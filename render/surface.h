@@ -30,9 +30,9 @@
 
 #include	"aqsis.h"
 
+#include	"attributes.h"
 #include	"renderer.h"
 #include	"ri.h"
-#include	"attributes.h"
 #include	"transform.h"
 #include	"list.h"
 #include	"refcount.h"
@@ -41,19 +41,19 @@
 #include	"bound.h"
 #include	"micropolygon.h"
 #include	"csgtree.h"
+#include	"isurface.h"
 
 #define		_qShareName	CORE
 #include	"share.h"
 
 START_NAMESPACE( Aqsis )
 
-
 //----------------------------------------------------------------------
 /** \class CqBasicSurface
  * Abstract base surface class, which provides interfaces to geometry.  
  */
 
-class CqBasicSurface : public CqListEntry<CqBasicSurface>, public CqRefCount
+class CqBasicSurface : public CqListEntry<CqBasicSurface>, public CqRefCount, public IqSurface
 {
 	public:
 		CqBasicSurface();
@@ -112,14 +112,14 @@ class CqBasicSurface : public CqListEntry<CqBasicSurface>, public CqRefCount
 		/** Get a pointer to the attributes state associated with this GPrim.
 		 * \return A pointer to a CqAttributes class.
 		 */
-		const	CqAttributes* pAttributes() const
+		virtual const	IqAttributes* pAttributes() const
 		{
 			return ( m_pAttributes );
 		}
 		/** Get a pointer to the transformation state associated with this GPrim.
 		 * \return A pointer to a CqTransform class.
 		 */
-		const	CqTransform* pTransform() const
+		virtual const	IqTransform* pTransform() const
 		{
 			return ( m_pTransform );
 		}

@@ -66,8 +66,11 @@ typedef	bool	TqBool;
 #define	VMAX(a,b)			( CqVector3D( MAX((a).x(), (b).x()), MAX((a).y(), (b).y()), MAX((a).z(), (b).z()) ) )
 #define	VCLAMP(a,min,max)	( CqVector3D( CLAMP( (a).x(), (min).x(), (max).x() ), CLAMP( (a).y(), (min).y(), (max).y() ), CLAMP( (a).z(), (min).z(), (max).z() ) ) )
 
-#define RAD(a)				((a)/(180.0f/RI_PI))
-#define DEG(a)				(((a)/180.0f)*RI_PI)
+#define	PI			3.14159265359f
+#define	PIO2		PI/2
+
+#define RAD(a)				((a)/(180.0f/PI))
+#define DEG(a)				(((a)/180.0f)*PI)
 
 inline TqUint LOWEST_BIT( TqUint x )
 {

@@ -5,7 +5,7 @@
  *	@brief	Declare the common interface structure for a Renderer core class.
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2002/05/01 22:11:34 $
+ *	Last change date:	$Date: 2002/05/07 22:37:58 $
  */
 //------------------------------------------------------------------------------
 #ifndef	___irenderer_Loaded___
@@ -14,6 +14,8 @@
 #include	"matrix.h"
 
 START_NAMESPACE( Aqsis )
+
+struct IqTextureMap;
 
 struct IqRenderer
 {
@@ -45,7 +47,24 @@ struct IqRenderer
 		 * \param msg A SqMessage structure to print.
 		 */
 		virtual	void	PrintString( const char* str ) = 0;
+
+		/*
+		 *  Access to the texture map handling component
+		 */
+
+		/** Get a pointer to a loaded texturemap ready for processing.
+		 */
+		virtual	IqTextureMap* GetTextureMap(const CqString& strFileName) = 0;
+		virtual	IqTextureMap* GetEnvironmentMap( const CqString& strName ) = 0;
+		virtual	IqTextureMap* GetShadowMap( const CqString& strName ) = 0;
+		virtual	IqTextureMap* GetLatLongMap( const CqString& strName ) = 0;
+
+
+		virtual	TqBool	GetBasisMatrix( CqMatrix& matBasis, const CqString& name) = 0; 
+
 };
+
+IqRenderer* QGetRenderContextI();
 
 //-----------------------------------------------------------------------
 

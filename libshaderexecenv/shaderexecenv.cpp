@@ -24,9 +24,8 @@
 */
 
 #include	"aqsis.h"
-#include	"shaderexecenv.h"
+#include	"ishaderexecenv.h"
 #include	"surface.h"
-#include	"imagebuffer.h"
 
 #include	"shadervm.h"
 
@@ -131,7 +130,7 @@ CqShaderExecEnv::~CqShaderExecEnv()
 /** Initialise variables to correct size for current grid.
  */
 
-void CqShaderExecEnv::Initialise( const TqInt uGridRes, const TqInt vGridRes, CqSurface* pSurface, IqShader* pShader, TqInt Uses )
+void CqShaderExecEnv::Initialise( const TqInt uGridRes, const TqInt vGridRes, IqSurface* pSurface, IqShader* pShader, TqInt Uses )
 {
 	m_uGridRes = uGridRes;
 	m_vGridRes = vGridRes;
@@ -141,8 +140,8 @@ void CqShaderExecEnv::Initialise( const TqInt uGridRes, const TqInt vGridRes, Cq
 	// Store a pointer to the surface definition.
 	if( NULL != pSurface ) 
 	{
-		m_pAttributes = const_cast<CqAttributes*>(pSurface->pAttributes());
-		m_pTransform = const_cast<CqTransform*>(pSurface->pTransform());
+		m_pAttributes = const_cast<IqAttributes*>(pSurface->pAttributes());
+		m_pTransform = const_cast<IqTransform*>(pSurface->pTransform());
 		m_pAttributes->AddRef();
 		m_pTransform->AddRef();
 	}

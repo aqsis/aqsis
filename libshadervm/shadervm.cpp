@@ -30,11 +30,10 @@
 #include	"aqsis.h"
 #include	"shadervm.h"
 #include	"symbols.h"
-#include	"renderer.h"
 #include	"version.h"
 #include	"sstring.h"
-//#include	"imagebuffer.h"
 
+#include	"irenderer.h"
 #include	"shadervariable.h"
 
 START_NAMESPACE( Aqsis )
@@ -1050,6 +1049,8 @@ void CqShaderVM::ExecuteInit()
 		return ;
 
 	// Fake an environment
+	IqShaderExecEnv* pOldEnv = m_pEnv;
+	
 	CqShaderExecEnv	Env;
 	Env.Initialise( 1, 1, 0, this, m_Uses );
 	Initialise( 1, 1, &Env );
@@ -1068,6 +1069,8 @@ void CqShaderVM::ExecuteInit()
 	// Check that the stack is empty.
 	assert( m_iTop == 0 );
 	m_Stack.clear();
+
+	m_pEnv = pOldEnv;
 }
 
 
@@ -1075,101 +1078,122 @@ void CqShaderVM::ExecuteInit()
 /** Set the instance variables on this shader.
  */
 
-void CqShaderVM::SetValue( const char* name, TqPchar val )
+void CqShaderVM::SetArgument( const CqString& strName, EqVariableType type, const CqString& strSpace, void* pval )
 {
 	// Find the relevant variable.
-	SqParameterDeclaration Decl = QGetRenderContext() ->FindParameterDecl( name );
-	TqInt i = FindLocalVarIndex( Decl.m_strName.c_str() );
+	TqInt i = FindLocalVarIndex( strName.c_str() );
 	if ( i >= 0 )
 	{
 		int index = 0, count = 1, arrayindex = 0;
-		CqShaderVariableArray* pArray = 0;
+		IqShaderData* pArray = 0;
 
 		if ( m_LocalVars[ i ] ->ArrayLength() > 0 )
 		{
-			pArray = static_cast<CqShaderVariableArray*>( m_LocalVars[ i ] );
+			pArray = m_LocalVars[ i ];
 			count = pArray->ArrayLength();
 		}
 
+		// Ensure that the type passed matches what the variable expects.
+		assert( m_LocalVars[ i ] ->Type() == type );
 		while ( count-- > 0 )
 		{
 			CqVMStackEntry VMVal;
 			switch ( m_LocalVars[ i ] ->Type() )
 			{
-					case	type_float:
-					VMVal = reinterpret_cast<TqFloat*>( val ) [ index++ ];
-					break;
+				case	type_float:
+				{
+					VMVal = reinterpret_cast<TqFloat*>( pval ) [ index++ ];
+				}
+				break;
 
-					case	type_point:
-					case	type_normal:
-					case	type_vector:
-					VMVal = CqVector3D( reinterpret_cast<TqFloat*>( val ) [ index + 0 ], reinterpret_cast<TqFloat*>( val ) [ index + 1 ], reinterpret_cast<TqFloat*>( val ) [ index + 2 ] );
+				case	type_point:
+				case	type_normal:
+				case	type_vector:
+				{
+					TqFloat* pvecval = reinterpret_cast<TqFloat*>( pval );
+					VMVal = CqVector3D( pvecval[ index + 0 ], pvecval[ index + 1 ], pvecval[ index + 2 ] );
 					index += 3;
-					break;
+				}
+				break;
 
-					case	type_hpoint:
-					VMVal = CqVector4D( reinterpret_cast<TqFloat*>( val ) [ index + 0 ], reinterpret_cast<TqFloat*>( val ) [ index + 1 ], reinterpret_cast<TqFloat*>( val ) [ index + 2 ], reinterpret_cast<TqFloat*>( val ) [ index + 3 ] );
+				case	type_hpoint:
+				{
+					TqFloat* pvecval = reinterpret_cast<TqFloat*>( pval );
+					VMVal = CqVector4D( pvecval[ index + 0 ], pvecval[ index + 1 ], pvecval[ index + 2 ], pvecval[ index + 3 ] );
 					index += 4;
-					break;
+				}
+				break;
 
-					case	type_color:
-					VMVal = CqColor( reinterpret_cast<TqFloat*>( val ) [ index + 0 ], reinterpret_cast<TqFloat*>( val ) [ index + 1 ], reinterpret_cast<TqFloat*>( val ) [ index + 2 ] );
+				case	type_color:
+				{
+					TqFloat* pvecval = reinterpret_cast<TqFloat*>( pval );
+					VMVal = CqColor( pvecval[ index + 0 ], pvecval[ index + 1 ], pvecval[ index + 2 ] );
 					index += 3;
-					break;
+				}
+				break;
 
-					case	type_matrix:
-					VMVal = CqMatrix( reinterpret_cast<TqFloat*>( val ) [ index + 0 ], reinterpret_cast<TqFloat*>( val ) [ index + 1 ], reinterpret_cast<TqFloat*>( val ) [ index + 2 ], reinterpret_cast<TqFloat*>( val ) [ index + 3 ],
-					                  reinterpret_cast<TqFloat*>( val ) [ index + 4 ], reinterpret_cast<TqFloat*>( val ) [ index + 5 ], reinterpret_cast<TqFloat*>( val ) [ index + 6 ], reinterpret_cast<TqFloat*>( val ) [ index + 7 ],
-					                  reinterpret_cast<TqFloat*>( val ) [ index + 8 ], reinterpret_cast<TqFloat*>( val ) [ index + 9 ], reinterpret_cast<TqFloat*>( val ) [ index + 10 ], reinterpret_cast<TqFloat*>( val ) [ index + 11 ],
-					                  reinterpret_cast<TqFloat*>( val ) [ index + 12 ], reinterpret_cast<TqFloat*>( val ) [ index + 13 ], reinterpret_cast<TqFloat*>( val ) [ index + 14 ], reinterpret_cast<TqFloat*>( val ) [ index + 15 ] );
+				case	type_matrix:
+				{
+					TqFloat* pvecval = reinterpret_cast<TqFloat*>( pval );
+					VMVal = CqMatrix( pvecval[ index + 0 ], pvecval[ index + 1 ], pvecval[ index + 2 ], pvecval[ index + 3 ],
+									  pvecval[ index + 4 ], pvecval[ index + 5 ], pvecval[ index + 6 ], pvecval[ index + 7 ],
+									  pvecval[ index + 8 ], pvecval[ index + 9 ], pvecval[ index + 10 ], pvecval[ index + 11 ],
+									  pvecval[ index + 12 ], pvecval[ index + 13 ], pvecval[ index + 14 ], pvecval[ index + 15 ] );
 					index += 16;
-					break;
+				}
+				break;
 
-					case	type_string:
-					VMVal = reinterpret_cast<char**>( val ) [ index++ ];
-					break;
+				case	type_string:
+				{
+					VMVal = reinterpret_cast<char**>( pval ) [ index++ ];
+				}
+				break;
 			}
 
+			CqMatrix matObjectToWorld = matCurrent();
+			if( NULL != m_pEnv )
+				matObjectToWorld = m_pEnv->pTransform()->matObjectToWorld();
+			
 			// If it is a color or a point, ensure it is the correct 'space'
 			if ( m_LocalVars[ i ] ->Type() == type_point || m_LocalVars[ i ] ->Type() == type_hpoint )
 			{
-				CqString strSpace( "shader" );
-				if ( Decl.m_strName != "" && Decl.m_strSpace != "" )
-					strSpace = Decl.m_strSpace;
+				CqString _strSpace( "shader" );
+				if ( strSpace.compare( "" ) != 0 )
+					_strSpace = strSpace;
 				CqVector3D p;
 				VMVal.GetPoint( p, 0 );
-				VMVal = QGetRenderContext() ->matSpaceToSpace( strSpace.c_str(), "camera", matCurrent(), QGetRenderContext() ->matCurrent() ) * p;
+				VMVal = QGetRenderContextI() ->matSpaceToSpace( _strSpace.c_str(), "camera", matCurrent(), matObjectToWorld ) * p;
 			}
 			else if ( m_LocalVars[ i ] ->Type() == type_normal )
 			{
-				CqString strSpace( "shader" );
-				if ( Decl.m_strName != "" && Decl.m_strSpace != "" )
-					strSpace = Decl.m_strSpace;
+				CqString _strSpace( "shader" );
+				if ( strSpace.compare( "" ) != 0 )
+					_strSpace = strSpace;
 				CqVector3D p;
 				VMVal.GetPoint( p, 0 );
-				VMVal = QGetRenderContext() ->matNSpaceToSpace( strSpace.c_str(), "camera", matCurrent(), QGetRenderContext() ->matCurrent() ) * p;
+				VMVal = QGetRenderContextI() ->matNSpaceToSpace( _strSpace.c_str(), "camera", matCurrent(), matObjectToWorld ) * p;
 			}
 			else if ( m_LocalVars[ i ] ->Type() == type_vector )
 			{
-				CqString strSpace( "shader" );
-				if ( Decl.m_strName != "" && Decl.m_strSpace != "" )
-					strSpace = Decl.m_strSpace;
+				CqString _strSpace( "shader" );
+				if ( strSpace.compare( "" ) != 0 )
+					_strSpace = strSpace;
 				CqVector3D p;
 				VMVal.GetPoint( p, 0 );
-				VMVal = QGetRenderContext() ->matVSpaceToSpace( strSpace.c_str(), "camera", matCurrent(), QGetRenderContext() ->matCurrent() ) * p;
+				VMVal = QGetRenderContextI() ->matVSpaceToSpace( _strSpace.c_str(), "camera", matCurrent(), matObjectToWorld ) * p;
 			}
 			else if ( m_LocalVars[ i ] ->Type() == type_matrix )
 			{
-				CqString strSpace( "shader" );
-				if ( Decl.m_strName != "" && Decl.m_strSpace != "" )
-					strSpace = Decl.m_strSpace;
+				CqString _strSpace( "shader" );
+				if ( strSpace.compare( "" ) != 0 )
+					_strSpace = strSpace;
 				CqMatrix m;
 				VMVal.GetMatrix( m, 0 );
-				VMVal = QGetRenderContext() ->matVSpaceToSpace( strSpace.c_str(), "camera", matCurrent(), QGetRenderContext() ->matCurrent() ) * m;
+				VMVal = QGetRenderContextI() ->matVSpaceToSpace( _strSpace.c_str(), "camera", matCurrent(), matObjectToWorld ) * m;
 			}
 
 			if ( pArray ) 
-				( *pArray ) [ arrayindex++ ] ->SetValueFromVariable( &VMVal );
+				pArray->ArrayEntry( arrayindex++ ) ->SetValueFromVariable( &VMVal );
 			else
 				m_LocalVars[ i ] ->SetValueFromVariable( &VMVal );
 		}
@@ -1272,7 +1296,7 @@ void CqShaderVM::SO_ipushv()
 	if ( pVar->ArrayLength() == 0 )
 	{
 		// Report error.
-		CqBasicError( 0, Severity_Fatal, "Attempt to index a non array variable" );
+		//CqBasicError( 0, Severity_Fatal, "Attempt to index a non array variable" );
 		return ;
 	}
 	//TqInt ext=__fVarying?m_pEnv->GridSize():1;
@@ -1310,7 +1334,7 @@ void CqShaderVM::SO_ipop()
 	if ( pV->ArrayLength() == 0 )
 	{
 		// Report error.
-		CqBasicError( 0, Severity_Fatal, "Attempt to index a non array variable" );
+		//CqBasicError( 0, Severity_Fatal, "Attempt to index a non array variable" );
 		return ;
 	}
 	POPV( A );

@@ -114,7 +114,7 @@ class CqShader : public IqShader
 		{
 			return ( m_strName );
 		}
-		virtual	void	SetValue( const char* name, TqPchar val )
+		virtual	void	SetArgument( const CqString& name, EqVariableType type, const CqString& space, void* val )
 		{}
 		virtual	TqBool	GetValue( const char* name, IqShaderData* res )
 		{

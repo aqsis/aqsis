@@ -185,7 +185,10 @@ CqOptions::CqOptions() :
 	m_pProgressHandler( NULL ),
 	m_pPreRenderFunction( NULL ),
 	m_funcFilter( RiGaussianFilter ),
-	m_pshadImager( NULL)
+	m_pshadImager( NULL),
+	m_bFrameAspectRatioCalled(TqFalse),
+	m_bScreenWindowCalled(TqFalse),
+	m_bFormatCalled(TqFalse)
 {
 	InitialiseDefaultOptions();
 }
@@ -635,13 +638,15 @@ void   CqOptions::DeleteImager()
 		m_pshadImager = NULL;
 	}
 }
+
+
 void CqOptions::SetValueImager(char *token, char *value)
 {
-	if (m_pshadImager != NULL) {
-		
-		m_pshadImager->pShader()->SetValue(token,value);
+	if (m_pshadImager != NULL) 
+	{
+		SqParameterDeclaration Decl = QGetRenderContext() ->FindParameterDecl( token );
+		m_pshadImager->pShader()->SetArgument( Decl.m_strName, Decl.m_Type, Decl.m_strSpace, value );
 	}
-
 }
 
 

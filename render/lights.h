@@ -40,6 +40,7 @@
 #include "vector4d.h"
 #include "imagebuffer.h"
 #include "version.h"
+#include "ilightsource.h"
 
 #define		_qShareName	CORE
 #include	"share.h"
@@ -51,7 +52,7 @@ START_NAMESPACE( Aqsis )
  * Abstract base class from which all lightsources are derived.
  */
 
-class CqLightsource : public CqListEntry<CqLightsource>
+class CqLightsource : public CqListEntry<CqLightsource>, public IqLightsource
 {
 	public:
 		CqLightsource( IqShader* pShader, TqBool fActive = TqTrue );
@@ -60,7 +61,7 @@ class CqLightsource : public CqListEntry<CqLightsource>
 		/** Get a pointer to the associated lightsource shader.
 		 * \return a pointer to a IqShader derived class.
 		 */
-		IqShader*	pShader()
+		virtual IqShader*	pShader()
 		{
 			return ( m_pShader );
 		}
@@ -68,12 +69,12 @@ class CqLightsource : public CqListEntry<CqLightsource>
 		 * \param uGridRes Integer grid size, not used.
 		 * \param cGridRes Integer grid size, not used.
 		 */
-		void	Initialise( TqInt uGridRes, TqInt vGridRes );
+		virtual void	Initialise( TqInt uGridRes, TqInt vGridRes );
 		//			void		GenerateShadowMap(const char* strShadowName);
 		/** Evaluate the shader.
 		 * \param Ps the point being lit.
 		 */
-		void	Evaluate( IqShaderData* pPs )
+		virtual void	Evaluate( IqShaderData* pPs )
 		{
 			Ps()->SetValueFromVariable( pPs );
 			m_pShader->Evaluate( m_pShaderExecEnv );
@@ -81,7 +82,7 @@ class CqLightsource : public CqListEntry<CqLightsource>
 		/** Get a pointer to the attributes associated with this lightsource.
 		 * \return a CqAttributes pointer.
 		 */
-		CqAttributes*	pAttributes() const
+		virtual IqAttributes*	pAttributes() const
 		{
 			return ( m_pAttributes );
 		}

@@ -30,6 +30,7 @@
 #include	"shaders.h"
 #include	"trimcurve.h"
 #include	"imagebuffer.h"
+#include	"lights.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -287,6 +288,32 @@ CqVector3D* CqAttributes::GetPointAttributeWrite( const char* strName, const cha
 
 
 //---------------------------------------------------------------------
+/** Get a vector system attribute parameter.
+ * \param strName The name of the attribute.
+ * \param strParam The name of the paramter on the attribute.
+ * \return CqVetor3D pointer 0 if not found.
+ */
+
+CqVector3D* CqAttributes::GetVectorAttributeWrite( const char* strName, const char* strParam )
+{
+	return( GetPointAttributeWrite(strName, strParam) );
+}
+
+
+//---------------------------------------------------------------------
+/** Get a normal system attribute parameter.
+ * \param strName The name of the attribute.
+ * \param strParam The name of the paramter on the attribute.
+ * \return CqVetor3D pointer 0 if not found.
+ */
+
+CqVector3D* CqAttributes::GetNormalAttributeWrite( const char* strName, const char* strParam )
+{
+	return( GetPointAttributeWrite(strName, strParam) );
+}
+
+
+//---------------------------------------------------------------------
 /** Get a color system attribute parameter.
  * \param strName The name of the attribute.
  * \param strParam The name of the paramter on the attribute.
@@ -389,6 +416,32 @@ const CqVector3D* CqAttributes::GetPointAttribute( const char* strName, const ch
 
 
 //---------------------------------------------------------------------
+/** Get a vector system attribute parameter.
+ * \param strName The name of the attribute.
+ * \param strParam The name of the paramter on the attribute.
+ * \return CqVector3D pointer 0 if not found.
+ */
+
+const CqVector3D* CqAttributes::GetVectorAttribute( const char* strName, const char* strParam ) const
+{
+	return( GetPointAttribute(strName, strParam) );
+}
+
+
+//---------------------------------------------------------------------
+/** Get a normal system attribute parameter.
+ * \param strName The name of the attribute.
+ * \param strParam The name of the paramter on the attribute.
+ * \return CqVector3D pointer 0 if not found.
+ */
+
+const CqVector3D* CqAttributes::GetNormalAttribute( const char* strName, const char* strParam ) const
+{
+	return( GetPointAttribute(strName, strParam) );
+}
+
+
+//---------------------------------------------------------------------
 /** Get a color system attribute parameter.
  * \param strName The name of the attribute.
  * \param strParam The name of the paramter on the attribute.
@@ -421,6 +474,11 @@ const CqMatrix* CqAttributes::GetMatrixAttribute( const char* strName, const cha
 		return ( 0 );
 }
 
+
+IqLightsource*	CqAttributes::pLight(TqInt index)
+{
+	return( m_apLightsources[index] ); 
+}
 
 //---------------------------------------------------------------------
 

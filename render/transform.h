@@ -35,6 +35,7 @@
 #include	"ri.h"
 #include	"matrix.h"
 #include	"options.h"
+#include	"itransform.h"
 
 #define		_qShareName	CORE
 #include	"share.h"
@@ -47,7 +48,7 @@ START_NAMESPACE( Aqsis )
  * Container class for the transform definitions of the graphics state.
  */
 
-class _qShareC	CqTransform : public CqMotionSpec<CqMatrix>, public CqRefCount
+class _qShareC	CqTransform : public CqMotionSpec<CqMatrix>, public CqRefCount, public IqTransform
 {
 	public:
 		_qShareM	CqTransform();
@@ -57,7 +58,7 @@ class _qShareC	CqTransform : public CqMotionSpec<CqMatrix>, public CqRefCount
 		/** Get a writable copy of this, if the reference count is greater than 1
 		 * create a new copy and retirn that.
 		 */
-		_qShareM	CqTransform* Write()
+		_qShareM CqTransform* Write()
 		{
 			// We are about to write to this attribute,so clone if references exist.
 			if ( RefCount() > 1 )
@@ -71,20 +72,22 @@ class _qShareC	CqTransform : public CqMotionSpec<CqMatrix>, public CqRefCount
 				return ( this );
 		}
 
-		_qShareM	CqTransform& operator=( const CqTransform& From );
+		_qShareM  virtual	CqTransform& operator=( const CqTransform& From );
 
 		/** Get a duplicate of this transform.
 		 */
-		_qShareM	CqTransform*	Clone() const
+		_qShareM  CqTransform*	Clone() const
 		{
 			return ( new CqTransform( *this ) );
 		}
 
-		_qShareM	void	SetCurrentTransform( TqFloat time, const CqMatrix& matTrans );
-		_qShareM	void	ConcatCurrentTransform( TqFloat time, const CqMatrix& matTrans );
+		_qShareM  virtual	void	SetCurrentTransform( TqFloat time, const CqMatrix& matTrans );
+		_qShareM  virtual	void	ConcatCurrentTransform( TqFloat time, const CqMatrix& matTrans );
 
-		_qShareM	const CqMatrix&	matObjectToWorld( TqFloat time = 0.0f ) const;
+		_qShareM  virtual	const CqMatrix&	matObjectToWorld( TqFloat time = 0.0f ) const;
 
+		virtual	void	Release()	{ CqRefCount::Release(); }
+		virtual	void	AddRef()	{ CqRefCount::AddRef(); }
 
 		_qShareM	virtual	void	ClearMotionObject( CqMatrix& A ) const;
 		_qShareM	virtual	CqMatrix	ConcatMotionObjects( const CqMatrix& A, const CqMatrix& B ) const;

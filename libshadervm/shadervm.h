@@ -374,9 +374,9 @@ static CqMatrix temp_matrix;
 class _qShareC CqShaderVM : public CqShaderStack, public IqShader
 {
 	public:
-		_qShareM CqShaderVM() : CqShaderStack(), m_Uses( 0xFFFFFFFF ), m_LocalIndex( 0 ), m_PC( 0 ), m_fAmbient( TqTrue )
+		_qShareM CqShaderVM() : CqShaderStack(), m_Uses( 0xFFFFFFFF ), m_LocalIndex( 0 ), m_pEnv( 0 ), m_PC( 0 ), m_fAmbient( TqTrue )
 		{}
-		_qShareM	CqShaderVM( const CqShaderVM& From ) : m_LocalIndex( 0 ), m_PC( 0 ), m_fAmbient( TqTrue )
+		_qShareM	CqShaderVM( const CqShaderVM& From ) : m_LocalIndex( 0 ), m_pEnv( 0 ), m_PC( 0 ), m_fAmbient( TqTrue )
 		{
 			*this = From;
 		}
@@ -401,7 +401,7 @@ class _qShareC CqShaderVM : public CqShaderStack, public IqShader
 		{
 			return ( m_strName );
 		}
-		virtual	void	SetValue( const char* name, TqPchar val );
+		virtual	void	SetArgument( const CqString& name, EqVariableType type, const CqString& space, void* val );
 		virtual	TqBool	GetValue( const char* name, IqShaderData* res );
 		virtual	void	Evaluate( IqShaderExecEnv* pEnv )
 		{

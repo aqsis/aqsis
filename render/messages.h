@@ -32,7 +32,7 @@
 #include	"aqsis.h"
 
 #include	"sstring.h"
-#include	"attributes.h"
+#include	"iattributes.h"
 
 #define		_qShareName	CORE
 #include	"share.h"
@@ -234,7 +234,7 @@ class _qShareC CqBasicError
 class _qShareC CqAttributeError : public CqBasicError
 {
 	public:
-		_qShareM	CqAttributeError( TqInt code, TqInt severity, const char* Message, const CqAttributes* pAttributes, TqBool OncePer = TqFalse );
+		_qShareM	CqAttributeError( TqInt code, TqInt severity, const char* Message, const IqAttributes* pAttributes, TqBool OncePer = TqFalse );
 		/** Copy constructor
 		 * \param From Error to copy.
 		 */
@@ -263,7 +263,7 @@ class _qShareC CqAttributeError : public CqBasicError
 		}
 
 	protected:
-		const CqAttributes* m_pAttributes;		///< Pointer to the attributes state this error is linked to.
+		const IqAttributes* m_pAttributes;		///< Pointer to the attributes state this error is linked to.
 }
 ;
 

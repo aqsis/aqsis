@@ -44,8 +44,8 @@
 #include	"matrix.h"
 #include	"refcount.h"
 
-#include	"attributes.h"
-#include	"transform.h"
+#include	"iattributes.h"
+#include	"itransform.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -115,8 +115,6 @@ extern TqInt gDefLightUses;
 #define	GET_TEXTURE_PARAMS	float _pswidth=1.0f,_ptwidth=1.0f,_psblur=0.0f,_ptblur=0.0f, _pfill=0.0f; \
 							GetTexParams(cParams, apParams, _pswidth,_ptwidth,_psblur,_ptblur,_pfill);
 
-class CqLightsource;
-class CqSurface;
 
 //----------------------------------------------------------------------
 /** \class CqShaderExecEnv
@@ -130,7 +128,7 @@ class CqShaderExecEnv : public IqShaderExecEnv, CqRefCount
 		virtual	~CqShaderExecEnv();
 
 		// Overidden from IqShaderExecEnv, see ishaderexecenv.h for descriptions.
-		virtual	void	Initialise( const TqInt uGridRes, const TqInt vGridRes, CqSurface* pSurface, IqShader* pShader, TqInt Uses );
+		virtual	void	Initialise( const TqInt uGridRes, const TqInt vGridRes, IqSurface* pSurface, IqShader* pShader, TqInt Uses );
 		virtual	TqInt	uGridRes() const
 		{
 			return ( m_uGridRes );
@@ -144,11 +142,11 @@ class CqShaderExecEnv : public IqShaderExecEnv, CqRefCount
 			return ( m_GridSize );
 		}
 		virtual	const CqMatrix&	matObjectToWorld() const;
-		const CqAttributes*	pAttributes() const
+		const IqAttributes*	pAttributes() const
 		{
 			return ( m_pAttributes );
 		}
-		const CqTransform*	pTransform() const
+		const IqTransform*	pTransform() const
 		{
 			return ( m_pTransform );
 		}
@@ -377,8 +375,8 @@ class CqShaderExecEnv : public IqShaderExecEnv, CqRefCount
 		TqInt	m_li;					///< Light index, used during illuminance loop.
 		TqInt	m_Illuminate;
 		TqBool	m_IlluminanceCacheValid;	///< Flag indicating whether the illuminance cache is valid.
-		CqAttributes* m_pAttributes;	///< Pointer to the associated attributes.
-		CqTransform* m_pTransform;		///< Pointer to the associated transform.
+		IqAttributes* m_pAttributes;	///< Pointer to the associated attributes.
+		IqTransform* m_pTransform;		///< Pointer to the associated transform.
 		CqBitVector	m_CurrentState;			///< SIMD execution state bit vector accumulator.
 		CqBitVector	m_RunningState;			///< SIMD running execution state bit vector.
 		std::stack<CqBitVector>	m_stkState;				///< Stack of execution state bit vectors.

@@ -27,10 +27,12 @@
 
 #include	"aqsis.h"
 #include	"shaderexecenv.h"
-#include	"texturemap.h"
 #include	"spline.h"
 #include	"shadervm.h"
 #include	"irenderer.h"
+#include	"itexturemap.h"
+#include	"ilightsource.h"
+#include	"version.h"
 
 
 START_NAMESPACE( Aqsis )
@@ -146,13 +148,15 @@ TqBool CqShaderExecEnv::SO_init_illuminance()
 TqBool CqShaderExecEnv::SO_advance_illuminance()
 {
 	m_li++;
-	while ( m_li < static_cast<TqInt>( m_pAttributes ->apLights().size() ) &&
-	        m_pAttributes ->apLights() [ m_li ] ->pShader() ->fAmbient() )
+	while ( m_li < m_pAttributes ->cLights() &&
+	        m_pAttributes ->pLight( m_li )->pShader() ->fAmbient() )
 	{
 		m_li++;
 	}
-	if ( m_li < static_cast<TqInt>( m_pAttributes ->apLights().size() ) ) return ( TqTrue );
-	else	return ( TqFalse );
+	if ( m_li < m_pAttributes ->cLights() )
+		return ( TqTrue );
+	else
+		return ( TqFalse );
 }
 
 
@@ -162,9 +166,9 @@ void CqShaderExecEnv::ValidateIlluminanceCache( IqShaderData* pP, IqShader* pSha
 	if ( !m_IlluminanceCacheValid )
 	{
 		TqUint li = 0;
-		while ( li < m_pAttributes ->apLights().size() )
+		while ( li < m_pAttributes ->cLights() )
 		{
-			CqLightsource * lp = m_pAttributes ->apLights() [ li ];
+			IqLightsource * lp = m_pAttributes ->pLight( li );
 			// Initialise the lightsource
 			lp->Initialise( uGridRes(), vGridRes() );
 			m_Illuminate = 0;
@@ -189,7 +193,7 @@ STD_SOIMPL	CqShaderExecEnv::SO_radians( FLOATVAL degrees, DEFPARAMIMPL )
 
 	BEGIN_VARYING_SECTION
 	GETFLOAT( degrees );
-	SETFLOAT( Result, FLOAT( degrees ) / ( 180.0f / RI_PI ) );
+	SETFLOAT( Result, RAD( FLOAT( degrees ) ) );
 	END_VARYING_SECTION
 }
 
@@ -202,7 +206,7 @@ STD_SOIMPL	CqShaderExecEnv::SO_degrees( FLOATVAL radians, DEFPARAMIMPL )
 
 	BEGIN_VARYING_SECTION
 	GETFLOAT( radians );
-	SETFLOAT( Result, ( FLOAT( radians ) / 180.0f ) * RI_PI );
+	SETFLOAT( Result, DEG( FLOAT( radians ) ) );
 	END_VARYING_SECTION
 }
 
@@ -1832,7 +1836,7 @@ STD_SOIMPL CqShaderExecEnv::SO_calculatenormal( POINTVAL p, DEFPARAMIMPL )
 
 	// Find out if the orientation is inverted.
 	TqInt O = m_pAttributes ->GetIntegerAttribute("System", "Orientation")[0];
-	float neg = 1;
+	TqFloat neg = 1;
 	if ( O != OrientationLH ) neg = -1;
 
 	CHECKVARY( p )
@@ -1946,7 +1950,7 @@ STD_SOIMPL CqShaderExecEnv::SO_ftexture1( STRINGVAL name, FLOATVAL channel, DEFP
 	BEGIN_UNIFORM_SECTION
 	GETSTRING( name );
 	GETFLOAT( channel );
-	CqTextureMap* pTMap = CqTextureMap::GetTextureMap( STRING( name ).c_str() );
+	IqTextureMap* pTMap = QGetRenderContextI()->GetTextureMap( STRING( name ) );
 	TqFloat fdu = 0.0f, fdv = 0.0f;
 	if( m_pAttributes )	
 	{
@@ -1987,10 +1991,10 @@ STD_SOIMPL CqShaderExecEnv::SO_ftexture1( STRINGVAL name, FLOATVAL channel, DEFP
 		TqFloat fs, ft;
 		s()->GetFloat( fs, __iGrid );
 		t()->GetFloat( ft, __iGrid );
-		pTMap->SampleMIPMAP( fs, ft, swidth, twidth, _psblur, _ptblur, val);
+		pTMap->SampleMap( fs, ft, swidth, twidth, _psblur, _ptblur, val);
 
 		// Grab the appropriate channel.
-		float fchan = FLOAT( channel );
+		TqFloat fchan = FLOAT( channel );
 		if ( fchan >= val.size() )
 			SETFLOAT( Result, _pfill );
 		else
@@ -2016,7 +2020,7 @@ STD_SOIMPL CqShaderExecEnv::SO_ftexture2( STRINGVAL name, FLOATVAL channel, FLOA
 	BEGIN_UNIFORM_SECTION
 	GETSTRING( name );
 	GETFLOAT( channel );
-	CqTextureMap* pTMap = CqTextureMap::GetTextureMap( STRING( name ).c_str() );
+	IqTextureMap* pTMap = QGetRenderContextI()->GetTextureMap( STRING( name ) );
 	TqFloat fdu = 0.0f, fdv = 0.0f;
 	if( m_pAttributes )	
 	{
@@ -2056,10 +2060,10 @@ STD_SOIMPL CqShaderExecEnv::SO_ftexture2( STRINGVAL name, FLOATVAL channel, FLOA
 
 		GETFLOAT( s );
 		GETFLOAT( t );
-		pTMap->SampleMIPMAP( FLOAT( s ), FLOAT( t ), swidth, twidth, _psblur, _ptblur, val);
+		pTMap->SampleMap( FLOAT( s ), FLOAT( t ), swidth, twidth, _psblur, _ptblur, val);
 
 		// Grab the appropriate channel.
-		float fchan = FLOAT( channel );
+		TqFloat fchan = FLOAT( channel );
 		if ( fchan >= val.size() )
 			SETFLOAT( Result, _pfill );
 		else
@@ -2085,7 +2089,7 @@ STD_SOIMPL CqShaderExecEnv::SO_ftexture3( STRINGVAL name, FLOATVAL channel, FLOA
 	BEGIN_UNIFORM_SECTION
 	GETSTRING( name );
 	GETFLOAT( channel );
-	CqTextureMap* pTMap = CqTextureMap::GetTextureMap( STRING( name ).c_str() );
+	IqTextureMap* pTMap = QGetRenderContextI()->GetTextureMap( STRING( name ) );
 	END_UNIFORM_SECTION
 
 	__fVarying = TqTrue;
@@ -2093,7 +2097,7 @@ STD_SOIMPL CqShaderExecEnv::SO_ftexture3( STRINGVAL name, FLOATVAL channel, FLOA
 	{
 		BEGIN_VARYING_SECTION
 		// Sample the texture.
-		std::valarray<float> val;
+		std::valarray<TqFloat> val;
 		GETFLOAT( s1 );
 		GETFLOAT( t1 );
 		GETFLOAT( s2 );
@@ -2102,10 +2106,10 @@ STD_SOIMPL CqShaderExecEnv::SO_ftexture3( STRINGVAL name, FLOATVAL channel, FLOA
 		GETFLOAT( t3 );
 		GETFLOAT( s4 );
 		GETFLOAT( t4 );
-		pTMap->SampleMIPMAP( FLOAT( s1 ), FLOAT( t1 ), FLOAT( s2 ), FLOAT( t2 ), FLOAT( s3 ), FLOAT( t3 ), FLOAT( s4 ), FLOAT( t4 ), _psblur, _ptblur, val );
+		pTMap->SampleMap( FLOAT( s1 ), FLOAT( t1 ), FLOAT( s2 ), FLOAT( t2 ), FLOAT( s3 ), FLOAT( t3 ), FLOAT( s4 ), FLOAT( t4 ), _psblur, _ptblur, val );
 
 		// Grab the appropriate channel.
-		float fchan = FLOAT( channel );
+		TqFloat fchan = FLOAT( channel );
 		if ( fchan >= val.size() )
 			SETFLOAT( Result, _pfill );
 		else
@@ -2131,7 +2135,7 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture1( STRINGVAL name, FLOATVAL channel, DEFP
 	BEGIN_UNIFORM_SECTION
 	GETSTRING( name );
 	GETFLOAT( channel );
-	CqTextureMap* pTMap = CqTextureMap::GetTextureMap( STRING( name ).c_str() );
+	IqTextureMap* pTMap = QGetRenderContextI()->GetTextureMap( STRING( name ) );
 	TqFloat fdu = 0.0f, fdv = 0.0f;
 	if( m_pAttributes )	
 	{
@@ -2172,10 +2176,10 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture1( STRINGVAL name, FLOATVAL channel, DEFP
 		TqFloat fs, ft;
 		s()->GetFloat( fs, __iGrid );
 		t()->GetFloat( ft, __iGrid );
-		pTMap->SampleMIPMAP( fs, ft, swidth, twidth, _psblur, _ptblur, val);
+		pTMap->SampleMap( fs, ft, swidth, twidth, _psblur, _ptblur, val);
 
 		// Grab the appropriate channel.
-		float fchan = FLOAT( channel );
+		TqFloat fchan = FLOAT( channel );
 		if ( fchan + 2 >= val.size() )
 			SETCOLOR( Result, CqColor( _pfill, _pfill, _pfill ) );
 		else
@@ -2201,7 +2205,7 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture2( STRINGVAL name, FLOATVAL channel, FLOA
 	BEGIN_UNIFORM_SECTION
 	GETSTRING( name );
 	GETFLOAT( channel );
-	CqTextureMap* pTMap = CqTextureMap::GetTextureMap( STRING( name ).c_str() );
+	IqTextureMap* pTMap = QGetRenderContextI()->GetTextureMap( STRING( name ) );
 	TqFloat fdu = 0.0f, fdv = 0.0f;
 	if( m_pAttributes )	
 	{
@@ -2241,10 +2245,10 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture2( STRINGVAL name, FLOATVAL channel, FLOA
 
 		GETFLOAT( s );
 		GETFLOAT( t );
-		pTMap->SampleMIPMAP( FLOAT( s ), FLOAT( t ), swidth, twidth, _psblur, _ptblur, val);
+		pTMap->SampleMap( FLOAT( s ), FLOAT( t ), swidth, twidth, _psblur, _ptblur, val);
 
 		// Grab the appropriate channel.
-		float fchan = FLOAT( channel );
+		TqFloat fchan = FLOAT( channel );
 		if ( fchan + 2 >= val.size() )
 			SETCOLOR( Result, CqColor( _pfill, _pfill, _pfill ) );
 		else
@@ -2270,7 +2274,7 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture3( STRINGVAL name, FLOATVAL channel, FLOA
 	BEGIN_UNIFORM_SECTION
 	GETSTRING( name );
 	GETFLOAT( channel );
-	CqTextureMap* pTMap = CqTextureMap::GetTextureMap( STRING( name ).c_str() );
+	IqTextureMap* pTMap = QGetRenderContextI()->GetTextureMap( STRING( name ) );
 	END_UNIFORM_SECTION
 
 	__fVarying = TqTrue;
@@ -2278,7 +2282,7 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture3( STRINGVAL name, FLOATVAL channel, FLOA
 	{
 		BEGIN_VARYING_SECTION
 		// Sample the texture.
-		std::valarray<float> val;
+		std::valarray<TqFloat> val;
 		GETFLOAT( s1 );
 		GETFLOAT( t1 );
 		GETFLOAT( s2 );
@@ -2287,10 +2291,10 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture3( STRINGVAL name, FLOATVAL channel, FLOA
 		GETFLOAT( t3 );
 		GETFLOAT( s4 );
 		GETFLOAT( t4 );
-		pTMap->SampleMIPMAP( FLOAT( s1 ), FLOAT( t1 ), FLOAT( s2 ), FLOAT( t2 ), FLOAT( s3 ), FLOAT( t3 ), FLOAT( s4 ), FLOAT( t4 ), _psblur, _ptblur, val );
+		pTMap->SampleMap( FLOAT( s1 ), FLOAT( t1 ), FLOAT( s2 ), FLOAT( t2 ), FLOAT( s3 ), FLOAT( t3 ), FLOAT( s4 ), FLOAT( t4 ), _psblur, _ptblur, val );
 
 		// Grab the appropriate channel.
-		float fchan = FLOAT( channel );
+		TqFloat fchan = FLOAT( channel );
 		if ( fchan + 2 >= val.size() )
 			SETCOLOR( Result, CqColor( _pfill, _pfill, _pfill ) );
 		else
@@ -2315,14 +2319,14 @@ STD_SOIMPL CqShaderExecEnv::SO_fenvironment2( STRINGVAL name, FLOATVAL channel, 
 	GET_TEXTURE_PARAMS;
 
 	BEGIN_UNIFORM_SECTION
-	CqTextureMap* pTMap;
 	GETSTRING( name );
 	GETFLOAT( channel );
-	pTMap = CqTextureMap::GetEnvironmentMap( STRING( name ).c_str() );
+	IqTextureMap* pTMap = QGetRenderContextI()->GetEnvironmentMap( STRING( name ) );
+
 	// Try with LatLong map file
 	if ( pTMap == 0 )
 	{
-		pTMap = CqTextureMap::GetLatLongMap( STRING( name ).c_str() );
+		pTMap = QGetRenderContextI()->GetLatLongMap( STRING( name ) );
 	}
 	TqFloat fdu = 0.0f, fdv = 0.0f;
 	if( m_pAttributes )
@@ -2360,10 +2364,10 @@ STD_SOIMPL CqShaderExecEnv::SO_fenvironment2( STRINGVAL name, FLOATVAL channel, 
 		// Sample the texture.
 		std::valarray<TqFloat> val;
 		GETVECTOR( R );
-		pTMap->SampleMIPMAP( VECTOR( R ), swidth, twidth, _psblur, _ptblur, val );
+		pTMap->SampleMap( VECTOR( R ), swidth, twidth, _psblur, _ptblur, val );
 
 		// Grab the appropriate channel.
-		float fchan = FLOAT( channel );
+		TqFloat fchan = FLOAT( channel );
 		if ( fchan >= val.size() )
 			SETFLOAT( Result, _pfill );
 		else
@@ -2387,14 +2391,13 @@ STD_SOIMPL CqShaderExecEnv::SO_fenvironment3( STRINGVAL name, FLOATVAL channel, 
 	GET_TEXTURE_PARAMS;
 
 	BEGIN_UNIFORM_SECTION
-	CqTextureMap* pTMap;
 	GETSTRING( name );
 	GETFLOAT( channel );
-	pTMap = CqTextureMap::GetEnvironmentMap( STRING( name ).c_str() );
+	IqTextureMap* pTMap = QGetRenderContextI()->GetEnvironmentMap( STRING( name ) );
 	// Try with LatLong map file
 	if ( pTMap == 0 )
 	{
-		pTMap = CqTextureMap::GetLatLongMap( STRING( name ).c_str() );
+		pTMap = QGetRenderContextI()->GetLatLongMap( STRING( name ) );
 	}
 	END_UNIFORM_SECTION
 
@@ -2403,15 +2406,15 @@ STD_SOIMPL CqShaderExecEnv::SO_fenvironment3( STRINGVAL name, FLOATVAL channel, 
 	{
 		BEGIN_VARYING_SECTION
 		// Sample the texture.
-		std::valarray<float> val;
+		std::valarray<TqFloat> val;
 		GETVECTOR( R1 );
 		GETVECTOR( R2 );
 		GETVECTOR( R3 );
 		GETVECTOR( R4 );
-		pTMap->SampleMIPMAP( VECTOR( R1 ), VECTOR( R2 ), VECTOR( R3 ), VECTOR( R4 ), _psblur, _ptblur, val );
+		pTMap->SampleMap( VECTOR( R1 ), VECTOR( R2 ), VECTOR( R3 ), VECTOR( R4 ), _psblur, _ptblur, val );
 
 		// Grab the appropriate channel.
-		float fchan = FLOAT( channel );
+		TqFloat fchan = FLOAT( channel );
 		if ( fchan >= val.size() )
 			SETFLOAT( Result, _pfill );
 		else
@@ -2436,14 +2439,13 @@ STD_SOIMPL CqShaderExecEnv::SO_cenvironment2( STRINGVAL name, FLOATVAL channel, 
 	GET_TEXTURE_PARAMS;
 
 	BEGIN_UNIFORM_SECTION
-	CqTextureMap* pTMap = NULL;
 	GETSTRING( name );
 	GETFLOAT( channel );
-	pTMap = CqTextureMap::GetEnvironmentMap( STRING( name ).c_str() );
+	IqTextureMap* pTMap = QGetRenderContextI()->GetEnvironmentMap( STRING( name ) );
 	// Try with LatLong map file
 	if ( pTMap == 0 )
 	{
-		pTMap = CqTextureMap::GetLatLongMap( STRING( name ).c_str() );
+		pTMap = QGetRenderContextI()->GetLatLongMap( STRING( name ) );
 	}
 	TqFloat fdu = 0.0f, fdv = 0.0f;
 	if( m_pAttributes )
@@ -2481,11 +2483,11 @@ STD_SOIMPL CqShaderExecEnv::SO_cenvironment2( STRINGVAL name, FLOATVAL channel, 
 		// Sample the texture.
 		std::valarray<TqFloat> val;
 		GETVECTOR( R );
-		pTMap->SampleMIPMAP( VECTOR( R ), swidth, twidth, _psblur, _ptblur, val );
+		pTMap->SampleMap( VECTOR( R ), swidth, twidth, _psblur, _ptblur, val );
 
 
 		// Grab the appropriate channel.
-		float fchan = FLOAT( channel );
+		TqFloat fchan = FLOAT( channel );
 		if ( fchan + 2 >= val.size() )
 			SETCOLOR( Result, CqColor( _pfill, _pfill, _pfill ) );
 		else
@@ -2509,14 +2511,13 @@ STD_SOIMPL CqShaderExecEnv::SO_cenvironment3( STRINGVAL name, FLOATVAL channel, 
 	GET_TEXTURE_PARAMS;
 
 	BEGIN_UNIFORM_SECTION
-	CqTextureMap* pTMap;
 	GETSTRING( name );
 	GETFLOAT( channel );
-	pTMap = CqTextureMap::GetEnvironmentMap( STRING( name ).c_str() );
+	IqTextureMap* pTMap = QGetRenderContextI()->GetEnvironmentMap( STRING( name ) );
 	// Try with LatLong map file
 	if ( pTMap == 0 )
 	{
-		pTMap = CqTextureMap::GetLatLongMap( STRING( name ).c_str() );
+		pTMap = QGetRenderContextI()->GetLatLongMap( STRING( name ) );
 	}
 	BEGIN_UNIFORM_SECTION
 
@@ -2526,15 +2527,15 @@ STD_SOIMPL CqShaderExecEnv::SO_cenvironment3( STRINGVAL name, FLOATVAL channel, 
 		BEGIN_VARYING_SECTION
 		// Sample the texture.
 		// TODO: need to get and pass width,blur etc. values.
-		std::valarray<float> val;
+		std::valarray<TqFloat> val;
 		GETVECTOR( R1 );
 		GETVECTOR( R2 );
 		GETVECTOR( R3 );
 		GETVECTOR( R4 );
-		pTMap->SampleMIPMAP( VECTOR( R1 ), VECTOR( R2 ), VECTOR( R3 ), VECTOR( R4 ), _psblur, _ptblur, val );
+		pTMap->SampleMap( VECTOR( R1 ), VECTOR( R2 ), VECTOR( R3 ), VECTOR( R4 ), _psblur, _ptblur, val );
 
 		// Grab the appropriate channel.
-		float fchan = FLOAT( channel );
+		TqFloat fchan = FLOAT( channel );
 		if ( fchan + 2 >= val.size() )
 			SETCOLOR( Result, CqColor( _pfill, _pfill, _pfill ) );
 		else
@@ -2599,7 +2600,7 @@ STD_SOIMPL CqShaderExecEnv::SO_shadow( STRINGVAL name, FLOATVAL channel, POINTVA
 	BEGIN_UNIFORM_SECTION
 	GETSTRING( name );
 	GETFLOAT( channel );
-	CqShadowMap* pMap = static_cast<CqShadowMap*>( CqShadowMap::GetShadowMap( STRING( name ).c_str() ) );
+	IqTextureMap* pMap = QGetRenderContextI()->GetShadowMap( STRING( name ) );
 	END_UNIFORM_SECTION
 
 	__fVarying = TqTrue;
@@ -2614,10 +2615,10 @@ STD_SOIMPL CqShaderExecEnv::SO_shadow( STRINGVAL name, FLOATVAL channel, POINTVA
 		swidth *= _pswidth;
 		twidth *= _ptwidth;
 
-		TqFloat fv;
+		std::valarray<TqFloat> fv;
 		GETPOINT( P );
 		pMap->SampleMap( POINT( P ), swidth, twidth, _psblur, _ptblur, fv );
-		SETFLOAT( Result, fv );
+		SETFLOAT( Result, fv[0] );
 		END_VARYING_SECTION
 	}
 	else
@@ -2640,20 +2641,20 @@ STD_SOIMPL CqShaderExecEnv::SO_shadow1( STRINGVAL name, FLOATVAL channel, POINTV
 	BEGIN_UNIFORM_SECTION
 	GETSTRING( name );
 	GETFLOAT( channel );
-	CqShadowMap* pMap = static_cast<CqShadowMap*>( CqShadowMap::GetShadowMap( STRING( name ).c_str() ) );
+	IqTextureMap* pMap = QGetRenderContextI()->GetShadowMap( STRING( name ) );
 	END_UNIFORM_SECTION
 
 	__fVarying = TqTrue;
 	if ( pMap != 0 && pMap->IsValid() )
 	{
 		BEGIN_VARYING_SECTION
-		TqFloat fv;
+		std::valarray<TqFloat> fv;
 		GETPOINT( P1 );
 		GETPOINT( P2 );
 		GETPOINT( P3 );
 		GETPOINT( P4 );
 		pMap->SampleMap( POINT( P1 ), POINT( P2 ), POINT( P3 ), POINT( P4 ), _psblur, _ptblur, fv );
-		SETFLOAT( Result, fv );
+		SETFLOAT( Result, fv[0] );
 		END_VARYING_SECTION
 	}
 	else
@@ -2683,11 +2684,11 @@ STD_SOIMPL CqShaderExecEnv::SO_ambient( DEFPARAMIMPL )
 
 		Result->SetColor( gColBlack );
 
-		for ( TqUint light_index = 0; light_index < m_pAttributes ->apLights().size(); light_index++ )
+		for ( TqUint light_index = 0; light_index < m_pAttributes ->cLights(); light_index++ )
 		{
 			__fVarying = TqTrue;
 
-			CqLightsource* lp = m_pAttributes ->apLights() [ light_index ];
+			IqLightsource* lp = m_pAttributes ->pLight( light_index );
 			if ( lp->pShader() ->fAmbient() )
 			{
 				BEGIN_VARYING_SECTION
@@ -2899,7 +2900,7 @@ STD_SOIMPL CqShaderExecEnv::SO_illuminance( POINTVAL P, VECTORVAL Axis, FLOATVAL
 	// Fill in the lightsource information, and transfer the results to the shader variables,
 	if ( m_pAttributes != 0 )
 	{
-		CqLightsource * lp = m_pAttributes ->apLights() [ m_li ];
+		IqLightsource * lp = m_pAttributes ->pLight( m_li );
 
 		if( NULL != Axis )		CHECKVARY( Axis )
 		if( NULL != Angle )		CHECKVARY( Angle )
@@ -2921,7 +2922,7 @@ STD_SOIMPL CqShaderExecEnv::SO_illuminance( POINTVAL P, VECTORVAL Axis, FLOATVAL
 		Ln.Unit();
 		CqVector3D vecAxis(0,1,0);
 		if( NULL != Axis )	Axis->GetVector( vecAxis, __iGrid );
-		TqFloat fAngle = RI_PIO2;
+		TqFloat fAngle = PIO2;
 		if( NULL != Angle )	Angle->GetFloat( fAngle, __iGrid );
 		
 		TqFloat cosangle = Ln * vecAxis;
@@ -2967,7 +2968,7 @@ STD_SOIMPL CqShaderExecEnv::SO_illuminate( POINTVAL P, VECTORVAL Axis, FLOATVAL 
 
 		CqVector3D vecAxis( 0.0f, 1.0f, 0.0f );
 		if( NULL != Axis ) Axis->GetVector( vecAxis, __iGrid );
-		TqFloat fAngle = RI_PI;
+		TqFloat fAngle = PI;
 		if( NULL != Angle ) Angle->GetFloat( fAngle, __iGrid );
 		TqFloat cosangle = Ln * vecAxis;
 		if ( acos( cosangle ) > fAngle )
@@ -3324,8 +3325,8 @@ STD_SOIMPL CqShaderExecEnv::SO_lightsource( STRINGVAL name, IqShaderData* pV, DE
 	
 	BEGIN_UNIFORM_SECTION
 	GETSTRING( name );
-	if ( m_li < static_cast<TqInt>( m_pAttributes ->apLights().size() ) )
-		pLightsource = m_pAttributes ->apLights() [ m_li ] ->pShader();
+	if ( m_li < m_pAttributes ->cLights() )
+		pLightsource = m_pAttributes ->pLight( m_li ) ->pShader();
 	if ( pLightsource )
 		Result->SetValue( pLightsource->GetValue( STRING( name ).c_str(), pV ) ? 1.0f : 0.0f, 0 );
 	else
@@ -3398,68 +3399,27 @@ STD_SOIMPL CqShaderExecEnv::SO_attribute( STRINGVAL name, IqShaderData* pV, DEFP
 		{
 			CqString strParam = STRING( name ).substr( iColon + 1, STRING( name ).size() - iColon - 1 );
 			STRING( name ) = STRING( name ).substr( 0, iColon );
-			const CqParameter* pParam = m_pAttributes ->pParameter( STRING( name ).c_str(), strParam.c_str() );
-			if ( pParam != 0 )
-			{
-				// Should only be able to query uniform parameters here, varying ones should be handled
-				// by passing as shader paramters.
-				// Types must match, although storage doesn't have to
-				if ( pParam->Class() == class_uniform &&
-				     pParam->Type() == pV->Type() )
-				{
-					switch ( pParam->Type() )
-					{
-							case type_integer:
-							{
-								pV->SetFloat( static_cast<TqFloat>( *( static_cast<const CqParameterTyped<TqInt>*>( pParam ) ->pValue() ) ) );
-								break;
-							}
+			//const CqParameter* pParam = m_pAttributes ->pParameter( STRING( name ).c_str(), strParam.c_str() );
 
-							case type_float:
-							{
-								pV->SetFloat( *static_cast<const CqParameterTyped<TqFloat>*>( pParam ) ->pValue() );
-								break;
-							}
-
-							case type_string:
-							{
-								pV->SetString( *static_cast<const CqParameterTyped<CqString>*>( pParam ) ->pValue() );
-								break;
-							}
-
-							case type_point:
-							{
-								pV->SetPoint( *static_cast<const CqParameterTyped<CqVector3D>*>( pParam ) ->pValue() );
-								break;
-							}
-
-							case type_vector:
-							{
-								pV->SetVector( *static_cast<const CqParameterTyped<CqVector3D>*>( pParam ) ->pValue() );
-								break;
-							}
-
-							case type_normal:
-							{
-								pV->SetNormal( *static_cast<const CqParameterTyped<CqVector3D>*>( pParam ) ->pValue() );
-								break;
-							}
-
-							case type_color:
-							{
-								pV->SetColor( *static_cast<const CqParameterTyped<CqColor>*>( pParam ) ->pValue() );
-								break;
-							}
-
-							case type_matrix:
-							{
-								pV->SetMatrix( *static_cast<const CqParameterTyped<CqMatrix>*>( pParam ) ->pValue() );
-								break;
-							}
-					}
-					Ret = 1.0f;
-				}
-			}
+			Ret = 1.0f;
+			if( NULL != pAttributes()->GetFloatAttribute( STRING( name ).c_str(), strParam.c_str()) )
+				pV->SetFloat(  pAttributes()->GetFloatAttribute( STRING( name ).c_str(), strParam.c_str())[0] );
+			else if( NULL != pAttributes()->GetIntegerAttribute( STRING( name ).c_str(), strParam.c_str()) )
+				pV->SetFloat(  pAttributes()->GetIntegerAttribute( STRING( name ).c_str(), strParam.c_str())[0] );
+			else if( NULL != pAttributes()->GetStringAttribute( STRING( name ).c_str(), strParam.c_str()) )
+				pV->SetString(  pAttributes()->GetStringAttribute( STRING( name ).c_str(), strParam.c_str())[0] );
+			else if( NULL != pAttributes()->GetPointAttribute( STRING( name ).c_str(), strParam.c_str()) )
+				pV->SetPoint(  pAttributes()->GetPointAttribute( STRING( name ).c_str(), strParam.c_str())[0] );
+			else if( NULL != pAttributes()->GetVectorAttribute( STRING( name ).c_str(), strParam.c_str()) )
+				pV->SetVector(  pAttributes()->GetVectorAttribute( STRING( name ).c_str(), strParam.c_str())[0] );
+			else if( NULL != pAttributes()->GetNormalAttribute( STRING( name ).c_str(), strParam.c_str()) )
+				pV->SetNormal(  pAttributes()->GetNormalAttribute( STRING( name ).c_str(), strParam.c_str())[0] );
+			else if( NULL != pAttributes()->GetColorAttribute( STRING( name ).c_str(), strParam.c_str()) )
+				pV->SetColor(  pAttributes()->GetColorAttribute( STRING( name ).c_str(), strParam.c_str())[0] );
+			else if( NULL != pAttributes()->GetMatrixAttribute( STRING( name ).c_str(), strParam.c_str()) )
+				pV->SetMatrix(  pAttributes()->GetMatrixAttribute( STRING( name ).c_str(), strParam.c_str())[0] );
+			else
+				Ret = 0.0f;
 		}
 	}
 	Result->SetValue( Ret, 0 );
@@ -4604,7 +4564,7 @@ STD_SOIMPL	CqShaderExecEnv::SO_shadername2( STRINGVAL shader, DEFPARAMIMPL )
 //----------------------------------------------------------------------
 // textureinfo
 // support resolution, type, channels, projectionmatrix(*) and viewingmatrix(*)
-// User has to provide an array of float (2) for resolution
+// User has to provide an array of TqFloat (2) for resolution
 //                     an string for type
 //                     an integer for channels
 //                     an array of floats (16) for both projectionmatrix and viewingmatrix
@@ -4616,11 +4576,11 @@ STD_SOIMPL CqShaderExecEnv::SO_textureinfo( STRINGVAL name, STRINGVAL dataname, 
 	INIT_SO
 
 	TqFloat Ret = 0.0f;
-	CqTextureMap* pMap = NULL;
-	CqShadowMap *pSMap = NULL;
-	CqLatLongMap *pLMap = NULL;
-	CqEnvironmentMap *pEMap = NULL;
-	CqTextureMap *pTMap = NULL;
+	IqTextureMap* pMap = NULL;
+	IqTextureMap *pSMap = NULL;
+	IqTextureMap *pLMap = NULL;
+	IqTextureMap *pEMap = NULL;
+	IqTextureMap *pTMap = NULL;
 
 	BEGIN_UNIFORM_SECTION
 	GETSTRING( name );
@@ -4628,7 +4588,7 @@ STD_SOIMPL CqShaderExecEnv::SO_textureinfo( STRINGVAL name, STRINGVAL dataname, 
 
 	if ( !pMap && strstr( STRING( name ).c_str(), ".tif" ) )
 	{
-		pTMap = ( CqTextureMap* ) CqTextureMap::GetTextureMap( STRING( name ).c_str() );
+		pTMap = QGetRenderContextI()->GetTextureMap( STRING( name ) );
 		if ( pTMap && ( pTMap->Type() == MapType_Texture ) )
 		{
 			pMap = pTMap;
@@ -4637,7 +4597,7 @@ STD_SOIMPL CqShaderExecEnv::SO_textureinfo( STRINGVAL name, STRINGVAL dataname, 
 	}
 	if ( !pMap )
 	{
-		pSMap = ( CqShadowMap * ) CqTextureMap::GetShadowMap( STRING( name ).c_str() );
+		pSMap = QGetRenderContextI()->GetShadowMap( STRING( name ) );
 		if ( pSMap && ( pSMap->Type() == MapType_Shadow ) )
 		{
 			pMap = pSMap;
@@ -4647,24 +4607,17 @@ STD_SOIMPL CqShaderExecEnv::SO_textureinfo( STRINGVAL name, STRINGVAL dataname, 
 
 	if ( !pMap )
 	{
-		pEMap = ( CqEnvironmentMap* ) CqTextureMap::GetEnvironmentMap( STRING( name ).c_str() );
+		pEMap = QGetRenderContextI()->GetEnvironmentMap( STRING( name ) );
 		if ( pEMap && ( pEMap->Type() == MapType_Environment ) )
 		{
 			pMap = pEMap;
 		}
 		else if ( pEMap ) delete pEMap;
-
-		pLMap = ( CqLatLongMap * ) CqTextureMap::GetLatLongMap( STRING( name ).c_str() );
-		if ( pLMap && ( pLMap->Type() == MapType_LatLong ) )
-		{
-			pMap = pLMap;
-		}
-		else if ( pLMap ) delete pLMap;
 	}
 
 	if ( !pMap )
 	{
-		pTMap = ( CqTextureMap* ) CqTextureMap::GetTextureMap( STRING( name ).c_str() );
+		pTMap = QGetRenderContextI()->GetTextureMap( STRING( name ) );
 		if ( pTMap && ( pTMap->Type() == MapType_Texture ) )
 		{
 			pMap = pTMap;
@@ -4742,7 +4695,7 @@ STD_SOIMPL CqShaderExecEnv::SO_textureinfo( STRINGVAL name, STRINGVAL dataname, 
 
 	}
 
-	if ( STRING( dataname ).compare( "viewingmatrix" ) == 0 )
+/*	if ( STRING( dataname ).compare( "viewingmatrix" ) == 0 )
 	{
 		if ( pV->Type() == type_float && 
 			 pV->ArrayLength() > 0 )
@@ -4815,7 +4768,7 @@ STD_SOIMPL CqShaderExecEnv::SO_textureinfo( STRINGVAL name, STRINGVAL dataname, 
 			}
 
 		}
-	}
+	}*/
 
 	delete pMap;
 

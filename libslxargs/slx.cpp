@@ -351,8 +351,8 @@ static void AddShaderVar(CqShaderVM * pShader, int i,
                     
                     // shader evaluation space - RI_CURRENT, RI_SHADER, RI_EYE or RI_NDC
                     // just go with RI_SHADER for now
-                    spacename = (char *)malloc(sizeof(RI_SHADER) + 1);	
-                    strcpy(spacename, RI_SHADER);
+                    spacename = (char *)malloc(sizeof("shader") + 1);	
+                    strcpy(spacename, "shader");
                     
                     StoreShaderArgDef(theArgsArray, *theNArgs, theVarNameStr, slxType, 
                             spacename, defaultVal);
@@ -374,8 +374,8 @@ static void AddShaderVar(CqShaderVM * pShader, int i,
                     
                     // shader evaluation space - RI_RGB, RI_RGBA, RI_RGBZ, RI_RGBAZ, RI_A, RI_Z or RI_AZ
                     // just go with RI_RGB for now
-                    spacename = (char *)malloc(sizeof(RI_RGB) + 1);
-                    strcpy(spacename, RI_RGB);
+                    spacename = (char *)malloc(sizeof("rgb") + 1);
+                    strcpy(spacename, "rgb");
                     
                     StoreShaderArgDef(theArgsArray, *theNArgs, theVarNameStr, slxType, 
                             spacename, defaultVal);
@@ -410,7 +410,7 @@ static RtInt GetCurrentShaderInfo(char * name, char * filePath)
 //    RiBegin("CRIBBER");
     
     CqString strFilename(filePath);
-    CqRiFile SLXFile(strFilename.c_str(),"");
+    CqFile SLXFile(strFilename.c_str());
     result = RIE_NOERROR;
     theNArgs = 0;
 

@@ -5,7 +5,7 @@
  *	@brief	Declare the interface which all shaders must implement.
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2002/04/24 22:27:57 $
+ *	Last change date:	$Date: 2002/05/07 22:37:58 $
  */
 //------------------------------------------------------------------------------
 
@@ -60,7 +60,7 @@ struct IqShader
 		 * \param name Character pointer to parameter name.
 		 * \param val Character pointer to the vale storage, will be cast to a pointer of the appropriate type.
 		 */
-		virtual	void	SetValue( const char* name, TqPchar val ) = 0;
+		virtual	void	SetArgument( const CqString& name, EqVariableType type, const CqString& space, void* val ) = 0;
 		/** Get the value of a named shader paramter.
 		 * \param name The name of the shader paramter.
 		 * \param res IqShaderData pointer to store the result in, will be typechecked for suitability.

@@ -36,6 +36,7 @@
 #include	"render.h"
 #include	"transform.h"
 #include	"rifile.h"
+#include	"texturemap.h"
 
 #include	"shadervm.h"
 
@@ -955,6 +956,40 @@ IqRenderer* QGetRenderContextI()
 {
 	return ( pCurrRenderer );
 }
+
+
+IqTextureMap* CqRenderer::GetTextureMap(const CqString& strFileName)
+{
+	return( CqTextureMap::GetTextureMap( strFileName ) );
+}
+
+IqTextureMap* CqRenderer::GetEnvironmentMap(const CqString& strFileName)
+{
+	return( CqTextureMap::GetEnvironmentMap( strFileName ) );
+}
+
+IqTextureMap* CqRenderer::GetShadowMap(const CqString& strFileName)
+{
+	return( CqTextureMap::GetShadowMap( strFileName ) );
+}
+
+IqTextureMap* CqRenderer::GetLatLongMap(const CqString& strFileName)
+{
+	return( CqTextureMap::GetLatLongMap( strFileName ) );
+}
+
+
+TqBool	CqRenderer::GetBasisMatrix( CqMatrix& matBasis, const CqString& name)
+{
+	RtBasis basis;
+	if( BasisFromName( &basis, name.c_str() ) )
+	{
+		matBasis = basis;
+		return(TqTrue);
+	}
+	else
+		return(TqFalse);
+} 
 
 //---------------------------------------------------------------------
 

@@ -46,21 +46,8 @@
 
 START_NAMESPACE( Aqsis )
 struct IqShader;
+class	CqLightsource;
 
-/// The options for the orientation of a coordinate system.
-enum EqOrientation
-{
-    OrientationLH,   	///< Left hand coordinate system.
-    OrientationRH,   	///< Right and coordinate system.
-};
-
-enum	ShadingInterpolation
-{
-	ShadingConstant,   	///< use constant shading, i.e. one value per micropoly.
-	ShadingSmooth,   		///< use smooth shading, i.e. interpolate the values at the corners of a micropoly.
-};
-
-class CqLightsource;
 
 //----------------------------------------------------------------------
 /**
@@ -171,7 +158,7 @@ class _qShareC	CqAttributes : public CqRefCount, public IqAttributes
 		/** Get a reference to the lightsource list.
 		 * \return a reference to the vector of lightsource pointers.
 		 */
-		const	std::vector<CqLightsource*>&	apLights() const
+		virtual const	std::vector<CqLightsource*>&	apLights() const
 		{
 			return ( m_apLightsources );
 		}
@@ -211,104 +198,51 @@ class _qShareC	CqAttributes : public CqRefCount, public IqAttributes
 			GetIntegerAttributeWrite("System", "Orientation")[1] = ( co == OrientationLH ) ? OrientationRH : OrientationLH;
 		}
 
-		/** Get the current dislacement shader.
-		 * \param time the frame time to get the values in the case of a motion blurred attribute. (not used).
-		 * \return a pointer to the displacement shader.
-		 */
-		IqShader*	pshadDisplacement( TqFloat time = 0.0f ) const
+		virtual IqShader*	pshadDisplacement( TqFloat time = 0.0f ) const
 		{
 			return ( m_pshadDisplacement );
 		}
-		/** Set the current displacement shader.
-		 * \param pshadAtmosphere a pointer to a shader to use as the displacement shader.
-		 * \param time the frame time to get the values in the case of a motion blurred attribute. (not used).
-		 */
-		void	SetpshadDisplacement( IqShader* pshadDisplacement, TqFloat time = 0.0f )
+		virtual void	SetpshadDisplacement( IqShader* pshadDisplacement, TqFloat time = 0.0f )
 		{
 			m_pshadDisplacement = pshadDisplacement;
 		}
-
-		/** Get the current area light source shader.
-		 * \param time the frame time to get the values in the case of a motion blurred attribute. (not used).
-		 * \return a pointer to the displacement shader.
-		 */
-		IqShader*	pshadAreaLightSource( TqFloat time = 0.0f ) const
+		virtual IqShader*	pshadAreaLightSource( TqFloat time = 0.0f ) const
 		{
 			return ( m_pshadAreaLightSource );
 		}
-		/** Set the current area light source shader.
-		 * \param pshadAtmosphere a pointer to a shader to use as the displacement shader.
-		 * \param time the frame time to get the values in the case of a motion blurred attribute. (not used).
-		 */
-		void	SetpshadAreaLightSource( IqShader* pshadAreaLightSource, TqFloat time = 0.0f )
+		virtual void	SetpshadAreaLightSource( IqShader* pshadAreaLightSource, TqFloat time = 0.0f )
 		{
 			m_pshadAreaLightSource = pshadAreaLightSource;
 		}
-
-		/** Get the current surface shader.
-		 * \param time the frame time to get the values in the case of a motion blurred attribute. (not used).
-		 * \return a pointer to the displacement shader.
-		 */
-		IqShader*	pshadSurface( TqFloat time = 0.0f ) const
+		virtual IqShader*	pshadSurface( TqFloat time = 0.0f ) const
 		{
 			return ( m_pshadSurface );
 		}
-		/** Set the current surface shader.
-		 * \param pshadAtmosphere a pointer to a shader to use as the displacement shader.
-		 * \param time the frame time to get the values in the case of a motion blurred attribute. (not used).
-		 */
-		void	SetpshadSurface( IqShader* pshadSurface, TqFloat time = 0.0f )
+		virtual void	SetpshadSurface( IqShader* pshadSurface, TqFloat time = 0.0f )
 		{
 			m_pshadSurface = pshadSurface;
 		}
-
-		/** Get the current atmosphere shader.
-		 * \param time the frame time to get the values in the case of a motion blurred attribute. (not used).
-		 * \return a pointer to the displacement shader.
-		 */
-		IqShader*	pshadAtmosphere( TqFloat time = 0.0f ) const
+		virtual IqShader*	pshadAtmosphere( TqFloat time = 0.0f ) const
 		{
 			return ( m_pshadAtmosphere );
 		}
-		/** Set the current atmosphere shader.
-		 * \param pshadAtmosphere a pointer to a shader to use as the displacement shader.
-		 * \param time the frame time to get the values in the case of a motion blurred attribute. (not used).
-		 */
-		void	SetpshadAtmosphere( IqShader* pshadAtmosphere, TqFloat time = 0.0f )
+		virtual void	SetpshadAtmosphere( IqShader* pshadAtmosphere, TqFloat time = 0.0f )
 		{
 			m_pshadAtmosphere = pshadAtmosphere;
 		}
-
-		/** Get the current external volume shader.
-		 * \param time the frame time to get the values in the case of a motion blurred attribute. (not used).
-		 * \return a pointer to the displacement shader.
-		 */
-		IqShader*	pshadExteriorVolume( TqFloat time = 0.0f ) const
+		virtual IqShader*	pshadExteriorVolume( TqFloat time = 0.0f ) const
 		{
 			return ( m_pshadExteriorVolume );
 		}
-		/** Set the current external volume shader.
-		 * \param pshadAtmosphere a pointer to a shader to use as the displacement shader.
-		 * \param time the frame time to get the values in the case of a motion blurred attribute. (not used).
-		 */
-		void	SetpshadExteriorVolume( IqShader* pshadExteriorVolume, TqFloat time = 0.0f )
+		virtual void	SetpshadExteriorVolume( IqShader* pshadExteriorVolume, TqFloat time = 0.0f )
 		{
 			m_pshadExteriorVolume = pshadExteriorVolume;
 		}
-
-		/** Get the current internal volume shader.
-		 * \param time the frame time to get the values in the case of a motion blurred attribute. (not used).
-		 * \return a pointer to the displacement shader.
-		 */
-		IqShader*	pshadAreaInteriorVolume( TqFloat time = 0.0f ) const
+		virtual IqShader*	pshadAreaInteriorVolume( TqFloat time = 0.0f ) const
 		{
 			return ( m_pshadInteriorVolume );
 		}
-		/** Set the current internal volume shader.
-		 * \param pshadAtmosphere a pointer to a shader to use as the displacement shader.
-		 * \param time the frame time to get the values in the case of a motion blurred attribute. (not used).
-		 */
-		void	SetpshadInteriorVolume( IqShader* pshadInteriorVolume, TqFloat time = 0.0f )
+		virtual void	SetpshadInteriorVolume( IqShader* pshadInteriorVolume, TqFloat time = 0.0f )
 		{
 			m_pshadInteriorVolume = pshadInteriorVolume;
 		}
@@ -339,19 +273,29 @@ class _qShareC	CqAttributes : public CqRefCount, public IqAttributes
 		const	CqParameter* pParameter( const char* strName, const char* strParam ) const;
 		CqParameter* pParameterWrite( const char* strName, const char* strParam );
 
-		const	TqFloat*	GetFloatAttribute( const char* strName, const char* strParam ) const;
-		const	TqInt*	GetIntegerAttribute( const char* strName, const char* strParam ) const;
-		const	CqString* GetStringAttribute( const char* strName, const char* strParam ) const;
-		const	CqVector3D*	GetPointAttribute( const char* strName, const char* strParam ) const;
-		const	CqColor*	GetColorAttribute( const char* strName, const char* strParam ) const;
-		const	CqMatrix*	GetMatrixAttribute( const char* strName, const char* strParam ) const;
+		virtual const	TqFloat*	GetFloatAttribute( const char* strName, const char* strParam ) const;
+		virtual const	TqInt*	GetIntegerAttribute( const char* strName, const char* strParam ) const;
+		virtual const	CqString* GetStringAttribute( const char* strName, const char* strParam ) const;
+		virtual const	CqVector3D*	GetPointAttribute( const char* strName, const char* strParam ) const;
+		virtual const	CqVector3D*	GetVectorAttribute( const char* strName, const char* strParam ) const;
+		virtual const	CqVector3D*	GetNormalAttribute( const char* strName, const char* strParam ) const;
+		virtual const	CqColor*	GetColorAttribute( const char* strName, const char* strParam ) const;
+		virtual const	CqMatrix*	GetMatrixAttribute( const char* strName, const char* strParam ) const;
 
-		TqFloat*	GetFloatAttributeWrite( const char* strName, const char* strParam );
-		TqInt*	GetIntegerAttributeWrite( const char* strName, const char* strParam );
-		CqString* GetStringAttributeWrite( const char* strName, const char* strParam );
-		CqVector3D*	GetPointAttributeWrite( const char* strName, const char* strParam );
-		CqColor*	GetColorAttributeWrite( const char* strName, const char* strParam );
-		CqMatrix*	GetMatrixAttributeWrite( const char* strName, const char* strParam );
+		virtual TqFloat*	GetFloatAttributeWrite( const char* strName, const char* strParam );
+		virtual TqInt*	GetIntegerAttributeWrite( const char* strName, const char* strParam );
+		virtual CqString* GetStringAttributeWrite( const char* strName, const char* strParam );
+		virtual CqVector3D*	GetPointAttributeWrite( const char* strName, const char* strParam );
+		virtual CqVector3D*	GetVectorAttributeWrite( const char* strName, const char* strParam );
+		virtual CqVector3D*	GetNormalAttributeWrite( const char* strName, const char* strParam );
+		virtual CqColor*	GetColorAttributeWrite( const char* strName, const char* strParam );
+		virtual CqMatrix*	GetMatrixAttributeWrite( const char* strName, const char* strParam );
+
+		virtual	TqInt	cLights() const		{ return( apLights().size() ); }
+		virtual	IqLightsource*	pLight(TqInt index);
+
+		virtual	void	Release()	{ CqRefCount::Release(); }
+		virtual	void	AddRef()	{ CqRefCount::AddRef(); }
 
 	private:
 		std::vector<CqSystemOption*>	m_aAttributes;		///< a vector of user defined attribute pointers.

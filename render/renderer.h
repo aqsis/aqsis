@@ -41,7 +41,6 @@
 #include	"semaphore.h"
 #include	"messages.h"
 #include	"shaders.h"
-#include	"renderer.h"
 #include	"symbols.h"
 #include	"iddmanager.h"
 #include	"irenderer.h"
@@ -182,6 +181,14 @@ class CqRenderer : public IqRenderer
 		{
 			PrintMessage( SqMessage( 0,0, str ) );
 		}
+
+		virtual	IqTextureMap* GetTextureMap(const CqString& strFileName);
+		virtual	IqTextureMap* GetEnvironmentMap(const CqString& strFileName);
+		virtual	IqTextureMap* GetShadowMap(const CqString& strFileName);
+		virtual	IqTextureMap* GetLatLongMap(const CqString& strFileName);
+
+		virtual	TqBool	GetBasisMatrix( CqMatrix& matBasis, const CqString& name); 
+
 
 		/** Get a read only reference to the current transformation matrix.
 		 * \return A constant reference to a CqMatrix.
@@ -332,7 +339,6 @@ inline CqRenderer* QGetRenderContext()
 }
 
 
-_qShareM	IqRenderer* QGetRenderContextI();
 _qShareM	void	QSetRenderContext( CqRenderer* pRenderer );
 
 

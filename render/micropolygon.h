@@ -49,7 +49,6 @@ START_NAMESPACE( Aqsis )
 class CqVector3D;
 class CqImageBuffer;
 class CqSurface;
-class CqAttributes;
 
 //----------------------------------------------------------------------
 /** \class CqMicroPolyGridBase
@@ -88,7 +87,7 @@ class CqMicroPolyGridBase
 		 */
 		virtual CqSurface*	pSurface() const = 0;
 
-		virtual	const CqAttributes* pAttributes() const = 0;
+		virtual	const IqAttributes* pAttributes() const = 0;
 
 		virtual	CqCSGTreeNode* pCSGNode() const = 0;
 
@@ -150,7 +149,7 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase, public CqRefCount
 		{
 			return ( m_pSurface );
 		}
-		virtual	const CqAttributes* pAttributes() const
+		virtual	const IqAttributes* pAttributes() const
 		{
 			assert( NULL != m_pShaderExecEnv );
 			return ( m_pShaderExecEnv->pAttributes() );
@@ -237,7 +236,7 @@ class CqMotionMicroPolyGrid : public CqMicroPolyGridBase, public CqMotionSpec<Cq
 			return ( static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( 0 ) ) ) ->pSurface() );
 		}
 
-		virtual const CqAttributes* pAttributes() const
+		virtual const IqAttributes* pAttributes() const
 		{
 			return ( static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( 0 ) ) ) ->pAttributes() );
 		}

@@ -98,10 +98,10 @@ class CqPolygonBase
 
 		/** Get a pointer to the attributes state associated with this polygon.
 		 */
-		virtual	const CqAttributes*	pAttributes() const = 0;
+		virtual	const IqAttributes*	pAttributes() const = 0;
 		/** Get a pointer to the transfrom associated with this polygon.
 		 */
-		virtual	const CqTransform*	pTransform() const = 0;
+		virtual	const IqTransform*	pTransform() const = 0;
 
 
 		/** Determine whether this surface has per vertex normals.
@@ -259,11 +259,11 @@ class CqSurfacePolygon : public CqSurface, public CqPolygonBase
 			return ( P().Size() );
 		}
 
-		virtual	const CqAttributes*	pAttributes() const
+		virtual	const IqAttributes*	pAttributes() const
 		{
 			return ( CqSurface::pAttributes() );
 		}
-		virtual	const CqTransform*	pTransform() const
+		virtual	const IqTransform*	pTransform() const
 		{
 			return ( CqSurface::pTransform() );
 		}
@@ -465,11 +465,11 @@ class CqSurfacePointsPolygon : public CqBasicSurface, public CqPolygonBase
 			return ( m_aIndices.size() );
 		}
 
-		virtual	const CqAttributes*	pAttributes() const
+		virtual	const IqAttributes*	pAttributes() const
 		{
 			return ( m_pPoints->pAttributes() );
 		}
-		virtual	const CqTransform*	pTransform() const
+		virtual	const IqTransform*	pTransform() const
 		{
 			return ( m_pPoints->pTransform() );
 		}
@@ -628,11 +628,11 @@ class CqMotionSurfacePointsPolygon : public CqBasicSurface, public CqPolygonBase
 			return ( m_aIndices.size() );
 		}
 
-		virtual	const CqAttributes*	pAttributes() const
+		virtual	const IqAttributes*	pAttributes() const
 		{
 			return ( GetMotionObject( Time( 0 ) ) ->pAttributes() );
 		}
-		virtual	const CqTransform*	pTransform() const
+		virtual	const IqTransform*	pTransform() const
 		{
 			return ( GetMotionObject( Time( 0 ) ) ->pTransform() );
 		}

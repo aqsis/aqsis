@@ -31,6 +31,7 @@
 
 #include	"aqsis.h"
 #include	"file.h"
+#include	"renderer.h"
 
 #define		_qShareName	CORE
 #include	"share.h"

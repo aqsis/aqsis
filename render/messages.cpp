@@ -120,7 +120,7 @@ CqBasicError::CqBasicError( TqInt code, TqInt severity, const char* message, TqB
  * \param pAttributes Pointer to CqAttributes class to associate message with.
  * \param onceper Flag indicating the message should only be show once.
  */
-CqAttributeError::CqAttributeError( TqInt code, TqInt severity, const char* message, const CqAttributes* pAttributes, TqBool onceper ) :
+CqAttributeError::CqAttributeError( TqInt code, TqInt severity, const char* message, const IqAttributes* pAttributes, TqBool onceper ) :
 		CqBasicError( code ),
 		m_pAttributes( pAttributes )
 {

@@ -53,6 +53,7 @@ using namespace Aqsis;
 static RtBoolean ProcessPrimitiveVariables( CqSurface* pSurface, PARAMETERLIST );
 template <class T>
 RtVoid	CreateGPrim( T* pSurface );
+void SetShaderArgument( IqShader* pShader, const char* name, TqPchar val );
 
 
 //---------------------------------------------------------------------
@@ -1321,7 +1322,7 @@ RtLightHandle	RiLightSourceV( const char *name, PARAMETERLIST )
 			RtToken	token = tokens[ i ];
 			RtPointer	value = values[ i ];
 
-			pShader->SetValue( token, static_cast<TqPchar>( value ) );
+			SetShaderArgument( pShader, token, static_cast<TqPchar>( value ) );
 		}
 		QGetRenderContext() ->pattrWriteCurrent() ->AddLightsource( pNew );
 
@@ -1416,7 +1417,7 @@ RtVoid	RiSurfaceV( const char *name, PARAMETERLIST )
 			RtToken	token = tokens[ i ];
 			RtPointer	value = values[ i ];
 
-			pshadSurface->SetValue( token, static_cast<TqPchar>( value ) );
+			SetShaderArgument( pshadSurface, token, static_cast<TqPchar>( value ) );
 		}
 		QGetRenderContext() ->pattrWriteCurrent() ->SetpshadSurface( pshadSurface, QGetRenderContext() ->Time() );
 	}
@@ -1462,7 +1463,7 @@ RtVoid	RiAtmosphereV( const char *name, PARAMETERLIST )
 			RtToken	token = tokens[ i ];
 			RtPointer	value = values[ i ];
 
-			pshadAtmosphere->SetValue( token, static_cast<TqPchar>( value ) );
+			SetShaderArgument( pshadAtmosphere, token, static_cast<TqPchar>( value ) );
 		}
 	}
 
@@ -1892,7 +1893,7 @@ RtVoid	RiDisplacementV( const char *name, PARAMETERLIST )
 			RtToken	token = tokens[ i ];
 			RtPointer	value = values[ i ];
 
-			pshadDisplacement->SetValue( token, static_cast<TqPchar>( value ) );
+			SetShaderArgument( pshadDisplacement, token, static_cast<TqPchar>( value ) );
 		}
 	}
 
@@ -3707,7 +3708,7 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 	CqWSurf* pSubdivision = NULL;
 	CqMotionWSurf* pMotionSubdivision = NULL;
 	CqSubdivider* pSubdivider = NULL;
-	const CqAttributes* pAttr;
+	const IqAttributes* pAttr;
 
 	std::vector<CqPolygonPoints*>	apPoints;
 	// Process any specified primitive variables
@@ -4137,3 +4138,14 @@ RtFunc	RiPreRenderFunction( RtFunc function )
 	QGetRenderContext() ->optCurrent().SetpPreRenderFunction( function );
 	return ( pOldPreRenderFunction );
 }
+
+
+
+void SetShaderArgument( IqShader* pShader, const char* name, TqPchar val )
+{
+	// Find the relevant variable.
+	SqParameterDeclaration Decl = QGetRenderContext() ->FindParameterDecl( name );
+
+	pShader->SetArgument( Decl.m_strName, Decl.m_Type, Decl.m_strSpace, val );
+}
+

@@ -91,10 +91,6 @@ SOURCE=.\shadeops.cpp
 
 SOURCE=.\shaderexecenv.cpp
 # End Source File
-# Begin Source File
-
-SOURCE=.\texturemap.cpp
-# End Source File
 # End Group
 # Begin Group "Header Files"
 
@@ -102,10 +98,6 @@ SOURCE=.\texturemap.cpp
 # Begin Source File
 
 SOURCE=.\shaderexecenv.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\texturemap.h
 # End Source File
 # End Group
 # End Target

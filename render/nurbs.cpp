@@ -34,6 +34,7 @@
 #include	"vector3d.h"
 #include	"imagebuffer.h"
 #include	"bilinear.h"
+#include	"attributes.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -44,7 +45,7 @@ START_NAMESPACE( Aqsis )
 
 CqSurfaceNURBS::CqSurfaceNURBS() : CqSurface()
 {
-	TrimLoops() = pAttributes() ->TrimLoops();
+	TrimLoops() = static_cast<const CqAttributes*>(pAttributes()) ->TrimLoops();
 }
 
 //---------------------------------------------------------------------

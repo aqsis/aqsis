@@ -35,9 +35,11 @@
 
 START_NAMESPACE( Aqsis )
 
-class CqSurface;
-class CqAttributes;
-class CqTransform;
+struct IqSurface;
+struct IqAttributes;
+struct IqTransform;
+struct IqShader;
+struct IqShaderData;
 
 /** \enum EqEnvVars
  * Identifiers for the standard environment variables.
@@ -118,7 +120,7 @@ struct IqShaderExecEnv
 {
 		virtual	~IqShaderExecEnv()	{}
 
-		virtual	void	Initialise( const TqInt uGridRes, const TqInt vGridRes, CqSurface* pSurface, IqShader* pShader, TqInt Uses ) = 0;
+		virtual	void	Initialise( const TqInt uGridRes, const TqInt vGridRes, IqSurface* pSurface, IqShader* pShader, TqInt Uses ) = 0;
 		/** Get grid size in u
 		 */
 		virtual	TqInt	uGridRes() const = 0;
@@ -133,10 +135,10 @@ struct IqShaderExecEnv
 		virtual	const CqMatrix&	matObjectToWorld() const = 0;
 		/** Get a pointer to the associated attributes.
 		 */
-		virtual	const CqAttributes*	pAttributes() const = 0;
+		virtual	const IqAttributes*	pAttributes() const = 0;
 		/** Get a pointer to the associated transform.
 		 */
-		virtual	const CqTransform*	pTransform() const = 0;
+		virtual	const IqTransform*	pTransform() const = 0;
 		/** Update all cached lighting results.
 		 */
 		virtual	void	ValidateIlluminanceCache( IqShaderData* pP, IqShader* pShader ) = 0;

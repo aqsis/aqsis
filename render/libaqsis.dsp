@@ -165,10 +165,6 @@ SOURCE=.\shaders.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\spline.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\stats.cpp
 # End Source File
 # Begin Source File
@@ -186,6 +182,10 @@ SOURCE=.\symbols.cpp
 # Begin Source File
 
 SOURCE=.\teapot.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\texturemap.cpp
 # End Source File
 # Begin Source File
 
@@ -233,6 +233,10 @@ SOURCE=.\iddmanager.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\ilightsource.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\ImageBuffer.h
 # End Source File
 # Begin Source File
@@ -254,6 +258,18 @@ SOURCE=.\ishaderdata.h
 # Begin Source File
 
 SOURCE=.\ishaderexecenv.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\isurface.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\itexturemap.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\itransform.h
 # End Source File
 # Begin Source File
 
@@ -321,10 +337,6 @@ SOURCE=.\win32\intel\share.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\spline.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\stats.h
 # End Source File
 # Begin Source File
@@ -342,6 +354,10 @@ SOURCE=.\symbols.h
 # Begin Source File
 
 SOURCE=.\teapot.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\texturemap.h
 # End Source File
 # Begin Source File
 
