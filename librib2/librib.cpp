@@ -113,7 +113,7 @@ void StandardDeclarations( RendermanInterface& CallbackInterface )
 	ParserDeclare( CallbackInterface, "jitter", "uniform integer" );
 	ParserDeclare( CallbackInterface, "depthfilter", "uniform string" );
 	ParserDeclare( CallbackInterface, "width", "varying float" );
-	ParserDeclare( CallbackInterface, "constantwidth", "uniform float" );
+	ParserDeclare( CallbackInterface, "constantwidth", "constant float" );
 }
 
 

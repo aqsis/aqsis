@@ -118,7 +118,7 @@ CqMicroPolyGridBase* CqPoints::Dice()
 	if ( USES( lUses, EnvVars_Cs ) && ( NULL != pGrid->Cs() ) )
 	{
 		if ( pPoints()->bHasCs() )
-			pPoints()->Cs() ->Dice( nVertices(), 1, pGrid->Cs(), this );
+			NaturalDice( pPoints()->Cs(), nVertices(), 1, pGrid->Cs() );
 		else if ( NULL != pAttributes() ->GetColorAttribute( "System", "Color" ) )
 			pGrid->Cs() ->SetColor( pAttributes() ->GetColorAttribute( "System", "Color" ) [ 0 ] );
 		else
@@ -128,7 +128,7 @@ CqMicroPolyGridBase* CqPoints::Dice()
 	if ( USES( lUses, EnvVars_Os ) && ( NULL != pGrid->Os() ) )
 	{
 		if ( bHasOs() )
-			pPoints()->Os() ->Dice( nVertices(), 1, pGrid->Os(), this );
+			NaturalDice( pPoints()->Os(), nVertices(), 1, pGrid->Os() );
 		else if ( NULL != pAttributes() ->GetColorAttribute( "System", "Opacity" ) )
 			pGrid->Os() ->SetColor( pAttributes() ->GetColorAttribute( "System", "Opacity" ) [ 0 ] );
 		else
@@ -136,16 +136,16 @@ CqMicroPolyGridBase* CqPoints::Dice()
 	}
 
 	if ( USES( lUses, EnvVars_s ) && ( NULL != pGrid->s() ) && pPoints()->bHass() )
-		pPoints()->s() ->Dice( nVertices(), 1, pGrid->s(), this );
+		NaturalDice( pPoints()->s(), nVertices(), 1, pGrid->s() );
 
 	if ( USES( lUses, EnvVars_t ) && ( NULL != pGrid->t() ) && pPoints()->bHast() )
-		pPoints()->t() ->Dice( nVertices(), 1, pGrid->t(), this );
+		NaturalDice( pPoints()->t(), nVertices(), 1, pGrid->t() );
 
 	if ( USES( lUses, EnvVars_u ) && ( NULL != pGrid->u() ) && pPoints()->bHasu() )
-		pPoints()->u() ->Dice( nVertices(), 1, pGrid->u(), this );
+		NaturalDice( pPoints()->u(), nVertices(), 1, pGrid->u() );
 
 	if ( USES( lUses, EnvVars_v ) && ( NULL != pGrid->v() ) && pPoints()->bHasv() )
-		pPoints()->v() ->Dice( nVertices(), 1, pGrid->v(), this );
+		NaturalDice( pPoints()->v(), nVertices(), 1, pGrid->v() );
 
 
 	if ( NULL != pGrid->P() )
@@ -154,7 +154,7 @@ CqMicroPolyGridBase* CqPoints::Dice()
 	// If the shaders need N and they have been explicitly specified, then bilinearly interpolate them.
 	if ( USES( lUses, EnvVars_N ) && ( NULL != pGrid->N() ) && pPoints()->bHasN() )
 	{
-		pPoints()->N() ->Dice( nVertices(), 1, pGrid->N(), this );
+		NaturalDice( pPoints()->N(), nVertices(), 1, pGrid->N() );
 		pGrid->SetbShadingNormals( TqTrue );
 	}
 
