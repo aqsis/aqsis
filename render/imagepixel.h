@@ -90,7 +90,8 @@ struct SqImageSample
     }
     enum {
         Flag_Occludes = 0x0001,
-        Flag_Matte = 0x0002
+        Flag_Matte = 0x0002,
+		Flag_Valid = 0x0004
     };
 
     CqColor Cs() const
@@ -353,6 +354,23 @@ public:
         assert( index < m_XSamples*m_YSamples );
         return ( m_aValues[ index ] );
     }
+
+	SqImageSample& OpaqueValues( TqInt index )
+	{
+        assert( index < m_XSamples*m_YSamples );
+        return ( m_OpaqueValues[ index ] );
+    }
+
+	void IncOpaqueSampleCount()
+	{
+		m_OpaqueSampleCount++;
+	}
+
+	void SetUsesSampleList()
+	{
+		m_AnySampleUsesSampleList = true;
+	}
+
     void	Combine();
 
     /** Get the sample data for the specified sample index.
@@ -393,9 +411,12 @@ private:
     TqInt	m_XSamples;						///< The number of samples in the horizontal direction.
     TqInt	m_YSamples;						///< The number of samples in the vertical direction.
     std::vector<std::vector<SqImageSample> > m_aValues;	///< Vector of vectors of sample point data.
-    std::vector<SqSampleData> m_Samples;	///< A Vector of samples. Holds position, time, dof offset etc for each sample.
+	std::vector<SqImageSample> m_OpaqueValues;	///< Vector of sample point data for opaque samples (one per sample position, no need for list).
+	std::vector<SqSampleData> m_Samples;	///< A Vector of samples. Holds position, time, dof offset etc for each sample.
 	std::vector<TqInt> m_DofOffsetIndices;	///< A mapping from dof bounding-box index to the sample that contains a dof offset in that bb.
     SqImageSample	m_Data;
+	TqInt	m_OpaqueSampleCount;			///< The number of valid opaque samples.
+	TqBool	m_AnySampleUsesSampleList;		///< True if any of the samples use the sample list (m_aValues) as opposed to the single opaque values
     TqFloat m_MaxDepth;						///< The maximum depth of any sample in this pixel. used for occlusion culling
     TqFloat m_MinDepth;						///< The minimum depth of any sample in this pixel. used for occlusion culling
     TqInt m_OcclusionBoxId;					///< The CqOcclusionBox that covers this pixel

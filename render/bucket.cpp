@@ -506,11 +506,11 @@ void CqBucket::FilterBucket(TqBool empty)
 									TqInt cindex = sindex + sampleData.m_SubCellIndex;
 									TqFloat g = m_aFilterValues[ cindex ];
 									gTot += g;
-									if ( !pie2->Values( sampleIndex ).empty() )
+									if ( pie2->OpaqueValues( sampleIndex ).m_flags & SqImageSample::Flag_Valid )
 									{
-										SqImageSample* pSample = &pie2->Values( sampleIndex ) [ 0 ];
+										SqImageSample& pSample = pie2->OpaqueValues( sampleIndex );
 										for ( TqInt k = 0; k < datasize; ++k )
-											samples[k] += pSample->m_Data[k] * g;
+											samples[k] += pSample.m_Data[k] * g;
 										sampleCounts[pixelIndex]++;
 									}
 								}
@@ -641,11 +641,11 @@ void CqBucket::FilterBucket(TqBool empty)
 										TqInt cindex = sindex + sampleData.m_SubCellIndex;
 										TqFloat g = m_aFilterValues[ cindex ];
 										gTot += g;
-										if ( pie2->Values( sampleIndex ).size() > 0 )
+										if ( pie2->OpaqueValues( sampleIndex ).m_flags & SqImageSample::Flag_Valid )
 										{
-											SqImageSample* pSample = &pie2->Values( sampleIndex ) [ 0 ];
+											SqImageSample& pSample = pie2->OpaqueValues( sampleIndex );
 											for ( TqInt k = 0; k < datasize; ++k )
-												samples[k] += pSample->m_Data[k] * g;
+												samples[k] += pSample.m_Data[k] * g;
 											SampleCount++;
 										}
 									}

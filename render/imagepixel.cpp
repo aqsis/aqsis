@@ -88,6 +88,7 @@ void CqImagePixel::AllocateSamples( TqInt XSamples, TqInt YSamples )
         if ( XSamples > 0 && YSamples > 0 )
         {
             m_aValues.resize( numSamples );
+			m_OpaqueValues.resize( numSamples );
             m_Samples.resize( numSamples );
 			m_DofOffsetIndices.resize( numSamples );
         }
@@ -227,9 +228,6 @@ void CqImagePixel::InitialiseSamples( std::vector<CqVector2D>& vecSamples, TqBoo
 		TqFloat lod = 0;
 		TqFloat dlod = dtime;
 
-		TqFloat r = 0, theta = 0;
-		TqFloat dr = dtime;
-		TqFloat dtheta = 2 * PI * dtime;
 		for ( i = 0; i < numSamples; i++ )
 		{
 			// Scale the value of time to the shutter time.
@@ -298,12 +296,19 @@ void CqImagePixel::Clear()
 {
     TqInt i;
     for ( i = ( m_XSamples * m_YSamples ) - 1; i >= 0; i-- )
-        m_aValues[ i ].clear( );
+	{
+		if(!m_aValues[i].empty())
+			 m_aValues[ i ].clear( );
+
+		m_OpaqueValues[i].m_flags = 0;
+	}
+
+	m_OpaqueSampleCount = 0;
+	m_AnySampleUsesSampleList = TqFalse;
     m_MaxDepth = FLT_MAX;
     m_MinDepth =  FLT_MAX;
     m_OcclusionBoxId = -1;
     m_NeedsZUpdate = TqFalse;
-
 }
 
 
@@ -313,7 +318,6 @@ void CqImagePixel::Clear()
 
 void CqImagePixel::Combine()
 {
-    TqFloat coverage = 0;
     TqInt depthfilter = 0;
 
     const CqString* pstrDepthFilter = QGetRenderContext() ->optCurrent().GetStringOption( "Hider", "depthfilter" );
@@ -336,137 +340,171 @@ void CqImagePixel::Combine()
             std::cerr << warning << "Invalid depthfilter \"" << pstrDepthFilter[ 0 ].c_str() << "\", depthfilter set to \"min\"" << std::endl;
     }
 
-
-
     TqUint samplecount = 0;
     TqUint numsamples = XSamples() * YSamples();
-    std::vector<std::vector<SqImageSample> >::iterator end = m_aValues.end();
-    for ( std::vector<std::vector<SqImageSample> >::iterator samples = m_aValues.begin(); samples != end; ++samples )
-    {
-        // Find out if any of the samples are in a CSG tree.
-        TqBool bProcessed;
-        TqBool CqCSGRequired = CqCSGTreeNode::IsRequired();
-        if (CqCSGRequired)
-            do
-            {
-                bProcessed = TqFalse;
-                //Warning ProcessTree add or remove elements in samples list
-                //We could not optimized the for loop here at all.
-                for ( std::vector<SqImageSample>::iterator isample = samples->begin(); isample != samples->end(); ++isample )
-                {
-                    if ( isample->m_pCSGNode )
-                    {
-                        isample->m_pCSGNode->ProcessTree( *samples );
-                        bProcessed = TqTrue;
-                        break;
-                    }
-                }
-            } while ( bProcessed );
+	if(m_AnySampleUsesSampleList)
+	{
+		TqInt sampleIndex = 0;
+		std::vector<std::vector<SqImageSample> >::iterator end = m_aValues.end();
+		for ( std::vector<std::vector<SqImageSample> >::iterator samples = m_aValues.begin(); samples != end; ++samples )
+		{
+			SqImageSample& opaqueValue = m_OpaqueValues[sampleIndex];
+			sampleIndex++;
 
-        CqColor samplecolor = gColBlack;
-        CqColor sampleopacity = gColBlack;
-        TqBool samplehit = TqFalse;
-		TqFloat opaqueDepths[2] = { FLT_MAX, FLT_MAX };
-		TqFloat maxOpaqueDepth = FLT_MAX;
-
-        for ( std::vector<SqImageSample>::reverse_iterator sample = samples->rbegin(); sample != samples->rend(); sample++ )
-        {
-            if ( sample->m_flags & SqImageSample::Flag_Matte )
-            {
-                if ( sample->m_flags & SqImageSample::Flag_Occludes )
-                {
-                    // Optimise common case
-                    samplecolor = gColBlack;
-                    sampleopacity = gColBlack;
-                }
-                else
-                {
-                    samplecolor.SetColorRGB(
-                        LERP( sample->Os().fRed(), samplecolor.fRed(), 0 ),
-                        LERP( sample->Os().fGreen(), samplecolor.fGreen(), 0 ),
-                        LERP( sample->Os().fBlue(), samplecolor.fBlue(), 0 )
-                    );
-                    sampleopacity.SetColorRGB(
-                        LERP( sample->Os().fRed(), sampleopacity.fRed(), 0 ),
-                        LERP( sample->Os().fGreen(), sampleopacity.fGreen(), 0 ),
-                        LERP( sample->Os().fBlue(), sampleopacity.fBlue(), 0 )
-                    );
-                }
-            }
-            else
-            {
-                samplecolor = ( samplecolor * ( gColWhite - sample->Os() ) ) + sample->Cs();
-                sampleopacity = ( ( gColWhite - sampleopacity ) * sample->Os() ) + sampleopacity;
-            }
-
-			// Now determine if the sample opacity meets the limit for depth mapping.
-			// If so, store the depth in the appropriate nearest opaque sample slot.
-			// The test is, if any channel of the opacity color is greater or equal to the threshold.
-			if(sample->Os().fRed() >= zThreshold.fRed() || sample->Os().fGreen() >= zThreshold.fGreen() || sample->Os().fBlue() >= zThreshold.fBlue())
+			if(!samples->empty())
 			{
-				// Make sure we store the nearest and second nearest depth values.
-				opaqueDepths[1] = opaqueDepths[0];
-				opaqueDepths[0] = sample->Depth();
-				// Store the max opaque depth too, if not already stored.
-				if(!(maxOpaqueDepth < FLT_MAX))
-					maxOpaqueDepth = sample->Depth();
-			}
-            samplehit = TqTrue;
-        }
+				if(opaqueValue.m_flags & SqImageSample::Flag_Valid)
+				{
+					//	insert opaqueValue into samples in the right place.
+					std::vector<SqImageSample>::iterator isi = samples->begin();
+					std::vector<SqImageSample>::iterator isend = samples->end();
+					while( isi != isend )
+					{
+						if((*isi).Depth() >= opaqueValue.Depth())
+							break;
 
-        if ( samplehit )
-        {
-            coverage += 1.0f;
-            samplecount++;
-        }
+						++isi;
+					}
+					samples->insert(isi, opaqueValue);
+				}
 
-        // Write the collapsed color values back into the top entry.
-        if ( !samples->empty() )
-        {
-            // Set the color and opacity.
-			samples->begin() ->SetCs( samplecolor );
-            samples->begin() ->SetOs( sampleopacity );
-
-            if ( depthfilter != 0)
-            {
-                if ( depthfilter == 1 )
-                {
-					//std::cerr << debug << "OpaqueDepths: " << opaqueDepths[0] << " - " << opaqueDepths[1] << std::endl;
-                    // Use midpoint for depth
-                    if ( samples->size() > 1 )
-                        ( *samples ) [ 0 ].SetDepth( ( opaqueDepths[0] + opaqueDepths[1] ) * 0.5f );
-                    else
-                        ( *samples ) [ 0 ].SetDepth( FLT_MAX );
-                }
-                else if ( depthfilter == 2)
-                {
-                    ( *samples ) [ 0 ].SetDepth( maxOpaqueDepth );
-                }
-                else if ( depthfilter == 3 )
-                {
-                    std::vector<SqImageSample>::iterator sample;
-                    TqFloat totDepth = 0.0f;
-					TqInt totCount = 0;
-                    for ( sample = samples->begin(); sample != samples->end(); sample++ )
-						if(sample->Os().fRed() >= zThreshold.fRed() || sample->Os().fGreen() >= zThreshold.fGreen() || sample->Os().fBlue() >= zThreshold.fBlue())
+				// Find out if any of the samples are in a CSG tree.
+				TqBool bProcessed;
+				TqBool CqCSGRequired = CqCSGTreeNode::IsRequired();
+				if (CqCSGRequired)
+					do
+					{
+						bProcessed = TqFalse;
+						//Warning ProcessTree add or remove elements in samples list
+						//We could not optimized the for loop here at all.
+						for ( std::vector<SqImageSample>::iterator isample = samples->begin(); isample != samples->end(); ++isample )
 						{
-	                        totDepth += sample->Depth();
-							totCount++;
+							if ( isample->m_pCSGNode )
+							{
+								isample->m_pCSGNode->ProcessTree( *samples );
+								bProcessed = TqTrue;
+								break;
+							}
 						}
-                    totDepth /= totCount;
+					} while ( bProcessed );
 
-                    ( *samples ) [ 0 ].SetDepth( totDepth );
-                }
-                // Default to "min"
-            }
+				CqColor samplecolor = gColBlack;
+				CqColor sampleopacity = gColBlack;
+				TqBool samplehit = TqFalse;
+				TqFloat opaqueDepths[2] = { FLT_MAX, FLT_MAX };
+				TqFloat maxOpaqueDepth = FLT_MAX;
+
+				for ( std::vector<SqImageSample>::reverse_iterator sample = samples->rbegin(); sample != samples->rend(); sample++ )
+				{
+					if ( sample->m_flags & SqImageSample::Flag_Matte )
+					{
+						if ( sample->m_flags & SqImageSample::Flag_Occludes )
+						{
+							// Optimise common case
+							samplecolor = gColBlack;
+							sampleopacity = gColBlack;
+						}
+						else
+						{
+							samplecolor.SetColorRGB(
+								LERP( sample->Os().fRed(), samplecolor.fRed(), 0 ),
+								LERP( sample->Os().fGreen(), samplecolor.fGreen(), 0 ),
+								LERP( sample->Os().fBlue(), samplecolor.fBlue(), 0 )
+							);
+							sampleopacity.SetColorRGB(
+								LERP( sample->Os().fRed(), sampleopacity.fRed(), 0 ),
+								LERP( sample->Os().fGreen(), sampleopacity.fGreen(), 0 ),
+								LERP( sample->Os().fBlue(), sampleopacity.fBlue(), 0 )
+							);
+						}
+					}
+					else
+					{
+						samplecolor = ( samplecolor * ( gColWhite - sample->Os() ) ) + sample->Cs();
+						sampleopacity = ( ( gColWhite - sampleopacity ) * sample->Os() ) + sampleopacity;
+					}
+
+					// Now determine if the sample opacity meets the limit for depth mapping.
+					// If so, store the depth in the appropriate nearest opaque sample slot.
+					// The test is, if any channel of the opacity color is greater or equal to the threshold.
+					if(sample->Os().fRed() >= zThreshold.fRed() || sample->Os().fGreen() >= zThreshold.fGreen() || sample->Os().fBlue() >= zThreshold.fBlue())
+					{
+						// Make sure we store the nearest and second nearest depth values.
+						opaqueDepths[1] = opaqueDepths[0];
+						opaqueDepths[0] = sample->Depth();
+						// Store the max opaque depth too, if not already stored.
+						if(!(maxOpaqueDepth < FLT_MAX))
+							maxOpaqueDepth = sample->Depth();
+					}
+					samplehit = TqTrue;
+				}
+
+				if ( samplehit )
+				{
+					samplecount++;
+				}
+
+				// Write the collapsed color values back into the opaque entry.
+				if ( !samples->empty() )
+				{
+					// Set the color and opacity.
+					opaqueValue.SetCs( samplecolor );
+					opaqueValue.SetOs( sampleopacity );
+					opaqueValue.m_flags |= SqImageSample::Flag_Valid;
+
+					if ( depthfilter != 0)
+					{
+						if ( depthfilter == 1 )
+						{
+							//std::cerr << debug << "OpaqueDepths: " << opaqueDepths[0] << " - " << opaqueDepths[1] << std::endl;
+							// Use midpoint for depth
+							if ( samples->size() > 1 )
+								opaqueValue.SetDepth( ( opaqueDepths[0] + opaqueDepths[1] ) * 0.5f );
+							else
+								opaqueValue.SetDepth( FLT_MAX );
+						}
+						else if ( depthfilter == 2)
+						{
+							opaqueValue.SetDepth( maxOpaqueDepth );
+						}
+						else if ( depthfilter == 3 )
+						{
+							std::vector<SqImageSample>::iterator sample;
+							TqFloat totDepth = 0.0f;
+							TqInt totCount = 0;
+							for ( sample = samples->begin(); sample != samples->end(); sample++ )
+								if(sample->Os().fRed() >= zThreshold.fRed() || sample->Os().fGreen() >= zThreshold.fGreen() || sample->Os().fBlue() >= zThreshold.fBlue())
+								{
+									totDepth += sample->Depth();
+									totCount++;
+								}
+							totDepth /= totCount;
+
+							opaqueValue.SetDepth( totDepth );
+						}
+						// Default to "min"
+					}
+					else
+						opaqueValue.SetDepth( opaqueDepths[0] );
+				}
+			}
 			else
-				( *samples ) [ 0 ].SetDepth( opaqueDepths[0] );
-        }
-    }
+			{
+				if(opaqueValue.m_flags & SqImageSample::Flag_Valid)
+				{
+					samplecount++;
+				}
+			}
+		}
+	}
+	else
+	{
+		samplecount = m_OpaqueSampleCount;
+	}
 
     if ( samplecount )
 	{
-		coverage /= numsamples;
+		TqFloat coverage = (TqFloat)samplecount / numsamples;
         SetCoverage(coverage);
 
 		// Calculate and set the alpha (pre-multiplied).
@@ -474,7 +512,9 @@ void CqImagePixel::Combine()
 		SetAlpha(a * coverage);
 	}
 	else
+	{
 		SetAlpha(0.0f);
+	}
 }
 
 //----------------------------------------------------------------------
@@ -485,39 +525,30 @@ void CqImagePixel::UpdateZValues()
 {
     float currentMax = 0.0f;
     float currentMin = FLT_MAX;
+	TqInt sampleIndex = 0;
     TqInt sx, sy;
     for ( sy = 0; sy < m_YSamples; sy++ )
     {
         for ( sx = 0; sx < m_XSamples; sx++ )
         {
-            std::vector<SqImageSample>& aValues = m_aValues[ sy * m_XSamples + sx ];
-
-            if ( aValues.size() > 0 )
+			SqImageSample& opaqueSample = m_OpaqueValues[ sampleIndex ];
+			if(opaqueSample.m_flags & SqImageSample::Flag_Valid)
             {
-                std::vector<SqImageSample>::iterator sc = aValues.begin();
-                // find first opaque sample
-                while ( sc != aValues.end() && ( ! ( sc->m_flags & SqImageSample::Flag_Occludes ) || ( sc->m_pCSGNode ) ) )
-                    sc++;
-                if ( sc != aValues.end() )
-                {
-                    if ( sc->Depth() > currentMax )
-                    {
-                        currentMax = sc->Depth();
-                    }
-                    if ( sc->Depth() < currentMin )
-                    {
-                        currentMin = sc->Depth();
-                    }
-                }
-                else
-                {
-                    currentMax = FLT_MAX;
-                }
+				if ( opaqueSample.Depth() > currentMax )
+				{
+					currentMax = opaqueSample.Depth();
+				}
+				if ( opaqueSample.Depth() < currentMin )
+				{
+					currentMin = opaqueSample.Depth();
+				}
             }
             else
             {
                 currentMax = FLT_MAX;
             }
+
+			sampleIndex++;
         }
     }
 

@@ -1102,24 +1102,49 @@ void CqImageBuffer::RenderMPG_Static( CqMicroPolygon* pMPG, long xmin, long xmax
 
 void CqImageBuffer::StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, TqInt index, TqFloat D )
 {
-    // Sort the color/opacity into the visible point list
-	// return if the sample is occluded and can be culled.
-    std::vector<SqImageSample>& aValues = pie2->Values( index );
+    TqBool Occludes = m_CurrentMpgSampleInfo.m_Occludes;
+
+	// use the single imagesample rather than the list if possible.
+	// transparent, matte or csg samples, or if we need more than the first depth
+	// value have to use the (slower) list.
+	TqBool opaque = Occludes && !pMPG->pGrid()->pCSGNode() &&
+					!( DisplayMode() & ModeZ ) && !m_CurrentMpgSampleInfo.m_IsMatte;
+
+	SqImageSample& currentOpaqueSample = pie2->OpaqueValues(index);
+	static SqImageSample localImageVal( QGetRenderContext() ->GetOutputDataTotalSize() );
+
+	SqImageSample& ImageVal = opaque ? currentOpaqueSample : localImageVal;
+
+	std::vector<SqImageSample>& aValues = pie2->Values( index );
 	std::vector<SqImageSample>::iterator sample = aValues.begin();
 	std::vector<SqImageSample>::iterator end = aValues.end();
-	while( sample != end )
+
+	// return if the sample is occluded and can be culled.
+	if(opaque)
 	{
-		if((*sample).Depth() >= D)
-			break;
-
-		if(((*sample).m_flags & SqImageSample::Flag_Occludes) &&
-			!(*sample).m_pCSGNode && m_CurrentMpgSampleInfo.m_IsCullable)
+		if((currentOpaqueSample.m_flags & SqImageSample::Flag_Valid) &&
+			currentOpaqueSample.Depth() <= D)
+		{
 			return;
+		}
+	}
+	else
+	{
+		// Sort the color/opacity into the visible point list
+		// return if the sample is occluded and can be culled.
+		while( sample != end )
+		{
+			if((*sample).Depth() >= D)
+				break;
 
-		++sample;
+			if(((*sample).m_flags & SqImageSample::Flag_Occludes) &&
+				!(*sample).m_pCSGNode && m_CurrentMpgSampleInfo.m_IsCullable)
+				return;
+
+			++sample;
+		}
 	}
 
-	static SqImageSample ImageVal( QGetRenderContext() ->GetOutputDataTotalSize() );
     ImageVal.SetDepth( D );
 
 	CqStats::IncI( CqStats::SPL_hits );
@@ -1134,12 +1159,11 @@ void CqImageBuffer::StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, TqInt
     val[ 5 ] = m_CurrentMpgSampleInfo.m_Opacity.fBlue();
     val[ 6 ] = D;
 
-    TqBool Occludes = m_CurrentMpgSampleInfo.m_Occludes;
 
     // Now store any other data types that have been registered.
     std::map<std::string, CqRenderer::SqOutputDataEntry>& DataMap = QGetRenderContext() ->GetMapOfOutputDataEntries();
     std::map<std::string, CqRenderer::SqOutputDataEntry>::iterator entry;
-    for ( entry = DataMap.begin(); entry != DataMap.end(); entry++ )
+    for ( entry = DataMap.begin(); entry != DataMap.end(); ++entry )
     {
         IqShaderData* pData;
         if ( ( pData = pMPG->pGrid() ->FindStandardVar( entry->first.c_str() ) ) != NULL )
@@ -1207,12 +1231,15 @@ void CqImageBuffer::StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, TqInt
     }
 
 
-	// If depth is exactly the same as previous sample, chances are we've
-	// hit a MPG grid line.
-	if ( sample != end && (*sample).Depth() == ImageVal.Depth() )
+	if(!opaque)
 	{
-		(*sample).m_Data = ( (*sample).m_Data + val ) * 0.5f;
-		return;
+		// If depth is exactly the same as previous sample, chances are we've
+		// hit a MPG grid line.
+		if ( sample != end && (*sample).Depth() == ImageVal.Depth() )
+		{
+			(*sample).m_Data = ( (*sample).m_Data + val ) * 0.5f;
+			return;
+		}
 	}
 
     // Update max depth values
@@ -1234,7 +1261,22 @@ void CqImageBuffer::StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, TqInt
         ImageVal.m_flags |= SqImageSample::Flag_Matte;
     }
 
-    aValues.insert( sample, ImageVal );
+	if(!opaque)
+	{
+		aValues.insert( sample, ImageVal );
+
+		// mark this pixel as using the visible point list.
+		pie2->SetUsesSampleList();
+	}
+	else
+	{
+		// increment the sample count if we havn't already.
+		if(!(ImageVal.m_flags & SqImageSample::Flag_Valid))
+			pie2->IncOpaqueSampleCount();
+			
+		// mark this sample as having been written into.
+		ImageVal.m_flags |= SqImageSample::Flag_Valid;
+	}
 }
 
 //----------------------------------------------------------------------
