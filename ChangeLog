@@ -1,3 +1,46 @@
+2002-11-09  pgregory
+	* render/version.h 1.17:
+		Update version number
+
+	* render/imagebuffer.cpp 1.77:
+		More small but effective optimisations in the inner loops.
+		        - Michel Joron
+
+2002-11-08  pgregory
+	* configure.in 1.49:
+		Updated version number.
+
+	* render/imagebuffer.cpp 1.76:
+	* render/parameters.h 1.24:
+	* render/quadrics.cpp 1.39:
+		More hash related optimisations.
+		        - Michel Joron
+
+	* render/nurbs.cpp 1.53:
+		Fix a couple of stupid bugs in the calculation of s,t values on
+		NURBS surfaces. Spotted by Matti.
+
+	* libaqsistypes/sstring.cpp 1.5:
+	* libaqsistypes/vector2d.cpp 1.3:
+	* libaqsistypes/vector2d.h 1.3:
+	* libaqsistypes/vector3d.cpp 1.3:
+	* libaqsistypes/vector3d.h 1.3:
+	* libaqsistypes/vector4d.cpp 1.4:
+	* libaqsistypes/vector4d.h 1.5:
+		Add stream output operators for handy debugging.
+
+	* render/patch.cpp 1.45:
+	* render/surface.h 1.32:
+		Some more hash lookup optimisations.
+		        - Michel Joron
+
+	* render/patch.cpp 1.46:
+	* render/patch.h 1.21:
+	* render/polygon.cpp 1.32:
+	* render/polygon.h 1.21:
+		Update new triangle method. Now works with all primitive
+		variable types.
+
 2002-11-07  pgregory
 	* render/attributes.h 1.19:
 	* render/options.h 1.22:
