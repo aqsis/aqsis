@@ -5,7 +5,7 @@
  *	@brief	Implementation of trimcurce functionality.
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2002/03/31 21:01:04 $
+ *	Last change date:	$Date: 2002/11/15 10:00:19 $
  */ 
 //------------------------------------------------------------------------------
 
@@ -111,9 +111,10 @@ CqVector2D	CqTrimCurve::Evaluate( TqFloat u )
 void CqTrimLoop::Prepare( CqSurface* pSurface )
 {
 	std::vector<CqTrimCurve>::iterator iCurve;
+	std::vector<CqTrimCurve>::iterator iEnd = m_aCurves.end(); 
 	TqInt iPoint;
 
-	for ( iCurve = m_aCurves.begin(); iCurve != m_aCurves.end(); iCurve++ )
+	for ( iCurve = m_aCurves.begin(); iCurve != iEnd; iCurve++ )
 	{
 		TqInt cPoints = pSurface->TrimDecimation( *iCurve );
 
@@ -139,7 +140,8 @@ const TqInt	CqTrimLoop::TrimPoint( const CqVector2D& v ) const
 	TqFloat x = v.x();
 	TqFloat y = v.y();
 	TqInt i, j, c = 0;
-	for ( i = 0, j = m_aCurvePoints.size() - 1; i < m_aCurvePoints.size(); j = i++ )
+	TqInt size = m_aCurvePoints.size();
+	for ( i = 0, j = size - 1; i < size; j = i++ )
 	{
 		if ( ( ( ( m_aCurvePoints[ i ].y() <= y ) && ( y < m_aCurvePoints[ j ].y() ) ) ||
 		        ( ( m_aCurvePoints[ j ].y() <= y ) && ( y < m_aCurvePoints[ i ].y() ) ) ) &&
@@ -155,7 +157,8 @@ const TqInt	CqTrimLoop::TrimPoint( const CqVector2D& v ) const
 void CqTrimLoopArray::Prepare( CqSurface* pSurface )
 {
 	std::vector<CqTrimLoop>::iterator iLoop;
-	for ( iLoop = m_aLoops.begin(); iLoop != m_aLoops.end(); iLoop++ )
+	std::vector<CqTrimLoop>::iterator iEnd = m_aLoops.end();
+	for ( iLoop = m_aLoops.begin(); iLoop != iEnd; iLoop++ )
 		iLoop->Prepare( pSurface );
 }
 
@@ -169,7 +172,8 @@ const TqBool	CqTrimLoopArray::TrimPoint( const CqVector2D& v ) const
 	TqInt	cCrosses = 0;
 
 	std::vector<CqTrimLoop>::const_iterator iLoop;
-	for ( iLoop = m_aLoops.begin(); iLoop != m_aLoops.end(); iLoop++ )
+	std::vector<CqTrimLoop>::const_iterator iEnd = m_aLoops.end();
+	for ( iLoop = m_aLoops.begin(); iLoop != iEnd; iLoop++ )
 		cCrosses += iLoop->TrimPoint( v );
 
 	return ( !( cCrosses & 1 ) );
@@ -195,7 +199,8 @@ TqUint CqTrimCurve::InsertKnot( TqFloat u, TqInt r )
 	if ( u < m_aKnots[ Degree() ] || u > m_aKnots[ m_cVerts ] )
 		return ( 0 );
 
-	for ( i = 0; i < static_cast<TqInt>( m_aKnots.size() ); i++ )
+	TqInt size = static_cast<TqInt>( m_aKnots.size() );
+	for ( i = 0; i < size; i++ )
 	{
 		if ( m_aKnots[ i ] > u )
 		{
@@ -229,7 +234,8 @@ TqUint CqTrimCurve::InsertKnot( TqFloat u, TqInt r )
 	// Load new knot vector
 	for ( i = 0;i <= k;i++ ) nS.m_aKnots[ i ] = m_aKnots[ i ];
 	for ( i = 1;i <= r;i++ ) nS.m_aKnots[ k + i ] = u;
-	for ( i = k + 1;i < static_cast<TqInt>( m_aKnots.size() ); i++ )
+	size = static_cast<TqInt>( m_aKnots.size() );
+	for ( i = k + 1;i < size; i++ )
 		nS.m_aKnots[ i + r ] = m_aKnots[ i ];
 
 	// Save unaltered control points
@@ -237,7 +243,8 @@ TqUint CqTrimCurve::InsertKnot( TqFloat u, TqInt r )
 
 	// Insert control points as required on each row.
 	for ( i = 0; i <= k - p; i++ ) nS.CP( i ) = CP( i );
-	for ( i = k - s; i < static_cast<TqInt>( m_cVerts ); i++ )
+	size = static_cast<TqInt>( m_cVerts );
+	for ( i = k - s; i < size; i++ )
 		nS.CP( i + r ) = CP( i );
 	for ( i = 0; i <= p - s; i++ ) R[ i ] = CP( k - p + i );
 
@@ -247,12 +254,15 @@ TqUint CqTrimCurve::InsertKnot( TqFloat u, TqInt r )
 	for ( j = 1; j <= r; j++ )
 	{
 		L = k - p + j;
-		for ( i = 0;i <= p - j - s;i++ )
+		TqInt i1;
+		TqInt limit = p - j - s;
+		for ( i = 0;i <= limit;i++ )
 		{
-			alpha = ( u - m_aKnots[ L + i ] ) / ( m_aKnots[ i + k + 1 ] - m_aKnots[ L + i ] );
-			R[ i ] = CqVector3D( alpha * R[ i + 1 ].x() + ( 1.0 - alpha ) * R[ i ].x(),
-			                     alpha * R[ i + 1 ].y() + ( 1.0 - alpha ) * R[ i ].y(),
-			                     alpha * R[ i + 1 ].z() + ( 1.0 - alpha ) * R[ i ].z() );
+			i1 = i + 1;
+			alpha = ( u - m_aKnots[ L + i ] ) / ( m_aKnots[ k + i1 ] - m_aKnots[ L + i ] );
+			R[ i ] = CqVector3D( alpha * R[ i1 ].x() + ( 1.0 - alpha ) * R[ i ].x(),
+			                     alpha * R[ i1 ].y() + ( 1.0 - alpha ) * R[ i ].y(),
+			                     alpha * R[ i1 ].z() + ( 1.0 - alpha ) * R[ i ].z() );
 		}
 		nS.CP( L ) = R[ 0 ];
 		if ( p - j - s > 0 )
@@ -287,9 +297,11 @@ void CqTrimCurve::Clamp()
 		m_aVerts.resize( m_cVerts - n1 - n2 );
 		m_cVerts -= n1 + n2;
 		TqUint i;
-		for ( i = n1; i < nS.m_aKnots.size() - n2; i++ )
+		TqInt size = nS.m_aKnots.size() - n2;
+		for ( i = n1; i < size; i++ )
 			m_aKnots[ i - n1 ] = nS.m_aKnots[ i ];
-		for ( i = n1; i < nS.m_cVerts - n2; i++ )
+		size = nS.m_cVerts - n2;
+		for ( i = n1; i < size; i++ )
 			CP( i - n1 ) = nS.CP( i );
 	}
 }

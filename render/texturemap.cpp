@@ -1209,14 +1209,44 @@ void CqTextureMap::GetSample( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, st
 	
 	// Read in the relevant texture tiles.
 	CqTextureMapBuffer* pTMBa = GetBuffer( iu, iv, id );		// Val00
-	CqTextureMapBuffer* pTMBb = GetBuffer( iu, iv_n, id );	// Val01
-	CqTextureMapBuffer* pTMBc = GetBuffer( iu_n, iv, id );	// Val10
-	CqTextureMapBuffer* pTMBd = GetBuffer( iu_n, iv_n, id );	// Val11
+	CqTextureMapBuffer* pTMBb = pTMBa;
+    if (iv != iv_n) 
+    {
+       pTMBb = GetBuffer( iu, iv_n, id );	// Val01
+    }
+     
+	CqTextureMapBuffer* pTMBc = pTMBa;
+    if (iu_n != iu)
+    {
+		pTMBc = GetBuffer( iu_n, iv, id );	// Val10
+    }
+	CqTextureMapBuffer* pTMBd = NULL;
+	if ( iv == iv_n) pTMBd = pTMBc;
+	else if (iu == iu_n) pTMBd = pTMBb;
+	else
+		pTMBd = GetBuffer( iu_n, iv_n, id);	// Val11
 
-
+	TqInt c;
 	/* cannot find anything than goodbye */
 	if ( !pTMBa || !pTMBb || !pTMBc || !pTMBd )
 	{
+		TqChar warnings[ 400 ];
+		TqPuchar mapa = NULL;
+		if (pTMBa)
+			mapa = pTMBa->pBufferData();
+		else if (pTMBb)
+			mapa = pTMBb->pBufferData();
+		else if (pTMBc)
+			mapa = pTMBb->pBufferData();
+		else if (pTMBd)
+			mapa = pTMBb->pBufferData();
+		for ( c = 0; c < m_SamplesPerPixel; c++ )
+			if (mapa)
+				val[c] = mapa[c]/255.0;
+			else
+				val[c] = 1.0;
+		sprintf( warnings, "Cannot find value for either pTMPB[a,b,c,d]" );
+		RiErrorPrint( 0, 1, warnings );
 		return ;
 	}
 
@@ -1243,7 +1273,7 @@ void CqTextureMap::GetSample( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, st
 	iv *= rowlen;
 	iv_n *= rowlen;
 
-	TqInt c;
+	
 	for ( c = 0; c < m_SamplesPerPixel; c++ )
 	{
 		TqFloat Val00 = ( mapa[ iv + iu + c ] / 255.0 );
@@ -1279,9 +1309,22 @@ void CqTextureMap::GetSample( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, st
 
 		// Read in the relevant texture tiles.
 		CqTextureMapBuffer* pTMBa = GetBuffer( iu, iv, id + 1 );		// Val00
-		CqTextureMapBuffer* pTMBb = GetBuffer( iu, iv_n, id + 1 );		// Val01
-		CqTextureMapBuffer* pTMBc = GetBuffer( iu_n, iv, id + 1 );		// Val10
-		CqTextureMapBuffer* pTMBd = GetBuffer( iu_n, iv_n, id + 1 );	// Val11
+		CqTextureMapBuffer* pTMBb = pTMBa;
+        if (iv != iv_n) 
+        {
+           	pTMBb = GetBuffer( iu, iv_n, id + 1 );	// Val01
+        }
+ 
+		CqTextureMapBuffer* pTMBc = pTMBa;
+        if (iu_n != iu)
+        {
+	   		pTMBc = GetBuffer( iu_n, iv, id + 1 );	// Val10
+        }
+		CqTextureMapBuffer* pTMBd = NULL;
+		if ( iv == iv_n) pTMBd = pTMBc;
+		else if (iu == iu_n) pTMBd = pTMBb;
+		else
+			pTMBd = GetBuffer( iu_n, iv_n, id + 1);	// Val11
 
 		/* cannot find anything than goodbye */
 		if ( !pTMBa || !pTMBb || !pTMBc || !pTMBd )

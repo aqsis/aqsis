@@ -1395,7 +1395,8 @@ void CqShaderVM::SO_mergef()
 	POPV( T );	// True statement
 	RESULT(type_float, class_varying);
 	TqInt i;
-	for ( i = 0; i < m_pEnv->GridSize(); i++ )
+	TqInt ext = m_pEnv->GridSize();
+	for ( i = 0; i < ext; i++ )
 	{
 		TqBool _aq_A;
 		TqFloat _aq_T, _aq_F;
@@ -1417,7 +1418,8 @@ void CqShaderVM::SO_merges()
 	POPV( T );	// True statement
 	RESULT(type_string, class_varying);
 	TqInt i;
-	for ( i = 0; i < m_pEnv->GridSize(); i++ )
+	TqInt ext = m_pEnv->GridSize();
+	for ( i = 0; i < ext; i++ )
 	{
 		TqBool _aq_A;
 		CqString _aq_T, _aq_F;
@@ -1439,7 +1441,8 @@ void CqShaderVM::SO_mergep()
 	POPV( T );	// True statement
 	RESULT(type_point, class_varying);
 	TqInt i;
-	for ( i = 0; i < m_pEnv->GridSize(); i++ )
+	TqInt ext = m_pEnv->GridSize();
+	for ( i = 0; i < ext; i++ )
 	{
 		TqBool _aq_A;
 		CqVector3D _aq_T, _aq_F;
@@ -1461,7 +1464,8 @@ void CqShaderVM::SO_mergec()
 	POPV( T );	// True statement
 	RESULT(type_color, class_varying);
 	TqInt i;
-	for ( i = m_pEnv->GridSize() - 1; i >= 0; i-- )
+	TqInt ext = m_pEnv->GridSize();
+	for ( i = 0; i < ext; i++ )
 	{
 		TqBool _aq_A;
 		CqColor _aq_T, _aq_F;
@@ -1598,7 +1602,8 @@ void CqShaderVM::SO_S_GET()
 	POPV( A );
 	TqInt i;
 	CqBitVector& RS = m_pEnv->RunningState();
-	for ( i = m_pEnv->GridSize() - 1; i >= 0; i-- )
+	TqInt ext = m_pEnv->GridSize();
+	for ( i = 0; i < ext; i++ )
 	{
 		if ( RS.Value( i ) )
 		{
