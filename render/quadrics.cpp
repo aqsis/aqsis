@@ -259,8 +259,9 @@ void CqQuadric::GenerateGeometricNormals( TqInt uDiceSize, TqInt vDiceSize, IqSh
         {
             TqInt igrid = ( v * ( uDiceSize + 1 ) ) + u;
             DicePoint( u, v, N );
+		    TqInt CSO = pAttributes() ->GetIntegerAttribute( "System", "Orientation" ) [ 1 ];
             TqInt O = pAttributes() ->GetIntegerAttribute( "System", "Orientation" ) [ 0 ];
-            N = ( O == OrientationLH ) ? N : -N;
+            N = ( O == CSO ) ? N : -N;
             pNormals->SetNormal( m_matITTx * N, igrid );
         }
     }

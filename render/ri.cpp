@@ -468,6 +468,10 @@ RtVoid	RiBegin( RtToken name )
     QGetRenderContext() ->RegisterShader( "_def_", Type_Surface, pShader );
     QGetRenderContext() ->pattrWriteCurrent() ->SetpshadSurface( pShader, QGetRenderContext() ->Time() );
 
+	// Setup the initial transformation.
+	QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "Orientation" ) [ 1 ] = OrientationLH;
+	QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "Orientation" ) [ 0 ] = OrientationLH;
+
     return ;
 }
 
@@ -602,17 +606,6 @@ RtVoid	RiWorldBegin()
     TqInt i;
     for ( i = 0; i < QGetRenderContext() ->ptransWriteCurrent() ->cTimes(); i++ )
         QGetRenderContext() ->ptransWriteCurrent() ->SetCurrentTransform( QGetRenderContext() ->ptransWriteCurrent() ->Time( i ), CqMatrix() );
-
-    if ( QGetRenderContext() ->matSpaceToSpace( "world", "camera" ).Determinant() < 0 )
-    {
-        QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "Orientation" ) [ 1 ] = OrientationRH;
-        QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "Orientation" ) [ 0 ] = OrientationRH;
-    }
-    else
-    {
-        QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "Orientation" ) [ 1 ] = OrientationLH;
-        QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "Orientation" ) [ 0 ] = OrientationLH;
-    }
 
     QGetRenderContext() ->optCurrent().InitialiseCamera();
     QGetRenderContext() ->pImage() ->SetImage();
@@ -2370,17 +2363,17 @@ RtVoid	RiOrientation( RtToken orientation )
 
     if ( orientation != 0 )
     {
-        if ( strstr( orientation, RI_LH ) != 0 )
-            QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "Orientation" ) [ 0 ] = OrientationLH;
         if ( strstr( orientation, RI_RH ) != 0 )
-            QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "Orientation" ) [ 0 ] = OrientationRH;
-        if ( strstr( orientation, RI_INSIDE ) != 0 )
         {
             QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "Orientation" ) [ 0 ] = QGetRenderContext() ->pattrCurrent() ->GetIntegerAttribute( "System", "Orientation" ) [ 1 ];
             QGetRenderContext() ->pattrWriteCurrent() ->FlipeOrientation();
         }
-        if ( strstr( orientation, RI_OUTSIDE ) != 0 )
+        if ( strstr( orientation, RI_LH ) != 0 )
             QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "Orientation" ) [ 0 ] = QGetRenderContext() ->pattrCurrent() ->GetIntegerAttribute( "System", "Orientation" ) [ 1 ];
+        if ( strstr( orientation, RI_INSIDE ) != 0 )
+            QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "Orientation" ) [ 0 ] = OrientationRH;
+        if ( strstr( orientation, RI_OUTSIDE ) != 0 )
+            QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "Orientation" ) [ 0 ] = OrientationLH;
     }
     QGetRenderContext() ->AdvanceTime();
     return ;
@@ -2432,21 +2425,6 @@ RtVoid	RiIdentity()
 
     QGetRenderContext() ->ptransWriteCurrent() ->SetCurrentTransform( QGetRenderContext() ->Time(), CqMatrix() );
 
-    // Make sure the orientations are correct after the matrix update.
-    // We get the camera matrix and see if that is going to alter the default orientation, note
-    // that this should still work if we get a call to identity before the WorldBegin, as then the
-    // camera transform will be identity, and the behaviour will be correct.
-    if ( QGetRenderContext() ->matSpaceToSpace( "world", "camera" ).Determinant() < 0 )
-    {
-        QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "Orientation" ) [ 1 ] = OrientationRH;
-        QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "Orientation" ) [ 0 ] = OrientationRH;
-    }
-    else
-    {
-        QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "Orientation" ) [ 1 ] = OrientationLH;
-        QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "Orientation" ) [ 0 ] = OrientationLH;
-    }
-
     QGetRenderContext() ->AdvanceTime();
     return ;
 }
@@ -2461,13 +2439,10 @@ RtVoid	RiTransform( RtMatrix transform )
 
 	Validate_RiTransform
 
-    // TODO: Determine if this matrix requires a change in orientation.
     CqMatrix matTrans( transform );
     if ( matTrans.Determinant() < 0 )
-    {
-        QGetRenderContext() ->pattrWriteCurrent() ->FlipeOrientation( QGetRenderContext() ->Time() );
         QGetRenderContext() ->pattrWriteCurrent() ->FlipeCoordsysOrientation( QGetRenderContext() ->Time() );
-    }
+
     QGetRenderContext() ->ptransWriteCurrent() ->SetCurrentTransform( QGetRenderContext() ->Time(), CqMatrix( transform ) );
     QGetRenderContext() ->AdvanceTime();
 
@@ -2488,10 +2463,7 @@ RtVoid	RiConcatTransform( RtMatrix transform )
     // Check if this transformation results in a change in orientation.
     CqMatrix matTrans( transform );
     if ( matTrans.Determinant() < 0 )
-    {
-        QGetRenderContext() ->pattrWriteCurrent() ->FlipeOrientation( QGetRenderContext() ->Time() );
         QGetRenderContext() ->pattrWriteCurrent() ->FlipeCoordsysOrientation( QGetRenderContext() ->Time() );
-    }
 
     QGetRenderContext() ->ptransWriteCurrent() ->ConcatCurrentTransform( QGetRenderContext() ->Time(), CqMatrix( transform ) );
     QGetRenderContext() ->AdvanceTime();
@@ -2522,10 +2494,7 @@ RtVoid	RiPerspective( RtFloat fov )
 
     // Check if this transformation results in a change in orientation.
     if ( matP.Determinant() < 0 )
-    {
-        QGetRenderContext() ->pattrWriteCurrent() ->FlipeOrientation( QGetRenderContext() ->Time() );
         QGetRenderContext() ->pattrWriteCurrent() ->FlipeCoordsysOrientation( QGetRenderContext() ->Time() );
-    }
 
     QGetRenderContext() ->ptransWriteCurrent() ->ConcatCurrentTransform( QGetRenderContext() ->Time(), matP );
     QGetRenderContext() ->AdvanceTime();
@@ -2547,10 +2516,7 @@ RtVoid	RiTranslate( RtFloat dx, RtFloat dy, RtFloat dz )
     CqMatrix	matTrans( CqVector3D( dx, dy, dz ) );
     // Check if this transformation results in a change in orientation.
     if ( matTrans.Determinant() < 0 )
-    {
-        QGetRenderContext() ->pattrWriteCurrent() ->FlipeOrientation( QGetRenderContext() ->Time() );
         QGetRenderContext() ->pattrWriteCurrent() ->FlipeCoordsysOrientation( QGetRenderContext() ->Time() );
-    }
 
     QGetRenderContext() ->ptransWriteCurrent() ->ConcatCurrentTransform( QGetRenderContext() ->Time(), matTrans );
     QGetRenderContext() ->AdvanceTime();
@@ -2572,10 +2538,7 @@ RtVoid	RiRotate( RtFloat angle, RtFloat dx, RtFloat dy, RtFloat dz )
     CqMatrix	matRot( RAD( angle ), CqVector4D( dx, dy, dz ) );
     // Check if this transformation results in a change in orientation.
     if ( matRot.Determinant() < 0 )
-    {
-        QGetRenderContext() ->pattrWriteCurrent() ->FlipeOrientation( QGetRenderContext() ->Time() );
         QGetRenderContext() ->pattrWriteCurrent() ->FlipeCoordsysOrientation( QGetRenderContext() ->Time() );
-    }
 
     QGetRenderContext() ->ptransWriteCurrent() ->ConcatCurrentTransform( QGetRenderContext() ->Time(), matRot );
     QGetRenderContext() ->AdvanceTime();
@@ -2596,10 +2559,7 @@ RtVoid	RiScale( RtFloat sx, RtFloat sy, RtFloat sz )
     CqMatrix	matScale( sx, sy, sz );
     // Check if this transformation results in a change in orientation.
     if ( matScale.Determinant() < 0 )
-    {
-        QGetRenderContext() ->pattrWriteCurrent() ->FlipeOrientation( QGetRenderContext() ->Time() );
         QGetRenderContext() ->pattrWriteCurrent() ->FlipeCoordsysOrientation( QGetRenderContext() ->Time() );
-    }
 
     QGetRenderContext() ->ptransWriteCurrent() ->ConcatCurrentTransform( QGetRenderContext() ->Time(), matScale );
     QGetRenderContext() ->AdvanceTime();
@@ -2953,7 +2913,7 @@ RtVoid	RiPolygonV( RtInt nvertices, PARAMETERLIST )
     CqSurfacePolygon * pSurface = new CqSurfacePolygon( nvertices );
     ADDREF( pSurface );
 
-    // Process any specified primitive variables.
+	// Process any specified primitive variables.
     if ( ProcessPrimitiveVariables( pSurface, count, tokens, values ) )
     {
         if ( !pSurface->CheckDegenerate() )
@@ -3080,7 +3040,7 @@ RtVoid	RiGeneralPolygonV( RtInt nloops, RtInt nverts[], PARAMETERLIST )
                 {
                     if ( polya.CalcOrientation() != CqPolygonGeneral2D::Orientation_AntiClockwise )
 					{
-						QGetRenderContext() ->pattrWriteCurrent() ->FlipeOrientation( QGetRenderContext() ->Time() );
+				        QGetRenderContext() ->pattrWriteCurrent()->GetIntegerAttributeWrite( "System", "Orientation" ) [ 0 ] = OrientationLH;
                         polya.SwapDirection();
 					}
                 }
@@ -3088,7 +3048,7 @@ RtVoid	RiGeneralPolygonV( RtInt nloops, RtInt nverts[], PARAMETERLIST )
                 {
                     if ( polya.CalcOrientation() != CqPolygonGeneral2D::Orientation_Clockwise )
 					{
-						QGetRenderContext() ->pattrWriteCurrent() ->FlipeOrientation( QGetRenderContext() ->Time() );
+				        QGetRenderContext() ->pattrWriteCurrent()->GetIntegerAttributeWrite( "System", "Orientation" ) [ 0 ] = OrientationRH;
                         polya.SwapDirection();
 					}
                 }
@@ -3563,6 +3523,7 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
                     Axis = CqPolygonGeneral2D::Axis_XY;
                 polya.SetAxis( Axis );
 
+				std::cout << O << ", " << polya.CalcOrientation() << ", " << Axis << std::endl;
                 if ( iloop == 0 )
                 {
 					/// \note: We need to check here if the orientation of the projected poly matches the
@@ -3570,21 +3531,19 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 					/// correctly determine the inside/outside nature of points. However, if doing so breaks the
 					/// orientation as expected by the rest of the renderer, we need to flip the orientation
 					/// attribute as well so that normals are correctly calculated.
-                    if( O == OrientationRH )
+                    if( O == OrientationLH )
                     {
-                        if ( polya.CalcOrientation() != CqPolygonGeneral2D::Orientation_AntiClockwise )
+                        if ( polya.CalcOrientation() != CqPolygonGeneral2D::Orientation_Clockwise )
 						{
-					        QGetRenderContext() ->pattrWriteCurrent()->GetIntegerAttributeWrite( "System", "Orientation" ) [ 0 ] = OrientationLH;
-						    //QGetRenderContext() ->pattrWriteCurrent() ->SeteOrientation( QGetRenderContext() ->Time() );
+							std::cout << "Swap" << std::endl;
                             polya.SwapDirection();
 						}
                     }
                     else
                     {
-                        if ( polya.CalcOrientation() != CqPolygonGeneral2D::Orientation_Clockwise )
+                        if ( polya.CalcOrientation() != CqPolygonGeneral2D::Orientation_AntiClockwise )
 						{
-					        QGetRenderContext() ->pattrWriteCurrent()->GetIntegerAttributeWrite( "System", "Orientation" ) [ 0 ] = OrientationRH;
-						    //QGetRenderContext() ->pattrWriteCurrent() ->FlipeOrientation( QGetRenderContext() ->Time() );
+							std::cout << "Swap" << std::endl;
                             polya.SwapDirection();
 						}
                     }
@@ -3592,14 +3551,14 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
                 }
                 else
                 {
-                    if( O == OrientationRH )
+                    if( O == OrientationLH )
                     {
-                        if ( polya.CalcOrientation() != CqPolygonGeneral2D::Orientation_Clockwise )
+                        if ( polya.CalcOrientation() != CqPolygonGeneral2D::Orientation_AntiClockwise )
                             polya.SwapDirection();
                     }
                     else
                     {
-                        if ( polya.CalcOrientation() != CqPolygonGeneral2D::Orientation_AntiClockwise )
+                        if ( polya.CalcOrientation() != CqPolygonGeneral2D::Orientation_Clockwise )
                             polya.SwapDirection();
                     }
                     poly.Combine( polya );

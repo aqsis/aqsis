@@ -74,6 +74,7 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
     // We need to take into account Orientation here, even though most other
     // primitives leave it up to the CalcNormals function on the MPGrid, because we
     // are forcing N to be setup here, so clockwise nature is important.
+    TqInt CSO = pAttributes() ->GetIntegerAttribute( "System", "Orientation" ) [ 1 ];
     TqInt O = pAttributes() ->GetIntegerAttribute( "System", "Orientation" ) [ 0 ];
 
     indexA = 0;
@@ -106,7 +107,7 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
             i++;
         }
         vecN = vecN0 % vecN1;
-        vecN = ( O == OrientationLH ) ? vecN : -vecN;
+        vecN = ( O == CSO ) ? vecN : -vecN;
         vecN.Unit();
     }
 
