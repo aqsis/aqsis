@@ -22,31 +22,8 @@ copy ..\ribber.cfg .
 copy ..\aqsis.ini .
 
 cd shaders
-copy ..\..\shaders\constant.sl .
-copy ..\..\shaders\constant.slx .
-copy ..\..\shaders\matte.sl .
-copy ..\..\shaders\matte.slx .
-copy ..\..\shaders\metal.sl .
-copy ..\..\shaders\metal.slx .
-copy ..\..\shaders\plastic.sl .
-copy ..\..\shaders\plastic.slx .
-copy ..\..\shaders\paintedplastic.sl .
-copy ..\..\shaders\paintedplastic.slx .
-copy ..\..\shaders\distantlight.sl .
-copy ..\..\shaders\distantlight.slx .
-copy ..\..\shaders\pointlight.sl .
-copy ..\..\shaders\pointlight.slx .
-copy ..\..\shaders\spotlight.sl .
-copy ..\..\shaders\spotlight.slx .
-copy ..\..\shaders\fog.sl .
-copy ..\..\shaders\fog.slx .
-copy ..\..\shaders\depthcue.sl .
-copy ..\..\shaders\depthcue.slx .
-
-copy ..\..\shaders\additional\shadowspot.sl .
-copy ..\..\shaders\additional\shadowspot.slx .
-copy ..\..\shaders\additional\dented.sl .
-copy ..\..\shaders\additional\dented.slx .
+copy ..\..\shaders\*.sl .
+copy ..\..\shaders\*.slx .
 
 cd ..\docs
 copy ..\..\README .
@@ -56,11 +33,7 @@ copy ..\..\AUTHORS .
 copy ..\..\License.txt .
 
 cd ..\examples
-copy ..\..\content\vase_shad1.rib .
-copy ..\..\content\vase_shad2.rib .
-copy ..\..\content\vase.rib .
-copy ..\..\content\test\noshadows.rib .
-copy ..\..\content\test\autoshadows.rib .
+copy ..\..\ribfiles\*.rib .
 
 cd ..\..\
-wzzip -a -r -p Aqsis-0.4.4003.zip binary-archive\*.*
+wzzip -a -r -p Aqsis-0.5.0000.zip binary-archive\*.*
