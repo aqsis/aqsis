@@ -423,19 +423,40 @@ class _qShareC CqSurface : public CqBasicSurface
 		{
 			m_aUserParams.push_back( pParam );
 			if( pParam->strName() == "Cs" )
+			{
+				assert( -1 == m_aiStdPrimitiveVars[ EnvVars_Cs ] );
 				m_aiStdPrimitiveVars[ EnvVars_Cs ] = m_aUserParams.size() - 1;
+			}
 			else if( pParam->strName() == "Os" )
+			{
+				assert( -1 == m_aiStdPrimitiveVars[ EnvVars_Os ] );
 				m_aiStdPrimitiveVars[ EnvVars_Os ] = m_aUserParams.size() - 1;
+			}
 			else if( pParam->strName() == "s" )
+			{
+				assert( -1 == m_aiStdPrimitiveVars[ EnvVars_s ] );
 				m_aiStdPrimitiveVars[ EnvVars_s ] = m_aUserParams.size() - 1;
+			}
 			else if( pParam->strName() == "t" )
+			{
+				assert( -1 == m_aiStdPrimitiveVars[ EnvVars_t ] );
 				m_aiStdPrimitiveVars[ EnvVars_t ] = m_aUserParams.size() - 1;
+			}
 			else if( pParam->strName() == "u" )
+			{
+				assert( -1 == m_aiStdPrimitiveVars[ EnvVars_u ] );
 				m_aiStdPrimitiveVars[ EnvVars_u ] = m_aUserParams.size() - 1;
+			}
 			else if( pParam->strName() == "v" )
+			{
+				assert( -1 == m_aiStdPrimitiveVars[ EnvVars_v ] );
 				m_aiStdPrimitiveVars[ EnvVars_v ] = m_aUserParams.size() - 1;
+			}
 			else if( pParam->strName() == "N" )
+			{
+				assert( -1 == m_aiStdPrimitiveVars[ EnvVars_N ] );
 				m_aiStdPrimitiveVars[ EnvVars_N ] = m_aUserParams.size() - 1;
+			}
 		}
 
 		/** Determine whether this surface can be trimmed
