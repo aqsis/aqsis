@@ -5,7 +5,7 @@
  *	@brief	Declare the interface structure for the log class.
  *
  *	Last change by:		$Author: mw_matti $
- *	Last change date:	$Date: 2003/03/10 17:15:39 $
+ *	Last change date:	$Date: 2003/03/22 11:00:54 $
  */ 
 //------------------------------------------------------------------------------
 #ifndef	___ilog_Loaded___
@@ -15,7 +15,7 @@
 #include <string>
 #include "sstring.h"
 
-#include "mtable.h"
+#include "imtable.h"
 
 
 START_NAMESPACE( Aqsis )
@@ -37,11 +37,11 @@ struct IqLog
 		
 		/** Set a message table as the current message table
 		 */
-		virtual void setMessageTable( CqMessageTable* pTable ) = 0;
+		virtual void setMessageTable( IqMessageTable* pTable ) = 0;
 		
 		/** Get the current message table
 		 */
-		virtual CqMessageTable* getMessageTable() = 0;
+		virtual IqMessageTable* getMessageTable() = 0;
 
 		/** Log a message
 		 */

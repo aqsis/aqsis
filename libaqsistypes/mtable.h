@@ -41,19 +41,20 @@
 
 #define	 _qShareName	BUILD_LIBAQSISTYPES
 #include "share.h"
+#include "imtable.h"
 
 
 START_NAMESPACE( Aqsis )
 
 typedef std::map< int, std::string > i_s;
 
-class _qShareC CqMessageTable
+class _qShareC CqMessageTable	: public IqMessageTable
 {
 	public:
 		_qShareM CqMessageTable();
 		_qShareM ~CqMessageTable();
 
-		_qShareM const char* getError( int table, int error_id );
+		_qShareM const char* getError( const int table, const int error_id );
 		_qShareM void insert( int table, i_s::value_type data );
 		
 		_qShareM int getErrorCount()

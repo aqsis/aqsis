@@ -39,7 +39,9 @@
 #include <log4cpp/BasicLayout.hh>
 #include <log4cpp/Priority.hh>
 
-#include "mtable.h"
+#include "imtable.h"
+#include "mtable.h"		//!TODO: Remove this as soon as IqMessageTable is used everywhere
+
 #include "ilog.h"
 #include "aqsis.h"
 
@@ -83,8 +85,8 @@ class _qShareC CqLog	: public IqLog
 		_qShareM void addFileLog( std::string filename = "render.log", std::string name = "AqsisFileLog" );
 		_qShareM void removeFileLog( std::string name );
 		
-		_qShareM void setMessageTable( CqMessageTable* pTable );
-		_qShareM CqMessageTable* getMessageTable();
+		_qShareM void setMessageTable( IqMessageTable* pTable );
+		_qShareM IqMessageTable* getMessageTable();
 
 		_qShareM void log( const char* priority, const char* stringFormat, ... );
 		_qShareM void log( const char* priority, const CqString &stringFormat );
@@ -157,7 +159,14 @@ class _qShareC CqLog	: public IqLog
 				RI_GEOMETRY_V_UNKNOWN,
 				RI_OBJECT_BEGIN_UNSUPPORTED,						//20
 				RI_OBJECT_END_UNSUPPORTED,						
-				RI_MAKE_BUMP_UNSUPPORTED } m_RiErrorTable;
+				RI_MAKE_BUMP_UNSUPPORTED,
+				RI_ONLY_UNIFORM_OPTIONS,
+				RI_ONLY_UNIFORM_ATTRIBUTES,
+				RI_INVALID_SHADING_INTERPOLATION,
+				RI_DEGENRATE_POLYGON,								//25
+				RI_MAKE_CUBE_ENV_WRONG_SIZE,
+				RI_SDS_NONMANIFOLD
+															} m_RiErrorTable;	
 
 				
 	private:
@@ -174,7 +183,7 @@ class _qShareC CqLog	: public IqLog
 		log4cpp::AqFileLayout* m_pFileLayout;
 		log4cpp::Category* m_pRoot;
 
-		CqMessageTable* m_pTable;
+		IqMessageTable* m_pTable;
 };
 
 END_NAMESPACE( Aqsis )

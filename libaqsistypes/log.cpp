@@ -173,7 +173,7 @@ void CqLog::createCOUTLog( std::string name )
 }
 
 // Set a message table as the current message table
-void CqLog::setMessageTable( CqMessageTable* pTable )
+void CqLog::setMessageTable( IqMessageTable* pTable )
 {
 	m_pTable = pTable;
 }
@@ -194,7 +194,7 @@ const char* CqLog::getError( int table, int error_id )
 }
 
 // Get a pointer to the current message table
-CqMessageTable* CqLog::getMessageTable()
+IqMessageTable* CqLog::getMessageTable()
 {
 	return m_pTable;
 }
