@@ -43,14 +43,7 @@ CqConverter::CqConverter( char *searchpath, char *library, char *function )
 	m_errorlog = "" ;
 	m_dynamicsearch = searchpath ;
 	m_dynamiclibrary =  library ;
-#if defined (AQSIS_SYSTEM_MACOSX) 
-	// For Mac OS X, define MACOSX_NO_LIBDL if libdl not installed
-#ifndef MACOSX_NO_LIBDL
-	m_dynamicfunction = "_" + function ;
-#endif
-#else
 	m_dynamicfunction = function ;
-#endif
 	m_handle = NULL;
 }
 

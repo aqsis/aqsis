@@ -105,7 +105,7 @@ CqPluginBase::DLSym(void *handle, CqString *symbol )
 		location = ( void * ) GetProcAddress( ( HINSTANCE ) handle, symbol->c_str() );
 #elif defined (AQSIS_SYSTEM_MACOSX) 
 #  ifndef MACOSX_NO_LIBDL
-		location = ( void * ) dlsym( handle, symbol->c_str() );
+		location = ( void * ) dlsym( handle, ('_' + *symbol).c_str() );
 #  endif
 #elif defined (AQSIS_SYSTEM_BEOS)
 		// We probably need an interface for CFPlugins here

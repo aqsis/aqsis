@@ -117,14 +117,8 @@ std::list<SqDSOExternalCall*>*
 CqDSORepository::getShadeOpMethods(CqString* pShadeOpName)
 {
 	IqLog *logger = QGetRenderContextI()->Logger();
-	CqString strTableSymbol;
-#ifdef AQSIS_SYSTEM_MACOSX
-        strTableSymbol = "_";
-#else
-        strTableSymbol = "";
-#endif
-        strTableSymbol += *pShadeOpName;
-        strTableSymbol += "_shadeops" ;
+	CqString strTableSymbol = *pShadeOpName + "_shadeops" ;
+
 	std::list<SqDSOExternalCall*>* oplist = new (std::list<SqDSOExternalCall*>);
 	std::list<CqString*>::iterator itPathEntry;
 	SqShadeOp *pTableSymbol = NULL;
@@ -204,12 +198,7 @@ CqDSORepository::parseShadeOpTableEntry(void* handle, SqShadeOp* pShadeOpEntry){
 	// Get function name
 	std::string strMethodName;
 	
-#ifdef AQSIS_SYSTEM_MACOSX
-	strMethodName = "_";
-#else
-	strMethodName = "";
-#endif
-        strMethodName += strtok(NULL, " ");
+        strMethodName = strtok(NULL, " ");
 	CqString s = strMethodName.c_str();
 	DSOMethod method = (DSOMethod) DLSym (handle,&s);
 	if(method == NULL) 
@@ -243,13 +232,7 @@ CqDSORepository::parseShadeOpTableEntry(void* handle, SqShadeOp* pShadeOpEntry){
 	}while(nextarg);
 
 	// Check if there is a valid init function
-	CqString strInit;
-#ifdef AQSIS_SYSTEM_MACOSX
-        strInit = "_";
-#else
-        strInit = "";
-#endif
-        strInit += pShadeOpEntry->m_init;
+	CqString strInit = pShadeOpEntry->m_init;
 	DSOInit initfunc = NULL;
 	if (strcmp(pShadeOpEntry->m_init,""))
 	{
@@ -262,13 +245,7 @@ CqDSORepository::parseShadeOpTableEntry(void* handle, SqShadeOp* pShadeOpEntry){
 	} 
 	
 	// Check if there is a valid shutdown function
-	CqString strShutdown;
-#ifdef AQSIS_SYSTEM_MACOSX
-        strShutdown = "_";
-#else
-        strShutdown = "";
-#endif
-        strShutdown += pShadeOpEntry->m_shutdown;
+	CqString strShutdown = pShadeOpEntry->m_shutdown;
 	DSOShutdown shutdownfunc = NULL;
 	if (strcmp(pShadeOpEntry->m_shutdown,""))
 	{
