@@ -291,6 +291,46 @@ void CqSurface::SetDefaultPrimitiveVariables( TqBool bUseDef_st )
 
 
 //---------------------------------------------------------------------
+/** Dice the patch into a mesh of micropolygons.
+ */
+
+CqMicroPolyGridBase* CqSurface::Dice()
+{
+	// Create a new CqMicorPolyGrid for this patch
+	CqMicroPolyGrid * pGrid = new CqMicroPolyGrid( m_uDiceSize, m_vDiceSize, this );
+
+	TqInt lUses = Uses();
+
+	// Dice the primitive variables.
+	if ( USES( lUses, EnvVars_u ) ) u().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->u() );
+	if ( USES( lUses, EnvVars_v ) ) v().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->v() );
+	if ( USES( lUses, EnvVars_s ) ) s().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->s() );
+	if ( USES( lUses, EnvVars_t ) ) t().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->t() );
+	if ( USES( lUses, EnvVars_Cs ) ) Cs().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->Cs() );
+	if ( USES( lUses, EnvVars_Os ) ) Os().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->Os() );
+	if ( USES( lUses, EnvVars_P ) ) NaturalInterpolate( &P(), m_uDiceSize, m_vDiceSize, pGrid->P() );
+
+	// If the shaders need N and they have been explicitly specified, then bilinearly interpolate them.
+	if ( USES( lUses, EnvVars_N ) )
+	{
+		if( bHasN() )
+		{
+			N().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->N() );
+			pGrid->SetbShadingNormals( TqTrue );
+		}
+	}
+
+	if( CanGenerateNormals() )
+	{
+		GenerateGeometricNormals( m_uDiceSize, m_vDiceSize, pGrid->Ng() );
+		pGrid->SetbGeometricNormals( TqTrue );
+	}
+
+	return ( pGrid );
+}
+
+
+//---------------------------------------------------------------------
 
 END_NAMESPACE( Aqsis )
 

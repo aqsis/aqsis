@@ -1202,6 +1202,9 @@ void CqSurfaceNURBS::uSubdivide( CqSurfaceNURBS*& pnrbA, CqSurfaceNURBS*& pnrbB 
 	pnrbB = new CqSurfaceNURBS( *this );
 	SplitNURBS( *pnrbA, *pnrbB, TqTrue );
 
+	// Subdivide the normals
+	if ( USES( Uses(), EnvVars_N ) ) pnrbA->N().uSubdivide( &pnrbB->N() );
+
 	// Subdivide the u/v vectors
 	if ( USES( Uses(), EnvVars_u ) ) pnrbA->u().uSubdivide( &pnrbB->u() );
 	if ( USES( Uses(), EnvVars_v ) ) pnrbA->v().uSubdivide( &pnrbB->v() );
@@ -1225,6 +1228,9 @@ void CqSurfaceNURBS::vSubdivide( CqSurfaceNURBS*& pnrbA, CqSurfaceNURBS*& pnrbB 
 	pnrbA = new CqSurfaceNURBS( *this );
 	pnrbB = new CqSurfaceNURBS( *this );
 	SplitNURBS( *pnrbA, *pnrbB, TqFalse );
+
+	// Subdivide the normals
+	if ( USES( Uses(), EnvVars_N ) ) pnrbA->N().vSubdivide( &pnrbB->N() );
 
 	// Subdivide the u/v vectors
 	if ( USES( Uses(), EnvVars_u ) ) pnrbA->u().vSubdivide( &pnrbB->u() );
@@ -1272,44 +1278,26 @@ CqBound CqSurfaceNURBS::Bound() const
 /** Dice the patch into a mesh of micropolygons.
  */
 
-CqMicroPolyGridBase* CqSurfaceNURBS::Dice()
+void CqSurfaceNURBS::NaturalInterpolate(CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData)
 {
-	// Create a new CqMicorPolyGrid for this patch
-	CqMicroPolyGrid * pGrid = new CqMicroPolyGrid( m_uDiceSize, m_vDiceSize, this );
-
 	CqVector4D vec1;
-
-	TqInt lUses = Uses();
-
-	// Dice the primitive variables.
-	if ( USES( lUses, EnvVars_u ) ) u().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->u() );
-	if ( USES( lUses, EnvVars_v ) ) v().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->v() );
-	if ( USES( lUses, EnvVars_s ) ) s().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->s() );
-	if ( USES( lUses, EnvVars_t ) ) t().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->t() );
-	if ( USES( lUses, EnvVars_Cs ) ) Cs().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->Cs() );
-	if ( USES( lUses, EnvVars_Os ) ) Os().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->Os() );
-
 	TqInt iv;
-	if(USES( lUses, EnvVars_P ) )
+	for ( iv = 0; iv <= vDiceSize; iv++ )
 	{
-		for ( iv = 0; iv <= m_vDiceSize; iv++ )
+		TqFloat sv = ( static_cast<TqFloat>( iv ) / static_cast<TqFloat>( vDiceSize ) )
+					 * ( m_avKnots[ m_cvVerts ] - m_avKnots[ m_vOrder - 1 ] )
+					 + m_avKnots[ m_vOrder - 1 ];
+		TqInt iu;
+		for ( iu = 0; iu <= uDiceSize; iu++ )
 		{
-			TqFloat sv = ( static_cast<TqFloat>( iv ) / static_cast<TqFloat>( m_vDiceSize ) )
-						 * ( m_avKnots[ m_cvVerts ] - m_avKnots[ m_vOrder - 1 ] )
-						 + m_avKnots[ m_vOrder - 1 ];
-			TqInt iu;
-			for ( iu = 0; iu <= m_uDiceSize; iu++ )
-			{
-				TqInt igrid = ( iv * ( m_uDiceSize + 1) ) + iu;
-				TqFloat su = ( static_cast<TqFloat>( iu ) / static_cast<TqFloat>( m_uDiceSize ) )
-							 * ( m_auKnots[ m_cuVerts ] - m_auKnots[ m_uOrder - 1 ] )
-							 + m_auKnots[ m_uOrder - 1 ];
+			TqInt igrid = ( iv * ( uDiceSize + 1) ) + iu;
+			TqFloat su = ( static_cast<TqFloat>( iu ) / static_cast<TqFloat>( uDiceSize ) )
+						 * ( m_auKnots[ m_cuVerts ] - m_auKnots[ m_uOrder - 1 ] )
+						 + m_auKnots[ m_uOrder - 1 ];
 
-				pGrid->P()->SetPoint( static_cast<CqVector3D>( Evaluate( su, sv ) ), igrid );
-			}
+			pData->SetPoint( static_cast<CqVector3D>( Evaluate( su, sv ) ), igrid );
 		}
 	}
-	return ( pGrid );
 }
 
 //---------------------------------------------------------------------

@@ -78,49 +78,41 @@ void	CqQuadric::Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const
 /** Dice the quadric into a grid of MPGs for rendering.
  */
 
-CqMicroPolyGridBase* CqQuadric::Dice()
+void CqQuadric::NaturalInterpolate(CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData)
 {
-	// Create a new CqMicorPolyGrid for this patch
-	CqMicroPolyGrid * pGrid = new CqMicroPolyGrid( m_uDiceSize, m_vDiceSize, this );
-
-	TqInt lUses = Uses();
-
-	// Dice the primitive variables.
-	if ( USES( lUses, EnvVars_u ) ) u().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->u() );
-	if ( USES( lUses, EnvVars_v ) ) v().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->v() );
-	if ( USES( lUses, EnvVars_s ) ) s().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->s() );
-	if ( USES( lUses, EnvVars_t ) ) t().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->t() );
-	if ( USES( lUses, EnvVars_Cs ) ) Cs().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->Cs() );
-	if ( USES( lUses, EnvVars_Os ) ) Os().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->Os() );
-
-	CqVector3D	P, N;
+	CqVector3D	P;
 	int v, u;
-	if( USES( lUses, EnvVars_P ) || USES( lUses, EnvVars_Ng ) )
+	for ( v = 0; v <= vDiceSize; v++ )
 	{
-		for ( v = 0; v <= m_vDiceSize; v++ )
+		for ( u = 0; u <= uDiceSize; u++ )
 		{
-			for ( u = 0; u <= m_uDiceSize; u++ )
-			{
-				TqInt igrid = ( v * ( m_uDiceSize + 1 ) ) + u;
-				if( USES( lUses, EnvVars_P ) )
-				{
-					P = DicePoint( u, v, N );
-					pGrid->P()->SetPoint( m_matTx * P, igrid );
-				}
-				if(CanGenerateNormals() && USES( lUses, EnvVars_Ng ) )
-				{
-					TqInt CSO = pAttributes() ->GetIntegerAttribute("System", "Orientation")[1];
-					TqInt O = pAttributes() ->GetIntegerAttribute("System", "Orientation")[0];
-					N = ( CSO == O ) ? N : -N;
-					pGrid->Ng()->SetNormal( m_matITTx * N, igrid );
-				}
-			}
+			TqInt igrid = ( v * ( uDiceSize + 1 ) ) + u;
+			P = DicePoint( u, v );
+			pData->SetPoint( m_matTx * P, igrid );
 		}
 	}
+}
 
-	pGrid->SetbGeometricNormals( CanGenerateNormals() );
+//---------------------------------------------------------------------
+/** Generate and store the geometric normals for this quadric.
+ */
 
-	return ( pGrid );
+void CqQuadric::GenerateGeometricNormals( TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pNormals )
+{
+	int v, u;
+	CqVector3D	N;
+	for ( v = 0; v <= vDiceSize; v++ )
+	{
+		for ( u = 0; u <= uDiceSize; u++ )
+		{
+			TqInt igrid = ( v * ( uDiceSize + 1 ) ) + u;
+			DicePoint( u, v, N );
+			TqInt CSO = pAttributes() ->GetIntegerAttribute("System", "Orientation")[1];
+			TqInt O = pAttributes() ->GetIntegerAttribute("System", "Orientation")[0];
+			N = ( CSO == O ) ? N : -N;
+			pNormals->SetNormal( m_matITTx * N, igrid );
+		}
+	}
 }
 
 

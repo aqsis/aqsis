@@ -72,7 +72,6 @@ class CqQuadric : public CqSurface
 
 
 		// Overrides from CqSurface
-		virtual	CqMicroPolyGridBase* Dice();
 		virtual TqBool	Diceable();
 
 		void	EstimateGridSize();
@@ -93,12 +92,11 @@ class CqQuadric : public CqSurface
 		 */
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal ) = 0;
 
-		/** Virtual function to indicate whether a particular quadric is able
-		 *  to generate normals itself.
-		 */
-		virtual TqBool		CanGenerateNormals() const	{ return( TqFalse ); }
-
 		CqQuadric&	operator=( const CqQuadric& From );
+
+		// Derived from CqSurface
+		virtual void		NaturalInterpolate(CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData);
+		virtual	void		GenerateGeometricNormals( TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pNormals );
 
 	protected:
 		CqMatrix	m_matTx;		///< Transformation matrix from object to camera.

@@ -90,7 +90,6 @@ class CqSurfacePatchBicubic : public CqSurface
 		CqSurfacePatchBicubic*	vSubdivide();
 
 		virtual	CqBound	Bound() const;
-		virtual	CqMicroPolyGridBase* Dice();
 		virtual	TqInt	Split( std::vector<CqBasicSurface*>& aSplits );
 		virtual TqBool	Diceable();
 
@@ -107,6 +106,8 @@ class CqSurfacePatchBicubic : public CqSurface
 		{
 			return ( 16 );
 		}
+
+		virtual void NaturalInterpolate(CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData);
 
 	protected:
 
@@ -156,7 +157,6 @@ class _qShareC CqSurfacePatchBilinear : public CqSurface
 		CqSurfacePatchBilinear*	vSubdivide();
 
 		virtual	CqBound	Bound() const;
-		virtual	CqMicroPolyGridBase* Dice();
 		virtual	TqInt	Split( std::vector<CqBasicSurface*>& aSplits );
 		virtual TqBool	Diceable();
 
@@ -173,6 +173,8 @@ class _qShareC CqSurfacePatchBilinear : public CqSurface
 		{
 			return ( 4 );
 		}
+
+		virtual void NaturalInterpolate(CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData);
 
 	protected:
 };

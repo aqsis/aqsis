@@ -343,17 +343,20 @@ CqSurfacePatchBicubic* CqSurfacePatchBicubic::uSubdivide()
 		pmResult->CP( i, 3 ) = CqVector4D( Gr[ 3 ][ 0 ], Gr[ 3 ][ 1 ], Gr[ 3 ][ 2 ], 1 );
 	}
 
+	// Subdivide the normals
+	if ( USES( Uses(), EnvVars_N ) && bHasN() ) N().uSubdivide( &pmResult->N() );
+
 	// Subdivide the u/v vectors
-	if ( USES( Uses(), EnvVars_u ) ) u().uSubdivide( &pmResult->u() );
-	if ( USES( Uses(), EnvVars_v ) ) v().uSubdivide( &pmResult->v() );
+	if ( USES( Uses(), EnvVars_u ) && bHasu() ) u().uSubdivide( &pmResult->u() );
+	if ( USES( Uses(), EnvVars_v ) && bHasv() ) v().uSubdivide( &pmResult->v() );
 
 	// Subdivide the s/t vectors
-	if ( USES( Uses(), EnvVars_s ) ) s().uSubdivide( &pmResult->s() );
-	if ( USES( Uses(), EnvVars_t ) ) t().uSubdivide( &pmResult->t() );
+	if ( USES( Uses(), EnvVars_s ) && bHass() ) s().uSubdivide( &pmResult->s() );
+	if ( USES( Uses(), EnvVars_t ) && bHast() ) t().uSubdivide( &pmResult->t() );
 
 	// Subdivide the colors
-	if ( USES( Uses(), EnvVars_Cs ) ) Cs().uSubdivide( &pmResult->Cs() );
-	if ( USES( Uses(), EnvVars_Os ) ) Os().uSubdivide( &pmResult->Os() );
+	if ( USES( Uses(), EnvVars_Cs ) && bHasCs() ) Cs().uSubdivide( &pmResult->Cs() );
+	if ( USES( Uses(), EnvVars_Os ) && bHasOs() ) Os().uSubdivide( &pmResult->Os() );
 
 	return ( pmResult );
 }
@@ -414,18 +417,21 @@ CqSurfacePatchBicubic* CqSurfacePatchBicubic::vSubdivide()
 		pmResult->CP( 3, i ) = CqVector4D( Gr[ 3 ][ 0 ], Gr[ 3 ][ 1 ], Gr[ 3 ][ 2 ], 1 );
 	}
 
+	// Subdivide the normals
+	if ( USES( Uses(), EnvVars_N ) && bHasN() ) N().vSubdivide( &pmResult->N() );
+
 	// Subdivide the u/v vectors
-	if ( USES( Uses(), EnvVars_u ) ) u().vSubdivide( &pmResult->u() );
-	if ( USES( Uses(), EnvVars_v ) ) v().vSubdivide( &pmResult->v() );
+	if ( USES( Uses(), EnvVars_u ) && bHasu() ) u().vSubdivide( &pmResult->u() );
+	if ( USES( Uses(), EnvVars_v ) && bHasv() ) v().vSubdivide( &pmResult->v() );
 
 
 	// Subdivide the s/t vectors
-	if ( USES( Uses(), EnvVars_s ) ) s().vSubdivide( &pmResult->s() );
-	if ( USES( Uses(), EnvVars_t ) ) t().vSubdivide( &pmResult->t() );
+	if ( USES( Uses(), EnvVars_s ) && bHass() ) s().vSubdivide( &pmResult->s() );
+	if ( USES( Uses(), EnvVars_t ) && bHast() ) t().vSubdivide( &pmResult->t() );
 
 	// Subdivide the colors
-	if ( USES( Uses(), EnvVars_Cs ) ) Cs().vSubdivide( &pmResult->Cs() );
-	if ( USES( Uses(), EnvVars_Os ) ) Os().vSubdivide( &pmResult->Os() );
+	if ( USES( Uses(), EnvVars_Cs ) && bHasCs() ) Cs().vSubdivide( &pmResult->Cs() );
+	if ( USES( Uses(), EnvVars_Os ) && bHasOs() ) Os().vSubdivide( &pmResult->Os() );
 
 	return ( pmResult );
 }
@@ -462,10 +468,10 @@ CqBound CqSurfacePatchBicubic::Bound() const
 /** Dice the patch into a mesh of micropolygons.
  */
 
-CqMicroPolyGridBase* CqSurfacePatchBicubic::Dice()
+void CqSurfacePatchBicubic::NaturalInterpolate(CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData)
 {
-	// Create a new CqMicorPolyGrid for this patch
-	CqMicroPolyGrid * pGrid = new CqMicroPolyGrid( m_uDiceSize, m_vDiceSize, this );
+	// \note: Only to avoid problems with not used warnings, remove when proper implementation in place.
+	pParameter = pParameter;
 
 	// NOTE: This violates thread safety, look into this.
 	CqMatrix	matDDx;
@@ -476,32 +482,18 @@ CqMicroPolyGridBase* CqSurfacePatchBicubic::Dice()
 	CqVector4D	DDzA;
 
 	// Initialise the forward difference variables.
-	InitFD( m_uDiceSize, m_vDiceSize, matDDx, matDDy, matDDz, DDxA, DDyA, DDzA );
-
-	TqInt lUses = Uses();
-
-	// Dice the primitive variables.
-	if ( USES( lUses, EnvVars_u ) ) u().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->u() );
-	if ( USES( lUses, EnvVars_v ) ) v().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->v() );
-	if ( USES( lUses, EnvVars_s ) ) s().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->s() );
-	if ( USES( lUses, EnvVars_t ) ) t().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->t() );
-	if ( USES( lUses, EnvVars_Cs ) ) Cs().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->Cs() );
-	if ( USES( lUses, EnvVars_Os ) ) Os().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->Os() );
+	InitFD( uDiceSize, vDiceSize, matDDx, matDDy, matDDz, DDxA, DDyA, DDzA );
 
 	TqInt iv, iu;
-	if( USES( lUses, EnvVars_P ) )
+	for ( iv = 0; iv <= vDiceSize; iv++ )
 	{
-		for ( iv = 0; iv <= m_vDiceSize; iv++ )
+		for ( iu = 0; iu <= uDiceSize; iu++ )
 		{
-			for ( iu = 0; iu <= m_uDiceSize; iu++ )
-			{
-				TqInt igrid = ( iv * ( m_uDiceSize + 1 ) ) + iu;
-				pGrid->P()->SetPoint( static_cast<CqVector3D>( EvaluateFD( matDDx, matDDy, matDDz, DDxA, DDyA, DDzA ) ), igrid );
-			}
-			AdvanceFD( matDDx, matDDy, matDDz, DDxA, DDyA, DDzA );
+			TqInt igrid = ( iv * ( uDiceSize + 1 ) ) + iu;
+			pData->SetPoint( static_cast<CqVector3D>( EvaluateFD( matDDx, matDDy, matDDz, DDxA, DDyA, DDzA ) ), igrid );
 		}
+		AdvanceFD( matDDx, matDDy, matDDz, DDxA, DDyA, DDzA );
 	}
-	return ( pGrid );
 }
 
 //---------------------------------------------------------------------
@@ -816,22 +808,22 @@ CqSurfacePatchBilinear* CqSurfacePatchBilinear::uSubdivide()
 	CqSurfacePatchBilinear * pmResult = new CqSurfacePatchBilinear( *this );
 
 	// Subdivide the vertices
-	P().uSubdivide( &pmResult->P() );
+	if ( USES( Uses(), EnvVars_P ) ) P().uSubdivide( &pmResult->P() );
 
 	// Subdivide the normals
-	if ( USES( Uses(), EnvVars_N ) ) N().uSubdivide( &pmResult->N() );
+	if ( USES( Uses(), EnvVars_N ) && bHasN() ) N().uSubdivide( &pmResult->N() );
 
 	// Subdivide the u/v vectors
-	if ( USES( Uses(), EnvVars_u ) ) u().uSubdivide( &pmResult->u() );
-	if ( USES( Uses(), EnvVars_v ) ) v().uSubdivide( &pmResult->v() );
+	if ( USES( Uses(), EnvVars_u ) && bHasu() ) u().uSubdivide( &pmResult->u() );
+	if ( USES( Uses(), EnvVars_v ) && bHasv() ) v().uSubdivide( &pmResult->v() );
 
 	// Subdivide the s/t vectors
-	if ( USES( Uses(), EnvVars_s ) ) s().uSubdivide( &pmResult->s() );
-	if ( USES( Uses(), EnvVars_t ) ) t().uSubdivide( &pmResult->t() );
+	if ( USES( Uses(), EnvVars_s ) && bHass() ) s().uSubdivide( &pmResult->s() );
+	if ( USES( Uses(), EnvVars_t ) && bHast() ) t().uSubdivide( &pmResult->t() );
 
 	// Subdivide the colors
-	if ( USES( Uses(), EnvVars_Cs ) ) Cs().uSubdivide( &pmResult->Cs() );
-	if ( USES( Uses(), EnvVars_Os ) ) Os().uSubdivide( &pmResult->Os() );
+	if ( USES( Uses(), EnvVars_Cs ) && bHasCs() ) Cs().uSubdivide( &pmResult->Cs() );
+	if ( USES( Uses(), EnvVars_Os ) && bHasOs() ) Os().uSubdivide( &pmResult->Os() );
 
 	return ( pmResult );
 }
@@ -846,22 +838,22 @@ CqSurfacePatchBilinear* CqSurfacePatchBilinear::vSubdivide()
 	CqSurfacePatchBilinear * pmResult = new CqSurfacePatchBilinear( *this );
 
 	// Subdivide the vertices.
-	P().vSubdivide( &pmResult->P() );
+	if ( USES( Uses(), EnvVars_P ) ) P().vSubdivide( &pmResult->P() );
 
 	// Subdivide the normals
-	if ( USES( Uses(), EnvVars_N ) ) N().vSubdivide( &pmResult->N() );
+	if ( USES( Uses(), EnvVars_N ) && bHasN() ) N().vSubdivide( &pmResult->N() );
 
 	// Subdivide the u/v vectors
-	if ( USES( Uses(), EnvVars_u ) ) u().vSubdivide( &pmResult->u() );
-	if ( USES( Uses(), EnvVars_v ) ) v().vSubdivide( &pmResult->v() );
+	if ( USES( Uses(), EnvVars_u ) && bHasu() ) u().vSubdivide( &pmResult->u() );
+	if ( USES( Uses(), EnvVars_v ) && bHasv() ) v().vSubdivide( &pmResult->v() );
 
 	// Subdivide the s/t vectors
-	if ( USES( Uses(), EnvVars_s ) ) s().vSubdivide( &pmResult->s() );
-	if ( USES( Uses(), EnvVars_t ) ) t().vSubdivide( &pmResult->t() );
+	if ( USES( Uses(), EnvVars_s ) && bHass() ) s().vSubdivide( &pmResult->s() );
+	if ( USES( Uses(), EnvVars_t ) && bHast() ) t().vSubdivide( &pmResult->t() );
 
 	// Subdivide the colors
-	if ( USES( Uses(), EnvVars_Cs ) ) Cs().vSubdivide( &pmResult->Cs() );
-	if ( USES( Uses(), EnvVars_Os ) ) Os().vSubdivide( &pmResult->Os() );
+	if ( USES( Uses(), EnvVars_Cs ) && bHasCs() ) Cs().vSubdivide( &pmResult->Cs() );
+	if ( USES( Uses(), EnvVars_Os ) && bHasOs() ) Os().vSubdivide( &pmResult->Os() );
 
 	return ( pmResult );
 }
@@ -898,47 +890,23 @@ CqBound CqSurfacePatchBilinear::Bound() const
 /** Dice the patch into a mesh of micropolygons.
  */
 
-CqMicroPolyGridBase* CqSurfacePatchBilinear::Dice()
+void CqSurfacePatchBilinear::NaturalInterpolate(CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData)
 {
-	// Create a new CqMicroPolyGrid for this patch
-	CqMicroPolyGrid * pGrid = new CqMicroPolyGrid( m_uDiceSize, m_vDiceSize, this );
+	// \note: Only to avoid problems with not used warnings, remove when proper implementation in place.
+	pParameter = pParameter;
 
-	TqFloat diu = 1.0 / m_uDiceSize;
-	TqFloat div = 1.0 / m_vDiceSize;
-
-	TqInt lUses = Uses();
-
-	// Dice the primitive variables.
-	if ( USES( lUses, EnvVars_u ) ) u().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->u() );
-	if ( USES( lUses, EnvVars_v ) ) v().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->v() );
-	if ( USES( lUses, EnvVars_s ) ) s().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->s() );
-	if ( USES( lUses, EnvVars_t ) ) t().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->t() );
-	if ( USES( lUses, EnvVars_Cs ) ) Cs().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->Cs() );
-	if ( USES( lUses, EnvVars_Os ) ) Os().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->Os() );
-
-	bool bNormals = false;
-	if ( N().Size() == 4 )
-	{
-		pGrid->SetbShadingNormals( TqTrue );
-		bNormals = true;
-	}
+	TqFloat diu = 1.0 / uDiceSize;
+	TqFloat div = 1.0 / vDiceSize;
 
 	TqInt iv, iu;
-	if( USES( lUses, EnvVars_P ) || USES( lUses, EnvVars_N ) )
+	for ( iv = 0; iv <= vDiceSize; iv++ )
 	{
-		for ( iv = 0; iv <= m_vDiceSize; iv++ )
+		for ( iu = 0; iu <= uDiceSize; iu++ )
 		{
-			for ( iu = 0; iu <= m_uDiceSize; iu++ )
-			{
-				TqInt igrid = ( iv * ( m_uDiceSize + 1 ) ) + iu;
-				if ( bNormals && USES( lUses, EnvVars_N ) ) 
-					pGrid->N()->SetNormal( static_cast<CqVector3D>( EvaluateNormal( iu * diu, iv * div ) ), igrid );
-				if( USES( lUses, EnvVars_P) )
-					pGrid->P()->SetPoint( static_cast<CqVector3D>( BilinearEvaluate<CqVector4D>( P() [ 0 ], P() [ 1 ], P() [ 2 ], P() [ 3 ], iu * diu, iv * div ) ), igrid );
-			}
+			TqInt igrid = ( iv * ( uDiceSize + 1 ) ) + iu;
+			pData->SetPoint( static_cast<CqVector3D>( BilinearEvaluate<CqVector4D>( P() [ 0 ], P() [ 1 ], P() [ 2 ], P() [ 3 ], iu * diu, iv * div ) ), igrid );
 		}
 	}
-	return ( pGrid );
 }
 
 

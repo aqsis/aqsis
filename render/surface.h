@@ -329,43 +329,43 @@ class _qShareC CqSurface : public CqBasicSurface
 		 */
 		const	TqBool	bHasN() const
 		{
-			return ( m_N.Size() >= cVertex() );
+			return ( m_N.Size() >= cVarying() );
 		}
 		/** Determine whether this surface has per vertex colors.
 		 */
 		const	TqBool	bHasCs() const
 		{
-			return ( m_Cs.Size() >= cVertex() );
+			return ( m_Cs.Size() >= cVarying() );
 		}
 		/** Determine whether this surface has per vertex opacities.
 		 */
 		const	TqBool	bHasOs() const
 		{
-			return ( m_Os.Size() >= cVertex() );
+			return ( m_Os.Size() >= cVarying() );
 		}
 		/** Determine whether this surface has per vertex s cordinates.
 		 */
 		const	TqBool	bHass() const
 		{
-			return ( m_s.Size() >= cVertex() );
+			return ( m_s.Size() >= cVarying() );
 		}
 		/** Determine whether this surface has per vertex t coordinates.
 		 */
 		const	TqBool	bHast() const
 		{
-			return ( m_t.Size() >= cVertex() );
+			return ( m_t.Size() >= cVarying() );
 		}
 		/** Determine whether this surface has per vertex u coordinates.
 		 */
 		const	TqBool	bHasu() const
 		{
-			return ( m_u.Size() >= cVertex() );
+			return ( m_u.Size() >= cVarying() );
 		}
 		/** Determine whether this surface has per vertex v coordinates.
 		 */
 		const	TqBool	bHasv() const
 		{
-			return ( m_v.Size() >= cVertex() );
+			return ( m_v.Size() >= cVarying() );
 		}
 
 
@@ -393,6 +393,23 @@ class _qShareC CqSurface : public CqBasicSurface
 		 */
 		virtual	void	PrepareTrimCurve()
 		{}
+
+		/** Interpolate the specified value using the natural interpolation method for the surface.
+		 *  Fills in the given shader data with the resulting data.
+		 */
+		virtual void NaturalInterpolate(CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData) {}
+
+		/** Virtual function to indicate whether a particular surface is able
+		 *  to generate geometric normals itself.
+		 */
+		virtual TqBool		CanGenerateNormals() const	{ return( TqFalse ); }
+
+		/** Virtual function to genrate and fill in geomtric normals if a surface is able to do so.
+		 */
+		virtual	void		GenerateGeometricNormals( TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pNormals )	{}
+
+		// Derived from CqBasicSurface
+		virtual	CqMicroPolyGridBase* Dice();
 
 	protected:
 		// Default primitive variables
