@@ -258,12 +258,12 @@ void OutputTreeNode( const IqParseNode* pNode, std::ostream& out, std::string st
 		}
 
 		slxFile << std::endl << std::endl << "segment Code" << std::endl;
-		IqParseNode* pNext = pNode->pChild();
-		while ( pNext )
-		{
-			OutputTreeNode( pNext, slxFile, strOutName );
-			pNext = pNext->pNextSibling();
-		}
+		IqParseNode* pCode = pNode->pChild();
+		// Output the code tree.
+		if( pCode )	OutputTreeNode( pCode, slxFile, strOutName );
+		/// \note There is another child here, it is the list of arguments, but they don't need to be 
+		/// output as part of the code segment.
+
 		slxFile.close();
 	}
 	else if ( pNode->GetInterface( ParseNode_FunctionCall, ( void** ) & pFC ) )
