@@ -481,8 +481,18 @@ class CqShaderVariableVaryingFloat : public CqShaderVariableVarying<type_float, 
 		virtual	void		SetValueFromVariable( IqShaderData* pFrom )		
 							{ 
 								TqInt i;
-								for(i = 0; i < Size(); i++)
-									pFrom->GetFloat( m_aValue[i], i );
+								if( pFrom->Size() > 1 )
+								{
+									for(i = 0; i < Size(); i++)
+										pFrom->GetFloat( m_aValue[i], i );
+								}
+								else
+								{
+									TqFloat temp;
+									pFrom->GetFloat( temp );
+									for(i = 0; i < Size(); i++)
+										m_aValue[i] = temp;
+								}
 							}
 		virtual	void		SetValueFromVariable( IqShaderData* pFrom, TqInt index )		
 							{ 
@@ -507,8 +517,18 @@ class CqShaderVariableVaryingString : public CqShaderVariableVarying<type_string
 		virtual	void		SetValueFromVariable( IqShaderData* pFrom )		
 							{ 
 								TqInt i;
-								for(i = 0; i < Size(); i++)
-									pFrom->GetString( m_aValue[ i ], i );
+								if( pFrom->Size() > 1 )
+								{
+									for(i = 0; i < Size(); i++)
+										pFrom->GetString( m_aValue[ i ], i );
+								}
+								else
+								{
+									CqString temp;
+									pFrom->GetString( temp );
+									for(i = 0; i < Size(); i++)
+										m_aValue[ i ] = temp;
+								}
 							}
 		virtual	void		SetValueFromVariable( IqShaderData* pFrom, TqInt index )		
 							{ 
@@ -539,8 +559,18 @@ class CqShaderVariableVaryingPoint : public CqShaderVariableVarying<type_point, 
 		virtual	void		SetValueFromVariable( IqShaderData* pFrom )		
 							{ 
 								TqInt i;
-								for(i = 0; i < Size(); i++)
-									pFrom->GetPoint( m_aValue[ i ], i );
+								if( pFrom->Size() > 1 )
+								{
+									for(i = 0; i < Size(); i++)
+										pFrom->GetPoint( m_aValue[ i ], i );
+								}
+								else
+								{
+									CqVector3D temp;
+									pFrom->GetPoint( temp );
+									for(i = 0; i < Size(); i++)
+										m_aValue[ i ] = temp;
+								}
 							}
 		virtual	void		SetValueFromVariable( IqShaderData* pFrom, TqInt index )		
 							{ 
@@ -571,8 +601,18 @@ class CqShaderVariableVaryingVector : public CqShaderVariableVarying<type_vector
 		virtual	void		SetValueFromVariable( IqShaderData* pFrom )		
 							{ 
 								TqInt i;
-								for(i = 0; i < Size(); i++)
-									pFrom->GetVector( m_aValue[ i ], i );
+								if( pFrom->Size() > 1 )
+								{
+									for(i = 0; i < Size(); i++)
+										pFrom->GetVector( m_aValue[ i ], i );
+								}
+								else
+								{
+									CqVector3D temp;
+									pFrom->GetVector( temp );
+									for(i = 0; i < Size(); i++)
+										m_aValue[ i ] = temp;
+								}
 							}
 		virtual	void		SetValueFromVariable( IqShaderData* pFrom, TqInt index )		
 							{ 
@@ -603,8 +643,18 @@ class CqShaderVariableVaryingNormal : public CqShaderVariableVarying<type_normal
 		virtual	void		SetValueFromVariable( IqShaderData* pFrom )		
 							{ 
 								TqInt i;
-								for(i = 0; i < Size(); i++)
-									pFrom->GetNormal( m_aValue[ i ], i );
+								if( pFrom->Size() > 1 )
+								{
+									for(i = 0; i < Size(); i++)
+										pFrom->GetNormal( m_aValue[ i ], i );
+								}
+								else
+								{
+									CqVector3D temp;
+									pFrom->GetNormal( temp );
+									for(i = 0; i < Size(); i++)
+										m_aValue[ i ] = temp;
+								}
 							}
 		virtual	void		SetValueFromVariable( IqShaderData* pFrom, TqInt index )		
 							{ 
@@ -629,8 +679,18 @@ class CqShaderVariableVaryingColor : public CqShaderVariableVarying<type_color, 
 		virtual	void		SetValueFromVariable( IqShaderData* pFrom )		
 							{ 
 								TqInt i;
-								for(i = 0; i < Size(); i++)
-									pFrom->GetColor( m_aValue[ i ], i );
+								if( pFrom->Size() > 1 )
+								{
+									for(i = 0; i < Size(); i++)
+										pFrom->GetColor( m_aValue[ i ], i );
+								}
+								else
+								{
+									CqColor temp;
+									pFrom->GetColor( temp );
+									for(i = 0; i < Size(); i++)
+										m_aValue[ i ] = temp;
+								}
 							}
 		virtual	void		SetValueFromVariable( IqShaderData* pFrom, TqInt index )		
 							{ 
@@ -655,8 +715,18 @@ class CqShaderVariableVaryingMatrix : public CqShaderVariableVarying<type_matrix
 		virtual	void		SetValueFromVariable( IqShaderData* pFrom )		
 							{ 
 								TqInt i;
-								for(i = 0; i < Size(); i++)
-									pFrom->GetMatrix( m_aValue[ i ], i );
+								if( pFrom->Size() > 1 )
+								{
+									for(i = 0; i < Size(); i++)
+										pFrom->GetMatrix( m_aValue[ i ], i );
+								}
+								else
+								{
+									CqMatrix temp;
+									pFrom->GetMatrix( temp );
+									for(i = 0; i < Size(); i++)
+										m_aValue[ i ] = temp;
+								}
 							}
 		virtual	void		SetValueFromVariable( IqShaderData* pFrom, TqInt index )		
 							{ 

@@ -131,15 +131,230 @@ START_NAMESPACE( Aqsis )
 			A vA; \
 			B vB; \
 			\
-			TqInt i = MAX( MAX( Size(), pB->Size() ), Res.Size() ) - 1; \
-			TqBool __fVarying = i > 0; \
-			for ( ; i >= 0; i-- ) \
+			TqBool fAVar = Size() > 1; \
+			TqBool fBVar = pB->Size() > 1; \
+			TqBool fADat = !fIsRef(); \
+			TqBool fBDat = !pB->fIsRef(); \
+			\
+			if( !fADat ) \
 			{ \
-				if ( !__fVarying || RunningState.Value( i ) ) \
+				CqVMStackEntryVarRef* pVRA = static_cast<CqVMStackEntryVarRef*>(this); \
+				if( !fBDat ) \
 				{ \
-					GetValue( vA, i); \
-					pB->GetValue( vB, i); \
-					Res.SetValue( vA OP vB, i ); \
+					CqVMStackEntryVarRef* pVRB = static_cast<CqVMStackEntryVarRef*>(pB); \
+					/* Both A and B are variables. */  \
+					if( fAVar && fBVar )\
+					{ \
+						/* Both are varying, must go accross all processing each element. */ \
+						TqInt i = Size() - 1; \
+						for ( ; i >= 0; i-- ) \
+						{ \
+							if ( RunningState.Value( i ) ) \
+							{ \
+								pVRA->m_pVarRef->GetValue( vA, i); \
+								pVRB->m_pVarRef->GetValue( vB, i); \
+								Res.SetValue( vA OP vB, i ); \
+							} \
+						} \
+					} \
+					else if( !fBVar && fAVar) \
+					{ \
+						/* A is varying, can just get B's value once. */ \
+						TqInt i = Size() - 1; \
+						pVRB->m_pVarRef->GetValue( vB ); \
+						for ( ; i >= 0; i-- ) \
+						{ \
+							if ( RunningState.Value( i ) ) \
+							{ \
+								pVRA->m_pVarRef->GetValue( vA, i); \
+								Res.SetValue( vA OP vB, i ); \
+							} \
+						} \
+					} \
+					else if( !fAVar && fBVar) \
+					{ \
+						/* B is varying, can just get A's value once. */ \
+						TqInt i = pB->Size() - 1; \
+						pVRA->m_pVarRef->GetValue( vA ); \
+						for ( ; i >= 0; i-- ) \
+						{ \
+							if ( RunningState.Value( i ) ) \
+							{ \
+								pVRB->m_pVarRef->GetValue( vB, i ); \
+								Res.SetValue( vA OP vB, i ); \
+							} \
+						} \
+					} \
+					else \
+					{ \
+						/* Both are uniform, simple one shot case. */ \
+						pVRA->m_pVarRef->GetValue( vA ); \
+						pVRB->m_pVarRef->GetValue( vB ); \
+						Res.SetValue( vA OP vB ); \
+					} \
+				} \
+				else \
+				{ \
+					/* A is a variable, B is data. */  \
+					if( fAVar && fBVar )\
+					{ \
+						/* Both are varying, must go accross all processing each element. */ \
+						TqInt i = Size() - 1; \
+						for ( ; i >= 0; i-- ) \
+						{ \
+							if ( RunningState.Value( i ) ) \
+							{ \
+								GetValue( vA, i); \
+								pB->m_aValues[ i ].GetValue( vB ); \
+								Res.SetValue( vA OP vB, i ); \
+							} \
+						} \
+					} \
+					else if( !fBVar && fAVar) \
+					{ \
+						/* A is varying, can just get B's value once. */ \
+						TqInt i = Size() - 1; \
+						pB->m_Value.GetValue( vB ); \
+						for ( ; i >= 0; i-- ) \
+						{ \
+							if ( RunningState.Value( i ) ) \
+							{ \
+								GetValue( vA, i); \
+								Res.SetValue( vA OP vB, i ); \
+							} \
+						} \
+					} \
+					else if( !fAVar && fBVar) \
+					{ \
+						/* B is varying, can just get A's value once. */ \
+						TqInt i = pB->Size() - 1; \
+						GetValue( vA ); \
+						for ( ; i >= 0; i-- ) \
+						{ \
+							if ( RunningState.Value( i ) ) \
+							{ \
+								pB->m_aValues[ i ].GetValue( vB ); \
+								Res.SetValue( vA OP vB, i ); \
+							} \
+						} \
+					} \
+					else \
+					{ \
+						/* Both are uniform, simple one shot case. */ \
+						GetValue( vA ); \
+						pB->m_Value.GetValue( vB ); \
+						Res.SetValue( vA OP vB ); \
+					} \
+				} \
+			} \
+			else \
+			{ \
+				if( !fBDat ) \
+				{ \
+					CqVMStackEntryVarRef* pVRB = static_cast<CqVMStackEntryVarRef*>(pB); \
+					/* A is data, B is a variable. */  \
+					if( fAVar && fBVar )\
+					{ \
+						/* Both are varying, must go accross all processing each element. */ \
+						TqInt i = Size() - 1; \
+						for ( ; i >= 0; i-- ) \
+						{ \
+							if ( RunningState.Value( i ) ) \
+							{ \
+								m_aValues[ i ].GetValue( vA ); \
+								pVRB->m_pVarRef->GetValue( vB, i); \
+								Res.SetValue( vA OP vB, i ); \
+							} \
+						} \
+					} \
+					else if( !fBVar && fAVar) \
+					{ \
+						/* A is varying, can just get B's value once. */ \
+						TqInt i = Size() - 1; \
+						pVRB->m_pVarRef->GetValue( vB ); \
+						for ( ; i >= 0; i-- ) \
+						{ \
+							if ( RunningState.Value( i ) ) \
+							{ \
+								m_aValues[ i ].GetValue( vA ); \
+								Res.SetValue( vA OP vB, i ); \
+							} \
+						} \
+					} \
+					else if( !fAVar && fBVar) \
+					{ \
+						/* B is varying, can just get A's value once. */ \
+						TqInt i = pB->Size() - 1; \
+						m_Value.GetValue( vA ); \
+						for ( ; i >= 0; i-- ) \
+						{ \
+							if ( RunningState.Value( i ) ) \
+							{ \
+								pVRB->m_pVarRef->GetValue( vB, i ); \
+								Res.SetValue( vA OP vB, i ); \
+							} \
+						} \
+					} \
+					else \
+					{ \
+						/* Both are uniform, simple one shot case. */ \
+						m_Value.GetValue( vA ); \
+						pVRB->m_pVarRef->GetValue( vB ); \
+						Res.SetValue( vA OP vB ); \
+					} \
+				} \
+				else \
+				{ \
+					/* Both A and B are data. */  \
+					if( fAVar && fBVar )\
+					{ \
+						/* Both are varying, must go accross all processing each element. */ \
+						TqInt i = Size() - 1; \
+						for ( ; i >= 0; i-- ) \
+						{ \
+							if ( RunningState.Value( i ) ) \
+							{ \
+								m_aValues[ i ].GetValue( vA ); \
+								pB->m_aValues[ i ].GetValue( vB ); \
+								Res.SetValue( vA OP vB, i ); \
+							} \
+						} \
+					} \
+					else if( !fBVar && fAVar) \
+					{ \
+						/* A is varying, can just get B's value once. */ \
+						TqInt i = Size() - 1; \
+						pB->m_Value.GetValue( vB ); \
+						for ( ; i >= 0; i-- ) \
+						{ \
+							if ( RunningState.Value( i ) ) \
+							{ \
+								m_aValues[ i ].GetValue( vA ); \
+								Res.SetValue( vA OP vB, i ); \
+							} \
+						} \
+					} \
+					else if( !fAVar && fBVar) \
+					{ \
+						/* B is varying, can just get A's value once. */ \
+						TqInt i = pB->Size() - 1; \
+						m_Value.GetValue( vA ); \
+						for ( ; i >= 0; i-- ) \
+						{ \
+							if ( RunningState.Value( i ) ) \
+							{ \
+								pB->m_aValues[ i ].GetValue( vB ); \
+								Res.SetValue( vA OP vB, i ); \
+							} \
+						} \
+					} \
+					else \
+					{ \
+						/* Both are uniform, simple one shot case. */ \
+						m_Value.GetValue( vA ); \
+						pB->m_Value.GetValue( vB ); \
+						Res.SetValue( vA OP vB ); \
+					} \
 				} \
 			} \
 		} 
@@ -1466,8 +1681,10 @@ class CqVMStackEntryVarRef : public CqVMStackEntry
 			m_pVarRef = pv;
 			return( *this );
 		}
-	private:
+	protected:
 		IqShaderData*	m_pVarRef;		///< Pointer to a referenced variable if a variable stack entry.
+
+	friend class CqVMStackEntry;
 }
 ;
 
