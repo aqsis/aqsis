@@ -684,19 +684,27 @@ RtFloat	RiGaussianFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth)
     *  else  exp(-d*d) - exp(-w*w)
     *
     */
-	RtFloat d,d2,w,w2;
+	//RtFloat d,d2,w,w2;
+	//
+	///* d = sqrt(x*x+y*y), d*d = (x*x+y*y)  */
+	//d2 = (x*x+y*y);
+	//d = sqrt(d2);
+	//
+	//w2 = 0.5*(xwidth*xwidth + ywidth*ywidth);
+	//w = sqrt(w2);
+	//
+	//if(d>w) 
+	//	return(0.0);
+	//else
+	//	return(exp(-d2) - exp(-w2));
 
-	/* d = sqrt(x*x+y*y), d*d = (x*x+y*y)  */
-	d2 = (x*x+y*y);
-	d = sqrt(d2);
+	// The above version falls faster than the one used by the 3.2 spec
+	//   PRMan and RenderDotC.  Since all three match exactly, might as
+	//   well change to the code below:
+	x *= 2.0/xwidth;
+	y *= 2.0/ywidth;
 
-	w2 = 0.5*(xwidth*xwidth + ywidth*ywidth);
-	w = sqrt(w2);
-
-	if(d>w) 
-		return(0.0);
-	else
-		return(exp(-d2) - exp(-w2));
+	return exp(-2.0*(x*x+y*y));
 }
 
 
@@ -781,21 +789,17 @@ RtFloat	RiCatmullRomFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth)
     * otherwise  f(d)=0
     *
     */
-   
-	RtFloat  d,d1,d2,d3;
+   RtFloat  d,d2;
 
-	d  = sqrt(x*x+y*y); /* distance from origin */
-	d1 = fabs(d);		/* was originally abs(d), changed 08/04/99 */
-	d2 = d*d;
-	d3 =  d2*d1; /* abs(d*d*d) */
+   d2 = x*x+y*y; /* d*d */
+   d  = sqrt(d2); /* distance from origin */
    
-	if(d1<1.0)
-		return((3.0/2.0)*d3-(5.0/2.0)*d2+1.0);
-	else 
-		if(d1<2.0)
-			return((-0.5)*d3+(5.0/2.0)*d2-4.0*d1+2.0);
-		else
-			return(0.0);
+   if ( d < 1 )
+     return (1.5*d*d2-2.5*d2+1.0);
+   else if ( d < 2 )
+     return (-d*d2*0.5 + 2.5*d2 - 4.0*d + 2.0);
+   else
+     return 0.0;
 }
 
 
@@ -805,14 +809,46 @@ RtFloat	RiCatmullRomFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth)
 //
 RtFloat	RiSincFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth)
 {
-	RtFloat d;
+	//RtFloat d;
+	//
+	//d = sqrt(x*x+y*y);
+	//
+	//if(d!=0)
+	//	return(sin(RI_PI*d)/(RI_PI*d));
+	//else
+	//	return(1.0);
 
-	d = sqrt(x*x+y*y);
+	// The above is an un-windowed sinc, below is a windowed sinc
+	//   function similar in shape to what PRMan 3.9 uses.  
+	// tburge 5-28-01
 
-	if(d!=0)
-		return(sin(RI_PI*d)/(RI_PI*d));
+	/* Modified version of the RI Spec 3.2 sinc filter but also with a 
+	 *   raised cosine window applied.  (von Hann Window)
+	 */
+	double d,w,xx,yy;
+
+	xx = x*x;
+	yy = y*y;
+
+	xwidth *= 0.5;
+	ywidth *= 0.5;
+
+	if ( (xx)/(xwidth*xwidth)+(yy)/(ywidth*ywidth)<1.0 )
+	{   
+		/* Raised cosine window (von Hann Window) described in 
+		 *   R. W. Hamming "Digital Filters" 3rd Ed. p.117. 
+		 */
+		x = (1+cos(RI_PI*x/xwidth))/2;
+		y = (1+cos(RI_PI*y/ywidth))/2;
+		w = x*y;
+
+		d = sqrt(xx+yy);
+		return w * sin(RI_PI*d)/(RI_PI*d);
+	}
 	else
-		return(1.0);
+	{
+		return 0.0;
+	}
 }
 
 
