@@ -31,6 +31,10 @@
 #include	<string>
 #include	<stdio.h>
 
+#if defined(REGEXP)
+#include        <regex.h>
+#endif
+
 #include	"shaderexecenv.h"
 #include	"spline.h"
 #include	"shadervm.h"
@@ -43,6 +47,7 @@ START_NAMESPACE(    Aqsis )
 
 IqRenderer* QGetRenderContextI();
 
+static TqFloat match(const char *string, const char *pattern);
 
 //----------------------------------------------------------------------
 // SO_sprintf
@@ -5895,6 +5900,7 @@ void	CqShaderExecEnv::SO_inversesqrt( IqShaderData* x, IqShaderData* Result, IqS
 	while( ( ++__iGrid < GridSize() ) && __fVarying);
 }
 
+
 void	CqShaderExecEnv::SO_match( IqShaderData* a, IqShaderData* b, IqShaderData* Result, IqShader* pShader )
 {
 	// TODO: Do this properly.
@@ -5915,9 +5921,21 @@ void	CqShaderExecEnv::SO_match( IqShaderData* a, IqShaderData* b, IqShaderData* 
 		r = 0.0f;
 	else
 	{
-		// MJO> Only check the occurrence of string b in string a
-		// It doesn't support the regular expression yet
-		r = ( float ) ( strstr( _aq_b.c_str(), _aq_a.c_str() ) != 0 );
+		// Check the simple case first where both strings are identical
+                TqUlong hasha = CqString::hash(_aq_a.c_str());
+                TqUlong hashb = CqString::hash(_aq_b.c_str());
+
+   		if (hasha == hashb) {
+			r = 1.0f;
+     		}
+		else {
+                	/*
+     	         	* Match string b into a
+     	         	*/
+			r = match(_aq_a.c_str(), _aq_b.c_str());
+		}
+ 
+
 	}
 
 	(Result)->SetFloat(r,__iGrid);
@@ -8102,6 +8120,8 @@ void CqShaderExecEnv::SO_occlusion( IqShaderData* occlmap, IqShaderData* channel
 
 	TqBool __fVarying=TqFalse;
 	TqInt __iGrid;
+	static CqMatrix *allmatrices= NULL;
+	static TqUlong  allmatrix = 0;
 
 	if ( NULL == QGetRenderContextI() )
 		return ;
@@ -8129,6 +8149,19 @@ void CqShaderExecEnv::SO_occlusion( IqShaderData* occlmap, IqShaderData* channel
 
 		__iGrid = 0;
 		CqBitVector& RS = RunningState();
+		TqInt nPages = pMap->NumPages() - 1;
+		if (CqString::hash(_aq_occlmap.c_str()) != allmatrix)
+		{
+			if (allmatrices) delete allmatrices;
+			allmatrix = CqString::hash(_aq_occlmap.c_str());
+		        allmatrices = new CqMatrix[nPages+1];
+
+			TqInt j = nPages;
+			for( ; j >= 0; j-- )
+			{
+				allmatrices[j] = pMap->GetMatrix(2, j);
+			}
+		}
 		do
 		{
 			if(!__fVarying || RS.Value( __iGrid ) )
@@ -8139,21 +8172,19 @@ void CqShaderExecEnv::SO_occlusion( IqShaderData* occlmap, IqShaderData* channel
 
 				CqVector3D swidth = 0.0f, twidth = 0.0f;
 
-
-				CqVector3D _aq_P;
-				(P)->GetPoint(_aq_P,__iGrid);
 				CqVector3D _aq_N;
+				CqVector3D _aq_P;
 				(N)->GetNormal(_aq_N,__iGrid);
-				TqInt i = pMap->NumPages() - 1;
+				(P)->GetPoint(_aq_P,__iGrid);
+				TqInt i = nPages; 
 				for( ; i >= 0; i-- )
 				{
 					// Check if the lightsource is behind the sample.
-					CqVector3D Nl = pMap->GetMatrix(2, i) * _aq_N;
+					CqVector3D Nl = allmatrices[i] * _aq_N;
 					TqFloat cosangle = Nl * L;
 					if( cosangle < 0.0f )
 						continue;
-
-				        pMap->SampleMap( _aq_P, swidth, twidth, fv, i );
+				    pMap->SampleMap( _aq_P, swidth, twidth, fv, i );
 					occlsum += cosangle * fv[0];
 					dotsum += cosangle;
 				}
@@ -8176,6 +8207,26 @@ void CqShaderExecEnv::SO_occlusion( IqShaderData* occlmap, IqShaderData* channel
 		}
 		while( ( ++__iGrid < GridSize() ) && __fVarying);
 	}
+}
+
+static TqFloat match(const char *string, const char *pattern)
+{
+#if defined(REGEXP)
+   int status;
+   regex_t re;
+   if (regcomp(&re, pattern, REG_EXTENDED|REG_NOSUB) != 0) {
+	return(0.0f);      /* report error */
+   }
+   status = regexec(&re, string, (size_t) 0, NULL, 0);
+   regfree(&re);
+
+   if (status != 0) {
+	 return(0.0f);      /* report error */
+   }
+   return(1.0f);
+#else
+   return (TqFloat) (strstr(string, pattern) != 0);
+#endif
 }
 
 END_NAMESPACE(    Aqsis )
