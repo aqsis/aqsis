@@ -70,6 +70,7 @@ enum EqErrorID
 	ErrorID_InvalidData,				///< Generic invalid data.
 	ErrorID_InvalidShader,				///< Shader not of correct type.
 	ErrorID_NonmanifoldSubdivision,		///< Geometry used in subdivision surface is non-manifold.
+	ErrorID_OcclusionMaxEyeSplits,		///< Geometry gets culled too many times       
 }; 
 
 

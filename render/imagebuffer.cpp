@@ -616,8 +616,18 @@ void CqBucket::FilterBucket()
 				fy++;
 			}
 			pCols[i  ]=c/gTot;
-			if(SampleCount>0)	pDepths[i++]=d/SampleCount;
-			else				pDepths[i++]=FLT_MAX;
+			if(SampleCount>0)	
+				pDepths[i++]=d/SampleCount;
+			else
+			{
+				/*
+				 * Assign the standard background color from the "background" imager 
+				 * the background color is not merged with the edge of an object so
+				 * it could badly aliased.
+				 */
+				pCols[i]= QGetRenderContext()->optCurrent().GetBkColorImager();
+				pDepths[i++]=FLT_MAX;
+			}
 		}
 	}
 	
@@ -653,18 +663,20 @@ void CqBucket::ExposeBucket()
 		CqImagePixel* pie;
 		ImageElement(XOrigin(), YOrigin(), pie);
 		TqInt x,y;
+		TqFloat exposegain = QGetRenderContext()->optCurrent().fExposureGain();
+		TqFloat exposegamma = QGetRenderContext()->optCurrent().fExposureGamma();
+		TqFloat oneovergamma=1.0f/exposegamma;
 		for(y=0; y<YSize(); y++)
 		{
 			CqImagePixel* pie2=pie;
 			for(x=0; x<XSize(); x++)
 			{
 				// color=(color*gain)^1/gamma
-				if(QGetRenderContext()->optCurrent().fExposureGain()!=1.0)
-					pie2->Color()*=QGetRenderContext()->optCurrent().fExposureGain();
+				if(exposegain!=1.0)
+					pie2->Color()*=exposegain;
 
-				if(QGetRenderContext()->optCurrent().fExposureGamma()!=1.0)
+				if(exposegamma!=1.0)
 				{
-					TqFloat oneovergamma=1.0f/QGetRenderContext()->optCurrent().fExposureGamma();
 					pie2->Color().SetfRed  (pow(pie2->Color().fRed  (),oneovergamma));
 					pie2->Color().SetfGreen(pow(pie2->Color().fGreen(),oneovergamma));
 					pie2->Color().SetfBlue (pow(pie2->Color().fBlue (),oneovergamma));
@@ -1071,7 +1083,8 @@ TqBool CqImageBuffer::OcclusionCullSurface(TqInt iBucket, CqBasicSurface* pSurfa
 		// bucket to the right
 		TqInt nextBucket = iBucket+1;
 		CqVector2D pos = Position(nextBucket);
-		if( RasterBound.vecMax().x() > pos.x() )
+		if( (nextBucket < m_cXBuckets * m_cYBuckets) && 
+			( RasterBound.vecMax().x() > pos.x() ) )
 		{
 			pSurface->UnLink();
 			m_aBuckets[nextBucket].AddGPrim(pSurface);
@@ -1085,8 +1098,9 @@ TqBool CqImageBuffer::OcclusionCullSurface(TqInt iBucket, CqBasicSurface* pSurfa
 		pos.x( RasterBound.vecMin().x() );
 		nextBucket = Bucket( pos.x(), pos.y() );
 		
-		if( RasterBound.vecMax().y() > pos.y() )
-		{		
+		if( (nextBucket < m_cXBuckets * m_cYBuckets) &&
+			(RasterBound.vecMax().y() > pos.y() ) )
+{		
 			pSurface->UnLink();
 			m_aBuckets[nextBucket].AddGPrim(pSurface);
 			return TqTrue;
@@ -1416,6 +1430,12 @@ inline void CqImageBuffer::RenderMicroPoly(CqMicroPolygonBase* pMPG, TqInt iBuck
 
 void CqImageBuffer::RenderSurfaces(TqInt iBucket,long xmin, long xmax, long ymin, long ymax)
 {
+	int counter = 0;
+        int MaxEyeSplits=10;
+	const TqInt* poptEyeSplits=QGetRenderContext()->optCurrent().GetIntegerOption("limits","eyesplits");
+	if(poptEyeSplits!=0)
+		MaxEyeSplits=poptEyeSplits[0];
+	
 	// Render any waiting micro polygon grids.
 	RenderMPGs(iBucket, xmin, xmax, ymin, ymax);
 
@@ -1433,9 +1453,26 @@ void CqImageBuffer::RenderSurfaces(TqInt iBucket,long xmin, long xmax, long ymin
 			//Cull surface if it's hidden
 			if(OcclusionCullSurface(iBucket, pSurface))
 			{
+				if (pSurface == Bucket.pTopSurface()) 
+					counter ++;
+				else 
+					counter = 0;
 				pSurface=Bucket.pTopSurface();
+				if (counter > MaxEyeSplits)  {
+					/* the same primitive was processed by the occlusion a MaxEyeSplits times !!
+					 * A bug occurred with the renderer probably.
+					 * We need a way out of this forloop. So I unlink the primitive
+					 * and try with the next one
+					 * 
+					 */
+					CqAttributeError(ErrorID_OcclusionMaxEyeSplits, Severity_Normal, "Geometry gets culled too many times", pSurface->pAttributes(), TqTrue);
+                                        counter = 0;
+					pSurface->UnLink();
+					pSurface=Bucket.pTopSurface();
+				}
 				continue;
 			}
+
 
 			CqMicroPolyGridBase* pGrid;
 			if((pGrid=pSurface->Dice())!=0)
