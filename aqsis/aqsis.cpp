@@ -11,9 +11,9 @@
 
 #ifdef	_DEBUG
 #ifdef	AQSIS_SYSTEM_WIN32
-extern "C" __declspec(dllimport) report_refcounts();
+extern "C" __declspec(dllimport) void report_refcounts();
 #else
-extern "C" report_refcounts();
+extern "C" void report_refcounts();
 #endif // AQSIS_SYSTEM_WIN32
 #endif // _DEBUG
 
