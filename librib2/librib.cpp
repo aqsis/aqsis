@@ -136,6 +136,7 @@ extern "C" const char* StandardParameters[][2] =
 	{"procedural", "uniform string" },
 	{"quantize", "uniform float[4]" },
 	{"dither", "uniform float" },
+	{"interpolateboundary", "uniform integer" },
 	{ NULL , NULL }
 };
 

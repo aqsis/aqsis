@@ -344,12 +344,12 @@ SOURCE=..\Object\Debug\librib2\scanner.cpp
 
 # End Source File
 # End Group
-# Begin Group "MPatrol"
+# Begin Group "Profile"
 
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\Object\MPatrol\librib2\parser.cpp
+SOURCE=..\Object\Profile\librib2\parser.cpp
 
 !IF  "$(CFG)" == "librib2 - Win32 Release"
 
@@ -366,7 +366,7 @@ SOURCE=..\Object\MPatrol\librib2\parser.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\Object\MPatrol\librib2\parser.hpp
+SOURCE=..\Object\Profile\librib2\parser.hpp
 
 !IF  "$(CFG)" == "librib2 - Win32 Release"
 
@@ -383,7 +383,7 @@ SOURCE=..\Object\MPatrol\librib2\parser.hpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\Object\MPatrol\librib2\scanner.cpp
+SOURCE=..\Object\Profile\librib2\scanner.cpp
 
 !IF  "$(CFG)" == "librib2 - Win32 Release"
 
