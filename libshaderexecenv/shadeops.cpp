@@ -169,6 +169,7 @@ void CqShaderExecEnv::ValidateIlluminanceCache( IqShaderData* pP, IqShader* pSha
 	// If this is the first call to illuminance this time round, call all lights and setup the Cl and L caches.
 	if ( !m_IlluminanceCacheValid )
 	{
+		IqShaderData* Ns = N();
 		TqUint li = 0;
 		while ( li < m_pAttributes ->cLights() )
 		{
@@ -178,9 +179,9 @@ void CqShaderExecEnv::ValidateIlluminanceCache( IqShaderData* pP, IqShader* pSha
 			m_Illuminate = 0;
 			// Evaluate the lightsource
 			if ( pP != NULL )
-				lp->Evaluate( pP, N() );
+				lp->Evaluate( pP, Ns );
 			else
-				lp->Evaluate( P(), N() );
+				lp->Evaluate( P(), Ns );
 			li++;
 		}
 		m_IlluminanceCacheValid = TqTrue;;
@@ -5632,8 +5633,8 @@ STD_SOIMPL CqShaderExecEnv::SO_occlusion( STRINGVAL occlmap, FLOATVAL channel, P
 	{
 		std::valarray<TqFloat> fv;
 		// Generate normal conversion matrices to save time.
-		std::vector<CqMatrix> matITTx;
 		TqInt i;
+		std::vector<CqMatrix> matITTx;
 		for( i = 0; i < pMap->NumPages(); i++ )
 		{
 			// Check if the lightsource is behind the sample.
@@ -5647,7 +5648,8 @@ STD_SOIMPL CqShaderExecEnv::SO_occlusion( STRINGVAL occlmap, FLOATVAL channel, P
 
 		BEGIN_VARYING_SECTION
 		// Storage for the final combined occlusion value.
-		TqFloat finalocclusion = 0.0f;
+		TqFloat occlsum = 0.0f;
+		TqFloat dotsum = 0.0f;
 
 		CqVector3D swidth = 0.0f, twidth = 0.0f;
 
@@ -5656,21 +5658,22 @@ STD_SOIMPL CqShaderExecEnv::SO_occlusion( STRINGVAL occlmap, FLOATVAL channel, P
 
 		GETPOINT( P );
 		GETNORMAL( N );
-		TqInt numValidMaps = 0;
 		for( i = 0; i < pMap->NumPages(); i++ )
 		{
 			// Check if the lightsource is behind the sample.
-			CqVector3D Nl = matITTx[i] * NORMAL( N );
-			if( ( CqVector3D(0,0,-1) * Nl ) < 0.0f )
+			TqFloat s = ( ( CqVector3D( 0,0,-1 ) * NORMAL(N) ) < 0.0f ) ? -1.0f : 1.0f;
+			CqVector3D Nl = matITTx[i] * ( NORMAL( N ) * s );
+			TqFloat cosangle = Nl * CqVector3D(0,0,-1);
+			if( cosangle < 0.0f )
 				continue;
 
 			fv = 0.0f;
 			pMap->SampleMap( POINT( P ), swidth, twidth, fv, paramMap, i );
-			finalocclusion += fv[0];
-			numValidMaps++;
+			occlsum += cosangle * fv[0];
+			dotsum += cosangle;
 		}
-		finalocclusion /= static_cast<TqFloat>(numValidMaps);
-		SETFLOAT( Result, finalocclusion);
+		occlsum /= dotsum;
+		SETFLOAT( Result, occlsum);
 		END_VARYING_SECTION
 	}
 	else
