@@ -20,4 +20,5 @@ config_DATA = displays.ini
 
 check-local:
 	rm -f $(top_srcdir)/display/libdisplay.so
+	chmod a+w $(top_srcdir)/display
 	ln -s $(top_builddir)/display/.libs/libdisplay.so $(top_srcdir)/display/libdisplay.so
