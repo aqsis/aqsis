@@ -1,11 +1,11 @@
 @echo off
-mkdir ..\install
-mkdir ..\install\shaders
-mkdir ..\install\docs
-mkdir ..\install\examples
+mkdir ..\binary-archive
+mkdir ..\binary-archive\shaders
+mkdir ..\binary-archive\docs
+mkdir ..\binary-archive\examples
 
 
-cd ..\install
+cd ..\binary-archive
 
 copy ..\library\release\cribber.exe .
 copy ..\library\release\filebuffer.exe .
