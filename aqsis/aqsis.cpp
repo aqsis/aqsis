@@ -8,6 +8,8 @@
 #include "librib2ri.h"
 #include "aqsis.h"
 #include "file.h"
+#include "logging.h"
+#include "logging_streambufs.h"
 
 #ifdef	_DEBUG
 #ifdef	AQSIS_SYSTEM_WIN32
@@ -78,6 +80,10 @@ ArgParse::apstring g_type = "";
 ArgParse::apstring g_addtype = "";
 ArgParse::apstring g_mode = "rgba";
 ArgParse::apstring g_strprogress = "Frame (%f) %p%% complete [ %s secs / %S left ]";
+
+#ifdef	AQSIS_SYSTEM_POSIX
+bool g_syslog = 0;
+#endif	// AQSIS_SYSTEM_POSIX
 
 /** Function to print out the version to a std::ostream
  */
@@ -298,6 +304,9 @@ int main( int argc, const char** argv )
 	ap.argString( "displays", "=string\aspecify a default displays searchpath", &g_displays );
 	ap.argString( "dsolibs", "=string\aspecify default DSO libraries", &g_dso_libs );
 	ap.argString( "procedurals", "=string\aspecify default searchpath for procedurals", &g_procedurals );
+#ifdef	AQSIS_SYSTEM_POSIX
+	ap.argFlag( "syslog", "\alog messages to syslog", &g_syslog );
+#endif	// AQSIS_SYSTEM_POSIX
 	ap.allowUnrecognizedOptions();
 
 	//_crtBreakAlloc = 1305;
@@ -334,6 +343,14 @@ int main( int argc, const char** argv )
 		std::cout << "dsolibs: " << g_dso_libs.c_str() << std::endl;
 		std::cout << "procedurals: " << g_procedurals.c_str() << std::endl;
 	}
+
+	std::auto_ptr<std::streambuf> show_timestamps( new timestamp_buf(std::cerr) );
+	std::auto_ptr<std::streambuf> fold_duplicates( new fold_duplicates_buf(std::cerr) );
+	std::auto_ptr<std::streambuf> show_level( new show_level_buf(std::cerr) );
+#ifdef	AQSIS_SYSTEM_POSIX
+	if( g_syslog )
+		std::auto_ptr<std::streambuf> use_syslog( new syslog_buf(std::cerr) );
+#endif	// AQSIS_SYSTEM_POSIX
 
 	if ( ap.leftovers().size() == 0 )     // If no files specified, take input from stdin.
 	{

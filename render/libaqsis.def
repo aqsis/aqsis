@@ -184,6 +184,9 @@ EXPORTS
 	?rgbtohsv@CqColor@Aqsis@@QBE?AV12@XZ
 	?rgbtoxyY@CqColor@Aqsis@@QBE?AV12@XZ
 	?xyYtorgb@CqColor@Aqsis@@QBE?AV12@XZ
+	??0show_level_buf@@QAE@AAV?$basic_ostream@DU?$char_traits@D@std@@@std@@@Z
+	??0fold_duplicates_buf@@QAE@AAV?$basic_ostream@DU?$char_traits@D@std@@@std@@@Z
+	??0timestamp_buf@@QAE@AAV?$basic_ostream@DU?$char_traits@D@std@@@std@@@Z
 	
 	?parseShadeOpTableEntry@CqDSORepository@Aqsis@@MAEPAUSqDSOExternalCall@2@PAXPAUSqShadeOp@@@Z
 	?getShadeOpMethods@CqDSORepository@Aqsis@@MAEPAV?$list@PAUSqDSOExternalCall@Aqsis@@V?$allocator@PAUSqDSOExternalCall@Aqsis@@@std@@@std@@PAVCqString@2@@Z

@@ -1,6 +1,3 @@
-#ifndef LOGGING_H
-#define LOGGING_H
-
 // Copyright © 2003, Timothy M. Shead
 //
 // Contact: tshead@k-3d.com
@@ -19,6 +16,9 @@
 // License along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+#ifndef	___logging_Loaded___
+#define	___logging_Loaded___
+
 #include <iosfwd>
 
 // iostream-compatible manipulators - use these
@@ -36,5 +36,5 @@ std::ostream& notice(std::ostream&);
 std::ostream& info(std::ostream&);
 std::ostream& debug(std::ostream&);
 
-#endif // !LOGGING_H
+#endif //	___logging_Loaded___
 

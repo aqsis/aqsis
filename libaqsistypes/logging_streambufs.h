@@ -1,6 +1,3 @@
-#ifndef LOG_BUFFERS_H
-#define LOG_BUFFERS_H
-
 // Copyright © 2003, Timothy M. Shead
 //
 // Contact: tshead@k-3d.com
@@ -19,7 +16,15 @@
 // License along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+
+#ifndef	___logging_streambufs_Loaded___
+#define	___logging_streambufs_Loaded___
+
 #include <iostream>
+
+#include "aqsis.h"
+
+START_NAMESPACE( Aqsis )
 
 ///////////////////////////////////////////////////////////
 // timestamp_buf
@@ -109,5 +114,9 @@ private:
 	std::string m_buffer;
 };
 
-#endif // !LOG_BUFFERS_H
+//-----------------------------------------------------------------------
+
+END_NAMESPACE( Aqsis )
+
+#endif	// ___logging_streambufs_Loaded___
 

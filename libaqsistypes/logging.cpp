@@ -56,6 +56,10 @@ typedef enum
 
 } // namespace detail
 
+START_NAMESPACE( Aqsis )
+
+//---------------------------------------------------------------------
+
 std::ostream& emergency(std::ostream& Stream)
 {
 	detail::log_level(Stream) = detail::EMERGENCY;
@@ -373,3 +377,6 @@ void syslog_buf::write_to_system_log(const std::string& Message)
 }
 
 #endif //NO_SYSLOG
+
+END_NAMESPACE( Aqsis )
+//---------------------------------------------------------------------
