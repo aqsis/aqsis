@@ -42,6 +42,7 @@ bool g_nostandard = 0;
 bool g_help = 0;
 bool g_version = 0;
 bool g_verbose = 0;
+bool g_envverbose = 0;
 bool g_fb = 0;
 bool g_d = 0;
 bool g_progress = 0;
@@ -227,7 +228,8 @@ int main( int argc, const char** argv )
 	ap.argString( "progressformat", "\astring representing the format of the progress message", &g_strprogress );
 	ap.argInt( "endofframe", "=integer\aequivalent to \"endofframe\" option", &g_endofframe );
 	ap.argFlag( "nostandard", "\adisables declaration of standard RenderMan parameter types", &g_nostandard );
-	ap.argFlag( "verbose", "\aoutput environment information", &g_verbose );
+	ap.argFlag( "verbose", "\aoutpur more information during rendering", &g_verbose );
+	ap.argFlag( "envverbose", "\aoutput environment information", &g_envverbose );
 	ap.argString( "type", "=string\aspecify a display device type to use", &g_type );
 	ap.argString( "addtype", "=string\aspecify a display device type to add", &g_addtype );
 	ap.argString( "mode", "=string\aspecify a display device mode to use", &g_mode );
@@ -263,7 +265,7 @@ int main( int argc, const char** argv )
 
 	GetOptions();
 
-	if ( g_verbose )
+	if ( g_envverbose )
 	{
 		std::cout << "config:   " << g_config.c_str() << std::endl;
 		std::cout << "base:     " << g_base_path.c_str() << std::endl;
@@ -456,7 +458,7 @@ void RenderFile( FILE* file, const char* name )
 			librib::Parse( cfgfile, "config", renderengine, std::cerr );
 			fclose( cfgfile );
 		}
-		else if ( g_verbose )
+		else if ( g_envverbose )
 		{
 #ifdef  AQSIS_SYSTEM_WIN32
 			std::cout << "Warning: Config file not found in" << std::endl <<
