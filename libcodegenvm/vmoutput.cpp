@@ -430,26 +430,39 @@ void CqCodeGenVM::OutputTreeNode( const IqParseNode* pNode, std::ostream& out, s
 	{
 		TqInt iLabelA = m_gcLabels++;
 		TqInt iLabelB = m_gcLabels++;
-		IqParseNode* pStmtInc = NULL;
-		IqParseNode* pArg = pNode->pChild();
-		assert( pArg != 0 );
-		IqParseNode* pStmt = pArg->pNextSibling();
-		//assert(pStmt!=0);
-		if ( pStmt )
-			pStmtInc = pStmt->pNextSibling();
+		if( pSC->fHasAxisAngle() )
+		{
+			IqParseNode* pArg = pNode->pChild();
+			assert( pArg != 0 );
+			IqParseNode* pStmt = pArg->pNextSibling();
+			//assert(pStmt!=0);
 
-		out << ":" << iLabelA << std::endl;		// loop back label
-		out << "\tS_CLEAR" << std::endl;		// clear current state
-		OutputTreeNode( pArg, out, strOutName );
-		if ( pSC->fHasAxisAngle() ) out << "\tsolar2" << std::endl;
-		else	out << "\tsolar" << std::endl;
-		out << "\tS_JZ " << iLabelB << std::endl;	// exit loop if false
-		out << "\tRS_PUSH" << std::endl;		// Push running state
-		out << "\tRS_GET" << std::endl;			// set running state
-		if ( pStmt ) OutputTreeNode( pStmt, out, strOutName );				// statement
-		out << "\tRS_POP" << std::endl;			// Pop the running state
-		out << "\tjmp " << iLabelA << std::endl; // loop back jump
-		out << ":" << iLabelB << std::endl;		// completion label
+			out << ":" << iLabelA << std::endl;		// loop back label
+			out << "\tS_CLEAR" << std::endl;		// clear current state
+			OutputTreeNode( pArg, out, strOutName );
+			out << "\tsolar2" << std::endl;
+			out << "\tS_JZ " << iLabelB << std::endl;	// exit loop if false
+			out << "\tRS_PUSH" << std::endl;		// Push running state
+			out << "\tRS_GET" << std::endl;			// set running state
+			if ( pStmt ) OutputTreeNode( pStmt, out, strOutName );				// statement
+			out << "\tRS_POP" << std::endl;			// Pop the running state
+			out << "\tjmp " << iLabelA << std::endl; // loop back jump
+			out << ":" << iLabelB << std::endl;		// completion label
+		}
+		else
+		{
+			IqParseNode* pStmt = pNode->pChild();
+			out << ":" << iLabelA << std::endl;		// loop back label
+			out << "\tS_CLEAR" << std::endl;		// clear current state
+			out << "\tsolar" << std::endl;
+			out << "\tS_JZ " << iLabelB << std::endl;	// exit loop if false
+			out << "\tRS_PUSH" << std::endl;		// Push running state
+			out << "\tRS_GET" << std::endl;			// set running state
+			if ( pStmt ) OutputTreeNode( pStmt, out, strOutName );				// statement
+			out << "\tRS_POP" << std::endl;			// Pop the running state
+			out << "\tjmp " << iLabelA << std::endl; // loop back jump
+			out << ":" << iLabelB << std::endl;		// completion label
+		}
 	}
 	else if ( pNode->GetInterface( ParseNode_Conditional, ( void** ) & pCond ) )
 	{
