@@ -269,29 +269,33 @@ void CqLath::Qff(std::vector<CqLath*>& Result)
     for(iLath = ResQfe.begin(); iLath!=ResQfe.end(); iLath++)
         len += (*iLath)->cQve();
 
-	Result.reserve(len);
 	Result.resize(0);
+	Result.reserve(len);
 	TqInt index = 0;
-	
-    for(iLath = ResQfe.begin(); iLath!=ResQfe.end(); iLath++)
+
+    for(iLath = ResQfe.begin(); iLath!=ResQfe.end(); ++iLath)
     {
         std::vector<CqLath*> ResQev;
         (*iLath)->Qve(ResQev);
 		std::vector<CqLath*>::iterator iEdge;
-        for(iEdge = ResQev.begin(); iEdge!=ResQev.end(); iEdge++)
+        for(iEdge = ResQev.begin(); iEdge!=ResQev.end(); ++iEdge)
         {
             CqLath* pNew = (*iEdge);
             // Search for the new candidate by traversing the cf lists for all laths currrently in the
             // result list.
             TqBool fValid = TqTrue;
 			std::vector<CqLath*>::iterator iCurr;
-            for(iCurr = Result.begin(); iCurr!=Result.end(); iCurr++)
+            for(iCurr = Result.begin(); iCurr!=Result.end() && fValid; ++iCurr)
             {
                 CqLath* pVisited =(*iCurr);
                 CqLath* pStart = pVisited;
                 do
                 {
-                    if(pVisited == pNew)	fValid=TqFalse;
+                    if(pVisited == pNew)
+					{
+						fValid=TqFalse;
+						break;
+					}
                     pVisited = pVisited->cf();
                 }while(pVisited != pStart);
             }
