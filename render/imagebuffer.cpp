@@ -39,6 +39,7 @@
 #include	"micropolygon.h"
 #include	"imagebuffer.h"
 #include	"occlusion.h"
+#include	"focus.h"
 
 
 START_NAMESPACE( Aqsis )
@@ -240,6 +241,18 @@ TqBool CqImageBuffer::CullSurface( CqBound& Bound, CqBasicSurface* pSurface )
 	TqFloat minz = Bound.vecMin().z();
 	TqFloat maxz = Bound.vecMax().z();
 
+	// Take into account depth-of-field (in camera space)
+	if ( QGetRenderContext()->UsingDepthOfField() )
+	{
+		const TqFloat *dofdata = QGetRenderContext() ->GetDepthOfFieldData();
+		TqFloat C = MAX( CircleOfConfusion(dofdata, minz), CircleOfConfusion(dofdata, maxz) );
+
+		Bound.vecMin().x( Bound.vecMin().x() - C );
+		Bound.vecMin().y( Bound.vecMin().y() - C );
+		Bound.vecMax().x( Bound.vecMax().x() + C );
+		Bound.vecMax().y( Bound.vecMax().y() + C );
+	}
+
 	// Convert the bounds to raster space.
 	Bound.Transform( QGetRenderContext() ->matSpaceToSpace( "camera", "raster" ) );
 	Bound.vecMin().x( Bound.vecMin().x() - m_FilterXWidth / 2 );
@@ -298,7 +311,7 @@ void CqImageBuffer::PostSurface( CqBasicSurface* pSurface )
 		Bound.vecMin() -= db;
 	}
 
-	// Check if the surface can be culled. (also converts Bound to raster space).
+	// Check if the surface can be culled. (also adjusts for DOF and converts Bound to raster space).
 	if ( CullSurface( Bound, pSurface ) )
 	{
 		pSurface->UnLink();
@@ -626,6 +639,13 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, TqInt iBucket,
 
 	TqBool IsMatte = ( TqBool ) ( pMPG->pGrid() ->pAttributes() ->GetIntegerAttribute( "System", "Matte" ) [ 0 ] == 1 );
 
+	TqBool UsingDepthOfField = QGetRenderContext()->UsingDepthOfField();
+	const TqFloat* dofdata = 0;
+	if (UsingDepthOfField)
+	{
+		dofdata = QGetRenderContext() ->GetDepthOfFieldData();
+	}
+
 	TqInt bound_max = pMPG->cSubBounds();
 	TqInt bound_max_1 = bound_max - 1;
 	for ( TqInt bound_num = 0; bound_num < bound_max ; bound_num++ )
@@ -640,6 +660,16 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, TqInt iBucket,
 		TqFloat bmaxx = Bound.vecMax().x();
 		TqFloat bminy = Bound.vecMin().y();
 		TqFloat bmaxy = Bound.vecMax().y();
+
+		if ( UsingDepthOfField )
+		{
+			TqFloat C = MAX( CircleOfConfusion(dofdata, Bound.vecMin().z()), CircleOfConfusion(dofdata, Bound.vecMax().z()) );
+
+			bminx -= C;
+			bminy -= C;
+			bmaxx += C;
+			bmaxy += C;
+		}
 
 		if ( bmaxx < xmin || bmaxy < ymin || bminx > xmax || bminy > ymax )
 		{
@@ -747,8 +777,19 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, TqInt iBucket,
 							}
 
 							// Now check if the subsample hits the micropoly
-							if ( pMPG->Sample( vecP, ImageVal.m_Depth, t ) )
+							TqBool SampleHit;
+
+							if (UsingDepthOfField)
 							{
+								SampleHit = pMPG->SampleDof( vecP, t, dofdata, pie->SampleLens( m, n ), ImageVal.m_Depth );
+							}
+							else
+							{
+								SampleHit = pMPG->Sample( vecP, ImageVal.m_Depth, t );
+							}
+
+							if ( SampleHit )
+ 							{
 								theStats.IncSampleHits();
 								pMPG->MarkHit();
 								// Sort the color/opacity into the visible point list

@@ -33,6 +33,7 @@
 #include	"lights.h"
 #include	"shaders.h"
 #include	"trimcurve.h"
+#include	"focus.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -1143,6 +1144,52 @@ TqBool CqMicroPolygon::Sample( const CqVector2D& vecSample, TqFloat& D, TqFloat 
 		return ( TqFalse );
 }
 
+//---------------------------------------------------------------------
+/** Sample the specified point against the MPG at the specified time.
+ * \param vecSample 2D vector to sample against.
+ * \param time Shutter time to sample at.
+ * \param DofParameters The lens data.
+ * \param LensPosition Position on the lens to use.
+ * \param D Storage for depth if valid hit.
+ * \return Boolean indicating smaple hit.
+ */
+
+TqBool CqMicroPolygon::SampleDof( const CqVector2D& vecSample, TqFloat time, const TqFloat* DofParameters, const CqVector2D& LensPosition, TqFloat& D )
+{
+	TqFloat C;
+
+	C = CircleOfConfusion( DofParameters, m_vecPoints[0].z() );
+	CqVector3D p0(
+		m_vecPoints[0].x() + C * LensPosition.x(),
+		m_vecPoints[0].y() + C * LensPosition.y(),
+		m_vecPoints[0].z()
+	);
+	
+	C = CircleOfConfusion( DofParameters, m_vecPoints[1].z() );
+	CqVector3D p1(
+		m_vecPoints[1].x() + C * LensPosition.x(),
+		m_vecPoints[1].y() + C * LensPosition.y(),
+		m_vecPoints[1].z()
+	);
+
+	C = CircleOfConfusion( DofParameters, m_vecPoints[2].z() );
+	CqVector3D p2(
+		m_vecPoints[2].x() + C * LensPosition.x(),
+		m_vecPoints[2].y() + C * LensPosition.y(),
+		m_vecPoints[2].z()
+	);
+
+	C = CircleOfConfusion( DofParameters, m_vecPoints[3].z() );
+	CqVector3D p3(
+		m_vecPoints[3].x() + C * LensPosition.x(),
+		m_vecPoints[3].y() + C * LensPosition.y(),
+		m_vecPoints[3].z()
+	);
+
+	CqMovingMicroPolygonKey newpoly(p0, p1, p2, p3);
+	return newpoly.fContains( vecSample, D );
+}
+
 
 //---------------------------------------------------------------------
 /** Calculate the 2D boundary of this micropolygon,
@@ -1203,6 +1250,20 @@ CqBound CqMicroPolygon::GetTotalBound( TqBool fForce )
 	}
 	CqBound B( pP[ GetCodedIndex( m_BoundCode, 0 ) ].x(), pP[ GetCodedIndex( m_BoundCode, 1 ) ].y(), pP[ GetCodedIndex( m_BoundCode, 2 ) ].z(), 
 			   pP[ GetCodedIndex( m_BoundCode, 3 ) ].x(), pP[ GetCodedIndex( m_BoundCode, 4 ) ].y(), pP[ GetCodedIndex( m_BoundCode, 5 ) ].z() );
+
+	// Adjust for DOF
+	if ( QGetRenderContext() ->UsingDepthOfField() )
+	{
+		const TqFloat* dofdata = QGetRenderContext() ->GetDepthOfFieldData();
+
+		TqFloat C = MAX( CircleOfConfusion(dofdata, B.vecMin().z()), CircleOfConfusion(dofdata, B.vecMax().z()) );
+
+		B.vecMin().x( B.vecMin().x() - C );
+		B.vecMin().y( B.vecMin().y() - C );
+		B.vecMax().x( B.vecMax().x() + C );
+		B.vecMax().y( B.vecMax().y() + C );
+	}
+
 	return ( B );
 }
 

@@ -217,6 +217,15 @@ class CqImagePixel
 			assert( n < m_YSamples );
 			return ( m_avecSamples[ n * m_XSamples + m ] );
 		}
+
+		/**	\TODO: Implent the DoF version...
+		 */
+		CqVector2D&	SampleLens( TqInt m, TqInt n )
+		{
+			assert( m < m_XSamples );
+			assert( n < m_YSamples );
+			return ( m_avecSamples[ n * m_XSamples + m ] );
+		}
 		/** Get the filter weight index of the appropriate subcell.
 		 * Subcell dimensions are inverted subpixel dimensions, producing a square subcell matrix.
 		 * \param m The horizontal index of the required sample point.
