@@ -461,7 +461,7 @@ void CqSubdivision2::Finalise()
 
 		// If the last lath wasn't linked, then we have a boundary condition, so
 		// start again from the initial lath and process backwards.
-		if(NULL == pCurrent->pClockwiseVertex())
+		if(NULL == pCurrent->cv())
 		{
 			fDone = TqFalse;
 			while(!fDone)
@@ -1043,18 +1043,52 @@ TqInt CqSurfaceSubdivisionPatch::Split( std::vector<CqBasicSurface*>& aSplits )
 	// If the patch is a quad with each corner having valence 4, and no special features, 
 	// we can just create a B-Spline patch.
 	TqBool fCanUsePatch = TqFalse;
+	
 	std::vector<CqLath*> aQff, aQfv;
-	pFace()->Qff(aQff);
-	if( aQff.size() == 9 )
+	pFace()->Qfv(aQfv);
+	if( aQfv.size() == 4 )
 	{
-		std::vector<CqLath*>::iterator iFF;
-		for( iFF = aQff.begin(); iFF!=aQff.end(); iFF++ )
-		{
-			(*iFF)->Qfv( aQfv );
-			if( aQfv.size() != 4 )
-				break;
-		}
 		fCanUsePatch = TqTrue;
+		std::vector<CqLath*>::iterator iFV;
+		for( iFV = aQfv.begin(); iFV!=aQfv.end(); iFV++ )
+		{
+			// Check if all vertices are valence 4.
+			std::vector<CqLath*> aQvv;
+			(*iFV)->Qvv( aQvv );
+			if( aQvv.size() != 4 )
+			{
+				fCanUsePatch = TqFalse;
+				break;
+			}
+
+			// Check if no internal boundaries.
+			CqLath* pEnd = (*iFV)->cv();
+			while( NULL != pEnd && (*iFV) != pEnd )
+				pEnd = pEnd->cv();
+			if( NULL == pEnd )
+			{
+				fCanUsePatch = TqFalse;
+				break;
+			}
+		}
+
+		if( fCanUsePatch )
+		{
+			pFace()->Qff(aQff);
+			if( aQff.size() == 9 )
+			{
+				std::vector<CqLath*>::iterator iFF;
+				for( iFF = aQff.begin(); iFF!=aQff.end(); iFF++ )
+				{
+					(*iFF)->Qfv( aQfv );
+					if( aQfv.size() != 4 )
+					{
+						fCanUsePatch = TqFalse;
+						break;
+					}
+				}
+			}
+		}
 	}
 	
 	if( fCanUsePatch )

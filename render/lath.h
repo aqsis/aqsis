@@ -48,10 +48,6 @@ public:
 	///	Destructor.
 	virtual ~CqLath();
 
-	/// Get a pointer to the next lath clockwise about the vertex.
-	CqLath*	pClockwiseVertex() const	{return(m_pClockwiseVertex);}
-	/// Get a pointer to the next lath clockwise about the facet.
-	CqLath*	pClockwiseFacet() const		{return(m_pClockwiseFacet);}
 	/// Get a pointer to the lath representing the facet that this one was created from.
 	CqLath*	pParentFacet() const		{return(m_pParentFacet);}
 	/// Get a pointer to the lath representing this vertex at the next level.
