@@ -16,8 +16,9 @@ Requirements:
 	Libraries:
 
 		libtiff		3.5.5 or later	(http://www.libtiff.org)
-					Load the file libtiff\libtiff.def into you text editor and add the line
+					Load the file libtiff\libtiff.def into you text editor and add the lines
 						TIFFCreateDirectory
+						TIFFDefaultStripSize
 					From within the libtiff directory type
 						nmake -f makefile.vc libtiff.dll
 					Add libtiff to your include paths under tools/options.
