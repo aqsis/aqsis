@@ -731,6 +731,15 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, TqInt iBucket,
 		if ( QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Oi" ) )
 			colMPGOpacity = pMPG->colOpacity();
 
+		TqFloat dc = 0.0f;
+		if( UsingDepthOfField )
+		{
+			TqFloat ad; // Average depth
+			ad = pMPG->PointA().z() + pMPG->PointB().z() + pMPG->PointC().z() + pMPG->PointD().z();
+			ad /= 4;
+			dc = CircleOfConfusion( dofdata, ad );
+		}
+
 		TqInt nextx = Bucket.XSize() + Bucket.XFWidth();
 		Bucket.ImageElement( sX, sY, pie );
 
@@ -758,6 +767,11 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, TqInt iBucket,
 					for ( m = start_m; m < end_m && !brkHoriz; m++ )
 					{
 						const CqVector2D& vecP = pie2->SamplePoint( m, n );
+
+						CqVector2D samplelens;
+						if( UsingDepthOfField )
+							samplelens = pie2->SampleLens( m, n );
+
 						theStats.IncSamples();
 
 						TqFloat t = pie2->SampleTime( m, n );
@@ -781,8 +795,7 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, TqInt iBucket,
 
 							if ( UsingDepthOfField )
 							{
-								CqVector2D samplelens = pie2->SampleLens( m, n );
-								SampleHit = pMPG->SampleDof( vecP, t, dofdata, samplelens, ImageVal.m_Depth );
+								SampleHit = pMPG->Sample( vecP + dc * samplelens, ImageVal.m_Depth, t );
 							}
 							else
 							{

@@ -496,14 +496,6 @@ class CqMicroPolygon : public CqRefCount, public CqPoolable<CqMicroPolygon, 512>
 		 */
 		virtual	TqBool	Sample( const CqVector2D& vecSample, TqFloat& D, TqFloat time );
 
-		/** Check if the sample point is within the micropoly.
-		 * \param vecSample 2D sample point.
-		 * \param time The frame time at which to check.
-		 * \param D storage to put the depth at the sample point if success.
-		 * \return Boolean success.
-		 */
-		virtual	TqBool	SampleDof( const CqVector2D& vecSample, TqFloat time, const TqFloat* DofParameters, const CqVector2D& LensPosition, TqFloat& D );
-
 		/** Query if the micropolygon has been successfully hit by a pixel sample.
 		 */
 		TqBool IsHit() const

@@ -1137,62 +1137,6 @@ TqBool CqMicroPolygon::Sample( const CqVector2D& vecSample, TqFloat& D, TqFloat 
 		return ( TqFalse );
 }
 
-//---------------------------------------------------------------------
-/** Sample the specified point against the MPG at the specified time.
- * \param vecSample 2D vector to sample against.
- * \param time Shutter time to sample at.
- * \param DofParameters The lens data.
- * \param LensPosition Position on the lens to use.
- * \param D Storage for depth if valid hit.
- * \return Boolean indicating smaple hit.
- */
-
-TqBool CqMicroPolygon::SampleDof( const CqVector2D& vecSample, TqFloat time, const TqFloat* DofParameters, const CqVector2D& LensPosition, TqFloat& D )
-{
-	/*
-	TqFloat C;
-
-	C = CircleOfConfusion( DofParameters, PointA().z() );
-	CqVector3D p0(
-	    PointA().x() + C * LensPosition.x(),
-	    PointA().y() + C * LensPosition.y(),
-	    PointA().z()
-	);
-
-	C = CircleOfConfusion( DofParameters, PointB().z() );
-	CqVector3D p1(
-	    PointB().x() + C * LensPosition.x(),
-	    PointB().y() + C * LensPosition.y(),
-	    PointB().z()
-	);
-
-	C = CircleOfConfusion( DofParameters, PointC().z() );
-	CqVector3D p2(
-	    PointC().x() + C * LensPosition.x(),
-	    PointC().y() + C * LensPosition.y(),
-	    PointC().z()
-	);
-
-	C = CircleOfConfusion( DofParameters, PointD().z() );
-	CqVector3D p3(
-	    PointD().x() + C * LensPosition.x(),
-	    PointD().y() + C * LensPosition.y(),
-	    PointD().z()
-	);
-
-	CqMovingMicroPolygonKey newpoly( p0, p1, p2, p3 );
-	//return newpoly.fContains( vecSample, D );
-	*/
-
-	TqFloat ad; // Average depth
-	ad = PointA().z() + PointB().z() + PointC().z() + PointD().z();
-	ad /= 4;
-
-	TqFloat dc = CircleOfConfusion( DofParameters, ad );
-
-	return fContains( vecSample + dc * LensPosition, D );
-}
-
 
 //---------------------------------------------------------------------
 /** Calculate the 2D boundary of this micropolygon,
