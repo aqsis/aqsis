@@ -59,6 +59,16 @@ std::ostream &operator<<( std::ostream &Stream, EqVariableType t )
 	return ( Stream );
 }
 
+//----------------------------------------------------------------------
+/** Outputs a variable class to an output stream.
+ */
+
+std::ostream &operator<<( std::ostream &Stream, EqVariableClass t )
+{
+	Stream << gVariableClassNames[ t ];
+	return ( Stream );
+}
+
 
 END_NAMESPACE( Aqsis )
 //---------------------------------------------------------------------

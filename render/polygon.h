@@ -181,6 +181,11 @@ class CqSurfacePolygon : public CqSurface, public CqPolygonBase
 		{
 			return ( m_cVertices );
 		}
+		virtual	TqUint	cFaceVarying() const
+		{
+			/// \todo Must work out what this value should be.
+			return ( 1 );
+		}
 
 		// Overridden from CqPolygonBase
 		virtual	const CqSurface& Surface() const
@@ -338,6 +343,11 @@ class CqPolygonPoints : public CqSurface
 		{
 			return ( m_cVertices );
 		}
+		virtual	TqUint	cFaceVarying() const
+		{
+			/// \todo Must work out what this value should be.
+			return ( 1 );
+		}
 
 		void	TransferDefaultSurfaceParameters();
 		/** Get the number of vertices in the list.
@@ -412,6 +422,10 @@ class CqSurfacePointsPolygon : public CqBasicSurface, public CqPolygonBase
 			return ( 0 );
 		}
 		virtual	TqUint	cVertex() const
+		{
+			return ( 0 );
+		}
+		virtual	TqUint	cFaceVarying() const
 		{
 			return ( 0 );
 		}
@@ -575,6 +589,10 @@ class CqMotionSurfacePointsPolygon : public CqBasicSurface, public CqPolygonBase
 			return ( 0 );
 		}
 		virtual	TqUint	cVertex() const
+		{
+			return ( 0 );
+		}
+		virtual	TqUint	cFaceVarying() const
 		{
 			return ( 0 );
 		}

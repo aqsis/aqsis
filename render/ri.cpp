@@ -4207,6 +4207,8 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 
 static RtBoolean ProcessPrimitiveVariables( CqSurface* pSurface, PARAMETERLIST )
 {
+	std::vector<TqInt>	aUserParams;
+	
 	// Read recognised parameter values.
 	RtInt	fP = RIL_NONE;
 	RtInt	fN = RIL_NONE;
@@ -4277,6 +4279,10 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface* pSurface, PARAMETERLIST )
 			fN = RIL_Np;
 			pNormals = ( RtFloat* ) value;
 		}
+		else
+		{
+			aUserParams.push_back(i);
+		}
 	}
 
 	// Fill in the position variable according to type.
@@ -4306,7 +4312,7 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface* pSurface, PARAMETERLIST )
 	}
 
 
-	// Fill in the position variable according to type.
+	// Fill in the normal variable according to type.
 	if ( fN != RIL_NONE )
 	{
 		TqUint i;
@@ -4378,6 +4384,129 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface* pSurface, PARAMETERLIST )
 		for ( i = 0; i < pSurface->cVarying(); i++ )
 			pSurface->Os() [ i ] = CqColor( pOs[ ( i * 3 ) ], pOs[ ( i * 3 ) + 1 ], pOs[ ( i * 3 ) + 2 ] );
 	}
+
+	// Now process any user defined paramter variables.
+	if(aUserParams.size()>0)
+	{
+		std::vector<TqInt>::iterator iUserParam;
+		for( iUserParam = aUserParams.begin(); iUserParam!=aUserParams.end(); iUserParam++ )
+		{
+			SqParameterDeclaration Decl = QGetRenderContext() ->FindParameterDecl( tokens[ *iUserParam ] );
+			std::cout << "Processing user parameter : \"" << Decl.m_strName.c_str() << "\", which is of type \"" << Decl.m_Class << " " << Decl.m_Type << "\"" << std::endl;
+
+			CqParameter* pNewParam = (*Decl.m_pCreate)(Decl.m_strName.c_str(), Decl.m_Count);
+			// Now go across all values and fill in the parameter variable.
+			TqInt cValues = 1;
+			switch( Decl.m_Class )
+			{
+				case class_uniform:
+					cValues = pSurface->cUniform();
+					break;
+
+				case class_varying:
+					cValues = pSurface->cVarying();
+					break;
+
+				case class_vertex:
+					cValues = pSurface->cVertex();
+					break;
+
+				case class_facevarying:
+					cValues = pSurface->cFaceVarying();
+					break;
+			}
+			pNewParam->SetSize(cValues);
+
+			TqInt i;
+			switch( Decl.m_Type )
+			{
+				case type_float:
+				{
+					CqParameterTyped<TqFloat, TqFloat>* pFloatParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>(pNewParam);
+					TqFloat* pValue = reinterpret_cast<TqFloat*>(values[ *iUserParam ]);
+					TqInt iArrayIndex;
+					for( i = 0; i < cValues; )
+						for( iArrayIndex = 0; iArrayIndex < Decl.m_Count; iArrayIndex++, i++ )
+							pFloatParam->pValue( i )[iArrayIndex] = pValue[ i++ ];
+				}
+				break;
+
+				case type_integer:
+				{
+					CqParameterTyped<TqInt, TqFloat>* pIntParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>(pNewParam);
+					TqInt* pValue = reinterpret_cast<TqInt*>(values[ *iUserParam ]);
+					TqInt iArrayIndex;
+					for( i = 0; i < cValues; )
+						for( iArrayIndex = 0; iArrayIndex < Decl.m_Count; iArrayIndex++, i++ )
+							pIntParam->pValue( i )[iArrayIndex] = pValue[ i ];
+				}
+				break;
+
+				case type_point:
+				case type_normal:
+				case type_vector:
+				{
+					CqParameterTyped<CqVector3D, CqVector3D>* pVectorParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>(pNewParam);
+					TqFloat* pValue = reinterpret_cast<TqFloat*>(values[ *iUserParam ]);
+					TqInt iArrayIndex;
+					for( i = 0; i < cValues; )
+						for( iArrayIndex = 0; iArrayIndex < Decl.m_Count; iArrayIndex++, i++ )
+							pVectorParam->pValue( i )[iArrayIndex] = CqVector3D( pValue[ (i*3) ], pValue[ (i*3)+1 ], pValue[ (i*3)+2 ] );
+				}
+				break;
+
+				case type_string:
+				{
+					CqParameterTyped<CqString, CqString>* pStringParam = static_cast<CqParameterTyped<CqString, CqString>*>(pNewParam);
+					char** pValue = reinterpret_cast<char**>(values[ *iUserParam ]);
+					TqInt iArrayIndex;
+					for( i = 0; i < cValues; )
+						for( iArrayIndex = 0; iArrayIndex < Decl.m_Count; iArrayIndex++, i++ )
+							pStringParam->pValue( i )[iArrayIndex] = CqString( pValue[ i ] );
+				}
+				break;
+
+				case type_color:
+				{
+					CqParameterTyped<CqColor, CqColor>* pColorParam = static_cast<CqParameterTyped<CqColor, CqColor>*>(pNewParam);
+					TqFloat* pValue = reinterpret_cast<TqFloat*>(values[ *iUserParam ]);
+					TqInt iArrayIndex;
+					for( i = 0; i < cValues; )
+						for( iArrayIndex = 0; iArrayIndex < Decl.m_Count; iArrayIndex++, i++ )
+							pColorParam->pValue( i )[iArrayIndex] = CqColor( pValue[ (i*3) ], pValue[ (i*3)+1 ], pValue[ (i*3)+2 ] );
+				}
+				break;
+
+				case type_hpoint:
+				{
+					CqParameterTyped<CqVector4D, CqVector3D>* pVectorParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>(pNewParam);
+					TqFloat* pValue = reinterpret_cast<TqFloat*>(values[ *iUserParam ]);
+					TqInt iArrayIndex;
+					for( i = 0; i < cValues; )
+						for( iArrayIndex = 0; iArrayIndex < Decl.m_Count; iArrayIndex++, i++ )
+							pVectorParam->pValue( i )[iArrayIndex] = CqVector4D( pValue[ (i*4) ], pValue[ (i*4)+1 ], pValue[ (i*4)+2 ], pValue[ (i*4)+3 ] );
+				}
+				break;
+
+				case type_matrix:
+				{
+					CqParameterTyped<CqMatrix, CqMatrix>* pMatrixParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>(pNewParam);
+					TqFloat* pValue = reinterpret_cast<TqFloat*>(values[ *iUserParam ]);
+					TqInt iArrayIndex;
+					for( i = 0; i < cValues; )
+						for( iArrayIndex = 0; iArrayIndex < Decl.m_Count; iArrayIndex++, i++ )
+							pMatrixParam->pValue( i )[iArrayIndex] = CqMatrix( pValue[ (i*16)    ], pValue[ (i*16)+1  ], pValue[ (i*16)+2  ], pValue[ (i*16)+3  ],
+																			   pValue[ (i*16)+4  ], pValue[ (i*16)+5  ], pValue[ (i*16)+6  ], pValue[ (i*16)+7  ],
+																			   pValue[ (i*16)+8  ], pValue[ (i*16)+9  ], pValue[ (i*16)+10 ], pValue[ (i*16)+11 ],
+																			   pValue[ (i*16)+12 ], pValue[ (i*16)+13 ], pValue[ (i*16)+14 ], pValue[ (i*16)+15 ]
+																			 );
+				}
+				break;
+			}
+			pSurface->aUserParams().push_back(pNewParam);
+		}
+	}
+
 	return ( fP != RIL_NONE );
 }
 

@@ -105,6 +105,9 @@ class CqBasicSurface : public CqListEntry<CqBasicSurface>, public CqRefCount, pu
 		/** Get the number of vertex parameters required for this GPrim.
 		 */
 		virtual	TqUint	cVertex() const = 0;
+		/** Get the number of facearying parameters required for this GPrim.
+		 */
+		virtual	TqUint	cFaceVarying() const = 0;
 
 		virtual CqString	strName() const;
 		virtual	TqInt	Uses() const;
@@ -228,6 +231,14 @@ class _qShareC CqSurface : public CqBasicSurface
 	public:
 		CqSurface();
 		CqSurface( const CqSurface& From );
+
+		virtual	~CqSurface()
+		{
+			std::vector<CqParameter*>::iterator iUP;
+			for(iUP = m_aUserParams.begin(); iUP!=m_aUserParams.end(); iUP++)
+				if( NULL != (*iUP) )
+					delete(*iUP);
+		}
 
 		virtual	void	SetDefaultPrimitiveVariables( TqBool bUseDef_st = TqTrue );
 
@@ -374,6 +385,19 @@ class _qShareC CqSurface : public CqBasicSurface
 			return ( m_v.Size() >= cVarying() );
 		}
 
+		/** Get a reference to the user parameter variables array
+		 */
+		const std::vector<CqParameter*>& aUserParams() const
+		{
+			return(m_aUserParams);
+		}
+
+		/** Get a reference to the user parameter variables array
+		 */
+		std::vector<CqParameter*>& aUserParams()
+		{
+			return(m_aUserParams);
+		}
 
 		/** Determine whether this surface can be trimmed
 		 */
@@ -399,6 +423,9 @@ class _qShareC CqSurface : public CqBasicSurface
 		 */
 		virtual	void	PrepareTrimCurve()
 		{}
+
+		void	uSubdivideUserParameters( CqSurface* pTarget );
+		void	vSubdivideUserParameters( CqSurface* pTarget );
 
 		/** Interpolate the specified value using the natural interpolation method for the surface.
 		 *  Fills in the given shader data with the resulting data.
@@ -427,6 +454,8 @@ class _qShareC CqSurface : public CqBasicSurface
 		CqParameterTypedVarying<TqFloat, type_float, TqFloat>	m_t;		///< Default parameter t.
 		CqParameterTypedVarying<TqFloat, type_float, TqFloat>	m_u;		///< Default parameter u.
 		CqParameterTypedVarying<TqFloat, type_float, TqFloat>	m_v;		///< Default parameter v.
+
+		std::vector<CqParameter*>	m_aUserParams;						///< Storage for user defined paramter variables.
 
 }
 ;
@@ -566,6 +595,10 @@ class CqMotionSurface : public CqBasicSurface, public CqMotionSpec<T>
 		virtual	TqUint	cVertex() const
 		{
 			return ( GetMotionObject( Time( 0 ) ) ->cVertex() );
+		}
+		virtual	TqUint	cFaceVarying() const
+		{
+			return ( GetMotionObject( Time( 0 ) ) ->cFaceVarying() );
 		}
 
 		// Overrides from CqMotionSpec

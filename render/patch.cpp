@@ -1255,6 +1255,7 @@ TqInt CqSurfacePatchMeshBicubic::Split( std::vector<CqBasicSurface*>& aSplits )
 			// Fill in the surface parameters for the mesh.
 			if ( USES( MyUses, EnvVars_u ) )
 			{
+				pSurface->u().SetSize( 4 );
 				pSurface->u() [ 0 ] = up;
 				pSurface->u() [ 1 ] = up + du;
 				pSurface->u() [ 2 ] = up;
@@ -1263,6 +1264,7 @@ TqInt CqSurfacePatchMeshBicubic::Split( std::vector<CqBasicSurface*>& aSplits )
 
 			if ( USES( MyUses, EnvVars_v ) )
 			{
+ 				pSurface->v().SetSize( 4 );
 				pSurface->v() [ 0 ] = vp;
 				pSurface->v() [ 1 ] = vp;
 				pSurface->v() [ 2 ] = vp + dv;

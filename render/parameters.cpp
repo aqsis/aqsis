@@ -67,6 +67,25 @@ CqParameter::~CqParameter()
 }
 
 
+CqParameter* ( *gVariableCreateFuncsConstant[] ) ( const char* strName, TqInt Count ) =
+    {
+        0,
+        CqParameterTypedConstant<TqFloat, type_float, TqFloat>::Create,
+        CqParameterTypedConstant<TqInt, type_integer, TqFloat>::Create,
+        CqParameterTypedConstant<CqVector3D, type_point, CqVector3D>::Create,
+        CqParameterTypedConstant<CqString, type_string, CqString>::Create,
+        CqParameterTypedConstant<CqColor, type_color, CqColor>::Create,
+        0,
+        CqParameterTypedConstant<CqVector4D, type_hpoint, CqVector3D>::Create,
+        CqParameterTypedConstant<CqVector3D, type_normal, CqVector3D>::Create,
+        CqParameterTypedConstant<CqVector3D, type_vector, CqVector3D>::Create,
+		0,
+        CqParameterTypedConstant<CqMatrix, type_matrix, CqMatrix>::Create,
+		0,
+		0,
+    };
+
+
 CqParameter* ( *gVariableCreateFuncsUniform[] ) ( const char* strName, TqInt Count ) =
     {
         0,
@@ -79,7 +98,10 @@ CqParameter* ( *gVariableCreateFuncsUniform[] ) ( const char* strName, TqInt Cou
         CqParameterTypedUniform<CqVector4D, type_hpoint, CqVector3D>::Create,
         CqParameterTypedUniform<CqVector3D, type_normal, CqVector3D>::Create,
         CqParameterTypedUniform<CqVector3D, type_vector, CqVector3D>::Create,
+		0,
         CqParameterTypedUniform<CqMatrix, type_matrix, CqMatrix>::Create,
+		0,
+		0,
     };
 
 CqParameter* ( *gVariableCreateFuncsVarying[] ) ( const char* strName, TqInt Count ) =
@@ -94,7 +116,10 @@ CqParameter* ( *gVariableCreateFuncsVarying[] ) ( const char* strName, TqInt Cou
         CqParameterTypedVarying<CqVector4D, type_hpoint, CqVector3D>::Create,
         CqParameterTypedVarying<CqVector3D, type_normal, CqVector3D>::Create,
         CqParameterTypedVarying<CqVector3D, type_vector, CqVector3D>::Create,
+		0,
         CqParameterTypedVarying<CqMatrix, type_matrix, CqMatrix>::Create,
+		0,
+		0,
     };
 
 CqParameter* ( *gVariableCreateFuncsVertex[] ) ( const char* strName, TqInt Count ) =
@@ -109,7 +134,48 @@ CqParameter* ( *gVariableCreateFuncsVertex[] ) ( const char* strName, TqInt Coun
         CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>::Create,
         CqParameterTypedVertex<CqVector3D, type_normal, CqVector3D>::Create,
         CqParameterTypedVertex<CqVector3D, type_vector, CqVector3D>::Create,
+		0,
         CqParameterTypedVertex<CqMatrix, type_matrix, CqMatrix>::Create,
+		0,
+		0,
+    };
+
+
+CqParameter* ( *gVariableCreateFuncsFaceVarying[] ) ( const char* strName, TqInt Count ) =
+    {
+        0,
+        CqParameterTypedFaceVarying<TqFloat, type_float, TqFloat>::Create,
+        CqParameterTypedFaceVarying<TqInt, type_integer, TqFloat>::Create,
+        CqParameterTypedFaceVarying<CqVector3D, type_point, CqVector3D>::Create,
+        CqParameterTypedFaceVarying<CqString, type_string, CqString>::Create,
+        CqParameterTypedFaceVarying<CqColor, type_color, CqColor>::Create,
+        0,
+        CqParameterTypedFaceVarying<CqVector4D, type_hpoint, CqVector3D>::Create,
+        CqParameterTypedFaceVarying<CqVector3D, type_normal, CqVector3D>::Create,
+        CqParameterTypedFaceVarying<CqVector3D, type_vector, CqVector3D>::Create,
+		0,
+        CqParameterTypedFaceVarying<CqMatrix, type_matrix, CqMatrix>::Create,
+		0,
+		0,
+    };
+
+
+CqParameter* ( *gVariableCreateFuncsConstantArray[] ) ( const char* strName, TqInt Count ) =
+    {
+        0,
+        CqParameterTypedConstantArray<TqFloat, type_float, TqFloat>::Create,
+        CqParameterTypedConstantArray<TqInt, type_integer, TqFloat>::Create,
+        CqParameterTypedConstantArray<CqVector3D, type_point, CqVector3D>::Create,
+        CqParameterTypedConstantArray<CqString, type_string, CqString>::Create,
+        CqParameterTypedConstantArray<CqColor, type_color, CqColor>::Create,
+        0,
+        CqParameterTypedConstantArray<CqVector4D, type_hpoint, CqVector3D>::Create,
+        CqParameterTypedConstantArray<CqVector3D, type_normal, CqVector3D>::Create,
+        CqParameterTypedConstantArray<CqVector3D, type_vector, CqVector3D>::Create,
+		0,
+        CqParameterTypedConstantArray<CqMatrix, type_matrix, CqMatrix>::Create,
+		0,
+		0,
     };
 
 
@@ -125,7 +191,10 @@ CqParameter* ( *gVariableCreateFuncsUniformArray[] ) ( const char* strName, TqIn
         CqParameterTypedUniformArray<CqVector4D, type_hpoint, CqVector3D>::Create,
         CqParameterTypedUniformArray<CqVector3D, type_normal, CqVector3D>::Create,
         CqParameterTypedUniformArray<CqVector3D, type_vector, CqVector3D>::Create,
+		0,
         CqParameterTypedUniformArray<CqMatrix, type_matrix, CqMatrix>::Create,
+		0,
+		0,
     };
 
 CqParameter* ( *gVariableCreateFuncsVaryingArray[] ) ( const char* strName, TqInt Count ) =
@@ -140,7 +209,10 @@ CqParameter* ( *gVariableCreateFuncsVaryingArray[] ) ( const char* strName, TqIn
         CqParameterTypedVaryingArray<CqVector4D, type_hpoint, CqVector3D>::Create,
         CqParameterTypedVaryingArray<CqVector3D, type_normal, CqVector3D>::Create,
         CqParameterTypedVaryingArray<CqVector3D, type_vector, CqVector3D>::Create,
+		0,
         CqParameterTypedVaryingArray<CqMatrix, type_matrix, CqMatrix>::Create,
+		0,
+		0,
     };
 
 CqParameter* ( *gVariableCreateFuncsVertexArray[] ) ( const char* strName, TqInt Count ) =
@@ -155,7 +227,28 @@ CqParameter* ( *gVariableCreateFuncsVertexArray[] ) ( const char* strName, TqInt
         CqParameterTypedVertexArray<CqVector4D, type_hpoint, CqVector3D>::Create,
         CqParameterTypedVertexArray<CqVector3D, type_normal, CqVector3D>::Create,
         CqParameterTypedVertexArray<CqVector3D, type_vector, CqVector3D>::Create,
+		0,
         CqParameterTypedVertexArray<CqMatrix, type_matrix, CqMatrix>::Create,
+		0,
+		0,
+    };
+
+CqParameter* ( *gVariableCreateFuncsFaceVaryingArray[] ) ( const char* strName, TqInt Count ) =
+    {
+        0,
+        CqParameterTypedFaceVaryingArray<TqFloat, type_float, TqFloat>::Create,
+        CqParameterTypedFaceVaryingArray<TqInt, type_integer, TqFloat>::Create,
+        CqParameterTypedFaceVaryingArray<CqVector3D, type_point, CqVector3D>::Create,
+        CqParameterTypedFaceVaryingArray<CqString, type_string, CqString>::Create,
+        CqParameterTypedFaceVaryingArray<CqColor, type_color, CqColor>::Create,
+        0,
+        CqParameterTypedFaceVaryingArray<CqVector4D, type_hpoint, CqVector3D>::Create,
+        CqParameterTypedFaceVaryingArray<CqVector3D, type_normal, CqVector3D>::Create,
+        CqParameterTypedFaceVaryingArray<CqVector3D, type_vector, CqVector3D>::Create,
+		0,
+        CqParameterTypedFaceVaryingArray<CqMatrix, type_matrix, CqMatrix>::Create,
+		0,
+		0,
     };
 
 

@@ -106,6 +106,11 @@ class CqSurfacePatchBicubic : public CqSurface
 		{
 			return ( 16 );
 		}
+		virtual	TqUint cFaceVarying() const
+		{
+			/// \todo Must work out what this value should be.
+			return ( 1 );
+		}
 
 		virtual void NaturalInterpolate(CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData);
 
@@ -172,6 +177,11 @@ class _qShareC CqSurfacePatchBilinear : public CqSurface
 		virtual	TqUint	cVertex() const
 		{
 			return ( 4 );
+		}
+		virtual	TqUint	cFaceVarying() const
+		{
+			/// \todo Must work out what this value should be.
+			return ( 1 );
 		}
 
 		virtual void NaturalInterpolate(CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData);
@@ -244,6 +254,11 @@ class CqSurfacePatchMeshBicubic : public CqSurface
 		{
 			return ( m_nu * m_nv );
 		}
+		virtual	TqUint	cFaceVarying() const
+		{
+			/// \todo Must work out what this value should be.
+			return ( 1 );
+		}
 
 	protected:
 
@@ -303,6 +318,11 @@ class CqSurfacePatchMeshBilinear : public CqSurface
 		virtual	TqUint	cVertex() const
 		{
 			return ( m_nu * m_nv );
+		}
+		virtual	TqUint	cFaceVarying() const
+		{
+			/// \todo Must work out what this value should be.
+			return ( 1 );
 		}
 
 	protected:

@@ -50,12 +50,13 @@
 START_NAMESPACE( Aqsis )
 
 
-_qShareM	extern char*	gVariableStorageNames[];
-_qShareM	extern TqInt	gcVariableStorageNames;
+_qShareM	extern char*	gVariableClassNames[];
+_qShareM	extern TqInt	gcVariableClassNames;
 _qShareM	extern char*	gVariableTypeNames[];
 _qShareM	extern TqInt	gcVariableTypeNames;
 
 _qShare	std::ostream &operator<<( std::ostream &Stream, EqVariableType t );
+_qShare	std::ostream &operator<<( std::ostream &Stream, EqVariableClass t );
 
 
 extern TqInt gDefUses;

@@ -49,7 +49,7 @@ char* gVariableTypeNames[] =
     };
 TqInt gcVariableTypeNames = sizeof( gVariableTypeNames ) / sizeof( gVariableTypeNames[ 0 ] );
 
-char* gVariableStorageNames[] =
+char* gVariableClassNames[] =
     {
         "invalid",
 		"constant",
@@ -58,7 +58,7 @@ char* gVariableStorageNames[] =
         "vertex",
 		"facevarying",
     };
-TqInt gcVariableStorageNames = sizeof( gVariableStorageNames ) / sizeof( gVariableStorageNames[ 0 ] );
+TqInt gcVariableClassNames = sizeof( gVariableClassNames ) / sizeof( gVariableClassNames[ 0 ] );
 
 
 CqNoise	CqShaderExecEnv::m_noise;

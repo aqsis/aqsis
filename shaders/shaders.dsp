@@ -724,6 +724,39 @@ InputName=show_st
 # End Source File
 # Begin Source File
 
+SOURCE=.\showuser.sl
+
+!IF  "$(CFG)" == "Shaders - Win32 Release"
+
+# Begin Custom Build - Compiling Shader $(InputPath)
+InputDir=.
+InputPath=.\showuser.sl
+InputName=showuser
+
+"$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	cd $(InputDir) 
+	aqsl $(InputName).sl 
+	
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "Shaders - Win32 Debug"
+
+# Begin Custom Build - Compiling Shader $(InputPath)
+InputDir=.
+InputPath=.\showuser.sl
+InputName=showuser
+
+"$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	cd $(InputDir) 
+	aqsl $(InputPath) 
+	
+# End Custom Build
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
 SOURCE=.\spacetest.sl
 
 !IF  "$(CFG)" == "Shaders - Win32 Release"

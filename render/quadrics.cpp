@@ -290,6 +290,8 @@ TqInt CqSphere::Split( std::vector<CqBasicSurface*>& aSplits )
 		pNew1->t().uSubdivide( &pNew2->t() );
 		pNew1->Cs().uSubdivide( &pNew2->Cs() );
 		pNew1->Os().uSubdivide( &pNew2->Os() );
+
+		pNew1->uSubdivideUserParameters( pNew2 );
 	}
 	else
 	{
@@ -303,6 +305,8 @@ TqInt CqSphere::Split( std::vector<CqBasicSurface*>& aSplits )
 		pNew1->t().vSubdivide( &pNew2->t() );
 		pNew1->Cs().vSubdivide( &pNew2->Cs() );
 		pNew1->Os().vSubdivide( &pNew2->Os() );
+
+		pNew1->vSubdivideUserParameters( pNew2 );
 	}
 	
 	pNew1->SetSurfaceParameters( *this );

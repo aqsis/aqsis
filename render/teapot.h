@@ -62,23 +62,22 @@ class CqTeapot : public CqSurface
 		{}
 
 		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx );
-		/** Get the number of uniform values for this GPrim.
-		 */
 		virtual	TqUint	cUniform() const
 		{
 			return ( 1 );
 		}
-		/** Get the number of varying values for this GPrim.
-		 */
 		virtual	TqUint	cVarying() const
 		{
 			return ( 4 );
 		}
-		/** Get the number of vertex values for this GPrim.
-		 */
 		virtual	TqUint	cVertex() const
 		{
 			return ( 16 );
+		}
+		virtual	TqUint	cFaceVarying() const
+		{
+			/// \todo Must work out what this value should be.
+			return ( 1 );
 		}
 
 		CqSurface *pPatchMeshBicubic[ 7 ];

@@ -1010,6 +1010,11 @@ class CqWSurf : public CqSubdivider, public CqBasicSurface
 		{
 			return ( m_cExpectedVertices );
 		}
+		virtual	TqUint	cFaceVarying() const
+		{
+			/// \todo Must work out what this value should be.
+			return ( 1 );
+		}
 
 		// Overridden from CqSubdivider
 		virtual TqInt	Uses() const
@@ -1023,31 +1028,31 @@ class CqWSurf : public CqSubdivider, public CqBasicSurface
 
 		virtual	TqBool	bHasN() const
 		{
-			return ( m_pPoints->N().Size() >= cVertex() );
+			return ( m_pPoints->N().Size() >= cVarying() );
 		}
 		virtual	TqBool	bHasCs() const
 		{
-			return ( m_pPoints->Cs().Size() >= cVertex() );
+			return ( m_pPoints->Cs().Size() >= cVarying() );
 		}
 		virtual	TqBool	bHasOs() const
 		{
-			return ( m_pPoints->Os().Size() >= cVertex() );
+			return ( m_pPoints->Os().Size() >= cVarying() );
 		}
 		virtual	TqBool	bHass() const
 		{
-			return ( m_pPoints->s().Size() >= cVertex() );
+			return ( m_pPoints->s().Size() >= cVarying() );
 		}
 		virtual	TqBool	bHast() const
 		{
-			return ( m_pPoints->t().Size() >= cVertex() );
+			return ( m_pPoints->t().Size() >= cVarying() );
 		}
 		virtual	TqBool	bHasu() const
 		{
-			return ( m_pPoints->u().Size() >= cVertex() );
+			return ( m_pPoints->u().Size() >= cVarying() );
 		}
 		virtual	TqBool	bHasv() const
 		{
-			return ( m_pPoints->v().Size() >= cVertex() );
+			return ( m_pPoints->v().Size() >= cVarying() );
 		}
 
 	protected:
@@ -1106,6 +1111,11 @@ class CqMotionWSurf : public CqSubdivider, public CqBasicSurface, public CqMotio
 		virtual	TqUint	cVertex() const
 		{
 			return ( m_cExpectedVertices );
+		}
+		virtual	TqUint	cFaceVarying() const
+		{
+			/// \todo Must work out what this value should be.
+			return ( 1 );
 		}
 
 		// Overridden from CqSubdivider

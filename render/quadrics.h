@@ -57,17 +57,18 @@ class CqQuadric : public CqSurface
 		{
 			return ( 1 );
 		}
-		/** Get the number of varying values for this GPrim.
-		 */
 		virtual	TqUint	cVarying() const
 		{
 			return ( 4 );
 		}
-		/** Get the number of vertex values for this GPrim.
-		 */
 		virtual	TqUint	cVertex() const
 		{
 			return ( 4 );
+		}
+		virtual	TqUint	cFaceVarying() const
+		{
+			/// \todo Must work out what this value should be.
+			return ( 1 );
 		}
 
 

@@ -295,11 +295,13 @@ class CqParameterTypedUniform : public CqParameterTyped<T, SLT>
 	public:
 		CqParameterTypedUniform( const char* strName, TqInt Count = 1 ) :
 				CqParameterTyped<T, SLT>( strName, Count )
-		{}
+		{
+			m_aValues.resize(1);
+		}
 		CqParameterTypedUniform( const CqParameterTypedUniform<T, I, SLT>& From ) :
 				CqParameterTyped<T, SLT>( From )
 		{
-			m_Value = From.m_Value;
+			*this = From;
 		}
 		virtual	~CqParameterTypedUniform()
 		{}
@@ -311,6 +313,115 @@ class CqParameterTypedUniform : public CqParameterTyped<T, SLT>
 		virtual	EqVariableClass	Class() const
 		{
 			return ( class_uniform );
+		}
+		virtual	EqVariableType	Type() const
+		{
+			return ( I );
+		}
+		virtual	void	SetSize( TqInt size )
+		{
+			m_aValues.resize( size );
+		}
+		virtual	TqUint	Size() const
+		{
+			return ( m_aValues.size() );
+		}
+		virtual	void	Clear()
+		{
+			m_aValues.clear();
+		}
+
+		virtual void	uSubdivide( CqParameter* pResult )
+		{}
+		virtual void	vSubdivide( CqParameter* pResult )
+		{}
+		virtual	void	BilinearDice( TqInt u, TqInt v, IqShaderData* pResult )
+		{
+			// Just promote the uniform value to varying by duplication.
+			assert( pResult->Type() == Type() );
+			assert( pResult->Class() == class_varying );
+			// Note it is assumed that the variable has been
+			// initialised to the correct size prior to calling.
+			// Also note that the only time a Uniform value is diced is when it is on a single element, i.e. the patchmesh
+			// has been split into isngle patches, or the polymesh has been split into polys.
+			TqInt i;
+			for ( i = 0; i < u*v; i++ )
+				pResult->SetValue( m_aValues[0], i );
+		}
+
+
+		// Overridden from CqParameterTyped<T>
+		virtual	const	T*	pValue() const
+		{
+			return ( &m_aValues[0] );
+		}
+		virtual	T*	pValue()
+		{
+			return ( &m_aValues[0] );
+		}
+		virtual	const	T*	pValue( const TqInt Index ) const
+		{
+			return ( &m_aValues[Index] );
+		}
+		virtual	T*	pValue( const TqInt Index )
+		{
+			return ( &m_aValues[Index] );
+		}
+
+
+		/** Assignment operator.
+		 */
+		CqParameterTypedUniform<T, I, SLT>& operator=( const CqParameterTypedUniform<T, I, SLT>& From )
+		{
+			m_aValues.resize( From.m_aValues.size() );
+			for ( TqUint j = 0; j < m_aValues.size(); j++ )
+			{
+				m_aValues[ j ] = From.m_aValues[ j ];
+			}
+			return ( *this );
+		}
+
+		/** Static constructor, to allow type free parameter construction.
+		 * \param strName Character pointer to new parameter name.
+		 * \param Count Integer array size.
+		 */
+		static	CqParameter*	Create( const char* strName, TqInt Count = 1 )
+		{
+			return ( new CqParameterTypedUniform<T, I, SLT>( strName, Count ) );
+		}
+	private:
+		std::vector<T>	m_aValues;		///< Vector of values, one per uniform index.
+}
+;
+
+
+//----------------------------------------------------------------------
+/** \class CqParameterTypedConstant
+ * Parameter with a constant type, templatised by value type and type id.
+ */
+
+template <class T, EqVariableType I, class SLT>
+class CqParameterTypedConstant : public CqParameterTyped<T, SLT>
+{
+	public:
+		CqParameterTypedConstant( const char* strName, TqInt Count = 1 ) :
+				CqParameterTyped<T, SLT>( strName, Count )
+		{}
+		CqParameterTypedConstant( const CqParameterTypedConstant<T, I, SLT>& From ) :
+				CqParameterTyped<T, SLT>( From )
+		{
+			m_Value = From.m_Value;
+		}
+		virtual	~CqParameterTypedConstant()
+		{}
+
+		virtual	CqParameter* Clone() const
+		{
+			return ( new CqParameterTypedConstant<T, I, SLT>( *this ) );
+		}
+		virtual	EqVariableClass	Class() const
+		{
+			return ( class_constant );
 		}
 		virtual	EqVariableType	Type() const
 		{
@@ -331,7 +442,7 @@ class CqParameterTypedUniform : public CqParameterTyped<T, SLT>
 		{}
 		virtual	void	BilinearDice( TqInt u, TqInt v, IqShaderData* pResult )
 		{
-			// Just promote the uniform value to varying by duplication.
+			// Just promote the constant value to varying by duplication.
 			assert( pResult->Type() == Type() );
 			assert( pResult->Class() == class_varying );
 			// Note it is assumed that the variable has been
@@ -363,7 +474,7 @@ class CqParameterTypedUniform : public CqParameterTyped<T, SLT>
 
 		/** Assignment operator.
 		 */
-		CqParameterTypedUniform<T, I, SLT>& operator=( const CqParameterTypedUniform<T, I, SLT>& From )
+		CqParameterTypedConstant<T, I, SLT>& operator=( const CqParameterTypedConstant<T, I, SLT>& From )
 		{
 			m_Value = From.m_Value;
 			return ( *this );
@@ -375,10 +486,10 @@ class CqParameterTypedUniform : public CqParameterTyped<T, SLT>
 		 */
 		static	CqParameter*	Create( const char* strName, TqInt Count = 1 )
 		{
-			return ( new CqParameterTypedUniform<T, I, SLT>( strName, Count ) );
+			return ( new CqParameterTypedConstant<T, I, SLT>( strName, Count ) );
 		}
 	private:
-		T	m_Value;	///< Single uniform value.
+		T	m_Value;	///< Single constant value.
 }
 ;
 
@@ -417,6 +528,46 @@ class CqParameterTypedVertex : public CqParameterTypedVarying<T, I, SLT>
 		static	CqParameter*	Create( const char* strName, TqInt Count = 1 )
 		{
 			return ( new CqParameterTypedVertex<T, I, SLT>( strName, Count ) );
+		}
+
+	private:
+};
+
+
+//----------------------------------------------------------------------
+/** \class CqParameterTypedFaceVarying
+ * Parameter with a vertex type, templatised by value type and type id.
+ */
+
+template <class T, EqVariableType I, class SLT>
+class CqParameterTypedFaceVarying : public CqParameterTypedVarying<T, I, SLT>
+{
+	public:
+		CqParameterTypedFaceVarying( const char* strName, TqInt Count ) :
+				CqParameterTypedVarying<T, I, SLT>( strName, Count )
+		{}
+		CqParameterTypedFaceVarying( const CqParameterTypedVertex<T, I, SLT>& From ) :
+				CqParameterTypedVarying<T, I, SLT>( From )
+		{}
+		virtual	~CqParameterTypedFaceVarying()
+		{}
+
+		virtual	CqParameter* Clone() const
+		{
+			return ( new CqParameterTypedFaceVarying<T, I, SLT>( *this ) );
+		}
+		virtual	EqVariableClass	Class() const
+		{
+			return ( class_facevarying );
+		}
+
+		/** Static constructor, to allow type free parameter construction.
+		 * \param strName Character pointer to new parameter name.
+		 * \param Count Integer array size.
+		 */
+		static	CqParameter*	Create( const char* strName, TqInt Count = 1 )
+		{
+			return ( new CqParameterTypedFaceVarying<T, I, SLT>( strName, Count ) );
 		}
 
 	private:
@@ -668,6 +819,110 @@ class CqParameterTypedUniformArray : public CqParameterTyped<T, SLT>
 }
 ;
 
+//----------------------------------------------------------------------
+/** \class CqParameterTypedConstantArray
+ * Parameter with a constant array type, templatised by value type and type id.
+ */
+
+template <class T, EqVariableType I, class SLT>
+class CqParameterTypedConstantArray : public CqParameterTyped<T, SLT>
+{
+	public:
+		CqParameterTypedConstantArray( const char* strName, TqInt Count = 1 ) :
+				CqParameterTyped<T, SLT>( strName, Count )
+		{
+			m_aValues.resize( Count );
+		}
+		CqParameterTypedConstantArray( const CqParameterTypedConstantArray<T, I, SLT>& From ) :
+				CqParameterTyped<T, SLT>( From )
+		{
+			m_aValues.resize( From.m_Count );
+			TqInt i;
+			for ( i = 0; i < From.m_Count; i++ )
+				m_aValues[ i ] = From.m_aValues[ i ];
+		}
+		virtual	~CqParameterTypedConstantArray()
+	{}
+
+		virtual	CqParameter* Clone() const
+		{
+			return ( new CqParameterTypedConstantArray<T, I, SLT>( *this ) );
+		}
+		virtual	EqVariableClass	Class() const
+		{
+			return ( class_constant );
+		}
+		virtual	EqVariableType	Type() const
+		{
+			return ( I );
+		}
+		virtual	void	SetSize( TqInt size )
+		{}
+		virtual	TqUint	Size() const
+		{
+			return ( 1 );
+		}
+		virtual	void	Clear()
+		{}
+
+		virtual void	uSubdivide( CqParameter* pResult )
+		{}
+		virtual void	vSubdivide( CqParameter* pResult )
+		{}
+		virtual	void	BilinearDice( TqInt u, TqInt v, IqShaderData* pResult )
+		{
+			// Just promote the constant value to varying by duplication.
+			assert( pResult->Type() == Type() );
+			assert( pResult->Class() == class_varying );
+			// Note it is assumed that the variable has been
+			// initialised to the correct size prior to calling.
+			TqInt i;
+			for ( i = 0; i < u*v; i++ )
+				pResult->SetValue( pValue( 0 ) [ 0 ], i );
+		}
+
+		// Overridden from CqParameterTyped<T>
+		virtual	const	T*	pValue() const
+		{
+			return ( &m_aValues[ 0 ] );
+		}
+		virtual	T*	pValue()
+		{
+			return ( &m_aValues[ 0 ] );
+		}
+		virtual	const	T*	pValue( const TqInt Index ) const
+		{
+			return ( &m_aValues[ Index ] );
+		}
+		virtual	T*	pValue( const TqInt Index )
+		{
+			return ( &m_aValues[ Index ] );
+		}
+
+		/** Assignment operator.
+		 */
+		CqParameterTypedConstantArray<T, I, SLT>& operator=( const CqParameterTypedUniformArray<T, I, SLT>& From )
+		{
+			m_aValues.resize( From.m_aValues.size() );
+			TqInt i2 = 0;
+			for ( std::vector<T>::iterator i = From.m_aValues.being(); i != From.m_aValues.end(); i++, i2++ )
+				m_aValues[ i2 ] = ( *i );
+			return ( *this );
+		}
+
+		/** Static constructor, to allow type free parameter construction.
+		 * \param strName Character pointer to new parameter name.
+		 * \param Count Integer array size.
+		 */
+		static	CqParameter*	Create( const char* strName, TqInt Count = 1 )
+		{
+			return ( new CqParameterTypedConstantArray<T, I, SLT>( strName, Count ) );
+		}
+	private:
+		std::vector<T>	m_aValues;	///< Array of uniform values.
+}
+;
+
 
 //----------------------------------------------------------------------
 /** \class CqParameterTypedVertexArray
@@ -703,6 +958,46 @@ class CqParameterTypedVertexArray : public CqParameterTypedVaryingArray<T, I, SL
 		static	CqParameter*	Create( const char* strName, TqInt Count = 1 )
 		{
 			return ( new CqParameterTypedVertexArray<T, I, SLT>( strName, Count ) );
+		}
+
+	private:
+};
+
+
+//----------------------------------------------------------------------
+/** \class CqParameterTypedFaceVaryingArray
+ * Parameter with a facevarying array type, templatised by value type and type id.
+ */
+
+template <class T, EqVariableType I, class SLT>
+class CqParameterTypedFaceVaryingArray : public CqParameterTypedVaryingArray<T, I, SLT>
+{
+	public:
+		CqParameterTypedFaceVaryingArray( const char* strName, TqInt Count ) :
+				CqParameterTypedVaryingArray<T, I, SLT>( strName, Count )
+		{}
+		CqParameterTypedFaceVaryingArray( const CqParameterTypedVertexArray<T, I, SLT>& From ) :
+				CqParameterTypedVaryingArray<T, I, SLT>( From )
+		{}
+		virtual	~CqParameterTypedFaceVaryingArray()
+		{}
+
+		virtual	CqParameter* Clone() const
+		{
+			return ( new CqParameterTypedFaceVaryingArray<T, I, SLT>( *this ) );
+		}
+		virtual	EqVariableClass	Class() const
+		{
+			return ( class_facevarying );
+		}
+
+		/** Static constructor, to allow type free parameter construction.
+		 * \param strName Character pointer to new parameter name.
+		 * \param Count Integer array size.
+		 */
+		static	CqParameter*	Create( const char* strName, TqInt Count = 1 )
+		{
+			return ( new CqParameterTypedFaceVaryingArray<T, I, SLT>( strName, Count ) );
 		}
 
 	private:
@@ -826,12 +1121,16 @@ void CqParameterTypedVaryingArray<T, I, SLT>::BilinearDice( TqInt u, TqInt v, Iq
 }
 
 
+_qShareM	extern CqParameter* ( *gVariableCreateFuncsConstant[] ) ( const char* strName, TqInt Count );
 _qShareM	extern CqParameter* ( *gVariableCreateFuncsUniform[] ) ( const char* strName, TqInt Count );
 _qShareM	extern CqParameter* ( *gVariableCreateFuncsVarying[] ) ( const char* strName, TqInt Count );
 _qShareM	extern CqParameter* ( *gVariableCreateFuncsVertex[] ) ( const char* strName, TqInt Count );
+_qShareM	extern CqParameter* ( *gVariableCreateFuncsFaceVarying[] ) ( const char* strName, TqInt Count );
+_qShareM	extern CqParameter* ( *gVariableCreateFuncsConstantArray[] ) ( const char* strName, TqInt Count );
 _qShareM	extern CqParameter* ( *gVariableCreateFuncsUniformArray[] ) ( const char* strName, TqInt Count );
 _qShareM	extern CqParameter* ( *gVariableCreateFuncsVaryingArray[] ) ( const char* strName, TqInt Count );
 _qShareM	extern CqParameter* ( *gVariableCreateFuncsVertexArray[] ) ( const char* strName, TqInt Count );
+_qShareM	extern CqParameter* ( *gVariableCreateFuncsFaceVaryingArray[] ) ( const char* strName, TqInt Count );
 
 //-----------------------------------------------------------------------
 

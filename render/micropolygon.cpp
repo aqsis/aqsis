@@ -121,6 +121,14 @@ void CqMicroPolyGrid::Initialise( TqInt cu, TqInt cv, CqSurface* pSurface )
 
 	m_pShaderExecEnv->Initialise( cu, cv, pSurface, pSurface->pAttributes()->pshadSurface(), lUses );
 
+	IqShader* pshadSurface = pSurface ->pAttributes() ->pshadSurface();
+	IqShader* pshadDisplacement = pSurface ->pAttributes() ->pshadDisplacement();
+	IqShader* pshadAtmosphere = pSurface ->pAttributes() ->pshadAtmosphere();
+
+	if( NULL != pshadSurface ) pshadSurface->Initialise( cu, cv, m_pShaderExecEnv );
+	if( NULL != pshadDisplacement ) pshadDisplacement->Initialise( cu, cv, m_pShaderExecEnv );
+	if( NULL != pshadAtmosphere ) pshadAtmosphere->Initialise( cu, cv, m_pShaderExecEnv );
+
 	// Initialise the local/public culled variable.
 	m_vfCulled = TqFalse;
 }
@@ -336,7 +344,6 @@ void CqMicroPolyGrid::Shade()
 	if ( pshadDisplacement != 0 )
 	{
 		theStats.DisplacementTimer().Start();
-		pshadDisplacement->Initialise( uGridRes(), vGridRes(), m_pShaderExecEnv );
 		pshadDisplacement->Evaluate( m_pShaderExecEnv );
 		theStats.DisplacementTimer().Stop();
 	}
@@ -368,7 +375,6 @@ void CqMicroPolyGrid::Shade()
 	theStats.SurfaceTimer().Start();
 	if( NULL != pshadSurface ) 
 	{
-		pshadSurface->Initialise( uGridRes(), vGridRes(), m_pShaderExecEnv );
 		pshadSurface->Evaluate( m_pShaderExecEnv );
 	}
 	theStats.SurfaceTimer().Stop();
@@ -400,7 +406,6 @@ void CqMicroPolyGrid::Shade()
 	if ( pshadAtmosphere != 0 )
 	{
 		theStats.AtmosphereTimer().Start();
-		pshadAtmosphere->Initialise( uGridRes(), vGridRes(), m_pShaderExecEnv );
 		pshadAtmosphere->Evaluate( m_pShaderExecEnv );
 		theStats.AtmosphereTimer().Stop();
 	}

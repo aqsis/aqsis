@@ -1,0 +1,71 @@
+Orientation "lh"
+Format 320 240 1
+PixelSamples 1 1
+ShadingRate 1.0
+Option "statistics" "endofframe" [1]
+Option "searchpath" "shader" ["../shaders:&"]
+
+FrameBegin 0
+#Display "userparams.tif" "file" "rgba"
+Display "userparams.tif" "framebuffer" "rgba"
+
+# Camera name: "Kamera01"
+Projection "perspective" "fov" [36.0]
+Rotate 180 0 1 0
+ConcatTransform [1.0 0.0 0.0 0  0.0 0.435544 -0.900167 0  0.0 0.900167 0.435544 0  0.955721 9.27594 -440.36 1]
+
+WorldBegin
+# Default-Surface
+Surface "matte"
+
+# Object "Punktlicht01"
+TransformBegin
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  204.187 -437.336 53.0255 1]
+Attribute "light" "shadows" ["off"]
+LightSource "pointlight" 2 "intensity" [150000]
+TransformEnd
+
+# Object "Punktlicht02"
+TransformBegin
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  -320.159 -429.109 -87.5622 1]
+Attribute "light" "shadows" ["off"]
+LightSource "pointlight" 3 "intensity" [100000]
+TransformEnd
+
+# Object "Punktlicht03"
+TransformBegin
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  121.927 4.77862 516.121 1]
+Attribute "light" "shadows" ["off"]
+LightSource "pointlight" 4 "intensity" [100000]
+TransformEnd
+
+# Object "Kugel"
+AttributeBegin
+Color 0.560784 0.878431 0.341176
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  0.0 0.0 0.0 1]
+Surface "showuser"
+Sphere 100.0 -100.0 100.0 360 
+	"uniform float myufloat" [1.0] 
+	"uniform integer myuinteger" [1] 
+	"uniform point myupoint" [1 1 1] 
+	"uniform vector myuvector" [2 2 2] 
+	"uniform normal myunormal" [1 0 0] 
+	"uniform string myustring" ["Hello World!"] 
+	"uniform matrix myumatrix" [ 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 ] 
+	"uniform color myucolor" [1 0 0] 
+	"uniform hpoint myuhpoint" [0 0 0 1] 
+
+	"uniform float myufloat" [1.0   1.0   1.0   1.0] 
+	"uniform integer myuinteger" [1   1   1   1] 
+	"varying point myvpoint" [ 0 0 0   0 1 0   0 1 1   0 0 1 ]
+	"varying vector myvvector" [ 0 0 0   0 1 0   0 1 1   0 0 1 ]
+	"varying normal myvnormal" [ 0 0 0   0 1 0   0 1 1   0 0 1 ]
+	"uniform string myustring" ["Hello World!"   "1"   "2"   "3"] 
+	"uniform matrix myumatrix" [ 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1   1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1   1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1   1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1] 
+	"varying color myvcolor" [0 0 0   1 0 0   0 1 0   0 0 1]
+	"uniform hpoint myuhpoint" [0 0 0 1   0 0 0 1   0 0 0 1   0 0 0 1] 
+	
+AttributeEnd
+WorldEnd
+FrameEnd
+

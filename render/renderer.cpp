@@ -738,16 +738,17 @@ SqParameterDeclaration CqRenderer::FindParameterDecl( const char* strDecl )
 	// First check if the declaration has embedded type information.
 	CqString strLocalDecl( strDecl );
 	TqInt i;
-	for ( i = 0; i < gcVariableStorageNames; i++ )
+	for ( i = 0; i < gcVariableClassNames; i++ )
 	{
-		if ( strLocalDecl.find( gVariableStorageNames[ i ] ) != CqString::npos )
+		if ( strLocalDecl.find( gVariableClassNames[ i ] ) != CqString::npos )
 		{
 			ILClass = static_cast< EqVariableClass > ( i );
 			break;
 		}
 	}
 
-	for ( i = 0; i < gcVariableTypeNames; i++ )
+	/// \note Go backwards through the type names to make sure hpoint is matched before point.
+	for ( i = gcVariableTypeNames-1; i >= 0; i-- )
 	{
 		if ( strLocalDecl.find( gVariableTypeNames[ i ] ) != CqString::npos )
 		{
@@ -788,6 +789,15 @@ SqParameterDeclaration CqRenderer::FindParameterDecl( const char* strDecl )
 		// Get the creation function.
 		switch ( ILClass )
 		{
+				case class_constant:
+				{
+					if ( bArray )
+						Decl.m_pCreate = gVariableCreateFuncsConstantArray[ ILType ];
+					else
+						Decl.m_pCreate = gVariableCreateFuncsConstant[ ILType ];
+				}
+				break;
+
 				case class_uniform:
 				{
 					if ( bArray )
@@ -812,6 +822,15 @@ SqParameterDeclaration CqRenderer::FindParameterDecl( const char* strDecl )
 						Decl.m_pCreate = gVariableCreateFuncsVertexArray[ ILType ];
 					else
 						Decl.m_pCreate = gVariableCreateFuncsVertex[ ILType ];
+				}
+				break;
+
+				case class_facevarying:
+				{
+					if ( bArray )
+						Decl.m_pCreate = gVariableCreateFuncsFaceVaryingArray[ ILType ];
+					else
+						Decl.m_pCreate = gVariableCreateFuncsFaceVarying[ ILType ];
 				}
 				break;
 		}

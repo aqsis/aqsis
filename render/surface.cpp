@@ -218,6 +218,11 @@ CqSurface& CqSurface::operator=( const CqSurface& From )
 	m_u = From.m_u;
 	m_v = From.m_v;
 
+	// Clone any user parameters.
+	std::vector<CqParameter*>::const_iterator iUP;
+	for( iUP = From.m_aUserParams.begin(); iUP != From.m_aUserParams.end(); iUP++ )
+		m_aUserParams.push_back( (*iUP)->Clone() );
+
 	return ( *this );
 }
 
@@ -326,9 +331,50 @@ CqMicroPolyGridBase* CqSurface::Dice()
 		pGrid->SetbGeometricNormals( TqTrue );
 	}
 
+	// Now we need to dice the user specified parameters as appropriate.
+	std::vector<CqParameter*>::iterator iUP;
+	for( iUP = m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++ )
+	{
+		/// \todo: Must transform point/vector/normal/matrix parameter variables from 'object' space to current before setting.
+		if( NULL != pGrid->pAttributes()->pshadSurface() )
+			pGrid->pAttributes()->pshadSurface()->SetArgument( (*iUP) );
+
+		if( NULL != pGrid->pAttributes()->pshadDisplacement() )
+			pGrid->pAttributes()->pshadDisplacement()->SetArgument( (*iUP) );
+
+		if( NULL != pGrid->pAttributes()->pshadAtmosphere() )
+			pGrid->pAttributes()->pshadAtmosphere()->SetArgument( (*iUP) );
+	}
+
 	return ( pGrid );
 }
 
+
+
+//---------------------------------------------------------------------
+/** uSubdivide any user defined parameter variables.
+ */
+
+void CqSurface::uSubdivideUserParameters( CqSurface* pTarget )
+{
+	// Iterate through any use parameters subdividing and storing the second value in the target surface.
+	std::vector<CqParameter*>::iterator iUP, iUPT;
+	for( iUP = m_aUserParams.begin(), iUPT = pTarget->m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++, iUPT++ )
+		(*iUP)->uSubdivide( (*iUPT ) );
+}
+
+
+//---------------------------------------------------------------------
+/** vSubdivide any user defined parameter variables.
+ */
+
+void CqSurface::vSubdivideUserParameters( CqSurface* pTarget )
+{
+	// Iterate through any use parameters subdividing and storing the second value in the target surface.
+	std::vector<CqParameter*>::iterator iUP, iUPT;
+	for( iUP = m_aUserParams.begin(), iUPT = pTarget->m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++, iUPT++ )
+		(*iUP)->vSubdivide( (*iUPT ) );
+}
 
 //---------------------------------------------------------------------
 

@@ -212,19 +212,30 @@ class CqSurfaceNURBS : public CqSurface
 		 */
 		virtual	TqUint cUniform() const
 		{
-			return ( 1 );
-		}	// NOTE: These are WRONG, see appnote #13
+			TqInt nuSegments = (1 + m_cuVerts - m_uOrder );
+			TqInt nvSegments = (1 + m_cvVerts - m_vOrder );
+			return ( nuSegments * nvSegments );
+		}
 		/** Get the number of varying variables for a NURBS surface.
 		 */
 		virtual	TqUint cVarying() const
 		{
-			return ( 4 );
+			TqInt nuSegments = (1 + m_cuVerts - m_uOrder );
+			TqInt nvSegments = (1 + m_cvVerts - m_vOrder );
+			return ( ( nuSegments + 1 ) * ( nvSegments + 1 ) );
 		}
 		/** Get the number of vertex variables for a NURBS surface.
 		 */
 		virtual	TqUint cVertex() const
 		{
 			return ( m_cuVerts * m_cvVerts );
+		}
+		/** Get the number of varying variables for a NURBS surface.
+		 */
+		virtual	TqUint cFaceVarying() const
+		{
+			/// \todo Must work out what this value should be.
+			return ( 1 );
 		}
 
 		virtual const TqBool bCanBeTrimmed() const
