@@ -113,9 +113,11 @@ void CqImagePixel::AllocateSamples( TqInt XSamples, TqInt YSamples )
 void CqImagePixel::InitialiseSamples( CqVector2D& vecPixel, TqBool fJitter )
 {
 	TqFloat subcell_width = 1.0f / ( m_XSamples * m_YSamples );
-	static CqRandom random( 53 );
 	TqInt m = m_XSamples;
 	TqInt n = m_YSamples;
+
+	// Initiliaze the random with a value based on the X,Y coordinate
+	CqRandom random(  vecPixel.Magnitude()  );
 
 	if ( !fJitter )
 	{
@@ -133,6 +135,8 @@ void CqImagePixel::InitialiseSamples( CqVector2D& vecPixel, TqBool fJitter )
 	}
 	else
 	{
+		
+
 		// Initialize points to the "canonical" multi-jittered pattern.
 		TqInt i, j;
 		for ( i = 0; i < n; i++ )
@@ -839,7 +843,9 @@ void CqBucket::ExposeBucket()
 
 void CqBucket::QuantizeBucket()
 {
-	static CqRandom random( 61 );
+	// Initiliaze the random with a value based on the X,Y coordinate
+        CqVector2D area(XOrigin(), YOrigin()); 
+	CqRandom random( area.Magnitude() );
 
 	if ( QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "DisplayMode" ) [ 0 ] & ModeRGB )
 	{
