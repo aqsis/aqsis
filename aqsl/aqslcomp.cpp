@@ -25,6 +25,7 @@
 */
 
 #include	"aqsis.h"
+#include	"logging_streambufs.h"
 
 #include	<iostream>
 #include	<fstream>
@@ -58,6 +59,8 @@ ArgParse::apstringvec g_defines; // Filled in with strings to pass to the prepro
 ArgParse::apstringvec g_includes; // Filled in with strings to pass to the preprocessor
 ArgParse::apstringvec g_undefines; // Filled in with strings to pass to the preprocessor
 
+bool g_cl_no_color = false;
+bool g_cl_syslog = false;
 
 void version( std::ostream& Stream )
 {
@@ -115,6 +118,22 @@ int main( int argc, const char** argv )
         std::cout << ap.usagemsg();
         exit( 0 );
     }
+
+#ifdef	AQSIS_SYSTEM_WIN32
+        std::auto_ptr<std::streambuf> ansi( new Aqsis::ansi_buf(std::cerr) );
+#endif
+        std::auto_ptr<std::streambuf> reset_level( new Aqsis::reset_level_buf(std::cerr) );
+        std::auto_ptr<std::streambuf> show_timestamps( new Aqsis::timestamp_buf(std::cerr) );
+        std::auto_ptr<std::streambuf> fold_duplicates( new Aqsis::fold_duplicates_buf(std::cerr) );
+        std::auto_ptr<std::streambuf> color_level;
+        if(!g_cl_no_color)
+		color_level.reset( new Aqsis::color_level_buf(std::cerr) );
+        std::auto_ptr<std::streambuf> show_level( new Aqsis::show_level_buf(std::cerr) );
+        std::auto_ptr<std::streambuf> filter_level( new Aqsis::filter_by_level_buf(Aqsis::DEBUG, std::cerr) );
+#ifdef	AQSIS_SYSTEM_POSIX
+        if( g_cl_syslog )
+            std::auto_ptr<std::streambuf> use_syslog( new Aqsis::syslog_buf(std::cerr) );
+#endif	// AQSIS_SYSTEM_POSIX
 
     // Pass the shader file through the slpp preprocessor first to generate a temporary file.
     if ( ap.leftovers().size() == 0 )     // If no files specified, take input from stdin.
