@@ -1,3 +1,168 @@
+2001-12-21 13:19  pgregory
+
+	* configure.in, render/version.h: Update version ready for release
+
+2001-12-20 12:50  pgregory
+
+	* Makefile.am, configure.in: Fixed ddmsock.ini generation for both
+	Linux and Cygwin
+
+2001-12-20 10:20  pgregory
+
+	* configure.in: Add STRNAME define to Posix build for filebuffer
+
+2001-12-19 18:04  pgregory
+
+	* Makefile.am, libaqsistypes/memorypool.h: Fix build on Posix
+
+2001-12-18 00:59  pgregory
+
+	* images/Image1.tif: New image
+
+2001-12-18 00:57  pgregory
+
+	* ribfiles/tmap_test.rib: Slight change to texture coordinates.
+
+2001-12-18 00:43  pgregory
+
+	* images/Image1.tif: Removed, to make binary and use new image,
+
+2001-12-18 00:33  pgregory
+
+	* images/Image1.tif: New image, last one got corrupted somehow.
+
+2001-12-13 16:43  pgregory
+
+	* ribber.cfg: Add gridsize to standard declares. - Michel Joron
+
+2001-12-13 16:42  pgregory
+
+	* render/: stats.cpp, stats.h: Add texture memery use statistic
+	output. - Michel Joron
+
+2001-12-13 16:42  pgregory
+
+	* render/: shaderexecenv.cpp, shaderexecenv.h, shadervm.cpp: Fix
+	backface culling - Michel Joron
+
+2001-12-13 16:41  pgregory
+
+	* render/ri.cpp, render/texturemap.cpp, render/texturemap.h,
+	teqser/teqser.cpp: Add support for clamping and filtering in
+	texture mapping - Michel Joron.
+
+2001-12-13 16:40  pgregory
+
+	* render/micropolygon.cpp: Fix the backface culling and geometric
+	normal calculation - Michel Joron
+
+2001-12-13 16:39  pgregory
+
+	* render/lights.cpp: Remove unnecesary assert - Michel Joron.
+
+2001-12-13 16:39  pgregory
+
+	* librib2/librib.cpp, render/nurbs.cpp, render/patch.cpp,
+	render/quadrics.cpp: Add support for gridsize option to control max
+	size of a MicroPolyGrid - Michel Joron
+
+2001-12-13 16:38  pgregory
+
+	* render/imagebuffer.cpp: Shade always, to allow displacement to
+	affect shadow maps.  Add memory flush optimisation on Windows.
+	
+	    - Michel Joron
+
+2001-12-13 16:37  pgregory
+
+	* framebuffer_glut_z/framebuffer_glut_z.cpp: Add a small sleep to
+	avoid clashes in output stats - Michel Joron
+
+2001-12-13 16:36  pgregory
+
+	* filebuffer/filebuffer.cpp: Save version of Aqsis in tiff file. -
+	Michel Joron
+
+2001-12-13 16:35  pgregory
+
+	* aqsl/aqsl_win.cpp: Add --help option - Michel Joron
+
+2001-12-05 08:12  pgregory
+
+	* render/: subdivision.cpp, subdivision.h: More minor
+	optimisations.
+
+2001-12-04 01:45  pgregory
+
+	* libaqsistypes/memorypool.h, render/micropolygon.cpp,
+	render/micropolygon.h, render/subdivision.cpp,
+	render/subdivision.h: Improve memory pool implementation.  Use
+	memory pool on subdivision edges.  Minor subdivision optimisations.
+
+2001-12-02 22:18  pgregory
+
+	* shaders/debug.sl: Remove extra rubbish.
+
+2001-12-02 22:18  pgregory
+
+	* ribfiles/env_test.rib: Get images from the correct directory.
+
+2001-12-02 22:14  pgregory
+
+	* render/renderer.h: Remove the old timer, no longer needed.
+
+2001-12-02 22:12  pgregory
+
+	* render/ri.cpp: Remove flush shaders call at RiWorldEnd, as shader
+	caches are cleaned up by the context handlers now.  Ensure that the
+	orientation is correctly set up after a call to RiIdentity.
+
+2001-12-02 22:04  pgregory
+
+	* ribfiles/softshadow.rib: Fix z framebuffer name.
+
+2001-12-02 22:02  pgregory
+
+	* render/subdivision.cpp: Fix erroneous round added in last
+	checkin.
+
+2001-12-02 22:01  pgregory
+
+	* ribfiles/tmap_test.rib: Fix location of image files for env. map.
+
+2001-12-02 22:01  pgregory
+
+	* libslparse/typecheck.cpp: Fix forced typecheck in relational
+	operator, added in error.
+
+2001-12-01 02:33  pgregory
+
+	* libslparse/typecheck.cpp: RelOp now checks its arguments types,
+	allowing functions in relops to be resolved properly.
+
+2001-11-30 17:30  pgregory
+
+	* render/: attributes.cpp, attributes.h: Fix bug in referencing
+	mechanism.
+
+2001-11-29 23:06  pgregory
+
+	* render/ri.cpp: Fix u/v parameterisation in NURBS
+
+2001-11-29 16:21  pgregory
+
+	* libslparse/funcdef.cpp: Fix the return type of rotate function to
+	be a point, not a float.
+
+2001-11-29 16:20  pgregory
+
+	* render/stats.h: Fix the timer to set the started flag correctly
+	when started and stopped.
+
+2001-11-28 16:49  pgregory
+
+	* ChangeLog: Ready for release
+
 2001-11-28 16:39  pgregory
 
 	* configure.in, render/version.h: Update version number
