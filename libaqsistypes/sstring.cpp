@@ -23,6 +23,8 @@
 		\author Paul C. Gregory (pgregory@aqsis.com)
 */
 
+#include	<stdio.h>
+
 #include	<stdarg.h>
 #include	<strstream>
 
