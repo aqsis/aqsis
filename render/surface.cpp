@@ -32,7 +32,7 @@
 
 START_NAMESPACE( Aqsis )
 
-TqFloat CqSurface::m_fGridSize = -1.0f;
+TqFloat CqSurface::m_fGridSize;
 
 //---------------------------------------------------------------------
 /** Default constructor

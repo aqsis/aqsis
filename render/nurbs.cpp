@@ -1559,7 +1559,7 @@ TqBool	CqSurfaceNURBS::Diceable()
 
         if (gs >= 1.0) gridsize = gs * gs;
 
-	TqFloat ShadingRate = pAttributes() ->GetFloatAttribute( "System", "ShadingRate" ) [ 0 ];
+	TqFloat ShadingRateSqrt = pAttributes() ->GetFloatAttribute( "System", "ShadingRateSqrt" ) [ 0 ];
 
 	const CqMatrix& matCtoR = QGetRenderContext() ->matSpaceToSpace( "camera", "raster", CqMatrix(), pTransform() ->matObjectToWorld() );
 	for ( i = 0; i < m_cuVerts*m_cvVerts; i++ )
@@ -1602,9 +1602,8 @@ TqBool	CqSurfaceNURBS::Diceable()
 		return ( TqFalse );
 	}
 
-	ShadingRate = static_cast<TqFloat>( sqrt( ShadingRate ) );
-	MaxuLen /= ShadingRate;
-	MaxvLen /= ShadingRate;
+	MaxuLen /= ShadingRateSqrt;
+	MaxvLen /= ShadingRateSqrt;
 	m_uDiceSize = static_cast<TqUint>( MAX( ROUND( MaxuLen ), 1 ) );
 	m_vDiceSize = static_cast<TqUint>( MAX( ROUND( MaxvLen ), 1 ) );
 
@@ -1667,9 +1666,8 @@ TqInt	CqSurfaceNURBS::TrimDecimation( const CqTrimCurve& Curve )
 		if ( Len > MaxLen ) MaxLen = Len;
 		cSegments++;
 	}
-	TqFloat ShadingRate = pAttributes() ->GetFloatAttribute( "System", "ShadingRate" ) [ 0 ];
-	ShadingRate = static_cast<TqFloat>( sqrt( ShadingRate ) );
-	MaxLen /= ShadingRate;
+	TqFloat ShadingRateSqrt = pAttributes() ->GetFloatAttribute( "System", "ShadingRateSqrt" ) [ 0 ];
+	MaxLen /= ShadingRateSqrt;
 
 	TqInt SplitCount = static_cast<TqUint>( MAX( MaxLen, 1 ) );
 

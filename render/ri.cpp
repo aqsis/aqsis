@@ -397,6 +397,7 @@ RtVoid	RiWorldBegin()
 	QGetRenderContext() ->optCurrent().InitialiseCamera();
 	QGetRenderContext() ->pImage() ->SetImage();
 
+	CqSurface::SqrtGridSize(-1.0f);
 	return ;
 }
 
@@ -1583,6 +1584,7 @@ RtVoid	RiExteriorV( const char *name, PARAMETERLIST )
 RtVoid	RiShadingRate( RtFloat size )
 {
 	QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite( "System", "ShadingRate" ) [ 0 ] = size;
+	QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite( "System", "ShadingRateSqrt" ) [ 0 ] = sqrt(size);
 	QGetRenderContext() ->AdvanceTime();
 
 	return ;
