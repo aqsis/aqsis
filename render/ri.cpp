@@ -2476,9 +2476,18 @@ RtVoid	RiPointsV( RtInt nvertices, PARAMETERLIST )
 
 		pSurface = new CqPoints( nvertices, pPointsClass );
 		pSurface->AddRef();
+//		CreateGPrim( pSurface );
+		// Transform the points into camera space for processing,
+		pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld() ),
+							 QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld() ),
+							 QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld() ) );
+
 		// Initialise the KDTree for the points to contain all.
 		pSurface->InitialiseKDTree();
-		CreateGPrim( pSurface );
+		pSurface->InitialiseMaxWidth();
+
+		QGetRenderContext() ->pImage() ->PostSurface( pSurface );
+		QGetRenderContext() ->Stats().IncGPrims();
 	
 		pPointsClass->Release();
 	}

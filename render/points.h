@@ -128,8 +128,6 @@ class CqPoints : public CqSurface, public CqMotionSpec<CqPolygonPoints*>
 
 		virtual	CqBound	Bound() const;
 		virtual	TqInt	Split( std::vector<CqBasicSurface*>& aSplits );
-		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime = 0 )
-		{}
 
 		CqPoints&	operator=( const CqPoints& From );
 
@@ -226,6 +224,7 @@ class CqPoints : public CqSurface, public CqMotionSpec<CqPolygonPoints*>
 
 		/// Initialise the KDTree to point to the whole points list.
 		void	InitialiseKDTree();
+		void CqPoints::InitialiseMaxWidth();
 
 		virtual void	NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData );
 
@@ -325,6 +324,113 @@ class CqMicroPolygonPoints : public CqMicroPolygon
 		CqMicroPolygonPoints( const CqMicroPolygonPoints& From )	{}
 
 		TqFloat	m_radius;
+}
+;
+
+//----------------------------------------------------------------------
+/** \class CqMovingMicroPolygonKey
+ * Base lass for static micropolygons. Stores point information about the geometry of the micropoly.
+ */
+
+class CqMovingMicroPolygonKeyPoints : public CqPoolable<CqMovingMicroPolygonKeyPoints, 512>
+{
+	public:
+		CqMovingMicroPolygonKeyPoints()
+		{}
+		CqMovingMicroPolygonKeyPoints( const CqVector3D& vA, TqFloat radius)
+		{
+			Initialise( vA, radius );
+		}
+		~CqMovingMicroPolygonKeyPoints()
+		{}
+
+	public:
+		TqBool	fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time = 0.0f ) const
+		{
+			if( (CqVector2D( m_Point0.x(), m_Point0.y() ) - vecP).Magnitude() < m_radius )
+			{
+				Depth = m_Point0.z();
+				return( TqTrue );
+			}
+			return( TqFalse );
+		}
+
+		CqBound	GetTotalBound() const
+		{
+			CqVector3D Pmin, Pmax; 
+			Pmin = Pmax = m_Point0;
+			Pmin.x( Pmin.x() - m_radius );
+			Pmin.y( Pmin.y() - m_radius );
+			Pmax.x( Pmax.x() + m_radius );
+			Pmax.y( Pmax.y() + m_radius );
+			return( CqBound( Pmin, Pmax ) );
+		}
+
+		void	Initialise( const CqVector3D& vA, TqFloat radius )
+		{
+			m_Point0 = vA;
+			m_radius = radius;
+		}
+
+		CqVector3D	m_Point0;
+		TqFloat		m_radius;
+}
+;
+
+
+//----------------------------------------------------------------------
+/** \class CqMicroPolygonMotion
+ * Class which stores a single moving micropolygon.
+ */
+
+class CqMicroPolygonMotionPoints : public CqMicroPolygon
+{
+	public:
+		CqMicroPolygonMotionPoints() : CqMicroPolygon(), m_BoundReady( TqFalse )
+		{ }
+		virtual	~CqMicroPolygonMotionPoints()
+		{
+			std::vector<CqMovingMicroPolygonKeyPoints*>::iterator	ikey;
+			for( ikey = m_Keys.begin(); ikey != m_Keys.end(); ikey++ )
+				delete( (*ikey) );
+		}
+
+	public:
+		void	AppendKey( const CqVector3D& vA, TqFloat radius, TqFloat time );
+		void	DeleteVariables( TqBool all )	{}
+
+		// Overrides from CqMicroPolygon
+		virtual TqBool	fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time = 0.0f ) const;
+		virtual	CqBound			GetTotalBound( TqBool fForce = TqFalse );
+		virtual const CqBound	GetTotalBound() const
+		{
+			return ( m_Bound );
+		}
+		virtual	TqInt			cSubBounds()
+		{
+			if ( !m_BoundReady )
+				BuildBoundList();
+			return ( m_BoundList.Size() );
+		}
+		virtual	CqBound			SubBound( TqInt iIndex, TqFloat& time )
+		{
+			if ( !m_BoundReady )
+				BuildBoundList();
+			assert( iIndex < m_BoundList.Size() );
+			time = m_BoundList.GetTime( iIndex );
+			return ( m_BoundList.GetBound( iIndex ) );
+		}
+		virtual void	BuildBoundList();
+
+		virtual	TqBool	Sample( const CqVector2D& vecSample, TqFloat& D, TqFloat time );
+	private:
+		CqBound	m_Bound;					///< Stored bound.
+		CqBoundList	m_BoundList;			///< List of bounds to get a tighter fit.
+		TqBool	m_BoundReady;				///< Flag indicating the boundary has been initialised.
+		std::vector<TqFloat> m_Times;
+		std::vector<CqMovingMicroPolygonKeyPoints*>	m_Keys;
+
+		CqMicroPolygonMotionPoints( const CqMicroPolygonMotionPoints& From ) {}
 }
 ;
 

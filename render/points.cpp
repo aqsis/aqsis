@@ -41,6 +41,9 @@
 
 START_NAMESPACE( Aqsis )
 
+DEFINE_STATIC_MEMORYPOOL( CqMovingMicroPolygonKeyPoints, 512 );
+
+
 #define NBR_SEGMENTS 6
 
 void CqPointsKDTreeData::SetpPoints( CqPoints* pPoints )
@@ -321,7 +324,7 @@ CqBound	CqPoints::Bound() const
 
 	// Expand the bound to take into account the width of the particles.
 	B.vecMax() += CqVector3D( m_MaxWidth, m_MaxWidth, m_MaxWidth );
-	B.vecMin() += CqVector3D( m_MaxWidth, m_MaxWidth, m_MaxWidth );
+	B.vecMin() -= CqVector3D( m_MaxWidth, m_MaxWidth, m_MaxWidth );
 
 	return ( AdjustBoundForTransformationMotion( B ) );
 }
@@ -369,6 +372,41 @@ void CqPoints::InitialiseKDTree()
 }
 
 
+void CqPoints::InitialiseMaxWidth()
+{
+	TqInt cu = nVertices();	// Only need cu, as we know cv is 1.
+
+	CqMatrix matObjectToCamera = QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pTransform()->matObjectToWorld() );
+	const CqParameterTypedConstant<TqFloat, type_float, TqFloat>* pConstantWidthParam = constantwidth( );
+
+	TqInt iu;
+	TqInt iTime, tTime = pTransform()->cTimes();
+
+	register TqInt i;
+	TqInt gsmin1;
+	gsmin1 = cu - 1;
+
+	CqVector3D Point0 = matObjectToCamera * CqVector3D(0,0,0);
+
+	TqFloat i_radius = pConstantWidthParam->pValue( 0 )[ 0 ];
+	for ( iu = 0; iu < cu; iu++ )
+	{
+		TqFloat radius;
+		// Find out if the "width" parameter was specified.
+		CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pWidthParam = width( 0 );
+
+		if( NULL != pWidthParam )
+			i_radius = pWidthParam->pValue( KDTree().aLeaves()[ iu ] )[ 0 ];
+
+		radius = i_radius;
+		// Get point in camera space.
+		CqVector3D Point1 = matObjectToCamera * CqVector3D(radius,0,0);
+		radius = (Point1-Point0).Magnitude();
+
+		m_MaxWidth = MAX(m_MaxWidth, radius );
+	}
+}
+
 void CqMicroPolyGridPoints::Split( CqImageBuffer* pImage, TqInt iBucket, long xmin, long xmax, long ymin, long ymax )
 {
 	if ( NULL == P() )
@@ -378,7 +416,7 @@ void CqMicroPolyGridPoints::Split( CqImageBuffer* pImage, TqInt iBucket, long xm
 
 	AddRef();
 
-	CqMatrix matCameraToWorld0 = QGetRenderContext() ->matSpaceToSpace( "camera", "world", CqMatrix(), pSurface()->pTransform()->matObjectToWorld() );
+	CqMatrix matCameraToObject0 = QGetRenderContext() ->matSpaceToSpace( "camera", "object", CqMatrix(), pSurface()->pTransform()->matObjectToWorld() );
 	CqMatrix matObjectToCamera = QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pSurface()->pTransform()->matObjectToWorld() );
 	CqMatrix matCameraToRaster = QGetRenderContext() ->matSpaceToSpace( "camera", "raster" );
 
@@ -420,22 +458,22 @@ void CqMicroPolyGridPoints::Split( CqImageBuffer* pImage, TqInt iBucket, long xm
 
 		for( iTime = 0; iTime < tTime; iTime++ )
 		{
-			CqMatrix matWorldToObjectT = QGetRenderContext() ->matSpaceToSpace( "world", "object", CqMatrix(), pSurface()->pTransform()->matObjectToWorld( pSurface()->pTransform()->Time( iTime ) ) );
-			amatObjectToCameraT[ iTime ] = QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pSurface()->pTransform()->matObjectToWorld( pSurface()->pTransform()->Time( iTime ) ) );
-			amatNObjectToCameraT[ iTime ] = QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pSurface()->pTransform()->matObjectToWorld( pSurface()->pTransform()->Time( iTime ) ) );
+			CqMatrix matCameraToObjectT = QGetRenderContext() ->matSpaceToSpace( "camera", "object", CqMatrix(), pSurface()->pTransform()->matObjectToWorld( pSurface()->pTransform()->Time( iTime ) ), pSurface()->pTransform()->Time( iTime ) );
+			amatObjectToCameraT[ iTime ] = QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pSurface()->pTransform()->matObjectToWorld( pSurface()->pTransform()->Time( iTime ) ),  pSurface()->pTransform()->Time( iTime ) );
+			amatNObjectToCameraT[ iTime ] = QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pSurface()->pTransform()->matObjectToWorld( pSurface()->pTransform()->Time( iTime ) ), pSurface()->pTransform()->Time( iTime ) );
 
 			aaPtimes[ iTime ].resize( gsmin1 + 1 );
 
 			for ( i = gsmin1; i >= 0; i-- )
 			{
 				// This makes sure all our points are in object space.
-				aaPtimes[ iTime ][ i ] = matWorldToObjectT * matCameraToWorld0 * pP[ i ];
+				aaPtimes[ iTime ][ i ] = matCameraToObject0 * pP[ i ];
 			}
 		}
 
 		for ( iu = 0; iu < cu; iu++ )
 		{
-			CqMicroPolygonMotion *pNew = new CqMicroPolygonMotion();
+			CqMicroPolygonMotionPoints *pNew = new CqMicroPolygonMotionPoints();
 			pNew->SetGrid( this );
 			pNew->SetIndex( iu );
 
@@ -452,7 +490,7 @@ void CqMicroPolyGridPoints::Split( CqImageBuffer* pImage, TqInt iBucket, long xm
 				radius = i_radius;
 				// Get point in camera space.
 				CqVector3D Point, pt, vecCamP;
-				Point = pt = vecCamP = amatObjectToCameraT[ 0 ] * aaPtimes[ iTime ][ iu ];
+				Point = pt = vecCamP = amatObjectToCameraT[ iTime ] * aaPtimes[ iTime ][ iu ];
 				// Ensure z is retained in camera space when we convert to raster.
 				TqFloat ztemp = Point.z();
 				Point = matCameraToRaster * Point;
@@ -481,12 +519,7 @@ void CqMicroPolyGridPoints::Split( CqImageBuffer* pImage, TqInt iBucket, long xm
 				TqFloat ras_radius = ( vecRasP2 - Point ).Magnitude();
 				radius = ras_radius * 0.5f;
 
-				CqVector3D p1( Point.x() - radius, Point.y() - radius, Point.z() );
-				CqVector3D p2( Point.x() + radius, Point.y() - radius, Point.z() );
-				CqVector3D p3( Point.x() + radius, Point.y() + radius, Point.z() );
-				CqVector3D p4( Point.x() - radius, Point.y() + radius, Point.z() );
-				
-				pNew->AppendKey( p1, p2, p3, p4, pSurface()->pTransform()->Time( iTime ) );
+				pNew->AppendKey( Point, radius, pSurface()->pTransform()->Time( iTime ) );
 			}
 			pNew->GetTotalBound( TqTrue );
 			pImage->AddMPG( pNew );
@@ -663,6 +696,158 @@ void CqMotionMicroPolyGridPoints::Split( CqImageBuffer* pImage, TqInt iBucket, l
 	}
 	//		delete( GetMotionObject( Time( iTime ) ) );
 }
+
+
+//---------------------------------------------------------------------
+/** Calculate the 2D boundary of this micropolygon,
+ * \param fForce Boolean flag to force the recalculation of the cached bound.
+ */
+
+CqBound CqMicroPolygonMotionPoints::GetTotalBound( TqBool fForce )
+{
+	if ( fForce )
+	{
+		assert( NULL != m_Keys[0] );
+
+		m_Bound = m_Keys[0]->GetTotalBound();
+		std::vector<CqMovingMicroPolygonKeyPoints*>::iterator i;
+		for ( i = m_Keys.begin(); i != m_Keys.end(); i++ )
+			m_Bound.Encapsulate( (*i)->GetTotalBound() );
+	}
+	return ( m_Bound );
+}
+
+//---------------------------------------------------------------------
+/** Calculate a list of 2D bounds for this micropolygon,
+ */
+void CqMicroPolygonMotionPoints::BuildBoundList()
+{
+	m_BoundList.Clear();
+	TqInt cBounds = 4;
+
+	assert( NULL != m_Keys[0] );
+
+	CqBound start = m_Keys[0]->GetTotalBound();
+	TqFloat	startTime = m_Times[ 0 ];
+	TqInt cTimes = m_Keys.size();
+	for ( TqInt i = 1; i < cTimes; i++ )
+	{
+		CqBound end = m_Keys[i]->GetTotalBound();
+		CqBound mid0( start );
+		CqBound mid1;
+		TqFloat endTime = m_Times[ i ];
+		TqFloat time = startTime;
+
+		TqInt d;
+		// arbitary number of divisions, should be related to screen size of blur
+		TqInt divisions = 4;
+		TqFloat delta = 1.0f / static_cast<TqFloat>( divisions );
+		m_BoundList.SetSize( divisions );
+		for ( d = 1; d <= divisions; d++ )
+		{
+			mid1.vecMin() = delta * ( end.vecMin() - start.vecMin() ) + start.vecMin();
+			mid1.vecMax() = delta * ( end.vecMax() - start.vecMax() ) + start.vecMax();
+			m_BoundList.Set( d-1, mid0.Combine( mid1 ), time );
+			time = delta * ( endTime - startTime ) + startTime;
+			mid0 = mid1;
+			delta += delta;
+		}
+		start = end;
+		startTime = endTime;
+	}
+	m_BoundReady = TqTrue;
+}
+
+
+//---------------------------------------------------------------------
+/** Sample the specified point against the MPG at the specified time.
+ * \param vecSample 2D vector to sample against.
+ * \param time Shutter time to sample at.
+ * \param D Storage for depth if valid hit.
+ * \return Boolean indicating smaple hit.
+ */
+
+TqBool CqMicroPolygonMotionPoints::Sample( const CqVector2D& vecSample, TqFloat& D, TqFloat time )
+{
+	return( fContains( vecSample, D, time ) );
+}
+
+
+//---------------------------------------------------------------------
+/** Store the vectors of the micropolygon at the specified shutter time.
+ * \param vA 3D Vector.
+ * \param vB 3D Vector.
+ * \param vC 3D Vector.
+ * \param vD 3D Vector.
+ * \param time Float shutter time that this MPG represents.
+ */
+
+void CqMicroPolygonMotionPoints::AppendKey( const CqVector3D& vA, TqFloat radius, TqFloat time )
+{
+//	assert( time >= m_Times.back() );
+
+	// Add a new planeset at the specified time.
+	CqMovingMicroPolygonKeyPoints* pMP = new CqMovingMicroPolygonKeyPoints( vA, radius );
+	m_Times.push_back( time );
+	m_Keys.push_back( pMP );
+	if ( m_Times.size() == 1 )
+		m_Bound = pMP->GetTotalBound();
+	else
+		m_Bound.Encapsulate( pMP->GetTotalBound() );
+}
+
+
+//---------------------------------------------------------------------
+/** Determinde whether the 2D point specified lies within this micropolygon.
+ * \param vecP 2D vector to test for containment.
+ * \param Depth Place to put the depth if valid intersection.
+ * \param time The frame time at which to check containment.
+ * \return Boolean indicating sample hit.
+ */
+
+TqBool CqMicroPolygonMotionPoints::fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const
+{
+	TqInt iIndex = 0;
+	TqFloat Fraction = 0.0f;
+	TqBool Exact = TqTrue;
+
+	if ( time > m_Times.front() )
+	{
+		if ( time >= m_Times.back() )
+			iIndex = m_Times.size() - 1;
+		else
+		{
+			// Find the appropriate time span.
+			iIndex = 0;
+			while ( time >= m_Times[ iIndex + 1 ] )
+				iIndex += 1;
+			Fraction = ( time - m_Times[ iIndex ] ) / ( m_Times[ iIndex + 1 ] - m_Times[ iIndex ] );
+			Exact = ( m_Times[ iIndex ] == time );
+		}
+	}
+
+	if( Exact )
+	{
+		CqMovingMicroPolygonKeyPoints* pMP1 = m_Keys[ iIndex ];
+		return( pMP1->fContains( vecP, Depth, time ) );
+	}
+	else
+	{
+		TqFloat F1 = 1.0f - Fraction;
+		CqMovingMicroPolygonKeyPoints* pMP1 = m_Keys[ iIndex ];
+		CqMovingMicroPolygonKeyPoints* pMP2 = m_Keys[ iIndex + 1 ];
+		// Check against each line of the quad, if outside any then point is outside MPG, therefore early exit.
+		CqVector3D MidPoint = ( ( pMP2->m_Point0 - pMP1->m_Point0 ) * Fraction ) + pMP1->m_Point0;
+		TqFloat MidRadius = ( ( pMP2->m_radius - pMP1->m_radius ) * Fraction ) + pMP1->m_radius;
+		if( (CqVector2D( MidPoint.x(), MidPoint.y() ) - vecP).Magnitude() < MidRadius )
+		{
+			Depth = MidPoint.z();
+			return( TqTrue );
+		}
+		return ( TqFalse );
+	}
+}
+
 
 
 END_NAMESPACE( Aqsis )
