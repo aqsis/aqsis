@@ -1072,6 +1072,14 @@ IqShader* CqRenderer::CreateShader( const char* strName, EqShaderType type )
 			const CqString *poptDSOPath = QGetRenderContext()->optCurrent().GetStringOption( "searchpath","dsolibs" );
 			pShader->SetDSOPath( poptDSOPath );
 			pShader->SetLogger( m_theLog );
+			
+			const TqInt* poptVerbose = QGetRenderContext() ->optCurrent().GetIntegerOption( "statistics", "verbose" );
+	 		CqString strRealName( SLXFile.strRealName() );
+			if ( poptVerbose )
+			{
+				QGetRenderContext() ->Logger() ->info( "Loading shader \"%s\" from file \"%s\"", strName, strRealName.c_str() );
+			}
+
 			pShader->SetstrName( strName );
 			pShader->LoadProgram( SLXFile );
 			RegisterShader( strName, type, pShader );
@@ -1081,12 +1089,9 @@ IqShader* CqRenderer::CreateShader( const char* strName, EqShaderType type )
 		{
 			if ( strcmp( strName, "null" ) != 0 )
 			{
-				CqString strError( "Shader \"" );
-				strError += strName ? strName : "";
-				strError += "\" not found";
 				//strError.Format("Shader \"%s\" not found",strName.String());
 				//CqBasicError( ErrorID_FileNotFound, Severity_Normal, strError.c_str() );
-				QGetRenderContext() ->Logger() ->error( strError );
+				QGetRenderContext() ->Logger() ->error( "Shader \"%s\" not found", strName ? strName : "" );
 			}
 			if( type == Type_Surface )
 			{

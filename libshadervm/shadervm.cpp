@@ -785,7 +785,7 @@ void CqShaderVM::GetToken( char* token, TqInt l, std::istream* pFile )
 
 
 //---------------------------------------------------------------------
-/** Load a program from a compiled slc file.
+/** Load a program from a compiled slx file.
 */
 
 void CqShaderVM::LoadProgram( std::istream* pFile )

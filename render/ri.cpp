@@ -538,7 +538,7 @@ RtVoid	RiWorldEnd()
 	QGetRenderContext() ->Stats().MakeParse().Stop();
 
 
-	const TqInt* poptVerbose = QGetRenderContext() ->optCurrent().GetIntegerOption( "statistics", "verbose" );
+	const TqInt* poptVerbose = QGetRenderContext() ->optCurrent().GetIntegerOption( "statistics", "renderinfo" );
 	if ( poptVerbose )
 	{
 		QGetRenderContext() -> Stats().PrintInfo();
@@ -4771,6 +4771,8 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
  RtVoid	RiReadArchiveV( RtToken name, RtArchiveCallback archcallback, PARAMETERLIST )
  {
 	 CqRiFile	fileArchive( name, "archive" );
+	 const TqInt* poptVerbose = QGetRenderContext() ->optCurrent().GetIntegerOption( "statistics", "verbose" );
+	 
 	 if ( fileArchive.IsValid() )
 	 {
 		 CqString strRealName( fileArchive.strRealName() );
@@ -4778,6 +4780,10 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 		 FILE *file;
 		 if ( ( file = fopen( strRealName.c_str(), "rb" ) ) != NULL )
 		 {
+			 if ( poptVerbose )
+			 {
+				QGetRenderContext() ->Logger() ->info( "RiReadArchive: Reading archive \"%s\"", strRealName.c_str() );
+			 }
 			 CqRIBParserState currstate = librib::GetParserState();
 			 if (currstate.m_pParseCallbackInterface == NULL) currstate.m_pParseCallbackInterface = new librib2ri::Engine;
 			 librib::Parse( file, name, *(currstate.m_pParseCallbackInterface), *(currstate.m_pParseErrorStream), archcallback );

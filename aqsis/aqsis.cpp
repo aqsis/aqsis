@@ -62,6 +62,7 @@ bool g_environment = 0;
 bool g_fb = 0;
 bool g_progress = 0;
 bool g_Progress = 0;
+bool g_rinfo = 0;
 TqInt verbose = 1;
 
 // Define strings used by argparse
@@ -281,6 +282,7 @@ int main( int argc, const char** argv )
 	ap.argFlag( "nostandard", "\adisables declaration of standard RenderMan parameter types", &g_nostandard );
 	ap.argFlag( "verbose", "\aoutpur more information during rendering", &g_verbose );
 	ap.alias( "verbose", "v" );
+	ap.argFlag( "renderinfo", "\aPrint out infos about base rendering settings", &g_rinfo );
 	ap.argFlag( "environment", "\aoutput environment information", &g_environment );
 	ap.argString( "type", "=string\aspecify a display device type to use", &g_type );
 	ap.argString( "addtype", "=string\aspecify a display device type to add", &g_addtype );
@@ -433,9 +435,14 @@ void RenderFile( FILE* file, const char* name )
 	if ( !g_nostandard )
 		librib::StandardDeclarations( *renderengine );
 
-	if ( g_verbose )
+	if ( g_rinfo )
 	{
-		RiOption( "statistics", "verbose", &verbose, RI_NULL );
+		RiOption( "statistics", "renderinfo", &g_rinfo, RI_NULL );
+	}
+
+	if( g_verbose )
+	{
+		RiOption( "statistics", "verbose", &g_rinfo, RI_NULL );
 	}
 
 	const char* popt[ 1 ];
