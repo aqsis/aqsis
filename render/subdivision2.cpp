@@ -129,8 +129,10 @@ void CqSubdivision2::Prepare(TqInt cVerts)
  */
 void CqSubdivision2::AddVertex(CqLath* pVertex, TqInt& iVIndex, TqInt& iFVIndex)
 {
-	iVIndex=0;
 	iFVIndex=0;
+
+	// If -1 is passed in as the 'vertex' class index, we must create a new value.
+	TqBool fNewVertex = iVIndex < 0;
 
 	std::vector<CqParameter*>::iterator iUP;
 	TqInt iTime;
@@ -140,17 +142,25 @@ void CqSubdivision2::AddVertex(CqLath* pVertex, TqInt& iVIndex, TqInt& iFVIndex)
 		for( iUP = pPoints( iTime )->aUserParams().begin(); iUP != pPoints( iTime )->aUserParams().end(); iUP++ )
 		{
 			TqInt iIndex = ( *iUP )->Size();
-			( *iUP )->SetSize( iIndex+1 );
 			// Store the index in the return variable based on its type.
 			if( ( *iUP )->Class() == class_vertex || ( *iUP )->Class() == class_varying )
 			{
-				assert( iVIndex==0 || iVIndex==iIndex );
-				iVIndex = iIndex;
+				if( fNewVertex )
+				{
+					assert( iVIndex<0 || iVIndex==iIndex );
+					iVIndex = iIndex;
+					( *iUP )->SetSize( iIndex+1 );
+					// Resize the vertex lath 
+					m_aapVertices.resize(iVIndex+1);
+				}
+				else
+					continue;
 			}
 			else if( ( *iUP )->Class() == class_facevarying )
 			{
 				assert( iFVIndex==0 || iFVIndex==iIndex );
 				iFVIndex = iIndex;
+				( *iUP )->SetSize( iIndex+1 );
 			}
 
 			switch ( ( *iUP )->Type() )
@@ -215,9 +225,6 @@ void CqSubdivision2::AddVertex(CqLath* pVertex, TqInt& iVIndex, TqInt& iFVIndex)
 
 		}
 	}
-
-	// Resize the vertex lath 
-	m_aapVertices.resize(iVIndex+1);
 }
 
 
@@ -231,8 +238,10 @@ void CqSubdivision2::AddVertex(CqLath* pVertex, TqInt& iVIndex, TqInt& iFVIndex)
  */
 void CqSubdivision2::AddEdgeVertex(CqLath* pVertex, TqInt& iVIndex, TqInt& iFVIndex )
 {
-	iVIndex=0;
 	iFVIndex=0;
+
+	// If -1 is passed in as the 'vertex' class index, we must create a new value.
+	TqBool fNewVertex = iVIndex < 0;
 
 	std::vector<CqParameter*>::iterator iUP;
 	TqInt iTime;
@@ -242,17 +251,25 @@ void CqSubdivision2::AddEdgeVertex(CqLath* pVertex, TqInt& iVIndex, TqInt& iFVIn
 		for ( iUP = pPoints( iTime )->aUserParams().begin(); iUP != pPoints( iTime )->aUserParams().end(); iUP++ )
 		{
 			TqInt iIndex = ( *iUP )->Size();
-			( *iUP )->SetSize( iIndex+1 );
 			// Store the index in the return variable based on its type.
 			if( ( *iUP )->Class() == class_vertex || ( *iUP )->Class() == class_varying )
 			{
-				assert( iVIndex==0 || iVIndex==iIndex );
-				iVIndex = iIndex;
+				if( fNewVertex )
+				{
+					assert( iVIndex<0 || iVIndex==iIndex );
+					iVIndex=iIndex;
+					( *iUP )->SetSize( iIndex+1 );
+					// Resize the vertex lath 
+					m_aapVertices.resize(iVIndex+1);
+				}
+				else
+					continue;
 			}
 			else if( ( *iUP )->Class() == class_facevarying )
 			{
 				assert( iFVIndex==0 || iFVIndex==iIndex );
 				iFVIndex = iIndex;
+				( *iUP )->SetSize( iIndex+1 );
 			}
 
 			switch ( ( *iUP )->Type() )
@@ -317,9 +334,6 @@ void CqSubdivision2::AddEdgeVertex(CqLath* pVertex, TqInt& iVIndex, TqInt& iFVIn
 
 		}
 	}
-
-	// Resize the vertex lath 
-	m_aapVertices.resize(iVIndex+1);
 }
 
 
@@ -624,7 +638,7 @@ void CqSubdivision2::SubdivideFace(CqLath* pFace, std::vector<CqLath*>& apSubFac
 	TqInt i;
 
 	// Create new point for the face midpoint.
-	TqInt iVert, iFVert=-1;
+	TqInt iVert=-1, iFVert=-1;
 	AddFaceVertex(pFace, iVert, iFVert);
 
 	// Store the index, for later lath creation
@@ -634,17 +648,13 @@ void CqSubdivision2::SubdivideFace(CqLath* pFace, std::vector<CqLath*>& apSubFac
 	// Create new points for the edge midpoints.
 	for(i = 0; i < n; i++)
 	{
-		TqInt iVert, iFVert=-2;
+		TqInt iVert=-1, iFVert=-2;
 		// Create new vertices for the edge mid points.
 		if( NULL != aQfv[i]->ec() && NULL != aQfv[i]->ec()->pMidVertex() )
-		{
-			// There is already a next level vertex for this, so just setup a lath to it.
+			// There is already a next level vertex for this, so reuse the 'vertex' class index.
 			iVert = aQfv[i]->ec()->pMidVertex()->VertexIndex();
-			iFVert = aQfv[i]->ec()->pMidVertex()->FaceVertexIndex();
-		}
-		else
-			// Create new vertex for the edge midpoint.
-			AddEdgeVertex(aQfv[i], iVert, iFVert);
+		// Create new vertex for the edge midpoint.
+		AddEdgeVertex(aQfv[i], iVert, iFVert);
 
 		// Store the index, for later lath creation
 		aVertices[i+n] = iVert;
@@ -654,17 +664,14 @@ void CqSubdivision2::SubdivideFace(CqLath* pFace, std::vector<CqLath*>& apSubFac
 	// Create new points for the existing vertices
 	for(i = 0; i < n; i++)
 	{
-		TqInt iVert, iFVert=-3;
+		TqInt iVert=-1, iFVert=-3;
 		// Create new vertices for the original points.
-		if( NULL == aQfv[i]->pChildVertex() )
-			// Create a new vertex for the next level
-			AddVertex(aQfv[i], iVert, iFVert);
-		else
-		{
-			// There is already a next level vertex for this, so just setup a lath to it.
+		if( NULL != aQfv[i]->pChildVertex() )
+			// There is already a next level vertex for this, so reuse the 'vertex' class index.
 			iVert = aQfv[i]->pChildVertex()->VertexIndex();
-			iFVert = aQfv[i]->pChildVertex()->FaceVertexIndex();
-		}
+
+		// Create a new vertex for the next level
+		AddVertex(aQfv[i], iVert, iFVert);
 
 		// Store the index, for later lath creation
 		aVertices[i] = iVert;
@@ -963,9 +970,10 @@ CqMicroPolyGridBase* CqSurfaceSubdivisionPatch::Dice()
 
 		// Get data from pLath
 		TqInt ivA = pLath->VertexIndex();
+		TqInt iFVA = pLath->FaceVertexIndex();
 		TqInt indexA = 0;
 		
-		StoreDice( pGrid, pMotionPoints, ivA, indexA );
+		StoreDice( pGrid, pMotionPoints, ivA, iFVA, indexA );
 
 		indexA++;		
 		pLath = pLath->ccf();
@@ -973,7 +981,7 @@ CqMicroPolyGridBase* CqSurfaceSubdivisionPatch::Dice()
 		while( c < nc )
 		{
 			TqInt ivA = pLath->VertexIndex();
-			StoreDice( pGrid, pMotionPoints, ivA, indexA );
+			StoreDice( pGrid, pMotionPoints, ivA, iFVA, indexA );
 
 			if( c < ( nc - 1 ) )	
 				pLath = pLath->cv()->ccf();
@@ -992,7 +1000,7 @@ CqMicroPolyGridBase* CqSurfaceSubdivisionPatch::Dice()
 			// Get data from pLath
 			TqInt ivA = pLath->VertexIndex();
 			TqInt indexA = ( r * ( nc + 1 ) );
-			StoreDice( pGrid, pMotionPoints, ivA, indexA );
+			StoreDice( pGrid, pMotionPoints, ivA, iFVA, indexA );
 
 			indexA++;		
 			pLath = pLath->cf();
@@ -1000,7 +1008,7 @@ CqMicroPolyGridBase* CqSurfaceSubdivisionPatch::Dice()
 			while( c < nc )
 			{
 				TqInt ivA = pLath->VertexIndex();
-				StoreDice( pGrid, pMotionPoints, ivA, indexA );
+				StoreDice( pGrid, pMotionPoints, ivA, iFVA, indexA );
 
 				if( c < ( nc - 1 ) )	
 					pLath = pLath->ccv()->cf();
@@ -1157,7 +1165,7 @@ static void StoreDiceAPVar( IqShader* pShader, CqParameter* pParam, TqUint ivA, 
 }
 
 
-void CqSurfaceSubdivisionPatch::StoreDice( CqMicroPolyGrid* pGrid, CqPolygonPoints* pPoints, TqInt iParam, TqInt iData )
+void CqSurfaceSubdivisionPatch::StoreDice( CqMicroPolyGrid* pGrid, CqPolygonPoints* pPoints, TqInt iParam, TqInt iFVParam, TqInt iData)
 {
 	TqInt lUses = Uses();
 	
@@ -1177,7 +1185,12 @@ void CqSurfaceSubdivisionPatch::StoreDice( CqMicroPolyGrid* pGrid, CqPolygonPoin
 	}
 
 	if ( USES( lUses, EnvVars_Cs ) && ( NULL != pGrid->Cs() ) && ( pPoints->bHasCs() ) )
-		pGrid->Cs() ->SetColor( pPoints->Cs()->pValue(iParam)[0], iData );
+	{
+		if( pPoints->Cs()->Class() == class_varying || pPoints->Cs()->Class() == class_vertex )
+			pGrid->Cs() ->SetColor( pPoints->Cs()->pValue(iParam)[0], iData );
+		else if( pPoints->Cs()->Class() == class_facevarying )
+			pGrid->Cs() ->SetColor( pPoints->Cs()->pValue(iFVParam)[0], iData );
+	}
 
 	if ( USES( lUses, EnvVars_Os ) && ( NULL != pGrid->Os() ) && ( pPoints->bHasOs() ) )
 		pGrid->Os() ->SetColor( pPoints->Os()->pValue(iParam)[0], iData );
@@ -1212,38 +1225,55 @@ TqInt CqSurfaceSubdivisionPatch::Split( std::vector<CqBasicSurface*>& aSplits )
 		CqLath* pRow = pPoint;
 
 		std::vector<TqInt>	aiVertices;
+		std::vector<TqInt>	aiFVertices;
 
 		aiVertices.push_back( pPoint->VertexIndex() );
+		aiFVertices.push_back( pPoint->FaceVertexIndex() );
 		pPoint = pPoint->ccf();
 		aiVertices.push_back( pPoint->VertexIndex() );
+		aiFVertices.push_back( pPoint->FaceVertexIndex() );
 		pPoint = pPoint->cv()->ccf();
 		aiVertices.push_back( pPoint->VertexIndex() );
+		aiFVertices.push_back( pPoint->FaceVertexIndex() );
 		pPoint = pPoint->cv()->ccf();
 		aiVertices.push_back( pPoint->VertexIndex() );
+		aiFVertices.push_back( pPoint->FaceVertexIndex() );
 		pRow = pPoint = pRow->cf();
 		aiVertices.push_back( pPoint->VertexIndex() );
+		aiFVertices.push_back( pPoint->FaceVertexIndex() );
 		pPoint = pPoint->cf();
 		aiVertices.push_back( pPoint->VertexIndex() );
+		aiFVertices.push_back( pPoint->FaceVertexIndex() );
 		pPoint = pPoint->ccv()->cf();
 		aiVertices.push_back( pPoint->VertexIndex() );
+		aiFVertices.push_back( pPoint->FaceVertexIndex() );
 		pPoint = pPoint->ccv()->cf();
 		aiVertices.push_back( pPoint->VertexIndex() );
+		aiFVertices.push_back( pPoint->FaceVertexIndex() );
 		pRow = pPoint = pRow->ccv()->cf();
 		aiVertices.push_back( pPoint->VertexIndex() );
+		aiFVertices.push_back( pPoint->FaceVertexIndex() );
 		pPoint = pPoint->cf();
 		aiVertices.push_back( pPoint->VertexIndex() );
+		aiFVertices.push_back( pPoint->FaceVertexIndex() );
 		pPoint = pPoint->ccv()->cf();
 		aiVertices.push_back( pPoint->VertexIndex() );
+		aiFVertices.push_back( pPoint->FaceVertexIndex() );
 		pPoint = pPoint->ccv()->cf();
 		aiVertices.push_back( pPoint->VertexIndex() );
+		aiFVertices.push_back( pPoint->FaceVertexIndex() );
 		pPoint = pRow->ccv()->cf();
 		aiVertices.push_back( pPoint->VertexIndex() );
+		aiFVertices.push_back( pPoint->FaceVertexIndex() );
 		pPoint = pPoint->cf();
 		aiVertices.push_back( pPoint->VertexIndex() );
+		aiFVertices.push_back( pPoint->FaceVertexIndex() );
 		pPoint = pPoint->ccv()->cf();
 		aiVertices.push_back( pPoint->VertexIndex() );
+		aiFVertices.push_back( pPoint->FaceVertexIndex() );
 		pPoint = pPoint->ccv()->cf();
 		aiVertices.push_back( pPoint->VertexIndex() );
+		aiFVertices.push_back( pPoint->FaceVertexIndex() );
 
 		std::vector< CqSurfacePatchBicubic* > apSurfaces;
 
@@ -1280,6 +1310,16 @@ TqInt CqSurfaceSubdivisionPatch::Split( std::vector<CqBasicSurface*>& aSplits )
 					TqUint i;
 					for( i = 0; i < pSurface->cVertex(); i++ )
 						pNewUP->SetValue( ( *iUP ), i, aiVertices[i] );
+					pSurface->AddPrimitiveVariable( pNewUP );
+				}
+				else if ( ( *iUP ) ->Class() == class_facevarying )
+				{
+					// Copy any 'facevarying' class primitive variables.
+					CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
+					pNewUP->SetSize( pSurface->cVertex() );
+					TqUint i;
+					for( i = 0; i < pSurface->cVertex(); i++ )
+						pNewUP->SetValue( ( *iUP ), i, aiFVertices[i] );
 					pSurface->AddPrimitiveVariable( pNewUP );
 				}
 				else if ( ( *iUP ) ->Class() == class_uniform )

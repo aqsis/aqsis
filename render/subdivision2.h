@@ -131,7 +131,7 @@ public:
 					TypeA R = TypeA(0.0f);
 					TqInt n;
 					
-					if(pParam->Class() == class_vertex || pParam->Class() == class_facevarying)
+					if(pParam->Class() == class_vertex /*|| pParam->Class() == class_facevarying*/)
 					{
 						// Get a pointer to the appropriate index accessor function on CqLath based on class.
 						TqInt (CqLath::*IndexFunction)() const;
@@ -308,7 +308,15 @@ public:
 					}
 					else
 					{
-						pParam->pValue( iIndex )[0] = pParam->pValue( pVertex->VertexIndex() )[0];
+						// Get a pointer to the appropriate index accessor function on CqLath based on class.
+						TqInt (CqLath::*IndexFunction)() const;
+						if( pParam->Class() == class_vertex )
+							IndexFunction = &CqLath::VertexIndex;
+						else
+							IndexFunction = &CqLath::FaceVertexIndex;
+
+						TypeA A = pParam->pValue( (pVertex->*IndexFunction)() )[0];
+						pParam->pValue( iIndex )[0] = A;
 					}
 				}
 	void		AddEdgeVertex(CqLath* pEdge, TqInt& iVIndex, TqInt& iFVIndex);
@@ -319,7 +327,7 @@ public:
 					TypeA B = TypeA(0.0f);
 					TypeA C = TypeA(0.0f);
 
-					if(pParam->Class() == class_vertex || pParam->Class() == class_facevarying)
+					if(pParam->Class() == class_vertex /*|| pParam->Class() == class_facevarying*/)
 					{
 						// Get a pointer to the appropriate index accessor function on CqLath based on class.
 						TqInt (CqLath::*IndexFunction)() const;
@@ -364,8 +372,15 @@ public:
 					}
 					else
 					{
-						A = pParam->pValue( pEdge->VertexIndex() )[0];
-						B = pParam->pValue( pEdge->ccf()->VertexIndex() )[0];
+						// Get a pointer to the appropriate index accessor function on CqLath based on class.
+						TqInt (CqLath::*IndexFunction)() const;
+						if( pParam->Class() == class_varying )
+							IndexFunction = &CqLath::VertexIndex;
+						else
+							IndexFunction = &CqLath::FaceVertexIndex;
+
+						A = pParam->pValue( (pEdge->*IndexFunction)() )[0];
+						B = pParam->pValue( (pEdge->ccf()->*IndexFunction)() )[0];
 						A = static_cast<TypeA>( (A+B)/2.0f );
 					}
 					pParam->pValue( iIndex )[0] = A;
@@ -521,7 +536,7 @@ class CqSurfaceSubdivisionPatch : public CqBasicSurface
 			return( TqFalse );
 		}
 
-		void StoreDice( CqMicroPolyGrid* pGrid, CqPolygonPoints* pPoints, TqInt iParam, TqInt iData );
+		void StoreDice( CqMicroPolyGrid* pGrid, CqPolygonPoints* pPoints, TqInt iParam, TqInt iFVParam, TqInt iVData);
 
 	private:
 		CqSubdivision2*	m_pTopology;
