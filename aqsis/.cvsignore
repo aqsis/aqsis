@@ -5,4 +5,5 @@ Makefile
 *.tif
 *.map
 *.z
-
+.#*
+*.plg
