@@ -304,6 +304,11 @@ CqFuncDef	gStandardFuncs[] = {
 
                                  CqFuncDef( Type_String, "shadername", "shadername2", "s" ),
                                  CqFuncDef( Type_String, "shadername", "shadername", "" ),
+                                 CqFuncDef( Type_Void, "bake", "bake_f", "sfff" ),
+                                 CqFuncDef( Type_Void, "bake", "bake_3c", "sffc" ),
+                                 CqFuncDef( Type_Void, "bake", "bake_3p", "sffp" ),
+                                 CqFuncDef( Type_Void, "bake", "bake_3v", "sffv" ),
+                                 CqFuncDef( Type_Void, "bake", "bake_3n", "sffn" ),
                              };
 
 TqUint	gcStandardFuncs = sizeof( gStandardFuncs ) / sizeof( gStandardFuncs[ 0 ] );

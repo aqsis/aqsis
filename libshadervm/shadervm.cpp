@@ -411,6 +411,11 @@ SqOpCodeTrans CqShaderVM::m_TransTable[] =
 
         {"shadername", 0, &CqShaderVM::SO_shadername, 0, 0},
         {"shadername2", 0, &CqShaderVM::SO_shadername2, 0, 0},
+        {"bake_f", 0, &CqShaderVM::SO_bake_f, 0, 0},
+        {"bake_3c", 0, &CqShaderVM::SO_bake_3c, 0, 0},
+        {"bake_3n", 0, &CqShaderVM::SO_bake_3n, 0, 0},
+        {"bake_3v", 0, &CqShaderVM::SO_bake_3v, 0, 0},
+        {"bake_3p", 0, &CqShaderVM::SO_bake_3p, 0, 0},
 
     };
 

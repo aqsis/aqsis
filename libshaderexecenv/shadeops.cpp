@@ -24,6 +24,9 @@
 */
 
 #include	<math.h>
+#include <map>
+#include <vector>
+#include <string>
 
 #include	"aqsis.h"
 #include	"shaderexecenv.h"
@@ -3632,78 +3635,36 @@ STD_SOIMPL CqShaderExecEnv::SO_option( STRINGVAL name, IqShaderData* pV, DEFPARA
 				Ret = 1.0f;
 			}
 		}
-	}
-	/*	else
+	} else
+        {
+                CqString strName = STRING( name ).c_str();
+		int iColon = strName.find_first_of( ':' );
+		if ( iColon >= 0 )
 		{
-			int iColon = STRING( name ).find_first_of( ':' );
-			if ( iColon >= 0 )
-			{
-				CqString strParam = STRING( name ).substr( iColon + 1, STRING( name ).size() - iColon - 1 );
-				STRING( name ) = STRING( name ).substr( 0, iColon );
-				const CqParameter* pParam = QGetRenderContext() ->optCurrent().pParameter( STRING( name ).c_str(), strParam.c_str() );
-				if ( pParam != 0 )
-				{
-					// Should only be able to query uniform parameters here, varying ones should be handled
-					// by passing as shader paramters.
-					// Types must match, although storage doesn't have to
-					if ( pParam->Class() == class_uniform &&
-					     pParam->Type() == pV->Type() )
-					{
-						switch ( pParam->Type() )
-						{
-								case type_integer:
-								{
-									pV->SetFloat( static_cast<TqFloat>( *( static_cast<const CqParameterTyped<TqInt>*>( pParam ) ->pValue() ) ) );
-									break;
-								}
-	 
-								case type_float:
-								{
-									pV->SetFloat( *static_cast<const CqParameterTyped<TqFloat>*>( pParam ) ->pValue() );
-									break;
-								}
-	 
-								case type_string:
-								{
-									pV->SetString( *static_cast<const CqParameterTyped<CqString>*>( pParam ) ->pValue() );
-									break;
-								}
-	 
-								case type_point:
-								{
-									pV->SetPoint( *static_cast<const CqParameterTyped<CqVector3D>*>( pParam ) ->pValue() );
-									break;
-								}
-	 
-								case type_vector:
-								{
-									pV->SetVector( *static_cast<const CqParameterTyped<CqVector3D>*>( pParam ) ->pValue() );
-									break;
-								}
-	 
-								case type_normal:
-								{
-									pV->SetNormal( *static_cast<const CqParameterTyped<CqVector3D>*>( pParam ) ->pValue() );
-									break;
-								}
-	 
-								case type_color:
-								{
-									pV->SetColor( *static_cast<const CqParameterTyped<CqColor>*>( pParam ) ->pValue() );
-									break;
-								}
-	 
-								case type_matrix:
-								{
-									pV->SetMatrix( *static_cast<const CqParameterTyped<CqMatrix>*>( pParam ) ->pValue() );
-									break;
-								}
-						}
-						Ret = 1.0f;
-					}
-				}
-			}
-		}*/
+			CqString strParam = strName.substr( iColon + 1, strName.size() - iColon - 1 );
+			strName = strName.substr( 0, iColon );
+			//const CqParameter* pParam = m_pAttributes ->pParameter( strName.c_str(), strParam.c_str() );
+
+			Ret = 1.0f;
+			
+			if ( NULL != QGetRenderContextI() ->GetStringOption( strName.c_str(), strParam.c_str() ) )
+				pV->SetString( QGetRenderContextI() ->GetStringOption( strName.c_str(), strParam.c_str() ) [ 0 ] );
+                        else if ( NULL != QGetRenderContextI() ->GetIntegerOption( strName.c_str(), strParam.c_str() ) )
+				pV->SetFloat( QGetRenderContextI() ->GetIntegerOption( strName.c_str(), strParam.c_str() ) [ 0 ] );
+			
+			else if ( NULL != QGetRenderContextI() ->GetPointOption( strName.c_str(), strParam.c_str() ) )
+				pV->SetPoint( QGetRenderContextI() ->GetPointOption( strName.c_str(), strParam.c_str() ) [ 0 ] );
+			
+			else if ( NULL != QGetRenderContextI() ->GetColorOption( strName.c_str(), strParam.c_str() ) )
+				pV->SetColor( QGetRenderContextI() ->GetColorOption( strName.c_str(), strParam.c_str() ) [ 0 ] );
+                        else if ( NULL != QGetRenderContextI() ->GetFloatOption( strName.c_str(), strParam.c_str() ) )
+				pV->SetFloat( QGetRenderContextI() ->GetFloatOption( strName.c_str(), strParam.c_str() ) [ 0 ] );
+			/* did not deal with Vector, Normal and Matrix yet */
+			else
+				Ret = 0.0f;
+		}
+	}
+
 	Result->SetValue( Ret, 0 );
 	END_UNIFORM_SECTION
 }
@@ -3889,9 +3850,20 @@ STD_SOIMPL	CqShaderExecEnv::SO_match( STRINGVAL a, STRINGVAL b, DEFPARAMIMPL )
 	// TODO: Do this properly.
 	INIT_SO
 
-	BEGIN_VARYING_SECTION
-	SETFLOAT( Result, 0.0f );
-	END_VARYING_SECTION
+	BEGIN_UNIFORM_SECTION
+        float r = 0.0f;
+	GETSTRING( a );
+	GETSTRING( b );
+        if (STRING( a ).size() == 0) r = 0.0f;
+        else if (STRING( b ).size() == 0) r = 0.0f;
+        else {
+            // MJO> Only check the occurrence of string b in string a 
+            // It doesn't support the regular expression yet
+            r = (float) (strstr(STRING( b ).c_str(), STRING( a ).c_str()) != 0);
+       }
+        
+	SETFLOAT( Result,  r);
+        END_UNIFORM_SECTION
 }
 
 
@@ -4905,6 +4877,242 @@ STD_SOIMPL CqShaderExecEnv::SO_textureinfo( STRINGVAL name, STRINGVAL dataname, 
 	END_UNIFORM_SECTION
 }
 
+// SIGGRAPH 2002; Larry G. Bake functions
+
+const int batchsize = 1; // elements to buffer before writing
+// Make sure we're thread-safe on those file writes
+
+class BakingChannel {
+// A "BakingChannel" is the buffer for a single baking output file.
+// We buffer up samples until "batchsize" has been accepted, then
+// write them all at once. This keeps us from constantly accessing
+// the disk. Note that we are careful to use a mutex to keep
+// simultaneous multithreaded writes from clobbering each other.
+public:
+// Constructors
+BakingChannel (void) : filename(NULL), data(NULL), buffered(0) { }
+BakingChannel (const char *_filename, int _elsize) {
+    init (_filename, _elsize);
+} 
+// Initialize - allocate memory, etc.
+void init (const char *_filename, int _elsize) {
+    elsize = _elsize+2;
+    buffered = 0;
+    data = new float [elsize*batchsize];
+    filename = strdup (_filename);
+}
+// Destructor: write buffered output, close file, deallocate
+~BakingChannel () {
+    writedata();
+    free (filename);
+    delete [] data; 
+}
+// Add one more data item
+void moredata (float s, float t, float *newdata) { 
+    if (buffered >= batchsize)
+        writedata();
+    float *f = data + elsize*buffered;
+    f[0] = s;
+    f[1] = t; 
+    for (int j = 2; j < elsize; ++j)
+        f[j] = newdata[j-2];
+    ++buffered;
+}
+private:
+int elsize; // element size (e.g., 3 for colors)
+int buffered; // how many elements are currently buffered
+float *data; // pointer to the allocated buffer (new'ed)
+char *filename; // pointer to filename (strdup'ed)
+// Write any buffered data to the file
+void writedata (void) {
+
+    if (buffered > 0 && filename != NULL) {
+        FILE *file = fopen (filename, "a");
+        float *f = data;
+        for (int i = 0; i < buffered; ++i, f += elsize) {
+            for (int j = 0; j < elsize; ++j) 
+                fprintf (file, "%g ", f[j]);
+            fprintf (file, "\n");
+        }
+        fclose (file);
+    }
+    
+    buffered = 0;
+}
+};
+
+typedef std::map<std::string, BakingChannel> BakingData;
+
+
+extern "C" BakingData *bake_init()
+{
+BakingData *bd = new BakingData;
+
+    return bd;
+}
+extern "C" void bake_done(BakingData *bd)
+{
+    delete bd; // Will destroy bd, and in turn all its BakingChannel's
+}
+// Workhorse routine -- look up the channel name, add a new BakingChannel
+// if it doesn't exist, add one point's data to the channel.
+extern "C" void bake (BakingData *bd, const std::string &name,
+float s, float t, int elsize, float *data)
+{
+BakingData::iterator found = bd->find (name);
+
+    if (found == bd->end()) {
+        // This named map doesn't yet exist
+        (*bd)[name] = BakingChannel();
+        found = bd->find (name);
+        BakingChannel &bc = (found->second);
+        bc.init (name.c_str(), elsize);
+        bc.moredata (s, t, data);
+    } else {
+        BakingChannel &bc = (found->second);
+        bc.moredata (s, t, data);
+    }
+}
+
+extern "C" int bake_f(BakingData *bd, char *name, float s, float t, float f)
+{
+float *bakedata = (float *) &f;
+
+    bake (bd, name, s, t, 1, bakedata);
+    return 0;
+}
+// for baking a triple -- just call bake with appropriate args
+extern "C" int bake_3(BakingData *bd, char *name, float s, float t, float *bakedata)
+{
+    bake (bd, name, s, t, 3, bakedata);
+    return 0;
+}
+
+
+STD_SOIMPL CqShaderExecEnv::SO_bake_f( STRINGVAL name, FLOATVAL s, FLOATVAL t, FLOATVAL f, DEFVOIDPARAMVARIMPL )
+{
+	INIT_SO
+
+	BEGIN_UNIFORM_SECTION
+        GETSTRING( name);
+        BakingData *bd = bake_init(/*STRING( name).c_str() */);
+	END_UNIFORM_SECTION
+	BEGIN_VARYING_SECTION
+       
+	
+	GETFLOAT( s );
+        GETFLOAT( t );
+        GETFLOAT( f );
+        bake_f( bd, (char *) STRING( name ).c_str(), FLOAT(s), FLOAT(t),  FLOAT(f) );
+        END_VARYING_SECTION
+	BEGIN_UNIFORM_SECTION
+	bake_done(bd);
+	END_UNIFORM_SECTION
+}
+
+STD_SOIMPL CqShaderExecEnv::SO_bake_3c( STRINGVAL name, FLOATVAL s, FLOATVAL t, COLORVAL f, DEFVOIDPARAMVARIMPL )
+{
+	INIT_SO
+
+	BEGIN_UNIFORM_SECTION
+        GETSTRING( name);
+        BakingData *bd = bake_init(/*(char *) STRING( name ).c_str()*/ );
+	END_UNIFORM_SECTION
+	BEGIN_VARYING_SECTION
+       
+	
+	GETFLOAT( s );
+        GETFLOAT( t );
+        GETCOLOR( f );
+        TqFloat rgb[3];
+        
+        COLOR( f ).GetColorRGB( &rgb[0], &rgb[1], &rgb[2] );
+        bake_3( bd,  (char *) STRING( name ).c_str(), FLOAT(s), FLOAT(t), rgb);
+        END_VARYING_SECTION
+	BEGIN_UNIFORM_SECTION
+	bake_done(bd);
+	END_UNIFORM_SECTION
+}
+
+STD_SOIMPL CqShaderExecEnv::SO_bake_3n( STRINGVAL name, FLOATVAL s, FLOATVAL t, NORMALVAL f, DEFVOIDPARAMVARIMPL  )
+{
+	INIT_SO
+
+	BEGIN_UNIFORM_SECTION
+        GETSTRING( name);
+        BakingData *bd = bake_init(/*(char *) STRING( name ).c_str() */ );
+	END_UNIFORM_SECTION
+	BEGIN_VARYING_SECTION
+       
+	
+	GETFLOAT( s );
+        GETFLOAT( t );
+        GETNORMAL( f );
+        TqFloat rgb[3];
+        
+        rgb[0] = VECTOR( f )[0];
+        rgb[1] = VECTOR( f )[1];
+        rgb[2] = VECTOR( f )[2];
+        
+        bake_3( bd,  (char *) STRING( name ).c_str(), FLOAT(s), FLOAT(t), rgb);
+        
+        END_VARYING_SECTION
+	BEGIN_UNIFORM_SECTION
+	bake_done(bd);
+	END_UNIFORM_SECTION
+}
+
+STD_SOIMPL CqShaderExecEnv::SO_bake_3p( STRINGVAL name, FLOATVAL s, FLOATVAL t, POINTVAL f, DEFVOIDPARAMVARIMPL )
+{
+	INIT_SO
+
+	BEGIN_UNIFORM_SECTION
+        GETSTRING( name);
+	BakingData *bd = bake_init(/*(char *) STRING( name ).c_str()  */);
+	END_UNIFORM_SECTION
+	BEGIN_VARYING_SECTION
+       
+	GETFLOAT( s );
+        GETFLOAT( t );
+        GETPOINT( f );
+        TqFloat rgb[3];
+        
+        rgb[0] = VECTOR( f )[0];
+        rgb[1] = VECTOR( f )[1];
+        rgb[2] = VECTOR( f )[2];
+        
+        bake_3( bd,  (char *) STRING( name ).c_str(), FLOAT(s), FLOAT(t), rgb);
+        END_VARYING_SECTION
+	BEGIN_UNIFORM_SECTION
+	bake_done(bd);
+	END_UNIFORM_SECTION
+}
+
+STD_SOIMPL CqShaderExecEnv::SO_bake_3v( STRINGVAL name, FLOATVAL s, FLOATVAL t, VECTORVAL f, DEFVOIDPARAMVARIMPL )
+{
+	INIT_SO
+
+	BEGIN_UNIFORM_SECTION
+        GETSTRING( name);
+	BakingData *bd = bake_init(/*(char *) STRING( name ).c_str()  */);
+	END_UNIFORM_SECTION
+	BEGIN_VARYING_SECTION
+       
+	GETFLOAT( s );
+        GETFLOAT( t );
+        GETVECTOR( f );
+        TqFloat rgb[3];
+        
+        rgb[0] = VECTOR( f )[0];
+        rgb[1] = VECTOR( f )[1];
+        rgb[2] = VECTOR( f )[2];
+        
+        bake_3( bd,  (char *) STRING( name ).c_str(), FLOAT(s), FLOAT(t), rgb);
+        END_VARYING_SECTION
+	BEGIN_UNIFORM_SECTION
+	bake_done(bd);
+	END_UNIFORM_SECTION
+}
 
 END_NAMESPACE( Aqsis )
 //---------------------------------------------------------------------

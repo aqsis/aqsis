@@ -20,13 +20,12 @@
 
 CqMessageTable mTable; // Create the message table
 
+TqBool	g_version = TqFalse;
+TqBool	g_help = TqFalse;
+TqBool	g_envcube = TqFalse;
+TqBool	g_envlatl = TqFalse;
+TqBool	g_shadow = TqFalse;
 
-bool	g_version = 0;
-bool	g_help = 0;
-
-bool	g_envcube;
-bool	g_envlatl;
-bool	g_shadow;
 ArgParse::apstring	g_swrap = "black";
 ArgParse::apstring	g_twrap = "black";
 ArgParse::apstring g_filter = "box";
@@ -36,6 +35,7 @@ ArgParse::apfloat g_fov = 90.0;
 ArgParse::apfloat g_width = -1.0;
 ArgParse::apstring g_compress = "none";
 ArgParse::apfloat g_quality = 70.0;
+ArgParse::apfloat g_bake = 64.0;
 
 
 void version( std::ostream& Stream )
@@ -68,6 +68,7 @@ int main( int argc, const char** argv )
 	ap.argFloat( "twidth", "=float t width [>0.0f]", &g_twidth );
 	ap.argFloat( "width", "=float width [>0,0f] set both swidth and twidth", &g_width );
 	ap.argFloat( "quality", "=float [>=1.0f && <= 100.0f]", &g_quality );
+	ap.argFloat( "bake", "=float [>=2.0f && <= 2048.0f]", &g_bake );
 
 
 	if ( argc > 1 && !ap.parse( argc - 1, argv + 1 ) )
@@ -154,9 +155,14 @@ int main( int argc, const char** argv )
 		std::cerr << "Unknown compression mode: " << g_compress << ". none." << std::endl;
 		g_compress = "none";
 	}
+
 	/* protect the quality mode */
 	if ( g_quality < 1.0f ) g_quality = 1.0;
 	if ( g_quality > 100.0f ) g_quality = 100.0;
+
+	/* protect the bake mode */
+	if ( g_bake < 2.0f ) g_bake = 2.0;
+	if ( g_bake > 2048.0f ) g_bake = 2048.0;
 
 	char *compression = ( char * ) g_compress.c_str();
 	float quality = ( float ) g_quality;
@@ -231,6 +237,14 @@ int main( int argc, const char** argv )
 		      );
 
 
+		if (strstr(ap.leftovers() [ 0 ].c_str(), ".bake"))
+                {
+		static char envbake[80];
+		int bake = (int) g_bake;
+
+			sprintf(envbake, "BAKE=%d", bake);
+    			putenv(envbake);
+                }
 		RiMakeTexture( ( char* ) ap.leftovers() [ 0 ].c_str(), ( char* ) ap.leftovers() [ 1 ].c_str(),
 		               ( char* ) g_swrap.c_str(), ( char* ) g_twrap.c_str(), filterfunc,
 		               ( float ) g_swidth, ( float ) g_twidth, "compression", &compression, "quality", &quality, RI_NULL );

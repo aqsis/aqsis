@@ -853,6 +853,11 @@ class _qShareC CqShaderVM : public CqShaderStack, public IqShader
 		void	SO_spsplinea();
 		void	SO_shadername();
 		void	SO_shadername2();
+		void	SO_bake_f();
+		void	SO_bake_3c();
+		void	SO_bake_3p();
+		void	SO_bake_3v();
+		void	SO_bake_3n();
 
 
 		static	SqOpCodeTrans	m_TransTable[];		///< Static opcode translation table.

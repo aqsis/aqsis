@@ -1164,6 +1164,32 @@ void CqShaderVM::SO_shadername2()
 	FUNC1( type_string, m_pEnv->SO_shadername2 );
 }
 
+// BAKING BASED ON APPLICATION FROM SIGGRAPH 2002 / Larry G.
+void CqShaderVM::SO_bake_f()
+{
+	VARFUNC;
+	VOIDFUNC4( m_pEnv->SO_bake_f );
+}
+void CqShaderVM::SO_bake_3c()
+{
+	VARFUNC;
+	VOIDFUNC4( m_pEnv->SO_bake_3c );
+}
+void CqShaderVM::SO_bake_3p()
+{
+	VARFUNC;
+	VOIDFUNC4( m_pEnv->SO_bake_3p );
+}
+void CqShaderVM::SO_bake_3v()
+{
+	VARFUNC;
+	VOIDFUNC4( m_pEnv->SO_bake_3v );
+}
+void CqShaderVM::SO_bake_3n()
+{
+	VARFUNC;
+	VOIDFUNC4( m_pEnv->SO_bake_3n );
+}
 #ifdef AQSIS_SYSTEM_MACOSX
 #pragma CC_OPT_RESTORE
 #endif

@@ -577,6 +577,11 @@ class CqShaderExecEnv : public IqShaderExecEnv, CqRefCount
 		virtual STD_SO	SO_shadername( DEFPARAM );
 		virtual STD_SO	SO_shadername2( STRINGVAL shader, DEFPARAM );
 		virtual STD_SO	SO_textureinfo( STRINGVAL shader, STRINGVAL dataname, IqShaderData* pV, DEFPARAM );
+		virtual STD_SO	SO_bake_f( STRINGVAL name, FLOATVAL s, FLOATVAL t, FLOATVAL f, DEFVOIDPARAMVAR );
+		virtual STD_SO	SO_bake_3c( STRINGVAL name, FLOATVAL s, FLOATVAL t, COLORVAL f, DEFVOIDPARAMVAR );
+		virtual STD_SO	SO_bake_3p( STRINGVAL name, FLOATVAL s, FLOATVAL t, POINTVAL f, DEFVOIDPARAMVAR );
+		virtual STD_SO	SO_bake_3v( STRINGVAL name, FLOATVAL s, FLOATVAL t, VECTORVAL f, DEFVOIDPARAMVAR );
+		virtual STD_SO	SO_bake_3n( STRINGVAL name, FLOATVAL s, FLOATVAL t, NORMALVAL f, DEFVOIDPARAMVAR );
 };
 
 

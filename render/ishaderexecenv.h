@@ -438,6 +438,11 @@ struct IqShaderExecEnv
 	virtual STD_SO	SO_shadername( DEFPARAM ) = 0;
 	virtual STD_SO	SO_shadername2( STRINGVAL shader, DEFPARAM ) = 0;
 	virtual STD_SO	SO_textureinfo( STRINGVAL shader, STRINGVAL dataname, IqShaderData* pV, DEFPARAM ) = 0;
+	virtual STD_SO	SO_bake_f( STRINGVAL shader, FLOATVAL s, FLOATVAL t, FLOATVAL f, DEFVOIDPARAMVAR) = 0;
+	virtual STD_SO	SO_bake_3c( STRINGVAL shader, FLOATVAL s, FLOATVAL t, FLOATVAL f, DEFVOIDPARAMVAR) = 0;
+	virtual STD_SO	SO_bake_3p( STRINGVAL shader, FLOATVAL s, FLOATVAL t, FLOATVAL f, DEFVOIDPARAMVAR) = 0;
+	virtual STD_SO	SO_bake_3n( STRINGVAL shader, FLOATVAL s, FLOATVAL t, FLOATVAL f, DEFVOIDPARAMVAR) = 0;
+	virtual STD_SO	SO_bake_3v( STRINGVAL shader, FLOATVAL s, FLOATVAL t, FLOATVAL f, DEFVOIDPARAMVAR) = 0;
 };
 
 //-----------------------------------------------------------------------
