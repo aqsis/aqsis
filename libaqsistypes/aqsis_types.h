@@ -49,6 +49,8 @@ typedef	bool			TqBool;
 
 #define FLOOR(x) ((int)(x) - ((x) < 0 && (x) != (int)(x)))
 #define CEIL(x) ((int)(x) + ((x) > 0 && (x) != (int)(x)))
+#define	ROUND(x) (((x) - FLOOR((x))) < 0.5f)?FLOOR((x)):CEIL((x))
+
 
 #define LERP(t,x0,x1)  ((x0) + (t)*((x1)-(x0)))
 
