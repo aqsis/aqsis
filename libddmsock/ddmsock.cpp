@@ -358,7 +358,7 @@ CqDDManager::~CqDDManager()
 #endif // AQSIS_SYSTEM_WIN32
 }
 
-TqInt CqDDManager::Initialise(IqRenderer*)
+TqInt CqDDManager::Initialise()
 {
     if ( !m_DDServer.Prepare( AQSIS_DD_PORT ) )
         return ( -1 );
@@ -410,7 +410,7 @@ TqInt CqDDManager::ClearDisplays()
     return ( 0 );
 }
 
-TqInt CqDDManager::OpenDisplays(IqRenderer*)
+TqInt CqDDManager::OpenDisplays()
 {
     std::vector<CqDDClient>::iterator i;
     for ( i = m_aDisplayRequests.begin(); i != m_aDisplayRequests.end(); i++ )

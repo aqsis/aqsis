@@ -97,7 +97,7 @@ struct IqDDManager
 	{}
     /** Initialise the device manager.
      */
-    virtual	TqInt	Initialise(IqRenderer*) = 0;
+    virtual	TqInt	Initialise() = 0;
     /** Shutdown the device manager.
      */
     virtual	TqInt	Shutdown() = 0;
@@ -109,7 +109,7 @@ struct IqDDManager
     virtual	TqInt	ClearDisplays() = 0;
     /** Open all displays in the managers list.
      */
-    virtual	TqInt	OpenDisplays(IqRenderer*) = 0;
+    virtual	TqInt	OpenDisplays() = 0;
     /** Close all displays in the managers list, rendering is finished.
      */
     virtual	TqInt	CloseDisplays() = 0;

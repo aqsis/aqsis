@@ -92,12 +92,16 @@ using namespace Aqsis;
 
 #include "display.h"
 
+#define INT_MULT(a,b,t) ( (t) = (a) * (b) + 0x80, ( ( ( (t)>>8 ) + (t) )>>8 ) )
+#define INT_PRELERP(p, q, a, t) ( (p) + (q) - INT_MULT( a, p, t) )
+
 START_NAMESPACE( Aqsis )
 
 TqInt g_ImageWidth = 0;
 TqInt g_ImageHeight = 0;
 TqInt g_PixelsProcessed = 0;
 TqInt g_Channels = 0;
+TqInt g_offset = 0;
 TqInt g_Format = 1;
 TqInt g_ElementSize = 0;
 TqInt g_CWXmin, g_CWYmin;
@@ -119,8 +123,9 @@ Fl_FrameBuffer_Widget *g_uiImageWidget;
 Fl_RGB_Image* g_uiImage;
 
 // Command line arguments 
-ArgParse::apstring g_type;
-ArgParse::apstring g_filename = "output.tif";
+ArgParse::apstring g_type("file");
+ArgParse::apstring g_mode("rgba");
+ArgParse::apstring g_filename("output.tif");
 ArgParse::apstring g_hostname;
 ArgParse::apstring g_port;
 bool g_help = 0;
@@ -349,7 +354,10 @@ void BucketFunction()
 					char* dataBin = new char[dataLen];
 					TqFloat* dataPtr = reinterpret_cast<TqFloat*>(dataBin);
 					b64_decode(reinterpret_cast<char*>(dataBin), data->Value());
+					TqInt t;
+					TqFloat alpha = 255.0f;
 					TqInt y;
+					TqBool use_alpha = g_mode.compare("rgba")==0;
 					for ( y = ymin - g_CWYmin; y < ymaxp1 - g_CWYmin; y++ )
 					{
 						TqInt x;
@@ -360,9 +368,11 @@ void BucketFunction()
 								TqInt so = ( y * linelen ) + ( x * g_Channels );
 
 								TqInt i = 0;
+								if(use_alpha)
+									alpha = dataPtr[3 + g_offset];
 								while ( i < g_Channels )
 								{
-									TqFloat value = dataPtr[i];
+									TqFloat value = dataPtr[i + g_offset];
 
 									if( !( g_QuantizeZeroVal == 0.0f &&
 										   g_QuantizeOneVal  == 0.0f &&
@@ -376,7 +386,14 @@ void BucketFunction()
 									if ( g_Format == 1 )
 									{
 										if( NULL != g_byteData )
-											g_byteData[ so ] = static_cast<char>( value );
+										{
+											// C’ = INT_PRELERP( A’, B’, b, t )
+											if( alpha > 0 )
+											{
+												int A = static_cast<int>(INT_PRELERP( g_byteData[ so + 0 ], value, alpha, t ));
+												g_byteData[ so ] = CLAMP( A, 0, 255 );
+											}
+										}
 									}
 									else
 									{
@@ -443,6 +460,7 @@ void ProcessFormat()
 	
 	// Extract the format attributes.
 	TiXmlHandle respHandle(&respDoc);
+	TiXmlHandle formatHandle = respHandle.FirstChildElement("aqsis:response").FirstChildElement("aqsis:format");
 	TiXmlElement* formatElement = respHandle.FirstChildElement("aqsis:response").FirstChildElement("aqsis:format").Element();
 	if( formatElement )
 	{
@@ -456,8 +474,49 @@ void ProcessFormat()
 		formatElement->QueryIntAttribute("bucketsperrow", &g_BucketsPerRow);
 		formatElement->QueryIntAttribute("bucketspercol", &g_BucketsPerCol);
 		formatElement->QueryIntAttribute("elementsize", &g_ElementSize);
+
+		// Find the appropriate data if processing if using AOV.
+		if(g_mode.compare("rgb")!=0 && g_mode.compare("rgba")!=0 && g_mode.compare("z")!=0)
+		{
+			TiXmlElement* pdataList = formatHandle.FirstChildElement("aqsis:datalist").Element();
+			TiXmlNode* pChildNode = pdataList->FirstChild("aqsis:dataelement");
+			int offset = 0;
+			TqBool found = TqFalse;
+			while(pChildNode != 0)
+			{
+				TiXmlElement* pChildElement = pChildNode->ToElement();
+				if(pChildElement!=0)
+				{
+					const char* pname = pChildElement->Attribute("name");
+					int size;
+					pChildElement->QueryIntAttribute("size", &size);
+					if(pname!=0 && g_mode.compare(pname)==0)
+					{
+						found = TqTrue;
+						g_offset = offset;
+						g_Channels = size;
+						break;
+					}
+					offset += size;
+				}
+				pChildNode = pChildNode->NextSibling("aqsis:dataelement");
+			}
+			if(!found)
+				std::cout << "Could not find element " << g_mode.c_str() << std::endl;
+		}
+		else
+		{
+			if(g_mode.find("rgb")!=g_mode.npos)
+			{
+				g_Channels=3;
+				if(g_mode.find("a")!=g_mode.npos)
+					g_Channels=4;
+			}
+			else
+				g_Channels=1;
+		}
+
 		g_PixelsProcessed = 0;
-		g_Channels = 3;
 
         if ( g_Format == 1 )
 		{
@@ -476,9 +535,9 @@ void ProcessFormat()
 					{
 						d      = 128;
 					}
-					g_byteData[3 * (i*g_ImageWidth + j) ] = d;
-					g_byteData[3 * (i*g_ImageWidth + j) + 1] = d;
-					g_byteData[3 * (i*g_ImageWidth + j) + 2] = d;
+					g_byteData[g_Channels * (i*g_ImageWidth + j) ] = d;
+					g_byteData[g_Channels * (i*g_ImageWidth + j) + 1] = d;
+					g_byteData[g_Channels * (i*g_ImageWidth + j) + 2] = d;
 				}
 			}
 		}
@@ -500,6 +559,7 @@ int main( int argc, char** argv )
     ap.usageHeader( ArgParse::apstring( "Usage: " ) + argv[ 0 ] + " [options]" );
     ap.argFlag( "help", "\aprint this help and exit", &g_help );
     ap.argString( "type", "=string\adefine the type of display", &g_type );
+    ap.argString( "mode", "=string\adefine the data that the display will process", &g_mode );
     ap.argString( "name", "=string\athe name of the file to save", &g_filename );
     ap.argString( "hostname", "=string\ahostname of the machine to connect to", &g_hostname );
     ap.argString( "port", "=string\aport to connect to", &g_port );
@@ -570,7 +630,7 @@ int main( int argc, char** argv )
 	if(g_type.compare("framebuffer")==0)
 	{
 		g_theWindow = new Fl_Window(g_ImageWidth,g_ImageHeight);
-		g_uiImageWidget = new Fl_FrameBuffer_Widget(0,0, g_ImageWidth, g_ImageHeight, g_byteData);
+		g_uiImageWidget = new Fl_FrameBuffer_Widget(0,0, g_ImageWidth, g_ImageHeight, g_Channels, g_byteData);
 		g_theWindow->resizable(g_uiImageWidget);
 		g_theWindow->end();
 		g_theWindow->show();

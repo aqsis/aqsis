@@ -261,7 +261,7 @@ void CqImagePixel::InitialiseSamples( std::vector<CqVector2D>& vecSamples, TqBoo
 		TqFloat xOffset = -1.0 + sx;
 		TqFloat yOffset = -1.0 + sy;
 		which = 0;
-		CqVector2D tmpDofOffsets[numSamples];
+		std::vector<CqVector2D> tmpDofOffsets(numSamples);
 		for ( i = 0; i < m_YSamples; ++i )
         {
             for ( j = 0; j < m_XSamples; ++j )

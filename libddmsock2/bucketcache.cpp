@@ -68,7 +68,7 @@ CqBucketDiskStore::~CqBucketDiskStore()
 
 	\return	void
 */
-void CqBucketDiskStore::PrepareFile(std::string& name, IqRenderer* renderer, TqBool temp)
+void CqBucketDiskStore::PrepareFile(std::string& name, TqBool temp)
 {
 	m_fileName = name;
 	m_Temporary = temp;
@@ -76,9 +76,18 @@ void CqBucketDiskStore::PrepareFile(std::string& name, IqRenderer* renderer, TqB
 	std::ofstream file(name.c_str());
 	if( file.is_open() )
 	{
-		std::string desc;
 		std::vector<TqInt> counts;
-		TqInt datasize = renderer->GetOutputDataInfo(desc,counts);
+		TqInt datasize = 5;
+		counts.push_back(5);
+		std::string desc("rgbaz/");
+		std::map<std::string, CqRenderer::SqOutputDataEntry>& mapAOV=QGetRenderContext()->GetMapOfOutputDataEntries();
+		std::map<std::string, CqRenderer::SqOutputDataEntry>::iterator iAOVEntry;
+		for(iAOVEntry = mapAOV.begin(); iAOVEntry!=mapAOV.end(); iAOVEntry++)
+		{
+			desc.append(iAOVEntry->first);
+			counts.push_back(iAOVEntry->second.m_NumSamples);
+			datasize+=iAOVEntry->second.m_NumSamples;
+		}
 		TqInt len = sizeof(SqBucketDiskStoreHeader) + (counts.size()-1)*sizeof(TqInt) + desc.length();
 		m_Header = reinterpret_cast<SqBucketDiskStoreHeader*>(calloc(len, 1));
 		m_Header->m_DataValueCount = counts.size();
@@ -137,14 +146,24 @@ TqLong CqBucketDiskStore::StoreBucket(IqBucket* bucket, SqBucketDiskStoreRecord*
 		SqBucketDiskStoreRecord* record;
 		TqInt datalen = ( bucket->Width() * bucket->Height() * m_Header->m_DataValueSize * sizeof(float) );
 		TqInt totallen = sizeof(SqBucketDiskStoreRecord) + datalen - sizeof(float);
-		record = reinterpret_cast<SqBucketDiskStoreRecord*>(calloc(totallen, 1));
+		record = reinterpret_cast<SqBucketDiskStoreRecord*>(malloc(totallen));
 		TqInt x, y;
 		TqFloat* recordaddress = &record->m_Data[0];
 		for(y = 0; y < bucket->Height(); y++)
 		{
 			for(x = 0; x < bucket->Width(); x++ )
 			{
-				memcpy(recordaddress, bucket->Data(x + bucket->XOrigin(), y + bucket->YOrigin()), m_Header->m_DataValueSize * sizeof(TqFloat));
+				const TqFloat* data = bucket->Data(x + bucket->XOrigin(), y + bucket->YOrigin());
+				recordaddress[0] = data[0];	// r
+				recordaddress[1] = data[1];	// g
+				recordaddress[2] = data[2];	// b
+                TqFloat a = ( data[3] + data[4] + data[5] ) / 3.0f;
+                recordaddress[3] = a * data[7]; // a
+				recordaddress[4] = data[6];	// z
+				// Copy any AOV variables.
+				TqInt i=5;
+				for(; i<m_Header->m_DataValueSize; i++)
+					recordaddress[i] = data[i+3];
 				recordaddress += m_Header->m_DataValueSize;
 			}
 		}

@@ -32,7 +32,6 @@
 
 START_NAMESPACE( Aqsis )
 
-struct IqRenderer;
 struct IqBucket;
 
 /**
@@ -91,7 +90,7 @@ class CqBucketDiskStore
 			TqFloat	m_Data[1];
 		};
 
-		void	PrepareFile(std::string& name, IqRenderer* renderer, TqBool temp = TqTrue);
+		void	PrepareFile(std::string& name, TqBool temp = TqTrue);
 		TqLong	StoreBucket(IqBucket* bucket, SqBucketDiskStoreRecord** record_out = NULL, TqInt* index_out = NULL);
 		SqBucketDiskStoreRecord* RetrieveBucketOrigin(TqInt originx, TqInt originy);
 		SqBucketDiskStoreRecord* RetrieveBucketIndex(TqInt index);

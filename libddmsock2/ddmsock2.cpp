@@ -106,7 +106,7 @@ CqDDManager::~CqDDManager()
 #endif // AQSIS_SYSTEM_WIN32
 }
 
-TqInt CqDDManager::Initialise(IqRenderer* renderer)
+TqInt CqDDManager::Initialise()
 {
 	m_Listener.Prepare(AQSIS_LISTENER_PORT, this);
 	return ( 0 );
@@ -140,11 +140,11 @@ TqInt CqDDManager::ClearDisplays()
     return ( 0 );
 }
 
-TqInt CqDDManager::OpenDisplays(IqRenderer* renderer)
+TqInt CqDDManager::OpenDisplays()
 {
 	std::string name;
 	// If the filename has been specified in the RIB file, then use that,, 
-	const CqString* optname = renderer->GetStringOption( "bucketcache", "name" );
+	const CqString* optname = QGetRenderContext()->GetStringOption( "bucketcache", "name" );
 	if( optname )
 		name = *optname;
 	else
@@ -153,7 +153,7 @@ TqInt CqDDManager::OpenDisplays(IqRenderer* renderer)
 
 	TqBool temp = TqTrue;
 	// Find out if the user wants to keep the bucket store.
-	const TqInt* opttemp = renderer->GetIntegerOption( "bucketcache", "temp" );
+	const TqInt* opttemp = QGetRenderContext()->GetIntegerOption( "bucketcache", "temp" );
 	if( opttemp )
 		temp = *opttemp != 0;
 
@@ -162,7 +162,7 @@ TqInt CqDDManager::OpenDisplays(IqRenderer* renderer)
 	if( temp )	std::cerr << info << "Bucket store will be deleted" << std::endl;
 	else		std::cerr << info << "Bucket store won't be deleted" << std::endl;
 
-	m_DiskStore.PrepareFile(name, renderer, temp);
+	m_DiskStore.PrepareFile(name, temp);
 
 	// Now go over any requested displays launching the clients.
 	std::vector<SqDisplayRequest>::iterator i;
@@ -183,6 +183,7 @@ TqInt CqDDManager::DisplayBucket( IqBucket* pBucket )
 	m_DiskStore.StoreBucket(pBucket, NULL, &record_index);
 	// Check if any sender threads are waiting on this bucket.
 	std::map<TqInt, boost::condition*>::iterator waiting;
+	boost::mutex::scoped_lock lk(m_BucketsLock);
 	if((waiting = m_BucketRequestsWaiting.find(record_index)) != m_BucketRequestsWaiting.end() )
 	{
 		std::cerr << debug << "Hit a waiting bucket " << record_index << std::endl;
@@ -197,8 +198,8 @@ TqBool CqDDManager::fDisplayNeeds( const TqChar* var )
 {
     static TqUlong rgb = CqParameter::hash( "rgb" );
     static TqUlong rgba = CqParameter::hash( "rgba" );
-    static TqUlong Ci = CqParameter::hash( "Ci" );
-    static TqUlong Oi = CqParameter::hash( "Oi" );
+    static TqUlong Ci = CqParameter::hash( "Cs" );
+    static TqUlong Oi = CqParameter::hash( "Os" );
 
     TqUlong htoken = CqParameter::hash( var );
 
@@ -291,6 +292,8 @@ void CqDDManager::LoadDisplayLibrary( SqDisplayRequest& req )
 	argstrings.push_back(CqString("-name=") + CqString( req.m_name ));
 	args.push_back(argstrings.back().c_str());
 	argstrings.push_back(CqString("-type=") + CqString( req.m_type ));
+	args.push_back(argstrings.back().c_str());
+	argstrings.push_back(CqString("-mode=") + CqString( req.m_mode ));
 	args.push_back(argstrings.back().c_str());
     args.push_back(NULL);
 

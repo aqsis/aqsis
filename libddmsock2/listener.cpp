@@ -230,9 +230,6 @@ void CqSender::operator()()
 		TiXmlElement* reqElement;
 		if((reqElement = reqHandle.FirstChild("aqsis:request").FirstChild("aqsis:format").Element()) != NULL)
 		{
-			std::string desc;
-			std::vector<TqInt> counts;
-			TqInt datasize = QGetRenderContext()->GetOutputDataInfo(desc,counts);
 			// Construct a response
 			TiXmlDocument doc;
 			TiXmlElement root("aqsis:response");
@@ -246,9 +243,32 @@ void CqSender::operator()()
 			format.SetAttribute("cropymin", ToString(QGetRenderContext()->pImage()->CropWindowYMin()).c_str());
 			format.SetAttribute("cropymax", ToString(QGetRenderContext()->pImage()->CropWindowYMax()).c_str());
 			format.SetAttribute("cropymax", ToString(QGetRenderContext()->pImage()->CropWindowYMax()).c_str());
+			TiXmlElement datalist("aqsis:datalist");
+
+			// Add the default "rgbaz" entry.
+			TiXmlElement* pdataelem = new TiXmlElement("aqsis:dataelement");
+			pdataelem->SetAttribute("name", "rgbaz");
+			pdataelem->SetAttribute("size", 5);
+			datalist.InsertEndChild(*pdataelem);
+
+			// Add entries for any AOV values specified.
+			TqInt datasize = 5;
+			std::map<std::string, CqRenderer::SqOutputDataEntry>& mapAOV=QGetRenderContext()->GetMapOfOutputDataEntries();
+			std::map<std::string, CqRenderer::SqOutputDataEntry>::iterator iAOVEntry;
+			for(iAOVEntry = mapAOV.begin(); iAOVEntry!=mapAOV.end(); iAOVEntry++)
+			{
+				TiXmlElement* pdataelem = new TiXmlElement("aqsis:dataelement");
+				pdataelem->SetAttribute("name", iAOVEntry->first);
+				pdataelem->SetAttribute("size", iAOVEntry->second.m_NumSamples);
+				datasize += iAOVEntry->second.m_NumSamples;
+				datalist.InsertEndChild(*pdataelem);
+			}
 			format.SetAttribute("elementsize", ToString(datasize).c_str());
+			format.InsertEndChild(datalist);
 			root.InsertEndChild(format);
 			doc.InsertEndChild(root);
+
+			//doc.Print(stdout);
 
 			std::ostringstream strFormat;
 			strFormat << doc;

@@ -42,20 +42,21 @@ START_NAMESPACE( Aqsis )
 class Fl_FrameBuffer_Widget : public Fl_Widget 
 {
 public: 
-	Fl_FrameBuffer_Widget(int x, int y, int imageW, int imageH, unsigned char* imageD) : Fl_Widget(x,y,imageW,imageH)
+	Fl_FrameBuffer_Widget(int x, int y, int imageW, int imageH, int depth, unsigned char* imageD) : Fl_Widget(x,y,imageW,imageH)
 	{
 		w = imageW;
 		h = imageH;
+		d = depth;
 		image = imageD;
 	}
 
 	void draw(void) 
 	{
-		fl_draw_image(image,x(),y(),w,h,3,w*3); // draw image
+		fl_draw_image(image,x(),y(),w,h,d,w*d); // draw image
 	}
 	
 private:
-	int w,h;
+	int w,h,d;
 	unsigned char* image;
 };
 
