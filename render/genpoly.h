@@ -51,7 +51,9 @@ class CqPolygonGeneral2D
 	public:
 		CqPolygonGeneral2D() :
 				m_Orientation( Orientation_Unknown )
-		{}
+		{
+			STATS_INC( GPR_poly );		
+		}
 		CqPolygonGeneral2D( const CqPolygonGeneral2D& From );
 		~CqPolygonGeneral2D()
 		{

@@ -47,6 +47,8 @@ START_NAMESPACE( Aqsis )
 CqSurfaceNURBS::CqSurfaceNURBS() : CqSurface(), m_uOrder( 0 ), m_vOrder( 0 ), m_cuVerts( 0 ), m_cvVerts( 0 ), m_umin( 0.0f ), m_umax( 1.0f ), m_vmin( 0.0f ), m_vmax( 1.0f ), m_fPatchMesh( TqFalse )
 {
 	TrimLoops() = static_cast<const CqAttributes*>( pAttributes() ) ->TrimLoops();
+
+	STATS_INC( GPR_nurbs );
 }
 
 //---------------------------------------------------------------------
@@ -56,6 +58,8 @@ CqSurfaceNURBS::CqSurfaceNURBS() : CqSurface(), m_uOrder( 0 ), m_vOrder( 0 ), m_
 CqSurfaceNURBS::CqSurfaceNURBS( const CqSurfaceNURBS& From )
 {
 	*this = From;
+
+	STATS_INC( GPR_nurbs );
 }
 
 

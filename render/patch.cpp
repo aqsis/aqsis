@@ -42,7 +42,9 @@ START_NAMESPACE( Aqsis )
  */
 
 CqSurfacePatchBicubic::CqSurfacePatchBicubic() : CqSurface()
-{}
+{
+	STATS_INC( GPR_patch );
+}
 
 
 //---------------------------------------------------------------------
@@ -53,6 +55,8 @@ CqSurfacePatchBicubic::CqSurfacePatchBicubic( const CqSurfacePatchBicubic& From 
 		CqSurface( From )
 {
 	*this = From;
+
+	STATS_INC( GPR_patch );
 }
 
 

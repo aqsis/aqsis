@@ -47,7 +47,7 @@ CqCurve::CqCurve() : CqSurface()
 	m_constantwidthParamIndex = -1;
 	m_splitDecision = Split_Undecided;
 
-	STATS_INC( GEO_crv_created );
+	STATS_INC( GPR_crv );
 }
 
 
@@ -58,6 +58,8 @@ CqCurve::CqCurve() : CqSurface()
 CqCurve::CqCurve( const CqCurve &from ) : CqSurface()
 {
 	( *this ) = from;
+
+	STATS_INC( GPR_crv );
 }
 
 

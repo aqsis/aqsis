@@ -45,6 +45,8 @@ CqSubdivision2::CqSubdivision2( CqPolygonPoints* pPoints ) :  CqMotionSpec<CqPol
 		ADDREF( pPoints );
 		AddTimeSlot( 0, pPoints );
 	}
+
+	STATS_INC( GPR_subdiv );
 }
 
 

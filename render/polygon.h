@@ -43,7 +43,9 @@ class CqPolygonBase
 {
 	public:
 		CqPolygonBase()
-		{}
+		{
+			STATS_INC( GPR_poly );
+		}
 		virtual	~CqPolygonBase()
 		{}
 
@@ -418,6 +420,7 @@ class CqSurfacePointsPolygon : public CqBasicSurface, public CqPolygonBase
 				m_FaceVaryingIndex( FaceVaryingIndex )
 		{
 			ADDREF( m_pPoints );
+			STATS_INC( GPR_poly );
 		}
 		CqSurfacePointsPolygon( const CqSurfacePointsPolygon& From );
 		virtual	~CqSurfacePointsPolygon()
@@ -633,6 +636,7 @@ class CqSurfacePointsPolygons : public CqSurface
 				for( polyvertex = 0; polyvertex < nverts[i]; polyvertex++ )
 					m_PointIndices.push_back( verts[vindex++] );
 			}
+			STATS_INC( GPR_poly );
 		}
 		virtual	~CqSurfacePointsPolygons()
 		{

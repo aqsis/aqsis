@@ -96,6 +96,8 @@ CqPoints::CqPoints( TqInt nvertices, CqPolygonPoints* pPoints ) : CqMotionSpec<C
 			m_widthParamIndex = index;
 
 	m_KDTreeData.SetpPoints( this );
+
+	STATS_INC( GPR_points );
 }
 
 

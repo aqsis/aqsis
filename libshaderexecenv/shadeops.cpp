@@ -189,6 +189,8 @@ void CqShaderExecEnv::ValidateIlluminanceCache( IqShaderData* pP, IqShaderData* 
 
 STD_SOIMPL	CqShaderExecEnv::SO_radians( FLOATVAL degrees, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_radians );
+
 	INIT_SO
 
 	CHECKVARY( degrees )
@@ -202,6 +204,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_radians( FLOATVAL degrees, DEFPARAMIMPL )
 
 STD_SOIMPL	CqShaderExecEnv::SO_degrees( FLOATVAL radians, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_degrees );
+
 	INIT_SO
 
 	CHECKVARY( radians )
@@ -215,6 +219,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_degrees( FLOATVAL radians, DEFPARAMIMPL )
 
 STD_SOIMPL	CqShaderExecEnv::SO_sin( FLOATVAL a, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_sin );
+
 	INIT_SO
 
 	CHECKVARY( a )
@@ -228,6 +234,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_sin( FLOATVAL a, DEFPARAMIMPL )
 
 STD_SOIMPL	CqShaderExecEnv::SO_asin( FLOATVAL a, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_asin );
+
 	INIT_SO
 
 	CHECKVARY( a )
@@ -241,6 +249,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_asin( FLOATVAL a, DEFPARAMIMPL )
 
 STD_SOIMPL	CqShaderExecEnv::SO_cos( FLOATVAL a, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_cos );
+
 	INIT_SO
 
 	CHECKVARY( a )
@@ -254,6 +264,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_cos( FLOATVAL a, DEFPARAMIMPL )
 
 STD_SOIMPL	CqShaderExecEnv::SO_acos( FLOATVAL a, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_acos );
+
 	INIT_SO
 
 	CHECKVARY( a )
@@ -267,6 +279,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_acos( FLOATVAL a, DEFPARAMIMPL )
 
 STD_SOIMPL	CqShaderExecEnv::SO_tan( FLOATVAL a, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_tan );
+
 	INIT_SO
 
 	CHECKVARY( a )
@@ -280,6 +294,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_tan( FLOATVAL a, DEFPARAMIMPL )
 
 STD_SOIMPL	CqShaderExecEnv::SO_atan( FLOATVAL yoverx, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_atan );
+
 	INIT_SO
 
 	CHECKVARY( yoverx )
@@ -293,6 +309,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_atan( FLOATVAL yoverx, DEFPARAMIMPL )
 
 STD_SOIMPL	CqShaderExecEnv::SO_atan( FLOATVAL y, FLOATVAL x, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_atan );
+
 	INIT_SO
 
 	CHECKVARY( x )
@@ -308,6 +326,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_atan( FLOATVAL y, FLOATVAL x, DEFPARAMIMPL )
 
 STD_SOIMPL	CqShaderExecEnv::SO_pow( FLOATVAL x, FLOATVAL y, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_pow );
+
 	INIT_SO
 
 	CHECKVARY( x )
@@ -326,6 +346,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_pow( FLOATVAL x, FLOATVAL y, DEFPARAMIMPL )
 
 STD_SOIMPL	CqShaderExecEnv::SO_exp( FLOATVAL x, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_exp );
+
 	INIT_SO
 
 	CHECKVARY( x )
@@ -339,6 +361,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_exp( FLOATVAL x, DEFPARAMIMPL )
 
 STD_SOIMPL	CqShaderExecEnv::SO_sqrt( FLOATVAL x, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_sqrt );
+
 	INIT_SO
 
 	CHECKVARY( x )
@@ -352,6 +376,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_sqrt( FLOATVAL x, DEFPARAMIMPL )
 
 STD_SOIMPL	CqShaderExecEnv::SO_log( FLOATVAL x, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_log );
+
 	INIT_SO
 
 	CHECKVARY( x )
@@ -365,6 +391,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_log( FLOATVAL x, DEFPARAMIMPL )
 
 STD_SOIMPL	CqShaderExecEnv::SO_mod( FLOATVAL a, FLOATVAL b, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_mod );
+
 	INIT_SO
 
 	CHECKVARY( a )
@@ -386,6 +414,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_mod( FLOATVAL a, FLOATVAL b, DEFPARAMIMPL )
 // log(x,base)
 STD_SOIMPL	CqShaderExecEnv::SO_log( FLOATVAL x, FLOATVAL base, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_log );
+
 	INIT_SO
 
 	CHECKVARY( x )
@@ -402,6 +432,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_log( FLOATVAL x, FLOATVAL base, DEFPARAMIMPL )
 
 STD_SOIMPL	CqShaderExecEnv::SO_abs( FLOATVAL x, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_abs );
+
 	INIT_SO
 
 	CHECKVARY( x )
@@ -415,6 +447,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_abs( FLOATVAL x, DEFPARAMIMPL )
 
 STD_SOIMPL	CqShaderExecEnv::SO_sign( FLOATVAL x, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_sign );
+
 	INIT_SO
 
 	CHECKVARY( x )
@@ -428,6 +462,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_sign( FLOATVAL x, DEFPARAMIMPL )
 
 STD_SOIMPL	CqShaderExecEnv::SO_min( FLOATVAL a, FLOATVAL b, DEFPARAMVARIMPL )
 {
+	STATS_INC( SHD_so_min );
+
 	INIT_SO
 
 	CHECKVARY( a )
@@ -450,6 +486,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_min( FLOATVAL a, FLOATVAL b, DEFPARAMVARIMPL )
 
 STD_SOIMPL	CqShaderExecEnv::SO_max( FLOATVAL a, FLOATVAL b, DEFPARAMVARIMPL )
 {
+	STATS_INC( SHD_so_max );
+
 	INIT_SO
 
 	CHECKVARY( a )
@@ -472,6 +510,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_max( FLOATVAL a, FLOATVAL b, DEFPARAMVARIMPL )
 
 STD_SOIMPL	CqShaderExecEnv::SO_pmin( POINTVAL a, POINTVAL b, DEFPARAMVARIMPL )
 {
+	STATS_INC( SHD_so_pmin );
+
 	INIT_SO
 
 	CHECKVARY( a )
@@ -494,6 +534,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_pmin( POINTVAL a, POINTVAL b, DEFPARAMVARIMPL )
 
 STD_SOIMPL	CqShaderExecEnv::SO_pmax( POINTVAL a, POINTVAL b, DEFPARAMVARIMPL )
 {
+	STATS_INC( SHD_so_pmax );
+
 	INIT_SO
 
 	CHECKVARY( a )
@@ -516,6 +558,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_pmax( POINTVAL a, POINTVAL b, DEFPARAMVARIMPL )
 
 STD_SOIMPL	CqShaderExecEnv::SO_cmin( COLORVAL a, COLORVAL b, DEFPARAMVARIMPL )
 {
+	STATS_INC( SHD_so_cmin );
+
 	INIT_SO
 
 	CHECKVARY( a )
@@ -538,6 +582,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_cmin( COLORVAL a, COLORVAL b, DEFPARAMVARIMPL )
 
 STD_SOIMPL	CqShaderExecEnv::SO_cmax( COLORVAL a, COLORVAL b, DEFPARAMVARIMPL )
 {
+	STATS_INC( SHD_so_cmax );
+
 	INIT_SO
 
 	CHECKVARY( a )
@@ -560,6 +606,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_cmax( COLORVAL a, COLORVAL b, DEFPARAMVARIMPL )
 
 STD_SOIMPL	CqShaderExecEnv::SO_clamp( FLOATVAL a, FLOATVAL _min, FLOATVAL _max, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_clamp );
+
 	INIT_SO
 
 	CHECKVARY( a )
@@ -577,6 +625,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_clamp( FLOATVAL a, FLOATVAL _min, FLOATVAL _max, 
 
 STD_SOIMPL	CqShaderExecEnv::SO_pclamp( POINTVAL a, POINTVAL _min, POINTVAL _max, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_pclamp );
+
 	INIT_SO
 
 	CHECKVARY( a )
@@ -594,6 +644,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_pclamp( POINTVAL a, POINTVAL _min, POINTVAL _max,
 
 STD_SOIMPL	CqShaderExecEnv::SO_cclamp( COLORVAL a, COLORVAL _min, COLORVAL _max, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_cclamp );
+
 	INIT_SO
 
 	CHECKVARY( a )
@@ -611,6 +663,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_cclamp( COLORVAL a, COLORVAL _min, COLORVAL _max,
 
 STD_SOIMPL	CqShaderExecEnv::SO_floor( FLOATVAL x, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_floor );
+
 	INIT_SO
 
 	CHECKVARY( x )
@@ -624,6 +678,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_floor( FLOATVAL x, DEFPARAMIMPL )
 
 STD_SOIMPL	CqShaderExecEnv::SO_ceil( FLOATVAL x, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_ceil );
+
 	INIT_SO
 
 	CHECKVARY( x )
@@ -651,6 +707,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_round( FLOATVAL x, DEFPARAMIMPL )
 
 STD_SOIMPL	CqShaderExecEnv::SO_step( FLOATVAL _min, FLOATVAL value, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_step );
+
 	INIT_SO
 
 	CHECKVARY( _min )
@@ -669,6 +727,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_step( FLOATVAL _min, FLOATVAL value, DEFPARAMIMPL
 // smoothstep(_min,_max,value)
 STD_SOIMPL	CqShaderExecEnv::SO_smoothstep( FLOATVAL _min, FLOATVAL _max, FLOATVAL value, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_smoothstep );
+
 	INIT_SO
 
 	CHECKVARY( value )
@@ -697,6 +757,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_smoothstep( FLOATVAL _min, FLOATVAL _max, FLOATVA
 // spline(value, f1,f2,...,fn)
 STD_SOIMPL	CqShaderExecEnv::SO_fspline( FLOATVAL value, DEFPARAMVARIMPL )
 {
+	STATS_INC( SHD_so_fspline );
+
 	INIT_SO
 
 	CqSplineCubic spline( cParams );
@@ -744,6 +806,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_fspline( FLOATVAL value, DEFPARAMVARIMPL )
 // spline(value, f1,f2,...,fn)
 STD_SOIMPL	CqShaderExecEnv::SO_cspline( FLOATVAL value, DEFPARAMVARIMPL )
 {
+	STATS_INC( SHD_so_cspline );
+
 	INIT_SO
 
 	CqSplineCubic spline( cParams );
@@ -791,6 +855,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_cspline( FLOATVAL value, DEFPARAMVARIMPL )
 // spline(value, f1,f2,...,fn)
 STD_SOIMPL	CqShaderExecEnv::SO_pspline( FLOATVAL value, DEFPARAMVARIMPL )
 {
+	STATS_INC( SHD_so_pspline );
+
 	INIT_SO
 
 	CqSplineCubic spline( cParams );
@@ -838,6 +904,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_pspline( FLOATVAL value, DEFPARAMVARIMPL )
 // spline(value, f1,f2,...,fn)
 STD_SOIMPL	CqShaderExecEnv::SO_sfspline( STRINGVAL basis, FLOATVAL value, DEFPARAMVARIMPL )
 {
+	STATS_INC( SHD_so_sfspline );
+
 	INIT_SO
 
 	CqSplineCubic spline( cParams );
@@ -890,6 +958,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_sfspline( STRINGVAL basis, FLOATVAL value, DEFPAR
 // spline(value, f1,f2,...,fn)
 STD_SOIMPL	CqShaderExecEnv::SO_scspline( STRINGVAL basis, FLOATVAL value, DEFPARAMVARIMPL )
 {
+	STATS_INC( SHD_so_scspline );
+
 	INIT_SO
 
 	CqSplineCubic spline( cParams );
@@ -942,6 +1012,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_scspline( STRINGVAL basis, FLOATVAL value, DEFPAR
 // spline(value, f1,f2,...,fn)
 STD_SOIMPL	CqShaderExecEnv::SO_spspline( STRINGVAL basis, FLOATVAL value, DEFPARAMVARIMPL )
 {
+	STATS_INC( SHD_so_spspline );
+
 	INIT_SO
 
 	CqSplineCubic spline( cParams );
@@ -992,6 +1064,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_spspline( STRINGVAL basis, FLOATVAL value, DEFPAR
 
 STD_SOIMPL	CqShaderExecEnv::SO_fDu( FLOATVAL p, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_fDu );
+
 	TqFloat Deffloat = 0.0f;
 	INIT_SO
 
@@ -1006,6 +1080,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_fDu( FLOATVAL p, DEFPARAMIMPL )
 
 STD_SOIMPL	CqShaderExecEnv::SO_fDv( FLOATVAL p, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_fDv );
+
 	TqFloat Deffloat = 0.0f;
 	INIT_SO
 
@@ -1020,6 +1096,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_fDv( FLOATVAL p, DEFPARAMIMPL )
 
 STD_SOIMPL	CqShaderExecEnv::SO_fDeriv( FLOATVAL p, FLOATVAL den, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_fDeriv );
+
 	INIT_SO
 
 	CHECKVARY( p )
@@ -1034,6 +1112,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_fDeriv( FLOATVAL p, FLOATVAL den, DEFPARAMIMPL )
 
 STD_SOIMPL	CqShaderExecEnv::SO_cDu( COLORVAL p, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_cDu );
+
 	CqColor Defcol( 0.0f, 0.0f, 0.0f );
 	INIT_SO
 
@@ -1048,6 +1128,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_cDu( COLORVAL p, DEFPARAMIMPL )
 
 STD_SOIMPL	CqShaderExecEnv::SO_cDv( COLORVAL p, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_cDv );
+
 	CqColor Defcol( 0.0f, 0.0f, 0.0f );
 	INIT_SO
 
@@ -1062,6 +1144,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_cDv( COLORVAL p, DEFPARAMIMPL )
 
 STD_SOIMPL	CqShaderExecEnv::SO_cDeriv( COLORVAL p, FLOATVAL den, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_cDeriv );
+
 	INIT_SO
 
 	CHECKVARY( p )
@@ -1076,6 +1160,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_cDeriv( COLORVAL p, FLOATVAL den, DEFPARAMIMPL )
 
 STD_SOIMPL	CqShaderExecEnv::SO_pDu( POINTVAL p, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_pDu );
+
 	CqVector3D Defvec( 0.0f, 0.0f, 0.0f );
 	INIT_SO
 
@@ -1090,6 +1176,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_pDu( POINTVAL p, DEFPARAMIMPL )
 
 STD_SOIMPL	CqShaderExecEnv::SO_pDv( POINTVAL p, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_pDv );
+
 	CqVector3D Defvec( 0.0f, 0.0f, 0.0f );
 	INIT_SO
 
@@ -1104,6 +1192,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_pDv( POINTVAL p, DEFPARAMIMPL )
 
 STD_SOIMPL	CqShaderExecEnv::SO_pDeriv( POINTVAL p, FLOATVAL den, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_pDeriv );
+
 	INIT_SO
 
 	CHECKVARY( p )
@@ -1118,6 +1208,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_pDeriv( POINTVAL p, FLOATVAL den, DEFPARAMIMPL )
 
 STD_SOIMPL	CqShaderExecEnv::SO_frandom( DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_frandom );
+
 	INIT_SO
 
 	CHECKVARY( Result )
@@ -1129,6 +1221,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_frandom( DEFPARAMIMPL )
 
 STD_SOIMPL	CqShaderExecEnv::SO_crandom( DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_crandom );
+
 	INIT_SO
 
 	CHECKVARY( Result )
@@ -1140,6 +1234,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_crandom( DEFPARAMIMPL )
 
 STD_SOIMPL	CqShaderExecEnv::SO_prandom( DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_prandom );
+
 	INIT_SO
 
 	CHECKVARY( Result )
@@ -1154,6 +1250,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_prandom( DEFPARAMIMPL )
 // noise(v)
 STD_SOIMPL	CqShaderExecEnv::SO_fnoise1( FLOATVAL v, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_fnoise1 );
+
 	INIT_SO
 
 	CHECKVARY( v )
@@ -1169,6 +1267,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_fnoise1( FLOATVAL v, DEFPARAMIMPL )
 // noise(u,v)
 STD_SOIMPL CqShaderExecEnv::SO_fnoise2( FLOATVAL u, FLOATVAL v, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_fnoise2 );
+
 	INIT_SO
 
 	CHECKVARY( u )
@@ -1186,6 +1286,8 @@ STD_SOIMPL CqShaderExecEnv::SO_fnoise2( FLOATVAL u, FLOATVAL v, DEFPARAMIMPL )
 // noise(p)
 STD_SOIMPL CqShaderExecEnv::SO_fnoise3( POINTVAL p, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_fnoise3 );
+
 	INIT_SO
 
 	CHECKVARY( p )
@@ -1202,6 +1304,8 @@ STD_SOIMPL CqShaderExecEnv::SO_fnoise3( POINTVAL p, DEFPARAMIMPL )
 STD_SOIMPL CqShaderExecEnv::SO_fnoise4( POINTVAL p, FLOATVAL t, DEFPARAMIMPL )
 {
 	// TODO: Do proper 4D noise.
+	STATS_INC( SHD_so_fnoise4 );
+
 	INIT_SO
 
 	CHECKVARY( p )
@@ -1219,6 +1323,8 @@ STD_SOIMPL CqShaderExecEnv::SO_fnoise4( POINTVAL p, FLOATVAL t, DEFPARAMIMPL )
 // noise(v)
 STD_SOIMPL	CqShaderExecEnv::SO_cnoise1( FLOATVAL v, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_cnoise1 );
+
 	INIT_SO
 
 	CHECKVARY( v )
@@ -1234,6 +1340,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_cnoise1( FLOATVAL v, DEFPARAMIMPL )
 // noise(u,v)
 STD_SOIMPL CqShaderExecEnv::SO_cnoise2( FLOATVAL u, FLOATVAL v, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_cnoise2 );
+
 	INIT_SO
 
 	CHECKVARY( u )
@@ -1251,6 +1359,8 @@ STD_SOIMPL CqShaderExecEnv::SO_cnoise2( FLOATVAL u, FLOATVAL v, DEFPARAMIMPL )
 // noise(p)
 STD_SOIMPL CqShaderExecEnv::SO_cnoise3( POINTVAL p, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_cnoise3 );
+
 	INIT_SO
 
 	CHECKVARY( p )
@@ -1267,6 +1377,8 @@ STD_SOIMPL CqShaderExecEnv::SO_cnoise3( POINTVAL p, DEFPARAMIMPL )
 STD_SOIMPL CqShaderExecEnv::SO_cnoise4( POINTVAL p, FLOATVAL t, DEFPARAMIMPL )
 {
 	// TODO: Do proper 4D noise.
+	STATS_INC( SHD_so_cnoise4 );
+
 	INIT_SO
 
 	CHECKVARY( p )
@@ -1284,6 +1396,8 @@ STD_SOIMPL CqShaderExecEnv::SO_cnoise4( POINTVAL p, FLOATVAL t, DEFPARAMIMPL )
 // noise(v)
 STD_SOIMPL CqShaderExecEnv::SO_pnoise1( FLOATVAL v, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_pnoise1 );
+
 	INIT_SO
 
 	CHECKVARY( v )
@@ -1299,6 +1413,8 @@ STD_SOIMPL CqShaderExecEnv::SO_pnoise1( FLOATVAL v, DEFPARAMIMPL )
 // noise(u,v)
 STD_SOIMPL CqShaderExecEnv::SO_pnoise2( FLOATVAL u, FLOATVAL v, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_pnoise2 );
+
 	INIT_SO
 
 	CHECKVARY( u )
@@ -1316,6 +1432,8 @@ STD_SOIMPL CqShaderExecEnv::SO_pnoise2( FLOATVAL u, FLOATVAL v, DEFPARAMIMPL )
 // noise(p)
 STD_SOIMPL CqShaderExecEnv::SO_pnoise3( POINTVAL p, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_pnoise3 );
+
 	INIT_SO
 
 	CHECKVARY( p )
@@ -1332,6 +1450,8 @@ STD_SOIMPL CqShaderExecEnv::SO_pnoise3( POINTVAL p, DEFPARAMIMPL )
 STD_SOIMPL CqShaderExecEnv::SO_pnoise4( POINTVAL p, FLOATVAL t, DEFPARAMIMPL )
 {
 	// TODO: Do proper 4D noise.
+	STATS_INC( SHD_so_pnoise4 );
+
 	INIT_SO
 
 	CHECKVARY( p )
@@ -1349,6 +1469,8 @@ STD_SOIMPL CqShaderExecEnv::SO_pnoise4( POINTVAL p, FLOATVAL t, DEFPARAMIMPL )
 // setcomp(c,__iGrid,v)
 STD_SOIMPL	CqShaderExecEnv::SO_setcomp( COLORVAL p, FLOATVAL index, FLOATVAL v, DEFVOIDPARAMIMPL )
 {
+	STATS_INC( SHD_so_setcomp );
+
 	INIT_SO
 
 	CHECKVARY( p )
@@ -1368,6 +1490,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_setcomp( COLORVAL p, FLOATVAL index, FLOATVAL v, 
 // setxcomp(p,v)
 STD_SOIMPL	CqShaderExecEnv::SO_setxcomp( POINTVAL p, FLOATVAL v, DEFVOIDPARAMIMPL )
 {
+	STATS_INC( SHD_so_setxcomp );
+
 	INIT_SO
 
 	CHECKVARY( p )
@@ -1385,6 +1509,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_setxcomp( POINTVAL p, FLOATVAL v, DEFVOIDPARAMIMP
 // setycomp(p,v)
 STD_SOIMPL	CqShaderExecEnv::SO_setycomp( POINTVAL p, FLOATVAL v, DEFVOIDPARAMIMPL )
 {
+	STATS_INC( SHD_so_setycomp );
+
 	INIT_SO
 
 	CHECKVARY( p )
@@ -1402,6 +1528,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_setycomp( POINTVAL p, FLOATVAL v, DEFVOIDPARAMIMP
 // setzcomp(p,v)
 STD_SOIMPL	CqShaderExecEnv::SO_setzcomp( POINTVAL p, FLOATVAL v, DEFVOIDPARAMIMPL )
 {
+	STATS_INC( SHD_so_setzcomp );
+
 	INIT_SO
 
 	CHECKVARY( p )
@@ -1419,6 +1547,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_setzcomp( POINTVAL p, FLOATVAL v, DEFVOIDPARAMIMP
 
 STD_SOIMPL	CqShaderExecEnv::SO_length( VECTORVAL V, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_length );
+
 	INIT_SO
 
 	CHECKVARY( V )
@@ -1432,6 +1562,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_length( VECTORVAL V, DEFPARAMIMPL )
 
 STD_SOIMPL	CqShaderExecEnv::SO_distance( POINTVAL P1, POINTVAL P2, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_distance );
+
 	INIT_SO
 
 	CHECKVARY( P1 )
@@ -1450,6 +1582,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_distance( POINTVAL P1, POINTVAL P2, DEFPARAMIMPL 
 // area(P)
 STD_SOIMPL CqShaderExecEnv::SO_area( POINTVAL p, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_area );
+
 	CqVector3D Defvec( 0.0f, 0.0f, 0.0f );
 	INIT_SO
 
@@ -1475,6 +1609,8 @@ STD_SOIMPL CqShaderExecEnv::SO_area( POINTVAL p, DEFPARAMIMPL )
 
 STD_SOIMPL	CqShaderExecEnv::SO_normalize( VECTORVAL V, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_normalize );
+
 	INIT_SO
 
 	CHECKVARY( V )
@@ -1492,6 +1628,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_normalize( VECTORVAL V, DEFPARAMIMPL )
 // faceforward(N,I)
 STD_SOIMPL CqShaderExecEnv::SO_faceforward( NORMALVAL N, VECTORVAL I, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_faceforward );
+
 	INIT_SO
 
 	CHECKVARY( N )
@@ -1513,6 +1651,8 @@ STD_SOIMPL CqShaderExecEnv::SO_faceforward( NORMALVAL N, VECTORVAL I, DEFPARAMIM
 // faceforward(N,I,Nref)
 STD_SOIMPL CqShaderExecEnv::SO_faceforward2( NORMALVAL N, VECTORVAL I, NORMALVAL Nref, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_faceforward2 );
+
 	INIT_SO
 
 	CHECKVARY( N )
@@ -1534,6 +1674,8 @@ STD_SOIMPL CqShaderExecEnv::SO_faceforward2( NORMALVAL N, VECTORVAL I, NORMALVAL
 // reflect(I,N)
 STD_SOIMPL CqShaderExecEnv::SO_reflect( VECTORVAL I, NORMALVAL N, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_reflect );
+
 	INIT_SO
 
 	CHECKVARY( I )
@@ -1554,6 +1696,8 @@ STD_SOIMPL CqShaderExecEnv::SO_reflect( VECTORVAL I, NORMALVAL N, DEFPARAMIMPL )
 // reftact(I,N,eta)
 STD_SOIMPL CqShaderExecEnv::SO_refract( VECTORVAL I, NORMALVAL N, FLOATVAL eta, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_refract );
+
 	INIT_SO
 
 	CHECKVARY( I )
@@ -1578,6 +1722,8 @@ STD_SOIMPL CqShaderExecEnv::SO_refract( VECTORVAL I, NORMALVAL N, FLOATVAL eta, 
 #define SQR(A)	((A)*(A))
 STD_SOIMPL CqShaderExecEnv::SO_fresnel( VECTORVAL I, NORMALVAL N, FLOATVAL eta, FLOATVAL Kr, FLOATVAL Kt, DEFVOIDPARAMIMPL )
 {
+	STATS_INC( SHD_so_fresnel );
+
 	INIT_SO
 
 	CHECKVARY( I )
@@ -1614,6 +1760,8 @@ STD_SOIMPL CqShaderExecEnv::SO_fresnel( VECTORVAL I, NORMALVAL N, FLOATVAL eta, 
 // fresnel(I,N,eta,Kr,Kt,R,T)
 STD_SOIMPL CqShaderExecEnv::SO_fresnel( VECTORVAL I, NORMALVAL N, FLOATVAL eta, FLOATVAL Kr, FLOATVAL Kt, VECTORVAL R, VECTORVAL T, DEFVOIDPARAMIMPL )
 {
+	STATS_INC( SHD_so_fresnel );
+
 	INIT_SO
 
 	CHECKVARY( I )
@@ -1657,6 +1805,8 @@ STD_SOIMPL CqShaderExecEnv::SO_fresnel( VECTORVAL I, NORMALVAL N, FLOATVAL eta, 
 // transform(s,s,P)
 STD_SOIMPL CqShaderExecEnv::SO_transform( STRINGVAL fromspace, STRINGVAL tospace, POINTVAL p, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_transform );
+
 	INIT_SO
 
 	if ( NULL == QGetRenderContextI() )
@@ -1684,6 +1834,8 @@ STD_SOIMPL CqShaderExecEnv::SO_transform( STRINGVAL fromspace, STRINGVAL tospace
 // transform(s,P)
 STD_SOIMPL CqShaderExecEnv::SO_transform( STRINGVAL tospace, POINTVAL p, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_transform );
+
 	INIT_SO
 
 	if ( NULL == QGetRenderContextI() )
@@ -1710,6 +1862,8 @@ STD_SOIMPL CqShaderExecEnv::SO_transform( STRINGVAL tospace, POINTVAL p, DEFPARA
 // transform(m,P)
 STD_SOIMPL CqShaderExecEnv::SO_transformm( MATRIXVAL tospace, POINTVAL p, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_transform );
+
 	INIT_SO
 
 	assert( pShader != 0 );
@@ -1729,6 +1883,8 @@ STD_SOIMPL CqShaderExecEnv::SO_transformm( MATRIXVAL tospace, POINTVAL p, DEFPAR
 // vtransform(s,s,P)
 STD_SOIMPL CqShaderExecEnv::SO_vtransform( STRINGVAL fromspace, STRINGVAL tospace, VECTORVAL p, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_vtransform );
+
 	INIT_SO
 
 	if ( NULL == QGetRenderContextI() )
@@ -1756,6 +1912,8 @@ STD_SOIMPL CqShaderExecEnv::SO_vtransform( STRINGVAL fromspace, STRINGVAL tospac
 // vtransform(s,P)
 STD_SOIMPL CqShaderExecEnv::SO_vtransform( STRINGVAL tospace, VECTORVAL p, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_vtransform );
+
 	INIT_SO
 
 	if ( NULL == QGetRenderContextI() )
@@ -1782,6 +1940,8 @@ STD_SOIMPL CqShaderExecEnv::SO_vtransform( STRINGVAL tospace, VECTORVAL p, DEFPA
 // vtransform(m,P)
 STD_SOIMPL CqShaderExecEnv::SO_vtransformm( MATRIXVAL tospace, VECTORVAL p, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_vtransform );
+
 	INIT_SO
 
 	assert( pShader != 0 );
@@ -1801,6 +1961,8 @@ STD_SOIMPL CqShaderExecEnv::SO_vtransformm( MATRIXVAL tospace, VECTORVAL p, DEFP
 // ntransform(s,s,P)
 STD_SOIMPL CqShaderExecEnv::SO_ntransform( STRINGVAL fromspace, STRINGVAL tospace, NORMALVAL p, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_ntransform );
+
 	INIT_SO
 
 	if ( NULL == QGetRenderContextI() )
@@ -1828,6 +1990,8 @@ STD_SOIMPL CqShaderExecEnv::SO_ntransform( STRINGVAL fromspace, STRINGVAL tospac
 // ntransform(s,P)
 STD_SOIMPL CqShaderExecEnv::SO_ntransform( STRINGVAL tospace, NORMALVAL p, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_ntransform );
+
 	INIT_SO
 
 	if ( NULL == QGetRenderContextI() )
@@ -1854,6 +2018,8 @@ STD_SOIMPL CqShaderExecEnv::SO_ntransform( STRINGVAL tospace, NORMALVAL p, DEFPA
 // ntransform(m,P)
 STD_SOIMPL CqShaderExecEnv::SO_ntransformm( MATRIXVAL tospace, NORMALVAL p, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_ntransform );
+
 	INIT_SO
 
 	assert( pShader != 0 );
@@ -1873,6 +2039,8 @@ STD_SOIMPL CqShaderExecEnv::SO_ntransformm( MATRIXVAL tospace, NORMALVAL p, DEFP
 // depth(P)
 STD_SOIMPL CqShaderExecEnv::SO_depth( POINTVAL p, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_depth );
+
 	INIT_SO
 
 	if ( NULL == QGetRenderContextI() )
@@ -1895,6 +2063,8 @@ STD_SOIMPL CqShaderExecEnv::SO_depth( POINTVAL p, DEFPARAMIMPL )
 // calculatenormal(P)
 STD_SOIMPL CqShaderExecEnv::SO_calculatenormal( POINTVAL p, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_calculatenormal );
+
 	CqVector3D Defvec( 0.0f, 0.0f, 0.0f );
 	INIT_SO
 
@@ -1918,6 +2088,8 @@ STD_SOIMPL CqShaderExecEnv::SO_calculatenormal( POINTVAL p, DEFPARAMIMPL )
 
 STD_SOIMPL CqShaderExecEnv::SO_cmix( COLORVAL color0, COLORVAL color1, FLOATVAL value, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_cmix );
+
 	INIT_SO
 
 	CHECKVARY( color0 )
@@ -1936,6 +2108,8 @@ STD_SOIMPL CqShaderExecEnv::SO_cmix( COLORVAL color0, COLORVAL color1, FLOATVAL 
 
 STD_SOIMPL	CqShaderExecEnv::SO_fmix( FLOATVAL f0, FLOATVAL f1, FLOATVAL value, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_fmix );
+
 	INIT_SO
 
 	CHECKVARY( f0 )
@@ -1953,6 +2127,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_fmix( FLOATVAL f0, FLOATVAL f1, FLOATVAL value, D
 
 STD_SOIMPL	CqShaderExecEnv::SO_pmix( POINTVAL p0, POINTVAL p1, FLOATVAL value, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_pmix );
+
 	INIT_SO
 
 	CHECKVARY( p0 )
@@ -1970,6 +2146,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_pmix( POINTVAL p0, POINTVAL p1, FLOATVAL value, D
 
 STD_SOIMPL	CqShaderExecEnv::SO_vmix( VECTORVAL v0, VECTORVAL v1, FLOATVAL value, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_vmix );
+
 	INIT_SO
 
 	CHECKVARY( v0 )
@@ -2007,6 +2185,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_nmix( NORMALVAL n0, NORMALVAL n1, FLOATVAL value,
 // texture(S)
 STD_SOIMPL CqShaderExecEnv::SO_ftexture1( STRINGVAL name, FLOATVAL channel, DEFPARAMVARIMPL )
 {
+	STATS_INC( SHD_so_ftexture1 );
+
 	TqFloat Deffloat = 0.0f;
 	INIT_SO
 
@@ -2084,6 +2264,8 @@ STD_SOIMPL CqShaderExecEnv::SO_ftexture1( STRINGVAL name, FLOATVAL channel, DEFP
 // texture(S,F,F)
 STD_SOIMPL CqShaderExecEnv::SO_ftexture2( STRINGVAL name, FLOATVAL channel, FLOATVAL s, FLOATVAL t, DEFPARAMVARIMPL )
 {
+	STATS_INC( SHD_so_ftexture2 );
+
 	TqFloat Deffloat = 0.0f;
 	INIT_SO
 
@@ -2160,6 +2342,8 @@ STD_SOIMPL CqShaderExecEnv::SO_ftexture2( STRINGVAL name, FLOATVAL channel, FLOA
 // texture(S,F,F,F,F,F,F,F,F)
 STD_SOIMPL CqShaderExecEnv::SO_ftexture3( STRINGVAL name, FLOATVAL channel, FLOATVAL s1, FLOATVAL t1, FLOATVAL s2, FLOATVAL t2, FLOATVAL s3, FLOATVAL t3, FLOATVAL s4, FLOATVAL t4, DEFPARAMVARIMPL )
 {
+	STATS_INC( SHD_so_ftexture3 );
+
 	INIT_SO
 
 	if ( NULL == QGetRenderContextI() )
@@ -2217,6 +2401,8 @@ STD_SOIMPL CqShaderExecEnv::SO_ftexture3( STRINGVAL name, FLOATVAL channel, FLOA
 // texture(S)
 STD_SOIMPL CqShaderExecEnv::SO_ctexture1( STRINGVAL name, FLOATVAL channel, DEFPARAMVARIMPL )
 {
+	STATS_INC( SHD_so_ctexture1 );
+
 	TqFloat Deffloat = 0.0f;
 	INIT_SO
 
@@ -2294,6 +2480,8 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture1( STRINGVAL name, FLOATVAL channel, DEFP
 // texture(S,F,F)
 STD_SOIMPL CqShaderExecEnv::SO_ctexture2( STRINGVAL name, FLOATVAL channel, FLOATVAL s, FLOATVAL t, DEFPARAMVARIMPL )
 {
+	STATS_INC( SHD_so_ctexture2 );
+
 	TqFloat Deffloat = 0.0f;
 	INIT_SO
 
@@ -2370,6 +2558,8 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture2( STRINGVAL name, FLOATVAL channel, FLOA
 // texture(S,F,F,F,F,F,F,F,F)
 STD_SOIMPL CqShaderExecEnv::SO_ctexture3( STRINGVAL name, FLOATVAL channel, FLOATVAL s1, FLOATVAL t1, FLOATVAL s2, FLOATVAL t2, FLOATVAL s3, FLOATVAL t3, FLOATVAL s4, FLOATVAL t4, DEFPARAMVARIMPL )
 {
+	STATS_INC( SHD_so_ctexture3 );
+
 	INIT_SO
 
 	if ( NULL == QGetRenderContextI() )
@@ -2427,6 +2617,8 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture3( STRINGVAL name, FLOATVAL channel, FLOA
 // environment(S,P)
 STD_SOIMPL CqShaderExecEnv::SO_fenvironment2( STRINGVAL name, FLOATVAL channel, VECTORVAL R, DEFPARAMVARIMPL )
 {
+	STATS_INC( SHD_so_fenvironment2 );
+
 	CqVector3D Defvec( 0.0f, 0.0f, 0.0f );
 	INIT_SO
 
@@ -2505,6 +2697,8 @@ STD_SOIMPL CqShaderExecEnv::SO_fenvironment2( STRINGVAL name, FLOATVAL channel, 
 // environment(S,P,P,P,P)
 STD_SOIMPL CqShaderExecEnv::SO_fenvironment3( STRINGVAL name, FLOATVAL channel, VECTORVAL R1, VECTORVAL R2, VECTORVAL R3, VECTORVAL R4, DEFPARAMVARIMPL )
 {
+	STATS_INC( SHD_so_fenvironment3 );
+
 	INIT_SO
 
 	if ( NULL == QGetRenderContextI() )
@@ -2562,6 +2756,8 @@ STD_SOIMPL CqShaderExecEnv::SO_fenvironment3( STRINGVAL name, FLOATVAL channel, 
 // environment(S,P)
 STD_SOIMPL CqShaderExecEnv::SO_cenvironment2( STRINGVAL name, FLOATVAL channel, VECTORVAL R, DEFPARAMVARIMPL )
 {
+	STATS_INC( SHD_so_cenvironment2 );
+
 	CqVector3D Defvec( 0.0f, 0.0f, 0.0f );
 	INIT_SO
 
@@ -2640,6 +2836,8 @@ STD_SOIMPL CqShaderExecEnv::SO_cenvironment2( STRINGVAL name, FLOATVAL channel, 
 // environment(S,P,P,P,P)
 STD_SOIMPL CqShaderExecEnv::SO_cenvironment3( STRINGVAL name, FLOATVAL channel, VECTORVAL R1, VECTORVAL R2, VECTORVAL R3, VECTORVAL R4, DEFPARAMVARIMPL )
 {
+	STATS_INC( SHD_so_cenvironment3 );
+
 	INIT_SO
 
 	if ( NULL == QGetRenderContextI() )
@@ -2735,6 +2933,8 @@ STD_SOIMPL CqShaderExecEnv::SO_bump3( STRINGVAL name, FLOATVAL channel, FLOATVAL
 // shadow(S,P)
 STD_SOIMPL CqShaderExecEnv::SO_shadow( STRINGVAL name, FLOATVAL channel, POINTVAL P, DEFPARAMVARIMPL )
 {
+	STATS_INC( SHD_so_shadow );
+
 	INIT_SO
 
 	IqShaderData* _sblur = 0;
@@ -2872,6 +3072,8 @@ STD_SOIMPL CqShaderExecEnv::SO_shadow( STRINGVAL name, FLOATVAL channel, POINTVA
 
 STD_SOIMPL CqShaderExecEnv::SO_shadow1( STRINGVAL name, FLOATVAL channel, POINTVAL P1, POINTVAL P2, POINTVAL P3, POINTVAL P4, DEFPARAMVARIMPL )
 {
+	STATS_INC( SHD_so_shadow1 );
+
 	INIT_SO
 
 	if ( NULL == QGetRenderContextI() )
@@ -2914,6 +3116,8 @@ STD_SOIMPL CqShaderExecEnv::SO_shadow1( STRINGVAL name, FLOATVAL channel, POINTV
 
 STD_SOIMPL CqShaderExecEnv::SO_ambient( DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_ambient );
+
 	INIT_SO
 
 	// Use the lightsource stack on the current surface
@@ -2953,6 +3157,8 @@ STD_SOIMPL CqShaderExecEnv::SO_ambient( DEFPARAMIMPL )
 // diffuse(N)
 STD_SOIMPL CqShaderExecEnv::SO_diffuse( NORMALVAL N, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_diffuse );
+
 	INIT_SO
 
 	// If the illuminance cache is already OK, then we don't need to bother filling in the illuminance parameters.
@@ -3031,6 +3237,8 @@ STD_SOIMPL CqShaderExecEnv::SO_diffuse( NORMALVAL N, DEFPARAMIMPL )
 // specular(N,V,roughness)
 STD_SOIMPL CqShaderExecEnv::SO_specular( NORMALVAL N, VECTORVAL V, FLOATVAL roughness, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_specular );
+
 	INIT_SO
 
 	// If the illuminance cache is already OK, then we don't need to bother filling in the illuminance parameters.
@@ -3113,6 +3321,8 @@ STD_SOIMPL CqShaderExecEnv::SO_specular( NORMALVAL N, VECTORVAL V, FLOATVAL roug
 // phong(N,V,size)
 STD_SOIMPL CqShaderExecEnv::SO_phong( NORMALVAL N, VECTORVAL V, FLOATVAL size, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_phong );
+
 	INIT_SO
 
 	IqShaderData * pnV = pShader ->CreateTemporaryStorage( type_vector, class_varying );
@@ -3197,6 +3407,8 @@ STD_SOIMPL CqShaderExecEnv::SO_phong( NORMALVAL N, VECTORVAL V, FLOATVAL size, D
 // trace(P,R)
 STD_SOIMPL CqShaderExecEnv::SO_trace( POINTVAL P, VECTORVAL R, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_trace );
+
 	INIT_SO
 
 	CHECKVARY( P )
@@ -3213,6 +3425,8 @@ STD_SOIMPL CqShaderExecEnv::SO_trace( POINTVAL P, VECTORVAL R, DEFPARAMIMPL )
 // illuminance(P,nsamples)
 STD_SOIMPL CqShaderExecEnv::SO_illuminance( STRINGVAL Category, POINTVAL P, VECTORVAL Axis, FLOATVAL Angle, DEFVOIDPARAMIMPL )
 {
+	STATS_INC( SHD_so_illuminance );
+
 	INIT_SO
 
 	BEGIN_UNIFORM_SECTION
@@ -3310,6 +3524,8 @@ STD_SOIMPL CqShaderExecEnv::SO_illuminance( STRINGVAL Category, POINTVAL P, VECT
 
 STD_SOIMPL	CqShaderExecEnv::SO_illuminance( STRINGVAL Category, POINTVAL P, DEFVOIDPARAMIMPL )
 {
+	STATS_INC( SHD_so_illuminance );
+
 	SO_illuminance( Category, P, NULL, NULL );
 }
 
@@ -3318,6 +3534,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_illuminance( STRINGVAL Category, POINTVAL P, DEFV
 // illuminate(P)
 STD_SOIMPL CqShaderExecEnv::SO_illuminate( POINTVAL P, VECTORVAL Axis, FLOATVAL Angle, DEFVOIDPARAMIMPL )
 {
+	STATS_INC( SHD_so_illuminate );
+
 	INIT_SO
 
 	TqBool res = TqTrue;
@@ -3361,6 +3579,8 @@ STD_SOIMPL CqShaderExecEnv::SO_illuminate( POINTVAL P, VECTORVAL Axis, FLOATVAL 
 
 STD_SOIMPL	CqShaderExecEnv::SO_illuminate( POINTVAL P, DEFVOIDPARAMIMPL )
 {
+	STATS_INC( SHD_so_illuminate );
+
 	SO_illuminate( P, NULL, NULL, pShader );
 }
 
@@ -3370,6 +3590,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_illuminate( POINTVAL P, DEFVOIDPARAMIMPL )
 STD_SOIMPL CqShaderExecEnv::SO_solar( VECTORVAL Axis, FLOATVAL Angle, DEFVOIDPARAMIMPL )
 {
 	// TODO: Check light cone, and exclude points outside.
+	STATS_INC( SHD_so_solar );
+
 	INIT_SO
 
 	TqBool res = TqTrue;
@@ -3392,6 +3614,8 @@ STD_SOIMPL CqShaderExecEnv::SO_solar( VECTORVAL Axis, FLOATVAL Angle, DEFVOIDPAR
 
 STD_SOIMPL	CqShaderExecEnv::SO_solar( DEFVOIDPARAMIMPL )
 {
+	STATS_INC( SHD_so_solar );
+
 	SO_solar( NULL, NULL, pShader );
 }
 
@@ -3401,6 +3625,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_solar( DEFVOIDPARAMIMPL )
 
 STD_SOIMPL	CqShaderExecEnv::SO_printf( STRINGVAL str, DEFVOIDPARAMVARIMPL )
 {
+	STATS_INC( SHD_so_printf );
+
 	INIT_SO
 
 	if ( NULL == QGetRenderContextI() )
@@ -3426,6 +3652,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_printf( STRINGVAL str, DEFVOIDPARAMVARIMPL )
 
 STD_SOIMPL	CqShaderExecEnv::SO_format( STRINGVAL str, DEFPARAMVARIMPL )
 {
+	STATS_INC( SHD_so_format );
+
 	INIT_SO
 
 	CHECKVARY( str )
@@ -3449,6 +3677,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_format( STRINGVAL str, DEFPARAMVARIMPL )
 
 STD_SOIMPL	CqShaderExecEnv::SO_concat( STRINGVAL stra, STRINGVAL strb, DEFPARAMVARIMPL )
 {
+	STATS_INC( SHD_so_concat );
+
 	INIT_SO
 
 	CHECKVARY( stra )
@@ -3480,6 +3710,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_concat( STRINGVAL stra, STRINGVAL strb, DEFPARAMV
 // noise(v)
 STD_SOIMPL CqShaderExecEnv::SO_fcellnoise1( FLOATVAL v, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_fcellnoise1 );
+
 	INIT_SO
 
 	CHECKVARY( v )
@@ -3493,6 +3725,8 @@ STD_SOIMPL CqShaderExecEnv::SO_fcellnoise1( FLOATVAL v, DEFPARAMIMPL )
 
 STD_SOIMPL CqShaderExecEnv::SO_ccellnoise1( FLOATVAL v, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_ccellnoise1 );
+
 	INIT_SO
 
 	CHECKVARY( v )
@@ -3506,6 +3740,8 @@ STD_SOIMPL CqShaderExecEnv::SO_ccellnoise1( FLOATVAL v, DEFPARAMIMPL )
 
 STD_SOIMPL CqShaderExecEnv::SO_pcellnoise1( FLOATVAL v, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_pcellnoise1 );
+
 	INIT_SO
 
 	CHECKVARY( v )
@@ -3521,6 +3757,8 @@ STD_SOIMPL CqShaderExecEnv::SO_pcellnoise1( FLOATVAL v, DEFPARAMIMPL )
 // noise(u,v)
 STD_SOIMPL CqShaderExecEnv::SO_fcellnoise2( FLOATVAL u, FLOATVAL v, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_fcellnoise2 );
+
 	INIT_SO
 
 	CHECKVARY( u )
@@ -3535,6 +3773,8 @@ STD_SOIMPL CqShaderExecEnv::SO_fcellnoise2( FLOATVAL u, FLOATVAL v, DEFPARAMIMPL
 }
 STD_SOIMPL CqShaderExecEnv::SO_ccellnoise2( FLOATVAL u, FLOATVAL v, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_ccellnoise2 );
+
 	INIT_SO
 
 	CHECKVARY( u )
@@ -3549,6 +3789,8 @@ STD_SOIMPL CqShaderExecEnv::SO_ccellnoise2( FLOATVAL u, FLOATVAL v, DEFPARAMIMPL
 }
 STD_SOIMPL CqShaderExecEnv::SO_pcellnoise2( FLOATVAL u, FLOATVAL v, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_pcellnoise3 );
+
 	INIT_SO
 
 	CHECKVARY( u )
@@ -3566,6 +3808,8 @@ STD_SOIMPL CqShaderExecEnv::SO_pcellnoise2( FLOATVAL u, FLOATVAL v, DEFPARAMIMPL
 // noise(p)
 STD_SOIMPL CqShaderExecEnv::SO_fcellnoise3( POINTVAL p, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_fcellnoise3 );
+
 	INIT_SO
 
 	CHECKVARY( p )
@@ -3578,6 +3822,8 @@ STD_SOIMPL CqShaderExecEnv::SO_fcellnoise3( POINTVAL p, DEFPARAMIMPL )
 }
 STD_SOIMPL CqShaderExecEnv::SO_ccellnoise3( POINTVAL p, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_ccellnoise3 );
+
 	INIT_SO
 
 	CHECKVARY( p )
@@ -3590,6 +3836,8 @@ STD_SOIMPL CqShaderExecEnv::SO_ccellnoise3( POINTVAL p, DEFPARAMIMPL )
 }
 STD_SOIMPL CqShaderExecEnv::SO_pcellnoise3( POINTVAL p, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_pcellnoise2 );
+
 	INIT_SO
 
 	CHECKVARY( p )
@@ -3605,6 +3853,8 @@ STD_SOIMPL CqShaderExecEnv::SO_pcellnoise3( POINTVAL p, DEFPARAMIMPL )
 // noise(p,f)
 STD_SOIMPL CqShaderExecEnv::SO_fcellnoise4( POINTVAL p, FLOATVAL v, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_fcellnoise4 );
+
 	INIT_SO
 
 	CHECKVARY( p )
@@ -3619,6 +3869,8 @@ STD_SOIMPL CqShaderExecEnv::SO_fcellnoise4( POINTVAL p, FLOATVAL v, DEFPARAMIMPL
 }
 STD_SOIMPL CqShaderExecEnv::SO_ccellnoise4( POINTVAL p, FLOATVAL v, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_ccellnoise4 );
+
 	INIT_SO
 
 	CHECKVARY( p )
@@ -3633,6 +3885,8 @@ STD_SOIMPL CqShaderExecEnv::SO_ccellnoise4( POINTVAL p, FLOATVAL v, DEFPARAMIMPL
 }
 STD_SOIMPL CqShaderExecEnv::SO_pcellnoise4( POINTVAL p, FLOATVAL v, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_pcellnoise2 );
+
 	INIT_SO
 
 	CHECKVARY( p )
@@ -3654,6 +3908,8 @@ STD_SOIMPL CqShaderExecEnv::SO_pcellnoise4( POINTVAL p, FLOATVAL v, DEFPARAMIMPL
 
 STD_SOIMPL CqShaderExecEnv::SO_atmosphere( STRINGVAL name, IqShaderData* pV, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_atmosphere );
+
 	INIT_SO
 
 	IqShader * pAtmosphere = NULL;
@@ -3677,6 +3933,8 @@ STD_SOIMPL CqShaderExecEnv::SO_atmosphere( STRINGVAL name, IqShaderData* pV, DEF
 
 STD_SOIMPL CqShaderExecEnv::SO_displacement( STRINGVAL name, IqShaderData* pV, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_displacement );
+
 	INIT_SO
 
 	IqShader * pDisplacement = NULL;
@@ -3700,6 +3958,8 @@ STD_SOIMPL CqShaderExecEnv::SO_displacement( STRINGVAL name, IqShaderData* pV, D
 
 STD_SOIMPL CqShaderExecEnv::SO_lightsource( STRINGVAL name, IqShaderData* pV, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_lightsource );
+
 	INIT_SO
 
 	// This should only be called within an Illuminance construct, so m_li should be valid.
@@ -3723,6 +3983,8 @@ STD_SOIMPL CqShaderExecEnv::SO_lightsource( STRINGVAL name, IqShaderData* pV, DE
 
 STD_SOIMPL CqShaderExecEnv::SO_surface( STRINGVAL name, IqShaderData* pV, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_surface );
+
 	INIT_SO
 
 	IqShader * pSurface = NULL;
@@ -3746,6 +4008,8 @@ STD_SOIMPL CqShaderExecEnv::SO_surface( STRINGVAL name, IqShaderData* pV, DEFPAR
 
 STD_SOIMPL CqShaderExecEnv::SO_attribute( STRINGVAL name, IqShaderData* pV, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_attribute );
+
 	INIT_SO
 
 	//Find out if it is a specific attribute request
@@ -3818,6 +4082,8 @@ STD_SOIMPL CqShaderExecEnv::SO_attribute( STRINGVAL name, IqShaderData* pV, DEFP
 
 STD_SOIMPL CqShaderExecEnv::SO_option( STRINGVAL name, IqShaderData* pV, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_option );
+
 	INIT_SO
 
 	if ( NULL == QGetRenderContextI() )
@@ -3946,6 +4212,8 @@ STD_SOIMPL CqShaderExecEnv::SO_option( STRINGVAL name, IqShaderData* pV, DEFPARA
 
 STD_SOIMPL CqShaderExecEnv::SO_rendererinfo( STRINGVAL name, IqShaderData* pV, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_rendererinfo );
+
 	INIT_SO
 
 	BEGIN_UNIFORM_SECTION
@@ -3997,6 +4265,8 @@ STD_SOIMPL CqShaderExecEnv::SO_rendererinfo( STRINGVAL name, IqShaderData* pV, D
 
 STD_SOIMPL CqShaderExecEnv::SO_incident( STRINGVAL name, IqShaderData* pV, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_incident );
+
 	INIT_SO
 
 	BEGIN_UNIFORM_SECTION
@@ -4010,6 +4280,8 @@ STD_SOIMPL CqShaderExecEnv::SO_incident( STRINGVAL name, IqShaderData* pV, DEFPA
 
 STD_SOIMPL CqShaderExecEnv::SO_opposite( STRINGVAL name, IqShaderData* pV, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_opposite );
+
 	INIT_SO
 
 	BEGIN_UNIFORM_SECTION
@@ -4022,6 +4294,8 @@ STD_SOIMPL CqShaderExecEnv::SO_opposite( STRINGVAL name, IqShaderData* pV, DEFPA
 // ctransform(s,s,c)
 STD_SOIMPL CqShaderExecEnv::SO_ctransform( STRINGVAL fromspace, STRINGVAL tospace, COLORVAL c, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_ctransform );
+
 	INIT_SO
 
 	CHECKVARY( c )
@@ -4057,6 +4331,8 @@ STD_SOIMPL CqShaderExecEnv::SO_ctransform( STRINGVAL fromspace, STRINGVAL tospac
 // ctransform(s,c)
 STD_SOIMPL CqShaderExecEnv::SO_ctransform( STRINGVAL tospace, COLORVAL c, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_ctransform );
+
 	assert( pShader != 0 );
 	SO_ctransform( NULL, tospace, c, Result, pShader );
 }
@@ -4066,6 +4342,8 @@ STD_SOIMPL CqShaderExecEnv::SO_ctransform( STRINGVAL tospace, COLORVAL c, DEFPAR
 // ctransform(s,c)
 STD_SOIMPL CqShaderExecEnv::SO_ptlined( POINTVAL P0, POINTVAL P1, POINTVAL Q, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_ptlined );
+
 	INIT_SO
 
 	CHECKVARY( P0 )
@@ -4104,6 +4382,8 @@ STD_SOIMPL CqShaderExecEnv::SO_ptlined( POINTVAL P0, POINTVAL P1, POINTVAL Q, DE
 
 STD_SOIMPL	CqShaderExecEnv::SO_inversesqrt( FLOATVAL x, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_inversesqrt );
+
 	INIT_SO
 
 	CHECKVARY( x )
@@ -4118,6 +4398,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_inversesqrt( FLOATVAL x, DEFPARAMIMPL )
 STD_SOIMPL	CqShaderExecEnv::SO_match( STRINGVAL a, STRINGVAL b, DEFPARAMIMPL )
 {
 	// TODO: Do this properly.
+	STATS_INC( SHD_so_match );
+
 	INIT_SO
 
 	BEGIN_UNIFORM_SECTION
@@ -4142,6 +4424,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_match( STRINGVAL a, STRINGVAL b, DEFPARAMIMPL )
 // pnoise(u,period)
 STD_SOIMPL CqShaderExecEnv::SO_fpnoise1( FLOATVAL v, FLOATVAL period, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_fpnoise1 );
+
 	INIT_SO
 
 	CHECKVARY( v )
@@ -4159,6 +4443,8 @@ STD_SOIMPL CqShaderExecEnv::SO_fpnoise1( FLOATVAL v, FLOATVAL period, DEFPARAMIM
 // pnoise(u,v,uperiod,vperiod)
 STD_SOIMPL CqShaderExecEnv::SO_fpnoise2( FLOATVAL u, FLOATVAL v, FLOATVAL uperiod, FLOATVAL vperiod, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_fpnoise2 );
+
 	INIT_SO
 
 	CHECKVARY( u )
@@ -4181,6 +4467,8 @@ STD_SOIMPL CqShaderExecEnv::SO_fpnoise2( FLOATVAL u, FLOATVAL v, FLOATVAL uperio
 // pnoise(p,pperiod)
 STD_SOIMPL CqShaderExecEnv::SO_fpnoise3( POINTVAL p, POINTVAL pperiod, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_fnoise3 );
+
 	INIT_SO
 
 	CHECKVARY( p )
@@ -4200,6 +4488,8 @@ STD_SOIMPL CqShaderExecEnv::SO_fpnoise3( POINTVAL p, POINTVAL pperiod, DEFPARAMI
 // pnoise(p,t,pperiod,tperiod)
 STD_SOIMPL CqShaderExecEnv::SO_fpnoise4( POINTVAL p, FLOATVAL t, POINTVAL pperiod, FLOATVAL tperiod, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_fnoise4 );
+
 	INIT_SO
 
 	CHECKVARY( p )
@@ -4223,6 +4513,8 @@ STD_SOIMPL CqShaderExecEnv::SO_fpnoise4( POINTVAL p, FLOATVAL t, POINTVAL pperio
 // pnoise(u,period)
 STD_SOIMPL CqShaderExecEnv::SO_cpnoise1( FLOATVAL v, FLOATVAL period, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_cpnoise1 );
+
 	INIT_SO
 
 	CHECKVARY( v )
@@ -4240,6 +4532,8 @@ STD_SOIMPL CqShaderExecEnv::SO_cpnoise1( FLOATVAL v, FLOATVAL period, DEFPARAMIM
 // pnoise(u,v,uperiod,vperiod)
 STD_SOIMPL CqShaderExecEnv::SO_cpnoise2( FLOATVAL u, FLOATVAL v, FLOATVAL uperiod, FLOATVAL vperiod, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_cpnoise2 );
+
 	INIT_SO
 
 	CHECKVARY( u )
@@ -4262,6 +4556,8 @@ STD_SOIMPL CqShaderExecEnv::SO_cpnoise2( FLOATVAL u, FLOATVAL v, FLOATVAL uperio
 // pnoise(p,pperiod)
 STD_SOIMPL CqShaderExecEnv::SO_cpnoise3( POINTVAL p, POINTVAL pperiod, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_cpnoise3 );
+
 	INIT_SO
 
 	CHECKVARY( p )
@@ -4281,6 +4577,8 @@ STD_SOIMPL CqShaderExecEnv::SO_cpnoise3( POINTVAL p, POINTVAL pperiod, DEFPARAMI
 // pnoise(p,t,pperiod,tperiod)
 STD_SOIMPL CqShaderExecEnv::SO_cpnoise4( POINTVAL p, FLOATVAL t, POINTVAL pperiod, FLOATVAL tperiod, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_cpnoise4 );
+
 	INIT_SO
 
 	CHECKVARY( p )
@@ -4304,6 +4602,8 @@ STD_SOIMPL CqShaderExecEnv::SO_cpnoise4( POINTVAL p, FLOATVAL t, POINTVAL pperio
 // pnoise(u,period)
 STD_SOIMPL CqShaderExecEnv::SO_ppnoise1( FLOATVAL v, FLOATVAL period, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_ppnoise1 );
+
 	INIT_SO
 
 	CHECKVARY( v )
@@ -4321,6 +4621,8 @@ STD_SOIMPL CqShaderExecEnv::SO_ppnoise1( FLOATVAL v, FLOATVAL period, DEFPARAMIM
 // pnoise(u,v,uperiod,vperiod)
 STD_SOIMPL CqShaderExecEnv::SO_ppnoise2( FLOATVAL u, FLOATVAL v, FLOATVAL uperiod, FLOATVAL vperiod, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_ppnoise2 );
+
 	INIT_SO
 
 	CHECKVARY( u )
@@ -4343,6 +4645,8 @@ STD_SOIMPL CqShaderExecEnv::SO_ppnoise2( FLOATVAL u, FLOATVAL v, FLOATVAL uperio
 // pnoise(p,pperiod)
 STD_SOIMPL CqShaderExecEnv::SO_ppnoise3( POINTVAL p, POINTVAL pperiod, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_ppnoise3 );
+
 	INIT_SO
 
 	CHECKVARY( p )
@@ -4362,6 +4666,8 @@ STD_SOIMPL CqShaderExecEnv::SO_ppnoise3( POINTVAL p, POINTVAL pperiod, DEFPARAMI
 // pnoise(p,t,pperiod,tperiod)
 STD_SOIMPL CqShaderExecEnv::SO_ppnoise4( POINTVAL p, FLOATVAL t, POINTVAL pperiod, FLOATVAL tperiod, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_ppnoise4 );
+
 	INIT_SO
 
 	CHECKVARY( p )
@@ -4386,6 +4692,8 @@ STD_SOIMPL CqShaderExecEnv::SO_ppnoise4( POINTVAL p, FLOATVAL t, POINTVAL pperio
 // rotate(Q,angle,P0,P1)
 STD_SOIMPL CqShaderExecEnv::SO_rotate( VECTORVAL Q, FLOATVAL angle, POINTVAL P0, POINTVAL P1, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_rotate );
+
 	INIT_SO
 
 	CHECKVARY( Q )
@@ -4412,6 +4720,8 @@ STD_SOIMPL CqShaderExecEnv::SO_rotate( VECTORVAL Q, FLOATVAL angle, POINTVAL P0,
 // filterstep(edge,s1)
 STD_SOIMPL CqShaderExecEnv::SO_filterstep( FLOATVAL edge, FLOATVAL s1, DEFPARAMVARIMPL )
 {
+	STATS_INC( SHD_so_filterstep );
+
 	TqFloat Deffloat = 0.0f;
 	INIT_SO
 
@@ -4455,6 +4765,8 @@ STD_SOIMPL CqShaderExecEnv::SO_filterstep( FLOATVAL edge, FLOATVAL s1, DEFPARAMV
 // filterstep(edge,s1,s2)
 STD_SOIMPL CqShaderExecEnv::SO_filterstep2( FLOATVAL edge, FLOATVAL s1, FLOATVAL s2, DEFPARAMVARIMPL )
 {
+	STATS_INC( SHD_so_filterstep2 );
+
 	GET_FILTER_PARAMS;
 
 	INIT_SO
@@ -4478,6 +4790,8 @@ STD_SOIMPL CqShaderExecEnv::SO_filterstep2( FLOATVAL edge, FLOATVAL s1, FLOATVAL
 // specularbrdf(L,N,V,rough)
 STD_SOIMPL CqShaderExecEnv::SO_specularbrdf( VECTORVAL L, NORMALVAL N, VECTORVAL V, FLOATVAL rough, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_specularbrdf );
+
 	INIT_SO
 
 	CHECKVARY( L )
@@ -4507,6 +4821,8 @@ STD_SOIMPL CqShaderExecEnv::SO_specularbrdf( VECTORVAL L, NORMALVAL N, VECTORVAL
 // determinant(m)
 STD_SOIMPL CqShaderExecEnv::SO_determinant( MATRIXVAL M, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_determinant );
+
 	INIT_SO
 
 	CHECKVARY( M )
@@ -4523,6 +4839,8 @@ STD_SOIMPL CqShaderExecEnv::SO_determinant( MATRIXVAL M, DEFPARAMIMPL )
 // translate(m,v)
 STD_SOIMPL CqShaderExecEnv::SO_mtranslate( MATRIXVAL M, VECTORVAL V, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_mtranslate );
+
 	INIT_SO
 
 	CHECKVARY( M )
@@ -4541,6 +4859,8 @@ STD_SOIMPL CqShaderExecEnv::SO_mtranslate( MATRIXVAL M, VECTORVAL V, DEFPARAMIMP
 // rotate(m,v)
 STD_SOIMPL CqShaderExecEnv::SO_mrotate( MATRIXVAL M, FLOATVAL angle, VECTORVAL axis, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_mrotate );
+
 	INIT_SO
 
 	CHECKVARY( M )
@@ -4561,6 +4881,8 @@ STD_SOIMPL CqShaderExecEnv::SO_mrotate( MATRIXVAL M, FLOATVAL angle, VECTORVAL a
 // scale(m,p)
 STD_SOIMPL CqShaderExecEnv::SO_mscale( MATRIXVAL M, POINTVAL S, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_mscale );
+
 	INIT_SO
 
 	CHECKVARY( M )
@@ -4580,6 +4902,8 @@ STD_SOIMPL CqShaderExecEnv::SO_mscale( MATRIXVAL M, POINTVAL S, DEFPARAMIMPL )
 // setmcomp(p,v)
 STD_SOIMPL	CqShaderExecEnv::SO_setmcomp( MATRIXVAL M, FLOATVAL r, FLOATVAL c, FLOATVAL v, DEFVOIDPARAMIMPL )
 {
+	STATS_INC( SHD_so_setmcomp );
+
 	INIT_SO
 
 	CHECKVARY( M )
@@ -4603,6 +4927,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_setmcomp( MATRIXVAL M, FLOATVAL r, FLOATVAL c, FL
 // spline(value, f1,f2,...,fn)
 STD_SOIMPL	CqShaderExecEnv::SO_fsplinea( FLOATVAL value, FLOATARRAYVAL a, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_fsplinea );
+
 	INIT_SO
 
 	assert( a->ArrayLength() > 0 );
@@ -4649,6 +4975,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_fsplinea( FLOATVAL value, FLOATARRAYVAL a, DEFPAR
 // spline(value, f1,f2,...,fn)
 STD_SOIMPL	CqShaderExecEnv::SO_csplinea( FLOATVAL value, COLORARRAYVAL a, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_csplinea );
+
 	INIT_SO
 
 	assert( a->ArrayLength() > 0 );
@@ -4696,6 +5024,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_csplinea( FLOATVAL value, COLORARRAYVAL a, DEFPAR
 // spline(value, f1,f2,...,fn)
 STD_SOIMPL	CqShaderExecEnv::SO_psplinea( FLOATVAL value, POINTARRAYVAL a, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_psplinea );
+
 	INIT_SO
 
 	assert( a->ArrayLength() > 0 );
@@ -4743,6 +5073,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_psplinea( FLOATVAL value, POINTARRAYVAL a, DEFPAR
 // spline(value, f1,f2,...,fn)
 STD_SOIMPL	CqShaderExecEnv::SO_sfsplinea( STRINGVAL basis, FLOATVAL value, FLOATARRAYVAL a, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_sfsplinea );
+
 	INIT_SO
 
 	assert( a->ArrayLength() > 0 );
@@ -4794,6 +5126,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_sfsplinea( STRINGVAL basis, FLOATVAL value, FLOAT
 // spline(value, f1,f2,...,fn)
 STD_SOIMPL	CqShaderExecEnv::SO_scsplinea( STRINGVAL basis, FLOATVAL value, COLORARRAYVAL a, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_scsplinea );
+
 	INIT_SO
 
 	assert( a->ArrayLength() > 0 );
@@ -4846,6 +5180,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_scsplinea( STRINGVAL basis, FLOATVAL value, COLOR
 // spline(value, f1,f2,...,fn)
 STD_SOIMPL	CqShaderExecEnv::SO_spsplinea( STRINGVAL basis, FLOATVAL value, POINTARRAYVAL a, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_spsplinea );
+
 	INIT_SO
 
 	assert( a->ArrayLength() > 0 );
@@ -4898,6 +5234,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_spsplinea( STRINGVAL basis, FLOATVAL value, POINT
 // shadername()
 STD_SOIMPL	CqShaderExecEnv::SO_shadername( DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_shadername );
+
 	INIT_SO
 
 	CHECKVARY( Result )
@@ -4912,6 +5250,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_shadername( DEFPARAMIMPL )
 // shadername(s)
 STD_SOIMPL	CqShaderExecEnv::SO_shadername2( STRINGVAL shader, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_shadername2 );
+
 	INIT_SO
 
 	CqString strName( "" );
@@ -4945,6 +5285,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_shadername2( STRINGVAL shader, DEFPARAMIMPL )
 
 STD_SOIMPL CqShaderExecEnv::SO_textureinfo( STRINGVAL name, STRINGVAL dataname, IqShaderData* pV, DEFPARAMIMPL )
 {
+	STATS_INC( SHD_so_textureinfo );
+
 	INIT_SO
 
 	if ( NULL == QGetRenderContextI() )
@@ -5286,6 +5628,8 @@ extern "C" int bake_3( BakingData *bd, char *name, float s, float t, float *bake
 
 STD_SOIMPL CqShaderExecEnv::SO_bake_f( STRINGVAL name, FLOATVAL s, FLOATVAL t, FLOATVAL f, DEFVOIDPARAMVARIMPL )
 {
+	STATS_INC( SHD_so_bake );
+
 	INIT_SO
 
 	CHECKVARY( f );
@@ -5311,6 +5655,8 @@ STD_SOIMPL CqShaderExecEnv::SO_bake_f( STRINGVAL name, FLOATVAL s, FLOATVAL t, F
 
 STD_SOIMPL CqShaderExecEnv::SO_bake_3c( STRINGVAL name, FLOATVAL s, FLOATVAL t, COLORVAL f, DEFVOIDPARAMVARIMPL )
 {
+	STATS_INC( SHD_so_bake );
+
 	INIT_SO
 
 	CHECKVARY( f );
@@ -5337,6 +5683,8 @@ STD_SOIMPL CqShaderExecEnv::SO_bake_3c( STRINGVAL name, FLOATVAL s, FLOATVAL t, 
 
 STD_SOIMPL CqShaderExecEnv::SO_bake_3n( STRINGVAL name, FLOATVAL s, FLOATVAL t, NORMALVAL f, DEFVOIDPARAMVARIMPL )
 {
+	STATS_INC( SHD_so_bake );
+
 	INIT_SO
 
 	CHECKVARY( f );
@@ -5366,6 +5714,8 @@ STD_SOIMPL CqShaderExecEnv::SO_bake_3n( STRINGVAL name, FLOATVAL s, FLOATVAL t, 
 
 STD_SOIMPL CqShaderExecEnv::SO_bake_3p( STRINGVAL name, FLOATVAL s, FLOATVAL t, POINTVAL f, DEFVOIDPARAMVARIMPL )
 {
+	STATS_INC( SHD_so_bake );
+
 	INIT_SO
 
 	CHECKVARY( f );
@@ -5395,6 +5745,8 @@ STD_SOIMPL CqShaderExecEnv::SO_bake_3p( STRINGVAL name, FLOATVAL s, FLOATVAL t, 
 
 STD_SOIMPL CqShaderExecEnv::SO_bake_3v( STRINGVAL name, FLOATVAL s, FLOATVAL t, VECTORVAL f, DEFVOIDPARAMVARIMPL )
 {
+	STATS_INC( SHD_so_bake );
+
 	INIT_SO
 	CHECKVARY( f );
 	CHECKVARY( s );
@@ -5425,6 +5777,8 @@ STD_SOIMPL CqShaderExecEnv::SO_bake_3v( STRINGVAL name, FLOATVAL s, FLOATVAL t, 
 // We manually decalr th
 STD_SOIMPL CqShaderExecEnv::SO_external( DSOMethod method, void *initData, DEFPARAMVARIMPL )
 {
+	STATS_INC( SHD_so_external );
+
 	INIT_SO
 
 	CHECKVARY( Result );
@@ -5767,6 +6121,8 @@ STD_SOIMPL CqShaderExecEnv::SO_external( DSOMethod method, void *initData, DEFPA
 // occlusion(occlmap,P,N,samples)
 STD_SOIMPL CqShaderExecEnv::SO_occlusion( STRINGVAL occlmap, FLOATVAL channel, POINTVAL P, NORMALVAL N, FLOATVAL samples, DEFPARAMVARIMPL )
 {
+	STATS_INC( SHD_so_occlusion );
+
 	INIT_SO
 
 	if ( NULL == QGetRenderContextI() )

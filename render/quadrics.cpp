@@ -47,6 +47,8 @@ CqQuadric::CqQuadric()
 {
 	m_uDiceSize = m_vDiceSize = 0;
 
+	STATS_INC( GPR_quad );
+
 }
 
 
