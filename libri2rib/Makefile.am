@@ -15,4 +15,4 @@ else
 AM_CXXFLAGS =
 endif
 
-EXTRA_DIST = libri2rib.dsp
+EXTRA_DIST = libri2rib.dsp COPYING_LGPL
