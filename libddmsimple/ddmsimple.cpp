@@ -56,7 +56,7 @@ TqInt CqDDManagerSimple::Shutdown()
 }
 
 
-TqInt CqDDManagerSimple::AddDisplay( const TqChar* name, const TqChar* type, const TqChar* mode, TqInt compression, TqInt quality )
+TqInt CqDDManagerSimple::AddDisplay( const TqChar* name, const TqChar* type, const TqChar* mode, TqInt compression, TqInt quality, TqInt modeID, TqInt dataOffset, TqInt dataSize )
 {
 	m_aDisplayRequests.push_back( SqDDevice( name, type, mode ) );
 	m_aDisplayQuality.push_back( quality );

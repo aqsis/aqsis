@@ -33,6 +33,7 @@
 #include	"color.h"
 #include	"ri.h"
 #include	"iddmanager.h"
+#include	"ishaderexecenv.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -82,13 +83,17 @@ class CqDDManagerSimple : public IqDDManager
 
 		virtual	TqInt	Initialise();
 		virtual	TqInt	Shutdown();
-		virtual	TqInt	AddDisplay( const TqChar* name, const TqChar* type, const TqChar* mode, TqInt compression, TqInt quality );
+		virtual	TqInt	AddDisplay( const TqChar* name, const TqChar* type, const TqChar* mode, TqInt compression, TqInt quality, TqInt modeID, TqInt dataOffset, TqInt dataSize );
 		virtual	TqInt	ClearDisplays();
 		virtual	TqInt	OpenDisplays();
 		virtual	TqInt	CloseDisplays();
 		virtual	TqInt	DisplayBucket( IqBucket* pBucket );
 		virtual	TqBool	fDisplayNeeds( const TqChar* var );
-
+		virtual	TqInt	Uses()
+		{
+			return( EnvVars_Ci | EnvVars_Oi );
+		}
+	
 	private:
 		std::vector<SqDDevice>	m_aDisplayRequests;		///< Array of requested display drivers.
 		std::vector<TqInt>	m_aDisplayCompression;
