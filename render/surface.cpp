@@ -94,6 +94,12 @@ CqBasicSurface::CqBasicSurface( const CqBasicSurface& From ) : m_fDiceable( TqTr
 
 	m_CachedBound = From.m_CachedBound;
 	m_Bound = From.m_Bound;
+
+	STATS_INC( GPR_allocated );
+	STATS_INC( GPR_current );
+	TqInt cGprim = STATS_GETI( GPR_current );
+	TqInt cPeak = STATS_GETI( GPR_peak );
+	STATS_SETI( GPR_peak, cGprim > cPeak ? cGprim : cPeak );
 }
 
 
