@@ -5,7 +5,7 @@
  *	@brief	Brief description of the file contents
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2004/02/09 20:04:48 $
+ *	Last change date:	$Date: 2004/02/24 23:11:01 $
  */ 
 //------------------------------------------------------------------------------
 #ifndef	___isurface_Loaded___
@@ -64,11 +64,11 @@ struct IqSurface
     /** Get a pointer to the attributes state associated with this GPrim.
      * \return A pointer to a CqAttributes class.
      */
-    virtual const	IqAttributes* pAttributes() const = 0;
+    virtual IqAttributes* pAttributes() const = 0;
     /** Get a pointer to the transformation state associated with this GPrim.
      * \return A pointer to a CqTransform class.
      */
-    virtual const	IqTransform* pTransform() const = 0;
+    virtual IqTransform* pTransform() const = 0;
     /** Perform any precalculation required before dicing.
      *  \param uDiceSize Size that the surface will be diced to in u.
      *  \param vDiceSize Size that the surface will be diced to in u.

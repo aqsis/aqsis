@@ -154,14 +154,14 @@ CqString className() const { return CqString("CqBasicSurface"); }
     /** Get a pointer to the attributes state associated with this GPrim.
      * \return A pointer to a CqAttributes class.
      */
-    virtual const	IqAttributes* pAttributes() const
+    virtual IqAttributes* pAttributes() const
     {
         return ( m_pAttributes );
     }
     /** Get a pointer to the transformation state associated with this GPrim.
      * \return A pointer to a CqTransform class.
      */
-    virtual const	IqTransform* pTransform() const
+    virtual IqTransform* pTransform() const
     {
         return ( m_pTransform );
     }

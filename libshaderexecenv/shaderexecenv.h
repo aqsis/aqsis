@@ -135,7 +135,7 @@ public:
 #endif
 
     // Overidden from IqShaderExecEnv, see ishaderexecenv.h for descriptions.
-    virtual	void	Initialise( const TqInt uGridRes, const TqInt vGridRes, IqSurface* pSurface, IqShader* pShader, TqInt Uses );
+    virtual	void	Initialise( const TqInt uGridRes, const TqInt vGridRes, IqAttributes* pAttr, IqTransform* pTrans, IqShader* pShader, TqInt Uses );
     virtual	TqInt	uGridRes() const
     {
         return ( m_uGridRes );

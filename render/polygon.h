@@ -111,10 +111,10 @@ public:
 
     /** Get a pointer to the attributes state associated with this polygon.
      */
-    virtual	const IqAttributes*	pAttributes() const = 0;
+    virtual	IqAttributes*	pAttributes() const = 0;
     /** Get a pointer to the transfrom associated with this polygon.
      */
-    virtual	const IqTransform*	pTransform() const = 0;
+    virtual	IqTransform*	pTransform() const = 0;
 
     /** Get the index of this polygon if it is a member of a polygon mesh
      */
@@ -249,11 +249,11 @@ public:
         return ( cVertex() );
     }
 
-    virtual	const IqAttributes*	pAttributes() const
+    virtual	IqAttributes*	pAttributes() const
     {
         return ( CqSurface::pAttributes() );
     }
-    virtual	const IqTransform*	pTransform() const
+    virtual	IqTransform*	pTransform() const
     {
         return ( CqSurface::pTransform() );
     }
@@ -500,11 +500,11 @@ public:
         return ( m_aIndices.size() );
     }
 
-    virtual	const IqAttributes*	pAttributes() const
+    virtual	IqAttributes*	pAttributes() const
     {
         return ( m_pPoints->pAttributes() );
     }
-    virtual	const IqTransform*	pTransform() const
+    virtual	IqTransform*	pTransform() const
     {
         return ( m_pPoints->pTransform() );
     }

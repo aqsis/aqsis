@@ -83,7 +83,7 @@ void CqLightsource::Initialise( TqInt uGridRes, TqInt vGridRes )
     if ( m_pShader )
     {
         Uses |= m_pShader->Uses();
-        m_pShaderExecEnv->Initialise( uGridRes, vGridRes, 0, m_pShader, Uses );
+        m_pShaderExecEnv->Initialise( uGridRes, vGridRes, m_pAttributes, 0, m_pShader, Uses );
     }
 
     if ( m_pShader )

@@ -491,11 +491,11 @@ public:
         return( m_pFace );
     }
 
-    virtual	const IqAttributes*	pAttributes() const
+    virtual	IqAttributes*	pAttributes() const
     {
         return ( pTopology()->pPoints()->pAttributes() );
     }
-    virtual	const IqTransform*	pTransform() const
+    virtual	IqTransform*	pTransform() const
     {
         return ( pTopology()->pPoints()->pTransform() );
     }

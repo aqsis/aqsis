@@ -159,26 +159,34 @@ CqShaderExecEnv::~CqShaderExecEnv()
 /** Initialise variables to correct size for current grid.
  */
 
-void CqShaderExecEnv::Initialise( const TqInt uGridRes, const TqInt vGridRes, IqSurface* pSurface, IqShader* pShader, TqInt Uses )
+void CqShaderExecEnv::Initialise( const TqInt uGridRes, const TqInt vGridRes, IqAttributes* pAttr, IqTransform* pTrans, IqShader* pShader, TqInt Uses )
 {
     m_uGridRes = uGridRes;
     m_vGridRes = vGridRes;
     m_GridSize = ( uGridRes + 1 ) * ( vGridRes + 1 );
     m_LocalIndex = 0;
 
-    // Store a pointer to the surface definition.
-    if ( NULL != pSurface )
+    // Store a pointer to the attributes definition.
+    if ( NULL != pAttr )
     {
-        m_pAttributes = const_cast<IqAttributes*>( pSurface->pAttributes() );
-        m_pTransform = const_cast<IqTransform*>( pSurface->pTransform() );
-        ADDREF( m_pAttributes );
-        ADDREF( m_pTransform );
+		if( NULL != m_pAttributes )
+			RELEASEREF(m_pAttributes);
+        m_pAttributes = pAttr;
+		ADDREF(m_pAttributes);
     }
     else
+	    m_pAttributes = NULL;
+
+    // Store a pointer to the transform.
+    if ( NULL != pTrans )
     {
-        m_pAttributes = NULL;
-        m_pTransform = NULL;
+		if( NULL != m_pTransform )
+			RELEASEREF(m_pTransform);
+        m_pTransform = pTrans;
+		ADDREF(m_pTransform);
     }
+    else
+	    m_pTransform = NULL;
 
     m_li = 0;
     m_Illuminate = 0;

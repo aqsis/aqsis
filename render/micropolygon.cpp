@@ -140,7 +140,7 @@ void CqMicroPolyGrid::Initialise( TqInt cu, TqInt cv, CqSurface* pSurface )
 
     /// \note This should delete through the interface that created it.
 
-    m_pShaderExecEnv->Initialise( cu, cv, pSurface, pSurface->pAttributes() ->pshadSurface(), lUses );
+    m_pShaderExecEnv->Initialise( cu, cv, pSurface->pAttributes(), pSurface->pTransform(), pSurface->pAttributes() ->pshadSurface(), lUses );
 
     IqShader* pshadSurface = pSurface ->pAttributes() ->pshadSurface();
     IqShader* pshadDisplacement = pSurface ->pAttributes() ->pshadDisplacement();
