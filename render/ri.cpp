@@ -3873,6 +3873,9 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
             case type_float:
                 elem_size = sizeof(RtFloat);
                 break;
+            case type_integer:
+                elem_size = sizeof(RtInt);
+                break;
             case type_vector:
             case type_point:
             case type_normal:
