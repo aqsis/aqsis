@@ -15,6 +15,9 @@ Package=<4>
     Project_Dep_Name aqsis
     End Project Dependency
     Begin Project Dependency
+    Project_Dep_Name libaqsistypes
+    End Project Dependency
+    Begin Project Dependency
     Project_Dep_Name libslparse
     End Project Dependency
     Begin Project Dependency
@@ -34,6 +37,9 @@ Package=<4>
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name filebuffer
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libaqsis
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name libdd
@@ -138,6 +144,12 @@ Package=<4>
     Project_Dep_Name librib2ri
     End Project Dependency
     Begin Project Dependency
+    Project_Dep_Name libaqsistypes
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libaqsis
+    End Project Dependency
+    Begin Project Dependency
     Project_Dep_Name libddmsock
     End Project Dependency
     Begin Project Dependency
@@ -145,9 +157,6 @@ Package=<4>
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name libshaderexecenv
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name libaqsis
     End Project Dependency
 }}}
 
@@ -183,6 +192,9 @@ Package=<4>
     Project_Dep_Name libslparse
     End Project Dependency
     Begin Project Dependency
+    Project_Dep_Name libaqsistypes
+    End Project Dependency
+    Begin Project Dependency
     Project_Dep_Name libcodegenvm
     End Project Dependency
 }}}
@@ -205,6 +217,9 @@ Package=<4>
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name libslxargs
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libaqsistypes
     End Project Dependency
 }}}
 
@@ -324,19 +339,19 @@ Package=<4>
     Project_Dep_Name libaqsistypes
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name libddmsock
+    Project_Dep_Name libshaderexecenv
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name librib2
+    Project_Dep_Name libshadervm
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libddmsock
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name librib2ri
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name libshaderexecenv
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name libshadervm
+    Project_Dep_Name librib2
     End Project Dependency
 }}}
 
@@ -410,6 +425,9 @@ Package=<5>
 
 Package=<4>
 {{{
+    Begin Project Dependency
+    Project_Dep_Name libaqsistypes
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -557,6 +575,15 @@ Package=<5>
 
 Package=<4>
 {{{
+    Begin Project Dependency
+    Project_Dep_Name libaqsis
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libaqsistypes
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libddmsimple
+    End Project Dependency
 }}}
 
 ###############################################################################
