@@ -87,6 +87,7 @@ class CqDDManagerSimple : public IqDDManager
 		virtual	TqInt	OpenDisplays();
 		virtual	TqInt	CloseDisplays();
 		virtual	TqInt	DisplayBucket( IqBucket* pBucket );
+		virtual	TqBool	fDisplayNeeds( const TqChar* var );
 
 	private:
 		std::vector<SqDDevice>	m_aDisplayRequests;		///< Array of requested display drivers.
