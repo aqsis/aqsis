@@ -460,7 +460,7 @@ class _qShareC	CqAttributes : public CqShadingAttributes, public CqGeometricAttr
 						 */
 	_qShareM	CqAttributes* Write()		{
 												// We are about to write to this attribute,so clone if references exist.
-												if(m_cReferences>1)
+												if(RefCount()>1)
 												{
 													CqAttributes* pWrite=Clone();
 													pWrite->AddRef();
@@ -538,7 +538,7 @@ class _qShareC	CqAttributes : public CqShadingAttributes, public CqGeometricAttr
 
 	private:
 			std::vector<CqSystemOption*>	m_aAttributes;		///< a vector of user defined attribute pointers.
-			TqInt		m_cReferences;							///< the count of external references to this attribute state.
+//			TqInt		m_cReferences;							///< the count of external references to this attribute state.
 			TqInt		m_StackIndex;							///< the index of this attribute state in the global stack, used for destroying when last reference is removed.
 };
 

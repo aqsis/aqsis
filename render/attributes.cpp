@@ -97,7 +97,7 @@ CqGeometricAttributes::~CqGeometricAttributes()
 /** Constructor.
  */
 
-CqAttributes::CqAttributes()	:	CqShadingAttributes(), CqGeometricAttributes(), m_cReferences(0)	
+CqAttributes::CqAttributes()	:	CqShadingAttributes(), CqGeometricAttributes()	
 {
 	Attribute_stack.push_back(this);
 	m_StackIndex=Attribute_stack.size()-1;
@@ -108,7 +108,7 @@ CqAttributes::CqAttributes()	:	CqShadingAttributes(), CqGeometricAttributes(), m
 /** Copy constructor.
  */
 
-CqAttributes::CqAttributes(const CqAttributes& From) : m_cReferences(0)
+CqAttributes::CqAttributes(const CqAttributes& From)
 {
 	*this=From;
 	
