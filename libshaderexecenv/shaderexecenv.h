@@ -433,7 +433,8 @@ class CqShaderExecEnv : public IqShaderExecEnv, CqRefCount
 		virtual STD_SO	SO_distance( POINTVAL P1, POINTVAL P2, DEFPARAM );
 		virtual STD_SO	SO_area( POINTVAL p, DEFPARAM );
 		virtual STD_SO	SO_normalize( VECTORVAL V, DEFPARAM );
-		virtual STD_SO	SO_faceforward( NORMALVAL N, VECTORVAL I /* [Nref] */, DEFPARAM );
+		virtual STD_SO	SO_faceforward( NORMALVAL N, VECTORVAL I, DEFPARAM );
+		virtual STD_SO	SO_faceforward2( NORMALVAL N, VECTORVAL I, NORMALVAL Nref, DEFPARAM );
 		virtual STD_SO	SO_reflect( VECTORVAL I, NORMALVAL N, DEFPARAM );
 		virtual STD_SO	SO_refract( VECTORVAL I, NORMALVAL N, FLOATVAL eta, DEFPARAM );
 		virtual STD_SO	SO_fresnel( VECTORVAL I, NORMALVAL N, FLOATVAL eta, FLOATVAL Kr, FLOATVAL Kt, DEFVOIDPARAM );

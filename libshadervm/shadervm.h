@@ -865,6 +865,7 @@ class CqShaderVM : public CqShaderStack, public IqShader, public CqDSORepository
 		void	SO_area();
 		void	SO_normalize();
 		void	SO_faceforward();
+		void	SO_faceforward2();
 		void	SO_reflect();
 		void	SO_refract();
 		void	SO_fresnel();

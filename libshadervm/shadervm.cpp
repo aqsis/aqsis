@@ -302,6 +302,7 @@ SqOpCodeTrans CqShaderVM::m_TransTable[] =
         {"area", 0, &CqShaderVM::SO_area, 0, {0}},
         {"normalize", 0, &CqShaderVM::SO_normalize, 0, {0}},
         {"faceforward", 0, &CqShaderVM::SO_faceforward, 0, {0}},
+        {"faceforward2", 0, &CqShaderVM::SO_faceforward2, 0, {0}},
         {"reflect", 0, &CqShaderVM::SO_reflect, 0, {0}},
         {"refract", 0, &CqShaderVM::SO_refract, 0, {0}},
         {"fresnel", 0, &CqShaderVM::SO_fresnel, 0, {0}},

@@ -1490,7 +1490,7 @@ STD_SOIMPL	CqShaderExecEnv::SO_normalize( VECTORVAL V, DEFPARAMIMPL )
 
 
 //----------------------------------------------------------------------
-// faceforward(N,I,[Nref])
+// faceforward(N,I)
 STD_SOIMPL CqShaderExecEnv::SO_faceforward( NORMALVAL N, VECTORVAL I, DEFPARAMIMPL )
 {
 	INIT_SO
@@ -1502,7 +1502,30 @@ STD_SOIMPL CqShaderExecEnv::SO_faceforward( NORMALVAL N, VECTORVAL I, DEFPARAMIM
 	BEGIN_VARYING_SECTION
 	GETNORMAL( N );
 	GETVECTOR( I );
-	TqFloat s = ( ( ( -VECTOR( I ) ) * NORMAL( N ) ) < 0.0f ) ? -1.0f : 1.0f;
+	CqVector3D Nref;
+	Ng()->GetNormal( Nref, __iGrid  );
+	TqFloat s = ( ( ( -VECTOR( I ) ) * Nref ) < 0.0f ) ? -1.0f : 1.0f;
+	SETNORMAL( Result, NORMAL( N ) * s );
+	END_VARYING_SECTION
+}
+
+
+//----------------------------------------------------------------------
+// faceforward(N,I,Nref)
+STD_SOIMPL CqShaderExecEnv::SO_faceforward2( NORMALVAL N, VECTORVAL I, NORMALVAL Nref, DEFPARAMIMPL )
+{
+	INIT_SO
+
+	CHECKVARY( N )
+	CHECKVARY( I )
+	CHECKVARY( Nref )
+	CHECKVARY( Result )
+
+	BEGIN_VARYING_SECTION
+	GETNORMAL( N );
+	GETVECTOR( I );
+	GETNORMAL( Nref );
+	TqFloat s = ( ( ( -VECTOR( I ) ) * NORMAL( Nref ) ) < 0.0f ) ? -1.0f : 1.0f;
 	SETNORMAL( Result, NORMAL( N ) * s );
 	END_VARYING_SECTION
 }

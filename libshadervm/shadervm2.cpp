@@ -448,6 +448,12 @@ void CqShaderVM::SO_faceforward()
 	FUNC2( type_vector, m_pEnv->SO_faceforward );
 }
 
+void CqShaderVM::SO_faceforward2()
+{
+	AUTOFUNC;
+	FUNC3( type_vector, m_pEnv->SO_faceforward2 );
+}
+
 void CqShaderVM::SO_reflect()
 {
 	AUTOFUNC;
