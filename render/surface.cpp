@@ -60,7 +60,13 @@ CqBasicSurface::CqBasicSurface() : CqListEntry<CqBasicSurface>(), m_fDiceable( T
 			ADDREF( m_pCSGNode );
 		}
 		else
-			CqAttributeError error( RIE_BADSOLID, Severity_Normal, "Primitive defined when not in 'Primitive' solid block", m_pAttributes, TqTrue );
+		{
+			//CqAttributeError error( RIE_BADSOLID, Severity_Normal, "Primitive defined when not in 'Primitive' solid block", m_pAttributes, TqTrue );
+			CqString objname( "unnamed" );
+			const CqString* pattrName = m_pAttributes->GetStringAttribute( "identifier", "name" );
+			if ( pattrName != 0 ) objname = pattrName[ 0 ];
+			QGetRenderContext() ->Logger() ->warn( "Primitive \"%s\" defined when not in 'Primitive' solid block", objname.c_str()  );
+		}
 	}
 }
 

@@ -231,7 +231,11 @@ TqBool CqImageBuffer::CullSurface( CqBound& Bound, CqBasicSurface* pSurface )
 
 		if ( pSurface->EyeSplitCount() > MaxEyeSplits )
 		{
-			CqAttributeError( ErrorID_MaxEyeSplits, Severity_Normal, "Max eyesplits exceeded", pSurface->pAttributes(), TqTrue );
+			//CqAttributeError( ErrorID_MaxEyeSplits, Severity_Normal, "Max eyesplits exceeded", pSurface->pAttributes(), TqTrue );
+			CqString objname( "unnamed" );
+			const CqString* pattrName = pSurface->pAttributes()->GetStringAttribute( "identifier", "name" );
+			if ( pattrName != 0 ) objname = pattrName[ 0 ];
+			QGetRenderContext() ->Logger() ->warn( "Max eyesplits for object \"%s\" exceeded", objname.c_str()  );
 			pSurface->Discard();
 		}
 		return ( TqFalse );
@@ -1094,7 +1098,12 @@ void CqImageBuffer::RenderSurfaces( TqInt iBucket, long xmin, long xmax, long ym
 						 * and try with the next one
 						 * 
 						 */
-						CqAttributeError( ErrorID_OcclusionMaxEyeSplits, Severity_Normal, "Geometry gets culled too many times", pSurface->pAttributes(), TqTrue );
+						//CqAttributeError( ErrorID_OcclusionMaxEyeSplits, Severity_Normal, "Geometry gets culled too many times", pSurface->pAttributes(), TqTrue );
+						CqString objname( "unnamed" );
+						const CqString* pattrName = pSurface ->pAttributes() ->GetStringAttribute( "identifier", "name" );
+						if ( pattrName != 0 ) objname = pattrName[ 0 ];
+						QGetRenderContext() ->Logger() ->warn( "Primitive \"%s\" gets culled too many times", objname.c_str()  );
+
 						counter = 0;
 						pSurface->UnLink();
 						pSurface = Bucket.pTopSurface();
