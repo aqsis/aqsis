@@ -2,7 +2,7 @@ version 3.03
 Option "searchpath" "shader" ["../shaders:&"]
 Display "uv_test.tif" "file" "rgba"
 Display "+uv_test.tif" "framebuffer" "rgba"
-Format 640 480 1
+Format 200 150 1
 ShadingRate 2
 PixelSamples 2 2
 PixelFilter "gaussian" 3 3
@@ -14,7 +14,7 @@ Translate 0 -4 5
 Option "limits" "eyesplits" [3]
 Option "statistics" "endofframe" [3]
 Option "searchpath" "shader" ["./:&"]
-Sides 2
+Sides 1
 
 WorldBegin
       

@@ -56,7 +56,9 @@ WorldBegin
 
   AttributeBegin
 	Translate -2 -1 0
-	Rotate 90 1 0 0
+	Rotate -90 1 0 0
+	Surface "constant"
+	Color [ 1 1 1 ]
 	Orientation "rh"
 	Disk 0 1 360
   AttributeEnd

@@ -13,6 +13,8 @@ Projection "perspective" "fov" 11
 
 Declare "v" "float"
 
+Sides 1
+
 WorldBegin
   Color 1 1 1
   LightSource "distantlight" 1
