@@ -47,6 +47,7 @@ typedef	RtFloat		(*RtFilterFunc)(RtFloat,RtFloat,RtFloat,RtFloat);
 typedef	RtFloat		(*RtFloatFunc)();
 typedef	RtVoid		(*RtFunc)();
 typedef	RtVoid		(*RtErrorFunc)(RtInt code, RtInt severity, const char* message);
+typedef	RtErrorFunc	RtErrorHandler;
 
 typedef	RtVoid		(*RtArchiveCallback)(RtToken, char *, ...);
 
@@ -83,10 +84,10 @@ _qShare	extern	RtToken		RI_AMBIENTLIGHT, RI_POINTLIGHT,
 _qShare	extern	RtToken		RI_INTENSITY, RI_LIGHTCOLOR, RI_FROM, RI_TO,
 								RI_CONEANGLE, RI_CONEDELTAANGLE,
 								RI_BEAMDISTRIBUTION;
-_qShare	extern	RtToken		RI_MATTE, RI_METAL, RI_PLASTIC;
+_qShare	extern	RtToken		RI_MATTE, RI_METAL, RI_PLASTIC, RI_SHINYMETAL, RI_PAINTEDPLASTIC;
 _qShare	extern	RtToken		RI_KA, RI_KD, RI_KS, RI_ROUGHNESS, RI_KR,
 								RI_TEXTURENAME, RI_SPECULARCOLOR;
-_qShare	extern	RtToken		RI_DEPTHCUE, RI_FOG;
+_qShare	extern	RtToken		RI_DEPTHCUE, RI_FOG, RI_BUMPY;
 _qShare	extern	RtToken		RI_MINDISTANCE, RI_MAXDISTANCE, RI_BACKGROUND,
 								RI_DISTANCE, RI_AMPLITUDE;
 
@@ -102,8 +103,11 @@ _qShare	extern	RtToken		RI_PRIMITIVE, RI_INTERSECTION, RI_UNION,
 _qShare	extern	RtToken		RI_WRAP, RI_NOWRAP, RI_PERIODIC, RI_NONPERIODIC, RI_CLAMP,
 								RI_BLACK;
 _qShare	extern	RtToken		RI_IGNORE, RI_PRINT, RI_ABORT, RI_HANDLER;
+_qShare extern	RtToken		RI_IDENTIFIER, RI_NAME;
 _qShare	extern	RtToken		RI_COMMENT, RI_STRUCTURE, RI_VERBATIM;
 _qShare	extern	RtToken		RI_WIDTH, RI_CONSTANTWIDTH;
+
+_qShare	extern	RtToken		RI_CURRENT, RI_SHADER, RI_EYE, RI_NDC;
 
 _qShare	extern	RtBasis		RiBezierBasis, RiBSplineBasis, RiCatmullRomBasis,
 								RiHermiteBasis, RiPowerBasis;
