@@ -62,17 +62,13 @@ TqInt CqProcedural::Split( std::vector<CqBasicSurface*>& aSplits )
 {
 	// Store current context, set current context to the stored one
 	CqModeBlock *pconSave = QGetRenderContext()->pconCurrent( m_pconStored );
-//	if( !m_pAttributes ) m_pAttributes = QGetRenderContext()->pattrWriteCurrent();
-	CqAttributes *pattrsSave = const_cast<CqAttributes*> (QGetRenderContext()->pconCurrent()->pattrCurrent( m_pAttributes )); 
-//	if( !m_pTransform ) m_pTransform = QGetRenderContext()->ptransWriteCurrent();
-	CqTransform *ptransSave = const_cast<CqTransform*> (QGetRenderContext()->pconCurrent()->ptransCurrent( m_pTransform ));
 
 	// Call the procedural secific Split()
+	RiAttributeBegin();
 	SplitProcedural();
+	RiAttributeEnd();
 
 	// restore saved context
-	QGetRenderContext()->pconCurrent()->ptransCurrent( ptransSave );
-	QGetRenderContext()->pconCurrent()->pattrCurrent( pattrsSave );
 	QGetRenderContext()->pconCurrent( pconSave );
 	return 0;
 }
