@@ -592,8 +592,8 @@ TqInt CqSurface::Split( std::vector<CqBasicSurface*>& aSplits )
 		cSplits = aSplits[ 0 ] ->Split( aSplits0 );
 		cSplits += aSplits[ 1 ] ->Split( aSplits1 );
 		// Release the old ones.
-		RELEASEREF( aSplits[ 0 ] );
-		RELEASEREF( aSplits[ 1 ] );
+		delete( aSplits[ 0 ] );
+		delete( aSplits[ 1 ] );
 
 		aSplits.clear();
 		aSplits.swap( aSplits0 );

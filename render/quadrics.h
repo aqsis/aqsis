@@ -198,8 +198,8 @@ class CqCone : public CqQuadric
 	private:
 		TqFloat	m_Height;		///< Height..
 		TqFloat	m_Radius;		///< Radius.
-		TqFloat	m_ZMin;			///< Min value on z axis.
-		TqFloat	m_ZMax;			///< Max value on z axis.
+		TqFloat	m_vMin;			///< Min value on z axis.
+		TqFloat	m_vMax;			///< Max value on z axis.
 		TqFloat	m_ThetaMin;		///< Min angle about z axis.
 		TqFloat	m_ThetaMax;		///< Max angle about z axis.
 }

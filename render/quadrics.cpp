@@ -457,11 +457,11 @@ CqVector3D CqSphere::DicePoint( TqInt u, TqInt v, CqVector3D& Normal )
 /** Constructor.
  */
 
-CqCone::CqCone( TqFloat height, TqFloat radius, TqFloat thetamin, TqFloat thetamax, TqFloat zmin, TqFloat zmax ) :
+CqCone::CqCone( TqFloat height, TqFloat radius, TqFloat thetamin, TqFloat thetamax, TqFloat vmin, TqFloat vmax ) :
 		m_Height( height ),
 		m_Radius( radius ),
-		m_ZMin( zmin ),
-		m_ZMax( zmax ),
+		m_vMin( vmin ),
+		m_vMax( vmax ),
 		m_ThetaMin( thetamin ),
 		m_ThetaMax( thetamax )
 {}
@@ -476,8 +476,8 @@ CqCone&	CqCone::operator=( const CqCone& From )
 	CqQuadric::operator=( From );
 	m_Height = From.m_Height;
 	m_Radius = From.m_Radius;
-	m_ZMin = From.m_ZMin;
-	m_ZMax = From.m_ZMax;
+	m_vMin = From.m_vMin;
+	m_vMax = From.m_vMax;
 	m_ThetaMin = From.m_ThetaMin;
 	m_ThetaMax = From.m_ThetaMax;
 
@@ -492,7 +492,9 @@ CqCone&	CqCone::operator=( const CqCone& From )
 CqBound	CqCone::Bound() const
 {
 	std::vector<CqVector3D> curve;
-	CqVector3D vA( m_Radius, 0, m_ZMin ), vB( 0, 0, m_ZMax ), vC( 0, 0, 0 ), vD( 0, 0, 1 );
+	TqFloat zmin = m_vMin * m_Height;
+	TqFloat zmax = m_vMax * m_Height;
+	CqVector3D vA( m_Radius, 0, zmin ), vB( 0, 0, zmax ), vC( 0, 0, 0 ), vD( 0, 0, 1 );
 	curve.push_back( vA );
 	curve.push_back( vB );
 	CqMatrix matRot( RAD ( m_ThetaMin ), vD );
@@ -511,7 +513,7 @@ CqBound	CqCone::Bound() const
 
 TqInt CqCone::PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool u )
 {
-	TqFloat zcent = ( m_ZMin + m_ZMax ) * 0.5;
+	TqFloat vcent = ( m_vMin + m_vMax ) * 0.5;
 	TqFloat arccent = ( m_ThetaMin + m_ThetaMax ) * 0.5;
 	//TqFloat rcent=m_RMax*sqrt(zcent/m_ZMax);
 
@@ -525,8 +527,8 @@ TqInt CqCone::PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool u )
 	}
 	else
 	{
-		pNew1->m_ZMax = zcent;
-		pNew2->m_ZMin = zcent;
+		pNew1->m_vMax = vcent;
+		pNew2->m_vMin = vcent;
 	}
 
 	aSplits.push_back( pNew1 );
@@ -547,8 +549,11 @@ CqVector3D CqCone::DicePoint( TqInt u, TqInt v )
 {
 	TqFloat theta = RAD( m_ThetaMin + ( ( TqFloat ) u * ( m_ThetaMax - m_ThetaMin ) ) / m_uDiceSize );
 
-	TqFloat z = m_ZMin + ( ( TqFloat ) v * ( m_ZMax - m_ZMin ) ) / m_vDiceSize;
-	TqFloat r = m_Radius * ( 1.0 - z / m_Height );
+	TqFloat zmin = m_vMin * m_Height;
+	TqFloat zmax = m_vMax * m_Height;
+	TqFloat z = zmin + ( ( TqFloat ) v * ( zmax - zmin ) ) / m_vDiceSize;
+	TqFloat vv = m_vMin + ( ( TqFloat ) v * ( m_vMax - m_vMin ) ) / m_vDiceSize;
+	TqFloat r = m_Radius * ( 1.0 - vv );
 
 	return ( CqVector3D( r * cos( theta ), r * sin( theta ), z ) );
 }
@@ -565,8 +570,11 @@ CqVector3D CqCone::DicePoint( TqInt u, TqInt v, CqVector3D& Normal )
 {
 	TqFloat theta = RAD( m_ThetaMin + ( ( TqFloat ) u * ( m_ThetaMax - m_ThetaMin ) ) / m_uDiceSize );
 
-	TqFloat z = m_ZMin + ( ( TqFloat ) v * ( m_ZMax - m_ZMin ) ) / m_vDiceSize;
-	TqFloat r = m_Radius * ( 1.0 - z / m_Height );
+	TqFloat zmin = m_vMin * m_Height;
+	TqFloat zmax = m_vMax * m_Height;
+	TqFloat z = zmin + ( ( TqFloat ) v * ( zmax - zmin ) ) / m_vDiceSize;
+	TqFloat vv = m_vMin + ( ( TqFloat ) v * ( m_vMax - m_vMin ) ) / m_vDiceSize;
+	TqFloat r = m_Radius * ( 1.0 - vv );
 
 	TqFloat cos_theta = cos( theta );
 	TqFloat sin_theta = sin( theta );

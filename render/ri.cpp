@@ -3575,8 +3575,12 @@ RtVoid	RiCone( RtFloat height, RtFloat radius, RtFloat thetamax, ... )
 //
 RtVoid	RiConeV( RtFloat height, RtFloat radius, RtFloat thetamax, PARAMETERLIST )
 {
+	/// \note This should be an exception and get caught further up.
+	if( thetamax == 0 )
+		return;
+	
 	// Create a cone
-	CqCone * pSurface = new CqCone( height, radius, 0, thetamax, 0, height );
+	CqCone * pSurface = new CqCone( height, radius, 0, thetamax, 0, 1.0f );
 	ADDREF( pSurface );
 	ProcessPrimitiveVariables( pSurface, count, tokens, values );
 	pSurface->SetDefaultPrimitiveVariables();
