@@ -366,9 +366,13 @@ void CqMatrix::ShearZ( const TqFloat xh, const TqFloat yh )
 
 //---------------------------------------------------------------------
 /** Skew matrix
- * \param xs X scale factor.
- * \param ys Y scale factor.
- * \param zs Z scale factor.
+ * \param angle The angle by which to skew the transformation.
+ * \param dx1 Along with the other float values, specifies the two vectors which control the direction of skew.
+ * \param dy1 Along with the other float values, specifies the two vectors which control the direction of skew.
+ * \param dz1 Along with the other float values, specifies the two vectors which control the direction of skew.
+ * \param dx2 Along with the other float values, specifies the two vectors which control the direction of skew.
+ * \param dy2 Along with the other float values, specifies the two vectors which control the direction of skew.
+ * \param dz2 Along with the other float values, specifies the two vectors which control the direction of skew.
  */
 
 void CqMatrix::Skew( const TqFloat angle,

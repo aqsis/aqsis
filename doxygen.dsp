@@ -80,6 +80,14 @@ SOURCE=.\Doxyfile
 
 !IF  "$(CFG)" == "doxygen - Win32 Release"
 
+# Begin Custom Build
+InputPath=.\Doxyfile
+
+"doxygen.out" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	doxygen
+
+# End Custom Build
+
 !ELSEIF  "$(CFG)" == "doxygen - Win32 Debug"
 
 # Begin Custom Build

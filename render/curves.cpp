@@ -1614,6 +1614,7 @@ TqInt CqLinearCurvesGroup::Split( std::vector<CqBasicSurface*>& aSplits )
  *                        transformation matrix, used to transform normals.
  * @param matRTx        Reference to the rotation only transformation matrix, 
  *                        used to transform vectors.
+ * @param iTime			The frame time at which to perform the transformation.
  */
 void CqLinearCurvesGroup::Transform(
     const CqMatrix& matTx,
@@ -1995,6 +1996,7 @@ TqInt CqCubicCurvesGroup::Split(
  *                        transformation matrix, used to transform normals.
  * @param matRTx        Reference to the rotation only transformation matrix, 
  *                        used to transform vectors.
+ * @param iTime			The frame time at which to apply the transformation.
  */
 void CqCubicCurvesGroup::Transform(
     const CqMatrix& matTx,

@@ -531,8 +531,14 @@ const CqColor* CqOptions::GetColorOption( const char* strName, const char* strPa
 
 //---------------------------------------------------------------------
 /** Force the imager shader to be executed
- * \param gx, gy the size of the bucket grid
- * \param x, y its origin 
+ * \param gx The width of the bucket in pixels.
+ * \param gy the height of the bucket in pixels.
+ * \param x The origin of the bucket within the overall image.
+ * \param y The origin of the bucket within the overall image.
+ * \param color Initial value Ci.
+ * \param opacity Initial value Oi.
+ * \param depth Initial value depth (not required).
+ * \param coverage Initial value "alpha"
  */
 void CqOptions::InitialiseColorImager( TqInt gx, TqInt gy,
                                        TqFloat x, TqFloat y,

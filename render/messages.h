@@ -188,7 +188,7 @@ class CqBasicError
 		 */
 		CqBasicError( TqInt code ) : m_Code( code )
 		{}
-		CqBasicError( TqInt code, TqInt severity, const char* Message, TqBool OncePer = TqFalse );
+		CqBasicError( TqInt code, TqInt severity, const char* message, TqBool onceper = TqFalse );
 		/** Copy constructor.
 		 * \param From The error to copy.
 		 */
@@ -231,7 +231,7 @@ class CqBasicError
 class CqAttributeError : public CqBasicError
 {
 	public:
-		CqAttributeError( TqInt code, TqInt severity, const char* Message, const IqAttributes* pAttributes, TqBool OncePer = TqFalse );
+		CqAttributeError( TqInt code, TqInt severity, const char* message, const IqAttributes* pAttributes, TqBool onceper = TqFalse );
 		/** Copy constructor
 		 * \param From Error to copy.
 		 */

@@ -1150,15 +1150,13 @@ CqVector3D CqDisk::DicePoint( TqInt u, TqInt v, CqVector3D& Normal )
  *	Create the points which make up a NURBS circle control hull, for use during boundary
  *  generation.
  *
- *	@param	O.	Origin of the circle.
- *	@param	X.	X axis of the plane to generate the circle in.
- *	@param	Y.	Y axis of the plane to generate the circle in.
- *	@param	r.	Radius of the circle.
- *	@param	as.	Start angle of the circle.
- *	@param	ae.	End angle of the circle.
- *	@param	points.	Storage for the points of the circle.
- *
- *	@return	Description of the return value.
+ *	\param	O	Origin of the circle.
+ *	\param	X	X axis of the plane to generate the circle in.
+ *	\param	Y	Y axis of the plane to generate the circle in.
+ *	\param	r	Radius of the circle.
+ *	\param	as	Start angle of the circle.
+ *	\param	ae	End angle of the circle.
+ *	\param	points	Storage for the points of the circle.
  */
 
 void CqQuadric::Circle( const CqVector3D& O, const CqVector3D& X, const CqVector3D& Y, TqFloat r, TqFloat as, TqFloat ae, std::vector<CqVector3D>& points ) const

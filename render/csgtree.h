@@ -106,8 +106,8 @@ class CqCSGTreeNode : public CqRefCount, public CqListEntry<CqCSGTreeNode>
 		void	ProcessTree( std::vector<SqImageSample>& samples );
 
 		static CqCSGTreeNode* CreateNode( CqString& type );
-		static TqBool CqCSGTreeNode::IsRequired();
-		static void CqCSGTreeNode::SetRequired(TqBool value);
+		static TqBool IsRequired();
+		static void SetRequired(TqBool value);
 
 
 	private:

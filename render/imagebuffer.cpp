@@ -448,7 +448,7 @@ void CqImageBuffer::AddMPG( CqMicroPolygon* pmpgNew )
 
 //----------------------------------------------------------------------
 /** Add a new micro polygon to the list of waiting ones.
- * \param pmpgNew Pointer to a CqMicroPolygon derived class.
+ * \param pmpg Pointer to a CqMicroPolygon derived class.
  */
 
 TqBool CqImageBuffer::PushMPGForward( CqMicroPolygon* pmpg )
@@ -498,7 +498,8 @@ TqBool CqImageBuffer::PushMPGForward( CqMicroPolygon* pmpg )
 
 //----------------------------------------------------------------------
 /** Add a new micro polygon to the list of waiting ones.
- * \param pmpgNew Pointer to a CqMicroPolygon derived class.
+ * \param pmpg Pointer to a CqMicroPolygon derived class.
+ * \param CurrBucketIndex Index of the bucket from which we are pushing down.
  */
 
 TqBool CqImageBuffer::PushMPGDown( CqMicroPolygon* pmpg, TqInt CurrBucketIndex )

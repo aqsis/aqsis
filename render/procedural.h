@@ -46,7 +46,11 @@ class CqProcedural : public CqSurface
 	public:
 		CqProcedural();
 		CqProcedural(RtPointer, CqBound&, RtProcSubdivFunc, RtProcFreeFunc);
-                virtual TqInt   Split( std::vector<CqBasicSurface*>& );
+		/** Split this GPrim into a number of other GPrims.
+		 * \param aSplits A reference to a CqBasicSurface array to fill in with the new GPrim pointers.
+		 * \return Integer count of new GPrims created.
+		 */
+		virtual TqInt   Split( std::vector<CqBasicSurface*>& aSplits );
 		virtual ~CqProcedural();
 
 		//---------------------------------------------- Inlined Public Methods
@@ -56,8 +60,8 @@ class CqProcedural : public CqSurface
 			return m_Bound;
 		};
                 virtual void    Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime = 0 );
-		/**  We have no actual geometry to dice.
-		 **/
+		/*  We have no actual geometry to dice.
+		 */
 		virtual TqBool Diceable()
 		{
 			return TqFalse;

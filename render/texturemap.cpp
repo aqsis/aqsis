@@ -776,8 +776,11 @@ CqTextureMap* CqTextureMap::GetLatLongMap( const CqString& strName )
 
 
 //----------------------------------------------------------------------
-/** Get the buffer segment from the cache which conmtains the requested s,t coordinates, read from the file if not
- * already cached.
+/** Get a pointer to the cache buffer segment which contains the specifed sample point.
+ * \param s Horizontal sample position.
+ * \param t Vertical sample position.
+ * \param directory TIFF directory index.
+ * \param fProt A boolean value, true if the buffer should be protected from removal by the cache management system.
  */
 
 CqTextureMapBuffer* CqTextureMap::GetBuffer( TqUlong s, TqUlong t, TqInt directory, TqBool fProt )

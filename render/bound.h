@@ -84,7 +84,7 @@ class CqBound
 		}
 		CqBound&	operator=( const CqBound& From );
 
-		void		Transform( const CqMatrix&	matTrans );
+		void		Transform( const CqMatrix&	matTransform );
 		CqBound		Combine( const CqBound& bound );
 		CqBound&	Encapsulate( const CqBound& bound );
 		CqBound&	Encapsulate( const CqVector3D& v );
@@ -144,9 +144,10 @@ class CqBoundList
 			m_Times.resize( size );
 		}
 		/** Add a bound to the current list
-		 *\param bound The CqBound to add
-		 *\param time The shutter time that this bound becomes valid at. The bound
-		 * is valid until the time of the next bound or until 1.0 if there are no more bounds.
+		 * \param index The index to set in the list.
+		 * \param bound The CqBound to add
+		 * \param time The shutter time that this bound becomes valid at. The bound
+		 *               is valid until the time of the next bound or until 1.0 if there are no more bounds.
 		 */
 		void	Set( TqInt index, CqBound bound, TqFloat time )
 		{

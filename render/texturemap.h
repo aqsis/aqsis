@@ -103,6 +103,7 @@ class CqTextureMapBuffer
 		 * \param height Height of the buffer segment.
 		 * \param samples Number of samples per pixel.
 		 * \param directory The directory within the TIFF image map, used for multi image formats, i.e. cubeface environment map.
+		 * \param fProt A flag indicating the buffer should be protected from removal by the cache management system.
 		 */
 		void	Init( TqUlong xorigin, TqUlong yorigin, TqUlong width, TqUlong height, TqInt samples, TqInt directory = 0, TqBool fProt = TqFalse )
 		{
@@ -286,8 +287,8 @@ class CqFloatTextureMapBuffer : public CqTextureMapBuffer
 ;
 
 //----------------------------------------------------------------------
-/** \class CqTextureMapBuffer
- * Class referencing a buffer in the image map cache. 
+/** \class CqShadowMapBuffer
+ * Class referencing a depth buffer in the image map cache. 
  */
 
 class CqShadowMapBuffer : public CqTextureMapBuffer
@@ -451,11 +452,6 @@ class CqTextureMap : public IqTextureMap
 			m_IsValid = TqFalse;
 		}
 
-		/** Get a pointer to the cache buffer segment which contains the specifed sample point.
-		 * \param s Horizontal sample position.
-		 * \param t Vertical sample position.
-		 * \param directory TIFF directory index.
-		 */
 		virtual	CqTextureMapBuffer*	GetBuffer( TqUlong s, TqUlong t, TqInt directory = 0, TqBool fProt = TqFalse );
 		void	CreateMIPMAP( TqBool fProtectBuffers = TqFalse );
 		virtual	CqTextureMapBuffer* CreateBuffer( TqUlong xorigin, TqUlong yorigin, TqUlong width, TqUlong height, TqInt directory = 0, TqBool fProt = TqFalse )

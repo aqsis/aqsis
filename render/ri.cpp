@@ -35,7 +35,6 @@
 #include	"patch.h"
 #include	"polygon.h"
 #include	"nurbs.h"
-#include	"subdivision.h"
 #include	"symbols.h"
 #include	"bilinear.h"
 #include	"quadrics.h"
@@ -4010,10 +4009,6 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 	// Create a storage class for all the points.
 	CqPolygonPoints* pPointsClass = new CqPolygonPoints( cVerts, nfaces );
 	pPointsClass->AddRef();
-
-	CqWSurf* pSubdivision = NULL;
-	CqMotionWSurf* pMotionSubdivision = NULL;
-	CqSubdivider* pSubdivider = NULL;
 
 	std::vector<CqPolygonPoints*>	apPoints;
 	// Process any specified primitive variables

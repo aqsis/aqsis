@@ -53,7 +53,8 @@ CqBound& CqBound::operator=( const CqBound& From )
 
 
 //---------------------------------------------------------------------
-/** Transform the boundary values by the specified matrix.
+/**
+ * Transform the boundary values by the specified matrix.
  * \param matTransform CqMatrix reference to the transformation matrix.
  */
 

@@ -84,7 +84,7 @@ class CqSplineCubic
 			m_matBasis = mat;
 		}
 		/** Set the cubic spline basis matrix.
-		 * \param name Basis name.
+		 * \param strName Basis name.
 		 */
 		void	SetmatBasis( const CqString& strName )
 		{

@@ -292,7 +292,7 @@ class CqRenderer : public IqRenderer
 			m_aCoordSystems[ CoordSystem_Raster ].m_matWorldTo = mat;
 		}
 		/** Set the world to camera matrix.
-		 * \param mat The new matrix to use as the world to camera transformation.
+		 * \param ptrans A pointer to the transformation object which represents the world to camera transform.
 		 */
 		virtual	void	SetmatCamera( const CqTransform* ptrans )
 		{

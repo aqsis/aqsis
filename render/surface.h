@@ -781,6 +781,7 @@ class CqMotionSurface : public CqBasicSurface, public CqMotionSpec<T>
 		 * \param matTx Reference to the transformation matrix.
 		 * \param matITTx Reference to the inverse transpose of the transformation matrix, used to transform normals.
 		 * \param matRTx Reference to the rotation only transformation matrix, used to transform vectors.
+		 * \param iTime The frame time at which to apply the transformation.
 		 */
 		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime = 0 )
 		{

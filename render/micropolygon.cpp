@@ -833,11 +833,7 @@ CqMicroPolygon::~CqMicroPolygon()
 
 
 //---------------------------------------------------------------------
-/** Store the vectors of the micropolygon.
- * \param vA 3D Vector.
- * \param vB 3D Vector.
- * \param vC 3D Vector.
- * \param vD 3D Vector.
+/** Initialise the information within the micro polygon used during sampling.
  */
 
 void CqMicroPolygon::Initialise()
@@ -923,6 +919,7 @@ void CqMicroPolygon::Initialise()
 /** Determinde whether the 2D point specified lies within this micropolygon.
  * \param vecP 2D vector to test for containment.
  * \param Depth Place to put the depth if valid intersection.
+ * \param time The frame time at which to check containment.
  * \return Boolean indicating sample hit.
  */
 
@@ -1316,6 +1313,7 @@ void CqMicroPolygonMotion::AppendKey( const CqVector3D& vA, const CqVector3D& vB
 /** Determinde whether the 2D point specified lies within this micropolygon.
  * \param vecP 2D vector to test for containment.
  * \param Depth Place to put the depth if valid intersection.
+ * \param time The frame time at which to check containment.
  * \return Boolean indicating sample hit.
  */
 
@@ -1432,6 +1430,7 @@ void CqMovingMicroPolygonKey::Initialise( const CqVector3D& vA, const CqVector3D
 /** Determinde whether the 2D point specified lies within this micropolygon.
  * \param vecP 2D vector to test for containment.
  * \param Depth Place to put the depth if valid intersection.
+ * \param time The frame time at which to check containment.
  * \return Boolean indicating sample hit.
  */
 

@@ -197,7 +197,7 @@ void CqOcclusionBox::SetupChildren()
  *  process for the parent boxes one level up in the hierarchy. static.
  */
 
-void CqOcclusionBox::UpdateLevel( int level )
+void CqOcclusionBox::UpdateLevel( TqInt level )
 {
 	assert( level < m_HierarchyLevels && level >= 0 );
 
@@ -384,7 +384,7 @@ TqBool CqOcclusionBox::UpdateZValues()
 
 //----------------------------------------------------------------------
 /** Tests if the given bound overlaps this box
- * \param bound, the bounding box to test
+ * \param bound The bounding box to test
  * \return true if the bound overlaps.
 */
 

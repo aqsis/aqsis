@@ -79,11 +79,18 @@ CqCSGTreeNode* CqCSGTreeNode::CreateNode( CqString& type )
 		return ( NULL );
 }
 
+
+/** 
+ * Get the state of the flag indicating if CSG processing is required at all.
+ */
 TqBool CqCSGTreeNode::IsRequired()
 {
 	return m_bCSGRequired;
 }
 
+/**
+ * Set the flag indicating CSG is now required.
+ */
 void CqCSGTreeNode::SetRequired(TqBool value)
 {
 	m_bCSGRequired = value;

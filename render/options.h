@@ -279,7 +279,7 @@ class CqOptions
 			return ( m_pshadImager );
 		}
 
-		void	InitialiseColorImager( TqInt bx, TqInt by,
+		void	InitialiseColorImager( TqInt gx, TqInt gy,
 		                            TqFloat x, TqFloat y,
 		                            CqColor *color, CqColor *opacity,
 		                            TqFloat *depth, TqFloat *coverage );

@@ -85,7 +85,10 @@ class CqParameter
 		 * instantiates special types (i.e. polygons).
 		 */
 		/** Subdivide the value in the u direction, place one half in this and the other in the specified parameter.
-		 * \param pResult Pointer to storage for the result.
+		 * \param pResult1 Pointer to the parameter class to hold the first half of the split.
+		 * \param pResult2 Pointer to the parameter class to hold the first half of the split.
+		 * \param u Boolean indicating whether to split in the u direction, false indicates split in v.
+		 * \param pSurface Pointer to the surface which this paramter belongs, used if the surface has special handling of parameter splitting.
 		 */
 		virtual void	Subdivide( CqParameter* pResult1, CqParameter* pResult2, TqBool u, IqSurface* pSurface = 0 )
 		{}
@@ -1189,6 +1192,7 @@ class CqParameterTypedFaceVaryingArray : public CqParameterTypedVaryingArray<T, 
  * \param u Integer dice count for the u direction.
  * \param v Integer dice count for the v direction.
  * \param pResult Pointer to storage for the result.
+ * \param pSurface Pointer to the surface to which this parameter belongs. Used if the surface type has special handling for parameter dicing.
  */
 
 template <class T, EqVariableType I, class SLT>
@@ -1241,6 +1245,7 @@ void CqParameterTypedVarying<T, I, SLT>::Dice( TqInt u, TqInt v, IqShaderData* p
  * \param u Integer dice count for the u direction.
  * \param v Integer dice count for the v direction.
  * \param pResult Pointer to storage for the result.
+ * \param pSurface Pointer to the surface to which this parameter belongs. Used if the surface type has special handling for parameter dicing.
  */
 
 template <class T, EqVariableType I, class SLT>

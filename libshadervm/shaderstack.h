@@ -125,6 +125,11 @@ START_NAMESPACE( Aqsis )
 //---------------------------------------------------------------------
 //
 // Define macros for defining Opcodes efficiently
+// a The type of the first operand, used to determine templateisation, needed by VC++..
+// b The type of the second operand, used to determine templateisation, needed by VC++..
+// Comp The stack entry to use as the second operand.
+// Res The stack entry to store the result in.
+// RunningState The current SIMD state.
 
 #define OpABRS(OP, NAME) \
 		template <class A, class B, class R>	\
@@ -349,74 +354,36 @@ class CqShaderStack
 
 
 
-/** Templatised less than operator.
+/* Templatised less than operator.
  * The template classes decide the cast used, there must be an appropriate operator between the two types.
- * \param a The type of the first operand, used to determine templateisation, needed by VC++..
- * \param b The type of the second operand, used to determine templateisation, needed by VC++..
- * \param Comp The stack entry to use as the second operand.
- * \param Res The stack entry to store the result in.
- * \param RunningState The current SIMD state.
  */
 OpABRS( < , LSS )
-/** Templatised greater than operator.
+/* Templatised greater than operator.
  * The template classes decide the cast used, there must be an appropriate operator between the two types.
- * \param a The type of the first operand, used to determine templateisation, needed by VC++..
- * \param b The type of the second operand, used to determine templateisation, needed by VC++..
- * \param Comp The stack entry to use as the second operand.
- * \param Res The stack entry to store the result in.
- * \param RunningState The current SIMD state.
  */
 OpABRS( > , GRT )
-/** Templatised less than or equal to operator.
+/* Templatised less than or equal to operator.
  * The template classes decide the cast used, there must be an appropriate operator between the two types.
- * \param a The type of the first operand, used to determine templateisation, needed by VC++..
- * \param b The type of the second operand, used to determine templateisation, needed by VC++..
- * \param Comp The stack entry to use as the second operand.
- * \param Res The stack entry to store the result in.
- * \param RunningState The current SIMD state.
  */
 OpABRS( <= , LE )
-/** Templatised greater than or equal to operator.
+/* Templatised greater than or equal to operator.
  * The template classes decide the cast used, there must be an appropriate operator between the two types.
- * \param a The type of the first operand, used to determine templateisation, needed by VC++..
- * \param b The type of the second operand, used to determine templateisation, needed by VC++..
- * \param Comp The stack entry to use as the second operand.
- * \param Res The stack entry to store the result in.
- * \param RunningState The current SIMD state.
  */
 OpABRS( >= , GE )
-/** Templatised equality operator.
+/* Templatised equality operator.
  * The template classes decide the cast used, there must be an appropriate operator between the two types.
- * \param a The type of the first operand, used to determine templateisation, needed by VC++..
- * \param b The type of the second operand, used to determine templateisation, needed by VC++..
- * \param Comp The stack entry to use as the second operand.
- * \param Res The stack entry to store the result in.
- * \param RunningState The current SIMD state.
  */
 OpABRS( == , EQ )
-/** Templatised inequality operator.
+/* Templatised inequality operator.
  * The template classes decide the cast used, there must be an appropriate operator between the two types.
- * \param a The type of the first operand, used to determine templateisation, needed by VC++..
- * \param b The type of the second operand, used to determine templateisation, needed by VC++..
- * \param Comp The stack entry to use as the second operand.
- * \param Res The stack entry to store the result in.
- * \param RunningState The current SIMD state.
  */
 OpABRS( != , NE )
-/** Templatised multiplication operator.
+/* Templatised multiplication operator.
  * The template classes decide the cast used, there must be an appropriate operator between the two types.
- * \param a The type of the first operand, used to determine templateisation, needed by VC++..
- * \param b The type of the second operand, used to determine templateisation, needed by VC++..
- * \param Comp The stack entry to use as the second operand.
- * \param Res The stack entry to store the result in.
- * \param RunningState The current SIMD state.
  */
 OpABRS( *, MUL )
 /** Special case vector multiplication operator.
  * The template classes decide the cast used, there must be an appropriate operator between the two types.
- * \param Comp The stack entry to use as the second operand.
- * \param Res The stack entry to store the result in.
- * \param RunningState The current SIMD state.
  */
 inline void	OpMULV( IqShaderData* pA, IqShaderData* pB, IqShaderData* pRes, CqBitVector& RunningState )
 {
@@ -484,77 +451,39 @@ inline void	OpMULV( IqShaderData* pA, IqShaderData* pB, IqShaderData* pRes, CqBi
 		                            vA.z() * vB.z() ) );
 	}
 }
-/** Templatised division operator.
+/* Templatised division operator.
  * The template classes decide the cast used, there must be an appropriate operator between the two types.
- * \param a The type of the first operand, used to determine templateisation, needed by VC++..
- * \param b The type of the second operand, used to determine templateisation, needed by VC++..
- * \param Comp The stack entry to use as the second operand.
- * \param Res The stack entry to store the result in.
- * \param RunningState The current SIMD state.
  */
 OpABRS( / , DIV )
-/** Templatised addition operator.
+/* Templatised addition operator.
  * The template classes decide the cast used, there must be an appropriate operator between the two types.
- * \param a The type of the first operand, used to determine templateisation, needed by VC++..
- * \param b The type of the second operand, used to determine templateisation, needed by VC++..
- * \param Comp The stack entry to use as the second operand.
- * \param Res The stack entry to store the result in.
- * \param RunningState The current SIMD state.
  */
 OpABRS( + , ADD )
-/** Templatised subtraction operator.
+/* Templatised subtraction operator.
  * The template classes decide the cast used, there must be an appropriate operator between the two types.
- * \param a The type of the first operand, used to determine templateisation, needed by VC++..
- * \param a The type of the second operand, used to determine templateisation, needed by VC++..
- * \param Comp The stack entry to use as the second operand.
- * \param Res The stack entry to store the result in.
- * \param RunningState The current SIMD state.
  */
 OpABRS( -, SUB )
-/** Templatised dot operator.
+/* Templatised dot operator.
  * The template classes decide the cast used, there must be an appropriate operator between the two types.
- * \param a The type of the first operand, used to determine templateisation, needed by VC++..
- * \param b The type of the second operand, used to determine templateisation, needed by VC++..
- * \param Comp The stack entry to use as the second operand.
- * \param Res The stack entry to store the result in.
- * \param RunningState The current SIMD state.
- * \attention Should only ever be called with vector based operands.
  */
 OpABRS( *, DOT )
-/** Templatised cross product operator.
+/* Templatised cross product operator.
  * The template classes decide the cast used, there must be an appropriate operator between the two types.
- * \param a The type of the first operand, used to determine templateisation, needed by VC++..
- * \param b The type of the second operand, used to determine templateisation, needed by VC++..
- * \param Comp The stack entry to use as the second operand.
- * \param Res The stack entry to store the result in.
- * \param RunningState The current SIMD state.
- * \attention Should only ever be called with vector based operands.
  */
 OpABRS( % , CRS )
-/** Templatised logical AND operator.
+/* Templatised logical AND operator.
  * The template classes decide the cast used, there must be an appropriate operator between the two types.
- * \param a The type of the first operand, used to determine templateisation, needed by VC++..
- * \param b The type of the second operand, used to determine templateisation, needed by VC++..
- * \param Comp The stack entry to use as the second operand.
- * \param Res The stack entry to store the result in.
- * \param RunningState The current SIMD state.
  */
 OpABRS( && , LAND )
-/** Templatised logical OR operator.
+/* Templatised logical OR operator.
  * The template classes decide the cast used, there must be an appropriate operator between the two types.
- * \param a The type of the first operand, used to determine templateisation, needed by VC++..
- * \param b The type of the second operand, used to determine templateisation, needed by VC++..
- * \param Comp The stack entry to use as the second operand.
- * \param Res The stack entry to store the result in.
- * \param RunningState The current SIMD state.
  */
 OpABRS( || , LOR )
-/** Templatised negation operator.
- * The template classes decide the cast used, there must be an appropriate operator between the two types.
+
+/* Templatised negation operator. The template classes decide the cast used, there must be an appropriate operator between the two types.
  * \param a The type of the first operand, used to determine templateisation, needed by VC++..
- * \param b The type of the second operand, used to determine templateisation, needed by VC++..
- * \param Comp The stack entry to use as the second operand.
- * \param Res The stack entry to store the result in.
+ * \param pA The shader data to use as the second operand.
+ * \param pRes The shader data to store the result in.
  * \param RunningState The current SIMD state.
  */
 template <class A>
@@ -585,12 +514,12 @@ inline void	OpNEG( A& a, IqShaderData* pA, IqShaderData* pRes, CqBitVector& Runn
 		pRes->SetValue( -vA );
 	}
 }
-/** Templatised cast operator, cast the current stack entry to the spcified type.
+/* Templatised cast operator, cast the current stack entry to the spcified type.
  * The template classes decide the cast used, there must be an appropriate operator between the two types.
  * \param a The type of the first operand, used to determine templateisation, needed by VC++..
  * \param b The type of the second operand, used to determine templateisation, needed by VC++..
- * \param Comp The stack entry to use as the second operand.
- * \param Res The stack entry to store the result in.
+ * \param pA The shader data to use as the second operand.
+ * \param pRes The shader data to store the result in.
  * \param RunningState The current SIMD state.
  */
 template <class A, class B>
@@ -621,15 +550,16 @@ inline void	OpCAST( A& a, B& b, IqShaderData* pA, IqShaderData* pRes, CqBitVecto
 		pRes->SetValue( static_cast<B>( vA ) );
 	}
 }
-/** Templatised cast three operands to a single triple type (vector/normal/color etc.) and store the result in this stack entry
- * \param z The type to combine the float values into.
- * \param a Float first operand 
- * \param b Float second operand 
- * \param c Float third operand 
+/* Templatised cast three operands to a single triple type (vector/normal/color etc.) and store the result in this stack entry
+ * \param a The type of the first operand, used to determine templateisation, needed by VC++..
+ * \param pA The shader data to use as the first triple element.
+ * \param pB The shader data to use as the second triple element.
+ * \param pC The shader data to use as the third triple element.
+ * \param pRes The shader data to store the result in.
  * \param RunningState The current SIMD state.
  */
 template <class A>
-inline void	OpTRIPLE( A&, IqShaderData* pRes, IqShaderData* pA, IqShaderData* pB, IqShaderData* pC, CqBitVector& RunningState )
+inline void	OpTRIPLE( A&a, IqShaderData* pRes, IqShaderData* pA, IqShaderData* pB, IqShaderData* pC, CqBitVector& RunningState )
 {
 	TqFloat x, y, z;
 
@@ -644,9 +574,25 @@ inline void	OpTRIPLE( A&, IqShaderData* pRes, IqShaderData* pA, IqShaderData* pB
 			pRes->SetValue( A( x, y, z ), i );
 		}
 }
-/** Templatised cast sixteen operands to a single matrix type and store the result in this stack entry
- * The parameters a-p are the float values to combine.
- * \param z The type to combine the float values into (currenlty only matrix supported).
+/* Templatised cast sixteen operands to a single matrix type and store the result in this stack entry
+ * \param z The type of the operand, used to determine templateisation, needed by VC++..
+ * \param pRes The shader data to store the result in.
+ * \param pA The shader data to use as the 0,0 element.
+ * \param pB The shader data to use as the 1,0 element.
+ * \param pC The shader data to use as the 2,0 element.
+ * \param pD The shader data to use as the 3,0 element.
+ * \param pE The shader data to use as the 0,1 element.
+ * \param pF The shader data to use as the 1,1 element.
+ * \param pG The shader data to use as the 2,1 element.
+ * \param pH The shader data to use as the 3,1 element.
+ * \param pI The shader data to use as the 0,2 element.
+ * \param pJ The shader data to use as the 1,2 element.
+ * \param pK The shader data to use as the 2,2 element.
+ * \param pL The shader data to use as the 3,2 element.
+ * \param pM The shader data to use as the 0,3 element.
+ * \param pN The shader data to use as the 1,3 element.
+ * \param pO The shader data to use as the 2,3 element.
+ * \param pP The shader data to use as the 3,3 element.
  * \param RunningState The current SIMD state.
  */
 template <class A>
@@ -684,11 +630,11 @@ inline void	OpHEXTUPLE( A& z, IqShaderData* pRes,
 		}
 	}
 }
-/** Templatised component access operator.
- * The template classes decide the cast used, there must be an appropriate operator between the two types.
- * \param z The type to cast this stackentry to.
- * \param index Integer index. 
- * \param Res The stack entry to store the result in.
+/* Templatised component access operator.
+ * \param z The type of the operand, used to determine templatisation, needed by VC++..
+ * \param pA The shader data to extract the component from.
+ * \param index The index of the component to extract.
+ * \param pRes The shader data to store the result in.
  * \param RunningState The current SIMD state.
  */
 template <class A>
@@ -719,11 +665,11 @@ inline void	OpCOMP( A& z, IqShaderData* pA, int index, IqShaderData* pRes, CqBit
 		pRes->SetValue( vA[ index ] );
 	}
 }
-/** Templatised component access operator.
- * The template classes decide the cast used, there must be an appropriate operator between the two types.
- * \param z The type to cast this stackentry to.
- * \param index Integer type stackentry index. 
- * \param Res The stack entry to store the result in.
+/* Templatised component access operator.
+ * \param z The type of the operand, used to determine templatisation, needed by VC++..
+ * \param pA The shader data to extract the component from.
+ * \param pB The shader data to use to get the index to extract.
+ * \param pRes The shader data to store the result in.
  * \param RunningState The current SIMD state.
  */
 template <class A>
@@ -788,10 +734,11 @@ inline void	OpCOMP( A& z, IqShaderData* pA, IqShaderData* pB, IqShaderData* pRes
 		pRes->SetValue( vA[ index ] );
 	}
 }
-/** Templatised component set operator.
- * \param z The type to cast this to.
- * \param index Integer index. 
- * \param a Float type stackentry to set the index to.
+/* Templatised component set operator.
+ * \param z The type of the operand, used to determine templatisation, needed by VC++..
+ * \param pRes The shader data to store the result in.
+ * \param index The index of the component to set.
+ * \param pA The shader data to set the component within.
  * \param RunningState The current SIMD state.
  */
 template <class A>
@@ -813,10 +760,11 @@ inline void	OpSETCOMP( A& z, IqShaderData* pRes, int index, IqShaderData* pA, Cq
 		}
 	}
 }
-/** Templatised component set operator.
- * \param z The type to cast this to.
- * \param index Integer type stackentry index. 
- * \param a Float type stackentry to set the index to.
+/* Templatised component set operator.
+ * \param z The type of the operand, used to determine templatisation, needed by VC++..
+ * \param pRes The shader data to store the result in.
+ * \param index The shader data to get the index of the component to set from.
+ * \param pA The shader data to set the component within.
  * \param RunningState The current SIMD state.
  */
 template <class A>
@@ -840,10 +788,11 @@ inline void	OpSETCOMP( A& z, IqShaderData* pRes, IqShaderData* index, IqShaderDa
 	}
 }
 
-/** Special case matrix component access.
- * \param r Integer type stackentry row index.
- * \param c Integer type stackentry column index.
- * \param Res The stack entry to store the result in.
+/* Special case matrix component access.
+ * \param pA The shader data that stores the matrix.
+ * \param pR The shader data to get the index into the rows from.
+ * \param pC The shader data to get the index into the columns from.
+ * \param pRes The shader data to store the result in.
  * \param RunningState The current SIMD state.
  */
 inline void	OpCOMPM( IqShaderData* pA, IqShaderData* pR, IqShaderData* pC, IqShaderData* pRes, CqBitVector& RunningState )
@@ -863,10 +812,11 @@ inline void	OpCOMPM( IqShaderData* pA, IqShaderData* pR, IqShaderData* pC, IqSha
 		}
 }
 
-/** Special case matrix component access.
- * \param r Integer type stackentry row index.
- * \param c Integer type stackentry column index.
- * \param v Float type stackentry value to set index to.
+/* Special case matrix component access.
+ * \param pA The shader data that stores the matrix.
+ * \param pR The shader data to get the index into the rows from.
+ * \param pC The shader data to get the index into the columns from.
+ * \param pV The shader data which holds the value to place in the appropriate row/column.
  * \param RunningState The current SIMD state.
  */
 inline void	OpSETCOMPM( IqShaderData* pA, IqShaderData* pR, IqShaderData* pC, IqShaderData* pV, CqBitVector& RunningState )

@@ -5,7 +5,7 @@
  *	@brief	Decares the interface to generic shader variables.
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2002/10/31 11:51:12 $
+ *	Last change date:	$Date: 2003/04/27 21:41:34 $
  */ 
 //------------------------------------------------------------------------------
 
@@ -314,15 +314,16 @@ struct IqShaderData
 	 * \return A IqShaderData pointer.
 	 */
 	virtual	IqShaderData* Clone() const = 0;
+
 	/** Set the all SIMD data ased on a state vector, only indexes whose bit is set are modified.
-	 * \param pFrom The stack entry to assign.
+	 * \param pVal The stack entry to assign.
 	 * \param index Integer SIMD index.
 	 */
-	virtual	void	SetValueFromVariable( IqShaderData* pFrom, TqInt index ) = 0;
+	virtual	void	SetValueFromVariable( IqShaderData* pVal, TqInt index ) = 0;
 	/** Copy the values from the passed variable into this, taking into account any class differences.
-	 * \param pFrom The variable to copy from.
+	 * \param pVal The variable to copy from.
 	 */
-	virtual	void	SetValueFromVariable( IqShaderData* pFrom ) = 0;
+	virtual	void	SetValueFromVariable( IqShaderData* pVal ) = 0;
 	/** Get an indexed SIMD data value.
 	 */
 	virtual	EqVariableClass	Class() const = 0;

@@ -298,10 +298,10 @@ WARN_LOGFILE           =
 # with spaces. 
 
 INPUT                  = ./aqsis ./aqsl ./filebuffer ./framebuffer_glut ./framebuffer_glut_z 
-INPUT				  += ./libaqsistypes ./libaqsistypes/win32/intel ./libcodegenvm ./libdd 
+INPUT				  += ./libaqsistypes ./libaqsistypes/win32/intel ./libargparse ./libcodegenvm ./libdd 
 INPUT				  += ./libddmsimple ./libddmsock ./librib2 ./librib2ri ./librib2stream 
 INPUT				  += ./libslparse ./render ./shadowmap ./teqser ./libshadervm ./libshaderexecenv
-INPUT				  += ./libri2rib ./libslxargs
+INPUT				  += ./libri2rib ./libslxargs ./teqser ./shadowmap
 
 # If the value of the INPUT tag contains directories, you can use the 
 # FILE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp 
