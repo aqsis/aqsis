@@ -202,6 +202,11 @@ class CqPolygonPoints : public CqSurface
 														m_cVertices(cVertices),
 														m_Transformed(TqFalse)
 															{}
+				CqPolygonPoints(const CqPolygonPoints& From) : CqSurface(From),
+																m_cVertices(From.m_cVertices),
+																m_cReferences(0),
+																m_Transformed(From.m_Transformed)
+															{}
 		virtual	~CqPolygonPoints()							{}
 
 		// Overridden from CqSurface.
@@ -253,9 +258,9 @@ class CqSurfacePointsPolygon : public CqBasicSurface, public CqPolygonBase
 				CqSurfacePointsPolygon(const CqSurfacePointsPolygon& From);
 		virtual	~CqSurfacePointsPolygon()							{m_pPoints->UnReference();}
 
-				std::vector<TqInt>&	aIndices()		{return(m_aIndices);}
 				CqSurfacePointsPolygon& operator=(const CqSurfacePointsPolygon& From);
-				TqInt		cVertices() const	{return(m_aIndices.size());}
+
+				std::vector<TqInt>&	aIndices()		{return(m_aIndices);}
 
 		// Overridden from CqBasicSurface
 		virtual	CqBound		Bound() const	{return(CqPolygonBase::Bound());}
@@ -273,19 +278,19 @@ class CqSurfacePointsPolygon : public CqBasicSurface, public CqPolygonBase
 		//---------------
 
 		// Overridden from CqPolygonBase
-		virtual	const CqSurface& Surface() const			{return(*m_pPoints);}
+		virtual	const CqSurface& Surface() const		{return(*m_pPoints);}
 		virtual		  CqSurface& Surface()				{return(*m_pPoints);}
 
 		virtual	const CqVector4D& PolyP(TqInt i) const	{return(m_pPoints->P()[m_aIndices[i]]);}
 		virtual	const CqVector3D& PolyN(TqInt i) const	{return(m_pPoints->N()[m_aIndices[i]]);}
-		virtual	const CqColor& PolyCs(TqInt i) const		{return(m_pPoints->Cs()[m_aIndices[i]]);}
-		virtual	const CqColor& PolyOs(TqInt i) const		{return(m_pPoints->Os()[m_aIndices[i]]);}
+		virtual	const CqColor& PolyCs(TqInt i) const	{return(m_pPoints->Cs()[m_aIndices[i]]);}
+		virtual	const CqColor& PolyOs(TqInt i) const	{return(m_pPoints->Os()[m_aIndices[i]]);}
 		virtual	const TqFloat& Polys(TqInt i) const		{return(m_pPoints->s()[m_aIndices[i]]);}
 		virtual	const TqFloat& Polyt(TqInt i) const		{return(m_pPoints->t()[m_aIndices[i]]);}
 		virtual	const TqFloat& Polyu(TqInt i) const		{return(m_pPoints->u()[m_aIndices[i]]);}
 		virtual	const TqFloat& Polyv(TqInt i) const		{return(m_pPoints->v()[m_aIndices[i]]);}
 
-		virtual	TqInt		NumVertices() const				{return(m_aIndices.size());}
+		virtual	TqInt		NumVertices() const			{return(m_aIndices.size());}
 
 		virtual	const CqAttributes*	pAttributes() const	{return(m_pPoints->pAttributes());}
 		virtual	const CqTransform*	pTransform() const	{return(m_pPoints->pTransform());}
@@ -317,6 +322,98 @@ class CqSurfacePointsPolygon : public CqBasicSurface, public CqPolygonBase
 	protected:
 		std::vector<TqInt>	m_aIndices;		///< Array of indices into the associated vertex list.
 		CqPolygonPoints*	m_pPoints;		///< Pointer to the associated CqPolygonPoints class.
+};
+
+
+//----------------------------------------------------------------------
+/** \class CqMotionSurfacePointsPolygon
+ * Motion points polygon surface primitive, a single motion blurred polygon.
+ */
+
+class CqMotionSurfacePointsPolygon : public CqBasicSurface, public CqPolygonBase, public CqMotionSpec<CqPolygonPoints*>
+{
+	public:
+				CqMotionSurfacePointsPolygon(CqPolygonPoints* pPoints)	:	
+													CqPolygonBase(),
+													CqMotionSpec<CqPolygonPoints*>(pPoints)
+													{}
+				CqMotionSurfacePointsPolygon(const CqMotionSurfacePointsPolygon& From);
+		virtual	~CqMotionSurfacePointsPolygon()		{
+														TqInt i;
+														for(i=0; i<cTimes(); i++)
+															GetMotionObject(Time(i))->UnReference();
+													}
+
+				CqMotionSurfacePointsPolygon& operator=(const CqMotionSurfacePointsPolygon& From);
+
+				std::vector<TqInt>&	aIndices()		{return(m_aIndices);}
+				
+		// Overridden from CqBasicSurface
+		virtual	CqBound		Bound() const;
+		virtual	CqMicroPolyGridBase* Dice();
+		virtual	TqInt		Split(std::vector<CqBasicSurface*>& aSplits);
+		virtual TqBool		Diceable();
+
+		virtual void		Transform(const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx)
+														{
+															TqInt i;
+															for(i=0; i<cTimes(); i++)
+																GetMotionObject(Time(i))->Transform(matTx,matITTx,matRTx);
+														}
+		// NOTE: These should never be called.
+		virtual	TqInt		cUniform() const			{return(0);}
+		virtual	TqInt		cVarying() const			{return(0);}
+		virtual	TqInt		cVertex() const				{return(0);}
+		//---------------
+
+		// Overridden from CqPolygonBase
+		virtual	const CqSurface& Surface() const		{return(*GetMotionObject(Time(0)));}
+		virtual		  CqSurface& Surface()				{return(*GetMotionObject(Time(0)));}
+
+		virtual	const CqVector4D& PolyP(TqInt i) const	{return(GetMotionObject(Time(m_CurrTimeIndex))->P()[m_aIndices[i]]);}
+		virtual	const CqVector3D& PolyN(TqInt i) const	{return(GetMotionObject(Time(m_CurrTimeIndex))->N()[m_aIndices[i]]);}
+		virtual	const CqColor& PolyCs(TqInt i) const	{return(GetMotionObject(Time(m_CurrTimeIndex))->Cs()[m_aIndices[i]]);}
+		virtual	const CqColor& PolyOs(TqInt i) const	{return(GetMotionObject(Time(m_CurrTimeIndex))->Os()[m_aIndices[i]]);}
+		virtual	const TqFloat& Polys(TqInt i) const		{return(GetMotionObject(Time(m_CurrTimeIndex))->s()[m_aIndices[i]]);}
+		virtual	const TqFloat& Polyt(TqInt i) const		{return(GetMotionObject(Time(m_CurrTimeIndex))->t()[m_aIndices[i]]);}
+		virtual	const TqFloat& Polyu(TqInt i) const		{return(GetMotionObject(Time(m_CurrTimeIndex))->u()[m_aIndices[i]]);}
+		virtual	const TqFloat& Polyv(TqInt i) const		{return(GetMotionObject(Time(m_CurrTimeIndex))->v()[m_aIndices[i]]);}
+
+		virtual	TqInt		NumVertices() const			{return(m_aIndices.size());}
+
+		virtual	const CqAttributes*	pAttributes() const	{return(GetMotionObject(Time(0))->pAttributes());}
+		virtual	const CqTransform*	pTransform() const	{return(GetMotionObject(Time(0))->pTransform());}
+
+		// Overrides from CqMotionSpec		
+		virtual		void		ClearMotionObject(CqPolygonPoints*& A) const	{};
+		virtual		CqPolygonPoints* ConcatMotionObjects(CqPolygonPoints* const & A, CqPolygonPoints* const & B) const	{return(A);}
+		virtual		CqPolygonPoints* LinearInterpolateMotionObjects(TqFloat Fraction, CqPolygonPoints* const & A, CqPolygonPoints* const & B) const {return(A);}
+
+						/** Determine whether this surface has per vertex normals.
+						 */
+	const	TqBool		bHasN() const					{return(GetMotionObject(Time(0))->bHasN());}
+						/** Determine whether this surface has per vertex colors.
+						 */
+	const	TqBool		bHasCs() const					{return(GetMotionObject(Time(0))->bHasCs());}
+						/** Determine whether this surface has per vertex opacities.
+						 */
+	const	TqBool		bHasOs() const					{return(GetMotionObject(Time(0))->bHasOs());}
+						/** Determine whether this surface has per vertex s cordinates.
+						 */
+	const	TqBool		bHass() const					{return(GetMotionObject(Time(0))->bHass());}
+						/** Determine whether this surface has per vertex t coordinates.
+						 */
+	const	TqBool		bHast() const					{return(GetMotionObject(Time(0))->bHast());}
+						/** Determine whether this surface has per vertex u coordinates.
+						 */
+	const	TqBool		bHasu() const					{return(GetMotionObject(Time(0))->bHasu());}
+						/** Determine whether this surface has per vertex v coordinates.
+						 */
+	const	TqBool		bHasv() const					{return(GetMotionObject(Time(0))->bHasv());}
+
+	protected:
+		std::vector<TqInt>	m_aIndices;		///< Array of indices into the associated vertex list.
+		TqInt				m_CurrTimeIndex;
 };
 
 

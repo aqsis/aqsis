@@ -577,7 +577,7 @@ void CqSurfacePolygon::TransferDefaultSurfaceParameters()
 /** Copy constructor.
  */
 
-CqSurfacePointsPolygon::CqSurfacePointsPolygon(const CqSurfacePointsPolygon& From)
+CqSurfacePointsPolygon::CqSurfacePointsPolygon(const CqSurfacePointsPolygon& From) : m_pPoints(0)
 {
 	*this=From;
 }
@@ -590,6 +590,7 @@ CqSurfacePointsPolygon::CqSurfacePointsPolygon(const CqSurfacePointsPolygon& Fro
 CqSurfacePointsPolygon& CqSurfacePointsPolygon::operator=(const CqSurfacePointsPolygon& From)	
 {
 	TqInt i;
+	m_aIndices.resize(From.m_aIndices.size());
 	for(i=From.m_aIndices.size()-1; i>=0; i--)
 		m_aIndices[i]=From.m_aIndices[i];
 
@@ -665,6 +666,87 @@ void CqPolygonPoints::TransferDefaultSurfaceParameters()
 			v()[i]=P()[i].y();
 	}
 }
+
+
+
+//---------------------------------------------------------------------
+/** Get the bound of this GPrim.
+ */
+
+CqBound	CqMotionSurfacePointsPolygon::Bound() const
+{
+	CqMotionSurfacePointsPolygon* pthis=const_cast<CqMotionSurfacePointsPolygon*>(this);
+	CqBound B(FLT_MAX, FLT_MAX, FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX);
+	TqInt i;
+	for(i=0; i<cTimes(); i++)
+	{
+		pthis->m_CurrTimeIndex=i;
+		B=B.Combine(CqPolygonBase::Bound());
+	}
+	return(B);
+}
+
+
+//---------------------------------------------------------------------
+/** Dice this GPrim.
+ */
+
+CqMicroPolyGridBase* CqMotionSurfacePointsPolygon::Dice()
+{
+	CqMotionMicroPolyGrid* pGrid=new CqMotionMicroPolyGrid;
+	TqInt i;
+	for(i=0; i<cTimes(); i++)
+	{
+		m_CurrTimeIndex=i;
+		CqMicroPolyGridBase* pGrid2=CqPolygonBase::Dice();
+		pGrid->AddTimeSlot(Time(i),pGrid2);
+	}
+	return(pGrid);
+}
+
+
+//---------------------------------------------------------------------
+/** Split this GPrim into smaller GPrims.
+ */
+
+TqInt CqMotionSurfacePointsPolygon::Split(std::vector<CqBasicSurface*>& aSplits)
+{
+	std::vector<std::vector<CqBasicSurface*> > aaMotionSplits;
+	aaMotionSplits.resize(cTimes());
+	TqInt cSplits;
+	TqInt i;
+	for(i=0; i<cTimes(); i++)
+	{
+		m_CurrTimeIndex=i;
+		cSplits=CqPolygonBase::Split(aaMotionSplits[i]);
+	}
+
+	// Now build motion surfaces from the splits and pass them back.
+	for(i=0; i<cSplits; i++)
+	{
+		CqMotionSurface<CqBasicSurface*>* pNewMotion=new CqMotionSurface<CqBasicSurface*>(0);
+		pNewMotion->m_fDiceable=TqTrue;
+		pNewMotion->m_EyeSplitCount=m_EyeSplitCount;
+		TqInt j;
+		for(j=0; j<cTimes(); j++)
+			pNewMotion->AddTimeSlot(Time(j),aaMotionSplits[j][i]);
+		aSplits.push_back(pNewMotion);
+	}
+	return(cSplits);
+}
+
+
+//---------------------------------------------------------------------
+/** Determine whether this GPrim is diceable or not.
+ * Only checks the GPrim at shutter time 0.
+ */
+
+TqBool CqMotionSurfacePointsPolygon::Diceable()
+{
+	TqBool f=GetMotionObject(Time(0))->Diceable();
+	return(f);
+}
+
 
 END_NAMESPACE(Aqsis)
 //---------------------------------------------------------------------
