@@ -41,6 +41,7 @@
 #include	"shadervm.h"
 #include	"log.h"
 #include	"mtable.h"
+#include	"inlineparse.h"
 
 
 START_NAMESPACE( Aqsis )
@@ -884,122 +885,76 @@ TqBool	CqRenderer::SetCoordSystem( const char* strName, const CqMatrix& matToWor
 
 SqParameterDeclaration CqRenderer::FindParameterDecl( const char* strDecl )
 {
-	TqInt Count = 1;
-	CqString strName( "" );
-	EqVariableType ILType = type_invalid;
-	EqVariableClass ILClass = class_invalid;
-	TqBool bArray = TqFalse;
-
-	// First check if the declaration has embedded type information.
-	CqString strLocalDecl( strDecl );
-	TqInt i;
-	/// \note Go backwards through the type names to make sure facevarying is matched before varying.
-	for ( i = gcVariableClassNames - 1; i >= 0; i-- )
+	CqInlineParse parser;
+	parser.parse( std::string( strDecl ) );
+	
+	if( parser.isInline() )	
 	{
-		if ( strLocalDecl.find( gVariableClassNames[ i ] ) != CqString::npos )
-		{
-			ILClass = static_cast< EqVariableClass > ( i );
-			break;
-		}
-	}
-
-	/// \note Go backwards through the type names to make sure hpoint is matched before point.
-	for ( i = gcVariableTypeNames - 1; i >= 0; i-- )
-	{
-		if ( strLocalDecl.find( gVariableTypeNames[ i ] ) != CqString::npos )
-		{
-			ILType = static_cast< EqVariableType > ( i );
-			break;
-		}
-	}
-
-	// Now search for an array specifier.
-	TqUint s, e;
-	if ( ( s = strLocalDecl.find( '[' ) ) != CqString::npos )
-	{
-		if ( ( e = strLocalDecl.find( ']' ) ) != CqString::npos && e > s )
-		{
-			Count = static_cast<TqInt>( atoi( strLocalDecl.substr( s + 1, e - ( s + 1 ) ).c_str() ) );
-			bArray = TqTrue ;
-		}
-	}
-
-	// Copy the token to the name.
-	s = strLocalDecl.find_last_of( ' ' );
-	if ( s != CqString::npos ) strName = strLocalDecl.substr( s + 1 );
-	else	strName = strLocalDecl;
-
-	if ( ILType != type_invalid )
-	{
-		// Default to uniform if no class specified
-		if ( ILClass == class_invalid )
-			ILClass = class_uniform ;
-
 		SqParameterDeclaration Decl;
-		Decl.m_strName = strName;
-		Decl.m_Count = Count;
-		Decl.m_Type = ILType;
-		Decl.m_Class = ILClass;
+		Decl.m_strName = parser.getIdentifier();
+		Decl.m_Count = parser.getQuantity();
+		Decl.m_Type = parser.getType();
+		Decl.m_Class = parser.getClass();
 		Decl.m_strSpace = "";
 
 		// Get the creation function.
-		switch ( ILClass )
+		switch ( Decl.m_Class )
 		{
-				case class_constant:
-				{
-					if ( bArray )
-						Decl.m_pCreate = gVariableCreateFuncsConstantArray[ ILType ];
-					else
-						Decl.m_pCreate = gVariableCreateFuncsConstant[ ILType ];
-				}
-				break;
+			case class_constant:
+			{
+				if ( Decl.m_Count > 1 )
+					Decl.m_pCreate = gVariableCreateFuncsConstantArray[ Decl.m_Type ];
+				else
+					Decl.m_pCreate = gVariableCreateFuncsConstant[ Decl.m_Type ];
+			}
+			break;
 
-				case class_uniform:
-				{
-					if ( bArray )
-						Decl.m_pCreate = gVariableCreateFuncsUniformArray[ ILType ];
-					else
-						Decl.m_pCreate = gVariableCreateFuncsUniform[ ILType ];
-				}
-				break;
+			case class_uniform:
+			{
+				if ( Decl.m_Count > 1 )
+					Decl.m_pCreate = gVariableCreateFuncsUniformArray[ Decl.m_Type ];
+				else
+					Decl.m_pCreate = gVariableCreateFuncsUniform[ Decl.m_Type ];
+			}
+			break;
 
-				case class_varying:
-				{
-					if ( bArray )
-						Decl.m_pCreate = gVariableCreateFuncsVaryingArray[ ILType ];
-					else
-						Decl.m_pCreate = gVariableCreateFuncsVarying[ ILType ];
-				}
-				break;
+			case class_varying:
+			{
+				if ( Decl.m_Count > 1 )
+					Decl.m_pCreate = gVariableCreateFuncsVaryingArray[ Decl.m_Type ];
+				else
+					Decl.m_pCreate = gVariableCreateFuncsVarying[ Decl.m_Type ];
+			}
+			break;
 
-				case class_vertex:
-				{
-					if ( bArray )
-						Decl.m_pCreate = gVariableCreateFuncsVertexArray[ ILType ];
-					else
-						Decl.m_pCreate = gVariableCreateFuncsVertex[ ILType ];
-				}
-				break;
+			case class_vertex:
+			{
+				if ( Decl.m_Count > 1 )
+					Decl.m_pCreate = gVariableCreateFuncsVertexArray[ Decl.m_Type ];
+				else
+					Decl.m_pCreate = gVariableCreateFuncsVertex[ Decl.m_Type ];
+			}
+			break;
 
-				case class_facevarying:
-				{
-					if ( bArray )
-						Decl.m_pCreate = gVariableCreateFuncsFaceVaryingArray[ ILType ];
-					else
-						Decl.m_pCreate = gVariableCreateFuncsFaceVarying[ ILType ];
-				}
-				break;
+			case class_facevarying:
+			{
+				if ( Decl.m_Count > 1 )
+					Decl.m_pCreate = gVariableCreateFuncsFaceVaryingArray[ Decl.m_Type ];
+				else
+					Decl.m_pCreate = gVariableCreateFuncsFaceVarying[ Decl.m_Type ];
+			}
+			break;
 
-				default:
-				{
-					// left blank to avoid compiler warnings about unhandled types
-					break;
-				}
+			default:
+			{
+				// left blank to avoid compiler warnings about unhandled types
+				break;
+			}
 		}
 		return ( Decl );
 	}
 
-	strName = strDecl;
+	CqString strName = strDecl;
 	// Search the local parameter declaration list.
 	std::vector<SqParameterDeclaration>::const_iterator is;
 	std::vector<SqParameterDeclaration>::const_iterator end = m_Symbols.end();

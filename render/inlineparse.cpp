@@ -22,8 +22,9 @@
  *  \author Lionel J. Lacour (intuition01@online.fr)
  */
 #include "inlineparse.h"
+#include "exception.h"
 
-USING_NAMESPACE( libri2rib );
+USING_NAMESPACE( Aqsis );
 
 void CqInlineParse::check_syntax ()
 {
@@ -39,10 +40,10 @@ void CqInlineParse::check_syntax ()
 	switch ( number_of_words )
 	{
 			case 0:
-			throw CqError ( RIE_SYNTAX, RIE_ERROR, "void parameter declaration", TqFalse );
+			throw XqException ( "void parameter declaration" );
 			case 4:
 			case 7:
-			throw CqError ( RIE_SYNTAX, RIE_ERROR, "Bad inline declaration", TqTrue );
+			throw XqException ( "Bad inline declaration" );
 			return ;
 			case 1: inline_def = TqFalse;
 			break;
@@ -50,10 +51,10 @@ void CqInlineParse::check_syntax ()
 			lc( word[ 0 ] );
 			if ( is_type( word[ 0 ] ) == TqFalse )
 			{
-				throw CqError ( RIE_SYNTAX, RIE_ERROR, "Bad inline declaration", TqTrue );
+				throw XqException ( "Bad inline declaration" );
 			}
 			inline_def = TqTrue;
-			tc = UNIFORM;
+			tc = class_uniform;
 			tt = get_type( word[ 0 ] );
 			size = 1;
 			identifier = word[ 1 ];
@@ -63,7 +64,7 @@ void CqInlineParse::check_syntax ()
 			lc( word[ 1 ] );
 			if ( ( is_class( word[ 0 ] ) == TqFalse ) || ( is_type( word[ 1 ] ) == TqFalse ) )
 			{
-				throw CqError ( RIE_SYNTAX, RIE_ERROR, "Bad inline declaration", TqTrue );
+				throw XqException ( "Bad inline declaration" );
 			}
 			inline_def = TqTrue;
 			tc = get_class( word[ 0 ] );
@@ -76,10 +77,10 @@ void CqInlineParse::check_syntax ()
 			if ( ( is_type( word[ 0 ] ) == TqFalse ) || ( word[ 1 ] != "[" ) ||
 			        ( is_int( word[ 2 ] ) == TqFalse ) || ( word[ 3 ] != "]" ) )
 			{
-				throw CqError ( RIE_SYNTAX, RIE_ERROR, "Bad inline declaration", TqTrue );
+				throw XqException ( "Bad inline declaration" );
 			}
 			inline_def = TqTrue;
-			tc = UNIFORM;
+			tc = class_uniform;
 			tt = get_type( word[ 0 ] );
 			size = get_size( word[ 2 ] );
 			identifier = word[ 4 ];
@@ -91,7 +92,7 @@ void CqInlineParse::check_syntax ()
 			        ( word[ 2 ] != "[" ) || ( is_int( word[ 3 ] ) == TqFalse ) ||
 			        ( word[ 4 ] != "]" ) )
 			{
-				throw CqError( RIE_SYNTAX, RIE_ERROR, "Bad inline declaration", TqTrue );
+				throw XqException ( "Bad inline declaration" );
 			}
 			inline_def = TqTrue;
 			tc = get_class( word[ 0 ] );
@@ -130,9 +131,9 @@ void CqInlineParse::parse ( std::string &str )
 				start_found = TqFalse;
 				break;
 				case '#':
-				throw CqError( RIE_SYNTAX, RIE_ERROR, "'#' character not allowed in strings", TqTrue );
+				throw XqException ( "'#' character not allowed in strings" );
 				case '\"':
-				throw CqError( RIE_SYNTAX, RIE_ERROR, "'\"' character not allowed in strings", TqTrue );
+				throw XqException ( "'\"' character not allowed in strings" );
 				case '[':
 				case ']':
 				if ( start_found == TqTrue )
@@ -204,28 +205,30 @@ TqBool CqInlineParse::is_int ( const std::string &str )
 	return TqTrue;
 }
 
-EqTokenClass CqInlineParse::get_class ( const std::string &str )
+EqVariableClass CqInlineParse::get_class ( const std::string &str )
 {
-	if ( str == "constant" ) return CONSTANT;
-	if ( str == "uniform" ) return UNIFORM;
-	if ( str == "varying" ) return VARYING;
-	if ( str == "vertex" ) return VERTEX;
-	return ( CONSTANT );
+	if ( str == "constant" ) return class_constant;
+	if ( str == "uniform" ) return class_uniform;
+	if ( str == "varying" ) return class_varying;
+	if ( str == "vertex" ) return class_vertex;
+	if ( str == "vertex" ) return class_vertex;
+	if ( str == "facevarying" ) return class_facevarying;
+	return ( class_constant );
 }
 
-EqTokenType CqInlineParse::get_type ( const std::string &str )
+EqVariableType CqInlineParse::get_type ( const std::string &str )
 {
-	if ( str == "float" ) return FLOAT;
-	if ( str == "point" ) return POINT;
-	if ( str == "vector" ) return VECTOR;
-	if ( str == "normal" ) return NORMAL;
-	if ( str == "color" ) return COLOR;
-	if ( str == "string" ) return STRING;
-	if ( str == "matrix" ) return MATRIX;
-	if ( str == "hpoint" ) return HPOINT;
-	if ( str == "integer" ) return INTEGER;
-	if ( str == "int" ) return INTEGER;
-	return ( FLOAT );
+	if ( str == "float" ) return type_float;
+	if ( str == "point" ) return type_point;
+	if ( str == "vector" ) return type_vector;
+	if ( str == "normal" ) return type_normal;
+	if ( str == "color" ) return type_color;
+	if ( str == "string" ) return type_string;
+	if ( str == "matrix" ) return type_matrix;
+	if ( str == "hpoint" ) return type_hpoint;
+	if ( str == "integer" ) return type_integer;
+	if ( str == "int" ) return type_integer;
+	return ( type_float );
 }
 
 TqUint CqInlineParse::get_size ( const std::string &str )

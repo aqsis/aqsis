@@ -169,6 +169,10 @@ SOURCE=.\imagers.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\inlineparse.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\lath.cpp
 # End Source File
 # Begin Source File
@@ -350,6 +354,10 @@ SOURCE=.\imagepixel.h
 # Begin Source File
 
 SOURCE=.\imagers.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\inlineparse.h
 # End Source File
 # Begin Source File
 

@@ -1736,6 +1736,9 @@ static ParameterType ParseParameterType(const std::string& Source)
 			if(cleanword == "integer")
 				return Type_Integer;
 
+			if(cleanword == "int")
+				return Type_Integer;
+
 			if(cleanword == "float")
 				return Type_Float;
 				
