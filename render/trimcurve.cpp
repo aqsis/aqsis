@@ -5,7 +5,7 @@
  *	@brief	Implementation of trimcurce functionality.
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2002/02/14 23:02:06 $
+ *	Last change date:	$Date: 2002/02/15 14:56:32 $
  */
 //------------------------------------------------------------------------------
 
@@ -162,6 +162,10 @@ void CqTrimLoopArray::Prepare(CqSurface* pSurface)
 
 const TqBool	CqTrimLoopArray::TrimPoint(const CqVector2D& v) const
 {
+	// Early out if no trim loops at all.
+	if(m_aLoops.size()==0)
+		return(TqFalse);
+
 	TqInt	cCrosses=0;
 
 	std::vector<CqTrimLoop>::const_iterator iLoop;
