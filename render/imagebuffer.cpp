@@ -880,7 +880,7 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, long xmin, lon
                         const SqSampleData& sampleData = pie2->SampleData( index );
                         const CqVector2D& vecP = sampleData.m_Position;
 
-						STATS_INC( SPL_count );
+						CqStats::IncI( CqStats::SPL_count );
 
                         index++;
 
@@ -901,7 +901,7 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, long xmin, lon
                             }
                             else
                             {
-                                STATS_INC( SPL_bound_hits );
+                                CqStats::IncI( CqStats::SPL_bound_hits );
                                 // check if the displaced sample will fall outside the mpg
                                 // if outside in x dimension, don't bother transforming y
                                 vecX = vecP.x() + coc.x()*sampleData.m_DofOffset.x();
@@ -934,13 +934,13 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, long xmin, lon
                                 continue;
                         }
 
-                        STATS_INC( SPL_bound_hits );
+                        CqStats::IncI( CqStats::SPL_bound_hits );
 
 
                         // Now check if the subsample hits the micropoly
                         TqBool SampleHit;
                         TqFloat D;
-
+			
                         if( UsingDepthOfField )
                         {
                             CqVector2D vecPDof(vecX, vecY);
@@ -953,7 +953,7 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, long xmin, lon
 
                         if ( SampleHit )
                         {
-                            STATS_INC( SPL_hits );
+                            CqStats::IncI( CqStats::SPL_hits );
                             pMPG->MarkHit();
 
                             sample_hits++;
@@ -1166,8 +1166,8 @@ void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax )
             {
                 QGetRenderContext() ->Stats().OcclusionCullTimer().Start();
                 TqBool fCull = TqFalse;
-//                if ( !bIsEmpty && pSurface->fCachedBound() )
-  //                  fCull = OcclusionCullSurface( pSurface );
+                if ( !bIsEmpty && pSurface->fCachedBound() )
+                    fCull = OcclusionCullSurface( pSurface );
                 QGetRenderContext() ->Stats().OcclusionCullTimer().Stop();
                 if ( fCull )
                 {
