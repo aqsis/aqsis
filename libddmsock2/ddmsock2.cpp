@@ -190,14 +190,11 @@ TqInt CqDDManager::DisplayBucket( IqBucket* pBucket )
 {
 	boost::mutex::scoped_lock lk(m_BucketsLock);
 	TqInt	record_index;
-	m_DiskStore.StoreBucket(pBucket, NULL, &record_index);
+	m_DiskStore.StoreBucket(pBucket, m_BucketRequestsWaiting, &record_index);
 	// Check if any sender threads are waiting on this bucket.
 	std::map<TqInt, boost::condition*>::iterator waiting;
 	if((waiting = m_BucketRequestsWaiting.find(record_index)) != m_BucketRequestsWaiting.end() )
-	{
-		std::cerr << debug << "Hit a waiting bucket " << record_index << std::endl;
 		waiting->second->notify_all();
-	}
     return ( 0 );
 }
 

@@ -416,6 +416,9 @@ void CqSender::operator()()
 
 			// Send the bucket to the client.
 			sendXMLMessage(m_Socket, strBucket.str().c_str());
+
+			// Let the bucket cache know that we don't need the record anymore.
+			m_pManager->getDiskStore().ReleaseBucket(precord, index);
 		}
 	}
 }

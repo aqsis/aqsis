@@ -126,7 +126,7 @@ void CqBucketDiskStore::PrepareFile(std::string& name, TqBool temp)
 
 	
 */
-TqLong CqBucketDiskStore::StoreBucket(IqBucket* bucket, SqBucketDiskStoreRecord** record_out, TqInt* index_out )
+TqLong CqBucketDiskStore::StoreBucket(IqBucket* bucket, std::map<TqInt, boost::condition*>& conditions, TqInt* index_out )
 {
 	TqLong seek_offset = -1;
 
@@ -169,11 +169,13 @@ TqLong CqBucketDiskStore::StoreBucket(IqBucket* bucket, SqBucketDiskStoreRecord*
 		record->m_BucketLength = totallen;
 
 		file.write(reinterpret_cast<const char*>(record), totallen);
-		m_OriginTable[bucket->YOrigin()][bucket->XOrigin()] = seek_offset;
 		m_IndexTable.push_back(seek_offset);
 		m_StoredBuckets++;
-		if(record_out!=NULL)
-			*record_out = record;
+		TqInt index = m_IndexTable.size()-1;
+		// Check if any sender threads are waiting on this bucket.
+		std::map<TqInt, boost::condition*>::iterator waiting;
+		if((waiting = conditions.find(index)) != conditions.end() )
+			CacheBucket(record, index);
 		else
 			free(record);
 		if(index_out!=NULL)
@@ -184,35 +186,6 @@ TqLong CqBucketDiskStore::StoreBucket(IqBucket* bucket, SqBucketDiskStoreRecord*
 	return(seek_offset);
 }
 
-
-/**	\brief	Retrive a bucket given the coordinates of it's origin.
-
-			The coordinates must be absolutely correct, or the bucket will not be found.
-
-	\param	originx	The x coordinate of the bucket to retrieve. 
-					Bucket coordinates are indexed from the top left of the image, starting 0,0 to width-1,height-1.
-	\param	originy	The y coordinate of the bucket to retrieve. 
-					Bucket coordinates are indexed from the top left of the image, starting 0,0 to width-1,height-1.
-
-	\return	A pointer to an area of memory storing a CqBucketDiskStore::SqBucketDiskStoreRecord. It is the responsibility 
-			of the calling function to free the memory pointed to by the record pointer.
-			NULL is returned if the bucket cannot be found.
-
-	
-*/
-CqBucketDiskStore::SqBucketDiskStoreRecord* CqBucketDiskStore::RetrieveBucketOrigin(TqInt originx, TqInt originy)
-{
-	// Check if the row exists first.
-	if(m_OriginTable.find(originy) != m_OriginTable.end() )
-	{
-		// If so, check if the column exists.
-		if(m_OriginTable[originy].find(originx) != m_OriginTable[originy].end())
-		{
-			return(RetrieveBucketOffset(m_OriginTable[originy][originx]));
-		}
-	}
-	return(0);
-}
 
 /**	\brief	Retrive an indexed bucket from the store.
 
@@ -229,11 +202,32 @@ CqBucketDiskStore::SqBucketDiskStoreRecord* CqBucketDiskStore::RetrieveBucketOri
 */
 CqBucketDiskStore::SqBucketDiskStoreRecord* CqBucketDiskStore::RetrieveBucketIndex(TqInt index)
 {
-	// Check if the index is available.
-	if(index < m_IndexTable.size() )
-		return(RetrieveBucketOffset(m_IndexTable[index]));
+	// First check if the index is in the memory cache.
+	boost::mutex::scoped_lock lk(m_MemoryCacheMutex);
+	if( m_MemoryCache.find(index) != m_MemoryCache.end() )
+	{
+		//std::cerr << debug << "Bucket found in cache: " << index << std::endl;
+		// Lock the cache entry so that it doesn't get freed while it is in use.
+		m_MemoryCache[index].second++;
+		return( m_MemoryCache[index].first );
+	}
 	else
-		return(0);
+	{
+		// Check if the index is available.
+		if(index < m_IndexTable.size() )
+		{
+			SqBucketDiskStoreRecord* record = RetrieveBucketOffset(m_IndexTable[index]);
+			if( record )
+			{
+				CacheBucket(record, index);
+
+				//std::cerr << debug << "Bucket memory cache size: " << m_MemoryCacheSize << std::endl;
+			}
+			return(record);
+		}
+		else
+			return(0);
+	}
 }
 
 
@@ -298,9 +292,63 @@ void CqBucketDiskStore::CloseDown()
 	}
 	free(m_Header);
 
-	m_OriginTable.clear();
 	m_IndexTable.clear();
+	
+	// Free any entries we have in the memory cache
+	boost::mutex::scoped_lock lk(m_MemoryCacheMutex);
+	std::map<TqInt, std::pair<SqBucketDiskStoreRecord*, TqInt> >::iterator i;
+	for( i = m_MemoryCache.begin(); i != m_MemoryCache.end(); i++ )
+		free(i->second.first);
+
+	m_MemoryCache.clear();
+	m_MemoryCacheSize = 0;
+	m_MemoryCacheReferences.clear();
 }
 
+
+void CqBucketDiskStore::ReleaseBucket(SqBucketDiskStoreRecord* record, TqInt index)
+{
+	// Check if the bucket is in the cache.
+	boost::mutex::scoped_lock lk(m_MemoryCacheMutex);
+	std::map<TqInt, std::pair<SqBucketDiskStoreRecord*, TqInt> >::iterator i;
+	if( ( i = m_MemoryCache.find(index) ) != m_MemoryCache.end() && i->second.first == record )
+		// If so, and it is valid, then mark it as no longer protected.
+		i->second.second--;
+}
+
+
+void CqBucketDiskStore::CacheBucket(SqBucketDiskStoreRecord* record, TqInt index)
+{
+	boost::mutex::scoped_lock lk(m_MemoryCacheMutex);
+	// Add the bucket to the most recently referenced list and add it to the memory cache.
+	if( ( m_MemoryCacheSize + record->m_BucketLength ) > 1024 * 50 )
+	{
+		// Free the least most recently used cache entry, that isn't locked.
+		std::deque<TqInt>::reverse_iterator i;
+		for( i = m_MemoryCacheReferences.rbegin(); i != m_MemoryCacheReferences.rend(); i++ )
+		{
+			// Check if it is locked.
+			if( m_MemoryCache[*i].second == 0)
+			{
+				SqBucketDiskStoreRecord* oldrec = m_MemoryCache[*i].first;
+				if( oldrec )
+				{
+					m_MemoryCacheSize -= oldrec->m_BucketLength;
+					free(oldrec);
+				}
+				m_MemoryCache.erase(m_MemoryCache.find(*i));
+				m_MemoryCacheReferences.erase(i.base());
+			}
+		}
+	}
+	// Create a new memory cache entry for this record, keyed by it's index.
+	m_MemoryCache[index] = std::pair<SqBucketDiskStoreRecord*, TqBool>(record, 1);
+	// Clear any previous entries in the reference table for this index.
+	std::remove(m_MemoryCacheReferences.begin(), m_MemoryCacheReferences.end(), index);
+	// And store the index at the top, as the most recently referenced record.
+	m_MemoryCacheReferences.push_front(index);
+	// Increase the cache memory use by the size of this new bucket record.
+	m_MemoryCacheSize += record->m_BucketLength;
+}
 
 END_NAMESPACE( Aqsis )

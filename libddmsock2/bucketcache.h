@@ -28,7 +28,14 @@
 #define BUCKETCACHE_H_INCLUDED 1
 
 #include	<vector>
+#include	<deque>
 #include	<string>
+
+#ifdef	AQSIS_SYSTEM_WIN32
+#pragma warning(disable : 4275 4251)
+#endif
+
+#include	<boost/thread.hpp>
 
 START_NAMESPACE( Aqsis )
 
@@ -61,7 +68,7 @@ struct IqBucket;
 class CqBucketDiskStore
 {
 	public:
-		CqBucketDiskStore()	: m_Header(NULL), m_Temporary(TqTrue)	{}
+		CqBucketDiskStore()	: m_Header(NULL), m_Temporary(TqTrue), m_MemoryCacheSize(0)	{}
 		~CqBucketDiskStore();
 
 		//---------------------------------------------------------------------
@@ -92,9 +99,11 @@ class CqBucketDiskStore
 
 		void	PrepareFile(std::string& name, TqBool temp = TqTrue);
 		void	CloseDown();
-		TqLong	StoreBucket(IqBucket* bucket, SqBucketDiskStoreRecord** record_out = NULL, TqInt* index_out = NULL);
+		TqLong	StoreBucket(IqBucket* bucket, std::map<TqInt, boost::condition*>& waiting, TqInt* index_out = NULL);
 		SqBucketDiskStoreRecord* RetrieveBucketOrigin(TqInt originx, TqInt originy);
 		SqBucketDiskStoreRecord* RetrieveBucketIndex(TqInt index);
+		void	ReleaseBucket(SqBucketDiskStoreRecord* record, TqInt index);
+		void	CacheBucket(SqBucketDiskStoreRecord* record, TqInt index);
 
 		TqInt	GetDataValueSize()
 		{
@@ -110,8 +119,11 @@ class CqBucketDiskStore
 		std::string	m_fileName;
 		SqBucketDiskStoreHeader* m_Header;
 		TqInt m_StoredBuckets;
-		std::map<TqInt, std::map<TqInt, TqLong> >	m_OriginTable;
+		std::map<TqInt, std::pair<SqBucketDiskStoreRecord*, TqInt> >	m_MemoryCache;
+		std::deque<TqInt>							m_MemoryCacheReferences;
 		std::vector<TqLong>							m_IndexTable;
+		boost::mutex								m_MemoryCacheMutex;
+		TqInt	m_MemoryCacheSize;
 		TqBool	m_Temporary;			///< Flag indicating the file should be deleted when done.
 };
 
