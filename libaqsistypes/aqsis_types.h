@@ -89,7 +89,7 @@ typedef	bool	TqBool;
 /// Convert the given degrees value to radians.
 #define RAD(a)				((a)/(180.0f/PI)) 
 /// Convert the given radians value to degrees.
-#define DEG(a)				(((a)/180.0f)*PI)
+#define DEG(a)				((a)/(PI/180.0f))
 
 /// Determine the lowest set bit in an unsigned value.
 inline TqUint LOWEST_BIT( TqUint x )
