@@ -54,7 +54,7 @@ START_NAMESPACE(Aqsis)
 #endif // !AQSIS_SYSTEM_WIN32
 
 #define	CUBEENVMAP_HEADER	"Aqsis CubeFace Environment"
-#define	SHADOWMAP_HEADER	"Aqsis Shadow Map"
+#define	SHADOWMAP_HEADER	"Shadow"
 #define	SATMAP_HEADER		"Aqsis SAT Map"
 
 void WriteImage(TIFF* ptex, float *raster, unsigned long width, unsigned long length, int samples);

@@ -391,15 +391,15 @@ void CqTextureMap::CreateSATMap()
 
 						if(y==0)
 						{
-							pSATMap[(x*m_SamplesPerPixel)  ]=raccum;
-							pSATMap[(x*m_SamplesPerPixel)+1]=gaccum;
-							pSATMap[(x*m_SamplesPerPixel)+2]=baccum;
+							TqInt sample;
+							for(sample=0; sample<m_SamplesPerPixel; sample++)
+								pSATMap[(x*m_SamplesPerPixel)+sample]=raccum;
 						}
 						else
 						{
-							pSATMap[(y*rowlen)+(x*m_SamplesPerPixel)  ]=raccum+pSATMap[((y-1)*rowlen)+(x*m_SamplesPerPixel)  ];
-							pSATMap[(y*rowlen)+(x*m_SamplesPerPixel)+1]=gaccum+pSATMap[((y-1)*rowlen)+(x*m_SamplesPerPixel)+1];
-							pSATMap[(y*rowlen)+(x*m_SamplesPerPixel)+2]=baccum+pSATMap[((y-1)*rowlen)+(x*m_SamplesPerPixel)+2];
+							TqInt sample;
+							for(sample=0; sample>m_SamplesPerPixel; sample++)
+								pSATMap[(y*rowlen)+(x*m_SamplesPerPixel)+sample]=raccum+pSATMap[((y-1)*rowlen)+(x*m_SamplesPerPixel)+sample];
 						}
 					}		
 				}
@@ -900,26 +900,26 @@ void	CqShadowMap::SampleMap(const CqVector3D& R1, const CqVector3D& R2,const CqV
 	// If no map defined, not in shadow.
 	val=0.0f;
 
-	CqVector3D	vecR1l,vecR2l,vecR3l,vecR4l;
 	CqVector3D	vecR1s,vecR2s,vecR3s,vecR4s;
 
+	// Add in the bias at this point in camera coordinates.
+	TqFloat bias=0.225f;
+	const TqFloat* poptBias=QGetRenderContext()->optCurrent().GetFloatOption("shadow","bias");
+	if(poptBias!=0)
+		bias=poptBias[0];
+
+	CqVector3D vecBias(0,0,bias);
 	CqMatrix matCameraToScreen=m_matWorldToScreen*QGetRenderContext()->matSpaceToSpace("camera","world");
-	CqMatrix matCameraToLight=m_matWorldToCamera*QGetRenderContext()->matSpaceToSpace("camera","world");
 
-	vecR1l=matCameraToLight*R1;
-	vecR2l=matCameraToLight*R2;
-	vecR3l=matCameraToLight*R3;
-	vecR4l=matCameraToLight*R4;
+	vecR1s=matCameraToScreen*(R1-vecBias);
+	vecR2s=matCameraToScreen*(R2-vecBias);
+	vecR3s=matCameraToScreen*(R3-vecBias);
+	vecR4s=matCameraToScreen*(R4-vecBias);
 
-	vecR1s=matCameraToScreen*R1;
-	vecR2s=matCameraToScreen*R2;
-	vecR3s=matCameraToScreen*R3;
-	vecR4s=matCameraToScreen*R4;
-
-	TqFloat z1=vecR1l.z();
-	TqFloat z2=vecR2l.z();
-	TqFloat z3=vecR3l.z();
-	TqFloat z4=vecR4l.z();
+	TqFloat z1=vecR1s.z();
+	TqFloat z2=vecR2s.z();
+	TqFloat z3=vecR3s.z();
+	TqFloat z4=vecR4s.z();
 	TqFloat z=(z1+z2+z3+z4)*0.25;
 
 	float sbo2=(sblur*0.5f)*m_XRes;
@@ -984,16 +984,9 @@ void	CqShadowMap::SampleMap(const CqVector3D& R1, const CqVector3D& R2,const CqV
 	TqFloat dt=/*2.0f**/tres/nt;
 	TqFloat js=ds*0.5f;
 	TqFloat jt=dt*0.5f;
-	//smin=smin+js;
-	//tmin=tmin+jt;
 
 	// Test the samples.
 	TqInt inshadow=0;
-
-	TqFloat bias=0.225f;
-	const TqFloat* poptBias=QGetRenderContext()->optCurrent().GetFloatOption("shadow","bias");
-	if(poptBias!=0)
-		bias=poptBias[0];
 
 	TqFloat s=lu;
 	TqInt i;
@@ -1018,7 +1011,7 @@ void	CqShadowMap::SampleMap(const CqVector3D& R1, const CqVector3D& R2,const CqV
 					iu-=pTMBa->sOrigin();
 					iv-=pTMBa->tOrigin();
 					TqInt rowlen=pTMBa->Width();
-					if((z-bias)>pTMBa->pBufferData()[(iv*rowlen)+iu])
+					if(z>pTMBa->pBufferData()[(iv*rowlen)+iu])
 						inshadow+=1;
 				}
 			}
@@ -1172,13 +1165,14 @@ void CqShadowMap::SaveShadowMap(const char* strShadowName)
 					matWorldToScreen[(r*4)+c]=m_matWorldToScreen[r][c];
 				}
 			}
+			
 			TIFFSetField(pshadow,TIFFTAG_PIXAR_MATRIX_WORLDTOCAMERA, matWorldToCamera);
 			TIFFSetField(pshadow,TIFFTAG_PIXAR_MATRIX_WORLDTOSCREEN, matWorldToScreen);
 			TIFFSetField(pshadow,TIFFTAG_PIXAR_TEXTUREFORMAT, SHADOWMAP_HEADER);
 			TIFFSetField(pshadow,TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
 
 			// Write the floating point image to the directory.
-			WriteTileImage(pshadow,m_apSegments[0]->pBufferData(),XRes(),YRes(),64,64,1);
+			WriteTileImage(pshadow,m_apSegments[0]->pBufferData(),XRes(),YRes(),32,32,1);
 			TIFFClose(pshadow);
 		}
 	}
