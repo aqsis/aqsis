@@ -1226,20 +1226,7 @@ void CqQuadric::Circle( const CqVector3D& O, const CqVector3D& X, const CqVector
 		ae += 2 * RI_PI;
 
 	theta = ae - as;
-	if ( theta <= RI_PIO2 )
-		narcs = 1;
-	else
-	{
-		if ( theta <= RI_PI )
-			narcs = 2;
-		else
-		{
-			if ( theta <= 1.5 * RI_PI )
-				narcs = 3;
-			else
-				narcs = 4;
-		}
-	}
+	narcs = 4;
 	dtheta = theta / static_cast<TqFloat>( narcs );
 	TqUint n = 2 * narcs + 1;				// n control points ;
 
