@@ -384,6 +384,16 @@ void CqDDManager::LoadDisplayLibrary(CqDDClient& dd)
 	// Load the requested display library according to the specified mode in the RiDisplay command.
 	CqString strDriverFile=g_mapDisplayNames[dd.strType()];
 
+    // Check-ins said temporary way to handle locating display drivers.
+    // Until finished provide a helpful message for folks instead of 
+    //    trapping.  
+    if (strDriverFile.empty())
+    {
+        CqBasicError(ErrorID_DisplayDriver,Severity_Normal,
+            "Add/copy ddmsock.ini file into path.  Defaulting to \"framebuffer.exe\".");
+        strDriverFile = "framebuffer.exe";
+    }
+
 	CqRiFile fileDriver(strDriverFile.c_str(), "display");
 	if(fileDriver.IsValid())
 	{
