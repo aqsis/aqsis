@@ -4551,6 +4551,7 @@ RtVoid	CreateGPrim( T* pSurface )
 			RtFloat time = QGetRenderContext() ->ptransCurrent() ->Time( i );
 
 			T* pTimeSurface = new T( *pSurface );
+			pTimeSurface->ClonePrimitiveVariables( *pSurface );
 			pTimeSurface->AddRef();
 			pMotionSurface->AddTimeSlot( time, pTimeSurface );
 

@@ -475,6 +475,7 @@ TqBool CqSurfacePolygon::CheckDegenerate() const
 CqSurfacePolygon& CqSurfacePolygon::operator=( const CqSurfacePolygon& From )
 {
 	CqSurface::operator=( From );
+	m_cVertices = From.m_cVertices;
 	return ( *this );
 }
 
