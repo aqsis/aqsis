@@ -1,0 +1,48 @@
+version 3.03
+
+Option "limits" "eyesplits" [10]
+
+Display "noshadows.tif" "file" "rgba"
+Format 200 150 1
+
+ShadingRate 1
+
+FrameBegin 1
+
+Projection "perspective" "fov" 45
+Translate 0 0 5
+Rotate -20 1 0 0
+
+WorldBegin
+  LightSource "ambientlight" 0 "intensity" [0.2]
+
+  TransformBegin
+	Translate 5.00 5.00 -5.00
+	Rotate -45.00 0.00 1.00 0.00
+	Rotate 35.26 1.00 0.00 0.00
+	Attribute "identifier" "name" ["Key Light"]
+	LightSource "shadowspot" 1 "intensity" [75] "from" [0 0 0] "to" [0 0 1] "coneangle" [0.5]
+  TransformEnd
+
+  TransformBegin
+	Translate -5.00 5.00 -5.00
+	Rotate 45.00 0.00 1.00 0.00
+	Rotate 35.26 1.00 0.00 0.00
+	Attribute "identifier" "name" ["Fill Light"]
+	LightSource "shadowspot" 2 "intensity" [25] "from" [0 0 0] "to" [0 0 1] "coneangle" [0.5] "conedeltaangle" [0.3]
+  TransformEnd
+  Illuminate 1 1
+  Illuminate 2 1
+
+  Color [1 1 1]
+  Surface "matte"
+  Sphere 1 -1 1 360
+
+  Orientation "rh"
+  Patch "bilinear" "P" [-10 -1 -10
+                         10 -1 -10
+                        -10 -1  10
+                         10 -1  10]
+WorldEnd
+
+FrameEnd

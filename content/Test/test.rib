@@ -1,0 +1,54 @@
+version 3.03
+Display "test.tif" "framebuffer" "rgba"
+Format 200 150 1
+ShadingRate 2
+PixelSamples 1 1
+PixelFilter "box" 2 2
+
+Projection "perspective" "fov" 45
+Rotate -40 1 0 0
+Translate 0 -4 5
+
+Option "limits" "eyesplits" [3]
+Option "statistics" "endofframe" [3]
+Option "searchpath" "shader" ["./:&"]
+Sides 2
+
+WorldBegin
+      
+	LightSource "ambientlight" 0 "intensity" [1]
+
+	Color [1 1 0]
+	Surface "matte"
+
+	AttributeBegin
+		Attribute "identifier" "name" ["bicubic patch"]
+		TransformBegin
+			Translate 2 0 0
+			Patch "bicubic" "P" [
+								-1 -1 1
+								-0.5 -1 1
+								0.5 -1 1
+								1 -1 1
+
+								-1 -1 0.5
+								-0.5 -1 0.5
+								0.5 -1 0.5
+								1 -1 0.5
+
+								-1 -1 -0.5
+								-0.5 -1 -0.5
+								0.5 -1 -0.5
+								1 -1 -0.5
+
+								-1 -1 -1
+								-0.5 -1 -1
+								0.5 -1 -1
+								1 -1 -1
+								]
+		TransformEnd
+	AttributeEnd
+
+
+WorldEnd
+

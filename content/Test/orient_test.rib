@@ -1,0 +1,59 @@
+version 3.03
+Display "orient_test.tif" "file" "rgba"
+Format 200 150 1
+ShadingRate 2
+
+ShadingRate 2
+Projection "perspective" "fov" 45
+Translate 0 0 5
+Rotate -20 1 0 0
+
+Option "limits" "eyesplits" 3
+Sides 2
+
+WorldBegin
+      
+  Attribute "light" "shadows" "off"
+  LightSource "ambientlight" 0 "intensity" [0.2]
+  LightSource "spotlight" 1 "intensity" [75] "from" [5 5 -5] "to" [0 0 0] "coneangle" [0.5]
+
+  Color [1 1 1]
+  Surface "show_st"
+  TransformBegin
+  Scale -1 -1 1
+  Orientation "lh"
+  Sphere 1 -1 1 -300
+  TransformEnd
+
+  Orientation "rh"
+  Patch "bilinear" "P" [-1 -1 -1
+                         1 -1 -1
+                        -1 -1  1
+                         1 -1  1]
+
+  TransformBegin
+  Translate 2 0 0
+  Patch "bicubic" "P" [
+						-1 -1 -1
+						-0.5 -1 -1
+						0.5 -1 -1
+						1 -1 -1
+
+						-1 -1 -0.5
+						-0.5 -1 -0.5
+						0.5 -1 -0.5
+						1 -1 -0.5
+
+						-1 -1 0.5
+						-0.5 -1 0.5
+						0.5 -1 0.5
+						1 -1 0.5
+
+						-1 -1 1
+						-0.5 -1 1
+						0.5 -1 1
+						1 -1 1
+					]
+  TransformEnd
+WorldEnd
+

@@ -1,0 +1,33 @@
+version 3.03
+ShadingRate 2
+PixelSamples 1 1
+Format 200 150 -1
+Display "bucket_test.tif" "file" "rgb"
+
+Projection "perspective" "fov" 20
+Rotate -90 1 0 0
+Translate 0 -1 -0.05
+Rotate -4 1 0 0
+
+Sides 2
+
+Option "limits" "bucketsize" [32 32]
+
+WorldBegin
+
+LightSource "ambientlight" 1 "intensity" [1]
+
+AttributeBegin
+  Surface "plastic" "Ka" 1 "Kd" 0.1 "Ks" 0.7 "roughness" 0.01
+  Color [1 1 1]
+  Orientation "rh"
+  Patch "bilinear"
+	"P"	[
+			-3 -3 0
+			-3  3 0
+			 3 -3 0
+			 3  3 0
+		]
+AttributeEnd
+
+WorldEnd

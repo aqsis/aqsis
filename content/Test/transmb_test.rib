@@ -1,0 +1,78 @@
+version 3.03
+Display "transmb_test.tif" "framebuffer" "rgb"
+Format 200 150 1
+PixelSamples 4 4
+PixelFilter "gaussian" 3 3
+ShadingRate 1
+
+Option "statistics" "endofframe" [3]
+
+Option "searchpath" "shader" ["./:&"]
+
+Projection "perspective" "fov" 45
+Translate 0 0 6
+#Rotate -20 1 0 0
+
+Option "limits" "eyesplits" [3]
+Option "limits" "bucketsize" [32 32]
+Sides 2
+Shutter 0 1
+
+WorldBegin
+      
+	LightSource "ambientlight" 0 "intensity" [0.1]
+	LightSource "distantlight" 3 "intensity" [0.5] "lightcolor" [1 1 1] "from" [-2 4 -2] "to" [0 0 0]
+	LightSource "distantlight" 4 "intensity" [0.7] "lightcolor" [1 1 1] "from" [1 2 -2] "to" [0 0 0]
+
+	Color [1 0 0]
+	Surface "plastic"
+
+	AttributeBegin
+		Attribute "identifier" "name" ["ball translate"]
+		Translate 1 0 0
+#		MotionBegin [0 1]
+#			Translate 1 0 0
+#			Translate -1 0 0
+#		MotionEnd
+#		TransformBegin
+#			MotionBegin [0 1]
+#				Translate  -1 0 0
+#				Translate  1 0 0
+#			MotionEnd
+#			Scale 2 2 2
+#			Translate -1 0 0
+#			Sphere 1 -1 1 360
+#		TransformEnd
+#	AttributeEnd
+
+#	AttributeBegin
+#		Attribute "identifier" "name" ["stick rotate"]
+#		Translate 0 0 0
+#		MotionBegin [0 0.5 1]
+#			Rotate 45 0 0 1
+#			Rotate 0 0 0 1
+#			Rotate -45 0 0 1
+#		MotionEnd
+#		Rotate 90 1 0 0 
+#		Color [0 1 0]
+#		Cylinder 0.1 -1 1 360
+#	AttributeEnd
+
+	AttributeBegin
+		Attribute "identifier" "name" ["ball scale&translate"]
+		Translate 1 0 0
+		MotionBegin [0 1]
+			Scale 1 1 1
+			Scale 0.5 0.5 0.5
+		MotionEnd
+		MotionBegin [0 1]
+			Translate 0 1 0
+			Translate 0 -1 0
+		MotionEnd
+		Rotate 90 1 0 0 
+		Color [0 1 1]
+		Sphere 1 -1 1 360
+	AttributeEnd
+
+WorldEnd
+

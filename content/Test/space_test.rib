@@ -1,0 +1,66 @@
+version 3.03
+Display "space_test.tif" "file" "rgba"
+Format 200 150 1
+ShadingRate 2
+
+Projection "perspective" "fov" 45
+Translate 0 0 5
+Rotate -90 1 0 0
+
+Option "limits" "eyesplits" 3
+Sides 2
+PixelSamples 1 1
+PixelFilter "box" 1 1
+
+WorldBegin
+      
+	Attribute "light" "shadows" "off"
+	LightSource "ambientlight" 0 "intensity" [1]
+
+	Declare "space" "uniform string"
+
+	Color [1 1 1]
+
+	Orientation "rh"
+	TransformBegin
+	  Translate 0 0 1.1
+	  AttributeBegin
+		  Translate -1.1 0 0
+		  Surface "SpaceTest"
+		  Patch "bilinear" "P" [-1 -1 -1
+								 1 -1 -1
+								-1 -1  1
+								 1 -1  1]
+	  AttributeEnd
+	  AttributeBegin
+		  Translate 1.1 0 0
+		  Surface "SpaceTest"
+		  Patch "bilinear" "P" [-1 -1 -1
+								 1 -1 -1
+								-1 -1  1
+								 1 -1  1]
+	  AttributeEnd
+	TransformEnd
+
+	TransformBegin
+	  Translate 0 0 -1.1
+	  AttributeBegin
+		  Translate -1.1 0 0
+		  Surface "SpaceTest" "space" "current"
+		  Patch "bilinear" "P" [-1 -1 -1
+								 1 -1 -1
+								-1 -1  1
+								 1 -1  1]
+	  AttributeEnd
+	  AttributeBegin
+		  Translate 1.1 0 0
+		  Surface "SpaceTest" "space" "current"
+		  Patch "bilinear" "P" [-1 -1 -1
+								 1 -1 -1
+								-1 -1  1
+								 1 -1  1]
+	  AttributeEnd
+	TransformEnd
+
+WorldEnd
+
