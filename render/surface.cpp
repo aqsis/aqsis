@@ -45,6 +45,8 @@ CqBasicSurface::CqBasicSurface()	:	CqListEntry<CqBasicSurface>(), m_fDiceable(Tq
 
 	m_pTransform=const_cast<CqTransform*>(QGetRenderContext()->ptransCurrent());
 	m_pTransform->Reference();
+
+	m_CachedBound=TqFalse;
 }
 
 
@@ -62,6 +64,9 @@ CqBasicSurface::CqBasicSurface(const CqBasicSurface& From) : m_fDiceable(TqTrue)
 
 	m_pTransform=From.m_pTransform;
 	m_pTransform->Reference();
+
+	m_CachedBound=From.m_CachedBound;
+	m_Bound=From.m_Bound;
 }
 
 

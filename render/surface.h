@@ -30,6 +30,7 @@
 
 #include	"aqsis.h"
 
+#include	"renderer.h"
 #include	"ri.h"
 #include	"attributes.h"
 #include	"transform.h"
@@ -134,6 +135,22 @@ class CqBasicSurface : public CqListEntry<CqBasicSurface>
 												m_SplitDir=From.m_SplitDir;
 											}
 
+						/** Cache the calculated bound for further reference
+						 * \param The calculated bound in hybrid raster/camera space
+						 */
+			void 		CacheRasterBound(CqBound& pBound){ m_Bound=pBound; m_CachedBound=TqTrue; }
+						/** Retrieve the cached bound. If it has never been cached then we
+						 * throw an error as this is probably a bug.
+						 * \return The object bound in hybrid raster/camera space
+						 */
+			CqBound		GetCachedRasterBound()
+								{
+									if( m_CachedBound == TqFalse )
+										CqBasicError(0, Severity_Fatal, "Bug in Renderer; No cached bound available");
+
+									return m_Bound;
+								}
+
 			CqBasicSurface&	operator=(const CqBasicSurface& From);
 
 			TqBool		m_fDiceable;		///< Flag to indicate that this GPrim is diceable.
@@ -151,6 +168,8 @@ class CqBasicSurface : public CqListEntry<CqBasicSurface>
 				SplitDir_V,
 			};
 			EqSplitDir	m_SplitDir;			///< The direction to split this GPrim to achieve best results.
+			TqBool		m_CachedBound;		///< Whether or not the bound has been cached
+			CqBound		m_Bound;			///< The cached object bound
 };
 
 
