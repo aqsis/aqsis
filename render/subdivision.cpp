@@ -945,7 +945,7 @@ void CqWSurf::SmoothVertexPoints(TqInt oldcVerts, TqBool uses_s, TqBool uses_t, 
 				}
 				else
 				{
-					if(pV->cEdges()==2)	// Boundary point with valence 2 is corner
+					if(m_bInterpolateBoundary && pV->cEdges()==2)	// Boundary point with valence 2 is corner
 					{
 						aVertices[i].P=SubdP(pPoints,pV->iVertex());
 						if(uses_s && has_s)		aVertices[i].s=Subds(pPoints,pV->iVertex());
@@ -1361,6 +1361,8 @@ void CqWReference::SetpeHeadHeadRight(CqWEdge* pe)
 CqWSurf::CqWSurf(CqWSurf* pSurf, TqInt iFace)
 {
 	m_fSubdivided=true;
+
+	InterpolateBoundary(pSurf->bInterpolateBoundary());
 
 	// Allocate a new points class for points storage.
 	CqPolygonPoints* pPointsClass=new CqPolygonPoints(pSurf->cVerts());

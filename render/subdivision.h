@@ -595,12 +595,14 @@ class CqSubdivider
 {
 	public:
 					CqSubdivider() :
-								m_fSubdivided(false)
+								m_fSubdivided(false),
+								m_bInterpolateBoundary(false)
 										{}
 					CqSubdivider(TqInt cExpectedVertices, TqInt cExpectedFaces) :
 								m_cExpectedVertices(cExpectedVertices),
 								m_cExpectedFaces(cExpectedFaces),
-								m_fSubdivided(false)
+								m_fSubdivided(false),
+								m_bInterpolateBoundary(false)
 										{}
 	virtual			~CqSubdivider();
 
@@ -725,6 +727,14 @@ class CqSubdivider
 									TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os,
 									TqBool has_s, TqBool has_t, TqBool has_Cs, TqBool has_Os);
 
+							/** Get the flag indicating whethe to interpolate two edge vertices as corners.
+							 */
+			TqBool		bInterpolateBoundary() const	{return(m_bInterpolateBoundary);}
+							/** Set the flag indicating whethe to interpolate two edge vertices as corners.
+							 * \param v Boolean flag value.
+							 */
+			void		InterpolateBoundary(TqBool v=TqTrue)	{m_bInterpolateBoundary = v;}
+
 	virtual	TqInt		Uses() const=0;
 
 	virtual	void		CreateFacePoints(TqInt& iStartIndex, TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os, TqBool has_s, TqBool has_t, TqBool has_Cs, TqBool has_Os)=0;
@@ -759,8 +769,9 @@ class CqSubdivider
 		std::vector<CqWFace*>	m_apFaces;				///< Array of pointers to winged edge face structures. 
 		TqInt					m_cExpectedVertices;	///< Number of vertices to be filled in.
 		TqInt					m_cExpectedFaces;		///< Number of faces to be filled in.
-		TqInt					m_DiceCount;	///< Integer subdivision count to achieve the appropriate shading rate.
+		TqInt					m_DiceCount;			///< Integer subdivision count to achieve the appropriate shading rate.
 		TqBool					m_fSubdivided;
+		TqBool					m_bInterpolateBoundary;	///< Flag indicating whether or not to make vertices with only two adjacent edges into corners.
 };
 
 

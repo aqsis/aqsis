@@ -3484,6 +3484,13 @@ RtVoid	RiSubdivisionMeshV(RtToken scheme, RtInt nfaces, RtInt nvertices[], RtInt
 		}
 	}
 
+	// Process tags.
+	for(TqInt i = 0; i<ntags; i++)
+	{
+		if(strcmp(tags[i], "interpolateboundary")==0)
+			pSubdivider->InterpolateBoundary(TqTrue);
+	}
+
 	return;
 }
 
