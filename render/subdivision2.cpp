@@ -616,16 +616,33 @@ void CqSubdivision2::SubdivideFace(CqLath* pFace, std::vector<CqLath*>& apSubFac
     // First make sure that the appropriate neighbour facets have been subdivided if this is >0 level face.
     if( pFace->pParentFacet() )
     {
-        std::vector<CqLath*> aQff;
-        std::vector<CqLath*> apSubFaces2;
-        pFace->pParentFacet()->Qff( aQff );
-        std::vector<CqLath*>::iterator iF;
-        for( iF = aQff.begin(); iF != aQff.end(); iF++ )
+		// loop through all our neighbour faces.
+		// we don't use Qff here because we can handle multiple copies
+		// of each face faster than it can.
+		std::vector<CqLath*> parentVertices;
+		pFace->pParentFacet()->Qfv( parentVertices );
+
+		std::vector<CqLath*>::iterator vertexIt;
+		std::vector<CqLath*>::iterator vertexEnd = parentVertices.end();
+		for( vertexIt = parentVertices.begin(); vertexIt != vertexEnd; ++vertexIt )
 		{
-		    if( NULL == (*iF)->pFaceVertex() )
-			    SubdivideFace(*iF, apSubFaces2);
+			CqLath* vertex = *vertexIt;
+			std::vector<CqLath*> vertexFaces;
+			vertex->Qvf( vertexFaces );
+
+			std::vector<CqLath*>::iterator faceIt;
+			std::vector<CqLath*>::iterator faceEnd = vertexFaces.end();
+			for( faceIt = vertexFaces.begin(); faceIt != faceEnd; ++faceIt )
+			{
+				CqLath* face = (*faceIt);
+				if( NULL == face->pFaceVertex() )
+				{
+					std::vector<CqLath*> dummySubFaces;
+					SubdivideFace(face, dummySubFaces);
+				}
+			}
 		}
-    }
+	}
 
     std::vector<CqLath*> aQfv;
     std::vector<TqInt> aVertices;
@@ -886,7 +903,9 @@ CqBound	CqSurfaceSubdivisionPatch::Bound() const
     assert( pTopology()->pPoints() );
     assert( pFace() );
 
-    // First make sure that the appropriate neighbour facets have been subdivided if this is >0 level face.
+    CqBound B;
+
+	// First make sure that the appropriate neighbour facets have been subdivided if this is >0 level face.
     if( pFace()->pParentFacet() )
     {
         std::vector<CqLath*> aQff;
@@ -894,10 +913,13 @@ CqBound	CqSurfaceSubdivisionPatch::Bound() const
         pFace()->pParentFacet()->Qff( aQff );
         std::vector<CqLath*>::iterator iF;
         for( iF = aQff.begin(); iF != aQff.end(); iF++ )
-            pTopology()->SubdivideFace(*iF, apSubFaces2);
+		{
+			CqLath* face = *iF;
+			if (NULL == face->pFaceVertex())
+				pTopology()->SubdivideFace(face, apSubFaces2);
+		}
     }
 
-    CqBound B;
 
     // Get the laths of the surrounding faces.
     std::vector<CqLath*> aQff;
@@ -960,12 +982,12 @@ CqMicroPolyGridBase* CqSurfaceSubdivisionPatch::Dice()
 CqMicroPolyGridBase* CqSurfaceSubdivisionPatch::DiceExtract()
 {
 	// Dice rate table			  0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16
-    static TqInt aDiceSizes[] = { 0, 0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4 };
+    static TqInt aDiceSizes[] = { 0, 0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4 };
 	assert( pTopology() );
     assert( pTopology()->pPoints() );
     assert( pFace() );
 
-    TqInt dicesize = MAX(m_uDiceSize, m_vDiceSize);
+    TqInt dicesize = MIN(MAX(m_uDiceSize, m_vDiceSize), 16);
 
 	TqInt sdcount = aDiceSizes[ dicesize ];
     dicesize = 1 << sdcount;
@@ -1210,7 +1232,7 @@ static void StoreDiceAPVar( const boost::shared_ptr<IqShader>& pShader, CqParame
 
 void CqSurfaceSubdivisionPatch::StoreDice( CqMicroPolyGrid* pGrid, const boost::shared_ptr<CqPolygonPoints>& pPoints, TqInt iParam, TqInt iFVParam, TqInt iData)
 {
-    TqInt lUses = Uses();
+    TqInt lUses = m_Uses;
     TqInt lDone = 0;
 
     if ( USES( lUses, EnvVars_P ) )
@@ -1265,13 +1287,13 @@ void CqSurfaceSubdivisionPatch::StoreDice( CqMicroPolyGrid* pGrid, const boost::
     {
         /// \todo: Must transform point/vector/normal/matrix parameter variables from 'object' space to current before setting.
         boost::shared_ptr<IqShader> pShader;
-		if ( pShader=pGrid->pAttributes() ->pshadSurface(QGetRenderContextI()->Time()) )
+		if ( pShader=pGrid->pAttributes() ->pshadSurface(m_Time) )
             StoreDiceAPVar( pShader, ( *iUP ), iParam, iData );
 
-        if ( pShader=pGrid->pAttributes() ->pshadDisplacement(QGetRenderContextI()->Time()) )
+        if ( pShader=pGrid->pAttributes() ->pshadDisplacement(m_Time) )
             StoreDiceAPVar( pShader, ( *iUP ), iParam, iData );
 
-        if ( pShader=pGrid->pAttributes() ->pshadAtmosphere(QGetRenderContextI()->Time()) )
+        if ( pShader=pGrid->pAttributes() ->pshadAtmosphere(m_Time) )
             StoreDiceAPVar( pShader, ( *iUP ), iParam, iData );
     }
 }
@@ -1570,23 +1592,20 @@ TqBool CqSurfaceSubdivisionPatch::Diceable()
 
     m_SplitDir = ( uLen > vLen ) ? SplitDir_U : SplitDir_V;
 
-    // TODO: Should ensure powers of half to prevent cracking.
     uLen = MAX( ROUND( uLen ), 1 );
     vLen = MAX( ROUND( vLen ), 1 );
 
     m_uDiceSize = static_cast<TqInt>( uLen );
     m_vDiceSize = static_cast<TqInt>( vLen );
 
-    // Ensure power of 2 to avoid cracking
-    m_uDiceSize = CEIL_POW2( m_uDiceSize );
-    m_vDiceSize = CEIL_POW2( m_vDiceSize );
+	// Note Subd surfaces always have a power of 2 dice rate because they
+	// are diced by recursive subdivision. Hence no need to set it explicitly.
 
-    if ( uLen < FLT_EPSILON || vLen < FLT_EPSILON )
+	if ( uLen < FLT_EPSILON || vLen < FLT_EPSILON )
     {
         m_fDiscard = TqTrue;
         return ( TqFalse );
     }
-
 
 	// because splitting to a bicubic patch is so much faster than dicing by
 	// recursive subdivision, the grid size is made smaller than usual to give

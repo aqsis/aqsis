@@ -479,6 +479,8 @@ public:
     {
         m_pTopology = pTopology;
         m_pFace = pFace;
+	    m_Uses = Uses();
+		m_Time = QGetRenderContextI()->Time();
     }
 
     virtual	~CqSurfaceSubdivisionPatch()
@@ -557,6 +559,8 @@ public:
 private:
     boost::shared_ptr<CqSubdivision2>	m_pTopology;
     CqLath*			m_pFace;
+	TqInt			m_Uses;
+	TqFloat			m_Time;
 };
 
 //----------------------------------------------------------------------
