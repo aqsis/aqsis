@@ -6,6 +6,11 @@ librib2stream_la_SOURCES = librib2stream.cpp librib2stream.h
 
 include_HEADERS = librib2stream.h
 
+if DEBUG
 CXXFLAGS = -g -Wall
+else
+CXXFLAGS =
+endif
+
 INCLUDES = -I$(top_srcdir)/librib2
 

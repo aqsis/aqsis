@@ -10,6 +10,11 @@ parser.cpp parser.cpp.h : $(srcdir)/parser.y
 scanner.cpp : $(srcdir)/scanner.l parser.cpp.h 
 	flex -oscanner.cpp $(srcdir)/scanner.l
 
+if DEBUG
 CXXFLAGS = -g -Wall
+else
+CXXFLAGS =
+endif
+
 INCLUDES = -I$(top_srcdir)/libaqsistypes -I$(top_srcdir)/libaqsistypes/posix 
 

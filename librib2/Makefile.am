@@ -14,6 +14,11 @@ parser.cpp parser.cpp.h : $(srcdir)/parser.y $(srcdir)/libribtypes.h
 scanner.cpp : $(srcdir)/scanner.l parser.cpp.h $(srcdir)/libribtypes.h
 	flex -oscanner.cpp $(srcdir)/scanner.l
 
+if DEBUG
 CXXFLAGS = -g -Wall
+else
+CXXFLAGS =
+endif
+
 INCLUDES = -I$(top_srcdir)/render -I$(top_srcdir)/render/posix/intel
 

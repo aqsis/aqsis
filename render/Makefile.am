@@ -6,7 +6,12 @@ libaqsis_la_SOURCES = attributes.cpp attributes.h bilinear.h bound.cpp bound.h c
 
 include_HEADERS = ri.h
 
+if DEBUG
 CXXFLAGS = -g -Wall
+else
+CXXFLAGS =
+endif
+
 INCLUDES = -I$(top_srcdir)/libaqsistypes -I$(top_srcdir)/libaqsistypes/posix
 
 
