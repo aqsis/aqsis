@@ -568,7 +568,7 @@ class CqMicroPolygon : public CqRefCount, public CqPoolable<CqMicroPolygon, 512>
 		}
 		virtual const TqBool IsDegenerate() const
 		{
-			return ( ( m_IndexCode & 0x8000 ) != 0 );
+			return ( ( m_IndexCode & 0x8000000 ) != 0 );
 		}
 
 	protected:
@@ -586,8 +586,8 @@ class CqMicroPolygon : public CqRefCount, public CqPoolable<CqMicroPolygon, 512>
 					return ( m_Index );
 			}
 		}
-		TqShort	m_IndexCode;
-		TqShort	m_BoundCode;
+		TqLong	m_IndexCode;
+		TqLong	m_BoundCode;
 		CqMicroPolyGrid*	m_pGrid;		///< Pointer to the donor grid.
 		TqInt	m_Index;		///< Index within the donor grid.
 

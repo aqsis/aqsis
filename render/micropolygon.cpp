@@ -956,13 +956,13 @@ void CqMicroPolygon::Initialise()
 	if ( !fFlip )
 	{
 		m_IndexCode = ( CodeD == -1 ) ?
-		              ( ( CodeA & 0x3 ) | ( ( CodeC & 0x3 ) << 2 ) | ( ( CodeB & 0x3 ) << 4 ) | 0x8000 ) :
+		              ( ( CodeA & 0x3 ) | ( ( CodeC & 0x3 ) << 2 ) | ( ( CodeB & 0x3 ) << 4 ) | 0x8000000 ) :
 		              ( ( CodeA & 0x3 ) | ( ( CodeD & 0x3 ) << 2 ) | ( ( CodeC & 0x3 ) << 4 ) | ( ( CodeB & 0x3 ) << 6 ) );
 	}
 	else
 	{
 		m_IndexCode = ( CodeD == -1 ) ?
-		              ( ( CodeA & 0x3 ) | ( ( CodeB & 0x3 ) << 2 ) | ( ( CodeC & 0x3 ) << 4 ) | 0x8000 ) :
+		              ( ( CodeA & 0x3 ) | ( ( CodeB & 0x3 ) << 2 ) | ( ( CodeC & 0x3 ) << 4 ) | 0x8000000 ) :
 		              ( ( CodeA & 0x3 ) | ( ( CodeB & 0x3 ) << 2 ) | ( ( CodeC & 0x3 ) << 4 ) | ( ( CodeD & 0x3 ) << 6 ) );
 	}
 }
@@ -985,13 +985,20 @@ TqBool CqMicroPolygon::fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloa
 	if ( ( r1 = ( y - y0 ) * ( x1 - x0 ) - ( x - x0 ) * ( y1 - y0 ) ) <= 0 ) return ( TqFalse );
 	x0 = x1; y0 = y1; x1 = PointC().x(); y1 = PointC().y();
 	if ( ( r2 = ( y - y0 ) * ( x1 - x0 ) - ( x - x0 ) * ( y1 - y0 ) ) <= 0 ) return ( TqFalse );
-	x0 = x1; y0 = y1; x1 = PointD().x(); y1 = PointD().y();
-	if ( ( r3 = ( y - y0 ) * ( x1 - x0 ) - ( x - x0 ) * ( y1 - y0 ) ) < 0 ) return ( TqFalse );
-	x0 = x1; y0 = y1; x1 = PointA().x(); y1 = PointA().y();
 
 	// Check for degeneracy.
 	if ( !( IsDegenerate() ) )
+	{
+		x0 = x1; y0 = y1; x1 = PointD().x(); y1 = PointD().y();
+		if ( ( r3 = ( y - y0 ) * ( x1 - x0 ) - ( x - x0 ) * ( y1 - y0 ) ) < 0 ) return ( TqFalse );
+		x0 = x1; y0 = y1; x1 = PointA().x(); y1 = PointA().y();
 		if ( ( r4 = ( y - y0 ) * ( x1 - x0 ) - ( x - x0 ) * ( y1 - y0 ) ) < 0 ) return ( TqFalse );
+	}
+	else
+	{
+		x0 = x1; y0 = y1; x1 = PointA().x(); y1 = PointA().y();
+		if ( ( r3 = ( y - y0 ) * ( x1 - x0 ) - ( x - x0 ) * ( y1 - y0 ) ) < 0 ) return ( TqFalse );
+	}
 
 	CqVector3D vecN = ( PointA() - PointB() ) % ( PointC() - PointB() );
 	vecN.Unit();
@@ -1189,7 +1196,7 @@ CqBound CqMicroPolygon::GetTotalBound( TqBool fForce )
 	if ( fForce )
 	{
 		// Calculate the boundary, and store the indexes in the cache.
-		const CqVector3D & A = pP[ m_Index ];
+		const CqVector3D& A = pP[ m_Index ];
 		const CqVector3D& B = pP[ m_Index + 1 ];
 		const CqVector3D& C = pP[ m_Index + m_pGrid->uGridRes() + 2 ];
 		const CqVector3D& D = pP[ m_Index + m_pGrid->uGridRes() + 1 ];
@@ -1202,9 +1209,9 @@ CqBound CqMicroPolygon::GetTotalBound( TqBool fForce )
 		TqShort BCMaxZ = 0;
 		m_BoundCode = 0xe4;
 		TqInt TempIndexTable[ 4 ] = {	GetCodedIndex( m_BoundCode, 0 ),
-		                              GetCodedIndex( m_BoundCode, 1 ),
-		                              GetCodedIndex( m_BoundCode, 2 ),
-		                              GetCodedIndex( m_BoundCode, 3 ) };
+		                                GetCodedIndex( m_BoundCode, 1 ),
+		                                GetCodedIndex( m_BoundCode, 2 ),
+		                                GetCodedIndex( m_BoundCode, 3 ) };
 		if ( B.x() < pP[ TempIndexTable[ BCMinX ] ].x() ) BCMinX = 1;
 		if ( B.x() > pP[ TempIndexTable[ BCMaxX ] ].x() ) BCMaxX = 1;
 		if ( B.y() < pP[ TempIndexTable[ BCMinY ] ].y() ) BCMinY = 1;
@@ -1229,11 +1236,11 @@ CqBound CqMicroPolygon::GetTotalBound( TqBool fForce )
 			if ( D.z() > pP[ TempIndexTable[ BCMaxZ ] ].z() ) BCMaxZ = 3;
 		}
 		m_BoundCode = ( ( BCMinX & 0x3 ) |
-		                ( ( BCMinY & 0x3 ) << 2 ) |
-		                ( ( BCMinZ & 0x3 ) << 4 ) |
-		                ( ( BCMaxX & 0x3 ) << 6 ) |
-		                ( ( BCMaxY & 0x3 ) << 8 ) |
-		                ( ( BCMaxZ & 0x3 ) << 10 ) );
+		              ( ( BCMinY & 0x3 ) << 2 ) |
+		              ( ( BCMinZ & 0x3 ) << 4 ) |
+		              ( ( BCMaxX & 0x3 ) << 6 ) |
+		              ( ( BCMaxY & 0x3 ) << 8 ) |
+		              ( ( BCMaxZ & 0x3 ) << 10 ) );
 	}
 	CqBound B( pP[ GetCodedIndex( m_BoundCode, 0 ) ].x(), pP[ GetCodedIndex( m_BoundCode, 1 ) ].y(), pP[ GetCodedIndex( m_BoundCode, 2 ) ].z(),
 	           pP[ GetCodedIndex( m_BoundCode, 3 ) ].x(), pP[ GetCodedIndex( m_BoundCode, 4 ) ].y(), pP[ GetCodedIndex( m_BoundCode, 5 ) ].z() );
