@@ -89,6 +89,7 @@ void CqImagePixel::AllocateSamples( TqInt XSamples, TqInt YSamples )
         {
             m_aValues.resize( numSamples );
             m_Samples.resize( numSamples );
+			m_DofOffsetIndices.resize( numSamples );
         }
     }
 }
@@ -104,12 +105,13 @@ void CqImagePixel::InitialiseSamples( std::vector<CqVector2D>& vecSamples, TqBoo
     TqFloat opentime = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Shutter" ) [ 0 ];
     TqFloat closetime = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Shutter" ) [ 1 ];
 
-    TqFloat subcell_width = 1.0f / ( m_XSamples * m_YSamples );
+	TqInt numSamples = m_XSamples * m_YSamples;
+    TqFloat subcell_width = 1.0f / numSamples;
     TqInt m = m_XSamples;
     TqInt n = m_YSamples;
     TqInt i, j;
 
-    vecSamples.resize(m_XSamples * m_YSamples);
+    vecSamples.resize(numSamples);
     if ( !fJitter )
     {
         // Initialise the samples to the centre points.
@@ -142,11 +144,9 @@ void CqImagePixel::InitialiseSamples( std::vector<CqVector2D>& vecSamples, TqBoo
     }
     else
     {
-        // Initiliaze the random with a value based on the X,Y coordinate
-        //		CqRandom random(  vecPixel.Magnitude()  );
-        static CqRandom random(  53 );
+    	static CqRandom random(  53 );
 
-        // Initialize points to the "canonical" multi-jittered pattern.
+		// Initialize points to the "canonical" multi-jittered pattern.
 
         for ( i = 0; i < n; i++ )
         {
@@ -215,85 +215,80 @@ void CqImagePixel::InitialiseSamples( std::vector<CqVector2D>& vecSamples, TqBoo
             }
         }
 
+		// Fill in the sample times for motion blur, detail levels for LOD and DoF.
 
-        // Fill in the sample times for motion blur, detail levels for LOD and DoF.
+		TqFloat time = 0;
+		TqFloat dtime = 1.0f / numSamples;
+		// We use the same random offset for each sample within a pixel.
+		// This ensures the best possible coverage whilst still avoiding
+		// aliasing. (I reckon). should minimise the noise.
+		TqFloat randomTime = random.RandomFloat( dtime );
 
-        TqInt nSamples = m_XSamples*m_YSamples;
+		TqFloat lod = 0;
+		TqFloat dlod = dtime;
 
-        TqFloat time = 0;
-        TqFloat dtime = 1.0f / nSamples;
+		TqFloat r = 0, theta = 0;
+		TqFloat dr = dtime;
+		TqFloat dtheta = 2 * PI * dtime;
+		for ( i = 0; i < numSamples; i++ )
+		{
+			// Scale the value of time to the shutter time.
+			TqFloat t = time + randomTime;
+			t = ( closetime - opentime ) * t + opentime;
+			m_Samples[ i ].m_Time = t;
+			time += dtime;
 
-        TqFloat lod = 0;
-        TqFloat dlod = dtime;
+			m_Samples[ i ].m_DetailLevel = lod + random.RandomFloat( dlod );
+			lod += dlod;
+		}
 
-        TqFloat r = 0, theta = 0;
-        TqFloat dr = dtime;
-        TqFloat dtheta = 2 * PI * dtime;
-
-        // We have to be a little more careful to pick DoF samples because we must
-        // sample them in polar coordinates to ensure uniform coverage.
-
-        for ( i = 0; i < nSamples; i++ )
+		// we calculate dof offsets in a grid inside the unit cube and then
+		// project them into the unit circle. This means that the offset
+		// positions match the offset bounding boxes calculated in CqBucket.
+		// The sample test in RenderMicroPoly then can be split into a number
+		// of smaller bounding boxes where we know in advance which samples
+		// fall into each. (This is analagous to what we do for mb now as well).
+		// note that there is an implied symmetry to the way we number the bounding
+		// boxes here and in the bucket code where the bb's are created (it
+		// should be left to right, top to bottom).
+		TqFloat dx = 2.0 / m_XSamples;
+		TqFloat dy = 2.0 / m_YSamples;
+		// We use the same random offset for each sample within a pixel.
+		// This ensures the best possible coverage whilst still avoiding
+		// aliasing. (I reckon). should minimise the noise.
+		TqFloat sx = random.RandomFloat(dx);
+		TqFloat sy = random.RandomFloat(dy);
+		TqFloat xOffset = -1.0 + sx;
+		TqFloat yOffset = -1.0 + sy;
+		which = 0;
+		CqVector2D tmpDofOffsets[numSamples];
+		for ( i = 0; i < m_YSamples; ++i )
         {
-            // Pick a lens position randomly in polar coordinates
+            for ( j = 0; j < m_XSamples; ++j )
+			{
+				tmpDofOffsets[which].x(xOffset);
+				tmpDofOffsets[which].y(yOffset);
+				ProjectToCircle(tmpDofOffsets[which]);
 
-            m_Samples[i].m_DofOffset.x( sqrt( r + random.RandomFloat(dr) ) );
-            m_Samples[i].m_DofOffset.y( theta + random.RandomFloat( dtheta ) );
-            r += dr;
-            theta += dtheta;
-        }
+				m_DofOffsetIndices[which] = which;
 
-        for ( i = 0; i < nSamples; i++ )
-        {
-            // Scale the value of time to the shutter time.
-            TqFloat t = time + random.RandomFloat( dtime );
-            t = ( closetime - opentime ) * t + opentime;
-            m_Samples[ i ].m_Time = t;
-            time += dtime;
+				xOffset += dx;
+				which++;
+			}
+			yOffset += dy;
+			xOffset = -1.0 + sx;
+		}
 
-            m_Samples[ i ].m_DetailLevel = lod + random.RandomFloat( dlod );
-            lod += dlod;
-
-            // For DoF samples, shuffle in both coordinates, then convert from polar
-            // back to cartesian
-
-            TqInt j = random.RandomInt( nSamples - 1 - i ) + i;
-            TqInt k = random.RandomInt( nSamples - 1 - i ) + i;
-
-            CqVector2D& iDofOffset = m_Samples[ i ].m_DofOffset;
-            CqVector2D& jDofOffset = m_Samples[ j ].m_DofOffset;
-            CqVector2D& kDofOffset = m_Samples[ k ].m_DofOffset;
-            r     = jDofOffset.x();
-            theta = kDofOffset.y();
-
-            jDofOffset.x( iDofOffset.x() );
-            kDofOffset.y( iDofOffset.y() );
-
-            iDofOffset.x( r * sin(theta) );
-            iDofOffset.y( r * cos(theta) );
-            // these hold the quadrant the offset falls into. it is used as a quick rejection test during sampling.
-            // if the sample is (eg) to the left of the mpg bound and the x-quad is negative then the sample can
-            // not hit, and we needn't work out it's exact position.
-            m_Samples[ i ].m_DofOffsetXQuad = iDofOffset.x() < 0.0f ? -1 : 1;
-            m_Samples[ i ].m_DofOffsetYQuad = iDofOffset.y() < 0.0f ? -1 : 1;
-        }
-
-    }
-    m_Data.m_Data.resize( QGetRenderContext()->GetOutputDataTotalSize() );
+		// we now shuffle the dof offsets but remember which one went where.
+		std::random_shuffle(m_DofOffsetIndices.begin(), m_DofOffsetIndices.end());
+		for( i = 0; i < numSamples; ++i)
+		{
+			m_Samples[m_DofOffsetIndices[i]].m_DofOffset = tmpDofOffsets[i];
+		}
+	}
+	m_Data.m_Data.resize( QGetRenderContext()->GetOutputDataTotalSize() );
 }
 
-//----------------------------------------------------------------------
-/** Offset the precomputed sample locations for a particular pixel
- */
-
-void CqImagePixel::OffsetSamples(CqVector2D& vecPixel, std::vector<CqVector2D>& vecSamples)
-{
-    // add in the pixel offset
-    for ( TqInt i = 0; i < m_YSamples*m_XSamples; i++ )
-    {
-        m_Samples[ i ].m_Position = vecSamples[ i ] + vecPixel;
-    }
-}
 
 //----------------------------------------------------------------------
 /** Clear the relevant data from the image element preparing it for the next usage.

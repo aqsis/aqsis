@@ -1144,6 +1144,8 @@ TqBool CqMicroPolygon::fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloa
 	// start with the edge that failed last time to get the most benefit
 	// from an early exit.
 	int e = m_pHitTestCache->m_LastFailedEdge;
+	int prev = e - 1;
+	if(prev < 0) prev = 3;
 	for(int i=0; i<4; ++i)
 	{
 		// test which side of the edge the sample point lies.
@@ -1151,7 +1153,10 @@ TqBool CqMicroPolygon::fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloa
 		// this is so every sample point lies on exactly one side of the edge,
 		// ie if it is exactly coincident with the edge it can't be on both
 		// or neither sides.
-		if(e & 2)
+//		if(e & 2)
+		if( m_pHitTestCache->m_Y[e] > m_pHitTestCache->m_Y[prev] ||
+			( m_pHitTestCache->m_Y[e] == m_pHitTestCache->m_Y[prev] &&
+			  m_pHitTestCache->m_X[e] > m_pHitTestCache->m_X[prev] ) )
 		{
 			if( (( y - m_pHitTestCache->m_Y[e]) * m_pHitTestCache->m_YMultiplier[e] ) -
 					(( x - m_pHitTestCache->m_X[e]) * m_pHitTestCache->m_XMultiplier[e] ) < 0)
@@ -1171,6 +1176,7 @@ TqBool CqMicroPolygon::fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloa
 		}
 
 		// move to next edge, wrapping to zero at four.
+		prev = e;
 		e = (e+1) & 3;
 	}
 
@@ -1185,10 +1191,9 @@ TqBool CqMicroPolygon::fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloa
  * This must be called prior to calling fContains() on a mpg.
  */
 
-void CqMicroPolygon::CacheHitTestValues(CqHitTestCache* cache)
+void CqMicroPolygon::CacheHitTestValues(CqHitTestCache* cache, CqVector3D* points)
 {
 	m_pHitTestCache = cache;
-	const CqVector3D points[4] = { PointB(), PointC(), PointD(), PointA() } ;
 
 	int j = 3;
 	for(int i=0; i<4; ++i)
@@ -1220,6 +1225,40 @@ void CqMicroPolygon::CacheHitTestValues(CqHitTestCache* cache)
 
 	cache->m_LastFailedEdge = 0;
 }
+
+void CqMicroPolygon::CacheHitTestValues(CqHitTestCache* cache)
+{
+	CqVector3D points[4] = { PointB(), PointC(), PointD(), PointA() };
+	CacheHitTestValues(cache, points);
+}
+
+
+// AGG - 19-6-04
+// this version moves the corners of the mpg for dof.
+// currently we don't use this as it's a fair bit slower than just offsetting
+// the sample position in the opposite direction (we need to call this for every
+// sample instead of just once). however, it is more correct than moving the
+// sample because the corners may move by different amounts. if I can work out
+// how to make it fast enough we should use this version.
+void CqMicroPolygon::CacheHitTestValuesDof(CqHitTestCache* cache, const CqVector2D& DofOffset, CqVector2D* coc)
+{
+	CqVector3D points[4];
+	points[0].x(PointB().x() - (coc[1].x() * DofOffset.x()));
+	points[0].y(PointB().y() - (coc[1].y() * DofOffset.y()));
+	points[0].z(PointB().z());
+	points[1].x(PointC().x() - (coc[2].x() * DofOffset.x()));
+	points[1].y(PointC().y() - (coc[2].y() * DofOffset.y()));
+	points[1].z(PointC().z());
+	points[2].x(PointD().x() - (coc[3].x() * DofOffset.x()));
+	points[2].y(PointD().y() - (coc[3].y() * DofOffset.y()));
+	points[2].z(PointD().z());
+	points[3].x(PointA().x() - (coc[0].x() * DofOffset.x()));
+	points[3].y(PointA().y() - (coc[0].y() * DofOffset.y()));
+	points[3].z(PointA().z());
+
+	CacheHitTestValues(cache, points);
+}
+
 
 CqVector2D CqMicroPolygon::ReverseBilinear( const CqVector2D& v )
 {
@@ -1439,45 +1478,70 @@ CqBound CqMicroPolygonMotion::GetTotalBound( TqBool fForce )
  */
 void CqMicroPolygonMotion::BuildBoundList()
 {
+    TqFloat opentime = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Shutter" ) [ 0 ];
+    TqFloat closetime = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Shutter" ) [ 1 ];
+    TqFloat shadingrate = pGrid() ->pAttributes() ->GetFloatAttribute( "System", "ShadingRate" ) [ 0 ];
+
 	m_BoundList.Clear();
 
     assert( NULL != m_Keys[ 0 ] );
 
-    CqBound start = m_Keys[ 0 ] ->GetTotalBound();
-    TqFloat	startTime = m_Times[ 0 ];
-    TqInt cTimes = m_Keys.size();
-    TqInt div = 0;
+	// compute an approximation of the distance travelled in raster space,
+	// we use this to guide how many sub-bounds to calcuate. note, it's much
+	// better for this to be fast than accurate, it's just a guide.
+	TqFloat dx = fabs(m_Keys.front()->m_Point0.x() - m_Keys.back()->m_Point0.x());
+	TqFloat dy = fabs(m_Keys.front()->m_Point0.y() - m_Keys.back()->m_Point0.y());
+	TqInt d = static_cast<int>((dx + dy) / shadingrate) + 1; // d is always >= 1
 
-	TqInt divisions = 10;
-    m_BoundList.SetSize( divisions * ( cTimes - 1 ));
-    for ( TqInt i = 1; i < cTimes; i++ )
-    {
-        CqBound end = m_Keys[ i ] ->GetTotalBound();
+	TqInt timeRanges = CqBucket::NumTimeRanges();
+	TqInt divisions = MIN(d, timeRanges);
+	TqFloat dt = (closetime - opentime) / divisions;
+	TqFloat time = opentime + dt;
+	TqInt startKey = 0;
+	TqInt endKey = 1;
+	CqBound bound = m_Keys[startKey]->GetTotalBound();
 
-        CqBound mid0( start );
-        CqBound mid1;
-        TqFloat endTime = m_Times[ i ];
-        TqFloat time = startTime;
+    m_BoundList.SetSize( divisions );
 
-        TqInt d;
-        // arbitary number of divisions, should be related to screen size of blur
-        TqFloat delta = 1.0f / static_cast<TqFloat>( divisions );
-		TqFloat pos = delta;
-        for ( d = 0; d < divisions; d++ )
-        {
-            mid1.vecMin() = pos * ( end.vecMin() - start.vecMin() ) + start.vecMin();
-            mid1.vecMax() = pos * ( end.vecMax() - start.vecMax() ) + start.vecMax();
-            
-			m_BoundList.Set( d + div, mid0.Combine( mid1 ), time );
-            time = pos * ( endTime - startTime ) + startTime;
-            mid0 = mid1;
-            pos += delta;
-        }
-        start = end;
-        startTime = endTime;
-        div += divisions;
-    }
-    m_BoundReady = TqTrue;
+	// create a bound for each time period.
+	for(TqInt i = 0; i < divisions; i++)
+	{
+		// find the fist key with a time greater than our end time.
+		while(time > m_Times[endKey] && endKey < m_Keys.size() - 1)
+			++endKey;
+
+		// interpolate between this key and the previous to get the
+		// bound at our end time.
+		TqInt endKey_1 = endKey - 1;
+		const CqBound& end0 = m_Keys[endKey_1]->GetTotalBound();
+		TqFloat end0Time = m_Times[endKey_1];
+		const CqBound& end1 = m_Keys[endKey]->GetTotalBound();
+		TqFloat end1Time = m_Times[endKey];
+
+		TqFloat mix = (time - end0Time) / (end1Time - end0Time);
+		CqBound mid(end0);
+		mid.vecMin() += mix * (end1.vecMin() - end0.vecMin());
+		mid.vecMax() += mix * (end1.vecMax() - end0.vecMax());
+
+		// combine with our starting bound.
+		bound.Encapsulate(mid);
+
+		// now combine the bound with any keys that fall between our start
+		// and end times.
+		while(startKey < endKey_1)
+		{
+			startKey++;
+			bound.Encapsulate(m_Keys[startKey]->GetTotalBound());
+		}
+
+		m_BoundList.Set( i, bound, time - dt );
+
+		// now set our new start to our current end ready for the next bound.
+		bound = mid;
+		time += dt;
+	}
+
+	m_BoundReady = TqTrue;
 }
 
 
@@ -1503,7 +1567,7 @@ TqBool CqMicroPolygonMotion::Sample( const CqVector2D& vecSample, TqFloat& D, Tq
             			CqString strTrimSense( "inside" );
             			if ( pattrTrimSense != 0 ) strTrimSense = pattrTrimSense[ 0 ];
             			TqBool bOutside = strTrimSense == "outside";
-             
+
             			CqVector2D vecUV = ReverseBilinear( vecSample );
              
             			TqFloat u, v;
@@ -1515,7 +1579,7 @@ TqBool CqMicroPolygonMotion::Sample( const CqVector2D& vecSample, TqFloat& D, Tq
             			pGrid() ->u() ->GetFloat( u, m_Index + 1 );
             			pGrid() ->v() ->GetFloat( v, m_Index + 1 );
             			CqVector2D uvB( u, v );
-             
+
             			pGrid() ->u() ->GetFloat( u, m_Index + pGrid() ->uGridRes() + 1 );
             			pGrid() ->v() ->GetFloat( v, m_Index + pGrid() ->uGridRes() + 1 );
             			CqVector2D uvC( u, v );
@@ -1688,6 +1752,8 @@ void CqMovingMicroPolygonKey::Initialise( const CqVector3D& vA, const CqVector3D
     m_N = ( vA - vvB ) % ( vvC - vvB );
     m_N.Unit();
     m_D = m_N * vA;
+
+	m_BoundReady = false;
 }
 
 
@@ -1772,32 +1838,35 @@ CqVector2D CqMovingMicroPolygonKey::ReverseBilinear( const CqVector2D& v )
 /** Calculate the 2D boundary of this micropolygon,
  */
 
-CqBound CqMovingMicroPolygonKey::GetTotalBound() const
+const CqBound& CqMovingMicroPolygonKey::GetTotalBound()
 {
-    CqBound Bound;
-    // Calculate the boundary, and store the indexes in the cache.
-    Bound.vecMin().x( MIN( m_Point0.x(), MIN( m_Point1.x(), MIN( m_Point2.x(), m_Point3.x() ) ) ) );
-    Bound.vecMin().y( MIN( m_Point0.y(), MIN( m_Point1.y(), MIN( m_Point2.y(), m_Point3.y() ) ) ) );
-    Bound.vecMin().z( MIN( m_Point0.z(), MIN( m_Point1.z(), MIN( m_Point2.z(), m_Point3.z() ) ) ) );
-    Bound.vecMax().x( MAX( m_Point0.x(), MAX( m_Point1.x(), MAX( m_Point2.x(), m_Point3.x() ) ) ) );
-    Bound.vecMax().y( MAX( m_Point0.y(), MAX( m_Point1.y(), MAX( m_Point2.y(), m_Point3.y() ) ) ) );
-    Bound.vecMax().z( MAX( m_Point0.z(), MAX( m_Point1.z(), MAX( m_Point2.z(), m_Point3.z() ) ) ) );
+	if(m_BoundReady)
+		return m_Bound;
+
+	// Calculate the boundary, and store the indexes in the cache.
+    m_Bound.vecMin().x( MIN( m_Point0.x(), MIN( m_Point1.x(), MIN( m_Point2.x(), m_Point3.x() ) ) ) );
+    m_Bound.vecMin().y( MIN( m_Point0.y(), MIN( m_Point1.y(), MIN( m_Point2.y(), m_Point3.y() ) ) ) );
+    m_Bound.vecMin().z( MIN( m_Point0.z(), MIN( m_Point1.z(), MIN( m_Point2.z(), m_Point3.z() ) ) ) );
+    m_Bound.vecMax().x( MAX( m_Point0.x(), MAX( m_Point1.x(), MAX( m_Point2.x(), m_Point3.x() ) ) ) );
+    m_Bound.vecMax().y( MAX( m_Point0.y(), MAX( m_Point1.y(), MAX( m_Point2.y(), m_Point3.y() ) ) ) );
+    m_Bound.vecMax().z( MAX( m_Point0.z(), MAX( m_Point1.z(), MAX( m_Point2.z(), m_Point3.z() ) ) ) );
 
 	// Adjust for DOF
 	if ( QGetRenderContext() ->UsingDepthOfField() )
 	{
-		const CqVector2D minZCoc = QGetRenderContext()->GetCircleOfConfusion( Bound.vecMin().z() );
-		const CqVector2D maxZCoc = QGetRenderContext()->GetCircleOfConfusion( Bound.vecMax().z() );
+		const CqVector2D minZCoc = QGetRenderContext()->GetCircleOfConfusion( m_Bound.vecMin().z() );
+		const CqVector2D maxZCoc = QGetRenderContext()->GetCircleOfConfusion( m_Bound.vecMax().z() );
 		TqFloat cocX = MAX( minZCoc.x(), maxZCoc.x() );
 		TqFloat cocY = MAX( minZCoc.y(), maxZCoc.y() );
 
-		Bound.vecMin().x( Bound.vecMin().x() - cocX );
-		Bound.vecMin().y( Bound.vecMin().y() - cocY );
-		Bound.vecMax().x( Bound.vecMax().x() + cocX );
-		Bound.vecMax().y( Bound.vecMax().y() + cocY );
+		m_Bound.vecMin().x( m_Bound.vecMin().x() - cocX );
+		m_Bound.vecMin().y( m_Bound.vecMin().y() - cocY );
+		m_Bound.vecMax().x( m_Bound.vecMax().x() + cocX );
+		m_Bound.vecMax().y( m_Bound.vecMax().y() + cocY );
 	}
 
-    return ( Bound );
+	m_BoundReady = true;
+    return ( m_Bound );
 }
 
 

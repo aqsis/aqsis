@@ -271,9 +271,11 @@ public:
     TqBool	PushMPGDown( CqMicroPolygon*, TqInt Col, TqInt Row );
     void	RenderMPGs( long xmin, long xmax, long ymin, long ymax );
     void	RenderMicroPoly( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax );
+	void	RenderMPG_MBOrDof( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax, TqBool IsMoving, TqBool UsingDof );
+	void	RenderMPG_Static( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax );
     void	RenderSurfaces( long xmin, long xmax, long ymin, long ymax );
     void	RenderImage();
-    void	StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, TqInt m, TqInt n, TqFloat D );
+    void	StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, TqInt index, TqFloat D );
     /** Get completion status of this rendered image.
      * \return bool indicating finished or not.
      */
@@ -324,10 +326,11 @@ private:
     // It caches the info for use by multiple samples.
     struct SqMpgSampleInfo
     {
-        TqBool m_IsMatte;
-        TqBool m_Occludes;
-        CqColor m_Colour;
-        CqColor m_Opacity;
+        CqColor		m_Colour;
+        CqColor		m_Opacity;
+        TqBool		m_IsMatte;
+        TqBool		m_Occludes;
+		TqBool		m_IsCullable;
     };
     SqMpgSampleInfo m_CurrentMpgSampleInfo;
 };

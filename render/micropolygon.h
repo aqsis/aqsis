@@ -438,7 +438,7 @@ public:
     /** Get the pointer to the grid this micropoly came from.
      * \return Pointer to the CqMicroPolyGrid.
      */
-    virtual CqMicroPolyGridBase* pGrid() const
+    CqMicroPolyGridBase* pGrid() const
     {
         return ( m_pGrid );
     }
@@ -550,9 +550,15 @@ public:
         return ( ( m_Flags & MicroPolyFlags_Trimmed ) != 0 );
     }
 
+	virtual TqBool IsMoving()
+	{
+		return TqFalse;
+	}
 
     virtual TqBool	fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const;
+	void	CacheHitTestValues(CqHitTestCache* cache, CqVector3D* points);
 	void	CacheHitTestValues(CqHitTestCache* cache);
+	void	CacheHitTestValuesDof(CqHitTestCache* cache, const CqVector2D& DofOffset, CqVector2D* coc);
     void	Initialise();
     CqVector2D ReverseBilinear( const CqVector2D& v );
 
@@ -635,7 +641,7 @@ public:
 public:
     TqBool	fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const;
 
-    CqBound	GetTotalBound() const;
+    const CqBound&	GetTotalBound();
     void	Initialise( const CqVector3D& vA, const CqVector3D& vB, const CqVector3D& vC, const CqVector3D& vD );
     CqVector2D ReverseBilinear( const CqVector2D& v );
 
@@ -645,6 +651,9 @@ public:
     CqVector3D	m_Point3;
     CqVector3D	m_N;			///< The normal to the micropoly.
     TqFloat	m_D;				///< Distance of the plane from the origin, used for calculating sample depth.
+
+	CqBound m_Bound;
+	TqBool	m_BoundReady;
 }
 ;
 
@@ -700,6 +709,12 @@ public:
     {
         m_fTrimmed = TqTrue;
     }
+
+	virtual TqBool IsMoving()
+	{
+		return TqTrue;
+	}
+
 private:
     CqBound	m_Bound;					///< Stored bound.
     CqBoundList	m_BoundList;			///< List of bounds to get a tighter fit.

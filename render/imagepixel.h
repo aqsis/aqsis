@@ -138,14 +138,13 @@ struct SqImageSample
 }
 ;
 
+
 /** Structure to hold the info about a sample point.
  */
 struct SqSampleData
 {
-    CqVector2D	m_Position;				///< Sample position.
+    CqVector2D	m_Position;				///< Sample position
     CqVector2D	m_DofOffset;			///< Dof lens offset.
-    TqInt		m_DofOffsetXQuad;		///< Cached info to hold which quadrant the Dof lens offset falls in.
-    TqInt		m_DofOffsetYQuad;
     TqInt		m_SubCellIndex;		///< Subcell index.
     TqFloat		m_Time;				///< Float sample time.
     TqFloat		m_DetailLevel;		///< Float level-of-detail sample.
@@ -178,7 +177,16 @@ public:
     }
     void	AllocateSamples( TqInt XSamples, TqInt YSamples );
     void	InitialiseSamples( std::vector<CqVector2D>& vecSamples, TqBool fJitter = TqTrue );
-    void	OffsetSamples(CqVector2D& vecPixel, std::vector<CqVector2D>& vecSamples);
+    void	OffsetSamples(CqVector2D& vecPixel, std::vector<CqVector2D>& vecSamples)
+	{
+		// add in the pixel offset
+		const TqInt numSamples = m_XSamples * m_YSamples;
+		for ( TqInt i = 0; i < numSamples; i++ )
+		{
+			m_Samples[ i ].m_Position = vecSamples[ i ];
+			m_Samples[ i ].m_Position += vecPixel;
+		}
+	}
 
     /** Get the approximate coverage of this pixel.
      * \return Float fraction of the pixel covered.
@@ -300,11 +308,10 @@ public:
      * \param n The vertical index of the required sample point.
      * \return A Reference to a vector of SqImageSample data.
      */
-    std::vector<SqImageSample>&	Values( TqInt m, TqInt n )
+    std::vector<SqImageSample>&	Values( TqInt index )
     {
-        assert( m < m_XSamples );
-        assert( n < m_YSamples );
-        return ( m_aValues[ n * m_XSamples + m ] );
+        assert( index < m_XSamples*m_YSamples );
+        return ( m_aValues[ index ] );
     }
     void	Combine();
 
@@ -318,11 +325,36 @@ public:
         return ( m_Samples[index] );
     }
 
+	/** Get the index of the sample that contains a dof offset that lies
+	 *  in bounding-box number i.
+	 * \param The index of the bounding box in question.
+	 * \return The index of the sample that contains a dof offset in said bb.
+	 */
+	TqInt GetDofOffsetIndex(TqInt i)
+	{
+		return m_DofOffsetIndices[i];
+	}
+
+	/** Convert a coord in the unit square to one inside the unit circle.
+	 *  used in generating dof sample positions.
+	 */
+	static void ProjectToCircle(CqVector2D& pos)
+	{
+		TqFloat r = pos.Magnitude();
+		if( r == 0.0 )
+			return;
+			
+		TqFloat adj = MAX(fabs(pos.x()), fabs(pos.y())) / r;
+		pos.x(pos.x() * adj);
+		pos.y(pos.y() * adj);
+	}
+
 private:
     TqInt	m_XSamples;						///< The number of samples in the horizontal direction.
     TqInt	m_YSamples;						///< The number of samples in the vertical direction.
     std::vector<std::vector<SqImageSample> > m_aValues;	///< Vector of vectors of sample point data.
     std::vector<SqSampleData> m_Samples;	///< A Vector of samples. Holds position, time, dof offset etc for each sample.
+	std::vector<TqInt> m_DofOffsetIndices;	///< A mapping from dof bounding-box index to the sample that contains a dof offset in that bb.
     SqImageSample	m_Data;
     TqFloat m_MaxDepth;						///< The maximum depth of any sample in this pixel. used for occlusion culling
     TqFloat m_MinDepth;						///< The minimum depth of any sample in this pixel. used for occlusion culling

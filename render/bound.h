@@ -112,7 +112,7 @@ public:
     CqBound&	Encapsulate( const CqVector3D& v );
     CqBound&	Encapsulate( const CqVector2D& v );
 
-    TqBool	Contains3D( const CqVector3D& v )
+    TqBool	Contains3D( const CqVector3D& v ) const
     {
         if ( ( v.x() >= m_vecMin.x() && v.x() <= m_vecMax.x() ) &&
                 ( v.y() >= m_vecMin.y() && v.y() <= m_vecMax.y() ) &&
@@ -121,7 +121,7 @@ public:
         else
             return ( TqFalse );
     }
-    TqBool	Contains2D( const CqVector2D& v )
+    TqBool	Contains2D( const CqVector2D& v ) const
     {
         if ( ( v.x() < m_vecMin.x() || v.x() > m_vecMax.x() ) ||
                 ( v.y() < m_vecMin.y() || v.y() > m_vecMax.y() ) )

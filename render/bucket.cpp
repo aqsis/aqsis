@@ -36,6 +36,7 @@
 
 #include	"imagers.h"
 
+#include	<algorithm>
 
 
 
@@ -55,7 +56,14 @@ TqInt	CqBucket::m_DiscreteShiftX;
 TqInt	CqBucket::m_DiscreteShiftY;
 TqInt	CqBucket::m_XOrigin;
 TqInt	CqBucket::m_YOrigin;
+TqInt	CqBucket::m_PixelXSamples;
+TqInt	CqBucket::m_PixelYSamples;
+TqFloat	CqBucket::m_FilterXWidth;
+TqFloat	CqBucket::m_FilterYWidth;
+TqInt	CqBucket::m_NumTimeRanges;
+TqInt	CqBucket::m_NumDofBounds;
 CqImageBuffer* CqBucket::m_ImageBuffer;
+std::vector<CqBound>		CqBucket::m_DofBounds;
 std::vector<CqImagePixel>	CqBucket::m_aieImage;
 std::vector<std::vector<CqVector2D> >	CqBucket::m_aSamplePositions;
 std::vector<TqFloat> CqBucket::m_aFilterValues;
@@ -74,18 +82,24 @@ void CqBucket::InitialiseBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqIn
     m_YOrigin = yorigin;
     m_XSize = xsize;
     m_YSize = ysize;
-	m_DiscreteShiftX = FLOOR(FilterXWidth()/2.0f);
-	m_DiscreteShiftY = FLOOR(FilterYWidth()/2.0f);
-    //m_RealWidth = m_XSize + CEIL(FilterXWidth());
-    //m_RealHeight = m_YSize + CEIL(FilterYWidth());
+	m_PixelXSamples = m_ImageBuffer->PixelXSamples();
+	m_PixelYSamples = m_ImageBuffer->PixelYSamples();
+	m_FilterXWidth = m_ImageBuffer->FilterXWidth();
+	m_FilterYWidth = m_ImageBuffer->FilterYWidth();
+	m_DiscreteShiftX = FLOOR(m_FilterXWidth/2.0f);
+	m_DiscreteShiftY = FLOOR(m_FilterYWidth/2.0f);
 	m_RealWidth = m_XSize + (m_DiscreteShiftX*2);
 	m_RealHeight = m_YSize + (m_DiscreteShiftY*2);
+
+	m_NumTimeRanges = MAX(4, m_PixelXSamples * m_PixelYSamples);
 
     // Allocate the image element storage if this is the first bucket
     if(m_aieImage.empty())
     {
-        m_aieImage.resize( m_RealWidth * m_RealHeight);
-        m_aSamplePositions.resize( m_RealWidth * m_RealHeight );
+        m_aieImage.resize( m_RealWidth * m_RealHeight );
+		m_aSamplePositions.resize( m_RealWidth * m_RealHeight );
+
+		CalculateDofBounds();
 
         // Initialise the samples for this bucket.
         TqInt which = 0;
@@ -94,7 +108,7 @@ void CqBucket::InitialiseBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqIn
             for ( TqInt j = 0; j < m_RealWidth; j++ )
             {
                 m_aieImage[which].Clear();
-                m_aieImage[which].AllocateSamples( PixelXSamples(), PixelYSamples() );
+                m_aieImage[which].AllocateSamples( m_PixelXSamples, m_PixelYSamples );
                 m_aieImage[which].InitialiseSamples( m_aSamplePositions[which], fJitter );
 
                 which++;
@@ -102,12 +116,11 @@ void CqBucket::InitialiseBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqIn
         }
     }
 
-    // now shuffle the pixels around and add in the pixel offset to the position.
-    static CqRandom random(  53 );
-    TqInt shuffleX = random.RandomInt( m_RealWidth-1 );
-    TqInt shuffleY = random.RandomInt( m_RealHeight-1 );
+	//:TODO: AGG, sort out sample shuffling.
+	// now shuffle the pixels around and add in the pixel offset to the position.
+//	std::random_shuffle(m_aImageIndex.begin(), m_aImageIndex.end());
+
     TqInt which = 0;
-    TqInt sourceIndex = shuffleY * m_RealWidth + shuffleX;
     TqInt numPixels = m_RealWidth*m_RealHeight;
     for ( TqInt i = 0; i < m_RealHeight; i++ )
     {
@@ -116,16 +129,78 @@ void CqBucket::InitialiseBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqIn
             CqVector2D bPos2( m_XOrigin, m_YOrigin );
             bPos2 += CqVector2D( ( j - m_DiscreteShiftX ), ( i - m_DiscreteShiftY ) );
 
-	    if(!empty)
-		    m_aieImage[which].Clear();
-            m_aieImage[which].OffsetSamples( bPos2, m_aSamplePositions[sourceIndex] );
+			if(!empty)
+		    	m_aieImage[which].Clear();
+
+            m_aieImage[which].OffsetSamples( bPos2, m_aSamplePositions[which] );
 
             which++;
-            sourceIndex = (sourceIndex+1) % (numPixels);
         }
     }
 }
 
+
+void CqBucket::CalculateDofBounds()
+{
+	m_NumDofBounds = m_PixelXSamples * m_PixelYSamples;
+	m_DofBounds.resize(m_NumDofBounds);
+
+	TqFloat dx = 2.0 / m_PixelXSamples;
+	TqFloat dy = 2.0 / m_PixelYSamples;
+
+	// I know this is far from an optimal way of calculating this,
+	// but it's only done once so I don't care.
+	// Calculate the bounding boxes that the dof offset positions fall into.
+	TqFloat minX = -1.0;
+	TqFloat minY = -1.0;
+	TqInt which = 0;
+	for(int j = 0; j < m_PixelYSamples; ++j)
+	{
+		for(int i = 0; i < m_PixelXSamples; ++i)
+		{
+			CqVector2D topLeft(minX, minY);
+			CqVector2D topRight(minX + dx, minY);
+			CqVector2D bottomLeft(minX, minY + dy);
+			CqVector2D bottomRight(minX + dx, minY + dy);
+
+			CqImagePixel::ProjectToCircle(topLeft);
+			CqImagePixel::ProjectToCircle(topRight);
+			CqImagePixel::ProjectToCircle(bottomLeft);
+			CqImagePixel::ProjectToCircle(bottomRight);
+
+			// if the bound straddles x=0 or y=0 then just using the corners
+			// will give too small a bound, so we enlarge it by including the
+			// non-projected coords.
+			if((topLeft.y() > 0.0 && bottomLeft.y() < 0.0) ||
+				(topLeft.y() < 0.0 && bottomLeft.y() > 0.0))
+			{
+				topLeft.x(minX);
+				bottomLeft.x(minX);
+				topRight.x(minX + dx);
+				bottomRight.x(minX + dx);
+			}
+			if((topLeft.x() > 0.0 && topRight.x() < 0.0) ||
+				(topLeft.x() < 0.0 && topRight.x() > 0.0))
+			{
+				topLeft.y(minY);
+				bottomLeft.y(minY + dy);
+				topRight.y(minY);
+				bottomRight.y(minY + dy);
+			}
+
+			m_DofBounds[which].vecMin() = topLeft;
+			m_DofBounds[which].vecMax() = topLeft;
+			m_DofBounds[which].Encapsulate(topRight);
+			m_DofBounds[which].Encapsulate(bottomLeft);
+			m_DofBounds[which].Encapsulate(bottomRight);
+
+			which++;
+			minX += dx;
+		}
+		minX = -1.0;
+		minY += dy;
+	}
+}
 
 //----------------------------------------------------------------------
 /** Initialise the static filter values.
@@ -413,9 +488,9 @@ void CqBucket::FilterBucket(TqBool empty)
                                     TqInt cindex = sindex + sampleData.m_SubCellIndex;
                                     TqFloat g = m_aFilterValues[ cindex ];
                                     gTot += g;
-                                    if ( pie2->Values( sx, sy ).size() > 0 )
+                                    if ( pie2->Values( sampleIndex ).size() > 0 )
                                     {
-                                        SqImageSample* pSample = &pie2->Values( sx, sy ) [ 0 ];
+                                        SqImageSample* pSample = &pie2->Values( sampleIndex ) [ 0 ];
                                         samples += pSample->m_Data * g;
                                         SampleCount++;
                                     }
@@ -699,40 +774,6 @@ void CqBucket::ShutdownBucket()
 	for( i=m_aSamplePositions.begin(); i!=m_aSamplePositions.end(); i++ )
 		(*i).clear();
 	m_aSamplePositions.clear();
-}
-
-TqInt CqBucket::PixelXSamples()
-{
-    return ( m_ImageBuffer->PixelXSamples() );
-}
-
-TqInt CqBucket::PixelYSamples()
-{
-    return ( m_ImageBuffer->PixelYSamples() );
-}
-
-TqFloat CqBucket::FilterXWidth()
-{
-    return ( m_ImageBuffer->FilterXWidth() );
-}
-
-TqFloat CqBucket::FilterYWidth()
-{
-    return ( m_ImageBuffer->FilterYWidth() );
-}
-
-
-void CqBucket::ImageElement( TqInt iXPos, TqInt iYPos, CqImagePixel*& pie )
-{
-    iXPos -= m_XOrigin;
-    iYPos -= m_YOrigin;
-
-    // Check within renderable range
-    //assert( iXPos < -m_XMax && iXPos < m_XSize + m_XMax &&
-    //		iYPos < -m_YMax && iYPos < m_YSize + m_YMax );
-
-    TqInt i = ( ( iYPos + m_DiscreteShiftY ) * ( m_RealWidth ) ) + ( iXPos + m_DiscreteShiftX );
-    pie = &m_aieImage[ i ];
 }
 
 

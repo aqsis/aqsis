@@ -95,10 +95,18 @@ public:
     {
         return ( m_YOrigin );
     }
-    static	TqInt	PixelXSamples();
-    static	TqInt	PixelYSamples();
-    static	TqFloat	FilterXWidth();
-    static	TqFloat	FilterYWidth();
+    static	TqInt	PixelXSamples(){ return m_PixelXSamples; }
+    static	TqInt	PixelYSamples(){ return m_PixelYSamples; }
+    static	TqFloat	FilterXWidth(){ return m_FilterXWidth; }
+    static	TqFloat	FilterYWidth(){ return m_FilterYWidth; }
+	static	TqInt	NumTimeRanges(){ return m_NumTimeRanges; }
+	static	TqInt	NumDofBounds(){ return m_NumDofBounds; }
+
+	static const CqBound& DofSubBound(TqInt index)
+	{
+		assert(index < m_NumDofBounds);
+		return m_DofBounds[index];
+	}
 
     virtual	CqColor Color( TqInt iXPos, TqInt iYPos );
     virtual	CqColor Opacity( TqInt iXPos, TqInt iYPos );
@@ -109,8 +117,21 @@ public:
     virtual	const TqFloat* Data( TqInt iXPos, TqInt iYPos );
 
     static	void	InitialiseBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt ysize, TqBool fJitter = TqTrue, TqBool empty = TqFalse );
+ 	static	void	CalculateDofBounds();
     static	void	InitialiseFilterValues();
-    static	void	ImageElement( TqInt iXPos, TqInt iYPos, CqImagePixel*& pie );
+    static	void	ImageElement( TqInt iXPos, TqInt iYPos, CqImagePixel*& pie )
+	{
+		iXPos -= m_XOrigin;
+		iYPos -= m_YOrigin;
+
+		// Check within renderable range
+		//assert( iXPos < -m_XMax && iXPos < m_XSize + m_XMax &&
+		//		iYPos < -m_YMax && iYPos < m_YSize + m_YMax );
+
+		TqInt i = ( ( iYPos + m_DiscreteShiftY ) * ( m_RealWidth ) ) + ( iXPos + m_DiscreteShiftX );
+		pie = &m_aieImage[ i ];
+	}
+
     static	void	CombineElements();
     void	FilterBucket(TqBool empty);
     void	ExposeBucket();
@@ -216,6 +237,13 @@ private:
 	static	TqInt	m_RealHeight;	///< Actual size of the data for this bucket including filter overlap.
 	static	TqInt	m_DiscreteShiftX;	///< 
 	static	TqInt	m_DiscreteShiftY;
+	static	TqInt	m_PixelXSamples;
+	static	TqInt	m_PixelYSamples;
+	static	TqFloat	m_FilterXWidth;
+	static	TqFloat	m_FilterYWidth;
+	static	TqInt	m_NumTimeRanges;
+	static	TqInt	m_NumDofBounds;
+	static	std::vector<CqBound>		m_DofBounds;
     static	std::vector<CqImagePixel>	m_aieImage;
     static	std::vector<std::vector<CqVector2D> >	m_aSamplePositions;///< Vector of vectors of jittered sample positions precalculated.
     static	std::vector<TqFloat>	m_aFilterValues;				///< Vector of filter weights precalculated.
