@@ -71,6 +71,12 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name teqser
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libddmsock
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libri2rib
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -289,6 +295,18 @@ Package=<4>
 ###############################################################################
 
 Project: "libddmsock"=.\libddmsock\libddmsock.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "libri2rib"=.\libri2rib\libri2rib.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
