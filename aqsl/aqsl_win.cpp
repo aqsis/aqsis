@@ -51,8 +51,13 @@ void compile_file(const char* sl_file)
 int main(int argc, char** argv)
 {
 	int i;
-	for(i=1; i<argc; i++)
+	for(i=1; i<argc; i++) {
+		if (strstr(argv[i], "-help")) {
+			printf("Usage: %s -D anyconstant yourshader.sl\n", argv[0]);
+			exit(2);
+		} 
 		compile_file(argv[i]);
+        }
 
 	return(0);
 }	
