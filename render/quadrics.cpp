@@ -304,7 +304,7 @@ TqInt CqSphere::Split(std::vector<CqBasicSurface*>& aSplits)
 CqVector3D CqSphere::DicePoint(TqInt u, TqInt v)
 {	
 	TqFloat phimin=(m_ZMin>-m_Radius)?asin(m_ZMin/m_Radius):RAD(-90.0);
-	TqFloat phimax=(m_ZMin<m_Radius)?asin(m_ZMax/m_Radius):RAD(90.0);
+	TqFloat phimax=(m_ZMax<m_Radius)?asin(m_ZMax/m_Radius):RAD(90.0);
 	TqFloat phi=phimin+(v*(phimax-phimin))/m_vDiceSize;
 
 	TqFloat cosphi=cos(phi);
