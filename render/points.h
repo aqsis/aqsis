@@ -128,6 +128,8 @@ class CqPoints : public CqSurface, public CqMotionSpec<CqPolygonPoints*>
 
 		virtual	CqBound	Bound() const;
 		virtual	TqInt	Split( std::vector<CqBasicSurface*>& aSplits );
+		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime = 0 )
+		{}
 
 		CqPoints&	operator=( const CqPoints& From );
 

@@ -129,99 +129,85 @@ CqMicroPolyGridBase* CqPoints::Dice()
 
 	std::vector<CqMicroPolyGrid*> apGrids;
 
-	TqInt iTime;
-	for( iTime = 0; iTime < cTimes(); iTime++ )
+	CqMicroPolyGridPoints* pGrid = new CqMicroPolyGridPoints( nVertices(), 1, this );
+	
+	TqInt lUses = Uses();
+
+	// Dice the primitive variables.
+	if ( USES( lUses, EnvVars_Cs ) && ( NULL != pGrid->Cs() ) )
 	{
-		CqMicroPolyGridPoints* pGrid = new CqMicroPolyGridPoints( nVertices(), 1, this );
-		
-		TqInt lUses = Uses();
-
-		// Dice the primitive variables.
-		if ( USES( lUses, EnvVars_Cs ) && ( NULL != pGrid->Cs() ) )
-		{
-			if ( pPoints()->bHasCs() )
-				NaturalDice( pPoints()->Cs(), nVertices(), 1, pGrid->Cs() );
-			else if ( NULL != pAttributes() ->GetColorAttribute( "System", "Color" ) )
-				pGrid->Cs() ->SetColor( pAttributes() ->GetColorAttribute( "System", "Color" ) [ 0 ] );
-			else
-				pGrid->Cs() ->SetColor( CqColor( 1, 1, 1 ) );
-		}
-
-		if ( USES( lUses, EnvVars_Os ) && ( NULL != pGrid->Os() ) )
-		{
-			if ( bHasOs() )
-				NaturalDice( pPoints()->Os(), nVertices(), 1, pGrid->Os() );
-			else if ( NULL != pAttributes() ->GetColorAttribute( "System", "Opacity" ) )
-				pGrid->Os() ->SetColor( pAttributes() ->GetColorAttribute( "System", "Opacity" ) [ 0 ] );
-			else
-				pGrid->Os() ->SetColor( CqColor( 1, 1, 1 ) );
-		}
-
-		if ( USES( lUses, EnvVars_s ) && ( NULL != pGrid->s() ) && pPoints()->bHass() )
-			NaturalDice( pPoints()->s(), nVertices(), 1, pGrid->s() );
-
-		if ( USES( lUses, EnvVars_t ) && ( NULL != pGrid->t() ) && pPoints()->bHast() )
-			NaturalDice( pPoints()->t(), nVertices(), 1, pGrid->t() );
-
-		if ( USES( lUses, EnvVars_u ) && ( NULL != pGrid->u() ) && pPoints()->bHasu() )
-			NaturalDice( pPoints()->u(), nVertices(), 1, pGrid->u() );
-
-		if ( USES( lUses, EnvVars_v ) && ( NULL != pGrid->v() ) && pPoints()->bHasv() )
-			NaturalDice( pPoints()->v(), nVertices(), 1, pGrid->v() );
-
-
-		if ( NULL != pGrid->P() )
-			NaturalDice( pPoints( iTime )->P(), nVertices(), 1, pGrid->P() );
-
-		// If the shaders need N and they have been explicitly specified, then bilinearly interpolate them.
-		if ( USES( lUses, EnvVars_N ) && ( NULL != pGrid->N() ) && pPoints()->bHasN() )
-		{
-			NaturalDice( pPoints()->N(), nVertices(), 1, pGrid->N() );
-			pGrid->SetbShadingNormals( TqTrue );
-		}
-
-		if ( USES( lUses, EnvVars_Ng ) )
-		{
-			CqVector3D	N(0,0,1);
-			//N = QGetRenderContext() ->matSpaceToSpace( "camera", "object", CqMatrix(), pGrid->matObjectToWorld() ) * N;
-			TqInt u;
-			for ( u = 0; u <= nVertices(); u++ )
-			{
-				TqInt O = pAttributes() ->GetIntegerAttribute( "System", "Orientation" ) [ 0 ];
-				N = ( O == OrientationLH ) ? N : -N;
-				pGrid->Ng()->SetNormal( N, u );
-			}
-			pGrid->SetbGeometricNormals( TqTrue );
-		}
-
-		// Now we need to dice the user specified parameters as appropriate.
-		std::vector<CqParameter*>::iterator iUP;
-		std::vector<CqParameter*>::iterator end = pPoints()->aUserParams().end();
-		for ( iUP = pPoints()->aUserParams().begin(); iUP != end ; iUP++ )
-		{
-			/// \todo: Must transform point/vector/normal/matrix parameter variables from 'object' space to current before setting.
-			if ( NULL != pGrid->pAttributes() ->pshadSurface() )
-				pGrid->pAttributes() ->pshadSurface() ->SetArgument( ( *iUP ), this );
-
-			if ( NULL != pGrid->pAttributes() ->pshadDisplacement() )
-				pGrid->pAttributes() ->pshadDisplacement() ->SetArgument( ( *iUP ), this );
-
-			if ( NULL != pGrid->pAttributes() ->pshadAtmosphere() )
-				pGrid->pAttributes() ->pshadAtmosphere() ->SetArgument( ( *iUP ), this );
-		}
-		apGrids.push_back( pGrid );
+		if ( pPoints()->bHasCs() )
+			NaturalDice( pPoints()->Cs(), nVertices(), 1, pGrid->Cs() );
+		else if ( NULL != pAttributes() ->GetColorAttribute( "System", "Color" ) )
+			pGrid->Cs() ->SetColor( pAttributes() ->GetColorAttribute( "System", "Color" ) [ 0 ] );
+		else
+			pGrid->Cs() ->SetColor( CqColor( 1, 1, 1 ) );
 	}
 
-	if( apGrids.size() == 1 )
-		return( apGrids[ 0 ] );
-	else
+	if ( USES( lUses, EnvVars_Os ) && ( NULL != pGrid->Os() ) )
 	{
-		CqMotionMicroPolyGrid * pGrid = new CqMotionMicroPolyGridPoints;
-		TqInt i;
-		for ( i = 0; i < cTimes(); i++ )
-			pGrid->AddTimeSlot( Time( i ), apGrids[ i ] );
-		return( pGrid );
+		if ( bHasOs() )
+			NaturalDice( pPoints()->Os(), nVertices(), 1, pGrid->Os() );
+		else if ( NULL != pAttributes() ->GetColorAttribute( "System", "Opacity" ) )
+			pGrid->Os() ->SetColor( pAttributes() ->GetColorAttribute( "System", "Opacity" ) [ 0 ] );
+		else
+			pGrid->Os() ->SetColor( CqColor( 1, 1, 1 ) );
 	}
+
+	if ( USES( lUses, EnvVars_s ) && ( NULL != pGrid->s() ) && pPoints()->bHass() )
+		NaturalDice( pPoints()->s(), nVertices(), 1, pGrid->s() );
+
+	if ( USES( lUses, EnvVars_t ) && ( NULL != pGrid->t() ) && pPoints()->bHast() )
+		NaturalDice( pPoints()->t(), nVertices(), 1, pGrid->t() );
+
+	if ( USES( lUses, EnvVars_u ) && ( NULL != pGrid->u() ) && pPoints()->bHasu() )
+		NaturalDice( pPoints()->u(), nVertices(), 1, pGrid->u() );
+
+	if ( USES( lUses, EnvVars_v ) && ( NULL != pGrid->v() ) && pPoints()->bHasv() )
+		NaturalDice( pPoints()->v(), nVertices(), 1, pGrid->v() );
+
+
+	if ( NULL != pGrid->P() )
+		NaturalDice( pPoints( 0 )->P(), nVertices(), 1, pGrid->P() );
+
+	// If the shaders need N and they have been explicitly specified, then bilinearly interpolate them.
+	if ( USES( lUses, EnvVars_N ) && ( NULL != pGrid->N() ) && pPoints()->bHasN() )
+	{
+		NaturalDice( pPoints()->N(), nVertices(), 1, pGrid->N() );
+		pGrid->SetbShadingNormals( TqTrue );
+	}
+
+	if ( USES( lUses, EnvVars_Ng ) )
+	{
+		CqVector3D	N(0,0,1);
+		//N = QGetRenderContext() ->matSpaceToSpace( "camera", "object", CqMatrix(), pGrid->matObjectToWorld() ) * N;
+		TqInt u;
+		for ( u = 0; u <= nVertices(); u++ )
+		{
+			TqInt O = pAttributes() ->GetIntegerAttribute( "System", "Orientation" ) [ 0 ];
+			N = ( O == OrientationLH ) ? N : -N;
+			pGrid->Ng()->SetNormal( N, u );
+		}
+		pGrid->SetbGeometricNormals( TqTrue );
+	}
+
+	// Now we need to dice the user specified parameters as appropriate.
+	std::vector<CqParameter*>::iterator iUP;
+	std::vector<CqParameter*>::iterator end = pPoints()->aUserParams().end();
+	for ( iUP = pPoints()->aUserParams().begin(); iUP != end ; iUP++ )
+	{
+		/// \todo: Must transform point/vector/normal/matrix parameter variables from 'object' space to current before setting.
+		if ( NULL != pGrid->pAttributes() ->pshadSurface() )
+			pGrid->pAttributes() ->pshadSurface() ->SetArgument( ( *iUP ), this );
+
+		if ( NULL != pGrid->pAttributes() ->pshadDisplacement() )
+			pGrid->pAttributes() ->pshadDisplacement() ->SetArgument( ( *iUP ), this );
+
+		if ( NULL != pGrid->pAttributes() ->pshadAtmosphere() )
+			pGrid->pAttributes() ->pshadAtmosphere() ->SetArgument( ( *iUP ), this );
+	}
+
+	return( pGrid );
 }
 
 
@@ -392,14 +378,9 @@ void CqMicroPolyGridPoints::Split( CqImageBuffer* pImage, TqInt iBucket, long xm
 
 	AddRef();
 
-	CqVector3D* pP;
-	P() ->GetPointPtr( pP );
-
+	CqMatrix matCameraToWorld0 = QGetRenderContext() ->matSpaceToSpace( "camera", "world", CqMatrix(), pSurface()->pTransform()->matObjectToWorld() );
 	CqMatrix matObjectToCamera = QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pSurface()->pTransform()->matObjectToWorld() );
 	CqMatrix matCameraToRaster = QGetRenderContext() ->matSpaceToSpace( "camera", "raster" );
-
-	CqMatrix matTx = QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pSurface()->pTransform() ->matObjectToWorld( ) );
-	CqMatrix matITTx = QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pSurface()->pTransform() ->matObjectToWorld( ) );
 
 	CqVector3D vecdefOriginRaster = matCameraToRaster * CqVector3D( 0.0f,0.0f,0.0f );
 	
@@ -408,60 +389,160 @@ void CqMicroPolyGridPoints::Split( CqImageBuffer* pImage, TqInt iBucket, long xm
 
 	const CqParameterTypedConstant<TqFloat, type_float, TqFloat>* pConstantWidthParam = pPoints->constantwidth( );
 
-	CqParameterTyped<CqVector4D, CqVector3D>* pPParam = pPoints->pPoints()->P();
+	QGetRenderContext() ->Stats().MakeProject().Start();
+	// Transform the whole grid to hybrid camera/raster space
+
+	CqVector3D* pP;
+	P() ->GetPointPtr( pP );
+
+	// Get an array of P's for all time positions.
+	std::vector<std::vector<CqVector3D> > aaPtimes;
+	aaPtimes.resize( pSurface()->pTransform()->cTimes() );
+
+	// Array of cached object to camera matrices for each time slot.
+	std::vector<CqMatrix>	amatObjectToCameraT;
+	amatObjectToCameraT.resize( pSurface()->pTransform()->cTimes() );
+	std::vector<CqMatrix>	amatNObjectToCameraT;
+	amatNObjectToCameraT.resize( pSurface()->pTransform()->cTimes() );
+
+	TqInt iTime, tTime = pSurface()->pTransform()->cTimes();
+	CqMatrix matObjectToCameraT;
+	register TqInt i;
+	TqInt gsmin1;
+	gsmin1 = GridSize() - 1;
+
+
+	for( iTime = 0; iTime < tTime; iTime++ )
+	{
+		CqMatrix matWorldToObjectT = QGetRenderContext() ->matSpaceToSpace( "world", "object", CqMatrix(), pSurface()->pTransform()->matObjectToWorld( pSurface()->pTransform()->Time( iTime ) ) );
+		amatObjectToCameraT[ iTime ] = QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pSurface()->pTransform()->matObjectToWorld( pSurface()->pTransform()->Time( iTime ) ) );
+		amatNObjectToCameraT[ iTime ] = QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pSurface()->pTransform()->matObjectToWorld( pSurface()->pTransform()->Time( iTime ) ) );
+
+		aaPtimes[ iTime ].resize( gsmin1 + 1 );
+
+		for ( i = gsmin1; i >= 0; i-- )
+		{
+			// This makes sure all our points are in object space.
+			aaPtimes[ iTime ][ i ] = matWorldToObjectT * matCameraToWorld0 * pP[ i ];
+		}
+	}
+
+	QGetRenderContext() ->Stats().MakeProject().Stop();
 
 	TqInt iu;
 	for ( iu = 0; iu < cu; iu++ )
 	{
-		CqVector3D Point = pP[ iu ];
+		if( tTime > 1 )
+		{
+			CqMicroPolygonMotion *pNew = new CqMicroPolygonMotion();
+			pNew->SetGrid( this );
+			pNew->SetIndex( iu );
 
-		TqFloat radius = pConstantWidthParam->pValue( 0 )[ 0 ];
-		// Find out if the "width" parameter was specified.
-		CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pWidthParam = pPoints->width( 0 );
+			TqFloat radius;
+			TqFloat i_radius = pConstantWidthParam->pValue( 0 )[ 0 ];
+			// Find out if the "width" parameter was specified.
+			CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pWidthParam = pPoints->width( 0 );
 
-		if( NULL != pWidthParam )
-			radius = pWidthParam->pValue( pPoints->KDTree().aLeaves()[ iu ] )[ 0 ];
-		
-		// first, create a horizontal vector in the new space which is
-		//  the length of the current width in current space
-		CqVector3D horiz( 1, 0, 0 );
-		horiz = matITTx * horiz;
-		horiz *= radius / horiz.Magnitude();
+			if( NULL != pWidthParam )
+				i_radius = pWidthParam->pValue( pPoints->KDTree().aLeaves()[ iu ] )[ 0 ];
 
-		// now, create two points; one at the vertex in current space
-		//  and one which is offset horizontally in the new space by
-		//  the width in the current space.  transform both points
-		//  into the new space
-		CqVector3D pt = pPParam->pValue( pPoints->KDTree().aLeaves()[ iu ] ) [ 0 ];
-		CqVector3D pt_delta = pt + horiz;
-		pt = matTx * pt;
-		pt_delta = matTx * pt_delta;
+			for( iTime = 0; iTime < tTime; iTime++ )
+			{
+				radius = i_radius;
+				// Get point in camera space.
+				CqVector3D Point, pt, vecCamP;
+				Point = pt = vecCamP = amatObjectToCameraT[ 0 ] * aaPtimes[ iTime ][ iu ];
+				// Ensure z is retained in camera space when we convert to raster.
+				TqFloat ztemp = Point.z();
+				Point = matCameraToRaster * Point;
+				Point.z( ztemp );
 
-		// finally, find the difference between the two points in
-		//  the new space - this is the transformed width
-		CqVector3D widthVector = pt_delta - pt;
-		radius = widthVector.Magnitude();
+				// first, create a horizontal vector in object space which is
+				//  the length of the current width.
+				CqVector3D horiz( 1, 0, 0 );
+				horiz = amatNObjectToCameraT[ iTime ] * horiz;
+				horiz *= radius / horiz.Magnitude();
 
-		CqVector3D vecCamP = pPParam->pValue( pPoints->KDTree().aLeaves()[ iu ] )[ 0 ];
-		CqVector3D vecCamP2 = vecCamP + CqVector3D( radius, 0.0f, 0.0f );
-		TqFloat ztemp = vecCamP2.z();
-		CqVector3D vecRasP2 = matCameraToRaster * vecCamP2;
-		vecRasP2.z( ztemp );
-		TqFloat ras_radius = ( vecRasP2 - Point ).Magnitude();
-		radius = ras_radius * 0.5f;
+				// Get the current point in object space.
+				CqVector3D pt_delta = pt + horiz;
+				pt = amatObjectToCameraT[ iTime ] * pt;
+				pt_delta = amatObjectToCameraT[ iTime ] * pt_delta;
 
-		CqVector3D p1( Point.x() - radius, Point.y() - radius, Point.z() );
-		CqVector3D p2( Point.x() + radius, Point.y() - radius, Point.z() );
-		CqVector3D p3( Point.x() + radius, Point.y() + radius, Point.z() );
-		CqVector3D p4( Point.x() - radius, Point.y() + radius, Point.z() );
-		
-		CqMicroPolygonStatic *pNew = new CqMicroPolygonStatic();
-		pNew->SetGrid( this );
-		pNew->SetIndex( iu );
-		pNew->Initialise( p1, p2, p3, p4 );
-		pNew->GetTotalBound( TqTrue );
+				// finally, find the difference between the two points in
+				//  the new space - this is the transformed width
+				CqVector3D widthVector = pt_delta - pt;
+				radius = widthVector.Magnitude();
 
-		pImage->AddMPG( pNew );
+				CqVector3D vecCamP2 = vecCamP + CqVector3D( radius, 0.0f, 0.0f );
+				ztemp = vecCamP2.z();
+				CqVector3D vecRasP2 = matCameraToRaster * vecCamP2;
+				vecRasP2.z( ztemp );
+				TqFloat ras_radius = ( vecRasP2 - Point ).Magnitude();
+				radius = ras_radius * 0.5f;
+
+				CqVector3D p1( Point.x() - radius, Point.y() - radius, Point.z() );
+				CqVector3D p2( Point.x() + radius, Point.y() - radius, Point.z() );
+				CqVector3D p3( Point.x() + radius, Point.y() + radius, Point.z() );
+				CqVector3D p4( Point.x() - radius, Point.y() + radius, Point.z() );
+				
+				pNew->Initialise( p1, p2, p3, p4, pSurface()->pTransform()->Time( iTime ) );
+			}
+			pNew->GetTotalBound( TqTrue );
+			pImage->AddMPG( pNew );
+		}
+		else
+		{
+			// Get point in camera space.
+			CqVector3D Point, pt, vecCamP;
+			Point = pt = vecCamP = amatObjectToCameraT[ 0 ] * aaPtimes[ 0 ][ iu ];
+			// Ensure z is retained in camera space when we convert to raster.
+			TqFloat ztemp = Point.z();
+			Point = matCameraToRaster * Point;
+			Point.z( ztemp );
+
+			TqFloat radius = pConstantWidthParam->pValue( 0 )[ 0 ];
+			// Find out if the "width" parameter was specified.
+			CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pWidthParam = pPoints->width( 0 );
+
+			if( NULL != pWidthParam )
+				radius = pWidthParam->pValue( pPoints->KDTree().aLeaves()[ iu ] )[ 0 ];
+			
+			// first, create a horizontal vector in camera space which is
+			//  the length of the current width in current space
+			CqVector3D horiz( 1, 0, 0 );
+			horiz = amatNObjectToCameraT[ 0 ] * horiz;
+			horiz *= radius / horiz.Magnitude();
+
+			// Get the current point in object space.
+			CqVector3D pt_delta = pt + horiz;
+			pt = amatObjectToCameraT[ 0 ] * pt;
+			pt_delta = amatObjectToCameraT[ 0 ] * pt_delta;
+
+			// finally, find the difference between the two points in
+			//  the new space - this is the transformed width
+			CqVector3D widthVector = pt_delta - pt;
+			radius = widthVector.Magnitude();
+
+			CqVector3D vecCamP2 = vecCamP + CqVector3D( radius, 0.0f, 0.0f );
+			ztemp = vecCamP2.z();
+			CqVector3D vecRasP2 = matCameraToRaster * vecCamP2;
+			vecRasP2.z( ztemp );
+			TqFloat ras_radius = ( vecRasP2 - Point ).Magnitude();
+			radius = ras_radius * 0.5f;
+
+			CqVector3D p1( Point.x() - radius, Point.y() - radius, Point.z() );
+			CqVector3D p2( Point.x() + radius, Point.y() - radius, Point.z() );
+			CqVector3D p3( Point.x() + radius, Point.y() + radius, Point.z() );
+			CqVector3D p4( Point.x() - radius, Point.y() + radius, Point.z() );
+			
+			CqMicroPolygonStatic *pNew = new CqMicroPolygonStatic();
+			pNew->SetGrid( this );
+			pNew->SetIndex( iu );
+			pNew->Initialise( p1, p2, p3, p4 );
+			pNew->GetTotalBound( TqTrue );
+
+			pImage->AddMPG( pNew );
+		}
 	}
 
 	Release();
