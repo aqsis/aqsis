@@ -200,6 +200,12 @@ START_NAMESPACE( Aqsis )
  * Class handling the shader execution stack.
  */
 
+struct	SqStackEntry
+{
+	TqBool			m_IsTemp;
+	IqShaderData*	m_Data;
+};
+
 class CqShaderStack
 {
 	public:
@@ -207,78 +213,87 @@ class CqShaderStack
 		{
 			TqInt n = MAX(m_maxsamples, m_samples);
 			m_Stack.resize( n );
-
-			m_aUFPool.resize( n );
-			m_aUPPool.resize( n );
-			m_aUSPool.resize( n );
-			m_aUCPool.resize( n );
-			m_aUNPool.resize( n );
-			m_aUVPool.resize( n );
-			m_aUMPool.resize( n );
-
-			m_aVFPool.resize( n );
-			m_aVPPool.resize( n );
-			m_aVSPool.resize( n );
-			m_aVCPool.resize( n );
-			m_aVNPool.resize( n );
-			m_aVVPool.resize( n );
-			m_aVMPool.resize( n );
-
-			TqInt i;
-			for ( i = 0; i < type_last; i++ )
-				m_iUPoolTops[ i ] = 0;
-			for ( i = 0; i < type_last; i++ )
-				m_iVPoolTops[ i ] = 0;
 		}
 		virtual ~CqShaderStack()
 		{
-		
 			m_Stack.clear();
-
-			m_aUFPool.clear();
-			m_aUPPool.clear();
-			m_aUSPool.clear();
-			m_aUCPool.clear();
-			m_aUNPool.clear();
-			m_aUVPool.clear();
-			m_aUMPool.clear();
-
-			m_aVFPool.clear();
-			m_aVPPool.clear();
-			m_aVSPool.clear();
-			m_aVCPool.clear();
-			m_aVNPool.clear();
-			m_aVVPool.clear();
-			m_aVMPool.clear();
-
 			Statistics();
-			
 		}
 
 
 		IqShaderData* GetNextTemp( EqVariableType type, EqVariableClass _class );
 
+		//----------------------------------------------------------------------
+		/** Push a new shader variable reference onto the stack.
+		 */
+		void	Push( IqShaderData* pv )
+		{
+			while ( m_iTop >= m_Stack.size() )
+			{
+				TqInt n = m_Stack.size() + 1;
+				m_Stack.resize( n );
+				m_Stack.reserve( n );
+			}
+
+			m_Stack[ m_iTop ].m_Data = pv;
+			m_Stack[ m_iTop ].m_IsTemp = TqTrue;
+			m_iTop ++;
+			m_maxsamples = MAX(m_maxsamples, m_iTop);
+		}
 
 		//----------------------------------------------------------------------
 		/** Push a new shader variable reference onto the stack.
 		 */
-		void	Push( IqShaderData* pv );
+		void	PushV( IqShaderData* pv )
+		{
+			while ( m_iTop >= m_Stack.size() )
+			{
+				TqInt n = m_Stack.size() + 1;
+				m_Stack.resize( n );
+				m_Stack.reserve( n );
+			}
+
+			m_Stack[ m_iTop ].m_Data = pv;
+			m_Stack[ m_iTop ].m_IsTemp = TqFalse;
+			m_iTop ++;
+			m_maxsamples = MAX(m_maxsamples, m_iTop);
+		}
 
 		//----------------------------------------------------------------------
 		/** Pop the top stack entry.
 		 * \param f Boolean value to update if this is varying. If not varying, leaves f unaltered.
 		 * \return Reference to the top stack entry.
 		 */
-		IqShaderData* Pop( TqBool& f );
+		SqStackEntry Pop( TqBool& f )
+		{
+			if ( m_iTop ) m_iTop--;
+
+			SqStackEntry Val = m_Stack[ m_iTop ];
+			f = Val.m_Data->Size() > 1 || f;
+			return ( Val );
+		}
+
+		void Release( SqStackEntry s );
 
 		//----------------------------------------------------------------------
 		/** Duplicate the top stack entry.
 		 */
-		void	Dup();
+		void	Dup()
+		{
+			TqInt iTop = m_iTop-1;
+
+			IqShaderData* s = GetNextTemp( m_Stack[ iTop ].m_Data ->Type(), m_Stack[ iTop ].m_Data ->Class() );
+			s->SetValueFromVariable( m_Stack[ iTop ].m_Data );
+			Push( s );
+		}
 
 		/** Drop the top stack entry.
 		 */
-		void	Drop();
+		void	Drop()
+		{
+			TqBool f = TqFalse;
+			Pop( f );
+		}
 
 		/**
 		 * Print the max number of depth if compiled for it.
@@ -297,38 +312,34 @@ class CqShaderStack
 		
 
 	protected:
-		std::vector<IqShaderData*>	m_Stack;
+		std::vector<SqStackEntry>	m_Stack;
 		TqUint	m_iTop;										///< Index of the top entry.
 
-
-		static std::deque<CqShaderVariableUniformFloat>		m_aUFPool;
+		static std::deque<CqShaderVariableUniformFloat*>				m_UFPool;
 		// Integer
-		static std::deque<CqShaderVariableUniformPoint>		m_aUPPool;
-		static std::deque<CqShaderVariableUniformString>	m_aUSPool;
-		static std::deque<CqShaderVariableUniformColor>		m_aUCPool;
+		static std::deque<CqShaderVariableUniformPoint*>				m_UPPool;
+		static std::deque<CqShaderVariableUniformString*>			m_USPool;
+		static std::deque<CqShaderVariableUniformColor*>				m_UCPool;
 		// Triple
 		// hPoint
-		static std::deque<CqShaderVariableUniformNormal>	m_aUNPool;
-		static std::deque<CqShaderVariableUniformVector>	m_aUVPool;
+		static std::deque<CqShaderVariableUniformNormal*>			m_UNPool;
+		static std::deque<CqShaderVariableUniformVector*>			m_UVPool;
 		// Void
-		static std::deque<CqShaderVariableUniformMatrix>	m_aUMPool;
+		static std::deque<CqShaderVariableUniformMatrix*>			m_UMPool;
 		// SixteenTuple
 
-		static std::deque<CqShaderVariableVaryingFloat>		m_aVFPool;
+		static std::deque<CqShaderVariableVaryingFloat*>				m_VFPool;
 		// Integer
-		static std::deque<CqShaderVariableVaryingPoint>		m_aVPPool;
-		static std::deque<CqShaderVariableVaryingString>	m_aVSPool;
-		static std::deque<CqShaderVariableVaryingColor>		m_aVCPool;
+		static std::deque<CqShaderVariableVaryingPoint*>				m_VPPool;
+		static std::deque<CqShaderVariableVaryingString*>			m_VSPool;
+		static std::deque<CqShaderVariableVaryingColor*>				m_VCPool;
 		// Triple
 		// hPoint
-		static std::deque<CqShaderVariableVaryingNormal>	m_aVNPool;
-		static std::deque<CqShaderVariableVaryingVector>	m_aVVPool;
+		static std::deque<CqShaderVariableVaryingNormal*>			m_VNPool;
+		static std::deque<CqShaderVariableVaryingVector*>			m_VVPool;
 		// Void
-		static std::deque<CqShaderVariableVaryingMatrix>	m_aVMPool;
+		static std::deque<CqShaderVariableVaryingMatrix*>			m_VMPool;
 		// SixteenTuple
-
-		static TqInt	m_iUPoolTops[ type_last ];
-		static TqInt	m_iVPoolTops[ type_last ];
 
 		static TqInt    m_samples; // by default == 18 see shaderstack.cpp
 		static TqInt    m_maxsamples;

@@ -104,9 +104,10 @@ union UsProgramElement
 // Macros used in the VM shadeops
 //
 
-#define	POPV(A)			IqShaderData* A=Pop(__fVarying)
-#define	POP				Pop(__fVarying) 
-//#define	RESULT			CqVMStackEntry& Result=__fVarying?gVaryingResult:gUniformResult;
+#define	POPV(A)			SqStackEntry _se_##A=Pop(__fVarying); \
+						IqShaderData* A = _se_##A.m_Data
+#define	POP				Pop(__fVarying)
+#define	RELEASE(A)		Release( _se_##A )
 #define	RESULT(t,c)		IqShaderData* pResult=GetNextTemp(t,c); \
 						pResult->SetSize(( m_uGridRes + 1 ) * ( m_vGridRes + 1 ))
 
@@ -119,25 +120,35 @@ union UsProgramElement
 #define	FUNC1(t,Func)	POPV(ValA); \
 						RESULT(t,__fVarying?class_varying:class_uniform); \
 						Func(ValA,pResult,this); \
-						Push(pResult);
+						Push(pResult); \
+						RELEASE(ValA);
 #define	FUNC2(t,Func)	POPV(ValA); \
 						POPV(ValB); \
 						RESULT(t,__fVarying?class_varying:class_uniform); \
 						Func(ValA,ValB,pResult,this); \
-						Push(pResult);
+						Push(pResult); \
+						RELEASE(ValA); \
+						RELEASE(ValB);
 #define	FUNC3(t,Func)	POPV(ValA); \
 						POPV(ValB); \
 						POPV(ValC); \
 						RESULT(t,__fVarying?class_varying:class_uniform); \
 						Func(ValA,ValB,ValC,pResult,this); \
-						Push(pResult);
+						Push(pResult); \
+						RELEASE(ValA); \
+						RELEASE(ValB); \
+						RELEASE(ValC);
 #define	FUNC4(t,Func)	POPV(ValA); \
 						POPV(ValB); \
 						POPV(ValC); \
 						POPV(ValD); \
 						RESULT(t,__fVarying?class_varying:class_uniform); \
 						Func(ValA,ValB,ValC,ValD,pResult,this); \
-						Push(pResult);
+						Push(pResult); \
+						RELEASE(ValA); \
+						RELEASE(ValB); \
+						RELEASE(ValC); \
+						RELEASE(ValD);
 #define	FUNC5(t,Func)	POPV(ValA); \
 						POPV(ValB); \
 						POPV(ValC); \
@@ -145,7 +156,12 @@ union UsProgramElement
 						POPV(ValE); \
 						RESULT(t,__fVarying?class_varying:class_uniform); \
 						Func(ValA,ValB,ValC,ValD,ValE,pResult,this); \
-						Push(pResult);
+						Push(pResult); \
+						RELEASE(ValA); \
+						RELEASE(ValB); \
+						RELEASE(ValC); \
+						RELEASE(ValD); \
+						RELEASE(ValE);
 #define	FUNC7(t,Func)	POPV(ValA); \
 						POPV(ValB); \
 						POPV(ValC); \
@@ -155,7 +171,14 @@ union UsProgramElement
 						POPV(ValG); \
 						RESULT(t,__fVarying?class_varying:class_uniform); \
 						Func(ValA,ValB,ValC,ValD,ValE,ValF,ValG,pResult,this); \
-						Push(pResult);
+						Push(pResult); \
+						RELEASE(ValA); \
+						RELEASE(ValB); \
+						RELEASE(ValC); \
+						RELEASE(ValD); \
+						RELEASE(ValE); \
+						RELEASE(ValF); \
+						RELEASE(ValG);
 #define FUNC1PLUS(t,Func)	POPV(count);	/* Count of additional values.*/ \
 						POPV(a);		/* first value */ \
 						/* Read all the additional values. */ \
@@ -164,11 +187,13 @@ union UsProgramElement
 						TqInt cParams=static_cast<TqInt>( fc ); \
 						IqShaderData** aParams=new IqShaderData*[cParams]; \
 						TqInt iP=0; \
-						while(iP!=cParams)	aParams[iP++]=POP; \
+						while(iP!=cParams)	aParams[iP++]=POP.m_Data; \
 						RESULT(t,__fVarying?class_varying:class_uniform); \
 						Func(a,pResult,this, cParams, aParams); \
 						delete[](aParams); \
-						Push(pResult);
+						Push(pResult); \
+						RELEASE(count); \
+						RELEASE(a);
 #define FUNC2PLUS(t,Func)	POPV(count);	/* Count of additional values.*/ \
 						POPV(a);		/* first value */ \
 						POPV(b);		/* second value */ \
@@ -178,11 +203,14 @@ union UsProgramElement
 						TqInt cParams=static_cast<TqInt>( fc ); \
 						IqShaderData** aParams=new IqShaderData*[cParams]; \
 						TqInt iP=0; \
-						while(iP!=cParams)	aParams[iP++]=POP; \
+						while(iP!=cParams)	aParams[iP++]=POP.m_Data; \
 						RESULT(t,__fVarying?class_varying:class_uniform); \
 						Func(a,b,pResult,this, cParams, aParams); \
 						delete[](aParams); \
-						Push(pResult);
+						Push(pResult); \
+						RELEASE(count); \
+						RELEASE(a); \
+						RELEASE(b);
 #define FUNC3PLUS(t,Func)	POPV(count);	/* Count of additional values.*/ \
 						POPV(a);		/* first value */ \
 						POPV(b);		/* second value */ \
@@ -193,34 +221,53 @@ union UsProgramElement
 						TqInt cParams=static_cast<TqInt>( fc ); \
 						IqShaderData** aParams=new IqShaderData*[cParams]; \
 						TqInt iP=0; \
-						while(iP!=cParams)	aParams[iP++]=POP; \
+						while(iP!=cParams)	aParams[iP++]=POP.m_Data; \
 						RESULT(t,__fVarying?class_varying:class_uniform); \
 						Func(a,b,c,pResult,this, cParams, aParams); \
 						delete[](aParams); \
-						Push(pResult);
+						Push(pResult); \
+						RELEASE(count); \
+						RELEASE(a); \
+						RELEASE(b); \
+						RELEASE(c);
 
 
 #define	VOIDFUNC(Func)	Func(this);
 #define	VOIDFUNC1(Func)	POPV(ValA); \
-						Func(ValA,this);
+						Func(ValA,this); \
+						RELEASE(ValA);
 #define	VOIDFUNC2(Func)	POPV(ValA); \
 						POPV(ValB); \
-						Func(ValA,ValB,this);
+						Func(ValA,ValB,this); \
+						RELEASE(ValA); \
+						RELEASE(ValB);
 #define	VOIDFUNC3(Func)	POPV(ValA); \
 						POPV(ValB); \
 						POPV(ValC); \
-						Func(ValA,ValB,ValC,this);
+						Func(ValA,ValB,ValC,this); \
+						RELEASE(ValA); \
+						RELEASE(ValB); \
+						RELEASE(ValC);
 #define	VOIDFUNC4(Func)	POPV(ValA); \
 						POPV(ValB); \
 						POPV(ValC); \
 						POPV(ValD); \
-						Func(ValA,ValB,ValC,ValD,this);
+						Func(ValA,ValB,ValC,ValD,this); \
+						RELEASE(ValA); \
+						RELEASE(ValB); \
+						RELEASE(ValC); \
+						RELEASE(ValD);
 #define	VOIDFUNC5(Func)	POPV(ValA); \
 						POPV(ValB); \
 						POPV(ValC); \
 						POPV(ValD); \
 						POPV(ValE); \
-						Func(ValA,ValB,ValC,ValD,ValE,this);
+						Func(ValA,ValB,ValC,ValD,ValE,this); \
+						RELEASE(ValA); \
+						RELEASE(ValB); \
+						RELEASE(ValC); \
+						RELEASE(ValD); \
+						RELEASE(ValE);
 #define	VOIDFUNC7(Func)	POPV(ValA); \
 						POPV(ValB); \
 						POPV(ValC); \
@@ -228,7 +275,14 @@ union UsProgramElement
 						POPV(ValE); \
 						POPV(ValF); \
 						POPV(ValG); \
-						Func(ValA,ValB,ValC,ValD,ValE,ValF,ValG,this);
+						Func(ValA,ValB,ValC,ValD,ValE,ValF,ValG,this); \
+						RELEASE(ValA); \
+						RELEASE(ValB); \
+						RELEASE(ValC); \
+						RELEASE(ValD); \
+						RELEASE(ValE); \
+						RELEASE(ValF); \
+						RELEASE(ValG);
 #define VOIDFUNC1PLUS(Func)	POPV(count);	/* Count of additional values.*/ \
 						POPV(a);		/* first value */ \
 						/* Read all the additional values. */ \
@@ -237,9 +291,11 @@ union UsProgramElement
 						TqInt cParams=static_cast<TqInt>( fc ); \
 						IqShaderData** aParams=new IqShaderData*[cParams]; \
 						TqInt iP=0; \
-						while(iP!=cParams)	aParams[iP++]=POP; \
+						while(iP!=cParams)	aParams[iP++]=POP.m_Data; \
 						Func(a,this, cParams, aParams); \
-						delete[](aParams);
+						delete[](aParams); \
+						RELEASE(count); \
+						RELEASE(a);
 
 #define	SPLINE(t,func)	POPV(count);	\
 						POPV(value); \
@@ -257,11 +313,17 @@ union UsProgramElement
 						apSplinePoints[3]=vald; \
 						TqInt iSP; \
 						for(iSP=4; iSP<cParams; iSP++) \
-							apSplinePoints[iSP]=POP; \
+							apSplinePoints[iSP]=POP.m_Data; \
 						RESULT(t,__fVarying?class_varying:class_uniform); \
 						func(value,pResult,this,cParams,apSplinePoints); \
 						delete[](apSplinePoints); \
-						Push(pResult);
+						Push(pResult); \
+						RELEASE(count); \
+						RELEASE(value); \
+						RELEASE(vala); \
+						RELEASE(valb); \
+						RELEASE(valc); \
+						RELEASE(vald);
 
 #define	SSPLINE(t,func)	POPV(count); \
 						POPV(basis); \
@@ -280,11 +342,18 @@ union UsProgramElement
 						apSplinePoints[3]=vald; \
 						TqInt iSP; \
 						for(iSP=4; iSP<cParams; iSP++) \
-							apSplinePoints[iSP]=POP; \
+							apSplinePoints[iSP]=POP.m_Data; \
 						RESULT(t,__fVarying?class_varying:class_uniform); \
 						func(basis,value,pResult,this,cParams,apSplinePoints); \
 						delete[](apSplinePoints); \
-						Push(pResult);
+						Push(pResult); \
+						RELEASE(count); \
+						RELEASE(basis); \
+						RELEASE(value); \
+						RELEASE(vala); \
+						RELEASE(valb); \
+						RELEASE(valc); \
+						RELEASE(vald);
 
 #define	TEXTURE(t,func)	POPV(count); /* additional parameter count */\
 						POPV(name); /* texture name */\
@@ -294,11 +363,14 @@ union UsProgramElement
 						TqInt cParams=static_cast<TqInt>( fc ); \
 						IqShaderData** aParams=new IqShaderData*[cParams]; \
 						TqInt iP=0; \
-						while(iP!=cParams)	aParams[iP++]=POP; \
+						while(iP!=cParams)	aParams[iP++]=POP.m_Data; \
 						RESULT(t,__fVarying?class_varying:class_uniform); \
 						func(name,channel,pResult,this,cParams,aParams); \
 						delete[](aParams); \
-						Push(pResult);
+						Push(pResult); \
+						RELEASE(count); \
+						RELEASE(name); \
+						RELEASE(channel); 
 #define	TEXTURE1(t,func)	POPV(count); /* additional parameter count */\
 						POPV(name); /* texture name */\
 						POPV(channel); /* channel */\
@@ -308,11 +380,15 @@ union UsProgramElement
 						TqInt cParams=static_cast<TqInt>( fc ); \
 						IqShaderData** aParams=new IqShaderData*[cParams]; \
 						TqInt iP=0; \
-						while(iP!=cParams)	aParams[iP++]=POP; \
+						while(iP!=cParams)	aParams[iP++]=POP.m_Data; \
 						RESULT(t,__fVarying?class_varying:class_uniform); \
 						func(name,channel,R,pResult,this, cParams, aParams); \
 						delete[](aParams); \
-						Push(pResult);
+						Push(pResult); \
+						RELEASE(count); \
+						RELEASE(name); \
+						RELEASE(channel); \
+						RELEASE(R); 
 #define	TEXTURE2(t,func)	POPV(count); /* additional parameter count */\
 						POPV(name); /* texture name */\
 						POPV(channel); /* channel */\
@@ -323,11 +399,16 @@ union UsProgramElement
 						TqInt cParams=static_cast<TqInt>( fc ); \
 						IqShaderData** aParams=new IqShaderData*[cParams]; \
 						TqInt iP=0; \
-						while(iP!=cParams)	aParams[iP++]=POP; \
+						while(iP!=cParams)	aParams[iP++]=POP.m_Data; \
 						RESULT(t,__fVarying?class_varying:class_uniform); \
 						func(name,channel,s1,t1,pResult,this, cParams, aParams); \
 						delete[](aParams); \
-						Push(pResult);
+						Push(pResult); \
+						RELEASE(count); \
+						RELEASE(name); \
+						RELEASE(channel); \
+						RELEASE(s1); \
+						RELEASE(t1); 
 #define	TEXTURE4(t,func)	POPV(count); /* additional parameter count */\
 						POPV(name); /* texture name */\
 						POPV(channel); /* channel */\
@@ -340,11 +421,18 @@ union UsProgramElement
 						TqInt cParams=static_cast<TqInt>( fc ); \
 						IqShaderData** aParams=new IqShaderData*[cParams]; \
 						TqInt iP=0; \
-						while(iP!=cParams)	aParams[iP++]=POP; \
+						while(iP!=cParams)	aParams[iP++]=POP.m_Data; \
 						RESULT(t,__fVarying?class_varying:class_uniform); \
 						func(name,channel,R1,R2,R3,R4,pResult,this,cParams,aParams); \
 						delete[](aParams); \
-						Push(pResult);
+						Push(pResult); \
+						RELEASE(count); \
+						RELEASE(name); \
+						RELEASE(channel); \
+						RELEASE(R1); \
+						RELEASE(R2); \
+						RELEASE(R3); \
+						RELEASE(R4); 
 #define	TEXTURE8(t,func)	POPV(count); /* additional parameter count */\
 						POPV(name); /* texture name */\
 						POPV(channel); /* channel */\
@@ -361,18 +449,32 @@ union UsProgramElement
 						TqInt cParams=static_cast<TqInt>( fc ); \
 						IqShaderData** aParams=new IqShaderData*[cParams]; \
 						TqInt iP=0; \
-						while(iP!=cParams)	aParams[iP++]=POP; \
+						while(iP!=cParams)	aParams[iP++]=POP.m_Data; \
 						RESULT(t,__fVarying?class_varying:class_uniform); \
 						func(name,channel,s1,t1,s2,t2,s3,t3,s4,t4,pResult,this,cParams,aParams); \
 						delete[](aParams); \
-						Push(pResult);
+						Push(pResult); \
+						RELEASE(count); \
+						RELEASE(name); \
+						RELEASE(channel); \
+						RELEASE(s1); \
+						RELEASE(t1); \
+						RELEASE(s2); \
+						RELEASE(t2); \
+						RELEASE(s3); \
+						RELEASE(t3); \
+						RELEASE(s4); \
+						RELEASE(t4); 
 
 #define	TRIPLE(T)		POPV(ValA); \
 						POPV(ValB); \
 						POPV(ValC); \
 						RESULT(type_color,__fVarying?class_varying:class_uniform); \
 						pResult->OpTRIPLE_C(*ValA,*ValB,*ValC); \
-						Push(pResult);
+						Push(pResult); \
+						RELEASE(ValA): \
+						RELEASE(ValB): \
+						RELEASE(ValC): 
 
 static TqFloat	temp_float;
 static CqVector3D temp_point;
@@ -452,6 +554,10 @@ class CqShaderVM : public CqShaderStack, public IqShader, public CqDSORepository
 		virtual	IqShaderData* CreateTemporaryStorage( EqVariableType type, EqVariableClass _class );
 		virtual void DeleteTemporaryStorage( IqShaderData* pData );
 		virtual void DefaultSurface();
+
+		/// \todo: These should be exposed by the IqShader Interface somehow.
+		static	void ShutdownShaderEngine();
+
 
 		void	LoadProgram( std::istream* pFile );
 		void	Execute( IqShaderExecEnv* pEnv );

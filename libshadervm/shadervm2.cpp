@@ -377,6 +377,7 @@ void CqShaderVM::SO_xcomp()
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
 	OpCOMP_P( A, 0, pResult, m_pEnv->RunningState() );
 	Push( pResult );
+	RELEASE( A );
 }
 
 void CqShaderVM::SO_ycomp()
@@ -386,6 +387,7 @@ void CqShaderVM::SO_ycomp()
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
 	OpCOMP_P( A, 1, pResult, m_pEnv->RunningState() );
 	Push( pResult );
+	RELEASE( A );
 }
 
 void CqShaderVM::SO_zcomp()
@@ -395,6 +397,7 @@ void CqShaderVM::SO_zcomp()
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
 	OpCOMP_P( A, 2, pResult, m_pEnv->RunningState() );
 	Push( pResult );
+	RELEASE( A );
 }
 
 void CqShaderVM::SO_setxcomp()
@@ -543,6 +546,8 @@ void CqShaderVM::SO_comp()
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
 	OpCOMP_C( A, B, pResult, m_pEnv->RunningState() );
 	Push( pResult );
+	RELEASE( B );
+	RELEASE( A );
 }
 
 void CqShaderVM::SO_setcomp()
@@ -722,6 +727,7 @@ void CqShaderVM::SO_init_illuminance()
 	RESULT(type_float, class_varying);
 	pResult->SetFloat( m_pEnv->SO_init_illuminance() );
 	Push( pResult );
+	RELEASE( A );
 }
 
 void CqShaderVM::SO_advance_illuminance()
@@ -769,6 +775,7 @@ void CqShaderVM::SO_atmosphere()
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
 	m_pEnv->SO_atmosphere( Val, pV, pResult );
 	Push( pResult );
+	RELEASE( Val );
 }
 
 void CqShaderVM::SO_displacement()
@@ -779,6 +786,7 @@ void CqShaderVM::SO_displacement()
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
 	m_pEnv->SO_displacement( Val, pV, pResult );
 	Push( pResult );
+	RELEASE( Val );
 }
 
 void CqShaderVM::SO_lightsource()
@@ -789,6 +797,7 @@ void CqShaderVM::SO_lightsource()
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
 	m_pEnv->SO_lightsource( Val, pV, pResult );
 	Push( pResult );
+	RELEASE( Val );
 }
 
 void CqShaderVM::SO_surface()
@@ -799,6 +808,7 @@ void CqShaderVM::SO_surface()
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
 	m_pEnv->SO_surface( Val, pV, pResult );
 	Push( pResult );
+	RELEASE( Val );
 }
 
 void CqShaderVM::SO_attribute()
@@ -809,6 +819,7 @@ void CqShaderVM::SO_attribute()
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
 	m_pEnv->SO_attribute( Val, pV, pResult );
 	Push( pResult );
+	RELEASE( Val );
 }
 
 void CqShaderVM::SO_option()
@@ -819,6 +830,7 @@ void CqShaderVM::SO_option()
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
 	m_pEnv->SO_option( Val, pV, pResult );
 	Push( pResult );
+	RELEASE( Val );
 }
 
 void CqShaderVM::SO_rendererinfo()
@@ -829,6 +841,7 @@ void CqShaderVM::SO_rendererinfo()
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
 	m_pEnv->SO_rendererinfo( Val, pV, pResult );
 	Push( pResult );
+	RELEASE( Val );
 }
 
 void CqShaderVM::SO_textureinfo()
@@ -841,6 +854,7 @@ void CqShaderVM::SO_textureinfo()
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
 	m_pEnv->SO_textureinfo( Val, DataInfo, pV, pResult );
 	Push( pResult );
+	RELEASE( Val );
 }
 
 void CqShaderVM::SO_incident()
@@ -851,6 +865,7 @@ void CqShaderVM::SO_incident()
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
 	m_pEnv->SO_incident( Val, pV, pResult );
 	Push( pResult );
+	RELEASE( Val );
 }
 
 void CqShaderVM::SO_opposite()
@@ -861,6 +876,7 @@ void CqShaderVM::SO_opposite()
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
 	m_pEnv->SO_opposite( Val, pV, pResult );
 	Push( pResult );
+	RELEASE( Val );
 }
 
 void CqShaderVM::SO_fcellnoise1()
@@ -1083,6 +1099,9 @@ void CqShaderVM::SO_mcomp()
 	RESULT(type_float, __fVarying?class_varying:class_uniform);
 	OpCOMPM( A, B, C, pResult, m_pEnv->RunningState() );
 	Push( pResult );
+	RELEASE( C );
+	RELEASE( B );
+	RELEASE( A );
 }
 
 void CqShaderVM::SO_setmcomp()
@@ -1200,7 +1219,7 @@ void CqShaderVM::SO_external()
 
 	IqShaderData **arg_data = new IqShaderData*[pCall->arg_types.size()];
 	for (int x = 0 ; x < pCall->arg_types.size();x++){
-		arg_data[x] = POP;
+		arg_data[x] = POP.m_Data;
 	};
 
 	m_pEnv->SO_external(pCall->method, pCall->initData, pResult, this, pCall->arg_types.size(),arg_data);

@@ -32,35 +32,25 @@
 
 START_NAMESPACE( Aqsis )
 
-std::deque<CqShaderVariableUniformFloat>	CqShaderStack::m_aUFPool;
-// Integer
-std::deque<CqShaderVariableUniformPoint>	CqShaderStack::m_aUPPool;
-std::deque<CqShaderVariableUniformString>	CqShaderStack::m_aUSPool;
-std::deque<CqShaderVariableUniformColor>	CqShaderStack::m_aUCPool;
-// Triple
-// hPoint
-std::deque<CqShaderVariableUniformNormal>	CqShaderStack::m_aUNPool;
-std::deque<CqShaderVariableUniformVector>	CqShaderStack::m_aUVPool;
-// Void
-std::deque<CqShaderVariableUniformMatrix>	CqShaderStack::m_aUMPool;
-// SixteenTuple
-
-std::deque<CqShaderVariableVaryingFloat>	CqShaderStack::m_aVFPool;
-// Integer
-std::deque<CqShaderVariableVaryingPoint>	CqShaderStack::m_aVPPool;
-std::deque<CqShaderVariableVaryingString>	CqShaderStack::m_aVSPool;
-std::deque<CqShaderVariableVaryingColor>	CqShaderStack::m_aVCPool;
-// Triple
-// hPoint
-std::deque<CqShaderVariableVaryingNormal>	CqShaderStack::m_aVNPool;
-std::deque<CqShaderVariableVaryingVector>	CqShaderStack::m_aVVPool;
-// Void
-std::deque<CqShaderVariableVaryingMatrix>	CqShaderStack::m_aVMPool;
-
-TqInt	CqShaderStack::m_iUPoolTops[ type_last ];
-TqInt	CqShaderStack::m_iVPoolTops[ type_last ];
 TqInt   CqShaderStack::m_samples = 18;
 TqInt   CqShaderStack::m_maxsamples = 0;
+
+std::deque<CqShaderVariableUniformFloat*>			CqShaderStack::m_UFPool;
+std::deque<CqShaderVariableUniformPoint*>			CqShaderStack::m_UPPool;
+std::deque<CqShaderVariableUniformString*>			CqShaderStack::m_USPool;
+std::deque<CqShaderVariableUniformColor*>			CqShaderStack::m_UCPool;
+std::deque<CqShaderVariableUniformNormal*>			CqShaderStack::m_UNPool;
+std::deque<CqShaderVariableUniformVector*>			CqShaderStack::m_UVPool;
+std::deque<CqShaderVariableUniformMatrix*>			CqShaderStack::m_UMPool;
+
+std::deque<CqShaderVariableVaryingFloat*>			CqShaderStack::m_VFPool;
+std::deque<CqShaderVariableVaryingPoint*>			CqShaderStack::m_VPPool;
+std::deque<CqShaderVariableVaryingString*>			CqShaderStack::m_VSPool;
+std::deque<CqShaderVariableVaryingColor*>			CqShaderStack::m_VCPool;
+std::deque<CqShaderVariableVaryingNormal*>			CqShaderStack::m_VNPool;
+std::deque<CqShaderVariableVaryingVector*>			CqShaderStack::m_VVPool;
+std::deque<CqShaderVariableVaryingMatrix*>			CqShaderStack::m_VMPool;
+
 
 //----------------------------------------------------------------------
 /** Returns the next shaderstack variable and allocates more if 
@@ -71,178 +61,268 @@ IqShaderData* CqShaderStack::GetNextTemp( EqVariableType type, EqVariableClass _
 {
 	switch ( type )
 	{
-	case type_point:
-	if ( _class == class_uniform )
-	{
-		while ( m_iUPoolTops[ type_point ] >= m_aUPPool.size() )
-			m_aUPPool.resize( m_aUPPool.size() + 1 );
-		return ( &m_aUPPool[ m_iUPoolTops[ type_point ] ] );
-	}
-	else
-	{
-		while ( m_iVPoolTops[ type_point ] >= m_aVPPool.size() )
-			m_aVPPool.resize( m_aVPPool.size() + 1 );
-		return ( &m_aVPPool[ m_iVPoolTops[ type_point ] ] );
-	}
-
-	case type_string:
-	if ( _class == class_uniform )
-	{
-		while ( m_iUPoolTops[ type_string ] >= m_aUSPool.size() )
-			m_aUSPool.resize( m_aUSPool.size() + 1 );
-		return ( &m_aUSPool[ m_iUPoolTops[ type_string ] ] );
-	}
-	else
-	{
-		while ( m_iVPoolTops[ type_string ] >= m_aVSPool.size() )
-			m_aVSPool.resize( m_aVSPool.size() + 1 );
-		return ( &m_aVSPool[ m_iVPoolTops[ type_string ] ] );
-	}
-
-	case type_color:
-	if ( _class == class_uniform )
-	{
-		while ( m_iUPoolTops[ type_color ] >= m_aUCPool.size() )
-			m_aUCPool.resize( m_aUCPool.size() + 1 );
-		return ( &m_aUCPool[ m_iUPoolTops[ type_color ] ] );
-	}
-	else
-	{
-		while ( m_iVPoolTops[ type_color ] >= m_aVCPool.size() )
-			m_aVCPool.resize( m_aVCPool.size() + 1 );
-		return ( &m_aVCPool[ m_iVPoolTops[ type_color ] ] );
-	}
-
-	case type_normal:
-	if ( _class == class_uniform )
-	{
-		while ( m_iUPoolTops[ type_normal ] >= m_aUNPool.size() )
-			m_aUNPool.resize( m_aUNPool.size() + 1 );
-		return ( &m_aUNPool[ m_iUPoolTops[ type_normal ] ] );
-	}
-	else
-	{
-		while ( m_iVPoolTops[ type_normal ] >= m_aVNPool.size() )
-			m_aVNPool.resize( m_aVNPool.size() + 1 );
-		return ( &m_aVNPool[ m_iVPoolTops[ type_normal ] ] );
-	}
-
-	case type_vector:
-	if ( _class == class_uniform )
-	{
-		while ( m_iUPoolTops[ type_vector ] >= m_aUVPool.size() )
-			m_aUVPool.resize( m_aUVPool.size() + 1 );
-		return ( &m_aUVPool[ m_iUPoolTops[ type_vector ] ] );
-	}
-	else
-	{
-		while ( m_iVPoolTops[ type_vector ] >= m_aVVPool.size() )
-			m_aVVPool.resize( m_aVVPool.size() + 1 );
-		return ( &m_aVVPool[ m_iVPoolTops[ type_vector ] ] );
-	}
-
-	case type_matrix:
-	if ( _class == class_uniform )
-	{
-		while ( m_iUPoolTops[ type_matrix ] >= m_aUMPool.size() )
-			m_aUMPool.resize( m_aUMPool.size() + 1 );
-		return ( &m_aUMPool[ m_iUPoolTops[ type_matrix ] ] );
-	}
-	else
-	{
-		while ( m_iVPoolTops[ type_matrix ] >= m_aVMPool.size() )
-			m_aVMPool.resize( m_aVMPool.size() + 1 );
-		return ( &m_aVMPool[ m_iVPoolTops[ type_matrix ] ] );
-	}
-
-	default:
-	if ( type == type_float )
-	{
-		if ( _class == class_uniform )
+		case type_float:
 		{
-			while ( m_iUPoolTops[ type_float ] >= m_aUFPool.size() )
-				m_aUFPool.resize( m_aUFPool.size() + 1 );
-			return ( &m_aUFPool[ m_iUPoolTops[ type_float ] ] );
+			if ( _class == class_uniform )
+			{
+				if( m_UFPool.empty() )
+					return( new CqShaderVariableUniformFloat() );
+				else
+				{
+					IqShaderData* ret = m_UFPool.front();
+					m_UFPool.pop_front();
+					return( ret );
+				}
+			}
+			else
+			{
+				if( m_VFPool.empty() )
+					return( new CqShaderVariableVaryingFloat() );
+				else
+				{
+					IqShaderData* ret = m_VFPool.front();
+					m_VFPool.pop_front();
+					return( ret );
+				}
+			}
 		}
-		else
+
+		case type_point:
 		{
-			while ( m_iVPoolTops[ type_float ] >= m_aVFPool.size() )
-				m_aVFPool.resize( m_aVFPool.size() + 1 );
-			return ( &m_aVFPool[ m_iVPoolTops[ type_float ] ] );
+			if ( _class == class_uniform )
+			{
+				if( m_UPPool.empty() )
+					return( new CqShaderVariableUniformPoint() );
+				else
+				{
+					IqShaderData* ret = m_UPPool.front();
+					m_UPPool.pop_front();
+					return( ret );
+				}
+			}
+			else
+			{
+				if( m_VPPool.empty() )
+					return( new CqShaderVariableVaryingPoint() );
+				else
+				{
+					IqShaderData* ret = m_VPPool.front();
+					m_VPPool.pop_front();
+					return( ret );
+				}
+			}
+		}
+
+		case type_string:
+		{
+			if ( _class == class_uniform )
+			{
+				if( m_USPool.empty() )
+					return( new CqShaderVariableUniformString() );
+				else
+				{
+					IqShaderData* ret = m_USPool.front();
+					m_USPool.pop_front();
+					return( ret );
+				}
+			}
+			else
+			{
+				if( m_VSPool.empty() )
+					return( new CqShaderVariableVaryingString() );
+				else
+				{
+					IqShaderData* ret = m_VSPool.front();
+					m_VSPool.pop_front();
+					return( ret );
+				}
+			}
+		}
+
+		case type_color:
+		{
+			if ( _class == class_uniform )
+			{
+				if( m_UCPool.empty() )
+					return( new CqShaderVariableUniformColor() );
+				else
+				{
+					IqShaderData* ret = m_UCPool.front();
+					m_UCPool.pop_front();
+					return( ret );
+				}
+			}
+			else
+			{
+				if( m_VCPool.empty() )
+					return( new CqShaderVariableVaryingColor() );
+				else
+				{
+					IqShaderData* ret = m_VCPool.front();
+					m_VCPool.pop_front();
+					return( ret );
+				}
+			}
+		}
+
+		case type_normal:
+		{
+			if ( _class == class_uniform )
+			{
+				if( m_UNPool.empty() )
+					return( new CqShaderVariableUniformNormal() );
+				else
+				{
+					IqShaderData* ret = m_UNPool.front();
+					m_UNPool.pop_front();
+					return( ret );
+				}
+			}
+			else
+			{
+				if( m_VNPool.empty() )
+					return( new CqShaderVariableVaryingNormal() );
+				else
+				{
+					IqShaderData* ret = m_VNPool.front();
+					m_VNPool.pop_front();
+					return( ret );
+				}
+			}
+		}
+
+		case type_vector:
+		{
+			if ( _class == class_uniform )
+			{
+				if( m_UVPool.empty() )
+					return( new CqShaderVariableUniformVector() );
+				else
+				{
+					IqShaderData* ret = m_UVPool.front();
+					m_UVPool.pop_front();
+					return( ret );
+				}
+			}
+			else
+			{
+				if( m_VVPool.empty() )
+					return( new CqShaderVariableVaryingVector() );
+				else
+				{
+					IqShaderData* ret = m_VVPool.front();
+					m_VVPool.pop_front();
+					return( ret );
+				}
+			}
+		}
+
+		case type_matrix:
+		{
+			if ( _class == class_uniform )
+			{
+				if( m_UMPool.empty() )
+					return( new CqShaderVariableUniformMatrix() );
+				else
+				{
+					IqShaderData* ret = m_UMPool.front();
+					m_UMPool.pop_front();
+					return( ret );
+				}
+			}
+			else
+			{
+				if( m_VMPool.empty() )
+					return( new CqShaderVariableVaryingMatrix() );
+				else
+				{
+					IqShaderData* ret = m_VMPool.front();
+					m_VMPool.pop_front();
+					return( ret );
+				}
+			}
 		}
 	}
-	return NULL;
-	}
+	assert( TqFalse );
+	return( NULL );
 }
 
 //----------------------------------------------------------------------
-/** Push a new shader variable reference onto the stack.
+/** Release the stack value passed in, if it is a temporary, return it to the bucket.
+ * \param s Stack entry to be released.
  */
-void	CqShaderStack::Push( IqShaderData* pv )
+void CqShaderStack::Release( SqStackEntry s )
 {
-	while ( m_iTop >= m_Stack.size() )
+	if( s.m_IsTemp )
 	{
-		TqInt n = m_Stack.size() + 1;
-		m_Stack.resize( n );
-		m_Stack.reserve( n );
+		switch( s.m_Data->Type() )
+		{
+			case type_float:
+			{
+				if ( s.m_Data->Class() == class_uniform )
+					m_UFPool.push_back(reinterpret_cast<CqShaderVariableUniformFloat*>(s.m_Data) );
+				else
+					m_VFPool.push_back(reinterpret_cast<CqShaderVariableVaryingFloat*>(s.m_Data) );
+				break;
+			}
+
+			case type_point:
+			{
+				if ( s.m_Data->Class() == class_uniform )
+					m_UPPool.push_back(reinterpret_cast<CqShaderVariableUniformPoint*>(s.m_Data) );
+				else
+					m_VPPool.push_back(reinterpret_cast<CqShaderVariableVaryingPoint*>(s.m_Data) );
+				break;
+			}
+
+			case type_string:
+			{
+				if ( s.m_Data->Class() == class_uniform )
+					m_USPool.push_back(reinterpret_cast<CqShaderVariableUniformString*>(s.m_Data) );
+				else
+					m_VSPool.push_back(reinterpret_cast<CqShaderVariableVaryingString*>(s.m_Data) );
+				break;
+			}
+
+			case type_color:
+			{
+				if ( s.m_Data->Class() == class_uniform )
+					m_UCPool.push_back(reinterpret_cast<CqShaderVariableUniformColor*>(s.m_Data) );
+				else
+					m_VCPool.push_back(reinterpret_cast<CqShaderVariableVaryingColor*>(s.m_Data) );
+				break;
+			}
+
+			case type_normal:
+			{
+				if ( s.m_Data->Class() == class_uniform )
+					m_UNPool.push_back(reinterpret_cast<CqShaderVariableUniformNormal*>(s.m_Data) );
+				else
+					m_VNPool.push_back(reinterpret_cast<CqShaderVariableVaryingNormal*>(s.m_Data) );
+				break;
+			}
+
+			case type_vector:
+			{
+				if ( s.m_Data->Class() == class_uniform )
+					m_UVPool.push_back(reinterpret_cast<CqShaderVariableUniformVector*>(s.m_Data) );
+				else
+					m_VVPool.push_back(reinterpret_cast<CqShaderVariableVaryingVector*>(s.m_Data) );
+				break;
+			}
+
+			case type_matrix:
+			{
+				if ( s.m_Data->Class() == class_uniform )
+					m_UMPool.push_back(reinterpret_cast<CqShaderVariableUniformMatrix*>(s.m_Data) );
+				else
+					m_VMPool.push_back(reinterpret_cast<CqShaderVariableVaryingMatrix*>(s.m_Data) );
+				break;
+			}
+		}
 	}
-
-	m_Stack[ m_iTop ] = pv;
-	m_iTop ++;
-	if ( pv->Class() == class_uniform )
-		m_iUPoolTops[ pv->Type() ] ++;
-	else
-		m_iVPoolTops[ pv->Type() ] ++;
-	m_maxsamples = MAX(m_maxsamples, m_iTop);
 }
 
-//----------------------------------------------------------------------
-/** Pop the top stack entry.
- * \param f Boolean value to update if this is varying. If not varying, leaves f unaltered.
- * \return Reference to the top stack entry.
- */
-IqShaderData* CqShaderStack::Pop( TqBool& f )
-{
-	if ( m_iTop ) m_iTop--;
-
-	IqShaderData* pVal = m_Stack[ m_iTop ];
-
-	f = pVal->Size() > 1 || f;
-
-	if ( pVal->Class() == class_uniform )
-	{
-		m_iUPoolTops[ pVal->Type() ] --;
-		assert( m_iUPoolTops[ pVal->Type() ] >= 0 );
-	}
-	else
-	{
-		m_iVPoolTops[ pVal->Type() ] --;
-		assert( m_iVPoolTops[ pVal->Type() ] >= 0 );
-	}
-
-	return ( pVal );
-}
-
-//----------------------------------------------------------------------
-/** Duplicate the top stack entry.
- */
-void	CqShaderStack::Dup()
-{
-	TqInt iTop = m_iTop-1;
-
-	IqShaderData* s = GetNextTemp( m_Stack[ iTop ] ->Type(), m_Stack[ iTop ] ->Class() );
-	s->SetValueFromVariable( m_Stack[ iTop ] );
-	Push( s );
-}
-
-//----------------------------------------------------------------------
-/** Drop the top stack entry.
- */
-void	CqShaderStack::Drop()
-{
-	TqBool f = TqFalse;
-	Pop( f );
-}
 
 //----------------------------------------------------------------------
 /** Prints the max. depth stack for now to stdout.

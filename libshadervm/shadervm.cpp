@@ -1523,5 +1523,93 @@ IqShaderData * CqShaderVM::GetShaderVarAt(int varIndex)
 	return result;
 }
 
+
+//---------------------------------------------------------------------
+/**
+ *  Shutdown the engine, releasing any static data it may hold on to during it's lifetime..
+ */
+
+void CqShaderVM::ShutdownShaderEngine()
+{
+	// Free any temporary variables in the buckets.
+	while( !m_UFPool.empty() )
+	{
+		delete(m_UFPool.front());
+		m_UFPool.pop_front();
+	}
+	while( !m_VFPool.empty() )
+	{
+		delete(m_VFPool.front());
+		m_VFPool.pop_front();
+	}
+
+	while( !m_UPPool.empty() )
+	{
+		delete(m_UPPool.front());
+		m_UPPool.pop_front();
+	}
+	while( !m_VPPool.empty() )
+	{
+		delete(m_VPPool.front());
+		m_VPPool.pop_front();
+	}
+
+	while( !m_USPool.empty() )
+	{
+		delete(m_USPool.front());
+		m_USPool.pop_front();
+	}
+	while( !m_VSPool.empty() )
+	{
+		delete(m_VSPool.front());
+		m_VSPool.pop_front();
+	}
+
+	while( !m_UCPool.empty() )
+	{
+		delete(m_UCPool.front());
+		m_UCPool.pop_front();
+	}
+	while( !m_VCPool.empty() )
+	{
+		delete(m_VCPool.front());
+		m_VCPool.pop_front();
+	}
+
+	while( !m_UNPool.empty() )
+	{
+		delete(m_UNPool.front());
+		m_UNPool.pop_front();
+	}
+	while( !m_VNPool.empty() )
+	{
+		delete(m_VNPool.front());
+		m_VNPool.pop_front();
+	}
+
+	while( !m_UVPool.empty() )
+	{
+		delete(m_UVPool.front());
+		m_UVPool.pop_front();
+	}
+	while( !m_VVPool.empty() )
+	{
+		delete(m_VVPool.front());
+		m_VVPool.pop_front();
+	}
+
+	while( !m_UMPool.empty() )
+	{
+		delete(m_UMPool.front());
+		m_UMPool.pop_front();
+	}
+	while( !m_VMPool.empty() )
+	{
+		delete(m_VMPool.front());
+		m_VMPool.pop_front();
+	}
+}
+
+
 END_NAMESPACE( Aqsis )
 //---------------------------------------------------------------------

@@ -321,6 +321,9 @@ RtVoid	RiEnd()
 		pL = Lightsource_stack.pFirst();
 	}
 
+	// Shutdown the shaderVM.
+	CqShaderVM::ShutdownShaderEngine();
+
 	// Delete the renderer
 	delete( QGetRenderContext() );
 	QSetRenderContext( 0 );
