@@ -386,9 +386,9 @@ class CqMicroPolygonStatic : public CqMicroPolygonBase, public CqMicroPolygonSta
 class CqMicroPolygonMotion : public CqMicroPolygonBase, public CqMotionSpec<CqMicroPolygonStaticBase>
 {
 	public:
-					CqMicroPolygonMotion() : CqMicroPolygonBase(), CqMotionSpec<CqMicroPolygonStaticBase>(CqMicroPolygonStaticBase())
+					CqMicroPolygonMotion() : CqMicroPolygonBase(), CqMotionSpec<CqMicroPolygonStaticBase>(CqMicroPolygonStaticBase()), m_BoundReady(TqFalse)
 										{ }
-					CqMicroPolygonMotion(const CqMicroPolygonMotion& From) : CqMicroPolygonBase(From), CqMotionSpec<CqMicroPolygonStaticBase>(From)
+					CqMicroPolygonMotion(const CqMicroPolygonMotion& From) : CqMicroPolygonBase(From), CqMotionSpec<CqMicroPolygonStaticBase>(From), m_BoundReady(TqFalse)
 										{
 											*this=From;
 										}
@@ -413,11 +413,14 @@ class CqMicroPolygonMotion : public CqMicroPolygonBase, public CqMotionSpec<CqMi
 	virtual const CqBound&	GetTotalBound() const	
 											{return(m_Bound);}
 	virtual	TqInt		cSubBounds()		{
-												BuildBoundList();
+												if(!m_BoundReady)
+													BuildBoundList();
 												return(m_BoundList.Size());
 											}
 	virtual	CqBound&	SubBound(TqInt iIndex, TqFloat& time) 
 											{
+												if(!m_BoundReady)
+													BuildBoundList();
 												assert(iIndex<m_BoundList.Size());
 												time=m_BoundList.GetTime(iIndex);
 												return(*m_BoundList.GetBound(iIndex));
@@ -445,6 +448,7 @@ class CqMicroPolygonMotion : public CqMicroPolygonBase, public CqMotionSpec<CqMi
 	private:
 			CqBound		m_Bound;		///< Stored bound.
 			CqBoundList	m_BoundList;	///< List of bounds to get a tighter fit.
+			TqBool		m_BoundReady;	///< Flag indicating the boundary has been initialised.
 };
 
 

@@ -805,6 +805,7 @@ void CqMicroPolygonMotion::BuildBoundList()
 		start = end;
 		startTime = endTime;
 	}
+	m_BoundReady=TqTrue;
 }
 	
 
