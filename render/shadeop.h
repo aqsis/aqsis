@@ -59,15 +59,15 @@ typedef struct _STRING_DESC {
 #define SHADEOP_TABLE(opname) struct SqShadeOp EXPORT  opname ## _shadeops [] 
 
 // Utility macro for declaring a shadeop method
-#define SHADEOP(method) EXTERN_C int EXPORT method (void *initdata, int argc, void **argv)
+#define SHADEOP(method) EXTERN_C EXPORT int method (void *initdata, int argc, void **argv)
 
 // Utility macro for declaring a shadeop initilaisation function
-#define SHADEOP_INIT(initfunc) EXTERN_C  void* EXPORT initfunc (int ctx, void *texturectx)
+#define SHADEOP_INIT(initfunc) EXTERN_C EXPORT void* initfunc (int ctx, void *texturectx)
 
 // Utility macro for declaring a shadeop shutdown function
-#define SHADEOP_SHUTDOWN(shutdownfunc) EXTERN_C void EXPORT shutdownfunc (void *initdata)
+#define SHADEOP_SHUTDOWN(shutdownfunc) EXTERN_C EXPORT void shutdownfunc (void *initdata)
 // alternative name for the above seen in bbox.c in the RMR
-#define SHADEOP_CLEANUP(shutdownfunc) EXTERN_C void EXPORT shutdownfunc (void *initdata)
+#define SHADEOP_CLEANUP(shutdownfunc) EXTERN_C EXPORT void shutdownfunc (void *initdata)
 
 // We declare these here for access from shaderexecenv
 typedef void (*DSOMethod)(void*,int,void**);
