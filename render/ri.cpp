@@ -44,6 +44,8 @@
 #include	"trimcurve.h"
 #include	"genpoly.h"
 #include	"points.h"
+#include	"rifile.h"
+#include	"librib2ri.h"
 #include        "plugins.h"
 #ifndef    AQSIS_SYSTEM_WIN32
 #include        "unistd.h"
@@ -4715,12 +4717,16 @@ RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 
 RtVoid RiReadArchive(RtToken name, RtArchiveCallback callback, ...)
 {
-	/***
-FILE *file;
-        if ((file = fopen(name, "rb")) != NULL) {
+	CqRiFile	fileArchive( name, "texture" );
+	if ( !fileArchive.IsValid() )
+	{		
+		CqString strRealName( fileArchive.strRealName() );
+		fileArchive.Close();
+		FILE *file;
+		if ((file = fopen(strRealName.c_str(), "rb")) != NULL)
+		{
 			librib2ri::Engine renderengine;
 			librib::Parse( file, name, renderengine, std::cerr );
-			
 		}
-		***/
+	}
 }
