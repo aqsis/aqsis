@@ -77,7 +77,7 @@ public:
 	}
 
 	void		Prepare(TqInt cVerts);
-	CqLath*		AddFacet(TqInt cVerts, TqInt* pIndices);
+	CqLath*		AddFacet(TqInt cVerts, TqInt* pIndices, TqInt iFVIndex);
 	TqBool		Finalise();
 	void		SubdivideFace(CqLath* pFace, std::vector<CqLath*>& apSubFaces);
 	TqBool		CanUsePatch( CqLath* pFace );
@@ -122,7 +122,7 @@ public:
 					return( 0.0f );
 				}
 
-	TqInt		AddVertex(CqLath* pVertex);
+	void		AddVertex(CqLath* pVertex, TqInt& iVIndex, TqInt& iFVIndex);
 	template<class TypeA, class TypeB>
 	void		CreateVertex(CqParameterTyped<TypeA, TypeB>* pParam, CqLath* pVertex, TqInt iIndex)
 				{
@@ -131,8 +131,15 @@ public:
 					TypeA R = TypeA(0.0f);
 					TqInt n;
 					
-					if(pParam->Class() == class_vertex)
+					if(pParam->Class() == class_vertex || pParam->Class() == class_facevarying)
 					{
+						// Get a pointer to the appropriate index accessor function on CqLath based on class.
+						TqInt (CqLath::*IndexFunction)() const;
+						if( pParam->Class() == class_vertex )
+							IndexFunction = &CqLath::VertexIndex;
+						else
+							IndexFunction = &CqLath::FaceVertexIndex;
+
 						// Determine if we have a boundary vertex.
 						if( pVertex->isBoundaryVertex() )
 						{
@@ -145,7 +152,7 @@ public:
 							if( apQve.size() == 2 )
 							{
 								// Yes, boundary with valence 2 is corner.
-								pParam->pValue( iIndex )[0] = pParam->pValue( pVertex->VertexIndex() )[0];
+								pParam->pValue( iIndex )[0] = pParam->pValue( (pVertex->*IndexFunction)() )[0];
 							}
 							else
 							{
@@ -161,17 +168,17 @@ public:
 									// Only consider the boundary edges.
 									if( NULL == (*iE)->ec() )
 									{
-										if( (*iE)->VertexIndex() == pVertex->VertexIndex() )
-											R += pParam->pValue( (*iE)->ccf()->VertexIndex() )[0];
+										if( (*iE)->VertexIndex() == (pVertex->*IndexFunction)() )
+											R += pParam->pValue( ((*iE)->ccf()->*IndexFunction)() )[0];
 										else
-											R += pParam->pValue( (*iE)->VertexIndex() )[0];
+											R += pParam->pValue( ((*iE)->*IndexFunction)() )[0];
 										cBoundaryEdges++;
 									}
 								}
 								assert( cBoundaryEdges == 2 );
 								
 								// Get the current vertex;
-								S = pParam->pValue( pVertex->VertexIndex() )[0];
+								S = pParam->pValue( (pVertex->*IndexFunction)() )[0];
 								pParam->pValue( iIndex )[0] = static_cast<TypeA>( ( R + ( S * 6.0f ) ) / 8.0f );
 							}
 						}
@@ -180,7 +187,7 @@ public:
 							// Check if a sharp corner vertex.
 							if( CornerSharpness( pVertex ) > 0.0f )
 							{
-								pParam->pValue( iIndex )[0] = pParam->pValue( pVertex->VertexIndex() )[0];
+								pParam->pValue( iIndex )[0] = pParam->pValue( (pVertex->*IndexFunction)() )[0];
 							}
 							else
 							{
@@ -246,7 +253,7 @@ public:
 									std::vector<CqLath*>::iterator iV;
 									TypeA Val = TypeA(0.0f);
 									for( iV = aQfv.begin(); iV != aQfv.end(); iV++ )
-										Val += pParam->pValue( (*iV)->VertexIndex() )[0];
+										Val += pParam->pValue( ((*iV)->*IndexFunction)() )[0];
 									Val = static_cast<TypeA>( Val / static_cast<TqFloat>( aQfv.size() ) );
 									Q += Val;
 								}
@@ -254,12 +261,12 @@ public:
 								Q /= n;
 
 								// Get the midpoints of the surrounding edges
-								TypeA A = pParam->pValue( pVertex->VertexIndex() )[0];
+								TypeA A = pParam->pValue( (pVertex->*IndexFunction)() )[0];
 								TypeA B = TypeA(0.0f);
 								std::vector<CqLath*>::iterator iE;
 								for( iE = aQve.begin(); iE != aQve.end(); iE++ )
 								{
-									B = pParam->pValue( (*iE)->ccf()->VertexIndex() )[0];
+									B = pParam->pValue( ((*iE)->ccf()->*IndexFunction)() )[0];
 									R += static_cast<TypeA>( (A+B)/2.0f );
 								}
 								R = static_cast<TypeA>( R * 2.0f );
@@ -267,7 +274,7 @@ public:
 								R /= n;
 
 								// Get the current vertex;
-								S = pParam->pValue( pVertex->VertexIndex() )[0];
+								S = pParam->pValue( (pVertex->*IndexFunction)() )[0];
 								S = static_cast<TypeA>( S * static_cast<TqFloat>(n-3) );
 								S /= n;
 
@@ -278,15 +285,15 @@ public:
 								{
 									// Crease
 									// Get the midpoints of the surrounding 2 hardest edges
-									R = pParam->pValue(hardEdge1->ccf()->VertexIndex() )[0];
-									R = R + pParam->pValue(hardEdge2->ccf()->VertexIndex() )[0];
+									R = pParam->pValue((hardEdge1->ccf()->*IndexFunction)() )[0];
+									R = R + pParam->pValue((hardEdge2->ccf()->*IndexFunction)() )[0];
 
 									// Get the current vertex;
-									S = pParam->pValue( pVertex->VertexIndex() )[0];
+									S = pParam->pValue( (pVertex->*IndexFunction)() )[0];
 									semiSharpPos = static_cast<TypeA>( ( R + ( S * 6.0f ) ) / 8.0f );
 								}
 
-								sharpPos = pParam->pValue( pVertex->VertexIndex() )[0];
+								sharpPos = pParam->pValue( (pVertex->*IndexFunction)() )[0];
 
 								// Blend the three values together weighted by the sharpness values.
 								TypeA Pos;
@@ -304,7 +311,7 @@ public:
 						pParam->pValue( iIndex )[0] = pParam->pValue( pVertex->VertexIndex() )[0];
 					}
 				}
-	TqInt		AddEdgeVertex(CqLath* pEdge);
+	void		AddEdgeVertex(CqLath* pEdge, TqInt& iVIndex, TqInt& iFVIndex);
 	template<class TypeA, class TypeB>
 	void		CreateEdgeVertex(CqParameterTyped<TypeA, TypeB>* pParam, CqLath* pEdge, TqInt iIndex)
 				{
@@ -312,8 +319,15 @@ public:
 					TypeA B = TypeA(0.0f);
 					TypeA C = TypeA(0.0f);
 
-					if(pParam->Class() == class_vertex)
+					if(pParam->Class() == class_vertex || pParam->Class() == class_facevarying)
 					{
+						// Get a pointer to the appropriate index accessor function on CqLath based on class.
+						TqInt (CqLath::*IndexFunction)() const;
+						if( pParam->Class() == class_vertex )
+							IndexFunction = &CqLath::VertexIndex;
+						else
+							IndexFunction = &CqLath::FaceVertexIndex;
+
 						if( NULL != pEdge->ec() )
 						{
 							// Edge point is the average of the centrepoint of the original edge and the
@@ -328,14 +342,14 @@ public:
 								std::vector<CqLath*>::iterator iV;
 								TypeA Val = TypeA(0.0f);
 								for( iV = aQfv.begin(); iV != aQfv.end(); iV++ )
-									Val += pParam->pValue( (*iV)->VertexIndex() )[0];
+									Val += pParam->pValue( ((*iV)->*IndexFunction)() )[0];
 								Val = static_cast<TypeA>( Val / static_cast<TqFloat>( aQfv.size() ) );
 								C += Val;
 							}
 							C = static_cast<TypeA>( C / static_cast<TqFloat>(aQef.size()) );
 
-							A = pParam->pValue( pEdge->VertexIndex() )[0];
-							B = pParam->pValue( pEdge->ccf()->VertexIndex() )[0];
+							A = pParam->pValue( (pEdge->*IndexFunction)() )[0];
+							B = pParam->pValue( (pEdge->ccf()->*IndexFunction)() )[0];
 
 							float h = EdgeSharpness( pEdge );
 							A = static_cast<TypeA>( ((1.0f+h)*(A+B)) / 2.0f );
@@ -343,8 +357,8 @@ public:
 						}
 						else
 						{
-							A = pParam->pValue( pEdge->VertexIndex() )[0];
-							B = pParam->pValue( pEdge->ccf()->VertexIndex() )[0];
+							A = pParam->pValue( (pEdge->*IndexFunction)() )[0];
+							B = pParam->pValue( (pEdge->ccf()->*IndexFunction)() )[0];
 							A = static_cast<TypeA>( (A+B)/2.0f );
 						}
 					}
@@ -356,17 +370,27 @@ public:
 					}
 					pParam->pValue( iIndex )[0] = A;
 				}
-	TqInt		AddFaceVertex(CqLath* pFace);
+	void		AddFaceVertex(CqLath* pFace, TqInt& iVIndex, TqInt& iFVIndex);
 	template<class TypeA, class TypeB>
 	void		CreateFaceVertex(CqParameterTyped<TypeA, TypeB>* pParam, CqLath* pFace, TqInt iIndex)
 				{
+					// Get a pointer to the appropriate index accessor function on CqLath based on class.
+					TqInt (CqLath::*IndexFunction)() const;
+					if( pParam->Class() == class_vertex || pParam->Class() == class_varying)
+						IndexFunction = &CqLath::VertexIndex;
+					else
+						IndexFunction = &CqLath::FaceVertexIndex;
 					// Face point is just the average of the original faces vertices.
 					std::vector<CqLath*> aQfv;
 					pFace->Qfv(aQfv);
 					std::vector<CqLath*>::iterator iV;
 					TypeA Val = TypeA(0.0f);
 					for( iV = aQfv.begin(); iV != aQfv.end(); iV++ )
-						Val += pParam->pValue( (*iV)->VertexIndex() )[0];
+					{
+						assert( ((*iV)->*IndexFunction)() >= 0 &&
+								((*iV)->*IndexFunction)() < pParam->Size() );
+						Val += pParam->pValue( ((*iV)->*IndexFunction)() )[0];
+					}
 					Val = static_cast<TypeA>( Val / static_cast<TqFloat>( aQfv.size() ) );
 					pParam->pValue( iIndex )[0] = Val;
 				}
@@ -579,8 +603,9 @@ class CqSurfaceSubdivisionMesh : public CqSurface
 		}
 		virtual	TqUint	cFaceVarying() const
 		{
-			/// \todo Must work out what this value should be.
-			return ( 1 );
+			assert( NULL != m_pTopology );
+			assert( NULL != m_pTopology->pPoints() );
+			return ( m_pTopology->pPoints()->cFaceVarying() );
 		}
 
 	private:

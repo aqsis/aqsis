@@ -44,9 +44,9 @@ class CqLath : public CqPoolable<CqLath, 512>
 {
 public:
 	///	Constructor.
-	CqLath()	 : m_pClockwiseVertex(NULL), m_pClockwiseFacet(NULL),  m_pParentFacet(NULL), m_pChildVertex(NULL), m_pMidVertex(NULL), m_pFaceVertex(NULL), m_VertexIndex(0)
+	CqLath()	 : m_pClockwiseVertex(NULL), m_pClockwiseFacet(NULL),  m_pParentFacet(NULL), m_pChildVertex(NULL), m_pMidVertex(NULL), m_pFaceVertex(NULL), m_VertexIndex(0), m_FaceVertexIndex(0)
 				   {}
-	CqLath( TqInt iV ) : m_pClockwiseVertex(NULL), m_pClockwiseFacet(NULL),m_pParentFacet(NULL), m_pChildVertex(NULL), m_pMidVertex(NULL), m_pFaceVertex(NULL), m_VertexIndex( iV )
+	CqLath( TqInt iV, TqInt iFV ) : m_pClockwiseVertex(NULL), m_pClockwiseFacet(NULL),m_pParentFacet(NULL), m_pChildVertex(NULL), m_pMidVertex(NULL), m_pFaceVertex(NULL), m_VertexIndex( iV ), m_FaceVertexIndex( iFV )
 				   {}
 
 	///	Destructor.
@@ -63,6 +63,8 @@ public:
 
 	/// Get the index of the vertex this lath references.
 	TqInt	VertexIndex() const	{return(m_VertexIndex);}
+	/// Get the index of the vertex this lath references.
+	TqInt	FaceVertexIndex() const	{return(m_FaceVertexIndex);}
 
 	/// Set the pointer to the next lath clockwise about the vertex.
 	void		SetpClockwiseVertex(CqLath* pLath)		
@@ -83,6 +85,8 @@ public:
 
 	/// Set the index of the vertex this lath refers to.
 	void		SetVertexIndex(TqInt iV)	{m_VertexIndex=iV;}
+	/// Set the index of the face vertex this lath refers to.
+	void		SetFaceVertexIndex(TqInt iV)	{m_FaceVertexIndex=iV;}
 
 	// Basic neighbourhood operators.
 
@@ -156,6 +160,7 @@ private:
 	CqLath*	m_pFaceVertex;		///< Pointer to the point that represents the midpoint of this face at the next level.
 
 	TqInt	m_VertexIndex;
+	TqInt	m_FaceVertexIndex;
 };
 
 END_NAMESPACE( Aqsis )

@@ -4648,7 +4648,7 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 			RtInt	iP = 0;
 			for ( face = 0; face < nfaces; face++ )
 			{
-				pSubd2->AddFacet( nvertices[ face ], &vertices[ iP ] );
+				pSubd2->AddFacet( nvertices[ face ], &vertices[ iP ], iP );
 				iP += nvertices[ face ];
 			}
 			if ( pSubd2->Finalise() )

@@ -127,9 +127,10 @@ void CqSubdivision2::Prepare(TqInt cVerts)
  *
  *	@return			The index of the new point.
  */
-TqInt CqSubdivision2::AddVertex(CqLath* pVertex)
+void CqSubdivision2::AddVertex(CqLath* pVertex, TqInt& iVIndex, TqInt& iFVIndex)
 {
-	TqInt iIndex=0;
+	iVIndex=0;
+	iFVIndex=0;
 
 	std::vector<CqParameter*>::iterator iUP;
 	TqInt iTime;
@@ -138,8 +139,19 @@ TqInt CqSubdivision2::AddVertex(CqLath* pVertex)
 	{
 		for( iUP = pPoints( iTime )->aUserParams().begin(); iUP != pPoints( iTime )->aUserParams().end(); iUP++ )
 		{
-			iIndex = ( *iUP )->Size();
+			TqInt iIndex = ( *iUP )->Size();
 			( *iUP )->SetSize( iIndex+1 );
+			// Store the index in the return variable based on its type.
+			if( ( *iUP )->Class() == class_vertex || ( *iUP )->Class() == class_varying )
+			{
+				assert( iVIndex==0 || iVIndex==iIndex );
+				iVIndex = iIndex;
+			}
+			else if( ( *iUP )->Class() == class_facevarying )
+			{
+				assert( iFVIndex==0 || iFVIndex==iIndex );
+				iFVIndex = iIndex;
+			}
 
 			switch ( ( *iUP )->Type() )
 			{
@@ -205,9 +217,7 @@ TqInt CqSubdivision2::AddVertex(CqLath* pVertex)
 	}
 
 	// Resize the vertex lath 
-	m_aapVertices.resize(iIndex+1);
-
-	return(iIndex);
+	m_aapVertices.resize(iVIndex+1);
 }
 
 
@@ -219,9 +229,10 @@ TqInt CqSubdivision2::AddVertex(CqLath* pVertex)
  *
  *	@return			The index of the new point.
  */
-TqInt CqSubdivision2::AddEdgeVertex(CqLath* pVertex)
+void CqSubdivision2::AddEdgeVertex(CqLath* pVertex, TqInt& iVIndex, TqInt& iFVIndex )
 {
-	TqInt iIndex;
+	iVIndex=0;
+	iFVIndex=0;
 
 	std::vector<CqParameter*>::iterator iUP;
 	TqInt iTime;
@@ -230,8 +241,19 @@ TqInt CqSubdivision2::AddEdgeVertex(CqLath* pVertex)
 	{
 		for ( iUP = pPoints( iTime )->aUserParams().begin(); iUP != pPoints( iTime )->aUserParams().end(); iUP++ )
 		{
-			iIndex = ( *iUP )->Size();
+			TqInt iIndex = ( *iUP )->Size();
 			( *iUP )->SetSize( iIndex+1 );
+			// Store the index in the return variable based on its type.
+			if( ( *iUP )->Class() == class_vertex || ( *iUP )->Class() == class_varying )
+			{
+				assert( iVIndex==0 || iVIndex==iIndex );
+				iVIndex = iIndex;
+			}
+			else if( ( *iUP )->Class() == class_facevarying )
+			{
+				assert( iFVIndex==0 || iFVIndex==iIndex );
+				iFVIndex = iIndex;
+			}
 
 			switch ( ( *iUP )->Type() )
 			{
@@ -297,9 +319,7 @@ TqInt CqSubdivision2::AddEdgeVertex(CqLath* pVertex)
 	}
 
 	// Resize the vertex lath 
-	m_aapVertices.resize(iIndex+1);
-
-	return(iIndex);
+	m_aapVertices.resize(iVIndex+1);
 }
 
 
@@ -311,9 +331,10 @@ TqInt CqSubdivision2::AddEdgeVertex(CqLath* pVertex)
  *
  *	@return			The index of the new point.
  */
-TqInt CqSubdivision2::AddFaceVertex(CqLath* pVertex)
+void CqSubdivision2::AddFaceVertex(CqLath* pVertex, TqInt& iVIndex, TqInt& iFVIndex)
 {
-	TqInt iIndex=0;
+	iVIndex=0;
+	iFVIndex=0;
 
 	std::vector<CqParameter*>::iterator iUP;
 	TqInt iTime;
@@ -322,8 +343,19 @@ TqInt CqSubdivision2::AddFaceVertex(CqLath* pVertex)
 	{
 		for ( iUP = pPoints( iTime )->aUserParams().begin(); iUP != pPoints( iTime )->aUserParams().end(); iUP++ )
 		{
-			iIndex = ( *iUP )->Size();
+			TqInt iIndex = ( *iUP )->Size();
 			( *iUP )->SetSize( iIndex+1 );
+			// Store the index in the return variable based on its type.
+			if( ( *iUP )->Class() == class_vertex || ( *iUP )->Class() == class_varying )
+			{
+				assert( iVIndex==0 || iVIndex==iIndex );
+				iVIndex = iIndex;
+			}
+			else if( ( *iUP )->Class() == class_facevarying )
+			{
+				assert( iFVIndex==0 || iFVIndex==iIndex );
+				iFVIndex = iIndex;
+			}
 
 			switch ( ( *iUP )->Type() )
 			{
@@ -389,9 +421,7 @@ TqInt CqSubdivision2::AddFaceVertex(CqLath* pVertex)
 	}
 
 	// Resize the vertex lath 
-	m_aapVertices.resize(iIndex+1);
-
-	return(iIndex);
+	m_aapVertices.resize(iVIndex+1);
 }
 
 
@@ -410,7 +440,7 @@ TqInt CqSubdivision2::AddFaceVertex(CqLath* pVertex)
  *	@return				Pointer to one of the laths which represent this new
  *						facet in the topology structure.
  */
-CqLath* CqSubdivision2::AddFacet(TqInt cVerts, TqInt* pIndices)
+CqLath* CqSubdivision2::AddFacet(TqInt cVerts, TqInt* pIndices, TqInt iFVIndex)
 {
 	CqLath* pLastLath=NULL;
 	CqLath* pFirstLath=NULL;
@@ -419,6 +449,7 @@ CqLath* CqSubdivision2::AddFacet(TqInt cVerts, TqInt* pIndices)
 	{
 		CqLath* pNewLath = new CqLath();
 		pNewLath->SetVertexIndex(pIndices[iVert]);
+		pNewLath->SetFaceVertexIndex(iFVIndex+iVert);
 
 		if(NULL != pLastLath)
 			pNewLath->SetpClockwiseFacet(pLastLath);
@@ -578,11 +609,13 @@ void CqSubdivision2::SubdivideFace(CqLath* pFace, std::vector<CqLath*>& apSubFac
 
 	std::vector<CqLath*> aQfv;
 	std::vector<TqInt> aVertices;
+	std::vector<TqInt> aFVertices;
 
 	pFace->Qfv(aQfv);
 	TqInt n = aQfv.size();
 
 	aVertices.resize((2*n)+1);
+	aFVertices.resize((2*n)+1);
 
 	// Clear the return array for subdface indices.
 	apSubFaces.clear();
@@ -591,42 +624,52 @@ void CqSubdivision2::SubdivideFace(CqLath* pFace, std::vector<CqLath*>& apSubFac
 	TqInt i;
 
 	// Create new point for the face midpoint.
-	TqInt iVert = AddFaceVertex(pFace);
+	TqInt iVert, iFVert=-1;
+	AddFaceVertex(pFace, iVert, iFVert);
+
+	// Store the index, for later lath creation
+	aVertices[2*n] = iVert;
+	aFVertices[2*n] = iFVert;
 
 	// Create new points for the edge midpoints.
 	for(i = 0; i < n; i++)
 	{
-		TqInt iVert;
+		TqInt iVert, iFVert=-2;
 		// Create new vertices for the edge mid points.
 		if( NULL != aQfv[i]->ec() && NULL != aQfv[i]->ec()->pMidVertex() )
+		{
 			// There is already a next level vertex for this, so just setup a lath to it.
 			iVert = aQfv[i]->ec()->pMidVertex()->VertexIndex();
+			iFVert = aQfv[i]->ec()->pMidVertex()->FaceVertexIndex();
+		}
 		else
 			// Create new vertex for the edge midpoint.
-			iVert = AddEdgeVertex(aQfv[i]);
+			AddEdgeVertex(aQfv[i], iVert, iFVert);
 
 		// Store the index, for later lath creation
 		aVertices[i+n] = iVert;
+		aFVertices[i+n] = iFVert;
 	}
 
 	// Create new points for the existing vertices
 	for(i = 0; i < n; i++)
 	{
-		TqInt iVert;
+		TqInt iVert, iFVert=-3;
 		// Create new vertices for the original points.
 		if( NULL == aQfv[i]->pChildVertex() )
 			// Create a new vertex for the next level
-			iVert = AddVertex(aQfv[i]);
+			AddVertex(aQfv[i], iVert, iFVert);
 		else
+		{
 			// There is already a next level vertex for this, so just setup a lath to it.
 			iVert = aQfv[i]->pChildVertex()->VertexIndex();
+			iFVert = aQfv[i]->pChildVertex()->FaceVertexIndex();
+		}
 
 		// Store the index, for later lath creation
 		aVertices[i] = iVert;
+		aFVertices[i] = iFVert;
 	}
-
-	// Store the index, for later lath creation
-	aVertices[2*n] = iVert;
 
 	// Now create new laths for the new facets
 	std::vector<SqFaceLathList>	apFaceLaths;
@@ -635,13 +678,13 @@ void CqSubdivision2::SubdivideFace(CqLath* pFace, std::vector<CqLath*>& apSubFac
 	for( i = 0; i < n; i++ )
 	{
 		// For each facet, create 4 laths and join them in the order of the facet
-		CqLath* pLathA = apFaceLaths[i].pA = new CqLath( aVertices[i] );
+		CqLath* pLathA = apFaceLaths[i].pA = new CqLath( aVertices[i], aFVertices[i] );
 		m_apLaths.push_back(pLathA);
-		CqLath* pLathB = apFaceLaths[i].pB = new CqLath( aVertices[(modulo((i+1),n))+n] );
+		CqLath* pLathB = apFaceLaths[i].pB = new CqLath( aVertices[(modulo((i+1),n))+n], aFVertices[(modulo((i+1),n))+n] );
 		m_apLaths.push_back(pLathB);
-		CqLath* pLathC = apFaceLaths[i].pC = new CqLath( aVertices[2*n] );
+		CqLath* pLathC = apFaceLaths[i].pC = new CqLath( aVertices[2*n], aFVertices[2*n] );
 		m_apLaths.push_back(pLathC);
-		CqLath* pLathD = apFaceLaths[i].pD = new CqLath( aVertices[i+n] );
+		CqLath* pLathD = apFaceLaths[i].pD = new CqLath( aVertices[i+n], aFVertices[i+n] );
 		m_apLaths.push_back(pLathD);
 		pLathA->SetpClockwiseFacet(pLathB);
 		pLathB->SetpClockwiseFacet(pLathC);
