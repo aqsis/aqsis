@@ -50,7 +50,7 @@ private:
 ///////////////////////////////////////////////////////////
 // show_level_buf
 
-/// When attached to an output stream, prefixes every line of output with its priority (if any)
+/// When attached to an output stream, prefixes every line of output with its log-level (if any)
 class show_level_buf :
 	public std::streambuf
 {
@@ -89,6 +89,57 @@ private:
 	std::string m_buffer;
 	std::string m_last_buffer;
 	unsigned long m_duplicate_count;
+};
+
+///////////////////////////////////////////////////////////
+// reset_level_buf
+
+/// When attached to an output stream, resets the log level to "unknown" after every line of output
+class reset_level_buf :
+	public std::streambuf
+{
+public:
+	reset_level_buf(std::ostream& Stream);
+	~reset_level_buf();
+
+protected:
+	int overflow(int);
+	int sync();
+
+private:
+	std::ostream& m_stream;
+	std::streambuf* const m_streambuf;
+};
+
+///////////////////////////////////////////////////////////
+// filter_by_level_buf
+
+/// Enumerates available log levels
+typedef enum
+{
+	CRITICAL = 1,
+	ERROR = 2,
+	WARNING = 3,
+	INFO = 4,
+	DEBUG = 5
+} log_level_t;
+
+/// When attached to an output stream, filters-out messages below the given level
+class filter_by_level_buf :
+	public std::streambuf
+{
+public:
+	filter_by_level_buf(const log_level_t MinimumLevel, std::ostream& Stream);
+	~filter_by_level_buf();
+
+protected:
+	int overflow(int);
+	int sync();
+
+private:
+	std::ostream& m_stream;
+	std::streambuf* const m_streambuf;
+	const log_level_t m_minimum_level;
 };
 
 ///////////////////////////////////////////////////////////

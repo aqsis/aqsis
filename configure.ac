@@ -23,7 +23,7 @@ if test x$debug = xtrue ; then
 else
   AC_DEFINE(NDEBUG,[],"Disable C99 asserts.")
   DEBUG_FLAGS="" 
-  OPT_FLAGS="-O2"
+  OPT_FLAGS=""
 fi
   
 AM_CONDITIONAL(DEBUG, test x$debug = xtrue)
@@ -83,15 +83,6 @@ MDL_HAVE_OPENGL
 AM_CONDITIONAL(OPENGL, test x$have_glut = xyes)
 if test x$have_glut = xno ; then
 	AC_MSG_WARN([*** Could not find GLUT, glut based framebuffer devices will not be built ***]);
-fi
-
-dnl Log4CPP for loggging support
-AC_LANG_SAVE
-AC_LANG(C++)
-AM_PATH_LOG4CPP
-AC_LANG_RESTORE
-if test -z "$LOG4CPP_LIBS" ; then
-	AC_MSG_ERROR([*** Could not find Log4cpp, check it is installed, with headers, and try again ***]);
 fi
 
 dnl TIFF library

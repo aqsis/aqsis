@@ -16,6 +16,7 @@ Makefile
 
 *.positions
 
+acinclude.m4
 aclocal.m4
 depcomp
 

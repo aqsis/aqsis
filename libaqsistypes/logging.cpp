@@ -42,69 +42,39 @@ long& log_level(std::ostream& Stream)
 	return Stream.iword(log_level_index());
 }
 
-typedef enum
-{
-	EMERGENCY = 1,
-	ALERT,
-	CRITICAL,
-	ERROR,
-	WARNING,
-	NOTICE,
-	INFO,
-	DEBUG
-} log_level_t;
-
 } // namespace detail
 
 START_NAMESPACE( Aqsis )
 
 //---------------------------------------------------------------------
 
-std::ostream& emergency(std::ostream& Stream)
-{
-	detail::log_level(Stream) = detail::EMERGENCY;
-	return Stream;
-}
-
-std::ostream& alert(std::ostream& Stream)
-{
-	detail::log_level(Stream) = detail::ALERT;
-	return Stream;
-}
-
 std::ostream& critical(std::ostream& Stream)
 {
-	detail::log_level(Stream) = detail::CRITICAL;
+	detail::log_level(Stream) = CRITICAL;
 	return Stream;
 }
 
 std::ostream& error(std::ostream& Stream)
 {
-	detail::log_level(Stream) = detail::ERROR;
+	detail::log_level(Stream) = ERROR;
 	return Stream;
 }
 
 std::ostream& warning(std::ostream& Stream)
 {
-	detail::log_level(Stream) = detail::WARNING;
-	return Stream;
-}
-
-std::ostream& notice(std::ostream& Stream)
-{
-	detail::log_level(Stream) = detail::NOTICE;
+	detail::log_level(Stream) = WARNING;
 	return Stream;
 }
 
 std::ostream& info(std::ostream& Stream)
 {
-	detail::log_level(Stream) = detail::INFO;
+	detail::log_level(Stream) = INFO;
 	return Stream;
 }
 
 std::ostream& debug(std::ostream& Stream)
 {
-	detail::log_level(Stream) = detail::DEBUG;
+	detail::log_level(Stream) = DEBUG;
 	return Stream;
 }
 
@@ -185,28 +155,19 @@ int show_level_buf::overflow(int c)
 			std::string buffer;	
 			switch(detail::log_level(m_stream))
 				{
-					case detail::EMERGENCY:
-						buffer = "EMERGENCY: ";
-						break;
-					case detail::ALERT:
-						buffer = "ALERT: ";
-						break;
-					case detail::CRITICAL:
+					case CRITICAL:
 						buffer = "CRITICAL: ";
 						break;
-					case detail::ERROR:
+					case ERROR:
 						buffer = "ERROR: ";
 						break;
-					case detail::WARNING:
+					case WARNING:
 						buffer = "WARNING: ";
 						break;
-					case detail::NOTICE:
-						buffer = "NOTICE: ";
-						break;
-					case detail::INFO:
+					case INFO:
 						buffer = "INFO: ";
 						break;
-					case detail::DEBUG:
+					case DEBUG:
 						buffer = "DEBUG: ";
 						break;
 				}
@@ -224,6 +185,67 @@ int show_level_buf::overflow(int c)
 }
 
 int show_level_buf::sync()
+{
+	m_streambuf->pubsync();
+	return 0;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+// reset_level_buf
+
+reset_level_buf::reset_level_buf(std::ostream& Stream) :
+	m_stream(Stream),
+	m_streambuf(Stream.rdbuf())
+{
+	setp(0, 0);
+	m_stream.rdbuf(this);
+}
+
+reset_level_buf::~reset_level_buf()
+{
+	m_stream.rdbuf(m_streambuf);
+}
+
+int reset_level_buf::overflow(int c)
+{
+	if(c == '\n')
+		detail::log_level(m_stream) = 0;
+	
+	return m_streambuf->sputc(c);
+}
+
+int reset_level_buf::sync()
+{
+	m_streambuf->pubsync();
+	return 0;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+// filter_by_level_buf
+
+filter_by_level_buf::filter_by_level_buf(const log_level_t MinimumLevel, std::ostream& Stream) :
+	m_stream(Stream),
+	m_streambuf(Stream.rdbuf()),
+	m_minimum_level(MinimumLevel)
+{
+	setp(0, 0);
+	m_stream.rdbuf(this);
+}
+
+filter_by_level_buf::~filter_by_level_buf()
+{
+	m_stream.rdbuf(m_streambuf);
+}
+
+int filter_by_level_buf::overflow(int c)
+{
+	if(detail::log_level(m_stream) <= m_minimum_level)
+		return m_streambuf->sputc(c);
+		
+	return c;
+}
+
+int filter_by_level_buf::sync()
 {
 	m_streambuf->pubsync();
 	return 0;
@@ -347,28 +369,19 @@ void syslog_buf::write_to_system_log(const std::string& Message)
 
 	switch(detail::log_level(m_stream))
 		{
-			case detail::EMERGENCY:
-				priority = LOG_EMERG;
-				break;
-			case detail::ALERT:
-				priority = LOG_ALERT;
-				break;
-			case detail::CRITICAL:
+			case CRITICAL:
 				priority = LOG_CRIT;
 				break;
-			case detail::ERROR:
+			case ERROR:
 				priority = LOG_ERR;
 				break;
-			case detail::WARNING:
+			case WARNING:
 				priority = LOG_WARNING;
 				break;
-			case detail::NOTICE:
-				priority = LOG_NOTICE;
-				break;
-			case detail::INFO:
+			case INFO:
 				priority = LOG_INFO;
 				break;
-			case detail::DEBUG:
+			case DEBUG:
 				priority = LOG_DEBUG;
 				break;
 		}
