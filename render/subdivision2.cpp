@@ -335,7 +335,7 @@ void CqSubdivision2::SubdivideFace(TqInt iF)
 		{
 			// Create new vertex for the edge midpoint.
 			CqVector3D vH = m_aVertices[aQfv[i]->VertexIndex()];
-			CqVector3D vT = m_aVertices[aQfv[i]->ec()->VertexIndex()];
+			CqVector3D vT = m_aVertices[aQfv[i]->ccf()->VertexIndex()];
 			iVert = AddVertex((vH+vT)/2);
 			m_aapVertices.resize(iVert+1);
 		}
@@ -398,7 +398,7 @@ void CqSubdivision2::SubdivideFace(TqInt iF)
 		{
 			pNextV->SetpChildVertex(pLathA);
 			pNextV = pNextV->pClockwiseVertex();
-		}while( pNextV != aQfv[i]);
+		}while( pNextV && pNextV != aQfv[i]);
 		
 		// For this edge of the original face, set a ponter to the new midpoint lath, so that we can
 		// use it when subdividing neighbour facets, do the same for the lath representing the edge in the
@@ -417,7 +417,7 @@ void CqSubdivision2::SubdivideFace(TqInt iF)
 	for( i = 0; i < n; i++ )
 	{
 		// Connect midpoints clockwise vertex pointers.
-		apFaceLaths[((i+1)%n)].pD->SetpClockwiseVertex( apFaceLaths[i].pA );
+		apFaceLaths[((i+1)%n)].pD->SetpClockwiseVertex( apFaceLaths[i].pB );
 		// Connect all laths around the new face point.
 		apFaceLaths[i].pC->SetpClockwiseVertex( apFaceLaths[ ((i+1)%n) ].pC );
 		// Connect the new corner vertices, this is only possible if neighbouring facets have previously been
@@ -436,8 +436,11 @@ void CqSubdivision2::SubdivideFace(TqInt iF)
 		{
 			if( (*iVertLath)->cf()->VertexIndex() == apFaceLaths[i].pA->VertexIndex() )
 				apFaceLaths[i].pB->SetpClockwiseVertex( (*iVertLath ) );
-			else if( (*iVertLath)->ccf()->VertexIndex() == apFaceLaths[i].pA->VertexIndex() )
-				(*iVertLath)->SetpClockwiseVertex( apFaceLaths[i].pB );
+		}
+		for( iVertLath = m_aapVertices[apFaceLaths[i].pD->VertexIndex()].begin(); iVertLath != m_aapVertices[apFaceLaths[i].pD->VertexIndex()].end(); iVertLath++ )
+		{
+			if( (*iVertLath)->ccf()->VertexIndex() == apFaceLaths[i].pA->VertexIndex() )
+				(*iVertLath )->SetpClockwiseVertex( apFaceLaths[i].pD );
 		}
 	}
 }
