@@ -16,6 +16,18 @@ esac],
 [debug=false])
 AM_CONDITIONAL(DEBUG, test x$debug = xtrue)
 
+AC_ARG_ENABLE(plugins,
+[  --enable-plugins        compile with image plugins support [default=no, requires shared lib support]],
+[case "${enableval}" in
+  true) plugins=true ;;
+  false) plugins=false ;;
+  yes) plugins=true ;;
+  no) plugins=false ;;
+  *) AC_MSG_ERROR(bad value ${enableval} for --enable-plugins) ;;
+esac],
+[plugins=false])
+AM_CONDITIONAL(PLUGINS, test x$plugins = xtrue)
+
 AC_PROG_CXX
 AM_ENABLE_SHARED
 AM_PROG_LIBTOOL
