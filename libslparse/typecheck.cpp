@@ -764,10 +764,10 @@ TqInt	CqParseNodeHexTuple::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOn
 		pExpr->TypeCheck( &ExprType, 1, CheckOnly );
 		pExpr = pExpr->pNext();
 	}
-	// Check if expecting a matrix, if not add a cast
+	// Check if expecting a sixteentuple, if not add a cast
 	TqInt i;
 	for ( i = 0; i < Count; i++ )
-		if ( pTypes[ i ] == Type_Matrix ) return ( Type_Matrix );
+		if ( pTypes[ i ] == Type_HexTuple ) return ( Type_HexTuple );
 
 	// If we got here, we are not of the correct type, so find a suitable cast.
 	TqInt NewType = FindCast( Type_Matrix, pTypes, Count );

@@ -1929,10 +1929,10 @@ void CqSurfaceNURBS::SetDefaultPrimitiveVariables( TqBool bUseDef_st )
 		TqInt i = 0;
 		for ( c = 0; c <= cvSegments(); c++ )
 		{
-			TqFloat v = ( 1.0f / ( cvSegments() + 1 ) ) * c;
+			TqFloat v = ( 1.0f / ( cvSegments() ) ) * c;
 			for ( r = 0; r <= cuSegments(); r++ )
 			{
-				TqFloat u = ( 1.0f / ( cuSegments() + 1 ) ) * r;
+				TqFloat u = ( 1.0f / ( cuSegments() ) ) * r;
 				s() ->pValue() [ i++ ] = BilinearEvaluate( st1.x(), st2.x(), st3.x(), st4.x(), u, v );
 			}
 		}
@@ -1947,10 +1947,10 @@ void CqSurfaceNURBS::SetDefaultPrimitiveVariables( TqBool bUseDef_st )
 		TqInt i = 0;
 		for ( c = 0; c <= cvSegments(); c++ )
 		{
-			TqFloat v = ( 1.0f / ( cvSegments() + 1 ) ) * c;
+			TqFloat v = ( 1.0f / ( cvSegments() ) ) * c;
 			for ( r = 0; r <= cuSegments(); r++ )
 			{
-				TqFloat u = ( 1.0f / ( cuSegments() + 1 ) ) * r;
+				TqFloat u = ( 1.0f / ( cuSegments() ) ) * r;
 				t() ->pValue() [ i++ ] = BilinearEvaluate( st1.y(), st2.y(), st3.y(), st4.y(), u, v );
 			}
 		}
