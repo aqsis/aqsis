@@ -13,32 +13,53 @@
 #include	"argparse.h"
 #include	"ri.h"
 
+bool				g_version=0;
+bool				g_help=0;
 bool				g_envcube;
 bool				g_shadow;
 ArgParse::apstring	g_swrap="black";
 ArgParse::apstring	g_twrap="black";
 
+
+void version(std::ostream& Stream)
+{
+#ifdef	AQSIS_SYSTEM_WIN32
+	Stream << "teqser version " << VERSION_STR << std::endl;
+#else
+	Stream << "teqser version " << VERSION << std::endl;
+#endif
+}
+
+
 static void arg_filename(int argc, char**argv);
 
 int main(int argc, const char** argv)
 {
-#ifdef AQSIS_SYSTEM_WIN32
-	std::cout << "teqser version " << VERSION_STR << " - Copyright 2000 Paul C. Gregory" << std::endl;
-#else // AQSIS_SYSTEM_WIN32
-	std::cout << "teqser version " << VERSION << " - Copyright 2000 Paul C. Gregory" << std::endl;
-#endif // !AQSIS_SYSTEM_WIN32
-	std::cout << "All Rights Reserved" << std::endl;
-
 	ArgParse ap;
 	ap.usageHeader(ArgParse::apstring("Usage: ") + argv[0] + " [options] outfile");
+	ap.argFlag("help", "\aprint this help and exit", &g_help);
+	ap.argFlag("version", "\aprint version information and exit", &g_version);	
 	ap.argFlag("envcube", " px nx py ny pz nz\aproduce a cubeface environment map from 6 images.", &g_envcube);
 	ap.argFlag("shadow", " \aproduce a shadow map from a z file.", &g_shadow);
 	ap.argString("swrap", "=string\as mode [black|periodic|clamp]", &g_swrap);
 	ap.argString("twrap", "=string\at mode [black|periodic|clamp]", &g_twrap);
-	if (!ap.parse(argc-1, argv+1) || ap.leftovers().size()<=1)
+
+	if (argc>1 && !ap.parse(argc-1, argv+1))
 	{
 		std::cerr << ap.errmsg() << std::endl << ap.usagemsg();
 		exit(1);
+	}
+
+	if(g_version)
+	{
+		version(std::cout);
+		exit(0);
+	}
+
+	if(g_help || ap.leftovers().size()<=1)
+	{
+		std::cout << ap.usagemsg();
+		exit(0);
 	}
 
 	if(g_envcube && g_shadow)
