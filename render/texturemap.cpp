@@ -1547,7 +1547,7 @@ static void project( TqInt face )
 #define	ResFactor	1.0f
 #define	MinSize		0.0f
 #define	NumSamples	16
-#define	MinSamples	1
+#define	MinSamples	3
 
 //---------------------------------------------------------------------
 /** Sample the shadow map data to see if the point vecPoint is in shadow.
@@ -1571,7 +1571,8 @@ void CqShadowMap::SampleMap( CqVector3D& vecPoint, CqVector3D& swidth, CqVector3
 void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4, TqFloat sblur, TqFloat tblur, std::valarray<TqFloat>& val )
 {
 	TqFloat depth;
-	TqFloat previousdepth;
+	SampleMap( R1, R2, R3, R4, sblur, tblur, val, depth );
+/*	TqFloat previousdepth;
 	std::valarray<TqFloat> coverage;
 	coverage.resize(m_SamplesPerPixel);
 	val.resize(m_SamplesPerPixel);
@@ -1607,7 +1608,7 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 		// get coverage and average depth again
 		//SampleMap( R1, R2, R3, R4, sblur, tblur, val, depth );
 		val = coverage;
-	}
+	}*/
 }
 
 
