@@ -378,7 +378,7 @@ Package=<4>
     Project_Dep_Name librib2ri
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name librib_shared
+    Project_Dep_Name librib2
     End Project Dependency
 }}}
 

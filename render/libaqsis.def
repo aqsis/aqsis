@@ -266,4 +266,7 @@ EXPORTS
 	BasisFromName
 	RiProgressHandler
 	RiPreRenderFunction
-	
+	Parse
+	StandardDeclarations
+	CreateRIBEngine
+	DestroyRIBEngine

@@ -7,10 +7,6 @@
 
 #include "ri.h"
 
-#define		_qShareName	BUILD_LIBRIB
-#include	"share.h"
-
-
 namespace librib
 {
 
@@ -160,15 +156,17 @@ class RendermanInterface
 
 
 /// Initializes the parser and callback object with a set of standard declarations
-_qShareM void StandardDeclarations( RendermanInterface& CallbackInterface );
+extern "C" {
+void StandardDeclarations( RendermanInterface& CallbackInterface );
 
 /// Parses an input stream, using the supplied callback object and sending error data to the supplied output stream
-_qShareM bool Parse( FILE *InputStream, const std::string StreamName, RendermanInterface& CallbackInterface, std::ostream& ErrorStream );
+bool Parse( FILE *InputStream, const std::string StreamName, RendermanInterface& CallbackInterface, std::ostream& ErrorStream );
 /// Resets the state of the parser, clearing any symbol tables, etc.
-_qShareM void ResetParser();
+void ResetParser();
 //
 /// Setup the defaut setting for the archive searchpath, automatically updated when an appropriate RiOption is seen.
-_qShareM void UpdateArchivePath( std::string strPath );
+void UpdateArchivePath( std::string strPath );
+}
 
 }
 ; // namespace librib

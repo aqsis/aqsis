@@ -499,6 +499,17 @@ RendermanInterface::RtFunc Engine::GetProceduralFunction(RtToken type)
 }
 
 
+RendermanInterface* CreateRIBEngine()
+{
+	return( new Engine() );
+}
+
+void DestroyRIBEngine(RendermanInterface* engine)
+{
+	delete( engine );
+}
+
+
 }
 ; // namespace librib2ri
 

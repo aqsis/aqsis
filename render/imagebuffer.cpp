@@ -216,7 +216,7 @@ TqBool CqImageBuffer::CullSurface( CqBound& Bound, CqBasicSurface* pSurface )
 {
 	// If the primitive is completely outside of the hither-yon z range, cull it.
 	if ( Bound.vecMin().z() >= QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Clipping" ) [ 1 ] ||
-	        Bound.vecMax().z() <= QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Clipping" ) [ 0 ] )
+	     Bound.vecMax().z() <= QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Clipping" ) [ 0 ] )
 		return ( TqTrue );
 
 	// If the primitive spans the epsilon plane and the hither plane and can be split,
@@ -249,9 +249,9 @@ TqBool CqImageBuffer::CullSurface( CqBound& Bound, CqBasicSurface* pSurface )
 
 	// If the bounds are completely outside the viewing frustum, cull the primitive.
 	if ( Bound.vecMin().x() > CropWindowXMax() + m_FilterXWidth / 2 ||
-	        Bound.vecMin().y() > CropWindowYMax() + m_FilterYWidth / 2 ||
-	        Bound.vecMax().x() < CropWindowXMin() - m_FilterXWidth / 2 ||
-	        Bound.vecMax().y() < CropWindowYMin() - m_FilterYWidth / 2 )
+	     Bound.vecMin().y() > CropWindowYMax() + m_FilterYWidth / 2 ||
+	     Bound.vecMax().x() < CropWindowXMin() - m_FilterXWidth / 2 ||
+	     Bound.vecMax().y() < CropWindowYMin() - m_FilterYWidth / 2 )
 		return ( TqTrue );
 
 	// Restore Z-Values to camera space.

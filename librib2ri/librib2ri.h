@@ -129,7 +129,14 @@ class Engine :
 		virtual RtBasis*		GetBasisMatrix(RtToken type);
 		virtual	RtFunc			GetProceduralFunction(RtToken type);
 	};
+
+	extern "C"
+	{
+		librib::RendermanInterface* CreateRIBEngine();
+		void DestroyRIBEngine(librib::RendermanInterface*);
+	}
 }
 ; // namespace librib2ri
+
 
 #endif // LIBRIB2RI_H

@@ -400,12 +400,12 @@ void GetOptions()
 
 void RenderFile( FILE* file, const char* name )
 {
-	librib2ri::Engine renderengine;
+	librib::RendermanInterface* renderengine = librib2ri::CreateRIBEngine();
 
 	RiBegin( "CRIBBER" );
 
 	if ( !g_nostandard )
-		librib::StandardDeclarations( renderengine );
+		librib::StandardDeclarations( *renderengine );
 
 	if ( g_verbose )
 	{
@@ -432,7 +432,7 @@ void RenderFile( FILE* file, const char* name )
 		FILE * cfgfile = fopen( g_config.c_str(), "rb" );
 		if ( cfgfile != NULL )
 		{
-			librib::Parse( cfgfile, "config", renderengine, std::cerr );
+			librib::Parse( cfgfile, "config", *renderengine, std::cerr );
 			fclose( cfgfile );
 		}
 		else if ( g_environment )
@@ -453,7 +453,9 @@ void RenderFile( FILE* file, const char* name )
 
 		}
 	}
-	librib::Parse( file, name, renderengine, std::cerr );
+	librib::Parse( file, name, *renderengine, std::cerr );
 
 	RiEnd();
+
+	librib2ri::DestroyRIBEngine(renderengine);
 }
