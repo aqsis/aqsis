@@ -28,7 +28,6 @@
 #include	<stdarg.h>
 #include	<math.h>
 #include	<strstream>
-#include	<list>
 
 #include	"imagebuffer.h"
 #include	"lights.h"
@@ -51,9 +50,9 @@
 #include	"librib2ri.h"
 #include	"converter.h"
 #include	"shadervm.h"
-#include 	"librib.h"
-#include 	"libribtypes.h"
-#include 	"parserstate.h"
+#include	"librib.h"
+#include	"libribtypes.h"
+#include	"parserstate.h"
 #include	"procedural.h"
 
 #include	"subdivision2.h"
@@ -67,11 +66,8 @@
 #include	"sstring.h"
 #include	"mtable.h"
 #include	"ilog.h"
-<<<<<<< ri.cpp
-=======
 #include	"share.h"
 #include	"validate.h"
->>>>>>> 1.191
 
 using namespace Aqsis;
 
@@ -4058,12 +4054,12 @@ RtVoid	RiMakeCubeFaceEnvironmentV( const char * px, const char * nx, const char 
 		// Now copy the images to the big map.
 		CqTextureMap* Images[ 6 ] =
 		    {
-		        &tpz,
-		        &tpx,
-		        &tpy,
-		        &tnx,
-		        &tny,
-		        &tnz
+		        {&tpz},
+		        {&tpx},
+		        {&tpy},
+		        {&tnx},
+		        {&tny},
+		        {&tnz}
 		    };
 
 		// Create a new image.
@@ -4349,298 +4345,488 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 }
 
 
- RtVoid RiReadArchive( RtToken name, RtArchiveCallback callback, ... )
- {
-	 va_list	pArgs;
-	 va_start( pArgs, callback );
-
-	 RtToken* pTokens;
-	 RtPointer* pValues;
-	 RtInt count = BuildParameterList( pArgs, pTokens, pValues );
-
-	 RiReadArchiveV( name, callback, count, pTokens, pValues );
- }
+//----------------------------------------------------------------------
+// RiProcFree()
+//
+RtVoid	RiProcFree( RtPointer data )
+{
+	free(data);
+}
 
 
- RtVoid	RiReadArchiveV( RtToken name, RtArchiveCallback archcallback, PARAMETERLIST )
- {
-	 CqRiFile	fileArchive( name, "archive" );
-	 if ( fileArchive.IsValid() )
-	 {
-		 CqString strRealName( fileArchive.strRealName() );
-		 fileArchive.Close();
-		 FILE *file;
-		 if ( ( file = fopen( strRealName.c_str(), "rb" ) ) != NULL )
-		 {
-			 CqRIBParserState currstate = librib::GetParserState();
-			 if (currstate.m_pParseCallbackInterface == NULL) currstate.m_pParseCallbackInterface = new librib2ri::Engine;
-			 librib::Parse( file, name, *(currstate.m_pParseCallbackInterface), *(currstate.m_pParseErrorStream), archcallback );
-			 librib::SetParserState( currstate );
-			 fclose(file);
-		 }
-	 }
- }
+class CqRiProceduralPlugin : CqPluginBase 
+{
+	private:
+	void *( *m_ppvfcts ) ( char * );
+	void ( *m_pvfctpvf ) ( void *, float );
+	void ( *m_pvfctpv ) ( void * );
+	void *m_ppriv;
+	void *m_handle;
+	bool m_bIsValid;
+	CqString m_Error;
+
+	public:
+	CqRiProceduralPlugin( CqString& strDSOName )
+	{
+		CqString strConver("ConvertParameters");
+		CqString strSubdivide("Subdivide");
+		CqString strFree("Free");
+
+        	CqRiFile        fileDSO( strDSOName.c_str(), "procedure" );
+		m_bIsValid = false ;
+
+	        if ( !fileDSO.IsValid() )
+		{
+			m_Error = CqString( "Cannot find Procedural DSO for " )
+			 + strDSOName 
+			 + CqString (" in current searchpath");
+
+			return;
+		}
+
+		CqString strRealName( fileDSO.strRealName() );
+		fileDSO.Close();
+		void *handle = DLOpen( &strRealName );
+	
+		if ( ( m_ppvfcts = ( void * ( * ) ( char * ) ) DLSym(handle, &strConver) ) == NULL )
+		{
+			m_Error = DLError();
+			return;
+		}
+
+		if ( ( m_pvfctpvf = ( void ( * ) ( void *, float ) ) DLSym(handle, &strSubdivide) ) == NULL )
+		{
+			m_Error = DLError();
+			return;
+		}
+
+		if ( ( m_pvfctpv = ( void ( * ) ( void * ) ) DLSym(handle, &strFree) ) == NULL )
+		{
+			m_Error = DLError();
+			return;
+		}
+
+		m_bIsValid = true ;
+	};
+	
+	void ConvertParameters(char* opdata)
+	{
+		if( m_bIsValid )
+			m_ppriv = ( *m_ppvfcts ) ( opdata );
+	};
+
+	void Subdivide( float detail )
+	{
+		if( m_bIsValid )
+			( *m_pvfctpvf ) ( m_ppriv, detail );
+	};
+
+	void Free()
+	{
+		if( m_bIsValid )
+			( *m_pvfctpv ) ( m_ppriv );
+	};
+
+	bool IsValid(void)
+	{
+		return m_bIsValid;
+	};
+
+	const CqString Error()
+	{
+		return m_Error;
+	};
+};
+
+// We don't want to DLClose until we are finished rendering, since any RiProcedurals
+// created from within the dynamic module may re-use the Subdivide and Free pointers so
+// they must remain linked in.
+std::list<CqRiProceduralPlugin*> ActiveProcDLList;
+//----------------------------------------------------------------------
+// RiProcDynamicLoad() subdivide function
+//
+RtVoid	RiProcDynamicLoad( RtPointer data, RtFloat detail )
+{
+	CqString dsoname = CqString( (( char** ) data)[0] ) + CqString(SHARED_LIBRARY_SUFFIX);
+	CqRiProceduralPlugin *plugin = new CqRiProceduralPlugin( dsoname );
+	
+	if( !plugin->IsValid() )
+	{
+		QGetRenderContext() ->Logger()->error( CqString("Problem loading Procedural DSO:") );
+		QGetRenderContext() ->Logger()->error( CqString(plugin->Error()) );
+		return;
+	}
+
+	plugin->ConvertParameters( (( char** ) data)[1] );
+	plugin->Subdivide( detail );
+	plugin->Free();
+
+	ActiveProcDLList.push_back( plugin ); 
+} 
 
 
- RtVoid	RiArchiveRecord( RtToken type, char *, ... )
- {
- }
 
- RtContextHandle	RiGetContext( void )
- {
-	 return( NULL );
- }
-
- RtVoid	RiContext( RtContextHandle )
- {
- }
-
- RtVoid	RiClippingPlane( RtFloat, RtFloat, RtFloat, RtFloat, RtFloat, RtFloat )
- {
- }
+//----------------------------------------------------------------------
+// RiProcDelayedReadArchive()
+//
+RtVoid	RiProcDelayedReadArchive( RtPointer data, RtFloat detail )
+{
+	RiReadArchive( (RtToken) ((char**) data)[0], NULL );
+}
 
 
- //---------------------------------------------------------------------
- //---------------------------------------------------------------------
- // Helper functions
+//----------------------------------------------------------------------
+/* RiProcRunProgram()
+ * Your program must writes its output to a pipe. Open this
+ * pipe with read text attribute so that we can read it 
+ * like a text file. 
+ */
 
- //----------------------------------------------------------------------
- // ProcessPrimitiveVariables
- // Process and fill in any primitive variables.
- // return	:	RI_TRUE if position specified, RI_FALSE otherwise.
+// TODO: This is far from ideal, we need to parse directly from the popene'd 
+// process.
+RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
+{
+        char psBuffer[ 128 ];
+        FILE *chkdsk;
+        FILE *file;
+        char *pt, atmpname[ 1024 ];
 
- static RtBoolean ProcessPrimitiveVariables( CqSurface * pSurface, PARAMETERLIST )
- {
-	 std::vector<TqInt>	aUserParams;
+	pt = tempnam( "", "aqsis" );
+	sprintf( atmpname, "%s.rib", pt );
 
-	 // Read recognised parameter values.
-	 RtInt	fP = RIL_NONE;
-	 RtInt	fN = RIL_NONE;
-	 RtInt	fT = RIL_NONE;
-	 RtBoolean	fCs = RI_FALSE;
-	 RtBoolean	fOs = RI_FALSE;
+#ifdef AQSIS_SYSTEM_WIN32
+	if ( ( chkdsk = _popen( (( const char ** ) data)[0], "rt" ) ) != NULL )
+	{
+		file = fopen( atmpname, "wt" );
+#else
+	if ( ( chkdsk = popen( (( const char ** ) data)[0], "r" ) ) != NULL )
+		{
+		file = fopen( atmpname, "w" );
+#endif
 
-	 RtFloat*	pPoints = 0;
-	 RtFloat*	pNormals = 0;
-	 RtFloat*	pTextures_s = 0;
-	 RtFloat*	pTextures_t = 0;
-	 RtFloat*	pTextures_st = 0;
-	 RtFloat*	pCs = 0;
-	 RtFloat*	pOs = 0;
-	 RtInt i;
-	 for ( i = 0; i < count; i++ )
-	 {
-		 RtToken	token = tokens[ i ];
-		 TqUlong htoken = CqParameter::hash( tokens[ i ] );
-		 RtPointer	value = values[ i ];
+	}
+	else
+	{
+		return ;
+	}
 
-		 if ( htoken == RIH_S )
-		 {
-			 fT = RIL_s;
-			 pTextures_s = ( RtFloat* ) value;
-		 }
-		 else if ( htoken == RIH_T )
-		 {
-			 fT = RIL_t;
-			 pTextures_t = ( RtFloat* ) value;
-		 }
-		 else if ( htoken == RIH_ST )
-		 {
-			 fT = RIL_st;
-			 pTextures_st = ( RtFloat* ) value;
-		 }
-		 else if ( htoken == RIH_CS )
-		 {
-			 fCs = RI_TRUE;
-			 pCs = ( RtFloat* ) value;
-		 }
-		 else if ( htoken == RIH_OS )
-		 {
-			 fOs = RI_TRUE;
-			 pOs = ( RtFloat* ) value;
-		 }
-		 else if ( htoken == RIH_P )
-		 {
-			 fP = RIL_P;
-			 pPoints = ( RtFloat* ) value;
-		 }
-		 else if ( htoken == RIH_PZ )
-		 {
-			 fP = RIL_Pz;
-			 pPoints = ( RtFloat* ) value;
-		 }
-		 else if ( htoken == RIH_PW )
-		 {
-			 fP = RIL_Pw;
-			 pPoints = ( RtFloat* ) value;
-		 }
-		 else if ( htoken == RIH_N )
-		 {
-			 fN = RIL_N;
-			 pNormals = ( RtFloat* ) value;
-		 }
-		 else if ( htoken == RIH_NP )
-		 {
-			 fN = RIL_Np;
-			 pNormals = ( RtFloat* ) value;
-		 }
-		 else
-		 {
-			 aUserParams.push_back( i );
-		 }
-	 }
-
-	 // Fill in the position variable according to type.
-	 if ( fP != RIL_NONE )
-	 {
-		 pSurface->AddPrimitiveVariable( new CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>( "P", 0 ) );
-		 pSurface->P() ->SetSize( pSurface->cVertex() );
-		 TqInt i;
-		 switch ( fP )
-		 {
-				 case RIL_P:
-				 for ( i = 0; i < pSurface->cVertex(); i++ )
-					 ( *pSurface->P() ) [ i ] = CqVector3D( pPoints[ ( i * 3 ) ], pPoints[ ( i * 3 ) + 1 ], pPoints[ ( i * 3 ) + 2 ] );
-				 break;
-
-				 case RIL_Pz:
-				 for ( i = 0; i < pSurface->cVertex(); i++ )
-				 {
-					 CqVector3D vecP = pSurface->SurfaceParametersAtVertex( i );
-					 vecP.z( pPoints[ i ] );
-					 ( *pSurface->P() ) [ i ] = vecP;
-				 }
-				 break;
-
-				 case RIL_Pw:
-				 for ( i = 0; i < pSurface->cVertex(); i++ )
-					 ( *pSurface->P() ) [ i ] = CqVector4D( pPoints[ ( i * 4 ) ], pPoints[ ( i * 4 ) + 1 ], pPoints[ ( i * 4 ) + 2 ], pPoints[ ( i * 4 ) + 3 ] );
-				 break;
-		 }
-	 }
+/* Read pipe until end of file. End of file indicates that
+ * CHKDSK closed its standard out (probably meaning it 
+ * terminated).
+ */
+	while ( !feof( chkdsk ) )
+	{
+		if ( fgets( psBuffer, 128, chkdsk ) != NULL )
+			fprintf( file, "%s", psBuffer );
+	}
+	fclose ( file );
 
 
-	 // Fill in the normal variable according to type.
-	 if ( fN != RIL_NONE )
-	 {
-		 pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<CqVector3D, type_normal, CqVector3D>( "N", 0 ) );
-		 pSurface->N() ->SetSize( pSurface->cVarying() );
-		 TqUint i;
-		 switch ( fN )
-		 {
-				 case RIL_N:
-				 for ( i = 0; i < pSurface->cVarying(); i++ )
-					 ( *pSurface->N() ) [ i ] = CqVector3D( pNormals[ ( i * 3 ) ], pNormals[ ( i * 3 ) + 1 ], pNormals[ ( i * 3 ) + 2 ] );
-				 break;
+/* Close pipe and print return value of CHKDSK. */
+#ifdef AQSIS_SYSTEM_WIN32
+	printf( "\nProcess returned %d\n", _pclose( chkdsk ) );
+	RiReadArchive( atmpname, NULL, NULL );
+#else
+	printf( "\nProcess returned %d\n", pclose( chkdsk ) );
+	RiReadArchive( atmpname, NULL, NULL );
+#endif
+	unlink( atmpname );
 
-				 case RIL_Np:
-				 for ( i = 0; i < pSurface->cUniform(); i++ )
-					 ( *pSurface->N() ) [ i ] = CqVector3D( pNormals[ ( i * 3 ) ], pNormals[ ( i * 3 ) + 1 ], pNormals[ ( i * 3 ) + 2 ] );
-				 break;
-		 }
-	 }
+	return;
+}
+
+RtVoid RiReadArchive( RtToken name, RtArchiveCallback callback, ... )
+{
+	va_list	pArgs;
+	va_start( pArgs, callback );
+
+	RtToken* pTokens;
+	RtPointer* pValues;
+	RtInt count = BuildParameterList( pArgs, pTokens, pValues );
+
+	RiReadArchiveV( name, callback, count, pTokens, pValues );
+}
 
 
-	 // Copy any specified texture coordinates to the surface.
-	 if ( fT != RIL_NONE )
-	 {
-		 TqUint i;
-		 switch ( fT )
-		 {
-				 case RIL_s:
-				 {
-					 if ( pTextures_s != 0 )
-					 {
-						 pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "s" ) );
-						 pSurface->s() ->SetSize( pSurface->cVarying() );
-						 for ( i = 0; i < pSurface->cVarying(); i++ )
-							 ( *pSurface->s() ) [ i ] = pTextures_s[ i ];
-					 }
+RtVoid	RiReadArchiveV( RtToken name, RtArchiveCallback archcallback, PARAMETERLIST )
+{
+	CqRiFile	fileArchive( name, "archive" );
+	if ( fileArchive.IsValid() )
+	{
+		CqString strRealName( fileArchive.strRealName() );
+		fileArchive.Close();
+		FILE *file;
+		if ( ( file = fopen( strRealName.c_str(), "rb" ) ) != NULL )
+		{
+			CqRIBParserState currstate = librib::GetParserState();
+			if (currstate.m_pParseCallbackInterface == NULL) currstate.m_pParseCallbackInterface = new librib2ri::Engine;
+			librib::Parse( file, name, *(currstate.m_pParseCallbackInterface), *(currstate.m_pParseErrorStream), archcallback );
+			librib::SetParserState( currstate );
+			fclose(file);
+		}
+	}
+}
 
-					 if ( pTextures_t != 0 )
-					 {
-						 pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "t" ) );
-						 pSurface->t() ->SetSize( pSurface->cVarying() );
-						 for ( i = 0; i < pSurface->cVarying(); i++ )
-							 ( *pSurface->t() ) [ i ] = pTextures_t[ i ];
-					 }
-				 }
-				 break;
 
-				 case RIL_st:
-				 {
-					 assert( pTextures_st != 0 );
-					 pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "s" ) );
-					 pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "t" ) );
-					 pSurface->s() ->SetSize( pSurface->cVarying() );
-					 pSurface->t() ->SetSize( pSurface->cVarying() );
-					 for ( i = 0; i < pSurface->cVarying(); i++ )
-					 {
-						 ( *pSurface->s() ) [ i ] = pTextures_st[ ( i * 2 ) ];
-						 ( *pSurface->t() ) [ i ] = pTextures_st[ ( i * 2 ) + 1 ];
-					 }
-				 }
-				 break;
-		 }
-	 }
+RtVoid	RiArchiveRecord( RtToken type, char *, ... )
+{
+}
 
-	 // Copy any specified varying color values to the surface
-	 if ( fCs )
-	 {
-		 pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<CqColor, type_color, CqColor>( "Cs" ) );
-		 TqUint i;
-		 pSurface->Cs() ->SetSize( pSurface->cVarying() );
-		 for ( i = 0; i < pSurface->cVarying(); i++ )
-			 ( *pSurface->Cs() ) [ i ] = CqColor( pCs[ ( i * 3 ) ], pCs[ ( i * 3 ) + 1 ], pCs[ ( i * 3 ) + 2 ] );
-	 }
+RtContextHandle	RiGetContext( void )
+{
+	return( NULL );
+}
 
-	 if ( fOs )
-	 {
-		 pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<CqColor, type_color, CqColor>( "Os" ) );
-		 TqUint i;
-		 pSurface->Os() ->SetSize( pSurface->cVarying() );
-		 for ( i = 0; i < pSurface->cVarying(); i++ )
-			 ( *pSurface->Os() ) [ i ] = CqColor( pOs[ ( i * 3 ) ], pOs[ ( i * 3 ) + 1 ], pOs[ ( i * 3 ) + 2 ] );
-	 }
+RtVoid	RiContext( RtContextHandle )
+{
+}
 
-	 // Now process any user defined paramter variables.
-	 if ( aUserParams.size() > 0 )
-	 {
-		 std::vector<TqInt>::iterator iUserParam;
-		 for ( iUserParam = aUserParams.begin(); iUserParam != aUserParams.end(); iUserParam++ )
-		 {
-			 SqParameterDeclaration Decl = QGetRenderContext() ->FindParameterDecl( tokens[ *iUserParam ] );
+RtVoid	RiClippingPlane( RtFloat, RtFloat, RtFloat, RtFloat, RtFloat, RtFloat )
+{
+}
 
-			 CqParameter* pNewParam = ( *Decl.m_pCreate ) ( Decl.m_strName.c_str(), Decl.m_Count );
-			 // Now go across all values and fill in the parameter variable.
-			 TqInt cValues = 1;
-			 switch ( Decl.m_Class )
-			 {
-					 case class_uniform:
-					 cValues = pSurface->cUniform();
-					 break;
 
-					 case class_varying:
-					 cValues = pSurface->cVarying();
-					 break;
+//---------------------------------------------------------------------
+//---------------------------------------------------------------------
+// Helper functions
 
-					 case class_vertex:
-					 cValues = pSurface->cVertex();
-					 break;
+//----------------------------------------------------------------------
+// ProcessPrimitiveVariables
+// Process and fill in any primitive variables.
+// return	:	RI_TRUE if position specified, RI_FALSE otherwise.
 
-					 case class_facevarying:
-					 cValues = pSurface->cFaceVarying();
-					 break;
-			 }
-			 pNewParam->SetSize( cValues );
+static RtBoolean ProcessPrimitiveVariables( CqSurface * pSurface, PARAMETERLIST )
+{
+	std::vector<TqInt>	aUserParams;
 
-			 TqInt i;
-			 switch ( Decl.m_Type )
-			 {
-					 case type_float:
-					 {
-						 CqParameterTyped<TqFloat, TqFloat>* pFloatParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pNewParam );
-						 TqFloat* pValue = reinterpret_cast<TqFloat*>( values[ *iUserParam ] );
+	// Read recognised parameter values.
+	RtInt	fP = RIL_NONE;
+	RtInt	fN = RIL_NONE;
+	RtInt	fT = RIL_NONE;
+	RtBoolean	fCs = RI_FALSE;
+	RtBoolean	fOs = RI_FALSE;
+
+	RtFloat*	pPoints = 0;
+	RtFloat*	pNormals = 0;
+	RtFloat*	pTextures_s = 0;
+	RtFloat*	pTextures_t = 0;
+	RtFloat*	pTextures_st = 0;
+	RtFloat*	pCs = 0;
+	RtFloat*	pOs = 0;
+	RtInt i;
+	for ( i = 0; i < count; i++ )
+	{
+		RtToken	token = tokens[ i ];
+		TqUlong htoken = CqParameter::hash( tokens[ i ] );
+		RtPointer	value = values[ i ];
+
+		if ( htoken == RIH_S )
+		{
+			fT = RIL_s;
+			pTextures_s = ( RtFloat* ) value;
+		}
+		else if ( htoken == RIH_T )
+		{
+			fT = RIL_t;
+			pTextures_t = ( RtFloat* ) value;
+		}
+		else if ( htoken == RIH_ST )
+		{
+			fT = RIL_st;
+			pTextures_st = ( RtFloat* ) value;
+		}
+		else if ( htoken == RIH_CS )
+		{
+			fCs = RI_TRUE;
+			pCs = ( RtFloat* ) value;
+		}
+		else if ( htoken == RIH_OS )
+		{
+			fOs = RI_TRUE;
+			pOs = ( RtFloat* ) value;
+		}
+		else if ( htoken == RIH_P )
+		{
+			fP = RIL_P;
+			pPoints = ( RtFloat* ) value;
+		}
+		else if ( htoken == RIH_PZ )
+		{
+			fP = RIL_Pz;
+			pPoints = ( RtFloat* ) value;
+		}
+		else if ( htoken == RIH_PW )
+		{
+			fP = RIL_Pw;
+			pPoints = ( RtFloat* ) value;
+		}
+		else if ( htoken == RIH_N )
+		{
+			fN = RIL_N;
+			pNormals = ( RtFloat* ) value;
+		}
+		else if ( htoken == RIH_NP )
+		{
+			fN = RIL_Np;
+			pNormals = ( RtFloat* ) value;
+		}
+		else
+		{
+			aUserParams.push_back( i );
+		}
+	}
+
+	// Fill in the position variable according to type.
+	if ( fP != RIL_NONE )
+	{
+		pSurface->AddPrimitiveVariable( new CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>( "P", 0 ) );
+		pSurface->P() ->SetSize( pSurface->cVertex() );
+		TqInt i;
+		switch ( fP )
+		{
+				case RIL_P:
+				for ( i = 0; i < pSurface->cVertex(); i++ )
+					( *pSurface->P() ) [ i ] = CqVector3D( pPoints[ ( i * 3 ) ], pPoints[ ( i * 3 ) + 1 ], pPoints[ ( i * 3 ) + 2 ] );
+				break;
+
+				case RIL_Pz:
+				for ( i = 0; i < pSurface->cVertex(); i++ )
+				{
+					CqVector3D vecP = pSurface->SurfaceParametersAtVertex( i );
+					vecP.z( pPoints[ i ] );
+					( *pSurface->P() ) [ i ] = vecP;
+				}
+				break;
+
+				case RIL_Pw:
+				for ( i = 0; i < pSurface->cVertex(); i++ )
+					( *pSurface->P() ) [ i ] = CqVector4D( pPoints[ ( i * 4 ) ], pPoints[ ( i * 4 ) + 1 ], pPoints[ ( i * 4 ) + 2 ], pPoints[ ( i * 4 ) + 3 ] );
+				break;
+		}
+	}
+
+
+	// Fill in the normal variable according to type.
+	if ( fN != RIL_NONE )
+	{
+		pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<CqVector3D, type_normal, CqVector3D>( "N", 0 ) );
+		pSurface->N() ->SetSize( pSurface->cVarying() );
+		TqUint i;
+		switch ( fN )
+		{
+				case RIL_N:
+				for ( i = 0; i < pSurface->cVarying(); i++ )
+					( *pSurface->N() ) [ i ] = CqVector3D( pNormals[ ( i * 3 ) ], pNormals[ ( i * 3 ) + 1 ], pNormals[ ( i * 3 ) + 2 ] );
+				break;
+
+				case RIL_Np:
+				for ( i = 0; i < pSurface->cUniform(); i++ )
+					( *pSurface->N() ) [ i ] = CqVector3D( pNormals[ ( i * 3 ) ], pNormals[ ( i * 3 ) + 1 ], pNormals[ ( i * 3 ) + 2 ] );
+				break;
+		}
+	}
+
+
+	// Copy any specified texture coordinates to the surface.
+	if ( fT != RIL_NONE )
+	{
+		TqUint i;
+		switch ( fT )
+		{
+				case RIL_s:
+				{
+					if ( pTextures_s != 0 )
+					{
+						pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "s" ) );
+						pSurface->s() ->SetSize( pSurface->cVarying() );
+						for ( i = 0; i < pSurface->cVarying(); i++ )
+							( *pSurface->s() ) [ i ] = pTextures_s[ i ];
+					}
+
+					if ( pTextures_t != 0 )
+					{
+						pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "t" ) );
+						pSurface->t() ->SetSize( pSurface->cVarying() );
+						for ( i = 0; i < pSurface->cVarying(); i++ )
+							( *pSurface->t() ) [ i ] = pTextures_t[ i ];
+					}
+				}
+				break;
+
+				case RIL_st:
+				{
+					assert( pTextures_st != 0 );
+					pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "s" ) );
+					pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "t" ) );
+					pSurface->s() ->SetSize( pSurface->cVarying() );
+					pSurface->t() ->SetSize( pSurface->cVarying() );
+					for ( i = 0; i < pSurface->cVarying(); i++ )
+					{
+						( *pSurface->s() ) [ i ] = pTextures_st[ ( i * 2 ) ];
+						( *pSurface->t() ) [ i ] = pTextures_st[ ( i * 2 ) + 1 ];
+					}
+				}
+				break;
+		}
+	}
+
+	// Copy any specified varying color values to the surface
+	if ( fCs )
+	{
+		pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<CqColor, type_color, CqColor>( "Cs" ) );
+		TqUint i;
+		pSurface->Cs() ->SetSize( pSurface->cVarying() );
+		for ( i = 0; i < pSurface->cVarying(); i++ )
+			( *pSurface->Cs() ) [ i ] = CqColor( pCs[ ( i * 3 ) ], pCs[ ( i * 3 ) + 1 ], pCs[ ( i * 3 ) + 2 ] );
+	}
+
+	if ( fOs )
+	{
+		pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<CqColor, type_color, CqColor>( "Os" ) );
+		TqUint i;
+		pSurface->Os() ->SetSize( pSurface->cVarying() );
+		for ( i = 0; i < pSurface->cVarying(); i++ )
+			( *pSurface->Os() ) [ i ] = CqColor( pOs[ ( i * 3 ) ], pOs[ ( i * 3 ) + 1 ], pOs[ ( i * 3 ) + 2 ] );
+	}
+
+	// Now process any user defined paramter variables.
+	if ( aUserParams.size() > 0 )
+	{
+		std::vector<TqInt>::iterator iUserParam;
+		for ( iUserParam = aUserParams.begin(); iUserParam != aUserParams.end(); iUserParam++ )
+		{
+			SqParameterDeclaration Decl = QGetRenderContext() ->FindParameterDecl( tokens[ *iUserParam ] );
+
+			CqParameter* pNewParam = ( *Decl.m_pCreate ) ( Decl.m_strName.c_str(), Decl.m_Count );
+			// Now go across all values and fill in the parameter variable.
+			TqInt cValues = 1;
+			switch ( Decl.m_Class )
+			{
+					case class_uniform:
+					cValues = pSurface->cUniform();
+					break;
+
+					case class_varying:
+					cValues = pSurface->cVarying();
+					break;
+
+					case class_vertex:
+					cValues = pSurface->cVertex();
+					break;
+
+					case class_facevarying:
+					cValues = pSurface->cFaceVarying();
+					break;
+			}
+			pNewParam->SetSize( cValues );
+
+			TqInt i;
+			switch ( Decl.m_Type )
+			{
+					case type_float:
+					{
+						CqParameterTyped<TqFloat, TqFloat>* pFloatParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pNewParam );
+						TqFloat* pValue = reinterpret_cast<TqFloat*>( values[ *iUserParam ] );
 						TqInt iArrayIndex, iValIndex;
 						i = 0;
 						for ( iValIndex = 0; iValIndex < cValues; iValIndex++ )
