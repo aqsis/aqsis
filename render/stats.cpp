@@ -379,15 +379,53 @@ void CqStats::PrintInfo() const
 {
 	int psX, psY; //< Pixel Samples
 	int resX, resY;	//< Image resolution
+	int fX, fY;	//< Filter width
+	float gain, gamma; //< Exposure, gain
+	float pratio; //< PixelAspectRatio
+	int bX = 16, bY = 16; //< Bucket Size
+	int gs; //< Grid Size
 
 	psX = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "PixelSamples" ) [ 0 ];
 	psY = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "PixelSamples" ) [ 1 ];
 
 	resX = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "Resolution" ) [ 0 ];
 	resY = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "Resolution" ) [ 1 ];
+	
+	fX = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "FilterWidth" ) [ 0 ];
+	fY = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "FilterWidth" ) [ 1 ];
 
-	QGetRenderContext() ->Logger().log( "INFO", "PixelSamples: %d %d", psX, psY );
-	QGetRenderContext() ->Logger().info( "Resolution: %d %d", resX, resY );
+	gain = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Exposure" ) [ 0 ];
+	gamma = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Exposure" ) [ 1 ];
+
+	pratio = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "PixelAspectRatio" ) [ 0 ];
+
+	const TqInt* poptBucketSize = QGetRenderContext() ->optCurrent().GetIntegerOption( "limits", "bucketsize" );
+	if ( poptBucketSize != 0 )
+	{
+		bX = poptBucketSize[ 0 ];
+		bY = poptBucketSize[ 1 ];
+	}
+
+	const TqInt* poptGridSize = QGetRenderContext() ->optCurrent().GetIntegerOption( "limits", "gridsize" );
+	
+	if ( poptGridSize )
+		gs = poptGridSize[ 0 ];
+	else
+		gs = 256;
+
+	QGetRenderContext() ->Logger().info( "Image settings:" );
+	QGetRenderContext() ->Logger().info( "	Resolution: %d %d", resX, resY );
+	QGetRenderContext() ->Logger().info( "	PixelAspectRatio: %d", pratio );
+	QGetRenderContext() ->Logger().info( "	Exposure:" );
+	QGetRenderContext() ->Logger().info( "		Gain: %d", gain );
+	QGetRenderContext() ->Logger().info( "		Gamma: %d", gamma );
+	QGetRenderContext() ->Logger().info( "Shading:" );
+	QGetRenderContext() ->Logger().info( "	Bucket size: [ %d %d ]", bX, bY );
+	QGetRenderContext() ->Logger().info( "	Gridsize: %d", gs );
+	QGetRenderContext() ->Logger().info( "Anti-aliasing settings: " );
+	QGetRenderContext() ->Logger().info( "	PixelSamples: %d %d", psX, psY );
+	QGetRenderContext() ->Logger().info( "	FilterWidth: %d %d", fX, fY );
+
 }
 
 //---------------------------------------------------------------------

@@ -435,7 +435,7 @@ RtVoid	RiWorldEnd()
 
 
 	const TqInt* poptVerbose = QGetRenderContext() ->optCurrent().GetIntegerOption( "statistics", "verbose" );
-	if ( !poptVerbose )
+	if ( poptVerbose )
 	{
 		QGetRenderContext() -> Stats().PrintInfo();
 	}
