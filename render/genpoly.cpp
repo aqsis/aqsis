@@ -124,18 +124,19 @@ TqInt CqPolygonGeneral2D::CalcDeterminant( TqInt i1, TqInt i2, TqInt i3 ) const
                      - ( ( *this ) [ i3 ].x() - ( *this ) [ i1 ].x() )
                      * ( ( *this ) [ i2 ].y() - ( *this ) [ i1 ].y() );
 
-    if ( Determ >= 0.0 )
+    if ( Determ > 0.0 )
         return ( Orientation_AntiClockwise );
     else
     {
         if ( Determ == 0.0 )
         {
-            if ( ( *this ) [ i1 ] == ( *this ) [ i2 ] ||
-                    ( *this ) [ i1 ] == ( *this ) [ i3 ] ||
-                    ( *this ) [ i2 ] == ( *this ) [ i3 ] )
-                return ( Orientation_AntiClockwise );
-            else
-                return ( Orientation_Clockwise );
+			return( Orientation_Unknown );
+            //if ( ( *this ) [ i1 ] == ( *this ) [ i2 ] ||
+            //     ( *this ) [ i1 ] == ( *this ) [ i3 ] ||
+            //     ( *this ) [ i2 ] == ( *this ) [ i3 ] )
+            //    return ( Orientation_AntiClockwise );
+            //else
+            //    return ( Orientation_Clockwise );
         }
         else
             return ( Orientation_Clockwise );
@@ -168,16 +169,16 @@ TqBool CqPolygonGeneral2D::NoneInside( TqInt i1, TqInt i2, TqInt i3, std::vector
         __t1 = CalcDeterminant( i2, i1, iN );
         __t2 = CalcDeterminant( i1, i3, iN );
         __t3 = CalcDeterminant( i3, i2, iN );
-        if ( ( __t1 == m_Orientation ) ||
-             ( __t2 == m_Orientation ) ||
+        if ( ( __t1 == m_Orientation ) || 
+             ( __t2 == m_Orientation ) || 
              ( __t3 == m_Orientation ) )
             continue;
         else
         {
             // If it is coincident with one of the vertices, then presume it is inside.
             if ( ( ( *this ) [ iN ] == ( *this ) [ i1 ] ) ||
-                    ( ( *this ) [ iN ] == ( *this ) [ i2 ] ) ||
-                    ( ( *this ) [ iN ] == ( *this ) [ i3 ] ) )
+                 ( ( *this ) [ iN ] == ( *this ) [ i2 ] ) ||
+                 ( ( *this ) [ iN ] == ( *this ) [ i3 ] ) )
                 continue;
             else
                 return ( TqFalse );
