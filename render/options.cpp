@@ -294,14 +294,6 @@ void CqOptions::InitialiseDefaultOptions()
 	ADD_SYSTEM_PARAM2( PixelSamples, TqInt, TqFloat, type_integer, 2, 2 );
 	ADD_SYSTEM_PARAM2( FilterWidth, TqFloat, TqFloat, type_float, 2.0f, 2.0f );
 	ADD_SYSTEM_PARAM2( Exposure, TqFloat, TqFloat, type_float, 1.0f, 1.0f );
-	ADD_SYSTEM_PARAM( ColorQuantizeOne, TqInt, TqFloat, type_integer, 255 );
-	ADD_SYSTEM_PARAM( ColorQuantizeMin, TqInt, TqFloat, type_integer, 0 );
-	ADD_SYSTEM_PARAM( ColorQuantizeMax, TqInt, TqFloat, type_integer, 255 );
-	ADD_SYSTEM_PARAM( ColorQuantizeDitherAmplitude, TqFloat, TqFloat, type_float, 0.5f );
-	ADD_SYSTEM_PARAM( DepthQuantizeOne, TqInt, TqFloat, type_integer, 0 );
-	ADD_SYSTEM_PARAM( DepthQuantizeMin, TqInt, TqFloat, type_integer, 0 );
-	ADD_SYSTEM_PARAM( DepthQuantizeMax, TqInt, TqFloat, type_integer, 255 );
-	ADD_SYSTEM_PARAM( DepthQuantizeDitherAmplitude, TqFloat, TqFloat, type_float, 0.0f );
 	ADD_SYSTEM_PARAM( Imager, CqString, CqString, type_string, "null" );
 	ADD_SYSTEM_PARAM( DisplayType, CqString, CqString, type_string, "file" );
 	ADD_SYSTEM_PARAM( DisplayName, CqString, CqString, type_string, "aqsis.tif" );
@@ -321,6 +313,14 @@ void CqOptions::InitialiseDefaultOptions()
 	ADD_SYSTEM_PARAM3( DepthOfField, TqFloat, TqFloat, type_float, FLT_MAX, FLT_MAX, FLT_MAX );
 	ADD_SYSTEM_PARAM2( Shutter, TqFloat, TqFloat, type_float, 0.0f, 1.0f );
 	ADD_SYSTEM_PARAM( FOV, TqFloat, TqFloat, type_float, 90.0f );
+
+	pdefopts->AddRef();
+	AddOption( pdefopts );
+
+	pdefopts = new CqNamedParameterList( "Quantize" );
+
+	ADD_SYSTEM_PARAM4( Color, TqFloat, TqFloat, type_float, 255.0f, 0.0f, 255.0f, 0.5f );
+	ADD_SYSTEM_PARAM4( Depth, TqFloat, TqFloat, type_float,   0.0f, 0.0f, 255.0f, 0.0f );
 
 	pdefopts->AddRef();
 	AddOption( pdefopts );

@@ -536,10 +536,11 @@ void CqBucket::QuantizeBucket()
 
 	if ( QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "DisplayMode" ) [ 0 ] & ModeRGB )
 	{
-		double ditheramplitude = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "ColorQuantizeDitherAmplitude" ) [ 0 ];
-		TqInt one = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "ColorQuantizeOne" ) [ 0 ];
-		TqInt min = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "ColorQuantizeMin" ) [ 0 ];
-		TqInt max = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "ColorQuantizeMax" ) [ 0 ];
+		const TqFloat* pQuant = QGetRenderContext() ->optCurrent().GetFloatOption( "Quantize", "Color" );
+		TqInt one = static_cast<TqInt>( pQuant [ 0 ] );
+		TqInt min = static_cast<TqInt>( pQuant [ 1 ] );
+		TqInt max = static_cast<TqInt>( pQuant [ 2 ] );
+		TqFloat ditheramplitude = pQuant [ 3 ];
 
 		// If settings are 0,0,0,0 then leave as floating point and we will save an FP tiff.
 		if ( one == 0 && min == 0 && max == 0 )
@@ -587,11 +588,11 @@ void CqBucket::QuantizeBucket()
 	}
 	else
 	{
-		double ditheramplitude = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "DepthQuantizeDitherAmplitude" ) [ 0 ];
-		if ( ditheramplitude == 0 ) return ;
-		TqInt one = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "DepthQuantizeOne" ) [ 0 ];
-		TqInt min = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "DepthQuantizeMin" ) [ 0 ];
-		TqInt max = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "DepthQuantizeMax" ) [ 0 ];
+		const TqFloat* pQuant = QGetRenderContext() ->optCurrent().GetFloatOption( "Quantize", "Depth" );
+		TqInt one = static_cast<TqInt>( pQuant [ 0 ] );
+		TqInt min = static_cast<TqInt>( pQuant [ 1 ] );
+		TqInt max = static_cast<TqInt>( pQuant [ 2 ] );
+		TqFloat ditheramplitude = pQuant [ 3 ];
 
 		CqImagePixel* pie;
 		ImageElement( XOrigin(), YOrigin(), pie );

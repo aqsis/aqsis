@@ -743,17 +743,19 @@ RtVoid	RiQuantize( RtToken type, RtInt one, RtInt min, RtInt max, RtFloat dither
 {
 	if ( strcmp( type, "rgba" ) == 0 )
 	{
-		QGetRenderContext() ->optCurrent().GetIntegerOptionWrite( "System", "ColorQuantizeOne" ) [ 0 ] = one ;
-		QGetRenderContext() ->optCurrent().GetIntegerOptionWrite( "System", "ColorQuantizeMin" ) [ 0 ] = min ;
-		QGetRenderContext() ->optCurrent().GetIntegerOptionWrite( "System", "ColorQuantizeMax" ) [ 0 ] = max ;
-		QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "ColorQuantizeDitherAmplitude" ) [ 0 ] = ditheramplitude ;
+		TqFloat* pColorQuantize = QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "Quantize", "Color" );
+		pColorQuantize [ 0 ] = static_cast<TqFloat>( one );
+		pColorQuantize [ 1 ] = static_cast<TqFloat>( min );
+		pColorQuantize [ 2 ] = static_cast<TqFloat>( max );
+		pColorQuantize [ 3 ] = static_cast<TqFloat>( ditheramplitude );
 	}
 	else
 	{
-		QGetRenderContext() ->optCurrent().GetIntegerOptionWrite( "System", "DepthQuantizeOne" ) [ 0 ] = one ;
-		QGetRenderContext() ->optCurrent().GetIntegerOptionWrite( "System", "DepthQuantizeMin" ) [ 0 ] = min ;
-		QGetRenderContext() ->optCurrent().GetIntegerOptionWrite( "System", "DepthQuantizeMax" ) [ 0 ] = max ;
-		QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "DepthQuantizeDitherAmplitude" ) [ 0 ] = ditheramplitude ;
+		TqFloat* pDepthQuantize = QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "Quantize", "Depth" );
+		pDepthQuantize [ 0 ] = static_cast<TqFloat>( one );
+		pDepthQuantize [ 1 ] = static_cast<TqFloat>( min );
+		pDepthQuantize [ 2 ] = static_cast<TqFloat>( max );
+		pDepthQuantize [ 3 ] = static_cast<TqFloat>( ditheramplitude );
 	}
 
 	return ;
