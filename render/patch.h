@@ -175,6 +175,8 @@ class _qShareC CqSurfacePatchBilinear : public CqSurface
 		}
 
 		virtual void NaturalInterpolate(CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData);
+		virtual TqBool		CanGenerateNormals() const	{ return( TqTrue ); }
+		virtual	void		GenerateGeometricNormals( TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pNormals );
 
 	protected:
 };

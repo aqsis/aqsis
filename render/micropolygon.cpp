@@ -138,8 +138,6 @@ void CqMicroPolyGrid::CalcNormals()
 	// the coordinate system specified, to check for normal flipping.
 	//	EqOrientation CSO=pSurface()->pAttributes()->eCoordsysOrientation();
 	TqInt O = pAttributes() ->GetIntegerAttribute("System", "Orientation")[0];
-	float neg = 1;
-	if ( O != OrientationLH ) neg = -1;
 	CqVector3D  vecMP[ 4 ];
 	CqVector3D	vecN, vecTemp;
 	CqVector3D	vecLastN( 0, 0, 0 );
@@ -173,7 +171,7 @@ void CqMicroPolyGrid::CalcNormals()
 					vecN.Unit();
 					// Flip the normal if the 'current orientation' differs from the 'coordinate system orientation'
 					// see RiSpec 'Orientation and Sides'
-					vecN *= neg;
+					vecN = ( O == OrientationLH )? vecN : -vecN;
 					vecLastN = vecN;
 				}
 				else

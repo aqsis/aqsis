@@ -1448,19 +1448,16 @@ TqBool	CqSurfaceNURBS::Diceable()
 		return ( TqFalse );
 	}
 
-	// TODO: Should ensure powers of half to prevent cracking.
-
-	//	if(QGetRenderContext()->Mode()==RenderMode_Shadows)
-	//	{
-	//		const TqFloat* pattrShadowShadingRate=m_pAttributes->GetFloatAttribute("render","shadow_shadingrate");
-	//		if(pattrShadowShadingRate!=0)
-	//			ShadingRate=pattrShadowShadingRate[0];
-	//	}
 	ShadingRate = static_cast<TqFloat>( sqrt( ShadingRate ) );
 	MaxuLen /= ShadingRate;
 	MaxvLen /= ShadingRate;
 	m_uDiceSize = static_cast<TqUint>( MAX( ROUND( MaxuLen ), 1 ) );
 	m_vDiceSize = static_cast<TqUint>( MAX( ROUND( MaxvLen ), 1 ) );
+
+	// Ensure power of 2 to avoid cracking
+	m_uDiceSize = CEIL_POW2(m_uDiceSize);
+	m_vDiceSize = CEIL_POW2(m_vDiceSize);
+
 	TqFloat Area = m_uDiceSize * m_vDiceSize;
 
 	if ( MaxuLen < FLT_EPSILON || MaxvLen < FLT_EPSILON )

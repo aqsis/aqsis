@@ -107,9 +107,8 @@ void CqQuadric::GenerateGeometricNormals( TqInt uDiceSize, TqInt vDiceSize, IqSh
 		{
 			TqInt igrid = ( v * ( uDiceSize + 1 ) ) + u;
 			DicePoint( u, v, N );
-			TqInt CSO = pAttributes() ->GetIntegerAttribute("System", "Orientation")[1];
 			TqInt O = pAttributes() ->GetIntegerAttribute("System", "Orientation")[0];
-			N = ( CSO == O ) ? N : -N;
+			N = (O==OrientationLH)? N : -N;
 			pNormals->SetNormal( m_matITTx * N, igrid );
 		}
 	}
@@ -196,17 +195,12 @@ void CqQuadric::EstimateGridSize()
 
 	TqFloat ShadingRate = pAttributes() ->GetFloatAttribute("System", "ShadingRate")[0];
 
-	TqInt us, vs;
+	m_uDiceSize = MAX( 4, ROUND( ESTIMATEGRIDSIZE * maxusize / ( ShadingRate ) ) );
+	m_vDiceSize = MAX( 4, ROUND( ESTIMATEGRIDSIZE * maxvsize / ( ShadingRate ) ) );
 
-	us = MAX( 4, ROUND( ESTIMATEGRIDSIZE * maxusize / ( ShadingRate ) ) );
-	vs = MAX( 4, ROUND( ESTIMATEGRIDSIZE * maxvsize / ( ShadingRate ) ) );
-
-	// Make size a power of 2
-	us = 1 << ( TqInt ) ( log( us ) / log( 2 ) );
-	vs = 1 << ( TqInt ) ( log( vs ) / log( 2 ) );
-
-	m_uDiceSize = us;
-	m_vDiceSize = vs;
+	// Ensure power of 2 to avoid cracking
+	m_uDiceSize = CEIL_POW2(m_uDiceSize);
+	m_vDiceSize = CEIL_POW2(m_vDiceSize);
 }
 
 

@@ -680,6 +680,11 @@ TqBool	CqSurfacePatchBicubic::Diceable()
 	vLen *= 3;
 	m_uDiceSize = static_cast<TqInt>( MAX( ROUND( uLen ), 1 ) );
 	m_vDiceSize = static_cast<TqInt>( MAX( ROUND( vLen ), 1 ) );
+
+	// Ensure power of 2 to avoid cracking
+	m_uDiceSize = CEIL_POW2(m_uDiceSize);
+	m_vDiceSize = CEIL_POW2(m_vDiceSize);
+
 	TqFloat Area = m_uDiceSize * m_vDiceSize;
 
 	if ( uLen < FLT_EPSILON || vLen < FLT_EPSILON )
@@ -773,7 +778,6 @@ CqVector4D CqSurfacePatchBilinear::EvaluateNormal( TqFloat s, TqFloat t ) const
 			vecN = ( vecNCD * t ) + ( vecNAB * ( 1.0 - t ) );
 	}
 
-	vecN.Unit();
 	return ( vecN );
 }
 
@@ -794,34 +798,34 @@ CqSurfacePatchBilinear& CqSurfacePatchBilinear::operator=( const CqSurfacePatchB
 /** Generate the vertex normals if not specified.
  */
 
-void CqSurfacePatchBilinear::GenNormals()
+void CqSurfacePatchBilinear::GenerateGeometricNormals( TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pNormals )
 {
 	assert( P().Size() == 4 );
 	N().SetSize( 4 );
 
 	// Get the handedness of the coordinate system (at the time of creation) and
 	// the coordinate system specified, to check for normal flipping.
-	TqInt CSO = pAttributes() ->GetIntegerAttribute("System", "Orientation")[1];
 	TqInt O = pAttributes() ->GetIntegerAttribute("System", "Orientation")[0];
 
 	// For each of the four points, calculate the normal as the cross product of its
 	// two vectors.
-	CqVector3D vecN;
-	vecN = ( P() [ 1 ] - P() [ 0 ] ) % ( P() [ 2 ] - P() [ 0 ] );
-	vecN.Unit();
-	N() [ 0 ] = ( CSO == O ) ? vecN : -vecN;
+	N() [ 0 ] = ( P() [ 1 ] - P() [ 0 ] ) % ( P() [ 2 ] - P() [ 0 ] );
+	N() [ 1 ] = ( P() [ 3 ] - P() [ 1 ] ) % ( P() [ 0 ] - P() [ 1 ] );
+	N() [ 2 ] = ( P() [ 0 ] - P() [ 2 ] ) % ( P() [ 3 ] - P() [ 2 ] );
+	N() [ 3 ] = ( P() [ 2 ] - P() [ 3 ] ) % ( P() [ 1 ] - P() [ 3 ] );
 
-	vecN = ( P() [ 3 ] - P() [ 1 ] ) % ( P() [ 0 ] - P() [ 1 ] );
-	vecN.Unit();
-	N() [ 1 ] = ( CSO == O ) ? vecN : -vecN;
-
-	vecN = ( P() [ 0 ] - P() [ 2 ] ) % ( P() [ 3 ] - P() [ 2 ] );
-	vecN.Unit();
-	N() [ 2 ] = ( CSO == O ) ? vecN : -vecN;
-
-	vecN = ( P() [ 2 ] - P() [ 3 ] ) % ( P() [ 1 ] - P() [ 3 ] );
-	vecN.Unit();
-	N() [ 3 ] = ( CSO == O ) ? vecN : -vecN;
+	CqVector3D	N;
+	TqInt v, u;
+	for ( v = 0; v <= vDiceSize; v++ )
+	{
+		for ( u = 0; u <= uDiceSize; u++ )
+		{
+			TqInt igrid = ( v * ( uDiceSize + 1 ) ) + u;
+			N = EvaluateNormal( u, v );
+			N = ( O == OrientationLH )? N : -N;
+			pNormals->SetNormal( N, igrid );
+		}
+	}
 }
 
 
@@ -1052,6 +1056,10 @@ TqBool	CqSurfacePatchBilinear::Diceable()
 	TqFloat Area = uLen * vLen;
 	m_uDiceSize = static_cast<TqInt>( uLen );
 	m_vDiceSize = static_cast<TqInt>( vLen );
+
+	// Ensure power of 2 to avoid cracking
+	m_uDiceSize = CEIL_POW2(m_uDiceSize);
+	m_vDiceSize = CEIL_POW2(m_vDiceSize);
 
 	if ( uLen < FLT_EPSILON || vLen < FLT_EPSILON )
 	{
