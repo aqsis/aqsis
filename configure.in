@@ -87,6 +87,7 @@ plugins/jpg2tif/Makefile \
 plugins/ppm2tif/Makefile \
 plugins/pcx2tif/Makefile \
 plugins/tga2tif/Makefile \
+plugins/bake2tif/Makefile \
 releasearchive/Makefile \
 libslxargs/Makefile \
 libshadervm/Makefile \
