@@ -23,6 +23,9 @@
 		\author Paul C. Gregory (pgregory@aqsis.com)
 */
 
+/* coherent noise function over 1, 2 or 3 dimensions */
+/* (copyright Ken Perlin) */
+
 #include	<math.h>
 
 #include	"aqsis.h"
@@ -33,15 +36,45 @@
 
 START_NAMESPACE(Aqsis)
 
+
+#define s_curve(t) ( t * t * (3. - 2. * t) )
+#define setup(i,b0,b1,r0,r1)\
+	t = vec[i] + NOISE_N;\
+	b0 = ((int)t) & NOISE_BM;\
+	b1 = (b0+1) & NOISE_BM;\
+	r0 = t - (int)t;\
+	r1 = r0 - 1.;
+
+
 //---------------------------------------------------------------------
 // Static data
 
 TqInt		CqNoise::m_Init=TqFalse;
 CqRandom	CqNoise::m_random;
-float		CqNoise::m_valueTab[TABSIZE];
-float		CqNoise::m_gradientTab[TABSIZE*3];
-float		CqNoise::m_table[NENTRIES];
+TqInt		CqNoise::m_p[NOISE_B + NOISE_B + 2];
+TqFloat		CqNoise::m_g3[NOISE_B + NOISE_B + 2][3];
+TqFloat		CqNoise::m_g2[NOISE_B + NOISE_B + 2][2];
+TqFloat		CqNoise::m_g1[NOISE_B + NOISE_B + 2];
 
+
+static void normalize2(TqFloat v[2])
+{
+	TqFloat s;
+
+	s = sqrt(v[0] * v[0] + v[1] * v[1]);
+	v[0] = v[0] / s;
+	v[1] = v[1] / s;
+}
+
+static void normalize3(TqFloat v[3])
+{
+	TqFloat s;
+
+	s = sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+	v[0] = v[0] / s;
+	v[1] = v[1] / s;
+	v[2] = v[2] / s;
+}
 
 //---------------------------------------------------------------------
 /** 1D float noise.
@@ -49,20 +82,18 @@ float		CqNoise::m_table[NENTRIES];
 
 TqFloat CqNoise::FGNoise1(TqFloat x)
 {
-	TqInt ix;
-	TqFloat fx0, fx1;
-	TqFloat wx;
-	TqFloat vx0, vx1;
+	TqInt bx0, bx1;
+	TqFloat rx0, rx1, sx, t, u, v, vec[1];
 
-	ix = FLOOR(x);
-	fx0 = x - ix;
-	fx1 = fx0 - 1;
-	wx = SMOOTHSTEP(fx0);
+	vec[0] = x;
 
-	vx0 = glattice(ix,0,0,fx0,0,0);
-	vx1 = glattice(ix+1,0,0,fx1,0,0);
+	setup(0, bx0,bx1, rx0,rx1);
+	sx = s_curve(rx0);
 
-	return(LERP(wx, vx0, vx1));
+	u = rx0 * m_g1[m_p[bx0]];
+	v = rx1 * m_g1[m_p[bx1]];
+
+	return(LERP(sx, u, v));
 }
 
 
@@ -72,29 +103,38 @@ TqFloat CqNoise::FGNoise1(TqFloat x)
 
 TqFloat CqNoise::FGNoise2(TqFloat x, TqFloat y)
 {
-	TqInt ix, iy;
-	TqFloat fx0, fx1, fy0, fy1;
-	TqFloat wx, wy;
-	TqFloat vx0, vx1, vy0, vy1;
+	TqInt bx0, bx1, by0, by1, b00, b10, b01, b11;
+	TqFloat rx0, rx1, ry0, ry1, *q, sx, sy, a, b, t, u, v, vec[2];
+	register i, j;
 
-	ix = FLOOR(x);
-	fx0 = x - ix;
-	fx1 = fx0 - 1;
-	wx = SMOOTHSTEP(fx0);
+	vec[0]=x;
+	vec[1]=y;
 
-	iy = FLOOR(y);
-	fy0 = y - iy;
-	fy1 = fy0 - 1;
-	wy = SMOOTHSTEP(fy0);
+	setup(0, bx0,bx1, rx0,rx1);
+	setup(1, by0,by1, ry0,ry1);
 
-	vx0 = glattice(ix,iy,0,fx0,fy0,0);
-	vx1 = glattice(ix+1,iy,0,fx1,fy0,0);
-	vy0 = LERP(wx, vx0, vx1);
-	vx0 = glattice(ix,iy+1,0,fx0,fy1,0);
-	vx1 = glattice(ix+1,iy+1,0,fx1,fy1,0);
-	vy1 = LERP(wx, vx0, vx1);
+	i=m_p[bx0];
+	j=m_p[bx1];
 
-	return(LERP(wy, vy0, vy1));
+	b00=m_p[i+by0];
+	b10=m_p[j+by0];
+	b01=m_p[i+by1];
+	b11=m_p[j+by1];
+
+	sx=s_curve(rx0);
+	sy=s_curve(ry0);
+
+#define at2(rx,ry) ( rx * q[0] + ry * q[1] )
+
+	q=m_g2[b00]; u=at2(rx0,ry0);
+	q=m_g2[b10]; v=at2(rx1,ry0);
+	a=LERP(sx, u, v);
+
+	q=m_g2[b01]; u=at2(rx0,ry1);
+	q=m_g2[b11]; v=at2(rx1,ry1);
+	b=LERP(sx, u, v);
+
+	return(LERP(sy, a, b));
 }
 
 
@@ -104,43 +144,53 @@ TqFloat CqNoise::FGNoise2(TqFloat x, TqFloat y)
 
 TqFloat CqNoise::FGNoise3(TqFloat x, TqFloat y, TqFloat z)
 {
-	TqInt ix, iy, iz;
-	TqFloat fx0, fx1, fy0, fy1, fz0, fz1;
-	TqFloat wx, wy, wz;
-	TqFloat vx0, vx1, vy0, vy1, vz0, vz1;
+	TqInt bx0, bx1, by0, by1, bz0, bz1, b00, b10, b01, b11;
+	TqFloat rx0, rx1, ry0, ry1, rz0, rz1, *q, sy, sz, a, b, c, d, t, u, v, vec[3];
+	register i, j;
 
-	ix = FLOOR(x);
-	fx0 = x - ix;
-	fx1 = fx0 - 1;
-	wx = SMOOTHSTEP(fx0);
+	vec[0]=x;
+	vec[1]=y;
+	vec[2]=z;
 
-	iy = FLOOR(y);
-	fy0 = y - iy;
-	fy1 = fy0 - 1;
-	wy = SMOOTHSTEP(fy0);
+	setup(0, bx0,bx1, rx0,rx1);
+	setup(1, by0,by1, ry0,ry1);
+	setup(2, bz0,bz1, rz0,rz1);
 
-	iz = FLOOR(z);
-	fz0 = z - iz;
-	fz1 = fz0 - 1;
-	wz = SMOOTHSTEP(fz0);
+	i=m_p[bx0];
+	j=m_p[bx1];
 
-	vx0 = glattice(ix,iy,iz,fx0,fy0,fz0);
-	vx1 = glattice(ix+1,iy,iz,fx1,fy0,fz0);
-	vy0 = LERP(wx, vx0, vx1);
-	vx0 = glattice(ix,iy+1,iz,fx0,fy1,fz0);
-	vx1 = glattice(ix+1,iy+1,iz,fx1,fy1,fz0);
-	vy1 = LERP(wx, vx0, vx1);
-	vz0 = LERP(wy, vy0, vy1);
+	b00=m_p[i+by0];
+	b10=m_p[j+by0];
+	b01=m_p[i+by1];
+	b11=m_p[j+by1];
 
-	vx0 = glattice(ix,iy,iz+1,fx0,fy0,fz1);
-	vx1 = glattice(ix+1,iy,iz+1,fx1,fy0,fz1);
-	vy0 = LERP(wx, vx0, vx1);
-	vx0 = glattice(ix,iy+1,iz+1,fx0,fy1,fz1);
-	vx1 = glattice(ix+1,iy+1,iz+1,fx1,fy1,fz1);
-	vy1 = LERP(wx, vx0, vx1);
-	vz1 = LERP(wy, vy0, vy1);
+	t =s_curve(rx0);
+	sy=s_curve(ry0);
+	sz=s_curve(rz0);
 
-	return(LERP(wz, vz0, vz1));
+#define at3(rx,ry,rz) ( rx * q[0] + ry * q[1] + rz * q[2] )
+
+	q=m_g3[b00+bz0]; u=at3(rx0,ry0,rz0);
+	q=m_g3[b10+bz0]; v=at3(rx1,ry0,rz0);
+	a=LERP(t, u, v);
+
+	q=m_g3[b01+bz0]; u=at3(rx0,ry1,rz0);
+	q=m_g3[b11+bz0]; v=at3(rx1,ry1,rz0);
+	b=LERP(t, u, v);
+
+	c=LERP(sy, a, b);
+
+	q=m_g3[b00+bz1]; u=at3(rx0,ry0,rz1);
+	q=m_g3[b10+bz1]; v=at3(rx1,ry0,rz1);
+	a=LERP(t, u, v);
+
+	q=m_g3[b01+bz1]; u=at3(rx0,ry1,rz1);
+	q=m_g3[b11+bz1]; v=at3(rx1,ry1,rz1);
+	b=LERP(t, u, v);
+
+	d=LERP(sy, a, b);
+
+	return(LERP(sz, c, d));
 }
 
 
@@ -153,68 +203,40 @@ void CqNoise::init(TqInt seed)
 {
     m_random.Reseed(seed);
 
-    TqFloat *table = m_valueTab;
-    TqInt i;
-	for(i=0; i < TABSIZE; i++)
-        *table++=1.0-2.0*m_random.RandomFloat();
+	TqInt i,j,k;
 
-	// Fill in the value noise table.
-	for(i=0; i<NENTRIES; i++)
+	for(i=0; i<NOISE_B; i++)
 	{
-		TqFloat x=i/(TqFloat)SAMPRATE;
-		x=sqrt(x);
-        if(x<1)
-			m_table[i]=0.5*(2+x*x*(-5+x*3));
-		else
-			m_table[i]=0.5*(4+x*(-8+x*(5-x)));
-    }
+		m_p[i]=i;
+		m_g1[i]=static_cast<TqFloat>((static_cast<TqInt>(m_random.RandomInt())%(NOISE_B+NOISE_B))-NOISE_B)/NOISE_B;
+		for(j=0; j<2; j++)
+			m_g2[i][j]=static_cast<TqFloat>((static_cast<TqInt>(m_random.RandomInt())%(NOISE_B+NOISE_B))-NOISE_B)/NOISE_B;
+		normalize2(m_g2[i]);
 
-	// Fill in the gradien noise table.
-    table=m_gradientTab;
-    for(i = 0; i < TABSIZE; i++)
+		for(j=0; j<3; j++)
+			m_g3[i][j]=static_cast<TqFloat>((static_cast<TqInt>(m_random.RandomInt())%(NOISE_B+NOISE_B))-NOISE_B)/NOISE_B;
+		normalize3(m_g3[i]);
+	}
+
+	while(--i) 
 	{
-		TqFloat z=1.0-2.0*m_random.RandomFloat();
-		// r is radius of x,y circle
-		TqFloat r=sqrt(1-z*z);
-		// theta is angle in (x,y)
-		TqFloat theta=2*RI_PI*m_random.RandomFloat();
-		*table++=r*cos(theta);
-		*table++=r*sin(theta);
-		*table++=z;
-    }
+		k=m_p[i];
+		m_p[i]=m_p[j=static_cast<TqInt>(m_random.RandomInt())%NOISE_B];
+		m_p[j]=k;
+	}
+
+	for(i=0; i<NOISE_B+2; i++) 
+	{
+		m_p[NOISE_B+i]=m_p[i];
+		m_g1[NOISE_B+i]=m_g1[i];
+		for(j=0; j<2; j++)
+			m_g2[NOISE_B+i][j]=m_g2[i][j];
+		for(j=0; j<3; j++)
+			m_g3[NOISE_B+i][j]=m_g3[i][j];
+	}
+
+	m_Init=1;
 } 
-
-
-//---------------------------------------------------------------------
-/** Random permutation table lookup.
- */
-
-TqFloat CqNoise::glattice(TqInt ix, TqInt iy, TqInt iz,TqFloat fx, TqFloat fy, TqFloat fz)
-{
-    TqFloat *g=&m_gradientTab[INDEX(ix,iy,iz)*3];
-    return(g[0]*fx + g[1]*fy + g[2]*fz);
-}
-
-
-unsigned char CqNoise::m_perm[TABSIZE] = {
-        225,155,210,108,175,199,221,144,203,116, 70,213, 69,158, 33,252,
-          5, 82,173,133,222,139,174, 27,  9, 71, 90,246, 75,130, 91,191,
-        169,138,  2,151,194,235, 81,  7, 25,113,228,159,205,253,134,142,
-        248, 65,224,217, 22,121,229, 63, 89,103, 96,104,156, 17,201,129,
-         36,  8,165,110,237,117,231, 56,132,211,152, 20,181,111,239,218,
-        170,163, 51,172,157, 47, 80,212,176,250, 87, 49, 99,242,136,189,
-        162,115, 44, 43,124, 94,150, 16,141,247, 32, 10,198,223,255, 72,
-         53,131, 84, 57,220,197, 58, 50,208, 11,241, 28,  3,192, 62,202,
-         18,215,153, 24, 76, 41, 15,179, 39, 46, 55,  6,128,167, 23,188,
-        106, 34,187,140,164, 73,112,182,244,195,227, 13, 35, 77,196,185,
-         26,200,226,119, 31,123,168,125,249, 68,183,230,177,135,160,180,
-         12,  1,243,148,102,166, 38,238,251, 37,240,126, 64, 74,161, 40,
-        184,149,171,178,101, 66, 29, 59,146, 61,254,107, 42, 86,154,  4,
-        236,232,120, 21,233,209, 45, 98,193,114, 78, 19,206, 14,118,127,
-         48, 79,147, 85, 30,207,219, 54, 88,234,190,122, 95, 67,143,109,
-        137,214,145, 93, 92,100,245,  0,216,186, 60, 83,105, 97,204, 52
-};
-
 
 
 END_NAMESPACE(Aqsis)

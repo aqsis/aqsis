@@ -54,14 +54,11 @@ START_NAMESPACE(Aqsis)
 #define	P3z	0.9
 
 
-#define TABSIZE          256
-#define TABMASK          (TABSIZE-1)
-#define PERM(x)          m_perm[(x)&TABMASK]
-#define INDEX(ix,iy,iz)  PERM((ix)+PERM((iy)+PERM(iz)))
-#define SAMPRATE 100  /* table entries per unit distance */
-#define NENTRIES (4*SAMPRATE+1)
-#define SMOOTHSTEP(x)  ((x)*(x)*(3 - 2*(x)))
 
+#define NOISE_B 0x100
+#define NOISE_BM 0xff
+
+#define NOISE_N 0x1000
 
 class CqNoise
 {
@@ -74,27 +71,6 @@ class CqNoise
 										}
 									}
 						~CqNoise()	{}
-
-	static	TqFloat		FNoise1(TqFloat x)							{return(FNoise3(x,0,0));}
-	static	TqFloat		FNoise2(TqFloat x, TqFloat y)				{return(FNoise3(x,y,0));}
-	static	TqFloat		FNoise3(const CqVector3D& v)				{return(FNoise3(v.x(),v.y(),v.z()));}
-	static	TqFloat		FNoise3(TqFloat x, TqFloat y, TqFloat z);
-
-	static	CqVector3D	PNoise1(TqFloat x)							{return(PNoise3(x,0,0));}
-	static	CqVector3D	PNoise2(TqFloat x, TqFloat y)				{return(PNoise3(x,y,0));}
-	static	CqVector3D	PNoise3(const CqVector3D& v)				{return(PNoise3(v.x(),v.y(),v.z()));}
-	static	CqVector3D	PNoise3(TqFloat x, TqFloat y, TqFloat z)	{
-																		CqVector3D res(
-																			FNoise3(x+P1x, y+P1y, z+P1z),
-																			FNoise3(x+P2x, y+P2y, z+P2z),
-																			FNoise3(x+P3x, y+P3y, z+P3z));
-																		return(res);
-																	}
-
-	static	CqColor		CNoise1(TqFloat x)							{return(CNoise3(x,0,0));}
-	static	CqColor		CNoise2(TqFloat x, TqFloat y)				{return(CNoise3(x,y,0));}
-	static	CqColor		CNoise3(const CqVector3D& v)				{return(CNoise3(v.x(),v.y(),v.z()));}
-	static	CqColor		CNoise3(TqFloat x, TqFloat y, TqFloat z)	{return(CqColor(PNoise3(x,y,z)));}
 
 	static	TqFloat		FGNoise1(TqFloat x);
 	static	TqFloat		FGNoise2(TqFloat x, TqFloat y);
@@ -134,12 +110,13 @@ class CqNoise
 
 	private:
 
-	static	float		m_valueTab[TABSIZE];
-	static	float		m_gradientTab[TABSIZE*3];
-    static	float		m_table[NENTRIES];
 	static	TqInt		m_Init;
 	static	CqRandom	m_random;
-	static	unsigned char CqNoise::m_perm[TABSIZE];
+
+	static	TqInt		m_p[NOISE_B + NOISE_B + 2];
+	static	TqFloat		m_g3[NOISE_B + NOISE_B + 2][3];
+	static	TqFloat		m_g2[NOISE_B + NOISE_B + 2][2];
+	static	TqFloat		m_g1[NOISE_B + NOISE_B + 2];
 };
 
 
