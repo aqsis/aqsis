@@ -185,6 +185,8 @@ RtVoid CqASCII::RiBegin(RtToken name)
     if (!out) {
 	throw CqError(RIE_NOFILE, RIE_ERROR, std::string("Unable to open file ")+std::string(name), TqFalse);
     }
+	out << "##RenderMan RIB-Structure 1.0" << endl;
+	out << "version 3.03" << endl;
 }
 RtVoid CqASCII::RiEnd(RtVoid)
 {
