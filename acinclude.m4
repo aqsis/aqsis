@@ -9,13 +9,13 @@ AC_DEFUN([HAVE_OPENGL],
 							OPENGL_LIB="$withval"
 						else
 							OPENGL_LIB=/usr/local/lib
-						fi])
+						fi],[OPENGL_LIB=/usr/local/lib])
 	AC_ARG_WITH(opengl_include,[  --with-opengl-include=DIR path to OpenGL includes [defaults to /usr/local/include]],
 						[if test "$withval" != no; then
 							OPENGL_INC="$withval"
 						else
 							OPENGL_INC=/usr/local/include
-						fi])
+						fi],[OPENGL_INC=/usr/local/include])
 	AC_SUBST(OPENGL_LIB)
 	AC_SUBST(OPENGL_INC)
   ])
