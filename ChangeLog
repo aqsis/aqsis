@@ -1,3 +1,216 @@
+2002-12-08  pgregory
+	* render/imagebuffer.cpp 1.81:
+	* render/nurbs.cpp 1.55:
+	* render/patch.cpp 1.48:
+	* render/quadrics.cpp 1.40:
+		Micro polygon dicing strategy improvements.
+		        - Michel Joron
+
+2002-12-06  pgregory
+	* aqsis/aqsis.cpp 1.37:
+	* libshaderexecenv/shadeops.cpp 1.19:
+	* render/lights.cpp 1.20:
+	* render/stats.cpp 1.19:
+		Fix crash with missing lightsource shader.
+		Fix some memory leaks.
+
+	* libri2rib/context.cpp 1.6:
+	* libri2rib/context.h 1.5:
+	* libri2rib/output.cpp 1.3:
+	* libri2rib/outstream.cpp 1.4:
+	* libri2rib/outstream.h 1.4:
+		Implement RiOption("RI2RIB_Output", "Pipe", (RtPointer)&fd, 
+		RI_NULL) support.
+
+2002-12-04  pgregory
+	* render/texturemap.cpp 1.58:
+		Reenable texture blurring.
+
+2002-12-03  pgregory
+	* render/lath.cpp 1.3:
+	* render/lath.h 1.3:
+	* render/ri.cpp 1.120:
+	* render/subdivision2.cpp 1.5:
+	* render/subdivision2.h 1.3:
+		More subdivision 2 changes.
+
+2002-12-02  pgregory
+	* librib2/bdec.cpp 1.9:
+	* librib2/bdec.h 1.6:
+		Optimise speed of RIB parser by very large amount.
+		        - Michel Joron.
+
+2002-12-01  pgregory
+	* render/ri.cpp 1.119:
+	* render/subdivision2.cpp 1.4:
+	* render/subdivision2.h 1.2:
+		More changes to new subdivision scheme.
+
+2002-11-30  pgregory
+	* aqsis/Makefile.am 1.17:
+	* aqsltell/Makefile.am 1.5:
+	* teqser/Makefile.am 1.9:
+		Fix dynamic linking library dependencies
+
+2002-11-29  pgregory
+	* aqsis/Makefile.am 1.16:
+	* aqsltell/Makefile.am 1.4:
+	* aqsltell/aqsltell.cpp 1.5:
+	* librib2/Makefile.am 1.9:
+	* librib2/scanner.l 1.18:
+	* libshadervm/Makefile.am 1.2:
+	* libslparse/Makefile.am 1.9:
+	* libslparse/scanner.l 1.7:
+	* render/Makefile.am 1.26:
+	* teqser/Makefile.am 1.8:
+		Try to make POSIX bison and flex stuff less version dependent.
+
+	* render/ri.cpp 1.118:
+	* render/subdivision2.cpp 1.3:
+		More changes to new subdivision scheme.
+
+2002-11-28  pgregory
+	* render/lath.cpp 1.2:
+	* render/lath.h 1.2:
+	* render/ri.cpp 1.117:
+	* render/subdivision2.cpp 1.2:
+		Changes to the new subdivision implementation.
+
+2002-11-26  pgregory
+	* thirdparty/libz.lib 1.1:
+		Added to allow linking with the libri2rib.lib
+
+	* render/ri.h 1.14:
+		Clean up ready for release with the binary installer.
+
+2002-11-25  pgregory
+	* render/texturemap.cpp 1.57:
+		Make sure missing shadow map reports no shadowing.
+		        - Michel Joron
+
+	* libshadervm/libshadervm.dsp 1.4:
+	* libshadervm/shaderstack.cpp 1.5:
+	* libshadervm/shaderstack.h 1.18:
+	* libshadervm/shadervm.cpp 1.20:
+	* libshadervm/shadervm1.cpp 1.1:
+	* libshadervm/shadervm2.cpp 1.1:
+		More optimisations and split the main VM instruction set across multiple cpp files to improve compiler time.
+		        - Michel Joron
+
+2002-11-24  pgregory
+	* render/lath.cpp 1.1:
+	* render/lath.h 1.1:
+	* render/libaqsis.dsp 1.28:
+	* render/ri.cpp 1.116:
+	* render/subdivision2.cpp 1.1:
+	* render/subdivision2.h 1.1:
+		Added code for experimental rewrite of subdivision surfaces.
+
+2002-11-24  oedo808
+	* libri2rib/Makefile.am 1.7:
+		added COPYING_LGPL to EXTRA_DIST
+
+2002-11-22  pgregory
+	* render/subdivision.cpp 1.46:
+	* render/subdivision.h 1.22:
+		Stabilise slightly in the case of errors in meshes, or
+		subdivision.
+
+2002-11-21  oedo808
+	* README 1.6:
+	* libri2rib/COPYING_LGPL 1.1:
+	* libri2rib/ascii.cpp 1.10:
+	* libri2rib/ascii.h 1.9:
+	* libri2rib/binary.cpp 1.3:
+	* libri2rib/binary.h 1.2:
+	* libri2rib/context.cpp 1.5:
+	* libri2rib/context.h 1.4:
+	* libri2rib/dictionary.cpp 1.5:
+	* libri2rib/dictionary.h 1.5:
+	* libri2rib/error.cpp 1.6:
+	* libri2rib/error.h 1.5:
+	* libri2rib/inlineparse.cpp 1.5:
+	* libri2rib/inlineparse.h 1.5:
+	* libri2rib/options.h 1.2:
+	* libri2rib/output.cpp 1.2:
+	* libri2rib/output.h 1.2:
+	* libri2rib/outstream.cpp 1.3:
+	* libri2rib/outstream.h 1.3:
+	* libri2rib/plstore.cpp 1.4:
+	* libri2rib/plstore.h 1.4:
+	* libri2rib/ri.cpp 1.10:
+	* libri2rib/tokens.cpp 1.4:
+		License change for libri2rib. libri2rib is now under the LGPL
+
+2002-11-20  pgregory
+	* libshadervm/shaderstack.h 1.17:
+		Fix 'dup' function, statements such as a=b=1; were not working
+		because of this bug.
+
+2002-11-19  pgregory
+	* libshaderexecenv/shadeops.cpp 1.18:
+		Fix the phong function to allocate temp variables correctly, 
+		and clean up after itself.
+
+	* librib2/parser.y 1.23:
+	* libshadervm/shaderstack.cpp 1.4:
+	* libshadervm/shaderstack.h 1.16:
+	* libshadervm/shadervm.cpp 1.19:
+	* libshadervm/shadervm.h 1.19:
+		More inner loop optimisations, and hash usage.
+		        - Michel Joron
+
+2002-11-15  pgregory
+	* libshadervm/shadervm.cpp 1.18:
+	* render/texturemap.cpp 1.56:
+	* render/trimcurve.cpp 1.11:
+		More inner loop optimisations.
+		        - Michel Joron
+
+2002-11-14  pgregory
+	* libaqsistypes/color.h 1.7:
+	* render/attributes.cpp 1.23:
+	* render/attributes.h 1.20:
+	* render/genpoly.cpp 1.4:
+	* render/micropolygon.cpp 1.55:
+	* render/nurbs.cpp 1.54:
+	* render/options.h 1.23:
+	* render/parameters.h 1.25:
+	* render/patch.cpp 1.47:
+	* render/polygon.cpp 1.33:
+	* render/renderer.cpp 1.46:
+	* render/stats.h 1.22:
+	* render/surface.cpp 1.31:
+		More optimisations and improvements in inner loops.
+		        - Michel Joron.
+
+2002-11-13  pgregory
+	* render/csgtree.cpp 1.7:
+	* render/csgtree.h 1.8:
+	* render/imagebuffer.cpp 1.79:
+	* render/imagebuffer.h 1.28:
+	* render/occlusion.cpp 1.3:
+	* render/occlusion.h 1.3:
+	* render/ri.cpp 1.115:
+	* render/stats.cpp 1.18:
+	* render/stats.h 1.21:
+		Lots more inner loop optimisations.
+		        - Michel Joron
+
+	* render/imagebuffer.cpp 1.80:
+	* render/imagebuffer.h 1.29:
+		More optimisations, this time avoiding unnecessary initialisation of empty buckets.
+		        - Michel Joron.
+
+2002-11-12  pseudonym
+	* render/imagebuffer.cpp 1.78:
+		printf -> std::cout
+
+2002-11-11  pgregory
+	* librib2/tests/ribprinter.cpp 1.4:
+	* librib2/tests/ribscanner.cpp 1.4:
+		*** empty log message ***
+
 2002-11-09  pgregory
 	* render/version.h 1.17:
 		Update version number
@@ -3892,11 +4105,11 @@
 		preprocessor are reported.
 
 2001-10-29  pgregory
-	* aqsis/aqsis.cpp 1.17:
-		Debug version automatically outputs statistics.
-
 	* render/shadeops.cpp 1.11:
 		Fix to faceforward by Michel Joron
+
+	* aqsis/aqsis.cpp 1.17:
+		Debug version automatically outputs statistics.
 
 	* render/texturemap.cpp 1.15:
 		Fix by Michel Joron
