@@ -251,6 +251,7 @@ int main( int argc, const char** argv )
 	if ( g_version )
 	{
 		version( std::cout );
+		std::cout << "compiled " << __DATE__ << " " << __TIME__  << std::endl;
 		exit( 0 );
 	}
 
