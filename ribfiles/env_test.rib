@@ -15,7 +15,7 @@ Rotate -20 1 0 0
 Option "limits" "eyesplits" [3]
 Sides 1
 
-MakeCubeFaceEnvironment "px.tif" "nx.tif" "py.tif" "ny.tif" "pz.tif" "nz.tif" "test.env" 90 "box" 1 1 
+MakeCubeFaceEnvironment "..\images\px.tif" "..\images\nx.tif" "..\images\py.tif" "..\images\ny.tif" "..\images\pz.tif" "..\images\nz.tif" "test.env" 90 "box" 1 1 
 
 WorldBegin
       
