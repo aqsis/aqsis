@@ -79,25 +79,13 @@ using namespace Aqsis;
 
 #endif // !AQSIS_SYSTEM_WIN32
 
-#ifdef AQSIS_SYSTEM_MACOSX
-
-	#include <GLUT/glut.h>
-	#include <GLUT/macxglut_utilities.h>
-	#include <ApplicationServices/ApplicationServices.h>
-	
-#else // AQSIS_SYSTEM_MACOSX
-
-	#include <GL/glut.h>
-
-#endif //!AQSIS_SYSTEM_MACOSX
-
 #include "tinyxml.h"
+#include "base64.h"
+#include "xmlmessages.h"
 
 #if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
 #include	<version.h>
 #endif
-
-int b64_decode(char *dest, const char *src);
 
 namespace
 {
@@ -301,15 +289,12 @@ SOCKET g_Socket;
 
 void BucketFunction()
 {
-	std::cout << "BucketFunction" << g_BucketsPerCol * g_BucketsPerRow << std::endl;
-
     TqInt	linelen = g_ImageWidth * g_Channels;
 
 	TqInt iBucket;
 	for(iBucket = 0; iBucket < (g_BucketsPerCol * g_BucketsPerRow); iBucket++)
 //	for(iBucket = (g_BucketsPerCol * g_BucketsPerRow ) -1; iBucket >= 0 ; iBucket--)
 	{
-		std::cout << "Request : " << iBucket << std::endl;
 		// Request the next bucket.
 		TiXmlDocument doc;
 		TiXmlElement root("aqsis:request");
@@ -320,29 +305,15 @@ void BucketFunction()
 		std::ostringstream strReq;
 		strReq << doc;
 
-		TqInt n = send(g_Socket, strReq.str().c_str(), strReq.str().length()+1, 0 );
+		sendXMLMessage(g_Socket, strReq.str().c_str());
 
 		// Wait for a response.
-		unsigned long msgLen;
-		recv(g_Socket, reinterpret_cast<char*>(&msgLen), sizeof(unsigned long), 0);
-		msgLen = ntohl(msgLen);
-		std::cout << "Message Length: " << msgLen << std::endl;
-		char* resp = new char[msgLen+1];
-		TqInt tot = 0, left = msgLen;
-		while(left > 0)
-		{
-			n = recv(g_Socket, &resp[tot], msgLen, 0);
-			tot += n;
-			left -= n;
-		}
-		resp[msgLen] = '\0';
+		char* resp = receiveXMLMessage(g_Socket);
 
 		// Parse the response
 		TiXmlDocument docResp;
 		docResp.Parse(resp);
-		delete[](resp);
-
-//		std::cout << resp << std::endl;
+		free(resp);
 
 		// Extract the format attributes.
 		TiXmlHandle respHandle(&docResp);
@@ -355,7 +326,6 @@ void BucketFunction()
 				(bucketElement->QueryIntAttribute("xmaxp1", &xmaxp1) == TIXML_SUCCESS) && 
 				(bucketElement->QueryIntAttribute("ymaxp1", &ymaxp1) == TIXML_SUCCESS) )
 			{
-				std::cout << "Bucket: " << iBucket << " - " << xmin << ", " << ymin << ", " << xmaxp1 << ", " << ymaxp1 << std::endl;
 				TiXmlNode* dataNode = bucketElement->FirstChild();
 				TiXmlText* data = dataNode->ToText();
 				if(data)
@@ -408,21 +378,19 @@ void BucketFunction()
 					}
 					delete[](dataBin);
 				}
-				else
-					std::cout << "Empty!" << std::endl;
-
 			}
 			else
 			{
 				std::cerr << "Error: Invalid response from Aqsis1" << std::endl;
+				exit(-1);
 			}
 		}
 		else
 		{
 			std::cerr << "Error: Invalid response from Aqsis2" << std::endl;
+			exit(-1);
 		}
 	}
-	std::cout << "Exiting bucket thread" << std::endl;
 	WriteTIFF(g_Filename);
 	CloseSocket(g_Socket);
 }
@@ -438,15 +406,16 @@ void ProcessFormat()
 	doc.InsertEndChild(root);
 	std::ostringstream strReq;
 	strReq << doc;
-	TqInt n = send(g_Socket, strReq.str().c_str(), strReq.str().length()+1, 0 );
+
+	sendXMLMessage(g_Socket, strReq.str().c_str());
 
 	// Wait for a response.
-	char resp[255];
-	n = recv(g_Socket, resp, 255, 0);
-	resp[n] = '\0';
+	char* resp = receiveXMLMessage(g_Socket);
 
 	// Parse the response
 	respDoc.Parse(resp);
+	
+	free(resp);
 	
 	// Extract the format attributes.
 	TiXmlHandle respHandle(&respDoc);
@@ -455,8 +424,6 @@ void ProcessFormat()
 	{
 		formatElement->Print(stdout,0);
 		TiXmlAttribute* pAttr = formatElement->FirstAttribute();
-		//if(pAttr)	pAttr->Print(stdout,0);
-		//else		std::cout << "No attributes!" << std::endl;
 		formatElement->QueryIntAttribute("xres", &g_ImageWidth);
 		formatElement->QueryIntAttribute("yres", &g_ImageHeight);
 		formatElement->QueryIntAttribute("cropxmin", &g_CWXmin);
@@ -466,11 +433,6 @@ void ProcessFormat()
 		formatElement->QueryIntAttribute("bucketsperrow", &g_BucketsPerRow);
 		formatElement->QueryIntAttribute("bucketspercol", &g_BucketsPerCol);
 		formatElement->QueryIntAttribute("elementsize", &g_ElementSize);
-		std::cout << g_ImageWidth << ", " << g_ImageHeight << ", " <<
-					 g_CWXmin << ", " << g_CWXmax << ", " <<
-					 g_CWYmin << ", " << g_CWYmax << ", " <<
-					 g_BucketsPerRow << ", " << g_BucketsPerCol << ", " << std::endl;
-				 
 		g_PixelsProcessed = 0;
 		g_Channels = 3;
 
@@ -527,85 +489,8 @@ int main( int argc, char** argv )
 	// Create a thread to request buckets from Aqsis
 	boost::thread thrd(&BucketFunction);
 	thrd.join();
-	std::cout << "Press any key..." << std::ends;
 	std::cin.ignore(std::cin.rdbuf()->in_avail() + 1);
 
     return 0;
 }
 
-
-static const char *b64_tbl =
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-static const char b64_pad = '=';
-
-/* base64 decode a group of 4 input chars into a group of between 0 and
- * 3
- * output chars */
-static void decode_group(char output[], const char input[], int *n)
-{
-	char *t1,*t2;
-	*n = 0;
-
-	if (input[0] == b64_pad)
-		return;
-
-	if (input[1] == b64_pad) 
-	{
-		fprintf(stderr, "Warning: orphaned bits ignored.\n");
-		return;
-	}
-
-	t1 = strchr(b64_tbl, input[0]);
-	t2 = strchr(b64_tbl, input[1]);
-
-	if ((t1 == NULL) || (t2 == NULL)) 
-	{
-		fprintf(stderr, "Warning: garbage found, giving up.\n");
-		return;
-	}
-
-	output[(*n)++] = ((t1 - b64_tbl) << 2) | ((t2 - b64_tbl) >> 4);
-
-	if (input[2] == b64_pad)
-		return;
-
-	t1 = strchr(b64_tbl, input[2]);
-
-	if (t1 == NULL) 
-	{
-		fprintf(stderr, "Warning: garbage found, giving up.\n");
-		return;
-	}
-
-	output[(*n)++] = ((t2 - b64_tbl) << 4) | ((t1 - b64_tbl) >> 2);
-
-	if (input[3] == b64_pad)
-		return;
-
-	t2 = strchr(b64_tbl, input[3]);
-
-	if (t2 == NULL) 
-	{
-		fprintf(stderr, "Warning: garbage found, giving up.\n");
-		return;
-	}
-
-	output[(*n)++] = ((t1 - b64_tbl) << 6) | (t2 - b64_tbl);
-
-	return;
-}
-
-int b64_decode(char *dest, const char *src)
-{
-	int len;
-	int outsz = 0;
-
-	while (*src) 
-	{
-		decode_group(dest + outsz, src, &len);
-		src += 4;
-		outsz += len;
-	}
-
-	return outsz;
-}

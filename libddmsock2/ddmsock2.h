@@ -80,7 +80,6 @@ public:
     virtual TqBool	fDisplayNeeds( const TqChar* var );
     virtual TqInt	Uses();
 
-//    void	LoadDisplayLibrary( CqDDClient& dd, std::map<std::string, void*>& mapParams );
     void	InitialiseDisplayNameMap();
 
 	CqBucketDiskStore&	getDiskStore()

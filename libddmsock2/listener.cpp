@@ -65,13 +65,13 @@ typedef sockaddr* PSOCKADDR;
 #include	"displaydriver.h"
 #include	<boost/bind.hpp>
 #include	"tinyxml.h"
+#include	"base64.h"
+#include	"xmlmessages.h"
 
 #include	<boost/ref.hpp>
 
 START_NAMESPACE( Aqsis )
 
-
-int b64_encode(char *dest, const char *src, int len);
 
 //---------------------------------------------------------------------
 /** Default constructor.
@@ -218,16 +218,14 @@ CqSender::CqSender(int socket, CqDDManager* manager)
 
 void CqSender::operator()()
 {
-//	std::cerr << debug << "Sender thread started: " << reinterpret_cast<long>(this) << std::endl;
-	char req[255];
-	int n;
-	while(( n = recv( m_Socket, req, 255, 0 ) ) != 0 )
+	char* req;
+	while(( req = receiveXMLMessage(m_Socket) ) != 0 )
 	{
-		req[n] = '\0';
-
 		// Parse the XML message with TinyXML
 		TiXmlDocument request;
 		request.Parse(req);
+
+		free(req);
 
 		TiXmlHandle reqHandle(&request);
 		TiXmlElement* reqElement;
@@ -256,7 +254,8 @@ void CqSender::operator()()
 			std::ostringstream strFormat;
 			strFormat << doc;
 
-			send(m_Socket, strFormat.str().c_str(), strFormat.str().length(), 0 );
+			// Send the response to the client
+			sendXMLMessage(m_Socket, strFormat.str().c_str());
 		}
 		else if((reqElement = reqHandle.FirstChild("aqsis:request").FirstChild("aqsis:bucket").Element()) != NULL)
 		{
@@ -292,53 +291,13 @@ void CqSender::operator()()
 			root.InsertEndChild(bucket);
 			doc.InsertEndChild(root);
 
-			std::ostringstream strFormat;
-			strFormat << doc;
+			std::ostringstream strBucket;
+			strBucket << doc;
 
-			unsigned long msgLen = htonl(strFormat.str().length());
-			send(m_Socket, reinterpret_cast<const char*>(&msgLen), sizeof(unsigned long), 0);
-			send(m_Socket, strFormat.str().c_str(), strFormat.str().length(), 0 );
+			// Send the bucket to the client.
+			sendXMLMessage(m_Socket, strBucket.str().c_str());
 		}
 	}
-//	std::cerr << debug << "Sender thread ended: " << reinterpret_cast<long>(this) << std::endl;
 }
-
-static const char *b64_tbl = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-static const char b64_pad = '=';
-
-/* base64 encode a group of between 1 and 3 input chars into a group of
- * 4 output chars */
-static void encode_group(char output[], const char input[], int n)
-{
-	unsigned char ingrp[3];
-
-	ingrp[0] = n > 0 ? input[0] : 0;
-	ingrp[1] = n > 1 ? input[1] : 0;
-	ingrp[2] = n > 2 ? input[2] : 0;
-
-	/* upper 6 bits of ingrp[0] */
-	output[0] = n > 0 ? b64_tbl[ingrp[0] >> 2] : b64_pad;
-	/* lower 2 bits of ingrp[0] | upper 4 bits of ingrp[1] */
-	output[1] = n > 0 ? b64_tbl[((ingrp[0] & 0x3) << 4) | (ingrp[1] >> 4)] : b64_pad;
-	/* lower 4 bits of ingrp[1] | upper 2 bits of ingrp[2] */
-	output[2] = n > 1 ? b64_tbl[((ingrp[1] & 0xf) << 2) | (ingrp[2] >> 6)] : b64_pad;
-	/* lower 6 bits of ingrp[2] */
-	output[3] = n > 2 ? b64_tbl[ingrp[2] & 0x3f] : b64_pad;
-}
-
-int b64_encode(char *dest, const char *src, int len)
-{
-	int outsz = 0;
-
-	while (len > 0) 
-	{
-		encode_group(dest + outsz, src, len > 3 ? 3 : len);
-		len -= 3;
-		src += 3;
-		outsz += 4;
-	}
-	return outsz;
-}
-
 
 END_NAMESPACE( Aqsis )

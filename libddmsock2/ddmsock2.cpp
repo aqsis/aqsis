@@ -121,20 +121,100 @@ TqInt CqDDManager::Shutdown()
 
 TqInt CqDDManager::AddDisplay( const TqChar* name, const TqChar* type, const TqChar* mode, TqInt modeID, TqInt dataOffset, TqInt dataSize, std::map<std::string, void*> mapOfArguments )
 {
-/*    CqDDClient New( name, type, mode, modeID, dataOffset, dataSize );
-    TqInt result = 0;
-    m_aDisplayRequests.push_back( New );
-    try
+    if ( !g_fDisplayMapInitialised )
+        InitialiseDisplayNameMap();
+
+    // strDriverFileAndArgs: Second part of the ddmsock.ini line (e.g. "mydriver.exe --foo")
+    CqString strDriverFileAndArgs = g_mapDisplayNames[ type ];
+    // strDriverFile: Only the executable without arguments (e.g. "mydriver.exe")
+    CqString strDriverFile = GetStringField( strDriverFileAndArgs, 0 );
+
+	// Display type not found.
+    if ( strDriverFile.empty() )
     {
-        LoadDisplayLibrary( m_aDisplayRequests.back(), mapOfArguments );
+        //CqBasicError( ErrorID_DisplayDriver, Severity_Normal, "Invalid display type. \"" + dd.strType + "\"" );
+        throw( CqString( "Invalid display type \"" ) + type + CqString( "\"" ) );
     }
-    catch( CqString str )
+
+    // Try to open the file to see if it's really there
+    CqRiFile fileDriver( strDriverFile.c_str(), "display" );
+
+    if ( !fileDriver.IsValid() )
     {
-        std::cerr << error << str.c_str() << std::endl;
-        result = 1;
-        m_aDisplayRequests.pop_back();
+        //CqBasicError( 0, 0, ( "Error loading display driver [ " + strDriverFile + " ]" ).c_str() );
+        throw( CqString( "Error loading display driver [ " ) + strDriverFile + CqString( " ]" ) );
     }
-    return ( result );*/
+
+    CqString strDriverPathAndFile = fileDriver.strRealName();
+
+    const int maxargs = 20;
+    const char* args[ maxargs ];
+    std::string argstrings[ maxargs ];
+    int i;
+
+    // Prepare an arry with the arguments
+    // (the first argument (the file name) begins at position 2 because
+    // the Windows version might have to call cmd.exe which will be
+    // prepended to the argument list)
+    args[ 2 ] = strDriverFile.c_str();
+    args[ 3 ] = NULL;
+    args[ maxargs - 1 ] = NULL;
+    for ( i = 1; i < maxargs - 3; i++ )
+    {
+        argstrings[ i ] = GetStringField( strDriverFileAndArgs, i );
+        if ( argstrings[ i ].length() == 0 )
+        {
+            args[ i + 2 ] = NULL;
+            break;
+        }
+        args[ i + 2 ] = argstrings[ i ].c_str();
+    }
+
+
+#ifdef AQSIS_SYSTEM_WIN32
+
+    // Set the AQSIS_DD_PORT environment variable
+//    SetEnvironmentVariable( "AQSIS_DD_PORT", ToString(m_DDServer.getPort()).c_str() );
+
+    // Spawn the driver (1st try)...
+    TqInt ProcHandle = _spawnv( _P_NOWAITO, strDriverPathAndFile.c_str(), &args[ 2 ] );
+    // If it didn't work try a second time via "cmd.exe"...
+    if ( ProcHandle < 0 )
+    {
+        args[ 0 ] = "cmd.exe";
+        args[ 1 ] = "/C";
+        args[ 2 ] = strDriverPathAndFile.c_str();
+        ProcHandle = _spawnvp( _P_NOWAITO, "cmd.exe", args );
+    }
+    if ( ProcHandle < 0 )
+    {
+        //CqBasicError( 0, 0, "Error spawning display driver process" );
+        throw( CqString( "Error spawning display driver process" ) );
+    }
+
+#else // AQSIS_SYSTEM_WIN32
+
+    // Set the AQSIS_DD_PORT environment variable
+//    putenv( const_cast<char*>(("AQSIS_DD_PORT=" + ToString(m_DDServer.getPort())).c_str()));
+    
+	signal( SIGCHLD, sig_chld );
+    // Spawn the driver
+    const int forkresult = fork();
+    // Start the driver in the child process
+    if ( 0 == forkresult )
+    {
+        //execlp( strDriverPathAndFile.c_str(), strDriverFile.c_str(), NULL );
+        execvp( strDriverPathAndFile.c_str(), ( char * const * ) ( args + 2 ) );
+        /* error checking? */
+        return ;
+    }
+    else if ( -1 == forkresult )
+    {
+        //CqBasicError( 0, 0, "Error forking display driver process" );
+        throw( CqString( "Error forking display driver process" ) );
+    }
+#endif // !AQSIS_SYSTEM_WIN32
+
 	return(0);
 }
 
@@ -376,11 +456,11 @@ void CqDDManager::InitialiseDisplayNameMap()
 
     ddmsock_path.append( "/" );
 
-    ddmsock_path.append( "ddmsock.ini" );
+    ddmsock_path.append( "ddmsock2.ini" );
 
     CqString strConfigFile = ddmsock_path;
 #else
-    CqString strConfigFile = "ddmsock.ini";
+    CqString strConfigFile = "ddmsock2.ini";
 #endif /* AQSIS_SYSTEM_POSIX */
 
     CqRiFile fileINI( strConfigFile.c_str(), "display" );
