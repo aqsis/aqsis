@@ -654,7 +654,7 @@ void CqTextureMap::GetSample( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, st
 
 		// Linearly interpolate between low_color and high_color by dinterp.
 
-		TqFloat dinterp = ( MAX( umapsize, vmapsize ) * d ) - 1;
+		TqFloat dinterp = ( (idv > 1)? umapsize * d : vmapsize * d ) - 1;
 		for ( c = 0; c < m_SamplesPerPixel; c++ )
 			val[ c ] = m_low_color[ c ] + dinterp * ( m_high_color[ c ] - m_low_color[ c ] );
 
