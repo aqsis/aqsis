@@ -5,7 +5,7 @@
  *	@brief	Declare the interface which all shaders must implement.
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2002/08/19 15:37:47 $
+ *	Last change date:	$Date: 2002/10/18 08:10:16 $
  */
 //------------------------------------------------------------------------------
 
@@ -119,6 +119,10 @@ struct IqShader
 		/** Function to destroy temporary storage created with CreateTemporaryStorage.
 		 */
 		virtual void DeleteTemporaryStorage( IqShaderData* pData ) = 0;
+
+		/** Use the default surface shader for this implementation.
+		 */
+		virtual void DefaultSurface( ) = 0;
 };
 
 

@@ -298,6 +298,9 @@ class CqRenderer : public IqRenderer
 			return ( m_TransformStack );
 		}
 
+		void	RegisterShader( const char* strName, EqShaderType type, IqShader* pShader );
+		CqShaderRegister* FindShader( const char* strName, EqShaderType type );
+
 		/** Set the locally stored render time.
 		 * \param time System time value representing the seconds taken to render.
 		 */ 
@@ -309,10 +312,6 @@ class CqRenderer : public IqRenderer
 		//						void		PrintStats(TqInt level);
 
 	private:
-		void	RegisterShader( const char* strName, EqShaderType type, IqShader* pShader );
-		CqShaderRegister* FindShader( const char* strName, EqShaderType type );
-
-
 		CqContext*	m_pconCurrent;					///< Pointer to the current context.
 		CqStats	m_Stats;						///< Global statistics.
 		CqAttributes	m_attrDefault;					///< Default attributes.

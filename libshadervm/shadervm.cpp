@@ -24,6 +24,7 @@
 */
 
 #include	<iostream>
+#include	<sstream>
 
 #include	<ctype.h>
 
@@ -586,6 +587,52 @@ IqShaderData* CqShaderVM::CreateTemporaryStorage(EqVariableType type, EqVariable
 void CqShaderVM::DeleteTemporaryStorage( IqShaderData* pData )
 {
 	delete( pData );
+}
+
+
+void CqShaderVM::DefaultSurface()
+{
+	char	pDefSurfaceShader[] = " \
+surface \
+segment Data \
+USES 460803 \
+param uniform  float Kd \
+param uniform  float Ka \
+varying  float d \
+segment Init \
+	pushif 0.8 \
+	pop Kd \
+	pushif 0.2 \
+	pop Ka \
+segment Code \
+	pushv N \
+	normalize \
+	pushv I \
+	normalize \
+	dotpp \
+	pop d \
+	pushv d \
+	pushv d \
+	pushv Kd \
+	mulff \
+	mulff \
+	pushv Ka \
+	addff \
+	setfc \
+	pushv Cs \
+	mulcc \
+	pop Ci \
+	pushv Os \
+	pop Oi \
+	pushv Oi \
+	pushv Ci \
+	mulcc \
+	pop Ci \
+	";
+	
+	std::stringstream defStream(pDefSurfaceShader);
+
+	LoadProgram(&defStream);
 }
 
 //---------------------------------------------------------------------

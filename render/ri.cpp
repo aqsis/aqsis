@@ -49,6 +49,8 @@
 #include	"rifile.h"
 #include	"librib2ri.h"
 #include        "plugins.h"
+#include	"shadervm.h"
+
 #ifndef    AQSIS_SYSTEM_WIN32
 #include        "unistd.h"
 #endif /* AQSIS_SYSTEM_WIN32 */
@@ -265,6 +267,15 @@ RtVoid	RiBegin( RtToken name )
 
 	// Clear any options.
 	QGetRenderContext() ->optCurrent().ClearOptions();
+
+	// Setup a default surface shader
+	CqShaderVM * pShader = new CqShaderVM();
+	pShader->SetstrName( "_def_" );
+	pShader->DefaultSurface();
+	pShader->matCurrent() = QGetRenderContext() ->matCurrent();
+	pShader->PrepareDefArgs();
+	QGetRenderContext() ->RegisterShader( "_def_", Type_Surface, pShader );
+	QGetRenderContext() ->pattrWriteCurrent() ->SetpshadSurface( pShader, QGetRenderContext() ->Time() );
 
 	return ;
 }

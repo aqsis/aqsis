@@ -937,6 +937,7 @@ IqShader* CqRenderer::CreateShader( const char* strName, EqShaderType type )
 			}
 			CqShaderVM * pShader = new CqShaderVM();
 			pShader->SetstrName( "null" );
+			pShader->DefaultSurface();
 			RegisterShader( strName, type, pShader );
 			return ( pShader );
 		}

@@ -164,6 +164,9 @@ class CqShader : public IqShader
 		virtual void DeleteTemporaryStorage( IqShaderData* pData )
 		{
 		}
+		virtual void DefaultSurface()
+		{
+		}
 
 	protected:
 		TqInt		m_Uses;			///< Bit vector representing the system variables used by this shader.

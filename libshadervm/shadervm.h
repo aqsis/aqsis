@@ -453,7 +453,7 @@ class _qShareC CqShaderVM : public CqShaderStack, public IqShader
 		virtual IqShaderData* CreateVariableArray(EqVariableType Type, EqVariableClass Class, const CqString& name, TqInt Count, TqBool fParameter = TqFalse );
 		virtual	IqShaderData* CreateTemporaryStorage(EqVariableType type, EqVariableClass _class);
 		virtual void DeleteTemporaryStorage( IqShaderData* pData );
-
+		virtual void DefaultSurface();
 
 		void	LoadProgram( std::istream* pFile );
 		void	Execute( IqShaderExecEnv* pEnv );
