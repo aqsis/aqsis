@@ -106,11 +106,10 @@ CqTransform::CqTransform( const CqTransformPtr& From )
 CqTransform::CqTransform( const CqTransformPtr& From, TqFloat time,
 	         const CqMatrix& matTrans, const Set& /* set */ )
     : CqMotionSpec<SqTransformation>( *From ),
-      m_IsMoving(TqFalse),
+      m_IsMoving( From->m_IsMoving ),
       m_StaticMatrix( From->m_StaticMatrix ),
       m_Handedness( From->m_Handedness )
 {
-	InitialiseDefaultObject( From );
 	SetTransform( time, matTrans );
 }
 
@@ -118,11 +117,10 @@ CqTransform::CqTransform( const CqTransformPtr& From, TqFloat time,
 CqTransform::CqTransform( const CqTransformPtr& From, TqFloat time,
 	         const CqMatrix& matTrans, const ConcatCurrent& /* concatCurrent */ )
     : CqMotionSpec<SqTransformation>( *From ),
-      m_IsMoving(TqFalse),
+      m_IsMoving( From->m_IsMoving ),
       m_StaticMatrix( From->m_StaticMatrix ),
       m_Handedness( From->m_Handedness )
 {
-	InitialiseDefaultObject( From );
 	ConcatCurrentTransform( time, matTrans );
 }
 
@@ -130,11 +128,10 @@ CqTransform::CqTransform( const CqTransformPtr& From, TqFloat time,
 CqTransform::CqTransform( const CqTransformPtr& From, TqFloat time,
 	         const CqMatrix& matTrans, const SetCurrent& /* setCurrent */ )
     : CqMotionSpec<SqTransformation>( *From ),
-      m_IsMoving(TqFalse),
+      m_IsMoving( From->m_IsMoving ),
       m_StaticMatrix( From->m_StaticMatrix ),
       m_Handedness( From->m_Handedness )
 {
-	InitialiseDefaultObject( From );
 	SetCurrentTransform( time, matTrans );
 }
 
