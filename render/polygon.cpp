@@ -277,7 +277,7 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 
 void CqPolygonBase::CreatePhantomData( CqParameter* pParam )
 {
-	assert( pParam->Class() == class_varying || pParam->Class() == class_vertex );
+	assert( pParam->Class() == class_varying || pParam->Class() == class_vertex || pParam->Class() == class_facevarying );
 
 	switch ( pParam->Type() )
 	{
