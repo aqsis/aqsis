@@ -331,6 +331,7 @@ class CqParameterTypedVarying : public CqParameterTyped<T, SLT>
 		 */
 		const	T&	operator[] ( const TqInt Index ) const
 		{
+			assert( Index < m_aValues.size() );
 			return( m_aValues[ Index ] );
 		}
 		/** Indexed access to values.
@@ -338,6 +339,7 @@ class CqParameterTypedVarying : public CqParameterTyped<T, SLT>
 		 */
 		T&	operator[] ( const TqInt Index )
 		{
+			assert( Index < m_aValues.size() );
 			return( m_aValues[ Index ] );
 		}
 
@@ -823,6 +825,7 @@ class CqParameterTypedVaryingArray : public CqParameterTyped<T, SLT>
 		 */
 		const	std::vector<T>& operator[] ( const TqInt Index ) const
 		{
+			assert( Index < m_aValues.size() );
 			return( m_aValues[ Index ] );
 		}
 		/** Indexed access to array values.
@@ -831,6 +834,7 @@ class CqParameterTypedVaryingArray : public CqParameterTyped<T, SLT>
 		 */
 		std::vector<T>& operator[] ( const TqInt Index )
 		{
+			assert( Index < m_aValues.size() );
 			return( m_aValues[ Index ] );
 		}
 
