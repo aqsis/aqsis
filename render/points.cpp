@@ -337,7 +337,7 @@ CqBound	CqPoints::Bound() const
 	B.vecMax() += CqVector3D( m_MaxWidth, m_MaxWidth, m_MaxWidth );
 	B.vecMin() += CqVector3D( m_MaxWidth, m_MaxWidth, m_MaxWidth );
 
-	return ( B );
+	return ( AdjustBoundForTransformationMotion( B ) );
 }
 
 //---------------------------------------------------------------------

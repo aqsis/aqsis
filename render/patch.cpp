@@ -178,7 +178,7 @@ CqBound CqSurfacePatchBicubic::Bound() const
 	CqBound	B;
 	B.vecMin() = vecA;
 	B.vecMax() = vecB;
-	return ( B );
+	return ( AdjustBoundForTransformationMotion( B ) );
 }
 
 
@@ -547,7 +547,7 @@ CqBound CqSurfacePatchBilinear::Bound() const
 	CqBound	B;
 	B.vecMin() = vecA;
 	B.vecMax() = vecB;
-	return ( B );
+	return ( AdjustBoundForTransformationMotion( B ) );
 }
 
 
@@ -774,7 +774,7 @@ CqBound CqSurfacePatchMeshBicubic::Bound() const
 	CqBound	B;
 	B.vecMin() = vecA;
 	B.vecMax() = vecB;
-	return ( B );
+	return ( AdjustBoundForTransformationMotion( B ) );
 }
 
 
@@ -999,7 +999,7 @@ CqBound CqSurfacePatchMeshBilinear::Bound() const
 	CqBound	B;
 	B.vecMin() = vecA;
 	B.vecMax() = vecB;
-	return ( B );
+	return ( AdjustBoundForTransformationMotion( B ) );
 }
 
 

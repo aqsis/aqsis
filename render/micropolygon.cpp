@@ -485,54 +485,6 @@ void CqMicroPolyGrid::DeleteVariables( TqBool all )
 }
 
 
-//---------------------------------------------------------------------
-/** Project the grid from camera space into raster space.
- */
-
-void CqMicroPolyGrid::Project()
-{
-	if ( NULL == P() )
-		return ;
-
-	QGetRenderContext() ->Stats().MakeProject().Start();
-	CqMatrix matCameraToRaster = QGetRenderContext() ->matSpaceToSpace( "camera", "raster" );
-	// Transform the whole grid to hybrid camera/raster space
-
-	CqVector3D* pP;
-	P() ->GetPointPtr( pP );
-
-	register TqInt i;
-	TqInt gsmin1;
-	gsmin1 = GridSize() - 1;
-	for ( i = gsmin1; i >= 0; i-- )
-	{
-		TqFloat zdepth = pP[ i ].z();
-		pP[ i ] = matCameraToRaster * pP[ i ];
-		pP[ i ].z( zdepth );
-	}
-	QGetRenderContext() ->Stats().MakeProject().Stop();
-}
-
-
-//---------------------------------------------------------------------
-/** Bound the grid in its current space, usually raster
- */
-
-CqBound CqMicroPolyGrid::Bound()
-{
-	CqBound B( FLT_MAX, FLT_MAX, FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX );
-
-	CqVector3D* pP;
-	P() ->GetPointPtr( pP );
-
-	// Get all point in the grid.
-	register TqInt i;
-	TqInt gsmin1 = GridSize() - 1;
-	for ( i = gsmin1; i >= 0; i-- )
-		B.Encapsulate( pP[ i ] );
-	return ( B );
-}
-
 
 //---------------------------------------------------------------------
 /** Split the shaded grid into microploygons, and insert them into the relevant buckets in the image buffer.
@@ -549,6 +501,48 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, TqInt iBucket, long xmin, lo
 	if ( NULL == P() )
 		return ;
 
+	QGetRenderContext() ->Stats().MakeProject().Start();
+	CqMatrix matCameraToRaster = QGetRenderContext() ->matSpaceToSpace( "camera", "raster" );
+	CqMatrix matCameraToObject0 = QGetRenderContext() ->matSpaceToSpace( "camera", "object", CqMatrix(), pSurface()->pTransform()->matObjectToWorld( pSurface()->pTransform()->Time( 0 ) ) );
+	// Transform the whole grid to hybrid camera/raster space
+
+	CqVector3D* pP;
+	P() ->GetPointPtr( pP );
+
+	// Get an array of P's for all time positions.
+	std::vector<std::vector<CqVector3D> > aaPtimes;
+	aaPtimes.resize( pSurface()->pTransform()->cTimes() );
+
+	TqInt iTime, tTime = MIN(pSurface()->pTransform()->cTimes(),1);
+	CqMatrix matObjectToCameraT;
+	for( iTime = 0; iTime < tTime; iTime++ )
+	{
+		TqInt gsmin1;
+		gsmin1 = GridSize() - 1;
+		aaPtimes[ iTime ].resize( gsmin1 + 1 );
+
+		if( iTime > 0 )
+			matObjectToCameraT = QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pSurface()->pTransform()->matObjectToWorld( pSurface()->pTransform()->Time( iTime ) ) );
+
+		register TqInt i;
+		for ( i = gsmin1; i >= 0; i-- )
+		{
+			CqVector3D Point( pP[ i ] );
+
+			// Only do the complex transform if motion blurred.
+			if( iTime > 0 )
+				Point = matObjectToCameraT * matCameraToObject0 * Point;
+
+			// Make sure to retain camera space 'z' coordinate.
+			TqFloat zdepth = Point.z();
+			aaPtimes[ iTime ][ i ] = matCameraToRaster * Point;
+			aaPtimes[ iTime ][ i ].z( zdepth );
+		}
+	}
+
+	QGetRenderContext() ->Stats().MakeProject().Stop();
+
+
 	TqInt cu = uGridRes();
 	TqInt cv = vGridRes();
 
@@ -564,9 +558,6 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, TqInt iBucket, long xmin, lo
 	CqStats& theStats = QGetRenderContext() ->Stats();
 
 	AddRef();
-
-	CqVector3D* pP;
-	P() ->GetPointPtr( pP );
 
 	TqInt iv;
 	for ( iv = 0; iv < cv; iv++ )
@@ -612,13 +603,12 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, TqInt iBucket, long xmin, lo
 					fTrimmed = TqTrue;
 			}
 
-			CqMicroPolygonStatic *pNew = new CqMicroPolygonStatic();
+			CqMicroPolygonMotion *pNew = new CqMicroPolygonMotion();
 			pNew->SetGrid( this );
 			pNew->SetIndex( iIndex );
-			if ( fTrimmed ) pNew->MarkTrimmed();
-			pNew->Initialise( pP[ iIndex ], pP[ iIndex + 1 ], pP[ iIndex + cu + 2 ], pP[ iIndex + cu + 1 ] );
+			for ( iTime = 0; iTime < tTime; iTime++ )
+				pNew->Initialise( aaPtimes[ iTime ][ iIndex ], aaPtimes[ iTime ][ iIndex + 1 ], aaPtimes[ iTime ][ iIndex + cu + 2 ], aaPtimes[ iTime ][ iIndex + cu + 1 ], iTime );
 			pNew->GetTotalBound( TqTrue );
-
 			pImage->AddMPG( pNew );
 		}
 	}
@@ -631,7 +621,7 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, TqInt iBucket, long xmin, lo
 /** Project all grids from camera to raster space.
  */
 
-void CqMotionMicroPolyGrid::Project()
+/*void CqMotionMicroPolyGrid::Project()
 {
 	QGetRenderContext() ->Stats().MakeProject().Start();
 	CqMatrix matCameraToRaster = QGetRenderContext() ->matSpaceToSpace( "camera", "raster" );
@@ -643,7 +633,7 @@ void CqMotionMicroPolyGrid::Project()
 		pGrid->Project();
 	}
 	QGetRenderContext() ->Stats().MakeProject().Stop();
-}
+}*/
 
 
 //---------------------------------------------------------------------
@@ -663,7 +653,7 @@ void CqMotionMicroPolyGrid::Shade()
 /** Bound all grids in their current space, usually raster.
  */
 
-CqBound CqMotionMicroPolyGrid::Bound()
+/*CqBound CqMotionMicroPolyGrid::Bound()
 {
 	CqBound B( FLT_MAX, FLT_MAX, FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX );
 	// Bound all grids.
@@ -674,7 +664,7 @@ CqBound CqMotionMicroPolyGrid::Bound()
 		B = B.Combine( pGrid->Bound() );
 	}
 	return ( B );
-}
+}*/
 
 
 //---------------------------------------------------------------------

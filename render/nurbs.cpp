@@ -1333,7 +1333,7 @@ CqBound CqSurfaceNURBS::Bound() const
 	B.vecMin() = vecA;
 	B.vecMax() = vecB;
 
-	return ( B );
+	return ( AdjustBoundForTransformationMotion( B ) );
 }
 
 

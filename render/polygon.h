@@ -165,7 +165,7 @@ class CqSurfacePolygon : public CqSurface, public CqPolygonBase
 		// Overridden fro mCqSurface.
 		virtual	CqBound	Bound() const
 		{
-			return ( CqPolygonBase::Bound() );
+			return ( AdjustBoundForTransformationMotion( CqPolygonBase::Bound() ) );
 		}
 		virtual	CqMicroPolyGridBase* Dice()
 		{
@@ -409,7 +409,7 @@ class CqSurfacePointsPolygon : public CqBasicSurface, public CqPolygonBase
 		// Overridden from CqBasicSurface
 		virtual	CqBound	Bound() const
 		{
-			return ( CqPolygonBase::Bound() );
+			return ( AdjustBoundForTransformationMotion( CqPolygonBase::Bound() ) );
 		}
 		virtual	CqMicroPolyGridBase* Dice()
 		{

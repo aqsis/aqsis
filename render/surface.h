@@ -114,6 +114,10 @@ class CqBasicSurface : public CqListEntry<CqBasicSurface>, public CqRefCount, pu
 		{}
 		virtual void	PostSubdivide(std::vector<CqBasicSurface*>& aSplits)
 		{}
+		/** Prepare the trim curve once the surface has been completed.
+		 */
+		virtual	void	PrepareTrimCurve()
+		{}
 
 		/** Get the surface paramter values for the given vertex index. Used when constructing a surface
 		 * using "Pz" point specification.
@@ -220,6 +224,7 @@ class CqBasicSurface : public CqListEntry<CqBasicSurface>, public CqRefCount, pu
 		{
 			return ( m_CachedBound );
 		}
+		CqBound	AdjustBoundForTransformationMotion( CqBound& B ) const;
 
 		CqBasicSurface&	operator=( const CqBasicSurface& From );
 

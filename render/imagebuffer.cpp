@@ -1812,7 +1812,6 @@ void CqImageBuffer::RenderSurfaces( TqInt iBucket, long xmin, long xmax, long ym
 				if ( pGrid->vfCulled() == TqFalse )
 				{
 					// Only project micropolygon not culled
-					pGrid->Project();
 					Bucket.AddGrid( pGrid );
 				}
 				else

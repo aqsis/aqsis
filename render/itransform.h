@@ -5,7 +5,7 @@
  *	@brief	Brief description of the file contents
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2002/10/31 11:51:12 $
+ *	Last change date:	$Date: 2003/02/27 18:44:47 $
  */ 
 //------------------------------------------------------------------------------
 #ifndef	___itransform_Loaded___
@@ -26,6 +26,8 @@ struct IqTransform
 	virtual void	SetCurrentTransform( TqFloat time, const CqMatrix& matTrans ) = 0;;
 	virtual	void	ConcatCurrentTransform( TqFloat time, const CqMatrix& matTrans ) = 0;
 	virtual	const CqMatrix&	matObjectToWorld( TqFloat time = 0.0f ) const = 0;
+	virtual	TqFloat	Time( TqInt index ) const = 0;
+	virtual	TqInt	cTimes() const = 0;
 
 	virtual	void	Release() = 0;
 	virtual	void	AddRef() = 0;

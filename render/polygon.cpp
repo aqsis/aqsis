@@ -620,7 +620,7 @@ CqBound	CqMotionSurfacePointsPolygon::Bound() const
 		pthis->m_CurrTimeIndex = i;
 		B = B.Combine( CqPolygonBase::Bound() );
 	}
-	return ( B );
+	return ( AdjustBoundForTransformationMotion( B ) );
 }
 
 

@@ -150,8 +150,7 @@ CqBound CqCurve::Bound() const
 	CqBound	B;
 	B.vecMin() = vecA;
 	B.vecMax() = vecB;
-	return ( B );
-
+	return ( AdjustBoundForTransformationMotion( B ) );
 }
 
 

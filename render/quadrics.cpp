@@ -258,7 +258,7 @@ CqBound	CqSphere::Bound() const
 	CqBound	B( RevolveForBound( curve, vA, vC, RAD( m_ThetaMax - m_ThetaMin ) ) );
 	B.Transform( m_matTx );
 
-	return ( B );
+	return ( AdjustBoundForTransformationMotion( B ) );
 }
 
 
@@ -376,7 +376,7 @@ CqBound	CqCone::Bound() const
 	CqBound	B( RevolveForBound( curve, vC, vD, RAD( m_ThetaMax - m_ThetaMin ) ) );
 	B.Transform( m_matTx );
 
-	return ( B );
+	return ( AdjustBoundForTransformationMotion( B ) );
 }
 
 
@@ -488,7 +488,7 @@ CqBound	CqCylinder::Bound() const
 	CqBound	B( RevolveForBound( curve, vC, vD, RAD( m_ThetaMax - m_ThetaMin ) ) );
 	B.Transform( m_matTx );
 
-	return ( B );
+	return ( AdjustBoundForTransformationMotion( B ) );
 }
 
 
@@ -612,7 +612,7 @@ CqBound	CqHyperboloid::Bound() const
 	CqBound	B( RevolveForBound( curve, vA, vB, RAD( m_ThetaMax - m_ThetaMin ) ) );
 	B.Transform( m_matTx );
 
-	return ( B );
+	return ( AdjustBoundForTransformationMotion( B ) );
 }
 
 
@@ -737,7 +737,8 @@ CqBound	CqParaboloid::Bound() const
 
 	CqBound	B( vecMin, vecMax );
 	B.Transform( m_matTx );
-	return ( B );
+
+	return ( AdjustBoundForTransformationMotion( B ) );
 }
 
 
@@ -850,7 +851,7 @@ CqBound	CqTorus::Bound() const
 	CqBound	B( RevolveForBound( curve, vD, vC, RAD( m_ThetaMax - m_ThetaMin ) ) );
 	B.Transform( m_matTx );
 
-	return ( B );
+	return ( AdjustBoundForTransformationMotion( B ) );
 }
 
 
@@ -962,7 +963,7 @@ CqBound	CqDisk::Bound() const
 	CqBound	B( RevolveForBound( curve, vC, vD, RAD( m_ThetaMax - m_ThetaMin ) ) );
 	B.Transform( m_matTx );
 
-	return ( B );
+	return ( AdjustBoundForTransformationMotion( B ) );
 }
 
 

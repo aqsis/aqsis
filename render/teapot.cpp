@@ -677,7 +677,7 @@ CqBound	CqTeapot::Bound() const
 
 	CqBound	B( vecMin, vecMax );
 	B.Transform( m_matTx );
-	return ( B );
+	return ( AdjustBoundForTransformationMotion( B ) );
 }
 
 //---------------------------------------------------------------------

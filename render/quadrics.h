@@ -50,6 +50,7 @@ class CqQuadric : public CqSurface
 		virtual	~CqQuadric()
 		{}
 
+		CqBound	MotionBound(CqBound&	B) const;
 		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime = 0 );
 		/** Get the number of uniform values for this GPrim.
 		 */

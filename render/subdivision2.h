@@ -328,9 +328,9 @@ class CqSurfaceSubdivisionPatch : public CqBasicSurface
 			return ( pTopology()->pPoints()->pTransform() );
 		}
 		// Required implementations from IqSurface
-		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime )
+		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime = 0 )
 		{
-			pTopology()->pPoints( iTime )->Transform( matTx, matITTx, matRTx );
+			//pTopology()->pPoints( iTime )->Transform( matTx, matITTx, matRTx );
 		}
 		// NOTE: These should never be called.
 		virtual	TqUint	cUniform() const

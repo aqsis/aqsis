@@ -86,6 +86,15 @@ class _qShareC	CqTransform : public CqMotionSpec<CqMatrix>, public CqRefCount, p
 
 		_qShareM virtual	const CqMatrix&	matObjectToWorld( TqFloat time = 0.0f ) const;
 
+		_qShareM virtual	TqFloat	Time( TqInt index ) const
+		{
+			return( CqMotionSpec<CqMatrix>::Time( index ) );
+		}
+		_qShareM virtual	TqInt	cTimes() const
+		{
+			return( CqMotionSpec<CqMatrix>::cTimes() );
+		}
+
 		virtual	void	Release()
 		{
 			CqRefCount::Release();

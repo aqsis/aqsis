@@ -169,6 +169,34 @@ TqInt CqBasicSurface::Uses() const
 
 
 //---------------------------------------------------------------------
+/** Adjust the bound of the quadric taking into account transformation motion blur.
+ */
+
+CqBound	CqBasicSurface::AdjustBoundForTransformationMotion( CqBound& B ) const
+{
+	CqBound Bm( B );
+
+	if( pTransform()->cTimes() > 0 )
+	{
+		CqMatrix matCameraToObject0 = QGetRenderContext() ->matSpaceToSpace( "camera", "object", CqMatrix(), pTransform()->matObjectToWorld( pTransform()->Time( 0 ) ) );
+		CqBound B0( B );
+		B0.Transform( matCameraToObject0 );
+		
+		TqInt i;
+		for( i = 1; i < pTransform()->cTimes(); i++ )
+		{
+			CqBound Btx( B0 );
+			CqMatrix matObjectToCameraT = QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pTransform()->matObjectToWorld( pTransform()->Time( i ) ) );
+			Btx.Transform( matObjectToCameraT );
+			Bm = Bm.Combine( Btx );
+		}
+	}
+
+	return ( Bm );
+}
+
+
+//---------------------------------------------------------------------
 /** Default constructor
  */
 

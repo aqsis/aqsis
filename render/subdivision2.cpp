@@ -830,7 +830,7 @@ CqBound	CqSurfaceSubdivisionPatch::Bound() const
 		}
 	}
 
-	return(B);
+	return( AdjustBoundForTransformationMotion( B ) );
 }
 
 
