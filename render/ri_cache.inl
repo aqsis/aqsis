@@ -490,14 +490,14 @@ public:
 	RiColorSamplesCache(RtInt N, RtFloat nRGB[], RtFloat RGBn[])
 	{
 		m_N = N;
-		int __nRGB_length = 1;
+		int __nRGB_length = N;
 		m_nRGB = new RtFloat[__nRGB_length];
 		int __nRGB_index;
 		for(__nRGB_index = 0; __nRGB_index<__nRGB_length; __nRGB_index++)
 		{
 			m_nRGB[__nRGB_index] = nRGB[__nRGB_index];
 		}
-		int __RGBn_length = 1;
+		int __RGBn_length = N;
 		m_RGBn = new RtFloat[__RGBn_length];
 		int __RGBn_index;
 		for(__RGBn_index = 0; __RGBn_index<__RGBn_length; __RGBn_index++)
@@ -1344,7 +1344,7 @@ public:
 		m_tospace = new char[ __tospace_length + 1 ];
 		strcpy(m_tospace, tospace);
 		m_npoints = npoints;
-		int __points_length = 1;
+		int __points_length = npoints;
 		m_points = new RtPoint[__points_length];
 		int __points_index;
 		for(__points_index = 0; __points_index<__points_length; __points_index++)
@@ -1463,7 +1463,7 @@ public:
 	RiGeneralPolygonVCache(RtInt nloops, RtInt nverts[], RtInt count, RtToken tokens[], RtPointer values[])
 	{
 		m_nloops = nloops;
-		int __nverts_length = 1;
+		int __nverts_length = nloops;
 		m_nverts = new RtInt[__nverts_length];
 		int __nverts_index;
 		for(__nverts_index = 0; __nverts_index<__nverts_length; __nverts_index++)
@@ -1496,14 +1496,19 @@ public:
 	RiPointsPolygonsVCache(RtInt npolys, RtInt nverts[], RtInt verts[], RtInt count, RtToken tokens[], RtPointer values[])
 	{
 		m_npolys = npolys;
-		int __nverts_length = 1;
+		int __nverts_length = npolys;
 		m_nverts = new RtInt[__nverts_length];
 		int __nverts_index;
 		for(__nverts_index = 0; __nverts_index<__nverts_length; __nverts_index++)
 		{
 			m_nverts[__nverts_index] = nverts[__nverts_index];
 		}
-		int __verts_length = 1;
+		int __verts_length = 0;
+		{
+			int __i;
+			for(__i=0; __i<npolys; __i++)
+				__verts_length+=nverts[__i];
+		}
 		m_verts = new RtInt[__verts_length];
 		int __verts_index;
 		for(__verts_index = 0; __verts_index<__verts_length; __verts_index++)
@@ -1538,21 +1543,31 @@ public:
 	RiPointsGeneralPolygonsVCache(RtInt npolys, RtInt nloops[], RtInt nverts[], RtInt verts[], RtInt count, RtToken tokens[], RtPointer values[])
 	{
 		m_npolys = npolys;
-		int __nloops_length = 1;
+		int __nloops_length = npolys;
 		m_nloops = new RtInt[__nloops_length];
 		int __nloops_index;
 		for(__nloops_index = 0; __nloops_index<__nloops_length; __nloops_index++)
 		{
 			m_nloops[__nloops_index] = nloops[__nloops_index];
 		}
-		int __nverts_length = 1;
+		int __nverts_length = 0;
+		{
+			int __i;
+			for(__i=0; __i<npolys; __i++)
+				__nverts_length+=nloops[__i];
+		}
 		m_nverts = new RtInt[__nverts_length];
 		int __nverts_index;
 		for(__nverts_index = 0; __nverts_index<__nverts_length; __nverts_index++)
 		{
 			m_nverts[__nverts_index] = nverts[__nverts_index];
 		}
-		int __verts_length = 1;
+		int __verts_length = 0;
+		{
+			int __i;
+			for(__i=0; __i<__nverts_length; __i++)
+				__verts_length+=nverts[__i];
+		}
 		m_verts = new RtInt[__verts_length];
 		int __verts_index;
 		for(__verts_index = 0; __verts_index<__verts_length; __verts_index++)
@@ -1689,7 +1704,7 @@ public:
 	{
 		m_nu = nu;
 		m_uorder = uorder;
-		int __uknot_length = 1;
+		int __uknot_length = nu + uorder;
 		m_uknot = new RtFloat[__uknot_length];
 		int __uknot_index;
 		for(__uknot_index = 0; __uknot_index<__uknot_length; __uknot_index++)
@@ -1700,7 +1715,7 @@ public:
 		m_umax = umax;
 		m_nv = nv;
 		m_vorder = vorder;
-		int __vknot_length = 1;
+		int __vknot_length = nv + vorder;
 		m_vknot = new RtFloat[__vknot_length];
 		int __vknot_index;
 		for(__vknot_index = 0; __vknot_index<__vknot_length; __vknot_index++)
@@ -1744,63 +1759,78 @@ public:
 	RiTrimCurveCache(RtInt nloops, RtInt ncurves[], RtInt order[], RtFloat knot[], RtFloat min[], RtFloat max[], RtInt n[], RtFloat u[], RtFloat v[], RtFloat w[])
 	{
 		m_nloops = nloops;
-		int __ncurves_length = 1;
+		int __ncurves_length = nloops;
 		m_ncurves = new RtInt[__ncurves_length];
 		int __ncurves_index;
 		for(__ncurves_index = 0; __ncurves_index<__ncurves_length; __ncurves_index++)
 		{
 			m_ncurves[__ncurves_index] = ncurves[__ncurves_index];
 		}
-		int __order_length = 1;
+		int __order_length = 0;
+		{
+			int __i;
+			for(__i=0; __i<nloops; __i++)
+				__order_length+=ncurves[__i];
+		}
 		m_order = new RtInt[__order_length];
 		int __order_index;
 		for(__order_index = 0; __order_index<__order_length; __order_index++)
 		{
 			m_order[__order_index] = order[__order_index];
 		}
-		int __knot_length = 1;
+		int __knot_length = 0;
+		{
+			int __i;
+			for(__i=0; __i<__order_length; __i++)
+				__knot_length+=order[__i]+n[__i];
+		}
 		m_knot = new RtFloat[__knot_length];
 		int __knot_index;
 		for(__knot_index = 0; __knot_index<__knot_length; __knot_index++)
 		{
 			m_knot[__knot_index] = knot[__knot_index];
 		}
-		int __min_length = 1;
+		int __min_length = __order_length;
 		m_min = new RtFloat[__min_length];
 		int __min_index;
 		for(__min_index = 0; __min_index<__min_length; __min_index++)
 		{
 			m_min[__min_index] = min[__min_index];
 		}
-		int __max_length = 1;
+		int __max_length = __order_length;
 		m_max = new RtFloat[__max_length];
 		int __max_index;
 		for(__max_index = 0; __max_index<__max_length; __max_index++)
 		{
 			m_max[__max_index] = max[__max_index];
 		}
-		int __n_length = 1;
+		int __n_length = __order_length;
 		m_n = new RtInt[__n_length];
 		int __n_index;
 		for(__n_index = 0; __n_index<__n_length; __n_index++)
 		{
 			m_n[__n_index] = n[__n_index];
 		}
-		int __u_length = 1;
+		int __u_length = 0;
+		{
+			int __i;
+			for(__i=0; __i<__order_length; __i++)
+				__u_length+=n[__i];
+		}
 		m_u = new RtFloat[__u_length];
 		int __u_index;
 		for(__u_index = 0; __u_index<__u_length; __u_index++)
 		{
 			m_u[__u_index] = u[__u_index];
 		}
-		int __v_length = 1;
+		int __v_length = __u_length;
 		m_v = new RtFloat[__v_length];
 		int __v_index;
 		for(__v_index = 0; __v_index<__v_length; __v_index++)
 		{
 			m_v[__v_index] = v[__v_index];
 		}
-		int __w_length = 1;
+		int __w_length = __u_length;
 		m_w = new RtFloat[__w_length];
 		int __w_index;
 		for(__w_index = 0; __w_index<__w_length; __w_index++)
@@ -2203,7 +2233,7 @@ public:
 	RiMotionBeginVCache(RtInt N, RtFloat times[])
 	{
 		m_N = N;
-		int __times_length = 1;
+		int __times_length = N;
 		m_times = new RtFloat[__times_length];
 		int __times_index;
 		for(__times_index = 0; __times_index<__times_length; __times_index++)
@@ -2479,7 +2509,7 @@ public:
 	RiMakeOcclusionVCache(RtInt npics, RtString picfiles[], RtString shadowfile, RtInt count, RtToken tokens[], RtPointer values[])
 	{
 		m_npics = npics;
-		int __picfiles_length = 1;
+		int __picfiles_length = npics;
 		m_picfiles = new RtString[__picfiles_length];
 		int __picfiles_index;
 		for(__picfiles_index = 0; __picfiles_index<__picfiles_length; __picfiles_index++)
@@ -2632,7 +2662,7 @@ public:
 	{
 		m_nleaf = nleaf;
 		m_ncode = ncode;
-		int __code_length = 1;
+		int __code_length = ncode;
 		m_code = new RtInt[__code_length];
 		int __code_index;
 		for(__code_index = 0; __code_index<__code_length; __code_index++)
@@ -2640,7 +2670,7 @@ public:
 			m_code[__code_index] = code[__code_index];
 		}
 		m_nflt = nflt;
-		int __flt_length = 1;
+		int __flt_length = nflt;
 		m_flt = new RtFloat[__flt_length];
 		int __flt_index;
 		for(__flt_index = 0; __flt_index<__flt_length; __flt_index++)
@@ -2648,7 +2678,7 @@ public:
 			m_flt[__flt_index] = flt[__flt_index];
 		}
 		m_nstr = nstr;
-		int __str_length = 1;
+		int __str_length = nstr;
 		m_str = new RtToken[__str_length];
 		int __str_index;
 		for(__str_index = 0; __str_index<__str_length; __str_index++)
@@ -2723,7 +2753,7 @@ public:
 		m_type = new char[ __type_length + 1 ];
 		strcpy(m_type, type);
 		m_ncurves = ncurves;
-		int __nvertices_length = 1;
+		int __nvertices_length = ncurves;
 		m_nvertices = new RtInt[__nvertices_length];
 		int __nvertices_index;
 		for(__nvertices_index = 0; __nvertices_index<__nvertices_length; __nvertices_index++)
@@ -2766,14 +2796,19 @@ public:
 		m_scheme = new char[ __scheme_length + 1 ];
 		strcpy(m_scheme, scheme);
 		m_nfaces = nfaces;
-		int __nvertices_length = 1;
+		int __nvertices_length = nfaces;
 		m_nvertices = new RtInt[__nvertices_length];
 		int __nvertices_index;
 		for(__nvertices_index = 0; __nvertices_index<__nvertices_length; __nvertices_index++)
 		{
 			m_nvertices[__nvertices_index] = nvertices[__nvertices_index];
 		}
-		int __vertices_length = 1;
+		int __vertices_length = 0;
+		{
+			int __i;
+			for(__i=0; __i<nfaces; __i++)
+				__vertices_length+=nvertices[__i];
+		}
 		m_vertices = new RtInt[__vertices_length];
 		int __vertices_index;
 		for(__vertices_index = 0; __vertices_index<__vertices_length; __vertices_index++)
@@ -2781,8 +2816,7 @@ public:
 			m_vertices[__vertices_index] = vertices[__vertices_index];
 		}
 		m_ntags = ntags;
-		int __tags_length = 1;
-		m_tags = new RtToken[__tags_length];
+		int __tags_length = ntags;		m_tags = new RtToken[__tags_length];
 		int __tags_index;
 		for(__tags_index = 0; __tags_index<__tags_length; __tags_index++)
 		{
@@ -2790,21 +2824,31 @@ public:
 			m_tags[__tags_index] = new char[ __tags_slength + 1 ];
 			strcpy(m_tags[__tags_index], tags[__tags_index]);
 		}
-		int __nargs_length = 1;
+		int __nargs_length = ntags*2;
 		m_nargs = new RtInt[__nargs_length];
 		int __nargs_index;
 		for(__nargs_index = 0; __nargs_index<__nargs_length; __nargs_index++)
 		{
 			m_nargs[__nargs_index] = nargs[__nargs_index];
 		}
-		int __intargs_length = 1;
+		int __intargs_length = 0;
+		{
+			int __i;
+			for(__i=0; __i<ntags*2; __i+=2)
+				__intargs_length+=nargs[__i];
+		}
 		m_intargs = new RtInt[__intargs_length];
 		int __intargs_index;
 		for(__intargs_index = 0; __intargs_index<__intargs_length; __intargs_index++)
 		{
 			m_intargs[__intargs_index] = intargs[__intargs_index];
 		}
-		int __floatargs_length = 1;
+		int __floatargs_length = 0;
+		{
+			int __i;
+			for(__i=0; __i<ntags*2; __i+=2)
+				__floatargs_length+=nargs[__i+1];
+		}
 		m_floatargs = new RtFloat[__floatargs_length];
 		int __floatargs_index;
 		for(__floatargs_index = 0; __floatargs_index<__floatargs_length; __floatargs_index++)

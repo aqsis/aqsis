@@ -233,8 +233,14 @@
 		<Procedure name="RiColorSamples" return="RtVoid">
 			<Arguments>
 				<Argument name="N" type="RtInt"/>
-				<Argument name="nRGB" type="RtFloatArray"/>
-				<Argument name="RGBn" type="RtFloatArray"/>
+				<Argument name="nRGB" type="RtFloatArray">
+					<Length>		int __nRGB_length = N;
+</Length>
+				</Argument>
+				<Argument name="RGBn" type="RtFloatArray">
+					<Length>		int __RGBn_length = N;
+</Length>
+				</Argument>
 			</Arguments>
 		</Procedure>
 		<Procedure name="RiRelativeDetail" return="RtVoid">
@@ -506,7 +512,10 @@
 				<Argument name="fromspace" type="RtToken"/>
 				<Argument name="tospace" type="RtToken"/>
 				<Argument name="npoints" type="RtInt"/>
-				<Argument name="points" type="RtPointArray"/>
+				<Argument name="points" type="RtPointArray">
+					<Length>		int __points_length = npoints;
+</Length>
+				</Argument>
 			</Arguments>
 		</Procedure>
 		<Procedure name="RiTransformBegin" return="RtVoid">
@@ -545,14 +554,20 @@
 			<NoCache/>
 			<Arguments>
 				<Argument name="nloops" type="RtInt"/>
-				<Argument name="nverts" type="RtIntArray"/>
+				<Argument name="nverts" type="RtIntArray">
+					<Length>		int __nverts_length = nloops;
+</Length>
+				</Argument>
 				<Argument name="..." type=""/>
 			</Arguments>
 		</Procedure>
 		<Procedure name="RiGeneralPolygonV" return="RtVoid">
 			<Arguments>
 				<Argument name="nloops" type="RtInt"/>
-				<Argument name="nverts" type="RtIntArray"/>
+				<Argument name="nverts" type="RtIntArray">
+					<Length>		int __nverts_length = nloops;
+</Length>
+				</Argument>
 				<Argument name="plist" type="PARAMETERLIST"/>
 			</Arguments>
 		</Procedure>
@@ -560,16 +575,38 @@
 			<NoCache/>
 			<Arguments>
 				<Argument name="npolys" type="RtInt"/>
-				<Argument name="nverts" type="RtIntArray"/>
-				<Argument name="verts" type="RtIntArray"/>
+				<Argument name="nverts" type="RtIntArray">
+					<Length>		int __nverts_length = npolys;
+</Length>
+				</Argument>
+				<Argument name="verts" type="RtIntArray">
+					<Length>		int __verts_length = 0;
+		{
+			int __i;
+			for(__i=0; __i&lt;npolys; __i++)
+				__verts_length+=nverts[__i];
+		}
+</Length>
+				</Argument>
 				<Argument name="..." type=""/>
 			</Arguments>
 		</Procedure>
 		<Procedure name="RiPointsPolygonsV" return="RtVoid">
 			<Arguments>
 				<Argument name="npolys" type="RtInt"/>
-				<Argument name="nverts" type="RtIntArray"/>
-				<Argument name="verts" type="RtIntArray"/>
+				<Argument name="nverts" type="RtIntArray">
+					<Length>		int __nverts_length = npolys;
+</Length>
+				</Argument>
+				<Argument name="verts" type="RtIntArray">
+					<Length>		int __verts_length = 0;
+		{
+			int __i;
+			for(__i=0; __i&lt;npolys; __i++)
+				__verts_length+=nverts[__i];
+		}
+</Length>
+				</Argument>
 				<Argument name="plist" type="PARAMETERLIST"/>
 			</Arguments>
 		</Procedure>
@@ -577,18 +614,54 @@
 			<NoCache/>
 			<Arguments>
 				<Argument name="npolys" type="RtInt"/>
-				<Argument name="nloops" type="RtIntArray"/>
-				<Argument name="nverts" type="RtIntArray"/>
-				<Argument name="verts" type="RtIntArray"/>
+				<Argument name="nloops" type="RtIntArray">
+					<Length>		int __nloops_length = npolys;&#xa;</Length>
+				</Argument>
+				<Argument name="nverts" type="RtIntArray">
+					<Length>		int __nverts_length = 0;
+		{
+			int __i;
+			for(__i=0; __i&lt;npolys; __i++)
+				__nverts_length+=nloops[__i];
+		}
+</Length>
+				</Argument>
+				<Argument name="verts" type="RtIntArray">
+					<Length>		int __verts_length = 0;
+		{
+			int __i;
+			for(__i=0; __i&lt;__nverts_length; __i++)
+				__verts_length+=nverts[__i];
+		}
+</Length>
+				</Argument>
 				<Argument name="..." type=""/>
 			</Arguments>
 		</Procedure>
 		<Procedure name="RiPointsGeneralPolygonsV" return="RtVoid">
 			<Arguments>
 				<Argument name="npolys" type="RtInt"/>
-				<Argument name="nloops" type="RtIntArray"/>
-				<Argument name="nverts" type="RtIntArray"/>
-				<Argument name="verts" type="RtIntArray"/>
+				<Argument name="nloops" type="RtIntArray">
+					<Length>		int __nloops_length = npolys;&#xa;</Length>
+				</Argument>
+				<Argument name="nverts" type="RtIntArray">
+					<Length>		int __nverts_length = 0;
+		{
+			int __i;
+			for(__i=0; __i&lt;npolys; __i++)
+				__nverts_length+=nloops[__i];
+		}
+</Length>
+				</Argument>
+				<Argument name="verts" type="RtIntArray">
+					<Length>		int __verts_length = 0;
+		{
+			int __i;
+			for(__i=0; __i&lt;__nverts_length; __i++)
+				__verts_length+=nverts[__i];
+		}
+</Length>
+				</Argument>
 				<Argument name="plist" type="PARAMETERLIST"/>
 			</Arguments>
 		</Procedure>
@@ -639,12 +712,16 @@
 			<Arguments>
 				<Argument name="nu" type="RtInt"/>
 				<Argument name="uorder" type="RtInt"/>
-				<Argument name="uknot" type="RtFloatArray"/>
+				<Argument name="uknot" type="RtFloatArray">
+					<Length>		int __uknot_length = nu + uorder;&#xa;</Length>
+				</Argument>
 				<Argument name="umin" type="RtFloat"/>
 				<Argument name="umax" type="RtFloat"/>
 				<Argument name="nv" type="RtInt"/>
 				<Argument name="vorder" type="RtInt"/>
-				<Argument name="vknot" type="RtFloatArray"/>
+				<Argument name="vknot" type="RtFloatArray">
+					<Length>		int __vknot_length = nv + vorder;&#xa;</Length>
+				</Argument>
 				<Argument name="vmin" type="RtFloat"/>
 				<Argument name="vmax" type="RtFloat"/>
 				<Argument name="..." type=""/>
@@ -654,12 +731,16 @@
 			<Arguments>
 				<Argument name="nu" type="RtInt"/>
 				<Argument name="uorder" type="RtInt"/>
-				<Argument name="uknot" type="RtFloatArray"/>
+				<Argument name="uknot" type="RtFloatArray">
+					<Length>		int __uknot_length = nu + uorder;&#xa;</Length>
+				</Argument>
 				<Argument name="umin" type="RtFloat"/>
 				<Argument name="umax" type="RtFloat"/>
 				<Argument name="nv" type="RtInt"/>
 				<Argument name="vorder" type="RtInt"/>
-				<Argument name="vknot" type="RtFloatArray"/>
+				<Argument name="vknot" type="RtFloatArray">
+					<Length>		int __vknot_length = nv + vorder;&#xa;</Length>
+				</Argument>
 				<Argument name="vmin" type="RtFloat"/>
 				<Argument name="vmax" type="RtFloat"/>
 				<Argument name="plist" type="PARAMETERLIST"/>
@@ -668,15 +749,51 @@
 		<Procedure name="RiTrimCurve" return="RtVoid">
 			<Arguments>
 				<Argument name="nloops" type="RtInt"/>
-				<Argument name="ncurves" type="RtIntArray"/>
-				<Argument name="order" type="RtIntArray"/>
-				<Argument name="knot" type="RtFloatArray"/>
-				<Argument name="min" type="RtFloatArray"/>
-				<Argument name="max" type="RtFloatArray"/>
-				<Argument name="n" type="RtIntArray"/>
-				<Argument name="u" type="RtFloatArray"/>
-				<Argument name="v" type="RtFloatArray"/>
-				<Argument name="w" type="RtFloatArray"/>
+				<Argument name="ncurves" type="RtIntArray">
+					<Length>		int __ncurves_length = nloops;&#xa;</Length>
+				</Argument>
+				<Argument name="order" type="RtIntArray">
+					<Length>		int __order_length = 0;
+		{
+			int __i;
+			for(__i=0; __i&lt;nloops; __i++)
+				__order_length+=ncurves[__i];
+		}
+</Length>
+				</Argument>
+				<Argument name="knot" type="RtFloatArray">
+					<Length>		int __knot_length = 0;
+		{
+			int __i;
+			for(__i=0; __i&lt;__order_length; __i++)
+				__knot_length+=order[__i]+n[__i];
+		}
+</Length>
+				</Argument>
+				<Argument name="min" type="RtFloatArray">
+					<Length>		int __min_length = __order_length;&#xa;</Length>
+				</Argument>
+				<Argument name="max" type="RtFloatArray">
+					<Length>		int __max_length = __order_length;&#xa;</Length>
+				</Argument>
+				<Argument name="n" type="RtIntArray">
+					<Length>		int __n_length = __order_length;&#xa;</Length>
+				</Argument>
+				<Argument name="u" type="RtFloatArray">
+					<Length>		int __u_length = 0;
+		{
+			int __i;
+			for(__i=0; __i&lt;__order_length; __i++)
+				__u_length+=n[__i];
+		}
+</Length>
+				</Argument>
+				<Argument name="v" type="RtFloatArray">
+					<Length>		int __v_length = __u_length;&#xa;</Length>
+				</Argument>
+				<Argument name="w" type="RtFloatArray">
+					<Length>		int __w_length = __u_length;&#xa;</Length>
+				</Argument>
 			</Arguments>
 		</Procedure>
 		<Procedure name="RiSphere" return="RtVoid">
@@ -858,7 +975,10 @@
 		<Procedure name="RiMotionBeginV" return="RtVoid">
 			<Arguments>
 				<Argument name="N" type="RtInt"/>
-				<Argument name="times" type="RtFloatArray"/>
+				<Argument name="times" type="RtFloatArray">
+					<Length>		int __times_length = N;
+</Length>
+				</Argument>
 			</Arguments>
 		</Procedure>
 		<Procedure name="RiMotionEnd" return="RtVoid">
@@ -987,7 +1107,10 @@
 			<NoCache/>
 			<Arguments>
 				<Argument name="npics" type="RtInt"/>
-				<Argument name="picfiles" type="RtStringArray"/>
+				<Argument name="picfiles" type="RtStringArray">
+					<Length>		int __picfiles_length = npics;
+</Length>
+				</Argument>
 				<Argument name="shadowfile" type="RtString"/>
 				<Argument name="..." type=""/>
 			</Arguments>
@@ -995,7 +1118,10 @@
 		<Procedure name="RiMakeOcclusionV" return="RtVoid">
 			<Arguments>
 				<Argument name="npics" type="RtInt"/>
-				<Argument name="picfiles" type="RtStringArray"/>
+				<Argument name="picfiles" type="RtStringArray">
+					<Length>		int __picfiles_length = npics;
+</Length>
+				</Argument>
 				<Argument name="shadowfile" type="RtString"/>
 				<Argument name="plist" type="PARAMETERLIST"/>
 			</Arguments>
@@ -1065,11 +1191,17 @@
 			<Arguments>
 				<Argument name="nleaf" type="RtInt"/>
 				<Argument name="ncode" type="RtInt"/>
-				<Argument name="code" type="RtIntArray"/>
+				<Argument name="code" type="RtIntArray">
+					<Length>		int __code_length = ncode;&#xa;</Length>
+				</Argument>
 				<Argument name="nflt" type="RtInt"/>
-				<Argument name="flt" type="RtFloatArray"/>
+				<Argument name="flt" type="RtFloatArray">
+					<Length>		int __flt_length = nflt;&#xa;</Length>
+				</Argument>
 				<Argument name="nstr" type="RtInt"/>
-				<Argument name="str" type="RtTokenArray"/>
+				<Argument name="str" type="RtTokenArray">
+					<Length>		int __str_length = nstr;&#xa;</Length>
+				</Argument>
 				<Argument name="..." type=""/>
 			</Arguments>
 		</Procedure>
@@ -1077,11 +1209,17 @@
 			<Arguments>
 				<Argument name="nleaf" type="RtInt"/>
 				<Argument name="ncode" type="RtInt"/>
-				<Argument name="code" type="RtIntArray"/>
+				<Argument name="code" type="RtIntArray">
+					<Length>		int __code_length = ncode;&#xa;</Length>
+				</Argument>
 				<Argument name="nflt" type="RtInt"/>
-				<Argument name="flt" type="RtFloatArray"/>
+				<Argument name="flt" type="RtFloatArray">
+					<Length>		int __flt_length = nflt;&#xa;</Length>
+				</Argument>
 				<Argument name="nstr" type="RtInt"/>
-				<Argument name="str" type="RtTokenArray"/>
+				<Argument name="str" type="RtTokenArray">
+					<Length>		int __str_length = nstr;&#xa;</Length>
+				</Argument>
 				<Argument name="plist" type="PARAMETERLIST"/>
 			</Arguments>
 		</Procedure>
@@ -1103,7 +1241,9 @@
 			<Arguments>
 				<Argument name="type" type="RtToken"/>
 				<Argument name="ncurves" type="RtInt"/>
-				<Argument name="nvertices" type="RtIntArray"/>
+				<Argument name="nvertices" type="RtIntArray">
+					<Length>		int __nvertices_length = ncurves;&#xa;</Length>
+				</Argument>
 				<Argument name="wrap" type="RtToken"/>
 				<Argument name="..." type=""/>
 			</Arguments>
@@ -1112,7 +1252,9 @@
 			<Arguments>
 				<Argument name="type" type="RtToken"/>
 				<Argument name="ncurves" type="RtInt"/>
-				<Argument name="nvertices" type="RtIntArray"/>
+				<Argument name="nvertices" type="RtIntArray">
+					<Length>		int __nvertices_length = ncurves;&#xa;</Length>
+				</Argument>
 				<Argument name="wrap" type="RtToken"/>
 				<Argument name="plist" type="PARAMETERLIST"/>
 			</Arguments>
@@ -1122,13 +1264,43 @@
 			<Arguments>
 				<Argument name="scheme" type="RtToken"/>
 				<Argument name="nfaces" type="RtInt"/>
-				<Argument name="nvertices" type="RtIntArray"/>
-				<Argument name="vertices" type="RtIntArray"/>
+				<Argument name="nvertices" type="RtIntArray">
+					<Length>		int __nvertices_length = nfaces;&#xa;</Length>
+				</Argument>
+				<Argument name="vertices" type="RtIntArray">
+					<Length>		int __vertices_length = 0;
+		{
+			int __i;
+			for(__i=0; __i&lt;nfaces; __i++)
+				__vertices_length+=nvertices[__i];
+		}
+</Length>
+				</Argument>
 				<Argument name="ntags" type="RtInt"/>
-				<Argument name="tags" type="RtTokenArray"/>
-				<Argument name="nargs" type="RtIntArray"/>
-				<Argument name="intargs" type="RtIntArray"/>
-				<Argument name="floatargs" type="RtFloatArray"/>
+				<Argument name="tags" type="RtTokenArray">
+					<Length>		int __tags_length = ntags;</Length>
+				</Argument>
+				<Argument name="nargs" type="RtIntArray">
+					<Length>		int __nargs_length = ntags*2;&#xa;</Length>
+				</Argument>
+				<Argument name="intargs" type="RtIntArray">
+					<Length>		int __intargs_length = 0;
+		{
+			int __i;
+			for(__i=0; __i&lt;ntags*2; __i+=2)
+				__intargs_length+=nargs[__i];
+		}
+</Length>
+				</Argument>
+				<Argument name="floatargs" type="RtFloatArray">
+					<Length>		int __floatargs_length = 0;
+		{
+			int __i;
+			for(__i=0; __i&lt;ntags*2; __i+=2)
+				__floatargs_length+=nargs[__i+1];
+		}
+</Length>
+				</Argument>
 				<Argument name="..." type=""/>
 			</Arguments>
 		</Procedure>
@@ -1136,13 +1308,43 @@
 			<Arguments>
 				<Argument name="scheme" type="RtToken"/>
 				<Argument name="nfaces" type="RtInt"/>
-				<Argument name="nvertices" type="RtIntArray"/>
-				<Argument name="vertices" type="RtIntArray"/>
+				<Argument name="nvertices" type="RtIntArray">
+					<Length>		int __nvertices_length = nfaces;&#xa;</Length>
+				</Argument>
+				<Argument name="vertices" type="RtIntArray">
+					<Length>		int __vertices_length = 0;
+		{
+			int __i;
+			for(__i=0; __i&lt;nfaces; __i++)
+				__vertices_length+=nvertices[__i];
+		}
+</Length>
+				</Argument>
 				<Argument name="ntags" type="RtInt"/>
-				<Argument name="tags" type="RtTokenArray"/>
-				<Argument name="nargs" type="RtIntArray"/>
-				<Argument name="intargs" type="RtIntArray"/>
-				<Argument name="floatargs" type="RtFloatArray"/>
+				<Argument name="tags" type="RtTokenArray">
+					<Length>		int __tags_length = ntags;</Length>
+				</Argument>
+				<Argument name="nargs" type="RtIntArray">
+					<Length>		int __nargs_length = ntags*2;&#xa;</Length>
+				</Argument>
+				<Argument name="intargs" type="RtIntArray">
+					<Length>		int __intargs_length = 0;
+		{
+			int __i;
+			for(__i=0; __i&lt;ntags*2; __i+=2)
+				__intargs_length+=nargs[__i];
+		}
+</Length>
+				</Argument>
+				<Argument name="floatargs" type="RtFloatArray">
+					<Length>		int __floatargs_length = 0;
+		{
+			int __i;
+			for(__i=0; __i&lt;ntags*2; __i+=2)
+				__floatargs_length+=nargs[__i+1];
+		}
+</Length>
+				</Argument>
 				<Argument name="plist" type="PARAMETERLIST"/>
 			</Arguments>
 		</Procedure>

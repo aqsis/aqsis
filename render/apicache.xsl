@@ -66,7 +66,15 @@
 				<xsl:text>&#x9;&#x9;// Copy the plist here.&#xa;</xsl:text>
 			</xsl:when>
 			<xsl:when test="contains( @type, 'Array')">
-				<xsl:value-of select="concat('&#x9;&#x9;int __', @name, '_length = 1;&#xa;')"/>
+				<xsl:choose>
+					<xsl:when test="./Length">
+						<xsl:value-of select="./Length"/>
+					</xsl:when>
+					<xsl:otherwise>
+						<xsl:text>&#x9;&#x9;// \note: Need to specify the length method here!&#xa;</xsl:text>
+						<xsl:value-of select="concat('&#x9;&#x9;int __', @name, '_length = 1;&#xa;')"/>
+					</xsl:otherwise>
+				</xsl:choose>
 				<xsl:value-of select="concat('&#x9;&#x9;m_', @name, ' = new ', substring-before(@type, 'Array'), '[__', @name, '_length];&#xa;')"/>
 				<xsl:value-of select="concat('&#x9;&#x9;int __', @name, '_index;&#xa;')"/>
 				<xsl:value-of select="concat('&#x9;&#x9;for(__', @name, '_index = 0; __', @name, '_index&lt;__', @name, '_length; __', @name, '_index++)&#xa;')"/>
