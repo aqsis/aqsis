@@ -30,6 +30,10 @@
 #include	<fstream>
 #include	<sstream>
 
+#include	"io.h"
+//#include	"stdlib.h"
+//#include	"stdio.h"
+
 #include	"libslparse.h"
 #include	"icodegen.h"
 #include	"codegenvm.h"
@@ -127,20 +131,24 @@ int main( int argc, const char** argv )
 				fclose(file);
 				tmpnam( &ifile[0] );
 				// Redirect stdout to the temp file.
-				freopen( ifile, "w", stdout );
-				std::stringstream strThisCommand;
-				strThisCommand << strCommand.str();
-				strThisCommand << e->c_str() << std::ends;
-				system( strThisCommand.str().c_str() );
-				freopen( "CON", "w", stdout );
+				int oldstdout = 0;
+				if( _dup2( 1, oldstdout) == 0)
+				{
+					freopen( ifile, "w", stdout );
+					std::stringstream strThisCommand;
+					strThisCommand << strCommand.str();
+					strThisCommand << e->c_str() << std::ends;
+					system( strThisCommand.str().c_str() );
+					_dup2( oldstdout, 1 );
 
-				std::ifstream ppfile( ifile );
-				if ( Parse( ppfile, e->c_str(), std::cerr ) )
-					codegen.OutputTree( GetParseTree(), g_stroutname );
+					std::ifstream ppfile( ifile );
+					if ( Parse( ppfile, e->c_str(), std::cerr ) )
+						codegen.OutputTree( GetParseTree(), g_stroutname );
 
-				// Delete the temporary file.
-				ppfile.close();
-				remove(ifile);
+					// Delete the temporary file.
+					ppfile.close();
+					remove(ifile);
+				}
 			}
 			else
 			{
