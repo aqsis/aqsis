@@ -38,10 +38,6 @@
 #include	"transform.h"
 #include	"rifile.h"
 
-#ifdef	AQSIS_SYSTEM_WIN32
-void InitialiseINIData();
-#endif //	AQSIS_SYSTEM_WIN32
-
 START_NAMESPACE(Aqsis)
 
 extern IqDDManager* CreateDisplayDriverManager();
@@ -552,10 +548,6 @@ void CqRenderer::Initialise()
 {
 	ClearSymbolTable();
 	FlushShaders();
-
-	#ifdef	AQSIS_SYSTEM_WIN32
-	InitialiseINIData();
-	#endif // AQSIS_SYSTEM_WNI32
 
 	// Register built in shaders.
 	RegisterShader("builtin_constant", Type_Surface, new CqShaderSurfaceConstant());

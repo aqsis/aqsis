@@ -37,7 +37,6 @@
 using namespace Aqsis;
 
 #ifdef AQSIS_SYSTEM_WIN32
-void InitialiseINIData();
 
 BOOL APIENTRY DllMain( HINSTANCE hModule, 
                        DWORD  ul_reason_for_call, 
@@ -58,72 +57,10 @@ BOOL APIENTRY DllMain( HINSTANCE hModule,
    	return TRUE;
 }
 
-
-void InitialiseINIData()
-{
-	// Read in and store information from the ini file.
-	char strExe[255];
-	char strDrive[10];
-	char strPath[255];
-	char strINIFile[255];
-	GetModuleFileName(NULL, strExe, 255);
-	_splitpath(strExe,strDrive,strPath,NULL,NULL);
-	_makepath(strINIFile,strDrive,strPath,"aqsis",".ini");
-
-	char* pTable;
-
-	// Open the ini file, if one exists in the current directory, use it else, look in the executable directory.
-	int fh=_open(".\\aqsis.ini",_O_RDONLY);
-	TqInt maxLen=0;
-	if(fh>=0)
-	{
-		strcpy(strINIFile,".\\aqsis.ini");
-		maxLen=_filelength(fh);
-		_close(fh);
-	}
-	else
-	{
-		fh=_open(strINIFile,_O_RDONLY);
-		if(fh>=0)
-		{
-			maxLen=_filelength(fh);
-			_close(fh);
-		}
-	}
-
-	// Now read the data in and store it in global data for later access.
-	if(maxLen>0)
-	{
-		// Truncate the display map to 0 length.
-		gaDisplayMap.clear();
-
-		pTable=new char[maxLen];
-
-		// Read in the  entire value table for the [DISPLAY_DRIVERS] section.
-		TqInt totLen=GetPrivateProfileString("DISPLAY_DRIVERS", NULL, "", pTable, maxLen, strINIFile);
-		char* pEnt=pTable;
-		while(totLen>1)
-		{
-			TqInt entLen=strlen(pEnt);
-
-			// Get the value for the next key
-			char strValue[255];
-			GetPrivateProfileString("DISPLAY_DRIVERS", pEnt, "framebuffer.exe", strValue, 255, strINIFile);
-			gaDisplayMap.push_back(SqDisplayMapEntry(pEnt, strValue));
-
-			pEnt+=entLen+1;
-			totLen-=entLen+1;
-		}
-		delete[](pTable);
-	}
-}
-
 #endif // AQSIS_SYSTEM_WIN32
 
 
 START_NAMESPACE(Aqsis)
-
-std::vector<SqDisplayMapEntry>	gaDisplayMap;
 
 //---------------------------------------------------------------------
 

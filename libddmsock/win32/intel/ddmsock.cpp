@@ -375,29 +375,8 @@ TqInt CqDDManager::DisplayBucket(IqBucket* pBucket)
 void CqDDManager::LoadDisplayLibrary(CqDDClient& dd)
 {
 	// Load the requested display library according to the specified mode in the RiDisplay command.
-	CqString strDriverFile("framebuffer.exe");
-
-	// Find the display driver in the map loaded from the ini file.
-	TqBool	bFound=TqFalse;
-	TqInt i;
-	for(i=0; i<gaDisplayMap.size(); i++)
-	{
-		if(dd.strType().compare(gaDisplayMap[i].m_strName)==0)
-		{
-			strDriverFile=gaDisplayMap[i].m_strLocation;
-			bFound=TqTrue;
-			break;
-		}
-	}
-
-	if(!bFound)
-	{
-		CqString strErr("Cannot find display driver ");
-		strErr+=dd.strType().c_str();
-		strErr+=" : defaulting to framebuffer";
-		//strErr.Format("Cannot find display driver %s : defaulting to framebuffer", QGetRenderContext()->optCurrent().strDisplayType().String());
-		CqBasicError(ErrorID_DisplayDriver,Severity_Normal,strErr.c_str());
-	}
+	CqString strDriverFile=dd.strType();
+	strDriverFile+=".exe";
 
 	CqRiFile fileDriver(strDriverFile.c_str(), "display");
 	if(fileDriver.IsValid())
