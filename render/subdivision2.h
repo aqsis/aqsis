@@ -310,7 +310,7 @@ public:
         {
             // Get a pointer to the appropriate index accessor function on CqLath based on class.
             TqInt (CqLath::*IndexFunction)() const;
-            if( pParam->Class() == class_vertex )
+            if( pParam->Class() == class_vertex || pParam->Class() == class_varying )
                 IndexFunction = &CqLath::VertexIndex;
             else
                 IndexFunction = &CqLath::FaceVertexIndex;
@@ -374,7 +374,7 @@ public:
         {
             // Get a pointer to the appropriate index accessor function on CqLath based on class.
             TqInt (CqLath::*IndexFunction)() const;
-            if( pParam->Class() == class_varying )
+            if( pParam->Class() == class_vertex || pParam->Class() == class_varying )
                 IndexFunction = &CqLath::VertexIndex;
             else
                 IndexFunction = &CqLath::FaceVertexIndex;
