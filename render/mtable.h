@@ -58,6 +58,9 @@ class CqMessageTable
 
 		
 	private:
+		// Stats
+		int m_errorCount;
+
 		// Cache
 		int m_cTable;
 		int m_cError;
@@ -78,6 +81,8 @@ class CqMessageTable
 		i_s::iterator m_Sh_i;
 
 };
+
+
 
 #ifndef __MESSAGE_TABLE
 extern CqMessageTable mTable;

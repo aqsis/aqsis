@@ -25,7 +25,6 @@
 
 #include "mtable.h"
 
-
 //------------------------------------------------------------------------------
 /**
  *	Constructor
@@ -42,6 +41,28 @@ CqMessageTable::CqMessageTable()
 
 	// RI Error
 	m_Ri.insert(i_s::value_type( 0, "RiError: Unknown error" ));
+	m_Ri.insert(i_s::value_type( 1, "RiColorSamples not supported, defaults to 3" ));
+	m_Ri.insert(i_s::value_type( 2, "RiRelativeDetail (invalid scaling factor)" ));
+	m_Ri.insert(i_s::value_type( 3, "Unknown Symbol" ));
+	m_Ri.insert(i_s::value_type( 4, "RiAreaLightSource not supported, creating a point lightsource" ));
+	m_Ri.insert(i_s::value_type( 5, "RiInterior shaders not supported" ));
+	m_Ri.insert(i_s::value_type( 6, "RiExterior shaders not supported" ));
+	m_Ri.insert(i_s::value_type( 7, "RiDetailRange (invalid levels of detail)" ));
+	m_Ri.insert(i_s::value_type( 8, "RiGeometricApproximation not supported" ));
+	m_Ri.insert(i_s::value_type( 9, "RiPerspective given bad fov value." ));
+	m_Ri.insert(i_s::value_type( 10, "RiDeformation shaders not supported" ));
+	m_Ri.insert(i_s::value_type( 11, "RiTransformPoints not supported" ));
+	m_Ri.insert(i_s::value_type( 12, "RiBlobbyV not supported" ));
+	m_Ri.insert(i_s::value_type( 13, "RiCurvesV (unknown wrap mode: must be \"periodic\" or \"nonperiodic\")" ));
+	m_Ri.insert(i_s::value_type( 14, "RiCurvesV (unknown type: must be \"linear\" or \"cubic\")" ));
+	m_Ri.insert(i_s::value_type( 15, "RiProcDelayedReadArchive not supported" ));
+	m_Ri.insert(i_s::value_type( 16, "RiProcRunProgram not supported" ));
+	m_Ri.insert(i_s::value_type( 17, "RiProcDynamicLoad not supported" ));
+	m_Ri.insert(i_s::value_type( 18, "RiProcedural Unknown SubdivFunc type" ));
+	m_Ri.insert(i_s::value_type( 19, "RiGeometryV, unknown geometry" ));
+	m_Ri.insert(i_s::value_type( 20, "RiObjectBegin, instances not supported" ));
+	m_Ri.insert(i_s::value_type( 21, "RiObjectInstance, instances not supported" ));
+	m_Ri.insert(i_s::value_type( 22, "RiMakeBump not supported" ));
 
 	// Shader error
 	m_Sh.insert(i_s::value_type( 0, "ShaderError: Unknown error" ));
@@ -59,6 +80,7 @@ CqMessageTable::CqMessageTable()
  */
 const char* CqMessageTable::getError( int table, int error_id )
 {
+	m_errorCount++;
 	// Return cached result if possible
 	if ( ( table == m_cTable ) && ( error_id == m_cError ) )
 		return m_cErrorText.c_str();
@@ -135,4 +157,4 @@ void CqMessageTable::insert( int table, i_s::value_type data)
 		}
 	}
 }
-    
+  
