@@ -894,7 +894,15 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, long xmin, lon
                     {
                         const SqSampleData& sampleData = pie2->SampleData( index );
                         const CqVector2D& vecP = sampleData.m_Position;
+
+						STATS_INC( SPL_count );
+
                         index++;
+
+                        TqFloat t;
+                        t = sampleData.m_Time;
+                        if( t < time0 || t > time1)
+                            continue;
 
                         TqFloat vecX;
                         TqFloat vecY;
@@ -935,11 +943,6 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, long xmin, lon
                             }
                         }
 
-                        TqFloat t;
-                        t = sampleData.m_Time;
-                        if( t < time0 || t > time1)
-                            continue;
-
                         if ( !UsingDepthOfField ) // already checked this if we're using dof.
                         {
                             if(!Bound.Contains2D( vecP ))
@@ -977,10 +980,6 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, long xmin, lon
                 }
                 iX++;
                 pie2++;
-
-                // increment the total sample count stats.
-                // note this is approximate as we might not have sampled a whole pixel.
-                STATS_SETI( SPL_count, STATS_GETI(SPL_count) + (iXSamples*iYSamples));
 
                 // Now compute the % of samples that hit...
                 TqInt scount = iXSamples * iYSamples;

@@ -1323,7 +1323,7 @@ CqBound CqMicroPolygonMotion::GetTotalBound( TqBool fForce )
  */
 void CqMicroPolygonMotion::BuildBoundList()
 {
-    m_BoundList.Clear();
+	m_BoundList.Clear();
 
     assert( NULL != m_Keys[ 0 ] );
 
@@ -1331,7 +1331,8 @@ void CqMicroPolygonMotion::BuildBoundList()
     TqFloat	startTime = m_Times[ 0 ];
     TqInt cTimes = m_Keys.size();
     TqInt div = 0;
-    TqInt divisions = 4;
+
+	TqInt divisions = 10;
     m_BoundList.SetSize( divisions * ( cTimes - 1 ));
     for ( TqInt i = 1; i < cTimes; i++ )
     {
@@ -1344,14 +1345,16 @@ void CqMicroPolygonMotion::BuildBoundList()
         TqInt d;
         // arbitary number of divisions, should be related to screen size of blur
         TqFloat delta = 1.0f / static_cast<TqFloat>( divisions );
+		TqFloat pos = delta;
         for ( d = 0; d < divisions; d++ )
         {
-            mid1.vecMin() = delta * ( end.vecMin() - start.vecMin() ) + start.vecMin();
-            mid1.vecMax() = delta * ( end.vecMax() - start.vecMax() ) + start.vecMax();
-            m_BoundList.Set( d + div, mid0.Combine( mid1 ), time );
-            time = delta * ( endTime - startTime ) + startTime;
+            mid1.vecMin() = pos * ( end.vecMin() - start.vecMin() ) + start.vecMin();
+            mid1.vecMax() = pos * ( end.vecMax() - start.vecMax() ) + start.vecMax();
+            
+			m_BoundList.Set( d + div, mid0.Combine( mid1 ), time );
+            time = pos * ( endTime - startTime ) + startTime;
             mid0 = mid1;
-            delta += delta;
+            pos += delta;
         }
         start = end;
         startTime = endTime;
