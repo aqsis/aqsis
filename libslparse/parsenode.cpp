@@ -118,7 +118,11 @@ TqInt CqParseNode::TypeFromIdentifier(char Id)
 	for(i=0; i<Type_Last; i++)
 	{
 		if(gVariableTypeIdentifiers[i][0]==Id ||
-		   gVariableTypeIdentifiers[i][0]==_tolower(Id))
+#ifdef AQSIS_SYSTEM_MACOSX
+                   gVariableTypeIdentifiers[i][0]==tolower(Id))
+#else
+                   gVariableTypeIdentifiers[i][0]==_tolower(Id))
+#endif
 		return(i);
 	}
 	return(Type_Nil);

@@ -4,7 +4,7 @@
 #include "aqsis.h"
 
 
-#ifdef	AQSIS_SYSTEM_WIN32
+#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
 #include "version.h"
 #endif
 
@@ -44,7 +44,7 @@ ArgParse::apstring g_mode="rgba";
 
 void version(std::ostream& Stream)
 {
-#ifdef	AQSIS_SYSTEM_WIN32
+#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
 	Stream << "aqsis version " << VERSION_STR << std::endl;
 #else
 	Stream << "aqsis version " << VERSION << std::endl;

@@ -27,10 +27,13 @@
 
 #include	"aqsis.h"
 
+#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
+#include	<version.h>
+#endif
+
 #ifdef AQSIS_SYSTEM_WIN32
 
 #include	<process.h>
-#include	<version.h>
 
 #else // AQSIS_SYSTEM_WIN32
 
@@ -147,7 +150,7 @@ TqInt Close(SOCKET s,SqDDMessageBase* pMsgB)
 		
 		int ExtraSamplesTypes[1]={EXTRASAMPLE_ASSOCALPHA};
 		
-#ifdef  AQSIS_SYSTEM_WIN32
+#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
 	sprintf(version, "%s %s",STRNAME, VERSION_STR);
 #else
 	sprintf(version, "%s %s",STRNAME, VERSION);

@@ -28,7 +28,7 @@
 
 #include "aqsis.h"
 
-#ifdef AQSIS_SYSTEM_WIN32
+#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
 #include	"version.h"
 #endif // AQSIS_SYSTEM_WIN32
 #include	"vmoutput.h"
@@ -216,7 +216,7 @@ void OutputTreeNode(const IqParseNode* pNode, std::ostream& out)
 		slxFile << pS->strShaderType() << std::endl;
 
 		// Output version information.
-#ifdef AQSIS_SYSTEM_WIN32
+#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
 		slxFile << "AQSIS_V " << VERSION_STR << std::endl;
 #else // AQSIS_SYSTEM_WIN32
 		slxFile << "AQSIS_V " << VERSION << std::endl;

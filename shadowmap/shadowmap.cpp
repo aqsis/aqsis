@@ -43,7 +43,7 @@ typedef int SOCKET;
 #include	"tiffio.h"
 #include	"sstring.h"
 
-#ifdef AQSIS_SYSTEM_WIN32 
+#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
 #include	"version.h"
 #endif
 
@@ -62,7 +62,7 @@ int main(int argc, char* argv[])
 	return 0;
 }
 
-#ifdef AQSIS_SYSTEM_WIN32
+#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
 #define	ZFILE_HEADER		"Aqsis ZFile" VERSION_STR
 #else // AQSIS_SYSTEM_WIN32
 #define ZFILE_HEADER		"Aqsis ZFile" VERSION
@@ -146,7 +146,7 @@ TqInt Close(SOCKET s,SqDDMessageBase* pMsgB)
 	// Save the shadowmap to a binary file.
 	if(strFilename!="")
 	{
-		std::ofstream ofile(strFilename.c_str(), std::ios::binary);
+                std::ofstream ofile(strFilename.c_str(), std::ios::out | std::ios::binary);
 		if(ofile.is_open())
 		{
 			// Save a file type and version marker

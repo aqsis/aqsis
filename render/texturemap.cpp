@@ -188,7 +188,9 @@ CqTextureMap::~CqTextureMap()
 }
 
 #ifndef AQSIS_SYSTEM_WIN32
+#ifndef AQSIS_SYSTEM_MACOSX
 #include <dlfcn.h>                /* dlopen() */
+#endif
 #endif
 
 //--------------------------------------------------------------------------
@@ -245,6 +247,10 @@ TqInt  CqTextureMap::Convert(CqString &strName )
 	{
 		function_pt = (char * (*) (char *)) GetProcAddress((HINSTANCE) handle, dynamicfunction);
 	}
+#elif defined(AQSIS_SYSTEM_MACOSX)
+        // We probably need an interface for CFPlugins here
+        // But for now, we will not implement plugins
+        function_pt = NULL;
 #else
 	
 	 /***********************************/
@@ -271,9 +277,11 @@ TqInt  CqTextureMap::Convert(CqString &strName )
 		}
         
 #ifdef AQSIS_SYSTEM_WIN32
-		FreeLibrary((HINSTANCE)handle);
+                FreeLibrary((HINSTANCE)handle);
+#elif defined(AQSIS_SYSTEM_MACOSX)
+                // Do nothing for now
 #else
-		dlclose(handle);
+                dlclose(handle);
 #endif
 
 	 }
@@ -318,8 +326,19 @@ void CqTextureMap::Open()
 
 		TIFFGetField(m_pImage, TIFFTAG_IMAGEWIDTH, &m_XRes);
 		TIFFGetField(m_pImage, TIFFTAG_IMAGELENGTH, &m_YRes);
-		TIFFGetField(m_pImage, TIFFTAG_PLANARCONFIG, &m_PlanarConfig);
-		TIFFGetField(m_pImage, TIFFTAG_SAMPLESPERPIXEL, &m_SamplesPerPixel);
+
+#ifdef AQSIS_SYSTEM_MACOSX
+                uint16 planarconfig;
+                TIFFGetField(m_pImage, TIFFTAG_PLANARCONFIG, &planarconfig);
+                m_PlanarConfig = planarconfig;
+                uint16 samplesperpixel;
+                TIFFGetField(m_pImage, TIFFTAG_SAMPLESPERPIXEL, &samplesperpixel);
+                m_SamplesPerPixel = samplesperpixel;
+#else
+                TIFFGetField(m_pImage, TIFFTAG_PLANARCONFIG, &m_PlanarConfig);
+                TIFFGetField(m_pImage, TIFFTAG_SAMPLESPERPIXEL, &m_SamplesPerPixel);
+#endif
+
 		TIFFGetField(m_pImage,  TIFFTAG_PIXAR_TEXTUREFORMAT, &pFormat);
 		TIFFGetField(m_pImage,  TIFFTAG_PIXAR_WRAPMODES, &pModes);
 
@@ -1684,7 +1703,7 @@ void CqShadowMap::SaveZFile()
 	// Save the shadowmap to a binary file.
 	if(m_strName!="")
 	{
-		std::ofstream ofile(m_strName.c_str(), std::ios::binary);
+                std::ofstream ofile(m_strName.c_str(), std::ios::out | std::ios::binary);
 		if(ofile.is_open())
 		{
 			// Save a file type and version marker
@@ -1722,15 +1741,17 @@ void CqShadowMap::LoadZFile()
 	// Load the shadowmap from a binary file.
 	if(m_strName!="")
 	{
-		std::ifstream file(m_strName.c_str(),std::ios::binary);
+                std::ifstream file(m_strName.c_str(),std::ios::in | std::ios::binary);
+
 		if(file!=NULL)
 		{
 			// Save a file type and version marker
-			char* strHeader=new char[strlen(ZFILE_HEADER)];
-            char* origHeader=ZFILE_HEADER;
-			file.read(strHeader, strlen(ZFILE_HEADER));
-			// Check validity of shadow map.
-			if(strncmp(strHeader,origHeader,strlen(origHeader))!=0)
+                        char* origHeader=ZFILE_HEADER;
+                        int headerLength = strlen(ZFILE_HEADER);
+                        char* strHeader=new char[headerLength];
+                        file.read(strHeader, headerLength);
+                        // Check validity of shadow map.
+                        if(strncmp(strHeader,origHeader,headerLength)!=0)
 			{
 				CqString strErr("Error : Invalid shadowmap format - ");
 				strErr+=m_strName;
@@ -1799,7 +1820,7 @@ void CqShadowMap::SaveShadowMap(const char* strShadowName)
 					matWorldToScreen[(r*4)+c]=m_matWorldToScreen[r][c];
 				}
 			}
-#ifdef  AQSIS_SYSTEM_WIN32
+#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
 			sprintf(version, "%s %s",STRNAME, VERSION_STR);
 #else
 			sprintf(version, "%s %s",STRNAME, VERSION);
@@ -1859,7 +1880,7 @@ void CqTextureMap::WriteTileImage(TIFF* ptex, float *raster, unsigned long width
 { 
 	//TIFFCreateDirectory(ptex);
 	char version[80];
-#ifdef  AQSIS_SYSTEM_WIN32
+#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
 	sprintf(version, "%s %s",STRNAME, VERSION_STR);
 #else
 	sprintf(version, "%s %s",STRNAME, VERSION);
@@ -1920,7 +1941,7 @@ void CqTextureMap::WriteImage(TIFF* ptex, float *raster, unsigned long width, un
 	char version[80];
 	TIFFCreateDirectory(ptex);
 
-#ifdef  AQSIS_SYSTEM_WIN32
+#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
 	sprintf(version, "%s %s",STRNAME, VERSION_STR);
 #else
 	sprintf(version, "%s %s",STRNAME, VERSION);
@@ -1953,7 +1974,7 @@ void CqTextureMap::WriteImage(TIFF* ptex, float *raster, unsigned long width, un
 void CqTextureMap::WriteTileImage(TIFF* ptex, unsigned char *raster, unsigned long width, unsigned long length, unsigned long twidth, unsigned long tlength, int samples)
 { 
 	char version[80];
-#ifdef  AQSIS_SYSTEM_WIN32
+#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
 	sprintf(version, "%s %s",STRNAME, VERSION_STR);
 #else
 	sprintf(version, "%s %s",STRNAME, VERSION);
@@ -2015,7 +2036,7 @@ void CqTextureMap::WriteImage(TIFF* ptex, unsigned char *raster, unsigned long w
 	char version[80];
 	TIFFCreateDirectory(ptex);
 
-#ifdef  AQSIS_SYSTEM_WIN32
+#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
 	sprintf(version, "%s %s",STRNAME, VERSION_STR);
 #else
 	sprintf(version, "%s %s",STRNAME, VERSION);

@@ -31,7 +31,12 @@
 #undef		max
 
 #include	<vector>
+
+#ifdef AQSIS_SYSTEM_MACOSX
+#include	"macosx/valarray"
+#else
 #include	<valarray>
+#endif
 
 #include	"aqsis.h"
 
@@ -47,7 +52,7 @@
 
 START_NAMESPACE(Aqsis)
 
-#ifdef AQSIS_SYSTEM_WIN32
+#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
 #define	ZFILE_HEADER		"Aqsis ZFile" VERSION_STR
 #else // AQSIS_SYSTEM_WIN32
 #define ZFILE_HEADER "Aqsis ZFile" VERSION

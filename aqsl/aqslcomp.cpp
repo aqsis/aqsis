@@ -32,7 +32,7 @@
 #include	"libslparse.h"
 #include	"vmoutput.h"
 
-#ifdef	AQSIS_SYSTEM_WIN32
+#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
 #include	"version.h"
 #endif
 
@@ -40,7 +40,7 @@ using namespace Aqsis;
 
 int main(int argc, char* argv[])
 {
-	#ifdef	AQSIS_SYSTEM_WIN32
+	#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
 	std::cout << argv[0] << " V" << VERSION_STR << std::endl;
 	#else
 	std::cout << argv[0] << " V" << VERSION << std::endl;
