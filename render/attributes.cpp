@@ -66,11 +66,11 @@ std::vector<CqAttributes*>	Attribute_stack;
 	p##name->pValue()[0] = ( def0 ); \
 	p##name->pValue()[1] = ( def1 ); \
 	p##name->pValue()[2] = ( def2 ); \
-	p##name->pValue()[2] = ( def3 ); \
-	p##name->pValue()[2] = ( def4 ); \
-	p##name->pValue()[2] = ( def5 ); \
-	p##name->pValue()[2] = ( def6 ); \
-	p##name->pValue()[2] = ( def7 ); \
+	p##name->pValue()[3] = ( def3 ); \
+	p##name->pValue()[4] = ( def4 ); \
+	p##name->pValue()[5] = ( def5 ); \
+	p##name->pValue()[6] = ( def6 ); \
+	p##name->pValue()[7] = ( def7 ); \
 	pdefattrs->AddParameter(p##name);
 
 
@@ -87,17 +87,17 @@ CqAttributes::CqAttributes() :
 
 	CqSystemOption*  pdefattrs = new CqSystemOption("System");
 
-	ADD_SYSTEM_ATTR(Color, CqColor, type_color, CqColor(0.0f,0.0f,0.0f));		// the current color attribute.
+	ADD_SYSTEM_ATTR(Color, CqColor, type_color, CqColor(1.0f,1.0f,1.0f));		// the current color attribute.
 	ADD_SYSTEM_ATTR(Opacity, CqColor, type_color, CqColor(1.0f,1.0f,1.0f));	// the current opacity attribute.
 	ADD_SYSTEM_ATTR8(TextureCoordinates, TqFloat, type_float, 0.0f,0.0f,1.0f,0.0f,0.0f,1.0f,1.0f,1.0f);	// an array of 2D vectors representing the coordinate space.
 	ADD_SYSTEM_ATTR(ShadingRate, TqFloat, type_float, 1.0f);					// the current effective shading rate.
 	ADD_SYSTEM_ATTR(ShadingInterpolation , TqInt, type_integer, ShadingConstant);	// the current shading interpolation mode.
 	ADD_SYSTEM_ATTR(Matte, TqInt, type_integer, 0);				// the current state of the matte flag.
-	ADD_SYSTEM_ATTR4(DetailRange, TqFloat, type_float, FLT_MIN, FLT_MIN, FLT_MAX, FLT_MAX);	// the detail range minimum visible distance.
+	ADD_SYSTEM_ATTR4(DetailRange, TqFloat, type_float, 0.0f, 0.0f, FLT_MAX, FLT_MAX);	// the detail range minimum visible distance.
 	ADD_SYSTEM_ATTR2(Basis, CqMatrix, type_matrix, RiBezierBasis, RiBezierBasis);	// the basis matrix for the u direction.
 	ADD_SYSTEM_ATTR2(BasisStep, TqInt, type_integer, 3, 3);	// the steps to advance the evaluation window in the u direction.
 	ADD_SYSTEM_ATTR2(Orientation, TqInt, type_integer, OrientationLH, OrientationLH);	// the orientation associated primitives are described in.
-	ADD_SYSTEM_ATTR(Sides, TqInt, type_integer, 1);		// the number of visible sides associated primitives have.
+	ADD_SYSTEM_ATTR(Sides, TqInt, type_integer, 2);		// the number of visible sides associated primitives have.
 
 	pdefattrs->AddRef();
 	AddAttribute(pdefattrs);

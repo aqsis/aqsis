@@ -1260,7 +1260,10 @@ RtVoid	RiTextureCoordinates( RtFloat s1, RtFloat t1,
                              RtFloat s3, RtFloat t3,
                              RtFloat s4, RtFloat t4 )
 {
-	TqFloat* pTC = QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite("System", "aTextureCoordinates");
+	TqFloat* pTC = QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite("System", "TextureCoordinates");
+	
+	assert( NULL !=pTC );
+	
 	pTC[0] = s1;
 	pTC[1] = t1;
 	pTC[2] = s2;

@@ -657,10 +657,10 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, TqInt iBucket, long xm
 			{
 				CqMicroPolyGrid* pGridT = static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( iTime ) ) );
 				CqVector3D vec1, vec2, vec3, vec4;
-				pGridA->P()->GetPoint( vec1, iIndex );
-				pGridA->P()->GetPoint( vec2, iIndex + 1 );
-				pGridA->P()->GetPoint( vec3, iIndex + cu + 2 );
-				pGridA->P()->GetPoint( vec4, iIndex + cu + 1 );
+				pGridT->P()->GetPoint( vec1, iIndex );
+				pGridT->P()->GetPoint( vec2, iIndex + 1 );
+				pGridT->P()->GetPoint( vec3, iIndex + cu + 2 );
+				pGridT->P()->GetPoint( vec4, iIndex + cu + 1 );
 				pNew->Initialise( vec1, vec2, vec3, vec4, Time( iTime ) );
 			}
 			pNew->GetTotalBound( TqTrue );
