@@ -126,10 +126,7 @@ TqBool	CqQuadric::Diceable()
 	// If the cull check showed that the primitive cannot be diced due to crossing the e and hither planes,
 	// then we can return immediately.
 	if ( !m_fDiceable )
-	{
-		m_SplitDir = (m_SplitDir==SplitDir_U)?SplitDir_V:SplitDir_U;
 		return ( TqFalse );
-	}
 
 	const TqInt* poptGridSize = QGetRenderContext() ->optCurrent().GetIntegerOption( "limits", "gridsize" );
 	TqInt m_XBucketSize = 16;
@@ -293,8 +290,6 @@ TqInt CqSphere::Split( std::vector<CqBasicSurface*>& aSplits )
 		pNew1->t().uSubdivide( &pNew2->t() );
 		pNew1->Cs().uSubdivide( &pNew2->Cs() );
 		pNew1->Os().uSubdivide( &pNew2->Os() );
-		pNew1->m_uDiceSize = m_uDiceSize / 2;
-		pNew2->m_uDiceSize = m_uDiceSize / 2;
 	}
 	else
 	{
@@ -308,20 +303,33 @@ TqInt CqSphere::Split( std::vector<CqBasicSurface*>& aSplits )
 		pNew1->t().vSubdivide( &pNew2->t() );
 		pNew1->Cs().vSubdivide( &pNew2->Cs() );
 		pNew1->Os().vSubdivide( &pNew2->Os() );
-		pNew1->m_vDiceSize = m_vDiceSize / 2;
-		pNew2->m_vDiceSize = m_vDiceSize / 2;
 	}
+	
 	pNew1->SetSurfaceParameters( *this );
 	pNew2->SetSurfaceParameters( *this );
 	pNew1->m_fDiceable = TqTrue;
 	pNew2->m_fDiceable = TqTrue;
+	pNew1->m_SplitDir = (m_SplitDir == SplitDir_U)? SplitDir_V:SplitDir_U;
+	pNew2->m_SplitDir = (m_SplitDir == SplitDir_U)? SplitDir_V:SplitDir_U;
 	pNew1->m_EyeSplitCount = m_EyeSplitCount;
 	pNew2->m_EyeSplitCount = m_EyeSplitCount;
 
-	aSplits.push_back( pNew1 );
-	aSplits.push_back( pNew2 );
+	TqInt cSplits = 0;
 
-	return ( 2 );
+	if( !m_fDiceable )
+	{
+		cSplits += pNew1->Split(aSplits);
+		cSplits += pNew2->Split(aSplits);
+	}
+	else
+	{
+		aSplits.push_back( pNew1 );
+		aSplits.push_back( pNew2 );
+
+		cSplits = 2;
+	}
+
+	return ( cSplits );
 }
 
 
@@ -439,8 +447,6 @@ TqInt CqCone::Split( std::vector<CqBasicSurface*>& aSplits )
 		pNew1->t().uSubdivide( &pNew2->t() );
 		pNew1->Cs().uSubdivide( &pNew2->Cs() );
 		pNew1->Os().uSubdivide( &pNew2->Os() );
-		pNew1->m_uDiceSize = m_uDiceSize / 2;
-		pNew2->m_uDiceSize = m_uDiceSize / 2;
 	}
 	else
 	{
@@ -454,20 +460,32 @@ TqInt CqCone::Split( std::vector<CqBasicSurface*>& aSplits )
 		pNew1->t().vSubdivide( &pNew2->t() );
 		pNew1->Cs().vSubdivide( &pNew2->Cs() );
 		pNew1->Os().vSubdivide( &pNew2->Os() );
-		pNew1->m_vDiceSize = m_vDiceSize / 2;
-		pNew2->m_vDiceSize = m_vDiceSize / 2;
 	}
 	pNew1->SetSurfaceParameters( *this );
 	pNew2->SetSurfaceParameters( *this );
 	pNew1->m_fDiceable = TqTrue;
 	pNew2->m_fDiceable = TqTrue;
+	pNew1->m_SplitDir = (m_SplitDir == SplitDir_U)? SplitDir_V:SplitDir_U;
+	pNew2->m_SplitDir = (m_SplitDir == SplitDir_U)? SplitDir_V:SplitDir_U;
 	pNew1->m_EyeSplitCount = m_EyeSplitCount;
 	pNew2->m_EyeSplitCount = m_EyeSplitCount;
 
-	aSplits.push_back( pNew1 );
-	aSplits.push_back( pNew2 );
+	TqInt cSplits = 0;
 
-	return ( 2 );
+	if( !m_fDiceable )
+	{
+		cSplits += pNew1->Split(aSplits);
+		cSplits += pNew2->Split(aSplits);
+	}
+	else
+	{
+		aSplits.push_back( pNew1 );
+		aSplits.push_back( pNew2 );
+
+		cSplits = 2;
+	}
+
+	return ( cSplits );
 }
 
 
@@ -578,8 +596,6 @@ TqInt CqCylinder::Split( std::vector<CqBasicSurface*>& aSplits )
 		pNew1->t().uSubdivide( &pNew2->t() );
 		pNew1->Cs().uSubdivide( &pNew2->Cs() );
 		pNew1->Os().uSubdivide( &pNew2->Os() );
-		pNew1->m_uDiceSize = m_uDiceSize / 2;
-		pNew2->m_uDiceSize = m_uDiceSize / 2;
 	}
 	else
 	{
@@ -593,20 +609,32 @@ TqInt CqCylinder::Split( std::vector<CqBasicSurface*>& aSplits )
 		pNew1->t().vSubdivide( &pNew2->t() );
 		pNew1->Cs().vSubdivide( &pNew2->Cs() );
 		pNew1->Os().vSubdivide( &pNew2->Os() );
-		pNew1->m_vDiceSize = m_vDiceSize / 2;
-		pNew2->m_vDiceSize = m_vDiceSize / 2;
 	}
 	pNew1->SetSurfaceParameters( *this );
 	pNew2->SetSurfaceParameters( *this );
 	pNew1->m_fDiceable = TqTrue;
 	pNew2->m_fDiceable = TqTrue;
+	pNew1->m_SplitDir = (m_SplitDir == SplitDir_U)? SplitDir_V:SplitDir_U;
+	pNew2->m_SplitDir = (m_SplitDir == SplitDir_U)? SplitDir_V:SplitDir_U;
 	pNew1->m_EyeSplitCount = m_EyeSplitCount;
 	pNew2->m_EyeSplitCount = m_EyeSplitCount;
 
-	aSplits.push_back( pNew1 );
-	aSplits.push_back( pNew2 );
+	TqInt cSplits = 0;
 
-	return ( 2 );
+	if( !m_fDiceable )
+	{
+		cSplits += pNew1->Split(aSplits);
+		cSplits += pNew2->Split(aSplits);
+	}
+	else
+	{
+		aSplits.push_back( pNew1 );
+		aSplits.push_back( pNew2 );
+
+		cSplits = 2;
+	}
+
+	return ( cSplits );
 }
 
 
@@ -717,8 +745,6 @@ TqInt CqHyperboloid::Split( std::vector<CqBasicSurface*>& aSplits )
 		pNew1->t().uSubdivide( &pNew2->t() );
 		pNew1->Cs().uSubdivide( &pNew2->Cs() );
 		pNew1->Os().uSubdivide( &pNew2->Os() );
-		pNew1->m_uDiceSize = m_uDiceSize / 2;
-		pNew2->m_uDiceSize = m_uDiceSize / 2;
 	}
 	else
 	{
@@ -732,20 +758,32 @@ TqInt CqHyperboloid::Split( std::vector<CqBasicSurface*>& aSplits )
 		pNew1->t().vSubdivide( &pNew2->t() );
 		pNew1->Cs().vSubdivide( &pNew2->Cs() );
 		pNew1->Os().vSubdivide( &pNew2->Os() );
-		pNew1->m_vDiceSize = m_vDiceSize / 2;
-		pNew2->m_vDiceSize = m_vDiceSize / 2;
 	}
 	pNew1->SetSurfaceParameters( *this );
 	pNew2->SetSurfaceParameters( *this );
 	pNew1->m_fDiceable = TqTrue;
 	pNew2->m_fDiceable = TqTrue;
+	pNew1->m_SplitDir = (m_SplitDir == SplitDir_U)? SplitDir_V:SplitDir_U;
+	pNew2->m_SplitDir = (m_SplitDir == SplitDir_U)? SplitDir_V:SplitDir_U;
 	pNew1->m_EyeSplitCount = m_EyeSplitCount;
 	pNew2->m_EyeSplitCount = m_EyeSplitCount;
 
-	aSplits.push_back( pNew1 );
-	aSplits.push_back( pNew2 );
+	TqInt cSplits = 0;
 
-	return ( 2 );
+	if( !m_fDiceable )
+	{
+		cSplits += pNew1->Split(aSplits);
+		cSplits += pNew2->Split(aSplits);
+	}
+	else
+	{
+		aSplits.push_back( pNew1 );
+		aSplits.push_back( pNew2 );
+
+		cSplits = 2;
+	}
+
+	return ( cSplits );
 }
 
 
@@ -870,8 +908,6 @@ TqInt CqParaboloid::Split( std::vector<CqBasicSurface*>& aSplits )
 		pNew1->t().uSubdivide( &pNew2->t() );
 		pNew1->Cs().uSubdivide( &pNew2->Cs() );
 		pNew1->Os().uSubdivide( &pNew2->Os() );
-		pNew1->m_uDiceSize = m_uDiceSize / 2;
-		pNew2->m_uDiceSize = m_uDiceSize / 2;
 	}
 	else
 	{
@@ -886,20 +922,32 @@ TqInt CqParaboloid::Split( std::vector<CqBasicSurface*>& aSplits )
 		pNew1->t().vSubdivide( &pNew2->t() );
 		pNew1->Cs().vSubdivide( &pNew2->Cs() );
 		pNew1->Os().vSubdivide( &pNew2->Os() );
-		pNew1->m_vDiceSize = m_vDiceSize / 2;
-		pNew2->m_vDiceSize = m_vDiceSize / 2;
 	}
 	pNew1->SetSurfaceParameters( *this );
 	pNew2->SetSurfaceParameters( *this );
 	pNew1->m_fDiceable = TqTrue;
 	pNew2->m_fDiceable = TqTrue;
+	pNew1->m_SplitDir = (m_SplitDir == SplitDir_U)? SplitDir_V:SplitDir_U;
+	pNew2->m_SplitDir = (m_SplitDir == SplitDir_U)? SplitDir_V:SplitDir_U;
 	pNew1->m_EyeSplitCount = m_EyeSplitCount;
 	pNew2->m_EyeSplitCount = m_EyeSplitCount;
 
-	aSplits.push_back( pNew1 );
-	aSplits.push_back( pNew2 );
+	TqInt cSplits = 0;
 
-	return ( 2 );
+	if( !m_fDiceable )
+	{
+		cSplits += pNew1->Split(aSplits);
+		cSplits += pNew2->Split(aSplits);
+	}
+	else
+	{
+		aSplits.push_back( pNew1 );
+		aSplits.push_back( pNew2 );
+
+		cSplits = 2;
+	}
+
+	return ( cSplits );
 }
 
 
@@ -1009,8 +1057,6 @@ TqInt CqTorus::Split( std::vector<CqBasicSurface*>& aSplits )
 		pNew1->t().uSubdivide( &pNew2->t() );
 		pNew1->Cs().uSubdivide( &pNew2->Cs() );
 		pNew1->Os().uSubdivide( &pNew2->Os() );
-		pNew1->m_uDiceSize = m_uDiceSize / 2;
-		pNew2->m_uDiceSize = m_uDiceSize / 2;
 	}
 	else
 	{
@@ -1024,20 +1070,32 @@ TqInt CqTorus::Split( std::vector<CqBasicSurface*>& aSplits )
 		pNew1->t().vSubdivide( &pNew2->t() );
 		pNew1->Cs().vSubdivide( &pNew2->Cs() );
 		pNew1->Os().vSubdivide( &pNew2->Os() );
-		pNew1->m_vDiceSize = m_vDiceSize / 2;
-		pNew2->m_vDiceSize = m_vDiceSize / 2;
 	}
 	pNew1->SetSurfaceParameters( *this );
 	pNew2->SetSurfaceParameters( *this );
 	pNew1->m_fDiceable = TqTrue;
 	pNew2->m_fDiceable = TqTrue;
+	pNew1->m_SplitDir = (m_SplitDir == SplitDir_U)? SplitDir_V:SplitDir_U;
+	pNew2->m_SplitDir = (m_SplitDir == SplitDir_U)? SplitDir_V:SplitDir_U;
 	pNew1->m_EyeSplitCount = m_EyeSplitCount;
 	pNew2->m_EyeSplitCount = m_EyeSplitCount;
 
-	aSplits.push_back( pNew1 );
-	aSplits.push_back( pNew2 );
+	TqInt cSplits = 0;
 
-	return ( 2 );
+	if( !m_fDiceable )
+	{
+		cSplits += pNew1->Split(aSplits);
+		cSplits += pNew2->Split(aSplits);
+	}
+	else
+	{
+		aSplits.push_back( pNew1 );
+		aSplits.push_back( pNew2 );
+
+		cSplits = 2;
+	}
+
+	return ( cSplits );
 }
 
 
@@ -1147,8 +1205,6 @@ TqInt CqDisk::Split( std::vector<CqBasicSurface*>& aSplits )
 		pNew2->t().uSubdivide( &pNew1->t() );
 		pNew1->Cs().uSubdivide( &pNew2->Cs() );
 		pNew1->Os().uSubdivide( &pNew2->Os() );
-		pNew1->m_uDiceSize = m_uDiceSize / 2;
-		pNew2->m_uDiceSize = m_uDiceSize / 2;
 	}
 	else
 	{
@@ -1162,20 +1218,32 @@ TqInt CqDisk::Split( std::vector<CqBasicSurface*>& aSplits )
 		pNew2->t().vSubdivide( &pNew1->t() );
 		pNew1->Cs().vSubdivide( &pNew2->Cs() );
 		pNew1->Os().vSubdivide( &pNew2->Os() );
-		pNew1->m_vDiceSize = m_vDiceSize / 2;
-		pNew2->m_vDiceSize = m_vDiceSize / 2;
 	}
 	pNew1->SetSurfaceParameters( *this );
 	pNew2->SetSurfaceParameters( *this );
 	pNew1->m_fDiceable = TqTrue;
 	pNew2->m_fDiceable = TqTrue;
+	pNew1->m_SplitDir = (m_SplitDir == SplitDir_U)? SplitDir_V:SplitDir_U;
+	pNew2->m_SplitDir = (m_SplitDir == SplitDir_U)? SplitDir_V:SplitDir_U;
 	pNew1->m_EyeSplitCount = m_EyeSplitCount;
 	pNew2->m_EyeSplitCount = m_EyeSplitCount;
 
-	aSplits.push_back( pNew1 );
-	aSplits.push_back( pNew2 );
+	TqInt cSplits = 0;
 
-	return ( 2 );
+	if( !m_fDiceable )
+	{
+		cSplits += pNew1->Split(aSplits);
+		cSplits += pNew2->Split(aSplits);
+	}
+	else
+	{
+		aSplits.push_back( pNew1 );
+		aSplits.push_back( pNew2 );
+
+		cSplits = 2;
+	}
+
+	return ( cSplits );
 }
 
 

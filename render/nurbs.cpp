@@ -1323,15 +1323,66 @@ TqInt CqSurfaceNURBS::Split( std::vector<CqBasicSurface*>& aSplits )
 	pNew2->SetSurfaceParameters( *this );
 	pNew1->m_fDiceable = TqTrue;
 	pNew2->m_fDiceable = TqTrue;
+	pNew1->m_SplitDir = m_SplitDir;
+	pNew2->m_SplitDir = m_SplitDir;
 	pNew1->m_EyeSplitCount = m_EyeSplitCount;
 	pNew2->m_EyeSplitCount = m_EyeSplitCount;
 	pNew1->AddRef();
 	pNew2->AddRef();
 
-	aSplits.push_back( pNew1 );
-	aSplits.push_back( pNew2 );
+	if ( !m_fDiceable )
+	{
+		CqSurfaceNURBS * pNew3;
+		CqSurfaceNURBS * pNew4;
 
-	cSplits += 2;
+		if ( m_SplitDir == SplitDir_U )
+			pNew1->vSubdivide( pNew3, pNew4 );
+		else
+			pNew1->uSubdivide( pNew3, pNew4 );
+
+		pNew3->SetSurfaceParameters( *this );
+		pNew4->SetSurfaceParameters( *this );
+		pNew3->m_fDiceable = TqTrue;
+		pNew4->m_fDiceable = TqTrue;
+		pNew3->m_EyeSplitCount = m_EyeSplitCount;
+		pNew4->m_EyeSplitCount = m_EyeSplitCount;
+		pNew3->AddRef();
+		pNew4->AddRef();
+
+		aSplits.push_back( pNew3 );
+		aSplits.push_back( pNew4 );
+
+		cSplits += 2;
+
+		if ( m_SplitDir == SplitDir_U )
+			pNew2->vSubdivide( pNew3, pNew4 );
+		else
+			pNew2->uSubdivide( pNew3, pNew4 );
+
+		pNew3->SetSurfaceParameters( *this );
+		pNew4->SetSurfaceParameters( *this );
+		pNew3->m_fDiceable = TqTrue;
+		pNew4->m_fDiceable = TqTrue;
+		pNew3->m_EyeSplitCount = m_EyeSplitCount;
+		pNew4->m_EyeSplitCount = m_EyeSplitCount;
+		pNew3->AddRef();
+		pNew4->AddRef();
+
+		aSplits.push_back( pNew3 );
+		aSplits.push_back( pNew4 );
+
+		cSplits += 2;
+
+		pNew1->Release();
+		pNew2->Release();
+	}
+	else
+	{
+		aSplits.push_back( pNew1 );
+		aSplits.push_back( pNew2 );
+
+		cSplits += 2;
+	}
 
 	return ( cSplits );
 }
@@ -1345,10 +1396,7 @@ TqBool	CqSurfaceNURBS::Diceable()
 	// If the cull check showed that the primitive cannot be diced due to crossing the e and hither planes,
 	// then we can return immediately.
 	if ( !m_fDiceable )
-	{
-		m_SplitDir = (m_SplitDir==SplitDir_U)?SplitDir_V:SplitDir_U;
 		return ( TqFalse );
-	}
 
 	// Otherwise we should continue to try to find the most advantageous split direction, OR the dice size.
 	// Convert the control hull to raster space.
