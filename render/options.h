@@ -362,7 +362,6 @@ class CqOptions
 		RtFunc	m_pPreRenderFunction;	///< A pointer to the function called just prior to rendering.
 
 		std::vector<CqSystemOption*>	m_aOptions;				///< Vector of user specified options.
-		TqFloat	m_fClippingRange;
 
 		RtFilterFunc m_funcFilter;						///< Pointer to the pixel filter function.
 		CqImagersource* m_pshadImager;		///< Pointer to the imager shader.

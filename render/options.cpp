@@ -171,9 +171,6 @@ void CqOptions::InitialiseCamera()
 
 	vecf = vecf * matWorldToScreen;
 	vecn = vecn * matWorldToScreen;
-
-	// Set some additional information about the clip range.
-	m_fClippingRange = GetFloatOption("System", "Clipping")[1] - GetFloatOption("System", "Clipping")[0];
 }
 
 
@@ -230,6 +227,11 @@ CqOptions& CqOptions::operator=( const CqOptions& From )
 	m_pErrorHandler = From.m_pErrorHandler;
 	m_pProgressHandler = From.m_pProgressHandler;
 	m_pPreRenderFunction = From.m_pPreRenderFunction;
+
+	m_bFrameAspectRatioCalled = From.m_bFrameAspectRatioCalled;
+	m_bScreenWindowCalled = From.m_bScreenWindowCalled;
+	m_bFormatCalled = From.m_bFormatCalled;
+
 
 	// Copy the system options.
 	m_aOptions.resize( From.m_aOptions.size() );
