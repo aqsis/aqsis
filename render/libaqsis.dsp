@@ -409,6 +409,10 @@ SOURCE=.\nurbs.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\objectinstance.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\occlusion.h
 # End Source File
 # Begin Source File
@@ -507,6 +511,85 @@ SOURCE=.\version.h
 # Begin Group "Resource Files"
 
 # PROP Default_Filter "ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
+# End Group
+# Begin Group "xml"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\api.xml
+
+!IF  "$(CFG)" == "libaqsis - Win32 Release"
+
+USERDEP__API_X="apicache.xsl"	"apiheader.xsl"	
+# Begin Custom Build
+InputPath=.\api.xml
+
+BuildCmds= \
+	echo Building cache inline file \
+	..\..\win32libs\bin\xsltproc -o ri_cache.inl apicache.xsl api.xml \
+	echo Building API header inline file \
+	..\..\win32libs\bin\xsltproc -o ri.inl apiheader.xsl api.xml \
+	
+
+"ri_cache.inl" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+
+"ri.inl" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "libaqsis - Win32 Debug"
+
+USERDEP__API_X="apicache.xsl"	"apiheader.xsl"	
+# Begin Custom Build
+InputPath=.\api.xml
+
+BuildCmds= \
+	..\..\win32libs\bin\xsltproc -o ri_cache.inl apicache.xsl api.xml \
+	..\..\win32libs\bin\xsltproc -o ri.inl apiheader.xsl api.xml \
+	
+
+"ri_cache.inl" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+
+"ri.inl" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "libaqsis - Win32 Profile"
+
+USERDEP__API_X="apicache.xsl"	"apiheader.xsl"	
+# Begin Custom Build
+InputPath=.\api.xml
+
+BuildCmds= \
+	..\..\win32libs\bin\xsltproc -o ri_cache.inl apicache.xsl api.xml \
+	..\..\win32libs\bin\xsltproc -o ri.inl apiheader.xsl api.xml \
+	
+
+"ri_cache.inl" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+
+"ri.inl" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+# End Custom Build
+
+!ENDIF 
+
+# End Source File
+# End Group
+# Begin Group "xslt"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\apicache.xsl
+# End Source File
+# Begin Source File
+
+SOURCE=.\apiheader.xsl
+# End Source File
 # End Group
 # End Target
 # End Project
