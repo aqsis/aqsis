@@ -90,7 +90,7 @@ class CqProcedural : public CqSurface
 		//------------------------------------------------------ Protexted
 	protected:
 		/* Contexy saved when the Procedural was declared */
-		CqModeBlock m_pconStored;
+		CqModeBlock *m_pconStored;
 		// Implementation specific portion of Split()
 		virtual void SplitProcedural(void) = 0;
 };
