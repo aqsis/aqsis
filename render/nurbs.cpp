@@ -39,6 +39,7 @@
 
 START_NAMESPACE( Aqsis )
 
+#pragma warning(push, 3)
 
 //---------------------------------------------------------------------
 /** Constructor.
@@ -1623,8 +1624,6 @@ TqBool	CqSurfaceNURBS::Diceable()
 	m_uDiceSize = CEIL_POW2( m_uDiceSize );
 	m_vDiceSize = CEIL_POW2( m_vDiceSize );
 
-	TqFloat Area = m_uDiceSize * m_vDiceSize;
-
 	if ( MaxuLen < FLT_EPSILON || MaxvLen < FLT_EPSILON )
 	{
 		m_fDiscard = TqTrue;
@@ -1634,13 +1633,13 @@ TqBool	CqSurfaceNURBS::Diceable()
 
 
 	delete[] ( avecHull );
-	if ( fabs( Area ) > gridsize )
-	{
-		m_SplitDir = ( MaxuLen > MaxvLen ) ? SplitDir_U : SplitDir_V;
-		return ( TqFalse );
-	}
-	else
-		return ( TqTrue );
+	m_SplitDir = ( MaxuLen > MaxvLen ) ? SplitDir_U : SplitDir_V;
+
+	TqDouble gs = sqrt(gridsize);
+	if ( m_uDiceSize > gs) return TqFalse;
+	if ( m_vDiceSize > gs) return TqFalse;
+
+	return ( TqTrue );
 }
 
 
@@ -2165,5 +2164,6 @@ void CqSurfaceNURBS::SubdivideSegments( std::vector<CqSurfaceNURBS*>& S )
 
 
 //-------------------------------------------------------
+#pragma warning(pop)
 
 END_NAMESPACE( Aqsis )

@@ -35,6 +35,7 @@
 
 START_NAMESPACE( Aqsis )
 
+#pragma warning(push, 3)
 
 //---------------------------------------------------------------------
 /** Constructor both u and vbasis matrices default to bezier.
@@ -386,16 +387,15 @@ TqBool	CqSurfacePatchBicubic::Diceable()
 	m_uDiceSize = CEIL_POW2( m_uDiceSize );
 	m_vDiceSize = CEIL_POW2( m_vDiceSize );
 
-	TqFloat Area = m_uDiceSize * m_vDiceSize;
-
 	if ( uLen < FLT_EPSILON || vLen < FLT_EPSILON )
 	{
 		m_fDiscard = TqTrue;
 		return ( TqFalse );
 	}
 
-	if ( fabs( Area ) > gridsize )
-		return ( TqFalse );
+    TqDouble gs = sqrt(gridsize);
+	if ( m_uDiceSize > gs) return TqFalse;
+	if ( m_vDiceSize > gs) return TqFalse;
 
 	return ( TqTrue );
 }
@@ -636,7 +636,7 @@ TqBool	CqSurfacePatchBilinear::Diceable()
 	// TODO: Should ensure powers of half to prevent cracking.
 	uLen = MAX( ROUND( uLen ), 1 );
 	vLen = MAX( ROUND( vLen ), 1 );
-	TqFloat Area = uLen * vLen;
+	
 	m_uDiceSize = static_cast<TqInt>( uLen );
 	m_vDiceSize = static_cast<TqInt>( vLen );
 
@@ -650,8 +650,9 @@ TqBool	CqSurfacePatchBilinear::Diceable()
 		return ( TqFalse );
 	}
 
-	if ( fabs( Area ) > gridsize )
-		return ( TqFalse );
+    TqDouble gs = sqrt(gridsize);
+	if ( m_uDiceSize > gs) return TqFalse;
+	if ( m_vDiceSize > gs) return TqFalse;
 
 	return ( TqTrue );
 }
@@ -1171,5 +1172,7 @@ TqInt CqSurfacePatchMeshBilinear::Split( std::vector<CqBasicSurface*>& aSplits )
 	return ( cSplits );
 }
 
+
+#pragma warning(pop)
 
 END_NAMESPACE( Aqsis )

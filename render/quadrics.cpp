@@ -36,6 +36,7 @@
 
 START_NAMESPACE( Aqsis )
 
+#pragma warning(push, 3)
 
 static TqBool IntersectLine( CqVector3D& P1, CqVector3D& T1, CqVector3D& P2, CqVector3D& T2, CqVector3D& P );
 static void ProjectToLine( const CqVector3D& S, const CqVector3D& Trj, const CqVector3D& pnt, CqVector3D& p );
@@ -157,13 +158,12 @@ TqBool	CqQuadric::Diceable()
 
 	m_SplitDir = ( m_uDiceSize > m_vDiceSize ) ? SplitDir_U : SplitDir_V;
 
-	// if the gridsize is not set the computation of gridsize assuming
-	// a minimum of 0.4 shadingrate
-	TqFloat esize = ( static_cast<TqFloat>( m_uDiceSize ) * static_cast<TqFloat>( m_vDiceSize ) );
-	if ( esize <= gridsize )
-		return ( TqTrue );
+	TqDouble gs = sqrt(gridsize);
+	if ( m_uDiceSize > gs) return TqFalse;
+	if ( m_vDiceSize > gs) return TqFalse;
+	
 
-	return ( TqFalse );
+	return ( TqTrue );
 
 }
 
@@ -211,8 +211,8 @@ void CqQuadric::EstimateGridSize()
 
 	TqFloat ShadingRate = pAttributes() ->GetFloatAttribute( "System", "ShadingRate" ) [ 0 ];
 
-	m_uDiceSize = MAX( 4, ROUND( ESTIMATEGRIDSIZE * maxusize / ( ShadingRate ) ) );
-	m_vDiceSize = MAX( 4, ROUND( ESTIMATEGRIDSIZE * maxvsize / ( ShadingRate ) ) );
+	m_uDiceSize = ROUND( ESTIMATEGRIDSIZE * maxusize / ( ShadingRate ) );
+	m_vDiceSize = ROUND( ESTIMATEGRIDSIZE * maxvsize / ( ShadingRate ) );
 
 	// Ensure power of 2 to avoid cracking
 	m_uDiceSize = CEIL_POW2( m_uDiceSize );
@@ -936,7 +936,8 @@ CqDisk::CqDisk( TqFloat height, TqFloat minorradius, TqFloat majorradius, TqFloa
 		m_MinorRadius( minorradius ),
 		m_ThetaMin( thetamin ),
 		m_ThetaMax( thetamax )
-{}
+{
+}
 
 
 //---------------------------------------------------------------------
@@ -1237,6 +1238,7 @@ void ProjectToLine( const CqVector3D& S, const CqVector3D& Trj, const CqVector3D
 	p += S;
 }
 
+#pragma warning(pop)
 
 END_NAMESPACE( Aqsis )
 //---------------------------------------------------------------------
