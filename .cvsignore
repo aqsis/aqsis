@@ -13,6 +13,8 @@ Makefile
 *.ncb
 *.opt
 *~
+*.dep
+*.mak
 
 *.positions
 
