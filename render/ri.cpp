@@ -140,7 +140,6 @@ RtToken	RI_BEAMDISTRIBUTION	= "beamdistribution";
 RtToken	RI_MATTE	= "matte";
 RtToken	RI_METAL	= "metal";
 RtToken	RI_PLASTIC	= "plastic";
-RtToken	RI_SHIINYMETAL	= "shinymetal";
 RtToken	RI_PAINTEDPLASTIC	= "paintedplastic";
 RtToken	RI_KA	= "ka";
 RtToken	RI_KD	= "kd";
