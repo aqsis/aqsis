@@ -5,7 +5,7 @@
  *	@brief	Declare the interface structure for the log class.
  *
  *	Last change by:		$Author: mw_matti $
- *	Last change date:	$Date: 2003/02/03 13:53:42 $
+ *	Last change date:	$Date: 2003/02/07 14:35:10 $
  */ 
 //------------------------------------------------------------------------------
 #ifndef	___ilog_Loaded___
@@ -45,10 +45,41 @@ struct IqLog
 		/** Log a message
 		 */
 		virtual void log( char* priority, const char* stringFormat, ... ) = 0;
-		
+				
 		/** Log an error message
 		 */
 		virtual void error( int table, int error_id ) = 0;
+		virtual void error( const char* stringFormat, ... ) = 0;
+
+		/** Log an warning
+		 */
+		virtual void warn( int table, int error_id ) = 0;
+		virtual void warn( const char* stringFormat, ... ) = 0;
+
+		/** Log an critical error message
+		 */
+		virtual void critical( int table, int error_id ) = 0;
+		virtual void critical( const char* stringFormat, ... ) = 0;
+
+		/** Log an notice message
+		 */
+		virtual void notice( int table, int error_id ) = 0;
+		virtual void notice( const char* stringFormat, ... ) = 0;
+		
+		/** Log an info message
+		 */
+		virtual void info( int table, int error_id ) = 0;
+		virtual void info( const char* stringFormat, ... ) = 0;
+		
+		/** Log an fatal error
+		 */
+		virtual void fatal( int table, int error_id ) = 0;
+		virtual void fatal( const char* stringFormat, ... ) = 0;
+		
+		/** Log an debug message
+		 */
+		virtual void debug( const char* stringFormat, ... ) = 0;
+
 
 		/** Get an error from the message table
 		 */

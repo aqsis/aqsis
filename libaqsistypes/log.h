@@ -73,7 +73,40 @@ class CqLog	: public IqLog
 		CqMessageTable* getMessageTable();
 
 		void log( char* priority, const char* stringFormat, ... );
+		
+		/** Log an error message
+		 */
 		void error( int table, int error_id );
+		void error( const char* stringFormat, ... );
+
+		/** Log an warning
+		 */
+		void warn( int table, int error_id );
+		void warn( const char* stringFormat, ... );
+
+		/** Log an critical error message
+		 */
+		void critical( int table, int error_id );
+		void critical( const char* stringFormat, ... );
+
+		/** Log an notice message
+		 */
+		void notice( int table, int error_id );
+		void notice( const char* stringFormat, ... );
+		
+		/** Log an info message
+		 */
+		void info( int table, int error_id );
+		void info( const char* stringFormat, ... );
+		
+		/** Log an fatal error
+		 */
+		void fatal( int table, int error_id );
+		void fatal( const char* stringFormat, ... );
+		
+		/** Log an debug message
+		 */
+		void debug( const char* stringFormat, ... );
 
 		const char* getError( int table, int error_id );
 
@@ -110,6 +143,8 @@ class CqLog	: public IqLog
 		
 		void createFileLog( std::string filename, std::string name );
 		void createCOUTLog( std::string name = "AqsisConsoleLog" );
+
+		void log2( log4cpp::Priority::Value priority, const char* stringFormat, ... );
 
 		log4cpp::Appender* m_pAppender;
 		log4cpp::Appender* m_pFileAppender;

@@ -100,6 +100,23 @@ void CqLog::log(char* priority, const char* stringFormat, ...)
 	va_end(va);
 }
 
+void CqLog::log2( log4cpp::Priority::Value priority, const char* stringFormat, ... )
+{
+	if ( m_FirstRun )
+	{
+		std::cout << "using log4cpp 0.3.4b ( licensed under the LGPL )" << std::endl;
+
+		m_FirstRun = false;
+	}
+
+	va_list va;
+	va_start(va, stringFormat);
+
+	m_pRoot->logva(priority, stringFormat, va);
+
+	va_end(va);
+}
+
 void CqLog::createFileLog( std::string filename , std::string name )
 {
 	m_pFileAppender = 
@@ -144,11 +161,6 @@ const char* CqLog::getError( int table, int error_id )
 	return m_pTable->getError( table, error_id );
 }
 
-void CqLog::error( int table, int error_id )
-{
-	log( "ERROR", CqLog::getError( table, error_id ) );
-}
-
 CqMessageTable* CqLog::getMessageTable()
 {
 	return m_pTable;
@@ -157,6 +169,101 @@ CqMessageTable* CqLog::getMessageTable()
 void CqLog::removeFileLog( std::string name )
 {
 	m_pRoot->removeAppender( m_pRoot->getAppender( name ) );
+}
+
+// ------------------------- Log functions
+
+void CqLog::error( int table, int error_id )
+{
+	m_pRoot->error( CqLog::getError( table, error_id ) );
+}
+
+void CqLog::error( const char* stringFormat, ... )
+{
+	va_list va;
+	va_start(va,stringFormat);
+	log2(log4cpp::Priority::ERROR, stringFormat, va);
+	va_end(va);
+}
+
+// -------------------------- Warning
+void CqLog::warn( int table, int error_id )
+{
+	m_pRoot->warn( CqLog::getError( table, error_id ) );
+}
+
+void CqLog::warn( const char* stringFormat, ... )
+{
+	va_list va;
+	va_start(va,stringFormat);
+	log2(log4cpp::Priority::WARN, stringFormat, va);
+	va_end(va);
+}
+
+// --------------------------- Critical
+void CqLog::critical( int table, int error_id )
+{
+	m_pRoot->crit( CqLog::getError( table, error_id ) );
+}
+
+void CqLog::critical( const char* stringFormat, ... )
+{
+	va_list va;
+	va_start(va,stringFormat);
+	log2(log4cpp::Priority::CRIT, stringFormat, va);
+	va_end(va);
+}
+
+// ---------------------------- Notice
+void CqLog::notice( int table, int error_id )
+{
+	m_pRoot->notice( CqLog::getError( table, error_id ) );
+}
+
+void CqLog::notice( const char* stringFormat, ... )
+{
+	va_list va;
+	va_start(va,stringFormat);
+	log2(log4cpp::Priority::NOTICE, stringFormat, va);
+	va_end(va);
+}
+
+// ---------------------------- Info
+void CqLog::info( int table, int error_id )
+{
+	m_pRoot->info( CqLog::getError( table, error_id ) );
+}
+
+void CqLog::info( const char* stringFormat, ... )
+{
+	va_list va;
+	va_start(va,stringFormat);
+	log2(log4cpp::Priority::INFO, stringFormat, va);
+	va_end(va);
+}
+
+// ----------------------------- Fatal
+void CqLog::fatal( int table, int error_id )
+{
+	m_pRoot->fatal( CqLog::getError( table, error_id ) );
+}
+
+void CqLog::fatal( const char* stringFormat, ... )
+{
+	va_list va;
+	va_start(va,stringFormat);
+	log2(log4cpp::Priority::FATAL, stringFormat, va);
+	va_end(va);
+}
+
+// ------------------------------ Debug
+
+void CqLog::debug( const char* stringFormat, ... )
+{
+	va_list va;
+	va_start(va,stringFormat);
+	log2(log4cpp::Priority::DEBUG, stringFormat, va);
+	va_end(va);
 }
 
 END_NAMESPACE( Aqsis )
