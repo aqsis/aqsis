@@ -1554,24 +1554,12 @@ TqBool	CqSurfaceNURBS::Diceable()
 	// Convert the control hull to raster space.
 	CqVector2D * avecHull = new CqVector2D[ m_cuVerts * m_cvVerts ];
 	TqUint i;
-	TqInt gridsize;
+        TqFloat gs = SqrtGridSize();
+	TqInt gridsize = 1.0;
 
-	const TqInt* poptGridSize = QGetRenderContext() ->optCurrent().GetIntegerOption( "limits", "gridsize" );
+        if (gs >= 1.0) gridsize = gs * gs;
 
-	TqInt m_XBucketSize = 16;
-	TqInt m_YBucketSize = 16;
-	const TqInt* poptBucketSize = QGetRenderContext() ->optCurrent().GetIntegerOption( "limits", "bucketsize" );
-	if ( poptBucketSize != 0 )
-	{
-		m_XBucketSize = poptBucketSize[ 0 ];
-		m_YBucketSize = poptBucketSize[ 1 ];
-	}
 	TqFloat ShadingRate = pAttributes() ->GetFloatAttribute( "System", "ShadingRate" ) [ 0 ];
-
-	if ( poptGridSize )
-		gridsize = poptGridSize[ 0 ];
-	else
-		gridsize = static_cast<TqInt>( m_XBucketSize * m_XBucketSize / ShadingRate );
 
 	const CqMatrix& matCtoR = QGetRenderContext() ->matSpaceToSpace( "camera", "raster", CqMatrix(), pTransform() ->matObjectToWorld() );
 	for ( i = 0; i < m_cuVerts*m_cvVerts; i++ )
@@ -1635,7 +1623,6 @@ TqBool	CqSurfaceNURBS::Diceable()
 	delete[] ( avecHull );
 	m_SplitDir = ( MaxuLen > MaxvLen ) ? SplitDir_U : SplitDir_V;
 
-	TqDouble gs = sqrt(gridsize);
 	if ( m_uDiceSize > gs) return TqFalse;
 	if ( m_vDiceSize > gs) return TqFalse;
 

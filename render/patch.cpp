@@ -275,22 +275,9 @@ TqBool	CqSurfacePatchBicubic::Diceable()
 	// Convert the control hull to raster space.
 	CqVector2D	avecHull[ 16 ];
 	TqInt i;
-	TqInt gridsize;
 
-	const TqInt* poptGridSize = QGetRenderContext() ->optCurrent().GetIntegerOption( "limits", "gridsize" );
-	TqInt m_XBucketSize = 16;
-	TqInt m_YBucketSize = 16;
-	const TqInt* poptBucketSize = QGetRenderContext() ->optCurrent().GetIntegerOption( "limits", "bucketsize" );
-	if ( poptBucketSize != 0 )
-	{
-		m_XBucketSize = poptBucketSize[ 0 ];
-		m_YBucketSize = poptBucketSize[ 1 ];
-	}
 	TqFloat ShadingRate = pAttributes() ->GetFloatAttribute( "System", "ShadingRate" ) [ 0 ];
-	if ( poptGridSize )
-		gridsize = poptGridSize[ 0 ];
-	else
-		gridsize = static_cast<TqInt>( m_XBucketSize * m_XBucketSize / ShadingRate );
+
 	for ( i = 0; i < 16; i++ )
 		avecHull[ i ] = matCtoR * ( *P() ) [ i ];
 
@@ -372,9 +359,8 @@ TqBool	CqSurfacePatchBicubic::Diceable()
 		if ( Vec3.Magnitude2() > vLen ) vLen = Vec3.Magnitude2();
 	}
 
-	ShadingRate = static_cast<float>( sqrt( ShadingRate ) );
-	uLen = sqrt( uLen ) / ShadingRate;
-	vLen = sqrt( vLen ) / ShadingRate;
+	uLen = sqrt( uLen  / ShadingRate);
+	vLen = sqrt( vLen  / ShadingRate);
 
 	m_SplitDir = ( uLen > vLen ) ? SplitDir_U : SplitDir_V;
 	// TODO: Should ensure powers of half to prevent cracking.
@@ -393,7 +379,8 @@ TqBool	CqSurfacePatchBicubic::Diceable()
 		return ( TqFalse );
 	}
 
-    TqDouble gs = sqrt(gridsize);
+        TqFloat gs = SqrtGridSize();
+
 	if ( m_uDiceSize > gs) return TqFalse;
 	if ( m_vDiceSize > gs) return TqFalse;
 
@@ -597,22 +584,9 @@ TqBool	CqSurfacePatchBilinear::Diceable()
 	// Convert the control hull to raster space.
 	CqVector2D	avecHull[ 4 ];
 	TqInt i;
-	TqInt gridsize;
 
-	const TqInt* poptGridSize = QGetRenderContext() ->optCurrent().GetIntegerOption( "limits", "gridsize" );
-	TqInt m_XBucketSize = 16;
-	TqInt m_YBucketSize = 16;
-	const TqInt* poptBucketSize = QGetRenderContext() ->optCurrent().GetIntegerOption( "limits", "bucketsize" );
-	if ( poptBucketSize != 0 )
-	{
-		m_XBucketSize = poptBucketSize[ 0 ];
-		m_YBucketSize = poptBucketSize[ 1 ];
-	}
 	TqFloat ShadingRate = pAttributes() ->GetFloatAttribute( "System", "ShadingRate" ) [ 0 ];
-	if ( poptGridSize )
-		gridsize = poptGridSize[ 0 ];
-	else
-		gridsize = static_cast<TqInt>( m_XBucketSize * m_XBucketSize / ShadingRate );
+
 	for ( i = 0; i < 4; i++ )
 		avecHull[ i ] = matCtoR * ( *P() ) [ i ];
 
@@ -627,9 +601,8 @@ TqBool	CqSurfacePatchBilinear::Diceable()
 	Vec2 = avecHull[ 3 ] - avecHull[ 1 ];
 	vLen = ( Vec1.Magnitude2() > Vec2.Magnitude2() ) ? Vec1.Magnitude2() : Vec2.Magnitude2();
 
-	ShadingRate = static_cast<float>( sqrt( ShadingRate ) );
-	uLen = sqrt( uLen ) / ShadingRate;
-	vLen = sqrt( vLen ) / ShadingRate;
+	uLen = sqrt( uLen / ShadingRate);
+	vLen = sqrt( vLen / ShadingRate);
 
 	m_SplitDir = ( uLen > vLen ) ? SplitDir_U : SplitDir_V;
 
@@ -650,7 +623,8 @@ TqBool	CqSurfacePatchBilinear::Diceable()
 		return ( TqFalse );
 	}
 
-    TqDouble gs = sqrt(gridsize);
+	TqFloat gs = SqrtGridSize();
+
 	if ( m_uDiceSize > gs) return TqFalse;
 	if ( m_vDiceSize > gs) return TqFalse;
 

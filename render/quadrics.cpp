@@ -131,34 +131,17 @@ void CqQuadric::GenerateGeometricNormals( TqInt uDiceSize, TqInt vDiceSize, IqSh
 
 TqBool	CqQuadric::Diceable()
 {
-	TqInt gridsize;
-
 	// If the cull check showed that the primitive cannot be diced due to crossing the e and hither planes,
 	// then we can return immediately.
 	if ( !m_fDiceable )
 		return ( TqFalse );
 
-	const TqInt* poptGridSize = QGetRenderContext() ->optCurrent().GetIntegerOption( "limits", "gridsize" );
-	TqInt m_XBucketSize = 16;
-	TqInt m_YBucketSize = 16;
-	const TqInt* poptBucketSize = QGetRenderContext() ->optCurrent().GetIntegerOption( "limits", "bucketsize" );
-	if ( poptBucketSize != 0 )
-	{
-		m_XBucketSize = poptBucketSize[ 0 ];
-		m_YBucketSize = poptBucketSize[ 1 ];
-	}
-	TqFloat ShadingRate = pAttributes() ->GetFloatAttribute( "System", "ShadingRate" ) [ 0 ];
-
-	if ( poptGridSize )
-		gridsize = poptGridSize[ 0 ];
-	else
-		gridsize = static_cast<TqInt>( m_XBucketSize * m_XBucketSize / ShadingRate );
-
 	EstimateGridSize();
 
 	m_SplitDir = ( m_uDiceSize > m_vDiceSize ) ? SplitDir_U : SplitDir_V;
 
-	TqDouble gs = sqrt(gridsize);
+	TqFloat gs = SqrtGridSize();
+
 	if ( m_uDiceSize > gs) return TqFalse;
 	if ( m_vDiceSize > gs) return TqFalse;
 	

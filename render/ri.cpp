@@ -327,6 +327,7 @@ RtVoid	RiFrameBegin( RtInt number )
 
 	QGetRenderContext() ->BeginFrameModeBlock();
 	CqCSGTreeNode::SetRequired(TqFalse);
+	CqSurface::SqrtGridSize(-1.0f);
 	return ;
 }
 
