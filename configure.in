@@ -19,6 +19,7 @@ framebuffer/Makefile \
 framebuffer/win32/Makefile \
 framebuffer/win32/intel/Makefile \
 framebuffer_glut/Makefile \
+framebuffer_glut_z/Makefile \
 images/Makefile \
 libaqsistypes/Makefile \
 libaqsistypes/posix/Makefile \
