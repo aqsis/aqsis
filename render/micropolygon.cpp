@@ -426,7 +426,7 @@ void CqMicroPolyGrid::Shade()
             {
                 cCulled++;
                 m_CulledPolys.SetValue( i, TqTrue );
-            } else break;
+            }
         }
         theStats.OcclusionCullTimer().Stop();
 
@@ -438,7 +438,6 @@ void CqMicroPolyGrid::Shade()
             DeleteVariables( TqTrue );
             return ;
         }
-
     }
 
     // Now shade the grid.
@@ -702,7 +701,7 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, long y
             // If culled don't bother.
             if ( m_CulledPolys.Value( iIndex ) )
             {
-                //theStats.IncCulledMPGs();
+                STATS_INC(MPG_culled);
                 continue;
             }
 

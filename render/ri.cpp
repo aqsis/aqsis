@@ -2362,10 +2362,7 @@ RtVoid	RiOrientation( RtToken orientation )
     if ( orientation != 0 )
     {
         if ( strstr( orientation, RI_RH ) != 0 )
-        {
-            QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "Orientation" ) [ 0 ] = ( QGetRenderContext() ->ptransCurrent()->GetHandedness(QGetRenderContext()->Time()) ) ? 1 : 0;
-            QGetRenderContext() ->pattrWriteCurrent() ->FlipeOrientation(QGetRenderContext()->Time());
-        }
+            QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "Orientation" ) [ 0 ] = ( QGetRenderContext() ->ptransCurrent()->GetHandedness(QGetRenderContext()->Time()) ) ? 0 : 1;
         if ( strstr( orientation, RI_LH ) != 0 )
             QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "Orientation" ) [ 0 ] = ( QGetRenderContext() ->ptransCurrent()->GetHandedness(QGetRenderContext()->Time()) ) ? 1 : 0;
         if ( strstr( orientation, RI_INSIDE ) != 0 )

@@ -1175,7 +1175,7 @@ void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax )
 				pGrid->Shade();
                 pGrid->TransferOutputVariables();
 
-                if ( pGrid->vfCulled() == TqFalse )
+				if ( pGrid->vfCulled() == TqFalse )
                 {
                     // Only project micropolygon not culled
                     Bucket.AddGrid( pGrid );

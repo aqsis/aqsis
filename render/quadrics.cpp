@@ -161,14 +161,14 @@ TqInt CqQuadric::DiceAll( CqMicroPolyGrid* pGrid )
         DONE( lDone, EnvVars_v );
     }
 
-    if( USES( lUses, EnvVars_P ) && NULL != pGrid->pVar(EnvVars_P) )
+/*    if( USES( lUses, EnvVars_P ) && NULL != pGrid->pVar(EnvVars_P) )
         DONE( lDone, EnvVars_P );
     if( USES( lUses, EnvVars_Ng ) && NULL != pGrid->pVar(EnvVars_Ng) )
     {
         DONE( lDone, EnvVars_Ng );
         pGrid->SetbGeometricNormals( TqTrue );
     }
-
+*/
     TqFloat du = 1.0 / uDiceSize();
     TqFloat dv = 1.0 / vDiceSize();
     for ( v = 0; v <= vDiceSize(); v++ )

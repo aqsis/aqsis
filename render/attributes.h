@@ -166,7 +166,7 @@ public:
     void	FlipeOrientation( TqFloat time )
     {
         TqBool co = GetIntegerAttribute( "System", "Orientation" ) [ 0 ] == 0;
-        GetIntegerAttributeWrite( "System", "Orientation" ) [ 0 ] = ( co ) ? 0 : 1;
+        GetIntegerAttributeWrite( "System", "Orientation" ) [ 0 ] = ( co ) ? 1 : 0;
     }
 
     virtual IqShader*	pshadDisplacement( TqFloat time ) const
