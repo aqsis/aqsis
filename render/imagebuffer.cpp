@@ -1102,7 +1102,24 @@ void CqImageBuffer::RenderMPG_Static( CqMicroPolygon* pMPG, long xmin, long xmax
 
 void CqImageBuffer::StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, TqInt index, TqFloat D )
 {
-    static SqImageSample ImageVal( QGetRenderContext() ->GetOutputDataTotalSize() );
+    // Sort the color/opacity into the visible point list
+	// return if the sample is occluded and can be culled.
+    std::vector<SqImageSample>& aValues = pie2->Values( index );
+	std::vector<SqImageSample>::iterator sample = aValues.begin();
+	std::vector<SqImageSample>::iterator end = aValues.end();
+	while( sample != end )
+	{
+		if((*sample).Depth() >= D)
+			break;
+
+		if(((*sample).m_flags & SqImageSample::Flag_Occludes) &&
+			(*sample).m_pCSGNode==NULL && m_CurrentMpgSampleInfo.m_IsCullable)
+			return;
+
+		++sample;
+	}
+
+	static SqImageSample ImageVal( QGetRenderContext() ->GetOutputDataTotalSize() );
     ImageVal.SetDepth( D );
 
 	CqStats::IncI( CqStats::SPL_hits );
@@ -1189,21 +1206,14 @@ void CqImageBuffer::StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, TqInt
         }
     }
 
-    // Sort the color/opacity into the visible point list
-    std::vector<SqImageSample>& aValues = pie2->Values( index );
-    int i = 0;
-    int c = aValues.size();
-    if ( c > 0 && aValues[ 0 ].Depth() < ImageVal.Depth() )
-    {
-        SqImageSample * p = &aValues[ 0 ];
-        while ( i < c && p[ i ].Depth() < ImageVal.Depth() ) i++;
-        // If it is exactly the same, chances are we've hit a MPG grid line.
-        if ( i < c && p[ i ].Depth() == ImageVal.Depth() )
-        {
-            p[ i ].m_Data = ( p[ i ].m_Data + val ) * 0.5f;
-            return ;
-        }
-    }
+
+	// If depth is exactly the same as previous sample, chances are we've
+	// hit a MPG grid line.
+	if ( sample != end && (*sample).Depth() == ImageVal.Depth() )
+	{
+		(*sample).m_Data = ( (*sample).m_Data + val ) * 0.5f;
+		return;
+	}
 
     // Update max depth values
     if ( !( DisplayMode() & ModeZ ) && Occludes )
@@ -1211,7 +1221,6 @@ void CqImageBuffer::StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, TqInt
         CqOcclusionBox::MarkForUpdate( pie2->OcclusionBoxId() );
         pie2->MarkForZUpdate();
     }
-
 
     ImageVal.m_pCSGNode = pMPG->pGrid() ->pCSGNode();
 
@@ -1225,7 +1234,7 @@ void CqImageBuffer::StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, TqInt
         ImageVal.m_flags |= SqImageSample::Flag_Matte;
     }
 
-    aValues.insert( aValues.begin() + i, ImageVal );
+    aValues.insert( sample, ImageVal );
 }
 
 //----------------------------------------------------------------------
