@@ -245,7 +245,7 @@ RtVoid  CqASCII::RiTransformBegin(RtVoid)
 {
     out <<"TransformBegin"<<endl;
 }
-RtVoid  CqASCII::RiTranformEnd(RtVoid)
+RtVoid  CqASCII::RiTransformEnd(RtVoid)
 {
     out <<"TransformEnd"<<endl;
 }
@@ -425,20 +425,26 @@ RtVoid  CqASCII::RiTextureCoordinates(RtFloat s1, RtFloat t1, RtFloat s2, RtFloa
 RtLightHandle CqASCII::RiLightSourceV(const char *name, RtInt n, RtToken tokens[], RtPointer parms[])
 {
     out <<"LightSource ";
-    printPL(n, tokens, parms);
+	printCharP(name);
+    
 
     RtInt t=lastLightHandle;
     lastLightHandle+=1;
+	out <<(RtInt) lastLightHandle <<" ";
+	printPL(n, tokens, parms);
     return (RtLightHandle) t;
 }
 RtLightHandle CqASCII::RiAreaLightSourceV(const char *name,
 					  RtInt n, RtToken tokens[], RtPointer parms[])
 {
     out <<"AreaLightSource ";
-    printPL(n, tokens, parms);
+	printCharP(name);
+    
 
     RtInt t=lastLightHandle;
     lastLightHandle+=1;
+	out <<(RtInt) lastLightHandle <<" ";
+	printPL(n, tokens, parms);
     return (RtLightHandle) t;
 }
 RtVoid  CqASCII::RiIlluminate(RtLightHandle light, RtBoolean onoff)

@@ -87,7 +87,7 @@ public:
     RtVoid  RiAttributeEnd();
 
     RtVoid  RiTransformBegin(RtVoid);  
-    RtVoid  RiTranformEnd(RtVoid);
+    RtVoid  RiTransformEnd(RtVoid);
 
     RtVoid  RiSolidBegin(RtToken operation);
     RtVoid  RiSolidEnd(RtVoid);

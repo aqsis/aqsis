@@ -863,7 +863,7 @@ RtVoid RiTransformBegin (void)
 RtVoid RiTransformEnd (void)
 {
  
-    try {   context.current().RiTranformEnd();
+    try {   context.current().RiTransformEnd();
     } catch (CqError &r) {
 	r.manage();
     }
