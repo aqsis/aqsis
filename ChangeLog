@@ -1,3 +1,67 @@
+2004-04-07 10:36  pgregory
+
+	* render/: imagebuffer.cpp, micropolygon.cpp, micropolygon.h:
+	  Temporarily rollback recent sampling optimisation update.
+
+2004-04-03 14:23  billybobjimboy
+
+	* render/: imagebuffer.cpp, micropolygon.cpp, micropolygon.h: added
+	  a couple of sampling optimisations
+
+2004-03-31 21:35  pgregory
+
+	* render/genpoly.cpp: Oops, remove debugging print commands.
+
+2004-03-31 20:59  pgregory
+
+	* render/genpoly.cpp: Skip the last triangulation fix, it was
+	  incorrect. If the triangle in question has no area, we have to
+	  admit defeat and say we don't know the orientation.
+
+2004-03-31 20:46  pgregory
+
+	* render/genpoly.cpp: Fix bug in triangulation. Needed to check for
+	  an area of >=0.0 instead of >0.0 for clockwise.
+
+2004-03-29 20:20  pgregory
+
+	* render/: attributes.h, imagebuffer.cpp, micropolygon.cpp,
+	  quadrics.cpp, ri.cpp: Fix orientation for quadrics, wasn't
+	  generating the normals.  Fix backface culling, errant 'break'
+	  statement would exit the backface cull loop as soon as one
+	  forward facing MP in a grid was found.
+
+2004-03-27 11:47  billybobjimboy
+
+	* render/imagebuffer.cpp: Update occlusion hierarchy after
+	  rendering mpgs left over from previous bucket.
+
+2004-03-27 11:21  pgregory
+
+	* render/imagebuffer.cpp: Fix stupid mistake, disabled occlusion
+	  culling by accident.
+
+2004-03-26 16:51  pgregory
+
+	* libaqsistypes/vector2d.cpp, libaqsistypes/vector2d.h,
+	  libaqsistypes/vector3d.cpp, libaqsistypes/vector3d.h,
+	  libaqsistypes/vector4d.cpp, libaqsistypes/vector4d.h,
+	  render/imagebuffer.cpp, render/libaqsis.def,
+	  render/micropolygon.cpp: Fix problem when DoF and MB are
+	  combined. The calculation of the bound for moving micro polygons
+	  wasn't taking into account the DoF adjustment.
+
+2004-03-26 13:01  mw_matti
+
+	* libaqsistypes/file.h, libaqsistypes/validate.h,
+	  libaqsistypes/vector2d.h, libaqsistypes/vector3d.h,
+	  libaqsistypes/vector4d.h, render/rifile.h, render/stats.h:
+	  added/improved documentation
+
+2004-03-26 11:40  pgregory
+
+	* ChangeLog: Updated changes from CVS.
+
 2004-03-23 22:26  pgregory
 
 	* libddmsock/ddmsock.cpp, libshaderexecenv/shadeops.cpp,
