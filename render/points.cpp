@@ -107,6 +107,7 @@ CqPoints&	CqPoints::operator=( const CqPoints& From )
 {
     CqSurface::operator=( From );
     m_nVertices = From.m_nVertices;
+
 /// \note: Needed to move this to the InitialiseKDTree function, as the shared_from_this() 
 ///			call is not valid in a constructor or so it seems.
 //	m_KDTreeData.SetpPoints( boost::static_pointer_cast<CqPoints>( shared_from_this() ) );
