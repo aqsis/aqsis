@@ -343,7 +343,7 @@ TqInt Data(SOCKET s, SqDDMessageBase* pMsgB)
 {
 	SqDDMessageData* pMsg=static_cast<SqDDMessageData*>(pMsgB);
 
-	TqInt	linelen=XRes*SamplesPerElement;
+	TqInt	linelen=XRes*3;
 	char* pBucket=reinterpret_cast<char*>(&pMsg->m_Data);
 	linelen=(linelen+3)&0xfffffffc;
 
@@ -355,7 +355,7 @@ TqInt Data(SOCKET s, SqDDMessageBase* pMsgB)
 		{
 			if(x>=0 && y>=0 && x<XRes && y<YRes)
 			{
-				TqInt so=((YRes-y-1)*linelen)+(x*SamplesPerElement);
+				TqInt so=((YRes-y-1)*linelen)+(x*3);
 				
 				if(SamplesPerElement>=3)
 				{

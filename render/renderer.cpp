@@ -44,6 +44,7 @@
 
 #ifdef	AQSIS_SYSTEM_WIN32
 #include	"ddmsock.h"
+#include	"ddmsimple.h"
 #endif //	AQSIS_SYSTEM_WIN32
 
 START_NAMESPACE(Aqsis)

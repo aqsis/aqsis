@@ -424,52 +424,55 @@ TqFloat CqBucket::Depth(TqInt iXPos, TqInt iYPos)
 
 void CqBucket::FilterBucket()
 {
-	CqImageElement* pie=&m_aieImage[0];;
+	CqImageElement* pie;
 
 	CqColor* pCols=new CqColor[XSize()*YSize()];
-	TqFloat xmax=XFWidth();
-	TqFloat ymax=YFWidth();
+	TqFloat xmax=XFWidth()*0.5f;
+	TqFloat ymax=YFWidth()*0.5f;
 	TqInt	xlen=XSize()+XFWidth();
 
 	TqInt x,y;
 	TqInt i=0;
-	for(y=0; y<YSize(); y++)
+	for(y=YOrigin(); y<YOrigin()+YSize(); y++)
 	{
-		for(x=0; x<XSize(); x++)
+		for(x=XOrigin(); x<XOrigin()+XSize(); x++)
 		{
 			CqColor c(0,0,0);
 			TqFloat gTot=0.0;
-			TqInt fy=0;
+			TqInt fy=static_cast<TqInt>(-ymax);
 			TqFloat* pFilterValues=&m_aFilterValues[0];
+			// Get the element at the upper left corner of the filter area.
+			ImageElement(x-static_cast<TqInt>(xmax), y-static_cast<TqInt>(ymax), pie);
 			while(fy<=ymax)
 			{
-				TqInt fx=0;
+				CqImageElement* pie2=pie;
+				TqInt fx=static_cast<TqInt>(-xmax);
 				while(fx<=xmax)
 				{
-					TqInt ieoff=(fy*xlen)+fx;
 					TqFloat g=*pFilterValues++;
-					c+=pie[ieoff].Color()*g;
+					c+=pie2->Color()*g;
 					gTot+=g;
 					fx++;
+					pie2++;
 				}
+				pie+=xlen;
 				fy++;
 			}
-			pie++;
 			pCols[i++]=c/gTot;
 		}
-		pie+=XFWidth();
 	}
 	
 	i=0;
-	pie=&m_aieImage[((YFWidth()*0.5f)*xlen)+(XFWidth()*0.5f)];
+	ImageElement(XOrigin(),YOrigin(),pie);
 	for(y=0; y<YSize(); y++)
 	{
+		CqImageElement* pie2=pie;
 		for(x=0; x<XSize(); x++)
 		{
-			pie->Color()=pCols[i++];
-			pie++;
+			pie2->Color()=pCols[i++];
+			pie2++;
 		}
-		pie+=XFWidth();
+		pie+=xlen;
 	}
 	delete[](pCols);
 }
@@ -487,26 +490,28 @@ void CqBucket::ExposeBucket()
 	else
 	{
 		TqInt	xlen=XSize()+XFWidth();
-		CqImageElement* pie=&m_aieImage[((YFWidth()*0.5f)*xlen)+(XFWidth()*0.5f)];
+		CqImageElement* pie;
+		ImageElement(XOrigin(), YOrigin(), pie);
 		TqInt x,y;
 		for(y=0; y<YSize(); y++)
 		{
+			CqImageElement* pie2=pie;
 			for(x=0; x<XSize(); x++)
 			{
 				// color=(color*gain)^1/gamma
 				if(QGetRenderContext()->optCurrent().fExposureGain()!=1.0)
-					pie->Color()*=QGetRenderContext()->optCurrent().fExposureGain();
+					pie2->Color()*=QGetRenderContext()->optCurrent().fExposureGain();
 
 				if(QGetRenderContext()->optCurrent().fExposureGamma()!=1.0)
 				{
 					TqFloat oneovergamma=1.0f/QGetRenderContext()->optCurrent().fExposureGamma();
-					pie->Color().SetfRed  (pow(pie->Color().fRed  (),oneovergamma));
-					pie->Color().SetfGreen(pow(pie->Color().fGreen(),oneovergamma));
-					pie->Color().SetfBlue (pow(pie->Color().fBlue (),oneovergamma));
+					pie2->Color().SetfRed  (pow(pie2->Color().fRed  (),oneovergamma));
+					pie2->Color().SetfGreen(pow(pie2->Color().fGreen(),oneovergamma));
+					pie2->Color().SetfBlue (pow(pie2->Color().fBlue (),oneovergamma));
 				}
-				pie++;
+				pie2++;
 			}
-			pie+=XFWidth();
+			pie+=XSize()+XFWidth();
 		}
 	}
 }
@@ -529,30 +534,32 @@ void CqBucket::QuantizeBucket()
 		TqInt max=QGetRenderContext()->optCurrent().iColorQuantizeMax();
 
 		TqInt	xlen=XSize()+XFWidth();
-		CqImageElement* pie=&m_aieImage[((YFWidth()*0.5f)*xlen)+(XFWidth()*0.5f)];
+		CqImageElement* pie;
+		ImageElement(XOrigin(),YOrigin(),pie);
 		TqInt x,y;
 		for(y=0; y<YSize(); y++)
 		{
+			CqImageElement* pie2=pie;
 			for(x=0; x<XSize(); x++)
 			{
 				double r,g,b,a;
 				double s=random.RandomFloat();
-				if(modf(one*pie->Color().fRed  ()+ditheramplitude*s,&r)>0.5)	r+=1;
-				if(modf(one*pie->Color().fGreen()+ditheramplitude*s,&g)>0.5)	g+=1;
-				if(modf(one*pie->Color().fBlue ()+ditheramplitude*s,&b)>0.5)	b+=1;
-				if(modf(one*pie->Coverage()		 +ditheramplitude*s,&a)>0.5)	a+=1;
+				if(modf(one*pie2->Color().fRed  ()+ditheramplitude*s,&r)>0.5)	r+=1;
+				if(modf(one*pie2->Color().fGreen()+ditheramplitude*s,&g)>0.5)	g+=1;
+				if(modf(one*pie2->Color().fBlue ()+ditheramplitude*s,&b)>0.5)	b+=1;
+				if(modf(one*pie2->Coverage()	  +ditheramplitude*s,&a)>0.5)	a+=1;
 				r=CLAMP(r,min,max);
 				g=CLAMP(g,min,max);
 				b=CLAMP(b,min,max);
 				a=CLAMP(a,min,max);
-				pie->Color().SetfRed  (r);
-				pie->Color().SetfGreen(g);
-				pie->Color().SetfBlue (b);
-				pie->SetCoverage(a);
+				pie2->Color().SetfRed  (r);
+				pie2->Color().SetfGreen(g);
+				pie2->Color().SetfBlue (b);
+				pie2->SetCoverage(a);
 				
-				pie++;
+				pie2++;
 			}
-			pie+=XFWidth();
+			pie+=XSize()+XFWidth();
 		}
 	}
 	else
@@ -564,19 +571,21 @@ void CqBucket::QuantizeBucket()
 		TqInt max=QGetRenderContext()->optCurrent().iDepthQuantizeMax();
 
 		TqInt	xlen=XSize()+XFWidth();
-		CqImageElement* pie=&m_aieImage[((YFWidth()*0.5f)*xlen)+(XFWidth()*0.5f)];
+		CqImageElement* pie;
+		ImageElement(XOrigin(), YOrigin(), pie);
 		TqInt x,y;
 		for(y=0; y<YSize(); y++)
 		{
+			CqImageElement* pie2=pie;
 			for(x=0; x<XSize(); x++)
 			{
 				double d;
-				if(modf(one*pie->Depth()+ditheramplitude*random.RandomFloat(),&d)>0.5)	d+=1;
+				if(modf(one*pie2->Depth()+ditheramplitude*random.RandomFloat(),&d)>0.5)	d+=1;
 				d=CLAMP(d,min,max);
-				pie->SetDepth(d);
-				pie++;
+				pie2->SetDepth(d);
+				pie2++;
 			}
-			pie+=XFWidth();
+			pie+=XSize()+XFWidth();
 		}
 	}
 }
