@@ -2149,3 +2149,20 @@ RtVoid RiErrorHandler ( RtErrorFunc handler )
         r.manage();
     }
 }
+
+RtVoid	RiErrorIgnore( RtInt code, RtInt severity, RtString message )
+{
+    return ;
+}
+
+
+RtVoid	RiErrorPrint( RtInt code, RtInt severity, RtString message )
+{
+    return ;
+}
+
+
+RtVoid	RiErrorAbort( RtInt code, RtInt severity, RtString message )
+{
+    return ;
+}
