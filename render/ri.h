@@ -306,6 +306,8 @@ extern	"C"
 	_qShareM RtVoid	RiReadArchive( RtToken name, RtArchiveCallback, ... );
 	_qShareM RtVoid	RiReadArchiveV( RtToken name, RtArchiveCallback, PARAMETERLIST );
 
+	_qShareM RtVoid	RiProcFree( RtPointer data );
+
 	_qShareM RtVoid	RiProcDelayedReadArchive( RtPointer data, RtFloat detail );
 	_qShareM RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail );
 	_qShareM RtVoid	RiProcDynamicLoad( RtPointer data, RtFloat detail );

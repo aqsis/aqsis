@@ -35,7 +35,6 @@
 START_NAMESPACE( Aqsis )
 
 
-
 /**
  * CqProcedural constructor.
  */
@@ -46,13 +45,15 @@ CqProcedural::CqProcedural() : CqSurface()
 /**
  * CqProcedural copy constructor.
  */
-CqProcedural::CqProcedural( CqBound &B ) : CqSurface()
+CqProcedural::CqProcedural(RtPointer data, CqBound &B, RtProcSubdivFunc subfunc, RtProcFreeFunc freefunc ) : CqSurface()
 {
+	m_pData = data;
 	m_Bound = B;	
+	m_pSubdivFunc = subfunc;
+	m_pFreeFunc = freefunc;
+
 	m_pconStored = QGetRenderContext()->pconCurrent();
 	m_pconStored->AddRef();
-//	m_pAttributes = m_pAttributes->Write();
-//	m_pTransform = m_pTransform->Write();
 }
 
 
@@ -65,7 +66,10 @@ TqInt CqProcedural::Split( std::vector<CqBasicSurface*>& aSplits )
 
 	// Call the procedural secific Split()
 	RiAttributeBegin();
-	SplitProcedural();
+
+	int detail = 1;// Need to work out what this should be
+	m_pSubdivFunc(m_pData, detail);
+
 	RiAttributeEnd();
 
 	// restore saved context
@@ -80,40 +84,8 @@ TqInt CqProcedural::Split( std::vector<CqBasicSurface*>& aSplits )
 CqProcedural::~CqProcedural()
 { 
 	m_pconStored->Release();
-};
-
-
-/**
- * CqProcDelayedReadArchive constructor.
- */
-CqProcDelayedReadArchive::CqProcDelayedReadArchive() : CqProcedural()
-{
-}
-
-/* CqProcDelayedReadArchive.
- */
-CqProcDelayedReadArchive::CqProcDelayedReadArchive( CqBound &B , CqString &filename) : CqProcedural(B)
-{
-	m_strFileName = filename;	
-}
-
-
-/**
- * Procedural Specific Split function implementing ReadArchive
- **/
-void CqProcDelayedReadArchive::SplitProcedural(void)
-{
-	RiReadArchive( const_cast<char*> (m_strFileName.c_str()), (RtArchiveCallback) NULL );
-}
-
-
-/**
- * CqProcDelayedReadArchive destructor.
- */
-CqProcDelayedReadArchive::~CqProcDelayedReadArchive()
-{ 
-
 }
 
 
 END_NAMESPACE( Aqsis )
+

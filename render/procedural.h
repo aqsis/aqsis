@@ -45,7 +45,7 @@ class CqProcedural : public CqSurface
 		//------------------------------------------------------ Public Methods
 	public:
 		CqProcedural();
-		CqProcedural( CqBound& B);
+		CqProcedural(RtPointer, CqBound&, RtProcSubdivFunc, RtProcFreeFunc);
                 virtual TqInt   Split( std::vector<CqBasicSurface*>& );
 		virtual ~CqProcedural();
 
@@ -91,40 +91,15 @@ class CqProcedural : public CqSurface
 	protected:
 		/* Contexy saved when the Procedural was declared */
 		CqModeBlock *m_pconStored;
-		// Implementation specific portion of Split()
-		virtual void SplitProcedural(void) = 0;
+
+		/* The RIB request data */
+		RtPointer m_pData;
+		RtProcSubdivFunc m_pSubdivFunc;
+		RtProcFreeFunc m_pFreeFunc;
+		
 };
-
-
-
-/**
- * \class CqProcDelayedReadArchive
- *
- * Procedural primtive implementing DelayedReadArchive
- */
-class CqProcDelayedReadArchive : public  CqProcedural
-{
-		//------------------------------------------------------ Public Methods
-	public:
-		CqProcDelayedReadArchive();
-		CqProcDelayedReadArchive( CqBound& B, CqString& filename);
-		virtual ~CqProcDelayedReadArchive();
-		//---------------------------------------------- Inlined Public Methods
-	public:
-		/** Returns a string name of the class. */
-		virtual CqString strName() const
-		{
-			return "CqProcDelayedReadArchive";
-		}
-		//------------------------------------------------------ Protexted
-	protected:
-		// Implementation specific portion of Split()
-		CqString m_strFileName;
-		virtual void SplitProcedural(void);
-
-};
-
-
 
 END_NAMESPACE( Aqsis )
-#endif
+
+#endif // PROCEDURAL_H_INCLUDED
+

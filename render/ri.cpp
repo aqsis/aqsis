@@ -3344,151 +3344,14 @@ RtVoid	RiTorusV( RtFloat majorrad, RtFloat minorrad, RtFloat phimin, RtFloat phi
 //
 RtVoid	RiProcedural( RtPointer data, RtBound bound, RtProcSubdivFunc refineproc, RtProcFreeFunc freeproc )
 {
-	char psBuffer[ 128 ];
-	FILE *chkdsk;
-	FILE *file;
-	char *pt, atmpname[ 1024 ];
 	CqBound B(bound);
-	CqProcDelayedReadArchive *pProc ;
-
-
 
 	//printf("bound(%f %f %f %f %f %f)\n", bound[0], bound[1], bound[2], bound[3], bound[4], bound[5]);
 
-	if ( refineproc == RiProcDelayedReadArchive )
-	{
-//		QGetRenderContext() ->Logger()->warn( CqLog::RI_ERROR_TABLE, CqLog::RI_PROC_DELAYED_READ_ARCHIVE_UNSUPPORTED );
-//		printf( "ReadArchive %s\n", ( const char * ) data );
-//		RiReadArchive( ( char* ) data, NULL, NULL );
-		CqString filename((char *)data);
-		pProc = new CqProcDelayedReadArchive(B, filename);
-
-	}
-	else if ( refineproc == RiProcRunProgram )
-	{
-
-		QGetRenderContext() ->Logger()->warn( CqLog::RI_ERROR_TABLE, CqLog::RI_PROC_RUN_PROGRAM_UNSUPPORTED );
-
-
-		/* Your program must writes its output to a pipe. Open this
-		 * pipe with read text attribute so that we can read it 
-		 * like a text file. 
-		 */
-		pt = tempnam( "", "aqsis" );
-		sprintf( atmpname, "%s.rib", pt );
-
-#ifdef AQSIS_SYSTEM_WIN32
-		if ( ( chkdsk = _popen( ( const char * ) data, "rt" ) ) != NULL )
-		{
-			file = fopen( atmpname, "wt" );
-#else
-		if ( ( chkdsk = popen( ( const char * ) data, "r" ) ) != NULL )
-		{
-			file = fopen( atmpname, "w" );
-#endif
-
-		}
-		else
-		{
-			return ;
-		}
-
-		/* Read pipe until end of file. End of file indicates that
-		 * CHKDSK closed its standard out (probably meaning it 
-		 * terminated).
-		 */
-		while ( !feof( chkdsk ) )
-		{
-			if ( fgets( psBuffer, 128, chkdsk ) != NULL )
-				fprintf( file, "%s", psBuffer );
-		}
-		fclose ( file );
-
-
-		/* Close pipe and print return value of CHKDSK. */
-#ifdef AQSIS_SYSTEM_WIN32
-		printf( "\nProcess returned %d\n", _pclose( chkdsk ) );
-		RiReadArchive( atmpname, NULL, NULL );
-#else
-		printf( "\nProcess returned %d\n", pclose( chkdsk ) );
-		RiReadArchive( atmpname, NULL, NULL );
-#endif
-		unlink( atmpname );
-
-		return;
-	}
-	else if ( refineproc == RiProcDynamicLoad )
-	{
-
-		// TODO: We need a custom class for handling RiProcDunamicLoad
-		CqConverter * pConvertParameters;
-		CqConverter *pFree;
-		CqConverter *pSubdivide;
-		void *( *pvfcts ) ( char * );
-		void ( *vfctpvf ) ( void *, float );
-		void ( *vfctpv ) ( void * );
-		void *priv;
-		char dsoname[ 1024 ];
-		char opdata[ 4096 ];
-
-
-		QGetRenderContext() ->Logger()->error( CqLog::RI_ERROR_TABLE, CqLog::RI_PROC_DYNAMIC_LOAD_UNSUPPORTED );
-
-		// take the first filename is saved to be the name of the .dll/.so
-		// the reset is passed as such to ConvertParameters function later on
-		strcpy( dsoname, ( char* ) data );
-		strcpy( opdata, ( char* ) data );
-		for ( int i = 0; i < strlen( dsoname ); i++ )
-			if ( isspace( dsoname[ i ] ) )
-			{
-				strcpy( opdata, &dsoname[ i + 1 ] );
-				dsoname[ i ] = '\0';
-				break;
-			}
-
-		// As the first parameters is empty I relied on the fullpath name for the .dll/.so
-		// or hopefully relies on the fact the dll/.so is local to this .rib file
-		// later it should use the "searchpath" "procedure" standard options
-
-		pConvertParameters = new CqConverter( "", dsoname, "ConvertParameters" );
-		pSubdivide = new CqConverter( "", dsoname, "Free" );
-		pFree = new CqConverter( "", dsoname, "Subdivide" );
-
-		if ( ( pvfcts = ( void * ( * ) ( char * ) ) pConvertParameters->Function() ) == NULL )
-			QGetRenderContext() ->Logger()->error( pConvertParameters->ErrorLog() );
-		else
-			priv = ( *pvfcts ) ( opdata );
-
-		if ( ( vfctpvf = ( void ( * ) ( void *, float ) ) pSubdivide->Function() ) == NULL )
-			QGetRenderContext() ->Logger()->error( pSubdivide->ErrorLog() );
-		else
-			( *vfctpvf ) ( priv, 1.0 );
-
-		if ( ( vfctpv = ( void ( * ) ( void * ) ) pFree->Function() ) == NULL )
-			QGetRenderContext() ->Logger()->error( pFree->ErrorLog() );
-		else
-			( *vfctpv ) ( priv );
-
-
-		// Unload all function/all dlls
-		if ( pConvertParameters ) pConvertParameters->Close();
-		if ( pSubdivide ) pSubdivide->Close();
-		if ( pFree ) pFree->Close();
-
-		//
-		delete pSubdivide;
-		delete pConvertParameters;
-		delete pFree;
-
-		return;
-	}
-	else
-	{
-		QGetRenderContext() ->Logger()->warn( CqLog::RI_ERROR_TABLE, CqLog::RI_PROCEDURAL_UNKNOWN_SUBDIV );
-		return;
-	}
-
-
+	// I suspect that in order to handle the RtFreeProc correctly that we need to reference count
+	// the instances of CqProcedural so that FreeProc gets called on the final Release();
+	
+	CqProcedural *pProc = new CqProcedural(data, B, refineproc, freeproc );
 	pProc->AddRef();
 	CreateGPrim( pProc );
 
@@ -4657,14 +4520,13 @@ RtBoolean	BasisFromName( RtBasis * b, const char * strName )
 
 //----------------------------------------------------------------------
 /** Set the function used to report progress.
- 
-	\param	handler	Pointer to the new function to use.
+ *	\param	handler	Pointer to the new function to use.
  */
 
 RtVoid	RiProgressHandler( RtProgressFunc handler )
 {
-	QGetRenderContext() ->optCurrent().SetpProgressHandler( handler );
-	return ;
+	 QGetRenderContext() ->optCurrent().SetpProgressHandler( handler );
+	 return ;
 }
 
 
@@ -4748,12 +4610,75 @@ static void ProcessCompression( TqInt * compression, TqInt * quality, TqInt coun
 
 
 //----------------------------------------------------------------------
+// RiProcFree()
+//
+RtVoid	RiProcFree( RtPointer data )
+{
+	// Do nothing in here at the moment
+}
+
+
+//----------------------------------------------------------------------
 // RiProcDynamicLoad()
 //
 RtVoid	RiProcDynamicLoad( RtPointer data, RtFloat detail )
 {
+	// TODO: We need a custom class for handling RiProcDunamicLoad
+	CqConverter * pConvertParameters;
+	CqConverter *pFree;
+	CqConverter *pSubdivide;
+	void *( *pvfcts ) ( char * );
+	void ( *vfctpvf ) ( void *, float );
+	void ( *vfctpv ) ( void * );
+	void *priv;
+	char dsoname[ 1024 ];
+	char opdata[ 4096 ];
 
-	QGetRenderContext() ->Logger()->error( "RiProcDynamicLoad()" );
+	// take the first filename is saved to be the name of the .dll/.so
+	// the reset is passed as such to ConvertParameters function later on
+	strcpy( dsoname, (( char** ) data)[0] );
+	strcpy( opdata, (( char** ) data)[1] );
+	for ( int i = 0; i < strlen( dsoname ); i++ )
+		if ( isspace( dsoname[ i ] ) )
+        	{
+			strcpy( opdata, &dsoname[ i + 1 ] );
+			dsoname[ i ] = '\0';
+			break;
+        	}
+
+	// As the first parameters is empty I relied on the fullpath name for the .dll/.so
+	// or hopefully relies on the fact the dll/.so is local to this .rib file
+	// later it should use the "searchpath" "procedure" standard options
+	pConvertParameters = new CqConverter( "", dsoname, "ConvertParameters" );
+	pSubdivide = new CqConverter( "", dsoname, "Free" );
+	pFree = new CqConverter( "", dsoname, "Subdivide" );
+
+	if ( ( pvfcts = ( void * ( * ) ( char * ) ) pConvertParameters->Function() ) == NULL )
+		QGetRenderContext() ->Logger()->error( pConvertParameters->ErrorLog() );
+	else
+		priv = ( *pvfcts ) ( opdata );
+
+	if ( ( vfctpvf = ( void ( * ) ( void *, float ) ) pSubdivide->Function() ) == NULL )
+		QGetRenderContext() ->Logger()->error( pSubdivide->ErrorLog() );
+	else
+		( *vfctpvf ) ( priv, 1.0 );
+
+	if ( ( vfctpv = ( void ( * ) ( void * ) ) pFree->Function() ) == NULL )
+		QGetRenderContext() ->Logger()->error( pFree->ErrorLog() );
+	else
+		( *vfctpv ) ( priv );
+
+
+	// Unload all function/all dlls
+	if ( pConvertParameters ) pConvertParameters->Close();
+	if ( pSubdivide ) pSubdivide->Close();
+	if ( pFree ) pFree->Close();
+
+	delete pSubdivide;
+	delete pConvertParameters;
+	delete pFree;
+
+	return;
 }
 
 
@@ -4762,19 +4687,68 @@ RtVoid	RiProcDynamicLoad( RtPointer data, RtFloat detail )
 //
 RtVoid	RiProcDelayedReadArchive( RtPointer data, RtFloat detail )
 {
-
-	QGetRenderContext() ->Logger()->error( "RiProcDelayedReadArchive()" );
-
+	RiReadArchive( (RtToken) ((char**) data)[0], NULL );
 }
 
 
 //----------------------------------------------------------------------
-// RiProcRunProgram()
-//
+/* RiProcRunProgram()
+ * Your program must writes its output to a pipe. Open this
+ * pipe with read text attribute so that we can read it 
+ * like a text file. 
+ */
+
+// TODO: This is far from ideal, we need to parse directly from the popene'd 
+// process.
 RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 {
+        char psBuffer[ 128 ];
+        FILE *chkdsk;
+        FILE *file;
+        char *pt, atmpname[ 1024 ];
 
-	QGetRenderContext() ->Logger()->error( "RiProcRunProgram()" );
+	pt = tempnam( "", "aqsis" );
+	sprintf( atmpname, "%s.rib", pt );
+
+#ifdef AQSIS_SYSTEM_WIN32
+	if ( ( chkdsk = _popen( (( const char ** ) data)[0], "rt" ) ) != NULL )
+	{
+		file = fopen( atmpname, "wt" );
+#else
+	if ( ( chkdsk = popen( (( const char ** ) data)[0], "r" ) ) != NULL )
+		{
+		file = fopen( atmpname, "w" );
+#endif
+
+	}
+	else
+	{
+		return ;
+	}
+
+/* Read pipe until end of file. End of file indicates that
+ * CHKDSK closed its standard out (probably meaning it 
+ * terminated).
+ */
+	while ( !feof( chkdsk ) )
+	{
+		if ( fgets( psBuffer, 128, chkdsk ) != NULL )
+			fprintf( file, "%s", psBuffer );
+	}
+	fclose ( file );
+
+
+/* Close pipe and print return value of CHKDSK. */
+#ifdef AQSIS_SYSTEM_WIN32
+	printf( "\nProcess returned %d\n", _pclose( chkdsk ) );
+	RiReadArchive( atmpname, NULL, NULL );
+#else
+	printf( "\nProcess returned %d\n", pclose( chkdsk ) );
+	RiReadArchive( atmpname, NULL, NULL );
+#endif
+	unlink( atmpname );
+
+	return;
 }
 
 RtVoid RiReadArchive( RtToken name, RtArchiveCallback callback, ... )
