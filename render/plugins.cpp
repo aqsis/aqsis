@@ -95,6 +95,7 @@ void *CqPlugins::Function()
 {
 	void * function_pt = NULL;
 
+#ifdef	PLUGINS
 #ifdef AQSIS_SYSTEM_WIN32
 	/* dll was never loaded before */
 	if ( !handle )
@@ -193,7 +194,7 @@ void *CqPlugins::Function()
 	}
 
 #endif
-
+#endif //PLUGINS
 	return function_pt;
 }
 
@@ -211,6 +212,7 @@ char * CqPlugins::ErrorLog()
 void CqPlugins::Close()
 {
 
+#ifdef	PLUGINS
 #ifdef AQSIS_SYSTEM_WIN32
 
 	if ( handle )
@@ -228,6 +230,7 @@ void CqPlugins::Close()
 		dlclose( handle );
 #endif
 	handle = NULL;
+#endif //PLUGINS
 
 }
 

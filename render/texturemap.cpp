@@ -36,7 +36,9 @@
 #include	"version.h"
 
 #include	"renderer.h"
+#ifdef		PLUGINS
 #include	"plugins.h"
+#endif
 
 #ifndef		AQSIS_SYSTEM_WIN32
 #include	"unistd.h"
@@ -228,6 +230,7 @@ CqTextureMap::~CqTextureMap()
 TqInt CqTextureMap::Convert( CqString &strName )
 {
 	TqInt result = 0;
+#ifdef	PLUGINS
 	TqInt lenght = 0;
 	TqChar library[ 1024 ];
 	TqChar function[ 1024 ];
@@ -289,6 +292,7 @@ TqInt CqTextureMap::Convert( CqString &strName )
 		plug->Close();
 	}
 	delete plug;
+#endif
 	return result;
 }
 
