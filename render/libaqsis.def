@@ -357,7 +357,6 @@ EXPORTS
 	??XCqMatrix@Aqsis@@QAEAAV01@ABV01@@Z
 	??XCqMatrix@Aqsis@@QAEAAV01@M@Z
 	??XCqVector4D@Aqsis@@QAEAAV01@M@Z
-	??YCqColor@Aqsis@@QAEAAV01@ABV01@@Z
 	??YCqMatrix@Aqsis@@QAEAAV01@ABV01@@Z
 	??YCqMatrix@Aqsis@@QAEAAV01@ABVCqVector4D@1@@Z
 	??YCqString@Aqsis@@QAEAAV01@ABV01@@Z
@@ -370,8 +369,6 @@ EXPORTS
 	??ZCqMatrix@Aqsis@@QAEAAV01@ABV01@@Z
 	??ZCqMatrix@Aqsis@@QAEAAV01@ABVCqVector4D@1@@Z
 	??ZCqVector4D@Aqsis@@QAEAAV01@ABV01@@Z
-	??_0CqColor@Aqsis@@QAEAAV01@M@Z
-	??_0CqVector3D@Aqsis@@QAEAAV01@M@Z
 	??_0CqVector4D@Aqsis@@QAEAAV01@M@Z
 	??_1CqVector3D@Aqsis@@QAEAAV01@ABV01@@Z
 	??_1CqVector4D@Aqsis@@QAEAAV01@ABV01@@Z
