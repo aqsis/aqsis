@@ -313,9 +313,9 @@ int main( int argc, const char** argv )
     ap.argString( "displays", "=string\aspecify a default displays searchpath", &g_displays );
     ap.argString( "dsolibs", "=string\aspecify default DSO libraries", &g_dso_libs );
     ap.argString( "procedurals", "=string\aspecify default searchpath for procedurals", &g_procedurals );
-#ifdef	AQSIS_SYSTEM_POSIX
-    ap.argFlag( "nocolor", "\adisable colored output", &g_no_color );
+    ap.argFlag( "nocolor", "\adisable colored output [color output not supported on Windows]", &g_no_color );
     ap.alias( "nocolor", "nc" );
+#ifdef	AQSIS_SYSTEM_POSIX
     ap.argFlag( "syslog", "\alog messages to syslog", &g_syslog );
 #endif	// AQSIS_SYSTEM_POSIX
     ap.allowUnrecognizedOptions();
