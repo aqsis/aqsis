@@ -2767,28 +2767,26 @@ STD_SOIMPL CqShaderExecEnv::SO_shadow( STRINGVAL name, FLOATVAL channel, POINTVA
 			paramMap[ "type" ] ->GetString( type );
 			if( type == "soft_m" )
 			{
-				TqFloat maxblur = .1, sblur = 1, tblur = 1;
+				TqFloat maxblur = 10, sblur = 1, tblur = 1, fadeto = 0.5;
 
 				// Get Max blur
-				if ( ( paramMap.size() != 0 ) && ( paramMap.find( "maxblur" ) != paramMap.end() ) )
+				if ( ( paramMap.size() != 0 ) )
 				{
-					paramMap[ "maxblur" ] ->GetFloat( maxblur );
+					if( ( paramMap.find( "soft_maxblur" ) != paramMap.end() ) )
+						paramMap[ "soft_maxblur" ] ->GetFloat( maxblur );
+					if( ( paramMap.find( "soft_sblur" ) != paramMap.end() ) )
+						paramMap[ "soft_sblur" ] ->GetFloat( sblur );
+					if( ( paramMap.find( "soft_tblur" ) != paramMap.end() ) )
+						paramMap[ "soft_tblur" ] ->GetFloat( tblur );
+					if( ( paramMap.find( "soft_fadeto" ) != paramMap.end() ) )
+						paramMap[ "soft_fadeto" ] ->GetFloat( fadeto );
 				}
 
-				if ( ( paramMap.size() != 0 ) && ( paramMap.find( "soft_sblur" ) != paramMap.end() ) )
-				{
-					paramMap[ "soft_sblur" ] ->GetFloat( sblur );
-				}
-
-				if ( ( paramMap.size() != 0 ) && ( paramMap.find( "soft_tblur" ) != paramMap.end() ) )
-				{
-					paramMap[ "soft_tblur" ] ->GetFloat( tblur );
-				}
 
 				// Check if 2 maps
 				if( pMap->NumPages() < 2 || pMap->NumPages() > 2 )
 				{
-					QGetRenderContextI() ->Logger() ->error( "Softshadows need 2 maps" );
+					QGetRenderContextI() ->Logger() ->error( "LDB SoftShadows need 2 maps" );
 					
 					// Return 0
 					BEGIN_VARYING_SECTION
@@ -2808,24 +2806,22 @@ STD_SOIMPL CqShaderExecEnv::SO_shadow( STRINGVAL name, FLOATVAL channel, POINTVA
 					if( fv[ 0 ] > 0 )
 					{
 						// We are
-						TqFloat depth;
-						pMap->SampleMap( POINT( P ), nullv, nullv, fv, 1, &depth );
+						TqFloat depth, shadow_depth;
+						pMap->SampleMap( POINT( P ), nullv, nullv, fv, 1, &depth, &shadow_depth );
 						
-						depth /= 100;
-
-						if( ( ( tblur * depth ) > maxblur ) && ( ( tblur * depth ) > maxblur ) )
+						if( ( ( sblur * shadow_depth ) > maxblur ) && ( ( tblur * shadow_depth ) > maxblur ) )
 						{
 							// Return 0, too much blur
 							BEGIN_VARYING_SECTION
-							SETFLOAT( Result, 0.0f );	// Default, completely lit
+							SETFLOAT( Result, fadeto );	// Default, completely lit
 							END_VARYING_SECTION					
 							
 							return;
 						}
 						else
 						{
-							swidth *= depth;
-							twidth *= depth;
+							swidth *= sblur * shadow_depth;
+							twidth *= tblur * shadow_depth;
 						}
 					}
 				}

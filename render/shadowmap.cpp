@@ -301,7 +301,7 @@ void CqShadowMap::PrepareSampleOptions( std::map<std::string, IqShaderData*>& pa
 /** Sample the shadow map data to see if the point vecPoint is in shadow.
  */
 
-void CqShadowMap::SampleMap( CqVector3D& vecPoint, CqVector3D& swidth, CqVector3D& twidth, std::valarray<TqFloat>& val, TqInt index, TqFloat* average_depth )
+void CqShadowMap::SampleMap( CqVector3D& vecPoint, CqVector3D& swidth, CqVector3D& twidth, std::valarray<TqFloat>& val, TqInt index, TqFloat* average_depth, TqFloat* shadow_depth )
 {
 	if ( m_pImage != 0 )
 	{
@@ -322,7 +322,7 @@ void CqShadowMap::SampleMap( CqVector3D& vecPoint, CqVector3D& swidth, CqVector3
 		R4 += ( swidth / 2.0f );
 		R4 += ( twidth / 2.0f );
 
-		SampleMap( R1, R2, R3, R4, val, index, average_depth );
+		SampleMap( R1, R2, R3, R4, val, index, average_depth, shadow_depth );
 	}
 	else
 	{
@@ -336,7 +336,7 @@ void CqShadowMap::SampleMap( CqVector3D& vecPoint, CqVector3D& swidth, CqVector3
 /** Sample the shadow map data using R1, R2, R3, R4
  */
 
-void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4, std::valarray<TqFloat>& val, TqInt index, TqFloat* average_depth )
+void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4, std::valarray<TqFloat>& val, TqInt index, TqFloat* average_depth, TqFloat* shadow_depth )
 {
 	// Check the memory and make sure we don't abuse it
 	CriticalMeasure();
@@ -462,6 +462,7 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 	// Test the samples.
 	TqInt inshadow = 0;
 	TqFloat avz = 0.0f;
+	TqFloat sample_z = 0.0f; // How deep we're in the shadow
 
 	TqFloat s = lu;
 	TqInt i;
@@ -486,7 +487,10 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 				iv -= pTMBa->tOrigin();
 				TqFloat mapz = pTMBa->GetValue( iu, iv, 0 );
 				if ( z > mapz )
+				{
 					inshadow += 1;
+					sample_z = z - mapz;
+				}
 				avz += mapz;
 			}
 			t += dt;
@@ -499,6 +503,14 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 		avz /= ( ns * nt );
 		*average_depth = avz;
 	}
+
+	if( NULL != shadow_depth )
+	{
+		sample_z /= ( ns * nt );
+		
+		*shadow_depth = sample_z;
+	}
+
 	val[ 0 ] = ( static_cast<TqFloat>( inshadow ) / ( ns * nt ) );
 }
 
