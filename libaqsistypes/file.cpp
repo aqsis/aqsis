@@ -75,6 +75,9 @@ void CqFile::Open( const char* strFilename, const char* strSearchPathOption, std
 					len += strcspn( &SearchPath[ start + 2 ], ";:" ) + 1;
 				CqString strPath = SearchPath.substr( start, len );
 				if ( strPath == "" ) break;
+	
+				// Apply any system specific string modification.
+				strPath = FixupPath( strPath );
 
 				// See if the shader can be found in this directory
 				CqString strAlternativeFilename = strPath;

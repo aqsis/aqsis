@@ -125,6 +125,8 @@ class CqFile
 			return ( len );
 		}
 
+		CqString FixupPath(CqString& strPath);
+
 		static std::list<CqString*> Glob( const CqString& strFileGlob );
 		static CqString GetSystemSetting( const CqString& strAsset );
 

@@ -178,5 +178,11 @@ CqString CqFile::GetSystemSetting( const CqString& strAsset )
 	return ( result );
 }
 
+CqString CqFile::FixupPath(CqString& strPath)
+{
+	return( strPath );
+}
+
+
 END_NAMESPACE( Aqsis )
 //---------------------------------------------------------------------

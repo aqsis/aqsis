@@ -167,5 +167,24 @@ CqString CqFile::GetSystemSetting( const CqString& strAsset )
 	return ( result );
 }
 
+
+CqString CqFile::FixupPath(CqString& strPath)
+{
+	if( strPath.find("//",0,2) == 0 )
+	{
+		if(strPath[3] == '/')
+		{
+			CqString strNewPath(strPath.substr(2,1));
+			strNewPath.append(":/");
+			strNewPath.append(strPath.substr(4));
+			//std::cout << strNewPath.c_str() << std::endl;
+			return(strNewPath);
+		}
+	}
+
+	return( strPath );
+}
+
+
 END_NAMESPACE( Aqsis )
 //---------------------------------------------------------------------
