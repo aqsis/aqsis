@@ -109,16 +109,16 @@ class CqCurve : public CqSurface
 											   "camera", "raster"
 										   );
 				CqVector2D hull[ 2 ];     // control hull
-				hull[ 0 ] = matCtoR * ( *P() ) [ 0 ];
-				hull[ 1 ] = matCtoR * ( *P() ) [ 1 ];
+				hull[ 0 ] = matCtoR * P()->pValue( 0 )[0];
+				hull[ 1 ] = matCtoR * P()->pValue( 1 )[0];
 				CqVector2D lengthVector = hull[ 1 ] - hull[ 0 ];
 				TqFloat lengthraster = lengthVector.Magnitude();
 
 				// find the maximum width of the line in raster space
 				CqVector3D pp0 = hull[ 0 ] -
-								 matCtoR * ( ( *P() ) [ 0 ] + CqVector4D( ( *width() ) [ 0 ], 0, 0, 1 ) );
+								 matCtoR * ( P()->pValue( 0 )[0] + CqVector4D( width()->pValue( 0 )[0], 0, 0, 1 ) );
 				CqVector3D pp1 = hull[ 1 ] -
-								 matCtoR * ( ( *P() ) [ 1 ] + CqVector4D( ( *width() ) [ 1 ], 0, 0, 1 ) );
+								 matCtoR * ( P()->pValue( 1 )[0] + CqVector4D( width()->pValue( 1 )[0], 0, 0, 1 ) );
 				TqFloat width0 = pp0.Magnitude();
 				TqFloat width1 = pp1.Magnitude();
 				TqFloat maxwidthraster = ( width0 > width1 ) ? width0 : width1;
@@ -169,7 +169,7 @@ class CqCurve : public CqSurface
 		{
 			if ( N() != NULL )
 			{
-				normal = ( *N() ) [ index ];
+				normal = N()->pValue( index )[0];
 				return TqTrue;
 			}
 			else

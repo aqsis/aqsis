@@ -1119,25 +1119,25 @@ void CqSurfaceSubdivisionPatch::StoreDice( CqMicroPolyGrid* pGrid, CqPolygonPoin
 	TqInt lUses = Uses();
 	
 	if ( USES( lUses, EnvVars_P ) )
-		pGrid->P() ->SetPoint( ( *pPoints->P() ) [ iParam ], iData );
+		pGrid->P() ->SetPoint( pPoints->P()->pValue( iParam )[0], iData );
 
 	if ( USES( lUses, EnvVars_s ) && ( NULL != pGrid->s() ) )
 	{
 		if( pPoints->bHass() )
-			pGrid->s() ->SetFloat( ( *pPoints->s() ) [ iParam ], iData );
+			pGrid->s() ->SetFloat( pPoints->s()->pValue( iParam )[0], iData );
 	}
 
 	if ( USES( lUses, EnvVars_t ) && ( NULL != pGrid->t() ) )
 	{
 		if( pPoints->bHast() )
-			pGrid->t() ->SetFloat( ( *pPoints->t() ) [ iParam ], iData );
+			pGrid->t() ->SetFloat( pPoints->t()->pValue( iParam )[0], iData );
 	}
 
 	if ( USES( lUses, EnvVars_Cs ) && ( NULL != pGrid->Cs() ) && ( pPoints->bHasCs() ) )
-		pGrid->Cs() ->SetColor( ( *pPoints->Cs() ) [ iParam ], iData );
+		pGrid->Cs() ->SetColor( pPoints->Cs()->pValue(iParam)[0], iData );
 
 	if ( USES( lUses, EnvVars_Os ) && ( NULL != pGrid->Os() ) && ( pPoints->bHasOs() ) )
-		pGrid->Os() ->SetColor( ( *pPoints->Os() ) [ iParam ], iData );
+		pGrid->Os() ->SetColor( pPoints->Os()->pValue(iParam)[0], iData );
 
 	// Now lets store the diced user specified primitive variables.
 	std::vector<CqParameter*>::iterator iUP;
@@ -1260,7 +1260,7 @@ TqInt CqSurfaceSubdivisionPatch::Split( std::vector<CqBasicSurface*>& aSplits )
 			// Need to get rid of any 'h' values added to the "P" variables during multiplication.
 			TqUint i;
 			for( i = 0; i < pSurface->cVertex(); i++ )
-				( *pSurface->P() ) [i] = static_cast<CqVector3D>( ( *pSurface->P() ) [i] );
+				pSurface->P()->pValue(i)[0] = static_cast<CqVector3D>( pSurface->P()->pValue(i)[0] );
 
 			CqMatrix matuBasis( RiBSplineBasis );
 			CqMatrix matvBasis( RiBSplineBasis );

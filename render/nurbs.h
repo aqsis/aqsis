@@ -202,7 +202,7 @@ class CqSurfaceNURBS : public CqSurface
 		 */
 		CqVector4D&	CP( const TqUint u, TqUint v )
 		{
-			return ( ( *P() ) [ ( v * m_cuVerts ) + u ] );
+			return ( P()->pValue( ( v * m_cuVerts ) + u )[0] );
 		}
 		/** Get the control point at the specified u,v index.
 		 * \param u Index in the u direction.
@@ -211,7 +211,7 @@ class CqSurfaceNURBS : public CqSurface
 		 */
 		const	CqVector4D&	CP( const TqUint u, TqUint v ) const
 		{
-			return ( ( *P() ) [ ( v * m_cuVerts ) + u ] );
+			return ( P()->pValue( ( v * m_cuVerts ) + u )[0] );
 		}
 
 		/** Initialise the NURBS structures to take a NURBS surfafe of the specified dimensions.

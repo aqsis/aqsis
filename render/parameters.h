@@ -340,23 +340,6 @@ class CqParameterTypedVarying : public CqParameterTyped<T, SLT>
 		}
 
 
-		/** Indexed access to values.
-		 * \param Index Integer index into the varying value list.
-		 */
-		const	T&	operator[] ( const TqInt Index ) const
-		{
-			assert( Index < static_cast<TqInt>( m_aValues.size() ) );
-			return( m_aValues[ Index ] );
-		}
-		/** Indexed access to values.
-		 * \param Index Integer index into the varying value list.
-		 */
-		T&	operator[] ( const TqInt Index )
-		{
-			assert( Index < static_cast<TqInt>( m_aValues.size() ) );
-			return( m_aValues[ Index ] );
-		}
-
 		/** Assignment operator
 		 */
 		CqParameterTypedVarying<T, I, SLT>& operator=( const CqParameterTypedVarying<T, I, SLT>& From )
@@ -859,25 +842,6 @@ class CqParameterTypedVaryingArray : public CqParameterTyped<T, SLT>
 			return ( &m_aValues[ Index ][ 0 ] );
 		}
 
-
-		/** Indexed access to array values.
-		 * \param Index Integer index into the varying value list.
-		 * \return A vector reference for the array of values at the specified varying index.
-		 */
-		const	std::vector<T>& operator[] ( const TqInt Index ) const
-		{
-			assert( Index < m_aValues.size() );
-			return( m_aValues[ Index ] );
-		}
-		/** Indexed access to array values.
-		 * \param Index Integer index into the varying value list.
-		 * \return A vector reference for the array of values at the specified varying index.
-		 */
-		std::vector<T>& operator[] ( const TqInt Index )
-		{
-			assert( Index < m_aValues.size() );
-			return( m_aValues[ Index ] );
-		}
 
 		virtual	void	SetValue( CqParameter* pFrom, TqInt idxTarget, TqInt idxSource )
 		{

@@ -2680,7 +2680,7 @@ RtVoid	RiGeneralPolygonV( RtInt nloops, RtInt nverts[], PARAMETERLIST )
 		TqFloat	MinX, MaxX;
 		TqFloat	MinY, MaxY;
 		TqFloat	MinZ, MaxZ;
-		CqVector3D	vecTemp = ( *pPointsClass->P() ) [ 0 ];
+		CqVector3D	vecTemp = pPointsClass->P()->pValue( 0 )[0];
 		MinX = MaxX = vecTemp.x();
 		MinY = MaxY = vecTemp.y();
 		MinZ = MaxZ = vecTemp.z();
@@ -2691,7 +2691,7 @@ RtVoid	RiGeneralPolygonV( RtInt nloops, RtInt nverts[], PARAMETERLIST )
 		TqUint iVert;
 		for ( iVert = 1; iVert < pPointsClass->P() ->Size(); iVert++ )
 		{
-			vecTemp = ( *pPointsClass->P() ) [ iVert ];
+			vecTemp = pPointsClass->P()->pValue( iVert )[0];
 			MinX = ( MinX < vecTemp.x() ) ? MinX : vecTemp.x();
 			MinY = ( MinY < vecTemp.y() ) ? MinY : vecTemp.y();
 			MinZ = ( MinZ < vecTemp.z() ) ? MinZ : vecTemp.z();
@@ -3141,7 +3141,7 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 				TqFloat	MinX, MaxX;
 				TqFloat	MinY, MaxY;
 				TqFloat	MinZ, MaxZ;
-				CqVector3D	vecTemp = ( *pPointsClass->P() ) [ verts[ igvert ] ];
+				CqVector3D	vecTemp = pPointsClass->P()->pValue( verts[ igvert ] )[0];
 				MinX = MaxX = vecTemp.x();
 				MinY = MaxY = vecTemp.y();
 				MinZ = MaxZ = vecTemp.z();
@@ -3155,7 +3155,7 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 					assert( ipoint < pPointsClass->P() ->Size() );
 					polya.aiVertices().push_back( ipoint );
 
-					vecTemp = ( *pPointsClass->P() ) [ verts[ igvert ] ];
+					vecTemp = pPointsClass->P()->pValue( verts[ igvert ] )[0];
 					MinX = ( MinX < vecTemp.x() ) ? MinX : vecTemp.x();
 					MinY = ( MinY < vecTemp.y() ) ? MinY : vecTemp.y();
 					MinZ = ( MinZ < vecTemp.z() ) ? MinZ : vecTemp.z();
@@ -4834,18 +4834,9 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 
 	 // Read recognised parameter values.
 	 RtInt	fP = RIL_NONE;
-	 RtInt	fN = RIL_NONE;
-	 RtInt	fT = RIL_NONE;
-	 RtBoolean	fCs = RI_FALSE;
-	 RtBoolean	fOs = RI_FALSE;
 
 	 RtFloat*	pPoints = 0;
-	 RtFloat*	pNormals = 0;
-	 RtFloat*	pTextures_s = 0;
-	 RtFloat*	pTextures_t = 0;
-	 RtFloat*	pTextures_st = 0;
-	 RtFloat*	pCs = 0;
-	 RtFloat*	pOs = 0;
+
 	 RtInt i;
 	 for ( i = 0; i < count; i++ )
 	 {
@@ -4885,7 +4876,7 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 		 {
 				 case RIL_P:
 				 for ( i = 0; i < pSurface->cVertex(); i++ )
-					 ( *pSurface->P() ) [ i ] = CqVector3D( pPoints[ ( i * 3 ) ], pPoints[ ( i * 3 ) + 1 ], pPoints[ ( i * 3 ) + 2 ] );
+					 pSurface->P()->pValue( i )[0] = CqVector3D( pPoints[ ( i * 3 ) ], pPoints[ ( i * 3 ) + 1 ], pPoints[ ( i * 3 ) + 2 ] );
 				 break;
 
 				 case RIL_Pz:
@@ -4893,99 +4884,15 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 				 {
 					 CqVector3D vecP = pSurface->SurfaceParametersAtVertex( i );
 					 vecP.z( pPoints[ i ] );
-					 ( *pSurface->P() ) [ i ] = vecP;
+					 pSurface->P()->pValue( i )[0] = vecP;
 				 }
 				 break;
 
 				 case RIL_Pw:
 				 for ( i = 0; i < pSurface->cVertex(); i++ )
-					 ( *pSurface->P() ) [ i ] = CqVector4D( pPoints[ ( i * 4 ) ], pPoints[ ( i * 4 ) + 1 ], pPoints[ ( i * 4 ) + 2 ], pPoints[ ( i * 4 ) + 3 ] );
+					 pSurface->P()->pValue( i )[0] = CqVector4D( pPoints[ ( i * 4 ) ], pPoints[ ( i * 4 ) + 1 ], pPoints[ ( i * 4 ) + 2 ], pPoints[ ( i * 4 ) + 3 ] );
 				 break;
 		 }
-	 }
-
-
-	 // Fill in the normal variable according to type.
-	 if ( fN != RIL_NONE )
-	 {
-		 pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<CqVector3D, type_normal, CqVector3D>( "N", 0 ) );
-		 pSurface->N() ->SetSize( pSurface->cVarying() );
-		 TqUint i;
-		 switch ( fN )
-		 {
-				 case RIL_N:
-				 for ( i = 0; i < pSurface->cVarying(); i++ )
-					 ( *pSurface->N() ) [ i ] = CqVector3D( pNormals[ ( i * 3 ) ], pNormals[ ( i * 3 ) + 1 ], pNormals[ ( i * 3 ) + 2 ] );
-				 break;
-
-				 case RIL_Np:
-				 for ( i = 0; i < pSurface->cUniform(); i++ )
-					 ( *pSurface->N() ) [ i ] = CqVector3D( pNormals[ ( i * 3 ) ], pNormals[ ( i * 3 ) + 1 ], pNormals[ ( i * 3 ) + 2 ] );
-				 break;
-		 }
-	 }
-
-
-	 // Copy any specified texture coordinates to the surface.
-	 if ( fT != RIL_NONE )
-	 {
-		 TqUint i;
-		 switch ( fT )
-		 {
-				 case RIL_s:
-				 {
-					 if ( pTextures_s != 0 )
-					 {
-						 pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "s" ) );
-						 pSurface->s() ->SetSize( pSurface->cVarying() );
-						 for ( i = 0; i < pSurface->cVarying(); i++ )
-							 ( *pSurface->s() ) [ i ] = pTextures_s[ i ];
-					 }
-
-					 if ( pTextures_t != 0 )
-					 {
-						 pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "t" ) );
-						 pSurface->t() ->SetSize( pSurface->cVarying() );
-						 for ( i = 0; i < pSurface->cVarying(); i++ )
-							 ( *pSurface->t() ) [ i ] = pTextures_t[ i ];
-					 }
-				 }
-				 break;
-
-				 case RIL_st:
-				 {
-					 assert( pTextures_st != 0 );
-					 pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "s" ) );
-					 pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "t" ) );
-					 pSurface->s() ->SetSize( pSurface->cVarying() );
-					 pSurface->t() ->SetSize( pSurface->cVarying() );
-					 for ( i = 0; i < pSurface->cVarying(); i++ )
-					 {
-						 ( *pSurface->s() ) [ i ] = pTextures_st[ ( i * 2 ) ];
-						 ( *pSurface->t() ) [ i ] = pTextures_st[ ( i * 2 ) + 1 ];
-					 }
-				 }
-				 break;
-		 }
-	 }
-
-	 // Copy any specified varying color values to the surface
-	 if ( fCs )
-	 {
-		 pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<CqColor, type_color, CqColor>( "Cs" ) );
-		 TqUint i;
-		 pSurface->Cs() ->SetSize( pSurface->cVarying() );
-		 for ( i = 0; i < pSurface->cVarying(); i++ )
-			 ( *pSurface->Cs() ) [ i ] = CqColor( pCs[ ( i * 3 ) ], pCs[ ( i * 3 ) + 1 ], pCs[ ( i * 3 ) + 2 ] );
-	 }
-
-	 if ( fOs )
-	 {
-		 pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<CqColor, type_color, CqColor>( "Os" ) );
-		 TqUint i;
-		 pSurface->Os() ->SetSize( pSurface->cVarying() );
-		 for ( i = 0; i < pSurface->cVarying(); i++ )
-			 ( *pSurface->Os() ) [ i ] = CqColor( pOs[ ( i * 3 ) ], pOs[ ( i * 3 ) + 1 ], pOs[ ( i * 3 ) + 2 ] );
 	 }
 
 	 // Now process any user defined paramter variables.

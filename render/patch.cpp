@@ -177,7 +177,7 @@ CqBound CqSurfacePatchBicubic::Bound() const
 	TqInt i;
 	for ( i = 0; i < 16; i++ )
 	{
-		CqVector3D	vecV = ( *P() ) [ i ];
+		CqVector3D	vecV = P()->pValue( i )[0];
 		if ( vecV.x() < vecA.x() ) vecA.x( vecV.x() );
 		if ( vecV.y() < vecA.y() ) vecA.y( vecV.y() );
 		if ( vecV.x() > vecB.x() ) vecB.x( vecV.x() );
@@ -295,7 +295,7 @@ TqBool	CqSurfacePatchBicubic::Diceable()
 	TqFloat ShadingRate = pAttributes() ->GetFloatAttribute( "System", "ShadingRate" ) [ 0 ];
 
 	for ( i = 0; i < 16; i++ )
-		avecHull[ i ] = matCtoR * ( *P() ) [ i ];
+		avecHull[ i ] = matCtoR * P()->pValue( i )[0];
 
 	// First check flatness, a curve which is too far off flat will
 	// produce unreliable results when the length is approximated below.
@@ -435,28 +435,157 @@ void CqSurfacePatchBicubic::ConvertToBezierBasis( CqMatrix& matuBasis, CqMatrix&
 	CqMatrix matuConv = matuMj * matMim1;
 	CqMatrix matvConv = matvMj * matMim1;
 
-	CqMatrix matCPx, matCPy, matCPz, matCPh;
-	for ( i = 0; i < 4; i++ )
+	std::vector<CqParameter*>::iterator iUP;
+	std::vector<CqParameter*>::iterator end = aUserParams().end();
+	for ( iUP = aUserParams().begin(); iUP != end; iUP++ )
 	{
-		for ( j = 0; j < 4; j++ )
+		if ( ( *iUP ) ->Class() == class_vertex )
 		{
-			matCPx[ i ][ j ] = CP( i, j ).x();
-			matCPy[ i ][ j ] = CP( i, j ).y();
-			matCPz[ i ][ j ] = CP( i, j ).z();
-			matCPh[ i ][ j ] = CP( i, j ).h();
+			TqInt ptype = (*iUP)->Type();
+			switch( ptype )
+			{
+				case type_point:
+				case type_vector:	///! \todo Not sure if this is correct, do vectors and normals need to be treated differently?
+				case type_normal:	///! \todo Not sure if this is correct, do vectors and normals need to be treated differently?
+				{
+					// Get the parameter pointer as the correct type.
+					CqParameterTyped<CqVector3D, CqVector3D>* pParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( ( *iUP ) );
+
+					// Store the data into a matrix for conversion.
+					CqMatrix matCPx, matCPy, matCPz, matCPh;
+					for ( i = 0; i < 4; i++ )
+					{
+						for ( j = 0; j < 4; j++ )
+						{
+							matCPx[ i ][ j ] = pParam->pValue( i*4 + j )[0][0];
+							matCPy[ i ][ j ] = pParam->pValue( i*4 + j )[0][1];
+							matCPz[ i ][ j ] = pParam->pValue( i*4 + j )[0][2];
+							matCPh[ i ][ j ] = 1.0f;
+						}
+					}
+					matCPx.SetfIdentity( TqFalse );	matCPy.SetfIdentity( TqFalse );
+					matCPz.SetfIdentity( TqFalse );	matCPh.SetfIdentity( TqFalse );
+
+					matCPx = matuConv.Transpose() * matCPx * matvConv;
+					matCPy = matuConv.Transpose() * matCPy * matvConv;
+					matCPz = matuConv.Transpose() * matCPz * matvConv;
+					matCPh = matuConv.Transpose() * matCPh * matvConv;
+
+					for ( i = 0; i < 4; i++ )
+					{
+						for ( j = 0; j < 4; j++ )
+						{
+							pParam->pValue( i*4 + j )[0][0] = matCPx[ i ][ j ];
+							pParam->pValue( i*4 + j )[0][1] = matCPy[ i ][ j ];
+							pParam->pValue( i*4 + j )[0][2] = matCPz[ i ][ j ];
+						}
+					}
+				}
+				break;
+
+				case type_hpoint:
+				{
+					// Get the parameter pointer as the correct type.
+					CqParameterTyped<CqVector4D, CqVector3D>* pParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( ( *iUP ) );
+
+					// Store the data into a matrix for conversion.
+					CqMatrix matCPx, matCPy, matCPz, matCPh;
+					for ( i = 0; i < 4; i++ )
+					{
+						for ( j = 0; j < 4; j++ )
+						{
+							matCPx[ i ][ j ] = pParam->pValue( i*4 + j )[0][0];
+							matCPy[ i ][ j ] = pParam->pValue( i*4 + j )[0][1];
+							matCPz[ i ][ j ] = pParam->pValue( i*4 + j )[0][2];
+							matCPh[ i ][ j ] = pParam->pValue( i*4 + j )[0][3];
+						}
+					}
+					matCPx.SetfIdentity( TqFalse );	matCPy.SetfIdentity( TqFalse );
+					matCPz.SetfIdentity( TqFalse );	matCPh.SetfIdentity( TqFalse );
+
+					matCPx = matuConv.Transpose() * matCPx * matvConv;
+					matCPy = matuConv.Transpose() * matCPy * matvConv;
+					matCPz = matuConv.Transpose() * matCPz * matvConv;
+					matCPh = matuConv.Transpose() * matCPh * matvConv;
+
+					for ( i = 0; i < 4; i++ )
+					{
+						for ( j = 0; j < 4; j++ )
+						{
+							pParam->pValue( i*4 + j )[0][0] = matCPx[ i ][ j ];
+							pParam->pValue( i*4 + j )[0][1] = matCPy[ i ][ j ];
+							pParam->pValue( i*4 + j )[0][2] = matCPz[ i ][ j ];
+							pParam->pValue( i*4 + j )[0][3] = matCPh[ i ][ j ];
+						}
+					}
+				}
+				break;
+
+				case type_color:
+				{
+					// Get the parameter pointer as the correct type.
+					CqParameterTyped<CqColor, CqColor>* pParam = static_cast<CqParameterTyped<CqColor, CqColor>*>( ( *iUP ) );
+
+					// Store the data into a matrix for conversion.
+					CqMatrix matRed, matGreen, matBlue;
+					for ( i = 0; i < 4; i++ )
+					{
+						for ( j = 0; j < 4; j++ )
+						{
+							matRed[ i ][ j ] = pParam->pValue( i*4 + j )[0][0];
+							matGreen[ i ][ j ] = pParam->pValue( i*4 + j )[0][1];
+							matBlue[ i ][ j ] = pParam->pValue( i*4 + j )[0][2];
+						}
+					}
+					matRed.SetfIdentity( TqFalse );	
+					matGreen.SetfIdentity( TqFalse );
+					matBlue.SetfIdentity( TqFalse );
+
+					matRed = matuConv.Transpose() * matRed * matvConv;
+					matGreen = matuConv.Transpose() * matGreen * matvConv;
+					matBlue = matuConv.Transpose() * matBlue * matvConv;
+
+					for ( i = 0; i < 4; i++ )
+					{
+						for ( j = 0; j < 4; j++ )
+						{
+							pParam->pValue( i*4 + j )[0][0] = matRed[ i ][ j ];
+							pParam->pValue( i*4 + j )[0][1] = matGreen[ i ][ j ];
+							pParam->pValue( i*4 + j )[0][2] = matBlue[ i ][ j ];
+						}
+					}
+				}
+				break;
+
+				case type_float:
+				{
+					// Get the parameter pointer as the correct type.
+					CqParameterTyped<TqFloat, TqFloat>* pParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( ( *iUP ) );
+
+					// Store the data into a matrix for conversion.
+					CqMatrix matCPx;
+					for ( i = 0; i < 4; i++ )
+					{
+						for ( j = 0; j < 4; j++ )
+							matCPx[ i ][ j ] = pParam->pValue( i*4 + j )[0];
+					}
+					matCPx.SetfIdentity( TqFalse );
+					matCPx = matuConv.Transpose() * matCPx * matvConv;
+
+					for ( i = 0; i < 4; i++ )
+					{
+						for ( j = 0; j < 4; j++ )
+							pParam->pValue( i*4 + j )[0] = matCPx[ i ][ j ];
+					}
+				}
+				break;
+
+				/// \todo Need to work out how to convert Matrix types to Bezier as well at some point.
+			} 
 		}
 	}
-	matCPx.SetfIdentity( TqFalse );
-	matCPy.SetfIdentity( TqFalse );
-	matCPz.SetfIdentity( TqFalse );
-	matCPh.SetfIdentity( TqFalse );
 
-	matCPx = matuConv.Transpose() * matCPx * matvConv;
-	matCPy = matuConv.Transpose() * matCPy * matvConv;
-	matCPz = matuConv.Transpose() * matCPz * matvConv;
-	matCPh = matuConv.Transpose() * matCPh * matvConv;
-
-	for ( i = 0; i < 4; i++ )
+/*	for ( i = 0; i < 4; i++ )
 	{
 		for ( j = 0; j < 4; j++ )
 		{
@@ -465,7 +594,7 @@ void CqSurfacePatchBicubic::ConvertToBezierBasis( CqMatrix& matuBasis, CqMatrix&
 			CP( i, j ).z( matCPz[ i ][ j ] );
 			CP( i, j ).h( matCPh[ i ][ j ] );
 		}
-	}
+	}*/
 }
 
 
@@ -526,10 +655,10 @@ void CqSurfacePatchBilinear::GenerateGeometricNormals( TqInt uDiceSize, TqInt vD
 
 	// For each of the four points, calculate the normal as the cross product of its
 	// two vectors.
-	CqVector3D N1 = ( ( *P() ) [ 1 ] - ( *P() ) [ 0 ] ) % ( ( *P() ) [ 2 ] - ( *P() ) [ 0 ] );
-	CqVector3D N2 = ( ( *P() ) [ 3 ] - ( *P() ) [ 1 ] ) % ( ( *P() ) [ 0 ] - ( *P() ) [ 1 ] );
-	CqVector3D N3 = ( ( *P() ) [ 0 ] - ( *P() ) [ 2 ] ) % ( ( *P() ) [ 3 ] - ( *P() ) [ 2 ] );
-	CqVector3D N4 = ( ( *P() ) [ 2 ] - ( *P() ) [ 3 ] ) % ( ( *P() ) [ 1 ] - ( *P() ) [ 3 ] );
+	CqVector3D N1 = ( P()->pValue( 1 )[0] - P()->pValue( 0 )[0] ) % ( P()->pValue( 2 )[0] - P()->pValue( 0 )[0] );
+	CqVector3D N2 = ( P()->pValue( 3 )[0] - P()->pValue( 1 )[0] ) % ( P()->pValue( 0 )[0] - P()->pValue( 1 )[0] );
+	CqVector3D N3 = ( P()->pValue( 0 )[0] - P()->pValue( 2 )[0] ) % ( P()->pValue( 3 )[0] - P()->pValue( 2 )[0] );
+	CqVector3D N4 = ( P()->pValue( 2 )[0] - P()->pValue( 3 )[0] ) % ( P()->pValue( 1 )[0] - P()->pValue( 3 )[0] );
 
 	CqVector3D	N;
 	TqInt v, u;
@@ -559,7 +688,7 @@ CqBound CqSurfacePatchBilinear::Bound() const
 	TqInt i;
 	for ( i = 0; i < ( m_fHasPhantomFourthVertex ? 3 : 4 ); i++ )
 	{
-		CqVector3D	vecV = ( *P() ) [ i ];
+		CqVector3D	vecV = P()->pValue( i )[0];
 		if ( vecV.x() < vecA.x() ) vecA.x( vecV.x() );
 		if ( vecV.y() < vecA.y() ) vecA.y( vecV.y() );
 		if ( vecV.x() > vecB.x() ) vecB.x( vecV.x() );
@@ -611,7 +740,7 @@ TqBool	CqSurfacePatchBilinear::Diceable()
 	TqFloat ShadingRate = pAttributes() ->GetFloatAttribute( "System", "ShadingRate" ) [ 0 ];
 
 	for ( i = 0; i < 4; i++ )
-		avecHull[ i ] = matCtoR * ( *P() ) [ i ];
+		avecHull[ i ] = matCtoR * P()->pValue( i )[0];
 
 	TqFloat uLen = 0;
 	TqFloat vLen = 0;
@@ -789,7 +918,7 @@ CqBound CqSurfacePatchMeshBicubic::Bound() const
 	TqUint i;
 	for ( i = 0; i < P() ->Size(); i++ )
 	{
-		CqVector3D	vecV = ( *P() ) [ i ];
+		CqVector3D	vecV = P()->pValue( i )[0];
 		if ( vecV.x() < vecA.x() ) vecA.x( vecV.x() );
 		if ( vecV.y() < vecA.y() ) vecA.y( vecV.y() );
 		if ( vecV.x() > vecB.x() ) vecB.x( vecV.x() );
@@ -1014,7 +1143,7 @@ CqBound CqSurfacePatchMeshBilinear::Bound() const
 	TqUint i;
 	for ( i = 0; i < P() ->Size(); i++ )
 	{
-		CqVector3D	vecV = ( *P() ) [ i ];
+		CqVector3D	vecV = P()->pValue( i )[0];
 		if ( vecV.x() < vecA.x() ) vecA.x( vecV.x() );
 		if ( vecV.y() < vecA.y() ) vecA.y( vecV.y() );
 		if ( vecV.x() > vecB.x() ) vecB.x( vecV.x() );

@@ -91,11 +91,11 @@ TqInt CqQuadric::DiceAll( CqMicroPolyGrid* pGrid )
 	CqVector3D	P, N;
 	int v, u;
 
-	CqParameterTypedVarying<TqFloat, type_float, TqFloat>* ps = s();
-	CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pt = t();
-	CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pu = this->u();
-	CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pv = this->v();
-	CqParameterTypedVaryingArray<TqFloat, type_float, TqFloat>* pst = static_cast<CqParameterTypedVaryingArray<TqFloat, type_float, TqFloat>*>(FindUserParam( "st" ));
+	CqParameterTyped<TqFloat, TqFloat>* ps = s();
+	CqParameterTyped<TqFloat, TqFloat>* pt = t();
+	CqParameterTyped<TqFloat, TqFloat>* pu = this->u();
+	CqParameterTyped<TqFloat, TqFloat>* pv = this->v();
+	CqParameterTyped<TqFloat, TqFloat>* pst = static_cast<CqParameterTyped<TqFloat, TqFloat>*>(FindUserParam( "st" ));
 
 	TqFloat s0,s1,s2,s3;
 	if( USES( lUses, EnvVars_s ) && NULL != pGrid->s() && bHass() )

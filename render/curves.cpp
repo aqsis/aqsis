@@ -125,7 +125,7 @@ CqBound CqCurve::Bound() const
 	{
 		// expand the boundary if necessary to accomodate the
 		//  current vertex
-		CqVector3D vecV = ( *P() ) [ i ];
+		CqVector3D vecV = P()->pValue( i )[0];
 		if ( vecV.x() < vecA.x() ) vecA.x( vecV.x() );
 		if ( vecV.y() < vecA.y() ) vecA.y( vecV.y() );
 		if ( vecV.x() > vecB.x() ) vecB.x( vecV.x() );
@@ -137,7 +137,7 @@ CqBound CqCurve::Bound() const
 		//  necessary
 		if ( i < nWidthParams )
 		{
-			TqFloat camSpaceWidth = ( *width() ) [ i ];
+			TqFloat camSpaceWidth = width()->pValue( i )[0];
 			if ( camSpaceWidth > maxCameraSpaceWidth )
 			{
 				maxCameraSpaceWidth = camSpaceWidth;
@@ -246,7 +246,7 @@ void CqCurve::PopulateWidth()
 	widthP->SetSize( cVarying() );
 	for ( TqUint i = 0; i < cVarying(); i++ )
 	{
-		( *widthP ) [ i ] = widthvalue;
+		widthP->pValue( i )[0] = widthvalue;
 	}
 
 	// add the width array to the curve as a primitive variable
@@ -538,7 +538,7 @@ TqInt CqLinearCurveSegment::SplitToPatch(
 	//                      the first point
 	//  widthOffset1  - offset to account for the width of the patch at
 	//                      the second point
-	CqVector3D direction = ( *P() ) [ 1 ] - ( *P() ) [ 0 ];
+	CqVector3D direction = P()->pValue( 1 )[0] - P()->pValue( 0 )[0];
 	CqVector3D normal0, normal1;
 	GetNormal( 0, normal0 ); GetNormal( 1, normal1 );
 	normal0.Unit();
@@ -546,9 +546,9 @@ TqInt CqLinearCurveSegment::SplitToPatch(
 	CqVector3D widthOffset0 = normal0 % direction;
 	CqVector3D widthOffset1 = normal1 % direction;
 	widthOffset0 *=
-	    ( *width() ) [ 0 ] / widthOffset0.Magnitude() / 2.0;
+	    width()->pValue( 0 )[0] / widthOffset0.Magnitude() / 2.0;
 	widthOffset1 *=
-	    ( *width() ) [ 1 ] / widthOffset1.Magnitude() / 2.0;
+	    width()->pValue( 1 )[0] / widthOffset1.Magnitude() / 2.0;
 
 	// next, we create the bilinear patch
 	CqSurfacePatchBilinear *pPatch = new CqSurfacePatchBilinear();
@@ -563,10 +563,10 @@ TqInt CqLinearCurveSegment::SplitToPatch(
 	    > ( "P", 0 )
 	);
 	pPatch->P() ->SetSize( 4 );
-	( *pPatch->P() ) [ 0 ] = static_cast<CqVector3D>( ( *P() ) [ 0 ] ) + widthOffset0;
-	( *pPatch->P() ) [ 1 ] = static_cast<CqVector3D>( ( *P() ) [ 0 ] ) - widthOffset0;
-	( *pPatch->P() ) [ 2 ] = static_cast<CqVector3D>( ( *P() ) [ 1 ] ) + widthOffset1;
-	( *pPatch->P() ) [ 3 ] = static_cast<CqVector3D>( ( *P() ) [ 1 ] ) - widthOffset1;
+	pPatch->P()->pValue( 0 )[0] = static_cast<CqVector3D>( P()->pValue( 0 )[0] ) + widthOffset0;
+	pPatch->P()->pValue( 1 )[0] = static_cast<CqVector3D>( P()->pValue( 0 )[0] ) - widthOffset0;
+	pPatch->P()->pValue( 2 )[0] = static_cast<CqVector3D>( P()->pValue( 1 )[0] ) + widthOffset1;
+	pPatch->P()->pValue( 3 )[0] = static_cast<CqVector3D>( P()->pValue( 1 )[0] ) - widthOffset1;
 
 	// set the normals on the patch
 	pPatch->AddPrimitiveVariable(
@@ -575,28 +575,28 @@ TqInt CqLinearCurveSegment::SplitToPatch(
 	    > ( "N", 0 )
 	);
 	pPatch->N() ->SetSize( 4 );
-	( *pPatch->N() ) [ 0 ] = ( *pPatch->N() ) [ 1 ] = normal0;
-	( *pPatch->N() ) [ 2 ] = ( *pPatch->N() ) [ 3 ] = normal1;
+	pPatch->N()->pValue( 0 )[0] = pPatch->N()->pValue( 1 )[0] = normal0;
+	pPatch->N()->pValue( 2 )[0] = pPatch->N()->pValue( 3 )[0] = normal1;
 
 	TqInt bUses = Uses();
 
 	// set u, v coordinates of the patch
 	if ( USES( bUses, EnvVars_u ) || USES( bUses, EnvVars_v ) )
 	{
-		( *pPatch->u() ) [ 0 ] = ( *pPatch->u() ) [ 2 ] = 0.0;
-		( *pPatch->u() ) [ 1 ] = ( *pPatch->u() ) [ 3 ] = 1.0;
-		( *pPatch->v() ) [ 0 ] = ( *pPatch->v() ) [ 1 ] = ( *v() ) [ 0 ];
-		( *pPatch->v() ) [ 2 ] = ( *pPatch->v() ) [ 3 ] = ( *v() ) [ 1 ];
+		pPatch->u()->pValue( 0 )[0] = pPatch->u()->pValue( 2 )[0] = 0.0;
+		pPatch->u()->pValue( 1 )[0] = pPatch->u()->pValue( 3 )[0] = 1.0;
+		pPatch->v()->pValue( 0 )[0] = pPatch->v()->pValue( 1 )[0] = v()->pValue( 0 )[0];
+		pPatch->v()->pValue( 2 )[0] = pPatch->v()->pValue( 3 )[0] = v()->pValue( 1 )[0];
 	}
 
 	// helllllp!!! WHAT DO I DO WITH s,t!!!???
 	//  for now, they're set equal to u and v
 	if ( USES( bUses, EnvVars_s ) || USES( bUses, EnvVars_t ) )
 	{
-		( *pPatch->s() ) [ 0 ] = ( *pPatch->s() ) [ 2 ] = 0.0;
-		( *pPatch->s() ) [ 1 ] = ( *pPatch->s() ) [ 3 ] = 1.0;
-		( *pPatch->t() ) [ 0 ] = ( *pPatch->t() ) [ 1 ] = ( *v() ) [ 0 ];
-		( *pPatch->t() ) [ 2 ] = ( *pPatch->t() ) [ 3 ] = ( *v() ) [ 1 ];
+		pPatch->s()->pValue( 0 )[0] = pPatch->s()->pValue( 2 )[0] = 0.0;
+		pPatch->s()->pValue( 1 )[0] = pPatch->s()->pValue( 3 )[0] = 1.0;
+		pPatch->t()->pValue( 0 )[0] = pPatch->t()->pValue( 1 )[0] = v()->pValue( 0 )[0];
+		pPatch->t()->pValue( 2 )[0] = pPatch->t()->pValue( 3 )[0] = v()->pValue( 1 )[0];
 	}
 
 	// set any remaining user parameters
@@ -1009,10 +1009,10 @@ TqInt CqCubicCurveSegment::SplitToPatch(
 	//                      the first point
 	//  widthOffset1  - offset to account for the width of the patch at
 	//                      the second point
-	CqVector3D direction0 = ( *P() ) [ 1 ] - ( *P() ) [ 0 ];
-	CqVector3D direction1 = ( *P() ) [ 2 ] - ( *P() ) [ 1 ];
-	CqVector3D direction2 = ( *P() ) [ 3 ] - ( *P() ) [ 2 ];
-	CqVector3D direction3 = ( *P() ) [ 3 ] - ( *P() ) [ 2 ];
+	CqVector3D direction0 = P()->pValue( 1 ) - P()->pValue( 0 );
+	CqVector3D direction1 = P()->pValue( 2 ) - P()->pValue( 1 );
+	CqVector3D direction2 = P()->pValue( 3 ) - P()->pValue( 2 );
+	CqVector3D direction3 = P()->pValue( 3 ) - P()->pValue( 2 );
 	
 	CqVector3D normal0, normal1, normal2, normal3;
 	GetNormal( 0, normal0 ); 
@@ -1030,8 +1030,8 @@ TqInt CqCubicCurveSegment::SplitToPatch(
 	CqVector3D widthOffset22 = normal2 % direction2;
 	CqVector3D widthOffset32 = normal3 % direction3;
 
-	TqFloat width0 = ( *width() ) [ 0 ];
-	TqFloat width3 = ( *width() ) [ 1 ];
+	TqFloat width0 = width()->pValue( 0 )[0];
+	TqFloat width3 = width()->pValue( 1 )[0];
 	TqFloat width1 = ( ( width3 - width0 ) / 3.0f ) + width0;
 	TqFloat width2 = ( ( ( width3 - width0 ) / 3.0f ) * 2.0f ) + width0;
 
@@ -1062,25 +1062,25 @@ TqInt CqCubicCurveSegment::SplitToPatch(
 	    > ( "P", 0 )
 	);
 	pPatch->P() ->SetSize( 16 );
-	( *pPatch->P() ) [ 0  ] = static_cast<CqVector3D>( ( *P() ) [ 0 ] ) + widthOffset0;
-	( *pPatch->P() ) [ 1  ] = static_cast<CqVector3D>( ( *P() ) [ 0 ] ) + widthOffset02;
-	( *pPatch->P() ) [ 2  ] = static_cast<CqVector3D>( ( *P() ) [ 0 ] ) - widthOffset02;
-	( *pPatch->P() ) [ 3  ] = static_cast<CqVector3D>( ( *P() ) [ 0 ] ) - widthOffset0;
+	pPatch->P()->pValue( 0  )[0] = static_cast<CqVector3D>( P()->pValue( 0 )[0] ) + widthOffset0;
+	pPatch->P()->pValue( 1  )[0] = static_cast<CqVector3D>( P()->pValue( 0 )[0] ) + widthOffset02;
+	pPatch->P()->pValue( 2  )[0] = static_cast<CqVector3D>( P()->pValue( 0 )[0] ) - widthOffset02;
+	pPatch->P()->pValue( 3  )[0] = static_cast<CqVector3D>( P()->pValue( 0 )[0] ) - widthOffset0;
 
-	( *pPatch->P() ) [ 4  ] = static_cast<CqVector3D>( ( *P() ) [ 1 ] ) + widthOffset1;
-	( *pPatch->P() ) [ 5  ] = static_cast<CqVector3D>( ( *P() ) [ 1 ] ) + widthOffset12;
-	( *pPatch->P() ) [ 6  ] = static_cast<CqVector3D>( ( *P() ) [ 1 ] ) - widthOffset12;
-	( *pPatch->P() ) [ 7  ] = static_cast<CqVector3D>( ( *P() ) [ 1 ] ) - widthOffset1;
+	pPatch->P()->pValue( 4  )[0] = static_cast<CqVector3D>( P()->pValue( 1 )[0] ) + widthOffset1;
+	pPatch->P()->pValue( 5  )[0] = static_cast<CqVector3D>( P()->pValue( 1 )[0] ) + widthOffset12;
+	pPatch->P()->pValue( 6  )[0] = static_cast<CqVector3D>( P()->pValue( 1 )[0] ) - widthOffset12;
+	pPatch->P()->pValue( 7  )[0] = static_cast<CqVector3D>( P()->pValue( 1 )[0] ) - widthOffset1;
 
-	( *pPatch->P() ) [ 8  ] = static_cast<CqVector3D>( ( *P() ) [ 2 ] ) + widthOffset2;
-	( *pPatch->P() ) [ 9  ] = static_cast<CqVector3D>( ( *P() ) [ 2 ] ) + widthOffset22;
-	( *pPatch->P() ) [ 10 ] = static_cast<CqVector3D>( ( *P() ) [ 2 ] ) - widthOffset22;
-	( *pPatch->P() ) [ 11 ] = static_cast<CqVector3D>( ( *P() ) [ 2 ] ) - widthOffset2;
+	pPatch->P()->pValue( 8  )[0] = static_cast<CqVector3D>( P()->pValue( 2 )[0] ) + widthOffset2;
+	pPatch->P()->pValue( 9  )[0] = static_cast<CqVector3D>( P()->pValue( 2 )[0] ) + widthOffset22;
+	pPatch->P()->pValue( 10 )[0] = static_cast<CqVector3D>( P()->pValue( 2 )[0] ) - widthOffset22;
+	pPatch->P()->pValue( 11 )[0] = static_cast<CqVector3D>( P()->pValue( 2 )[0] ) - widthOffset2;
 
-	( *pPatch->P() ) [ 12 ] = static_cast<CqVector3D>( ( *P() ) [ 3 ] ) + widthOffset3;
-	( *pPatch->P() ) [ 13 ] = static_cast<CqVector3D>( ( *P() ) [ 3 ] ) + widthOffset32;
-	( *pPatch->P() ) [ 14 ] = static_cast<CqVector3D>( ( *P() ) [ 3 ] ) - widthOffset32;
-	( *pPatch->P() ) [ 15 ] = static_cast<CqVector3D>( ( *P() ) [ 3 ] ) - widthOffset3;
+	pPatch->P()->pValue( 12 )[0] = static_cast<CqVector3D>( P()->pValue( 3 )[0] ) + widthOffset3;
+	pPatch->P()->pValue( 13 )[0] = static_cast<CqVector3D>( P()->pValue( 3 )[0] ) + widthOffset32;
+	pPatch->P()->pValue( 14 )[0] = static_cast<CqVector3D>( P()->pValue( 3 )[0] ) - widthOffset32;
+	pPatch->P()->pValue( 15 )[0] = static_cast<CqVector3D>( P()->pValue( 3 )[0] ) - widthOffset3;
 
 	// set the normals on the patch
 //	pPatch->AddPrimitiveVariable(
@@ -1099,20 +1099,20 @@ TqInt CqCubicCurveSegment::SplitToPatch(
 	// set u, v coordinates of the patch
 	if ( USES( bUses, EnvVars_u ) || USES( bUses, EnvVars_v ) )
 	{
-		( *pPatch->u() ) [ 0 ] = ( *pPatch->u() ) [ 2 ] = 0.0;
-		( *pPatch->u() ) [ 1 ] = ( *pPatch->u() ) [ 3 ] = 1.0;
-		( *pPatch->v() ) [ 0 ] = ( *pPatch->v() ) [ 1 ] = ( *v() ) [ 0 ];
-		( *pPatch->v() ) [ 2 ] = ( *pPatch->v() ) [ 3 ] = ( *v() ) [ 1 ];
+		pPatch->u()->pValue( 0 )[0] = pPatch->u()->pValue( 2 )[0] = 0.0;
+		pPatch->u()->pValue( 1 )[0] = pPatch->u()->pValue( 3 )[0] = 1.0;
+		pPatch->v()->pValue( 0 )[0] = pPatch->v()->pValue( 1 )[0] = v()->pValue( 0 )[0];
+		pPatch->v()->pValue( 2 )[0] = pPatch->v()->pValue( 3 )[0] = v()->pValue( 1 )[0];
 	}
 
 	// helllllp!!! WHAT DO I DO WITH s,t!!!???
 	//  for now, they're set equal to u and v
 	if ( USES( bUses, EnvVars_s ) || USES( bUses, EnvVars_t ) )
 	{
-		( *pPatch->s() ) [ 0 ] = ( *pPatch->s() ) [ 2 ] = 0.0;
-		( *pPatch->s() ) [ 1 ] = ( *pPatch->s() ) [ 3 ] = 1.0;
-		( *pPatch->t() ) [ 0 ] = ( *pPatch->t() ) [ 1 ] = ( *v() ) [ 0 ];
-		( *pPatch->t() ) [ 2 ] = ( *pPatch->t() ) [ 3 ] = ( *v() ) [ 1 ];
+		pPatch->s()->pValue( 0 )[0] = pPatch->s()->pValue( 2 )[0] = 0.0;
+		pPatch->s()->pValue( 1 )[0] = pPatch->s()->pValue( 3 )[0] = 1.0;
+		pPatch->t()->pValue( 0 )[0] = pPatch->t()->pValue( 1 )[0] = v()->pValue( 0 )[0];
+		pPatch->t()->pValue( 2 )[0] = pPatch->t()->pValue( 3 )[0] = v()->pValue( 1 )[0];
 	}
 
 	// set any remaining user parameters
@@ -1227,10 +1227,10 @@ void CqCubicCurveSegment::ConvertToBezierBasis( CqMatrix& matBasis )
 	CqMatrix matCP;
 	for ( i = 0; i < 4; i++ )
 	{
-		matCP[ 0 ][ i ] = (*P())[i].x();
-		matCP[ 1 ][ i ] = (*P())[i].y();
-		matCP[ 2 ][ i ] = (*P())[i].z();
-		matCP[ 3 ][ i ] = (*P())[i].h();
+		matCP[ 0 ][ i ] = P()->pValue(i)[0].x();
+		matCP[ 1 ][ i ] = P()->pValue(i)[0].y();
+		matCP[ 2 ][ i ] = P()->pValue(i)[0].z();
+		matCP[ 3 ][ i ] = P()->pValue(i)[0].h();
 	}
 	matCP.SetfIdentity( TqFalse );
 
@@ -1238,10 +1238,10 @@ void CqCubicCurveSegment::ConvertToBezierBasis( CqMatrix& matBasis )
 
 	for ( i = 0; i < 4; i++ )
 	{
-		(*P())[i].x( matCP[ 0 ][ i ] );
-		(*P())[i].y( matCP[ 1 ][ i ] );
-		(*P())[i].z( matCP[ 2 ][ i ] );
-		(*P())[i].h( matCP[ 3 ][ i ] );
+		P()->pValue(i)[0].x( matCP[ 0 ][ i ] );
+		P()->pValue(i)[0].y( matCP[ 1 ][ i ] );
+		P()->pValue(i)[0].z( matCP[ 2 ][ i ] );
+		P()->pValue(i)[0].h( matCP[ 3 ][ i ] );
 	}
 }
 
@@ -1451,8 +1451,8 @@ TqInt CqLinearCurvesGroup::Split( std::vector<CqBasicSurface*>& aSplits )
 				          TqFloat, type_float, TqFloat
 				          > ( "v", 1 );
 				pVP->SetSize( pSeg->cVarying() );
-				( *pVP ) [ 0 ] = vv;
-				( *pVP ) [ 1 ] = vvnext;
+				pVP->pValue( 0 )[0] = vv;
+				pVP->pValue( 1 )[0] = vvnext;
 				pSeg->AddPrimitiveVariable( pVP );
 			}
 
@@ -1566,13 +1566,13 @@ void CqLinearCurvesGroup::Transform(
 		//  the length of the current width in current space
 		CqVector3D horiz( 1, 0, 0 );
 		horiz = matITTx * horiz;
-		horiz *= ( *width() ) [ i ] / horiz.Magnitude();
+		horiz *= width()->pValue( i )[0] / horiz.Magnitude();
 
 		// now, create two points; one at the vertex in current space
 		//  and one which is offset horizontally in the new space by
 		//  the width in the current space.  transform both points
 		//  into the new space
-		CqVector3D pt = ( *P() ) [ i ];
+		CqVector3D pt = P()->pValue( i )[0];
 		CqVector3D pt_delta = pt + horiz;
 		pt = matTx * pt;
 		pt_delta = matTx * pt_delta;
@@ -1580,7 +1580,7 @@ void CqLinearCurvesGroup::Transform(
 		// finally, find the difference between the two points in
 		//  the new space - this is the transformed width
 		CqVector3D widthVector = pt_delta - pt;
-		( *width() ) [ i ] = widthVector.Magnitude();
+		width()->pValue( i )[0] = widthVector.Magnitude();
 	}
 
 	// finally, we want to call the base class transform
@@ -1821,8 +1821,8 @@ TqInt CqCubicCurvesGroup::Split(
 				          TqFloat, type_float, TqFloat
 				          > ( "v", 1 );
 				pVP->SetSize( pSeg->cVarying() );
-				( *pVP ) [ 0 ] = vstart;
-				( *pVP ) [ 1 ] = vend;
+				pVP->pValue( 0 )[0] = vstart;
+				pVP->pValue( 1 )[0] = vend;
 				pSeg->AddPrimitiveVariable( pVP );
 			}
 
@@ -1987,13 +1987,13 @@ void CqCubicCurvesGroup::Transform(
 			//  current space
 			CqVector3D horiz( 1, 0, 0 );
 			horiz = matITTx * horiz;
-			horiz *= ( *width() ) [ widthI ] / horiz.Magnitude();
+			horiz *= width()->pValue( widthI )[0] / horiz.Magnitude();
 
 			// now, create two points; one at the vertex in
 			//  current space and one which is offset horizontally
 			//  in the new space by the width in the current space.
 			//  transform both points into the new space
-			CqVector3D pt = ( *P() ) [ vertexI ];
+			CqVector3D pt = P()->pValue( vertexI )[0];
 			CqVector3D pt_delta = pt + horiz;
 			pt = matTx * pt;
 			pt_delta = matTx * pt_delta;
@@ -2002,7 +2002,7 @@ void CqCubicCurvesGroup::Transform(
 			//  points in the new space - this is the transformed
 			//  width
 			CqVector3D widthVector = pt_delta - pt;
-			( *width() ) [ widthI ] = widthVector.Magnitude();
+			width()->pValue( widthI )[0] = widthVector.Magnitude();
 
 
 			// we've finished the current width, so we move on

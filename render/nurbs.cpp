@@ -108,7 +108,7 @@ TqInt CqSurfaceNURBS::operator==( const CqSurfaceNURBS& from )
 	TqInt i;
 	for ( i = P() ->Size() - 1; i >= 0; i-- )
 	{
-		if ( ( *P() ) [ i ] != ( *from.P() ) [ i ] )
+		if ( P()->pValue( i )[0] != from.P()->pValue( i )[0] )
 			return ( 0 );
 	}
 
@@ -1356,7 +1356,7 @@ CqBound CqSurfaceNURBS::Bound() const
 	TqUint i;
 	for ( i = 0; i < m_cuVerts*m_cvVerts; i++ )
 	{
-		CqVector3D	vecV = ( *P() ) [ i ];
+		CqVector3D	vecV = P()->pValue( i )[0];
 		if ( vecV.x() < vecA.x() ) vecA.x( vecV.x() );
 		if ( vecV.y() < vecA.y() ) vecA.y( vecV.y() );
 		if ( vecV.x() > vecB.x() ) vecB.x( vecV.x() );
@@ -1612,7 +1612,7 @@ TqBool	CqSurfaceNURBS::Diceable()
 	const CqMatrix& matCtoR = QGetRenderContext() ->matSpaceToSpace( "camera", "raster", CqMatrix(), pTransform() ->matObjectToWorld() );
 	for ( i = 0; i < m_cuVerts*m_cvVerts; i++ )
 	{
-		CqVector3D vT = ( *P() ) [ i ];
+		CqVector3D vT = P()->pValue( i )[0];
 		//vT.h(1.0f);
 		vT = matCtoR * vT;
 		avecHull[ i ] = vT;
@@ -1869,7 +1869,7 @@ void CqSurfaceNURBS::Output( const char* name )
 
 	fputs( "\"Pw\" [\n", fp );
 	for ( i = 0; i < P() ->Size(); i++ )
-		fprintf( fp, "%f %f %f %f \n", ( *P() ) [ i ].x(), ( *P() ) [ i ].y(), ( *P() ) [ i ].z(), ( *P() ) [ i ].h() );
+		fprintf( fp, "%f %f %f %f \n", P()->pValue( i )[0].x(), P()->pValue( i )[0].y(), P()->pValue( i )[0].z(), P()->pValue( i )[0].h() );
 	fputs( "]\n", fp );
 
 	fclose( fp );

@@ -61,7 +61,7 @@ void CqPointsKDTreeData::FreePoints()
 
 bool CqPointsKDTreeData::CqPointsKDTreeDataComparator::operator()(TqInt a, TqInt b)	
 {  
-	return( ( ( *m_pPointsSurface->pPoints()->P() )[ a ][m_Dim] ) < ( ( *m_pPointsSurface->pPoints()->P() )[ b ][m_Dim] ) ); 
+	return( ( m_pPointsSurface->pPoints()->P()->pValue( a )[0][m_Dim] ) < ( m_pPointsSurface->pPoints()->P()->pValue( b )[0][m_Dim] ) ); 
 }
 
 
@@ -329,7 +329,7 @@ CqBound	CqPoints::Bound() const
 	{
 		CqPolygonPoints* pTimePoints = pPoints( t );
 		for( i = 0; i < nVertices(); i++ )
-			B.Encapsulate( (*pTimePoints->P())[ m_KDTree.aLeaves()[ i ] ] );
+			B.Encapsulate( pTimePoints->P()->pValue( m_KDTree.aLeaves()[ i ] )[0] );
 	}
 
 	// Expand the bound to take into account the width of the particles.

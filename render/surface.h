@@ -306,146 +306,146 @@ class CqSurface : public CqBasicSurface
 
 		/** Get a reference the to P default parameter.
 		 */
-		virtual CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>* P()
+		virtual CqParameterTyped<CqVector4D, CqVector3D>* P()
 		{
 			if ( m_aiStdPrimitiveVars[ EnvVars_P ] >= 0 )
-				return ( static_cast<CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_P ] ] ) );
+				return ( static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_P ] ] ) );
 			else
 				return ( NULL );
 		}
 		/** Get a reference the to N default parameter.
 		 */
-		virtual CqParameterTypedVarying<CqVector3D, type_normal, CqVector3D>* N()
+		virtual CqParameterTyped<CqVector3D, CqVector3D>* N()
 		{
 			if ( m_aiStdPrimitiveVars[ EnvVars_N ] >= 0 )
-				return ( static_cast<CqParameterTypedVarying<CqVector3D, type_normal, CqVector3D>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_N ] ] ) );
+				return ( static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_N ] ] ) );
 			else
 				return ( NULL );
 		}
 		/** Get a reference the to Cq default parameter.
 		 */
-		virtual CqParameterTypedVarying<CqColor, type_color, CqColor>* Cs()
+		virtual CqParameterTyped<CqColor, CqColor>* Cs()
 		{
 			if ( m_aiStdPrimitiveVars[ EnvVars_Cs ] >= 0 )
-				return ( static_cast<CqParameterTypedVarying<CqColor, type_color, CqColor>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_Cs ] ] ) );
+				return ( static_cast<CqParameterTyped<CqColor, CqColor>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_Cs ] ] ) );
 			else
 				return ( NULL );
 		}
 		/** Get a reference the to Os default parameter.
 		 */
-		virtual CqParameterTypedVarying<CqColor, type_color, CqColor>* Os()
+		virtual CqParameterTyped<CqColor, CqColor>* Os()
 		{
 			if ( m_aiStdPrimitiveVars[ EnvVars_Os ] >= 0 )
-				return ( static_cast<CqParameterTypedVarying<CqColor, type_color, CqColor>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_Os ] ] ) );
+				return ( static_cast<CqParameterTyped<CqColor, CqColor>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_Os ] ] ) );
 			else
 				return ( NULL );
 		}
 		/** Get a reference the to s default parameter.
 		 */
-		virtual CqParameterTypedVarying<TqFloat, type_float, TqFloat>* s()
+		virtual CqParameterTyped<TqFloat, TqFloat>* s()
 		{
 			if ( m_aiStdPrimitiveVars[ EnvVars_s ] >= 0 )
-				return ( static_cast<CqParameterTypedVarying<TqFloat, type_float, TqFloat>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_s ] ] ) );
+				return ( static_cast<CqParameterTyped<TqFloat, TqFloat>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_s ] ] ) );
 			else
 				return ( NULL );
 		}
 		/** Get a reference the to t default parameter.
 		 */
-		virtual CqParameterTypedVarying<TqFloat, type_float, TqFloat>* t()
+		virtual CqParameterTyped<TqFloat, TqFloat>* t()
 		{
 			if ( m_aiStdPrimitiveVars[ EnvVars_t ] >= 0 )
-				return ( static_cast<CqParameterTypedVarying<TqFloat, type_float, TqFloat>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_t ] ] ) );
+				return ( static_cast<CqParameterTyped<TqFloat, TqFloat>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_t ] ] ) );
 			else
 				return ( NULL );
 		}
 		/** Get a reference the to u default parameter.
 		 */
-		virtual CqParameterTypedVarying<TqFloat, type_float, TqFloat>* u()
+		virtual CqParameterTyped<TqFloat, TqFloat>* u()
 		{
 			if ( m_aiStdPrimitiveVars[ EnvVars_u ] >= 0 )
-				return ( static_cast<CqParameterTypedVarying<TqFloat, type_float, TqFloat>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_u ] ] ) );
+				return ( static_cast<CqParameterTyped<TqFloat, TqFloat>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_u ] ] ) );
 			else
 				return ( NULL );
 		}
 		/** Get a reference the to v default parameter.
 		 */
-		virtual CqParameterTypedVarying<TqFloat, type_float, TqFloat>* v()
+		virtual CqParameterTyped<TqFloat, TqFloat>* v()
 		{
 			if ( m_aiStdPrimitiveVars[ EnvVars_v ] >= 0 )
-				return ( static_cast<CqParameterTypedVarying<TqFloat, type_float, TqFloat>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_v ] ] ) );
+				return ( static_cast<CqParameterTyped<TqFloat, TqFloat>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_v ] ] ) );
 			else
 				return ( NULL );
 		}
 
 		/** Get a reference the to P default parameter.
 		 */
-		virtual const	CqParameterTypedVarying<CqVector4D, type_hpoint, CqVector3D>* P() const
+		virtual const	CqParameterTyped<CqVector4D, CqVector3D>* P() const
 		{
 			if ( m_aiStdPrimitiveVars[ EnvVars_P ] >= 0 )
-				return ( static_cast<const CqParameterTypedVarying<CqVector4D, type_hpoint, CqVector3D>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_P ] ] ) );
+				return ( static_cast<const CqParameterTyped<CqVector4D, CqVector3D>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_P ] ] ) );
 			else
 				return ( NULL );
 		}
 		/** Get a reference the to N default parameter.
 		 */
-		virtual const	CqParameterTypedVarying<CqVector3D, type_normal, CqVector3D>* N() const
+		virtual const	CqParameterTyped<CqVector3D, CqVector3D>* N() const
 		{
 			if ( m_aiStdPrimitiveVars[ EnvVars_N ] >= 0 )
-				return ( static_cast<const CqParameterTypedVarying<CqVector3D, type_normal, CqVector3D>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_N ] ] ) );
+				return ( static_cast<const CqParameterTyped<CqVector3D, CqVector3D>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_N ] ] ) );
 			else
 				return ( NULL );
 		}
 		/** Get a reference the to Cq default parameter.
 		 */
-		virtual const	CqParameterTypedVarying<CqColor, type_color, CqColor>* Cs() const
+		virtual const	CqParameterTyped<CqColor, CqColor>* Cs() const
 		{
 			if ( m_aiStdPrimitiveVars[ EnvVars_Cs ] >= 0 )
-				return ( static_cast<const CqParameterTypedVarying<CqColor, type_color, CqColor>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_Cs ] ] ) );
+				return ( static_cast<const CqParameterTyped<CqColor, CqColor>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_Cs ] ] ) );
 			else
 				return ( NULL );
 		}
 		/** Get a reference the to Os default parameter.
 		 */
-		virtual const	CqParameterTypedVarying<CqColor, type_color, CqColor>* Os() const
+		virtual const	CqParameterTyped<CqColor, CqColor>* Os() const
 		{
 			if ( m_aiStdPrimitiveVars[ EnvVars_Os ] >= 0 )
-				return ( static_cast<const CqParameterTypedVarying<CqColor, type_color, CqColor>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_Os ] ] ) );
+				return ( static_cast<const CqParameterTyped<CqColor, CqColor>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_Os ] ] ) );
 			else
 				return ( NULL );
 		}
 		/** Get a reference the to s default parameter.
 		 */
-		virtual const	CqParameterTypedVarying<TqFloat, type_float, TqFloat>* s() const
+		virtual const	CqParameterTyped<TqFloat, TqFloat>* s() const
 		{
 			if ( m_aiStdPrimitiveVars[ EnvVars_s ] >= 0 )
-				return ( static_cast<const CqParameterTypedVarying<TqFloat, type_float, TqFloat>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_s ] ] ) );
+				return ( static_cast<const CqParameterTyped<TqFloat, TqFloat>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_s ] ] ) );
 			else
 				return ( NULL );
 		}
 		/** Get a reference the to t default parameter.
 		 */
-		virtual const	CqParameterTypedVarying<TqFloat, type_float, TqFloat>* t() const
+		virtual const	CqParameterTyped<TqFloat, TqFloat>* t() const
 		{
 			if ( m_aiStdPrimitiveVars[ EnvVars_t ] >= 0 )
-				return ( static_cast<const CqParameterTypedVarying<TqFloat, type_float, TqFloat>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_t ] ] ) );
+				return ( static_cast<const CqParameterTyped<TqFloat, TqFloat>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_t ] ] ) );
 			else
 				return ( NULL );
 		}
 		/** Get a reference the to u default parameter.
 		 */
-		virtual const	CqParameterTypedVarying<TqFloat, type_float, TqFloat>* u() const
+		virtual const	CqParameterTyped<TqFloat, TqFloat>* u() const
 		{
 			if ( m_aiStdPrimitiveVars[ EnvVars_u ] >= 0 )
-				return ( static_cast<const CqParameterTypedVarying<TqFloat, type_float, TqFloat>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_u ] ] ) );
+				return ( static_cast<const CqParameterTyped<TqFloat, TqFloat>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_u ] ] ) );
 			else
 				return ( NULL );
 		}
 		/** Get a reference the to v default parameter.
 		 */
-		virtual const	CqParameterTypedVarying<TqFloat, type_float, TqFloat>* v() const
+		virtual const	CqParameterTyped<TqFloat, TqFloat>* v() const
 		{
 			if ( m_aiStdPrimitiveVars[ EnvVars_v ] >= 0 )
-				return ( static_cast<const CqParameterTypedVarying<TqFloat, type_float, TqFloat>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_v ] ] ) );
+				return ( static_cast<const CqParameterTyped<TqFloat, TqFloat>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_v ] ] ) );
 			else
 				return ( NULL );
 		}

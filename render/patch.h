@@ -136,7 +136,7 @@ class CqSurfacePatchBicubic : public CqSurface
 		 */
 		const	CqVector4D& CP( TqInt iRow, TqInt iCol ) const
 		{
-			return ( ( *P() ) [ ( iRow * 4 ) + iCol ] );
+			return ( P()->pValue( ( iRow * 4 ) + iCol )[0] );
 		}
 		/** Get a reference to the indexed control point.
 		 * \param iRow Integer row index.
@@ -145,7 +145,7 @@ class CqSurfacePatchBicubic : public CqSurface
 		 */
 		CqVector4D& CP( TqInt iRow, TqInt iCol )
 		{
-			return ( ( *P() ) [ ( iRow * 4 ) + iCol ] );
+			return ( P()->pValue( ( iRow * 4 ) + iCol )[0] );
 		}
 		CqSurfacePatchBicubic& operator=( const CqSurfacePatchBicubic& From );
 

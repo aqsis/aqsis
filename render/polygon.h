@@ -218,35 +218,35 @@ class CqSurfacePolygon : public CqSurface, public CqPolygonBase
 
 		virtual	const	CqVector4D& PolyP( TqInt i ) const
 		{
-			return ( ( *P() ) [ i ] );
+			return ( P()->pValue( i )[0] );
 		}
 		virtual	const	CqVector3D& PolyN( TqInt i ) const
 		{
-			return ( ( *N() ) [ i ] );
+			return ( N()->pValue( i )[0] );
 		}
 		virtual	const	CqColor& PolyCs( TqInt i ) const
 		{
-			return ( ( *Cs() ) [ i ] );
+			return ( Cs()->pValue( i )[0] );
 		}
 		virtual	const	CqColor& PolyOs( TqInt i ) const
 		{
-			return ( ( *Os() ) [ i ] );
+			return ( Os()->pValue( i )[0] );
 		}
 		virtual	const	TqFloat& Polys( TqInt i ) const
 		{
-			return ( ( *s() ) [ i ] );
+			return ( s()->pValue( i )[0] );
 		}
 		virtual	const	TqFloat& Polyt( TqInt i ) const
 		{
-			return ( ( *t() ) [ i ] );
+			return ( t()->pValue( i )[0] );
 		}
 		virtual	const	TqFloat& Polyu( TqInt i ) const
 		{
-			return ( ( *u() ) [ i ] );
+			return ( u()->pValue( i )[0] );
 		}
 		virtual	const	TqFloat& Polyv( TqInt i ) const
 		{
-			return ( ( *v() ) [ i ] );
+			return ( v()->pValue( i )[0] );
 		}
 		virtual	const	TqInt PolyIndex( TqInt i ) const
 		{
@@ -498,35 +498,35 @@ class CqSurfacePointsPolygon : public CqBasicSurface, public CqPolygonBase
 
 		virtual	const CqVector4D& PolyP( TqInt i ) const
 		{
-			return ( ( *m_pPoints->P() ) [ m_aIndices[ i ] ] );
+			return ( m_pPoints->P()->pValue( m_aIndices[ i ] )[0] );
 		}
 		virtual	const CqVector3D& PolyN( TqInt i ) const
 		{
-			return ( ( *m_pPoints->N() ) [ m_aIndices[ i ] ] );
+			return ( m_pPoints->N()->pValue( m_aIndices[ i ] )[0] );
 		}
 		virtual	const CqColor& PolyCs( TqInt i ) const
 		{
-			return ( ( *m_pPoints->Cs() ) [ m_aIndices[ i ] ] );
+			return ( m_pPoints->Cs()->pValue( m_aIndices[ i ] )[0] );
 		}
 		virtual	const CqColor& PolyOs( TqInt i ) const
 		{
-			return ( ( *m_pPoints->Os() ) [ m_aIndices[ i ] ] );
+			return ( m_pPoints->Os()->pValue( m_aIndices[ i ] )[0] );
 		}
 		virtual	const TqFloat& Polys( TqInt i ) const
 		{
-			return ( ( *m_pPoints->s() ) [ m_aIndices[ i ] ] );
+			return ( m_pPoints->s()->pValue( m_aIndices[ i ] )[0] );
 		}
 		virtual	const TqFloat& Polyt( TqInt i ) const
 		{
-			return ( ( *m_pPoints->t() ) [ m_aIndices[ i ] ] );
+			return ( m_pPoints->t()->pValue( m_aIndices[ i ] )[0] );
 		}
 		virtual	const TqFloat& Polyu( TqInt i ) const
 		{
-			return ( ( *m_pPoints->u() ) [ m_aIndices[ i ] ] );
+			return ( m_pPoints->u()->pValue( m_aIndices[ i ] )[0] );
 		}
 		virtual	const TqFloat& Polyv( TqInt i ) const
 		{
-			return ( ( *m_pPoints->v() ) [ m_aIndices[ i ] ] );
+			return ( m_pPoints->v()->pValue( m_aIndices[ i ] )[0] );
 		}
 		virtual	const	TqInt PolyIndex( TqInt i ) const
 		{

@@ -102,16 +102,16 @@ class CqPolygonGeneral2D
 			switch ( m_Axis )
 			{
 					case Axis_XY:
-					return ( CqVector2D( ( *m_pVertices->P() ) [ m_aiVertices[ index ] ].x(),
-					                     ( *m_pVertices->P() ) [ m_aiVertices[ index ] ].y() ) );
+					return ( CqVector2D( m_pVertices->P()->pValue( m_aiVertices[ index ] )[0].x(),
+					                     m_pVertices->P()->pValue( m_aiVertices[ index ] )[0].y() ) );
 
 					case Axis_XZ:
-					return ( CqVector2D( ( *m_pVertices->P() ) [ m_aiVertices[ index ] ].x(),
-					                     ( *m_pVertices->P() ) [ m_aiVertices[ index ] ].z() ) );
+					return ( CqVector2D( m_pVertices->P()->pValue( m_aiVertices[ index ] )[0].x(),
+					                     m_pVertices->P()->pValue( m_aiVertices[ index ] )[0].z() ) );
 
 					case Axis_YZ:
-					return ( CqVector2D( ( *m_pVertices->P() ) [ m_aiVertices[ index ] ].y(),
-					                     ( *m_pVertices->P() ) [ m_aiVertices[ index ] ].z() ) );
+					return ( CqVector2D( m_pVertices->P()->pValue( m_aiVertices[ index ] )[0].y(),
+					                     m_pVertices->P()->pValue( m_aiVertices[ index ] )[0].z() ) );
 			}
 			return ( CqVector2D( 0, 0 ) );
 		}
