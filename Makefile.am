@@ -19,7 +19,4 @@ EXTRA_DIST = Doxyfile Renderer.dsw bootstrap doxygen.dsp
 .PHONY: test
 test:
 	cd aqsl/tests; $(MAKE) $(AM_MAKEFLAGS) test
-	cd librib2/tests; $(MAKE) $(AM_MAKEFLAGS) test
-	cd aqsis; $(MAKE) $(AM_MAKEFLAGS) test
-
 

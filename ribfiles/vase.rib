@@ -148,7 +148,7 @@ FrameEnd
 FrameBegin 2
 
 Display "shad2.map" "zfile" "z"
-Display "+shad2.map" "framebuffer" "z"
+Display "+shad2.map" "zframebuffer" "z"
 
 Format 256 256 1
 PixelSamples 1 1

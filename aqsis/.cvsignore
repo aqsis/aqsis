@@ -1,10 +1,6 @@
 aqsis
 Makefile
 
-*.slx
-*.tif
-*.map
-*.z
 .#*
 *.plg
 *.#*

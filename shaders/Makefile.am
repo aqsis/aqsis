@@ -1,14 +1,18 @@
-EXTRA_DIST = DPProctext.h ambientlight.sl borg_metal.sl bumpy.sl constant.sl debug.sl dented.sl depthcue.sl distantlight.sl dpbluemarble.sl fog.sl matte.sl metal.sl noises.h paintedplastic.sl patterns.h plastic.sl pointlight.sl randgrid.sl shaders.dsp shadowspot.sl shinymetal.sl spotlight.sl wavy.sl uvtest.sl spacetest.sl show_st.sl cellnoisetest.sl brickbump.sl curvetube.sl
+SHADER_INCLUDES = $(wildcard $(srcdir)/*.h)
+SHADERS = $(wildcard $(srcdir)/*.sl)
+COMPILED_SHADERS = $(SHADERS:.sl=.slx)
 
-shaderdir = $(datadir)/shaders
+.sl.slx:
+	$(top_builddir)/aqsl/aqsl $< -o $@
 
-install-data-local:
-	$(mkinstalldirs) $(shaderdir)
-	$(INSTALL_DATA) $(srcdir)/*.h $(shaderdir)
-	$(INSTALL_DATA) $(srcdir)/*.sl $(shaderdir)
-	PATH=$$PATH:$(bindir); cd $(shaderdir); for file in $$(find . -name "*.sl"); do $(bindir)/aqsl $$file; done
+shadersdir = $(datadir)/shaders
 
-uninstall-local:
-	rm -f $(shaderdir)/*.h
-	rm -f $(shaderdir)/*.sl
-	rm -f $(shaderdir)/*.slx
+shaders_DATA = $(SHADER_INCLUDES) $(SHADERS) $(COMPILED_SHADERS)
+
+clean-local:
+	rm -f *.slx
+
+all-local: $(COMPILED_SHADERS)
+
+EXTRA_DIST = $(SHADER_INCLUDES) $(SHADERS)
+

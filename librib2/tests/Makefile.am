@@ -12,8 +12,7 @@ ribprinter_LDADD = $(top_builddir)/librib2/librib2.la $(top_builddir)/librib2str
 
 INCLUDES = -I$(top_srcdir)/librib2 -I$(top_srcdir)/librib2stream -I$(top_srcdir)/librib2ri -I$(top_srcdir)/render -I$(top_srcdir)/libaqsistypes -I$(top_srcdir)/libaqsistypes/posix
 
-test: check 
+check-local:
 	for file in $$(find $(top_srcdir)/ribfiles -name "*.rib" | sort); do echo "Scanning $$file ..."; $(top_builddir)/librib2/tests/ribscanner < $$file; done
 	for file in $$(find $(top_srcdir)/ribfiles -name "*.rib" | sort); do echo "Parsing $$file ..."; $(top_builddir)/librib2/tests/ribprinter $$file; done
 
-.PHONY: test-shaders test
