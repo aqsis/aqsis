@@ -21,6 +21,10 @@
 
 #include <iosfwd>
 
+#include "aqsis.h"
+
+START_NAMESPACE( Aqsis )
+
 // iostream-compatible manipulators - use these
 // at the beginning of a message to indicate its priority, e.g.
 //
@@ -35,6 +39,8 @@ std::ostream& warning(std::ostream&);
 std::ostream& notice(std::ostream&);
 std::ostream& info(std::ostream&);
 std::ostream& debug(std::ostream&);
+
+END_NAMESPACE( Aqsis )
 
 #endif //	___logging_Loaded___
 

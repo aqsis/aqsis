@@ -344,12 +344,12 @@ int main( int argc, const char** argv )
 		std::cout << "procedurals: " << g_procedurals.c_str() << std::endl;
 	}
 
-	std::auto_ptr<std::streambuf> show_timestamps( new timestamp_buf(std::cerr) );
-	std::auto_ptr<std::streambuf> fold_duplicates( new fold_duplicates_buf(std::cerr) );
-	std::auto_ptr<std::streambuf> show_level( new show_level_buf(std::cerr) );
+	std::auto_ptr<std::streambuf> show_timestamps( new Aqsis::timestamp_buf(std::cerr) );
+	std::auto_ptr<std::streambuf> fold_duplicates( new Aqsis::fold_duplicates_buf(std::cerr) );
+	std::auto_ptr<std::streambuf> show_level( new Aqsis::show_level_buf(std::cerr) );
 #ifdef	AQSIS_SYSTEM_POSIX
 	if( g_syslog )
-		std::auto_ptr<std::streambuf> use_syslog( new syslog_buf(std::cerr) );
+		std::auto_ptr<std::streambuf> use_syslog( new Aqsis::syslog_buf(std::cerr) );
 #endif	// AQSIS_SYSTEM_POSIX
 
 	if ( ap.leftovers().size() == 0 )     // If no files specified, take input from stdin.
