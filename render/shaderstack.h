@@ -936,7 +936,7 @@ class _qShareC CqShaderStack
 				CqVMStackEntry& GetPush()
 								{
 									if(m_iTop>=m_Stack.size())
-										m_Stack.resize(m_Stack.size()+10);
+										m_Stack.resize(m_Stack.size()+1);
 
 									return(m_Stack[m_iTop++]);
 								}
