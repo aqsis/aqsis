@@ -1,0 +1,5 @@
+AttributeBegin
+Opacity .5 .5 .5 
+Polygon "P" [1 1 1 1 -1 1 -1 -1 1 ]
+AttributeEnd
+

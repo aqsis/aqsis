@@ -1,0 +1,17 @@
+#!/bin/sh
+
+command()
+{
+	file=$1
+
+	echo "---------------------------------------------------------"
+	echo "scanning $file" ... 
+	echo "---------------------------------------------------------"
+	./ribscanner < $1
+}
+
+for file in @srcdir@/*.rib; do
+	command $file
+done
+
+

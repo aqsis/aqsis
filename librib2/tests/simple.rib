@@ -1,0 +1,16 @@
+##RenderMan RIB-Structure 1.0
+version 3.03
+
+Display "simple.tif" "file" "rgba"
+Format 320 240 1
+
+WorldBegin
+Color 1 1 1
+Polygon "P" [1 .5 .5 .5 -.5 .5 -.5 -.5 .5 -.5 .5 .5]
+
+ReadArchive "simple_archive"
+
+Color 1 1 0
+Polygon "P" [.3 .3 .3 .3 -.3 .3 -.3 -.3 .3 -.3 .3 .3]
+WorldEnd
+

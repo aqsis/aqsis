@@ -1,0 +1,16 @@
+#!/bin/sh
+
+command()
+{
+	file=$1
+
+	echo "---------------------------------------------------------"
+	echo "parsing $file" ... 
+	echo "---------------------------------------------------------"
+	./ribprinter @top_srcdir@/ribber.cfg $1
+}
+
+for file in @srcdir@/*.rib; do
+	command $file
+done
+
