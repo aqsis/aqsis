@@ -4247,11 +4247,7 @@ STD_SOIMPL CqShaderExecEnv::SO_rendererinfo( STRINGVAL name, IqShaderData* pV, D
     {
         if ( pV->Type() == type_string )
         {
-#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
             pV->SetString( VERSION_STR );
-#else // AQSIS_SYSTEM_WIN32
-            pV->SetString( VERSION );
-#endif // !AQSIS_SYSTEM_WIN32
             Ret = 1.0f;
         }
     }

@@ -23,9 +23,7 @@ extern "C" void report_refcounts();
 #include <windows.h>
 #endif
 
-#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
 #include "version.h"
-#endif
 
 #if defined(AQSIS_SYSTEM_WIN32) && defined(_DEBUG)
 #include <crtdbg.h>
@@ -91,11 +89,7 @@ bool g_syslog = 0;
  */
 void version( std::ostream& Stream )
 {
-#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
     Stream << "aqsis version " << VERSION_STR << std::endl;
-#else
-    Stream << "aqsis version " << VERSION << std::endl;
-#endif
 }
 
 

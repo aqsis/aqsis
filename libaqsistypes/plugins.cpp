@@ -35,18 +35,6 @@
 #include <Windows.h>                /* LoadLibrary() */
 #endif /* AQSIS_SYSTEM_WIN32 */
 
-#ifdef AQSIS_SYSTEM_BEOS
-#endif /* AQSIS_SYSTEM_BEOS */
-
-#ifdef AQSIS_SYSTEM_MACOSX
-extern "C"
-{
-    // For Mac OS X, define MACOSX_NO_LIBDL if libdl not installed
-#ifndef MACOSX_NO_LIBDL
-#include <dlfcn.h>                /* dlopen() */
-#endif
-}
-#endif /* AQSIS_SYSTEM_MACOSX */
 #ifdef AQSIS_SYSTEM_POSIX
 extern "C"
 {
@@ -79,18 +67,12 @@ CqPluginBase::DLOpen( CqString *library )
 #ifdef	PLUGINS
 #ifdef AQSIS_SYSTEM_WIN32
     handle = ( void* ) LoadLibrary( library->c_str() );
-#elif defined (AQSIS_SYSTEM_MACOSX)
-#  ifndef MACOSX_NO_LIBDL
-    handle = ( void * ) dlopen( library->c_str(), RTLD_NOW | RTLD_GLOBAL );
-#  endif
-#elif defined (AQSIS_SYSTEM_BEOS)
-    // We probably need an interface for CFPlugins here
-    // But for now, we will not implement plugins
 #else
-    handle = ( void * ) dlopen( library->c_str(), RTLD_LAZY );
+    handle = ( void * ) dlopen( library->c_str(), RTLD_NOW | RTLD_GLOBAL );
 #endif
 #endif
     if ( handle ) m_activeHandles.push_back( handle );
+	std::cerr << info << "Done! " << handle << " " << dlerror() << std::endl;
     return handle;
 }
 
@@ -105,15 +87,7 @@ CqPluginBase::DLSym( void *handle, CqString *symbol )
 
 #if   defined (AQSIS_SYSTEM_WIN32) //Win32 LoadProc support
         location = ( void * ) GetProcAddress( ( HINSTANCE ) handle, symbol->c_str() );
-#elif defined (AQSIS_SYSTEM_MACOSX)
-#  ifndef MACOSX_NO_LIBDL
-        location = ( void * ) dlsym( handle, ( CqString( "_" ) + *symbol ).c_str() );
-#  endif
-#elif defined (AQSIS_SYSTEM_BEOS)
-        // We probably need an interface for CFPlugins here
-        // But for now, we will not implement plugins
 #else
-        //this is the same as MacOS-X but we might aswell keep the same seperation for the moment
         location = ( void * ) dlsym( handle, symbol->c_str() );
 #endif
 
@@ -132,15 +106,7 @@ CqPluginBase::DLClose( void *handle )
 
 #if   defined (AQSIS_SYSTEM_WIN32) //Win32 LoadProc support
         FreeLibrary( ( HINSTANCE ) handle );
-#elif defined (AQSIS_SYSTEM_MACOSX)
-#  ifndef MACOSX_NO_LIBDL
-        dlclose( handle );
-#  endif
-#elif defined (AQSIS_SYSTEM_BEOS)
-        // We probably need an interface for CFPlugins here
-        // But for now, we will not implement plugins
 #else
-        //this is the same as MacOS-X but we might aswell keep the same seperation for the moment
         dlclose( handle );
 #endif
 
@@ -184,8 +150,10 @@ CqPluginBase::DLError( void )
 
     // Free the buffer.
     LocalFree( lpMsgBuf );
-#else
-    errorlog = dlerror() ;
+#elif not defined AQSIS_SYSTEM_MACOSX
+    char* error = dlerror();
+    if( dlerror )
+	    errorlog = error;
 #endif
 
 #else

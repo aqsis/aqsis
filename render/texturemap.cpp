@@ -1146,11 +1146,7 @@ void CqTextureMap::WriteImage( TIFF* ptex, TqPuchar raster, TqUlong width, TqUlo
     TqChar version[ 80 ];
     TIFFCreateDirectory( ptex );
 
-#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
     sprintf( version, "%s %s", STRNAME, VERSION_STR );
-#else
-    sprintf( version, "%s %s", STRNAME, VERSION );
-#endif
     TIFFSetField( ptex, TIFFTAG_SOFTWARE, ( uint32 ) version );
     TIFFSetField( ptex, TIFFTAG_IMAGEWIDTH, width );
     TIFFSetField( ptex, TIFFTAG_IMAGELENGTH, length );
@@ -1181,11 +1177,7 @@ void CqTextureMap::WriteImage( TIFF* ptex, TqFloat *raster, TqUlong width, TqUlo
     TqChar version[ 80 ];
     TIFFCreateDirectory( ptex );
 
-#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
     sprintf( version, "%s %s", STRNAME, VERSION_STR );
-#else
-    sprintf( version, "%s %s", STRNAME, VERSION );
-#endif
     TIFFSetField( ptex, TIFFTAG_SOFTWARE, ( uint32 ) version );
     TIFFSetField( ptex, TIFFTAG_IMAGEWIDTH, width );
     TIFFSetField( ptex, TIFFTAG_IMAGELENGTH, length );
@@ -1218,11 +1210,7 @@ void CqTextureMap::WriteImage( TIFF* ptex, TqUshort *raster, TqUlong width, TqUl
     TqChar version[ 80 ];
     TIFFCreateDirectory( ptex );
 
-#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
     sprintf( version, "%s %s", STRNAME, VERSION_STR );
-#else
-    sprintf( version, "%s %s", STRNAME, VERSION );
-#endif
     TIFFSetField( ptex, TIFFTAG_SOFTWARE, ( uint32 ) version );
     TIFFSetField( ptex, TIFFTAG_IMAGEWIDTH, width );
     TIFFSetField( ptex, TIFFTAG_IMAGELENGTH, length );
@@ -1313,11 +1301,7 @@ void CqTextureMap::WriteTileImage( TIFF* ptex, TqFloat *raster, TqUlong width, T
 {
     //TIFFCreateDirectory(ptex);
     TqChar version[ 80 ];
-#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
     sprintf( version, "%s %s", STRNAME, VERSION_STR );
-#else
-    sprintf( version, "%s %s", STRNAME, VERSION );
-#endif
     TIFFSetField( ptex, TIFFTAG_SOFTWARE, ( uint32 ) version );
     TIFFSetField( ptex, TIFFTAG_IMAGEWIDTH, width );
     TIFFSetField( ptex, TIFFTAG_IMAGELENGTH, length );
@@ -1376,11 +1360,7 @@ void CqTextureMap::WriteTileImage( TIFF* ptex, TqUshort *raster, TqUlong width, 
 {
     //TIFFCreateDirectory(ptex);
     TqChar version[ 80 ];
-#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
     sprintf( version, "%s %s", STRNAME, VERSION_STR );
-#else
-    sprintf( version, "%s %s", STRNAME, VERSION );
-#endif
     TIFFSetField( ptex, TIFFTAG_SOFTWARE, ( uint32 ) version );
     TIFFSetField( ptex, TIFFTAG_IMAGEWIDTH, width );
     TIFFSetField( ptex, TIFFTAG_IMAGELENGTH, length );
@@ -1438,11 +1418,7 @@ void CqTextureMap::WriteTileImage( TIFF* ptex, TqUshort *raster, TqUlong width, 
 void CqTextureMap::WriteTileImage( TIFF* ptex, TqPuchar raster, TqUlong width, TqUlong length, TqUlong twidth, TqUlong tlength, TqInt samples, TqInt compression, TqInt quality )
 {
     TqChar version[ 80 ];
-#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
     sprintf( version, "%s %s", STRNAME, VERSION_STR );
-#else
-    sprintf( version, "%s %s", STRNAME, VERSION );
-#endif
     TIFFSetField( ptex, TIFFTAG_SOFTWARE, ( uint32 ) version );
     TIFFSetField( ptex, TIFFTAG_IMAGEWIDTH, width );
     TIFFSetField( ptex, TIFFTAG_IMAGELENGTH, length );

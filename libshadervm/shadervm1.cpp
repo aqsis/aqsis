@@ -34,12 +34,6 @@
 
 START_NAMESPACE( Aqsis )
 
-#ifdef AQSIS_SYSTEM_MACOSX 
-// Workaround for Mac OS X gcc 2.95 compiler error -
-// "Fixup [linenumber] too large for field width of 16 bits"
-#pragma CC_OPT_OFF
-#endif
-
 void CqShaderVM::SO_nop()
 {}
 
@@ -1177,10 +1171,6 @@ void CqShaderVM::SO_pow()
     AUTOFUNC;
     FUNC2( type_float, m_pEnv->SO_pow );
 }
-
-#ifdef AQSIS_SYSTEM_MACOSX
-#pragma CC_OPT_RESTORE
-#endif
 
 END_NAMESPACE( Aqsis )
 //---------------------------------------------------------------------

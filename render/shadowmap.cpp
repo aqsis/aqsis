@@ -553,11 +553,7 @@ void CqShadowMap::SaveShadowMap( const CqString& strShadowName, TqBool append )
                     matWToS[ ( r * 4 ) + c ] = matWorldToScreen()[ r ][ c ];
                 }
             }
-#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
             sprintf( version, "%s %s", STRNAME, VERSION_STR );
-#else
-            sprintf( version, "%s %s", STRNAME, VERSION );
-#endif
             TIFFSetField( pshadow, TIFFTAG_SOFTWARE, ( uint32 ) version );
             TIFFSetField( pshadow, TIFFTAG_PIXAR_MATRIX_WORLDTOCAMERA, matWToC );
             TIFFSetField( pshadow, TIFFTAG_PIXAR_MATRIX_WORLDTOSCREEN, matWToS );

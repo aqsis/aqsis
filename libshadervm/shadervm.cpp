@@ -27,11 +27,7 @@
 
 #include	<iostream>
 
-#ifndef AQSIS_SYSTEM_MACOSX
 #include	<sstream>
-#else
-#include	<strstream>
-#endif
 #include	<ctype.h>
 
 #include	"shadervm.h"
@@ -725,12 +721,7 @@ void CqShaderVM::DefaultSurface()
                                pop Ci \
                                ";
 
-#ifndef AQSIS_SYSTEM_MACOSX
     std::stringstream defStream(pDefSurfaceShader);
-#else
-    std::strstream defStream;
-    defStream  << pDefSurfaceShader << std::ends;
-#endif
 
     LoadProgram(&defStream);
 }

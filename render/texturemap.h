@@ -32,12 +32,7 @@
 
 #include	<vector>
 #include	<list>
-
-#ifdef AQSIS_SYSTEM_MACOSX
-#include	"macosx/valarray"
-#else
 #include	<valarray>
-#endif
 
 #include	"aqsis.h"
 
@@ -55,12 +50,7 @@ START_NAMESPACE( Aqsis )
 struct IqShader;
 struct IqShaderData;
 
-#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
 #define	ZFILE_HEADER		"Aqsis ZFile" VERSION_STR
-#else // AQSIS_SYSTEM_WIN32
-#define ZFILE_HEADER "Aqsis ZFile" VERSION
-#endif // !AQSIS_SYSTEM_WIN32
-
 #define	LATLONG_HEADER	"Aqsis LatLong MIP MAP"
 #define	CUBEENVMAP_HEADER	"Aqsis CubeFace Environment"
 #define	SHADOWMAP_HEADER	"Shadow"

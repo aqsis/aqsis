@@ -29,12 +29,6 @@
 
 START_NAMESPACE( Aqsis )
 
-#ifdef AQSIS_SYSTEM_MACOSX 
-// Workaround for Mac OS X gcc 2.95 compiler error -
-// "Fixup [linenumber] too large for field width of 16 bits"
-#pragma CC_OPT_OFF
-#endif
-
 //----------------------------------------------------------------------
 // Static Variables
 
@@ -402,10 +396,6 @@ TqBool CqOcclusionBox::Overlaps( CqBound* bound )
 
     return retval;
 }
-
-#ifdef AQSIS_SYSTEM_MACOSX
-#pragma CC_OPT_RESTORE
-#endif
 
 END_NAMESPACE( Aqsis )
 

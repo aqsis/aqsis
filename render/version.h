@@ -34,16 +34,7 @@
 #define	VERMAJOR 0
 #define	VERMINOR 9
 #define	BUILD 2
-
-#define	STRX(x)	#x
-#define	STR(x)	STRX(x)
-
-#define	VERMAJOR_STR	STR(VERMAJOR)
-#define	VERMINOR_STR	STR(VERMINOR)
-#define	BUILD_STR		STR(BUILD)
-
-#define	VERMAJORDOTVERMINOR_STR	STR(VERMAJOR##.##VERMINOR)
-#define	VERSION_STR	STR(VERMAJOR##.##VERMINOR##.##BUILD)
+#define	VERSION_STR	"0.9.2"
 
 #define GET_VERSION_FROM_STRING(a,b,c) TqInt __s=0,__e; \
 			__s+=strVersion.find_first_of("0123456789",__s);	__e=strVersion.find_first_of(".",__s); \

@@ -5,7 +5,7 @@
  *	@brief	Brief description of the file contents
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2003/12/28 18:26:21 $
+ *	Last change date:	$Date: 2004/07/22 22:25:57 $
  */ 
 //------------------------------------------------------------------------------
 
@@ -15,10 +15,6 @@
 
 #include	"aqsis.h"
 
-#ifdef AQSIS_SYSTEM_MACOSX
-#include	"macosx/valarray"
-#include	<map>
-#else
 #ifdef	AQSIS_COMPILER_MSVC6
 #ifdef	min
 #undef min
@@ -27,9 +23,9 @@
 #undef max
 #endif
 #endif
+
 #include	<valarray>
 #include	<map>
-#endif
 
 START_NAMESPACE( Aqsis )
 
