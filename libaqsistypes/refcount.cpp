@@ -24,6 +24,7 @@
 */
 
 #include "refcount.h"
+#include "aqsis.h"
 
 /// Only include this file under a debug build.  The methods included
 /// here are the debug implementations.  For the non-debug
@@ -31,9 +32,12 @@
 /// inlined.
 #ifdef _DEBUG
 
+#ifdef AQSIS_SYSTEM_WIN32
+#pragma message("Using the debug reference counting scheme.")
+#else
 #warning Using the debug reference counting scheme.
+#endif
 
-#include "aqsis.h"
 #include "sstring.h"
 #include <stdlib.h>
 
@@ -65,7 +69,7 @@ class RefCountTracker {
 		 * \param refCount	CqRefCount object to add.
 		 */
 		static void addRefCountObj(CqRefCount *refCount) {
-			m_tracker->_addRefCountObj(refCount);
+			theTracker()->_addRefCountObj(refCount);
 		}
 		/**
 		 * Removes a reference count object from the global list.
@@ -76,7 +80,7 @@ class RefCountTracker {
 		 * \param refCount	CqRefCount object to remove.
 		 */
 		static void removeRefCountObj(CqRefCount *refCount) {
-			m_tracker->_removeRefCountObj(refCount);
+			theTracker()->_removeRefCountObj(refCount);
 		}
 		/**
 		 * Reports on the list of un-released CqRefCount objects.
@@ -84,7 +88,7 @@ class RefCountTracker {
 		 * global-scope function report_refcounts() instead.
 		 */
 		static void report() {
-			m_tracker->_report();
+			theTracker()->_report();
 		}
 
 	private:
@@ -115,12 +119,18 @@ class RefCountTracker {
 	private:
 		RefCountVector m_refCountObjs;
 		static RefCountTracker *m_tracker;
-	
+
+		static RefCountTracker* theTracker()
+		{
+			if( m_tracker == NULL )
+				m_tracker = new RefCountTracker();
+			return( m_tracker );
+		}
 };
 /**
  * The one global instance of RefCountTracker.
  */
-RefCountTracker *RefCountTracker::m_tracker = new RefCountTracker();
+RefCountTracker *RefCountTracker::m_tracker = NULL;
 /**
  * Reports on the un-release CqRefCount objects.  This
  * function (which is declared in refcount.h) should be called

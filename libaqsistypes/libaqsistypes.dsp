@@ -179,6 +179,10 @@ SOURCE=.\plugins.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\refcount.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\win32\intel\semaphore.cpp
 # End Source File
 # Begin Source File
