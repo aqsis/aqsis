@@ -77,7 +77,11 @@ CqRenderer::CqRenderer() :
         m_OutputDataOffset(7),		// Cs, Os, z
         m_OutputDataTotalSize(7),	// Cs, Os, z
         m_FrameNo( 0 ),
-		m_bObjectOpen(TqFalse)
+		m_bObjectOpen(TqFalse),
+        m_pErrorHandler( &RiErrorPrint ),
+        m_pProgressHandler( NULL ),
+        m_pPreRenderFunction( NULL ),
+        m_pPreWorldFunction( NULL )
 {
     m_pconCurrent = 0;
     m_pImageBuffer = new	CqImageBuffer();

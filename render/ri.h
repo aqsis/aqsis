@@ -193,6 +193,7 @@ extern	"C"
     _qShare	RtBoolean	BasisFromName( RtBasis * b, const char * strName );
     _qShare	RtVoid	RiProgressHandler( RtProgressFunc handler );
     _qShare	RtFunc	RiPreRenderFunction( RtFunc function );
+    _qShare	RtFunc	RiPreWorldFunction( RtFunc function );
 
 #ifdef	__cplusplus
 }

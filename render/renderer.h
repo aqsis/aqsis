@@ -384,6 +384,61 @@ public:
 		m_bObjectOpen = TqFalse;
 	}
 
+    /** Get a pointer to the error handler function.
+     */
+    RtErrorFunc	pErrorHandler()
+    {
+        return ( m_pErrorHandler );
+    }
+    /** Set the error handler function to use.
+     * \param perrorhandler A pointer to a function which conforms to RtErrorFunc.
+     */
+    void	SetpErrorHandler( RtErrorFunc perrorhandler )
+    {
+        m_pErrorHandler = perrorhandler;
+    }
+
+    /** Get a pointer to the progress handler function.
+     */
+    RtProgressFunc	pProgressHandler()
+    {
+        return ( m_pProgressHandler );
+    }
+    /** Set the progress handler function to use.
+     * \param pprogresshandler A pointer to a function which conforms to RtProgressFunc.
+     */
+    void	SetpProgressHandler( RtProgressFunc pprogresshandler )
+    {
+        m_pProgressHandler = pprogresshandler;
+    }
+
+    RtFunc	pPreRenderFunction()
+    {
+        return ( m_pPreRenderFunction );
+    }
+    /** Set a function to call just before initiating the render.
+	 *  This function will be called during the RiWorldEnd command, the state will be World.
+     * \param pfunction A pointer to a function which conforms to RtFunc.
+     */
+    void	SetpPreRenderFunction( RtFunc pfunction )
+    {
+        m_pPreRenderFunction = pfunction;
+    }
+
+    RtFunc	pPreWorldFunction()
+    {
+        return ( m_pPreWorldFunction );
+    }
+    /** Set a function to call just before starting the world definition.
+	 *  This function will be called during the RiWorldBegin command, the state will be Begin/End or Frame.
+     * \param pfunction A pointer to a function which conforms to RtFunc.
+     */
+    void	SetpPreWorldFunction( RtFunc pfunction )
+    {
+        m_pPreWorldFunction = pfunction;
+    }
+
+
 private:
     CqModeBlock*	m_pconCurrent;					///< Pointer to the current context.
     CqStats	m_Stats;						///< Global statistics.
@@ -416,6 +471,11 @@ private:
     TqInt	m_FrameNo;
 	std::vector<CqObjectInstance*>	m_ObjectInstances;
 	TqBool	m_bObjectOpen;
+
+    RtErrorFunc	m_pErrorHandler;		///< A pointer to the error hadling function.
+    RtProgressFunc	m_pProgressHandler;		///< A pointer to the progress hadling function.
+    RtFunc	m_pPreRenderFunction;	///< A pointer to the function called just prior to rendering.
+    RtFunc	m_pPreWorldFunction;	///< A pointer to the function called just prior to starting the world.
 
 public:
     std::vector<SqCoordSys>	m_aCoordSystems;		///< List of reistered coordinate systems.

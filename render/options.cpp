@@ -169,9 +169,6 @@ void CqOptions::InitialiseCamera()
 
 
 CqOptions::CqOptions() :
-        m_pErrorHandler( &RiErrorPrint ),
-        m_pProgressHandler( NULL ),
-        m_pPreRenderFunction( NULL ),
         m_funcFilter( RiGaussianFilter ),
         m_pshadImager( NULL ),
         m_bFrameAspectRatioCalled( TqFalse ),
@@ -186,9 +183,6 @@ CqOptions::CqOptions() :
  */
 
 CqOptions::CqOptions( const CqOptions& From ) :
-        m_pErrorHandler( &RiErrorPrint ),
-        m_pProgressHandler( NULL ),
-        m_pPreRenderFunction( NULL ),
         m_funcFilter( RiGaussianFilter ),
         m_pshadImager( NULL ),
         m_bFrameAspectRatioCalled( TqFalse ),
@@ -223,10 +217,6 @@ CqOptions::~CqOptions()
 
 CqOptions& CqOptions::operator=( const CqOptions& From )
 {
-    m_pErrorHandler = From.m_pErrorHandler;
-    m_pProgressHandler = From.m_pProgressHandler;
-    m_pPreRenderFunction = From.m_pPreRenderFunction;
-
     m_bFrameAspectRatioCalled = From.m_bFrameAspectRatioCalled;
     m_bScreenWindowCalled = From.m_bScreenWindowCalled;
     m_bFormatCalled = From.m_bFormatCalled;

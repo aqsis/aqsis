@@ -553,6 +553,10 @@ RtVoid	RiWorldBegin()
 
 	Validate_RiWorldBegin
 
+    // Call any specified pre world function.
+    if ( QGetRenderContext()->pPreWorldFunction() != NULL )
+        ( *QGetRenderContext()->pPreWorldFunction() ) ();
+
     // Start the frame timer (just in case there was no FrameBegin block. If there
     // was, nothing happens)
     QGetRenderContext() ->Stats().StartFrameTimer();
@@ -628,8 +632,8 @@ RtVoid	RiWorldEnd()
 
     TqBool fFailed = TqFalse;
     // Call any specified pre render function.
-    if ( QGetRenderContext() ->optCurrent().pPreRenderFunction() != NULL )
-        ( *QGetRenderContext() ->optCurrent().pPreRenderFunction() ) ();
+    if ( QGetRenderContext()->pPreRenderFunction() != NULL )
+        ( *QGetRenderContext()->pPreRenderFunction() ) ();
 
     // Stop the parsing counter
     QGetRenderContext() ->Stats().MakeParse().Stop();
@@ -5042,7 +5046,7 @@ RtVoid	RiErrorHandler( RtErrorFunc handler )
 
 	Validate_RiErrorHandler
 
-    QGetRenderContext() ->optCurrent().SetpErrorHandler( handler );
+    QGetRenderContext()->SetpErrorHandler( handler );
     return ;
 }
 
@@ -5630,26 +5634,36 @@ RtBoolean	BasisFromName( RtBasis * b, const char * strName )
 
 RtVoid	RiProgressHandler( RtProgressFunc handler )
 {
-    QGetRenderContext() ->optCurrent().SetpProgressHandler( handler );
+    QGetRenderContext()->SetpProgressHandler( handler );
     return ;
 }
 
 
 //----------------------------------------------------------------------
 /** Set the function called just prior to rendering, after the world is complete.
- 
-	\param	function	Pointer to the new function to use.
- 
-	\return	Pointer to the old function.
+ 	\param	function	Pointer to the new function to use.
+ 	\return	Pointer to the old function.
  */
 
 RtFunc	RiPreRenderFunction( RtFunc function )
 {
-    RtFunc pOldPreRenderFunction = QGetRenderContext() ->optCurrent().pPreRenderFunction();
-    QGetRenderContext() ->optCurrent().SetpPreRenderFunction( function );
+    RtFunc pOldPreRenderFunction = QGetRenderContext()->pPreRenderFunction();
+    QGetRenderContext()->SetpPreRenderFunction( function );
     return ( pOldPreRenderFunction );
 }
 
+//----------------------------------------------------------------------
+/** Set the function called just prior to world definition.
+ 	\param	function	Pointer to the new function to use.
+ 	\return	Pointer to the old function.
+ */
+
+RtFunc	RiPreWorldFunction( RtFunc function )
+{
+    RtFunc pOldPreWorldFunction = QGetRenderContext()->pPreWorldFunction();
+    QGetRenderContext()->SetpPreWorldFunction( function );
+    return ( pOldPreWorldFunction );
+}
 
 
 void SetShaderArgument( IqShader * pShader, const char * name, TqPchar val )

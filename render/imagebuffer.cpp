@@ -1369,7 +1369,7 @@ void CqImageBuffer::RenderImage()
     CqOcclusionBox::CreateHierarchy( m_XBucketSize, m_YBucketSize, m_FilterXWidth, m_FilterYWidth );
 
     RtProgressFunc pProgressHandler = NULL;
-    pProgressHandler = QGetRenderContext() ->optCurrent().pProgressHandler();
+    pProgressHandler = QGetRenderContext()->pProgressHandler();
 
     do
     {

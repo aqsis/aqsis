@@ -148,46 +148,6 @@ public:
     }
     const	CqParameter* pParameter( const char* strName, const char* strParam ) const;
     CqParameter* pParameterWrite( const char* strName, const char* strParam );
-    /** Get a pointer to the error handler function.
-     */
-    RtErrorFunc	pErrorHandler()
-    {
-        return ( m_pErrorHandler );
-    }
-    /** Set the error handler function to use.
-     * \param perrorhandler A pointer to a function which conforms to RtErrorFunc.
-     */
-    void	SetpErrorHandler( RtErrorFunc perrorhandler )
-    {
-        m_pErrorHandler = perrorhandler;
-    }
-
-    /** Get a pointer to the progress handler function.
-     */
-    RtProgressFunc	pProgressHandler()
-    {
-        return ( m_pProgressHandler );
-    }
-    /** Set the progress handler function to use.
-     * \param pprogresshandler A pointer to a function which conforms to RtProgressFunc.
-     */
-    void	SetpProgressHandler( RtProgressFunc pprogresshandler )
-    {
-        m_pProgressHandler = pprogresshandler;
-    }
-
-    RtFunc	pPreRenderFunction()
-    {
-        return ( m_pPreRenderFunction );
-    }
-    /** Set the progress handler function to use.
-     * \param pfunction A pointer to a function which conforms to RtProgressFunc.
-     */
-    void	SetpPreRenderFunction( RtFunc pfunction )
-    {
-        m_pPreRenderFunction = pfunction;
-    }
-
     const	TqFloat*	GetFloatOption( const char* strName, const char* strParam ) const;
     const	TqInt*	GetIntegerOption( const char* strName, const char* strParam ) const;
     const	CqString* GetStringOption( const char* strName, const char* strParam ) const;
@@ -293,10 +253,6 @@ public:
     TqFloat GetAlphaImager( TqFloat x, TqFloat y );
 
 private:
-    RtErrorFunc	m_pErrorHandler;		///< A pointer to the error hadling function.
-    RtProgressFunc	m_pProgressHandler;		///< A pointer to the progress hadling function.
-    RtFunc	m_pPreRenderFunction;	///< A pointer to the function called just prior to rendering.
-
     std::vector<CqNamedParameterList*>	m_aOptions;	///< Vector of user specified options.
 
     RtFilterFunc m_funcFilter;						///< Pointer to the pixel filter function.

@@ -240,17 +240,17 @@ RtVoid PrintProgress( RtFloat percent, RtInt FrameNo )
 
 
 /** Function to setup specific options needed after world loading but before rendering.
-	Used as the callback function to a RiPreRenderFunction call.
+	Used as the callback function to a RiPreWorldFunction call.
  */
 #ifdef	AQSIS_SYSTEM_BEOS
-RtVoid PreRender( ... )
+RtVoid PreWorld( ... )
 #else
-RtVoid PreRender()
+RtVoid PreWorld()
 #endif
 {
     if ( g_fb )
     {
-        char * type = "framebuffer", *mode = "rgba";
+        char * type = "framebuffer", *mode = "rgb";
         RiDisplay( "aqsis", type, mode, NULL );
     }
     else if ( g_type.compare( "" ) != 0 )
@@ -302,7 +302,7 @@ int main( int argc, const char** argv )
     ap.argString( "type", "=string\aspecify a display device type to use", &g_type );
     ap.argString( "addtype", "=string\aspecify a display device type to add", &g_addtype );
     ap.argString( "mode", "=string\aspecify a display device mode to use", &g_mode );
-    ap.argFlag( "fb", "\aequivalent to --type=\"framebuffer\" --mode=\"rgba\"", &g_fb );
+    ap.argFlag( "fb", "\aequivalent to --type=\"framebuffer\" --mode=\"rgb\"", &g_fb );
     ap.alias( "fb", "d" );
     ap.argString( "config", "=string\aspecify a configuration file to load", &g_config );
     ap.argString( "base", "=string\aspecify a default base path", &g_base_path );
@@ -508,7 +508,7 @@ void RenderFile( FILE* file, std::string&  name )
     RiOption( "searchpath", "procedural", &popt, RI_NULL );
 
     RiProgressHandler( &PrintProgress );
-    RiPreRenderFunction( &PreRender );
+    RiPreWorldFunction( &PreWorld );
 
     if ( g_config.compare( "" ) )
     {
