@@ -57,19 +57,19 @@ class CqStreamStd : public CqStream
 	private:
 		std::ofstream out;
 	public:
-		CqStreamStd & operator<<( int i )
+		CqStream & operator<<( int i )
 		{
 			out << i; return *this;
 		}
-		CqStreamStd & operator<<( float f )
+		CqStream & operator<<( float f )
 		{
 			out << f; return *this;
 		}
-		CqStreamStd & operator<<( std::string s )
+		CqStream & operator<<( std::string s )
 		{
 			out << s; return *this;
 		}
-		CqStreamStd & operator<<( char c )
+		CqStream & operator<<( char c )
 		{
 			out << c; return *this;
 		}
@@ -89,10 +89,10 @@ class CqStreamGzip : public CqStream
 		gzFile gzf;
 		void error();
 	public:
-		CqStreamGzip & operator<<( int i );
-		CqStreamGzip & operator<<( float f );
-		CqStreamGzip & operator<<( std::string s );
-		CqStreamGzip & operator<<( char c );
+		CqStream & operator<<( int i );
+		CqStream & operator<<( float f );
+		CqStream & operator<<( std::string s );
+		CqStream & operator<<( char c );
 
 		CqStreamGzip()
 		{}

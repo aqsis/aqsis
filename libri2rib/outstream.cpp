@@ -61,25 +61,25 @@ void CqStreamGzip::error()
 	}
 }
 
-CqStreamGzip & CqStreamGzip::operator<< ( int i )
+CqStream & CqStreamGzip::operator<< ( int i )
 {
 	if ( gzprintf( gzf, "%i", i ) == 0 ) error();
 	return *this;
 }
 
-CqStreamGzip & CqStreamGzip::operator<< ( float f )
+CqStream & CqStreamGzip::operator<< ( float f )
 {
 	if ( gzprintf( gzf, "%f", f ) == 0 ) error();
 	return *this;
 }
 
-CqStreamGzip & CqStreamGzip::operator<< ( std::string s )
+CqStream & CqStreamGzip::operator<< ( std::string s )
 {
 	if ( gzputs( gzf, s.c_str() ) == -1 ) error();
 	return *this;
 }
 
-CqStreamGzip & CqStreamGzip::operator<< ( char c )
+CqStream & CqStreamGzip::operator<< ( char c )
 {
 	if ( gzputc( gzf, c ) == -1 ) error();
 	return *this;

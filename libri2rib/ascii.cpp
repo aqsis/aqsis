@@ -45,16 +45,17 @@ void CqASCII::printHeader()
 
 void CqASCII::printRequest( const char *cp, EqFunctions )
 {
+	TqInt i;
 	switch ( m_Indentation )
 	{
 			case SqOptions::Indentation_None:
 			break;
 			case SqOptions::Indentation_Space:
-			for ( TqInt i = 0; i < m_IndentSize * m_IndentLevel; i++ )
+			for ( i = 0; i < m_IndentSize * m_IndentLevel; i++ )
 				OUT << ' ';
 			break;
 			case SqOptions::Indentation_Tab:
-			for ( TqInt i = 0; i < m_IndentSize * m_IndentLevel; i++ )
+			for ( i = 0; i < m_IndentSize * m_IndentLevel; i++ )
 				OUT << '\t';
 			break;
 	}

@@ -34,6 +34,7 @@
 
 #include "binary.h"
 #include <iostream>
+#include <string>
 
 #define OUT (*out)
 
@@ -116,8 +117,8 @@ void CqBinary::encodeString( const char *s )
 CqBinary::CqBinary( CqStream *o, SqOptions::EqIndentation i, TqInt isize )
 		: CqOutput( o, i, isize )
 {
-	for ( TqInt i = 0; i < LAST_Function; i++ )
-		m_aRequest[ i ] = TqFalse;
+	for ( TqInt ii = 0; ii < LAST_Function; ii++ )
+		m_aRequest[ ii ] = TqFalse;
 }
 
 
@@ -264,5 +265,6 @@ void CqBinary::printToken ( RtToken t )
 
 void CqBinary::print ( const char *c )
 {
-	OUT << std::string( c );
+	std::string str( c );
+	OUT << str;
 }

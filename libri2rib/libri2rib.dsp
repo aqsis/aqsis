@@ -89,6 +89,10 @@ SOURCE=.\ascii.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\binary.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\context.cpp
 # End Source File
 # Begin Source File
@@ -102,6 +106,14 @@ SOURCE=.\error.cpp
 # Begin Source File
 
 SOURCE=.\inlineparse.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\output.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\outstream.cpp
 # End Source File
 # Begin Source File
 
@@ -125,6 +137,10 @@ SOURCE=.\ascii.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\binary.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\context.h
 # End Source File
 # Begin Source File
@@ -138,6 +154,18 @@ SOURCE=.\error.h
 # Begin Source File
 
 SOURCE=.\inlineparse.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\options.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\output.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\outstream.h
 # End Source File
 # Begin Source File
 
