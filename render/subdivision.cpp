@@ -1164,7 +1164,7 @@ CqBasicSurface* CqWSurf::ExtractFace( TqInt index)
 }
 
 //---------------------------------------------------------------------
-/** Create a new C4D polygonobject from this winged edge surface.
+/** Create a new polygonobject from this winged edge surface.
  */
 
 void CqWSurf::_OutputMesh( char* pname )
@@ -1582,7 +1582,6 @@ CqWVert* CqWSurf::TransferVert( CqWSurf* pSurf, TqInt iVert )
 	for( iUP = pSurf->pPoints()->aUserParams().begin(), iTUP = m_pPoints->aUserParams().begin(); iUP != pSurf->pPoints()->aUserParams().end(); iUP++, iTUP++ )
 	{
 		if ( (*iTUP)->Size() <= iV ) (*iTUP)->SetSize( iV + 1 );
-		CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pTT = static_cast<CqParameterTypedVarying<TqFloat, type_float, TqFloat>*>((*iUP));
 		(*iTUP)->SetValue( (*iUP), iV, iVert );
 	}
 
@@ -2533,13 +2532,13 @@ void CqWVert::GetCornerScalar( CqParameter* pCurrent, CqParameter* pTarget, TqUi
 	{
 		case type_float:
 		{
-			_BoundaryScalar_(TqFloat, TqFloat);
+			_CornerScalar_(TqFloat, TqFloat);
 		}
 		break;
 
 		case type_integer:
 		{
-			_BoundaryScalar_(TqInt, TqFloat);
+			_CornerScalar_(TqInt, TqFloat);
 		}
 		break;
 
@@ -2547,31 +2546,31 @@ void CqWVert::GetCornerScalar( CqParameter* pCurrent, CqParameter* pTarget, TqUi
 		case type_normal:
 		case type_vector:
 		{
-			_BoundaryScalar_(CqVector3D, CqVector3D);
+			_CornerScalar_(CqVector3D, CqVector3D);
 		}
 		break;
 
 		case type_color:
 		{
-			_BoundaryScalar_(CqColor, CqColor);
+			_CornerScalar_(CqColor, CqColor);
 		}
 		break;
 
 		case type_hpoint:
 		{
-			_BoundaryScalar_(CqVector4D, CqVector3D);
+			_CornerScalar_(CqVector4D, CqVector3D);
 		}
 		break;
 
 //				case type_string:
 //				{
-//					_BoundaryScalar_(CqString, CqString);
+//					_CornerScalar_(CqString, CqString);
 //				}
 //				break;
 
 //				case type_matrix:
 //				{
-//					_BoundaryScalar_(CqMatrix, CqMatrix);
+//					_CornerScalar_(CqMatrix, CqMatrix);
 //				}
 		break;
 	}
