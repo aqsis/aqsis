@@ -375,6 +375,20 @@ std::ostream& CqStats::TimeToString( std::ostream& os, TqFloat t ) const
 	return os;
 }
 
+void CqStats::PrintInfo() const
+{
+	int psX, psY; //< Pixel Samples
+	int resX, resY;	//< Image resolution
+
+	psX = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "PixelSamples" ) [ 0 ];
+	psY = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "PixelSamples" ) [ 1 ];
+
+	resX = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "Resolution" ) [ 0 ];
+	resY = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "Resolution" ) [ 1 ];
+
+	QGetRenderContext() ->Logger().log( "INFO", "PixelSamples: %d %d", psX, psY );
+	QGetRenderContext() ->Logger().info( "Resolution: %d %d", resX, resY );
+}
 
 //---------------------------------------------------------------------
 

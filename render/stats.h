@@ -427,6 +427,7 @@ class CqStats
 		//@}
 
 		void PrintStats( TqInt level ) const;
+		void PrintInfo() const;
 
 	private:
 		std::ostream& TimeToString( std::ostream& os, TqFloat t ) const;

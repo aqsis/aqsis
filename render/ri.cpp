@@ -433,6 +433,14 @@ RtVoid	RiWorldEnd()
 	// Stop the parsing counter
 	QGetRenderContext() ->Stats().MakeParse().Stop();
 
+
+	const TqInt* poptVerbose = QGetRenderContext() ->optCurrent().GetIntegerOption( "statistics", "verbose" );
+	if ( !poptVerbose )
+	{
+		QGetRenderContext() -> Stats().PrintInfo();
+	}
+
+
 	// Render the world
 	try
 	{
