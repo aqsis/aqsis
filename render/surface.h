@@ -707,7 +707,7 @@ class CqMotionSurface : public CqBasicSurface, public CqMotionSpec<T>
 			CqBound B( FLT_MAX, FLT_MAX, FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX );
 			TqInt i;
 			for ( i = 0; i < cTimes(); i++ )
-				B = B.Combine( GetMotionObject( Time( i ) ) ->Bound() );
+				B.Encapsulate( GetMotionObject( Time( i ) ) ->Bound() );
 
 			return ( B );
 		}

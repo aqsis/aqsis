@@ -35,7 +35,7 @@
 #include	"aqsis.h"
 
 #include	"ri.h"
-#include	"context.h"
+#include	"graphicsstate.h"
 #include	"stats.h"
 #include	"vector2d.h"
 #include	"semaphore.h"

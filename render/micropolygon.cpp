@@ -670,23 +670,6 @@ void CqMotionMicroPolyGrid::Shade()
 }
 
 
-//---------------------------------------------------------------------
-/** Bound all grids in their current space, usually raster.
- */
-
-/*CqBound CqMotionMicroPolyGrid::Bound()
-{
-	CqBound B( FLT_MAX, FLT_MAX, FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX );
-	// Bound all grids.
-	TqInt iTime;
-	for ( iTime = 0; iTime < cTimes(); iTime++ )
-	{
-		CqMicroPolyGrid* pGrid = static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( iTime ) ) );
-		B = B.Combine( pGrid->Bound() );
-	}
-	return ( B );
-}*/
-
 
 //---------------------------------------------------------------------
 /** Split the micropolygrid into individual MPGs,
@@ -1059,7 +1042,7 @@ CqBound& CqMicroPolygonMotion::GetTotalBound( TqBool fForce )
 		m_Bound = GetMotionObject( Time( 0 ) ).GetTotalBound();
 		TqInt i;
 		for ( i = 1; i < cTimes(); i++ )
-			m_Bound = m_Bound.Combine( GetMotionObject( Time( i ) ).GetTotalBound() );
+			m_Bound.Encapsulate( GetMotionObject( Time( i ) ).GetTotalBound() );
 
 	}
 	return ( m_Bound );
@@ -1153,7 +1136,7 @@ void CqMicroPolygonMotion::Initialise( const CqVector3D& vA, const CqVector3D& v
 
 void CqMicroPolygonMotion::ExpandBound( const CqMicroPolygonStaticBase& MP )
 {
-	m_Bound.Combine( MP.GetTotalBound() );
+	m_Bound.Encapsulate( MP.GetTotalBound() );
 }
 
 

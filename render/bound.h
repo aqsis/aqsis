@@ -87,10 +87,12 @@ class CqBound
 		}
 		CqBound&	operator=( const CqBound& From );
 
-		void	Transform( const CqMatrix&	matTrans );
-		CqBound	Combine( const CqBound& bound );
-		void	Encapsulate( const CqVector3D& v );
-		void	Encapsulate2D( const CqVector2D& v );
+		void		Transform( const CqMatrix&	matTrans );
+		CqBound		Combine( const CqBound& bound );
+		CqBound&	Encapsulate( const CqBound& bound );
+		CqBound&	Encapsulate( const CqVector3D& v );
+		CqBound&	Encapsulate( const CqVector2D& v );
+
 		TqBool	Contains3D( const CqVector3D& v )
 		{
 			if ( ( v.x() >= m_vecMin.x() && v.x() <= m_vecMax.x() ) &&

@@ -188,7 +188,7 @@ CqBound	CqBasicSurface::AdjustBoundForTransformationMotion( const CqBound& B ) c
 			CqBound Btx( B0 );
 			CqMatrix matObjectToCameraT = QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pTransform()->matObjectToWorld( pTransform()->Time( i ) ) );
 			Btx.Transform( matObjectToCameraT );
-			Bm = Bm.Combine( Btx );
+			Bm.Encapsulate( Btx );
 		}
 	}
 

@@ -93,10 +93,6 @@ SOURCE=.\bound.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\context.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\converter.cpp
 # End Source File
 # Begin Source File
@@ -110,6 +106,10 @@ SOURCE=.\curves.cpp
 # Begin Source File
 
 SOURCE=.\genpoly.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\graphicsstate.cpp
 # End Source File
 # Begin Source File
 
@@ -237,10 +237,6 @@ SOURCE=.\bound.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\Context.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\converter.h
 # End Source File
 # Begin Source File
@@ -258,6 +254,10 @@ SOURCE=.\forwarddiff.h
 # Begin Source File
 
 SOURCE=.\genpoly.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\graphicsstate.h
 # End Source File
 # Begin Source File
 
