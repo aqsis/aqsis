@@ -2755,12 +2755,83 @@ STD_SOIMPL CqShaderExecEnv::SO_shadow( STRINGVAL name, FLOATVAL channel, POINTVA
 		pMap->PrepareSampleOptions( paramMap );
 
 		BEGIN_VARYING_SECTION
-		CqVector3D swidth = 0.0f, twidth = 0.0f;
+		CqVector3D swidth = 0.0f, twidth = 0.0f, nullv = 0.0f;
 
 		swidth = SO_DerivType<CqVector3D>( P, NULL, __iGrid, this );
 		twidth = SO_DerivType<CqVector3D>( P, NULL, __iGrid, this );
 
 		GETPOINT( P );
+		if( ( paramMap.size() != 0 ) && ( paramMap.find( "type" ) != paramMap.end() ) || true )
+		{
+			CqString type;
+			paramMap[ "type" ] ->GetString( type );
+			if( type == "soft_m" )
+			{
+				TqFloat maxblur = .1, sblur = 1, tblur = 1;
+
+				// Get Max blur
+				if ( ( paramMap.size() != 0 ) && ( paramMap.find( "maxblur" ) != paramMap.end() ) )
+				{
+					paramMap[ "maxblur" ] ->GetFloat( maxblur );
+				}
+
+				if ( ( paramMap.size() != 0 ) && ( paramMap.find( "soft_sblur" ) != paramMap.end() ) )
+				{
+					paramMap[ "soft_sblur" ] ->GetFloat( sblur );
+				}
+
+				if ( ( paramMap.size() != 0 ) && ( paramMap.find( "soft_tblur" ) != paramMap.end() ) )
+				{
+					paramMap[ "soft_tblur" ] ->GetFloat( tblur );
+				}
+
+				// Check if 2 maps
+				if( pMap->NumPages() < 2 || pMap->NumPages() > 2 )
+				{
+					QGetRenderContextI() ->Logger() ->error( "Softshadows need 2 maps" );
+					
+					// Return 0
+					BEGIN_VARYING_SECTION
+					SETFLOAT( Result, 0.0f );	// Default, completely lit
+					END_VARYING_SECTION
+					
+					return;
+				}
+				else
+				{
+				
+					// Map 0 == mid, Map 1 == min
+
+					// Check if we are in shadow
+					pMap->SampleMap( POINT( P ), nullv, nullv, fv, 0 );
+
+					if( fv[ 0 ] > 0 )
+					{
+						// We are
+						TqFloat depth;
+						pMap->SampleMap( POINT( P ), nullv, nullv, fv, 1, &depth );
+						
+						depth /= 100;
+
+						if( ( ( tblur * depth ) > maxblur ) && ( ( tblur * depth ) > maxblur ) )
+						{
+							// Return 0, too much blur
+							BEGIN_VARYING_SECTION
+							SETFLOAT( Result, 0.0f );	// Default, completely lit
+							END_VARYING_SECTION					
+							
+							return;
+						}
+						else
+						{
+							swidth *= depth;
+							twidth *= depth;
+						}
+					}
+				}
+			}
+		}
+
 		pMap->SampleMap( POINT( P ), swidth, twidth, fv, 0 );
 		SETFLOAT( Result, fv[ 0 ] );
 		END_VARYING_SECTION
