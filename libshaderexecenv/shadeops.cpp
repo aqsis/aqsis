@@ -318,7 +318,10 @@ STD_SOIMPL	CqShaderExecEnv::SO_pow( FLOATVAL x, FLOATVAL y, DEFPARAMIMPL )
 	BEGIN_VARYING_SECTION
 	GETFLOAT( x );
 	GETFLOAT( y );
-	SETFLOAT( Result, static_cast<TqFloat>( pow( FLOAT( x ), FLOAT( y ) ) ) );
+	TqFloat yy = FLOAT( y );
+	TqFloat xx = FLOAT( x );
+	if( xx < 0.0f )	yy = FLOOR( yy );
+	SETFLOAT( Result, static_cast<TqFloat>( pow( xx, yy ) ) );
 	END_VARYING_SECTION
 }
 
