@@ -1,5 +1,4 @@
 SUBDIRS = posix win32 .
-
 EXTRA_DIST = libaqsistypes.dsp
 
 lib_LTLIBRARIES = libaqsistypes.la

@@ -1,6 +1,6 @@
-noinst_LTLIBRARIES =  libcodegenvm.la
-
 EXTRA_DIST = libcodegenvm.dsp
+
+noinst_LTLIBRARIES =  libcodegenvm.la
 
 libcodegenvm_la_SOURCES = vmoutput.cpp vmoutput.h 
 

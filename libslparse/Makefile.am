@@ -1,4 +1,4 @@
-## Process this file with automake to produce Makefile.in.
+EXTRA_DIST = parser.y scanner.l libslparse.dsp
 
 lib_LTLIBRARIES =  libslparse.la
 
@@ -12,9 +12,6 @@ parser.cpp parser.cpp.h : $(srcdir)/parser.y
 scanner.cpp : $(srcdir)/scanner.l parser.cpp.h 
 	flex -oscanner.cpp $(srcdir)/scanner.l
 
-EXTRA_DIST = parser.y scanner.l libslparse.dsp
-
 CXXFLAGS = -g -Wall
 INCLUDES = -I$(top_srcdir)/libaqsistypes -I$(top_srcdir)/libaqsistypes/posix 
 
-SUBDIRS = . 

@@ -1,0 +1,1 @@
+EXTRA_DIST = DPProctext.h borg_metal.sl constant.sl debug.sl dented.sl depthcue.sl distantlight.sl dpbluemarble.sl fog.sl matte.sl metal.sl noises.h paintedplastic.sl patterns.h plastic.sl pointlight.sl randgrid.sl shaders.dsp shadowspot.sl shinymetal.sl spotlight.sl wavy.sl

@@ -7,27 +7,38 @@ AM_PROG_LEX
 AC_PROG_YACC
 
 AC_OUTPUT( \
+all/Makefile \
+aqsis/Makefile \
+aqsl/Makefile \
+aqsl/tests/Makefile \
+cribber/Makefile \
+filebuffer/Makefile \
+framebuffer/Makefile \
+framebuffer/win32/Makefile \
+framebuffer/win32/intel/Makefile \
+images/Makefile \
 libaqsistypes/Makefile \
 libaqsistypes/posix/Makefile \
 libaqsistypes/win32/Makefile \
 libaqsistypes/win32/intel/Makefile \
+libcodegenvm/Makefile \
+libdd/Makefile \
 libddmsimple/Makefile \
 libddmsock/Makefile \
-libddmsock/posix/Makefile \
 libddmsock/win32/Makefile \
 libddmsock/win32/intel/Makefile \
-render/Makefile \
+libddmsock/posix/Makefile \
 librib2/Makefile \
 librib2/tests/Makefile \
-librib2stream/Makefile \
 librib2ri/Makefile \
+librib2stream/Makefile \
 libslparse/Makefile \
-libcodegenvm/Makefile \
-aqsl/Makefile \
-aqsl/tests/Makefile \
-aqsis/Makefile \
-libdd/Makefile \
-filebuffer/Makefile \
+render/Makefile \
+ribfiles/Makefile \
+shaders/Makefile \
 shadowmap/Makefile \
+slcomp/Makefile \
+slpp/Makefile \
+texer/Makefile \
 Makefile )
 

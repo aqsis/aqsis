@@ -1,6 +1,6 @@
-noinst_LTLIBRARIES =  librib2stream.la
-
 EXTRA_DIST = librib2stream.dsp
+
+noinst_LTLIBRARIES =  librib2stream.la
 
 librib2stream_la_SOURCES = librib2stream.cpp librib2stream.h
 

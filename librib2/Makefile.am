@@ -1,4 +1,6 @@
-## Process this file with automake to produce Makefile.in.
+SUBDIRS = . tests
+
+EXTRA_DIST = parser.y scanner.l librib2.dsp
 
 lib_LTLIBRARIES =  librib2.la
 
@@ -12,9 +14,6 @@ parser.cpp parser.cpp.h : $(srcdir)/parser.y $(srcdir)/libribtypes.h
 scanner.cpp : $(srcdir)/scanner.l parser.cpp.h $(srcdir)/libribtypes.h
 	flex -oscanner.cpp $(srcdir)/scanner.l
 
-EXTRA_DIST = parser.y scanner.l librib2.dsp
-
 CXXFLAGS = -g -Wall
 INCLUDES = -I$(top_srcdir)/render -I$(top_srcdir)/render/posix/intel
 
-SUBDIRS = . tests

@@ -5,7 +5,7 @@
  * Author: Larry Gritz (gritzl@acm.org), though most are obvious to any
  *         experienced shader writer.
  *
- * $Revision: 1.1 $    $Date: 2001/04/27 20:14:18 $
+ * $Revision: 1.1 $    $Date: 2001/06/07 18:46:13 $
  *
  **************************************************************************/
 

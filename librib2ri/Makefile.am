@@ -1,6 +1,6 @@
-noinst_LTLIBRARIES =  librib2ri.la
-
 EXTRA_DIST = librib2ri.dsp
+
+noinst_LTLIBRARIES =  librib2ri.la
 
 librib2ri_la_SOURCES = librib2ri.cpp librib2ri.h
 
