@@ -225,7 +225,9 @@ RtVoid CqOutput::RiBegin( RtToken name )
 }
 
 RtVoid CqOutput::RiEnd( RtVoid )
-{}
+{
+	out->flushFile();
+}
 
 RtVoid CqOutput::RiFrameBegin( RtInt frame )
 {

@@ -52,6 +52,7 @@ class CqStream
 		virtual void openFile( const char * ) = 0;
 		virtual void openFile ( int file_descriptor ) = 0;
 		virtual void closeFile() = 0;
+		virtual void flushFile() = 0;
 };
 
 class CqStreamGzip : public CqStream
@@ -73,6 +74,7 @@ class CqStreamGzip : public CqStream
 		void openFile( const char * );
 		void openFile( int );
 		void closeFile();
+		void flushFile();
 };
 
 
@@ -95,6 +97,7 @@ class CqStreamFDesc : public CqStream
 		void openFile( const char * );
 		void openFile( int );
 		void closeFile();
+		void flushFile();
 };
 
 
