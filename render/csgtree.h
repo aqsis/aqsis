@@ -27,7 +27,6 @@
 #ifndef CSGTREE_H_INCLUDED
 #define CSGTREE_H_INCLUDED 1
 
-#include	<ostream>
 #include	<vector>
 
 #include	"aqsis.h"
