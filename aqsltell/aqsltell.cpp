@@ -61,9 +61,9 @@ bool g_version = 0;
 void version( std::ostream& Stream )
 {
 #if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
-	Stream << "aqsis version " << VERSION_STR << std::endl;
+	Stream << "aqsltell version " << VERSION_STR << std::endl;
 #else
-	Stream << "aqsis version " << VERSION << std::endl;
+	Stream << "aqsltell version " << VERSION << std::endl;
 #endif
 }
 
