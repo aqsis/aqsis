@@ -153,8 +153,8 @@ TqInt CqDDManagerSimple::DisplayBucket( IqBucket* pBucket )
 	{
 		TqInt	xmin = pBucket->XOrigin();
 		TqInt	ymin = pBucket->YOrigin();
-		TqInt	xsize = pBucket->XSize();
-		TqInt	ysize = pBucket->YSize();
+		TqInt	xsize = pBucket->Width();
+		TqInt	ysize = pBucket->Height();
 
 		for ( std::vector<SqDDevice>::iterator i = m_aDisplayRequests.begin(); i != m_aDisplayRequests.end(); i++ )
 		{
