@@ -1768,6 +1768,9 @@ TqInt CqCubicCurvesGroup::Split(
             nVarying = npcSegs + 1;
         }
 
+		TqInt nextCurveVertexIndex = vertexI + m_nvertices[ curveN ];
+		TqInt nextCurveVaryingIndex = varyingI + nVarying;
+
         // process each piecewise cubic segment within the current
         //  curve.  pcN is the index of the current piecewise
         //  cubic curve segment within the current curve
@@ -1907,7 +1910,9 @@ TqInt CqCubicCurvesGroup::Split(
             aSplits.push_back( pSeg );
         }
 
-        // we've finished our current curve, so we can get the next
+        vertexI = nextCurveVertexIndex;
+        varyingI = nextCurveVaryingIndex;
+		// we've finished our current curve, so we can get the next
         //  uniform parameter.  there's one uniform parameter per
         //  facet, so each curve corresponds to a facet.
         uniformI++;
