@@ -65,11 +65,11 @@ void CqOptions::InitialiseCamera()
             matCameraToScreen.Identity();
             matCameraToScreen.SetfIdentity( TqFalse );
             matCameraToScreen.SetElement( 0, 0, 2.0f / ( r - l ) );
-            matCameraToScreen.SetElement( 3, 0, ( r + l ) / ( r - l ) );
+	    matCameraToScreen.SetElement( 3, 0, -( r + l ) / ( r - l ) );
             matCameraToScreen.SetElement( 1, 1, 2.0f / ( t - b ) );
-            matCameraToScreen.SetElement( 3, 1, ( t + b ) / ( t - b ) );
+	    matCameraToScreen.SetElement( 3, 1, -( t + b ) / ( t - b ) );
             matCameraToScreen.SetElement( 2, 2, -2.0f / ( f - n ) );
-            matCameraToScreen.SetElement( 3, 2, ( f + n ) / ( f - n ) );
+	    matCameraToScreen.SetElement( 3, 2, -( f + n ) / ( f - n ) );
             matCameraToScreen.SetElement( 2, 3, 0 );
             matCameraToScreen.SetElement( 3, 3, 1 );
 
