@@ -47,7 +47,7 @@ START_NAMESPACE( Aqsis )
 class CqCodeGenOutput : public IqParseNodeVisitor
 {
 	public:
-	CqCodeGenOutput( CqCodeGenDataGather* pDataGather ) : m_pDataGather( pDataGather ), m_gcLabels( 0 )
+	CqCodeGenOutput( CqCodeGenDataGather* pDataGather, std::string strOutName ) : m_strOutName(strOutName), m_pDataGather( pDataGather ), m_gcLabels( 0 )
 	{}
 
 	virtual	void Visit( IqParseNode& );

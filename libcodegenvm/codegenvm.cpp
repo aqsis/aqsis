@@ -49,7 +49,7 @@ START_NAMESPACE( Aqsis )
 void CqCodeGenVM::OutputTree( IqParseNode* pNode, std::string strOutName )
 {
 	CqCodeGenDataGather DG;
-	CqCodeGenOutput V( &DG );
+	CqCodeGenOutput V( &DG, strOutName );
 	pNode->Accept( DG );
 	pNode->Accept( V );
 }
