@@ -4,7 +4,7 @@ config.sub
 libtool
 configure
 Makefile
-
+doxygen_docs
 
 *.zip
 

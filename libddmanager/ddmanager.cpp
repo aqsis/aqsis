@@ -466,7 +466,7 @@ void CqDDManager::InitialiseDisplayNameMap()
     }
     else
     {
-        std::cerr << error << "Could not find ddmsock.ini file." << std::endl;
+        std::cerr << error << "Could not find " << strConfigFile << " configuration file." << std::endl;
     }
 }
 

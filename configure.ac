@@ -97,42 +97,7 @@ AC_EXEEXT
 dnl Needed by librib2/bdec.cpp. Define WORDS_BIGENDIAN.
 AC_C_BIGENDIAN
 
-dnl Check for OpenGL and glut
-MDL_HAVE_OPENGL
-AM_CONDITIONAL(OPENGL, test x$have_glut = xyes)
-if test x$have_glut = xno ; then
-	AC_MSG_WARN([*** Could not find GLUT, glut based framebuffer devices will not be built ***]);
-fi
-
-dnl Socket libraries
-NET_LIBS=""
-AC_CHECK_LIB(socket, socket, NET_LIBS="-lsocket $NET_LIBS",)
-AC_CHECK_LIB(nsl, gethostbyname, NET_LIBS="-lnsl $NET_LIBS",)
-AC_SUBST(NET_LIBS)
-
-dnl pthread library
-dnl This macro sets:
-dnl    PTHREAD_LIBS
-dnl    PTHREAD_CFLAGS
-ACX_PTHREAD(LIBS="$PTHREAD_LIBS $LIBS",)
-
-dnl Check if we should use the new display devices refactor.
-dnl  NB: this should be temporary until the new display devices become standard
-AC_ARG_ENABLE( newdisplay,
-[  --enable-newdisplay     compile with new display refactor support [default=no, requires FLTK support]],
-[case "${enableval}" in
-  true)  newdisplay=true  ;;
-  yes)   newdisplay=true  ;;
-  false) newdisplay=false ;;
-  no)    newdisplay=false ;;
-  *)     AC_MSG_ERROR(bad value ${enableval} for --enable-newdisplay) ;;
-esac],
-[newdisplay=false])
-if test x$newdisplay = xtrue ; then
-  AC_DEFINE(AQSIS_NEWDISPLAY,,"Compile with the new Aqsis display device.")
-fi
-AM_CONDITIONAL(AQSIS_NEWDISPLAY, test x$newdisplay = xtrue)
-AQSIS_WITH_FLTK
+AQSIS_CHECK_FLTK
 
 dnl TIFF library
 saveCFLAGS=$CFLAGS
@@ -191,11 +156,12 @@ AQSIS_CXXFLAGS="$DEBUG_FLAGS $OPT_FLAGS $PTHREAD_CFLAGS"
 AQSIS_CFLAGS="$DEBUG_FLAGS $OPT_FLAGS $PTHREAD_CFLAGS"
 
 AC_OUTPUT( \
-all/Makefile \
 all/AdditionalDeveloperLibs/Makefile \
+all/Makefile \
 aqsis/Makefile \
 aqsl/Makefile \
 aqsl/tests/Makefile \
+aqsltell/Makefile \
 boost/Makefile \
 boost/boost/Makefile \
 boost/boost/bind/Makefile \
@@ -205,6 +171,8 @@ boost/boost/config/platform/Makefile \
 boost/boost/config/stdlib/Makefile \
 boost/boost/detail/Makefile \
 boost/boost/filesystem/Makefile \
+boost/boost/function/Makefile \
+boost/boost/function/detail/Makefile \
 boost/boost/mpl/Makefile \
 boost/boost/mpl/aux_/Makefile \
 boost/boost/mpl/aux_/config/Makefile \
@@ -305,15 +273,13 @@ boost/boost/spirit/tree/impl/Makefile \
 boost/boost/spirit/utility/Makefile \
 boost/boost/spirit/utility/impl/Makefile \
 boost/boost/spirit/utility/impl/chset/Makefile \
+boost/boost/thread/Makefile \
+boost/boost/thread/detail/Makefile \
 boost/boost/tuple/Makefile \
 boost/boost/tuple/detail/Makefile \
 boost/boost/type_traits/Makefile \
 boost/boost/type_traits/detail/Makefile \
 boost/boost/utility/Makefile \
-boost/boost/function/Makefile \
-boost/boost/function/detail/Makefile \
-boost/boost/thread/Makefile \
-boost/boost/thread/detail/Makefile \
 boost/libs/Makefile \
 boost/libs/filesystem/Makefile \
 boost/libs/filesystem/src/Makefile \
@@ -329,50 +295,40 @@ boost/libs/thread/src/Makefile \
 boost/libs/thread/src/mac/Makefile \
 boost/libs/thread/src/mac/msl_replacements/Makefile \
 display/Makefile \
-filebuffer/Makefile \
-framebuffer_glut/Makefile \
-framebuffer_glut_z/Makefile \
+dsotest/Makefile \
 images/Makefile \
 libaqsistypes/Makefile \
 libaqsistypes/posix/Makefile \
 libaqsistypes/win32/Makefile \
 libaqsistypes/win32/intel/Makefile \
+libargparse/Makefile \
 libcodegenvm/Makefile \
-libdd/Makefile \
-libdd2/Makefile \
-libddmsimple/Makefile \
-libddmsock/Makefile \
-libddmsock2/Makefile \
+libddmanager/Makefile \
 libraytrace/Makefile \
 libri2rib/Makefile \
 librib2/Makefile \
 librib2/tests/Makefile \
 librib2ri/Makefile \
 librib2stream/Makefile \
+libshaderexecenv/Makefile \
+libshadervm/Makefile \
 libslparse/Makefile \
+libslxargs/Makefile \
+plugins/Makefile \
+plugins/bake2tif/Makefile \
+plugins/common/Makefile \
+plugins/gif2tif/Makefile \
+plugins/jpg2tif/Makefile \
+plugins/pcx2tif/Makefile \
+plugins/ppm2tif/Makefile \
+plugins/tga2tif/Makefile \
 render/Makefile \
 render/macosx/Makefile \
 render/macosx/std/Makefile \
 ribfiles/Makefile \
 shaders/Makefile \
-shadowmap/Makefile \
 slpp/Makefile \
 teqser/Makefile \
-aqsltell/Makefile \
-plugins/Makefile \
-plugins/common/Makefile \
-plugins/gif2tif/Makefile \
-plugins/jpg2tif/Makefile \
-plugins/ppm2tif/Makefile \
-plugins/pcx2tif/Makefile \
-plugins/tga2tif/Makefile \
-plugins/bake2tif/Makefile \
-libslxargs/Makefile \
-libshadervm/Makefile \
-libshaderexecenv/Makefile \
-libargparse/Makefile \
-dsotest/Makefile \
 thirdparty/Makefile \
-thirdparty/tinyxml/Makefile \
 Makefile )
 
