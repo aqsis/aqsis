@@ -65,7 +65,7 @@ class _qShareC CqRiFile : public CqFile
 		_qShareM	virtual		~CqRiFile()				{}
 
 
-		_qShareM	void		Open(const char* strFilename, const char* strSearchPathOption="", std::ios::open_mode mode = std::ios::in)
+		_qShareM	void		Open(const char* strFilename, const char* strSearchPathOption="", std::ios::openmode mode = std::ios::in)
 								{
 									CqString SearchPath("");
 									if(strSearchPathOption!="")

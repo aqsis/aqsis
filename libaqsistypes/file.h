@@ -60,7 +60,7 @@ class _qShareC CqFile
 								 */
 		_qShareM	virtual		~CqFile()				{if(m_pStream!=NULL && m_bInternal)	delete(m_pStream);}
 
-		_qShareM	void		Open(const char* strFilename, const char* strSearchPathOption="",std::ios::open_mode mode = std::ios::in);
+		_qShareM	void		Open(const char* strFilename, const char* strSearchPathOption="",std::ios::openmode mode = std::ios::in);
 								/** Close any opened stream associated with this object.
 								 */
 		_qShareM	void		Close()					{if(m_pStream!=NULL)	delete(m_pStream); m_pStream=NULL;}
