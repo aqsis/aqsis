@@ -59,28 +59,28 @@ static SLX_TYPE currentShaderType = SLX_TYPE_UNKNOWN;
 static int currentShaderNArgs = 0;
 static SLX_VISSYMDEF * currentShaderArgsArray = NULL;
 
-static char * SLX_TYPE_UNKNOWN_STR = "unknown";
-static char * SLX_TYPE_POINT_STR = "point";
-static char * SLX_TYPE_COLOR_STR = "color";
-static char * SLX_TYPE_SCALAR_STR = "float";
-static char * SLX_TYPE_STRING_STR = "string";
-static char * SLX_TYPE_SURFACE_STR = "surface";
-static char * SLX_TYPE_LIGHT_STR = "light";
-static char * SLX_TYPE_DISPLACEMENT_STR = "displacement";
-static char * SLX_TYPE_VOLUME_STR = "volume";
-static char * SLX_TYPE_TRANSFORMATION_STR = "transformation";
-static char * SLX_TYPE_IMAGER_STR = "imager";
+static const char * SLX_TYPE_UNKNOWN_STR = "unknown";
+static const char * SLX_TYPE_POINT_STR = "point";
+static const char * SLX_TYPE_COLOR_STR = "color";
+static const char * SLX_TYPE_SCALAR_STR = "float";
+static const char * SLX_TYPE_STRING_STR = "string";
+static const char * SLX_TYPE_SURFACE_STR = "surface";
+static const char * SLX_TYPE_LIGHT_STR = "light";
+static const char * SLX_TYPE_DISPLACEMENT_STR = "displacement";
+static const char * SLX_TYPE_VOLUME_STR = "volume";
+static const char * SLX_TYPE_TRANSFORMATION_STR = "transformation";
+static const char * SLX_TYPE_IMAGER_STR = "imager";
 
-static char * SLX_STOR_UNKNOWN_STR = "unknown";
-static char * SLX_STOR_CONSTANT_STR = "constant";
-static char * SLX_STOR_VARIABLE_STR = "variable";
-static char * SLX_STOR_TEMPORARY_STR = "temporary";
-static char * SLX_STOR_PARAMETER_STR = "parameter";
-static char * SLX_STOR_GSTATE_STR = "gstate";
+static const char * SLX_STOR_UNKNOWN_STR = "unknown";
+static const char * SLX_STOR_CONSTANT_STR = "constant";
+static const char * SLX_STOR_VARIABLE_STR = "variable";
+static const char * SLX_STOR_TEMPORARY_STR = "temporary";
+static const char * SLX_STOR_PARAMETER_STR = "parameter";
+static const char * SLX_STOR_GSTATE_STR = "gstate";
 
-static char * SLX_DETAIL_UNKNOWN_STR = "unknown";
-static char * SLX_DETAIL_VARYING_STR = "varying";
-static char * SLX_DETAIL_UNIFORM_STR = "uniform";
+static const char * SLX_DETAIL_UNKNOWN_STR = "unknown";
+static const char * SLX_DETAIL_VARYING_STR = "varying";
+static const char * SLX_DETAIL_UNIFORM_STR = "uniform";
 
 
 /*
@@ -112,7 +112,7 @@ static int CloseCurrentShader(FILE * shaderInputFile)
 /*
  * Return a pointer to record specified by index from a shader argument array
  */
-SLX_VISSYMDEF * GetShaderArgRecAt(SLX_VISSYMDEF * theShaderArgArray, int argIdx)
+static SLX_VISSYMDEF * GetShaderArgRecAt(SLX_VISSYMDEF * theShaderArgArray, int argIdx)
 {
     long unsigned int arrayPtr;
     long unsigned int arrayOffset;
@@ -128,7 +128,7 @@ SLX_VISSYMDEF * GetShaderArgRecAt(SLX_VISSYMDEF * theShaderArgArray, int argIdx)
 /*
  * Return a pointer to record specified by index from a shader argument array
  */
-SLX_VISSYMDEF * GetShaderArgRecByName(SLX_VISSYMDEF * theShaderArgArray, 
+static SLX_VISSYMDEF * GetShaderArgRecByName(SLX_VISSYMDEF * theShaderArgArray, 
         int theShaderNArgs, char * name)
 {
     //long unsigned int arrayPtr;
@@ -988,42 +988,42 @@ char *SLX_TypetoStr (SLX_TYPE type)
     char * slxTypeStr;
     
     SlxLastError = RIE_NOERROR;
-    slxTypeStr = SLX_TYPE_UNKNOWN_STR;
+    slxTypeStr = (char *)SLX_TYPE_UNKNOWN_STR;
     
     switch (type)
     {
         case SLX_TYPE_UNKNOWN:
-            slxTypeStr = SLX_TYPE_UNKNOWN_STR;
+            slxTypeStr = (char *)SLX_TYPE_UNKNOWN_STR;
             break;
         case SLX_TYPE_POINT:
-            slxTypeStr = SLX_TYPE_POINT_STR;
+            slxTypeStr = (char *)SLX_TYPE_POINT_STR;
             break;
         case SLX_TYPE_COLOR:
-            slxTypeStr = SLX_TYPE_COLOR_STR;
+            slxTypeStr = (char *)SLX_TYPE_COLOR_STR;
             break;
         case SLX_TYPE_SCALAR:
-            slxTypeStr = SLX_TYPE_SCALAR_STR;
+            slxTypeStr = (char *)SLX_TYPE_SCALAR_STR;
             break;
         case SLX_TYPE_STRING:
-            slxTypeStr = SLX_TYPE_STRING_STR;
+            slxTypeStr = (char *)SLX_TYPE_STRING_STR;
             break;
         case SLX_TYPE_SURFACE:
-            slxTypeStr = SLX_TYPE_SURFACE_STR;
+            slxTypeStr = (char *)SLX_TYPE_SURFACE_STR;
             break;
         case SLX_TYPE_LIGHT:
-            slxTypeStr = SLX_TYPE_LIGHT_STR;
+            slxTypeStr = (char *)SLX_TYPE_LIGHT_STR;
             break;
         case SLX_TYPE_DISPLACEMENT:
-            slxTypeStr = SLX_TYPE_DISPLACEMENT_STR;
+            slxTypeStr = (char *)SLX_TYPE_DISPLACEMENT_STR;
             break;
         case SLX_TYPE_VOLUME:
-            slxTypeStr = SLX_TYPE_VOLUME_STR;
+            slxTypeStr = (char *)SLX_TYPE_VOLUME_STR;
             break;
         case SLX_TYPE_TRANSFORMATION:
-            slxTypeStr = SLX_TYPE_TRANSFORMATION_STR;
+            slxTypeStr = (char *)SLX_TYPE_TRANSFORMATION_STR;
             break;
         case SLX_TYPE_IMAGER:
-            slxTypeStr = SLX_TYPE_IMAGER_STR;
+            slxTypeStr = (char *)SLX_TYPE_IMAGER_STR;
             break;
     }
     return slxTypeStr;
@@ -1038,27 +1038,27 @@ char *SLX_StortoStr (SLX_STORAGE storage)
     char * slxStorageStr;
     
     SlxLastError = RIE_NOERROR;
-    slxStorageStr = SLX_STOR_UNKNOWN_STR;
+    slxStorageStr = (char *)SLX_STOR_UNKNOWN_STR;
 
     switch (storage)
     {
         case SLX_STOR_UNKNOWN:
-            slxStorageStr = SLX_STOR_UNKNOWN_STR;
+            slxStorageStr = (char *)SLX_STOR_UNKNOWN_STR;
             break;
         case SLX_STOR_CONSTANT:
-            slxStorageStr = SLX_STOR_CONSTANT_STR;
+            slxStorageStr = (char *)SLX_STOR_CONSTANT_STR;
             break;
         case SLX_STOR_VARIABLE:
-            slxStorageStr = SLX_STOR_VARIABLE_STR;
+            slxStorageStr = (char *)SLX_STOR_VARIABLE_STR;
             break;
         case SLX_STOR_TEMPORARY:
-            slxStorageStr = SLX_STOR_TEMPORARY_STR;
+            slxStorageStr = (char *)SLX_STOR_TEMPORARY_STR;
             break;
         case SLX_STOR_PARAMETER:
-            slxStorageStr = SLX_STOR_PARAMETER_STR;
+            slxStorageStr = (char *)SLX_STOR_PARAMETER_STR;
             break;
         case SLX_STOR_GSTATE:
-            slxStorageStr = SLX_STOR_GSTATE_STR;
+            slxStorageStr = (char *)SLX_STOR_GSTATE_STR;
             break;
     }
     return slxStorageStr;
@@ -1073,18 +1073,18 @@ char *SLX_DetailtoStr (SLX_DETAIL detail)
     char * slxDetailStr;
 
     SlxLastError = RIE_NOERROR;
-    slxDetailStr = SLX_DETAIL_UNKNOWN_STR;
+    slxDetailStr = (char *)SLX_DETAIL_UNKNOWN_STR;
 
     switch (detail)
     {
         case SLX_DETAIL_UNKNOWN:
-            slxDetailStr = SLX_DETAIL_UNKNOWN_STR;
+            slxDetailStr = (char *)SLX_DETAIL_UNKNOWN_STR;
             break;
         case SLX_DETAIL_VARYING:
-            slxDetailStr = SLX_DETAIL_VARYING_STR;
+            slxDetailStr = (char *)SLX_DETAIL_VARYING_STR;
             break;
         case SLX_DETAIL_UNIFORM:
-            slxDetailStr = SLX_DETAIL_UNIFORM_STR;
+            slxDetailStr = (char *)SLX_DETAIL_UNIFORM_STR;
             break;
     }
     return slxDetailStr;
