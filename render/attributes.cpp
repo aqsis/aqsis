@@ -36,66 +36,71 @@ START_NAMESPACE( Aqsis )
 
 std::vector<CqAttributes*>	Attribute_stack;
 
-//---------------------------------------------------------------------
-/** Constructor.
- */
-
-CqShadingAttributes::CqShadingAttributes() :
-		m_colColor( 1.0, 1.0, 1.0 ),
-		m_colOpacity( 1.0, 1.0, 1.0 ),
-		m_pshadAreaLightSource( 0 ),
-		m_pshadSurface( 0 ),
-		m_pshadAtmosphere( 0 ),
-		m_pshadInteriorVolume( 0 ),
-		m_pshadExteriorVolume( 0 ),
-		m_fEffectiveShadingRate( 1.0 ),
-		m_eShadingInterpolation( ShadingConstant ),
-		m_bMatteSurfaceFlag( TqFalse )
-{
-	// Setup default surface attributes.
-	m_aTextureCoordinates[ 0 ] = CqVector2D( 0, 0 );
-	m_aTextureCoordinates[ 1 ] = CqVector2D( 1, 0 );
-	m_aTextureCoordinates[ 2 ] = CqVector2D( 0, 1 );
-	m_aTextureCoordinates[ 3 ] = CqVector2D( 1, 1 );
-}
-
-
-//---------------------------------------------------------------------
-/** Copy constructor.
- */
-CqGeometricAttributes::CqGeometricAttributes( CqGeometricAttributes& From ) :
-		m_Bound( From.m_Bound ),
-		m_fDetailRangeMinVisible( From.m_fDetailRangeMinVisible ),
-		m_fDetailRangeLowerTransition( From.m_fDetailRangeLowerTransition ),
-		m_fDetailRangeUpperTransition( From.m_fDetailRangeUpperTransition ),
-		m_fDetailRangeMaxVisible( From.m_fDetailRangeMaxVisible ),
-		m_matuBasis( From.m_matuBasis ),
-		m_matvBasis( From.m_matvBasis ),
-		m_uSteps( From.m_uSteps ),
-		m_vSteps( From.m_vSteps ),
-		m_eOrientation( From.m_eOrientation ),
-		m_eCoordsysOrientation( From.m_eCoordsysOrientation ),
-		m_iNumberOfSides( From.m_iNumberOfSides ),
-		m_pshadDisplacement( From.m_pshadDisplacement )
-{}
-
-
-//---------------------------------------------------------------------
-/** Destructor.
- */
-CqGeometricAttributes::~CqGeometricAttributes()
-{}
-
-
 
 //---------------------------------------------------------------------
 /** Constructor.
  */
 
-CqAttributes::CqAttributes() : CqShadingAttributes(), CqGeometricAttributes()
+
+#define	ADD_SYSTEM_ATTR(name, type, id, def) \
+	CqParameterTypedUniform<type,id>* p##name = new CqParameterTypedUniform<type,id>(#name); \
+	p##name->pValue()[0] = ( def ); \
+	pdefattrs->AddParameter(p##name);
+
+#define	ADD_SYSTEM_ATTR2(name, type, id, def0, def1) \
+	CqParameterTypedUniformArray<type,id>* p##name = new CqParameterTypedUniformArray<type,id>(#name,2); \
+	p##name->pValue()[0] = ( def0 ); \
+	p##name->pValue()[1] = ( def1 ); \
+	pdefattrs->AddParameter(p##name);
+
+#define	ADD_SYSTEM_ATTR4(name, type, id, def0, def1, def2, def3) \
+	CqParameterTypedUniformArray<type,id>* p##name = new CqParameterTypedUniformArray<type,id>(#name,4); \
+	p##name->pValue()[0] = ( def0 ); \
+	p##name->pValue()[1] = ( def1 ); \
+	p##name->pValue()[2] = ( def2 ); \
+	p##name->pValue()[3] = ( def3 ); \
+	pdefattrs->AddParameter(p##name);
+
+#define	ADD_SYSTEM_ATTR8(name, type, id, def0, def1, def2, def3, def4, def5, def6, def7) \
+	CqParameterTypedUniformArray<type,id>* p##name = new CqParameterTypedUniformArray<type,id>(#name,8); \
+	p##name->pValue()[0] = ( def0 ); \
+	p##name->pValue()[1] = ( def1 ); \
+	p##name->pValue()[2] = ( def2 ); \
+	p##name->pValue()[2] = ( def3 ); \
+	p##name->pValue()[2] = ( def4 ); \
+	p##name->pValue()[2] = ( def5 ); \
+	p##name->pValue()[2] = ( def6 ); \
+	p##name->pValue()[2] = ( def7 ); \
+	pdefattrs->AddParameter(p##name);
+
+
+CqAttributes::CqAttributes() : 
+				m_pshadDisplacement( 0 ),
+				m_pshadAreaLightSource( 0 ),
+				m_pshadSurface( 0 ),
+				m_pshadAtmosphere( 0 ),
+				m_pshadInteriorVolume( 0 ),
+				m_pshadExteriorVolume( 0 )
 {
 	Attribute_stack.push_back( this );
 	m_StackIndex = Attribute_stack.size() - 1;
+
+	CqSystemOption*  pdefattrs = new CqSystemOption("System");
+
+	ADD_SYSTEM_ATTR(Color, CqColor, type_color, CqColor(0.0f,0.0f,0.0f));		// the current color attribute.
+	ADD_SYSTEM_ATTR(Opacity, CqColor, type_color, CqColor(0.0f,0.0f,0.0f));	// the current opacity attribute.
+	ADD_SYSTEM_ATTR8(TextureCoordinates, TqFloat, type_float, 0.0f,0.0f,1.0f,0.0f,0.0f,1.0f,1.0f,1.0f);	// an array of 2D vectors representing the coordinate space.
+	ADD_SYSTEM_ATTR(ShadingRate, TqFloat, type_float, 1.0f);					// the current effective shading rate.
+	ADD_SYSTEM_ATTR(ShadingInterpolation , TqInt, type_integer, ShadingConstant);	// the current shading interpolation mode.
+	ADD_SYSTEM_ATTR(Matte, TqInt, type_integer, 0);				// the current state of the matte flag.
+	ADD_SYSTEM_ATTR4(DetailRange, TqFloat, type_float, FLT_MIN, FLT_MIN, FLT_MAX, FLT_MAX);	// the detail range minimum visible distance.
+	ADD_SYSTEM_ATTR2(Basis, CqMatrix, type_matrix, RiBezierBasis, RiBezierBasis);	// the basis matrix for the u direction.
+	ADD_SYSTEM_ATTR2(BasisStep, TqInt, type_integer, 3, 3);	// the steps to advance the evaluation window in the u direction.
+	ADD_SYSTEM_ATTR2(Orientation, TqInt, type_integer, OrientationLH, OrientationLH);	// the orientation associated primitives are described in.
+	ADD_SYSTEM_ATTR(Sides, TqInt, type_integer, 1);		// the number of visible sides associated primitives have.
+
+	pdefattrs->AddRef();
+	AddAttribute(pdefattrs);
 }
 
 
@@ -147,9 +152,6 @@ CqAttributes::~CqAttributes()
 
 CqAttributes& CqAttributes::operator=( const CqAttributes& From )
 {
-	CqGeometricAttributes::operator=( From );
-	CqShadingAttributes::operator=( From );
-
 	// Copy the system attributes.
 	m_aAttributes.resize( From.m_aAttributes.size() );
 	TqInt i = From.m_aAttributes.size();
@@ -164,6 +166,13 @@ CqAttributes& CqAttributes::operator=( const CqAttributes& From )
 	std::vector<CqLightsource*>::const_iterator il;
 	for ( il = From.m_apLightsources.begin(); il != From.m_apLightsources.end(); il++ )
 		m_apLightsources.push_back( *il );
+
+	m_pshadDisplacement = From.m_pshadDisplacement;
+	m_pshadAreaLightSource = From.m_pshadAreaLightSource;
+	m_pshadSurface = From.m_pshadSurface;
+	m_pshadAtmosphere = From.m_pshadAtmosphere;
+	m_pshadInteriorVolume = From.m_pshadInteriorVolume;
+	m_pshadExteriorVolume = From.m_pshadExteriorVolume;
 
 	return ( *this );
 }
@@ -295,6 +304,23 @@ CqColor* CqAttributes::GetColorAttributeWrite( const char* strName, const char* 
 
 
 //---------------------------------------------------------------------
+/** Get a matrix system attribute parameter.
+ * \param strName The name of the attribute.
+ * \param strParam The name of the paramter on the attribute.
+ * \return CqMatrix pointer 0 if not found.
+ */
+
+CqMatrix* CqAttributes::GetMatrixAttributeWrite( const char* strName, const char* strParam )
+{
+	CqParameter * pParam = pParameterWrite( strName, strParam );
+	if ( pParam != 0 )
+		return ( static_cast<CqParameterTyped<CqMatrix>*>( pParam ) ->pValue() );
+	else
+		return ( 0 );
+}
+
+
+//---------------------------------------------------------------------
 /** Get a float system attribute parameter.
  * \param strName The name of the attribute.
  * \param strParam The name of the paramter on the attribute.
@@ -374,6 +400,23 @@ const CqColor* CqAttributes::GetColorAttribute( const char* strName, const char*
 	const CqParameter * pParam = pParameter( strName, strParam );
 	if ( pParam != 0 )
 		return ( static_cast<const CqParameterTyped<CqColor>*>( pParam ) ->pValue() );
+	else
+		return ( 0 );
+}
+
+
+//---------------------------------------------------------------------
+/** Get a matrix system attribute parameter.
+ * \param strName The name of the attribute.
+ * \param strParam The name of the paramter on the attribute.
+ * \return CqMatrix pointer 0 if not found.
+ */
+
+const CqMatrix* CqAttributes::GetMatrixAttribute( const char* strName, const char* strParam ) const
+{
+	const CqParameter * pParam = pParameter( strName, strParam );
+	if ( pParam != 0 )
+		return ( static_cast<const CqParameterTyped<CqMatrix>*>( pParam ) ->pValue() );
 	else
 		return ( 0 );
 }

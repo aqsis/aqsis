@@ -76,13 +76,13 @@ class CqSurfacePatchBicubic : public CqSurface
 		 */
 		const	CqMatrix&	matuBasis()
 		{
-			return ( pAttributes() ->matuBasis() );
+			return ( pAttributes() ->GetMatrixAttribute("System", "Basis")[0] );
 		}
 		/** Get a reference to the basis matrix for the v direction.
 		 */
 		const	CqMatrix&	matvBasis()
 		{
-			return ( pAttributes() ->matvBasis() );
+			return ( pAttributes() ->GetMatrixAttribute("System", "Basis")[1] );
 		}
 		CqSurfacePatchBicubic& operator=( const CqSurfacePatchBicubic& From );
 
@@ -193,8 +193,8 @@ class CqSurfacePatchMeshBicubic : public CqSurface
 				m_uPeriodic( uPeriodic ),
 				m_vPeriodic( vPeriodic )
 		{
-			TqInt uStep = pAttributes() ->uSteps();
-			TqInt vStep = pAttributes() ->vSteps();
+			TqInt uStep = pAttributes() ->GetIntegerAttribute("System", "BasisStep")[0];
+			TqInt vStep = pAttributes() ->GetIntegerAttribute("System", "BasisStep")[1];
 			m_uPatches = ( uPeriodic ) ? nu / uStep : ( ( nu - 4 ) / uStep ) + 1;
 			m_vPatches = ( vPeriodic ) ? nv / vStep : ( ( nv - 4 ) / vStep ) + 1;
 		}
@@ -207,13 +207,13 @@ class CqSurfacePatchMeshBicubic : public CqSurface
 		 */
 		const	CqMatrix&	matuBasis()
 		{
-			return ( pAttributes() ->matuBasis() );
+			return ( pAttributes() ->GetMatrixAttribute("System", "Basis")[0] );
 		}
 		/** Get a reference to the basis matrix for the v direction.
 		 */
 		const	CqMatrix&	matvBasis()
 		{
-			return ( pAttributes() ->matvBasis() );
+			return ( pAttributes() ->GetMatrixAttribute("System", "Basis")[1] );
 		}
 
 		virtual	CqBound	Bound() const;

@@ -109,8 +109,8 @@ CqMicroPolyGridBase* CqQuadric::Dice()
 				}
 				if(CanGenerateNormals() && USES( lUses, EnvVars_Ng ) )
 				{
-					EqOrientation CSO = pAttributes() ->eCoordsysOrientation();
-					EqOrientation O = pAttributes() ->eOrientation();
+					TqInt CSO = pAttributes() ->GetIntegerAttribute("System", "Orientation")[1];
+					TqInt O = pAttributes() ->GetIntegerAttribute("System", "Orientation")[0];
 					N = ( CSO == O ) ? N : -N;
 					pGrid->Ng()->SetNormal( m_matITTx * N, igrid );
 				}
@@ -141,7 +141,7 @@ TqBool	CqQuadric::Diceable()
 		m_XBucketSize = poptBucketSize[ 0 ];
 		m_YBucketSize = poptBucketSize[ 1 ];
 	}
-	TqFloat ShadingRate = pAttributes() ->fEffectiveShadingRate();
+	TqFloat ShadingRate = pAttributes() ->GetFloatAttribute("System", "ShadingRate")[0];
 
 	if ( poptGridSize )
 		gridsize = poptGridSize[ 0 ];
@@ -202,7 +202,7 @@ void CqQuadric::EstimateGridSize()
 	maxusize = sqrt( maxusize );
 	maxvsize = sqrt( maxvsize );
 
-	TqFloat ShadingRate = pAttributes() ->fEffectiveShadingRate();
+	TqFloat ShadingRate = pAttributes() ->GetFloatAttribute("System", "ShadingRate")[0];
 
 	TqInt us, vs;
 

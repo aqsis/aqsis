@@ -144,11 +144,11 @@ CqVector4D CqSurfacePatchBicubic::EvaluateMatrix( TqFloat s, TqFloat t, CqMatrix
 	S[ 0 ] = s3;	S[ 1 ] = s2;	S[ 2 ] = s;	S[ 3 ] = 1;
 
 	CqMatrix	matvBasisT;
-	matvBasisT = pAttributes() ->matvBasis().Transpose();
+	matvBasisT = pAttributes() ->GetMatrixAttribute("System", "Basis")[1].Transpose();
 
 	CqVector4D	vecResult;
 
-	vecResult = T * matvBasisT * Gx * pAttributes() ->matuBasis() * S;
+	vecResult = T * matvBasisT * Gx * pAttributes() ->GetMatrixAttribute("System", "Basis")[0] * S;
 
 	return ( vecResult );
 }
@@ -201,9 +201,9 @@ void CqSurfacePatchBicubic::InitFD( TqInt cu, TqInt cv,
 	CqMatrix	matEvT( EvValues );
 
 	CqMatrix	matvBasisT;
-	matvBasisT = pAttributes() ->matvBasis().Transpose();
+	matvBasisT = pAttributes() ->GetMatrixAttribute("System", "Basis")[1].Transpose();
 
-	const CqMatrix& matuBasis = pAttributes() ->matuBasis();
+	const CqMatrix& matuBasis = pAttributes() ->GetMatrixAttribute("System", "Basis")[0];
 	Gx = matvBasisT * Gx * matuBasis;
 	Gy = matvBasisT * Gy * matuBasis;
 	Gz = matvBasisT * Gz * matuBasis;
@@ -556,7 +556,7 @@ TqBool	CqSurfacePatchBicubic::Diceable()
 		m_XBucketSize = poptBucketSize[ 0 ];
 		m_YBucketSize = poptBucketSize[ 1 ];
 	}
-	TqFloat ShadingRate = pAttributes() ->fEffectiveShadingRate();
+	TqFloat ShadingRate = pAttributes() ->GetFloatAttribute("System", "ShadingRate")[0];
 	if ( poptGridSize )
 		gridsize = poptGridSize[ 0 ];
 	else
@@ -783,8 +783,8 @@ void CqSurfacePatchBilinear::GenNormals()
 
 	// Get the handedness of the coordinate system (at the time of creation) and
 	// the coordinate system specified, to check for normal flipping.
-	EqOrientation CSO = pAttributes() ->eCoordsysOrientation();
-	EqOrientation O = pAttributes() ->eOrientation();
+	TqInt CSO = pAttributes() ->GetIntegerAttribute("System", "Orientation")[1];
+	TqInt O = pAttributes() ->GetIntegerAttribute("System", "Orientation")[0];
 
 	// For each of the four points, calculate the normal as the cross product of its
 	// two vectors.
@@ -995,7 +995,7 @@ TqBool	CqSurfacePatchBilinear::Diceable()
 		m_XBucketSize = poptBucketSize[ 0 ];
 		m_YBucketSize = poptBucketSize[ 1 ];
 	}
-	TqFloat ShadingRate = pAttributes() ->fEffectiveShadingRate();
+	TqFloat ShadingRate = pAttributes() ->GetFloatAttribute("System", "ShadingRate")[0];
 	if ( poptGridSize )
 		gridsize = poptGridSize[ 0 ];
 	else
@@ -1157,8 +1157,8 @@ TqInt CqSurfacePatchMeshBicubic::Split( std::vector<CqBasicSurface*>& aSplits )
 
 	CqVector4D vecPoint;
 	RtInt iP = 0;
-	RtInt uStep = pAttributes() ->uSteps();
-	RtInt vStep = pAttributes() ->vSteps();
+	RtInt uStep = pAttributes() ->GetIntegerAttribute("System", "BasisStep")[0];
+	RtInt vStep = pAttributes() ->GetIntegerAttribute("System", "BasisStep")[1];
 
 	RtInt nvaryingu = ( m_uPeriodic ) ? m_uPatches : m_uPatches + 1;
 	RtInt nvaryingv = ( m_vPeriodic ) ? m_vPatches : m_vPatches + 1;
@@ -1169,11 +1169,11 @@ TqInt CqSurfacePatchMeshBicubic::Split( std::vector<CqBasicSurface*>& aSplits )
 
 	TqInt MyUses = Uses();
 
-	CqVector2D st1, st2, st3, st4;
-	st1 = pAttributes() ->aTextureCoordinates() [ 0 ];
-	st2 = pAttributes() ->aTextureCoordinates() [ 1 ];
-	st3 = pAttributes() ->aTextureCoordinates() [ 2 ];
-	st4 = pAttributes() ->aTextureCoordinates() [ 3 ];
+	const TqFloat* pTC = pAttributes() ->GetFloatAttribute("System", "TextureCoordinates");
+	CqVector2D st1( pTC[0], pTC[1]);
+	CqVector2D st2( pTC[2], pTC[3]);
+	CqVector2D st3( pTC[4], pTC[5]);
+	CqVector2D st4( pTC[6], pTC[7]);
 
 	vp = 0;
 	// Fill in the points
@@ -1396,11 +1396,11 @@ TqInt CqSurfacePatchMeshBilinear::Split( std::vector<CqBasicSurface*>& aSplits )
 
 	TqInt MyUses = Uses();
 
-	CqVector2D st1, st2, st3, st4;
-	st1 = pAttributes() ->aTextureCoordinates() [ 0 ];
-	st2 = pAttributes() ->aTextureCoordinates() [ 1 ];
-	st3 = pAttributes() ->aTextureCoordinates() [ 2 ];
-	st4 = pAttributes() ->aTextureCoordinates() [ 3 ];
+	const TqFloat* pTC = pAttributes() ->GetFloatAttribute("System", "TextureCoordinates");
+	CqVector2D st1( pTC[0], pTC[1]);
+	CqVector2D st2( pTC[2], pTC[3]);
+	CqVector2D st3( pTC[4], pTC[5]);
+	CqVector2D st4( pTC[6], pTC[7]);
 
 	vp = 0;
 	TqInt i;

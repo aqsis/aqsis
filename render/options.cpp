@@ -308,6 +308,7 @@ void CqOptions::InitialiseDefaultOptions()
 	ADD_SYSTEM_PARAM2(Shutter, TqFloat, type_float, 0.0f, 1.0f );
 	ADD_SYSTEM_PARAM(FOV, TqFloat, type_float, 90.0f );
 
+	pdefopts->AddRef();
 	AddOption(pdefopts);
 }
 

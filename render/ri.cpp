@@ -46,6 +46,8 @@
 
 #include	"ri.h"
 
+#include	"sstring.h"
+
 using namespace Aqsis;
 
 static RtBoolean ProcessPrimitiveVariables( CqSurface* pSurface, PARAMETERLIST );
@@ -1231,7 +1233,7 @@ RtVoid	RiAttributeEnd()
 //
 RtVoid	RiColor( RtColor Cq )
 {
-	QGetRenderContext() ->pattrWriteCurrent() ->SetcolColor( CqColor( Cq ), QGetRenderContext() ->Time() );
+	QGetRenderContext() ->pattrWriteCurrent() ->GetColorAttributeWrite("System", "Color")[0] = CqColor( Cq );
 	QGetRenderContext() ->AdvanceTime();
 	return ;
 }
@@ -1243,7 +1245,7 @@ RtVoid	RiColor( RtColor Cq )
 //
 RtVoid	RiOpacity( RtColor Os )
 {
-	QGetRenderContext() ->pattrWriteCurrent() ->SetcolOpacity( CqColor( Os ), QGetRenderContext() ->Time() );
+	QGetRenderContext() ->pattrWriteCurrent() ->GetColorAttributeWrite("System", "Opacity")[0] = CqColor( Os );
 	QGetRenderContext() ->AdvanceTime();
 	return ;
 }
@@ -1258,10 +1260,15 @@ RtVoid	RiTextureCoordinates( RtFloat s1, RtFloat t1,
                              RtFloat s3, RtFloat t3,
                              RtFloat s4, RtFloat t4 )
 {
-	QGetRenderContext() ->pattrWriteCurrent() ->aTextureCoordinates( QGetRenderContext() ->Time() ) [ 0 ] = CqVector2D( s1, t1 );
-	QGetRenderContext() ->pattrWriteCurrent() ->aTextureCoordinates( QGetRenderContext() ->Time() ) [ 1 ] = CqVector2D( s2, t2 );
-	QGetRenderContext() ->pattrWriteCurrent() ->aTextureCoordinates( QGetRenderContext() ->Time() ) [ 2 ] = CqVector2D( s3, t3 );
-	QGetRenderContext() ->pattrWriteCurrent() ->aTextureCoordinates( QGetRenderContext() ->Time() ) [ 3 ] = CqVector2D( s4, t4 );
+	TqFloat* pTC = QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite("System", "aTextureCoordinates");
+	pTC[0] = s1;
+	pTC[1] = t1;
+	pTC[2] = s2;
+	pTC[3] = t2;
+	pTC[4] = s3;
+	pTC[5] = t3;
+	pTC[6] = s4;
+	pTC[7] = t4;
 	QGetRenderContext() ->AdvanceTime();
 
 	return ;
@@ -1512,7 +1519,7 @@ RtVoid	RiExteriorV( const char *name, PARAMETERLIST )
 //
 RtVoid	RiShadingRate( RtFloat size )
 {
-	QGetRenderContext() ->pattrWriteCurrent() ->SetfEffectiveShadingRate( size, QGetRenderContext() ->Time() );
+	QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite("System", "ShadingRate")[0] = size;
 	QGetRenderContext() ->AdvanceTime();
 
 	return ;
@@ -1526,10 +1533,10 @@ RtVoid	RiShadingRate( RtFloat size )
 RtVoid	RiShadingInterpolation( RtToken type )
 {
 	if ( strcmp( type, RI_CONSTANT ) == 0 )
-		QGetRenderContext() ->pattrWriteCurrent() ->SeteShadingInterpolation( CqShadingAttributes::ShadingConstant, QGetRenderContext() ->Time() );
+		QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite("System", "ShadingInterpolation")[0] = ShadingConstant;
 	else
 		if ( strcmp( type, RI_SMOOTH ) == 0 )
-			QGetRenderContext() ->pattrWriteCurrent() ->SeteShadingInterpolation( CqShadingAttributes::ShadingSmooth, QGetRenderContext() ->Time() );
+			QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite("System", "ShadingInterpolation")[0] = ShadingSmooth;
 		else
 			CqBasicError( ErrorID_InvalidData, Severity_Normal, "Invald shading interpolation" );
 
@@ -1545,7 +1552,7 @@ RtVoid	RiShadingInterpolation( RtToken type )
 RtVoid	RiMatte( RtBoolean onoff )
 {
 	CqBasicError( 0, Severity_Normal, "RiMatte not supported" );
-	QGetRenderContext() ->pattrWriteCurrent() ->SetbMatteSurfaceFlag( onoff != 0, QGetRenderContext() ->Time() );
+	QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite("System", "Matte")[0] = onoff != 0;
 	QGetRenderContext() ->AdvanceTime();
 	return ;
 }
@@ -1606,16 +1613,16 @@ RtVoid	RiOrientation( RtToken orientation )
 	if ( orientation != 0 )
 	{
 		if ( strstr( orientation, RI_LH ) != 0 )
-			QGetRenderContext() ->pattrWriteCurrent() ->SeteOrientation( OrientationLH, QGetRenderContext() ->Time() );
+			QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite("System", "Orientation")[0] = OrientationLH;
 		if ( strstr( orientation, RI_RH ) != 0 )
-			QGetRenderContext() ->pattrWriteCurrent() ->SeteOrientation( OrientationRH, QGetRenderContext() ->Time() );
+			QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite("System", "Orientation")[0] = OrientationRH;
 		if ( strstr( orientation, RI_INSIDE ) != 0 )
 		{
-			QGetRenderContext() ->pattrWriteCurrent() ->SeteOrientation( QGetRenderContext() ->pattrCurrent() ->eCoordsysOrientation(), QGetRenderContext() ->Time() );
+			QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite("System", "Orientation")[0] = QGetRenderContext() ->pattrCurrent() ->GetIntegerAttribute("System", "Orientation")[1];
 			QGetRenderContext() ->pattrWriteCurrent() ->FlipeOrientation();
 		}
 		if ( strstr( orientation, RI_OUTSIDE ) != 0 )
-			QGetRenderContext() ->pattrWriteCurrent() ->SeteOrientation( QGetRenderContext() ->pattrCurrent() ->eCoordsysOrientation(), QGetRenderContext() ->Time() );
+			QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite("System", "Orientation")[0] = QGetRenderContext() ->pattrCurrent() ->GetIntegerAttribute("System", "Orientation")[1];
 	}
 	QGetRenderContext() ->AdvanceTime();
 	return ;
@@ -1640,7 +1647,7 @@ RtVoid	RiReverseOrientation()
 //
 RtVoid	RiSides( RtInt nsides )
 {
-	QGetRenderContext() ->pattrWriteCurrent() ->SetiNumberOfSides( nsides, QGetRenderContext() ->Time() );
+	QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite("System", "Sides")[0] = nsides;
 	QGetRenderContext() ->AdvanceTime();
 
 	return ;
@@ -1661,13 +1668,13 @@ RtVoid	RiIdentity()
 	// camera transform will be identity, and the behaviour will be correct.
 	if ( QGetRenderContext() ->matWorldToCamera().Determinant() < 0 )
 	{
-		QGetRenderContext() ->pattrWriteCurrent() ->SeteCoordsysOrientation( OrientationRH );
-		QGetRenderContext() ->pattrWriteCurrent() ->SeteOrientation( OrientationRH );
+		QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite("System", "Orientation")[1] = OrientationRH;
+		QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite("System", "Orientation")[0] = OrientationRH;
 	}
 	else
 	{
-		QGetRenderContext() ->pattrWriteCurrent() ->SeteCoordsysOrientation( OrientationLH );
-		QGetRenderContext() ->pattrWriteCurrent() ->SeteOrientation( OrientationLH );
+		QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite("System", "Orientation")[1] = OrientationLH;
+		QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite("System", "Orientation")[0] = OrientationLH;
 	}
 
 	QGetRenderContext() ->AdvanceTime();
@@ -2572,10 +2579,10 @@ RtVoid	RiBasis( RtBasis ubasis, RtInt ustep, RtBasis vbasis, RtInt vstep )
 	u.SetfIdentity( TqFalse );
 	v.SetfIdentity( TqFalse );
 
-	QGetRenderContext() ->pattrWriteCurrent() ->SetmatuBasis( u, QGetRenderContext() ->Time() );
-	QGetRenderContext() ->pattrWriteCurrent() ->SetmatvBasis( v, QGetRenderContext() ->Time() );
-	QGetRenderContext() ->pattrWriteCurrent() ->SetuSteps( ustep, QGetRenderContext() ->Time() );
-	QGetRenderContext() ->pattrWriteCurrent() ->SetvSteps( vstep, QGetRenderContext() ->Time() );
+	QGetRenderContext() ->pattrWriteCurrent() ->GetMatrixAttributeWrite("System", "Basis")[0] = u;
+	QGetRenderContext() ->pattrWriteCurrent() ->GetMatrixAttributeWrite("System", "Basis")[1] = v;
+	QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite("System", "BasisStep")[0] = ustep;
+	QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite("System", "BasisStep")[1] = vstep;
 	QGetRenderContext() ->AdvanceTime();
 	return ;
 }

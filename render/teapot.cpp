@@ -444,8 +444,8 @@ CqTeapot::CqTeapot( TqBool addCrowBase ) : m_CrowBase( addCrowBase )
 	pSurface->Os().SetSize( 130 );
 	for ( i = 0; i < 13*10; i++ )
 	{
-		pSurface->Cs() [ i ] = m_pAttributes->colColor();
-		pSurface->Os() [ i ] = m_pAttributes->colOpacity();
+		pSurface->Cs() [ i ] = m_pAttributes->GetColorAttribute("System", "Color")[0];
+		pSurface->Os() [ i ] = m_pAttributes->GetColorAttribute("System", "Opacity")[0];
 	}
 
 
@@ -465,8 +465,8 @@ CqTeapot::CqTeapot( TqBool addCrowBase ) : m_CrowBase( addCrowBase )
 	pSurface->Os().SetSize( 13 * 7 );
 	for ( i = 0; i < 13*7; i++ )
 	{
-		pSurface->Cs() [ i ] = m_pAttributes->colColor();
-		pSurface->Os() [ i ] = m_pAttributes->colOpacity();
+		pSurface->Cs() [ i ] = m_pAttributes->GetColorAttribute("System", "Color")[0];
+		pSurface->Os() [ i ] = m_pAttributes->GetColorAttribute("System", "Opacity")[0];
 	}
 	this->pPatchMeshBicubic[ 1 ] = pSurface;
 
@@ -484,8 +484,8 @@ CqTeapot::CqTeapot( TqBool addCrowBase ) : m_CrowBase( addCrowBase )
 	pSurface->Os().SetSize( 4 * 7 );
 	for ( i = 0; i < 4*7; i++ )
 	{
-		pSurface->Cs() [ i ] = m_pAttributes->colColor();
-		pSurface->Os() [ i ] = m_pAttributes->colOpacity();
+		pSurface->Cs() [ i ] = m_pAttributes->GetColorAttribute("System", "Color")[0];
+		pSurface->Os() [ i ] = m_pAttributes->GetColorAttribute("System", "Opacity")[0];
 	}
 	this->pPatchMeshBicubic[ 2 ] = pSurface;
 
@@ -503,8 +503,8 @@ CqTeapot::CqTeapot( TqBool addCrowBase ) : m_CrowBase( addCrowBase )
 	pSurface->Os().SetSize( 4 * 7 );
 	for ( i = 0; i < 4*7; i++ )
 	{
-		pSurface->Cs() [ i ] = m_pAttributes->colColor();
-		pSurface->Os() [ i ] = m_pAttributes->colOpacity();
+		pSurface->Cs() [ i ] = m_pAttributes->GetColorAttribute("System", "Color")[0];
+		pSurface->Os() [ i ] = m_pAttributes->GetColorAttribute("System", "Opacity")[0];
 	}
 	this->pPatchMeshBicubic[ 3 ] = pSurface;
 
@@ -522,8 +522,8 @@ CqTeapot::CqTeapot( TqBool addCrowBase ) : m_CrowBase( addCrowBase )
 	pSurface->Os().SetSize( 4 * 7 );
 	for ( i = 0; i < 4*7; i++ )
 	{
-		pSurface->Cs() [ i ] = m_pAttributes->colColor();
-		pSurface->Os() [ i ] = m_pAttributes->colOpacity();
+		pSurface->Cs() [ i ] = m_pAttributes->GetColorAttribute("System", "Color")[0];
+		pSurface->Os() [ i ] = m_pAttributes->GetColorAttribute("System", "Opacity")[0];
 	}
 	this->pPatchMeshBicubic[ 4 ] = pSurface;
 
@@ -541,8 +541,8 @@ CqTeapot::CqTeapot( TqBool addCrowBase ) : m_CrowBase( addCrowBase )
 	pSurface->Os().SetSize( 4 * 7 );
 	for ( i = 0; i < 4*7; i++ )
 	{
-		pSurface->Cs() [ i ] = m_pAttributes->colColor();
-		pSurface->Os() [ i ] = m_pAttributes->colOpacity();
+		pSurface->Cs() [ i ] = m_pAttributes->GetColorAttribute("System", "Color")[0];
+		pSurface->Os() [ i ] = m_pAttributes->GetColorAttribute("System", "Opacity")[0];
 	}
 	this->pPatchMeshBicubic[ 5 ] = pSurface;
 	this->cNbrPatchMeshBicubic = 6;
@@ -573,8 +573,8 @@ CqTeapot::CqTeapot( TqBool addCrowBase ) : m_CrowBase( addCrowBase )
 		pSurface->Os().SetSize( 13 * 4 );
 		for ( i = 0; i < 13*4; i++ )
 		{
-			pSurface->Cs() [ i ] = m_pAttributes->colColor();
-			pSurface->Os() [ i ] = m_pAttributes->colOpacity();
+			pSurface->Cs() [ i ] = m_pAttributes->GetColorAttribute("System", "Color")[0];
+			pSurface->Os() [ i ] = m_pAttributes->GetColorAttribute("System", "Opacity")[0];
 		}
 		this->pPatchMeshBicubic[ 6 ] = pSurface;
 		this->cNbrPatchMeshBicubic = 7;

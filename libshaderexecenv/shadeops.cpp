@@ -146,12 +146,12 @@ TqBool CqShaderExecEnv::SO_init_illuminance()
 TqBool CqShaderExecEnv::SO_advance_illuminance()
 {
 	m_li++;
-	while ( m_li < static_cast<TqInt>( m_pSurface->pAttributes() ->apLights().size() ) &&
-	        m_pSurface->pAttributes() ->apLights() [ m_li ] ->pShader() ->fAmbient() )
+	while ( m_li < static_cast<TqInt>( m_pAttributes ->apLights().size() ) &&
+	        m_pAttributes ->apLights() [ m_li ] ->pShader() ->fAmbient() )
 	{
 		m_li++;
 	}
-	if ( m_li < static_cast<TqInt>( m_pSurface->pAttributes() ->apLights().size() ) ) return ( TqTrue );
+	if ( m_li < static_cast<TqInt>( m_pAttributes ->apLights().size() ) ) return ( TqTrue );
 	else	return ( TqFalse );
 }
 
@@ -162,9 +162,9 @@ void CqShaderExecEnv::ValidateIlluminanceCache( IqShaderData* pP, IqShader* pSha
 	if ( !m_IlluminanceCacheValid )
 	{
 		TqUint li = 0;
-		while ( li < m_pSurface->pAttributes() ->apLights().size() )
+		while ( li < m_pAttributes ->apLights().size() )
 		{
-			CqLightsource * lp = m_pSurface->pAttributes() ->apLights() [ li ];
+			CqLightsource * lp = m_pAttributes ->apLights() [ li ];
 			// Initialise the lightsource
 			lp->Initialise( uGridRes(), vGridRes() );
 			m_Illuminate = 0;
@@ -1442,7 +1442,7 @@ STD_SOIMPL CqShaderExecEnv::SO_area( POINTVAL p, DEFPARAMIMPL )
 	CHECKVARY( Result )
 
 	BEGIN_VARYING_SECTION
-	if ( m_pSurface )
+	if ( m_pAttributes )
 	{
 		TqFloat fdu, fdv;
 		du()->GetFloat( fdu, __iGrid );
@@ -1831,7 +1831,7 @@ STD_SOIMPL CqShaderExecEnv::SO_calculatenormal( POINTVAL p, DEFPARAMIMPL )
 	INIT_SO
 
 	// Find out if the orientation is inverted.
-	EqOrientation O = pSurface() ->pAttributes() ->eOrientation();
+	TqInt O = m_pAttributes ->GetIntegerAttribute("System", "Orientation")[0];
 	float neg = 1;
 	if ( O != OrientationLH ) neg = -1;
 
@@ -1948,7 +1948,7 @@ STD_SOIMPL CqShaderExecEnv::SO_ftexture1( STRINGVAL name, FLOATVAL channel, DEFP
 	GETFLOAT( channel );
 	CqTextureMap* pTMap = CqTextureMap::GetTextureMap( STRING( name ).c_str() );
 	TqFloat fdu = 0.0f, fdv = 0.0f;
-	if( m_pSurface )	
+	if( m_pAttributes )	
 	{
 		du()->GetFloat( fdu );
 		dv()->GetFloat( fdv );
@@ -2018,7 +2018,7 @@ STD_SOIMPL CqShaderExecEnv::SO_ftexture2( STRINGVAL name, FLOATVAL channel, FLOA
 	GETFLOAT( channel );
 	CqTextureMap* pTMap = CqTextureMap::GetTextureMap( STRING( name ).c_str() );
 	TqFloat fdu = 0.0f, fdv = 0.0f;
-	if( m_pSurface )	
+	if( m_pAttributes )	
 	{
 		du()->GetFloat( fdu );
 		dv()->GetFloat( fdv );
@@ -2133,7 +2133,7 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture1( STRINGVAL name, FLOATVAL channel, DEFP
 	GETFLOAT( channel );
 	CqTextureMap* pTMap = CqTextureMap::GetTextureMap( STRING( name ).c_str() );
 	TqFloat fdu = 0.0f, fdv = 0.0f;
-	if( m_pSurface )	
+	if( m_pAttributes )	
 	{
 		du()->GetFloat( fdu );
 		dv()->GetFloat( fdv );
@@ -2203,7 +2203,7 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture2( STRINGVAL name, FLOATVAL channel, FLOA
 	GETFLOAT( channel );
 	CqTextureMap* pTMap = CqTextureMap::GetTextureMap( STRING( name ).c_str() );
 	TqFloat fdu = 0.0f, fdv = 0.0f;
-	if( m_pSurface )	
+	if( m_pAttributes )	
 	{
 		du()->GetFloat( fdu );
 		dv()->GetFloat( fdv );
@@ -2325,7 +2325,7 @@ STD_SOIMPL CqShaderExecEnv::SO_fenvironment2( STRINGVAL name, FLOATVAL channel, 
 		pTMap = CqTextureMap::GetLatLongMap( STRING( name ).c_str() );
 	}
 	TqFloat fdu = 0.0f, fdv = 0.0f;
-	if( m_pSurface )
+	if( m_pAttributes )
 	{
 		du()->GetFloat( fdu );
 		dv()->GetFloat( fdv );
@@ -2446,7 +2446,7 @@ STD_SOIMPL CqShaderExecEnv::SO_cenvironment2( STRINGVAL name, FLOATVAL channel, 
 		pTMap = CqTextureMap::GetLatLongMap( STRING( name ).c_str() );
 	}
 	TqFloat fdu = 0.0f, fdv = 0.0f;
-	if( m_pSurface )
+	if( m_pAttributes )
 	{
 		du()->GetFloat( fdu );
 		dv()->GetFloat( fdv );
@@ -2673,7 +2673,7 @@ STD_SOIMPL CqShaderExecEnv::SO_ambient( DEFPARAMIMPL )
 	INIT_SO
 
 	// Use the lightsource stack on the current surface
-	if ( m_pSurface != 0 )
+	if ( m_pAttributes != 0 )
 	{
 		// If this is the first call to illuminance this time round, call all lights and setup the Cl and L caches.
 		if ( !m_IlluminanceCacheValid )
@@ -2683,11 +2683,11 @@ STD_SOIMPL CqShaderExecEnv::SO_ambient( DEFPARAMIMPL )
 
 		Result->SetColor( gColBlack );
 
-		for ( TqUint light_index = 0; light_index < m_pSurface->pAttributes() ->apLights().size(); light_index++ )
+		for ( TqUint light_index = 0; light_index < m_pAttributes ->apLights().size(); light_index++ )
 		{
 			__fVarying = TqTrue;
 
-			CqLightsource* lp = m_pSurface->pAttributes() ->apLights() [ light_index ];
+			CqLightsource* lp = m_pAttributes ->apLights() [ light_index ];
 			if ( lp->pShader() ->fAmbient() )
 			{
 				BEGIN_VARYING_SECTION
@@ -2812,9 +2812,9 @@ STD_SOIMPL CqShaderExecEnv::SO_phong( NORMALVAL N, VECTORVAL V, FLOATVAL size, D
 {
 	INIT_SO
 
-	IqShaderData* pnV = pSurface()->pAttributes()->pshadSurface()->CreateTemporaryStorage();
-	IqShaderData* pnN = pSurface()->pAttributes()->pshadSurface()->CreateTemporaryStorage();
-	IqShaderData* pR = pSurface()->pAttributes()->pshadSurface()->CreateTemporaryStorage();
+	IqShaderData* pnV = m_pAttributes->pshadSurface()->CreateTemporaryStorage();
+	IqShaderData* pnN = m_pAttributes->pshadSurface()->CreateTemporaryStorage();
+	IqShaderData* pR = m_pAttributes->pshadSurface()->CreateTemporaryStorage();
 
 	SO_normalize( V, pnV );
 	SO_normalize( N, pnN );
@@ -2897,9 +2897,9 @@ STD_SOIMPL CqShaderExecEnv::SO_illuminance( POINTVAL P, VECTORVAL Axis, FLOATVAL
 	INIT_SO
 
 	// Fill in the lightsource information, and transfer the results to the shader variables,
-	if ( m_pSurface != 0 )
+	if ( m_pAttributes != 0 )
 	{
-		CqLightsource * lp = m_pSurface->pAttributes() ->apLights() [ m_li ];
+		CqLightsource * lp = m_pAttributes ->apLights() [ m_li ];
 
 		if( NULL != Axis )		CHECKVARY( Axis )
 		if( NULL != Angle )		CHECKVARY( Angle )
@@ -3279,7 +3279,7 @@ STD_SOIMPL CqShaderExecEnv::SO_atmosphere( STRINGVAL name, IqShaderData* pV, DEF
 {
 	INIT_SO
 
-	IqShader * pAtmosphere = m_pSurface->pAttributes() ->pshadAtmosphere();
+	IqShader * pAtmosphere = m_pAttributes ->pshadAtmosphere();
 
 	BEGIN_UNIFORM_SECTION
 	GETSTRING( name );
@@ -3299,7 +3299,7 @@ STD_SOIMPL CqShaderExecEnv::SO_displacement( STRINGVAL name, IqShaderData* pV, D
 {
 	INIT_SO
 
-	IqShader * pDisplacement = m_pSurface->pAttributes() ->pshadDisplacement();
+	IqShader * pDisplacement = m_pAttributes ->pshadDisplacement();
 
 	BEGIN_UNIFORM_SECTION
 	GETSTRING( name );
@@ -3324,8 +3324,8 @@ STD_SOIMPL CqShaderExecEnv::SO_lightsource( STRINGVAL name, IqShaderData* pV, DE
 	
 	BEGIN_UNIFORM_SECTION
 	GETSTRING( name );
-	if ( m_li < static_cast<TqInt>( m_pSurface->pAttributes() ->apLights().size() ) )
-		pLightsource = m_pSurface->pAttributes() ->apLights() [ m_li ] ->pShader();
+	if ( m_li < static_cast<TqInt>( m_pAttributes ->apLights().size() ) )
+		pLightsource = m_pAttributes ->apLights() [ m_li ] ->pShader();
 	if ( pLightsource )
 		Result->SetValue( pLightsource->GetValue( STRING( name ).c_str(), pV ) ? 1.0f : 0.0f, 0 );
 	else
@@ -3342,7 +3342,7 @@ STD_SOIMPL CqShaderExecEnv::SO_surface( STRINGVAL name, IqShaderData* pV, DEFPAR
 {
 	INIT_SO
 
-	IqShader * pSurface = m_pSurface->pAttributes() ->pshadSurface();
+	IqShader * pSurface = m_pAttributes ->pshadSurface();
 
 	BEGIN_UNIFORM_SECTION
 	GETSTRING( name );
@@ -3371,7 +3371,7 @@ STD_SOIMPL CqShaderExecEnv::SO_attribute( STRINGVAL name, IqShaderData* pV, DEFP
 	{
 		if ( pV->Type() == type_float )
 		{
-			pV->SetFloat( m_pSurface->pAttributes() ->fEffectiveShadingRate() );
+			pV->SetFloat( m_pAttributes ->GetFloatAttribute("System", "ShadingRate")[0] );
 			Ret = 1.0f;
 		}
 	}
@@ -3379,7 +3379,7 @@ STD_SOIMPL CqShaderExecEnv::SO_attribute( STRINGVAL name, IqShaderData* pV, DEFP
 	{
 		if ( pV->Type() == type_float )
 		{
-			pV->SetFloat( m_pSurface->pAttributes() ->iNumberOfSides() );
+			pV->SetFloat( m_pAttributes ->GetIntegerAttribute("System", "Sides")[0] );
 			Ret = 1.0f;
 		}
 	}
@@ -3387,7 +3387,7 @@ STD_SOIMPL CqShaderExecEnv::SO_attribute( STRINGVAL name, IqShaderData* pV, DEFP
 	{
 		if ( pV->Type() == type_float )
 		{
-			pV->SetFloat( m_pSurface->pAttributes() ->bMatteSurfaceFlag() );
+			pV->SetFloat( m_pAttributes ->GetIntegerAttribute("System", "Matte")[0] );
 			Ret = 1.0f;
 		}
 	}
@@ -3398,7 +3398,7 @@ STD_SOIMPL CqShaderExecEnv::SO_attribute( STRINGVAL name, IqShaderData* pV, DEFP
 		{
 			CqString strParam = STRING( name ).substr( iColon + 1, STRING( name ).size() - iColon - 1 );
 			STRING( name ) = STRING( name ).substr( 0, iColon );
-			const CqParameter* pParam = m_pSurface->pAttributes() ->pParameter( STRING( name ).c_str(), strParam.c_str() );
+			const CqParameter* pParam = m_pAttributes ->pParameter( STRING( name ).c_str(), strParam.c_str() );
 			if ( pParam != 0 )
 			{
 				// Should only be able to query uniform parameters here, varying ones should be handled
@@ -4584,9 +4584,9 @@ STD_SOIMPL	CqShaderExecEnv::SO_shadername2( STRINGVAL shader, DEFPARAMIMPL )
 
 	CqString strName( "" );
 	CqString strShader;
-	IqShader* pSurface = m_pSurface->pAttributes() ->pshadSurface();
-	IqShader* pDisplacement = m_pSurface->pAttributes() ->pshadDisplacement();
-	IqShader* pAtmosphere = m_pSurface->pAttributes() ->pshadAtmosphere();
+	IqShader* pSurface = m_pAttributes ->pshadSurface();
+	IqShader* pDisplacement = m_pAttributes ->pshadDisplacement();
+	IqShader* pAtmosphere = m_pAttributes ->pshadAtmosphere();
 
 	CHECKVARY( Result )
 

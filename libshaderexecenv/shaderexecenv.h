@@ -44,6 +44,9 @@
 #include	"matrix.h"
 #include	"refcount.h"
 
+#include	"attributes.h"
+#include	"transform.h"
+
 START_NAMESPACE( Aqsis )
 
 
@@ -141,9 +144,13 @@ class CqShaderExecEnv : public IqShaderExecEnv, CqRefCount
 			return ( m_GridSize );
 		}
 		virtual	const CqMatrix&	matObjectToWorld() const;
-		CqSurface*	pSurface() const
+		const CqAttributes*	pAttributes() const
 		{
-			return ( m_pSurface );
+			return ( m_pAttributes );
+		}
+		const CqTransform*	pTransform() const
+		{
+			return ( m_pTransform );
 		}
 		virtual	void	ValidateIlluminanceCache( IqShaderData* pP, IqShader* pShader );
 		virtual	void	InvalidateIlluminanceCache()
@@ -370,7 +377,8 @@ class CqShaderExecEnv : public IqShaderExecEnv, CqRefCount
 		TqInt	m_li;					///< Light index, used during illuminance loop.
 		TqInt	m_Illuminate;
 		TqBool	m_IlluminanceCacheValid;	///< Flag indicating whether the illuminance cache is valid.
-		CqSurface*	m_pSurface;				///< Pointer to the associated surface.
+		CqAttributes* m_pAttributes;	///< Pointer to the associated attributes.
+		CqTransform* m_pTransform;		///< Pointer to the associated transform.
 		CqBitVector	m_CurrentState;			///< SIMD execution state bit vector accumulator.
 		CqBitVector	m_RunningState;			///< SIMD running execution state bit vector.
 		std::stack<CqBitVector>	m_stkState;				///< Stack of execution state bit vectors.

@@ -235,7 +235,7 @@ void CqSurface::SetDefaultPrimitiveVariables( TqBool bUseDef_st )
 	if ( USES( bUses, EnvVars_Cs ) )
 	{
 		m_Cs.SetSize( 1 );
-		m_Cs.pValue() [ 0 ] = m_pAttributes->colColor();
+		m_Cs.pValue() [ 0 ] = m_pAttributes->GetColorAttribute("System", "Color")[0];
 	}
 	else
 		m_Cs.SetSize( 0 );
@@ -243,7 +243,7 @@ void CqSurface::SetDefaultPrimitiveVariables( TqBool bUseDef_st )
 	if ( USES( bUses, EnvVars_Os ) )
 	{
 		m_Os.SetSize( 1 );
-		m_Os.pValue() [ 0 ] = m_pAttributes->colOpacity();
+		m_Os.pValue() [ 0 ] = m_pAttributes->GetColorAttribute("System", "Opacity")[0];
 	}
 	else
 		m_Os.SetSize( 0 );
@@ -255,7 +255,7 @@ void CqSurface::SetDefaultPrimitiveVariables( TqBool bUseDef_st )
 		m_s.SetSize( 4 );
 		TqInt i;
 		for ( i = 0; i < 4; i++ )
-			m_s.pValue() [ i ] = m_pAttributes->aTextureCoordinates() [ i ].x();
+			m_s.pValue() [ i ] = m_pAttributes->GetFloatAttribute("System", "TextureCoordinates") [ i*2 ];
 	}
 	else
 		m_s.SetSize( 0 );
@@ -265,7 +265,7 @@ void CqSurface::SetDefaultPrimitiveVariables( TqBool bUseDef_st )
 		m_t.SetSize( 4 );
 		TqInt i;
 		for ( i = 0; i < 4; i++ )
-			m_t.pValue() [ i ] = m_pAttributes->aTextureCoordinates() [ i ].y();
+			m_t.pValue() [ i ] = m_pAttributes->GetFloatAttribute("System", "TextureCoordinates") [ (i*2)+1 ];
 	}
 	else
 		m_t.SetSize( 0 );

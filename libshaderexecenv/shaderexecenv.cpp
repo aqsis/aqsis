@@ -104,7 +104,7 @@ TqInt	gDefLightUses = ( 1 << EnvVars_P ) | ( 1 << EnvVars_L ) | ( 1 << EnvVars_P
 /** Constructor.
  */
 
-CqShaderExecEnv::CqShaderExecEnv() : m_LocalIndex( 0 ), m_li( 0 ), m_Illuminate( 0 ), m_pSurface( 0 )
+CqShaderExecEnv::CqShaderExecEnv() : m_LocalIndex( 0 ), m_li( 0 ), m_Illuminate( 0 ), m_pAttributes( 0 ), m_pTransform( 0 )
 {
 	m_apVariables.resize( EnvVars_Last );
 	TqInt i;
@@ -123,7 +123,8 @@ CqShaderExecEnv::~CqShaderExecEnv()
 	for ( i = 0; i < EnvVars_Last; i++ )
 		delete( m_apVariables[ i ] );
 
-	if ( pSurface() ) pSurface() ->Release();
+	if ( m_pAttributes ) m_pAttributes->Release();
+	if ( m_pTransform ) m_pTransform->Release();
 }
 
 //---------------------------------------------------------------------
@@ -138,8 +139,18 @@ void CqShaderExecEnv::Initialise( const TqInt uGridRes, const TqInt vGridRes, Cq
 	m_LocalIndex = 0;
 
 	// Store a pointer to the surface definition.
-	m_pSurface = pSurface;
-	if ( pSurface ) pSurface->AddRef();
+	if( NULL != pSurface ) 
+	{
+		m_pAttributes = const_cast<CqAttributes*>(pSurface->pAttributes());
+		m_pTransform = const_cast<CqTransform*>(pSurface->pTransform());
+		m_pAttributes->AddRef();
+		m_pTransform->AddRef();
+	}
+	else
+	{
+		m_pAttributes = NULL;
+		m_pTransform = NULL;
+	}
 
 	m_li = 0;
 	m_Illuminate = 0;
@@ -219,7 +230,8 @@ void CqShaderExecEnv::Initialise( const TqInt uGridRes, const TqInt vGridRes, Cq
 
 const CqMatrix& CqShaderExecEnv::matObjectToWorld() const
 {
-	return ( m_pSurface == 0 ? m_matIdentity : m_pSurface->pTransform() ->matObjectToWorld() );
+//	return ( m_pSurface == 0 ? m_matIdentity : m_pSurface->pTransform() ->matObjectToWorld() );
+	return ( m_pTransform == 0 ? m_matIdentity : m_pTransform ->matObjectToWorld() );
 }
 
 

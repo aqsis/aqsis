@@ -46,7 +46,7 @@ DEFINE_STATIC_MEMORYPOOL( CqMicroPolygonStatic );
 CqMicroPolyGrid::CqMicroPolyGrid() : CqMicroPolyGridBase(), 
 									 m_bShadingNormals( TqFalse ), 
 									 m_bGeometricNormals( TqFalse ), 
-									 m_pAttributes( NULL ), 
+									 m_pSurface( NULL ), 
 									 m_pCSGNode( NULL ), 
 									 m_pShaderExecEnv( NULL ),
 									 m_vfCulled( TqFalse )
@@ -64,8 +64,8 @@ CqMicroPolyGrid::~CqMicroPolyGrid()
 	QGetRenderContext() ->Stats().IncGridsDeallocated();
 
 	// Release the reference to the attributes.
-	if ( m_pAttributes != 0 ) m_pAttributes->Release();
-	m_pAttributes = 0;
+	if ( m_pSurface != 0 ) m_pSurface->Release();
+	m_pSurface = 0;
 
 	// Release the reference to the CSG node.
 	if ( m_pCSGNode != 0 ) m_pCSGNode->Release();
@@ -84,7 +84,7 @@ CqMicroPolyGrid::~CqMicroPolyGrid()
 CqMicroPolyGrid::CqMicroPolyGrid( TqInt cu, TqInt cv, CqSurface* pSurface ) : 
 									m_bShadingNormals( TqFalse ), 
 									m_bGeometricNormals( TqFalse ), 
-									m_pAttributes( NULL ),
+									m_pSurface( NULL ),
 									m_pShaderExecEnv( NULL ),
 								    m_vfCulled( TqFalse )
 {
@@ -108,8 +108,8 @@ void CqMicroPolyGrid::Initialise( TqInt cu, TqInt cv, CqSurface* pSurface )
 	if ( pSurface )
 	{
 		lUses = pSurface->Uses();
-		m_pAttributes = const_cast<CqAttributes*>( pSurface->pAttributes() );
-		m_pAttributes->AddRef();
+		m_pSurface = pSurface;
+		m_pSurface->AddRef();
 
 		m_pCSGNode = pSurface->pCSGNode();
 		if ( m_pCSGNode ) m_pCSGNode->AddRef();
@@ -138,7 +138,7 @@ void CqMicroPolyGrid::CalcNormals()
 	// Get the handedness of the coordinate system (at the time of creation) and
 	// the coordinate system specified, to check for normal flipping.
 	//	EqOrientation CSO=pSurface()->pAttributes()->eCoordsysOrientation();
-	EqOrientation O = pSurface() ->pAttributes() ->eOrientation();
+	TqInt O = pAttributes() ->GetIntegerAttribute("System", "Orientation")[0];
 	float neg = 1;
 	if ( O != OrientationLH ) neg = -1;
 	CqVector3D  vecMP[ 4 ];
@@ -329,7 +329,7 @@ void CqMicroPolyGrid::Shade()
 	}
 
 	// Now try and cull any hidden MPs if Sides==1
-	if ( pSurface() ->pAttributes() ->iNumberOfSides() == 1 && m_pCSGNode == NULL )
+	if ( pAttributes() ->GetIntegerAttribute("System", "Sides")[0] == 1 && m_pCSGNode == NULL )
 	{
 		cCulled = 0;
 		QGetRenderContext() ->Stats().OcclusionCullTimer().Start();

@@ -36,6 +36,8 @@
 START_NAMESPACE( Aqsis )
 
 class CqSurface;
+class CqAttributes;
+class CqTransform;
 
 /** \enum EqEnvVars
  * Identifiers for the standard environment variables.
@@ -129,9 +131,12 @@ struct IqShaderExecEnv
 		/** Get the matrix which describes the transformation from Object space to World space for the surface related to this execution environment.
 		 */
 		virtual	const CqMatrix&	matObjectToWorld() const = 0;
-		/** Get a pointer to the associated surface.
+		/** Get a pointer to the associated attributes.
 		 */
-		virtual	CqSurface*	pSurface() const = 0;
+		virtual	const CqAttributes*	pAttributes() const = 0;
+		/** Get a pointer to the associated transform.
+		 */
+		virtual	const CqTransform*	pTransform() const = 0;
 		/** Update all cached lighting results.
 		 */
 		virtual	void	ValidateIlluminanceCache( IqShaderData* pP, IqShader* pShader ) = 0;

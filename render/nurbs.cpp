@@ -1362,7 +1362,7 @@ TqBool	CqSurfaceNURBS::Diceable()
 		m_XBucketSize = poptBucketSize[ 0 ];
 		m_YBucketSize = poptBucketSize[ 1 ];
 	}
-	TqFloat ShadingRate = pAttributes() ->fEffectiveShadingRate();
+	TqFloat ShadingRate = pAttributes() ->GetFloatAttribute("System", "ShadingRate")[0];
 
 	if ( poptGridSize )
 		gridsize = poptGridSize[ 0 ];
@@ -1495,7 +1495,7 @@ TqInt	CqSurfaceNURBS::TrimDecimation( const CqTrimCurve& Curve )
 		if ( Len > MaxLen ) MaxLen = Len;
 		cSegments++;
 	}
-	TqFloat ShadingRate = pAttributes() ->fEffectiveShadingRate();
+	TqFloat ShadingRate = pAttributes() ->GetFloatAttribute("System", "ShadingRate")[0];
 	ShadingRate = static_cast<TqFloat>( sqrt( ShadingRate ) );
 	MaxLen /= ShadingRate;
 

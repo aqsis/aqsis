@@ -1585,7 +1585,7 @@ TqBool CqWSurf::Diceable()
 	//	l=ROUND(l);
 
 	// Get the shading rate.
-	float ShadingRate = pAttributes() ->fEffectiveShadingRate();
+	TqFloat ShadingRate = pAttributes() ->GetFloatAttribute("System", "ShadingRate")[0];
 	l /= ShadingRate;
 
 	if ( l > 16 ) return ( TqFalse );
@@ -1737,7 +1737,7 @@ TqBool CqMotionWSurf::Diceable()
 
 
 	// Get the shading rate.
-	float ShadingRate = pAttributes() ->fEffectiveShadingRate();
+	TqFloat ShadingRate = pAttributes() ->GetFloatAttribute("System", "ShadingRate")[0];
 	l /= ShadingRate;
 
 	if ( l > 16 ) return ( TqFalse );

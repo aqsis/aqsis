@@ -88,7 +88,7 @@ class CqMicroPolyGridBase
 		 */
 		virtual CqSurface*	pSurface() const = 0;
 
-		virtual	CqAttributes* pAttributes() const = 0;
+		virtual	const CqAttributes* pAttributes() const = 0;
 
 		virtual	CqCSGTreeNode* pCSGNode() const = 0;
 
@@ -148,12 +148,12 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase, public CqRefCount
 		 */
 		virtual CqSurface*	pSurface() const
 		{
-			assert( NULL != m_pShaderExecEnv );
-			return ( m_pShaderExecEnv->pSurface() );
+			return ( m_pSurface );
 		}
-		virtual	CqAttributes* pAttributes() const
+		virtual	const CqAttributes* pAttributes() const
 		{
-			return ( m_pAttributes );
+			assert( NULL != m_pShaderExecEnv );
+			return ( m_pShaderExecEnv->pAttributes() );
 		}
 		virtual	CqCSGTreeNode* pCSGNode() const
 		{
@@ -199,7 +199,7 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase, public CqRefCount
 	private:
 		TqBool	m_bShadingNormals;		///< Flag indicating shading normals have been filled in and don't need to be calculated during shading.
 		TqBool	m_bGeometricNormals;	///< Flag indicating geometric normals have been filled in and don't need to be calculated during shading.
-		CqAttributes* m_pAttributes;	///< Pointer to the attributes for this grid.
+		CqSurface* m_pSurface;	///< Pointer to the attributes for this grid.
 		CqCSGTreeNode* m_pCSGNode;	///< Pointer to the CSG tree node this grid belongs to, NULL if not part of a solid.
 		IqShaderExecEnv* m_pShaderExecEnv;	///< Pointer to the shader execution environment for this grid.
 	protected:
@@ -237,7 +237,7 @@ class CqMotionMicroPolyGrid : public CqMicroPolyGridBase, public CqMotionSpec<Cq
 			return ( static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( 0 ) ) ) ->pSurface() );
 		}
 
-		virtual CqAttributes* pAttributes() const
+		virtual const CqAttributes* pAttributes() const
 		{
 			return ( static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( 0 ) ) ) ->pAttributes() );
 		}
