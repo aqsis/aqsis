@@ -31,7 +31,8 @@
 #include	"aqsis.h"
 
 #include	<vector>
-#include	<list>
+#include	<queue>
+#include	<deque>
 
 #include	"bitvector.h"
 #include	"micropolygon.h"
@@ -132,8 +133,12 @@ public:
     static	void	ShutdownBucket();
 
     /** Add a GPRim to the stack of deferred GPrims.
+	 * \param The Gprim to be added.
      */
-    void	AddGPrim( const boost::shared_ptr<CqBasicSurface>& pGPrim );
+    void	AddGPrim( const boost::shared_ptr<CqBasicSurface>& pGPrim )
+	{
+		m_aGPrims.push(pGPrim);
+	}
 
     /** Add an MPG to the list of deferred MPGs.
      */
@@ -165,7 +170,7 @@ public:
     {
 	if (!m_aGPrims.empty())
 	{
-	    return m_aGPrims.front();
+	    return m_aGPrims.top();
 	}
 	else
 	{
@@ -176,7 +181,7 @@ public:
      */
     void popSurface()
     {
-	m_aGPrims.pop_front();
+		m_aGPrims.pop();
     }
     /** Get a count of deferred GPrims.
      */
@@ -210,6 +215,7 @@ public:
         m_bProcessed = bProc;
     }
 
+
 private:
     static	TqInt	m_XSize;
     static	TqInt	m_YSize;
@@ -227,10 +233,27 @@ private:
     static	std::vector<TqFloat>	m_aDatas;
     static	std::vector<TqFloat>	m_aCoverages;
 
+	// this is a compare functor for sorting surfaces in order of depth.
+	struct closest_surface
+	{
+		bool operator()(const boost::shared_ptr<CqBasicSurface>& s1, const boost::shared_ptr<CqBasicSurface>& s2) const
+		{
+            if ( s1->fCachedBound() && s2->fCachedBound() )
+            {
+                return ( s1->GetCachedRasterBound().vecMin().z() > s2->GetCachedRasterBound().vecMin().z() );
+            }
+
+			// don't have bounds for the surface(s). I suspect we should assert here.
+			return true;
+		}
+	};
+
     std::vector<CqMicroPolygon*> m_ampgWaiting;			///< Vector of vectors of waiting micropolygons in this bucket
     std::vector<CqMicroPolyGridBase*> m_agridWaiting;		///< Vector of vectors of waiting micropolygrids in this bucket
-    std::list<boost::shared_ptr<CqBasicSurface> >	m_aGPrims;						///< Vector of lists of split surfaces for this bucket.
-    TqBool	m_bProcessed;	///< Flag indicating if this bucket has been processed yet.
+
+	/// A sorted list of primitives for this bucket
+	std::priority_queue<boost::shared_ptr<CqBasicSurface>, std::deque<boost::shared_ptr<CqBasicSurface> >, closest_surface> m_aGPrims;
+	TqBool	m_bProcessed;	///< Flag indicating if this bucket has been processed yet.
 }
 ;
 
