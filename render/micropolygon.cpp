@@ -620,7 +620,7 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, long y
     if ( NULL == P() )
         return ;
 
-    QGetRenderContext() ->Stats().MakeProject().Start();
+	QGetRenderContext() ->Stats().MakeProject().Start();
     CqMatrix matCameraToRaster = QGetRenderContext() ->matSpaceToSpace( "camera", "raster" );
     CqMatrix matCameraToObject0 = QGetRenderContext() ->matSpaceToSpace( "camera", "object", CqMatrix(), pSurface() ->pTransform() ->matObjectToWorld( pSurface() ->pTransform() ->Time( 0 ) ) );
 

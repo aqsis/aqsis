@@ -532,7 +532,7 @@ void	CqRenderer::EndMotionModeBlock()
 
 TqFloat	CqRenderer::Time() const
 {
-    if ( m_pconCurrent != 0 )
+    if ( m_pconCurrent != 0 && m_pconCurrent->Type() == Motion)
         return ( m_pconCurrent->Time() );
     else
         return ( QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "Shutter" ) [ 0 ] );

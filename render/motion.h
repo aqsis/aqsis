@@ -260,6 +260,18 @@ public:
         m_DefObject = a;
     }
 
+	/** Empty all keyframes
+	 *
+	 */
+	void	Reset()
+	{
+		m_aTimes.clear();
+		std::vector<T>::iterator i;
+		for(i=m_aObjects.begin(); i!=m_aObjects.end(); i++)
+			ClearMotionObject(*i);
+		m_aObjects.clear();
+	}
+
     /** Pure virtual, overridden by deriving classes. Clear a motion object.
      */
     virtual	void	ClearMotionObject( T& A ) const = 0;

@@ -82,6 +82,7 @@ public:
         return ( new CqTransform( *this ) );
     }
 
+    virtual	void	SetTransform( TqFloat time, const CqMatrix& matTrans );
     virtual	void	SetCurrentTransform( TqFloat time, const CqMatrix& matTrans );
     virtual	void	ConcatCurrentTransform( TqFloat time, const CqMatrix& matTrans );
 
@@ -98,6 +99,8 @@ public:
 		else
 			return( 1 );
     }
+
+	virtual void ResetTransform(const CqMatrix& mat, TqBool makeStatic=TqTrue);
 
 #ifndef _DEBUG
     virtual	void	Release()

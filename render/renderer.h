@@ -273,16 +273,19 @@ public:
     {
         m_aCoordSystems[ CoordSystem_Raster ].m_matWorldTo = mat;
     }
-    /** Set the world to camera matrix.
+    /** Set the world to camera transform.
      * \param ptrans A pointer to the transformation object which represents the world to camera transform.
      */
-    virtual	void	SetmatCamera( const CqTransform* ptrans )
+    virtual	void	SetCameraTransform( const CqTransform* ptrans )
     {
         (*m_pTransCamera) = *ptrans;
-        //m_aCoordSystems[ CoordSystem_Camera ] .m_matWorldTo =
-        //m_aCoordSystems[ CoordSystem_Current ].m_matWorldTo = ptrans->GetMotionObjectInterpolated(0);
-        //m_aCoordSystems[ CoordSystem_Camera ] .m_matToWorld =
-        //m_aCoordSystems[ CoordSystem_Current ].m_matToWorld = ptrans->GetMotionObjectInterpolated(0).Inverse();
+    }
+    /** Get the world to camera tramsform.
+     * \return A pointer to the transformation object which represents the world to camera transform.
+     */
+    virtual	CqTransform*	GetCameraTransform( )
+    {
+        return( m_pTransCamera );
     }
     /** Get the current transformation stack.
      * \return A reference to a vector of CqTransform class pointers.

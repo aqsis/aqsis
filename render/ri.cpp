@@ -408,8 +408,8 @@ RtVoid	RiBegin( RtToken name )
 
     QGetRenderContext() ->Initialise();
     QGetRenderContext() ->BeginMainModeBlock();
-    QGetRenderContext() ->ptransWriteCurrent() ->SetCurrentTransform( QGetRenderContext() ->Time(), CqMatrix() );
-    QGetRenderContext() ->SetmatCamera( QGetRenderContext() ->ptransCurrent() );
+    QGetRenderContext() ->ptransWriteCurrent() ->SetTransform( QGetRenderContext() ->Time(), CqMatrix() );
+    QGetRenderContext() ->SetCameraTransform( QGetRenderContext() ->ptransCurrent() );
     // Clear the lightsources stack.
     CqLightsource* pL = Lightsource_stack.pFirst();
     while ( pL )
@@ -600,12 +600,21 @@ RtVoid	RiWorldBegin()
 
     QGetRenderContext() ->BeginWorldModeBlock();
     // Set the world to camera transformation matrix to the current matrix.
-    //QGetRenderContext() ->SetmatCamera( QGetRenderContext() ->matCurrent( QGetRenderContext() ->Time() ) );
-    QGetRenderContext() ->SetmatCamera( QGetRenderContext() ->ptransCurrent() );
+    QGetRenderContext() ->SetCameraTransform( QGetRenderContext() ->ptransCurrent() );
     // and then reset the current matrix to identity, ready for object transformations.
-    TqInt i;
-    for ( i = 0; i < QGetRenderContext() ->ptransWriteCurrent() ->cTimes(); i++ )
-        QGetRenderContext() ->ptransWriteCurrent() ->SetCurrentTransform( QGetRenderContext() ->ptransCurrent() ->Time( i ), CqMatrix() );
+    if(QGetRenderContext() ->ptransWriteCurrent() ->cTimes() > 1)
+	{
+		TqInt i;
+		CqMatrix matOpenShutterInverse = QGetRenderContext() ->ptransCurrent() ->matObjectToWorld( QGetRenderContext() ->ptransCurrent() ->Time( 0 ) );
+		matOpenShutterInverse = matOpenShutterInverse.Inverse();
+		QGetRenderContext() ->ptransWriteCurrent() ->SetCurrentTransform( QGetRenderContext() ->ptransCurrent() ->Time( 0 ), CqMatrix() );
+		for ( i = 1; i < QGetRenderContext() ->ptransWriteCurrent() ->cTimes(); i++ )
+			QGetRenderContext() ->ptransWriteCurrent() ->SetCurrentTransform( QGetRenderContext() ->ptransCurrent() ->Time( i ), matOpenShutterInverse * QGetRenderContext() ->ptransCurrent() ->matObjectToWorld( QGetRenderContext() ->ptransCurrent() ->Time( i ) ) );
+	}
+	else
+		QGetRenderContext() ->ptransWriteCurrent() ->SetCurrentTransform( QGetRenderContext() ->Time(), CqMatrix() );
+	// Clear the camera transform to a single state, all camera motion is now transferred to the objects.
+	QGetRenderContext()->GetCameraTransform()->ResetTransform( QGetRenderContext()->GetCameraTransform()->matObjectToWorld( QGetRenderContext()->GetCameraTransform()->Time(0) ) );
 
     QGetRenderContext() ->optCurrent().InitialiseCamera();
     QGetRenderContext() ->pImage() ->SetImage();
@@ -862,7 +871,7 @@ RtVoid	RiProjectionV( RtToken name, PARAMETERLIST )
             QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "FOV" ) [ 0 ] = *( reinterpret_cast<RtFloat*>( value ) ) ;
     }
     // TODO: need to get the current transformation so that it can be added to the screen transformation.
-    QGetRenderContext() ->ptransWriteCurrent() ->SetCurrentTransform( QGetRenderContext() ->Time(), CqMatrix() );
+    QGetRenderContext() ->ptransWriteCurrent() ->SetTransform( QGetRenderContext() ->Time(), CqMatrix() );
 
     return ;
 }
@@ -2423,7 +2432,7 @@ RtVoid	RiIdentity()
 
 	Validate_RiIdentity
 
-    QGetRenderContext() ->ptransWriteCurrent() ->SetCurrentTransform( QGetRenderContext() ->Time(), CqMatrix() );
+    QGetRenderContext() ->ptransWriteCurrent() ->SetTransform( QGetRenderContext() ->Time(), CqMatrix() );
 
     QGetRenderContext() ->AdvanceTime();
     return ;
@@ -2443,7 +2452,7 @@ RtVoid	RiTransform( RtMatrix transform )
     if ( matTrans.Determinant() < 0 )
         QGetRenderContext() ->pattrWriteCurrent() ->FlipeCoordsysOrientation( QGetRenderContext() ->Time() );
 
-    QGetRenderContext() ->ptransWriteCurrent() ->SetCurrentTransform( QGetRenderContext() ->Time(), CqMatrix( transform ) );
+    QGetRenderContext() ->ptransWriteCurrent() ->SetTransform( QGetRenderContext() ->Time(), CqMatrix( transform ) );
     QGetRenderContext() ->AdvanceTime();
 
     return ;
@@ -2695,7 +2704,7 @@ RtVoid	RiCoordSysTransform( RtToken space )
 	Validate_RiCoordSysTransform
 
     // Insert the named coordinate system into the list help on the renderer.
-    QGetRenderContext() ->ptransWriteCurrent() ->SetCurrentTransform( QGetRenderContext() ->Time(), QGetRenderContext() ->matSpaceToSpace( space, "world" ) );
+    QGetRenderContext() ->ptransWriteCurrent() ->SetTransform( QGetRenderContext() ->Time(), QGetRenderContext() ->matSpaceToSpace( space, "world" ) );
     QGetRenderContext() ->AdvanceTime();
 
     return ;
@@ -3523,7 +3532,6 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
                     Axis = CqPolygonGeneral2D::Axis_XY;
                 polya.SetAxis( Axis );
 
-				std::cout << O << ", " << polya.CalcOrientation() << ", " << Axis << std::endl;
                 if ( iloop == 0 )
                 {
 					/// \note: We need to check here if the orientation of the projected poly matches the
@@ -3534,18 +3542,12 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
                     if( O == OrientationLH )
                     {
                         if ( polya.CalcOrientation() != CqPolygonGeneral2D::Orientation_Clockwise )
-						{
-							std::cout << "Swap" << std::endl;
                             polya.SwapDirection();
-						}
                     }
                     else
                     {
                         if ( polya.CalcOrientation() != CqPolygonGeneral2D::Orientation_AntiClockwise )
-						{
-							std::cout << "Swap" << std::endl;
                             polya.SwapDirection();
-						}
                     }
                     poly = polya;
                 }
