@@ -284,6 +284,9 @@ TqBool CqImageBuffer::CullSurface( CqBound& Bound, CqBasicSurface* pSurface )
 
 void CqImageBuffer::PostSurface( CqBasicSurface* pSurface )
 {
+	// Initially, the surface enters this method with zero references, so add one.
+	ADDREF( pSurface );
+	
 	// Count the number of total gprims
 	QGetRenderContext() ->Stats().IncTotalGPrims();
 
@@ -345,6 +348,9 @@ void CqImageBuffer::PostSurface( CqBasicSurface* pSurface )
 
 	assert( nBucket >= iCurrentBucket() );
 	m_aBuckets[ nBucket ].AddGPrim( pSurface );
+
+	// Release the reference acquired for the surface for this method.
+	RELEASEREF( pSurface );
 
 }
 
