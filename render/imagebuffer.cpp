@@ -38,6 +38,7 @@
 #include	"imagebuffer.h"
 #include	"occlusion.h"
 
+#include	"mpdump.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -1302,6 +1303,14 @@ TqBool CqImageBuffer::IsCurrentBucketEmpty()
 
 void CqImageBuffer::RenderImage()
 {
+	////////// Create a new dump file  //////////
+	#ifdef DEBUG_MPDUMP
+	mpdump.open();
+	mpdump.dumpImageInfo();
+    #endif
+	/////////////////////////////////////////////
+
+
     if ( bucketmodulo == -1 )
     {
         // Small change which allows full control of virtual memory on NT swapping
@@ -1339,6 +1348,12 @@ void CqImageBuffer::RenderImage()
         // doesn't initialise correctly so later we have problem in the FilterBucket()
         CqBucket::InitialiseBucket( static_cast<TqInt>( bPos.x() ), static_cast<TqInt>( bPos.y() ), static_cast<TqInt>( bSize.x() ), static_cast<TqInt>( bSize.y() ), true );
         CqBucket::InitialiseFilterValues();
+
+		////////// Dump the pixel sample positions into a dump file //////////
+		#ifdef DEBUG_MPDUMP
+		mpdump.dumpPixelSamples();
+	    #endif
+		/////////////////////////////////////////////////////////////////////////
 
         // Set up some bounds for the bucket.
         CqVector2D vecMin = bPos;
