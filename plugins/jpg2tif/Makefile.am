@@ -7,6 +7,6 @@ AM_CFLAGS=@AQSIS_CFLAGS@
 pkglib_LTLIBRARIES = libjpg2tif.la
 
 libjpg2tif_la_SOURCES = jpg2tif.c
-libjpg2tif_la_LIBADD  = ../common/libcommon.la @JPEG_FLAGS@
+libjpg2tif_la_LIBADD  = ../common/libcommon.la @AQSIS_JPEG_LDFLAGS@
 
-INCLUDES = -I$(top_srcdir)/libaqsistypes -I$(top_srcdir)/libaqsistypes/posix @JPEG_INC@
+INCLUDES = -I$(top_srcdir)/libaqsistypes -I$(top_srcdir)/libaqsistypes/posix @AQSIS_JPEG_CPPFLAGS@

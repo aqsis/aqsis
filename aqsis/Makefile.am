@@ -8,7 +8,7 @@ INCLUDES = -I$(top_srcdir)/libaqsistypes -I$(top_srcdir)/libaqsistypes/posix -I$
 
 bin_PROGRAMS = aqsis 
 aqsis_SOURCES = aqsis.cpp
-aqsis_LDADD = $(top_builddir)/render/libaqsis.la $(top_builddir)/libraytrace/libraytrace.la $(top_builddir)/libargparse/libargparse.la
+aqsis_LDADD = $(top_builddir)/render/libaqsis.la $(top_builddir)/libraytrace/libraytrace.la $(top_builddir)/libargparse/libargparse.la @AQSIS_PLUGIN_LDFLAGS@
 
 check-local: clean-local
 	for file in $(top_srcdir)/ribfiles/*.rib; do echo "Rendering $$file ..."; $(top_builddir)/aqsis/aqsis --displays="$(top_srcdir)/display" --shaders="$(top_srcdir)/shaders" -v3 $$file; done

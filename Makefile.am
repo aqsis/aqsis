@@ -1,13 +1,3 @@
-MAINDIRS = bin boost thirdparty all images libargparse libaqsistypes libcodegenvm librib2 librib2ri librib2stream libslparse libshadervm libshaderexecenv libraytrace ribfiles slpp aqsl shaders libri2rib libslxargs aqsltell dsotest display libddmanager render aqsis teqser man renderer.xcode
-
-if PLUGINS
-PLUGINSDIRS = plugins
-else
-PLUGINSDIRS = 
-endif
-
-SUBDIRS = . $(MAINDIRS) $(PLUGINSDIRS)
-
 EXTRA_DIST = Doxyfile Renderer.dsw bootstrap doxygen.dsp Renderer.sln aqsis.spec
 
 .PHONY: strace
@@ -24,3 +14,72 @@ $(top_srcdir)/render/ri_cache.inl: $(top_srcdir)/render/apicache.xsl $(top_srcdi
 
 $(top_srcdir)/render/ri_validate.inl: $(top_srcdir)/render/apivalidate.xsl $(top_srcdir)/render/api.xml
 	xsltproc -o $(top_srcdir)/render/ri_validate.inl $(top_srcdir)/render/apivalidate.xsl $(top_srcdir)/render/api.xml
+
+SUBDIRS = \
+. \
+bin \
+boost \
+thirdparty \
+all \
+images \
+libargparse \
+libaqsistypes \
+libcodegenvm \
+librib2 \
+librib2ri \
+librib2stream \
+libslparse \
+libshadervm \
+libshaderexecenv \
+libraytrace \
+ribfiles \
+slpp \
+aqsl \
+shaders \
+libri2rib \
+libslxargs \
+aqsltell \
+dsotest \
+display \
+libddmanager \
+render \
+aqsis \
+teqser \
+man \
+renderer.xcode \
+@AQSIS_PLUGIN_SUBDIR@
+
+DIST_SUBDIRS = \
+. \
+bin \
+boost \
+thirdparty \
+all \
+images \
+libargparse \
+libaqsistypes \
+libcodegenvm \
+librib2 \
+librib2ri \
+librib2stream \
+libslparse \
+libshadervm \
+libshaderexecenv \
+libraytrace \
+ribfiles \
+slpp \
+aqsl \
+shaders \
+libri2rib \
+libslxargs \
+aqsltell \
+dsotest \
+display \
+libddmanager \
+render \
+aqsis \
+teqser \
+man \
+renderer.xcode \
+plugins
+
