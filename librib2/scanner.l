@@ -1,3 +1,10 @@
+/* 
+ * THIS FILE HAS BEEN SUPERSCEDED BY SCANNER.LXX AMD SJPI:D
+ * BE CONSIDERED DEPRECATED
+ */
+
+
+
 /* -------------- declaration section -------------- */
 
 %{

@@ -1,3 +1,10 @@
+/*
+ * THIS FILE HAS BEEN SUPERSCEDED BY PARSER.YXX AND SHOULD BE 
+ * CONSIDERED AS DEPRECATED
+ */
+
+
+
 /* -------------- declaration section -------------- */
 
 %{
