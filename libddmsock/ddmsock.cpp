@@ -660,7 +660,7 @@ void CqDDManager::LoadDisplayLibrary( CqDDClient& dd, std::map<std::string, void
 
 	CqString strDriverPathAndFile = fileDriver.strRealName();
 
-	char envBuffer[ 32 ];
+	char envBuffer[ 45 ];
 	const int maxargs = 20;
 	const char* args[ maxargs ];
 	std::string argstrings[ maxargs ];
@@ -688,7 +688,7 @@ void CqDDManager::LoadDisplayLibrary( CqDDClient& dd, std::map<std::string, void
 #ifdef AQSIS_SYSTEM_WIN32
 
 	// Set the AQSIS_DD_PORT environment variable
-	_snprintf( envBuffer, 32, "%d", m_DDServer.getPort() );
+	_snprintf( envBuffer, 45, "%d", m_DDServer.getPort() );
 	SetEnvironmentVariable( "AQSIS_DD_PORT", envBuffer );
 
 	// Spawn the driver (1st try)...
@@ -710,8 +710,8 @@ void CqDDManager::LoadDisplayLibrary( CqDDClient& dd, std::map<std::string, void
 #else // AQSIS_SYSTEM_WIN32
 
 	// Set the AQSIS_DD_PORT environment variable
-	snprintf( envBuffer, 32, "%d", m_DDServer.getPort() );
-	putenv( "AQSIS_DD_PORT", envBuffer, 1 );
+	snprintf( envBuffer, 45, "AQSIS_DD_PORT=%d", m_DDServer.getPort() );
+	putenv( envBuffer );
 	signal( SIGCHLD, sig_chld );
 	// Spawn the driver
 	const int forkresult = fork();
