@@ -728,6 +728,20 @@ TqBool CqTextureMap::BiLinear(TqFloat u, TqFloat v, TqInt umapsize, TqInt vmapsi
 	CqTextureMapBuffer* pTMBc = GetBuffer( iu, iv_n, id );  // Val10
 	CqTextureMapBuffer* pTMBd = GetBuffer( iu_n, iv_n, id );// Val11
 
+
+	/* cannot find anything than goodbye */
+	if ( !pTMBa || !pTMBb || !pTMBc || !pTMBd )
+	{
+		for ( c = 0; c < m_SamplesPerPixel; c++ )
+		{
+			m_color[ c ] = 1.0f;
+		}
+
+		std::cerr << error << "Cannot find value for either pTMPB[a,b,c,d]" << std::endl;
+		Open();
+		return TqFalse;
+	}
+
 	TqUint x1, y1, x2, y2, x3, y3, x4, y4;
 
 	TqFloat Val00, Val01, Val10, Val11;
@@ -740,19 +754,6 @@ TqBool CqTextureMap::BiLinear(TqFloat u, TqFloat v, TqInt umapsize, TqInt vmapsi
 	y3 = iv_n - pTMBc->tOrigin();
 	x4 = iu_n - pTMBd->sOrigin();
 	y4 = iv_n - pTMBd->tOrigin();
-
-	/* cannot find anything than goodbye */
-	if ( !pTMBa || !pTMBb || !pTMBc || !pTMBd )
-	{
-		for ( c = 0; c < m_SamplesPerPixel; c++ )
-		{
-			m_color[ c ] = 1.0f;
-		}
-
-		std::cerr << error << "Cannot find value for either pTMPB[a,b,c,d]" << std::endl;
-		return TqFalse;
-	}
-
 	//std::cerr << warning << "ru, rv" << ru << " " << rv << std::endl;
 
 	// Bilinear interpolate the values at the corners of the sample.
@@ -801,19 +802,16 @@ void CqTextureMap::GetSampleWithoutBlur( TqFloat u1, TqFloat v1, TqFloat u2, TqF
 	// provide to texture() call in the shader.
 	if (m_lerp == -1.0)
 	{
-		const TqInt* poptVerbose = QGetRenderContext() ->optCurrent().GetIntegerOption( "texture", "lerp" );
+		const TqInt* pLerp = QGetRenderContext() ->optCurrent().GetIntegerOption( "texture", "lerp" );
 
-		m_lerp = 1.0f;
-		if (poptVerbose && (*poptVerbose == 0.0))
-			m_lerp = 0.0f;
+		m_lerp = 0.0f;
+		if (pLerp && (*pLerp > 0.0f))
+			m_lerp = 1.0f;
 
 	}
-	TqBool bLerp = (m_lerp == 1.0)&& (m_interp > m_pixelvariance);
+	TqBool bLerp = (m_lerp == 1.0); 
 
-	TqFloat pixel2 = m_pixelvariance * m_pixelvariance;
-	TqBool  bTwice = TqFalse;
-	TqFloat a, diffs;
-	diffs = 0.0f;
+	
 	// Assuming this will also include the pixel at u,v multiple samplings interval
 	for (TqInt i = 0; i <= m_samples; i ++)
 	{
@@ -840,9 +838,7 @@ void CqTextureMap::GetSampleWithoutBlur( TqFloat u1, TqFloat v1, TqFloat u2, TqF
 		{
 			for (c = 0; c < m_SamplesPerPixel; c++)
 			{
-				a = mul * LERP(m_interp, m_pixel_variance[c], m_pixel_sublevel[c]);
-				diffs += ((m_accum_color[c]/contrib) - a) * ((m_accum_color[c]/contrib) - a);
-				m_accum_color[c] += a;
+				m_accum_color[c] += mul * LERP(m_interp, m_pixel_variance[c], m_pixel_sublevel[c]);
 
 			}
 		}
@@ -850,20 +846,8 @@ void CqTextureMap::GetSampleWithoutBlur( TqFloat u1, TqFloat v1, TqFloat u2, TqF
 		{
 			for (c = 0; c < m_SamplesPerPixel; c++)
 			{
-				a = mul * m_pixel_variance[c];
-				diffs += ((m_accum_color[c]/contrib) - a) * ((m_accum_color[c]/contrib) - a);
-				m_accum_color[c] += a;
+				m_accum_color[c] += mul * m_pixel_variance[c];
 			}
-		}
-		if (diffs < pixel2)
-		{
-			if (bTwice)
-				break;
-			bTwice = TqTrue;
-		}
-		else
-		{
-			bTwice = TqFalse;
 		}
 	}
 	for (c = 0; c < m_SamplesPerPixel; c++)
@@ -1312,14 +1296,14 @@ void CqTextureMap::Open()
  */
 void CqTextureMap::PrepareSampleOptions( std::map<std::string, IqShaderData*>& paramMap )
 {
-	m_sblur = 0.0f;   // Turnon the blur per texture(), environment() or shadow() by default
+	m_sblur = 0.0f;   // TurnOff the blur per texture(), environment() or shadow() by default
 	m_tblur = 0.0f;
 	m_pswidth = 1.0f; // In case of sampling
 	m_ptwidth = 1.0f;
 	m_samples = 16.0f; // The shadow required to be init. at 16.0 by default
 
 	if (Type() != MapType_Shadow)
-		m_samples = 8.0;
+		m_samples = 8.0f;
 
 	// Get parameters out of the map.
 	if ( paramMap.size() != 0 )
@@ -1352,8 +1336,11 @@ void CqTextureMap::PrepareSampleOptions( std::map<std::string, IqShaderData*>& p
 				paramMap[ "tblur" ] ->GetFloat( m_tblur );
 			}
 		}
-		if ( paramMap.find( "samples" ) != paramMap.end() )
+
+ 		if ( paramMap.find( "samples" ) != paramMap.end() )
+		{
 			paramMap[ "samples" ] ->GetFloat( m_samples );
+		}
 
 		if ( paramMap.find( "filter" ) != paramMap.end() )
 		{
@@ -1365,14 +1352,12 @@ void CqTextureMap::PrepareSampleOptions( std::map<std::string, IqShaderData*>& p
 			m_FilterFunc = CalculateFilter(filter);
 
 		}
-		if ( paramMap.find( "lerp" ) != paramMap.end() )
-		{
-			paramMap[ "lerp" ] ->GetFloat( m_lerp );
-		}
+		
 		if ( paramMap.find( "pixelvariance" ) != paramMap.end() )
 		{
 			paramMap[ "pixelvariance" ] ->GetFloat( m_pixelvariance );
 		}
+
 	}
 }
 
