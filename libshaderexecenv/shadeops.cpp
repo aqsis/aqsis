@@ -5644,6 +5644,8 @@ STD_SOIMPL CqShaderExecEnv::SO_occlusion( STRINGVAL occlmap, FLOATVAL channel, P
 	IqTextureMap* pMap = QGetRenderContextI() ->GetShadowMap( STRING( occlmap ) );
 	END_UNIFORM_SECTION
 
+	CqVector3D L(0,0,-1);
+
 	__fVarying = TqTrue;
 	if ( pMap != 0 && pMap->IsValid() )
 	{
@@ -5662,12 +5664,12 @@ STD_SOIMPL CqShaderExecEnv::SO_occlusion( STRINGVAL occlmap, FLOATVAL channel, P
 
 		GETPOINT( P );
 		GETNORMAL( N );
-		TqInt i;
-		for( i = 0; i < pMap->NumPages(); i++ )
+		TqInt i = pMap->NumPages() - 1;
+		for( ; i >= 0; i-- )
 		{
 			// Check if the lightsource is behind the sample.
 			CqVector3D Nl = pMap->GetMatrix(2, i) * NORMAL( N );
-			TqFloat cosangle = Nl * CqVector3D(0,0,-1);
+			TqFloat cosangle = Nl * L;
 			if( cosangle < 0.0f )
 				continue;
 
