@@ -228,7 +228,7 @@ public:
      */
     TqBool	operator<=( const CqVector3D &Cmp ) const
     {
-        return ( ( m_x <= Cmp.m_x ) || ( m_y <= Cmp.m_y ) || ( m_z <= Cmp.m_z ) );
+        return ( ( m_x <= Cmp.m_x ) && ( m_y <= Cmp.m_y ) && ( m_z <= Cmp.m_z ) );
     }
     /** Component wise greater than operator.
      */
@@ -240,7 +240,7 @@ public:
      */
     TqBool	operator<( const CqVector3D &Cmp ) const
     {
-        return ( ( m_x < Cmp.m_x ) || ( m_y < Cmp.m_y ) || ( m_z < Cmp.m_z ) );
+        return ( ( m_x < Cmp.m_x ) && ( m_y < Cmp.m_y ) && ( m_z < Cmp.m_z ) );
     }
 
     friend CqVector3D	operator+( const TqFloat f, const CqVector3D& v )
