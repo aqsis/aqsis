@@ -896,6 +896,12 @@ struct SqVData
 };
 
 
+#ifdef AQSIS_SYSTEM_MACOSX
+// Workaround for Mac OS X gcc 2.95 compiler error -
+// "Fixup [linenumber] too large for field width of 16 bits"
+#pragma CC_OPT_OFF
+#endif
+
 void CqWSurf::SmoothVertexPoints( TqInt oldcVerts, TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os,
                                   TqBool has_s, TqBool has_t, TqBool has_Cs, TqBool has_Os )
 {
@@ -991,6 +997,9 @@ void CqWSurf::SmoothVertexPoints( TqInt oldcVerts, TqBool uses_s, TqBool uses_t,
 	}
 }
 
+#ifdef AQSIS_SYSTEM_MACOSX
+#pragma CC_OPT_RESTORE
+#endif
 
 //---------------------------------------------------------------------
 /** Split the surface into smaller patches
@@ -1554,6 +1563,12 @@ CqBound CqWSurf::Bound() const
  * out how many subdivisions to perform to get a MP grid and store it.
  */
 
+#ifdef AQSIS_SYSTEM_MACOSX
+// Workaround for Mac OS X gcc 2.95 compiler error -
+// "Fixup [linenumber] too large for field width of 16 bits"
+#pragma CC_OPT_OFF
+#endif
+
 TqBool CqWSurf::Diceable()
 {
 	if( !m_fSubdivided )	return( TqFalse );
@@ -1600,6 +1615,9 @@ TqBool CqWSurf::Diceable()
 	}
 }
 
+#ifdef AQSIS_SYSTEM_MACOSX
+#pragma CC_OPT_RESTORE
+#endif
 
 //---------------------------------------------------------------------
 /** Dice the patch into a micropolygon grid for shading and rendering.
@@ -1706,6 +1724,12 @@ TqInt CqMotionWSurf::Split( std::vector<CqBasicSurface*>& aSplits )
  * out how many subdivisions to perform to get a MP grid and store it.
  */
 
+#ifdef AQSIS_SYSTEM_MACOSX
+// Workaround for Mac OS X gcc 2.95 compiler error -
+// "Fixup [linenumber] too large for field width of 16 bits"
+#pragma CC_OPT_OFF
+#endif
+
 TqBool CqMotionWSurf::Diceable()
 {
 	// Fail if not a quad patch
@@ -1752,6 +1776,9 @@ TqBool CqMotionWSurf::Diceable()
 	}
 }
 
+#ifdef AQSIS_SYSTEM_MACOSX
+#pragma CC_OPT_RESTORE
+#endif
 
 //---------------------------------------------------------------------
 /** Dice the patch into a micropolygon grid for shading and rendering.
