@@ -93,7 +93,7 @@ struct SqLabel
 
 union UsProgramElement
 {
-	void( CqShaderVM::*m_Command ) ();		//< Pointer to a function.
+	void( CqShaderVM::*m_Command ) ();		///< Pointer to a function.
 	TqFloat	m_FloatVal;				///< Absolute float value.
 	CqString*	m_pString;				///< Absolute string value.
 	TqInt	m_iVariable;			///< Shader variable index.

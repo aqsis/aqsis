@@ -19,7 +19,7 @@
 
 
 /** \file
-		\brief Declares support structires for registering shaders, and any built in shaders.
+		\brief Declares support structures for registering shaders, and any built in shaders.
 		\author Paul C. Gregory (pgregory@aqsis.com)
 */
 
@@ -182,7 +182,7 @@ class CqShader : public IqShader
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Sappire )
+END_NAMESPACE( Aqsis )
 
 //}  // End of #ifdef SHADERS_H_INCLUDED
 #endif

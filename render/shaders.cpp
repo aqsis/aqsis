@@ -19,7 +19,7 @@
 
 
 /** \file
-		\brief Implements support structires for registering shaders, and any built in shaders.
+		\brief Implements support structures for registering shaders, and any built in shaders.
 		\author Paul C. Gregory (pgregory@aqsis.com)
 */
 
