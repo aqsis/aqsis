@@ -1610,7 +1610,7 @@ TqBool CqWSurf::Diceable()
 	{
 		m_DiceCount = static_cast<TqInt>( l );
 		m_DiceCount = CEIL_POW2( m_DiceCount );
-		m_DiceCount = ( m_DiceCount == 16 ) ? 4 : ( m_DiceCount == 8 ) ? 3 : ( m_DiceCount == 4 ) ? 2 : ( m_DiceCount == 2 ) ? 1 : 0;
+		m_DiceCount = ( m_DiceCount == 16 ) ? 4 : ( m_DiceCount == 8 ) ? 3 : ( m_DiceCount == 4 ) ? 2 : ( m_DiceCount == 2 ) ? 1 : 1;
 		return ( TqTrue );
 	}
 }
@@ -1771,7 +1771,7 @@ TqBool CqMotionWSurf::Diceable()
 	{
 		m_DiceCount = static_cast<TqInt>( l );
 		m_DiceCount = CEIL_POW2( m_DiceCount );
-		m_DiceCount = ( m_DiceCount == 16 ) ? 4 : ( m_DiceCount == 8 ) ? 3 : ( m_DiceCount == 4 ) ? 2 : ( m_DiceCount == 2 ) ? 1 : 0;
+		m_DiceCount = ( m_DiceCount == 16 ) ? 4 : ( m_DiceCount == 8 ) ? 3 : ( m_DiceCount == 4 ) ? 2 : ( m_DiceCount == 2 ) ? 1 : 1;
 		return ( TqTrue );
 	}
 }
