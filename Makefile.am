@@ -3,6 +3,7 @@ SUBDIRS = libaqsistypes librib2 librib2stream librib2ri libslparse libcodegenvm 
 EXTRA_DIST = ribber.cfg
 
 test:
+	cd aqsl/tests; $(MAKE) $(AM_MAKEFLAGS) test
 	cd librib2/tests; $(MAKE) $(AM_MAKEFLAGS) test
 
 .PHONY: test

@@ -24,6 +24,7 @@ librib2ri/Makefile \
 libslparse/Makefile \
 libcodegenvm/Makefile \
 aqsl/Makefile \
+aqsl/tests/Makefile \
 aqsis/Makefile \
 Makefile )
 
