@@ -79,6 +79,8 @@ static TqInt g_SamplesPerElement = 0;
 static int g_Window = 0;
 static GLubyte* g_Image = 0;
 static TqFloat* g_Data = 0;
+static g_CWXmin, g_CWYmin;
+static g_CWXmax, g_CWYmax;
 
 void display( void )
 {
@@ -264,6 +266,11 @@ TqInt Open( SOCKET s, SqDDMessageBase* pMsgB )
 	g_ImageHeight = ( message->m_CropWindowYMax - message->m_CropWindowYMin );
 	g_SamplesPerElement = message->m_SamplesPerElement;
 
+	g_CWXmin = message->m_CropWindowXMin;
+	g_CWYmin = message->m_CropWindowYMin;
+	g_CWXmax = message->m_CropWindowXMax;
+	g_CWYmax = message->m_CropWindowYMax;
+
 	if ( g_SamplesPerElement > 1 )
 		return -1;
 
@@ -287,9 +294,14 @@ TqInt Data( SOCKET s, SqDDMessageBase* pMsgB )
 	const TqInt linelength = g_ImageWidth * 3;
 	char* bucket = reinterpret_cast<char*>( &message->m_Data );
 
-	for ( TqInt y = message->m_YMin; y < message->m_YMaxPlus1; y++ )
+	// CHeck if the beck is not at all within the crop window.
+	if( message->m_XMin > g_CWXmax || message->m_XMaxPlus1 < g_CWXmin ||
+	    message->m_YMin > g_CWYmax || message->m_YMaxPlus1 < g_CWYmin )
+		return( 0 );
+
+	for ( TqInt y = message->m_YMin - g_CWYmin; y < message->m_YMaxPlus1 - g_CWYmin; y++ )
 	{
-		for ( TqInt x = message->m_XMin; x < message->m_XMaxPlus1; x++ )
+		for ( TqInt x = message->m_XMin - g_CWXmin; x < message->m_XMaxPlus1 - g_CWXmin; x++ )
 		{
 			if ( x >= 0 && y >= 0 && x < g_ImageWidth && y < g_ImageHeight )
 			{
@@ -304,8 +316,8 @@ TqInt Data( SOCKET s, SqDDMessageBase* pMsgB )
 		}
 	}
 
-	const TqInt BucketX = message->m_XMin;
-	const TqInt BucketY = g_ImageHeight - ( message->m_YMaxPlus1 );
+	const TqInt BucketX = message->m_XMin  - g_CWXmin;
+	const TqInt BucketY = g_ImageHeight - ( message->m_YMaxPlus1 - g_CWYmin );
 	const TqInt BucketW = message->m_XMaxPlus1 - message->m_XMin;
 	const TqInt BucketH = message->m_YMaxPlus1 - message->m_YMin;
 

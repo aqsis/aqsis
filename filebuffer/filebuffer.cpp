@@ -82,7 +82,10 @@ TqInt	XRes, YRes;
 TqInt	SamplesPerElement;
 unsigned char* pByteData;
 TIFF*	pOut;
-TqInt	CWXMin, CWYMin;
+TqInt	g_CWXmin, g_CWYmin;
+TqInt	g_CWXmax, g_CWYmax;
+
+
 /// Storage for the output file name.
 std::string	strFilename( "output.tif" );
 
@@ -106,9 +109,12 @@ TqInt Open( SOCKET s, SqDDMessageBase* pMsgB )
 
 	XRes = ( pMsg->m_CropWindowXMax - pMsg->m_CropWindowXMin );
 	YRes = ( pMsg->m_CropWindowYMax - pMsg->m_CropWindowYMin );
-	CWXMin = pMsg->m_CropWindowXMin;
-	CWYMin = pMsg->m_CropWindowYMin;
 	SamplesPerElement = pMsg->m_SamplesPerElement;
+
+	g_CWXmin = pMsg->m_CropWindowXMin;
+	g_CWYmin = pMsg->m_CropWindowYMin;
+	g_CWXmax = pMsg->m_CropWindowXMax;
+	g_CWYmax = pMsg->m_CropWindowYMax;
 
 	// Create a buffer big enough to hold a row of buckets.
 	pByteData = new unsigned char[ XRes * YRes * SamplesPerElement ];
@@ -123,11 +129,18 @@ TqInt Data( SOCKET s, SqDDMessageBase* pMsgB )
 	TqInt	linelen = XRes * SamplesPerElement;
 	char* pBucket = reinterpret_cast<char*>( &pMsg->m_Data );
 
+	SqDDMessageData * const message = static_cast<SqDDMessageData*>( pMsgB );
+
+	// CHeck if the beck is not at all within the crop window.
+	if( message->m_XMin > g_CWXmax || message->m_XMaxPlus1 < g_CWXmin ||
+	    message->m_YMin > g_CWYmax || message->m_YMaxPlus1 < g_CWYmin )
+		return( 0 );
+
 	TqInt y;
-	for ( y = pMsg->m_YMin; y < pMsg->m_YMaxPlus1; y++ )
+	for ( y = pMsg->m_YMin - g_CWYmin; y < pMsg->m_YMaxPlus1 - g_CWYmin; y++ )
 	{
 		TqInt x;
-		for ( x = pMsg->m_XMin; x < pMsg->m_XMaxPlus1; x++ )
+		for ( x = pMsg->m_XMin - g_CWXmin; x < pMsg->m_XMaxPlus1 - g_CWXmin; x++ )
 		{
 			if ( x >= 0 && y >= 0 && x < XRes && y < YRes )
 			{
@@ -190,8 +203,8 @@ TqInt Close( SOCKET s, SqDDMessageBase* pMsgB )
 			TIFFSetField( pOut, TIFFTAG_EXTRASAMPLES, 1, ExtraSamplesTypes );
 
 		// Set the position tages in case we aer dealing with a cropped image.
-		TIFFSetField( pOut, TIFFTAG_XPOSITION, ( float ) CWXMin );
-		TIFFSetField( pOut, TIFFTAG_YPOSITION, ( float ) CWYMin );
+		TIFFSetField( pOut, TIFFTAG_XPOSITION, ( float ) g_CWXmin );
+		TIFFSetField( pOut, TIFFTAG_YPOSITION, ( float ) g_CWYmin );
 
 		TqInt	linelen = XRes * SamplesPerElement;
 		TqInt row;
