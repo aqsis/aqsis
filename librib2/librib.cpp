@@ -112,6 +112,7 @@ extern "C" const char* StandardParameters[][2] =
             {"texture", "uniform string" },
             {"display", "uniform string" },
             {"dsolibs", "uniform string" },
+            {"plugin", "uniform string" },
             {"auto_shadows", "uniform string" },
             {"endofframe", "uniform integer" },
 			{"offset", "uniform float"},
