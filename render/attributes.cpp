@@ -38,6 +38,9 @@ START_NAMESPACE( Aqsis )
 std::vector<CqAttributes*>	Attribute_stack;
 
 
+const TqInt CqAttributes::CqHashTable::tableSize = 127;
+
+
 /** A macro to take care of adding a system attribute given a name.
  *  Creates a new CqParameter derived class, initialises it to the given default value and 
  *  adds it to the default attributes member.
@@ -114,7 +117,6 @@ CqAttributes::CqAttributes() :
 	ADD_SYSTEM_ATTR2(Orientation, TqInt, type_integer, OrientationLH, OrientationLH);	// the orientation associated primitives are described in.
 	ADD_SYSTEM_ATTR(Sides, TqInt, type_integer, 2);		// the number of visible sides associated primitives have.
 
-	pdefattrs->AddRef();
 	AddAttribute(pdefattrs);
 }
 
@@ -142,12 +144,12 @@ CqAttributes::~CqAttributes()
 	assert( RefCount() == 0 );
 
 	// Unreference the system attributes.
-	TqInt i = m_aAttributes.size();
-	while ( i-- > 0 )
-	{
-		m_aAttributes[ i ] ->Release();
-		m_aAttributes[ i ] = 0;
-	}
+//	TqInt i = m_aAttributes.size();
+//	while ( i-- > 0 )
+//	{
+//		m_aAttributes[ i ] ->Release();
+//		m_aAttributes[ i ] = 0;
+//	}
 
 	// Remove ourself from the stack
 	std::vector<CqAttributes*>::iterator p = Attribute_stack.begin();
@@ -168,13 +170,14 @@ CqAttributes::~CqAttributes()
 CqAttributes& CqAttributes::operator=( const CqAttributes& From )
 {
 	// Copy the system attributes.
-	m_aAttributes.resize( From.m_aAttributes.size() );
-	TqInt i = From.m_aAttributes.size();
-	while ( i-- > 0 )
-	{
-		m_aAttributes[ i ] = From.m_aAttributes[ i ];
-		m_aAttributes[ i ] ->AddRef();
-	}
+//	m_aAttributes.resize( From.m_aAttributes.size() );
+//	TqInt i = From.m_aAttributes.size();
+//	while ( i-- > 0 )
+//	{
+//		m_aAttributes[ i ] = From.m_aAttributes[ i ];
+//		m_aAttributes[ i ] ->AddRef();
+//	}
+	m_aAttributes = From.m_aAttributes;
 
 	// Copy the lightsource list.
 	m_apLightsources.resize( 0 );

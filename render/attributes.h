@@ -29,6 +29,7 @@
 #define ATTRIBUTES_H_INCLUDED 1
 
 #include	<vector>
+#include	<list>
 
 #include	"aqsis.h"
 
@@ -87,7 +88,8 @@ class _qShareC	CqAttributes : public CqRefCount, public IqAttributes
 		 */
 		_qShareM	void	AddAttribute( CqSystemOption* pAttribute )
 		{
-			m_aAttributes.push_back( pAttribute );
+			m_aAttributes.Add( pAttribute );
+			//m_aAttributes.push_back( pAttribute );
 		}
 		/** Get a pointer to a named user defined attribute.
 		 * \param straName the name of the attribute to retrieve.
@@ -95,9 +97,10 @@ class _qShareC	CqAttributes : public CqRefCount, public IqAttributes
 		 */
 		const	CqSystemOption* pAttribute( const char* strName ) const
 		{
-			for ( std::vector<CqSystemOption*>::const_iterator i = m_aAttributes.begin(); i != m_aAttributes.end(); i++ )
-				if ( ( *i ) ->strName().compare( strName ) == 0 ) return ( *i );
-			return ( 0 );
+			return( m_aAttributes.Find( strName ) );
+			//for ( std::vector<CqSystemOption*>::const_iterator i = m_aAttributes.begin(); i != m_aAttributes.end(); i++ )
+			//	if ( ( *i ) ->strName().compare( strName ) == 0 ) return ( *i );
+			//return ( 0 );
 		}
 		/** Get a pointer to a named user defined attribute suitable for writing.
 		 * If the attribute has more than 1 external reference, create a duplicate an return that.
@@ -107,7 +110,21 @@ class _qShareC	CqAttributes : public CqRefCount, public IqAttributes
 		 */
 		CqSystemOption* pAttributeWrite( const char* strName )
 		{
-			for ( std::vector<CqSystemOption*>::iterator i = m_aAttributes.begin(); i != m_aAttributes.end(); i++ )
+			CqSystemOption* pAttr = m_aAttributes.Find( strName );
+			if( NULL != pAttr)
+			{
+				if( pAttr->RefCount() == 1 )
+					return( pAttr );
+				else
+				{
+					CqSystemOption* pNew = new CqSystemOption( *pAttr );
+					m_aAttributes.Remove( pAttr );
+					m_aAttributes.Add( pNew );
+					pNew->AddRef();
+					return(pNew);
+				}
+			}
+/*			for ( std::vector<CqSystemOption*>::iterator i = m_aAttributes.begin(); i != m_aAttributes.end(); i++ )
 			{
 				if ( ( *i ) ->strName().compare( strName ) == 0 )
 				{
@@ -121,10 +138,13 @@ class _qShareC	CqAttributes : public CqRefCount, public IqAttributes
 						return ( *i );
 					}
 				}
-			}
-			m_aAttributes.push_back( new CqSystemOption( strName ) );
-			m_aAttributes.back() ->AddRef();
-			return ( m_aAttributes.back() );
+			}*/
+			//m_aAttributes.push_back( new CqSystemOption( strName ) );
+			//m_aAttributes.back() ->AddRef();
+			//return ( m_aAttributes.back() );
+			CqSystemOption* pNew = new CqSystemOption( strName );
+			m_aAttributes.Add( pNew );
+			return( pNew );
 		}
 
 		/** Add a lightsource to the current available list.
@@ -298,7 +318,126 @@ class _qShareC	CqAttributes : public CqRefCount, public IqAttributes
 		virtual	void	AddRef()	{ CqRefCount::AddRef(); }
 
 	private:
-		std::vector<CqSystemOption*>	m_aAttributes;		///< a vector of user defined attribute pointers.
+		class CqHashTable
+		{
+			private:
+				static const TqInt tableSize;
+
+			public:
+				CqHashTable()	
+				{
+					m_aLists.resize(tableSize);
+				}
+				virtual	~CqHashTable()	
+				{
+					// Release all the system options we have a handle on.
+					std::vector<std::list<CqSystemOption*> >::iterator i;
+					for( i = m_aLists.begin(); i != m_aLists.end(); i++ )
+					{
+						std::list<CqSystemOption*>::iterator i2;
+						for( i2 = (*i).begin(); i2 != (*i).end(); i2++ )
+							(*i2)->Release();
+					}
+				}
+
+				const CqSystemOption*	Find(const TqChar* pname) const
+				{
+					TqInt i = _hash(pname);
+
+					if( m_aLists[i].empty() )
+						return( 0 );
+					
+					std::list<CqSystemOption*>::const_iterator iEntry = m_aLists[i].begin();
+					if( iEntry == m_aLists[i].end() )
+						return( *iEntry );
+					else
+					{
+						while( iEntry != m_aLists[i].end() )
+						{
+							if( ( *iEntry )->strName().compare( pname ) == 0 )
+								return( *iEntry );
+							iEntry++;
+						}
+					}
+					
+					return( 0 );
+				}
+
+				CqSystemOption*	Find(const TqChar* pname)
+				{
+					TqInt i = _hash(pname);
+					
+					if( m_aLists[i].empty() )
+						return( 0 );
+
+					std::list<CqSystemOption*>::const_iterator iEntry = m_aLists[i].begin();
+					if( iEntry == m_aLists[i].end() )
+						return( *iEntry );
+					else
+					{
+						while( iEntry != m_aLists[i].end() )
+						{
+							if( ( *iEntry )->strName().compare( pname ) == 0 )
+								return( *iEntry );
+							iEntry++;
+						}
+					}
+					
+					return( 0 );
+				}
+
+				void Add( CqSystemOption* pOption )
+				{
+					TqInt i = _hash( pOption->strName().c_str() );
+					m_aLists[i].push_back( pOption );
+					pOption->AddRef();
+				}
+
+				void Remove( CqSystemOption* pOption )
+				{
+					TqInt i = _hash( pOption->strName().c_str() );
+					
+					std::list<CqSystemOption*>::iterator iEntry = m_aLists[i].begin();
+					while( iEntry != m_aLists[i].end() )
+					{
+						if( ( *iEntry ) == pOption )
+						{
+							pOption->Release();
+							m_aLists[i].remove(*iEntry);
+							return;
+						}
+						iEntry++;
+					}
+				}
+
+				CqHashTable& operator=( const CqHashTable& From )
+				{
+					std::vector<std::list<CqSystemOption*> >::const_iterator i;
+					for( i = From.m_aLists.begin(); i != From.m_aLists.end(); i++ )
+					{
+						std::list<CqSystemOption*>::const_iterator i2;
+						for( i2 = (*i).begin(); i2 != (*i).end(); i2++ )
+							Add( *i2 );
+					}
+					return( *this );
+				}
+
+			private:
+				TqInt _hash( const TqChar* string ) const
+				{
+					assert (string != 0 && string[0] != 0);
+
+					TqUchar h = string[0];
+					for(TqInt i = 1; string[i] != 0; ++i)
+						h = (h << 4) + string[i];
+					
+					return(h % tableSize); // remainder				
+				}
+
+				std::vector<std::list<CqSystemOption*> >	m_aLists;
+		};
+		
+		CqHashTable	m_aAttributes;					///< a vector of user defined attribute pointers.
 
 		CqBound	m_Bound;							///< the bound used for any associated primitives.
 		IqShader*	m_pshadDisplacement;				///< a pointer to the current displacement shader.
