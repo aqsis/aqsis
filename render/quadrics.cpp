@@ -939,7 +939,20 @@ CqVector3D CqParaboloid::DicePoint( TqInt u, TqInt v )
 
 CqVector3D CqParaboloid::DicePoint( TqInt u, TqInt v, CqVector3D& Normal )
 {
-	return ( DicePoint( u, v ) );
+	TqFloat theta = RAD( m_ThetaMin + ( ( m_ThetaMax - m_ThetaMin ) * ( TqFloat ) u ) / m_uDiceSize );
+	TqFloat sin_theta = sin( theta );
+	TqFloat cos_theta = cos( theta );
+
+	TqFloat z = m_ZMin + ( ( TqFloat ) v * ( m_ZMax - m_ZMin ) ) / m_vDiceSize;
+	TqFloat r = m_RMax * sqrt( z / m_ZMax );
+
+	TqFloat dzdr = r * 2.0 * m_ZMax / ( m_RMax * m_RMax );
+	TqFloat normalAngle = PI / 2.0 - atan( dzdr );
+	Normal.x( cos_theta * cos( normalAngle ) );
+	Normal.y( sin_theta * cos( normalAngle ) );
+	Normal.z( -sin( normalAngle ) );
+	
+	return ( CqVector3D( r * cos_theta, r * sin_theta, z ) );
 }
 
 
