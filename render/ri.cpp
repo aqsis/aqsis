@@ -3155,7 +3155,6 @@ RtVoid	RiSubdivisionMeshV(RtToken scheme, RtInt nfaces, RtInt nvertices[], RtInt
 		{
 			// Create a surface face
 			RtBoolean fValid=RI_TRUE;
-			RtInt iStartV=vertices[iP];
 			RtInt i;
 			for(i=0; i<nvertices[face]; i++)	// Fill in the points
 			{
@@ -3296,6 +3295,7 @@ static RtBoolean ProcessPrimitiveVariables(CqSurface* pSurface, PARAMETERLIST)
 	// Fill in the position variable according to type.
 	if(fP!=RIL_NONE)
 	{
+		TqUint i;
 		switch(fP)
 		{
 			case RIL_P:
@@ -3322,6 +3322,7 @@ static RtBoolean ProcessPrimitiveVariables(CqSurface* pSurface, PARAMETERLIST)
 	// Fill in the position variable according to type.
 	if(fN!=RIL_NONE)
 	{
+		TqUint i;
 		switch(fN)
 		{
 			case RIL_N:
@@ -3342,6 +3343,7 @@ static RtBoolean ProcessPrimitiveVariables(CqSurface* pSurface, PARAMETERLIST)
 	// Copy any specified texture coordinates to the surface.
 	if(fT!=RIL_NONE)
 	{
+		TqUint i;
 		switch(fT)
 		{
 			case RIL_s:
@@ -3376,6 +3378,7 @@ static RtBoolean ProcessPrimitiveVariables(CqSurface* pSurface, PARAMETERLIST)
 	// Copy any specified varying color values to the surface
 	if(fCs)
 	{
+		TqUint i;
 		pSurface->Cs().SetSize(pSurface->cVarying());
 		for(i=0; i<pSurface->cVarying(); i++)
 			pSurface->Cs()[i]=CqColor(pCs[(i*3)],pCs[(i*3)+1],pCs[(i*3)+2]);
@@ -3383,6 +3386,7 @@ static RtBoolean ProcessPrimitiveVariables(CqSurface* pSurface, PARAMETERLIST)
 
 	if(fOs)
 	{
+		TqUint i;
 		pSurface->Os().SetSize(pSurface->cVarying());
 		for(i=0; i<pSurface->cVarying(); i++)
 			pSurface->Os()[i]=CqColor(pOs[(i*3)],pOs[(i*3)+1],pOs[(i*3)+2]);

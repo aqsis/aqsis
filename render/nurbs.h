@@ -55,28 +55,28 @@ class CqSurfaceNURBS : public CqSurface
 
 							/** Get the order of the NURBS surface in the u direction.
 							 */
-				TqInt		uOrder() const		{return(m_uOrder);}
+				TqUint		uOrder() const		{return(m_uOrder);}
 							/** Get the order of the NURBS surface in the v direction.
 							 */
-				TqInt		vOrder() const		{return(m_vOrder);}
+				TqUint		vOrder() const		{return(m_vOrder);}
 							/** Get the degree of the NURBS surface in the u direction.
 							 */
-				TqInt		uDegree() const		{return(m_uOrder-1);}
+				TqUint		uDegree() const		{return(m_uOrder-1);}
 							/** Get the degree of the NURBS surface in the v direction.
 							 */
-				TqInt		vDegree() const		{return(m_vOrder-1);}
+				TqUint		vDegree() const		{return(m_vOrder-1);}
 							/** Get the number of control points in the u direction.
 							 */
-				TqInt		cuVerts() const		{return(m_cuVerts);}
+				TqUint		cuVerts() const		{return(m_cuVerts);}
 							/** Get the number of control points in the v direction.
 							 */
-				TqInt		cvVerts() const		{return(m_cvVerts);}
+				TqUint		cvVerts() const		{return(m_cvVerts);}
 							/** Get the length of the knot vector for the u direction.
 							 */
-				TqInt		cuKnots() const		{return(m_cuVerts+m_uOrder);}
+				TqUint		cuKnots() const		{return(m_cuVerts+m_uOrder);}
 							/** Get the length of the knot vector for the v direction.
 							 */
-				TqInt		cvKnots() const		{return(m_cvVerts+m_vOrder);}
+				TqUint		cvKnots() const		{return(m_cvVerts+m_vOrder);}
 							/** Get a reference to the knot vector for the u direction.
 							 */
 				std::vector<TqFloat>& auKnots()	{return(m_auKnots);}
@@ -91,13 +91,13 @@ class CqSurfaceNURBS : public CqSurface
 							 * \param v Index in the v direction.
 							 * \return Reference to the 4D homogenous control point.
 							 */
-				CqVector4D&	CP(const TqInt u, TqInt v)	{return(P()[(v*m_cuVerts)+u]);}
+				CqVector4D&	CP(const TqUint u, TqUint v)	{return(P()[(v*m_cuVerts)+u]);}
 							/** Get the control point at the specified u,v index.
 							 * \param u Index in the u direction.
 							 * \param v Index in the v direction.
 							 * \return Reference to the 4D homogenous control point.
 							 */
-		const	CqVector4D&	CP(const TqInt u, TqInt v) const	
+		const	CqVector4D&	CP(const TqUint u, TqUint v) const	
 														{return(P()[(v*m_cuVerts)+u]);}
 
 							/** Initialise the NURBS structures to take a NURBS surfafe of the specified dimensions.
@@ -106,10 +106,10 @@ class CqSurfaceNURBS : public CqSurface
 							 * \param cuVerts The required control point count in the u direction.
 							 * \param cvVerts The required control point count in the v direction.
 							 */
-				void		Init(TqInt uOrder, TqInt vOrder, TqInt cuVerts, TqInt cvVerts)
+				void		Init(TqUint uOrder, TqUint vOrder, TqUint cuVerts, TqUint cvVerts)
 												{
-													TqInt uKnots=cuVerts+uOrder;
-													TqInt vKnots=cvVerts+vOrder;
+													TqUint uKnots=cuVerts+uOrder;
+													TqUint vKnots=cvVerts+vOrder;
 													m_auKnots.resize(uKnots);
 													m_avKnots.resize(vKnots);
 													P().SetSize(cuVerts*cvVerts);
@@ -118,16 +118,16 @@ class CqSurfaceNURBS : public CqSurface
 													m_cuVerts=cuVerts;
 													m_cvVerts=cvVerts;
 												}
-				TqInt		FindSpanU(TqFloat u) const;
-				TqInt		FindSpanV(TqFloat v) const;
-				void		BasisFunctions(TqFloat u, TqInt span, std::vector<TqFloat>& aKnots, TqInt k, std::vector<TqFloat>& BasisVals);
+				TqUint		FindSpanU(TqFloat u) const;
+				TqUint		FindSpanV(TqFloat v) const;
+				void		BasisFunctions(TqFloat u, TqUint span, std::vector<TqFloat>& aKnots, TqInt k, std::vector<TqFloat>& BasisVals);
 				CqVector4D	Evaluate(TqFloat u, TqFloat v);
 				void		SplitNURBS(CqSurfaceNURBS& nrbA, CqSurfaceNURBS& nrbB,	TqBool dirflag);
 				void		Decompose(std::vector<CqSurfaceNURBS>& Array);
 				void		RefineKnotU(const std::vector<TqFloat>& X);
 				void		RefineKnotV(const std::vector<TqFloat>& X);
-				TqInt		InsertKnotU(TqFloat u, TqInt r);
-				TqInt		InsertKnotV(TqFloat v, TqInt r);
+				TqUint		InsertKnotU(TqFloat u, TqInt r);
+				TqUint		InsertKnotV(TqFloat v, TqInt r);
 				void		ClampU();
 				void		ClampV();
 							/** Clamp the surface to ensure the knot vectors are 0-1 in each direction.
@@ -157,27 +157,27 @@ class CqSurfaceNURBS : public CqSurface
 				virtual	CqBound		Bound() const;
 				virtual	CqMicroPolyGridBase* Dice();
 				virtual	TqInt		Split(std::vector<CqBasicSurface*>& aSplits);
-				virtual TqBool	Diceable();
+				virtual TqBool		Diceable();
 
 				virtual void		Transform(const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx);
 							/** Get the number of uniform variables for a NURBS surface.
 							 */	
-				virtual	TqInt cUniform() const	{return(1);}	// NOTE: These are WRONG, see appnote #13
+				virtual	TqUint cUniform() const	{return(1);}	// NOTE: These are WRONG, see appnote #13
 							/** Get the number of varying variables for a NURBS surface.
 							 */	
-				virtual	TqInt cVarying() const	{return(4);}
+				virtual	TqUint cVarying() const	{return(4);}
 							/** Get the number of vertex variables for a NURBS surface.
 							 */	
-				virtual	TqInt cVertex() const		{return(m_cuVerts*m_cvVerts);}
+				virtual	TqUint cVertex() const		{return(m_cuVerts*m_cvVerts);}
 
 				
 	protected:
 				std::vector<TqFloat>	m_auKnots;	///< Knot vector for the u direction.
 				std::vector<TqFloat>	m_avKnots;	///< Knot vector for the v direction.
-				TqInt				m_uOrder;	///< Surface order in the u direction.
-				TqInt				m_vOrder;	///< Surface order in the v direction.
-				TqInt				m_cuVerts;	///< Control point count in the u direction.
-				TqInt				m_cvVerts;	///< Control point count in the v direction.
+				TqUint				m_uOrder;	///< Surface order in the u direction.
+				TqUint				m_vOrder;	///< Surface order in the v direction.
+				TqUint				m_cuVerts;	///< Control point count in the u direction.
+				TqUint				m_cvVerts;	///< Control point count in the v direction.
 };
 
 

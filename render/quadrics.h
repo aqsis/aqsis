@@ -50,13 +50,13 @@ class CqQuadric : public CqSurface
 	virtual void		Transform(const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx);
 						/** Get the number of uniform values for this GPrim.
 						 */
-	virtual	TqInt		cUniform() const					{return(1);}
+	virtual	TqUint		cUniform() const					{return(1);}
 						/** Get the number of varying values for this GPrim.
 						 */
-	virtual	TqInt		cVarying() const					{return(4);}
+	virtual	TqUint		cVarying() const					{return(4);}
 						/** Get the number of vertex values for this GPrim.
 						 */
-	virtual	TqInt		cVertex() const						{return(4);}
+	virtual	TqUint		cVertex() const						{return(4);}
 
 
 	// Overrides from CqSurface

@@ -91,13 +91,13 @@ class CqBasicSurface : public CqListEntry<CqBasicSurface>
 	virtual void		Transform(const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx)=0;
 						/** Get the number of uniform parameters required for this GPrim.
 						 */
-	virtual	TqInt		cUniform() const=0;
+	virtual	TqUint		cUniform() const=0;
 						/** Get the number of varying parameters required for this GPrim.
 						 */
-	virtual	TqInt		cVarying() const=0;
+	virtual	TqUint		cVarying() const=0;
 						/** Get the number of vertex parameters required for this GPrim.
 						 */
-	virtual	TqInt		cVertex() const=0;
+	virtual	TqUint		cVertex() const=0;
 
 	virtual CqString	strName() const;
 	virtual	TqInt		Uses() const;
@@ -372,9 +372,9 @@ class CqMotionSurface : public CqBasicSurface, public CqMotionSpec<T>
 												GetMotionObject(Time(i))->Discard();
 										}
 
-	virtual	TqInt		cUniform() const	{return(GetMotionObject(Time(0))->cUniform());}
-	virtual	TqInt		cVarying() const	{return(GetMotionObject(Time(0))->cVarying());}
-	virtual	TqInt		cVertex() const		{return(GetMotionObject(Time(0))->cVertex());}
+	virtual	TqUint		cUniform() const	{return(GetMotionObject(Time(0))->cUniform());}
+	virtual	TqUint		cVarying() const	{return(GetMotionObject(Time(0))->cVarying());}
+	virtual	TqUint		cVertex() const		{return(GetMotionObject(Time(0))->cVertex());}
 
 	// Overrides from CqMotionSpec		
 	virtual		void		ClearMotionObject(T& A) const	{};

@@ -478,8 +478,6 @@ CqMicroPolyGridBase* CqSurfacePatchBicubic::Dice()
 
 	// Initialise the forward difference variables.
 	InitFD(m_uDiceSize,m_vDiceSize,matDDx,matDDy,matDDz,DDxA,DDyA,DDzA);
-	TqFloat diu=1.0/m_uDiceSize;
-	TqFloat div=1.0/m_vDiceSize;
 
 	TqInt lUses=Uses();
 
@@ -656,8 +654,8 @@ TqBool	CqSurfacePatchBicubic::Diceable()
 
 	if(fabs(Area)>256)
 		return(TqFalse);
-	else
-		return(TqTrue);
+
+	return(TqTrue);
 }
 
 
@@ -1007,8 +1005,8 @@ TqBool	CqSurfacePatchBilinear::Diceable()
 
 	if(fabs(Area)>256)
 		return(TqFalse);
-	else
-		return(TqTrue);
+
+	return(TqTrue);
 }
 
 
@@ -1077,7 +1075,7 @@ CqBound CqSurfacePatchMeshBicubic::Bound() const
 	// Get the boundary in camera space.
 	CqVector3D	vecA(FLT_MAX, FLT_MAX, FLT_MAX);
 	CqVector3D	vecB(-FLT_MAX, -FLT_MAX, -FLT_MAX);
-	TqInt i;
+	TqUint i;
 	for(i=0; i<P().Size(); i++)
 	{
 		CqVector3D	vecV=P()[i];
@@ -1102,7 +1100,7 @@ CqBound CqSurfacePatchMeshBicubic::Bound() const
 void CqSurfacePatchMeshBicubic::Transform(const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx)
 {
 	// Tansform the control hull by the specified matrix.
-	TqInt i;
+	TqUint i;
 	for(i=0; i<P().Size(); i++)
 		P()[i]=matTx*P()[i];
 }
@@ -1309,7 +1307,7 @@ CqBound CqSurfacePatchMeshBilinear::Bound() const
 	// Get the boundary in camera space.
 	CqVector3D	vecA(FLT_MAX, FLT_MAX, FLT_MAX);
 	CqVector3D	vecB(-FLT_MAX, -FLT_MAX, -FLT_MAX);
-	TqInt i;
+	TqUint i;
 	for(i=0; i<P().Size(); i++)
 	{
 		CqVector3D	vecV=P()[i];
@@ -1334,7 +1332,7 @@ CqBound CqSurfacePatchMeshBilinear::Bound() const
 void CqSurfacePatchMeshBilinear::Transform(const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx)
 {
 	// Tansform the control hull by the specified matrix.
-	TqInt i;
+	TqUint i;
 	for(i=0; i<P().Size(); i++)
 		P()[i]=matTx*P()[i];
 }

@@ -715,7 +715,7 @@ SqParameterDeclaration CqRenderer::FindParameterDecl(const char* strDecl)
 	}
 
 	// Now search for an array specifier.
-	TqInt s,e;
+	TqUint s,e;
 	if((s=strLocalDecl.find('['))!=CqString::npos)
 	{
 		if((e=strLocalDecl.find(']'))!=CqString::npos && e>s)
@@ -777,10 +777,11 @@ SqParameterDeclaration CqRenderer::FindParameterDecl(const char* strDecl)
 	
 	strName=strDecl;
 	// Search the local parameter declaration list.
-	for(i=0; i<m_Symbols.size(); i++)
+	std::vector<SqParameterDeclaration>::const_iterator is;
+	for(is=m_Symbols.begin(); is!=m_Symbols.end(); is++)
 	{
-		if(strName==m_Symbols[i].m_strName)
-			return(m_Symbols[i]);
+		if(strName==is->m_strName)
+			return(*is);
 	}
 	return(SqParameterDeclaration("",Type_Nil,0,0,""));
 }

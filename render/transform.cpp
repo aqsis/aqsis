@@ -35,7 +35,7 @@ START_NAMESPACE(Aqsis)
 /** Constructor.
  */
 
-CqTransform::CqTransform() : m_cReferences(0), CqMotionSpec<CqMatrix>(CqMatrix()), m_StackIndex(0)
+CqTransform::CqTransform() : CqMotionSpec<CqMatrix>(CqMatrix()), m_cReferences(0), m_StackIndex(0)
 {
 	if(QGetRenderContext()!=0)
 	{
@@ -55,7 +55,7 @@ CqTransform::CqTransform() : m_cReferences(0), CqMotionSpec<CqMatrix>(CqMatrix()
 /** Copy constructor.
  */
 
-CqTransform::CqTransform(const CqTransform& From) : m_cReferences(0), CqMotionSpec<CqMatrix>(From), m_StackIndex(-1)
+CqTransform::CqTransform(const CqTransform& From) : CqMotionSpec<CqMatrix>(From), m_cReferences(0), m_StackIndex(-1)
 {
 	*this=From;
 	
@@ -78,7 +78,7 @@ CqTransform::CqTransform(const CqTransform& From) : m_cReferences(0), CqMotionSp
 
 CqTransform::~CqTransform()
 {
-	if(m_StackIndex>=0 && m_StackIndex<QGetRenderContext()->TransformStack().size())
+	if(m_StackIndex>=0 && m_StackIndex<static_cast<TqInt>(QGetRenderContext()->TransformStack().size()))
 	{
 		// Remove ourself from the stack
 		std::vector<CqTransform*>::iterator p=QGetRenderContext()->TransformStack().begin();

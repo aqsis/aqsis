@@ -35,6 +35,8 @@
 
 START_NAMESPACE(Aqsis)
 
+static	TqFloat	temp_float;
+
 //----------------------------------------------------------------------
 // SO_sprintf
 // Helper function to process a string inserting variable, used in printf and format.
@@ -44,8 +46,8 @@ static	CqString	SO_sprintf(const char* str, int cParams, CqVMStackEntry** apPara
 	CqString strRes("");
 	CqString strTrans=str; //str.TranslateEqcapes();
 
-	int i=0;
-	int ivar=0;
+	TqUint i=0;
+	TqUint ivar=0;
 	while(i<strTrans.size())
 	{
 		switch(strTrans[i])
@@ -137,12 +139,12 @@ TqBool CqShaderExecEnv::SO_init_illuminance()
 TqBool CqShaderExecEnv::SO_advance_illuminance()
 {
 	m_li++;
-	while(m_li<m_pSurface->pAttributes()->apLights().size() && 
+	while(m_li<static_cast<TqInt>(m_pSurface->pAttributes()->apLights().size()) && 
 	   m_pSurface->pAttributes()->apLights()[m_li]->pShader()->fAmbient())
 	{
 		m_li++;
 	}
-	if(m_li<m_pSurface->pAttributes()->apLights().size())	return(TqTrue);
+	if(m_li<static_cast<TqInt>(m_pSurface->pAttributes()->apLights().size()))	return(TqTrue);
 	else														return(TqFalse);
 }
 
@@ -2530,7 +2532,7 @@ STD_SOIMPL CqShaderExecEnv::SO_lightsource(STRINGVAL name, CqShaderVariable* pV,
 	// This should only be called within an Illuminance construct, so m_li should be valid.
 	TqInt i=0;
 	CqShader* pLightsource=0;
-	if(m_li<m_pSurface->pAttributes()->apLights().size())
+	if(m_li<static_cast<TqInt>(m_pSurface->pAttributes()->apLights().size()))
 		pLightsource=m_pSurface->pAttributes()->apLights()[m_li]->pShader();
 	if(pLightsource)	Result.SetValue(0,pLightsource->GetValue(STRING(name).c_str(), pV)?1.0f:0.0f);
 	else				Result.SetValue(0,0.0f);

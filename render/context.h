@@ -481,7 +481,7 @@ class CqMotionContext : public CqContext
 	virtual			TqBool		fMotionBlock() const{return(TqTrue);}
  
 	private:
-			TqInt				m_iTime;		///< The index of the current frame time.
+			TqUint					m_iTime;		///< The index of the current frame time.
 			std::vector<TqFloat>	m_aTimes;		///< An array of specified frame times.
 };
 

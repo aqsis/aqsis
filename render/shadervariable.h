@@ -228,7 +228,7 @@ class CqShaderVariable
 					/** Get the SIMD size of this variable.
 					 * \return Integer SIMD data size.
 					 */
-	virtual TqInt	Size() const=0;
+	virtual TqUint	Size() const=0;
 
 	protected:
 			CqString	m_strName;		///< Name of this variable.
@@ -286,7 +286,7 @@ class CqShaderVariableArray: public CqShaderVariable
 												}
 	virtual	EqVariableType	Type() const		{return(static_cast<EqVariableType>(m_aVariables[0]->Type()|Type_Array));}
 	virtual	CqShaderVariable* Clone() const;
-	virtual TqInt			Size() const		{return(m_aVariables[0]->Size());}
+	virtual TqUint			Size() const		{return(m_aVariables[0]->Size());}
 
 					/** Get a reference to the variable array.
 					 */
@@ -294,7 +294,7 @@ class CqShaderVariableArray: public CqShaderVariable
 					/** Array index access to the values in the array.
 					 * \param index Integer index intot he array.
 					 */
-			CqShaderVariable* operator[](TqInt index)	{return(m_aVariables[index]);}
+			CqShaderVariable* operator[](TqUint index)	{return(m_aVariables[index]);}
 					/** Get the length of the variable array.
 					 * \return Integer array length.
 					 */
@@ -344,12 +344,12 @@ class CqShaderVariableTyped : public CqShaderVariable
 					 * \param i Integer SIMD index.
 					 * \return Reference to the data at that index, or at aero if uniform.
 					 */
-	virtual	const	R&		operator[](const TqInt i) const=0;
+	virtual	const	R&		operator[](const TqUint i) const=0;
 					/** Indexed access to the SIMD data on this variable.
 					 * \param i Integer SIMD index.
 					 * \return Reference to the data at that index, or at aero if uniform.
 					 */
-	virtual			R&		operator[](const TqInt i)=0;
+	virtual			R&		operator[](const TqUint i)=0;
 
 	private:
 };
@@ -395,7 +395,7 @@ class CqShaderVariableUniform : public CqShaderVariableTyped<R>
 	virtual	R		GetValue()const				{return(m_Value);}
 	virtual	EqVariableType	Type() const		{return(static_cast<EqVariableType>(T|Type_Uniform|Type_Variable));}
 	virtual	CqShaderVariable* Clone() const		{return(new CqShaderVariableUniform<T,R>(*this));}
-	virtual TqInt	Size() const				{return(1);}
+	virtual TqUint	Size() const				{return(1);}
 
 	virtual	void	operator=(const CqShaderVariableTyped<R>* From)
 												{
@@ -403,9 +403,9 @@ class CqShaderVariableUniform : public CqShaderVariableTyped<R>
 												}
 					operator R&()				{return(m_Value);}
 			void	operator=(const R& v)		{m_Value=v;}
-	const	R&		operator[](const TqInt i) const
+	const	R&		operator[](const TqUint i) const
 												{return(m_Value);}
-			R&		operator[](const TqInt i)	{return(m_Value);}
+			R&		operator[](const TqUint i)	{return(m_Value);}
 
 	private:
 			R				m_Value;	///< Simgle uniform value of the appropriate type.
@@ -497,7 +497,7 @@ class CqShaderVariableVarying : public CqShaderVariableTyped<R>
 	virtual	R		GetValue()const				{return(m_aValue[*m_pIndex]);}
 	virtual	EqVariableType	Type() const		{return(static_cast<EqVariableType>(T|Type_Varying|Type_Variable));}
 	virtual	CqShaderVariable* Clone() const		{return(new CqShaderVariableVarying<T,R>(*this));}
-	virtual TqInt	Size() const				{return(m_Size);}
+	virtual TqUint	Size() const				{return(m_Size);}
 
 	virtual	void	operator=(const CqShaderVariableTyped<R>& From)
 												{
@@ -507,12 +507,12 @@ class CqShaderVariableVarying : public CqShaderVariableTyped<R>
 												}
 					operator R&()				{return(m_aValue[*m_pIndex]);}
 			void	operator=(const R& v)		{m_aValue[*m_pIndex]=v;}
-	const	R&		operator[](const TqInt i)	const
+	const	R&		operator[](const TqUint i)	const
 												{
 													assert(i<m_Size);
 													return(m_aValue[i]);
 												}
-			R&		operator[](const TqInt i)	{
+			R&		operator[](const TqUint i)	{
 													assert(i<m_Size);
 													return(m_aValue[i]);
 												}
@@ -520,7 +520,7 @@ class CqShaderVariableVarying : public CqShaderVariableTyped<R>
 	private:
 			std::vector<R>	m_aValue;		///< Array of values of the appropriate type.
 			TqInt*			m_pIndex;		///< Pointer to the SIMD index.
-			TqInt			m_Size;			///< Integer size of the SIMD data.
+			TqUint			m_Size;			///< Integer size of the SIMD data.
 			R				m_temp_R;		///< Temp value to use in template functions, problem with VC++.
 };
 

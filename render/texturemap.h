@@ -231,13 +231,13 @@ class _qShareC CqTextureMap
 
 										/** Get the horizontal resolution of this image.
 										 */
-	_qShareM			unsigned long	XRes() const		{return(m_XRes);}
+	_qShareM			TqUint		XRes() const		{return(m_XRes);}
 										/** Get the vertical resolution of this image.
 										 */
-	_qShareM			unsigned long	YRes() const		{return(m_YRes);}
+	_qShareM			TqUint		YRes() const		{return(m_YRes);}
 										/** Get the number of samples per pixel.
 										 */
-	_qShareM			int				SamplesPerPixel() const	{return(m_SamplesPerPixel);}
+	_qShareM			TqInt		SamplesPerPixel() const	{return(m_SamplesPerPixel);}
 										/** Get the storage format of this image.
 										 */
 	_qShareM			EqTexFormat		Format() const		{return(m_Format);}
@@ -297,8 +297,8 @@ class _qShareC CqTextureMap
 	protected:
 static	std::vector<CqTextureMap*>	m_TextureMap_Cache;	///< Static array of loaded textures.
 
-				TqInt	m_XRes;					///< Horizontal resolution.
-				TqInt	m_YRes;					///< Vertical resolution.
+				TqUint	m_XRes;					///< Horizontal resolution.
+				TqUint	m_YRes;					///< Vertical resolution.
 				TqInt	m_PlanarConfig;			///< TIFF planar configuration type.
 				TqInt	m_SamplesPerPixel;		///< Number of samples per pixel.
 

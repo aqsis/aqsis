@@ -133,8 +133,9 @@ CqAttributes& CqAttributes::operator=(const CqAttributes& From)
 
 	// Copy the lightsource list.
 	m_apLightsources.resize(0);
-	for(i=0; i<From.m_apLightsources.size(); i++)
-		m_apLightsources.push_back(From.m_apLightsources[i]);
+	std::vector<CqLightsource*>::const_iterator il;
+	for(il=From.m_apLightsources.begin(); il!=From.m_apLightsources.end(); il++)
+		m_apLightsources.push_back(*il);
 
 	return(*this);
 }

@@ -101,7 +101,7 @@ void CqMicroPolyGrid::CalcNormals()
 {
 	// Get the handedness of the coordinate system (at the time of creation) and
 	// the coordinate system specified, to check for normal flipping.
-	EqOrientation CSO=pSurface()->pAttributes()->eCoordsysOrientation();
+//	EqOrientation CSO=pSurface()->pAttributes()->eCoordsysOrientation();
 	EqOrientation O=pSurface()->pAttributes()->eOrientation();
 	float neg=1;
 	if(O!=OrientationLH)	neg=-1;

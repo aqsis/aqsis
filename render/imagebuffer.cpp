@@ -182,7 +182,7 @@ void CqImageElement::InitialiseSamples(CqVector2D& vecPixel, TqBool fJitter)
 				m_avecSamples[i*m + j].x(xindex*subcell_width + (subcell_width*0.5f) + sx);
 				m_avecSamples[i*m + j].y(yindex*subcell_width + (subcell_width*0.5f) + sy);
 				m_avecSamples[i*m + j]+=vecPixel;
-				m_aSubCellIndex[i*m+j]=(yindex*m_YSamples)+xindex;
+				m_aSubCellIndex[i*m+j]=static_cast<TqInt>((yindex*m_YSamples)+xindex);
 			}
 		}
 	}
@@ -220,8 +220,6 @@ void CqImageElement::Combine()
 	static CqColor	opaque(1,1,1);
 	static CqColor	colWhite(1,1,1);
 	CqColor col_total(0,0,0);
-	TqFloat	depth_total=0;
-	TqFloat cov=0;
 
 	TqInt n;
 	for(n=0; n<m_YSamples; n++)
@@ -275,8 +273,8 @@ TqBool CqBucket::ImageElement(TqInt iXPos, TqInt iYPos, CqImageElement*& pie)
 	iXPos-=m_XOrigin;
 	iYPos-=m_YOrigin;
 
-	TqInt fxo2=ceil((m_XFWidth-1)*0.5f);
-	TqInt fyo2=ceil((m_YFWidth-1)*0.5f);
+	TqInt fxo2=static_cast<TqInt>(ceil((m_XFWidth-1)*0.5f));
+	TqInt fyo2=static_cast<TqInt>(ceil((m_YFWidth-1)*0.5f));
 	
 	// Check within renderable range
 	if(iXPos>=-fxo2 && iXPos<=m_XSize+fxo2 &&
@@ -357,18 +355,18 @@ void CqBucket::InitialiseFilterValues()
 	TqFloat subcellwidth=1.0f/numsubcells;
 	TqFloat subcellcentre=subcellwidth*0.5f;
 	TqInt numperpixel=numsubpixels*numsubcells;
-	TqInt numvalues=((xfw+1)*(yfw+1))*(numperpixel);
+	TqInt numvalues=static_cast<TqInt>(((xfw+1)*(yfw+1))*(numperpixel));
 	
 	m_aFilterValues.resize(numvalues);
 
 	// Go over every pixel touched by the filter
 	TqInt px,py;
-	for(py=-ymax; py<=ymax; py++)
+	for(py=static_cast<TqInt>(-ymax); py<=static_cast<TqInt>(ymax); py++)
 	{
-		for(px=-xmax; px<=xmax; px++)
+		for(px=static_cast<TqInt>(-xmax); px<=static_cast<TqInt>(xmax); px++)
 		{
 			// Get the index of the pixel in the array.
-			TqInt index=(((py+ymax)*xfw)+(px+xmax))*numperpixel;
+			TqInt index=static_cast<TqInt>((((py+ymax)*xfw)+(px+xmax))*numperpixel);
 			TqFloat pfx=px-0.5f;
 			TqFloat pfy=py-0.5f;
 			// Go over every subpixel in the pixel.
@@ -475,13 +473,12 @@ void CqBucket::FilterBucket()
 	CqImageElement* pie;
 
 	CqColor* pCols=new CqColor[XSize()*YSize()];
-	TqInt xmax=ceil((XFWidth()-1)*0.5f);
-	TqInt ymax=ceil((YFWidth()-1)*0.5f);
+	TqInt xmax=static_cast<TqInt>(ceil((XFWidth()-1)*0.5f));
+	TqInt ymax=static_cast<TqInt>(ceil((YFWidth()-1)*0.5f));
 	TqFloat xfwo2=XFWidth()*0.5f;
 	TqFloat yfwo2=YFWidth()*0.5f;
 	TqInt numsubpixels=(m_XPixelSamples*m_YPixelSamples);
 	TqInt numsubcells=numsubpixels;
-	TqFloat subcellwidth=1.0f/numsubcells;
 	TqInt numperpixel=numsubpixels*numsubcells;
 	TqInt	xlen=XSize()+XFWidth();
 
@@ -560,7 +557,6 @@ void CqBucket::ExposeBucket()
 		return;
 	else
 	{
-		TqInt	xlen=XSize()+XFWidth();
 		CqImageElement* pie;
 		ImageElement(XOrigin(), YOrigin(), pie);
 		TqInt x,y;
@@ -604,7 +600,6 @@ void CqBucket::QuantizeBucket()
 		TqInt min=QGetRenderContext()->optCurrent().iColorQuantizeMin();
 		TqInt max=QGetRenderContext()->optCurrent().iColorQuantizeMax();
 
-		TqInt	xlen=XSize()+XFWidth();
 		CqImageElement* pie;
 		ImageElement(XOrigin(),YOrigin(),pie);
 		TqInt x,y;
@@ -641,7 +636,6 @@ void CqBucket::QuantizeBucket()
 		TqInt min=QGetRenderContext()->optCurrent().iDepthQuantizeMin();
 		TqInt max=QGetRenderContext()->optCurrent().iDepthQuantizeMax();
 
-		TqInt	xlen=XSize()+XFWidth();
 		CqImageElement* pie;
 		ImageElement(XOrigin(), YOrigin(), pie);
 		TqInt x,y;
@@ -999,11 +993,6 @@ void CqImageBuffer::RenderMPGs(TqInt iBucket, long xmin, long xmax, long ymin, l
 	
 	if(m_aBuckets[iBucket].aMPGs().empty())	return;
 
-	TqFloat farplane=QGetRenderContext()->optCurrent().fClippingPlaneFar();
-	TqFloat nearplane=QGetRenderContext()->optCurrent().fClippingPlaneNear();
-	
-	register long iY=ymin;
-
 	for(std::vector<CqMicroPolygonBase*>::iterator i=m_aBuckets[iBucket].aMPGs().begin(); i!=m_aBuckets[iBucket].aMPGs().end(); i++)
 	{
 		RenderMicroPoly(*i,iBucket,xmin,xmax,ymin,ymax);
@@ -1085,7 +1074,7 @@ inline void CqImageBuffer::RenderMicroPoly(CqMicroPolygonBase* pMPG, TqInt iBuck
 	{
 		register long iX=initX;
 
-		bool valid=Bucket.ImageElement(iX,iY,pie);
+		Bucket.ImageElement(iX,iY,pie);
 
 		while(iX<=eX)
 		{
@@ -1265,8 +1254,6 @@ void CqImageBuffer::RenderImage()
 		CqVector2D bPos=Position(iBucket);
 		CqVector2D bSize=Size(iBucket);
 		CqBucket::InitialiseBucket(bPos.x(), bPos.y(), bSize.x(), bSize.y(), m_FilterXWidth, m_FilterYWidth, m_PixelXSamples, m_PixelYSamples);
-
-		CqBucket& Bucket=m_aBuckets[iBucket];
 
 		// Set up some bounds for the bucket.
 		CqVector2D vecMin=bPos;

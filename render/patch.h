@@ -83,9 +83,9 @@ class CqSurfacePatchBicubic : public CqSurface
 		virtual TqBool		Diceable();
 
 		virtual void		Transform(const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx);
-		virtual	TqInt		cUniform() const	{return(1);}
-		virtual	TqInt		cVarying() const	{return(4);}
-		virtual	TqInt		cVertex() const		{return(16);}
+		virtual	TqUint		cUniform() const	{return(1);}
+		virtual	TqUint		cVarying() const	{return(4);}
+		virtual	TqUint		cVertex() const		{return(16);}
 
 	protected:
 
@@ -140,9 +140,9 @@ class _qShareC CqSurfacePatchBilinear : public CqSurface
 		virtual TqBool	Diceable();
 
 		virtual void		Transform(const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx);
-		virtual	TqInt		cUniform() const	{return(1);}
-		virtual	TqInt		cVarying() const	{return(4);}
-		virtual	TqInt		cVertex() const		{return(4);}
+		virtual	TqUint		cUniform() const	{return(1);}
+		virtual	TqUint		cVarying() const	{return(4);}
+		virtual	TqUint		cVertex() const		{return(4);}
 
 	protected:
 };
@@ -186,9 +186,9 @@ class CqSurfacePatchMeshBicubic : public CqSurface
 		virtual TqBool		Diceable()			{return(TqFalse);}
 
 		virtual void		Transform(const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx);
-		virtual	TqInt		cUniform() const	{return(m_uPatches*m_vPatches);}
-		virtual	TqInt		cVarying() const	{return(((m_uPeriodic)?m_uPatches:m_uPatches+1)*((m_vPeriodic)?m_vPatches:m_vPatches+1));}
-		virtual	TqInt		cVertex() const		{return(m_nu*m_nv);}
+		virtual	TqUint		cUniform() const	{return(m_uPatches*m_vPatches);}
+		virtual	TqUint		cVarying() const	{return(((m_uPeriodic)?m_uPatches:m_uPatches+1)*((m_vPeriodic)?m_vPatches:m_vPatches+1));}
+		virtual	TqUint		cVertex() const		{return(m_nu*m_nv);}
 
 	protected:
 
@@ -230,9 +230,9 @@ class CqSurfacePatchMeshBilinear : public CqSurface
 		virtual TqBool		Diceable()			{return(TqFalse);}
 
 		virtual void		Transform(const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx);
-		virtual	TqInt		cUniform() const	{return(m_uPatches*m_vPatches);}
-		virtual	TqInt		cVarying() const	{return(((m_uPeriodic)?m_uPatches:m_uPatches+1)*((m_vPeriodic)?m_vPatches:m_vPatches+1));}
-		virtual	TqInt		cVertex() const		{return(m_nu*m_nv);}
+		virtual	TqUint		cUniform() const	{return(m_uPatches*m_vPatches);}
+		virtual	TqUint		cVarying() const	{return(((m_uPeriodic)?m_uPatches:m_uPatches+1)*((m_vPeriodic)?m_vPatches:m_vPatches+1));}
+		virtual	TqUint		cVertex() const		{return(m_nu*m_nv);}
 
 	protected:
 

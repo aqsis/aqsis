@@ -301,7 +301,7 @@ class CqVMStackEntry
 							/** Set the size of the SIMD array.
 							 * \param size The new size.
 							 */
-			void			SetSize(TqInt size)		{
+			void			SetSize(TqUint size)	{
 														m_Size=size; 
 														if(m_aValues.size()<size && size>1)	
 															m_aValues.resize(size);
@@ -878,7 +878,7 @@ class CqVMStackEntry
 		std::vector<SqVMStackEntry/*,CqVMStackEntryAllocator*/>	m_aValues;	///< Array of SqVMStackEntry storage stuctures.
 		SqVMStackEntry		m_Value;		///< Single value in the case of a uniforn stack entry.
 		CqShaderVariable*	m_pVarRef;		///< Pointer to a referenced variable if a variable stack entry.
-		TqInt				m_Size;			///< Size of the SIMD data.
+		TqUint				m_Size;			///< Size of the SIMD data.
 };
 
 
@@ -1014,7 +1014,7 @@ class _qShareC CqShaderStack
 								}
 	protected:
 			std::vector<CqVMStackEntry>		m_Stack;		///< Array of stacke entries.
-			TqInt							m_iTop;			///< Index of the top entry.
+			TqUint							m_iTop;			///< Index of the top entry.
 };
 
 

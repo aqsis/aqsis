@@ -425,6 +425,8 @@ TqInt CqShaderVM::m_cTransSize=sizeof(m_TransTable)/sizeof(m_TransTable[0]);
 CqVMStackEntry		gUniformResult(1);
 CqVMStackEntry		gVaryingResult(2);
 
+static	TqFloat	temp_float;
+static	TqBool	temp_bool;
 
 CqShaderVariableArray* CreateNewArray(EqVariableType VarType, char* name, TqInt Count)
 {
@@ -789,7 +791,7 @@ void CqShaderVM::LoadProgram(std::istream* pFile)
 		(*pFile) >> std::ws;
 	}
 	// Now we need to complete any label jump statements.
-	TqInt i=0;
+	TqUint i=0;
 	while(i<m_Program.size())
 	{
 		UsProgramElement E=m_Program[i++];
@@ -2681,7 +2683,8 @@ void CqShaderVM::SO_illuminance2()
 
 void CqShaderVM::SO_solar()					
 {
-	VARFUNC; 
+	VARFUNC;
+	__fVarying=TqFalse; 
 	VOIDFUNC(m_pEnv->SO_solar);
 }
 

@@ -116,16 +116,16 @@ TqInt CqSurfaceNURBS::operator==(const CqSurfaceNURBS& from)
 /** Find the span in the U knot vector containing the specified parameter value.
  */
 
-TqInt CqSurfaceNURBS::FindSpanU(TqFloat u) const
+TqUint CqSurfaceNURBS::FindSpanU(TqFloat u) const
 {
 	if(u>=m_auKnots[m_cuVerts]) 
 		return(m_cuVerts-1);
 	if(u<=m_auKnots[uDegree()])
 		return(uDegree());
 	
-	TqInt low=0;
-	TqInt high=m_cuVerts+1; 
-	TqInt mid=(low+high)/2;
+	TqUint low=0;
+	TqUint high=m_cuVerts+1; 
+	TqUint mid=(low+high)/2;
 
 	while(u<m_auKnots[mid] || u>=m_auKnots[mid+1])
 	{
@@ -143,16 +143,16 @@ TqInt CqSurfaceNURBS::FindSpanU(TqFloat u) const
 /** Find the span in the V knot vector containing the specified parameter value.
  */
 
-TqInt CqSurfaceNURBS::FindSpanV(TqFloat v) const
+TqUint CqSurfaceNURBS::FindSpanV(TqFloat v) const
 {
 	if(v>=m_avKnots[m_cvVerts]) 
 		return(m_cvVerts-1);
 	if(v<=m_avKnots[vDegree()])
 		return(vDegree());
 	
-	TqInt low=0;
-	TqInt high=m_cvVerts+1; 
-	TqInt mid=(low+high)/2;
+	TqUint low=0;
+	TqUint high=m_cvVerts+1; 
+	TqUint mid=(low+high)/2;
 
 	while(v<m_avKnots[mid] || v>=m_avKnots[mid+1])
 	{
@@ -170,7 +170,7 @@ TqInt CqSurfaceNURBS::FindSpanV(TqFloat v) const
 /** Return the basis functions for the specified parameter value.
  */
 
-void CqSurfaceNURBS::BasisFunctions(TqFloat u, TqInt span, std::vector<TqFloat>& aKnots, TqInt k, std::vector<TqFloat>& BasisVals)
+void CqSurfaceNURBS::BasisFunctions(TqFloat u, TqUint span, std::vector<TqFloat>& aKnots, TqInt k, std::vector<TqFloat>& BasisVals)
 {
     register TqInt r, s, i;
     register double omega;
@@ -208,24 +208,24 @@ CqVector4D	CqSurfaceNURBS::Evaluate(TqFloat u, TqFloat v)
 
 	/* Evaluate non-uniform basis functions (and derivatives) */
 
-	TqInt uspan=FindSpanU(u);
-	TqInt ufirst=uspan-m_uOrder+1;
+	TqUint uspan=FindSpanU(u);
+	TqUint ufirst=uspan-m_uOrder+1;
 	BasisFunctions(u, uspan, m_auKnots, m_uOrder, bu);
 
-	TqInt vspan=FindSpanV(v);
-	TqInt vfirst=vspan-m_vOrder+1;
+	TqUint vspan=FindSpanV(v);
+	TqUint vfirst=vspan-m_vOrder+1;
 	BasisFunctions(v, vspan, m_avKnots, m_vOrder, bv);
 
 	// Weight control points against the basis functions
 
-	TqInt i;
+	TqUint i;
 	for(i=0; i<m_vOrder; i++)
 	{
-		TqInt j;
+		TqUint j;
 		for(j=0; j<m_uOrder; j++)
 		{
-			TqInt ri=m_vOrder-1L-i;
-			TqInt rj=m_uOrder-1L-j;
+			TqUint ri=m_vOrder-1L-i;
+			TqUint rj=m_uOrder-1L-j;
 
 			TqFloat tmp=bu[rj]*bv[ri];
 			CqVector4D& cp=CP(j+ufirst,i+vfirst);
@@ -245,7 +245,7 @@ CqVector4D	CqSurfaceNURBS::Evaluate(TqFloat u, TqFloat v)
  * \return The number of new knots created.
  */
 
-TqInt CqSurfaceNURBS::InsertKnotU(TqFloat u, TqInt r)
+TqUint CqSurfaceNURBS::InsertKnotU(TqFloat u, TqInt r)
 {
 	// Work on a copy.
 	CqSurfaceNURBS nS(*this);
@@ -260,7 +260,7 @@ TqInt CqSurfaceNURBS::InsertKnotU(TqFloat u, TqInt r)
 		return(0);
 	}
 
-	for(i=0; i<m_auKnots.size(); i++)
+	for(i=0; i<static_cast<TqInt>(m_auKnots.size()); i++)
 	{
 		if(m_auKnots[i]>u)
 		{
@@ -294,22 +294,23 @@ TqInt CqSurfaceNURBS::InsertKnotU(TqFloat u, TqInt r)
 	// Load new knot vector
 	for(i=0;i<=k;i++)	nS.m_auKnots[i]=m_auKnots[i];
 	for(i=1;i<=r;i++)	nS.m_auKnots[k+i]=u;
-	for(i=k+1;i<m_auKnots.size(); i++)
+	for(i=k+1;i<static_cast<TqInt>(m_auKnots.size()); i++)
 		nS.m_auKnots[i+r]=m_auKnots[i];
 
 	// Save unaltered control points
 	std::vector<CqVector4D> R(p+1);
 
 	// Insert control points as required on each row.
-	TqInt row;
+	TqUint row;
 	for(row=0; row<m_cvVerts; row++)
 	{
 		for(i=0; i<=k-p; i++)			nS.CP(i,row)=CP(i,row);
-		for(i=k-s; i<m_cuVerts; i++)	nS.CP(i+r,row)=CP(i,row);
+		for(i=k-s; i<static_cast<TqInt>(m_cuVerts); i++)	
+			nS.CP(i+r,row)=CP(i,row);
 		for(i=0; i<=p-s; i++)			R[i]=CP(k-p+i,row);
 
 		// Insert the knot r times
-		int L=0 ;
+		TqUint L=0 ;
 		TqFloat alpha;
 		for(j=1; j<=r; j++)
 		{
@@ -345,7 +346,7 @@ TqInt CqSurfaceNURBS::InsertKnotU(TqFloat u, TqInt r)
  * \return The number of new knots created.
  */
 
-TqInt CqSurfaceNURBS::InsertKnotV(TqFloat v, TqInt r)
+TqUint CqSurfaceNURBS::InsertKnotV(TqFloat v, TqInt r)
 {
 	// Work on a copy.
 	CqSurfaceNURBS nS(*this);
@@ -360,7 +361,7 @@ TqInt CqSurfaceNURBS::InsertKnotV(TqFloat v, TqInt r)
 		return(0);
 	}
 
-	for(i=0; i<m_avKnots.size(); i++)
+	for(i=0; i<static_cast<TqInt>(m_avKnots.size()); i++)
 	{
 		if(m_avKnots[i]>v)
 		{
@@ -394,22 +395,23 @@ TqInt CqSurfaceNURBS::InsertKnotV(TqFloat v, TqInt r)
 	// Load new knot vector
 	for(i=0;i<=k;i++)	nS.m_avKnots[i]=m_avKnots[i];
 	for(i=1;i<=r;i++)	nS.m_avKnots[k+i]=v;
-	for(i=k+1;i<m_avKnots.size(); i++)
+	for(i=k+1;i<static_cast<TqInt>(m_avKnots.size()); i++)
 		nS.m_avKnots[i+r]=m_avKnots[i];
 
 	// Save unaltered control points
 	std::vector<CqVector4D> R(p+1);
 
 	// Insert control points as required on each row.
-	TqInt col;
+	TqUint col;
 	for(col=0; col<m_cuVerts; col++)
 	{
 		for(i=0; i<=k-p; i++)			nS.CP(col,i)=CP(col,i);
-		for(i=k-s; i<m_cvVerts; i++)	nS.CP(col,i+r)=CP(col,i);
+		for(i=k-s; i<static_cast<TqInt>(m_cvVerts); i++)	
+			nS.CP(col,i+r)=CP(col,i);
 		for(i=0; i<=p-s; i++)			R[i]=CP(col,k-p+i);
 
 		// Insert the knot r times
-		int L=0 ;
+		TqUint L=0 ;
 		TqFloat alpha;
 		for(j=1; j<=r; j++)
 		{
@@ -450,11 +452,11 @@ void CqSurfaceNURBS::RefineKnotU(const std::vector<TqFloat>& X)
 	if(X.size()<=0)
 		return;
 
-	int n=m_cuVerts-1;
-	int p=uDegree();
-	int m=n+p+1;
-	int a,b;
-	int r=X.size()-1;
+	TqInt n=m_cuVerts-1;
+	TqInt p=uDegree();
+	TqInt m=n+p+1;
+	TqInt a,b;
+	TqInt r=X.size()-1;
 	
 	CqSurfaceNURBS nS(*this);
 
@@ -464,8 +466,8 @@ void CqSurfaceNURBS::RefineKnotU(const std::vector<TqFloat>& X)
 	b=FindSpanU(X[r]);
 	++b;
 
-	int j,row;
-	for(row=0; row<m_cvVerts; row++)
+	TqInt j,row;
+	for(row=0; row<static_cast<TqInt>(m_cvVerts); row++)
 	{
 		for(j=0; j<=a-p ; j++)
 			nS.CP(j,row)=CP(j,row);
@@ -479,37 +481,37 @@ void CqSurfaceNURBS::RefineKnotU(const std::vector<TqFloat>& X)
 	for(j=b+p; j<=m; j++)
 		nS.m_auKnots[j+r+1]=m_auKnots[j];
 	
-	int i=b+p-1; 
-	int k=b+p+r;
+	TqInt i=b+p-1; 
+	TqInt k=b+p+r;
 	
 	for(j=r; j>=0; j--)
 	{
 		while(X[j]<=m_auKnots[i] && i>a)
 		{
-			for(row=0; row<m_cvVerts; row++)
+			for(row=0; row<static_cast<TqInt>(m_cvVerts); row++)
 				nS.CP(k-p-1,row)=CP(i-p-1,row);
 			nS.m_auKnots[k]=m_auKnots[i];
 			--k;
 			--i;
 		}
-		for(row=0; row<m_cvVerts; row++)
+		for(row=0; row<static_cast<TqInt>(m_cvVerts); row++)
 			nS.CP(k-p-1,row)=nS.CP(k-p,row);
 		
-		int l;
+		TqInt l;
 		for(l=1; l<=p ; l++)
 		{
-			int ind=k-p+l;
-			float alpha=nS.m_auKnots[k+l]-X[j];
+			TqUint ind=k-p+l;
+			TqFloat alpha=nS.m_auKnots[k+l]-X[j];
 			if(alpha==0.0)
 			{
-				for(row=0; row<m_cvVerts; row++)
+				for(row=0; row<static_cast<TqInt>(m_cvVerts); row++)
 					nS.CP(ind-1,row)=nS.CP(ind,row);
 			}
 			else
 			{
 				alpha/=nS.m_auKnots[k+l]-m_auKnots[i-p+l];
 			
-				for(row=0; row<m_cvVerts; row++)
+				for(row=0; row<static_cast<TqInt>(m_cvVerts); row++)
 				nS.CP(ind-1,row)=CqVector4D(	alpha*nS.CP(ind-1,row).x()+(1.0-alpha)*nS.CP(ind,row).x(),
 												alpha*nS.CP(ind-1,row).y()+(1.0-alpha)*nS.CP(ind,row).y(),
 												alpha*nS.CP(ind-1,row).z()+(1.0-alpha)*nS.CP(ind,row).z(),
@@ -532,11 +534,11 @@ void CqSurfaceNURBS::RefineKnotV(const std::vector<TqFloat>& X)
 	if(X.size()<=0)
 		return;
 	
-	int n=m_cvVerts-1;
-	int p=vDegree();
-	int m=n+p+1;
-	int a,b;
-	int r=X.size()-1;
+	TqInt n=m_cvVerts-1;
+	TqInt p=vDegree();
+	TqInt m=n+p+1;
+	TqInt a,b;
+	TqInt r=X.size()-1;
 	CqSurfaceNURBS nS(*this);
 
 	nS.Init(m_uOrder, m_vOrder, m_cuVerts, r+1+n+1);
@@ -545,8 +547,8 @@ void CqSurfaceNURBS::RefineKnotV(const std::vector<TqFloat>& X)
 	b=FindSpanV(X[r]) ;
 	++b;
 
-	int j,col;
-	for(col=0; col<m_cuVerts; col++)
+	TqInt j,col;
+	for(col=0; col<static_cast<TqInt>(m_cuVerts); col++)
 	{
 		for(j=0; j<=a-p; j++)
 			nS.CP(col,j)=CP(col,j);
@@ -559,35 +561,36 @@ void CqSurfaceNURBS::RefineKnotV(const std::vector<TqFloat>& X)
 	for(j=b+p; j<=m; j++)
 		nS.m_avKnots[j+r+1]=m_avKnots[j];
 
-	int i=b+p-1; 
-	int k=b+p+r;
+	TqInt i=b+p-1; 
+	TqInt k=b+p+r;
 	
 	for(j=r; j>=0 ; j--)
 	{
 		while(X[j]<=m_avKnots[i] && i>a)
 		{
-			for(col=0; col<m_cuVerts; col++)
+			for(col=0; col<static_cast<TqInt>(m_cuVerts); col++)
 				nS.CP(col,k-p-1)=CP(col,i-p-1);
 			nS.m_avKnots[k]=m_avKnots[i];
 			--k;
 			--i;
 		}
-		for(col=0; col<m_cuVerts; col++)
+		for(col=0; col<static_cast<TqInt>(m_cuVerts); col++)
 			nS.CP(col,k-p-1)=nS.CP(col,k-p);
-		int l;
+		
+		TqInt l;
 		for(l=1; l<=p; l++)
 		{
-			int ind=k-p+l;
-			float alpha=nS.m_avKnots[k+l]-X[j];
+			TqUint ind=k-p+l;
+			TqFloat alpha=nS.m_avKnots[k+l]-X[j];
 			if(alpha==0.0)
 			{
-				for(col=0; col<m_cuVerts; col++)
+				for(col=0; col<static_cast<TqInt>(m_cuVerts); col++)
 					nS.CP(col,ind-1)=nS.CP(col,ind);
 			}
 			else
 			{
 				alpha/=nS.m_avKnots[k+l]-m_avKnots[i-p+l];
-				for(col=0; col<m_cuVerts; col++)
+				for(col=0; col<static_cast<TqInt>(m_cuVerts); col++)
 				nS.CP(col,ind-1)=CqVector4D(	alpha*nS.CP(col,ind-1).x()+(1.0-alpha)*nS.CP(col,ind).x(),
 												alpha*nS.CP(col,ind-1).y()+(1.0-alpha)*nS.CP(col,ind).y(),
 												alpha*nS.CP(col,ind-1).z()+(1.0-alpha)*nS.CP(col,ind).z(),
@@ -607,8 +610,8 @@ void CqSurfaceNURBS::RefineKnotV(const std::vector<TqFloat>& X)
 
 void CqSurfaceNURBS::ClampU()
 {
-	TqInt n1=InsertKnotU(m_auKnots[uDegree()],uDegree());
-	TqInt n2=InsertKnotU(m_auKnots[m_cuVerts],uDegree());
+	TqUint n1=InsertKnotU(m_auKnots[uDegree()],uDegree());
+	TqUint n2=InsertKnotU(m_auKnots[m_cuVerts],uDegree());
 
 	// Now trim unnecessary knots and control points
 	if(n1||n2)
@@ -617,13 +620,13 @@ void CqSurfaceNURBS::ClampU()
 		m_auKnots.resize(m_auKnots.size()-n1-n2);
 		P().SetSize((m_cuVerts-n1-n2)*m_cvVerts);
 		m_cuVerts-=n1+n2;
-		TqInt i;
+		TqUint i;
 		for(i=n1; i<nS.m_auKnots.size()-n2; i++)
 			m_auKnots[i-n1]=nS.m_auKnots[i];
-		TqInt row;
+		TqUint row;
 		for(row=0; row<m_cvVerts; row++)
 		{
-			TqInt i;
+			TqUint i;
 			for(i=n1; i<nS.m_cuVerts-n2; i++)
 				CP(i-n1,row)=nS.CP(i,row);
 		}
@@ -637,8 +640,8 @@ void CqSurfaceNURBS::ClampU()
 
 void CqSurfaceNURBS::ClampV()
 {
-	TqInt n1=InsertKnotV(m_avKnots[vDegree()],vDegree());
-	TqInt n2=InsertKnotV(m_avKnots[m_cvVerts],vDegree());
+	TqUint n1=InsertKnotV(m_avKnots[vDegree()],vDegree());
+	TqUint n2=InsertKnotV(m_avKnots[m_cvVerts],vDegree());
 
 	// Now trim unnecessary knots and control points
 	if(n1||n2)
@@ -647,13 +650,13 @@ void CqSurfaceNURBS::ClampV()
 		m_avKnots.resize(m_avKnots.size()-n1-n2);
 		P().SetSize((m_cvVerts-n1-n2)*m_cuVerts);
 		m_cvVerts-=n1+n2;
-		TqInt i;
+		TqUint i;
 		for(i=n1; i<nS.m_avKnots.size()-n2; i++)
 			m_avKnots[i-n1]=nS.m_avKnots[i];
-		TqInt col;
+		TqUint col;
 		for(col=0; col<m_cuVerts; col++)
 		{
-			TqInt i;
+			TqUint i;
 			for(i=n1; i<nS.m_cvVerts-n2; i++)
 				CP(col,i-n1)=nS.CP(col,i);
 		}
@@ -670,21 +673,21 @@ void CqSurfaceNURBS::SplitNURBS(CqSurfaceNURBS& nrbA, CqSurfaceNURBS& nrbB,	TqBo
 	CqSurfaceNURBS tmp(*this);
 
     std::vector<TqFloat>& aKnots=(dirflag)?m_auKnots:m_avKnots;
-	TqInt Order=(dirflag)?m_uOrder:m_vOrder;
+	TqUint Order=(dirflag)?m_uOrder:m_vOrder;
 
 	// Add a multiplicty k knot to the knot vector in the direction
 	// specified by dirflag, and refine the surface.  This creates two
 	// adjacent surfaces with c0 discontinuity at the seam.
-	TqInt extra=0L;
-    TqInt last=(dirflag)?(m_cuVerts+m_uOrder-1):(m_cvVerts+m_vOrder-1);
-//    TqInt middex=last/2;
+	TqUint extra=0L;
+    TqUint last=(dirflag)?(m_cuVerts+m_uOrder-1):(m_cvVerts+m_vOrder-1);
+//    TqUint middex=last/2;
 //    TqFloat midVal=aKnots[middex];
 	TqFloat midVal=(aKnots[0]+aKnots[last])/2;
-	TqInt middex=(dirflag)?FindSpanU(midVal):FindSpanV(midVal);
+	TqUint middex=(dirflag)?FindSpanU(midVal):FindSpanV(midVal);
 
 	// Search forward and backward to see if multiple knot is already there
-    TqInt i=0;
-	TqInt same=0L;
+    TqUint i=0;
+	TqUint same=0L;
 	if(aKnots[middex]==midVal)
 	{
 		i=middex+1L;
@@ -722,7 +725,7 @@ void CqSurfaceNURBS::SplitNURBS(CqSurfaceNURBS& nrbA, CqSurfaceNURBS& nrbB,	TqBo
 			anewKnots[i]=midVal;
 	}
 
-	TqInt SplitPoint=(extra<Order)?middex-1L : middex;
+	TqUint SplitPoint=(extra<Order)?middex-1L : middex;
     if(dirflag)	tmp.RefineKnotU(anewKnots);
 	else		tmp.RefineKnotV(anewKnots);
 
@@ -731,7 +734,7 @@ void CqSurfaceNURBS::SplitNURBS(CqSurfaceNURBS& nrbA, CqSurfaceNURBS& nrbB,	TqBo
 
 	// First half
     nrbA.Init(m_uOrder, m_vOrder,(dirflag)?SplitPoint+1L:m_cuVerts, (dirflag)?m_cvVerts:SplitPoint+1L);
-    TqInt j;
+    TqUint j;
 	for(i=0L; i<nrbA.m_cvVerts; i++)
 		for(j=0L; j<nrbA.m_cuVerts; j++)
 			nrbA.CP(j,i)=tmp.CP(j,i);
@@ -762,7 +765,7 @@ void CqSurfaceNURBS::SplitNURBS(CqSurfaceNURBS& nrbA, CqSurfaceNURBS& nrbB,	TqBo
 
 void CqSurfaceNURBS::Decompose(std::vector<CqSurfaceNURBS>& S)
 {
-	int i,m,a,b,nb,mult,j,r,save,s,k,row,col ;
+	TqInt i,m,a,b,nb,mult,j,r,save,s,k,row,col ;
 	TqFloat  numer,alpha ;
 
 
@@ -772,19 +775,19 @@ void CqSurfaceNURBS::Decompose(std::vector<CqSurfaceNURBS>& S)
 	// direction
 	
 	std::vector<TqFloat> nU(2*m_uOrder);
-	for(i=0;i<nU.size()/2;++i)
+	for(i=0;i<static_cast<TqInt>(nU.size()/2);++i)
 		nU[i]=0;
-	for(i=nU.size()/2;i<nU.size();++i)
+	for(i=nU.size()/2;i<static_cast<TqInt>(nU.size());++i)
 		nU[i]=1;
 
 	std::vector<TqFloat> nV(2*m_vOrder);
-	for(i=0;i<nV.size()/2;++i)
+	for(i=0;i<static_cast<TqInt>(nV.size()/2);++i)
 		nV[i]=0;
-	for(i=nV.size()/2;i<nV.size();++i)
+	for(i=nV.size()/2;i<static_cast<TqInt>(nV.size());++i)
 		nV[i]=1;
 
 	std::vector<CqSurfaceNURBS> Su(m_cuVerts-uDegree());
-	for(i=0;i<Su.size();i++)
+	for(i=0;i<static_cast<TqInt>(Su.size());i++)
 	{
 		Su[i].Init(m_uOrder,m_vOrder,m_uOrder,m_cvVerts) ;
 		Su[i].m_auKnots=nU;
@@ -796,8 +799,8 @@ void CqSurfaceNURBS::Decompose(std::vector<CqSurfaceNURBS>& S)
 	b=m_uOrder;
 	nb=0;
 
-	for(i=0;i<=uDegree();i++)
-		for(col=0;col<m_cvVerts;col++)
+	for(i=0;i<=static_cast<TqInt>(uDegree());i++)
+		for(col=0;col<static_cast<TqInt>(m_cvVerts);col++)
 			Su[nb].CP(i,col)=CP(i,col);
 	
 	while(b<m)
@@ -805,7 +808,7 @@ void CqSurfaceNURBS::Decompose(std::vector<CqSurfaceNURBS>& S)
 		i=b;
 		while(b<m && m_auKnots[b+1]<=m_auKnots[b]) b++;
 		mult=b-i+1;
-		if(mult<uDegree())
+		if(mult<static_cast<TqInt>(uDegree()))
 		{
 			numer=m_auKnots[b]-m_auKnots[a];	// the enumerator of the alphas
 			for(j=uDegree();j>mult;j--)		// compute and store the alphas
@@ -818,19 +821,19 @@ void CqSurfaceNURBS::Decompose(std::vector<CqSurfaceNURBS>& S)
 				for(k=uDegree();k>=s;k--)
 				{
 					alpha = alphas[k-s];
-					for(row=0;row<m_cvVerts;++row)
+					for(row=0;row<static_cast<TqInt>(m_cvVerts);++row)
 						Su[nb].CP(k,row)=alpha*Su[nb].CP(k,row)+(1.0-alpha)*Su[nb].CP(k-1,row);
 				}
 				if(b<m) // control point of next patch
-					for(row=0;row<m_cvVerts;++row)
+					for(row=0;row<static_cast<TqInt>(m_cvVerts);++row)
 						Su[nb+1].CP(save,row)=Su[nb].CP(uDegree(),row);
 			}
 		}
 		++nb;
 		if(b<m)
 		{ // initialize for next segment
-			for(i=uDegree()-mult; i<=uDegree(); ++i)
-				for(row=0;row<m_cvVerts;++row)
+			for(i=uDegree()-mult; i<=static_cast<TqInt>(uDegree()); ++i)
+				for(row=0;row<static_cast<TqInt>(m_cvVerts);++row)
 					Su[nb].CP(i,row)=CP(b-uDegree()+i,row);
 			a=b;
 			++b;
@@ -840,7 +843,7 @@ void CqSurfaceNURBS::Decompose(std::vector<CqSurfaceNURBS>& S)
 
 	S.resize(Su.size()*(m_cvVerts-vDegree())) ;
 
-	for(i=0;i<S.size();i++)
+	for(i=0;i<static_cast<TqInt>(S.size());i++)
 	{
 		S[i].Init(m_uOrder,m_vOrder,m_uOrder,m_vOrder);
 		S[i].m_auKnots=nU;
@@ -849,11 +852,11 @@ void CqSurfaceNURBS::Decompose(std::vector<CqSurfaceNURBS>& S)
 
 	nb=0;
 
-	int np;
+	TqUint np;
 	for(np=0;np<Su.size();++np)
 	{
-		for(i=0;i<=uDegree();i++)
-			for(j=0;j<=vDegree();++j)
+		for(i=0;i<=static_cast<TqInt>(uDegree());i++)
+			for(j=0;j<=static_cast<TqInt>(vDegree());++j)
 				S[nb].CP(i,j)=Su[np].CP(i,j);
 		m=m_cvVerts+vDegree();
 		a=vDegree() ;
@@ -863,7 +866,7 @@ void CqSurfaceNURBS::Decompose(std::vector<CqSurfaceNURBS>& S)
 			i=b;
 			while(b<m && m_avKnots[b+1]<=m_avKnots[b]) b++;
 			mult=b-i+1;
-			if(mult<vDegree())
+			if(mult<static_cast<TqInt>(vDegree()))
 			{
 				numer=m_avKnots[b]-m_avKnots[a];	// the enumerator of the alphas
 				for(j=vDegree();j>mult;j--)			// compute and store the alphas
@@ -876,19 +879,19 @@ void CqSurfaceNURBS::Decompose(std::vector<CqSurfaceNURBS>& S)
 					for(k=vDegree();k>=s;k--)
 					{
 						alpha=alphas[k-s];
-						for(col=0;col<=uDegree();++col)
+						for(col=0;col<=static_cast<TqInt>(uDegree());++col)
 							S[nb].CP(col,k)=alpha*S[nb].CP(col,k)+(1.0-alpha)*S[nb].CP(col,k-1);
 					}				
 					if(b<m) // control point of next patch
-						for(col=0;col<=uDegree();++col)
+						for(col=0;col<=static_cast<TqInt>(uDegree());++col)
 							S[nb+1].CP(col,save)=S[nb].CP(col,vDegree());
 				}
 			}
 			++nb;
 			if(b<m)
 			{ // initialize for next patch
-				for(i=vDegree()-mult; i<= vDegree(); ++i)
-					for(col=0;col<=uDegree();++col)
+				for(i=vDegree()-mult; i<= static_cast<TqInt>(vDegree()); ++i)
+					for(col=0;col<=static_cast<TqInt>(uDegree());++col)
 						S[nb].CP(col,i)=Su[np].CP(col,b-vDegree()+i);
 				a=b;
 				++b;
@@ -946,7 +949,7 @@ void CqSurfaceNURBS::ProjectToLine(const CqVector3D& S, const CqVector3D& Trj, c
 void CqSurfaceNURBS::Circle(const CqVector3D& O, const CqVector3D& X, const CqVector3D& Y, TqFloat r, TqFloat as, TqFloat ae)
 {
 	TqFloat theta,angle,dtheta;
-	TqInt narcs;
+	TqUint narcs;
 	
 	while(ae<as)
 		ae+=2*RI_PI;
@@ -967,7 +970,7 @@ void CqSurfaceNURBS::Circle(const CqVector3D& O, const CqVector3D& X, const CqVe
 		}
 	}
 	dtheta=theta/static_cast<TqFloat>(narcs);
-	TqInt n=2*narcs+1;				// n control points ;
+	TqUint n=2*narcs+1;				// n control points ;
 	TqFloat w1=cos(dtheta/2.0);		// dtheta/2.0 is base angle
 
 	CqVector3D P0,T0,P2,T2,P1;
@@ -976,10 +979,10 @@ void CqSurfaceNURBS::Circle(const CqVector3D& O, const CqVector3D& X, const CqVe
 	Init(3,0,n,1);
 
 	P()[0]=P0;
-	TqInt index=0;
+	TqUint index=0;
 	angle=as;
 	
-	TqInt i;
+	TqUint i;
 	for(i=1; i<=narcs; i++)
 	{
 		angle+=dtheta;
@@ -997,7 +1000,7 @@ void CqSurfaceNURBS::Circle(const CqVector3D& O, const CqVector3D& X, const CqVe
 		}
 	}
 	
-	int j=2*narcs+1;				// load the knot vector
+	TqUint j=2*narcs+1;				// load the knot vector
 	for(i=0; i<3; i++)
 	{
 		m_auKnots[i]=0.0;
@@ -1052,8 +1055,8 @@ void CqSurfaceNURBS::LineSegment(const CqVector3D& P1, CqVector3D& P2)
 void CqSurfaceNURBS::SurfaceOfRevolution(const CqSurfaceNURBS& profile, const CqVector3D& S, const CqVector3D& Tvec, TqFloat theta)
 {
 	TqFloat angle,dtheta;
-	int narcs;
-	int i,j;
+	TqUint narcs;
+	TqUint i,j;
 
 	if(fabs(theta)>2.0*RI_PI)
 	{
@@ -1079,7 +1082,7 @@ void CqSurfaceNURBS::SurfaceOfRevolution(const CqSurfaceNURBS& profile, const Cq
 	}
 	dtheta=theta/static_cast<TqFloat>(narcs);
 
-	int n=2*narcs+1;					// n control points ;
+	TqUint n=2*narcs+1;					// n control points ;
 	Init(3,profile.uOrder(),n,profile.cuVerts());
 
 	switch(narcs)
@@ -1162,7 +1165,7 @@ void CqSurfaceNURBS::SurfaceOfRevolution(const CqSurfaceNURBS& profile, const Cq
 		CP(0,j)=profile.CP(j,0);
 
 		T0=Y;
-		int index=0;
+		TqUint index=0;
 
 		for(i=1; i<=narcs; ++i)
 		{
@@ -1242,7 +1245,7 @@ CqBound CqSurfaceNURBS::Bound() const
 	// Get the boundary in camera space.
 	CqVector3D	vecA(FLT_MAX, FLT_MAX, FLT_MAX);
 	CqVector3D	vecB(-FLT_MAX, -FLT_MAX, -FLT_MAX);
-	TqInt i;
+	TqUint i;
 	for(i=0; i<m_cuVerts*m_cvVerts; i++)
 	{
 		CqVector3D	vecV=P()[i];
@@ -1271,8 +1274,6 @@ CqMicroPolyGridBase* CqSurfaceNURBS::Dice()
 	CqMicroPolyGrid* pGrid=new CqMicroPolyGrid(m_uDiceSize, m_vDiceSize, this);
 
 	CqVector4D vec1;
-	TqFloat diu=1.0/m_uDiceSize;
-	TqFloat div=1.0/m_vDiceSize;
 
 	TqInt lUses=Uses();
 
@@ -1341,7 +1342,7 @@ TqBool	CqSurfaceNURBS::Diceable()
 {
 	// Convert the control hull to raster space.
 	CqVector2D*	avecHull=new CqVector2D[m_cuVerts*m_cvVerts];
-	TqInt i;
+	TqUint i;
 	for(i=0; i<m_cuVerts*m_cvVerts; i++)
 		avecHull[i]=QGetRenderContext()->matSpaceToSpace("camera","raster",CqMatrix(),pTransform()->matObjectToWorld())*P()[i];
 	
@@ -1351,17 +1352,17 @@ TqBool	CqSurfaceNURBS::Diceable()
 	TqFloat MaxuLen=0;
 	TqFloat MaxvLen=0;
 
-	TqInt v;
+	TqUint v;
 	for(v=0; v<m_cvVerts; v++)
 	{
-		TqInt u;
+		TqUint u;
 		for(u=0; u<m_cuVerts-1; u++)
 			uLen+=CqVector2D(avecHull[(v*m_cuVerts)+u+1]-avecHull[(v*m_cuVerts)+u]).Magnitude();
 		if(uLen>MaxuLen)	MaxuLen=uLen;
 		uLen=0;
 	}
 
-	TqInt u;
+	TqUint u;
 	for(u=0; u<m_cuVerts; u++)
 	{
 		for(v=0; v<m_cvVerts-1; v++)
@@ -1385,18 +1386,18 @@ TqBool	CqSurfaceNURBS::Diceable()
 	}	
 	
 	// TODO: Should ensure powers of half to prevent cracking.
-	float ShadingRate=pAttributes()->fEffectiveShadingRate();
+	TqFloat ShadingRate=pAttributes()->fEffectiveShadingRate();
 //	if(QGetRenderContext()->Mode()==RenderMode_Shadows)
 //	{
 //		const TqFloat* pattrShadowShadingRate=m_pAttributes->GetFloatAttribute("render","shadow_shadingrate");
 //		if(pattrShadowShadingRate!=0)
 //			ShadingRate=pattrShadowShadingRate[0];
 //	}	
-	ShadingRate=static_cast<float>(sqrt(ShadingRate));
+	ShadingRate=static_cast<TqFloat>(sqrt(ShadingRate));
 	MaxuLen/=ShadingRate;
 	MaxvLen/=ShadingRate;
-	m_uDiceSize=static_cast<TqInt>(MAX(MaxuLen,1));
-	m_vDiceSize=static_cast<TqInt>(MAX(MaxvLen,1));
+	m_uDiceSize=static_cast<TqUint>(MAX(MaxuLen,1));
+	m_vDiceSize=static_cast<TqUint>(MAX(MaxvLen,1));
 	TqFloat Area=m_uDiceSize*m_vDiceSize;
 
 	if(MaxuLen<FLT_EPSILON || MaxvLen<FLT_EPSILON)
@@ -1425,7 +1426,7 @@ TqBool	CqSurfaceNURBS::Diceable()
 void	CqSurfaceNURBS::Transform(const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx)
 {
 	// Tansform the control hull by the specified matrix.
-	TqInt i;
+	TqUint i;
 	for(i=0; i<P().Size(); i++)
 		P()[i]=matTx*P()[i];
 }
@@ -1435,7 +1436,7 @@ void	CqSurfaceNURBS::Transform(const CqMatrix& matTx, const CqMatrix& matITTx, c
 
 void CqSurfaceNURBS::OutputMesh()
 {
-	long Granularity = 30;  // Controls the number of steps in u and v
+	TqUint Granularity = 30;  // Controls the number of steps in u and v
 
 
 	std::vector<CqSurfaceNURBS>	S(1);
@@ -1445,25 +1446,25 @@ void CqSurfaceNURBS::OutputMesh()
 	// Save the grid as a .raw file.
 	FILE* fp=fopen("NURBS.RAW", "w");
 
-	TqInt s;
+	TqUint s;
 	for(s=0; s<S.size(); s++)
 	{
 		fprintf(fp, "Surface_%d\n",s);
 		std::vector<std::vector<CqVector3D> > aaPoints(Granularity+1);
-		TqInt p;
+		TqUint p;
 		for(p=0; p<=Granularity; p++)	aaPoints[p].resize(Granularity+1);
 
 
 		// Compute points on curve
 
-		TqInt i;
+		TqUint i;
 		for(i=0; i<=Granularity; i++)
 		{
 			TqFloat v=(static_cast<TqFloat>(i)/static_cast<TqFloat>(Granularity))
 						*(S[s].m_avKnots[S[s].m_cvVerts]-S[s].m_avKnots[S[s].m_vOrder-1])
 						+S[s].m_avKnots[S[s].m_vOrder-1];
 
-			TqInt j;
+			TqUint j;
 			for(j=0; j<=Granularity; j++)
 			{
 				TqFloat u=(static_cast<TqFloat>(j)/static_cast<TqFloat>(Granularity))
@@ -1477,7 +1478,7 @@ void CqSurfaceNURBS::OutputMesh()
 
 		for(i=0; i<Granularity; i++)
 		{
-			TqInt j;
+			TqUint j;
 			for(j=0; j<Granularity; j++)
 			{
 				fprintf(fp, "%f %f %f %f %f %f %f %f %f\n",
@@ -1506,7 +1507,7 @@ void CqSurfaceNURBS::Output(char* name)
 	fprintf(fp, "cuVerts: %d\n", m_cuVerts);
 	fprintf(fp, "cvVerts: %d\n", m_cvVerts);
 
-	TqInt i;
+	TqUint i;
 	for(i=0; i<m_auKnots.size(); i++)
 		fprintf(fp, "%f ", m_auKnots[i]);
 	fprintf(fp,"\n");

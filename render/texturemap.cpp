@@ -311,8 +311,6 @@ CqTextureMapBuffer* CqTextureMap::GetBuffer(unsigned long s, unsigned long t, in
 		uint32 tsx,tsy;
 		int ret=TIFFGetField(m_pImage,TIFFTAG_TILEWIDTH,&tsx);
 		TIFFGetField(m_pImage,TIFFTAG_TILELENGTH,&tsy);
-		tsize_t tsize=TIFFTileSize(m_pImage);
-		ttile_t ctiles=TIFFNumberOfTiles(m_pImage);
 		// If a tiled image, read the appropriate tile.
 		if(ret)
 		{
@@ -322,7 +320,7 @@ CqTextureMapBuffer* CqTextureMap::GetBuffer(unsigned long s, unsigned long t, in
 						
 			pTMB=new CqTextureMapBuffer(ox,oy,tsx,tsy,m_SamplesPerPixel,directory);
 
-			int res=TIFFSetDirectory(m_pImage, directory);
+			TIFFSetDirectory(m_pImage, directory);
 			float* pData=pTMB->pBufferData();
 			TIFFReadTile(m_pImage,pData,s,t,0,0);
 			m_apSegments.push_back(pTMB);
@@ -334,7 +332,7 @@ CqTextureMapBuffer* CqTextureMap::GetBuffer(unsigned long s, unsigned long t, in
 
 			pTMB=new CqTextureMapBuffer(0,0,m_XRes,m_YRes,m_SamplesPerPixel,directory);
 			
-			int res=TIFFSetDirectory(m_pImage, directory);
+			TIFFSetDirectory(m_pImage, directory);
 			float* pdata=pTMB->pBufferData();
 			TqUint i;
 			for(i=0; i<m_YRes; i++)
@@ -439,8 +437,8 @@ void CqTextureMap::SampleSATMap(float s1, float t1, float swidth, float twidth, 
 	{
 		if(ss1<0)	ss1=0;
 		if(tt1<0)	tt1=0;
-		if(ss2>(m_XRes-1))	ss2=(m_XRes-1);
-		if(tt2>(m_YRes-1))	tt2=(m_YRes-1);
+		if(ss2>static_cast<long>(m_XRes-1))	ss2=(m_XRes-1);
+		if(tt2>static_cast<long>(m_YRes-1))	tt2=(m_YRes-1);
 	}
 	else
 	{
@@ -448,10 +446,10 @@ void CqTextureMap::SampleSATMap(float s1, float t1, float swidth, float twidth, 
 		while(tt1<0)	tt1+=m_YRes;
 		while(ss2<0)	ss2+=m_XRes;
 		while(tt2<0)	tt2+=m_YRes;
-		while(ss1>(m_XRes-1))	ss1-=m_XRes;
-		while(tt1>(m_YRes-1))	tt1-=m_YRes;
-		while(ss2>(m_XRes-1))	ss2-=m_XRes;
-		while(tt2>(m_YRes-1))	tt2-=m_YRes;
+		while(ss1>static_cast<long>(m_XRes-1))	ss1-=m_XRes;
+		while(tt1>static_cast<long>(m_YRes-1))	tt1-=m_YRes;
+		while(ss2>static_cast<long>(m_XRes-1))	ss2-=m_XRes;
+		while(tt2>static_cast<long>(m_YRes-1))	tt2-=m_YRes;
 	}
 
 	// If no boundaries are crossed, just do a single sample (the most common case)
@@ -945,15 +943,15 @@ void	CqShadowMap::SampleMap(const CqVector3D& R1, const CqVector3D& R2,const CqV
 	TqFloat tmax=(t1>t2)?t1:(t2>t3)?t2:(t3>t4)?t3:t4;
 	
 	// Cull if outside bounding box.
-	TqInt lu=static_cast<TqInt>(floor(smin));
-	TqInt hu=static_cast<TqInt>(ceil(smax));
-	TqInt lv=static_cast<TqInt>(floor(tmin));
-	TqInt hv=static_cast<TqInt>(ceil(tmax));
+	TqUint lu=static_cast<TqInt>(floor(smin));
+	TqUint hu=static_cast<TqInt>(ceil(smax));
+	TqUint lv=static_cast<TqInt>(floor(tmin));
+	TqUint hv=static_cast<TqInt>(ceil(tmax));
 
-	lu-=sbo2;
-	lv-=tbo2;
-	hu+=sbo2;
-	hv+=tbo2;
+	lu-=static_cast<TqInt>(sbo2);
+	lv-=static_cast<TqInt>(tbo2);
+	hu+=static_cast<TqInt>(sbo2);
+	hv+=static_cast<TqInt>(tbo2);
 
 	if(lu>m_XRes || hu<0 || lv>m_YRes || hv<0)
 		return;
@@ -999,9 +997,9 @@ void	CqShadowMap::SampleMap(const CqVector3D& R1, const CqVector3D& R2,const CqV
 		{
 			// Jitter s and t
 			m_rand_index=(m_rand_index+1)&255;
-			TqInt iu=static_cast<TqInt>(s+m_aRand_no[m_rand_index]*js);
+			TqUint iu=static_cast<TqUint>(s+m_aRand_no[m_rand_index]*js);
 			m_rand_index=(m_rand_index+1)&255;
-			TqInt iv=static_cast<TqInt>(t+m_aRand_no[m_rand_index]*jt);
+			TqUint iv=static_cast<TqUint>(t+m_aRand_no[m_rand_index]*jt);
 			// Clip to bounding box.
 			if(iu>=0 && iu<m_XRes &&
 			   iv>=0 && iv<m_YRes)

@@ -153,9 +153,9 @@ class CqSurfacePolygon : public CqSurface, public CqPolygonBase
 		virtual TqBool		Diceable()				{return(CqPolygonBase::Diceable());}
 
 		virtual void		Transform(const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx);
-		virtual	TqInt		cUniform() const	{return(1);}
-		virtual	TqInt		cVarying() const	{return(m_cVertices);}
-		virtual	TqInt		cVertex() const		{return(m_cVertices);}
+		virtual	TqUint		cUniform() const	{return(1);}
+		virtual	TqUint		cVarying() const	{return(m_cVertices);}
+		virtual	TqUint		cVertex() const		{return(m_cVertices);}
 
 		// Overridden from CqPolygonBase
 		virtual	const CqSurface& Surface() const		{return(*this);}
@@ -225,9 +225,9 @@ class CqPolygonPoints : public CqSurface
 		virtual TqBool		Diceable()			{return(TqFalse);}
 
 		virtual	void		Transform(const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx);
-		virtual	TqInt		cUniform() const	{return(m_cReferences);}
-		virtual	TqInt		cVarying() const	{return(m_cVertices);}
-		virtual	TqInt		cVertex() const		{return(m_cVertices);}
+		virtual	TqUint		cUniform() const	{return(m_cReferences);}
+		virtual	TqUint		cVarying() const	{return(m_cVertices);}
+		virtual	TqUint		cVertex() const		{return(m_cVertices);}
 
 							/** Increment the number of polygons referercing this list.
 							 */		
@@ -279,9 +279,9 @@ class CqSurfacePointsPolygon : public CqBasicSurface, public CqPolygonBase
 		virtual void		Transform(const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx)
 											{m_pPoints->Transform(matTx,matITTx,matRTx);}
 		// NOTE: These should never be called.
-		virtual	TqInt		cUniform() const	{return(0);}
-		virtual	TqInt		cVarying() const	{return(0);}
-		virtual	TqInt		cVertex() const		{return(0);}
+		virtual	TqUint		cUniform() const	{return(0);}
+		virtual	TqUint		cVarying() const	{return(0);}
+		virtual	TqUint		cVertex() const		{return(0);}
 		//---------------
 
 		// Overridden from CqPolygonBase
@@ -368,9 +368,9 @@ class CqMotionSurfacePointsPolygon : public CqBasicSurface, public CqPolygonBase
 																GetMotionObject(Time(i))->Transform(matTx,matITTx,matRTx);
 														}
 		// NOTE: These should never be called.
-		virtual	TqInt		cUniform() const			{return(0);}
-		virtual	TqInt		cVarying() const			{return(0);}
-		virtual	TqInt		cVertex() const				{return(0);}
+		virtual	TqUint		cUniform() const			{return(0);}
+		virtual	TqUint		cVarying() const			{return(0);}
+		virtual	TqUint		cVertex() const				{return(0);}
 		//---------------
 
 		// Overridden from CqPolygonBase

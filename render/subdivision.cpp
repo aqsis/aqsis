@@ -82,7 +82,7 @@ TqBool CqWEdge::IsValid()
 /** Create a new WVertex for this edge taking into account its sharpness, and that of its neighbours.
  */
 
-CqWVert* CqWEdge::CreateSubdividePoint(CqWSurf* pSurf, TqInt index, TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os,
+CqWVert* CqWEdge::CreateSubdividePoint(CqWSurf* pSurf, TqUint index, TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os,
 																	TqBool has_s, TqBool has_t, TqBool has_Cs, TqBool has_Os)
 {
 	assert(index<pSurf->P().Size());
@@ -185,7 +185,7 @@ void CqWEdge::Subdivide(CqWSurf* pSurf)
 /** Create a new WVertex as the centroid of this face.
  */
 
-CqWVert* CqWFace::CreateSubdividePoint(CqWSurf* pSurf, TqInt index, TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os,
+CqWVert* CqWFace::CreateSubdividePoint(CqWSurf* pSurf, TqUint index, TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os,
 																	TqBool has_s, TqBool has_t, TqBool has_Cs, TqBool has_Os)
 {
 	assert(index<pSurf->P().Size());
@@ -649,7 +649,7 @@ TqInt CqWSurf::Split(std::vector<CqBasicSurface*>& aSplits)
 void CqWSurf::Transform(const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx)
 {
 	// Tansform the control hull by the specified matrix.
-	TqInt i;
+	TqUint i;
 	for(i=0; i<P().Size(); i++)
 		P()[i]=matTx*P()[i];
 }
@@ -1019,7 +1019,6 @@ CqSubdivisionPatch::CqSubdivisionPatch(CqWSurf* pSurf, TqInt iFace)
 	AddFace(&apEdges[0],pF->cEdges());
 
 	// Now do the same for each surrounding face.
-	CqWEdge* peStart=0;
 	rEdge.Reset(pF->pEdge(0),pF);
 
 	for(i=0; i<pF->cEdges(); i++)
@@ -1063,7 +1062,7 @@ CqWVert* CqSubdivisionPatch::AddVert(CqWSurf* pSurf, TqInt iVert, TqBool uses_s,
 {
 	CqWVert* pNew=CqWSurf::AddVert(pSurf->SubdP(iVert));
 
-	TqInt iV=pNew->iVertex();
+	TqUint iV=pNew->iVertex();
 	if(uses_s && has_s)	
 	{
 		if(s().Size()<=iV)	s().SetSize(iV+1);
@@ -1289,7 +1288,7 @@ CqBound CqWSurf::Bound() const
 	// Get the boundary in camera space.
 	CqVector3D	vecA(FLT_MAX, FLT_MAX, FLT_MAX);
 	CqVector3D	vecB(-FLT_MAX, -FLT_MAX, -FLT_MAX);
-	TqInt i;
+	TqUint i;
 	for(i=0; i<P().Size(); i++)
 	{
 		CqVector3D	vecV=P()[i];
@@ -1354,7 +1353,7 @@ TqBool CqSubdivisionPatch::Diceable()
 	if(l>16)	return(TqFalse);
 	else			
 	{
-		m_DiceCount=l;
+		m_DiceCount=static_cast<TqInt>(l);
 		m_DiceCount=CEIL_POW2(m_DiceCount);
 		m_DiceCount=(m_DiceCount==16)?4:(m_DiceCount==8)?3:(m_DiceCount==4)?2:(m_DiceCount==2)?1:0;
 		return(TqTrue);
@@ -1411,9 +1410,6 @@ CqMicroPolyGridBase* CqSubdivisionPatch::Dice()
 	if(uses_Os && !has_Os)	Os().BilinearDice(cuv,cuv,&pGrid->Os());
 
 	DiceSubdivide(m_DiceCount);
-
-	TqInt NumMPs=static_cast<TqInt>(pow(4,m_DiceCount));
-	TqInt iU=0, iV=0;
 
 	TqInt iFace=0;
 	StoreDice(m_DiceCount, iFace, 0, 0, cuv+1, pGrid, uses_s, uses_t, uses_Cs, uses_Os, has_s, has_t, has_Cs, has_Os);
@@ -1570,7 +1566,7 @@ void CqSubdivisionPatch::StoreDice(TqInt Level, TqInt& iFace, TqInt uOff, TqInt 
 void CqSubdivisionPatch::_OutputMesh(FILE* pf, TqInt Subd, char* name, unsigned int col)
 {
 	fprintf(pf,"%s\n",name);
-	TqInt i;
+	TqUint i;
 	fprintf(pf,"%d\n",cVerts());
 	for(i=0; i<P().Size(); i++)
 	{
@@ -1580,7 +1576,7 @@ void CqSubdivisionPatch::_OutputMesh(FILE* pf, TqInt Subd, char* name, unsigned 
 	}
 
 	fprintf(pf,"%d\n",(TqInt)pow(4,Subd));
-	for(i=0; i<(TqInt)pow(4,Subd); i++)
+	for(i=0; i<static_cast<TqUint>(pow(4,Subd)); i++)
 	{
 		CqWReference ref(pFace(i)->pEdge(0),pFace(i));
 		TqInt j=0;

@@ -288,7 +288,7 @@ class CqWFace
 					 */
 		CqWVert*	pvSubdivide()	{return(m_pvSubdivide);}
 
-		CqWVert*	CreateSubdividePoint(CqWSurf* pSurf, TqInt index, TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os,
+		CqWVert*	CreateSubdividePoint(CqWSurf* pSurf, TqUint index, TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os,
 																	  TqBool has_s, TqBool has_t, TqBool has_Cs, TqBool has_Os);
 
 					/** Templatised function to perform the subdivision arithmetic on a paramter type.
@@ -508,7 +508,7 @@ class CqWEdge
 		
 		TqBool		IsBoundary();
 		TqBool		IsValid();
-		CqWVert*	CreateSubdividePoint(CqWSurf* pSurf, TqInt index, TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os,
+		CqWVert*	CreateSubdividePoint(CqWSurf* pSurf, TqUint index, TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os,
 																	  TqBool has_s, TqBool has_t, TqBool has_Cs, TqBool has_Os);
 		void		Subdivide(CqWSurf* pSurf);
 					/** Get a pointer to the calculated midpoint of this edge.
@@ -596,9 +596,9 @@ class CqWSurf : public CqSurface
 						 */
 	virtual TqBool		Diceable()		{return(TqFalse);}
 	virtual void		Transform(const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx);
-	virtual	TqInt		cUniform() const{return(m_cExpectedFaces);}
-	virtual	TqInt		cVarying() const{return(m_cExpectedVertices);}
-	virtual	TqInt		cVertex() const	{return(m_cExpectedVertices);}
+	virtual	TqUint		cUniform() const{return(m_cExpectedFaces);}
+	virtual	TqUint		cVarying() const{return(m_cExpectedVertices);}
+	virtual	TqUint		cVertex() const	{return(m_cExpectedVertices);}
 
 						/** Get a pointer to the indexed vertex in the list.
 						 * \param iV Integer index.

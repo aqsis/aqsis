@@ -328,7 +328,7 @@ union UsProgramElement
 						POPV(a);		/* first value */ \
 						/* Read all the additional values. */ \
 						static TqInt i=0; \
-						TqInt cParams=FLOAT(count); \
+						TqInt cParams=static_cast<TqInt>(FLOAT(count)); \
 						CqVMStackEntry** aParams=new CqVMStackEntry*[cParams]; \
 						TqInt iP=0; \
 						while(iP!=cParams)	aParams[iP++]=&POP; \
@@ -447,11 +447,11 @@ union UsProgramElement
 						Result.OpTRIPLE_C(ValA,ValB,ValC); \
 						Push(Result);
 
-static TqFloat temp_float;
+//static TqFloat temp_float;
 static CqVector3D temp_point;
 static CqColor temp_color;
 static CqString temp_string;
-static bool temp_bool;
+//static bool temp_bool;
 static CqMatrix temp_matrix;
 
 //----------------------------------------------------------------------

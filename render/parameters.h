@@ -62,7 +62,7 @@ class CqParameter
 	virtual	void		SetSize(TqInt size)=0;
 						/** Pure virtual, get value size, not array, but varying/vertex size.
 						 */
-	virtual	TqInt		Size() const=0;
+	virtual	TqUint		Size() const=0;
 						/** Pure virtual, clear value contents.
 						 */
 	virtual	void		Clear()=0;
@@ -161,7 +161,7 @@ class CqParameterTypedVarying : public CqParameterTyped<T>
 	virtual	CqParameter* Clone()const	{return(new CqParameterTypedVarying<T,I>(*this));}
 	virtual	EqVariableType	Type() const {return((EqVariableType)(I|Type_Varying));}
 	virtual	void		SetSize(TqInt size)	{m_aValues.resize(size);}
-	virtual	TqInt		Size() const		{return(m_aValues.size());}
+	virtual	TqUint		Size() const		{return(m_aValues.size());}
 	virtual	void		Clear()				{m_aValues.clear();}
 	virtual void		uSubdivide(CqParameter* pResult)	
 											{
@@ -170,8 +170,8 @@ class CqParameterTypedVarying : public CqParameterTyped<T>
 												// Check if a valid 4 point quad, do nothing if not.
 												if(m_aValues.size()==4 && pVS->m_aValues.size()==4)
 												{
-													pValue(1)[0]=pVS->pValue(0)[0]=(pValue(0)[0]+pValue(1)[0])*0.5;
-													pValue(3)[0]=pVS->pValue(2)[0]=(pValue(2)[0]+pValue(3)[0])*0.5;
+													pValue(1)[0]=pVS->pValue(0)[0]=static_cast<T>((pValue(0)[0]+pValue(1)[0])*0.5);
+													pValue(3)[0]=pVS->pValue(2)[0]=static_cast<T>((pValue(2)[0]+pValue(3)[0])*0.5);
 												}
 											}
 	virtual void		vSubdivide(CqParameter* pResult)	
@@ -181,8 +181,8 @@ class CqParameterTypedVarying : public CqParameterTyped<T>
 												// Check if a valid 4 point quad, do nothing if not.
 												if(m_aValues.size()==4 && pVS->m_aValues.size()==4)
 												{
-													pValue(2)[0]=pVS->pValue(0)[0]=(pValue(0)[0]+pValue(2)[0])*0.5;
-													pValue(3)[0]=pVS->pValue(1)[0]=(pValue(1)[0]+pValue(3)[0])*0.5;
+													pValue(2)[0]=pVS->pValue(0)[0]=static_cast<T>((pValue(0)[0]+pValue(2)[0])*0.5);
+													pValue(3)[0]=pVS->pValue(1)[0]=static_cast<T>((pValue(1)[0]+pValue(3)[0])*0.5);
 												}
 											}
 	virtual	void		BilinearDice(TqInt u, TqInt v, CqShaderVariable* pResult);
@@ -252,7 +252,7 @@ class CqParameterTypedUniform : public CqParameterTyped<T>
 	virtual	CqParameter* Clone()const	{return(new CqParameterTypedUniform<T,I>(*this));}
 	virtual	EqVariableType	Type() const {return((EqVariableType)(I|Type_Uniform));}
 	virtual	void		SetSize(TqInt size)	{}
-	virtual	TqInt		Size() const	{return(1);}
+	virtual	TqUint		Size() const	{return(1);}
 	virtual	void		Clear()			{}
 
 	virtual void		uSubdivide(CqParameter* pResult)	{}
@@ -360,7 +360,7 @@ class CqParameterTypedVaryingArray : public CqParameterTyped<T>
 												for(j=0; j<size; j++)
 													m_aValues[j].resize(m_Count);
 											}
-	virtual	TqInt		Size() const		{return(m_aValues[0].size());}
+	virtual	TqUint		Size() const		{return(m_aValues[0].size());}
 	virtual	void		Clear()				{m_aValues.clear();}
 	virtual void		uSubdivide(CqParameter* pResult)	
 											{
@@ -369,8 +369,8 @@ class CqParameterTypedVaryingArray : public CqParameterTyped<T>
 												// Check if a valid 4 point quad, do nothing if not.
 												if(m_aValues.size()==4 && pVS->m_aValues.size()==4)
 												{
-													pValue(1)[0]=pVS->pValue(0)[0]=(pValue(0)[0]+pValue(1)[0])*0.5;
-													pValue(3)[0]=pVS->pValue(2)[0]=(pValue(2)[0]+pValue(3)[0])*0.5;
+													pValue(1)[0]=pVS->pValue(0)[0]=static_cast<T>((pValue(0)[0]+pValue(1)[0])*0.5);
+													pValue(3)[0]=pVS->pValue(2)[0]=static_cast<T>((pValue(2)[0]+pValue(3)[0])*0.5);
 												}
 											}
 	virtual void		vSubdivide(CqParameter* pResult)	
@@ -380,8 +380,8 @@ class CqParameterTypedVaryingArray : public CqParameterTyped<T>
 												// Check if a valid 4 point quad, do nothing if not.
 												if(m_aValues.size()==4 && pVS->m_aValues.size()==4)
 												{
-													pValue(2)[0]=pVS->pValue(0)[0]=(pValue(0)[0]+pValue(2)[0])*0.5;
-													pValue(3)[0]=pVS->pValue(1)[0]=(pValue(1)[0]+pValue(3)[0])*0.5;
+													pValue(2)[0]=pVS->pValue(0)[0]=static_cast<T>((pValue(0)[0]+pValue(2)[0])*0.5);
+													pValue(3)[0]=pVS->pValue(1)[0]=static_cast<T>((pValue(1)[0]+pValue(3)[0])*0.5);
 												}
 											}
 	virtual	void		BilinearDice(TqInt u, TqInt v, CqShaderVariable* pResult);
@@ -411,7 +411,7 @@ class CqParameterTypedVaryingArray : public CqParameterTyped<T>
 		CqParameterTypedVaryingArray<T,I>& operator=(const CqParameterTypedVaryingArray<T,I>& From)
 											{
 												m_aValues.resize(From.m_aValues.size());
-												TqInt j;
+												TqUint j;
 												for(j=0; j<m_aValues.size(); j++)
 												{
 													m_aValues[j].resize(m_Count);
@@ -461,7 +461,7 @@ class CqParameterTypedUniformArray : public CqParameterTyped<T>
 	virtual	CqParameter* Clone()const	{return(new CqParameterTypedUniformArray<T,I>(*this));}
 	virtual	EqVariableType	Type() const {return((EqVariableType)(I|Type_Uniform));}
 	virtual	void		SetSize(TqInt size)	{}
-	virtual	TqInt		Size() const		{return(1);}
+	virtual	TqUint		Size() const		{return(1);}
 	virtual	void		Clear()			{}
 
 	virtual void		uSubdivide(CqParameter* pResult)	{}
