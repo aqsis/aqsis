@@ -861,7 +861,7 @@ inline void	OpCOMP( A& z, IqShaderData* pA, IqShaderData* pB, IqShaderData* pRes
 		for ( i = 0; i < ii; i++ ) 
 		{ 
 			if ( RunningState.Value( i ) ) 
-				pRes->SetValue( vA[ index ], i ); 
+				pRes->SetValue( (*pdA)[ index ], i ); 
 			pdA++; 
 		} 
 	} 
