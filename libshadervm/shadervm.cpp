@@ -797,7 +797,8 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 	EqSegment	Segment = Seg_Data;
 	std::vector<UsProgramElement>*	pProgramArea = NULL;
 	std::vector<TqInt>	aLabels;
-	CqShaderExecEnv	StdEnv;
+	CqShaderExecEnv	*StdEnv = new CqShaderExecEnv;
+	ADDREF( StdEnv );
 	TqInt	array_count = 0;
 	TqUlong  htoken, i;
 
@@ -953,6 +954,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 						if ( i == strlen( token ) )
 						{
 							//CqBasicError( 0, Severity_Fatal, "Invalid variable specification in slx file" );
+							RELEASEREF( StdEnv );
 							return ;
 						}
 						token[ strlen( token ) - 1 ] = '\0';
@@ -1014,6 +1016,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 							  	candidates = getShadeOpMethods(&strFunc);
 								if( candidates == NULL )
 								{
+									RELEASEREF( StdEnv );
 									logger->fatal("%s: No DSO found for external shadeop: %s\n", strName().c_str(), strFunc.c_str());
 									return ;
 								}
@@ -1030,6 +1033,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 							else 
 							{
 								//error, we dont know this return type
+								RELEASEREF( StdEnv );
 								logger->fatal("%s: Invalid return type in call to external shadeop: %s: %s\n", strName().c_str(), strFunc.c_str(), strRetType.c_str());
 								return;
 							};
@@ -1045,6 +1049,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 								else
 								{
 									// Error, unknown arg type
+									RELEASEREF( StdEnv );
 									logger->fatal("%s: Invalid argument type in call to external shadeop: %s: %c\n", strName().c_str(), strFunc.c_str(), strArgTypes[x]);
 									return;
 								};
@@ -1073,6 +1078,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 									logger->info("%s:\t%s\n", strName().c_str(), strProto.c_str());
 									candidate++;
 								};
+								RELEASEREF( StdEnv );
 								return ; //ERROR
 							};
 
@@ -1118,7 +1124,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 									TqInt iVar;
 									if ( ( iVar = FindLocalVarIndex( token ) ) >= 0 )
 										AddVariable( iVar, pProgramArea );
-									else if ( ( iVar = StdEnv.FindStandardVarIndex( token ) ) >= 0 )
+									else if ( ( iVar = StdEnv->FindStandardVarIndex( token ) ) >= 0 )
 										AddVariable( iVar | 0x8000, pProgramArea );
 									else
 										// TODO: Report error.
@@ -1156,6 +1162,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 						CqString strErr( "Invalid opcode found : " );
 						strErr += token;
 						//CqBasicError( 0, Severity_Fatal, strErr.c_str() );
+						RELEASEREF( StdEnv );
 						return ;
 					}
 					break;
@@ -1196,6 +1203,8 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 			}
 		}
 	}
+
+	RELEASEREF( StdEnv );
 }
 
 
@@ -1292,9 +1301,10 @@ void CqShaderVM::ExecuteInit()
 	// Fake an environment
 	IqShaderExecEnv* pOldEnv = m_pEnv;
 
-	CqShaderExecEnv	Env;
-	Env.Initialise( 1, 1, 0, this, m_Uses );
-	Initialise( 1, 1, &Env );
+	CqShaderExecEnv* Env = new CqShaderExecEnv;
+	ADDREF( Env );
+	Env->Initialise( 1, 1, 0, this, m_Uses );
+	Initialise( 1, 1, Env );
 
 	// Execute the init program.
 	m_PC = &m_ProgramInit[ 0 ];
@@ -1312,6 +1322,8 @@ void CqShaderVM::ExecuteInit()
 	m_Stack.clear();
 
 	m_pEnv = pOldEnv;
+
+	RELEASEREF( Env );
 }
 
 
