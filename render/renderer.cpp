@@ -886,7 +886,8 @@ TqBool	CqRenderer::SetCoordSystem( const char* strName, const CqMatrix& matToWor
 SqParameterDeclaration CqRenderer::FindParameterDecl( const char* strDecl )
 {
 	CqInlineParse parser;
-	parser.parse( std::string( strDecl ) );
+	std::string __strDecl( strDecl );
+	parser.parse( __strDecl );
 	
 	if( parser.isInline() )	
 	{

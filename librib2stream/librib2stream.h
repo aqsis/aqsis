@@ -71,6 +71,7 @@ class Stream :
 		virtual	RtVoid	RiMakeLatLongEnvironmentV( const char *imagefile, const char *reflfile, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, RtInt count, RtToken tokens[], RtPointer values[] );
 		virtual	RtVoid	RiMakeShadowV( const char *picfile, const char *shadowfile, RtInt count, RtToken tokens[], RtPointer values[] );
 		virtual	RtVoid	RiMakeTextureV( const char *imagefile, const char *texturefile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, RtInt count, RtToken tokens[], RtPointer values[] );
+		virtual	RtVoid	RiMakeOcclusionV( int piccount, const char **picfile, const char *shadowfile, RtInt count, RtToken tokens[], RtPointer values[] );
 		virtual	RtVoid	RiMatte( RtBoolean onoff );
 		virtual	RtVoid	RiMotionBeginV( RtInt N, RtFloat times[] );
 		virtual	RtVoid	RiMotionEnd();

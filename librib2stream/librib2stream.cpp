@@ -233,6 +233,10 @@ RendermanInterface::RtVoid Stream::RiMakeTextureV( const char *imagefile, const 
 {
 	m_Stream << "RiMakeTextureV()" << std::endl;
 }
+RendermanInterface::RtVoid Stream::RiMakeOcclusionV( int picount, const char **picfile, const char *shadowfile, RtInt count, RtToken tokens[], RtPointer values[] )
+{
+	m_Stream << "RiMakeOcclusionV()" << std::endl;
+}
 RendermanInterface::RtVoid Stream::RiMatte( RtBoolean onoff )
 {
 	m_Stream << "RiMatte()" << std::endl;
