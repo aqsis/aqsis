@@ -1162,6 +1162,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 						CqString strErr( "Invalid opcode found : " );
 						strErr += token;
 						//CqBasicError( 0, Severity_Fatal, strErr.c_str() );
+						logger->fatal( strErr );
 						RELEASEREF( StdEnv );
 						return ;
 					}
