@@ -1233,7 +1233,7 @@ void CqShadowMap::SaveShadowMap(const char* strShadowName)
 		if(m_apSegments.size()!=0)
 		{
 			TIFF* pshadow=TIFFOpen(strShadowName,"w");
-//			TIFFCreateDirectory(pshadow);
+			TIFFCreateDirectory(pshadow);
 
 			// Write the transform matrices.
 			float	matWorldToCamera[16];
@@ -1297,7 +1297,7 @@ void CqShadowMap::ReadMatrices()
 
 void WriteTileImage(TIFF* ptex, float *raster, unsigned long width, unsigned long length, unsigned long twidth, unsigned long tlength, int samples)
 { 
-//	TIFFCreateDirectory(ptex);
+	TIFFCreateDirectory(ptex);
 	TIFFSetField(ptex,TIFFTAG_IMAGEWIDTH, width);
 	TIFFSetField(ptex,TIFFTAG_IMAGELENGTH, length);
 	TIFFSetField(ptex,TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
@@ -1345,7 +1345,7 @@ void WriteTileImage(TIFF* ptex, float *raster, unsigned long width, unsigned lon
 
 void WriteImage(TIFF* ptex, float *raster, unsigned long width, unsigned long length, int samples)
 { 
-//	TIFFCreateDirectory(ptex);
+	TIFFCreateDirectory(ptex);
 	TIFFSetField(ptex,TIFFTAG_IMAGEWIDTH, width);
 	TIFFSetField(ptex,TIFFTAG_IMAGELENGTH, length);
 	TIFFSetField(ptex,TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
