@@ -1,3 +1,4 @@
+
 // Aqsis
 // Copyright © 1997 - 2001, Paul C. Gregory
 //
@@ -104,8 +105,24 @@ CqMicroPolyGridBase* CqQuadric::Dice()
 
 TqBool	CqQuadric::Diceable()
 {
+        TqInt   gridsize;
+
+        const TqInt* poptGridSize = QGetRenderContext()->optCurrent().GetIntegerOption("limits","gridsize");
+	TqInt m_XBucketSize=16;
+	TqInt m_YBucketSize=16;
+	const TqInt* poptBucketSize=QGetRenderContext()->optCurrent().GetIntegerOption("limits","bucketsize");
+	if(poptBucketSize!=0)
+	{
+		m_XBucketSize=poptBucketSize[0];
+		m_YBucketSize=poptBucketSize[1];
+	}
+	TqFloat ShadingRate=pAttributes()->fEffectiveShadingRate();
+        if (poptGridSize)
+           gridsize = poptGridSize[0];
+        else
+           gridsize = m_XBucketSize * m_XBucketSize / ShadingRate;
 	EqtimateGridSize();
-	if ((TqFloat)m_uDiceSize*(TqFloat)m_vDiceSize<=256.0)	return(TqTrue);
+	if ((TqFloat)m_uDiceSize*(TqFloat)m_vDiceSize<=gridsize)	return(TqTrue);
 	else								return(TqFalse);
 }
 

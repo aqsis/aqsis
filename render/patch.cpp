@@ -1,3 +1,4 @@
+ 
 // Aqsis
 // Copyright © 1997 - 2001, Paul C. Gregory
 //
@@ -544,6 +545,22 @@ TqBool	CqSurfacePatchBicubic::Diceable()
 	// Convert the control hull to raster space.
 	CqVector2D	avecHull[16];
 	TqInt i;
+        TqInt   gridsize;
+
+        const TqInt* poptGridSize = QGetRenderContext()->optCurrent().GetIntegerOption("limits","gridsize");
+	TqInt m_XBucketSize=16;
+	TqInt m_YBucketSize=16;
+	const TqInt* poptBucketSize=QGetRenderContext()->optCurrent().GetIntegerOption("limits","bucketsize");
+	if(poptBucketSize!=0)
+	{
+		m_XBucketSize=poptBucketSize[0];
+		m_YBucketSize=poptBucketSize[1];
+	}
+	TqFloat ShadingRate=pAttributes()->fEffectiveShadingRate();
+        if (poptGridSize)
+           gridsize = poptGridSize[0];
+        else
+           gridsize = m_XBucketSize * m_XBucketSize / ShadingRate;
 	for(i=0; i<16; i++)
 		avecHull[i]=matCtoR*P()[i];
 
@@ -625,7 +642,6 @@ TqBool	CqSurfacePatchBicubic::Diceable()
 		if(Vec3.Magnitude2()>vLen)	vLen=Vec3.Magnitude2();
 	}
 
-	float ShadingRate=pAttributes()->fEffectiveShadingRate();
 //	if(QGetRenderContext()->Mode()==RenderMode_Shadows)
 //	{
 //		const TqFloat* pattrShadowShadingRate=m_pAttributes->GetFloatAttribute("render","shadow_shadingrate");
@@ -654,7 +670,7 @@ TqBool	CqSurfacePatchBicubic::Diceable()
 		return(TqFalse);
 	}
 
-	if(fabs(Area)>256)
+	if(fabs(Area)>gridsize)
 		return(TqFalse);
 
 	return(TqTrue);
@@ -966,6 +982,22 @@ TqBool	CqSurfacePatchBilinear::Diceable()
 	// Convert the control hull to raster space.
 	CqVector2D	avecHull[4];
 	TqInt i;
+        TqInt   gridsize;
+
+        const TqInt* poptGridSize = QGetRenderContext()->optCurrent().GetIntegerOption("limits","gridsize");
+	TqInt m_XBucketSize=16;
+	TqInt m_YBucketSize=16;
+	const TqInt* poptBucketSize=QGetRenderContext()->optCurrent().GetIntegerOption("limits","bucketsize");
+	if(poptBucketSize!=0)
+	{
+		m_XBucketSize=poptBucketSize[0];
+		m_YBucketSize=poptBucketSize[1];
+	}
+	TqFloat ShadingRate=pAttributes()->fEffectiveShadingRate();
+        if (poptGridSize)
+           gridsize = poptGridSize[0];
+        else
+           gridsize = m_XBucketSize * m_XBucketSize / ShadingRate;
 	for(i=0; i<4; i++)
 		avecHull[i]=matCtoR*P()[i];
 
@@ -980,7 +1012,6 @@ TqBool	CqSurfacePatchBilinear::Diceable()
 				Vec2=avecHull[3]-avecHull[1];
 	vLen=(Vec1.Magnitude2()>Vec2.Magnitude2())?Vec1.Magnitude2():Vec2.Magnitude2();
 
-	float ShadingRate=pAttributes()->fEffectiveShadingRate();
 //	if(QGetRenderContext()->Mode()==RenderMode_Shadows)
 //	{
 //		const TqFloat* pattrShadowShadingRate=m_pAttributes->GetFloatAttribute("render","shadow_shadingrate");
@@ -1009,7 +1040,7 @@ TqBool	CqSurfacePatchBilinear::Diceable()
 		return(TqFalse);
 	}
 
-	if(fabs(Area)>256)
+	if(fabs(Area)>gridsize)
 		return(TqFalse);
 
 	return(TqTrue);

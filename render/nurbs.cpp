@@ -1,3 +1,4 @@
+ 
 // Aqsis
 // Copyright © 1997 - 2001, Paul C. Gregory
 //
@@ -1348,6 +1349,25 @@ TqBool	CqSurfaceNURBS::Diceable()
 	// Convert the control hull to raster space.
 	CqVector2D*	avecHull=new CqVector2D[m_cuVerts*m_cvVerts];
 	TqUint i;
+        TqInt   gridsize;
+
+        const TqInt* poptGridSize = QGetRenderContext()->optCurrent().GetIntegerOption("limits","gridsize");
+
+	TqInt m_XBucketSize=16;
+	TqInt m_YBucketSize=16;
+	const TqInt* poptBucketSize=QGetRenderContext()->optCurrent().GetIntegerOption("limits","bucketsize");
+	if(poptBucketSize!=0)
+	{
+		m_XBucketSize=poptBucketSize[0];
+		m_YBucketSize=poptBucketSize[1];
+	}
+	TqFloat ShadingRate=pAttributes()->fEffectiveShadingRate();
+
+        if (poptGridSize)
+           gridsize = poptGridSize[0];
+        else
+           gridsize = m_XBucketSize * m_XBucketSize / ShadingRate;
+
 	for(i=0; i<m_cuVerts*m_cvVerts; i++)
 		avecHull[i]=QGetRenderContext()->matSpaceToSpace("camera","raster",CqMatrix(),pTransform()->matObjectToWorld())*P()[i];
 	
@@ -1391,7 +1411,7 @@ TqBool	CqSurfaceNURBS::Diceable()
 	}	
 	
 	// TODO: Should ensure powers of half to prevent cracking.
-	TqFloat ShadingRate=pAttributes()->fEffectiveShadingRate();
+	
 //	if(QGetRenderContext()->Mode()==RenderMode_Shadows)
 //	{
 //		const TqFloat* pattrShadowShadingRate=m_pAttributes->GetFloatAttribute("render","shadow_shadingrate");
@@ -1414,7 +1434,7 @@ TqBool	CqSurfaceNURBS::Diceable()
 
 
 	delete[](avecHull);
-	if(fabs(Area)>256)
+	if(fabs(Area)>gridsize)
 	{
 		m_SplitDir=(MaxuLen>MaxvLen)?SplitDir_U:SplitDir_V;
 		return(TqFalse);

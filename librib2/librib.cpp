@@ -85,6 +85,7 @@ void StandardDeclarations(RendermanInterface& CallbackInterface)
 	ParserDeclare(CallbackInterface, "s", "varying float");
 	ParserDeclare(CallbackInterface, "t", "varying float");
 	ParserDeclare(CallbackInterface, "st", "varying float");
+	ParserDeclare(CallbackInterface, "gridsize", "uniform integer");
 	ParserDeclare(CallbackInterface, "bucketsize", "uniform integer[2]");
 	ParserDeclare(CallbackInterface, "eyesplits", "uniform integer");
 	ParserDeclare(CallbackInterface, "shader", "uniform string");
