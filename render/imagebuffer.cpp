@@ -432,6 +432,13 @@ void CqImageBuffer::AddMPG( CqMicroPolygon* pmpgNew )
         return ;
     }
 
+	////////// Dump the micro polygon into a dump file //////////
+    #ifdef DEBUG_MPDUMP
+	mpdump.dump(*pmpgNew);
+    #endif
+	/////////////////////////////////////////////////////////////
+
+
     // Find out the minimum bucket touched by the micropoly bound.
     TqInt iBkt = m_cXBuckets * m_cYBuckets;
 

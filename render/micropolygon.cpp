@@ -1188,12 +1188,6 @@ void CqMicroPolygon::CacheHitTestValues(CqHitTestCache* cache)
 	m_pHitTestCache = cache;
 	const CqVector3D points[4] = { PointB(), PointC(), PointD(), PointA() } ;
 
-	////////// Dump the micro polygon into a dump file //////////
-    #ifdef DEBUG_MPDUMP
-	mpdump.dump(*this);
-    #endif
-	/////////////////////////////////////////////////////////////
-
 	int j = 3;
 	for(int i=0; i<4; ++i)
 	{
