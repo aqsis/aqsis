@@ -64,11 +64,7 @@ class CqNoise
 	public:
 		CqNoise()
 		{
-			if ( !m_Init )
-			{
-				init( 665 );
-				m_Init = TqTrue;
-			}
+			init( 665 );
 		}
 		~CqNoise()
 		{}
@@ -131,9 +127,6 @@ class CqNoise
 		static	float	glattice( TqInt ix, TqInt iy, TqInt iz, TqFloat fx, TqFloat fy, TqFloat fz );
 
 	private:
-
-		static	TqInt	m_Init;
-		static	CqRandom	m_random;
 
 		static	TqInt	m_p[ NOISE_B + NOISE_B + 2 ];
 		static	TqFloat	m_g3[ NOISE_B + NOISE_B + 2 ][ 3 ];
