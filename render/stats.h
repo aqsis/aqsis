@@ -78,6 +78,7 @@ class CqStatTimer
 		void	Stop()	{
 							assert(m_fStarted);
 							m_timeTotal += clock()-m_timeStart;
+							m_fStarted = TqFalse;
 						}
 
 		/** Reset the total time for this timer, asserts that the timer is not running.
@@ -85,6 +86,7 @@ class CqStatTimer
 		void	Reset()	{
 							assert(!m_fStarted);
 							m_timeTotal = 0;
+							m_fStarted = TqFalse;
 						}
 
 	private:
