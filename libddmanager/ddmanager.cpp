@@ -33,6 +33,11 @@
 #include	"shaderexecenv.h"
 #include	"logging.h"
 #include	"ndspy.h"
+#include	"version.h"
+
+#ifdef	AQSIS_SYSTEM_WIN32
+#include	"winsock2.h"
+#endif
 
 START_NAMESPACE( Aqsis )
 
@@ -89,8 +94,11 @@ TqInt CqDDManager::ClearDisplays()
 		std::vector<UserParameter>::iterator iup;
 		for(iup = i->m_customParams.begin(); iup != i->m_customParams.end(); iup++ )
 		{
-			free(iup->name);
-			free(iup->value);
+			if( iup->nbytes )
+			{
+				free(iup->name);
+				free(iup->value);
+			}
 		}			
 	}
 	
@@ -353,12 +361,22 @@ void CqDDManager::LoadDisplayLibrary( SqDisplayRequest& req )
 				req.m_formats.push_back(fmt);
 			}		
 		}
+
+		// If we got here, we are dealing with a valid display device, so now is the time
+		// to fill in the system parameters.
+		PrepareSystemParameters(req);
         
 		// Call the DspyImageOpen method on the display to initialise things.
+		TqInt xres = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "Resolution" ) [ 0 ];
+		TqInt yres = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "Resolution" ) [ 1 ];
+		TqInt xmin = static_cast<TqInt>( CLAMP( CEIL( xres * QGetRenderContext() ->optCurrent().GetFloatOption( "System", "CropWindow" ) [ 0 ] ), 0, xres ) );
+		TqInt xmax = static_cast<TqInt>( CLAMP( CEIL( xres * QGetRenderContext() ->optCurrent().GetFloatOption( "System", "CropWindow" ) [ 1 ] ), 0, xres ) );
+		TqInt ymin = static_cast<TqInt>( CLAMP( CEIL( yres * QGetRenderContext() ->optCurrent().GetFloatOption( "System", "CropWindow" ) [ 2 ] ), 0, yres ) );
+		TqInt ymax = static_cast<TqInt>( CLAMP( CEIL( yres * QGetRenderContext() ->optCurrent().GetFloatOption( "System", "CropWindow" ) [ 3 ] ), 0, yres ) );
 		PtDspyError err = (*req.m_OpenMethod)(&req.m_imageHandle, 
 											  req.m_type.c_str(), req.m_name.c_str(), 
-											  QGetRenderContext() ->pImage() ->iXRes(), 
-											  QGetRenderContext() ->pImage() ->iYRes(), 
+											  xmax-xmin, 
+											  ymax-ymin, 
 											  req.m_customParams.size(), 
 											  &req.m_customParams[0], 
 											  req.m_formats.size(), &req.m_formats[0], 
@@ -575,6 +593,94 @@ std::string CqDDManager::GetStringField( const std::string& s, int idx )
 }
 
 
+void ConstructMatrixParameter(const char* name, const CqMatrix* mats, TqInt count, UserParameter& parameter)
+{
+	// Allocate and fill in the name.
+	char* pname = reinterpret_cast<char*>(malloc(strlen(name)+1));
+	strcpy(pname, name);
+	parameter.name = pname;
+	// Allocate a 16 element float array.
+	TqInt totallen = 16 * count * sizeof(RtFloat);
+	RtFloat* pfloats = reinterpret_cast<RtFloat*>(malloc(totallen));
+	TqInt i;
+	for( i=0; i<count; i++)
+	{
+		const TqFloat* floats = mats[i].pElements();
+		TqInt m;
+		for(m=0; m<16; m++)
+			pfloats[(i*16)+m]=floats[m];
+	}
+	parameter.value = reinterpret_cast<RtPointer>(pfloats);
+	parameter.vtype = 'f';
+	parameter.vcount = count * 16;
+	parameter.nbytes = totallen;
+}
+
+
+void ConstructFloatsParameter(const char* name, const TqFloat* floats, TqInt count, UserParameter& parameter)
+{
+	// Allocate and fill in the name.
+	char* pname = reinterpret_cast<char*>(malloc(strlen(name)+1));
+	strcpy(pname, name);
+	parameter.name = pname;
+	// Allocate a float array.
+	TqInt totallen = count * sizeof(RtFloat);
+	RtFloat* pfloats = reinterpret_cast<RtFloat*>(malloc(totallen));
+	// Then just copy the whole lot in one go.
+	memcpy(pfloats, floats, totallen);
+	parameter.value = reinterpret_cast<RtPointer>(pfloats);
+	parameter.vtype = 'f';
+	parameter.vcount = count;
+	parameter.nbytes = totallen;
+}
+
+
+void ConstructIntsParameter(const char* name, const TqInt* ints, TqInt count, UserParameter& parameter)
+{
+	// Allocate and fill in the name.
+	char* pname = reinterpret_cast<char*>(malloc(strlen(name)+1));
+	strcpy(pname, name);
+	parameter.name = pname;
+	// Allocate a float array.
+	TqInt totallen = count * sizeof(RtInt);
+	RtInt* pints = reinterpret_cast<RtInt*>(malloc(totallen));
+	// Then just copy the whole lot in one go.
+	memcpy(pints, ints, totallen);
+	parameter.value = reinterpret_cast<RtPointer>(pints);
+	parameter.vtype = 'i';
+	parameter.vcount = count;
+	parameter.nbytes = totallen;
+}
+
+
+void ConstructStringsParameter(const char* name, const char** strings, TqInt count, UserParameter& parameter)
+{
+	// Allocate and fill in the name.
+	char* pname = reinterpret_cast<char*>(malloc(strlen(name)+1));
+	strcpy(pname, name);
+	parameter.name = pname;
+	// Allocate enough space for the string pointers, and the strings, in one big block,
+	// makes it easy to deallocate later.
+	TqInt totallen = count * sizeof(char*);
+	TqInt i;
+	for( i = 0; i < count; i++ )
+		totallen += (strlen(strings[i])+1) * sizeof(char);
+	char** pstringptrs = reinterpret_cast<char**>(malloc(totallen));
+	char* pstrings = reinterpret_cast<char*>(&pstringptrs[count]);
+	for( i = 0; i < count; i++ )
+	{
+		// Copy each string to the end of the block.
+		strcpy(pstrings, strings[i]);
+		pstringptrs[i] = pstrings;
+		pstrings += strlen(strings[i])+1;
+	}
+	parameter.value = reinterpret_cast<RtPointer>(pstringptrs);
+	parameter.vtype = 's';
+	parameter.vcount = count;
+	parameter.nbytes = totallen;
+}
+
+
 void CqDDManager::PrepareCustomParameters( std::map<std::string, void*>& mapParams, SqDisplayRequest& req )
 {
 	// Scan the map of extra parameters
@@ -630,66 +736,104 @@ void CqDDManager::PrepareCustomParameters( std::map<std::string, void*>& mapPara
 			strcpy(pname, Decl.m_strName.c_str());
 			parameter.name = pname;
 
-			TqInt i;
 			switch ( Decl.m_Type )
 			{
 				case type_string:
 				{
-					// Allocate enough space for the string pointers, and the strings, in one big block,
-					// makes it easy to deallocate later.
 					const char** strings = static_cast<const char**>( param->second );
-					TqInt totallen = Decl.m_Count * sizeof(char*);
-					for( i = 0; i < Decl.m_Count; i++ )
-						totallen += (strlen(strings[i])+1) * sizeof(char);
-					char** pstringptrs = reinterpret_cast<char**>(malloc(totallen));
-					char* pstrings = reinterpret_cast<char*>(&pstringptrs[Decl.m_Count]);
-					for( i = 0; i < Decl.m_Count; i++ )
-					{
-						// Copy each string to the end of the block.
-						strcpy(pstrings, strings[i]);
-						pstringptrs[i] = pstrings;
-						pstrings += strlen(strings[i])+1;
-					}
-					parameter.value = reinterpret_cast<RtPointer>(pstringptrs);
-					parameter.vtype = 's';
-					parameter.vcount = Decl.m_Count;
-					parameter.nbytes = totallen;
+					ConstructStringsParameter(Decl.m_strName.c_str(), strings, Decl.m_Count, parameter);
 				}
 				break;
 
 				case type_float:
 				{
-					// Allocate space for all the floats.
-					TqInt totallen = Decl.m_Count * sizeof(RtFloat);
-					RtFloat* pfloats = reinterpret_cast<RtFloat*>(malloc(totallen));
 					const RtFloat* floats = static_cast<RtFloat*>( param->second );
-					// Then just copy the whole lot in one go.
-					memcpy(pfloats, floats, totallen);
-					parameter.value = reinterpret_cast<RtPointer>(pfloats);
-					parameter.vtype = 'f';
-					parameter.vcount = Decl.m_Count;
-					parameter.nbytes = totallen;
+					ConstructFloatsParameter(Decl.m_strName.c_str(), floats, Decl.m_Count, parameter);
 				}
 				break;
 
 				case type_integer:
 				{
-					// Allocate space for all the ints.
-					TqInt totallen = Decl.m_Count * sizeof(RtInt);
-					RtInt* pints = reinterpret_cast<RtInt*>(malloc(totallen));
 					const RtInt* ints = static_cast<RtInt*>( param->second );
-					// Then just copy the whole lot in one go.
-					memcpy(pints, ints, totallen);
-					parameter.value = reinterpret_cast<RtPointer>(pints);
-					parameter.vtype = 'i';
-					parameter.vcount = Decl.m_Count;
-					parameter.nbytes = totallen;
+					ConstructIntsParameter(Decl.m_strName.c_str(), ints, Decl.m_Count, parameter);
 				}
 				break;
 			}
 			req.m_customParams.push_back(parameter);
 		}
     }
+}
+
+
+
+void CqDDManager::PrepareSystemParameters( SqDisplayRequest& req )
+{
+	// Fill in "standard" parameters that the renderer must supply
+	UserParameter parameter;
+
+	// "NP"
+    CqMatrix matWorldToScreen = QGetRenderContext() ->matSpaceToSpace( "world", "screen", CqMatrix(), CqMatrix(), QGetRenderContextI()->Time() );
+	ConstructMatrixParameter("NP", &matWorldToScreen, 1, parameter);
+	req.m_customParams.push_back(parameter);
+
+	// "Nl"
+    CqMatrix matWorldToCamera = QGetRenderContext() ->matSpaceToSpace( "world", "camera", CqMatrix(), CqMatrix(), QGetRenderContextI()->Time() );
+	ConstructMatrixParameter("Nl", &matWorldToScreen, 1, parameter);
+	req.m_customParams.push_back(parameter);
+
+	// "near"
+    TqFloat nearval = static_cast<TqFloat>( QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Clipping" ) [ 0 ] );
+	ConstructFloatsParameter("near", &nearval, 1, parameter);
+	req.m_customParams.push_back(parameter);
+
+	// "far"
+    TqFloat farval = static_cast<TqFloat>( QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Clipping" ) [ 1 ] );
+	ConstructFloatsParameter("far", &farval, 1, parameter);
+	req.m_customParams.push_back(parameter);
+
+	// "OriginalSize"
+    TqInt OriginalSize[2];
+	OriginalSize[0] = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "Resolution" ) [ 0 ];
+	OriginalSize[1] = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "Resolution" ) [ 1 ];
+	ConstructIntsParameter("OriginalSize", OriginalSize, 2, parameter);
+	req.m_customParams.push_back(parameter);
+
+	// "origin"
+    TqInt origin[2];
+    origin[0] = static_cast<TqInt>( CLAMP( CEIL( OriginalSize[0] * QGetRenderContext() ->optCurrent().GetFloatOption( "System", "CropWindow" ) [ 0 ] ), 0, OriginalSize[0] ) );
+    origin[1] = static_cast<TqInt>( CLAMP( CEIL( OriginalSize[0] * QGetRenderContext() ->optCurrent().GetFloatOption( "System", "CropWindow" ) [ 2 ] ), 0, OriginalSize[1] ) );
+	ConstructIntsParameter("origin", origin, 2, parameter);
+	req.m_customParams.push_back(parameter);
+
+	// "PixelAspectRatio"
+	TqFloat PixelAspectRatio = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "PixelAspectRatio" ) [ 0 ];
+	ConstructFloatsParameter("PixelAspectRatio", &PixelAspectRatio, 1, parameter);
+	req.m_customParams.push_back(parameter);
+
+	// "Software"
+    char SoftwareName[ 80 ];
+	const char* Software = SoftwareName;
+#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
+    sprintf( SoftwareName, "%s %s", STRNAME, VERSION_STR );
+#else
+    sprintf( SoftwareName, "%s %s", STRNAME, VERSION );
+#endif
+	ConstructStringsParameter("Software", &Software, 1, parameter);
+	req.m_customParams.push_back(parameter);
+
+	// "HostComputer"
+	char HostComputerName[255];
+	const char* HostComputer = HostComputerName;
+#ifdef AQSIS_SYSTEM_WIN32
+	WSADATA wsaData;
+	WSAStartup( MAKEWORD( 2, 0 ), &wsaData );
+#endif // AQSIS_SYSTEM_WIN32
+	gethostname( HostComputerName, 255 );
+#ifdef	AQSIS_SYSTEM_WIN32
+	WSACleanup();
+#endif
+	ConstructStringsParameter("HostComputer", &HostComputer, 1, parameter);
+	req.m_customParams.push_back(parameter);
 }
 
 

@@ -63,6 +63,8 @@ using namespace Aqsis;
 extern "C" {
 #endif
 PtDspyError DspyReorderFormatting(int formatCount, PtDspyDevFormat *format, int outFormatCount, const PtDspyDevFormat *outFormat);
+PtDspyError DspyFindStringInParamList(const char *string, char **result, int n, const UserParameter *p);
+PtDspyError DspyFindIntInParamList(const char *string, int *result, int n, const UserParameter *p);
 #ifdef __cplusplus
 }
 #endif
@@ -434,6 +436,25 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			{"a", widestFormat},
 		};
 		DspyReorderFormatting(iFormatCount, format, MIN(iFormatCount,4), outFormat);
+
+		// Extract any important data from the user parameters.
+		char* compression;
+		if( DspyFindStringInParamList("compression", &compression, paramCount, parameters ) == PkDspyErrorNone )
+		{
+            if ( strstr( compression, "none" ) != 0 )
+                pImage->m_compression = COMPRESSION_NONE;
+            else if ( strstr( compression, "lzw" ) != 0 )
+                pImage->m_compression = COMPRESSION_LZW;
+            else if ( strstr( compression, "deflate" ) != 0 )
+                pImage->m_compression = COMPRESSION_DEFLATE;
+            else if ( strstr( compression, "jpeg" ) != 0 )
+                pImage->m_compression = COMPRESSION_JPEG;
+            else if ( strstr( compression, "packbits" ) != 0 )
+                pImage->m_compression = COMPRESSION_PACKBITS;
+		}
+		int quality;
+		if( DspyFindIntInParamList("quality", &quality, paramCount, parameters ) == PkDspyErrorNone )
+			pImage->m_quality = quality;
 	}
 	else
 		return(PkDspyErrorNoMemory);

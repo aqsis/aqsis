@@ -108,6 +108,7 @@ private:
 	void	LoadDisplayLibrary( SqDisplayRequest& req );
 	void	CloseDisplayLibrary( SqDisplayRequest& req );
 	void	PrepareCustomParameters( std::map<std::string, void*>& mapParams, SqDisplayRequest& req );
+	void	PrepareSystemParameters( SqDisplayRequest& req );
 
     std::vector<SqDisplayRequest>	m_displayRequests;		///< Array of requested display drivers.
 	TqBool	m_fDisplayMapInitialised;
