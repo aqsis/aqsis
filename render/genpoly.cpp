@@ -124,7 +124,7 @@ TqInt CqPolygonGeneral2D::CalcDeterminant( TqInt i1, TqInt i2, TqInt i3 ) const
                      - ( ( *this ) [ i3 ].x() - ( *this ) [ i1 ].x() )
                      * ( ( *this ) [ i2 ].y() - ( *this ) [ i1 ].y() );
 
-    if ( Determ > 0.0 )
+    if ( Determ >= 0.0 )
         return ( Orientation_AntiClockwise );
     else
     {
@@ -164,9 +164,13 @@ TqBool CqPolygonGeneral2D::NoneInside( TqInt i1, TqInt i2, TqInt i3, std::vector
         // Use the reverse direction of the triangle lines, and if the
         // triangle fromed with the vertex is the same orientation, the
         // vertex lies outside that edge.
-        if ( ( CalcDeterminant( i2, i1, iN ) == m_Orientation ) ||
-                ( CalcDeterminant( i1, i3, iN ) == m_Orientation ) ||
-                ( CalcDeterminant( i3, i2, iN ) == m_Orientation ) )
+		TqInt __t1, __t2, __t3;
+        __t1 = CalcDeterminant( i2, i1, iN );
+        __t2 = CalcDeterminant( i1, i3, iN );
+        __t3 = CalcDeterminant( i3, i2, iN );
+        if ( ( __t1 == m_Orientation ) ||
+             ( __t2 == m_Orientation ) ||
+             ( __t3 == m_Orientation ) )
             continue;
         else
         {
@@ -373,6 +377,7 @@ void CqPolygonGeneral2D::Triangulate( std::vector<TqInt>& aiList ) const
                                         iList[ iCurr ],
                                         iList[ iNext ],
                                         iList );
+			std::cout << iList[ iPrev ] << ", " << iList[ iCurr ] << ", " << iList[ iNext ] << " - " << CurrPos << std::endl;
             if ( ( CurrDeterm == Orientation() ) &&
                     ( CurrPos != 0 ) )
                 fDone = TqTrue;
