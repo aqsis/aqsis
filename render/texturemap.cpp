@@ -82,6 +82,7 @@ TqFloat	uv[ max_no ][ 2 ];	// Stores the values of this projection for a given f
 TqInt	CqShadowMap::m_rand_index = 0;
 TqFloat	CqShadowMap::m_aRand_no[ 256 ];
 static TqBool  m_critical = TqFalse;
+static CqTextureMapBuffer *previous = NULL;
 
 //---------------------------------------------------------------------
 /** Static array of cached texture maps.
@@ -460,15 +461,29 @@ void CqTextureMap::Close()
 
 CqTextureMap* CqTextureMap::GetTextureMap( const CqString& strName )
 {
+	static int size = -1;
+	static CqTextureMap *previous = NULL;
+
+	/* look if the last item return by this function was ok */
+	if (size == m_TextureMap_Cache.size()) 
+		if ((previous) && (previous->m_strName == strName) ) 
+			return previous;
+
 	// First search the texture map cache
 	for ( std::vector<CqTextureMap*>::iterator i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
 	{
 		if ( ( *i ) ->m_strName == strName )
 		{
 			if ( ( *i ) ->Type() == MapType_Texture )
+			{
+				previous = *i;
+				size = m_TextureMap_Cache.size();
 				return ( *i );
+			}
 			else
+			{
 				return ( NULL );
+			}
 		}
 	}
 	// If we got here, it doesn't exist yet, so we must create and load it.
@@ -494,15 +509,29 @@ CqTextureMap* CqTextureMap::GetTextureMap( const CqString& strName )
 
 CqTextureMap* CqTextureMap::GetEnvironmentMap( const CqString& strName )
 {
+        static int size = -1;
+	static CqTextureMap *previous = NULL;
+
+	/* look if the last item return by this function was ok */
+	if (size == m_TextureMap_Cache.size()) 
+		if ((previous) && (previous->m_strName == strName))
+			return previous;
+		
 	// First search the texture map cache
 	for ( std::vector<CqTextureMap*>::iterator i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
 	{
 		if ( ( *i ) ->m_strName == strName )
 		{
 			if ( ( *i ) ->Type() == MapType_Environment )
+			{
+				previous = *i;
+				size = m_TextureMap_Cache.size();
 				return ( *i );
+			}
 			else
+			{
 				return ( NULL );
+			}
 		}
 	}
 	// If we got here, it doesn't exist yet, so we must create and load it.
@@ -544,15 +573,28 @@ CqTextureMap* CqTextureMap::GetEnvironmentMap( const CqString& strName )
 
 CqTextureMap* CqTextureMap::GetShadowMap( const CqString& strName )
 {
+        static int size = -1;
+	static CqTextureMap *previous = NULL;
+
+	if (size == m_TextureMap_Cache.size()) 
+		if ( (previous) && (previous->m_strName == strName) )
+			 return previous;
+
 	// First search the texture map cache
 	for ( std::vector<CqTextureMap*>::iterator i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
 	{
 		if ( ( *i ) ->m_strName == strName )
 		{
 			if ( ( *i ) ->Type() == MapType_Shadow )
+			{
+				previous = *i;
+				size = m_TextureMap_Cache.size();
 				return ( *i );
+			}
 			else
+			{
 				return ( NULL );
+			}
 		}
 	}
 	// If we got here, it doesn't exist yet, so we must create and load it.
@@ -582,15 +624,28 @@ CqTextureMap* CqTextureMap::GetShadowMap( const CqString& strName )
 
 CqTextureMap* CqTextureMap::GetLatLongMap( const CqString& strName )
 {
+        static int size = -1;
+	static CqTextureMap *previous = NULL;
+
+	if (size == m_TextureMap_Cache.size()) 
+		if ( previous && (previous->m_strName == strName) ) 
+			return previous;
+
 	// First search the texture map cache
 	for ( std::vector<CqTextureMap*>::iterator i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
 	{
 		if ( ( *i ) ->m_strName == strName )
 		{
 			if ( ( *i ) ->Type() == MapType_LatLong )
+			{
+				previous = *i;
+				size = m_TextureMap_Cache.size();
 				return ( *i );
+			}
 			else
+			{
 				return ( NULL );
+			}
 		}
 	}
 	// If we got here, it doesn't exist yet, so we must create and load it.
@@ -622,11 +677,25 @@ CqTextureMap* CqTextureMap::GetLatLongMap( const CqString& strName )
 
 CqTextureMapBuffer* CqTextureMap::GetBuffer( TqUlong s, TqUlong t, TqInt directory )
 {
+    static TqInt    size = -1;	
+	static CqString name = "";
 	
+
+	/* look if the last item return by this function was ok */
+	if ((size == m_apSegments.size()) && previous && (name == m_strName) ) 
+		if ( previous->IsValid( s, t, directory )  ) 
+			return previous;
+
 
 	// Search already cached segments first.
 	for ( std::vector<CqTextureMapBuffer*>::iterator i = m_apSegments.begin(); i != m_apSegments.end(); i++ )
-		if ( ( *i ) ->IsValid( s, t, directory ) ) return ( *i );
+		if ( ( *i ) ->IsValid( s, t, directory ) ) 
+		{
+			previous = (*i);
+			name = m_strName;
+			size = m_apSegments.size();
+			return ( *i );
+		}
 
 	// If we got here, segment is not currently loaded, so load the correct segement and store it in the cache.
 	CqTextureMapBuffer* pTMB = 0;
@@ -1029,6 +1098,7 @@ std::vector<CqTextureMapBuffer*>::iterator j;
 			current = QGetRenderContext() ->Stats().GetTextureMemory();
 			if ((now-current) > (limit/4)) break;
 		}
+		previous = NULL;
 	}
 	current = QGetRenderContext() ->Stats().GetTextureMemory();
 	
@@ -1247,6 +1317,8 @@ void CqTextureMap::SampleMap( TqFloat s1, TqFloat t1, TqFloat s2, TqFloat t2, Tq
 void CqEnvironmentMap::SampleMap( CqVector3D& R1, CqVector3D& swidth, CqVector3D& twidth, TqFloat sblur, TqFloat tblur,
                                      std::valarray<TqFloat>& val )
 {
+	CriticalMeasure();
+
 	if ( m_pImage != 0 )
 	{
 		if ( Type() != MapType_LatLong )
@@ -1645,6 +1717,8 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 
 void	CqShadowMap::SampleMap( const CqVector3D& R1, const CqVector3D& R2, const CqVector3D& R3, const CqVector3D& R4, TqFloat sblur, TqFloat tblur, std::valarray<TqFloat>& val, TqFloat& depth )
 {
+	CriticalMeasure();
+
 	// If no map defined, not in shadow.
 	val.resize( 1 );
 	val[0] = 0.0f;
