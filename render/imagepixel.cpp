@@ -80,19 +80,22 @@ CqImagePixel::CqImagePixel( const CqImagePixel& ieFrom )
 
 void CqImagePixel::AllocateSamples( TqInt XSamples, TqInt YSamples )
 {
-	m_XSamples = XSamples;
-	m_YSamples = YSamples;
-	TqInt numSamples = m_XSamples * m_YSamples;
-
-	if ( XSamples > 0 && YSamples > 0 )
+	if( m_XSamples != XSamples || m_YSamples != YSamples )
 	{
-		m_aValues.resize( numSamples );
-		m_avecSamples.resize( numSamples);
-		m_aDoFSamples.resize( numSamples );
-		m_aSubCellIndex.resize( numSamples);
-		m_aTimes.resize( numSamples );
-		// XXX TODO: Compute this lazily
-		m_aDetailLevels.resize( numSamples );
+		m_XSamples = XSamples;
+		m_YSamples = YSamples;
+		TqInt numSamples = m_XSamples * m_YSamples;
+
+		if ( XSamples > 0 && YSamples > 0 )
+		{
+			m_aValues.resize( numSamples );
+			m_avecSamples.resize( numSamples);
+			m_aDoFSamples.resize( numSamples );
+			m_aSubCellIndex.resize( numSamples);
+			m_aTimes.resize( numSamples );
+			// XXX TODO: Compute this lazily
+			m_aDetailLevels.resize( numSamples );
+		}
 	}
 }
 
@@ -281,7 +284,7 @@ void CqImagePixel::Clear()
 {
 	TqInt i;
 	for ( i = ( m_XSamples * m_YSamples ) - 1; i >= 0; i-- )
-		m_aValues[ i ].resize( 0 );
+		m_aValues[ i ].clear( );
 	m_MaxDepth = FLT_MAX;
 	m_MinDepth =  FLT_MAX;
 	m_OcclusionBoxId = -1;
