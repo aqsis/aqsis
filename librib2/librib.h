@@ -147,4 +147,12 @@ public:
 
 }; // namespace librib
 
+
+typedef	librib::RendermanInterface::RtFloat RtFloat;
+extern "C" RtFloat RiBoxFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth);
+extern "C" RtFloat RiCatmullRomFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth);
+extern "C" RtFloat RiGaussianFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth);
+extern "C" RtFloat RiSincFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth);
+extern "C" RtFloat RiTriangleFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth);
+
 #endif // LIBRIB_H

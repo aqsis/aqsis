@@ -122,3 +122,9 @@ RendermanInterface::RtVoid Stream::RiWorldEnd() { m_Stream << "RiWorldEnd()" << 
 
 }; // namespace librib2stream
 
+
+RtFloat RiBoxFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth)			{return(0.0);}
+RtFloat RiCatmullRomFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth)	{return(0.0);}
+RtFloat RiGaussianFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth)		{return(0.0);}
+RtFloat RiSincFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth)			{return(0.0);}
+RtFloat RiTriangleFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth)		{return(0.0);}
