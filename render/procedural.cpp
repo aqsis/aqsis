@@ -413,8 +413,6 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 		ActiveProcRP[std::string(((char**)data)[0])] = run_proc;
 		it = ActiveProcRP.find(std::string(((char**)data)[0])); 
 
-		BOOL fSuccess; 
-
 	// Create a pipe for the child process's STDOUT. 
 
 		if (! CreatePipe(&hChildStdoutRd, &hChildStdoutWr, NULL, 0) ||

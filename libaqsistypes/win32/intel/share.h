@@ -22,7 +22,7 @@
 		\brief Define method of exporting symbols from a shared library.
 */
 
-#ifndef	AQSIS_DYNAMIC_LINK
+#ifdef	AQSIS_STATIC_LINK
 
 #define  _qShare
 #define	_qShareC

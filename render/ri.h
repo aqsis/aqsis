@@ -14,6 +14,61 @@
 
 #include	"float.h"
 
+#define	_qShareName	CORE
+#ifdef	WIN32
+#  ifdef	AQSIS_STATIC_LINK
+
+#    define  _qShare
+#    define	_qShareC
+#    define	_qShareM
+
+#    undef _qShareName
+
+#  else // AQSIS_DYNAMIC_LINK
+
+#    define _qExportM __declspec(dllexport)
+#    define _qImportM __declspec(dllimport)
+
+#    define _qExportC
+#    define _qImportC
+
+#    define _qExport __declspec(dllexport)
+#    define _qImport __declspec(dllimport)
+
+#    undef  _qShare
+#    undef	_qShareC
+#    undef	_qShareM
+
+#    ifdef _qBUILDING
+#      if _qBUILDING == _qShareName
+#        define _qShare _qExport
+#        define _qShareM _qExportM
+#        define _qShareC _qExportC
+#      else
+#        define _qShare _qImport
+#        define _qShareM _qImportM
+#        define _qShareC _qImportC
+#      endif
+#    else
+#      define	_qShare _qImport
+#      define _qShareM _qImportM
+#      define _qShareC _qImportC
+#    endif // _qBUILDING
+
+#    undef _qShareName
+
+#  endif	// AQSIS_DYNAMIC_LINK
+
+#else	// !WIN32
+
+#  define  _qShare
+#  define	_qShareC
+#  define	_qShareM
+
+#  undef _qShareName
+
+#endif // WIN32
+
 #ifdef	__cplusplus
 extern	"C"
 {
@@ -72,45 +127,46 @@ extern	"C"
 
 #define	RI_SHADER_EXTENSION	".slx"
 
-	extern	RtToken	RI_FRAMEBUFFER, RI_FILE;
-	extern	RtToken	RI_RGB, RI_RGBA, RI_RGBZ, RI_RGBAZ, RI_A, RI_Z, RI_AZ;
-	extern	RtToken	RI_MERGE, RI_ORIGIN;
-	extern	RtToken	RI_PERSPECTIVE, RI_ORTHOGRAPHIC;
-	extern	RtToken	RI_HIDDEN, RI_PAINT;
-	extern	RtToken	RI_CONSTANT, RI_SMOOTH;
-	extern	RtToken	RI_FLATNESS, RI_FOV;
+	_qShare	extern	RtToken	RI_FRAMEBUFFER, RI_FILE;
+	_qShare	extern	RtToken	RI_RGB, RI_RGBA, RI_RGBZ, RI_RGBAZ, RI_A, RI_Z, RI_AZ;
+	_qShare	extern	RtToken	RI_MERGE, RI_ORIGIN;
+	_qShare	extern	RtToken	RI_PERSPECTIVE, RI_ORTHOGRAPHIC;
+	_qShare	extern	RtToken	RI_HIDDEN, RI_PAINT;
+	_qShare	extern	RtToken	RI_CONSTANT, RI_SMOOTH;
+	_qShare	extern	RtToken	RI_FLATNESS, RI_FOV;
 
-	extern	RtToken	RI_AMBIENTLIGHT, RI_POINTLIGHT,
+	_qShare	extern	RtToken	RI_AMBIENTLIGHT, RI_POINTLIGHT,
 		RI_DISTANTLIGHT, RI_SPOTLIGHT;
-	extern	RtToken	RI_INTENSITY, RI_LIGHTCOLOR, RI_FROM, RI_TO,
+	_qShare	extern	RtToken	RI_INTENSITY, RI_LIGHTCOLOR, RI_FROM, RI_TO,
 		RI_CONEANGLE, RI_CONEDELTAANGLE,
 		RI_BEAMDISTRIBUTION;
-	extern	RtToken	RI_MATTE, RI_METAL, RI_PLASTIC, RI_SHINYMETAL, RI_PAINTEDPLASTIC;
-	extern	RtToken	RI_KA, RI_KD, RI_KS, RI_ROUGHNESS, RI_KR,
+	_qShare	extern	RtToken	RI_MATTE, RI_METAL, RI_PLASTIC, RI_SHINYMETAL, RI_PAINTEDPLASTIC;
+	_qShare	extern	RtToken	RI_KA, RI_KD, RI_KS, RI_ROUGHNESS, RI_KR,
 		RI_TEXTURENAME, RI_SPECULARCOLOR;
-	extern	RtToken	RI_DEPTHCUE, RI_FOG, RI_BUMPY;
-	extern	RtToken	RI_MINDISTANCE, RI_MAXDISTANCE, RI_BACKGROUND,
+	_qShare	extern	RtToken	RI_DEPTHCUE, RI_FOG, RI_BUMPY;
+	_qShare	extern	RtToken	RI_MINDISTANCE, RI_MAXDISTANCE, RI_BACKGROUND,
 		RI_DISTANCE, RI_AMPLITUDE;
 
-	extern	RtToken	RI_RASTER, RI_SCREEN, RI_CAMERA, RI_WORLD,
+	_qShare	extern	RtToken	RI_RASTER, RI_SCREEN, RI_CAMERA, RI_WORLD,
 		RI_OBJECT;
-	extern	RtToken	RI_INSIDE, RI_OUTSIDE, RI_LH, RI_RH;
-	extern	RtToken	RI_P, RI_PZ, RI_PW, RI_N, RI_NP, RI_CS, RI_OS,
+	_qShare	extern	RtToken	RI_INSIDE, RI_OUTSIDE, RI_LH, RI_RH;
+	//__declspec(dllimport) RtToken RI_P;
+	_qShare	extern	RtToken	RI_P, RI_PZ, RI_PW, RI_N, RI_NP, RI_CS, RI_OS,
 		RI_S, RI_T, RI_ST;
-	extern	RtToken	RI_BILINEAR, RI_BICUBIC;
-	extern	RtToken	RI_LINEAR, RI_CUBIC;
-	extern	RtToken	RI_PRIMITIVE, RI_INTERSECTION, RI_UNION,
+	_qShare	extern	RtToken	RI_BILINEAR, RI_BICUBIC;
+	_qShare	extern	RtToken	RI_LINEAR, RI_CUBIC;
+	_qShare	extern	RtToken	RI_PRIMITIVE, RI_INTERSECTION, RI_UNION,
 		RI_DIFFERENCE;
-	extern	RtToken	RI_WRAP, RI_NOWRAP, RI_PERIODIC, RI_NONPERIODIC, RI_CLAMP,
+	_qShare	extern	RtToken	RI_WRAP, RI_NOWRAP, RI_PERIODIC, RI_NONPERIODIC, RI_CLAMP,
 		RI_BLACK;
-	extern	RtToken	RI_IGNORE, RI_PRINT, RI_ABORT, RI_HANDLER;
-	extern	RtToken	RI_IDENTIFIER, RI_NAME;
-	extern	RtToken	RI_COMMENT, RI_STRUCTURE, RI_VERBATIM;
-	extern	RtToken	RI_WIDTH, RI_CONSTANTWIDTH;
+	_qShare	extern	RtToken	RI_IGNORE, RI_PRINT, RI_ABORT, RI_HANDLER;
+	_qShare	extern	RtToken	RI_IDENTIFIER, RI_NAME;
+	_qShare	extern	RtToken	RI_COMMENT, RI_STRUCTURE, RI_VERBATIM;
+	_qShare	extern	RtToken	RI_WIDTH, RI_CONSTANTWIDTH;
 
-	extern	RtToken	RI_CURRENT, RI_SHADER, RI_EYE, RI_NDC;
+	_qShare	extern	RtToken	RI_CURRENT, RI_SHADER, RI_EYE, RI_NDC;
 
-	extern	RtBasis	RiBezierBasis, RiBSplineBasis, RiCatmullRomBasis,
+	_qShare	extern	RtBasis	RiBezierBasis, RiBSplineBasis, RiCatmullRomBasis,
 		RiHermiteBasis, RiPowerBasis;
 
 #define	RI_BEZIERSTEP		((RtInt)3)
@@ -119,206 +175,206 @@ extern	"C"
 #define	RI_HERMITESTEP		((RtInt)2)
 #define	RI_POWERSTEP		((RtInt)4)
 
-	extern	RtInt	RiLastError;
+	_qShare	extern	RtInt	RiLastError;
 
 	/* Declarations of All of the RenderMan Interface Subroutines */
 
 #define	PARAMETERLIST	RtInt count, RtToken tokens[], RtPointer values[]
 
-	RtToken	RiDeclare( const char * name, const char * declaration );
+	_qShare	RtToken	RiDeclare( const char * name, const char * declaration );
 
-	RtVoid		RiBegin( RtToken name );
-	RtVoid		RiEnd();
-	RtVoid		RiFrameBegin( RtInt number );
-	RtVoid		RiFrameEnd();
-	RtVoid		RiWorldBegin();
-	RtVoid		RiWorldEnd();
+	_qShare	RtVoid	RiBegin( RtToken name );
+	_qShare	RtVoid	RiEnd();
+	_qShare	RtVoid	RiFrameBegin( RtInt number );
+	_qShare	RtVoid	RiFrameEnd();
+	_qShare	RtVoid	RiWorldBegin();
+	_qShare	RtVoid	RiWorldEnd();
 
-	RtVoid	RiFormat( RtInt xresolution, RtInt yresolution, RtFloat pixelaspectratio );
-	RtVoid	RiFrameAspectRatio( RtFloat frameratio );
-	RtVoid	RiScreenWindow( RtFloat left, RtFloat right, RtFloat bottom, RtFloat top );
-	RtVoid	RiCropWindow( RtFloat left, RtFloat right, RtFloat top, RtFloat bottom );
-	RtVoid	RiProjection( const char * name, ... );
-	RtVoid	RiProjectionV( const char * name, PARAMETERLIST );
-	RtVoid	RiClipping( RtFloat cnear, RtFloat cfar );
-	RtVoid	RiDepthOfField( RtFloat fstop, RtFloat focallength, RtFloat focaldistance );
-	RtVoid	RiShutter( RtFloat opentime, RtFloat closetime );
+	_qShare	RtVoid	RiFormat( RtInt xresolution, RtInt yresolution, RtFloat pixelaspectratio );
+	_qShare	RtVoid	RiFrameAspectRatio( RtFloat frameratio );
+	_qShare	RtVoid	RiScreenWindow( RtFloat left, RtFloat right, RtFloat bottom, RtFloat top );
+	_qShare	RtVoid	RiCropWindow( RtFloat left, RtFloat right, RtFloat top, RtFloat bottom );
+	_qShare	RtVoid	RiProjection( const char * name, ... );
+	_qShare	RtVoid	RiProjectionV( const char * name, PARAMETERLIST );
+	_qShare	RtVoid	RiClipping( RtFloat cnear, RtFloat cfar );
+	_qShare	RtVoid	RiDepthOfField( RtFloat fstop, RtFloat focallength, RtFloat focaldistance );
+	_qShare	RtVoid	RiShutter( RtFloat opentime, RtFloat closetime );
 
-	RtVoid	RiPixelVariance( RtFloat variance );
-	RtVoid	RiPixelSamples( RtFloat xsamples, RtFloat ysamples );
-	RtVoid	RiPixelFilter( RtFilterFunc function, RtFloat xwidth, RtFloat ywidth );
-	RtVoid	RiExposure( RtFloat gain, RtFloat gamma );
-	RtVoid	RiImager( const char * name, ... );
-	RtVoid	RiImagerV( const char * name, PARAMETERLIST );
-	RtVoid	RiQuantize( RtToken type, RtInt one, RtInt min, RtInt max, RtFloat ditheramplitude );
-	RtVoid	RiDisplay( const char * name, RtToken type, RtToken mode, ... );
-	RtVoid	RiDisplayV( const char * name, RtToken type, RtToken mode, PARAMETERLIST );
-	RtFloat	RiGaussianFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth );
-	RtFloat	RiBoxFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth );
-	RtFloat	RiTriangleFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth );
-	RtFloat	RiCatmullRomFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth );
-	RtFloat	RiSincFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth );
-	RtFloat	RiDiskFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth );
-	RtFloat	RiBesselFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth );
+	_qShare	RtVoid	RiPixelVariance( RtFloat variance );
+	_qShare	RtVoid	RiPixelSamples( RtFloat xsamples, RtFloat ysamples );
+	_qShare	RtVoid	RiPixelFilter( RtFilterFunc function, RtFloat xwidth, RtFloat ywidth );
+	_qShare	RtVoid	RiExposure( RtFloat gain, RtFloat gamma );
+	_qShare	RtVoid	RiImager( const char * name, ... );
+	_qShare	RtVoid	RiImagerV( const char * name, PARAMETERLIST );
+	_qShare	RtVoid	RiQuantize( RtToken type, RtInt one, RtInt min, RtInt max, RtFloat ditheramplitude );
+	_qShare	RtVoid	RiDisplay( const char * name, RtToken type, RtToken mode, ... );
+	_qShare	RtVoid	RiDisplayV( const char * name, RtToken type, RtToken mode, PARAMETERLIST );
+	_qShare	RtFloat	RiGaussianFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth );
+	_qShare	RtFloat	RiBoxFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth );
+	_qShare	RtFloat	RiTriangleFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth );
+	_qShare	RtFloat	RiCatmullRomFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth );
+	_qShare	RtFloat	RiSincFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth );
+	_qShare	RtFloat	RiDiskFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth );
+	_qShare	RtFloat	RiBesselFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth );
 
-	RtVoid	RiHider( const char * name, ... );
-	RtVoid	RiHiderV( const char * name, PARAMETERLIST );
-	RtVoid	RiColorSamples( RtInt N, RtFloat * nRGB, RtFloat * RGBn );
-	RtVoid	RiRelativeDetail( RtFloat relativedetail );
-	RtVoid	RiOption( const char * name, ... );
-	RtVoid	RiOptionV( const char * name, PARAMETERLIST );
+	_qShare	RtVoid	RiHider( const char * name, ... );
+	_qShare	RtVoid	RiHiderV( const char * name, PARAMETERLIST );
+	_qShare	RtVoid	RiColorSamples( RtInt N, RtFloat * nRGB, RtFloat * RGBn );
+	_qShare	RtVoid	RiRelativeDetail( RtFloat relativedetail );
+	_qShare	RtVoid	RiOption( const char * name, ... );
+	_qShare	RtVoid	RiOptionV( const char * name, PARAMETERLIST );
 
-	RtVoid	RiAttributeBegin();
-	RtVoid	RiAttributeEnd();
-	RtVoid	RiColor( RtColor Cq );
-	RtVoid	RiOpacity( RtColor Os );
-	RtVoid	RiTextureCoordinates( RtFloat s1, RtFloat t1,
+	_qShare	RtVoid	RiAttributeBegin();
+	_qShare	RtVoid	RiAttributeEnd();
+	_qShare	RtVoid	RiColor( RtColor Cq );
+	_qShare	RtVoid	RiOpacity( RtColor Os );
+	_qShare	RtVoid	RiTextureCoordinates( RtFloat s1, RtFloat t1,
 	                             RtFloat s2, RtFloat t2,
 	                             RtFloat s3, RtFloat t3,
 	                             RtFloat s4, RtFloat t4 );
 
-	RtLightHandle	RiLightSource( const char * name, ... );
-	RtLightHandle	RiLightSourceV( const char * name, PARAMETERLIST );
-	RtLightHandle	RiAreaLightSource( const char * name, ... );
-	RtLightHandle	RiAreaLightSourceV( const char * name, PARAMETERLIST );
-	RtVoid	RiIlluminate( RtLightHandle light, RtBoolean onoff );
-	RtVoid	RiSurface( const char * name, ... );
-	RtVoid	RiSurfaceV( const char * name, PARAMETERLIST );
-	RtVoid	RiAtmosphere( const char * name, ... );
-	RtVoid	RiAtmosphereV( const char * name, PARAMETERLIST );
-	RtVoid	RiInterior( const char * name, ... );
-	RtVoid	RiInteriorV( const char * name, PARAMETERLIST );
-	RtVoid	RiExterior( const char * name, ... );
-	RtVoid	RiExteriorV( const char * name, PARAMETERLIST );
-	RtVoid	RiShadingRate( RtFloat size );
-	RtVoid	RiShadingInterpolation( RtToken type );
-	RtVoid	RiMatte( RtBoolean onoff );
+	_qShare	RtLightHandle	RiLightSource( const char * name, ... );
+	_qShare	RtLightHandle	RiLightSourceV( const char * name, PARAMETERLIST );
+	_qShare	RtLightHandle	RiAreaLightSource( const char * name, ... );
+	_qShare	RtLightHandle	RiAreaLightSourceV( const char * name, PARAMETERLIST );
+	_qShare	RtVoid	RiIlluminate( RtLightHandle light, RtBoolean onoff );
+	_qShare	RtVoid	RiSurface( const char * name, ... );
+	_qShare	RtVoid	RiSurfaceV( const char * name, PARAMETERLIST );
+	_qShare	RtVoid	RiAtmosphere( const char * name, ... );
+	_qShare	RtVoid	RiAtmosphereV( const char * name, PARAMETERLIST );
+	_qShare	RtVoid	RiInterior( const char * name, ... );
+	_qShare	RtVoid	RiInteriorV( const char * name, PARAMETERLIST );
+	_qShare	RtVoid	RiExterior( const char * name, ... );
+	_qShare	RtVoid	RiExteriorV( const char * name, PARAMETERLIST );
+	_qShare	RtVoid	RiShadingRate( RtFloat size );
+	_qShare	RtVoid	RiShadingInterpolation( RtToken type );
+	_qShare	RtVoid	RiMatte( RtBoolean onoff );
 
-	RtVoid	RiBound( RtBound bound );
-	RtVoid	RiDetail( RtBound bound );
-	RtVoid	RiDetailRange( RtFloat offlow, RtFloat onlow, RtFloat onhigh, RtFloat offhigh );
-	RtVoid	RiGeometricApproximation( RtToken type, RtFloat value );
-	RtVoid	RiOrientation( RtToken orientation );
-	RtVoid	RiReverseOrientation();
-	RtVoid	RiSides( RtInt nsides );
+	_qShare	RtVoid	RiBound( RtBound bound );
+	_qShare	RtVoid	RiDetail( RtBound bound );
+	_qShare	RtVoid	RiDetailRange( RtFloat offlow, RtFloat onlow, RtFloat onhigh, RtFloat offhigh );
+	_qShare	RtVoid	RiGeometricApproximation( RtToken type, RtFloat value );
+	_qShare	RtVoid	RiOrientation( RtToken orientation );
+	_qShare	RtVoid	RiReverseOrientation();
+	_qShare	RtVoid	RiSides( RtInt nsides );
 
-	RtVoid	RiIdentity();
-	RtVoid	RiTransform( RtMatrix transform );
-	RtVoid	RiConcatTransform( RtMatrix transform );
-	RtVoid	RiPerspective( RtFloat fov );
-	RtVoid	RiTranslate( RtFloat dx, RtFloat dy, RtFloat dz );
-	RtVoid	RiRotate( RtFloat angle, RtFloat dx, RtFloat dy, RtFloat dz );
-	RtVoid	RiScale( RtFloat sx, RtFloat sy, RtFloat sz );
-	RtVoid	RiSkew( RtFloat angle, RtFloat dx1, RtFloat dy1, RtFloat dz1,
+	_qShare	RtVoid	RiIdentity();
+	_qShare	RtVoid	RiTransform( RtMatrix transform );
+	_qShare	RtVoid	RiConcatTransform( RtMatrix transform );
+	_qShare	RtVoid	RiPerspective( RtFloat fov );
+	_qShare	RtVoid	RiTranslate( RtFloat dx, RtFloat dy, RtFloat dz );
+	_qShare	RtVoid	RiRotate( RtFloat angle, RtFloat dx, RtFloat dy, RtFloat dz );
+	_qShare	RtVoid	RiScale( RtFloat sx, RtFloat sy, RtFloat sz );
+	_qShare	RtVoid	RiSkew( RtFloat angle, RtFloat dx1, RtFloat dy1, RtFloat dz1,
 	               RtFloat dx2, RtFloat dy2, RtFloat dz2 );
-	RtVoid	RiDeformation( const char * name, ... );
-	RtVoid	RiDeformationV( const char * name, PARAMETERLIST );
-	RtVoid	RiDisplacement( const char * name, ... );
-	RtVoid	RiDisplacementV( const char * name, PARAMETERLIST );
-	RtVoid	RiCoordinateSystem( RtToken space );
-	RtPoint*	RiTransformPoints( RtToken fromspace, RtToken tospace, RtInt npoints, RtPoint points[] );
-	RtVoid	RiTransformBegin();
-	RtVoid	RiTransformEnd();
+	_qShare	RtVoid	RiDeformation( const char * name, ... );
+	_qShare	RtVoid	RiDeformationV( const char * name, PARAMETERLIST );
+	_qShare	RtVoid	RiDisplacement( const char * name, ... );
+	_qShare	RtVoid	RiDisplacementV( const char * name, PARAMETERLIST );
+	_qShare	RtVoid	RiCoordinateSystem( RtToken space );
+	_qShare	RtPoint*	RiTransformPoints( RtToken fromspace, RtToken tospace, RtInt npoints, RtPoint points[] );
+	_qShare	RtVoid	RiTransformBegin();
+	_qShare	RtVoid	RiTransformEnd();
 
-	RtVoid	RiAttribute( const char * name, ... );
-	RtVoid	RiAttributeV( const char * name, PARAMETERLIST );
+	_qShare	RtVoid	RiAttribute( const char * name, ... );
+	_qShare	RtVoid	RiAttributeV( const char * name, PARAMETERLIST );
 
-	RtVoid	RiPolygon( RtInt nvertices, ... );
-	RtVoid	RiPolygonV( RtInt nvertices, PARAMETERLIST );
-	RtVoid	RiGeneralPolygon( RtInt nloops, RtInt nverts[], ... );
-	RtVoid	RiGeneralPolygonV( RtInt nloops, RtInt nverts[], PARAMETERLIST );
-	RtVoid	RiPointsPolygons( RtInt npolys, RtInt nverts[], RtInt verts[], ... );
-	RtVoid	RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETERLIST );
-	RtVoid	RiPointsGeneralPolygons( RtInt npolys, RtInt nloops[], RtInt nverts[], RtInt verts[], ... );
-	RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], RtInt verts[], PARAMETERLIST );
-	RtVoid	RiBasis( RtBasis ubasis, RtInt ustep, RtBasis vbasis, RtInt vstep );
-	RtVoid	RiPatch( RtToken type, ... );
-	RtVoid	RiPatchV( RtToken type, PARAMETERLIST );
-	RtVoid	RiPatchMesh( RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vwrap, ... );
-	RtVoid	RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vwrap, PARAMETERLIST );
-	RtVoid	RiNuPatch( RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin, RtFloat umax,
+	_qShare	RtVoid	RiPolygon( RtInt nvertices, ... );
+	_qShare	RtVoid	RiPolygonV( RtInt nvertices, PARAMETERLIST );
+	_qShare	RtVoid	RiGeneralPolygon( RtInt nloops, RtInt nverts[], ... );
+	_qShare	RtVoid	RiGeneralPolygonV( RtInt nloops, RtInt nverts[], PARAMETERLIST );
+	_qShare	RtVoid	RiPointsPolygons( RtInt npolys, RtInt nverts[], RtInt verts[], ... );
+	_qShare	RtVoid	RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETERLIST );
+	_qShare	RtVoid	RiPointsGeneralPolygons( RtInt npolys, RtInt nloops[], RtInt nverts[], RtInt verts[], ... );
+	_qShare	RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], RtInt verts[], PARAMETERLIST );
+	_qShare	RtVoid	RiBasis( RtBasis ubasis, RtInt ustep, RtBasis vbasis, RtInt vstep );
+	_qShare	RtVoid	RiPatch( RtToken type, ... );
+	_qShare	RtVoid	RiPatchV( RtToken type, PARAMETERLIST );
+	_qShare	RtVoid	RiPatchMesh( RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vwrap, ... );
+	_qShare	RtVoid	RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vwrap, PARAMETERLIST );
+	_qShare	RtVoid	RiNuPatch( RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin, RtFloat umax,
 	                  RtInt nv, RtInt vorder, RtFloat vknot[], RtFloat vmin, RtFloat vmax, ... );
-	RtVoid	RiNuPatchV( RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin, RtFloat umax,
+	_qShare	RtVoid	RiNuPatchV( RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin, RtFloat umax,
 	                   RtInt nv, RtInt vorder, RtFloat vknot[], RtFloat vmin, RtFloat vmax, PARAMETERLIST );
-	RtVoid	RiTrimCurve( RtInt nloops, RtInt ncurves[], RtInt order[], RtFloat knot[], RtFloat min[], RtFloat max[], RtInt n[], RtFloat u[], RtFloat v[], RtFloat w[] );
+	_qShare	RtVoid	RiTrimCurve( RtInt nloops, RtInt ncurves[], RtInt order[], RtFloat knot[], RtFloat min[], RtFloat max[], RtInt n[], RtFloat u[], RtFloat v[], RtFloat w[] );
 
-	RtVoid	RiSphere( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, ... );
-	RtVoid	RiSphereV( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, PARAMETERLIST );
-	RtVoid	RiCone( RtFloat height, RtFloat radius, RtFloat thetamax, ... );
-	RtVoid	RiConeV( RtFloat height, RtFloat radius, RtFloat thetamax, PARAMETERLIST );
-	RtVoid	RiCylinder( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, ... );
-	RtVoid	RiCylinderV( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, PARAMETERLIST );
-	RtVoid	RiHyperboloid( RtPoint point1, RtPoint point2, RtFloat thetamax, ... );
-	RtVoid	RiHyperboloidV( RtPoint point1, RtPoint point2, RtFloat thetamax, PARAMETERLIST );
-	RtVoid	RiParaboloid( RtFloat rmax, RtFloat zmin, RtFloat zmax, RtFloat thetamax, ... );
-	RtVoid	RiParaboloidV( RtFloat rmax, RtFloat zmin, RtFloat zmax, RtFloat thetamax, PARAMETERLIST );
-	RtVoid	RiDisk( RtFloat height, RtFloat radius, RtFloat thetamax, ... );
-	RtVoid	RiDiskV( RtFloat height, RtFloat radius, RtFloat thetamax, PARAMETERLIST );
-	RtVoid	RiTorus( RtFloat majorrad, RtFloat minorrad, RtFloat phimin, RtFloat phimax, RtFloat thetamax, ... );
-	RtVoid	RiTorusV( RtFloat majorrad, RtFloat minorrad, RtFloat phimin, RtFloat phimax, RtFloat thetamax, PARAMETERLIST );
-	RtVoid	RiProcedural( RtPointer data, RtBound bound, RtProcSubdivFunc refineproc, RtProcFreeFunc freeproc );
-	RtVoid	RiGeometry( RtToken type, ... );
-	RtVoid	RiGeometryV( RtToken type, PARAMETERLIST );
+	_qShare	RtVoid	RiSphere( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, ... );
+	_qShare	RtVoid	RiSphereV( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, PARAMETERLIST );
+	_qShare	RtVoid	RiCone( RtFloat height, RtFloat radius, RtFloat thetamax, ... );
+	_qShare	RtVoid	RiConeV( RtFloat height, RtFloat radius, RtFloat thetamax, PARAMETERLIST );
+	_qShare	RtVoid	RiCylinder( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, ... );
+	_qShare	RtVoid	RiCylinderV( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, PARAMETERLIST );
+	_qShare	RtVoid	RiHyperboloid( RtPoint point1, RtPoint point2, RtFloat thetamax, ... );
+	_qShare	RtVoid	RiHyperboloidV( RtPoint point1, RtPoint point2, RtFloat thetamax, PARAMETERLIST );
+	_qShare	RtVoid	RiParaboloid( RtFloat rmax, RtFloat zmin, RtFloat zmax, RtFloat thetamax, ... );
+	_qShare	RtVoid	RiParaboloidV( RtFloat rmax, RtFloat zmin, RtFloat zmax, RtFloat thetamax, PARAMETERLIST );
+	_qShare	RtVoid	RiDisk( RtFloat height, RtFloat radius, RtFloat thetamax, ... );
+	_qShare	RtVoid	RiDiskV( RtFloat height, RtFloat radius, RtFloat thetamax, PARAMETERLIST );
+	_qShare	RtVoid	RiTorus( RtFloat majorrad, RtFloat minorrad, RtFloat phimin, RtFloat phimax, RtFloat thetamax, ... );
+	_qShare	RtVoid	RiTorusV( RtFloat majorrad, RtFloat minorrad, RtFloat phimin, RtFloat phimax, RtFloat thetamax, PARAMETERLIST );
+	_qShare	RtVoid	RiProcedural( RtPointer data, RtBound bound, RtProcSubdivFunc refineproc, RtProcFreeFunc freeproc );
+	_qShare	RtVoid	RiGeometry( RtToken type, ... );
+	_qShare	RtVoid	RiGeometryV( RtToken type, PARAMETERLIST );
 
-	RtVoid	RiSolidBegin( RtToken type );
-	RtVoid	RiSolidEnd();
-	RtObjectHandle	RiObjectBegin();
-	RtVoid	RiObjectEnd();
-	RtVoid	RiObjectInstance( RtObjectHandle handle );
-	RtVoid	RiMotionBegin( RtInt N, ... );
-	RtVoid	RiMotionBeginV( RtInt N, RtFloat times[] );
-	RtVoid	RiMotionEnd();
+	_qShare	RtVoid	RiSolidBegin( RtToken type );
+	_qShare	RtVoid	RiSolidEnd();
+	_qShare	RtObjectHandle	RiObjectBegin();
+	_qShare	RtVoid	RiObjectEnd();
+	_qShare	RtVoid	RiObjectInstance( RtObjectHandle handle );
+	_qShare	RtVoid	RiMotionBegin( RtInt N, ... );
+	_qShare	RtVoid	RiMotionBeginV( RtInt N, RtFloat times[] );
+	_qShare	RtVoid	RiMotionEnd();
 
-	RtVoid	RiMakeTexture( const char * imagefile, const char * texturefile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, ... );
-	RtVoid	RiMakeTextureV( const char * imagefile, const char * texturefile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, PARAMETERLIST );
-	RtVoid	RiMakeBump( const char * imagefile, const char * bumpfile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, ... );
-	RtVoid	RiMakeBumpV( const char * imagefile, const char * bumpfile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, PARAMETERLIST );
-	RtVoid	RiMakeLatLongEnvironment( const char * imagefile, const char * reflfile, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, ... );
-	RtVoid	RiMakeLatLongEnvironmentV( const char * imagefile, const char * reflfile, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, PARAMETERLIST );
-	RtVoid	RiMakeCubeFaceEnvironment( const char * px, const char * nx, const char * py, const char * ny, const char * pz, const char * nz, const char * reflfile, RtFloat fov, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, ... );
-	RtVoid	RiMakeCubeFaceEnvironmentV( const char * px, const char * nx, const char * py, const char * ny, const char * pz, const char * nz, const char * reflfile, RtFloat fov, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, PARAMETERLIST );
-	RtVoid	RiMakeShadow( const char * picfile, const char * shadowfile, ... );
-	RtVoid	RiMakeShadowV( const char * picfile, const char * shadowfile, PARAMETERLIST );
-	RtVoid	RiMakeOcclusion( RtInt npics, const char **picfiles, const char *shadowfile, ... );
-	RtVoid	RiMakeOcclusionV( RtInt npics, const char **picfiles, const char *shadowfile, RtInt count, RtToken tokens[], RtPointer values[] );
+	_qShare	RtVoid	RiMakeTexture( const char * imagefile, const char * texturefile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, ... );
+	_qShare	RtVoid	RiMakeTextureV( const char * imagefile, const char * texturefile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, PARAMETERLIST );
+	_qShare	RtVoid	RiMakeBump( const char * imagefile, const char * bumpfile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, ... );
+	_qShare	RtVoid	RiMakeBumpV( const char * imagefile, const char * bumpfile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, PARAMETERLIST );
+	_qShare	RtVoid	RiMakeLatLongEnvironment( const char * imagefile, const char * reflfile, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, ... );
+	_qShare	RtVoid	RiMakeLatLongEnvironmentV( const char * imagefile, const char * reflfile, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, PARAMETERLIST );
+	_qShare	RtVoid	RiMakeCubeFaceEnvironment( const char * px, const char * nx, const char * py, const char * ny, const char * pz, const char * nz, const char * reflfile, RtFloat fov, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, ... );
+	_qShare	RtVoid	RiMakeCubeFaceEnvironmentV( const char * px, const char * nx, const char * py, const char * ny, const char * pz, const char * nz, const char * reflfile, RtFloat fov, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, PARAMETERLIST );
+	_qShare	RtVoid	RiMakeShadow( const char * picfile, const char * shadowfile, ... );
+	_qShare	RtVoid	RiMakeShadowV( const char * picfile, const char * shadowfile, PARAMETERLIST );
+	_qShare	RtVoid	RiMakeOcclusion( RtInt npics, const char **picfiles, const char *shadowfile, ... );
+	_qShare	RtVoid	RiMakeOcclusionV( RtInt npics, const char **picfiles, const char *shadowfile, RtInt count, RtToken tokens[], RtPointer values[] );
 
-	RtVoid	RiErrorHandler( RtErrorFunc handler );
-	RtVoid	RiErrorIgnore( RtInt code, RtInt severity, const char * message );
-	RtVoid	RiErrorPrint( RtInt code, RtInt severity, const char * message );
-	RtVoid	RiErrorAbort( RtInt code, RtInt severity, const char * message );
-	RtVoid	RiArchiveRecord( RtToken type, char *, ... );
+	_qShare	RtVoid	RiErrorHandler( RtErrorFunc handler );
+	_qShare	RtVoid	RiErrorIgnore( RtInt code, RtInt severity, const char * message );
+	_qShare	RtVoid	RiErrorPrint( RtInt code, RtInt severity, const char * message );
+	_qShare	RtVoid	RiErrorAbort( RtInt code, RtInt severity, const char * message );
+	_qShare	RtVoid	RiArchiveRecord( RtToken type, char *, ... );
 
 	// ---Additional to spec. v3.1---
-	RtContextHandle	RiGetContext( void );
-	RtVoid	RiContext( RtContextHandle );
-	RtVoid	RiClippingPlane( RtFloat, RtFloat, RtFloat, RtFloat, RtFloat, RtFloat );
-	RtVoid	RiCoordSysTransform( RtToken space );
-	RtVoid	RiBlobby( RtInt nleaf, RtInt ncode, RtInt code[], RtInt nflt, RtFloat flt[], RtInt nstr, RtToken str[], ... );
-	RtVoid	RiBlobbyV( RtInt nleaf, RtInt ncode, RtInt code[], RtInt nflt, RtFloat flt[], RtInt nstr, RtToken str[], PARAMETERLIST );
-	RtVoid	RiPoints( RtInt npoints, ... );
-	RtVoid	RiPointsV( RtInt npoints, PARAMETERLIST );
-	RtVoid	RiCurves( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, ... );
-	RtVoid	RiCurvesV( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, PARAMETERLIST );
-	RtVoid	RiSubdivisionMesh( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtInt vertices[], RtInt ntags, RtToken tags[], RtInt nargs[], RtInt intargs[], RtFloat floatargs[], ... );
-	RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtInt vertices[], RtInt ntags, RtToken tags[], RtInt nargs[], RtInt intargs[], RtFloat floatargs[], PARAMETERLIST );
+	_qShare	RtContextHandle	RiGetContext( void );
+	_qShare	RtVoid	RiContext( RtContextHandle );
+	_qShare	RtVoid	RiClippingPlane( RtFloat, RtFloat, RtFloat, RtFloat, RtFloat, RtFloat );
+	_qShare	RtVoid	RiCoordSysTransform( RtToken space );
+	_qShare	RtVoid	RiBlobby( RtInt nleaf, RtInt ncode, RtInt code[], RtInt nflt, RtFloat flt[], RtInt nstr, RtToken str[], ... );
+	_qShare	RtVoid	RiBlobbyV( RtInt nleaf, RtInt ncode, RtInt code[], RtInt nflt, RtFloat flt[], RtInt nstr, RtToken str[], PARAMETERLIST );
+	_qShare	RtVoid	RiPoints( RtInt npoints, ... );
+	_qShare	RtVoid	RiPointsV( RtInt npoints, PARAMETERLIST );
+	_qShare	RtVoid	RiCurves( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, ... );
+	_qShare	RtVoid	RiCurvesV( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, PARAMETERLIST );
+	_qShare	RtVoid	RiSubdivisionMesh( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtInt vertices[], RtInt ntags, RtToken tags[], RtInt nargs[], RtInt intargs[], RtFloat floatargs[], ... );
+	_qShare	RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtInt vertices[], RtInt ntags, RtToken tags[], RtInt nargs[], RtInt intargs[], RtFloat floatargs[], PARAMETERLIST );
 
-	RtVoid	RiReadArchive( RtToken name, RtArchiveCallback, ... );
-	RtVoid	RiReadArchiveV( RtToken name, RtArchiveCallback, PARAMETERLIST );
+	_qShare	RtVoid	RiReadArchive( RtToken name, RtArchiveCallback, ... );
+	_qShare	RtVoid	RiReadArchiveV( RtToken name, RtArchiveCallback, PARAMETERLIST );
 
-	RtVoid	RiProcFree( RtPointer data );
+	_qShare	RtVoid	RiProcFree( RtPointer data );
 
-	RtVoid	RiProcDelayedReadArchive( RtPointer data, RtFloat detail );
-	RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail );
-	RtVoid	RiProcDynamicLoad( RtPointer data, RtFloat detail );
+	_qShare	RtVoid	RiProcDelayedReadArchive( RtPointer data, RtFloat detail );
+	_qShare	RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail );
+	_qShare	RtVoid	RiProcDynamicLoad( RtPointer data, RtFloat detail );
 
 
 	// Specific to Aqsis
 
 	typedef	RtVoid	( *RtProgressFunc ) ( RtFloat PercentComplete, RtInt FrameNo );
 
-	RtBoolean	BasisFromName( RtBasis * b, const char * strName );
-	RtVoid	RiProgressHandler( RtProgressFunc handler );
-	RtFunc	RiPreRenderFunction( RtFunc function );
+	_qShare	RtBoolean	BasisFromName( RtBasis * b, const char * strName );
+	_qShare	RtVoid	RiProgressHandler( RtProgressFunc handler );
+	_qShare	RtFunc	RiPreRenderFunction( RtFunc function );
 
 #ifdef	__cplusplus
 }

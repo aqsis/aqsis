@@ -29,8 +29,8 @@
 
 #include	"aqsis.h"
 
-#define		_qShareName	CORE
-#include	"share.h"
+//#define		_qShareName	CORE
+//#include	"share.h"
 
 START_NAMESPACE( Aqsis )
 
