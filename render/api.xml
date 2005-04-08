@@ -1659,6 +1659,28 @@
 			</Valid>
 		</Procedure>
 
+		<Procedure name="RiElse" return="RtVoid">
+			<Arguments>
+			</Arguments>
+		</Procedure>
+
+		<Procedure name="RiElseIf" return="RtVoid">
+			<Arguments>
+				<Argument name="condition" type="RtString"/>
+			</Arguments>
+		</Procedure>
+
+		<Procedure name="RiIfEnd" return="RtVoid">
+			<Arguments>
+			</Arguments>
+		</Procedure>
+
+		<Procedure name="RiIfBegin" return="RtVoid">
+			<Arguments>
+				<Argument name="condition" type="RtString"/>
+			</Arguments>
+		</Procedure>
+
 		<Procedure name="RiErrorHandler" return="RtVoid">
 			<Arguments>
 				<Argument name="handler" type="RtErrorFunc"/>
