@@ -134,6 +134,10 @@ SOURCE=.\bucket.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\condition.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\converter.cpp
 # End Source File
 # Begin Source File
@@ -299,6 +303,10 @@ SOURCE=.\bound.h
 # Begin Source File
 
 SOURCE=.\bucket.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\condition.h
 # End Source File
 # Begin Source File
 
