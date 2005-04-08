@@ -1709,7 +1709,28 @@ RtVoid CqOutput::RiReadArchiveV( RtToken name, RtArchiveCallback callback,
 }
 
 
-
+RtVoid CqOutput::RiIfBegin( RtString condition )
+{
+    PR( "IfBegin", IfBegin ); S;
+    printToken( condition );
+    EOL;
+}
+RtVoid CqOutput::RiElseIf( RtString condition )
+{
+    PR( "ElseIf", ElseIf ); S;
+    printToken( condition );
+    EOL;
+}
+RtVoid CqOutput::RiIfEnd( )
+{
+    PR( "IfEnd", IfEnd ); S;
+    EOL;
+}
+RtVoid CqOutput::RiElse( )
+{
+    PR( "Else", Else ); S;
+    EOL;
+}
 
 // *************************************************************
 // ******* ******* ******* ERROR HANDLER ******* ******* *******

@@ -67,7 +67,7 @@ protected:
                       Torus, Blobby, Points, Curves,
                       SubdivisionMesh, Procedural, Geometry, MakeTexture,
                       MakeBump, MakeLatLongEnvironment, MakeCubeFaceEnvironment, MakeShadow,
-                      ArchiveRecord, ReadArchive, ErrorHandler, LAST_Function };
+                      ArchiveRecord, ReadArchive, ErrorHandler, IfBegin, IfEnd, Else, ElseIf, LAST_Function };
     // block types (used to check context nesting)
     enum EqBlocks{
         B_Ri, B_Frame, B_World, B_Attribute, B_Transform, B_Solid, B_Object, 
