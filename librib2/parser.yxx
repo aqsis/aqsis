@@ -149,6 +149,7 @@ static RendermanInterface::RtInt ColorSamples = 3;
 %token	<ctype>	REQUEST_TOKEN_DISKFILTER
 %token	<ctype>	REQUEST_TOKEN_DISPLACEMENT
 %token	<ctype>	REQUEST_TOKEN_DISPLAY
+%token	<ctype>	REQUEST_TOKEN_ELSE
 %token	<ctype>	REQUEST_TOKEN_ELSEIF
 %token	<ctype>	REQUEST_TOKEN_ERRORABORT
 %token	<ctype>	REQUEST_TOKEN_ERRORHANDLER
@@ -260,6 +261,7 @@ static RendermanInterface::RtInt ColorSamples = 3;
 %type	<ctype>	disk
 %type	<ctype>	displacement
 %type	<ctype>	display
+%type	<ctype>	else
 %type	<ctype>	elseif
 %type	<ctype>	errorabort
 %type	<ctype>	errorhandler
@@ -439,8 +441,15 @@ complete_request
 
 				DiscardStringValue($2);
 			}
+	|	else 
+			{
+				ParseCallbackInterface->RiElse();
+			}
 	|	elseif string
-			{ }
+			{
+				ParseCallbackInterface->RiElseIf($2);
+				DiscardStringValue($2);
+			}
 	|	exposure float float
 			{ ParseCallbackInterface->RiExposure($2, $3); }
 	|	imager string opttvpairs
@@ -574,9 +583,12 @@ complete_request
 			}
 	|	ifbegin string
 			{
+				ParseCallbackInterface->RiIfBegin($2);
+				DiscardStringValue($2);
 			}
 	|	ifend 
 			{
+				ParseCallbackInterface->RiIfEnd();
 			}
 	|	illuminate integer integer
 			{
@@ -1277,6 +1289,7 @@ detailrange : REQUEST_TOKEN_DETAILRANGE	{ ExpectParams(); };
 disk : REQUEST_TOKEN_DISK	{ ExpectParams(); };
 displacement : REQUEST_TOKEN_DISPLACEMENT	{ ExpectParams(); };
 display : REQUEST_TOKEN_DISPLAY	{ ExpectParams(); };
+else   : REQUEST_TOKEN_ELSE	{  ExpectParams();};
 elseif : REQUEST_TOKEN_ELSEIF	{  ExpectParams();};
 errorabort : REQUEST_TOKEN_ERRORABORT	{ ExpectParams(); };
 errorhandler : REQUEST_TOKEN_ERRORHANDLER	{ ExpectParams(); };

@@ -136,6 +136,23 @@ RendermanInterface::RtVoid Engine::RiEnd()
 {
     ::RiEnd();
 }
+
+RendermanInterface::RtVoid Engine::RiIfBegin(RtString condition)
+{
+   ::RiIfBegin(condition);
+}
+RendermanInterface::RtVoid Engine::RiIfEnd()
+{
+   ::RiIfEnd();
+}
+RendermanInterface::RtVoid Engine::RiElse()
+{
+   ::RiElse();
+}
+RendermanInterface::RtVoid Engine::RiElseIf(RtString condition)
+{
+   ::RiElseIf(condition);
+}
 RendermanInterface::RtVoid Engine::RiErrorAbort( RtInt code, RtInt severity, RtString message )
 {
     ::RiErrorAbort( code, severity, message );

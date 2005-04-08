@@ -2141,6 +2141,53 @@ RtVoid RiReadArchiveV( RtToken name, RtArchiveCallback callback,
     }
 }
 
+RtVoid RiIfBegin ( RtString condition )
+{
+    try
+    {
+        context.current().RiIfBegin( condition );
+    }
+    catch ( CqError & r )
+    {
+        r.manage();
+    }
+}
+
+RtVoid RiElse( )
+{
+    try
+    {
+        context.current().RiElse();
+    }
+    catch ( CqError & r )
+    {
+        r.manage();
+    }
+}
+
+RtVoid RiElseIf ( RtString condition )
+{
+    try
+    {
+        context.current().RiElseIf( condition );
+    }
+    catch ( CqError & r )
+    {
+        r.manage();
+    }
+}
+
+RtVoid RiIfEnd ( )
+{
+    try
+    {
+        context.current().RiIfEnd( );
+    }
+    catch ( CqError & r )
+    {
+        r.manage();
+    }
+}
 RtVoid RiErrorHandler ( RtErrorFunc handler )
 {
     try

@@ -331,6 +331,12 @@ public:
 
     /* ERROR HANDLER */
     RtVoid RiErrorHandler( RtErrorFunc handler );
+
+    /* 3.04 New Condition statements */
+    RtVoid RiIfBegin( RtString condition );
+    RtVoid RiIfEnd( );
+    RtVoid RiElse();
+    RtVoid RiElseIf( RtString condition);
 };
 
 

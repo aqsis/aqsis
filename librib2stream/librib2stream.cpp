@@ -132,6 +132,22 @@ RendermanInterface::RtVoid Stream::RiEnd()
 {
     m_Stream << "RiEnd()" << std::endl;
 }
+RendermanInterface::RtVoid Stream::RiIfBegin(RtString condition)
+{
+    m_Stream << "RiIfBegin(\"" << condition << "\")" << std::endl;
+}
+RendermanInterface::RtVoid Stream::RiElse()
+{
+    m_Stream << "RiElse()" << std::endl;
+}
+RendermanInterface::RtVoid Stream::RiElseIf(RtString condition)
+{
+    m_Stream << "RiElseIf(\"" << condition << "\")" << std::endl;
+}
+RendermanInterface::RtVoid Stream::RiIfEnd()
+{
+    m_Stream << "RiIfEnd()" << std::endl;
+}
 RendermanInterface::RtVoid Stream::RiErrorAbort( RtInt code, RtInt severity, char* message )
 {
     m_Stream << "RiErrorAbort()" << std::endl;

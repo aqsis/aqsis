@@ -145,6 +145,7 @@ Disk				{ return REQUEST_TOKEN_DISK; }
 DiskFilter			{ return REQUEST_TOKEN_DISKFILTER; }
 Displacement			{ return REQUEST_TOKEN_DISPLACEMENT; }
 Display				{ return REQUEST_TOKEN_DISPLAY; }
+Else				{ return REQUEST_TOKEN_ELSE; }
 ElseIf				{ return REQUEST_TOKEN_ELSEIF; }
 ErrorHandler			{ return REQUEST_TOKEN_ERRORHANDLER; }
 Exposure			{ return REQUEST_TOKEN_EXPOSURE; }

@@ -44,6 +44,10 @@ public:
     virtual	RtVoid	RiDisplacementV( RtToken name, RtInt count, RtToken tokens[], RtPointer values[] );
     virtual	RtVoid	RiDisplayV( RtToken name, RtToken type, RtToken mode, RtInt count, RtToken tokens[], RtPointer values[] );
     virtual	RtVoid	RiEnd();
+    virtual	RtVoid	RiIfBegin( RtString condition);
+    virtual	RtVoid	RiElse( );
+    virtual	RtVoid	RiElseIf( RtString condition);
+    virtual	RtVoid	RiIfEnd( );
     virtual	RtVoid	RiErrorAbort( RtInt code, RtInt severity, RtString message );
     //virtual	RtVoid	RiErrorHandler(RtErrorFunc handler);
     virtual	RtVoid	RiErrorIgnore( RtInt code, RtInt severity, RtString message );

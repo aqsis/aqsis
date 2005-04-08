@@ -58,6 +58,7 @@
 #include	"ri_cache.h"
 
 #include	"subdivision2.h"
+#include	"condition.h"
 
 #ifndef    AQSIS_SYSTEM_WIN32
 #include        "unistd.h"
@@ -94,6 +95,19 @@ RtVoid	CreateGPrim( const boost::shared_ptr<CqBasicSurface>& pSurface );
 void SetShaderArgument( const boost::shared_ptr<IqShader>& pShader, const char* name, TqPchar val );
 TqBool	ValidateState(...);
 
+TqBool   IfOk = TqTrue;
+
+#define Validate_Conditional \
+	{\
+	if (!IfOk) \
+		return;\
+	}
+
+#define Validate_Conditional0 \
+	{\
+	if (!IfOk) \
+		return 0;\
+	}
 
 //---------------------------------------------------------------------
 // This file contains the interface functions which are published as the
@@ -414,6 +428,8 @@ const char*	GetStateAsString()
 //
 RtToken	RiDeclare( RtString name, RtString declaration )
 {
+	Validate_Conditional0
+
 	Cache_RiDeclare
 
 	Validate_RiDeclare
@@ -657,6 +673,8 @@ RtVoid	RiEnd()
 //
 RtVoid	RiFrameBegin( RtInt number )
 {
+	Validate_Conditional
+
 	Cache_RiFrameBegin
 
 	Validate_RiFrameBegin
@@ -689,6 +707,8 @@ RtVoid	RiFrameBegin( RtInt number )
 //
 RtVoid	RiFrameEnd()
 {
+	Validate_Conditional
+
 	Cache_RiFrameEnd
 
 	Validate_RiFrameEnd
@@ -706,6 +726,8 @@ RtVoid	RiFrameEnd()
 //
 RtVoid	RiWorldBegin()
 {
+	Validate_Conditional
+
 	Cache_RiWorldBegin
 
 	Validate_RiWorldBegin
@@ -802,6 +824,8 @@ RtVoid	RiWorldBegin()
 
 RtVoid	RiWorldEnd()
 {
+	Validate_Conditional
+
 	Cache_RiWorldEnd
 
 	Validate_RiWorldEnd
@@ -870,6 +894,8 @@ RtVoid	RiWorldEnd()
 //
 RtVoid	RiFormat( RtInt xresolution, RtInt yresolution, RtFloat pixelaspectratio )
 {
+	Validate_Conditional
+
 	Cache_RiFormat
 
 	Validate_RiFormat
@@ -891,6 +917,8 @@ RtVoid	RiFormat( RtInt xresolution, RtInt yresolution, RtFloat pixelaspectratio 
 //
 RtVoid	RiFrameAspectRatio( RtFloat frameratio )
 {
+	Validate_Conditional
+
 	Cache_RiFrameAspectRatio
 
 	Validate_RiFrameAspectRatio
@@ -927,6 +955,8 @@ RtVoid	RiFrameAspectRatio( RtFloat frameratio )
 //
 RtVoid	RiScreenWindow( RtFloat left, RtFloat right, RtFloat bottom, RtFloat top )
 {
+	Validate_Conditional
+
 	Cache_RiScreenWindow
 
 	Validate_RiScreenWindow
@@ -950,6 +980,8 @@ RtVoid	RiScreenWindow( RtFloat left, RtFloat right, RtFloat bottom, RtFloat top 
 //
 RtVoid	RiCropWindow( RtFloat left, RtFloat right, RtFloat top, RtFloat bottom )
 {
+	Validate_Conditional
+
 	Cache_RiCropWindow
 
 	Validate_RiCropWindow
@@ -1020,6 +1052,8 @@ RtVoid	RiProjection( RtToken name, ... )
 //
 RtVoid	RiProjectionV( RtToken name, PARAMETERLIST )
 {
+	Validate_Conditional
+
 	Cache_RiProjection
 
 	Validate_RiProjection
@@ -1056,6 +1090,8 @@ RtVoid	RiProjectionV( RtToken name, PARAMETERLIST )
 //
 RtVoid	RiClipping( RtFloat cnear, RtFloat cfar )
 {
+	Validate_Conditional
+
 	Cache_RiClipping
 
 	Validate_RiClipping
@@ -1096,6 +1132,8 @@ RtVoid	RiClipping( RtFloat cnear, RtFloat cfar )
 //
 RtVoid	RiDepthOfField( RtFloat fstop, RtFloat focallength, RtFloat focaldistance )
 {
+	Validate_Conditional
+
 	Cache_RiDepthOfField
 
 	Validate_RiDepthOfField
@@ -1142,6 +1180,8 @@ RtVoid	RiDepthOfField( RtFloat fstop, RtFloat focallength, RtFloat focaldistance
 //
 RtVoid	RiShutter( RtFloat opentime, RtFloat closetime )
 {
+	Validate_Conditional
+
 	Cache_RiShutter
 
 	Validate_RiShutter
@@ -1160,6 +1200,8 @@ RtVoid	RiShutter( RtFloat opentime, RtFloat closetime )
 //
 RtVoid	RiPixelVariance( RtFloat variance )
 {
+	Validate_Conditional
+
 	Cache_RiPixelVariance
 
 	Validate_RiPixelVariance
@@ -1192,6 +1234,8 @@ RtVoid	RiPixelVariance( RtFloat variance )
 //
 RtVoid	RiPixelSamples( RtFloat xsamples, RtFloat ysamples )
 {
+	Validate_Conditional
+
 	Cache_RiPixelSamples
 
 	Validate_RiPixelSamples
@@ -1232,6 +1276,8 @@ RtVoid	RiPixelSamples( RtFloat xsamples, RtFloat ysamples )
 //
 RtVoid	RiPixelFilter( RtFilterFunc function, RtFloat xwidth, RtFloat ywidth )
 {
+	Validate_Conditional
+
 	Cache_RiPixelFilter
 
 	Validate_RiPixelFilter
@@ -1250,6 +1296,8 @@ RtVoid	RiPixelFilter( RtFilterFunc function, RtFloat xwidth, RtFloat ywidth )
 //
 RtVoid	RiExposure( RtFloat gain, RtFloat gamma )
 {
+	Validate_Conditional
+
 	Cache_RiExposure
 
 	Validate_RiExposure
@@ -1284,6 +1332,8 @@ RtVoid	RiImager( RtToken name, ... )
 //
 RtVoid	RiImagerV( RtToken name, PARAMETERLIST )
 {
+	Validate_Conditional
+
 	Cache_RiImager
 
 	Validate_RiImager
@@ -1313,6 +1363,8 @@ RtVoid	RiImagerV( RtToken name, PARAMETERLIST )
 //
 RtVoid	RiQuantize( RtToken type, RtInt one, RtInt min, RtInt max, RtFloat ditheramplitude )
 {
+	Validate_Conditional
+
 	Cache_RiQuantize
 
 	Validate_RiQuantize
@@ -1374,6 +1426,8 @@ RtVoid	RiDisplay( RtToken name, RtToken type, RtToken mode, ... )
 //
 RtVoid	RiDisplayV( RtToken name, RtToken type, RtToken mode, PARAMETERLIST )
 {
+	Validate_Conditional
+
 	Cache_RiDisplay
 
 	Validate_RiDisplay
@@ -1722,6 +1776,8 @@ RtVoid	RiHider( RtToken name, ... )
 //
 RtVoid	RiHiderV( RtToken name, PARAMETERLIST )
 {
+	Validate_Conditional
+
 	Cache_RiHider
 
 	Validate_RiHider
@@ -1762,6 +1818,8 @@ RtVoid	RiHiderV( RtToken name, PARAMETERLIST )
 //
 RtVoid	RiColorSamples( RtInt N, RtFloat *nRGB, RtFloat *RGBn )
 {
+	Validate_Conditional
+
 	Cache_RiColorSamples
 
 	Validate_RiColorSamples
@@ -1777,6 +1835,8 @@ RtVoid	RiColorSamples( RtInt N, RtFloat *nRGB, RtFloat *RGBn )
 //
 RtVoid	RiRelativeDetail( RtFloat relativedetail )
 {
+	Validate_Conditional
+
 	Cache_RiRelativeDetail
 
 	Validate_RiRelativeDetail
@@ -1816,6 +1876,8 @@ RtVoid	RiOption( RtToken name, ... )
 //
 RtVoid	RiOptionV( RtToken name, PARAMETERLIST )
 {
+	Validate_Conditional
+
 	Cache_RiOption
 
 	Validate_RiOption
@@ -2069,6 +2131,8 @@ RtVoid	RiOptionV( RtToken name, PARAMETERLIST )
 //
 RtVoid	RiAttributeBegin()
 {
+	Validate_Conditional
+
 	Cache_RiAttributeBegin
 
 	Validate_RiAttributeBegin
@@ -2085,6 +2149,8 @@ RtVoid	RiAttributeBegin()
 //
 RtVoid	RiAttributeEnd()
 {
+	Validate_Conditional
+
 	Cache_RiAttributeEnd
 
 	Validate_RiAttributeEnd
@@ -2101,6 +2167,8 @@ RtVoid	RiAttributeEnd()
 //
 RtVoid	RiColor( RtColor Cq )
 {
+	Validate_Conditional
+
 	Cache_RiColor
 
 	Validate_RiColor
@@ -2117,6 +2185,8 @@ RtVoid	RiColor( RtColor Cq )
 //
 RtVoid	RiOpacity( RtColor Os )
 {
+	Validate_Conditional
+
 	Cache_RiOpacity
 
 	Validate_RiOpacity
@@ -2136,6 +2206,8 @@ RtVoid	RiTextureCoordinates( RtFloat s1, RtFloat t1,
                              RtFloat s3, RtFloat t3,
                              RtFloat s4, RtFloat t4 )
 {
+	Validate_Conditional
+
 	Cache_RiTextureCoordinates
 
 	Validate_RiTextureCoordinates
@@ -2181,6 +2253,8 @@ RtLightHandle	RiLightSource( RtToken name, ... )
 //
 RtLightHandle	RiLightSourceV( RtToken name, PARAMETERLIST )
 {
+	Validate_Conditional0
+
 	Cache_RiLightSource
 
 	Validate_RiLightSource
@@ -2227,6 +2301,7 @@ RtLightHandle	RiLightSourceV( RtToken name, PARAMETERLIST )
 //
 RtLightHandle	RiAreaLightSource( RtToken name, ... )
 {
+
     va_list	pArgs;
     va_start( pArgs, name );
 
@@ -2244,6 +2319,8 @@ RtLightHandle	RiAreaLightSource( RtToken name, ... )
 //
 RtLightHandle	RiAreaLightSourceV( RtToken name, PARAMETERLIST )
 {
+	Validate_Conditional0
+
 	Cache_RiAreaLightSource
 
 	Validate_RiAreaLightSource
@@ -2260,6 +2337,8 @@ RtLightHandle	RiAreaLightSourceV( RtToken name, PARAMETERLIST )
 //
 RtVoid	RiIlluminate( RtLightHandle light, RtBoolean onoff )
 {
+	Validate_Conditional
+
 	Cache_RiIlluminate
 
 	Validate_RiIlluminate
@@ -2299,6 +2378,8 @@ RtVoid	RiSurface( RtToken name, ... )
 //
 RtVoid	RiSurfaceV( RtToken name, PARAMETERLIST )
 {
+	Validate_Conditional
+
 	Cache_RiSurface
 
 	Validate_RiSurface
@@ -2351,6 +2432,8 @@ RtVoid	RiAtmosphere( RtToken name, ... )
 //
 RtVoid	RiAtmosphereV( RtToken name, PARAMETERLIST )
 {
+	Validate_Conditional
+
 	Cache_RiAtmosphere
 
 	Validate_RiAtmosphere
@@ -2396,6 +2479,8 @@ RtVoid	RiInterior( RtToken name, ... )
 //
 RtVoid	RiInteriorV( RtToken name, PARAMETERLIST )
 {
+	Validate_Conditional
+
 	Cache_RiInterior
 
 	Validate_RiInterior
@@ -2422,6 +2507,8 @@ RtVoid	RiExterior( RtToken name, ... )
 //
 RtVoid	RiExteriorV( RtToken name, PARAMETERLIST )
 {
+	Validate_Conditional
+
 	Cache_RiExterior
 
 	Validate_RiExterior
@@ -2437,6 +2524,8 @@ RtVoid	RiExteriorV( RtToken name, PARAMETERLIST )
 //
 RtVoid	RiShadingRate( RtFloat size )
 {
+	Validate_Conditional
+
 	Cache_RiShadingRate
 
 	Validate_RiShadingRate
@@ -2471,6 +2560,8 @@ RtVoid	RiShadingRate( RtFloat size )
 //
 RtVoid	RiShadingInterpolation( RtToken type )
 {
+	Validate_Conditional
+
 	Cache_RiShadingInterpolation
 
 	Validate_RiShadingInterpolation
@@ -2494,6 +2585,8 @@ RtVoid	RiShadingInterpolation( RtToken type )
 //
 RtVoid	RiMatte( RtBoolean onoff )
 {
+	Validate_Conditional
+
 	Cache_RiMatte
 
 	Validate_RiMatte
@@ -2510,6 +2603,8 @@ RtVoid	RiMatte( RtBoolean onoff )
 //
 RtVoid	RiBound( RtBound bound )
 {
+	Validate_Conditional
+
 	Cache_RiBound
 
 	Validate_RiBound
@@ -2527,6 +2622,8 @@ RtVoid	RiBound( RtBound bound )
 //
 RtVoid	RiDetail( RtBound bound )
 {
+	Validate_Conditional
+
 	Cache_RiDetail
 
 	Validate_RiDetail
@@ -2550,6 +2647,8 @@ RtVoid	RiDetail( RtBound bound )
 //
 RtVoid	RiDetailRange( RtFloat offlow, RtFloat onlow, RtFloat onhigh, RtFloat offhigh )
 {
+	Validate_Conditional
+
 	Cache_RiDetailRange
 
 	Validate_RiDetailRange
@@ -2600,6 +2699,8 @@ RtVoid	RiDetailRange( RtFloat offlow, RtFloat onlow, RtFloat onhigh, RtFloat off
 //
 RtVoid	RiGeometricApproximation( RtToken type, RtFloat value )
 {
+	Validate_Conditional
+
 	Cache_RiGeometricApproximation
 
 	Validate_RiGeometricApproximation
@@ -2615,6 +2716,8 @@ RtVoid	RiGeometricApproximation( RtToken type, RtFloat value )
 //
 RtVoid	RiOrientation( RtToken orientation )
 {
+	Validate_Conditional
+
 	Cache_RiOrientation
 
 	Validate_RiOrientation
@@ -2641,6 +2744,8 @@ RtVoid	RiOrientation( RtToken orientation )
 //
 RtVoid	RiReverseOrientation()
 {
+	Validate_Conditional
+
 	Cache_RiReverseOrientation
 
 	Validate_RiReverseOrientation
@@ -2657,6 +2762,8 @@ RtVoid	RiReverseOrientation()
 //
 RtVoid	RiSides( RtInt nsides )
 {
+	Validate_Conditional
+
 	Cache_RiSides
 
 	Validate_RiSides
@@ -2674,6 +2781,8 @@ RtVoid	RiSides( RtInt nsides )
 //
 RtVoid	RiIdentity()
 {
+	Validate_Conditional
+
 	Cache_RiIdentity
 
 	Validate_RiIdentity
@@ -2689,6 +2798,8 @@ RtVoid	RiIdentity()
 //
 RtVoid	RiTransform( RtMatrix transform )
 {
+	Validate_Conditional
+
 	Cache_RiTransform
 
 	Validate_RiTransform
@@ -2717,6 +2828,8 @@ RtVoid	RiTransform( RtMatrix transform )
 //
 RtVoid	RiConcatTransform( RtMatrix transform )
 {
+	Validate_Conditional
+
 	Cache_RiConcatTransform
 
 	Validate_RiConcatTransform
@@ -2738,6 +2851,8 @@ RtVoid	RiConcatTransform( RtMatrix transform )
 //
 RtVoid	RiPerspective( RtFloat fov )
 {
+	Validate_Conditional
+
 	Cache_RiPerspective
 
 	Validate_RiPerspective
@@ -2770,6 +2885,8 @@ RtVoid	RiPerspective( RtFloat fov )
 //
 RtVoid	RiTranslate( RtFloat dx, RtFloat dy, RtFloat dz )
 {
+	Validate_Conditional
+
 	Cache_RiTranslate
 
 	Validate_RiTranslate
@@ -2792,6 +2909,8 @@ RtVoid	RiTranslate( RtFloat dx, RtFloat dy, RtFloat dz )
 //
 RtVoid	RiRotate( RtFloat angle, RtFloat dx, RtFloat dy, RtFloat dz )
 {
+	Validate_Conditional
+
 	Cache_RiRotate
 
 	Validate_RiRotate
@@ -2813,6 +2932,8 @@ RtVoid	RiRotate( RtFloat angle, RtFloat dx, RtFloat dy, RtFloat dz )
 //
 RtVoid	RiScale( RtFloat sx, RtFloat sy, RtFloat sz )
 {
+	Validate_Conditional
+
 	Cache_RiScale
 
 	Validate_RiScale
@@ -2835,6 +2956,8 @@ RtVoid	RiScale( RtFloat sx, RtFloat sy, RtFloat sz )
 RtVoid	RiSkew( RtFloat angle, RtFloat dx1, RtFloat dy1, RtFloat dz1,
                RtFloat dx2, RtFloat dy2, RtFloat dz2 )
 {
+	Validate_Conditional
+
 	Cache_RiSkew
 
 	Validate_RiSkew
@@ -2866,6 +2989,8 @@ RtVoid	RiDeformation( RtToken name, ... )
 //
 RtVoid	RiDeformationV( RtToken name, PARAMETERLIST )
 {
+	Validate_Conditional
+
 	Cache_RiDeformation
 
 	Validate_RiDeformation
@@ -2898,6 +3023,8 @@ RtVoid	RiDisplacement( RtToken name, ... )
 //
 RtVoid	RiDisplacementV( RtToken name, PARAMETERLIST )
 {
+	Validate_Conditional
+
 	Cache_RiDisplacement
 
 	Validate_RiDisplacement
@@ -2932,6 +3059,8 @@ RtVoid	RiDisplacementV( RtToken name, PARAMETERLIST )
 //
 RtVoid	RiCoordinateSystem( RtToken space )
 {
+	Validate_Conditional
+
 	Cache_RiCoordinateSystem
 
 	Validate_RiCoordinateSystem
@@ -2951,6 +3080,8 @@ RtVoid	RiCoordinateSystem( RtToken space )
 
 RtVoid	RiCoordSysTransform( RtToken space )
 {
+	Validate_Conditional
+
 	Cache_RiCoordSysTransform
 
 	Validate_RiCoordSysTransform
@@ -2970,20 +3101,40 @@ RtVoid	RiCoordSysTransform( RtToken space )
 RtPoint*	RiTransformPoints( RtToken fromspace, RtToken tospace, RtInt npoints, RtPoint points[] )
 {
 	Cache_RiTransformPoints
+	CqMatrix m1, m2;
 
 	Validate_RiTransformPoints
 
-    std::cerr << warning << "RiTransformPoints not supported" << std::endl;
-    return ( 0 );
+	if (!IfOk)
+		return points;
+
+	CqMatrix matCToW = QGetRenderContext() ->matSpaceToSpace( fromspace,
+	                   tospace, m1, m2, QGetRenderContextI()->Time() );
+
+	if (matCToW.fIdentity() != TqTrue)
+	{
+		for(TqInt i =0; i< npoints; i++)
+		{
+			CqVector3D tmp = points[i];
+			tmp = tmp * matCToW;
+			points[i][0] = tmp.x();
+			points[i][1] = tmp.y();
+			points[i][2] = tmp.z();
+		}
+	}
+
+	return ( points );
 }
 
 
 //----------------------------------------------------------------------
-// Rijjj
+// RiTransformBegin
 // Push the current transformation state.
 //
 RtVoid	RiTransformBegin()
 {
+	Validate_Conditional
+
 	Cache_RiTransformBegin
 
 	Validate_RiTransformBegin
@@ -3000,6 +3151,8 @@ RtVoid	RiTransformBegin()
 //
 RtVoid	RiTransformEnd()
 {
+	Validate_Conditional
+
 	Cache_RiTransformEnd
 
 	Validate_RiTransformEnd
@@ -3040,6 +3193,8 @@ RtVoid	RiAttribute( RtToken name, ... )
 //
 RtVoid	RiAttributeV( RtToken name, PARAMETERLIST )
 {
+	Validate_Conditional
+
 	Cache_RiAttribute
 
 	Validate_RiAttribute
@@ -3184,6 +3339,8 @@ RtVoid	RiPolygon( RtInt nvertices, ... )
 //
 RtVoid	RiPolygonV( RtInt nvertices, PARAMETERLIST )
 {
+	Validate_Conditional
+
 	Cache_RiPolygon
 
 	Validate_RiPolygon
@@ -3236,6 +3393,8 @@ RtVoid	RiGeneralPolygon( RtInt nloops, RtInt nverts[], ... )
 //
 RtVoid	RiGeneralPolygonV( RtInt nloops, RtInt nverts[], PARAMETERLIST )
 {
+	Validate_Conditional
+
 	Cache_RiGeneralPolygon
 
 	Validate_RiGeneralPolygon
@@ -3393,6 +3552,8 @@ RtVoid RiBlobby( RtInt nleaf, RtInt ncodes, RtInt codes[], RtInt nfloats, RtFloa
 RtVoid RiBlobbyV( RtInt nleaf, RtInt ncode, RtInt code[], RtInt nflt, RtFloat flt[],
                   RtInt nstr, RtString str[], PARAMETERLIST )
 {
+	Validate_Conditional
+
 	Cache_RiBlobby
 
 	Validate_RiBlobby
@@ -3429,6 +3590,8 @@ RtVoid	RiPoints( RtInt nvertices, ... )
  **/
 RtVoid	RiPointsV( RtInt npoints, PARAMETERLIST )
 {
+	Validate_Conditional
+
 	Cache_RiPoints
 
 	Validate_RiPoints
@@ -3523,6 +3686,8 @@ RtVoid RiCurves( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, .
  **/
 RtVoid RiCurvesV( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, PARAMETERLIST )
 {
+	Validate_Conditional
+
 	Cache_RiCurves
 
 	Validate_RiCurves
@@ -3620,6 +3785,8 @@ RtVoid	RiPointsPolygons( RtInt npolys, RtInt nverts[], RtInt verts[], ... )
 
 RtVoid	RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETERLIST )
 {
+	Validate_Conditional
+
 	Cache_RiPointsPolygons
 
 	Validate_RiPointsPolygons
@@ -3683,6 +3850,8 @@ RtVoid	RiPointsGeneralPolygons( RtInt npolys, RtInt nloops[], RtInt nverts[], Rt
 //
 RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], RtInt verts[], PARAMETERLIST )
 {
+	Validate_Conditional
+
 	Cache_RiPointsGeneralPolygons
 
 	Validate_RiPointsGeneralPolygons
@@ -3944,6 +4113,8 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 //
 RtVoid	RiBasis( RtBasis ubasis, RtInt ustep, RtBasis vbasis, RtInt vstep )
 {
+	Validate_Conditional
+
 	Cache_RiBasis
 
 	Validate_RiBasis
@@ -4016,6 +4187,8 @@ RtVoid	RiPatch( RtToken type, ... )
 //
 RtVoid	RiPatchV( RtToken type, PARAMETERLIST )
 {
+	Validate_Conditional
+
 	Cache_RiPatch
 
 	Validate_RiPatch
@@ -4092,6 +4265,8 @@ RtVoid	RiPatchMesh( RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vwr
 
 RtVoid	RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vwrap, PARAMETERLIST )
 {
+	Validate_Conditional
+
 	Cache_RiPatchMesh
 
 	Validate_RiPatchMesh
@@ -4185,6 +4360,8 @@ RtVoid	RiNuPatch( RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin, RtFloat
 RtVoid	RiNuPatchV( RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin, RtFloat umax,
                    RtInt nv, RtInt vorder, RtFloat vknot[], RtFloat vmin, RtFloat vmax, PARAMETERLIST )
 {
+	Validate_Conditional
+
 	Cache_RiNuPatch
 
 	Validate_RiNuPatch
@@ -4228,6 +4405,8 @@ RtVoid	RiNuPatchV( RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin, RtFloa
 //
 RtVoid	RiTrimCurve( RtInt nloops, RtInt ncurves[], RtInt order[], RtFloat knot[], RtFloat min[], RtFloat max[], RtInt n[], RtFloat u[], RtFloat v[], RtFloat w[] )
 {
+	Validate_Conditional
+
 	Cache_RiTrimCurve
 
 	Validate_RiTrimCurve
@@ -4299,6 +4478,8 @@ RtVoid	RiSphere( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, .
 //
 RtVoid	RiSphereV( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, PARAMETERLIST )
 {
+	Validate_Conditional
+
 	Cache_RiSphere
 
 	Validate_RiSphere
@@ -4349,6 +4530,8 @@ RtVoid	RiCone( RtFloat height, RtFloat radius, RtFloat thetamax, ... )
 //
 RtVoid	RiConeV( RtFloat height, RtFloat radius, RtFloat thetamax, PARAMETERLIST )
 {
+	Validate_Conditional
+
 	Cache_RiCone
 
 	Validate_RiCone
@@ -4396,6 +4579,8 @@ RtVoid	RiCylinder( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax,
 //
 RtVoid	RiCylinderV( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, PARAMETERLIST )
 {
+	Validate_Conditional
+
 	Cache_RiCylinder
 
 	Validate_RiCylinder
@@ -4439,6 +4624,8 @@ RtVoid	RiHyperboloid( RtPoint point1, RtPoint point2, RtFloat thetamax, ... )
 //
 RtVoid	RiHyperboloidV( RtPoint point1, RtPoint point2, RtFloat thetamax, PARAMETERLIST )
 {
+	Validate_Conditional
+
 	Cache_RiHyperboloid
 
 	Validate_RiHyperboloid
@@ -4484,6 +4671,8 @@ RtVoid	RiParaboloid( RtFloat rmax, RtFloat zmin, RtFloat zmax, RtFloat thetamax,
 //
 RtVoid	RiParaboloidV( RtFloat rmax, RtFloat zmin, RtFloat zmax, RtFloat thetamax, PARAMETERLIST )
 {
+	Validate_Conditional
+
 	Cache_RiParaboloid
 
 	Validate_RiParaboloid
@@ -4527,6 +4716,8 @@ RtVoid	RiDisk( RtFloat height, RtFloat radius, RtFloat thetamax, ... )
 //
 RtVoid	RiDiskV( RtFloat height, RtFloat radius, RtFloat thetamax, PARAMETERLIST )
 {
+	Validate_Conditional
+
 	Cache_RiDisk
 
 	Validate_RiDisk
@@ -4570,6 +4761,8 @@ RtVoid	RiTorus( RtFloat majorrad, RtFloat minorrad, RtFloat phimin, RtFloat phim
 //
 RtVoid	RiTorusV( RtFloat majorrad, RtFloat minorrad, RtFloat phimin, RtFloat phimax, RtFloat thetamax, PARAMETERLIST )
 {
+	Validate_Conditional
+
 	Cache_RiTorus
 
 	Validate_RiTorus
@@ -4597,6 +4790,8 @@ RtVoid	RiTorusV( RtFloat majorrad, RtFloat minorrad, RtFloat phimin, RtFloat phi
 //
 RtVoid	RiProcedural( RtPointer data, RtBound bound, RtProcSubdivFunc refineproc, RtProcFreeFunc freeproc )
 {
+	Validate_Conditional
+
 	Cache_RiProcedural
 
 	Validate_RiProcedural
@@ -4643,6 +4838,8 @@ RtVoid	RiGeometry( RtToken type, ... )
 //
 RtVoid	RiGeometryV( RtToken type, PARAMETERLIST )
 {
+	Validate_Conditional
+
 	Cache_RiGeometry
 
 	Validate_RiGeometry
@@ -4708,6 +4905,8 @@ RtVoid	RiGeometryV( RtToken type, PARAMETERLIST )
 //
 RtVoid	RiSolidBegin( RtToken type )
 {
+	Validate_Conditional
+
 	Cache_RiSolidBegin
 
 	Validate_RiSolidBegin
@@ -4725,6 +4924,8 @@ RtVoid	RiSolidBegin( RtToken type )
 //
 RtVoid	RiSolidEnd()
 {	
+	Validate_Conditional
+
 	Cache_RiSolidEnd
 
 	Validate_RiSolidEnd
@@ -4741,6 +4942,8 @@ RtVoid	RiSolidEnd()
 //
 RtObjectHandle	RiObjectBegin()
 {
+	Validate_Conditional0
+
 	Cache_RiObjectBegin
 
 	Validate_RiObjectBegin
@@ -4758,6 +4961,8 @@ RtObjectHandle	RiObjectBegin()
 //
 RtVoid	RiObjectEnd()
 {
+	Validate_Conditional
+
 	Validate_RiObjectEnd
 
     QGetRenderContext() ->EndObjectModeBlock();
@@ -4775,6 +4980,8 @@ RtVoid	RiObjectEnd()
 //
 RtVoid	RiObjectInstance( RtObjectHandle handle )
 {
+	Validate_Conditional
+
 	Cache_RiObjectInstance
 
 	Validate_RiObjectInstance
@@ -4811,6 +5018,8 @@ RtVoid	RiMotionBegin( RtInt N, ... )
 //
 RtVoid	RiMotionBeginV( RtInt N, RtFloat times[] )
 {
+	Validate_Conditional
+
 	Cache_RiMotionBeginV
 
 	Validate_RiMotionBeginV
@@ -4827,6 +5036,8 @@ RtVoid	RiMotionBeginV( RtInt N, RtFloat times[] )
 //
 RtVoid	RiMotionEnd()
 {
+	Validate_Conditional
+
 	Cache_RiMotionEnd
 
 	Validate_RiMotionEnd
@@ -4861,6 +5072,8 @@ RtVoid RiMakeTexture ( RtString pic, RtString tex, RtToken swrap, RtToken twrap,
 //
 RtVoid	RiMakeTextureV( RtString imagefile, RtString texturefile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, PARAMETERLIST )
 {
+	Validate_Conditional
+
 	Cache_RiMakeTexture
 
 	Validate_RiMakeTexture
@@ -4962,6 +5175,8 @@ RtVoid	RiMakeBump( RtString imagefile, RtString bumpfile, RtToken swrap, RtToken
 //
 RtVoid	RiMakeBumpV( RtString imagefile, RtString bumpfile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, PARAMETERLIST )
 {
+	Validate_Conditional
+
 	Cache_RiMakeBump
 
 	Validate_RiMakeBump
@@ -4995,6 +5210,8 @@ RtVoid	RiMakeLatLongEnvironment( RtString imagefile, RtString reflfile, RtFilter
 //
 RtVoid	RiMakeLatLongEnvironmentV( RtString imagefile, RtString reflfile, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, PARAMETERLIST )
 {
+	Validate_Conditional
+
 	Cache_RiMakeLatLongEnvironment
 
 	Validate_RiMakeLatLongEnvironment
@@ -5091,6 +5308,8 @@ RtVoid	RiMakeCubeFaceEnvironment( RtString px, RtString nx, RtString py, RtStrin
 //
 RtVoid	RiMakeCubeFaceEnvironmentV( RtString px, RtString nx, RtString py, RtString ny, RtString pz, RtString nz, RtString reflfile, RtFloat fov, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, PARAMETERLIST )
 {
+	Validate_Conditional
+
 	Cache_RiMakeCubeFaceEnvironment
 
 	Validate_RiMakeCubeFaceEnvironment
@@ -5219,6 +5438,8 @@ RtVoid	RiMakeShadow( RtString picfile, RtString shadowfile, ... )
 //
 RtVoid	RiMakeShadowV( RtString picfile, RtString shadowfile, PARAMETERLIST )
 {
+	Validate_Conditional
+
 	Cache_RiMakeShadow
 
 	Validate_RiMakeShadow
@@ -5261,6 +5482,8 @@ RtVoid	RiMakeOcclusion( RtInt npics, RtString picfiles[], RtString shadowfile, .
 //
 RtVoid	RiMakeOcclusionV( RtInt npics, RtString picfiles[], RtString shadowfile, RtInt count, RtToken tokens[], RtPointer values[] )
 {
+	Validate_Conditional
+
 	Cache_RiMakeOcclusion
 
 	Validate_RiMakeOcclusion
@@ -5284,6 +5507,30 @@ RtVoid	RiMakeOcclusionV( RtInt npics, RtString picfiles[], RtString shadowfile, 
     return ;
 }
 
+//----------------------------------------------------------------------
+/** Conditional handlers for 3.4 new RI Tokens
+ * It calls TestCondition(); expect to modify the global variable IfOk.
+ *	\param	condition	
+ */
+RtVoid	RiIfBegin( RtString condition )
+{
+	IfOk = TestCondition(condition, "RiIfBegin");
+}
+
+RtVoid	RiElseIf( RtString condition )
+{
+	IfOk = TestCondition(condition, "RiElseIf");
+}
+
+RtVoid	RiElse( )
+{
+	IfOk = !IfOk;
+}
+
+RtVoid	RiIfEnd( )
+{
+	IfOk = TqTrue;
+}
 
 //----------------------------------------------------------------------
 // RiErrorHandler
@@ -5291,6 +5538,8 @@ RtVoid	RiMakeOcclusionV( RtInt npics, RtString picfiles[], RtString shadowfile, 
 //
 RtVoid	RiErrorHandler( RtErrorFunc handler )
 {
+	Validate_Conditional
+
 	Cache_RiErrorHandler
 
 	Validate_RiErrorHandler
@@ -5354,6 +5603,8 @@ RtVoid	RiSubdivisionMesh( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtInt
 //
 RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtInt vertices[], RtInt ntags, RtToken tags[], RtInt nargs[], RtInt intargs[], RtFloat floatargs[], PARAMETERLIST )
 {
+	Validate_Conditional
+
 	Cache_RiSubdivisionMesh
 
 	Validate_RiSubdivisionMesh
@@ -5502,6 +5753,8 @@ RtVoid RiReadArchive( RtToken name, RtArchiveCallback callback, ... )
 
 RtVoid	RiReadArchiveV( RtToken name, RtArchiveCallback callback, PARAMETERLIST )
 {
+	Validate_Conditional
+
 	Cache_RiReadArchive
 
 	Validate_RiReadArchive
@@ -5515,7 +5768,9 @@ RtVoid	RiReadArchiveV( RtToken name, RtArchiveCallback callback, PARAMETERLIST )
         FILE *file;
         if ( ( file = fopen( strRealName.c_str(), "rb" ) ) != NULL )
         {
+#ifdef REQUIRED
             std::cerr << info << "RiReadArchive: Reading archive \"" << strRealName.c_str() << "\"" << std::endl;
+#endif
 
             CqRIBParserState currstate = librib::GetParserState();
             if (currstate.m_pParseCallbackInterface == NULL) currstate.m_pParseCallbackInterface = new librib2ri::Engine;
