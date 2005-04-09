@@ -2273,14 +2273,23 @@ void	CqShaderExecEnv::SO_normalize( IqShaderData* V, IqShaderData* Result, IqSha
 
 	__iGrid = 0;
 	CqBitVector& RS = RunningState();
+	CqVector3D _old(1,0,0); 
+	CqVector3D _unit(1,0,0);
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
 		{
 			CqVector3D _aq_V;
 			(V)->GetVector(_aq_V,__iGrid);
-			_aq_V.Unit();
-			(Result)->SetVector(_aq_V,__iGrid);
+			// Trade a small comparaison instead of
+			// blindly call Unit(). Big improvement 
+			// for polygon or relative flat patch/microgrid.
+			if (_old != _aq_V) {
+				_unit = _aq_V;
+				_unit.Unit();
+				_old = _aq_V;
+			} 
+			(Result)->SetVector(_unit,__iGrid);
 		}
 	}
 	while( ( ++__iGrid < GridSize() ) && __fVarying);
