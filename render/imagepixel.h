@@ -173,6 +173,8 @@ struct SqSampleData
     TqInt		m_SubCellIndex;		///< Subcell index.
     TqFloat		m_Time;				///< Float sample time.
     TqFloat		m_DetailLevel;		///< Float level-of-detail sample.
+	std::vector<SqImageSample>	m_Data;	///< Array of sampled surface data for this sample.
+	SqImageSample m_OpaqueSample;	///< Single opaque sample for optimised processing if all encountered surfaces are opaque
 };
 
 //-----------------------------------------------------------------------
@@ -349,24 +351,14 @@ public:
     std::vector<SqImageSample>&	Values( TqInt index )
     {
         assert( index < m_XSamples*m_YSamples );
-        return ( m_aValues[ index ] );
+		return ( m_Samples[ index ].m_Data );
     }
 
 	SqImageSample& OpaqueValues( TqInt index )
 	{
         assert( index < m_XSamples*m_YSamples );
-        return ( m_OpaqueValues[ index ] );
+		return ( m_Samples[ index ].m_OpaqueSample );
     }
-
-	void IncOpaqueSampleCount()
-	{
-		m_OpaqueSampleCount++;
-	}
-
-	void SetUsesSampleList()
-	{
-		m_AnySampleUsesSampleList = true;
-	}
 
     void	Combine();
 
@@ -374,7 +366,17 @@ public:
      * \param The index of the required sample point.
      * \return A reference to the sample data.
      */
-    const SqSampleData& SampleData( TqInt index )
+    const SqSampleData& SampleData( TqInt index ) const
+    {
+        assert( index < m_XSamples*m_YSamples );
+        return ( m_Samples[index] );
+    }
+
+    /** Get the sample data for the specified sample index.
+     * \param The index of the required sample point.
+     * \return A reference to the sample data.
+     */
+    SqSampleData& SampleData( TqInt index )
     {
         assert( index < m_XSamples*m_YSamples );
         return ( m_Samples[index] );
@@ -407,13 +409,9 @@ public:
 private:
     TqInt	m_XSamples;						///< The number of samples in the horizontal direction.
     TqInt	m_YSamples;						///< The number of samples in the vertical direction.
-    std::vector<std::vector<SqImageSample> > m_aValues;	///< Vector of vectors of sample point data.
-	std::vector<SqImageSample> m_OpaqueValues;	///< Vector of sample point data for opaque samples (one per sample position, no need for list).
 	std::vector<SqSampleData> m_Samples;	///< A Vector of samples. Holds position, time, dof offset etc for each sample.
 	std::vector<TqInt> m_DofOffsetIndices;	///< A mapping from dof bounding-box index to the sample that contains a dof offset in that bb.
     SqImageSample	m_Data;
-	TqInt	m_OpaqueSampleCount;			///< The number of valid opaque samples.
-	TqBool	m_AnySampleUsesSampleList;		///< True if any of the samples use the sample list (m_aValues) as opposed to the single opaque values
     TqFloat m_MaxDepth;						///< The maximum depth of any sample in this pixel. used for occlusion culling
     TqFloat m_MinDepth;						///< The minimum depth of any sample in this pixel. used for occlusion culling
     TqInt m_OcclusionBoxId;					///< The CqOcclusionBox that covers this pixel

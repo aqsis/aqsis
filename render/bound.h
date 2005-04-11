@@ -130,6 +130,15 @@ public:
             return ( TqTrue );
     }
 
+    TqBool	Intersects( const CqVector2D& min, const CqVector2D& max ) const
+    {
+        if( min.x() > m_vecMax.x() || min.y() > m_vecMax.y() ||
+		    max.x() < m_vecMin.x() || max.y() < m_vecMin.y() )
+            return ( TqFalse );
+        else
+            return ( TqTrue );
+    }
+
     friend std::ostream &operator<<( std::ostream &Stream, const CqBound &Bound );
 
 private:

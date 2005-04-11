@@ -68,11 +68,12 @@ bool CqPointsKDTreeData::CqPointsKDTreeDataComparator::operator()(TqInt a, TqInt
 CqPoints::CqPoints( TqInt nvertices, const boost::shared_ptr<CqPolygonPoints>& pPoints ) : CqMotionSpec<boost::shared_ptr<CqPolygonPoints> >(pPoints),
         m_nVertices(nvertices),
         m_KDTreeData( this ),
-        m_KDTree(&m_KDTreeData),
         m_MaxWidth(0)
 {
     //assert( NULL != pPoints );
     assert( nvertices > 0 );
+
+	m_KDTree.SetData(boost::shared_ptr<IqKDTreeData<TqInt> >(&m_KDTreeData));
 
     m_widthParamIndex = -1;
     m_constantwidthParamIndex = -1;

@@ -74,6 +74,13 @@ public:
         std::sort(aLeaves.begin(), aLeaves.end(), CqPointsKDTreeDataComparator(m_pPointsSurface, dimension) );
     }
     virtual TqInt Dimensions() const	{return(3);}
+	virtual void Subdivided(CqKDTreeNode<TqInt>& original, 
+							CqKDTreeNode<TqInt>& leftResult, 
+							CqKDTreeNode<TqInt>& rightResult, 
+							TqInt dimension, TqInt median)
+	{}
+	virtual void Initialise(CqKDTreeNode<TqInt,SqEmptyExtraData>& treenode)
+	{}
 
     void	SetpPoints( const CqPoints* pPoints );
     void	FreePoints();
@@ -229,8 +236,8 @@ CqString className() const { return CqString("CqPoints"); }
     }
 
     /// Accessor function for the KDTree
-    CqKDTree<TqInt>&	KDTree()			{return( m_KDTree); }
-    const CqKDTree<TqInt>&	KDTree() const	{return( m_KDTree); }
+    CqKDTreeNode<TqInt>&	KDTree()			{return( m_KDTree); }
+    const CqKDTreeNode<TqInt>&	KDTree() const	{return( m_KDTree); }
 
     void ClearKDTree()
     {
@@ -273,9 +280,9 @@ private:
     // make this private.
 
     CqPoints( const CqPoints& From ) : CqMotionSpec<boost::shared_ptr<CqPolygonPoints> >(From.pPoints()),
-	    m_KDTreeData( this ),
-            m_KDTree( &m_KDTreeData )
+	    m_KDTreeData( this )
     {
+		m_KDTree.SetData(boost::shared_ptr<IqKDTreeData<TqInt> >(&m_KDTreeData));
         *this = From;
     }
 
@@ -284,7 +291,7 @@ private:
     boost::shared_ptr<CqPolygonPoints> m_pPoints;				///< Pointer to the surface storing the primtive variables.
     TqInt	m_nVertices;					///< Number of points this surfaces represents.
     CqPointsKDTreeData	m_KDTreeData;		///< KD Tree data handling class.
-    CqKDTree<TqInt>		m_KDTree;			///< KD Tree node for this part of the entire primitive.
+    CqKDTreeNode<TqInt>		m_KDTree;			///< KD Tree node for this part of the entire primitive.
     TqInt m_widthParamIndex;				///< Index of the "width" primitive variable if specified, -1 if not.
     TqInt m_constantwidthParamIndex;		///< Index of the "constantwidth" primitive variable if specified, -1 if not.
     TqFloat	m_MaxWidth;						///< Maximum width of the points, used for bound calculation.

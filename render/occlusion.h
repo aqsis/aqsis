@@ -28,11 +28,90 @@
 #define OCCLUSION_H_INCLUDED 1
 
 #include "aqsis.h"
+#include "kdtree.h"
+#include "imagepixel.h"
 
 START_NAMESPACE( Aqsis )
 
 class CqBound;
 class CqBucket;
+
+
+struct	SqOcclusionKDTreeExtraData
+{
+	CqVector2D	m_MinSamplePoint;
+	CqVector2D	m_MaxSamplePoint;
+	TqFloat		m_MinTime;
+	TqFloat		m_MaxTime;
+};
+
+typedef	SqSampleData*	TqOcclusionKDTreeData;
+typedef CqKDTree<TqOcclusionKDTreeData, SqOcclusionKDTreeExtraData> TqOcclusionKDTree;
+
+/**	\brief	The CqOcclusionKDTreeData class
+	Specialisation of the KDTree data class to support generation of a KDTree
+	representing the sample data of a bucket.
+*/
+class CqOcclusionKDTreeData : public IqKDTreeData<TqOcclusionKDTreeData, SqOcclusionKDTreeExtraData>
+{
+    class CqOcclusionKDTreeDataComparator
+    {
+    public:
+        CqOcclusionKDTreeDataComparator(TqInt dimension) : m_Dim( dimension )
+        {}
+
+        bool operator()(TqOcclusionKDTreeData a, TqOcclusionKDTreeData b);
+
+    private:
+        TqInt		m_Dim;
+    };
+
+public:
+    CqOcclusionKDTreeData()
+    {}
+
+    virtual void SortElements(std::vector<TqOcclusionKDTreeData>& aLeaves, TqInt dimension)
+    {
+        std::sort(aLeaves.begin(), aLeaves.end(), CqOcclusionKDTreeDataComparator(dimension) );
+    }
+    virtual TqInt Dimensions() const	{return(2);}
+	virtual void Subdivided(CqKDTreeNode<TqOcclusionKDTreeData, SqOcclusionKDTreeExtraData>& original, 
+							CqKDTreeNode<TqOcclusionKDTreeData, SqOcclusionKDTreeExtraData>& leftResult, 
+							CqKDTreeNode<TqOcclusionKDTreeData, SqOcclusionKDTreeExtraData>& rightResult, 
+							TqInt dimension, TqInt median)
+	{
+		Initialise(leftResult);
+		Initialise(rightResult);
+	}
+
+	void Initialise(CqKDTreeNode<TqOcclusionKDTreeData, SqOcclusionKDTreeExtraData>& treenode)
+	{
+		TqFloat minXVal = treenode.aLeaves()[0]->m_Position.x();
+		TqFloat maxXVal = minXVal;
+		TqFloat minYVal = treenode.aLeaves()[0]->m_Position.y();
+		TqFloat maxYVal = minYVal;
+		TqFloat minTime = treenode.aLeaves()[0]->m_Time;
+		TqFloat maxTime = minTime;
+		std::vector<TqOcclusionKDTreeData>::iterator i;
+		for(i = treenode.aLeaves().begin(); i!=treenode.aLeaves().end(); ++i)
+		{
+			minXVal = MIN(minXVal, (*i)->m_Position.x());
+			maxXVal = MAX(maxXVal, (*i)->m_Position.x());
+			minYVal = MIN(minYVal, (*i)->m_Position.y());
+			maxYVal = MAX(maxYVal, (*i)->m_Position.y());
+			minTime = MIN(minTime, (*i)->m_Time);
+			maxTime = MAX(maxTime, (*i)->m_Time);
+		}
+		treenode.ExtraData().m_MinSamplePoint[0] = minXVal;
+		treenode.ExtraData().m_MaxSamplePoint[0] = maxXVal;
+		treenode.ExtraData().m_MinSamplePoint[1] = minYVal;
+		treenode.ExtraData().m_MaxSamplePoint[1] = maxYVal;
+		treenode.ExtraData().m_MinTime = minTime;
+		treenode.ExtraData().m_MaxTime = maxTime;
+	}
+
+private:
+};
 
 
 class CqOcclusionBox
@@ -55,6 +134,10 @@ public:
         assert( id >= 0 && id < m_TotalBoxes );
         m_Hierarchy[ id ].MarkForUpdate();
     }
+	static TqOcclusionKDTree& KDTree()
+	{
+		return(m_KDTree);
+	}
 
 protected:
     CqOcclusionBox();
@@ -105,7 +188,11 @@ protected:
     static TqInt* m_LevelStartId; // the id for the start of each level, ie 0,1,5,21... etc
 
     TqBool m_NeedsUpdating;
+
+    static TqOcclusionKDTree	m_KDTree;			///< KD Tree representing the samples in the bucket.
 };
+
+
 
 END_NAMESPACE( Aqsis )
 

@@ -42,6 +42,8 @@
 #include	"vector2d.h"
 #include    "imagepixel.h"
 #include    "bucket.h"
+#include	"kdtree.h"
+#include	"occlusion.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -273,10 +275,15 @@ public:
     void	RenderMicroPoly( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax );
 	void	RenderMPG_MBOrDof( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax, TqBool IsMoving, TqBool UsingDof );
 	void	RenderMPG_Static( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax );
+	void	ProcessMPG( CqMicroPolygon* pMPG, const CqBound& bound, TqOcclusionKDTree& treenode, TqFloat time0, TqFloat time1);
     void	RenderSurfaces( long xmin, long xmax, long ymin, long ymax );
     void	RenderImage();
     void	StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, TqInt index, TqFloat D );
 	void	StoreExtraData( CqMicroPolygon* pMPG, std::valarray<TqFloat>& val);
+
+	// Optimised sampling routines.
+	void	RenderMPG_MBOrDofNew( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax, TqBool IsMoving, TqBool UsingDof );
+	void	RenderMPG_StaticNew( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax );
 
 
 
@@ -347,6 +354,7 @@ private:
 		TqBool			m_IsCullable;
 		TqBool			m_UsesDataMap;
 		const TqFloat*	m_LodBounds;
+		TqInt			m_NewSampling;
 	};
 	SqGridInfo m_CurrentGridInfo;
 
