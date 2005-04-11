@@ -168,32 +168,37 @@ void CqOcclusionBox::SetupHierarchy( CqBucket* bucket, TqInt xMin, TqInt yMin, T
     m_Hierarchy[ 0 ].SetupChildren();
     m_Hierarchy[ 0 ].Clear();
 
-	// Setup the KDTree of samples
-	m_KDTree.aLeaves().clear();
-    for ( TqInt j = yMin; j < yMax; j++ )
-    {
-        for ( TqInt i = xMin; i < xMax; i++ )
-        {
-            CqImagePixel* pie;
-            m_Bucket->ImageElement( i, j, pie );
-			// Gather all samples within the pixel
-			TqInt sampleIndex = 0;
-			TqInt sx, sy;
-			for ( sy = 0; sy < pie->YSamples(); sy++ )
+	if(m_KDTree.aLeaves().empty())
+	{
+		// Setup the KDTree of samples
+		m_KDTree.aLeaves().clear();
+		for ( TqInt j = yMin; j < yMax; j++ )
+		{
+			for ( TqInt i = xMin; i < xMax; i++ )
 			{
-				for ( sx = 0; sx < pie->XSamples(); sx++ )
+				CqImagePixel* pie;
+				m_Bucket->ImageElement( i, j, pie );
+				// Gather all samples within the pixel
+				TqInt sampleIndex = 0;
+				TqInt sx, sy;
+				for ( sy = 0; sy < pie->YSamples(); sy++ )
 				{
-					SqSampleData* pSample = &pie->SampleData( sampleIndex );
-					m_KDTree.aLeaves().push_back(pSample);
-					sampleIndex++;
+					for ( sx = 0; sx < pie->XSamples(); sx++ )
+					{
+						SqSampleData* pSample = &pie->SampleData( sampleIndex );
+						m_KDTree.aLeaves().push_back(pSample);
+						sampleIndex++;
+					}
 				}
 			}
-        }
-    }
-	// Setup the limits of the initial level
-	m_KDTree.Initialise();
-	// Now split the tree down until each leaf has only one sample.
-	m_KDTree.Subdivide(1);
+		}
+		// Setup the limits of the initial level
+		m_KDTree.Initialise(TqFalse);
+		// Now split the tree down until each leaf has only one sample.
+		m_KDTree.Subdivide(1);
+	}
+
+	m_KDTree.Initialise(TqTrue);
 }
 
 

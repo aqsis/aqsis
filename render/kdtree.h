@@ -165,6 +165,21 @@ public:
 			m_Right->Subdivide(maxLeaves);
 	}
 
+	void Initialise(TqBool recursive)
+	{
+		assert(m_pDataInterface);
+		CqKDTreeNode<T,D>::Initialise();
+
+		if( recursive )
+		{
+			if( m_Left )
+				m_Left->Initialise(recursive);
+			if( m_Right )
+				m_Right->Initialise(recursive);
+		}
+	}
+
+
 	//boost::shared_ptr<CqKDTree<T,D> > Left()
 	CqKDTree<T,D>* Left()
 	{
