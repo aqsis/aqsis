@@ -77,6 +77,13 @@ enum EqSampleIndices
 	Sample_Alpha = 8,
 };
 
+enum EqFilterDepth
+{
+    Filter_Min = 0,
+    Filter_MidPoint = 1,
+    Filter_Max = 2,
+    Filter_Average = 3,
+};
 
 struct SqImageSample
 {
@@ -360,7 +367,7 @@ public:
 		return ( m_Samples[ index ].m_OpaqueSample );
     }
 
-    void	Combine();
+    void	Combine(EqFilterDepth eDepthFilter, CqColor zThreshold);
 
     /** Get the sample data for the specified sample index.
      * \param The index of the required sample point.

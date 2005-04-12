@@ -343,30 +343,8 @@ void CqImagePixel::Clear()
 /** Get the color at the specified sample point by blending the colors that appear at that point.
  */
 
-void CqImagePixel::Combine()
+void CqImagePixel::Combine(enum EqFilterDepth depthfilter, CqColor zThreshold)
 {
-    TqInt depthfilter = 0;
-
-    const CqString* pstrDepthFilter = QGetRenderContext() ->optCurrent().GetStringOption( "Hider", "depthfilter" );
-    const CqColor* pzThreshold = QGetRenderContext() ->optCurrent().GetColorOption( "limits", "zthreshold" );
-	CqColor zThreshold(1.0f, 1.0f, 1.0f);	// Default threshold of 1,1,1 means that any objects that are partially transparent won't appear in shadow maps.
-	if(NULL != pzThreshold)
-		zThreshold = pzThreshold[0];
-
-    if ( NULL != pstrDepthFilter )
-    {
-        if( !pstrDepthFilter[ 0 ].compare( "min" ) )
-            depthfilter = 0;
-        else if ( !pstrDepthFilter[ 0 ].compare( "midpoint" ) )
-            depthfilter = 1;
-        else if ( !pstrDepthFilter[ 0 ].compare( "max" ) )
-            depthfilter = 2;
-        else if ( !pstrDepthFilter[ 0 ].compare( "average" ) )
-            depthfilter = 3;
-        else
-            std::cerr << warning << "Invalid depthfilter \"" << pstrDepthFilter[ 0 ].c_str() << "\", depthfilter set to \"min\"" << std::endl;
-    }
-
     TqUint samplecount = 0;
     TqUint numsamples = XSamples() * YSamples();
 	TqInt sampleIndex = 0;
@@ -477,9 +455,9 @@ void CqImagePixel::Combine()
 				opaqueValue.SetOs( sampleopacity );
 				opaqueValue.m_flags |= SqImageSample::Flag_Valid;
 
-				if ( depthfilter != 0)
+				if ( depthfilter != Filter_Min)
 				{
-					if ( depthfilter == 1 )
+					if ( depthfilter == Filter_MidPoint )
 					{
 						//std::cerr << debug << "OpaqueDepths: " << opaqueDepths[0] << " - " << opaqueDepths[1] << std::endl;
 						// Use midpoint for depth
@@ -488,11 +466,11 @@ void CqImagePixel::Combine()
 						else
 							opaqueValue.SetDepth( FLT_MAX );
 					}
-					else if ( depthfilter == 2)
+					else if ( depthfilter == Filter_Max)
 					{
 						opaqueValue.SetDepth( maxOpaqueDepth );
 					}
-					else if ( depthfilter == 3 )
+					else if ( depthfilter == Filter_Min )
 					{
 						std::vector<SqImageSample>::iterator sample;
 						TqFloat totDepth = 0.0f;

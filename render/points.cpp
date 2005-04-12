@@ -73,7 +73,7 @@ CqPoints::CqPoints( TqInt nvertices, const boost::shared_ptr<CqPolygonPoints>& p
     //assert( NULL != pPoints );
     assert( nvertices > 0 );
 
-	m_KDTree.SetData(boost::shared_ptr<IqKDTreeData<TqInt> >(&m_KDTreeData));
+	m_KDTree.SetData(boost::shared_ptr<IqKDTreeData<TqInt, struct SqEmptyExtraData> >(&m_KDTreeData));
 
     m_widthParamIndex = -1;
     m_constantwidthParamIndex = -1;

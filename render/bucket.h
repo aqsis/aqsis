@@ -133,7 +133,7 @@ public:
 		pie = &m_aieImage[ i ];
 	}
 
-    static	void	CombineElements();
+    static	void	CombineElements(enum EqFilterDepth eDepthFilter, CqColor zThreshold);
     void	FilterBucket(TqBool empty);
     void	ExposeBucket();
     void	QuantizeBucket();

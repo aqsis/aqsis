@@ -569,6 +569,7 @@ public:
     void	IncTextureMemory( TqInt n = 0 )
     {
         m_cTextureMemory += n;
+	if (m_cTextureMemory < 0) m_cTextureMemory = 0;
     }
     void IncTextureHits( TqInt primary, TqInt which )
     {

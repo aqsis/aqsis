@@ -50,7 +50,7 @@ START_NAMESPACE( Aqsis )
  */
 
 class CqPoints;
-class CqPointsKDTreeData : public IqKDTreeData<TqInt>
+class CqPointsKDTreeData : public IqKDTreeData<TqInt, struct SqEmptyExtraData>
 {
     class CqPointsKDTreeDataComparator
     {
@@ -74,9 +74,9 @@ public:
         std::sort(aLeaves.begin(), aLeaves.end(), CqPointsKDTreeDataComparator(m_pPointsSurface, dimension) );
     }
     virtual TqInt Dimensions() const	{return(3);}
-	virtual void Subdivided(CqKDTreeNode<TqInt>& original, 
-							CqKDTreeNode<TqInt>& leftResult, 
-							CqKDTreeNode<TqInt>& rightResult, 
+	virtual void Subdivided(CqKDTreeNode<TqInt, struct SqEmptyExtraData>& original, 
+							CqKDTreeNode<TqInt, struct SqEmptyExtraData>& leftResult, 
+							CqKDTreeNode<TqInt, struct SqEmptyExtraData>& rightResult, 
 							TqInt dimension, TqInt median)
 	{}
 	virtual void Initialise(CqKDTreeNode<TqInt,SqEmptyExtraData>& treenode)
@@ -236,8 +236,8 @@ CqString className() const { return CqString("CqPoints"); }
     }
 
     /// Accessor function for the KDTree
-    CqKDTreeNode<TqInt>&	KDTree()			{return( m_KDTree); }
-    const CqKDTreeNode<TqInt>&	KDTree() const	{return( m_KDTree); }
+    CqKDTreeNode<TqInt, struct SqEmptyExtraData>&	KDTree()			{return( m_KDTree); }
+    const CqKDTreeNode<TqInt, struct SqEmptyExtraData>&	KDTree() const	{return( m_KDTree); }
 
     void ClearKDTree()
     {
@@ -282,7 +282,7 @@ private:
     CqPoints( const CqPoints& From ) : CqMotionSpec<boost::shared_ptr<CqPolygonPoints> >(From.pPoints()),
 	    m_KDTreeData( this )
     {
-		m_KDTree.SetData(boost::shared_ptr<IqKDTreeData<TqInt> >(&m_KDTreeData));
+		m_KDTree.SetData(boost::shared_ptr<IqKDTreeData<TqInt, struct SqEmptyExtraData> >(&m_KDTreeData));
         *this = From;
     }
 
@@ -291,7 +291,7 @@ private:
     boost::shared_ptr<CqPolygonPoints> m_pPoints;				///< Pointer to the surface storing the primtive variables.
     TqInt	m_nVertices;					///< Number of points this surfaces represents.
     CqPointsKDTreeData	m_KDTreeData;		///< KD Tree data handling class.
-    CqKDTreeNode<TqInt>		m_KDTree;			///< KD Tree node for this part of the entire primitive.
+    CqKDTreeNode<TqInt, struct SqEmptyExtraData>		m_KDTree;			///< KD Tree node for this part of the entire primitive.
     TqInt m_widthParamIndex;				///< Index of the "width" primitive variable if specified, -1 if not.
     TqInt m_constantwidthParamIndex;		///< Index of the "constantwidth" primitive variable if specified, -1 if not.
     TqFloat	m_MaxWidth;						///< Maximum width of the points, used for bound calculation.

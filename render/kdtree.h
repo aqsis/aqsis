@@ -46,10 +46,11 @@ struct SqEmptyExtraData	{};
  *	Interface to the data handled by the K-DTree, implementation provided.
  */
 
-template<class T, class D=SqEmptyExtraData>
+template<class T, class D>
 class CqKDTreeNode;
 
-template<class T, class D=SqEmptyExtraData>
+
+template<class T, class D>
 struct IqKDTreeData
 {
     /** Function to sort the elements in the given array, in ascending order based on the specified dimension index.
@@ -74,8 +75,7 @@ struct IqKDTreeData
 };
 
 
-
-template<class T, class D=SqEmptyExtraData>
+template<class T, class D>
 class CqKDTreeNode
 {
 public:
@@ -124,11 +124,10 @@ protected:
     std::vector<T>		m_aLeaves;
     boost::shared_ptr<IqKDTreeData<T,D> >	m_pDataInterface;
     TqInt				m_Dim;
-	D					m_ExtraData;
+    D					m_ExtraData;
 };
 
-
-template<class T, class D=SqEmptyExtraData>
+template<class T, class D>
 class CqKDTree : public CqKDTreeNode<T,D>
 {
 public:
@@ -201,6 +200,7 @@ private:
 	CqKDTree<T,D>* m_Left;	
 	CqKDTree<T,D>* m_Right;	
 };
+
 
 END_NAMESPACE( Aqsis )
 

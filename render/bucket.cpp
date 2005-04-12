@@ -284,11 +284,11 @@ void CqBucket::InitialiseFilterValues()
 /** Combine the subsamples into single pixel samples and coverage information.
  */
 
-void CqBucket::CombineElements()
+void CqBucket::CombineElements(enum EqFilterDepth filterdepth, CqColor zThreshold)
 {
     std::vector<CqImagePixel>::iterator end = m_aieImage.end();
     for ( std::vector<CqImagePixel>::iterator i = m_aieImage.begin(); i != end ; i++ )
-        i->Combine();
+	i->Combine(filterdepth, zThreshold);
 }
 
 

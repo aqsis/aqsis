@@ -134,6 +134,7 @@ void CqOcclusionBox::DeleteHierarchy()
     m_Hierarchy = NULL;
     delete [] m_LevelStartId;
     m_LevelStartId = NULL;
+    m_KDTree.aLeaves().clear();
 }
 
 

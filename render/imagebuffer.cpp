@@ -155,7 +155,12 @@ void	CqImageBuffer::SetImage()
     m_ClippingFar = static_cast<TqFloat>( QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Clipping" ) [ 1 ] );
     m_DisplayMode = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "DisplayMode" ) [ 0 ];
 
-	CqBucket::SetImageBuffer(this);
+    m_MaxEyeSplits = 10;
+    const TqInt* poptEyeSplits = QGetRenderContext() ->optCurrent().GetIntegerOption( "limits", "eyesplits" );
+    if ( poptEyeSplits != 0 )
+        m_MaxEyeSplits = poptEyeSplits[ 0 ];
+
+    CqBucket::SetImageBuffer(this);
     m_Buckets.resize( m_cYBuckets );
     std::vector<std::vector<CqBucket> >::iterator i;
     for( i = m_Buckets.begin(); i!=m_Buckets.end(); i++)
@@ -221,18 +226,16 @@ TqBool CqImageBuffer::CullSurface( CqBound& Bound, const boost::shared_ptr<CqBas
     {
         // Mark the primitive as not dicable.
         pSurface->ForceUndiceable();
-        TqInt MaxEyeSplits = 10;
-        const TqInt* poptEyeSplits = QGetRenderContext() ->optCurrent().GetIntegerOption( "limits", "eyesplits" );
-        if ( poptEyeSplits != 0 )
-            MaxEyeSplits = poptEyeSplits[ 0 ];
 
-        if ( pSurface->EyeSplitCount() > MaxEyeSplits )
+        if ( pSurface->EyeSplitCount() > m_MaxEyeSplits )
         {
+#ifdef _DEBUG
             CqString objname( "unnamed" );
             const CqString* pattrName = pSurface->pAttributes() ->GetStringAttribute( "identifier", "name" );
             if ( pattrName != 0 ) objname = pattrName[ 0 ];
 			std::cerr << warning << "Max eyesplits for object \"" << objname.c_str() << "\" exceeded" << std::endl;
-			return( TqTrue );
+#endif
+	    return( TqTrue );
         }
         return ( TqFalse );
     }
@@ -402,11 +405,13 @@ TqBool CqImageBuffer::OcclusionCullSurface( const boost::shared_ptr<CqBasicSurfa
             return TqTrue;
         }
 
+#ifdef _DEBUG
         // Bound covers no more buckets therefore we can delete the surface completely.
         CqString objname( "unnamed" );
         const CqString* pattrName = pSurface->pAttributes() ->GetStringAttribute( "identifier", "name" );
         if( pattrName )	objname = *pattrName;
-        std::cerr << info << "GPrim: \"" << objname << "\" occlusion culled" << std::endl;
+            std::cerr << info << "GPrim: \"" << objname << "\" occlusion culled" << std::endl;
+#endif
         STATS_INC( GPR_culled );
         return TqTrue;
     }
@@ -1623,7 +1628,7 @@ void CqImageBuffer::StoreExtraData( CqMicroPolygon* pMPG, std::valarray<TqFloat>
  * \param ymax Integer maximum extend of the image part being rendered, takes into account buckets and clipping.
  */
 
-void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax )
+void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax, TqBool fImager, enum EqFilterDepth depthfilter, CqColor zThreshold)
 {
 	TqBool bIsEmpty = IsCurrentBucketEmpty();
 
@@ -1738,17 +1743,11 @@ void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax )
     if(!bIsEmpty)
     {
         QGetRenderContext() ->Stats().MakeCombine().Start();
-        CqBucket::CombineElements();
+        CqBucket::CombineElements(depthfilter, zThreshold);
         QGetRenderContext() ->Stats().MakeCombine().Stop();
     }
 
     QGetRenderContext() ->Stats().MakeFilterBucket().Start();
-
-    TqBool fImager = TqFalse;
-    const CqString* systemOptions;
-    if( ( systemOptions = QGetRenderContext() ->optCurrent().GetStringOption( "System", "Imager" ) ) != 0 )
-    	if( systemOptions[ 0 ].compare("null") != 0 )
-		fImager = TqTrue;
 
     if (fImager)
         bIsEmpty = TqFalse;
@@ -1824,7 +1823,31 @@ void CqImageBuffer::RenderImage()
         if ( bucketmodulo <= 0 ) bucketmodulo = m_cXBuckets;
     }
 
+    TqBool fImager = TqFalse;
+    const CqString* systemOptions;
+    if( ( systemOptions = QGetRenderContext() ->optCurrent().GetStringOption( "System", "Imager" ) ) != 0 )
+    if( systemOptions[ 0 ].compare("null") != 0 )
+	fImager = TqTrue;
 
+    const CqString* pstrDepthFilter = QGetRenderContext() ->optCurrent().GetStringOption( "Hider", "depthfilter" );
+    const CqColor* pzThreshold = QGetRenderContext() ->optCurrent().GetColorOption( "limits", "zthreshold" );
+    CqColor zThreshold(1.0f, 1.0f, 1.0f);	// Default threshold of 1,1,1 means that any objects that are partially transparent won't appear in shadow maps.
+    if(NULL != pzThreshold)
+	zThreshold = pzThreshold[0];
+    enum EqFilterDepth depthfilter = Filter_Min;
+    if ( NULL != pstrDepthFilter )
+    {
+	if( !pstrDepthFilter[ 0 ].compare( "min" ) )
+		depthfilter = Filter_Min;
+	else if ( !pstrDepthFilter[ 0 ].compare( "midpoint" ) )
+		depthfilter = Filter_MidPoint;
+	else if ( !pstrDepthFilter[ 0 ].compare( "max" ) )
+		depthfilter = Filter_Max;
+	else if ( !pstrDepthFilter[ 0 ].compare( "average" ) )
+		depthfilter = Filter_Average;
+	else
+		std::cerr << warning << "Invalid depthfilter \"" << pstrDepthFilter[ 0 ].c_str() << "\", depthfilter set to \"min\"" << std::endl;
+    }
 
     // Render the surface at the front of the list.
     m_fDone = TqFalse;
@@ -1908,7 +1931,7 @@ void CqImageBuffer::RenderImage()
         }
 
 
-        RenderSurfaces( xmin, xmax, ymin, ymax );
+        RenderSurfaces( xmin, xmax, ymin, ymax, fImager, depthfilter, zThreshold );
         if ( m_fQuit )
         {
             m_fDone = TqTrue;
