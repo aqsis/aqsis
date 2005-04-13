@@ -82,6 +82,11 @@ public:
 	virtual void Initialise(CqKDTreeNode<TqInt,SqEmptyExtraData>& treenode)
 	{}
 
+	virtual TqBool PropagateChangesFromChild(CqKDTreeNode<TqInt,SqEmptyExtraData>& treenode, CqKDTreeNode<TqInt,SqEmptyExtraData>& child)
+	{
+		return(TqFalse);
+	}
+
     void	SetpPoints( const CqPoints* pPoints );
     void	FreePoints();
 

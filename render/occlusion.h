@@ -43,6 +43,8 @@ struct	SqOcclusionKDTreeExtraData
 	CqVector2D	m_MaxSamplePoint;
 	TqFloat		m_MinTime;
 	TqFloat		m_MaxTime;
+	TqFloat		m_MinOpaqueZ;
+	TqFloat		m_MaxOpaqueZ;
 };
 
 typedef	SqSampleData*	TqOcclusionKDTreeData;
@@ -84,6 +86,24 @@ public:
 		Initialise(rightResult);
 	}
 
+	virtual TqBool PropagateChangesFromChild(CqKDTreeNode<TqOcclusionKDTreeData, SqOcclusionKDTreeExtraData>& treenode, CqKDTreeNode<TqOcclusionKDTreeData, SqOcclusionKDTreeExtraData>& child)
+	{
+		TqBool madeChange = TqFalse;
+		// Propagate any changes to the opaque Z data in the samples up to the parent.
+		if(child.ExtraData().m_MaxOpaqueZ > treenode.ExtraData().m_MaxOpaqueZ )
+		{
+			treenode.ExtraData().m_MaxOpaqueZ = child.ExtraData().m_MaxOpaqueZ;
+			madeChange = TqTrue;
+		}
+
+		if(child.ExtraData().m_MinOpaqueZ < treenode.ExtraData().m_MinOpaqueZ )
+		{
+			treenode.ExtraData().m_MinOpaqueZ = child.ExtraData().m_MinOpaqueZ;
+			madeChange = TqTrue;
+		}
+		return( madeChange );
+	}
+
 	void Initialise(CqKDTreeNode<TqOcclusionKDTreeData, SqOcclusionKDTreeExtraData>& treenode)
 	{
 		TqFloat minXVal = treenode.aLeaves()[0]->m_Position.x();
@@ -108,6 +128,10 @@ public:
 		treenode.ExtraData().m_MaxSamplePoint[1] = maxYVal;
 		treenode.ExtraData().m_MinTime = minTime;
 		treenode.ExtraData().m_MaxTime = maxTime;
+
+		// Set the opaque depths to the limits to begin with.
+		treenode.ExtraData().m_MinOpaqueZ = -FLT_MAX;
+		treenode.ExtraData().m_MaxOpaqueZ = FLT_MAX;
 	}
 
 private:

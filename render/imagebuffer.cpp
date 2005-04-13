@@ -1377,11 +1377,20 @@ void CqImageBuffer::ProcessMPG( CqMicroPolygon* pMPG, const CqBound& bound, TqOc
 			}
 
 			// Update max depth values
-			//if ( !( DisplayMode() & ModeZ ) && Occludes )
-			//{
+			if ( !( DisplayMode() & ModeZ ) && Occludes )
+			{
 			//	CqOcclusionBox::MarkForUpdate( pie2->OcclusionBoxId() );
 			//	pie2->MarkForZUpdate();
-			//}
+				if(treenode.ExtraData().m_MaxOpaqueZ == FLT_MAX)
+					treenode.ExtraData().m_MaxOpaqueZ = D;
+				else
+					treenode.ExtraData().m_MaxOpaqueZ = MAX(treenode.ExtraData().m_MaxOpaqueZ, D);
+				if(treenode.ExtraData().m_MinOpaqueZ == -FLT_MAX)
+					treenode.ExtraData().m_MinOpaqueZ = D;
+				else
+					treenode.ExtraData().m_MinOpaqueZ = MIN(treenode.ExtraData().m_MinOpaqueZ, D);
+				CqOcclusionBox::KDTree().PropagateChanges();
+			}
 
 			ImageVal.m_pCSGNode = pMPG->pGrid() ->pCSGNode();
 
@@ -1414,10 +1423,16 @@ void CqImageBuffer::ProcessMPG( CqMicroPolygon* pMPG, const CqBound& bound, TqOc
 		const SqOcclusionKDTreeExtraData& rightData = right->ExtraData();
 		if(	((time0 <= leftData.m_MaxTime) && (time1 >= leftData.m_MinTime) ) &&
 			(bound.Intersects(leftData.m_MinSamplePoint, leftData.m_MaxSamplePoint)))
-			ProcessMPG(pMPG, bound, *left, time0, time1);
+		{
+			if(bound.vecMin().z() <= leftData.m_MaxOpaqueZ)
+				ProcessMPG(pMPG, bound, *left, time0, time1);
+		}
 		if(	((time0 <= rightData.m_MaxTime) && (time1 >= rightData.m_MinTime) ) &&
 			(bound.Intersects(rightData.m_MinSamplePoint, rightData.m_MaxSamplePoint)))
-			ProcessMPG(pMPG, bound, *right, time0, time1);
+		{
+			if(bound.vecMin().z() <= rightData.m_MaxOpaqueZ)
+				ProcessMPG(pMPG, bound, *right, time0, time1);
+		}
 	}
 }
 

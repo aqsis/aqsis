@@ -69,6 +69,10 @@ struct IqKDTreeData
 	 */
 	virtual void Initialise(CqKDTreeNode<T,D>& treenode) = 0;
 
+	/** Function to call to propagate changes up the tree.
+	 */
+	virtual TqBool PropagateChangesFromChild(CqKDTreeNode<T,D>& treenode, CqKDTreeNode<T,D>& child) = 0;
+
 #ifdef _DEBUG
     CqString className() const { return CqString("IqKDTreeData"); }
 #endif
@@ -131,7 +135,7 @@ template<class T, class D>
 class CqKDTree : public CqKDTreeNode<T,D>
 {
 public:
-    CqKDTree( boost::shared_ptr<IqKDTreeData<T,D> > pDataInterface) : CqKDTreeNode<T,D>( pDataInterface ), m_Left(0), m_Right(0)
+    CqKDTree( boost::shared_ptr<IqKDTreeData<T,D> > pDataInterface) : CqKDTreeNode<T,D>( pDataInterface ), m_Left(0), m_Right(0), m_Parent(0)
     {}
     CqKDTree() : CqKDTreeNode<T,D>()
 	{}
@@ -144,10 +148,16 @@ public:
     TqInt	Subdivide( )
     {
 		if(m_Left == 0)
+		{
 			m_Left = new CqKDTree<T,D>(m_pDataInterface);
+			m_Left->m_Parent = this;
+		}
 		if(m_Right == 0)
+		{
 			m_Right = new CqKDTree<T,D>(m_pDataInterface);
-
+			m_Right->m_Parent = this;
+		}
+	
 		TqInt median = CqKDTreeNode<T,D>::Subdivide(*m_Left, *m_Right);
 
 		return(median);
@@ -167,8 +177,7 @@ public:
 	void Initialise(TqBool recursive)
 	{
 		assert(m_pDataInterface);
-		CqKDTreeNode<T,D>::Initialise();
-
+		// Initialise the children first, in case we need access to the processed child data.
 		if( recursive )
 		{
 			if( m_Left )
@@ -176,29 +185,37 @@ public:
 			if( m_Right )
 				m_Right->Initialise(recursive);
 		}
+		// Now do this one.
+		CqKDTreeNode<T,D>::Initialise();
 	}
 
+	/// Propagate any changes from the child nodes up the tree.
+	void PropagateChanges()
+	{
+		// Call the data handler for each child.
+		TqBool prop = m_pDataInterface->PropagateChangesFromChild(*this, *m_Left);
+		prop = prop | m_pDataInterface->PropagateChangesFromChild(*this, *m_Right);
 
-	//boost::shared_ptr<CqKDTree<T,D> > Left()
+		// If the child changes caused a change in this node, propagate it up, otherwise, no need.
+		if(prop && m_Parent)
+			m_Parent->PropagateChanges();
+	}
+
 	CqKDTree<T,D>* Left()
 	{
-		//return(boost::shared_ptr<CqKDTree<T,D> >(m_Left));
 		return(m_Left);
 	}
 
-	//boost::shared_ptr<CqKDTree<T,D> > Right()
 	CqKDTree<T,D>* Right()
 	{
-		//return(boost::shared_ptr<CqKDTree<T,D> >(m_Right));
 		return(m_Right);
 	}
 
 	
 private:
-//	boost::shared_ptr<CqKDTree<T,D> > m_Left;	
-//	boost::shared_ptr<CqKDTree<T,D> > m_Right;	
 	CqKDTree<T,D>* m_Left;	
 	CqKDTree<T,D>* m_Right;	
+	CqKDTree<T,D>* m_Parent;
 };
 
 
