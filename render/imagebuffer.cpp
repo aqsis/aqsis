@@ -614,11 +614,11 @@ void CqImageBuffer::CacheGridInfo(CqMicroPolyGridBase* pGrid)
 
 	m_CurrentGridInfo.m_LodBounds = pGrid->pAttributes() ->GetFloatAttribute( "System", "LevelOfDetailBounds" );
 
+	m_CurrentGridInfo.m_NewSampling = 0;
 	const TqInt* pOptimiseSampling;
 	if( ( pOptimiseSampling  = QGetRenderContext() ->optCurrent().GetIntegerOption( "Optimise", "Sampling" ) ) != 0 )
 		m_CurrentGridInfo.m_NewSampling = pOptimiseSampling[ 0 ];
-	else
-		m_CurrentGridInfo.m_NewSampling = 0;
+
 }
 
 //----------------------------------------------------------------------
@@ -1301,6 +1301,16 @@ void CqImageBuffer::ProcessMPG( CqMicroPolygon* pMPG, const CqBound& bound, TqOc
 		TqBool SampleHit;
 		TqFloat D;
 
+		const TqFloat* LodBounds = m_CurrentGridInfo.m_LodBounds;
+		TqBool UsingLevelOfDetail = LodBounds[ 0 ] >= 0.0f;
+		// Check to see if the sample is within the sample's level of detail
+		if ( UsingLevelOfDetail)
+		{
+			TqFloat LevelOfDetail = pData->m_DetailLevel;
+			if ( LodBounds[ 0 ] > LevelOfDetail || LevelOfDetail >= LodBounds[ 1 ] )
+				return;
+		}
+
 		CqStats::IncI( CqStats::SPL_count );
 		SampleHit = pMPG->Sample(*pData , D, pData->m_Time );
 
@@ -1376,22 +1386,23 @@ void CqImageBuffer::ProcessMPG( CqMicroPolygon* pMPG, const CqBound& bound, TqOc
 				}
 			}
 
-			// Update max depth values
-			if ( !( DisplayMode() & ModeZ ) && Occludes )
+			// Update max depth values if the sample is opaque and can occlude
+/*			if ( !( DisplayMode() & ModeZ ) && Occludes )
 			{
-			//	CqOcclusionBox::MarkForUpdate( pie2->OcclusionBoxId() );
-			//	pie2->MarkForZUpdate();
-				if(treenode.ExtraData().m_MaxOpaqueZ == FLT_MAX)
-					treenode.ExtraData().m_MaxOpaqueZ = D;
-				else
-					treenode.ExtraData().m_MaxOpaqueZ = MAX(treenode.ExtraData().m_MaxOpaqueZ, D);
-				if(treenode.ExtraData().m_MinOpaqueZ == -FLT_MAX)
-					treenode.ExtraData().m_MinOpaqueZ = D;
-				else
-					treenode.ExtraData().m_MinOpaqueZ = MIN(treenode.ExtraData().m_MinOpaqueZ, D);
-				CqOcclusionBox::KDTree().PropagateChanges();
+				if ( !( DisplayMode() & ModeZ ) && Occludes )
+				{
+					if(treenode.ExtraData().m_MaxOpaqueZ == FLT_MAX)
+						treenode.ExtraData().m_MaxOpaqueZ = D;
+					else
+						treenode.ExtraData().m_MaxOpaqueZ = MAX(treenode.ExtraData().m_MaxOpaqueZ, D);
+					if(treenode.ExtraData().m_MinOpaqueZ == -FLT_MAX)
+						treenode.ExtraData().m_MinOpaqueZ = D;
+					else
+						treenode.ExtraData().m_MinOpaqueZ = MIN(treenode.ExtraData().m_MinOpaqueZ, D);
+					CqOcclusionBox::KDTree().PropagateChanges();
+				}
 			}
-
+*/
 			ImageVal.m_pCSGNode = pMPG->pGrid() ->pCSGNode();
 
 			ImageVal.m_flags = 0;
@@ -1424,13 +1435,13 @@ void CqImageBuffer::ProcessMPG( CqMicroPolygon* pMPG, const CqBound& bound, TqOc
 		if(	((time0 <= leftData.m_MaxTime) && (time1 >= leftData.m_MinTime) ) &&
 			(bound.Intersects(leftData.m_MinSamplePoint, leftData.m_MaxSamplePoint)))
 		{
-			if(bound.vecMin().z() <= leftData.m_MaxOpaqueZ)
+			if(bound.vecMin().z() <= leftData.m_MaxOpaqueZ || !m_CurrentGridInfo.m_IsCullable)
 				ProcessMPG(pMPG, bound, *left, time0, time1);
 		}
 		if(	((time0 <= rightData.m_MaxTime) && (time1 >= rightData.m_MinTime) ) &&
 			(bound.Intersects(rightData.m_MinSamplePoint, rightData.m_MaxSamplePoint)))
 		{
-			if(bound.vecMin().z() <= rightData.m_MaxOpaqueZ)
+			if(bound.vecMin().z() <= rightData.m_MaxOpaqueZ || !m_CurrentGridInfo.m_IsCullable)
 				ProcessMPG(pMPG, bound, *right, time0, time1);
 		}
 	}
@@ -1645,6 +1656,11 @@ void CqImageBuffer::StoreExtraData( CqMicroPolygon* pMPG, std::valarray<TqFloat>
 
 void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax, TqBool fImager, enum EqFilterDepth depthfilter, CqColor zThreshold)
 {
+	TqBool UseNewSampling = TqFalse;
+	const TqInt* pOptimiseSampling;
+	if( ( pOptimiseSampling  = QGetRenderContext() ->optCurrent().GetIntegerOption( "Optimise", "Sampling" ) ) != 0 )
+		UseNewSampling = pOptimiseSampling[ 0 ] == 1;
+
 	TqBool bIsEmpty = IsCurrentBucketEmpty();
 
     // Render any waiting micro polygon grids.
@@ -1652,11 +1668,14 @@ void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax, 
     RenderMPGs( xmin, xmax, ymin, ymax );
     QGetRenderContext() ->Stats().RenderMPGsTimer().Stop();
 
-    QGetRenderContext() ->Stats().OcclusionCullTimer().Start();
-    // Update our occlusion hierarchy after drawing.
-    if ( !bIsEmpty )
-        CqOcclusionBox::Update();
-    QGetRenderContext() ->Stats().OcclusionCullTimer().Stop();
+    if(!UseNewSampling)
+	{
+		QGetRenderContext() ->Stats().OcclusionCullTimer().Start();
+		// Update our occlusion hierarchy after drawing.
+		if ( !bIsEmpty )
+			CqOcclusionBox::Update();
+		QGetRenderContext() ->Stats().OcclusionCullTimer().Stop();
+	}
 
 	CqBucket& Bucket = CurrentBucket();
 
@@ -1680,8 +1699,8 @@ void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax, 
             {
                 QGetRenderContext() ->Stats().OcclusionCullTimer().Start();
                 TqBool fCull = TqFalse;
-                if ( !bIsEmpty && pSurface->fCachedBound() )
-                    fCull = OcclusionCullSurface( pSurface );
+				if ( !bIsEmpty && pSurface->fCachedBound() )
+					fCull = OcclusionCullSurface( pSurface );
                 QGetRenderContext() ->Stats().OcclusionCullTimer().Stop();
                 if ( fCull )
                 {
@@ -1745,11 +1764,14 @@ void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax, 
         RenderMPGs( xmin, xmax, ymin, ymax );
         QGetRenderContext() ->Stats().RenderMPGsTimer().Stop();
 
-        QGetRenderContext() ->Stats().OcclusionCullTimer().Start();
-        // Update our occlusion hierarchy after each grid that gets drawn.
-        if ( !bIsEmpty )
-            CqOcclusionBox::Update();
-        QGetRenderContext() ->Stats().OcclusionCullTimer().Stop();
+		if(!UseNewSampling)
+		{
+			QGetRenderContext() ->Stats().OcclusionCullTimer().Start();
+			// Update our occlusion hierarchy after each grid that gets drawn.
+			if ( !bIsEmpty )
+				CqOcclusionBox::Update();
+			QGetRenderContext() ->Stats().OcclusionCullTimer().Stop();
+		}
     }
 
     // Now combine the colors at each pixel sample for any micropolygons rendered to that pixel.
