@@ -5828,9 +5828,9 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface * pSurface, PARAMETERLIST 
     {
         RtToken	token = tokens[ i ];
         RtPointer	value = values[ i ];
-	     TqUlong hash = CqString::hash(token);
 
         SqParameterDeclaration Decl = QGetRenderContext()->FindParameterDecl( token );
+	    TqUlong hash = CqString::hash(Decl.m_strName.c_str());
 
 		if ( (hash == RIH_P) && (Decl.m_Class == class_vertex ))
         {
