@@ -177,6 +177,7 @@ struct SqSampleData
 {
     CqVector2D	m_Position;				///< Sample position
     CqVector2D	m_DofOffset;			///< Dof lens offset.
+	TqInt		m_DofOffsetIndex;		
     TqInt		m_SubCellIndex;		///< Subcell index.
     TqFloat		m_Time;				///< Float sample time.
     TqFloat		m_DetailLevel;		///< Float level-of-detail sample.

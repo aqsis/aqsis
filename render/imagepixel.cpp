@@ -283,6 +283,7 @@ void CqImagePixel::InitialiseSamples( std::vector<CqVector2D>& vecSamples, TqBoo
 		for( i = 0; i < numSamples; ++i)
 		{
 			m_Samples[m_DofOffsetIndices[i]].m_DofOffset = tmpDofOffsets[i];
+			m_Samples[m_DofOffsetIndices[i]].m_DofOffsetIndex = i;
 		}
 	}
 	m_Data.m_Data.resize( QGetRenderContext()->GetOutputDataTotalSize() );
@@ -315,6 +316,7 @@ void CqImagePixel::ShuffleSamples( )
 	for( i = 0; i < numSamples; ++i)
 	{
 		m_Samples[m_DofOffsetIndices[i]].m_DofOffset = tmpDofOffsets[i];
+		m_Samples[m_DofOffsetIndices[i]].m_DofOffsetIndex = i;
 	}
 }
 

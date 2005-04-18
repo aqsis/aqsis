@@ -45,6 +45,8 @@ struct	SqOcclusionKDTreeExtraData
 	TqFloat		m_MaxTime;
 	TqFloat		m_MinOpaqueZ;
 	TqFloat		m_MaxOpaqueZ;
+	TqInt		m_MinDofBoundIndex;
+	TqInt		m_MaxDofBoundIndex;
 };
 
 typedef	SqSampleData*	TqOcclusionKDTreeData;
@@ -112,6 +114,8 @@ public:
 		TqFloat maxYVal = minYVal;
 		TqFloat minTime = treenode.aLeaves()[0]->m_Time;
 		TqFloat maxTime = minTime;
+		TqInt	minDofIndex = treenode.aLeaves()[0]->m_DofOffsetIndex;
+		TqInt	maxDofIndex = minDofIndex;
 		std::vector<TqOcclusionKDTreeData>::iterator i;
 		for(i = treenode.aLeaves().begin(); i!=treenode.aLeaves().end(); ++i)
 		{
@@ -121,6 +125,8 @@ public:
 			maxYVal = MAX(maxYVal, (*i)->m_Position.y());
 			minTime = MIN(minTime, (*i)->m_Time);
 			maxTime = MAX(maxTime, (*i)->m_Time);
+			minDofIndex = MIN(minDofIndex, (*i)->m_DofOffsetIndex);
+			maxDofIndex = MAX(maxDofIndex, (*i)->m_DofOffsetIndex);
 		}
 		treenode.ExtraData().m_MinSamplePoint[0] = minXVal;
 		treenode.ExtraData().m_MaxSamplePoint[0] = maxXVal;
@@ -128,6 +134,8 @@ public:
 		treenode.ExtraData().m_MaxSamplePoint[1] = maxYVal;
 		treenode.ExtraData().m_MinTime = minTime;
 		treenode.ExtraData().m_MaxTime = maxTime;
+		treenode.ExtraData().m_MinDofBoundIndex = minDofIndex;
+		treenode.ExtraData().m_MaxDofBoundIndex = maxDofIndex;
 
 		// Set the opaque depths to the limits to begin with.
 		treenode.ExtraData().m_MinOpaqueZ = -FLT_MAX;

@@ -229,13 +229,11 @@ TqBool CqImageBuffer::CullSurface( CqBound& Bound, const boost::shared_ptr<CqBas
 
         if ( pSurface->EyeSplitCount() > m_MaxEyeSplits )
         {
-#ifdef _DEBUG
             CqString objname( "unnamed" );
             const CqString* pattrName = pSurface->pAttributes() ->GetStringAttribute( "identifier", "name" );
             if ( pattrName != 0 ) objname = pattrName[ 0 ];
 			std::cerr << warning << "Max eyesplits for object \"" << objname.c_str() << "\" exceeded" << std::endl;
-#endif
-	    return( TqTrue );
+		    return( TqTrue );
         }
         return ( TqFalse );
     }
@@ -405,13 +403,11 @@ TqBool CqImageBuffer::OcclusionCullSurface( const boost::shared_ptr<CqBasicSurfa
             return TqTrue;
         }
 
-#ifdef _DEBUG
         // Bound covers no more buckets therefore we can delete the surface completely.
         CqString objname( "unnamed" );
         const CqString* pattrName = pSurface->pAttributes() ->GetStringAttribute( "identifier", "name" );
         if( pattrName )	objname = *pattrName;
             std::cerr << info << "GPrim: \"" << objname << "\" occlusion culled" << std::endl;
-#endif
         STATS_INC( GPR_culled );
         return TqTrue;
     }
@@ -771,8 +767,21 @@ void CqImageBuffer::RenderMPG_MBOrDofNew( CqMicroPolygon* pMPG,
 										long xmin, long xmax, long ymin, long ymax,
 										TqBool IsMoving, TqBool UsingDof )
 {
+    CqBucket & Bucket = CurrentBucket();
+    CqStats& theStats = QGetRenderContext() ->Stats();
+
+    const TqFloat* LodBounds = m_CurrentGridInfo.m_LodBounds;
+    TqBool UsingLevelOfDetail = LodBounds[ 0 ] >= 0.0f;
+
+    TqInt sample_hits = 0;
+    TqFloat shd_rate = m_CurrentGridInfo.m_ShadingRate;
+
 	CqHitTestCache hitTestCache;
+	TqBool cachedHitData = TqFalse;
 	pMPG->CacheHitTestValues(&hitTestCache);
+	cachedHitData = TqTrue;
+
+	TqBool mustDraw = !m_CurrentGridInfo.m_IsCullable;
 
 	TqInt iXSamples = PixelXSamples();
     TqInt iYSamples = PixelYSamples();
@@ -791,8 +800,8 @@ void CqImageBuffer::RenderMPG_MBOrDofNew( CqMicroPolygon* pMPG,
 	TqInt currentIndex = 0;
     for ( TqInt bound_numMB = 0; bound_numMB < bound_maxMB; bound_numMB++ )
     {
-        TqFloat time0;
-        TqFloat time1;
+        TqFloat time0 = m_CurrentGridInfo.m_ShutterOpenTime;
+        TqFloat time1 = m_CurrentGridInfo.m_ShutterCloseTime;
         const CqBound& Bound = pMPG->SubBound( bound_numMB, time0 );
 
 		// get the index of the first and last samples that can fall inside
@@ -883,7 +892,7 @@ void CqImageBuffer::RenderMPG_MBOrDofNew( CqMicroPolygon* pMPG,
 			if(UsingDof)
 			{
 				CqBound DofBound(bminx, bminy, bminz, bmaxx, bmaxy, bmaxz);
-				ProcessMPG(pMPG, DofBound, CqOcclusionBox::KDTree(), time0, time1 );
+				ProcessMPG(pMPG, DofBound, CqOcclusionBox::KDTree(), time0, time1, TqTrue, bound_numDof );
 			}
 			else
 			{
@@ -1290,12 +1299,16 @@ void CqImageBuffer::RenderMPG_Static( CqMicroPolygon* pMPG, long xmin, long xmax
 }
 
 
-void CqImageBuffer::ProcessMPG( CqMicroPolygon* pMPG, const CqBound& bound, TqOcclusionKDTree& treenode, TqFloat time0, TqFloat time1)
+void CqImageBuffer::ProcessMPG( CqMicroPolygon* pMPG, const CqBound& bound, TqOcclusionKDTree& treenode, TqFloat time0, TqFloat time1, TqBool usingDof, TqInt dofboundindex)
 {
 	// Check the current tree level, and if only one leaf, sample the MP, otherwise, pass it down to the left
 	// and/or right side of the tree if it crosses.
 	if(treenode.aLeaves().size() == 1)
 	{
+		// If using DoF, only check this sample if it is within the appropriate Dof bound.
+		if(usingDof && dofboundindex != treenode.aLeaves()[0]->m_DofOffsetIndex)
+			return;
+
 		// Sample the MPG
 		SqSampleData* pData = treenode.aLeaves()[0];
 		TqBool SampleHit;
@@ -1312,7 +1325,7 @@ void CqImageBuffer::ProcessMPG( CqMicroPolygon* pMPG, const CqBound& bound, TqOc
 		}
 
 		CqStats::IncI( CqStats::SPL_count );
-		SampleHit = pMPG->Sample(*pData , D, pData->m_Time );
+		SampleHit = pMPG->Sample(*pData , D, pData->m_Time, usingDof );
 
 		if ( SampleHit )
 		{
@@ -1429,17 +1442,19 @@ void CqImageBuffer::ProcessMPG( CqMicroPolygon* pMPG, const CqBound& bound, TqOc
 		TqOcclusionKDTree* right = treenode.Right();
 		const SqOcclusionKDTreeExtraData& leftData = left->ExtraData();
 		const SqOcclusionKDTreeExtraData& rightData = right->ExtraData();
-		if(	((time0 <= leftData.m_MaxTime) && (time1 >= leftData.m_MinTime) ) &&
+		if(	((dofboundindex >= leftData.m_MinDofBoundIndex) && (dofboundindex <= leftData.m_MaxDofBoundIndex )) &&
+			((time0 <= leftData.m_MaxTime) && (time1 >= leftData.m_MinTime) ) &&
 			(bound.Intersects(leftData.m_MinSamplePoint, leftData.m_MaxSamplePoint)))
 		{
 			if(bound.vecMin().z() <= leftData.m_MaxOpaqueZ || !m_CurrentGridInfo.m_IsCullable)
-				ProcessMPG(pMPG, bound, *left, time0, time1);
+				ProcessMPG(pMPG, bound, *left, time0, time1, usingDof, dofboundindex);
 		}
-		if(	((time0 <= rightData.m_MaxTime) && (time1 >= rightData.m_MinTime) ) &&
+		if(	((dofboundindex >= rightData.m_MinDofBoundIndex) && (dofboundindex <= rightData.m_MaxDofBoundIndex )) &&
+			((time0 <= rightData.m_MaxTime) && (time1 >= rightData.m_MinTime) ) &&
 			(bound.Intersects(rightData.m_MinSamplePoint, rightData.m_MaxSamplePoint)))
 		{
 			if(bound.vecMin().z() <= rightData.m_MaxOpaqueZ || !m_CurrentGridInfo.m_IsCullable)
-				ProcessMPG(pMPG, bound, *right, time0, time1);
+				ProcessMPG(pMPG, bound, *right, time0, time1, usingDof, dofboundindex);
 		}
 	}
 }
