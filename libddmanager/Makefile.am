@@ -10,5 +10,5 @@ ddmanager.cpp \
 ddmanager.h \
 ndspy.h
 
-INCLUDES = -I$(top_srcdir)/boost -I$(top_srcdir)/libaqsistypes -I$(top_srcdir)/libaqsistypes/posix -I$(top_srcdir)/libshaderexecenv -I$(top_srcdir)/render
+INCLUDES = -I$(top_srcdir)/libaqsistypes -I$(top_srcdir)/libaqsistypes/posix -I$(top_srcdir)/libshaderexecenv -I$(top_srcdir)/render @AQSIS_BOOST_CPPFLAGS@
 

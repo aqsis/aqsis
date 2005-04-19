@@ -15,4 +15,4 @@ libaqsis_la_LIBADD = $(top_builddir)/librib2ri/librib2ri.la $(top_builddir)/libr
 
 pkginclude_HEADERS = ri.h ri.inl shadeop.h
 
-INCLUDES = -I$(top_srcdir)/boost -I$(top_srcdir)/libaqsistypes -I$(top_srcdir)/libaqsistypes/posix -I$(top_srcdir)/libshadervm -I$(top_srcdir)/libshaderexecenv -I$(top_srcdir)/librib2 -I$(top_srcdir)/librib2ri @AQSIS_TIFF_CPPFLAGS@
+INCLUDES = -I$(top_srcdir)/libaqsistypes -I$(top_srcdir)/libaqsistypes/posix -I$(top_srcdir)/libshadervm -I$(top_srcdir)/libshaderexecenv -I$(top_srcdir)/librib2 -I$(top_srcdir)/librib2ri @AQSIS_TIFF_CPPFLAGS@ @AQSIS_BOOST_CPPFLAGS@

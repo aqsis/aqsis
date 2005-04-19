@@ -13,7 +13,7 @@ displayhelpers.c
 
 libdisplay_la_LIBADD = @AQSIS_FLTK_LIBS@ @AQSIS_TIFF_LDFLAGS@
 
-INCLUDES = -I$(top_srcdir)/libaqsistypes -I$(top_srcdir)/libaqsistypes/posix -I$(top_srcdir)/boost -I$(top_srcdir)/libddmanager -I$(top_srcdir)/render @AQSIS_FLTK_CFLAGS@ @AQSIS_TIFF_CPPFLAGS@
+INCLUDES = -I$(top_srcdir)/libaqsistypes -I$(top_srcdir)/libaqsistypes/posix -I$(top_srcdir)/libddmanager -I$(top_srcdir)/render @AQSIS_FLTK_CFLAGS@ @AQSIS_TIFF_CPPFLAGS@ @AQSIS_BOOST_CPPFLAGS@
 
 configdir = $(pkglibdir)
 config_DATA = displays.ini

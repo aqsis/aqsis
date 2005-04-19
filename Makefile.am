@@ -1,3 +1,4 @@
+
 EXTRA_DIST = Doxyfile Renderer.dsw bootstrap doxygen.dsp Renderer.sln aqsis.spec
 
 .PHONY: strace
@@ -15,10 +16,10 @@ $(top_srcdir)/render/ri_cache.inl: $(top_srcdir)/render/apicache.xsl $(top_srcdi
 $(top_srcdir)/render/ri_validate.inl: $(top_srcdir)/render/apivalidate.xsl $(top_srcdir)/render/api.xml
 	xsltproc -o $(top_srcdir)/render/ri_validate.inl $(top_srcdir)/render/apivalidate.xsl $(top_srcdir)/render/api.xml
 
+
 SUBDIRS = \
 . \
 bin \
-boost \
 thirdparty \
 all \
 images \
@@ -52,7 +53,6 @@ renderer.xcode \
 DIST_SUBDIRS = \
 . \
 bin \
-boost \
 thirdparty \
 all \
 images \
