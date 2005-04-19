@@ -149,12 +149,12 @@ public:
     {
 		if(m_Left == 0)
 		{
-			m_Left = new CqKDTree<T,D>(m_pDataInterface);
+			m_Left = new CqKDTree<T,D>(this->m_pDataInterface);
 			m_Left->m_Parent = this;
 		}
 		if(m_Right == 0)
 		{
-			m_Right = new CqKDTree<T,D>(m_pDataInterface);
+			m_Right = new CqKDTree<T,D>(this->m_pDataInterface);
 			m_Right->m_Parent = this;
 		}
 	
@@ -167,7 +167,7 @@ public:
 	{
 		TqInt median = Subdivide();
 		// Call the subdivided callback on the data interface.
-		m_pDataInterface->Subdivided(*this, *m_Left, *m_Right, m_Dim, median); 
+		this->m_pDataInterface->Subdivided(*this, *m_Left, *m_Right, this->m_Dim, median); 
 		if( m_Left->aLeaves().size() > maxLeaves)
 			m_Left->Subdivide(maxLeaves);
 		if( m_Right->aLeaves().size() > maxLeaves)
@@ -193,8 +193,8 @@ public:
 	void PropagateChanges()
 	{
 		// Call the data handler for each child.
-		TqBool prop = m_pDataInterface->PropagateChangesFromChild(*this, *m_Left);
-		prop = prop | m_pDataInterface->PropagateChangesFromChild(*this, *m_Right);
+		TqBool prop = this->m_pDataInterface->PropagateChangesFromChild(*this, *m_Left);
+		prop = prop | this->m_pDataInterface->PropagateChangesFromChild(*this, *m_Right);
 
 		// If the child changes caused a change in this node, propagate it up, otherwise, no need.
 		if(prop && m_Parent)
