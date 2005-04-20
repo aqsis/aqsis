@@ -361,8 +361,8 @@ void CqImagePixel::Combine(enum EqFilterDepth depthfilter, CqColor zThreshold)
 			if(opaqueValue.m_flags & SqImageSample::Flag_Valid)
 			{
 				//	insert opaqueValue into samples in the right place.
-				std::vector<SqImageSample>::iterator isi = samples->m_Data.begin();
-				std::vector<SqImageSample>::iterator isend = samples->m_Data.end();
+				std::list<SqImageSample>::iterator isi = samples->m_Data.begin();
+				std::list<SqImageSample>::iterator isend = samples->m_Data.end();
 				while( isi != isend )
 				{
 					if((*isi).Depth() >= opaqueValue.Depth())
@@ -382,7 +382,7 @@ void CqImagePixel::Combine(enum EqFilterDepth depthfilter, CqColor zThreshold)
 					bProcessed = TqFalse;
 					//Warning ProcessTree add or remove elements in samples list
 					//We could not optimized the for loop here at all.
-					for ( std::vector<SqImageSample>::iterator isample = samples->m_Data.begin(); isample != samples->m_Data.end(); ++isample )
+					for ( std::list<SqImageSample>::iterator isample = samples->m_Data.begin(); isample != samples->m_Data.end(); ++isample )
 					{
 						if ( isample->m_pCSGNode )
 						{
@@ -399,7 +399,7 @@ void CqImagePixel::Combine(enum EqFilterDepth depthfilter, CqColor zThreshold)
 			TqFloat opaqueDepths[2] = { FLT_MAX, FLT_MAX };
 			TqFloat maxOpaqueDepth = FLT_MAX;
 
-			for ( std::vector<SqImageSample>::reverse_iterator sample = samples->m_Data.rbegin(); sample != samples->m_Data.rend(); sample++ )
+			for ( std::list<SqImageSample>::reverse_iterator sample = samples->m_Data.rbegin(); sample != samples->m_Data.rend(); sample++ )
 			{
 				if ( sample->m_flags & SqImageSample::Flag_Matte )
 				{
@@ -474,7 +474,7 @@ void CqImagePixel::Combine(enum EqFilterDepth depthfilter, CqColor zThreshold)
 					}
 					else if ( depthfilter == Filter_Min )
 					{
-						std::vector<SqImageSample>::iterator sample;
+						std::list<SqImageSample>::iterator sample;
 						TqFloat totDepth = 0.0f;
 						TqInt totCount = 0;
 						for ( sample = samples->m_Data.begin(); sample != samples->m_Data.end(); sample++ )

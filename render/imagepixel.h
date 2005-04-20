@@ -181,7 +181,7 @@ struct SqSampleData
     TqInt		m_SubCellIndex;		///< Subcell index.
     TqFloat		m_Time;				///< Float sample time.
     TqFloat		m_DetailLevel;		///< Float level-of-detail sample.
-	std::vector<SqImageSample>	m_Data;	///< Array of sampled surface data for this sample.
+	std::list<SqImageSample>	m_Data;	///< Array of sampled surface data for this sample.
 	SqImageSample m_OpaqueSample;	///< Single opaque sample for optimised processing if all encountered surfaces are opaque
 };
 
@@ -356,7 +356,7 @@ public:
      * \param n The vertical index of the required sample point.
      * \return A Reference to a vector of SqImageSample data.
      */
-    std::vector<SqImageSample>&	Values( TqInt index )
+    std::list<SqImageSample>&	Values( TqInt index )
     {
         assert( index < m_XSamples*m_YSamples );
 		return ( m_Samples[ index ].m_Data );

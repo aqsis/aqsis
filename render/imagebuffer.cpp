@@ -1337,9 +1337,9 @@ void CqImageBuffer::ProcessMPG( CqMicroPolygon* pMPG, const CqBound& bound, TqOc
 
 			SqImageSample& ImageVal = opaque ? currentOpaqueSample : localImageVal;
 
-			std::vector<SqImageSample>& aValues = pData->m_Data;
-			std::vector<SqImageSample>::iterator sample = aValues.begin();
-			std::vector<SqImageSample>::iterator end = aValues.end();
+			std::list<SqImageSample>& aValues = pData->m_Data;
+			std::list<SqImageSample>::iterator sample = aValues.begin();
+			std::list<SqImageSample>::iterator end = aValues.end();
 
 			// return if the sample is occluded and can be culled.
 			if(opaque)
@@ -1471,9 +1471,9 @@ void CqImageBuffer::StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, TqInt
 
 	SqImageSample& ImageVal = opaque ? currentOpaqueSample : localImageVal;
 
-	std::vector<SqImageSample>& aValues = pie2->Values( index );
-	std::vector<SqImageSample>::iterator sample = aValues.begin();
-	std::vector<SqImageSample>::iterator end = aValues.end();
+	std::list<SqImageSample>& aValues = pie2->Values( index );
+	std::list<SqImageSample>::iterator sample = aValues.begin();
+	std::list<SqImageSample>::iterator end = aValues.end();
 
 	// return if the sample is occluded and can be culled.
 	if(opaque)

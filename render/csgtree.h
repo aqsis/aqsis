@@ -103,9 +103,9 @@ public:
      */
     virtual	TqBool	EvaluateState( std::vector<TqBool>& abChildStates ) = 0;
 
-    virtual	void	ProcessSampleList( std::vector<SqImageSample>& samples );
+    virtual	void	ProcessSampleList( std::list<SqImageSample>& samples );
 
-    void	ProcessTree( std::vector<SqImageSample>& samples );
+    void	ProcessTree( std::list<SqImageSample>& samples );
 
     static boost::shared_ptr<CqCSGTreeNode> CreateNode( CqString& type );
     static TqBool IsRequired();
@@ -152,7 +152,7 @@ public:
     {
         return ( CSGNodeType_Primitive );
     }
-    virtual	void	ProcessSampleList( std::vector<SqImageSample>& samples );
+    virtual	void	ProcessSampleList( std::list<SqImageSample>& samples );
     virtual	TqBool	EvaluateState( std::vector<TqBool>& abChildStates )
     {
         return ( TqTrue );
