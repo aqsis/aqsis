@@ -1,9 +1,0 @@
-SUBDIRS = . boost libs
-
-
-EXTRA_DIST = \
-AUTHORS \
-COPYING \
-INSTALL \
-README
-
