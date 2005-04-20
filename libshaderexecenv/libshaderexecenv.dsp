@@ -46,7 +46,7 @@ RSC=rc.exe
 # PROP Intermediate_Dir "..\Object\Release\libshaderexecenv"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GR /GX /O2 /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\render" /I "..\libshadervm" /I "..\..\win32libs\include" /I "..\boost" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_LIBSHADEREXECENV /D BUILD_LIBSHADEREXECENV=1 /D "NDEBUG" /D "PLUGINS" /D "_MBCS" /D "_LIB" /D _qBUILDING=CORE /D CORE=1 /D "WIN32" /D "NO_SYSLOG" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GR /GX /O2 /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\render" /I "..\libshadervm" /I "..\..\win32libs\include" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_LIBSHADEREXECENV /D BUILD_LIBSHADEREXECENV=1 /D "NDEBUG" /D "PLUGINS" /D "_MBCS" /D "_LIB" /D _qBUILDING=CORE /D CORE=1 /D "WIN32" /D "NO_SYSLOG" /YX /FD /c
 # ADD BASE RSC /l 0x809 /d "NDEBUG"
 # ADD RSC /l 0x809 /d "NDEBUG"
 BSC32=bscmake.exe
@@ -69,7 +69,7 @@ LIB32=link.exe -lib
 # PROP Intermediate_Dir "..\Object\Debug\libshaderexecenv"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GR /GX /ZI /Od /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\render" /I "..\libshadervm" /I "..\..\win32libs\include" /I "..\boost" /D "_DEBUG" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_LIBSHADEREXECENV /D BUILD_LIBSHADEREXECENV=1 /D "_MBCS" /D "_LIB" /D _qBUILDING=CORE /D CORE=1 /D "WIN32" /D "NO_SYSLOG" /YX /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GR /GX /ZI /Od /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\render" /I "..\libshadervm" /I "..\..\win32libs\include" /D "_DEBUG" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_LIBSHADEREXECENV /D BUILD_LIBSHADEREXECENV=1 /D "_MBCS" /D "_LIB" /D _qBUILDING=CORE /D CORE=1 /D "WIN32" /D "NO_SYSLOG" /YX /FD /GZ /c
 # ADD BASE RSC /l 0x809 /d "_DEBUG"
 # ADD RSC /l 0x809 /d "_DEBUG"
 BSC32=bscmake.exe
@@ -92,7 +92,7 @@ LIB32=link.exe -lib
 # PROP Intermediate_Dir "..\Object\Profile\libshaderexecenv"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /GR /GX /O2 /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\render" /I "..\libshadervm" /D "NDEBUG" /D "_MBCS" /D "_LIB" /D "WIN32" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_LIBSHADEREXECENV /D BUILD_LIBSHADEREXECENV=1 /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GR /GX /Zi /O2 /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\render" /I "..\libshadervm" /I "..\..\win32libs\include" /I "..\boost" /D "NDEBUG" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_LIBSHADEREXECENV /D BUILD_LIBSHADEREXECENV=1 /D "_MBCS" /D "_LIB" /D _qBUILDING=CORE /D CORE=1 /D "WIN32" /D "NO_SYSLOG" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GR /GX /Zi /O2 /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\render" /I "..\libshadervm" /I "..\..\win32libs\include" /D "NDEBUG" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_LIBSHADEREXECENV /D BUILD_LIBSHADEREXECENV=1 /D "_MBCS" /D "_LIB" /D _qBUILDING=CORE /D CORE=1 /D "WIN32" /D "NO_SYSLOG" /YX /FD /c
 # ADD BASE RSC /l 0x809 /d "NDEBUG"
 # ADD RSC /l 0x809 /d "NDEBUG"
 BSC32=bscmake.exe
@@ -115,7 +115,7 @@ LIB32=link.exe -lib
 # PROP Intermediate_Dir "..\Object\Release_Static_MT\libshaderexecenv"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /GR /GX /O2 /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\render" /I "..\libshadervm" /I "..\..\win32libs\include" /I "..\boost" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_LIBSHADEREXECENV /D BUILD_LIBSHADEREXECENV=1 /D "NDEBUG" /D "PLUGINS" /D "_MBCS" /D "_LIB" /D _qBUILDING=CORE /D CORE=1 /D "WIN32" /D "NO_SYSLOG" /YX /FD /c
-# ADD CPP /nologo /MT /W3 /GR /GX /O2 /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\render" /I "..\libshadervm" /I "..\..\win32libs\include" /I "..\boost" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_LIBSHADEREXECENV /D BUILD_LIBSHADEREXECENV=1 /D "NDEBUG" /D "PLUGINS" /D "_MBCS" /D "_LIB" /D _qBUILDING=CORE /D CORE=1 /D "WIN32" /D "NO_SYSLOG" /YX /FD /c
+# ADD CPP /nologo /MT /W3 /GR /GX /O2 /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\render" /I "..\libshadervm" /I "..\..\win32libs\include" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_LIBSHADEREXECENV /D BUILD_LIBSHADEREXECENV=1 /D "NDEBUG" /D "PLUGINS" /D "_MBCS" /D "_LIB" /D _qBUILDING=CORE /D CORE=1 /D "WIN32" /D "NO_SYSLOG" /YX /FD /c
 # ADD BASE RSC /l 0x809 /d "NDEBUG"
 # ADD RSC /l 0x809 /d "NDEBUG"
 BSC32=bscmake.exe
@@ -138,7 +138,7 @@ LIB32=link.exe -lib
 # PROP Intermediate_Dir "..\Object\Debug_Static_MT\libshaderexecenv"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MDd /W3 /Gm /GR /GX /ZI /Od /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\render" /I "..\libshadervm" /I "..\..\win32libs\include" /I "..\boost" /D "_DEBUG" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_LIBSHADEREXECENV /D BUILD_LIBSHADEREXECENV=1 /D "_MBCS" /D "_LIB" /D _qBUILDING=CORE /D CORE=1 /D "WIN32" /D "NO_SYSLOG" /YX /FD /GZ /c
-# ADD CPP /nologo /MTd /W3 /Gm /GR /GX /ZI /Od /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\render" /I "..\libshadervm" /I "..\..\win32libs\include" /I "..\boost" /D "_DEBUG" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_LIBSHADEREXECENV /D BUILD_LIBSHADEREXECENV=1 /D "_MBCS" /D "_LIB" /D _qBUILDING=CORE /D CORE=1 /D "WIN32" /D "NO_SYSLOG" /YX /FD /GZ /c
+# ADD CPP /nologo /MTd /W3 /Gm /GR /GX /ZI /Od /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\render" /I "..\libshadervm" /I "..\..\win32libs\include" /D "_DEBUG" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_LIBSHADEREXECENV /D BUILD_LIBSHADEREXECENV=1 /D "_MBCS" /D "_LIB" /D _qBUILDING=CORE /D CORE=1 /D "WIN32" /D "NO_SYSLOG" /YX /FD /GZ /c
 # ADD BASE RSC /l 0x809 /d "_DEBUG"
 # ADD RSC /l 0x809 /d "_DEBUG"
 BSC32=bscmake.exe
@@ -161,7 +161,7 @@ LIB32=link.exe -lib
 # PROP Intermediate_Dir "..\Object\Release_Static_ST\libshaderexecenv"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /GR /GX /O2 /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\render" /I "..\libshadervm" /I "..\..\win32libs\include" /I "..\boost" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_LIBSHADEREXECENV /D BUILD_LIBSHADEREXECENV=1 /D "NDEBUG" /D "PLUGINS" /D "_MBCS" /D "_LIB" /D _qBUILDING=CORE /D CORE=1 /D "WIN32" /D "NO_SYSLOG" /YX /FD /c
-# ADD CPP /nologo /W3 /GR /GX /O2 /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\render" /I "..\libshadervm" /I "..\..\win32libs\include" /I "..\boost" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_LIBSHADEREXECENV /D BUILD_LIBSHADEREXECENV=1 /D "NDEBUG" /D "PLUGINS" /D "_MBCS" /D "_LIB" /D _qBUILDING=CORE /D CORE=1 /D "WIN32" /D "NO_SYSLOG" /YX /FD /c
+# ADD CPP /nologo /W3 /GR /GX /O2 /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\render" /I "..\libshadervm" /I "..\..\win32libs\include" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_LIBSHADEREXECENV /D BUILD_LIBSHADEREXECENV=1 /D "NDEBUG" /D "PLUGINS" /D "_MBCS" /D "_LIB" /D _qBUILDING=CORE /D CORE=1 /D "WIN32" /D "NO_SYSLOG" /YX /FD /c
 # ADD BASE RSC /l 0x809 /d "NDEBUG"
 # ADD RSC /l 0x809 /d "NDEBUG"
 BSC32=bscmake.exe
@@ -184,7 +184,7 @@ LIB32=link.exe -lib
 # PROP Intermediate_Dir "..\Object\Debug_Static_ST\libshaderexecenv"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MDd /W3 /Gm /GR /GX /ZI /Od /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\render" /I "..\libshadervm" /I "..\..\win32libs\include" /I "..\boost" /D "_DEBUG" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_LIBSHADEREXECENV /D BUILD_LIBSHADEREXECENV=1 /D "_MBCS" /D "_LIB" /D _qBUILDING=CORE /D CORE=1 /D "WIN32" /D "NO_SYSLOG" /YX /FD /GZ /c
-# ADD CPP /nologo /W3 /Gm /GR /GX /ZI /Od /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\render" /I "..\libshadervm" /I "..\..\win32libs\include" /I "..\boost" /D "_DEBUG" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_LIBSHADEREXECENV /D BUILD_LIBSHADEREXECENV=1 /D "_MBCS" /D "_LIB" /D _qBUILDING=CORE /D CORE=1 /D "WIN32" /D "NO_SYSLOG" /YX /FD /GZ /c
+# ADD CPP /nologo /W3 /Gm /GR /GX /ZI /Od /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\render" /I "..\libshadervm" /I "..\..\win32libs\include" /D "_DEBUG" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_LIBSHADEREXECENV /D BUILD_LIBSHADEREXECENV=1 /D "_MBCS" /D "_LIB" /D _qBUILDING=CORE /D CORE=1 /D "WIN32" /D "NO_SYSLOG" /YX /FD /GZ /c
 # ADD BASE RSC /l 0x809 /d "_DEBUG"
 # ADD RSC /l 0x809 /d "_DEBUG"
 BSC32=bscmake.exe

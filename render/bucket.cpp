@@ -288,7 +288,7 @@ void CqBucket::CombineElements(enum EqFilterDepth filterdepth, CqColor zThreshol
 {
     std::vector<CqImagePixel>::iterator end = m_aieImage.end();
     for ( std::vector<CqImagePixel>::iterator i = m_aieImage.begin(); i != end ; i++ )
-	i->Combine(filterdepth, zThreshold);
+		i->Combine(filterdepth, zThreshold);
 }
 
 
