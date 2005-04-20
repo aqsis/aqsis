@@ -89,6 +89,8 @@ Requirements:
 
 	Libraries:
 
+		boost		1.32.0 (http://www.boost.org)
+					Only the main boost package is needed
 		libtiff		3.5.7 (http://sourceforge.net/projects/gnuwin32/)
 					Included in the win32libs project
 		libjpeg		6b (http://sourceforge.net/projects/gnuwin32/)
