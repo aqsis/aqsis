@@ -3,6 +3,7 @@ Aqsis Rendering System INSTALL - Prerequisites
 
 On all platforms, the following libraries and tools are required to build Aqsis.
 
+ * boost       (version 1.32.0+)
  * libtiff.lib (version 3.7.1+)
  * flex        (version 2.5.4+)
  * bison       (version 1.35+)
