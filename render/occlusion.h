@@ -108,7 +108,9 @@ public:
 
 	void Initialise(CqKDTreeNode<TqOcclusionKDTreeData, SqOcclusionKDTreeExtraData>& treenode)
 	{
-		TqFloat minXVal = treenode.aLeaves()[0]->m_Position.x();
+      if (treenode.aLeaves().size() < 1) return;
+
+      TqFloat minXVal = treenode.aLeaves()[0]->m_Position.x();
 		TqFloat maxXVal = minXVal;
 		TqFloat minYVal = treenode.aLeaves()[0]->m_Position.y();
 		TqFloat maxYVal = minYVal;
