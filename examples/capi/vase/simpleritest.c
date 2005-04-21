@@ -178,8 +178,8 @@ void CreateScene()
 
 int main(int argc, char* argv[])
 {
-	RtString shaderpath = "..\\..\\shaders:&";
-	RtString displaypath = "..\\..\\bin:&";
+	RtString shaderpath = "..\\..\\..\\shaders:&";
+	RtString displaypath = "..\\..\\..\\bin:&";
 
 	/* Initialise the renderer */
 	RiBegin(0);
