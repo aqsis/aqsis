@@ -41,6 +41,7 @@ using namespace Aqsis;
 #include <string>
 #include <fstream>
 #include <float.h>
+#include <time.h>
 
 #include "ndspy.h"
 
@@ -60,14 +61,15 @@ using namespace Aqsis;
 
 // From displayhelpers.c
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
-PtDspyError DspyReorderFormatting(int formatCount, PtDspyDevFormat *format, int outFormatCount, const PtDspyDevFormat *outFormat);
-PtDspyError DspyFindStringInParamList(const char *string, char **result, int n, const UserParameter *p);
-PtDspyError DspyFindIntInParamList(const char *string, int *result, int n, const UserParameter *p);
-PtDspyError DspyFindFloatInParamList(const char *string, float *result, int n, const UserParameter *p);
-PtDspyError DspyFindMatrixInParamList(const char *string, float *result, int n, const UserParameter *p);
-PtDspyError DspyFindIntsInParamList(const char *string, int *resultCount, int *result, int n, const UserParameter *p);
+	PtDspyError DspyReorderFormatting(int formatCount, PtDspyDevFormat *format, int outFormatCount, const PtDspyDevFormat *outFormat);
+	PtDspyError DspyFindStringInParamList(const char *string, char **result, int n, const UserParameter *p);
+	PtDspyError DspyFindIntInParamList(const char *string, int *result, int n, const UserParameter *p);
+	PtDspyError DspyFindFloatInParamList(const char *string, float *result, int n, const UserParameter *p);
+	PtDspyError DspyFindMatrixInParamList(const char *string, float *result, int n, const UserParameter *p);
+	PtDspyError DspyFindIntsInParamList(const char *string, int *resultCount, int *result, int n, const UserParameter *p);
 #ifdef __cplusplus
 }
 #endif
@@ -78,41 +80,67 @@ PtDspyError DspyFindIntsInParamList(const char *string, int *resultCount, int *r
 START_NAMESPACE( Aqsis )
 
 
+static char datetime[21];
+static long start;
+static char* description = NULL;
 
-void SaveAsShadowMap(const std::string& filename, SqDisplayInstance* image)
+void SaveAsShadowMap(const std::string& filename, SqDisplayInstance* image, char *mydescription)
 {
-    TqChar version[ 80 ];
-    TqInt twidth = 32;
-    TqInt tlength = 32;
+	TqChar version[ 80 ];
+	TqInt twidth = 32;
+	TqInt tlength = 32;
 
-    const char* mode = (image->m_append)? "a" : "w";
+	struct tm *ct;
+	int year;
 
-    // Save the shadowmap to a binary file.
-    if ( filename.compare( "" ) != 0 )
-    {
-        TIFF * pshadow = TIFFOpen( filename.c_str(), mode );
+	time_t long_time;
+
+	time( &long_time );           /* Get time as long integer. */
+	ct = localtime( &long_time ); /* Convert to local time. */
+
+
+	year=1900 + ct->tm_year;
+	sprintf(datetime, "%04d:%02d:%02d %02d:%02d:%02d", year, ct->tm_mon + 1,
+	        ct->tm_mday, ct->tm_hour, ct->tm_min, ct->tm_sec);
+
+
+	const char* mode = (image->m_append)? "a" : "w";
+
+	// Save the shadowmap to a binary file.
+	if ( filename.compare( "" ) != 0 )
+	{
+		TIFF * pshadow = TIFFOpen( filename.c_str(), mode );
 		if( pshadow != NULL )
 		{
 			// Set common tags
 			TIFFCreateDirectory( pshadow );
 
-	#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
-			sprintf( version, "%s %s", STRNAME, VERSION_STR );
-	#else
-			sprintf( version, "%s %s", STRNAME, VERSION );
-	#endif
+#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
+
+			sprintf( version, "%s %s (%s %s)", STRNAME, VERSION_STR, __DATE__, __TIME__);
+#else
+
+			sprintf( version, "%s %s (%s %s)", STRNAME, VERSION, __DATE__, __TIME__ );
+#endif
+
 			TIFFSetField( pshadow, TIFFTAG_SOFTWARE, ( char* ) version );
 			TIFFSetField( pshadow, TIFFTAG_PIXAR_MATRIX_WORLDTOCAMERA, image->m_matWorldToCamera );
 			TIFFSetField( pshadow, TIFFTAG_PIXAR_MATRIX_WORLDTOSCREEN, image->m_matWorldToScreen );
 			TIFFSetField( pshadow, TIFFTAG_PIXAR_TEXTUREFORMAT, SHADOWMAP_HEADER );
 			TIFFSetField( pshadow, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK );
 
+			if (image->m_hostname)
+				TIFFSetField( pshadow, TIFFTAG_HOSTCOMPUTER, image->m_hostname );
+			TIFFSetField( pshadow, TIFFTAG_IMAGEDESCRIPTION, mydescription);
 			// Write the floating point image to the directory.
-		#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
-			sprintf( version, "%s %s", STRNAME, VERSION_STR );
-		#else
-			sprintf( version, "%s %s", STRNAME, VERSION );
-		#endif
+#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
+
+			sprintf( version, "%s %s (%s %s)", STRNAME, VERSION_STR, __DATE__, __TIME__);
+#else
+
+			sprintf( version, "%s %s (%s %s)", STRNAME, VERSION, __DATE__, __TIME__ );
+#endif
+
 			TIFFSetField( pshadow, TIFFTAG_SOFTWARE, ( char* ) version );
 			TIFFSetField( pshadow, TIFFTAG_IMAGEWIDTH, image->m_width );
 			TIFFSetField( pshadow, TIFFTAG_IMAGELENGTH, image->m_height );
@@ -124,6 +152,7 @@ void SaveAsShadowMap(const std::string& filename, SqDisplayInstance* image)
 			TIFFSetField( pshadow, TIFFTAG_TILELENGTH, tlength );
 			TIFFSetField( pshadow, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP );
 			TIFFSetField( pshadow, TIFFTAG_COMPRESSION, image->m_compression );
+			TIFFSetField( pshadow, TIFFTAG_DATETIME, datetime);
 
 
 			TqInt tsize = twidth * tlength;
@@ -162,163 +191,195 @@ void SaveAsShadowMap(const std::string& filename, SqDisplayInstance* image)
 
 			TIFFClose( pshadow );
 		}
-    }
+	}
 }
 
 
 void WriteTIFF(const std::string& filename, SqDisplayInstance* image)
 {
-    uint16 photometric = PHOTOMETRIC_RGB;
-    uint16 config = PLANARCONFIG_CONTIG;
+	uint16 photometric = PHOTOMETRIC_RGB;
+	uint16 config = PLANARCONFIG_CONTIG;
+	struct tm *ct;
+	char mydescription[80];
+	int year;
 
-    // Set common tags
-    // If in "shadowmap" mode, write as a shadowmap.
+	time_t long_time;
+
+	time( &long_time );           /* Get time as long integer. */
+	ct = localtime( &long_time ); /* Convert to local time. */
+
+
+	year=1900 + ct->tm_year;
+	sprintf(datetime, "%04d:%02d:%02d %02d:%02d:%02d", year, ct->tm_mon + 1,
+	        ct->tm_mday, ct->tm_hour, ct->tm_min, ct->tm_sec);
+
+	if (description == NULL)
+	{
+		TqInt nSecs = difftime(long_time, start);
+		sprintf(mydescription,"%d secs", nSecs);
+		start = long_time;
+	} else {
+		strcpy(mydescription, description);
+	}
+	
+
+	// Set common tags
+	// If in "shadowmap" mode, write as a shadowmap.
 	if( image->m_imageType == Type_Shadowmap )
 	{
-		SaveAsShadowMap(filename, image);
+		SaveAsShadowMap(filename, image, mydescription);
 		return;
 	}
-    else if( image->m_imageType == Type_ZFile )
-    {
-        std::ofstream ofile( filename.c_str(), std::ios::out | std::ios::binary );
-        if ( ofile.is_open() )
-        {
-            // Save a file type and version marker
-            ofile << ZFILE_HEADER;
+	else if( image->m_imageType == Type_ZFile )
+	{
+		std::ofstream ofile( filename.c_str(), std::ios::out | std::ios::binary );
+		if ( ofile.is_open() )
+		{
+			// Save a file type and version marker
+			ofile << ZFILE_HEADER;
 
-            // Save the xres and yres.
-            ofile.write( reinterpret_cast<char* >( &image->m_width ), sizeof( image->m_width ) );
-            ofile.write( reinterpret_cast<char* >( &image->m_height ), sizeof( image->m_height ) );
+			// Save the xres and yres.
+			ofile.write( reinterpret_cast<char* >( &image->m_width ), sizeof( image->m_width ) );
+			ofile.write( reinterpret_cast<char* >( &image->m_height ), sizeof( image->m_height ) );
 
-            // Save the transformation matrices.
-            ofile.write( reinterpret_cast<char*>( image->m_matWorldToCamera[ 0 ] ), sizeof( image->m_matWorldToCamera[ 0 ][ 0 ] ) * 4 );
-            ofile.write( reinterpret_cast<char*>( image->m_matWorldToCamera[ 1 ] ), sizeof( image->m_matWorldToCamera[ 0 ][ 0 ] ) * 4 );
-            ofile.write( reinterpret_cast<char*>( image->m_matWorldToCamera[ 2 ] ), sizeof( image->m_matWorldToCamera[ 0 ][ 0 ] ) * 4 );
-            ofile.write( reinterpret_cast<char*>( image->m_matWorldToCamera[ 3 ] ), sizeof( image->m_matWorldToCamera[ 0 ][ 0 ] ) * 4 );
+			// Save the transformation matrices.
+			ofile.write( reinterpret_cast<char*>( image->m_matWorldToCamera[ 0 ] ), sizeof( image->m_matWorldToCamera[ 0 ][ 0 ] ) * 4 );
+			ofile.write( reinterpret_cast<char*>( image->m_matWorldToCamera[ 1 ] ), sizeof( image->m_matWorldToCamera[ 0 ][ 0 ] ) * 4 );
+			ofile.write( reinterpret_cast<char*>( image->m_matWorldToCamera[ 2 ] ), sizeof( image->m_matWorldToCamera[ 0 ][ 0 ] ) * 4 );
+			ofile.write( reinterpret_cast<char*>( image->m_matWorldToCamera[ 3 ] ), sizeof( image->m_matWorldToCamera[ 0 ][ 0 ] ) * 4 );
 
-            ofile.write( reinterpret_cast<char*>( image->m_matWorldToScreen[ 0 ] ), sizeof( image->m_matWorldToScreen[ 0 ][ 0 ] ) * 4 );
-            ofile.write( reinterpret_cast<char*>( image->m_matWorldToScreen[ 1 ] ), sizeof( image->m_matWorldToScreen[ 0 ][ 0 ] ) * 4 );
-            ofile.write( reinterpret_cast<char*>( image->m_matWorldToScreen[ 2 ] ), sizeof( image->m_matWorldToScreen[ 0 ][ 0 ] ) * 4 );
-            ofile.write( reinterpret_cast<char*>( image->m_matWorldToScreen[ 3 ] ), sizeof( image->m_matWorldToScreen[ 0 ][ 0 ] ) * 4 );
+			ofile.write( reinterpret_cast<char*>( image->m_matWorldToScreen[ 0 ] ), sizeof( image->m_matWorldToScreen[ 0 ][ 0 ] ) * 4 );
+			ofile.write( reinterpret_cast<char*>( image->m_matWorldToScreen[ 1 ] ), sizeof( image->m_matWorldToScreen[ 0 ][ 0 ] ) * 4 );
+			ofile.write( reinterpret_cast<char*>( image->m_matWorldToScreen[ 2 ] ), sizeof( image->m_matWorldToScreen[ 0 ][ 0 ] ) * 4 );
+			ofile.write( reinterpret_cast<char*>( image->m_matWorldToScreen[ 3 ] ), sizeof( image->m_matWorldToScreen[ 0 ][ 0 ] ) * 4 );
 
-            // Now output the depth values
-            ofile.write( reinterpret_cast<char*>( image->m_data ), sizeof( TqFloat ) * ( image->m_width * image->m_height ) );
-            ofile.close();
-        }
+			// Now output the depth values
+			ofile.write( reinterpret_cast<char*>( image->m_data ), sizeof( TqFloat ) * ( image->m_width * image->m_height ) );
+			ofile.close();
+		}
 		return;
-    }
-	
+	}
+
 	TIFF* pOut = TIFFOpen( filename.c_str(), "w" );
 
-    if ( pOut )
-    {
-        // Write the image to a tiff file.
-        char version[ 80 ];
+	if ( pOut )
+	{
+		// Write the image to a tiff file.
+		char version[ 80 ];
 
-        int ExtraSamplesTypes[ 1 ] = {EXTRASAMPLE_ASSOCALPHA};
+		int ExtraSamplesTypes[ 1 ] = {EXTRASAMPLE_ASSOCALPHA};
 
 #if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
-        sprintf( version, "%s %s", STRNAME, VERSION_STR );
+
+		sprintf( version, "%s %s (%s %s)", STRNAME, VERSION_STR, __DATE__, __TIME__);
 #else
-        sprintf( version, "%s %s", STRNAME, VERSION );
+
+		sprintf( version, "%s %s (%s %s)", STRNAME, VERSION, __DATE__, __TIME__);
 #endif
 
-        bool use_logluv = false;
+		bool use_logluv = false;
 
-        TIFFSetField( pOut, TIFFTAG_SOFTWARE, ( char* ) version );
-        TIFFSetField( pOut, TIFFTAG_IMAGEWIDTH, ( uint32 ) image->m_width );
-        TIFFSetField( pOut, TIFFTAG_IMAGELENGTH, ( uint32 ) image->m_height );
-        TIFFSetField( pOut, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT );
-        TIFFSetField( pOut, TIFFTAG_SAMPLESPERPIXEL, image->m_iFormatCount );
+		TIFFSetField( pOut, TIFFTAG_SOFTWARE, ( char* ) version );
+		TIFFSetField( pOut, TIFFTAG_IMAGEWIDTH, ( uint32 ) image->m_width );
+		TIFFSetField( pOut, TIFFTAG_IMAGELENGTH, ( uint32 ) image->m_height );
+		TIFFSetField( pOut, TIFFTAG_PIXAR_MATRIX_WORLDTOCAMERA, image->m_matWorldToCamera );
+		TIFFSetField( pOut, TIFFTAG_PIXAR_MATRIX_WORLDTOSCREEN, image->m_matWorldToScreen );
+		TIFFSetField( pOut, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT );
+		TIFFSetField( pOut, TIFFTAG_SAMPLESPERPIXEL, image->m_iFormatCount );
+		TIFFSetField( pOut, TIFFTAG_DATETIME, datetime);
+		if (image->m_hostname)
+			TIFFSetField( pOut, TIFFTAG_HOSTCOMPUTER, image->m_hostname );
+		TIFFSetField( pOut, TIFFTAG_IMAGEDESCRIPTION, mydescription);
 
-        // Write out an 8 bits per pixel integer image.
-        if ( image->m_format == PkDspyUnsigned8 )
-        {
-            TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, 8 );
-            TIFFSetField( pOut, TIFFTAG_PLANARCONFIG, config );
-            TIFFSetField( pOut, TIFFTAG_COMPRESSION, image->m_compression );
-            if ( image->m_compression == COMPRESSION_JPEG )
-                TIFFSetField( pOut, TIFFTAG_JPEGQUALITY, image->m_quality );
-            //if (description != "")
-            //TIFFSetField(TIFFTAG_IMAGEDESCRIPTION, description);
-            TIFFSetField( pOut, TIFFTAG_PHOTOMETRIC, photometric );
-            TIFFSetField( pOut, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize( pOut, 0 ) );
 
-            if ( image->m_iFormatCount == 4 )
-                TIFFSetField( pOut, TIFFTAG_EXTRASAMPLES, 1, ExtraSamplesTypes );
+		// Write out an 8 bits per pixel integer image.
+		if ( image->m_format == PkDspyUnsigned8 )
+		{
+			TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, 8 );
+			TIFFSetField( pOut, TIFFTAG_PLANARCONFIG, config );
+			TIFFSetField( pOut, TIFFTAG_COMPRESSION, image->m_compression );
+			if ( image->m_compression == COMPRESSION_JPEG )
+				TIFFSetField( pOut, TIFFTAG_JPEGQUALITY, image->m_quality );
+			TIFFSetField( pOut, TIFFTAG_PHOTOMETRIC, photometric );
+			TIFFSetField( pOut, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize( pOut, 0 ) );
 
-            // Set the position tages in case we aer dealing with a cropped image.
-            TIFFSetField( pOut, TIFFTAG_XPOSITION, ( float ) image->m_origin[0] );
-            TIFFSetField( pOut, TIFFTAG_YPOSITION, ( float ) image->m_origin[1] );
+			if ( image->m_iFormatCount == 4 )
+				TIFFSetField( pOut, TIFFTAG_EXTRASAMPLES, 1, ExtraSamplesTypes );
 
-            TqInt row;
-            for ( row = 0; row < image->m_height; row++ )
-            {
-                if ( TIFFWriteScanline( pOut, reinterpret_cast<void*>(reinterpret_cast<char*>(image->m_data) + ( row * image->m_lineLength )), row, 0 ) < 0 )
-                    break;
-            }
-            TIFFClose( pOut );
-        }
-        else
-        {
-            // Write out a floating point image.
-            TIFFSetField( pOut, TIFFTAG_STONITS, ( double ) 1.0 );
+			// Set the position tages in case we aer dealing with a cropped image.
+			TIFFSetField( pOut, TIFFTAG_XPOSITION, ( float ) image->m_origin[0] );
+			TIFFSetField( pOut, TIFFTAG_YPOSITION, ( float ) image->m_origin[1] );
 
-            //			if(/* user wants logluv compression*/)
-            //			{
-            //				if(/* user wants to save the alpha channel */)
-            //				{
-            //					warn("SGI LogLuv encoding does not allow an alpha channel"
-            //							" - using uncompressed IEEEFP instead");
-            //				}
-            //				else
-            //				{
-            //					use_logluv = true;
-            //				}
-            //
-            //				if(/* user wants LZW compression*/)
-            //				{
-            //					warn("LZW compression is not available with SGI LogLuv encoding\n");
-            //				}
-            //			}
+			TqInt row;
+			for ( row = 0; row < image->m_height; row++ )
+			{
+				if ( TIFFWriteScanline( pOut, reinterpret_cast<void*>(reinterpret_cast<char*>(image->m_data) + ( row * image->m_lineLength ))
+				                        , row, 0 ) < 0 )
+					break;
+			}
+			TIFFClose( pOut );
+		}
+		else
+		{
+			// Write out a floating point image.
+			TIFFSetField( pOut, TIFFTAG_STONITS, ( double ) 1.0 );
 
-            if ( use_logluv )
-            {
-                /* use SGI LogLuv compression */
-                TIFFSetField( pOut, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_INT );
-                TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, 16 );
-                TIFFSetField( pOut, TIFFTAG_COMPRESSION, COMPRESSION_SGILOG );
-                TIFFSetField( pOut, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_LOGLUV );
-                TIFFSetField( pOut, TIFFTAG_SGILOGDATAFMT, SGILOGDATAFMT_FLOAT );
-            }
-            else
-            {
-                /* use uncompressed IEEEFP pixels */
-                TIFFSetField( pOut, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP );
-                TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, 32 );
-                TIFFSetField( pOut, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB );
-                TIFFSetField( pOut, TIFFTAG_COMPRESSION, image->m_compression );
-            }
+			//			if(/* user wants logluv compression*/)
+			//			{
+			//				if(/* user wants to save the alpha channel */)
+			//				{
+			//					warn("SGI LogLuv encoding does not allow an alpha channel"
+			//							" - using uncompressed IEEEFP instead");
+			//				}
+			//				else
+			//				{
+			//					use_logluv = true;
+			//				}
+			//
+			//				if(/* user wants LZW compression*/)
+			//				{
+			//					warn("LZW compression is not available with SGI LogLuv encoding\n");
+			//				}
+			//			}
 
-            TIFFSetField( pOut, TIFFTAG_SAMPLESPERPIXEL, image->m_iFormatCount );
+			if ( use_logluv )
+			{
+				/* use SGI LogLuv compression */
+				TIFFSetField( pOut, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_INT );
+				TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, 16 );
+				TIFFSetField( pOut, TIFFTAG_COMPRESSION, COMPRESSION_SGILOG );
+				TIFFSetField( pOut, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_LOGLUV );
+				TIFFSetField( pOut, TIFFTAG_SGILOGDATAFMT, SGILOGDATAFMT_FLOAT );
+			}
+			else
+			{
+				/* use uncompressed IEEEFP pixels */
+				TIFFSetField( pOut, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP );
+				TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, 32 );
+				TIFFSetField( pOut, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB );
+				TIFFSetField( pOut, TIFFTAG_COMPRESSION, image->m_compression );
+			}
 
-            if ( image->m_iFormatCount == 4 )
-                TIFFSetField( pOut, TIFFTAG_EXTRASAMPLES, 1, ExtraSamplesTypes );
-            // Set the position tages in case we aer dealing with a cropped image.
-            TIFFSetField( pOut, TIFFTAG_XPOSITION, ( float ) image->m_origin[0] );
-            TIFFSetField( pOut, TIFFTAG_YPOSITION, ( float ) image->m_origin[1] );
-            TIFFSetField( pOut, TIFFTAG_PLANARCONFIG, config );
+			TIFFSetField( pOut, TIFFTAG_SAMPLESPERPIXEL, image->m_iFormatCount );
 
-            TqInt	linelen = image->m_width * image->m_iFormatCount;
-            TqInt row = 0;
-            for ( row = 0; row < image->m_height; row++ )
-            {
-                if ( TIFFWriteScanline( pOut, reinterpret_cast<void*>(reinterpret_cast<float*>(image->m_data) + ( row * linelen )), row, 0 ) < 0 )
-                    break;
-            }
-            TIFFClose( pOut );
-        }
-    }
+			if ( image->m_iFormatCount == 4 )
+				TIFFSetField( pOut, TIFFTAG_EXTRASAMPLES, 1, ExtraSamplesTypes );
+			// Set the position tages in case we aer dealing with a cropped image.
+			TIFFSetField( pOut, TIFFTAG_XPOSITION, ( float ) image->m_origin[0] );
+			TIFFSetField( pOut, TIFFTAG_YPOSITION, ( float ) image->m_origin[1] );
+			TIFFSetField( pOut, TIFFTAG_PLANARCONFIG, config );
+
+			TqInt	linelen = image->m_width * image->m_iFormatCount;
+			TqInt row = 0;
+			for ( row = 0; row < image->m_height; row++ )
+			{
+				if ( TIFFWriteScanline( pOut, reinterpret_cast<void*>(reinterpret_cast<float*>(image->m_data) + ( row * linelen )), row, 0 )
+				        < 0 )
+					break;
+			}
+			TIFFClose( pOut );
+		}
+	}
 }
 
 
@@ -327,20 +388,22 @@ END_NAMESPACE( Aqsis )
 
 
 PtDspyError DspyImageOpen(PtDspyImageHandle * image,
-								   const char *drivername,
-								   const char *filename,
-								   int width,
-								   int height,
-								   int paramCount,
-								   const UserParameter *parameters,
-								   int iFormatCount,
-								   PtDspyDevFormat *format,
-								   PtFlagStuff *flagstuff)
+                          const char *drivername,
+                          const char *filename,
+                          int width,
+                          int height,
+                          int paramCount,
+                          const UserParameter *parameters,
+                          int iFormatCount,
+                          PtDspyDevFormat *format,
+                          PtFlagStuff *flagstuff)
 {
 	SqDisplayInstance* pImage;
-	
-	pImage = new SqDisplayInstance;	
 
+	pImage = new SqDisplayInstance;
+        flagstuff->flags = 0;
+
+	time(&start);
 	if(pImage)
 	{
 		// Store the instance information so that on re-entry we know which display is being referenced.
@@ -350,25 +413,11 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 		if(strcmp(drivername, "file")==0 || strcmp(drivername, "tiff")==0)
 			pImage->m_imageType = Type_File;
 		else if(strcmp(drivername, "framebuffer")==0)
-#ifndef AQSIS_SYSTEM_MACOSX
 			pImage->m_imageType = Type_Framebuffer;
-#else
-        {
-            std::cout << "framebuffer display type not supported under MacOSX, reverting to 'file'" << std::endl;
-            pImage->m_imageType = Type_File;
-        }
-#endif
 		else if(strcmp(drivername, "zfile")==0)
 			pImage->m_imageType = Type_ZFile;
 		else if(strcmp(drivername, "zframebuffer")==0)
-#ifndef AQSIS_SYSTEM_MACOSX
 			pImage->m_imageType = Type_ZFramebuffer;
-#else
-        {
-            std::cout << "zframebuffer display type not supported under MacOSX, reverting to 'zfile'" << std::endl;
-            pImage->m_imageType = Type_ZFile;
-        }
-#endif
 		else if(strcmp(drivername, "shadow")==0)
 			pImage->m_imageType = Type_Shadowmap;
 		pImage->m_iFormatCount = iFormatCount;
@@ -385,9 +434,12 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			if(format[i].type < widestFormat)
 				widestFormat = format[i].type;
 
-		if(widestFormat == PkDspySigned8) widestFormat = PkDspyUnsigned8;
-		else if(widestFormat == PkDspySigned16) widestFormat = PkDspyUnsigned16;
-		else if(widestFormat == PkDspySigned32)	widestFormat = PkDspyUnsigned32;
+		if(widestFormat == PkDspySigned8)
+			widestFormat = PkDspyUnsigned8;
+		else if(widestFormat == PkDspySigned16)
+			widestFormat = PkDspyUnsigned16;
+		else if(widestFormat == PkDspySigned32)
+			widestFormat = PkDspyUnsigned32;
 
 		// Create and initialise a byte array if rendering 8bit image, or we are in framebuffer mode
 		if(pImage->m_imageType == Type_Framebuffer)
@@ -396,15 +448,17 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			pImage->m_entrySize = pImage->m_iFormatCount * sizeof(char);
 
 			// Initialise the display to a checkerboard to show alpha
-			for (TqInt i = 0; i < pImage->m_height; i ++) 
+			for (TqInt i = 0; i < pImage->m_height; i ++)
 			{
 				for (TqInt j = 0; j < pImage->m_width; j++)
 				{
 					int     t       = 0;
 					unsigned char d = 255;
 
-					if ( ( (pImage->m_height - 1 - i) & 31 ) < 16 ) t ^= 1;
-					if ( ( j & 31 ) < 16 ) t ^= 1;
+					if ( ( (pImage->m_height - 1 - i) & 31 ) < 16 )
+						t ^= 1;
+					if ( ( j & 31 ) < 16 )
+						t ^= 1;
 
 					if ( t )
 					{
@@ -417,7 +471,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			}
 			widestFormat = PkDspyUnsigned8;
 
-#ifndef AQSIS_SYSTEM_MACOSX
+
 			pImage->m_theWindow = new Fl_Window(pImage->m_width, pImage->m_height);
 			pImage->m_uiImageWidget = new Fl_FrameBuffer_Widget(0,0, pImage->m_width, pImage->m_height, pImage->m_iFormatCount, reinterpret_cast<unsigned char*>(pImage->m_data));
 			pImage->m_theWindow->resizable(pImage->m_uiImageWidget);
@@ -425,9 +479,9 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			pImage->m_theWindow->end();
 			Fl::visual(FL_RGB);
 			pImage->m_theWindow->show();
-#endif
+
 		}
-        else
+		else
 		{
 			// Determine the appropriate format to save into.
 			if(widestFormat == PkDspyUnsigned8)
@@ -457,7 +511,6 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 		// If in "zframebuffer" mode, we need another buffer for the displayed depth data.
 		if(pImage->m_imageType == Type_ZFramebuffer)
 		{
-#ifndef AQSIS_SYSTEM_MACOSX
 			pImage->m_zfbdata = reinterpret_cast<unsigned char*>(malloc( pImage->m_width * pImage->m_height * 3 * sizeof(unsigned char)));
 
 			pImage->m_theWindow = new Fl_Window(pImage->m_width, pImage->m_height);
@@ -467,33 +520,38 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			pImage->m_theWindow->end();
 			Fl::visual(FL_RGB);
 			pImage->m_theWindow->show();
-#endif
+
 		}
 
 		// If we are recieving "rgba" data, ensure that it is in the correct order.
-		PtDspyDevFormat outFormat[] = 
-		{
-			{"r", widestFormat},
-			{"g", widestFormat},
-			{"b", widestFormat},
-			{"a", widestFormat},
-		};
+		PtDspyDevFormat outFormat[] =
+		    {
+		        {"r", widestFormat},
+		        {"g", widestFormat},
+		        {"b", widestFormat},
+		        {"a", widestFormat},
+		    };
 		DspyReorderFormatting(iFormatCount, format, MIN(iFormatCount,4), outFormat);
 
 		// Extract any important data from the user parameters.
 		char* compression;
+		char* hostname;
+		if( DspyFindStringInParamList("HostComputer", &hostname, paramCount, parameters ) == PkDspyErrorNone )
+		{
+			pImage->m_hostname= strdup(hostname);
+		}
 		if( DspyFindStringInParamList("compression", &compression, paramCount, parameters ) == PkDspyErrorNone )
 		{
-            if ( strstr( compression, "none" ) != 0 )
-                pImage->m_compression = COMPRESSION_NONE;
-            else if ( strstr( compression, "lzw" ) != 0 )
-                pImage->m_compression = COMPRESSION_LZW;
-            else if ( strstr( compression, "deflate" ) != 0 )
-                pImage->m_compression = COMPRESSION_DEFLATE;
-            else if ( strstr( compression, "jpeg" ) != 0 )
-                pImage->m_compression = COMPRESSION_JPEG;
-            else if ( strstr( compression, "packbits" ) != 0 )
-                pImage->m_compression = COMPRESSION_PACKBITS;
+			if ( strstr( compression, "none" ) != 0 )
+				pImage->m_compression = COMPRESSION_NONE;
+			else if ( strstr( compression, "lzw" ) != 0 )
+				pImage->m_compression = COMPRESSION_LZW;
+			else if ( strstr( compression, "deflate" ) != 0 )
+				pImage->m_compression = COMPRESSION_DEFLATE;
+			else if ( strstr( compression, "jpeg" ) != 0 )
+				pImage->m_compression = COMPRESSION_JPEG;
+			else if ( strstr( compression, "packbits" ) != 0 )
+				pImage->m_compression = COMPRESSION_PACKBITS;
 		}
 		int quality;
 		if( DspyFindIntInParamList("quality", &quality, paramCount, parameters ) == PkDspyErrorNone )
@@ -514,21 +572,29 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 		float append;
 		if( DspyFindFloatInParamList("append", &append, paramCount, parameters ) == PkDspyErrorNone )
 			pImage->m_append = (append != 0.0f)? 1:0;
+
+		char *ydesc = NULL;
+		if (DspyFindStringInParamList("description", &ydesc, paramCount, parameters ) == PkDspyErrorNone )
+		{
+			// Do something about it; the user will want to add its copyright notice.
+			if (ydesc && *ydesc)
+				description = strdup(ydesc);
+		}
 	}
 	else
 		return(PkDspyErrorNoMemory);
 
-	return(PkDspyErrorNone);	
+	return(PkDspyErrorNone);
 }
 
 
 PtDspyError DspyImageData(PtDspyImageHandle image,
-								   int xmin,
-								   int xmaxplus1,
-								   int ymin,
-								   int ymaxplus1,
-								   int entrysize,
-								   const unsigned char *data)
+                          int xmin,
+                          int xmaxplus1,
+                          int ymin,
+                          int ymaxplus1,
+                          int entrysize,
+                          const unsigned char *data)
 {
 	SqDisplayInstance* pImage;
 	pImage = reinterpret_cast<SqDisplayInstance*>(image);
@@ -606,22 +672,22 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 				{
 					TqFloat value = reinterpret_cast<const RtFloat*>(_pdatarow)[0];
 					TqInt so = ( y * pImage->m_width * 3 * sizeof(unsigned char) ) + ( x * 3 * sizeof(unsigned char) );
-					pImage->m_zfbdata[ so + 0 ] = 
-					pImage->m_zfbdata[ so + 1 ] = 
-					pImage->m_zfbdata[ so + 2 ] = value < FLT_MAX ? 255 : 0;
+					pImage->m_zfbdata[ so + 0 ] =
+					    pImage->m_zfbdata[ so + 1 ] =
+					        pImage->m_zfbdata[ so + 2 ] = value < FLT_MAX ? 255 : 0;
 					_pdatarow += entrysize;
 				}
 				pdatarow += bucketlinelen;
 			}
 		}
-	}	
+	}
 
 	if(pImage->m_imageType == Type_Framebuffer || pImage->m_imageType == Type_ZFramebuffer)
 	{
 		pImage->m_uiImageWidget->damage(1, __xmin, __ymin, __xmaxplus1-__xmin, __ymaxplus1-__ymin);
 		Fl::check();
 	}
-	return(PkDspyErrorNone);	
+	return(PkDspyErrorNone);
 }
 
 
@@ -629,21 +695,30 @@ PtDspyError DspyImageClose(PtDspyImageHandle image)
 {
 	SqDisplayInstance* pImage;
 	pImage = reinterpret_cast<SqDisplayInstance*>(image);
-	
+
 	// Write the image to disk
-	if( pImage->m_imageType == Type_File || 
-		pImage->m_imageType == Type_ZFile || 
-		pImage->m_imageType == Type_Shadowmap )
+	if( pImage->m_imageType == Type_File ||
+	        pImage->m_imageType == Type_ZFile ||
+	        pImage->m_imageType == Type_Shadowmap )
 		WriteTIFF( pImage->m_filename, pImage);
 
 	// Delete the image structure.
-	free(pImage->m_data);
+    if (pImage->m_data)
+		free(pImage->m_data);
+ 	if (pImage->m_hostname)
+		free(pImage->m_hostname);
 	if(pImage->m_imageType == Type_ZFramebuffer)
 		free(pImage->m_zfbdata);
+	if (description)
+	{
+		free(description);
+		description = NULL;
+	}
 	delete[](pImage->m_filename);
 	delete(pImage);
+	
 
-	return(PkDspyErrorNone);	
+	return(PkDspyErrorNone);
 }
 
 
@@ -654,7 +729,6 @@ PtDspyError DspyImageDelayClose(PtDspyImageHandle image)
 
 	if(pImage)
 	{
-#ifndef AQSIS_SYSTEM_MACOSX
 		if(pImage->m_imageType == Type_Framebuffer || pImage->m_imageType == Type_ZFramebuffer)
 		{
 			if( pImage->m_imageType == Type_ZFramebuffer )
@@ -670,7 +744,8 @@ PtDspyError DspyImageDelayClose(PtDspyImageHandle image)
 					totalsamples++;
 
 					// Skip background pixels ...
-					if( reinterpret_cast<const TqFloat*>(pImage->m_data)[i] >= FLT_MAX )
+					if( reinterpret_cast<const TqFloat*>(pImage->m_data)
+					        [i] >= FLT_MAX )
 						continue;
 
 					mindepth = MIN( mindepth, reinterpret_cast<const TqFloat*>(pImage->m_data)[ i ] );
@@ -682,27 +757,30 @@ PtDspyError DspyImageDelayClose(PtDspyImageHandle image)
 
 				const TqFloat dynamicrange = maxdepth - mindepth;
 
-		/*		std::cerr << info << g_Filename << " total samples: " << totalsamples << std::endl;
-				std::cerr << info << g_Filename << " depth samples: " << samples << std::endl;
-				std::cerr << info << g_Filename << " coverage: " << static_cast<TqFloat>( samples ) / static_cast<TqFloat>( totalsamples ) << std::endl;
-				std::cerr << info << g_Filename << " minimum depth: " << mindepth << std::endl;
-				std::cerr << info << g_Filename << " maximum depth: " << maxdepth << std::endl;
-				std::cerr << info << g_Filename << " dynamic range: " << dynamicrange << std::endl;
-				std::cerr << info << g_Filename << " average depth: " << totaldepth / static_cast<TqFloat>( samples ) << std::endl;
-		*/
+				/*		std::cerr << info << g_Filename << " total samples: " << totalsamples << std::endl;
+						std::cerr << info << g_Filename << " depth samples: " << samples << std::endl;
+						std::cerr << info << g_Filename << " coverage: " << static_cast<TqFloat>( samples ) / static_cast<TqFloat>( totalsamples ) << std::endl;
+						std::cerr << info << g_Filename << " minimum depth: " << mindepth << std::endl;
+						std::cerr << info << g_Filename << " maximum depth: " << maxdepth << std::endl;
+						std::cerr << info << g_Filename << " dynamic range: " << dynamicrange << std::endl;
+						std::cerr << info << g_Filename << " average depth: " << totaldepth / static_cast<TqFloat>( samples ) << std::endl;
+				*/
 				const TqInt linelength = pImage->m_width * 3;
-				for ( TqInt y = 0; y < pImage->m_height; y++ )
+				for ( TqInt y = 0;
+				        y < pImage->m_height;
+				        y++ )
 				{
 					for ( TqInt x = 0; x < pImage->m_height; x++ )
 					{
 						const TqInt imageindex = ( y * linelength ) + ( x * 3 );
 						const TqInt dataindex = ( y * pImage->m_width ) + x;
 
-						if( reinterpret_cast<const TqFloat*>(pImage->m_data)[dataindex] == FLT_MAX)
+						if( reinterpret_cast<const TqFloat*>(pImage->m_data)
+						        [dataindex] == FLT_MAX)
 						{
-							pImage->m_zfbdata[imageindex + 0] = 
-							pImage->m_zfbdata[imageindex + 1] = 
-							pImage->m_zfbdata[imageindex + 2] = 0;
+							pImage->m_zfbdata[imageindex + 0] =
+							    pImage->m_zfbdata[imageindex + 1] =
+							        pImage->m_zfbdata[imageindex + 2] = 0;
 						}
 						else
 						{
@@ -714,11 +792,10 @@ PtDspyError DspyImageDelayClose(PtDspyImageHandle image)
 					}
 				}
 				pImage->m_uiImageWidget->damage(1);
-				Fl::check();		
+				Fl::check();
 			}
 			Fl::run();
 		}
-#endif
 		return(DspyImageClose(image));
 	}
 	return(PkDspyErrorNone);
@@ -726,29 +803,29 @@ PtDspyError DspyImageDelayClose(PtDspyImageHandle image)
 
 
 PtDspyError DspyImageQuery(PtDspyImageHandle image,
-									PtDspyQueryType type,
-									int size,
-									void *data)
+                           PtDspyQueryType type,
+                           int size,
+                           void *data)
 {
 	SqDisplayInstance* pImage;
 	pImage = reinterpret_cast<SqDisplayInstance*>(image);
 
-    PtDspyOverwriteInfo overwriteInfo;
-    PtDspySizeInfo sizeInfo;
+	PtDspyOverwriteInfo overwriteInfo;
+	PtDspySizeInfo sizeInfo;
 
 	if(size <= 0 || !data)
 		return PkDspyErrorBadParams;
 
 	switch (type)
 	{
-		case PkOverwriteQuery:
+			case PkOverwriteQuery:
 			if (size > sizeof(overwriteInfo))
 				size = sizeof(overwriteInfo);
 			overwriteInfo.overwrite = 1;
 			overwriteInfo.interactive = 0;
 			memcpy(data, &overwriteInfo, size);
 			break;
-		case PkSizeQuery:
+			case PkSizeQuery:
 			if (size > sizeof(sizeInfo))
 				size = sizeof(sizeInfo);
 			if(pImage)
@@ -770,9 +847,9 @@ PtDspyError DspyImageQuery(PtDspyImageHandle image,
 			}
 			memcpy(data, &sizeInfo, size);
 			break;
-		default:
+			default:
 			return PkDspyErrorUnsupported;
-    }
+	}
 
-	return(PkDspyErrorNone);	
+	return(PkDspyErrorNone);
 }

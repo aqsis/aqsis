@@ -80,7 +80,8 @@ struct SqDisplayInstance
 		m_format(PkDspyUnsigned8),
 		m_entrySize(0),
 		m_lineLength(0),
-		m_compression(COMPRESSION_NONE), m_quality(0),
+		m_compression(COMPRESSION_NONE), m_quality(90),
+		m_hostname(0),
 		m_RenderWholeFrame(TqFalse),
 		m_imageType(Type_File),
 		m_append(0),
@@ -99,6 +100,7 @@ struct SqDisplayInstance
 	TqInt		m_entrySize;
 	TqInt		m_lineLength;
 	uint16		m_compression, m_quality;
+	char*		m_hostname;
 	TqBool		m_RenderWholeFrame;
 	TqInt		m_imageType;
 	TqInt		m_append;
