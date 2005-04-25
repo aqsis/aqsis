@@ -23,7 +23,7 @@
 				AdditionalOptions="/Zm200 "
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\libaqsistypes\win32\intel,..\libaqsistypes,..\libshadervm,..\libshaderexecenv,..\librib2ri,..\librib2,..\..\win32libs\include,..\boost"
+				AdditionalIncludeDirectories="..\libaqsistypes\win32\intel,..\libaqsistypes,..\libshadervm,..\libshaderexecenv,..\librib2ri,..\librib2,..\..\win32libs\include"
 				PreprocessorDefinitions="NDEBUG;CORE=1;_qBUILDING=CORE;PLUGINS;_LIB;WIN32;NO_SYSLOG"
 				StringPooling="TRUE"
 				RuntimeLibrary="2"
@@ -93,7 +93,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/Zm200 "
 				Optimization="0"
-				AdditionalIncludeDirectories="..\libaqsistypes\win32\intel,..\libaqsistypes,..\libshadervm,..\libshaderexecenv,..\librib2ri,..\librib2,..\..\win32libs\include,..\boost"
+				AdditionalIncludeDirectories="..\libaqsistypes\win32\intel,..\libaqsistypes,..\libshadervm,..\libshaderexecenv,..\librib2ri,..\librib2,..\..\win32libs\include"
 				PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_LIB;WIN32;NO_SYSLOG"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -166,7 +166,7 @@
 				AdditionalOptions="/Zm200 "
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\libaqsistypes\win32\intel,..\libaqsistypes,..\libshadervm,..\libshaderexecenv,..\librib2ri,..\librib2,..\..\win32libs\include,..\boost"
+				AdditionalIncludeDirectories="..\libaqsistypes\win32\intel,..\libaqsistypes,..\libshadervm,..\libshaderexecenv,..\librib2ri,..\librib2,..\..\win32libs\include"
 				PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_LIB;WIN32;NO_SYSLOG"
 				StringPooling="TRUE"
 				RuntimeLibrary="2"
@@ -294,6 +294,37 @@
 			</File>
 			<File
 				RelativePath="bucket.cpp">
+				<FileConfiguration
+					Name="Profile|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions="NDEBUG;CORE=1;_qBUILDING=CORE;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						BrowseInformation="1"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						BrowseInformation="1"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="condition.cpp">
 				<FileConfiguration
 					Name="Profile|Win32">
 					<Tool
@@ -1457,6 +1488,9 @@
 			</File>
 			<File
 				RelativePath="bucket.h">
+			</File>
+			<File
+				RelativePath="condition.h">
 			</File>
 			<File
 				RelativePath="converter.h">
