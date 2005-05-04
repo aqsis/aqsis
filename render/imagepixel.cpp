@@ -45,11 +45,7 @@ START_NAMESPACE( Aqsis )
 
 CqImagePixel::CqImagePixel() :
         m_XSamples( 0 ),
-        m_YSamples( 0 ),
-        m_MaxDepth( FLT_MAX ),
-        m_MinDepth( FLT_MAX ),
-        m_OcclusionBoxId( -1 ),
-        m_NeedsZUpdate( TqFalse )
+        m_YSamples( 0 )
 {}
 
 
@@ -333,11 +329,6 @@ void CqImagePixel::Clear()
 			m_Samples[ i ].m_Data.clear( );
 		m_Samples[ i ].m_OpaqueSample.m_flags=0;
 	}
-
-    m_MaxDepth = FLT_MAX;
-    m_MinDepth =  FLT_MAX;
-    m_OcclusionBoxId = -1;
-    m_NeedsZUpdate = TqFalse;
 }
 
 
@@ -501,46 +492,6 @@ void CqImagePixel::Combine(enum EqFilterDepth depthfilter, CqColor zThreshold)
 			}
 		}
 	}
-}
-
-//----------------------------------------------------------------------
-/** ReCalculate the min and max z values for this pixel
- */
-
-void CqImagePixel::UpdateZValues()
-{
-    float currentMax = 0.0f;
-    float currentMin = FLT_MAX;
-	TqInt sampleIndex = 0;
-    TqInt sx, sy;
-    for ( sy = 0; sy < m_YSamples; sy++ )
-    {
-        for ( sx = 0; sx < m_XSamples; sx++ )
-        {
-			//SqImageSample& opaqueSample = m_OpaqueValues[ sampleIndex ];
-			SqImageSample& opaqueSample = m_Samples[ sampleIndex ].m_OpaqueSample;
-			if(opaqueSample.m_flags & SqImageSample::Flag_Valid)
-            {
-				if ( opaqueSample.Depth() > currentMax )
-				{
-					currentMax = opaqueSample.Depth();
-				}
-				if ( opaqueSample.Depth() < currentMin )
-				{
-					currentMin = opaqueSample.Depth();
-				}
-            }
-            else
-            {
-                currentMax = FLT_MAX;
-            }
-
-			sampleIndex++;
-        }
-    }
-
-    m_MaxDepth = currentMax;
-    m_MinDepth = currentMin;
 }
 
 //---------------------------------------------------------------------

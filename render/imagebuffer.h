@@ -274,17 +274,13 @@ public:
     TqBool	PushMPGDown( CqMicroPolygon*, TqInt Col, TqInt Row );
     void	RenderMPGs( long xmin, long xmax, long ymin, long ymax );
     void	RenderMicroPoly( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax );
-	void	RenderMPG_MBOrDof( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax, TqBool IsMoving, TqBool UsingDof );
-	void	RenderMPG_Static( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax );
 	void	ProcessMPG( CqMicroPolygon* pMPG, const CqBound& bound, TqOcclusionKDTree& treenode, TqFloat time0, TqFloat time1, TqBool usingDof = TqFalse, TqInt dofoffsetindex = 0);
     void	RenderSurfaces( long xmin, long xmax, long ymin, long ymax, TqBool fImager, enum EqFilterDepth filterdepth, CqColor zThreshold );
     void	RenderImage();
-    void	StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, TqInt index, TqFloat D );
 	void	StoreExtraData( CqMicroPolygon* pMPG, std::valarray<TqFloat>& val);
 
-	// Optimised sampling routines.
-	void	RenderMPG_MBOrDofNew( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax, TqBool IsMoving, TqBool UsingDof );
-	void	RenderMPG_StaticNew( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax );
+	void	RenderMPG_MBOrDof( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax, TqBool IsMoving, TqBool UsingDof );
+	void	RenderMPG_Static( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax );
 
 
 
@@ -353,7 +349,6 @@ private:
 		TqFloat			m_ShutterOpenTime;
 		TqFloat			m_ShutterCloseTime;
 		const TqFloat*	        m_LodBounds;
-    		TqInt			m_NewSampling;
 		TqBool			m_IsMatte;
 		TqBool			m_IsCullable;
 		TqBool			m_UsesDataMap;

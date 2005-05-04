@@ -46,10 +46,6 @@ Project: "All"=.\All\All.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
-    begin source code control
-    All
-    .\all
-    end source code control
 }}}
 
 Package=<4>
@@ -146,10 +142,6 @@ Project: "Shaders"=.\Shaders\shaders.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
-    begin source code control
-    Shaders
-    .
-    end source code control
 }}}
 
 Package=<4>
@@ -222,10 +214,6 @@ Project: "aqsltell"=.\aqsltell\aqsltell.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
-    begin source code control
-    Plamondon
-    .\aqsltell
-    end source code control
 }}}
 
 Package=<4>
@@ -277,10 +265,6 @@ Project: "doxygen"=.\doxygen.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
-    begin source code control
-    doxygen
-    .
-    end source code control
 }}}
 
 Package=<4>
@@ -320,10 +304,6 @@ Project: "gif2tif"=.\plugins\gif2tif\gif2tif.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
-    begin source code control
-    Plamondon
-    .\plugins\gif2tif
-    end source code control
 }}}
 
 Package=<4>
@@ -348,10 +328,6 @@ Project: "jpg2tif"=.\plugins\jpg2tif\jpg2tif.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
-    begin source code control
-    Plamondon
-    .\plugins\jpg2tif
-    end source code control
 }}}
 
 Package=<4>
@@ -478,10 +454,6 @@ Project: "librib2"=.\librib2\librib2.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
-    begin source code control
-    librib2
-    .
-    end source code control
 }}}
 
 Package=<4>
@@ -554,10 +526,6 @@ Project: "libslparse"=.\libslparse\libslparse.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
-    begin source code control
-    libslparse
-    .
-    end source code control
 }}}
 
 Package=<4>
@@ -597,10 +565,6 @@ Project: "pcx2tif"=.\plugins\pcx2tif\pcx2tif.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
-    begin source code control
-    Plamondon
-    .\plugins\pcx2tif
-    end source code control
 }}}
 
 Package=<4>
@@ -613,10 +577,6 @@ Project: "ppm2tif"=.\plugins\ppm2tif\ppm2tif.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
-    begin source code control
-    Plamondon
-    .\plugins\ppm2tif
-    end source code control
 }}}
 
 Package=<4>
@@ -644,10 +604,6 @@ Project: "slpp"=.\slpp\slpp.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
-    begin source code control
-    slpp
-    .\slpp
-    end source code control
 }}}
 
 Package=<4>
@@ -681,14 +637,13 @@ Project: "tga2tif"=.\plugins\tga2tif\tga2tif.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
-    begin source code control
-    Plamondon
-    .\plugins\tga2tif
-    end source code control
 }}}
 
 Package=<4>
 {{{
+    Begin Project Dependency
+    Project_Dep_Name jpg2tif
+    End Project Dependency
 }}}
 
 ###############################################################################

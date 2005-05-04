@@ -364,24 +364,6 @@ TqFloat CqBucket::Depth( TqInt iXPos, TqInt iYPos )
 
 
 //----------------------------------------------------------------------
-/** Get the maximum sample depth for the specified screen position.
- * If position is outside bucket, returns FLT_MAX.
- * \param iXPos Screen position of sample.
- * \param iYPos Screen position of sample.
- */
-
-TqFloat CqBucket::MaxDepth( TqInt iXPos, TqInt iYPos )
-{
-    CqImagePixel * pie;
-    ImageElement( iXPos, iYPos, pie );
-    if( NULL != pie )
-        return ( pie->MaxDepth() );
-    else
-        return ( FLT_MAX );
-}
-
-
-//----------------------------------------------------------------------
 /** Get a pointer to the samples for a given pixel.
  * If position is outside bucket, returns NULL.
  * \param iXPos Screen position of sample.

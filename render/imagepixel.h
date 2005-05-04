@@ -301,52 +301,6 @@ public:
     {
         return ( m_Data.m_Data.size() );
     }
-    /** Get the maximum depth of this pixel
-     * \return A float representing the maximum depth at this pixel.
-     */
-    TqFloat	MaxDepth()
-    {
-        return ( m_MaxDepth );
-    }
-    void	SetMaxDepth( TqFloat d )
-    {
-        m_MaxDepth = d;
-    }
-    /** Get the minimum depth of this pixel
-     * \return A float representing the minimum depth at this pixel.
-     */
-    TqFloat	MinDepth()
-    {
-        return ( m_MinDepth );
-    }
-    void	SetMinDepth( TqFloat d )
-    {
-        m_MinDepth = d;
-    }
-    /** Get the id of the occlusion box that covers this pixel
-     * \return The covering occlusion box's id.
-     */
-    TqInt	OcclusionBoxId()
-    {
-        return ( m_OcclusionBoxId );
-    }
-    void	SetOcclusionBoxId( TqInt id )
-    {
-        m_OcclusionBoxId = id;
-    }
-    /** Mark this pixel as needing its min and max Z  values recalculating
-    */
-    void	MarkForZUpdate()
-    {
-        m_NeedsZUpdate = true;
-    }
-    bool	NeedsZUpdating()
-    {
-        return m_NeedsZUpdate;
-    }
-    /** Scan through all the samples to find the min and max z values
-    */
-    void	UpdateZValues();
 
     /** Clear all sample information from this pixel.
      */
@@ -420,10 +374,6 @@ private:
 	std::vector<SqSampleData> m_Samples;	///< A Vector of samples. Holds position, time, dof offset etc for each sample.
 	std::vector<TqInt> m_DofOffsetIndices;	///< A mapping from dof bounding-box index to the sample that contains a dof offset in that bb.
     SqImageSample	m_Data;
-    TqFloat m_MaxDepth;						///< The maximum depth of any sample in this pixel. used for occlusion culling
-    TqFloat m_MinDepth;						///< The minimum depth of any sample in this pixel. used for occlusion culling
-    TqInt m_OcclusionBoxId;					///< The CqOcclusionBox that covers this pixel
-    TqBool m_NeedsZUpdate;					///< Whether or not the min/max depth values are up to date.
 }
 ;
 

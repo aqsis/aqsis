@@ -113,7 +113,6 @@ public:
     virtual	CqColor Opacity( TqInt iXPos, TqInt iYPos );
     virtual	TqFloat Coverage( TqInt iXPos, TqInt iYPos );
     virtual	TqFloat Depth( TqInt iXPos, TqInt iYPos );
-    virtual	TqFloat MaxDepth( TqInt iXPos, TqInt iYPos );
     virtual	TqInt DataSize( TqInt iXPos, TqInt iYPos );
     virtual	const TqFloat* Data( TqInt iXPos, TqInt iYPos );
 

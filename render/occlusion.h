@@ -154,19 +154,11 @@ public:
     static void CreateHierarchy( TqInt bucketXSize, TqInt bucketYSize, TqInt XFWidth, TqInt YFWidth );
     static void DeleteHierarchy();
     static void SetupHierarchy( CqBucket* bucket, TqInt xMin, TqInt yMin, TqInt xMax, TqInt yMax );
-    static void Update()
-    {
-        UpdateLevel( m_HierarchyLevels - 1 );
-    }
 
     static TqBool CanCull( CqBound* bound )
     {
-        return m_Hierarchy[ 0 ].IsCullable( bound );
-    }
-    static void MarkForUpdate( TqInt id )
-    {
-        assert( id >= 0 && id < m_TotalBoxes );
-        m_Hierarchy[ id ].MarkForUpdate();
+        //return m_Hierarchy[ 0 ].IsCullable( bound );
+		return(TqFalse);
     }
 	static TqOcclusionKDTree& KDTree()
 	{
@@ -177,52 +169,7 @@ protected:
     CqOcclusionBox();
     ~CqOcclusionBox();
 
-    void SetupChildren();
-    static void UpdateLevel( TqInt level );
-    TqBool UpdateZValues(); // returns true if we changed anything
-    void Clear();
-
-    void SetBounds( TqInt x0, TqInt y0, TqInt x1, TqInt y1 );
-    bool Overlaps( CqBound* bound );
-
-    TqBool IsCullable( CqBound* bound );
-    TqBool NeedsUpdating()
-    {
-        return m_NeedsUpdating;
-    }
-    void MarkForUpdate()
-    {
-        m_NeedsUpdating = TqTrue;
-    }
-
-    TqInt m_MinX; // pixel positions of box boundary
-    TqInt m_MinY;
-    TqInt m_MaxX;
-    TqInt m_MaxY;
-
-    TqFloat m_MinZ;
-    TqFloat m_MaxZ;
-
-    TqInt m_Id;
-
-    /*
-    	m_Hierarchy is a tree but implemented as an array for speed.
-    	Each box has exactly 4 children apart from the leaves (obviously).
-    	For reference:
-    	this = m_Hierarchy[m_Id];
-    	parent = m_Hierarchy[m_Id/4]; (integer divide, rounds down)
-    	first child = m_Hierarchy[m_Id*4 + 1]; (if we are a leaf this will be >= m_TotalBoxes)
-    	next sibling = m_Hierarchy[m_Id + 1];
-    */
-
     static CqBucket* m_Bucket;
-    static CqOcclusionBox* m_Hierarchy; // tree of OcclusionBoxes
-    static TqInt m_HierarchyLevels; // the depth of the tree
-    static TqInt m_TotalBoxes;
-    static TqInt* m_LevelStartId; // the id for the start of each level, ie 0,1,5,21... etc
-
-    TqBool m_NeedsUpdating;
-
     static TqOcclusionKDTree	m_KDTree;			///< KD Tree representing the samples in the bucket.
 };
 
