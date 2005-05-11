@@ -15,8 +15,11 @@ dnl profile optimised rather than non-optimised code, because the results
 dnl can be different, and the end-user normally runs optimised code.
 
 if test x$profile = xyes; then
-	AQSIS_PROFILE_CFLAGS="-g -Wall -pg -ftest-coverage -fprofile-arcs -O2"
-	AQSIS_PROFILE_LDFLAGS="-pg"
+dnl We need to disable shared libraries for profiling
+dnl but we pass --export-dynamic so that we can still use dlopen
+	AC_DISABLE_SHARED
+	AQSIS_PROFILE_CFLAGS="-g -Wall -pg -ftest-coverage -fprofile-arcs -O2 -static -export-dynamic"
+	AQSIS_PROFILE_LDFLAGS="-pg -static -export-dynamic"
 	AC_MSG_NOTICE([Profiling enabled])
 else
 	AC_MSG_NOTICE([Profiling disabled])
