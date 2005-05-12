@@ -13,8 +13,6 @@ dnl We need to do this early so that we can disable
 dnl shared libraries if profiling is in use 
 AQSIS_WITH_PROFILING
 
-AM_ENABLE_SHARED
-AC_DISABLE_STATIC
 AC_PROG_LIBTOOL
 
 AM_PROG_LEX
