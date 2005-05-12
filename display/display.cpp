@@ -599,12 +599,12 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 	SqDisplayInstance* pImage;
 	pImage = reinterpret_cast<SqDisplayInstance*>(image);
 
-	TqInt __xmin = MAX((xmin-pImage->m_origin[0]), 0);
-	TqInt __ymin = MAX((ymin-pImage->m_origin[1]), 0);
-	TqInt __xmaxplus1 = MIN((xmaxplus1-pImage->m_origin[0]), pImage->m_width);
-	TqInt __ymaxplus1 = MIN((ymaxplus1-pImage->m_origin[1]), pImage->m_height);
+	TqInt xmin__ = MAX((xmin-pImage->m_origin[0]), 0);
+	TqInt ymin__ = MAX((ymin-pImage->m_origin[1]), 0);
+	TqInt xmaxplus1__ = MIN((xmaxplus1-pImage->m_origin[0]), pImage->m_width);
+	TqInt ymaxplus1__ = MIN((ymaxplus1-pImage->m_origin[1]), pImage->m_height);
 	TqInt bucketlinelen = entrysize * (xmaxplus1 - xmin);
-	TqInt copylinelen = entrysize * (__xmaxplus1 - __xmin);
+	TqInt copylinelen = entrysize * (xmaxplus1__ - xmin__);
 
 	// Calculate where in the bucket we are starting from if the window is cropped.
 	TqInt row = MAX(pImage->m_origin[1] - ymin, 0);
@@ -612,16 +612,16 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 	const unsigned char* pdatarow = data;
 	pdatarow += (row * bucketlinelen) + (col * entrysize);
 
-	if( pImage && data && __xmin >= 0 && __ymin >= 0 && __xmaxplus1 <= pImage->m_width && __ymaxplus1 <= pImage->m_height )
+	if( pImage && data && xmin__ >= 0 && ymin__ >= 0 && xmaxplus1__ <= pImage->m_width && ymaxplus1__ <= pImage->m_height )
 	{
 		// If rendering to a file, or an "rgb" framebuffer, we can just copy the data.
 		if( pImage->m_imageType != Type_Framebuffer || pImage->m_iFormatCount <= 3 )
 		{
 			TqInt y;
-			for ( y = __ymin; y < __ymaxplus1; y++ )
+			for ( y = ymin__; y < ymaxplus1__; y++ )
 			{
 				// Copy a whole row at a time, as we know it is being sent in the proper format and order.
-				TqInt so = ( y * pImage->m_lineLength ) + ( __xmin * pImage->m_entrySize );
+				TqInt so = ( y * pImage->m_lineLength ) + ( xmin__ * pImage->m_entrySize );
 				memcpy(reinterpret_cast<char*>(pImage->m_data)+so, reinterpret_cast<const void*>(pdatarow), copylinelen);
 				pdatarow += bucketlinelen;
 			}
@@ -631,11 +631,11 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 		{
 			TqInt t;	// Not used, just a temporary needed for the INT_PRELERP macro.
 			TqInt y;
-			for ( y = __ymin; y < __ymaxplus1; y++ )
+			for ( y = ymin__; y < ymaxplus1__; y++ )
 			{
 				TqInt x;
 				const unsigned char* _pdatarow = pdatarow;
-				for ( x = __xmin; x < __xmaxplus1; x++ )
+				for ( x = xmin__; x < xmaxplus1__; x++ )
 				{
 					unsigned char alpha = _pdatarow[3];
 					if( alpha > 0 )
@@ -664,7 +664,7 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 			const unsigned char* pdatarow = data;
 			pdatarow += (row * bucketlinelen) + (col * entrysize);
 			TqInt y;
-			for ( y = __ymin; y < __ymaxplus1; y++ )
+			for ( y = ymin__; y < ymaxplus1__; y++ )
 			{
 				TqInt x;
 				const unsigned char* _pdatarow = pdatarow;
@@ -684,18 +684,8 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 
 	if(pImage->m_imageType == Type_Framebuffer || pImage->m_imageType == Type_ZFramebuffer)
 	{
-		pImage->m_uiImageWidget->damage(1, __xmin, __ymin, __xmaxplus1-__xmin, __ymaxplus1-__ymin);
+		pImage->m_uiImageWidget->damage(1, xmin__, ymin__, xmaxplus1__-xmin__, ymaxplus1__-ymin__);
 		Fl::check();
-      		char title[80];
-      
-      		TqFloat percent = (TqFloat) ((__xmaxplus1-1) + (TqFloat)((__ymaxplus1-1) * pImage->m_width)) / (TqFloat) (pImage->m_width * pImage->m_height);
-      		percent *= 100.0f;
-      		percent = CLAMP(percent, 0.0f, 100.0f);
-		if (percent < 99.9f)
-			sprintf(title, "%s: %3.1f%% complete", pImage->m_filename, percent);
-		else
-			sprintf(title, "%s", pImage->m_filename);
-		pImage->m_theWindow->label(title);
 	}
 	return(PkDspyErrorNone);
 }
