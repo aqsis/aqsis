@@ -686,6 +686,15 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 	{
 		pImage->m_uiImageWidget->damage(1, xmin__, ymin__, xmaxplus1__-xmin__, ymaxplus1__-ymin__);
 		Fl::check();
+      	TqFloat percent = (TqFloat) ((__xmaxplus1-1) + (TqFloat)((__ymaxplus1-1) * pImage->m_width)) / (TqFloat) (pImage->m_width * pImage->m_height);
+      	percent *= 100.0f;
+      	percent = CLAMP(percent, 0.0f, 100.0f);
+		std::stringstream strTitle;
+		if (percent < 99.9f)
+			strTitle << pImage->m_filename << ": " << std::setprecision(1) << std::setw(3) << percent << "% complete" << std::ends;
+		else
+			strTitle << pImage->m_filename << std::ends;
+		pImage->m_theWindow->label(strTitle.str().c_str());
 	}
 	return(PkDspyErrorNone);
 }
