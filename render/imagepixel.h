@@ -97,68 +97,6 @@ struct SqImageSample
 		Flag_Valid = 0x0004
     };
 
-    CqColor Cs()
-    {
-        return( CqColor( Data()[Sample_Red], Data()[Sample_Green], Data()[Sample_Blue] ) );
-    }
-
-    void SetCs( const CqColor& col )
-    {
-        assert( m_Data.size() >= Sample_Blue+1 );
-        Data()[Sample_Red] = col.fRed();
-        Data()[Sample_Green] = col.fGreen();
-        Data()[Sample_Blue] = col.fBlue();
-    }
-
-    CqColor Os()
-    {
-        return( CqColor( Data()[Sample_ORed], Data()[Sample_OGreen], Data()[Sample_OBlue] ) );
-    }
-
-    void SetOs( const CqColor& col )
-    {
-        assert( m_Data.size() >= Sample_OBlue+1);
-        Data()[Sample_ORed] = col.fRed();
-        Data()[Sample_OGreen] = col.fGreen();
-        Data()[Sample_OBlue] = col.fBlue();
-    }
-
-    TqFloat Depth()
-    {
-        //assert( m_Data.size() >= Sample_Depth+1 );
-        return( Data()[Sample_Depth] );
-    }
-
-    void SetDepth( TqFloat d )
-    {
-        //assert( m_Data.size() >= Sample_Depth+1 );
-        Data()[Sample_Depth] = d;
-    }
-
-    TqFloat Coverage()
-    {
-        //assert( m_Data.size() >= Sample_Coverage+1 );
-        return( Data()[Sample_Coverage] );
-    }
-
-    void SetCoverage( TqFloat d )
-    {
-        //assert( m_Data.size() >= Sample_Coverage+1 );
-        Data()[Sample_Coverage] = d;
-    }
-
-	TqFloat Alpha()
-	{
-        //assert( m_Data.size() >= Sample_Alpha+1 );
-		return(Data()[Sample_Alpha]);
-	}
-
-	void SetAlpha(TqFloat a)
-	{
-        //assert( m_Data.size() >= Sample_Alpha+1 );
-		Data()[Sample_Alpha] = a;
-	}
-
 
 	TqFloat* Data()
 	{
@@ -233,11 +171,11 @@ public:
      */
     TqFloat	Coverage()
     {
-        return ( m_Data.Coverage() );
+        return ( m_Data.Data()[Sample_Coverage] );
     }
     void	SetCoverage( TqFloat c )
     {
-        m_Data.SetCoverage( c );
+        m_Data.Data()[Sample_Coverage] = c;
     }
     /** Get the averaged color of this pixel
      * \return A color representing the averaged color at this pixel.
@@ -245,11 +183,15 @@ public:
      */
     CqColor	Color()
     {
-        return ( m_Data.Cs() );
+		TqFloat* data = m_Data.Data();
+        return ( CqColor(data[Sample_Red], data[Sample_Green], data[Sample_Blue]) );
     }
     void	SetColor(const CqColor& col)
     {
-        m_Data.SetCs( col );
+		TqFloat* data = m_Data.Data();
+        data[Sample_Red] = col.fRed();
+        data[Sample_Green] = col.fGreen();
+        data[Sample_Blue] = col.fBlue();
     }
     /** Get the averaged opacity of this pixel
      * \return A color representing the averaged opacity at this pixel.
@@ -257,11 +199,15 @@ public:
      */
     CqColor	Opacity()
     {
-        return ( m_Data.Os() );
+		TqFloat* data = m_Data.Data();
+        return ( CqColor(data[Sample_ORed], data[Sample_OGreen], data[Sample_OBlue]) );
     }
     void	SetOpacity(const CqColor& col)
     {
-        m_Data.SetOs( col );
+		TqFloat* data = m_Data.Data();
+        data[Sample_ORed] = col.fRed();
+        data[Sample_OGreen] = col.fGreen();
+        data[Sample_OBlue] = col.fBlue();
     }
     /** Get the averaged depth of this pixel
      * \return A float representing the averaged depth at this pixel.
@@ -269,11 +215,11 @@ public:
      */
     TqFloat	Depth()
     {
-        return ( m_Data.Depth() );
+        return ( m_Data.Data()[Sample_Depth] );
     }
     void	SetDepth( TqFloat d )
     {
-        m_Data.SetDepth( d );
+        m_Data.Data()[Sample_Depth] = d;
     }
     /** Get the premultiplied alpha of this pixel
      * \return A float representing the premultiplied alpha value of this pixel.
@@ -281,11 +227,11 @@ public:
      */
     TqFloat	Alpha()
     {
-        return ( m_Data.Alpha() );
+        return ( m_Data.Data()[Sample_Alpha] );
     }
     void	SetAlpha( TqFloat a )
     {
-        m_Data.SetAlpha( a );
+        m_Data.Data()[Sample_Alpha] = a;
     }
     /** Get a pointer to the sample data
      * \return A constant pointer to the sample data.

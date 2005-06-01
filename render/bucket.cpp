@@ -675,11 +675,12 @@ void CqBucket::FilterBucket(TqBool empty)
             SqImageSample& spl = pie2->GetPixelSample();
 			for (TqInt k=0; k < datasize; k++)
                 spl.Data()[k] = m_aDatas[ i * datasize + k ];
-            spl.SetCoverage( m_aCoverages[ i++ ] );
+            TqFloat* sample_data = spl.Data();
+			sample_data[Sample_Coverage] = m_aCoverages[ i++ ];
 	
 			// Calculate the alpha as the combination of the opacity and the coverage.
-			TqFloat a = ( spl.Os()[0] + spl.Os()[1] + spl.Os()[2] ) / 3.0f;
-			pie2->SetAlpha(a * spl.Coverage());
+			TqFloat a = ( sample_data[Sample_ORed] + sample_data[Sample_OGreen] + sample_data[Sample_OBlue] ) / 3.0f;
+			pie2->SetAlpha(a * sample_data[Sample_Coverage]);
 
             pie2++;
         }
