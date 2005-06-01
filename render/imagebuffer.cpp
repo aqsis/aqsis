@@ -1000,7 +1000,10 @@ void CqImageBuffer::ProcessMPG( CqMicroPolygon* pMPG, const CqBound& bound, TqOc
 				// \note: Cannot do this if there is CSG involved, as all samples must be taken and kept the same.
 				if ( sample != end && (*sample).Data()[Sample_Depth] == ImageVal.Data()[Sample_Depth] && !(*sample).m_pCSGNode )
 				{
-					(*sample).TempDataAccessor() = ( (*sample).TempDataAccessor() + ImageVal.TempDataAccessor() ) * 0.5f;
+				    TqInt datasize = QGetRenderContext()->GetOutputDataTotalSize();
+					TqInt i;
+					for( i=0; i<datasize; ++i)
+						(*sample).Data()[i] = ( (*sample).Data()[i] + ImageVal.Data()[i] ) * 0.5f;
 					return;
 				}
 			}
