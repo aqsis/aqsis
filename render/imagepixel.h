@@ -103,6 +103,11 @@ struct SqImageSample
 		return( &m_Data[0] );
 	}
 
+	std::valarray<TqFloat>& TempDataAccessor()
+	{
+		return(m_Data);
+	}
+
 
     TqInt m_flags;
     boost::shared_ptr<CqCSGTreeNode>	m_pCSGNode;	///< Pointer to the CSG node this sample is part of, NULL if not part of a solid.

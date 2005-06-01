@@ -277,7 +277,7 @@ public:
 	void	ProcessMPG( CqMicroPolygon* pMPG, const CqBound& bound, TqOcclusionKDTree& treenode, TqFloat time0, TqFloat time1, TqBool usingDof = TqFalse, TqInt dofoffsetindex = 0);
     void	RenderSurfaces( long xmin, long xmax, long ymin, long ymax, TqBool fImager, enum EqFilterDepth filterdepth, CqColor zThreshold );
     void	RenderImage();
-	void	StoreExtraData( CqMicroPolygon* pMPG, std::valarray<TqFloat>& val);
+	void	StoreExtraData( CqMicroPolygon* pMPG, SqImageSample& sample);
 
 	void	RenderMPG_MBOrDof( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax, TqBool IsMoving, TqBool UsingDof );
 	void	RenderMPG_Static( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax );

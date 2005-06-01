@@ -282,7 +282,7 @@ void CqImagePixel::InitialiseSamples( std::vector<CqVector2D>& vecSamples, TqBoo
 			m_Samples[m_DofOffsetIndices[i]].m_DofOffsetIndex = i;
 		}
 	}
-	m_Data.Data().resize( QGetRenderContext()->GetOutputDataTotalSize() );
+	m_Data.TempDataAccessor().resize( QGetRenderContext()->GetOutputDataTotalSize() );
 }
 
 
@@ -356,7 +356,7 @@ void CqImagePixel::Combine(enum EqFilterDepth depthfilter, CqColor zThreshold)
 				std::list<SqImageSample>::iterator isend = samples->m_Data.end();
 				while( isi != isend )
 				{
-					if((*isi).Depth() >= opaqueValue.Depth())
+					if((*isi).Data()[Sample_Depth] >= opaqueValue.Data()[Sample_Depth])
 						break;
 
 					++isi;
@@ -392,6 +392,7 @@ void CqImagePixel::Combine(enum EqFilterDepth depthfilter, CqColor zThreshold)
 
 			for ( std::list<SqImageSample>::reverse_iterator sample = samples->m_Data.rbegin(); sample != samples->m_Data.rend(); sample++ )
 			{
+				TqFloat* sample_data = sample->Data();
 				if ( sample->m_flags & SqImageSample::Flag_Matte )
 				{
 					if ( sample->m_flags & SqImageSample::Flag_Occludes )
@@ -403,34 +404,38 @@ void CqImagePixel::Combine(enum EqFilterDepth depthfilter, CqColor zThreshold)
 					else
 					{
 						samplecolor.SetColorRGB(
-							LERP( sample->Os().fRed(), samplecolor.fRed(), 0 ),
-							LERP( sample->Os().fGreen(), samplecolor.fGreen(), 0 ),
-							LERP( sample->Os().fBlue(), samplecolor.fBlue(), 0 )
+							LERP( sample_data[Sample_ORed], samplecolor.fRed(), 0 ),
+							LERP( sample_data[Sample_OGreen], samplecolor.fGreen(), 0 ),
+							LERP( sample_data[Sample_OBlue], samplecolor.fBlue(), 0 )
 						);
 						sampleopacity.SetColorRGB(
-							LERP( sample->Os().fRed(), sampleopacity.fRed(), 0 ),
-							LERP( sample->Os().fGreen(), sampleopacity.fGreen(), 0 ),
-							LERP( sample->Os().fBlue(), sampleopacity.fBlue(), 0 )
+							LERP( sample_data[Sample_Red], sampleopacity.fRed(), 0 ),
+							LERP( sample_data[Sample_OGreen], sampleopacity.fGreen(), 0 ),
+							LERP( sample_data[Sample_Blue], sampleopacity.fBlue(), 0 )
 						);
 					}
 				}
 				else
 				{
-					samplecolor = ( samplecolor * ( gColWhite - sample->Os() ) ) + sample->Cs();
-					sampleopacity = ( ( gColWhite - sampleopacity ) * sample->Os() ) + sampleopacity;
+					samplecolor = ( samplecolor * 
+								  ( gColWhite - CqColor(sample_data[Sample_ORed], sample_data[Sample_OGreen], sample_data[Sample_OBlue]) ) ) + 
+								    CqColor(sample_data[Sample_Red], sample_data[Sample_Green], sample_data[Sample_Blue]);
+					sampleopacity = ( ( gColWhite - sampleopacity ) * 
+									CqColor(sample_data[Sample_ORed], sample_data[Sample_OGreen], sample_data[Sample_OBlue]) ) + 
+									sampleopacity;
 				}
 
 				// Now determine if the sample opacity meets the limit for depth mapping.
 				// If so, store the depth in the appropriate nearest opaque sample slot.
 				// The test is, if any channel of the opacity color is greater or equal to the threshold.
-				if(sample->Os().fRed() >= zThreshold.fRed() || sample->Os().fGreen() >= zThreshold.fGreen() || sample->Os().fBlue() >= zThreshold.fBlue())
+				if(sample_data[Sample_ORed] >= zThreshold.fRed() || sample_data[Sample_OGreen] >= zThreshold.fGreen() || sample_data[Sample_OBlue] >= zThreshold.fBlue())
 				{
 					// Make sure we store the nearest and second nearest depth values.
 					opaqueDepths[1] = opaqueDepths[0];
-					opaqueDepths[0] = sample->Depth();
+					opaqueDepths[0] = sample->Data()[Sample_Depth];
 					// Store the max opaque depth too, if not already stored.
 					if(!(maxOpaqueDepth < FLT_MAX))
-						maxOpaqueDepth = sample->Depth();
+						maxOpaqueDepth = sample->Data()[Sample_Depth];
 				}
 				samplehit = TqTrue;
 			}
@@ -444,8 +449,12 @@ void CqImagePixel::Combine(enum EqFilterDepth depthfilter, CqColor zThreshold)
 			if ( !samples->m_Data.empty() )
 			{
 				// Set the color and opacity.
-				opaqueValue.SetCs( samplecolor );
-				opaqueValue.SetOs( sampleopacity );
+				opaqueValue.Data()[Sample_Red] = samplecolor.fRed();
+				opaqueValue.Data()[Sample_Green] = samplecolor.fGreen();
+				opaqueValue.Data()[Sample_Blue] = samplecolor.fBlue();
+				opaqueValue.Data()[Sample_ORed] = sampleopacity.fRed();
+				opaqueValue.Data()[Sample_OGreen] = sampleopacity.fGreen();
+				opaqueValue.Data()[Sample_OBlue] = sampleopacity.fBlue();
 				opaqueValue.m_flags |= SqImageSample::Flag_Valid;
 
 				if ( depthfilter != Filter_Min)
@@ -455,13 +464,13 @@ void CqImagePixel::Combine(enum EqFilterDepth depthfilter, CqColor zThreshold)
 						//std::cerr << debug << "OpaqueDepths: " << opaqueDepths[0] << " - " << opaqueDepths[1] << std::endl;
 						// Use midpoint for depth
 						if ( samples->m_Data.size() > 1 )
-							opaqueValue.SetDepth( ( opaqueDepths[0] + opaqueDepths[1] ) * 0.5f );
+							opaqueValue.Data()[Sample_Depth] = ( ( opaqueDepths[0] + opaqueDepths[1] ) * 0.5f );
 						else
-							opaqueValue.SetDepth( FLT_MAX );
+							opaqueValue.Data()[Sample_Depth] = FLT_MAX;
 					}
 					else if ( depthfilter == Filter_Max)
 					{
-						opaqueValue.SetDepth( maxOpaqueDepth );
+						opaqueValue.Data()[Sample_Depth] = maxOpaqueDepth;
 					}
 					else if ( depthfilter == Filter_Min )
 					{
@@ -469,19 +478,22 @@ void CqImagePixel::Combine(enum EqFilterDepth depthfilter, CqColor zThreshold)
 						TqFloat totDepth = 0.0f;
 						TqInt totCount = 0;
 						for ( sample = samples->m_Data.begin(); sample != samples->m_Data.end(); sample++ )
-							if(sample->Os().fRed() >= zThreshold.fRed() || sample->Os().fGreen() >= zThreshold.fGreen() || sample->Os().fBlue() >= zThreshold.fBlue())
+						{
+							TqFloat* sample_data = sample->Data();
+							if(sample_data[Sample_ORed] >= zThreshold.fRed() || sample_data[Sample_OGreen] >= zThreshold.fGreen() || sample_data[Sample_OBlue] >= zThreshold.fBlue())
 							{
-								totDepth += sample->Depth();
+								totDepth += sample_data[Sample_Depth];
 								totCount++;
 							}
+						}
 						totDepth /= totCount;
 
-						opaqueValue.SetDepth( totDepth );
+						opaqueValue.Data()[Sample_Depth] = totDepth;
 					}
 					// Default to "min"
 				}
 				else
-					opaqueValue.SetDepth( opaqueDepths[0] );
+					opaqueValue.Data()[Sample_Depth] = opaqueDepths[0];
 			}
 		}
 		else

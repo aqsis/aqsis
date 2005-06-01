@@ -951,7 +951,7 @@ void CqImageBuffer::ProcessMPG( CqMicroPolygon* pMPG, const CqBound& bound, TqOc
 			if(opaque)
 			{
 				if((currentOpaqueSample.m_flags & SqImageSample::Flag_Valid) &&
-					currentOpaqueSample.Depth() <= D)
+					currentOpaqueSample.Data()[Sample_Depth] <= D)
 				{
 					return;
 				}
@@ -962,7 +962,7 @@ void CqImageBuffer::ProcessMPG( CqMicroPolygon* pMPG, const CqBound& bound, TqOc
 				// return if the sample is occluded and can be culled.
 				while( sample != end )
 				{
-					if((*sample).Depth() >= D)
+					if((*sample).Data()[Sample_Depth] >= D)
 						break;
 
 					if(((*sample).m_flags & SqImageSample::Flag_Occludes) &&
@@ -973,12 +973,12 @@ void CqImageBuffer::ProcessMPG( CqMicroPolygon* pMPG, const CqBound& bound, TqOc
 				}
 			}
 
-			ImageVal.SetDepth( D );
+			ImageVal.Data()[Sample_Depth] = D;
 
 			CqStats::IncI( CqStats::SPL_hits );
 			pMPG->MarkHit();
 
-			std::valarray<TqFloat>& val = ImageVal.Data();
+			TqFloat* val = ImageVal.Data();
 			val[ 0 ] = m_CurrentMpgSampleInfo.m_Colour.fRed();
 			val[ 1 ] = m_CurrentMpgSampleInfo.m_Colour.fGreen();
 			val[ 2 ] = m_CurrentMpgSampleInfo.m_Colour.fBlue();
@@ -990,7 +990,7 @@ void CqImageBuffer::ProcessMPG( CqMicroPolygon* pMPG, const CqBound& bound, TqOc
 			// Now store any other data types that have been registered.
 			if(m_CurrentGridInfo.m_UsesDataMap)
 			{
-				StoreExtraData(pMPG, val);
+				StoreExtraData(pMPG, ImageVal);
 			}
 
 			if(!opaque)
@@ -998,9 +998,9 @@ void CqImageBuffer::ProcessMPG( CqMicroPolygon* pMPG, const CqBound& bound, TqOc
 				// If depth is exactly the same as previous sample, chances are we've
 				// hit a MPG grid line.
 				// \note: Cannot do this if there is CSG involved, as all samples must be taken and kept the same.
-				if ( sample != end && (*sample).Depth() == ImageVal.Depth() && !(*sample).m_pCSGNode )
+				if ( sample != end && (*sample).Data()[Sample_Depth] == ImageVal.Data()[Sample_Depth] && !(*sample).m_pCSGNode )
 				{
-					(*sample).Data() = ( (*sample).Data() + val ) * 0.5f;
+					(*sample).TempDataAccessor() = ( (*sample).TempDataAccessor() + ImageVal.TempDataAccessor() ) * 0.5f;
 					return;
 				}
 			}
@@ -1065,7 +1065,7 @@ void CqImageBuffer::ProcessMPG( CqMicroPolygon* pMPG, const CqBound& bound, TqOc
 	}
 }
 
-void CqImageBuffer::StoreExtraData( CqMicroPolygon* pMPG, std::valarray<TqFloat>& val)
+void CqImageBuffer::StoreExtraData( CqMicroPolygon* pMPG, SqImageSample& sample)
 {
     std::map<std::string, CqRenderer::SqOutputDataEntry>& DataMap = QGetRenderContext() ->GetMapOfOutputDataEntries();
 	std::map<std::string, CqRenderer::SqOutputDataEntry>::iterator entry;
@@ -1081,7 +1081,7 @@ void CqImageBuffer::StoreExtraData( CqMicroPolygon* pMPG, std::valarray<TqFloat>
                 {
                     TqFloat f;
                     pData->GetFloat( f, pMPG->GetIndex() );
-                    val[ entry->second.m_Offset ] = f;
+                    sample.Data()[ entry->second.m_Offset ] = f;
                     break;
                 }
             case type_point:
@@ -1091,18 +1091,18 @@ void CqImageBuffer::StoreExtraData( CqMicroPolygon* pMPG, std::valarray<TqFloat>
                 {
                     CqVector3D v;
                     pData->GetPoint( v, pMPG->GetIndex() );
-                    val[ entry->second.m_Offset ] = v.x();
-                    val[ entry->second.m_Offset + 1 ] = v.y();
-                    val[ entry->second.m_Offset + 2 ] = v.z();
+                    sample.Data()[ entry->second.m_Offset ] = v.x();
+                    sample.Data()[ entry->second.m_Offset + 1 ] = v.y();
+                    sample.Data()[ entry->second.m_Offset + 2 ] = v.z();
                     break;
                 }
             case type_color:
                 {
                     CqColor c;
                     pData->GetColor( c, pMPG->GetIndex() );
-                    val[ entry->second.m_Offset ] = c.fRed();
-                    val[ entry->second.m_Offset + 1 ] = c.fGreen();
-                    val[ entry->second.m_Offset + 2 ] = c.fBlue();
+                    sample.Data()[ entry->second.m_Offset ] = c.fRed();
+                    sample.Data()[ entry->second.m_Offset + 1 ] = c.fGreen();
+                    sample.Data()[ entry->second.m_Offset + 2 ] = c.fBlue();
                     break;
                 }
             case type_matrix:
@@ -1110,22 +1110,22 @@ void CqImageBuffer::StoreExtraData( CqMicroPolygon* pMPG, std::valarray<TqFloat>
                     CqMatrix m;
                     pData->GetMatrix( m, pMPG->GetIndex() );
                     TqFloat* pElements = m.pElements();
-                    val[ entry->second.m_Offset ] = pElements[ 0 ];
-                    val[ entry->second.m_Offset + 1 ] = pElements[ 1 ];
-                    val[ entry->second.m_Offset + 2 ] = pElements[ 2 ];
-                    val[ entry->second.m_Offset + 3 ] = pElements[ 3 ];
-                    val[ entry->second.m_Offset + 4 ] = pElements[ 4 ];
-                    val[ entry->second.m_Offset + 5 ] = pElements[ 5 ];
-                    val[ entry->second.m_Offset + 6 ] = pElements[ 6 ];
-                    val[ entry->second.m_Offset + 7 ] = pElements[ 7 ];
-                    val[ entry->second.m_Offset + 8 ] = pElements[ 8 ];
-                    val[ entry->second.m_Offset + 9 ] = pElements[ 9 ];
-                    val[ entry->second.m_Offset + 10 ] = pElements[ 10 ];
-                    val[ entry->second.m_Offset + 11 ] = pElements[ 11 ];
-                    val[ entry->second.m_Offset + 12 ] = pElements[ 12 ];
-                    val[ entry->second.m_Offset + 13 ] = pElements[ 13 ];
-                    val[ entry->second.m_Offset + 14 ] = pElements[ 14 ];
-                    val[ entry->second.m_Offset + 15 ] = pElements[ 15 ];
+                    sample.Data()[ entry->second.m_Offset ] = pElements[ 0 ];
+                    sample.Data()[ entry->second.m_Offset + 1 ] = pElements[ 1 ];
+                    sample.Data()[ entry->second.m_Offset + 2 ] = pElements[ 2 ];
+                    sample.Data()[ entry->second.m_Offset + 3 ] = pElements[ 3 ];
+                    sample.Data()[ entry->second.m_Offset + 4 ] = pElements[ 4 ];
+                    sample.Data()[ entry->second.m_Offset + 5 ] = pElements[ 5 ];
+                    sample.Data()[ entry->second.m_Offset + 6 ] = pElements[ 6 ];
+                    sample.Data()[ entry->second.m_Offset + 7 ] = pElements[ 7 ];
+                    sample.Data()[ entry->second.m_Offset + 8 ] = pElements[ 8 ];
+                    sample.Data()[ entry->second.m_Offset + 9 ] = pElements[ 9 ];
+                    sample.Data()[ entry->second.m_Offset + 10 ] = pElements[ 10 ];
+                    sample.Data()[ entry->second.m_Offset + 11 ] = pElements[ 11 ];
+                    sample.Data()[ entry->second.m_Offset + 12 ] = pElements[ 12 ];
+                    sample.Data()[ entry->second.m_Offset + 13 ] = pElements[ 13 ];
+                    sample.Data()[ entry->second.m_Offset + 14 ] = pElements[ 14 ];
+                    sample.Data()[ entry->second.m_Offset + 15 ] = pElements[ 15 ];
                     break;
                 }
             default:
