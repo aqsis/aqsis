@@ -978,7 +978,7 @@ void CqImageBuffer::ProcessMPG( CqMicroPolygon* pMPG, const CqBound& bound, TqOc
 			CqStats::IncI( CqStats::SPL_hits );
 			pMPG->MarkHit();
 
-			std::valarray<TqFloat>& val = ImageVal.m_Data;
+			std::valarray<TqFloat>& val = ImageVal.Data();
 			val[ 0 ] = m_CurrentMpgSampleInfo.m_Colour.fRed();
 			val[ 1 ] = m_CurrentMpgSampleInfo.m_Colour.fGreen();
 			val[ 2 ] = m_CurrentMpgSampleInfo.m_Colour.fBlue();
@@ -1000,7 +1000,7 @@ void CqImageBuffer::ProcessMPG( CqMicroPolygon* pMPG, const CqBound& bound, TqOc
 				// \note: Cannot do this if there is CSG involved, as all samples must be taken and kept the same.
 				if ( sample != end && (*sample).Depth() == ImageVal.Depth() && !(*sample).m_pCSGNode )
 				{
-					(*sample).m_Data = ( (*sample).m_Data + val ) * 0.5f;
+					(*sample).Data() = ( (*sample).Data() + val ) * 0.5f;
 					return;
 				}
 			}

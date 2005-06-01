@@ -87,9 +87,9 @@ enum EqFilterDepth
 
 struct SqImageSample
 {
-    SqImageSample( TqInt NumData = 9 )
+    SqImageSample( TqInt NumData = 9 ) : m_Data(NumData)
     {
-        m_Data.resize( NumData );
+        //m_Data.resize( NumData );
     }
     enum {
         Flag_Occludes = 0x0001,
@@ -97,76 +97,80 @@ struct SqImageSample
 		Flag_Valid = 0x0004
     };
 
-    CqColor Cs() const
+    CqColor Cs()
     {
-        return( CqColor( m_Data[Sample_Red], m_Data[Sample_Green], m_Data[Sample_Blue] ) );
+        return( CqColor( Data()[Sample_Red], Data()[Sample_Green], Data()[Sample_Blue] ) );
     }
 
     void SetCs( const CqColor& col )
     {
         assert( m_Data.size() >= Sample_Blue+1 );
-        m_Data[Sample_Red] = col.fRed();
-        m_Data[Sample_Green] = col.fGreen();
-        m_Data[Sample_Blue] = col.fBlue();
+        Data()[Sample_Red] = col.fRed();
+        Data()[Sample_Green] = col.fGreen();
+        Data()[Sample_Blue] = col.fBlue();
     }
 
-    CqColor Os() const
+    CqColor Os()
     {
-        return( CqColor( m_Data[Sample_ORed], m_Data[Sample_OGreen], m_Data[Sample_OBlue] ) );
+        return( CqColor( Data()[Sample_ORed], Data()[Sample_OGreen], Data()[Sample_OBlue] ) );
     }
 
     void SetOs( const CqColor& col )
     {
         assert( m_Data.size() >= Sample_OBlue+1);
-        m_Data[Sample_ORed] = col.fRed();
-        m_Data[Sample_OGreen] = col.fGreen();
-        m_Data[Sample_OBlue] = col.fBlue();
+        Data()[Sample_ORed] = col.fRed();
+        Data()[Sample_OGreen] = col.fGreen();
+        Data()[Sample_OBlue] = col.fBlue();
     }
 
-    TqFloat Depth() const
+    TqFloat Depth()
     {
-        assert( m_Data.size() >= Sample_Depth+1 );
-        return( m_Data[Sample_Depth] );
+        //assert( m_Data.size() >= Sample_Depth+1 );
+        return( Data()[Sample_Depth] );
     }
 
     void SetDepth( TqFloat d )
     {
-        assert( m_Data.size() >= Sample_Depth+1 );
-        m_Data[Sample_Depth] = d;
+        //assert( m_Data.size() >= Sample_Depth+1 );
+        Data()[Sample_Depth] = d;
     }
 
-    TqFloat Coverage() const
+    TqFloat Coverage()
     {
-        assert( m_Data.size() >= Sample_Coverage+1 );
-        return( m_Data[Sample_Coverage] );
+        //assert( m_Data.size() >= Sample_Coverage+1 );
+        return( Data()[Sample_Coverage] );
     }
 
     void SetCoverage( TqFloat d )
     {
-        assert( m_Data.size() >= Sample_Coverage+1 );
-        m_Data[Sample_Coverage] = d;
+        //assert( m_Data.size() >= Sample_Coverage+1 );
+        Data()[Sample_Coverage] = d;
     }
 
-	TqFloat Alpha() const
+	TqFloat Alpha()
 	{
-        assert( m_Data.size() >= Sample_Alpha+1 );
-		return(m_Data[Sample_Alpha]);
+        //assert( m_Data.size() >= Sample_Alpha+1 );
+		return(Data()[Sample_Alpha]);
 	}
 
 	void SetAlpha(TqFloat a)
 	{
-        assert( m_Data.size() >= Sample_Alpha+1 );
-		m_Data[Sample_Alpha] = a;
+        //assert( m_Data.size() >= Sample_Alpha+1 );
+		Data()[Sample_Alpha] = a;
 	}
 
-    TqInt DataSize() const
-    {
-        return( m_Data.size() );
-    }
+
+	TqFloat* Data()
+	{
+		return( &m_Data[0] );
+	}
+
 
     TqInt m_flags;
-    std::valarray<TqFloat>	m_Data;
     boost::shared_ptr<CqCSGTreeNode>	m_pCSGNode;	///< Pointer to the CSG node this sample is part of, NULL if not part of a solid.
+	
+	private:    
+	std::valarray<TqFloat>	m_Data;
 }
 ;
 
@@ -288,7 +292,7 @@ public:
      */
     const TqFloat*	Data()
     {
-        return ( &m_Data.m_Data[0] );
+        return ( &m_Data.Data()[0] );
     }
     SqImageSample&	GetPixelSample()
     {
@@ -296,11 +300,11 @@ public:
     }
     /** Get a count of data
      * \return A count of the samples on this pixel.
-     */
+     *
     TqInt	DataSize()
     {
-        return ( m_Data.m_Data.size() );
-    }
+        return ( m_Data.Data().size() );
+    }*/
 
     /** Clear all sample information from this pixel.
      */

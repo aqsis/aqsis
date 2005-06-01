@@ -380,23 +380,6 @@ const TqFloat* CqBucket::Data( TqInt iXPos, TqInt iYPos )
         return ( NULL );
 }
 
-//----------------------------------------------------------------------
-/** Get count of samples.
- * If position is outside bucket, returns 0.
- * \param iXPos Screen position of sample.
- * \param iYPos Screen position of sample.
- */
-
-TqInt CqBucket::DataSize( TqInt iXPos, TqInt iYPos )
-{
-    CqImagePixel * pie;
-    ImageElement( iXPos, iYPos, pie );
-    if( NULL != pie )
-        return ( pie->DataSize() );
-    else
-        return ( 0 );
-}
-
 
 //----------------------------------------------------------------------
 /** Filter the samples in this bucket according to type and filter widths.
@@ -493,7 +476,7 @@ void CqBucket::FilterBucket(TqBool empty)
 									{
 										SqImageSample& pSample = pie2->OpaqueValues( sampleIndex );
 										for ( TqInt k = 0; k < datasize; ++k )
-											samples[k] += pSample.m_Data[k] * g;
+											samples[k] += pSample.Data()[k] * g;
 										sampleCounts[pixelIndex]++;
 									}
 								}
@@ -628,7 +611,7 @@ void CqBucket::FilterBucket(TqBool empty)
 										{
 											SqImageSample& pSample = pie2->OpaqueValues( sampleIndex );
 											for ( TqInt k = 0; k < datasize; ++k )
-												samples[k] += pSample.m_Data[k] * g;
+												samples[k] += pSample.Data()[k] * g;
 											SampleCount++;
 										}
 									}
@@ -691,7 +674,7 @@ void CqBucket::FilterBucket(TqBool empty)
         {
             SqImageSample& spl = pie2->GetPixelSample();
 			for (TqInt k=0; k < datasize; k++)
-                spl.m_Data[k] = m_aDatas[ i * datasize + k ];
+                spl.Data()[k] = m_aDatas[ i * datasize + k ];
             spl.SetCoverage( m_aCoverages[ i++ ] );
 	
 			// Calculate the alpha as the combination of the opacity and the coverage.
@@ -916,9 +899,9 @@ void CqBucket::QuantizeBucket()
                     for( sampleindex = startindex; sampleindex < endindex; sampleindex++ )
                     {
                         double d;
-                        if ( modf( one * pie2->GetPixelSample().m_Data[sampleindex] + ditheramplitude * random.RandomFloat(), &d ) > 0.5 ) d += 1.0f;
+                        if ( modf( one * pie2->GetPixelSample().Data()[sampleindex] + ditheramplitude * random.RandomFloat(), &d ) > 0.5 ) d += 1.0f;
                         d = CLAMP( d, min, max );
-                        pie2->GetPixelSample().m_Data[sampleindex] = d;
+                        pie2->GetPixelSample().Data()[sampleindex] = d;
                     }
                     pie2++;
                 }

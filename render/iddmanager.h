@@ -79,11 +79,6 @@ struct IqBucket
      * \param iYPos Screen position of the requested element.
      */
     virtual	TqFloat Depth( TqInt iXPos, TqInt iYPos ) = 0;
-    /** Get a count of samples
-     * \param iXPos Screen position of the requested element.
-     * \param iYPos Screen position of the requested element.
-     */
-    virtual TqInt DataSize( TqInt iXPos, TqInt iYPos ) = 0;
     /** Get a pointer to the sample array
      * \param iXPos Screen position of the requested element.
      * \param iYPos Screen position of the requested element.
