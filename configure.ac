@@ -11,8 +11,8 @@ AC_PROG_CXX
 
 dnl We need to do this early so that we can disable 
 dnl shared libraries if profiling is in use 
+AC_ENABLE_SHARED
 AQSIS_WITH_PROFILING
-
 AC_PROG_LIBTOOL
 
 AM_PROG_LEX
