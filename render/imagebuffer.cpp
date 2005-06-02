@@ -939,7 +939,7 @@ void CqImageBuffer::ProcessMPG( CqMicroPolygon* pMPG, const CqBound& bound, TqOc
 			TqBool opaque =  m_CurrentMpgSampleInfo.m_IsOpaque;
 
 			SqImageSample& currentOpaqueSample = pData->m_OpaqueSample;
-			static SqImageSample localImageVal( QGetRenderContext() ->GetOutputDataTotalSize() );
+			SqImageSample localImageVal;
 
 			SqImageSample& ImageVal = opaque ? currentOpaqueSample : localImageVal;
 

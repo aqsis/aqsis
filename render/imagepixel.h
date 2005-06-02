@@ -31,6 +31,8 @@
 #include	"aqsis.h"
 
 #include	<vector>
+#include	<stack>
+
 #ifdef	min
 #define	__old_min__ min
 #undef min
@@ -85,12 +87,91 @@ enum EqFilterDepth
     Filter_Average = 3,
 };
 
+
+class CqSampleDataPool
+{
+	public:
+		CqSampleDataPool()	: m_theDataPool(10000), m_nextSlot(0), m_slotSize(9)
+		{}
+		~CqSampleDataPool()
+		{
+			// \todo except if there are still blocks allocated.
+		}
+
+		void	Initialise(TqInt slotSize)
+		{
+			// \todo except if there are slots that haven't been freed.
+			m_slotSize = slotSize;
+			m_nextSlot = 0;
+			while(!m_freeSlots.empty())
+				m_freeSlots.pop();
+		}
+
+		TqInt	Allocate()
+		{
+			// If there are slots in the deallocated stack, use one of those.
+			if(!m_freeSlots.empty())
+			{
+				TqInt slot = m_freeSlots.top();
+				m_freeSlots.pop();
+				return(slot);
+			}
+			else
+			{
+				// If the pool isn't big enough, resize it.
+				if((m_nextSlot + m_slotSize)>m_theDataPool.size())
+					m_theDataPool.resize(m_theDataPool.size()*2);
+				TqInt slot = m_nextSlot;
+				m_nextSlot += m_slotSize;
+				return(slot);
+			}
+		}
+
+		void	DeAllocate(TqInt index)
+		{
+			m_freeSlots.push(index);
+		}
+
+		TqFloat*	SampleDataSlot(TqInt slot)
+		{
+			assert((slot+m_slotSize) < m_theDataPool.size());
+			return(&m_theDataPool[slot]);
+		}
+
+		TqInt	slotSize()
+		{
+			return(m_slotSize);
+		}
+
+	private:
+		TqInt					m_nextSlot;
+		TqInt					m_slotSize;
+		std::vector<TqFloat>	m_theDataPool;		
+		std::stack<TqInt>		m_freeSlots;
+};
+
+
 struct SqImageSample
 {
-    SqImageSample( TqInt NumData = 9 ) : m_Data(NumData)
+    SqImageSample() : m_flags(0)
     {
-        //m_Data.resize( NumData );
+		m_sampleSlot = m_theSamplePool.Allocate();
     }
+	
+	/// Copy constructor
+    ///
+	SqImageSample(const SqImageSample& from)
+    {
+		m_sampleSlot = m_theSamplePool.Allocate();
+		*this = from;
+    }
+
+	~SqImageSample()
+	{
+		m_theSamplePool.DeAllocate(m_sampleSlot);
+	}
+
+
     enum {
         Flag_Occludes = 0x0001,
         Flag_Matte = 0x0002,
@@ -98,22 +179,47 @@ struct SqImageSample
     };
 
 
+	SqImageSample& operator=(const SqImageSample& from)
+	{
+		m_flags = from.m_flags;
+		m_pCSGNode = from.m_pCSGNode;
+
+		const TqFloat* fromData = from.Data();
+		TqFloat* toData = Data();
+		for(TqInt i=0; i<m_theSamplePool.slotSize(); ++i)
+			toData[i] = fromData[i];
+	
+		return(*this);
+	}
+
+
+	static void SetSampleSize(TqInt size)
+	{
+		m_theSamplePool.Initialise(size);
+	}
+
 	TqFloat* Data()
 	{
-		return( &m_Data[0] );
+		return(m_theSamplePool.SampleDataSlot(m_sampleSlot));
 	}
 
-	std::valarray<TqFloat>& TempDataAccessor()
+	const TqFloat* Data() const
 	{
-		return(m_Data);
+		return(m_theSamplePool.SampleDataSlot(m_sampleSlot));
 	}
 
+	TqInt sampleSlot() const
+	{
+		return(m_sampleSlot);
+	}
 
     TqInt m_flags;
     boost::shared_ptr<CqCSGTreeNode>	m_pCSGNode;	///< Pointer to the CSG node this sample is part of, NULL if not part of a solid.
 	
 	private:    
-	std::valarray<TqFloat>	m_Data;
+	TqInt	m_sampleSlot;
+	
+	static	CqSampleDataPool m_theSamplePool;
 }
 ;
 

@@ -39,6 +39,8 @@
 
 START_NAMESPACE( Aqsis )
 
+CqSampleDataPool	SqImageSample::m_theSamplePool;
+
 //----------------------------------------------------------------------
 /** Constructor
  */
@@ -85,7 +87,6 @@ void CqImagePixel::AllocateSamples( TqInt XSamples, TqInt YSamples )
         {
 			// Initialise the OpaqueSampleEntries to the correct depth for the data we are
 			// rendering, including any AOV data.
-			SqImageSample def( QGetRenderContext() ->GetOutputDataTotalSize() );
             m_Samples.resize( numSamples );
 			m_DofOffsetIndices.resize( numSamples );
         }
@@ -282,7 +283,6 @@ void CqImagePixel::InitialiseSamples( std::vector<CqVector2D>& vecSamples, TqBoo
 			m_Samples[m_DofOffsetIndices[i]].m_DofOffsetIndex = i;
 		}
 	}
-	m_Data.TempDataAccessor().resize( QGetRenderContext()->GetOutputDataTotalSize() );
 }
 
 

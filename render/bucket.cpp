@@ -96,6 +96,8 @@ void CqBucket::InitialiseBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqIn
     // Allocate the image element storage if this is the first bucket
     if(m_aieImage.empty())
     {
+		SqImageSample::SetSampleSize(QGetRenderContext() ->GetOutputDataTotalSize());
+
         m_aieImage.resize( m_RealWidth * m_RealHeight );
 		m_aSamplePositions.resize( m_RealWidth * m_RealHeight );
 

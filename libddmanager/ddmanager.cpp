@@ -157,7 +157,7 @@ TqInt CqDDManager::DisplayBucket( IqBucket* pBucket )
 			i->m_DataRow = reinterpret_cast<unsigned char*>(malloc(i->m_elementSize * width * height));
 		}
 
-		SqImageSample val( QGetRenderContext()->GetOutputDataTotalSize() );
+		SqImageSample val;
 		// Fill in the bucket data for each channel in each element, honoring the requested order and formats.
 		unsigned char* pdata = i->m_DataBucket;
 		TqInt y;
