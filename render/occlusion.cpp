@@ -270,6 +270,10 @@ void CqOcclusionBox::CreateHierarchy( TqInt bucketXSize, TqInt bucketYSize, TqIn
 void CqOcclusionBox::DeleteHierarchy()
 {
     m_KDTree.m_Samples.clear();
+//	std::vector<CqOcclusionTree*>::iterator child;
+//	for(child = m_KDTree.m_Children.begin(); child != m_KDTree.m_Children.end(); ++child)
+//		delete((*child));
+	m_KDTree.m_Children.clear();
 }
 
 
