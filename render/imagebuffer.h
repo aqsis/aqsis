@@ -274,7 +274,7 @@ public:
     TqBool	PushMPGDown( CqMicroPolygon*, TqInt Col, TqInt Row );
     void	RenderMPGs( long xmin, long xmax, long ymin, long ymax );
     void	RenderMicroPoly( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax );
-	void	ProcessMPG( CqMicroPolygon* pMPG, const CqBound& bound, TqOcclusionKDTree& treenode, TqFloat time0, TqFloat time1, TqBool usingDof = TqFalse, TqInt dofoffsetindex = 0);
+	void	ProcessMPG( CqMicroPolygon* pMPG, const CqBound& bound, CqOcclusionTree& treenode, TqFloat time0, TqFloat time1, TqBool usingDof = TqFalse, TqInt dofoffsetindex = 0);
     void	RenderSurfaces( long xmin, long xmax, long ymin, long ymax, TqBool fImager, enum EqFilterDepth filterdepth, CqColor zThreshold );
     void	RenderImage();
 	void	StoreExtraData( CqMicroPolygon* pMPG, SqImageSample& sample);

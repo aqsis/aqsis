@@ -905,18 +905,18 @@ void CqImageBuffer::RenderMPG_Static( CqMicroPolygon* pMPG, long xmin, long xmax
 }
 
 
-void CqImageBuffer::ProcessMPG( CqMicroPolygon* pMPG, const CqBound& bound, TqOcclusionKDTree& treenode, TqFloat time0, TqFloat time1, TqBool usingDof, TqInt dofboundindex)
+void CqImageBuffer::ProcessMPG( CqMicroPolygon* pMPG, const CqBound& bound, CqOcclusionTree& treenode, TqFloat time0, TqFloat time1, TqBool usingDof, TqInt dofboundindex)
 {
 	// Check the current tree level, and if only one leaf, sample the MP, otherwise, pass it down to the left
 	// and/or right side of the tree if it crosses.
-	if(treenode.aLeaves().size() == 1)
+	if(treenode.Samples().size() == 1)
 	{
 		// If using DoF, only check this sample if it is within the appropriate Dof bound.
-		if(usingDof && dofboundindex != treenode.aLeaves()[0]->m_DofOffsetIndex)
+		if(usingDof && dofboundindex != treenode.Samples()[0]->m_DofOffsetIndex)
 			return;
 
 		// Sample the MPG
-		SqSampleData* pData = treenode.aLeaves()[0];
+		SqSampleData* pData = treenode.Samples()[0];
 		TqBool SampleHit;
 		TqFloat D;
 
@@ -1009,17 +1009,15 @@ void CqImageBuffer::ProcessMPG( CqMicroPolygon* pMPG, const CqBound& bound, TqOc
 			}
 
 			// Update max depth values if the sample is opaque and can occlude
+			// If the sample depth is closer than the current closest one, and is opaques
+			// we can just replace, as we know we are in a treenode that is a leaf.
 			if ( !( DisplayMode() & ModeZ ) && opaque )
 			{
-				if(treenode.ExtraData().m_MaxOpaqueZ == FLT_MAX)
-					treenode.ExtraData().m_MaxOpaqueZ = D;
-				else
-					treenode.ExtraData().m_MaxOpaqueZ = MAX(treenode.ExtraData().m_MaxOpaqueZ, D);
-				if(treenode.ExtraData().m_MinOpaqueZ == -FLT_MAX)
-					treenode.ExtraData().m_MinOpaqueZ = D;
-				else
-					treenode.ExtraData().m_MinOpaqueZ = MIN(treenode.ExtraData().m_MinOpaqueZ, D);
-				CqOcclusionBox::KDTree().PropagateChanges();
+				if(D < treenode.m_MaxOpaqueZ)
+				{
+					treenode.m_MaxOpaqueZ = D;
+					treenode.PropagateChanges();
+				}
 			}
 
 			ImageVal.m_pCSGNode = pMPG->pGrid() ->pCSGNode();
@@ -1047,23 +1045,16 @@ void CqImageBuffer::ProcessMPG( CqMicroPolygon* pMPG, const CqBound& bound, TqOc
 	}
 	else
 	{
-		TqOcclusionKDTree* left = treenode.Left();
-		TqOcclusionKDTree* right = treenode.Right();
-		const SqOcclusionKDTreeExtraData& leftData = left->ExtraData();
-		const SqOcclusionKDTreeExtraData& rightData = right->ExtraData();
-		if(	(!usingDof || (dofboundindex >= leftData.m_MinDofBoundIndex) && (dofboundindex <= leftData.m_MaxDofBoundIndex )) &&
-			((time0 <= leftData.m_MaxTime) && (time1 >= leftData.m_MinTime) ) &&
-			(bound.Intersects(leftData.m_MinSamplePoint, leftData.m_MaxSamplePoint)))
+		std::vector<CqOcclusionTree*>::iterator childNode;
+		for(childNode = treenode.m_Children.begin(); childNode != treenode.m_Children.end(); ++childNode)
 		{
-			if(bound.vecMin().z() <= leftData.m_MaxOpaqueZ || !m_CurrentGridInfo.m_IsCullable)
-				ProcessMPG(pMPG, bound, *left, time0, time1, usingDof, dofboundindex);
-		}
-		if(	(!usingDof || (dofboundindex >= rightData.m_MinDofBoundIndex) && (dofboundindex <= rightData.m_MaxDofBoundIndex )) &&
-			((time0 <= rightData.m_MaxTime) && (time1 >= rightData.m_MinTime) ) &&
-			(bound.Intersects(rightData.m_MinSamplePoint, rightData.m_MaxSamplePoint)))
-		{
-			if(bound.vecMin().z() <= rightData.m_MaxOpaqueZ || !m_CurrentGridInfo.m_IsCullable)
-				ProcessMPG(pMPG, bound, *right, time0, time1, usingDof, dofboundindex);
+			if(	(!usingDof || (dofboundindex >= (*childNode)->m_MinDofBoundIndex) && (dofboundindex <= (*childNode)->m_MaxDofBoundIndex )) &&
+				((time0 <= (*childNode)->m_MaxTime) && (time1 >= (*childNode)->m_MinTime) ) &&
+				(bound.Intersects((*childNode)->m_MinSamplePoint, (*childNode)->m_MaxSamplePoint)))
+			{
+				if(bound.vecMin().z() <= (*childNode)->m_MaxOpaqueZ || !m_CurrentGridInfo.m_IsCullable)
+					ProcessMPG(pMPG, bound, *(*childNode), time0, time1, usingDof, dofboundindex);
+			}
 		}
 	}
 }
