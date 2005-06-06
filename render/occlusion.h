@@ -27,6 +27,8 @@
 #ifndef OCCLUSION_H_INCLUDED
 #define OCCLUSION_H_INCLUDED 1
 
+#include <deque>
+
 #include "aqsis.h"
 #include "kdtree.h"
 #include "imagepixel.h"
@@ -98,11 +100,8 @@ public:
     static void DeleteHierarchy();
     static void SetupHierarchy( CqBucket* bucket, TqInt xMin, TqInt yMin, TqInt xMax, TqInt yMax );
 
-    static TqBool CanCull( CqBound* bound )
-    {
-        //return m_Hierarchy[ 0 ].IsCullable( bound );
-		return(TqFalse);
-    }
+    static TqBool CanCull( CqBound* bound );
+
 	static CqOcclusionTree& KDTree()
 	{
 		return(m_KDTree);

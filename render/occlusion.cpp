@@ -325,5 +325,38 @@ void CqOcclusionBox::SetupHierarchy( CqBucket* bucket, TqInt xMin, TqInt yMin, T
 }
 
 
+TqBool CqOcclusionBox::CanCull( CqBound* bound )
+{
+	// Recursively call each level to see if it can be culled at that point.
+	// Stop recursing at a level that doesn't contain the whole bound.
+	std::deque<CqOcclusionTree*> stack;
+	stack.push_front(&m_KDTree);
+	TqBool	top_level = TqTrue;
+	while(!stack.empty())
+	{
+		CqOcclusionTree* node = stack.front();
+		stack.pop_front();
+		// Check the bound against the 2D limits of this level, if not entirely contained, then we
+		// cannot cull at this level, nor at any of the children.
+		CqBound b1(node->m_MinSamplePoint, node->m_MaxSamplePoint);
+		if(b1.Contains2D(*bound) || top_level)
+		{
+			top_level = TqFalse;
+			if( bound->vecMin().z() > node->m_MaxOpaqueZ )
+				// If the bound is entirely contained within this node's 2D bound, and is further
+				// away than the furthest opaque point, then cull.
+				return(TqTrue);
+			// If contained, but not behind the furthest point, push the children nodes onto the stack for
+			// processing.
+			std::vector<CqOcclusionTree*>::iterator childNode;
+			for(childNode = node->m_Children.begin(); childNode != node->m_Children.end(); ++childNode)
+				stack.push_front(*childNode);
+		}
+	}
+	return(TqFalse);
+}
+
+
+
 END_NAMESPACE( Aqsis )
 
