@@ -194,25 +194,27 @@ void CqOcclusionTree::UpdateBounds()
 
 void CqOcclusionTree::PropagateChanges()
 {
+	CqOcclusionTree* node = this;
 	// Update our opaque depth based on that our our children.
-	if( m_Children.size() > 0 )
+	while(node)
 	{
-		TqFloat maxdepth = -FLT_MAX;
-		std::vector<CqOcclusionTree*>::iterator child;
-		for(child = m_Children.begin(); child != m_Children.end(); ++child)
-			maxdepth = MAX((*child)->m_MaxOpaqueZ, maxdepth);
-		// Only if this has resulted in a change at this level, should we process the parent.
-		if(maxdepth < m_MaxOpaqueZ)
+		if( node->m_Children.size() > 0 )
 		{
-			m_MaxOpaqueZ = maxdepth;
-			if( m_Parent)
-				m_Parent->PropagateChanges();
+			TqFloat maxdepth = -FLT_MAX;
+			std::vector<CqOcclusionTree*>::iterator child;
+			for(child = node->m_Children.begin(); child != node->m_Children.end(); ++child)
+				maxdepth = MAX((*child)->m_MaxOpaqueZ, maxdepth);
+			// Only if this has resulted in a change at this level, should we process the parent.
+			if(maxdepth < node->m_MaxOpaqueZ)
+			{
+				node->m_MaxOpaqueZ = maxdepth;
+				node = node->m_Parent;
+			}
+			else
+				break;
 		}
-	}
-	else
-	{
-		if( m_Parent)
-			m_Parent->PropagateChanges();
+		else
+			node = node->m_Parent;
 	}
 }
 

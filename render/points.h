@@ -343,8 +343,9 @@ public:
     {
         m_radius = radius;
     }
-    virtual	CqBound			GetTotalBound( )
+    virtual	CqBound& GetTotalBound( )
     {
+		static CqBound b;
         CqVector3D Pmin, Pmax;
         pGrid()->pVar(EnvVars_P)->GetPoint(Pmin, m_Index);
         Pmax = Pmin;
@@ -352,7 +353,9 @@ public:
         Pmin.y( Pmin.y() - m_radius );
         Pmax.x( Pmax.x() + m_radius );
         Pmax.y( Pmax.y() + m_radius );
-        return( CqBound( Pmin, Pmax ) );
+		b.Encapsulate(Pmin);
+		b.Encapsulate(Pmax);
+        return( b );
     }
     virtual	TqBool	Sample( const SqSampleData& sample, TqFloat& D, TqFloat time, TqBool UsingDof = TqFalse );
 
@@ -439,8 +442,8 @@ void	DeleteVariables( TqBool all )	{}
     // Overrides from CqMicroPolygon
     virtual TqBool	fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const;
 	virtual void CalculateTotalBound();
-    virtual	CqBound			GetTotalBound( /*TqBool fForce = TqFalse */);
-    virtual const CqBound	GetTotalBound() const
+    virtual	CqBound&		GetTotalBound( /*TqBool fForce = TqFalse */);
+    virtual const CqBound&	GetTotalBound() const
     {
         return ( m_Bound );
     }

@@ -512,7 +512,7 @@ TqBool CqImageBuffer::PushMPGForward( CqMicroPolygon* pmpg, TqInt Col, TqInt Row
     BucketMin -= FilterWidth;
     BucketMax += FilterWidth;
 
-    CqBound	B( pmpg->GetTotalBound() );
+    const CqBound&	B = pmpg->GetTotalBound();
 
     const CqVector3D& vMin = B.vecMin();
     const CqVector3D& vMax = B.vecMax();
@@ -567,7 +567,7 @@ TqBool CqImageBuffer::PushMPGDown( CqMicroPolygon* pmpg, TqInt Col, TqInt Row )
     BucketMin -= FilterWidth;
     BucketMax += FilterWidth;
 
-    CqBound	B( pmpg->GetTotalBound( ) );
+    const CqBound&	B = pmpg->GetTotalBound( );
 
     const CqVector3D& vMin = B.vecMin();
     const CqVector3D& vMax = B.vecMax();
@@ -694,12 +694,12 @@ void CqImageBuffer::RenderMPGs( long xmin, long xmax, long ymin, long ymax )
 
 void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax )
 {
-	CqBound Bound = pMPG->GetTotalBound();
+	const CqBound& Bound = pMPG->GetTotalBound();
 
 	// if bounding box is outside our viewing range, then cull it.
 	if ( Bound.vecMax().x() < xmin || Bound.vecMax().y() < ymin ||
-		Bound.vecMin().x() > xmax || Bound.vecMin().y() > ymax ||
-		Bound.vecMin().z() > ClippingFar() || Bound.vecMax().z() < ClippingNear())
+		 Bound.vecMin().x() > xmax || Bound.vecMin().y() > ymax ||
+		 Bound.vecMin().z() > ClippingFar() || Bound.vecMax().z() < ClippingNear())
 	{
 		STATS_INC( MPG_culled );
 		return;
@@ -709,7 +709,7 @@ void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, long xmin, long xmax,
     // Must check if colour is needed, as if not, the variable will have been deleted from the grid.
     if ( QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Ci" ) )
     {
-        m_CurrentMpgSampleInfo.m_Colour = pMPG->colColor();
+        m_CurrentMpgSampleInfo.m_Colour = pMPG->colColor()[0];
     }
     else
     {
@@ -719,8 +719,8 @@ void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, long xmin, long xmax,
     // Must check if opacity is needed, as if not, the variable will have been deleted from the grid.
     if ( QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Oi" ) )
     {
-        m_CurrentMpgSampleInfo.m_Opacity = pMPG->colOpacity();
-        m_CurrentMpgSampleInfo.m_Occludes = pMPG->colOpacity() >= gColWhite;
+        m_CurrentMpgSampleInfo.m_Opacity = pMPG->colOpacity()[0];
+        m_CurrentMpgSampleInfo.m_Occludes = m_CurrentMpgSampleInfo.m_Opacity >= gColWhite;
     }
     else
     {
@@ -899,7 +899,7 @@ void CqImageBuffer::RenderMPG_Static( CqMicroPolygon* pMPG, long xmin, long xmax
 	CqHitTestCache hitTestCache;
 	pMPG->CacheHitTestValues(&hitTestCache);
 
-    CqBound Bound = pMPG->GetTotalBound();
+    const CqBound& Bound = pMPG->GetTotalBound();
 
 	ProcessMPG(pMPG, Bound, CqOcclusionBox::KDTree(), m_CurrentGridInfo.m_ShutterOpenTime, m_CurrentGridInfo.m_ShutterCloseTime );
 }
@@ -911,10 +911,6 @@ void CqImageBuffer::ProcessMPG( CqMicroPolygon* pMPG, const CqBound& bound, CqOc
 	// and/or right side of the tree if it crosses.
 	if(treenode.Samples().size() == 1)
 	{
-		// If using DoF, only check this sample if it is within the appropriate Dof bound.
-		if(usingDof && dofboundindex != treenode.Samples()[0]->m_DofOffsetIndex)
-			return;
-
 		// Sample the MPG
 		SqSampleData* pData = treenode.Samples()[0];
 		TqBool SampleHit;
@@ -923,6 +919,8 @@ void CqImageBuffer::ProcessMPG( CqMicroPolygon* pMPG, const CqBound& bound, CqOc
 		const TqFloat* LodBounds = m_CurrentGridInfo.m_LodBounds;
 		TqBool UsingLevelOfDetail = LodBounds[ 0 ] >= 0.0f;
 		// Check to see if the sample is within the sample's level of detail
+		// \note Need to move this to the level check further down and 
+		// include LOD bounds in the treenode data.
 		if ( UsingLevelOfDetail)
 		{
 			TqFloat LevelOfDetail = pData->m_DetailLevel;
@@ -930,7 +928,7 @@ void CqImageBuffer::ProcessMPG( CqMicroPolygon* pMPG, const CqBound& bound, CqOc
 				return;
 		}
 
-		CqStats::IncI( CqStats::SPL_count );
+		//CqStats::IncI( CqStats::SPL_count );
 		SampleHit = pMPG->Sample(*pData , D, pData->m_Time, usingDof );
 
 		if ( SampleHit )
@@ -939,7 +937,7 @@ void CqImageBuffer::ProcessMPG( CqMicroPolygon* pMPG, const CqBound& bound, CqOc
 			TqBool opaque =  m_CurrentMpgSampleInfo.m_IsOpaque;
 
 			SqImageSample& currentOpaqueSample = pData->m_OpaqueSample;
-			SqImageSample localImageVal;
+			static SqImageSample localImageVal;
 
 			SqImageSample& ImageVal = opaque ? currentOpaqueSample : localImageVal;
 
@@ -979,12 +977,14 @@ void CqImageBuffer::ProcessMPG( CqMicroPolygon* pMPG, const CqBound& bound, CqOc
 			pMPG->MarkHit();
 
 			TqFloat* val = ImageVal.Data();
-			val[ 0 ] = m_CurrentMpgSampleInfo.m_Colour.fRed();
-			val[ 1 ] = m_CurrentMpgSampleInfo.m_Colour.fGreen();
-			val[ 2 ] = m_CurrentMpgSampleInfo.m_Colour.fBlue();
-			val[ 3 ] = m_CurrentMpgSampleInfo.m_Opacity.fRed();
-			val[ 4 ] = m_CurrentMpgSampleInfo.m_Opacity.fGreen();
-			val[ 5 ] = m_CurrentMpgSampleInfo.m_Opacity.fBlue();
+			const CqColor& col = m_CurrentMpgSampleInfo.m_Colour;
+			const CqColor& opa = m_CurrentMpgSampleInfo.m_Colour;
+			val[ 0 ] = col[0];
+			val[ 1 ] = col[1];
+			val[ 2 ] = col[2];
+			val[ 3 ] = opa[0];
+			val[ 4 ] = opa[1];
+			val[ 5 ] = opa[2];
 			val[ 6 ] = D;
 
 			// Now store any other data types that have been registered.
@@ -1045,15 +1045,26 @@ void CqImageBuffer::ProcessMPG( CqMicroPolygon* pMPG, const CqBound& bound, CqOc
 	}
 	else
 	{
-		std::vector<CqOcclusionTree*>::iterator childNode;
-		for(childNode = treenode.m_Children.begin(); childNode != treenode.m_Children.end(); ++childNode)
+		if( ( treenode.m_Children.size() > 0 ) && treenode.m_Children[0] )
 		{
-			if(	(!usingDof || (dofboundindex >= (*childNode)->m_MinDofBoundIndex) && (dofboundindex <= (*childNode)->m_MaxDofBoundIndex )) &&
-				((time0 <= (*childNode)->m_MaxTime) && (time1 >= (*childNode)->m_MinTime) ) &&
-				(bound.Intersects((*childNode)->m_MinSamplePoint, (*childNode)->m_MaxSamplePoint)))
+			CqOcclusionTree* child = treenode.m_Children[0];
+			if(	(!usingDof || (dofboundindex >= child->m_MinDofBoundIndex) && (dofboundindex <= child->m_MaxDofBoundIndex )) &&
+				((time0 <= child->m_MaxTime) && (time1 >= child->m_MinTime) ) &&
+				(bound.Intersects(child->m_MinSamplePoint, child->m_MaxSamplePoint)))
 			{
-				if(bound.vecMin().z() <= (*childNode)->m_MaxOpaqueZ || !m_CurrentGridInfo.m_IsCullable)
-					ProcessMPG(pMPG, bound, *(*childNode), time0, time1, usingDof, dofboundindex);
+				if(bound.vecMin().z() <= child->m_MaxOpaqueZ || !m_CurrentGridInfo.m_IsCullable)
+					ProcessMPG(pMPG, bound, *child, time0, time1, usingDof, dofboundindex);
+			}
+			if( ( treenode.m_Children.size() > 1 ) && treenode.m_Children[1] )
+			{
+				CqOcclusionTree* child = treenode.m_Children[1];
+				if(	(!usingDof || (dofboundindex >= child->m_MinDofBoundIndex) && (dofboundindex <= child->m_MaxDofBoundIndex )) &&
+					((time0 <= child->m_MaxTime) && (time1 >= child->m_MinTime) ) &&
+					(bound.Intersects(child->m_MinSamplePoint, child->m_MaxSamplePoint)))
+				{
+					if(bound.vecMin().z() <= child->m_MaxOpaqueZ || !m_CurrentGridInfo.m_IsCullable)
+						ProcessMPG(pMPG, bound, *child, time0, time1, usingDof, dofboundindex);
+				}
 			}
 		}
 	}
@@ -1349,7 +1360,7 @@ void CqImageBuffer::RenderImage()
     const CqString* systemOptions;
     if( ( systemOptions = QGetRenderContext() ->optCurrent().GetStringOption( "System", "Imager" ) ) != 0 )
     if( systemOptions[ 0 ].compare("null") != 0 )
-	fImager = TqTrue;
+		fImager = TqTrue;
 
     const CqString* pstrDepthFilter = QGetRenderContext() ->optCurrent().GetStringOption( "Hider", "depthfilter" );
     const CqColor* pzThreshold = QGetRenderContext() ->optCurrent().GetColorOption( "limits", "zthreshold" );
@@ -1385,7 +1396,6 @@ void CqImageBuffer::RenderImage()
     do
     {
         TqBool bIsEmpty = IsCurrentBucketEmpty();
-        QGetRenderContext() ->Stats().Others().Start();
         // Prepare the bucket.
         CqVector2D bPos = BucketPosition();
         CqVector2D bSize = BucketSize();
@@ -1396,12 +1406,14 @@ void CqImageBuffer::RenderImage()
         const CqString* systemOptions;
         if( ( systemOptions = QGetRenderContext() ->optCurrent().GetStringOption( "System", "Imager" ) ) != 0 )
     	if( systemOptions[ 0 ].compare("null") != 0 )
-		fImager = TqTrue;
+			fImager = TqTrue;
 
         if (fImager)
             bIsEmpty = TqFalse;
 
+        QGetRenderContext() ->Stats().Others().Start();
         CqBucket::InitialiseBucket( static_cast<TqInt>( bPos.x() ), static_cast<TqInt>( bPos.y() ), static_cast<TqInt>( bSize.x() ), static_cast<TqInt>( bSize.y() ), true, bIsEmpty );
+        QGetRenderContext() ->Stats().Others().Stop();
         CqBucket::InitialiseFilterValues();
 
 		////////// Dump the pixel sample positions into a dump file //////////
@@ -1430,7 +1442,6 @@ void CqImageBuffer::RenderImage()
         if ( ymax > CropWindowYMax() + m_FilterYWidth / 2 )
 			ymax = static_cast<long>(CropWindowYMax() + m_FilterYWidth / 2.0f);
 
-        QGetRenderContext() ->Stats().Others().Stop();
 
         if ( !bIsEmpty )
         {

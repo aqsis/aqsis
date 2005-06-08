@@ -799,7 +799,7 @@ void CqMicroPolygonMotionPoints::CalculateTotalBound()
  * \param fForce Boolean flag to force the recalculation of the cached bound.
  */
 
-CqBound CqMicroPolygonMotionPoints::GetTotalBound( )
+CqBound& CqMicroPolygonMotionPoints::GetTotalBound( )
 {
     return ( m_Bound );
 }

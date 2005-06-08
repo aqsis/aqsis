@@ -470,20 +470,20 @@ public:
     /** Get the color of this micropoly.
      * \return CqColor reference.
      */
-    const	CqColor	colColor() const
+    const CqColor*	colColor() const
     {
-        CqColor colRes;
-        m_pGrid->pVar(EnvVars_Ci) ->GetColor( colRes, m_Index );
-        return ( colRes );
+        CqColor* col;
+        m_pGrid->pVar(EnvVars_Ci) ->GetColorPtr( col );
+        return ( &col[m_Index] );
     }
     /** Get the opacity of this micropoly.
      * \return CqColor reference.
      */
-    const	CqColor	colOpacity() const
+    const	CqColor* colOpacity() const
     {
-        CqColor colRes;
-        m_pGrid->pVar(EnvVars_Oi) ->GetColor( colRes, m_Index );
-        return ( colRes );
+        CqColor* col;
+        m_pGrid->pVar(EnvVars_Oi) ->GetColorPtr( col );
+        return ( &col[m_Index] );
     }
 
     /** Calculate the bound of the micropoly.
@@ -494,18 +494,15 @@ public:
     /** Get the bound of the micropoly.
      * \return CqBound representing the conservative bound.
      */
-    virtual	CqBound GetTotalBound()
+    virtual	CqBound& GetTotalBound()
+	{
+		return m_Bound;
+	}
+    virtual	const CqBound& GetTotalBound() const
 	{
 		return m_Bound;
 	}
 
-    /** Get the bound of the micropoly.
-     * \return CqBound representing the conservative bound.
-     */
-    virtual const CqBound GetTotalBound() const
-    {
-        return ( GetTotalBound() );
-    }
     virtual	TqInt	cSubBounds()
     {
         return ( 1 );
@@ -695,8 +692,8 @@ public:
 
     // Overrides from CqMicroPolygon
 	virtual void CalculateTotalBound();
-	virtual	CqBound	GetTotalBound() { return m_Bound; }
-    virtual const CqBound	GetTotalBound() const
+	virtual	CqBound&	GetTotalBound() { return m_Bound; }
+    virtual const CqBound&	GetTotalBound() const
     {
         return ( m_Bound );
     }

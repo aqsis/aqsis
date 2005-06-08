@@ -153,12 +153,12 @@ void CqMPDump::dump(const CqMicroPolygon& mp)
 	v = mp.PointD();
 	dumpVec3(v);
 	if (mp.pGrid()->pVar(EnvVars_Ci)!=NULL)
-	  c = mp.colColor();
+	  c = *mp.colColor();
 	else
 	  c = CqColor(0.9,0.9,1);
 	dumpCol(c);
     if (mp.pGrid()->pVar(EnvVars_Oi)!=NULL)
-		c = mp.colOpacity();
+		c = *mp.colOpacity();
 	else
 		c = CqColor(0.9,0.9,1);
 	dumpCol(c);
