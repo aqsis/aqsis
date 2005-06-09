@@ -980,7 +980,7 @@ void CqImageBuffer::ProcessMPG( CqMicroPolygon* pMPG, const CqBound& bound, CqOc
 
 			TqFloat* val = ImageVal.Data();
 			const CqColor& col = m_CurrentMpgSampleInfo.m_Colour;
-			const CqColor& opa = m_CurrentMpgSampleInfo.m_Colour;
+			const CqColor& opa = m_CurrentMpgSampleInfo.m_Opacity;
 			val[ 0 ] = col[0];
 			val[ 1 ] = col[1];
 			val[ 2 ] = col[2];

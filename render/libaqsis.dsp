@@ -44,7 +44,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "LIBAQSIS_EXPORTS" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GR /GX /O2 /I "..\libaqsistypes\win32\intel" /I "..\libaqsistypes" /I "..\libshadervm" /I "..\libshaderexecenv" /I "..\librib2ri" /I "..\librib2" /I "..\..\win32libs\include" /D "NDEBUG" /D "PLUGINS" /D "_MBCS" /D "_LIB" /D "WIN32" /D "NO_SYSLOG" /D "USE_TIMERS" /FR /YX /FD /Zm200 /c
+# ADD CPP /nologo /MD /W3 /GR /GX /O2 /I "..\libaqsistypes\win32\intel" /I "..\libaqsistypes" /I "..\libshadervm" /I "..\libshaderexecenv" /I "..\librib2ri" /I "..\librib2" /I "..\..\win32libs\include" /D "NDEBUG" /D _qBUILDING=CORE /D CORE=1 /D "PLUGINS" /D "_MBCS" /D "_LIB" /D "WIN32" /D "NO_SYSLOG" /D "USE_TIMERS" /FR /YX /FD /Zm200 /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x809 /d "NDEBUG"
@@ -70,7 +70,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "LIBAQSIS_EXPORTS" /YX /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GR /GX /ZI /Od /I "..\libaqsistypes\win32\intel" /I "..\libaqsistypes" /I "..\libshadervm" /I "..\libshaderexecenv" /I "..\librib2ri" /I "..\librib2" /I "..\..\win32libs\include" /D "_DEBUG" /D "PLUGINS" /D "_MBCS" /D "_LIB" /D "WIN32" /D "NO_SYSLOG" /D "USE_TIMERS" /FR /YX /FD /GZ /Zm200 /c
+# ADD CPP /nologo /MDd /W3 /Gm /GR /GX /ZI /Od /I "..\libaqsistypes\win32\intel" /I "..\libaqsistypes" /I "..\libshadervm" /I "..\libshaderexecenv" /I "..\librib2ri" /I "..\librib2" /I "..\..\win32libs\include" /D "_DEBUG" /D _qBUILDING=CORE /D CORE=1 /D "PLUGINS" /D "_MBCS" /D "_LIB" /D "WIN32" /D "NO_SYSLOG" /D "USE_TIMERS" /FR /YX /FD /GZ /Zm200 /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x809 /d "_DEBUG"
@@ -98,7 +98,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /GR /GX /O2 /I "..\libaqsistypes\win32\intel" /I "..\libaqsistypes" /I "..\libshadervm" /I "..\libshaderexecenv" /I "..\librib2ri" /I "..\librib2" /D "NDEBUG" /D "_MBCS" /D "_LIB" /D "PLUGINS" /D "AQSIS_DYNAMIC_LINK" /D "WIN32" /D _qBUILDING=CORE /D CORE=1 /FR /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GR /GX /Zi /O2 /I "..\libaqsistypes\win32\intel" /I "..\libaqsistypes" /I "..\libshadervm" /I "..\libshaderexecenv" /I "..\librib2ri" /I "..\librib2" /I "..\..\win32libs\include" /D "NDEBUG" /D "PLUGINS" /D "_MBCS" /D "_LIB" /D "WIN32" /D "NO_SYSLOG" /D "USE_TIMERS" /FR /YX /FD /Zm200 /c
+# ADD CPP /nologo /MD /W3 /GR /GX /Zi /O2 /I "..\libaqsistypes\win32\intel" /I "..\libaqsistypes" /I "..\libshadervm" /I "..\libshaderexecenv" /I "..\librib2ri" /I "..\librib2" /I "..\..\win32libs\include" /D "NDEBUG" /D _qBUILDING=CORE /D CORE=1 /D "PLUGINS" /D "_MBCS" /D "_LIB" /D "WIN32" /D "NO_SYSLOG" /D "USE_TIMERS" /FR /YX /FD /Zm200 /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x809 /d "NDEBUG"
