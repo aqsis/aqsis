@@ -1399,9 +1399,7 @@ void CqImageBuffer::RenderImage()
         // Prepare the bucket.
         CqVector2D bPos = BucketPosition();
         CqVector2D bSize = BucketSize();
-        // TODO: fix non jittered bucket initialisation.
-        // Warning Jitter must be True is all cases; the InitialiseBucket when it is not in jittering mode
-        // doesn't initialise correctly so later we have problem in the FilterBucket()
+
         TqBool fImager = TqFalse;
         const CqString* systemOptions;
         if( ( systemOptions = QGetRenderContext() ->optCurrent().GetStringOption( "System", "Imager" ) ) != 0 )
@@ -1412,9 +1410,9 @@ void CqImageBuffer::RenderImage()
             bIsEmpty = TqFalse;
 
         QGetRenderContext() ->Stats().Others().Start();
-        CqBucket::InitialiseBucket( static_cast<TqInt>( bPos.x() ), static_cast<TqInt>( bPos.y() ), static_cast<TqInt>( bSize.x() ), static_cast<TqInt>( bSize.y() ), true, bIsEmpty );
-        QGetRenderContext() ->Stats().Others().Stop();
+        CqBucket::PrepareBucket( static_cast<TqInt>( bPos.x() ), static_cast<TqInt>( bPos.y() ), static_cast<TqInt>( bSize.x() ), static_cast<TqInt>( bSize.y() ), true, bIsEmpty );
         CqBucket::InitialiseFilterValues();
+        QGetRenderContext() ->Stats().Others().Stop();
 
 		////////// Dump the pixel sample positions into a dump file //////////
 		#ifdef DEBUG_MPDUMP

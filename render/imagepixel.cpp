@@ -99,7 +99,7 @@ void CqImagePixel::AllocateSamples( TqInt XSamples, TqInt YSamples )
  * \param fJitter Flag indicating whether to apply jittering to the sample points or not.
  */
 
-void CqImagePixel::InitialiseSamples( std::vector<CqVector2D>& vecSamples, TqBool fJitter )
+void CqImagePixel::InitialiseSamples( std::vector<CqVector2D>& vecSamples )
 {
     TqFloat opentime = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Shutter" ) [ 0 ];
     TqFloat closetime = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Shutter" ) [ 1 ];
@@ -111,177 +111,77 @@ void CqImagePixel::InitialiseSamples( std::vector<CqVector2D>& vecSamples, TqBoo
     TqInt i, j;
 
     vecSamples.resize(numSamples);
-    if ( !fJitter )
+    // Initialise the samples to the centre points.
+    TqFloat XInc = ( 1.0f / m_XSamples ) / 2.0f;
+    TqFloat YInc = ( 1.0f / m_YSamples ) / 2.0f;
+    TqInt y;
+    for ( y = 0; y < m_YSamples; y++ )
     {
-        // Initialise the samples to the centre points.
-        TqFloat XInc = ( 1.0f / m_XSamples ) / 2.0f;
-        TqFloat YInc = ( 1.0f / m_YSamples ) / 2.0f;
-        TqInt y;
-        for ( y = 0; y < m_YSamples; y++ )
-        {
-            TqFloat YSam = YInc + ( YInc * y );
-            TqInt x;
-            for ( x = 0; x < m_XSamples; x++ )
-                vecSamples[ ( y * m_XSamples ) + x ] = CqVector2D( XInc + ( XInc * x ), YSam );
-        }
-
-
-        // Fill in the sample times for motion blur, LOD and SubCellIndex entries
-
-        TqFloat time = 0;
-        TqInt nSamples = m_XSamples*m_YSamples;
-        TqFloat dtime = 1.0f / nSamples;
-
-        for ( i = 0; i < nSamples; i++ )
-        {
-            m_Samples[ i ].m_SubCellIndex = 0;
-            m_Samples[ i ].m_DetailLevel = m_Samples[ i ].m_Time = time;
-            time += dtime;
-        }
-
-
+        TqFloat YSam = YInc + ( YInc * y );
+        TqInt x;
+        for ( x = 0; x < m_XSamples; x++ )
+            vecSamples[ ( y * m_XSamples ) + x ] = CqVector2D( XInc + ( XInc * x ), YSam );
     }
-    else
+
+
+    static CqRandom random(  53 );
+    // Fill in the sample times for motion blur, LOD and SubCellIndex entries
+
+    TqFloat time = 0;
+    TqInt nSamples = m_XSamples*m_YSamples;
+    TqFloat dtime = 1.0f / nSamples;
+
+    for ( i = 0; i < nSamples; i++ )
     {
-    	static CqRandom random(  53 );
-
-		// Initialize points to the "canonical" multi-jittered pattern.
-
-        for ( i = 0; i < n; i++ )
-        {
-            for ( j = 0; j < m; j++ )
-            {
-                TqInt which = i * m + j;
-                vecSamples[which].x( i );
-                vecSamples[which].y( j );
-            }
-        }
-
-        // Shuffle y coordinates within each row of cells.
-        for ( i = 0; i < n; i++ )
-        {
-            for ( j = 0; j < m; j++ )
-            {
-                TqFloat t;
-                TqInt k;
-
-                k = random.RandomInt( n - 1 - i ) + i;
-                TqInt i1 = i * m + j;
-                TqInt i2 = k * m + j;
-                assert( i1 < vecSamples.size() && i2 < vecSamples.size() );
-                t = vecSamples[ i1 ].y();
-                vecSamples[ i1 ].y( vecSamples[ i2 ].y() );
-                vecSamples[ i2 ].y( t );
-            }
-        }
-
-        // Shuffle x coordinates within each column of cells.
-        for ( i = 0; i < m; i++ )
-        {
-            for ( j = 0; j < n; j++ )
-            {
-                TqFloat t;
-                TqInt k;
-
-                k = random.RandomInt( n - 1 - j ) + j;
-                TqInt i1 = j * m + i;
-                TqInt i2 = k * m + i;
-                assert( i1 < vecSamples.size() && i2 < vecSamples.size() );
-                t = vecSamples[ i1 ].x();
-                vecSamples[ i1 ].x( vecSamples[ i2 ].x() );
-                vecSamples[ i2 ].x( t );
-
-            }
-        }
+        m_Samples[ i ].m_SubCellIndex = 0;
+        m_Samples[ i ].m_DetailLevel = m_Samples[ i ].m_Time = time;
+        time += dtime;
+    }
 
 
-        TqFloat subpixelheight = 1.0f / m_YSamples;
-        TqFloat subpixelwidth = 1.0f / m_XSamples;
-
-        TqInt which = 0;
-        for ( i = 0; i < n; i++ )
-        {
-            TqFloat sy = i * subpixelheight;
-            for ( j = 0; j < m; j++ )
-            {
-                TqFloat sx = j * subpixelwidth;
-                TqFloat xindex = vecSamples[ which ].x();
-                TqFloat yindex = vecSamples[ which ].y();
-                vecSamples[ which ].x( xindex * subcell_width + ( subcell_width * 0.5f ) + sx );
-                vecSamples[ which ].y( yindex * subcell_width + ( subcell_width * 0.5f ) + sy );
-                m_Samples[ which ].m_SubCellIndex = static_cast<TqInt>( ( yindex * m_YSamples ) + xindex );
-                which++;
-            }
-        }
-
-		// Fill in the sample times for motion blur, detail levels for LOD and DoF.
-
-		TqFloat time = 0;
-		TqFloat dtime = 1.0f / numSamples;
-		// We use the same random offset for each sample within a pixel.
-		// This ensures the best possible coverage whilst still avoiding
-		// aliasing. (I reckon). should minimise the noise.
-		TqFloat randomTime = random.RandomFloat( dtime );
-
-		TqFloat lod = 0;
-		TqFloat dlod = dtime;
-
-		for ( i = 0; i < numSamples; i++ )
+	// we calculate dof offsets in a grid inside the unit cube and then
+	// project them into the unit circle. This means that the offset
+	// positions match the offset bounding boxes calculated in CqBucket.
+	// The sample test in RenderMicroPoly then can be split into a number
+	// of smaller bounding boxes where we know in advance which samples
+	// fall into each. (This is analagous to what we do for mb now as well).
+	// note that there is an implied symmetry to the way we number the bounding
+	// boxes here and in the bucket code where the bb's are created (it
+	// should be left to right, top to bottom).
+	TqFloat dx = 2.0 / m_XSamples;
+	TqFloat dy = 2.0 / m_YSamples;
+	// We use the same random offset for each sample within a pixel.
+	// This ensures the best possible coverage whilst still avoiding
+	// aliasing. (I reckon). should minimise the noise.
+	TqFloat sx = random.RandomFloat(dx);
+	TqFloat sy = random.RandomFloat(dy);
+	TqFloat xOffset = -1.0 + sx;
+	TqFloat yOffset = -1.0 + sy;
+	TqInt which = 0;
+	std::vector<CqVector2D> tmpDofOffsets(numSamples);
+	for ( i = 0; i < m_YSamples; ++i )
+    {
+        for ( j = 0; j < m_XSamples; ++j )
 		{
-			// Scale the value of time to the shutter time.
-			TqFloat t = time + randomTime;
-			t = ( closetime - opentime ) * t + opentime;
-			m_Samples[ i ].m_Time = t;
-			time += dtime;
+			tmpDofOffsets[which].x(xOffset);
+			tmpDofOffsets[which].y(yOffset);
+			ProjectToCircle(tmpDofOffsets[which]);
 
-			m_Samples[ i ].m_DetailLevel = lod + random.RandomFloat( dlod );
-			lod += dlod;
+			m_DofOffsetIndices[which] = which;
+
+			xOffset += dx;
+			which++;
 		}
+		yOffset += dy;
+		xOffset = -1.0 + sx;
+	}
 
-		// we calculate dof offsets in a grid inside the unit cube and then
-		// project them into the unit circle. This means that the offset
-		// positions match the offset bounding boxes calculated in CqBucket.
-		// The sample test in RenderMicroPoly then can be split into a number
-		// of smaller bounding boxes where we know in advance which samples
-		// fall into each. (This is analagous to what we do for mb now as well).
-		// note that there is an implied symmetry to the way we number the bounding
-		// boxes here and in the bucket code where the bb's are created (it
-		// should be left to right, top to bottom).
-		TqFloat dx = 2.0 / m_XSamples;
-		TqFloat dy = 2.0 / m_YSamples;
-		// We use the same random offset for each sample within a pixel.
-		// This ensures the best possible coverage whilst still avoiding
-		// aliasing. (I reckon). should minimise the noise.
-		TqFloat sx = random.RandomFloat(dx);
-		TqFloat sy = random.RandomFloat(dy);
-		TqFloat xOffset = -1.0 + sx;
-		TqFloat yOffset = -1.0 + sy;
-		which = 0;
-		std::vector<CqVector2D> tmpDofOffsets(numSamples);
-		for ( i = 0; i < m_YSamples; ++i )
-        {
-            for ( j = 0; j < m_XSamples; ++j )
-			{
-				tmpDofOffsets[which].x(xOffset);
-				tmpDofOffsets[which].y(yOffset);
-				ProjectToCircle(tmpDofOffsets[which]);
-
-				m_DofOffsetIndices[which] = which;
-
-				xOffset += dx;
-				which++;
-			}
-			yOffset += dy;
-			xOffset = -1.0 + sx;
-		}
-
-		// we now shuffle the dof offsets but remember which one went where.
-		std::random_shuffle(m_DofOffsetIndices.begin(), m_DofOffsetIndices.end());
-		for( i = 0; i < numSamples; ++i)
-		{
-			m_Samples[m_DofOffsetIndices[i]].m_DofOffset = tmpDofOffsets[i];
-			m_Samples[m_DofOffsetIndices[i]].m_DofOffsetIndex = i;
-		}
+	// we now shuffle the dof offsets but remember which one went where.
+	std::random_shuffle(m_DofOffsetIndices.begin(), m_DofOffsetIndices.end());
+	for( i = 0; i < numSamples; ++i)
+	{
+		m_Samples[m_DofOffsetIndices[i]].m_DofOffset = tmpDofOffsets[i];
+		m_Samples[m_DofOffsetIndices[i]].m_DofOffsetIndex = i;
 	}
 }
 
@@ -290,17 +190,114 @@ void CqImagePixel::InitialiseSamples( std::vector<CqVector2D>& vecSamples, TqBoo
 /** Shuffle the sample data to avoid repeating patterns in the sampling.
  */
 
-void CqImagePixel::ShuffleSamples( )
+void CqImagePixel::JitterSamples( std::vector<CqVector2D>& vecSamples )
 {
+    TqFloat opentime = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Shutter" ) [ 0 ];
+    TqFloat closetime = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Shutter" ) [ 1 ];
 	TqInt numSamples = m_XSamples * m_YSamples;
+    TqFloat subcell_width = 1.0f / numSamples;
+    TqInt m = m_XSamples;
+    TqInt n = m_YSamples;
+    TqInt i, j;
 
-	// Shuffle the DoF offset indices.
-	TqInt which = 0;
+    static CqRandom random(  53 );
+
+	// Initialize points to the "canonical" multi-jittered pattern.
+
+    for ( i = 0; i < n; i++ )
+    {
+        for ( j = 0; j < m; j++ )
+        {
+            TqInt which = i * m + j;
+            vecSamples[which].x( i );
+            vecSamples[which].y( j );
+        }
+    }
+
+    // Shuffle y coordinates within each row of cells.
+    for ( i = 0; i < n; i++ )
+    {
+        for ( j = 0; j < m; j++ )
+        {
+            TqFloat t;
+            TqInt k;
+
+            k = random.RandomInt( n - 1 - i ) + i;
+            TqInt i1 = i * m + j;
+            TqInt i2 = k * m + j;
+            assert( i1 < vecSamples.size() && i2 < vecSamples.size() );
+            t = vecSamples[ i1 ].y();
+            vecSamples[ i1 ].y( vecSamples[ i2 ].y() );
+            vecSamples[ i2 ].y( t );
+        }
+    }
+
+    // Shuffle x coordinates within each column of cells.
+    for ( i = 0; i < m; i++ )
+    {
+        for ( j = 0; j < n; j++ )
+        {
+            TqFloat t;
+            TqInt k;
+
+            k = random.RandomInt( n - 1 - j ) + j;
+            TqInt i1 = j * m + i;
+            TqInt i2 = k * m + i;
+            assert( i1 < vecSamples.size() && i2 < vecSamples.size() );
+            t = vecSamples[ i1 ].x();
+            vecSamples[ i1 ].x( vecSamples[ i2 ].x() );
+            vecSamples[ i2 ].x( t );
+
+        }
+    }
+
+
+    TqFloat subpixelheight = 1.0f / m_YSamples;
+    TqFloat subpixelwidth = 1.0f / m_XSamples;
+
+    TqInt which = 0;
+    for ( i = 0; i < n; i++ )
+    {
+        TqFloat sy = i * subpixelheight;
+        for ( j = 0; j < m; j++ )
+        {
+            TqFloat sx = j * subpixelwidth;
+            TqFloat xindex = vecSamples[ which ].x();
+            TqFloat yindex = vecSamples[ which ].y();
+            vecSamples[ which ].x( xindex * subcell_width + ( subcell_width * 0.5f ) + sx );
+            vecSamples[ which ].y( yindex * subcell_width + ( subcell_width * 0.5f ) + sy );
+            m_Samples[ which ].m_SubCellIndex = static_cast<TqInt>( ( yindex * m_YSamples ) + xindex );
+            which++;
+        }
+    }
+
+	// Fill in the sample times for motion blur, detail levels for LOD and DoF.
+
+	TqFloat time = 0;
+	TqFloat dtime = 1.0f / numSamples;
+	// We use the same random offset for each sample within a pixel.
+	// This ensures the best possible coverage whilst still avoiding
+	// aliasing. (I reckon). should minimise the noise.
+	TqFloat randomTime = random.RandomFloat( dtime );
+
+	TqFloat lod = 0;
+	TqFloat dlod = dtime;
+
+	for ( i = 0; i < numSamples; i++ )
+	{
+		// Scale the value of time to the shutter time.
+		TqFloat t = time + randomTime;
+		t = ( closetime - opentime ) * t + opentime;
+		m_Samples[ i ].m_Time = t;
+		time += dtime;
+
+		m_Samples[ i ].m_DetailLevel = lod + random.RandomFloat( dlod );
+		lod += dlod;
+	}
+
 	std::vector<CqVector2D> tmpDofOffsets(numSamples);
-
 	// Store the DoF offsets in the canonical order to ensure that
 	// assumptions made about ordering during sampling still hold.
-	TqInt i;
 	for( i = 0; i < numSamples; ++i)
 	{
 		tmpDofOffsets[i] = m_Samples[m_DofOffsetIndices[i]].m_DofOffset;

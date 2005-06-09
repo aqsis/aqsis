@@ -76,7 +76,7 @@ std::vector<TqFloat> CqBucket::m_aCoverages;
  *  Clear,Allocate, Init. the m_aieImage samples
  */
 
-void CqBucket::InitialiseBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt ysize, TqBool fJitter, TqBool empty )
+void CqBucket::PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt ysize, TqBool fJitter, TqBool empty )
 {
     m_XOrigin = xorigin;
     m_YOrigin = yorigin;
@@ -111,18 +111,16 @@ void CqBucket::InitialiseBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqIn
             {
                 m_aieImage[which].Clear();
                 m_aieImage[which].AllocateSamples( m_PixelXSamples, m_PixelYSamples );
-                m_aieImage[which].InitialiseSamples( m_aSamplePositions[which], fJitter );
-				m_aieImage[which].ShuffleSamples();
+                m_aieImage[which].InitialiseSamples( m_aSamplePositions[which] );
+				if(fJitter)
+					m_aieImage[which].JitterSamples(m_aSamplePositions[which]);
 
                 which++;
             }
         }
     }
 
-	//:TODO: AGG, sort out sample shuffling.
-	// now shuffle the pixels around and add in the pixel offset to the position.
-	std::random_shuffle(m_aieImage.begin(), m_aieImage.end());
-
+	// Jitter the samplepoints and adjust them for the new bucket position.
 	TqInt which = 0;
 	TqInt numPixels = m_RealWidth*m_RealHeight;
 	for ( TqInt i = 0; i < m_RealHeight; i++ )
@@ -135,6 +133,8 @@ void CqBucket::InitialiseBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqIn
 			if(!empty)
 				m_aieImage[which].Clear();
 
+			if(fJitter)
+				m_aieImage[which].JitterSamples(m_aSamplePositions[which]);
 			m_aieImage[which].OffsetSamples( bPos2, m_aSamplePositions[which] );
 
 			which++;

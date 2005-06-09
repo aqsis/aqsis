@@ -264,8 +264,8 @@ public:
         return ( m_YSamples );
     }
     void	AllocateSamples( TqInt XSamples, TqInt YSamples );
-    void	InitialiseSamples( std::vector<CqVector2D>& vecSamples, TqBool fJitter = TqTrue );
-    void	ShuffleSamples( );
+    void	InitialiseSamples( std::vector<CqVector2D>& vecSamples );
+    void	JitterSamples( std::vector<CqVector2D>& vecSamples );
 	void	OffsetSamples(CqVector2D& vecPixel, std::vector<CqVector2D>& vecSamples)
 	{
 		// add in the pixel offset
