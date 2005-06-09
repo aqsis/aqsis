@@ -23,6 +23,8 @@
 		\author Michel Joron (joron@sympatico.ca)
 */
 
+#include	"MultiTimer.h"
+
 #include	"aqsis.h"
 #include	"imagers.h"
 #include	"file.h"
@@ -71,7 +73,7 @@ CqImagersource::~CqImagersource()
  */
 void CqImagersource::Initialise( IqBucket* pBucket )
 {
-    QGetRenderContext() ->Stats().ImagerTimer().Start();
+	TIME_SCOPE("Imager shading")
 
     TqInt uGridRes = pBucket->Width();
     TqInt vGridRes = pBucket->Height();
@@ -134,8 +136,6 @@ void CqImagersource::Initialise( IqBucket* pBucket )
         m_pShader->Evaluate( m_pShaderExecEnv );
         alpha() ->SetFloat( 1.0f ); /* by default 3delight/bmrt set it to 1.0 */
     }
-
-    QGetRenderContext() ->Stats().ImagerTimer().Stop();
 }
 
 //---------------------------------------------------------------------

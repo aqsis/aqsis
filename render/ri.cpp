@@ -23,6 +23,8 @@
 		\author Paul C. Gregory (pgregory@aqsis.com)
 */
 
+#include	"MultiTimer.h"
+
 #include	"aqsis.h"
 
 #include	<stdarg.h>
@@ -686,7 +688,8 @@ RtVoid	RiFrameBegin( RtInt number )
     // Start the timer. Note: The corresponding call of StopFrameTimer() is
     // done in WorldEnd (!) not FrameEnd since it can happen that there is
     // not FrameEnd (and usually there's not much between WorldEnd and FrameEnd).
-    QGetRenderContext() ->Stats().StartFrameTimer();
+    //QGetRenderContext() ->Stats().StartFrameTimer();
+	TIMER_START("Frame")
 
     QGetRenderContext() ->BeginFrameModeBlock();
     QGetRenderContext() ->SetCurrentFrame( number );
@@ -738,8 +741,9 @@ RtVoid	RiWorldBegin()
 
     // Start the frame timer (just in case there was no FrameBegin block. If there
     // was, nothing happens)
-    QGetRenderContext() ->Stats().StartFrameTimer();
-    QGetRenderContext() ->Stats().MakeParse().Start();
+    //QGetRenderContext() ->Stats().StartFrameTimer();
+    TIMER_START("Frame")
+	TIMER_START("Parse")
 
     // Now that the options have all been set, setup any undefined camera parameters.
     if ( !QGetRenderContext() ->optCurrent().FrameAspectRatioCalled() )
@@ -836,7 +840,7 @@ RtVoid	RiWorldEnd()
         ( *QGetRenderContext()->pPreRenderFunction() ) ();
 
     // Stop the parsing counter
-    QGetRenderContext() ->Stats().MakeParse().Stop();
+	TIMER_STOP("Parse")
 
 
     const TqInt* poptVerbose = QGetRenderContext() ->optCurrent().GetIntegerOption( "statistics", "renderinfo" );
@@ -868,7 +872,8 @@ RtVoid	RiWorldEnd()
     QGetRenderContext() ->EndWorldModeBlock();
 
     // Stop the frame timer
-    QGetRenderContext() ->Stats().StopFrameTimer();
+    //QGetRenderContext() ->Stats().StopFrameTimer();
+	TIMER_STOP("Frame")
 
     if ( !fFailed )
     {
@@ -5081,8 +5086,8 @@ RtVoid	RiMakeTextureV( RtString imagefile, RtString texturefile, RtToken swrap, 
     char modes[ 1024 ];
     assert( imagefile != 0 && texturefile != 0 && swrap != 0 && twrap != 0 && filterfunc != 0 );
 
-    QGetRenderContext() ->Stats().MakeTextureTimer().Start();
-    // Get the wrap modes first.
+    TIME_SCOPE("Texture")
+	// Get the wrap modes first.
     enum EqWrapMode smode = WrapMode_Black;
     if ( strcmp( swrap, RI_PERIODIC ) == 0 )
         smode = WrapMode_Periodic;
@@ -5154,7 +5159,6 @@ RtVoid	RiMakeTextureV( RtString imagefile, RtString texturefile, RtToken swrap, 
     }
 
     Source.Close();
-    QGetRenderContext() ->Stats().MakeTextureTimer().Stop();
 }
 
 
@@ -5222,7 +5226,7 @@ RtVoid	RiMakeLatLongEnvironmentV( RtString imagefile, RtString reflfile, RtFilte
 
     assert( imagefile != 0 && reflfile != 0 && swrap != 0 && twrap != 0 && filterfunc != 0 );
 
-    QGetRenderContext() ->Stats().MakeEnvTimer().Start();
+	TIME_SCOPE("Environment Mapping")
 
     sprintf( modes, "%s %s %s %f %f", swrap, twrap, "box", swidth, twidth );
     if ( filterfunc == RiGaussianFilter )
@@ -5280,7 +5284,6 @@ RtVoid	RiMakeLatLongEnvironmentV( RtString imagefile, RtString reflfile, RtFilte
     }
 
     Source.Close();
-    QGetRenderContext() ->Stats().MakeEnvTimer().Stop();
     return ;
 }
 
@@ -5314,8 +5317,8 @@ RtVoid	RiMakeCubeFaceEnvironmentV( RtString px, RtString nx, RtString py, RtStri
 
 	Validate_RiMakeCubeFaceEnvironment
 
-    QGetRenderContext() ->Stats().MakeEnvTimer().Start();
-    assert( px != 0 && nx != 0 && py != 0 && ny != 0 && pz != 0 && nz != 0 &&
+    TIME_SCOPE("Environment Mapping")
+	assert( px != 0 && nx != 0 && py != 0 && ny != 0 && pz != 0 && nz != 0 &&
             reflfile != 0 && filterfunc != 0 );
 
     // Now load the original image.
@@ -5410,7 +5413,6 @@ RtVoid	RiMakeCubeFaceEnvironmentV( RtString px, RtString nx, RtString py, RtStri
         }
         TIFFClose( ptex );
     }
-    QGetRenderContext() ->Stats().MakeEnvTimer().Stop();
     return ;
 }
 
@@ -5444,8 +5446,8 @@ RtVoid	RiMakeShadowV( RtString picfile, RtString shadowfile, PARAMETERLIST )
 
 	Validate_RiMakeShadow
 
-    QGetRenderContext() ->Stats().MakeShadowTimer().Start();
-    CqShadowMap ZFile( picfile );
+    TIME_SCOPE("Shadow Mapping")
+	CqShadowMap ZFile( picfile );
     ZFile.LoadZFile();
 
     TqInt comp, qual;
@@ -5454,7 +5456,6 @@ RtVoid	RiMakeShadowV( RtString picfile, RtString shadowfile, PARAMETERLIST )
     ZFile.SetQuality( qual );
 
     ZFile.SaveShadowMap( shadowfile );
-    QGetRenderContext() ->Stats().MakeShadowTimer().Stop();
     return ;
 }
 
@@ -5488,7 +5489,7 @@ RtVoid	RiMakeOcclusionV( RtInt npics, RtString picfiles[], RtString shadowfile, 
 
 	Validate_RiMakeOcclusion
 
-    QGetRenderContext() ->Stats().MakeShadowTimer().Start();
+	TIME_SCOPE("Shadow Mapping")
 
     RtInt index;
     for( index = 0; index < npics; ++index )
@@ -5503,7 +5504,6 @@ RtVoid	RiMakeOcclusionV( RtInt npics, RtString picfiles[], RtString shadowfile, 
 
         ZFile.SaveShadowMap( shadowfile, TqTrue );
     }
-    QGetRenderContext() ->Stats().MakeShadowTimer().Stop();
     return ;
 }
 

@@ -23,6 +23,8 @@
 		\author Paul C. Gregory (pgregory@aqsis.com)
 */
 
+#include	"MultiTimer.h"
+
 #include	"aqsis.h"
 
 #ifdef WIN32
@@ -1178,9 +1180,10 @@ void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax, 
 	TqBool bIsEmpty = IsCurrentBucketEmpty();
 
     // Render any waiting micro polygon grids.
-    QGetRenderContext() ->Stats().RenderMPGsTimer().Start();
-    RenderMPGs( xmin, xmax, ymin, ymax );
-    QGetRenderContext() ->Stats().RenderMPGsTimer().Stop();
+	{
+	    TIME_SCOPE("Render MPGs")
+		RenderMPGs( xmin, xmax, ymin, ymax );
+	}
 
 	CqBucket& Bucket = CurrentBucket();
 
@@ -1193,20 +1196,20 @@ void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax, 
         // If the epsilon check has deemed this surface to be undiceable, don't bother asking.
         TqBool fDiceable = TqFalse;
         // Dice & shade the surface if it's small enough...
-        QGetRenderContext() ->Stats().DiceableTimer().Start();
-        fDiceable = pSurface->Diceable();
-        QGetRenderContext() ->Stats().DiceableTimer().Stop();
+        {
+			TIME_SCOPE("Dicable check")
+			fDiceable = pSurface->Diceable();
+		}
 
         if ( fDiceable )
         {
             //Cull surface if it's hidden
             if ( !( DisplayMode() & ModeZ ) && !pSurface->pCSGNode() )
             {
-                QGetRenderContext() ->Stats().OcclusionCullTimer().Start();
+                TIME_SCOPE("Occlusion culling")
                 TqBool fCull = TqFalse;
 				if ( !bIsEmpty && pSurface->fCachedBound() )
 					fCull = OcclusionCullSurface( pSurface );
-                QGetRenderContext() ->Stats().OcclusionCullTimer().Stop();
                 if ( fCull )
                 {
 					Bucket.popSurface();
@@ -1217,9 +1220,11 @@ void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax, 
 
 		    Bucket.popSurface();	
             CqMicroPolyGridBase* pGrid;
-            QGetRenderContext() ->Stats().DicingTimer().Start();
-            pGrid = pSurface->Dice();
-            QGetRenderContext() ->Stats().DicingTimer().Stop();
+            {
+				TIME_SCOPE("Dicing")
+			    pGrid = pSurface->Dice();
+			}
+
             if ( NULL != pGrid )
             {
                 ADDREF( pGrid );
@@ -1232,9 +1237,10 @@ void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax, 
                     // Only project micropolygon not culled
                     Bucket.AddGrid( pGrid );
                     // Render any waiting micro polygon grids.
-                    QGetRenderContext() ->Stats().RenderMPGsTimer().Start();
-                    RenderMPGs( xmin, xmax, ymin, ymax );
-                    QGetRenderContext() ->Stats().RenderMPGsTimer().Stop();
+                    {
+						TIME_SCOPE("Render MPGs")
+						RenderMPGs( xmin, xmax, ymin, ymax );
+					}
                 }
                 RELEASEREF( pGrid );
             }
@@ -1248,15 +1254,16 @@ void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax, 
             STATS_DEC( GPR_created_total );
 
             // Split it
-            QGetRenderContext() ->Stats().SplitsTimer().Start();
-            std::vector<boost::shared_ptr<CqBasicSurface> > aSplits;
-            TqInt cSplits = pSurface->Split( aSplits );
-            TqInt i;
-            for ( i = 0; i < cSplits; i++ )
-                PostSurface( aSplits[ i ] );
-
-            QGetRenderContext() ->Stats().SplitsTimer().Stop();
-        } else if ( pSurface == Bucket.pTopSurface() ) 
+            {
+				TIME_SCOPE("Splits")
+				std::vector<boost::shared_ptr<CqBasicSurface> > aSplits;
+				TqInt cSplits = pSurface->Split( aSplits );
+				TqInt i;
+				for ( i = 0; i < cSplits; i++ )
+					PostSurface( aSplits[ i ] );
+			}
+        } 
+		else if ( pSurface == Bucket.pTopSurface() ) 
         {
              // Make sure we will break the while() 
              //   e.g.  !fDiceable  &&  pSurface->fDiscard()
@@ -1265,9 +1272,10 @@ void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax, 
 
         pSurface = Bucket.pTopSurface();
         // Render any waiting micro polygon grids.
-        QGetRenderContext() ->Stats().RenderMPGsTimer().Start();
-        RenderMPGs( xmin, xmax, ymin, ymax );
-        QGetRenderContext() ->Stats().RenderMPGsTimer().Stop();
+        {
+			TIME_SCOPE("Render MPGs")
+			RenderMPGs( xmin, xmax, ymin, ymax );
+		}
     }
 
     // Now combine the colors at each pixel sample for any micropolygons rendered to that pixel.
@@ -1275,13 +1283,11 @@ void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax, 
 
     if(!bIsEmpty)
     {
-        QGetRenderContext() ->Stats().MakeCombine().Start();
+        TIME_SCOPE("Combine")
         CqBucket::CombineElements(depthfilter, zThreshold);
-        QGetRenderContext() ->Stats().MakeCombine().Stop();
     }
 
-    QGetRenderContext() ->Stats().MakeFilterBucket().Start();
-
+	TIMER_START("Filter")
     if (fImager)
         bIsEmpty = TqFalse;
 
@@ -1292,12 +1298,13 @@ void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax, 
 	Bucket.QuantizeBucket();
     }
 
-    QGetRenderContext() ->Stats().MakeFilterBucket().Stop();
+	TIMER_STOP("Filter")
 
     BucketComplete();
-    QGetRenderContext() ->Stats().MakeDisplayBucket().Start();
-    QGetRenderContext() ->pDDmanager() ->DisplayBucket( &CurrentBucket() );
-    QGetRenderContext() ->Stats().MakeDisplayBucket().Stop();
+    {
+		TIME_SCOPE("Display bucket")
+		QGetRenderContext() ->pDDmanager() ->DisplayBucket( &CurrentBucket() );
+	}
 }
 
 //----------------------------------------------------------------------
@@ -1409,10 +1416,11 @@ void CqImageBuffer::RenderImage()
         if (fImager)
             bIsEmpty = TqFalse;
 
-        QGetRenderContext() ->Stats().Others().Start();
-        CqBucket::PrepareBucket( static_cast<TqInt>( bPos.x() ), static_cast<TqInt>( bPos.y() ), static_cast<TqInt>( bSize.x() ), static_cast<TqInt>( bSize.y() ), true, bIsEmpty );
-        CqBucket::InitialiseFilterValues();
-        QGetRenderContext() ->Stats().Others().Stop();
+        {
+			TIME_SCOPE("Prepare bucket")
+			CqBucket::PrepareBucket( static_cast<TqInt>( bPos.x() ), static_cast<TqInt>( bPos.y() ), static_cast<TqInt>( bSize.x() ), static_cast<TqInt>( bSize.y() ), true, bIsEmpty );
+			CqBucket::InitialiseFilterValues();
+		}
 
 		////////// Dump the pixel sample positions into a dump file //////////
 		#ifdef DEBUG_MPDUMP
@@ -1443,9 +1451,8 @@ void CqImageBuffer::RenderImage()
 
         if ( !bIsEmpty )
         {
-            QGetRenderContext() ->Stats().OcclusionCullTimer().Start();
+            TIME_SCOPE("Occlusion culling")
             CqOcclusionBox::SetupHierarchy( &CurrentBucket(), xmin, ymin, xmax, ymax );
-            QGetRenderContext() ->Stats().OcclusionCullTimer().Stop();
         }
 
 

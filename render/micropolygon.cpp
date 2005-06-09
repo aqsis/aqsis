@@ -35,6 +35,8 @@
 
 #include	"mpdump.h"
 
+#include	"MultiTimer.h"
+
 START_NAMESPACE( Aqsis )
 
 
@@ -348,8 +350,10 @@ void CqMicroPolyGrid::Shade()
     cCulled = 0;
     if ( USES( lUses, EnvVars_Os ) && QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "DisplayMode" ) [ 0 ] & ModeZ )
     {
-        theStats.OcclusionCullTimer().Start();
-        for ( i = gsmin1; i >= 0; i-- )
+        //theStats.OcclusionCullTimer().Start();
+        TIME_SCOPE("Occlusion Culling")
+		{
+		for ( i = gsmin1; i >= 0; i-- )
         {
             if ( pOs[ i ] != gColWhite )
             {
@@ -359,7 +363,8 @@ void CqMicroPolyGrid::Shade()
             else
                 break;
         }
-        theStats.OcclusionCullTimer().Stop();
+        //theStats.OcclusionCullTimer().Stop();
+		}
 
         if ( cCulled == gs )
         {
@@ -376,8 +381,9 @@ void CqMicroPolyGrid::Shade()
     cCulled = 0;
     if ( USES( lUses, EnvVars_Os ) && QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "DisplayMode" ) [ 0 ] & ModeRGB )
     {
-        theStats.OcclusionCullTimer().Start();
-        for ( i = gsmin1; i >= 0; i-- )
+        //theStats.OcclusionCullTimer().Start();
+        TIME_SCOPE("Occlusion culling")
+		for ( i = gsmin1; i >= 0; i-- )
         {
             if ( pOs[ i ] == gColBlack )
             {
@@ -387,7 +393,7 @@ void CqMicroPolyGrid::Shade()
             else
                 break;
         }
-        theStats.OcclusionCullTimer().Stop();
+        //theStats.OcclusionCullTimer().Stop();
 
         if ( cCulled == gs )
         {
@@ -400,17 +406,19 @@ void CqMicroPolyGrid::Shade()
 
     if ( pshadDisplacement )
     {
-        theStats.DisplacementTimer().Start();
-        pshadDisplacement->Evaluate( m_pShaderExecEnv );
-        theStats.DisplacementTimer().Stop();
+        //theStats.DisplacementTimer().Start();
+        TIME_SCOPE("Discplacement")
+		pshadDisplacement->Evaluate( m_pShaderExecEnv );
+        //theStats.DisplacementTimer().Stop();
     }
 
     // Now try and cull any hidden MPs if Sides==1
     cCulled = 0;
     if ( ( pAttributes() ->GetIntegerAttribute( "System", "Sides" ) [ 0 ] == 1 ) && !m_pCSGNode )
     {
-        theStats.OcclusionCullTimer().Start();
-        for ( i = gsmin1; i >= 0; i-- )
+        //theStats.OcclusionCullTimer().Start();
+        TIME_SCOPE("Occlusion culling")
+		for ( i = gsmin1; i >= 0; i-- )
         {
             // Calulate the direction the MPG is facing.
             if ( ( pN[ i ] * pP[ i ] ) >= 0 )
@@ -419,7 +427,7 @@ void CqMicroPolyGrid::Shade()
                 m_CulledPolys.SetValue( i, TqTrue );
             }
         }
-        theStats.OcclusionCullTimer().Stop();
+        //theStats.OcclusionCullTimer().Stop();
 
         // If the whole grid is culled don't bother going any further.
         if ( cCulled == gs )
@@ -432,22 +440,24 @@ void CqMicroPolyGrid::Shade()
     }
 
     // Now shade the grid.
-    theStats.SurfaceTimer().Start();
+    //theStats.SurfaceTimer().Start();
     if ( pshadSurface )
     {
+		TIME_SCOPE("Surface shading")
 		//boost::shared_ptr<CqSurface> surf(pSurface());
 		m_pShaderExecEnv->SetCurrentSurface(pSurface());
         pshadSurface->Evaluate( m_pShaderExecEnv );
     }
-    theStats.SurfaceTimer().Stop();
+    //theStats.SurfaceTimer().Stop();
 
     // Now try and cull any true transparent MPs (assigned by the shader code
 
     cCulled = 0;
     if ( USES( lUses, EnvVars_Os ) && QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "DisplayMode" ) [ 0 ] & ModeRGB )
     {
-        theStats.OcclusionCullTimer().Start();
-        for ( i = gsmin1; i >= 0; i-- )
+        //theStats.OcclusionCullTimer().Start();
+        TIME_SCOPE("Occlusion culling")
+		for ( i = gsmin1; i >= 0; i-- )
         {
             if ( pOs[ i ] == gColBlack )
             {
@@ -457,7 +467,7 @@ void CqMicroPolyGrid::Shade()
             else
                 break;
         }
-        theStats.OcclusionCullTimer().Stop();
+        //theStats.OcclusionCullTimer().Stop();
 
         if ( cCulled == gs )
         {
@@ -470,9 +480,10 @@ void CqMicroPolyGrid::Shade()
     // Now perform atmosphere shading
     if ( pshadAtmosphere )
     {
-        theStats.AtmosphereTimer().Start();
+        TIME_SCOPE("Atmosphere shading")
+		//theStats.AtmosphereTimer().Start();
         pshadAtmosphere->Evaluate( m_pShaderExecEnv );
-        theStats.AtmosphereTimer().Stop();
+        //theStats.AtmosphereTimer().Stop();
     }
 
     DeleteVariables( TqFalse );
@@ -585,8 +596,8 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, long y
     TqInt cu = uGridRes();
     TqInt cv = vGridRes();
 
-	QGetRenderContext() ->Stats().MakeProject().Start();
-    CqMatrix matCameraToRaster = QGetRenderContext() ->matSpaceToSpace( "camera", "raster", CqMatrix(), CqMatrix(), QGetRenderContext()->Time() );
+    TIMER_START("Project points")
+	CqMatrix matCameraToRaster = QGetRenderContext() ->matSpaceToSpace( "camera", "raster", CqMatrix(), CqMatrix(), QGetRenderContext()->Time() );
     CqMatrix matCameraToObject0 = QGetRenderContext() ->matSpaceToSpace( "camera", "object", CqMatrix(), pSurface() ->pTransform() ->matObjectToWorld( pSurface() ->pTransform() ->Time( 0 ) ), QGetRenderContext()->Time() );
 
     // Transform the whole grid to hybrid camera/raster space
@@ -669,7 +680,7 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, long y
 	}
 	m_TriangleSplitLine.AddTimeSlot(pSurface()->pTransform()->Time( 0 ), sl ); 
 
-    QGetRenderContext() ->Stats().MakeProject().Stop();
+	TIMER_STOP("Project points")
 
     // Get the required trim curve sense, if specified, defaults to "inside".
     const CqString* pattrTrimSense = pAttributes() ->GetStringAttribute( "trimcurve", "sense" );

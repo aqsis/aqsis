@@ -23,6 +23,8 @@
 		\author Paul C. Gregory (pgregory@aqsis.com)
 */
 
+#include	"MultiTimer.h"
+
 #include	"aqsis.h"
 
 #include	<math.h>
@@ -795,7 +797,7 @@ void CqTextureMap::GetSampleWithoutBlur( TqFloat u1, TqFloat v1, TqFloat u2, TqF
 {
 	register TqInt c;
 
-	QGetRenderContext() ->Stats().TextureMapTimer().Start();
+	TIME_SCOPE("Texture mapping")
 
 	// u/v is provided to the function now; they are the average of
 	// sample positions (u1,v1), (u2, v2).
@@ -867,8 +869,6 @@ void CqTextureMap::GetSampleWithoutBlur( TqFloat u1, TqFloat v1, TqFloat u2, TqF
 	}
 	for (c = 0; c < m_SamplesPerPixel; c++)
 		val[c] = m_accum_color[c] / contrib;
-
-	QGetRenderContext() ->Stats().TextureMapTimer().Stop();
 }
 
 //----------------------------------------------------------------------
@@ -891,7 +891,7 @@ void CqTextureMap::GetSampleWithBlur( TqFloat u1, TqFloat v1, TqFloat u2, TqFloa
 {
 	register TqInt c;
 
-	QGetRenderContext() ->Stats().TextureMapTimer().Start();
+	TIME_SCOPE("Texture mapping")
 
 	// u/v is provided to the function now; they are the average of
 	// sample positions (u1,v1), (u2, v2).
@@ -941,8 +941,6 @@ void CqTextureMap::GetSampleWithBlur( TqFloat u1, TqFloat v1, TqFloat u2, TqFloa
 
 	for (c = 0; c < m_SamplesPerPixel; c++ )
 		val[c] = m_accum_color[c] / div;
-
-	QGetRenderContext() ->Stats().TextureMapTimer().Stop();
 }
 
 //----------------------------------------------------------------------
@@ -1829,7 +1827,7 @@ void CqEnvironmentMap::SampleMap( CqVector3D& R1,
 	TqFloat side[2];
 	register TqInt c;
 
-	QGetRenderContext() ->Stats().TextureMapTimer().Start();
+	TIME_SCOPE("Environment mapping")
 
 	// Textures are filtered with either bilinear or trilinear mip-mapping.
 	// Trilinear gives higher image quality but takes more time.  To disable trilinear
@@ -1991,8 +1989,6 @@ void CqEnvironmentMap::SampleMap( CqVector3D& R1,
 			val[c] = m_accum_color[c] / contrib;
 
 	}
-	QGetRenderContext() ->Stats().TextureMapTimer().Stop();
-
 }
 
 END_NAMESPACE( Aqsis )

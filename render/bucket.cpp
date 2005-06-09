@@ -23,6 +23,8 @@
 		\author Paul C. Gregory (pgregory@aqsis.com)
 */
 
+#include	"MultiTimer.h"
+
 #include	"aqsis.h"
 
 #ifdef WIN32
@@ -694,10 +696,10 @@ void CqBucket::FilterBucket(TqBool empty)
 
     if ( NULL != QGetRenderContext() ->optCurrent().pshadImager() && QGetRenderContext() ->optCurrent().pshadImager() ->pShader() )
     {
-        QGetRenderContext() ->Stats().MakeFilterBucket().Stop();
         // Init & Execute the imager shader
 
         QGetRenderContext() ->optCurrent().InitialiseColorImager( this );
+		TIME_SCOPE("Imager shading")
 
         if ( fImager )
         {
@@ -723,7 +725,6 @@ void CqBucket::FilterBucket(TqBool empty)
                 pie += xlen;
             }
         }
-        QGetRenderContext() ->Stats().MakeFilterBucket().Start();
     }
 }
 

@@ -44,7 +44,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "LIBAQSIS_EXPORTS" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GR /GX /O2 /I "..\libaqsistypes\win32\intel" /I "..\libaqsistypes" /I "..\libshadervm" /I "..\libshaderexecenv" /I "..\librib2ri" /I "..\librib2" /I "..\..\win32libs\include" /D "NDEBUG" /D _qBUILDING=CORE /D CORE=1 /D "PLUGINS" /D "_MBCS" /D "_LIB" /D "WIN32" /D "NO_SYSLOG" /FR /YX /FD /Zm200 /c
+# ADD CPP /nologo /MD /W3 /GR /GX /O2 /I "..\libaqsistypes\win32\intel" /I "..\libaqsistypes" /I "..\libshadervm" /I "..\libshaderexecenv" /I "..\librib2ri" /I "..\librib2" /I "..\..\win32libs\include" /D "NDEBUG" /D "PLUGINS" /D "_MBCS" /D "_LIB" /D "WIN32" /D "NO_SYSLOG" /D "USE_TIMERS" /FR /YX /FD /Zm200 /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x809 /d "NDEBUG"
@@ -54,7 +54,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386
-# ADD LINK32 libz.lib libtiff.lib ws2_32.lib /nologo /dll /machine:I386 /out:"..\bin/aqsis.dll" /libpath:"..\lib" /libpath:"..\bin" /libpath:"..\..\win32libs\lib"
+# ADD LINK32 libz.lib libtiff.lib ws2_32.lib user32.lib /nologo /dll /machine:I386 /out:"..\bin/aqsis.dll" /libpath:"..\lib" /libpath:"..\bin" /libpath:"..\..\win32libs\lib"
 
 !ELSEIF  "$(CFG)" == "libaqsis - Win32 Debug"
 
@@ -70,7 +70,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "LIBAQSIS_EXPORTS" /YX /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GR /GX /ZI /Od /I "..\libaqsistypes\win32\intel" /I "..\libaqsistypes" /I "..\libshadervm" /I "..\libshaderexecenv" /I "..\librib2ri" /I "..\librib2" /I "..\..\win32libs\include" /D "_DEBUG" /D _qBUILDING=CORE /D CORE=1 /D "PLUGINS" /D "_MBCS" /D "_LIB" /D "WIN32" /D "NO_SYSLOG" /FR /YX /FD /GZ /Zm200 /c
+# ADD CPP /nologo /MDd /W3 /Gm /GR /GX /ZI /Od /I "..\libaqsistypes\win32\intel" /I "..\libaqsistypes" /I "..\libshadervm" /I "..\libshaderexecenv" /I "..\librib2ri" /I "..\librib2" /I "..\..\win32libs\include" /D "_DEBUG" /D "PLUGINS" /D "_MBCS" /D "_LIB" /D "WIN32" /D "NO_SYSLOG" /D "USE_TIMERS" /FR /YX /FD /GZ /Zm200 /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x809 /d "_DEBUG"
@@ -80,7 +80,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 libz.lib libtiff.lib ws2_32.lib /nologo /dll /pdb:"..\bin/libaqsis_d.pdb" /map /debug /machine:I386 /out:"..\bin/aqsis_d.dll" /pdbtype:sept /libpath:"..\lib" /libpath:"..\bin" /libpath:"..\..\win32libs\lib"
+# ADD LINK32 libz.lib libtiff.lib ws2_32.lib user32.lib /nologo /dll /pdb:"..\bin/libaqsis_d.pdb" /map /debug /machine:I386 /out:"..\bin/aqsis_d.dll" /pdbtype:sept /libpath:"..\lib" /libpath:"..\bin" /libpath:"..\..\win32libs\lib"
 # SUBTRACT LINK32 /pdb:none
 
 !ELSEIF  "$(CFG)" == "libaqsis - Win32 Profile"
@@ -98,7 +98,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /GR /GX /O2 /I "..\libaqsistypes\win32\intel" /I "..\libaqsistypes" /I "..\libshadervm" /I "..\libshaderexecenv" /I "..\librib2ri" /I "..\librib2" /D "NDEBUG" /D "_MBCS" /D "_LIB" /D "PLUGINS" /D "AQSIS_DYNAMIC_LINK" /D "WIN32" /D _qBUILDING=CORE /D CORE=1 /FR /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GR /GX /Zi /O2 /I "..\libaqsistypes\win32\intel" /I "..\libaqsistypes" /I "..\libshadervm" /I "..\libshaderexecenv" /I "..\librib2ri" /I "..\librib2" /I "..\..\win32libs\include" /D "NDEBUG" /D CORE=1 /D _qBUILDING=CORE /D "PLUGINS" /D "_MBCS" /D "_LIB" /D "WIN32" /D "NO_SYSLOG" /FR /YX /FD /Zm200 /c
+# ADD CPP /nologo /MD /W3 /GR /GX /Zi /O2 /I "..\libaqsistypes\win32\intel" /I "..\libaqsistypes" /I "..\libshadervm" /I "..\libshaderexecenv" /I "..\librib2ri" /I "..\librib2" /I "..\..\win32libs\include" /D "NDEBUG" /D "PLUGINS" /D "_MBCS" /D "_LIB" /D "WIN32" /D "NO_SYSLOG" /D "USE_TIMERS" /FR /YX /FD /Zm200 /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x809 /d "NDEBUG"
@@ -108,7 +108,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 libaqsistypes.lib libshaderexecenv.lib libshadervm.lib libddmsock.lib libz.lib libtiff.lib ws2_32.lib librib2.lib librib2ri.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386 /libpath:"..\Library\Release"
-# ADD LINK32 libz.lib libtiff.lib ws2_32.lib /nologo /dll /profile /debug /machine:I386 /libpath:"..\lib\Profile" /libpath:"..\bin\Profile" /libpath:"..\..\win32libs\lib"
+# ADD LINK32 libz.lib libtiff.lib ws2_32.lib user32.lib /nologo /dll /profile /debug /machine:I386 /libpath:"..\lib\Profile" /libpath:"..\bin\Profile" /libpath:"..\..\win32libs\lib"
 
 !ENDIF 
 

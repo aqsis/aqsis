@@ -16,12 +16,11 @@
 // You should have received a copy of the GNU General Public
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-
-
 /** \file
 		\brief Declares CqStats class for holding global renderer statistics information.
 		\author Paul C. Gregory (pgregory@aqsis.com)
 */
+#include "MultiTimer.h"
 
 #include "aqsis.h"
 #include "attributes.h"
@@ -29,12 +28,12 @@
 #include "renderer.h"
 #include "stats.h"
 #include "transform.h"
-
 #include <iomanip>
 #include <iostream>
 #include <math.h>
 
 START_NAMESPACE( Aqsis )
+
 
 // Global accessor functions, defined like this so that other projects using libshadervm can
 // simply provide empty implementations and not have to link to libaqsis.
@@ -42,36 +41,28 @@ void gStats_IncI( TqInt index )
 {
 	CqStats::IncI( index );
 }
-
 void gStats_DecI( TqInt index )
 {
 	CqStats::DecI( index );
 }
-
 TqInt gStats_getI( TqInt index )
 {
 	return( CqStats::getI( index ) );
 }
-
 void gStats_setI( TqInt index, TqInt value )
 {
 	CqStats::setI( index, value );
 }
-
 TqFloat gStats_getF( TqInt index )
 {
 	return( CqStats::getF( index ) );
 }
-
 void gStats_setF( TqInt index, TqFloat value )
 {
 	CqStats::setF( index, value );
 }
-
-
 TqFloat	 CqStats::m_floatVars[ CqStats::_Last_float ];		///< Float variables
 TqInt	 CqStats::m_intVars[ CqStats::_Last_int ];			///< Int variables
-
 /**
    Initialise every variable.
  
@@ -85,7 +76,6 @@ TqInt	 CqStats::m_intVars[ CqStats::_Last_int ];			///< Int variables
 void CqStats::Initialise()
 {
 	TqInt i;
-
 	m_Complete = 0.0f;
 	for (i = _First_int; i < _Last_int; i++)
 		m_intVars[i] = 0;
@@ -94,8 +84,6 @@ void CqStats::Initialise()
 	//	m_timeTotal = 0;
 	InitialiseFrame();
 }
-
-
 /**
    Initialise all variables before processing the next frame.
  
@@ -110,162 +98,34 @@ void CqStats::InitialiseFrame()
 	m_cTextureMemory = 0;
 	memset( m_cTextureMisses, '\0', sizeof( m_cTextureMisses ) );
 	memset( m_cTextureHits, '\0', sizeof( m_cTextureHits ) );
-	m_timeTotalFrame.Reset();
-	m_timeSurface.Reset();
-	m_timeDisplacement.Reset();
-	m_timeImager.Reset();
-	m_timeAtmosphere.Reset();
-	m_timeSplits.Reset();
-	m_timeDicing.Reset();
-	m_timeRenderMPGs.Reset();
-	m_timeOcclusionCull.Reset();
-	m_timeDiceable.Reset();
-	m_timeTM.Reset();
-	m_timeMakeTexture.Reset();
-	m_timeMakeShadow.Reset();
-	m_timeMakeEnv.Reset();
-	m_timeFB.Reset();
-	m_timeDB.Reset();
-	m_timeParse.Reset();
-	m_timeProject.Reset();
-	m_timeCombine.Reset();
-	m_timeOthers.Reset();
-
 }
-
-/** Start the frame timer.
- 
-    If the timer was already running, nothing happens (so it is safe
-		to call it in RiFrameBegin() as well as in RiWorldBegin()).
- 
-   \see StopFrameTimer()
- */
-void CqStats::StartFrameTimer()
-{
-	m_timeTotalFrame.Reset();
-	if( !m_timeTotalFrame.isStarted() )
-		m_timeTotalFrame.Start();
-}
-
-/** Stop the frame timer.
-    The difference between the starting time and the current time is
-		stored and also added to the total time.
- 
-    \see StartFrameTimer()
- */
-void CqStats::StopFrameTimer()
-{
-	m_timeTotalFrame.Stop();
-	m_timeTotal+=m_timeTotalFrame;
-}
-
-
 //----------------------------------------------------------------------
 /** Output rendering stats if required.
  
     \param level  Verbosity level as set by Options "statistics" "endofframe"
  */
-
 void CqStats::PrintStats( TqInt level ) const
 {
+	std::ostream& MSG = std::cout;
 	/*! Levels
 		Minimum := 0
 		Normal  := 1
 		Verbose := 2
 		Max		:= 3
 	*/
-
-	std::ostream& MSG = std::cout;
-
-
-	TqFloat timeTotal = m_timeSurface.TimeTotal() +
-	                    m_timeDisplacement.TimeTotal() +
-	                    m_timeImager.TimeTotal() +
-	                    m_timeAtmosphere.TimeTotal() +
-	                    m_timeSplits.TimeTotal() +
-	                    m_timeDicing.TimeTotal() +
-	                    m_timeRenderMPGs.TimeTotal() +
-	                    m_timeOcclusionCull.TimeTotal() +
-	                    m_timeDiceable.TimeTotal() +
-	                    m_timeMakeTexture.TimeTotal() +
-	                    m_timeMakeShadow.TimeTotal() +
-	                    m_timeMakeEnv.TimeTotal() +
-	                    m_timeFB.TimeTotal() +
-	                    m_timeDB.TimeTotal() +
-	                    m_timeParse.TimeTotal() +
-	                    m_timeProject.TimeTotal() +
-	                    m_timeCombine.TimeTotal() +
-	                    m_timeOthers.TimeTotal();
-
 	//! level >= 0
-	std::cerr << info << "Total render time: ";
-	TimeToString( std::cerr, m_timeTotal.TimeTotal(), -1 ) << std::endl;
-	std::cerr << info << "Last frame (" << QGetRenderContext()->CurrentFrame( ) <<"): ";
-	TimeToString( std::cerr, m_timeTotalFrame.TimeTotal(), -1 ) << std::endl;
+	if( level > 0 )
+		TIMER_DUMP(OUT_CONSOLE, SORT_TIMES)
 
-	if ( level >= 1 )
-	{
-		MSG << std::endl;
-
-		MSG << "Parsing             : ";
-		TimeToString( MSG, m_timeParse.TimeTotal(), m_timeTotalFrame.TimeTotal() ) << std::endl;
-		MSG << "Diceable check      : ";
-		TimeToString( MSG, m_timeDiceable.TimeTotal(), m_timeTotalFrame.TimeTotal() ) << std::endl;
-		MSG << "Splitting           : ";
-		TimeToString( MSG, m_timeSplits.TimeTotal(), m_timeTotalFrame.TimeTotal() ) << std::endl;
-		MSG << "Dicing              : ";
-		TimeToString( MSG, m_timeDicing.TimeTotal(), m_timeTotalFrame.TimeTotal() ) << std::endl;
-		MSG << "Render MPGs         : ";
-		TimeToString( MSG, m_timeRenderMPGs.TimeTotal(), m_timeTotalFrame.TimeTotal() ) << std::endl;
-		MSG << "Occlusion Culling   : ";
-		TimeToString( MSG, m_timeOcclusionCull.TimeTotal(), m_timeTotalFrame.TimeTotal() ) << std::endl;
-		MSG << "Imager shading      : ";
-		TimeToString( MSG, m_timeImager.TimeTotal(), m_timeTotalFrame.TimeTotal() ) << std::endl;
-		MSG << "Surface shading     : ";
-		TimeToString( MSG, m_timeSurface.TimeTotal(), m_timeTotalFrame.TimeTotal() ) << std::endl;
-		MSG << "Displacement shading: ";
-		TimeToString( MSG, m_timeDisplacement.TimeTotal(), m_timeTotalFrame.TimeTotal() ) << std::endl;
-		MSG << "Atmosphere shading  : ";
-		TimeToString( MSG, m_timeAtmosphere.TimeTotal(), m_timeTotalFrame.TimeTotal() ) << std::endl;
-		MSG << "SampleTexture       : ";
-		TimeToString( MSG, m_timeTM.TimeTotal(), m_timeTotalFrame.TimeTotal() ) << std::endl;
-		MSG << "Combine             : ";
-		TimeToString( MSG, m_timeCombine.TimeTotal(), m_timeTotalFrame.TimeTotal() ) << std::endl;
-		MSG << "Project             : ";
-		TimeToString( MSG, m_timeProject.TimeTotal(), m_timeTotalFrame.TimeTotal() ) << std::endl;
-		MSG << "FilterBucket        : ";
-		TimeToString( MSG, m_timeFB.TimeTotal(), m_timeTotalFrame.TimeTotal() ) << std::endl;
-		MSG << "DisplayBucket       : ";
-		TimeToString( MSG, m_timeDB.TimeTotal(), m_timeTotalFrame.TimeTotal() ) << std::endl;
-		MSG << "MakeTexture         : ";
-		TimeToString( MSG, m_timeMakeTexture.TimeTotal(), m_timeTotalFrame.TimeTotal() ) << std::endl;
-		MSG << "MakeShadow          : ";
-		TimeToString( MSG, m_timeMakeShadow.TimeTotal(), m_timeTotalFrame.TimeTotal() ) << std::endl;
-		MSG << "MakeCubeEnv         : ";
-		TimeToString( MSG, m_timeMakeEnv.TimeTotal(), m_timeTotalFrame.TimeTotal() ) << std::endl;
-		MSG << "Others              : ";
-		TimeToString( MSG, m_timeOthers.TimeTotal(), m_timeTotalFrame.TimeTotal() ) << std::endl;
-
-		MSG << "Total time measured : ";
-		TimeToString( MSG, timeTotal, m_timeTotalFrame.TimeTotal() ) << std::endl;
-
-		MSG << std::endl;
-
-
-
-	}
 	//! Most important informations
 	if ( level == 2 || level == 3 )
 	{
-
 		/*
 			-------------------------------------------------------------------
 			GPrim stats
 		*/
-
 		TqFloat _gpr_c_q = 100.0f * STATS_INT_GETI( GPR_culled ) / STATS_INT_GETI( GPR_created_total );
 		TqFloat _gpr_u_q = 100.0f * STATS_INT_GETI( GPR_created_total ) / STATS_INT_GETI( GPR_allocated );
-
 		MSG << "Input geometry:\n\t" << STATS_INT_GETI( GPR_created ) << " primitives created\n\n"
 		<< "\t"	<<	STATS_INT_GETI( GPR_subdiv ) << " subdivision primitives\n\t"
 		<<			STATS_INT_GETI( GPR_nurbs )	 << " NURBS primitives\n\t"
@@ -275,42 +135,32 @@ void CqStats::PrintStats( TqInt level ) const
 		<<			STATS_INT_GETI( GPR_patch )	 << " patches\n\t"
 		<<			STATS_INT_GETI( GPR_quad )	 << " quadrics\n\t"
 		<< std::endl;
-
 		MSG << "GPrims:\n\t"
 		<< STATS_INT_GETI( GPR_allocated ) <<  " allocated\n\t"
 		<< STATS_INT_GETI( GPR_created_total ) <<  " used (" << _gpr_u_q << "%), " << STATS_INT_GETI( GPR_peak ) << " peak,\n\t"
 		<< STATS_INT_GETI( GPR_culled ) << " culled (" << _gpr_c_q << "%)\n" << std::endl;
-
 		/*
 			GPrim stats - End
 			-------------------------------------------------------------------
 		*/
-
-
-
 		/*
 			-------------------------------------------------------------------
 			Geometry stats
 		*/
-
 		// Curves
 		TqFloat _geo_crv_s_q = 0.0f;
 		if (STATS_INT_GETI(GPR_crv))
 			_geo_crv_s_q = 100.0f * STATS_INT_GETI( GEO_crv_splits ) / STATS_INT_GETI( GPR_crv );
-
 		TqFloat _geo_crv_s_c_q  = 0.0f;
 		if (STATS_INT_GETI(GEO_crv_splits))
 			_geo_crv_s_c_q = 100.0f * STATS_INT_GETI( GEO_crv_crv ) / STATS_INT_GETI( GEO_crv_splits );
-
 		TqFloat _geo_crv_s_p_q = 0.0f;
 		if (STATS_INT_GETI(GEO_crv_splits))
 			_geo_crv_s_p_q = 100.0f * STATS_INT_GETI( GEO_crv_patch ) / STATS_INT_GETI( GEO_crv_splits );
-
 		// Procedural
 		TqFloat _geo_prc_s_q = 0.0f;
 		if (STATS_INT_GETI( GEO_prc_created ))
 			_geo_prc_s_q = 100.0f * STATS_INT_GETI( GEO_prc_split ) / STATS_INT_GETI( GEO_prc_created );
-
 		MSG << "Geometry:\n\t"
 		// Curves
 		<< "Curves:\n"
@@ -325,19 +175,14 @@ void CqStats::PrintStats( TqInt level ) const
 		<<							STATS_INT_GETI( GEO_prc_created_dra ) << " dynamic read archive,\n\t\t"
 		<<							STATS_INT_GETI( GEO_prc_created_prp ) << " run program\n\t\t"
 		<< std::endl;
-
 		/*
 			GPrim stats - End
 			-------------------------------------------------------------------
 		*/
-
-
-
 		/*
 			-------------------------------------------------------------------
 			Grid stats
 		*/
-
 		TqInt _grd_init =
 		    STATS_INT_GETI( GRD_size_4 ) +
 		    STATS_INT_GETI( GRD_size_8 ) +
@@ -347,7 +192,6 @@ void CqStats::PrintStats( TqInt level ) const
 		    STATS_INT_GETI( GRD_size_128 ) +
 		    STATS_INT_GETI( GRD_size_256 ) +
 		    STATS_INT_GETI( GRD_size_g256 );
-
 		TqInt _grd_shade =
 		    STATS_INT_GETI( GRD_shd_size_4 ) +
 		    STATS_INT_GETI( GRD_shd_size_8 ) +
@@ -357,7 +201,6 @@ void CqStats::PrintStats( TqInt level ) const
 		    STATS_INT_GETI( GRD_shd_size_128 ) +
 		    STATS_INT_GETI( GRD_shd_size_256 ) +
 		    STATS_INT_GETI( GRD_shd_size_g256 );
-
 		TqFloat	_grd_init_quote	= 0.0f;
 		TqFloat	_grd_shade_quote= 0.0f;
 		TqFloat	_grd_cull_quote = 0.0f;
@@ -367,7 +210,6 @@ void CqStats::PrintStats( TqInt level ) const
 			_grd_shade_quote = 100.0f *  _grd_shade / STATS_INT_GETI( GRD_created );
 			_grd_cull_quote = 100.0f *  STATS_INT_GETI( GRD_culled ) / STATS_INT_GETI( GRD_created );
 		}
-
 		if (_grd_init == 0)
 			_grd_init = 1;
 		TqFloat	_grd_4		=	100.0f * STATS_INT_GETI( GRD_size_4 ) / _grd_init;
@@ -378,7 +220,6 @@ void CqStats::PrintStats( TqInt level ) const
 		TqFloat	_grd_128	=	100.0f * STATS_INT_GETI( GRD_size_128 ) / _grd_init;
 		TqFloat	_grd_256	=	100.0f * STATS_INT_GETI( GRD_size_256 ) / _grd_init;
 		TqFloat	_grd_g256	=	100.0f * STATS_INT_GETI( GRD_size_g256 ) / _grd_init;
-
 		if (_grd_shade == 0)
 			_grd_shade = 1;
 		TqFloat	_grd_shd_4		=	100.0f * STATS_INT_GETI( GRD_shd_size_4 ) / _grd_shade;
@@ -389,9 +230,6 @@ void CqStats::PrintStats( TqInt level ) const
 		TqFloat	_grd_shd_128	=	100.0f * STATS_INT_GETI( GRD_shd_size_128 ) / _grd_shade;
 		TqFloat	_grd_shd_256	=	100.0f * STATS_INT_GETI( GRD_shd_size_256 ) / _grd_shade;
 		TqFloat	_grd_shd_g256	=	100.0f * STATS_INT_GETI( GRD_shd_size_g256 ) / _grd_shade;
-
-
-
 		MSG << "Grids:\n\t"
 		<< STATS_INT_GETI( GRD_created ) << " created, " << STATS_INT_GETI( GRD_peak ) << " peak,\n\t"
 		<< _grd_init << " initialized (" << _grd_init_quote << "%),\n\t" << _grd_shade << " shaded (" << _grd_shade_quote << "%), " << STATS_INT_GETI( GRD_culled ) << " culled (" << _grd_cull_quote << "%)\n\n"
@@ -438,29 +276,22 @@ void CqStats::PrintStats( TqInt level ) const
 		<< std::setw(5) << std::setprecision( 1 )<< std::setiosflags( std::ios::right ) << _grd_shd_g256 << "%|\n"
 		<< "\t+------+------+------+------+------+------+------+------+\n\n"
 		<< std::endl;
-
 		/*
 			Grid stats - End
 			-------------------------------------------------------------------
 		*/
-
 		/* MPGS */
-
-
 		/*
 			-------------------------------------------------------------------
 			MPG stats
 		*/
-
 		TqInt _mpg_pushes_all = STATS_INT_GETI( MPG_pushed_forward ) + STATS_INT_GETI( MPG_pushed_down ) +
 		                        STATS_INT_GETI( MPG_pushed_far_down );
-
 		if (_mpg_pushes_all == 0)
 			_mpg_pushes_all = 1;
 		TqFloat _mpg_p_f =  100.0f * STATS_INT_GETI( MPG_pushed_forward ) / _mpg_pushes_all;
 		TqFloat _mpg_p_d = 100.0f * STATS_INT_GETI( MPG_pushed_down ) / _mpg_pushes_all;
 		TqFloat _mpg_p_fd = 100.0f * STATS_INT_GETI( MPG_pushed_far_down ) / _mpg_pushes_all;
-
 		TqFloat _mpg_p_a = 0.0f;
 		TqFloat _mpg_m_q = 0.0f;
 		TqFloat _mpg_average_ratio = 0.0f;
@@ -470,7 +301,6 @@ void CqStats::PrintStats( TqInt level ) const
 			_mpg_m_q =  100.0f * STATS_INT_GETI( MPG_missed ) /STATS_INT_GETI( MPG_allocated );
 			_mpg_average_ratio = STATS_INT_GETF( MPG_average_area ) / (TqFloat) STATS_INT_GETI( MPG_allocated );
 		}
-
 		// Sample hit quote
 		TqInt _mpg_hits =	STATS_INT_GETI ( MPG_sample_coverage0_125 ) +
 		                  STATS_INT_GETI ( MPG_sample_coverage125_25 ) +
@@ -480,7 +310,6 @@ void CqStats::PrintStats( TqInt level ) const
 		                  STATS_INT_GETI ( MPG_sample_coverage625_75 ) +
 		                  STATS_INT_GETI ( MPG_sample_coverage75_875 ) +
 		                  STATS_INT_GETI ( MPG_sample_coverage875_100 );
-
 		if (_mpg_hits == 0)
 			_mpg_hits = 1;
 		TqFloat	_mpg_1		=	100.0f * STATS_INT_GETI( MPG_sample_coverage0_125 ) / _mpg_hits;
@@ -491,14 +320,12 @@ void CqStats::PrintStats( TqInt level ) const
 		TqFloat	_mpg_6		=	100.0f * STATS_INT_GETI( MPG_sample_coverage625_75 ) / _mpg_hits;
 		TqFloat	_mpg_7		=	100.0f * STATS_INT_GETI( MPG_sample_coverage75_875 ) / _mpg_hits;
 		TqFloat	_mpg_8		=	100.0f * STATS_INT_GETI( MPG_sample_coverage875_100 ) / _mpg_hits;
-
 		TqFloat _mpg_min = 0.0f;
 		if (STATS_INT_GETF( MPG_min_area ) != FLT_MAX) 
 			_mpg_min = STATS_INT_GETF( MPG_min_area );
 		TqFloat _mpg_max = 0.0f;
 		if (STATS_INT_GETF( MPG_max_area ) != FLT_MIN)
 			_mpg_max = STATS_INT_GETF( MPG_max_area );
-
 		MSG << "Micropolygons:\n\t"
 		<< STATS_INT_GETI( MPG_allocated ) << " created (" << STATS_INT_GETI( MPG_culled ) << " culled)\n"
 		<< "\t" <<STATS_INT_GETI( MPG_peak ) << " peak, " << STATS_INT_GETI( MPG_trimmed ) << " trimmed, ( " << STATS_INT_GETI( MPG_trimmedout ) << " completely ) " << STATS_INT_GETI( MPG_missed ) << " missed (" << _mpg_m_q << "%)\n\t"
@@ -519,7 +346,6 @@ void CqStats::PrintStats( TqInt level ) const
 		<< std::setw(5) << std::setprecision( 1 )<< std::setiosflags( std::ios::right ) << _mpg_8 << "%|\n"
 		<< "\t+------+------+------+------+------+------+------+------+\n\n"
 		<< std::endl;
-
 		/*
 			MPG Pushed
 		*/
@@ -528,21 +354,14 @@ void CqStats::PrintStats( TqInt level ) const
 		<< STATS_INT_GETI( MPG_pushed_down )		<< " down ("		<< _mpg_p_d	 << "%),\n\t\t"
 		<< STATS_INT_GETI( MPG_pushed_far_down )	<< " far down ("	<< _mpg_p_fd << "%)\n"
 		<< std::endl;
-
 		/*
 			MPG stats - End
 			-------------------------------------------------------------------
 		*/
-
-
-
 		/*
 			-------------------------------------------------------------------
 			Sampling
 		*/
-
-
-
 		TqFloat _spl_b_h = 0.0f;
 		TqFloat _spl_h = 0.0f;
 		TqFloat _spl_m = 100.0f;
@@ -552,10 +371,8 @@ void CqStats::PrintStats( TqInt level ) const
 			_spl_h = 100.0f * STATS_INT_GETI( SPL_hits ) / STATS_INT_GETI( SPL_count );
 			_spl_m = 100.0f - _spl_b_h - _spl_h;
 		}
-
 		TqInt _spl_px = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "PixelSamples" ) [ 0 ];
 		TqInt _spl_py = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "PixelSamples" ) [ 1 ];
-
 		MSG << "Sampling:\n"
 		<< "\tSamples per Pixel: " << _spl_px * _spl_py << " (" << _spl_px << " " << _spl_py << ")\n\t"
 		<< STATS_INT_GETI( SPL_count ) << " samples" << std::endl;
@@ -563,12 +380,10 @@ void CqStats::PrintStats( TqInt level ) const
 		<< "bound hits: " << STATS_INT_GETI( SPL_bound_hits ) << " (" << _spl_b_h << "%),\n\tmisses: "
 		<< STATS_INT_GETI( SPL_count ) - STATS_INT_GETI( SPL_hits ) - STATS_INT_GETI( SPL_bound_hits ) << " (" << _spl_m << "%)\n"
 		<< std::endl;
-
 		/*
 			Sampling - End
 			-------------------------------------------------------------------
 		*/
-
 		/*
 			Shading stats
 			-------------------------------------------------------------------
@@ -579,10 +394,7 @@ void CqStats::PrintStats( TqInt level ) const
 		TqFloat _shd_var_a = 100.0f * STATS_INT_GETI( SHD_var_array ) / _shd_var_all;
 		TqFloat _shd_var_u = 100.0f * STATS_INT_GETI( SHD_var_uniform ) / _shd_var_all;
 		TqFloat _shd_var_v = 100.0f * STATS_INT_GETI( SHD_var_varying ) / _shd_var_all;
-
 		TqFloat _shd_var_c_q = 100.0f * STATS_INT_GETI( SHD_var_created_total ) / _shd_var_all;
-
-
 		MSG << 	"Shading:\n\t"
 		<<					"Stack:\n\t\t"
 		<<					STATS_INT_GETI( SHD_stk_peak ) << " max stack depth\n\t\t"
@@ -614,8 +426,6 @@ void CqStats::PrintStats( TqInt level ) const
 		<<					"\t\t" << STATS_INT_GETI( SHD_var_varying_normal ) << " normal\n\t\t"
 		<<					"\t\t" << STATS_INT_GETI( SHD_var_varying_color ) << " color\n\t\t"
 		<<					"\t\t" << STATS_INT_GETI( SHD_var_varying_matrix ) << " matrix\n\n\t"
-
-
 		<<	"Shadeop calls:\n\t\t";
 		if( STATS_INT_GETI( SHD_so_abs ) )
 			MSG << STATS_INT_GETI( SHD_so_abs ) << "\tabs\n\t\t";
@@ -944,17 +754,12 @@ void CqStats::PrintStats( TqInt level ) const
 		if( STATS_INT_GETI( SHD_so_vtransform ) )
 			MSG << STATS_INT_GETI( SHD_so_vtransform ) << "\tvtransform\n\t\t";
 		MSG << std::endl;
-
 		MSG << "Attributes:\n\t";
 		MSG << ( TqInt ) Attribute_stack.size() << " created\n" << std::endl;
-
 		// MSG << "Transforms:\n\t";
 		// MSG << ( TqInt ) Transform_stack.size() << " created\n" << std::endl;
-
 		MSG << "Parameters:\n\t" << STATS_INT_GETI( PRM_created ) << " created, " << STATS_INT_GETI( PRM_peak ) << " peak\n" << std::endl;
-
 	}
-
 	if ( level == 3 )
 	{
 		MSG << "Textures            : " << m_cTextureMemory << " bytes used." << std::endl;
@@ -1006,14 +811,10 @@ void CqStats::PrintStats( TqInt level ) const
 				}
 				MSG << 100.0f * ( ( float ) m_cTextureHits[ 1 ][ i ] / ( float ) ( m_cTextureHits[ 1 ][ i ] + m_cTextureMisses[ i ] ) ) << "%)" << std::endl;
 			}
-
 		}
 		MSG << std::endl;
 	}
 }
-
-
-
 /** Convert a time value into a string.
  
     \param os  Output stream
@@ -1023,18 +824,15 @@ void CqStats::PrintStats( TqInt level ) const
 std::ostream& CqStats::TimeToString( std::ostream& os, TqFloat ticks, TqFloat tot ) const
 {
 	TqFloat t = static_cast<TqFloat>(ticks) / CLOCKS_PER_SEC;
-
 	// Is the time negative? Then there's a bug somewhere.
 	if ( t < 0.0 )
 	{
 		os << "<invalid>";
 		return os;
 	}
-
 	// Round the time if it's more than 5sec
 	if ( t > 5.0 )
 		t = fmod( t, 1 ) < 0.5 ? FLOOR( t ) : CEIL( t );
-
 	TqInt h = static_cast<TqInt>( t / ( 60 * 60 ) );
 	TqInt m = static_cast<TqInt>( ( t / 60 ) - ( h * 60 ) );
 	TqFloat s = ( t ) - ( h * 60 * 60 ) - ( m * 60 );
@@ -1050,7 +848,6 @@ std::ostream& CqStats::TimeToString( std::ostream& os, TqFloat ticks, TqFloat to
 		os << " (" << std::setprecision(2) << std::setw(6) << 100.0f * ticks / tot << "%)";
 	return os;
 }
-
 void CqStats::PrintInfo() const
 {
 	TqInt psX, psY; //< Pixel Samples
@@ -1060,35 +857,26 @@ void CqStats::PrintInfo() const
 	TqFloat pratio; //< PixelAspectRatio
 	TqInt bX = 16, bY = 16; //< Bucket Size
 	TqInt gs; //< Grid Size
-
 	psX = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "PixelSamples" ) [ 0 ];
 	psY = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "PixelSamples" ) [ 1 ];
-
 	resX = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "Resolution" ) [ 0 ];
 	resY = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "Resolution" ) [ 1 ];
-
 	fX = (TqInt) QGetRenderContext() ->optCurrent().GetFloatOption( "System", "FilterWidth" ) [ 0 ];
 	fY = (TqInt) QGetRenderContext() ->optCurrent().GetFloatOption( "System", "FilterWidth" ) [ 1 ];
-
 	gain = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Exposure" ) [ 0 ];
 	gamma = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Exposure" ) [ 1 ];
-
 	pratio = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "PixelAspectRatio" ) [ 0 ];
-
 	const TqInt* poptBucketSize = QGetRenderContext() ->optCurrent().GetIntegerOption( "limits", "bucketsize" );
 	if ( poptBucketSize != 0 )
 	{
 		bX = poptBucketSize[ 0 ];
 		bY = poptBucketSize[ 1 ];
 	}
-
 	const TqInt* poptGridSize = QGetRenderContext() ->optCurrent().GetIntegerOption( "limits", "gridsize" );
-
 	if ( poptGridSize )
 		gs = poptGridSize[ 0 ];
 	else
 		gs = 256;
-
 	std::cerr << info << "Image settings:" << std::endl;
 	std::cerr << info << "	Resolution: " << resX << " " << resY << std::endl;
 	std::cerr << info << "	PixelAspectRatio: " << pratio << std::endl;
@@ -1101,10 +889,6 @@ void CqStats::PrintInfo() const
 	std::cerr << info << "Anti-aliasing settings: " << std::endl;
 	std::cerr << info << "	PixelSamples: " << psX << " " << psY << std::endl;
 	std::cerr << info << "	FilterWidth: " << fX << " " << fY << std::endl;
-
 }
-
 //---------------------------------------------------------------------
-
 END_NAMESPACE( Aqsis )
-

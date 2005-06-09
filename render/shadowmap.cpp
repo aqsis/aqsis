@@ -24,6 +24,7 @@
 */
 
 #include	"aqsis.h"
+#include	"Multitimer.h"
 
 #include	<math.h>
 #include	<iostream>
@@ -331,7 +332,7 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
     // Check the memory and make sure we don't abuse it
     CriticalMeasure();
 
-    QGetRenderContext() ->Stats().TextureMapTimer().Start();
+	TIME_SCOPE("Texture Mapping")
 
     // If no map defined, not in shadow.
     val.resize( 1 );
@@ -517,8 +518,6 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
     }
 
     val[ 0 ] = ( static_cast<TqFloat>( inshadow ) / ( ns * nt ) );
-
-    QGetRenderContext() ->Stats().TextureMapTimer().Stop();
 }
 
 
