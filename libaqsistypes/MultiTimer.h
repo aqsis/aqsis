@@ -4,7 +4,7 @@
 // Comment out next line to remove timing code
 //#define USE_TIMERS
 // Comment out next line to remove clock speed code
-#define _CLOCKTICKS
+//#define _CLOCKTICKS
 
 #ifdef USE_TIMERS
 	#define TIME_SCOPE(name) CTimerProxy _tim(timerFactory.getTimer(name));
