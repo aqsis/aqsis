@@ -132,7 +132,7 @@ void CqMicroPolyGrid::Initialise( TqInt cu, TqInt cv, const boost::shared_ptr<Cq
 
     TqInt size = ( cu + 1 ) * ( cv + 1 );
 
-    STATS_INC( GRD_size_4 + CLAMP( CqStats::log2( size ) - 2, 0, 7 ) );
+    STATS_INC( GRD_size_4 + CLAMP( CqStats::stats_log2( size ) - 2, 0, 7 ) );
 }
 
 //---------------------------------------------------------------------
@@ -490,7 +490,7 @@ void CqMicroPolyGrid::Shade()
 
     TqInt	size = GridSize();
 
-    STATS_INC( GRD_shd_size_4 + CLAMP( CqStats::log2( size ) - 2, 0, 7 ) );
+    STATS_INC( GRD_shd_size_4 + CLAMP( CqStats::stats_log2( size ) - 2, 0, 7 ) );
 }
 
 //---------------------------------------------------------------------
