@@ -134,7 +134,8 @@ public:
     /**
     	\param	value	This has to be a 32-bit integer!
      */
-    static unsigned int log2( int value /* Must be 32-bit integer!! */ )
+    /* Must be 32-bit integer!! */
+    static unsigned int log2( int value )
     {
         // As described in http://graphics.stanford.edu/~seander/bithacks.html#IntegerLog
         // This method should take roughly O(lg(N)) operations for a N-bit integer
