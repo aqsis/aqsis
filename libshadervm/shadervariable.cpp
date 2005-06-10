@@ -41,27 +41,20 @@ START_NAMESPACE( Aqsis )
  */
 CqShaderVariable::CqShaderVariable() : m_fParameter( TqFalse )
 {
-    STATS_INC( SHD_var_created_total );
-    STATS_INC( SHD_var_current );
-    TqInt cSHD = STATS_GETI( SHD_var_current );
-    TqInt cPeak = STATS_GETI( SHD_var_peak );
+    
 
-    STATS_SETI( SHD_var_peak, cSHD > cPeak ? cSHD : cPeak );
+    
 }
 
 CqShaderVariable::CqShaderVariable( const char* strName, TqBool fParameter ) : m_strName( strName ), m_fParameter( fParameter )
 {
-    STATS_INC( SHD_var_created_total );
-    STATS_INC( SHD_var_current );
-    TqInt cSHD = STATS_GETI( SHD_var_current );
-    TqInt cPeak = STATS_GETI( SHD_var_peak );
+    
 
-    STATS_SETI( SHD_var_peak, cSHD > cPeak ? cSHD : cPeak );
+    
 }
 
 CqShaderVariable::~CqShaderVariable()
 {
-    STATS_DEC( SHD_var_current );
 }
 
 

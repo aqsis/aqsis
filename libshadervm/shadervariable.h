@@ -268,16 +268,6 @@ public:
 
         m_aVariables.resize( Count );
 
-        STATS_INC( SHD_var_array );
-
-        STATS_INC( SHD_var_array_current );
-
-        TqInt cvArr = STATS_GETI( SHD_var_array_current );
-
-        TqInt cPeak = STATS_GETI( SHD_var_array_peak );
-
-        STATS_SETI( SHD_var_array_peak, cvArr > cPeak ? cvArr : cPeak );
-
     }
 
     /** Copy constructor.
@@ -294,23 +284,11 @@ public:
 
             m_aVariables[ i ] = From.m_aVariables[ i ] ->Clone();
 
-        STATS_INC( SHD_var_array );
-
-        STATS_INC( SHD_var_array_current );
-
-        TqInt cvArr = STATS_GETI( SHD_var_array_current );
-
-        TqInt cPeak = STATS_GETI( SHD_var_array_peak );
-
-        STATS_SETI( SHD_var_array_peak, cvArr > cPeak ? cvArr : cPeak );
-
     }
 
     virtual	~CqShaderVariableArray()
 
     {
-
-        STATS_DEC( SHD_var_array_current );
 
     }
 
@@ -329,8 +307,6 @@ public:
         for ( std::vector<IqShaderData*>::iterator i = m_aVariables.begin(); i != m_aVariables.end(); i++ )
 
             ( *i ) ->Initialise( uGridRes, vGridRes );
-
-        STATS_INC( SHD_var_array_init );
 
     }
 
@@ -804,15 +780,6 @@ public:
 
     {
 
-        STATS_INC( SHD_var_uniform );
-
-        STATS_INC( SHD_var_uniform_current );
-
-        TqInt cvUni = STATS_GETI( SHD_var_uniform_current );
-
-        TqInt cPeak = STATS_GETI( SHD_var_uniform_peak );
-
-        STATS_SETI( SHD_var_uniform_peak, cvUni > cPeak ? cvUni : cPeak );
 
     }
 
@@ -820,15 +787,7 @@ public:
 
     {
 
-        STATS_INC( SHD_var_uniform );
 
-        STATS_INC( SHD_var_uniform_current );
-
-        TqInt cvUni = STATS_GETI( SHD_var_uniform_current );
-
-        TqInt cPeak = STATS_GETI( SHD_var_uniform_peak );
-
-        STATS_SETI( SHD_var_uniform_peak, cvUni > cPeak ? cvUni : cPeak );
 
     }
 
@@ -838,15 +797,6 @@ public:
 
     {
 
-        STATS_INC( SHD_var_uniform );
-
-        STATS_INC( SHD_var_uniform_current );
-
-        TqInt cvUni = STATS_GETI( SHD_var_uniform_current );
-
-        TqInt cPeak = STATS_GETI( SHD_var_uniform_peak );
-
-        STATS_SETI( SHD_var_uniform_peak, cvUni > cPeak ? cvUni : cPeak );
 
 
 
@@ -860,15 +810,6 @@ public:
 
     {
 
-        STATS_INC( SHD_var_uniform );
-
-        STATS_INC( SHD_var_uniform_current );
-
-        TqInt cvUni = STATS_GETI( SHD_var_uniform_current );
-
-        TqInt cPeak = STATS_GETI( SHD_var_uniform_peak );
-
-        STATS_SETI( SHD_var_uniform_peak, cvUni > cPeak ? cvUni : cPeak );
 
     }
 
@@ -876,7 +817,6 @@ public:
 
     {
 
-        STATS_DEC( SHD_var_uniform_current );
 
     }
 
@@ -886,9 +826,7 @@ public:
 
     {
 
-        STATS_INC( SHD_var_uniform_init );
-
-    }
+            }
 
     virtual	void	SetSize( const TqInt size )
 
@@ -1280,15 +1218,11 @@ public:
 
     {
 
-        STATS_INC( SHD_var_uniform_float );
-
     }
 
     CqShaderVariableUniformFloat( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableUniform<type_float, TqFloat>( strName, fParameter )
 
     {
-
-        STATS_INC( SHD_var_uniform_float );
 
     }
 
@@ -1382,7 +1316,6 @@ public:
 
     {
 
-        STATS_INC( SHD_var_uniform_string );
 
     }
 
@@ -1390,7 +1323,6 @@ public:
 
     {
 
-        STATS_INC( SHD_var_uniform_string );
 
     }
 
@@ -1468,15 +1400,11 @@ public:
 
     {
 
-        STATS_INC( SHD_var_uniform_point );
-
     }
 
     CqShaderVariableUniformPoint( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableUniform<type_point, CqVector3D>( strName, fParameter )
 
     {
-
-        STATS_INC( SHD_var_uniform_point );
 
     }
 
@@ -1610,15 +1538,11 @@ public:
 
     {
 
-        STATS_INC( SHD_var_uniform_vector );
-
     }
 
     CqShaderVariableUniformVector( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableUniform<type_vector, CqVector3D>( strName, fParameter )
 
     {
-
-        STATS_INC( SHD_var_uniform_vector );
 
     }
 
@@ -1752,16 +1676,11 @@ public:
 
     {
 
-        STATS_INC( SHD_var_uniform_normal );
-
     }
 
     CqShaderVariableUniformNormal( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableUniform<type_normal, CqVector3D>( strName, fParameter )
 
     {
-
-        STATS_INC( SHD_var_uniform_normal );
-
     }
 
     virtual	void	GetPoint( CqVector3D& res, TqInt index = 0 ) const
@@ -1894,7 +1813,6 @@ public:
 
     {
 
-        STATS_INC( SHD_var_uniform_color );
 
     }
 
@@ -1902,7 +1820,6 @@ public:
 
     {
 
-        STATS_INC( SHD_var_uniform_color );
 
     }
 
@@ -1980,7 +1897,6 @@ public:
 
     {
 
-        STATS_INC( SHD_var_uniform_matrix );
 
     }
 
@@ -1988,7 +1904,6 @@ public:
 
     {
 
-        STATS_INC( SHD_var_uniform_matrix );
 
     }
 
@@ -2074,18 +1989,6 @@ public:
 
         m_aValue.resize( 1 );
 
-
-
-        STATS_INC( SHD_var_varying );
-
-        STATS_INC( SHD_var_varying_current );
-
-        TqInt cvVar = STATS_GETI( SHD_var_varying_current );
-
-        TqInt cPeak = STATS_GETI( SHD_var_varying_peak );
-
-        STATS_SETI( SHD_var_varying_peak, cvVar > cPeak ? cvVar : cPeak );
-
     }
 
 
@@ -2095,19 +1998,6 @@ public:
     {
 
         m_aValue.resize( 1 );
-
-
-
-        STATS_INC( SHD_var_varying );
-
-        STATS_INC( SHD_var_varying_current );
-
-        TqInt cvVar = STATS_GETI( SHD_var_varying_current );
-
-        TqInt cPeak = STATS_GETI( SHD_var_varying_peak );
-
-        STATS_SETI( SHD_var_varying_peak, cvVar > cPeak ? cvVar : cPeak );
-
     }
 
     CqShaderVariableVarying( const char* strName, const R& val ) : CqShaderVariable( strName )
@@ -2117,18 +2007,6 @@ public:
         m_aValue.resize( 1 );
 
         m_aValue[ 0 ] = val;
-
-
-
-        STATS_INC( SHD_var_varying );
-
-        STATS_INC( SHD_var_varying_current );
-
-        TqInt cvVar = STATS_GETI( SHD_var_varying_current );
-
-        TqInt cPeak = STATS_GETI( SHD_var_varying_peak );
-
-        STATS_SETI( SHD_var_varying_peak, cvVar > cPeak ? cvVar : cPeak );
 
     }
 
@@ -2140,25 +2018,12 @@ public:
 
         m_aValue.assign( val.m_aValue.begin(), val.m_aValue.begin() );
 
-
-
-        STATS_INC( SHD_var_varying );
-
-        STATS_INC( SHD_var_varying_current );
-
-        TqInt cvVar = STATS_GETI( SHD_var_varying_current );
-
-        TqInt cPeak = STATS_GETI( SHD_var_varying_peak );
-
-        STATS_SETI( SHD_var_varying_peak, cvVar > cPeak ? cvVar : cPeak );
-
     }
 
     virtual	~CqShaderVariableVarying()
 
     {
 
-        STATS_DEC( SHD_var_varying_current );
 
     }
 
@@ -2173,8 +2038,6 @@ public:
         if ( m_aValue.size() > 0 ) Def = m_aValue[ 0 ];
 
         m_aValue.assign( (( uGridRes + 1 ) * ( vGridRes + 1 )), Def );
-
-        STATS_INC( SHD_Var_varying_init );
 
     }
 
@@ -2542,15 +2405,11 @@ public:
 
     {
 
-        STATS_INC( SHD_var_varying_float );
-
     }
 
     CqShaderVariableVaryingFloat( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableVarying<type_float, TqFloat>( strName, fParameter )
 
     {
-
-        STATS_INC( SHD_var_varying_float );
 
     }
 
@@ -2704,17 +2563,13 @@ public:
 
     {
 
-        STATS_INC( SHD_var_varying_string );
-
-    }
+            }
 
     CqShaderVariableVaryingString( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableVarying<type_string, CqString>( strName, fParameter )
 
     {
 
-        STATS_INC( SHD_var_varying_string );
-
-    }
+            }
 
     virtual	void	GetString( CqString& res, TqInt index = 0 ) const
 
@@ -2826,17 +2681,13 @@ public:
 
     {
 
-        STATS_INC( SHD_var_varying_point );
-
-    }
+            }
 
     CqShaderVariableVaryingPoint( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableVarying<type_point, CqVector3D>( strName, fParameter )
 
     {
 
-        STATS_INC( SHD_var_varying_point );
-
-    }
+            }
 
     virtual	void	GetPoint( CqVector3D& res, TqInt index = 0 ) const
 
@@ -3050,17 +2901,13 @@ public:
 
     {
 
-        STATS_INC( SHD_var_varying_vector );
-
-    }
+            }
 
     CqShaderVariableVaryingVector( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableVarying<type_vector, CqVector3D>( strName, fParameter )
 
     {
 
-        STATS_INC( SHD_var_varying_vector );
-
-    }
+            }
 
     virtual	void	GetPoint( CqVector3D& res, TqInt index = 0 ) const
 
@@ -3274,17 +3121,13 @@ public:
 
     {
 
-        STATS_INC( SHD_var_varying_normal );
-
-    }
+            }
 
     CqShaderVariableVaryingNormal( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableVarying<type_normal, CqVector3D>( strName, fParameter )
 
     {
 
-        STATS_INC( SHD_var_varying_normal );
-
-    }
+            }
 
     virtual	void	GetPoint( CqVector3D& res, TqInt index = 0 ) const
 
@@ -3498,17 +3341,13 @@ public:
 
     {
 
-        STATS_INC( SHD_var_varying_color );
-
-    }
+            }
 
     CqShaderVariableVaryingColor( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableVarying<type_color, CqColor>( strName, fParameter )
 
     {
 
-        STATS_INC( SHD_var_varying_color );
-
-    }
+            }
 
     virtual	void	GetColor( CqColor& res, TqInt index = 0 ) const
 
@@ -3642,17 +3481,13 @@ public:
 
     {
 
-        STATS_INC( SHD_var_varying_matrix );
-
-    }
+            }
 
     CqShaderVariableVaryingMatrix( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableVarying<type_matrix, CqMatrix>( strName, fParameter )
 
     {
 
-        STATS_INC( SHD_var_varying_matrix );
-
-    }
+            }
 
     virtual	void	GetMatrix( CqMatrix& res, TqInt index = 0 ) const
 

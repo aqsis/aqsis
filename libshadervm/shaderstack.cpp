@@ -321,7 +321,6 @@ void CqShaderStack::Release( SqStackEntry s )
             }
         }
     }
-    STATS_INC( SHD_stk_release );
 }
 
 

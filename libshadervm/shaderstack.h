@@ -243,8 +243,8 @@ public:
         m_Stack[ m_iTop ].m_Data = pv;
         m_Stack[ m_iTop ].m_IsTemp = TqTrue;
         m_iTop ++;
-        STATS_INC( SHD_stk_push );
-        STATS_SETI( SHD_stk_peak, MAX( STATS_GETI( SHD_stk_peak ), static_cast<TqInt>( m_iTop )) );
+        
+        
     }
 
     //----------------------------------------------------------------------
@@ -263,8 +263,8 @@ public:
         m_Stack[ m_iTop ].m_Data = pv;
         m_Stack[ m_iTop ].m_IsTemp = TqFalse;
         m_iTop ++;
-        STATS_INC( SHD_stk_pushv );
-        STATS_SETI( SHD_stk_peak, MAX( STATS_GETI( SHD_stk_peak ), static_cast<TqInt>( m_iTop )) );
+        
+        
     }
 
     //----------------------------------------------------------------------
@@ -279,9 +279,7 @@ public:
         SqStackEntry Val = m_Stack[ m_iTop ];
         f = Val.m_Data->Size() > 1 || f;
 
-        STATS_INC( SHD_stk_pop );
-
-        return ( Val );
+                return ( Val );
     }
 
     void Release( SqStackEntry s );
@@ -297,7 +295,7 @@ public:
         s->SetValueFromVariable( m_Stack[ iTop ].m_Data );
         Push( s );
 
-        STATS_INC( SHD_stk_dup );
+        
     }
 
     /** Drop the top stack entry.
@@ -307,7 +305,7 @@ public:
         TqBool f = TqFalse;
         Pop( f );
 
-        STATS_INC( SHD_stk_drop );
+        
     }
 
     /**
