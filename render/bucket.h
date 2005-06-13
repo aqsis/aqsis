@@ -130,6 +130,23 @@ public:
 		TqInt i = ( ( iYPos + m_DiscreteShiftY ) * ( m_RealWidth ) ) + ( iXPos + m_DiscreteShiftX );
 		pie = &m_aieImage[ i ];
 	}
+	static CqImagePixel& ImageElement(TqInt index)
+	{
+		assert(index < m_aieImage.size());
+		return(m_aieImage[index]);
+	}
+
+	static	std::vector<SqSampleData>& SamplePoints()
+	{
+		return(m_SamplePoints);
+	}
+
+	static TqInt GetNextSamplePointIndex()
+	{
+		TqInt index = m_NextSamplePoint;
+		m_NextSamplePoint++;
+		return(index);
+	}
 
     static	void	CombineElements(enum EqFilterDepth eDepthFilter, CqColor zThreshold);
     void	FilterBucket(TqBool empty);
@@ -244,6 +261,8 @@ private:
 	static	TqInt	m_NumDofBounds;
 	static	std::vector<CqBound>		m_DofBounds;
     static	std::vector<CqImagePixel>	m_aieImage;
+	static	std::vector<SqSampleData>	m_SamplePoints;
+	static	TqInt	m_NextSamplePoint;
     static	std::vector<std::vector<CqVector2D> >	m_aSamplePositions;///< Vector of vectors of jittered sample positions precalculated.
     static	std::vector<TqFloat>	m_aFilterValues;				///< Vector of filter weights precalculated.
     static	std::vector<TqFloat>	m_aDatas;

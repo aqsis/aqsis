@@ -35,6 +35,7 @@
 #include    "random.h"
 #include	"imagepixel.h"
 #include	"logging.h"
+#include	"bucket.h"
 
 
 START_NAMESPACE( Aqsis )
@@ -87,7 +88,9 @@ void CqImagePixel::AllocateSamples( TqInt XSamples, TqInt YSamples )
         {
 			// Initialise the OpaqueSampleEntries to the correct depth for the data we are
 			// rendering, including any AOV data.
-            m_Samples.resize( numSamples );
+            m_SampleIndices.resize( numSamples );
+			for(TqInt i=0; i<numSamples; i++)
+				m_SampleIndices[i] = CqBucket::GetNextSamplePointIndex();
 			m_DofOffsetIndices.resize( numSamples );
         }
     }
@@ -133,8 +136,8 @@ void CqImagePixel::InitialiseSamples( std::vector<CqVector2D>& vecSamples )
 
     for ( i = 0; i < nSamples; i++ )
     {
-        m_Samples[ i ].m_SubCellIndex = 0;
-        m_Samples[ i ].m_DetailLevel = m_Samples[ i ].m_Time = time;
+        CqBucket::SamplePoints()[m_SampleIndices[ i ]].m_SubCellIndex = 0;
+        CqBucket::SamplePoints()[m_SampleIndices[ i ]].m_DetailLevel = CqBucket::SamplePoints()[m_SampleIndices[ i ]].m_Time = time;
         time += dtime;
     }
 
@@ -180,8 +183,8 @@ void CqImagePixel::InitialiseSamples( std::vector<CqVector2D>& vecSamples )
 	std::random_shuffle(m_DofOffsetIndices.begin(), m_DofOffsetIndices.end());
 	for( i = 0; i < numSamples; ++i)
 	{
-		m_Samples[m_DofOffsetIndices[i]].m_DofOffset = tmpDofOffsets[i];
-		m_Samples[m_DofOffsetIndices[i]].m_DofOffsetIndex = i;
+		CqBucket::SamplePoints()[m_SampleIndices[m_DofOffsetIndices[i]]].m_DofOffset = tmpDofOffsets[i];
+		CqBucket::SamplePoints()[m_SampleIndices[m_DofOffsetIndices[i]]].m_DofOffsetIndex = i;
 	}
 }
 
@@ -266,7 +269,7 @@ void CqImagePixel::JitterSamples( std::vector<CqVector2D>& vecSamples )
             TqFloat yindex = vecSamples[ which ].y();
             vecSamples[ which ].x( xindex * subcell_width + ( subcell_width * 0.5f ) + sx );
             vecSamples[ which ].y( yindex * subcell_width + ( subcell_width * 0.5f ) + sy );
-            m_Samples[ which ].m_SubCellIndex = static_cast<TqInt>( ( yindex * m_YSamples ) + xindex );
+            CqBucket::SamplePoints()[m_SampleIndices[ which ]].m_SubCellIndex = static_cast<TqInt>( ( yindex * m_YSamples ) + xindex );
             which++;
         }
     }
@@ -288,10 +291,10 @@ void CqImagePixel::JitterSamples( std::vector<CqVector2D>& vecSamples )
 		// Scale the value of time to the shutter time.
 		TqFloat t = time + randomTime;
 		t = ( closetime - opentime ) * t + opentime;
-		m_Samples[ i ].m_Time = t;
+		CqBucket::SamplePoints()[m_SampleIndices[ i ]].m_Time = t;
 		time += dtime;
 
-		m_Samples[ i ].m_DetailLevel = lod + random.RandomFloat( dlod );
+		CqBucket::SamplePoints()[m_SampleIndices[ i ]].m_DetailLevel = lod + random.RandomFloat( dlod );
 		lod += dlod;
 	}
 
@@ -300,7 +303,7 @@ void CqImagePixel::JitterSamples( std::vector<CqVector2D>& vecSamples )
 	// assumptions made about ordering during sampling still hold.
 	for( i = 0; i < numSamples; ++i)
 	{
-		tmpDofOffsets[i] = m_Samples[m_DofOffsetIndices[i]].m_DofOffset;
+		tmpDofOffsets[i] = CqBucket::SamplePoints()[m_SampleIndices[m_DofOffsetIndices[i]]].m_DofOffset;
 		m_DofOffsetIndices[i] = i;
 	}
 
@@ -308,8 +311,8 @@ void CqImagePixel::JitterSamples( std::vector<CqVector2D>& vecSamples )
 	std::random_shuffle(m_DofOffsetIndices.begin(), m_DofOffsetIndices.end());
 	for( i = 0; i < numSamples; ++i)
 	{
-		m_Samples[m_DofOffsetIndices[i]].m_DofOffset = tmpDofOffsets[i];
-		m_Samples[m_DofOffsetIndices[i]].m_DofOffsetIndex = i;
+		CqBucket::SamplePoints()[m_SampleIndices[m_DofOffsetIndices[i]]].m_DofOffset = tmpDofOffsets[i];
+		CqBucket::SamplePoints()[m_SampleIndices[m_DofOffsetIndices[i]]].m_DofOffsetIndex = i;
 	}
 }
 
@@ -322,9 +325,9 @@ void CqImagePixel::Clear()
     TqInt i;
     for ( i = ( m_XSamples * m_YSamples ) - 1; i >= 0; i-- )
 	{
-		if(!m_Samples[i].m_Data.empty())
-			m_Samples[ i ].m_Data.clear( );
-		m_Samples[ i ].m_OpaqueSample.m_flags=0;
+		if(!CqBucket::SamplePoints()[m_SampleIndices[i]].m_Data.empty())
+			CqBucket::SamplePoints()[m_SampleIndices[ i ]].m_Data.clear( );
+		CqBucket::SamplePoints()[m_SampleIndices[ i ]].m_OpaqueSample.m_flags=0;
 	}
 }
 
@@ -338,9 +341,11 @@ void CqImagePixel::Combine(enum EqFilterDepth depthfilter, CqColor zThreshold)
     TqUint samplecount = 0;
     TqUint numsamples = XSamples() * YSamples();
 	TqInt sampleIndex = 0;
-	std::vector<SqSampleData>::iterator end = m_Samples.end();
-	for ( std::vector<SqSampleData>::iterator samples = m_Samples.begin(); samples != end; ++samples )
+	std::vector<TqInt>::iterator end = m_SampleIndices.end();
+	for ( std::vector<TqInt>::iterator sample_index = m_SampleIndices.begin(); sample_index != end; ++sample_index )
 	{
+		SqSampleData* samples = &CqBucket::SamplePoints()[*sample_index];
+
 		SqImageSample& opaqueValue = samples->m_OpaqueSample;
 		sampleIndex++;
 
@@ -502,6 +507,43 @@ void CqImagePixel::Combine(enum EqFilterDepth depthfilter, CqColor zThreshold)
 		}
 	}
 }
+
+void CqImagePixel::OffsetSamples(CqVector2D& vecPixel, std::vector<CqVector2D>& vecSamples)
+{
+	// add in the pixel offset
+	const TqInt numSamples = m_XSamples * m_YSamples;
+	for ( TqInt i = 0; i < numSamples; i++ )
+	{
+		CqBucket::SamplePoints()[ m_SampleIndices[i] ].m_Position = vecSamples[ i ];
+		CqBucket::SamplePoints()[ m_SampleIndices[i] ].m_Position += vecPixel;
+	}
+}
+
+//std::list<SqImageSample>& CqImagePixel::Values( TqInt index )
+//{
+//    assert( index < m_XSamples*m_YSamples );
+//	return ( CqBucket::SamplePoints()[m_SampleIndices[ index ]].m_Data );
+//}
+
+SqImageSample& CqImagePixel::OpaqueValues( TqInt index )
+{
+    assert( index < m_XSamples*m_YSamples );
+	return ( CqBucket::SamplePoints()[m_SampleIndices[ index ]].m_OpaqueSample );
+}
+
+
+const SqSampleData& CqImagePixel::SampleData( TqInt index ) const
+{
+    assert( index < m_XSamples*m_YSamples );
+    return ( CqBucket::SamplePoints()[m_SampleIndices[index]] );
+}
+
+SqSampleData& CqImagePixel::SampleData( TqInt index )
+{
+    assert( index < m_XSamples*m_YSamples );
+    return ( CqBucket::SamplePoints()[m_SampleIndices[index]] );
+}
+
 
 //---------------------------------------------------------------------
 

@@ -266,16 +266,7 @@ public:
     void	AllocateSamples( TqInt XSamples, TqInt YSamples );
     void	InitialiseSamples( std::vector<CqVector2D>& vecSamples );
     void	JitterSamples( std::vector<CqVector2D>& vecSamples );
-	void	OffsetSamples(CqVector2D& vecPixel, std::vector<CqVector2D>& vecSamples)
-	{
-		// add in the pixel offset
-		const TqInt numSamples = m_XSamples * m_YSamples;
-		for ( TqInt i = 0; i < numSamples; i++ )
-		{
-			m_Samples[ i ].m_Position = vecSamples[ i ];
-			m_Samples[ i ].m_Position += vecPixel;
-		}
-	}
+	void	OffsetSamples(CqVector2D& vecPixel, std::vector<CqVector2D>& vecSamples);
 
     /** Get the approximate coverage of this pixel.
      * \return Float fraction of the pixel covered.
@@ -371,17 +362,9 @@ public:
      * \param n The vertical index of the required sample point.
      * \return A Reference to a vector of SqImageSample data.
      */
-    std::list<SqImageSample>&	Values( TqInt index )
-    {
-        assert( index < m_XSamples*m_YSamples );
-		return ( m_Samples[ index ].m_Data );
-    }
+    //std::list<SqImageSample>&	Values( TqInt index );
 
-	SqImageSample& OpaqueValues( TqInt index )
-	{
-        assert( index < m_XSamples*m_YSamples );
-		return ( m_Samples[ index ].m_OpaqueSample );
-    }
+	SqImageSample& OpaqueValues( TqInt index );
 
     void	Combine(EqFilterDepth eDepthFilter, CqColor zThreshold);
 
@@ -389,21 +372,13 @@ public:
      * \param The index of the required sample point.
      * \return A reference to the sample data.
      */
-    const SqSampleData& SampleData( TqInt index ) const
-    {
-        assert( index < m_XSamples*m_YSamples );
-        return ( m_Samples[index] );
-    }
+    const SqSampleData& SampleData( TqInt index ) const;
 
     /** Get the sample data for the specified sample index.
      * \param The index of the required sample point.
      * \return A reference to the sample data.
      */
-    SqSampleData& SampleData( TqInt index )
-    {
-        assert( index < m_XSamples*m_YSamples );
-        return ( m_Samples[index] );
-    }
+    SqSampleData& SampleData( TqInt index );
 
 	/** Get the index of the sample that contains a dof offset that lies
 	 *  in bounding-box number i.
@@ -432,7 +407,8 @@ public:
 private:
     TqInt	m_XSamples;						///< The number of samples in the horizontal direction.
     TqInt	m_YSamples;						///< The number of samples in the vertical direction.
-	std::vector<SqSampleData> m_Samples;	///< A Vector of samples. Holds position, time, dof offset etc for each sample.
+	//std::vector<SqSampleData> m_Samples;	///< A Vector of samples. Holds position, time, dof offset etc for each sample.
+	std::vector<TqInt> m_SampleIndices;
 	std::vector<TqInt> m_DofOffsetIndices;	///< A mapping from dof bounding-box index to the sample that contains a dof offset in that bb.
     SqImageSample	m_Data;
 }

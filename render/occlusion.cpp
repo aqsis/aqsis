@@ -43,9 +43,9 @@ void CqOcclusionTree::ConstructTree()
 	// Create the children nodes.
 	CqOcclusionTree* a = new CqOcclusionTree();
 	CqOcclusionTree* b = new CqOcclusionTree();
-	TqInt samplecount = Samples().size();
-	TqInt median = static_cast<TqInt>( m_Samples.size() / 2.0f );
-	TqFloat dividingplane = m_Samples[median]->m_Position[m_Dimension];
+	TqInt samplecount = m_SampleIndices.size();
+	TqInt median = static_cast<TqInt>( m_SampleIndices.size() / 2.0f );
+	TqFloat dividingplane = CqBucket::ImageElement(m_SampleIndices[median].first).SampleData(m_SampleIndices[median].second).m_Position[m_Dimension];
 
 	a->m_MinSamplePoint = m_MinSamplePoint;
 	b->m_MinSamplePoint = m_MinSamplePoint;
@@ -63,11 +63,12 @@ void CqOcclusionTree::ConstructTree()
 	TqInt i;
 	for(i = 0; i<median; ++i)
 	{
-		a->Samples().push_back(Samples()[i]);
-		minTime = MIN(minTime, Samples()[0]->m_Time);
-		maxTime = MAX(maxTime, Samples()[0]->m_Time);
-		minDofIndex = MIN(minDofIndex, Samples()[0]->m_DofOffsetIndex);
-		maxDofIndex = MAX(maxDofIndex, Samples()[0]->m_DofOffsetIndex);
+		a->m_SampleIndices.push_back(m_SampleIndices[i]);
+		const SqSampleData& sample = CqBucket::ImageElement(m_SampleIndices[i].first).SampleData(m_SampleIndices[i].second);
+		minTime = MIN(minTime, sample.m_Time);
+		maxTime = MAX(maxTime, sample.m_Time);
+		minDofIndex = MIN(minDofIndex, sample.m_DofOffsetIndex);
+		maxDofIndex = MAX(maxDofIndex, sample.m_DofOffsetIndex);
 	}
 	a->m_MinTime = minTime;
 	a->m_MaxTime = maxTime;
@@ -78,29 +79,30 @@ void CqOcclusionTree::ConstructTree()
 	minDofIndex = m_MaxDofBoundIndex, maxDofIndex = m_MinDofBoundIndex;
 	for(; i<samplecount; ++i)
 	{
-		b->Samples().push_back(Samples()[i]);
-		minTime = MIN(minTime, Samples()[0]->m_Time);
-		maxTime = MAX(maxTime, Samples()[0]->m_Time);
-		minDofIndex = MIN(minDofIndex, Samples()[0]->m_DofOffsetIndex);
-		maxDofIndex = MAX(maxDofIndex, Samples()[0]->m_DofOffsetIndex);
+		b->m_SampleIndices.push_back(m_SampleIndices[i]);
+		const SqSampleData& sample = CqBucket::ImageElement(m_SampleIndices[i].first).SampleData(m_SampleIndices[i].second);
+		minTime = MIN(minTime, sample.m_Time);
+		maxTime = MAX(maxTime, sample.m_Time);
+		minDofIndex = MIN(minDofIndex, sample.m_DofOffsetIndex);
+		maxDofIndex = MAX(maxDofIndex, sample.m_DofOffsetIndex);
 	}
 	b->m_MinTime = minTime;
 	b->m_MaxTime = maxTime;
 	b->m_MinDofBoundIndex = minDofIndex;
 	b->m_MaxDofBoundIndex = maxDofIndex;
 
-	if(a->Samples().size() >= 1)
+	if(a->m_SampleIndices.size() >= 1)
 	{
 		m_Children.push_back(a);
 		a->m_Parent = this;
-		if(a->Samples().size() > 1)
+		if(a->m_SampleIndices.size() > 1)
 			a->ConstructTree();
 	}
-	if(b->Samples().size() >= 1)
+	if(b->m_SampleIndices.size() >= 1)
 	{
 		m_Children.push_back(b);
 		b->m_Parent = this;
-		if(b->Samples().size() > 1)
+		if(b->m_SampleIndices.size() > 1)
 			b->ConstructTree();
 	}
 }
@@ -108,27 +110,29 @@ void CqOcclusionTree::ConstructTree()
 
 void CqOcclusionTree::InitialiseBounds()
 {
-	if (Samples().size() < 1) return;
+	if (m_SampleIndices.size() < 1) return;
 
-	TqFloat minXVal = Samples()[0]->m_Position.x();
+	const SqSampleData& sample = CqBucket::ImageElement(m_SampleIndices[0].first).SampleData(m_SampleIndices[0].second);
+	TqFloat minXVal = sample.m_Position.x();
 	TqFloat maxXVal = minXVal;
-	TqFloat minYVal = Samples()[0]->m_Position.y();
+	TqFloat minYVal = sample.m_Position.y();
 	TqFloat maxYVal = minYVal;
-	TqFloat minTime = Samples()[0]->m_Time;
+	TqFloat minTime = sample.m_Time;
 	TqFloat maxTime = minTime;
-	TqInt	minDofIndex = Samples()[0]->m_DofOffsetIndex;
+	TqInt	minDofIndex = sample.m_DofOffsetIndex;
 	TqInt	maxDofIndex = minDofIndex;
-	std::vector<SqSampleData*>::iterator i;
-	for(i = Samples().begin(); i!=Samples().end(); ++i)
+	std::vector<std::pair<TqInt, TqInt> >::iterator i;
+	for(i = m_SampleIndices.begin()+1; i!=m_SampleIndices.end(); ++i)
 	{
-		minXVal = MIN(minXVal, (*i)->m_Position.x());
-		maxXVal = MAX(maxXVal, (*i)->m_Position.x());
-		minYVal = MIN(minYVal, (*i)->m_Position.y());
-		maxYVal = MAX(maxYVal, (*i)->m_Position.y());
-		minTime = MIN(minTime, (*i)->m_Time);
-		maxTime = MAX(maxTime, (*i)->m_Time);
-		minDofIndex = MIN(minDofIndex, (*i)->m_DofOffsetIndex);
-		maxDofIndex = MAX(maxDofIndex, (*i)->m_DofOffsetIndex);
+		const SqSampleData& sample = CqBucket::ImageElement(i->first).SampleData(i->second);
+		minXVal = MIN(minXVal, sample.m_Position.x());
+		maxXVal = MAX(maxXVal, sample.m_Position.x());
+		minYVal = MIN(minYVal, sample.m_Position.y());
+		maxYVal = MAX(maxYVal, sample.m_Position.y());
+		minTime = MIN(minTime, sample.m_Time);
+		maxTime = MAX(maxTime, sample.m_Time);
+		minDofIndex = MIN(minDofIndex, sample.m_DofOffsetIndex);
+		maxDofIndex = MAX(maxDofIndex, sample.m_DofOffsetIndex);
 	}
 	m_MinSamplePoint[0] = minXVal;
 	m_MaxSamplePoint[0] = maxXVal;
@@ -156,43 +160,23 @@ void CqOcclusionTree::UpdateBounds()
 
 	if(m_Children.size() == 0)
 	{
-		assert(Samples().size() == 1);
-		SqSampleData* sample = Samples()[0];
-		m_MinSamplePoint[0] = m_MaxSamplePoint[0] = sample->m_Position[0];
-		m_MinSamplePoint[1] = m_MaxSamplePoint[1] = sample->m_Position[1];
-		m_MinTime = m_MaxTime = sample->m_Time;
-		m_MinDofBoundIndex = m_MaxDofBoundIndex = sample->m_DofOffsetIndex;
+		assert(m_SampleIndices.size() == 1);
+		const SqSampleData& sample = CqBucket::ImageElement(m_SampleIndices[0].first).SampleData(m_SampleIndices[0].second);;
+		m_MinSamplePoint[0] = m_MaxSamplePoint[0] = sample.m_Position[0];
+		m_MinSamplePoint[1] = m_MaxSamplePoint[1] = sample.m_Position[1];
+		m_MinTime = m_MaxTime = sample.m_Time;
+		m_MinDofBoundIndex = m_MaxDofBoundIndex = sample.m_DofOffsetIndex;
 	}
 	else
 	{
-		TqFloat minXVal = m_Children[0]->m_MinSamplePoint[0];
-		TqFloat maxXVal = minXVal;
-		TqFloat minYVal = m_Children[0]->m_MinSamplePoint[1];
-		TqFloat maxYVal = minYVal;
-		TqFloat minTime = m_Children[0]->m_MinTime;
-		TqFloat maxTime = minTime;
-		TqInt	minDofIndex = m_Children[0]->m_MinDofBoundIndex;
-		TqInt	maxDofIndex = minDofIndex;
-		std::vector<CqOcclusionTree*>::iterator i;
-		for(i = m_Children.begin(); i!=m_Children.end(); ++i)
-		{
-			minXVal = MIN(minXVal, (*i)->m_MinSamplePoint[0]);
-			maxXVal = MAX(maxXVal, (*i)->m_MaxSamplePoint[0]);
-			minYVal = MIN(minYVal, (*i)->m_MinSamplePoint[1]);
-			maxYVal = MAX(maxYVal, (*i)->m_MaxSamplePoint[1]);
-			minTime = MIN(minTime, (*i)->m_MinTime);
-			maxTime = MAX(maxTime, (*i)->m_MaxTime);
-			minDofIndex = MIN(minDofIndex, (*i)->m_MinDofBoundIndex);
-			maxDofIndex = MAX(maxDofIndex, (*i)->m_MaxDofBoundIndex);
-		}
-		m_MinSamplePoint[0] = minXVal;
-		m_MaxSamplePoint[0] = maxXVal;
-		m_MinSamplePoint[1] = minYVal;
-		m_MaxSamplePoint[1] = maxYVal;
-		m_MinTime = minTime;
-		m_MaxTime = maxTime;
-		m_MinDofBoundIndex = minDofIndex;
-		m_MaxDofBoundIndex = maxDofIndex;
+		m_MinSamplePoint[0] = MIN(m_Children[0]->m_MinSamplePoint[0], m_Children[1]->m_MinSamplePoint[0]);
+		m_MaxSamplePoint[0] = MAX(m_Children[0]->m_MaxSamplePoint[0], m_Children[1]->m_MaxSamplePoint[0]);
+		m_MinSamplePoint[1] = MIN(m_Children[0]->m_MinSamplePoint[1], m_Children[1]->m_MinSamplePoint[1]);
+		m_MaxSamplePoint[1] = MAX(m_Children[0]->m_MaxSamplePoint[1], m_Children[1]->m_MaxSamplePoint[1]);
+		m_MinTime = MIN(m_Children[0]->m_MinTime, m_Children[1]->m_MinTime);
+		m_MaxTime = MAX(m_Children[0]->m_MaxTime, m_Children[1]->m_MaxTime);
+		m_MinDofBoundIndex = MIN(m_Children[0]->m_MinDofBoundIndex, m_Children[1]->m_MinDofBoundIndex);
+		m_MaxDofBoundIndex = MAX(m_Children[0]->m_MaxDofBoundIndex, m_Children[1]->m_MaxDofBoundIndex);
 	}
 	// Set the opaque depths to the limits to begin with.
 	m_MaxOpaqueZ = FLT_MAX;
@@ -229,9 +213,11 @@ void CqOcclusionTree::PropagateChanges()
 
 CqBucket* CqOcclusionBox::m_Bucket = NULL;
 
-bool CqOcclusionTree::CqOcclusionTreeComparator::operator()(SqSampleData* a, SqSampleData* b)
+bool CqOcclusionTree::CqOcclusionTreeComparator::operator()(std::pair<TqInt, TqInt>& a, std::pair<TqInt, TqInt>& b)
 {
-    return( a->m_Position[m_Dim] < b->m_Position[m_Dim] );
+	const SqSampleData& A = CqBucket::ImageElement(a.first).SampleData(a.second);
+	const SqSampleData& B = CqBucket::ImageElement(b.first).SampleData(b.second);
+	return( A.m_Position[m_Dim] < B.m_Position[m_Dim] );
 }
 
 
@@ -277,7 +263,7 @@ void CqOcclusionBox::CreateHierarchy( TqInt bucketXSize, TqInt bucketYSize, TqIn
 */
 void CqOcclusionBox::DeleteHierarchy()
 {
-    m_KDTree.m_Samples.clear();
+//    m_KDTree.m_Samples.clear();
 //	std::vector<CqOcclusionTree*>::iterator child;
 //	for(child = m_KDTree.m_Children.begin(); child != m_KDTree.m_Children.end(); ++child)
 //		delete((*child));
@@ -300,28 +286,18 @@ void CqOcclusionBox::SetupHierarchy( CqBucket* bucket, TqInt xMin, TqInt yMin, T
     assert( bucket );
     m_Bucket = bucket;
 
-	if(m_KDTree.Samples().empty())
+	if(m_KDTree.m_SampleIndices.empty())
 	{
 		// Setup the KDTree of samples
-		m_KDTree.Samples().clear();
-		for ( TqInt j = yMin; j < yMax; j++ )
+		TqInt numpixels = bucket->RealHeight() * bucket->RealWidth();
+		TqInt numsamples = bucket->PixelXSamples() * bucket->PixelYSamples();
+		for ( TqInt j = 0; j < numpixels; j++ )
 		{
-			for ( TqInt i = xMin; i < xMax; i++ )
+			CqImagePixel& pixel = bucket->ImageElement(j);
+			// Gather all samples within the pixel
+			for ( TqInt i = 0; i < numsamples; i++ )
 			{
-				CqImagePixel* pie;
-				m_Bucket->ImageElement( i, j, pie );
-				// Gather all samples within the pixel
-				TqInt sampleIndex = 0;
-				TqInt sx, sy;
-				for ( sy = 0; sy < pie->YSamples(); sy++ )
-				{
-					for ( sx = 0; sx < pie->XSamples(); sx++ )
-					{
-						SqSampleData* pSample = &pie->SampleData( sampleIndex );
-						m_KDTree.Samples().push_back(pSample);
-						sampleIndex++;
-					}
-				}
+				m_KDTree.m_SampleIndices.push_back(std::pair<TqInt, TqInt>(j,i));
 			}
 		}
 		// Now split the tree down until each leaf has only one sample.

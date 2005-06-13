@@ -911,10 +911,10 @@ void CqImageBuffer::ProcessMPG( CqMicroPolygon* pMPG, const CqBound& bound, CqOc
 {
 	// Check the current tree level, and if only one leaf, sample the MP, otherwise, pass it down to the left
 	// and/or right side of the tree if it crosses.
-	if(treenode.Samples().size() == 1)
+	if(treenode.m_SampleIndices.size() == 1)
 	{
 		// Sample the MPG
-		SqSampleData* pData = treenode.Samples()[0];
+		SqSampleData& sample = CqBucket::ImageElement(treenode.m_SampleIndices[0].first).SampleData(treenode.m_SampleIndices[0].second);
 		TqBool SampleHit;
 		TqFloat D;
 
@@ -925,25 +925,25 @@ void CqImageBuffer::ProcessMPG( CqMicroPolygon* pMPG, const CqBound& bound, CqOc
 		// include LOD bounds in the treenode data.
 		if ( UsingLevelOfDetail)
 		{
-			TqFloat LevelOfDetail = pData->m_DetailLevel;
+			TqFloat LevelOfDetail = sample.m_DetailLevel;
 			if ( LodBounds[ 0 ] > LevelOfDetail || LevelOfDetail >= LodBounds[ 1 ] )
 				return;
 		}
 
-		//CqStats::IncI( CqStats::SPL_count );
-		SampleHit = pMPG->Sample(*pData , D, pData->m_Time, usingDof );
+		CqStats::IncI( CqStats::SPL_count );
+		SampleHit = pMPG->Sample(sample, D, sample.m_Time, usingDof );
 
 		if ( SampleHit )
 		{
 			TqBool Occludes = m_CurrentMpgSampleInfo.m_Occludes;
 			TqBool opaque =  m_CurrentMpgSampleInfo.m_IsOpaque;
 
-			SqImageSample& currentOpaqueSample = pData->m_OpaqueSample;
+			SqImageSample& currentOpaqueSample = sample.m_OpaqueSample;
 			static SqImageSample localImageVal;
 
 			SqImageSample& ImageVal = opaque ? currentOpaqueSample : localImageVal;
 
-			std::list<SqImageSample>& aValues = pData->m_Data;
+			std::list<SqImageSample>& aValues = sample.m_Data;
 			std::list<SqImageSample>::iterator sample = aValues.begin();
 			std::list<SqImageSample>::iterator end = aValues.end();
 

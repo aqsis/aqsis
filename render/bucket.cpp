@@ -67,6 +67,8 @@ TqInt	CqBucket::m_NumDofBounds;
 CqImageBuffer* CqBucket::m_ImageBuffer;
 std::vector<CqBound>		CqBucket::m_DofBounds;
 std::vector<CqImagePixel>	CqBucket::m_aieImage;
+std::vector<SqSampleData>	CqBucket::m_SamplePoints;
+TqInt	CqBucket::m_NextSamplePoint = 0;
 std::vector<std::vector<CqVector2D> >	CqBucket::m_aSamplePositions;
 std::vector<TqFloat> CqBucket::m_aFilterValues;
 std::vector<TqFloat> CqBucket::m_aDatas;
@@ -102,6 +104,8 @@ void CqBucket::PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt y
 
         m_aieImage.resize( m_RealWidth * m_RealHeight );
 		m_aSamplePositions.resize( m_RealWidth * m_RealHeight );
+		m_SamplePoints.resize( m_RealWidth * m_RealHeight * m_PixelXSamples * m_PixelYSamples );
+		m_NextSamplePoint = 0;
 
 		CalculateDofBounds();
 
@@ -122,6 +126,8 @@ void CqBucket::PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt y
         }
     }
 
+	std::random_shuffle(m_aieImage.begin(), m_aieImage.end());
+
 	// Jitter the samplepoints and adjust them for the new bucket position.
 	TqInt which = 0;
 	TqInt numPixels = m_RealWidth*m_RealHeight;
@@ -135,8 +141,8 @@ void CqBucket::PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt y
 			if(!empty)
 				m_aieImage[which].Clear();
 
-			if(fJitter)
-				m_aieImage[which].JitterSamples(m_aSamplePositions[which]);
+			//if(fJitter)
+			//	m_aieImage[which].JitterSamples(m_aSamplePositions[which]);
 			m_aieImage[which].OffsetSamples( bPos2, m_aSamplePositions[which] );
 
 			which++;

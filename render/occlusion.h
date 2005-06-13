@@ -51,7 +51,7 @@ class CqOcclusionTree
         CqOcclusionTreeComparator(TqInt dimension) : m_Dim( dimension )
         {}
 
-        bool operator()(SqSampleData* a, SqSampleData* b);
+        bool operator()(std::pair<TqInt, TqInt>& a, std::pair<TqInt, TqInt>& b);
 
     private:
         TqInt		m_Dim;
@@ -63,13 +63,13 @@ public:
 
     void SortElements(TqInt dimension)
     {
-        std::sort(m_Samples.begin(), m_Samples.end(), CqOcclusionTreeComparator(dimension) );
+        std::sort(m_SampleIndices.begin(), m_SampleIndices.end(), CqOcclusionTreeComparator(dimension) );
     }
     TqInt Dimensions() const	{return(2);}
-	std::vector<SqSampleData*>& Samples()
+	/*std::vector<SqSampleData*>& Samples()
 	{
 		return(m_Samples);
-	}
+	}*/
 
 	void ConstructTree();
 
@@ -89,7 +89,8 @@ public:
 	TqInt		m_MinDofBoundIndex;
 	TqInt		m_MaxDofBoundIndex;
 	std::vector<CqOcclusionTree*>	m_Children;
-	std::vector<SqSampleData*>		m_Samples;
+	//std::vector<SqSampleData*>		m_Samples;
+	std::vector<std::pair<TqInt, TqInt> > m_SampleIndices;
 };
 
 
