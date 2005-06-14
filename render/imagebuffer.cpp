@@ -882,11 +882,11 @@ void CqImageBuffer::RenderMPG_MBOrDof( CqMicroPolygon* pMPG,
 			if(UsingDof)
 			{
 				CqBound DofBound(bminx, bminy, bminz, bmaxx, bmaxy, bmaxz);
-				ProcessMPG(pMPG, DofBound, CqOcclusionBox::KDTree(), time0, time1, TqTrue, bound_numDof );
+				CqOcclusionBox::KDTree().SampleMPG(pMPG, DofBound, time0, time1, TqTrue, bound_numDof, m_CurrentMpgSampleInfo, m_CurrentGridInfo);
 			}
 			else
 			{
-				ProcessMPG(pMPG, Bound, CqOcclusionBox::KDTree(), time0, time1 );
+				CqOcclusionBox::KDTree().SampleMPG(pMPG, Bound, time0, time1, TqFalse, 0, m_CurrentMpgSampleInfo, m_CurrentGridInfo);
 			}
 		}
     }
@@ -903,174 +903,10 @@ void CqImageBuffer::RenderMPG_Static( CqMicroPolygon* pMPG, long xmin, long xmax
 
     const CqBound& Bound = pMPG->GetTotalBound();
 
-	ProcessMPG(pMPG, Bound, CqOcclusionBox::KDTree(), m_CurrentGridInfo.m_ShutterOpenTime, m_CurrentGridInfo.m_ShutterCloseTime );
+	CqOcclusionBox::KDTree().SampleMPG(pMPG, Bound, m_CurrentGridInfo.m_ShutterOpenTime, m_CurrentGridInfo.m_ShutterCloseTime, TqFalse, 0, m_CurrentMpgSampleInfo, m_CurrentGridInfo);
 }
 
 
-void CqImageBuffer::ProcessMPG( CqMicroPolygon* pMPG, const CqBound& bound, CqOcclusionTree& treenode, TqFloat time0, TqFloat time1, TqBool usingDof, TqInt dofboundindex)
-{
-	// Check the current tree level, and if only one leaf, sample the MP, otherwise, pass it down to the left
-	// and/or right side of the tree if it crosses.
-	if(treenode.m_SampleIndices.size() == 1)
-	{
-		// Sample the MPG
-		SqSampleData& sample = CqBucket::ImageElement(treenode.m_SampleIndices[0].first).SampleData(treenode.m_SampleIndices[0].second);
-		TqBool SampleHit;
-		TqFloat D;
-
-		const TqFloat* LodBounds = m_CurrentGridInfo.m_LodBounds;
-		TqBool UsingLevelOfDetail = LodBounds[ 0 ] >= 0.0f;
-		// Check to see if the sample is within the sample's level of detail
-		// \note Need to move this to the level check further down and 
-		// include LOD bounds in the treenode data.
-		if ( UsingLevelOfDetail)
-		{
-			TqFloat LevelOfDetail = sample.m_DetailLevel;
-			if ( LodBounds[ 0 ] > LevelOfDetail || LevelOfDetail >= LodBounds[ 1 ] )
-				return;
-		}
-
-		CqStats::IncI( CqStats::SPL_count );
-		SampleHit = pMPG->Sample(sample, D, sample.m_Time, usingDof );
-
-		if ( SampleHit )
-		{
-			TqBool Occludes = m_CurrentMpgSampleInfo.m_Occludes;
-			TqBool opaque =  m_CurrentMpgSampleInfo.m_IsOpaque;
-
-			SqImageSample& currentOpaqueSample = sample.m_OpaqueSample;
-			static SqImageSample localImageVal;
-
-			SqImageSample& ImageVal = opaque ? currentOpaqueSample : localImageVal;
-
-			std::list<SqImageSample>& aValues = sample.m_Data;
-			std::list<SqImageSample>::iterator sample = aValues.begin();
-			std::list<SqImageSample>::iterator end = aValues.end();
-
-			// return if the sample is occluded and can be culled.
-			if(opaque)
-			{
-				if((currentOpaqueSample.m_flags & SqImageSample::Flag_Valid) &&
-					currentOpaqueSample.Data()[Sample_Depth] <= D)
-				{
-					return;
-				}
-			}
-			else
-			{
-				// Sort the color/opacity into the visible point list
-				// return if the sample is occluded and can be culled.
-				while( sample != end )
-				{
-					if((*sample).Data()[Sample_Depth] >= D)
-						break;
-
-					if(((*sample).m_flags & SqImageSample::Flag_Occludes) &&
-						!(*sample).m_pCSGNode && m_CurrentGridInfo.m_IsCullable)
-						return;
-
-					++sample;
-				}
-			}
-
-			ImageVal.Data()[Sample_Depth] = D;
-
-			CqStats::IncI( CqStats::SPL_hits );
-			pMPG->MarkHit();
-
-			TqFloat* val = ImageVal.Data();
-			const CqColor& col = m_CurrentMpgSampleInfo.m_Colour;
-			const CqColor& opa = m_CurrentMpgSampleInfo.m_Opacity;
-			val[ 0 ] = col[0];
-			val[ 1 ] = col[1];
-			val[ 2 ] = col[2];
-			val[ 3 ] = opa[0];
-			val[ 4 ] = opa[1];
-			val[ 5 ] = opa[2];
-			val[ 6 ] = D;
-
-			// Now store any other data types that have been registered.
-			if(m_CurrentGridInfo.m_UsesDataMap)
-			{
-				StoreExtraData(pMPG, ImageVal);
-			}
-
-			if(!opaque)
-			{
-				// If depth is exactly the same as previous sample, chances are we've
-				// hit a MPG grid line.
-				// \note: Cannot do this if there is CSG involved, as all samples must be taken and kept the same.
-				if ( sample != end && (*sample).Data()[Sample_Depth] == ImageVal.Data()[Sample_Depth] && !(*sample).m_pCSGNode )
-				{
-				    TqInt datasize = QGetRenderContext()->GetOutputDataTotalSize();
-					TqInt i;
-					for( i=0; i<datasize; ++i)
-						(*sample).Data()[i] = ( (*sample).Data()[i] + ImageVal.Data()[i] ) * 0.5f;
-					return;
-				}
-			}
-
-			// Update max depth values if the sample is opaque and can occlude
-			// If the sample depth is closer than the current closest one, and is opaques
-			// we can just replace, as we know we are in a treenode that is a leaf.
-			if ( !( DisplayMode() & ModeZ ) && opaque )
-			{
-				if(D < treenode.m_MaxOpaqueZ)
-				{
-					treenode.m_MaxOpaqueZ = D;
-					treenode.PropagateChanges();
-				}
-			}
-
-			ImageVal.m_pCSGNode = pMPG->pGrid() ->pCSGNode();
-
-			ImageVal.m_flags = 0;
-			if ( Occludes )
-			{
-				ImageVal.m_flags |= SqImageSample::Flag_Occludes;
-			}
-			if( m_CurrentGridInfo.m_IsMatte )
-			{
-				ImageVal.m_flags |= SqImageSample::Flag_Matte;
-			}
-
-			if(!opaque)
-			{
-				aValues.insert( sample, ImageVal );
-			}
-			else
-			{
-				// mark this sample as having been written into.
-				ImageVal.m_flags |= SqImageSample::Flag_Valid;
-			}
-		}
-	}
-	else
-	{
-		if( ( treenode.m_Children.size() > 0 ) && treenode.m_Children[0] )
-		{
-			CqOcclusionTree* child = treenode.m_Children[0];
-			if(	(!usingDof || (dofboundindex >= child->m_MinDofBoundIndex) && (dofboundindex <= child->m_MaxDofBoundIndex )) &&
-				((time0 <= child->m_MaxTime) && (time1 >= child->m_MinTime) ) &&
-				(bound.Intersects(child->m_MinSamplePoint, child->m_MaxSamplePoint)))
-			{
-				if(bound.vecMin().z() <= child->m_MaxOpaqueZ || !m_CurrentGridInfo.m_IsCullable)
-					ProcessMPG(pMPG, bound, *child, time0, time1, usingDof, dofboundindex);
-			}
-			if( ( treenode.m_Children.size() > 1 ) && treenode.m_Children[1] )
-			{
-				CqOcclusionTree* child = treenode.m_Children[1];
-				if(	(!usingDof || (dofboundindex >= child->m_MinDofBoundIndex) && (dofboundindex <= child->m_MaxDofBoundIndex )) &&
-					((time0 <= child->m_MaxTime) && (time1 >= child->m_MinTime) ) &&
-					(bound.Intersects(child->m_MinSamplePoint, child->m_MaxSamplePoint)))
-				{
-					if(bound.vecMin().z() <= child->m_MaxOpaqueZ || !m_CurrentGridInfo.m_IsCullable)
-						ProcessMPG(pMPG, bound, *child, time0, time1, usingDof, dofboundindex);
-				}
-			}
-		}
-	}
-}
 
 void CqImageBuffer::StoreExtraData( CqMicroPolygon* pMPG, SqImageSample& sample)
 {

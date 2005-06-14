@@ -48,6 +48,29 @@
 START_NAMESPACE( Aqsis )
 
 
+// This struct is used to hold info about a mpg that is used when rendering the mpg.
+// It caches the info for use by multiple samples.
+struct SqMpgSampleInfo
+{
+    CqColor		m_Colour;
+    CqColor		m_Opacity;
+    TqBool		m_Occludes;		// whether the opacity is full.
+	TqBool		m_IsOpaque;		// whether the mpg can use the faster StoreOpaqueSample routine that assumes a few things.
+};
+
+// This struct holds info about a grid that can be cached and used for all its mpgs.
+struct SqGridInfo
+{
+	TqFloat			m_ShadingRate;
+	TqFloat			m_ShutterOpenTime;
+	TqFloat			m_ShutterCloseTime;
+	const TqFloat*	        m_LodBounds;
+	TqBool			m_IsMatte;
+	TqBool			m_IsCullable;
+	TqBool			m_UsesDataMap;
+};
+
+
 
 //-----------------------------------------------------------------------
 /**
@@ -274,7 +297,6 @@ public:
     TqBool	PushMPGDown( CqMicroPolygon*, TqInt Col, TqInt Row );
     void	RenderMPGs( long xmin, long xmax, long ymin, long ymax );
     void	RenderMicroPoly( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax );
-	void	ProcessMPG( CqMicroPolygon* pMPG, const CqBound& bound, CqOcclusionTree& treenode, TqFloat time0, TqFloat time1, TqBool usingDof = TqFalse, TqInt dofoffsetindex = 0);
     void	RenderSurfaces( long xmin, long xmax, long ymin, long ymax, TqBool fImager, enum EqFilterDepth filterdepth, CqColor zThreshold );
     void	RenderImage();
 	void	StoreExtraData( CqMicroPolygon* pMPG, SqImageSample& sample);
@@ -304,6 +326,7 @@ public:
     {}
     virtual	TqBool	IsCurrentBucketEmpty();
 
+
 private:
     TqBool	m_fQuit;			///< Set by system if a quit has been requested.
     TqBool	m_fDone;			///< Set when the render of this image has completed.
@@ -331,32 +354,14 @@ private:
     TqInt	m_CurrentBucketRow;	///< Row index of the bucket currently being processed.
     TqInt	m_MaxEyeSplits;	        ///< Max Eye Splits by default 10
 
-    // This struct is used to hold info about a mpg that is used when rendering the mpg.
-    // It caches the info for use by multiple samples.
-    struct SqMpgSampleInfo
-    {
-        CqColor		m_Colour;
-        CqColor		m_Opacity;
-        TqBool		m_Occludes;		// whether the opacity is full.
-		TqBool		m_IsOpaque;		// whether the mpg can use the faster StoreOpaqueSample routine that assumes a few things.
-    };
     SqMpgSampleInfo m_CurrentMpgSampleInfo;
 
-	// This struct holds info about a grid that can be cached and used for all its mpgs.
-	struct SqGridInfo
-	{
-		TqFloat			m_ShadingRate;
-		TqFloat			m_ShutterOpenTime;
-		TqFloat			m_ShutterCloseTime;
-		const TqFloat*	        m_LodBounds;
-		TqBool			m_IsMatte;
-		TqBool			m_IsCullable;
-		TqBool			m_UsesDataMap;
-	};
 	SqGridInfo m_CurrentGridInfo;
 
 	void CacheGridInfo( CqMicroPolyGridBase* pGrid );
 };
+
+
 
 //-----------------------------------------------------------------------
 

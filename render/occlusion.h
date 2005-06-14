@@ -33,12 +33,15 @@
 #include "aqsis.h"
 #include "kdtree.h"
 #include "imagepixel.h"
+#include "bucket.h"
 
 START_NAMESPACE( Aqsis )
 
 class CqBound;
 class CqBucket;
 
+struct SqMpgSampleInfo;
+struct SqGridInfo;
 
 /**	\brief	The CqOcclusionKDTreeData class
 	Specialisation of the KDTree data class to support generation of a KDTree
@@ -67,11 +70,15 @@ public:
         std::sort(m_SampleIndices.begin(), m_SampleIndices.end(), CqOcclusionTreeComparator(dimension) );
     }
     TqInt Dimensions() const	{return(2);}
-	/*std::vector<SqSampleData*>& Samples()
+	SqSampleData& Sample(TqInt index = 0)
 	{
-		return(m_Samples);
-	}*/
+		return(CqBucket::ImageElement(m_SampleIndices[0].first).SampleData(m_SampleIndices[0].second));
+	}
 
+	void AddSample(std::pair<TqInt, TqInt>& sample)
+	{
+		m_SampleIndices.push_back(sample);
+	}
 	void ConstructTree();
 	void DestroyTree();
 
@@ -80,7 +87,35 @@ public:
 	void InitialiseBounds();
 	void UpdateBounds();
 
-//private:
+	TqBool CanCull( CqBound* bound );
+	void SampleMPG( CqMicroPolygon* pMPG, const CqBound& bound, TqFloat time0, TqFloat time1, TqBool usingDof, TqInt dofboundindex, SqMpgSampleInfo& MpgSampleInfo, SqGridInfo& gridInfo);
+
+	TqInt NumSamples() const
+	{
+		return(m_SampleIndices.size());
+	}
+
+	TqFloat MaxOpaqueZ() const
+	{
+		return(m_MaxOpaqueZ);
+	}
+
+	void SetMaxOpaqueZ(TqFloat z)
+	{
+		m_MaxOpaqueZ = z;
+	}
+
+	const CqVector2D& MinSamplePoint() const
+	{
+		return(m_MinSamplePoint);
+	}
+
+	const CqVector2D& MaxSamplePoint() const
+	{
+		return(m_MaxSamplePoint);
+	}
+
+private:
 
 	enum { s_ChildrenPerNode = 2 };
 	typedef boost::array<CqOcclusionTree*,s_ChildrenPerNode> TqChildArray;
@@ -95,7 +130,6 @@ public:
 	TqInt		m_MinDofBoundIndex;
 	TqInt		m_MaxDofBoundIndex;
 	TqChildArray	m_Children;
-	//std::vector<SqSampleData*>		m_Samples;
 	std::vector<std::pair<TqInt, TqInt> > m_SampleIndices;
 };
 
