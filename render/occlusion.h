@@ -81,7 +81,7 @@ public:
 
 //private:
 
-	static const int s_ChildrenPerNode = 2;
+	enum { s_ChildrenPerNode = 2 };
 	typedef boost::array<CqOcclusionTree*,s_ChildrenPerNode> TqChildArray;
 
 	CqOcclusionTree* m_Parent;
