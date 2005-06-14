@@ -28,6 +28,7 @@
 #define OCCLUSION_H_INCLUDED 1
 
 #include <deque>
+#include <boost/array.hpp>
 
 #include "aqsis.h"
 #include "kdtree.h"
@@ -51,14 +52,14 @@ class CqOcclusionTree
         CqOcclusionTreeComparator(TqInt dimension) : m_Dim( dimension )
         {}
 
-        bool operator()(std::pair<TqInt, TqInt>& a, std::pair<TqInt, TqInt>& b);
+        bool operator()(const std::pair<TqInt, TqInt>& a, const std::pair<TqInt, TqInt>& b);
 
     private:
         TqInt		m_Dim;
     };
 
 public:
-    CqOcclusionTree(TqInt dimension = 0) : m_Dimension(dimension), m_Parent(0)
+    CqOcclusionTree(TqInt dimension = 0) : m_Parent(0), m_Dimension(dimension)
     {}
 
     void SortElements(TqInt dimension)
@@ -79,6 +80,10 @@ public:
 	void UpdateBounds();
 
 //private:
+
+	static const int s_ChildrenPerNode = 2;
+	typedef boost::array<CqOcclusionTree*,s_ChildrenPerNode> TqChildArray;
+
 	CqOcclusionTree* m_Parent;
 	TqInt		m_Dimension;
 	CqVector2D	m_MinSamplePoint;
@@ -88,7 +93,7 @@ public:
 	TqFloat		m_MaxOpaqueZ;
 	TqInt		m_MinDofBoundIndex;
 	TqInt		m_MaxDofBoundIndex;
-	std::vector<CqOcclusionTree*>	m_Children;
+	TqChildArray	m_Children;
 	//std::vector<SqSampleData*>		m_Samples;
 	std::vector<std::pair<TqInt, TqInt> > m_SampleIndices;
 };

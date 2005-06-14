@@ -91,19 +91,25 @@ void CqOcclusionTree::ConstructTree()
 	b->m_MinDofBoundIndex = minDofIndex;
 	b->m_MaxDofBoundIndex = maxDofIndex;
 
+	TqChildArray::iterator ii = m_Children.begin();
 	if(a->m_SampleIndices.size() >= 1)
 	{
-		m_Children.push_back(a);
+		*ii++ = a;
 		a->m_Parent = this;
 		if(a->m_SampleIndices.size() > 1)
 			a->ConstructTree();
 	}
 	if(b->m_SampleIndices.size() >= 1)
 	{
-		m_Children.push_back(b);
+		*ii++ = b;
 		b->m_Parent = this;
 		if(b->m_SampleIndices.size() > 1)
 			b->ConstructTree();
+	}
+
+	while (ii != m_Children.end())
+	{
+	    *ii++ = 0;
 	}
 }
 
@@ -151,14 +157,19 @@ void CqOcclusionTree::InitialiseBounds()
 void CqOcclusionTree::UpdateBounds()
 {
 	// Update the children first
-	if(m_Children.size() >= 1)
+	if (m_Children[0])
 	{
-		std::vector<CqOcclusionTree*>::iterator child;
+		TqChildArray::iterator child;
 		for(child = m_Children.begin(); child != m_Children.end(); ++child)
-			(*child)->UpdateBounds();
+		{
+			if (*child)
+			{
+				(*child)->UpdateBounds();
+			}
+		}
 	}
 
-	if(m_Children.size() == 0)
+	if (!m_Children[0])
 	{
 		assert(m_SampleIndices.size() == 1);
 		const SqSampleData& sample = CqBucket::ImageElement(m_SampleIndices[0].first).SampleData(m_SampleIndices[0].second);;
@@ -169,14 +180,32 @@ void CqOcclusionTree::UpdateBounds()
 	}
 	else
 	{
-		m_MinSamplePoint[0] = MIN(m_Children[0]->m_MinSamplePoint[0], m_Children[1]->m_MinSamplePoint[0]);
-		m_MaxSamplePoint[0] = MAX(m_Children[0]->m_MaxSamplePoint[0], m_Children[1]->m_MaxSamplePoint[0]);
-		m_MinSamplePoint[1] = MIN(m_Children[0]->m_MinSamplePoint[1], m_Children[1]->m_MinSamplePoint[1]);
-		m_MaxSamplePoint[1] = MAX(m_Children[0]->m_MaxSamplePoint[1], m_Children[1]->m_MaxSamplePoint[1]);
-		m_MinTime = MIN(m_Children[0]->m_MinTime, m_Children[1]->m_MinTime);
-		m_MaxTime = MAX(m_Children[0]->m_MaxTime, m_Children[1]->m_MaxTime);
-		m_MinDofBoundIndex = MIN(m_Children[0]->m_MinDofBoundIndex, m_Children[1]->m_MinDofBoundIndex);
-		m_MaxDofBoundIndex = MAX(m_Children[0]->m_MaxDofBoundIndex, m_Children[1]->m_MaxDofBoundIndex);
+		m_MinSamplePoint[0] = m_Children[0]->m_MinSamplePoint[0];
+		m_MaxSamplePoint[0] = m_Children[0]->m_MaxSamplePoint[0];
+		m_MinSamplePoint[1] = m_Children[0]->m_MinSamplePoint[1];
+		m_MaxSamplePoint[1] = m_Children[0]->m_MaxSamplePoint[1];
+		m_MinTime = m_Children[0]->m_MinTime;
+		m_MaxTime = m_Children[0]->m_MaxTime;
+		m_MinDofBoundIndex = m_Children[0]->m_MinDofBoundIndex;
+		m_MaxDofBoundIndex = m_Children[0]->m_MaxDofBoundIndex;
+
+		TqChildArray::iterator child = m_Children.begin();
+		++child;
+
+		for (; child != m_Children.end(); ++child)
+		{
+			if (*child)
+			{
+				m_MinSamplePoint[0] = MIN(m_MinSamplePoint[0], (*child)->m_MinSamplePoint[0]);
+				m_MaxSamplePoint[0] = MAX(m_MaxSamplePoint[0], (*child)->m_MaxSamplePoint[0]);
+				m_MinSamplePoint[1] = MIN(m_MinSamplePoint[1], (*child)->m_MinSamplePoint[1]);
+				m_MaxSamplePoint[1] = MAX(m_MaxSamplePoint[1], (*child)->m_MaxSamplePoint[1]);
+				m_MinTime = MIN(m_MinTime, (*child)->m_MinTime);
+				m_MaxTime = MAX(m_MaxTime, (*child)->m_MaxTime);
+				m_MinDofBoundIndex = MIN(m_MinDofBoundIndex, (*child)->m_MinDofBoundIndex);
+				m_MaxDofBoundIndex = MAX(m_MaxDofBoundIndex, (*child)->m_MaxDofBoundIndex);
+			}
+		}
 	}
 	// Set the opaque depths to the limits to begin with.
 	m_MaxOpaqueZ = FLT_MAX;
@@ -188,12 +217,17 @@ void CqOcclusionTree::PropagateChanges()
 	// Update our opaque depth based on that our our children.
 	while(node)
 	{
-		if( node->m_Children.size() > 0 )
+		if( node->m_Children[0] )
 		{
 			TqFloat maxdepth = -FLT_MAX;
-			std::vector<CqOcclusionTree*>::iterator child;
+			TqChildArray::iterator child;
 			for(child = node->m_Children.begin(); child != node->m_Children.end(); ++child)
-				maxdepth = MAX((*child)->m_MaxOpaqueZ, maxdepth);
+			{
+				if (*child)
+				{
+					maxdepth = MAX((*child)->m_MaxOpaqueZ, maxdepth);
+				}
+			}
 			// Only if this has resulted in a change at this level, should we process the parent.
 			if(maxdepth < node->m_MaxOpaqueZ)
 			{
@@ -213,7 +247,7 @@ void CqOcclusionTree::PropagateChanges()
 
 CqBucket* CqOcclusionBox::m_Bucket = NULL;
 
-bool CqOcclusionTree::CqOcclusionTreeComparator::operator()(std::pair<TqInt, TqInt>& a, std::pair<TqInt, TqInt>& b)
+bool CqOcclusionTree::CqOcclusionTreeComparator::operator()(const std::pair<TqInt, TqInt>& a, const std::pair<TqInt, TqInt>& b)
 {
 	const SqSampleData& A = CqBucket::ImageElement(a.first).SampleData(a.second);
 	const SqSampleData& B = CqBucket::ImageElement(b.first).SampleData(b.second);
@@ -267,7 +301,6 @@ void CqOcclusionBox::DeleteHierarchy()
 //	std::vector<CqOcclusionTree*>::iterator child;
 //	for(child = m_KDTree.m_Children.begin(); child != m_KDTree.m_Children.end(); ++child)
 //		delete((*child));
-	m_KDTree.m_Children.clear();
 }
 
 
@@ -332,9 +365,14 @@ TqBool CqOcclusionBox::CanCull( CqBound* bound )
 				return(TqTrue);
 			// If contained, but not behind the furthest point, push the children nodes onto the stack for
 			// processing.
-			std::vector<CqOcclusionTree*>::iterator childNode;
+			CqOcclusionTree::TqChildArray::iterator childNode;
 			for(childNode = node->m_Children.begin(); childNode != node->m_Children.end(); ++childNode)
-				stack.push_front(*childNode);
+			{
+				if (*childNode)
+				{
+					stack.push_front(*childNode);
+				}
+			}
 		}
 	}
 	return(TqFalse);
