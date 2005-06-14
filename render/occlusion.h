@@ -73,6 +73,7 @@ public:
 	}*/
 
 	void ConstructTree();
+	void DestroyTree();
 
 	void PropagateChanges();
 

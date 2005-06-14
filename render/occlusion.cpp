@@ -98,18 +98,40 @@ void CqOcclusionTree::ConstructTree()
 		a->m_Parent = this;
 		if(a->m_SampleIndices.size() > 1)
 			a->ConstructTree();
+		else
+			a->m_Children[0] = a->m_Children[1] = 0;
 	}
+	else
+		delete(a);
+	
 	if(b->m_SampleIndices.size() >= 1)
 	{
 		*ii++ = b;
 		b->m_Parent = this;
 		if(b->m_SampleIndices.size() > 1)
 			b->ConstructTree();
+		else
+			b->m_Children[0] = b->m_Children[1] = 0;
 	}
+	else
+		delete(b);
 
 	while (ii != m_Children.end())
 	{
 	    *ii++ = 0;
+	}
+}
+
+void CqOcclusionTree::DestroyTree()
+{
+	for(TqChildArray::iterator i = m_Children.begin(); i != m_Children.end(); ++i)
+	{
+		if( (*i) )
+		{
+			(*i)->DestroyTree();
+			delete(*i);
+			*i = 0;
+		}
 	}
 }
 
@@ -297,10 +319,8 @@ void CqOcclusionBox::CreateHierarchy( TqInt bucketXSize, TqInt bucketYSize, TqIn
 */
 void CqOcclusionBox::DeleteHierarchy()
 {
-//    m_KDTree.m_Samples.clear();
-//	std::vector<CqOcclusionTree*>::iterator child;
-//	for(child = m_KDTree.m_Children.begin(); child != m_KDTree.m_Children.end(); ++child)
-//		delete((*child));
+    m_KDTree.m_SampleIndices.clear();
+	m_KDTree.DestroyTree();
 }
 
 

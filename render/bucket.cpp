@@ -934,6 +934,7 @@ void CqBucket::ShutdownBucket()
 	for( i=m_aSamplePositions.begin(); i!=m_aSamplePositions.end(); i++ )
 		(*i).clear();
 	m_aSamplePositions.clear();
+	m_SamplePoints.clear();
 }
 
 
