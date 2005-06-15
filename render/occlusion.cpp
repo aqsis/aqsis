@@ -213,9 +213,8 @@ void CqOcclusionTree::UpdateBounds()
 		m_MaxDofBoundIndex = m_Children[0]->m_MaxDofBoundIndex;
 
 		TqChildArray::iterator child = m_Children.begin();
-		++child;
 
-		for (; child != m_Children.end(); ++child)
+		for (++child; child != m_Children.end(); ++child)
 		{
 			if (*child)
 			{
@@ -242,9 +241,9 @@ void CqOcclusionTree::PropagateChanges()
 	{
 		if( node->m_Children[0] )
 		{
-			TqFloat maxdepth = -FLT_MAX;
+			TqFloat maxdepth = m_Children[0]->m_MaxOpaqueZ;
 			TqChildArray::iterator child;
-			for(child = node->m_Children.begin(); child != node->m_Children.end(); ++child)
+			for (++child; child != node->m_Children.end(); ++child)
 			{
 				if (*child)
 				{
@@ -290,7 +289,7 @@ TqBool CqOcclusionTree::CanCull( CqBound* bound )
 			// If contained, but not behind the furthest point, push the children nodes onto the stack for
 			// processing.
 			CqOcclusionTree::TqChildArray::iterator childNode;
-			for(childNode = node->m_Children.begin(); childNode != node->m_Children.end(); ++childNode)
+			for (childNode = node->m_Children.begin(); childNode != node->m_Children.end(); ++childNode)
 			{
 				if (*childNode)
 				{
@@ -620,25 +619,22 @@ void CqOcclusionTree::SampleMPG( CqMicroPolygon* pMPG, const CqBound& bound, TqF
 	}
 	else
 	{
-		if( ( m_Children.size() > 0 ) && m_Children[0] )
+		TqChildArray::iterator child;
+		for(child = m_Children.begin(); child != m_Children.end(); ++child)
 		{
-			CqOcclusionTree* child = m_Children[0];
-			if(	(!usingDof || (dofboundindex >= child->m_MinDofBoundIndex) && (dofboundindex <= child->m_MaxDofBoundIndex )) &&
-				((time0 <= child->m_MaxTime) && (time1 >= child->m_MinTime) ) &&
-				(bound.Intersects(child->m_MinSamplePoint, child->m_MaxSamplePoint)))
+			if (!*child)
 			{
-				if(bound.vecMin().z() <= child->m_MaxOpaqueZ || !gridInfo.m_IsCullable)
-					child->SampleMPG(pMPG, bound, time0, time1, usingDof, dofboundindex, MpgSampleInfo, gridInfo);
+				continue;
 			}
-			if( ( m_Children.size() > 1 ) && m_Children[1] )
+
+			if(	(!usingDof || (dofboundindex >= (*child)->m_MinDofBoundIndex)
+								&& (dofboundindex <= (*child)->m_MaxDofBoundIndex ))
+				&& ((time0 <= (*child)->m_MaxTime) && (time1 >= (*child)->m_MinTime) )
+				&& (bound.Intersects((*child)->m_MinSamplePoint, (*child)->m_MaxSamplePoint)) )
 			{
-				CqOcclusionTree* child = m_Children[1];
-				if(	(!usingDof || (dofboundindex >= child->m_MinDofBoundIndex) && (dofboundindex <= child->m_MaxDofBoundIndex )) &&
-					((time0 <= child->m_MaxTime) && (time1 >= child->m_MinTime) ) &&
-					(bound.Intersects(child->m_MinSamplePoint, child->m_MaxSamplePoint)))
+				if(bound.vecMin().z() <= (*child)->m_MaxOpaqueZ || !gridInfo.m_IsCullable)
 				{
-					if(bound.vecMin().z() <= child->m_MaxOpaqueZ || !gridInfo.m_IsCullable)
-						child->SampleMPG(pMPG, bound, time0, time1, usingDof, dofboundindex, MpgSampleInfo, gridInfo);
+					(*child)->SampleMPG(pMPG, bound, time0, time1, usingDof, dofboundindex, MpgSampleInfo, gridInfo);
 				}
 			}
 		}

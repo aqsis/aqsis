@@ -75,7 +75,7 @@ public:
 		return(CqBucket::ImageElement(m_SampleIndices[0].first).SampleData(m_SampleIndices[0].second));
 	}
 
-	void AddSample(std::pair<TqInt, TqInt>& sample)
+	void AddSample(const std::pair<TqInt, TqInt>& sample)
 	{
 		m_SampleIndices.push_back(sample);
 	}
