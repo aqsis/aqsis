@@ -367,7 +367,7 @@ CqOcclusionBox::~CqOcclusionBox()
  *\param YFWidth  filter width in y
 */
 
-void CqOcclusionBox::CreateHierarchy( TqInt bucketXSize, TqInt bucketYSize, TqInt XFWidth, TqInt YFWidth )
+void CqOcclusionBox::CreateHierarchy( TqInt bucketXSize, TqInt bucketYSize, TqFloat XFWidth, TqFloat YFWidth )
 {
 	// Initialise the data handler for the KDTree
 	//CqOcclusionKDTreeData*	kddata = new CqOcclusionKDTreeData;

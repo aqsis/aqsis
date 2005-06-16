@@ -144,7 +144,7 @@ private:
 class CqOcclusionBox
 {
 public:
-    static void CreateHierarchy( TqInt bucketXSize, TqInt bucketYSize, TqInt XFWidth, TqInt YFWidth );
+    static void CreateHierarchy( TqInt bucketXSize, TqInt bucketYSize, TqFloat XFWidth, TqFloat YFWidth );
     static void DeleteHierarchy();
     static void SetupHierarchy( CqBucket* bucket, TqInt xMin, TqInt yMin, TqInt xMax, TqInt yMax );
 

@@ -882,11 +882,11 @@ void CqImageBuffer::RenderMPG_MBOrDof( CqMicroPolygon* pMPG,
 			if(UsingDof)
 			{
 				CqBound DofBound(bminx, bminy, bminz, bmaxx, bmaxy, bmaxz);
-				CqOcclusionBox::KDTree().SampleMPG(pMPG, DofBound, time0, time1, TqTrue, bound_numDof, m_CurrentMpgSampleInfo, m_CurrentGridInfo);
+				CqOcclusionBox::KDTree()->SampleMPG(pMPG, DofBound, time0, time1, TqTrue, bound_numDof, m_CurrentMpgSampleInfo, m_CurrentGridInfo);
 			}
 			else
 			{
-				CqOcclusionBox::KDTree().SampleMPG(pMPG, Bound, time0, time1, TqFalse, 0, m_CurrentMpgSampleInfo, m_CurrentGridInfo);
+				CqOcclusionBox::KDTree()->SampleMPG(pMPG, Bound, time0, time1, TqFalse, 0, m_CurrentMpgSampleInfo, m_CurrentGridInfo);
 			}
 		}
     }
@@ -903,7 +903,7 @@ void CqImageBuffer::RenderMPG_Static( CqMicroPolygon* pMPG, long xmin, long xmax
 
     const CqBound& Bound = pMPG->GetTotalBound();
 
-	CqOcclusionBox::KDTree().SampleMPG(pMPG, Bound, m_CurrentGridInfo.m_ShutterOpenTime, m_CurrentGridInfo.m_ShutterCloseTime, TqFalse, 0, m_CurrentMpgSampleInfo, m_CurrentGridInfo);
+	CqOcclusionBox::KDTree()->SampleMPG(pMPG, Bound, m_CurrentGridInfo.m_ShutterOpenTime, m_CurrentGridInfo.m_ShutterCloseTime, TqFalse, 0, m_CurrentMpgSampleInfo, m_CurrentGridInfo);
 }
 
 
