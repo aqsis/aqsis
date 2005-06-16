@@ -119,7 +119,7 @@ void CqOcclusionTree::ConstructTree()
 
 		CqOcclusionTreePtr a;
 		CqOcclusionTreePtr b;
-		SplitNode(a, b);
+		old->SplitNode(a, b);
 		if (a)
 		{
 			ChildQueue.push_back(a);

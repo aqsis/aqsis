@@ -120,7 +120,7 @@ public:
 	}
 
 private:
-	enum { s_ChildrenPerNode = 2 };
+	enum { s_ChildrenPerNode = 4 };
 	typedef boost::array<CqOcclusionTreePtr,s_ChildrenPerNode> TqChildArray;
 
 	typedef std::vector<std::pair<TqInt, TqInt> > TqSampleIndices;
