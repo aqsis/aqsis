@@ -155,15 +155,6 @@ void CqOcclusionTree::ConstructTree()
 	}
 }
 
-void CqOcclusionTree::DestroyTree()
-{
-    m_SampleIndices.clear();
-	for(TqChildArray::iterator i = m_Children.begin(); i != m_Children.end(); ++i)
-	{
-		*i = CqOcclusionTreePtr();
-	}
-}
-
 
 void CqOcclusionTree::InitialiseBounds()
 {
@@ -282,7 +273,7 @@ void CqOcclusionTree::PropagateChanges()
 			if(maxdepth < node->m_MaxOpaqueZ)
 			{
 				node->m_MaxOpaqueZ = maxdepth;
-				node = node->m_Parent.lock();
+				node = CqOcclusionTreePtr(node->m_Parent);
 			}
 			else
 			{
@@ -291,7 +282,7 @@ void CqOcclusionTree::PropagateChanges()
 		}
 		else
 		{
-			node = node->m_Parent.lock();
+			node = CqOcclusionTreePtr(node->m_Parent);
 		}
 	}
 }
@@ -347,7 +338,7 @@ bool CqOcclusionTree::CqOcclusionTreeComparator::operator()(const std::pair<TqIn
 }
 
 
-CqOcclusionTree	CqOcclusionBox::m_KDTree;	///< KD Tree representing the samples in the bucket.
+CqOcclusionTreePtr	CqOcclusionBox::m_KDTree;	///< KD Tree representing the samples in the bucket.
 
 
 //----------------------------------------------------------------------
@@ -389,7 +380,7 @@ void CqOcclusionBox::CreateHierarchy( TqInt bucketXSize, TqInt bucketYSize, TqIn
 */
 void CqOcclusionBox::DeleteHierarchy()
 {
-	m_KDTree.DestroyTree();
+	m_KDTree = CqOcclusionTreePtr();
 }
 
 
@@ -408,8 +399,9 @@ void CqOcclusionBox::SetupHierarchy( CqBucket* bucket, TqInt xMin, TqInt yMin, T
     assert( bucket );
     m_Bucket = bucket;
 
-	if(m_KDTree.NumSamples() == 0)
+	if(!m_KDTree)
 	{
+		m_KDTree = CqOcclusionTreePtr(new CqOcclusionTree());
 		// Setup the KDTree of samples
 		TqInt numpixels = bucket->RealHeight() * bucket->RealWidth();
 		TqInt numsamples = bucket->PixelXSamples() * bucket->PixelYSamples();
@@ -419,21 +411,21 @@ void CqOcclusionBox::SetupHierarchy( CqBucket* bucket, TqInt xMin, TqInt yMin, T
 			// Gather all samples within the pixel
 			for ( TqInt i = 0; i < numsamples; i++ )
 			{
-				m_KDTree.AddSample(std::pair<TqInt, TqInt>(j,i));
+				m_KDTree->AddSample(std::pair<TqInt, TqInt>(j,i));
 			}
 		}
 		// Now split the tree down until each leaf has only one sample.
-		m_KDTree.InitialiseBounds();
-		m_KDTree.ConstructTree();
+		m_KDTree->InitialiseBounds();
+		m_KDTree->ConstructTree();
 	}
 
-	m_KDTree.UpdateBounds();
+	m_KDTree->UpdateBounds();
 }
 
 
 TqBool CqOcclusionBox::CanCull( CqBound* bound )
 {
-	return(m_KDTree.CanCull(bound));
+	return(m_KDTree->CanCull(bound));
 }
 
 

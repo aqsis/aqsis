@@ -85,7 +85,6 @@ public:
 		m_SampleIndices.push_back(sample);
 	}
 	void ConstructTree();
-	void DestroyTree();
 
 	void PropagateChanges();
 
@@ -151,7 +150,7 @@ public:
 
     static TqBool CanCull( CqBound* bound );
 
-	static CqOcclusionTree& KDTree()
+	static CqOcclusionTreePtr& KDTree()
 	{
 		return(m_KDTree);
 	}
@@ -161,7 +160,7 @@ protected:
     ~CqOcclusionBox();
 
     static CqBucket* m_Bucket;
-    static CqOcclusionTree	m_KDTree;			///< Tree representing the samples in the bucket.
+    static CqOcclusionTreePtr	m_KDTree;			///< Tree representing the samples in the bucket.
 };
 
 
