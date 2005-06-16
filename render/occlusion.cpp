@@ -273,7 +273,7 @@ void CqOcclusionTree::PropagateChanges()
 			if(maxdepth < node->m_MaxOpaqueZ)
 			{
 				node->m_MaxOpaqueZ = maxdepth;
-				node = CqOcclusionTreePtr(node->m_Parent);
+				node = node->m_Parent.lock();
 			}
 			else
 			{
@@ -282,7 +282,7 @@ void CqOcclusionTree::PropagateChanges()
 		}
 		else
 		{
-			node = CqOcclusionTreePtr(node->m_Parent);
+			node = node->m_Parent.lock();
 		}
 	}
 }
