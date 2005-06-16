@@ -117,6 +117,8 @@ void CqStats::PrintStats( TqInt level ) const
 	if( level > 0 )
 		TIMER_DUMP(OUT_CONSOLE, SORT_TIMES)
 
+	MSG << std::setiosflags(std::ios_base::fixed) << std::setfill(' ') << std::setprecision(6);
+
 	//! Most important informations
 	if ( level == 2 || level == 3 )
 	{
