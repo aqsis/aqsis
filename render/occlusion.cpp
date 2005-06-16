@@ -37,7 +37,7 @@
 START_NAMESPACE( Aqsis )
 
 CqOcclusionTree::CqOcclusionTree(TqInt dimension)
-    : m_Dimension(dimension)
+    : m_Parent(0), m_Dimension(dimension)
 {
 }
 
@@ -254,7 +254,7 @@ void CqOcclusionTree::UpdateBounds()
 
 void CqOcclusionTree::PropagateChanges()
 {
-	CqOcclusionTreePtr node = shared_from_this();
+	CqOcclusionTree* node = this;
 	// Update our opaque depth based on that our our children.
 	while(node)
 	{
@@ -273,7 +273,7 @@ void CqOcclusionTree::PropagateChanges()
 			if(maxdepth < node->m_MaxOpaqueZ)
 			{
 				node->m_MaxOpaqueZ = maxdepth;
-				node = node->m_Parent.lock();
+				node = node->m_Parent;
 			}
 			else
 			{
@@ -282,7 +282,7 @@ void CqOcclusionTree::PropagateChanges()
 		}
 		else
 		{
-			node = node->m_Parent.lock();
+			node = node->m_Parent;
 		}
 	}
 }

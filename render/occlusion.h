@@ -127,7 +127,7 @@ private:
 
 	void SplitNode(CqOcclusionTreePtr& a, CqOcclusionTreePtr& b);
 
-	CqOcclusionTreeWeakPtr	m_Parent;
+	CqOcclusionTree*	m_Parent;
 	TqInt		m_Dimension;
 	CqVector2D	m_MinSamplePoint;
 	CqVector2D	m_MaxSamplePoint;
