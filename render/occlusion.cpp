@@ -40,8 +40,11 @@ START_NAMESPACE( Aqsis )
 TqInt CqOcclusionTree::m_Tab = 0;
 
 CqOcclusionTree::CqOcclusionTree(TqInt dimension)
-    : m_Dimension(dimension)
+    : m_Parent(0), m_Dimension(dimension)
 {
+	TqChildArray::iterator child = m_Children.begin();
+	for(; child != m_Children.end(); ++child)
+		(*child) = 0;
 }
 
 
@@ -117,7 +120,7 @@ CqOcclusionTree::SplitNode(CqOcclusionTreePtr& a, CqOcclusionTreePtr& b)
 void CqOcclusionTree::ConstructTree()
 {
 	std::deque<CqOcclusionTreePtr> ChildQueue;
-	ChildQueue.push_back(shared_from_this());
+	ChildQueue.push_back(this/*shared_from_this()*/);
 
 	TqInt NonLeafCount = NumSamples() >= 1 ? 1 : 0;
 
@@ -159,7 +162,7 @@ void CqOcclusionTree::ConstructTree()
 		if( (*jj)->NumSamples() > 0)
 		{
 			*ii = *jj;
-			//(*ii)->m_Parent = shared_from_this();
+			(*ii)->m_Parent = this/*shared_from_this()*/;
 			if ((*ii)->NumSamples() > 1)
 			{
 				(*ii)->ConstructTree();
@@ -170,7 +173,7 @@ void CqOcclusionTree::ConstructTree()
 
 	while (ii != m_Children.end())
 	{
-	    *ii++ = CqOcclusionTreePtr();
+	    *ii++ = 0;//CqOcclusionTreePtr();
 	}
 }
 
@@ -278,13 +281,13 @@ void CqOcclusionTree::UpdateBounds()
 
 void CqOcclusionTree::PropagateChanges()
 {
-	CqOcclusionTreePtr node = shared_from_this();
+	CqOcclusionTreePtr node = this/*shared_from_this()*/;
 	// Update our opaque depth based on that our our children.
 	while(node)
 	{
 		if( node->m_Children[0] )
 		{
-			TqFloat maxdepth = m_Children[0]->m_MaxOpaqueZ;
+			TqFloat maxdepth = node->m_Children[0]->m_MaxOpaqueZ;
 			TqChildArray::iterator child = node->m_Children.begin();
 			for (++child; child != node->m_Children.end(); ++child)
 			{
@@ -297,7 +300,7 @@ void CqOcclusionTree::PropagateChanges()
 			if(maxdepth < node->m_MaxOpaqueZ)
 			{
 				node->m_MaxOpaqueZ = maxdepth;
-				node = node->m_Parent.lock();
+				node = node->m_Parent/*.lock()*/;
 			}
 			else
 			{
@@ -306,7 +309,7 @@ void CqOcclusionTree::PropagateChanges()
 		}
 		else
 		{
-			node = node->m_Parent.lock();
+			node = node->m_Parent/*.lock()*/;
 		}
 	}
 }
@@ -340,7 +343,7 @@ TqBool CqOcclusionTree::CanCull( CqBound* bound )
 			{
 				if (*childNode)
 				{
-					stack.push_front(childNode->get());
+					stack.push_front(*childNode/*->get()*/);
 				}
 			}
 		}

@@ -46,14 +46,17 @@ struct SqMpgSampleInfo;
 struct SqGridInfo;
 
 class CqOcclusionTree;
-typedef boost::shared_ptr<CqOcclusionTree> CqOcclusionTreePtr;
-typedef boost::weak_ptr<CqOcclusionTree> CqOcclusionTreeWeakPtr;
+//typedef boost::shared_ptr<CqOcclusionTree> CqOcclusionTreePtr;
+//typedef boost::weak_ptr<CqOcclusionTree> CqOcclusionTreeWeakPtr;
+typedef CqOcclusionTree* CqOcclusionTreePtr;
+typedef CqOcclusionTree* CqOcclusionTreeWeakPtr;
+
 
 /**	\brief	The CqOcclusionKDTreeData class
 	Specialisation of the KDTree data class to support generation of a KDTree
 	representing the sample data of a bucket.
 */
-class CqOcclusionTree : public boost::enable_shared_from_this<CqOcclusionTree>
+class CqOcclusionTree// : public boost::enable_shared_from_this<CqOcclusionTree>
 {
     class CqOcclusionTreeComparator
     {
