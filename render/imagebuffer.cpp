@@ -882,11 +882,11 @@ void CqImageBuffer::RenderMPG_MBOrDof( CqMicroPolygon* pMPG,
 			if(UsingDof)
 			{
 				CqBound DofBound(bminx, bminy, bminz, bmaxx, bmaxy, bmaxz);
-				CqOcclusionBox::KDTree()->SampleMPG(pMPG, DofBound, time0, time1, TqTrue, bound_numDof, m_CurrentMpgSampleInfo, m_CurrentGridInfo);
+				CqOcclusionBox::KDTree()->SampleMPG(pMPG, DofBound, IsMoving, time0, time1, TqTrue, bound_numDof, m_CurrentMpgSampleInfo, m_CurrentGridInfo.m_LodBounds[0] >= 0.0f, m_CurrentGridInfo);
 			}
 			else
 			{
-				CqOcclusionBox::KDTree()->SampleMPG(pMPG, Bound, time0, time1, TqFalse, 0, m_CurrentMpgSampleInfo, m_CurrentGridInfo);
+				CqOcclusionBox::KDTree()->SampleMPG(pMPG, Bound, IsMoving, time0, time1, TqFalse, 0, m_CurrentMpgSampleInfo, m_CurrentGridInfo.m_LodBounds[0] >= 0.0f, m_CurrentGridInfo);
 			}
 		}
     }
@@ -903,7 +903,7 @@ void CqImageBuffer::RenderMPG_Static( CqMicroPolygon* pMPG, long xmin, long xmax
 
     const CqBound& Bound = pMPG->GetTotalBound();
 
-	CqOcclusionBox::KDTree()->SampleMPG(pMPG, Bound, m_CurrentGridInfo.m_ShutterOpenTime, m_CurrentGridInfo.m_ShutterCloseTime, TqFalse, 0, m_CurrentMpgSampleInfo, m_CurrentGridInfo);
+	CqOcclusionBox::KDTree()->SampleMPG(pMPG, Bound, TqFalse, 0, 0, TqFalse, 0, m_CurrentMpgSampleInfo, m_CurrentGridInfo.m_LodBounds[0] >= 0.0f, m_CurrentGridInfo);
 }
 
 
@@ -1029,6 +1029,22 @@ void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax, 
     {
         if ( m_fQuit ) return ;
 
+
+        //Cull surface if it's hidden
+        if ( !( DisplayMode() & ModeZ ) && !pSurface->pCSGNode() )
+        {
+            TIME_SCOPE("Occlusion culling")
+            TqBool fCull = TqFalse;
+			if ( !bIsEmpty && pSurface->fCachedBound() )
+				fCull = OcclusionCullSurface( pSurface );
+            if ( fCull )
+            {
+				Bucket.popSurface();
+                pSurface = Bucket.pTopSurface();
+                continue;
+            }
+        }
+
         // If the epsilon check has deemed this surface to be undiceable, don't bother asking.
         TqBool fDiceable = TqFalse;
         // Dice & shade the surface if it's small enough...
@@ -1039,20 +1055,6 @@ void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax, 
 
         if ( fDiceable )
         {
-            //Cull surface if it's hidden
-            if ( !( DisplayMode() & ModeZ ) && !pSurface->pCSGNode() )
-            {
-                TIME_SCOPE("Occlusion culling")
-                TqBool fCull = TqFalse;
-				if ( !bIsEmpty && pSurface->fCachedBound() )
-					fCull = OcclusionCullSurface( pSurface );
-                if ( fCull )
-                {
-					Bucket.popSurface();
-                    pSurface = Bucket.pTopSurface();
-                    continue;
-                }
-            }
 
 		    Bucket.popSurface();	
             CqMicroPolyGridBase* pGrid;
@@ -1229,9 +1231,6 @@ void CqImageBuffer::RenderImage()
     m_fDone = TqFalse;
 
     CqVector2D bHalf = CqVector2D( FLOOR(m_FilterXWidth / 2.0f), FLOOR(m_FilterYWidth / 2.0f) );
-
-    // Setup the hierarchy of boxes for occlusion culling
-    CqOcclusionBox::CreateHierarchy( m_XBucketSize, m_YBucketSize, m_FilterXWidth, m_FilterYWidth );
 
     RtProgressFunc pProgressHandler = NULL;
     pProgressHandler = QGetRenderContext()->pProgressHandler();

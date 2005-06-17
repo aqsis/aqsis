@@ -33,11 +33,14 @@
 #include "bound.h"
 #include "imagebuffer.h"
 #include <deque>
+#include <fstream>
 
 START_NAMESPACE( Aqsis )
 
+TqInt CqOcclusionTree::m_Tab = 0;
+
 CqOcclusionTree::CqOcclusionTree(TqInt dimension)
-    : m_Parent(0), m_Dimension(dimension)
+    : m_Dimension(dimension)
 {
 }
 
@@ -68,6 +71,7 @@ CqOcclusionTree::SplitNode(CqOcclusionTreePtr& a, CqOcclusionTreePtr& b)
 
 	TqFloat minTime = m_MaxTime, maxTime = m_MinTime;
 	TqInt minDofIndex = m_MaxDofBoundIndex, maxDofIndex = m_MinDofBoundIndex;
+	TqInt minDetailLevel = m_MaxDetailLevel, maxDetailLevel = m_MinDetailLevel;
 
 	TqInt i;
 	for(i = 0; i<median; ++i)
@@ -78,14 +82,19 @@ CqOcclusionTree::SplitNode(CqOcclusionTreePtr& a, CqOcclusionTreePtr& b)
 		maxTime = MAX(maxTime, sample.m_Time);
 		minDofIndex = MIN(minDofIndex, sample.m_DofOffsetIndex);
 		maxDofIndex = MAX(maxDofIndex, sample.m_DofOffsetIndex);
+		minDetailLevel = MIN(minDetailLevel, sample.m_DetailLevel);
+		maxDetailLevel = MAX(maxDetailLevel, sample.m_DetailLevel);
 	}
 	a->m_MinTime = minTime;
 	a->m_MaxTime = maxTime;
 	a->m_MinDofBoundIndex = minDofIndex;
 	a->m_MaxDofBoundIndex = maxDofIndex;
+	a->m_MinDetailLevel = minDetailLevel;
+	a->m_MaxDetailLevel = maxDetailLevel;
 
 	minTime = m_MaxTime, maxTime = m_MinTime;
 	minDofIndex = m_MaxDofBoundIndex, maxDofIndex = m_MinDofBoundIndex;
+	minDetailLevel = m_MaxDetailLevel, maxDetailLevel = m_MinDetailLevel;
 	for(; i<samplecount; ++i)
 	{
 		b->m_SampleIndices.push_back(m_SampleIndices[i]);
@@ -94,11 +103,15 @@ CqOcclusionTree::SplitNode(CqOcclusionTreePtr& a, CqOcclusionTreePtr& b)
 		maxTime = MAX(maxTime, sample.m_Time);
 		minDofIndex = MIN(minDofIndex, sample.m_DofOffsetIndex);
 		maxDofIndex = MAX(maxDofIndex, sample.m_DofOffsetIndex);
+		minDetailLevel = MIN(minDetailLevel, sample.m_DetailLevel);
+		maxDetailLevel = MAX(maxDetailLevel, sample.m_DetailLevel);
 	}
 	b->m_MinTime = minTime;
 	b->m_MaxTime = maxTime;
 	b->m_MinDofBoundIndex = minDofIndex;
 	b->m_MaxDofBoundIndex = maxDofIndex;
+	b->m_MinDetailLevel = minDetailLevel;
+	b->m_MaxDetailLevel = maxDetailLevel;
 }
 
 void CqOcclusionTree::ConstructTree()
@@ -140,12 +153,18 @@ void CqOcclusionTree::ConstructTree()
 
 	TqChildArray::iterator ii;
 	std::deque<CqOcclusionTreePtr>::const_iterator jj;
-	for (ii = m_Children.begin(), jj = ChildQueue.begin(); jj != ChildQueue.end(); ++ii, ++jj)
+	for (ii = m_Children.begin(), jj = ChildQueue.begin(); jj != ChildQueue.end(); ++jj)
 	{
-		*ii = *jj;
-		if ((*ii)->NumSamples() > 1)
+		// Check if the child actually has any samples, ignore it if no.
+		if( (*jj)->NumSamples() > 0)
 		{
-			(*ii)->ConstructTree();
+			*ii = *jj;
+			//(*ii)->m_Parent = shared_from_this();
+			if ((*ii)->NumSamples() > 1)
+			{
+				(*ii)->ConstructTree();
+			}
+			++ii;
 		}
 	}
 
@@ -169,6 +188,8 @@ void CqOcclusionTree::InitialiseBounds()
 	TqFloat maxTime = minTime;
 	TqInt	minDofIndex = sample.m_DofOffsetIndex;
 	TqInt	maxDofIndex = minDofIndex;
+	TqInt	minDetailLevel = sample.m_DetailLevel;
+	TqInt	maxDetailLevel = minDetailLevel;
 	std::vector<std::pair<TqInt, TqInt> >::iterator i;
 	for(i = m_SampleIndices.begin()+1; i!=m_SampleIndices.end(); ++i)
 	{
@@ -181,6 +202,8 @@ void CqOcclusionTree::InitialiseBounds()
 		maxTime = MAX(maxTime, sample.m_Time);
 		minDofIndex = MIN(minDofIndex, sample.m_DofOffsetIndex);
 		maxDofIndex = MAX(maxDofIndex, sample.m_DofOffsetIndex);
+		minDetailLevel = MIN(minDetailLevel, sample.m_DetailLevel);
+		maxDetailLevel = MAX(maxDetailLevel, sample.m_DetailLevel);
 	}
 	m_MinSamplePoint[0] = minXVal;
 	m_MaxSamplePoint[0] = maxXVal;
@@ -190,6 +213,8 @@ void CqOcclusionTree::InitialiseBounds()
 	m_MaxTime = maxTime;
 	m_MinDofBoundIndex = minDofIndex;
 	m_MaxDofBoundIndex = maxDofIndex;
+	m_MinDetailLevel = minDetailLevel;
+	m_MaxDetailLevel = maxDetailLevel;
 
 	// Set the opaque depths to the limits to begin with.
 	m_MaxOpaqueZ = FLT_MAX;
@@ -213,6 +238,8 @@ void CqOcclusionTree::UpdateBounds()
 		m_MaxTime = (*child)->m_MaxTime;
 		m_MinDofBoundIndex = (*child)->m_MinDofBoundIndex;
 		m_MaxDofBoundIndex = (*child)->m_MaxDofBoundIndex;
+		m_MinDetailLevel = (*child)->m_MinDetailLevel;
+		m_MaxDetailLevel = (*child)->m_MaxDetailLevel;
 
 		for(++child; child != m_Children.end(); ++child)
 		{
@@ -228,6 +255,8 @@ void CqOcclusionTree::UpdateBounds()
 				m_MaxTime = std::max(m_MaxTime, (*child)->m_MaxTime);
 				m_MinDofBoundIndex = std::min(m_MinDofBoundIndex, (*child)->m_MinDofBoundIndex);
 				m_MaxDofBoundIndex = std::max(m_MaxDofBoundIndex, (*child)->m_MaxDofBoundIndex);
+				m_MinDetailLevel = std::min(m_MinDetailLevel, (*child)->m_MinDetailLevel);
+				m_MaxDetailLevel = std::max(m_MaxDetailLevel, (*child)->m_MaxDetailLevel);
 			}
 		}
 	}
@@ -240,6 +269,7 @@ void CqOcclusionTree::UpdateBounds()
 		m_MinSamplePoint[1] = m_MaxSamplePoint[1] = sample.m_Position[1];
 		m_MinTime = m_MaxTime = sample.m_Time;
 		m_MinDofBoundIndex = m_MaxDofBoundIndex = sample.m_DofOffsetIndex;
+		m_MinDetailLevel = m_MaxDetailLevel = sample.m_DetailLevel;
 	}
 
 	// Set the opaque depths to the limits to begin with.
@@ -248,14 +278,14 @@ void CqOcclusionTree::UpdateBounds()
 
 void CqOcclusionTree::PropagateChanges()
 {
-	CqOcclusionTree* node = this;
+	CqOcclusionTreePtr node = shared_from_this();
 	// Update our opaque depth based on that our our children.
 	while(node)
 	{
 		if( node->m_Children[0] )
 		{
 			TqFloat maxdepth = m_Children[0]->m_MaxOpaqueZ;
-			TqChildArray::iterator child;
+			TqChildArray::iterator child = node->m_Children.begin();
 			for (++child; child != node->m_Children.end(); ++child)
 			{
 				if (*child)
@@ -267,7 +297,7 @@ void CqOcclusionTree::PropagateChanges()
 			if(maxdepth < node->m_MaxOpaqueZ)
 			{
 				node->m_MaxOpaqueZ = maxdepth;
-				node = node->m_Parent;
+				node = node->m_Parent.lock();
 			}
 			else
 			{
@@ -276,7 +306,7 @@ void CqOcclusionTree::PropagateChanges()
 		}
 		else
 		{
-			node = node->m_Parent;
+			node = node->m_Parent.lock();
 		}
 	}
 }
@@ -352,22 +382,6 @@ CqOcclusionBox::~CqOcclusionBox()
 {}
 
 
-//----------------------------------------------------------------------
-/** Create the static hierarchy that will be used throughout the rendering. Static.
-	This should be called only once, before rendering has started.
- *\param bucketXSize width of a bucket in pixels
- *\param bucketYSize height of a bucket in pixels
- *\param XFWidth  filter width in x
- *\param YFWidth  filter width in y
-*/
-
-void CqOcclusionBox::CreateHierarchy( TqInt bucketXSize, TqInt bucketYSize, TqFloat XFWidth, TqFloat YFWidth )
-{
-	// Initialise the data handler for the KDTree
-	//CqOcclusionKDTreeData*	kddata = new CqOcclusionKDTreeData;
-	//m_KDTree.SetData(boost::shared_ptr<IqKDTreeData<TqOcclusionKDTreeData,SqOcclusionKDTreeExtraData> >(kddata));
-}
-
 
 //----------------------------------------------------------------------
 /** Delete the static hierarchy created in CreateHierachy(). static.
@@ -414,6 +428,22 @@ void CqOcclusionBox::SetupHierarchy( CqBucket* bucket, TqInt xMin, TqInt yMin, T
 	}
 
 	m_KDTree->UpdateBounds();
+
+/*
+	static TqInt i__ = 0;
+	if(i__ == 800)
+	{
+		std::ofstream strFile("test.out");
+		strFile << "xmin = " << xMin << std::endl << "ymin = " << yMin << std::endl << "xmax = " <<  xMax << std::endl << "ymax = " << yMax << std::endl << std::endl;
+		strFile << "points = [" << std::endl;
+		strFile.close();
+		CqOcclusionTree::m_Tab = 0;
+		m_KDTree->OutputTree("test.out");
+		std::ofstream strFile2("test.out", std::ios_base::out|std::ios_base::app);
+		strFile2 << "]" << std::endl;
+	}
+	i__++;
+*/
 }
 
 
@@ -497,7 +527,7 @@ void StoreExtraData( CqMicroPolygon* pMPG, SqImageSample& sample)
 
 
 
-void CqOcclusionTree::SampleMPG( CqMicroPolygon* pMPG, const CqBound& bound, TqFloat time0, TqFloat time1, TqBool usingDof, TqInt dofboundindex, SqMpgSampleInfo& MpgSampleInfo, SqGridInfo& gridInfo)
+void CqOcclusionTree::SampleMPG( CqMicroPolygon* pMPG, const CqBound& bound, TqBool usingMB, TqFloat time0, TqFloat time1, TqBool usingDof, TqInt dofboundindex, SqMpgSampleInfo& MpgSampleInfo, TqBool usingLOD, SqGridInfo& gridInfo)
 {
 	// Check the current tree level, and if only one leaf, sample the MP, otherwise, pass it down to the left
 	// and/or right side of the tree if it crosses.
@@ -507,18 +537,6 @@ void CqOcclusionTree::SampleMPG( CqMicroPolygon* pMPG, const CqBound& bound, TqF
 		SqSampleData& sample = Sample();
 		TqBool SampleHit;
 		TqFloat D;
-
-		const TqFloat* LodBounds = gridInfo.m_LodBounds;
-		TqBool UsingLevelOfDetail = LodBounds[ 0 ] >= 0.0f;
-		// Check to see if the sample is within the sample's level of detail
-		// \note Need to move this to the level check further down and 
-		// include LOD bounds in the treenode data.
-		if( UsingLevelOfDetail )
-		{
-			TqFloat LevelOfDetail = sample.m_DetailLevel;
-			if ( LodBounds[ 0 ] > LevelOfDetail || LevelOfDetail >= LodBounds[ 1 ] )
-				return;
-		}
 
 		CqStats::IncI( CqStats::SPL_count );
 		SampleHit = pMPG->Sample(sample, D, sample.m_Time, usingDof );
@@ -555,15 +573,9 @@ void CqOcclusionTree::SampleMPG( CqMicroPolygon* pMPG, const CqBound& bound, TqF
 					if((*sample).Data()[Sample_Depth] >= D)
 						break;
 
-					if(((*sample).m_flags & SqImageSample::Flag_Occludes) &&
-						!(*sample).m_pCSGNode && gridInfo.m_IsCullable)
-						return;
-
 					++sample;
 				}
 			}
-
-			ImageVal.Data()[Sample_Depth] = D;
 
 			CqStats::IncI( CqStats::SPL_hits );
 			pMPG->MarkHit();
@@ -612,7 +624,8 @@ void CqOcclusionTree::SampleMPG( CqMicroPolygon* pMPG, const CqBound& bound, TqF
 				}
 			}
 
-			ImageVal.m_pCSGNode = pMPG->pGrid() ->pCSGNode();
+			if(pMPG->pGrid()->usesCSG())
+				ImageVal.m_pCSGNode = pMPG->pGrid() ->pCSGNode();
 
 			ImageVal.m_flags = 0;
 			if ( Occludes )
@@ -638,27 +651,56 @@ void CqOcclusionTree::SampleMPG( CqMicroPolygon* pMPG, const CqBound& bound, TqF
 	else
 	{
 		TqChildArray::iterator child;
-		for(child = m_Children.begin(); child != m_Children.end(); ++child)
+		TqChildArray::iterator end = m_Children.end();
+		for(child = m_Children.begin(); child != end; ++child)
 		{
 			if (!*child)
-			{
 				continue;
-			}
 
-			if(	(!usingDof || (dofboundindex >= (*child)->m_MinDofBoundIndex)
-								&& (dofboundindex <= (*child)->m_MaxDofBoundIndex ))
-				&& ((time0 <= (*child)->m_MaxTime) && (time1 >= (*child)->m_MinTime) )
+			if(	   (!usingDof || ((dofboundindex >= (*child)->m_MinDofBoundIndex) && (dofboundindex <= (*child)->m_MaxDofBoundIndex )) )
+				&& (!usingMB || ((time0 <= (*child)->m_MaxTime) && (time1 >= (*child)->m_MinTime)) )
+				&& (!usingLOD || ((gridInfo.m_LodBounds[0] <= (*child)->m_MaxDetailLevel) && (gridInfo.m_LodBounds[1] >= (*child)->m_MinDetailLevel)) )
 				&& (bound.Intersects((*child)->m_MinSamplePoint, (*child)->m_MaxSamplePoint)) )
 			{
 				if(bound.vecMin().z() <= (*child)->m_MaxOpaqueZ || !gridInfo.m_IsCullable)
 				{
-					(*child)->SampleMPG(pMPG, bound, time0, time1, usingDof, dofboundindex, MpgSampleInfo, gridInfo);
+					(*child)->SampleMPG(pMPG, bound, usingMB, time0, time1, usingDof, dofboundindex, MpgSampleInfo, usingLOD, gridInfo);
 				}
 			}
 		}
 	}
 }
 
+
+/*void CqOcclusionTree::OutputTree(const char* name)
+{
+	std::ofstream strFile(name, std::ios_base::out|std::ios_base::app);
+
+	strFile <<
+			"(" << m_Tab << ", " <<  
+			"(" << m_MinSamplePoint[0] << ", " << m_MinSamplePoint[1] << "), " << 
+			"(" << m_MaxSamplePoint[0] << ", " << m_MinSamplePoint[1] << "), " <<
+			"(" << m_MaxSamplePoint[0] << ", " << m_MinSamplePoint[1] << "), " <<
+			"(" << m_MaxSamplePoint[0] << ", " << m_MaxSamplePoint[1] << "), " <<
+			"(" << m_MaxSamplePoint[0] << ", " << m_MaxSamplePoint[1] << "), " <<
+			"(" << m_MinSamplePoint[0] << ", " << m_MaxSamplePoint[1] << "), " <<
+			"(" << m_MinSamplePoint[0] << ", " << m_MaxSamplePoint[1] << "), " <<
+			"(" << m_MinSamplePoint[0] << ", " << m_MinSamplePoint[1] << ")" <<
+			"), " << 
+			std::endl;
+
+	TqChildArray::iterator child;
+	for(child = m_Children.begin(); child != m_Children.end(); ++child)
+	{
+		if (*child && (*child)->NumSamples() > 1)
+		{
+			m_Tab++;
+			(*child)->OutputTree(name);
+			m_Tab--;
+		}
+	}
+}
+*/
 
 END_NAMESPACE( Aqsis )
 

@@ -87,6 +87,7 @@ public:
 
     virtual	const IqAttributes* pAttributes() const = 0;
 
+	virtual TqBool	usesCSG() const = 0;
     virtual	boost::shared_ptr<CqCSGTreeNode> pCSGNode() const = 0;
     TqBool vfCulled()
     {
@@ -224,6 +225,10 @@ public:
         assert( m_pShaderExecEnv );
         return ( m_pShaderExecEnv->pAttributes() );
     }
+	virtual TqBool	usesCSG() const
+	{
+		return(!m_pCSGNode);
+	}
     virtual	boost::shared_ptr<CqCSGTreeNode> pCSGNode() const
     {
         return ( m_pCSGNode );
@@ -343,6 +348,10 @@ public:
         return ( static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( 0 ) ) ) ->pAttributes() );
     }
 
+	virtual TqBool	usesCSG() const
+	{
+		return(static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( 0 ) ) ) ->usesCSG());
+	}
     virtual boost::shared_ptr<CqCSGTreeNode> pCSGNode() const
     {
         return ( static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( 0 ) ) ) ->pCSGNode() );

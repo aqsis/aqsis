@@ -85,6 +85,7 @@ public:
 		m_SampleIndices.push_back(sample);
 	}
 	void ConstructTree();
+	void OutputTree(const char* name);
 
 	void PropagateChanges();
 
@@ -92,7 +93,7 @@ public:
 	void UpdateBounds();
 
 	TqBool CanCull( CqBound* bound );
-	void SampleMPG( CqMicroPolygon* pMPG, const CqBound& bound, TqFloat time0, TqFloat time1, TqBool usingDof, TqInt dofboundindex, SqMpgSampleInfo& MpgSampleInfo, SqGridInfo& gridInfo);
+	void SampleMPG( CqMicroPolygon* pMPG, const CqBound& bound, TqBool usingMB, TqFloat time0, TqFloat time1, TqBool usingDof, TqInt dofboundindex, SqMpgSampleInfo& MpgSampleInfo, TqBool usingLOD, SqGridInfo& gridInfo);
 
 	TqInt NumSamples() const
 	{
@@ -127,7 +128,7 @@ private:
 
 	void SplitNode(CqOcclusionTreePtr& a, CqOcclusionTreePtr& b);
 
-	CqOcclusionTree*	m_Parent;
+	CqOcclusionTreeWeakPtr	m_Parent;
 	TqInt		m_Dimension;
 	CqVector2D	m_MinSamplePoint;
 	CqVector2D	m_MaxSamplePoint;
@@ -136,15 +137,19 @@ private:
 	TqFloat		m_MaxOpaqueZ;
 	TqInt		m_MinDofBoundIndex;
 	TqInt		m_MaxDofBoundIndex;
+	TqInt		m_MinDetailLevel;
+	TqInt		m_MaxDetailLevel;
 	TqChildArray	m_Children;
 	TqSampleIndices	m_SampleIndices;
+
+public:
+	static TqInt		m_Tab;
 };
 
 
 class CqOcclusionBox
 {
 public:
-    static void CreateHierarchy( TqInt bucketXSize, TqInt bucketYSize, TqFloat XFWidth, TqFloat YFWidth );
     static void DeleteHierarchy();
     static void SetupHierarchy( CqBucket* bucket, TqInt xMin, TqInt yMin, TqInt xMax, TqInt yMax );
 
