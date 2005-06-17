@@ -330,10 +330,6 @@ SOURCE=.\matrix.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\memorypool.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\MultiTimer.h
 # End Source File
 # Begin Source File

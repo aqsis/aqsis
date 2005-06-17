@@ -41,7 +41,9 @@
 #define	__old_max__ max
 #undef max
 #endif
+
 #include	<valarray>
+
 #ifdef	__old_min__
 #define	min __old_min__
 #undef __old_min__

@@ -90,6 +90,7 @@ void my_func()
 #include <sstream>
 #include <time.h>
 #include <math.h>
+#include <algorithm>
 
 class CTimerFactory;
 extern CTimerFactory timerFactory;
@@ -152,7 +153,7 @@ public:
 
 		total -= ohs.getOverhead();
 
-		return max(total, 0.0);
+		return std::_MAX(total, 0.0);
 	}
 	double getAverageTime() const {return (getTotalTime() / m_samples.size());}
 	double getMinimumTime() const
@@ -164,7 +165,7 @@ public:
 			if (it == m_samples.begin() || *it < min)
 				min = *it;
 		}
-		return max(min, 0.0);
+		return std::_MAX(min, 0.0);
 	}
 	double getMaximumTime() const
 	{

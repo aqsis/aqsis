@@ -372,7 +372,7 @@ private:
  * Base lass for static micropolygons. Stores point information about the geometry of the micropoly.
  */
 
-class CqMovingMicroPolygonKeyPoints : public CqPoolable<CqMovingMicroPolygonKeyPoints, 512>
+class CqMovingMicroPolygonKeyPoints
 {
 public:
     CqMovingMicroPolygonKeyPoints()
@@ -383,6 +383,21 @@ public:
     }
     ~CqMovingMicroPolygonKeyPoints()
     {}
+
+
+    /** Overridden operator new to allocate micropolys from a pool.
+     */
+    void* operator new( size_t size )
+    {
+        return( m_thePool.malloc() );
+    }
+
+    /** Overridden operator delete to allocate micropolys from a pool.
+     */
+    void operator delete( void* p )
+    {
+        m_thePool.free( reinterpret_cast<CqMovingMicroPolygonKeyPoints*>(p) );
+    }
 
 public:
     TqBool	fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const
@@ -414,6 +429,8 @@ public:
 
     CqVector3D	m_Point0;
     TqFloat		m_radius;
+
+	static	boost::object_pool<CqMovingMicroPolygonKeyPoints>	m_thePool;
 }
 ;
 

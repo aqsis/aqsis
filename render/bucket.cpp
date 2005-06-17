@@ -39,6 +39,7 @@
 #include	"imagers.h"
 
 #include	<algorithm>
+#include	<valarray>
 
 
 

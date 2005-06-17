@@ -29,7 +29,7 @@
 
 START_NAMESPACE( Aqsis )
 
-DEFINE_STATIC_MEMORYPOOL( CqLath, 512 );
+boost::object_pool<CqLath>	CqLath::m_thePool;
 
 //------------------------------------------------------------------------------
 /**

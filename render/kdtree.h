@@ -28,7 +28,6 @@
 #define	KDTREE_H_LOADED
 
 #include	"aqsis.h"
-#include	"memorypool.h"
 #include	"refcount.h"
 #include	<vector>
 

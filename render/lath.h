@@ -28,8 +28,8 @@
 #define	LATH_H_LOADED
 
 #include	"aqsis.h"
-#include	"memorypool.h"
 #include	<vector>
+#include	<boost/pool/object_pool.hpp>
 
 START_NAMESPACE( Aqsis )
 
@@ -40,7 +40,7 @@ START_NAMESPACE( Aqsis )
  *	Holds information about mesh neighbourhoods allowing easy data aextraction about mesh topology.
  */
 
-class CqLath : public CqPoolable<CqLath, 512>
+class CqLath
 {
 public:
     ///	Constructor.
@@ -51,6 +51,20 @@ public:
 
     ///	Destructor.
     ~CqLath()	{}
+
+    /** Overridden operator new to allocate micropolys from a pool.
+     */
+    void* operator new( size_t size )
+    {
+        return( m_thePool.malloc() );
+    }
+
+    /** Overridden operator delete to allocate micropolys from a pool.
+     */
+    void operator delete( void* p )
+    {
+        m_thePool.free( reinterpret_cast<CqLath*>(p) );
+    }
 
     /// Get a pointer to the lath representing the facet that this one was created from.
     CqLath*	pParentFacet() const		{return(m_pParentFacet);}
@@ -165,6 +179,8 @@ private:
 
     TqInt	m_VertexIndex;
     TqInt	m_FaceVertexIndex;
+
+	static	boost::object_pool<CqLath>	m_thePool;
 };
 
 

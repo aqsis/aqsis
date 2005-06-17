@@ -170,10 +170,6 @@ CqRenderer::~CqRenderer()
 		delete m_pRaytracer;
 		m_pRaytracer = 0;	// MGC: or better NULL?
 	}
-	// Clear up the MicroPolygon memory pool.
-	CqMicroPolygon::Flush();
-	CqMovingMicroPolygonKeyPoints::Flush();
-	CqLath::Flush();
 
 	// Clear the ObjectInstance buffer
 	std::vector<CqObjectInstance*>::iterator i;

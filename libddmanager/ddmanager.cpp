@@ -35,10 +35,6 @@
 #include	"ndspy.h"
 #include	"version.h"
 
-#ifdef	AQSIS_SYSTEM_WIN32
-#include	"winsock2.h"
-#endif
-
 START_NAMESPACE( Aqsis )
 
 

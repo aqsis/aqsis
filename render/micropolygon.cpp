@@ -40,8 +40,8 @@
 START_NAMESPACE( Aqsis )
 
 
-DEFINE_STATIC_MEMORYPOOL( CqMicroPolygon, 512 );
-DEFINE_STATIC_MEMORYPOOL( CqMovingMicroPolygonKey, 512 );
+boost::object_pool<CqMicroPolygon>	CqMicroPolygon::m_thePool;
+boost::object_pool<CqMovingMicroPolygonKey>	CqMovingMicroPolygonKey::m_thePool;
 
 //---------------------------------------------------------------------
 /** Default constructor

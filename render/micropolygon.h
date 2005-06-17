@@ -31,7 +31,7 @@
 
 #include	"aqsis.h"
 
-#include	"memorypool.h"
+#include	<boost/pool/object_pool.hpp>
 #include	"color.h"
 #include	"list.h"
 #include	"bound.h"
@@ -403,11 +403,26 @@ struct CqHitTestCache
  * Abstract base class from which static and motion micropolygons are derived.
  */
 
-class CqMicroPolygon : public CqRefCount, public CqPoolable<CqMicroPolygon, 512>
+class CqMicroPolygon : public CqRefCount
 {
 public:
     CqMicroPolygon();
     virtual	~CqMicroPolygon();
+
+    /** Overridden operator new to allocate micropolys from a pool.
+     */
+    void* operator new( size_t size )
+    {
+        return( m_thePool.malloc() );
+    }
+
+    /** Overridden operator delete to allocate micropolys from a pool.
+     */
+    void operator delete( void* p )
+    {
+        m_thePool.free( reinterpret_cast<CqMicroPolygon*>(p) );
+    }
+
 #ifdef _DEBUG
     CqString className() const { return CqString("CqMicroPolygon"); }
 #endif
@@ -632,6 +647,8 @@ protected:
 private:
     CqMicroPolygon( const CqMicroPolygon& From )
 {}
+
+	static	boost::object_pool<CqMicroPolygon>	m_thePool;
 }
 ;
 
@@ -642,7 +659,7 @@ private:
  * Base lass for static micropolygons. Stores point information about the geometry of the micropoly.
  */
 
-class CqMovingMicroPolygonKey : public CqPoolable<CqMovingMicroPolygonKey, 512>
+class CqMovingMicroPolygonKey
 {
 public:
     CqMovingMicroPolygonKey()
@@ -653,6 +670,21 @@ public:
     }
     ~CqMovingMicroPolygonKey()
     {}
+
+    /** Overridden operator new to allocate micropolys from a pool.
+     */
+    void* operator new( size_t size )
+    {
+        return( m_thePool.malloc() );
+    }
+
+    /** Overridden operator delete to allocate micropolys from a pool.
+     */
+    void operator delete( void* p )
+    {
+        m_thePool.free( reinterpret_cast<CqMovingMicroPolygonKey*>(p) );
+    }
+
 
 public:
     const CqBound&	GetTotalBound();
@@ -673,6 +705,8 @@ public:
 
 	CqBound m_Bound;
 	TqBool	m_BoundReady;
+
+	static	boost::object_pool<CqMovingMicroPolygonKey>	m_thePool;
 }
 ;
 

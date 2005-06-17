@@ -43,7 +43,7 @@
 
 START_NAMESPACE( Aqsis )
 
-DEFINE_STATIC_MEMORYPOOL( CqMovingMicroPolygonKeyPoints, 512 );
+boost::object_pool<CqMovingMicroPolygonKeyPoints>	CqMovingMicroPolygonKeyPoints::m_thePool;
 
 
 #define NBR_SEGMENTS 6
