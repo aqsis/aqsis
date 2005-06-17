@@ -198,56 +198,50 @@ void CqOcclusionTree::InitialiseBounds()
 
 void CqOcclusionTree::UpdateBounds()
 {
-	// Update the children first
 	if (m_Children[0])
 	{
-		TqChildArray::iterator child;
-		for(child = m_Children.begin(); child != m_Children.end(); ++child)
+		assert(m_SampleIndices.size() > 1);
+
+		TqChildArray::iterator child = m_Children.begin();
+		(*child)->UpdateBounds();
+
+		m_MinSamplePoint[0] = (*child)->m_MinSamplePoint[0];
+		m_MaxSamplePoint[0] = (*child)->m_MaxSamplePoint[0];
+		m_MinSamplePoint[1] = (*child)->m_MinSamplePoint[1];
+		m_MaxSamplePoint[1] = (*child)->m_MaxSamplePoint[1];
+		m_MinTime = (*child)->m_MinTime;
+		m_MaxTime = (*child)->m_MaxTime;
+		m_MinDofBoundIndex = (*child)->m_MinDofBoundIndex;
+		m_MaxDofBoundIndex = (*child)->m_MaxDofBoundIndex;
+
+		for(++child; child != m_Children.end(); ++child)
 		{
 			if (*child)
 			{
 				(*child)->UpdateBounds();
+
+				m_MinSamplePoint[0] = std::min(m_MinSamplePoint[0], (*child)->m_MinSamplePoint[0]);
+				m_MaxSamplePoint[0] = std::max(m_MaxSamplePoint[0], (*child)->m_MaxSamplePoint[0]);
+				m_MinSamplePoint[1] = std::min(m_MinSamplePoint[1], (*child)->m_MinSamplePoint[1]);
+				m_MaxSamplePoint[1] = std::max(m_MaxSamplePoint[1], (*child)->m_MaxSamplePoint[1]);
+				m_MinTime = std::min(m_MinTime, (*child)->m_MinTime);
+				m_MaxTime = std::max(m_MaxTime, (*child)->m_MaxTime);
+				m_MinDofBoundIndex = std::min(m_MinDofBoundIndex, (*child)->m_MinDofBoundIndex);
+				m_MaxDofBoundIndex = std::max(m_MaxDofBoundIndex, (*child)->m_MaxDofBoundIndex);
 			}
 		}
 	}
-
-	if (!m_Children[0])
+	else
 	{
 		assert(m_SampleIndices.size() == 1);
+
 		const SqSampleData& sample = Sample();
 		m_MinSamplePoint[0] = m_MaxSamplePoint[0] = sample.m_Position[0];
 		m_MinSamplePoint[1] = m_MaxSamplePoint[1] = sample.m_Position[1];
 		m_MinTime = m_MaxTime = sample.m_Time;
 		m_MinDofBoundIndex = m_MaxDofBoundIndex = sample.m_DofOffsetIndex;
 	}
-	else
-	{
-		m_MinSamplePoint[0] = m_Children[0]->m_MinSamplePoint[0];
-		m_MaxSamplePoint[0] = m_Children[0]->m_MaxSamplePoint[0];
-		m_MinSamplePoint[1] = m_Children[0]->m_MinSamplePoint[1];
-		m_MaxSamplePoint[1] = m_Children[0]->m_MaxSamplePoint[1];
-		m_MinTime = m_Children[0]->m_MinTime;
-		m_MaxTime = m_Children[0]->m_MaxTime;
-		m_MinDofBoundIndex = m_Children[0]->m_MinDofBoundIndex;
-		m_MaxDofBoundIndex = m_Children[0]->m_MaxDofBoundIndex;
 
-		TqChildArray::iterator child = m_Children.begin();
-
-		for (++child; child != m_Children.end(); ++child)
-		{
-			if (*child)
-			{
-				m_MinSamplePoint[0] = MIN(m_MinSamplePoint[0], (*child)->m_MinSamplePoint[0]);
-				m_MaxSamplePoint[0] = MAX(m_MaxSamplePoint[0], (*child)->m_MaxSamplePoint[0]);
-				m_MinSamplePoint[1] = MIN(m_MinSamplePoint[1], (*child)->m_MinSamplePoint[1]);
-				m_MaxSamplePoint[1] = MAX(m_MaxSamplePoint[1], (*child)->m_MaxSamplePoint[1]);
-				m_MinTime = MIN(m_MinTime, (*child)->m_MinTime);
-				m_MaxTime = MAX(m_MaxTime, (*child)->m_MaxTime);
-				m_MinDofBoundIndex = MIN(m_MinDofBoundIndex, (*child)->m_MinDofBoundIndex);
-				m_MaxDofBoundIndex = MAX(m_MaxDofBoundIndex, (*child)->m_MaxDofBoundIndex);
-			}
-		}
-	}
 	// Set the opaque depths to the limits to begin with.
 	m_MaxOpaqueZ = FLT_MAX;
 }
