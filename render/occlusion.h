@@ -29,7 +29,6 @@
 
 #include <boost/array.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/weak_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
 
 #include "aqsis.h"
@@ -46,17 +45,14 @@ struct SqMpgSampleInfo;
 struct SqGridInfo;
 
 class CqOcclusionTree;
-//typedef boost::shared_ptr<CqOcclusionTree> CqOcclusionTreePtr;
-//typedef boost::weak_ptr<CqOcclusionTree> CqOcclusionTreeWeakPtr;
-typedef CqOcclusionTree* CqOcclusionTreePtr;
-typedef CqOcclusionTree* CqOcclusionTreeWeakPtr;
+typedef boost::shared_ptr<CqOcclusionTree> CqOcclusionTreePtr;
 
 
 /**	\brief	The CqOcclusionKDTreeData class
 	Specialisation of the KDTree data class to support generation of a KDTree
 	representing the sample data of a bucket.
 */
-class CqOcclusionTree// : public boost::enable_shared_from_this<CqOcclusionTree>
+class CqOcclusionTree : public boost::enable_shared_from_this<CqOcclusionTree>
 {
     class CqOcclusionTreeComparator
     {
@@ -87,7 +83,7 @@ public:
 	{
 		m_SampleIndices.push_back(sample);
 	}
-	void ConstructTree();
+	void ConstructTree(CqOcclusionTree* parent);
 	void OutputTree(const char* name);
 
 	void PropagateChanges();
@@ -131,7 +127,7 @@ private:
 
 	void SplitNode(CqOcclusionTreePtr& a, CqOcclusionTreePtr& b);
 
-	CqOcclusionTreeWeakPtr	m_Parent;
+	CqOcclusionTree*	m_Parent;
 	TqInt		m_Dimension;
 	CqVector2D	m_MinSamplePoint;
 	CqVector2D	m_MaxSamplePoint;
@@ -140,8 +136,8 @@ private:
 	TqFloat		m_MaxOpaqueZ;
 	TqInt		m_MinDofBoundIndex;
 	TqInt		m_MaxDofBoundIndex;
-	TqInt		m_MinDetailLevel;
-	TqInt		m_MaxDetailLevel;
+	TqFloat		m_MinDetailLevel;
+	TqFloat		m_MaxDetailLevel;
 	TqChildArray	m_Children;
 	TqSampleIndices	m_SampleIndices;
 
