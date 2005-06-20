@@ -43,7 +43,7 @@
 
 START_NAMESPACE( Aqsis )
 
-boost::object_pool<CqMovingMicroPolygonKeyPoints>	CqMovingMicroPolygonKeyPoints::m_thePool;
+CqObjectPool<CqMovingMicroPolygonKeyPoints>	CqMovingMicroPolygonKeyPoints::m_thePool;
 
 
 #define NBR_SEGMENTS 6

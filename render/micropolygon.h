@@ -31,7 +31,7 @@
 
 #include	"aqsis.h"
 
-#include	<boost/pool/object_pool.hpp>
+#include	"pool.h"
 #include	"color.h"
 #include	"list.h"
 #include	"bound.h"
@@ -413,7 +413,7 @@ public:
      */
     void* operator new( size_t size )
     {
-        return( m_thePool.malloc() );
+        return( m_thePool.alloc() );
     }
 
     /** Overridden operator delete to allocate micropolys from a pool.
@@ -648,7 +648,7 @@ private:
     CqMicroPolygon( const CqMicroPolygon& From )
 {}
 
-	static	boost::object_pool<CqMicroPolygon>	m_thePool;
+	static	CqObjectPool<CqMicroPolygon> m_thePool;
 }
 ;
 
@@ -675,7 +675,7 @@ public:
      */
     void* operator new( size_t size )
     {
-        return( m_thePool.malloc() );
+        return( m_thePool.alloc() );
     }
 
     /** Overridden operator delete to allocate micropolys from a pool.
@@ -706,7 +706,7 @@ public:
 	CqBound m_Bound;
 	TqBool	m_BoundReady;
 
-	static	boost::object_pool<CqMovingMicroPolygonKey>	m_thePool;
+	static	CqObjectPool<CqMovingMicroPolygonKey>	m_thePool;
 }
 ;
 

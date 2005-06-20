@@ -389,7 +389,7 @@ public:
      */
     void* operator new( size_t size )
     {
-        return( m_thePool.malloc() );
+        return( m_thePool.alloc() );
     }
 
     /** Overridden operator delete to allocate micropolys from a pool.
@@ -430,7 +430,7 @@ public:
     CqVector3D	m_Point0;
     TqFloat		m_radius;
 
-	static	boost::object_pool<CqMovingMicroPolygonKeyPoints>	m_thePool;
+	static	CqObjectPool<CqMovingMicroPolygonKeyPoints>	m_thePool;
 }
 ;
 

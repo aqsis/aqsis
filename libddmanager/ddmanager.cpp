@@ -26,6 +26,10 @@
 
 #include	"aqsis.h"
 
+#ifdef	AQSIS_SYSTEM_WIN32
+#include	"winsock2.h"
+#endif
+
 #include	"sstring.h"
 #include	"ddmanager.h"
 #include	"rifile.h"

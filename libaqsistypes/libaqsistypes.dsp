@@ -342,6 +342,10 @@ SOURCE=.\plugins.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\pool.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\random.h
 # End Source File
 # Begin Source File

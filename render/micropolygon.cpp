@@ -40,8 +40,8 @@
 START_NAMESPACE( Aqsis )
 
 
-boost::object_pool<CqMicroPolygon>	CqMicroPolygon::m_thePool;
-boost::object_pool<CqMovingMicroPolygonKey>	CqMovingMicroPolygonKey::m_thePool;
+CqObjectPool<CqMicroPolygon> CqMicroPolygon::m_thePool;
+CqObjectPool<CqMovingMicroPolygonKey>	CqMovingMicroPolygonKey::m_thePool;
 
 //---------------------------------------------------------------------
 /** Default constructor
