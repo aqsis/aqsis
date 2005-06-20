@@ -46,9 +46,7 @@ CqOcclusionTree::CqOcclusionTree(TqInt dimension)
 {
 	TqChildArray::iterator child = m_Children.begin();
 	for(; child != m_Children.end(); ++child)
-	{
-		*child = CqOcclusionTreePtr();
-	}
+		(*child) = 0;
 }
 
 
@@ -78,7 +76,7 @@ CqOcclusionTree::SplitNode(CqOcclusionTreePtr& a, CqOcclusionTreePtr& b)
 
 	TqFloat minTime = m_MaxTime, maxTime = m_MinTime;
 	TqInt minDofIndex = m_MaxDofBoundIndex, maxDofIndex = m_MinDofBoundIndex;
-	TqFloat minDetailLevel = m_MaxDetailLevel, maxDetailLevel = m_MinDetailLevel;
+	TqInt minDetailLevel = m_MaxDetailLevel, maxDetailLevel = m_MinDetailLevel;
 
 	TqInt i;
 	for(i = 0; i<median; ++i)
@@ -121,12 +119,10 @@ CqOcclusionTree::SplitNode(CqOcclusionTreePtr& a, CqOcclusionTreePtr& b)
 	b->m_MaxDetailLevel = maxDetailLevel;
 }
 
-void CqOcclusionTree::ConstructTree(CqOcclusionTree* parent)
+void CqOcclusionTree::ConstructTree()
 {
-	m_Parent = parent;
-
 	std::deque<CqOcclusionTreePtr> ChildQueue;
-	ChildQueue.push_back(shared_from_this());
+	ChildQueue.push_back(this/*shared_from_this()*/);
 
 	TqInt NonLeafCount = NumSamples() >= 1 ? 1 : 0;
 
@@ -167,13 +163,19 @@ void CqOcclusionTree::ConstructTree(CqOcclusionTree* parent)
 		// Check if the child actually has any samples, ignore it if no.
 		if( (*jj)->NumSamples() > 0)
 		{
-			(*ii)->ConstructTree(this);
+			*ii = *jj;
+			(*ii)->m_Parent = this/*shared_from_this()*/;
+			if ((*ii)->NumSamples() > 1)
+			{
+				(*ii)->ConstructTree();
+			}
+			++ii;
 		}
 	}
 
 	while (ii != m_Children.end())
 	{
-	    *ii++ = CqOcclusionTreePtr();
+	    *ii++ = 0;//CqOcclusionTreePtr();
 	}
 }
 
@@ -191,8 +193,8 @@ void CqOcclusionTree::InitialiseBounds()
 	TqFloat maxTime = minTime;
 	TqInt	minDofIndex = sample.m_DofOffsetIndex;
 	TqInt	maxDofIndex = minDofIndex;
-	TqFloat	minDetailLevel = sample.m_DetailLevel;
-	TqFloat	maxDetailLevel = minDetailLevel;
+	TqInt	minDetailLevel = sample.m_DetailLevel;
+	TqInt	maxDetailLevel = minDetailLevel;
 	std::vector<std::pair<TqInt, TqInt> >::iterator i;
 	for(i = m_SampleIndices.begin()+1; i!=m_SampleIndices.end(); ++i)
 	{
@@ -281,7 +283,7 @@ void CqOcclusionTree::UpdateBounds()
 
 void CqOcclusionTree::PropagateChanges()
 {
-	CqOcclusionTree* node = this;
+	CqOcclusionTreePtr node = this/*shared_from_this()*/;
 	// Update our opaque depth based on that our our children.
 	while(node)
 	{
@@ -300,7 +302,7 @@ void CqOcclusionTree::PropagateChanges()
 			if(maxdepth < node->m_MaxOpaqueZ)
 			{
 				node->m_MaxOpaqueZ = maxdepth;
-				node = node->m_Parent;
+				node = node->m_Parent/*.lock()*/;
 			}
 			else
 			{
@@ -309,7 +311,7 @@ void CqOcclusionTree::PropagateChanges()
 		}
 		else
 		{
-			node = node->m_Parent;
+			node = node->m_Parent/*.lock()*/;
 		}
 	}
 }
@@ -343,7 +345,7 @@ TqBool CqOcclusionTree::CanCull( CqBound* bound )
 			{
 				if (*childNode)
 				{
-					stack.push_front(childNode->get());
+					stack.push_front(*childNode/*->get()*/);
 				}
 			}
 		}
@@ -427,7 +429,7 @@ void CqOcclusionBox::SetupHierarchy( CqBucket* bucket, TqInt xMin, TqInt yMin, T
 		}
 		// Now split the tree down until each leaf has only one sample.
 		m_KDTree->InitialiseBounds();
-		m_KDTree->ConstructTree(0);
+		m_KDTree->ConstructTree();
 	}
 
 	m_KDTree->UpdateBounds();
