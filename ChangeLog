@@ -1,3 +1,2572 @@
+2005-06-21 09:40  pgregory
+
+	* render/lath.cpp, render/lath.h: Switch laths over to the new,
+	more efficient object pooling system.
+
+2005-06-21 08:35  pgregory
+
+	* render/micropolygon.h: Fix problem with pool allocation change
+	and MB upolys.
+
+2005-06-20 15:09  pgregory
+
+	* libaqsistypes/Makefile.am: Add new pool.h file to the makefile.am 
+2005-06-20 15:01  pgregory
+
+	* libaqsistypes/libaqsistypes.dsp, libaqsistypes/pool.h,
+	libddmanager/ddmanager.cpp, render/micropolygon.cpp,
+	render/micropolygon.h, render/points.cpp, render/points.h: Add a
+	new object pool class based on code from Bjarne Stroustrup's "The
+	C++ Programming Language - Third Edition"
+
+2005-06-20 11:56  pgregory
+
+	* render/occlusion.cpp, render/occlusion.h: Rollback Andrew's
+	change, couldn't get it to work at all, on any files.
+
+2005-06-20 06:46  pseudonym
+
+	* render/occlusion.cpp, render/occlusion.h: Set parent pointers
+	correctly this time.
+
+2005-06-18 07:12  jpgrad
+
+	* libaqsistypes/Makefile.am: - Removed memorypool.h from the
+	autotools build.  Everyone remember to	 do a fresh bootstrap!
+
+2005-06-17 22:46  pgregory
+
+	* libaqsistypes/MultiTimer.h, libaqsistypes/libaqsistypes.dsp,
+	libaqsistypes/memorypool.h, libddmanager/ddmanager.cpp,
+	render/bucket.cpp, render/imagepixel.h, render/kdtree.h,
+	render/lath.cpp, render/lath.h, render/micropolygon.cpp,
+	render/micropolygon.h, render/occlusion.cpp, render/points.cpp,
+	render/points.h, render/renderer.cpp: Remove the old memory pool
+	implementation, replacing it with boost::object_pool.
+
+2005-06-17 17:27  pgregory
+
+	* render/occlusion.cpp, render/occlusion.h: Termporarily fix
+	occlusion culling by removing the shared_ptr stuff.
+
+2005-06-17 16:50  pgregory
+
+	* render/imagebuffer.cpp, render/micropolygon.h,
+	render/occlusion.cpp, render/occlusion.h: Minor optimisations.
+
+2005-06-17 00:46  pseudonym
+
+	* render/occlusion.cpp: Slight cleanup
+
+2005-06-16 16:57  pgregory
+
+	* render/stats.cpp: Fix stats output formatting, std::cout has it's
+	formatting modified by MultiTimer.h
+
+2005-06-16 09:17  pgregory
+
+	* render/occlusion.cpp, render/occlusion.h: Fix an error in the
+	code that constructs the occlusion tree. It was splitting the
+	'curren't node each time, instead of the one popped off the stack.
+
+2005-06-16 07:13  pseudonym
+
+	* render/occlusion.cpp, render/occlusion.h: Replacing weak
+	references with raw pointers.
+
+2005-06-16 06:48  pseudonym
+
+	* render/occlusion.cpp: Try this.
+
+2005-06-16 05:39  pseudonym
+
+	* render/imagebuffer.cpp, render/occlusion.cpp, render/occlusion.h:
+	Whoops again.
+
+2005-06-16 05:32  pseudonym
+
+	* render/occlusion.cpp, render/occlusion.h: Whoops. 
+	weak_ptr.lock() doesn't work if the pointer is null
+
+2005-06-16 04:40  pseudonym
+
+	* render/occlusion.cpp, render/occlusion.h: Improving the way child
+	occlusion nodes are built
+
+2005-06-15 01:10  pseudonym
+
+	* render/occlusion.cpp, render/occlusion.h: Some cleanup, and
+	removing some more assumptions about occlusion tree children.
+
+2005-06-14 23:11  pgregory
+
+	* render/imagebuffer.cpp, render/imagebuffer.h,
+	render/occlusion.cpp, render/occlusion.h: Clean up the kdtree
+	sampling code a little.
+
+2005-06-14 20:43  pgregory
+
+	* render/bucket.cpp, render/occlusion.cpp, render/occlusion.h: Fix
+	the cleanup code to ensure that the bucket structures are properly
+	cleaned up after each frame.
+
+2005-06-14 06:58  pseudonym
+
+	* render/occlusion.h: Stupid non-ANSI-compliant VC6
+
+2005-06-14 06:19  pseudonym
+
+	* render/occlusion.cpp, render/occlusion.h: Attempt to optimise the
+	representation of occlusion node children.
+
+2005-06-13 23:18  pgregory
+
+	* render/bucket.cpp, render/bucket.h, render/imagebuffer.cpp,
+	render/imagepixel.cpp, render/imagepixel.h, render/occlusion.cpp,
+	render/occlusion.h: Break the pointer connection between the
+	bucket/pixel/sample structures and the occlusion tree structures.
+
+2005-06-10 15:53  mw_matti
+
+	* render/micropolygon.cpp, render/stats.h: renamed CqStats::log2 to
+	CqStats::stats_log2 to avoid potential name clashes
+
+2005-06-10 15:50  mw_matti
+
+	* render/stats.h: removed inline comment in line 137
+
+2005-06-10 15:42  mw_matti
+
+	* libshaderexecenv/shadeops.cpp, libshadervm/shaderstack.cpp,
+	libshadervm/shaderstack.h, libshadervm/shadervariable.cpp,
+	libshadervm/shadervariable.h, render/stats.cpp, render/stats.h:
+	removed shading related stats - sorry for adding this
+
+2005-06-10 11:38  cgtobix
+
+	* render/shadowmap.cpp: fixed case sensivity problem with
+	MultiTimer.h
+
+2005-06-10 07:37  pgregory
+
+	* libaqsistypes/MultiTimer.h: Disable clockticks code as I don't
+	think it is reliable on multiprocessor machines.
+
+2005-06-09 22:38  pgregory
+
+	* libaqsistypes/libaqsistypes.dsp, render/imagebuffer.cpp,
+	render/libaqsis.dsp: Fix accidental damage to .dsp files. Fix bug
+	in opacity code.
+
+2005-06-09 16:40  pgregory
+
+	* libaqsistypes/MultiTimer.cpp, libaqsistypes/MultiTimer.h,
+	libaqsistypes/libaqsistypes.dsp, render/bucket.cpp,
+	render/imagebuffer.cpp, render/imagers.cpp, render/libaqsis.dsp,
+	render/micropolygon.cpp, render/points.cpp, render/ri.cpp,
+	render/shadowmap.cpp, render/stats.cpp, render/stats.h,
+	render/texturemap.cpp: Replace the old timer code with MultiTimer
+	from Code Project.
+
+2005-06-09 12:54  pgregory
+
+	* render/bucket.cpp, render/bucket.h, render/imagebuffer.cpp,
+	render/imagepixel.cpp, render/imagepixel.h, render/occlusion.cpp:
+	Reorganise the initialisation/preparation of bucket data. Improves
+	the speed by doing less for each bucket, and makes things a little
+	clearer by use of more appropriate function naming.
+
+2005-06-08 07:29  pgregory
+
+	* libshadervm/shadervariable.h, render/imagebuffer.cpp,
+	render/micropolygon.h, render/mpdump.cpp, render/occlusion.cpp,
+	render/points.cpp, render/points.h: Minor optimisations
+
+2005-06-06 23:22  pgregory
+
+	* render/bound.h, render/occlusion.cpp, render/occlusion.h:
+	Re-implement primitive level occlusion culling. Not sure if it is
+	working properly yet as the culled numbers don't match 1.0. Needs
+	investigation.
+
+2005-06-03 16:05  pgregory
+
+	* render/occlusion.cpp: Fix error in teardown of occlusion tree.
+
+2005-06-03 15:12  pgregory
+
+	* render/imagebuffer.cpp, render/imagebuffer.h,
+	render/occlusion.cpp, render/occlusion.h: Replace the obscure
+	CqKDTree based occlusion tree with a custom specific class that
+	does the same job, neater and more efficiently.
+
+2005-06-02 12:41  pgregory
+
+	* libddmanager/ddmanager.cpp, render/bucket.cpp,
+	render/imagebuffer.cpp, render/imagepixel.cpp, render/imagepixel.h:
+	Refactor sample storage strategy, now uses a custom memory pool for
+	data storage to avoid construction of std::valarray's. Slightly
+	faster.
+
+2005-06-01 17:14  pgregory
+
+	* render/imagebuffer.cpp: Initial preparation for a refactor of the
+	sample storage code.
+
+2005-06-01 16:39  pgregory
+
+	* render/imagebuffer.cpp, render/imagebuffer.h,
+	render/imagepixel.cpp, render/imagepixel.h: Initial preparation for
+	a refactor of the sample storage code.
+
+2005-06-01 15:46  pgregory
+
+	* render/bucket.cpp, render/imagepixel.h: Initial preparation for a
+	refactor of the sample storage code.
+
+2005-06-01 15:10  cgtobix
+
+	* display/display.cpp: Fixed the __stuff.
+
+2005-06-01 15:00  pgregory
+
+	* render/bucket.cpp, render/bucket.h, render/iddmanager.h,
+	render/imagebuffer.cpp, render/imagepixel.cpp, render/imagepixel.h:
+	Initial preparation for a refactor of the sample storage code.
+
+2005-06-01 10:18  minty
+
+	* configure.ac: More fixes for --with-profiling, fingers crossed
+
+2005-05-31 15:49  minty
+
+	* m4/aqsis_with_plugins.m4: Fix an apparent corruption that caused
+	profiling to get enabled.
+
+2005-05-26 22:10  pgregory
+
+	* display/display.cpp: Fix the code that displays the filename and
+	progress to the framebuffer window title. Fixed length array's are
+	*EVIL*
+
+2005-05-12 09:04  minty
+
+	* configure.ac: Fix with-profiling again.
+
+2005-05-12 06:56  cgtobix
+
+	* display/display.cpp: Changed __xmin to xmin__ same for the other
+	__variables
+
+2005-05-11 13:12  minty
+
+	* configure.ac, m4/aqsis_with_profiling.m4: Make --with-profiling
+	produce a useable, profileable binary.
+
+2005-05-04 14:02  pgregory
+
+	* render/imagebuffer.h, render/imagepixel.cpp, render/imagepixel.h,
+	render/occlusion.cpp, render/occlusion.h: Rip out the old sampling
+	code, now it is new KDTree based sampling all the way. Make tga2tif
+	depend on jpeg2tif as it uses it to convert JPG encoded TGA files.
+
+2005-05-04 14:01  pgregory
+
+	* Renderer.dsw, render/bucket.cpp, render/bucket.h,
+	render/imagebuffer.cpp: Rip out the old sampling code, now it is
+	new KDTree based sampling all the way. Make tga2tif depend on
+	jpeg2tif as it uses it to convert JPG encoded TGA files.
+
+2005-04-26 00:51  joron
+
+	* display/display.cpp: 
+	
+	I was very attached to the percentage while rendering vase.rib in
+	the title.
+	
+	I put it back.
+
+2005-04-25 16:19  mw_matti
+
+	* Renderer.sln, display/display.vcproj,
+	libddmanager/libddmanager.vcproj, libraytrace/libraytrace.vcproj,
+	libshaderexecenv/libshaderexecenv.vcproj,
+	libshadervm/libshadervm.vcproj, libslxargs/libslxargs.vcproj,
+	plugins/tga2tif/tga2tif.vcproj, render/libaqsis.vcproj: updated 7.1
+	build files * Note: tga2tif links now to jpg2tif
+
+2005-04-22 11:40  joron
+
+	* display/display.cpp, display/display.h: 
+	
+	Save into the tiff image (for shadowmap and final tiff output) the
+	description field, hostname used to create the files. if the user
+	passes a string description to the display it will be used if not
+	than the number of seconds will be stored.
+	
+	fix the problem with flag so the bucket are displayed each time the
+	bucket are finished. the flag was not init.
+
+2005-04-21 16:54  pgregory
+
+	* examples/capi/simpleritest.c, examples/capi/vase.dsp,
+	examples/capi/vase.dsw, examples/capi/vase_ribout.dsp,
+	examples/capi/vase/simpleritest.c, examples/capi/vase/vase.dsp,
+	examples/capi/vase/vase.dsw, examples/capi/vase/vase_ribout.dsp:
+	Moved the vase sample into it's own folder.
+
+2005-04-21 16:49  pgregory
+
+	* examples/capi/simpleritest.c, examples/capi/vase.dsp,
+	examples/capi/vase.dsw, examples/capi/vase_ribout.dsp: Added a
+	simple usage example for the C api.
+
+2005-04-21 10:04  pgregory
+
+	* boost/boost/spirit/core/primitives/impl/.cvsignore,
+	boost/boost/spirit/core/primitives/impl/Makefile.am,
+	boost/boost/spirit/core/primitives/impl/numerics.ipp,
+	boost/boost/spirit/core/primitives/impl/primitives.ipp,
+	boost/boost/spirit/core/scanner/.cvsignore,
+	boost/boost/spirit/core/scanner/Makefile.am,
+	boost/boost/spirit/core/scanner/scanner.hpp,
+	boost/boost/spirit/core/scanner/skipper.hpp,
+	boost/boost/spirit/core/scanner/impl/.cvsignore,
+	boost/boost/spirit/core/scanner/impl/Makefile.am,
+	boost/boost/spirit/core/scanner/impl/skipper.ipp,
+	boost/boost/spirit/debug/.cvsignore,
+	boost/boost/spirit/debug/Makefile.am,
+	boost/boost/spirit/debug/debug_node.hpp,
+	boost/boost/spirit/debug/minimal.hpp,
+	boost/boost/spirit/debug/parser_names.hpp,
+	boost/boost/spirit/debug/impl/.cvsignore,
+	boost/boost/spirit/debug/impl/Makefile.am,
+	boost/boost/spirit/debug/impl/parser_names.ipp,
+	boost/boost/spirit/dyic/.cvsignore,
+	boost/boost/spirit/dyic/Makefile.am,
+	boost/boost/spirit/dyic/impl/.cvsignore,
+	boost/boost/spirit/dyic/impl/Makefile.am,
+	boost/boost/spirit/dynamic/.cvsignore,
+	boost/boost/spirit/dynamic/Makefile.am,
+	boost/boost/spirit/dynamic/for.hpp,
+	boost/boost/spirit/dynamic/if.hpp,
+	boost/boost/spirit/dynamic/while.hpp,
+	boost/boost/spirit/dynamic/impl/.cvsignore,
+	boost/boost/spirit/dynamic/impl/Makefile.am,
+	boost/boost/spirit/dynamic/impl/conditions.ipp,
+	boost/boost/spirit/error_handling/.cvsignore,
+	boost/boost/spirit/error_handling/Makefile.am,
+	boost/boost/spirit/error_handling/exceptions.hpp,
+	boost/boost/spirit/error_handling/impl/.cvsignore,
+	boost/boost/spirit/error_handling/impl/Makefile.am,
+	boost/boost/spirit/error_handling/impl/exceptions.ipp,
+	boost/boost/spirit/iterator/.cvsignore,
+	boost/boost/spirit/iterator/Makefile.am,
+	boost/boost/spirit/iterator/file_iterator.hpp,
+	boost/boost/spirit/iterator/fixed_size_queue.hpp,
+	boost/boost/spirit/iterator/multi_pass.hpp,
+	boost/boost/spirit/iterator/position_iterator.hpp,
+	boost/boost/spirit/iterator/impl/.cvsignore,
+	boost/boost/spirit/iterator/impl/Makefile.am,
+	boost/boost/spirit/iterator/impl/file_iterator.ipp,
+	boost/boost/spirit/phoenix/.cvsignore,
+	boost/boost/spirit/phoenix/Makefile.am,
+	boost/boost/spirit/phoenix/actor.hpp,
+	boost/boost/spirit/phoenix/binders.hpp,
+	boost/boost/spirit/phoenix/casts.hpp,
+	boost/boost/spirit/phoenix/closures.hpp,
+	boost/boost/spirit/phoenix/composite.hpp,
+	boost/boost/spirit/phoenix/functions.hpp,
+	boost/boost/spirit/phoenix/operators.hpp,
+	boost/boost/spirit/phoenix/primitives.hpp,
+	boost/boost/spirit/phoenix/special_ops.hpp,
+	boost/boost/spirit/phoenix/statements.hpp,
+	boost/boost/spirit/phoenix/tuple_helpers.hpp,
+	boost/boost/spirit/phoenix/tuples.hpp,
+	boost/boost/spirit/symbols/.cvsignore,
+	boost/boost/spirit/symbols/Makefile.am,
+	boost/boost/spirit/symbols/symbols.hpp,
+	boost/boost/spirit/symbols/impl/.cvsignore,
+	boost/boost/spirit/symbols/impl/Makefile.am,
+	boost/boost/spirit/symbols/impl/symbols.ipp,
+	boost/boost/spirit/symbols/impl/tst.ipp,
+	boost/boost/spirit/tree/.cvsignore,
+	boost/boost/spirit/tree/Makefile.am,
+	boost/boost/spirit/tree/ast.hpp,
+	boost/boost/spirit/tree/common.hpp,
+	boost/boost/spirit/tree/parse_tree.hpp,
+	boost/boost/spirit/tree/parse_tree_utils.hpp,
+	boost/boost/spirit/tree/parsetree.dtd,
+	boost/boost/spirit/tree/tree_iterator.hpp,
+	boost/boost/spirit/tree/tree_to_xml.hpp,
+	boost/boost/spirit/tree/impl/.cvsignore,
+	boost/boost/spirit/tree/impl/Makefile.am,
+	boost/boost/spirit/tree/impl/parse_tree_utils.ipp,
+	boost/boost/spirit/tree/impl/tree_to_xml.ipp,
+	boost/boost/spirit/utility/.cvsignore,
+	boost/boost/spirit/utility/Makefile.am,
+	boost/boost/spirit/utility/chset.hpp,
+	boost/boost/spirit/utility/chset_operators.hpp,
+	boost/boost/spirit/utility/confix.hpp,
+	boost/boost/spirit/utility/escape_char.hpp,
+	boost/boost/spirit/utility/flush_multi_pass.hpp,
+	boost/boost/spirit/utility/functor_parser.hpp,
+	boost/boost/spirit/utility/lists.hpp,
+	boost/boost/spirit/utility/loops.hpp,
+	boost/boost/spirit/utility/refactoring.hpp,
+	boost/boost/spirit/utility/regex.hpp,
+	boost/boost/spirit/utility/scoped_lock.hpp,
+	boost/boost/spirit/utility/impl/.cvsignore,
+	boost/boost/spirit/utility/impl/Makefile.am,
+	boost/boost/spirit/utility/impl/chset.ipp,
+	boost/boost/spirit/utility/impl/chset_operators.ipp,
+	boost/boost/spirit/utility/impl/confix.ipp,
+	boost/boost/spirit/utility/impl/escape_char.ipp,
+	boost/boost/spirit/utility/impl/lists.ipp,
+	boost/boost/spirit/utility/impl/refactoring.ipp,
+	boost/boost/spirit/utility/impl/regex.ipp,
+	boost/boost/spirit/utility/impl/chset/.cvsignore,
+	boost/boost/spirit/utility/impl/chset/Makefile.am,
+	boost/boost/spirit/utility/impl/chset/basic_chset.hpp,
+	boost/boost/spirit/utility/impl/chset/basic_chset.ipp,
+	boost/boost/spirit/utility/impl/chset/range_run.hpp,
+	boost/boost/spirit/utility/impl/chset/range_run.ipp,
+	boost/boost/thread/.cvsignore, boost/boost/thread/Makefile.am,
+	boost/boost/thread/condition.hpp,
+	boost/boost/thread/exceptions.hpp, boost/boost/thread/mutex.hpp,
+	boost/boost/thread/once.hpp,
+	boost/boost/thread/recursive_mutex.hpp,
+	boost/boost/thread/thread.hpp, boost/boost/thread/tss.hpp,
+	boost/boost/thread/xtime.hpp, boost/boost/thread/detail/.cvsignore,
+	boost/boost/thread/detail/Makefile.am,
+	boost/boost/thread/detail/config.hpp,
+	boost/boost/thread/detail/force_cast.hpp,
+	boost/boost/thread/detail/lock.hpp,
+	boost/boost/thread/detail/singleton.hpp,
+	boost/boost/thread/detail/threadmon.hpp,
+	boost/boost/tuple/.cvsignore, boost/boost/tuple/Makefile.am,
+	boost/boost/tuple/tuple.hpp,
+	boost/boost/tuple/tuple_comparison.hpp,
+	boost/boost/tuple/tuple_io.hpp,
+	boost/boost/tuple/detail/.cvsignore,
+	boost/boost/tuple/detail/Makefile.am,
+	boost/boost/tuple/detail/tuple_basic.hpp,
+	boost/boost/tuple/detail/tuple_basic_no_partial_spec.hpp,
+	boost/boost/type_traits/.cvsignore,
+	boost/boost/type_traits/Makefile.am,
+	boost/boost/type_traits/add_const.hpp,
+	boost/boost/type_traits/add_cv.hpp,
+	boost/boost/type_traits/add_pointer.hpp,
+	boost/boost/type_traits/add_reference.hpp,
+	boost/boost/type_traits/add_volatile.hpp,
+	boost/boost/type_traits/alignment_of.hpp,
+	boost/boost/type_traits/alignment_traits.hpp,
+	boost/boost/type_traits/arithmetic_traits.hpp,
+	boost/boost/type_traits/array_traits.hpp,
+	boost/boost/type_traits/broken_compiler_spec.hpp,
+	boost/boost/type_traits/composite_traits.hpp,
+	boost/boost/type_traits/config.hpp,
+	boost/boost/type_traits/conversion_traits.hpp,
+	boost/boost/type_traits/cv_traits.hpp,
+	boost/boost/type_traits/function_traits.hpp,
+	boost/boost/type_traits/has_nothrow_assign.hpp,
+	boost/boost/type_traits/has_nothrow_constructor.hpp,
+	boost/boost/type_traits/has_nothrow_copy.hpp,
+	boost/boost/type_traits/has_nothrow_destructor.hpp,
+	boost/boost/type_traits/has_trivial_assign.hpp,
+	boost/boost/type_traits/has_trivial_constructor.hpp,
+	boost/boost/type_traits/has_trivial_copy.hpp,
+	boost/boost/type_traits/has_trivial_destructor.hpp,
+	boost/boost/type_traits/ice.hpp,
+	boost/boost/type_traits/intrinsics.hpp,
+	boost/boost/type_traits/is_arithmetic.hpp,
+	boost/boost/type_traits/is_array.hpp,
+	boost/boost/type_traits/is_base_and_derived.hpp,
+	boost/boost/type_traits/is_class.hpp,
+	boost/boost/type_traits/is_compound.hpp,
+	boost/boost/type_traits/is_const.hpp,
+	boost/boost/type_traits/is_convertible.hpp,
+	boost/boost/type_traits/is_empty.hpp,
+	boost/boost/type_traits/is_enum.hpp,
+	boost/boost/type_traits/is_float.hpp,
+	boost/boost/type_traits/is_function.hpp,
+	boost/boost/type_traits/is_fundamental.hpp,
+	boost/boost/type_traits/is_integral.hpp,
+	boost/boost/type_traits/is_member_function_pointer.hpp,
+	boost/boost/type_traits/is_member_pointer.hpp,
+	boost/boost/type_traits/is_object.hpp,
+	boost/boost/type_traits/is_pod.hpp,
+	boost/boost/type_traits/is_pointer.hpp,
+	boost/boost/type_traits/is_polymorphic.hpp,
+	boost/boost/type_traits/is_reference.hpp,
+	boost/boost/type_traits/is_same.hpp,
+	boost/boost/type_traits/is_scalar.hpp,
+	boost/boost/type_traits/is_stateless.hpp,
+	boost/boost/type_traits/is_union.hpp,
+	boost/boost/type_traits/is_void.hpp,
+	boost/boost/type_traits/is_volatile.hpp,
+	boost/boost/type_traits/object_traits.hpp,
+	boost/boost/type_traits/reference_traits.hpp,
+	boost/boost/type_traits/remove_bounds.hpp,
+	boost/boost/type_traits/remove_const.hpp,
+	boost/boost/type_traits/remove_cv.hpp,
+	boost/boost/type_traits/remove_pointer.hpp,
+	boost/boost/type_traits/remove_reference.hpp,
+	boost/boost/type_traits/remove_volatile.hpp,
+	boost/boost/type_traits/same_traits.hpp,
+	boost/boost/type_traits/transform_traits.hpp,
+	boost/boost/type_traits/transform_traits_spec.hpp,
+	boost/boost/type_traits/type_traits_test.hpp,
+	boost/boost/type_traits/type_with_alignment.hpp,
+	boost/boost/type_traits/detail/.cvsignore,
+	boost/boost/type_traits/detail/Makefile.am,
+	boost/boost/type_traits/detail/bool_trait_def.hpp,
+	boost/boost/type_traits/detail/bool_trait_undef.hpp,
+	boost/boost/type_traits/detail/cv_traits_impl.hpp,
+	boost/boost/type_traits/detail/false_result.hpp,
+	boost/boost/type_traits/detail/ice_and.hpp,
+	boost/boost/type_traits/detail/ice_eq.hpp,
+	boost/boost/type_traits/detail/ice_not.hpp,
+	boost/boost/type_traits/detail/ice_or.hpp,
+	boost/boost/type_traits/detail/is_function_ptr_helper.hpp,
+	boost/boost/type_traits/detail/is_function_ptr_tester.hpp,
+	boost/boost/type_traits/detail/is_function_type_tester.hpp,
+	boost/boost/type_traits/detail/is_mem_fun_pointer_impl.hpp,
+	boost/boost/type_traits/detail/is_mem_fun_pointer_tester.hpp,
+	boost/boost/type_traits/detail/size_t_trait_def.hpp,
+	boost/boost/type_traits/detail/size_t_trait_undef.hpp,
+	boost/boost/type_traits/detail/template_arity_spec.hpp,
+	boost/boost/type_traits/detail/type_trait_def.hpp,
+	boost/boost/type_traits/detail/type_trait_undef.hpp,
+	boost/boost/type_traits/detail/wrap.hpp,
+	boost/boost/type_traits/detail/yes_no_type.hpp,
+	boost/boost/utility/.cvsignore, boost/boost/utility/Makefile.am,
+	boost/boost/utility/addressof.hpp,
+	boost/boost/utility/base_from_member.hpp,
+	boost/boost/utility/value_init.hpp, boost/libs/.cvsignore,
+	boost/libs/Makefile.am, boost/libs/filesystem/.cvsignore,
+	boost/libs/filesystem/Makefile.am,
+	boost/libs/filesystem/src/.cvsignore,
+	boost/libs/filesystem/src/Makefile.am,
+	boost/libs/filesystem/src/convenience.cpp,
+	boost/libs/filesystem/src/exception.cpp,
+	boost/libs/filesystem/src/operations_posix_windows.cpp,
+	boost/libs/filesystem/src/path_posix_windows.cpp,
+	boost/libs/mpl/.cvsignore, boost/libs/mpl/Makefile.am,
+	boost/libs/mpl/preprocessed/.cvsignore,
+	boost/libs/mpl/preprocessed/Makefile.am,
+	boost/libs/mpl/preprocessed/pp.py,
+	boost/libs/mpl/preprocessed/list/.cvsignore,
+	boost/libs/mpl/preprocessed/list/Makefile.am,
+	boost/libs/mpl/preprocessed/list/list10.cpp,
+	boost/libs/mpl/preprocessed/list/list10_c.cpp,
+	boost/libs/mpl/preprocessed/list/list20.cpp,
+	boost/libs/mpl/preprocessed/list/list20_c.cpp,
+	boost/libs/mpl/preprocessed/list/list30.cpp,
+	boost/libs/mpl/preprocessed/list/list30_c.cpp,
+	boost/libs/mpl/preprocessed/list/list40.cpp,
+	boost/libs/mpl/preprocessed/list/list40_c.cpp,
+	boost/libs/mpl/preprocessed/list/list50.cpp,
+	boost/libs/mpl/preprocessed/list/list50_c.cpp,
+	boost/libs/mpl/preprocessed/src/.cvsignore,
+	boost/libs/mpl/preprocessed/src/Makefile.am,
+	boost/libs/mpl/preprocessed/src/advance_backward.cpp,
+	boost/libs/mpl/preprocessed/src/advance_forward.cpp,
+	boost/libs/mpl/preprocessed/src/and.cpp,
+	boost/libs/mpl/preprocessed/src/apply.cpp,
+	boost/libs/mpl/preprocessed/src/arg.cpp,
+	boost/libs/mpl/preprocessed/src/basic_bind.cpp,
+	boost/libs/mpl/preprocessed/src/bind.cpp,
+	boost/libs/mpl/preprocessed/src/fold_backward_impl.cpp,
+	boost/libs/mpl/preprocessed/src/fold_impl.cpp,
+	boost/libs/mpl/preprocessed/src/full_lambda.cpp,
+	boost/libs/mpl/preprocessed/src/iter_fold_backward_impl.cpp,
+	boost/libs/mpl/preprocessed/src/iter_fold_if_impl.cpp,
+	boost/libs/mpl/preprocessed/src/iter_fold_impl.cpp,
+	boost/libs/mpl/preprocessed/src/lambda_helper.cpp,
+	boost/libs/mpl/preprocessed/src/lambda_no_ctps.cpp,
+	boost/libs/mpl/preprocessed/src/list.cpp,
+	boost/libs/mpl/preprocessed/src/list_c.cpp,
+	boost/libs/mpl/preprocessed/src/or.cpp,
+	boost/libs/mpl/preprocessed/src/placeholders.cpp,
+	boost/libs/mpl/preprocessed/src/quote.cpp,
+	boost/libs/mpl/preprocessed/src/template_arity.cpp,
+	boost/libs/mpl/preprocessed/src/vector.cpp,
+	boost/libs/mpl/preprocessed/src/vector_c.cpp,
+	boost/libs/mpl/preprocessed/vector/.cvsignore,
+	boost/libs/mpl/preprocessed/vector/Makefile.am,
+	boost/libs/mpl/preprocessed/vector/vector10.cpp,
+	boost/libs/mpl/preprocessed/vector/vector10_c.cpp,
+	boost/libs/mpl/preprocessed/vector/vector20.cpp,
+	boost/libs/mpl/preprocessed/vector/vector20_c.cpp,
+	boost/libs/mpl/preprocessed/vector/vector30.cpp,
+	boost/libs/mpl/preprocessed/vector/vector30_c.cpp,
+	boost/libs/mpl/preprocessed/vector/vector40.cpp,
+	boost/libs/mpl/preprocessed/vector/vector40_c.cpp,
+	boost/libs/mpl/preprocessed/vector/vector50.cpp,
+	boost/libs/mpl/preprocessed/vector/vector50_c.cpp,
+	boost/libs/regex/.cvsignore, boost/libs/regex/Makefile.am,
+	boost/libs/regex/licence.txt, boost/libs/regex/src/.cvsignore,
+	boost/libs/regex/src/Makefile.am,
+	boost/libs/regex/src/c_regex_traits.cpp,
+	boost/libs/regex/src/c_regex_traits_common.cpp,
+	boost/libs/regex/src/cpp_regex_traits.cpp,
+	boost/libs/regex/src/cregex.cpp, boost/libs/regex/src/fileiter.cpp,
+	boost/libs/regex/src/instances.cpp,
+	boost/libs/regex/src/posix_api.cpp,
+	boost/libs/regex/src/primary_transform.hpp,
+	boost/libs/regex/src/regex.cpp,
+	boost/libs/regex/src/regex_debug.cpp,
+	boost/libs/regex/src/regex_synch.cpp,
+	boost/libs/regex/src/w32_regex_traits.cpp,
+	boost/libs/regex/src/wide_posix_api.cpp,
+	boost/libs/regex/src/winstances.cpp, boost/libs/thread/.cvsignore,
+	boost/libs/thread/Makefile.am, boost/libs/thread/thread.dsp,
+	boost/libs/thread/src/.cvsignore,
+	boost/libs/thread/src/Makefile.am,
+	boost/libs/thread/src/condition.cpp,
+	boost/libs/thread/src/exceptions.cpp,
+	boost/libs/thread/src/mutex.cpp, boost/libs/thread/src/once.cpp,
+	boost/libs/thread/src/recursive_mutex.cpp,
+	boost/libs/thread/src/thread.cpp,
+	boost/libs/thread/src/threadmon.cpp,
+	boost/libs/thread/src/timeconv.inl, boost/libs/thread/src/tss.cpp,
+	boost/libs/thread/src/xtime.cpp,
+	boost/libs/thread/src/mac/.cvsignore,
+	boost/libs/thread/src/mac/Makefile.am,
+	boost/libs/thread/src/mac/debug_prefix.hpp,
+	boost/libs/thread/src/mac/delivery_man.cpp,
+	boost/libs/thread/src/mac/delivery_man.hpp,
+	boost/libs/thread/src/mac/dt_scheduler.cpp,
+	boost/libs/thread/src/mac/dt_scheduler.hpp,
+	boost/libs/thread/src/mac/execution_context.cpp,
+	boost/libs/thread/src/mac/execution_context.hpp,
+	boost/libs/thread/src/mac/init.cpp,
+	boost/libs/thread/src/mac/init.hpp,
+	boost/libs/thread/src/mac/os.cpp, boost/libs/thread/src/mac/os.hpp,
+	boost/libs/thread/src/mac/ot_context.cpp,
+	boost/libs/thread/src/mac/ot_context.hpp,
+	boost/libs/thread/src/mac/package.hpp,
+	boost/libs/thread/src/mac/periodical.hpp,
+	boost/libs/thread/src/mac/prefix.hpp,
+	boost/libs/thread/src/mac/remote_call_manager.cpp,
+	boost/libs/thread/src/mac/remote_call_manager.hpp,
+	boost/libs/thread/src/mac/remote_calls.hpp,
+	boost/libs/thread/src/mac/safe.cpp,
+	boost/libs/thread/src/mac/safe.hpp,
+	boost/libs/thread/src/mac/scoped_critical_region.cpp,
+	boost/libs/thread/src/mac/scoped_critical_region.hpp,
+	boost/libs/thread/src/mac/st_scheduler.cpp,
+	boost/libs/thread/src/mac/st_scheduler.hpp,
+	boost/libs/thread/src/mac/thread_cleanup.cpp,
+	boost/libs/thread/src/mac/thread_cleanup.hpp,
+	boost/libs/thread/src/mac/msl_replacements/.cvsignore,
+	boost/libs/thread/src/mac/msl_replacements/Makefile.am,
+	boost/libs/thread/src/mac/msl_replacements/assert.cpp,
+	boost/libs/thread/src/mac/msl_replacements/console_io.cpp,
+	boost/libs/thread/src/mac/msl_replacements/malloc.cpp,
+	boost/libs/thread/src/mac/msl_replacements/news_and_deletes.cpp,
+	boost/libs/thread/src/mac/msl_replacements/time.cpp: Remove old
+	boost source from the source tree.
+
+2005-04-21 04:21  joron
+
+	* render/occlusion.h: 
+	
+	Fix croptest.rib from the regression test suite.
+
+2005-04-20 14:23  minty
+
+	* INSTALL: Added boost download location to INSTALL
+
+2005-04-20 11:22  pgregory
+
+	* display/display.dsp, libddmanager/libddmanager.dsp,
+	libraytrace/libraytrace.dsp, libshaderexecenv/libshaderexecenv.dsp,
+	libshadervm/libshadervm.dsp, libslxargs/libslxargs.dsp,
+	render/bucket.cpp, render/libaqsis.dsp: Modify the project files to
+	remove the reference to the old boost source. DevStudio will now
+	have to have the locally installed boost in it's include
+	directories path.
+
+2005-04-20 11:05  pgregory
+
+	* boost/boost/spirit/core/primitives/numerics.hpp,
+	boost/boost/spirit/core/primitives/primitives.hpp: Remove boost
+	from source tree.
+
+2005-04-20 10:59  pgregory
+
+	* boost/boost/mpl/aux_/preprocessed/msvc60/.cvsignore,
+	boost/boost/mpl/aux_/preprocessed/msvc60/Makefile.am,
+	boost/boost/mpl/aux_/preprocessed/msvc60/advance_backward.hpp,
+	boost/boost/mpl/aux_/preprocessed/msvc60/advance_forward.hpp,
+	boost/boost/mpl/aux_/preprocessed/msvc60/and.hpp,
+	boost/boost/mpl/aux_/preprocessed/msvc60/apply.hpp,
+	boost/boost/mpl/aux_/preprocessed/msvc60/arg.hpp,
+	boost/boost/mpl/aux_/preprocessed/msvc60/basic_bind.hpp,
+	boost/boost/mpl/aux_/preprocessed/msvc60/bind.hpp,
+	boost/boost/mpl/aux_/preprocessed/msvc60/fold_backward_impl.hpp,
+	boost/boost/mpl/aux_/preprocessed/msvc60/fold_impl.hpp,
+	boost/boost/mpl/aux_/preprocessed/msvc60/full_lambda.hpp,
+	boost/boost/mpl/aux_/preprocessed/msvc60/iter_fold_backward_impl.hp
+	p, boost/boost/mpl/aux_/preprocessed/msvc60/iter_fold_if_impl.hpp,
+	boost/boost/mpl/aux_/preprocessed/msvc60/iter_fold_impl.hpp,
+	boost/boost/mpl/aux_/preprocessed/msvc60/lambda_helper.hpp,
+	boost/boost/mpl/aux_/preprocessed/msvc60/lambda_no_ctps.hpp,
+	boost/boost/mpl/aux_/preprocessed/msvc60/list.hpp,
+	boost/boost/mpl/aux_/preprocessed/msvc60/list_c.hpp,
+	boost/boost/mpl/aux_/preprocessed/msvc60/or.hpp,
+	boost/boost/mpl/aux_/preprocessed/msvc60/placeholders.hpp,
+	boost/boost/mpl/aux_/preprocessed/msvc60/quote.hpp,
+	boost/boost/mpl/aux_/preprocessed/msvc60/template_arity.hpp,
+	boost/boost/mpl/aux_/preprocessed/msvc60/vector.hpp,
+	boost/boost/mpl/aux_/preprocessed/msvc60/vector_c.hpp,
+	boost/boost/mpl/aux_/preprocessed/msvc70/.cvsignore,
+	boost/boost/mpl/aux_/preprocessed/msvc70/Makefile.am,
+	boost/boost/mpl/aux_/preprocessed/msvc70/advance_backward.hpp,
+	boost/boost/mpl/aux_/preprocessed/msvc70/advance_forward.hpp,
+	boost/boost/mpl/aux_/preprocessed/msvc70/and.hpp,
+	boost/boost/mpl/aux_/preprocessed/msvc70/apply.hpp,
+	boost/boost/mpl/aux_/preprocessed/msvc70/arg.hpp,
+	boost/boost/mpl/aux_/preprocessed/msvc70/basic_bind.hpp,
+	boost/boost/mpl/aux_/preprocessed/msvc70/bind.hpp,
+	boost/boost/mpl/aux_/preprocessed/msvc70/fold_backward_impl.hpp,
+	boost/boost/mpl/aux_/preprocessed/msvc70/fold_impl.hpp,
+	boost/boost/mpl/aux_/preprocessed/msvc70/full_lambda.hpp,
+	boost/boost/mpl/aux_/preprocessed/msvc70/iter_fold_backward_impl.hp
+	p, boost/boost/mpl/aux_/preprocessed/msvc70/iter_fold_if_impl.hpp,
+	boost/boost/mpl/aux_/preprocessed/msvc70/iter_fold_impl.hpp,
+	boost/boost/mpl/aux_/preprocessed/msvc70/lambda_helper.hpp,
+	boost/boost/mpl/aux_/preprocessed/msvc70/lambda_no_ctps.hpp,
+	boost/boost/mpl/aux_/preprocessed/msvc70/list.hpp,
+	boost/boost/mpl/aux_/preprocessed/msvc70/list_c.hpp,
+	boost/boost/mpl/aux_/preprocessed/msvc70/or.hpp,
+	boost/boost/mpl/aux_/preprocessed/msvc70/placeholders.hpp,
+	boost/boost/mpl/aux_/preprocessed/msvc70/quote.hpp,
+	boost/boost/mpl/aux_/preprocessed/msvc70/template_arity.hpp,
+	boost/boost/mpl/aux_/preprocessed/msvc70/vector.hpp,
+	boost/boost/mpl/aux_/preprocessed/msvc70/vector_c.hpp,
+	boost/boost/mpl/aux_/preprocessed/mwcw/.cvsignore,
+	boost/boost/mpl/aux_/preprocessed/mwcw/Makefile.am,
+	boost/boost/mpl/aux_/preprocessed/mwcw/advance_backward.hpp,
+	boost/boost/mpl/aux_/preprocessed/mwcw/advance_forward.hpp,
+	boost/boost/mpl/aux_/preprocessed/mwcw/and.hpp,
+	boost/boost/mpl/aux_/preprocessed/mwcw/apply.hpp,
+	boost/boost/mpl/aux_/preprocessed/mwcw/arg.hpp,
+	boost/boost/mpl/aux_/preprocessed/mwcw/basic_bind.hpp,
+	boost/boost/mpl/aux_/preprocessed/mwcw/bind.hpp,
+	boost/boost/mpl/aux_/preprocessed/mwcw/fold_backward_impl.hpp,
+	boost/boost/mpl/aux_/preprocessed/mwcw/fold_impl.hpp,
+	boost/boost/mpl/aux_/preprocessed/mwcw/full_lambda.hpp,
+	boost/boost/mpl/aux_/preprocessed/mwcw/iter_fold_backward_impl.hpp,
+	boost/boost/mpl/aux_/preprocessed/mwcw/iter_fold_if_impl.hpp,
+	boost/boost/mpl/aux_/preprocessed/mwcw/iter_fold_impl.hpp,
+	boost/boost/mpl/aux_/preprocessed/mwcw/lambda_helper.hpp,
+	boost/boost/mpl/aux_/preprocessed/mwcw/lambda_no_ctps.hpp,
+	boost/boost/mpl/aux_/preprocessed/mwcw/list.hpp,
+	boost/boost/mpl/aux_/preprocessed/mwcw/list_c.hpp,
+	boost/boost/mpl/aux_/preprocessed/mwcw/or.hpp,
+	boost/boost/mpl/aux_/preprocessed/mwcw/placeholders.hpp,
+	boost/boost/mpl/aux_/preprocessed/mwcw/quote.hpp,
+	boost/boost/mpl/aux_/preprocessed/mwcw/template_arity.hpp,
+	boost/boost/mpl/aux_/preprocessed/mwcw/vector.hpp,
+	boost/boost/mpl/aux_/preprocessed/mwcw/vector_c.hpp,
+	boost/boost/mpl/aux_/preprocessed/no_ctps/.cvsignore,
+	boost/boost/mpl/aux_/preprocessed/no_ctps/Makefile.am,
+	boost/boost/mpl/aux_/preprocessed/no_ctps/advance_backward.hpp,
+	boost/boost/mpl/aux_/preprocessed/no_ctps/advance_forward.hpp,
+	boost/boost/mpl/aux_/preprocessed/no_ctps/and.hpp,
+	boost/boost/mpl/aux_/preprocessed/no_ctps/apply.hpp,
+	boost/boost/mpl/aux_/preprocessed/no_ctps/arg.hpp,
+	boost/boost/mpl/aux_/preprocessed/no_ctps/basic_bind.hpp,
+	boost/boost/mpl/aux_/preprocessed/no_ctps/bind.hpp,
+	boost/boost/mpl/aux_/preprocessed/no_ctps/fold_backward_impl.hpp,
+	boost/boost/mpl/aux_/preprocessed/no_ctps/fold_impl.hpp,
+	boost/boost/mpl/aux_/preprocessed/no_ctps/full_lambda.hpp,
+	boost/boost/mpl/aux_/preprocessed/no_ctps/iter_fold_backward_impl.h
+	pp,
+	boost/boost/mpl/aux_/preprocessed/no_ctps/iter_fold_if_impl.hpp,
+	boost/boost/mpl/aux_/preprocessed/no_ctps/iter_fold_impl.hpp,
+	boost/boost/mpl/aux_/preprocessed/no_ctps/lambda_helper.hpp,
+	boost/boost/mpl/aux_/preprocessed/no_ctps/lambda_no_ctps.hpp,
+	boost/boost/mpl/aux_/preprocessed/no_ctps/list.hpp,
+	boost/boost/mpl/aux_/preprocessed/no_ctps/list_c.hpp,
+	boost/boost/mpl/aux_/preprocessed/no_ctps/or.hpp,
+	boost/boost/mpl/aux_/preprocessed/no_ctps/placeholders.hpp,
+	boost/boost/mpl/aux_/preprocessed/no_ctps/quote.hpp,
+	boost/boost/mpl/aux_/preprocessed/no_ctps/template_arity.hpp,
+	boost/boost/mpl/aux_/preprocessed/no_ctps/vector.hpp,
+	boost/boost/mpl/aux_/preprocessed/no_ctps/vector_c.hpp,
+	boost/boost/mpl/aux_/preprocessed/no_ttp/.cvsignore,
+	boost/boost/mpl/aux_/preprocessed/no_ttp/Makefile.am,
+	boost/boost/mpl/aux_/preprocessed/no_ttp/advance_backward.hpp,
+	boost/boost/mpl/aux_/preprocessed/no_ttp/advance_forward.hpp,
+	boost/boost/mpl/aux_/preprocessed/no_ttp/and.hpp,
+	boost/boost/mpl/aux_/preprocessed/no_ttp/apply.hpp,
+	boost/boost/mpl/aux_/preprocessed/no_ttp/arg.hpp,
+	boost/boost/mpl/aux_/preprocessed/no_ttp/basic_bind.hpp,
+	boost/boost/mpl/aux_/preprocessed/no_ttp/bind.hpp,
+	boost/boost/mpl/aux_/preprocessed/no_ttp/fold_backward_impl.hpp,
+	boost/boost/mpl/aux_/preprocessed/no_ttp/fold_impl.hpp,
+	boost/boost/mpl/aux_/preprocessed/no_ttp/full_lambda.hpp,
+	boost/boost/mpl/aux_/preprocessed/no_ttp/iter_fold_backward_impl.hp
+	p, boost/boost/mpl/aux_/preprocessed/no_ttp/iter_fold_if_impl.hpp,
+	boost/boost/mpl/aux_/preprocessed/no_ttp/iter_fold_impl.hpp,
+	boost/boost/mpl/aux_/preprocessed/no_ttp/lambda_helper.hpp,
+	boost/boost/mpl/aux_/preprocessed/no_ttp/lambda_no_ctps.hpp,
+	boost/boost/mpl/aux_/preprocessed/no_ttp/list.hpp,
+	boost/boost/mpl/aux_/preprocessed/no_ttp/list_c.hpp,
+	boost/boost/mpl/aux_/preprocessed/no_ttp/or.hpp,
+	boost/boost/mpl/aux_/preprocessed/no_ttp/placeholders.hpp,
+	boost/boost/mpl/aux_/preprocessed/no_ttp/quote.hpp,
+	boost/boost/mpl/aux_/preprocessed/no_ttp/template_arity.hpp,
+	boost/boost/mpl/aux_/preprocessed/no_ttp/vector.hpp,
+	boost/boost/mpl/aux_/preprocessed/no_ttp/vector_c.hpp,
+	boost/boost/mpl/aux_/preprocessed/plain/.cvsignore,
+	boost/boost/mpl/aux_/preprocessed/plain/Makefile.am,
+	boost/boost/mpl/aux_/preprocessed/plain/advance_backward.hpp,
+	boost/boost/mpl/aux_/preprocessed/plain/advance_forward.hpp,
+	boost/boost/mpl/aux_/preprocessed/plain/and.hpp,
+	boost/boost/mpl/aux_/preprocessed/plain/apply.hpp,
+	boost/boost/mpl/aux_/preprocessed/plain/arg.hpp,
+	boost/boost/mpl/aux_/preprocessed/plain/basic_bind.hpp,
+	boost/boost/mpl/aux_/preprocessed/plain/bind.hpp,
+	boost/boost/mpl/aux_/preprocessed/plain/fold_backward_impl.hpp,
+	boost/boost/mpl/aux_/preprocessed/plain/fold_impl.hpp,
+	boost/boost/mpl/aux_/preprocessed/plain/full_lambda.hpp,
+	boost/boost/mpl/aux_/preprocessed/plain/iter_fold_backward_impl.hpp
+	, boost/boost/mpl/aux_/preprocessed/plain/iter_fold_if_impl.hpp,
+	boost/boost/mpl/aux_/preprocessed/plain/iter_fold_impl.hpp,
+	boost/boost/mpl/aux_/preprocessed/plain/lambda_helper.hpp,
+	boost/boost/mpl/aux_/preprocessed/plain/lambda_no_ctps.hpp,
+	boost/boost/mpl/aux_/preprocessed/plain/list.hpp,
+	boost/boost/mpl/aux_/preprocessed/plain/list_c.hpp,
+	boost/boost/mpl/aux_/preprocessed/plain/or.hpp,
+	boost/boost/mpl/aux_/preprocessed/plain/placeholders.hpp,
+	boost/boost/mpl/aux_/preprocessed/plain/quote.hpp,
+	boost/boost/mpl/aux_/preprocessed/plain/template_arity.hpp,
+	boost/boost/mpl/aux_/preprocessed/plain/vector.hpp,
+	boost/boost/mpl/aux_/preprocessed/plain/vector_c.hpp,
+	boost/boost/mpl/aux_/preprocessor/.cvsignore,
+	boost/boost/mpl/aux_/preprocessor/Makefile.am,
+	boost/boost/mpl/aux_/preprocessor/add.hpp,
+	boost/boost/mpl/aux_/preprocessor/def_params_tail.hpp,
+	boost/boost/mpl/aux_/preprocessor/default_params.hpp,
+	boost/boost/mpl/aux_/preprocessor/enum.hpp,
+	boost/boost/mpl/aux_/preprocessor/ext_params.hpp,
+	boost/boost/mpl/aux_/preprocessor/filter_params.hpp,
+	boost/boost/mpl/aux_/preprocessor/params.hpp,
+	boost/boost/mpl/aux_/preprocessor/partial_spec_params.hpp,
+	boost/boost/mpl/aux_/preprocessor/range.hpp,
+	boost/boost/mpl/aux_/preprocessor/repeat.hpp,
+	boost/boost/mpl/aux_/preprocessor/sub.hpp,
+	boost/boost/mpl/aux_/preprocessor/tuple.hpp,
+	boost/boost/mpl/aux_/range_c/.cvsignore,
+	boost/boost/mpl/aux_/range_c/Makefile.am,
+	boost/boost/mpl/aux_/range_c/O1_size.hpp,
+	boost/boost/mpl/aux_/range_c/back.hpp,
+	boost/boost/mpl/aux_/range_c/begin_end.hpp,
+	boost/boost/mpl/aux_/range_c/empty.hpp,
+	boost/boost/mpl/aux_/range_c/front.hpp,
+	boost/boost/mpl/aux_/range_c/iterator.hpp,
+	boost/boost/mpl/aux_/range_c/size.hpp,
+	boost/boost/mpl/aux_/range_c/tag.hpp,
+	boost/boost/mpl/limits/.cvsignore,
+	boost/boost/mpl/limits/Makefile.am,
+	boost/boost/mpl/limits/arity.hpp, boost/boost/mpl/limits/list.hpp,
+	boost/boost/mpl/limits/unrolling.hpp,
+	boost/boost/mpl/limits/vector.hpp, boost/boost/mpl/list/.cvsignore,
+	boost/boost/mpl/list/Makefile.am, boost/boost/mpl/list/list0.hpp,
+	boost/boost/mpl/list/list0_c.hpp, boost/boost/mpl/list/list10.hpp,
+	boost/boost/mpl/list/list10_c.hpp, boost/boost/mpl/list/list20.hpp,
+	boost/boost/mpl/list/list20_c.hpp, boost/boost/mpl/list/list30.hpp,
+	boost/boost/mpl/list/list30_c.hpp, boost/boost/mpl/list/list40.hpp,
+	boost/boost/mpl/list/list40_c.hpp, boost/boost/mpl/list/list50.hpp,
+	boost/boost/mpl/list/list50_c.hpp,
+	boost/boost/mpl/list/aux_/.cvsignore,
+	boost/boost/mpl/list/aux_/Makefile.am,
+	boost/boost/mpl/list/aux_/O1_size.hpp,
+	boost/boost/mpl/list/aux_/begin_end.hpp,
+	boost/boost/mpl/list/aux_/clear.hpp,
+	boost/boost/mpl/list/aux_/empty.hpp,
+	boost/boost/mpl/list/aux_/front.hpp,
+	boost/boost/mpl/list/aux_/include_preprocessed.hpp,
+	boost/boost/mpl/list/aux_/iterator.hpp,
+	boost/boost/mpl/list/aux_/node.hpp,
+	boost/boost/mpl/list/aux_/numbered.hpp,
+	boost/boost/mpl/list/aux_/numbered_c.hpp,
+	boost/boost/mpl/list/aux_/pop_front.hpp,
+	boost/boost/mpl/list/aux_/push_front.hpp,
+	boost/boost/mpl/list/aux_/size.hpp,
+	boost/boost/mpl/list/aux_/tag.hpp,
+	boost/boost/mpl/list/aux_/preprocessed/.cvsignore,
+	boost/boost/mpl/list/aux_/preprocessed/Makefile.am,
+	boost/boost/mpl/list/aux_/preprocessed/plain/.cvsignore,
+	boost/boost/mpl/list/aux_/preprocessed/plain/Makefile.am,
+	boost/boost/mpl/list/aux_/preprocessed/plain/list10.hpp,
+	boost/boost/mpl/list/aux_/preprocessed/plain/list10_c.hpp,
+	boost/boost/mpl/list/aux_/preprocessed/plain/list20.hpp,
+	boost/boost/mpl/list/aux_/preprocessed/plain/list20_c.hpp,
+	boost/boost/mpl/list/aux_/preprocessed/plain/list30.hpp,
+	boost/boost/mpl/list/aux_/preprocessed/plain/list30_c.hpp,
+	boost/boost/mpl/list/aux_/preprocessed/plain/list40.hpp,
+	boost/boost/mpl/list/aux_/preprocessed/plain/list40_c.hpp,
+	boost/boost/mpl/list/aux_/preprocessed/plain/list50.hpp,
+	boost/boost/mpl/list/aux_/preprocessed/plain/list50_c.hpp,
+	boost/boost/mpl/math/.cvsignore, boost/boost/mpl/math/Makefile.am,
+	boost/boost/mpl/math/fixed_c.hpp, boost/boost/mpl/math/is_even.hpp,
+	boost/boost/mpl/math/rational_c.hpp,
+	boost/boost/mpl/vector/.cvsignore,
+	boost/boost/mpl/vector/Makefile.am,
+	boost/boost/mpl/vector/vector0.hpp,
+	boost/boost/mpl/vector/vector0_c.hpp,
+	boost/boost/mpl/vector/vector10.hpp,
+	boost/boost/mpl/vector/vector10_c.hpp,
+	boost/boost/mpl/vector/vector20.hpp,
+	boost/boost/mpl/vector/vector20_c.hpp,
+	boost/boost/mpl/vector/vector30.hpp,
+	boost/boost/mpl/vector/vector30_c.hpp,
+	boost/boost/mpl/vector/vector40.hpp,
+	boost/boost/mpl/vector/vector40_c.hpp,
+	boost/boost/mpl/vector/vector50.hpp,
+	boost/boost/mpl/vector/vector50_c.hpp,
+	boost/boost/mpl/vector/aux_/.cvsignore,
+	boost/boost/mpl/vector/aux_/Makefile.am,
+	boost/boost/mpl/vector/aux_/O1_size.hpp,
+	boost/boost/mpl/vector/aux_/at.hpp,
+	boost/boost/mpl/vector/aux_/back.hpp,
+	boost/boost/mpl/vector/aux_/begin_end.hpp,
+	boost/boost/mpl/vector/aux_/clear.hpp,
+	boost/boost/mpl/vector/aux_/empty.hpp,
+	boost/boost/mpl/vector/aux_/front.hpp,
+	boost/boost/mpl/vector/aux_/include_preprocessed.hpp,
+	boost/boost/mpl/vector/aux_/item.hpp,
+	boost/boost/mpl/vector/aux_/iterator.hpp,
+	boost/boost/mpl/vector/aux_/node.hpp,
+	boost/boost/mpl/vector/aux_/numbered.hpp,
+	boost/boost/mpl/vector/aux_/numbered_c.hpp,
+	boost/boost/mpl/vector/aux_/pop_back.hpp,
+	boost/boost/mpl/vector/aux_/pop_front.hpp,
+	boost/boost/mpl/vector/aux_/push_back.hpp,
+	boost/boost/mpl/vector/aux_/push_front.hpp,
+	boost/boost/mpl/vector/aux_/size.hpp,
+	boost/boost/mpl/vector/aux_/tag.hpp,
+	boost/boost/mpl/vector/aux_/vector0.hpp,
+	boost/boost/mpl/vector/aux_/preprocessed/.cvsignore,
+	boost/boost/mpl/vector/aux_/preprocessed/Makefile.am,
+	boost/boost/mpl/vector/aux_/preprocessed/no_ctps/.cvsignore,
+	boost/boost/mpl/vector/aux_/preprocessed/no_ctps/Makefile.am,
+	boost/boost/mpl/vector/aux_/preprocessed/no_ctps/vector10.hpp,
+	boost/boost/mpl/vector/aux_/preprocessed/no_ctps/vector10_c.hpp,
+	boost/boost/mpl/vector/aux_/preprocessed/no_ctps/vector20.hpp,
+	boost/boost/mpl/vector/aux_/preprocessed/no_ctps/vector20_c.hpp,
+	boost/boost/mpl/vector/aux_/preprocessed/no_ctps/vector30.hpp,
+	boost/boost/mpl/vector/aux_/preprocessed/no_ctps/vector30_c.hpp,
+	boost/boost/mpl/vector/aux_/preprocessed/no_ctps/vector40.hpp,
+	boost/boost/mpl/vector/aux_/preprocessed/no_ctps/vector40_c.hpp,
+	boost/boost/mpl/vector/aux_/preprocessed/no_ctps/vector50.hpp,
+	boost/boost/mpl/vector/aux_/preprocessed/no_ctps/vector50_c.hpp,
+	boost/boost/mpl/vector/aux_/preprocessed/plain/.cvsignore,
+	boost/boost/mpl/vector/aux_/preprocessed/plain/Makefile.am,
+	boost/boost/mpl/vector/aux_/preprocessed/plain/vector10.hpp,
+	boost/boost/mpl/vector/aux_/preprocessed/plain/vector10_c.hpp,
+	boost/boost/mpl/vector/aux_/preprocessed/plain/vector20.hpp,
+	boost/boost/mpl/vector/aux_/preprocessed/plain/vector20_c.hpp,
+	boost/boost/mpl/vector/aux_/preprocessed/plain/vector30.hpp,
+	boost/boost/mpl/vector/aux_/preprocessed/plain/vector30_c.hpp,
+	boost/boost/mpl/vector/aux_/preprocessed/plain/vector40.hpp,
+	boost/boost/mpl/vector/aux_/preprocessed/plain/vector40_c.hpp,
+	boost/boost/mpl/vector/aux_/preprocessed/plain/vector50.hpp,
+	boost/boost/mpl/vector/aux_/preprocessed/plain/vector50_c.hpp,
+	boost/boost/mpl/vector/aux_/preprocessed/typeof_based/.cvsignore,
+	boost/boost/mpl/vector/aux_/preprocessed/typeof_based/Makefile.am,
+	boost/boost/mpl/vector/aux_/preprocessed/typeof_based/vector10.hpp,
+	boost/boost/mpl/vector/aux_/preprocessed/typeof_based/vector10_c.hp
+	p,
+	boost/boost/mpl/vector/aux_/preprocessed/typeof_based/vector20.hpp,
+	boost/boost/mpl/vector/aux_/preprocessed/typeof_based/vector20_c.hp
+	p,
+	boost/boost/mpl/vector/aux_/preprocessed/typeof_based/vector30.hpp,
+	boost/boost/mpl/vector/aux_/preprocessed/typeof_based/vector30_c.hp
+	p,
+	boost/boost/mpl/vector/aux_/preprocessed/typeof_based/vector40.hpp,
+	boost/boost/mpl/vector/aux_/preprocessed/typeof_based/vector40_c.hp
+	p,
+	boost/boost/mpl/vector/aux_/preprocessed/typeof_based/vector50.hpp,
+	boost/boost/mpl/vector/aux_/preprocessed/typeof_based/vector50_c.hp
+	p, boost/boost/multi_array/.cvsignore,
+	boost/boost/multi_array/Makefile.am,
+	boost/boost/multi_array/algorithm.hpp,
+	boost/boost/multi_array/base.hpp,
+	boost/boost/multi_array/collection_concept.hpp,
+	boost/boost/multi_array/concept_checks.hpp,
+	boost/boost/multi_array/copy_array.hpp,
+	boost/boost/multi_array/extent_gen.hpp,
+	boost/boost/multi_array/extent_range.hpp,
+	boost/boost/multi_array/index_gen.hpp,
+	boost/boost/multi_array/index_range.hpp,
+	boost/boost/multi_array/iterator.hpp,
+	boost/boost/multi_array/iterator_adaptors.hpp,
+	boost/boost/multi_array/multi_array_ref.hpp,
+	boost/boost/multi_array/range_list.hpp,
+	boost/boost/multi_array/storage_order.hpp,
+	boost/boost/multi_array/subarray.hpp,
+	boost/boost/multi_array/types.hpp,
+	boost/boost/multi_array/view.hpp, boost/boost/pending/.cvsignore,
+	boost/boost/pending/Makefile.am,
+	boost/boost/pending/bucket_sorter.hpp,
+	boost/boost/pending/container_traits.hpp,
+	boost/boost/pending/cstddef.hpp, boost/boost/pending/ct_if.hpp,
+	boost/boost/pending/disjoint_sets.hpp,
+	boost/boost/pending/fenced_priority_queue.hpp,
+	boost/boost/pending/fibonacci_heap.hpp,
+	boost/boost/pending/indirect_cmp.hpp,
+	boost/boost/pending/integer_range.hpp,
+	boost/boost/pending/is_heap.hpp,
+	boost/boost/pending/iterator_adaptors.hpp,
+	boost/boost/pending/iterator_tests.hpp,
+	boost/boost/pending/mutable_heap.hpp,
+	boost/boost/pending/mutable_queue.hpp,
+	boost/boost/pending/property.hpp, boost/boost/pending/queue.hpp,
+	boost/boost/pending/stringtok.hpp,
+	boost/boost/pending/detail/.cvsignore,
+	boost/boost/pending/detail/Makefile.am,
+	boost/boost/pending/detail/disjoint_sets.hpp,
+	boost/boost/pending/detail/int_iterator.hpp,
+	boost/boost/pending/detail/property.hpp,
+	boost/boost/pool/.cvsignore, boost/boost/pool/Makefile.am,
+	boost/boost/pool/object_pool.hpp, boost/boost/pool/pool.hpp,
+	boost/boost/pool/pool_alloc.hpp, boost/boost/pool/poolfwd.hpp,
+	boost/boost/pool/simple_segregated_storage.hpp,
+	boost/boost/pool/singleton_pool.hpp,
+	boost/boost/pool/detail/.cvsignore,
+	boost/boost/pool/detail/Makefile.am,
+	boost/boost/pool/detail/ct_gcd_lcm.hpp,
+	boost/boost/pool/detail/for.m4,
+	boost/boost/pool/detail/gcd_lcm.hpp,
+	boost/boost/pool/detail/guard.hpp,
+	boost/boost/pool/detail/mutex.hpp,
+	boost/boost/pool/detail/pool_construct.bat,
+	boost/boost/pool/detail/pool_construct.inc,
+	boost/boost/pool/detail/pool_construct.m4,
+	boost/boost/pool/detail/pool_construct.sh,
+	boost/boost/pool/detail/pool_construct_simple.bat,
+	boost/boost/pool/detail/pool_construct_simple.inc,
+	boost/boost/pool/detail/pool_construct_simple.m4,
+	boost/boost/pool/detail/pool_construct_simple.sh,
+	boost/boost/pool/detail/singleton.hpp,
+	boost/boost/preprocessor/.cvsignore,
+	boost/boost/preprocessor/Makefile.am,
+	boost/boost/preprocessor/arithmetic.hpp,
+	boost/boost/preprocessor/array.hpp,
+	boost/boost/preprocessor/assert_msg.hpp,
+	boost/boost/preprocessor/cat.hpp,
+	boost/boost/preprocessor/comma.hpp,
+	boost/boost/preprocessor/comma_if.hpp,
+	boost/boost/preprocessor/comparison.hpp,
+	boost/boost/preprocessor/control.hpp,
+	boost/boost/preprocessor/debug.hpp,
+	boost/boost/preprocessor/dec.hpp,
+	boost/boost/preprocessor/empty.hpp,
+	boost/boost/preprocessor/enum.hpp,
+	boost/boost/preprocessor/enum_params.hpp,
+	boost/boost/preprocessor/enum_params_with_a_default.hpp,
+	boost/boost/preprocessor/enum_params_with_defaults.hpp,
+	boost/boost/preprocessor/enum_shifted.hpp,
+	boost/boost/preprocessor/enum_shifted_params.hpp,
+	boost/boost/preprocessor/expand.hpp,
+	boost/boost/preprocessor/expr_if.hpp,
+	boost/boost/preprocessor/facilities.hpp,
+	boost/boost/preprocessor/for.hpp,
+	boost/boost/preprocessor/identity.hpp,
+	boost/boost/preprocessor/if.hpp, boost/boost/preprocessor/inc.hpp,
+	boost/boost/preprocessor/iterate.hpp,
+	boost/boost/preprocessor/iteration.hpp,
+	boost/boost/preprocessor/library.hpp,
+	boost/boost/preprocessor/limits.hpp,
+	boost/boost/preprocessor/list.hpp,
+	boost/boost/preprocessor/logical.hpp,
+	boost/boost/preprocessor/max.hpp, boost/boost/preprocessor/min.hpp,
+	boost/boost/preprocessor/punctuation.hpp,
+	boost/boost/preprocessor/repeat.hpp,
+	boost/boost/preprocessor/repeat_2nd.hpp,
+	boost/boost/preprocessor/repeat_3rd.hpp,
+	boost/boost/preprocessor/repeat_from_to.hpp,
+	boost/boost/preprocessor/repeat_from_to_2nd.hpp,
+	boost/boost/preprocessor/repeat_from_to_3rd.hpp,
+	boost/boost/preprocessor/repetition.hpp,
+	boost/boost/preprocessor/selection.hpp,
+	boost/boost/preprocessor/seq.hpp,
+	boost/boost/preprocessor/slot.hpp,
+	boost/boost/preprocessor/stringize.hpp,
+	boost/boost/preprocessor/tuple.hpp,
+	boost/boost/preprocessor/while.hpp,
+	boost/boost/preprocessor/wstringize.hpp,
+	boost/boost/preprocessor/arithmetic/.cvsignore,
+	boost/boost/preprocessor/arithmetic/Makefile.am,
+	boost/boost/preprocessor/arithmetic/add.hpp,
+	boost/boost/preprocessor/arithmetic/dec.hpp,
+	boost/boost/preprocessor/arithmetic/div.hpp,
+	boost/boost/preprocessor/arithmetic/inc.hpp,
+	boost/boost/preprocessor/arithmetic/mod.hpp,
+	boost/boost/preprocessor/arithmetic/mul.hpp,
+	boost/boost/preprocessor/arithmetic/sub.hpp,
+	boost/boost/preprocessor/arithmetic/detail/.cvsignore,
+	boost/boost/preprocessor/arithmetic/detail/Makefile.am,
+	boost/boost/preprocessor/arithmetic/detail/div_base.hpp,
+	boost/boost/preprocessor/array/.cvsignore,
+	boost/boost/preprocessor/array/Makefile.am,
+	boost/boost/preprocessor/array/data.hpp,
+	boost/boost/preprocessor/array/elem.hpp,
+	boost/boost/preprocessor/array/insert.hpp,
+	boost/boost/preprocessor/array/pop_back.hpp,
+	boost/boost/preprocessor/array/pop_front.hpp,
+	boost/boost/preprocessor/array/push_back.hpp,
+	boost/boost/preprocessor/array/push_front.hpp,
+	boost/boost/preprocessor/array/remove.hpp,
+	boost/boost/preprocessor/array/replace.hpp,
+	boost/boost/preprocessor/array/reverse.hpp,
+	boost/boost/preprocessor/array/size.hpp,
+	boost/boost/preprocessor/comparison/.cvsignore,
+	boost/boost/preprocessor/comparison/Makefile.am,
+	boost/boost/preprocessor/comparison/equal.hpp,
+	boost/boost/preprocessor/comparison/greater.hpp,
+	boost/boost/preprocessor/comparison/greater_equal.hpp,
+	boost/boost/preprocessor/comparison/less.hpp,
+	boost/boost/preprocessor/comparison/less_equal.hpp,
+	boost/boost/preprocessor/comparison/not_equal.hpp,
+	boost/boost/preprocessor/config/.cvsignore,
+	boost/boost/preprocessor/config/Makefile.am,
+	boost/boost/preprocessor/config/config.hpp,
+	boost/boost/preprocessor/config/limits.hpp,
+	boost/boost/preprocessor/control/.cvsignore,
+	boost/boost/preprocessor/control/Makefile.am,
+	boost/boost/preprocessor/control/deduce_d.hpp,
+	boost/boost/preprocessor/control/expr_if.hpp,
+	boost/boost/preprocessor/control/expr_iif.hpp,
+	boost/boost/preprocessor/control/if.hpp,
+	boost/boost/preprocessor/control/iif.hpp,
+	boost/boost/preprocessor/control/while.hpp,
+	boost/boost/preprocessor/control/detail/.cvsignore,
+	boost/boost/preprocessor/control/detail/Makefile.am,
+	boost/boost/preprocessor/control/detail/while.hpp,
+	boost/boost/preprocessor/control/detail/edg/.cvsignore,
+	boost/boost/preprocessor/control/detail/edg/Makefile.am,
+	boost/boost/preprocessor/control/detail/edg/while.hpp,
+	boost/boost/preprocessor/control/detail/msvc/.cvsignore,
+	boost/boost/preprocessor/control/detail/msvc/Makefile.am,
+	boost/boost/preprocessor/control/detail/msvc/while.hpp,
+	boost/boost/preprocessor/debug/.cvsignore,
+	boost/boost/preprocessor/debug/Makefile.am,
+	boost/boost/preprocessor/debug/assert.hpp,
+	boost/boost/preprocessor/debug/error.hpp,
+	boost/boost/preprocessor/debug/line.hpp,
+	boost/boost/preprocessor/detail/.cvsignore,
+	boost/boost/preprocessor/detail/Makefile.am,
+	boost/boost/preprocessor/detail/auto_rec.hpp,
+	boost/boost/preprocessor/detail/check.hpp,
+	boost/boost/preprocessor/detail/is_binary.hpp,
+	boost/boost/preprocessor/detail/is_nullary.hpp,
+	boost/boost/preprocessor/detail/is_unary.hpp,
+	boost/boost/preprocessor/detail/null.hpp,
+	boost/boost/preprocessor/detail/split.hpp,
+	boost/boost/preprocessor/facilities/.cvsignore,
+	boost/boost/preprocessor/facilities/Makefile.am,
+	boost/boost/preprocessor/facilities/apply.hpp,
+	boost/boost/preprocessor/facilities/empty.hpp,
+	boost/boost/preprocessor/facilities/expand.hpp,
+	boost/boost/preprocessor/facilities/identity.hpp,
+	boost/boost/preprocessor/facilities/intercept.hpp,
+	boost/boost/preprocessor/facilities/is_1.hpp,
+	boost/boost/preprocessor/facilities/is_empty.hpp,
+	boost/boost/preprocessor/facilities/is_empty_or_1.hpp,
+	boost/boost/preprocessor/iteration/.cvsignore,
+	boost/boost/preprocessor/iteration/Makefile.am,
+	boost/boost/preprocessor/iteration/iterate.hpp,
+	boost/boost/preprocessor/iteration/local.hpp,
+	boost/boost/preprocessor/iteration/self.hpp,
+	boost/boost/preprocessor/iteration/detail/.cvsignore,
+	boost/boost/preprocessor/iteration/detail/Makefile.am,
+	boost/boost/preprocessor/iteration/detail/finish.hpp,
+	boost/boost/preprocessor/iteration/detail/local.hpp,
+	boost/boost/preprocessor/iteration/detail/rlocal.hpp,
+	boost/boost/preprocessor/iteration/detail/self.hpp,
+	boost/boost/preprocessor/iteration/detail/start.hpp,
+	boost/boost/preprocessor/iteration/detail/bounds/.cvsignore,
+	boost/boost/preprocessor/iteration/detail/bounds/Makefile.am,
+	boost/boost/preprocessor/iteration/detail/bounds/lower1.hpp,
+	boost/boost/preprocessor/iteration/detail/bounds/lower2.hpp,
+	boost/boost/preprocessor/iteration/detail/bounds/lower3.hpp,
+	boost/boost/preprocessor/iteration/detail/bounds/lower4.hpp,
+	boost/boost/preprocessor/iteration/detail/bounds/lower5.hpp,
+	boost/boost/preprocessor/iteration/detail/bounds/upper1.hpp,
+	boost/boost/preprocessor/iteration/detail/bounds/upper2.hpp,
+	boost/boost/preprocessor/iteration/detail/bounds/upper3.hpp,
+	boost/boost/preprocessor/iteration/detail/bounds/upper4.hpp,
+	boost/boost/preprocessor/iteration/detail/bounds/upper5.hpp,
+	boost/boost/preprocessor/iteration/detail/iter/.cvsignore,
+	boost/boost/preprocessor/iteration/detail/iter/Makefile.am,
+	boost/boost/preprocessor/iteration/detail/iter/forward1.hpp,
+	boost/boost/preprocessor/iteration/detail/iter/forward2.hpp,
+	boost/boost/preprocessor/iteration/detail/iter/forward3.hpp,
+	boost/boost/preprocessor/iteration/detail/iter/forward4.hpp,
+	boost/boost/preprocessor/iteration/detail/iter/forward5.hpp,
+	boost/boost/preprocessor/iteration/detail/iter/reverse1.hpp,
+	boost/boost/preprocessor/iteration/detail/iter/reverse2.hpp,
+	boost/boost/preprocessor/iteration/detail/iter/reverse3.hpp,
+	boost/boost/preprocessor/iteration/detail/iter/reverse4.hpp,
+	boost/boost/preprocessor/iteration/detail/iter/reverse5.hpp,
+	boost/boost/preprocessor/list/.cvsignore,
+	boost/boost/preprocessor/list/Makefile.am,
+	boost/boost/preprocessor/list/adt.hpp,
+	boost/boost/preprocessor/list/append.hpp,
+	boost/boost/preprocessor/list/at.hpp,
+	boost/boost/preprocessor/list/cat.hpp,
+	boost/boost/preprocessor/list/enum.hpp,
+	boost/boost/preprocessor/list/filter.hpp,
+	boost/boost/preprocessor/list/first_n.hpp,
+	boost/boost/preprocessor/list/fold_left.hpp,
+	boost/boost/preprocessor/list/fold_right.hpp,
+	boost/boost/preprocessor/list/for_each.hpp,
+	boost/boost/preprocessor/list/for_each_i.hpp,
+	boost/boost/preprocessor/list/for_each_product.hpp,
+	boost/boost/preprocessor/list/rest_n.hpp,
+	boost/boost/preprocessor/list/reverse.hpp,
+	boost/boost/preprocessor/list/size.hpp,
+	boost/boost/preprocessor/list/to_tuple.hpp,
+	boost/boost/preprocessor/list/transform.hpp,
+	boost/boost/preprocessor/list/detail/.cvsignore,
+	boost/boost/preprocessor/list/detail/Makefile.am,
+	boost/boost/preprocessor/list/detail/fold_left.hpp,
+	boost/boost/preprocessor/list/detail/fold_right.hpp,
+	boost/boost/preprocessor/list/detail/edg/.cvsignore,
+	boost/boost/preprocessor/list/detail/edg/Makefile.am,
+	boost/boost/preprocessor/list/detail/edg/fold_left.hpp,
+	boost/boost/preprocessor/list/detail/edg/fold_right.hpp,
+	boost/boost/preprocessor/logical/.cvsignore,
+	boost/boost/preprocessor/logical/Makefile.am,
+	boost/boost/preprocessor/logical/and.hpp,
+	boost/boost/preprocessor/logical/bitand.hpp,
+	boost/boost/preprocessor/logical/bitnor.hpp,
+	boost/boost/preprocessor/logical/bitor.hpp,
+	boost/boost/preprocessor/logical/bitxor.hpp,
+	boost/boost/preprocessor/logical/bool.hpp,
+	boost/boost/preprocessor/logical/compl.hpp,
+	boost/boost/preprocessor/logical/nor.hpp,
+	boost/boost/preprocessor/logical/not.hpp,
+	boost/boost/preprocessor/logical/or.hpp,
+	boost/boost/preprocessor/logical/xor.hpp,
+	boost/boost/preprocessor/punctuation/.cvsignore,
+	boost/boost/preprocessor/punctuation/Makefile.am,
+	boost/boost/preprocessor/punctuation/comma.hpp,
+	boost/boost/preprocessor/punctuation/comma_if.hpp,
+	boost/boost/preprocessor/punctuation/paren.hpp,
+	boost/boost/preprocessor/punctuation/paren_if.hpp,
+	boost/boost/preprocessor/repetition/.cvsignore,
+	boost/boost/preprocessor/repetition/Makefile.am,
+	boost/boost/preprocessor/repetition/deduce_r.hpp,
+	boost/boost/preprocessor/repetition/deduce_z.hpp,
+	boost/boost/preprocessor/repetition/enum.hpp,
+	boost/boost/preprocessor/repetition/enum_binary_params.hpp,
+	boost/boost/preprocessor/repetition/enum_params.hpp,
+	boost/boost/preprocessor/repetition/enum_params_with_a_default.hpp,
+	boost/boost/preprocessor/repetition/enum_params_with_defaults.hpp,
+	boost/boost/preprocessor/repetition/enum_shifted.hpp,
+	boost/boost/preprocessor/repetition/enum_shifted_params.hpp,
+	boost/boost/preprocessor/repetition/enum_trailing.hpp,
+	boost/boost/preprocessor/repetition/enum_trailing_binary_params.hpp
+	, boost/boost/preprocessor/repetition/enum_trailing_params.hpp,
+	boost/boost/preprocessor/repetition/for.hpp,
+	boost/boost/preprocessor/repetition/repeat.hpp,
+	boost/boost/preprocessor/repetition/repeat_from_to.hpp,
+	boost/boost/preprocessor/repetition/detail/.cvsignore,
+	boost/boost/preprocessor/repetition/detail/Makefile.am,
+	boost/boost/preprocessor/repetition/detail/for.hpp,
+	boost/boost/preprocessor/repetition/detail/edg/.cvsignore,
+	boost/boost/preprocessor/repetition/detail/edg/Makefile.am,
+	boost/boost/preprocessor/repetition/detail/edg/for.hpp,
+	boost/boost/preprocessor/repetition/detail/msvc/.cvsignore,
+	boost/boost/preprocessor/repetition/detail/msvc/Makefile.am,
+	boost/boost/preprocessor/repetition/detail/msvc/for.hpp,
+	boost/boost/preprocessor/selection/.cvsignore,
+	boost/boost/preprocessor/selection/Makefile.am,
+	boost/boost/preprocessor/selection/max.hpp,
+	boost/boost/preprocessor/selection/min.hpp,
+	boost/boost/preprocessor/seq/.cvsignore,
+	boost/boost/preprocessor/seq/Makefile.am,
+	boost/boost/preprocessor/seq/cat.hpp,
+	boost/boost/preprocessor/seq/elem.hpp,
+	boost/boost/preprocessor/seq/enum.hpp,
+	boost/boost/preprocessor/seq/filter.hpp,
+	boost/boost/preprocessor/seq/first_n.hpp,
+	boost/boost/preprocessor/seq/fold_left.hpp,
+	boost/boost/preprocessor/seq/fold_right.hpp,
+	boost/boost/preprocessor/seq/for_each.hpp,
+	boost/boost/preprocessor/seq/for_each_i.hpp,
+	boost/boost/preprocessor/seq/for_each_product.hpp,
+	boost/boost/preprocessor/seq/insert.hpp,
+	boost/boost/preprocessor/seq/pop_back.hpp,
+	boost/boost/preprocessor/seq/pop_front.hpp,
+	boost/boost/preprocessor/seq/push_back.hpp,
+	boost/boost/preprocessor/seq/push_front.hpp,
+	boost/boost/preprocessor/seq/remove.hpp,
+	boost/boost/preprocessor/seq/replace.hpp,
+	boost/boost/preprocessor/seq/rest_n.hpp,
+	boost/boost/preprocessor/seq/reverse.hpp,
+	boost/boost/preprocessor/seq/seq.hpp,
+	boost/boost/preprocessor/seq/size.hpp,
+	boost/boost/preprocessor/seq/subseq.hpp,
+	boost/boost/preprocessor/seq/to_array.hpp,
+	boost/boost/preprocessor/seq/to_tuple.hpp,
+	boost/boost/preprocessor/seq/transform.hpp,
+	boost/boost/preprocessor/seq/detail/.cvsignore,
+	boost/boost/preprocessor/seq/detail/Makefile.am,
+	boost/boost/preprocessor/seq/detail/split.hpp,
+	boost/boost/preprocessor/slot/.cvsignore,
+	boost/boost/preprocessor/slot/Makefile.am,
+	boost/boost/preprocessor/slot/slot.hpp,
+	boost/boost/preprocessor/slot/detail/.cvsignore,
+	boost/boost/preprocessor/slot/detail/Makefile.am,
+	boost/boost/preprocessor/slot/detail/def.hpp,
+	boost/boost/preprocessor/slot/detail/shared.hpp,
+	boost/boost/preprocessor/slot/detail/slot1.hpp,
+	boost/boost/preprocessor/slot/detail/slot2.hpp,
+	boost/boost/preprocessor/slot/detail/slot3.hpp,
+	boost/boost/preprocessor/slot/detail/slot4.hpp,
+	boost/boost/preprocessor/slot/detail/slot5.hpp,
+	boost/boost/preprocessor/tuple/.cvsignore,
+	boost/boost/preprocessor/tuple/Makefile.am,
+	boost/boost/preprocessor/tuple/eat.hpp,
+	boost/boost/preprocessor/tuple/elem.hpp,
+	boost/boost/preprocessor/tuple/rem.hpp,
+	boost/boost/preprocessor/tuple/reverse.hpp,
+	boost/boost/preprocessor/tuple/to_list.hpp,
+	boost/boost/preprocessor/tuple/to_seq.hpp,
+	boost/boost/random/.cvsignore, boost/boost/random/Makefile.am,
+	boost/boost/random/additive_combine.hpp,
+	boost/boost/random/bernoulli_distribution.hpp,
+	boost/boost/random/binomial_distribution.hpp,
+	boost/boost/random/cauchy_distribution.hpp,
+	boost/boost/random/discard_block.hpp,
+	boost/boost/random/exponential_distribution.hpp,
+	boost/boost/random/gamma_distribution.hpp,
+	boost/boost/random/geometric_distribution.hpp,
+	boost/boost/random/inversive_congruential.hpp,
+	boost/boost/random/lagged_fibonacci.hpp,
+	boost/boost/random/linear_congruential.hpp,
+	boost/boost/random/linear_feedback_shift.hpp,
+	boost/boost/random/lognormal_distribution.hpp,
+	boost/boost/random/mersenne_twister.hpp,
+	boost/boost/random/normal_distribution.hpp,
+	boost/boost/random/poisson_distribution.hpp,
+	boost/boost/random/random_number_generator.hpp,
+	boost/boost/random/ranlux.hpp,
+	boost/boost/random/shuffle_output.hpp,
+	boost/boost/random/subtract_with_carry.hpp,
+	boost/boost/random/triangle_distribution.hpp,
+	boost/boost/random/uniform_01.hpp,
+	boost/boost/random/uniform_int.hpp,
+	boost/boost/random/uniform_on_sphere.hpp,
+	boost/boost/random/uniform_real.hpp,
+	boost/boost/random/uniform_smallint.hpp,
+	boost/boost/random/xor_combine.hpp,
+	boost/boost/random/detail/.cvsignore,
+	boost/boost/random/detail/Makefile.am,
+	boost/boost/random/detail/const_mod.hpp,
+	boost/boost/random/detail/iterator_mixin.hpp,
+	boost/boost/random/detail/signed_unsigned_compare.hpp,
+	boost/boost/regex/.cvsignore, boost/boost/regex/Makefile.am,
+	boost/boost/regex/config.hpp, boost/boost/regex/pattern_except.hpp,
+	boost/boost/regex/regex_traits.hpp, boost/boost/regex/src.cpp,
+	boost/boost/regex/user.hpp, boost/boost/regex/v3/.cvsignore,
+	boost/boost/regex/v3/Makefile.am, boost/boost/regex/v3/cregex.hpp,
+	boost/boost/regex/v3/fileiter.hpp,
+	boost/boost/regex/v3/instances.hpp, boost/boost/regex/v3/regex.hpp,
+	boost/boost/regex/v3/regex_compile.hpp,
+	boost/boost/regex/v3/regex_cstring.hpp,
+	boost/boost/regex/v3/regex_format.hpp,
+	boost/boost/regex/v3/regex_fwd.hpp,
+	boost/boost/regex/v3/regex_kmp.hpp,
+	boost/boost/regex/v3/regex_library_include.hpp,
+	boost/boost/regex/v3/regex_match.hpp,
+	boost/boost/regex/v3/regex_raw_buffer.hpp,
+	boost/boost/regex/v3/regex_split.hpp,
+	boost/boost/regex/v3/regex_stack.hpp,
+	boost/boost/regex/v3/regex_synch.hpp,
+	boost/boost/regex/v3/regex_traits.hpp,
+	boost/boost/spirit/.cvsignore, boost/boost/spirit/Makefile.am,
+	boost/boost/spirit/attribute.hpp, boost/boost/spirit/core.hpp,
+	boost/boost/spirit/debug.hpp, boost/boost/spirit/dynamic.hpp,
+	boost/boost/spirit/error_handling.hpp,
+	boost/boost/spirit/iterator.hpp, boost/boost/spirit/symbols.hpp,
+	boost/boost/spirit/utility.hpp,
+	boost/boost/spirit/attribute/.cvsignore,
+	boost/boost/spirit/attribute/Makefile.am,
+	boost/boost/spirit/attribute/closure.hpp,
+	boost/boost/spirit/attribute/closure_context.hpp,
+	boost/boost/spirit/attribute/parametric.hpp,
+	boost/boost/spirit/core/.cvsignore,
+	boost/boost/spirit/core/Makefile.am,
+	boost/boost/spirit/core/assert.hpp,
+	boost/boost/spirit/core/basics.hpp,
+	boost/boost/spirit/core/match.hpp,
+	boost/boost/spirit/core/parser.hpp,
+	boost/boost/spirit/core/composite/.cvsignore,
+	boost/boost/spirit/core/composite/Makefile.am,
+	boost/boost/spirit/core/composite/actions.hpp,
+	boost/boost/spirit/core/composite/composite.hpp,
+	boost/boost/spirit/core/composite/directives.hpp,
+	boost/boost/spirit/core/composite/epsilon.hpp,
+	boost/boost/spirit/core/composite/operators.hpp,
+	boost/boost/spirit/core/composite/impl/.cvsignore,
+	boost/boost/spirit/core/composite/impl/Makefile.am,
+	boost/boost/spirit/core/composite/impl/composite.ipp,
+	boost/boost/spirit/core/composite/impl/directives.ipp,
+	boost/boost/spirit/core/composite/impl/operators.ipp,
+	boost/boost/spirit/core/impl/.cvsignore,
+	boost/boost/spirit/core/impl/Makefile.am,
+	boost/boost/spirit/core/impl/borland.hpp,
+	boost/boost/spirit/core/impl/match.ipp,
+	boost/boost/spirit/core/impl/msvc.hpp,
+	boost/boost/spirit/core/impl/parser.ipp,
+	boost/boost/spirit/core/meta/.cvsignore,
+	boost/boost/spirit/core/meta/Makefile.am,
+	boost/boost/spirit/core/meta/fundamental.hpp,
+	boost/boost/spirit/core/meta/parser_traits.hpp,
+	boost/boost/spirit/core/meta/traverse.hpp,
+	boost/boost/spirit/core/meta/impl/.cvsignore,
+	boost/boost/spirit/core/meta/impl/Makefile.am,
+	boost/boost/spirit/core/meta/impl/fundamental.ipp,
+	boost/boost/spirit/core/meta/impl/parser_traits.ipp,
+	boost/boost/spirit/core/meta/impl/parser_type.hpp,
+	boost/boost/spirit/core/meta/impl/traverse.ipp,
+	boost/boost/spirit/core/non_terminal/.cvsignore,
+	boost/boost/spirit/core/non_terminal/Makefile.am,
+	boost/boost/spirit/core/non_terminal/grammar.hpp,
+	boost/boost/spirit/core/non_terminal/parser_context.hpp,
+	boost/boost/spirit/core/non_terminal/parser_id.hpp,
+	boost/boost/spirit/core/non_terminal/rule.hpp,
+	boost/boost/spirit/core/non_terminal/subrule.hpp,
+	boost/boost/spirit/core/non_terminal/impl/.cvsignore,
+	boost/boost/spirit/core/non_terminal/impl/Makefile.am,
+	boost/boost/spirit/core/non_terminal/impl/grammar.ipp,
+	boost/boost/spirit/core/non_terminal/impl/object_with_id.ipp,
+	boost/boost/spirit/core/non_terminal/impl/rule.ipp,
+	boost/boost/spirit/core/non_terminal/impl/subrule.ipp,
+	boost/boost/spirit/core/primitives/.cvsignore,
+	boost/boost/spirit/core/primitives/Makefile.am: Removed old boost
+	source distribution from the source tree.
+
+2005-04-20 10:53  pgregory
+
+	* boost/.cvsignore, boost/AUTHORS, boost/COPYING, boost/INSTALL,
+	boost/Makefile.am, boost/README, boost/boost/.cvsignore,
+	boost/boost/Makefile.am, boost/boost/any.hpp,
+	boost/boost/array.hpp, boost/boost/assert.hpp,
+	boost/boost/bind.hpp, boost/boost/call_traits.hpp,
+	boost/boost/cast.hpp, boost/boost/checked_delete.hpp,
+	boost/boost/compressed_pair.hpp, boost/boost/concept_archetype.hpp,
+	boost/boost/concept_check.hpp, boost/boost/config.hpp,
+	boost/boost/counting_iterator.hpp, boost/boost/cregex.hpp,
+	boost/boost/cstdint.hpp, boost/boost/cstdlib.hpp,
+	boost/boost/current_function.hpp,
+	boost/boost/enable_shared_from_this.hpp, boost/boost/function.hpp,
+	boost/boost/functional.hpp, boost/boost/generator_iterator.hpp,
+	boost/boost/get_pointer.hpp, boost/boost/half_open_range.hpp,
+	boost/boost/integer_traits.hpp, boost/boost/intrusive_ptr.hpp,
+	boost/boost/iterator.hpp, boost/boost/iterator_adaptors.hpp,
+	boost/boost/last_value.hpp, boost/boost/lexical_cast.hpp,
+	boost/boost/limits.hpp, boost/boost/math_fwd.hpp,
+	boost/boost/mem_fn.hpp, boost/boost/multi_array.hpp,
+	boost/boost/next_prior.hpp, boost/boost/noncopyable.hpp,
+	boost/boost/nondet_random.hpp, boost/boost/operators.hpp,
+	boost/boost/permutation_iterator.hpp, boost/boost/preprocessor.hpp,
+	boost/boost/progress.hpp, boost/boost/random.hpp,
+	boost/boost/ref.hpp, boost/boost/regex.h, boost/boost/regex.hpp,
+	boost/boost/regex_fwd.hpp, boost/boost/scoped_array.hpp,
+	boost/boost/scoped_ptr.hpp, boost/boost/shared_array.hpp,
+	boost/boost/shared_container_iterator.hpp,
+	boost/boost/shared_ptr.hpp, boost/boost/signal.hpp,
+	boost/boost/spirit.hpp, boost/boost/static_assert.hpp,
+	boost/boost/thread.hpp, boost/boost/throw_exception.hpp,
+	boost/boost/timer.hpp, boost/boost/token_functions.hpp,
+	boost/boost/token_iterator.hpp, boost/boost/tokenizer.hpp,
+	boost/boost/type.hpp, boost/boost/type_traits.hpp,
+	boost/boost/utility.hpp, boost/boost/utility_fwd.hpp,
+	boost/boost/version.hpp, boost/boost/visit_each.hpp,
+	boost/boost/weak_ptr.hpp, boost/boost/bind/.cvsignore,
+	boost/boost/bind/Makefile.am, boost/boost/bind/apply.hpp,
+	boost/boost/bind/arg.hpp, boost/boost/bind/bind_cc.hpp,
+	boost/boost/bind/bind_mf_cc.hpp,
+	boost/boost/bind/bind_template.hpp,
+	boost/boost/bind/make_adaptable.hpp,
+	boost/boost/bind/mem_fn_cc.hpp,
+	boost/boost/bind/mem_fn_template.hpp,
+	boost/boost/bind/mem_fn_vw.hpp, boost/boost/bind/placeholders.hpp,
+	boost/boost/bind/protect.hpp, boost/boost/config/.cvsignore,
+	boost/boost/config/Makefile.am,
+	boost/boost/config/posix_features.hpp,
+	boost/boost/config/select_compiler_config.hpp,
+	boost/boost/config/select_platform_config.hpp,
+	boost/boost/config/select_stdlib_config.hpp,
+	boost/boost/config/suffix.hpp, boost/boost/config/user.hpp,
+	boost/boost/config/compiler/.cvsignore,
+	boost/boost/config/compiler/Makefile.am,
+	boost/boost/config/compiler/borland.hpp,
+	boost/boost/config/compiler/comeau.hpp,
+	boost/boost/config/compiler/common_edg.hpp,
+	boost/boost/config/compiler/compaq_cxx.hpp,
+	boost/boost/config/compiler/gcc.hpp,
+	boost/boost/config/compiler/greenhills.hpp,
+	boost/boost/config/compiler/hp_acc.hpp,
+	boost/boost/config/compiler/intel.hpp,
+	boost/boost/config/compiler/kai.hpp,
+	boost/boost/config/compiler/metrowerks.hpp,
+	boost/boost/config/compiler/mpw.hpp,
+	boost/boost/config/compiler/sgi_mipspro.hpp,
+	boost/boost/config/compiler/sunpro_cc.hpp,
+	boost/boost/config/compiler/vacpp.hpp,
+	boost/boost/config/compiler/visualc.hpp,
+	boost/boost/config/platform/.cvsignore,
+	boost/boost/config/platform/Makefile.am,
+	boost/boost/config/platform/aix.hpp,
+	boost/boost/config/platform/amigaos.hpp,
+	boost/boost/config/platform/beos.hpp,
+	boost/boost/config/platform/bsd.hpp,
+	boost/boost/config/platform/cygwin.hpp,
+	boost/boost/config/platform/hpux.hpp,
+	boost/boost/config/platform/irix.hpp,
+	boost/boost/config/platform/linux.hpp,
+	boost/boost/config/platform/macos.hpp,
+	boost/boost/config/platform/solaris.hpp,
+	boost/boost/config/platform/win32.hpp,
+	boost/boost/config/stdlib/.cvsignore,
+	boost/boost/config/stdlib/Makefile.am,
+	boost/boost/config/stdlib/dinkumware.hpp,
+	boost/boost/config/stdlib/libcomo.hpp,
+	boost/boost/config/stdlib/libstdcpp3.hpp,
+	boost/boost/config/stdlib/modena.hpp,
+	boost/boost/config/stdlib/msl.hpp,
+	boost/boost/config/stdlib/roguewave.hpp,
+	boost/boost/config/stdlib/sgi.hpp,
+	boost/boost/config/stdlib/stlport.hpp,
+	boost/boost/config/stdlib/vacpp.hpp, boost/boost/detail/.cvsignore,
+	boost/boost/detail/Makefile.am, boost/boost/detail/algorithm.hpp,
+	boost/boost/detail/allocator.hpp,
+	boost/boost/detail/atomic_count.hpp,
+	boost/boost/detail/atomic_count_gcc.hpp,
+	boost/boost/detail/atomic_count_linux.hpp,
+	boost/boost/detail/atomic_count_pthreads.hpp,
+	boost/boost/detail/atomic_count_win32.hpp,
+	boost/boost/detail/binary_search.hpp,
+	boost/boost/detail/call_traits.hpp,
+	boost/boost/detail/catch_exceptions.hpp,
+	boost/boost/detail/compressed_pair.hpp,
+	boost/boost/detail/ct_gcd_lcm.hpp,
+	boost/boost/detail/dynamic_bitset.hpp, boost/boost/detail/for.m4,
+	boost/boost/detail/gcd_lcm.hpp, boost/boost/detail/guard.hpp,
+	boost/boost/detail/iterator.hpp,
+	boost/boost/detail/lightweight_mutex.hpp,
+	boost/boost/detail/lightweight_test.hpp,
+	boost/boost/detail/limits.hpp, boost/boost/detail/lwm_gcc.hpp,
+	boost/boost/detail/lwm_irix.hpp, boost/boost/detail/lwm_linux.hpp,
+	boost/boost/detail/lwm_nop.hpp,
+	boost/boost/detail/lwm_pthreads.hpp,
+	boost/boost/detail/lwm_win32.hpp,
+	boost/boost/detail/lwm_win32_cs.hpp, boost/boost/detail/mutex.hpp,
+	boost/boost/detail/named_template_params.hpp,
+	boost/boost/detail/numeric_traits.hpp,
+	boost/boost/detail/ob_call_traits.hpp,
+	boost/boost/detail/ob_compressed_pair.hpp,
+	boost/boost/detail/pool_construct.bat,
+	boost/boost/detail/pool_construct.inc,
+	boost/boost/detail/pool_construct.m4,
+	boost/boost/detail/pool_construct.sh,
+	boost/boost/detail/pool_construct_simple.bat,
+	boost/boost/detail/pool_construct_simple.inc,
+	boost/boost/detail/pool_construct_simple.m4,
+	boost/boost/detail/pool_construct_simple.sh,
+	boost/boost/detail/quick_allocator.hpp,
+	boost/boost/detail/select_type.hpp,
+	boost/boost/detail/shared_array_nmt.hpp,
+	boost/boost/detail/shared_count.hpp,
+	boost/boost/detail/shared_ptr_nmt.hpp,
+	boost/boost/detail/singleton.hpp,
+	boost/boost/detail/workaround.hpp,
+	boost/boost/filesystem/.cvsignore,
+	boost/boost/filesystem/Makefile.am,
+	boost/boost/filesystem/convenience.hpp,
+	boost/boost/filesystem/exception.hpp,
+	boost/boost/filesystem/fstream.hpp,
+	boost/boost/filesystem/operations.hpp,
+	boost/boost/filesystem/path.hpp, boost/boost/function/.cvsignore,
+	boost/boost/function/Makefile.am,
+	boost/boost/function/function0.hpp,
+	boost/boost/function/function1.hpp,
+	boost/boost/function/function10.hpp,
+	boost/boost/function/function2.hpp,
+	boost/boost/function/function3.hpp,
+	boost/boost/function/function4.hpp,
+	boost/boost/function/function5.hpp,
+	boost/boost/function/function6.hpp,
+	boost/boost/function/function7.hpp,
+	boost/boost/function/function8.hpp,
+	boost/boost/function/function9.hpp,
+	boost/boost/function/function_base.hpp,
+	boost/boost/function/function_template.hpp,
+	boost/boost/function/gen_function_N.pl,
+	boost/boost/function/detail/.cvsignore,
+	boost/boost/function/detail/Makefile.am,
+	boost/boost/function/detail/function_iterate.hpp,
+	boost/boost/function/detail/gen_maybe_include.pl,
+	boost/boost/function/detail/maybe_include.hpp,
+	boost/boost/function/detail/prologue.hpp,
+	boost/boost/mpl/.cvsignore, boost/boost/mpl/Makefile.am,
+	boost/boost/mpl/O1_size.hpp, boost/boost/mpl/O1_size_fwd.hpp,
+	boost/boost/mpl/advance.hpp, boost/boost/mpl/alias.hpp,
+	boost/boost/mpl/always.hpp, boost/boost/mpl/and.hpp,
+	boost/boost/mpl/apply.hpp, boost/boost/mpl/apply_if.hpp,
+	boost/boost/mpl/arg.hpp, boost/boost/mpl/arg_fwd.hpp,
+	boost/boost/mpl/arithmetic.hpp, boost/boost/mpl/as_sequence.hpp,
+	boost/boost/mpl/assert_is_same.hpp, boost/boost/mpl/at.hpp,
+	boost/boost/mpl/at_fwd.hpp, boost/boost/mpl/back.hpp,
+	boost/boost/mpl/back_fwd.hpp, boost/boost/mpl/base.hpp,
+	boost/boost/mpl/begin_end.hpp, boost/boost/mpl/begin_end_fwd.hpp,
+	boost/boost/mpl/bind.hpp, boost/boost/mpl/bitand.hpp,
+	boost/boost/mpl/bitor.hpp, boost/boost/mpl/bitwise.hpp,
+	boost/boost/mpl/bitxor.hpp, boost/boost/mpl/bool.hpp,
+	boost/boost/mpl/bool_fwd.hpp, boost/boost/mpl/clear.hpp,
+	boost/boost/mpl/clear_fwd.hpp, boost/boost/mpl/comparison.hpp,
+	boost/boost/mpl/contains.hpp, boost/boost/mpl/copy.hpp,
+	boost/boost/mpl/copy_backward.hpp,
+	boost/boost/mpl/copy_backward_if.hpp, boost/boost/mpl/copy_if.hpp,
+	boost/boost/mpl/count.hpp, boost/boost/mpl/count_if.hpp,
+	boost/boost/mpl/deref.hpp, boost/boost/mpl/distance.hpp,
+	boost/boost/mpl/divides.hpp, boost/boost/mpl/empty.hpp,
+	boost/boost/mpl/empty_base.hpp, boost/boost/mpl/empty_fwd.hpp,
+	boost/boost/mpl/equal.hpp, boost/boost/mpl/equal_to.hpp,
+	boost/boost/mpl/erase.hpp, boost/boost/mpl/erase_fwd.hpp,
+	boost/boost/mpl/filter_view.hpp, boost/boost/mpl/find.hpp,
+	boost/boost/mpl/find_if.hpp, boost/boost/mpl/fold.hpp,
+	boost/boost/mpl/fold_backward.hpp, boost/boost/mpl/for_each.hpp,
+	boost/boost/mpl/front.hpp, boost/boost/mpl/front_fwd.hpp,
+	boost/boost/mpl/greater.hpp, boost/boost/mpl/greater_equal.hpp,
+	boost/boost/mpl/identity.hpp, boost/boost/mpl/if.hpp,
+	boost/boost/mpl/inherit.hpp, boost/boost/mpl/inherit_linearly.hpp,
+	boost/boost/mpl/insert.hpp, boost/boost/mpl/insert_fwd.hpp,
+	boost/boost/mpl/insert_range.hpp,
+	boost/boost/mpl/insert_range_fwd.hpp, boost/boost/mpl/int.hpp,
+	boost/boost/mpl/int_fwd.hpp, boost/boost/mpl/integral_c.hpp,
+	boost/boost/mpl/integral_c_fwd.hpp,
+	boost/boost/mpl/is_placeholder.hpp,
+	boost/boost/mpl/is_sequence.hpp, boost/boost/mpl/iter_fold.hpp,
+	boost/boost/mpl/iter_fold_backward.hpp,
+	boost/boost/mpl/iterator_category.hpp,
+	boost/boost/mpl/iterator_range.hpp,
+	boost/boost/mpl/iterator_tag.hpp, boost/boost/mpl/joint_view.hpp,
+	boost/boost/mpl/lambda.hpp, boost/boost/mpl/lambda_fwd.hpp,
+	boost/boost/mpl/lambda_helper.hpp, boost/boost/mpl/less.hpp,
+	boost/boost/mpl/less_equal.hpp, boost/boost/mpl/list.hpp,
+	boost/boost/mpl/list_c.hpp, boost/boost/mpl/logical.hpp,
+	boost/boost/mpl/long.hpp, boost/boost/mpl/long_fwd.hpp,
+	boost/boost/mpl/lower_bound.hpp, boost/boost/mpl/max_element.hpp,
+	boost/boost/mpl/minus.hpp, boost/boost/mpl/modulus.hpp,
+	boost/boost/mpl/multiplies.hpp, boost/boost/mpl/negate.hpp,
+	boost/boost/mpl/next.hpp, boost/boost/mpl/not.hpp,
+	boost/boost/mpl/not_equal_to.hpp, boost/boost/mpl/or.hpp,
+	boost/boost/mpl/pair.hpp, boost/boost/mpl/placeholders.hpp,
+	boost/boost/mpl/plus.hpp, boost/boost/mpl/pop_back.hpp,
+	boost/boost/mpl/pop_back_fwd.hpp, boost/boost/mpl/pop_front.hpp,
+	boost/boost/mpl/pop_front_fwd.hpp, boost/boost/mpl/prior.hpp,
+	boost/boost/mpl/project1st.hpp, boost/boost/mpl/project2nd.hpp,
+	boost/boost/mpl/protect.hpp, boost/boost/mpl/push_back.hpp,
+	boost/boost/mpl/push_back_fwd.hpp, boost/boost/mpl/push_front.hpp,
+	boost/boost/mpl/push_front_fwd.hpp, boost/boost/mpl/quote.hpp,
+	boost/boost/mpl/range_c.hpp, boost/boost/mpl/remove.hpp,
+	boost/boost/mpl/remove_if.hpp, boost/boost/mpl/replace.hpp,
+	boost/boost/mpl/replace_if.hpp, boost/boost/mpl/reverse.hpp,
+	boost/boost/mpl/same_as.hpp, boost/boost/mpl/select1st.hpp,
+	boost/boost/mpl/select2nd.hpp, boost/boost/mpl/sequence_tag.hpp,
+	boost/boost/mpl/sequence_tag_fwd.hpp,
+	boost/boost/mpl/shift_left.hpp, boost/boost/mpl/shift_right.hpp,
+	boost/boost/mpl/single_view.hpp, boost/boost/mpl/size.hpp,
+	boost/boost/mpl/size_fwd.hpp, boost/boost/mpl/size_t.hpp,
+	boost/boost/mpl/size_t_fwd.hpp, boost/boost/mpl/sizeof.hpp,
+	boost/boost/mpl/switch.hpp, boost/boost/mpl/transform.hpp,
+	boost/boost/mpl/transform_view.hpp, boost/boost/mpl/unique.hpp,
+	boost/boost/mpl/upper_bound.hpp, boost/boost/mpl/vector.hpp,
+	boost/boost/mpl/vector_c.hpp, boost/boost/mpl/void.hpp,
+	boost/boost/mpl/zip_view.hpp, boost/boost/mpl/aux_/.cvsignore,
+	boost/boost/mpl/aux_/Makefile.am,
+	boost/boost/mpl/aux_/O1_size_impl.hpp,
+	boost/boost/mpl/aux_/advance_backward.hpp,
+	boost/boost/mpl/aux_/advance_forward.hpp,
+	boost/boost/mpl/aux_/algorithm_namespace.hpp,
+	boost/boost/mpl/aux_/apply.hpp, boost/boost/mpl/aux_/apply_1st.hpp,
+	boost/boost/mpl/aux_/arg_typedef.hpp,
+	boost/boost/mpl/aux_/arity.hpp,
+	boost/boost/mpl/aux_/arity_spec.hpp,
+	boost/boost/mpl/aux_/at_impl.hpp,
+	boost/boost/mpl/aux_/back_impl.hpp,
+	boost/boost/mpl/aux_/begin_end_impl.hpp,
+	boost/boost/mpl/aux_/bool_value_wknd.hpp,
+	boost/boost/mpl/aux_/clear_impl.hpp,
+	boost/boost/mpl/aux_/common_name_wknd.hpp,
+	boost/boost/mpl/aux_/copy_if_op.hpp,
+	boost/boost/mpl/aux_/copy_op.hpp,
+	boost/boost/mpl/aux_/count_args.hpp,
+	boost/boost/mpl/aux_/debug_print.hpp,
+	boost/boost/mpl/aux_/deref_wknd.hpp,
+	boost/boost/mpl/aux_/empty_impl.hpp,
+	boost/boost/mpl/aux_/erase_impl.hpp,
+	boost/boost/mpl/aux_/filter_iter.hpp,
+	boost/boost/mpl/aux_/fold_backward_impl.hpp,
+	boost/boost/mpl/aux_/fold_backward_impl_body.hpp,
+	boost/boost/mpl/aux_/fold_impl.hpp,
+	boost/boost/mpl/aux_/fold_impl_body.hpp,
+	boost/boost/mpl/aux_/fold_op.hpp,
+	boost/boost/mpl/aux_/fold_pred.hpp,
+	boost/boost/mpl/aux_/front_impl.hpp,
+	boost/boost/mpl/aux_/full_lambda.hpp,
+	boost/boost/mpl/aux_/has_begin.hpp,
+	boost/boost/mpl/aux_/has_rebind.hpp,
+	boost/boost/mpl/aux_/has_size.hpp,
+	boost/boost/mpl/aux_/has_tag.hpp,
+	boost/boost/mpl/aux_/has_type.hpp,
+	boost/boost/mpl/aux_/has_xxx.hpp,
+	boost/boost/mpl/aux_/ice_cast.hpp,
+	boost/boost/mpl/aux_/include_preprocessed.hpp,
+	boost/boost/mpl/aux_/insert_impl.hpp,
+	boost/boost/mpl/aux_/insert_range_impl.hpp,
+	boost/boost/mpl/aux_/integral_wrapper.hpp,
+	boost/boost/mpl/aux_/is_msvc_eti_arg.hpp,
+	boost/boost/mpl/aux_/iter_apply.hpp,
+	boost/boost/mpl/aux_/iter_distance.hpp,
+	boost/boost/mpl/aux_/iter_fold_backward_impl.hpp,
+	boost/boost/mpl/aux_/iter_fold_if_impl.hpp,
+	boost/boost/mpl/aux_/iter_fold_impl.hpp,
+	boost/boost/mpl/aux_/iter_push_front.hpp,
+	boost/boost/mpl/aux_/iterator_category.hpp,
+	boost/boost/mpl/aux_/iterator_names.hpp,
+	boost/boost/mpl/aux_/joint_iter.hpp,
+	boost/boost/mpl/aux_/lambda_arity_param.hpp,
+	boost/boost/mpl/aux_/lambda_expr.hpp,
+	boost/boost/mpl/aux_/lambda_no_ctps.hpp,
+	boost/boost/mpl/aux_/lambda_spec.hpp,
+	boost/boost/mpl/aux_/lambda_support.hpp,
+	boost/boost/mpl/aux_/logical_op.hpp,
+	boost/boost/mpl/aux_/metafunction.hpp,
+	boost/boost/mpl/aux_/msvc_dtw.hpp,
+	boost/boost/mpl/aux_/msvc_eti_base.hpp,
+	boost/boost/mpl/aux_/msvc_never_true.hpp,
+	boost/boost/mpl/aux_/nested_type_wknd.hpp,
+	boost/boost/mpl/aux_/next.hpp,
+	boost/boost/mpl/aux_/pop_back_impl.hpp,
+	boost/boost/mpl/aux_/pop_front_impl.hpp,
+	boost/boost/mpl/aux_/pred.hpp, boost/boost/mpl/aux_/prior.hpp,
+	boost/boost/mpl/aux_/push_back_impl.hpp,
+	boost/boost/mpl/aux_/push_front_impl.hpp,
+	boost/boost/mpl/aux_/sequence_tag.hpp,
+	boost/boost/mpl/aux_/single_element_iter.hpp,
+	boost/boost/mpl/aux_/size_impl.hpp,
+	boost/boost/mpl/aux_/template_arity.hpp,
+	boost/boost/mpl/aux_/template_arity_fwd.hpp,
+	boost/boost/mpl/aux_/traits_lambda_spec.hpp,
+	boost/boost/mpl/aux_/transform_iter.hpp,
+	boost/boost/mpl/aux_/type_wrapper.hpp,
+	boost/boost/mpl/aux_/typeof.hpp, boost/boost/mpl/aux_/unwrap.hpp,
+	boost/boost/mpl/aux_/value_wknd.hpp,
+	boost/boost/mpl/aux_/void_spec.hpp,
+	boost/boost/mpl/aux_/yes_no.hpp,
+	boost/boost/mpl/aux_/config/.cvsignore,
+	boost/boost/mpl/aux_/config/Makefile.am,
+	boost/boost/mpl/aux_/config/bind.hpp,
+	boost/boost/mpl/aux_/config/compiler.hpp,
+	boost/boost/mpl/aux_/config/ctps.hpp,
+	boost/boost/mpl/aux_/config/dependent_nttp.hpp,
+	boost/boost/mpl/aux_/config/dtp.hpp,
+	boost/boost/mpl/aux_/config/eti.hpp,
+	boost/boost/mpl/aux_/config/internals.hpp,
+	boost/boost/mpl/aux_/config/lambda.hpp,
+	boost/boost/mpl/aux_/config/msvc.hpp,
+	boost/boost/mpl/aux_/config/msvc_typename.hpp,
+	boost/boost/mpl/aux_/config/nttp.hpp,
+	boost/boost/mpl/aux_/config/overload_resolution.hpp,
+	boost/boost/mpl/aux_/config/preprocessor.hpp,
+	boost/boost/mpl/aux_/config/static_constant.hpp,
+	boost/boost/mpl/aux_/config/ttp.hpp,
+	boost/boost/mpl/aux_/config/use_preprocessed.hpp,
+	boost/boost/mpl/aux_/config/vector.hpp,
+	boost/boost/mpl/aux_/config/workaround.hpp,
+	boost/boost/mpl/aux_/preprocessed/.cvsignore,
+	boost/boost/mpl/aux_/preprocessed/Makefile.am,
+	boost/boost/mpl/aux_/preprocessed/bcc/.cvsignore,
+	boost/boost/mpl/aux_/preprocessed/bcc/Makefile.am,
+	boost/boost/mpl/aux_/preprocessed/bcc/advance_backward.hpp,
+	boost/boost/mpl/aux_/preprocessed/bcc/advance_forward.hpp,
+	boost/boost/mpl/aux_/preprocessed/bcc/and.hpp,
+	boost/boost/mpl/aux_/preprocessed/bcc/apply.hpp,
+	boost/boost/mpl/aux_/preprocessed/bcc/arg.hpp,
+	boost/boost/mpl/aux_/preprocessed/bcc/basic_bind.hpp,
+	boost/boost/mpl/aux_/preprocessed/bcc/bind.hpp,
+	boost/boost/mpl/aux_/preprocessed/bcc/fold_backward_impl.hpp,
+	boost/boost/mpl/aux_/preprocessed/bcc/fold_impl.hpp,
+	boost/boost/mpl/aux_/preprocessed/bcc/full_lambda.hpp,
+	boost/boost/mpl/aux_/preprocessed/bcc/iter_fold_backward_impl.hpp,
+	boost/boost/mpl/aux_/preprocessed/bcc/iter_fold_if_impl.hpp,
+	boost/boost/mpl/aux_/preprocessed/bcc/iter_fold_impl.hpp,
+	boost/boost/mpl/aux_/preprocessed/bcc/lambda_helper.hpp,
+	boost/boost/mpl/aux_/preprocessed/bcc/lambda_no_ctps.hpp,
+	boost/boost/mpl/aux_/preprocessed/bcc/list.hpp,
+	boost/boost/mpl/aux_/preprocessed/bcc/list_c.hpp,
+	boost/boost/mpl/aux_/preprocessed/bcc/or.hpp,
+	boost/boost/mpl/aux_/preprocessed/bcc/placeholders.hpp,
+	boost/boost/mpl/aux_/preprocessed/bcc/quote.hpp,
+	boost/boost/mpl/aux_/preprocessed/bcc/template_arity.hpp,
+	boost/boost/mpl/aux_/preprocessed/bcc/vector.hpp,
+	boost/boost/mpl/aux_/preprocessed/bcc/vector_c.hpp,
+	boost/boost/mpl/aux_/preprocessed/bcc551/.cvsignore,
+	boost/boost/mpl/aux_/preprocessed/bcc551/Makefile.am,
+	boost/boost/mpl/aux_/preprocessed/bcc551/advance_backward.hpp,
+	boost/boost/mpl/aux_/preprocessed/bcc551/advance_forward.hpp,
+	boost/boost/mpl/aux_/preprocessed/bcc551/and.hpp,
+	boost/boost/mpl/aux_/preprocessed/bcc551/apply.hpp,
+	boost/boost/mpl/aux_/preprocessed/bcc551/arg.hpp,
+	boost/boost/mpl/aux_/preprocessed/bcc551/basic_bind.hpp,
+	boost/boost/mpl/aux_/preprocessed/bcc551/bind.hpp,
+	boost/boost/mpl/aux_/preprocessed/bcc551/fold_backward_impl.hpp,
+	boost/boost/mpl/aux_/preprocessed/bcc551/fold_impl.hpp,
+	boost/boost/mpl/aux_/preprocessed/bcc551/full_lambda.hpp,
+	boost/boost/mpl/aux_/preprocessed/bcc551/iter_fold_backward_impl.hp
+	p, boost/boost/mpl/aux_/preprocessed/bcc551/iter_fold_if_impl.hpp,
+	boost/boost/mpl/aux_/preprocessed/bcc551/iter_fold_impl.hpp,
+	boost/boost/mpl/aux_/preprocessed/bcc551/lambda_helper.hpp,
+	boost/boost/mpl/aux_/preprocessed/bcc551/lambda_no_ctps.hpp,
+	boost/boost/mpl/aux_/preprocessed/bcc551/list.hpp,
+	boost/boost/mpl/aux_/preprocessed/bcc551/list_c.hpp,
+	boost/boost/mpl/aux_/preprocessed/bcc551/or.hpp,
+	boost/boost/mpl/aux_/preprocessed/bcc551/placeholders.hpp,
+	boost/boost/mpl/aux_/preprocessed/bcc551/quote.hpp,
+	boost/boost/mpl/aux_/preprocessed/bcc551/template_arity.hpp,
+	boost/boost/mpl/aux_/preprocessed/bcc551/vector.hpp,
+	boost/boost/mpl/aux_/preprocessed/bcc551/vector_c.hpp,
+	boost/boost/mpl/aux_/preprocessed/gcc/.cvsignore,
+	boost/boost/mpl/aux_/preprocessed/gcc/Makefile.am,
+	boost/boost/mpl/aux_/preprocessed/gcc/advance_backward.hpp,
+	boost/boost/mpl/aux_/preprocessed/gcc/advance_forward.hpp,
+	boost/boost/mpl/aux_/preprocessed/gcc/and.hpp,
+	boost/boost/mpl/aux_/preprocessed/gcc/apply.hpp,
+	boost/boost/mpl/aux_/preprocessed/gcc/arg.hpp,
+	boost/boost/mpl/aux_/preprocessed/gcc/basic_bind.hpp,
+	boost/boost/mpl/aux_/preprocessed/gcc/bind.hpp,
+	boost/boost/mpl/aux_/preprocessed/gcc/fold_backward_impl.hpp,
+	boost/boost/mpl/aux_/preprocessed/gcc/fold_impl.hpp,
+	boost/boost/mpl/aux_/preprocessed/gcc/full_lambda.hpp,
+	boost/boost/mpl/aux_/preprocessed/gcc/iter_fold_backward_impl.hpp,
+	boost/boost/mpl/aux_/preprocessed/gcc/iter_fold_if_impl.hpp,
+	boost/boost/mpl/aux_/preprocessed/gcc/iter_fold_impl.hpp,
+	boost/boost/mpl/aux_/preprocessed/gcc/lambda_helper.hpp,
+	boost/boost/mpl/aux_/preprocessed/gcc/lambda_no_ctps.hpp,
+	boost/boost/mpl/aux_/preprocessed/gcc/list.hpp,
+	boost/boost/mpl/aux_/preprocessed/gcc/list_c.hpp,
+	boost/boost/mpl/aux_/preprocessed/gcc/or.hpp,
+	boost/boost/mpl/aux_/preprocessed/gcc/placeholders.hpp,
+	boost/boost/mpl/aux_/preprocessed/gcc/quote.hpp,
+	boost/boost/mpl/aux_/preprocessed/gcc/template_arity.hpp,
+	boost/boost/mpl/aux_/preprocessed/gcc/vector.hpp,
+	boost/boost/mpl/aux_/preprocessed/gcc/vector_c.hpp: Removed old
+	boost from source tree, now needs to be independently installed.
+
+2005-04-20 09:19  minty
+
+	* INSTALL: Add BOOST to the dependency list.
+
+2005-04-20 07:20  cgtobix
+
+	* render/csgtree.cpp, render/csgtree.h, render/imagebuffer.cpp,
+	render/imagepixel.cpp, render/imagepixel.h: Changed
+	std::vector<SqImageSample> to std::list<SqImageSample>
+
+2005-04-19 17:26  minty
+
+	* render/kdtree.h: GCC fixes for CqKDTree
+
+2005-04-19 17:25  minty
+
+	* display/Makefile.am, libddmanager/Makefile.am,
+	libraytrace/Makefile.am, libshaderexecenv/Makefile.am,
+	libshadervm/Makefile.am, libslxargs/Makefile.am,
+	m4/aqsis_check_boost.m4, render/Makefile.am: Stop POSSIX using the
+	In-Tree boost. In-Tree boost to be removed in favour of a local
+	boost install.
+
+2005-04-19 17:24  minty
+
+	* Makefile.am, configure.ac: Stop POSSIX using the In-Tree boost.
+	In-Tree boost to be removed in favour of a local boost install.
+
+2005-04-18 06:41  pgregory
+
+	* render/imagebuffer.cpp, render/imagebuffer.h,
+	render/imagepixel.cpp, render/imagepixel.h, render/occlusion.h: Fix
+	DoF support in the new sampling system (still very slow though).
+
+2005-04-16 20:48  pgregory
+
+	* render/ri.cpp: Fix bug #1184401, if a RIB file explicitly
+	redeclared "P", i.e. "vertex point P" it caused a comparison to
+	fail when collecting primitive variable data, the comparison was
+	being done agains the token, not the parsed variable name.
+
+2005-04-16 20:47  pgregory
+
+	* render/ri.cpp: Fix bug #1184401, if a RIB file explicitly
+	redeclared "P", i.e. "vertex point P" it caused a comparison to
+	fail when collecting primitive variable data, the comparison was
+	being done agains the token, not the parsed variable name.
+
+2005-04-14 06:58  pgregory
+
+	* render/imagebuffer.cpp: Fix CSG in new sampling code.
+
+2005-04-14 06:52  pgregory
+
+	* render/imagebuffer.cpp: Fix LOD in new sampling code, and
+	partially fix CSG.
+
+2005-04-13 06:47  pgregory
+
+	* render/imagebuffer.cpp, render/kdtree.h, render/occlusion.h,
+	render/points.h: Some work on occlusion culling in the new KDTree
+	sampling system.
+
+2005-04-12 22:49  joron
+
+	* render/bucket.cpp, render/bucket.h, render/imagebuffer.cpp,
+	render/imagebuffer.h, render/imagepixel.cpp, render/imagepixel.h,
+	render/kdtree.h, render/occlusion.cpp, render/points.cpp,
+	render/points.h, render/stats.h: 
+	
+	bucket.cpp, bucket.h CombineElement() receive pre compute
+	zthreshold,   filterdepth so imagepixel.cpp imagepixel.h will
+	remove some superficious   computation.
+	
+	imagebuffer.cpp, imagebuffer.h keep track of the current
+	zthreshold, filterdept and the eyesplits values so the
+	RenderImage() doesn't have to compute them all the time. stats.h
+	make sure the texturememory counter is never negative
+	occlusion.cpp, kdtree.h, points.cpp, points.h  make sure they
+	compiled on NT and MacOSX (gcc 3.3)
+
+2005-04-11 23:57  pgregory
+
+	* render/kdtree.h, render/occlusion.cpp: Only initialise the
+	occlusion KDTree once, then for subsequent buckets, just
+	recalculate the bounds. This may result in very slightly
+	overlapping nodes, but won't affect things much, if at all.
+
+2005-04-11 20:16  pgregory
+
+	* render/bound.h, render/imagebuffer.cpp, render/imagebuffer.h,
+	render/imagepixel.cpp, render/imagepixel.h, render/kdtree.h,
+	render/occlusion.cpp, render/occlusion.h, render/points.cpp,
+	render/points.h: Implement alternative sampling method, using a
+	KDTree to determine which samples to test against. Experimental,
+	enable using
+	
+	    Option "Optimise" "integer Sampling" [1]
+
+2005-04-09 03:02  joron
+
+	* libshaderexecenv/shadeops.cpp: 
+	
+	An optimization for normalize() shadeops. I verify if the normal
+	vector would not be the same over the grid. In case of flat patchs
+	it is a big gain of performance. Idem for polygons.
+
+2005-04-08 23:17  joron
+
+	* libri2rib/output.cpp, libri2rib/output.h:  Implement the new
+	Condition RI C Binding.
+	
+	  These files needed to be modified so librib2, librib2ri,
+	libri2rib, libaqsis   will know about the new C Binding RIB
+	commands. The command based on the releasenote 10 of  Prman; are   
+	  RiIfBegin(string condition), RiIfEnd, RiElse, RiElseIf(string
+	condition).
+	
+	  The parser calls the right RiIfBegin()...; and each new commands
+	will call  TestCondition(condition) implement in the subsequant
+	checks-in.
+	
+	  It support math and logical arithmetic for float, integer, color,
+	point, vector, normal and  support direct comparaison with string.
+	
+	  see the new module condition.cpp/condition.h
+
+2005-04-08 10:55  joron
+
+	* render/api.xml: 
+	
+	Implement the new Condition RI C Binding.
+	
+	 These files needed to be modified so librib2, librib2ri,
+	libri2rib, libaqsis  will know about the new C Binding RIB
+	commands. The command based on the releasenote 10 of Prman; are    
+	RiIfBegin(string condition), RiIfEnd, RiElse, RiElseIf(string
+	condition).
+	
+	 The parser calls the right RiIfBegin()...; and each new commands
+	will call TestCondition(condition) implement in the subsequant
+	checks-in.
+	
+	 It support math and logical arithmetic for float, integer, color,
+	point, vector, normal and support direct comparaison with string.
+	
+	 see the new module condition.cpp/condition.h
+
+2005-04-08 04:18  joron
+
+	* render/libaqsis.dsp: 
+	
+	add condition.cpp, condition.h.
+
+2005-04-08 04:12  joron
+
+	* render/condition.cpp, render/condition.h: 
+	
+	Implement TestCondition() calls by RiIfBegin() and RiElseIf().
+
+2005-04-08 04:09  joron
+
+	* libri2rib/output.h, libri2rib/ri.cpp, librib2/librib.h,
+	librib2/parser.yxx, librib2/scanner.lxx, librib2ri/librib2ri.cpp,
+	librib2ri/librib2ri.h, librib2stream/librib2stream.cpp,
+	librib2stream/librib2stream.h, render/Makefile.am, render/ri.cpp: 
+	
+	Implement the new Condition RI C Binding.
+	
+	These files needed to be modified so librib2, librib2ri, libri2rib,
+	libaqsis will know about the new C Binding RIB commands. The
+	command based on the releasenote 10 of Prman; are   
+	RiIfBegin(string condition), RiIfEnd, RiElse, RiElseIf(string
+	condition).
+	
+	The parser calls the right RiIfBegin()...; and each new commands
+	will call TestCondition(condition) implement in the subsequant
+	checks-in.
+	
+	It support math and logical arithmetic for float, integer, color,
+	point, vector, normal and support direct comparaison with string.
+	
+	see the new module condition.cpp/condition.h
+
+2005-04-03 08:58  pgregory
+
+	* render/ri.cpp: Fix bug #1175571 The RiPointsGeneralPolygonsV
+	routine wasn't dealing with integer primitive variables at all.
+
+2005-04-03 00:57  pgregory
+
+	* render/ri.cpp: Fix bug #1175571 The RiPointsGeneralPolygonsV
+	routine wasn't dealing with integer primitive variables at all.
+
+2005-04-02 21:25  joron
+
+	* librib2/parser.yxx, librib2/scanner.lxx: 
+	
+	Remove the error when aqsis parses rib files containing 3.04 token
+	like IfBegin, IfEnd and ElseIf.
+
+2005-04-02 21:24  joron
+
+	* plugins/tga2tif/tga2tif.c: 
+	
+	remove <malloc.h> is not used anymore.
+
+2005-04-01 12:55  joron
+
+	* plugins/png2tif/Makefile.am:	First version.
+
+2005-04-01 12:54  joron
+
+	* plugins/png2tif/makefile.am:	makefile.am -> Makefile.am
+
+2005-04-01 12:53  joron
+
+	* plugins/png2tif/makefile.am, plugins/png2tif/png2tif.c: 
+	
+	Put them to cvs
+
+2005-04-01 05:46  joron
+
+	* libshaderexecenv/shadeops.cpp: 
+	
+	slightly faster occlusion(); it reads once the matrices, instead of
+	reading constantly the same matrix information it reads at the
+	beginning until you change the occlusion map.
+	
+	complete match() if you have already install regular expression
+	(linux, macosx have it by default); otherwise match() stays nearly
+	the same only faster.
+
+2005-04-01 05:37  joron
+
+	* render/environment.cpp, render/ri.cpp, render/texturemap.cpp,
+	render/texturemap.h: 
+	
+	astyle environment.cpp texturemap.cpp texturemap.h deal with
+	cotangent information saved by ri.cpp for cube environment map
+	ri.cpp save the cotangent (as 3delight, air, ....)
+	
+	Right now the cube texturemapping is very close to 3delight. It is
+	getting.
+
+2005-04-01 05:29  joron
+
+	* librib2/bdec.cpp: 
+	
+	A few months ago bdec.cpp was able to be faster but introduce some
+	bugs with gzipped and/or binary rib files. I decided to let the
+	same enhancement but it will only available if	you set "IGNOREGZ"
+	environment variable. Otherwise it remains as before.
+
+2005-04-01 05:22  joron
+
+	* libshadervm/shadervariable.h: 
+	
+	Varying string variables will act as uniform string variables.
+
+2005-04-01 05:07  joron
+
+	* plugins/tga2tif/Makefile.am, plugins/tga2tif/tga2tif.c: [no log
+	message]
+
+2005-03-31 01:59  joron
+
+	* aqsis/aqsis.cpp: 
+	
+	make sure it works for both posix, macosx.
+
+2005-03-30 15:48  pgregory
+
+	* aqsis/aqsis.cpp, render/libaqsis.def: Added a flexible catch all
+	option to the aqsis command line options.
+	
+	--option "<any RIB request>"
+	
+	You can specify multiple --option's on the command line, each
+	containing a string representing a RIB request. These will all be
+	parsed and executed just before the WorldBegin.
+	
+	example:
+	
+	aqsis --option "ShadingRate 20" --option "Format 400 400 1"
+	--option "PixelFilter \"gaussian\" 10 10" vase.rib
+
+2005-03-30 12:10  pgregory
+
+	* Renderer.dsw, aqsis/aqsis.cpp: Add a --res option to aqsis CL
+	renderer.
+
+2005-03-30 11:55  joron
+
+	* libcodegenvm/Makefile.am: 
+	
+	add a reference to ../render directory in order to find version.h
+
+2005-03-28 00:53  joron
+
+	* aqsis/Makefile.am, teqser/Makefile.am: 
+	
+	make sure both teqser and aqsis pulls into the list of libraries
+	fltk, and in context of MacosX the framework.
+
+2005-03-28 00:47  joron
+
+	* librib2/scanner.lxx, libslparse/scanner.lxx: 
+	
+	We will assume the MACOSX is identical in term of tools like
+	flex/bison as the port for Linux. So the parser.h will be used
+	instead of parser.h.cpp (as on NT) or previously known as
+	parser.hpp.
+	
+	for both renderer/librib2, renderer/libslparse.
+
+2005-03-26 06:32  tshead
+
+	* Makefile.am, configure.ac, aqsis/Makefile.am, aqsl/Makefile.am,
+	aqsltell/Makefile.am, display/Makefile.am,
+	librib2/tests/Makefile.am, m4/aqsis_check_libjpeg.m4,
+	m4/aqsis_check_libtiff.m4, m4/aqsis_check_libz.m4,
+	m4/aqsis_libjpeg_args.m4, m4/aqsis_libtiff_args.m4,
+	m4/aqsis_libz_args.m4, m4/aqsis_with_debugging.m4,
+	m4/aqsis_with_plugins.m4, m4/aqsis_with_profiling.m4,
+	m4/aqsis_with_xsltproc.m4, plugins/common/Makefile.am,
+	plugins/jpg2tif/Makefile.am, render/Makefile.am,
+	teqser/Makefile.am: * Posix build cleanup
+
+2005-03-25 08:44  tshead
+
+	* configure.ac, m4/aqsis_libjpeg_args.m4, m4/aqsis_libtiff_args.m4,
+	m4/aqsis_libz_args.m4, m4/aqsis_with_openexr.m4, m4/bits.m4,
+	plugins/Makefile.am, plugins/bmp2tif/.cvsignore,
+	plugins/exr2tif/.cvsignore, plugins/exr2tif/Makefile.am,
+	render/macosx/.cvsignore, render/macosx/std/.cvsignore: * exr2tif
+	plugin can be enabled/disabled at configure-time * Began cleanup of
+	the autotools build
+
+2005-03-24 03:52  joron
+
+	* render/environment.cpp, render/ri.cpp, render/texturemap.cpp,
+	render/texturemap.h: 
+	
+	Make sure environment() behaved. Cube' environment GetSample() was
+	rewritten based on Pixie code, old implementation and the new
+	implemantation for MipMap GetSample().
+	
+	In environment for cube; it will support:
+	
+	Filter at runtime ("filter" "gaussian") PixelVariance
+	Bilinear/Trilinear sampling
+	
+	Both latlong and cubic environment file are directly compatible
+	with others renderer's latlong/cubic tiff files.
+	
+	You could use now teqser/aqsis to generate environment latlong/cube
+	for others renderer and aqsis could read the ones generated by
+	others.
+
+2005-03-19 12:04  joron
+
+	* configure.ac: 
+	
+	Until I found a way to configurate if the user has OpenEXR I remove
+	the build of d_exr, and exr2tif.
+
+2005-03-14 05:07  joron
+
+	* configure.ac: 
+	
+	add d_exr display support.
+
+2005-03-14 05:04  joron
+
+	* configure.ac: 
+	
+	add bmp2tif, exr2tif support.
+
+2005-03-14 04:59  joron
+
+	* plugins/Makefile.am: 
+	
+	add two new plugin bmp2tif, exr2tif. bmp2tif is windows bitmap
+	plugin exr2tif is OpenEXR plugin for aqsis.
+
+2005-03-14 04:57  joron
+
+	* plugins/bmp2tif/Makefile.am, plugins/bmp2tif/bmp2tif.c: bmp2tif
+	plugin
+
+2005-03-14 04:31  joron
+
+	* plugins/exr2tif/Makefile.am, plugins/exr2tif/exr2tif.cpp: 
+	
+	First version of the importer for OpenEXR file; it convert RGBA
+	channels information (could be into Half, or Float format) and
+	create unsigned char information with gamma correction (set as
+	0.0).
+	
+	If you have GAMMA environment variable set to any value between -20
+	... 20.0 it will apply that value as correction instead.
+
+2005-03-14 04:26  joron
+
+	* d_exr/Makefile.am, d_exr/d_exr.cpp, d_exr/dspyhlpr.c,
+	d_exr/dspyhlpr.h, d_exr/tst.rib: OpenEXR Display
+
+2005-03-12 20:05  joron
+
+	* libslparse/typecheck.cpp: 
+	
+	Protect againts Null pointer.
+
+2005-03-12 19:58  joron
+
+	* render/texturemap.cpp: 
+	
+	I removed Trilinear filtering by default; and only let it when the
+	user sets it by "Option" "texture" "lerp" 1.
+	
+	It solved the problem with too much blurry texturemapping... eg.
+	the problem described by Tim (blurry.rib,sharp.rib).
+	
+	Also I make sure BiLinear() checks if the mipmap is valid before
+	access its individual pixel...
+
+2005-03-11 13:07  joron
+
+	* render/stats.cpp: 
+	
+	stats.cpp : remove the division by zero into stats.cpp when you
+	don't have either primitives or curves, procedurals primtives. I
+	also from the totol timing SampleTexture which is already accounted
+	withing different shaders timers.
+
+2005-03-11 13:05  joron
+
+	* render/environment.cpp: 
+	
+	environment.cpp: the start/stop were in wrong position.
+
+2005-03-11 06:13  joron
+
+	* libshaderexecenv/shadeops.cpp: 
+	
+	make sure the textureinfo() SL function returns 0 when the file
+	doesn't exist or if the texture is not valid shadow, environment or
+	mipmap/plain files.
+
+2005-03-11 06:04  joron
+
+	* libddmanager/ddmanager.cpp, libddmanager/ddmanager.h: 
+	
+	Respect the flag PkDspyFlagsWantsScanLineOrder and make sure the
+	flag PkDspyMaskType is used to filter down the type.
+
+2005-02-24 16:05  pgregory
+
+	* INSTALL: Add prerequisites list.
+
+2005-02-24 00:18  pgregory
+
+	* Makefile.am, render/imagebuffer.cpp, render/micropolygon.cpp,
+	render/micropolygon.h, render/points.cpp, render/points.h,
+	render/quadrics.cpp, render/ri.cpp, render/shadowmap.cpp,
+	render/texturemap.cpp, render/texturemap.h: Merged fix for #1144077
+	from the 1.0 mainenance branch.
+	
+	Commit Michel Joron's changes to texture mapping, comment from
+	Michel...
+	
+	---------- Improved a lot the texturemap.cpp, texturemap.h 1)
+	GetSampleSgle() is renamed GetSampleWithoutBlur()      within this
+	function now the sampling supports runtime filter changes	   
+	eg. texture(s,t,"filter","gaussian")	  the number of samples is
+	configurable	       eg.  texture(s,t,"samples", 64)	    wih or
+	without out trilinear() sampling	   eg.	texture(s,t,
+	"lerp", 0)
+	
+	     It uses a method CalculateLevel() to figure which mipmap level
+	is required; CalculateLevel() caches numerous infromation within
+	CqTextureMap, in prime it used now fastlog2().
+	
+	2) GetSampleTri() is renamed GetSampleWithBlur()
+	
+	     within this function now the sampling supports runtime filter
+	changes 	  eg. texture(s,t,"filter","gaussian")	    the
+	number of samples is configurable	    eg. 
+	texture(s,t,"samples", 64)
+	
+	    It uses too the same method CaculateLevel(). --------
+
+2005-02-22 23:43  pgregory
+
+	* render/imagebuffer.cpp, render/micropolygon.cpp,
+	render/micropolygon.h, render/points.cpp, render/points.h,
+	render/quadrics.cpp: Fix bug #1144077. The implementation of motion
+	blurred/DoF micropolygons using the CqDetachedMicropolygon class
+	didn't allow for the special case micropolygon used for Points. The
+	use of CqDetachedMicropolygon has now been removed, and an
+	alternative solution found.
+
+2005-02-01 23:45  jpgrad
+
+	* render/options.cpp: Fix for Bug 1113859 (ScreenWindow doesn't
+	work properly).
+	
+	It seems that some minus signs were missing.  This chunk of code
+	really needs to be completely reviewed at some stage though (and
+	the stages of constructing the transformations documented *much*
+	more fully!).
+
+2005-01-26 23:21  pgregory
+
+	* render/ri.cpp: Fix a problem with array primitive variables on
+	RiPointsGeneralPolygons. We triangulate the general polys and
+	produce a RiPointsPolygons, during which process we need to add to
+	any uniform and facevarying arrays to account for triangles added
+	during triangulation. We weren't taking into account the lenght of
+	each element in an array variable.
+
+2005-01-25 23:27  pgregory
+
+	* render/micropolygon.cpp: Minor optimisation if dPdu or dPdv are
+	not needed.
+
+2005-01-25 23:20  pgregory
+
+	* render/micropolygon.cpp: Fix bug #1104545, Surface derivatives
+	are 0 (on quadrics)
+
+2005-01-24 22:44  pgregory
+
+	* libslparse/parser.yxx: Fix bug #1108592, array variables could
+	not be passed as arguments to functions.
+
+2005-01-24 20:13  pgregory
+
+	* libslparse/parser.yxx: Fix bug #1108592, array variables could
+	not be passed as arguments to functions.
+
+2005-01-17 16:55  pgregory
+
+	* Makefile.am: Add aqsis.spec to the package
+
+2005-01-17 16:21  pgregory
+
+	* ChangeLog: Update changelog ready for release.
+
+2005-01-17 16:10  pgregory
+
+	* aqsis.spec: Update from Tobias
+
+2005-01-14 13:43  mw_matti
+
+	* Renderer.sln: No idea why 7.1 changes something again :/ Here it
+	is, ready for 1.0
+
+2005-01-14 13:28  pgregory
+
+	* configure.ac, render/micropolygon.cpp, render/version.h: Update
+	version no. to 1.1.0, this is now the post 1.0 development branch.
+
+2005-01-14 13:26  pgregory
+
+	* configure.ac, render/version.h: Update version no. to 1.0.0 in
+	preparation for 1.0 launch.
+
+2005-01-10 20:40  cgtobix
+
+	* render/ri.cpp: Removed double SHINYMETAL entry.
+
+2005-01-06 14:09  pgregory
+
+	* render/points.cpp: Fix handling of "Os" on RiPoints.
+
+2005-01-06 00:52  pseudonym
+
+	* render/points.cpp, render/points.h: Fix for Mario F.'s RiPoints
+	problem.
+
+2005-01-06 00:21  pseudonym
+
+	* aqsis/aqsis.cpp: Print "(debug build)" in response to aqsis
+	--version if _DEBUG is enabled.
+
+2005-01-05 04:02  pseudonym
+
+	* libslparse/parsenode.h, libslparse/parser.yxx: Improve error
+	reporting a little bit.
+
+2005-01-03 16:01  pgregory
+
+	* configure.ac, render/Makefile.am, render/macosx/.cvsignore,
+	render/macosx/Makefile.am, render/macosx/valarray,
+	render/macosx/std/.cvsignore, render/macosx/std/Makefile.am,
+	render/macosx/std/std_valarray.h,
+	render/macosx/std/valarray_array.h,
+	render/macosx/std/valarray_array.tcc,
+	render/macosx/std/valarray_meta.h: Remove legacy MacOS support
+	files, no longer needed with the latest versions of MacOSX.
+
+2005-01-03 04:47  tshead
+
+	* render/Makefile.am: * Fix: Posix build
+
+2004-12-25 23:27  minty
+
+	* libaqsistypes/plugins.cpp: Bug - Make sure dlopen never falls
+	back to ld.so.conf and friends when locking for plugins/dso/etc
+
+2004-12-25 23:02  minty
+
+	* render/ri.cpp: Add default paths setting for the C bindings,
+	replicates the code from aqsis
+
+2004-12-24 00:09  minty
+
+	* libri2rib/ri.cpp: Add a stub RiProcFree to make linking with
+	libri2rib or libaqsis more transparent.
+
+2004-12-24 00:08  minty
+
+	* render/Makefile.am: Add libraytrace to the linking policy for
+	libaqsis
+
+2004-12-09 13:30  pgregory
+
+	* aqsis/aqsis.cpp: Add a --beep option to send a beep character to
+	the console when all rendering is complete.
+
+2004-12-09 08:58  pgregory
+
+	* runprogramtest/runprogramtest.dsp: Make sure runprogramtest can
+	find zlib.lib.
+
+2004-12-08 17:04  pgregory
+
+	* aqsis/aqsis.cpp, librib2/librib.h, librib2/parser.yxx,
+	librib2/scanner.lxx, render/libaqsis.def: Implement support for
+	skipping frames in the parser. Doing so in the parser makes it
+	faster, as data within a skipped frame is simply not read, and
+	doing so at the C API level makes no sense, as if you don't want to
+	render a frame, you don't make the calls.
+
+2004-12-06 00:15  pgregory
+
+	* renderer.xcode/project.pbxproj: Minor updates to get MacOSX build
+	to work again.
+
+2004-12-06 00:14  pgregory
+
+	* aqsis/aqsis.cpp, render/texturemap.cpp: Minor updates to get
+	MacOSX build to work again.
+
+2004-12-04 22:15  pgregory
+
+	* render/bucket.cpp, render/imagepixel.cpp, render/imagepixel.h:
+	Shuffle the pixel samples, and the DoF offsets with the pixel,
+	after each bucket to ensure that there is no repeating pattern in
+	the sampling.
+
+2004-12-03 13:14  pgregory
+
+	* configure.ac, render/version.h: Update version number, post 0.9.3
+	release. Now shows 0.9.4.
+
+2004-12-03 13:09  pgregory
+
+	* render/imagebuffer.cpp: Fix a bounding problem with DoF. Was
+	applying the DoF expansion in camera space, instead of raster.
+
+2004-12-02 17:31  pgregory
+
+	* Makefile.am: Remove redundant cleanup command to fix distcheck
+	build.
+
+2004-12-02 11:11  pgregory
+
+	* Renderer.dsw, aqsl/aqslcomp.cpp,
+	runprogramtest/runprogramtest.dsp: Fix a build problem under Win32
+	introduced with the inclusion of logging in aqsl. Fix build problem
+	under Win32 of the runprogramtest target.
+
+2004-12-02 00:25  pgregory
+
+	* ChangeLog: Update ready for release.
+
 2004-12-02 00:11  pgregory
 
 	* configure.ac, render/version.h: Update version number ready for
