@@ -728,6 +728,21 @@ public:
             delete( ( *ikey ) );
 	}
 
+    /** Overridden operator new to avoid the pool allocator from CqMicroPolygon.
+     */
+    void* operator new( size_t size )
+    {
+        return( malloc(size) );
+    }
+
+    /** Overridden operator delete to allocate micropolys from a pool.
+     */
+    void operator delete( void* p )
+    {
+        free( p );
+    }
+
+
 public:
     void	AppendKey( const CqVector3D& vA, const CqVector3D& vB, const CqVector3D& vC, const CqVector3D& vD, TqFloat time );
     void	DeleteVariables( TqBool all )
