@@ -29,7 +29,7 @@
 
 START_NAMESPACE( Aqsis )
 
-boost::object_pool<CqLath>	CqLath::m_thePool;
+CqObjectPool<CqLath>	CqLath::m_thePool;
 
 //------------------------------------------------------------------------------
 /**

@@ -28,8 +28,8 @@
 #define	LATH_H_LOADED
 
 #include	"aqsis.h"
+#include	"pool.h"
 #include	<vector>
-#include	<boost/pool/object_pool.hpp>
 
 START_NAMESPACE( Aqsis )
 
@@ -56,14 +56,14 @@ public:
      */
     void* operator new( size_t size )
     {
-        return( m_thePool.malloc() );
+        return( m_thePool.alloc() );
     }
 
     /** Overridden operator delete to allocate micropolys from a pool.
      */
     void operator delete( void* p )
     {
-        m_thePool.free( reinterpret_cast<CqLath*>(p) );
+        m_thePool.free( p );
     }
 
     /// Get a pointer to the lath representing the facet that this one was created from.
@@ -180,7 +180,7 @@ private:
     TqInt	m_VertexIndex;
     TqInt	m_FaceVertexIndex;
 
-	static	boost::object_pool<CqLath>	m_thePool;
+	static	CqObjectPool<CqLath>	m_thePool;
 };
 
 
