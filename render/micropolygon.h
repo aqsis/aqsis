@@ -227,7 +227,8 @@ public:
     }
 	virtual TqBool	usesCSG() const
 	{
-		return(!m_pCSGNode);
+	TqBool result = (m_pCSGNode.get() != NULL);
+		return(result);
 	}
     virtual	boost::shared_ptr<CqCSGTreeNode> pCSGNode() const
     {
