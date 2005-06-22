@@ -1,10 +1,5 @@
-%{!?rel:    %define rel    %(date +%Y%m%d)}
-
 Name: aqsis
-
-Version: 0.9.3_%{rel}
-#Version: 0.9.3
-
+Version: 1.1.0_unstable
 Release: %{distro}
 Summary: RenderMan(tm)-compatible renderer
 License: GPL
@@ -26,7 +21,7 @@ A RenderMan(tm)-compatible renderer
 
 %build
 #export CFLAGS="-O2" 
-#export CXXFLAGS="-O29" 
+#export CXXFLAGS="-O2" 
 ./configure --bindir=%{_bindir} --mandir=%{_mandir} --libdir=%{_libdir} --datadir=%{_datadir} --includedir=%{_includedir} --sysconfdir=%{_sysconfdir}
 
 make
