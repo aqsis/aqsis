@@ -24,7 +24,7 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\libaqsistypes\win32\intel,..\libaqsistypes,..\libshadervm,..\libshaderexecenv,..\librib2ri,..\librib2,..\..\win32libs\include"
-				PreprocessorDefinitions="NDEBUG;CORE=1;_qBUILDING=CORE;PLUGINS;_LIB;WIN32;NO_SYSLOG"
+				PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS"
 				StringPooling="TRUE"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="TRUE"
@@ -94,7 +94,7 @@
 				AdditionalOptions="/Zm200 "
 				Optimization="0"
 				AdditionalIncludeDirectories="..\libaqsistypes\win32\intel,..\libaqsistypes,..\libshadervm,..\libshaderexecenv,..\librib2ri,..\librib2,..\..\win32libs\include"
-				PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_LIB;WIN32;NO_SYSLOG"
+				PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				RuntimeTypeInfo="TRUE"
@@ -167,7 +167,7 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\libaqsistypes\win32\intel,..\libaqsistypes,..\libshadervm,..\libshaderexecenv,..\librib2ri,..\librib2,..\..\win32libs\include"
-				PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_LIB;WIN32;NO_SYSLOG"
+				PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS"
 				StringPooling="TRUE"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="TRUE"
@@ -238,7 +238,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;CORE=1;_qBUILDING=CORE;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -247,7 +247,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BasicRuntimeChecks="3"
 						BrowseInformation="1"/>
 				</FileConfiguration>
@@ -257,7 +257,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
@@ -269,7 +269,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;CORE=1;_qBUILDING=CORE;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -278,7 +278,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BasicRuntimeChecks="3"
 						BrowseInformation="1"/>
 				</FileConfiguration>
@@ -288,7 +288,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
@@ -300,7 +300,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;CORE=1;_qBUILDING=CORE;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -309,7 +309,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BasicRuntimeChecks="3"
 						BrowseInformation="1"/>
 				</FileConfiguration>
@@ -319,7 +319,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
@@ -331,7 +331,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;CORE=1;_qBUILDING=CORE;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -340,7 +340,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BasicRuntimeChecks="3"
 						BrowseInformation="1"/>
 				</FileConfiguration>
@@ -350,7 +350,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
@@ -362,7 +362,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;CORE=1;_qBUILDING=CORE;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -371,7 +371,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BasicRuntimeChecks="3"
 						BrowseInformation="1"/>
 				</FileConfiguration>
@@ -381,7 +381,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
@@ -393,7 +393,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;CORE=1;_qBUILDING=CORE;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -402,7 +402,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BasicRuntimeChecks="3"
 						BrowseInformation="1"/>
 				</FileConfiguration>
@@ -412,7 +412,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
@@ -424,7 +424,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;CORE=1;_qBUILDING=CORE;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -433,7 +433,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BasicRuntimeChecks="3"
 						BrowseInformation="1"/>
 				</FileConfiguration>
@@ -443,7 +443,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
@@ -455,7 +455,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;CORE=1;_qBUILDING=CORE;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -464,7 +464,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BasicRuntimeChecks="3"
 						BrowseInformation="1"/>
 				</FileConfiguration>
@@ -474,7 +474,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
@@ -486,7 +486,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;CORE=1;_qBUILDING=CORE;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -495,7 +495,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BasicRuntimeChecks="3"
 						BrowseInformation="1"/>
 				</FileConfiguration>
@@ -505,7 +505,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
@@ -517,7 +517,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;CORE=1;_qBUILDING=CORE;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -526,7 +526,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BasicRuntimeChecks="3"
 						BrowseInformation="1"/>
 				</FileConfiguration>
@@ -536,7 +536,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
@@ -548,7 +548,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;CORE=1;_qBUILDING=CORE;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -557,7 +557,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BasicRuntimeChecks="3"
 						BrowseInformation="1"/>
 				</FileConfiguration>
@@ -567,7 +567,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
@@ -579,7 +579,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;CORE=1;_qBUILDING=CORE;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -588,7 +588,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BasicRuntimeChecks="3"
 						BrowseInformation="1"/>
 				</FileConfiguration>
@@ -598,7 +598,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
@@ -610,7 +610,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;CORE=1;_qBUILDING=CORE;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -619,7 +619,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BasicRuntimeChecks="3"
 						BrowseInformation="1"/>
 				</FileConfiguration>
@@ -629,7 +629,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
@@ -641,7 +641,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;CORE=1;_qBUILDING=CORE;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -650,7 +650,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BasicRuntimeChecks="3"
 						BrowseInformation="1"/>
 				</FileConfiguration>
@@ -660,7 +660,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
@@ -672,7 +672,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;CORE=1;_qBUILDING=CORE;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -681,7 +681,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BasicRuntimeChecks="3"
 						BrowseInformation="1"/>
 				</FileConfiguration>
@@ -691,7 +691,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
@@ -706,7 +706,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;CORE=1;_qBUILDING=CORE;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -715,7 +715,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BasicRuntimeChecks="3"
 						BrowseInformation="1"/>
 				</FileConfiguration>
@@ -725,7 +725,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
@@ -737,7 +737,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;CORE=1;_qBUILDING=CORE;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -746,7 +746,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BasicRuntimeChecks="3"
 						BrowseInformation="1"/>
 				</FileConfiguration>
@@ -756,7 +756,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
@@ -768,7 +768,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;CORE=1;_qBUILDING=CORE;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -777,7 +777,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BasicRuntimeChecks="3"
 						BrowseInformation="1"/>
 				</FileConfiguration>
@@ -787,7 +787,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
@@ -799,7 +799,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;CORE=1;_qBUILDING=CORE;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -808,7 +808,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BasicRuntimeChecks="3"
 						BrowseInformation="1"/>
 				</FileConfiguration>
@@ -818,7 +818,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
@@ -830,7 +830,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;CORE=1;_qBUILDING=CORE;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -839,7 +839,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BasicRuntimeChecks="3"
 						BrowseInformation="1"/>
 				</FileConfiguration>
@@ -849,7 +849,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
@@ -861,7 +861,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;CORE=1;_qBUILDING=CORE;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -870,7 +870,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BasicRuntimeChecks="3"
 						BrowseInformation="1"/>
 				</FileConfiguration>
@@ -880,7 +880,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
@@ -892,7 +892,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;CORE=1;_qBUILDING=CORE;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -901,7 +901,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BasicRuntimeChecks="3"
 						BrowseInformation="1"/>
 				</FileConfiguration>
@@ -911,7 +911,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
@@ -923,7 +923,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;CORE=1;_qBUILDING=CORE;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -932,7 +932,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BasicRuntimeChecks="3"
 						BrowseInformation="1"/>
 				</FileConfiguration>
@@ -942,7 +942,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
@@ -954,7 +954,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;CORE=1;_qBUILDING=CORE;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -963,7 +963,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BasicRuntimeChecks="3"
 						BrowseInformation="1"/>
 				</FileConfiguration>
@@ -973,7 +973,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
@@ -985,7 +985,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;CORE=1;_qBUILDING=CORE;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -994,7 +994,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BasicRuntimeChecks="3"
 						BrowseInformation="1"/>
 				</FileConfiguration>
@@ -1004,7 +1004,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
@@ -1016,7 +1016,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;CORE=1;_qBUILDING=CORE;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -1025,7 +1025,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BasicRuntimeChecks="3"
 						BrowseInformation="1"/>
 				</FileConfiguration>
@@ -1035,7 +1035,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
@@ -1047,7 +1047,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;CORE=1;_qBUILDING=CORE;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -1056,7 +1056,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BasicRuntimeChecks="3"
 						BrowseInformation="1"/>
 				</FileConfiguration>
@@ -1066,7 +1066,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
@@ -1078,7 +1078,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;CORE=1;_qBUILDING=CORE;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -1087,7 +1087,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BasicRuntimeChecks="3"
 						BrowseInformation="1"/>
 				</FileConfiguration>
@@ -1097,7 +1097,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
@@ -1109,7 +1109,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;CORE=1;_qBUILDING=CORE;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -1118,7 +1118,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BasicRuntimeChecks="3"
 						BrowseInformation="1"/>
 				</FileConfiguration>
@@ -1128,7 +1128,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
@@ -1140,7 +1140,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;CORE=1;_qBUILDING=CORE;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -1149,7 +1149,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BasicRuntimeChecks="3"
 						BrowseInformation="1"/>
 				</FileConfiguration>
@@ -1159,7 +1159,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
@@ -1171,7 +1171,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;CORE=1;_qBUILDING=CORE;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -1180,7 +1180,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BasicRuntimeChecks="3"
 						BrowseInformation="1"/>
 				</FileConfiguration>
@@ -1190,7 +1190,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
@@ -1202,7 +1202,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;CORE=1;_qBUILDING=CORE;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -1211,7 +1211,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BasicRuntimeChecks="3"
 						BrowseInformation="1"/>
 				</FileConfiguration>
@@ -1221,7 +1221,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
@@ -1233,7 +1233,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;CORE=1;_qBUILDING=CORE;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -1242,7 +1242,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BasicRuntimeChecks="3"
 						BrowseInformation="1"/>
 				</FileConfiguration>
@@ -1252,7 +1252,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
@@ -1264,7 +1264,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;CORE=1;_qBUILDING=CORE;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -1273,7 +1273,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BasicRuntimeChecks="3"
 						BrowseInformation="1"/>
 				</FileConfiguration>
@@ -1283,7 +1283,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
@@ -1295,7 +1295,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;CORE=1;_qBUILDING=CORE;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -1304,7 +1304,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BasicRuntimeChecks="3"
 						BrowseInformation="1"/>
 				</FileConfiguration>
@@ -1314,7 +1314,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
@@ -1326,7 +1326,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;CORE=1;_qBUILDING=CORE;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -1335,7 +1335,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BasicRuntimeChecks="3"
 						BrowseInformation="1"/>
 				</FileConfiguration>
@@ -1345,7 +1345,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
@@ -1357,7 +1357,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;CORE=1;_qBUILDING=CORE;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -1366,7 +1366,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BasicRuntimeChecks="3"
 						BrowseInformation="1"/>
 				</FileConfiguration>
@@ -1376,7 +1376,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
@@ -1388,7 +1388,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;CORE=1;_qBUILDING=CORE;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -1397,7 +1397,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BasicRuntimeChecks="3"
 						BrowseInformation="1"/>
 				</FileConfiguration>
@@ -1407,7 +1407,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
@@ -1419,7 +1419,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;CORE=1;_qBUILDING=CORE;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -1428,7 +1428,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BasicRuntimeChecks="3"
 						BrowseInformation="1"/>
 				</FileConfiguration>
@@ -1438,7 +1438,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>
@@ -1450,7 +1450,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;CORE=1;_qBUILDING=CORE;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -1459,7 +1459,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BasicRuntimeChecks="3"
 						BrowseInformation="1"/>
 				</FileConfiguration>
@@ -1469,7 +1469,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;$(NoInherit)"
+						PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_MBCS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS;$(NoInherit)"
 						BrowseInformation="1"/>
 				</FileConfiguration>
 			</File>

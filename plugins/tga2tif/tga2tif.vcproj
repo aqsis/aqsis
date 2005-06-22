@@ -40,7 +40,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libtiff.lib .\..\..\bin/jpg2tif.lib"
+				AdditionalDependencies="libtiff.lib"
 				OutputFile=".\..\..\bin/tga2tif.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
@@ -108,7 +108,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libtiff.lib .\..\..\bin/jpg2tif.lib"
+				AdditionalDependencies="libtiff.lib"
 				OutputFile=".\..\..\bin\profile/tga2tif.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
@@ -174,7 +174,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="libtiff.lib .\..\..\bin/jpg2tif_d.lib"
+				AdditionalDependencies="libtiff.lib"
 				OutputFile="..\..\procedures/tga2tif_d.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"

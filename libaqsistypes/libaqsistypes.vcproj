@@ -23,7 +23,7 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories=".\win32\intel,..\libaqsis,.\,..\..\win32libs\include"
-				PreprocessorDefinitions="PLUGINS;NDEBUG;_LIB;_qBUILDING=CORE;CORE=1;WIN32;NO_SYSLOG"
+				PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS"
 				StringPooling="TRUE"
 				RuntimeLibrary="4"
 				EnableFunctionLevelLinking="TRUE"
@@ -76,7 +76,7 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories=".\win32\intel,..\libaqsis,.\,..\..\win32libs\include"
-				PreprocessorDefinitions="NDEBUG;PLUGINS;_LIB;_qBUILDING=CORE;CORE=1;WIN32;NO_SYSLOG"
+				PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS"
 				StringPooling="TRUE"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="TRUE"
@@ -129,7 +129,7 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories=".\win32\intel,..\libaqsis,.\,..\..\win32libs\include"
-				PreprocessorDefinitions="PLUGINS;NDEBUG;_LIB;_qBUILDING=CORE;CORE=1;WIN32;NO_SYSLOG"
+				PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="TRUE"
@@ -181,7 +181,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories=".\win32\intel,..\libaqsis,.\,..\..\win32libs\include"
-				PreprocessorDefinitions="_DEBUG;PLUGINS;_LIB;_qBUILDING=CORE;CORE=1;WIN32;NO_SYSLOG"
+				PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				RuntimeTypeInfo="TRUE"
@@ -233,7 +233,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories=".\win32\intel,..\libaqsis,.\,..\..\win32libs\include"
-				PreprocessorDefinitions="_DEBUG;PLUGINS;_LIB;_qBUILDING=CORE;CORE=1;WIN32;NO_SYSLOG"
+				PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="5"
 				RuntimeTypeInfo="TRUE"
@@ -285,7 +285,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories=".\win32\intel,..\libaqsis,.\,..\..\win32libs\include"
-				PreprocessorDefinitions="_DEBUG;PLUGINS;_LIB;_qBUILDING=CORE;CORE=1;WIN32;NO_SYSLOG"
+				PreprocessorDefinitions="_DEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				RuntimeTypeInfo="TRUE"
@@ -338,7 +338,7 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories=".\win32\intel,..\libaqsis,.\,..\..\win32libs\include"
-				PreprocessorDefinitions="PLUGINS;NDEBUG;_LIB;_qBUILDING=CORE;CORE=1;WIN32;NO_SYSLOG"
+				PreprocessorDefinitions="NDEBUG;_qBUILDING=CORE;CORE=1;PLUGINS;_LIB;WIN32;NO_SYSLOG;USE_TIMERS"
 				StringPooling="TRUE"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="TRUE"
@@ -759,6 +759,68 @@
 			</File>
 			<File
 				RelativePath="matrix.cpp">
+				<FileConfiguration
+					Name="Release_Static_ST|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Profile|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release_Static_MT|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug_Static_ST|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug_Static_MT|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+						BasicRuntimeChecks="3"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="MultiTimer.cpp">
 				<FileConfiguration
 					Name="Release_Static_ST|Win32">
 					<Tool
@@ -1418,13 +1480,16 @@
 				RelativePath="matrix.h">
 			</File>
 			<File
-				RelativePath="memorypool.h">
+				RelativePath="MultiTimer.h">
 			</File>
 			<File
 				RelativePath="noise.h">
 			</File>
 			<File
 				RelativePath="plugins.h">
+			</File>
+			<File
+				RelativePath="pool.h">
 			</File>
 			<File
 				RelativePath="random.h">
