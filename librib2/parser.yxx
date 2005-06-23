@@ -936,7 +936,12 @@ complete_request
 
 				RendermanInterface::RtBasis *u=ParseCallbackInterface->GetBasisMatrix($2);
 				RendermanInterface::RtBasis *v=ParseCallbackInterface->GetBasisMatrix($4);
-				ParseCallbackInterface->RiBasis(*u, $3, *v, $5);
+				if(u == 0)
+					yyerror("Invalid uBasis \"" + std::string($2) + "\"");
+				if(v == 0)
+					yyerror("Invalid vBasis \"" + std::string($4) + "\"");
+				if(u != 0 && v != 0)
+					ParseCallbackInterface->RiBasis(*u, $3, *v, $5);
 				DiscardStringValue($2);
 				DiscardStringValue($4);
 
