@@ -389,6 +389,8 @@ int main( int argc, const char** argv )
 		std::string	 stracPath(acPath);
 		stracPath.append("..\\");
 		_fullpath(rootPath,&stracPath[0],256);
+		if((rootPath[strlen(rootPath)-1] != '\\') && (strlen(rootPath) < 255))
+			strcat(rootPath, "\\");
 	}
 	g_rc_path = rootPath;
 	g_shader_path = rootPath;
