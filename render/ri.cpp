@@ -810,6 +810,19 @@ RtVoid	RiWorldBegin()
 		QGetRenderContext()->SetDefObjTransform( newTrans );
 	}
 
+	// If rendering a depth buffer, check that the filter is "box" 1x1, warn if not.
+	TqInt iMode = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "DisplayMode" ) [ 0 ];
+	if( iMode & ModeZ )
+	{
+		RtFilterFunc filter = QGetRenderContext() ->optCurrent().funcFilter();
+		TqFloat xwidth = QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "FilterWidth" ) [ 0 ];
+		TqFloat ywidth = QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "FilterWidth" ) [ 1 ];
+		if( filter != RiBoxFilter || xwidth != 1 || ywidth != 1)
+			std::cerr << warning << "When rendering a Z buffer the filter mode should be \"box\" with a width of 1x1" << std::endl;
+	}
+
+
+
 	QGetRenderContext()->SetWorldBegin();
 
     QGetRenderContext() ->optCurrent().InitialiseCamera();
