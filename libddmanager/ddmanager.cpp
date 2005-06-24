@@ -480,7 +480,14 @@ void CqDDManager::LoadDisplayLibrary( SqDisplayRequest& req )
 					// by default we will stored into red channel eg. "s" will be saved into 'r' channel
 					fmt.name = m_RedName;
 				}
-				fmt.type = PkDspyFloat32;
+				if( colorQuantOne == 255 )
+					fmt.type = PkDspyUnsigned8;
+				else if( colorQuantOne == 65535 )
+					fmt.type = PkDspyUnsigned16;
+				else if( colorQuantOne == 4294967295u )
+					fmt.type = PkDspyUnsigned32;
+				else
+					fmt.type = PkDspyFloat32;
 				req.m_AOVnames.push_back(fmt.name);
 				req.m_formats.push_back(fmt);
 			}

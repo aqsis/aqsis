@@ -462,7 +462,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 		{
 			// Allocate the buffer, even if the formatcount <3, always allocated 3, as that is what's needed for the
 			// display.
-			pImage->m_data = new unsigned char[ pImage->m_width * pImage->m_height * MIN(pImage->m_iFormatCount,3) ];
+			pImage->m_data = new unsigned char[ pImage->m_width * pImage->m_height * pImage->m_iFormatCount ];
 			pImage->m_entrySize = pImage->m_iFormatCount * sizeof(char);
 
 			// Initialise the display to a checkerboard to show alpha
