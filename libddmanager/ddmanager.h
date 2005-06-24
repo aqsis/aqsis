@@ -77,6 +77,7 @@ private:
 
 	struct SqDisplayRequest
 	{
+		TqBool		m_valid;
 		std::string m_name;
 		std::string m_type;
 		std::string m_mode;

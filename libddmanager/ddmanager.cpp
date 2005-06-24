@@ -64,6 +64,7 @@ TqInt CqDDManager::AddDisplay( const TqChar* name, const TqChar* type, const TqC
 {
 	SqDisplayRequest req;
 
+	req.m_valid = TqFalse;
 	req.m_name = name;
 	req.m_type = type;
 	req.m_mode = mode;
@@ -129,7 +130,7 @@ TqInt CqDDManager::CloseDisplays()
 
 TqInt CqDDManager::DisplayBucket( IqBucket* pBucket )
 {
-	if( (pBucket->Width() == 0) || (pBucket->Height() == 0) )
+ 	if( (pBucket->Width() == 0) || (pBucket->Height() == 0) )
 		return(0);
 
 	TqInt	xmin = pBucket->XOrigin();
@@ -147,6 +148,10 @@ TqInt CqDDManager::DisplayBucket( IqBucket* pBucket )
 	std::vector<SqDisplayRequest>::iterator i;
 	for ( i = m_displayRequests.begin(); i != m_displayRequests.end(); i++ )
 	{
+		// If the display is not validated, don't send it data.
+		if( !i->m_valid )
+			continue;
+
 		// Allocate enough space to put the whole bucket data into.
 		if (i->m_DataBucket == 0)
 			i->m_DataBucket = reinterpret_cast<unsigned char*>(malloc(i->m_elementSize * pBucket->Width() * pBucket->Height()));
@@ -501,6 +506,38 @@ void CqDDManager::LoadDisplayLibrary( SqDisplayRequest& req )
 		                                      req.m_formats.size(), &req.m_formats[0],
 		                                      &req.m_flags);
 
+		// Check for an error
+		if( err != PkDspyErrorNone )
+		{
+			// The display did not successfully open, so clean up after it and leave the 
+			// request as invalid.
+			std::cerr << error << "Cannot open display \"" << req.m_name << "\" : ";
+			switch(err)
+			{
+				case PkDspyErrorNoMemory:
+					std::cerr << "Out of memory" << std::endl;
+					break;
+				case PkDspyErrorUnsupported:
+					std::cerr << "Unsupported" << std::endl;
+					break;
+				case PkDspyErrorBadParams:
+					std::cerr << "Bad params" << std::endl;
+					break;
+				case PkDspyErrorNoResource:
+					std::cerr << "No resource" << std::endl;
+					break;
+				case PkDspyErrorUndefined:			
+				default:
+					std::cerr << "Undefined" << std::endl;
+					break;
+			}
+
+			CloseDisplayLibrary(req);
+			return;			
+		}
+		else
+			req.m_valid = TqTrue;
+
 		// Now scan the returned format list to make sure that we pass the data in the order the display wants it.
 		std::vector<PtDspyDevFormat>::iterator i;
 		for(i=req.m_formats.begin(); i!=req.m_formats.end(); i++)
@@ -599,6 +636,15 @@ void CqDDManager::CloseDisplayLibrary( SqDisplayRequest& req )
 		free(req.m_DataRow);
 		req.m_DataRow = 0;
 	}
+
+	// Empty out the display request data
+	req.m_CloseMethod = NULL;
+	req.m_DataMethod = NULL;
+	req.m_DelayCloseMethod = NULL;
+	req.m_DriverHandle = 0;
+	req.m_imageHandle = 0;
+	req.m_OpenMethod = NULL;
+	req.m_QueryMethod = NULL;
 
 	/// \note We don't close the driver shared libraries here because doing so caused
 	/// some problems with Win2K and FLTK. It seems that detaching from the drive DLL

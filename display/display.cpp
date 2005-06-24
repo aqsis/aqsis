@@ -40,6 +40,7 @@ using namespace Aqsis;
 #include <sstream>
 #include <string>
 #include <fstream>
+#include <algorithm>
 #include <float.h>
 #include <time.h>
 
@@ -441,10 +442,27 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 		else if(widestFormat == PkDspySigned32)
 			widestFormat = PkDspyUnsigned32;
 
+		// If we are recieving "rgba" data, ensure that it is in the correct order.
+		PtDspyDevFormat outFormat[] =
+		    {
+		        {"r", widestFormat},
+		        {"g", widestFormat},
+		        {"b", widestFormat},
+		        {"a", widestFormat},
+		    };
+		PtDspyError err = DspyReorderFormatting(iFormatCount, format, MIN(iFormatCount,4), outFormat);
+		if( err != PkDspyErrorNone )
+		{
+			return(err);
+		}
+
+
 		// Create and initialise a byte array if rendering 8bit image, or we are in framebuffer mode
 		if(pImage->m_imageType == Type_Framebuffer)
 		{
-			pImage->m_data = new unsigned char[ pImage->m_width * pImage->m_height * pImage->m_iFormatCount ];
+			// Allocate the buffer, even if the formatcount <3, always allocated 3, as that is what's needed for the
+			// display.
+			pImage->m_data = new unsigned char[ pImage->m_width * pImage->m_height * MIN(pImage->m_iFormatCount,3) ];
 			pImage->m_entrySize = pImage->m_iFormatCount * sizeof(char);
 
 			// Initialise the display to a checkerboard to show alpha
@@ -523,15 +541,6 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 
 		}
 
-		// If we are recieving "rgba" data, ensure that it is in the correct order.
-		PtDspyDevFormat outFormat[] =
-		    {
-		        {"r", widestFormat},
-		        {"g", widestFormat},
-		        {"b", widestFormat},
-		        {"a", widestFormat},
-		    };
-		DspyReorderFormatting(iFormatCount, format, MIN(iFormatCount,4), outFormat);
 
 		// Extract any important data from the user parameters.
 		char* compression;
