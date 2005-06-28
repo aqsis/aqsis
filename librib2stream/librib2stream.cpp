@@ -473,6 +473,14 @@ RendermanInterface::RtVoid Stream::RiWorldEnd()
 {
     m_Stream << "RiWorldEnd()" << std::endl;
 }
+RendermanInterface::RtVoid Stream::RiShaderLayerV( RtToken type, RtToken name, RtToken layername, RtInt count, RtToken tokens[], RtPointer values[] )
+{
+	m_Stream << "RiShaderLayerV()" << std::endl;
+}
+RendermanInterface::RtVoid Stream::RiConnectShaderLayers( RtToken type, RtToken layer1, RtToken variable1, RtToken layer2, RtToken variable2 ) 
+{
+	m_Stream << "RiConnectShaderLayers()" << std::endl;
+}
 
 RendermanInterface::RtFilterFunc Stream::GetFilterFunction( RtToken type )
 {

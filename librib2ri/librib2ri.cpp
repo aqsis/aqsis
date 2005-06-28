@@ -473,6 +473,14 @@ RendermanInterface::RtVoid Engine::RiWorldEnd()
 {
     ::RiWorldEnd();
 }
+RendermanInterface::RtVoid Engine::RiShaderLayerV( RtToken type, RtToken name, RtToken layername, RtInt count, RtToken tokens[], RtPointer values[] )
+{
+	::RiShaderLayerV( type, name, layername, count, tokens, values );
+}
+RendermanInterface::RtVoid Engine::RiConnectShaderLayers( RtToken type, RtToken layer1, RtToken variable1, RtToken layer2, RtToken variable2 )
+{
+	::RiConnectShaderLayers( type, layer1, variable1, layer2, variable2 );
+}
 RendermanInterface::RtFilterFunc Engine::GetFilterFunction( RtToken type )
 {
     if ( strcmp( type, "box" ) == 0 )

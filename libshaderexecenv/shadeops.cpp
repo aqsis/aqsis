@@ -4217,7 +4217,7 @@ void CqShaderExecEnv::SO_diffuse( IqShaderData* N, IqShaderData* Result, IqShade
 				pLightsource = m_pAttributes ->pLight( m_li ) ->pShader();
 			if ( pLightsource )
 			{
-				pLightsource->GetValue( "__nondiffuse", __nondiffuse );
+				pLightsource->GetVariableValue( "__nondiffuse", __nondiffuse );
 				/// \note: This is OK here, outside the BEGIN_VARYING_SECTION as, varying in terms of lightsources
 				/// is not valid.
 				if( NULL != __nondiffuse )
@@ -4305,7 +4305,7 @@ void CqShaderExecEnv::SO_specular( IqShaderData* N, IqShaderData* V, IqShaderDat
 				pLightsource = m_pAttributes ->pLight( m_li ) ->pShader();
 			if ( pLightsource )
 			{
-				pLightsource->GetValue( "__nonspecular", __nonspecular );
+				pLightsource->GetVariableValue( "__nonspecular", __nonspecular );
 				/// \note: This is OK here, outside the BEGIN_VARYING_SECTION as, varying in terms of lightsources
 				/// is not valid.
 				if( NULL != __nonspecular )
@@ -5125,7 +5125,7 @@ void CqShaderExecEnv::SO_atmosphere( IqShaderData* name, IqShaderData* pV, IqSha
 	CqString _aq_name;
 	(name)->GetString(_aq_name,__iGrid);
 	if ( pAtmosphere )
-		Result->SetValue( pAtmosphere->GetValue( _aq_name.c_str(), pV ) ? 1.0f : 0.0f, 0 );
+		Result->SetValue( pAtmosphere->GetVariableValue( _aq_name.c_str(), pV ) ? 1.0f : 0.0f, 0 );
 	else
 		Result->SetValue( 0.0f, 0 );
 
@@ -5150,7 +5150,7 @@ void CqShaderExecEnv::SO_displacement( IqShaderData* name, IqShaderData* pV, IqS
 	CqString _aq_name;
 	(name)->GetString(_aq_name,__iGrid);
 	if ( pDisplacement )
-		Result->SetValue( pDisplacement->GetValue( _aq_name.c_str(), pV ) ? 1.0f : 0.0f, 0 );
+		Result->SetValue( pDisplacement->GetVariableValue( _aq_name.c_str(), pV ) ? 1.0f : 0.0f, 0 );
 	else
 		Result->SetValue( 0.0f, 0 );
 
@@ -5175,7 +5175,7 @@ void CqShaderExecEnv::SO_lightsource( IqShaderData* name, IqShaderData* pV, IqSh
 	if ( m_li < m_pAttributes ->cLights() )
 		pLightsource = m_pAttributes ->pLight( m_li ) ->pShader();
 	if ( pLightsource )
-		Result->SetValue( pLightsource->GetValue( _aq_name.c_str(), pV ) ? 1.0f : 0.0f, 0 );
+		Result->SetValue( pLightsource->GetVariableValue( _aq_name.c_str(), pV ) ? 1.0f : 0.0f, 0 );
 	else
 		Result->SetValue( 0.0f, 0 );
 
@@ -5202,7 +5202,7 @@ void CqShaderExecEnv::SO_surface( IqShaderData* name, IqShaderData* pV, IqShader
 	CqString _aq_name;
 	(name)->GetString(_aq_name,__iGrid);
 	if ( pSurface )
-		Result->SetValue( pSurface->GetValue( _aq_name.c_str(), pV ) ? 1.0f : 0.0f, 0 );
+		Result->SetValue( pSurface->GetVariableValue( _aq_name.c_str(), pV ) ? 1.0f : 0.0f, 0 );
 	else
 		Result->SetValue( 0.0f, 0 );
 

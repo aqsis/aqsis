@@ -1969,6 +1969,36 @@
 			</Arguments>
 		</Procedure>
 
+		<Procedure name="RiShaderLayer" return="RtVoid">
+			<Arguments>
+				<Argument name="type" type="RtToken"/>
+				<Argument name="name" type="RtToken"/>
+				<Argument name="layername" type="RtToken"/>
+				<Argument name="plist" type="PARAMETERLIST"/>
+			</Arguments>
+			<Valid>
+				<BeginEnd/>
+				<Frame/>
+				<World/>
+				<Attribute/>
+				<Transform/>
+				<Solid/>
+				<Object Aqsis="true"/>
+				<Motion/>
+			</Valid>
+		</Procedure>
+
+		<Procedure name="RiConnectShaderLayers" return="RtVoid">
+			<NoCache/>
+			<Arguments>
+				<Argument name="type" type="RtToken"/>
+				<Argument name="layer1" type="RtToken"/>
+				<Argument name="variable1" type="RtToken"/>
+				<Argument name="layer2" type="RtToken"/>
+				<Argument name="variable2" type="RtToken"/>
+			</Arguments>
+		</Procedure>
+
 	</Procedures>
 </RiAPI>
 

@@ -225,6 +225,8 @@ TriangleFilter			{ return REQUEST_TOKEN_TRIANGLEFILTER; }
 TrimCurve			{ return REQUEST_TOKEN_TRIMCURVE; }
 WorldBegin			{ return REQUEST_TOKEN_WORLDBEGIN; }
 WorldEnd			{ return REQUEST_TOKEN_WORLDEND; }
+ShaderLayer			{ return REQUEST_TOKEN_SHADERLAYER; }
+ConnectShaderLayers { return REQUEST_TOKEN_CONNECTSHADERLAYERS; }
 version				{ return REQUEST_TOKEN_VERSION; }
 
 {letter}({letter}|{digit})*	{ return UNKNOWN_TOKEN; }

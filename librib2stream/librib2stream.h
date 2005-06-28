@@ -130,6 +130,8 @@ public:
     virtual	RtVoid	RiTrimCurve( RtInt nloops, RtInt ncurves[], RtInt order[], RtFloat knot[], RtFloat min[], RtFloat max[], RtInt n[], RtFloat u[], RtFloat v[], RtFloat w[] );
     virtual	RtVoid	RiWorldBegin();
     virtual	RtVoid	RiWorldEnd();
+	virtual RtVoid	RiShaderLayerV( RtToken type, RtToken name, RtToken layername, RtInt count, RtToken tokens[], RtPointer values[] );
+	virtual RtVoid	RiConnectShaderLayers( RtToken type, RtToken layer1, RtToken variable1, RtToken layer2, RtToken variable2 );
 
     virtual RtFilterFunc	GetFilterFunction( RtToken type );
     virtual RtBasis*	GetBasisMatrix( RtToken type );

@@ -543,7 +543,7 @@ public:
     virtual	void	SetArgument( const CqString& name, EqVariableType type, const CqString& space, void* val );
     virtual	void	SetArgument( CqParameter* pParam, IqSurface* pSurface );
     virtual	IqShaderData*	FindArgument( const CqString& name );
-    virtual	TqBool	GetValue( const char* name, IqShaderData* res );
+    virtual	TqBool	GetVariableValue( const char* name, IqShaderData* res );
     virtual	void	Evaluate( const boost::shared_ptr<IqShaderExecEnv>& pEnv )
     {
         Execute( pEnv );
@@ -577,6 +577,14 @@ public:
     virtual	IqShaderData* CreateTemporaryStorage( EqVariableType type, EqVariableClass _class );
     virtual void DeleteTemporaryStorage( IqShaderData* pData );
     virtual void DefaultSurface();
+	virtual	TqBool IsLayered()
+	{
+		return(TqFalse);
+	}
+	void AddLayer(const CqString& layername, const boost::shared_ptr<IqShader>& layer)
+	{}
+	virtual void AddConnection(const CqString& layer1, const CqString& variable1, const CqString& layer2, const CqString& variable2)
+	{}
 
     /// \todo: These should be exposed by the IqShader Interface somehow.
     static	void ShutdownShaderEngine();

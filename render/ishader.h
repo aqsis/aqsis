@@ -4,8 +4,8 @@
  *	@author	Paul Gregory
  *	@brief	Declare the interface which all shaders must implement.
  *
- *	Last change by:		$Author: pseudonym $
- *	Last change date:	$Date: 2004/02/27 07:00:01 $
+ *	Last change by:		$Author: pgregory $
+ *	Last change date:	$Date: 2005/06/28 16:03:08 $
  */ 
 //------------------------------------------------------------------------------
 
@@ -74,7 +74,7 @@ struct IqShader
      * \param res IqShaderData pointer to store the result in, will be typechecked for suitability.
      * \return Boolean indicating the parameter existed and res was of an appropriate type.
      */
-    virtual	TqBool	GetValue( const char* name, IqShaderData* res ) = 0;
+    virtual	TqBool	GetVariableValue( const char* name, IqShaderData* res ) = 0;
     /** Evaluate the shader code.
      * \param pEnv The shader execution environment to evaluate within.
      */
@@ -119,6 +119,11 @@ struct IqShader
     /** Use the default surface shader for this implementation.
      */
     virtual void DefaultSurface( ) = 0;
+	/** Query if the shader is a layered shader
+	 */
+	virtual TqBool IsLayered() = 0;
+	virtual void AddLayer(const CqString& layername, const boost::shared_ptr<IqShader>& layer) = 0;
+	virtual void AddConnection(const CqString& layer1, const CqString& variable1, const CqString& layer2, const CqString& variable2) = 0;
 };
 
 

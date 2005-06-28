@@ -177,7 +177,6 @@ EXPORTS
 	?DefaultSurface@CqShaderVM@Aqsis@@UAEXXZ
 	?DeleteTemporaryStorage@CqShaderVM@Aqsis@@UAEXPAUIqShaderData@2@@Z
 	?CreateTemporaryStorage@CqShaderVM@Aqsis@@UAEPAUIqShaderData@2@W4EqVariableType@2@W4EqVariableClass@2@@Z
-	?GetValue@CqShaderVM@Aqsis@@UAE_NPBDPAUIqShaderData@2@@Z
 	?FindArgument@CqShaderVM@Aqsis@@UAEPAUIqShaderData@2@ABVCqString@2@@Z
 	?SetArgument@CqShaderVM@Aqsis@@UAEXABVCqString@2@W4EqVariableType@2@0PAX@Z
 	?SetArgument@CqShaderVM@Aqsis@@UAEXPAVCqParameter@2@PAUIqSurface@2@@Z

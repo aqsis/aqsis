@@ -34,11 +34,79 @@ START_NAMESPACE( Aqsis )
 
 
 
-//---------------------------------------------------------------------
-//---------------------------------------------------------------------
-//---------------------------------------------------------------------
-// These are the built in shaders, they will be registered as "builtin_<name>"
-// these should be used where speed is an issue.
+/** Add a new layer to this layered shader.
+ */
+
+void CqLayeredShader::AddLayer(const CqString& layername, const boost::shared_ptr<IqShader> &layer)
+{
+	// Add it to the list of shaders first
+	m_Layers.push_back(std::pair<CqString, boost::shared_ptr<IqShader> >(layername, layer));
+	m_LayerMap[layername] = m_Layers.size()-1;
+
+	// Now combine the new layer's "Uses" data into ours.
+	m_Uses |= layer->Uses();
+}
+
+
+void CqLayeredShader::AddConnection(const CqString& layer1, const CqString& variable1, const CqString& layer2, const CqString& variable2)
+{
+	// Add the connection.
+	/// \todo should check that the layers exist.
+	SqLayerConnection conn;
+	conn.m_layer2Name = layer2;
+	conn.m_variable1Name = variable1;
+	conn.m_variable2Name = variable2;
+	m_Connections.insert(std::pair<CqString, SqLayerConnection>(layer1, conn));
+}
+
+
+bool LayerNameMatch(std::pair<CqString, boost::shared_ptr<IqShader> >& elem1, std::pair<CqString, boost::shared_ptr<IqShader> >& elem2 )
+{
+	return(elem1.first.compare(elem2.first) == 0);
+}
+
+
+
+void CqLayeredShader::Evaluate( const boost::shared_ptr<IqShaderExecEnv>& pEnv )
+{
+	if(!m_Layers.empty())
+	{
+		TqInt index = 1;
+
+		std::vector<std::pair<CqString, boost::shared_ptr<IqShader> > >::iterator i = m_Layers.begin();
+		while( i != m_Layers.end() )
+		{
+			i->second->Evaluate(pEnv);
+			std::vector<std::pair<CqString, boost::shared_ptr<IqShader> > >::iterator j = i;
+			++i;
+			if(m_Connections.count(j->first) > 0)
+			{
+				// Iterate across all map entries with the previous layer as it's layer1 name
+				// and complete the connections.
+				std::multimap<CqString, SqLayerConnection>::iterator start = m_Connections.lower_bound(j->first);
+				std::multimap<CqString, SqLayerConnection>::iterator end = m_Connections.upper_bound(j->first);
+				while( start != end )
+				{
+					// Find the target layer in the map, if it exists.
+					if(m_LayerMap.count(start->second.m_layer2Name) > 0)
+					{
+						IqShaderData* pOut = j->second->FindArgument(start->second.m_variable1Name);
+						if(!pOut)
+							pOut = pEnv->FindStandardVar(start->second.m_variable1Name.c_str());
+						boost::shared_ptr<IqShader> targetlayer = m_Layers[m_LayerMap[start->second.m_layer2Name]].second;
+						IqShaderData* pIn = targetlayer->FindArgument(start->second.m_variable2Name);
+						if(!pIn)
+							pIn = pEnv->FindStandardVar(start->second.m_variable2Name.c_str());
+						if(pOut && pIn)
+							pIn->SetValueFromVariable(pOut);
+					}
+					++start;
+				}
+			}
+			++index;
+		}
+	}
+}
 
 //---------------------------------------------------------------------
 

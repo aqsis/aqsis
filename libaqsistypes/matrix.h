@@ -191,6 +191,8 @@ public:
     friend std::ostream &operator<<( std::ostream &Stream, const CqMatrix &Matrix );
     friend std::ostream &operator<<( std::ostream &Stream, CqMatrix &Matrix );
     friend CqMatrix	operator*( TqFloat S, const CqMatrix& a );
+	friend bool  operator==(const CqMatrix& A, const CqMatrix& B);
+	friend bool  operator!=(const CqMatrix& A, const CqMatrix& B);
 
     TqFloat	Determinant() const;
 

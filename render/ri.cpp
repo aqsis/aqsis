@@ -2420,7 +2420,7 @@ RtVoid	RiSurfaceV( RtToken name, PARAMETERLIST )
 
             SetShaderArgument( pshadSurface, token, static_cast<TqPchar>( value ) );
         }
-        QGetRenderContext() ->pattrWriteCurrent() ->SetpshadSurface( pshadSurface, QGetRenderContext() ->Time() );
+		QGetRenderContext() ->pattrWriteCurrent() ->SetpshadSurface( pshadSurface, QGetRenderContext() ->Time() );
     }
     QGetRenderContext() ->AdvanceTime();
     return ;
@@ -5815,6 +5815,85 @@ RtVoid	RiContext( RtContextHandle )
 RtVoid	RiClippingPlane( RtFloat, RtFloat, RtFloat, RtFloat, RtFloat, RtFloat )
 {
 	Validate_RiClippingPlane
+}
+
+
+RtVoid RiShaderLayer( RtToken type, RtToken name, RtToken layername, ... )
+{
+    va_list	pArgs;
+    va_start( pArgs, layername );
+
+    std::vector<RtToken> aTokens;
+    std::vector<RtPointer> aValues;
+    RtInt count = BuildParameterList( pArgs, aTokens, aValues );
+
+    RiShaderLayerV( type, name, layername, count, &aTokens[0], &aValues[0] );
+}
+
+RtVoid RiShaderLayerV( RtToken type, RtToken name, RtToken layername, RtInt count, RtToken tokens[], RtPointer values[] )
+{
+	TqFloat time = QGetRenderContext()->Time();
+	// If the current shader for the specified type is already a layer container, add this layer to it, if not, 
+	// create one and add this layer as the first.
+
+	if(stricmp(type, "surface")==0)
+	{
+		boost::shared_ptr<IqShader> pshadSurface = QGetRenderContext()->CreateShader( name, Type_Surface );
+
+		if ( pshadSurface )
+		{
+			pshadSurface->matCurrent() = QGetRenderContext() ->matCurrent(time);
+			// Execute the intiialisation code here, as we now have our shader context complete.
+			pshadSurface->PrepareDefArgs();
+			RtInt i;
+			for ( i = 0; i < count; ++i )
+			{
+				RtToken	token = tokens[ i ];
+				RtPointer	value = values[ i ];
+
+				SetShaderArgument( pshadSurface, token, static_cast<TqPchar>( value ) );
+			}
+
+			boost::shared_ptr<IqShader> pcurr = QGetRenderContext()->pattrCurrent()->pshadSurface(QGetRenderContext()->Time());
+			if( pcurr && pcurr->IsLayered() )
+			{
+				// Just add this layer in
+				boost::shared_ptr<IqShader> layeredshader = QGetRenderContext() ->pattrWriteCurrent() ->pshadSurface( QGetRenderContext() ->Time() );
+				layeredshader->AddLayer(layername, pshadSurface);
+
+				// Just check that the transformation hasn't changed between layers, as this is not handled.
+				if(QGetRenderContext()->matCurrent(time) != layeredshader->matCurrent())
+					std::cerr << error << "The shader space has changed between layers, this is not supported" << std::endl;
+			}
+			else
+			{
+				// Create a new layered shader and add this shader to it.
+				boost::shared_ptr<IqShader> layeredshader(new CqLayeredShader);
+				layeredshader->matCurrent() = QGetRenderContext() ->matCurrent(time);
+				layeredshader->AddLayer(layername, pshadSurface);
+				QGetRenderContext() ->pattrWriteCurrent() ->SetpshadSurface( layeredshader, QGetRenderContext() ->Time() );
+			}
+		}
+	}
+	else
+		std::cerr << error << "Layered shaders not supported for type \"" << type << "\"" << std::endl;
+}
+
+RtVoid RiConnectShaderLayers( RtToken type, RtToken layer1, RtToken variable1, RtToken layer2, RtToken variable2 )
+{
+	// If the current shader for the specified type is a layer container, add this connection to it
+	if(stricmp(type, "surface")==0)
+	{
+		boost::shared_ptr<IqShader> pcurr = QGetRenderContext()->pattrCurrent()->pshadSurface(QGetRenderContext()->Time());
+		if( pcurr && pcurr->IsLayered() )
+		{
+			// Just add this layer in
+			boost::shared_ptr<IqShader> layeredshader = QGetRenderContext() ->pattrWriteCurrent() ->pshadSurface( QGetRenderContext() ->Time() );
+			layeredshader->AddConnection(layer1, variable1, layer2, variable2);
+		}
+	}
+	else
+		std::cerr << error << "Layered shaders not supported for type \"" << type << "\"" << std::endl;
 }
 
 

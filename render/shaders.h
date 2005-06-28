@@ -140,12 +140,16 @@ private:
  * Abstract base class from which all shaders must be defined.
  */
 
-class CqShader : public IqShader
+class CqLayeredShader : public IqShader
 {
 public:
-    CqShader() : m_Uses( 0xFFFFFFFF )
+    CqLayeredShader() : m_Uses( 0xFFFFFFFF )
     {}
-    virtual	~CqShader()
+	CqLayeredShader(const CqLayeredShader& from)
+	{
+		/// \todo Need to implement a proper copy constrctor, and operator=.
+	}
+    virtual	~CqLayeredShader()
     {}
 
     // Overidden from IqShader
@@ -163,30 +167,81 @@ public:
         return ( m_strName );
     }
     virtual	void	SetArgument( const CqString& name, EqVariableType type, const CqString& space, void* val )
-    {}
+    {
+		// Pass the argument on to the shader for each layer in the list.
+		std::vector<std::pair<CqString, boost::shared_ptr<IqShader> > >::iterator i = m_Layers.begin();
+		while( i != m_Layers.end() )
+		{
+			i->second->SetArgument(name, type, space, val);
+			++i;
+		}
+	}
     virtual	void	SetArgument( CqParameter* pParam, IqSurface* pSurface )
-    {}
+    {
+		// Pass the argument on to the shader for each layer in the list.
+		std::vector<std::pair<CqString, boost::shared_ptr<IqShader> > >::iterator i = m_Layers.begin();
+		while( i != m_Layers.end() )
+		{
+			i->second->SetArgument(pParam, pSurface);
+			++i;
+		}
+	}
     virtual	IqShaderData*	FindArgument( const CqString& name )
     {
+		// Need to search for the output var backwards in the list, i.e. find the last shader layer
+		// that will output the variable.
+		std::vector<std::pair<CqString, boost::shared_ptr<IqShader> > >::reverse_iterator i = m_Layers.rbegin();
+		while( i != m_Layers.rend() )
+		{
+			IqShaderData* result;
+			if((result = i->second->FindArgument(name)) != NULL)
+				return(result);
+			++i;
+		}
         return ( NULL );
     }
-    virtual	TqBool	GetValue( const char* name, IqShaderData* res )
+    virtual	TqBool	GetVariableValue( const char* name, IqShaderData* res )
     {
+		// Again, need to search backwards through the list, as the last layer to affect this value will
+		// be the one that matters.
+		std::vector<std::pair<CqString, boost::shared_ptr<IqShader> > >::reverse_iterator i = m_Layers.rbegin();
+		while( i != m_Layers.rend() )
+		{
+			if(i->second->GetVariableValue(name, res))
+				return(TqTrue);
+			++i;
+		}
         return ( TqFalse );
     }
-    virtual	void	Evaluate( const boost::shared_ptr<IqShaderExecEnv>& pEnv )
-    {}
+    virtual	void	Evaluate( const boost::shared_ptr<IqShaderExecEnv>& pEnv );
     virtual	void	PrepareDefArgs()
-    {}
+    {
+		// Call PrepareDefArgs on all layers
+		std::vector<std::pair<CqString, boost::shared_ptr<IqShader> > >::iterator i = m_Layers.begin();
+		while( i != m_Layers.end() )
+		{
+			i->second->PrepareDefArgs();
+			++i;
+		}
+	}
     virtual void	Initialise( const TqInt uGridRes, const TqInt vGridRes, const boost::shared_ptr<IqShaderExecEnv>& pEnv )
-    {}
+    {
+		// Call Initialise on all layers.
+		std::vector<std::pair<CqString, boost::shared_ptr<IqShader> > >::iterator i = m_Layers.begin();
+		while( i != m_Layers.end() )
+		{
+			i->second->Initialise(uGridRes, vGridRes, pEnv);
+			++i;
+		}
+	}
     virtual	TqBool	fAmbient() const
     {
+		// Not sure, probably always return false for now.
         return ( TqFalse );
     }
     virtual IqShader*	Clone() const
     {
-        return ( new CqShader );
+        return ( new CqLayeredShader(*this) );
     }
     virtual TqBool	Uses( TqInt Var ) const
     {
@@ -195,39 +250,64 @@ public:
     }
     virtual TqInt	Uses() const
     {
+		// Gather the uses from all layers as they are added.
         return ( m_Uses );
     }
     virtual IqShaderData* CreateVariable( EqVariableType Type, EqVariableClass Class, const CqString& name, TqBool fArgument = TqFalse, TqBool fOutput = TqFalse  )
     {
+		// Call CreateVariable on the first shader in the list, all layers must be the same type.
+		if(!m_Layers.empty())
+			return(m_Layers.front().second->CreateVariable(Type, Class, name, fArgument, fOutput));
         return ( NULL );
     }
     virtual IqShaderData* CreateVariableArray( EqVariableType Type, EqVariableClass Class, const CqString& name, TqInt Count, TqBool fArgument = TqFalse, TqBool fOutput = TqFalse  )
     {
+		// Call CreateVariableArray on the first shader in the list, all layers must be the same type.
+		if(!m_Layers.empty())
+			return(m_Layers.front().second->CreateVariableArray(Type, Class, name, Count, fArgument, fOutput));
         return ( NULL );
     }
     virtual IqShaderData* CreateTemporaryStorage( EqVariableType type, EqVariableClass _class )
     {
+		// Call CreateTemporaryStorage on the first shader in the list, all layers must be the same type.
+		if(!m_Layers.empty())
+			return(m_Layers.front().second->CreateTemporaryStorage(type, _class));
         return ( NULL );
     }
     virtual void DeleteTemporaryStorage( IqShaderData* pData )
-    {}
+    {
+		// Call DeleteTemporaryStorage on the first shader in the list, all layers must be the same type.
+		if(!m_Layers.empty())
+			m_Layers.front().second->DeleteTemporaryStorage(pData);
+	}
     virtual void DefaultSurface()
     {}
+	virtual TqBool IsLayered()
+	{
+		return(TqTrue);
+	}
+
+	virtual void AddLayer(const CqString& layername, const boost::shared_ptr<IqShader>& layer);
+	virtual void AddConnection(const CqString& layer1, const CqString& variable1, const CqString& layer2, const CqString& variable2);
 
 protected:
     TqInt	m_Uses;			///< Bit vector representing the system variables used by this shader.
 private:
     CqMatrix	m_matCurrent;	///< Transformation matrix to world coordinates in effect at the time this shader was instantiated.
     CqString	m_strName;		///< The name of this shader.
+
+	std::vector<std::pair<CqString, boost::shared_ptr<IqShader> > >	m_Layers;
+	std::map<CqString, TqInt> m_LayerMap;
+
+	struct SqLayerConnection 
+	{
+		CqString m_layer2Name;
+		CqString m_variable1Name;
+		CqString m_variable2Name;
+	};
+	std::multimap<CqString, SqLayerConnection> m_Connections;
 }
 ;
-
-
-//---------------------------------------------------------------------
-//---------------------------------------------------------------------
-//---------------------------------------------------------------------
-// These are the built in shaders, they will be registered as "builtin_<name>"
-// these should be used where speed is an issue.
 
 
 //-----------------------------------------------------------------------

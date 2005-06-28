@@ -1312,6 +1312,39 @@ CqVector4D operator*( const CqVector4D &Vector, const CqMatrix& Matrix )
     return ( Matrix.PreMultiply( Vector ) );
 }
 
+
+bool  operator==(const CqMatrix& A, const CqMatrix& B)
+{
+    if(	(A.m_aaElement[ 0 ][ 0 ] == B.m_aaElement[ 0 ][ 0 ]) &&
+		(A.m_aaElement[ 1 ][ 0 ] == B.m_aaElement[ 1 ][ 0 ]) &&
+		(A.m_aaElement[ 2 ][ 0 ] == B.m_aaElement[ 2 ][ 0 ]) &&
+		(A.m_aaElement[ 3 ][ 0 ] == B.m_aaElement[ 3 ][ 0 ]) &&
+
+		(A.m_aaElement[ 0 ][ 1 ] == B.m_aaElement[ 0 ][ 1 ]) &&
+		(A.m_aaElement[ 1 ][ 1 ] == B.m_aaElement[ 1 ][ 1 ]) &&
+		(A.m_aaElement[ 2 ][ 1 ] == B.m_aaElement[ 2 ][ 1 ]) &&
+		(A.m_aaElement[ 3 ][ 1 ] == B.m_aaElement[ 3 ][ 1 ]) &&
+
+		(A.m_aaElement[ 0 ][ 2 ] == B.m_aaElement[ 0 ][ 2 ]) &&
+		(A.m_aaElement[ 1 ][ 2 ] == B.m_aaElement[ 1 ][ 2 ]) &&
+		(A.m_aaElement[ 2 ][ 2 ] == B.m_aaElement[ 2 ][ 2 ]) &&
+		(A.m_aaElement[ 3 ][ 2 ] == B.m_aaElement[ 3 ][ 2 ]) &&
+
+		(A.m_aaElement[ 0 ][ 3 ] == B.m_aaElement[ 0 ][ 3 ]) &&
+		(A.m_aaElement[ 1 ][ 3 ] == B.m_aaElement[ 1 ][ 3 ]) &&
+		(A.m_aaElement[ 2 ][ 3 ] == B.m_aaElement[ 2 ][ 3 ]) &&
+		(A.m_aaElement[ 3 ][ 3 ] == B.m_aaElement[ 3 ][ 3 ]))
+		return(true);
+	else
+		return(false);
+}
+
+
+bool  operator!=(const CqMatrix& A, const CqMatrix& B)
+{
+	return(!(A==B));
+}
+
 //---------------------------------------------------------------------
 
 END_NAMESPACE( Aqsis )

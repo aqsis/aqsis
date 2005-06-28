@@ -1,5 +1,5 @@
 /* -------------- declaration section -------------- */
-%expect 45
+%expect 46
 
 %{
 
@@ -233,6 +233,8 @@ static RendermanInterface::RtInt ColorSamples = 3;
 %token	<ctype>	REQUEST_TOKEN_VERSION
 %token	<ctype>	REQUEST_TOKEN_WORLDBEGIN
 %token	<ctype>	REQUEST_TOKEN_WORLDEND
+%token	<ctype> REQUEST_TOKEN_SHADERLAYER
+%token	<ctype> REQUEST_TOKEN_CONNECTSHADERLAYERS
 
 
 %type	<ctype>	arealightsource
@@ -342,6 +344,8 @@ static RendermanInterface::RtInt ColorSamples = 3;
 %type	<ctype>	version
 %type	<ctype>	worldbegin
 %type	<ctype>	worldend
+%type	<ctype> shaderlayer
+%type	<ctype> connectshaderlayers
 
 /* -------------- rules section -------------- */
 %%
@@ -1242,6 +1246,23 @@ complete_request
 				DiscardArrayValue($4);
 				DiscardTokenValuePairs($5);
 			}
+	|	shaderlayer string string string opttvpairs
+			{
+				ParseCallbackInterface->RiShaderLayerV(const_cast<char*>($2), const_cast<char*>($3), const_cast<char*>($4), $5->Count(), $5->Tokens(), $5->Values());
+				DiscardStringValue($2);
+				DiscardStringValue($3);
+				DiscardStringValue($4);
+				DiscardTokenValuePairs($5);
+			}
+	|	connectshaderlayers string string string string string
+			{
+				ParseCallbackInterface->RiConnectShaderLayers(const_cast<char*>($2), const_cast<char*>($3), const_cast<char*>($4), const_cast<char*>($5), const_cast<char*>($6));
+				DiscardStringValue($2);
+				DiscardStringValue($3);
+				DiscardStringValue($4);
+				DiscardStringValue($5);
+				DiscardStringValue($6);
+			}
 	|	UNKNOWN_TOKEN
 			{
 				// Print the error, then force the scanner into 'request'
@@ -1376,6 +1397,8 @@ trimcurve : REQUEST_TOKEN_TRIMCURVE	{ ExpectParams(); };
 version : REQUEST_TOKEN_VERSION	{ ExpectParams(); };
 worldbegin : REQUEST_TOKEN_WORLDBEGIN	{ ExpectParams(); };
 worldend : REQUEST_TOKEN_WORLDEND	{ ExpectParams(); };
+shaderlayer : REQUEST_TOKEN_SHADERLAYER	{ ExpectParams(); };
+connectshaderlayers : REQUEST_TOKEN_CONNECTSHADERLAYERS	{ ExpectParams(); };
 
 
 float : FLOAT_TOKEN
