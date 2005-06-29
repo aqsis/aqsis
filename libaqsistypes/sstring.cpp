@@ -240,6 +240,14 @@ CqString& CqString::Format( const TqChar* strFmt, ... )
     return ( *this );
 }
 
+CqString CqString::ToLower() const
+{
+	CqString res(*this);
+	CqStringBase::iterator i;
+	for(i=res.begin(); i!=res.end(); ++i)
+		*i = tolower(*i);
+	return(res);
+}
 
 CqString& CqString::operator+=( const CqString& str )
 {

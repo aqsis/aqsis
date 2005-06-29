@@ -30,7 +30,6 @@
 #include	<stdarg.h>
 #include	<math.h>
 #include	<list>
-#include	<boost/algorithm/string.hpp>
 
 #include	"imagebuffer.h"
 #include	"lights.h"
@@ -5839,8 +5838,8 @@ RtVoid RiShaderLayerV( RtToken type, RtToken name, RtToken layername, RtInt coun
 
 	boost::shared_ptr<IqShader> newlayer;
 	boost::shared_ptr<IqShader> layeredshader;
-	std::string stringtype(type);
-	boost::to_lower(stringtype);
+	CqString stringtype(type);
+	stringtype = stringtype.ToLower();
 	if(stringtype.compare("surface")==0)
 	{
 		newlayer = QGetRenderContext()->CreateShader( name, Type_Surface );
@@ -5895,8 +5894,8 @@ RtVoid RiShaderLayerV( RtToken type, RtToken name, RtToken layername, RtInt coun
 RtVoid RiConnectShaderLayers( RtToken type, RtToken layer1, RtToken variable1, RtToken layer2, RtToken variable2 )
 {
 	// If the current shader for the specified type is a layer container, add this connection to it
-	std::string stringtype(type);
-	boost::to_lower(stringtype);
+	CqString stringtype(type);
+	stringtype = stringtype.ToLower();
 	boost::shared_ptr<IqShader> pcurr;
 	if(stringtype.compare("surface")==0)
 		pcurr = QGetRenderContext()->pattrWriteCurrent()->pshadSurface(QGetRenderContext()->Time());

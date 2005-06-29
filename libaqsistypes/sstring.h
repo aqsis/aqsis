@@ -88,6 +88,7 @@ public:
     CqString&	Format( const TqChar* Format, ... );
     CqString	ExpandEscapes() const;
     CqString	TranslateEscapes() const;
+	CqString	ToLower() const;
 
     // Concatenation functions not provided by std::string
     CqString&	operator+=( const CqString& str );
