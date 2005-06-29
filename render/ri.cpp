@@ -30,6 +30,7 @@
 #include	<stdarg.h>
 #include	<math.h>
 #include	<list>
+#include	<boost/algorithm/string.hpp>
 
 #include	"imagebuffer.h"
 #include	"lights.h"
@@ -5838,7 +5839,9 @@ RtVoid RiShaderLayerV( RtToken type, RtToken name, RtToken layername, RtInt coun
 
 	boost::shared_ptr<IqShader> newlayer;
 	boost::shared_ptr<IqShader> layeredshader;
-	if(stricmp(type, "surface")==0)
+	std::string stringtype(type);
+	boost::to_lower(stringtype);
+	if(stringtype.compare("surface")==0)
 	{
 		newlayer = QGetRenderContext()->CreateShader( name, Type_Surface );
 		layeredshader = QGetRenderContext()->pattrCurrent()->pshadSurface(QGetRenderContext()->Time());
@@ -5850,7 +5853,7 @@ RtVoid RiShaderLayerV( RtToken type, RtToken name, RtToken layername, RtInt coun
 			QGetRenderContext() ->pattrWriteCurrent() ->SetpshadSurface( layeredshader, QGetRenderContext() ->Time() );
 		}
 	}
-	else if(stricmp(type, "displacement")==0)
+	else if(stringtype.compare("displacement")==0)
 	{
 		newlayer = QGetRenderContext()->CreateShader( name, Type_Displacement );
 		layeredshader = QGetRenderContext()->pattrCurrent()->pshadDisplacement(QGetRenderContext()->Time());
@@ -5892,18 +5895,20 @@ RtVoid RiShaderLayerV( RtToken type, RtToken name, RtToken layername, RtInt coun
 RtVoid RiConnectShaderLayers( RtToken type, RtToken layer1, RtToken variable1, RtToken layer2, RtToken variable2 )
 {
 	// If the current shader for the specified type is a layer container, add this connection to it
-	if(stricmp(type, "surface")==0)
-	{
-		boost::shared_ptr<IqShader> pcurr = QGetRenderContext()->pattrCurrent()->pshadSurface(QGetRenderContext()->Time());
-		if( pcurr && pcurr->IsLayered() )
-		{
-			// Just add this layer in
-			boost::shared_ptr<IqShader> layeredshader = QGetRenderContext() ->pattrWriteCurrent() ->pshadSurface( QGetRenderContext() ->Time() );
-			layeredshader->AddConnection(layer1, variable1, layer2, variable2);
-		}
-	}
+	std::string stringtype(type);
+	boost::to_lower(stringtype);
+	boost::shared_ptr<IqShader> pcurr;
+	if(stringtype.compare("surface")==0)
+		pcurr = QGetRenderContext()->pattrWriteCurrent()->pshadSurface(QGetRenderContext()->Time());
+	else if(stringtype.compare("displacement")==0)
+		pcurr = QGetRenderContext()->pattrWriteCurrent()->pshadDisplacement(QGetRenderContext()->Time());
 	else
 		std::cerr << error << "Layered shaders not supported for type \"" << type << "\"" << std::endl;
+	if( pcurr && pcurr->IsLayered() )
+	{
+		// Just add this layer in
+		pcurr->AddConnection(layer1, variable1, layer2, variable2);
+	}
 }
 
 
