@@ -443,19 +443,21 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			widestFormat = PkDspyUnsigned32;
 
 		// If we are recieving "rgba" data, ensure that it is in the correct order.
-		PtDspyDevFormat outFormat[] =
-		    {
-		        {"r", widestFormat},
-		        {"g", widestFormat},
-		        {"b", widestFormat},
-		        {"a", widestFormat},
-		    };
-		PtDspyError err = DspyReorderFormatting(iFormatCount, format, MIN(iFormatCount,4), outFormat);
-		if( err != PkDspyErrorNone )
+		if(pImage->m_imageType == Type_File || pImage->m_imageType == Type_Framebuffer )
 		{
-			return(err);
+			PtDspyDevFormat outFormat[] =
+				{
+					{"r", widestFormat},
+					{"g", widestFormat},
+					{"b", widestFormat},
+					{"a", widestFormat},
+				};
+			PtDspyError err = DspyReorderFormatting(iFormatCount, format, MIN(iFormatCount,4), outFormat);
+			if( err != PkDspyErrorNone )
+			{
+				return(err);
+			}
 		}
-
 
 		// Create and initialise a byte array if rendering 8bit image, or we are in framebuffer mode
 		if(pImage->m_imageType == Type_Framebuffer)
@@ -745,7 +747,7 @@ PtDspyError DspyImageDelayClose(PtDspyImageHandle image)
 	SqDisplayInstance* pImage;
 	pImage = reinterpret_cast<SqDisplayInstance*>(image);
 
-	if(pImage)
+	if(pImage && pImage->m_data)
 	{
 		if(pImage->m_imageType == Type_Framebuffer || pImage->m_imageType == Type_ZFramebuffer)
 		{

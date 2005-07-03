@@ -432,7 +432,6 @@ void CqImagePixel::Combine(enum EqFilterDepth depthfilter, CqColor zThreshold)
 				// The test is, if any channel of the opacity color is greater or equal to the threshold.
 				if(sample_data[Sample_ORed] >= zThreshold.fRed() || sample_data[Sample_OGreen] >= zThreshold.fGreen() || sample_data[Sample_OBlue] >= zThreshold.fBlue())
 				{
-					std::cout << sample_data[Sample_ORed] << std::endl;
 					// Make sure we store the nearest and second nearest depth values.
 					opaqueDepths[1] = opaqueDepths[0];
 					opaqueDepths[0] = sample->Data()[Sample_Depth];
