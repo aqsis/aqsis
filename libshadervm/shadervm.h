@@ -560,7 +560,6 @@ public:
     virtual	IqShader*	Clone() const
     {
         CqShaderVM * pShader = new CqShaderVM( *this );
-        pShader->ExecuteInit();
         return ( pShader );
     }
     virtual TqBool	Uses( TqInt Var ) const

@@ -2396,6 +2396,7 @@ RtVoid	RiSurface( RtToken name, ... )
 //
 RtVoid	RiSurfaceV( RtToken name, PARAMETERLIST )
 {
+	
 	Validate_Conditional
 
 	Cache_RiSurface

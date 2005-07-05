@@ -25,6 +25,8 @@
 
 #include	"aqsis.h"
 
+#include	"MultiTimer.h"
+
 #include	<iostream>
 
 #include	<sstream>
@@ -1248,13 +1250,10 @@ CqShaderVM&	CqShaderVM::operator=( const CqShaderVM& From )
         m_LocalVars.push_back( ( *i ) ->Clone() );
 
     // Copy the intialisation program.
-    std::vector<UsProgramElement>::const_iterator p;
-    for ( p = From.m_ProgramInit.begin(); p != From.m_ProgramInit.end(); p++ )
-        m_ProgramInit.push_back( *p );
+	m_ProgramInit.assign(From.m_ProgramInit.begin(), From.m_ProgramInit.end());
 
     // Copy the main program.
-    for ( p = From.m_Program.begin(); p != From.m_Program.end(); p++ )
-        m_Program.push_back( *p );
+	m_Program.assign(From.m_Program.begin(), From.m_Program.end());
 
     return ( *this );
 }
