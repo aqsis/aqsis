@@ -141,6 +141,11 @@ private:
     std::ostream& m_Stream;
     unsigned int m_CurrentLightHandle;
 };
+extern "C"
+{
+    librib::RendermanInterface* CreateRIBEngine();
+    void DestroyRIBEngine( librib::RendermanInterface* );
+}
 
 }
 ; // namespace librib2stream

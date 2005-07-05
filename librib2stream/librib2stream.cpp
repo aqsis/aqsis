@@ -1,5 +1,8 @@
 #include "librib2stream.h"
+#pragma warning (disable : 4786)
+#include "parserstate.h"
 using namespace librib;
+
 
 namespace librib2stream
 {
@@ -14,7 +17,8 @@ Stream::~Stream()
 
 RendermanInterface::RtLightHandle Stream::RiAreaLightSourceV( RtToken name, RtInt count, RtToken tokens[], RtPointer values[] )
 {
-    m_Stream << "RiAreaLightSourceV()" << std::endl; return reinterpret_cast<RtLightHandle>( m_CurrentLightHandle++ );
+    m_Stream << "RiAreaLightSourceV()" << std::endl; 
+	return reinterpret_cast<RtLightHandle>( m_CurrentLightHandle++ );
 }
 RendermanInterface::RtVoid Stream::RiAtmosphereV( RtToken name, RtInt count, RtToken tokens[], RtPointer values[] )
 {
@@ -42,7 +46,8 @@ RendermanInterface::RtVoid Stream::RiBegin( RtToken name )
 }
 RendermanInterface::RtFloat Stream::RiBesselFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 {
-    m_Stream << "RiBesselFilter()" << std::endl; return 0;
+    m_Stream << "RiBesselFilter()" << std::endl; 
+	return 0;
 }
 RendermanInterface::RtVoid Stream::RiBound( RtBound bound )
 {
@@ -50,11 +55,13 @@ RendermanInterface::RtVoid Stream::RiBound( RtBound bound )
 }
 RendermanInterface::RtFloat Stream::RiBoxFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 {
-    m_Stream << "RiBoxFilter()" << std::endl; return 0;
+    m_Stream << "RiBoxFilter()" << std::endl; 
+	return 0;
 }
 RendermanInterface::RtFloat Stream::RiCatmullRomFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 {
-    m_Stream << "RiCatmullRomFilter()" << std::endl; return 0;
+    m_Stream << "RiCatmullRomFilter()" << std::endl; 
+	return 0;
 }
 RendermanInterface::RtVoid Stream::RiClipping( RtFloat cnear, RtFloat cfar )
 {
@@ -94,7 +101,8 @@ RendermanInterface::RtVoid Stream::RiCylinderV( RtFloat radius, RtFloat zmin, Rt
 }
 RendermanInterface::RtToken Stream::RiDeclare( RtString name, RtString declaration )
 {
-    m_Stream << "RiDeclare(" << name << ", " << declaration << ")" << std::endl; return 0;
+    m_Stream << "RiDeclare(" << name << ", " << declaration << ")" << std::endl; 
+	return 0;
 }
 RendermanInterface::RtVoid Stream::RiDeformationV( RtToken name, RtInt count, RtToken tokens[], RtPointer values[] )
 {
@@ -114,7 +122,8 @@ RendermanInterface::RtVoid Stream::RiDetailRange( RtFloat offlow, RtFloat onlow,
 }
 RendermanInterface::RtFloat Stream::RiDiskFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 {
-    m_Stream << "RiDiskFilter()" << std::endl; return 0;
+    m_Stream << "RiDiskFilter()" << std::endl; 
+	return 0;
 }
 RendermanInterface::RtVoid Stream::RiDiskV( RtFloat height, RtFloat radius, RtFloat thetamax, RtInt count, RtToken tokens[], RtPointer values[] )
 {
@@ -187,7 +196,8 @@ RendermanInterface::RtVoid Stream::RiFrameEnd()
 }
 RendermanInterface::RtFloat Stream::RiGaussianFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 {
-    m_Stream << "RiGaussianFilter()" << std::endl; return 0;
+    m_Stream << "RiGaussianFilter()" << std::endl; 
+	return 0;
 }
 RendermanInterface::RtVoid Stream::RiGeneralPolygonV( RtInt nloops, RtInt nverts[], RtInt count, RtToken tokens[], RtPointer values[] )
 {
@@ -227,7 +237,8 @@ RendermanInterface::RtVoid Stream::RiInteriorV( RtToken name, RtInt count, RtTok
 }
 RendermanInterface::RtLightHandle Stream::RiLightSourceV( RtToken name, RtInt count, RtToken tokens[], RtPointer values[] )
 {
-    m_Stream << "RiLightSourceV()" << std::endl; return reinterpret_cast<RtLightHandle>( m_CurrentLightHandle++ );
+    m_Stream << "RiLightSourceV()" << std::endl; 
+	return reinterpret_cast<RtLightHandle>( m_CurrentLightHandle++ );
 }
 RendermanInterface::RtVoid Stream::RiMakeBumpV( RtString imagefile, RtString bumpfile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, RtInt count, RtToken tokens[], RtPointer values[] )
 {
@@ -271,7 +282,8 @@ RendermanInterface::RtVoid Stream::RiNuPatchV( RtInt nu, RtInt uorder, RtFloat u
 }
 RendermanInterface::RtObjectHandle Stream::RiObjectBegin()
 {
-    m_Stream << "RiObjectBegin()" << std::endl; return 0;
+    m_Stream << "RiObjectBegin()" << std::endl; 
+	return 0;
 }
 RendermanInterface::RtVoid Stream::RiObjectEnd()
 {
@@ -364,6 +376,18 @@ RendermanInterface::RtVoid Stream::RiQuantize( RtToken type, RtInt one, RtInt mi
 RendermanInterface::RtVoid Stream::RiReadArchive( RtToken data, RtArchiveCallback callback )
 {
     m_Stream << "RiReadArchive()" << std::endl;
+
+    //CqRiFile	fileArchive( name, "archive" );
+    FILE* file = fopen( data, "rb" );
+
+    if ( NULL != file )
+    {
+        librib::CqRIBParserState currstate = librib::GetParserState();
+        if (currstate.m_pParseCallbackInterface == NULL) currstate.m_pParseCallbackInterface = new librib2stream::Stream(std::cout);
+        librib::Parse( file, data, *(currstate.m_pParseCallbackInterface), *(currstate.m_pParseErrorStream), callback );
+        librib::SetParserState( currstate );
+        fclose(file);
+    }
 }
 RendermanInterface::RtVoid Stream::RiRelativeDetail( RtFloat relativedetail )
 {
@@ -403,7 +427,8 @@ RendermanInterface::RtVoid Stream::RiSides( RtInt nsides )
 }
 RendermanInterface::RtFloat Stream::RiSincFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 {
-    m_Stream << "RiSincFilter()" << std::endl; return 0;
+    m_Stream << "RiSincFilter()" << std::endl; 
+	return 0;
 }
 RendermanInterface::RtVoid Stream::RiSkew( RtFloat angle, RtFloat dx1, RtFloat dy1, RtFloat dz1, RtFloat dx2, RtFloat dy2, RtFloat dz2 )
 {
@@ -451,7 +476,8 @@ RendermanInterface::RtVoid Stream::RiTransformEnd()
 }
 RendermanInterface::RtPoint* Stream::RiTransformPoints( RtToken fromspace, RtToken tospace, RtInt npoints, RtPoint points[] )
 {
-    m_Stream << "RiTransformPoints()" << std::endl; return 0;
+    m_Stream << "RiTransformPoints()" << std::endl; 
+	return 0;
 }
 RendermanInterface::RtVoid Stream::RiTranslate( RtFloat dx, RtFloat dy, RtFloat dz )
 {
@@ -459,7 +485,8 @@ RendermanInterface::RtVoid Stream::RiTranslate( RtFloat dx, RtFloat dy, RtFloat 
 }
 RendermanInterface::RtFloat Stream::RiTriangleFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 {
-    m_Stream << "RiTriangleFilter()" << std::endl; return 0;
+    m_Stream << "RiTriangleFilter()" << std::endl; 
+	return 0;
 }
 RendermanInterface::RtVoid Stream::RiTrimCurve( RtInt nloops, RtInt ncurves[], RtInt order[], RtFloat knot[], RtFloat min[], RtFloat max[], RtInt n[], RtFloat u[], RtFloat v[], RtFloat w[] )
 {
@@ -496,6 +523,16 @@ RendermanInterface::RtFunc Stream::GetProceduralFunction( RtToken type )
 {
     m_Stream << "Filter: " << type << std::endl;
     return ( NULL );
+}
+
+RendermanInterface* CreateRIBEngine()
+{
+    return ( new Stream(std::cout) );
+}
+
+void DestroyRIBEngine( RendermanInterface* engine )
+{
+    delete( engine );
 }
 
 }
