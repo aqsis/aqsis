@@ -679,445 +679,451 @@ void CqRibBinaryDecoder::getNext ()
 
 	gc( c );
 
-	switch ( c )
+	if ( c < '\200' )
 	{
-			/* Decode integers */
-			case '\200':     //0x80 B
-			GET1;
-			ostr = " ";
-			ostr += dtoa( ctsi( b1 ) );
-			ostr += " ";
-			break;
-
-			case '\201':     //0x81 BB
-			GET2;
-			ostr = " ";
-			ostr += dtoa( ctsi( b1, b2 ) );
-			ostr += " ";
-			break;
-
-			case '\202':     //0x82 BBB
-			GET3;
-			ostr = " ";
-			ostr += ctsi( b1, b2, b3 );
-			ostr += " ";
-			break;
-
-			case '\203':     //0x83 BBBB
-			GET4;
-			ostr = " ";
-			ostr += dtoa( ctsi( b1, b2, b3, b4 ) );
-			ostr += " ";
-			break;
-
-			/* Decode fixed point numbers */
-			case '\204':     //0x84 .B
-			GET1;
-			f = ctui( b1 );
-			f /= 256;
-			ostr = " ";
-			ostr += ftoa( f );
-			ostr += " ";
-			break;
-
-			case '\205':     //0x85 B.B
-			GET2;
-			f = ctui( b2 );
-			f /= 256;
-			f += ctsi( b1 );
-			ostr = " ";
-			ostr += ftoa( f );
-			ostr += " ";
-			break;
-
-			case '\206':     //0x86 BB.B
-			GET3;
-			f = ctui( b3 );
-			f /= 256;
-			f += ctsi( b1, b2 );
-			ostr = " ";
-			ostr += ftoa( f );
-			ostr += " ";
-			break;
-
-			case '\207':     //0x87 BBB.B
-			GET4;
-			f = b4;
-			f /= 256;
-			f += ctsi( b1, b2, b3 );
-			ostr = " ";
-			ostr += ftoa( f );
-			ostr += " ";
-			break;
-
-			case '\210':
-			break; // -
-
-			case '\211':     //0x89 .BB
-			GET2;
-			f = ctui( b1, b2 );
-			f /= 65536;
-			ostr = " ";
-			ostr += ftoa( f );
-			ostr += " ";
-			break;
-
-			case '\212':     //0x8A B.BB
-			GET3;
-			f = ctui( b2, b3 );
-			f /= 65536;
-			f += ctsi( b1 );
-			ostr = " ";
-			ostr += ftoa( f );
-			ostr += " ";
-			break;
-
-			case '\213':     //0x8B BB.BB
-			GET4;
-			f = ctui( b3, b4 );
-			f /= 65536;
-			f += ctsi( b1, b2 );
-			ostr = " ";
-			ostr += ftoa( f );
-			ostr += " ";
-			break;
-
-			case '\214':
-			break; // -
-			case '\215':
-			break; // -
-
-			case '\216':     // 0x8E .BBB
-			GET3;
-			f = ctui( b1, b2, b3 );
-			f /= 16777216;
-			ostr = " ";
-			ostr += ftoa( f );
-			ostr += " ";
-			break;
-
-			case '\217':     // 0x8F B.BBB
-			GET4;
-			f = ctui( b2, b3, b4 );
-			f /= 16777216;
-			f += ctsi( b1 );
-			ostr = " ";
-			ostr += ftoa( f );
-			ostr += " ";
-			break;
-
-			/* Decode small strings */
-			case '\220':
-			break;  // 0x90
-			case '\221':
-			ostr = " \"";
-			snc( 1, ostr );
-			ostr += "\" ";
-			break;
-			case '\222':
-			ostr = " \"";
-			snc( 2, ostr );
-			ostr += "\" ";
-			break;
-			case '\223':
-			ostr = " \"";
-			snc( 3, ostr );
-			ostr += "\" ";
-			break;
-			case '\224':
-			ostr = " \"";
-			snc( 4, ostr );
-			ostr += "\" ";
-			break;
-			case '\225':
-			ostr = " \"";
-			snc( 5, ostr );
-			ostr += "\" ";
-			break;
-			case '\226':
-			ostr = " \"";
-			snc( 6, ostr );
-			ostr += "\" ";
-			break;
-			case '\227':
-			ostr = " \"";
-			snc( 7, ostr );
-			ostr += "\" ";
-			break;
-			case '\230':
-			ostr = " \"";
-			snc( 8, ostr );
-			ostr += "\" ";
-			break;
-			case '\231':
-			ostr = " \"";
-			snc( 9, ostr );
-			ostr += "\" ";
-			break;
-			case '\232':
-			ostr = " \"";
-			snc( 10, ostr );
-			ostr += "\" ";
-			break;
-			case '\233':
-			ostr = " \"";
-			snc( 11, ostr );
-			ostr += "\" ";
-			break;
-			case '\234':
-			ostr = " \"";
-			snc( 12, ostr );
-			ostr += "\" ";
-			break;
-			case '\235':
-			ostr = " \"";
-			snc( 13, ostr );
-			ostr += "\" ";
-			break;
-			case '\236':
-			ostr = " \"";
-			snc( 14, ostr );
-			ostr += "\" ";
-			break;
-			case '\237':
-			ostr = " \"";
-			snc( 15, ostr );
-			ostr += "\" ";
-			break;
-
-			/* Decode strings of any size */
-			case '\240':
-			GET1;
-			ui = ctui( b1 );
-			ostr = " \"";
-			snc( ui, ostr );
-			ostr += "\" ";
-			break;  // 0xA0
-			case '\241':
-			GET2;
-			ui = ctui( b1, b2 );
-			ostr = " \"";
-			snc( ui, ostr );
-			ostr += "\" ";
-			break;
-			case '\242':
-			GET3;
-			ui = ctui( b1, b2, b3 );
-			ostr = " \"";
-			snc( ui, ostr );
-			ostr += "\" ";
-			break;
-			case '\243':
-			GET4;
-			ui = ctui( b1, b2, b3, b4 );
-			ostr = " \"";
-			snc( ui, ostr );
-			ostr += "\" ";
-			break;
-
-			/* Decode a single precision floating point value */
-			case '\244':
-			sendFloat( ostr );
-			break;  // 0xA4
-
-			/* Decode a double precision floating point value */
-			case '\245':
-			sendDouble( ostr );
-			break;  // 0xA5
-
-			/* Decode a RI request previously declared */
-			case '\246':     // 0xA6
-			GET1;
-			ui = ctui( b1 );
-			ostr = "\n";
-			ostr += ritab[ ui ];
-			ostr += " ";
-			break;
-
-
-			case '\247':
-			case '\250':
-			case '\251':
-			case '\252':
-			case '\253':
-			case '\254':
-			case '\255':
-			case '\256':
-			case '\257':
-			case '\260':
-			case '\261':
-			case '\262':
-			case '\263':
-			case '\264':
-			case '\265':
-			case '\266':
-			case '\267':
-			case '\270':
-			case '\271':
-			case '\272':
-			case '\273':
-			case '\274':
-			case '\275':
-			case '\276':
-			case '\277':
-			case '\300':
-			case '\301':
-			case '\302':
-			case '\303':
-			case '\304':
-			case '\305':
-			case '\306':
-			case '\307':
-			throw std::string( " BINARY_DECODER_WARNING: reserved byte encountered" );
-			break;
-
-			/* Decode arrays of single precision floating point values */
-			case '\310':     // 0xC8 L
-			GET1;
-			ui = ctui( b1 );
-			ostr += "[";
-			for ( ;ui > 0; ui-- )
+		ostr += c;
+	} 
+	else 
+	{
+		switch ( c )
+		{
+				/* Decode integers */
+				case '\200':     //0x80 B
+				GET1;
+				ostr = " ";
+				ostr += dtoa( ctsi( b1 ) );
+				ostr += " ";
+				break;
+	
+				case '\201':     //0x81 BB
+				GET2;
+				ostr = " ";
+				ostr += dtoa( ctsi( b1, b2 ) );
+				ostr += " ";
+				break;
+	
+				case '\202':     //0x82 BBB
+				GET3;
+				ostr = " ";
+				ostr += ctsi( b1, b2, b3 );
+				ostr += " ";
+				break;
+	
+				case '\203':     //0x83 BBBB
+				GET4;
+				ostr = " ";
+				ostr += dtoa( ctsi( b1, b2, b3, b4 ) );
+				ostr += " ";
+				break;
+	
+				/* Decode fixed point numbers */
+				case '\204':     //0x84 .B
+				GET1;
+				f = ctui( b1 );
+				f /= 256;
+				ostr = " ";
+				ostr += ftoa( f );
+				ostr += " ";
+				break;
+	
+				case '\205':     //0x85 B.B
+				GET2;
+				f = ctui( b2 );
+				f /= 256;
+				f += ctsi( b1 );
+				ostr = " ";
+				ostr += ftoa( f );
+				ostr += " ";
+				break;
+	
+				case '\206':     //0x86 BB.B
+				GET3;
+				f = ctui( b3 );
+				f /= 256;
+				f += ctsi( b1, b2 );
+				ostr = " ";
+				ostr += ftoa( f );
+				ostr += " ";
+				break;
+	
+				case '\207':     //0x87 BBB.B
+				GET4;
+				f = b4;
+				f /= 256;
+				f += ctsi( b1, b2, b3 );
+				ostr = " ";
+				ostr += ftoa( f );
+				ostr += " ";
+				break;
+	
+				case '\210':
+				break; // -
+	
+				case '\211':     //0x89 .BB
+				GET2;
+				f = ctui( b1, b2 );
+				f /= 65536;
+				ostr = " ";
+				ostr += ftoa( f );
+				ostr += " ";
+				break;
+	
+				case '\212':     //0x8A B.BB
+				GET3;
+				f = ctui( b2, b3 );
+				f /= 65536;
+				f += ctsi( b1 );
+				ostr = " ";
+				ostr += ftoa( f );
+				ostr += " ";
+				break;
+	
+				case '\213':     //0x8B BB.BB
+				GET4;
+				f = ctui( b3, b4 );
+				f /= 65536;
+				f += ctsi( b1, b2 );
+				ostr = " ";
+				ostr += ftoa( f );
+				ostr += " ";
+				break;
+	
+				case '\214':
+				break; // -
+				case '\215':
+				break; // -
+	
+				case '\216':     // 0x8E .BBB
+				GET3;
+				f = ctui( b1, b2, b3 );
+				f /= 16777216;
+				ostr = " ";
+				ostr += ftoa( f );
+				ostr += " ";
+				break;
+	
+				case '\217':     // 0x8F B.BBB
+				GET4;
+				f = ctui( b2, b3, b4 );
+				f /= 16777216;
+				f += ctsi( b1 );
+				ostr = " ";
+				ostr += ftoa( f );
+				ostr += " ";
+				break;
+	
+				/* Decode small strings */
+				case '\220':
+				break;  // 0x90
+				case '\221':
+				ostr = " \"";
+				snc( 1, ostr );
+				ostr += "\" ";
+				break;
+				case '\222':
+				ostr = " \"";
+				snc( 2, ostr );
+				ostr += "\" ";
+				break;
+				case '\223':
+				ostr = " \"";
+				snc( 3, ostr );
+				ostr += "\" ";
+				break;
+				case '\224':
+				ostr = " \"";
+				snc( 4, ostr );
+				ostr += "\" ";
+				break;
+				case '\225':
+				ostr = " \"";
+				snc( 5, ostr );
+				ostr += "\" ";
+				break;
+				case '\226':
+				ostr = " \"";
+				snc( 6, ostr );
+				ostr += "\" ";
+				break;
+				case '\227':
+				ostr = " \"";
+				snc( 7, ostr );
+				ostr += "\" ";
+				break;
+				case '\230':
+				ostr = " \"";
+				snc( 8, ostr );
+				ostr += "\" ";
+				break;
+				case '\231':
+				ostr = " \"";
+				snc( 9, ostr );
+				ostr += "\" ";
+				break;
+				case '\232':
+				ostr = " \"";
+				snc( 10, ostr );
+				ostr += "\" ";
+				break;
+				case '\233':
+				ostr = " \"";
+				snc( 11, ostr );
+				ostr += "\" ";
+				break;
+				case '\234':
+				ostr = " \"";
+				snc( 12, ostr );
+				ostr += "\" ";
+				break;
+				case '\235':
+				ostr = " \"";
+				snc( 13, ostr );
+				ostr += "\" ";
+				break;
+				case '\236':
+				ostr = " \"";
+				snc( 14, ostr );
+				ostr += "\" ";
+				break;
+				case '\237':
+				ostr = " \"";
+				snc( 15, ostr );
+				ostr += "\" ";
+				break;
+	
+				/* Decode strings of any size */
+				case '\240':
+				GET1;
+				ui = ctui( b1 );
+				ostr = " \"";
+				snc( ui, ostr );
+				ostr += "\" ";
+				break;  // 0xA0
+				case '\241':
+				GET2;
+				ui = ctui( b1, b2 );
+				ostr = " \"";
+				snc( ui, ostr );
+				ostr += "\" ";
+				break;
+				case '\242':
+				GET3;
+				ui = ctui( b1, b2, b3 );
+				ostr = " \"";
+				snc( ui, ostr );
+				ostr += "\" ";
+				break;
+				case '\243':
+				GET4;
+				ui = ctui( b1, b2, b3, b4 );
+				ostr = " \"";
+				snc( ui, ostr );
+				ostr += "\" ";
+				break;
+	
+				/* Decode a single precision floating point value */
+				case '\244':
 				sendFloat( ostr );
-			ostr += "]";
-			break;
-
-			case '\311':     // 0xC9 LL
-			GET2;
-			ui = ctui( b1, b2 );
-			ostr += "[";
-			for ( ;ui > 0; ui-- )
-				sendFloat( ostr );
-			ostr += "]";
-			break;
-
-			case '\312':     // 0xCA LLL
-			GET3;
-			ui = ctui( b1, b2, b3 );
-			ostr += "[";
-			for ( ;ui > 0; ui-- )
-				sendFloat( ostr );
-			ostr += "]";
-			break;
-
-			case '\313':     // 0xCB LLLL
-			GET4;
-			ui = ctui( b1, b2, b3, b4 );
-			ostr = "[";
-			for ( ;ui > 0; ui-- )
-				sendFloat( ostr );
-			ostr += "]";
-			break;
-
-			/* Declare a RI request */
-			case '\314':     // 0xCC B <string>
-			GET1;
-			ui = ctui( b1 );
-			gc( c );
-			readString( c, str ); //str << std::ends;
-			tmpstr = str.c_str();
-			ritab[ ui ] = tmpstr;
-			break;
-
-			/* Declare strings */
-			case '\315':     // 0xCD L
-			GET1;
-			ui = ctui( b1 );
-			gc( c );
-			str += "\"";
-			readString( c, str );
-			str += "\"" ; //<< std::ends;
-			if ( stringtab.size() <= ui )
-				stringtab.resize( ui + 1 );
-			tmpstr = str.c_str();
-			stringtab[ ui ] = tmpstr;
-			break;
-
-			case '\316':     // 0xCE LL
-			GET2;
-			ui = ctui( b1, b2 );
-			gc( c );
-			str += "\"";
-			readString( c, str );
-			str += "\"" ; //std::ends;
-			if ( stringtab.size() <= ui )
-				stringtab.resize( ui + 1 );
-			tmpstr = str.c_str();
-			stringtab[ ui ] = tmpstr;
-			break;
-
-			/* Decode previously declared strings */
-			case '\317':     // 0xCF L
-			GET1;
-			ui = ctui( b1 );
-			ostr += " ";
-			ostr += stringtab[ ui ];
-			ostr += " ";
-			break;
-
-			case '\320':    // 0xD0 LL
-			GET2;
-			ui = ctui( b1, b2 );
-			ostr += " ";
-			ostr += stringtab[ ui ];
-			ostr += " ";
-			break;
-
-
-			case '\321':
-			case '\322':
-			case '\323':
-			case '\324':
-			case '\325':
-			case '\326':
-			case '\327':
-			case '\330':
-			case '\331':
-			case '\332':
-			case '\333':
-			case '\334':
-			case '\335':
-			case '\336':
-			case '\337':
-			case '\340':
-			case '\341':
-			case '\342':
-			case '\343':
-			case '\344':
-			case '\345':
-			case '\346':
-			case '\347':
-			case '\350':
-			case '\351':
-			case '\352':
-			case '\353':
-			case '\354':
-			case '\355':
-			case '\356':
-			case '\357':
-			case '\360':
-			case '\361':
-			case '\362':
-			case '\363':
-			case '\364':
-			case '\365':
-			case '\366':
-			case '\367':
-			case '\370':
-			case '\371':
-			case '\372':
-			case '\373':
-			case '\374':
-			case '\375':
-			case '\376':
-			//case '\377': Signals the end of a RunProgram block
-			throw std::string( " BINARY_DECODER_WARNING: reserved byte encountered" );
-			break;
-
-			default:
-			ostr += c;
+				break;  // 0xA4
+	
+				/* Decode a double precision floating point value */
+				case '\245':
+				sendDouble( ostr );
+				break;  // 0xA5
+	
+				/* Decode a RI request previously declared */
+				case '\246':     // 0xA6
+				GET1;
+				ui = ctui( b1 );
+				ostr = "\n";
+				ostr += ritab[ ui ];
+				ostr += " ";
+				break;
+	
+	
+				case '\247':
+				case '\250':
+				case '\251':
+				case '\252':
+				case '\253':
+				case '\254':
+				case '\255':
+				case '\256':
+				case '\257':
+				case '\260':
+				case '\261':
+				case '\262':
+				case '\263':
+				case '\264':
+				case '\265':
+				case '\266':
+				case '\267':
+				case '\270':
+				case '\271':
+				case '\272':
+				case '\273':
+				case '\274':
+				case '\275':
+				case '\276':
+				case '\277':
+				case '\300':
+				case '\301':
+				case '\302':
+				case '\303':
+				case '\304':
+				case '\305':
+				case '\306':
+				case '\307':
+				throw std::string( " BINARY_DECODER_WARNING: reserved byte encountered" );
+				break;
+	
+				/* Decode arrays of single precision floating point values */
+				case '\310':     // 0xC8 L
+				GET1;
+				ui = ctui( b1 );
+				ostr += "[";
+				for ( ;ui > 0; ui-- )
+					sendFloat( ostr );
+				ostr += "]";
+				break;
+	
+				case '\311':     // 0xC9 LL
+				GET2;
+				ui = ctui( b1, b2 );
+				ostr += "[";
+				for ( ;ui > 0; ui-- )
+					sendFloat( ostr );
+				ostr += "]";
+				break;
+	
+				case '\312':     // 0xCA LLL
+				GET3;
+				ui = ctui( b1, b2, b3 );
+				ostr += "[";
+				for ( ;ui > 0; ui-- )
+					sendFloat( ostr );
+				ostr += "]";
+				break;
+	
+				case '\313':     // 0xCB LLLL
+				GET4;
+				ui = ctui( b1, b2, b3, b4 );
+				ostr = "[";
+				for ( ;ui > 0; ui-- )
+					sendFloat( ostr );
+				ostr += "]";
+				break;
+	
+				/* Declare a RI request */
+				case '\314':     // 0xCC B <string>
+				GET1;
+				ui = ctui( b1 );
+				gc( c );
+				readString( c, str ); //str << std::ends;
+				tmpstr = str.c_str();
+				ritab[ ui ] = tmpstr;
+				break;
+	
+				/* Declare strings */
+				case '\315':     // 0xCD L
+				GET1;
+				ui = ctui( b1 );
+				gc( c );
+				str += "\"";
+				readString( c, str );
+				str += "\"" ; //<< std::ends;
+				if ( stringtab.size() <= ui )
+					stringtab.resize( ui + 1 );
+				tmpstr = str.c_str();
+				stringtab[ ui ] = tmpstr;
+				break;
+	
+				case '\316':     // 0xCE LL
+				GET2;
+				ui = ctui( b1, b2 );
+				gc( c );
+				str += "\"";
+				readString( c, str );
+				str += "\"" ; //std::ends;
+				if ( stringtab.size() <= ui )
+					stringtab.resize( ui + 1 );
+				tmpstr = str.c_str();
+				stringtab[ ui ] = tmpstr;
+				break;
+	
+				/* Decode previously declared strings */
+				case '\317':     // 0xCF L
+				GET1;
+				ui = ctui( b1 );
+				ostr += " ";
+				ostr += stringtab[ ui ];
+				ostr += " ";
+				break;
+	
+				case '\320':    // 0xD0 LL
+				GET2;
+				ui = ctui( b1, b2 );
+				ostr += " ";
+				ostr += stringtab[ ui ];
+				ostr += " ";
+				break;
+	
+	
+				case '\321':
+				case '\322':
+				case '\323':
+				case '\324':
+				case '\325':
+				case '\326':
+				case '\327':
+				case '\330':
+				case '\331':
+				case '\332':
+				case '\333':
+				case '\334':
+				case '\335':
+				case '\336':
+				case '\337':
+				case '\340':
+				case '\341':
+				case '\342':
+				case '\343':
+				case '\344':
+				case '\345':
+				case '\346':
+				case '\347':
+				case '\350':
+				case '\351':
+				case '\352':
+				case '\353':
+				case '\354':
+				case '\355':
+				case '\356':
+				case '\357':
+				case '\360':
+				case '\361':
+				case '\362':
+				case '\363':
+				case '\364':
+				case '\365':
+				case '\366':
+				case '\367':
+				case '\370':
+				case '\371':
+				case '\372':
+				case '\373':
+				case '\374':
+				case '\375':
+				case '\376':
+				//case '\377': Signals the end of a RunProgram block
+				throw std::string( " BINARY_DECODER_WARNING: reserved byte encountered" );
+				break;
+	
+				default:
+				ostr += c;
+		}
 	}
-
-
+	
 	for ( ui = 0;ui < ostr.size();ui++ )
 		cv.push_back( ostr[ ui ] );
 
