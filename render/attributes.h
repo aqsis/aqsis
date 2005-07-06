@@ -314,7 +314,7 @@ private:
             if( it != m_ParameterLists.end() )
                 return ( it->second );
             else
-                return ( boost::shared_ptr<CqNamedParameterList>() );
+                return boost::shared_ptr<CqNamedParameterList>(static_cast<CqNamedParameterList*>(0));
         }
 
 	boost::shared_ptr<CqNamedParameterList>	Find( const TqChar* pname )
@@ -324,7 +324,7 @@ private:
             if( it != m_ParameterLists.end() )
                 return ( it->second );
             else
-                return ( boost::shared_ptr<CqNamedParameterList>() );
+                return boost::shared_ptr<CqNamedParameterList>(static_cast<CqNamedParameterList*>(0));
         }
 
         void Add( const boost::shared_ptr<CqNamedParameterList>& pOption )
