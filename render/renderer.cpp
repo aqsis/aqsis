@@ -1075,7 +1075,14 @@ boost::shared_ptr<IqShader> CqRenderer::getDefaultSurfaceShader()
         boost::shared_ptr<IqShader> pMapCheck = 
                 CreateShader( "_def_", Type_Surface );
         if (pMapCheck)
+	{
+		// we must initialize the shader here.  non-default
+		//  shaders are initialized in RiSurfaceV()
+		CqShaderVM* pCreated = static_cast<CqShaderVM*>( pMapCheck.get() );
+		pCreated->PrepareDefArgs();
+		
                 return pMapCheck;
+	}
 
         // insert the default surface template into the map
         boost::shared_ptr<IqShader> pRet( new CqShaderVM() );
