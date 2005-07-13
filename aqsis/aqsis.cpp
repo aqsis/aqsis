@@ -408,6 +408,7 @@ int main( int argc, const char** argv )
 	g_dso_path.append( "dsos" );
 	g_procedural_path.append( "procedures" );
 	g_plugin_path.append( "plugins" );
+	g_rc_path.append( "aqsisrc" );
 #elif AQSIS_SYSTEM_MACOSX
     CFURLRef pluginRef = CFBundleCopyBundleURL(CFBundleGetMainBundle());
     CFStringRef macPath = CFURLCopyFileSystemPath(pluginRef, kCFURLPOSIXPathStyle);
