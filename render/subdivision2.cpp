@@ -880,6 +880,10 @@ void CqSubdivision2::OutputInfo(const char* fname, std::vector<CqLath*>* paFaces
     if( NULL == paLaths )
         paLaths = &m_apFacets;
 
+    paLaths = &m_apLaths;
+
+    CqMatrix matCameraToObject0 = QGetRenderContext() ->matSpaceToSpace( "camera", "object", CqMatrix(), pPoints()->pTransform()->matObjectToWorld(pPoints()->pTransform()->Time(0)), pPoints()->pTransform()->Time(0) );
+
     for(TqUint i = 0; i < paLaths->size(); i++)
     {
         CqLath* pL = (*paLaths)[i];
@@ -896,6 +900,10 @@ void CqSubdivision2::OutputInfo(const char* fname, std::vector<CqLath*>* paFaces
             file << "0x" << pL->cv();
         else
             file << "***";
+
+		CqVector3D vecP = pPoints()->P()->pValue(pL->VertexIndex())[0]; 
+		vecP = matCameraToObject0 * vecP;
+		file << "[P=" << vecP << "]";
 
         file << std::endl;
     }
@@ -1168,25 +1176,29 @@ CqMicroPolyGridBase* CqSurfaceSubdivisionPatch::DiceExtract()
 
 
 
-static void StoreDiceAPVar( const boost::shared_ptr<IqShader>& pShader, CqParameter* pParam, TqUint ivA, TqUint indexA )
+static void StoreDiceAPVar( const boost::shared_ptr<IqShader>& pShader, CqParameter* pParam, TqUint ivA, TqInt ifvA, TqUint indexA )
 {
     // Find the argument
     IqShaderData * pArg = pShader->FindArgument( pParam->strName() );
     if ( pArg )
     {
+		TqInt index = ivA;
+		if( pParam->Class() == class_facevarying )
+			index = ifvA;
+
         switch ( pParam->Type() )
         {
         case type_float:
             {
                 CqParameterTyped<TqFloat, TqFloat>* pNParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParam );
-                pArg->SetValue( *pNParam->pValue( ivA ), indexA );
+                pArg->SetValue( *pNParam->pValue( index ), indexA );
             }
             break;
 
         case type_integer:
             {
                 CqParameterTyped<TqInt, TqFloat>* pNParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParam );
-                pArg->SetValue( *pNParam->pValue( ivA ), indexA );
+                pArg->SetValue( *pNParam->pValue( index ), indexA );
             }
             break;
 
@@ -1195,35 +1207,35 @@ static void StoreDiceAPVar( const boost::shared_ptr<IqShader>& pShader, CqParame
         case type_normal:
             {
                 CqParameterTyped<CqVector3D, CqVector3D>* pNParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParam );
-                pArg->SetValue( *pNParam->pValue( ivA ), indexA );
+                pArg->SetValue( *pNParam->pValue( index ), indexA );
             }
             break;
 
         case type_hpoint:
             {
                 CqParameterTyped<CqVector4D, CqVector3D>* pNParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( pParam );
-                pArg->SetValue( *pNParam->pValue( ivA ), indexA );
+                pArg->SetValue( *pNParam->pValue( index ), indexA );
             }
             break;
 
         case type_string:
             {
                 CqParameterTyped<CqString, CqString>* pNParam = static_cast<CqParameterTyped<CqString, CqString>*>( pParam );
-                pArg->SetValue( *pNParam->pValue( ivA ), indexA );
+                pArg->SetValue( *pNParam->pValue( index ), indexA );
             }
             break;
 
         case type_color:
             {
                 CqParameterTyped<CqColor, CqColor>* pNParam = static_cast<CqParameterTyped<CqColor, CqColor>*>( pParam );
-                pArg->SetValue( *pNParam->pValue( ivA ), indexA );
+                pArg->SetValue( *pNParam->pValue( index ), indexA );
             }
             break;
 
         case type_matrix:
             {
                 CqParameterTyped<CqMatrix, CqMatrix>* pNParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParam );
-                pArg->SetValue( *pNParam->pValue( ivA ), indexA );
+                pArg->SetValue( *pNParam->pValue( index ), indexA );
             }
             break;
 
@@ -1308,13 +1320,13 @@ void CqSurfaceSubdivisionPatch::StoreDice( CqMicroPolyGrid* pGrid, const boost::
         /// \todo: Must transform point/vector/normal/matrix parameter variables from 'object' space to current before setting.
         boost::shared_ptr<IqShader> pShader;
 		if ( pShader=pGrid->pAttributes() ->pshadSurface(m_Time) )
-            StoreDiceAPVar( pShader, ( *iUP ), iParam, iData );
+            StoreDiceAPVar( pShader, ( *iUP ), iParam, iFVParam, iData );
 
         if ( pShader=pGrid->pAttributes() ->pshadDisplacement(m_Time) )
-            StoreDiceAPVar( pShader, ( *iUP ), iParam, iData );
+            StoreDiceAPVar( pShader, ( *iUP ), iParam, iFVParam, iData );
 
         if ( pShader=pGrid->pAttributes() ->pshadAtmosphere(m_Time) )
-            StoreDiceAPVar( pShader, ( *iUP ), iParam, iData );
+            StoreDiceAPVar( pShader, ( *iUP ), iParam, iFVParam, iData );
     }
 }
 
