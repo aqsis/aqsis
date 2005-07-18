@@ -778,8 +778,11 @@ void CqSubdivision2::SubdivideFace(CqLath* pFace, std::vector<CqLath*>& apSubFac
             AddSharpCorner( pLathA, CornerSharpness( aQfv[ i ] ) );
 
         // Store a lath reference for the facet.
-        apSubFaces.push_back( pLathA );
-        m_apFacets.push_back( pLathA );
+		CqLath* pLathF = pLathA;
+		TqInt reorder = i;
+		while( reorder-- > 0)	pLathF = pLathF->ccf();
+        apSubFaces.push_back( pLathF );
+        m_apFacets.push_back( pLathF );
     }
 
     // Now connect up the laths we have created.
