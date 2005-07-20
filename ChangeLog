@@ -1,3 +1,42 @@
+2005-07-18 22:18  pgregory
+
+	* render/subdivision2.cpp: Fix the problem with facevarying
+	  interpolation on subdivision surfaces. Bug #1220286
+
+2005-07-18 00:34  ltatkinson
+
+	* neqsus/.neqsus/ui/: collapse.png, expand.png, rsl.png: Initial
+	  check-in (these files are for UI elements, like show/hide panes).
+
+2005-07-18 00:32  ltatkinson
+
+	* neqsus/.neqsus/temp/: index.html, static_preview.png: Initial
+	  check-in (these are temporary files only, and not for
+	  redistribution).
+
+2005-07-18 00:29  ltatkinson
+
+	* neqsus/: about.cpp, about.h, credits.cpp, credits.h, main.cpp,
+	  main.h, makefile.vc, neqsus.cpp, neqsus.h, neqsus.pjd, neqsus.rc,
+	  options.cpp, options.h: Initial check-in (these files need
+	  serious pruning to be more continuous with the rest of Aqsis'
+	  modules).
+
+2005-07-15 16:51  pgregory
+
+	* render/subdivision2.cpp: Fix a problem with dicing 'facevarying'
+	  parameters.
+
+2005-07-13 22:52  pgregory
+
+	* aqsis/aqsis.cpp: Fix the default specification of the aqsisrc
+	  configuration file. It is now 'aqsisrc' in the install/binary
+	  directory.
+
+2005-07-10 10:52  pgregory
+
+	* ChangeLog: Update ChangeLog.
+
 2005-07-09 18:14  jpgrad
 
 	* render/renderer.cpp: - Initialize the default surface shader, now
