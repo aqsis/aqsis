@@ -672,6 +672,8 @@ void CqRenderer::Initialise()
     m_OutputDataEntries.clear();
     m_OutputDataOffset = 9;		// Cs, Os, depth, coverage, a
     m_OutputDataTotalSize = 9;	// Cs, Os, depth, coverage, a
+
+	m_clippingVolume.clear();
 }
 
 

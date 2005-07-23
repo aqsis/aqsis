@@ -288,7 +288,7 @@ TqInt CqPolygonBase::Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSp
 
         }
 
-        aSplits.push_back( pNew );
+		aSplits.push_back( pNew );
         cNew++;
 
         // Move onto the next quad

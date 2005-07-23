@@ -46,6 +46,8 @@
 #include	"iraytrace.h"
 #include	"iraytrace.h"
 
+#include	"clippingvolume.h"
+
 START_NAMESPACE( Aqsis )
 
 class CqImageBuffer;
@@ -475,6 +477,16 @@ public:
 		m_fWorldBegin = begin;
 	}
 
+	CqClippingVolume& clippingVolume()
+	{
+		return(m_clippingVolume);
+	}
+	const CqClippingVolume& clippingVolume() const
+	{
+		return(m_clippingVolume);
+	}
+
+
 private:
 	boost::shared_ptr<CqModeBlock>	m_pconCurrent;					///< Pointer to the current context.
     CqStats	m_Stats;						///< Global statistics.
@@ -518,6 +530,8 @@ private:
     RtFunc	m_pPreWorldFunction;	///< A pointer to the function called just prior to starting the world.
 
 	IqRaytrace*	m_pRaytracer;		///< Pointer to the raytracing subsystem interface.
+
+	CqClippingVolume	m_clippingVolume;
 
 public:
     std::vector<SqCoordSys>	m_aCoordSystems;		///< List of reistered coordinate systems.

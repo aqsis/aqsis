@@ -306,6 +306,10 @@ SOURCE=.\bucket.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\clippingvolume.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\condition.h
 # End Source File
 # Begin Source File
@@ -443,6 +447,10 @@ SOURCE=.\parameters.h
 # Begin Source File
 
 SOURCE=.\patch.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\plane.h
 # End Source File
 # Begin Source File
 

@@ -760,11 +760,22 @@ TqBool	CqSurfacePatchBilinear::Diceable()
 
 
 
+/** CqSurfacePatchBilinear::Split
+ *  Split the patch into 2 or 3 new patches depending on whether the patch has a phantom
+ *  fourth vertex or not. If not, then the patch is split into to in the chose u or v direction.
+ *  If it has a phantom fourth vertex, it is split in both u and v, and the patch corresponding
+ *  to the phantom corner is discarded. The new patch opposite the phantom vertex in the original
+ *  is no longer a phantom patch, the other two are.
+ *
+ */
 TqInt CqSurfacePatchBilinear::Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
 {
+	// Create two new patches
     aSplits.push_back( boost::shared_ptr<CqBasicSurface>( new CqSurfacePatchBilinear ) );
     aSplits.push_back( boost::shared_ptr<CqBasicSurface>( new CqSurfacePatchBilinear ) );
 
+	// If phantom, create a further two.
+	/// \note: We can actually avoid this, as we only really need three for a phantom patch.
     if ( m_fHasPhantomFourthVertex )
     {
         aSplits.push_back( boost::shared_ptr<CqBasicSurface>( new CqSurfacePatchBilinear ) );
@@ -773,7 +784,8 @@ TqInt CqSurfacePatchBilinear::Split( std::vector<boost::shared_ptr<CqBasicSurfac
     TqBool direction = SplitDir() == SplitDir_U;
     TqBool opposite = !direction;
     TqInt i;
-    for ( i = 0; i < ( m_fHasPhantomFourthVertex ? 4 : 2 ); i++ )
+    // Fill in the standard data from this donor to the new patches.
+	for ( i = 0; i < ( m_fHasPhantomFourthVertex ? 4 : 2 ); i++ )
     {
         aSplits[ i ] ->SetSurfaceParameters( *this );
         aSplits[ i ] ->SetSplitDir( direction ? SplitDir_V : SplitDir_U );
@@ -787,12 +799,14 @@ TqInt CqSurfacePatchBilinear::Split( std::vector<boost::shared_ptr<CqBasicSurfac
 
     for ( iUP = m_aUserParams.begin(); iUP != end; iUP++ )
     {
-        CqParameter* pNewA = ( *iUP ) ->Clone();
+        // Clone the parameter and subdivide it in the chosen direction.
+		CqParameter* pNewA = ( *iUP ) ->Clone();
         CqParameter* pNewB = ( *iUP ) ->Clone();
         ( *iUP ) ->Subdivide( pNewA, pNewB, direction, this );
 
         if ( m_fHasPhantomFourthVertex )
         {
+			// If phantom, clone the two new parameters, and subdivide in the other direction.
             CqParameter * pNewC = pNewA ->Clone();
             CqParameter* pNewD = pNewA ->Clone();
             CqParameter* pNewE = pNewB ->Clone();
@@ -817,8 +831,10 @@ TqInt CqSurfacePatchBilinear::Split( std::vector<boost::shared_ptr<CqBasicSurfac
 
     if ( m_fHasPhantomFourthVertex )
     {
+		// If phantom, we can discard the new patch at the phantom vertex.
         aSplits.pop_back();
 
+		// And set the phantom status of the remaining 3 patches.
         static_cast<CqSurfacePatchBilinear*>( aSplits[ 0 ].get() ) ->m_fHasPhantomFourthVertex = TqFalse;
         static_cast<CqSurfacePatchBilinear*>( aSplits[ 1 ].get() ) ->m_fHasPhantomFourthVertex = TqTrue;
         static_cast<CqSurfacePatchBilinear*>( aSplits[ 2 ].get() ) ->m_fHasPhantomFourthVertex = TqTrue;
@@ -827,6 +843,7 @@ TqInt CqSurfacePatchBilinear::Split( std::vector<boost::shared_ptr<CqBasicSurfac
     }
     else
     {
+		// If not phantom, just return the two new halves.
         static_cast<CqSurfacePatchBilinear*>( aSplits[ 0 ].get() ) ->m_fHasPhantomFourthVertex = TqFalse;
         static_cast<CqSurfacePatchBilinear*>( aSplits[ 1 ].get() ) ->m_fHasPhantomFourthVertex = TqFalse;
 

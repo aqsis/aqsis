@@ -65,11 +65,11 @@ void CqOptions::InitialiseCamera()
             matCameraToScreen.Identity();
             matCameraToScreen.SetfIdentity( TqFalse );
             matCameraToScreen.SetElement( 0, 0, 2.0f / ( r - l ) );
-	    matCameraToScreen.SetElement( 3, 0, -( r + l ) / ( r - l ) );
+			matCameraToScreen.SetElement( 3, 0, -( r + l ) / ( r - l ) );
             matCameraToScreen.SetElement( 1, 1, 2.0f / ( t - b ) );
-	    matCameraToScreen.SetElement( 3, 1, -( t + b ) / ( t - b ) );
+			matCameraToScreen.SetElement( 3, 1, -( t + b ) / ( t - b ) );
             matCameraToScreen.SetElement( 2, 2, -2.0f / ( f - n ) );
-	    matCameraToScreen.SetElement( 3, 2, -( f + n ) / ( f - n ) );
+			matCameraToScreen.SetElement( 3, 2, -( f + n ) / ( f - n ) );
             matCameraToScreen.SetElement( 2, 3, 0 );
             matCameraToScreen.SetElement( 3, 3, 1 );
 
@@ -93,6 +93,31 @@ void CqOptions::InitialiseCamera()
             CqMatrix	S3( 1, -1, 1 );
             matScreenToNDC = S * T * S3; // S*T*S2
             matNDCToRaster = S2;
+
+			// Setup the view frustum clipping volume
+			// Left clipping plane
+			CqPlane pl(1,0,0,fabs(l));
+			QGetRenderContext()->clippingVolume().addPlane(pl);
+
+			// Right clipping plane
+			CqPlane pr(-1,0,0,fabs(r));
+			QGetRenderContext()->clippingVolume().addPlane(pr);
+
+			// Top clipping plane
+			CqPlane pt(0,-1,0,fabs(t));
+			QGetRenderContext()->clippingVolume().addPlane(pt);
+
+			// Bottom clipping plane
+			CqPlane pb(0,1,0,fabs(b));
+			QGetRenderContext()->clippingVolume().addPlane(pb);
+
+			// Near clipping plane
+			CqPlane pn(0,0,1,fabs(n));
+			QGetRenderContext()->clippingVolume().addPlane(pn);
+
+			// Far clipping plane
+			CqPlane pf(0,0,-1,fabs(f));
+			QGetRenderContext()->clippingVolume().addPlane(pf);
 
             break;
         }
@@ -139,6 +164,49 @@ void CqOptions::InitialiseCamera()
             CqMatrix	S3( 1.0f, -1.0f, 1.0f );
             matScreenToNDC = S * T * S3; // S*T*S2
             matNDCToRaster = S2;
+
+			// Setup the view frustum clipping volume
+			// Left clipping plane
+			CqPlane pl(matCameraToScreen[0][3] + matCameraToScreen[0][0],
+					   matCameraToScreen[1][3] + matCameraToScreen[1][0],
+					   matCameraToScreen[2][3] + matCameraToScreen[2][0],
+					   matCameraToScreen[3][3] + matCameraToScreen[3][0]);
+			QGetRenderContext()->clippingVolume().addPlane(pl);
+
+			// Right clipping plane
+			CqPlane pr(matCameraToScreen[0][3] - matCameraToScreen[0][0],
+					   matCameraToScreen[1][3] - matCameraToScreen[1][0],
+					   matCameraToScreen[2][3] - matCameraToScreen[2][0],
+					   matCameraToScreen[3][3] - matCameraToScreen[3][0]);
+			QGetRenderContext()->clippingVolume().addPlane(pr);
+
+			// Top clipping plane
+			CqPlane pt(matCameraToScreen[0][3] - matCameraToScreen[0][1],
+					   matCameraToScreen[1][3] - matCameraToScreen[1][1],
+					   matCameraToScreen[2][3] - matCameraToScreen[2][1],
+					   matCameraToScreen[3][3] - matCameraToScreen[3][1]);
+			QGetRenderContext()->clippingVolume().addPlane(pt);
+
+			// Bottom clipping plane
+			CqPlane pb(matCameraToScreen[0][3] + matCameraToScreen[0][1],
+					   matCameraToScreen[1][3] + matCameraToScreen[1][1],
+					   matCameraToScreen[2][3] + matCameraToScreen[2][1],
+					   matCameraToScreen[3][3] + matCameraToScreen[3][1]);
+			QGetRenderContext()->clippingVolume().addPlane(pb);
+
+			// Near clipping plane
+			CqPlane pn(matCameraToScreen[0][2],
+					   matCameraToScreen[1][2],
+					   matCameraToScreen[2][2],
+					   matCameraToScreen[3][2]);
+			QGetRenderContext()->clippingVolume().addPlane(pn);
+
+			// Far clipping plane
+			CqPlane pf(matCameraToScreen[0][3] - matCameraToScreen[0][2],
+					   matCameraToScreen[1][3] - matCameraToScreen[1][2],
+					   matCameraToScreen[2][3] - matCameraToScreen[2][2],
+					   matCameraToScreen[3][3] - matCameraToScreen[3][2]);
+			QGetRenderContext()->clippingVolume().addPlane(pf);
 
             break;
         }

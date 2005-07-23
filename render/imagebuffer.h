@@ -44,6 +44,7 @@
 #include    "bucket.h"
 #include	"kdtree.h"
 #include	"occlusion.h"
+#include	"clippingvolume.h"
 
 START_NAMESPACE( Aqsis )
 

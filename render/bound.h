@@ -31,6 +31,7 @@
 
 #include	"ri.h"
 #include	"matrix.h"
+#include	"plane.h"
 
 #include <vector>
 
@@ -145,6 +146,110 @@ public:
             return ( TqFalse );
         else
             return ( TqTrue );
+    }
+
+	enum EqPlaneSide
+	{
+		Side_Outside = -1,
+		Side_Both = 0,
+		Side_Inside = 1,
+	};
+
+    TqInt whichSideOf(CqPlane plane) 
+	{
+		TqBool inside = TqFalse;
+        TqBool outside = TqFalse;
+        
+		
+		CqVector3D p(m_vecMin.x(), m_vecMin.y(), m_vecMin.z());
+        if (plane.whichSide(p) == CqPlane::Space_Positive)
+            inside = TqTrue;
+        else
+            outside = TqTrue;
+        
+		p.z(m_vecMax.z());	// xmin, ymin, zmax
+        if (plane.whichSide(p) == CqPlane::Space_Positive) 
+		{
+            inside = TqTrue;
+            if (outside)	return(Side_Both);	// Both sides
+        } 
+		else 
+		{
+            outside = TqTrue;
+            if (inside)		return(Side_Both);	// Both sides
+        }
+        
+		p.z(m_vecMin.z());	
+		p.y(m_vecMax.y());	// xmin, ymax, zmin
+        if (plane.whichSide(p) == CqPlane::Space_Positive) 
+		{
+            inside = TqTrue;
+            if (outside)	return(Side_Both);	// Both sides
+        }
+		else 
+		{
+            outside = TqTrue;
+            if (inside)		return(Side_Both);	// Both sides
+        }
+        p.z(m_vecMax.z());	// xmin, ymax, zmax
+        if (plane.whichSide(p) == CqPlane::Space_Positive) 
+		{
+            inside = TqTrue;
+            if (outside)	return(Side_Both);
+        } 
+		else 
+		{
+            outside = TqTrue;
+            if (inside)		return(Side_Both);
+        }
+        p.x(m_vecMax.x());
+		p.y(m_vecMin.y());
+		p.z(m_vecMin.z());	// xmax, ymin, zmin
+        if (plane.whichSide(p) == CqPlane::Space_Positive) 
+		{
+            inside = TqTrue;
+            if (outside)	return(Side_Both);
+        }
+		else
+		{
+            outside = TqTrue;
+            if (inside)		return(Side_Both);
+        }
+		p.z(m_vecMax.z());	// xmax, ymin, zmax
+        if (plane.whichSide(p) == CqPlane::Space_Positive) 
+		{
+            inside = TqTrue;
+            if (outside)	return(Side_Both);
+        } 
+		else 
+		{
+            outside = TqTrue;
+            if (inside)		return(Side_Both);
+        }
+		p.z(m_vecMin.z());
+		p.y(m_vecMax.y());	// xmax, ymax, zmin
+        if (plane.whichSide(p) == CqPlane::Space_Positive) 
+		{
+            inside = TqTrue;
+            if (outside)	return(Side_Both);
+        } 
+		else 
+		{
+            outside = TqTrue;
+            if (inside)		return(Side_Both);
+        }
+		p.z(m_vecMax.z());	// xmax, ymax, zmax
+        if (plane.whichSide(p) == CqPlane::Space_Positive) 
+		{
+            inside = TqTrue;
+            if (outside)	return(Side_Both);
+        } 
+		else 
+		{
+            outside = TqTrue;
+            if (inside)		return(Side_Both);
+        }
+        return(inside ? Side_Inside : Side_Outside);
     }
 
     friend std::ostream &operator<<( std::ostream &Stream, const CqBound &Bound );

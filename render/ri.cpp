@@ -697,6 +697,8 @@ RtVoid	RiFrameBegin( RtInt number )
 
     QGetRenderContext() ->Stats().InitialiseFrame();
 
+	QGetRenderContext()->clippingVolume().clear();
+
 
     worldrand.Reseed('a'+'q'+'s'+'i'+'s');
 
@@ -3837,7 +3839,7 @@ RtVoid	RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETER
         pPointsClass->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld(time), time ),
                                  QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld(time), time ),
                                  QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld(time), time ) );
-        CreateGPrim(pPsPs);
+		CreateGPrim(pPsPs);
     }
 
     return ;

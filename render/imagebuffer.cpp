@@ -220,8 +220,13 @@ TqBool CqImageBuffer::CullSurface( CqBound& Bound, const boost::shared_ptr<CqBas
 {
     // If the primitive is completely outside of the hither-yon z range, cull it.
     if ( Bound.vecMin().z() >= QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Clipping" ) [ 1 ] ||
-            Bound.vecMax().z() <= QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Clipping" ) [ 0 ] )
+         Bound.vecMax().z() <= QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Clipping" ) [ 0 ] )
         return ( TqTrue );
+
+	if(QGetRenderContext()->clippingVolume().whereIs(Bound) == CqBound::Side_Outside)
+	{
+		return(TqTrue);
+	}
 
     // If the primitive spans the epsilon plane and the hither plane and can be split,
     if ( Bound.vecMin().z() <= 0.0f && Bound.vecMax().z() > FLT_EPSILON )
@@ -1099,7 +1104,19 @@ void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax, 
 				TqInt i;
 				for ( i = 0; i < cSplits; i++ )
 					PostSurface( aSplits[ i ] );
-			}
+
+				/// \debug:
+/*				if(pSurface->IsUndiceable())
+				{
+				    CqBound Bound( pSurface->Bound() );
+					std::cout << pSurface << " - " << Bound.vecMin().z() << " --> " << Bound.vecMax().z() << std::endl;
+					for ( i = 0; i < cSplits; i++ )
+					{
+					    CqBound SBound( aSplits[i]->Bound() );
+						std::cout << "\t" << aSplits[i] << " - " << SBound.vecMin().z() << " --> " << SBound.vecMax().z() << std::endl;
+					}
+				}
+*/			}
         } 
 		else if ( pSurface == Bucket.pTopSurface() ) 
         {
