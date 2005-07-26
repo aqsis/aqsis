@@ -1038,8 +1038,14 @@ TqInt CqCubicCurveSegment::SplitToPatch(
     //                      the first point
     //  widthOffset1  - offset to account for the width of the patch at
     //                      the second point
-    CqVector3D direction0 = *P()->pValue( 1 ) - *P()->pValue( 0 );
-    CqVector3D direction3 = *P()->pValue( 3 ) - *P()->pValue( 2 );
+
+	// \note: Not really happy about this, but by shifting the calculation value 
+	// slightly along the curve for tangent calculation of endpoints, we avoid
+	// problems with curves that have duplicated points at one or other ends.
+	// See bug #1102605
+	CqVector3D direction0 = CalculateTangent(0.01);
+	CqVector3D direction3 = CalculateTangent(0.99);
+
 	CqVector3D direction1 = CalculateTangent(0.333);
 	CqVector3D direction2 = CalculateTangent(0.666);
 
