@@ -9,6 +9,8 @@
 #include	"aqsis.h"
 #include	"parsenode.h"
 
+#include	<queue>
+
 START_NAMESPACE( Aqsis )
 
 ///---------------------------------------------------------------------
@@ -16,13 +18,56 @@ START_NAMESPACE( Aqsis )
 /// Do a type check based on suitable types requested, and add a cast if required.
 /// Uses all possible functions listed to try to fund a suitable candidate.
 
+class CqFunctionSignature
+{
+	public:
+		CqFunctionSignature(SqFuncRef ref, CqFuncDef* func, TqInt weight) : m_ref(ref), m_func(func), m_weight(weight)
+		{}
+		~CqFunctionSignature() {}
+
+		const SqFuncRef& getRef() const
+		{
+			return(m_ref);
+		}
+
+		SqFuncRef& getRef()
+		{
+			return(m_ref);
+		}
+
+		CqFuncDef* getFunc() const
+		{
+			return(m_func);
+		}
+
+		TqInt getWeight() const
+		{
+			return(m_weight);
+		}
+
+	private:
+		SqFuncRef m_ref;
+		CqFuncDef* m_func;
+		TqInt m_weight;
+
+		friend bool operator<(const CqFunctionSignature& a, const CqFunctionSignature& b)
+		{
+			return(a.m_weight < b.m_weight);
+		}
+
+};
+
+
 TqInt	CqParseNodeFunctionCall::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOnly )
 {
     TqInt NewType = Type_Nil;
     TqInt cSpecifiedArgs = 0;
 
     TqInt* aArgTypes = new TqInt[ m_aFuncRef.size() ];
-    std::vector<CqFuncDef*> aFuncs;
+
+	// This is the priority queue that we will build for the available 
+	// signatures. The top entry will be the most suitable for use.
+	std::priority_queue<CqFunctionSignature> functions;
 
     CqString strMyName = strName();
 
@@ -44,152 +89,267 @@ TqInt	CqParseNodeFunctionCall::TypeCheck( TqInt* pTypes, TqInt Count, TqBool Che
         pArg = pArg->pNext();
     }
 
+
+	// Build the queue
     TqUint i;
-    for ( i = 0; i < m_aFuncRef.size(); i++ )
+    for ( i = 0; i < this->m_aFuncRef.size(); i++ )
     {
-        aFuncs.push_back( CqFuncDef::GetFunctionPtr( m_aFuncRef[ i ] ) );
-        if ( aFuncs[ i ] != 0 )
+        CqFuncDef* pfunc = CqFuncDef::GetFunctionPtr( m_aFuncRef[ i ] );
+        if( pfunc != 0 )
         {
-            TqInt cArgs = aFuncs[ i ] ->cTypeSpecLength();
+			TqInt weight = 0;
+            TqInt cArgs = pfunc->cTypeSpecLength();
             if ( ( cArgs > 0 ) &&
-                    ( ( !aFuncs[ i ] ->fVarying() && cArgs != cSpecifiedArgs ) ||
-                      ( aFuncs[ i ] ->fVarying() && cSpecifiedArgs < cArgs ) ) )
+                 ( ( !pfunc->fVarying() && cArgs != cSpecifiedArgs ) ||
+                   (  pfunc->fVarying() && cSpecifiedArgs < cArgs ) ) )
             {
-                m_aFuncRef.erase( m_aFuncRef.begin() + i );
-                aFuncs.erase( aFuncs.begin() + i );
-                i--;
+				// This function isn't suitable for the arguments list, as the
+				// argument counts don't match. Don't add it to the queue.
+				continue;
             }
+			else
+			{
+				// Check if the args list matches the arguments passed, the weight
+				// is adjusted according to the number of casts required.
+				pArg = m_pChild;
+				TqUint iArg = 0;
+				TqBool fArgsFailed = TqFalse;
+				while(pArg != 0)
+				{
+					CqParseNode * pNext = pArg->pNext();
+					
+					// Check if this is a varying length argument function.
+					if ( pfunc->cTypeSpecLength() <= iArg || ( pfunc->fVarying() && pfunc->cTypeSpecLength() == iArg ) )
+					{
+						// Not entirely happy about this, if the function takes a varying number
+						// of arguments, and this argument is amongst the varying list, then
+						// just accept it, no casting necessary.
+						break;
+					}
+
+					TqInt paramType = pfunc->aTypeSpec()[iArg];
+					TqInt castType;
+					if((castType = pArg->TypeCheck(&paramType, 1, TqTrue)) == Type_Nil)
+					{
+						// We've found and argument that can't be cast to the suitable type
+						// so this signature is no good, don't add it.
+						fArgsFailed = TqTrue;
+						break;
+					}
+					else
+					{
+						// If we have an upper case type in the function declaration, then we need an actual variable.
+						if( (paramType & Type_Variable) && !pArg->IsVariableRef() )
+							break;
+						else
+							// Did the argument have to cast to match? If not, then increase the weight.
+							if(castType == pArg->ResType())
+								weight++;
+					}
+
+					pArg = pNext;
+					iArg++;					
+				}
+
+				if(!fArgsFailed)
+				{
+					// Now check the return type against the possible return types requested,
+					// a function that can return the right type without casting carries more weight.
+					TqInt castType, index;
+					if( (castType = FindCast(pfunc->Type(), pTypes, Count, index)) == Type_Nil )
+					{
+						// This signature cannot return any of the required types.
+						continue;
+					} 
+					else
+					{
+						// A function signature that can return one of the requested types without
+						// casting has more weight.
+						TqInt retType;
+						for(retType = 0; retType < Count; retType++)
+						{
+							if(pTypes[retType] == castType)
+							{
+								weight++;
+								break;
+							}
+						}
+					}
+
+					// If we got this far, the function signature matches, and we have a weight
+					// from the various data gathered, so add it to the queue.
+					functions.push(CqFunctionSignature(m_aFuncRef[i], pfunc, weight));
+				}
+			}
         }
     }
 
-    // If we have eliminated all possibilities, then we have an error.
-    if ( m_aFuncRef.size() == 0 )
+	// If we don't have any candidate function signatures at all, then there is an error, so report
+	// it and retun nil.
+    if( functions.empty() )
     {
-        strErr += "Arguments to function not valid : ";
-        throw( strErr );
-        return ( Type_Nil );
+		if(!CheckOnly)
+		{
+			strErr += "Arguments to function not valid : ";
+			throw( strErr );
+		}
+		return ( Type_Nil );
     }
 
-    // Then typecheck the arguments.
-    pArg = m_pChild;
-    TqUint iArg = 0;
-    TqBool fVarLen = TqFalse;
-    while ( pArg != 0 )
-    {
-        CqParseNode * pNext = pArg->pNext();
-        // Build an array of possible types.
-        TqInt ctypes = 0;
-        for ( i = 0; i < m_aFuncRef.size(); i++ )
-        {
-            if ( aFuncs[ i ] != 0 )
-            {
-                if ( aFuncs[ i ] ->cTypeSpecLength() <= iArg || ( aFuncs[ i ] ->fVarying() && aFuncs[ i ] ->cTypeSpecLength() == iArg ) )
-                {
-                    if ( aFuncs[ i ] ->cTypeSpecLength() >= iArg && aFuncs[ i ] ->fVarying() )
-                        fVarLen = TqTrue;
-                    continue;
-                }
-                else
-                {
-                    aArgTypes[ i ] = aFuncs[ i ] ->aTypeSpec() [ iArg ];
-                    ctypes++;
-                }
-            }
-        }
+	CqFunctionSignature& best = functions.top();
 
-        // If we have no valid types to check, it must be a variable length function.
-        if ( ctypes == 0 )
-        {
-            pArg->TypeCheck( pAllTypes(), Type_Last - 1, TqTrue );
-            break;
-        }
-        // Now type check the argument
-        TqInt ArgType = pArg->TypeCheck( aArgTypes, ctypes, TqTrue );
-        // If no valid function exists for the argument, then this is an error.
-        if ( ArgType == Type_Nil && !fVarLen )
-        {
-            strErr += strErrDesc;
-            throw( strErr );
-            return ( Type_Nil );
-        }
-        else if ( ArgType != Type_Nil )
-            pArg->TypeCheck( &ArgType, 1 );	// Now do a real typecast
+	
+	// If we are not just checking, at this point, we have the best function candidate,
+	// so cast the arguments if necessary, and apply a cast to the return if necessary.
+	if(!CheckOnly)
+	{
+		// Set the top function signature to the chosen one.
+		m_aFuncRef[0] = best.getRef();
 
-        // Check the list of possibles, and remove any that don't take the returned argument at the current point in the
-        // argument list.
-        for ( i = 0; i < m_aFuncRef.size(); i++ )
-        {
-            if ( strlen( aFuncs[ i ] ->strParams() ) <= iArg || aFuncs[ i ] ->strParams() [ iArg ] == '*' )
-                continue;
+		CqFuncDef* pfunc = best.getFunc();
+		// Apply casts to the arguments first.
+		pArg = m_pChild;
+		TqUint iArg = 0;
+		while ( pArg != 0 )
+		{
+			CqParseNode * pNext = pArg->pNext();
+			// Get the required type for the function signature.
+			TqInt argType;
+			if ( pfunc->cTypeSpecLength() <= iArg || ( pfunc->fVarying() && pfunc->cTypeSpecLength() == iArg ) )
+				break;
+			else
+				argType = pfunc->aTypeSpec() [ iArg ];
 
-            TqInt type = aFuncs[ i ] ->aTypeSpec() [ iArg ];
-            if ( ( type & Type_Mask ) != ( ArgType & Type_Mask ) )
-            {
-                m_aFuncRef.erase( m_aFuncRef.begin() + i );
-                aFuncs.erase( aFuncs.begin() + i );
-                i--;
-            }
-            else
-            {
-                // If we have an upper case type in the function declaration, then we need an actual variable.
-                if ( type & Type_Variable && !pArg->IsVariableRef() )
-                {
-                    strErrDesc = "Argument ";
-                    strErrDesc += static_cast<TqInt>( iArg );
-                    strErrDesc += " must be a variable";
-                    m_aFuncRef.erase( m_aFuncRef.begin() + i );
-                    aFuncs.erase( aFuncs.begin() + i );
-                    i--;
-                }
-            }
-        }
-        pArg = pNext;
-        iArg++;
-    }
+			// Now type check the argument, and cast if necessary
+			argType = pArg->TypeCheck( &argType, 1 /* False = do the cast */ );
+
+			pArg = pNext;
+			iArg++;
+		}
+
+		// Now check if the return value needs to be cast.
+		TqInt retType, index;
+		if ( ( retType = FindCast( pfunc->Type(), pTypes, Count, index ) ) != Type_Nil )
+		{
+			// Add a cast to the new type.
+			CqParseNode* pCast = new CqParseNodeCast( retType );
+			LinkParent( pCast );
+		}
+	}
+/*
+    // If we got here, we know that the arguments match, or can be made to, and
+	// the return matches, or can be made to. If we want more than just a check, 
+	// go ahead and do the casting.
+    if(!CheckOnly)
+	{
+		pArg = m_pChild;
+		TqUint iArg = 0;
+		TqBool fVarLen = TqFalse;
+		while ( pArg != 0 )
+		{
+			CqParseNode * pNext = pArg->pNext();
+			// Build an array of possible types.
+			TqInt ctypes = 0;
+			for ( i = 0; i < aFuncRefs.size(); i++ )
+			{
+				if ( aFuncs[ i ] != 0 )
+				{
+					if ( aFuncs[ i ] ->cTypeSpecLength() <= iArg || ( aFuncs[ i ] ->fVarying() && aFuncs[ i ] ->cTypeSpecLength() == iArg ) )
+					{
+						if ( aFuncs[ i ] ->cTypeSpecLength() >= iArg && aFuncs[ i ] ->fVarying() )
+							fVarLen = TqTrue;
+						continue;
+					}
+					else
+					{
+						aArgTypes[ i ] = aFuncs[ i ] ->aTypeSpec() [ iArg ];
+						ctypes++;
+					}
+				}
+			}
+
+			// If we have no valid types to check, it must be a variable length function.
+			if ( ctypes == 0 )
+			{
+				pArg->TypeCheck( pAllTypes(), Type_Last - 1, TqTrue );
+				break;
+			}
+			// Now type check the argument
+			TqInt ArgType = pArg->TypeCheck( aArgTypes, ctypes, TqTrue );
+			// If no valid function exists for the argument, then this is an error.
+			if ( ArgType == Type_Nil && !fVarLen )
+			{
+				strErr += strErrDesc;
+				throw( strErr );
+				return ( Type_Nil );
+			}
+			else if ( ArgType != Type_Nil && !CheckOnly)
+				pArg->TypeCheck( &ArgType, 1 );	// Now do a real typecast
+
+			// Check the list of possibles, and remove any that don't take the returned argument at the current point in the
+			// argument list.
+			for ( i = 0; i < aFuncRefs.size(); i++ )
+			{
+				if ( strlen( aFuncs[ i ] ->strParams() ) <= iArg || aFuncs[ i ] ->strParams() [ iArg ] == '*' )
+					continue;
+
+				TqInt type = aFuncs[ i ] ->aTypeSpec() [ iArg ];
+				if ( ( type & Type_Mask ) != ( ArgType & Type_Mask ) )
+				{
+					aFuncRefs.erase( aFuncRefs.begin() + i );
+					aFuncs.erase( aFuncs.begin() + i );
+					i--;
+				}
+				else
+				{
+					// If we have an upper case type in the function declaration, then we need an actual variable.
+					if ( type & Type_Variable && !pArg->IsVariableRef() )
+					{
+						strErrDesc = "Argument ";
+						strErrDesc += static_cast<TqInt>( iArg );
+						strErrDesc += " must be a variable";
+						aFuncRefs.erase( aFuncRefs.begin() + i );
+						aFuncs.erase( aFuncs.begin() + i );
+						i--;
+					}
+				}
+			}
+			pArg = pNext;
+			iArg++;
+		}
 
 
-    // Check if any of the remaining functions return the correct type.
-    for ( i = 0; i < m_aFuncRef.size(); i++ )
-    {
-        if ( aFuncs[ i ] != 0 )
-        {
-            TqInt j;
-            for ( j = 0; j < Count; j++ )
-            {
-                if ( aFuncs[ i ] ->Type() == pTypes[ j ] )
-                {
-                    // Set the selected function declaration as top.
-                    m_aFuncRef[ 0 ] = m_aFuncRef[ i ];
-                    return ( pTypes[ j ] );
-                }
-            }
-        }
-    }
-
-    // If we got here, we must cast the return value to a suitable type.
-    for ( i = 0; i < m_aFuncRef.size(); i++ )
-    {
-        if ( aFuncs[ i ] != 0 )
-        {
-            TqInt j;
-            for ( j = 0; j < Count; j++ )
-            {
-                if ( ( NewType = FindCast( aFuncs[ i ] ->Type(), pTypes, Count ) ) != Type_Nil )
-                {
-                    // Set the selected function declaration as top.
-                    m_aFuncRef[ 0 ] = m_aFuncRef[ i ];
-                    // Add a cast to the new type.
-                    CqParseNode* pCast = new CqParseNodeCast( NewType );
-                    LinkParent( pCast );
-                    return ( NewType );
-                }
-            }
-        }
-    }
-
-    strErr += strErrDesc;
-    throw( strErr );
-    return ( Type_Nil );
+		// If we got here, we must cast the return value to a suitable type.
+		for ( i = 0; i < aFuncRefs.size(); i++ )
+		{
+			if ( aFuncs[ i ] != 0 )
+			{
+				TqInt j, index;
+				for ( j = 0; j < Count; j++ )
+				{
+					if ( ( NewType = FindCast( aFuncs[ i ] ->Type(), pTypes, Count, index ) ) != Type_Nil )
+					{
+						// Set the selected function declaration as top.
+						if(!CheckOnly)
+						{
+							m_aFuncRef[ 0 ] = aFuncRefs[ i ];
+							// Add a cast to the new type.
+							CqParseNode* pCast = new CqParseNodeCast( NewType );
+							LinkParent( pCast );
+						}
+						return ( NewType );
+					}
+				}
+			}
+		}
+		if(!CheckOnly)
+		{
+			strErr += strErrDesc;
+			throw( strErr );
+		}
+	}
+*/
+	return(best.getFunc()->Type());
 }
 
 
@@ -233,8 +393,9 @@ void CqParseNodeFunctionCall::CheckArgCast( std::vector<TqInt>& aRes )
         // Now check through to see if the specified arguments can be converted to the required ones.
         TqBool	fValid = TqTrue;
         TqUint j;
+		TqInt index;
         for ( j = 0; j < aTypes.size(); j++ )
-            if ( FindCast( aArgTypes[ j ], &aTypes[ j ], 1 ) == Type_Nil ) fValid = TqFalse;
+            if ( FindCast( aArgTypes[ j ], &aTypes[ j ], 1, index ) == Type_Nil ) fValid = TqFalse;
 
         // If we have found a match, return it.
         if ( !fValid )
@@ -342,9 +503,13 @@ TqInt	CqParseNodeVariable::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOn
             return ( MyType );
     }
     // If we got here, we are not of the correct type, so find a suitable cast.
-    TqInt NewType = FindCast( MyType, pTypes, Count );
-    CqParseNodeCast* pCast = new CqParseNodeCast( NewType );
-    LinkParent( pCast );
+    TqInt index;
+	TqInt NewType = FindCast( MyType, pTypes, Count, index );
+	if(!CheckOnly)
+	{
+		CqParseNodeCast* pCast = new CqParseNodeCast( NewType );
+		LinkParent( pCast );
+	}
 
     if ( NewType == Type_Nil && !CheckOnly )
     {
@@ -443,9 +608,13 @@ TqInt	CqParseNodeAssign::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOnly
             return ( MyType );
     }
     // If we got here, we are not of the correct type, so find a suitable cast.
-    TqInt NewType = FindCast( MyType, pTypes, Count );
-    CqParseNodeCast* pCast = new CqParseNodeCast( NewType );
-    LinkParent( pCast );
+    TqInt index;
+	TqInt NewType = FindCast( MyType, pTypes, Count, index );
+    if(!CheckOnly)
+	{
+		CqParseNodeCast* pCast = new CqParseNodeCast( NewType );
+		LinkParent( pCast );
+	}
 
     if ( NewType == Type_Nil && !CheckOnly )
     {
@@ -505,9 +674,10 @@ TqInt	CqParseNodeOp::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOnly )
     TqInt i;
     for ( i = 0; i < Count; i++ )
     {
-        if ( FindCast( TypeA, &pTypes[ i ], 1 ) != Type_Nil )
+        TqInt index;
+		if ( FindCast( TypeA, &pTypes[ i ], 1, index ) != Type_Nil )
         {
-            if ( FindCast( TypeB, &pTypes[ i ], 1 ) != Type_Nil )
+            if ( FindCast( TypeB, &pTypes[ i ], 1, index ) != Type_Nil )
             {
                 // Add any cast operators required.
                 pOperandA->TypeCheck( &pTypes[ i ], 1, CheckOnly );
@@ -545,15 +715,19 @@ TqInt	CqParseNodeRelOp::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOnly 
     	return( RelType );
 
     // See if float is a requested type.
-    TqInt NewType;
-    if ( ( NewType = FindCast( Type_Float, pTypes, Count ) ) != Type_Nil )
+    TqInt NewType, index;
+    if ( ( NewType = FindCast( Type_Float, pTypes, Count, index ) ) != Type_Nil )
     {
-        if ( NewType == Type_Float ) return ( Type_Float );
+        if ( NewType == Type_Float ) 
+			return ( Type_Float );
         else
         {
-            CqParseNodeCast* pCast = new CqParseNodeCast( NewType );
-            LinkParent( pCast );
-            return ( NewType );
+			if(!CheckOnly)
+			{
+				CqParseNodeCast* pCast = new CqParseNodeCast( NewType );
+				LinkParent( pCast );
+            }
+			return ( NewType );
         }
     }
 
@@ -605,16 +779,16 @@ TqInt	CqParseNodeMathOpDot::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckO
     // arguments can be made to match this, and always returns a float,
     // check this is valid.
 
-    TqInt RetType;
-    if ( ( RetType = FindCast( Type_Float, pTypes, Count ) ) != Type_Nil )
+    TqInt RetType, index;
+    if ( ( RetType = FindCast( Type_Float, pTypes, Count, index ) ) != Type_Nil )
     {
         TqBool fValid = TqFalse;
         TqUint i;
         for ( i = 0; i < sizeof( aArgTypes ) / sizeof( aArgTypes[ 0 ] ); i++ )
         {
-            if ( FindCast( TypeA, &aArgTypes[ i ], 1 ) != Type_Nil )
+            if ( FindCast( TypeA, &aArgTypes[ i ], 1, index ) != Type_Nil )
             {
-                if ( FindCast( TypeB, &aArgTypes[ i ], 1 ) != Type_Nil )
+                if ( FindCast( TypeB, &aArgTypes[ i ], 1, index ) != Type_Nil )
                 {
                     // Add any cast operators required.
                     pOperandA->TypeCheck( &aArgTypes[ i ], 1, CheckOnly );
@@ -626,7 +800,7 @@ TqInt	CqParseNodeMathOpDot::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckO
         }
         if ( fValid )
         {
-            if ( RetType != Type_Float )
+            if ( RetType != Type_Float && !CheckOnly)
             {
                 CqParseNodeCast * pCast = new CqParseNodeCast( RetType );
                 LinkParent( pCast );
@@ -665,7 +839,8 @@ TqInt CqParseNodeConst::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOnly 
             return ( MyType );
     }
 
-    TqInt NewType = FindCast( MyType, pTypes, Count );
+    TqInt index;
+	TqInt NewType = FindCast( MyType, pTypes, Count, index );
     // If we got here, we are not of the correct type, so find a suitable cast.
     if ( !CheckOnly )
     {
@@ -707,7 +882,8 @@ TqInt	CqParseNodeCast::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOnly )
     for ( i = 0; i < Count; i++ )
         if ( pTypes[ i ] == m_tTo ) return ( m_tTo );
 
-    TqInt NewType = FindCast( m_tTo, pTypes, Count );
+    TqInt index;
+	TqInt NewType = FindCast( m_tTo, pTypes, Count, index );
     if ( NewType == Type_Nil && !CheckOnly )
     {
         CqString strErr( strFileName() );
@@ -753,9 +929,13 @@ TqInt	CqParseNodeTriple::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOnly
         if ( pTypes[ i ] == Type_Triple ) return ( Type_Triple );
 
     // If we got here, we are not of the correct type, so find a suitable cast.
-    TqInt NewType = FindCast( Type_Triple, pTypes, Count );
-    CqParseNodeCast* pCast = new CqParseNodeCast( NewType );
-    LinkParent( pCast );
+    TqInt index;
+	TqInt NewType = FindCast( Type_Triple, pTypes, Count, index );
+    if(!CheckOnly)
+	{
+		CqParseNodeCast* pCast = new CqParseNodeCast( NewType );
+		LinkParent( pCast );
+	}
 
     if ( NewType == Type_Nil && !CheckOnly )
     {
@@ -793,9 +973,13 @@ TqInt	CqParseNodeHexTuple::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOn
         if ( pTypes[ i ] == Type_HexTuple ) return ( Type_HexTuple );
 
     // If we got here, we are not of the correct type, so find a suitable cast.
-    TqInt NewType = FindCast( Type_Matrix, pTypes, Count );
-    CqParseNodeCast* pCast = new CqParseNodeCast( NewType );
-    LinkParent( pCast );
+    TqInt index;
+	TqInt NewType = FindCast( Type_Matrix, pTypes, Count, index );
+    if(!CheckOnly)
+	{
+		CqParseNodeCast* pCast = new CqParseNodeCast( NewType );
+		LinkParent( pCast );
+	}
 
     if ( NewType == Type_Nil && !CheckOnly )
     {
@@ -827,9 +1011,13 @@ TqInt CqParseNodeCommFunction::TypeCheck( TqInt* pTypes, TqInt Count, TqBool Che
             return ( MyType );
     }
     // If we got here, we are not of the correct type, so find a suitable cast.
-    TqInt NewType = FindCast( MyType, pTypes, Count );
-    CqParseNodeCast* pCast = new CqParseNodeCast( NewType );
-    LinkParent( pCast );
+    TqInt index;
+	TqInt NewType = FindCast( MyType, pTypes, Count, index );
+    if(!CheckOnly)
+	{
+		CqParseNodeCast* pCast = new CqParseNodeCast( NewType );
+		LinkParent( pCast );
+	}
 
     if ( NewType == Type_Nil && !CheckOnly )
     {
@@ -871,9 +1059,10 @@ TqInt	CqParseNodeQCond::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOnly 
     TqInt i;
     for ( i = 0; i < Count; i++ )
     {
-        if ( FindCast( TypeT, &pTypes[ i ], 1 ) != Type_Nil )
+		TqInt index;
+        if ( FindCast( TypeT, &pTypes[ i ], 1, index ) != Type_Nil )
         {
-            if ( FindCast( TypeF, &pTypes[ i ], 1 ) != Type_Nil )
+            if ( FindCast( TypeF, &pTypes[ i ], 1, index ) != Type_Nil )
             {
                 // Add any cast operators required.
                 pTrue->TypeCheck( &pTypes[ i ], 1, CheckOnly );

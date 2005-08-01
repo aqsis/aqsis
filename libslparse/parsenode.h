@@ -225,7 +225,7 @@ public:
     static	char*	TypeIdentifier( int Type );
     static	TqInt	TypeFromIdentifier( char Id );
     static	char*	TypeName( int Type );
-    static	TqInt	FindCast( TqInt CurrType, TqInt* pTypes, TqInt Count );
+    static	TqInt	FindCast( TqInt CurrType, TqInt* pTypes, TqInt Count, TqInt& index );
     static	TqInt*	pAllTypes()
     {
         return ( m_aAllTypes );

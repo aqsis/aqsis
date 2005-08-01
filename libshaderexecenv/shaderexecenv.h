@@ -543,6 +543,8 @@ public:
     virtual STD_SO	SO_filterstep( FLOATVAL edge, FLOATVAL s1, DEFPARAMVAR );
     virtual STD_SO	SO_filterstep2( FLOATVAL edge, FLOATVAL s1, FLOATVAL s2, DEFPARAMVAR );
     virtual STD_SO	SO_specularbrdf( VECTORVAL L, NORMALVAL N, VECTORVAL V, FLOATVAL rough, DEFPARAM );
+    virtual STD_SO	SO_mtransform( STRINGVAL fromspace, STRINGVAL tospace, MATRIXVAL m, DEFPARAM );
+    virtual STD_SO	SO_mtransform( STRINGVAL tospace, MATRIXVAL m, DEFPARAM );
     virtual STD_SO	SO_setmcomp( MATRIXVAL M, FLOATVAL row, FLOATVAL column, FLOATVAL val, DEFVOIDPARAM );
     virtual STD_SO	SO_determinant( MATRIXVAL M, DEFPARAM );
     virtual STD_SO	SO_mtranslate( MATRIXVAL M, VECTORVAL V, DEFPARAM );

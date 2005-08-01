@@ -526,6 +526,18 @@ void CqShaderVM::SO_ntransformm()
     FUNC2( type_normal, m_pEnv->SO_ntransformm );
 }
 
+void CqShaderVM::SO_mtransform2()
+{
+    AUTOFUNC;
+    FUNC3( type_matrix, m_pEnv->SO_mtransform );
+}
+
+void CqShaderVM::SO_mtransform()
+{
+    AUTOFUNC;
+    FUNC2( type_matrix, m_pEnv->SO_mtransform );
+}
+
 void CqShaderVM::SO_depth()
 {
     AUTOFUNC;

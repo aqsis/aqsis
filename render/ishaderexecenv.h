@@ -439,6 +439,8 @@ struct IqShaderExecEnv
     virtual STD_SO	SO_filterstep( FLOATVAL edge, FLOATVAL s1, DEFPARAMVAR ) = 0;
     virtual STD_SO	SO_filterstep2( FLOATVAL edge, FLOATVAL s1, FLOATVAL s2, DEFPARAMVAR ) = 0;
     virtual STD_SO	SO_specularbrdf( VECTORVAL L, NORMALVAL N, VECTORVAL V, FLOATVAL rough, DEFPARAM ) = 0;
+    virtual STD_SO	SO_mtransform( STRINGVAL fromspace, STRINGVAL tospace, MATRIXVAL m, DEFPARAM ) = 0;
+    virtual STD_SO	SO_mtransform( STRINGVAL tospace, MATRIXVAL m, DEFPARAM ) = 0;
     virtual STD_SO	SO_setmcomp( MATRIXVAL M, FLOATVAL row, FLOATVAL column, FLOATVAL val, DEFVOIDPARAM ) = 0;
     virtual STD_SO	SO_determinant( MATRIXVAL M, DEFPARAM ) = 0;
     virtual STD_SO	SO_mtranslate( MATRIXVAL M, VECTORVAL V, DEFPARAM ) = 0;

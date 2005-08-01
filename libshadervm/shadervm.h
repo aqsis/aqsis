@@ -904,6 +904,8 @@ private:
     void	SO_ntransform2();
     void	SO_ntransform();
     void	SO_ntransformm();
+    void	SO_mtransform2();
+    void	SO_mtransform();
     void	SO_depth();
     void	SO_calculatenormal();
     void	SO_comp();

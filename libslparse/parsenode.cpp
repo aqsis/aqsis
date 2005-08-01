@@ -167,12 +167,16 @@ char* CqParseNode::TypeName( int Type )
 /** Find a valid cast type from the list of available options.
  */
 
-TqInt	CqParseNode::FindCast( TqInt CurrType, TqInt* pTypes, TqInt Count )
+TqInt	CqParseNode::FindCast( TqInt CurrType, TqInt* pTypes, TqInt Count, TqInt& index )
 {
     // Check if the current type exists in the list first.
     TqInt i;
     for ( i = 0; i < Count; i++ )
-        if ( ( pTypes[ i ] & Type_Mask ) == ( CurrType & Type_Mask ) ) return ( static_cast<TqInt>( CurrType & Type_Mask ) );
+        if ( ( pTypes[ i ] & Type_Mask ) == ( CurrType & Type_Mask ) ) 
+		{
+			index = i;
+			return ( static_cast<TqInt>( CurrType & Type_Mask ) );
+		}
 
     // Else search for the best option.
     TqInt Ret = Type_Nil;
@@ -181,6 +185,7 @@ TqInt	CqParseNode::FindCast( TqInt CurrType, TqInt* pTypes, TqInt Count )
     {
         if ( m_aaTypePriorities[ CurrType & Type_Mask ][ ( pTypes[ i ] & Type_Mask ) ] > Pri )
         {
+			index = i;
             Ret = pTypes[ i ];
             Pri = m_aaTypePriorities[ CurrType & Type_Mask ][ ( pTypes[ i ] & Type_Mask ) ];
         }
@@ -296,7 +301,7 @@ TqInt CqParseNodeVariable::ResType() const
 {
     IqVarDef * pVD = IqVarDef::GetVariablePtr( m_VarRef );
     if ( pVD )
-        return ( pVD->Type() );
+        return ( pVD->Type() & Type_Mask );
     else
         return ( Type_Nil );
 }

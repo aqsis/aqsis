@@ -6253,6 +6253,111 @@ void CqShaderExecEnv::SO_specularbrdf( IqShaderData* L, IqShaderData* N, IqShade
 
 
 //----------------------------------------------------------------------
+// mtransform(s,s,M)
+void CqShaderExecEnv::SO_mtransform( IqShaderData* fromspace, IqShaderData* tospace, IqShaderData* m, IqShaderData* Result, IqShader* pShader )
+{
+	TqBool __fVarying=TqFalse;
+	TqInt __iGrid;
+
+	assert( pShader != 0 );
+
+	__fVarying=(m)->Class()==class_varying||__fVarying;
+	__fVarying=(Result)->Class()==class_varying||__fVarying;
+
+	if ( NULL != QGetRenderContextI() )
+	{
+		__iGrid = 0;
+		CqString _aq_fromspace;
+		(fromspace)->GetString(_aq_fromspace,__iGrid);
+		CqString _aq_tospace;
+		(tospace)->GetString(_aq_tospace,__iGrid);
+		const CqMatrix& mat = QGetRenderContextI() ->matNSpaceToSpace( _aq_fromspace.c_str(), _aq_tospace.c_str(), pShader->matCurrent(), matObjectToWorld(), QGetRenderContextI()->Time() );
+		__iGrid = 0;
+
+		__iGrid = 0;
+		CqBitVector& RS = RunningState();
+		do
+		{
+			if(!__fVarying || RS.Value( __iGrid ) )
+			{
+				CqMatrix _aq_m;
+				(m)->GetMatrix(_aq_m,__iGrid);
+				(Result)->SetMatrix(mat * _aq_m,__iGrid);
+			}
+		}
+		while( ( ++__iGrid < GridSize() ) && __fVarying);
+	}
+	else
+	{
+		__iGrid = 0;
+		CqBitVector& RS = RunningState();
+		do
+		{
+			if(!__fVarying || RS.Value( __iGrid ) )
+			{
+				CqMatrix _aq_m;
+				(m)->GetMatrix(_aq_m,__iGrid);
+				(Result)->SetMatrix(_aq_m,__iGrid);
+			}
+		}
+		while( ( ++__iGrid < GridSize() ) && __fVarying);
+	}
+}
+
+
+//----------------------------------------------------------------------
+// mtransform(s,M)
+void CqShaderExecEnv::SO_mtransform( IqShaderData* tospace, IqShaderData* m, IqShaderData* Result, IqShader* pShader )
+{
+	TqBool __fVarying=TqFalse;
+	TqInt __iGrid;
+
+	assert( pShader != 0 );
+
+	__fVarying=(m)->Class()==class_varying||__fVarying;
+	__fVarying=(Result)->Class()==class_varying||__fVarying;
+
+	if ( NULL != QGetRenderContextI() )
+	{
+		__iGrid = 0;
+		CqString _aq_tospace;
+		(tospace)->GetString(_aq_tospace,__iGrid);
+		const CqMatrix& mat = QGetRenderContextI() ->matNSpaceToSpace( "current", _aq_tospace.c_str(), pShader->matCurrent(), matObjectToWorld(), QGetRenderContextI()->Time() );
+		__iGrid = 0;
+
+		__iGrid = 0;
+		CqBitVector& RS = RunningState();
+		do
+		{
+			if(!__fVarying || RS.Value( __iGrid ) )
+			{
+				CqMatrix _aq_m;
+				(m)->GetMatrix(_aq_m,__iGrid);
+				(Result)->SetMatrix(mat * _aq_m,__iGrid);
+			}
+		}
+		while( ( ++__iGrid < GridSize() ) && __fVarying);
+	}
+	else
+	{
+		__iGrid = 0;
+		CqBitVector& RS = RunningState();
+		do
+		{
+			if(!__fVarying || RS.Value( __iGrid ) )
+			{
+				CqMatrix _aq_m;
+				(m)->GetMatrix(_aq_m,__iGrid);
+				(Result)->SetMatrix(_aq_m,__iGrid);
+			}
+		}
+		while( ( ++__iGrid < GridSize() ) && __fVarying);
+	}
+}
+
+
+
+//----------------------------------------------------------------------
 // determinant(m)
 void CqShaderExecEnv::SO_determinant( IqShaderData* M, IqShaderData* Result, IqShader* pShader )
 {

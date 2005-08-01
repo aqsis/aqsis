@@ -405,6 +405,8 @@ SqOpCodeTrans CqShaderVM::m_TransTable[] =
         {"filterstep2", 0, &CqShaderVM::SO_filterstep2, 0, {0}},
         {"specularbrdf", 0, &CqShaderVM::SO_specularbrdf, 0, {0}},
 
+        {"mtransform2", 0, &CqShaderVM::SO_mtransform2, 0, {0}},
+        {"mtransform", 0, &CqShaderVM::SO_mtransform, 0, {0}},
         {"mcomp", 0, &CqShaderVM::SO_mcomp, 0, {0}},
         {"setmcomp", 0, &CqShaderVM::SO_setmcomp, 0, {0}},
         {"determinant", 0, &CqShaderVM::SO_determinant, 0, {0}},
