@@ -168,7 +168,7 @@ TqInt	CqParseNodeFunctionCall::TypeCheck( TqInt* pTypes, TqInt Count, TqBool Che
 						TqInt retType;
 						for(retType = 0; retType < Count; retType++)
 						{
-							if(pTypes[retType] == castType)
+							if(pfunc->Type() == castType)
 							{
 								weight++;
 								break;
