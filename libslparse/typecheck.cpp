@@ -196,7 +196,7 @@ TqInt	CqParseNodeFunctionCall::TypeCheck( TqInt* pTypes, TqInt Count, TqBool Che
 		return ( Type_Nil );
     }
 
-	CqFunctionSignature& best = functions.top();
+	const CqFunctionSignature& best = functions.top();
 
 	
 	// If we are not just checking, at this point, we have the best function candidate,
