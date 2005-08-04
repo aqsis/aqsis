@@ -1,3 +1,30 @@
+2005-08-02 04:37  tshead
+
+	* libslparse/typecheck.cpp: * Fix: compile problem with
+	  const-correctness
+
+2005-08-01 12:44  pgregory
+
+	* libslparse/typecheck.cpp: Fix error when weighting function
+	  candidates by return type when typechecking overloaded function
+	  calls.
+
+2005-08-01 10:08  pgregory
+
+	* libshaderexecenv/shadeops.cpp, libshaderexecenv/shaderexecenv.h,
+	  libshadervm/shadervm.cpp, libshadervm/shadervm.h,
+	  libshadervm/shadervm2.cpp, libslparse/parsenode.cpp,
+	  libslparse/parsenode.h, libslparse/typecheck.cpp,
+	  render/ishaderexecenv.h: Redo the function call typechecking
+	  code. Now chooses the best (hopefully) function from the list (of
+	  functions with the same name) by weighting them according to the
+	  suitability, taking into account arguments passed in, and return
+	  value.
+
+2005-07-28 22:14  pgregory
+
+	* ChangeLog: Update changelog for release.
+
 2005-07-28 22:12  pgregory
 
 	* libaqsistypes/Makefile.am, render/Makefile.am: Fix the inclusion
