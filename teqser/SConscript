@@ -1,0 +1,5 @@
+Import('env')
+teqser_sources = Split("""
+	teqser.cpp""")
+teqser = env.Program('teqser', teqser_sources, LIBS=['argparse', 'aqsis'], LIBPATH=['$LIBDIR', '$BINDIR'])
+env.Install('$BINDIR', teqser)

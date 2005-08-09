@@ -1,0 +1,14 @@
+Import('env')
+slparse_sources = Split("""
+	funcdef.cpp
+	libslparse.cpp
+	optimise.cpp
+	parsenode.cpp
+	parser.cpp
+	scanner.cpp
+	typecheck.cpp
+	vardef.cpp""")
+env.CXXFile(target='parser.cpp', source='parser.yy')
+env.CXXFile(target='scanner.cpp', source='scanner.ll')
+slparse = env.Library('slparse', slparse_sources)
+env.Install('$LIBDIR', slparse)

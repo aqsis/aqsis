@@ -1,0 +1,9 @@
+Import('env')
+displayenv = env.Copy()
+displayenv.AppendUnique(CPPPATH=['#/libddmanager'])
+displayenv.AppendUnique(CPPDEFINES=['DISPLAY_EXPORTS'])
+display_sources = Split("""
+	display.cpp
+	displayhelpers.c""")
+display = displayenv.SharedLibrary('display', display_sources, LIBS=['libtiff', 'libz', 'fltk', 'gdi32', 'user32', 'ole32', 'shell32', 'ws2_32', 'comctl32'], LIBPPATH=['$TPLIBS'])
+displayenv.Install('$BINDIR', display)

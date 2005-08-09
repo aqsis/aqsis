@@ -1,0 +1,5 @@
+Import('env')
+rib2ri_sources = Split("""
+	librib2ri.cpp""")
+rib2ri = env.Library('rib2ri', rib2ri_sources)
+env.Install('$LIBDIR', rib2ri)

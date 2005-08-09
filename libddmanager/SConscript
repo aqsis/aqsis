@@ -1,0 +1,5 @@
+Import('env')
+ddmanager_sources = Split("""
+	ddmanager.cpp""")
+ddmanager = env.Library('ddmanager', ddmanager_sources)
+env.Install('$LIBDIR', ddmanager)

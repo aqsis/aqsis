@@ -1,0 +1,8 @@
+Import('env')
+
+env.Append(XSLTPROC = env.File('#/../win32libs/bin/xsltproc'))
+env.Append(APIXML = env.File('./api.xml'))
+env.Append(RENDERDIR = env.Dir('#/render'))
+env.Command('ri_cache.inl', 'apicache.xsl', ['$XSLTPROC -o $TARGET $SOURCE $APIXML', Delete('$RENDERDIR/${TARGET.file}'), Copy('$RENDERDIR', '$TARGET')])
+env.Command('ri.inl', 'apiheader.xsl', ['$XSLTPROC -o $TARGET $SOURCE $APIXML', Delete('$RENDERDIR/${TARGET.file}'), Copy('$RENDERDIR', '$TARGET')])
+env.Command('ri_validate.inl', 'apivalidate.xsl', ['$XSLTPROC -o $TARGET $SOURCE $APIXML', Delete('$RENDERDIR/${TARGET.file}'), Copy('$RENDERDIR', '$TARGET')])

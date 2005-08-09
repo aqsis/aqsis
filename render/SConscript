@@ -1,0 +1,46 @@
+Import('env')
+aqsisdll_sources = Split("""
+	attributes.cpp
+	bound.cpp
+	bucket.cpp
+	condition.cpp
+	converter.cpp
+	csgtree.cpp
+	curves.cpp
+	environment.cpp
+	genpoly.cpp
+	graphicsstate.cpp
+	imagebuffer.cpp
+	imagepixel.cpp
+	imagers.cpp
+	inlineparse.cpp
+	lath.cpp
+	libaqsis.def
+	lights.cpp
+	micropolygon.cpp
+	mpdump.cpp
+	nurbs.cpp
+	occlusion.cpp
+	options.cpp
+	parameters.cpp
+	patch.cpp
+	points.cpp
+	polygon.cpp
+	procedural.cpp
+	quadrics.cpp
+	render.cpp
+	renderer.cpp
+	ri.cpp
+	shaders.cpp
+	shadowmap.cpp
+	stats.cpp
+	subdivision2.cpp
+	surface.cpp
+	symbols.cpp
+	teapot.cpp
+	texturemap.cpp
+	transform.cpp
+	trimcurve.cpp""")
+env.AppendUnique(CPPDEFINES=[('_qBUILDING', 'CORE'), ('CORE', 1)])
+aqsisdll = env.SharedLibrary('aqsis', aqsisdll_sources, LIBS=['aqsistypes', 'ddmanager', 'raytrace', 'rib2', 'rib2ri', 'shaderexecenv', 'shadervm', 'libtiff', 'libz', 'ws2_32'], LIBPATH=['$LIBDIR', '$TPLIBS'])
+env.Install('$BINDIR', aqsisdll)

@@ -1,0 +1,6 @@
+Import('env')
+Import('pixelsave')
+jpg2tif_sources=Split("""
+	jpg2tif.c""")
+jpg2tif = env.SharedLibrary('jpg2tif', jpg2tif_sources + pixelsave, LIBS=['libtiff', 'libz', 'libjpeg'], LIBPATH=['$TPLIBS'])
+env.Install('$BINDIR', jpg2tif)

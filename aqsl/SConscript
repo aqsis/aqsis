@@ -1,0 +1,5 @@
+Import('env')
+aqsl_sources = Split("""
+	aqslcomp.cpp""")
+aqsl = env.Program('aqsl', aqsl_sources, LIBS=['argparse', 'codegenvm', 'slpp', 'aqsistypes', 'slparse'], LIBPATH=['$LIBDIR'])
+env.Install('$BINDIR', aqsl)

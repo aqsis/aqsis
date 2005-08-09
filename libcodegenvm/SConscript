@@ -1,0 +1,7 @@
+Import('env')
+codegenvm_sources = Split("""
+	vmdatagather.cpp
+	vmoutput.cpp
+	codegenvm.cpp""")
+codegenvm = env.Library('codegenvm', codegenvm_sources)
+env.Install('$LIBDIR', codegenvm)

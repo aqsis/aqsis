@@ -1,0 +1,21 @@
+Import('env')
+aqsistypes_sources = Split("""
+	bitvector.cpp
+	cellnoise.cpp
+	color.cpp
+	file.cpp
+	logging.cpp
+	matrix.cpp
+	MultiTimer.cpp
+	noise.cpp
+	plugins.cpp
+	random.cpp
+	refcount.cpp
+	spline.cpp
+	sstring.cpp
+	vector2d.cpp
+	vector3d.cpp
+	vector4d.cpp""")
+aqsistypes_sources = aqsistypes_sources + ['win32/intel/file_system.cpp']
+aqsistypes = env.Library('aqsistypes', aqsistypes_sources)
+env.Install('$LIBDIR', aqsistypes)

@@ -1,0 +1,6 @@
+Import('env')
+shaderexecenv_sources = Split("""
+	shaderexecenv.cpp
+	shadeops.cpp""")
+shaderexecenv = env.Library('shaderexecenv', shaderexecenv_sources)
+env.Install('$LIBDIR', shaderexecenv)

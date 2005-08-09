@@ -1,0 +1,6 @@
+Import('env')
+slxargs_sources = Split("""
+	rcdummy.cpp
+	slx.cpp""")
+slxargs = env.Library('slxargs', slxargs_sources)
+env.Install('$LIBDIR', slxargs)
