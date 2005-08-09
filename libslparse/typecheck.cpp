@@ -21,7 +21,7 @@ START_NAMESPACE( Aqsis )
 class CqFunctionSignature
 {
 	public:
-		CqFunctionSignature(SqFuncRef ref, CqFuncDef* func, TqInt weight) : m_ref(ref), m_func(func), m_weight(weight)
+		CqFunctionSignature(SqFuncRef ref, CqFuncDef* func, TqInt weight, TqBool mustCast) : m_ref(ref), m_func(func), m_weight(weight), m_mustCast(mustCast)
 		{}
 		~CqFunctionSignature() {}
 
@@ -45,10 +45,16 @@ class CqFunctionSignature
 			return(m_weight);
 		}
 
+		TqBool needsCast() const
+		{
+			return(m_mustCast);
+		}
+
 	private:
 		SqFuncRef m_ref;
 		CqFuncDef* m_func;
 		TqInt m_weight;
+		TqBool m_mustCast;
 
 		friend bool operator<(const CqFunctionSignature& a, const CqFunctionSignature& b)
 		{
@@ -58,12 +64,10 @@ class CqFunctionSignature
 };
 
 
-TqInt	CqParseNodeFunctionCall::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOnly )
+TqInt	CqParseNodeFunctionCall::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& needsCast, TqBool CheckOnly )
 {
     TqInt NewType = Type_Nil;
     TqInt cSpecifiedArgs = 0;
-
-    TqInt* aArgTypes = new TqInt[ m_aFuncRef.size() ];
 
 	// This is the priority queue that we will build for the available 
 	// signatures. The top entry will be the most suitable for use.
@@ -91,13 +95,14 @@ TqInt	CqParseNodeFunctionCall::TypeCheck( TqInt* pTypes, TqInt Count, TqBool Che
 
 
 	// Build the queue
-    TqUint i;
-    for ( i = 0; i < this->m_aFuncRef.size(); i++ )
+    std::vector<SqFuncRef>::iterator i;
+    for ( i = m_aFuncRef.begin(); i != m_aFuncRef.end();  )
     {
-        CqFuncDef* pfunc = CqFuncDef::GetFunctionPtr( m_aFuncRef[ i ] );
+        CqFuncDef* pfunc = CqFuncDef::GetFunctionPtr( (*i) );
         if( pfunc != 0 )
         {
 			TqInt weight = 0;
+			TqBool mustCast = TqFalse;
             TqInt cArgs = pfunc->cTypeSpecLength();
             if ( ( cArgs > 0 ) &&
                  ( ( !pfunc->fVarying() && cArgs != cSpecifiedArgs ) ||
@@ -105,10 +110,36 @@ TqInt	CqParseNodeFunctionCall::TypeCheck( TqInt* pTypes, TqInt Count, TqBool Che
             {
 				// This function isn't suitable for the arguments list, as the
 				// argument counts don't match. Don't add it to the queue.
+				i = m_aFuncRef.erase(i);
 				continue;
             }
 			else
 			{
+				// Check the return type against the possible return types requested,
+				// a function that can return the right type without casting carries more weight.
+				TqInt castType, index;
+				if( (castType = FindCast(pfunc->Type(), pTypes, Count, index)) == Type_Nil )
+				{
+					// This signature cannot return any of the required types.
+					++i;
+					continue;
+				} 
+				else
+				{
+					// A function signature that can return one of the requested types without
+					// casting has more weight.
+					TqInt retType;
+					mustCast = TqTrue;
+					for(retType = 0; retType < Count; retType++)
+					{
+						if(castType == pfunc->Type())
+						{
+							weight++;
+							mustCast = TqFalse;
+							break;
+						}
+					}
+				}
 				// Check if the args list matches the arguments passed, the weight
 				// is adjusted according to the number of casts required.
 				pArg = m_pChild;
@@ -129,7 +160,8 @@ TqInt	CqParseNodeFunctionCall::TypeCheck( TqInt* pTypes, TqInt Count, TqBool Che
 
 					TqInt paramType = pfunc->aTypeSpec()[iArg];
 					TqInt castType;
-					if((castType = pArg->TypeCheck(&paramType, 1, TqTrue)) == Type_Nil)
+					TqBool castReturn = TqFalse;
+					if((castType = pArg->TypeCheck(&paramType, 1, castReturn, TqTrue)) == Type_Nil)
 					{
 						// We've found and argument that can't be cast to the suitable type
 						// so this signature is no good, don't add it.
@@ -143,7 +175,7 @@ TqInt	CqParseNodeFunctionCall::TypeCheck( TqInt* pTypes, TqInt Count, TqBool Che
 							break;
 						else
 							// Did the argument have to cast to match? If not, then increase the weight.
-							if(castType == pArg->ResType())
+							if(!castReturn)
 								weight++;
 					}
 
@@ -151,37 +183,24 @@ TqInt	CqParseNodeFunctionCall::TypeCheck( TqInt* pTypes, TqInt Count, TqBool Che
 					iArg++;					
 				}
 
+				// If we got this far, the function signature matches, and we have a weight
+				// from the various data gathered, so add it to the queue.
 				if(!fArgsFailed)
 				{
-					// Now check the return type against the possible return types requested,
-					// a function that can return the right type without casting carries more weight.
-					TqInt castType, index;
-					if( (castType = FindCast(pfunc->Type(), pTypes, Count, index)) == Type_Nil )
-					{
-						// This signature cannot return any of the required types.
-						continue;
-					} 
-					else
-					{
-						// A function signature that can return one of the requested types without
-						// casting has more weight.
-						TqInt retType;
-						for(retType = 0; retType < Count; retType++)
-						{
-							if(pfunc->Type() == castType)
-							{
-								weight++;
-								break;
-							}
-						}
-					}
-
-					// If we got this far, the function signature matches, and we have a weight
-					// from the various data gathered, so add it to the queue.
-					functions.push(CqFunctionSignature(m_aFuncRef[i], pfunc, weight));
+					functions.push(CqFunctionSignature((*i), pfunc, weight, mustCast));
+					++i;
+				}
+				else
+				{
+					// If the arguments check failed, this one can actually be removed from the list on the 
+					// node, as the arguments aren't going to change, only the potential return type
+					// for different calls to TypeCheck.
+					i = m_aFuncRef.erase(i);
 				}
 			}
         }
+		else
+			++i;
     }
 
 	// If we don't have any candidate function signatures at all, then there is an error, so report
@@ -197,8 +216,8 @@ TqInt	CqParseNodeFunctionCall::TypeCheck( TqInt* pTypes, TqInt Count, TqBool Che
     }
 
 	const CqFunctionSignature& best = functions.top();
+	needsCast = best.needsCast();
 
-	
 	// If we are not just checking, at this point, we have the best function candidate,
 	// so cast the arguments if necessary, and apply a cast to the return if necessary.
 	if(!CheckOnly)
@@ -221,7 +240,7 @@ TqInt	CqParseNodeFunctionCall::TypeCheck( TqInt* pTypes, TqInt Count, TqBool Che
 				argType = pfunc->aTypeSpec() [ iArg ];
 
 			// Now type check the argument, and cast if necessary
-			argType = pArg->TypeCheck( &argType, 1 /* False = do the cast */ );
+			argType = pArg->TypeCheck( &argType, 1, needsCast, TqFalse );
 
 			pArg = pNext;
 			iArg++;
@@ -236,119 +255,6 @@ TqInt	CqParseNodeFunctionCall::TypeCheck( TqInt* pTypes, TqInt Count, TqBool Che
 			LinkParent( pCast );
 		}
 	}
-/*
-    // If we got here, we know that the arguments match, or can be made to, and
-	// the return matches, or can be made to. If we want more than just a check, 
-	// go ahead and do the casting.
-    if(!CheckOnly)
-	{
-		pArg = m_pChild;
-		TqUint iArg = 0;
-		TqBool fVarLen = TqFalse;
-		while ( pArg != 0 )
-		{
-			CqParseNode * pNext = pArg->pNext();
-			// Build an array of possible types.
-			TqInt ctypes = 0;
-			for ( i = 0; i < aFuncRefs.size(); i++ )
-			{
-				if ( aFuncs[ i ] != 0 )
-				{
-					if ( aFuncs[ i ] ->cTypeSpecLength() <= iArg || ( aFuncs[ i ] ->fVarying() && aFuncs[ i ] ->cTypeSpecLength() == iArg ) )
-					{
-						if ( aFuncs[ i ] ->cTypeSpecLength() >= iArg && aFuncs[ i ] ->fVarying() )
-							fVarLen = TqTrue;
-						continue;
-					}
-					else
-					{
-						aArgTypes[ i ] = aFuncs[ i ] ->aTypeSpec() [ iArg ];
-						ctypes++;
-					}
-				}
-			}
-
-			// If we have no valid types to check, it must be a variable length function.
-			if ( ctypes == 0 )
-			{
-				pArg->TypeCheck( pAllTypes(), Type_Last - 1, TqTrue );
-				break;
-			}
-			// Now type check the argument
-			TqInt ArgType = pArg->TypeCheck( aArgTypes, ctypes, TqTrue );
-			// If no valid function exists for the argument, then this is an error.
-			if ( ArgType == Type_Nil && !fVarLen )
-			{
-				strErr += strErrDesc;
-				throw( strErr );
-				return ( Type_Nil );
-			}
-			else if ( ArgType != Type_Nil && !CheckOnly)
-				pArg->TypeCheck( &ArgType, 1 );	// Now do a real typecast
-
-			// Check the list of possibles, and remove any that don't take the returned argument at the current point in the
-			// argument list.
-			for ( i = 0; i < aFuncRefs.size(); i++ )
-			{
-				if ( strlen( aFuncs[ i ] ->strParams() ) <= iArg || aFuncs[ i ] ->strParams() [ iArg ] == '*' )
-					continue;
-
-				TqInt type = aFuncs[ i ] ->aTypeSpec() [ iArg ];
-				if ( ( type & Type_Mask ) != ( ArgType & Type_Mask ) )
-				{
-					aFuncRefs.erase( aFuncRefs.begin() + i );
-					aFuncs.erase( aFuncs.begin() + i );
-					i--;
-				}
-				else
-				{
-					// If we have an upper case type in the function declaration, then we need an actual variable.
-					if ( type & Type_Variable && !pArg->IsVariableRef() )
-					{
-						strErrDesc = "Argument ";
-						strErrDesc += static_cast<TqInt>( iArg );
-						strErrDesc += " must be a variable";
-						aFuncRefs.erase( aFuncRefs.begin() + i );
-						aFuncs.erase( aFuncs.begin() + i );
-						i--;
-					}
-				}
-			}
-			pArg = pNext;
-			iArg++;
-		}
-
-
-		// If we got here, we must cast the return value to a suitable type.
-		for ( i = 0; i < aFuncRefs.size(); i++ )
-		{
-			if ( aFuncs[ i ] != 0 )
-			{
-				TqInt j, index;
-				for ( j = 0; j < Count; j++ )
-				{
-					if ( ( NewType = FindCast( aFuncs[ i ] ->Type(), pTypes, Count, index ) ) != Type_Nil )
-					{
-						// Set the selected function declaration as top.
-						if(!CheckOnly)
-						{
-							m_aFuncRef[ 0 ] = aFuncRefs[ i ];
-							// Add a cast to the new type.
-							CqParseNode* pCast = new CqParseNodeCast( NewType );
-							LinkParent( pCast );
-						}
-						return ( NewType );
-					}
-				}
-			}
-		}
-		if(!CheckOnly)
-		{
-			strErr += strErrDesc;
-			throw( strErr );
-		}
-	}
-*/
 	return(best.getFunc()->Type());
 }
 
@@ -429,7 +335,8 @@ void CqParseNodeFunctionCall::ArgCast( TqInt iIndex )
     {
         // Must get the next here incase the check inserts a cast.
         CqParseNode * pNext = pArg->pNext();
-        pArg->TypeCheck( &aTypes[ j++ ] );
+		TqBool needsCast;
+        pArg->TypeCheck( &aTypes[ j++ ], 1, needsCast, TqFalse );
         pArg = pNext;
     }
 }
@@ -441,7 +348,7 @@ void CqParseNodeFunctionCall::ArgCast( TqInt iIndex )
 /// to be, then later when the shader vm parses the .slx we can try and build
 /// a cast then, the same goes for the arguments.
 
-TqInt	CqParseNodeUnresolvedCall::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOnly )
+TqInt	CqParseNodeUnresolvedCall::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& needsCast, TqBool CheckOnly )
 {
     TqInt NewType = Type_Nil;
 
@@ -453,7 +360,7 @@ TqInt	CqParseNodeUnresolvedCall::TypeCheck( TqInt* pTypes, TqInt Count, TqBool C
     while (pArg != NULL)
     {
         CqParseNode *pNext = pArg->pNext();
-        pArg->TypeCheck( pAllTypes(), Type_Last - 1 );
+        pArg->TypeCheck( pAllTypes(), Type_Last - 1, needsCast, TqFalse );
 		strArgTypes+=CqParseNode::TypeIdentifier(pArg->ResType());
         pArg = pNext;
     };
@@ -492,7 +399,7 @@ TqInt	CqParseNodeUnresolvedCall::TypeCheck( TqInt* pTypes, TqInt Count, TqBool C
 /// CqParseNodeVariable::TypeCheck
 /// Do a type check based on suitable types requested, and add a cast in required.
 
-TqInt	CqParseNodeVariable::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOnly )
+TqInt	CqParseNodeVariable::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& needsCast, TqBool CheckOnly )
 {
     // Check if the variable type matches any of the requested ones.
     TqInt	MyType = ( ResType() & Type_Mask );
@@ -505,6 +412,7 @@ TqInt	CqParseNodeVariable::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOn
     // If we got here, we are not of the correct type, so find a suitable cast.
     TqInt index;
 	TqInt NewType = FindCast( MyType, pTypes, Count, index );
+	needsCast = TqTrue;
 	if(!CheckOnly)
 	{
 		CqParseNodeCast* pCast = new CqParseNodeCast( NewType );
@@ -531,11 +439,12 @@ TqInt	CqParseNodeVariable::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOn
 /// CqParseNodeVariableArray::TypeCheck
 /// Do a type check based on suitable types requested, and add a cast in required.
 
-TqInt	CqParseNodeVariableArray::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOnly )
+TqInt	CqParseNodeVariableArray::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& needsCast, TqBool CheckOnly )
 {
     // Check if the child can be made into a float.
     TqInt aType = Type_Float;
-    if ( m_pChild && m_pChild->TypeCheck( &aType, 1, CheckOnly ) == Type_Nil )
+	TqBool temp;
+    if ( m_pChild && m_pChild->TypeCheck( &aType, 1, temp, CheckOnly ) == Type_Nil )
     {
         TqInt	IndexType = ( m_pChild->ResType() & Type_Mask );
         CqString strErr( strFileName() );
@@ -564,7 +473,7 @@ TqInt	CqParseNodeVariableArray::TypeCheck( TqInt* pTypes, TqInt Count, TqBool Ch
         return ( Type_Nil );
 	}
 
-    return ( CqParseNodeVariable::TypeCheck( pTypes, Count, CheckOnly ) );
+    return ( CqParseNodeVariable::TypeCheck( pTypes, Count, needsCast, CheckOnly ) );
 }
 
 
@@ -574,7 +483,7 @@ TqInt	CqParseNodeVariableArray::TypeCheck( TqInt* pTypes, TqInt Count, TqBool Ch
 
 extern EqShaderType gShaderType;
 
-TqInt	CqParseNodeAssign::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOnly )
+TqInt	CqParseNodeAssign::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& needsCast, TqBool CheckOnly )
 {
     // First check if the assign is to a read only variable.
     if( CqVarDef::GetVariablePtr( m_VarRef ) &&
@@ -597,7 +506,7 @@ TqInt	CqParseNodeAssign::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOnly
     TqInt	MyType = ( ResType() & Type_Mask );
     // Type check the assignment expression first.
     CqParseNode* pExpr = m_pChild;
-    if ( pExpr->TypeCheck( &MyType, 1, CheckOnly ) != MyType )
+    if ( pExpr->TypeCheck( &MyType, 1, needsCast, CheckOnly ) != MyType )
         return ( Type_Nil );	// TODO: Should throw an exception here.
 
     // Check if the variable type matches any of the requested ones.
@@ -610,6 +519,7 @@ TqInt	CqParseNodeAssign::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOnly
     // If we got here, we are not of the correct type, so find a suitable cast.
     TqInt index;
 	TqInt NewType = FindCast( MyType, pTypes, Count, index );
+	needsCast = TqTrue;
     if(!CheckOnly)
 	{
 		CqParseNodeCast* pCast = new CqParseNodeCast( NewType );
@@ -636,11 +546,12 @@ TqInt	CqParseNodeAssign::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOnly
 /// CqParseNodeAssignArray::TypeCheck
 /// Do a type check based on suitable types requested, and add a cast in required.
 
-TqInt	CqParseNodeAssignArray::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOnly )
+TqInt	CqParseNodeAssignArray::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& needsCast, TqBool CheckOnly )
 {
     // Check if the child can be made into a float.
     TqInt aType = Type_Float;
-    if ( m_pChild->pNext() ->TypeCheck( &aType, 1, CheckOnly ) == Type_Nil )
+	TqBool temp;
+    if ( m_pChild->pNext() ->TypeCheck( &aType, 1, temp, CheckOnly ) == Type_Nil )
     {
         TqInt	IndexType = ( m_pChild->pNext() ->ResType() & Type_Mask );
         CqString strErr( strFileName() );
@@ -653,7 +564,7 @@ TqInt	CqParseNodeAssignArray::TypeCheck( TqInt* pTypes, TqInt Count, TqBool Chec
         return ( Type_Nil );
     }
 
-    return ( CqParseNodeAssign::TypeCheck( pTypes, Count, CheckOnly ) );
+    return ( CqParseNodeAssign::TypeCheck( pTypes, Count, needsCast, CheckOnly ) );
 }
 
 
@@ -661,7 +572,7 @@ TqInt	CqParseNodeAssignArray::TypeCheck( TqInt* pTypes, TqInt Count, TqBool Chec
 /// CqParseNodeOp::TypeCheck
 /// Do a type check based on suitable types requested, and add a cast in required.
 
-TqInt	CqParseNodeOp::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOnly )
+TqInt	CqParseNodeOp::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& needsCast, TqBool CheckOnly )
 {
     // Check if both arguments to the operator match type.
     CqParseNode * pOperandA = m_pChild;
@@ -680,8 +591,11 @@ TqInt	CqParseNodeOp::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOnly )
             if ( FindCast( TypeB, &pTypes[ i ], 1, index ) != Type_Nil )
             {
                 // Add any cast operators required.
-                pOperandA->TypeCheck( &pTypes[ i ], 1, CheckOnly );
-                pOperandB->TypeCheck( &pTypes[ i ], 1, CheckOnly );
+                if(!CheckOnly)
+				{
+					pOperandA->TypeCheck( &pTypes[ i ], 1, needsCast, CheckOnly );
+					pOperandB->TypeCheck( &pTypes[ i ], 1, needsCast, CheckOnly );
+				}
                 return ( pTypes[ i ] );
             }
         }
@@ -706,10 +620,10 @@ TqInt	CqParseNodeOp::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOnly )
 /// CqParseNodeRelOp::TypeCheck
 /// Do a type check based on suitable types requested, and add a cast in required.
 
-TqInt	CqParseNodeRelOp::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOnly )
+TqInt	CqParseNodeRelOp::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& needsCast, TqBool CheckOnly )
 {
     TqInt RelType;
-    RelType = CqParseNodeOp::TypeCheck( pAllTypes(), Type_Last - 1, CheckOnly );  
+    RelType = CqParseNodeOp::TypeCheck( pAllTypes(), Type_Last - 1, needsCast, CheckOnly );  
 
     if( RelType == Type_Nil)
     	return( RelType );
@@ -722,11 +636,12 @@ TqInt	CqParseNodeRelOp::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOnly 
 			return ( Type_Float );
         else
         {
+			needsCast = TqTrue;
 			if(!CheckOnly)
 			{
 				CqParseNodeCast* pCast = new CqParseNodeCast( NewType );
 				LinkParent( pCast );
-            }
+			}
 			return ( NewType );
         }
     }
@@ -750,11 +665,11 @@ TqInt	CqParseNodeRelOp::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOnly 
 /// CqParseNodeUnaryOp::TypeCheck
 /// Do a type check based on suitable types requested, and add a cast in required.
 
-TqInt	CqParseNodeUnaryOp::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOnly )
+TqInt	CqParseNodeUnaryOp::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& needsCast, TqBool CheckOnly )
 {
     // Check if the operand can be cast to a requested type.
     if ( m_pChild != 0 )
-        return ( m_pChild->TypeCheck( pTypes, Count, CheckOnly ) );
+        return ( m_pChild->TypeCheck( pTypes, Count, needsCast, CheckOnly ) );
     else
         return ( Type_Nil );
 }
@@ -764,7 +679,7 @@ TqInt	CqParseNodeUnaryOp::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOnl
 /// CqParseNodeOpDot::TypeCheck
 /// Do a type check based on suitable types requested, and add a cast in required.
 
-TqInt	CqParseNodeMathOpDot::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOnly )
+TqInt	CqParseNodeMathOpDot::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& needsCast, TqBool CheckOnly )
 {
     static TqInt aArgTypes[ 3 ] = {Type_Point, Type_Vector, Type_Normal};
 
@@ -791,8 +706,11 @@ TqInt	CqParseNodeMathOpDot::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckO
                 if ( FindCast( TypeB, &aArgTypes[ i ], 1, index ) != Type_Nil )
                 {
                     // Add any cast operators required.
-                    pOperandA->TypeCheck( &aArgTypes[ i ], 1, CheckOnly );
-                    pOperandB->TypeCheck( &aArgTypes[ i ], 1, CheckOnly );
+                    if(!CheckOnly)
+					{
+						pOperandA->TypeCheck( &aArgTypes[ i ], 1, needsCast, CheckOnly );
+						pOperandB->TypeCheck( &aArgTypes[ i ], 1, needsCast, CheckOnly );
+					}
                     fValid = TqTrue;
                     break;
                 }
@@ -800,10 +718,14 @@ TqInt	CqParseNodeMathOpDot::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckO
         }
         if ( fValid )
         {
-            if ( RetType != Type_Float && !CheckOnly)
+            if ( RetType != Type_Float)
             {
-                CqParseNodeCast * pCast = new CqParseNodeCast( RetType );
-                LinkParent( pCast );
+				needsCast = TqTrue;
+				if(!CheckOnly)
+				{
+					CqParseNodeCast * pCast = new CqParseNodeCast( RetType );
+					LinkParent( pCast );
+				}
             }
             return ( RetType );
         }
@@ -828,7 +750,7 @@ TqInt	CqParseNodeMathOpDot::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckO
 /// CqParseNodeConst::TypeCheck
 /// Perform a typecheck, and add cast if required.
 
-TqInt CqParseNodeConst::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOnly )
+TqInt CqParseNodeConst::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& needsCast, TqBool CheckOnly )
 {
     // Check if the variable type matches any of the requested ones.
     TqInt	MyType = ResType();
@@ -839,14 +761,15 @@ TqInt CqParseNodeConst::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOnly 
             return ( MyType );
     }
 
+    // If we got here, we are not of the correct type, so find a suitable cast.
     TqInt index;
 	TqInt NewType = FindCast( MyType, pTypes, Count, index );
-    // If we got here, we are not of the correct type, so find a suitable cast.
+	needsCast = TqTrue;
     if ( !CheckOnly )
     {
         CqParseNodeCast * pCast = new CqParseNodeCast( NewType );
         LinkParent( pCast );
-    }
+	}
 
     if ( NewType == Type_Nil && !CheckOnly )
     {
@@ -868,11 +791,11 @@ TqInt CqParseNodeConst::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOnly 
 /// CqParseNodeCast::TypeCheck
 /// Do a type check based on suitable types requested, and add a cast in required.
 
-TqInt	CqParseNodeCast::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOnly )
+TqInt	CqParseNodeCast::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& needsCast, TqBool CheckOnly )
 {
     // Perform a typecheck on the cast expression
     CqParseNode * pExpr = m_pChild;
-    pExpr->TypeCheck( &m_tTo, 1, CheckOnly );
+    pExpr->TypeCheck( &m_tTo, 1, needsCast, CheckOnly );
 
     // Check the return type, and add another cast if necessary.
     // Note: We add another cast to allow for forced casts of function return types,
@@ -898,6 +821,7 @@ TqInt	CqParseNodeCast::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOnly )
     }
     else
     {
+		needsCast = TqTrue;
         if ( !CheckOnly )
         {
             CqParseNodeCast * pCast = new CqParseNodeCast( NewType );
@@ -913,14 +837,14 @@ TqInt	CqParseNodeCast::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOnly )
 /// CqParseNodeTriple::TypeCheck
 /// Do a type check based on suitable types requested, and add a cast in required.
 
-TqInt	CqParseNodeTriple::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOnly )
+TqInt	CqParseNodeTriple::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& needsCast, TqBool CheckOnly )
 {
     static TqInt ExprType = Type_Float;
     // Perform a typecheck on the three float expressions
     CqParseNode* pExpr = m_pChild;
     while ( pExpr != 0 )
     {
-        pExpr->TypeCheck( &ExprType, 1, CheckOnly );
+        pExpr->TypeCheck( &ExprType, 1, needsCast, CheckOnly );
         pExpr = pExpr->pNext();
     }
     // Check if expecting a triple, if not add a cast
@@ -929,6 +853,7 @@ TqInt	CqParseNodeTriple::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOnly
         if ( pTypes[ i ] == Type_Triple ) return ( Type_Triple );
 
     // If we got here, we are not of the correct type, so find a suitable cast.
+	needsCast = TqTrue;
     TqInt index;
 	TqInt NewType = FindCast( Type_Triple, pTypes, Count, index );
     if(!CheckOnly)
@@ -957,14 +882,14 @@ TqInt	CqParseNodeTriple::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOnly
 /// CqParseNodeHexTuple::TypeCheck
 /// Do a type check based on suitable types requested, and add a cast in required.
 
-TqInt	CqParseNodeHexTuple::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOnly )
+TqInt	CqParseNodeHexTuple::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& needsCast, TqBool CheckOnly )
 {
     static TqInt ExprType = Type_Float;
     // Perform a typecheck on the three float expressions
     CqParseNode* pExpr = m_pChild;
     while ( pExpr != 0 )
     {
-        pExpr->TypeCheck( &ExprType, 1, CheckOnly );
+        pExpr->TypeCheck( &ExprType, 1, needsCast, CheckOnly );
         pExpr = pExpr->pNext();
     }
     // Check if expecting a sixteentuple, if not add a cast
@@ -973,6 +898,7 @@ TqInt	CqParseNodeHexTuple::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOn
         if ( pTypes[ i ] == Type_HexTuple ) return ( Type_HexTuple );
 
     // If we got here, we are not of the correct type, so find a suitable cast.
+	needsCast = TqTrue;
     TqInt index;
 	TqInt NewType = FindCast( Type_Matrix, pTypes, Count, index );
     if(!CheckOnly)
@@ -1000,7 +926,7 @@ TqInt	CqParseNodeHexTuple::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOn
 ///---------------------------------------------------------------------
 /// CqParseNodeCommFunction::TypeCheck
 
-TqInt CqParseNodeCommFunction::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOnly )
+TqInt CqParseNodeCommFunction::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& needsCast, TqBool CheckOnly )
 {
     // Check if the variable type matches any of the requested ones.
     TqInt	MyType = ResType();
@@ -1011,6 +937,7 @@ TqInt CqParseNodeCommFunction::TypeCheck( TqInt* pTypes, TqInt Count, TqBool Che
             return ( MyType );
     }
     // If we got here, we are not of the correct type, so find a suitable cast.
+	needsCast = TqTrue;
     TqInt index;
 	TqInt NewType = FindCast( MyType, pTypes, Count, index );
     if(!CheckOnly)
@@ -1039,12 +966,12 @@ TqInt CqParseNodeCommFunction::TypeCheck( TqInt* pTypes, TqInt Count, TqBool Che
 /// CqParseNodeQCond::TypeCheck
 /// Type check the return from a conditional statement and cast the true/false expressions if necessary.
 
-TqInt	CqParseNodeQCond::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOnly )
+TqInt	CqParseNodeQCond::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& needsCast, TqBool CheckOnly )
 {
     // Ensure that the conditional expression is type checked.
     CqParseNode * pCondExp = m_pChild;
     assert( pCondExp != 0 );
-    pCondExp->TypeCheck( pAllTypes(), Type_Last - 1, CheckOnly );
+    pCondExp->TypeCheck( pAllTypes(), Type_Last - 1, needsCast, CheckOnly );
 
     // Check if both expressions match type.
     CqParseNode * pTrue = m_pChild->pNext();
@@ -1065,8 +992,11 @@ TqInt	CqParseNodeQCond::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOnly 
             if ( FindCast( TypeF, &pTypes[ i ], 1, index ) != Type_Nil )
             {
                 // Add any cast operators required.
-                pTrue->TypeCheck( &pTypes[ i ], 1, CheckOnly );
-                pFalse->TypeCheck( &pTypes[ i ], 1, CheckOnly );
+                if(!CheckOnly)
+				{
+					pTrue->TypeCheck( &pTypes[ i ], 1, needsCast, CheckOnly );
+					pFalse->TypeCheck( &pTypes[ i ], 1, needsCast, CheckOnly );
+				}
                 return ( pTypes[ i ] );
             }
         }

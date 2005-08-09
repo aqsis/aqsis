@@ -185,7 +185,7 @@ public:
     }
 
     virtual	TqBool	Optimise();
-    virtual TqInt	TypeCheck( TqInt* pTypes, TqInt Count = 1, TqBool CheckOnly = TqFalse )
+    virtual TqInt	TypeCheck( TqInt* pTypes, TqInt Count, TqBool& needsCast, TqBool CheckOnly )
     {
         TqInt NewType = Type_Nil;
         CqParseNode* pChild = pFirstChild();
@@ -193,7 +193,7 @@ public:
         {
             // Get the next pointer nowm, incase the TypeCheck inserts a Cast operator.
             CqParseNode * pNext = pChild->pNext();
-            NewType = pChild->TypeCheck( pTypes, Count, CheckOnly );
+            NewType = pChild->TypeCheck( pTypes, Count, needsCast, CheckOnly );
             pChild = pNext;
         }
         return ( NewType );
@@ -353,7 +353,7 @@ public:
     virtual	void	Accept( IqParseNodeVisitor &V)	{ V.Visit(static_cast<IqParseNodeFunctionCall&>(*this)); }
 
 
-    virtual	TqInt	TypeCheck( TqInt* pTypes, TqInt Count = 1, TqBool CheckOnly = TqFalse );
+    virtual	TqInt	TypeCheck( TqInt* pTypes, TqInt Count, TqBool& needsCast, TqBool CheckOnly );
     virtual	TqBool	Optimise();
     virtual	TqInt	ResType() const;
     virtual	CqParseNode*	Clone( CqParseNode* pParent = 0 )
@@ -410,7 +410,7 @@ public:
     virtual	void	Accept( IqParseNodeVisitor &V)	{ V.Visit(static_cast<IqParseNodeUnresolvedCall&>(*this)); }
 
 
-    virtual	TqInt	TypeCheck( TqInt* pTypes, TqInt Count = 1, TqBool CheckOnly = TqFalse );
+    virtual	TqInt	TypeCheck( TqInt* pTypes, TqInt Count, TqBool& needsCast, TqBool CheckOnly );
     virtual	TqBool	Optimise();
     virtual	TqInt	ResType() const;
     virtual	CqParseNode*	Clone( CqParseNode* pParent = 0 )
@@ -485,7 +485,7 @@ public:
 
 
     virtual	TqBool	Optimise();
-    virtual	TqInt	TypeCheck( TqInt* pTypes, TqInt Count = 1, TqBool CheckOnly = TqFalse );
+    virtual	TqInt	TypeCheck( TqInt* pTypes, TqInt Count, TqBool& needsCast, TqBool CheckOnly );
     virtual	TqInt	ResType() const;
     virtual	CqParseNode*	Clone( CqParseNode* pParent = 0 )
     {
@@ -548,7 +548,7 @@ public:
     virtual	void	Accept( IqParseNodeVisitor &V)	{ V.Visit(static_cast<IqParseNodeArrayVariable&>(*this)); }
 
 
-    virtual	TqInt	TypeCheck( TqInt* pTypes, TqInt Count = 1, TqBool CheckOnly = TqFalse );
+    virtual	TqInt	TypeCheck( TqInt* pTypes, TqInt Count, TqBool& needsCast, TqBool CheckOnly );
     virtual	CqParseNode*	Clone( CqParseNode* pParent = 0 )
     {
         CqParseNodeVariableArray * pNew = new CqParseNodeVariableArray( *this );
@@ -604,7 +604,7 @@ public:
 
 
     virtual	TqBool	Optimise();
-    virtual	TqInt	TypeCheck( TqInt* pTypes, TqInt Count = 1, TqBool CheckOnly = TqFalse );
+    virtual	TqInt	TypeCheck( TqInt* pTypes, TqInt Count, TqBool& needsCast, TqBool CheckOnly );
     virtual	void	NoDup()
     {
         m_fNoDup = TqTrue;
@@ -673,7 +673,7 @@ public:
 
 
 
-    virtual	TqInt	TypeCheck( TqInt* pTypes, TqInt Count = 1, TqBool CheckOnly = TqFalse );
+    virtual	TqInt	TypeCheck( TqInt* pTypes, TqInt Count, TqBool& needsCast, TqBool CheckOnly );
     virtual	CqParseNode*	Clone( CqParseNode* pParent = 0 )
     {
         CqParseNodeAssignArray * pNew = new CqParseNodeAssignArray( *this );
@@ -712,7 +712,7 @@ public:
     }
 virtual	void	Accept( IqParseNodeVisitor &V)	{ V.Visit(static_cast<IqParseNodeOperator&>(*this)); }
 
-    virtual	TqInt	TypeCheck( TqInt* pTypes, TqInt Count = 1, TqBool CheckOnly = TqFalse );
+    virtual	TqInt	TypeCheck( TqInt* pTypes, TqInt Count, TqBool& needsCast, TqBool CheckOnly );
 };
 
 
@@ -790,7 +790,7 @@ public:
     virtual	~CqParseNodeMathOpDot()
     {}
 
-    virtual	TqInt	TypeCheck( TqInt* pTypes, TqInt Count = 1, TqBool CheckOnly = TqFalse );
+    virtual	TqInt	TypeCheck( TqInt* pTypes, TqInt Count, TqBool& needsCast, TqBool CheckOnly );
 };
 
 
@@ -845,7 +845,7 @@ public:
         pNew->m_pParent = pParent;
         return ( pNew );
     }
-    virtual	TqInt	TypeCheck( TqInt* pTypes, TqInt Count = 1, TqBool CheckOnly = TqFalse );
+    virtual	TqInt	TypeCheck( TqInt* pTypes, TqInt Count, TqBool& needsCast, TqBool CheckOnly );
 
 protected:
     EqRelOp	m_Operator;
@@ -891,7 +891,7 @@ public:
     virtual	void	Accept( IqParseNodeVisitor &V)	{ V.Visit(static_cast<IqParseNodeUnaryOp&>(*this)); }
 
 
-    virtual	TqInt	TypeCheck( TqInt* pTypes, TqInt Count = 1, TqBool CheckOnly = TqFalse );
+    virtual	TqInt	TypeCheck( TqInt* pTypes, TqInt Count, TqBool& needsCast, TqBool CheckOnly );
     virtual	CqParseNode*	Clone( CqParseNode* pParent = 0 )
     {
         CqParseNodeUnaryOp * pNew = new CqParseNodeUnaryOp( *this );
@@ -1022,7 +1022,7 @@ public:
     virtual	~CqParseNodeConst()
     {}
 
-    virtual	TqInt	TypeCheck( TqInt* pTypes, TqInt Count = 1, TqBool CheckOnly = TqFalse );
+    virtual	TqInt	TypeCheck( TqInt* pTypes, TqInt Count, TqBool& needsCast, TqBool CheckOnly );
 private:
 };
 
@@ -1380,14 +1380,14 @@ public:
         pNew->m_pParent = pParent;
         return ( pNew );
     }
-    virtual	TqInt	TypeCheck( TqInt* pTypes, TqInt Count = 1, TqBool CheckOnly = TqFalse )
+    virtual	TqInt	TypeCheck( TqInt* pTypes, TqInt Count, TqBool& needsCast, TqBool CheckOnly )
     {
         TqInt Types = Type_Float;
         TqInt NewType = Type_Nil;
         CqParseNode* pChild = pFirstChild();
 
         // Typecheck the conditional
-        pChild->TypeCheck( &Types, 1, CheckOnly );
+        pChild->TypeCheck( &Types, 1, needsCast, CheckOnly );
 
         // Now typecheck the conditional statements
         pChild = pChild->pNext();
@@ -1395,7 +1395,7 @@ public:
         {
             // Get the next pointer nowm, incase the TypeCheck inserts a Cast operator.
             CqParseNode * pNext = pChild->pNext();
-            pChild->TypeCheck( pAllTypes(), Type_Last - 1, CheckOnly );
+            pChild->TypeCheck( pAllTypes(), Type_Last - 1, needsCast, CheckOnly );
             pChild = pNext;
         }
         return ( NewType );
@@ -1436,7 +1436,7 @@ public:
     virtual	void	Accept( IqParseNodeVisitor &V)	{ V.Visit(static_cast<IqParseNodeConditionalExpression&>(*this)); }
 
 
-    virtual	TqInt	TypeCheck( TqInt* pTypes, TqInt Count = 1, TqBool CheckOnly = TqFalse );
+    virtual	TqInt	TypeCheck( TqInt* pTypes, TqInt Count, TqBool& needsCast, TqBool CheckOnly );
     virtual	CqParseNode*	Clone( CqParseNode* pParent = 0 )
     {
         CqParseNodeQCond * pNew = new CqParseNodeQCond( *this );
@@ -1496,7 +1496,7 @@ public:
 
 
     virtual	TqBool	Optimise();
-    virtual	TqInt	TypeCheck( TqInt* pTypes, TqInt Count = 1, TqBool CheckOnly = TqFalse );
+    virtual	TqInt	TypeCheck( TqInt* pTypes, TqInt Count, TqBool& needsCast, TqBool CheckOnly );
     virtual	CqParseNode*	Clone( CqParseNode* pParent = 0 )
     {
         CqParseNodeCast * pNew = new CqParseNodeCast( *this );
@@ -1545,7 +1545,7 @@ public:
     virtual	void	Accept( IqParseNodeVisitor &V)	{ V.Visit(static_cast<IqParseNodeTriple&>(*this)); }
 
 
-    virtual	TqInt	TypeCheck( TqInt* pTypes, TqInt Count = 1, TqBool CheckOnly = TqFalse );
+    virtual	TqInt	TypeCheck( TqInt* pTypes, TqInt Count, TqBool& needsCast, TqBool CheckOnly );
     virtual	CqParseNode*	Clone( CqParseNode* pParent = 0 )
     {
         CqParseNodeTriple * pNew = new CqParseNodeTriple( *this );
@@ -1594,7 +1594,7 @@ public:
     virtual	void	Accept( IqParseNodeVisitor &V)	{ V.Visit(static_cast<IqParseNodeSixteenTuple&>(*this)); }
 
 
-    virtual	TqInt	TypeCheck( TqInt* pTypes, TqInt Count = 1, TqBool CheckOnly = TqFalse );
+    virtual	TqInt	TypeCheck( TqInt* pTypes, TqInt Count, TqBool& needsCast, TqBool CheckOnly );
     virtual	CqParseNode*	Clone( CqParseNode* pParent = 0 )
     {
         CqParseNodeHexTuple * pNew = new CqParseNodeHexTuple( *this );
@@ -1669,7 +1669,7 @@ public:
     virtual	void	Accept( IqParseNodeVisitor &V)	{ V.Visit(static_cast<IqParseNodeMessagePassingFunction&>(*this)); }
 
 
-    virtual	TqInt	TypeCheck( TqInt* pTypes, TqInt Count = 1, TqBool CheckOnly = TqFalse );
+    virtual	TqInt	TypeCheck( TqInt* pTypes, TqInt Count, TqBool& needsCast, TqBool CheckOnly );
     virtual	CqParseNode*	Clone( CqParseNode* pParent = 0 )
     {
         CqParseNodeCommFunction * pNew = new CqParseNodeCommFunction( *this );
