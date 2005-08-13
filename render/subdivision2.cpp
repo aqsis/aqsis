@@ -612,11 +612,20 @@ void CqSubdivision2::SubdivideFace(CqLath* pFace, std::vector<CqLath*>& apSubFac
         apSubFaces.clear();
         std::vector<CqLath*> aQvf;
         pFace->pFaceVertex()->Qvf(aQvf);
-        // Fill in the lath pointers to the same laths that reference the faces in the topology list. This ensures that
-        // the dicing routine will still get the lath it expects in the corner for reading data out.
+        // Fill in the lath references for the starting points of the faces.
+		// Reorder them so that they are all in the same orientaion as their parent, if possible.
+		// This is due to the fact that the subdivision algorithm results in 4 quads with the '2' vertex
+		// in the middle point, we need to rotate them to restore the original orientation by choosing the 
+		// next one round for each subsequent quad.
         std::vector<CqLath*>::iterator iVF;
-        for( iVF = aQvf.begin(); iVF != aQvf.end(); iVF++ )
-            apSubFaces.push_back( (*iVF)->ccf()->ccf() );
+		TqInt i = 0;
+        for( iVF = aQvf.begin(); iVF != aQvf.end(); iVF++, i++ )
+		{
+			CqLath* pLathF = (*iVF)->ccf()->ccf();
+			TqInt r = i;
+			while( r-- > 0)	pLathF = pLathF->ccf();
+			apSubFaces.push_back( pLathF );
+		}
         return;
     }
 
@@ -777,10 +786,14 @@ void CqSubdivision2::SubdivideFace(CqLath* pFace, std::vector<CqLath*>& apSubFac
         if( CornerSharpness( aQfv[ i ] ) > 0.0f )
             AddSharpCorner( pLathA, CornerSharpness( aQfv[ i ] ) );
 
-        // Store a lath reference for the facet.
+        // Fill in the lath references for the starting points of the faces.
+		// Reorder them so that they are all in the same orientaion as their parent, if possible.
+		// This is due to the fact that the subdivision algorithm results in 4 quads with the '2' vertex
+		// in the middle point, we need to rotate them to restore the original orientation by choosing the 
+		// next one round for each subsequent quad.
 		CqLath* pLathF = pLathA;
-		TqInt reorder = i;
-		while( reorder-- > 0)	pLathF = pLathF->ccf();
+		TqInt r = i;
+		while( r-- > 0)	pLathF = pLathF->ccf();
         apSubFaces.push_back( pLathF );
         m_apFacets.push_back( pLathF );
     }
@@ -1063,7 +1076,6 @@ CqMicroPolyGridBase* CqSurfaceSubdivisionPatch::DiceExtract()
             TqInt ivA = pLath->VertexIndex();
 	        TqInt iFVA = pLath->FaceVertexIndex();
             StoreDice( pGrid, pMotionPoints, ivA, iFVA, indexA );
-
             if( c < ( nc - 1 ) )
                 pLath = pLath->cv()->ccf();
 
@@ -1083,7 +1095,6 @@ CqMicroPolyGridBase* CqSurfaceSubdivisionPatch::DiceExtract()
 	        TqInt iFVA = pLath->FaceVertexIndex();
             TqInt indexA = ( r * ( nc + 1 ) );
             StoreDice( pGrid, pMotionPoints, ivA, iFVA, indexA );
-
             indexA++;
             pLath = pLath->cf();
             c = 0;
@@ -1092,7 +1103,6 @@ CqMicroPolyGridBase* CqSurfaceSubdivisionPatch::DiceExtract()
                 TqInt ivA = pLath->VertexIndex();
 		        TqInt iFVA = pLath->FaceVertexIndex();
                 StoreDice( pGrid, pMotionPoints, ivA, iFVA, indexA );
-
                 if( c < ( nc - 1 ) )
                     pLath = pLath->ccv()->cf();
 
@@ -1102,8 +1112,6 @@ CqMicroPolyGridBase* CqSurfaceSubdivisionPatch::DiceExtract()
 
             r++;
         }
-
-
         // If the color and opacity are not defined, use the system values.
         if ( USES( lUses, EnvVars_Cs ) && !pTopology()->pPoints()->bHasVar(EnvVars_Cs) )
         {
