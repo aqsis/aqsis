@@ -50,7 +50,7 @@ START_NAMESPACE( Aqsis )
  */
 
 class CqPoints;
-class CqPointsKDTreeData : public IqKDTreeData<TqInt, struct SqEmptyExtraData>
+class CqPointsKDTreeData : public IqKDTreeData<TqInt>
 {
     class CqPointsKDTreeDataComparator
     {
@@ -74,18 +74,6 @@ public:
         std::sort(aLeaves.begin(), aLeaves.end(), CqPointsKDTreeDataComparator(m_pPointsSurface, dimension) );
     }
     virtual TqInt Dimensions() const	{return(3);}
-	virtual void Subdivided(CqKDTreeNode<TqInt, struct SqEmptyExtraData>& original, 
-							CqKDTreeNode<TqInt, struct SqEmptyExtraData>& leftResult, 
-							CqKDTreeNode<TqInt, struct SqEmptyExtraData>& rightResult, 
-							TqInt dimension, TqInt median)
-	{}
-	virtual void Initialise(CqKDTreeNode<TqInt,SqEmptyExtraData>& treenode)
-	{}
-
-	virtual TqBool PropagateChangesFromChild(CqKDTreeNode<TqInt,SqEmptyExtraData>& treenode, CqKDTreeNode<TqInt,SqEmptyExtraData>& child)
-	{
-		return(TqFalse);
-	}
 
     void	SetpPoints( const CqPoints* pPoints );
     void	FreePoints();
@@ -241,8 +229,8 @@ CqString className() const { return CqString("CqPoints"); }
     }
 
     /// Accessor function for the KDTree
-    CqKDTreeNode<TqInt, struct SqEmptyExtraData>&	KDTree()			{return( m_KDTree); }
-    const CqKDTreeNode<TqInt, struct SqEmptyExtraData>&	KDTree() const	{return( m_KDTree); }
+    CqKDTree<TqInt>&	KDTree()			{return( m_KDTree); }
+    const CqKDTree<TqInt>&	KDTree() const	{return( m_KDTree); }
 
     void ClearKDTree()
     {
@@ -285,9 +273,9 @@ private:
     // make this private.
 
     CqPoints( const CqPoints& From ) : CqMotionSpec<boost::shared_ptr<CqPolygonPoints> >(From.pPoints()),
-	    m_KDTreeData( this )
+	    m_KDTreeData( this ),
+            m_KDTree( &m_KDTreeData )
     {
-		m_KDTree.SetData(boost::shared_ptr<IqKDTreeData<TqInt, struct SqEmptyExtraData> >(&m_KDTreeData));
         *this = From;
     }
 
@@ -296,7 +284,7 @@ private:
     boost::shared_ptr<CqPolygonPoints> m_pPoints;				///< Pointer to the surface storing the primtive variables.
     TqInt	m_nVertices;					///< Number of points this surfaces represents.
     CqPointsKDTreeData	m_KDTreeData;		///< KD Tree data handling class.
-    CqKDTreeNode<TqInt, struct SqEmptyExtraData>		m_KDTree;			///< KD Tree node for this part of the entire primitive.
+    CqKDTree<TqInt>		m_KDTree;			///< KD Tree node for this part of the entire primitive.
     TqInt m_widthParamIndex;				///< Index of the "width" primitive variable if specified, -1 if not.
     TqInt m_constantwidthParamIndex;		///< Index of the "constantwidth" primitive variable if specified, -1 if not.
     TqFloat	m_MaxWidth;						///< Maximum width of the points, used for bound calculation.
@@ -338,12 +326,26 @@ public:
     CqMicroPolygonPoints() : CqMicroPolygon()	{}
     virtual	~CqMicroPolygonPoints()	{}
 
+	/** Overridden operator new to allocate micropolys from a pool.
+     */
+    void* operator new( size_t size )
+    {
+        return( m_thePool.alloc() );
+    }
+
+    /** Overridden operator delete to allocate micropolys from a pool.
+     */
+    void operator delete( void* p )
+    {
+        m_thePool.free( reinterpret_cast<CqMicroPolygonPoints*>(p) );
+    }
+
 public:
     void Initialise( TqFloat radius )
     {
         m_radius = radius;
     }
-    virtual	CqBound& GetTotalBound( )
+    virtual	CqBound&			GetTotalBound( )
     {
 		static CqBound b;
         CqVector3D Pmin, Pmax;
@@ -353,8 +355,8 @@ public:
         Pmin.y( Pmin.y() - m_radius );
         Pmax.x( Pmax.x() + m_radius );
         Pmax.y( Pmax.y() + m_radius );
-		b.Encapsulate(Pmin);
-		b.Encapsulate(Pmax);
+		b.vecMin() = Pmin;
+		b.vecMax() = Pmax;
         return( b );
     }
     virtual	TqBool	Sample( const SqSampleData& sample, TqFloat& D, TqFloat time, TqBool UsingDof = TqFalse );
@@ -364,6 +366,8 @@ private:
     CqMicroPolygonPoints( const CqMicroPolygonPoints& From )	{}
 
     TqFloat	m_radius;
+
+	static	CqObjectPool<CqMicroPolygonPoints>	m_thePool;
 }
 ;
 
@@ -384,8 +388,7 @@ public:
     ~CqMovingMicroPolygonKeyPoints()
     {}
 
-
-    /** Overridden operator new to allocate micropolys from a pool.
+	/** Overridden operator new to allocate micropolys from a pool.
      */
     void* operator new( size_t size )
     {
