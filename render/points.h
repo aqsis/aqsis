@@ -455,6 +455,20 @@ public:
             delete( (*ikey) );
     }
 
+	/** Overridden operator new to allocate micropolys from a pool.
+     */
+    void* operator new( size_t size )
+    {
+        return( m_thePool.alloc() );
+    }
+
+    /** Overridden operator delete to allocate micropolys from a pool.
+     */
+    void operator delete( void* p )
+    {
+        m_thePool.free( reinterpret_cast<CqMicroPolygonPoints*>(p) );
+    }
+
 public:
     void	AppendKey( const CqVector3D& vA, TqFloat radius, TqFloat time );
 void	DeleteVariables( TqBool all )	{}
@@ -496,6 +510,9 @@ private:
     std::vector<CqMovingMicroPolygonKeyPoints*>	m_Keys;
 
 CqMicroPolygonMotionPoints( const CqMicroPolygonMotionPoints& From ) {}
+
+	static	CqObjectPool<CqMicroPolygonMotionPoints>	m_thePool;
+
 }
 ;
 

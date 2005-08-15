@@ -46,6 +46,7 @@ START_NAMESPACE( Aqsis )
 
 CqObjectPool<CqMovingMicroPolygonKeyPoints>	CqMovingMicroPolygonKeyPoints::m_thePool;
 CqObjectPool<CqMicroPolygonPoints>	CqMicroPolygonPoints::m_thePool;
+CqObjectPool<CqMicroPolygonMotionPoints>	CqMicroPolygonMotionPoints::m_thePool;
 
 
 #define NBR_SEGMENTS 6
