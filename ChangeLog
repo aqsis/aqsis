@@ -1,3 +1,46 @@
+2005-08-14 23:04  pgregory
+
+	* render/: kdtree.h, points.cpp, points.h: Fix problem with
+	  RiPoints primitives, introduced during refactor of the KDTree
+	  implementation for the new sampling code. As the KDTree didn't
+	  end up getting used in the new sampling code, I reverted to the
+	  old implementation.
+
+2005-08-13 10:13  pgregory
+
+	* render/subdivision2.cpp: More fixes to the subdivision surface
+	  code to improve the handling of varying and facevarying primitive
+	  variables. Now efforts are made to ensure that quads resulting
+	  from subdivision match the parent polygon's orientation, thus
+	  making grid points match up better.
+
+2005-08-09 13:25  pgregory
+
+	* SConstruct, aqsis/SConscript, aqsl/SConscript,
+	  aqsltell/SConscript, display/SConscript,
+	  libaqsistypes/SConscript, libargparse/SConscript,
+	  libcodegenvm/SConscript, libddmanager/SConscript,
+	  libraytrace/SConscript, libri2rib/SConscript, librib2/SConscript,
+	  librib2/parser.yy, librib2/scanner.ll, librib2ri/SConscript,
+	  librib2stream/SConscript, libshaderexecenv/SConscript,
+	  libshadervm/SConscript, libslparse/SConscript,
+	  libslparse/parser.yy, libslparse/scanner.ll,
+	  libslxargs/SConscript, plugins/SConscript,
+	  plugins/bake2tif/SConscript, plugins/bmp2tif/SConscript,
+	  plugins/gif2tif/SConscript, plugins/jpg2tif/SConscript,
+	  plugins/pcx2tif/SConscript, plugins/ppm2tif/SConscript,
+	  plugins/tga2tif/SConscript, render/SConscript, slpp/SConscript,
+	  teqser/SConscript: Initial scons build support.
+
+2005-08-09 00:00  pgregory
+
+	* libslparse/: parsenode.h, parser.yxx, typecheck.cpp: More changes
+	  to the function call typechecking in slparse, now more robust.
+
+2005-08-04 21:21  pgregory
+
+	* ChangeLog: Update for release.
+
 2005-08-02 04:37  tshead
 
 	* libslparse/typecheck.cpp: * Fix: compile problem with
