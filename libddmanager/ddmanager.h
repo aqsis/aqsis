@@ -98,6 +98,8 @@ private:
 		TqFloat		m_QuantizeMinVal;
 		TqFloat		m_QuantizeMaxVal;
 		TqFloat		m_QuantizeDitherVal;
+		TqBool		m_QuantizeSpecified;
+		TqBool		m_QuantizeDitherSpecified;
 		DspyImageOpenMethod			m_OpenMethod;
 		DspyImageQueryMethod		m_QueryMethod;
 		DspyImageDataMethod			m_DataMethod;

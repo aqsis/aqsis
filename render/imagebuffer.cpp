@@ -1150,7 +1150,7 @@ void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax, 
     if(!bIsEmpty)
     {
         Bucket.ExposeBucket();
-	Bucket.QuantizeBucket();
+		Bucket.QuantizeBucket();
     }
 
 	TIMER_STOP("Filter")

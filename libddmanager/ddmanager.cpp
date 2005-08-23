@@ -73,10 +73,12 @@ TqInt CqDDManager::AddDisplay( const TqChar* name, const TqChar* type, const TqC
 	req.m_modeHash = CqString::hash( mode );
 	req.m_modeID = modeID;
 	req.m_QuantizeZeroVal = 0.0f;
-	req.m_QuantizeOneVal = 0.0f;
+	req.m_QuantizeOneVal = 255.0f;
 	req.m_QuantizeMinVal = 0.0f;
 	req.m_QuantizeMaxVal = 0.0f;
 	req.m_QuantizeDitherVal = 0.0f;
+	req.m_QuantizeSpecified = TqFalse;
+	req.m_QuantizeDitherSpecified = TqFalse;
 
 	// Create the array of UserParameter structures for all the unrecognised extra parameters,
 	// while extracting information for the recognised ones.
@@ -130,6 +132,8 @@ TqInt CqDDManager::CloseDisplays()
 
 TqInt CqDDManager::DisplayBucket( IqBucket* pBucket )
 {
+    static CqRandom random( 61 );
+
  	if( (pBucket->Width() == 0) || (pBucket->Height() == 0) )
 		return(0);
 
@@ -175,6 +179,7 @@ TqInt CqDDManager::DisplayBucket( IqBucket* pBucket )
 				TqInt index = 0;
 				const TqFloat* pSamples = pBucket->Data( x, y );
 				std::vector<PtDspyDevFormat>::iterator iformat;
+                double s = random.RandomFloat();
 				for(iformat = i->m_formats.begin(); iformat != i->m_formats.end(); iformat++)
 				{
 					TqFloat value = pSamples[i->m_dataOffsets[index]];
@@ -184,8 +189,10 @@ TqInt CqDDManager::DisplayBucket( IqBucket* pBucket )
 					        i->m_QuantizeMinVal  == 0.0f &&
 					        i->m_QuantizeMaxVal  == 0.0f ) )
 					{
-						value = ROUND(i->m_QuantizeZeroVal + value * (i->m_QuantizeOneVal - i->m_QuantizeZeroVal) + i->m_QuantizeDitherVal );
-						value = CLAMP(value, i->m_QuantizeMinVal, i->m_QuantizeMaxVal) ;
+//		                double val1;
+//						if( modf( (i->m_QuantizeOneVal - i->m_QuantizeZeroVal) * (i->m_QuantizeZeroVal + value) + ( i->m_QuantizeDitherVal * s ), &val1 ) > 0.5 ) val1 += 1;
+						//value = ROUND(i->m_QuantizeZeroVal + value * (i->m_QuantizeOneVal - i->m_QuantizeZeroVal) + ( i->m_QuantizeDitherVal * s ) );
+//						value = CLAMP(val1, i->m_QuantizeMinVal, i->m_QuantizeMaxVal) ;
 					}
 					TqInt type = iformat->type & PkDspyMaskType;
 					switch(type)
@@ -387,25 +394,38 @@ void CqDDManager::LoadDisplayLibrary( SqDisplayRequest& req )
 
 	if( NULL != req.m_OpenMethod )
 	{
-		TqFloat colorQuantOne = 255.0f;
-		TqFloat depthQuantOne = 0.0f;
-		// Get some key information about the render to be used when initialising the display.
-		const TqFloat* pQuant = QGetRenderContext() ->optCurrent().GetFloatOption( "Quantize", "Color" );
-		if( pQuant )
-			colorQuantOne = pQuant[0];
-		pQuant = QGetRenderContext() ->optCurrent().GetFloatOption( "Quantize", "Depth" );
-		if( pQuant )
-			depthQuantOne = pQuant[0];
-
+		// If the quantization options haven't been set in the RiDisplay call, get the appropriate values out 
+		// of the RiQuantize option.
+		const TqFloat* pQuant = 0;
+		if(!req.m_QuantizeSpecified || !req.m_QuantizeDitherSpecified)
+		{
+			if(req.m_modeID & ModeZ)
+				pQuant = QGetRenderContext() ->optCurrent().GetFloatOption( "Quantize", "Depth" );
+			else
+				pQuant = QGetRenderContext() ->optCurrent().GetFloatOption( "Quantize", "Color" );
+			if( pQuant && !req.m_QuantizeSpecified)
+			{
+				req.m_QuantizeOneVal = pQuant[0];
+				req.m_QuantizeMinVal = pQuant[1];
+				req.m_QuantizeMaxVal = pQuant[2];
+				req.m_QuantizeSpecified = TqTrue;
+			}
+	
+			if( pQuant && !req.m_QuantizeDitherSpecified)
+			{
+				req.m_QuantizeDitherVal = pQuant[3];
+				req.m_QuantizeDitherSpecified = TqTrue;
+			}
+		}
 		// Prepare the information and call the DspyImageOpen function in the display device.
 		if(req.m_modeID & ( ModeRGB | ModeA | ModeZ) )
 		{
 			PtDspyDevFormat fmt;
-			if( colorQuantOne == 255 )
+			if( req.m_QuantizeOneVal == 255 )
 				fmt.type = PkDspyUnsigned8;
-			else if( colorQuantOne == 65535 )
+			else if( req.m_QuantizeOneVal == 65535 )
 				fmt.type = PkDspyUnsigned16;
-			else if( colorQuantOne == 4294967295u )
+			else if( req.m_QuantizeOneVal == 4294967295u )
 				fmt.type = PkDspyUnsigned32;
 			else
 				fmt.type = PkDspyFloat32;
@@ -459,32 +479,33 @@ void CqDDManager::LoadDisplayLibrary( SqDisplayRequest& req )
 
 					if (componentNames.substr(i, 1) == "r")
 						fmt.name = m_RedName;
-					if (componentNames.substr(i, 1) == "g")
+					else if (componentNames.substr(i, 1) == "g")
 						fmt.name = m_GreenName;
-					if (componentNames.substr(i, 1) == "b")
+					else if (componentNames.substr(i, 1) == "b")
 						fmt.name = m_BlueName;
-					if (componentNames.substr(i, 1) == "a")
+					else if (componentNames.substr(i, 1) == "a")
 						fmt.name = m_AlphaName;
-					if (componentNames.substr(i, 1) == "z")
+					else if (componentNames.substr(i, 1) == "z")
 						fmt.name = m_ZName;
-					if (componentNames.substr(i, 1) == "X")
+					else if (componentNames.substr(i, 1) == "X")
 						fmt.name = m_RedName;
-					if (componentNames.substr(i, 1) == "Y")
+					else if (componentNames.substr(i, 1) == "Y")
 						fmt.name = m_GreenName;
-					if (componentNames.substr(i, 1) == "Z")
+					else if (componentNames.substr(i, 1) == "Z")
 						fmt.name = m_BlueName;
-
+					else
+						fmt.name = m_RedName;
 				}
 				else
 				{
 					// by default we will stored into red channel eg. "s" will be saved into 'r' channel
 					fmt.name = m_RedName;
 				}
-				if( colorQuantOne == 255 )
+				if( req.m_QuantizeOneVal == 255 )
 					fmt.type = PkDspyUnsigned8;
-				else if( colorQuantOne == 65535 )
+				else if( req.m_QuantizeOneVal == 65535 )
 					fmt.type = PkDspyUnsigned16;
-				else if( colorQuantOne == 4294967295u )
+				else if( req.m_QuantizeOneVal == 4294967295u )
 					fmt.type = PkDspyUnsigned32;
 				else
 					fmt.type = PkDspyFloat32;
@@ -903,12 +924,14 @@ void CqDDManager::PrepareCustomParameters( std::map<std::string, void*>& mapPara
 			req.m_QuantizeOneVal = floats[1];
 			req.m_QuantizeMinVal = floats[2];
 			req.m_QuantizeMaxVal = floats[3];
+			req.m_QuantizeSpecified = TqTrue;
 		}
 		else if(param->first.compare("dither")==0)
 		{
 			// Extract the quantization information and store it with the display request.
 			const RtFloat* floats = static_cast<float*>( param->second );
 			req.m_QuantizeDitherVal = floats[0];
+			req.m_QuantizeDitherSpecified = TqTrue;
 		}
 		else
 		{
