@@ -20,7 +20,6 @@ $(top_srcdir)/render/ri_validate.inl: $(top_srcdir)/render/apivalidate.xsl $(top
 SUBDIRS = \
 . \
 bin \
-thirdparty \
 all \
 images \
 libargparse \
@@ -53,7 +52,6 @@ renderer.xcode \
 DIST_SUBDIRS = \
 . \
 bin \
-thirdparty \
 all \
 images \
 libargparse \

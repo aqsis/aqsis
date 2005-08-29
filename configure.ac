@@ -86,7 +86,6 @@ ribfiles/Makefile
 shaders/Makefile 
 slpp/Makefile 
 teqser/Makefile 
-thirdparty/Makefile 
 ])
 
 AC_OUTPUT
