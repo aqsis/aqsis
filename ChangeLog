@@ -1,3 +1,11 @@
+2005-08-30 19:52  pgregory
+
+	* Renderer.dsw: Removed genkeywords project for now.
+
+2005-08-30 19:51  pgregory
+
+	* ChangeLog: Update ready for release.
+
 2005-08-29 18:18  pgregory
 
 	* Makefile.am, configure.ac: Removed thirdparty folder, no longer
