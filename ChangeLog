@@ -1,3 +1,33 @@
+2005-08-29 18:18  pgregory
+
+	* Makefile.am, configure.ac: Removed thirdparty folder, no longer
+	  relevant.
+
+2005-08-23 22:02  pgregory
+
+	* thirdparty/: .cvsignore, Makefile.am, glut32.dll, libjpeg.dll,
+	  libtiff.dll, libz.lib, zlib.dll: Removed, no longer relevant.
+
+2005-08-23 21:11  pgregory
+
+	* libddmanager/ddmanager.cpp, libddmanager/ddmanager.h,
+	  render/imagebuffer.cpp: Update the way that the quantization is
+	  performed, to allow different quantizations per display, even if
+	  the display is processing the same output variables.
+
+2005-08-15 22:32  pgregory
+
+	* render/: points.cpp, points.h: Fix bug in motion blurred points
+	  primitives. The CqMicropolygon base class has a custom new/delete
+	  operator to use boosts memory pools, so all derived classed must
+	  have too, otherwise the allocation fails.
+
+2005-08-15 16:19  pgregory
+
+	* ChangeLog, render/Makefile.am: Update changelog ready for
+	  release.  Update Makefile.am in render to include additional
+	  headers.
+
 2005-08-14 23:04  pgregory
 
 	* render/: kdtree.h, points.cpp, points.h: Fix problem with
@@ -961,10 +991,9 @@
 	* configure.ac, m4/aqsis_libjpeg_args.m4, m4/aqsis_libtiff_args.m4,
 	  m4/aqsis_libz_args.m4, m4/aqsis_with_openexr.m4, m4/bits.m4,
 	  plugins/Makefile.am, plugins/bmp2tif/.cvsignore,
-	  plugins/exr2tif/.cvsignore, plugins/exr2tif/Makefile.am,
-	  render/macosx/.cvsignore, render/macosx/std/.cvsignore: * exr2tif
-	  plugin can be enabled/disabled at configure-time * Began cleanup
-	  of the autotools build
+	  plugins/exr2tif/.cvsignore, plugins/exr2tif/Makefile.am: *
+	  exr2tif plugin can be enabled/disabled at configure-time * Began
+	  cleanup of the autotools build
 
 2005-03-24 03:52  joron
 
@@ -1222,13 +1251,7 @@
 
 2005-01-03 16:01  pgregory
 
-	* configure.ac, render/Makefile.am, render/macosx/.cvsignore,
-	  render/macosx/Makefile.am, render/macosx/valarray,
-	  render/macosx/std/.cvsignore, render/macosx/std/Makefile.am,
-	  render/macosx/std/std_valarray.h,
-	  render/macosx/std/valarray_array.h,
-	  render/macosx/std/valarray_array.tcc,
-	  render/macosx/std/valarray_meta.h: Remove legacy MacOS support
+	* configure.ac, render/Makefile.am: Remove legacy MacOS support
 	  files, no longer needed with the latest versions of MacOSX.
 
 2005-01-03 04:47  tshead
@@ -2502,8 +2525,8 @@
 
 	* Makefile.am, configure.ac, display/.cvsignore,
 	  display/Makefile.am, display/display.cpp, m4/aqsis_with_fltk.m4,
-	  thirdparty/.cvsignore, thirdparty/tinyxml/.cvsignore: *
-	  Integrated new display communications libs into the Posix build
+	  thirdparty/.cvsignore: * Integrated new display communications
+	  libs into the Posix build
 
 2004-06-14 13:45  jpgrad
 
@@ -2605,11 +2628,10 @@
 
 2004-06-08 18:30  pgregory
 
-	* render/iddmanager.h, render/imagepixel.cpp, render/imagepixel.h,
-	  render/irenderer.h, render/libaqsis.dsp, render/renderer.cpp,
-	  render/renderer.h, thirdparty/tinyxml/tinyxml_lib.dsp: Some
-	  preparatory work for the display system refactor.  Add the mpdump
-	  code to the Windows build.
+	* render/: iddmanager.h, imagepixel.cpp, imagepixel.h, irenderer.h,
+	  libaqsis.dsp, renderer.cpp, renderer.h: Some preparatory work for
+	  the display system refactor.	Add the mpdump code to the Windows
+	  build.
 
 2004-06-08 10:06  jpgrad
 
@@ -2633,49 +2655,14 @@
 
 2004-06-07 10:08  pgregory
 
-	* Makefile.am, configure.ac, thirdparty/Makefile.am,
-	  thirdparty/tinyxml/Makefile.am: Added build support for TinyXML
-	  library under Posix makefile build system.
-
-2004-06-07 09:38  pgregory
-
-	* thirdparty/tinyxml/Makefile: Removed Makefile to avoid clash with
-	  Posix build.
+	* Makefile.am, configure.ac, thirdparty/Makefile.am: Added build
+	  support for TinyXML library under Posix makefile build system.
 
 2004-06-07 09:12  pgregory
 
 	* render/: bucket.cpp, bucket.h, imagebuffer.cpp: Add some small
 	  optimisations to the bucket initialisation and handling for empty
 	  buckets.
-
-2004-06-06 21:52  pgregory
-
-	* thirdparty/tinyxml/: Makefile, changes.txt, echo.dsp, readme.txt,
-	  tinyXmlTest.dsp, tinyXmlTestSTL.dsp, tinystr.cpp, tinystr.h,
-	  tinyxml.cpp, tinyxml.dsw, tinyxml.h, tinyxmlSTL.dsp,
-	  tinyxml_lib.dsp, tinyxml_lib.plg, tinyxmlerror.cpp,
-	  tinyxmlparser.cpp, utf8test.gif, utf8test.xml,
-	  utf8testverify.xml, xmltest.cpp, docs/annotated.html,
-	  docs/classTiXmlAttribute-members.html,
-	  docs/classTiXmlAttribute.html, docs/classTiXmlAttribute.png,
-	  docs/classTiXmlBase-members.html, docs/classTiXmlBase.html,
-	  docs/classTiXmlBase.png, docs/classTiXmlComment-members.html,
-	  docs/classTiXmlComment.html, docs/classTiXmlComment.png,
-	  docs/classTiXmlDeclaration-members.html,
-	  docs/classTiXmlDeclaration.html, docs/classTiXmlDeclaration.png,
-	  docs/classTiXmlDocument-members.html,
-	  docs/classTiXmlDocument.html, docs/classTiXmlDocument.png,
-	  docs/classTiXmlElement-members.html, docs/classTiXmlElement.html,
-	  docs/classTiXmlElement.png, docs/classTiXmlHandle-members.html,
-	  docs/classTiXmlHandle.html, docs/classTiXmlNode-members.html,
-	  docs/classTiXmlNode.html, docs/classTiXmlNode.png,
-	  docs/classTiXmlText-members.html, docs/classTiXmlText.html,
-	  docs/classTiXmlText.png, docs/classTiXmlUnknown-members.html,
-	  docs/classTiXmlUnknown.html, docs/classTiXmlUnknown.png,
-	  docs/doxygen.css, docs/doxygen.png, docs/files.html,
-	  docs/functions.html, docs/hierarchy.html, docs/index.html,
-	  docs/tinystr_8h-source.html, docs/tinyxml_8h-source.html: Add
-	  TinyXML library to the project.
 
 2004-05-31 21:57  pgregory
 
@@ -4056,11 +4043,9 @@
 	  render/symbols.h, render/teapot.cpp, render/teapot.h,
 	  render/texturemap.cpp, render/texturemap.h, render/transform.cpp,
 	  render/transform.h, render/trimcurve.cpp, render/trimcurve.h,
-	  render/version.h, render/macosx/std/std_valarray.h,
-	  render/macosx/std/valarray_array.h,
-	  render/macosx/std/valarray_meta.h, shaders/noises.h,
-	  shaders/patterns.h, slpp/pp.h, teqser/teqser.cpp: Apply artistic
-	  style to bring everything back into line.
+	  render/version.h, shaders/noises.h, shaders/patterns.h,
+	  slpp/pp.h, teqser/teqser.cpp: Apply artistic style to bring
+	  everything back into line.
 
 2003-12-28 12:26  pgregory
 
@@ -7587,8 +7572,7 @@
 	  plugins/bake2tif/.cvsignore, plugins/common/.cvsignore,
 	  plugins/gif2tif/.cvsignore, plugins/jpg2tif/.cvsignore,
 	  plugins/pcx2tif/.cvsignore, plugins/ppm2tif/.cvsignore,
-	  plugins/tga2tif/.cvsignore, render/macosx/.cvsignore,
-	  render/macosx/std/.cvsignore: * Eliminated "no carriage return at
+	  plugins/tga2tif/.cvsignore: * Eliminated "no carriage return at
 	  end of file" warnings * .cvsignore updates
 
 2003-02-08 18:02  mw_matti
@@ -8525,9 +8509,8 @@
 	  librib2stream/librib2stream.cpp, librib2stream/librib2stream.h,
 	  libslparse/funcdef.h, libslparse/ivardef.h,
 	  libslparse/parsenode.cpp, libslparse/parsenode.h,
-	  render/macosx/std/std_valarray.h, teqser/teqser.cpp,
-	  libaqsistypes/posix/semaphore.cpp: Applied artistic style to
-	  bring coding latyout back up to scratch.
+	  teqser/teqser.cpp, libaqsistypes/posix/semaphore.cpp: Applied
+	  artistic style to bring coding latyout back up to scratch.
 
 2002-10-30 15:18  pgregory
 
@@ -10501,9 +10484,7 @@
 	  plugins/common/pixelsave.c, plugins/common/pixelsave.h,
 	  plugins/ppm2tif/ppm2tif.c, libcodegenvm/vmoutput.cpp,
 	  librib2/tests/ribprinter.cpp, librib2/tests/ribscanner.cpp,
-	  plugins/tga2tif/tga2tif.c, render/macosx/std/std_valarray.h,
-	  render/macosx/std/valarray_array.h,
-	  render/macosx/std/valarray_meta.h, teqser/teqser.cpp,
+	  plugins/tga2tif/tga2tif.c, teqser/teqser.cpp,
 	  libcodegenvm/vmoutput.h: Apply "Aqrtisitic Style" to ensure
 	  consistent coding style throughout codebase.	Fix Windows
 	  warnings.  Fix most (if not all) remaining Posix (gcc -Wall)
@@ -10626,14 +10607,6 @@
 
 	* render/motion.h: Fix bug with negative time values.
 
-2002-02-17 21:41  pgregory
-
-	* render/macosx/std/Makefile.am: Add relevant macos makefiles
-
-2002-02-17 21:38  pgregory
-
-	* render/macosx/Makefile.am: Add relevant macos makefiles
-
 2002-02-16 00:09  pgregory
 
 	* INSTALL, README: Add Windows install message, remove Posix status
@@ -10721,17 +10694,9 @@
 
 	* ddmsock-macosx.ini: Add Mac OS X support
 
-2002-02-11 00:29  dsward2
+2002-02-11 00:30  dsward2
 
-	* render/macosx/std/std_valarray.h,
-	  render/macosx/std/valarray_array.h,
-	  render/macosx/std/valarray_array.tcc,
-	  render/macosx/std/valarray_meta.h, aqsl/macaqsl: Add Mac OS X
-	  support
-
-2002-02-11 00:25  dsward2
-
-	* render/macosx/valarray: Add Mac OS X support
+	* aqsl/macaqsl: Add Mac OS X support
 
 2002-02-10 20:04  pgregory
 
