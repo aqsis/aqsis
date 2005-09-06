@@ -2653,7 +2653,7 @@ RtVoid	RiDetail( RtBound bound )
 
     Bound.Transform( QGetRenderContext() ->matSpaceToSpace( "object", "raster", CqMatrix(), QGetRenderContext() ->matCurrent( QGetRenderContext() ->Time() ), QGetRenderContext()->Time() ) );
 
-    TqFloat ruler = fabs( MAX( Bound.vecMax().x() - Bound.vecMin().x(), Bound.vecMax().y() - Bound.vecMin().y() ) );
+    TqFloat ruler = fabs( ( Bound.vecMax().x() - Bound.vecMin().x() ) * ( Bound.vecMax().y() - Bound.vecMin().y() ) );
 
     ruler *= QGetRenderContext() ->optCurrent().GetFloatOption( "System", "RelativeDetail" ) [ 0 ];
 
