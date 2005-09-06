@@ -12,8 +12,8 @@
 	<Configurations>
 		<Configuration
 			Name="Release_Static_MT|Win32"
-			OutputDirectory=".\..\lib\Static_MT"
-			IntermediateDirectory=".\..\Object\Release_Static_MT\librib2"
+			OutputDirectory=".\..\libvc7\Static_MT"
+			IntermediateDirectory=".\..\Objectvc7\Release_Static_MT\librib2"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -29,10 +29,10 @@
 				EnableFunctionLevelLinking="TRUE"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Release_Static_MT\librib2/librib2.pch"
-				AssemblerListingLocation=".\..\Object\Release_Static_MT\librib2/"
-				ObjectFile=".\..\Object\Release_Static_MT\librib2/"
-				ProgramDataBaseFileName=".\..\Object\Release_Static_MT\librib2/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Release_Static_MT\librib2/librib2.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Release_Static_MT\librib2/"
+				ObjectFile=".\..\Objectvc7\Release_Static_MT\librib2/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Release_Static_MT\librib2/"
 				BrowseInformation="1"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
@@ -41,7 +41,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\lib\Static_MT\rib2.lib"
+				OutputFile="..\libvc7\Static_MT\rib2.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -66,8 +66,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug_Static_ST|Win32"
-			OutputDirectory=".\..\lib\Static_ST"
-			IntermediateDirectory=".\..\Object\Debug_Static_ST\librib2"
+			OutputDirectory=".\..\libvc7\Static_ST"
+			IntermediateDirectory=".\..\Objectvc7\Debug_Static_ST\librib2"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -81,10 +81,10 @@
 				RuntimeLibrary="5"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Debug_Static_ST\librib2/librib2.pch"
-				AssemblerListingLocation=".\..\Object\Debug_Static_ST\librib2/"
-				ObjectFile=".\..\Object\Debug_Static_ST\librib2/"
-				ProgramDataBaseFileName=".\..\Object\Debug_Static_ST\librib2/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Debug_Static_ST\librib2/librib2.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Debug_Static_ST\librib2/"
+				ObjectFile=".\..\Objectvc7\Debug_Static_ST\librib2/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Debug_Static_ST\librib2/"
 				BrowseInformation="1"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
@@ -94,7 +94,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\lib\Static_ST\rib2_d.lib"
+				OutputFile="..\libvc7\Static_ST\rib2_d.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -119,8 +119,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release_Static_ST|Win32"
-			OutputDirectory=".\..\lib\Static_ST"
-			IntermediateDirectory=".\..\Object\Release_Static_ST\librib2"
+			OutputDirectory=".\..\libvc7\Static_ST"
+			IntermediateDirectory=".\..\Objectvc7\Release_Static_ST\librib2"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -136,10 +136,10 @@
 				EnableFunctionLevelLinking="TRUE"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Release_Static_ST\librib2/librib2.pch"
-				AssemblerListingLocation=".\..\Object\Release_Static_ST\librib2/"
-				ObjectFile=".\..\Object\Release_Static_ST\librib2/"
-				ProgramDataBaseFileName=".\..\Object\Release_Static_ST\librib2/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Release_Static_ST\librib2/librib2.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Release_Static_ST\librib2/"
+				ObjectFile=".\..\Objectvc7\Release_Static_ST\librib2/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Release_Static_ST\librib2/"
 				BrowseInformation="1"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
@@ -148,7 +148,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\lib\Static_ST\rib2.lib"
+				OutputFile="..\libvc7\Static_ST\rib2.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -173,8 +173,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\..\lib"
-			IntermediateDirectory=".\..\Object\Release\librib2"
+			OutputDirectory=".\..\libvc7"
+			IntermediateDirectory=".\..\Objectvc7\Release\librib2"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -190,10 +190,10 @@
 				EnableFunctionLevelLinking="TRUE"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Release\librib2/librib2.pch"
-				AssemblerListingLocation=".\..\Object\Release\librib2/"
-				ObjectFile=".\..\Object\Release\librib2/"
-				ProgramDataBaseFileName=".\..\Object\Release\librib2/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Release\librib2/librib2.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Release\librib2/"
+				ObjectFile=".\..\Objectvc7\Release\librib2/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Release\librib2/"
 				BrowseInformation="1"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
@@ -202,7 +202,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\lib\rib2.lib"
+				OutputFile="..\libvc7\rib2.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -227,8 +227,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug_Static_MT|Win32"
-			OutputDirectory=".\..\lib\Static_MT"
-			IntermediateDirectory=".\..\Object\Debug_Static_MT\librib2"
+			OutputDirectory=".\..\libvc7\Static_MT"
+			IntermediateDirectory=".\..\Objectvc7\Debug_Static_MT\librib2"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -242,10 +242,10 @@
 				RuntimeLibrary="1"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Debug_Static_MT\librib2/librib2.pch"
-				AssemblerListingLocation=".\..\Object\Debug_Static_MT\librib2/"
-				ObjectFile=".\..\Object\Debug_Static_MT\librib2/"
-				ProgramDataBaseFileName=".\..\Object\Debug_Static_MT\librib2/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Debug_Static_MT\librib2/librib2.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Debug_Static_MT\librib2/"
+				ObjectFile=".\..\Objectvc7\Debug_Static_MT\librib2/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Debug_Static_MT\librib2/"
 				BrowseInformation="1"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
@@ -255,7 +255,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\lib\Static_MT\rib2_d.lib"
+				OutputFile="..\libvc7\Static_MT\rib2_d.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -280,8 +280,8 @@
 		</Configuration>
 		<Configuration
 			Name="Profile|Win32"
-			OutputDirectory=".\..\lib\Profile"
-			IntermediateDirectory=".\..\Object\Profile\librib2"
+			OutputDirectory=".\..\libvc7\Profile"
+			IntermediateDirectory=".\..\Objectvc7\Profile\librib2"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -297,10 +297,10 @@
 				EnableFunctionLevelLinking="TRUE"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Profile\librib2/librib2.pch"
-				AssemblerListingLocation=".\..\Object\Profile\librib2/"
-				ObjectFile=".\..\Object\Profile\librib2/"
-				ProgramDataBaseFileName=".\..\Object\Profile\librib2/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Profile\librib2/librib2.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Profile\librib2/"
+				ObjectFile=".\..\Objectvc7\Profile\librib2/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Profile\librib2/"
 				BrowseInformation="1"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
@@ -310,7 +310,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\lib\Profile\rib2.lib"
+				OutputFile="..\libvc7\Profile\rib2.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -335,8 +335,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\..\lib"
-			IntermediateDirectory=".\..\Object\Debug\librib2"
+			OutputDirectory=".\..\libvc7"
+			IntermediateDirectory=".\..\Objectvc7\Debug\librib2"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -350,10 +350,10 @@
 				RuntimeLibrary="3"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Debug\librib2/librib2.pch"
-				AssemblerListingLocation=".\..\Object\Debug\librib2/"
-				ObjectFile=".\..\Object\Debug\librib2/"
-				ProgramDataBaseFileName=".\..\Object\Debug\librib2/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Debug\librib2/librib2.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Debug\librib2/"
+				ObjectFile=".\..\Objectvc7\Debug\librib2/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Debug\librib2/"
 				BrowseInformation="1"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
@@ -363,7 +363,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\lib\rib2_d.lib"
+				OutputFile="..\libvc7\rib2_d.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -684,7 +684,7 @@
 				Name="Release"
 				Filter="">
 				<File
-					RelativePath="..\Object\Release\librib2\parser.cpp">
+					RelativePath="..\Objectvc7\Release\librib2\parser.cpp">
 					<FileConfiguration
 						Name="Release_Static_MT|Win32"
 						ExcludedFromBuild="TRUE">
@@ -759,7 +759,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\Object\Release\librib2\parser.hpp">
+					RelativePath="..\Objectvc7\Release\librib2\parser.hpp">
 					<FileConfiguration
 						Name="Release_Static_MT|Win32"
 						ExcludedFromBuild="TRUE">
@@ -798,7 +798,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\Object\Release\librib2\scanner.cpp">
+					RelativePath="..\Objectvc7\Release\librib2\scanner.cpp">
 					<FileConfiguration
 						Name="Release_Static_MT|Win32"
 						ExcludedFromBuild="TRUE">
@@ -877,7 +877,7 @@
 				Name="Debug"
 				Filter="">
 				<File
-					RelativePath="..\Object\Debug\librib2\parser.cpp">
+					RelativePath="..\Objectvc7\Debug\librib2\parser.cpp">
 					<FileConfiguration
 						Name="Release_Static_MT|Win32"
 						ExcludedFromBuild="TRUE">
@@ -952,7 +952,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\Object\Debug\librib2\parser.hpp">
+					RelativePath="..\Objectvc7\Debug\librib2\parser.hpp">
 					<FileConfiguration
 						Name="Release_Static_MT|Win32"
 						ExcludedFromBuild="TRUE">
@@ -991,7 +991,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\Object\Debug\librib2\scanner.cpp">
+					RelativePath="..\Objectvc7\Debug\librib2\scanner.cpp">
 					<FileConfiguration
 						Name="Release_Static_MT|Win32"
 						ExcludedFromBuild="TRUE">
@@ -1070,7 +1070,7 @@
 				Name="Profile"
 				Filter="">
 				<File
-					RelativePath="..\Object\Profile\librib2\parser.cpp">
+					RelativePath="..\Objectvc7\Profile\librib2\parser.cpp">
 					<FileConfiguration
 						Name="Release_Static_MT|Win32"
 						ExcludedFromBuild="TRUE">
@@ -1145,7 +1145,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\Object\Profile\librib2\parser.hpp">
+					RelativePath="..\Objectvc7\Profile\librib2\parser.hpp">
 					<FileConfiguration
 						Name="Release_Static_MT|Win32"
 						ExcludedFromBuild="TRUE">
@@ -1184,7 +1184,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\Object\Profile\librib2\scanner.cpp">
+					RelativePath="..\Objectvc7\Profile\librib2\scanner.cpp">
 					<FileConfiguration
 						Name="Release_Static_MT|Win32"
 						ExcludedFromBuild="TRUE">
@@ -1263,7 +1263,7 @@
 				Name="Release_Static_MT"
 				Filter="">
 				<File
-					RelativePath="..\Object\Release_Static_MT\librib2\parser.cpp">
+					RelativePath="..\Objectvc7\Release_Static_MT\librib2\parser.cpp">
 					<FileConfiguration
 						Name="Release_Static_MT|Win32">
 						<Tool
@@ -1338,7 +1338,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\Object\Release_Static_MT\librib2\parser.hpp">
+					RelativePath="..\Objectvc7\Release_Static_MT\librib2\parser.hpp">
 					<FileConfiguration
 						Name="Debug_Static_ST|Win32"
 						ExcludedFromBuild="TRUE">
@@ -1377,7 +1377,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\Object\Release_Static_MT\librib2\scanner.cpp">
+					RelativePath="..\Objectvc7\Release_Static_MT\librib2\scanner.cpp">
 					<FileConfiguration
 						Name="Release_Static_MT|Win32">
 						<Tool
@@ -1456,7 +1456,7 @@
 				Name="Release_Static_ST"
 				Filter="">
 				<File
-					RelativePath="..\Object\Release_Static_ST\librib2\parser.cpp">
+					RelativePath="..\Objectvc7\Release_Static_ST\librib2\parser.cpp">
 					<FileConfiguration
 						Name="Release_Static_MT|Win32"
 						ExcludedFromBuild="TRUE">
@@ -1531,7 +1531,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\Object\Release_Static_ST\librib2\parser.hpp">
+					RelativePath="..\Objectvc7\Release_Static_ST\librib2\parser.hpp">
 					<FileConfiguration
 						Name="Release_Static_MT|Win32"
 						ExcludedFromBuild="TRUE">
@@ -1570,7 +1570,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\Object\Release_Static_ST\librib2\scanner.cpp">
+					RelativePath="..\Objectvc7\Release_Static_ST\librib2\scanner.cpp">
 					<FileConfiguration
 						Name="Release_Static_MT|Win32"
 						ExcludedFromBuild="TRUE">
@@ -1649,7 +1649,7 @@
 				Name="Debug_Static_MT"
 				Filter="">
 				<File
-					RelativePath="..\Object\Debug_Static_MT\librib2\parser.cpp">
+					RelativePath="..\Objectvc7\Debug_Static_MT\librib2\parser.cpp">
 					<FileConfiguration
 						Name="Release_Static_MT|Win32"
 						ExcludedFromBuild="TRUE">
@@ -1724,7 +1724,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\Object\Debug_Static_MT\librib2\parser.hpp">
+					RelativePath="..\Objectvc7\Debug_Static_MT\librib2\parser.hpp">
 					<FileConfiguration
 						Name="Release_Static_MT|Win32"
 						ExcludedFromBuild="TRUE">
@@ -1763,7 +1763,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\Object\Debug_Static_MT\librib2\scanner.cpp">
+					RelativePath="..\Objectvc7\Debug_Static_MT\librib2\scanner.cpp">
 					<FileConfiguration
 						Name="Release_Static_MT|Win32"
 						ExcludedFromBuild="TRUE">
@@ -1842,7 +1842,7 @@
 				Name="Debug_Static_ST"
 				Filter="">
 				<File
-					RelativePath="..\Object\Debug_Static_ST\librib2\parser.cpp">
+					RelativePath="..\Objectvc7\Debug_Static_ST\librib2\parser.cpp">
 					<FileConfiguration
 						Name="Release_Static_MT|Win32"
 						ExcludedFromBuild="TRUE">
@@ -1917,7 +1917,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\Object\Debug_Static_ST\librib2\parser.hpp">
+					RelativePath="..\Objectvc7\Debug_Static_ST\librib2\parser.hpp">
 					<FileConfiguration
 						Name="Release_Static_MT|Win32"
 						ExcludedFromBuild="TRUE">
@@ -1956,7 +1956,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\Object\Debug_Static_ST\librib2\scanner.cpp">
+					RelativePath="..\Objectvc7\Debug_Static_ST\librib2\scanner.cpp">
 					<FileConfiguration
 						Name="Release_Static_MT|Win32"
 						ExcludedFromBuild="TRUE">

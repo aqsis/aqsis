@@ -153,7 +153,11 @@ public:
 
 		total -= ohs.getOverhead();
 
+#if (_MSC_VER>=13)
+		return std::max<double>(total, 0.0);
+#else
 		return std::_MAX(total, 0.0);
+#endif
 	}
 	double getAverageTime() const {return (getTotalTime() / m_samples.size());}
 	double getMinimumTime() const
@@ -165,7 +169,11 @@ public:
 			if (it == m_samples.begin() || *it < min)
 				min = *it;
 		}
+#if (_MSC_VER>=13)
+		return std::max<double>(min, 0.0);
+#else
 		return std::_MAX(min, 0.0);
+#endif
 	}
 	double getMaximumTime() const
 	{
@@ -576,7 +584,7 @@ private:
 		const std::vector<double>& samps = timer.getSamples();
 
 		unsigned int numSamples = timer.getNumberSamples();
-		int width = (int)log10(numSamples) + 1;
+		int width = (int)((double)log10((double)numSamples)) + 1;
 		for (unsigned int i = 0; i < numSamples; i++)
 			ostr << "Sample " << std::setw(width) << i + 1 << " = " << timeToString(samps[i]) << std::endl;
 		ostr << std::endl;

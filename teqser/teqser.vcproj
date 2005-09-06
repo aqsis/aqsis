@@ -12,8 +12,8 @@
 	<Configurations>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\..\bin"
-			IntermediateDirectory=".\..\Object\Release\teqser"
+			OutputDirectory=".\..\binvc7"
+			IntermediateDirectory=".\..\Objectvc7\Release\teqser"
 			ConfigurationType="1"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -22,17 +22,17 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\Object\Release\ribber,..\Object\Release\render,..\Render,..\libaqsistypes,..\libaqsistypes\win32\intel,..\libargparse,..\..\win32libs\include"
+				AdditionalIncludeDirectories="..\Objectvc7\Release\ribber,..\Objectvc7\Release\render,..\Render,..\libaqsistypes,..\libaqsistypes\win32\intel,..\libargparse,..\..\win32libs\include"
 				PreprocessorDefinitions="_CONSOLE;PLUGINS;AQSIS_DYNAMIC_LINK;_qBUILDING=BUILD_TEQSER;BUILD_TEQSER=1;NDEBUG;WIN32;NO_SYSLOG"
 				StringPooling="TRUE"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="TRUE"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Release\teqser/teqser.pch"
-				AssemblerListingLocation=".\..\Object\Release\teqser/"
-				ObjectFile=".\..\Object\Release\teqser/"
-				ProgramDataBaseFileName=".\..\Object\Release\teqser/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Release\teqser/teqser.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Release\teqser/"
+				ObjectFile=".\..\Objectvc7\Release\teqser/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Release\teqser/"
 				BrowseInformation="1"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
@@ -42,17 +42,17 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="odbc32.lib odbccp32.lib"
-				OutputFile=".\..\bin/teqser.exe"
+				OutputFile=".\..\binvc7/teqser.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories="..\lib,..\bin,..\..\win32libs\lib"
+				AdditionalLibraryDirectories="..\libvc7,..\binvc7,..\..\win32libs\lib"
 				IgnoreDefaultLibraryNames="libc.lib"
-				ProgramDatabaseFile=".\..\bin/teqser.pdb"
+				ProgramDatabaseFile=".\..\binvc7/teqser.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\..\bin/teqser.tlb"
+				TypeLibraryName=".\..\binvc7/teqser.tlb"
 				HeaderFileName=""/>
 			<Tool
 				Name="VCPostBuildEventTool"/>
@@ -77,8 +77,8 @@
 		</Configuration>
 		<Configuration
 			Name="Profile|Win32"
-			OutputDirectory=".\..\bin\Profile"
-			IntermediateDirectory=".\..\Object\Profile\teqser"
+			OutputDirectory=".\..\binvc7\Profile"
+			IntermediateDirectory=".\..\Objectvc7\Profile\teqser"
 			ConfigurationType="1"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -87,17 +87,17 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\Object\Release\ribber,..\Object\Release\render,..\Render,..\libaqsistypes,..\libaqsistypes\win32\intel,..\libargparse,..\..\win32libs\include"
+				AdditionalIncludeDirectories="..\Objectvc7\Release\ribber,..\Objectvc7\Release\render,..\Render,..\libaqsistypes,..\libaqsistypes\win32\intel,..\libargparse,..\..\win32libs\include"
 				PreprocessorDefinitions="NDEBUG;_CONSOLE;PLUGINS;AQSIS_DYNAMIC_LINK;_qBUILDING=BUILD_TEQSER;BUILD_TEQSER=1;WIN32;NO_SYSLOG"
 				StringPooling="TRUE"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="TRUE"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Profile\teqser/teqser.pch"
-				AssemblerListingLocation=".\..\Object\Profile\teqser/"
-				ObjectFile=".\..\Object\Profile\teqser/"
-				ProgramDataBaseFileName=".\..\Object\Profile\teqser/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Profile\teqser/teqser.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Profile\teqser/"
+				ObjectFile=".\..\Objectvc7\Profile\teqser/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Profile\teqser/"
 				BrowseInformation="1"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
@@ -108,17 +108,17 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="odbc32.lib odbccp32.lib"
-				OutputFile=".\..\bin\Profile/teqser.exe"
+				OutputFile=".\..\binvc7\Profile/teqser.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories="..\lib\Profile,..\bin\Profile,..\..\win32libs\lib"
+				AdditionalLibraryDirectories="..\libvc7\Profile,..\binvc7\Profile,..\..\win32libs\lib"
 				IgnoreDefaultLibraryNames="libc.lib"
 				GenerateDebugInformation="TRUE"
 				SubSystem="1"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\..\bin\Profile/teqser.tlb"
+				TypeLibraryName=".\..\binvc7\Profile/teqser.tlb"
 				HeaderFileName=""/>
 			<Tool
 				Name="VCPostBuildEventTool"/>
@@ -143,8 +143,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\..\bin"
-			IntermediateDirectory=".\..\Object\Debug\teqser"
+			OutputDirectory=".\..\binvc7"
+			IntermediateDirectory=".\..\Objectvc7\Debug\teqser"
 			ConfigurationType="1"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -152,16 +152,16 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\Object\Debug\ribber,..\Object\Debug\render,..\Render,..\libaqsistypes,..\libaqsistypes\win32\intel,..\libargparse,..\..\win32libs\include"
+				AdditionalIncludeDirectories="..\Objectvc7\Debug\ribber,..\Objectvc7\Debug\render,..\Render,..\libaqsistypes,..\libaqsistypes\win32\intel,..\libargparse,..\..\win32libs\include"
 				PreprocessorDefinitions="_DEBUG;_CONSOLE;PLUGINS;AQSIS_DYNAMIC_LINK;_qBUILDING=BUILD_TEQSER;BUILD_TEQSER=1;WIN32;NO_SYSLOG"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Debug\teqser/teqser.pch"
-				AssemblerListingLocation=".\..\Object\Debug\teqser/"
-				ObjectFile=".\..\Object\Debug\teqser/"
-				ProgramDataBaseFileName=".\..\Object\Debug\teqser/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Debug\teqser/teqser.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Debug\teqser/"
+				ObjectFile=".\..\Objectvc7\Debug\teqser/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Debug\teqser/"
 				BrowseInformation="1"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
@@ -172,18 +172,18 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="odbc32.lib odbccp32.lib"
-				OutputFile="..\bin/teqser_d.exe"
+				OutputFile="..\binvc7/teqser_d.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories="..\lib,..\bin,..\..\win32libs\lib"
+				AdditionalLibraryDirectories="..\libvc7,..\binvc7,..\..\win32libs\lib"
 				IgnoreDefaultLibraryNames="libcd.lib"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile=".\..\bin/teqser_d.pdb"
+				ProgramDatabaseFile=".\..\binvc7/teqser_d.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\..\bin/teqser.tlb"
+				TypeLibraryName=".\..\binvc7/teqser.tlb"
 				HeaderFileName=""/>
 			<Tool
 				Name="VCPostBuildEventTool"/>

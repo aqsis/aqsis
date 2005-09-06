@@ -12,8 +12,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug_Static_ST|Win32"
-			OutputDirectory=".\..\lib\Static_ST"
-			IntermediateDirectory=".\..\Object\Debug_Static_ST\libslxargs"
+			OutputDirectory=".\..\libvc7\Static_ST"
+			IntermediateDirectory=".\..\Objectvc7\Debug_Static_ST\libslxargs"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -26,10 +26,10 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="5"
 				RuntimeTypeInfo="TRUE"
-				PrecompiledHeaderFile=".\..\Object\Debug_Static_ST\libslxargs/libslxargs.pch"
-				AssemblerListingLocation=".\..\Object\Debug_Static_ST\libslxargs/"
-				ObjectFile=".\..\Object\Debug_Static_ST\libslxargs/"
-				ProgramDataBaseFileName=".\..\Object\Debug_Static_ST\libslxargs/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Debug_Static_ST\libslxargs/libslxargs.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Debug_Static_ST\libslxargs/"
+				ObjectFile=".\..\Objectvc7\Debug_Static_ST\libslxargs/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Debug_Static_ST\libslxargs/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				DebugInformationFormat="4"
@@ -38,7 +38,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\lib\Static_ST\slxargs_d.lib"
+				OutputFile="..\libvc7\Static_ST\slxargs_d.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -63,8 +63,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\..\lib"
-			IntermediateDirectory=".\..\Object\Release\libslxargs"
+			OutputDirectory=".\..\libvc7"
+			IntermediateDirectory=".\..\Objectvc7\Release\libslxargs"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -79,10 +79,10 @@
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="TRUE"
 				RuntimeTypeInfo="TRUE"
-				PrecompiledHeaderFile=".\..\Object\Release\libslxargs/libslxargs.pch"
-				AssemblerListingLocation=".\..\Object\Release\libslxargs/"
-				ObjectFile=".\..\Object\Release\libslxargs/"
-				ProgramDataBaseFileName=".\..\Object\Release\libslxargs/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Release\libslxargs/libslxargs.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Release\libslxargs/"
+				ObjectFile=".\..\Objectvc7\Release\libslxargs/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Release\libslxargs/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				CompileAs="0"/>
@@ -90,7 +90,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\lib\slxargs.lib"
+				OutputFile="..\libvc7\slxargs.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -115,8 +115,8 @@
 		</Configuration>
 		<Configuration
 			Name="Profile|Win32"
-			OutputDirectory=".\..\lib\Profile"
-			IntermediateDirectory=".\..\Object\Profile\libslxargs"
+			OutputDirectory=".\..\libvc7\Profile"
+			IntermediateDirectory=".\..\Objectvc7\Profile\libslxargs"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -131,10 +131,10 @@
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="TRUE"
 				RuntimeTypeInfo="TRUE"
-				PrecompiledHeaderFile=".\..\Object\Profile\libslxargs/libslxargs.pch"
-				AssemblerListingLocation=".\..\Object\Profile\libslxargs/"
-				ObjectFile=".\..\Object\Profile\libslxargs/"
-				ProgramDataBaseFileName=".\..\Object\Profile\libslxargs/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Profile\libslxargs/libslxargs.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Profile\libslxargs/"
+				ObjectFile=".\..\Objectvc7\Profile\libslxargs/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Profile\libslxargs/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				DebugInformationFormat="3"
@@ -143,7 +143,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\lib\Profile\slxargs.lib"
+				OutputFile="..\libvc7\Profile\slxargs.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -168,8 +168,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release_Static_ST|Win32"
-			OutputDirectory=".\..\lib\Static_ST"
-			IntermediateDirectory=".\..\Object\Release_Static_ST\libslxargs"
+			OutputDirectory=".\..\libvc7\Static_ST"
+			IntermediateDirectory=".\..\Objectvc7\Release_Static_ST\libslxargs"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -184,10 +184,10 @@
 				RuntimeLibrary="4"
 				EnableFunctionLevelLinking="TRUE"
 				RuntimeTypeInfo="TRUE"
-				PrecompiledHeaderFile=".\..\Object\Release_Static_ST\libslxargs/libslxargs.pch"
-				AssemblerListingLocation=".\..\Object\Release_Static_ST\libslxargs/"
-				ObjectFile=".\..\Object\Release_Static_ST\libslxargs/"
-				ProgramDataBaseFileName=".\..\Object\Release_Static_ST\libslxargs/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Release_Static_ST\libslxargs/libslxargs.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Release_Static_ST\libslxargs/"
+				ObjectFile=".\..\Objectvc7\Release_Static_ST\libslxargs/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Release_Static_ST\libslxargs/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				CompileAs="0"/>
@@ -195,7 +195,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\lib\Static_ST\slxargs.lib"
+				OutputFile="..\libvc7\Static_ST\slxargs.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -220,8 +220,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug_Static_MT|Win32"
-			OutputDirectory=".\..\lib\Static_MT"
-			IntermediateDirectory=".\..\Object\Debug_Static_MT\libslxargs"
+			OutputDirectory=".\..\libvc7\Static_MT"
+			IntermediateDirectory=".\..\Objectvc7\Debug_Static_MT\libslxargs"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -234,10 +234,10 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				RuntimeTypeInfo="TRUE"
-				PrecompiledHeaderFile=".\..\Object\Debug_Static_MT\libslxargs/libslxargs.pch"
-				AssemblerListingLocation=".\..\Object\Debug_Static_MT\libslxargs/"
-				ObjectFile=".\..\Object\Debug_Static_MT\libslxargs/"
-				ProgramDataBaseFileName=".\..\Object\Debug_Static_MT\libslxargs/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Debug_Static_MT\libslxargs/libslxargs.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Debug_Static_MT\libslxargs/"
+				ObjectFile=".\..\Objectvc7\Debug_Static_MT\libslxargs/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Debug_Static_MT\libslxargs/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				DebugInformationFormat="4"
@@ -246,7 +246,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\lib\Static_MT\slxargs_d.lib"
+				OutputFile="..\libvc7\Static_MT\slxargs_d.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -271,8 +271,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release_Static_MT|Win32"
-			OutputDirectory=".\..\lib\Static_MT"
-			IntermediateDirectory=".\..\Object\Release_Static_MT\libslxargs"
+			OutputDirectory=".\..\libvc7\Static_MT"
+			IntermediateDirectory=".\..\Objectvc7\Release_Static_MT\libslxargs"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -287,10 +287,10 @@
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="TRUE"
 				RuntimeTypeInfo="TRUE"
-				PrecompiledHeaderFile=".\..\Object\Release_Static_MT\libslxargs/libslxargs.pch"
-				AssemblerListingLocation=".\..\Object\Release_Static_MT\libslxargs/"
-				ObjectFile=".\..\Object\Release_Static_MT\libslxargs/"
-				ProgramDataBaseFileName=".\..\Object\Release_Static_MT\libslxargs/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Release_Static_MT\libslxargs/libslxargs.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Release_Static_MT\libslxargs/"
+				ObjectFile=".\..\Objectvc7\Release_Static_MT\libslxargs/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Release_Static_MT\libslxargs/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				CompileAs="0"/>
@@ -298,7 +298,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\lib\Static_MT\slxargs.lib"
+				OutputFile="..\libvc7\Static_MT\slxargs.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -323,8 +323,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\..\lib"
-			IntermediateDirectory=".\..\Object\Debug\libslxargs"
+			OutputDirectory=".\..\libvc7"
+			IntermediateDirectory=".\..\Objectvc7\Debug\libslxargs"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -337,10 +337,10 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				RuntimeTypeInfo="TRUE"
-				PrecompiledHeaderFile=".\..\Object\Debug\libslxargs/libslxargs.pch"
-				AssemblerListingLocation=".\..\Object\Debug\libslxargs/"
-				ObjectFile=".\..\Object\Debug\libslxargs/"
-				ProgramDataBaseFileName=".\..\Object\Debug\libslxargs/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Debug\libslxargs/libslxargs.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Debug\libslxargs/"
+				ObjectFile=".\..\Objectvc7\Debug\libslxargs/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Debug\libslxargs/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				DebugInformationFormat="4"
@@ -349,7 +349,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\lib\slxargs_d.lib"
+				OutputFile="..\libvc7\slxargs_d.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>

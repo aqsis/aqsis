@@ -13,7 +13,7 @@
 		<Configuration
 			Name="Debug|Win32"
 			OutputDirectory=".\..\dso"
-			IntermediateDirectory=".\..\Object\Debug\plugins\dsotest"
+			IntermediateDirectory=".\..\Objectvc7\Debug\plugins\dsotest"
 			ConfigurationType="2"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -26,10 +26,10 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Debug\plugins\dsotest/dsotest.pch"
-				AssemblerListingLocation=".\..\Object\Debug\plugins\dsotest/"
-				ObjectFile=".\..\Object\Debug\plugins\dsotest/"
-				ProgramDataBaseFileName=".\..\Object\Debug\plugins\dsotest/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Debug\plugins\dsotest/dsotest.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Debug\plugins\dsotest/"
+				ObjectFile=".\..\Objectvc7\Debug\plugins\dsotest/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Debug\plugins\dsotest/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				DebugInformationFormat="4"
@@ -78,7 +78,7 @@
 		<Configuration
 			Name="Release|Win32"
 			OutputDirectory=".\..\dso"
-			IntermediateDirectory=".\..\Object\Release\plugins\dsotest"
+			IntermediateDirectory=".\..\Objectvc7\Release\plugins\dsotest"
 			ConfigurationType="2"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -93,10 +93,10 @@
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Release\plugins\dsotest/dsotest.pch"
-				AssemblerListingLocation=".\..\Object\Release\plugins\dsotest/"
-				ObjectFile=".\..\Object\Release\plugins\dsotest/"
-				ProgramDataBaseFileName=".\..\Object\Release\plugins\dsotest/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Release\plugins\dsotest/dsotest.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Release\plugins\dsotest/"
+				ObjectFile=".\..\Objectvc7\Release\plugins\dsotest/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Release\plugins\dsotest/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				CompileAs="0"/>
@@ -144,7 +144,7 @@
 		<Configuration
 			Name="Profile|Win32"
 			OutputDirectory=".\..\dso\Profile"
-			IntermediateDirectory=".\..\Object\Profile\plugins\dsotest"
+			IntermediateDirectory=".\..\Objectvc7\Profile\plugins\dsotest"
 			ConfigurationType="2"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -159,10 +159,10 @@
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Profile\plugins\dsotest/dsotest.pch"
-				AssemblerListingLocation=".\..\Object\Profile\plugins\dsotest/"
-				ObjectFile=".\..\Object\Profile\plugins\dsotest/"
-				ProgramDataBaseFileName=".\..\Object\Profile\plugins\dsotest/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Profile\plugins\dsotest/dsotest.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Profile\plugins\dsotest/"
+				ObjectFile=".\..\Objectvc7\Profile\plugins\dsotest/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Profile\plugins\dsotest/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				CompileAs="0"/>
@@ -250,7 +250,7 @@
 						Name="VCCustomBuildTool"
 						Description="Compiling Shader $(InputPath)"
 						CommandLine="cd &quot;$(InputDir)&quot;
-..\bin\aqsl_d.exe &quot;$(InputName)&quot;.sl
+..\binvc7\aqsl_d.exe &quot;$(InputName)&quot;.sl
 "
 						Outputs="$(InputDir)$(InputName).slx"/>
 				</FileConfiguration>
@@ -260,7 +260,7 @@
 						Name="VCCustomBuildTool"
 						Description="Compiling Shader $(InputPath)"
 						CommandLine="cd &quot;$(InputDir)&quot;
-..\bin\aqsl.exe &quot;$(InputName)&quot;.sl
+..\binvc7\aqsl.exe &quot;$(InputName)&quot;.sl
 "
 						Outputs="$(InputDir)$(InputName).slx"/>
 				</FileConfiguration>
@@ -270,7 +270,7 @@
 						Name="VCCustomBuildTool"
 						Description="Compiling Shader $(InputPath)"
 						CommandLine="cd &quot;$(InputDir)&quot;
-..\bin\Profile\aqsl.exe &quot;$(InputName)&quot;.sl
+..\binvc7\Profile\aqsl.exe &quot;$(InputName)&quot;.sl
 "
 						Outputs="$(InputDir)$(InputName).slx"/>
 				</FileConfiguration>

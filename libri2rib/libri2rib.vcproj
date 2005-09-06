@@ -12,8 +12,8 @@
 	<Configurations>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\..\lib"
-			IntermediateDirectory=".\..\Object\Release\libri2rib"
+			OutputDirectory=".\..\libvc7"
+			IntermediateDirectory=".\..\Objectvc7\Release\libri2rib"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -29,10 +29,10 @@
 				EnableFunctionLevelLinking="TRUE"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Release\libri2rib/libri2rib.pch"
-				AssemblerListingLocation=".\..\Object\Release\libri2rib/"
-				ObjectFile=".\..\Object\Release\libri2rib/"
-				ProgramDataBaseFileName=".\..\Object\Release\libri2rib/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Release\libri2rib/libri2rib.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Release\libri2rib/"
+				ObjectFile=".\..\Objectvc7\Release\libri2rib/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Release\libri2rib/"
 				BrowseInformation="1"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
@@ -41,7 +41,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\lib\ri2rib.lib"
+				OutputFile="..\libvc7\ri2rib.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -66,8 +66,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\..\lib"
-			IntermediateDirectory=".\..\Object\Debug\libri2rib"
+			OutputDirectory=".\..\libvc7"
+			IntermediateDirectory=".\..\Objectvc7\Debug\libri2rib"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -81,10 +81,10 @@
 				RuntimeLibrary="3"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Debug\libri2rib/libri2rib.pch"
-				AssemblerListingLocation=".\..\Object\Debug\libri2rib/"
-				ObjectFile=".\..\Object\Debug\libri2rib/"
-				ProgramDataBaseFileName=".\..\Object\Debug\libri2rib/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Debug\libri2rib/libri2rib.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Debug\libri2rib/"
+				ObjectFile=".\..\Objectvc7\Debug\libri2rib/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Debug\libri2rib/"
 				BrowseInformation="1"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
@@ -94,7 +94,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\lib\ri2rib_d.lib"
+				OutputFile="..\libvc7\ri2rib_d.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -119,8 +119,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug_Static_ST|Win32"
-			OutputDirectory=".\..\lib\Static_ST"
-			IntermediateDirectory=".\..\Object\Debug_Static_ST\libri2rib"
+			OutputDirectory=".\..\libvc7\Static_ST"
+			IntermediateDirectory=".\..\Objectvc7\Debug_Static_ST\libri2rib"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -134,10 +134,10 @@
 				RuntimeLibrary="5"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Debug_Static_ST\libri2rib/libri2rib.pch"
-				AssemblerListingLocation=".\..\Object\Debug_Static_ST\libri2rib/"
-				ObjectFile=".\..\Object\Debug_Static_ST\libri2rib/"
-				ProgramDataBaseFileName=".\..\Object\Debug_Static_ST\libri2rib/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Debug_Static_ST\libri2rib/libri2rib.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Debug_Static_ST\libri2rib/"
+				ObjectFile=".\..\Objectvc7\Debug_Static_ST\libri2rib/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Debug_Static_ST\libri2rib/"
 				BrowseInformation="1"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
@@ -147,7 +147,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\lib\Static_ST\ri2rib_d.lib"
+				OutputFile="..\libvc7\Static_ST\ri2rib_d.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -172,8 +172,8 @@
 		</Configuration>
 		<Configuration
 			Name="Profile|Win32"
-			OutputDirectory=".\..\lib\Profile"
-			IntermediateDirectory=".\..\Object\Profile\libri2rib"
+			OutputDirectory=".\..\libvc7\Profile"
+			IntermediateDirectory=".\..\Objectvc7\Profile\libri2rib"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -189,10 +189,10 @@
 				EnableFunctionLevelLinking="TRUE"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Profile\libri2rib/libri2rib.pch"
-				AssemblerListingLocation=".\..\Object\Profile\libri2rib/"
-				ObjectFile=".\..\Object\Profile\libri2rib/"
-				ProgramDataBaseFileName=".\..\Object\Profile\libri2rib/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Profile\libri2rib/libri2rib.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Profile\libri2rib/"
+				ObjectFile=".\..\Objectvc7\Profile\libri2rib/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Profile\libri2rib/"
 				BrowseInformation="1"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
@@ -202,7 +202,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\lib\Profile\ri2rib.lib"
+				OutputFile="..\libvc7\Profile\ri2rib.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -227,8 +227,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release_Static_ST|Win32"
-			OutputDirectory=".\..\lib\Static_ST"
-			IntermediateDirectory=".\..\Object\Release_Static_ST\libri2rib"
+			OutputDirectory=".\..\libvc7\Static_ST"
+			IntermediateDirectory=".\..\Objectvc7\Release_Static_ST\libri2rib"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -244,10 +244,10 @@
 				EnableFunctionLevelLinking="TRUE"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Release_Static_ST\libri2rib/libri2rib.pch"
-				AssemblerListingLocation=".\..\Object\Release_Static_ST\libri2rib/"
-				ObjectFile=".\..\Object\Release_Static_ST\libri2rib/"
-				ProgramDataBaseFileName=".\..\Object\Release_Static_ST\libri2rib/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Release_Static_ST\libri2rib/libri2rib.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Release_Static_ST\libri2rib/"
+				ObjectFile=".\..\Objectvc7\Release_Static_ST\libri2rib/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Release_Static_ST\libri2rib/"
 				BrowseInformation="1"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
@@ -256,7 +256,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\lib\Static_ST\ri2rib.lib"
+				OutputFile="..\libvc7\Static_ST\ri2rib.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -281,8 +281,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug_Static_MT|Win32"
-			OutputDirectory=".\..\lib\Static_MT"
-			IntermediateDirectory=".\..\Object\Debug_Static_MT\libri2rib"
+			OutputDirectory=".\..\libvc7\Static_MT"
+			IntermediateDirectory=".\..\Objectvc7\Debug_Static_MT\libri2rib"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -296,10 +296,10 @@
 				RuntimeLibrary="1"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Debug_Static_MT\libri2rib/libri2rib.pch"
-				AssemblerListingLocation=".\..\Object\Debug_Static_MT\libri2rib/"
-				ObjectFile=".\..\Object\Debug_Static_MT\libri2rib/"
-				ProgramDataBaseFileName=".\..\Object\Debug_Static_MT\libri2rib/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Debug_Static_MT\libri2rib/libri2rib.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Debug_Static_MT\libri2rib/"
+				ObjectFile=".\..\Objectvc7\Debug_Static_MT\libri2rib/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Debug_Static_MT\libri2rib/"
 				BrowseInformation="1"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
@@ -309,7 +309,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\lib\Static_MT\ri2rib_d.lib"
+				OutputFile="..\libvc7\Static_MT\ri2rib_d.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -334,8 +334,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release_Static_MT|Win32"
-			OutputDirectory=".\..\lib\Static_MT"
-			IntermediateDirectory=".\..\Object\Release_Static_MT\libri2rib"
+			OutputDirectory=".\..\libvc7\Static_MT"
+			IntermediateDirectory=".\..\Objectvc7\Release_Static_MT\libri2rib"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -351,10 +351,10 @@
 				EnableFunctionLevelLinking="TRUE"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Release_Static_MT\libri2rib/libri2rib.pch"
-				AssemblerListingLocation=".\..\Object\Release_Static_MT\libri2rib/"
-				ObjectFile=".\..\Object\Release_Static_MT\libri2rib/"
-				ProgramDataBaseFileName=".\..\Object\Release_Static_MT\libri2rib/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Release_Static_MT\libri2rib/libri2rib.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Release_Static_MT\libri2rib/"
+				ObjectFile=".\..\Objectvc7\Release_Static_MT\libri2rib/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Release_Static_MT\libri2rib/"
 				BrowseInformation="1"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
@@ -363,7 +363,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\lib\Static_MT\ri2rib.lib"
+				OutputFile="..\libvc7\Static_MT\ri2rib.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>

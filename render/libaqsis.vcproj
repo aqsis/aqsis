@@ -12,8 +12,8 @@
 	<Configurations>
 		<Configuration
 			Name="Profile|Win32"
-			OutputDirectory=".\..\bin\Profile"
-			IntermediateDirectory=".\..\Object\Profile\libaqsis"
+			OutputDirectory=".\..\binvc7\Profile"
+			IntermediateDirectory=".\..\Objectvc7\Profile\libaqsis"
 			ConfigurationType="2"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -30,10 +30,10 @@
 				EnableFunctionLevelLinking="TRUE"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Profile\libaqsis/libaqsis.pch"
-				AssemblerListingLocation=".\..\Object\Profile\libaqsis/"
-				ObjectFile=".\..\Object\Profile\libaqsis/"
-				ProgramDataBaseFileName=".\..\Object\Profile\libaqsis/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Profile\libaqsis/libaqsis.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Profile\libaqsis/"
+				ObjectFile=".\..\Objectvc7\Profile\libaqsis/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Profile\libaqsis/"
 				BrowseInformation="1"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
@@ -44,13 +44,13 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="libz.lib libtiff.lib ws2_32.lib"
-				OutputFile=".\..\bin\Profile/libaqsis.dll"
+				OutputFile=".\..\binvc7\Profile/libaqsis.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories="..\lib\Profile,..\bin\Profile,..\..\win32libs\lib"
+				AdditionalLibraryDirectories="..\libvc7\Profile,..\binvc7\Profile,..\..\win32libs\lib"
 				ModuleDefinitionFile=".\libaqsis.def"
 				GenerateDebugInformation="TRUE"
-				ImportLibrary=".\..\bin\Profile/libaqsis.lib"
+				ImportLibrary=".\..\binvc7\Profile/libaqsis.lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -58,7 +58,7 @@
 				MkTypLibCompatible="TRUE"
 				SuppressStartupBanner="TRUE"
 				TargetEnvironment="1"
-				TypeLibraryName=".\..\bin\Profile/libaqsis.tlb"
+				TypeLibraryName=".\..\binvc7\Profile/libaqsis.tlb"
 				HeaderFileName=""/>
 			<Tool
 				Name="VCPostBuildEventTool"/>
@@ -83,8 +83,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\..\bin"
-			IntermediateDirectory=".\..\Object\Debug\libaqsis"
+			OutputDirectory=".\..\binvc7"
+			IntermediateDirectory=".\..\Objectvc7\Debug\libaqsis"
 			ConfigurationType="2"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -99,10 +99,10 @@
 				RuntimeLibrary="3"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Debug\libaqsis/libaqsis.pch"
-				AssemblerListingLocation=".\..\Object\Debug\libaqsis/"
-				ObjectFile=".\..\Object\Debug\libaqsis/"
-				ProgramDataBaseFileName=".\..\Object\Debug\libaqsis/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Debug\libaqsis/libaqsis.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Debug\libaqsis/"
+				ObjectFile=".\..\Objectvc7\Debug\libaqsis/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Debug\libaqsis/"
 				BrowseInformation="1"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
@@ -113,16 +113,16 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="libz.lib libtiff.lib ws2_32.lib"
-				OutputFile="..\bin/aqsis_d.dll"
+				OutputFile="..\binvc7/aqsis_d.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories="..\lib,..\bin,..\..\win32libs\lib"
+				AdditionalLibraryDirectories="..\libvc7,..\binvc7,..\..\win32libs\lib"
 				ModuleDefinitionFile=".\libaqsis.def"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="..\bin/libaqsis_d.pdb"
+				ProgramDatabaseFile="..\binvc7/libaqsis_d.pdb"
 				GenerateMapFile="TRUE"
-				MapFileName=".\..\Object\Debug\libaqsis/aqsis_d.map"
-				ImportLibrary=".\..\bin/aqsis_d.lib"
+				MapFileName=".\..\Objectvc7\Debug\libaqsis/aqsis_d.map"
+				ImportLibrary=".\..\binvc7/aqsis_d.lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -130,7 +130,7 @@
 				MkTypLibCompatible="TRUE"
 				SuppressStartupBanner="TRUE"
 				TargetEnvironment="1"
-				TypeLibraryName=".\..\bin/libaqsis.tlb"
+				TypeLibraryName=".\..\binvc7/libaqsis.tlb"
 				HeaderFileName=""/>
 			<Tool
 				Name="VCPostBuildEventTool"/>
@@ -155,8 +155,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\..\bin"
-			IntermediateDirectory=".\..\Object\Release\libaqsis"
+			OutputDirectory=".\..\binvc7"
+			IntermediateDirectory=".\..\Objectvc7\Release\libaqsis"
 			ConfigurationType="2"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -173,10 +173,10 @@
 				EnableFunctionLevelLinking="TRUE"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Release\libaqsis/libaqsis.pch"
-				AssemblerListingLocation=".\..\Object\Release\libaqsis/"
-				ObjectFile=".\..\Object\Release\libaqsis/"
-				ProgramDataBaseFileName=".\..\Object\Release\libaqsis/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Release\libaqsis/libaqsis.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Release\libaqsis/"
+				ObjectFile=".\..\Objectvc7\Release\libaqsis/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Release\libaqsis/"
 				BrowseInformation="1"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
@@ -186,13 +186,13 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="libz.lib libtiff.lib ws2_32.lib"
-				OutputFile="..\bin/aqsis.dll"
+				OutputFile="..\binvc7/aqsis.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories="..\lib,..\bin,..\..\win32libs\lib"
+				AdditionalLibraryDirectories="..\libvc7,..\binvc7,..\..\win32libs\lib"
 				ModuleDefinitionFile=".\libaqsis.def"
-				ProgramDatabaseFile=".\..\bin/aqsis.pdb"
-				ImportLibrary=".\..\bin/aqsis.lib"
+				ProgramDatabaseFile=".\..\binvc7/aqsis.pdb"
+				ImportLibrary=".\..\binvc7/aqsis.lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -200,7 +200,7 @@
 				MkTypLibCompatible="TRUE"
 				SuppressStartupBanner="TRUE"
 				TargetEnvironment="1"
-				TypeLibraryName=".\..\bin/libaqsis.tlb"
+				TypeLibraryName=".\..\binvc7/libaqsis.tlb"
 				HeaderFileName=""/>
 			<Tool
 				Name="VCPostBuildEventTool"/>

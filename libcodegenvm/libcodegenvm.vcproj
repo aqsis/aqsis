@@ -12,8 +12,8 @@
 	<Configurations>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\..\lib"
-			IntermediateDirectory=".\..\Object\Release\libcodegenvm"
+			OutputDirectory=".\..\libvc7"
+			IntermediateDirectory=".\..\Objectvc7\Release\libcodegenvm"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE">
@@ -28,10 +28,10 @@
 				EnableFunctionLevelLinking="TRUE"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Release\libcodegenvm/libcodegenvm.pch"
-				AssemblerListingLocation=".\..\Object\Release\libcodegenvm/"
-				ObjectFile=".\..\Object\Release\libcodegenvm/"
-				ProgramDataBaseFileName=".\..\Object\Release\libcodegenvm/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Release\libcodegenvm/libcodegenvm.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Release\libcodegenvm/"
+				ObjectFile=".\..\Objectvc7\Release\libcodegenvm/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Release\libcodegenvm/"
 				BrowseInformation="1"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
@@ -40,7 +40,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\lib\codegenvm.lib"
+				OutputFile="..\libvc7\codegenvm.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -65,8 +65,8 @@
 		</Configuration>
 		<Configuration
 			Name="Profile|Win32"
-			OutputDirectory=".\..\lib\Profile"
-			IntermediateDirectory=".\..\Object\Profile\libcodegenvm"
+			OutputDirectory=".\..\libvc7\Profile"
+			IntermediateDirectory=".\..\Objectvc7\Profile\libcodegenvm"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE">
@@ -81,10 +81,10 @@
 				EnableFunctionLevelLinking="TRUE"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Profile\libcodegenvm/libcodegenvm.pch"
-				AssemblerListingLocation=".\..\Object\Profile\libcodegenvm/"
-				ObjectFile=".\..\Object\Profile\libcodegenvm/"
-				ProgramDataBaseFileName=".\..\Object\Profile\libcodegenvm/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Profile\libcodegenvm/libcodegenvm.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Profile\libcodegenvm/"
+				ObjectFile=".\..\Objectvc7\Profile\libcodegenvm/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Profile\libcodegenvm/"
 				BrowseInformation="1"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
@@ -94,7 +94,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\lib\Profile\codegenvm.lib"
+				OutputFile="..\libvc7\Profile\codegenvm.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -119,8 +119,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\..\lib"
-			IntermediateDirectory=".\..\Object\Debug\libcodegenvm"
+			OutputDirectory=".\..\libvc7"
+			IntermediateDirectory=".\..\Objectvc7\Debug\libcodegenvm"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE">
@@ -133,10 +133,10 @@
 				RuntimeLibrary="3"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Debug\libcodegenvm/libcodegenvm.pch"
-				AssemblerListingLocation=".\..\Object\Debug\libcodegenvm/"
-				ObjectFile=".\..\Object\Debug\libcodegenvm/"
-				ProgramDataBaseFileName=".\..\Object\Debug\libcodegenvm/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Debug\libcodegenvm/libcodegenvm.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Debug\libcodegenvm/"
+				ObjectFile=".\..\Objectvc7\Debug\libcodegenvm/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Debug\libcodegenvm/"
 				BrowseInformation="1"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
@@ -146,7 +146,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\lib\codegenvm_d.lib"
+				OutputFile="..\libvc7\codegenvm_d.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>

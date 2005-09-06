@@ -13,8 +13,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug_Static_ST|Win32"
-			OutputDirectory=".\..\lib\Static_ST"
-			IntermediateDirectory=".\..\Object\Debug_Static_ST"
+			OutputDirectory=".\..\libvc7\Static_ST"
+			IntermediateDirectory=".\..\Objectvc7\Debug_Static_ST"
 			ConfigurationType="10"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE">
@@ -22,7 +22,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\..\lib\Static_ST/AdditionalDeveloperLibs.tlb"
+				TypeLibraryName=".\..\libvc7\Static_ST/AdditionalDeveloperLibs.tlb"
 				HeaderFileName=""/>
 			<Tool
 				Name="VCPostBuildEventTool"/>
@@ -31,8 +31,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release_Static_MT|Win32"
-			OutputDirectory=".\..\lib\Static_MT"
-			IntermediateDirectory=".\..\Object\Release_Static_MT"
+			OutputDirectory=".\..\libvc7\Static_MT"
+			IntermediateDirectory=".\..\Objectvc7\Release_Static_MT"
 			ConfigurationType="10"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE">
@@ -40,7 +40,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\..\lib\Static_MT/AdditionalDeveloperLibs.tlb"
+				TypeLibraryName=".\..\libvc7\Static_MT/AdditionalDeveloperLibs.tlb"
 				HeaderFileName=""/>
 			<Tool
 				Name="VCPostBuildEventTool"/>
@@ -49,8 +49,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug_Static_MT|Win32"
-			OutputDirectory=".\..\lib\Static_MT"
-			IntermediateDirectory=".\..\Object\Debug_Static_MT"
+			OutputDirectory=".\..\libvc7\Static_MT"
+			IntermediateDirectory=".\..\Objectvc7\Debug_Static_MT"
 			ConfigurationType="10"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE">
@@ -58,7 +58,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\..\lib\Static_MT/AdditionalDeveloperLibs.tlb"
+				TypeLibraryName=".\..\libvc7\Static_MT/AdditionalDeveloperLibs.tlb"
 				HeaderFileName=""/>
 			<Tool
 				Name="VCPostBuildEventTool"/>
@@ -67,8 +67,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release_Static_ST|Win32"
-			OutputDirectory=".\..\lib\Static_ST"
-			IntermediateDirectory=".\..\Object\Release_Static_ST"
+			OutputDirectory=".\..\libvc7\Static_ST"
+			IntermediateDirectory=".\..\Objectvc7\Release_Static_ST"
 			ConfigurationType="10"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE">
@@ -76,7 +76,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\..\lib\Static_ST/AdditionalDeveloperLibs.tlb"
+				TypeLibraryName=".\..\libvc7\Static_ST/AdditionalDeveloperLibs.tlb"
 				HeaderFileName=""/>
 			<Tool
 				Name="VCPostBuildEventTool"/>

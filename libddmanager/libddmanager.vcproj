@@ -12,8 +12,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\..\lib"
-			IntermediateDirectory=".\..\Object\Debug\libddmanager"
+			OutputDirectory=".\..\libvc7"
+			IntermediateDirectory=".\..\Objectvc7\Debug\libddmanager"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -27,10 +27,10 @@
 				RuntimeLibrary="3"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Debug\libddmanager/libddmanager.pch"
-				AssemblerListingLocation=".\..\Object\Debug\libddmanager/"
-				ObjectFile=".\..\Object\Debug\libddmanager/"
-				ProgramDataBaseFileName=".\..\Object\Debug\libddmanager/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Debug\libddmanager/libddmanager.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Debug\libddmanager/"
+				ObjectFile=".\..\Objectvc7\Debug\libddmanager/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Debug\libddmanager/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				DebugInformationFormat="4"
@@ -39,7 +39,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\lib\libddmanager_d.lib"
+				OutputFile="..\libvc7\libddmanager_d.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -64,8 +64,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\..\lib"
-			IntermediateDirectory=".\..\Object\Release\libddmanager"
+			OutputDirectory=".\..\libvc7"
+			IntermediateDirectory=".\..\Objectvc7\Release\libddmanager"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -81,10 +81,10 @@
 				EnableFunctionLevelLinking="TRUE"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Release\libddmanager/libddmanager.pch"
-				AssemblerListingLocation=".\..\Object\Release\libddmanager/"
-				ObjectFile=".\..\Object\Release\libddmanager/"
-				ProgramDataBaseFileName=".\..\Object\Release\libddmanager/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Release\libddmanager/libddmanager.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Release\libddmanager/"
+				ObjectFile=".\..\Objectvc7\Release\libddmanager/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Release\libddmanager/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				CompileAs="0"/>
@@ -92,7 +92,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile=".\..\lib\libddmanager.lib"
+				OutputFile=".\..\libvc7\libddmanager.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -117,8 +117,8 @@
 		</Configuration>
 		<Configuration
 			Name="Profile|Win32"
-			OutputDirectory=".\..\lib\Profile"
-			IntermediateDirectory=".\..\Object\Profile\libddmanager"
+			OutputDirectory=".\..\libvc7\Profile"
+			IntermediateDirectory=".\..\Objectvc7\Profile\libddmanager"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -134,10 +134,10 @@
 				EnableFunctionLevelLinking="TRUE"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Profile\libddmanager/libddmanager.pch"
-				AssemblerListingLocation=".\..\Object\Profile\libddmanager/"
-				ObjectFile=".\..\Object\Profile\libddmanager/"
-				ProgramDataBaseFileName=".\..\Object\Profile\libddmanager/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Profile\libddmanager/libddmanager.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Profile\libddmanager/"
+				ObjectFile=".\..\Objectvc7\Profile\libddmanager/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Profile\libddmanager/"
 				BrowseInformation="1"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
@@ -147,7 +147,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile=".\..\lib\Profile\libddmanager.lib"
+				OutputFile=".\..\libvc7\Profile\libddmanager.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>

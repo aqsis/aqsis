@@ -12,8 +12,8 @@
 	<Configurations>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\..\lib"
-			IntermediateDirectory=".\..\Object\Release\libslpp"
+			OutputDirectory=".\..\libvc7"
+			IntermediateDirectory=".\..\Objectvc7\Release\libslpp"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -28,10 +28,10 @@
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Release\libslpp/libslpp.pch"
-				AssemblerListingLocation=".\..\Object\Release\libslpp/"
-				ObjectFile=".\..\Object\Release\libslpp/"
-				ProgramDataBaseFileName=".\..\Object\Release\libslpp/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Release\libslpp/libslpp.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Release\libslpp/"
+				ObjectFile=".\..\Objectvc7\Release\libslpp/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Release\libslpp/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				CompileAs="0"/>
@@ -39,7 +39,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\lib\slpp.lib"
+				OutputFile="..\libvc7\slpp.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -64,8 +64,8 @@
 		</Configuration>
 		<Configuration
 			Name="Profile|Win32"
-			OutputDirectory=".\..\lib\Profile"
-			IntermediateDirectory=".\..\Object\Profile\libslpp"
+			OutputDirectory=".\..\libvc7\Profile"
+			IntermediateDirectory=".\..\Objectvc7\Profile\libslpp"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -80,10 +80,10 @@
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Profile\libslpp/libslpp.pch"
-				AssemblerListingLocation=".\..\Object\Profile\libslpp/"
-				ObjectFile=".\..\Object\Profile\libslpp/"
-				ProgramDataBaseFileName=".\..\Object\Profile\libslpp/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Profile\libslpp/libslpp.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Profile\libslpp/"
+				ObjectFile=".\..\Objectvc7\Profile\libslpp/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Profile\libslpp/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				CompileAs="0"/>
@@ -91,7 +91,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\lib\Profile\slpp.lib"
+				OutputFile="..\libvc7\Profile\slpp.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -116,8 +116,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\..\lib"
-			IntermediateDirectory=".\..\Object\Debug\libslpp"
+			OutputDirectory=".\..\libvc7"
+			IntermediateDirectory=".\..\Objectvc7\Debug\libslpp"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -130,10 +130,10 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Debug\libslpp/libslpp.pch"
-				AssemblerListingLocation=".\..\Object\Debug\libslpp/"
-				ObjectFile=".\..\Object\Debug\libslpp/"
-				ProgramDataBaseFileName=".\..\Object\Debug\libslpp/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Debug\libslpp/libslpp.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Debug\libslpp/"
+				ObjectFile=".\..\Objectvc7\Debug\libslpp/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Debug\libslpp/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				DebugInformationFormat="4"
@@ -142,7 +142,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\lib\slpp_d.lib"
+				OutputFile="..\libvc7\slpp_d.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>

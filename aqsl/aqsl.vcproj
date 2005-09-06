@@ -12,8 +12,8 @@
 	<Configurations>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\..\bin"
-			IntermediateDirectory=".\..\Object\Release\aqsl"
+			OutputDirectory=".\..\binvc7"
+			IntermediateDirectory=".\..\Objectvc7\Release\aqsl"
 			ConfigurationType="1"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -29,10 +29,10 @@
 				EnableFunctionLevelLinking="TRUE"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Release\aqsl/aqsl.pch"
-				AssemblerListingLocation=".\..\Object\Release\aqsl/"
-				ObjectFile=".\..\Object\Release\aqsl/"
-				ProgramDataBaseFileName=".\..\Object\Release\aqsl/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Release\aqsl/aqsl.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Release\aqsl/"
+				ObjectFile=".\..\Objectvc7\Release\aqsl/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Release\aqsl/"
 				BrowseInformation="1"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
@@ -42,16 +42,16 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="odbc32.lib odbccp32.lib"
-				OutputFile=".\..\bin/aqsl.exe"
+				OutputFile=".\..\binvc7/aqsl.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories="..\lib,..\bin,..\..\win32libs\lib"
-				ProgramDatabaseFile=".\..\bin/aqsl.pdb"
+				AdditionalLibraryDirectories="..\libvc7,..\binvc7,..\..\win32libs\lib"
+				ProgramDatabaseFile=".\..\binvc7/aqsl.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\..\bin/aqsl.tlb"
+				TypeLibraryName=".\..\binvc7/aqsl.tlb"
 				HeaderFileName=""/>
 			<Tool
 				Name="VCPostBuildEventTool"/>
@@ -76,8 +76,8 @@
 		</Configuration>
 		<Configuration
 			Name="Profile|Win32"
-			OutputDirectory=".\..\bin\Profile"
-			IntermediateDirectory=".\..\Object\Profile\aqsl"
+			OutputDirectory=".\..\binvc7\Profile"
+			IntermediateDirectory=".\..\Objectvc7\Profile\aqsl"
 			ConfigurationType="1"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -93,10 +93,10 @@
 				EnableFunctionLevelLinking="TRUE"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Profile\aqsl/aqsl.pch"
-				AssemblerListingLocation=".\..\Object\Profile\aqsl/"
-				ObjectFile=".\..\Object\Profile\aqsl/"
-				ProgramDataBaseFileName=".\..\Object\Profile\aqsl/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Profile\aqsl/aqsl.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Profile\aqsl/"
+				ObjectFile=".\..\Objectvc7\Profile\aqsl/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Profile\aqsl/"
 				BrowseInformation="1"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
@@ -106,16 +106,16 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="odbc32.lib odbccp32.lib"
-				OutputFile=".\..\bin\Profile/aqsl.exe"
+				OutputFile=".\..\binvc7\Profile/aqsl.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories="..\lib\Profile,..\bin\Profile,..\..\win32libs\lib"
-				ProgramDatabaseFile=".\..\bin\Profile/aqsl.pdb"
+				AdditionalLibraryDirectories="..\libvc7\Profile,..\binvc7\Profile,..\..\win32libs\lib"
+				ProgramDatabaseFile=".\..\binvc7\Profile/aqsl.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\..\bin\Profile/aqsl.tlb"
+				TypeLibraryName=".\..\binvc7\Profile/aqsl.tlb"
 				HeaderFileName=""/>
 			<Tool
 				Name="VCPostBuildEventTool"/>
@@ -140,8 +140,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\..\bin"
-			IntermediateDirectory=".\..\Object\Debug\aqsl"
+			OutputDirectory=".\..\binvc7"
+			IntermediateDirectory=".\..\Objectvc7\Debug\aqsl"
 			ConfigurationType="1"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -155,10 +155,10 @@
 				RuntimeLibrary="3"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Debug\aqsl/aqsl.pch"
-				AssemblerListingLocation=".\..\Object\Debug\aqsl/"
-				ObjectFile=".\..\Object\Debug\aqsl/"
-				ProgramDataBaseFileName=".\..\Object\Debug\aqsl/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Debug\aqsl/aqsl.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Debug\aqsl/"
+				ObjectFile=".\..\Objectvc7\Debug\aqsl/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Debug\aqsl/"
 				BrowseInformation="1"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
@@ -169,17 +169,17 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="odbc32.lib odbccp32.lib"
-				OutputFile="..\bin/aqsl_d.exe"
+				OutputFile="..\binvc7/aqsl_d.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories="..\lib,..\bin,..\..\win32libs\lib"
+				AdditionalLibraryDirectories="..\libvc7,..\binvc7,..\..\win32libs\lib"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile=".\..\bin/aqsl_d.pdb"
+				ProgramDatabaseFile=".\..\binvc7/aqsl_d.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\..\bin/aqsl.tlb"
+				TypeLibraryName=".\..\binvc7/aqsl.tlb"
 				HeaderFileName=""/>
 			<Tool
 				Name="VCPostBuildEventTool"/>

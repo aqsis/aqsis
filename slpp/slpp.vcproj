@@ -12,8 +12,8 @@
 	<Configurations>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\..\bin"
-			IntermediateDirectory=".\..\Object\Release\slpp"
+			OutputDirectory=".\..\binvc7"
+			IntermediateDirectory=".\..\Objectvc7\Release\slpp"
 			ConfigurationType="1"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -29,10 +29,10 @@
 				EnableFunctionLevelLinking="TRUE"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Release\slpp/slpp.pch"
-				AssemblerListingLocation=".\..\Object\Release\slpp/"
-				ObjectFile=".\..\Object\Release\slpp/"
-				ProgramDataBaseFileName=".\..\Object\Release\slpp/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Release\slpp/slpp.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Release\slpp/"
+				ObjectFile=".\..\Objectvc7\Release\slpp/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Release\slpp/"
 				BrowseInformation="1"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
@@ -42,16 +42,16 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="odbc32.lib odbccp32.lib"
-				OutputFile=".\..\bin/slpp.exe"
+				OutputFile=".\..\binvc7/slpp.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="..\..\win32libs\lib"
-				ProgramDatabaseFile=".\..\bin/slpp.pdb"
+				ProgramDatabaseFile=".\..\binvc7/slpp.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\..\bin/slpp.tlb"
+				TypeLibraryName=".\..\binvc7/slpp.tlb"
 				HeaderFileName=""/>
 			<Tool
 				Name="VCPostBuildEventTool"/>
@@ -76,8 +76,8 @@
 		</Configuration>
 		<Configuration
 			Name="Profile|Win32"
-			OutputDirectory=".\..\bin\Profile"
-			IntermediateDirectory=".\..\Object\Profile\slpp"
+			OutputDirectory=".\..\binvc7\Profile"
+			IntermediateDirectory=".\..\Objectvc7\Profile\slpp"
 			ConfigurationType="1"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -93,10 +93,10 @@
 				EnableFunctionLevelLinking="TRUE"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Profile\slpp/slpp.pch"
-				AssemblerListingLocation=".\..\Object\Profile\slpp/"
-				ObjectFile=".\..\Object\Profile\slpp/"
-				ProgramDataBaseFileName=".\..\Object\Profile\slpp/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Profile\slpp/slpp.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Profile\slpp/"
+				ObjectFile=".\..\Objectvc7\Profile\slpp/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Profile\slpp/"
 				BrowseInformation="1"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
@@ -107,7 +107,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="odbc32.lib odbccp32.lib"
-				OutputFile=".\..\bin\Profile/slpp.exe"
+				OutputFile=".\..\binvc7\Profile/slpp.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="..\..\win32libs\lib"
@@ -116,7 +116,7 @@
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\..\bin\Profile/slpp.tlb"
+				TypeLibraryName=".\..\binvc7\Profile/slpp.tlb"
 				HeaderFileName=""/>
 			<Tool
 				Name="VCPostBuildEventTool"/>
@@ -141,8 +141,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\..\bin"
-			IntermediateDirectory=".\..\Object\Debug\slpp"
+			OutputDirectory=".\..\binvc7"
+			IntermediateDirectory=".\..\Objectvc7\Debug\slpp"
 			ConfigurationType="1"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -156,10 +156,10 @@
 				RuntimeLibrary="5"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Debug\slpp/slpp.pch"
-				AssemblerListingLocation=".\..\Object\Debug\slpp/"
-				ObjectFile=".\..\Object\Debug\slpp/"
-				ProgramDataBaseFileName=".\..\Object\Debug\slpp/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Debug\slpp/slpp.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Debug\slpp/"
+				ObjectFile=".\..\Objectvc7\Debug\slpp/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Debug\slpp/"
 				BrowseInformation="1"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
@@ -170,17 +170,17 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="odbc32.lib odbccp32.lib"
-				OutputFile="..\bin/slpp_d.exe"
+				OutputFile="..\binvc7/slpp_d.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="..\..\win32libs\lib"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile=".\..\bin/slpp_d.pdb"
+				ProgramDatabaseFile=".\..\binvc7/slpp_d.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\..\bin/slpp.tlb"
+				TypeLibraryName=".\..\binvc7/slpp.tlb"
 				HeaderFileName=""/>
 			<Tool
 				Name="VCPostBuildEventTool"/>

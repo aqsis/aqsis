@@ -12,8 +12,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\..\lib"
-			IntermediateDirectory=".\..\Object\Debug\libshaderexecenv"
+			OutputDirectory=".\..\libvc7"
+			IntermediateDirectory=".\..\Objectvc7\Debug\libshaderexecenv"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -27,10 +27,10 @@
 				RuntimeLibrary="3"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Debug\libshaderexecenv/libshaderexecenv.pch"
-				AssemblerListingLocation=".\..\Object\Debug\libshaderexecenv/"
-				ObjectFile=".\..\Object\Debug\libshaderexecenv/"
-				ProgramDataBaseFileName=".\..\Object\Debug\libshaderexecenv/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Debug\libshaderexecenv/libshaderexecenv.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Debug\libshaderexecenv/"
+				ObjectFile=".\..\Objectvc7\Debug\libshaderexecenv/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Debug\libshaderexecenv/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				DebugInformationFormat="4"
@@ -39,7 +39,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\lib\shaderexecenv_d.lib"
+				OutputFile="..\libvc7\shaderexecenv_d.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -64,8 +64,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug_Static_ST|Win32"
-			OutputDirectory=".\..\lib\Static_ST"
-			IntermediateDirectory=".\..\Object\Debug_Static_ST\libshaderexecenv"
+			OutputDirectory=".\..\libvc7\Static_ST"
+			IntermediateDirectory=".\..\Objectvc7\Debug_Static_ST\libshaderexecenv"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -79,10 +79,10 @@
 				RuntimeLibrary="5"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Debug_Static_ST\libshaderexecenv/libshaderexecenv.pch"
-				AssemblerListingLocation=".\..\Object\Debug_Static_ST\libshaderexecenv/"
-				ObjectFile=".\..\Object\Debug_Static_ST\libshaderexecenv/"
-				ProgramDataBaseFileName=".\..\Object\Debug_Static_ST\libshaderexecenv/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Debug_Static_ST\libshaderexecenv/libshaderexecenv.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Debug_Static_ST\libshaderexecenv/"
+				ObjectFile=".\..\Objectvc7\Debug_Static_ST\libshaderexecenv/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Debug_Static_ST\libshaderexecenv/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				DebugInformationFormat="4"
@@ -91,7 +91,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\lib\Static_ST\shaderexecenv_d.lib"
+				OutputFile="..\libvc7\Static_ST\shaderexecenv_d.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -116,8 +116,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\..\lib"
-			IntermediateDirectory=".\..\Object\Release\libshaderexecenv"
+			OutputDirectory=".\..\libvc7"
+			IntermediateDirectory=".\..\Objectvc7\Release\libshaderexecenv"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -133,10 +133,10 @@
 				EnableFunctionLevelLinking="TRUE"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Release\libshaderexecenv/libshaderexecenv.pch"
-				AssemblerListingLocation=".\..\Object\Release\libshaderexecenv/"
-				ObjectFile=".\..\Object\Release\libshaderexecenv/"
-				ProgramDataBaseFileName=".\..\Object\Release\libshaderexecenv/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Release\libshaderexecenv/libshaderexecenv.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Release\libshaderexecenv/"
+				ObjectFile=".\..\Objectvc7\Release\libshaderexecenv/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Release\libshaderexecenv/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				CompileAs="0"/>
@@ -144,7 +144,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\lib\shaderexecenv.lib"
+				OutputFile="..\libvc7\shaderexecenv.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -169,8 +169,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release_Static_ST|Win32"
-			OutputDirectory=".\..\lib\Static_ST"
-			IntermediateDirectory=".\..\Object\Release_Static_ST\libshaderexecenv"
+			OutputDirectory=".\..\libvc7\Static_ST"
+			IntermediateDirectory=".\..\Objectvc7\Release_Static_ST\libshaderexecenv"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -186,10 +186,10 @@
 				EnableFunctionLevelLinking="TRUE"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Release_Static_ST\libshaderexecenv/libshaderexecenv.pch"
-				AssemblerListingLocation=".\..\Object\Release_Static_ST\libshaderexecenv/"
-				ObjectFile=".\..\Object\Release_Static_ST\libshaderexecenv/"
-				ProgramDataBaseFileName=".\..\Object\Release_Static_ST\libshaderexecenv/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Release_Static_ST\libshaderexecenv/libshaderexecenv.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Release_Static_ST\libshaderexecenv/"
+				ObjectFile=".\..\Objectvc7\Release_Static_ST\libshaderexecenv/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Release_Static_ST\libshaderexecenv/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				CompileAs="0"/>
@@ -197,7 +197,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\lib\Static_ST\shaderexecenv.lib"
+				OutputFile="..\libvc7\Static_ST\shaderexecenv.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -222,8 +222,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug_Static_MT|Win32"
-			OutputDirectory=".\..\lib\Static_MT"
-			IntermediateDirectory=".\..\Object\Debug_Static_MT\libshaderexecenv"
+			OutputDirectory=".\..\libvc7\Static_MT"
+			IntermediateDirectory=".\..\Objectvc7\Debug_Static_MT\libshaderexecenv"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -237,10 +237,10 @@
 				RuntimeLibrary="1"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Debug_Static_MT\libshaderexecenv/libshaderexecenv.pch"
-				AssemblerListingLocation=".\..\Object\Debug_Static_MT\libshaderexecenv/"
-				ObjectFile=".\..\Object\Debug_Static_MT\libshaderexecenv/"
-				ProgramDataBaseFileName=".\..\Object\Debug_Static_MT\libshaderexecenv/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Debug_Static_MT\libshaderexecenv/libshaderexecenv.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Debug_Static_MT\libshaderexecenv/"
+				ObjectFile=".\..\Objectvc7\Debug_Static_MT\libshaderexecenv/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Debug_Static_MT\libshaderexecenv/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				DebugInformationFormat="4"
@@ -249,7 +249,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\lib\Static_MT\shaderexecenv_d.lib"
+				OutputFile="..\libvc7\Static_MT\shaderexecenv_d.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -274,8 +274,8 @@
 		</Configuration>
 		<Configuration
 			Name="Profile|Win32"
-			OutputDirectory=".\..\lib\Profile"
-			IntermediateDirectory=".\..\Object\Profile\libshaderexecenv"
+			OutputDirectory=".\..\libvc7\Profile"
+			IntermediateDirectory=".\..\Objectvc7\Profile\libshaderexecenv"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -291,10 +291,10 @@
 				EnableFunctionLevelLinking="TRUE"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Profile\libshaderexecenv/libshaderexecenv.pch"
-				AssemblerListingLocation=".\..\Object\Profile\libshaderexecenv/"
-				ObjectFile=".\..\Object\Profile\libshaderexecenv/"
-				ProgramDataBaseFileName=".\..\Object\Profile\libshaderexecenv/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Profile\libshaderexecenv/libshaderexecenv.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Profile\libshaderexecenv/"
+				ObjectFile=".\..\Objectvc7\Profile\libshaderexecenv/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Profile\libshaderexecenv/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				DebugInformationFormat="3"
@@ -303,7 +303,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\lib\Profile\shaderexecenv.lib"
+				OutputFile="..\libvc7\Profile\shaderexecenv.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -328,8 +328,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release_Static_MT|Win32"
-			OutputDirectory=".\..\lib\Static_MT"
-			IntermediateDirectory=".\..\Object\Release_Static_MT\libshaderexecenv"
+			OutputDirectory=".\..\libvc7\Static_MT"
+			IntermediateDirectory=".\..\Objectvc7\Release_Static_MT\libshaderexecenv"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -345,10 +345,10 @@
 				EnableFunctionLevelLinking="TRUE"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Release_Static_MT\libshaderexecenv/libshaderexecenv.pch"
-				AssemblerListingLocation=".\..\Object\Release_Static_MT\libshaderexecenv/"
-				ObjectFile=".\..\Object\Release_Static_MT\libshaderexecenv/"
-				ProgramDataBaseFileName=".\..\Object\Release_Static_MT\libshaderexecenv/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Release_Static_MT\libshaderexecenv/libshaderexecenv.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Release_Static_MT\libshaderexecenv/"
+				ObjectFile=".\..\Objectvc7\Release_Static_MT\libshaderexecenv/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Release_Static_MT\libshaderexecenv/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				CompileAs="0"/>
@@ -356,7 +356,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\lib\Static_MT\shaderexecenv.lib"
+				OutputFile="..\libvc7\Static_MT\shaderexecenv.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>

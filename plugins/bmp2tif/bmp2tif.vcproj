@@ -12,8 +12,8 @@
 	<Configurations>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\..\..\bin"
-			IntermediateDirectory=".\..\..\Object\Release\plugins\bmp2tif"
+			OutputDirectory=".\..\..\binvc7"
+			IntermediateDirectory=".\..\..\Objectvc7\Release\plugins\bmp2tif"
 			ConfigurationType="2"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -28,10 +28,10 @@
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="TRUE"
 				RuntimeTypeInfo="TRUE"
-				PrecompiledHeaderFile=".\..\..\Object\Release\plugins\bmp2tif/bmp2tif.pch"
-				AssemblerListingLocation=".\..\..\Object\Release\plugins\bmp2tif/"
-				ObjectFile=".\..\..\Object\Release\plugins\bmp2tif/"
-				ProgramDataBaseFileName=".\..\..\Object\Release\plugins\bmp2tif/"
+				PrecompiledHeaderFile=".\..\..\Objectvc7\Release\plugins\bmp2tif/bmp2tif.pch"
+				AssemblerListingLocation=".\..\..\Objectvc7\Release\plugins\bmp2tif/"
+				ObjectFile=".\..\..\Objectvc7\Release\plugins\bmp2tif/"
+				ProgramDataBaseFileName=".\..\..\Objectvc7\Release\plugins\bmp2tif/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				CompileAs="0"/>
@@ -39,11 +39,11 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile=".\..\..\bin/bmp2tif.dll"
+				OutputFile=".\..\..\binvc7/bmp2tif.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				ProgramDatabaseFile=".\..\..\bin/bmp2tif.pdb"
-				ImportLibrary=".\..\..\bin/bmp2tif.lib"
+				ProgramDatabaseFile=".\..\..\binvc7/bmp2tif.pdb"
+				ImportLibrary=".\..\..\binvc7/bmp2tif.lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -51,7 +51,7 @@
 				MkTypLibCompatible="TRUE"
 				SuppressStartupBanner="TRUE"
 				TargetEnvironment="1"
-				TypeLibraryName=".\..\..\bin/bmp2tif.tlb"
+				TypeLibraryName=".\..\..\binvc7/bmp2tif.tlb"
 				HeaderFileName=""/>
 			<Tool
 				Name="VCPostBuildEventTool"/>
@@ -76,8 +76,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\..\..\bin\debug"
-			IntermediateDirectory=".\..\..\Object\Debug\plugins\bmp2tif"
+			OutputDirectory=".\..\..\binvc7\debug"
+			IntermediateDirectory=".\..\..\Objectvc7\Debug\plugins\bmp2tif"
 			ConfigurationType="2"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -90,10 +90,10 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				RuntimeTypeInfo="TRUE"
-				PrecompiledHeaderFile=".\..\..\Object\Debug\plugins\bmp2tif/bmp2tif.pch"
-				AssemblerListingLocation=".\..\..\Object\Debug\plugins\bmp2tif/"
-				ObjectFile=".\..\..\Object\Debug\plugins\bmp2tif/"
-				ProgramDataBaseFileName=".\..\..\Object\Debug\plugins\bmp2tif/"
+				PrecompiledHeaderFile=".\..\..\Objectvc7\Debug\plugins\bmp2tif/bmp2tif.pch"
+				AssemblerListingLocation=".\..\..\Objectvc7\Debug\plugins\bmp2tif/"
+				ObjectFile=".\..\..\Objectvc7\Debug\plugins\bmp2tif/"
+				ProgramDataBaseFileName=".\..\..\Objectvc7\Debug\plugins\bmp2tif/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				DebugInformationFormat="4"
@@ -102,12 +102,12 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile=".\..\..\bin\debug/bmp2tif.dll"
+				OutputFile=".\..\..\binvc7\debug/bmp2tif.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile=".\..\..\bin\debug/bmp2tif.pdb"
-				ImportLibrary=".\..\..\bin\debug/bmp2tif.lib"
+				ProgramDatabaseFile=".\..\..\binvc7\debug/bmp2tif.pdb"
+				ImportLibrary=".\..\..\binvc7\debug/bmp2tif.lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -115,7 +115,7 @@
 				MkTypLibCompatible="TRUE"
 				SuppressStartupBanner="TRUE"
 				TargetEnvironment="1"
-				TypeLibraryName=".\..\..\bin\debug/bmp2tif.tlb"
+				TypeLibraryName=".\..\..\binvc7\debug/bmp2tif.tlb"
 				HeaderFileName=""/>
 			<Tool
 				Name="VCPostBuildEventTool"/>

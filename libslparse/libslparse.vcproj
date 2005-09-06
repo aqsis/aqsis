@@ -12,8 +12,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\..\lib"
-			IntermediateDirectory=".\..\Object\Debug\libslparse"
+			OutputDirectory=".\..\libvc7"
+			IntermediateDirectory=".\..\Objectvc7\Debug\libslparse"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -27,10 +27,10 @@
 				RuntimeLibrary="3"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Debug\libslparse/libslparse.pch"
-				AssemblerListingLocation=".\..\Object\Debug\libslparse/"
-				ObjectFile=".\..\Object\Debug\libslparse/"
-				ProgramDataBaseFileName=".\..\Object\Debug\libslparse/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Debug\libslparse/libslparse.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Debug\libslparse/"
+				ObjectFile=".\..\Objectvc7\Debug\libslparse/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Debug\libslparse/"
 				BrowseInformation="1"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
@@ -40,7 +40,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\lib\slparse_d.lib"
+				OutputFile="..\libvc7\slparse_d.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -65,8 +65,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\..\lib"
-			IntermediateDirectory=".\..\Object\Release\libslparse"
+			OutputDirectory=".\..\libvc7"
+			IntermediateDirectory=".\..\Objectvc7\Release\libslparse"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -82,10 +82,10 @@
 				EnableFunctionLevelLinking="TRUE"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Release\libslparse/libslparse.pch"
-				AssemblerListingLocation=".\..\Object\Release\libslparse/"
-				ObjectFile=".\..\Object\Release\libslparse/"
-				ProgramDataBaseFileName=".\..\Object\Release\libslparse/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Release\libslparse/libslparse.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Release\libslparse/"
+				ObjectFile=".\..\Objectvc7\Release\libslparse/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Release\libslparse/"
 				BrowseInformation="1"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
@@ -94,7 +94,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\lib\slparse.lib"
+				OutputFile="..\libvc7\slparse.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -119,8 +119,8 @@
 		</Configuration>
 		<Configuration
 			Name="Profile|Win32"
-			OutputDirectory=".\..\lib\Profile"
-			IntermediateDirectory=".\..\Object\Profile\libslparse"
+			OutputDirectory=".\..\libvc7\Profile"
+			IntermediateDirectory=".\..\Objectvc7\Profile\libslparse"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -136,10 +136,10 @@
 				EnableFunctionLevelLinking="TRUE"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Profile\libslparse/libslparse.pch"
-				AssemblerListingLocation=".\..\Object\Profile\libslparse/"
-				ObjectFile=".\..\Object\Profile\libslparse/"
-				ProgramDataBaseFileName=".\..\Object\Profile\libslparse/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Profile\libslparse/libslparse.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Profile\libslparse/"
+				ObjectFile=".\..\Objectvc7\Profile\libslparse/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Profile\libslparse/"
 				BrowseInformation="1"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
@@ -149,7 +149,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\lib\Profile\slparse.lib"
+				OutputFile="..\libvc7\Profile\slparse.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -174,8 +174,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release_Static_MT|Win32"
-			OutputDirectory=".\..\lib\Static_MT"
-			IntermediateDirectory=".\..\Object\Release_Static_MT\libslparse"
+			OutputDirectory=".\..\libvc7\Static_MT"
+			IntermediateDirectory=".\..\Objectvc7\Release_Static_MT\libslparse"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -191,10 +191,10 @@
 				EnableFunctionLevelLinking="TRUE"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Release_Static_MT\libslparse/libslparse.pch"
-				AssemblerListingLocation=".\..\Object\Release_Static_MT\libslparse/"
-				ObjectFile=".\..\Object\Release_Static_MT\libslparse/"
-				ProgramDataBaseFileName=".\..\Object\Release_Static_MT\libslparse/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Release_Static_MT\libslparse/libslparse.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Release_Static_MT\libslparse/"
+				ObjectFile=".\..\Objectvc7\Release_Static_MT\libslparse/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Release_Static_MT\libslparse/"
 				BrowseInformation="1"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
@@ -203,7 +203,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\lib\Static_MT\slparse.lib"
+				OutputFile="..\libvc7\Static_MT\slparse.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -228,8 +228,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug_Static_ST|Win32"
-			OutputDirectory=".\..\lib\Static_ST"
-			IntermediateDirectory=".\..\Object\Debug_Static_ST\libslparse"
+			OutputDirectory=".\..\libvc7\Static_ST"
+			IntermediateDirectory=".\..\Objectvc7\Debug_Static_ST\libslparse"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -243,10 +243,10 @@
 				RuntimeLibrary="5"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Debug_Static_ST\libslparse/libslparse.pch"
-				AssemblerListingLocation=".\..\Object\Debug_Static_ST\libslparse/"
-				ObjectFile=".\..\Object\Debug_Static_ST\libslparse/"
-				ProgramDataBaseFileName=".\..\Object\Debug_Static_ST\libslparse/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Debug_Static_ST\libslparse/libslparse.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Debug_Static_ST\libslparse/"
+				ObjectFile=".\..\Objectvc7\Debug_Static_ST\libslparse/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Debug_Static_ST\libslparse/"
 				BrowseInformation="1"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
@@ -256,7 +256,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\lib\Static_ST\slparse_d.lib"
+				OutputFile="..\libvc7\Static_ST\slparse_d.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -281,8 +281,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release_Static_ST|Win32"
-			OutputDirectory=".\..\lib\Static_ST"
-			IntermediateDirectory=".\..\Object\Release_Static_ST\libslparse"
+			OutputDirectory=".\..\libvc7\Static_ST"
+			IntermediateDirectory=".\..\Objectvc7\Release_Static_ST\libslparse"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -298,10 +298,10 @@
 				EnableFunctionLevelLinking="TRUE"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Release_Static_ST\libslparse/libslparse.pch"
-				AssemblerListingLocation=".\..\Object\Release_Static_ST\libslparse/"
-				ObjectFile=".\..\Object\Release_Static_ST\libslparse/"
-				ProgramDataBaseFileName=".\..\Object\Release_Static_ST\libslparse/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Release_Static_ST\libslparse/libslparse.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Release_Static_ST\libslparse/"
+				ObjectFile=".\..\Objectvc7\Release_Static_ST\libslparse/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Release_Static_ST\libslparse/"
 				BrowseInformation="1"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
@@ -310,7 +310,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\lib\Static_ST\slparse.lib"
+				OutputFile="..\libvc7\Static_ST\slparse.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -335,8 +335,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug_Static_MT|Win32"
-			OutputDirectory=".\..\lib\Static_MT"
-			IntermediateDirectory=".\..\Object\Debug_Static_MT\libslparse"
+			OutputDirectory=".\..\libvc7\Static_MT"
+			IntermediateDirectory=".\..\Objectvc7\Debug_Static_MT\libslparse"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -350,10 +350,10 @@
 				RuntimeLibrary="1"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Debug_Static_MT\libslparse/libslparse.pch"
-				AssemblerListingLocation=".\..\Object\Debug_Static_MT\libslparse/"
-				ObjectFile=".\..\Object\Debug_Static_MT\libslparse/"
-				ProgramDataBaseFileName=".\..\Object\Debug_Static_MT\libslparse/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Debug_Static_MT\libslparse/libslparse.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Debug_Static_MT\libslparse/"
+				ObjectFile=".\..\Objectvc7\Debug_Static_MT\libslparse/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Debug_Static_MT\libslparse/"
 				BrowseInformation="1"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
@@ -363,7 +363,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\lib\Static_MT\slparse_d.lib"
+				OutputFile="..\libvc7\Static_MT\slparse_d.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -972,7 +972,7 @@
 				Name="Release"
 				Filter="">
 				<File
-					RelativePath="..\Object\Release\libslparse\parser.cpp">
+					RelativePath="..\Objectvc7\Release\libslparse\parser.cpp">
 					<FileConfiguration
 						Name="Debug|Win32"
 						ExcludedFromBuild="TRUE">
@@ -1047,7 +1047,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\Object\Release\libslparse\parser.hpp">
+					RelativePath="..\Objectvc7\Release\libslparse\parser.hpp">
 					<FileConfiguration
 						Name="Debug|Win32"
 						ExcludedFromBuild="TRUE">
@@ -1086,7 +1086,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\Object\Release\libslparse\scanner.cpp">
+					RelativePath="..\Objectvc7\Release\libslparse\scanner.cpp">
 					<FileConfiguration
 						Name="Debug|Win32"
 						ExcludedFromBuild="TRUE">
@@ -1165,7 +1165,7 @@
 				Name="Debug"
 				Filter="">
 				<File
-					RelativePath="..\Object\Debug\libslparse\parser.cpp">
+					RelativePath="..\Objectvc7\Debug\libslparse\parser.cpp">
 					<FileConfiguration
 						Name="Debug|Win32">
 						<Tool
@@ -1240,7 +1240,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\Object\Debug\libslparse\parser.hpp">
+					RelativePath="..\Objectvc7\Debug\libslparse\parser.hpp">
 					<FileConfiguration
 						Name="Release|Win32"
 						ExcludedFromBuild="TRUE">
@@ -1279,7 +1279,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\Object\Debug\libslparse\scanner.cpp">
+					RelativePath="..\Objectvc7\Debug\libslparse\scanner.cpp">
 					<FileConfiguration
 						Name="Debug|Win32">
 						<Tool
@@ -1358,7 +1358,7 @@
 				Name="Profile"
 				Filter="">
 				<File
-					RelativePath="..\Object\Profile\libslparse\parser.cpp">
+					RelativePath="..\Objectvc7\Profile\libslparse\parser.cpp">
 					<FileConfiguration
 						Name="Debug|Win32"
 						ExcludedFromBuild="TRUE">
@@ -1433,7 +1433,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\Object\Profile\libslparse\parser.hpp">
+					RelativePath="..\Objectvc7\Profile\libslparse\parser.hpp">
 					<FileConfiguration
 						Name="Debug|Win32"
 						ExcludedFromBuild="TRUE">
@@ -1472,7 +1472,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\Object\Profile\libslparse\scanner.cpp">
+					RelativePath="..\Objectvc7\Profile\libslparse\scanner.cpp">
 					<FileConfiguration
 						Name="Debug|Win32"
 						ExcludedFromBuild="TRUE">
@@ -1551,7 +1551,7 @@
 				Name="Release_Static_MT"
 				Filter="">
 				<File
-					RelativePath="..\Object\Release_Static_MT\libslparse\parser.cpp">
+					RelativePath="..\Objectvc7\Release_Static_MT\libslparse\parser.cpp">
 					<FileConfiguration
 						Name="Debug|Win32"
 						ExcludedFromBuild="TRUE">
@@ -1626,7 +1626,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\Object\Release_Static_MT\libslparse\parser.hpp">
+					RelativePath="..\Objectvc7\Release_Static_MT\libslparse\parser.hpp">
 					<FileConfiguration
 						Name="Debug|Win32"
 						ExcludedFromBuild="TRUE">
@@ -1665,7 +1665,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\Object\Release_Static_MT\libslparse\scanner.cpp">
+					RelativePath="..\Objectvc7\Release_Static_MT\libslparse\scanner.cpp">
 					<FileConfiguration
 						Name="Debug|Win32"
 						ExcludedFromBuild="TRUE">
@@ -1744,7 +1744,7 @@
 				Name="Release_Static_ST"
 				Filter="">
 				<File
-					RelativePath="..\Object\Release_Static_ST\libslparse\parser.cpp">
+					RelativePath="..\Objectvc7\Release_Static_ST\libslparse\parser.cpp">
 					<FileConfiguration
 						Name="Debug|Win32"
 						ExcludedFromBuild="TRUE">
@@ -1819,7 +1819,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\Object\Release_Static_ST\libslparse\parser.hpp">
+					RelativePath="..\Objectvc7\Release_Static_ST\libslparse\parser.hpp">
 					<FileConfiguration
 						Name="Debug|Win32"
 						ExcludedFromBuild="TRUE">
@@ -1858,7 +1858,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\Object\Release_Static_ST\libslparse\scanner.cpp">
+					RelativePath="..\Objectvc7\Release_Static_ST\libslparse\scanner.cpp">
 					<FileConfiguration
 						Name="Debug|Win32"
 						ExcludedFromBuild="TRUE">
@@ -1937,7 +1937,7 @@
 				Name="Debug_Static_MT"
 				Filter="">
 				<File
-					RelativePath="..\Object\Debug_Static_MT\libslparse\parser.cpp">
+					RelativePath="..\Objectvc7\Debug_Static_MT\libslparse\parser.cpp">
 					<FileConfiguration
 						Name="Debug|Win32"
 						ExcludedFromBuild="TRUE">
@@ -2012,7 +2012,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\Object\Debug_Static_MT\libslparse\parser.hpp">
+					RelativePath="..\Objectvc7\Debug_Static_MT\libslparse\parser.hpp">
 					<FileConfiguration
 						Name="Debug|Win32"
 						ExcludedFromBuild="TRUE">
@@ -2051,7 +2051,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\Object\Debug_Static_MT\libslparse\scanner.cpp">
+					RelativePath="..\Objectvc7\Debug_Static_MT\libslparse\scanner.cpp">
 					<FileConfiguration
 						Name="Debug|Win32"
 						ExcludedFromBuild="TRUE">
@@ -2130,7 +2130,7 @@
 				Name="Debug_Static_ST"
 				Filter="">
 				<File
-					RelativePath="..\Object\Debug_Static_ST\libslparse\parser.cpp">
+					RelativePath="..\Objectvc7\Debug_Static_ST\libslparse\parser.cpp">
 					<FileConfiguration
 						Name="Debug|Win32"
 						ExcludedFromBuild="TRUE">
@@ -2205,7 +2205,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\Object\Debug_Static_ST\libslparse\parser.hpp">
+					RelativePath="..\Objectvc7\Debug_Static_ST\libslparse\parser.hpp">
 					<FileConfiguration
 						Name="Debug|Win32"
 						ExcludedFromBuild="TRUE">
@@ -2244,7 +2244,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\Object\Debug_Static_ST\libslparse\scanner.cpp">
+					RelativePath="..\Objectvc7\Debug_Static_ST\libslparse\scanner.cpp">
 					<FileConfiguration
 						Name="Debug|Win32"
 						ExcludedFromBuild="TRUE">

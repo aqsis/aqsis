@@ -12,8 +12,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug_Static_ST|Win32"
-			OutputDirectory=".\..\lib\Static_ST"
-			IntermediateDirectory=".\..\Object\Debug_Static_ST\libargparse"
+			OutputDirectory=".\..\libvc7\Static_ST"
+			IntermediateDirectory=".\..\Objectvc7\Debug_Static_ST\libargparse"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE">
@@ -25,10 +25,10 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="5"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Debug_Static_ST\libargparse/libargparse.pch"
-				AssemblerListingLocation=".\..\Object\Debug_Static_ST\libargparse/"
-				ObjectFile=".\..\Object\Debug_Static_ST\libargparse/"
-				ProgramDataBaseFileName=".\..\Object\Debug_Static_ST\libargparse/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Debug_Static_ST\libargparse/libargparse.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Debug_Static_ST\libargparse/"
+				ObjectFile=".\..\Objectvc7\Debug_Static_ST\libargparse/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Debug_Static_ST\libargparse/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				DebugInformationFormat="4"
@@ -37,7 +37,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\lib\Static_ST\argparse_d.lib"
+				OutputFile="..\libvc7\Static_ST\argparse_d.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -62,8 +62,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release_Static_ST|Win32"
-			OutputDirectory=".\..\lib\Static_ST"
-			IntermediateDirectory=".\..\Object\Release_Static_ST\libargparse"
+			OutputDirectory=".\..\libvc7\Static_ST"
+			IntermediateDirectory=".\..\Objectvc7\Release_Static_ST\libargparse"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE">
@@ -77,10 +77,10 @@
 				RuntimeLibrary="4"
 				EnableFunctionLevelLinking="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Release_Static_ST\libargparse/libargparse.pch"
-				AssemblerListingLocation=".\..\Object\Release_Static_ST\libargparse/"
-				ObjectFile=".\..\Object\Release_Static_ST\libargparse/"
-				ProgramDataBaseFileName=".\..\Object\Release_Static_ST\libargparse/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Release_Static_ST\libargparse/libargparse.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Release_Static_ST\libargparse/"
+				ObjectFile=".\..\Objectvc7\Release_Static_ST\libargparse/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Release_Static_ST\libargparse/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				CompileAs="0"/>
@@ -88,7 +88,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\lib\Static_ST\argparse.lib"
+				OutputFile="..\libvc7\Static_ST\argparse.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -113,8 +113,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug_Static_MT|Win32"
-			OutputDirectory=".\..\lib\Static_MT"
-			IntermediateDirectory=".\..\Object\Debug_Static_MT\libargparse"
+			OutputDirectory=".\..\libvc7\Static_MT"
+			IntermediateDirectory=".\..\Objectvc7\Debug_Static_MT\libargparse"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE">
@@ -126,10 +126,10 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Debug_Static_MT\libargparse/libargparse.pch"
-				AssemblerListingLocation=".\..\Object\Debug_Static_MT\libargparse/"
-				ObjectFile=".\..\Object\Debug_Static_MT\libargparse/"
-				ProgramDataBaseFileName=".\..\Object\Debug_Static_MT\libargparse/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Debug_Static_MT\libargparse/libargparse.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Debug_Static_MT\libargparse/"
+				ObjectFile=".\..\Objectvc7\Debug_Static_MT\libargparse/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Debug_Static_MT\libargparse/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				DebugInformationFormat="4"
@@ -138,7 +138,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\lib\Static_MT\argparse_d.lib"
+				OutputFile="..\libvc7\Static_MT\argparse_d.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -163,8 +163,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release_Static_MT|Win32"
-			OutputDirectory=".\..\lib\Static_MT"
-			IntermediateDirectory=".\..\Object\Release_Static_MT\libargparse"
+			OutputDirectory=".\..\libvc7\Static_MT"
+			IntermediateDirectory=".\..\Objectvc7\Release_Static_MT\libargparse"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE">
@@ -178,10 +178,10 @@
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Release_Static_MT\libargparse/libargparse.pch"
-				AssemblerListingLocation=".\..\Object\Release_Static_MT\libargparse/"
-				ObjectFile=".\..\Object\Release_Static_MT\libargparse/"
-				ProgramDataBaseFileName=".\..\Object\Release_Static_MT\libargparse/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Release_Static_MT\libargparse/libargparse.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Release_Static_MT\libargparse/"
+				ObjectFile=".\..\Objectvc7\Release_Static_MT\libargparse/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Release_Static_MT\libargparse/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				CompileAs="0"/>
@@ -189,7 +189,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\lib\Static_MT\argparse.lib"
+				OutputFile="..\libvc7\Static_MT\argparse.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -214,8 +214,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\..\lib"
-			IntermediateDirectory=".\..\Object\Debug\libargparse"
+			OutputDirectory=".\..\libvc7"
+			IntermediateDirectory=".\..\Objectvc7\Debug\libargparse"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE">
@@ -227,10 +227,10 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Debug\libargparse/libargparse.pch"
-				AssemblerListingLocation=".\..\Object\Debug\libargparse/"
-				ObjectFile=".\..\Object\Debug\libargparse/"
-				ProgramDataBaseFileName=".\..\Object\Debug\libargparse/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Debug\libargparse/libargparse.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Debug\libargparse/"
+				ObjectFile=".\..\Objectvc7\Debug\libargparse/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Debug\libargparse/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				DebugInformationFormat="4"
@@ -239,7 +239,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\lib\argparse_d.lib"
+				OutputFile="..\libvc7\argparse_d.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -264,8 +264,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\..\lib"
-			IntermediateDirectory=".\..\Object\Release\libargparse"
+			OutputDirectory=".\..\libvc7"
+			IntermediateDirectory=".\..\Objectvc7\Release\libargparse"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE">
@@ -279,10 +279,10 @@
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Release\libargparse/libargparse.pch"
-				AssemblerListingLocation=".\..\Object\Release\libargparse/"
-				ObjectFile=".\..\Object\Release\libargparse/"
-				ProgramDataBaseFileName=".\..\Object\Release\libargparse/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Release\libargparse/libargparse.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Release\libargparse/"
+				ObjectFile=".\..\Objectvc7\Release\libargparse/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Release\libargparse/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				CompileAs="0"/>
@@ -290,7 +290,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\lib\argparse.lib"
+				OutputFile="..\libvc7\argparse.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -315,8 +315,8 @@
 		</Configuration>
 		<Configuration
 			Name="Profile|Win32"
-			OutputDirectory=".\..\lib\Profile"
-			IntermediateDirectory=".\..\Object\Profile\libargparse"
+			OutputDirectory=".\..\libvc7\Profile"
+			IntermediateDirectory=".\..\Objectvc7\Profile\libargparse"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE">
@@ -330,10 +330,10 @@
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Profile\libargparse/libargparse.pch"
-				AssemblerListingLocation=".\..\Object\Profile\libargparse/"
-				ObjectFile=".\..\Object\Profile\libargparse/"
-				ProgramDataBaseFileName=".\..\Object\Profile\libargparse/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Profile\libargparse/libargparse.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Profile\libargparse/"
+				ObjectFile=".\..\Objectvc7\Profile\libargparse/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Profile\libargparse/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				CompileAs="0"/>
@@ -341,7 +341,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="..\lib\Profile\argparse.lib"
+				OutputFile="..\libvc7\Profile\argparse.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>

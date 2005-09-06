@@ -13,7 +13,7 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\..\bin"
+			OutputDirectory=".\..\binvc7"
 			IntermediateDirectory="."
 			ConfigurationType="10"
 			UseOfMFC="0"
@@ -22,7 +22,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\..\bin/shaders.tlb"
+				TypeLibraryName=".\..\binvc7/shaders.tlb"
 				HeaderFileName=""/>
 			<Tool
 				Name="VCPostBuildEventTool"/>
@@ -31,7 +31,7 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\..\bin"
+			OutputDirectory=".\..\binvc7"
 			IntermediateDirectory="."
 			ConfigurationType="10"
 			UseOfMFC="0"
@@ -40,7 +40,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\..\bin/shaders.tlb"
+				TypeLibraryName=".\..\binvc7/shaders.tlb"
 				HeaderFileName=""/>
 			<Tool
 				Name="VCPostBuildEventTool"/>
@@ -49,7 +49,7 @@
 		</Configuration>
 		<Configuration
 			Name="Profile|Win32"
-			OutputDirectory=".\..\bin\Profile"
+			OutputDirectory=".\..\binvc7\Profile"
 			IntermediateDirectory="."
 			ConfigurationType="10"
 			UseOfMFC="0"
@@ -58,7 +58,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\..\bin\Profile/shaders.tlb"
+				TypeLibraryName=".\..\binvc7\Profile/shaders.tlb"
 				HeaderFileName=""/>
 			<Tool
 				Name="VCPostBuildEventTool"/>

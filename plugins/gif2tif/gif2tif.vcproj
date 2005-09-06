@@ -12,8 +12,8 @@
 	<Configurations>
 		<Configuration
 			Name="Profile|Win32"
-			OutputDirectory=".\..\..\bin\profile"
-			IntermediateDirectory=".\..\Object\Profile\plugins\gif2tif"
+			OutputDirectory=".\..\..\binvc7\profile"
+			IntermediateDirectory=".\..\Objectvc7\Profile\plugins\gif2tif"
 			ConfigurationType="2"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -29,10 +29,10 @@
 				EnableFunctionLevelLinking="TRUE"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\Object\Profile\plugins\gif2tif/gif2tif.pch"
-				AssemblerListingLocation=".\..\Object\Profile\plugins\gif2tif/"
-				ObjectFile=".\..\Object\Profile\plugins\gif2tif/"
-				ProgramDataBaseFileName=".\..\Object\Profile\plugins\gif2tif/"
+				PrecompiledHeaderFile=".\..\Objectvc7\Profile\plugins\gif2tif/gif2tif.pch"
+				AssemblerListingLocation=".\..\Objectvc7\Profile\plugins\gif2tif/"
+				ObjectFile=".\..\Objectvc7\Profile\plugins\gif2tif/"
+				ProgramDataBaseFileName=".\..\Objectvc7\Profile\plugins\gif2tif/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				DebugInformationFormat="3"
@@ -42,12 +42,12 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="libtiff.lib"
-				OutputFile=".\..\..\bin\profile/gif2tif.dll"
+				OutputFile=".\..\..\binvc7\profile/gif2tif.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="..\..\win32libs\lib,..\..\..\win32libs\lib"
 				GenerateDebugInformation="TRUE"
-				ImportLibrary=".\..\..\bin\profile/gif2tif.lib"
+				ImportLibrary=".\..\..\binvc7\profile/gif2tif.lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -55,7 +55,7 @@
 				MkTypLibCompatible="TRUE"
 				SuppressStartupBanner="TRUE"
 				TargetEnvironment="1"
-				TypeLibraryName=".\..\..\bin\profile/gif2tif.tlb"
+				TypeLibraryName=".\..\..\binvc7\profile/gif2tif.tlb"
 				HeaderFileName=""/>
 			<Tool
 				Name="VCPostBuildEventTool"/>
@@ -80,8 +80,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\..\..\bin\debug"
-			IntermediateDirectory=".\..\..\Object\Debug\plugins\gif2tif"
+			OutputDirectory=".\..\..\binvc7\debug"
+			IntermediateDirectory=".\..\..\Objectvc7\Debug\plugins\gif2tif"
 			ConfigurationType="2"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -95,10 +95,10 @@
 				RuntimeLibrary="3"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\..\Object\Debug\plugins\gif2tif/gif2tif.pch"
-				AssemblerListingLocation=".\..\..\Object\Debug\plugins\gif2tif/"
-				ObjectFile=".\..\..\Object\Debug\plugins\gif2tif/"
-				ProgramDataBaseFileName=".\..\..\Object\Debug\plugins\gif2tif/"
+				PrecompiledHeaderFile=".\..\..\Objectvc7\Debug\plugins\gif2tif/gif2tif.pch"
+				AssemblerListingLocation=".\..\..\Objectvc7\Debug\plugins\gif2tif/"
+				ObjectFile=".\..\..\Objectvc7\Debug\plugins\gif2tif/"
+				ProgramDataBaseFileName=".\..\..\Objectvc7\Debug\plugins\gif2tif/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				DebugInformationFormat="4"
@@ -113,8 +113,8 @@
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="..\..\win32libs\lib,..\..\..\win32libs\lib"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile=".\..\..\bin\debug/gif2tif_d.pdb"
-				ImportLibrary=".\..\..\bin\debug/gif2tif_d.lib"
+				ProgramDatabaseFile=".\..\..\binvc7\debug/gif2tif_d.pdb"
+				ImportLibrary=".\..\..\binvc7\debug/gif2tif_d.lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -122,7 +122,7 @@
 				MkTypLibCompatible="TRUE"
 				SuppressStartupBanner="TRUE"
 				TargetEnvironment="1"
-				TypeLibraryName=".\..\..\bin\debug/gif2tif.tlb"
+				TypeLibraryName=".\..\..\binvc7\debug/gif2tif.tlb"
 				HeaderFileName=""/>
 			<Tool
 				Name="VCPostBuildEventTool"/>
@@ -147,8 +147,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\..\..\bin"
-			IntermediateDirectory=".\..\..\Object\Release\plugins\gif2tif"
+			OutputDirectory=".\..\..\binvc7"
+			IntermediateDirectory=".\..\..\Objectvc7\Release\plugins\gif2tif"
 			ConfigurationType="2"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -164,10 +164,10 @@
 				EnableFunctionLevelLinking="TRUE"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\..\..\Object\Release\plugins\gif2tif/gif2tif.pch"
-				AssemblerListingLocation=".\..\..\Object\Release\plugins\gif2tif/"
-				ObjectFile=".\..\..\Object\Release\plugins\gif2tif/"
-				ProgramDataBaseFileName=".\..\..\Object\Release\plugins\gif2tif/"
+				PrecompiledHeaderFile=".\..\..\Objectvc7\Release\plugins\gif2tif/gif2tif.pch"
+				AssemblerListingLocation=".\..\..\Objectvc7\Release\plugins\gif2tif/"
+				ObjectFile=".\..\..\Objectvc7\Release\plugins\gif2tif/"
+				ProgramDataBaseFileName=".\..\..\Objectvc7\Release\plugins\gif2tif/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				CompileAs="0"/>
@@ -176,12 +176,12 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="libtiff.lib"
-				OutputFile=".\..\..\bin/gif2tif.dll"
+				OutputFile=".\..\..\binvc7/gif2tif.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="..\..\win32libs\lib,..\..\..\win32libs\lib"
-				ProgramDatabaseFile=".\..\..\bin/gif2tif.pdb"
-				ImportLibrary=".\..\..\bin/gif2tif.lib"
+				ProgramDatabaseFile=".\..\..\binvc7/gif2tif.pdb"
+				ImportLibrary=".\..\..\binvc7/gif2tif.lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -189,7 +189,7 @@
 				MkTypLibCompatible="TRUE"
 				SuppressStartupBanner="TRUE"
 				TargetEnvironment="1"
-				TypeLibraryName=".\..\..\bin/gif2tif.tlb"
+				TypeLibraryName=".\..\..\binvc7/gif2tif.tlb"
 				HeaderFileName=""/>
 			<Tool
 				Name="VCPostBuildEventTool"/>
