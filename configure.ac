@@ -56,6 +56,7 @@ libaqsistypes/posix/Makefile
 libaqsistypes/win32/Makefile 
 libaqsistypes/win32/intel/Makefile 
 libargparse/Makefile 
+libaqfile/Makefile
 libcodegenvm/Makefile 
 libddmanager/Makefile 
 libraytrace/Makefile 

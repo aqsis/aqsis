@@ -24,6 +24,7 @@ all \
 images \
 libargparse \
 libaqsistypes \
+libaqfile \
 libcodegenvm \
 librib2 \
 librib2ri \
