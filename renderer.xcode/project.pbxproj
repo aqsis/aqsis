@@ -3486,6 +3486,236 @@
 			target = 715FC32D06B06C760052FAB7;
 			targetProxy = 715FC3F306B071EB0052FAB7;
 		};
+		7169BAD508D419E2009483F4 = {
+			buildActionMask = 2147483647;
+			files = (
+			);
+			isa = PBXHeadersBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7169BAD608D419E2009483F4 = {
+			buildActionMask = 2147483647;
+			files = (
+			);
+			isa = PBXResourcesBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7169BAD708D419E2009483F4 = {
+			buildActionMask = 2147483647;
+			files = (
+			);
+			isa = PBXSourcesBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7169BAD808D419E2009483F4 = {
+			buildActionMask = 2147483647;
+			files = (
+			);
+			isa = PBXRezBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7169BAD908D419E2009483F4 = {
+			buildActionMask = 2147483647;
+			files = (
+			);
+			isa = PBXFrameworksBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7169BADA08D419E2009483F4 = {
+			buildPhases = (
+				7169BAD508D419E2009483F4,
+				7169BAD608D419E2009483F4,
+				7169BAD708D419E2009483F4,
+				7169BAD808D419E2009483F4,
+				7169BAD908D419E2009483F4,
+			);
+			buildRules = (
+			);
+			buildSettings = {
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_VERSION = A;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
+				GCC_WARN_FOUR_CHARACTER_CONSTANTS = NO;
+				GCC_WARN_UNKNOWN_PRAGMAS = NO;
+				INFOPLIST_FILE = "Aqsis-Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				OPTIMIZATION_CFLAGS = "";
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "-framework Carbon";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = Aqsis;
+				REZ_EXECUTABLE = NO;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = "-Wmost";
+			};
+			dependencies = (
+				7169BADF08D41D5D009483F4,
+				7169BAE108D41D5D009483F4,
+				7169BAE308D41D5D009483F4,
+				7169BAE508D41D5D009483F4,
+				7169BAE708D41D5D009483F4,
+				7169BAE908D41D5D009483F4,
+				7169BAEB08D41D5D009483F4,
+				7169BAED08D41D5D009483F4,
+				7169BAEF08D41D5D009483F4,
+			);
+			isa = PBXNativeTarget;
+			name = Aqsis;
+			productName = Aqsis;
+			productReference = 7169BADB08D419E2009483F4;
+			productSettingsXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
+<plist version=\"1.0\">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleExecutable</key>
+	<string>Aqsis</string>
+	<key>CFBundleGetInfoString</key>
+	<string></string>
+	<key>CFBundleIdentifier</key>
+	<string>com.MySoftwareCompany.Aqsis</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundlePackageType</key>
+	<string>FMWK</string>
+	<key>CFBundleShortVersionString</key>
+	<string></string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>1.0.0d1</string>
+</dict>
+</plist>
+";
+			productType = "com.apple.product-type.framework";
+		};
+		7169BADB08D419E2009483F4 = {
+			explicitFileType = wrapper.framework;
+			includeInIndex = 0;
+			isa = PBXFileReference;
+			path = Aqsis.framework;
+			refType = 3;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		7169BADC08D419E2009483F4 = {
+			isa = PBXFileReference;
+			lastKnownFileType = text.plist.xml;
+			name = "Aqsis-Info.plist";
+			path = "/Users/pgregory/aqsis/renderer/Aqsis-Info.plist";
+			refType = 0;
+			sourceTree = "<absolute>";
+		};
+		7169BADE08D41D5D009483F4 = {
+			containerPortal = 71DE6C710691FA5900145266;
+			isa = PBXContainerItemProxy;
+			proxyType = 1;
+			remoteGlobalIDString = 71DE6C8C0691FB0700145266;
+			remoteInfo = libaqsistypes;
+		};
+		7169BADF08D41D5D009483F4 = {
+			isa = PBXTargetDependency;
+			target = 71DE6C8C0691FB0700145266;
+			targetProxy = 7169BADE08D41D5D009483F4;
+		};
+		7169BAE008D41D5D009483F4 = {
+			containerPortal = 71DE6C710691FA5900145266;
+			isa = PBXContainerItemProxy;
+			proxyType = 1;
+			remoteGlobalIDString = 7144F7120692113B007CCB15;
+			remoteInfo = librib2;
+		};
+		7169BAE108D41D5D009483F4 = {
+			isa = PBXTargetDependency;
+			target = 7144F7120692113B007CCB15;
+			targetProxy = 7169BAE008D41D5D009483F4;
+		};
+		7169BAE208D41D5D009483F4 = {
+			containerPortal = 71DE6C710691FA5900145266;
+			isa = PBXContainerItemProxy;
+			proxyType = 1;
+			remoteGlobalIDString = 7144F814069222D2007CCB15;
+			remoteInfo = librib2ri;
+		};
+		7169BAE308D41D5D009483F4 = {
+			isa = PBXTargetDependency;
+			target = 7144F814069222D2007CCB15;
+			targetProxy = 7169BAE208D41D5D009483F4;
+		};
+		7169BAE408D41D5D009483F4 = {
+			containerPortal = 71DE6C710691FA5900145266;
+			isa = PBXContainerItemProxy;
+			proxyType = 1;
+			remoteGlobalIDString = 71DCDFC20696069000CDDB8A;
+			remoteInfo = libthread;
+		};
+		7169BAE508D41D5D009483F4 = {
+			isa = PBXTargetDependency;
+			target = 71DCDFC20696069000CDDB8A;
+			targetProxy = 7169BAE408D41D5D009483F4;
+		};
+		7169BAE608D41D5D009483F4 = {
+			containerPortal = 71DE6C710691FA5900145266;
+			isa = PBXContainerItemProxy;
+			proxyType = 1;
+			remoteGlobalIDString = 71DCE0200696079000CDDB8A;
+			remoteInfo = libshadervm;
+		};
+		7169BAE708D41D5D009483F4 = {
+			isa = PBXTargetDependency;
+			target = 71DCE0200696079000CDDB8A;
+			targetProxy = 7169BAE608D41D5D009483F4;
+		};
+		7169BAE808D41D5D009483F4 = {
+			containerPortal = 71DE6C710691FA5900145266;
+			isa = PBXContainerItemProxy;
+			proxyType = 1;
+			remoteGlobalIDString = 71DCE04F069608B100CDDB8A;
+			remoteInfo = libshaderexecenv;
+		};
+		7169BAE908D41D5D009483F4 = {
+			isa = PBXTargetDependency;
+			target = 71DCE04F069608B100CDDB8A;
+			targetProxy = 7169BAE808D41D5D009483F4;
+		};
+		7169BAEA08D41D5D009483F4 = {
+			containerPortal = 71DE6C710691FA5900145266;
+			isa = PBXContainerItemProxy;
+			proxyType = 1;
+			remoteGlobalIDString = 71DCE0680696098500CDDB8A;
+			remoteInfo = libraytrace;
+		};
+		7169BAEB08D41D5D009483F4 = {
+			isa = PBXTargetDependency;
+			target = 71DCE0680696098500CDDB8A;
+			targetProxy = 7169BAEA08D41D5D009483F4;
+		};
+		7169BAEC08D41D5D009483F4 = {
+			containerPortal = 71DE6C710691FA5900145266;
+			isa = PBXContainerItemProxy;
+			proxyType = 1;
+			remoteGlobalIDString = 71DCE0DC06AC48DF00CDDB8A;
+			remoteInfo = libddmanager;
+		};
+		7169BAED08D41D5D009483F4 = {
+			isa = PBXTargetDependency;
+			target = 71DCE0DC06AC48DF00CDDB8A;
+			targetProxy = 7169BAEC08D41D5D009483F4;
+		};
+		7169BAEE08D41D5D009483F4 = {
+			containerPortal = 71DE6C710691FA5900145266;
+			isa = PBXContainerItemProxy;
+			proxyType = 1;
+			remoteGlobalIDString = 715FC32D06B06C760052FAB7;
+			remoteInfo = inline;
+		};
+		7169BAEF08D41D5D009483F4 = {
+			isa = PBXTargetDependency;
+			target = 715FC32D06B06C760052FAB7;
+			targetProxy = 7169BAEE08D41D5D009483F4;
+		};
 		7190520E06AC88FE000D9934 = {
 			buildActionMask = 2147483647;
 			files = (
@@ -6606,6 +6836,7 @@
 				7102313B06ACFE560066ED4D,
 				71DE6C7C0691FA7400145266,
 				715FC1C406AEFFA20052FAB7,
+				7169BADC08D419E2009483F4,
 			);
 			isa = PBXGroup;
 			refType = 4;
@@ -6670,6 +6901,7 @@
 				715FC3CA06B0712D0052FAB7,
 				71AB553706BAE8A10074427F,
 				71536C7306C171DD00BA5CC0,
+				7169BADA08D419E2009483F4,
 			);
 		};
 		71DE6C780691FA7400145266 = {
@@ -6745,6 +6977,7 @@
 				715FC37C06B070910052FAB7,
 				715FC3CB06B0712D0052FAB7,
 				71AB553806BAE8A10074427F,
+				7169BADB08D419E2009483F4,
 			);
 			isa = PBXGroup;
 			name = Products;

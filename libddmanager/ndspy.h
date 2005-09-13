@@ -37,7 +37,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <ri.h>
+
+typedef	char*	RtToken;
+typedef	void*	RtPointer;
 
 
 typedef double PtDspyFloat64;

@@ -2,5 +2,13 @@ Import('env')
 Import('pixelsave')
 bake2tif_sources=Split("""
 	bake2tif.c""")
-bake2tif = env.SharedLibrary('bake2tif', bake2tif_sources + pixelsave, LIBS=['libtiff', 'libz'], LIBPATH=['$TPLIBS'])
+
+if 'darwin' == env['PLATFORM']:
+	bake2tif_libs = ['tiff', 'z']
+
+if 'win32' == env['PLATFORM']:
+	bake2tif_libs = ['libtiff', 'libz', 'ws2_32']
+
+bake2tif = env.SharedLibrary('bake2tif', bake2tif_sources + pixelsave, LIBS=bake2tif_libs)
+
 env.Install('$BINDIR', bake2tif)

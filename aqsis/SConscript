@@ -1,5 +1,12 @@
 Import('env')
 aqsis_sources = Split("""
 	aqsis.cpp""")
-aqsis = env.Program('aqsis', aqsis_sources, LIBS=['argparse', 'aqsis'], LIBPATH=['$LIBDIR', '$BINDIR'])
-env.Install('$BINDIR', aqsis)
+
+aqsisenv = env.Copy();
+
+# Add the Core framework if on MacOSX
+if 'darwin' == aqsisenv['PLATFORM']:
+	aqsisenv.AppendUnique(LINKFLAGS = ['-framework', 'CoreFoundation'])
+
+aqsis = aqsisenv.Program('aqsis', aqsis_sources, LIBS=['argparse', 'aqsis'], LIBPATH=['$LIBDIR', '$BINDIR'])
+aqsisenv.Install('$BINDIR', aqsis)

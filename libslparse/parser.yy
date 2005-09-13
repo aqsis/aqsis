@@ -1941,8 +1941,9 @@ void TypeCheck()
 	TqUint i;
 	for(i=0; i<gLocalVars.size(); i++)
 	{
+		TqBool needsCast = TqFalse;
 		if(gLocalVars[i].pDefValue()!=0)
-			gLocalVars[i].pDefValue()->TypeCheck(CqParseNode::pAllTypes(), Type_Last-1);
+			gLocalVars[i].pDefValue()->TypeCheck(CqParseNode::pAllTypes(), Type_Last-1, needsCast, TqFalse);
 	}
 
 	// Typecheck any local functions.
@@ -1950,13 +1951,15 @@ void TypeCheck()
 	{
 		if(gLocalFuncs[i].pDef()!=0)
 		{
+			TqBool needsCast = TqFalse;
 //			TqInt RetType=gLocalFuncs[i].Type();
-			gLocalFuncs[i].pDefNode()->TypeCheck(CqParseNode::pAllTypes(), Type_Last-1);
+			gLocalFuncs[i].pDefNode()->TypeCheck(CqParseNode::pAllTypes(), Type_Last-1, needsCast, TqFalse);
 		}
 	}
 
+	TqBool needsCast = TqFalse;
 	if(ParseTreePointer)
-		ParseTreePointer->TypeCheck(CqParseNode::pAllTypes(), Type_Last-1);
+		ParseTreePointer->TypeCheck(CqParseNode::pAllTypes(), Type_Last-1, needsCast, TqFalse);
 }
 
 

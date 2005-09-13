@@ -1,0 +1,12 @@
+Import('env')
+
+env.AppendUnique(CCFLAGS=['/GX', '/MD', '/GR', '/Zm200', '/O2'])
+env.AppendUnique(CPPDEFINES=['NO_SYSLOG', 'WIN32', 'PLUGINS'])
+env.AppendUnique(CPPPATH = ['#/libaqsistypes/win32/intel'])
+if env['tiff_include_path'] == "":
+	env.Replace(tiff_include_path = ['#/../win32libs/include'])
+if env['tiff_lib_path'] == "":
+	env.Replace(tiff_lib_path, env.Dir('#/../win32libs/lib'))
+env.Replace(YACC = '${BISON}')
+env.Replace(LEX = '${FLEX}')
+env.Replace(YACCFLAGS = '--no-lines -d')

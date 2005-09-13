@@ -5,5 +5,14 @@ displayenv.AppendUnique(CPPDEFINES=['DISPLAY_EXPORTS'])
 display_sources = Split("""
 	display.cpp
 	displayhelpers.c""")
-display = displayenv.SharedLibrary('display', display_sources, LIBS=['libtiff', 'libz', 'fltk', 'gdi32', 'user32', 'ole32', 'shell32', 'ws2_32', 'comctl32'], LIBPPATH=['$TPLIBS'])
+
+if 'darwin' == displayenv['PLATFORM']:
+	display_libs = ['tiff', 'z']
+	displayenv.AppendUnique(CPPDEFINES=['AQSIS_NO_FLTK'])
+
+if 'win32' == displayenv['PLATFORM']:
+	display_libs = ['libtiff', 'libz', 'ws2_32', 'gdi32', 'ole32', 'shell32', 'comctl32', 'fltk']
+
+display = displayenv.SharedLibrary('display', display_sources, LIBS=display_libs)
+
 displayenv.Install('$BINDIR', display)

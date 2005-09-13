@@ -28,17 +28,20 @@
 
 #include <aqsis.h>
 
+#ifndef	AQSIS_NO_FLTK
 #include <FL/Fl.H>
 #include <FL/Fl_Window.H>
 #include <FL/Fl_Box.H>
 #include <FL/Fl_Image.H>
 #include <FL/fl_draw.H>
+#endif // AQSIS_NO_LTK
 
 START_NAMESPACE( Aqsis )
 
 /** FLTK Widget used to show a constantly updating image.
  *
  */
+#ifndef	AQSIS_NO_FLTK
 class Fl_FrameBuffer_Widget : public Fl_Widget 
 {
 public: 
@@ -59,6 +62,7 @@ private:
 	int w,h,d;
 	unsigned char* image;
 };
+#endif // AQSIS_NO_FLTK
 
 enum EqDisplayTypes 
 {
@@ -85,10 +89,13 @@ struct SqDisplayInstance
 		m_RenderWholeFrame(TqFalse),
 		m_imageType(Type_File),
 		m_append(0),
-		m_data(0),
+		m_data(0)
+#ifndef	AQSIS_NO_FLTK
+		,
 		m_theWindow(0),
 		m_uiImageWidget(0),
 		m_uiImage(0)
+#endif // AQSIS_NO_FLTK
 	{}
 	char*		m_filename;
 	TqInt		m_width;
@@ -110,9 +117,11 @@ struct SqDisplayInstance
 	void*		m_data;
 	unsigned char*	m_zfbdata;
 
+#ifndef	AQSIS_NO_FLTK
 	Fl_Window*	m_theWindow;
 	Fl_FrameBuffer_Widget* m_uiImageWidget;
 	Fl_RGB_Image*	m_uiImage;
+#endif // AQSIS_NO_FLTK
 };
 
 

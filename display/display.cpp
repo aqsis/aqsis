@@ -413,14 +413,20 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 		// Determine the display type from the list that we support.
 		if(strcmp(drivername, "file")==0 || strcmp(drivername, "tiff")==0)
 			pImage->m_imageType = Type_File;
+#ifndef	AQSIS_NO_FLTK
 		else if(strcmp(drivername, "framebuffer")==0)
 			pImage->m_imageType = Type_Framebuffer;
+#endif // AQSIS_NO_FLTK
 		else if(strcmp(drivername, "zfile")==0)
 			pImage->m_imageType = Type_ZFile;
+#ifndef AQSIS_NO_FLTK
 		else if(strcmp(drivername, "zframebuffer")==0)
 			pImage->m_imageType = Type_ZFramebuffer;
+#endif // AQSIS_NO_FLTK
 		else if(strcmp(drivername, "shadow")==0)
 			pImage->m_imageType = Type_Shadowmap;
+		else
+			pImage->m_imageType = Type_File;
 		pImage->m_iFormatCount = iFormatCount;
 
 		*image = pImage;
@@ -462,6 +468,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 		// Create and initialise a byte array if rendering 8bit image, or we are in framebuffer mode
 		if(pImage->m_imageType == Type_Framebuffer)
 		{
+#ifndef	AQSIS_NO_FLTK
 			// Allocate the buffer, even if the formatcount <3, always allocated 3, as that is what's needed for the
 			// display.
 			pImage->m_data = new unsigned char[ pImage->m_width * pImage->m_height * pImage->m_iFormatCount ];
@@ -499,7 +506,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			pImage->m_theWindow->end();
 			Fl::visual(FL_RGB);
 			pImage->m_theWindow->show();
-
+#endif // AQSIS_NO_FLTK
 		}
 		else
 		{
@@ -531,6 +538,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 		// If in "zframebuffer" mode, we need another buffer for the displayed depth data.
 		if(pImage->m_imageType == Type_ZFramebuffer)
 		{
+#ifndef	AQSIS_NO_FLTK
 			pImage->m_zfbdata = reinterpret_cast<unsigned char*>(malloc( pImage->m_width * pImage->m_height * 3 * sizeof(unsigned char)));
 
 			pImage->m_theWindow = new Fl_Window(pImage->m_width, pImage->m_height);
@@ -540,7 +548,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			pImage->m_theWindow->end();
 			Fl::visual(FL_RGB);
 			pImage->m_theWindow->show();
-
+#endif // AQSIS_NO_FLTK
 		}
 
 
@@ -672,6 +680,7 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 		// If rendering into a zframebuffer, we need to setup a separate image store for the displayed data.
 		if(pImage->m_imageType == Type_ZFramebuffer)
 		{
+#ifndef AQSIS_NO_FLTK
 			const unsigned char* pdatarow = data;
 			pdatarow += (row * bucketlinelen) + (col * entrysize);
 			TqInt y;
@@ -690,11 +699,13 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 				}
 				pdatarow += bucketlinelen;
 			}
+#endif // AQSIS_NO_FLTK
 		}
 	}
 
 	if(pImage->m_imageType == Type_Framebuffer || pImage->m_imageType == Type_ZFramebuffer)
 	{
+#ifndef AQSIS_NO_FLTK
 		pImage->m_uiImageWidget->damage(1, xmin__, ymin__, xmaxplus1__-xmin__, ymaxplus1__-ymin__);
 		Fl::check();
       	TqFloat percent = (TqFloat) ((xmaxplus1__-1) + (TqFloat)((ymaxplus1__-1) * pImage->m_width)) / (TqFloat) (pImage->m_width * pImage->m_height);
@@ -706,6 +717,7 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 		else
 			strTitle << pImage->m_filename << std::ends;
 		pImage->m_theWindow->label(strTitle.str().c_str());
+#endif // AQSIS_NO_FLTK
 	}
 	return(PkDspyErrorNone);
 }
@@ -723,7 +735,7 @@ PtDspyError DspyImageClose(PtDspyImageHandle image)
 		WriteTIFF( pImage->m_filename, pImage);
 
 	// Delete the image structure.
-    if (pImage->m_data)
+	if (pImage->m_data)
 		free(pImage->m_data);
  	if (pImage->m_hostname)
 		free(pImage->m_hostname);
@@ -751,6 +763,7 @@ PtDspyError DspyImageDelayClose(PtDspyImageHandle image)
 	{
 		if(pImage->m_imageType == Type_Framebuffer || pImage->m_imageType == Type_ZFramebuffer)
 		{
+#ifndef	AQSIS_NO_FLTK
 			if( pImage->m_imageType == Type_ZFramebuffer )
 			{
 				// Now that we have all of our data, calculate some handy statistics ...
@@ -815,6 +828,7 @@ PtDspyError DspyImageDelayClose(PtDspyImageHandle image)
 				Fl::check();
 			}
 			Fl::run();
+#endif // AQSIS_NO_FLTK
 		}
 		return(DspyImageClose(image));
 	}
