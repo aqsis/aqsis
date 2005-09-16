@@ -6,13 +6,42 @@ env.AppendUnique(CCFLAGS=['-g', '-O2'])
 env.AppendUnique(CPPPATH = [env.Dir('#/libaqsistypes/posix')])
 
 # Point at the boost headers.
+# todo: need to find a way of determining this location automatically
 env.AppendUnique(CPPPATH = ['/usr/local/include/boost-1_33'])
 
 # Find out where the TIFF headers are, look in common places for Fink and DarwinPorts.
 tiffiofile = env.FindFile('tiffio.h', ['$tiff_include_path', '/usr/local/include', '/opt/local/include'])
-env.Replace(tiff_include_path = os.path.dirname(tiffiofile.abspath))
+if tiffiofile != None:
+	env.Replace(tiff_include_path = os.path.dirname(tiffiofile.abspath))
 
 # Find out where the TIFF libraries are, look in common places for Fink and DarwinPorts.
 tifflibfile = env.FindFile('libtiff.a', ['$tiff_lib_path', '/usr/local/lib', '/opt/local/lib'])
-env.Replace(tiff_lib_path = os.path.dirname(tifflibfile.abspath))
+if tifflibfile != None:
+	env.Replace(tiff_lib_path = os.path.dirname(tifflibfile.abspath))
+env.Replace(tiff_lib = 'tiff')
 
+# Find out where the JPEG headers are, look in common places for Fink and DarwinPorts.
+jpegiofile = env.FindFile('jpeglib.h', ['$jpeg_include_path', '/usr/local/include', '/opt/local/include'])
+if jpegiofile != None:
+	env.Replace(jpeg_include_path = os.path.dirname(jpegiofile.abspath))
+
+# Find out where the JPEG libraries are, look in common places for Fink and DarwinPorts.
+jpeglibfile = env.FindFile('libjpeg.a', ['$jpeg_lib_path', '/usr/local/lib', '/opt/local/lib'])
+if jpeglibfile != None:
+	env.Replace(jpeg_lib_path = os.path.dirname(jpeglibfile.abspath))
+env.Replace(jpeg_lib = 'jpeg')
+
+# Find out where the zlib headers are, look in common places for Fink and DarwinPorts.
+zlibiofile = env.FindFile('zlib.h', ['$zlib_include_path', '/usr/local/include', '/opt/local/include'])
+if zlibiofile != None:
+	env.Replace(zlib_include_path = os.path.dirname(zlibiofile.abspath))
+
+# Find out where the zlib libraries are, look in common places for Fink and DarwinPorts.
+zliblibfile = env.FindFile('libz.a', ['$zlib_lib_path', '/usr/local/lib', '/opt/local/lib'])
+if zliblibfile != None:
+	env.Replace(zlib_lib_path = os.path.dirname(zliblibfile.abspath))
+env.Replace(z_lib = 'z')
+
+# Ensure that shared libraries have their install name set to not include a path, all shared libraries we link 
+# against will be in the bin directory with the executables.
+env.AppendUnique(SHLINKFLAGS = ['-install_name', '${TARGET.file}'])

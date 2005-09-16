@@ -3,12 +3,6 @@ Import('pixelsave')
 tga2tif_sources=Split("""
 	tga2tif.c""")
 
-if 'darwin' == env['PLATFORM']:
-	tga2tif_libs = ['tiff', 'z', 'jpg2tif']
-
-if 'win32' == env['PLATFORM']:
-	tga2tif_libs = ['libtiff', 'libz', 'jpg2tif', 'ws2_32']
-
-tga2tif = env.SharedLibrary('tga2tif', tga2tif_sources + pixelsave, LIBS=tga2tif_libs)
+tga2tif = env.SharedLibrary('tga2tif', tga2tif_sources + pixelsave, LIBS=['$tiff_lib', '$z_lib', 'jpg2tif'])
 
 env.Install('$BINDIR', tga2tif)

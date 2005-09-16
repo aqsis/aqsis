@@ -3,12 +3,6 @@ Import('pixelsave')
 gif2tif_sources=Split("""
 	gif2tif.c""")
 
-if 'darwin' == env['PLATFORM']:
-	gif2tif_libs = ['tiff', 'z']
-
-if 'win32' == env['PLATFORM']:
-	gif2tif_libs = ['libtiff', 'libz', 'ws2_32']
-
-gif2tif = env.SharedLibrary('gif2tif', gif2tif_sources + pixelsave, LIBS=gif2tif_libs)
+gif2tif = env.SharedLibrary('gif2tif', gif2tif_sources + pixelsave, LIBS=['$tiff_lib', '$z_lib'])
 
 env.Install('$BINDIR', gif2tif)

@@ -3,12 +3,6 @@ Import('pixelsave')
 pcx2tif_sources=Split("""
 	pcx2tif.c""")
 
-if 'darwin' == env['PLATFORM']:
-	pcx2tif_libs = ['tiff', 'z']
-
-if 'win32' == env['PLATFORM']:
-	pcx2tif_libs = ['libtiff', 'libz', 'ws2_32']
-
-pcx2tif = env.SharedLibrary('pcx2tif', pcx2tif_sources + pixelsave, LIBS=pcx2tif_libs)
+pcx2tif = env.SharedLibrary('pcx2tif', pcx2tif_sources + pixelsave, LIBS=['$tiff_lib', '$z_lib'])
 
 env.Install('$BINDIR', pcx2tif)

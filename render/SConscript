@@ -44,18 +44,13 @@ aqsisenv = env.Copy()
 aqsisenv.AppendUnique(CPPDEFINES=[('_qBUILDING', 'CORE'), ('CORE', 1)])
 
 if 'darwin' == aqsisenv['PLATFORM']:
-	aqsisenv.AppendUnique(CPPDEFINES=[('DEFAULT_PLUGIN_PATH', '\\"${BINDIR}\\"')])
-	aqsisdll_libs = ['tiff', 'z']
 	aqsisenv.AppendUnique(LINKFLAGS = ['-framework', 'Carbon'])
-	aqsislibname = '${SHLIBPREFIX}aqsis${SHLIBSUFFIX}'
-	aqsisenv.AppendUnique(SHLINKFLAGS = ['-install_name', aqsislibname])
 
 if 'win32' == aqsisenv['PLATFORM']:
 	aqsisdll_sources = aqsisdll_sources + ["libaqsis.def"]
-	aqsisdll_libs = ['libtiff', 'libz', 'ws2_32']
 
 
 aqsisdll = aqsisenv.SharedLibrary('aqsis', aqsisdll_sources, 
-	LIBS=['ddmanager', 'raytrace', 'rib2', 'rib2ri', 'shaderexecenv', 'shadervm', 'aqsistypes'] + aqsisdll_libs)
+	LIBS=['ddmanager', 'raytrace', 'rib2', 'rib2ri', 'shaderexecenv', 'shadervm', 'aqsistypes', '$tiff_lib', '$z_lib'])
 
 aqsisenv.Install('$BINDIR', aqsisdll)

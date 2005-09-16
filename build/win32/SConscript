@@ -10,3 +10,5 @@ if env['tiff_lib_path'] == "":
 env.Replace(YACC = '${BISON}')
 env.Replace(LEX = '${FLEX}')
 env.Replace(YACCFLAGS = '--no-lines -d')
+env.Replace(jpeg_lib = 'libjpeg')
+env.Replace(tiff_lib = 'libtiff')
