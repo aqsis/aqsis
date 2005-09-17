@@ -690,7 +690,7 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 				const unsigned char* _pdatarow = pdatarow;
 				for ( x = xmin; x < xmaxplus1; x++ )
 				{
-					TqFloat value = reinterpret_cast<const RtFloat*>(_pdatarow)[0];
+					TqFloat value = reinterpret_cast<const TqFloat*>(_pdatarow)[0];
 					TqInt so = ( y * pImage->m_width * 3 * sizeof(unsigned char) ) + ( x * 3 * sizeof(unsigned char) );
 					pImage->m_zfbdata[ so + 0 ] =
 					    pImage->m_zfbdata[ so + 1 ] =
