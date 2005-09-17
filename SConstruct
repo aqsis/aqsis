@@ -40,7 +40,6 @@ SConscript('build_check.py')
 
 Help(opts.GenerateHelpText(env))
 
-SConscript('api/SConscript')
 SConscript('libaqsistypes/SConscript')
 SConscript('libargparse/SConscript')
 SConscript('libddmanager/SConscript')

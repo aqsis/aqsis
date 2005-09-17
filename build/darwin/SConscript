@@ -45,3 +45,6 @@ env.Replace(z_lib = 'z')
 # Ensure that shared libraries have their install name set to not include a path, all shared libraries we link 
 # against will be in the bin directory with the executables.
 env.AppendUnique(SHLINKFLAGS = ['-install_name', '${TARGET.file}'])
+
+# Setup the xsltproc program location
+env.Replace(XSLTPROC = 'xsltproc')
