@@ -4,9 +4,6 @@ from build_support import *
 
 # This allows the developer to choose the version of msvs from the command line.
 opts = Options()
-opts.Add(EnumOption('MSVS_VERSION', 'MS Visual C++ Version', '6.0', allowed_values=('6.0', '7.1')))
-opts.Add('BISON', 'Point to the bison executable', File('#/../win32libs/bin/bison'))
-opts.Add('FLEX', 'Point to the flex executable', File('#/../win32libs/bin/flex'))
 opts.Add('tiff_include_path', 'Point to the tiff header files', '')
 opts.Add('tiff_lib_path', 'Point to the tiff library files', '')
 opts.Add('boost_include_path', 'Point to the boost header files', '')
@@ -17,7 +14,7 @@ opts.Add('zlib_lib_path', 'Point to the zlib library files', '')
 
 # Create the default environment
 env = Environment(options = opts)
-Export('env')
+Export('env opts')
 
 # Determine the target and load the appropriate configuration SConscript
 target_dir =  '#' + SelectBuildDir('build')
@@ -28,17 +25,16 @@ env.Replace(BINDIR = target_dir + os.sep + 'bin')
 env.Replace(LIBDIR = target_dir + os.sep + 'lib')
 
 # Setup common environment settings to allow includes from the various local folders
-env.AppendUnique(CPPPATH = ['#/libaqsistypes','#/render', '#/libshaderexecenv', '#/librib2', '#/libshadervm', '#/librib2ri', '#/libargparse', '#/libslparse', '#/libcodegenvm', '$tiff_include_path', '$jpeg_include_path', '$zlib_include_path'])
+env.AppendUnique(CPPPATH = ['#/libaqsistypes','#/render', '#/libshaderexecenv', '#/librib2', '#/libshadervm', '#/librib2ri', '#/libargparse', '#/libslparse', '#/libcodegenvm', '$tiff_include_path', '$jpeg_include_path', '$zlib_include_path', '$boost_include_path'])
 env.AppendUnique(CPPDEFINES=[('DEFAULT_PLUGIN_PATH', '\\"' + env.Dir('${BINDIR}').abspath + '\\"')])
 
 # Setup the include path to the tiff headers (should have been determined in the system specific sections above).
 env.AppendUnique(LIBPATH = ['$LIBDIR', '$BINDIR', '$tiff_lib_path', '$jpeg_lib_path', '$zlib_lib_path'])
 
+Help(opts.GenerateHelpText(env))
 	
 # Check for the existence of the various dependencies
 SConscript('build_check.py')
-
-Help(opts.GenerateHelpText(env))
 
 SConscript('libaqsistypes/SConscript')
 SConscript('libargparse/SConscript')

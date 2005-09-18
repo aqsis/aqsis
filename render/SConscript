@@ -51,9 +51,13 @@ if 'win32' == aqsisenv['PLATFORM']:
 
 
 aqsisenv.Replace(APIXML = aqsisenv.File('api.xml'))
-aqsisenv.Command('ri_cache.inl', 'apicache.xsl', ['$XSLTPROC -o $TARGET $SOURCE $APIXML'])
-aqsisenv.Command('ri.inl', 'apiheader.xsl', ['$XSLTPROC -o $TARGET $SOURCE $APIXML'])
-aqsisenv.Command('ri_validate.inl', 'apivalidate.xsl', ['$XSLTPROC -o $TARGET $SOURCE $APIXML'])
+cachegen = aqsisenv.Command('ri_cache.inl', 'apicache.xsl', ['$XSLTPROC -o $TARGET $SOURCE $APIXML'])
+headergen = aqsisenv.Command('ri.inl', 'apiheader.xsl', ['$XSLTPROC -o $TARGET $SOURCE $APIXML'])
+validategen = aqsisenv.Command('ri_validate.inl', 'apivalidate.xsl', ['$XSLTPROC -o $TARGET $SOURCE $APIXML'])
+
+aqsisenv.Depends(cachegen, '$APIXML')
+aqsisenv.Depends(headergen, '$APIXML')
+aqsisenv.Depends(validategen, '$APIXML')
 
 aqsisdll = aqsisenv.SharedLibrary('aqsis', aqsisdll_sources, 
 	LIBS=['ddmanager', 'raytrace', 'rib2', 'rib2ri', 'shaderexecenv', 'shadervm', 'aqsistypes', '$tiff_lib', '$z_lib'])

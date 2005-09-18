@@ -1,13 +1,13 @@
 import os.path
 
-Import('env')
+Import('env opts')
 
 env.AppendUnique(CCFLAGS=['-g', '-O2'])
 env.AppendUnique(CPPPATH = [env.Dir('#/libaqsistypes/posix')])
 
 # Point at the boost headers.
 # todo: need to find a way of determining this location automatically
-env.AppendUnique(CPPPATH = ['/usr/local/include/boost-1_33'])
+env.Replace(boost_include_path = ['/usr/local/include/boost-1_33'])
 
 # Find out where the TIFF headers are, look in common places for Fink and DarwinPorts.
 tiffiofile = env.FindFile('tiffio.h', ['$tiff_include_path', '/usr/local/include', '/opt/local/include'])
