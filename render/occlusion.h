@@ -140,8 +140,8 @@ private:
 	TqFloat		m_MaxOpaqueZ;
 	TqInt		m_MinDofBoundIndex;
 	TqInt		m_MaxDofBoundIndex;
-	TqInt		m_MinDetailLevel;
-	TqInt		m_MaxDetailLevel;
+	TqFloat		m_MinDetailLevel;
+	TqFloat		m_MaxDetailLevel;
 	TqChildArray	m_Children;
 	TqSampleIndices	m_SampleIndices;
 

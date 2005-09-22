@@ -76,7 +76,7 @@ CqOcclusionTree::SplitNode(CqOcclusionTreePtr& a, CqOcclusionTreePtr& b)
 
 	TqFloat minTime = m_MaxTime, maxTime = m_MinTime;
 	TqInt minDofIndex = m_MaxDofBoundIndex, maxDofIndex = m_MinDofBoundIndex;
-	TqInt minDetailLevel = m_MaxDetailLevel, maxDetailLevel = m_MinDetailLevel;
+	TqFloat minDetailLevel = m_MaxDetailLevel, maxDetailLevel = m_MinDetailLevel;
 
 	TqInt i;
 	for(i = 0; i<median; ++i)
@@ -193,8 +193,8 @@ void CqOcclusionTree::InitialiseBounds()
 	TqFloat maxTime = minTime;
 	TqInt	minDofIndex = sample.m_DofOffsetIndex;
 	TqInt	maxDofIndex = minDofIndex;
-	TqInt	minDetailLevel = sample.m_DetailLevel;
-	TqInt	maxDetailLevel = minDetailLevel;
+	TqFloat	minDetailLevel = sample.m_DetailLevel;
+	TqFloat	maxDetailLevel = minDetailLevel;
 	std::vector<std::pair<TqInt, TqInt> >::iterator i;
 	for(i = m_SampleIndices.begin()+1; i!=m_SampleIndices.end(); ++i)
 	{
