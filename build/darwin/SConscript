@@ -2,8 +2,13 @@ import os.path
 
 Import('env opts')
 
-env.AppendUnique(CCFLAGS=['-g', '-O2'])
+opts.Add('bison', 'Point to the bison executable', '/opt/local/bin/bison')
+opts.Add('flex', 'Point to the flex executable', '/opt/local/bin/flex')
+opts.Update(env)
+
+env.AppendUnique(CCFLAGS=['-g', '-O2', '-fno-common'])
 env.AppendUnique(CPPPATH = [env.Dir('#/libaqsistypes/posix')])
+env.AppendUnique(CPPDEFINES=[('NDEBUG', '1'), ('PLUGINS', '1')])
 
 # Point at the boost headers.
 # todo: need to find a way of determining this location automatically
@@ -44,7 +49,13 @@ env.Replace(z_lib = 'z')
 
 # Ensure that shared libraries have their install name set to not include a path, all shared libraries we link 
 # against will be in the bin directory with the executables.
-env.AppendUnique(SHLINKFLAGS = ['-install_name', '${TARGET.file}'])
+env.AppendUnique(SHLINKFLAGS = ['-install_name', '@executable_path' + os.path.sep + '${TARGET.file}'])
+
+env.AppendUnique(SHLINKFLAGS = ['-single_module', '-flat_namespace', '-undefined', 'suppress'])
 
 # Setup the xsltproc program location
 env.Replace(XSLTPROC = 'xsltproc')
+
+env.Replace(YACC = '${bison}')
+env.Replace(LEX = '${flex}')
+env.Replace(YACCFLAGS = '--no-lines -d')

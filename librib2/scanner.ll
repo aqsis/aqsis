@@ -18,11 +18,7 @@ extern "C" int isatty(int);
 #include <stdio.h>
 
 #include "libribtypes.h"
-#ifdef	WIN32
 #include "parser.hpp"
-#else
-#include "parser.h"
-#endif /* WIN32 */
 
 #include "bdec.h"
 

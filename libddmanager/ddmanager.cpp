@@ -717,7 +717,7 @@ void CqDDManager::InitialiseDisplayNameMap()
 
 
 	CqString strConfigFile("displays.ini");
-	const CqString* displays = QGetRenderContext()->optCurrent().GetStringOption( "searchpath", "displays" );
+	const CqString* displays = QGetRenderContext()->optCurrent().GetStringOption( "searchpath", "display" );
 	if( displays )
 		strConfigFile = displays[ 0 ] + "/" + strConfigFile;
 

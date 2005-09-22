@@ -12,11 +12,7 @@
 
 using namespace Aqsis;
 
-#ifdef	WIN32
 #include "parser.hpp"
-#else
-#include "parser.h"
-#endif
 
 #ifdef	WIN32
 extern "C" TqInt isatty(TqInt);
