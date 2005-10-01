@@ -1642,7 +1642,7 @@ void CqTextureMap::WriteTileImage( TIFF* ptex, TqFloat *raster, TqUlong width, T
 {
 	//TIFFCreateDirectory(ptex);
 	TqChar version[ 80 ];
-	sprintf( version, "%s %s", STRNAME, VERSION_STR );
+	snprintf( version, 80, "%s %s", STRNAME, VERSION_STR );
 	TIFFSetField( ptex, TIFFTAG_SOFTWARE, ( char* ) version );
 	TIFFSetField( ptex, TIFFTAG_IMAGEWIDTH, width );
 	TIFFSetField( ptex, TIFFTAG_IMAGELENGTH, length );
@@ -1687,7 +1687,7 @@ void CqTextureMap::WriteTileImage( TIFF* ptex, TqFloat *raster, TqUlong width, T
 			TIFFWriteTile( ptex, ptile, x, y, 0, 0 );
 		}
 		TIFFWriteDirectory( ptex );
-
+		_TIFFfree( ptile );
 	}
 }
 
@@ -1700,7 +1700,7 @@ void CqTextureMap::WriteTileImage( TIFF* ptex, TqUshort *raster, TqUlong width, 
 {
 	//TIFFCreateDirectory(ptex);
 	TqChar version[ 80 ];
-	sprintf( version, "%s %s", STRNAME, VERSION_STR );
+	snprintf( version, 80, "%s %s", STRNAME, VERSION_STR );
 	TIFFSetField( ptex, TIFFTAG_SOFTWARE, ( char* ) version );
 	TIFFSetField( ptex, TIFFTAG_IMAGEWIDTH, width );
 	TIFFSetField( ptex, TIFFTAG_IMAGELENGTH, length );
@@ -1745,7 +1745,7 @@ void CqTextureMap::WriteTileImage( TIFF* ptex, TqUshort *raster, TqUlong width, 
 			TIFFWriteTile( ptex, ptile, x, y, 0, 0 );
 		}
 		TIFFWriteDirectory( ptex );
-
+		_TIFFfree( ptile );
 	}
 }
 
@@ -1757,7 +1757,7 @@ void CqTextureMap::WriteTileImage( TIFF* ptex, TqUshort *raster, TqUlong width, 
 void CqTextureMap::WriteTileImage( TIFF* ptex, TqPuchar raster, TqUlong width, TqUlong length, TqUlong twidth, TqUlong tlength, TqInt samples, TqInt compression, TqInt quality )
 {
 	TqChar version[ 80 ];
-	sprintf( version, "%s %s", STRNAME, VERSION_STR );
+	snprintf( version, 80, "%s %s", STRNAME, VERSION_STR );
 	TIFFSetField( ptex, TIFFTAG_SOFTWARE, ( char* ) version );
 	TIFFSetField( ptex, TIFFTAG_IMAGEWIDTH, width );
 	TIFFSetField( ptex, TIFFTAG_IMAGELENGTH, length );
@@ -1802,6 +1802,7 @@ void CqTextureMap::WriteTileImage( TIFF* ptex, TqPuchar raster, TqUlong width, T
 			TIFFWriteTile( ptex, ptile, x, y, 0, 0 );
 		}
 		TIFFWriteDirectory( ptex );
+		_TIFFfree( ptile );
 	}
 }
 

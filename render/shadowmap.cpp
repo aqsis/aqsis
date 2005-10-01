@@ -527,8 +527,6 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 
 void CqShadowMap::SaveShadowMap( const CqString& strShadowName, TqBool append )
 {
-    TqChar version[ 80 ];
-
     const char* mode = (append)? "a" : "w";
 
     // Save the shadowmap to a binary file.
@@ -551,8 +549,6 @@ void CqShadowMap::SaveShadowMap( const CqString& strShadowName, TqBool append )
                     matWToS[ ( r * 4 ) + c ] = matWorldToScreen()[ r ][ c ];
                 }
             }
-            sprintf( version, "%s %s", STRNAME, VERSION_STR );
-            TIFFSetField( pshadow, TIFFTAG_SOFTWARE, ( char* ) version );
             TIFFSetField( pshadow, TIFFTAG_PIXAR_MATRIX_WORLDTOCAMERA, matWToC );
             TIFFSetField( pshadow, TIFFTAG_PIXAR_MATRIX_WORLDTOSCREEN, matWToS );
             TIFFSetField( pshadow, TIFFTAG_PIXAR_TEXTUREFORMAT, SHADOWMAP_HEADER );
