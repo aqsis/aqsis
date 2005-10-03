@@ -1641,9 +1641,9 @@ void CqTextureMap::WriteTileImage( TIFF* ptex, CqTextureMapBuffer* pBuffer, TqUl
 void CqTextureMap::WriteTileImage( TIFF* ptex, TqFloat *raster, TqUlong width, TqUlong length, TqUlong twidth, TqUlong tlength, TqInt samples, TqInt compression, TqInt quality )
 {
 	//TIFFCreateDirectory(ptex);
-	TqChar version[ 80 ];
-	snprintf( version, 80, "%s %s", STRNAME, VERSION_STR );
-	TIFFSetField( ptex, TIFFTAG_SOFTWARE, ( char* ) version );
+	std::ostringstream version;
+	version << STRNAME << " " << VERSION_STR << std::ends;
+	TIFFSetField( ptex, TIFFTAG_SOFTWARE, version.str ().c_str () );
 	TIFFSetField( ptex, TIFFTAG_IMAGEWIDTH, width );
 	TIFFSetField( ptex, TIFFTAG_IMAGELENGTH, length );
 	TIFFSetField( ptex, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG );
@@ -1699,9 +1699,9 @@ void CqTextureMap::WriteTileImage( TIFF* ptex, TqFloat *raster, TqUlong width, T
 void CqTextureMap::WriteTileImage( TIFF* ptex, TqUshort *raster, TqUlong width, TqUlong length, TqUlong twidth, TqUlong tlength, TqInt samples, TqInt compression, TqInt quality )
 {
 	//TIFFCreateDirectory(ptex);
-	TqChar version[ 80 ];
-	snprintf( version, 80, "%s %s", STRNAME, VERSION_STR );
-	TIFFSetField( ptex, TIFFTAG_SOFTWARE, ( char* ) version );
+	std::ostringstream version;
+	version << STRNAME << " " << VERSION_STR << std::ends;
+	TIFFSetField( ptex, TIFFTAG_SOFTWARE, version.str ().c_str () );
 	TIFFSetField( ptex, TIFFTAG_IMAGEWIDTH, width );
 	TIFFSetField( ptex, TIFFTAG_IMAGELENGTH, length );
 	TIFFSetField( ptex, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG );
@@ -1756,9 +1756,9 @@ void CqTextureMap::WriteTileImage( TIFF* ptex, TqUshort *raster, TqUlong width, 
  */
 void CqTextureMap::WriteTileImage( TIFF* ptex, TqPuchar raster, TqUlong width, TqUlong length, TqUlong twidth, TqUlong tlength, TqInt samples, TqInt compression, TqInt quality )
 {
-	TqChar version[ 80 ];
-	snprintf( version, 80, "%s %s", STRNAME, VERSION_STR );
-	TIFFSetField( ptex, TIFFTAG_SOFTWARE, ( char* ) version );
+	std::ostringstream version;
+	version << STRNAME << " " << VERSION_STR << std::ends;
+	TIFFSetField( ptex, TIFFTAG_SOFTWARE, version.str ().c_str () );
 	TIFFSetField( ptex, TIFFTAG_IMAGEWIDTH, width );
 	TIFFSetField( ptex, TIFFTAG_IMAGELENGTH, length );
 	TIFFSetField( ptex, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG );
