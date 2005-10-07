@@ -1,7 +1,6 @@
-Import('env')
+Import('env conf')
 
 # Check for the availability of various important files.
-conf = Configure(env)
 
 # Check for the TIFF libraries and headers
 if not conf.CheckLibWithHeader('tiff', 'tiffio.h', 'c++'):
@@ -18,4 +17,3 @@ if not conf.CheckLibWithHeader('z', 'zlib.h', 'c++'):
 	print 'Cannot find zlib'
 	Exit(1)
 
-env = conf.Finish()

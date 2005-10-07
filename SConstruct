@@ -15,7 +15,8 @@ opts.Add('bison2', 'Point to the zlib library files', '/opt/local/bin/bison')
 
 # Create the default environment
 env = Environment(options = opts)
-Export('env opts')
+conf = Configure(env)
+Export('env opts conf')
 
 # Determine the target and load the appropriate configuration SConscript
 target_dir =  '#' + SelectBuildDir('build')
@@ -36,6 +37,8 @@ Help(opts.GenerateHelpText(env))
 	
 # Check for the existence of the various dependencies
 SConscript('build_check.py')
+
+env = conf.Finish()
 
 SConscript('libaqsistypes/SConscript')
 SConscript('libargparse/SConscript')
