@@ -1,3 +1,14 @@
+2005-10-10 00:12  jpgrad (Jonathan Merritt)
+
+	* libslparse/funcdef.cpp: Hooked up vector cellnoise() functions.
+	  Previously only float, color and point cellnoise() were hooked up
+	  properly, so vector cellnoise() was being returned as a float.
+	  (Bug #1320079)
+	* libaqsistypes/cellnoise.cpp: Made major changes to the hash lookup
+	  for cellnoise() so that all values of a vector output depend upon
+	  all values provided by the input.  Also changed C-style casts to
+	  CPP-style static_cast. (Bug #1320079)
+
 2005-08-30 19:52  pgregory
 
 	* Renderer.dsw: Removed genkeywords project for now.

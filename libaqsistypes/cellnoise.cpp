@@ -24,6 +24,13 @@
 */ 
 // This is based on code authored orignally by Thomas Burge published on
 //   the Affine webpages.
+// Major changes were made to the hashing functions by Jonathan Merritt
+//   (j.merritt@pgrad.unimelb.edu.au) on 10th Oct 2005.  These changes allow
+//   the hash for all elements of a return value to depend upon all elements
+//   of the input value(s).  Previously (and in the code by T Burge), there
+//   were numerous instances where (for example), the hash for the
+//   x-component of the output would depend only upon the x-component of the
+//   input, leading to heavily coherent noise.
 
 #include	"aqsis.h"
 
@@ -37,10 +44,10 @@ START_NAMESPACE( Aqsis )
 
 TqFloat CqCellNoise::FCellNoise1( TqFloat u )
 {
-    if ( u < 0.0 ) u -= 1;
-    TqInt i = m_PermuteTable[ ( ( unsigned int ) ( u ) ) & 0x7ff ];
+	if ( u < 0.0 ) u -= 1;
+	TqInt i = m_PermuteTable[ static_cast<unsigned int>( u ) & 0x7ff ];
 
-    return ( m_RandomTable[ i ] );
+	return ( m_RandomTable[ i ] );
 }
 
 
@@ -50,13 +57,13 @@ TqFloat CqCellNoise::FCellNoise1( TqFloat u )
 
 TqFloat CqCellNoise::FCellNoise2( TqFloat u, TqFloat v )
 {
-    if ( u < 0.0 ) u -= 1;
-    TqInt i = m_PermuteTable[ ( ( unsigned int ) ( u ) ) & 0x7ff ];
+	if ( u < 0.0 ) u -= 1;
+	if ( v < 0.0 ) v -= 1;
 
-    if ( v < 0.0 ) v -= 1;
-    i = m_PermuteTable[ i + ( unsigned int ) ( v ) & 0x7ff ];
+	TqInt i = m_PermuteTable[ static_cast<unsigned int>( u ) & 0x7ff ];
+	i = m_PermuteTable[  i  + static_cast<unsigned int>( v ) & 0x7ff ];
 
-    return ( m_RandomTable[ i ] );
+	return ( m_RandomTable[ i ] );
 }
 
 
@@ -66,19 +73,19 @@ TqFloat CqCellNoise::FCellNoise2( TqFloat u, TqFloat v )
 
 TqFloat CqCellNoise::FCellNoise3( const CqVector3D& P )
 {
-    TqFloat f = P.x();
-    if ( f < 0.0 ) f -= 1;
-    TqInt i = m_PermuteTable[ ( ( unsigned int ) ( f ) ) & 0x7ff ];
+	TqFloat x = P.x();
+	TqFloat y = P.x();
+	TqFloat z = P.z();
 
-    f = P.y();
-    if ( f < 0.0 ) f -= 1;
-    i = m_PermuteTable[ m_PermuteTable[ i ] + ( unsigned int ) ( f ) & 0x7ff ];
+	if ( x < 0.0 ) x -= 1;
+	if ( y < 0.0 ) y -= 1;
+	if ( z < 0.0 ) z -= 1;
 
-    f = P.z();
-    if ( f < 0.0 ) f -= 1;
-    i = m_PermuteTable[ m_PermuteTable[ i ] + ( unsigned int ) ( f ) & 0x7ff ];
+	TqInt i = m_PermuteTable[ static_cast<unsigned int>( x ) & 0x7ff ];
+	i = m_PermuteTable[  i  + static_cast<unsigned int>( y ) & 0x7ff ];
+	i = m_PermuteTable[  i  + static_cast<unsigned int>( z ) & 0x7ff ];
 
-    return ( m_RandomTable[ i ] );
+	return ( m_RandomTable[ i ] );
 }
 
 
@@ -88,23 +95,21 @@ TqFloat CqCellNoise::FCellNoise3( const CqVector3D& P )
 
 TqFloat CqCellNoise::FCellNoise4( const CqVector3D& P, TqFloat v )
 {
-    TqFloat f = P.x();
-    if ( f < 0.0 ) f -= 1;
-    TqInt i = m_PermuteTable[ ( ( unsigned int ) ( f ) ) & 0x7ff ];
+	TqFloat x = P.x();
+	TqFloat y = P.y();
+	TqFloat z = P.z();
 
-    f = P.y();
-    if ( f < 0.0 ) f -= 1;
-    i = m_PermuteTable[ m_PermuteTable[ i ] + ( unsigned int ) ( f ) & 0x7ff ];
+	if ( x < 0.0 ) x -= 1;
+	if ( y < 0.0 ) y -= 1;
+	if ( z < 0.0 ) z -= 1;
+	if ( v < 0.0 ) v -= 1;
 
-    f = P.z();
-    if ( f < 0.0 ) f -= 1;
-    i = m_PermuteTable[ m_PermuteTable[ i ] + ( unsigned int ) ( f ) & 0x7ff ];
+	TqInt i = m_PermuteTable[ static_cast<unsigned int>( x ) & 0x7ff ];
+	i = m_PermuteTable[  i  + static_cast<unsigned int>( y ) & 0x7ff ];
+	i = m_PermuteTable[  i  + static_cast<unsigned int>( z ) & 0x7ff ];
+	i = m_PermuteTable[  i  + static_cast<unsigned int>( v ) & 0x7ff ];
 
-    f = v;
-    if ( f < 0.0 ) f -= 1;
-    i = m_PermuteTable[ m_PermuteTable[ i ] + ( ( unsigned int ) ( f ) ) & 0x7ff ];
-
-    return ( m_RandomTable[ i ] );
+	return ( m_RandomTable[ i ] );
 }
 
 
@@ -114,17 +119,17 @@ TqFloat CqCellNoise::FCellNoise4( const CqVector3D& P, TqFloat v )
 
 CqVector3D CqCellNoise::PCellNoise1( TqFloat u )
 {
-    if ( u < 0.0 ) u -= 1;
-    TqInt i = m_PermuteTable[ ( ( unsigned int ) ( u ) ) & 0x7ff ];
+	CqVector3D result;
+	
+	if ( u < 0.0 ) u -= 1;
 
-    CqVector3D result;
-    result.x( m_RandomTable[ i ] );
-    i = m_PermuteTable[ m_PermuteTable[ i ] + i ];
-    result.y( m_RandomTable[ i ] );
-    i = m_PermuteTable[ m_PermuteTable[ i ] + i ];
-    result.z( m_RandomTable[ i ] );
+	TqInt i = m_PermuteTable[ static_cast<unsigned int>( u ) & 0x7ff ];
 
-    return ( result );
+	result.x( m_RandomTable[ i ] );  i = m_PermuteTable[ i ];
+	result.y( m_RandomTable[ i ] );  i = m_PermuteTable[ i ];
+	result.z( m_RandomTable[ i ] );
+
+	return ( result );
 }
 
 
@@ -134,20 +139,19 @@ CqVector3D CqCellNoise::PCellNoise1( TqFloat u )
 
 CqVector3D CqCellNoise::PCellNoise2( TqFloat u, TqFloat v )
 {
-    if ( u < 0.0 ) u -= 1;
-    TqInt i = m_PermuteTable[ ( ( unsigned int ) ( u ) ) & 0x7ff ];
+	CqVector3D result;
 
-    if ( v < 0.0 ) v -= 1;
-    i = m_PermuteTable[ m_PermuteTable[ i ] + ( unsigned int ) ( v ) & 0x7ff ];
+	if ( u < 0.0 ) u -= 1;
+	if ( v < 0.0 ) v -= 1;
 
-    CqVector3D result;
-    result.x( m_RandomTable[ i ] );
-    i = m_PermuteTable[ i ];
-    result.y( m_RandomTable[ i ] );
-    i = m_PermuteTable[ i ];
-    result.z( m_RandomTable[ i ] );
+	TqInt i = m_PermuteTable[ static_cast<unsigned int>( u ) & 0x7ff ];
+	i = m_PermuteTable[  i  + static_cast<unsigned int>( v ) & 0x7ff ];
 
-    return ( result );
+	result.x( m_RandomTable[ i ] );  i = m_PermuteTable[ i ];
+	result.y( m_RandomTable[ i ] );  i = m_PermuteTable[ i ];
+	result.z( m_RandomTable[ i ] );
+
+	return ( result );
 }
 
 
@@ -157,24 +161,25 @@ CqVector3D CqCellNoise::PCellNoise2( TqFloat u, TqFloat v )
 
 CqVector3D CqCellNoise::PCellNoise3( const CqVector3D& P )
 {
-    CqVector3D result;
+	CqVector3D result;
 
-    TqFloat f = P.x();
-    if ( f < 0.0 ) f -= 1;
-    TqInt i = m_PermuteTable[ ( unsigned int ) ( f ) & 0x7ff ];
-    result.x( m_RandomTable[ i ] );
+	TqFloat x = P.x();
+	TqFloat y = P.y();
+	TqFloat z = P.z();
 
-    f = P.y();
-    if ( f < 0.0 ) f -= 1;
-    i = m_PermuteTable[ m_PermuteTable[ i ] + ( unsigned int ) ( f ) & 0x7ff ];
-    result.y( m_RandomTable[ i ] );
+	if ( x < 0.0 ) x -= 1;
+	if ( y < 0.0 ) y -= 1;
+	if ( z < 0.0 ) z -= 1;
 
-    f = P.z();
-    if ( f < 0.0 ) f -= 1;
-    i = m_PermuteTable[ m_PermuteTable[ i ] + ( unsigned int ) ( f ) & 0x7ff ];
-    result.z( m_RandomTable[ i ] );
+	TqInt i = m_PermuteTable[ static_cast<unsigned int>( x ) & 0x7ff ];
+	i = m_PermuteTable[  i  + static_cast<unsigned int>( y ) & 0x7ff ];
+	i = m_PermuteTable[  i  + static_cast<unsigned int>( z ) & 0x7ff ];
 
-    return ( result );
+	result.x( m_RandomTable[ i ] );  i = m_PermuteTable[ i ];
+	result.y( m_RandomTable[ i ] );  i = m_PermuteTable[ i ];
+	result.z( m_RandomTable[ i ] );
+	
+	return ( result );
 }
 
 
@@ -184,27 +189,27 @@ CqVector3D CqCellNoise::PCellNoise3( const CqVector3D& P )
 
 CqVector3D CqCellNoise::PCellNoise4( const CqVector3D& P, TqFloat v )
 {
-    CqVector3D result;
-    TqFloat f = v;
-    if ( f < 0.0 ) f -= 1;
-    TqInt i = m_PermuteTable[ ( unsigned int ) ( f ) & 0x7ff ];
+	CqVector3D result;
 
-    f = P.x();
-    if ( f < 0.0 ) f -= 1;
-    i = m_PermuteTable[ m_PermuteTable[ i ] + ( unsigned int ) ( f ) & 0x7ff ];
-    result.x( m_RandomTable[ i ] );
+	TqFloat x = P.x();
+	TqFloat y = P.y();
+	TqFloat z = P.z();
 
-    f = P.y();
-    if ( f < 0.0 ) f -= 1;
-    i = m_PermuteTable[ m_PermuteTable[ i ] + ( unsigned int ) ( f ) & 0x7ff ];
-    result.y( m_RandomTable[ i ] );
+	if ( x < 0.0 ) x -= 1;
+	if ( y < 0.0 ) y -= 1;
+	if ( z < 0.0 ) z -= 1;
+	if ( v < 0.0 ) v -= 1;
 
-    f = P.z();
-    if ( f < 0.0 ) f -= 1;
-    i = m_PermuteTable[ m_PermuteTable[ i ] + ( unsigned int ) ( f ) & 0x7ff ];
-    result.z( m_RandomTable[ i ] );
+	TqInt i = m_PermuteTable[ static_cast<unsigned int>( x ) & 0x7ff ];
+	i = m_PermuteTable[  i  + static_cast<unsigned int>( y ) & 0x7ff ];
+	i = m_PermuteTable[  i  + static_cast<unsigned int>( z ) & 0x7ff ];
+	i = m_PermuteTable[  i  + static_cast<unsigned int>( v ) & 0x7ff ];
 
-    return ( CqVector3D( 0, 0, 0 ) );
+	result.x( m_RandomTable[ i ] );  i = m_PermuteTable[ i ];
+	result.y( m_RandomTable[ i ] );  i = m_PermuteTable[ i ];
+	result.z( m_RandomTable[ i ] );
+
+	return ( result );
 }
 
 
