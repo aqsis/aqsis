@@ -5,6 +5,7 @@ rib2_sources = Split("""
 	scanner.cpp
 	parser.cpp""")
 env.CXXFile(target='parser.cpp', source='parser.yy')
+print env.subst('$LEX')
 env.CXXFile(target='scanner.cpp', source='scanner.ll')
 rib2 = env.Library('rib2', rib2_sources)
 env.Install('$LIBDIR', rib2)

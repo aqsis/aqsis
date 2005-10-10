@@ -1,38 +1,40 @@
 Import('env opts')
 
-env.AppendUnique(CCFLAGS=['/GX', '/MD', '/GR', '/Zm200', '/O2'])
-env.AppendUnique(CPPDEFINES=['NO_SYSLOG', 'WIN32', 'PLUGINS'])
-env.AppendUnique(CPPPATH = ['#/libaqsistypes/win32/intel'])
-
 opts.Add(EnumOption('MSVS_VERSION', 'MS Visual C++ Version', '6.0', allowed_values=('6.0', '7.1')))
-opts.Add('BISON', 'Point to the bison executable', File('#/../win32libs/bin/bison'))
-opts.Add('FLEX', 'Point to the flex executable', File('#/../win32libs/bin/flex'))
+opts.Add('bison', 'Point to the bison executable', env.File('#/../win32libs/bin/bison'))
+opts.Add('flex', 'Point to the flex executable', env.File('#/../win32libs/bin/flex'))
+opts.Update(env)
 
 # If the tiff include path isn't specified as an option, choose the default, of the 
 # win32libs project from CVS checked out to the same folder as 'renderer'
 if env['tiff_include_path'] == "":
-	env.Replace(tiff_include_path = ['#/../win32libs/include'])
+	env.Replace(tiff_include_path = env.Dir('#/../win32libs/include'))
 if env['tiff_lib_path'] == "":
-	env.Replace(tiff_lib_path, env.Dir('#/../win32libs/lib'))
+	env.Replace(tiff_lib_path = env.Dir('#/../win32libs/lib'))
 env.Replace(tiff_lib = 'libtiff')
 
 # If the jpeg include path isn't specified as an option, choose the default, of the 
 # win32libs project from CVS checked out to the same folder as 'renderer'
 if env['jpeg_include_path'] == "":
-	env.Replace(jpeg_include_path = ['#/../win32libs/include'])
+	env.Replace(jpeg_include_path = env.Dir('#/../win32libs/include'))
 if env['jpeg_lib_path'] == "":
-	env.Replace(jpeg_lib_path, env.Dir('#/../win32libs/lib'))
+	env.Replace(jpeg_lib_path = env.Dir('#/../win32libs/lib'))
 env.Replace(jpeg_lib = 'libjpeg')
 
 # If the zlib include path isn't specified as an option, choose the default, of the 
 # win32libs project from CVS checked out to the same folder as 'renderer'
 if env['zlib_include_path'] == "":
-	env.Replace(zlib_include_path = ['#/../win32libs/include'])
+	env.Replace(zlib_include_path = env.Dir('#/../win32libs/include'))
 if env['zlib_lib_path'] == "":
-	env.Replace(zlib_lib_path, env.Dir('#/../win32libs/lib'))
+	env.Replace(zlib_lib_path = env.Dir('#/../win32libs/lib'))
 env.Replace(z_lib = 'libz')
 
-env.Replace(YACC = '${BISON}')
-env.Replace(LEX = '${FLEX}')
+env.AppendUnique(CCFLAGS=['/GX', '/MD', '/GR', '/Zm200', '/O2'])
+env.AppendUnique(CPPDEFINES=['NO_SYSLOG', 'WIN32', 'PLUGINS', ('_qBUILDING', 'CORE'), ('CORE', '1')])
+env.AppendUnique(CPPPATH = ['#/libaqsistypes/win32/intel'])
+env.AppendUnique(LIBS = ['ws2_32.lib', 'user32.lib'])
+
+env.Replace(YACC = '${bison}')
+env.Replace(LEX = '${flex}')
 env.Replace(YACCFLAGS = '--no-lines -d')
-env.Replace(XSLTPROC = ['#/../win32libs/include'])
+env.Replace(XSLTPROC = env.File('#/../win32libs/bin/xsltproc'))

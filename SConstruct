@@ -11,7 +11,8 @@ opts.Add('jpeg_include_path', 'Point to the jpeg header files', '')
 opts.Add('jpeg_lib_path', 'Point to the jpeg library files', '')
 opts.Add('zlib_include_path', 'Point to the zlib header files', '')
 opts.Add('zlib_lib_path', 'Point to the zlib library files', '')
-opts.Add('bison2', 'Point to the zlib library files', '/opt/local/bin/bison')
+opts.Add('fltk_include_path', 'Point to the fltk header files', '')
+opts.Add('fltk_lib_path', 'Point to the fltk library files', '')
 
 # Create the default environment
 env = Environment(options = opts)
