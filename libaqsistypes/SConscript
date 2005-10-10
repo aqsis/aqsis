@@ -5,6 +5,7 @@ aqsistypes_sources = Split("""
 	color.cpp
 	file.cpp
 	logging.cpp
+	lowdiscrep.cpp
 	matrix.cpp
 	MultiTimer.cpp
 	noise.cpp

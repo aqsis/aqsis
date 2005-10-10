@@ -53,8 +53,7 @@ START_NAMESPACE( Aqsis )
 
 // Local Variables
 
-TqInt	CqShadowMap::m_rand_index = -1;
-TqFloat	CqShadowMap::m_aRand_no[ 256 ];
+CqLowDiscrepancy	CqShadowMap::m_LowDiscrep(2);
 
 
 //---------------------------------------------------------------------
@@ -64,16 +63,6 @@ TqFloat	CqShadowMap::m_aRand_no[ 256 ];
 CqShadowMap::CqShadowMap( const CqString& strName ) :
         CqTextureMap( strName )
 {
-    static CqRandom rand;
-
-    // Initialise the random table the first time it is needed.
-    if( m_rand_index < 0 )
-    {
-        TqInt i;
-        for ( i = 0; i < 256; i++ )
-            m_aRand_no[ i ] = ( rand.RandomFloat( 2.0f ) - 1.0f );
-        m_rand_index = 0;
-    }
 }
 
 
@@ -470,17 +459,16 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
     TqFloat s = lu;
     TqInt i;
     CqTextureMapBuffer * pTMBa = NULL;
+    TqUint ord = 0;
     for ( i = 0; i < ns; i++ )
     {
         TqFloat t = lv;
         TqInt j;
         for ( j = 0; j < nt; j++ )
         {
-            // Jitter s and t
-            m_rand_index = ( m_rand_index + 1 ) & 255;
-            TqInt iu = static_cast<TqUint>( s + m_aRand_no[ m_rand_index ] * js );
-            m_rand_index = ( m_rand_index + 1 ) & 255;
-            TqInt iv = static_cast<TqUint>( t + m_aRand_no[ m_rand_index ] * jt );
+            TqInt iu = static_cast<TqUint>( s + m_LowDiscrep.Generate(0, ord) * js );
+            TqInt iv = static_cast<TqUint>( t + m_LowDiscrep.Generate(1, ord) * jt );
+	    ++ord;
 
             if( iu < 0 || iu > m_XRes || iv < 0 || iv > m_YRes )
                 continue;
@@ -503,6 +491,7 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
         }
         s += ds;
     }
+    m_LowDiscrep.Reset();
 
     if( NULL != average_depth )
     {

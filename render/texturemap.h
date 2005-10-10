@@ -44,6 +44,7 @@
 #include	"itexturemap.h"
 #include	"ri.h"
 #include	"ishaderexecenv.h"
+#include	"lowdiscrep.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -782,8 +783,7 @@ class CqShadowMap : public CqTextureMap
 
 
 	private:
-		static	TqInt	m_rand_index;			///< Static random number table index.
-		static	TqFloat	m_aRand_no[ 256 ];		///< Random no. table used for jittering the shadow sampling.
+		static	CqLowDiscrepancy	m_LowDiscrep;			///< Low discrepancy point generator.
 
 		TqFloat	m_bias;
 		TqFloat m_bias0;
