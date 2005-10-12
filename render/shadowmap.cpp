@@ -466,8 +466,8 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
         TqInt j;
         for ( j = 0; j < nt; j++ )
         {
-            TqInt iu = static_cast<TqUint>( s + m_LowDiscrep.Generate(0, ord) * js );
-            TqInt iv = static_cast<TqUint>( t + m_LowDiscrep.Generate(1, ord) * jt );
+            TqInt iu = static_cast<TqUint>( s + ( m_LowDiscrep.Generate(0, ord) * 2 ) * js );
+            TqInt iv = static_cast<TqUint>( t + ( m_LowDiscrep.Generate(1, ord) * 2 ) * jt );
 	    ++ord;
 
             if( iu < 0 || iu > m_XRes || iv < 0 || iv > m_YRes )

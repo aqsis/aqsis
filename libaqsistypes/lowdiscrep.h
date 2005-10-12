@@ -28,6 +28,7 @@
 #define LOWDISCREP_H_INCLUDED 1
 
 #include    "aqsis.h"
+#include    "random.h"
 #include    <vector>
 
 
@@ -58,6 +59,7 @@ public:
     TqFloat Generate(TqUint p_axis, TqUint p_i);
 
 private:
+    CqRandom m_Random;
     TqUint m_NextBase;
     TqUint m_Dimensions;
     std::vector<TqUint> m_Bases;
