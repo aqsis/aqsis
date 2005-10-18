@@ -10,6 +10,10 @@ if 'darwin' == displayenv['PLATFORM']:
 	display_libs = ['tiff', 'z']
 	displayenv.AppendUnique(CPPDEFINES=['AQSIS_NO_FLTK'])
 
+if 'posix' == displayenv['PLATFORM']:
+	display_libs = ['tiff', 'z']
+	displayenv.AppendUnique(CPPDEFINES=['AQSIS_NO_FLTK'])
+
 if 'win32' == displayenv['PLATFORM']:
 	display_libs = ['ws2_32', 'gdi32', 'ole32', 'shell32', 'comctl32', 'fltk']
 

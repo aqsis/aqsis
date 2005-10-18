@@ -59,3 +59,16 @@ env.Replace(XSLTPROC = 'xsltproc')
 env.Replace(YACC = '${bison}')
 env.Replace(LEX = '${flex}')
 env.Replace(YACCFLAGS = '--no-lines -d')
+
+display_libs = ['tiff', 'z']
+
+# These are place holders at the moment, we need to work out the proper defines?
+env.AppendUnique(CPPDEFINES=[('DEFAULT_RC_PATH', '\\"' + env.Dir('${BINDIR}').abspath + '\\"')])
+env.AppendUnique(CPPDEFINES=[('DEFAULT_SHADER_PATH', '\\"' + env.Dir('${BINDIR}').abspath + '\\"')])
+env.AppendUnique(CPPDEFINES=[('DEFAULT_ARCHIVE_PATH', '\\"' + env.Dir('${BINDIR}').abspath + '\\"')])
+env.AppendUnique(CPPDEFINES=[('DEFAULT_DSO_PATH', '\\"' + env.Dir('${BINDIR}').abspath + '\\"')])
+env.AppendUnique(CPPDEFINES=[('DEFAULT_DISPLAY_PATH', '\\"' + env.Dir('${BINDIR}').abspath + '\\"')])
+env.AppendUnique(CPPDEFINES=[('DEFAULT_PROCEDURAL_PATH', '\\"' + env.Dir('${BINDIR}').abspath + '\\"')])
+env.AppendUnique(CPPDEFINES=[('DEFAULT_TEXTURE_PATH', '\\"' + env.Dir('${BINDIR}').abspath + '\\"')])
+
+
