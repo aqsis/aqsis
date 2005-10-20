@@ -19,6 +19,13 @@ env = Environment(options = opts)
 conf = Configure(env)
 Export('env opts conf')
 
+# Setup the distribution stuff, this should be non-platform specific, the distribution
+# archive should apply to all supported platforms.
+env['ZIPDISTDIR'] = '#/dist'
+def Distribute(dir, files):
+        env.Install('$ZIPDISTDIR/%s' % dir, files)
+env.Distribute = Distribute
+
 # Determine the target and load the appropriate configuration SConscript
 target_dir =  '#' + SelectBuildDir('build')
 SConscript(target_dir + os.sep + 'SConscript')

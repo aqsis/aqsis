@@ -153,7 +153,7 @@ public:
 
 		total -= ohs.getOverhead();
 
-#if (_MSC_VER>=13)
+#if (_MSC_VER>=1300)
 		return std::max<double>(total, 0.0);
 #else
 		return std::_MAX(total, 0.0);
@@ -169,7 +169,7 @@ public:
 			if (it == m_samples.begin() || *it < min)
 				min = *it;
 		}
-#if (_MSC_VER>=13)
+#if (_MSC_VER>=1300)
 		return std::max<double>(min, 0.0);
 #else
 		return std::_MAX(min, 0.0);

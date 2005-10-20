@@ -234,6 +234,10 @@ SOURCE=.\logging.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\lowdiscrep.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\matrix.cpp
 # End Source File
 # Begin Source File
@@ -323,6 +327,10 @@ SOURCE=.\logging.h
 # Begin Source File
 
 SOURCE=.\logging_streambufs.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\lowdiscrep.h
 # End Source File
 # Begin Source File
 

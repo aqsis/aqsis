@@ -114,7 +114,8 @@ CqLowDiscrepancy::Reset()
     // Pick m_Dimensions bases randomly.
     unsigned low = 0;
     unsigned high = m_Bases.size() - m_Dimensions;
-    for (unsigned i = 0; i < m_Dimensions; ++i)
+    unsigned i;
+	for (i = 0; i < m_Dimensions; ++i)
     {
         unsigned j = m_Random.RandomInt(high - low) + low;
         m_Bases[i] = s_primes[j];
@@ -123,7 +124,7 @@ CqLowDiscrepancy::Reset()
     }
 
     // Now randomly permute.
-    for (unsigned i = m_Dimensions - 1; i > 0; --i)
+    for (i = m_Dimensions - 1; i > 0; --i)
     {
         unsigned j = m_Random.RandomInt(i - 1);
         std::swap(m_Bases[i], m_Bases[j]);
