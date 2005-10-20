@@ -11,7 +11,7 @@ slparse_sources = Split("""
 slparseenv = env.Copy()
 
 # Need to disable optimisation on gcc platforms as it takes too much memory.
-if 'darwin' == slparseenv['PLATFORM']:
+if 'darwin' == slparseenv['PLATFORM'] or 'posix' == slparseenv['PLATFORM']:
 	slparseenv.AppendUnique(CCFLAGS=['-O0'])
 
 slparseenv.CXXFile(target='parser.cpp', source='parser.yy')

@@ -34,7 +34,7 @@
 #include	<map>
 
 
-#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
+#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX) || defined(SCONS_BUILD)
 #include	"version.h"
 #endif // AQSIS_SYSTEM_WIN32
 #include	"vmoutput.h"
@@ -82,7 +82,7 @@ void CqCodeGenOutput::Visit( IqParseNodeShader& S )
     m_slxFile << S.strShaderType() << std::endl;
 
     // Output version information.
-#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
+#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX) || defined(SCONS_BUILD)
     m_slxFile << "AQSIS_V " << VERSION_STR << std::endl;
 #else // AQSIS_SYSTEM_WIN32
     m_slxFile << "AQSIS_V " << VERSION << std::endl;

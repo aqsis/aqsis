@@ -47,11 +47,7 @@ if zliblibfile != None:
 	env.Replace(zlib_lib_path = os.path.dirname(zliblibfile.abspath))
 env.Replace(z_lib = 'z')
 
-# Ensure that shared libraries have their install name set to not include a path, all shared libraries we link 
-# against will be in the bin directory with the executables.
-env.AppendUnique(SHLINKFLAGS = ['-install_name', '@executable_path' + os.path.sep + '${TARGET.file}'])
-
-env.AppendUnique(SHLINKFLAGS = ['-single_module', '-flat_namespace', '-undefined', 'suppress'])
+#env.AppendUnique(SHLINKFLAGS = ['-single_module', '-flat_namespace', '-undefined', 'suppress'])
 
 # Setup the xsltproc program location
 env.Replace(XSLTPROC = 'xsltproc')
@@ -71,4 +67,4 @@ env.AppendUnique(CPPDEFINES=[('DEFAULT_DISPLAY_PATH', '\\"' + env.Dir('${BINDIR}
 env.AppendUnique(CPPDEFINES=[('DEFAULT_PROCEDURAL_PATH', '\\"' + env.Dir('${BINDIR}').abspath + '\\"')])
 env.AppendUnique(CPPDEFINES=[('DEFAULT_TEXTURE_PATH', '\\"' + env.Dir('${BINDIR}').abspath + '\\"')])
 
-
+env.Replace(ADDITIONAL_LIBS=['dl'])

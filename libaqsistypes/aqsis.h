@@ -26,6 +26,7 @@
 #ifndef AQSIS_H_INCLUDED
 #define AQSIS_H_INCLUDED 1
 
+#ifndef	SCONS_BUILD
 #ifdef HAVE_CONFIG_H
 #include	"config.h"
 #else
@@ -35,6 +36,7 @@
 #endif /* __APPLE__ */
 #endif /* __GNUC__ */
 #endif /* HAVE_CONFIG_H */
+#endif /* SCONS_BUILD */
 
 #include	<assert.h>
 

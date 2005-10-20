@@ -17,9 +17,13 @@ aqsistypes_sources = Split("""
 	vector2d.cpp
 	vector3d.cpp
 	vector4d.cpp""")
+
 if 'win32' == env['PLATFORM']:
 	aqsistypes_sources = aqsistypes_sources + ['win32/intel/file_system.cpp']
 elif 'darwin' == env['PLATFORM']:
 	aqsistypes_sources = aqsistypes_sources + ['posix/file_system.cpp']
+elif 'posix' == env['PLATFORM']:
+	aqsistypes_sources = aqsistypes_sources + ['posix/file_system.cpp']
+
 aqsistypes = env.Library('aqsistypes', aqsistypes_sources)
 env.Install('$LIBDIR', aqsistypes)

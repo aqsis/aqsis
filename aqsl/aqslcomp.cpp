@@ -44,7 +44,7 @@
 #include	"vmoutput.h"
 #include	"argparse.h"
 
-#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
+#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX) || defined(SCONS_BUILD)
 #include	"version.h"
 #endif
 
@@ -64,7 +64,7 @@ bool g_cl_syslog = false;
 
 void version( std::ostream& Stream )
 {
-#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
+#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX) || defined(SCONS_BUILD)
     Stream << "aqsl version " << VERSION_STR << std::endl;
 #else
     Stream << "aqsl version " << VERSION << std::endl;

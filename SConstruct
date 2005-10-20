@@ -37,6 +37,7 @@ env.Replace(LIBDIR = target_dir + os.sep + 'lib')
 # Setup common environment settings to allow includes from the various local folders
 env.AppendUnique(CPPPATH = ['#/libaqsistypes','#/render', '#/libshaderexecenv', '#/librib2', '#/libshadervm', '#/librib2ri', '#/libargparse', '#/libslparse', '#/libcodegenvm', '$tiff_include_path', '$jpeg_include_path', '$zlib_include_path', '$boost_include_path'])
 env.AppendUnique(CPPDEFINES=[('DEFAULT_PLUGIN_PATH', '\\"' + env.Dir('${BINDIR}').abspath + '\\"')])
+env.AppendUnique(CPPDEFINES=['SCONS_BUILD'])
 
 # Setup the include path to the tiff headers (should have been determined in the system specific sections above).
 env.AppendUnique(LIBPATH = ['$LIBDIR', '$BINDIR', '$tiff_lib_path', '$jpeg_lib_path', '$zlib_lib_path'])
