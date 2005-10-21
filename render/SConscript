@@ -70,8 +70,7 @@ aqsisdll_xsl = Split("""
 aqsisenv = env.Copy()
 aqsisenv.AppendUnique(CPPDEFINES=[('_qBUILDING', 'CORE'), ('CORE', 1)])
 
-if 'darwin' == aqsisenv['PLATFORM']:
-	aqsisenv.AppendUnique(LINKFLAGS = ['-framework', 'Carbon'])
+aqsisenv.UseTargetOptions('libaqsis')
 
 if 'win32' == aqsisenv['PLATFORM']:
 	aqsisdll_sources = aqsisdll_sources + ["libaqsis.def"]

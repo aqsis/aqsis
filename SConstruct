@@ -26,13 +26,17 @@ def Distribute(dir, files):
         env.Install('$ZIPDISTDIR/%s' % dir, files)
 env.Distribute = Distribute
 
+Environment.UseTargetOptions = UseTargetOptions
+
 # Determine the target and load the appropriate configuration SConscript
 target_dir =  '#' + SelectBuildDir('build')
-SConscript(target_dir + os.sep + 'SConscript')
 
 # Setup the output directories for binaries and libraries.
 env.Replace(BINDIR = target_dir + os.sep + 'bin')
 env.Replace(LIBDIR = target_dir + os.sep + 'lib')
+
+# Read in any platform specific configuration.
+SConscript(target_dir + os.sep + 'SConscript')
 
 # Setup common environment settings to allow includes from the various local folders
 env.AppendUnique(CPPPATH = ['#/libaqsistypes','#/render', '#/libshaderexecenv', '#/librib2', '#/libshadervm', '#/librib2ri', '#/libargparse', '#/libslparse', '#/libcodegenvm', '$tiff_include_path', '$jpeg_include_path', '$zlib_include_path', '$boost_include_path'])
@@ -45,7 +49,7 @@ env.AppendUnique(LIBPATH = ['$LIBDIR', '$BINDIR', '$tiff_lib_path', '$jpeg_lib_p
 Help(opts.GenerateHelpText(env))
 	
 # Check for the existence of the various dependencies
-#SConscript('build_check.py')
+SConscript('build_check.py')
 
 env = conf.Finish()
 

@@ -1,5 +1,6 @@
 import os
 import sys
+from string import lower, split
 
 def SelectBuildDir(build_dir, platform=None):
 	# if no platform is specified, then default to sys.platform
@@ -45,3 +46,19 @@ def SelectBuildDir(build_dir, platform=None):
 	print "Found directory %s, will build there" % target_dir
 	return target_dir
 
+
+def UseTargetOptions(self, target_name):
+	for value in split("""
+		LIBS 
+		CPPFLAGS 
+		CPPDEFINES
+		CPPPATH
+		CCFLAGS
+		SHCCFLAGS
+		SHCXXFLAGS
+		CXXFLAGS
+		LIBPATH
+		LINKFLAGS
+		SHLINKFLAGS"""):
+		if self.has_key(target_name + '_' + lower(value)):
+			self.AppendUnique(**{value: self['' + target_name + '_' + lower(value)]})

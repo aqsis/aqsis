@@ -10,9 +10,7 @@ slparse_sources = Split("""
 	vardef.cpp""")
 slparseenv = env.Copy()
 
-# Need to disable optimisation on gcc platforms as it takes too much memory.
-if 'darwin' == slparseenv['PLATFORM'] or 'posix' == slparseenv['PLATFORM']:
-	slparseenv.AppendUnique(CCFLAGS=['-O0'])
+slparseenv.UseTargetOptions('slparse')
 
 slparseenv.CXXFile(target='parser.cpp', source='parser.yy')
 slparseenv.CXXFile(target='scanner.cpp', source='scanner.ll')
