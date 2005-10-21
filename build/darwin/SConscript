@@ -59,3 +59,5 @@ env.Replace(XSLTPROC = 'xsltproc')
 env.Replace(YACC = '${bison}')
 env.Replace(LEX = '${flex}')
 env.Replace(YACCFLAGS = '--no-lines -d')
+
+env.Replace(aqsis_exe_linkflags = ['-framework', 'CoreFoundation'])

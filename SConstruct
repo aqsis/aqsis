@@ -45,7 +45,7 @@ env.AppendUnique(LIBPATH = ['$LIBDIR', '$BINDIR', '$tiff_lib_path', '$jpeg_lib_p
 Help(opts.GenerateHelpText(env))
 	
 # Check for the existence of the various dependencies
-SConscript('build_check.py')
+#SConscript('build_check.py')
 
 env = conf.Finish()
 

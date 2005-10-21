@@ -4,9 +4,7 @@ aqsis_sources = Split("""
 
 aqsisenv = env.Copy();
 
-# Add the Core framework if on MacOSX
-if 'darwin' == aqsisenv['PLATFORM']:
-	aqsisenv.AppendUnique(LINKFLAGS = ['-framework', 'CoreFoundation'])
+aqsisenv.AppendUnique(LINKFLAGS = '$aqsis_exe_linkflags')
 
 aqsis = aqsisenv.Program('aqsis', aqsis_sources, LIBS=['argparse', 'aqsis'], LIBPATH=['$LIBDIR', '$BINDIR'])
 aqsisenv.Install('$BINDIR', aqsis)

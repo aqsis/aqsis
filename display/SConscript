@@ -6,18 +6,19 @@ display_sources = Split("""
 	display.cpp
 	displayhelpers.c""")
 
+display_libs = ['']
+
 if 'darwin' == displayenv['PLATFORM']:
-	display_libs = ['tiff', 'z']
 	displayenv.AppendUnique(CPPDEFINES=['AQSIS_NO_FLTK'])
 
 if 'posix' == displayenv['PLATFORM']:
-	display_libs = ['tiff', 'z']
 	displayenv.AppendUnique(CPPDEFINES=['AQSIS_NO_FLTK'])
 
 if 'win32' == displayenv['PLATFORM']:
 	display_libs = ['ws2_32', 'gdi32', 'ole32', 'shell32', 'comctl32', 'fltk']
 
-displayenv.AppendUnique(LIBS = ['$tiff_lib', '$z_lib', display_libs])
+displayenv.AppendUnique(LIBS = ['$tiff_lib', '$z_lib'])
+displayenv.AppendUnique(LIBS = display_libs)
 
 display = displayenv.SharedLibrary('display', display_sources)
 
