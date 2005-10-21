@@ -3,5 +3,10 @@ aqsltellenv = env.Copy()
 aqsltellenv.AppendUnique(CPPPATH=['#/libslxargs'])
 aqsltell_sources = Split("""
 	aqsltell.cpp""")
+
+
+# Set any platform specific options for this target
+aqsltellenv.UseTargetOptions('aqsltell')
+
 aqsltell = aqsltellenv.Program('aqsltell', aqsltell_sources, LIBS=['argparse', 'slxargs', 'shadervm', 'shaderexecenv', 'aqsistypes', '$ADDITIONAL_LIBS'], LIBPATH=['$LIBDIR'])
 aqsltellenv.Install('$BINDIR', aqsltell)

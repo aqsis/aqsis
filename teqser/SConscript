@@ -1,5 +1,9 @@
 Import('env')
 teqser_sources = Split("""
 	teqser.cpp""")
+
+# Set any platform specific options for this target
+env.UseTargetOptions('teqser')
+
 teqser = env.Program('teqser', teqser_sources, LIBS=['argparse', 'aqsis'], LIBPATH=['$LIBDIR', '$BINDIR'])
 env.Install('$BINDIR', teqser)

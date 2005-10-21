@@ -1,5 +1,9 @@
 Import('env')
 rib2ri_sources = Split("""
 	librib2ri.cpp""")
+
+# Set any platform specific options for this target
+env.UseTargetOptions('rib2ri')
+
 rib2ri = env.Library('rib2ri', rib2ri_sources)
 env.Install('$LIBDIR', rib2ri)

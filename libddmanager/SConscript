@@ -1,5 +1,9 @@
 Import('env')
 ddmanager_sources = Split("""
 	ddmanager.cpp""")
+
+# Set any platform specific options for this target
+env.UseTargetOptions('ddmanager')
+
 ddmanager = env.Library('ddmanager', ddmanager_sources)
 env.Install('$LIBDIR', ddmanager)

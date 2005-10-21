@@ -3,5 +3,9 @@ codegenvm_sources = Split("""
 	vmdatagather.cpp
 	vmoutput.cpp
 	codegenvm.cpp""")
+
+# Set any platform specific options for this target
+env.UseTargetOptions('codegenvm')
+
 codegenvm = env.Library('codegenvm', codegenvm_sources)
 env.Install('$LIBDIR', codegenvm)

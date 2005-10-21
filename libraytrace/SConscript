@@ -1,5 +1,9 @@
 Import('env')
 raytrace_sources = Split("""
 	raytrace.cpp""")
+
+# Set any platform specific options for this target
+env.UseTargetOptions('raytrace')
+
 raytrace = env.Library('raytrace', raytrace_sources)
 env.Install('$LIBDIR', raytrace)

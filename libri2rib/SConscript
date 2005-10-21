@@ -11,5 +11,9 @@ ri2rib_sources = Split("""
 	plstore.cpp
 	ri.cpp
 	tokens.cpp""")
+
+# Set any platform specific options for this target
+env.UseTargetOptions('ri2rib')
+
 ri2rib = env.Library('ri2rib', ri2rib_sources)
 env.Install('$LIBDIR', ri2rib)

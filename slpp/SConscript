@@ -10,6 +10,10 @@ slpp_sources = Split("""
 	pp6.c
 	pp7.c
 	pp8.c""")
+
+# Set any platform specific options for this target
+env.UseTargetOptions('slpplib')
+
 slpplib = slppenv.Library('slpp', slpp_sources)
 slppenv.Install('$LIBDIR', slpplib)
 # Note: Need to work out how to do an executable build of slpp as well at some point.

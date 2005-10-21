@@ -1,5 +1,10 @@
 Import('env')
 argparse_sources = Split("""
 	argparse.cpp""")
+
+
+# Set any platform specific options for this target
+env.UseTargetOptions('argparse')
+
 argparse = env.Library('argparse', argparse_sources)
 env.Install('$LIBDIR', argparse)

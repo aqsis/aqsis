@@ -6,5 +6,9 @@ shadervm_sources = Split("""
 	shadervm.cpp
 	shadervm1.cpp
 	shadervm2.cpp""")
+
+# Set any platform specific options for this target
+env.UseTargetOptions('shadervm')
+
 shadervm = env.Library('shadervm', shadervm_sources)
 env.Install('$LIBDIR', shadervm)

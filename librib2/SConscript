@@ -6,5 +6,9 @@ rib2_sources = Split("""
 	parser.cpp""")
 env.CXXFile(target='parser.cpp', source='parser.yy')
 env.CXXFile(target='scanner.cpp', source='scanner.ll')
+
+# Set any platform specific options for this target
+env.UseTargetOptions('rib2')
+
 rib2 = env.Library('rib2', rib2_sources)
 env.Install('$LIBDIR', rib2)

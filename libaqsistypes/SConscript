@@ -25,5 +25,9 @@ elif 'darwin' == env['PLATFORM']:
 elif 'posix' == env['PLATFORM']:
 	aqsistypes_sources = aqsistypes_sources + ['posix/file_system.cpp']
 
+
+# Set any platform specific options for this target
+env.UseTargetOptions('aqsistypes')
+
 aqsistypes = env.Library('aqsistypes', aqsistypes_sources)
 env.Install('$LIBDIR', aqsistypes)
