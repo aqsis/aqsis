@@ -47,14 +47,14 @@ using namespace Aqsis;
 #include "ndspy.h"
 
 
-#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
+#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX) || defined(SCONS_BUILD)
 #define	ZFILE_HEADER		"Aqsis ZFile" VERSION_STR
 #else // AQSIS_SYSTEM_WIN32
 #define ZFILE_HEADER "Aqsis ZFile" VERSION
 #endif // !AQSIS_SYSTEM_WIN32
 #define	SHADOWMAP_HEADER	"Shadow"
 
-#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
+#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX) || defined(SCONS_BUILD)
 #include	<version.h>
 #endif
 
@@ -116,7 +116,7 @@ void SaveAsShadowMap(const std::string& filename, SqDisplayInstance* image, char
 			// Set common tags
 			TIFFCreateDirectory( pshadow );
 
-#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
+#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX) || defined(SCONS_BUILD)
 
 			sprintf( version, "%s %s (%s %s)", STRNAME, VERSION_STR, __DATE__, __TIME__);
 #else
@@ -134,7 +134,7 @@ void SaveAsShadowMap(const std::string& filename, SqDisplayInstance* image, char
 				TIFFSetField( pshadow, TIFFTAG_HOSTCOMPUTER, image->m_hostname );
 			TIFFSetField( pshadow, TIFFTAG_IMAGEDESCRIPTION, mydescription);
 			// Write the floating point image to the directory.
-#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
+#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX) || defined(SCONS_BUILD)
 
 			sprintf( version, "%s %s (%s %s)", STRNAME, VERSION_STR, __DATE__, __TIME__);
 #else
@@ -270,7 +270,7 @@ void WriteTIFF(const std::string& filename, SqDisplayInstance* image)
 
 		int ExtraSamplesTypes[ 1 ] = {EXTRASAMPLE_ASSOCALPHA};
 
-#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
+#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX) || defined(SCONS_BUILD)
 
 		sprintf( version, "%s %s (%s %s)", STRNAME, VERSION_STR, __DATE__, __TIME__);
 #else
