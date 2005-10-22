@@ -66,7 +66,7 @@ CqShadowMap::CqShadowMap( const CqString& strName ) :
     if( m_rand_index < 0 )
     {
         TqInt i;
-        for ( i = 0; i < 1023; i++ )
+        for ( i = 0; i < 1024; i++ )
             m_aRand_no[ i ] = random.RandomFloat(2.0);
         m_rand_index = 0;
     }
