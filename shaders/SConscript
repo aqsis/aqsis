@@ -1,0 +1,9 @@
+import glob
+
+Import('env')
+shaders = glob.glob('*.sl')
+
+for shader in shaders:
+	compiled_shader = env.Shader(shader)
+	env.Install('$SHADERDIR', shader)
+	env.Install('$SHADERDIR', compiled_shader)

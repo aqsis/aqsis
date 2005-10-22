@@ -62,3 +62,4 @@ def UseTargetOptions(self, target_name):
 		SHLINKFLAGS"""):
 		if self.has_key(target_name + '_' + lower(value)):
 			self.AppendUnique(**{value: self['' + target_name + '_' + lower(value)]})
+

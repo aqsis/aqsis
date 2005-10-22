@@ -34,6 +34,7 @@ target_dir =  '#' + SelectBuildDir('build')
 # Setup the output directories for binaries and libraries.
 env.Replace(BINDIR = target_dir + os.sep + 'bin')
 env.Replace(LIBDIR = target_dir + os.sep + 'lib')
+env.Replace(SHADERDIR = target_dir + os.sep + 'shaders')
 
 # Read in any platform specific configuration.
 SConscript(target_dir + os.sep + 'SConscript')
@@ -74,5 +75,6 @@ SConscript('libri2rib/SConscript')
 SConscript('librib2stream/SConscript')
 SConscript('teqser/SConscript')
 #SConscript('plugins/SConscript')
-env.Alias('release', ['$BINDIR','$LIBDIR'])
+SConscript('shaders/SConscript')
+env.Alias('release', ['$BINDIR','$LIBDIR', '$SHADERDIR'])
 Default('release')
