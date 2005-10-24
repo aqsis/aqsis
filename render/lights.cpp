@@ -85,7 +85,7 @@ void CqLightsource::Initialise( TqInt uGridRes, TqInt vGridRes )
     if ( USES( Uses, EnvVars_u ) )	u() ->SetFloat( 0.0f );
     if ( USES( Uses, EnvVars_v ) )	v() ->SetFloat( 0.0f );
     if ( USES( Uses, EnvVars_du ) )	du() ->SetFloat( 0.0f );
-    if ( USES( Uses, EnvVars_du ) )	dv() ->SetFloat( 0.0f );
+    if ( USES( Uses, EnvVars_dv ) )	dv() ->SetFloat( 0.0f );
     if ( USES( Uses, EnvVars_s ) )	s() ->SetFloat( 0.0f );
     if ( USES( Uses, EnvVars_t ) )	t() ->SetFloat( 0.0f );
     if ( USES( Uses, EnvVars_N ) )	N() ->SetNormal( CqVector3D( 0.0f, 0.0f, 0.0f ) );
