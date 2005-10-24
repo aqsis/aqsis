@@ -335,14 +335,25 @@ void CqDDManager::LoadDisplayLibrary( SqDisplayRequest& req )
 	if ( !m_fDisplayMapInitialised )
 		InitialiseDisplayNameMap();
 
-	// strDriverFileAndArgs: Second part of the ddmsock.ini line (e.g. "mydriver.exe --foo")
-	CqString strDriverFileAndArgs = m_mapDisplayNames[ req.m_type ];
-	// strDriverFile: Only the executable without arguments (e.g. "mydriver.exe")
-	CqString strDriverFile = GetStringField( strDriverFileAndArgs, 0 );
+	// Get the display mapping from the "display" options, if one exists.
+	CqString strDriverFile = "";
+	CqString displayType = req.m_type;
+	const CqString* poptDisplay = QGetRenderContext()->optCurrent().GetStringOption("display", displayType.c_str());
+	if(0 != poptDisplay)
+		strDriverFile = poptDisplay[0];
+	else
+	{
+		const CqString* poptDisplayMapping = QGetRenderContext()->optCurrent().GetStringOption("display", "mapping");
+		if(0 != poptDisplayMapping)
+		{
+			CqString strMapping = poptDisplayMapping[0];
+			strDriverFile.Format(strMapping.c_str(), displayType.c_str());
+		}
+	}
 
 	// Display type not found.
 	if ( strDriverFile.empty() )
-		throw( CqString( "Invalid display type \"" ) + CqString( req.m_type ) + CqString( "\"" ) );
+		throw( CqString( "Invalid display type \"" ) + CqString( req.m_type ) + CqString( "\"" ) + CqString(" (") + strDriverFile + CqString(")") );
 
 	// Try to open the file to see if it's really there
 	CqRiFile fileDriver( strDriverFile.c_str(), "display" );
@@ -683,39 +694,6 @@ void CqDDManager::CloseDisplayLibrary( SqDisplayRequest& req )
 
 void CqDDManager::InitialiseDisplayNameMap()
 {
-	/*
-	    // Read in the configuration file.
-	    // Find the config file in the same place as the display drivers.
-	#ifdef AQSIS_SYSTEM_POSIX
-	    CqString ddmsock_path( "" );
-	    char* env = NULL;
-	 
-	    env = getenv( "AQSIS_CONFIG_PATH" );
-	    if ( env == NULL )
-	    {
-	#ifndef __apple__
-	        ddmsock_path = CONFIG_PATH;
-	#else
-	        ddmsock_path = ".";
-	#endif
-	 
-	    }
-	    else
-	    {
-	        ddmsock_path = env;
-	    }
-	 
-	    ddmsock_path.append( "/" );
-	 
-	    ddmsock_path.append( "displays.ini" );
-	 
-	    CqString strConfigFile = ddmsock_path;
-	#else
-	    CqString strConfigFile = "displays.ini";
-	#endif // AQSIS_SYSTEM_POSIX 
-	*/
-
-
 	CqString strConfigFile("displays.ini");
 	const CqString* displays = QGetRenderContext()->optCurrent().GetStringOption( "searchpath", "display" );
 	if( displays )
