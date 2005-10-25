@@ -448,154 +448,127 @@ RtToken	RiDeclare( RtString name, RtString declaration )
 //
 void SetDefaultRiOptions( void )
 {
-    std::string g_shader_path;
-    std::string g_archive_path;
-    std::string g_texture_path;
-    std::string g_display_path;
-    std::string g_dso_path;
-    std::string g_procedural_path;
-    std::string g_plugin_path;
+    std::string systemRCPath;
+    std::string homeRCPath;
+    std::string currentRCPath;
+    std::string rootPath;
+    std::string separator;
 
 #ifdef AQSIS_SYSTEM_WIN32
     char acPath[256];
-    char rootPath[256];
+    char root[256];
     if( GetModuleFileName( NULL, acPath, 256 ) != 0)
     {
         // guaranteed file name of at least one character after path
-        *( strrchr( acPath, '\\' ) + 1 ) = '\0';
+        *( strrchr( acPath, '\\' ) ) = '\0';
         std::string      stracPath(acPath);
-        stracPath.append("..\\");
-        _fullpath(rootPath,&stracPath[0],256);
+        _fullpath(root,&stracPath[0],256);
     }
-    g_shader_path = rootPath;
-    g_archive_path = rootPath;
-    g_texture_path = rootPath;
-    g_display_path = rootPath;
-    g_dso_path = rootPath;
-    g_procedural_path = rootPath;
-    g_plugin_path = rootPath;
-
-    g_shader_path.append( "shaders" );
-    g_archive_path.append( "archives" );
-    g_texture_path.append( "textures" );
-    g_display_path.append( "bin" );
-    g_dso_path.append( "dsos" );
-    g_procedural_path.append( "procedures" );
-    g_plugin_path.append( "plugins" );
+    rootPath = root;
+    separator = "\\";
 #elif AQSIS_SYSTEM_MACOSX
     CFURLRef pluginRef = CFBundleCopyBundleURL(CFBundleGetMainBundle());
     CFStringRef macPath = CFURLCopyFileSystemPath(pluginRef, kCFURLPOSIXPathStyle);
     const char *pathPtr = CFStringGetCStringPtr(macPath, CFStringGetSystemEncoding());
-
-    g_shader_path = pathPtr;
-    g_archive_path = pathPtr;
-    g_texture_path = pathPtr;
-    g_display_path = pathPtr;
-    g_dso_path = pathPtr;
-    g_procedural_path = pathPtr;
-    g_plugin_path = pathPtr;
-
-    g_shader_path.append( "/shaders" );
-    g_archive_path.append( "/archives" );
-    g_texture_path.append( "/textures" );
-    g_dso_path.append( "/dsos" );
-    g_procedural_path.append( "/procedures" );
-    g_plugin_path.append( "/plugins" );
+    rootPath = pathPtr;
+    separator = "/";
 #else
-    g_shader_path = DEFAULT_SHADER_PATH;
-    g_archive_path = DEFAULT_ARCHIVE_PATH;
-    g_texture_path = DEFAULT_TEXTURE_PATH;
-    g_display_path = DEFAULT_DISPLAY_PATH;
-    g_dso_path = DEFAULT_DSO_PATH;
-    g_procedural_path = DEFAULT_PROCEDURAL_PATH;
-    g_plugin_path = DEFAULT_PLUGIN_PATH;
+    // Minty: Need to work out the executable path here.
+    rootPath = "/etc/aqsis";
+    separator = "/";
 #endif
 
-    // Apply environment-variable overrides to default paths ...
+    systemRCPath = rootPath;
+    systemRCPath.append( "/.aqsisrc" );
+
+    // Read in the system configuration file if found.
+    FILE* rcfile = fopen( systemRCPath.c_str(), "rb" );
+    if (rcfile != NULL )
+    {
+	CqRIBParserState currstate = librib::GetParserState();
+	if (currstate.m_pParseCallbackInterface == NULL) 
+		currstate.m_pParseCallbackInterface = new librib2ri::Engine;
+	librib::Parse( rcfile, "System Config", *(currstate.m_pParseCallbackInterface), *(currstate.m_pParseErrorStream), NULL );
+	librib::SetParserState( currstate );
+	fclose(rcfile);
+    }
+
+    /* ...then read the .aqsisrc files in $HOME... */
+    if(getenv("HOME"))
+    {
+        homeRCPath = getenv("HOME");
+	// \note need to ensure that there is a trailing '/'
+	homeRCPath.append(".aqsisrc");
+	rcfile = fopen( homeRCPath.c_str(), "rb" );
+	if (rcfile != NULL )
+	{
+	    CqRIBParserState currstate = librib::GetParserState();
+	    if (currstate.m_pParseCallbackInterface == NULL) 
+		    currstate.m_pParseCallbackInterface = new librib2ri::Engine;
+	    librib::Parse( rcfile, "Home Config", *(currstate.m_pParseCallbackInterface), *(currstate.m_pParseErrorStream), NULL );
+	    librib::SetParserState( currstate );
+	    fclose(rcfile);
+	}
+    }
+
+    /* ...and the current directory... */
+    currentRCPath = ".aqsisrc";
+    rcfile = fopen( currentRCPath.c_str(), "rb" );
+    if (rcfile != NULL )
+    {
+	CqRIBParserState currstate = librib::GetParserState();
+	if (currstate.m_pParseCallbackInterface == NULL) 
+		currstate.m_pParseCallbackInterface = new librib2ri::Engine;
+	librib::Parse( rcfile, "Current Config", *(currstate.m_pParseCallbackInterface), *(currstate.m_pParseErrorStream), NULL );
+	librib::SetParserState( currstate );
+	fclose(rcfile);
+    }
+
     const char* popt[ 1 ];
-    const CqString *pOption;
+    if(getenv("AQSIS_SHADER_PATH"))
+    {
+	popt[0] = getenv("AQSIS_SHADER_PATH");
+	RiOption( "searchpath", "shader", &popt, RI_NULL );
+    }
 
-    pOption = QGetRenderContext() ->optCurrent().GetStringOption( "searchpath", "shader" );
-    if (!pOption){
-        // If the calling application has not already set a shader path then we provide one here.
-        if(getenv("AQSIS_SHADER_PATH")){
-            popt[0] = getenv("AQSIS_SHADER_PATH");
-        }else{
-            popt[0] = g_shader_path.c_str();
-        };
-        RiOption( "searchpath", "shader", &popt, RI_NULL );
-    } ;
+    if(getenv("AQSIS_ARCHIVE_PATH"))
+    {
+	popt[0] = getenv("AQSIS_ARCHIVE_PATH");
+	RiOption( "searchpath", "archive", &popt, RI_NULL );
+    }
 
-    pOption = QGetRenderContext() ->optCurrent().GetStringOption( "searchpath", "archive" );
-    if (!pOption){
-        // If the calling application has not already set a shader path then we provide one here.
-        if(getenv("AQSIS_ARCHIVE_PATH")){
-            popt[0] = getenv("AQSIS_ARCHIVE_PATH");
-        }else{
-            popt[0] = g_archive_path.c_str();
-        };
-        RiOption( "searchpath", "archive", &popt, RI_NULL );
-    } ;
+    if(getenv("AQSIS_TEXTURE_PATH"))
+    {
+	popt[0] = getenv("AQSIS_TEXTURE_PATH");
+	RiOption( "searchpath", "texture", &popt, RI_NULL );
+    }
 
-    pOption = QGetRenderContext() ->optCurrent().GetStringOption( "searchpath", "texture" );
-    if (!pOption){
-        // If the calling application has not already set a shader path then we provide one here.
-        if(getenv("AQSIS_TEXTURE_PATH")){
-            popt[0] = getenv("AQSIS_TEXTURE_PATH");
-        }else{
-            popt[0] = g_texture_path.c_str();
-        };
-        RiOption( "searchpath", "texture", &popt, RI_NULL );
-    } ;
+    if(getenv("AQSIS_DISPLAY_PATH"))
+    {
+	popt[0] = getenv("AQSIS_DISPLAY_PATH");
+	RiOption( "searchpath", "display", &popt, RI_NULL );
+    }
 
-    pOption = QGetRenderContext() ->optCurrent().GetStringOption( "searchpath", "display" );
-    if (!pOption){
-        // If the calling application has not already set a shader path then we provide one here.
-        if(getenv("AQSIS_DISPLAY_PATH")){
-            popt[0] = getenv("AQSIS_DISPLAY_PATH");
-        }else{
-            popt[0] = g_display_path.c_str();
-        };
-        RiOption( "searchpath", "display", &popt, RI_NULL );
-    } ;
+    if(getenv("AQSIS_DSO_PATH"))
+    {
+	popt[0] = getenv("AQSIS_DSO_PATH");
+	RiOption( "searchpath", "dsolibs", &popt, RI_NULL );
+    }
 
-    pOption = QGetRenderContext() ->optCurrent().GetStringOption( "searchpath", "dsolibs" );
-    if (!pOption){
-        // If the calling application has not already set a shader path then we provide one here.
-        if(getenv("AQSIS_DSO_PATH")){
-            popt[0] = getenv("AQSIS_DSO_PATH");
-        }else{
-            popt[0] = g_dso_path.c_str();
-        };
-        RiOption( "searchpath", "dsolibs", &popt, RI_NULL );
-    } ;
+    if(getenv("AQSIS_PROCEDURAL_PATH"))
+    {
+	popt[0] = getenv("AQSIS_PROCEDURAL_PATH");
+	RiOption( "searchpath", "procedural", &popt, RI_NULL );
+    }
 
+    if(getenv("AQSIS_PLUGIN_PATH"))
+    {
+	popt[0] = getenv("AQSIS_PLUGIN_PATH");
+	RiOption( "searchpath", "plugin", &popt, RI_NULL );
+    }
 
-    pOption = QGetRenderContext() ->optCurrent().GetStringOption( "searchpath", "procedural" );
-    if (!pOption){
-        // If the calling application has not already set a shader path then we provide one here.
-        if(getenv("AQSIS_PROCEDURAL_PATH")){
-            popt[0] = getenv("AQSIS_PROCEDURAL_PATH");
-        }else{
-            popt[0] = g_procedural_path.c_str();
-        };
-        RiOption( "searchpath", "procedural", &popt, RI_NULL );
-    } ;
-
-    pOption = QGetRenderContext() ->optCurrent().GetStringOption( "searchpath", "plugin" );
-    if (!pOption){
-        // If the calling application has not already set a shader path then we provide one here.
-        if(getenv("AQSIS_PLUGIN_PATH")){
-            popt[0] = getenv("AQSIS_PLUGIN_PATH");
-        }else{
-            popt[0] = g_plugin_path.c_str();
-        };
-        RiOption( "searchpath", "plugin", &popt, RI_NULL );
-    } ;
-
-    // Setup a default Displac
+    // Setup a default Display
     RiDisplay( "ri.pic", "file", "rgba", NULL );
-
 }
 
 //----------------------------------------------------------------------

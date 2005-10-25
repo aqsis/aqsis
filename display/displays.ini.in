@@ -1,7 +1,0 @@
-file		%(displaylib)s
-framebuffer	%(displaylib)s
-zfile		%(displaylib)s
-zframebuffer	%(displaylib)s
-shadow		%(displaylib)s
-tiff		%(displaylib)s
-

@@ -332,9 +332,6 @@ TqInt CqDDManager::Uses()
 
 void CqDDManager::LoadDisplayLibrary( SqDisplayRequest& req )
 {
-	if ( !m_fDisplayMapInitialised )
-		InitialiseDisplayNameMap();
-
 	// Get the display mapping from the "display" options, if one exists.
 	CqString strDriverFile = "";
 	CqString displayType = req.m_type;

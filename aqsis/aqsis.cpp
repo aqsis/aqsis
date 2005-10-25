@@ -88,16 +88,6 @@
 #include "Carbon/Carbon.h"
 #endif
 
-// Storage for the actual resource paths that we will use at runtime
-std::string g_rc_path;
-std::string g_shader_path;
-std::string g_archive_path;
-std::string g_texture_path;
-std::string g_display_path;
-std::string g_dso_path;
-std::string g_procedural_path;
-std::string g_plugin_path;
-
 // Forward declarations
 void RenderFile( FILE* file, std::string& name );
 
@@ -378,69 +368,6 @@ RtVoid PreWorld()
 
 int main( int argc, const char** argv )
 {
-// Set default resource paths ...
-#ifdef AQSIS_SYSTEM_WIN32
-	char acPath[256];
-	char rootPath[256];
-	if( GetModuleFileName( NULL, acPath, 256 ) != 0) 
-	{
-		// guaranteed file name of at least one character after path
-		*( strrchr( acPath, '\\' ) + 1 ) = '\0';
-		std::string	 stracPath(acPath);
-		stracPath.append("..\\");
-		_fullpath(rootPath,&stracPath[0],256);
-		if((rootPath[strlen(rootPath)-1] != '\\') && (strlen(rootPath) < 255))
-			strcat(rootPath, "\\");
-	}
-	g_rc_path = rootPath;
-	g_shader_path = rootPath;
-	g_archive_path = rootPath;
-	g_texture_path = rootPath;
-	g_display_path = rootPath;
-	g_dso_path = rootPath;
-	g_procedural_path = rootPath;
-	g_plugin_path = rootPath;
-
-	g_shader_path.append( "shaders" );
-	g_archive_path.append( "archives" );
-	g_texture_path.append( "textures" );
-	g_display_path.append( "bin" );
-	g_dso_path.append( "dsos" );
-	g_procedural_path.append( "procedures" );
-	g_plugin_path.append( "plugins" );
-	g_rc_path.append( "aqsisrc" );
-#elif AQSIS_SYSTEM_MACOSX
-    CFURLRef pluginRef = CFBundleCopyBundleURL(CFBundleGetMainBundle());
-    CFStringRef macPath = CFURLCopyFileSystemPath(pluginRef, kCFURLPOSIXPathStyle);
-    const char *pathPtr = CFStringGetCStringPtr(macPath, CFStringGetSystemEncoding());
-
-	g_rc_path = pathPtr;
-	g_shader_path = pathPtr;
-	g_archive_path = pathPtr;
-	g_texture_path = pathPtr;
-	g_display_path = pathPtr;
-	g_dso_path = pathPtr;
-	g_procedural_path = pathPtr;
-	g_plugin_path = pathPtr;
-
-	g_shader_path.append( "/shaders" );
-	g_archive_path.append( "/archives" );
-	g_texture_path.append( "/textures" );
-//	g_display_path.append( "bin" );
-	g_dso_path.append( "/dsos" );
-	g_procedural_path.append( "/procedures" );
-	g_plugin_path.append( "/plugins" );
-#else
-	g_rc_path = DEFAULT_RC_PATH;
-	g_shader_path = DEFAULT_SHADER_PATH;
-	g_archive_path = DEFAULT_ARCHIVE_PATH;
-	g_texture_path = DEFAULT_TEXTURE_PATH;
-	g_display_path = DEFAULT_DISPLAY_PATH;
-	g_dso_path = DEFAULT_DSO_PATH;
-	g_procedural_path = DEFAULT_PROCEDURAL_PATH;
-	g_plugin_path = DEFAULT_PLUGIN_PATH;
-#endif
-
     StartMemoryDebugging();
     {
         ArgParse ap;
@@ -477,14 +404,14 @@ int main( int argc, const char** argv )
 #ifdef	AQSIS_SYSTEM_POSIX
         ap.argFlag( "syslog", "\aLog messages to syslog", &g_cl_syslog );
 #endif	// AQSIS_SYSTEM_POSIX
-        ap.argString( "rc", "=string\aOverride the default RIB configuration file [" + g_rc_path + "]", &g_cl_rc_path );
-        ap.argString( "shaders", "=string\aOverride the default shader searchpath(s) [" + g_shader_path + "]", &g_cl_shader_path );
-        ap.argString( "archives", "=string\aOverride the default archive searchpath(s) [" + g_archive_path + "]", &g_cl_archive_path );
-        ap.argString( "textures", "=string\aOverride the default texture searchpath(s) [" + g_texture_path + "]", &g_cl_texture_path );
-        ap.argString( "displays", "=string\aOverride the default display searchpath(s) [" + g_display_path + "]", &g_cl_display_path );
-        ap.argString( "dsolibs", "=string\aOverride the default dso searchpath(s) [" + g_dso_path + "]", &g_cl_dso_path );
-        ap.argString( "procedurals", "=string\aOverride the default procedural searchpath(s) [" + g_procedural_path + "]", &g_cl_procedural_path );
-        ap.argString( "plugins", "=string\aOverride the default plugin searchpath(s) [" + g_plugin_path + "]", &g_cl_plugin_path );
+        ap.argString( "rc", "=string\aOverride the default RIB configuration file", &g_cl_rc_path );
+        ap.argString( "shaders", "=string\aOverride the default shader searchpath(s)", &g_cl_shader_path );
+        ap.argString( "archives", "=string\aOverride the default archive searchpath(s)", &g_cl_archive_path );
+        ap.argString( "textures", "=string\aOverride the default texture searchpath(s)", &g_cl_texture_path );
+        ap.argString( "displays", "=string\aOverride the default display searchpath(s)", &g_cl_display_path );
+        ap.argString( "dsolibs", "=string\aOverride the default dso searchpath(s)", &g_cl_dso_path );
+        ap.argString( "procedurals", "=string\aOverride the default procedural searchpath(s)", &g_cl_procedural_path );
+        ap.argString( "plugins", "=string\aOverride the default plugin searchpath(s)", &g_cl_plugin_path );
         ap.allowUnrecognizedOptions();
 
         //_crtBreakAlloc = 1305;
@@ -519,42 +446,6 @@ int main( int argc, const char** argv )
             exit( 0 );
         }
 
-        // Apply environment-variable overrides to default paths ...
-	if(getenv("AQSIS_RC_PATH"))
-		g_rc_path = getenv("AQSIS_RC_PATH");
-	if(getenv("AQSIS_SHADER_PATH"))
-		g_shader_path = getenv("AQSIS_SHADER_PATH");
-	if(getenv("AQSIS_ARCHIVE_PATH"))
-		g_archive_path = getenv("AQSIS_ARCHIVE_PATH");
-	if(getenv("AQSIS_TEXTURE_PATH"))
-		g_texture_path = getenv("AQSIS_TEXTURE_PATH");
-	if(getenv("AQSIS_DISPLAY_PATH"))
-		g_display_path = getenv("AQSIS_DISPLAY_PATH");
-	if(getenv("AQSIS_DSO_PATH"))
-		g_dso_path = getenv("AQSIS_DSO_PATH");
-	if(getenv("AQSIS_PROCEDURAL_PATH"))
-		g_procedural_path = getenv("AQSIS_PROCEDURAL_PATH");
-	if(getenv("AQSIS_PLUGIN_PATH"))
-		g_procedural_path = getenv("AQSIS_PLUGIN_PATH");
-
-        // Apply command-line overrides to default paths ...
-        if(!g_cl_rc_path.empty())
-            g_rc_path = g_cl_rc_path;
-        if(!g_cl_shader_path.empty())
-            g_shader_path = g_cl_shader_path;
-        if(!g_cl_archive_path.empty())
-            g_archive_path = g_cl_archive_path;
-        if(!g_cl_texture_path.empty())
-            g_texture_path = g_cl_texture_path;
-        if(!g_cl_display_path.empty())
-            g_display_path = g_cl_display_path;
-        if(!g_cl_dso_path.empty())
-            g_dso_path = g_cl_dso_path;
-        if(!g_cl_procedural_path.empty())
-            g_procedural_path = g_cl_procedural_path;
-        if(!g_cl_plugin_path.empty())
-            g_plugin_path = g_cl_plugin_path;
-
 #ifdef	AQSIS_SYSTEM_WIN32
         std::auto_ptr<std::streambuf> ansi( new Aqsis::ansi_buf(std::cerr) );
 #endif
@@ -577,15 +468,6 @@ int main( int argc, const char** argv )
         if( g_cl_syslog )
             std::auto_ptr<std::streambuf> use_syslog( new Aqsis::syslog_buf(std::cerr) );
 #endif	// AQSIS_SYSTEM_POSIX
-
-	    std::cerr << Aqsis::info << "rc path: " << g_rc_path << std::endl;
-	    std::cerr << Aqsis::info << "shader path(s): " << g_shader_path << std::endl;
-	    std::cerr << Aqsis::info << "archive path(s): " << g_archive_path << std::endl;
-	    std::cerr << Aqsis::info << "texture path(s): " << g_texture_path << std::endl;
-	    std::cerr << Aqsis::info << "display path(s): " << g_display_path << std::endl;
-	    std::cerr << Aqsis::info << "dso path(s): " << g_dso_path << std::endl;
-	    std::cerr << Aqsis::info << "procedural path(s): " << g_procedural_path << std::endl;
-	    std::cerr << Aqsis::info << "plugin path(s): " << g_plugin_path << std::endl;
 
         if ( ap.leftovers().size() == 0 )     // If no files specified, take input from stdin.
         {
@@ -632,7 +514,7 @@ void RenderFile( FILE* file, std::string&  name )
 {
     librib::RendermanInterface * renderengine = librib2ri::CreateRIBEngine();
 
-    RiBegin( "CRIBBER" );
+    RiBegin( "aqsis" );
 
     if ( !g_cl_nostandard )
         librib::StandardDeclarations( *renderengine );
@@ -642,32 +524,47 @@ void RenderFile( FILE* file, std::string&  name )
         RiOption( "statistics", "renderinfo", &g_cl_rinfo, RI_NULL );
     }
 
-    const char* popt[ 1 ];
-    popt[ 0 ] = g_shader_path.c_str();
-    RiOption( "searchpath", "shader", &popt, RI_NULL );
-    popt[ 0 ] = g_archive_path.c_str();
-    RiOption( "searchpath", "archive", &popt, RI_NULL );
-    popt[ 0 ] = g_texture_path.c_str();
-    RiOption( "searchpath", "texture", &popt, RI_NULL );
-    popt[ 0 ] = g_display_path.c_str();
-    RiOption( "searchpath", "display", &popt, RI_NULL );
-    popt[ 0 ] = g_dso_path.c_str();
-    RiOption( "searchpath", "dsolibs", &popt, RI_NULL );
-    popt[ 0 ] = g_procedural_path.c_str();
-    RiOption( "searchpath", "procedural", &popt, RI_NULL );
-    popt[ 0 ] = g_plugin_path.c_str();
-    RiOption( "searchpath", "plugin", &popt, RI_NULL );
+    /* Allow any command line arguments to override system/env settings */
+    const char* popt[1];
+    if(!g_cl_shader_path.empty())
+    {
+	popt[0] = g_cl_shader_path.c_str();
+        RiOption( "searchpath", "shader", &popt, RI_NULL );
+    }
+    if(!g_cl_archive_path.empty())
+    {
+	popt[0] = g_cl_archive_path.c_str();
+        RiOption( "searchpath", "archive", &popt, RI_NULL );
+    }
+    if(!g_cl_texture_path.empty())
+    {
+	popt[0] = g_cl_texture_path.c_str();
+        RiOption( "searchpath", "texture", &popt, RI_NULL );
+    }
+    if(!g_cl_display_path.empty())
+    {
+	popt[0] = g_cl_display_path.c_str();
+        RiOption( "searchpath", "display", &popt, RI_NULL );
+    }
+    if(!g_cl_dso_path.empty())
+    {
+	popt[0] = g_cl_dso_path.c_str();
+        RiOption( "searchpath", "dsolibs", &popt, RI_NULL );
+    }
+    if(!g_cl_procedural_path.empty())
+    {
+	popt[0] = g_cl_procedural_path.c_str();
+        RiOption( "searchpath", "procedural", &popt, RI_NULL );
+    }
+    if(!g_cl_plugin_path.empty())
+    {
+	popt[0] = g_cl_plugin_path.c_str();
+        RiOption( "searchpath", "plugin", &popt, RI_NULL );
+    }
 
     RiProgressHandler( &PrintProgress );
     RiPreWorldFunction( &PreWorld );
 
-    std::cerr << Aqsis::info << "Loading config file " << g_rc_path << std::endl;
-    FILE* rcfile = fopen( g_rc_path.c_str(), "rb" );
-    if (rcfile != NULL )
-    {
-	librib::Parse( rcfile, "config", *renderengine, std::cerr, NULL );
-	fclose( rcfile );
-    }
 
 	librib::ClearFrames();
 	// Pass in specified frame lists.

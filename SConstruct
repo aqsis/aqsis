@@ -70,11 +70,35 @@ SConscript('slpp/SConscript')
 SConscript('aqsl/SConscript')
 SConscript('libslxargs/SConscript')
 SConscript('aqsltell/SConscript')
-SConscript('display/SConscript')
+display = SConscript('display/SConscript')
 SConscript('libri2rib/SConscript')
 SConscript('librib2stream/SConscript')
 SConscript('teqser/SConscript')
 #SConscript('plugins/SConscript')
 SConscript('shaders/SConscript')
+
+# Generate and install the '.aqsisrc' configuration file from the template '.aqsisrc.in'
+def build_function(target, source, env):
+	# Code to build "target" from "source"
+	for x in target:
+		print str(x)
+	displaylib = os.path.basename(display[0].path)
+	defines = {
+		"displaylib": displaylib,
+		"shaderpath": env.Dir('$SHADERDIR').abspath,
+		"displaypath": env.Dir('$BINDIR').abspath,
+	    }
+
+	for a_target, a_source in zip(target, source):
+		aqsisrc_out = file(str(a_target), "w")
+		aqsisrc_in = file(str(a_source), "r")
+		aqsisrc_out.write(aqsisrc_in.read() % defines)
+		aqsisrc_out.close()
+		aqsisrc_in.close()
+
+aqsisrc = env.Command('.aqsisrc', 'aqsisrc.in', build_function)
+env.Install('$BINDIR', aqsisrc)
+env.Depends(aqsisrc, display)
+
 env.Alias('release', ['$BINDIR','$LIBDIR', '$SHADERDIR'])
 Default('release')
