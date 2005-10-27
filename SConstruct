@@ -3,7 +3,7 @@ import os.path
 from build_support import *
 
 # This allows the developer to choose the version of msvs from the command line.
-opts = Options()
+opts = Options(['options.cache', 'custom.py'])
 opts.Add('tiff_include_path', 'Point to the tiff header files', '')
 opts.Add('tiff_lib_path', 'Point to the tiff library files', '')
 opts.Add('boost_include_path', 'Point to the boost header files', '')
@@ -53,6 +53,7 @@ Help(opts.GenerateHelpText(env))
 SConscript('build_check.py')
 
 env = conf.Finish()
+opts.Save('options.cache', env)
 
 SConscript('libaqsistypes/SConscript')
 SConscript('libargparse/SConscript')
