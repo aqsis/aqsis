@@ -11,3 +11,8 @@ aqsisenv.UseTargetOptions('aqsis')
 
 aqsis = aqsisenv.Program('aqsis', aqsis_sources, LIBS=['argparse', 'aqsis'], LIBPATH=['$LIBDIR', '$BINDIR'])
 aqsisenv.Install('$BINDIR', aqsis)
+
+env.Distribute('aqsis', aqsis_sources)
+env.Distribute('aqsis', 'Makefile.am')
+env.Distribute('aqsis', 'SConscript')
+

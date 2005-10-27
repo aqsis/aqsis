@@ -18,6 +18,33 @@ aqsistypes_sources = Split("""
 	vector3d.cpp
 	vector4d.cpp""")
 
+aqsistypes_headers = Split("""
+	aqerror.h
+	aqsis.h
+	aqsis_types.h
+	bitvector.h
+	cellnoise.h
+	color.h
+	exception.h
+	file.h
+	list.h
+	logging.h
+	logging_streambufs.h
+	lowdiscrep.h
+	matrix.h
+	MultiTimer.h
+	noise.h
+	plugins.h
+	pool.h
+	random.h
+	refcount.h
+	spline.h
+	sstring.h
+	validate.h
+	vector2d.h
+	vector3d.h
+	vector4d.h""")
+
 if 'win32' == env['PLATFORM']:
 	aqsistypes_sources = aqsistypes_sources + ['win32/intel/file_system.cpp']
 elif 'darwin' == env['PLATFORM']:
@@ -31,3 +58,9 @@ env.UseTargetOptions('aqsistypes')
 
 aqsistypes = env.Library('aqsistypes', aqsistypes_sources)
 env.Install('$LIBDIR', aqsistypes)
+
+env.Distribute('libaqsistypes', aqsistypes_sources)
+env.Distribute('libaqsistypes', aqsistypes_headers)
+env.Distribute('libaqsistypes', 'SConscript')
+env.Distribute('libaqsistypes', 'Makefile.am')
+

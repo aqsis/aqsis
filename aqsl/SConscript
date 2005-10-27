@@ -23,4 +23,7 @@ bld = Builder(action = aqsl[0].abspath + ' -o $TARGET $SOURCE',
 # Add the new Builder to the list of builders
 env['BUILDERS']['Shader'] = bld
 
+env.Distribute('aqsl', aqsl_sources)
+env.Distribute('aqsl', "SConscript")
+env.Distribute('aqsl', "Makefile.am")
 

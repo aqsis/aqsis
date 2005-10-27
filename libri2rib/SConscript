@@ -12,8 +12,25 @@ ri2rib_sources = Split("""
 	ri.cpp
 	tokens.cpp""")
 
+ri2rib_headers = Split("""
+	ascii.h
+	binary.h
+	context.h
+	dictionary.h
+	error.h
+	inlineparse.h
+	options.h
+	output.h
+	outstream.h
+	plstore.h""")
+
 # Set any platform specific options for this target
 env.UseTargetOptions('ri2rib')
 
 ri2rib = env.Library('ri2rib', ri2rib_sources)
 env.Install('$LIBDIR', ri2rib)
+
+env.Distribute('libri2rib', ri2rib_sources)
+env.Distribute('libri2rib', ri2rib_headers)
+env.Distribute('libri2rib', 'SConscript')
+env.Distribute('libri2rib', 'Makefile.am')

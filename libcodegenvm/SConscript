@@ -4,8 +4,19 @@ codegenvm_sources = Split("""
 	vmoutput.cpp
 	codegenvm.cpp""")
 
+codegenvm_headers = Split("""
+	codegenvm.h
+	vmdatagather.h
+	vmoutput.h""")
+
 # Set any platform specific options for this target
 env.UseTargetOptions('codegenvm')
 
 codegenvm = env.Library('codegenvm', codegenvm_sources)
 env.Install('$LIBDIR', codegenvm)
+
+env.Distribute('libcodegenvm', codegenvm_sources)
+env.Distribute('libcodegenvm', codegenvm_headers)
+env.Distribute('libcodegenvm', 'SConscript')
+env.Distribute('libcodegenvm', 'Makefile.am')
+

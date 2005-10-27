@@ -1,4 +1,5 @@
 Import('env')
+
 shadervm_sources = Split("""
 	dsoshadeops.cpp
 	shaderstack.cpp
@@ -7,8 +8,20 @@ shadervm_sources = Split("""
 	shadervm1.cpp
 	shadervm2.cpp""")
 
+shadervm_headers = Split("""
+	dsoshadeops.h
+	shaderstack.h
+	shadervariable.h
+	shadervm.h""")
+
 # Set any platform specific options for this target
 env.UseTargetOptions('shadervm')
 
 shadervm = env.Library('shadervm', shadervm_sources)
 env.Install('$LIBDIR', shadervm)
+
+env.Distribute('libshadervm', shadervm_sources)
+env.Distribute('libshadervm', shadervm_headers)
+env.Distribute('libshadervm', 'SConscript')
+env.Distribute('libshadervm', 'Makefile.am')
+

@@ -2,8 +2,15 @@ import glob
 
 Import('env')
 shaders = glob.glob('*.sl')
+headers = glob.glob('*.h')
 
 for shader in shaders:
 	compiled_shader = env.Shader(shader)
 	env.Install('$SHADERDIR', shader)
 	env.Install('$SHADERDIR', compiled_shader)
+
+env.Distribute('shaders', shaders)
+env.Distribute('shaders', headers)
+env.Distribute('shaders', 'SConscript')
+env.Distribute('shaders', 'Makefile.am')
+

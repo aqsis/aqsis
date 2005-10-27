@@ -103,3 +103,21 @@ env.Depends(aqsisrc, display)
 
 env.Alias('release', ['$BINDIR','$LIBDIR', '$SHADERDIR'])
 Default('release')
+
+main_distfiles = Split("""
+        SConstruct
+	AUTHORS
+	build_check.py
+	build_support.py
+	ChangeLog
+	configure.ac
+	COPYING
+	Doxyfile
+	INSTALL
+	Makefile.am
+	NEWS
+	README
+	SConstruct
+        aqsis.spec""")
+
+env.Distribute('', main_distfiles)
