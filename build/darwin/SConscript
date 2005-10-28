@@ -66,5 +66,5 @@ env.Replace(display_cppdefines = ['AQSIS_NO_FLTK'])
 env.Replace(slparse_ccflags = ['-O0'])
 env.Replace(libaqsis_linkflags = ['-framework', 'Carbon'])
 
-env.Distribute('build', 'darwin', 'Makefile.am')
+env.Distribute('build', 'Makefile.am')
 
