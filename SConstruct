@@ -1,8 +1,9 @@
 import os
 import os.path
 from build_support import *
+import glob
 
-# This allows the developer to choose the version of msvs from the command line.
+# Setup the common command line options.
 opts = Options(['options.cache', 'custom.py'])
 opts.Add('tiff_include_path', 'Point to the tiff header files', '')
 opts.Add('tiff_lib_path', 'Point to the tiff library files', '')
@@ -16,6 +17,9 @@ opts.Add('fltk_lib_path', 'Point to the fltk library files', '')
 
 # Create the default environment
 env = Environment(options = opts)
+
+# Create the configure object here, as you can't do it once a call
+# to SConscript has been processed.
 conf = Configure(env)
 Export('env opts conf')
 
@@ -25,10 +29,9 @@ env['ZIPDISTDIR'] = '#/dist'
 def Distribute(dir, files):
         env.Install('$ZIPDISTDIR/%s' % dir, files)
 env.Distribute = Distribute
+env.Alias('dist', '$ZIPDISTDIR')
 
-Environment.UseTargetOptions = UseTargetOptions
-
-# Determine the target and load the appropriate configuration SConscript
+# Determine the target 
 target_dir =  '#' + SelectBuildDir('build')
 
 # Setup the output directories for binaries and libraries.
@@ -36,7 +39,8 @@ env.Replace(BINDIR = target_dir + os.sep + 'bin')
 env.Replace(LIBDIR = target_dir + os.sep + 'lib')
 env.Replace(SHADERDIR = target_dir + os.sep + 'shaders')
 
-# Read in any platform specific configuration.
+# Read in the platform specific configuration.
+# Allowing it to override the settings defined above.
 SConscript(target_dir + os.sep + 'SConscript')
 
 # Setup common environment settings to allow includes from the various local folders
@@ -47,14 +51,20 @@ env.AppendUnique(CPPDEFINES=['SCONS_BUILD'])
 # Setup the include path to the tiff headers (should have been determined in the system specific sections above).
 env.AppendUnique(LIBPATH = ['$LIBDIR', '$BINDIR', '$tiff_lib_path', '$jpeg_lib_path', '$zlib_lib_path'])
 
+# Create the output for the command line options defined above and in the platform specific configuration.
 Help(opts.GenerateHelpText(env))
 	
 # Check for the existence of the various dependencies
 SConscript('build_check.py')
 
+# Transfer any findings from the build_check back to the environment
 env = conf.Finish()
+
+# Save the command line options to a cache file, allowing the user to just run scons without 
+# command line options in future runs.
 opts.Save('options.cache', env)
 
+# Load the sub-project sconscript files.
 SConscript('libaqsistypes/SConscript')
 SConscript('libargparse/SConscript')
 SConscript('libddmanager/SConscript')
@@ -104,6 +114,7 @@ env.Depends(aqsisrc, display)
 env.Alias('release', ['$BINDIR','$LIBDIR', '$SHADERDIR'])
 Default('release')
 
+# Define any files that need to be included in a source distribution.
 main_distfiles = Split("""
         SConstruct
 	AUTHORS
@@ -121,3 +132,9 @@ main_distfiles = Split("""
         aqsis.spec""")
 
 env.Distribute('', main_distfiles)
+
+# Distribute the platform build configurations.
+platforms = glob.glob('build/*/SConscript')
+for platform in platforms:
+	path, name = os.path.split(platform)
+	env.Distribute(path, platform)

@@ -1,6 +1,8 @@
 import os
 import sys
 from string import lower, split
+import SCons
+from SCons.Script.SConscript import SConsEnvironment
 
 def SelectBuildDir(build_dir, platform=None):
 	# if no platform is specified, then default to sys.platform
@@ -63,3 +65,4 @@ def UseTargetOptions(self, target_name):
 		if self.has_key(target_name + '_' + lower(value)):
 			self.AppendUnique(**{value: self['' + target_name + '_' + lower(value)]})
 
+SConsEnvironment.UseTargetOptions = UseTargetOptions
