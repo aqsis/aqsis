@@ -1161,9 +1161,13 @@ boost::shared_ptr<IqShader> CqRenderer::CreateShader(
                 )
                 {
                         CqString strError;
-                        strError.Format( "Shader \"%s\" not found",
-                                strName ? strName : "" );
+                        strError.Format( "Shader \"%s\" not found", strName ? strName : "" );
                         std::cerr << error << strError.c_str() << std::endl;
+			const CqString* poptShaderPath = QGetRenderContext()->optCurrent().GetStringOption("searchpath", "shader");
+			if(poptShaderPath != NULL)
+				std::cerr << info << "Shader searchpath is : " << poptShaderPath[0] << std::endl;
+			else
+				std::cerr << info << "No shader searchpath specified" << std::endl;
                 }
                 if ( type == Type_Surface )
                 {

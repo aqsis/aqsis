@@ -18,6 +18,7 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 #include "aqsis.h"
+#include "exception.h"
 #include "argparse.h"
 #include "file.h"
 #include "librib.h"
@@ -514,75 +515,82 @@ void RenderFile( FILE* file, std::string&  name )
 {
     librib::RendermanInterface * renderengine = librib2ri::CreateRIBEngine();
 
-    RiBegin( "aqsis" );
-
-    if ( !g_cl_nostandard )
-        librib::StandardDeclarations( *renderengine );
-
-    if ( g_cl_rinfo )
+    try
     {
-        RiOption( "statistics", "renderinfo", &g_cl_rinfo, RI_NULL );
-    }
+	    RiBegin( "aqsis" );
 
-    /* Allow any command line arguments to override system/env settings */
-    const char* popt[1];
-    if(!g_cl_shader_path.empty())
-    {
-	popt[0] = g_cl_shader_path.c_str();
-        RiOption( "searchpath", "shader", &popt, RI_NULL );
-    }
-    if(!g_cl_archive_path.empty())
-    {
-	popt[0] = g_cl_archive_path.c_str();
-        RiOption( "searchpath", "archive", &popt, RI_NULL );
-    }
-    if(!g_cl_texture_path.empty())
-    {
-	popt[0] = g_cl_texture_path.c_str();
-        RiOption( "searchpath", "texture", &popt, RI_NULL );
-    }
-    if(!g_cl_display_path.empty())
-    {
-	popt[0] = g_cl_display_path.c_str();
-        RiOption( "searchpath", "display", &popt, RI_NULL );
-    }
-    if(!g_cl_dso_path.empty())
-    {
-	popt[0] = g_cl_dso_path.c_str();
-        RiOption( "searchpath", "dsolibs", &popt, RI_NULL );
-    }
-    if(!g_cl_procedural_path.empty())
-    {
-	popt[0] = g_cl_procedural_path.c_str();
-        RiOption( "searchpath", "procedural", &popt, RI_NULL );
-    }
-    if(!g_cl_plugin_path.empty())
-    {
-	popt[0] = g_cl_plugin_path.c_str();
-        RiOption( "searchpath", "plugin", &popt, RI_NULL );
-    }
+	    if ( !g_cl_nostandard )
+		librib::StandardDeclarations( *renderengine );
 
-    RiProgressHandler( &PrintProgress );
-    RiPreWorldFunction( &PreWorld );
+	    if ( g_cl_rinfo )
+	    {
+		RiOption( "statistics", "renderinfo", &g_cl_rinfo, RI_NULL );
+	    }
+
+	    /* Allow any command line arguments to override system/env settings */
+	    const char* popt[1];
+	    if(!g_cl_shader_path.empty())
+	    {
+		popt[0] = g_cl_shader_path.c_str();
+		RiOption( "searchpath", "shader", &popt, RI_NULL );
+	    }
+	    if(!g_cl_archive_path.empty())
+	    {
+		popt[0] = g_cl_archive_path.c_str();
+		RiOption( "searchpath", "archive", &popt, RI_NULL );
+	    }
+	    if(!g_cl_texture_path.empty())
+	    {
+		popt[0] = g_cl_texture_path.c_str();
+		RiOption( "searchpath", "texture", &popt, RI_NULL );
+	    }
+	    if(!g_cl_display_path.empty())
+	    {
+		popt[0] = g_cl_display_path.c_str();
+		RiOption( "searchpath", "display", &popt, RI_NULL );
+	    }
+	    if(!g_cl_dso_path.empty())
+	    {
+		popt[0] = g_cl_dso_path.c_str();
+		RiOption( "searchpath", "dsolibs", &popt, RI_NULL );
+	    }
+	    if(!g_cl_procedural_path.empty())
+	    {
+		popt[0] = g_cl_procedural_path.c_str();
+		RiOption( "searchpath", "procedural", &popt, RI_NULL );
+	    }
+	    if(!g_cl_plugin_path.empty())
+	    {
+		popt[0] = g_cl_plugin_path.c_str();
+		RiOption( "searchpath", "plugin", &popt, RI_NULL );
+	    }
+
+	    RiProgressHandler( &PrintProgress );
+	    RiPreWorldFunction( &PreWorld );
 
 
-	librib::ClearFrames();
-	// Pass in specified frame lists.
-	if(g_cl_frames.size() == 2)
-	{
-		std::stringstream strframes;
-		strframes << g_cl_frames[0] << "-" << g_cl_frames[1] << std::ends;
-		librib::AppendFrames(strframes.str().c_str());
-	}
-	if(!g_cl_framesList.empty())
-		librib::AppendFrames(g_cl_framesList.c_str());
+		librib::ClearFrames();
+		// Pass in specified frame lists.
+		if(g_cl_frames.size() == 2)
+		{
+			std::stringstream strframes;
+			strframes << g_cl_frames[0] << "-" << g_cl_frames[1] << std::ends;
+			librib::AppendFrames(strframes.str().c_str());
+		}
+		if(!g_cl_framesList.empty())
+			librib::AppendFrames(g_cl_framesList.c_str());
 
-    librib::Parse( file, name, *renderengine, std::cerr, NULL );
+	    librib::Parse( file, name, *renderengine, std::cerr, NULL );
 
-    RiEnd();
+	    RiEnd();
 
-    if ( !g_cl_nostandard )
-        librib::CleanupDeclarations( *renderengine );
+	    if ( !g_cl_nostandard )
+		librib::CleanupDeclarations( *renderengine );
+    }
+    catch(Aqsis::XqException& x)
+    {
+	    std::cerr << Aqsis::error << x.strReason().c_str() << std::endl;
+    }
 
     librib2ri::DestroyRIBEngine( renderengine );
 }

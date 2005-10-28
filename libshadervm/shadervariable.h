@@ -1,6 +1,6 @@
 // Aqsis
 
-// Copyright © 1997 - 2001, Paul C. Gregory
+// Copyright (C) 1997 - 2001, Paul C. Gregory
 
 //
 
@@ -2016,7 +2016,7 @@ public:
 
         m_aValue.resize( val.m_aValue.size() );
 
-        m_aValue.assign( val.m_aValue.begin(), val.m_aValue.begin() );
+        m_aValue.assign( val.m_aValue.begin(), val.m_aValue.end() );
 
     }
 
