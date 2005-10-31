@@ -1,7 +1,8 @@
+import re
+
 Import('env')
 aqsl_sources = Split("""
 	aqslcomp.cpp""")
-
 
 # Set any platform specific options for this target
 env.UseTargetOptions('aqsl')
@@ -22,6 +23,19 @@ bld = Builder(action = aqsl[0].abspath + ' -o $TARGET $SOURCE',
 
 # Add the new Builder to the list of builders
 env['BUILDERS']['Shader'] = bld
+
+      
+# Create a scanner for .sl files
+include_re = re.compile(r'^#include\s+"(\S+)"$', re.M)
+
+def slfile_scan(node, env, path):
+	contents = node.get_contents()
+	result = include_re.findall(contents)
+	return result
+    
+slscan = Scanner(function = slfile_scan,
+	skeys = ['.sl'])
+env.Append(SCANNERS = slscan)
 
 env.Distribute('aqsl', aqsl_sources)
 env.Distribute('aqsl', "SConscript")

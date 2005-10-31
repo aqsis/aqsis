@@ -1,6 +1,6 @@
 import os
 import os.path
-from build_support import *
+#from build_support import *
 import glob
 
 # Setup the common command line options.
@@ -22,6 +22,9 @@ env = Environment(options = opts)
 # to SConscript has been processed.
 conf = Configure(env)
 Export('env opts conf')
+
+SConscript('build_support.py')
+Import('SelectBuildDir')
 
 # Setup the distribution stuff, this should be non-platform specific, the distribution
 # archive should apply to all supported platforms.
@@ -110,8 +113,8 @@ SConscript('build/librib2stream/SConscript')
 BuildDir('build/teqser', 'teqser')
 SConscript('build/teqser/SConscript')
 #SConscript('plugins/SConscript')
-BuildDir('build/shaders', 'shaders')
-SConscript('shaders/SConscript')
+#BuildDir('build/shaders', 'shaders')
+SConscript('shaders/SConscript', build_dir='build/shaders')
 
 # Generate and install the '.aqsisrc' configuration file from the template '.aqsisrc.in'
 def build_function(target, source, env):

@@ -1,8 +1,8 @@
-import glob
+Import('env Glob')
 
-Import('env')
-shaders = glob.glob('*.sl')
-headers = glob.glob('*.h')
+
+shaders = Glob('*.sl')
+headers = Glob('*.h')
 
 for shader in shaders:
 	compiled_shader = env.Shader(shader)
