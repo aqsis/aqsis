@@ -2013,7 +2013,8 @@ void CqCubicCurvesGroup::Transform(
             //  to the next one.  this means incrementing the width
             //  index by 1, and the vertex index by vStep
             ++widthI;
-            vertexI += vStep;
+//            vertexI += vStep;
+	    vertexI = (vertexI + vStep)%m_nvertices[curveN];
         }
         vertexI = nextCurveVertexIndex;
     }
