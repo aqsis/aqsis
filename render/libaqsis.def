@@ -198,3 +198,4 @@ EXPORTS
 	?GetParserState@librib@@YA?AVCqRIBParserState@1@XZ
 	??0CqRibBinaryDecoder@librib@@QAE@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@H@Z
 	ParseOpenStream
+	?error@Aqsis@@YAAAV?$basic_ostream@DU?$char_traits@D@std@@@std@@AAV23@@Z	

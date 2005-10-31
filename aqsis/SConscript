@@ -4,12 +4,12 @@ aqsis_sources = Split("""
 
 aqsisenv = env.Copy();
 
-aqsisenv.AppendUnique(LINKFLAGS = '$aqsis_exe_linkflags')
+aqsisenv.AppendUnique(LIBS = ['argparse', 'aqsis'])
 
 # Set any platform specific options for this target
 aqsisenv.UseTargetOptions('aqsis')
 
-aqsis = aqsisenv.Program('aqsis', aqsis_sources, LIBS=['argparse', 'aqsis'], LIBPATH=['$LIBDIR', '$BINDIR'])
+aqsis = aqsisenv.Program('aqsis', aqsis_sources)
 aqsisenv.Install('$BINDIR', aqsis)
 
 env.Distribute('aqsis', aqsis_sources)
