@@ -71,3 +71,6 @@ env.Replace(ADDITIONAL_LIBS=['dl'])
 
 env.Replace(display_cppdefines = ['AQSIS_NO_FLTK'])
 env.Replace(slparse_ccflags = ['-O0'])
+env.Replace(aqsis_libs = ['dl'])
+env.Replace(aqsltell_libs = ['dl'])
+env.Replace(teqser_libs = ['dl'])
