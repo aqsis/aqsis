@@ -12,5 +12,4 @@ for shader in shaders:
 env.Distribute('shaders', shaders)
 env.Distribute('shaders', headers)
 env.Distribute('shaders', 'SConscript')
-env.Distribute('shaders', 'Makefile.am')
 

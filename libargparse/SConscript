@@ -15,5 +15,4 @@ env.Install('$LIBDIR', argparse)
 env.Distribute('libargparse', argparse_sources)
 env.Distribute('libargparse', argparse_headers)
 env.Distribute('libargparse', 'SConscript')
-env.Distribute('libargparse', 'Makefile.am')
 

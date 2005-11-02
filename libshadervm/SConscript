@@ -23,5 +23,4 @@ env.Install('$LIBDIR', shadervm)
 env.Distribute('libshadervm', shadervm_sources)
 env.Distribute('libshadervm', shadervm_headers)
 env.Distribute('libshadervm', 'SConscript')
-env.Distribute('libshadervm', 'Makefile.am')
 

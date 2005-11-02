@@ -33,5 +33,6 @@ slparseenv.Install('$LIBDIR', slparse)
 env.Distribute('libslparse', slparse_sources)
 env.Distribute('libslparse', slparse_headers)
 env.Distribute('libslparse', 'SConscript')
-env.Distribute('libslparse', 'Makefile.am')
+env.Distribute('libslparse', 'parser.yy')
+env.Distribute('libslparse', 'scanner.ll')
 

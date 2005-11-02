@@ -15,5 +15,4 @@ env.Install('$LIBDIR', rib2stream)
 env.Distribute('librib2stream', rib2stream_sources)
 env.Distribute('librib2stream', rib2stream_headers)
 env.Distribute('librib2stream', 'SConscript')
-env.Distribute('librib2stream', 'Makefile.am')
 

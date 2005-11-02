@@ -14,5 +14,4 @@ env.Install('$LIBDIR', raytrace)
 env.Distribute('libraytrace', raytrace_sources)
 env.Distribute('libraytrace', raytrace_headers)
 env.Distribute('libraytrace', 'SConscript')
-env.Distribute('libraytrace', 'Makefile.am')
 

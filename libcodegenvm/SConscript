@@ -18,5 +18,4 @@ env.Install('$LIBDIR', codegenvm)
 env.Distribute('libcodegenvm', codegenvm_sources)
 env.Distribute('libcodegenvm', codegenvm_headers)
 env.Distribute('libcodegenvm', 'SConscript')
-env.Distribute('libcodegenvm', 'Makefile.am')
 

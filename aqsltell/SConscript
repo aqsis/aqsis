@@ -14,5 +14,4 @@ aqsltellenv.Install('$BINDIR', aqsltell)
 
 env.Distribute('aqsltell', aqsltell_sources)
 env.Distribute('aqsltell', "SConscript")
-env.Distribute('aqsltell', "Makefile.am")
 

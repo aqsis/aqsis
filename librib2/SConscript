@@ -23,5 +23,6 @@ env.Install('$LIBDIR', rib2)
 env.Distribute('librib2', rib2_sources)
 env.Distribute('librib2', rib2_headers)
 env.Distribute('librib2', 'SConscript')
-env.Distribute('librib2', 'Makefile.am')
+env.Distribute('librib2', 'scanner.ll')
+env.Distribute('librib2', 'parser.yy')
 

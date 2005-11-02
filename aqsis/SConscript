@@ -13,6 +13,5 @@ aqsis = aqsisenv.Program('aqsis', aqsis_sources)
 aqsisenv.Install('$BINDIR', aqsis)
 
 env.Distribute('aqsis', aqsis_sources)
-env.Distribute('aqsis', 'Makefile.am')
 env.Distribute('aqsis', 'SConscript')
 

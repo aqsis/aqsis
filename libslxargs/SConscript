@@ -16,5 +16,4 @@ env.Install('$LIBDIR', slxargs)
 env.Distribute('libslxargs', slxargs_sources)
 env.Distribute('libslxargs', slxargs_headers)
 env.Distribute('libslxargs', 'SConscript')
-env.Distribute('libslxargs', 'Makefile.am')
 

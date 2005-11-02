@@ -52,7 +52,6 @@ elif 'darwin' == env['PLATFORM']:
 elif 'posix' == env['PLATFORM']:
 	aqsistypes_sources = aqsistypes_sources + ['posix/file_system.cpp']
 
-
 # Set any platform specific options for this target
 env.UseTargetOptions('aqsistypes')
 
@@ -62,5 +61,5 @@ env.Install('$LIBDIR', aqsistypes)
 env.Distribute('libaqsistypes', aqsistypes_sources)
 env.Distribute('libaqsistypes', aqsistypes_headers)
 env.Distribute('libaqsistypes', 'SConscript')
-env.Distribute('libaqsistypes', 'Makefile.am')
-
+SConscript('posix/SConscript')
+SConscript('win32/intel/SConscript')

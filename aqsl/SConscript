@@ -39,5 +39,4 @@ env.Append(SCANNERS = slscan)
 
 env.Distribute('aqsl', aqsl_sources)
 env.Distribute('aqsl', "SConscript")
-env.Distribute('aqsl', "Makefile.am")
 

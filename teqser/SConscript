@@ -12,5 +12,4 @@ env.Install('$BINDIR', teqser)
 
 env.Distribute('teqser', teqser_sources)
 env.Distribute('teqser', "SConscript")
-env.Distribute('teqser', "Makefile.am")
 

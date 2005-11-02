@@ -129,15 +129,14 @@ main_distfiles = Split("""
 	build_check.py
 	build_support.py
 	ChangeLog
-	configure.ac
 	COPYING
 	Doxyfile
 	INSTALL
-	Makefile.am
 	NEWS
 	README
 	SConstruct
-        aqsis.spec""")
+        aqsis.spec
+	aqsisrc.in""")
 
 env.Distribute('', main_distfiles)
 

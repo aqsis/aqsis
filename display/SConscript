@@ -24,5 +24,4 @@ Return('display')
 env.Distribute('display', display_sources)
 env.Distribute('display', display_headers)
 env.Distribute('display', 'SConscript')
-env.Distribute('display', 'Makefile.am')
 
