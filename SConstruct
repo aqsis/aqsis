@@ -34,6 +34,12 @@ def Distribute(dir, files):
         env.Install('$ZIPDISTDIR/%s' % dir, files)
 env.Distribute = Distribute
 env.Alias('dist', '$ZIPDISTDIR')
+zip_target = env.Zip('aqsis', '$ZIPDISTDIR')
+env.Alias('dist-zip', zip_target)
+env.AppendUnique(TARFLAGS = '-c -z')
+env.AppendUnique(TARSUFFIX = '.tgz')
+tar_target = env.Tar('aqsis', '$ZIPDISTDIR')
+env.Alias('dist-tar', tar_target)
 
 # Determine the target 
 target_dir =  '#' + SelectBuildDir('build')
