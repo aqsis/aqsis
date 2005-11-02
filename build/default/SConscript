@@ -67,8 +67,6 @@ env.AppendUnique(CPPDEFINES=[('DEFAULT_DISPLAY_PATH', '\\"' + env.Dir('${BINDIR}
 env.AppendUnique(CPPDEFINES=[('DEFAULT_PROCEDURAL_PATH', '\\"' + env.Dir('${BINDIR}').abspath + '\\"')])
 env.AppendUnique(CPPDEFINES=[('DEFAULT_TEXTURE_PATH', '\\"' + env.Dir('${BINDIR}').abspath + '\\"')])
 
-env.Replace(ADDITIONAL_LIBS=['dl'])
-
 env.Replace(display_cppdefines = ['AQSIS_NO_FLTK'])
 env.Replace(slparse_ccflags = ['-O0'])
 env.Replace(aqsis_libs = ['dl'])
