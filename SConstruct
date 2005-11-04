@@ -16,7 +16,7 @@ opts.Add('fltk_include_path', 'Point to the fltk header files', '')
 opts.Add('fltk_lib_path', 'Point to the fltk library files', '')
 
 # Create the default environment
-env = Environment(options = opts, tools = ['default', 'lex', 'yacc'])
+env = Environment(options = opts, tools = ['default', 'lex', 'yacc', 'zip', 'tar'])
 
 
 # Create the configure object here, as you can't do it once a call
@@ -58,7 +58,7 @@ env.Replace(SHADERDIR = env.Dir('$install_prefix').abspath + os.sep + 'shaders')
 SConscript(target_dir + os.sep + 'SConscript')
 
 # Setup common environment settings to allow includes from the various local folders
-env.AppendUnique(CPPPATH = ['#/build/libaqsistypes','#/build/render', '#/build/libshaderexecenv', '#/build/librib2', '#/build/libshadervm', '#/build/librib2ri', '#/build/libargparse', '#/build/libslparse', '#/build/libcodegenvm', '$tiff_include_path', '$jpeg_include_path', '$zlib_include_path', '$boost_include_path'])
+env.AppendUnique(CPPPATH = ['#/build/libaqsistypes','#/build/render', '#/build/libshaderexecenv', '#/build/librib2', '#/build/libshadervm', '#/build/librib2ri', '#/build/libargparse', '#/build/libslparse', '#/build/libcodegenvm', '$zlib_include_path', '$tiff_include_path', '$jpeg_include_path', '$boost_include_path'])
 env.AppendUnique(CPPDEFINES=[('DEFAULT_PLUGIN_PATH', '\\"' + env.Dir('${BINDIR}').abspath + '\\"')])
 env.AppendUnique(CPPDEFINES=['SCONS_BUILD'])
 
