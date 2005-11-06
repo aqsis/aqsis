@@ -14,6 +14,7 @@ opts.Add('zlib_include_path', 'Point to the zlib header files', '')
 opts.Add('zlib_lib_path', 'Point to the zlib library files', '')
 opts.Add('fltk_include_path', 'Point to the fltk header files', '')
 opts.Add('fltk_lib_path', 'Point to the fltk library files', '')
+opts.Add(BoolOption('debug', 'Build with debug options enabled', '0'))
 
 # Create the default environment
 env = Environment(options = opts, tools = ['default', 'lex', 'yacc', 'zip', 'tar'])
@@ -42,6 +43,7 @@ tar_target = env.Tar('aqsis', '$ZIPDISTDIR')
 env.Alias('dist-tar', tar_target)
 
 # Determine the target 
+target_config_dir =  '#' + SelectBuildDir('platform')
 target_dir =  '#' + SelectBuildDir('build')
 
 # Add an option to control the root location of the 'install' target
@@ -55,7 +57,7 @@ env.Replace(SHADERDIR = env.Dir('$install_prefix').abspath + os.sep + 'shaders')
 
 # Read in the platform specific configuration.
 # Allowing it to override the settings defined above.
-SConscript(target_dir + os.sep + 'SConscript')
+SConscript(target_config_dir + os.sep + 'SConscript')
 
 # Setup common environment settings to allow includes from the various local folders
 env.AppendUnique(CPPPATH = ['#/build/libaqsistypes','#/build/render', '#/build/libshaderexecenv', '#/build/librib2', '#/build/libshadervm', '#/build/librib2ri', '#/build/libargparse', '#/build/libslparse', '#/build/libcodegenvm', '$zlib_include_path', '$tiff_include_path', '$jpeg_include_path', '$boost_include_path'])
