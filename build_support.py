@@ -46,7 +46,7 @@ def SelectBuildDir(build_dir, platform=None):
 				print "No build directories found for your platform '%s'" % platform
 				return None
 
-	print "Found directory %s, will build there" % target_dir
+	print "Found configuration directory %s, will use that" % target_dir
 	return target_dir
 
 

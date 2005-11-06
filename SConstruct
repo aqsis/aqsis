@@ -1,6 +1,5 @@
 import os
 import os.path
-#from build_support import *
 import glob
 
 # Setup the common command line options.
@@ -44,10 +43,10 @@ env.Alias('dist-tar', tar_target)
 
 # Determine the target 
 target_config_dir =  '#' + SelectBuildDir('platform')
-target_dir =  '#' + SelectBuildDir('build')
+target_dir =  '#/build'
 
 # Add an option to control the root location of the 'install' target
-opts.Add('install_prefix', 'Root folder under which to install Aqsis', env.Dir(target_dir))
+opts.Add('install_prefix', 'Root folder under which to install Aqsis', env.Dir('#/output'))
 opts.Update(env)
 
 # Setup the output directories for binaries and libraries.
@@ -81,28 +80,28 @@ env = conf.Finish()
 opts.Save('options.cache', env)
 
 # Load the sub-project sconscript files.
-SConscript('libaqsistypes/SConscript', build_dir='build/libaqsistypes')
-SConscript('libargparse/SConscript', build_dir='build/libargparse')
-SConscript('libddmanager/SConscript', build_dir='build/libddmanager')
-SConscript('libraytrace/SConscript', build_dir='build/libraytrace')
-SConscript('librib2/SConscript', build_dir='build/librib2')
-SConscript('librib2ri/SConscript', build_dir='build/librib2ri')
-SConscript('libshaderexecenv/SConscript', build_dir='build/libshaderexecenv')
-SConscript('libshadervm/SConscript', build_dir='build/libshadervm')
-SConscript('render/SConscript', build_dir='build/render')
-SConscript('aqsis/SConscript', build_dir='build/aqsis')
-SConscript('libslparse/SConscript', build_dir='build/libslparse')
-SConscript('libcodegenvm/SConscript', build_dir='build/libcodegenvm')
-SConscript('slpp/SConscript', build_dir='build/slpp')
-SConscript('aqsl/SConscript', build_dir='build/aqsl')
-SConscript('libslxargs/SConscript', build_dir='build/libslxargs')
-SConscript('aqsltell/SConscript', build_dir='build/aqsltell')
-display = SConscript('display/SConscript', build_dir='build/display')
-SConscript('libri2rib/SConscript', build_dir='build/libri2rib')
-SConscript('librib2stream/SConscript', build_dir='build/librib2stream')
-SConscript('teqser/SConscript', build_dir='build/teqser')
+SConscript('libaqsistypes/SConscript', build_dir=target_dir + '/libaqsistypes')
+SConscript('libargparse/SConscript', build_dir=target_dir + '/libargparse')
+SConscript('libddmanager/SConscript', build_dir=target_dir + '/libddmanager')
+SConscript('libraytrace/SConscript', build_dir=target_dir + '/libraytrace')
+SConscript('librib2/SConscript', build_dir=target_dir + '/librib2')
+SConscript('librib2ri/SConscript', build_dir=target_dir + '/librib2ri')
+SConscript('libshaderexecenv/SConscript', build_dir=target_dir + '/libshaderexecenv')
+SConscript('libshadervm/SConscript', build_dir=target_dir + '/libshadervm')
+SConscript('render/SConscript', build_dir=target_dir + '/render')
+SConscript('aqsis/SConscript', build_dir=target_dir + '/aqsis')
+SConscript('libslparse/SConscript', build_dir=target_dir + '/libslparse')
+SConscript('libcodegenvm/SConscript', build_dir=target_dir + '/libcodegenvm')
+SConscript('slpp/SConscript', build_dir=target_dir + '/slpp')
+SConscript('aqsl/SConscript', build_dir=target_dir + '/aqsl')
+SConscript('libslxargs/SConscript', build_dir=target_dir + '/libslxargs')
+SConscript('aqsltell/SConscript', build_dir=target_dir + '/aqsltell')
+display = SConscript('display/SConscript', build_dir=target_dir + '/display')
+SConscript('libri2rib/SConscript', build_dir=target_dir + '/libri2rib')
+SConscript('librib2stream/SConscript', build_dir=target_dir + '/librib2stream')
+SConscript('teqser/SConscript', build_dir=target_dir + '/teqser')
 #SConscript('plugins/SConscript')
-SConscript('shaders/SConscript', build_dir='build/shaders')
+SConscript('shaders/SConscript', build_dir=target_dir + '/shaders')
 
 # Generate and install the '.aqsisrc' configuration file from the template '.aqsisrc.in'
 def build_function(target, source, env):
