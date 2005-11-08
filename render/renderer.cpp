@@ -1130,7 +1130,7 @@ boost::shared_ptr<IqShader> CqRenderer::CreateShader(
         
                 CqShaderVM* pShader = static_cast<CqShaderVM*>( pRet.get() );
                 const CqString* poptDSOPath = QGetRenderContext()->
-                    optCurrent().GetStringOption( "searchpath", "dsolibs" );
+                    optCurrent().GetStringOption( "searchpath", "shader" );
 
 		if(poptDSOPath)
 		{
@@ -1219,7 +1219,7 @@ IqShader* CqRenderer::CreateShader( const char* strName, EqShaderType type )
         if ( SLXFile.IsValid() )
         {
             CqShaderVM * pShader = new CqShaderVM();
-            const CqString *poptDSOPath = QGetRenderContext()->optCurrent().GetStringOption( "searchpath","dsolibs" );
+            const CqString *poptDSOPath = QGetRenderContext()->optCurrent().GetStringOption( "searchpath","shader" );
             pShader->SetDSOPath( poptDSOPath );
 
             CqString strRealName( SLXFile.strRealName() );

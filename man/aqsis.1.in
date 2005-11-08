@@ -114,11 +114,6 @@ Specify the path(s) used to search for texture files (overrides the default and 
 Specify the path(s) used to search for display plugins (overrides the default and AQSIS_DISPLAY_PATH environment variable).  You may specify multiple search paths, delimited using a colon.
 .RE
 
-.B --dsolibs=[path1:path2...]
-.RS
-Specify the path(s) used to search for DSO shader plugins (overrides the default and AQSIS_DSO_PATH environment variable).  You may specify multiple search paths, delimited using a colon.
-.RE
-
 .B --procedurals=[path1:path2...]
 .RS
 Specify the path(s) used to search for procedural geometry plugins (overrides the default and AQSIS_PROCEDURAL_PATH environment variable).  You may specify multiple search paths, delimited using a colon.
@@ -159,11 +154,6 @@ Overrides the path(s) used to search for texture files (this overrides the defau
 .B AQSIS_DISPLAY_PATH
 .RS
 Overrides the path(s) used to search for display plugins (this overrides the default, but can be overridden by the --displays option, above).  You may specify multiple search paths, delimited using a colon.
-.RE
-
-.B AQSIS_DSO_PATH
-.RS
-Overrides the path(s) used to search for DSO shader plugins (this overrides the default, but can be overridden by the --dsolibs option, above).  You may specify multiple search paths, delimited using a colon.
 .RE
 
 .B AQSIS_PROCEDURAL_PATH

@@ -549,12 +549,6 @@ void SetDefaultRiOptions( void )
 	RiOption( "searchpath", "display", &popt, RI_NULL );
     }
 
-    if(getenv("AQSIS_DSO_PATH"))
-    {
-	popt[0] = getenv("AQSIS_DSO_PATH");
-	RiOption( "searchpath", "dsolibs", &popt, RI_NULL );
-    }
-
     if(getenv("AQSIS_PROCEDURAL_PATH"))
     {
 	popt[0] = getenv("AQSIS_PROCEDURAL_PATH");

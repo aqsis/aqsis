@@ -55,11 +55,9 @@ extern IqRenderer* QGetRenderContextI();
 }
 
 std::string g_shader_path;
-std::string g_dso_path;
 bool g_cl_help = 0;
 bool g_cl_version = 0;
 ArgParse::apstring g_cl_shader_path = "";
-ArgParse::apstring g_cl_dso_path = "";
 
 int main( int argc, const char** argv )
 {
@@ -77,8 +75,6 @@ int main( int argc, const char** argv )
 	}
 	g_shader_path = rootPath;
 	g_shader_path.append( "shaders" );
-	g_dso_path = rootPath;
-	g_dso_path.append( "dsos" );
 #elif defined(AQSIS_SYSTEM_MACOSX)
 #else
 	g_shader_path = DEFAULT_SHADER_PATH;
@@ -89,8 +85,7 @@ int main( int argc, const char** argv )
     ap.usageHeader( ArgParse::apstring( "Usage: " ) + argv[ 0 ] + " <shadername>" );
     ap.argFlag( "help", "\aprint this help and exit", &g_cl_help );
     ap.argFlag( "version", "\aprint version information and exit", &g_cl_version );
-	ap.argString( "shaders", "=string\aOverride the default shader searchpath(s) [" + g_shader_path + "]", &g_cl_shader_path );
-	ap.argString( "dsolibs", "=string\aOverride the default dso searchpath(s) [" + g_dso_path + "]", &g_cl_dso_path );
+    ap.argString( "shaders", "=string\aOverride the default shader searchpath(s) [" + g_shader_path + "]", &g_cl_shader_path );
 
     if ( argc > 1 && !ap.parse( argc - 1, argv + 1 ) )
     {
@@ -113,14 +108,10 @@ int main( int argc, const char** argv )
     // Apply environment-variable overrides to default paths ...
     if(getenv("AQSIS_SHADER_PATH"))
 		g_shader_path = getenv("AQSIS_SHADER_PATH");
-	if(getenv("AQSIS_DSO_PATH"))
-		g_dso_path = getenv("AQSIS_DSO_PATH");
 
     // Apply command-line overrides to default paths ...
     if(!g_cl_shader_path.empty())
         g_shader_path = g_cl_shader_path;
-	if(!g_cl_dso_path.empty())
-		g_dso_path = g_cl_dso_path;
 
     // Any leftovers are presumed to be shader names.
     if ( ap.leftovers().size() == 0 )     // If no files specified, take input from stdin.
@@ -133,7 +124,7 @@ int main( int argc, const char** argv )
         for ( ArgParse::apstringvec::const_iterator e = ap.leftovers().begin(); e != ap.leftovers().end(); e++ )
         {
             SLX_SetPath( const_cast<char*>( g_shader_path.c_str() ) );
-            SLX_SetDSOPath( const_cast<char*>( g_dso_path.c_str() ) );
+            SLX_SetDSOPath( const_cast<char*>( g_shader_path.c_str() ) );
 
             if ( SLX_SetShader( ( char* ) e->c_str() ) == 0 )
             {

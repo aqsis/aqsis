@@ -100,6 +100,11 @@ public:
     CqDSORepository(): CqPluginBase()
     {
         BuildTypeMaps();
+        if(getenv("AQSIS_SHADER_PATH"))
+        {
+          char *dsopath = getenv("AQSIS_SHADER_PATH");
+          SetDSOPath(dsopath);
+       }
     };
 
 

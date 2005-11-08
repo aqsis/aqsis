@@ -116,7 +116,6 @@ ArgParse::apstring g_cl_shader_path = "";
 ArgParse::apstring g_cl_archive_path = "";
 ArgParse::apstring g_cl_texture_path = "";
 ArgParse::apstring g_cl_display_path = "";
-ArgParse::apstring g_cl_dso_path = "";
 ArgParse::apstring g_cl_procedural_path = "";
 ArgParse::apstring g_cl_plugin_path = "";
 ArgParse::apstring g_cl_type = "";
@@ -410,7 +409,6 @@ int main( int argc, const char** argv )
         ap.argString( "archives", "=string\aOverride the default archive searchpath(s)", &g_cl_archive_path );
         ap.argString( "textures", "=string\aOverride the default texture searchpath(s)", &g_cl_texture_path );
         ap.argString( "displays", "=string\aOverride the default display searchpath(s)", &g_cl_display_path );
-        ap.argString( "dsolibs", "=string\aOverride the default dso searchpath(s)", &g_cl_dso_path );
         ap.argString( "procedurals", "=string\aOverride the default procedural searchpath(s)", &g_cl_procedural_path );
         ap.argString( "plugins", "=string\aOverride the default plugin searchpath(s)", &g_cl_plugin_path );
         ap.allowUnrecognizedOptions();
@@ -548,11 +546,6 @@ void RenderFile( FILE* file, std::string&  name )
 	    {
 		popt[0] = g_cl_display_path.c_str();
 		RiOption( "searchpath", "display", &popt, RI_NULL );
-	    }
-	    if(!g_cl_dso_path.empty())
-	    {
-		popt[0] = g_cl_dso_path.c_str();
-		RiOption( "searchpath", "dsolibs", &popt, RI_NULL );
 	    }
 	    if(!g_cl_procedural_path.empty())
 	    {
