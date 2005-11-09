@@ -1150,7 +1150,8 @@ void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax, 
     if(!bIsEmpty)
     {
         Bucket.ExposeBucket();
-		Bucket.QuantizeBucket();
+	// \note: Used to quantize here too, but not any more, as it is handled by 
+	//	  ddmanager in a specific way for each display.
     }
 
 	TIMER_STOP("Filter")

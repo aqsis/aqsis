@@ -189,10 +189,8 @@ TqInt CqDDManager::DisplayBucket( IqBucket* pBucket )
 					        i->m_QuantizeMinVal  == 0.0f &&
 					        i->m_QuantizeMaxVal  == 0.0f ) )
 					{
-//		                double val1;
-//						if( modf( (i->m_QuantizeOneVal - i->m_QuantizeZeroVal) * (i->m_QuantizeZeroVal + value) + ( i->m_QuantizeDitherVal * s ), &val1 ) > 0.5 ) val1 += 1;
-						//value = ROUND(i->m_QuantizeZeroVal + value * (i->m_QuantizeOneVal - i->m_QuantizeZeroVal) + ( i->m_QuantizeDitherVal * s ) );
-//						value = CLAMP(val1, i->m_QuantizeMinVal, i->m_QuantizeMaxVal) ;
+						value = ROUND(i->m_QuantizeZeroVal + value * (i->m_QuantizeOneVal - i->m_QuantizeZeroVal) + ( i->m_QuantizeDitherVal * s ) );
+						value = CLAMP(value, i->m_QuantizeMinVal, i->m_QuantizeMaxVal) ;
 					}
 					TqInt type = iformat->type & PkDspyMaskType;
 					switch(type)
