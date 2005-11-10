@@ -450,6 +450,9 @@ void CqImagePixel::Combine(enum EqFilterDepth depthfilter, CqColor zThreshold)
 			// Write the collapsed color values back into the opaque entry.
 			if ( !samples->m_Data.empty() )
 			{
+				// Make sure the extra sample data from the top entry is copied 
+				// to the opaque sample, which is then sent to the display.
+				opaqueValue = *samples->m_Data.begin();
 				// Set the color and opacity.
 				opaqueValue.Data()[Sample_Red] = samplecolor.fRed();
 				opaqueValue.Data()[Sample_Green] = samplecolor.fGreen();
