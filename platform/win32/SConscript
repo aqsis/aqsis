@@ -13,20 +13,12 @@ if env['tiff_lib_path'] == "":
 	env.Replace(tiff_lib_path = env.Dir('#/../win32libs/libtiff/lib/vc6'))
 env.Replace(tiff_lib = 'libtiff')
 
-# If the jpeg include path isn't specified as an option, choose the default, of the 
-# win32libs project from CVS checked out to the same folder as 'renderer'
-if env['jpeg_include_path'] == "":
-	env.Replace(jpeg_include_path = env.Dir('#/../win32libs/include'))
-if env['jpeg_lib_path'] == "":
-	env.Replace(jpeg_lib_path = env.Dir('#/../win32libs/lib'))
-env.Replace(jpeg_lib = 'libjpeg')
-
 # If the zlib include path isn't specified as an option, choose the default, of the 
 # win32libs project from CVS checked out to the same folder as 'renderer'
 if env['zlib_include_path'] == "":
 	env.Replace(zlib_include_path = env.Dir('#/../win32libs/zlib/include'))
 if env['zlib_lib_path'] == "":
-	env.Replace(zlib_lib_path = env.Dir('#/../win32/libs2/zlib/lib/vc6'))
+	env.Replace(zlib_lib_path = env.Dir('#/../win32libs/zlib/lib/vc6'))
 env.Replace(z_lib = 'zlibstat')
 
 env.AppendUnique(CCFLAGS=['/GX', '/MD', '/GR', '/Zm200', '/O2'])

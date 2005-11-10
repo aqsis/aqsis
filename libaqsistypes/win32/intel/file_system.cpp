@@ -47,17 +47,29 @@ std::list<CqString*> CqFile::Glob ( const CqString& strFileGlob )
     long hFile;
     const char *pt = strFileGlob.c_str();
 
+    char drive[_MAX_PATH];
+    char dir[_MAX_PATH];
+    char fname[_MAX_PATH];
+    char ext[_MAX_PATH];
+
+    _splitpath( pt, drive, dir, fname, ext);
+
+    CqString strPath(drive);
+    strPath += CqString(dir);
+
     std::list<CqString*> result;
     if ( ( hFile = _findfirst( pt, &c_file ) ) != -1L )
     {
         /* we found something here; then we list
         * all of them with the directory first
         */
-        CqString strFile( c_file.name );
-        result.push_front( &strFile );
+	CqString* strFound = new CqString(strPath + CqString(c_file.name));
+        result.push_front( strFound );
         while ( _findnext( hFile, &c_file ) == 0 )
         {
-            result.push_front( new CqString( c_file.name ) );
+	    CqString* strFound = new CqString(strPath + CqString(c_file.name));
+	    result.push_front( strFound );
+            result.push_front( strFound );
         }
         _findclose( hFile );
     }
