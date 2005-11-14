@@ -53,6 +53,7 @@ opts.Update(env)
 env.Replace(BINDIR = env.Dir('$install_prefix').abspath + os.sep + 'bin')
 env.Replace(LIBDIR = env.Dir('$install_prefix').abspath + os.sep + 'lib')
 env.Replace(SHADERDIR = env.Dir('$install_prefix').abspath + os.sep + 'shaders')
+env.Replace(SYSCONFDIR = env.Dir('$install_prefix').abspath + os.sep + 'bin')
 
 # Read in the platform specific configuration.
 # Allowing it to override the settings defined above.
@@ -123,10 +124,10 @@ def build_function(target, source, env):
 		aqsisrc_in.close()
 
 aqsisrc = env.Command('.aqsisrc', 'aqsisrc.in', build_function)
-env.Install('$BINDIR', aqsisrc)
+env.Install('$SYSCONFDIR', aqsisrc)
 env.Depends(aqsisrc, display)
 
-env.Alias('release', ['$BINDIR','$LIBDIR', '$SHADERDIR'])
+env.Alias('release', ['$BINDIR','$LIBDIR', '$SHADERDIR','$SYSCONFDIR'])
 Default('release')
 
 # Define any files that need to be included in a source distribution.

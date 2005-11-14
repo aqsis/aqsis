@@ -474,7 +474,7 @@ void SetDefaultRiOptions( void )
     separator = "/";
 #else
     // Minty: Need to work out the executable path here.
-    rootPath = "/etc/aqsis";
+    rootPath = DEFAULT_RC_PATH;
     separator = "/";
 #endif
 
