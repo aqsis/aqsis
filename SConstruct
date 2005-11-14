@@ -103,6 +103,7 @@ SConscript('librib2stream/SConscript', build_dir=target_dir + '/librib2stream')
 SConscript('teqser/SConscript', build_dir=target_dir + '/teqser')
 #SConscript('plugins/SConscript')
 SConscript('shaders/SConscript', build_dir=target_dir + '/shaders')
+SConscript('thirdparty/tinyxml/SConscript', build_dir=target_dir + '/thirdpart/tinyxml')
 
 # Generate and install the '.aqsisrc' configuration file from the template '.aqsisrc.in'
 def build_function(target, source, env):
