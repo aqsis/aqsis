@@ -498,6 +498,10 @@ void SetDefaultRiOptions( void )
     {
         homeRCPath = getenv("HOME");
 	// \note need to ensure that there is a trailing '/'
+        if (homeRCPath[ homeRCPath.length() ] != '/') 
+	{ 
+	    homeRCPath.append("/");
+	};
 	homeRCPath.append(".aqsisrc");
 	rcfile = fopen( homeRCPath.c_str(), "rb" );
 	if (rcfile != NULL )

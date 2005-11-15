@@ -59,8 +59,8 @@ env.Replace(YACCFLAGS = '--no-lines -d')
 display_libs = ['tiff', 'z']
 
 # These are place holders at the moment, we need to work out the proper defines?
-env.AppendUnique(CPPDEFINES=[('DEFAULT_RC_PATH', '\\"' + env.Dir('$install_root').abspath + os.sep + 'etc' + '\\"')])
-env.AppendUnique(CPPDEFINES=[('DEFAULT_SHADER_PATH', '\\"' + env.Dir('$install_root').abspath + os.sep + 'shaders' + '\\"')])
+env.AppendUnique(CPPDEFINES=[('DEFAULT_RC_PATH', '\\"' + env.Dir('$install_prefix').abspath + os.sep + 'etc' + '\\"')])
+env.AppendUnique(CPPDEFINES=[('DEFAULT_SHADER_PATH', '\\"' + env.Dir('$install_prefix').abspath + os.sep + 'shaders' + '\\"')])
 
 # System configuration location
 env.Replace(SYSCONFDIR = env.Dir('$install_prefix').abspath + os.sep + 'etc')
