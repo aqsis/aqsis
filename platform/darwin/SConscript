@@ -6,7 +6,12 @@ opts.Add('bison', 'Point to the bison executable', '/opt/local/bin/bison')
 opts.Add('flex', 'Point to the flex executable', '/opt/local/bin/flex')
 opts.Update(env)
 
-env.AppendUnique(CCFLAGS=['-g', '-O2', '-fno-common'])
+if env['debug']:
+	env.AppendUnique(CCFLAGS=['-g', '-O0', '-fno-common'])
+else:
+	env.AppendUnique(CCFLAGS=['-O2', '-fno-common'])
+	env.AppendUnique(LINKFLAGS=['-s'])
+
 env.AppendUnique(CPPPATH = [env.Dir('#/libaqsistypes/posix')])
 env.AppendUnique(CPPDEFINES=[('NDEBUG', '1'), ('PLUGINS', '1')])
 
