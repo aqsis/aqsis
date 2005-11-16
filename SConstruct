@@ -105,7 +105,7 @@ SConscript('teqser/SConscript', build_dir=target_dir + '/teqser')
 SConscript('shaders/SConscript', build_dir=target_dir + '/shaders')
 SConscript('thirdparty/tinyxml/SConscript', build_dir=target_dir + '/thirdpart/tinyxml')
 
-# Generate and install the '.aqsisrc' configuration file from the template '.aqsisrc.in'
+# Generate and install the 'aqsisrc' configuration file from the template '.aqsisrc.in'
 def build_function(target, source, env):
 	# Code to build "target" from "source"
 	for x in target:
@@ -124,7 +124,7 @@ def build_function(target, source, env):
 		aqsisrc_out.close()
 		aqsisrc_in.close()
 
-aqsisrc = env.Command('.aqsisrc', 'aqsisrc.in', build_function)
+aqsisrc = env.Command('aqsisrc', 'aqsisrc.in', build_function)
 env.Install('$SYSCONFDIR', aqsisrc)
 env.Depends(aqsisrc, display)
 

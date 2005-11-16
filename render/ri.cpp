@@ -479,7 +479,8 @@ void SetDefaultRiOptions( void )
 #endif
 
     systemRCPath = rootPath;
-    systemRCPath.append( "/.aqsisrc" );
+    systemRCPath.append( separator );
+    systemRCPath.append( "aqsisrc" );
 
     // Read in the system configuration file if found.
     FILE* rcfile = fopen( systemRCPath.c_str(), "rb" );
@@ -497,10 +498,9 @@ void SetDefaultRiOptions( void )
     if(getenv("HOME"))
     {
         homeRCPath = getenv("HOME");
-	// \note need to ensure that there is a trailing '/'
-        if (homeRCPath[ homeRCPath.length() ] != '/') 
+        if (homeRCPath[ homeRCPath.length() ] != separator[0]) 
 	{ 
-	    homeRCPath.append("/");
+	    homeRCPath.append(separator);
 	};
 	homeRCPath.append(".aqsisrc");
 	rcfile = fopen( homeRCPath.c_str(), "rb" );
