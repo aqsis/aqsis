@@ -11,7 +11,11 @@ if env['tiff_include_path'] == "":
 	env.Replace(tiff_include_path = env.Dir('#/../win32libs/libtiff/include'))
 if env['tiff_lib_path'] == "":
 	env.Replace(tiff_lib_path = env.Dir('#/../win32libs/libtiff/lib/vc6'))
-env.Replace(tiff_lib = 'libtiff')
+
+if env['debug']:
+	env.Replace(tiff_lib = 'libtiff_d')
+else:
+	env.Replace(tiff_lib = 'libtiff')
 
 # If the zlib include path isn't specified as an option, choose the default, of the 
 # win32libs project from CVS checked out to the same folder as 'renderer'
@@ -19,9 +23,18 @@ if env['zlib_include_path'] == "":
 	env.Replace(zlib_include_path = env.Dir('#/../win32libs/zlib/include'))
 if env['zlib_lib_path'] == "":
 	env.Replace(zlib_lib_path = env.Dir('#/../win32libs/zlib/lib/vc6'))
-env.Replace(z_lib = 'zlibstat')
 
-env.AppendUnique(CCFLAGS=['/GX', '/MD', '/GR', '/Zm200', '/O2'])
+if env['debug']:
+	env.Replace(z_lib = 'zlibstat_d')
+else:
+	env.Replace(z_lib = 'zlibstat')
+
+if env['debug']:
+	env.AppendUnique(CCFLAGS=['/GX', '/MDd', '/GR', '/Zm200', '/Od', '/Zi'])
+	env.AppendUnique(CPPDEFINES=[('_DEBUG', 1)])
+else:
+	env.AppendUnique(CCFLAGS=['/GX', '/MD', '/GR', '/Zm200', '/O2'])
+
 env.AppendUnique(CPPDEFINES=['NO_SYSLOG', 'WIN32', 'PLUGINS', ('_qBUILDING', 'CORE'), ('CORE', '1'), 'ZLIB_WINAPI'])
 env.AppendUnique(CPPPATH = ['#/libaqsistypes/win32/intel'])
 

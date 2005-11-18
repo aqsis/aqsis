@@ -43,10 +43,15 @@ env.Alias('dist-tar', tar_target)
 
 # Determine the target 
 target_config_dir =  '#' + SelectBuildDir('platform')
-target_dir =  '#/build'
 
 # Add an option to control the root location of the 'install' target
-opts.Add('install_prefix', 'Root folder under which to install Aqsis', env.Dir('#/output'))
+defout = env.Dir('#/output')
+target_dir =  env.Dir('#/build')
+if env['debug']:
+	defout = env.Dir('#/output_debug')
+	target_dir =  env.Dir('#/build_debug')
+opts.Add('install_prefix', 'Root folder under which to install Aqsis', defout)
+
 opts.Update(env)
 
 # Setup the output directories for binaries and libraries.
@@ -59,8 +64,11 @@ env.Replace(SYSCONFDIR = env.Dir('$install_prefix').abspath + os.sep + 'bin')
 # Allowing it to override the settings defined above.
 SConscript(target_config_dir + os.sep + 'SConscript')
 
+	
+	
+
 # Setup common environment settings to allow includes from the various local folders
-env.AppendUnique(CPPPATH = ['#/build/libaqsistypes','#/build/render', '#/build/libshaderexecenv', '#/build/librib2', '#/build/libshadervm', '#/build/librib2ri', '#/build/libargparse', '#/build/libslparse', '#/build/libcodegenvm', '$zlib_include_path', '$tiff_include_path', '$jpeg_include_path', '$boost_include_path'])
+env.AppendUnique(CPPPATH = [target_dir.abspath + '/libaqsistypes',target_dir.abspath + '/render', target_dir.abspath + '/libshaderexecenv', target_dir.abspath + '/librib2', target_dir.abspath + '/libshadervm', target_dir.abspath + '/librib2ri', target_dir.abspath + '/libargparse', target_dir.abspath + '/libslparse', target_dir.abspath + '/libcodegenvm', '$zlib_include_path', '$tiff_include_path', '$jpeg_include_path', '$boost_include_path'])
 env.AppendUnique(CPPDEFINES=[('DEFAULT_PLUGIN_PATH', '\\"' + env.Dir('${BINDIR}').abspath + '\\"')])
 env.AppendUnique(CPPDEFINES=['SCONS_BUILD'])
 
@@ -81,29 +89,29 @@ env = conf.Finish()
 opts.Save('options.cache', env)
 
 # Load the sub-project sconscript files.
-SConscript('libaqsistypes/SConscript', build_dir=target_dir + '/libaqsistypes')
-SConscript('libargparse/SConscript', build_dir=target_dir + '/libargparse')
-SConscript('libddmanager/SConscript', build_dir=target_dir + '/libddmanager')
-SConscript('libraytrace/SConscript', build_dir=target_dir + '/libraytrace')
-SConscript('librib2/SConscript', build_dir=target_dir + '/librib2')
-SConscript('librib2ri/SConscript', build_dir=target_dir + '/librib2ri')
-SConscript('libshaderexecenv/SConscript', build_dir=target_dir + '/libshaderexecenv')
-SConscript('libshadervm/SConscript', build_dir=target_dir + '/libshadervm')
-SConscript('render/SConscript', build_dir=target_dir + '/render')
-SConscript('aqsis/SConscript', build_dir=target_dir + '/aqsis')
-SConscript('libslparse/SConscript', build_dir=target_dir + '/libslparse')
-SConscript('libcodegenvm/SConscript', build_dir=target_dir + '/libcodegenvm')
-SConscript('slpp/SConscript', build_dir=target_dir + '/slpp')
-SConscript('aqsl/SConscript', build_dir=target_dir + '/aqsl')
-SConscript('libslxargs/SConscript', build_dir=target_dir + '/libslxargs')
-SConscript('aqsltell/SConscript', build_dir=target_dir + '/aqsltell')
-display = SConscript('display/SConscript', build_dir=target_dir + '/display')
-SConscript('libri2rib/SConscript', build_dir=target_dir + '/libri2rib')
-SConscript('librib2stream/SConscript', build_dir=target_dir + '/librib2stream')
-SConscript('teqser/SConscript', build_dir=target_dir + '/teqser')
+SConscript('libaqsistypes/SConscript', build_dir=target_dir.abspath + '/libaqsistypes')
+SConscript('libargparse/SConscript', build_dir=target_dir.abspath + '/libargparse')
+SConscript('libddmanager/SConscript', build_dir=target_dir.abspath + '/libddmanager')
+SConscript('libraytrace/SConscript', build_dir=target_dir.abspath + '/libraytrace')
+SConscript('librib2/SConscript', build_dir=target_dir.abspath + '/librib2')
+SConscript('librib2ri/SConscript', build_dir=target_dir.abspath + '/librib2ri')
+SConscript('libshaderexecenv/SConscript', build_dir=target_dir.abspath + '/libshaderexecenv')
+SConscript('libshadervm/SConscript', build_dir=target_dir.abspath + '/libshadervm')
+SConscript('render/SConscript', build_dir=target_dir.abspath + '/render')
+SConscript('aqsis/SConscript', build_dir=target_dir.abspath + '/aqsis')
+SConscript('libslparse/SConscript', build_dir=target_dir.abspath + '/libslparse')
+SConscript('libcodegenvm/SConscript', build_dir=target_dir.abspath + '/libcodegenvm')
+SConscript('slpp/SConscript', build_dir=target_dir.abspath + '/slpp')
+SConscript('aqsl/SConscript', build_dir=target_dir.abspath + '/aqsl')
+SConscript('libslxargs/SConscript', build_dir=target_dir.abspath + '/libslxargs')
+SConscript('aqsltell/SConscript', build_dir=target_dir.abspath + '/aqsltell')
+display = SConscript('display/SConscript', build_dir=target_dir.abspath + '/display')
+SConscript('libri2rib/SConscript', build_dir=target_dir.abspath + '/libri2rib')
+SConscript('librib2stream/SConscript', build_dir=target_dir.abspath + '/librib2stream')
+SConscript('teqser/SConscript', build_dir=target_dir.abspath + '/teqser')
 #SConscript('plugins/SConscript')
-SConscript('shaders/SConscript', build_dir=target_dir + '/shaders')
-SConscript('thirdparty/tinyxml/SConscript', build_dir=target_dir + '/thirdpart/tinyxml')
+SConscript('shaders/SConscript', build_dir=target_dir.abspath + '/shaders')
+SConscript('thirdparty/tinyxml/SConscript', build_dir=target_dir.abspath + '/thirdpart/tinyxml')
 
 # Generate and install the 'aqsisrc' configuration file from the template '.aqsisrc.in'
 def build_function(target, source, env):
