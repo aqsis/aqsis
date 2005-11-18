@@ -1640,7 +1640,7 @@ void	CqShaderExecEnv::SO_fnoise1( IqShaderData* v, IqShaderData* Result, IqShade
 		{
 			TqFloat _aq_v;
 			(v)->GetFloat(_aq_v,__iGrid);
-			(Result)->SetFloat(( m_noise.FGNoise1( _aq_v ) + 1 ) / 2.0f,__iGrid);
+			(Result)->SetFloat( m_noise.FGNoise1( _aq_v ),__iGrid);
 		}
 	}
 	while( ( ++__iGrid < GridSize() ) && __fVarying);
@@ -1667,7 +1667,7 @@ void CqShaderExecEnv::SO_fnoise2( IqShaderData* u, IqShaderData* v, IqShaderData
 			(u)->GetFloat(_aq_u,__iGrid);
 			TqFloat _aq_v;
 			(v)->GetFloat(_aq_v,__iGrid);
-			(Result)->SetFloat(( m_noise.FGNoise2( _aq_u, _aq_v ) + 1 ) / 2.0f,__iGrid);
+			(Result)->SetFloat( m_noise.FGNoise2( _aq_u, _aq_v ),__iGrid);
 		}
 	}
 	while( ( ++__iGrid < GridSize() ) && __fVarying);
@@ -1691,7 +1691,7 @@ void CqShaderExecEnv::SO_fnoise3( IqShaderData* p, IqShaderData* Result, IqShade
 		{
 			CqVector3D _aq_p;
 			(p)->GetPoint(_aq_p,__iGrid);
-			(Result)->SetFloat(( m_noise.FGNoise3( _aq_p ) + 1 ) / 2.0f,__iGrid);
+			(Result)->SetFloat( m_noise.FGNoise3( _aq_p ),__iGrid);
 		}
 	}
 	while( ( ++__iGrid < GridSize() ) && __fVarying);
@@ -1719,7 +1719,7 @@ void CqShaderExecEnv::SO_fnoise4( IqShaderData* p, IqShaderData* t, IqShaderData
 			(p)->GetPoint(_aq_p,__iGrid);
 			TqFloat _aq_t;
 			(t)->GetFloat(_aq_t,__iGrid);
-			(Result)->SetFloat(( m_noise.FGNoise3( _aq_p ) + 1 ) / 2.0f,__iGrid);
+			(Result)->SetFloat( m_noise.FGNoise4( _aq_p, _aq_t ),__iGrid);
 		}
 	}
 	while( ( ++__iGrid < GridSize() ) && __fVarying);
@@ -1743,7 +1743,7 @@ void	CqShaderExecEnv::SO_cnoise1( IqShaderData* v, IqShaderData* Result, IqShade
 		{
 			TqFloat _aq_v;
 			(v)->GetFloat(_aq_v,__iGrid);
-			(Result)->SetColor(( m_noise.CGNoise1( _aq_v ) + 1 ) / 2.0f,__iGrid);
+			(Result)->SetColor( m_noise.CGNoise1( _aq_v ),__iGrid);
 		}
 	}
 	while( ( ++__iGrid < GridSize() ) && __fVarying);
@@ -1770,7 +1770,7 @@ void CqShaderExecEnv::SO_cnoise2( IqShaderData* u, IqShaderData* v, IqShaderData
 			(u)->GetFloat(_aq_u,__iGrid);
 			TqFloat _aq_v;
 			(v)->GetFloat(_aq_v,__iGrid);
-			(Result)->SetColor(( m_noise.CGNoise2( _aq_u, _aq_v ) + 1 ) / 2.0f,__iGrid);
+			(Result)->SetColor( m_noise.CGNoise2( _aq_u, _aq_v ),__iGrid);
 		}
 	}
 	while( ( ++__iGrid < GridSize() ) && __fVarying);
@@ -1794,7 +1794,7 @@ void CqShaderExecEnv::SO_cnoise3( IqShaderData* p, IqShaderData* Result, IqShade
 		{
 			CqVector3D _aq_p;
 			(p)->GetPoint(_aq_p,__iGrid);
-			(Result)->SetColor(( m_noise.CGNoise3( _aq_p ) + 1 ) / 2.0f,__iGrid);
+			(Result)->SetColor( m_noise.CGNoise3( _aq_p ),__iGrid);
 		}
 	}
 	while( ( ++__iGrid < GridSize() ) && __fVarying);
@@ -1822,7 +1822,7 @@ void CqShaderExecEnv::SO_cnoise4( IqShaderData* p, IqShaderData* t, IqShaderData
 			(p)->GetPoint(_aq_p,__iGrid);
 			TqFloat _aq_t;
 			(t)->GetFloat(_aq_t,__iGrid);
-			(Result)->SetColor(( m_noise.CGNoise3( _aq_p ) + 1 ) / 2.0f,__iGrid);
+			(Result)->SetColor( m_noise.CGNoise4( _aq_p, _aq_t ),__iGrid);
 		}
 	}
 	while( ( ++__iGrid < GridSize() ) && __fVarying);
@@ -1846,7 +1846,7 @@ void CqShaderExecEnv::SO_pnoise1( IqShaderData* v, IqShaderData* Result, IqShade
 		{
 			TqFloat _aq_v;
 			(v)->GetFloat(_aq_v,__iGrid);
-			(Result)->SetPoint(( m_noise.PGNoise1( _aq_v ) + 1 ) / 2.0f,__iGrid);
+			(Result)->SetPoint( m_noise.PGNoise1( _aq_v ),__iGrid);
 		}
 	}
 	while( ( ++__iGrid < GridSize() ) && __fVarying);
@@ -1873,7 +1873,7 @@ void CqShaderExecEnv::SO_pnoise2( IqShaderData* u, IqShaderData* v, IqShaderData
 			(u)->GetFloat(_aq_u,__iGrid);
 			TqFloat _aq_v;
 			(v)->GetFloat(_aq_v,__iGrid);
-			(Result)->SetPoint(( m_noise.PGNoise2( _aq_u, _aq_v ) + 1 ) / 2.0f,__iGrid);
+			(Result)->SetPoint( m_noise.PGNoise2( _aq_u, _aq_v ),__iGrid);
 		}
 	}
 	while( ( ++__iGrid < GridSize() ) && __fVarying);
@@ -1897,7 +1897,7 @@ void CqShaderExecEnv::SO_pnoise3( IqShaderData* p, IqShaderData* Result, IqShade
 		{
 			CqVector3D _aq_p;
 			(p)->GetPoint(_aq_p,__iGrid);
-			(Result)->SetPoint(( m_noise.PGNoise3( _aq_p ) + 1 ) / 2.0f,__iGrid);
+			(Result)->SetPoint( m_noise.PGNoise3( _aq_p ),__iGrid);
 		}
 	}
 	while( ( ++__iGrid < GridSize() ) && __fVarying);
@@ -1925,7 +1925,7 @@ void CqShaderExecEnv::SO_pnoise4( IqShaderData* p, IqShaderData* t, IqShaderData
 			(p)->GetPoint(_aq_p,__iGrid);
 			TqFloat _aq_t;
 			(t)->GetFloat(_aq_t,__iGrid);
-			(Result)->SetPoint(( m_noise.PGNoise3( _aq_p ) + 1 ) / 2.0f,__iGrid);
+			(Result)->SetPoint( m_noise.PGNoise4( _aq_p, _aq_t ),__iGrid);
 		}
 	}
 	while( ( ++__iGrid < GridSize() ) && __fVarying);
@@ -5691,7 +5691,7 @@ void CqShaderExecEnv::SO_fpnoise1( IqShaderData* v, IqShaderData* period, IqShad
 			(v)->GetFloat(_aq_v,__iGrid);
 			TqFloat _aq_period;
 			(period)->GetFloat(_aq_period,__iGrid);
-			(Result)->SetFloat(( m_noise.FGNoise1( fmod( _aq_v, _aq_period ) ) + 1 ) / 2.0f,__iGrid);
+			(Result)->SetFloat( m_noise.FGPNoise1( _aq_v, _aq_period ),__iGrid);
 		}
 	}
 	while( ( ++__iGrid < GridSize() ) && __fVarying);
@@ -5725,11 +5725,7 @@ void CqShaderExecEnv::SO_fpnoise2( IqShaderData* u, IqShaderData* v, IqShaderDat
 			TqFloat _aq_vperiod;
 			(vperiod)->GetFloat(_aq_vperiod,__iGrid);
 
-                        TqFloat a, b;
-                        a = fmod( _aq_u, _aq_uperiod ); 
-                        b = fmod( _aq_v, _aq_vperiod );
-
-			(Result)->SetFloat(( m_noise.FGNoise2( a, b ) + 1 ) / 2.0f,__iGrid);
+			(Result)->SetFloat( m_noise.FGPNoise2( _aq_u, _aq_v, _aq_uperiod, _aq_vperiod ),__iGrid);
 		}
 	}
 	while( ( ++__iGrid < GridSize() ) && __fVarying);
@@ -5757,12 +5753,7 @@ void CqShaderExecEnv::SO_fpnoise3( IqShaderData* p, IqShaderData* pperiod, IqSha
 			CqVector3D _aq_pperiod;
 			(pperiod)->GetPoint(_aq_pperiod,__iGrid);
 
-			TqFloat a, b, c;
-                        a = fmod( _aq_p.x(), _aq_pperiod.x() ); 
-                        b = fmod( _aq_p.y(), _aq_pperiod.y() ); 
-			c = fmod( _aq_p.z(), _aq_pperiod.z() );
-
-			(Result)->SetFloat(( m_noise.FGNoise3( CqVector3D( a, b, c )) + 1 ) / 2.0f,__iGrid);
+			(Result)->SetFloat( m_noise.FGPNoise3( _aq_p, _aq_pperiod ),__iGrid);
 		}
 	}
 	while( ( ++__iGrid < GridSize() ) && __fVarying);
@@ -5795,14 +5786,8 @@ void CqShaderExecEnv::SO_fpnoise4( IqShaderData* p, IqShaderData* t, IqShaderDat
 			(pperiod)->GetPoint(_aq_pperiod,__iGrid);
 			TqFloat _aq_tperiod;
 			(tperiod)->GetFloat(_aq_tperiod,__iGrid);
-
-
-			TqFloat a, b, c;
-			a = fmod( _aq_p.x(), _aq_pperiod.x() ); 
-                        b = fmod( _aq_p.y(), _aq_pperiod.y() ); 
-			c = fmod( _aq_p.z(), _aq_pperiod.z() );
             
-			(Result)->SetFloat(( m_noise.FGNoise3( CqVector3D( a, b, c ) ) + 1 ) / 2.0f,__iGrid);
+			(Result)->SetFloat( m_noise.FGPNoise4( _aq_p, _aq_t, _aq_pperiod, _aq_tperiod ),__iGrid);
 		}
 	}
 	while( ( ++__iGrid < GridSize() ) && __fVarying);
@@ -5829,7 +5814,7 @@ void CqShaderExecEnv::SO_cpnoise1( IqShaderData* v, IqShaderData* period, IqShad
 			(v)->GetFloat(_aq_v,__iGrid);
 			TqFloat _aq_period;
 			(period)->GetFloat(_aq_period,__iGrid);
-			(Result)->SetColor(( m_noise.CGNoise1( fmod( _aq_v, _aq_period ) ) + 1 ) / 2.0f,__iGrid);
+			(Result)->SetColor( m_noise.CGPNoise1( _aq_v, _aq_period ),__iGrid);
 		}
 	}
 	while( ( ++__iGrid < GridSize() ) && __fVarying);
@@ -5863,11 +5848,7 @@ void CqShaderExecEnv::SO_cpnoise2( IqShaderData* u, IqShaderData* v, IqShaderDat
 			TqFloat _aq_vperiod;
 			(vperiod)->GetFloat(_aq_vperiod,__iGrid);
 
-                        TqFloat a, b;
-			a = fmod( _aq_u, _aq_uperiod );
-			b = fmod( _aq_v, _aq_vperiod );
-
-			(Result)->SetColor(( m_noise.CGNoise2( a, b ) + 1 ) / 2.0f,__iGrid);
+			(Result)->SetColor( m_noise.CGPNoise2( _aq_u, _aq_v, _aq_uperiod, _aq_vperiod ),__iGrid);
 		}
 	}
 	while( ( ++__iGrid < GridSize() ) && __fVarying);
@@ -5895,12 +5876,7 @@ void CqShaderExecEnv::SO_cpnoise3( IqShaderData* p, IqShaderData* pperiod, IqSha
 			CqVector3D _aq_pperiod;
 			(pperiod)->GetPoint(_aq_pperiod,__iGrid);
 
-                        TqFloat a, b, c;
-			a = fmod( _aq_p.x(), _aq_pperiod.x());
-			b = fmod( _aq_p.y(), _aq_pperiod.y());
-			c = fmod( _aq_p.z(), _aq_pperiod.z());
-
-			(Result)->SetColor(( m_noise.CGNoise3( CqVector3D( a, b, c ) ) + 1 ) / 2.0f,__iGrid);
+			(Result)->SetColor( m_noise.CGPNoise3( _aq_p, _aq_pperiod ),__iGrid);
 		}
 	}
 	while( ( ++__iGrid < GridSize() ) && __fVarying);
@@ -5934,12 +5910,7 @@ void CqShaderExecEnv::SO_cpnoise4( IqShaderData* p, IqShaderData* t, IqShaderDat
 			TqFloat _aq_tperiod;
 			(tperiod)->GetFloat(_aq_tperiod,__iGrid);
 
-			TqFloat a, b, c;
-			a = fmod( _aq_p.x(), _aq_pperiod.x());
-			b = fmod( _aq_p.y(), _aq_pperiod.y());
-			c = fmod( _aq_p.z(), _aq_pperiod.z());
-
-			(Result)->SetColor(( m_noise.CGNoise3( CqVector3D( a, b, c ) ) + 1 ) / 2.0f,__iGrid);
+			(Result)->SetColor( m_noise.CGPNoise4( _aq_p, _aq_t, _aq_pperiod, _aq_tperiod ),__iGrid);
 		}
 	}
 	while( ( ++__iGrid < GridSize() ) && __fVarying);
@@ -5966,7 +5937,7 @@ void CqShaderExecEnv::SO_ppnoise1( IqShaderData* v, IqShaderData* period, IqShad
 			(v)->GetFloat(_aq_v,__iGrid);
 			TqFloat _aq_period;
 			(period)->GetFloat(_aq_period,__iGrid);
-			(Result)->SetPoint(( m_noise.PGNoise1( fmod( _aq_v, _aq_period ) ) + 1 ) / 2.0f,__iGrid);
+			(Result)->SetPoint( m_noise.PGPNoise1( _aq_v, _aq_period ),__iGrid);
 		}
 	}
 	while( ( ++__iGrid < GridSize() ) && __fVarying);
@@ -6000,11 +5971,7 @@ void CqShaderExecEnv::SO_ppnoise2( IqShaderData* u, IqShaderData* v, IqShaderDat
 			TqFloat _aq_vperiod;
 			(vperiod)->GetFloat(_aq_vperiod,__iGrid);
 
-                        TqFloat a, b;
-                        a = fmod( _aq_u, _aq_uperiod ); 
-                        b = fmod( _aq_v, _aq_vperiod );
-
-			(Result)->SetPoint(( m_noise.PGNoise2( a, b ) + 1 ) / 2.0f,__iGrid);
+			(Result)->SetPoint( m_noise.PGPNoise2( _aq_u, _aq_v, _aq_uperiod, _aq_vperiod ),__iGrid);
 		}
 	}
 	while( ( ++__iGrid < GridSize() ) && __fVarying);
@@ -6032,12 +5999,7 @@ void CqShaderExecEnv::SO_ppnoise3( IqShaderData* p, IqShaderData* pperiod, IqSha
 			CqVector3D _aq_pperiod;
 			(pperiod)->GetPoint(_aq_pperiod,__iGrid);
 
-                        TqFloat a, b, c;
-			a = fmod( _aq_p.x(), _aq_pperiod.x());
-		        b = fmod( _aq_p.y(), _aq_pperiod.y());
-			c = fmod( _aq_p.z(), _aq_pperiod.z());
-
-			(Result)->SetPoint(( m_noise.PGNoise3( CqVector3D( a,b,c ) ) + 1 ) / 2.0f,__iGrid);
+			(Result)->SetPoint( m_noise.PGPNoise3( _aq_p, _aq_pperiod ),__iGrid);
 		}
 	}
 	while( ( ++__iGrid < GridSize() ) && __fVarying);
@@ -6071,13 +6033,7 @@ void CqShaderExecEnv::SO_ppnoise4( IqShaderData* p, IqShaderData* t, IqShaderDat
 			TqFloat _aq_tperiod;
 			(tperiod)->GetFloat(_aq_tperiod,__iGrid);
 
-
-			TqFloat a, b, c;
-			a = fmod( _aq_p.x(), _aq_pperiod.x());
-		        b = fmod( _aq_p.y(), _aq_pperiod.y());
-			c = fmod( _aq_p.z(), _aq_pperiod.z());
-
-			(Result)->SetPoint(( m_noise.PGNoise3( CqVector3D( a,b,c ) ) + 1 ) / 2.0f,__iGrid);
+			(Result)->SetPoint( m_noise.PGPNoise4( _aq_p, _aq_t, _aq_pperiod, _aq_tperiod ),__iGrid);
 		}
 	}
 	while( ( ++__iGrid < GridSize() ) && __fVarying);

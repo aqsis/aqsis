@@ -86,9 +86,6 @@ EXPORTS
 	??ZCqMatrix@Aqsis@@QAEAAV01@ABVCqVector4D@1@@Z
 	??_1CqVector3D@Aqsis@@QAEAAV01@ABV01@@Z
 
-	?CGNoise2@CqNoise@Aqsis@@SA?AVCqColor@2@MM@Z
-	?CGNoise3@CqNoise@Aqsis@@SA?AVCqColor@2@ABVCqVector3D@2@@Z
-	?CGNoise3@CqNoise@Aqsis@@SA?AVCqColor@2@MMM@Z
 	?Canonize@CqBitVector@Aqsis@@QAEXXZ
 	?Count@CqBitVector@Aqsis@@QAEHXZ
 	?DLClose@CqPluginBase@Aqsis@@IAEXPAX@Z
@@ -104,9 +101,6 @@ EXPORTS
 	?FCellNoise2@CqCellNoise@Aqsis@@QAEMMM@Z
 	?FCellNoise3@CqCellNoise@Aqsis@@QAEMABVCqVector3D@2@@Z
 	?FCellNoise4@CqCellNoise@Aqsis@@QAEMABVCqVector3D@2@M@Z
-	?FGNoise1@CqNoise@Aqsis@@SAMM@Z
-	?FGNoise2@CqNoise@Aqsis@@SAMMM@Z
-	?FGNoise3@CqNoise@Aqsis@@SAMMMM@Z
 	?Format@CqString@Aqsis@@QAAAAV12@PBDZZ
 	?Glob@CqFile@Aqsis@@SA?AV?$list@PAVCqString@Aqsis@@V?$allocator@PAVCqString@Aqsis@@@std@@@std@@ABVCqString@2@@Z
 	?Identity@CqMatrix@Aqsis@@QAEXXZ
@@ -121,10 +115,6 @@ EXPORTS
 	?PCellNoise2@CqCellNoise@Aqsis@@QAE?AVCqVector3D@2@MM@Z
 	?PCellNoise3@CqCellNoise@Aqsis@@QAE?AVCqVector3D@2@ABV32@@Z
 	?PCellNoise4@CqCellNoise@Aqsis@@QAE?AVCqVector3D@2@ABV32@M@Z
-	?PGNoise1@CqNoise@Aqsis@@SA?AVCqVector3D@2@M@Z
-	?PGNoise2@CqNoise@Aqsis@@SA?AVCqVector3D@2@MM@Z
-	?PGNoise3@CqNoise@Aqsis@@SA?AVCqVector3D@2@ABV32@@Z
-	?PGNoise3@CqNoise@Aqsis@@SA?AVCqVector3D@2@MMM@Z
 	?PreMultiply@CqMatrix@Aqsis@@QAEAAV12@ABV12@@Z
 	?PreMultiply@CqMatrix@Aqsis@@QBE?AVCqVector4D@2@ABV32@@Z
 	?RandomInt@CqRandom@Aqsis@@QAEIXZ
@@ -157,7 +147,6 @@ EXPORTS
 	?gPowerBasis@Aqsis@@3PAY03MA
 	?hsltorgb@CqColor@Aqsis@@QBE?AV12@XZ
 	?hsvtorgb@CqColor@Aqsis@@QBE?AV12@XZ
-	?init@CqNoise@Aqsis@@SAXH@Z
 	?rgbtoXYZ@CqColor@Aqsis@@QBE?AV12@XZ
 	?rgbtoYIQ@CqColor@Aqsis@@QBE?AV12@XZ
 	?rgbtohsl@CqColor@Aqsis@@QBE?AV12@XZ

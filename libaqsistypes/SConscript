@@ -9,6 +9,7 @@ aqsistypes_sources = Split("""
 	matrix.cpp
 	MultiTimer.cpp
 	noise.cpp
+	noise1234.cpp
 	plugins.cpp
 	random.cpp
 	refcount.cpp
@@ -34,6 +35,7 @@ aqsistypes_headers = Split("""
 	matrix.h
 	MultiTimer.h
 	noise.h
+	noise1234.h
 	plugins.h
 	pool.h
 	random.h

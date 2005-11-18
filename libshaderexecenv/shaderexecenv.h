@@ -36,6 +36,7 @@
 #include	"bitvector.h"
 #include	"color.h"
 #include	"noise.h"
+#include	"random.h"
 #include	"cellnoise.h"
 #include	"vector3d.h"
 #include	"vector4d.h"
