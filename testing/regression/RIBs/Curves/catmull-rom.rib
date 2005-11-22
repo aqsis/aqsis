@@ -1,0 +1,21 @@
+Display "catmull-rom.tif" "file" "rgb" "string compression" "deflate"
+Format 320 240 1
+ShadingRate 1
+Projection "perspective" "fov" 35.0
+
+WorldBegin
+AttributeBegin
+Surface "constant"
+Opacity 1 1 1 
+Color 0.8 0.8 1.0 
+ConcatTransform [ 0.4 0.0 0.0 0.0 0.0 0.4 0.0 0.0 0.0 0.0 0.4 0.0 0.0 0.0 2.0 1.0 ]
+
+Basis "catmull-rom" 1 "catmull-rom" 1
+Curves "cubic" [8] "nonperiodic" "P" [-1 -1 0   1 -1 0   1 1 0    -1 1 0 -1 -1 1   1 -1 1   1 1 1  -1 1 1] "constantwidth" [0.05]
+
+Translate -0.8 0 0
+Scale 0.025 0.025 0.025
+Polygon "P" [-1 1 0 1 1 0 1 -1 0 -1 -1 0]
+
+AttributeEnd
+WorldEnd

@@ -1,0 +1,10 @@
+version 3.03
+Format 320 240 1
+Display "delayedproc.tif" "file" "rgb" "string compression" "deflate"
+Projection "perspective" "fov" [50]
+Translate 0 0 5
+WorldBegin
+Surface "constant"
+Color 1 1 0
+Procedural "DelayedReadArchive" ["delayed_archive.rib"] [-1 1 -1 1 -1 1]
+WorldEnd

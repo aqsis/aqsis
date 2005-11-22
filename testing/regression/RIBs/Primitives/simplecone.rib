@@ -1,0 +1,49 @@
+Orientation "lh"
+Option "searchpath" "shader" ["../shaders:&"]
+Format 200 150 1
+PixelSamples 1 1
+ShadingRate 1.0
+Option "statistics" "endofframe" [1]
+
+FrameBegin 0
+
+Display "simplecone.tif" "file" "rgba" "string compression" "deflate"
+
+# Camera name: "Kamera01"
+Projection "perspective" "fov" [36.0]
+Rotate 180 0 1 0
+ConcatTransform [1.0 0.0 0.0 0  0.0 0.435544 -0.900167 0  0.0 0.900167 0.435544 0  0.955721 9.27594 -440.36 1]
+
+WorldBegin
+# Default-Surface
+Surface "matte"
+
+# Object "Punktlicht01"
+TransformBegin
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  204.187 -437.336 53.0255 1]
+Attribute "light" "shadows" ["off"]
+LightSource "pointlight" 2 "intensity" [150000]
+TransformEnd
+
+# Object "Punktlicht02"
+TransformBegin
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  -320.159 -429.109 -87.5622 1]
+Attribute "light" "shadows" ["off"]
+LightSource "pointlight" 3 "intensity" [100000]
+TransformEnd
+
+# Object "Punktlicht03"
+TransformBegin
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  121.927 4.77862 516.121 1]
+Attribute "light" "shadows" ["off"]
+LightSource "pointlight" 4 "intensity" [100000]
+TransformEnd
+
+# Object "Kegel"
+AttributeBegin
+Color 0.894118 0.721569 0.6
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  0.0 4.32229e-006 -98.8825 1]
+Cone 200.0 100.0 360
+AttributeEnd
+WorldEnd
+FrameEnd

@@ -1,0 +1,9 @@
+version 3.03
+Option "searchpath" "procedural" ["$PATH:&"]
+Format 320 240 1
+Display "rundetailproc.tif" "file" "rgb" "string compression" "deflate"
+Projection "perspective" "fov" [50]
+Translate 0 0 3.5
+WorldBegin
+Procedural "RunProgram" ["python detailproc.py" ""] [-2 2 -1 1 -0.01 0.01]
+WorldEnd

@@ -1,0 +1,47 @@
+Orientation "lh"
+Format 200 150 1
+PixelSamples 4 4
+PixelFilter "gaussian" 2 2
+ShadingRate 1.0
+
+Option "statistics" "endofframe" [1]
+Option "searchpath" "shader" ["../shaders:&"]
+
+FrameBegin 2
+
+Display "mblur2a.tif" "file" "rgba" "string compression" "deflate"
+
+# Camera name: "Kamera01"
+Projection "perspective" "fov" [45.0]
+Rotate 180 0 1 0
+ConcatTransform [1.0 0.0 0.0 0  0.0 0.0 -1.0 0  0.0 1.0 0.0 0  0.0 0.0 -122.781 1]
+Shutter 1.5 2.5
+
+WorldBegin
+# Default-Surface
+Surface "matte"
+
+# Object "Richtg.01"
+TransformBegin
+#MotionBegin [1.5 2.5]
+ConcatTransform [0.965904 0.258902 0.0 0  -0.0330392 0.123262 0.991824 0  0.256785 -0.958006 0.127613 0  51.5677 -155.667 12.4544 1]
+#ConcatTransform [0.965904 0.258902 0.0 0  -0.0330392 0.123262 0.991824 0  0.256785 -0.958006 0.127613 0  51.5677 -155.667 12.4544 1]
+#MotionEnd
+Attribute "light" "shadows" ["off"]
+LightSource "distantlight" 2 "to" [0 0 -1] "intensity" [1.5]
+TransformEnd
+
+# Object "Kugel01"
+AttributeBegin
+Color 0.65098 0.898039 0.898039
+MotionBegin [1.5 2.5]
+ConcatTransform [1.0 0.0 0.0 0  0.0 0.0 1.0 0  0.0 -1.0 0.0 0  23.3483 -2.14846e-007 4.91511 1]
+ConcatTransform [1.0 0.0 0.0 0  0.0 0.0 1.0 0  0.0 -1.0 0.0 0  -21.0241 -2.14846e-007 4.91511 1]
+#ConcatTransform [1.0 0.0 0.0 0  0.0 0.0 1.0 0  0.0 -1.0 0.0 0  46.696599999999997 -4.2969199999999998e-007 9.8302200000000006 1]
+#ConcatTransform [1.0 0.0 0.0 0  0.0 0.0 1.0 0  0.0 -1.0 0.0 0  -42.048200000000001 -4.2969199999999998e-007 9.8302200000000006 1]
+MotionEnd
+Sphere 10.0566 -10.0566 10.0566 360
+AttributeEnd
+WorldEnd
+FrameEnd
+

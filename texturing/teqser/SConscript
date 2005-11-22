@@ -1,0 +1,15 @@
+Import('env')
+teqser_sources = Split("""
+	teqser.cpp""")
+
+env.AppendUnique(LIBS = ['argparse', 'aqsis'])
+
+# Set any platform specific options for this target
+env.UseTargetOptions('teqser')
+
+teqser = env.Program('teqser', teqser_sources)
+env.Install('$BINDIR', teqser)
+
+env.Distribute('texturing/teqser', teqser_sources)
+env.Distribute('texturing/teqser', "SConscript")
+

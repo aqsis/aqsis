@@ -1,0 +1,27 @@
+Import('env')
+displayenv = env.Copy()
+displayenv.AppendUnique(CPPPATH=['#/renderer/ddmanager'])
+displayenv.AppendUnique(CPPDEFINES=['DISPLAY_EXPORTS'])
+
+display_sources = Split("""
+	display.cpp
+	displayhelpers.c""")
+
+display_headers =  Split("""
+	display.h""")
+
+
+displayenv.AppendUnique(LIBS = ['$tiff_lib', '$z_lib'])
+
+# Set any platform specific target options.
+displayenv.UseTargetOptions('display')
+
+display = displayenv.SharedLibrary('display', display_sources)
+displayenv.Install('$BINDIR', display)
+
+Return('display')
+
+env.Distribute('displays/display', display_sources)
+env.Distribute('displays/display', display_headers)
+env.Distribute('displays/display', 'SConscript')
+

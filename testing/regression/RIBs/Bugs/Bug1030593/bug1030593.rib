@@ -1,0 +1,10 @@
+##RenderMan RIB-Structure 1.
+# Aqsis crashes when an empty file is read via 
+
+Display "bug1030593.tif" "file" "rgb" "string compression" ["deflate"]
+Format 320 200 1
+WorldBegin
+ReadArchive "empty.rib"
+Translate 0 0 2
+Sphere 1 -1 1 360
+WorldEnd

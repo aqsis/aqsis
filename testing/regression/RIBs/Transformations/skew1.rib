@@ -1,0 +1,154 @@
+Option "searchpath" "shader" ["../../shaders:&"]
+Option "searchpath" "texture" ["../../maps:&"]
+
+PixelSamples 2 2
+Display "skew1.tif" "file" "rgba" "string compression" "deflate"
+Format 320 240 1
+Projection "orthographic" 
+Translate 0 0 5
+Scale 0.335 0.335 0.335
+Translate -2.5 -2.5 0
+
+MakeTexture "gridtile.tif" "gridtile.map" "periodic" "periodic" "gaussian" 2 2
+
+ObjectBegin 1
+Translate 0.5 0.5 0.5
+PointsGeneralPolygons [1 1 1 1 1 1] [4 4 4 4 4 4] [3
+2 1 0 7 6 5 4 11 10 9 8 15 14 13 12 19 18 17 16 23 22 21 20] "P" [-0.5 -0.5 0.5 0.5 -0.5 0.5 0.5 0.5 0.5 -0.5 0.5 0.5
+-0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 -0.5 -0.5 0.5 -0.5
+-0.5 0.5 -0.5 0.5 0.5 -0.5 0.5 -0.5 -0.5 -0.5 -0.5 -0.5
+-0.5 -0.5 -0.5 0.5 -0.5 -0.5 0.5 -0.5 0.5 -0.5 -0.5 0.5
+0.5 -0.5 0.5 0.5 -0.5 -0.5 0.5 0.5 -0.5 0.5 0.5 0.5
+-0.5 -0.5 -0.5 -0.5 -0.5 0.5 -0.5 0.5 0.5 -0.5 0.5 -0.5]"N" [0 0 1 0 0 1 0 0 1 0 0 1
+0 1 0 0 1 0 0 1 0 0 1 0
+0 0 -1 0 0 -1 0 0 -1 0 0 -1
+0 -1 0 0 -1 0 0 -1 0 0 -1 0
+1 0 0 1 0 0 1 0 0 1 0 0
+-1 0 0 -1 0 0 -1 0 0 -1 0 0]
+ObjectEnd 
+
+WorldBegin
+Surface "constant"
+
+AttributeBegin
+  # Move the grid back so the "origin" is free
+  Translate 0 0 10
+
+  # Grid
+  AttributeBegin
+  Surface "paintedconstant" "string texturename" ["gridtile.map"]
+  Patch "bilinear" "P" [-2 8 0  8 8 0  -2 -2 0  8 -2 0] 
+                  "st" [0 0  10 0  0 10  10 10]
+  AttributeEnd
+
+  # X axis
+  AttributeBegin
+  Rotate 90 0 1 0
+  Color 0 0 0
+  Cylinder 0.019 -10 10 360
+  AttributeEnd
+
+  # Y axis
+  AttributeBegin
+  Rotate 90 1 0 0
+  Color 0 0 0
+  Cylinder 0.019 -10 10 360
+  AttributeEnd
+AttributeEnd
+
+######################## 1st row ####################
+
+Color 0 1 0
+AttributeBegin
+Translate 0 4 0
+Skew 0  0 1.5 0  2 0 0
+ObjectInstance 1
+AttributeEnd
+
+AttributeBegin
+Translate 2 4 0
+Skew 22.5  0 1.5 0  2 0 0
+ObjectInstance 1
+AttributeEnd
+
+AttributeBegin
+Translate 4 4 0
+Skew 45  0 1.5 0  2 0 0
+ObjectInstance 1
+AttributeEnd
+
+######################## 2nd row ####################
+
+Color 1 0 0
+AttributeBegin
+Translate 0 2 0
+Skew 0  1 1 0  1 0 0
+ObjectInstance 1
+AttributeEnd
+
+AttributeBegin
+Translate 2 2 0
+Skew 11.25  1 1 0  1 0 0
+ObjectInstance 1
+AttributeEnd
+
+AttributeBegin
+Translate 4 2 0
+Skew 22.5  1 1 0  1 0 0
+ObjectInstance 1
+AttributeEnd
+
+######################## 3rd row ####################
+
+Color 0 0 1
+AttributeBegin
+Translate 0 0 0
+Skew 0  -1 1 0  1 1 0
+Rotate 45 0 0 1
+ObjectInstance 1
+AttributeEnd
+
+AttributeBegin
+Translate 2 0 0
+Skew 22.5  -1 1 0  1 1 0
+Rotate 45 0 0 1
+ObjectInstance 1
+AttributeEnd
+
+AttributeBegin
+Translate 4 0 0
+Skew 45  -1 1 0  1 1 0
+Rotate 45 0 0 1
+ObjectInstance 1
+AttributeEnd
+
+# Auxiliary lines 
+Color 0 0 0
+AttributeBegin
+Rotate 45 0 0 1
+Rotate 90 0 1 0
+Cylinder 0.02 -0.5 1.5 360
+Translate 0 1 0
+Cylinder 0.02 -0.5 1.5 360
+AttributeEnd
+
+AttributeBegin
+Translate 2 0 0
+Rotate 45 0 0 1
+Rotate 90 0 1 0
+Cylinder 0.02 -0.5 1.5 360
+Translate 0 1 0
+Cylinder 0.02 -0.5 1.5 360
+AttributeEnd
+
+AttributeBegin
+Translate 4 0 0
+Rotate 45 0 0 1
+Rotate 90 0 1 0
+Cylinder 0.02 -0.5 1.5 360
+Translate 0 1 0
+Cylinder 0.02 -0.5 1.5 360
+AttributeEnd
+
+
+WorldEnd

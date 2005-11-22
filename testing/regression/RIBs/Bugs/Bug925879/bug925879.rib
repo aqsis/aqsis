@@ -1,0 +1,29 @@
+##RenderMan RIB-Structure 1.0
+version 3.03
+
+FrameBegin 1
+   Display "bug925879.tif" "file" "rgb" "string compression" "deflate"
+   Format 320 240 1
+
+   Projection "perspective" 
+   ScreenWindow -0.532448 0.532448 -0.399336 0.399336
+   Clipping 1 1000
+   Rotate -0.232792 0 0 1
+   Rotate -28.0187 1 0 0
+   Rotate -32.9251 0 1 0
+   Translate 4.21007 -4.78246 6.87887
+
+   WorldBegin
+      TransformBegin
+         Transform [ 1 0 0 0 0 1 0 0 0 0 1 0 -20 20 -30 1 ]
+         LightSource "pointlight" 1 "constant float intensity" [ 3000 ] "constant color lightcolor" [ 1 1 1 ] 
+      TransformEnd
+      AttributeBegin
+         ConcatTransform [ 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 ]
+         Color 1 1 1
+         Opacity 1 1 1
+         Surface "plastic" "constant float Ka" [ 1 ] "constant float Kd" [ 0.5 ] "constant float Ks" [ 0.5 ] "constant float roughness" [ 0.1 ] "constant color specularcolor" [ 1 1 1 ] 
+         PointsGeneralPolygons [ 1 ] [ 8 ] [ 0 1 2 3 4 5 6 7 ] "P" [ -0.35138 -2.62818 0 -0.35138 2.00789 0 -2.08318 2.00789 0 -2.08318 2.62818 0 2.08318 2.62818 0 2.08318 2.00789 0 0.344209 2.00789 0 0.344209 -2.62818 0 ] 
+      AttributeEnd
+   WorldEnd
+FrameEnd

@@ -1,0 +1,35 @@
+version 3.03
+Option "searchpath" "shader" ["../../shaders:&"]
+Option "searchpath" "texture" ["../../maps:&"]
+
+Display "env_test.tif" "file" "rgba" "string compression" "deflate"
+
+Format 200 150 1
+ShadingRate 1
+
+Projection "perspective" "fov" 45
+Translate 0 0 6
+Rotate -20 1 0 0
+
+Option "limits" "eyesplits" [3]
+Sides 1
+
+MakeCubeFaceEnvironment "../../maps/px.tif" "../../maps/nx.tif" "../../maps/py.tif" "../../maps/ny.tif" "../../maps/pz.tif" "../../maps/nz.tif" "test.env" 90 "box" 1 1 
+
+WorldBegin
+      
+  LightSource "ambientlight" 0 "intensity" [0.1]
+  LightSource "distantlight" 3 "intensity" [0.5] "lightcolor" [1 1 1] "from" [-2 4 -2] "to" [0 0 0]
+  LightSource "distantlight" 4 "intensity" [0.7] "lightcolor" [1 1 1] "from" [1 2 -2] "to" [0 0 0]
+
+  Color [1 1 1]
+  Surface "shinymetal" "string texturename" ["test.env"]
+
+  TransformBegin
+    Rotate 90 1 0 0
+    Scale 2 2 2
+    Sphere 1 -1 1 360
+  TransformEnd
+
+WorldEnd
+

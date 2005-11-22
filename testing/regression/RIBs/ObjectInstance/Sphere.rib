@@ -1,0 +1,47 @@
+##RenderMan RIB-Structure 1.0
+version 3.03
+                                                                                                                                           
+FrameBegin 1
+                                                                                                                                           
+   #Setup Display
+   Display "Sphere.tif" "file" "rgb" "string compression" "deflate"
+   Format 320 240 1
+                                                                                                                                           
+   #Setup viewing transformation
+   Projection "perspective"
+   ScreenWindow -0.401855 0.401855 -0.301391 0.301391
+   Clipping 1 1000
+   Rotate 2.94405e-14 0 0 1
+   Rotate -35.8797 1 0 0
+   Rotate -22.325 0 1 0
+   Translate 10.8906 -19.4432 26.5209
+                                                                                                                                           
+   WorldBegin
+      TransformBegin
+         Transform [ 1 0 0 0 0 1 0 0 0 0 1 0 -20 20 -30 1 ]
+         LightSource "pointlight" 1 "constant float intensity" [ 3000 ] "constant color lightcolor" [ 1 1 1 ]
+      TransformEnd
+      AttributeBegin
+         ConcatTransform [ 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 ]
+         ObjectBegin 1
+            AttributeBegin
+               ConcatTransform [ 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 ]
+               Sphere 5 5 -5 360 "uniform float temperature" [ 234.0 ]
+            AttributeEnd
+         ObjectEnd
+         Color 1 1 1
+         Opacity 1 1 1
+         Matte 0
+         Surface "plastic"
+         Displacement "null"
+         AttributeBegin
+            Translate -10 0 0
+            ObjectInstance 1
+         AttributeEnd
+         AttributeBegin
+            Translate 10 0 0
+            ObjectInstance 1
+         AttributeEnd
+      AttributeEnd
+   WorldEnd
+FrameEnd 

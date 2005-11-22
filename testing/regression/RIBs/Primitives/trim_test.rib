@@ -1,0 +1,25 @@
+##RenderMan RIB-Structure 1.0
+version 3.03
+Format 200 150 -1
+Projection "perspective" "fov" [10]
+Option "searchpath" "shader" ["../shaders:&"]
+ShadingRate 2
+
+Display "trim_test.tif" "file" "rgba" "string compression" "deflate"
+
+LightSource "distantlight" 1
+
+#Translate 0 0 1 
+PixelSamples 2 2
+PixelFilter "gaussian" 2 2
+Exposure 1 1
+
+WorldBegin
+	Surface "matte"
+	AttributeBegin
+		Rotate 90 1 0 0
+		TrimCurve [1 ][3 ][0 0 0 0.25 0.25 0.5 0.5 0.75 0.75 1 1 1] [0] [1] [9 ][0.5 0 0 0 0.5 0.707107 1 0.707107 0.5] [1 0.707107 0.5 0 0 0 0.5 0.707107 1] [1 0.707107 1 0.707107 1 0.707107 1 0.707107 1]
+		NuPatch 2 2 [0 0 1 1] 0.000000 1.000000 2 2 [0 0 1 1] 0.000000 1.000000  "Pw" [-0.329958 4.0615 -0.329958 1 0.329958 4.0615 -0.329958 1 -0.329958 4.0615 0.329958 1 0.329958 4.0615 0.329958 1]
+	AttributeEnd
+WorldEnd
+

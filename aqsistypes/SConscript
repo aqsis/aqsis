@@ -1,0 +1,67 @@
+Import('env')
+aqsistypes_sources = Split("""
+	bitvector.cpp
+	cellnoise.cpp
+	color.cpp
+	file.cpp
+	logging.cpp
+	lowdiscrep.cpp
+	matrix.cpp
+	MultiTimer.cpp
+	noise.cpp
+	noise1234.cpp
+	plugins.cpp
+	random.cpp
+	refcount.cpp
+	spline.cpp
+	sstring.cpp
+	vector2d.cpp
+	vector3d.cpp
+	vector4d.cpp""")
+
+aqsistypes_headers = Split("""
+	aqerror.h
+	aqsis.h
+	aqsis_types.h
+	bitvector.h
+	cellnoise.h
+	color.h
+	exception.h
+	file.h
+	list.h
+	logging.h
+	logging_streambufs.h
+	lowdiscrep.h
+	matrix.h
+	MultiTimer.h
+	noise.h
+	noise1234.h
+	plugins.h
+	pool.h
+	random.h
+	refcount.h
+	spline.h
+	sstring.h
+	validate.h
+	vector2d.h
+	vector3d.h
+	vector4d.h""")
+
+if 'win32' == env['PLATFORM']:
+	aqsistypes_sources = aqsistypes_sources + ['win32/file_system.cpp']
+elif 'darwin' == env['PLATFORM']:
+	aqsistypes_sources = aqsistypes_sources + ['posix/file_system.cpp']
+elif 'posix' == env['PLATFORM']:
+	aqsistypes_sources = aqsistypes_sources + ['posix/file_system.cpp']
+
+# Set any platform specific options for this target
+env.UseTargetOptions('aqsistypes')
+
+aqsistypes = env.Library('aqsistypes', aqsistypes_sources)
+env.Install('$LIBDIR', aqsistypes)
+
+env.Distribute('aqsistypes', aqsistypes_sources)
+env.Distribute('aqsistypes', aqsistypes_headers)
+env.Distribute('aqsistypes', 'SConscript')
+SConscript('posix/SConscript')
+SConscript('win32/SConscript')

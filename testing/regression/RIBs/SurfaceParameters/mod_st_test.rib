@@ -1,0 +1,168 @@
+version 3.03
+Option "searchpath" "shader" ["../../shaders:&"]
+
+Display "mod_st_test.tif" "file" "rgba" "string compression" "deflate"
+
+Format 200 150 1
+ShadingRate 2
+
+Projection "perspective" "fov" 45
+Rotate -40 1 0 0
+Translate 0 -4 5
+
+Option "limits" "eyesplits" [3]
+Sides 2
+
+WorldBegin
+      
+  Attribute "light" "shadows" "off"
+  LightSource "ambientlight" 0 "intensity" [1]
+
+  Color [1 1 1]
+  Surface "show_st"
+  TextureCoordinates 0 0 0.5 0 0 1 0.5 1
+
+  Patch "bilinear" "P" [-1 -1 -1
+                         1 -1 -1
+                        -1 -1  1
+                         1 -1  1]
+
+  TransformBegin
+  Translate 2 0 0
+  Patch "bicubic" "P" [
+						-1 -1 -1
+						-0.5 -1 -1
+						0.5 -1 -1
+						1 -1 -1
+
+						-1 -1 -0.5
+						-0.5 -1 -0.5
+						0.5 -1 -0.5
+						1 -1 -0.5
+
+						-1 -1 0.5
+						-0.5 -1 0.5
+						0.5 -1 0.5
+						1 -1 0.5
+
+						-1 -1 1
+						-0.5 -1 1
+						0.5 -1 1
+						1 -1 1
+					]
+  TransformEnd
+
+  TransformBegin
+	Translate -2 -1 0
+	Rotate 90 1 0 0
+	Disk 0 1 360
+  TransformEnd
+
+  TransformBegin
+	Translate -2.5 0 1
+	PointsPolygons [3 3] [0 1 2  0 2 3]
+		"P" [
+				0 0 -1 
+				0 2 -1 
+				1 2 -1 
+				1 0 -1
+			]
+		"st" [
+				0 0 0 1 1 1 4 2
+			]
+  TransformEnd
+
+  TransformBegin
+	Translate -1.5 0 1
+	Polygon "P" [
+				0 0 -1 
+				0 2 -1 
+				1 2 -1 
+				1 0 -1
+			]
+		"s" [
+				0 0 1 4
+			]
+		"t" [
+				0 1 1 2
+			]
+  TransformEnd
+
+  TransformBegin
+	AttributeBegin
+	Translate 0.5 -0.5 2
+	PatchMesh "bicubic" 12 "periodic" 4 "nonperiodic" 
+		"P" [
+			-1.0 0.0  0.0
+			-1.0 0.0  0.3
+			-0.3 0.0  1.0
+			 0.0 0.0  1.0
+			 0.3 0.0  1.0
+			 1.0 0.0  0.3
+			 1.0 0.0  0.0
+			 1.0 0.0 -0.3
+			 0.3 0.0 -1.0
+			 0.0 0.0 -1.0
+			-0.3 0.0 -1.0
+			-1.0 0.0 -0.3
+
+			-1.0 0.25  0.0
+			-1.0 0.25  0.3
+			-0.3 0.25  1.0
+			 0.0 0.25  1.0
+			 0.3 0.25  1.0
+			 1.0 0.25  0.3
+			 1.0 0.25  0.0
+			 1.0 0.25 -0.3
+			 0.3 0.25 -1.0
+			 0.0 0.25 -1.0
+			-0.3 0.25 -1.0
+			-1.0 0.25 -0.3
+
+			-1.0 0.75  0.0
+			-1.0 0.75  0.3
+			-0.3 0.75  1.0
+			 0.0 0.75  1.0
+			 0.3 0.75  1.0
+			 1.0 0.75  0.3
+			 1.0 0.75  0.0
+			 1.0 0.75 -0.3
+			 0.3 0.75 -1.0
+			 0.0 0.75 -1.0
+			-0.3 0.75 -1.0
+			-1.0 0.75 -0.3
+
+			-1.0 1.0  0.0
+			-1.0 1.0  0.3
+			-0.3 1.0  1.0
+			 0.0 1.0  1.0
+			 0.3 1.0  1.0
+			 1.0 1.0  0.3
+			 1.0 1.0  0.0
+			 1.0 1.0 -0.3
+			 0.3 1.0 -1.0
+			 0.0 1.0 -1.0
+			-0.3 1.0 -1.0
+			-1.0 1.0 -0.3
+		]
+	AttributeEnd
+  TransformEnd
+
+  TransformBegin
+	Translate 1.5 0 1
+	PatchMesh "bilinear" 4 "nonperiodic" 2 "nonperiodic"
+		"P"	[
+				0 0 -1
+				1 0 -1
+				1 0 0
+				0 0 0
+
+				0 1 -1
+				1 1 -1
+				1 1 0
+				0 1 0
+			]
+  TransformEnd
+
+WorldEnd
+

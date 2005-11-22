@@ -1,0 +1,17 @@
+Import('env')
+raytrace_sources = Split("""
+	raytrace.cpp""")
+
+raytrace_headers = Split("""
+	raytrace.h""")
+
+# Set any platform specific options for this target
+env.UseTargetOptions('raytrace')
+
+raytrace = env.Library('raytrace', raytrace_sources)
+env.Install('$LIBDIR', raytrace)
+
+env.Distribute('renderer/raytrace', raytrace_sources)
+env.Distribute('renderer/raytrace', raytrace_headers)
+env.Distribute('renderer/raytrace', 'SConscript')
+

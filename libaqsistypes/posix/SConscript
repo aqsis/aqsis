@@ -1,5 +1,0 @@
-Import('env')
-
-env.Distribute('libaqsistypes/posix', 'aqsis_compiler.h')
-env.Distribute('libaqsistypes/posix', 'file_system.cpp')
-env.Distribute('libaqsistypes/posix', 'SConscript')

@@ -1,0 +1,35 @@
+Import('env')
+ri2rib_sources = Split("""
+	ascii.cpp
+	binary.cpp
+	context.cpp
+	dictionary.cpp
+	error.cpp
+	inlineparse.cpp
+	output.cpp
+	outstream.cpp
+	plstore.cpp
+	ri.cpp
+	tokens.cpp""")
+
+ri2rib_headers = Split("""
+	ascii.h
+	binary.h
+	context.h
+	dictionary.h
+	error.h
+	inlineparse.h
+	options.h
+	output.h
+	outstream.h
+	plstore.h""")
+
+# Set any platform specific options for this target
+env.UseTargetOptions('ri2rib')
+
+ri2rib = env.Library('ri2rib', ri2rib_sources)
+env.Install('$LIBDIR', ri2rib)
+
+env.Distribute('rib/ri2rib', ri2rib_sources)
+env.Distribute('rib/ri2rib', ri2rib_headers)
+env.Distribute('rib/ri2rib', 'SConscript')

@@ -1,0 +1,18 @@
+Import('env')
+shaderexecenv_sources = Split("""
+	shaderexecenv.cpp
+	shadeops.cpp""")
+
+shaderexecenv_headers = Split("""
+	shaderexecenv.h""")
+
+# Set any platform specific options for this target
+env.UseTargetOptions('shaderexecenv')
+
+shaderexecenv = env.Library('shaderexecenv', shaderexecenv_sources)
+env.Install('$LIBDIR', shaderexecenv)
+
+env.Distribute('shadercompiler/shaderexecenv', shaderexecenv_sources)
+env.Distribute('shadercompiler/shaderexecenv', shaderexecenv_headers)
+env.Distribute('shadercompiler/shaderexecenv', 'SConscript')
+

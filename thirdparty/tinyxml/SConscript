@@ -19,11 +19,11 @@ tinyxmlenv.UseTargetOptions('tinyxml')
 tinyxml = tinyxmlenv.Library('tinyxml', tinyxml_sources)
 tinyxmlenv.Install('$LIBDIR', tinyxml)
 
-env.Distribute('libtinyxml', tinyxml_sources)
-env.Distribute('libtinyxml', tinyxml_headers)
-env.Distribute('libtinyxml', 'SConscript')
+env.Distribute('thirdparty/tinyxml', tinyxml_sources)
+env.Distribute('thirdparty/tinyxml', tinyxml_headers)
+env.Distribute('thirdparty/tinyxml', 'SConscript')
 
 # For politeness
-env.Distribute('libtinyxml', 'readme.txt')
-env.Distribute('libtinyxml', 'changes.txt')
+env.Distribute('thirdparty/tinyxml', 'readme.txt')
+env.Distribute('thirdparty/tinyxml', 'changes.txt')
 

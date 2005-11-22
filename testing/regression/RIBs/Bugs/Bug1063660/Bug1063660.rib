@@ -1,0 +1,54 @@
+##RenderMan RIB-Structure 1.0
+version 3.03
+
+#Created with K-3D Version 0.5.0.6, http://www.k-3d.org
+
+#Setup file search paths
+Option "searchpath" "shader" [ "/home/tshead/.k3d/shadercache:&" ] 
+
+FrameBegin 1
+
+   #Setup options
+   Option "limits" "gridsize" [ 256 ] "bucketsize" [ 16 16 ] "eyesplits" [ 10 ] "texturememory" [ 1024 ] 
+
+   #Setup Display
+   Display "Bug1063660.tif" "file" "rgb" "string compression" ["deflate"]
+   Format 320 240 1
+   PixelSamples 1 1
+   PixelFilter "gaussian" 2 2
+   Exposure 1 1
+   ShadingRate 1
+   ShadingInterpolation "constant"
+   Orientation "lh"
+   Sides 2
+   CropWindow 0 1 0 1
+
+   #Setup viewing transformation
+   Projection "perspective" 
+   ScreenWindow -0.666667 0.666667 -0.5 0.5
+   Clipping 1 1000
+   Rotate -1.99124e-15 0 0 1
+   Rotate -37 1 0 0
+   Rotate -45 0 1 0
+   Translate 8.01259 -7.22518 8.01259
+
+   WorldBegin
+      TransformBegin
+         Transform [ 1 0 0 0 0 1 0 0 0 0 1 0 -20 20 -30 1 ]
+         Attribute "light" "uniform string shadows" [ "off" ] 
+         LightSource "pointlight" 1 "constant float intensity" [ 3000 ] "constant color lightcolor" [ 1 1 1 ] 
+      TransformEnd
+      AttributeBegin
+         ConcatTransform [ 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 ]
+         Attribute "render" "uniform integer visibility" [ 7 ] "uniform string casts_shadows" [ "Os" ] "uniform integer truedisplacement" [ 0 ] 
+         Attribute "displacementbound" "uniform float sphere" [ 1 ] "uniform string coordinatesystem" [ "world" ] 
+         Color 1 1 1
+         Opacity 1 1 1
+         Matte 0
+         Surface "matte" 
+         SubdivisionMesh "catmull-clark" [ 4 4 4 4 4 4 ] [ 0 1 2 3 0 3 4 5 1 0 5 6 2 1 6 7 3 2 7 4 6 5 4 7 ] [ "interpolateboundary" ] [ 0 0 ] [ ] [ ] 
+"P" [ -2.5 -2.5 2.5 2.5 -2.5 2.5 2.5 2.5 2.5 -2.5 2.5 2.5 -2.5 2.5 -2.5 -2.5 -2.5 -2.5 2.5 -2.5 -2.5 2.5 2.5 -2.5 ] 
+"uniform color Cs" [ 1 1 1 0 0 1 1 1 1 1 1 1 1 1 1 1 1 1 ] 
+      AttributeEnd
+   WorldEnd
+FrameEnd

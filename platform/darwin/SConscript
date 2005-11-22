@@ -10,9 +10,9 @@ if env['debug']:
 	env.AppendUnique(CCFLAGS=['-g', '-O0', '-fno-common'])
 else:
 	env.AppendUnique(CCFLAGS=['-O2', '-fno-common'])
-	env.AppendUnique(LINKFLAGS=['-s'])
+	env.AppendUnique(LINKFLAGS=['-Wl,-s'])
 
-env.AppendUnique(CPPPATH = [env.Dir('#/libaqsistypes/posix')])
+env.AppendUnique(CPPPATH = [env.Dir('#/aqsistypes/posix')])
 env.AppendUnique(CPPDEFINES=[('NDEBUG', '1'), ('PLUGINS', '1')])
 
 # Point at the boost headers.

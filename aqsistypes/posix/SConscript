@@ -1,0 +1,5 @@
+Import('env')
+
+env.Distribute('aqsistypes/posix', 'aqsis_compiler.h')
+env.Distribute('aqsistypes/posix', 'file_system.cpp')
+env.Distribute('aqsistypes/posix', 'SConscript')

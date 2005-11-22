@@ -1,0 +1,28 @@
+Import('env')
+rib2_sources = Split("""
+	bdec.cpp
+	librib.cpp
+	scanner.cpp
+	parser.cpp""")
+
+rib2_headers = Split("""
+	bdec.h
+	librib.h
+	libribtypes.h
+	parserstate.h""")
+
+env.CXXFile(target='parser.cpp', source='parser.yy')
+env.CXXFile(target='scanner.cpp', source='scanner.ll')
+
+# Set any platform specific options for this target
+env.UseTargetOptions('rib2')
+
+rib2 = env.Library('rib2', rib2_sources)
+env.Install('$LIBDIR', rib2)
+
+env.Distribute('rib/rib2', rib2_sources)
+env.Distribute('rib/rib2', rib2_headers)
+env.Distribute('rib/rib2', 'SConscript')
+env.Distribute('rib/rib2', 'scanner.ll')
+env.Distribute('rib/rib2', 'parser.yy')
+

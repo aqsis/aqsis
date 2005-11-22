@@ -1,0 +1,19 @@
+Import('env')
+
+slxargs_sources = Split("""
+	rcdummy.cpp
+	slx.cpp""")
+
+slxargs_headers = Split("""
+	slx.h""")
+
+# Set any platform specific options for this target
+env.UseTargetOptions('slxargs')
+
+slxargs = env.Library('slxargs', slxargs_sources)
+env.Install('$LIBDIR', slxargs)
+
+env.Distribute('shadercompiler/slxargs', slxargs_sources)
+env.Distribute('shadercompiler/slxargs', slxargs_headers)
+env.Distribute('shadercompiler/slxargs', 'SConscript')
+

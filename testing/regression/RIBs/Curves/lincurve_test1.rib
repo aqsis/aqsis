@@ -1,0 +1,88 @@
+###############################################################################
+# File: lincurve_test1.rib
+#
+# Description:
+#   Test of "varying float[2] st" texture coordinates on Curves.  The RiSpec
+#   is a little badly defined on the topic of texture coordinates for curves.
+#   The current Aqsis implementation sets s=u, t=v at ALL times, regardless of
+#   any user-specified st coordinates.
+#
+# See also: curves.cpp, curves.h, ri.cpp
+#
+# Author:  Jonathan Merritt (jmerritt@pgrad.unimelb.edu.au), 6th Oct 2002.
+###############################################################################
+
+Option "searchpath" "shader" ["../../shaders:&"]
+
+Format 320 200 1
+PixelFilter "gaussian" 2 2
+Display "lincurve_test1.tif" "file" "rgb" "string compression" "deflate"
+#Display "+lincurve_test1.tif" "framebuffer" "rgb"
+
+Projection "perspective" "fov" [45]
+Translate 0 0 8
+
+WorldBegin
+
+Surface "show_st"
+
+# Single horizontal non-periodic curve (top left).
+AttributeBegin
+	Translate -3.5 2.5 0
+	Curves "linear" [ 2 ] "nonperiodic" 
+	"P" [ -1 0 0 1 0 0 ]
+	"constantwidth" [ 0.2 ]
+AttributeEnd
+
+# "Dragon's tail" non-periodic curve (left).
+AttributeBegin
+	Translate -3.5 1.5 0
+	Curves "linear" [ 4 ] "nonperiodic"
+        "P" [ -1 0 0  -.75 .5 0  -.5 -.5 0  1 0 0 ]
+	"width" [ 0 .1 .2 .5 ]
+AttributeEnd
+
+# Periodic square curve (left).
+AttributeBegin
+	Translate -3.5 -.5 0
+	Curves "linear" [ 4 ] "periodic"
+	"P" [ -1 -1 0  -1 1 0  1 1 0  1 -1 0 ]
+	"constantwidth" [ 0.3 ]
+AttributeEnd
+
+# Set of three non-periodic curves of different thicknesses (left).
+AttributeBegin
+	Translate -3.5 -2.3 0
+	Curves "linear" [ 2 2 2 ] "nonperiodic"
+	"P" [ -1 0 0  1 0 0  -1 -.35 0  1 -.35 0  -1 -.6 0  1 -.6 0 ]
+	"width" [ .3 .3  .2 .2 .1 .1 ]
+AttributeEnd
+
+# Pair of periodic square curves at two distances (top middle).
+AttributeBegin
+	Translate 0 1.5 0
+	Curves "linear" [ 4 4 ] "periodic"
+	"P" [ 
+	  -1 -1 0  -1 1 0  1 1 0  1 -1 0 
+	  -1 .5 8  -1 2.5 8  1 2.5 8  1 .5 8
+	]
+	"constantwidth" 0.5
+AttributeEnd
+
+# Rotated periodic square curve (bottom).
+AttributeBegin
+	Translate 0 -1.5 0
+	Rotate 60 1 0 0
+	Curves "linear" [ 4 ] "periodic"
+	"P" [ -1 -1 0  -1 1 0  1 1 0  1 -1 0 ]
+	"constantwidth" 0.5
+AttributeEnd
+
+# Curve with one end much further away than the other (right).
+AttributeBegin
+	Curves "linear" [ 2 ] "nonperiodic"
+	"P" [ 2 -1 -4  30 30 100  ]
+	"constantwidth" 1.0
+AttributeEnd
+
+WorldEnd

@@ -1,0 +1,33 @@
+Option "searchpath" "shader" ["../../../shaders:&"]
+Option "searchpath" "texture" ["../../../maps:&"]
+
+PixelSamples 2 2
+Display "invtrig.tif" "file" "rgba" "string compression" "deflate"
+Format 320 240 1
+Projection "orthographic" 
+Translate 0 0 5
+Scale 0.35 0.35 0.35
+
+ReadArchive "func_maketexture.rib"
+
+WorldBegin
+Surface "constant"
+
+ReadArchive "func_common.rib"
+
+# Red function
+Color 1 0 0
+Displacement "funcs" "yscale" [1] "func" [13]
+Cylinder 0.02 -4 4 360 "varying float x" [-4 -4 4 4]
+
+# Green function
+Color 0 1 0
+Displacement "funcs" "yscale" [1] "func" [14]
+Cylinder 0.02 -4 4 360 "varying float x" [-4 -4 4 4]
+
+# Blue function
+Color 0 0 1
+Displacement "funcs" "yscale" [1] "func" [15]
+Cylinder 0.02 -4 4 360 "varying float x" [-4 -4 4 4]
+
+WorldEnd

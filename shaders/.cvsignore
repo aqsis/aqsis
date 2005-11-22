@@ -1,9 +1,0 @@
-Makefile
-*.slx
-*.slc
-*.sdl
-*.slo
-.#*
-*.plg
-*.#*
-*~

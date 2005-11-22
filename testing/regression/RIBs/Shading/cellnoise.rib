@@ -1,0 +1,12 @@
+Option "searchpath" "shader" ["../../shaders:&"]
+
+Display "cellnoise.tif" "file" "rgba" "string compression" "deflate"
+
+Format 200 200 1
+Projection "perspective" 
+Translate 0 0 1
+WorldBegin 
+LightSource "ambientlight" 2 "intensity" [1]
+Surface "cellnoisetest" 
+Patch "bilinear" "P" [-1 1 0 1 1 0 -1 -1 0 1 -1 0]
+WorldEnd 

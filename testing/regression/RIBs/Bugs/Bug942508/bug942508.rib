@@ -1,0 +1,35 @@
+##RenderMan RIB-Structure 1.0
+version 3.03
+
+#Created with K-3D Version 0.3.9.7, http://www.k-3d.org
+
+FrameBegin 1
+
+   #Setup options
+   Option "limits" "gridsize" [ 256 ] "bucketsize" [ 16 16 ] "eyesplits" [ 10 ] "texturememory" [ 1024 ] 
+
+   #Setup Display
+   Display "bug942508.tif" "file" "rgb" "string compression" "deflate"
+   Format 320 240 1
+   PixelSamples 1 1
+   PixelFilter "gaussian" 2 2
+   Exposure 1 1
+   ShadingRate 1
+   ShadingInterpolation "constant"
+   Orientation "lh"
+   Sides 2
+   CropWindow 0 1 0 1
+
+   #Setup viewing transformation
+   Projection "perspective" 
+   ScreenWindow -0.666667 0.666667 -0.5 0.5
+   Clipping 1 1000
+   Rotate -1.99124e-15 0 0 1
+   Rotate -37 1 0 0
+   Rotate -45 0 1 0
+   Translate 20 -20 20
+   Imager "background" "constant color bgcolor" [ 0 0 1 ] 
+
+   WorldBegin
+   WorldEnd
+FrameEnd

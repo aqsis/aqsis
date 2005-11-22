@@ -1,0 +1,16 @@
+Import('env')
+ddmanager_sources = Split("""
+	ddmanager.cpp""")
+
+ddmanager_headers = Split("""
+	ddmanager.h
+	ndspy.h""")
+
+# Set any platform specific options for this target
+env.UseTargetOptions('ddmanager')
+
+ddmanager = env.Library('ddmanager', ddmanager_sources)
+env.Install('$LIBDIR', ddmanager)
+
+env.Distribute('renderer/ddmanager', ddmanager_sources)
+env.Distribute('renderer/ddmanager', ddmanager_headers)

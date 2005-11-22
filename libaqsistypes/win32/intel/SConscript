@@ -1,6 +1,0 @@
-Import('env')
-
-env.Distribute('libaqsistypes/win32/intel', 'aqsis_compiler.h')
-env.Distribute('libaqsistypes/win32/intel', 'file_system.cpp')
-env.Distribute('libaqsistypes/win32/intel', 'SConscript')
-env.Distribute('libaqsistypes/win32/intel', 'unistd.h')

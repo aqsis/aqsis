@@ -36,7 +36,7 @@ else:
 	env.AppendUnique(CCFLAGS=['/GX', '/MD', '/GR', '/Zm200', '/O2'])
 
 env.AppendUnique(CPPDEFINES=['NO_SYSLOG', 'WIN32', 'PLUGINS', ('_qBUILDING', 'CORE'), ('CORE', '1'), 'ZLIB_WINAPI'])
-env.AppendUnique(CPPPATH = ['#/libaqsistypes/win32/intel'])
+env.AppendUnique(CPPPATH = ['#/aqsistypes/win32'])
 
 env.Replace(YACC = '${bison}')
 env.Replace(LEX = '${flex}')

@@ -1,0 +1,63 @@
+##RenderMan RIB-Structure 1.1
+##Creator ./generate_rib
+##CreationDate Sat Aug 21 00:42:53 2004
+##For ovi
+version 3.03
+Declare "eyesplits" "uniform integer"
+Declare "gridsize" "uniform integer"
+Declare "bucketsize" "uniform integer[2]"
+Option "limits" "eyesplits" [5]
+Option "limits" "gridsize" [64]
+Option "limits" "bucketsize" [32 32]
+ShadingRate 1
+FrameBegin 0
+Display "Bug1013736.tif" "file" "rgb" "string compression" ["deflate"]
+Format 400 400 1
+Projection "perspective" "fov" [40]
+Clipping 0.01 1000
+Exposure 1 1.5
+Identity
+Transform [0.97969771926616822 -0.090510094579688463 -0.17888628131817244 -0.0 -0.20048037027267404 -0.4423003265091846 -0.87417277600323406 0.0 9.5545316450285094e-18 0.89228826281031215 -0.45146611838648026 -0.0 -2.4936649967166606e-18 -1.7145302105142651e-16 8.8600225733346747 1.0]
+WorldBegin
+LightSource "ambientlight" 1 "intensity" [0.10000000000000001]
+LightSource "pointlight" 2 "intensity" [3000] "from" [1000.0 1000.0 2000.0]
+LightSource "distantlight" 3 "to" [0.0 0.0 0.0] "intensity" [1] "from" [50.0 50.0 20.0]
+LightSource "distantlight" 4 "to" [0.0 0.0 0.0] "intensity" [1] "from" [1.9019237886466853 9.2942286340599463 4.7999999999999998]
+ObjectBegin 1
+SolidBegin "primitive"
+Cylinder 0.28000000000000003 -2.3999999999999999 2.3999999999999999 360
+TransformBegin
+Translate 0 0 -3.5999999999999996
+Disk 0 0.28000000000000003 360
+TransformEnd
+TransformBegin
+Translate 0 0 3.5999999999999996
+Disk 0 0.28000000000000003 360
+TransformEnd
+SolidEnd
+ObjectEnd
+ObjectBegin 2
+SolidBegin "difference"
+SolidBegin "primitive"
+PointsPolygons [4 4 4 4 4 4] [0 1 2 3 4 5 6 7 0 1 5 4 1 2 6 5 2 3 7 6 0 4 7 3] "P" [0 0 0 1 0 0 1 1 0 0 1 0 0 0 1.2 1 0 1.2 1 1 1.2 0 1 1.2]
+SolidEnd
+TransformBegin
+Translate 0.5 0.90000000000000002 0
+ObjectInstance 1
+TransformEnd
+SolidEnd
+ObjectEnd
+AttributeBegin
+Color [0 0.0 1.0]
+Surface "plastic" "Ks" [0.5] "Ka" [0.20000000000000001] "Kd" [0.59999999999999998]
+TransformBegin
+Translate 0.0 0.0 -1.7999999999999998
+ObjectInstance 2
+TransformEnd
+TransformBegin
+Translate 0.0 0.0 0.0
+ObjectInstance 2
+TransformEnd
+AttributeEnd
+WorldEnd
+FrameEnd

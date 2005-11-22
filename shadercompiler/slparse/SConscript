@@ -1,0 +1,38 @@
+Import('env')
+
+slparse_sources = Split("""
+	funcdef.cpp
+	libslparse.cpp
+	optimise.cpp
+	parsenode.cpp
+	parser.cpp
+	scanner.cpp
+	typecheck.cpp
+	vardef.cpp""")
+
+slparse_headers = Split("""
+	funcdef.h
+	icodegen.h
+	ifuncdef.h
+	iparsenode.h
+	ivardef.h
+	libslparse.h
+	parsenode.h
+	vardef.h""")
+
+slparseenv = env.Copy()
+
+# Set any platform specific options for this target
+slparseenv.UseTargetOptions('slparse')
+
+slparseenv.CXXFile(target='parser.cpp', source='parser.yy')
+slparseenv.CXXFile(target='scanner.cpp', source='scanner.ll')
+slparse = slparseenv.Library('slparse', slparse_sources)
+slparseenv.Install('$LIBDIR', slparse)
+
+env.Distribute('shadercompiler/slparse', slparse_sources)
+env.Distribute('shadercompiler/slparse', slparse_headers)
+env.Distribute('shadercompiler/slparse', 'SConscript')
+env.Distribute('shadercompiler/slparse', 'parser.yy')
+env.Distribute('shadercompiler/slparse', 'scanner.ll')
+

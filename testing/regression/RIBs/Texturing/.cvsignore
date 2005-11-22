@@ -1,0 +1,7 @@
+*.sdl
+*.sdr
+*.slx
+*.slc
+*.tif
+*.temp
+test.env

@@ -1,0 +1,135 @@
+Orientation "lh"
+Format 320 240 1
+PixelSamples 2 2
+ShadingRate 1.0
+PixelFilter "gaussian" 2 2
+Option "searchpath" "shader" ["../shaders:&"]
+
+FrameBegin 0
+
+Display "matte.tif" "file" "rgba" "string compression" "deflate"
+
+# Camera name: "Kamera01"
+Projection "orthographic"
+
+WorldBegin
+
+Surface "constant"
+CoordinateSystem "screen"
+
+# Opaque over opaque over opaque
+TransformBegin
+  Translate -.75 -.6 0.3
+
+  AttributeBegin
+    Color 0 0 1
+    Opacity 1 1 1
+    Patch "bilinear" "P" [  -.3 -.3 0   .3 -.3 0   -.3  .3 0   .3  .3 0   ]
+  AttributeEnd
+
+  Translate .15 .15 .3
+
+  AttributeBegin
+    Color 1 0 0
+    Opacity 1 1 1
+	Matte 1
+    Patch "bilinear" "P" [  -.3 -.3 0   .3 -.3 0   -.3  .3 0   .3  .3 0   ]
+  AttributeEnd
+
+  Translate .15 .15 .3
+
+  AttributeBegin
+    Color 0 1 0
+    Opacity 1 1 1
+    Patch "bilinear" "P" [  -.3 -.3 0   .3 -.3 0   -.3  .3 0   .3  .3 0   ]
+  AttributeEnd
+
+TransformEnd
+
+# Transparent over transparent over transparent
+TransformBegin
+  Translate .6 -.6 0.3
+
+  AttributeBegin
+    Color 0 0 1
+    Opacity .3 .3 .3
+    Patch "bilinear" "P" [  -.3 -.3 0   .3 -.3 0   -.3  .3 0   .3  .3 0   ]
+  AttributeEnd
+
+  Translate .15 .15 .3
+
+  AttributeBegin
+    Color 1 0 0
+    Opacity .3 .3 .3
+	Matte 1
+    Patch "bilinear" "P" [  -.3 -.3 0   .3 -.3 0   -.3  .3 0   .3  .3 0   ]
+  AttributeEnd
+
+  Translate .15 .15 .3
+
+  AttributeBegin
+    Color 0 1 0
+    Opacity .8 .8 .8
+    Patch "bilinear" "P" [  -.3 -.3 0   .3 -.3 0   -.3  .3 0   .3  .3 0   ]
+  AttributeEnd
+
+TransformEnd
+
+# Opaque over transparent over opaque
+TransformBegin
+  Translate -.75 .35 0.3
+
+  AttributeBegin
+    Color 0 0 1
+    Opacity 1 1 1
+    Patch "bilinear" "P" [  -.3 -.3 0   .3 -.3 0   -.3  .3 0   .3  .3 0   ]
+  AttributeEnd
+
+  Translate .15 .15 .3
+
+  AttributeBegin
+    Color 1 0 0
+    Opacity .1 .1 .1
+	Matte 1
+    Patch "bilinear" "P" [  -.3 -.3 0   .3 -.3 0   -.3  .3 0   .3  .3 0   ]
+  AttributeEnd
+
+  Translate .15 .15 .3
+
+  AttributeBegin
+    Color 0 1 0
+    Opacity 1 1 1
+    Patch "bilinear" "P" [  -.3 -.3 0   .3 -.3 0   -.3  .3 0   .3  .3 0   ]
+  AttributeEnd
+TransformEnd
+
+# Transparent over transparent over opaque
+TransformBegin
+  Translate .6 .35 0.3
+
+  AttributeBegin
+    Color 0 0 1
+    Opacity .3 .3 .3
+    Patch "bilinear" "P" [  -.3 -.3 0   .3 -.3 0   -.3  .3 0   .3  .3 0   ]
+  AttributeEnd
+
+  Translate .15 .15 .3
+
+  AttributeBegin
+    Color 1 0 0
+    Opacity .1 .1 .1
+	Matte 1
+    Patch "bilinear" "P" [  -.3 -.3 0   .3 -.3 0   -.3  .3 0   .3  .3 0   ]
+  AttributeEnd
+
+  Translate .15 .15 .3
+
+  AttributeBegin
+    Color 0 1 0
+    Opacity 1 1 1
+    Patch "bilinear" "P" [  -.3 -.3 0   .3 -.3 0   -.3  .3 0   .3  .3 0   ]
+  AttributeEnd
+TransformEnd
+
+WorldEnd
+FrameEnd

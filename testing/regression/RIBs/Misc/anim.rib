@@ -1,0 +1,770 @@
+Orientation "lh"
+Format 320 240 1
+PixelSamples 1 1
+ShadingRate 2.0
+
+Option "searchpath" "shader" ["../shaders:&"]
+Option "statistics" "endofframe" [1]
+
+# Camera name: "Kamera01"
+Projection "perspective" "fov" [45.0]
+Rotate 180 0 1 0
+ConcatTransform [0.999991 -0.000137707 0.00428109 0  0.00428331 0.0321494 -0.999474 0  0.0 0.999483 0.0321497 0  0.743534 0.0237003 -346.616 1]
+
+# Object "Richtg.01"
+TransformBegin
+ConcatTransform [0.985653 0.168787 0.0 0  -0.027523 0.160725 0.986615 0  0.166527 -0.97246 0.163064 0  108.105 -225.24 28.4813 1]
+Attribute "light" "shadows" ["off"]
+LightSource "distantlight" 2 "to" [0 0 -1] 
+TransformEnd
+
+FrameBegin 0
+Display "anim00.tif" "file" "rgba" "string compression" "deflate"
+
+WorldBegin
+# Default-Surface
+Surface "matte"
+
+# Object "Kugel01"
+AttributeBegin
+Color 0.894118 0.721569 0.6
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  0.0 0.0 0.0 1]
+Sphere 21.0122 -21.0122 21.0122 360
+AttributeEnd
+WorldEnd
+FrameEnd
+FrameBegin 1
+Display "anim01.tif" "file" "rgba" "string compression" "deflate"
+
+WorldBegin
+# Default-Surface
+Surface "matte"
+
+# Object "Kugel01"
+AttributeBegin
+Color 0.894118 0.721569 0.6
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  24.869 0.0 10.0267 1]
+Sphere 21.0122 -21.0122 21.0122 360
+AttributeEnd
+WorldEnd
+FrameEnd
+FrameBegin 2
+Display "anim02.tif" "file" "rgba" "string compression" "deflate"
+
+WorldBegin
+# Default-Surface
+Surface "matte"
+
+# Object "Kugel01"
+AttributeBegin
+Color 0.894118 0.721569 0.6
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  48.1754 0.0 19.8952 1]
+Sphere 21.0122 -21.0122 21.0122 360
+AttributeEnd
+WorldEnd
+FrameEnd
+FrameBegin 3
+Display "anim03.tif" "file" "rgba" "string compression" "deflate"
+
+WorldBegin
+# Default-Surface
+Surface "matte"
+
+# Object "Kugel01"
+AttributeBegin
+Color 0.894118 0.721569 0.6
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  68.4547 0.0 29.45 1]
+Sphere 21.0122 -21.0122 21.0122 360
+AttributeEnd
+WorldEnd
+FrameEnd
+FrameBegin 4
+Display "anim04.tif" "file" "rgba" "string compression" "deflate"
+
+WorldBegin
+# Default-Surface
+Surface "matte"
+
+# Object "Kugel01"
+AttributeBegin
+Color 0.894118 0.721569 0.6
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  84.4328 0.0 38.5403 1]
+Sphere 21.0122 -21.0122 21.0122 360
+AttributeEnd
+WorldEnd
+FrameEnd
+FrameBegin 5
+Display "anim05.tif" "file" "rgba" "string compression" "deflate"
+
+WorldBegin
+# Default-Surface
+Surface "matte"
+
+# Object "Kugel01"
+AttributeBegin
+Color 0.894118 0.721569 0.6
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  95.1057 0.0 47.0228 1]
+Sphere 21.0122 -21.0122 21.0122 360
+AttributeEnd
+WorldEnd
+FrameEnd
+FrameBegin 6
+Display "anim06.tif" "file" "rgba" "string compression" "deflate"
+
+WorldBegin
+# Default-Surface
+Surface "matte"
+
+# Object "Kugel01"
+AttributeBegin
+Color 0.894118 0.721569 0.6
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  99.8027 0.0 54.7638 1]
+Sphere 21.0122 -21.0122 21.0122 360
+AttributeEnd
+WorldEnd
+FrameEnd
+FrameBegin 7
+Display "anim07.tif" "file" "rgba" "string compression" "deflate"
+
+WorldBegin
+# Default-Surface
+Surface "matte"
+
+# Object "Kugel01"
+AttributeBegin
+Color 0.894118 0.721569 0.6
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  98.2287 0.0 61.6411 1]
+Sphere 21.0122 -21.0122 21.0122 360
+AttributeEnd
+WorldEnd
+FrameEnd
+FrameBegin 8
+Display "anim08.tif" "file" "rgba" "string compression" "deflate"
+
+WorldBegin
+# Default-Surface
+Surface "matte"
+
+# Object "Kugel01"
+AttributeBegin
+Color 0.894118 0.721569 0.6
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  90.4827 0.0 67.5462 1]
+Sphere 21.0122 -21.0122 21.0122 360
+AttributeEnd
+WorldEnd
+FrameEnd
+FrameBegin 9
+Display "anim09.tif" "file" "rgba" "string compression" "deflate"
+
+WorldBegin
+# Default-Surface
+Surface "matte"
+
+# Object "Kugel01"
+AttributeBegin
+Color 0.894118 0.721569 0.6
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  77.0513 0.0 72.3862 1]
+Sphere 21.0122 -21.0122 21.0122 360
+AttributeEnd
+WorldEnd
+FrameEnd
+FrameBegin 10
+Display "anim10.tif" "file" "rgba" "string compression" "deflate"
+
+WorldBegin
+# Default-Surface
+Surface "matte"
+
+# Object "Kugel01"
+AttributeBegin
+Color 0.894118 0.721569 0.6
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  58.7785 0.0 76.0845 1]
+Sphere 21.0122 -21.0122 21.0122 360
+AttributeEnd
+WorldEnd
+FrameEnd
+FrameBegin 11
+Display "anim11.tif" "file" "rgba" "string compression" "deflate"
+
+WorldBegin
+# Default-Surface
+Surface "matte"
+
+# Object "Kugel01"
+AttributeBegin
+Color 0.894118 0.721569 0.6
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  36.8125 0.0 78.583 1]
+Sphere 21.0122 -21.0122 21.0122 360
+AttributeEnd
+WorldEnd
+FrameEnd
+FrameBegin 12
+Display "anim12.tif" "file" "rgba" "string compression" "deflate"
+
+WorldBegin
+# Default-Surface
+Surface "matte"
+
+# Object "Kugel01"
+AttributeBegin
+Color 0.894118 0.721569 0.6
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  12.5333 0.0 79.8421 1]
+Sphere 21.0122 -21.0122 21.0122 360
+AttributeEnd
+WorldEnd
+FrameEnd
+FrameBegin 13
+Display "anim13.tif" "file" "rgba" "string compression" "deflate"
+
+WorldBegin
+# Default-Surface
+Surface "matte"
+
+# Object "Kugel01"
+AttributeBegin
+Color 0.894118 0.721569 0.6
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  -12.5333 0.0 79.8421 1]
+Sphere 21.0122 -21.0122 21.0122 360
+AttributeEnd
+WorldEnd
+FrameEnd
+FrameBegin 14
+Display "anim14.tif" "file" "rgba" "string compression" "deflate"
+
+WorldBegin
+# Default-Surface
+Surface "matte"
+
+# Object "Kugel01"
+AttributeBegin
+Color 0.894118 0.721569 0.6
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  -36.8125 0.0 78.583 1]
+Sphere 21.0122 -21.0122 21.0122 360
+AttributeEnd
+WorldEnd
+FrameEnd
+FrameBegin 15
+Display "anim15.tif" "file" "rgba" "string compression" "deflate"
+
+WorldBegin
+# Default-Surface
+Surface "matte"
+
+# Object "Kugel01"
+AttributeBegin
+Color 0.894118 0.721569 0.6
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  -58.7785 0.0 76.0845 1]
+Sphere 21.0122 -21.0122 21.0122 360
+AttributeEnd
+WorldEnd
+FrameEnd
+FrameBegin 16
+Display "anim16.tif" "file" "rgba" "string compression" "deflate"
+
+WorldBegin
+# Default-Surface
+Surface "matte"
+
+# Object "Kugel01"
+AttributeBegin
+Color 0.894118 0.721569 0.6
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  -77.0513 0.0 72.3862 1]
+Sphere 21.0122 -21.0122 21.0122 360
+AttributeEnd
+WorldEnd
+FrameEnd
+FrameBegin 17
+Display "anim17.tif" "file" "rgba" "string compression" "deflate"
+
+WorldBegin
+# Default-Surface
+Surface "matte"
+
+# Object "Kugel01"
+AttributeBegin
+Color 0.894118 0.721569 0.6
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  -90.4827 0.0 67.5462 1]
+Sphere 21.0122 -21.0122 21.0122 360
+AttributeEnd
+WorldEnd
+FrameEnd
+FrameBegin 18
+Display "anim18.tif" "file" "rgba" "string compression" "deflate"
+
+WorldBegin
+# Default-Surface
+Surface "matte"
+
+# Object "Kugel01"
+AttributeBegin
+Color 0.894118 0.721569 0.6
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  -98.2287 0.0 61.6411 1]
+Sphere 21.0122 -21.0122 21.0122 360
+AttributeEnd
+WorldEnd
+FrameEnd
+FrameBegin 19
+Display "anim19.tif" "file" "rgba" "string compression" "deflate"
+
+WorldBegin
+# Default-Surface
+Surface "matte"
+
+# Object "Kugel01"
+AttributeBegin
+Color 0.894118 0.721569 0.6
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  -99.8027 0.0 54.7638 1]
+Sphere 21.0122 -21.0122 21.0122 360
+AttributeEnd
+WorldEnd
+FrameEnd
+FrameBegin 20
+Display "anim20.tif" "file" "rgba" "string compression" "deflate"
+
+WorldBegin
+# Default-Surface
+Surface "matte"
+
+# Object "Kugel01"
+AttributeBegin
+Color 0.894118 0.721569 0.6
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  -95.1057 0.0 47.0228 1]
+Sphere 21.0122 -21.0122 21.0122 360
+AttributeEnd
+WorldEnd
+FrameEnd
+FrameBegin 21
+Display "anim21.tif" "file" "rgba" "string compression" "deflate"
+
+WorldBegin
+# Default-Surface
+Surface "matte"
+
+# Object "Kugel01"
+AttributeBegin
+Color 0.894118 0.721569 0.6
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  -84.4328 0.0 38.5403 1]
+Sphere 21.0122 -21.0122 21.0122 360
+AttributeEnd
+WorldEnd
+FrameEnd
+FrameBegin 22
+Display "anim22.tif" "file" "rgba" "string compression" "deflate"
+
+WorldBegin
+# Default-Surface
+Surface "matte"
+
+# Object "Kugel01"
+AttributeBegin
+Color 0.894118 0.721569 0.6
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  -68.4547 0.0 29.45 1]
+Sphere 21.0122 -21.0122 21.0122 360
+AttributeEnd
+WorldEnd
+FrameEnd
+FrameBegin 23
+Display "anim23.tif" "file" "rgba" "string compression" "deflate"
+
+WorldBegin
+# Default-Surface
+Surface "matte"
+
+# Object "Kugel01"
+AttributeBegin
+Color 0.894118 0.721569 0.6
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  -48.1754 0.0 19.8952 1]
+Sphere 21.0122 -21.0122 21.0122 360
+AttributeEnd
+WorldEnd
+FrameEnd
+FrameBegin 24
+Display "anim24.tif" "file" "rgba" "string compression" "deflate"
+
+WorldBegin
+# Default-Surface
+Surface "matte"
+
+# Object "Kugel01"
+AttributeBegin
+Color 0.894118 0.721569 0.6
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  -24.869 0.0 10.0267 1]
+Sphere 21.0122 -21.0122 21.0122 360
+AttributeEnd
+WorldEnd
+FrameEnd
+FrameBegin 25
+Display "anim25.tif" "file" "rgba" "string compression" "deflate"
+
+WorldBegin
+# Default-Surface
+Surface "matte"
+
+# Object "Kugel01"
+AttributeBegin
+Color 0.894118 0.721569 0.6
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  -4.86719e-006 0.0 1.94687e-006 1]
+Sphere 21.0122 -21.0122 21.0122 360
+AttributeEnd
+WorldEnd
+FrameEnd
+FrameBegin 26
+Display "anim26.tif" "file" "rgba" "string compression" "deflate"
+
+WorldBegin
+# Default-Surface
+Surface "matte"
+
+# Object "Kugel01"
+AttributeBegin
+Color 0.894118 0.721569 0.6
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  24.869 0.0 -10.0267 1]
+Sphere 21.0122 -21.0122 21.0122 360
+AttributeEnd
+WorldEnd
+FrameEnd
+FrameBegin 27
+Display "anim27.tif" "file" "rgba" "string compression" "deflate"
+
+WorldBegin
+# Default-Surface
+Surface "matte"
+
+# Object "Kugel01"
+AttributeBegin
+Color 0.894118 0.721569 0.6
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  48.1754 0.0 -19.8952 1]
+Sphere 21.0122 -21.0122 21.0122 360
+AttributeEnd
+WorldEnd
+FrameEnd
+FrameBegin 28
+Display "anim28.tif" "file" "rgba" "string compression" "deflate"
+
+WorldBegin
+# Default-Surface
+Surface "matte"
+
+# Object "Kugel01"
+AttributeBegin
+Color 0.894118 0.721569 0.6
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  68.4547 0.0 -29.45 1]
+Sphere 21.0122 -21.0122 21.0122 360
+AttributeEnd
+WorldEnd
+FrameEnd
+FrameBegin 29
+Display "anim29.tif" "file" "rgba" "string compression" "deflate"
+
+WorldBegin
+# Default-Surface
+Surface "matte"
+
+# Object "Kugel01"
+AttributeBegin
+Color 0.894118 0.721569 0.6
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  84.4328 0.0 -38.5403 1]
+Sphere 21.0122 -21.0122 21.0122 360
+AttributeEnd
+WorldEnd
+FrameEnd
+FrameBegin 30
+Display "anim30.tif" "file" "rgba" "string compression" "deflate"
+
+WorldBegin
+# Default-Surface
+Surface "matte"
+
+# Object "Kugel01"
+AttributeBegin
+Color 0.894118 0.721569 0.6
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  95.1057 0.0 -47.0228 1]
+Sphere 21.0122 -21.0122 21.0122 360
+AttributeEnd
+WorldEnd
+FrameEnd
+FrameBegin 31
+Display "anim31.tif" "file" "rgba" "string compression" "deflate"
+
+WorldBegin
+# Default-Surface
+Surface "matte"
+
+# Object "Kugel01"
+AttributeBegin
+Color 0.894118 0.721569 0.6
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  99.8027 0.0 -54.7638 1]
+Sphere 21.0122 -21.0122 21.0122 360
+AttributeEnd
+WorldEnd
+FrameEnd
+FrameBegin 32
+Display "anim32.tif" "file" "rgba" "string compression" "deflate"
+
+WorldBegin
+# Default-Surface
+Surface "matte"
+
+# Object "Kugel01"
+AttributeBegin
+Color 0.894118 0.721569 0.6
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  98.2287 0.0 -61.6411 1]
+Sphere 21.0122 -21.0122 21.0122 360
+AttributeEnd
+WorldEnd
+FrameEnd
+FrameBegin 33
+Display "anim33.tif" "file" "rgba" "string compression" "deflate"
+
+WorldBegin
+# Default-Surface
+Surface "matte"
+
+# Object "Kugel01"
+AttributeBegin
+Color 0.894118 0.721569 0.6
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  90.4827 0.0 -67.5462 1]
+Sphere 21.0122 -21.0122 21.0122 360
+AttributeEnd
+WorldEnd
+FrameEnd
+FrameBegin 34
+Display "anim34.tif" "file" "rgba" "string compression" "deflate"
+
+WorldBegin
+# Default-Surface
+Surface "matte"
+
+# Object "Kugel01"
+AttributeBegin
+Color 0.894118 0.721569 0.6
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  77.0513 0.0 -72.3862 1]
+Sphere 21.0122 -21.0122 21.0122 360
+AttributeEnd
+WorldEnd
+FrameEnd
+FrameBegin 35
+Display "anim35.tif" "file" "rgba" "string compression" "deflate"
+
+WorldBegin
+# Default-Surface
+Surface "matte"
+
+# Object "Kugel01"
+AttributeBegin
+Color 0.894118 0.721569 0.6
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  58.7785 0.0 -76.0845 1]
+Sphere 21.0122 -21.0122 21.0122 360
+AttributeEnd
+WorldEnd
+FrameEnd
+FrameBegin 36
+Display "anim36.tif" "file" "rgba" "string compression" "deflate"
+
+WorldBegin
+# Default-Surface
+Surface "matte"
+
+# Object "Kugel01"
+AttributeBegin
+Color 0.894118 0.721569 0.6
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  36.8124 0.0 -78.583 1]
+Sphere 21.0122 -21.0122 21.0122 360
+AttributeEnd
+WorldEnd
+FrameEnd
+FrameBegin 37
+Display "anim37.tif" "file" "rgba" "string compression" "deflate"
+
+WorldBegin
+# Default-Surface
+Surface "matte"
+
+# Object "Kugel01"
+AttributeBegin
+Color 0.894118 0.721569 0.6
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  12.5334 0.0 -79.8421 1]
+Sphere 21.0122 -21.0122 21.0122 360
+AttributeEnd
+WorldEnd
+FrameEnd
+FrameBegin 38
+Display "anim38.tif" "file" "rgba" "string compression" "deflate"
+
+WorldBegin
+# Default-Surface
+Surface "matte"
+
+# Object "Kugel01"
+AttributeBegin
+Color 0.894118 0.721569 0.6
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  -12.5333 0.0 -79.8421 1]
+Sphere 21.0122 -21.0122 21.0122 360
+AttributeEnd
+WorldEnd
+FrameEnd
+FrameBegin 39
+Display "anim39.tif" "file" "rgba" "string compression" "deflate"
+
+WorldBegin
+# Default-Surface
+Surface "matte"
+
+# Object "Kugel01"
+AttributeBegin
+Color 0.894118 0.721569 0.6
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  -36.8124 0.0 -78.583 1]
+Sphere 21.0122 -21.0122 21.0122 360
+AttributeEnd
+WorldEnd
+FrameEnd
+FrameBegin 40
+Display "anim40.tif" "file" "rgba" "string compression" "deflate"
+
+WorldBegin
+# Default-Surface
+Surface "matte"
+
+# Object "Kugel01"
+AttributeBegin
+Color 0.894118 0.721569 0.6
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  -58.7785 0.0 -76.0845 1]
+Sphere 21.0122 -21.0122 21.0122 360
+AttributeEnd
+WorldEnd
+FrameEnd
+FrameBegin 41
+Display "anim41.tif" "file" "rgba" "string compression" "deflate"
+
+WorldBegin
+# Default-Surface
+Surface "matte"
+
+# Object "Kugel01"
+AttributeBegin
+Color 0.894118 0.721569 0.6
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  -77.0513 0.0 -72.3862 1]
+Sphere 21.0122 -21.0122 21.0122 360
+AttributeEnd
+WorldEnd
+FrameEnd
+FrameBegin 42
+Display "anim42.tif" "file" "rgba" "string compression" "deflate"
+
+WorldBegin
+# Default-Surface
+Surface "matte"
+
+# Object "Kugel01"
+AttributeBegin
+Color 0.894118 0.721569 0.6
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  -90.4827 0.0 -67.5462 1]
+Sphere 21.0122 -21.0122 21.0122 360
+AttributeEnd
+WorldEnd
+FrameEnd
+FrameBegin 43
+Display "anim43.tif" "file" "rgba" "string compression" "deflate"
+
+WorldBegin
+# Default-Surface
+Surface "matte"
+
+# Object "Kugel01"
+AttributeBegin
+Color 0.894118 0.721569 0.6
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  -98.2287 0.0 -61.6411 1]
+Sphere 21.0122 -21.0122 21.0122 360
+AttributeEnd
+WorldEnd
+FrameEnd
+FrameBegin 44
+Display "anim44.tif" "file" "rgba" "string compression" "deflate"
+
+WorldBegin
+# Default-Surface
+Surface "matte"
+
+# Object "Kugel01"
+AttributeBegin
+Color 0.894118 0.721569 0.6
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  -99.8027 0.0 -54.7638 1]
+Sphere 21.0122 -21.0122 21.0122 360
+AttributeEnd
+WorldEnd
+FrameEnd
+FrameBegin 45
+Display "anim45.tif" "file" "rgba" "string compression" "deflate"
+
+WorldBegin
+# Default-Surface
+Surface "matte"
+
+# Object "Kugel01"
+AttributeBegin
+Color 0.894118 0.721569 0.6
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  -95.1057 0.0 -47.0228 1]
+Sphere 21.0122 -21.0122 21.0122 360
+AttributeEnd
+WorldEnd
+FrameEnd
+FrameBegin 46
+Display "anim46.tif" "file" "rgba" "string compression" "deflate"
+
+WorldBegin
+# Default-Surface
+Surface "matte"
+
+# Object "Kugel01"
+AttributeBegin
+Color 0.894118 0.721569 0.6
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  -84.4328 0.0 -38.5403 1]
+Sphere 21.0122 -21.0122 21.0122 360
+AttributeEnd
+WorldEnd
+FrameEnd
+FrameBegin 47
+Display "anim47.tif" "file" "rgba" "string compression" "deflate"
+
+WorldBegin
+# Default-Surface
+Surface "matte"
+
+# Object "Kugel01"
+AttributeBegin
+Color 0.894118 0.721569 0.6
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  -68.4547 0.0 -29.45 1]
+Sphere 21.0122 -21.0122 21.0122 360
+AttributeEnd
+WorldEnd
+FrameEnd
+FrameBegin 48
+Display "anim48.tif" "file" "rgba" "string compression" "deflate"
+
+WorldBegin
+# Default-Surface
+Surface "matte"
+
+# Object "Kugel01"
+AttributeBegin
+Color 0.894118 0.721569 0.6
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  -48.1754 0.0 -19.8952 1]
+Sphere 21.0122 -21.0122 21.0122 360
+AttributeEnd
+WorldEnd
+FrameEnd
+FrameBegin 49
+Display "anim49.tif" "file" "rgba" "string compression" "deflate"
+
+WorldBegin
+# Default-Surface
+Surface "matte"
+
+# Object "Kugel01"
+AttributeBegin
+Color 0.894118 0.721569 0.6
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  -24.8689 0.0 -10.0266 1]
+Sphere 21.0122 -21.0122 21.0122 360
+AttributeEnd
+WorldEnd
+FrameEnd
