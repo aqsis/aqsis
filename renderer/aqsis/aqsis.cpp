@@ -468,9 +468,6 @@ int main( int argc, const char** argv )
             std::auto_ptr<std::streambuf> use_syslog( new Aqsis::syslog_buf(std::cerr) );
 #endif	// AQSIS_SYSTEM_POSIX
 
-	std::cout << &std::cerr << std::endl;
-	std::cerr << Aqsis::error << "Help!" << std::endl;
-
         if ( ap.leftovers().size() == 0 )     // If no files specified, take input from stdin.
         {
             std::string name("stdin");
