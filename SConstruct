@@ -25,7 +25,7 @@ conf = Configure(env)
 Export('env opts conf')
 
 SConscript('build_support.py')
-Import('SelectBuildDir')
+Import('SelectBuildDir print_config')
 
 # Setup the distribution stuff, this should be non-platform specific, the distribution
 # archive should apply to all supported platforms.
@@ -64,11 +64,8 @@ env.Replace(SYSCONFDIR = env.Dir('$install_prefix').abspath + os.sep + 'bin')
 # Allowing it to override the settings defined above.
 SConscript(target_config_dir + os.sep + 'SConscript')
 
-	
-	
-
 # Setup common environment settings to allow includes from the various local folders
-env.AppendUnique(CPPPATH = [target_dir.abspath + '/aqsistypes', target_dir.abspath + '/renderer/render', target_dir.abspath + '/shadercompiler/shaderexecenv', target_dir.abspath + '/rib/rib2', target_dir.abspath + '/shadercompiler/shadervm', target_dir.abspath + '/rib/rib2ri', target_dir.abspath + '/argparse', target_dir.abspath + '/shadercompiler/slparse', target_dir.abspath + '/shadercompiler/codegenvm', target_dir.abspath + '/rib/api', '$zlib_include_path', '$tiff_include_path', '$jpeg_include_path', '$boost_include_path'])
+env.AppendUnique(CPPPATH = [target_dir.abspath, target_dir.abspath + '/aqsistypes', target_dir.abspath + '/renderer/render', target_dir.abspath + '/shadercompiler/shaderexecenv', target_dir.abspath + '/rib/rib2', target_dir.abspath + '/shadercompiler/shadervm', target_dir.abspath + '/rib/rib2ri', target_dir.abspath + '/argparse', target_dir.abspath + '/shadercompiler/slparse', target_dir.abspath + '/shadercompiler/codegenvm', target_dir.abspath + '/rib/api', '$zlib_include_path', '$tiff_include_path', '$jpeg_include_path', '$boost_include_path'])
 env.AppendUnique(CPPDEFINES=[('DEFAULT_PLUGIN_PATH', '\\"' + env.Dir('${BINDIR}').abspath + '\\"')])
 env.AppendUnique(CPPDEFINES=['SCONS_BUILD'])
 
@@ -114,17 +111,18 @@ SConscript('texturing/teqser/SConscript', build_dir=target_dir.abspath + '/textu
 SConscript('shaders/SConscript', build_dir=target_dir.abspath + '/shaders')
 SConscript('thirdparty/tinyxml/SConscript', build_dir=target_dir.abspath + '/thirdparty/tinyxml')
 
+#
 # Generate and install the 'aqsisrc' configuration file from the template '.aqsisrc.in'
-def build_function(target, source, env):
+#
+def aqsis_rc_build(target, source, env):
 	# Code to build "target" from "source"
-	for x in target:
-		print str(x)
 	displaylib = os.path.basename(display[0].path)
 	defines = {
 		"displaylib": displaylib,
 		"shaderpath": env.Dir('$SHADERDIR').abspath,
 		"displaypath": env.Dir('$BINDIR').abspath,
 	    }
+	print_config("Building aqsisrc with the following settings:", defines.items())
 
 	for a_target, a_source in zip(target, source):
 		aqsisrc_out = file(str(a_target), "w")
@@ -133,9 +131,33 @@ def build_function(target, source, env):
 		aqsisrc_out.close()
 		aqsisrc_in.close()
 
-aqsisrc = env.Command('aqsisrc', 'aqsisrc.in', build_function)
+aqsisrc = env.Command('aqsisrc', 'aqsisrc.in', aqsis_rc_build)
 env.Install('$SYSCONFDIR', aqsisrc)
 env.Depends(aqsisrc, display)
+
+#
+# Generate and install the version.h file from the template 'version.h.in'
+#
+import version
+def version_h_build(target, source, env):
+	# Code to build "target" from "source"
+	defines = {
+		"major": version.major,
+		"minor": version.minor,
+		"build": version.build,
+	    }
+
+	print_config("Building version.h with the following settings:", defines.items())
+
+	for a_target, a_source in zip(target, source):
+		aqsisrc_out = file(str(a_target), "w")
+		aqsisrc_in = file(str(a_source), "r")
+		aqsisrc_out.write(aqsisrc_in.read() % defines)
+		aqsisrc_out.close()
+		aqsisrc_in.close()
+
+version_h = env.Command('version.h', 'version.h.in', version_h_build)
+env.Install(target_dir.abspath, version_h)
 
 env.Alias('release', ['$BINDIR','$LIBDIR', '$SHADERDIR','$SYSCONFDIR'])
 Default('release')

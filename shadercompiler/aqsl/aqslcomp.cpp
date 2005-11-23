@@ -44,9 +44,7 @@
 #include	"vmoutput.h"
 #include	"argparse.h"
 
-#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX) || defined(SCONS_BUILD)
 #include	"version.h"
-#endif
 
 using namespace Aqsis;
 

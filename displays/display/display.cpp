@@ -47,16 +47,10 @@ using namespace Aqsis;
 #include "ndspy.h"
 
 
-#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX) || defined(SCONS_BUILD)
 #define	ZFILE_HEADER		"Aqsis ZFile" VERSION_STR
-#else // AQSIS_SYSTEM_WIN32
-#define ZFILE_HEADER "Aqsis ZFile" VERSION
-#endif // !AQSIS_SYSTEM_WIN32
 #define	SHADOWMAP_HEADER	"Shadow"
 
-#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX) || defined(SCONS_BUILD)
 #include	<version.h>
-#endif
 
 #include "display.h"
 

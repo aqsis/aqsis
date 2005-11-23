@@ -34,10 +34,7 @@
 #include	<map>
 
 
-#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
 #include	"version.h"
-#endif // AQSIS_SYSTEM_WIN32
-
 #include	"vmdatagather.h"
 
 #include	"parsenode.h"

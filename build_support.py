@@ -95,4 +95,13 @@ def Glob(match):
 
     return nodes
 
-Export('Glob SelectBuildDir')
+def print_config(msg, two_dee_iterable):
+    # this function is handy and can be used for other configuration-printing tasks
+    print
+    print msg
+    print
+    for key, val in two_dee_iterable:
+        print "    %-20s %s" % (key, val)
+    print
+
+Export('Glob SelectBuildDir print_config')

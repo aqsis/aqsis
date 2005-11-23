@@ -34,9 +34,7 @@
 #include	<map>
 
 
-#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX) || defined(SCONS_BUILD)
 #include	"version.h"
-#endif // AQSIS_SYSTEM_WIN32
 #include	"vmoutput.h"
 
 #include	"parsenode.h"
