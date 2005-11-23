@@ -112,7 +112,7 @@ SConscript('rib/rib2stream/SConscript', build_dir=target_dir.abspath + '/rib/rib
 SConscript('texturing/teqser/SConscript', build_dir=target_dir.abspath + '/texturing/teqser')
 #SConscript('texturing/plugins/SConscript')
 SConscript('shaders/SConscript', build_dir=target_dir.abspath + '/shaders')
-SConscript('thirdparty/tinyxml/SConscript', build_dir=target_dir.abspath + '/thirdpart/tinyxml')
+SConscript('thirdparty/tinyxml/SConscript', build_dir=target_dir.abspath + '/thirdparty/tinyxml')
 
 # Generate and install the 'aqsisrc' configuration file from the template '.aqsisrc.in'
 def build_function(target, source, env):
@@ -142,18 +142,14 @@ Default('release')
 
 # Define any files that need to be included in a source distribution.
 main_distfiles = Split("""
-        SConstruct
+	SConstruct
 	AUTHORS
 	build_check.py
 	build_support.py
-	ChangeLog
 	COPYING
 	Doxyfile
 	INSTALL
-	NEWS
 	README
-	SConstruct
-        aqsis.spec
 	aqsisrc.in""")
 
 env.Distribute('', main_distfiles)
