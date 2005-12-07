@@ -51,7 +51,7 @@ if 'win32' == env['PLATFORM']:
 	aqsistypes_sources = aqsistypes_sources + ['win32/file_system.cpp']
 elif 'darwin' == env['PLATFORM']:
 	aqsistypes_sources = aqsistypes_sources + ['posix/file_system.cpp']
-elif 'posix' == env['PLATFORM']:
+else:
 	aqsistypes_sources = aqsistypes_sources + ['posix/file_system.cpp']
 
 # Set any platform specific options for this target
