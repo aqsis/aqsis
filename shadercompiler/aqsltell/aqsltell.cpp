@@ -65,7 +65,7 @@ int main( int argc, const char** argv )
 #ifdef	AQSIS_SYSTEM_WIN32
 	char acPath[256];
 	char rootPath[256];
-	if( GetModuleFileName( NULL, acPath, 256 ) != 0) 
+	if( GetModuleFileName( NULL, acPath, 256 ) != 0)
 	{
 		// guaranteed file name of at least one character after path
 		*( strrchr( acPath, '\\' ) + 1 ) = '\0';
@@ -77,170 +77,171 @@ int main( int argc, const char** argv )
 	g_shader_path.append( "shaders" );
 #elif defined(AQSIS_SYSTEM_MACOSX)
 #else
+
 	g_shader_path = DEFAULT_SHADER_PATH;
 #endif
 
-    Aqsis::QGetRenderContextI();
-    ArgParse ap;
-    ap.usageHeader( ArgParse::apstring( "Usage: " ) + argv[ 0 ] + " <shadername>" );
-    ap.argFlag( "help", "\aprint this help and exit", &g_cl_help );
-    ap.argFlag( "version", "\aprint version information and exit", &g_cl_version );
-    ap.argString( "shaders", "=string\aOverride the default shader searchpath(s) [" + g_shader_path + "]", &g_cl_shader_path );
+	Aqsis::QGetRenderContextI();
+	ArgParse ap;
+	ap.usageHeader( ArgParse::apstring( "Usage: " ) + argv[ 0 ] + " <shadername>" );
+	ap.argFlag( "help", "\aprint this help and exit", &g_cl_help );
+	ap.argFlag( "version", "\aprint version information and exit", &g_cl_version );
+	ap.argString( "shaders", "=string\aOverride the default shader searchpath(s) [" + g_shader_path + "]", &g_cl_shader_path );
 
-    if ( argc > 1 && !ap.parse( argc - 1, argv + 1 ) )
-    {
-        std::cerr << ap.errmsg() << std::endl << ap.usagemsg();
-        exit( 1 );
-    }
+	if ( argc > 1 && !ap.parse( argc - 1, argv + 1 ) )
+	{
+		std::cerr << ap.errmsg() << std::endl << ap.usagemsg();
+		exit( 1 );
+	}
 
-    if ( g_cl_help )
-    {
-        std::cout << ap.usagemsg();
-        exit( 0 );
-    }
+	if ( g_cl_help )
+	{
+		std::cout << ap.usagemsg();
+		exit( 0 );
+	}
 
-    if ( g_cl_version )
-    {
-    	std::cout << "aqsltell version " << VERSION_STR << std::endl;
-        exit( 0 );
-    }
+	if ( g_cl_version )
+	{
+		std::cout << "aqsltell version " << VERSION_STR << std::endl;
+		exit( 0 );
+	}
 
-    // Apply environment-variable overrides to default paths ...
-    if(getenv("AQSIS_SHADER_PATH"))
+	// Apply environment-variable overrides to default paths ...
+	if(getenv("AQSIS_SHADER_PATH"))
 		g_shader_path = getenv("AQSIS_SHADER_PATH");
 
-    // Apply command-line overrides to default paths ...
-    if(!g_cl_shader_path.empty())
-        g_shader_path = g_cl_shader_path;
+	// Apply command-line overrides to default paths ...
+	if(!g_cl_shader_path.empty())
+		g_shader_path = g_cl_shader_path;
 
-    // Any leftovers are presumed to be shader names.
-    if ( ap.leftovers().size() == 0 )     // If no files specified, take input from stdin.
-    {
-        std::cerr << ap.errmsg() << std::endl << ap.usagemsg();
-        exit( 1 );
-    }
-    else
-    {
-        for ( ArgParse::apstringvec::const_iterator e = ap.leftovers().begin(); e != ap.leftovers().end(); e++ )
-        {
-            SLX_SetPath( const_cast<char*>( g_shader_path.c_str() ) );
-            SLX_SetDSOPath( const_cast<char*>( g_shader_path.c_str() ) );
+	// Any leftovers are presumed to be shader names.
+	if ( ap.leftovers().size() == 0 )     // If no files specified, take input from stdin.
+	{
+		std::cerr << ap.errmsg() << std::endl << ap.usagemsg();
+		exit( 1 );
+	}
+	else
+	{
+		for ( ArgParse::apstringvec::const_iterator e = ap.leftovers().begin(); e != ap.leftovers().end(); e++ )
+		{
+			SLX_SetPath( const_cast<char*>( g_shader_path.c_str() ) );
+			SLX_SetDSOPath( const_cast<char*>( g_shader_path.c_str() ) );
 
-            if ( SLX_SetShader( ( char* ) e->c_str() ) == 0 )
-            {
-                // SLX_SetShader successful
-                int	nArgs;
-                int i;
-                SLX_VISSYMDEF * symPtr;
+			if ( SLX_SetShader( ( char* ) e->c_str() ) == 0 )
+			{
+				// SLX_SetShader successful
+				int	nArgs;
+				int i;
+				SLX_VISSYMDEF * symPtr;
 
-                char* currpath = SLX_GetPath();
-                std::cout << SLX_TypetoStr( SLX_GetType() ) << " \"" << currpath;
-                if ( strlen( currpath ) > 0 &&
-                        ( currpath[ strlen( currpath ) - 1 ] != '/' ) &&
-                        ( currpath[ strlen( currpath ) - 1 ] != '\\' ) )
-                    std::cout << "/";
-                std::cout << SLX_GetName() << "\"" << std::endl;
-                nArgs = SLX_GetNArgs();
+				char* currpath = SLX_GetPath();
+				std::cout << SLX_TypetoStr( SLX_GetType() ) << " \"" << currpath;
+				if ( strlen( currpath ) > 0 &&
+				        ( currpath[ strlen( currpath ) - 1 ] != '/' ) &&
+				        ( currpath[ strlen( currpath ) - 1 ] != '\\' ) )
+					std::cout << "/";
+				std::cout << SLX_GetName() << "\"" << std::endl;
+				nArgs = SLX_GetNArgs();
 
-                for ( i = 0; i < nArgs; i++ )
-                {
-                    symPtr = SLX_GetArgById( i );
-                    if ( symPtr != NULL )
-                    {
-                        TqInt arrayLen = 1;
-                        if ( symPtr->svd_arraylen != 0 )
-                            arrayLen = symPtr->svd_arraylen;
+				for ( i = 0; i < nArgs; i++ )
+				{
+					symPtr = SLX_GetArgById( i );
+					if ( symPtr != NULL )
+					{
+						TqInt arrayLen = 1;
+						if ( symPtr->svd_arraylen != 0 )
+							arrayLen = symPtr->svd_arraylen;
 
-                        std::cout << "    \"" << symPtr->svd_name << "\" \"parameter " <<
-                        SLX_DetailtoStr( symPtr->svd_detail ) << " " <<
-                        SLX_TypetoStr( symPtr->svd_type );
+						std::cout << "    \"" << symPtr->svd_name << "\" \"parameter " <<
+						SLX_DetailtoStr( symPtr->svd_detail ) << " " <<
+						SLX_TypetoStr( symPtr->svd_type );
 
-                        if ( symPtr->svd_arraylen != 0 )
-                            std::cout << "[" << arrayLen << "]";
+						if ( symPtr->svd_arraylen != 0 )
+							std::cout << "[" << arrayLen << "]";
 
-                        std::cout << "\"" << std::endl;
+						std::cout << "\"" << std::endl;
 
-                        TqInt arrayIndex;
-                        for ( arrayIndex = 0; arrayIndex < arrayLen; arrayIndex++ )
-                        {
-                            std::cout << "\t\tDefault value: ";
+						TqInt arrayIndex;
+						for ( arrayIndex = 0; arrayIndex < arrayLen; arrayIndex++ )
+						{
+							std::cout << "\t\tDefault value: ";
 
-                            if ( symPtr->svd_spacename != NULL )
-                            {
-                                if ( ( symPtr->svd_type == SLX_TYPE_POINT ) ||
-                                        ( symPtr->svd_type == SLX_TYPE_NORMAL ) ||
-                                        ( symPtr->svd_type == SLX_TYPE_VECTOR ) ||
-                                        ( symPtr->svd_type == SLX_TYPE_MATRIX ) ||
-                                        ( symPtr->svd_type == SLX_TYPE_COLOR ) )
-                                    std::cout << "\"" << symPtr->svd_spacename << "\" ";
-                            }
+							if ( symPtr->svd_spacename != NULL )
+							{
+								if ( ( symPtr->svd_type == SLX_TYPE_POINT ) ||
+								        ( symPtr->svd_type == SLX_TYPE_NORMAL ) ||
+								        ( symPtr->svd_type == SLX_TYPE_VECTOR ) ||
+								        ( symPtr->svd_type == SLX_TYPE_MATRIX ) ||
+								        ( symPtr->svd_type == SLX_TYPE_COLOR ) )
+									std::cout << "\"" << symPtr->svd_spacename << "\" ";
+							}
 
-                            if ( symPtr->svd_default.stringval != NULL )
-                            {
-                                switch ( symPtr->svd_type )
-                                {
-                                case SLX_TYPE_UNKNOWN:
-                                    std::cout << "unknown" << std::endl;
-                                    break;
-                                case SLX_TYPE_POINT:
-                                case SLX_TYPE_NORMAL:
-                                case SLX_TYPE_VECTOR:
-                                    std::cout << "[" << symPtr->svd_default.pointval[ arrayIndex ].xval << " " <<
-                                    symPtr->svd_default.pointval[ arrayIndex ].yval << " " <<
-                                    symPtr->svd_default.pointval[ arrayIndex ].zval <<
-                                    "]" << std::endl;
-                                    break;
-                                case SLX_TYPE_COLOR:
-                                    std::cout << "[" << symPtr->svd_default.pointval[ arrayIndex ].xval << " " <<
-                                    symPtr->svd_default.pointval[ arrayIndex ].yval << " " <<
-                                    symPtr->svd_default.pointval[ arrayIndex ].zval <<
-                                    "]" << std::endl;
-                                    break;
-                                case SLX_TYPE_SCALAR:
-                                    std::cout << symPtr->svd_default.scalarval[ arrayIndex ] << std::endl;
-                                    break;
-                                case SLX_TYPE_STRING:
-                                    std::cout << "\"" << symPtr->svd_default.stringval[ arrayIndex ] << "\"" << std::endl;
-                                    break;
-                                case SLX_TYPE_MATRIX:
-                                    std::cout << "[" <<
-                                    symPtr->svd_default.matrixval[ arrayIndex ].val[0][0] << " " <<
-                                    symPtr->svd_default.matrixval[ arrayIndex ].val[0][1] << " " <<
-                                    symPtr->svd_default.matrixval[ arrayIndex ].val[0][2] << " " <<
-                                    symPtr->svd_default.matrixval[ arrayIndex ].val[0][2] << std::endl << "\t\t\t" <<
-                                    symPtr->svd_default.matrixval[ arrayIndex ].val[1][0] << " " <<
-                                    symPtr->svd_default.matrixval[ arrayIndex ].val[1][1] << " " <<
-                                    symPtr->svd_default.matrixval[ arrayIndex ].val[1][2] << " " <<
-                                    symPtr->svd_default.matrixval[ arrayIndex ].val[1][2] << std::endl << "\t\t\t" <<
-                                    symPtr->svd_default.matrixval[ arrayIndex ].val[2][0] << " " <<
-                                    symPtr->svd_default.matrixval[ arrayIndex ].val[2][1] << " " <<
-                                    symPtr->svd_default.matrixval[ arrayIndex ].val[2][2] << " " <<
-                                    symPtr->svd_default.matrixval[ arrayIndex ].val[2][3] << std::endl << "\t\t\t" <<
-                                    symPtr->svd_default.matrixval[ arrayIndex ].val[3][0] << " " <<
-                                    symPtr->svd_default.matrixval[ arrayIndex ].val[3][1] << " " <<
-                                    symPtr->svd_default.matrixval[ arrayIndex ].val[3][2] << " " <<
-                                    symPtr->svd_default.matrixval[ arrayIndex ].val[3][3] <<
-                                    "]" << std::endl;
-                                    break;
-                                default:
-                                    std::cout << "unknown" << std::endl;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        printf( "ERROR - null pointer to value" );
-                    }
-                    //std::cout << std::endl;
-                }
+							if ( symPtr->svd_default.stringval != NULL )
+							{
+								switch ( symPtr->svd_type )
+								{
+										case SLX_TYPE_UNKNOWN:
+										std::cout << "unknown" << std::endl;
+										break;
+										case SLX_TYPE_POINT:
+										case SLX_TYPE_NORMAL:
+										case SLX_TYPE_VECTOR:
+										std::cout << "[" << symPtr->svd_default.pointval[ arrayIndex ].xval << " " <<
+										symPtr->svd_default.pointval[ arrayIndex ].yval << " " <<
+										symPtr->svd_default.pointval[ arrayIndex ].zval <<
+										"]" << std::endl;
+										break;
+										case SLX_TYPE_COLOR:
+										std::cout << "[" << symPtr->svd_default.pointval[ arrayIndex ].xval << " " <<
+										symPtr->svd_default.pointval[ arrayIndex ].yval << " " <<
+										symPtr->svd_default.pointval[ arrayIndex ].zval <<
+										"]" << std::endl;
+										break;
+										case SLX_TYPE_SCALAR:
+										std::cout << symPtr->svd_default.scalarval[ arrayIndex ] << std::endl;
+										break;
+										case SLX_TYPE_STRING:
+										std::cout << "\"" << symPtr->svd_default.stringval[ arrayIndex ] << "\"" << std::endl;
+										break;
+										case SLX_TYPE_MATRIX:
+										std::cout << "[" <<
+										symPtr->svd_default.matrixval[ arrayIndex ].val[0][0] << " " <<
+										symPtr->svd_default.matrixval[ arrayIndex ].val[0][1] << " " <<
+										symPtr->svd_default.matrixval[ arrayIndex ].val[0][2] << " " <<
+										symPtr->svd_default.matrixval[ arrayIndex ].val[0][2] << std::endl << "\t\t\t" <<
+										symPtr->svd_default.matrixval[ arrayIndex ].val[1][0] << " " <<
+										symPtr->svd_default.matrixval[ arrayIndex ].val[1][1] << " " <<
+										symPtr->svd_default.matrixval[ arrayIndex ].val[1][2] << " " <<
+										symPtr->svd_default.matrixval[ arrayIndex ].val[1][2] << std::endl << "\t\t\t" <<
+										symPtr->svd_default.matrixval[ arrayIndex ].val[2][0] << " " <<
+										symPtr->svd_default.matrixval[ arrayIndex ].val[2][1] << " " <<
+										symPtr->svd_default.matrixval[ arrayIndex ].val[2][2] << " " <<
+										symPtr->svd_default.matrixval[ arrayIndex ].val[2][3] << std::endl << "\t\t\t" <<
+										symPtr->svd_default.matrixval[ arrayIndex ].val[3][0] << " " <<
+										symPtr->svd_default.matrixval[ arrayIndex ].val[3][1] << " " <<
+										symPtr->svd_default.matrixval[ arrayIndex ].val[3][2] << " " <<
+										symPtr->svd_default.matrixval[ arrayIndex ].val[3][3] <<
+										"]" << std::endl;
+										break;
+										default:
+										std::cout << "unknown" << std::endl;
+										break;
+								}
+							}
+						}
+					}
+					else
+					{
+						printf( "ERROR - null pointer to value" );
+					}
+					//std::cout << std::endl;
+				}
 
-                SLX_EndShader();
-            }
-        }
-    }
+				SLX_EndShader();
+			}
+		}
+	}
 
-    return ( 0 );
+	return ( 0 );
 }
 

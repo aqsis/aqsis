@@ -40,8 +40,9 @@ START_NAMESPACE( Aqsis )
 class CqObjectInstance
 {
 	public:
-		CqObjectInstance()	{}
-		~CqObjectInstance()	
+		CqObjectInstance()
+		{}
+		~CqObjectInstance()
 		{
 			std::vector<RiCacheBase*>::iterator i;
 			for(i=m_CachedCommands.begin(); i!=m_CachedCommands.end(); i++)

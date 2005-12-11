@@ -31,8 +31,8 @@
 #define _qExport __declspec(dllexport)
 #define _qImport __declspec(dllimport)
 #else	// !WIN32
-#define _qExport 
-#define _qImport 
+#define _qExport
+#define _qImport
 #endif // WIN32
 
 #include <stdio.h>
@@ -101,7 +101,8 @@ typedef struct
 {
 	char *name;
 	unsigned type;
-} PtDspyDevFormat;
+}
+PtDspyDevFormat;
 
 
 typedef struct
@@ -109,31 +110,33 @@ typedef struct
 	PtDspyUnsigned32 width;
 	PtDspyUnsigned32 height;
 	PtDspyFloat32 aspectRatio;
-} PtDspySizeInfo;
+}
+PtDspySizeInfo;
 
 
 typedef struct
 {
 	PtDspyUnsigned8 overwrite;
 	PtDspyUnsigned8 interactive;
-} PtDspyOverwriteInfo;
+}
+PtDspyOverwriteInfo;
 
 
 typedef enum
 {
-	PkSizeQuery,
-	PkOverwriteQuery,
+    PkSizeQuery,
+    PkOverwriteQuery,
 } PtDspyQueryType;
 
 
 typedef enum
 {
-	PkDspyErrorNone = 0,
-	PkDspyErrorNoMemory,
-	PkDspyErrorUnsupported,
-	PkDspyErrorBadParams,
-	PkDspyErrorNoResource,
-	PkDspyErrorUndefined
+    PkDspyErrorNone = 0,
+    PkDspyErrorNoMemory,
+    PkDspyErrorUnsupported,
+    PkDspyErrorBadParams,
+    PkDspyErrorNoResource,
+    PkDspyErrorUndefined
 } PtDspyError;
 
 #define PkDspyFlagsWantsScanLineOrder 1
@@ -142,7 +145,8 @@ typedef enum
 typedef struct
 {
 	int flags;
-} PtFlagStuff;
+}
+PtFlagStuff;
 
 
 typedef void *PtDspyImageHandle;
@@ -150,12 +154,14 @@ typedef void *PtDspyImageHandle;
 typedef void * PtDspyChannel;
 typedef void * PtDspyOutput;
 
-typedef struct uparam {
+typedef struct uparam
+{
 	RtToken		name;
 	char		vtype, vcount;
 	RtPointer	value;
 	int		nbytes;
-} UserParameter;
+}
+UserParameter;
 
 typedef PtDspyError (*DspyImageOpenMethod)(PtDspyImageHandle*,const char*,const char*,int,int,int,const UserParameter*,int,PtDspyDevFormat*,PtFlagStuff*);
 typedef PtDspyError (*DspyImageQueryMethod)(PtDspyImageHandle,PtDspyQueryType,size_t,void*);
@@ -167,41 +173,42 @@ typedef PtDspyError (*DspyImageDelayCloseMethod)(PtDspyImageHandle);
 #ifndef	DSPY_INTERNAL
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
-    
-void DspyPrintFormat(FILE *fp,PtDspyDevFormat *format,int formatCount);
 
-PtDspyDevFormat *DspyCopyDevFormat(PtDspyDevFormat *f,int fc);
+	void DspyPrintFormat(FILE *fp,PtDspyDevFormat *format,int formatCount);
+
+	PtDspyDevFormat *DspyCopyDevFormat(PtDspyDevFormat *f,int fc);
 
 
-_qExport PtDspyError DspyImageOpen(PtDspyImageHandle * image,
-								   const char *drivername,
-								   const char *filename,
-								   int width,
-								   int height,
-								   int paramCount,
-								   const UserParameter *parameters,
-								   int iFormatCount,
-								   PtDspyDevFormat *format,
-								   PtFlagStuff *flagstuff);
+	_qExport PtDspyError DspyImageOpen(PtDspyImageHandle * image,
+	                                   const char *drivername,
+	                                   const char *filename,
+	                                   int width,
+	                                   int height,
+	                                   int paramCount,
+	                                   const UserParameter *parameters,
+	                                   int iFormatCount,
+	                                   PtDspyDevFormat *format,
+	                                   PtFlagStuff *flagstuff);
 
-_qExport PtDspyError DspyImageData(PtDspyImageHandle image,
-								   int xmin,
-								   int xmaxplus1,
-								   int ymin,
-								   int ymaxplus1,
-								   int entrysize,
-								   const unsigned char *data);
- 
-_qExport PtDspyError DspyImageClose(PtDspyImageHandle);
+	_qExport PtDspyError DspyImageData(PtDspyImageHandle image,
+	                                   int xmin,
+	                                   int xmaxplus1,
+	                                   int ymin,
+	                                   int ymaxplus1,
+	                                   int entrysize,
+	                                   const unsigned char *data);
 
-_qExport PtDspyError DspyImageDelayClose(PtDspyImageHandle);
+	_qExport PtDspyError DspyImageClose(PtDspyImageHandle);
 
-_qExport PtDspyError DspyImageQuery(PtDspyImageHandle image,
-									PtDspyQueryType type,
-									int size,
-									void *data);
+	_qExport PtDspyError DspyImageDelayClose(PtDspyImageHandle);
+
+	_qExport PtDspyError DspyImageQuery(PtDspyImageHandle image,
+	                                    PtDspyQueryType type,
+	                                    int size,
+	                                    void *data);
 
 #ifdef __cplusplus
 }

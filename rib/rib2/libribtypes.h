@@ -29,7 +29,7 @@
 using namespace librib;
 
 //#include <string>
-#include <vector> 
+#include <vector>
 //#include <cassert>
 
 namespace librib
@@ -74,208 +74,208 @@ typedef enum
 /// Abstract interface for Renderman Interface arrays
 class Array
 {
-public:
-    virtual ~Array()
-    {}
+	public:
+		virtual ~Array()
+		{}
 
-    virtual ParameterType Type() = 0;
-    virtual RendermanInterface::RtInt Count() = 0;
-    virtual RendermanInterface::RtPointer Values() = 0;
+		virtual ParameterType Type() = 0;
+		virtual RendermanInterface::RtInt Count() = 0;
+		virtual RendermanInterface::RtPointer Values() = 0;
 };
 
 /// Encapsulates a Renderman Interface array of integers
 class IntegerArray :
-            public Array,
-            public std::vector<RendermanInterface::RtInt>
+			public Array,
+			public std::vector<RendermanInterface::RtInt>
 {
-public:
-    IntegerArray()
-    {}
+	public:
+		IntegerArray()
+		{}
 
-    IntegerArray( const RendermanInterface::RtInt Value )
-    {
-        push_back( Value );
-    }
+		IntegerArray( const RendermanInterface::RtInt Value )
+		{
+			push_back( Value );
+		}
 
-    ParameterType Type()
-    {
-        return Type_Integer;
-    }
+		ParameterType Type()
+		{
+			return Type_Integer;
+		}
 
-    RendermanInterface::RtInt Count()
-    {
-        return size();
-    }
+		RendermanInterface::RtInt Count()
+		{
+			return size();
+		}
 
-    RendermanInterface::RtPointer Values()
-    {
-        return reinterpret_cast<RendermanInterface::RtPointer>( size() ? &front() : 0 );
-    }
+		RendermanInterface::RtPointer Values()
+		{
+			return reinterpret_cast<RendermanInterface::RtPointer>( size() ? &front() : 0 );
+		}
 };
 
 /// Encapsulates a Renderman Interface array of floats
 class FloatArray :
-            public Array,
-            public std::vector<RendermanInterface::RtFloat>
+			public Array,
+			public std::vector<RendermanInterface::RtFloat>
 {
-public:
-    FloatArray()
-    {}
+	public:
+		FloatArray()
+		{}
 
-    FloatArray( const RendermanInterface::RtFloat Value )
-    {
-        push_back( Value );
-    }
+		FloatArray( const RendermanInterface::RtFloat Value )
+		{
+			push_back( Value );
+		}
 
-    FloatArray( IntegerArray* const Values )
-    {
-        for ( unsigned int i = 0; i < Values->size(); i++ )
-            push_back( static_cast<RendermanInterface::RtFloat>( ( *Values ) [ i ] ) );
-    }
+		FloatArray( IntegerArray* const Values )
+		{
+			for ( unsigned int i = 0; i < Values->size(); i++ )
+				push_back( static_cast<RendermanInterface::RtFloat>( ( *Values ) [ i ] ) );
+		}
 
-    ParameterType Type()
-    {
-        return Type_Float;
-    }
+		ParameterType Type()
+		{
+			return Type_Float;
+		}
 
-    RendermanInterface::RtInt Count()
-    {
-        return size();
-    }
+		RendermanInterface::RtInt Count()
+		{
+			return size();
+		}
 
-    RendermanInterface::RtPointer Values()
-    {
-        return reinterpret_cast<RendermanInterface::RtPointer>( size() ? &front() : 0 );
-    }
+		RendermanInterface::RtPointer Values()
+		{
+			return reinterpret_cast<RendermanInterface::RtPointer>( size() ? &front() : 0 );
+		}
 };
 
 /// Encapsulates a Renderman Interface array of strings
 class StringArray :
-            public Array,
-            public std::vector<RendermanInterface::RtString>
+			public Array,
+			public std::vector<RendermanInterface::RtString>
 {
-public:
-    StringArray()
-    {}
+	public:
+		StringArray()
+		{}
 
-    StringArray( const RendermanInterface::RtString Value )
-    {
-        push_back( Value );
-    }
+		StringArray( const RendermanInterface::RtString Value )
+		{
+			push_back( Value );
+		}
 
-    ~StringArray()
-    {
-        for ( iterator string = begin(); string != end(); string++ )
-            delete[] ( *string );
-    }
+		~StringArray()
+		{
+			for ( iterator string = begin(); string != end(); string++ )
+				delete[] ( *string );
+		}
 
-    ParameterType Type()
-    {
-        return Type_String;
-    }
+		ParameterType Type()
+		{
+			return Type_String;
+		}
 
-    RendermanInterface::RtInt Count()
-    {
-        return size();
-    }
+		RendermanInterface::RtInt Count()
+		{
+			return size();
+		}
 
-    RendermanInterface::RtPointer Values()
-    {
-        return reinterpret_cast<RendermanInterface::RtPointer>( size() ? &front() : 0 );
-    }
+		RendermanInterface::RtPointer Values()
+		{
+			return reinterpret_cast<RendermanInterface::RtPointer>( size() ? &front() : 0 );
+		}
 };
 
 /// Encapsulates a Renderman Interface token-value pair
 class TokenValuePair
 {
-public:
-    TokenValuePair() :
-            m_Token( 0 ),
-            m_Array( 0 )
-    {}
+	public:
+		TokenValuePair() :
+				m_Token( 0 ),
+				m_Array( 0 )
+		{}
 
-    TokenValuePair( RendermanInterface::RtToken Token, Array* const Values ) :
-            m_Token( Token ),
-            m_Array( Values )
-    {}
+		TokenValuePair( RendermanInterface::RtToken Token, Array* const Values ) :
+				m_Token( Token ),
+				m_Array( Values )
+		{}
 
-    ~TokenValuePair()
-    {
-        delete[] m_Token;
-        delete m_Array;
-    }
+		~TokenValuePair()
+		{
+			delete[] m_Token;
+			delete m_Array;
+		}
 
-    RendermanInterface::RtInt Count()
-    {
-        return m_Array->Count();
-    }
-    RendermanInterface::RtToken Token()
-    {
-        return m_Token;
-    }
-    RendermanInterface::RtPointer Values()
-    {
-        return m_Array->Values();
-    }
+		RendermanInterface::RtInt Count()
+		{
+			return m_Array->Count();
+		}
+		RendermanInterface::RtToken Token()
+		{
+			return m_Token;
+		}
+		RendermanInterface::RtPointer Values()
+		{
+			return m_Array->Values();
+		}
 
-private:
-    RendermanInterface::RtToken m_Token;
-    Array* const m_Array;
+	private:
+		RendermanInterface::RtToken m_Token;
+		Array* const m_Array;
 };
 
 /// Encapsulates a set of Renderman Interface token-value pairs
 class TokenValuePairs
 {
-public:
-    TokenValuePairs()
-    {}
+	public:
+		TokenValuePairs()
+		{}
 
-    TokenValuePairs( TokenValuePair* const Pair )
-    {
-        AddPair( Pair );
-    }
+		TokenValuePairs( TokenValuePair* const Pair )
+		{
+			AddPair( Pair );
+		}
 
-    ~TokenValuePairs()
-    {
-        for ( unsigned int i = 0; i < m_TokenValuePairs.size(); i++ )
-            delete m_TokenValuePairs[ i ];
-    }
+		~TokenValuePairs()
+		{
+			for ( unsigned int i = 0; i < m_TokenValuePairs.size(); i++ )
+				delete m_TokenValuePairs[ i ];
+		}
 
-    void AddPair( TokenValuePair* const Pair )
-    {
-        if ( 0 == Pair )
-            return ;
+		void AddPair( TokenValuePair* const Pair )
+		{
+			if ( 0 == Pair )
+				return ;
 
-        m_Counts.push_back( Pair->Count() );
-        m_Tokens.push_back( Pair->Token() );
-        m_Values.push_back( Pair->Values() );
+			m_Counts.push_back( Pair->Count() );
+			m_Tokens.push_back( Pair->Token() );
+			m_Values.push_back( Pair->Values() );
 
-        m_TokenValuePairs.push_back( Pair );
-    }
+			m_TokenValuePairs.push_back( Pair );
+		}
 
-    RendermanInterface::RtInt Count()
-    {
-        return m_Tokens.size();
-    }
-    RendermanInterface::RtInt* Counts()
-    {
-        return m_Counts.size() ? & m_Counts[ 0 ] : 0;
-    }
-    RendermanInterface::RtToken* Tokens()
-    {
-        return m_Tokens.size() ? &m_Tokens[ 0 ] : 0;
-    }
-    RendermanInterface::RtPointer* Values()
-    {
-        return m_Values.size() ? &m_Values[ 0 ] : 0;
-    }
+		RendermanInterface::RtInt Count()
+		{
+			return m_Tokens.size();
+		}
+		RendermanInterface::RtInt* Counts()
+		{
+			return m_Counts.size() ? & m_Counts[ 0 ] : 0;
+		}
+		RendermanInterface::RtToken* Tokens()
+		{
+			return m_Tokens.size() ? &m_Tokens[ 0 ] : 0;
+		}
+		RendermanInterface::RtPointer* Values()
+		{
+			return m_Values.size() ? &m_Values[ 0 ] : 0;
+		}
 
-private:
-    std::vector<RendermanInterface::RtInt> m_Counts;
-    std::vector<RendermanInterface::RtToken> m_Tokens;
-    std::vector<RendermanInterface::RtPointer> m_Values;
+	private:
+		std::vector<RendermanInterface::RtInt> m_Counts;
+		std::vector<RendermanInterface::RtToken> m_Tokens;
+		std::vector<RendermanInterface::RtPointer> m_Values;
 
-    std::vector<TokenValuePair*> m_TokenValuePairs;
+		std::vector<TokenValuePair*> m_TokenValuePairs;
 };
 
 }

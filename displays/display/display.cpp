@@ -213,10 +213,12 @@ void WriteTIFF(const std::string& filename, SqDisplayInstance* image)
 		TqInt nSecs = difftime(long_time, start);
 		sprintf(mydescription,"%d secs", nSecs);
 		start = long_time;
-	} else {
+	}
+	else
+	{
 		strcpy(mydescription, description);
 	}
-	
+
 
 	// Set common tags
 	// If in "shadowmap" mode, write as a shadowmap.
@@ -396,7 +398,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 	SqDisplayInstance* pImage;
 
 	pImage = new SqDisplayInstance;
-        flagstuff->flags = 0;
+	flagstuff->flags = 0;
 
 	time(&start);
 	if(pImage)
@@ -408,15 +410,19 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 		if(strcmp(drivername, "file")==0 || strcmp(drivername, "tiff")==0)
 			pImage->m_imageType = Type_File;
 #ifndef	AQSIS_NO_FLTK
+
 		else if(strcmp(drivername, "framebuffer")==0)
 			pImage->m_imageType = Type_Framebuffer;
 #endif // AQSIS_NO_FLTK
+
 		else if(strcmp(drivername, "zfile")==0)
 			pImage->m_imageType = Type_ZFile;
 #ifndef AQSIS_NO_FLTK
+
 		else if(strcmp(drivername, "zframebuffer")==0)
 			pImage->m_imageType = Type_ZFramebuffer;
 #endif // AQSIS_NO_FLTK
+
 		else if(strcmp(drivername, "shadow")==0)
 			pImage->m_imageType = Type_Shadowmap;
 		else
@@ -446,12 +452,12 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 		if(pImage->m_imageType == Type_File || pImage->m_imageType == Type_Framebuffer )
 		{
 			PtDspyDevFormat outFormat[] =
-				{
-					{"r", widestFormat},
-					{"g", widestFormat},
-					{"b", widestFormat},
-					{"a", widestFormat},
-				};
+			    {
+			        {"r", widestFormat},
+			        {"g", widestFormat},
+			        {"b", widestFormat},
+			        {"a", widestFormat},
+			    };
 			PtDspyError err = DspyReorderFormatting(iFormatCount, format, MIN(iFormatCount,4), outFormat);
 			if( err != PkDspyErrorNone )
 			{
@@ -501,6 +507,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			Fl::visual(FL_RGB);
 			pImage->m_theWindow->show();
 #endif // AQSIS_NO_FLTK
+
 		}
 		else
 		{
@@ -543,6 +550,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			Fl::visual(FL_RGB);
 			pImage->m_theWindow->show();
 #endif // AQSIS_NO_FLTK
+
 		}
 
 
@@ -583,11 +591,13 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 
 		// Determine if we are creating a combined shadow map for ambient occlusion.
 		float append;
-		if( DspyFindFloatInParamList("append", &append, paramCount, parameters ) == PkDspyErrorNone )
+		if( DspyFindFloatInParamList("append", &append, paramCount, parameters )
+		        == PkDspyErrorNone )
 			pImage->m_append = (append != 0.0f)? 1:0;
 
 		char *ydesc = NULL;
-		if (DspyFindStringInParamList("description", &ydesc, paramCount, parameters ) == PkDspyErrorNone )
+		if (DspyFindStringInParamList("description", &ydesc, paramCount, parameters )
+		        == PkDspyErrorNone )
 		{
 			// Do something about it; the user will want to add its copyright notice.
 			if (ydesc && *ydesc)
@@ -694,6 +704,7 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 				pdatarow += bucketlinelen;
 			}
 #endif // AQSIS_NO_FLTK
+
 		}
 	}
 
@@ -702,9 +713,9 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 #ifndef AQSIS_NO_FLTK
 		pImage->m_uiImageWidget->damage(1, xmin__, ymin__, xmaxplus1__-xmin__, ymaxplus1__-ymin__);
 		Fl::check();
-      	TqFloat percent = (TqFloat) ((xmaxplus1__-1) + (TqFloat)((ymaxplus1__-1) * pImage->m_width)) / (TqFloat) (pImage->m_width * pImage->m_height);
-      	percent *= 100.0f;
-      	percent = CLAMP(percent, 0.0f, 100.0f);
+		TqFloat percent = (TqFloat) ((xmaxplus1__-1) + (TqFloat)((ymaxplus1__-1) * pImage->m_width)) / (TqFloat) (pImage->m_width * pImage->m_height);
+		percent *= 100.0f;
+		percent = CLAMP(percent, 0.0f, 100.0f);
 		std::stringstream strTitle;
 		if (percent < 99.9f)
 			strTitle << pImage->m_filename << ": " << std::setprecision(1) << std::setw(3) << percent << "% complete" << std::ends;
@@ -712,6 +723,7 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 			strTitle << pImage->m_filename << std::ends;
 		pImage->m_theWindow->label(strTitle.str().c_str());
 #endif // AQSIS_NO_FLTK
+
 	}
 	return(PkDspyErrorNone);
 }
@@ -731,7 +743,7 @@ PtDspyError DspyImageClose(PtDspyImageHandle image)
 	// Delete the image structure.
 	if (pImage->m_data)
 		free(pImage->m_data);
- 	if (pImage->m_hostname)
+	if (pImage->m_hostname)
 		free(pImage->m_hostname);
 	if(pImage->m_imageType == Type_ZFramebuffer)
 		free(pImage->m_zfbdata);
@@ -742,7 +754,7 @@ PtDspyError DspyImageClose(PtDspyImageHandle image)
 	}
 	delete[](pImage->m_filename);
 	delete(pImage);
-	
+
 
 	return(PkDspyErrorNone);
 }
@@ -823,6 +835,7 @@ PtDspyError DspyImageDelayClose(PtDspyImageHandle image)
 			}
 			Fl::run();
 #endif // AQSIS_NO_FLTK
+
 		}
 		return(DspyImageClose(image));
 	}

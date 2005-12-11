@@ -39,22 +39,22 @@ START_NAMESPACE( Aqsis )
 
 /// When attached to an output stream, prepends a string "tag" to the beginning of every line of output
 class tag_buf :
-	public std::streambuf
+			public std::streambuf
 {
-public:
-	tag_buf(const std::string& Tag, std::ostream& Stream);
-	~tag_buf();
+	public:
+		tag_buf(const std::string& Tag, std::ostream& Stream);
+		~tag_buf();
 
-protected:
-	int overflow(int);
-	int sync();
+	protected:
+		int overflow(int);
+		int sync();
 
-private:
-	
-	std::ostream& m_stream;
-	std::streambuf* const m_streambuf;
-	bool m_start_new_line;
-	const std::string m_tag;
+	private:
+
+		std::ostream& m_stream;
+		std::streambuf* const m_streambuf;
+		bool m_start_new_line;
+		const std::string m_tag;
 };
 
 ///////////////////////////////////////////////////////////
@@ -62,20 +62,20 @@ private:
 
 /// When attached to an output stream, prefixes every line of output with a timestamp
 class timestamp_buf :
-            public std::streambuf
+			public std::streambuf
 {
-public:
-    timestamp_buf(std::ostream& Stream);
-    ~timestamp_buf();
+	public:
+		timestamp_buf(std::ostream& Stream);
+		~timestamp_buf();
 
-protected:
-    int overflow(int);
-    int sync();
+	protected:
+		int overflow(int);
+		int sync();
 
-private:
-    std::ostream& m_stream;
-    std::streambuf* const m_streambuf;
-    bool m_start_new_line;
+	private:
+		std::ostream& m_stream;
+		std::streambuf* const m_streambuf;
+		bool m_start_new_line;
 };
 
 ///////////////////////////////////////////////////////////
@@ -83,20 +83,20 @@ private:
 
 /// When attached to an output stream, prefixes every line of output with its log-level (if any)
 class show_level_buf :
-            public std::streambuf
+			public std::streambuf
 {
-public:
-    show_level_buf(std::ostream& Stream);
-    ~show_level_buf();
+	public:
+		show_level_buf(std::ostream& Stream);
+		~show_level_buf();
 
-protected:
-    int overflow(int);
-    int sync();
+	protected:
+		int overflow(int);
+		int sync();
 
-private:
-    std::ostream& m_stream;
-    std::streambuf* const m_streambuf;
-    bool m_start_new_line;
+	private:
+		std::ostream& m_stream;
+		std::streambuf* const m_streambuf;
+		bool m_start_new_line;
 };
 
 ///////////////////////////////////////////////////////////
@@ -104,20 +104,20 @@ private:
 
 /// When attached to an output stream, colors output based on its log level (if any)
 class color_level_buf :
-	public std::streambuf
+			public std::streambuf
 {
-public:
-	color_level_buf(std::ostream& Stream);
-	~color_level_buf();
+	public:
+		color_level_buf(std::ostream& Stream);
+		~color_level_buf();
 
-protected:
-	int overflow(int);
-	int sync();
+	protected:
+		int overflow(int);
+		int sync();
 
-private:
-	std::ostream& m_stream;
-	std::streambuf* const m_streambuf;
-	bool m_start_new_line;
+	private:
+		std::ostream& m_stream;
+		std::streambuf* const m_streambuf;
+		bool m_start_new_line;
 };
 
 ///////////////////////////////////////////////////////////
@@ -125,24 +125,24 @@ private:
 
 /// When attached to an output stream, replaces duplicate lines of output with a message indicating the number of duplicates
 class fold_duplicates_buf :
-            public std::streambuf
+			public std::streambuf
 {
-public:
-    fold_duplicates_buf(std::ostream& Stream);
-    ~fold_duplicates_buf();
+	public:
+		fold_duplicates_buf(std::ostream& Stream);
+		~fold_duplicates_buf();
 
-protected:
-    int overflow(int);
-    int sync();
+	protected:
+		int overflow(int);
+		int sync();
 
-private:
-    bool print_duplicates();
+	private:
+		bool print_duplicates();
 
-    std::ostream& m_stream;
-    std::streambuf* const m_streambuf;
-    std::string m_buffer;
-    std::string m_last_buffer;
-    unsigned long m_duplicate_count;
+		std::ostream& m_stream;
+		std::streambuf* const m_streambuf;
+		std::string m_buffer;
+		std::string m_last_buffer;
+		unsigned long m_duplicate_count;
 };
 
 ///////////////////////////////////////////////////////////
@@ -150,19 +150,19 @@ private:
 
 /// When attached to an output stream, resets the log level to "unknown" after every line of output
 class reset_level_buf :
-            public std::streambuf
+			public std::streambuf
 {
-public:
-    reset_level_buf(std::ostream& Stream);
-    ~reset_level_buf();
+	public:
+		reset_level_buf(std::ostream& Stream);
+		~reset_level_buf();
 
-protected:
-    int overflow(int);
-    int sync();
+	protected:
+		int overflow(int);
+		int sync();
 
-private:
-    std::ostream& m_stream;
-    std::streambuf* const m_streambuf;
+	private:
+		std::ostream& m_stream;
+		std::streambuf* const m_streambuf;
 };
 
 ///////////////////////////////////////////////////////////
@@ -180,20 +180,20 @@ typedef enum
 
 /// When attached to an output stream, filters-out messages below the given level
 class filter_by_level_buf :
-            public std::streambuf
+			public std::streambuf
 {
-public:
-    filter_by_level_buf(const log_level_t MinimumLevel, std::ostream& Stream);
-    ~filter_by_level_buf();
+	public:
+		filter_by_level_buf(const log_level_t MinimumLevel, std::ostream& Stream);
+		~filter_by_level_buf();
 
-protected:
-    int overflow(int);
-    int sync();
+	protected:
+		int overflow(int);
+		int sync();
 
-private:
-    std::ostream& m_stream;
-    std::streambuf* const m_streambuf;
-    const log_level_t m_minimum_level;
+	private:
+		std::ostream& m_stream;
+		std::streambuf* const m_streambuf;
+		const log_level_t m_minimum_level;
 };
 
 ///////////////////////////////////////////////////////////
@@ -201,22 +201,22 @@ private:
 
 /// When attached to an output stream, copies output to the system log
 class syslog_buf :
-            public std::streambuf
+			public std::streambuf
 {
-public:
-    syslog_buf(std::ostream& Stream);
-    ~syslog_buf();
+	public:
+		syslog_buf(std::ostream& Stream);
+		~syslog_buf();
 
-protected:
-    int overflow(int);
-    int sync();
+	protected:
+		int overflow(int);
+		int sync();
 
-private:
-    void write_to_system_log(const std::string& Message);
+	private:
+		void write_to_system_log(const std::string& Message);
 
-    std::ostream& m_stream;
-    std::streambuf* const m_streambuf;
-    std::string m_buffer;
+		std::ostream& m_stream;
+		std::streambuf* const m_streambuf;
+		std::string m_buffer;
 };
 
 #ifdef	AQSIS_SYSTEM_WIN32
@@ -226,27 +226,27 @@ private:
 
 /// Scans the stream for ANSI control sequences and emulates the behaviour under Windows
 class ansi_buf :
-	public std::streambuf
+			public std::streambuf
 {
-public:
-	ansi_buf(std::ostream& Stream);
-	~ansi_buf();
+	public:
+		ansi_buf(std::ostream& Stream);
+		~ansi_buf();
 
-protected:
-	int overflow(int);
-	int sync();
+	protected:
+		int overflow(int);
+		int sync();
 
-private:
-	void process_code();
-	void set_attributes();
-	
-	std::ostream& m_stream;
-	std::streambuf* const m_streambuf;
-	int m_processing_ansi;
-	WORD m_attributes;
-	std::string m_code;
-	HANDLE	m_sbh;
-	CONSOLE_SCREEN_BUFFER_INFO	m_csbInfo;
+	private:
+		void process_code();
+		void set_attributes();
+
+		std::ostream& m_stream;
+		std::streambuf* const m_streambuf;
+		int m_processing_ansi;
+		WORD m_attributes;
+		std::string m_code;
+		HANDLE	m_sbh;
+		CONSOLE_SCREEN_BUFFER_INFO	m_csbInfo;
 };
 
 #endif

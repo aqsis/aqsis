@@ -58,10 +58,10 @@
 
 void
 cur_user()
-	{
+{
 	bdos(BDOS_SELDISK,Orig_disk);
 	bdos(BDOS_USER,Orig_user);
-	}
+}
 #endif	/* HOST == H_CPM */
 
 /************************************************************************/
@@ -90,8 +90,8 @@ cur_user()
 
 void
 do_line(at_bol)
-	char			at_bol;	/* TRUE if already at BOL */
-	{
+char			at_bol;	/* TRUE if already at BOL */
+{
 	char			buf[TOKENSIZE + 1];
 	char			filen[FILENAMESIZE + 1];
 	register	int	n;
@@ -100,34 +100,37 @@ do_line(at_bol)
 
 	sprintf(filen," \"%s\"",Filestack[Tokenfile]->f_name);
 	sprintf(buf,"%s#%s %d%s\n",
-		!at_bol ? "\n" : "",	/* Emit a \n if needed */
-			Lineopt == LINE_EXP ? "line" : "",
+	        !at_bol ? "\n" : "",	/* Emit a \n if needed */
+	        Lineopt == LINE_EXP ? "line" : "",
 #if	TARGET == T_QC
-				Tokenline-1,	/* QC bug */
+	        Tokenline-1,	/* QC bug */
 #else	/* TARGET != T_QC */
-				Tokenline,
+	        Tokenline,
 #endif	/* TARGET == T_QC */
-					Do_name ? filen : "");
+	        Do_name ? filen : "");
 
 #if	(TARGET == T_QC) OR (TARGET == T_QCX)
+
 	if((!Do_name && (n >= 0) && (((unsigned int) n) <
-		(strlen(buf)/NL_CHAR + 1))) || Do_asm)
+	                             (strlen(buf)/NL_CHAR + 1))) || Do_asm)
 #else	/* ! ((TARGET == T_QC) OR (TARGET == T_QCX)) */
+
 	if(!Do_name && (n >= 0) && (((unsigned int) n) <
-		(strlen(buf)/NL_CHAR + 1)))
+	                            (strlen(buf)/NL_CHAR + 1)))
 #endif	/* (TARGET == T_QC) OR (TARGET == T_QCX) */
-		{
+
+	{
 		while(n-- > 0)
 			putc('\n',Output);	/* Write newlines to synch */
-		}
+	}
 	else
-		{
+	{
 		fprintf(Output,buf);
-		}
+	}
 
 	Outline = Tokenline;		/* Make them the same */
 	Do_name = FALSE;
-	}
+}
 
 /************************************************************************/
 /*									*/
@@ -146,18 +149,21 @@ do_line(at_bol)
 
 void
 doinclude()
-	{
+{
 	char			buf[TOKENSIZE];
 	register int		c;
 	register int		d;
 	register char		*incf;
 	char			incfile[FILENAMESIZE + 1];
 #if	HOST != H_CPM
+
 	char			filename[FILENAMESIZE + 1];
 	register char		**ip;
 #endif	/* HOST != H_CPM */
+
 	register int		ok;
 #if	HOST == H_CPM
+
 	register int		disk;
 	register char		*p;
 	register char		**ip;
@@ -165,16 +171,19 @@ doinclude()
 #endif	/* HOST == H_CPM */
 
 #if	DEBUG
-	if(Debug) printf("doinclude: include level:%d\n",Filelevel);
+
+	if(Debug)
+		printf("doinclude: include level:%d\n",Filelevel);
 #endif	/* DEBUG */
+
 	if(Filelevel >= FILESTACKSIZE)
-		{
+	{
 		non_fatal("Include file stack overflow","");
 		return;
-		}
-/*
- *	Read line and process any macros encountered.
- */
+	}
+	/*
+	 *	Read line and process any macros encountered.
+	 */
 	pbcstr(readline(buf,TOKENSIZE,GT_ANGLE));
 
 	while(istype((c = getchn()),C_W))
@@ -187,26 +196,26 @@ doinclude()
 	else if(c == '"')
 		d = '"';
 	else
-		{
+	{
 		non_fatal("Bad include argument","");
 		if(c == '\n')
 			pushback('\n');
 		return;
-		}
+	}
 
 	for(incf = incfile; c != EOF && c != '\n';)
-		{
+	{
 		if((c = getchn()) == d)
 			break;
 
 		if(incf >= &incfile[FILENAMESIZE])
-			{
+		{
 			non_fatal("Include file name too long","");
 			return;
-			}
+		}
 		else
 			*incf++ = c;
-		}
+	}
 
 	while((c != '\n') && (c != EOF))
 		c = getchn();		/* Slurp trailing \n */
@@ -214,16 +223,18 @@ doinclude()
 	if(incf != incfile)
 		*incf = '\0';
 	else
-		{
+	{
 		non_fatal("Illegal file name","");
 		return;
-		}
+	}
 
 	if(Lineopt)
 		do_line(TRUE);		/* Catch up before inc file switch */
 
 #if	DEBUG
-	if(Debug) printf("doinclude: <%s>\n",incfile);
+
+	if(Debug)
+		printf("doinclude: <%s>\n",incfile);
 #endif	/* DEBUG */
 
 	if(Verbose)
@@ -233,17 +244,17 @@ doinclude()
 
 #if	HOST == H_CPM		/* The following stuff works only under CP/M */
 
-/*
- *	Determine the type of include: if d == '<' then search the path
- *	indicated by the -i parameter (or the default.)  If the delimiter is
- *	'"' then include the current directory as well.
- */
+	/*
+	 *	Determine the type of include: if d == '<' then search the path
+	 *	indicated by the -i parameter (or the default.)  If the delimiter is
+	 *	'"' then include the current directory as well.
+	 */
 	if(d == '"')
 		ok = inc_open(incfile,-1,0);	/* The current location */
 
 	/* Try all path options in -i list (including DFLT_PATH stuff) */
 	for(ip = &Ipath[0]; (*ip != NULL) && !ok; ip++)
-		{
+	{
 		p = *ip;
 
 		while(istype(*p & 0xFF,C_W))
@@ -257,34 +268,34 @@ doinclude()
 		if(disk == '*')
 			user = -1;	/* Use the default */
 		else if((disk >= 'a') && (disk <= 'p'))
-			{
+		{
 			disk -= 'a';	/* Drive */
 
 			if(! isdigit(*p))
 				user = -1;	/* Default */
 			else
-				{
+			{
 				user = atoi(p);
 				if((user < 0) || (user > 31))
-					{
+				{
 					non_fatal("Illegal user number","");
 					return;
-					}
 				}
 			}
+		}
 		else
-			{
+		{
 			non_fatal("Illegal disk drive specifier","");
 			return;
-			}
+		}
 
 		ok = inc_open(incfile,user,disk);
-		}
+	}
 
 #else	/* HOST != H_CPM */
 
 	if(d == '"')
-		{
+	{
 		/* Look in current directory */
 		strcpy(filename,Filestack[Filelevel]->f_name);
 		if(strrchr(filename,SLASHCHAR))
@@ -293,17 +304,17 @@ doinclude()
 			strcpy(filename,incfile);
 
 		ok = inc_open(filename);
-		}
+	}
 
 	/* Look through all paths for an existance of the file */
 
 	for(ip = &Ipath[0]; *ip != NULL && !ok; ip++)
-		{
+	{
 		strcpy(filename,*ip);	/* Copy path name */
 		strcat(filename,SLASHSTR);	/* Append / for directory */
 		strcat(filename,incfile);	/* Append local file name */
 		ok = inc_open(filename);	/* Attempt an open */
-		}
+	}
 
 #endif	/* (HOST != H_CPM) */
 
@@ -317,7 +328,7 @@ doinclude()
 
 	/* Let token scanner see first things on line */
 	Lastnl = TRUE;
-	}
+}
 
 /************************************************************************/
 /*									*/
@@ -329,21 +340,21 @@ doinclude()
 
 void
 doline()
-	{
+{
 	char			buf[TOKENSIZE];
 	int			c;
 	int			l;
 	char			*p;
-/*
- *	Read line and process any macros encountered.
- */
+	/*
+	 *	Read line and process any macros encountered.
+	 */
 	pbcstr(readline(buf,TOKENSIZE,GT_STR));
 
 	while(istype((c = getchn()),C_W))
 		;
 
 	if(istype(c,C_D))
-		{
+	{
 		for(l = 0; istype(c,C_D); c = getchn())
 			l = l * 10 + c - '0';
 
@@ -353,9 +364,9 @@ doline()
 		c = getnstoken(GT_STR);
 
 		if((c != '\n') && (c != EOF))
-			{
+		{
 			if(c == '"')
-				{
+			{
 				p = strrchr(Token,'"');	/* Find ending " */
 
 				/* Allow for first " */
@@ -366,19 +377,19 @@ doline()
 				strcpy(Filestack[Filelevel]->f_name,Token + 1);
 				/* Need filename on "output" #line */
 				Do_name = TRUE;
-				}
+			}
 			else
-				{
+			{
 				pushback(c);
 				c = '\0';
-				}
 			}
 		}
+	}
 	else
-		{
+	{
 		pushback(c);
 		c = '\0';
-		}
+	}
 
 	if(c == '\0')
 		non_fatal("\"#line\" argument error","");
@@ -386,7 +397,7 @@ doline()
 	while((c != '\n') && (c != EOF))
 		c = getnstoken(GT_STR);	/* Slurp trailing \n */
 	pushback('\n');
-	}
+}
 
 /************************************************************************/
 /*									*/
@@ -399,21 +410,22 @@ doline()
 
 int
 gchbuf()
-	{
+{
 	register int		c;
 
 	for(;;)
-		{
+	{
 		if(Lasteol)
-			{
+		{
 			Lasteol = FALSE;
 			LLine++;
-			}
+		}
 
 		if(! istype(c = (Bufc-- ? *Bufp++ : gchfile()),C_C))
 			break;		/* If no need to examine closely */
 
 #ifdef	IGNORE_CR
+
 		if(c == '\r')
 			continue;
 #endif	/* IGNORE_CR */
@@ -422,17 +434,18 @@ gchbuf()
 			Lasteol = TRUE;	/* Inc line number next time */
 #ifdef	PP_SYSIO
 #if	HOST == H_CPM
+
 		else if(c == ENDFILE)
-			{
+		{
 			Bufc = 0;
 			continue;	/* Try to get next file */
-			}
+		}
 #endif	/* HOST == H_CPM */
 #endif	/* PP_SYSIO */
 		break;
-		}
-	return(c);			/* And exit */
 	}
+	return(c);			/* And exit */
+}
 
 /************************************************************************/
 /*									*/
@@ -446,7 +459,7 @@ gchbuf()
 
 int
 gchfile()
-	{
+{
 #ifdef	PP_SYSIO
 	extern	int		read();
 #endif	/* PP_SYSIO */
@@ -454,42 +467,46 @@ gchfile()
 	register struct	file	*f;
 
 	if(Filelevel < 0)
-		{
+	{
 		Bufc = 0;
 		return (EOF);
-		}
+	}
 	else if((Filestack[Filelevel]->f_eof) && popfile())
 		return (A_trigraph ? trigraph() : gchbuf());
 
 	if(Filelevel < 0)
-		{
+	{
 		Bufc = 0;
 		return (EOF);
-		}
+	}
 	f = Filestack[Filelevel];
 
 #if	HOST == H_CPM
+
 	set_user();
 #endif	/* HOST == H_CPM */
 
 	Bufp = f->f_buf;		/* Set buffer address */
 
 #ifdef	PP_SYSIO
+
 	if((Bufc = read(f->f_fd, Bufp, BUFFERSIZE)) == 0)
 #else	/* !PP_SYSIO */
+
 	if((Bufc = fread(Bufp, 1, BUFFERSIZE, f->f_file)) == 0)
 #endif	/* PP_SYSIO */
-		{
+
+	{
 		f->f_eof = TRUE;
 		return ('\n');		/* Fake '\n' before EOF */
-		}
+	}
 #if	HOST == H_CPM
 	cur_user();
 #endif	/* HOST == H_CPM */
 
 	Bufc--;
 	return(*Bufp++ & 0xFF);		/* Return the char */
-	}
+}
 
 /************************************************************************/
 /*									*/
@@ -502,37 +519,40 @@ gchfile()
 
 int
 gchpb()
-	{
+{
 	register int		c;
 
 	for(;;)
-		{
+	{
 		if(Pbbufp->pb_type == PB_CHAR)
 			c = (Pbbufp--)->pb_val.pb_char;	/* Pop the char */
 		else if(Pbbufp->pb_type == PB_STRING)
-			{
+		{
 			/* Get next char from string */
 			if((c = *(Pbbufp->pb_val.pb_str++) & 0xFF) == '\0')
-				{
-/*
- *	End of the string.  Pop the stack to get the next pushback buffer
- *	which contains the starting address for the string.
- */
-				Pbbufp--;
-/* Free up the memory */	free(Pbbufp->pb_val.pb_str);
-/* Get nxt real pushback buf */	Pbbufp--;
-/* Try again to get input */	continue;
-				}
-			}
-		else
 			{
-			/* Assume PB_TOS and pop to file input */
-/* Next char source */	Nextch = A_trigraph ? trigraph : gchbuf;
-			return (A_trigraph ? trigraph() : gchbuf());
+				/*
+				 *	End of the string.  Pop the stack to get the next pushback buffer
+				 *	which contains the starting address for the string.
+				 */
+				Pbbufp--;
+				/* Free up the memory */
+				free(Pbbufp->pb_val.pb_str);
+				/* Get nxt real pushback buf */
+				Pbbufp--;
+				/* Try again to get input */
+				continue;
 			}
-		return (c);
 		}
+		else
+		{
+			/* Assume PB_TOS and pop to file input */
+			/* Next char source */	Nextch = A_trigraph ? trigraph : gchbuf;
+			return (A_trigraph ? trigraph() : gchbuf());
+		}
+		return (c);
 	}
+}
 
 /************************************************************************/
 /*									*/
@@ -545,23 +565,23 @@ gchpb()
 
 int
 getchn()
-	{
+{
 	int			c;
 	int			c2;
 
 	for(;;)
-		{
+	{
 		if((c = nextch()) == '\\')
-			{
+		{
 			c2 = nextch();
 			if(c2 == '\n')
 				continue;	/* Ignore char and get next */
 
 			pushback(c2);	/* We'll get to this char later */
-			}
-		return (c);
 		}
+		return (c);
 	}
+}
 
 /************************************************************************/
 /*									*/
@@ -574,15 +594,16 @@ getchn()
 #if	HOST == H_CPM
 int
 inc_open(incfile,u,d)
-	register char		*incfile;
-	int			u;
-	int			d;
+register char		*incfile;
+int			u;
+int			d;
 #else	/* HOST != H_CPM */
 int
 inc_open(incfile)
-	char			*incfile;
+char			*incfile;
 #endif	/* HOST == H_CPM */
-	{
+
+{
 #ifdef	PP_SYSIO
 	extern	int		open();
 #endif	/* PP_SYSIO */
@@ -594,15 +615,16 @@ inc_open(incfile)
 #if	HOST == H_CPM
 
 #if	DEBUG
+
 	if(Debug)
 		printf("inc_open: %s on %c%d\n",incfile,d+'A',u);
 #endif	/* DEBUG */
 
 	if(u >= 0)
-		{
+	{
 		bdos(BDOS_USER,u);
 		bdos(BDOS_SELDISK,d);
-		}
+	}
 
 #else	/* HOST != H_CPM */
 
@@ -614,25 +636,28 @@ inc_open(incfile)
 #endif	/* HOST == H_CPM */
 
 	f = Filestack[Filelevel+1] =
-		(struct file *) malloc(sizeof(struct file));
+	        (struct file *) malloc(sizeof(struct file));
 
 	if(f == NULL)
 		out_of_memory();
 
 #ifdef	PP_SYSIO
+
 	if((v = ((f->f_fd = open(incfile,0)) != -1)) != 0)
 #else	/* !PP_SYSIO */
+
 	if((v = (int)((f->f_file = fopen(incfile,"r")) != NULL)) != 0)
 #endif	/* PP_SYSIO */
-		{
+
+	{
 		if(Filelevel >= 0)	/* Don't do if first time thru */
-			{
+		{
 #if	DEBUG
 			if(Debug)
-				{
-	printf("inc_open pushing: Bufc=%d, Bufp=%p, Lasteol=%d, Line=%d\n",
-					Bufc,Bufp,Lasteol,LLine);
-				}
+			{
+				printf("inc_open pushing: Bufc=%d, Bufp=%p, Lasteol=%d, Line=%d\n",
+				       Bufc,Bufp,Lasteol,LLine);
+			}
 #endif	/* DEBUG */
 
 			fold = Filestack[Filelevel];
@@ -640,34 +665,37 @@ inc_open(incfile)
 			fold->f_bufc = Bufc;	/* Save current buffer count */
 			fold->f_lasteol = Lasteol;	/* Save last char */
 			fold->f_line = LLine;	/* Save current line # */
-			}
+		}
 		Filelevel++;
 		strcpy(f->f_name,incfile);
 		LLine		= 1;	/* Initial line number		*/
 		Bufc		= 0;	/* No chars in buffer		*/
 		f->f_eof	= 	/* Not at eof yet		*/
-		Lasteol		= FALSE;/* Last char was not EOL	*/
+		    Lasteol		= FALSE;/* Last char was not EOL	*/
 #if	HOST == H_CPM
+
 		f->f_disk = d;
 		f->f_user = u;
 #endif	/* HOST == H_CPM */
-		}
+
+	}
 	else
 		free((char *)f);	/* Return the memory used */
 
 #if	HOST == H_CPM
+
 	if(u >= 0)
 		cur_user();		/* Restore current user/disk */
 #endif	/* HOST == H_CPM */
 
 	if(v)
-		{
+	{
 		Do_name = TRUE;
 		return (TRUE);
-		}
+	}
 	else
 		return (FALSE);
-	}
+}
 
 /************************************************************************/
 /*									*/
@@ -685,7 +713,7 @@ inc_open(incfile)
 
 void
 init_path()
-	{
+{
 #if	HOST == H_CPM
 	register int		inum;
 	char			pb[TOKENSIZE];
@@ -695,41 +723,43 @@ init_path()
 	bdos(BDOS_SELDISK,0);		/* Select A0 */
 
 	if(pf = fopen(PATHFILE,"r"))
-		{
+	{
 		/* Found the file -- read lines and use as paths */
 		for(inum = Ipcnt; inum < NIPATHS; inum++)
-			{
+		{
 			if(fgets(pb,TOKENSIZE,pf) != NULL)
-				{
+			{
 				if((Ipath[inum] = malloc((unsigned)
-					(strlen(pb) + 1))) == NULL)
-					{
-					out_of_memory();
-					}
-				else
-/* Copy the default path */		strcpy(Ipath[inum],pb);
-				}
-			else
+				                         (strlen(pb) + 1))) == NULL)
 				{
-				if(inum == Ipcnt)
-					{
-					/* Didn't find any -- give error msg */
-				warning("Bad format on include path file: ",
-						PATHFILE);
-/* Use default path */			Ipath[inum++] = DFLT_PATH;
-					}
-				break;
+					out_of_memory();
 				}
+				else
+					/* Copy the default path */
+					strcpy(Ipath[inum],pb);
 			}
+			else
+			{
+				if(inum == Ipcnt)
+				{
+					/* Didn't find any -- give error msg */
+					warning("Bad format on include path file: ",
+					        PATHFILE);
+					/* Use default path */
+					Ipath[inum++] = DFLT_PATH;
+				}
+				break;
+			}
+		}
 
 		Ipcnt = inum;		/* Keep counter correct	*/
 
 		if(fclose(pf) == EOF)
-			{
+		{
 			non_fatal("Unable to close include path file: ",
-				PATHFILE);
-			}
+			          PATHFILE);
 		}
+	}
 	else
 		Ipath[Ipcnt++] = DFLT_PATH;	/* The default path list */
 
@@ -741,31 +771,32 @@ init_path()
 	char			*cptr1;
 	char			*cptr2;
 	char			pb[TOKENSIZE];
-/*
- *	See if there is an environment variable for the default search path.
- */
+	/*
+	 *	See if there is an environment variable for the default search path.
+	 */
 	if((cptr1 = getenv(ENV_PATH)) == NULL)
 		cptr1 = strcpy(pb,DFLT_PATH);	/* Nope, use default path */
 	else
 		cptr1 = strcpy(pb,cptr1);
 
 	for(; (*cptr1 != '\0') && (Ipcnt < NIPATHS); cptr1 = cptr2)
-		{
+	{
 		if((cptr2 = strchr(cptr1,PATHPUNC)) != NULL)
 			*cptr2++ = '\0';
 		else
 			cptr2 = "\0";
 
 		if((Ipath[Ipcnt] = malloc((unsigned) (strlen(cptr1) + 1))) ==
-			NULL)
-			{
+		        NULL)
+		{
 			out_of_memory();
-			}
+		}
 		else
 			strcpy(Ipath[Ipcnt++],cptr1);
-		}
-#endif	/* HOST != H_CPM */
 	}
+#endif	/* HOST != H_CPM */
+
+}
 
 /************************************************************************/
 /*									*/
@@ -777,26 +808,32 @@ init_path()
 
 int
 popfile()
-	{
+{
 #ifdef	PP_SYSIO
 	extern	int		close();
 #endif	/* PP_SYSIO */
+
 	register struct	file	*f;
 
 #if	HOST == H_CPM
+
 	set_user();
 #endif	/* HOST == H_CPM */
 
 #ifdef	PP_SYSIO
+
 	if(close((f = Filestack[Filelevel])->f_fd) == -1)
 #else	/* !PP_SYSIO */
+
 	if(fclose((f = Filestack[Filelevel])->f_file) == EOF)
 #endif	/* PP_SYSIO */
+
 		non_fatal("Unable to close input/include file: ",f->f_name);
 
 	free((char *)f);		/* Free the entry */
 
 #if	HOST == H_CPM
+
 	cur_user();
 #endif	/* HOST == H_CPM */
 
@@ -815,13 +852,14 @@ popfile()
 	LLine = f->f_line;
 
 #if	DEBUG
+
 	if(Debug)
 		printf("popfile: Bufc=%d, Bufp=%p, Lasteol=%d, Line=%d\n",
-			Bufc, Bufp, Lasteol, LLine);
+		       Bufc, Bufp, Lasteol, LLine);
 #endif	/* DEBUG */
 
 	return (TRUE);			/* All is ok -- return success */
-	}
+}
 
 /************************************************************************/
 /*									*/
@@ -833,10 +871,10 @@ popfile()
 
 char	*
 readline(buf,bufsize,flags)
-	register char		*buf;
-	register int		bufsize;
-	register int		flags;
-	{
+register char		*buf;
+register int		bufsize;
+register int		flags;
+{
 	static	char		rbo[] = "Read buffer overflow";
 
 	register char		*bufp;
@@ -844,17 +882,17 @@ readline(buf,bufsize,flags)
 	register int		t;
 
 	for(bufp = buf; (t = gettoken(flags)) != '\n'; )
-		{
+	{
 		if(t == EOF)
 			end_of_file();
 		if((t == LETTER) && ((sy = lookup(Token,NULL)) != NULL) &&
-			(sy->disable != TRUE))
-			{
+		        (sy->disable != TRUE))
+		{
 			bufp = docall(sy,bufp,&buf[bufsize - 1]);
-			}
+		}
 		else
 			bufp = addstr(bufp,&buf[bufsize - 1],rbo,Token);
-		}
+	}
 	pushback('\n');
 	*bufp = '\0';
 
@@ -862,7 +900,7 @@ readline(buf,bufsize,flags)
 		;			/* Skip leading blanks */
 
 	return(bufp);
-	}
+}
 
 /************************************************************************/
 /*									*/
@@ -874,16 +912,16 @@ readline(buf,bufsize,flags)
 
 void
 scaneol()
-	{
+{
 	register int		t;
 
 	while((t = gettoken(GT_STR)) != '\n')
-		{
+	{
 		if(t == EOF)
 			return;		/* Absorb chars */
-		}
-	pushback('\n');			/* So the newline is seen */
 	}
+	pushback('\n');			/* So the newline is seen */
+}
 
 #if	HOST == H_CPM
 /************************************************************************/
@@ -896,14 +934,14 @@ scaneol()
 
 void
 set_user()
-	{
+{
 	/* Don't change if < 0 */
 	if(Filestack[Filelevel]->f_user >= 0)
-		{
+	{
 		bdos(BDOS_SELDISK,Filestack[Filelevel]->f_disk);
 		bdos(BDOS_USER,Filestack[Filelevel]->f_user);
-		}
 	}
+}
 #endif	/* HOST == H_CPM */
 
 /************************************************************************/
@@ -916,73 +954,73 @@ set_user()
 
 int
 trigraph()
-	{
+{
 	int			c;
 	int			q_count;
 
 	if((c = gchbuf()) == '?')
-		{
+	{
 		if((c = gchbuf()) == '?')
-			{
+		{
 			q_count = 0;	/* Extra '?' encountered */
 			for(;;)
-				{
+			{
 				switch((int) (c = gchbuf()))
-					{
-					case '=':
+				{
+						case '=':
 						c = '#';
 						break;
-					case '(':
+						case '(':
 						c = '[';
 						break;
-					case '/':
+						case '/':
 						c = '\\';
 						break;
-					case ')':
+						case ')':
 						c = ']';
 						break;
-					case '\'':
+						case '\'':
 						c = '^';
 						break;
-					case '<':
+						case '<':
 						c = '{';
 						break;
-					case '!':
+						case '!':
 						c = '|';
 						break;
-					case '>':
+						case '>':
 						c = '}';
 						break;
-					case '-':
+						case '-':
 						c = '~';
 						break;
-					case '?':
+						case '?':
 						q_count++;
 						continue;
-					default:
+						default:
 						pushback(c);
 						pushback('?');
 						c = '?';
 						break;
-					}
-/*
- *	Handle stuff like "????????????#" correctly.
- */
+				}
+				/*
+				 *	Handle stuff like "????????????#" correctly.
+				 */
 				if(q_count > 0)
-					{
+				{
 					pushback(c);
 					while(q_count-- > 1)
 						pushback('?');
 					c = '?';
-					}
-				break;
 				}
-			}
-		else
-			{
-			pushback(c);
-			c = '?';
+				break;
 			}
 		}
-	return (c);
+		else
+		{
+			pushback(c);
+			c = '?';
+		}
 	}
+	return (c);
+}

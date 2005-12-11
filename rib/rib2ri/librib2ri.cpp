@@ -14,464 +14,464 @@ Engine::~Engine()
 
 RendermanInterface::RtLightHandle Engine::RiAreaLightSourceV( RtToken name, RtInt count, RtToken tokens[], RtPointer values[] )
 {
-    return ::RiAreaLightSourceV( name, count, tokens, values );
+	return ::RiAreaLightSourceV( name, count, tokens, values );
 }
 RendermanInterface::RtVoid Engine::RiAtmosphereV( RtToken name, RtInt count, RtToken tokens[], RtPointer values[] )
 {
-    ::RiAtmosphereV( name, count, tokens, values );
+	::RiAtmosphereV( name, count, tokens, values );
 }
 RendermanInterface::RtVoid Engine::RiAttributeBegin()
 {
-    ::RiAttributeBegin();
+	::RiAttributeBegin();
 }
 RendermanInterface::RtVoid Engine::RiAttributeEnd()
 {
-    ::RiAttributeEnd();
+	::RiAttributeEnd();
 }
 RendermanInterface::RtVoid Engine::RiAttributeV( RtToken name, RtInt count, RtToken tokens[], RtPointer values[] )
 {
-    ::RiAttributeV( name, count, tokens, values );
+	::RiAttributeV( name, count, tokens, values );
 }
 RendermanInterface::RtVoid Engine::RiBasis( RtBasis ubasis, RtInt ustep, RtBasis vbasis, RtInt vstep )
 {
-    ::RiBasis( ubasis, ustep, vbasis, vstep );
+	::RiBasis( ubasis, ustep, vbasis, vstep );
 }
 RendermanInterface::RtVoid Engine::RiBegin( RtToken name )
 {
-    ::RiBegin( name );
+	::RiBegin( name );
 }
 RendermanInterface::RtFloat Engine::RiBesselFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 {
-    return ::RiBesselFilter( x, y, xwidth, ywidth );
+	return ::RiBesselFilter( x, y, xwidth, ywidth );
 }
 RendermanInterface::RtVoid Engine::RiBlobbyV( RtInt nleaf, RtInt ncode, RtInt code[], RtInt nflt, RtFloat flt[], RtInt nstr, RtToken str[], RtInt count, RtToken tokens[], RtPointer values[] )
 {
-    ::RiBlobbyV( nleaf, ncode, code, nflt, flt, nstr, str, count, tokens, values );
+	::RiBlobbyV( nleaf, ncode, code, nflt, flt, nstr, str, count, tokens, values );
 }
 RendermanInterface::RtVoid Engine::RiBound( RtBound bound )
 {
-    ::RiBound( bound );
+	::RiBound( bound );
 }
 RendermanInterface::RtFloat Engine::RiBoxFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 {
-    return ::RiBoxFilter( x, y, xwidth, ywidth );
+	return ::RiBoxFilter( x, y, xwidth, ywidth );
 }
 RendermanInterface::RtFloat Engine::RiCatmullRomFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 {
-    return ::RiCatmullRomFilter( x, y, xwidth, ywidth );
+	return ::RiCatmullRomFilter( x, y, xwidth, ywidth );
 }
 RendermanInterface::RtVoid Engine::RiClipping( RtFloat cnear, RtFloat cfar )
 {
-    ::RiClipping( cnear, cfar );
+	::RiClipping( cnear, cfar );
 }
 RendermanInterface::RtVoid Engine::RiColor( RtColor Cq )
 {
-    ::RiColor( Cq );
+	::RiColor( Cq );
 }
 RendermanInterface::RtVoid Engine::RiColorSamples( RtInt N, RtFloat *nRGB, RtFloat *RGBn )
 {
-    ::RiColorSamples( N, nRGB, RGBn );
+	::RiColorSamples( N, nRGB, RGBn );
 }
 RendermanInterface::RtVoid Engine::RiConcatTransform( RtMatrix transform )
 {
-    ::RiConcatTransform( transform );
+	::RiConcatTransform( transform );
 }
 RendermanInterface::RtVoid Engine::RiConeV( RtFloat height, RtFloat radius, RtFloat thetamax, RtInt count, RtToken tokens[], RtPointer values[] )
 {
-    ::RiConeV( height, radius, thetamax, count, tokens, values );
+	::RiConeV( height, radius, thetamax, count, tokens, values );
 }
 RendermanInterface::RtVoid Engine::RiCoordinateSystem( RtToken space )
 {
-    ::RiCoordinateSystem( space );
+	::RiCoordinateSystem( space );
 }
 RendermanInterface::RtVoid Engine::RiCoordSysTransform( RtToken space )
 {
-    ::RiCoordSysTransform( space );
+	::RiCoordSysTransform( space );
 }
 RendermanInterface::RtVoid Engine::RiCropWindow( RtFloat left, RtFloat right, RtFloat top, RtFloat bottom )
 {
-    ::RiCropWindow( left, right, top, bottom );
+	::RiCropWindow( left, right, top, bottom );
 }
 RendermanInterface::RtVoid Engine::RiCylinderV( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, RtInt count, RtToken tokens[], RtPointer values[] )
 {
-    ::RiCylinderV( radius, zmin, zmax, thetamax, count, tokens, values );
+	::RiCylinderV( radius, zmin, zmax, thetamax, count, tokens, values );
 }
 RendermanInterface::RtToken Engine::RiDeclare( RtString name, RtString declaration )
 {
-    return ::RiDeclare( name, declaration );
+	return ::RiDeclare( name, declaration );
 }
 RendermanInterface::RtVoid Engine::RiDeformationV( RtToken name, RtInt count, RtToken tokens[], RtPointer values[] )
 {
-    ::RiDeformationV( name, count, tokens, values );
+	::RiDeformationV( name, count, tokens, values );
 }
 RendermanInterface::RtVoid Engine::RiDepthOfField( RtFloat fstop, RtFloat focallength, RtFloat focaldistance )
 {
-    ::RiDepthOfField( fstop, focallength, focaldistance );
+	::RiDepthOfField( fstop, focallength, focaldistance );
 }
 RendermanInterface::RtVoid Engine::RiDetail( RtBound bound )
 {
-    ::RiDetail( bound );
+	::RiDetail( bound );
 }
 RendermanInterface::RtVoid Engine::RiDetailRange( RtFloat offlow, RtFloat onlow, RtFloat onhigh, RtFloat offhigh )
 {
-    ::RiDetailRange( offlow, onlow, onhigh, offhigh );
+	::RiDetailRange( offlow, onlow, onhigh, offhigh );
 }
 RendermanInterface::RtFloat Engine::RiDiskFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 {
-    return ::RiDiskFilter( x, y, xwidth, ywidth );
+	return ::RiDiskFilter( x, y, xwidth, ywidth );
 }
 RendermanInterface::RtVoid Engine::RiDiskV( RtFloat height, RtFloat radius, RtFloat thetamax, RtInt count, RtToken tokens[], RtPointer values[] )
 {
-    ::RiDiskV( height, radius, thetamax, count, tokens, values );
+	::RiDiskV( height, radius, thetamax, count, tokens, values );
 }
 RendermanInterface::RtVoid Engine::RiDisplacementV( RtToken name, RtInt count, RtToken tokens[], RtPointer values[] )
 {
-    ::RiDisplacementV( name, count, tokens, values );
+	::RiDisplacementV( name, count, tokens, values );
 }
 RendermanInterface::RtVoid Engine::RiDisplayV( RtToken name, RtToken type, RtToken mode, RtInt count, RtToken tokens[], RtPointer values[] )
 {
-    ::RiDisplayV( name, type, mode, count, tokens, values );
+	::RiDisplayV( name, type, mode, count, tokens, values );
 }
 RendermanInterface::RtVoid Engine::RiEnd()
 {
-    ::RiEnd();
+	::RiEnd();
 }
 
 RendermanInterface::RtVoid Engine::RiIfBegin(RtString condition)
 {
-   ::RiIfBegin(condition);
+	::RiIfBegin(condition);
 }
 RendermanInterface::RtVoid Engine::RiIfEnd()
 {
-   ::RiIfEnd();
+	::RiIfEnd();
 }
 RendermanInterface::RtVoid Engine::RiElse()
 {
-   ::RiElse();
+	::RiElse();
 }
 RendermanInterface::RtVoid Engine::RiElseIf(RtString condition)
 {
-   ::RiElseIf(condition);
+	::RiElseIf(condition);
 }
 RendermanInterface::RtVoid Engine::RiErrorAbort( RtInt code, RtInt severity, RtString message )
 {
-    ::RiErrorAbort( code, severity, message );
+	::RiErrorAbort( code, severity, message );
 }
 //RendermanInterface::RtVoid Engine::RiErrorHandler(RtErrorFunc handler) { ::RiErrorHandler(handler); }
 RendermanInterface::RtVoid Engine::RiErrorIgnore( RtInt code, RtInt severity, RtString message )
 {
-    ::RiErrorIgnore( code, severity, message );
+	::RiErrorIgnore( code, severity, message );
 }
 RendermanInterface::RtVoid Engine::RiErrorPrint( RtInt code, RtInt severity, RtString message )
 {
-    ::RiErrorPrint( code, severity, message );
+	::RiErrorPrint( code, severity, message );
 }
 RendermanInterface::RtVoid Engine::RiExposure( RtFloat gain, RtFloat gamma )
 {
-    ::RiExposure( gain, gamma );
+	::RiExposure( gain, gamma );
 }
 RendermanInterface::RtVoid Engine::RiExteriorV( RtToken name, RtInt count, RtToken tokens[], RtPointer values[] )
 {
-    ::RiExteriorV( name, count, tokens, values );
+	::RiExteriorV( name, count, tokens, values );
 }
 RendermanInterface::RtVoid Engine::RiFormat( RtInt xresolution, RtInt yresolution, RtFloat pixelaspectratio )
 {
-    ::RiFormat( xresolution, yresolution, pixelaspectratio );
+	::RiFormat( xresolution, yresolution, pixelaspectratio );
 }
 RendermanInterface::RtVoid Engine::RiFrameAspectRatio( RtFloat frameratio )
 {
-    ::RiFrameAspectRatio( frameratio );
+	::RiFrameAspectRatio( frameratio );
 }
 RendermanInterface::RtVoid Engine::RiFrameBegin( RtInt number )
 {
-    ::RiFrameBegin( number );
+	::RiFrameBegin( number );
 }
 RendermanInterface::RtVoid Engine::RiFrameEnd()
 {
-    ::RiFrameEnd();
+	::RiFrameEnd();
 }
 RendermanInterface::RtFloat Engine::RiGaussianFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 {
-    return ::RiGaussianFilter( x, y, xwidth, ywidth );
+	return ::RiGaussianFilter( x, y, xwidth, ywidth );
 }
 RendermanInterface::RtVoid Engine::RiGeneralPolygonV( RtInt nloops, RtInt nverts[], RtInt count, RtToken tokens[], RtPointer values[] )
 {
-    ::RiGeneralPolygonV( nloops, nverts, count, tokens, values );
+	::RiGeneralPolygonV( nloops, nverts, count, tokens, values );
 }
 RendermanInterface::RtVoid Engine::RiGeometricApproximation( RtToken type, RtFloat value )
 {
-    ::RiGeometricApproximation( type, value );
+	::RiGeometricApproximation( type, value );
 }
 RendermanInterface::RtVoid Engine::RiGeometryV( RtToken type, RtInt count, RtToken tokens[], RtPointer values[] )
 {
-    ::RiGeometryV( type, count, tokens, values );
+	::RiGeometryV( type, count, tokens, values );
 }
 RendermanInterface::RtVoid Engine::RiHiderV( RtToken type, RtInt count, RtToken tokens[], RtPointer values[] )
 {
-    ::RiHiderV( type, count, tokens, values );
+	::RiHiderV( type, count, tokens, values );
 }
 RendermanInterface::RtVoid Engine::RiHyperboloidV( RtPoint point1, RtPoint point2, RtFloat thetamax, RtInt count, RtToken tokens[], RtPointer values[] )
 {
-    ::RiHyperboloidV( point1, point2, thetamax, count, tokens, values );
+	::RiHyperboloidV( point1, point2, thetamax, count, tokens, values );
 }
 RendermanInterface::RtVoid Engine::RiIdentity()
 {
-    ::RiIdentity();
+	::RiIdentity();
 }
 RendermanInterface::RtVoid Engine::RiIlluminate( RtLightHandle light, RtBoolean onoff )
 {
-    ::RiIlluminate( light, onoff );
+	::RiIlluminate( light, onoff );
 }
 RendermanInterface::RtVoid Engine::RiImagerV( RtToken name, RtInt count, RtToken tokens[], RtPointer values[] )
 {
-    ::RiImagerV( name, count, tokens, values );
+	::RiImagerV( name, count, tokens, values );
 }
 RendermanInterface::RtVoid Engine::RiInteriorV( RtToken name, RtInt count, RtToken tokens[], RtPointer values[] )
 {
-    ::RiInteriorV( name, count, tokens, values );
+	::RiInteriorV( name, count, tokens, values );
 }
 RendermanInterface::RtLightHandle Engine::RiLightSourceV( RtToken name, RtInt count, RtToken tokens[], RtPointer values[] )
 {
-    return ::RiLightSourceV( name, count, tokens, values );
+	return ::RiLightSourceV( name, count, tokens, values );
 }
 RendermanInterface::RtVoid Engine::RiMakeBumpV( RtString imagefile, RtString bumpfile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, RtInt count, RtToken tokens[], RtPointer values[] )
 {
-    ::RiMakeBumpV( imagefile, bumpfile, swrap, twrap, filterfunc, swidth, twidth, count, tokens, values );
+	::RiMakeBumpV( imagefile, bumpfile, swrap, twrap, filterfunc, swidth, twidth, count, tokens, values );
 }
 RendermanInterface::RtVoid Engine::RiMakeCubeFaceEnvironmentV( RtString px, RtString nx, RtString py, RtString ny, RtString pz, RtString nz, RtString reflfile, RtFloat fov, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, RtInt count, RtToken tokens[], RtPointer values[] )
 {
-    ::RiMakeCubeFaceEnvironmentV( px, nx, py, ny, pz, nz, reflfile, fov, filterfunc, swidth, twidth, count, tokens, values );
+	::RiMakeCubeFaceEnvironmentV( px, nx, py, ny, pz, nz, reflfile, fov, filterfunc, swidth, twidth, count, tokens, values );
 }
 RendermanInterface::RtVoid Engine::RiMakeLatLongEnvironmentV( RtString imagefile, RtString reflfile, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, RtInt count, RtToken tokens[], RtPointer values[] )
 {
-    ::RiMakeLatLongEnvironmentV( imagefile, reflfile, filterfunc, swidth, twidth, count, tokens, values );
+	::RiMakeLatLongEnvironmentV( imagefile, reflfile, filterfunc, swidth, twidth, count, tokens, values );
 }
 RendermanInterface::RtVoid Engine::RiMakeShadowV( RtString picfile, RtString shadowfile, RtInt count, RtToken tokens[], RtPointer values[] )
 {
-    ::RiMakeShadowV( picfile, shadowfile, count, tokens, values );
+	::RiMakeShadowV( picfile, shadowfile, count, tokens, values );
 }
 RendermanInterface::RtVoid Engine::RiMakeOcclusionV( RtInt npics, RtString picfile[], RtString shadowfile, RtInt count, RtToken tokens[], RtPointer values[] )
 {
-    ::RiMakeOcclusionV( npics, picfile, shadowfile, count, tokens, values );
+	::RiMakeOcclusionV( npics, picfile, shadowfile, count, tokens, values );
 }
 RendermanInterface::RtVoid Engine::RiMakeTextureV( RtString imagefile, RtString texturefile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, RtInt count, RtToken tokens[], RtPointer values[] )
 {
-    ::RiMakeTextureV( imagefile, texturefile, swrap, twrap, filterfunc, swidth, twidth, count, tokens, values );
+	::RiMakeTextureV( imagefile, texturefile, swrap, twrap, filterfunc, swidth, twidth, count, tokens, values );
 }
 RendermanInterface::RtVoid Engine::RiMatte( RtBoolean onoff )
 {
-    ::RiMatte( onoff );
+	::RiMatte( onoff );
 }
 RendermanInterface::RtVoid Engine::RiMotionBeginV( RtInt N, RtFloat times[] )
 {
-    ::RiMotionBeginV( N, times );
+	::RiMotionBeginV( N, times );
 }
 RendermanInterface::RtVoid Engine::RiMotionEnd()
 {
-    ::RiMotionEnd();
+	::RiMotionEnd();
 }
 RendermanInterface::RtVoid Engine::RiNuPatchV( RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin, RtFloat umax, RtInt nv, RtInt vorder, RtFloat vknot[], RtFloat vmin, RtFloat vmax, RtInt count, RtToken tokens[], RtPointer values[] )
 {
-    ::RiNuPatchV( nu, uorder, uknot, umin, umax, nv, vorder, vknot, vmin, vmax, count, tokens, values );
+	::RiNuPatchV( nu, uorder, uknot, umin, umax, nv, vorder, vknot, vmin, vmax, count, tokens, values );
 }
 RendermanInterface::RtObjectHandle Engine::RiObjectBegin()
 {
-    return ::RiObjectBegin();
+	return ::RiObjectBegin();
 }
 RendermanInterface::RtVoid Engine::RiObjectEnd()
 {
-    ::RiObjectEnd();
+	::RiObjectEnd();
 }
 RendermanInterface::RtVoid Engine::RiObjectInstance( RtObjectHandle handle )
 {
-    ::RiObjectInstance( handle );
+	::RiObjectInstance( handle );
 }
 RendermanInterface::RtVoid Engine::RiOpacity( RtColor Os )
 {
-    ::RiOpacity( Os );
+	::RiOpacity( Os );
 }
 RendermanInterface::RtVoid Engine::RiOptionV( RtToken name, RtInt count, RtToken tokens[], RtPointer values[] )
 {
-    ::RiOptionV( name, count, tokens, values );
+	::RiOptionV( name, count, tokens, values );
 }
 RendermanInterface::RtVoid Engine::RiOrientation( RtToken orientation )
 {
-    ::RiOrientation( orientation );
+	::RiOrientation( orientation );
 }
 RendermanInterface::RtVoid Engine::RiParaboloidV( RtFloat rmax, RtFloat zmin, RtFloat zmax, RtFloat thetamax, RtInt count, RtToken tokens[], RtPointer values[] )
 {
-    ::RiParaboloidV( rmax, zmin, zmax, thetamax, count, tokens, values );
+	::RiParaboloidV( rmax, zmin, zmax, thetamax, count, tokens, values );
 }
 RendermanInterface::RtVoid Engine::RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vwrap, RtInt count, RtToken tokens[], RtPointer values[] )
 {
-    ::RiPatchMeshV( type, nu, uwrap, nv, vwrap, count, tokens, values );
+	::RiPatchMeshV( type, nu, uwrap, nv, vwrap, count, tokens, values );
 }
 RendermanInterface::RtVoid Engine::RiPatchV( RtToken type, RtInt count, RtToken tokens[], RtPointer values[] )
 {
-    ::RiPatchV( type, count, tokens, values );
+	::RiPatchV( type, count, tokens, values );
 }
 RendermanInterface::RtVoid Engine::RiPerspective( RtFloat fov )
 {
-    ::RiPerspective( fov );
+	::RiPerspective( fov );
 }
 RendermanInterface::RtVoid Engine::RiPixelFilter( RtFilterFunc function, RtFloat xwidth, RtFloat ywidth )
 {
-    ::RiPixelFilter( function, xwidth, ywidth );
+	::RiPixelFilter( function, xwidth, ywidth );
 }
 RendermanInterface::RtVoid Engine::RiPixelSamples( RtFloat xsamples, RtFloat ysamples )
 {
-    ::RiPixelSamples( xsamples, ysamples );
+	::RiPixelSamples( xsamples, ysamples );
 }
 RendermanInterface::RtVoid Engine::RiPixelVariance( RtFloat variance )
 {
-    ::RiPixelVariance( variance );
+	::RiPixelVariance( variance );
 }
 
 RendermanInterface::RtVoid Engine::RiCurvesV( RtToken type, RtInt ncurves,
         RtInt nvertices[], RtToken wrap,
         RtInt n, RtToken tokens[], RtPointer values[] )
 {
-    ::RiCurvesV( type, ncurves, nvertices, wrap, n, tokens, values );
+	::RiCurvesV( type, ncurves, nvertices, wrap, n, tokens, values );
 }
 RendermanInterface::RtVoid Engine::RiPointsV( RtInt vertices, RtInt count, RtToken tokens[], RtPointer values[] )
 {
-    ::RiPointsV( vertices, count, tokens, values );
+	::RiPointsV( vertices, count, tokens, values );
 }
 RendermanInterface::RtVoid Engine::RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], RtInt verts[], RtInt count, RtToken tokens[], RtPointer values[] )
 {
-    ::RiPointsGeneralPolygonsV( npolys, nloops, nverts, verts, count, tokens, values );
+	::RiPointsGeneralPolygonsV( npolys, nloops, nverts, verts, count, tokens, values );
 }
 RendermanInterface::RtVoid Engine::RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[], RtInt count, RtToken tokens[], RtPointer values[] )
 {
-    ::RiPointsPolygonsV( npolys, nverts, verts, count, tokens, values );
+	::RiPointsPolygonsV( npolys, nverts, verts, count, tokens, values );
 }
 RendermanInterface::RtVoid Engine::RiPolygonV( RtInt nvertices, RtInt count, RtToken tokens[], RtPointer values[] )
 {
-    ::RiPolygonV( nvertices, count, tokens, values );
+	::RiPolygonV( nvertices, count, tokens, values );
 }
 RendermanInterface::RtVoid Engine::RiProcedural( RtPointer data, RtBound bound, RtFunc refineproc, RtFunc freeproc )
 {
-    ::RiProcedural( data, bound, ( RtProcSubdivFunc ) refineproc, ( RtProcFreeFunc ) freeproc );
+	::RiProcedural( data, bound, ( RtProcSubdivFunc ) refineproc, ( RtProcFreeFunc ) freeproc );
 }
 RendermanInterface::RtVoid Engine::RiProjectionV( RtToken name, RtInt count, RtToken tokens[], RtPointer values[] )
 {
-    ::RiProjectionV( name, count, tokens, values );
+	::RiProjectionV( name, count, tokens, values );
 }
 RendermanInterface::RtVoid Engine::RiQuantize( RtToken type, RtInt one, RtInt min, RtInt max, RtFloat ditheramplitude )
 {
-    ::RiQuantize( type, one, min, max, ditheramplitude );
+	::RiQuantize( type, one, min, max, ditheramplitude );
 }
 RendermanInterface::RtVoid Engine::RiReadArchive( RtToken data, RtArchiveCallback callback )
 {
-    ::RiReadArchive( data , callback );
+	::RiReadArchive( data , callback );
 }
 RendermanInterface::RtVoid Engine::RiRelativeDetail( RtFloat relativedetail )
 {
-    ::RiRelativeDetail( relativedetail );
+	::RiRelativeDetail( relativedetail );
 }
 RendermanInterface::RtVoid Engine::RiReverseOrientation()
 {
-    ::RiReverseOrientation();
+	::RiReverseOrientation();
 }
 RendermanInterface::RtVoid Engine::RiRotate( RtFloat angle, RtFloat dx, RtFloat dy, RtFloat dz )
 {
-    ::RiRotate( angle, dx, dy, dz );
+	::RiRotate( angle, dx, dy, dz );
 }
 RendermanInterface::RtVoid Engine::RiScale( RtFloat sx, RtFloat sy, RtFloat sz )
 {
-    ::RiScale( sx, sy, sz );
+	::RiScale( sx, sy, sz );
 }
 RendermanInterface::RtVoid Engine::RiScreenWindow( RtFloat left, RtFloat right, RtFloat bottom, RtFloat top )
 {
-    ::RiScreenWindow( left, right, bottom, top );
+	::RiScreenWindow( left, right, bottom, top );
 }
 RendermanInterface::RtVoid Engine::RiShadingInterpolation( RtToken type )
 {
-    ::RiShadingInterpolation( type );
+	::RiShadingInterpolation( type );
 }
 RendermanInterface::RtVoid Engine::RiShadingRate( RtFloat size )
 {
-    ::RiShadingRate( size );
+	::RiShadingRate( size );
 }
 RendermanInterface::RtVoid Engine::RiShutter( RtFloat opentime, RtFloat closetime )
 {
-    ::RiShutter( opentime, closetime );
+	::RiShutter( opentime, closetime );
 }
 RendermanInterface::RtVoid Engine::RiSides( RtInt nsides )
 {
-    ::RiSides( nsides );
+	::RiSides( nsides );
 }
 RendermanInterface::RtFloat Engine::RiSincFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 {
-    return ::RiSincFilter( x, y, xwidth, ywidth );
+	return ::RiSincFilter( x, y, xwidth, ywidth );
 }
 RendermanInterface::RtVoid Engine::RiSkew( RtFloat angle, RtFloat dx1, RtFloat dy1, RtFloat dz1, RtFloat dx2, RtFloat dy2, RtFloat dz2 )
 {
-    ::RiSkew( angle, dx1, dy1, dz1, dx2, dy2, dz2 );
+	::RiSkew( angle, dx1, dy1, dz1, dx2, dy2, dz2 );
 }
 RendermanInterface::RtVoid Engine::RiSolidBegin( RtToken type )
 {
-    ::RiSolidBegin( type );
+	::RiSolidBegin( type );
 }
 RendermanInterface::RtVoid Engine::RiSolidEnd()
 {
-    ::RiSolidEnd();
+	::RiSolidEnd();
 }
 RendermanInterface::RtVoid Engine::RiSphereV( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, RtInt count, RtToken tokens[], RtPointer values[] )
 {
-    ::RiSphereV( radius, zmin, zmax, thetamax, count, tokens, values );
+	::RiSphereV( radius, zmin, zmax, thetamax, count, tokens, values );
 }
 RendermanInterface::RtVoid Engine::RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtInt vertices[], RtInt ntags, RtToken tags[], RtInt nargs[], RtInt intargs[], RtFloat floatargs[], RtInt count, RtToken tokens[], RtPointer values[] )
 {
-    ::RiSubdivisionMeshV( scheme, nfaces, nvertices, vertices, ntags, tags, nargs, intargs, floatargs, count, tokens, values );
+	::RiSubdivisionMeshV( scheme, nfaces, nvertices, vertices, ntags, tags, nargs, intargs, floatargs, count, tokens, values );
 }
 RendermanInterface::RtVoid Engine::RiSurfaceV( RtToken name, RtInt count, RtToken tokens[], RtPointer values[] )
 {
-    ::RiSurfaceV( name, count, tokens, values );
+	::RiSurfaceV( name, count, tokens, values );
 }
 RendermanInterface::RtVoid Engine::RiTextureCoordinates( RtFloat s1, RtFloat t1, RtFloat s2, RtFloat t2, RtFloat s3, RtFloat t3, RtFloat s4, RtFloat t4 )
 {
-    ::RiTextureCoordinates( s1, t1, s2, t2, s3, t3, s4, t4 );
+	::RiTextureCoordinates( s1, t1, s2, t2, s3, t3, s4, t4 );
 }
 RendermanInterface::RtVoid Engine::RiTorusV( RtFloat majorrad, RtFloat minorrad, RtFloat phimin, RtFloat phimax, RtFloat thetamax, RtInt count, RtToken tokens[], RtPointer values[] )
 {
-    ::RiTorusV( majorrad, minorrad, phimin, phimax, thetamax, count, tokens, values );
+	::RiTorusV( majorrad, minorrad, phimin, phimax, thetamax, count, tokens, values );
 }
 RendermanInterface::RtVoid Engine::RiTransform( RtMatrix transform )
 {
-    ::RiTransform( transform );
+	::RiTransform( transform );
 }
 RendermanInterface::RtVoid Engine::RiTransformBegin()
 {
-    ::RiTransformBegin();
+	::RiTransformBegin();
 }
 RendermanInterface::RtVoid Engine::RiTransformEnd()
 {
-    ::RiTransformEnd();
+	::RiTransformEnd();
 }
 RendermanInterface::RtPoint* Engine::RiTransformPoints( RtToken fromspace, RtToken tospace, RtInt npoints, RtPoint points[] )
 {
-    return ::RiTransformPoints( fromspace, tospace, npoints, points );
+	return ::RiTransformPoints( fromspace, tospace, npoints, points );
 }
 RendermanInterface::RtVoid Engine::RiTranslate( RtFloat dx, RtFloat dy, RtFloat dz )
 {
-    ::RiTranslate( dx, dy, dz );
+	::RiTranslate( dx, dy, dz );
 }
 RendermanInterface::RtFloat Engine::RiTriangleFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 {
-    return ::RiTriangleFilter( x, y, xwidth, ywidth );
+	return ::RiTriangleFilter( x, y, xwidth, ywidth );
 }
 RendermanInterface::RtVoid Engine::RiTrimCurve( RtInt nloops, RtInt ncurves[], RtInt order[], RtFloat knot[], RtFloat min[], RtFloat max[], RtInt n[], RtFloat u[], RtFloat v[], RtFloat w[] )
 {
-    ::RiTrimCurve( nloops, ncurves, order, knot, min, max, n, u, v, w );
+	::RiTrimCurve( nloops, ncurves, order, knot, min, max, n, u, v, w );
 }
 RendermanInterface::RtVoid Engine::RiWorldBegin()
 {
-    ::RiWorldBegin();
+	::RiWorldBegin();
 }
 RendermanInterface::RtVoid Engine::RiWorldEnd()
 {
-    ::RiWorldEnd();
+	::RiWorldEnd();
 }
 RendermanInterface::RtVoid Engine::RiShaderLayerV( RtToken type, RtToken name, RtToken layername, RtInt count, RtToken tokens[], RtPointer values[] )
 {
@@ -483,61 +483,61 @@ RendermanInterface::RtVoid Engine::RiConnectShaderLayers( RtToken type, RtToken 
 }
 RendermanInterface::RtFilterFunc Engine::GetFilterFunction( RtToken type )
 {
-    if ( strcmp( type, "box" ) == 0 )
-        return ( &::RiBoxFilter );
-    else if ( strcmp( type, "gaussian" ) == 0 )
-        return ( &::RiGaussianFilter );
-    else if ( strcmp( type, "triangle" ) == 0 )
-        return ( &::RiTriangleFilter );
-    else if ( strcmp( type, "catmull-rom" ) == 0 )
-        return ( &::RiCatmullRomFilter );
-    else if ( strcmp( type, "sinc" ) == 0 )
-        return ( &::RiSincFilter );
-    else if ( strcmp( type, "bessel" ) == 0 )
-        return ( &::RiBesselFilter );
-    else if ( strcmp( type, "disk" ) == 0 )
-        return ( &::RiDiskFilter );
+	if ( strcmp( type, "box" ) == 0 )
+		return ( &::RiBoxFilter );
+	else if ( strcmp( type, "gaussian" ) == 0 )
+		return ( &::RiGaussianFilter );
+	else if ( strcmp( type, "triangle" ) == 0 )
+		return ( &::RiTriangleFilter );
+	else if ( strcmp( type, "catmull-rom" ) == 0 )
+		return ( &::RiCatmullRomFilter );
+	else if ( strcmp( type, "sinc" ) == 0 )
+		return ( &::RiSincFilter );
+	else if ( strcmp( type, "bessel" ) == 0 )
+		return ( &::RiBesselFilter );
+	else if ( strcmp( type, "disk" ) == 0 )
+		return ( &::RiDiskFilter );
 
-    return ( NULL );
+	return ( NULL );
 }
 RendermanInterface::RtBasis* Engine::GetBasisMatrix( RtToken type )
 {
-    if ( strcmp( type, "bezier" ) == 0 )
-        return ( &::RiBezierBasis );
-    else if ( strcmp( type, "b-spline" ) == 0 )
-        return ( &::RiBSplineBasis );
-    else if ( strcmp( type, "catmull-rom" ) == 0 )
-        return ( &::RiCatmullRomBasis );
-    else if ( strcmp( type, "hermite" ) == 0 )
-        return ( &::RiHermiteBasis );
-    else if ( strcmp( type, "power" ) == 0 )
-        return ( &::RiPowerBasis );
+	if ( strcmp( type, "bezier" ) == 0 )
+		return ( &::RiBezierBasis );
+	else if ( strcmp( type, "b-spline" ) == 0 )
+		return ( &::RiBSplineBasis );
+	else if ( strcmp( type, "catmull-rom" ) == 0 )
+		return ( &::RiCatmullRomBasis );
+	else if ( strcmp( type, "hermite" ) == 0 )
+		return ( &::RiHermiteBasis );
+	else if ( strcmp( type, "power" ) == 0 )
+		return ( &::RiPowerBasis );
 
-    return ( NULL );
+	return ( NULL );
 }
 RendermanInterface::RtFunc Engine::GetProceduralFunction( RtToken type )
 {
-    if ( strcmp( type, "DelayedReadArchive" ) == 0 )
-        return ( ( void ( * ) ( void ) ) &::RiProcDelayedReadArchive );
-    else if ( strcmp( type, "RunProgram" ) == 0 )
-        return ( ( void ( * ) ( void ) ) &::RiProcRunProgram );
-    else if ( strcmp( type, "DynamicLoad" ) == 0 )
-        return ( ( void ( * ) ( void ) ) &::RiProcDynamicLoad );
-    else if ( strcmp( type, "RiProcFree" ) == 0 )
-        return ( ( void ( * ) ( void ) ) &::RiProcFree );
+	if ( strcmp( type, "DelayedReadArchive" ) == 0 )
+		return ( ( void ( * ) ( void ) ) &::RiProcDelayedReadArchive );
+	else if ( strcmp( type, "RunProgram" ) == 0 )
+		return ( ( void ( * ) ( void ) ) &::RiProcRunProgram );
+	else if ( strcmp( type, "DynamicLoad" ) == 0 )
+		return ( ( void ( * ) ( void ) ) &::RiProcDynamicLoad );
+	else if ( strcmp( type, "RiProcFree" ) == 0 )
+		return ( ( void ( * ) ( void ) ) &::RiProcFree );
 
-    return ( NULL );
+	return ( NULL );
 }
 
 
 RendermanInterface* CreateRIBEngine()
 {
-    return ( new Engine() );
+	return ( new Engine() );
 }
 
 void DestroyRIBEngine( RendermanInterface* engine )
 {
-    delete( engine );
+	delete( engine );
 }
 
 

@@ -54,117 +54,119 @@ extern __Basis	gPowerBasis;
 
 class CqSplineCubic
 {
-public:
-    CqSplineCubic( TqInt cu = 4 );
-    virtual	~CqSplineCubic()
-    {}
+	public:
+		CqSplineCubic( TqInt cu = 4 );
+		virtual	~CqSplineCubic()
+		{}
 
-    virtual	CqVector4D	Evaluate( TqFloat t ) const;
-    virtual	void	InitFD( TqInt n );
-    virtual	CqVector4D	EvaluateFD();
-    virtual	TqInt	cSections() const;
+		virtual	CqVector4D	Evaluate( TqFloat t ) const;
+		virtual	void	InitFD( TqInt n );
+		virtual	CqVector4D	EvaluateFD();
+		virtual	TqInt	cSections() const;
 
-    /** Get a reference to the array of control points.
-     */
-    std::vector<CqVector4D>& aControlPoints()
-    {
-        return ( m_aControlPoints );
-    }
-    /** Get a reference to the cubic spline basis matrix.
-     */
-    CqMatrix&	matBasis()
-    {
-        return ( m_matBasis );
-    }
-    /** Set the cubic spline basis matrix.
-     * \param mat Basis matrix.
-     */
-    void	SetmatBasis( CqMatrix& mat )
-    {
-        m_matBasis = mat;
-    }
-    /** Set the cubic spline basis matrix.
-     * \param strName Basis name.
-     */
-    void	SetBasis( const CqString& strName )
-    {
-        __Basis * pVals = 0;
-		TqInt step = 3;
-        if ( strName.compare( "bezier" ) == 0 )
+		/** Get a reference to the array of control points.
+		 */
+		std::vector<CqVector4D>& aControlPoints()
 		{
-            pVals = &gBezierBasis;
-			step = 3;
+			return ( m_aControlPoints );
 		}
-        else if ( strName.compare( "bspline" ) == 0 )
+		/** Get a reference to the cubic spline basis matrix.
+		 */
+		CqMatrix&	matBasis()
 		{
-            pVals = &gBSplineBasis;
-			step = 1;
+			return ( m_matBasis );
 		}
-        else if ( strName.compare( "catmull-rom" ) == 0 )
+		/** Set the cubic spline basis matrix.
+		 * \param mat Basis matrix.
+		 */
+		void	SetmatBasis( CqMatrix& mat )
 		{
-            pVals = &gCatmullRomBasis;
-			step = 1;
+			m_matBasis = mat;
 		}
-        else if ( strName.compare( "hermite" ) == 0 )
+		/** Set the cubic spline basis matrix.
+		 * \param strName Basis name.
+		 */
+		void	SetBasis( const CqString& strName )
 		{
-            pVals = &gHermiteBasis;
-			step = 2;
+			__Basis * pVals = 0;
+			TqInt step = 3;
+			if ( strName.compare( "bezier" ) == 0 )
+			{
+				pVals = &gBezierBasis;
+				step = 3;
+			}
+			else if ( strName.compare( "bspline" ) == 0 )
+			{
+				pVals = &gBSplineBasis;
+				step = 1;
+			}
+			else if ( strName.compare( "catmull-rom" ) == 0 )
+			{
+				pVals = &gCatmullRomBasis;
+				step = 1;
+			}
+			else if ( strName.compare( "hermite" ) == 0 )
+			{
+				pVals = &gHermiteBasis;
+				step = 2;
+			}
+			else if ( strName.compare( "power" ) == 0 )
+			{
+				pVals = &gPowerBasis;
+				step =4;
+			}
+
+			if ( pVals )
+			{
+				CqMatrix m;
+				m = *pVals;
+				SetmatBasis( m );
+				SetStep( step );
+			}
 		}
-        else if ( strName.compare( "power" ) == 0 )
+
+		/** Get the control point step size for the evaluation window.
+		 * \return Integer step size.
+		 */
+		TqInt	Step() const
 		{
-            pVals = &gPowerBasis;
-			step =4;
+			return ( m_Step );
+		}
+		/** Set the control point step size for the evaluation window.
+		 * \param Step Integer step size.
+		 */
+		void	SetStep( const TqInt Step )
+		{
+			m_Step = Step;
 		}
 
-        if ( pVals )
-        {
-            CqMatrix m;
-            m = *pVals;
-            SetmatBasis( m );
-			SetStep( step );
-        }
-    }
+		/** Indexed access to the control points.
+		 * \param i Integer index.
+		 */
+		CqVector4D&	operator[] ( TqInt i )
+		{
+			assert( i<m_cu );
+			return ( m_aControlPoints[ i ] );
+		}
+		/** Indexed access to the control points.
+		 * \param i Integer index.
+		 */
+		const CqVector4D&	operator[] ( TqInt i ) const
+		{
+			assert( i<m_cu );
+			return ( m_aControlPoints[ i ] );
+		}
 
-    /** Get the control point step size for the evaluation window.
-     * \return Integer step size.
-     */
-    TqInt	Step() const
-    {
-        return ( m_Step );
-    }
-    /** Set the control point step size for the evaluation window.
-     * \param Step Integer step size.
-     */
-    void	SetStep( const TqInt Step )
-    {
-        m_Step = Step;
-    }
+	protected:
+		CqMatrix	m_matBasis;						///< Basis matrix.
+		TqInt	m_Step;							///< Evaluation window step size.
+		TqInt	m_cu;							///< Number of control points.
+		std::vector<CqVector4D>	m_aControlPoints;		///< Array of 4D control points.
 
-    /** Indexed access to the control points.
-     * \param i Integer index.
-     */
-    CqVector4D&	operator[] ( TqInt i )
-    {
-        assert( i<m_cu ); return ( m_aControlPoints[ i ] );
-    }
-    /** Indexed access to the control points.
-     * \param i Integer index.
-     */
-    const CqVector4D&	operator[] ( TqInt i ) const
-    {
-        assert( i<m_cu ); return ( m_aControlPoints[ i ] );
-    }
-
-protected:
-    CqMatrix	m_matBasis;						///< Basis matrix.
-    TqInt	m_Step;							///< Evaluation window step size.
-    TqInt	m_cu;							///< Number of control points.
-    std::vector<CqVector4D>	m_aControlPoints;		///< Array of 4D control points.
-
-    CqVector4D	m_vecFDPoint;					///< Forward difference evaluation parameters.
-    CqVector4D	m_vecFDDelta;					///< Forward difference evaluation parameters.
-    CqVector4D	m_vecFDDelta2;					///< Forward difference evaluation parameters.
-    CqVector4D	m_vecFDDelta3;					///< Forward difference evaluation parameters.
+		CqVector4D	m_vecFDPoint;					///< Forward difference evaluation parameters.
+		CqVector4D	m_vecFDDelta;					///< Forward difference evaluation parameters.
+		CqVector4D	m_vecFDDelta2;					///< Forward difference evaluation parameters.
+		CqVector4D	m_vecFDDelta3;					///< Forward difference evaluation parameters.
 }
 ;
 

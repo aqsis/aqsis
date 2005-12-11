@@ -45,57 +45,57 @@ typedef std::string CqStringBase;
 
 class CqString : public CqStringBase
 {
-public:
-    CqString() : CqStringBase()
-    {}
-    CqString( const CqString& str ) : CqStringBase( str )
-    {}
-    CqString( const CqStringBase& str ) : CqStringBase( str )
-    {}
-    CqString( const TqChar* s ) : CqStringBase( s )
-    {}
-    /** Construct from an integer,
-     */
-    CqString( TqInt i )
-    {
-        *this += i;
-    }
-    /** Construct from a float,
-     */
-    CqString( TqFloat f )
-    {
-        *this += f;
-    }
-
-
-    inline static TqUlong	hash( const char *strName )
-    {
-        TqUlong retval = 0;
-		const char *p = strName;
-		retval = *p;
-
-	    if(retval) 
+	public:
+		CqString() : CqStringBase()
+		{}
+		CqString( const CqString& str ) : CqStringBase( str )
+		{}
+		CqString( const CqStringBase& str ) : CqStringBase( str )
+		{}
+		CqString( const TqChar* s ) : CqStringBase( s )
+		{}
+		/** Construct from an integer,
+		 */
+		CqString( TqInt i )
 		{
-			for (p += 1; *p != '\0'; p++)
-			{
-				retval = (retval << 5) - retval + *p;
-			}
+			*this += i;
 		}
-	return retval;
-	}
+		/** Construct from a float,
+		 */
+		CqString( TqFloat f )
+		{
+			*this += f;
+		}
 
-    // Format a string printf style.
-    CqString&	Format( const TqChar* Format, ... );
-    CqString	ExpandEscapes() const;
-    CqString	TranslateEscapes() const;
-	CqString	ToLower() const;
 
-    // Concatenation functions not provided by std::string
-    CqString&	operator+=( const CqString& str );
-    CqString&	operator+=( const TqChar* str );
-    CqString&	operator+=( TqChar c );
-    CqString&	operator+=( TqInt i );
-    CqString&	operator+=( TqFloat f );
+		inline static TqUlong	hash( const char *strName )
+		{
+			TqUlong retval = 0;
+			const char *p = strName;
+			retval = *p;
+
+			if(retval)
+			{
+				for (p += 1; *p != '\0'; p++)
+				{
+					retval = (retval << 5) - retval + *p;
+				}
+			}
+			return retval;
+		}
+
+		// Format a string printf style.
+		CqString&	Format( const TqChar* Format, ... );
+		CqString	ExpandEscapes() const;
+		CqString	TranslateEscapes() const;
+		CqString	ToLower() const;
+
+		// Concatenation functions not provided by std::string
+		CqString&	operator+=( const CqString& str );
+		CqString&	operator+=( const TqChar* str );
+		CqString&	operator+=( TqChar c );
+		CqString&	operator+=( TqInt i );
+		CqString&	operator+=( TqFloat f );
 };
 
 
@@ -118,9 +118,9 @@ CqString operator-( const CqString& strAdd1, const CqString& strAdd2 );
 template<typename value_t>
 CqString ToString(const value_t& Value)
 {
-    std::ostringstream buffer;
-    buffer << Value;
-    return CqString(buffer.str());
+	std::ostringstream buffer;
+	buffer << Value;
+	return CqString(buffer.str());
 }
 
 //-----------------------------------------------------------------------

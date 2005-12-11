@@ -72,89 +72,90 @@ extern bool fRequest;
 extern bool fParams;
 
 extern "C" const char* StandardParameters[][2] =
-        {
-            {"Ka", "uniform float" },
-            {"Kd", "uniform float" },
-            {"Ks", "uniform float" },
-            {"Kr", "uniform float" },
-            {"roughness", "uniform float" },
-            {"texturename", "uniform string" },
-            {"specularcolor", "uniform color" },
-            {"intensity", "uniform float" },
-            {"lightcolor", "uniform color" },
-            {"from", "uniform point" },
-            {"to", "uniform point" },
-            {"coneangle", "uniform float" },
-            {"conedeltaangle", "uniform float" },
-            {"beamdistribution", "uniform float" },
-            {"mindistance", "uniform float" },
-            {"maxdistance", "uniform float" },
-            {"distance", "uniform float" },
-            {"background", "uniform color" },
-            {"fov", "uniform float" },
-            {"P", "vertex point" },
-            {"Pz", "vertex point" },
-            {"Pw", "vertex hpoint" },
-            {"N", "varying normal" },
-            {"Ng", "varying normal" },
-            {"Np", "uniform normal" },
-            {"Cs", "varying color" },
-            {"Os", "varying color" },
-            {"s", "varying float" },
-            {"t", "varying float" },
-            {"st", "varying float[2]" },
-            {"gridsize", "uniform integer" },
-            {"texturememory", "uniform integer" },
-            {"bucketsize", "uniform integer[2]" },
-            {"eyesplits", "uniform integer" },
-            {"shader", "uniform string" },
-            {"archive", "uniform string" },
-            {"texture", "uniform string" },
-            {"display", "uniform string" },
-            {"plugin", "uniform string" },
-            {"auto_shadows", "uniform string" },
-            {"endofframe", "uniform integer" },
-			{"offset", "uniform float"},
-            {"renderinfo", "uniform integer" },
-            {"sphere", "uniform float" },
-            {"coordinatesystem", "uniform string" },
-            {"shadows", "uniform string" },
-            {"shadowmapsize", "uniform integer[2]" },
-            {"shadowangle", "uniform float" },
-            {"shadowmapname", "uniform string" },
-            {"shadow_shadingrate", "uniform float" },
-            {"name", "uniform string" },
-            {"shadinggroup", "uniform string" },
-            {"sense", "uniform string" },
-            {"compression", "uniform string" },
-            {"quality", "uniform integer" },
-            {"bias0", "uniform float" },
-            {"bias1", "uniform float" },
-            {"bias", "uniform float" },
-            {"jitter", "uniform integer" },
-            {"depthfilter", "uniform string" },
-            {"width", "varying float" },
-            {"constantwidth", "constant float" },
-            {"binary", "uniform integer" },
-            {"procedural", "uniform string" },
-            {"quantize", "uniform float[4]" },
-            {"dither", "uniform float" },
-            {"interpolateboundary", "uniform integer" },
-            {"zthreshold", "uniform color" },
-            { NULL , NULL }
-        };
+	    {
+	        {"Ka", "uniform float"
+	        },
+	        {"Kd", "uniform float" },
+	        {"Ks", "uniform float" },
+	        {"Kr", "uniform float" },
+	        {"roughness", "uniform float" },
+	        {"texturename", "uniform string" },
+	        {"specularcolor", "uniform color" },
+	        {"intensity", "uniform float" },
+	        {"lightcolor", "uniform color" },
+	        {"from", "uniform point" },
+	        {"to", "uniform point" },
+	        {"coneangle", "uniform float" },
+	        {"conedeltaangle", "uniform float" },
+	        {"beamdistribution", "uniform float" },
+	        {"mindistance", "uniform float" },
+	        {"maxdistance", "uniform float" },
+	        {"distance", "uniform float" },
+	        {"background", "uniform color" },
+	        {"fov", "uniform float" },
+	        {"P", "vertex point" },
+	        {"Pz", "vertex point" },
+	        {"Pw", "vertex hpoint" },
+	        {"N", "varying normal" },
+	        {"Ng", "varying normal" },
+	        {"Np", "uniform normal" },
+	        {"Cs", "varying color" },
+	        {"Os", "varying color" },
+	        {"s", "varying float" },
+	        {"t", "varying float" },
+	        {"st", "varying float[2]" },
+	        {"gridsize", "uniform integer" },
+	        {"texturememory", "uniform integer" },
+	        {"bucketsize", "uniform integer[2]" },
+	        {"eyesplits", "uniform integer" },
+	        {"shader", "uniform string" },
+	        {"archive", "uniform string" },
+	        {"texture", "uniform string" },
+	        {"display", "uniform string" },
+	        {"plugin", "uniform string" },
+	        {"auto_shadows", "uniform string" },
+	        {"endofframe", "uniform integer" },
+	        {"offset", "uniform float"},
+	        {"renderinfo", "uniform integer" },
+	        {"sphere", "uniform float" },
+	        {"coordinatesystem", "uniform string" },
+	        {"shadows", "uniform string" },
+	        {"shadowmapsize", "uniform integer[2]" },
+	        {"shadowangle", "uniform float" },
+	        {"shadowmapname", "uniform string" },
+	        {"shadow_shadingrate", "uniform float" },
+	        {"name", "uniform string" },
+	        {"shadinggroup", "uniform string" },
+	        {"sense", "uniform string" },
+	        {"compression", "uniform string" },
+	        {"quality", "uniform integer" },
+	        {"bias0", "uniform float" },
+	        {"bias1", "uniform float" },
+	        {"bias", "uniform float" },
+	        {"jitter", "uniform integer" },
+	        {"depthfilter", "uniform string" },
+	        {"width", "varying float" },
+	        {"constantwidth", "constant float" },
+	        {"binary", "uniform integer" },
+	        {"procedural", "uniform string" },
+	        {"quantize", "uniform float[4]" },
+	        {"dither", "uniform float" },
+	        {"interpolateboundary", "uniform integer" },
+	        {"zthreshold", "uniform color" },
+	        { NULL , NULL }
+	    };
 
 void StandardDeclarations( RendermanInterface& CallbackInterface )
 {
-    // Declare standard arguments
-    unsigned int i = 0;
-    while( StandardParameters[ i ][0] != NULL )
-    {
-        std::string name( StandardParameters[i][0] );
-        std::string type( StandardParameters[i][1] );
-        ParserDeclare( CallbackInterface, name, type );
-        i++;
-    };
+	// Declare standard arguments
+	unsigned int i = 0;
+	while( StandardParameters[ i ][0] != NULL )
+	{
+		std::string name( StandardParameters[i][0] );
+		std::string type( StandardParameters[i][1] );
+		ParserDeclare( CallbackInterface, name, type );
+		i++;
+	};
 }
 
 
@@ -167,109 +168,109 @@ void CleanupDeclarations( RendermanInterface& CallbackInterface )
 /// Retrieve the current state of the parser internal variables
 CqRIBParserState GetParserState()
 {
-    CqRIBParserState state;
+	CqRIBParserState state;
 
-    state.m_pParseInputFile = ParseInputFile;
-    state.m_ParseStreamName = ParseStreamName;
-    state.m_pBinaryDecoder = BinaryDecoder;
-    state.m_pParseErrorStream = ParseErrorStream;
-    state.m_pArchiveCallback = pArchiveCallback;
+	state.m_pParseInputFile = ParseInputFile;
+	state.m_ParseStreamName = ParseStreamName;
+	state.m_pBinaryDecoder = BinaryDecoder;
+	state.m_pParseErrorStream = ParseErrorStream;
+	state.m_pArchiveCallback = pArchiveCallback;
 
-    state.m_pParseCallbackInterface = ParseCallbackInterface;
-    state.m_ParseLineNumber = ParseLineNumber;
-    state.m_ParseSucceeded = ParseSucceeded;
+	state.m_pParseCallbackInterface = ParseCallbackInterface;
+	state.m_ParseLineNumber = ParseLineNumber;
+	state.m_ParseSucceeded = ParseSucceeded;
 
-    state.m_fRecovering = fRecovering;
-    state.m_fRequest = fRequest;
-    state.m_fParams = fParams;
+	state.m_fRecovering = fRecovering;
+	state.m_fRequest = fRequest;
+	state.m_fParams = fParams;
 
-    state.m_pYY_STATE = ( void* ) current_flex_buffer();
+	state.m_pYY_STATE = ( void* ) current_flex_buffer();
 
-    return state;
+	return state;
 };
 
 /// Retrieve the current state of the parser internal variables
 void SetParserState( CqRIBParserState& state )
 {
-    ParseInputFile = state.m_pParseInputFile;
-    ParseStreamName = state.m_ParseStreamName;
-    BinaryDecoder = state.m_pBinaryDecoder;
-    ParseErrorStream = state.m_pParseErrorStream;
-    pArchiveCallback = state.m_pArchiveCallback;
+	ParseInputFile = state.m_pParseInputFile;
+	ParseStreamName = state.m_ParseStreamName;
+	BinaryDecoder = state.m_pBinaryDecoder;
+	ParseErrorStream = state.m_pParseErrorStream;
+	pArchiveCallback = state.m_pArchiveCallback;
 
-    ParseCallbackInterface = state.m_pParseCallbackInterface;
-    ParseLineNumber = state.m_ParseLineNumber;
-    ParseSucceeded = state.m_ParseSucceeded;
+	ParseCallbackInterface = state.m_pParseCallbackInterface;
+	ParseLineNumber = state.m_ParseLineNumber;
+	ParseSucceeded = state.m_ParseSucceeded;
 
-    fRecovering = state.m_fRecovering;
-    fRequest = state.m_fRequest;
-    fParams = state.m_fParams;
+	fRecovering = state.m_fRecovering;
+	fRequest = state.m_fRequest;
+	fParams = state.m_fParams;
 
-    yy_switch_to_buffer( ( struct yy_buffer_state* ) state.m_pYY_STATE ) ;
+	yy_switch_to_buffer( ( struct yy_buffer_state* ) state.m_pYY_STATE ) ;
 };
 
 bool Parse( FILE *InputStream, const std::string StreamName, RendermanInterface& CallbackInterface, std::ostream& ErrorStream, RtArchiveCallback callback )
 {
-    ParseInputFile = InputStream;
-    ParseStreamName = StreamName;
-    ParseCallbackInterface = &CallbackInterface;
-    ParseErrorStream = &ErrorStream;
-    ParseLineNumber = 1;
-    ParseSucceeded = true;
-    fRequest = false;
-    fRecovering = false;
-    fParams = false;
-    pArchiveCallback = callback;
+	ParseInputFile = InputStream;
+	ParseStreamName = StreamName;
+	ParseCallbackInterface = &CallbackInterface;
+	ParseErrorStream = &ErrorStream;
+	ParseLineNumber = 1;
+	ParseSucceeded = true;
+	fRequest = false;
+	fRecovering = false;
+	fParams = false;
+	pArchiveCallback = callback;
 
-    BinaryDecoder = new CqRibBinaryDecoder( InputStream );
-    // 16384 is knicked from flex, in reality since we read via BinaryDecoder, this is not used
-    struct yy_buffer_state *yybuffer = ::yy_create_buffer( InputStream, 16384 );
-    ::yy_switch_to_buffer( yybuffer );
+	BinaryDecoder = new CqRibBinaryDecoder( InputStream );
+	// 16384 is knicked from flex, in reality since we read via BinaryDecoder, this is not used
+	struct yy_buffer_state *yybuffer = ::yy_create_buffer( InputStream, 16384 );
+	::yy_switch_to_buffer( yybuffer );
 
-    // Reenable this to get parse tree output in debug version.
-    //yydebug = 1;
-    yyparse();
+	// Reenable this to get parse tree output in debug version.
+	//yydebug = 1;
+	yyparse();
 
-    ::yy_delete_buffer( yybuffer );
-    delete BinaryDecoder;
+	::yy_delete_buffer( yybuffer );
+	delete BinaryDecoder;
 
-    return ParseSucceeded;
+	return ParseSucceeded;
 }
 
 bool ParseOpenStream( CqRibBinaryDecoder *decoder, const std::string StreamName, RendermanInterface& CallbackInterface, std::ostream& ErrorStream, RtArchiveCallback callback)
 {
-    BinaryDecoder = decoder;
-    ParseStreamName = StreamName;
-    ParseCallbackInterface = &CallbackInterface;
-    ParseErrorStream = &ErrorStream;
-    ParseLineNumber = 1;
-    ParseSucceeded = true;
-    fRequest = false;
-    fRecovering = false;
-    fParams = false;
-    pArchiveCallback = callback;
+	BinaryDecoder = decoder;
+	ParseStreamName = StreamName;
+	ParseCallbackInterface = &CallbackInterface;
+	ParseErrorStream = &ErrorStream;
+	ParseLineNumber = 1;
+	ParseSucceeded = true;
+	fRequest = false;
+	fRecovering = false;
+	fParams = false;
+	pArchiveCallback = callback;
 
-    // 1 is used to attempt to force interactive scanning
-    struct yy_buffer_state *yybuffer = ::yy_create_buffer( stdin, 1);
-    ::yy_switch_to_buffer(yybuffer);
+	// 1 is used to attempt to force interactive scanning
+	struct yy_buffer_state *yybuffer = ::yy_create_buffer( stdin, 1);
+	::yy_switch_to_buffer(yybuffer);
 
-    // Reenable this to get parse tree output in debug version.
-    // yydebug = 1;
-    yyparse();
+	// Reenable this to get parse tree output in debug version.
+	// yydebug = 1;
+	yyparse();
 
-    ::yy_delete_buffer(yybuffer);
+	::yy_delete_buffer(yybuffer);
 
-    return ParseSucceeded;
+	return ParseSucceeded;
 }
 
 void ResetParser()
 {
-    ParseInputFile = stdin;
-    ParseStreamName = "stdin";
-    ParseCallbackInterface = 0;
-    ParseErrorStream = &std::cerr;
-    ParseLineNumber = 1;
-    ParseSucceeded = true;
+	ParseInputFile = stdin;
+	ParseStreamName = "stdin";
+	ParseCallbackInterface = 0;
+	ParseErrorStream = &std::cerr;
+	ParseLineNumber = 1;
+	ParseSucceeded = true;
 }
 
 }

@@ -24,7 +24,7 @@
 */
 
 //? Is .h included already?
-#ifndef SURFACE_H_INCLUDED 
+#ifndef SURFACE_H_INCLUDED
 //{
 #define SURFACE_H_INCLUDED 1
 
@@ -57,219 +57,225 @@ START_NAMESPACE( Aqsis )
 
 class CqBasicSurface : public IqSurface
 {
-public:
-    CqBasicSurface();
-    CqBasicSurface( const CqBasicSurface& From );
-    virtual	~CqBasicSurface()
-    {
-        // Release our reference on the current attributes.
-        if ( m_pAttributes )
-            RELEASEREF( m_pAttributes );
-        m_pAttributes = 0;
+	public:
+		CqBasicSurface();
+		CqBasicSurface( const CqBasicSurface& From );
+		virtual	~CqBasicSurface()
+		{
+			// Release our reference on the current attributes.
+			if ( m_pAttributes )
+				RELEASEREF( m_pAttributes );
+			m_pAttributes = 0;
 
-        STATS_DEC( GPR_current );
-    }
+			STATS_DEC( GPR_current );
+		}
 
 #ifdef _DEBUG
-CqString className() const { return CqString("CqBasicSurface"); }
+		CqString className() const
+		{
+			return CqString("CqBasicSurface");
+		}
 #endif
 
-    enum EqSplitDir
-    {
-        SplitDir_U,
-        SplitDir_V,
-    };
+		enum EqSplitDir
+		{
+		    SplitDir_U,
+		    SplitDir_V,
+	};
 
-    /** Dice this GPrim.
-     * \return A pointer to a new micropolygrid..
-     */
-    virtual	CqMicroPolyGridBase* Dice() = 0;
-    /** Split this GPrim into a number of other GPrims.
-     * \param aSplits A reference to a CqBasicSurface array to fill in with the new GPrim pointers.
-     * \return Integer count of new GPrims created.
-     */
-    virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits ) = 0;
-    /** Determine whether this GPrim is diceable at its current size.
-     */
-    virtual TqBool	Diceable() = 0;
+		/** Dice this GPrim.
+		 * \return A pointer to a new micropolygrid..
+		 */
+		virtual	CqMicroPolyGridBase* Dice() = 0;
+		/** Split this GPrim into a number of other GPrims.
+		 * \param aSplits A reference to a CqBasicSurface array to fill in with the new GPrim pointers.
+		 * \return Integer count of new GPrims created.
+		 */
+		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits ) = 0;
+		/** Determine whether this GPrim is diceable at its current size.
+		 */
+		virtual TqBool	Diceable() = 0;
 
-    virtual	void	Reset()
-    {}
+		virtual	void	Reset()
+		{}
 
-    virtual TqBool	IsMotionBlurMatch( CqBasicSurface* pSurf ) = 0;
+		virtual TqBool	IsMotionBlurMatch( CqBasicSurface* pSurf ) = 0;
 
-    virtual CqString	strName() const;
-    virtual	TqInt	Uses() const;
+		virtual CqString	strName() const;
+		virtual	TqInt	Uses() const;
 
-    virtual void	PreDice( TqInt uDiceSize, TqInt vDiceSize )
-    {}
-    virtual TqInt	DiceAll( CqMicroPolyGrid* pGrid )
-    { return(0); }
-    virtual void	NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData )
-    {}
-    virtual void	PostDice(CqMicroPolyGrid * pGrid)
-    {}
+		virtual void	PreDice( TqInt uDiceSize, TqInt vDiceSize )
+		{}
+		virtual TqInt	DiceAll( CqMicroPolyGrid* pGrid )
+		{
+			return(0);
+		}
+		virtual void	NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData )
+		{}
+		virtual void	PostDice(CqMicroPolyGrid * pGrid)
+		{}
 
-    virtual TqInt	PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u )
-    {
-        return ( 0 );
-    }
-    virtual void	NaturalSubdivide( CqParameter* pParam, CqParameter* pParam1, CqParameter* pParam2, TqBool u )
-    {}
-    virtual void	PostSubdivide(std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits)
-    {}
-    virtual void	RenderComplete()
-    {
-    }
-    /** Prepare the trim curve once the surface has been completed.
-     */
-    virtual	void	PrepareTrimCurve()
-    {}
+		virtual TqInt	PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u )
+		{
+			return ( 0 );
+		}
+		virtual void	NaturalSubdivide( CqParameter* pParam, CqParameter* pParam1, CqParameter* pParam2, TqBool u )
+		{}
+		virtual void	PostSubdivide(std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits)
+		{}
+		virtual void	RenderComplete()
+		{}
+		/** Prepare the trim curve once the surface has been completed.
+		 */
+		virtual	void	PrepareTrimCurve()
+		{}
 
-    /** Get the value of the dice size in u, determined during a Diceable() call
-     */
-    TqInt uDiceSize() const
-    {
-        return( m_uDiceSize );
-    }
+		/** Get the value of the dice size in u, determined during a Diceable() call
+		 */
+		TqInt uDiceSize() const
+		{
+			return( m_uDiceSize );
+		}
 
-    /** Get the value of the dice size in v, determined during a Diceable() call
-     */
-    TqInt vDiceSize() const
-    {
-        return( m_vDiceSize );
-    }
+		/** Get the value of the dice size in v, determined during a Diceable() call
+		 */
+		TqInt vDiceSize() const
+		{
+			return( m_vDiceSize );
+		}
 
-    /** Get the surface paramter values for the given vertex index. Used when constructing a surface
-     * using "Pz" point specification.
-     */
-    virtual CqVector3D	SurfaceParametersAtVertex( TqInt index )
-    {
-        return ( CqVector3D( 0, 0, 0 ) );
-    }
+		/** Get the surface paramter values for the given vertex index. Used when constructing a surface
+		 * using "Pz" point specification.
+		 */
+		virtual CqVector3D	SurfaceParametersAtVertex( TqInt index )
+		{
+			return ( CqVector3D( 0, 0, 0 ) );
+		}
 
-    /** Get a pointer to the attributes state associated with this GPrim.
-     * \return A pointer to a CqAttributes class.
-     */
-    virtual IqAttributes* pAttributes() const
-    {
-        return ( m_pAttributes );
-    }
-    /** Get a pointer to the transformation state associated with this GPrim.
-     * \return A pointer to a CqTransform class.
-     */
-    virtual boost::shared_ptr<IqTransform> pTransform() const
-    {
-        return ( boost::static_pointer_cast<IqTransform>( m_pTransform ) );
-    }
-    virtual	void	SetSurfaceParameters( const CqBasicSurface& From );
-    /** Force this GPrim to be undiceable, usually if it crosses the epsilon and eye plane.
-     */
-    virtual	void	ForceUndiceable()
-    {
-        m_fDiceable = TqFalse; m_EyeSplitCount++;
-    }
-    /** Query if this primitive has been marked as undiceable by the eyesplit check.
-     */
-    virtual TqBool	IsUndiceable() const
-    {
-        return ( !m_fDiceable );
-    }
-    /** Force this GPrim to be discarded, usually if it has been split too many times due to crossing the epsilon and eye planes..
-     */
-    virtual	void	Discard()
-    {
-        m_fDiscard = TqTrue;
-    }
-    /** Copy the information about splitting and dicing from the specified GPrim.
-     * \param From A CqBasicSurface reference to copy the information from.
-     */
-    virtual void CopySplitInfo( const CqBasicSurface* From )
-    {
-        m_uDiceSize = From->m_uDiceSize;
-        m_vDiceSize = From->m_vDiceSize;
-        m_SplitDir = From->m_SplitDir;
-    }
+		/** Get a pointer to the attributes state associated with this GPrim.
+		 * \return A pointer to a CqAttributes class.
+		 */
+		virtual IqAttributes* pAttributes() const
+		{
+			return ( m_pAttributes );
+		}
+		/** Get a pointer to the transformation state associated with this GPrim.
+		 * \return A pointer to a CqTransform class.
+		 */
+		virtual boost::shared_ptr<IqTransform> pTransform() const
+		{
+			return ( boost::static_pointer_cast<IqTransform>( m_pTransform ) );
+		}
+		virtual	void	SetSurfaceParameters( const CqBasicSurface& From );
+		/** Force this GPrim to be undiceable, usually if it crosses the epsilon and eye plane.
+		 */
+		virtual	void	ForceUndiceable()
+		{
+			m_fDiceable = TqFalse;
+			m_EyeSplitCount++;
+		}
+		/** Query if this primitive has been marked as undiceable by the eyesplit check.
+		 */
+		virtual TqBool	IsUndiceable() const
+		{
+			return ( !m_fDiceable );
+		}
+		/** Force this GPrim to be discarded, usually if it has been split too many times due to crossing the epsilon and eye planes..
+		 */
+		virtual	void	Discard()
+		{
+			m_fDiscard = TqTrue;
+		}
+		/** Copy the information about splitting and dicing from the specified GPrim.
+		 * \param From A CqBasicSurface reference to copy the information from.
+		 */
+		virtual void CopySplitInfo( const CqBasicSurface* From )
+		{
+			m_uDiceSize = From->m_uDiceSize;
+			m_vDiceSize = From->m_vDiceSize;
+			m_SplitDir = From->m_SplitDir;
+		}
 
-    /** Determine whether this GPrim is to be discardrd.
-     */
-    TqBool	fDiscard() const
-    {
-        return ( m_fDiscard );
-    }
-    /** Get the number of times this GPrim has been split because if crossing the epsilon and eye planes.
-     */
-    TqInt	EyeSplitCount() const
-    {
-        return ( m_EyeSplitCount );
-    }
-    /** Set the number of times this GPrim has been split because if crossing the epsilon and eye planes.
-     */
-    void	SetEyeSplitCount( TqInt EyeSplitCount )
-    {
-        m_EyeSplitCount = EyeSplitCount;
-    }
-    /** Get the precalculated split direction.
-     */
-    TqInt	SplitDir() const
-    {
-        return ( m_SplitDir );
-    }
-    /** Set the precalculated split direction.
-     */
-    void	SetSplitDir( EqSplitDir SplitDir )
-    {
-        m_SplitDir = SplitDir;
-    }
+		/** Determine whether this GPrim is to be discardrd.
+		 */
+		TqBool	fDiscard() const
+		{
+			return ( m_fDiscard );
+		}
+		/** Get the number of times this GPrim has been split because if crossing the epsilon and eye planes.
+		 */
+		TqInt	EyeSplitCount() const
+		{
+			return ( m_EyeSplitCount );
+		}
+		/** Set the number of times this GPrim has been split because if crossing the epsilon and eye planes.
+		 */
+		void	SetEyeSplitCount( TqInt EyeSplitCount )
+		{
+			m_EyeSplitCount = EyeSplitCount;
+		}
+		/** Get the precalculated split direction.
+		 */
+		TqInt	SplitDir() const
+		{
+			return ( m_SplitDir );
+		}
+		/** Set the precalculated split direction.
+		 */
+		void	SetSplitDir( EqSplitDir SplitDir )
+		{
+			m_SplitDir = SplitDir;
+		}
 
-    /** Cache the calculated bound for further reference
-     * \param pBound The calculated bound in hybrid raster/camera space
-     */
-    void CacheRasterBound( CqBound& pBound )
-    {
-        m_Bound = pBound; m_CachedBound = TqTrue;
-    }
-    /** Retrieve the cached bound. If it has never been cached then we
-     * throw an error as this is probably a bug.
-     * \return The object bound in hybrid raster/camera space
-     */
-    CqBound	GetCachedRasterBound()
-    {
-        if ( m_CachedBound == TqFalse && m_fDiceable )
-        {
-            std::cerr << critical << "No cached bound available" << std::endl;
-        }
+		/** Cache the calculated bound for further reference
+		 * \param pBound The calculated bound in hybrid raster/camera space
+		 */
+		void CacheRasterBound( CqBound& pBound )
+		{
+			m_Bound = pBound;
+			m_CachedBound = TqTrue;
+		}
+		/** Retrieve the cached bound. If it has never been cached then we
+		 * throw an error as this is probably a bug.
+		 * \return The object bound in hybrid raster/camera space
+		 */
+		CqBound	GetCachedRasterBound()
+		{
+			if ( m_CachedBound == TqFalse && m_fDiceable )
+			{
+				std::cerr << critical << "No cached bound available" << std::endl;
+			}
 
-        return m_Bound;
-    }
+			return m_Bound;
+		}
 
-    TqBool	fCachedBound() const
-    {
-        return ( m_CachedBound );
-    }
-    CqBound	AdjustBoundForTransformationMotion( const CqBound& B ) const;
+		TqBool	fCachedBound() const
+		{
+			return ( m_CachedBound );
+		}
+		CqBound	AdjustBoundForTransformationMotion( const CqBound& B ) const;
 
-    CqBasicSurface&	operator=( const CqBasicSurface& From );
+		CqBasicSurface&	operator=( const CqBasicSurface& From );
 
-    boost::shared_ptr<CqCSGTreeNode>& pCSGNode()
-    {
-        return ( m_pCSGNode );
-    }
+		boost::shared_ptr<CqCSGTreeNode>& pCSGNode()
+		{
+			return ( m_pCSGNode );
+		}
 
-    TqBool	m_fDiceable;		///< Flag to indicate that this GPrim is diceable.
-    TqBool	m_fDiscard;			///< Flag to indicate that this GPrim is to be discarded.
-    TqInt	m_EyeSplitCount;	///< The number of times this GPrim has been split because if crossing the epsilon and eye planes.
-protected:
-    CqAttributes* m_pAttributes;	///< Pointer to the attributes state associated with this GPrim.
-    CqTransformPtr m_pTransform;		///< Pointer to the transformation state associated with this GPrim.
+		TqBool	m_fDiceable;		///< Flag to indicate that this GPrim is diceable.
+		TqBool	m_fDiscard;			///< Flag to indicate that this GPrim is to be discarded.
+		TqInt	m_EyeSplitCount;	///< The number of times this GPrim has been split because if crossing the epsilon and eye planes.
+	protected:
+		CqAttributes* m_pAttributes;	///< Pointer to the attributes state associated with this GPrim.
+		CqTransformPtr m_pTransform;		///< Pointer to the transformation state associated with this GPrim.
 
-    TqInt	m_uDiceSize;		///< Calculated dice size to achieve an appropriate shading rate.
-    TqInt	m_vDiceSize;		///< Calculated dice size to achieve an appropriate shading rate.
-    EqSplitDir	m_SplitDir;			///< The direction to split this GPrim to achieve best results.
-    TqBool	m_CachedBound;		///< Whether or not the bound has been cached
-    CqBound	m_Bound;			///< The cached object bound
-    boost::shared_ptr<CqCSGTreeNode>	m_pCSGNode;		///< Pointer to the 'primitive' CSG node this surface belongs to, NULL if not part of a solid.
-    static TqFloat     m_fGridSize;   ///< standard sqrt(gridsize);
+		TqInt	m_uDiceSize;		///< Calculated dice size to achieve an appropriate shading rate.
+		TqInt	m_vDiceSize;		///< Calculated dice size to achieve an appropriate shading rate.
+		EqSplitDir	m_SplitDir;			///< The direction to split this GPrim to achieve best results.
+		TqBool	m_CachedBound;		///< Whether or not the bound has been cached
+		CqBound	m_Bound;			///< The cached object bound
+		boost::shared_ptr<CqCSGTreeNode>	m_pCSGNode;		///< Pointer to the 'primitive' CSG node this surface belongs to, NULL if not part of a solid.
+		static TqFloat     m_fGridSize;   ///< standard sqrt(gridsize);
 }
 ;
 
@@ -281,390 +287,393 @@ protected:
 
 class CqSurface : public CqBasicSurface, public boost::enable_shared_from_this<CqSurface>
 {
-public:
-    CqSurface();
-    CqSurface( const CqSurface& From );
+	public:
+		CqSurface();
+		CqSurface( const CqSurface& From );
 
-    virtual	~CqSurface()
-    {
-        std::vector<CqParameter*>::iterator iUP;
-        for ( iUP = m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++ )
-            if ( NULL != ( *iUP ) )
-                delete( *iUP );
-    }
+		virtual	~CqSurface()
+		{
+			std::vector<CqParameter*>::iterator iUP;
+			for ( iUP = m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++ )
+				if ( NULL != ( *iUP ) )
+					delete( *iUP );
+		}
 
-    virtual	void	SetDefaultPrimitiveVariables( TqBool bUseDef_st = TqTrue );
+		virtual	void	SetDefaultPrimitiveVariables( TqBool bUseDef_st = TqTrue );
 
-    CqSurface&	operator=( const CqSurface& From );
-    void ClonePrimitiveVariables( const CqSurface& From );
+		CqSurface&	operator=( const CqSurface& From );
+		void ClonePrimitiveVariables( const CqSurface& From );
 
-    /** Get a reference the to P default parameter.
-     */
-    virtual CqParameterTyped<CqVector4D, CqVector3D>* P()
-    {
-        if ( m_aiStdPrimitiveVars[ EnvVars_P ] >= 0 )
-            return ( static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_P ] ] ) );
-        else
-            return ( NULL );
-    }
-    /** Get a reference the to N default parameter.
-     */
-    virtual CqParameterTyped<CqVector3D, CqVector3D>* N()
-    {
-        if ( m_aiStdPrimitiveVars[ EnvVars_N ] >= 0 )
-            return ( static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_N ] ] ) );
-        else
-            return ( NULL );
-    }
-    /** Get a reference the to Cq default parameter.
-     */
-    virtual CqParameterTyped<CqColor, CqColor>* Cs()
-    {
-        if ( m_aiStdPrimitiveVars[ EnvVars_Cs ] >= 0 )
-            return ( static_cast<CqParameterTyped<CqColor, CqColor>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_Cs ] ] ) );
-        else
-            return ( NULL );
-    }
-    /** Get a reference the to Os default parameter.
-     */
-    virtual CqParameterTyped<CqColor, CqColor>* Os()
-    {
-        if ( m_aiStdPrimitiveVars[ EnvVars_Os ] >= 0 )
-            return ( static_cast<CqParameterTyped<CqColor, CqColor>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_Os ] ] ) );
-        else
-            return ( NULL );
-    }
-    /** Get a reference the to s default parameter.
-     */
-    virtual CqParameterTyped<TqFloat, TqFloat>* s()
-    {
-        if ( m_aiStdPrimitiveVars[ EnvVars_s ] >= 0 )
-            return ( static_cast<CqParameterTyped<TqFloat, TqFloat>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_s ] ] ) );
-        else
-            return ( NULL );
-    }
-    /** Get a reference the to t default parameter.
-     */
-    virtual CqParameterTyped<TqFloat, TqFloat>* t()
-    {
-        if ( m_aiStdPrimitiveVars[ EnvVars_t ] >= 0 )
-            return ( static_cast<CqParameterTyped<TqFloat, TqFloat>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_t ] ] ) );
-        else
-            return ( NULL );
-    }
-    /** Get a reference the to u default parameter.
-     */
-    virtual CqParameterTyped<TqFloat, TqFloat>* u()
-    {
-        if ( m_aiStdPrimitiveVars[ EnvVars_u ] >= 0 )
-            return ( static_cast<CqParameterTyped<TqFloat, TqFloat>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_u ] ] ) );
-        else
-            return ( NULL );
-    }
-    /** Get a reference the to v default parameter.
-     */
-    virtual CqParameterTyped<TqFloat, TqFloat>* v()
-    {
-        if ( m_aiStdPrimitiveVars[ EnvVars_v ] >= 0 )
-            return ( static_cast<CqParameterTyped<TqFloat, TqFloat>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_v ] ] ) );
-        else
-            return ( NULL );
-    }
+		/** Get a reference the to P default parameter.
+		 */
+		virtual CqParameterTyped<CqVector4D, CqVector3D>* P()
+		{
+			if ( m_aiStdPrimitiveVars[ EnvVars_P ] >= 0 )
+				return ( static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_P ] ] ) );
+			else
+				return ( NULL );
+		}
+		/** Get a reference the to N default parameter.
+		 */
+		virtual CqParameterTyped<CqVector3D, CqVector3D>* N()
+		{
+			if ( m_aiStdPrimitiveVars[ EnvVars_N ] >= 0 )
+				return ( static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_N ] ] ) );
+			else
+				return ( NULL );
+		}
+		/** Get a reference the to Cq default parameter.
+		 */
+		virtual CqParameterTyped<CqColor, CqColor>* Cs()
+		{
+			if ( m_aiStdPrimitiveVars[ EnvVars_Cs ] >= 0 )
+				return ( static_cast<CqParameterTyped<CqColor, CqColor>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_Cs ] ] ) );
+			else
+				return ( NULL );
+		}
+		/** Get a reference the to Os default parameter.
+		 */
+		virtual CqParameterTyped<CqColor, CqColor>* Os()
+		{
+			if ( m_aiStdPrimitiveVars[ EnvVars_Os ] >= 0 )
+				return ( static_cast<CqParameterTyped<CqColor, CqColor>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_Os ] ] ) );
+			else
+				return ( NULL );
+		}
+		/** Get a reference the to s default parameter.
+		 */
+		virtual CqParameterTyped<TqFloat, TqFloat>* s()
+		{
+			if ( m_aiStdPrimitiveVars[ EnvVars_s ] >= 0 )
+				return ( static_cast<CqParameterTyped<TqFloat, TqFloat>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_s ] ] ) );
+			else
+				return ( NULL );
+		}
+		/** Get a reference the to t default parameter.
+		 */
+		virtual CqParameterTyped<TqFloat, TqFloat>* t()
+		{
+			if ( m_aiStdPrimitiveVars[ EnvVars_t ] >= 0 )
+				return ( static_cast<CqParameterTyped<TqFloat, TqFloat>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_t ] ] ) );
+			else
+				return ( NULL );
+		}
+		/** Get a reference the to u default parameter.
+		 */
+		virtual CqParameterTyped<TqFloat, TqFloat>* u()
+		{
+			if ( m_aiStdPrimitiveVars[ EnvVars_u ] >= 0 )
+				return ( static_cast<CqParameterTyped<TqFloat, TqFloat>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_u ] ] ) );
+			else
+				return ( NULL );
+		}
+		/** Get a reference the to v default parameter.
+		 */
+		virtual CqParameterTyped<TqFloat, TqFloat>* v()
+		{
+			if ( m_aiStdPrimitiveVars[ EnvVars_v ] >= 0 )
+				return ( static_cast<CqParameterTyped<TqFloat, TqFloat>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_v ] ] ) );
+			else
+				return ( NULL );
+		}
 
-    /** Get a reference the to P default parameter.
-     */
-    virtual const	CqParameterTyped<CqVector4D, CqVector3D>* P() const
-    {
-        if ( m_aiStdPrimitiveVars[ EnvVars_P ] >= 0 )
-            return ( static_cast<const CqParameterTyped<CqVector4D, CqVector3D>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_P ] ] ) );
-        else
-            return ( NULL );
-    }
-    /** Get a reference the to N default parameter.
-     */
-    virtual const	CqParameterTyped<CqVector3D, CqVector3D>* N() const
-    {
-        if ( m_aiStdPrimitiveVars[ EnvVars_N ] >= 0 )
-            return ( static_cast<const CqParameterTyped<CqVector3D, CqVector3D>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_N ] ] ) );
-        else
-            return ( NULL );
-    }
-    /** Get a reference the to an indexed primitive variable.
-     */
-    virtual const	CqParameter* pVar(TqInt index) const
-    {
-        assert( index >= EnvVars_Cs && index < EnvVars_Last );
-        if ( m_aiStdPrimitiveVars[ index ] >= 0 )
-            return ( m_aUserParams[ m_aiStdPrimitiveVars[ index ] ] );
-        else
-            return ( NULL );
-    }
-    /** Get a reference the to Cq default parameter.
-     */
-    virtual const	CqParameterTyped<CqColor, CqColor>* Cs() const
-    {
-        if ( m_aiStdPrimitiveVars[ EnvVars_Cs ] >= 0 )
-            return ( static_cast<const CqParameterTyped<CqColor, CqColor>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_Cs ] ] ) );
-        else
-            return ( NULL );
-    }
-    /** Get a reference the to Os default parameter.
-     */
-    virtual const	CqParameterTyped<CqColor, CqColor>* Os() const
-    {
-        if ( m_aiStdPrimitiveVars[ EnvVars_Os ] >= 0 )
-            return ( static_cast<const CqParameterTyped<CqColor, CqColor>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_Os ] ] ) );
-        else
-            return ( NULL );
-    }
-    /** Get a reference the to s default parameter.
-     */
-    virtual const	CqParameterTyped<TqFloat, TqFloat>* s() const
-    {
-        if ( m_aiStdPrimitiveVars[ EnvVars_s ] >= 0 )
-            return ( static_cast<const CqParameterTyped<TqFloat, TqFloat>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_s ] ] ) );
-        else
-            return ( NULL );
-    }
-    /** Get a reference the to t default parameter.
-     */
-    virtual const	CqParameterTyped<TqFloat, TqFloat>* t() const
-    {
-        if ( m_aiStdPrimitiveVars[ EnvVars_t ] >= 0 )
-            return ( static_cast<const CqParameterTyped<TqFloat, TqFloat>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_t ] ] ) );
-        else
-            return ( NULL );
-    }
-    /** Get a reference the to u default parameter.
-     */
-    virtual const	CqParameterTyped<TqFloat, TqFloat>* u() const
-    {
-        if ( m_aiStdPrimitiveVars[ EnvVars_u ] >= 0 )
-            return ( static_cast<const CqParameterTyped<TqFloat, TqFloat>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_u ] ] ) );
-        else
-            return ( NULL );
-    }
-    /** Get a reference the to v default parameter.
-     */
-    virtual const	CqParameterTyped<TqFloat, TqFloat>* v() const
-    {
-        if ( m_aiStdPrimitiveVars[ EnvVars_v ] >= 0 )
-            return ( static_cast<const CqParameterTyped<TqFloat, TqFloat>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_v ] ] ) );
-        else
-            return ( NULL );
-    }
-    /** Get a reference the to an indexed primitive variable.
-     */
-    virtual CqParameter* pVar(TqInt index)
-    {
-        assert( index >= EnvVars_Cs && index < EnvVars_Last );
-        if ( m_aiStdPrimitiveVars[ index ] >= 0 )
-            return ( m_aUserParams[ m_aiStdPrimitiveVars[ index ] ] );
-        else
-            return ( NULL );
-    }
+		/** Get a reference the to P default parameter.
+		 */
+		virtual const	CqParameterTyped<CqVector4D, CqVector3D>* P() const
+		{
+			if ( m_aiStdPrimitiveVars[ EnvVars_P ] >= 0 )
+				return ( static_cast<const CqParameterTyped<CqVector4D, CqVector3D>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_P ] ] ) );
+			else
+				return ( NULL );
+		}
+		/** Get a reference the to N default parameter.
+		 */
+		virtual const	CqParameterTyped<CqVector3D, CqVector3D>* N() const
+		{
+			if ( m_aiStdPrimitiveVars[ EnvVars_N ] >= 0 )
+				return ( static_cast<const CqParameterTyped<CqVector3D, CqVector3D>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_N ] ] ) );
+			else
+				return ( NULL );
+		}
+		/** Get a reference the to an indexed primitive variable.
+		 */
+		virtual const	CqParameter* pVar(TqInt index) const
+		{
+			assert( index >= EnvVars_Cs && index < EnvVars_Last );
+			if ( m_aiStdPrimitiveVars[ index ] >= 0 )
+				return ( m_aUserParams[ m_aiStdPrimitiveVars[ index ] ] );
+			else
+				return ( NULL );
+		}
+		/** Get a reference the to Cq default parameter.
+		 */
+		virtual const	CqParameterTyped<CqColor, CqColor>* Cs() const
+		{
+			if ( m_aiStdPrimitiveVars[ EnvVars_Cs ] >= 0 )
+				return ( static_cast<const CqParameterTyped<CqColor, CqColor>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_Cs ] ] ) );
+			else
+				return ( NULL );
+		}
+		/** Get a reference the to Os default parameter.
+		 */
+		virtual const	CqParameterTyped<CqColor, CqColor>* Os() const
+		{
+			if ( m_aiStdPrimitiveVars[ EnvVars_Os ] >= 0 )
+				return ( static_cast<const CqParameterTyped<CqColor, CqColor>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_Os ] ] ) );
+			else
+				return ( NULL );
+		}
+		/** Get a reference the to s default parameter.
+		 */
+		virtual const	CqParameterTyped<TqFloat, TqFloat>* s() const
+		{
+			if ( m_aiStdPrimitiveVars[ EnvVars_s ] >= 0 )
+				return ( static_cast<const CqParameterTyped<TqFloat, TqFloat>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_s ] ] ) );
+			else
+				return ( NULL );
+		}
+		/** Get a reference the to t default parameter.
+		 */
+		virtual const	CqParameterTyped<TqFloat, TqFloat>* t() const
+		{
+			if ( m_aiStdPrimitiveVars[ EnvVars_t ] >= 0 )
+				return ( static_cast<const CqParameterTyped<TqFloat, TqFloat>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_t ] ] ) );
+			else
+				return ( NULL );
+		}
+		/** Get a reference the to u default parameter.
+		 */
+		virtual const	CqParameterTyped<TqFloat, TqFloat>* u() const
+		{
+			if ( m_aiStdPrimitiveVars[ EnvVars_u ] >= 0 )
+				return ( static_cast<const CqParameterTyped<TqFloat, TqFloat>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_u ] ] ) );
+			else
+				return ( NULL );
+		}
+		/** Get a reference the to v default parameter.
+		 */
+		virtual const	CqParameterTyped<TqFloat, TqFloat>* v() const
+		{
+			if ( m_aiStdPrimitiveVars[ EnvVars_v ] >= 0 )
+				return ( static_cast<const CqParameterTyped<TqFloat, TqFloat>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_v ] ] ) );
+			else
+				return ( NULL );
+		}
+		/** Get a reference the to an indexed primitive variable.
+		 */
+		virtual CqParameter* pVar(TqInt index)
+		{
+			assert( index >= EnvVars_Cs && index < EnvVars_Last );
+			if ( m_aiStdPrimitiveVars[ index ] >= 0 )
+				return ( m_aUserParams[ m_aiStdPrimitiveVars[ index ] ] );
+			else
+				return ( NULL );
+		}
 
-    /** Determine whether this surface has a specified primitive variable based on index
-     */
-    virtual const	TqBool bHasVar(TqInt index) const
-    {
-        assert( index >= EnvVars_Cs && index < EnvVars_Last );
-        // Special case for s & t if "st" is specified.
-        if( index == EnvVars_s || index == EnvVars_t )
-            return( m_aiStdPrimitiveVars[ index ] >= 0 || FindUserParam("st") );
-        else
-            return ( m_aiStdPrimitiveVars[ index ] >= 0 );
-    }
+		/** Determine whether this surface has a specified primitive variable based on index
+		 */
+		virtual const	TqBool bHasVar(TqInt index) const
+		{
+			assert( index >= EnvVars_Cs && index < EnvVars_Last );
+			// Special case for s & t if "st" is specified.
+			if( index == EnvVars_s || index == EnvVars_t )
+				return( m_aiStdPrimitiveVars[ index ] >= 0 || FindUserParam("st") );
+			else
+				return ( m_aiStdPrimitiveVars[ index ] >= 0 );
+		}
 
-    /** Get a reference to the user parameter variables array
-     */
-    virtual const std::vector<CqParameter*>& aUserParams() const
-    {
-        return ( m_aUserParams );
-    }
+		/** Get a reference to the user parameter variables array
+		 */
+		virtual const std::vector<CqParameter*>& aUserParams() const
+		{
+			return ( m_aUserParams );
+		}
 
-    /** Get a reference to the user parameter variables array
-     */
-    virtual std::vector<CqParameter*>& aUserParams()
-    {
-        return ( m_aUserParams );
-    }
+		/** Get a reference to the user parameter variables array
+		 */
+		virtual std::vector<CqParameter*>& aUserParams()
+		{
+			return ( m_aUserParams );
+		}
 
-    virtual CqParameter* FindUserParam( const char* strName ) const;
+		virtual CqParameter* FindUserParam( const char* strName ) const;
 
-    /* From IqSurface.
-     */
-    virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime = 0 );
+		/* From IqSurface.
+		 */
+		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime = 0 );
 
-    /** Add a primitive variable to the array.
-     */
-    virtual void AddPrimitiveVariable( CqParameter* pParam )
-    {
-    static TqUlong RIH_P = CqString::hash("P");
-    static TqUlong RIH_N = CqString::hash("N");
-    static TqUlong RIH_CS = CqString::hash("Cs");
-    static TqUlong RIH_OS = CqString::hash("Os");
-    static TqUlong RIH_S = CqString::hash("s");
-    static TqUlong RIH_T = CqString::hash("t") ;
-    static TqUlong RIH_U = CqString::hash("u");
-    static TqUlong RIH_V = CqString::hash("v");
+		/** Add a primitive variable to the array.
+		 */
+		virtual void AddPrimitiveVariable( CqParameter* pParam )
+		{
+			static TqUlong RIH_P = CqString::hash("P");
+			static TqUlong RIH_N = CqString::hash("N");
+			static TqUlong RIH_CS = CqString::hash("Cs");
+			static TqUlong RIH_OS = CqString::hash("Os");
+			static TqUlong RIH_S = CqString::hash("s");
+			static TqUlong RIH_T = CqString::hash("t") ;
+			static TqUlong RIH_U = CqString::hash("u");
+			static TqUlong RIH_V = CqString::hash("v");
 
-        m_aUserParams.push_back( pParam );
+			m_aUserParams.push_back( pParam );
 
-        if ( pParam->hash() == RIH_P )
-        {
-            assert( -1 == m_aiStdPrimitiveVars[ EnvVars_P ] );
-            m_aiStdPrimitiveVars[ EnvVars_P ] = m_aUserParams.size() - 1;
-        }
-        else if ( pParam->hash() == RIH_N )
-        {
-            assert( -1 == m_aiStdPrimitiveVars[ EnvVars_N ] );
-            m_aiStdPrimitiveVars[ EnvVars_N ] = m_aUserParams.size() - 1;
-        }
+			if ( pParam->hash() == RIH_P )
+			{
+				assert( -1 == m_aiStdPrimitiveVars[ EnvVars_P ] );
+				m_aiStdPrimitiveVars[ EnvVars_P ] = m_aUserParams.size() - 1;
+			}
+			else if ( pParam->hash() == RIH_N )
+			{
+				assert( -1 == m_aiStdPrimitiveVars[ EnvVars_N ] );
+				m_aiStdPrimitiveVars[ EnvVars_N ] = m_aUserParams.size() - 1;
+			}
 
-        else if ( pParam->hash() == RIH_CS )
-        {
-            assert( -1 == m_aiStdPrimitiveVars[ EnvVars_Cs ] );
-            m_aiStdPrimitiveVars[ EnvVars_Cs ] = m_aUserParams.size() - 1;
-        }
-        else if ( pParam->hash() == RIH_OS )
-        {
-            assert( -1 == m_aiStdPrimitiveVars[ EnvVars_Os ] );
-            m_aiStdPrimitiveVars[ EnvVars_Os ] = m_aUserParams.size() - 1;
-        }
-        else if ( pParam->hash() == RIH_S  )
-        {
-            assert( -1 == m_aiStdPrimitiveVars[ EnvVars_s ] );
-            m_aiStdPrimitiveVars[ EnvVars_s ] = m_aUserParams.size() - 1;
-        }
-        else if ( pParam->hash() == RIH_T)
-        {
-            assert( -1 == m_aiStdPrimitiveVars[ EnvVars_t ] );
-            m_aiStdPrimitiveVars[ EnvVars_t ] = m_aUserParams.size() - 1;
-        }
-        else if ( pParam->hash() == RIH_U)
-        {
-            assert( -1 == m_aiStdPrimitiveVars[ EnvVars_u ] );
-            m_aiStdPrimitiveVars[ EnvVars_u ] = m_aUserParams.size() - 1;
-        }
-        else if ( pParam->hash() == RIH_V )
-        {
-            assert( -1 == m_aiStdPrimitiveVars[ EnvVars_v ] );
-            m_aiStdPrimitiveVars[ EnvVars_v ] = m_aUserParams.size() - 1;
-        }
-        
-    }
+			else if ( pParam->hash() == RIH_CS )
+			{
+				assert( -1 == m_aiStdPrimitiveVars[ EnvVars_Cs ] );
+				m_aiStdPrimitiveVars[ EnvVars_Cs ] = m_aUserParams.size() - 1;
+			}
+			else if ( pParam->hash() == RIH_OS )
+			{
+				assert( -1 == m_aiStdPrimitiveVars[ EnvVars_Os ] );
+				m_aiStdPrimitiveVars[ EnvVars_Os ] = m_aUserParams.size() - 1;
+			}
+			else if ( pParam->hash() == RIH_S  )
+			{
+				assert( -1 == m_aiStdPrimitiveVars[ EnvVars_s ] );
+				m_aiStdPrimitiveVars[ EnvVars_s ] = m_aUserParams.size() - 1;
+			}
+			else if ( pParam->hash() == RIH_T)
+			{
+				assert( -1 == m_aiStdPrimitiveVars[ EnvVars_t ] );
+				m_aiStdPrimitiveVars[ EnvVars_t ] = m_aUserParams.size() - 1;
+			}
+			else if ( pParam->hash() == RIH_U)
+			{
+				assert( -1 == m_aiStdPrimitiveVars[ EnvVars_u ] );
+				m_aiStdPrimitiveVars[ EnvVars_u ] = m_aUserParams.size() - 1;
+			}
+			else if ( pParam->hash() == RIH_V )
+			{
+				assert( -1 == m_aiStdPrimitiveVars[ EnvVars_v ] );
+				m_aiStdPrimitiveVars[ EnvVars_v ] = m_aUserParams.size() - 1;
+			}
 
-    /** Determine whether this surface can be trimmed
-     */
-    virtual const	TqBool	bCanBeTrimmed() const
-    {
-        return ( TqFalse );
-    }
-    /** Determine if the specified point is trimmed.
-     */
-    virtual	const	TqBool	bIsPointTrimmed( const CqVector2D& p ) const
-    {
-        return ( TqFalse );
-    }
-    /** Determine if the specified edge crosses the trimming curves.
-     */
-    virtual	const	TqBool	bIsLineIntersecting( const CqVector2D& v1, const CqVector2D& v2 ) const
-    {
-        return ( TqFalse );
-    }
-    /** Determine the level at which to split a trim curve according
-     * to its screen size after application to the surface paramters of this
-     * surface.
-     */
-    virtual	TqInt	TrimDecimation( const CqTrimCurve& Curve )
-    {
-        return ( 0 );
-    }
-    /** Prepare the trim curve once the surface has been completed.
-     */
-    virtual	void	PrepareTrimCurve()
-    {}
+		}
 
-    void	uSubdivideUserParameters( CqSurface* pA, CqSurface* pB );
-    void	vSubdivideUserParameters( CqSurface* pA, CqSurface* pB );
+		/** Determine whether this surface can be trimmed
+		 */
+		virtual const	TqBool	bCanBeTrimmed() const
+		{
+			return ( TqFalse );
+		}
+		/** Determine if the specified point is trimmed.
+		 */
+		virtual	const	TqBool	bIsPointTrimmed( const CqVector2D& p ) const
+		{
+			return ( TqFalse );
+		}
+		/** Determine if the specified edge crosses the trimming curves.
+		 */
+		virtual	const	TqBool	bIsLineIntersecting( const CqVector2D& v1, const CqVector2D& v2 ) const
+		{
+			return ( TqFalse );
+		}
+		/** Determine the level at which to split a trim curve according
+		 * to its screen size after application to the surface paramters of this
+		 * surface.
+		 */
+		virtual	TqInt	TrimDecimation( const CqTrimCurve& Curve )
+		{
+			return ( 0 );
+		}
+		/** Prepare the trim curve once the surface has been completed.
+		 */
+		virtual	void	PrepareTrimCurve()
+		{}
 
-    virtual void	PreDice( TqInt uDiceSize, TqInt vDiceSize )
-    {}
-    virtual void	NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData );
-    virtual void	PostDice(CqMicroPolyGrid * pGrid)
-    {}
+		void	uSubdivideUserParameters( CqSurface* pA, CqSurface* pB );
+		void	vSubdivideUserParameters( CqSurface* pA, CqSurface* pB );
 
-    virtual TqInt	PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u )
-    {
-        return ( 0 );
-    }
-    virtual void	NaturalSubdivide( CqParameter* pParam, CqParameter* pParam1, CqParameter* pParam2, TqBool u );
-    virtual void	PostSubdivide(std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits)
-    {}
+		virtual void	PreDice( TqInt uDiceSize, TqInt vDiceSize )
+		{}
+		virtual void	NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData );
+		virtual void	PostDice(CqMicroPolyGrid * pGrid)
+		{}
 
-    /** Virtual function to indicate whether a particular surface is able
-     *  to generate geometric normals itself.
-     */
-    virtual TqBool	CanGenerateNormals() const
-    {
-        return ( TqFalse );
-    }
+		virtual TqInt	PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u )
+		{
+			return ( 0 );
+		}
+		virtual void	NaturalSubdivide( CqParameter* pParam, CqParameter* pParam1, CqParameter* pParam2, TqBool u );
+		virtual void	PostSubdivide(std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits)
+		{}
 
-    /** Virtual function to genrate and fill in geomtric normals if a surface is able to do so.
-     */
-    virtual	void	GenerateGeometricNormals( TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pNormals )
-    {}
+		/** Virtual function to indicate whether a particular surface is able
+		 *  to generate geometric normals itself.
+		 */
+		virtual TqBool	CanGenerateNormals() const
+		{
+			return ( TqFalse );
+		}
 
-    // Derived from CqBasicSurface
+		/** Virtual function to genrate and fill in geomtric normals if a surface is able to do so.
+		 */
+		virtual	void	GenerateGeometricNormals( TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pNormals )
+		{}
 
-    virtual	CqMicroPolyGridBase* Dice();
-    virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits );
-    virtual TqBool	Diceable()	{ return(false); }
+		// Derived from CqBasicSurface
 
-protected:
-    std::vector<CqParameter*>	m_aUserParams;						///< Storage for user defined paramter variables.
-    TqInt	m_aiStdPrimitiveVars[ EnvVars_Last ];		///< Quick lookup index into the primitive variables table for standard variables.
+		virtual	CqMicroPolyGridBase* Dice();
+		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits );
+		virtual TqBool	Diceable()
+		{
+			return(false);
+		}
 
-    template <class T, class SLT>
-    void	TypedNaturalDice( TqFloat uSize, TqFloat vSize, CqParameterTyped<T, SLT>* pParam, IqShaderData* pData )
-    {
-        TqInt iv, iu;
-        for ( iv = 0; iv <= vSize; iv++ )
-        {
-            TqFloat v = ( 1.0f / vSize ) * iv;
-            for ( iu = 0; iu <= uSize; iu++ )
-            {
-                TqFloat u = ( 1.0f / uSize ) * iu;
-                T vec = BilinearEvaluate( pParam->pValue() [ 0 ], pParam->pValue() [ 1 ], pParam->pValue() [ 2 ], pParam->pValue() [ 3 ], u, v );
-                TqInt igrid = static_cast<TqInt>( ( iv * ( uSize + 1 ) ) + iu );
-                pData->SetValue( static_cast<SLT>( vec ), igrid );
-            }
-        }
-    }
+	protected:
+		std::vector<CqParameter*>	m_aUserParams;						///< Storage for user defined paramter variables.
+		TqInt	m_aiStdPrimitiveVars[ EnvVars_Last ];		///< Quick lookup index into the primitive variables table for standard variables.
 
-    template <class T, class SLT>
-    void	TypedNaturalSubdivide( CqParameterTyped<T, SLT>* pParam, CqParameterTyped<T, SLT>* pResult1, CqParameterTyped<T, SLT>* pResult2, TqBool u )
-    {
-        CqParameterTyped<T, SLT>* pTParam = static_cast<CqParameterTyped<T, SLT>*>( pParam );
-        CqParameterTyped<T, SLT>* pTResult1 = static_cast<CqParameterTyped<T, SLT>*>( pResult1 );
-        CqParameterTyped<T, SLT>* pTResult2 = static_cast<CqParameterTyped<T, SLT>*>( pResult2 );
+		template <class T, class SLT>
+		void	TypedNaturalDice( TqFloat uSize, TqFloat vSize, CqParameterTyped<T, SLT>* pParam, IqShaderData* pData )
+		{
+			TqInt iv, iu;
+			for ( iv = 0; iv <= vSize; iv++ )
+			{
+				TqFloat v = ( 1.0f / vSize ) * iv;
+				for ( iu = 0; iu <= uSize; iu++ )
+				{
+					TqFloat u = ( 1.0f / uSize ) * iu;
+					T vec = BilinearEvaluate( pParam->pValue() [ 0 ], pParam->pValue() [ 1 ], pParam->pValue() [ 2 ], pParam->pValue() [ 3 ], u, v );
+					TqInt igrid = static_cast<TqInt>( ( iv * ( uSize + 1 ) ) + iu );
+					pData->SetValue( static_cast<SLT>( vec ), igrid );
+				}
+			}
+		}
 
-        if ( u )
-        {
-            pTResult2->pValue( 1 ) [ 0 ] = pTParam->pValue( 1 ) [ 0 ];
-            pTResult2->pValue( 3 ) [ 0 ] = pTParam->pValue( 3 ) [ 0 ];
-            pTResult1->pValue( 1 ) [ 0 ] = pTResult2->pValue( 0 ) [ 0 ] = static_cast<T>( ( pTParam->pValue( 0 ) [ 0 ] + pTParam->pValue( 1 ) [ 0 ] ) * 0.5 );
-            pTResult1->pValue( 3 ) [ 0 ] = pTResult2->pValue( 2 ) [ 0 ] = static_cast<T>( ( pTParam->pValue( 2 ) [ 0 ] + pTParam->pValue( 3 ) [ 0 ] ) * 0.5 );
-        }
-        else
-        {
-            pTResult2->pValue( 2 ) [ 0 ] = pTParam->pValue( 2 ) [ 0 ];
-            pTResult2->pValue( 3 ) [ 0 ] = pTParam->pValue( 3 ) [ 0 ];
-            pTResult1->pValue( 2 ) [ 0 ] = pTResult2->pValue( 0 ) [ 0 ] = static_cast<T>( ( pTParam->pValue( 0 ) [ 0 ] + pTParam->pValue( 2 ) [ 0 ] ) * 0.5 );
-            pTResult1->pValue( 3 ) [ 0 ] = pTResult2->pValue( 1 ) [ 0 ] = static_cast<T>( ( pTParam->pValue( 1 ) [ 0 ] + pTParam->pValue( 3 ) [ 0 ] ) * 0.5 );
-        }
-    }
+		template <class T, class SLT>
+		void	TypedNaturalSubdivide( CqParameterTyped<T, SLT>* pParam, CqParameterTyped<T, SLT>* pResult1, CqParameterTyped<T, SLT>* pResult2, TqBool u )
+		{
+			CqParameterTyped<T, SLT>* pTParam = static_cast<CqParameterTyped<T, SLT>*>( pParam );
+			CqParameterTyped<T, SLT>* pTResult1 = static_cast<CqParameterTyped<T, SLT>*>( pResult1 );
+			CqParameterTyped<T, SLT>* pTResult2 = static_cast<CqParameterTyped<T, SLT>*>( pResult2 );
+
+			if ( u )
+			{
+				pTResult2->pValue( 1 ) [ 0 ] = pTParam->pValue( 1 ) [ 0 ];
+				pTResult2->pValue( 3 ) [ 0 ] = pTParam->pValue( 3 ) [ 0 ];
+				pTResult1->pValue( 1 ) [ 0 ] = pTResult2->pValue( 0 ) [ 0 ] = static_cast<T>( ( pTParam->pValue( 0 ) [ 0 ] + pTParam->pValue( 1 ) [ 0 ] ) * 0.5 );
+				pTResult1->pValue( 3 ) [ 0 ] = pTResult2->pValue( 2 ) [ 0 ] = static_cast<T>( ( pTParam->pValue( 2 ) [ 0 ] + pTParam->pValue( 3 ) [ 0 ] ) * 0.5 );
+			}
+			else
+			{
+				pTResult2->pValue( 2 ) [ 0 ] = pTParam->pValue( 2 ) [ 0 ];
+				pTResult2->pValue( 3 ) [ 0 ] = pTParam->pValue( 3 ) [ 0 ];
+				pTResult1->pValue( 2 ) [ 0 ] = pTResult2->pValue( 0 ) [ 0 ] = static_cast<T>( ( pTParam->pValue( 0 ) [ 0 ] + pTParam->pValue( 2 ) [ 0 ] ) * 0.5 );
+				pTResult1->pValue( 3 ) [ 0 ] = pTResult2->pValue( 1 ) [ 0 ] = static_cast<T>( ( pTParam->pValue( 1 ) [ 0 ] + pTParam->pValue( 3 ) [ 0 ] ) * 0.5 );
+			}
+		}
 
 }
 ;
@@ -677,166 +686,167 @@ protected:
 
 class CqDeformingSurface : public CqBasicSurface, public CqMotionSpec<boost::shared_ptr<CqBasicSurface> >
 {
-public:
-    CqDeformingSurface( boost::shared_ptr<CqBasicSurface> const& a ) : CqBasicSurface(), CqMotionSpec<boost::shared_ptr<CqBasicSurface> >( a )
-    {}
-    CqDeformingSurface( const CqDeformingSurface& From ) : CqBasicSurface( From ), CqMotionSpec<boost::shared_ptr<CqBasicSurface> >( From )
-    {}
-    virtual	~CqDeformingSurface()
-    {
-    }
+	public:
+		CqDeformingSurface( boost::shared_ptr<CqBasicSurface> const& a ) : CqBasicSurface(), CqMotionSpec<boost::shared_ptr<CqBasicSurface> >( a )
+		{}
+		CqDeformingSurface( const CqDeformingSurface& From ) : CqBasicSurface( From ), CqMotionSpec<boost::shared_ptr<CqBasicSurface> >( From )
+		{}
+		virtual	~CqDeformingSurface()
+		{}
 
-    /** Get combnied bound for all times
-     * \return CqBound representing the geometric boundary of this GPrim over all time slots.
-     */
-    virtual	CqBound	Bound() const
-    {
-        CqBound B( FLT_MAX, FLT_MAX, FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX );
-        TqInt i;
-        for ( i = 0; i < cTimes(); i++ )
-            B.Encapsulate( GetMotionObject( Time( i ) ) ->Bound() );
+		/** Get combnied bound for all times
+		 * \return CqBound representing the geometric boundary of this GPrim over all time slots.
+		 */
+		virtual	CqBound	Bound() const
+		{
+			CqBound B( FLT_MAX, FLT_MAX, FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX );
+			TqInt i;
+			for ( i = 0; i < cTimes(); i++ )
+				B.Encapsulate( GetMotionObject( Time( i ) ) ->Bound() );
 
-        return ( B );
-    }
-    /** Dice this GPrim, creating a CqMotionMicroPolyGrid with all times in.
-     */
-    virtual	CqMicroPolyGridBase* Dice()
-    {
-        CqMotionMicroPolyGrid * pGrid = new CqMotionMicroPolyGrid;
-        TqInt i;
-        for ( i = 0; i < cTimes(); i++ )
-        {
-            CqMicroPolyGridBase* pGrid2 = GetMotionObject( Time( i ) ) ->Dice();
-            pGrid->AddTimeSlot( Time( i ), pGrid2 );
-			ADDREF(pGrid2);
-			pGrid->SetfTriangular( pGrid2->fTriangular() );
-        }
-        return ( pGrid );
-    }
-    /** Split this GPrim, creating a series of CqDeformingSurface with all times in.
-     */
-    virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
-    {
-        std::vector<std::vector<boost::shared_ptr<CqBasicSurface> > > aaMotionSplits;
-        aaMotionSplits.resize( cTimes() );
-        TqInt cSplits = 0;
-        TqInt i;
+			return ( B );
+		}
+		/** Dice this GPrim, creating a CqMotionMicroPolyGrid with all times in.
+		 */
+		virtual	CqMicroPolyGridBase* Dice()
+		{
+			CqMotionMicroPolyGrid * pGrid = new CqMotionMicroPolyGrid;
+			TqInt i;
+			for ( i = 0; i < cTimes(); i++ )
+			{
+				CqMicroPolyGridBase* pGrid2 = GetMotionObject( Time( i ) ) ->Dice();
+				pGrid->AddTimeSlot( Time( i ), pGrid2 );
+				ADDREF(pGrid2);
+				pGrid->SetfTriangular( pGrid2->fTriangular() );
+			}
+			return ( pGrid );
+		}
+		/** Split this GPrim, creating a series of CqDeformingSurface with all times in.
+		 */
+		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
+		{
+			std::vector<std::vector<boost::shared_ptr<CqBasicSurface> > > aaMotionSplits;
+			aaMotionSplits.resize( cTimes() );
+			TqInt cSplits = 0;
+			TqInt i;
 
-        cSplits = GetMotionObject( Time( 0 ) ) ->Split( aaMotionSplits[ 0 ] );
-        for ( i = 1; i < cTimes(); i++ )
-        {
+			cSplits = GetMotionObject( Time( 0 ) ) ->Split( aaMotionSplits[ 0 ] );
+			for ( i = 1; i < cTimes(); i++ )
+			{
 #ifdef _DEBUG
-            TqInt numsplits = GetMotionObject( Time( i ) ) ->Split( aaMotionSplits[ i ] );
-            assert( numsplits == cSplits);
+				TqInt numsplits = GetMotionObject( Time( i ) ) ->Split( aaMotionSplits[ i ] );
+				assert( numsplits == cSplits);
 #else
-            GetMotionObject( Time( i ) ) ->Split( aaMotionSplits[ i ] );
+
+				GetMotionObject( Time( i ) ) ->Split( aaMotionSplits[ i ] );
 #endif
-        }
 
-        // Now build motion surfaces from the splits and pass them back.
-        for ( i = 0; i < cSplits; i++ )
-        {
-	    boost::shared_ptr<CqDeformingSurface> pNewMotion( new CqDeformingSurface( boost::shared_ptr<CqBasicSurface>() ) );
-            pNewMotion->m_fDiceable = TqTrue;
-            pNewMotion->m_EyeSplitCount = m_EyeSplitCount;
-            TqInt j;
-            for ( j = 0; j < cTimes(); j++ )
-                pNewMotion->AddTimeSlot( Time( j ), aaMotionSplits[ j ][ i ] );
-            aSplits.push_back( boost::static_pointer_cast<CqBasicSurface>( pNewMotion ) );
-        }
-        return ( cSplits );
-    }
-    /** Determine if the prmary time slot is diceable, this is the one that is shaded, so
-     * determines the dicing rate, which is then copied to the other times.
-     * \return Boolean indicating GPrim is diceable.
-     */
-    virtual TqBool	Diceable()
-    {
-        TqBool f = GetMotionObject( Time( 0 ) ) ->Diceable();
-        // Copy the split info so that at each time slot, the gprims split the same.
-        TqInt i;
-        for ( i = 1; i < cTimes(); i++ )
-            GetMotionObject( Time( i ) ) ->CopySplitInfo( GetMotionObject( Time( 0 ) ).get() );
-        return ( f );
-    }
+			}
 
-    /** Determine whether the passed surface is valid to be used as a
-     *  frame in motion blur for this surface.
-     */
-    virtual TqBool	IsMotionBlurMatch( CqBasicSurface* pSurf )
-    {
-        return( TqFalse );
-    }
+			// Now build motion surfaces from the splits and pass them back.
+			for ( i = 0; i < cSplits; i++ )
+			{
+				boost::shared_ptr<CqDeformingSurface> pNewMotion( new CqDeformingSurface( boost::shared_ptr<CqBasicSurface>() ) );
+				pNewMotion->m_fDiceable = TqTrue;
+				pNewMotion->m_EyeSplitCount = m_EyeSplitCount;
+				TqInt j;
+				for ( j = 0; j < cTimes(); j++ )
+					pNewMotion->AddTimeSlot( Time( j ), aaMotionSplits[ j ][ i ] );
+				aSplits.push_back( boost::static_pointer_cast<CqBasicSurface>( pNewMotion ) );
+			}
+			return ( cSplits );
+		}
+		/** Determine if the prmary time slot is diceable, this is the one that is shaded, so
+		 * determines the dicing rate, which is then copied to the other times.
+		 * \return Boolean indicating GPrim is diceable.
+		 */
+		virtual TqBool	Diceable()
+		{
+			TqBool f = GetMotionObject( Time( 0 ) ) ->Diceable();
+			// Copy the split info so that at each time slot, the gprims split the same.
+			TqInt i;
+			for ( i = 1; i < cTimes(); i++ )
+				GetMotionObject( Time( i ) ) ->CopySplitInfo( GetMotionObject( Time( 0 ) ).get() );
+			return ( f );
+		}
 
-    /** Transform all GPrims by the specified transformation matrices.
-     * \param matTx Reference to the transformation matrix.
-     * \param matITTx Reference to the inverse transpose of the transformation matrix, used to transform normals.
-     * \param matRTx Reference to the rotation only transformation matrix, used to transform vectors.
-     * \param iTime The frame time at which to apply the transformation.
-     */
-    virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime = 0 )
-    {
-        GetMotionObject( iTime ) ->Transform( matTx, matITTx, matRTx, iTime );
-    }
+		/** Determine whether the passed surface is valid to be used as a
+		 *  frame in motion blur for this surface.
+		 */
+		virtual TqBool	IsMotionBlurMatch( CqBasicSurface* pSurf )
+		{
+			return( TqFalse );
+		}
 
-    /** Set the surface parameters of all GPrims to match those on the spefified one.
-     * \param From GPrim to copy parameters from.
-     */
-    virtual	void	SetSurfaceParameters( const CqBasicSurface& From )
-    {
-        TqInt i;
-        for ( i = 0; i < cTimes(); i++ )
-            GetMotionObject( Time( i ) ) ->SetSurfaceParameters( From );
-    }
-    /** Force all GPrims to be undiceable.
-     */
-    virtual	void	ForceUndiceable()
-    {
-        CqBasicSurface::ForceUndiceable();
-        TqInt i;
-        for ( i = 0; i < cTimes(); i++ )
-            GetMotionObject( Time( i ) ) ->ForceUndiceable();
-    }
+		/** Transform all GPrims by the specified transformation matrices.
+		 * \param matTx Reference to the transformation matrix.
+		 * \param matITTx Reference to the inverse transpose of the transformation matrix, used to transform normals.
+		 * \param matRTx Reference to the rotation only transformation matrix, used to transform vectors.
+		 * \param iTime The frame time at which to apply the transformation.
+		 */
+		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime = 0 )
+		{
+			GetMotionObject( iTime ) ->Transform( matTx, matITTx, matRTx, iTime );
+		}
 
-    /** Mark all GPrims to be discarded.
-     */
-    virtual	void	Discard()
-    {
-        CqBasicSurface::Discard();
-        TqInt i;
-        for ( i = 0; i < cTimes(); i++ )
-            GetMotionObject( Time( i ) ) ->Discard();
-    }
+		/** Set the surface parameters of all GPrims to match those on the spefified one.
+		 * \param From GPrim to copy parameters from.
+		 */
+		virtual	void	SetSurfaceParameters( const CqBasicSurface& From )
+		{
+			TqInt i;
+			for ( i = 0; i < cTimes(); i++ )
+				GetMotionObject( Time( i ) ) ->SetSurfaceParameters( From );
+		}
+		/** Force all GPrims to be undiceable.
+		 */
+		virtual	void	ForceUndiceable()
+		{
+			CqBasicSurface::ForceUndiceable();
+			TqInt i;
+			for ( i = 0; i < cTimes(); i++ )
+				GetMotionObject( Time( i ) ) ->ForceUndiceable();
+		}
 
-    virtual	TqUint	cUniform() const
-    {
-        return ( GetMotionObject( Time( 0 ) ) ->cUniform() );
-    }
-    virtual	TqUint	cVarying() const
-    {
-        return ( GetMotionObject( Time( 0 ) ) ->cVarying() );
-    }
-    virtual	TqUint	cVertex() const
-    {
-        return ( GetMotionObject( Time( 0 ) ) ->cVertex() );
-    }
-    virtual	TqUint	cFaceVarying() const
-    {
-        return ( GetMotionObject( Time( 0 ) ) ->cFaceVarying() );
-    }
-    // Overrides from CqMotionSpec
-    virtual	void	ClearMotionObject( boost::shared_ptr<CqBasicSurface>& A ) const
-        {}
-    ;
-    virtual	boost::shared_ptr<CqBasicSurface>	ConcatMotionObjects( boost::shared_ptr<CqBasicSurface> const& A, boost::shared_ptr<CqBasicSurface> const& B ) const
-    {
-        return ( A );
-    }
-    virtual	boost::shared_ptr<CqBasicSurface>	LinearInterpolateMotionObjects( TqFloat Fraction, boost::shared_ptr<CqBasicSurface> const& A, boost::shared_ptr<CqBasicSurface> const& B ) const
-    {
-        return ( A );
-    }
-protected:
+		/** Mark all GPrims to be discarded.
+		 */
+		virtual	void	Discard()
+		{
+			CqBasicSurface::Discard();
+			TqInt i;
+			for ( i = 0; i < cTimes(); i++ )
+				GetMotionObject( Time( i ) ) ->Discard();
+		}
+
+		virtual	TqUint	cUniform() const
+		{
+			return ( GetMotionObject( Time( 0 ) ) ->cUniform() );
+		}
+		virtual	TqUint	cVarying() const
+		{
+			return ( GetMotionObject( Time( 0 ) ) ->cVarying() );
+		}
+		virtual	TqUint	cVertex() const
+		{
+			return ( GetMotionObject( Time( 0 ) ) ->cVertex() );
+		}
+		virtual	TqUint	cFaceVarying() const
+		{
+			return ( GetMotionObject( Time( 0 ) ) ->cFaceVarying() );
+		}
+		// Overrides from CqMotionSpec
+		virtual	void	ClearMotionObject( boost::shared_ptr<CqBasicSurface>& A ) const
+			{}
+		;
+		virtual	boost::shared_ptr<CqBasicSurface>	ConcatMotionObjects( boost::shared_ptr<CqBasicSurface> const& A, boost::shared_ptr<CqBasicSurface> const& B ) const
+		{
+			return ( A );
+		}
+		virtual	boost::shared_ptr<CqBasicSurface>	LinearInterpolateMotionObjects( TqFloat Fraction, boost::shared_ptr<CqBasicSurface> const& A, boost::shared_ptr<CqBasicSurface> const& B ) const
+		{
+			return ( A );
+		}
+	protected:
 };
 
 

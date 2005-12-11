@@ -58,117 +58,120 @@ typedef CqOcclusionTree* CqOcclusionTreeWeakPtr;
 */
 class CqOcclusionTree// : public boost::enable_shared_from_this<CqOcclusionTree>
 {
-    class CqOcclusionTreeComparator
-    {
-    public:
-        CqOcclusionTreeComparator(TqInt dimension) : m_Dim( dimension )
-        {}
+		class CqOcclusionTreeComparator
+		{
+			public:
+				CqOcclusionTreeComparator(TqInt dimension) : m_Dim( dimension )
+				{}
 
-        bool operator()(const std::pair<TqInt, TqInt>& a, const std::pair<TqInt, TqInt>& b);
+				bool operator()(const std::pair<TqInt, TqInt>& a, const std::pair<TqInt, TqInt>& b);
 
-    private:
-        TqInt		m_Dim;
-    };
+			private:
+				TqInt		m_Dim;
+		};
 
-public:
-    CqOcclusionTree(TqInt dimension = 0);
+	public:
+		CqOcclusionTree(TqInt dimension = 0);
 
-    void SortElements(TqInt dimension)
-    {
-        std::sort(m_SampleIndices.begin(), m_SampleIndices.end(), CqOcclusionTreeComparator(dimension) );
-    }
-    TqInt Dimensions() const	{return(2);}
-	SqSampleData& Sample(TqInt index = 0)
-	{
-		return(CqBucket::ImageElement(m_SampleIndices[0].first).SampleData(m_SampleIndices[0].second));
-	}
+		void SortElements(TqInt dimension)
+		{
+			std::sort(m_SampleIndices.begin(), m_SampleIndices.end(), CqOcclusionTreeComparator(dimension) );
+		}
+		TqInt Dimensions() const
+		{
+			return(2);
+		}
+		SqSampleData& Sample(TqInt index = 0)
+		{
+			return(CqBucket::ImageElement(m_SampleIndices[0].first).SampleData(m_SampleIndices[0].second));
+		}
 
-	void AddSample(const std::pair<TqInt, TqInt>& sample)
-	{
-		m_SampleIndices.push_back(sample);
-	}
-	void ConstructTree();
-	void OutputTree(const char* name);
+		void AddSample(const std::pair<TqInt, TqInt>& sample)
+		{
+			m_SampleIndices.push_back(sample);
+		}
+		void ConstructTree();
+		void OutputTree(const char* name);
 
-	void PropagateChanges();
+		void PropagateChanges();
 
-	void InitialiseBounds();
-	void UpdateBounds();
+		void InitialiseBounds();
+		void UpdateBounds();
 
-	TqBool CanCull( CqBound* bound );
-	void SampleMPG( CqMicroPolygon* pMPG, const CqBound& bound, TqBool usingMB, TqFloat time0, TqFloat time1, TqBool usingDof, TqInt dofboundindex, SqMpgSampleInfo& MpgSampleInfo, TqBool usingLOD, SqGridInfo& gridInfo);
+		TqBool CanCull( CqBound* bound );
+		void SampleMPG( CqMicroPolygon* pMPG, const CqBound& bound, TqBool usingMB, TqFloat time0, TqFloat time1, TqBool usingDof, TqInt dofboundindex, SqMpgSampleInfo& MpgSampleInfo, TqBool usingLOD, SqGridInfo& gridInfo);
 
-	TqInt NumSamples() const
-	{
-		return(m_SampleIndices.size());
-	}
+		TqInt NumSamples() const
+		{
+			return(m_SampleIndices.size());
+		}
 
-	TqFloat MaxOpaqueZ() const
-	{
-		return(m_MaxOpaqueZ);
-	}
+		TqFloat MaxOpaqueZ() const
+		{
+			return(m_MaxOpaqueZ);
+		}
 
-	void SetMaxOpaqueZ(TqFloat z)
-	{
-		m_MaxOpaqueZ = z;
-	}
+		void SetMaxOpaqueZ(TqFloat z)
+		{
+			m_MaxOpaqueZ = z;
+		}
 
-	const CqVector2D& MinSamplePoint() const
-	{
-		return(m_MinSamplePoint);
-	}
+		const CqVector2D& MinSamplePoint() const
+		{
+			return(m_MinSamplePoint);
+		}
 
-	const CqVector2D& MaxSamplePoint() const
-	{
-		return(m_MaxSamplePoint);
-	}
+		const CqVector2D& MaxSamplePoint() const
+		{
+			return(m_MaxSamplePoint);
+		}
 
-private:
-	enum { s_ChildrenPerNode = 4 };
-	typedef boost::array<CqOcclusionTreePtr,s_ChildrenPerNode> TqChildArray;
+	private:
+		enum { s_ChildrenPerNode = 4 };
+		typedef boost::array<CqOcclusionTreePtr,s_ChildrenPerNode> TqChildArray;
 
-	typedef std::vector<std::pair<TqInt, TqInt> > TqSampleIndices;
+		typedef std::vector<std::pair<TqInt, TqInt> > TqSampleIndices;
 
-	void SplitNode(CqOcclusionTreePtr& a, CqOcclusionTreePtr& b);
+		void SplitNode(CqOcclusionTreePtr& a, CqOcclusionTreePtr& b);
 
-	CqOcclusionTreeWeakPtr	m_Parent;
-	TqInt		m_Dimension;
-	CqVector2D	m_MinSamplePoint;
-	CqVector2D	m_MaxSamplePoint;
-	TqFloat		m_MinTime;
-	TqFloat		m_MaxTime;
-	TqFloat		m_MaxOpaqueZ;
-	TqInt		m_MinDofBoundIndex;
-	TqInt		m_MaxDofBoundIndex;
-	TqFloat		m_MinDetailLevel;
-	TqFloat		m_MaxDetailLevel;
-	TqChildArray	m_Children;
-	TqSampleIndices	m_SampleIndices;
+		CqOcclusionTreeWeakPtr	m_Parent;
+		TqInt		m_Dimension;
+		CqVector2D	m_MinSamplePoint;
+		CqVector2D	m_MaxSamplePoint;
+		TqFloat		m_MinTime;
+		TqFloat		m_MaxTime;
+		TqFloat		m_MaxOpaqueZ;
+		TqInt		m_MinDofBoundIndex;
+		TqInt		m_MaxDofBoundIndex;
+		TqFloat		m_MinDetailLevel;
+		TqFloat		m_MaxDetailLevel;
+		TqChildArray	m_Children;
+		TqSampleIndices	m_SampleIndices;
 
-public:
-	static TqInt		m_Tab;
+	public:
+		static TqInt		m_Tab;
 };
 
 
 class CqOcclusionBox
 {
-public:
-    static void DeleteHierarchy();
-    static void SetupHierarchy( CqBucket* bucket, TqInt xMin, TqInt yMin, TqInt xMax, TqInt yMax );
+	public:
+		static void DeleteHierarchy();
+		static void SetupHierarchy( CqBucket* bucket, TqInt xMin, TqInt yMin, TqInt xMax, TqInt yMax );
 
-    static TqBool CanCull( CqBound* bound );
+		static TqBool CanCull( CqBound* bound );
 
-	static CqOcclusionTreePtr& KDTree()
-	{
-		return(m_KDTree);
-	}
+		static CqOcclusionTreePtr& KDTree()
+		{
+			return(m_KDTree);
+		}
 
-protected:
-    CqOcclusionBox();
-    ~CqOcclusionBox();
+	protected:
+		CqOcclusionBox();
+		~CqOcclusionBox();
 
-    static CqBucket* m_Bucket;
-    static CqOcclusionTreePtr	m_KDTree;			///< Tree representing the samples in the bucket.
+		static CqBucket* m_Bucket;
+		static CqOcclusionTreePtr	m_KDTree;			///< Tree representing the samples in the bucket.
 };
 
 

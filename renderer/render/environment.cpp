@@ -159,7 +159,8 @@ CqTextureMap* CqTextureMap::GetEnvironmentMap( const CqString& strName )
 		delete pNew;
 		pNew = NULL;
 
-	} else
+	}
+	else
 	{
 		TqFloat fov;
 		if (TIFFGetField( pNew->m_pImage, TIFFTAG_PIXAR_FOVCOT, &fov) == 1)

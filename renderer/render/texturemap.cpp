@@ -93,9 +93,9 @@ typedef enum {
 static TqBool m_critical = TqFalse;
 
 static TqFloat sides[6][2]    =  {
-     {0.0f,0.0f}, {0.0f, ONEHALF}, {ONETHIRD, 0.0f}, {ONETHIRD,ONEHALF}, 
-     {TWOTHIRD, 0.0f}, {TWOTHIRD, ONEHALF}
-};
+                                     {0.0f,0.0f}, {0.0f, ONEHALF}, {ONETHIRD, 0.0f}, {ONETHIRD,ONEHALF},
+                                     {TWOTHIRD, 0.0f}, {TWOTHIRD, ONEHALF}
+                                 };
 
 //---------------------------------------------------------------------
 /** Static array of cached texture maps.
@@ -826,9 +826,9 @@ void CqTextureMap::GetSampleWithoutBlur( TqFloat u1, TqFloat v1, TqFloat u2, TqF
 			m_lerp = 1.0f;
 
 	}
-	TqBool bLerp = (m_lerp == 1.0); 
+	TqBool bLerp = (m_lerp == 1.0);
 
-	
+
 	// Assuming this will also include the pixel at u,v multiple samplings interval
 	for (TqInt i = 0; i <= m_samples; i ++)
 	{
@@ -1352,7 +1352,7 @@ void CqTextureMap::PrepareSampleOptions( std::map<std::string, IqShaderData*>& p
 			}
 		}
 
- 		if ( paramMap.find( "samples" ) != paramMap.end() )
+		if ( paramMap.find( "samples" ) != paramMap.end() )
 		{
 			paramMap[ "samples" ] ->GetFloat( m_samples );
 		}
@@ -1367,7 +1367,7 @@ void CqTextureMap::PrepareSampleOptions( std::map<std::string, IqShaderData*>& p
 			m_FilterFunc = CalculateFilter(filter);
 
 		}
-		
+
 		if ( paramMap.find( "pixelvariance" ) != paramMap.end() )
 		{
 			paramMap[ "pixelvariance" ] ->GetFloat( m_pixelvariance );
@@ -1815,10 +1815,10 @@ void CqTextureMap::WriteTileImage( TIFF* ptex, TqPuchar raster, TqUlong width, T
 #define COMP_Y 1
 #define COMP_Z 2
 
-void CqEnvironmentMap::SampleMap( CqVector3D& R1, 
-		CqVector3D& R2, CqVector3D& R3, CqVector3D& R4,
-		std::valarray<TqFloat>& val, TqInt index, 
-		TqFloat* average_depth, TqFloat* shadow_depth )
+void CqEnvironmentMap::SampleMap( CqVector3D& R1,
+                                  CqVector3D& R2, CqVector3D& R3, CqVector3D& R4,
+                                  std::valarray<TqFloat>& val, TqInt index,
+                                  TqFloat* average_depth, TqFloat* shadow_depth )
 {
 	CqVector3D D;
 	TqFloat x,y;
@@ -1843,7 +1843,7 @@ void CqEnvironmentMap::SampleMap( CqVector3D& R1,
 		if (pLerp && (*pLerp > 0.0f))
 			m_lerp = 1.0f;
 	}
-	TqBool bLerp = (m_lerp == 1.0); 
+	TqBool bLerp = (m_lerp == 1.0);
 
 	if ( m_pImage != 0 )
 	{
@@ -1852,7 +1852,8 @@ void CqEnvironmentMap::SampleMap( CqVector3D& R1,
 		m_accum_color = 0.0f;
 		contrib = 0.0f;
 
-		if ((R1 * R1) == 0) return;
+		if ((R1 * R1) == 0)
+			return;
 
 		TqFloat dfovu = fabs(1.0f - m_fov)/(TqFloat) (m_XRes);
 		TqFloat dfovv = fabs(1.0f - m_fov)/(TqFloat) (m_YRes);
@@ -1950,11 +1951,11 @@ void CqEnvironmentMap::SampleMap( CqVector3D& R1,
 					break;
 			}
 
-			/* At this point: u,v are between 0..1.0 
+			/* At this point: u,v are between 0..1.0
 			* They must be remapped to their correct 
 			* position 
 			*/
-			
+
 			u = CLAMP(u, dfovu, 1.0f );
 			v = CLAMP(v, dfovv, 1.0f );
 
@@ -1963,7 +1964,7 @@ void CqEnvironmentMap::SampleMap( CqVector3D& R1,
 			u = CLAMP(u, 0.0f, 1.0f);
 			v = CLAMP(v, 0.0f, 1.0f);
 			CalculateLevel(u, v);
-			
+
 			BiLinear(u, v, m_umapsize, m_vmapsize, m_level, m_pixel_variance);
 			if (bLerp)
 				BiLinear(u, v, m_umapsize/2, m_vmapsize/2, m_level+1, m_pixel_sublevel);

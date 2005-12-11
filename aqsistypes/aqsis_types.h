@@ -45,14 +45,14 @@ typedef	double	TqDouble;
 
 typedef	bool	TqBool;
 /// Defines the 'true' value used in TqBool operations.
-#define	TqTrue			true 
+#define	TqTrue			true
 /// Defines the 'true' value used in TqBool operations.
 #define	TqFalse			false
 
 /// Determine the largest integer value smaller than the given float.
-#define FLOOR(x) ((int)(x) - ((x) < 0 && (x) != (int)(x))) 
+#define FLOOR(x) ((int)(x) - ((x) < 0 && (x) != (int)(x)))
 /// Determine the smallest integer value larger than the given float.
-#define CEIL(x) ((int)(x) + ((x) > 0 && (x) != (int)(x))) 
+#define CEIL(x) ((int)(x) + ((x) > 0 && (x) != (int)(x)))
 /// Determine the nearest integer value to the given float.
 #define	ROUND(x) (((x) - FLOOR((x))) < 0.5f)?FLOOR((x)):CEIL((x))
 
@@ -61,60 +61,60 @@ typedef	bool	TqBool;
 #define LERP(t,x0,x1)  ((x0) + (t)*((x1)-(x0)))
 
 /// Clamp the given value a, to be with the extents of the given range.
-#define	CLAMP(a,min,max)	((a)<(min)?(min):((a)>(max)?(max):(a))) 
+#define	CLAMP(a,min,max)	((a)<(min)?(min):((a)>(max)?(max):(a)))
 /// Determine the minimum of the two values given.
-#define	MIN(a,b)			(((a)<(b))?(a):(b)) 
+#define	MIN(a,b)			(((a)<(b))?(a):(b))
 /// Determine the maximum of the two values given.
 #define	MAX(a,b)			(((a)<(b))?(b):(a))
 
 /// Determine the minimum of the two colors given.
-#define	CMIN(a,b)			( CqColor( MIN((a).fRed(), (b).fRed()), MIN((a).fGreen(), (b).fGreen()), MIN((a).fBlue(), (b).fBlue()) ) ) 
+#define	CMIN(a,b)			( CqColor( MIN((a).fRed(), (b).fRed()), MIN((a).fGreen(), (b).fGreen()), MIN((a).fBlue(), (b).fBlue()) ) )
 /// Determine the maximum of the two colors given.
-#define	CMAX(a,b)			( CqColor( MAX((a).fRed(), (b).fRed()), MAX((a).fGreen(), (b).fGreen()), MAX((a).fBlue(), (b).fBlue()) ) ) 
+#define	CMAX(a,b)			( CqColor( MAX((a).fRed(), (b).fRed()), MAX((a).fGreen(), (b).fGreen()), MAX((a).fBlue(), (b).fBlue()) ) )
 /// Clamp the given color a, to be with the extents of the given range.
 #define	CCLAMP(a,min,max)	( CqColor( CLAMP((a).fRed(), (min).fRed(), (max).fRed()), CLAMP((a).fGreen(), (min).fGreen(), (max).fGreen()), CLAMP((a).fBlue(), (min).fBlue(), (max).fBlue()) ) )
 
 /// Determine the minimum of the two vectors given.
-#define	VMIN(a,b)			( CqVector3D( MIN((a).x(), (b).x()), MIN((a).y(), (b).y()), MIN((a).z(), (b).z()) ) ) 
+#define	VMIN(a,b)			( CqVector3D( MIN((a).x(), (b).x()), MIN((a).y(), (b).y()), MIN((a).z(), (b).z()) ) )
 /// Determine the maximum of the two vectors given.
-#define	VMAX(a,b)			( CqVector3D( MAX((a).x(), (b).x()), MAX((a).y(), (b).y()), MAX((a).z(), (b).z()) ) ) 
+#define	VMAX(a,b)			( CqVector3D( MAX((a).x(), (b).x()), MAX((a).y(), (b).y()), MAX((a).z(), (b).z()) ) )
 /// Clamp the given vector a, to be with the extents of the given range.
 #define	VCLAMP(a,min,max)	( CqVector3D( CLAMP( (a).x(), (min).x(), (max).x() ), CLAMP( (a).y(), (min).y(), (max).y() ), CLAMP( (a).z(), (min).z(), (max).z() ) ) )
 
 /// Defines an approximation to PI.
-#define	PI			3.14159265359f 
+#define	PI			3.14159265359f
 /// Defines an approximation to PI divided by 2.
 #define	PIO2		PI/2
 
 /// Convert the given degrees value to radians.
-#define RAD(a)				((a)/(180.0f/PI)) 
+#define RAD(a)				((a)/(180.0f/PI))
 /// Convert the given radians value to degrees.
 #define DEG(a)				((a)/(PI/180.0f))
 
 /// Determine the lowest set bit in an unsigned value.
 inline TqUint LOWEST_BIT( TqUint x )
 {
-    return ( x & ( ( ~x ) + 1 ) );
+	return ( x & ( ( ~x ) + 1 ) );
 }
 
 /// Determine if the given value is a power of two.
 inline TqBool IS_POW2( TqUint x )
 {
-    return ( x != 0 && x == LOWEST_BIT( x ) );
+	return ( x != 0 && x == LOWEST_BIT( x ) );
 }
 
 /// Calculate the next highest power of two minus 1 from the given value.
 inline TqUint CEIL_POW2_MINUS1( TqUint x )
 {
-    for ( TqUint i = 1; i; i <<= 1 )
-        x |= x >> i;
-    return ( x );
+	for ( TqUint i = 1; i; i <<= 1 )
+		x |= x >> i;
+	return ( x );
 }
 
 /// Calculate the next highest power of two from the given value.
 inline TqUint CEIL_POW2( TqUint x )
 {
-    return ( CEIL_POW2_MINUS1( x - 1 ) + 1 );
+	return ( CEIL_POW2_MINUS1( x - 1 ) + 1 );
 }
 
 

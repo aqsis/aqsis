@@ -38,17 +38,17 @@ START_NAMESPACE( Aqsis )
 
 CqBitVector&	CqBitVector::Intersect( CqBitVector& from )
 {
-    TqInt size = ( from.m_cLength < m_cLength ) ? from.m_cLength : m_cLength;
-    SetSize( size );
-    TqInt numints = NumberOfInts( size );
+	TqInt size = ( from.m_cLength < m_cLength ) ? from.m_cLength : m_cLength;
+	SetSize( size );
+	TqInt numints = NumberOfInts( size );
 
-    TqInt i;
-    for ( i = 0; i < numints; i++ )
-        m_aBits[ i ] = ( m_aBits[ i ] & from.m_aBits[ i ] );
+	TqInt i;
+	for ( i = 0; i < numints; i++ )
+		m_aBits[ i ] = ( m_aBits[ i ] & from.m_aBits[ i ] );
 
-    Canonize();
+	Canonize();
 
-    return ( *this );
+	return ( *this );
 }
 
 
@@ -60,18 +60,18 @@ CqBitVector&	CqBitVector::Intersect( CqBitVector& from )
 
 CqBitVector&	CqBitVector::Union( CqBitVector& from )
 {
-    TqInt size = ( from.m_cLength > m_cLength ) ? from.m_cLength : m_cLength;
-    TqInt ssize = ( from.m_cLength < m_cLength ) ? from.m_cLength : m_cLength;
-    SetSize( size );
-    TqInt numints = NumberOfInts( ssize );
+	TqInt size = ( from.m_cLength > m_cLength ) ? from.m_cLength : m_cLength;
+	TqInt ssize = ( from.m_cLength < m_cLength ) ? from.m_cLength : m_cLength;
+	SetSize( size );
+	TqInt numints = NumberOfInts( ssize );
 
-    TqInt i;
-    for ( i = 0; i < numints; i++ )
-        m_aBits[ i ] = ( m_aBits[ i ] | from.m_aBits[ i ] );
+	TqInt i;
+	for ( i = 0; i < numints; i++ )
+		m_aBits[ i ] = ( m_aBits[ i ] | from.m_aBits[ i ] );
 
-    Canonize();
+	Canonize();
 
-    return ( *this );
+	return ( *this );
 }
 
 
@@ -83,18 +83,18 @@ CqBitVector&	CqBitVector::Union( CqBitVector& from )
 
 CqBitVector&	CqBitVector::Difference( CqBitVector& from )
 {
-    TqInt size = ( from.m_cLength > m_cLength ) ? from.m_cLength : m_cLength;
-    TqInt ssize = ( from.m_cLength < m_cLength ) ? from.m_cLength : m_cLength;
-    SetSize( size );
-    TqInt numints = NumberOfInts( ssize );
+	TqInt size = ( from.m_cLength > m_cLength ) ? from.m_cLength : m_cLength;
+	TqInt ssize = ( from.m_cLength < m_cLength ) ? from.m_cLength : m_cLength;
+	SetSize( size );
+	TqInt numints = NumberOfInts( ssize );
 
-    TqInt i;
-    for ( i = 0; i < numints; i++ )
-        m_aBits[ i ] = ( m_aBits[ i ] ^ from.m_aBits[ i ] );
+	TqInt i;
+	for ( i = 0; i < numints; i++ )
+		m_aBits[ i ] = ( m_aBits[ i ] ^ from.m_aBits[ i ] );
 
-    Canonize();
+	Canonize();
 
-    return ( *this );
+	return ( *this );
 }
 
 
@@ -104,30 +104,30 @@ CqBitVector&	CqBitVector::Difference( CqBitVector& from )
 
 TqInt CqBitVector::Count()
 {
-    register TqInt count;
-    register TqInt i;
+	register TqInt count;
+	register TqInt i;
 
-    static const unsigned bitcount[ 256 ] =
-        {
-            0, 1, 1, 2, 1, 2, 2, 3, 1, \
-            2, 2, 3, 2, 3, 3, 4, 1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, \
-            4, 4, 5, 1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5, 2, \
-            3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 1, 2, 2, 3, 2, \
-            3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5, 2, 3, 3, 4, 3, 4, 4, 5, 3, \
-            4, 4, 5, 4, 5, 5, 6, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, \
-            5, 5, 6, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7, 1, \
-            2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5, 2, 3, 3, 4, 3, \
-            4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 2, 3, 3, 4, 3, 4, 4, 5, 3, \
-            4, 4, 5, 4, 5, 5, 6, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, \
-            6, 6, 7, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 3, \
-            4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7, 3, 4, 4, 5, 4, \
-            5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7, 4, 5, 5, 6, 5, 6, 6, 7, 5, \
-            6, 6, 7, 6, 7, 7, 8
-        };
+	static const unsigned bitcount[ 256 ] =
+	    {
+	        0, 1, 1, 2, 1, 2, 2, 3, 1, \
+	        2, 2, 3, 2, 3, 3, 4, 1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, \
+	        4, 4, 5, 1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5, 2, \
+	        3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 1, 2, 2, 3, 2, \
+	        3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5, 2, 3, 3, 4, 3, 4, 4, 5, 3, \
+	        4, 4, 5, 4, 5, 5, 6, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, \
+	        5, 5, 6, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7, 1, \
+	        2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5, 2, 3, 3, 4, 3, \
+	        4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 2, 3, 3, 4, 3, 4, 4, 5, 3, \
+	        4, 4, 5, 4, 5, 5, 6, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, \
+	        6, 6, 7, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 3, \
+	        4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7, 3, 4, 4, 5, 4, \
+	        5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7, 4, 5, 5, 6, 5, 6, 6, 7, 5, \
+	        6, 6, 7, 6, 7, 7, 8
+	    };
 
-    for ( count = 0L, i = 0; i < m_cNumInts; i++ )
-        count += bitcount[ m_aBits[ i ] ];
-    return ( count );
+	for ( count = 0L, i = 0; i < m_cNumInts; i++ )
+		count += bitcount[ m_aBits[ i ] ];
+	return ( count );
 }
 
 
@@ -140,13 +140,13 @@ TqInt CqBitVector::Count()
 
 std::ostream &operator<<( std::ostream &Stream, CqBitVector &Vector )
 {
-    TqInt numints = Vector.ArraySize();
+	TqInt numints = Vector.ArraySize();
 	Vector.Canonize();
 
-    TqInt i;
-    for ( i = 0; i < numints; i++ )
+	TqInt i;
+	for ( i = 0; i < numints; i++ )
 		Stream << std::hex << (int)Vector.IntArray()[i];
-    return ( Stream );
+	return ( Stream );
 }
 
 

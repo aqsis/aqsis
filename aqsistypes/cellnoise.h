@@ -40,26 +40,26 @@ START_NAMESPACE( Aqsis )
 
 class CqCellNoise
 {
-public:
-    // Default constructor.
-    CqCellNoise()
-    {}
-    ~CqCellNoise()
-    {}
+	public:
+		// Default constructor.
+		CqCellNoise()
+		{}
+		~CqCellNoise()
+		{}
 
-    TqFloat	FCellNoise1( TqFloat u );
-    TqFloat	FCellNoise2( TqFloat u, TqFloat v );
-    TqFloat	FCellNoise3( const CqVector3D& P );
-    TqFloat	FCellNoise4( const CqVector3D& P, TqFloat v );
+		TqFloat	FCellNoise1( TqFloat u );
+		TqFloat	FCellNoise2( TqFloat u, TqFloat v );
+		TqFloat	FCellNoise3( const CqVector3D& P );
+		TqFloat	FCellNoise4( const CqVector3D& P, TqFloat v );
 
-    CqVector3D	PCellNoise1( TqFloat u );
-    CqVector3D	PCellNoise2( TqFloat u, TqFloat v );
-    CqVector3D	PCellNoise3( const CqVector3D& P );
-    CqVector3D	PCellNoise4( const CqVector3D& P, TqFloat v );
+		CqVector3D	PCellNoise1( TqFloat u );
+		CqVector3D	PCellNoise2( TqFloat u, TqFloat v );
+		CqVector3D	PCellNoise3( const CqVector3D& P );
+		CqVector3D	PCellNoise4( const CqVector3D& P, TqFloat v );
 
-private:
-    static TqInt	m_PermuteTable[ 2*2048 ];		///< static permutation table.
-    static TqFloat	m_RandomTable[ 2048 ];		///< static random table.
+	private:
+		static TqInt	m_PermuteTable[ 2*2048 ];		///< static permutation table.
+		static TqFloat	m_RandomTable[ 2048 ];		///< static random table.
 }
 ;
 

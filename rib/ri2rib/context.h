@@ -37,32 +37,32 @@ START_NAMESPACE( libri2rib )
 
 class CqContext
 {
-    std::list<CqOutput *> m_lContextHandle;
-    CqOutput *m_Active;
+		std::list<CqOutput *> m_lContextHandle;
+		CqOutput *m_Active;
 
-    TqBool m_PipeHandleSet;
-    int m_PipeHandle;
+		TqBool m_PipeHandleSet;
+		int m_PipeHandle;
 
-    SqOptions::EqOutputType m_OutputType;
-    SqOptions::EqCompression m_Compression;
-    SqOptions::EqIndentation m_Indentation;
-    TqInt m_IndentSize;
+		SqOptions::EqOutputType m_OutputType;
+		SqOptions::EqCompression m_Compression;
+		SqOptions::EqIndentation m_Indentation;
+		TqInt m_IndentSize;
 
-    void parseOutputType( RtInt n, RtToken[], RtPointer params[] );
-    void parseIndentation( RtInt n, RtToken[], RtPointer params[] );
+		void parseOutputType( RtInt n, RtToken[], RtPointer params[] );
+		void parseIndentation( RtInt n, RtToken[], RtPointer params[] );
 
-public:
-    CqContext();
-    ~CqContext()
-    {}
+	public:
+		CqContext();
+		~CqContext()
+		{}
 
-    void addContext( RtToken name );
-    RtContextHandle getContext();
-    CqOutput & current();
-    void switchTo ( RtContextHandle );
-    void removeCurrent();
+		void addContext( RtToken name );
+		RtContextHandle getContext();
+		CqOutput & current();
+		void switchTo ( RtContextHandle );
+		void removeCurrent();
 
-    void parseOption( const char *name, RtInt n, RtToken tokens[], RtPointer params[] );
+		void parseOption( const char *name, RtInt n, RtToken tokens[], RtPointer params[] );
 };
 
 END_NAMESPACE( libri2rib )

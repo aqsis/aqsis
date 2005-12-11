@@ -40,7 +40,7 @@ START_NAMESPACE( Aqsis )
 
 CqFile::CqFile( const char* strFilename, const char* strSearchPathOption ) : m_pStream( 0 )
 {
-    Open( strFilename, strSearchPathOption );
+	Open( strFilename, strSearchPathOption );
 }
 
 
@@ -53,62 +53,66 @@ CqFile::CqFile( const char* strFilename, const char* strSearchPathOption ) : m_p
 
 void CqFile::Open( const char* strFilename, const char* strSearchPathOption, std::ios::openmode mode )
 {
-    // Search in the current directory first.
-    m_strRealName = strFilename;
-    m_bInternal = TqTrue;
-    std::ifstream* pFStream = new std::ifstream( strFilename, mode );
-    if ( !pFStream->is_open() )
-    {
-        // If a searchpath option name was specified, use it.
-        if ( strcmp( strSearchPathOption, "" ) != 0 )
-        {
-            // if not found there, search in the specified option searchpath.
-            CqString SearchPath( strSearchPathOption );
-            // Search each specified path in the search path (separated by ':' or ';')
-            unsigned int start = 0;
-            while ( 1 )
-            {
-                // Find the next search path in the spec.
-                unsigned int len = SearchPath.find_first_of( ";:", start ) - start;
-                // Check if it is realy meant as a drive spec.
-                if ( len == 1 && isalpha( SearchPath[ start ] ) )
-                    len += strcspn( &SearchPath[ start + 2 ], ";:" ) + 1;
-                CqString strPath = SearchPath.substr( start, len );
-                if ( strPath == "" ) break;
+	// Search in the current directory first.
+	m_strRealName = strFilename;
+	m_bInternal = TqTrue;
+	std::ifstream* pFStream = new std::ifstream( strFilename, mode );
+	if ( !pFStream->is_open() )
+	{
+		// If a searchpath option name was specified, use it.
+		if ( strcmp( strSearchPathOption, "" ) != 0 )
+		{
+			// if not found there, search in the specified option searchpath.
+			CqString SearchPath( strSearchPathOption );
+			// Search each specified path in the search path (separated by ':' or ';')
+			unsigned int start = 0;
+			while ( 1 )
+			{
+				// Find the next search path in the spec.
+				unsigned int len = SearchPath.find_first_of( ";:", start ) - start;
+				// Check if it is realy meant as a drive spec.
+				if ( len == 1 && isalpha( SearchPath[ start ] ) )
+					len += strcspn( &SearchPath[ start + 2 ], ";:" ) + 1;
+				CqString strPath = SearchPath.substr( start, len );
+				if ( strPath == "" )
+					break;
 
-                // Apply any system specific string modification.
-                strPath = FixupPath( strPath );
+				// Apply any system specific string modification.
+				strPath = FixupPath( strPath );
 
-                // See if the shader can be found in this directory
-                CqString strAlternativeFilename = strPath;
-                // Check the path is correctly terminated
-                if ( strAlternativeFilename[ strAlternativeFilename.size() - 1 ] != '/' &&
-                        strAlternativeFilename[ strAlternativeFilename.size() - 1 ] != '\\' )
+				// See if the shader can be found in this directory
+				CqString strAlternativeFilename = strPath;
+				// Check the path is correctly terminated
+				if ( strAlternativeFilename[ strAlternativeFilename.size() - 1 ] != '/' &&
+				        strAlternativeFilename[ strAlternativeFilename.size() - 1 ] != '\\' )
 #ifdef AQSIS_SYSTEM_WIN32
-                    strAlternativeFilename += "\\";
-#else // AQSIS_SYSTEM_WIN32
-                    strAlternativeFilename += "/";
-#endif // !AQSIS_SYSTEM_WIN32
-                strAlternativeFilename += strFilename;
 
-                // Clear the previous error first.
-                pFStream->clear();
-                pFStream->open( strAlternativeFilename.c_str(), std::ios::in );
-                if ( pFStream->is_open() )
-                {
-                    m_pStream = pFStream;
-                    m_strRealName = strAlternativeFilename;
-                    break;
-                }
-                if ( len < strlen( &SearchPath[ start ] ) )
-                    start += len + 1;
-                else
-                    break;
-            }
-        }
-    }
-    else
-        m_pStream = pFStream;
+					strAlternativeFilename += "\\";
+#else // AQSIS_SYSTEM_WIN32
+
+					strAlternativeFilename += "/";
+#endif // !AQSIS_SYSTEM_WIN32
+
+				strAlternativeFilename += strFilename;
+
+				// Clear the previous error first.
+				pFStream->clear();
+				pFStream->open( strAlternativeFilename.c_str(), std::ios::in );
+				if ( pFStream->is_open() )
+				{
+					m_pStream = pFStream;
+					m_strRealName = strAlternativeFilename;
+					break;
+				}
+				if ( len < strlen( &SearchPath[ start ] ) )
+					start += len + 1;
+				else
+					break;
+			}
+		}
+	}
+	else
+		m_pStream = pFStream;
 }
 
 

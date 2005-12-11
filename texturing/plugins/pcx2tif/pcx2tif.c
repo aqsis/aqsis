@@ -74,7 +74,7 @@ typedef struct
 	unsigned short Hres;                   /* horizontal resolution of device */
 	unsigned short Vres;                   /* vertical resolution of device */
 	CMAP cmap_16[ 16 ];            /* first 16 entries of colour map - MUST be
-	                                 * 48 bytes */
+		                                 * 48 bytes */
 	unsigned char Vmode;                 /* ??? */
 	unsigned char nplanes;               /* number of image planes */
 	unsigned short bytes_per_line;         /* number of bytes per scan line */
@@ -101,12 +101,15 @@ __export char *pcx2tif( char *in )
 
 
 	strcpy( tiffname, in );
-	if ( ( result = strstr( tiffname, ".pcx" ) ) != 0 ) strcpy( result, ".tif" );
+	if ( ( result = strstr( tiffname, ".pcx" ) ) != 0 )
+		strcpy( result, ".tif" );
 	if ( !result )
 	{
-		if ( ( result = strstr( tiffname, ".pcx" ) ) != 0 ) strcpy( result, ".tif" );
+		if ( ( result = strstr( tiffname, ".pcx" ) ) != 0 )
+			strcpy( result, ".tif" );
 	}
-	if ( !result ) return result;
+	if ( !result )
+		return result;
 
 	pcxfile = fopen( in, "rb" );
 	result = pcx_open( pcxfile, tiffname );
@@ -157,6 +160,7 @@ static char *pcx_open( FILE *pcxfile, char *tiffname )
 
 
 #ifdef DEBUG
+
 	printf( "%dx%d\n", w, h );
 #endif
 
@@ -165,6 +169,7 @@ static char *pcx_open( FILE *pcxfile, char *tiffname )
 #ifdef DEBUG
 		fprintf( stderr, "pcx2bmp: not enough memory for scanline!\n" );
 #endif
+
 		return NULL;
 	}
 
@@ -196,7 +201,9 @@ static char *pcx_open( FILE *pcxfile, char *tiffname )
 	save_tiff( tiffname, pixels, w, h, 3, "pcx2tif" );
 
 	free( pixels );
-	free( r ); free( g ); free( b );
+	free( r );
+	free( g );
+	free( b );
 	return tiffname;
 }
 

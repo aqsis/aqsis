@@ -40,11 +40,11 @@ START_NAMESPACE( Aqsis )
  */
 CqConverter::CqConverter( char *searchpath, char *library, char *function )
 {
-    m_errorlog = "" ;
-    m_dynamicsearch = searchpath ;
-    m_dynamiclibrary =  library ;
-    m_dynamicfunction = function ;
-    m_handle = NULL;
+	m_errorlog = "" ;
+	m_dynamicsearch = searchpath ;
+	m_dynamiclibrary =  library ;
+	m_dynamicfunction = function ;
+	m_handle = NULL;
 }
 
 //---------------------------------------------------------------------
@@ -56,25 +56,25 @@ CqConverter::CqConverter( char *searchpath, char *library, char *function )
  */
 void *CqConverter::Function()
 {
-    void * function_pt = NULL;
+	void * function_pt = NULL;
 
-    if ( !m_handle )
-        m_handle = ( void* ) DLOpen ( &m_dynamiclibrary ) ;
+	if ( !m_handle )
+		m_handle = ( void* ) DLOpen ( &m_dynamiclibrary ) ;
 
-    if ( m_handle )
-    {
-        function_pt = ( void * ) DLSym(m_handle, &m_dynamicfunction );
-        if ( function_pt == NULL )
-        {
-            m_errorlog = m_dynamicfunction + "(): " +  DLError() ;
-        }
-    }
-    else
-    {
-        m_errorlog = m_dynamiclibrary + DLError() ;
-    };
+	if ( m_handle )
+	{
+		function_pt = ( void * ) DLSym(m_handle, &m_dynamicfunction );
+		if ( function_pt == NULL )
+		{
+			m_errorlog = m_dynamicfunction + "(): " +  DLError() ;
+		}
+	}
+	else
+	{
+		m_errorlog = m_dynamiclibrary + DLError() ;
+	};
 
-    return function_pt;
+	return function_pt;
 }
 
 //---------------------------------------------------------------------
@@ -83,7 +83,7 @@ void *CqConverter::Function()
  */
 const char * CqConverter::ErrorLog()
 {
-    return m_errorlog.c_str();
+	return m_errorlog.c_str();
 }
 //---------------------------------------------------------------------
 /** Close and unload the .dll, .dso, .so
@@ -91,10 +91,10 @@ const char * CqConverter::ErrorLog()
 void CqConverter::Close()
 {
 
-    if ( m_handle )
-        DLClose( m_handle );
+	if ( m_handle )
+		DLClose( m_handle );
 
-    m_handle = NULL;
+	m_handle = NULL;
 
 }
 

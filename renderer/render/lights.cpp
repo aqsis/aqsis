@@ -37,13 +37,13 @@ std::deque<CqLightsourcePtr>	Lightsource_stack;
  */
 
 CqLightsource::CqLightsource( const boost::shared_ptr<IqShader>& pShader, TqBool fActive ) :
-        m_pShader( pShader ),
-        m_pAttributes( NULL ),
-	m_pShaderExecEnv(new CqShaderExecEnv)
+		m_pShader( pShader ),
+		m_pAttributes( NULL ),
+		m_pShaderExecEnv(new CqShaderExecEnv)
 {
-    // Set a reference with the current attributes.
-    m_pAttributes = const_cast<CqAttributes*>( QGetRenderContext() ->pattrCurrent() );
-    ADDREF( m_pAttributes );
+	// Set a reference with the current attributes.
+	m_pAttributes = const_cast<CqAttributes*>( QGetRenderContext() ->pattrCurrent() );
+	ADDREF( m_pAttributes );
 }
 
 
@@ -53,10 +53,10 @@ CqLightsource::CqLightsource( const boost::shared_ptr<IqShader>& pShader, TqBool
 
 CqLightsource::~CqLightsource()
 {
-    // Release our reference on the current attributes.
-    if ( m_pAttributes )
-        RELEASEREF( m_pAttributes );
-    m_pAttributes = 0;
+	// Release our reference on the current attributes.
+	if ( m_pAttributes )
+		RELEASEREF( m_pAttributes );
+	m_pAttributes = 0;
 }
 
 
@@ -67,28 +67,38 @@ CqLightsource::~CqLightsource()
  */
 void CqLightsource::Initialise( TqInt uGridRes, TqInt vGridRes )
 {
-    TqInt Uses = gDefLightUses;
-    if ( m_pShader )
-    {
-        Uses |= m_pShader->Uses();
-        m_pShaderExecEnv->Initialise( uGridRes, vGridRes, m_pAttributes, boost::shared_ptr<IqTransform>(), m_pShader.get(), Uses );
-    }
+	TqInt Uses = gDefLightUses;
+	if ( m_pShader )
+	{
+		Uses |= m_pShader->Uses();
+		m_pShaderExecEnv->Initialise( uGridRes, vGridRes, m_pAttributes, boost::shared_ptr<IqTransform>(), m_pShader.get(), Uses );
+	}
 
-    if ( m_pShader )
-        m_pShader->Initialise( uGridRes, vGridRes, m_pShaderExecEnv );
+	if ( m_pShader )
+		m_pShader->Initialise( uGridRes, vGridRes, m_pShaderExecEnv );
 
-    if ( USES( Uses, EnvVars_L ) )	L() ->Initialise( uGridRes, vGridRes );
-    if ( USES( Uses, EnvVars_Cl ) )	Cl() ->Initialise( uGridRes, vGridRes );
+	if ( USES( Uses, EnvVars_L ) )
+		L() ->Initialise( uGridRes, vGridRes );
+	if ( USES( Uses, EnvVars_Cl ) )
+		Cl() ->Initialise( uGridRes, vGridRes );
 
-    // Initialise the geometric parameters in the shader exec env.
-    if ( USES( Uses, EnvVars_P ) )	P() ->SetPoint( QGetRenderContext() ->matSpaceToSpace( "shader", "current", m_pShader->matCurrent(), CqMatrix(), QGetRenderContextI()->Time() ) * CqVector3D( 0.0f, 0.0f, 0.0f ) );
-    if ( USES( Uses, EnvVars_u ) )	u() ->SetFloat( 0.0f );
-    if ( USES( Uses, EnvVars_v ) )	v() ->SetFloat( 0.0f );
-    if ( USES( Uses, EnvVars_du ) )	du() ->SetFloat( 0.0f );
-    if ( USES( Uses, EnvVars_dv ) )	dv() ->SetFloat( 0.0f );
-    if ( USES( Uses, EnvVars_s ) )	s() ->SetFloat( 0.0f );
-    if ( USES( Uses, EnvVars_t ) )	t() ->SetFloat( 0.0f );
-    if ( USES( Uses, EnvVars_N ) )	N() ->SetNormal( CqVector3D( 0.0f, 0.0f, 0.0f ) );
+	// Initialise the geometric parameters in the shader exec env.
+	if ( USES( Uses, EnvVars_P ) )
+		P() ->SetPoint( QGetRenderContext() ->matSpaceToSpace( "shader", "current", m_pShader->matCurrent(), CqMatrix(), QGetRenderContextI()->Time() ) * CqVector3D( 0.0f, 0.0f, 0.0f ) );
+	if ( USES( Uses, EnvVars_u ) )
+		u() ->SetFloat( 0.0f );
+	if ( USES( Uses, EnvVars_v ) )
+		v() ->SetFloat( 0.0f );
+	if ( USES( Uses, EnvVars_du ) )
+		du() ->SetFloat( 0.0f );
+	if ( USES( Uses, EnvVars_dv ) )
+		dv() ->SetFloat( 0.0f );
+	if ( USES( Uses, EnvVars_s ) )
+		s() ->SetFloat( 0.0f );
+	if ( USES( Uses, EnvVars_t ) )
+		t() ->SetFloat( 0.0f );
+	if ( USES( Uses, EnvVars_N ) )
+		N() ->SetNormal( CqVector3D( 0.0f, 0.0f, 0.0f ) );
 }
 
 

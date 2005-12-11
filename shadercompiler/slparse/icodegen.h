@@ -45,8 +45,8 @@ START_NAMESPACE( Aqsis )
 
 struct SqVarRefTranslator
 {
-    SqVarRef	m_From;
-    SqVarRef	m_To;
+	SqVarRef	m_From;
+	SqVarRef	m_To;
 };
 
 
@@ -70,8 +70,8 @@ static const char* const gVariableTypeNames[] =
 
 class IqCodeGen
 {
-public:
-    virtual void OutputTree( IqParseNode* pNode, std::string strOutName = "" ) = 0;
+	public:
+		virtual void OutputTree( IqParseNode* pNode, std::string strOutName = "" ) = 0;
 };
 
 //-----------------------------------------------------------------------

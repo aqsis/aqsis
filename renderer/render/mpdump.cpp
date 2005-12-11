@@ -25,15 +25,15 @@ START_NAMESPACE( Aqsis )
 
 
 // Constructor
-CqMPDump::CqMPDump() 
- : out(NULL), mpcount(0)
-{ 
-};
+CqMPDump::CqMPDump()
+		: out(NULL), mpcount(0)
+{}
+;
 
 
 // Destructor
-CqMPDump::~CqMPDump() 
-{ 
+CqMPDump::~CqMPDump()
+{
 	close();
 };
 
@@ -117,7 +117,7 @@ void CqMPDump::dump(int x, int y, int idx, const SqSampleData& sd)
 		std::cerr<<"No dump file opened!"<<std::endl;
 		return;
 	}
-		
+
 	fwrite((void*)&id, sizeof(short), 1, out);
 	fwrite((void*)&x, sizeof(int), 1, out);
 	fwrite((void*)&y, sizeof(int), 1, out);
@@ -140,7 +140,7 @@ void CqMPDump::dump(const CqMicroPolygon& mp)
 		std::cerr<<"No dump file opened!"<<std::endl;
 		return;
 	}
-		
+
 	mpcount++;
 	fwrite((void*)&id, sizeof(short), 1, out);
 
@@ -153,11 +153,11 @@ void CqMPDump::dump(const CqMicroPolygon& mp)
 	v = mp.PointD();
 	dumpVec3(v);
 	if (mp.pGrid()->pVar(EnvVars_Ci)!=NULL)
-	  c = *mp.colColor();
+		c = *mp.colColor();
 	else
-	  c = CqColor(0.9,0.9,1);
+		c = CqColor(0.9,0.9,1);
 	dumpCol(c);
-    if (mp.pGrid()->pVar(EnvVars_Oi)!=NULL)
+	if (mp.pGrid()->pVar(EnvVars_Oi)!=NULL)
 		c = *mp.colOpacity();
 	else
 		c = CqColor(0.9,0.9,1);
@@ -170,7 +170,7 @@ void CqMPDump::dumpVec3(const CqVector3D& v)
 	TqFloat x = v.x();
 	TqFloat y = v.y();
 	TqFloat z = v.z();
-		
+
 	fwrite((void*)&x, sizeof(TqFloat), 1, out);
 	fwrite((void*)&y, sizeof(TqFloat), 1, out);
 	fwrite((void*)&z, sizeof(TqFloat), 1, out);
@@ -182,7 +182,7 @@ void CqMPDump::dumpCol(const CqColor& c)
 	TqFloat r = c.fRed();
 	TqFloat g = c.fGreen();
 	TqFloat b = c.fBlue();
-		
+
 	fwrite((void*)&r, sizeof(TqFloat), 1, out);
 	fwrite((void*)&g, sizeof(TqFloat), 1, out);
 	fwrite((void*)&b, sizeof(TqFloat), 1, out);

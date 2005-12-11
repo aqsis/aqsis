@@ -682,8 +682,8 @@ void CqRibBinaryDecoder::getNext ()
 	if ( c < '\200' )
 	{
 		ostr += c;
-	} 
-	else 
+	}
+	else
 	{
 		switch ( c )
 		{
@@ -694,28 +694,28 @@ void CqRibBinaryDecoder::getNext ()
 				ostr += dtoa( ctsi( b1 ) );
 				ostr += " ";
 				break;
-	
+
 				case '\201':     //0x81 BB
 				GET2;
 				ostr = " ";
 				ostr += dtoa( ctsi( b1, b2 ) );
 				ostr += " ";
 				break;
-	
+
 				case '\202':     //0x82 BBB
 				GET3;
 				ostr = " ";
 				ostr += ctsi( b1, b2, b3 );
 				ostr += " ";
 				break;
-	
+
 				case '\203':     //0x83 BBBB
 				GET4;
 				ostr = " ";
 				ostr += dtoa( ctsi( b1, b2, b3, b4 ) );
 				ostr += " ";
 				break;
-	
+
 				/* Decode fixed point numbers */
 				case '\204':     //0x84 .B
 				GET1;
@@ -725,7 +725,7 @@ void CqRibBinaryDecoder::getNext ()
 				ostr += ftoa( f );
 				ostr += " ";
 				break;
-	
+
 				case '\205':     //0x85 B.B
 				GET2;
 				f = ctui( b2 );
@@ -735,7 +735,7 @@ void CqRibBinaryDecoder::getNext ()
 				ostr += ftoa( f );
 				ostr += " ";
 				break;
-	
+
 				case '\206':     //0x86 BB.B
 				GET3;
 				f = ctui( b3 );
@@ -745,7 +745,7 @@ void CqRibBinaryDecoder::getNext ()
 				ostr += ftoa( f );
 				ostr += " ";
 				break;
-	
+
 				case '\207':     //0x87 BBB.B
 				GET4;
 				f = b4;
@@ -755,10 +755,10 @@ void CqRibBinaryDecoder::getNext ()
 				ostr += ftoa( f );
 				ostr += " ";
 				break;
-	
+
 				case '\210':
 				break; // -
-	
+
 				case '\211':     //0x89 .BB
 				GET2;
 				f = ctui( b1, b2 );
@@ -767,7 +767,7 @@ void CqRibBinaryDecoder::getNext ()
 				ostr += ftoa( f );
 				ostr += " ";
 				break;
-	
+
 				case '\212':     //0x8A B.BB
 				GET3;
 				f = ctui( b2, b3 );
@@ -777,7 +777,7 @@ void CqRibBinaryDecoder::getNext ()
 				ostr += ftoa( f );
 				ostr += " ";
 				break;
-	
+
 				case '\213':     //0x8B BB.BB
 				GET4;
 				f = ctui( b3, b4 );
@@ -787,12 +787,12 @@ void CqRibBinaryDecoder::getNext ()
 				ostr += ftoa( f );
 				ostr += " ";
 				break;
-	
+
 				case '\214':
 				break; // -
 				case '\215':
 				break; // -
-	
+
 				case '\216':     // 0x8E .BBB
 				GET3;
 				f = ctui( b1, b2, b3 );
@@ -801,7 +801,7 @@ void CqRibBinaryDecoder::getNext ()
 				ostr += ftoa( f );
 				ostr += " ";
 				break;
-	
+
 				case '\217':     // 0x8F B.BBB
 				GET4;
 				f = ctui( b2, b3, b4 );
@@ -811,7 +811,7 @@ void CqRibBinaryDecoder::getNext ()
 				ostr += ftoa( f );
 				ostr += " ";
 				break;
-	
+
 				/* Decode small strings */
 				case '\220':
 				break;  // 0x90
@@ -890,7 +890,7 @@ void CqRibBinaryDecoder::getNext ()
 				snc( 15, ostr );
 				ostr += "\" ";
 				break;
-	
+
 				/* Decode strings of any size */
 				case '\240':
 				GET1;
@@ -920,17 +920,17 @@ void CqRibBinaryDecoder::getNext ()
 				snc( ui, ostr );
 				ostr += "\" ";
 				break;
-	
+
 				/* Decode a single precision floating point value */
 				case '\244':
 				sendFloat( ostr );
 				break;  // 0xA4
-	
+
 				/* Decode a double precision floating point value */
 				case '\245':
 				sendDouble( ostr );
 				break;  // 0xA5
-	
+
 				/* Decode a RI request previously declared */
 				case '\246':     // 0xA6
 				GET1;
@@ -939,8 +939,8 @@ void CqRibBinaryDecoder::getNext ()
 				ostr += ritab[ ui ];
 				ostr += " ";
 				break;
-	
-	
+
+
 				case '\247':
 				case '\250':
 				case '\251':
@@ -976,7 +976,7 @@ void CqRibBinaryDecoder::getNext ()
 				case '\307':
 				throw std::string( " BINARY_DECODER_WARNING: reserved byte encountered" );
 				break;
-	
+
 				/* Decode arrays of single precision floating point values */
 				case '\310':     // 0xC8 L
 				GET1;
@@ -986,7 +986,7 @@ void CqRibBinaryDecoder::getNext ()
 					sendFloat( ostr );
 				ostr += "]";
 				break;
-	
+
 				case '\311':     // 0xC9 LL
 				GET2;
 				ui = ctui( b1, b2 );
@@ -995,7 +995,7 @@ void CqRibBinaryDecoder::getNext ()
 					sendFloat( ostr );
 				ostr += "]";
 				break;
-	
+
 				case '\312':     // 0xCA LLL
 				GET3;
 				ui = ctui( b1, b2, b3 );
@@ -1004,7 +1004,7 @@ void CqRibBinaryDecoder::getNext ()
 					sendFloat( ostr );
 				ostr += "]";
 				break;
-	
+
 				case '\313':     // 0xCB LLLL
 				GET4;
 				ui = ctui( b1, b2, b3, b4 );
@@ -1013,7 +1013,7 @@ void CqRibBinaryDecoder::getNext ()
 					sendFloat( ostr );
 				ostr += "]";
 				break;
-	
+
 				/* Declare a RI request */
 				case '\314':     // 0xCC B <string>
 				GET1;
@@ -1023,7 +1023,7 @@ void CqRibBinaryDecoder::getNext ()
 				tmpstr = str.c_str();
 				ritab[ ui ] = tmpstr;
 				break;
-	
+
 				/* Declare strings */
 				case '\315':     // 0xCD L
 				GET1;
@@ -1037,7 +1037,7 @@ void CqRibBinaryDecoder::getNext ()
 				tmpstr = str.c_str();
 				stringtab[ ui ] = tmpstr;
 				break;
-	
+
 				case '\316':     // 0xCE LL
 				GET2;
 				ui = ctui( b1, b2 );
@@ -1050,7 +1050,7 @@ void CqRibBinaryDecoder::getNext ()
 				tmpstr = str.c_str();
 				stringtab[ ui ] = tmpstr;
 				break;
-	
+
 				/* Decode previously declared strings */
 				case '\317':     // 0xCF L
 				GET1;
@@ -1059,7 +1059,7 @@ void CqRibBinaryDecoder::getNext ()
 				ostr += stringtab[ ui ];
 				ostr += " ";
 				break;
-	
+
 				case '\320':    // 0xD0 LL
 				GET2;
 				ui = ctui( b1, b2 );
@@ -1067,8 +1067,8 @@ void CqRibBinaryDecoder::getNext ()
 				ostr += stringtab[ ui ];
 				ostr += " ";
 				break;
-	
-	
+
+
 				case '\321':
 				case '\322':
 				case '\323':
@@ -1118,12 +1118,12 @@ void CqRibBinaryDecoder::getNext ()
 				//case '\377': Signals the end of a RunProgram block
 				throw std::string( " BINARY_DECODER_WARNING: reserved byte encountered" );
 				break;
-	
+
 				default:
 				ostr += c;
 		}
 	}
-	
+
 	for ( ui = 0;ui < ostr.size();ui++ )
 		cv.push_back( ostr[ ui ] );
 

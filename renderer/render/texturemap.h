@@ -622,7 +622,7 @@ class CqTextureMap : public IqTextureMap
 		TqFloat		m_sblur;
 		TqFloat		m_tblur;
 		TqFloat		m_pswidth;
-		TqFloat		m_ptwidth;          
+		TqFloat		m_ptwidth;
 		TqFloat		m_samples;             ///< How many samplings
 		TqFloat     m_lerp;                ///< Enable TriLinear
 		TqFloat     m_pixelvariance;       ///< Smallest Difference between two distinct samples
@@ -630,7 +630,7 @@ class CqTextureMap : public IqTextureMap
 		TqInt       m_level;               ///< Which level of mipmap (from m_ds, m_dt)
 		TqInt       m_umapsize;            ///< Umapsize for m_level of mipmap
 		TqInt       m_vmapsize;            ///< Vmapsize for m_level of mipmap
-		TqFloat     m_ds;                  ///< delta (u2-u1) 
+		TqFloat     m_ds;                  ///< delta (u2-u1)
 		TqFloat     m_dt;                  ///< delta (v2-v1)
 
 		// Temporary values used during BiLinear and/or TriLinear sampling.
@@ -677,7 +677,7 @@ class CqEnvironmentMap : public CqTextureMap
 			return ( m_matWorldToScreen );
 		}
 		virtual void SetFov(TqFloat f)
-		{		
+		{
 			m_fov = f;
 		}
 

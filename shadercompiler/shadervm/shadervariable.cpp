@@ -41,21 +41,18 @@ START_NAMESPACE( Aqsis )
  */
 CqShaderVariable::CqShaderVariable() : m_fParameter( TqFalse )
 {
-    
 
-    
+
 }
 
 CqShaderVariable::CqShaderVariable( const char* strName, TqBool fParameter ) : m_strName( strName ), m_fParameter( fParameter )
 {
-    
 
-    
+
 }
 
 CqShaderVariable::~CqShaderVariable()
-{
-}
+{}
 
 
 //----------------------------------------------------------------------
@@ -64,8 +61,8 @@ CqShaderVariable::~CqShaderVariable()
 
 std::ostream &operator<<( std::ostream &Stream, EqVariableType t )
 {
-    Stream << gVariableTypeNames[ t ];
-    return ( Stream );
+	Stream << gVariableTypeNames[ t ];
+	return ( Stream );
 }
 
 //----------------------------------------------------------------------
@@ -74,8 +71,8 @@ std::ostream &operator<<( std::ostream &Stream, EqVariableType t )
 
 std::ostream &operator<<( std::ostream &Stream, EqVariableClass t )
 {
-    Stream << gVariableClassNames[ t ];
-    return ( Stream );
+	Stream << gVariableClassNames[ t ];
+	return ( Stream );
 }
 
 

@@ -166,356 +166,356 @@ struct IqParseNodeMessagePassingFunction;
 
 struct IqParseNodeVisitor
 {
-    virtual	void Visit( IqParseNode& ) = 0;
-    virtual	void Visit( IqParseNodeShader& ) = 0;
-    virtual	void Visit( IqParseNodeFunctionCall& ) = 0;
-    virtual	void Visit( IqParseNodeUnresolvedCall& ) = 0;
-    virtual	void Visit( IqParseNodeVariable& ) = 0;
-    virtual	void Visit( IqParseNodeArrayVariable& ) = 0;
-    virtual	void Visit( IqParseNodeVariableAssign& ) = 0;
-    virtual	void Visit( IqParseNodeArrayVariableAssign& ) = 0;
-    virtual	void Visit( IqParseNodeOperator& ) = 0;
-    virtual	void Visit( IqParseNodeMathOp& ) = 0;
-    virtual	void Visit( IqParseNodeRelationalOp& ) = 0;
-    virtual	void Visit( IqParseNodeUnaryOp& ) = 0;
-    virtual	void Visit( IqParseNodeLogicalOp& ) = 0;
-    virtual	void Visit( IqParseNodeDiscardResult& ) = 0;
-    virtual	void Visit( IqParseNodeConstantFloat& ) = 0;
-    virtual	void Visit( IqParseNodeConstantString& ) = 0;
-    virtual	void Visit( IqParseNodeWhileConstruct& ) = 0;
-    virtual	void Visit( IqParseNodeIlluminateConstruct& ) = 0;
-    virtual	void Visit( IqParseNodeIlluminanceConstruct& ) = 0;
-    virtual	void Visit( IqParseNodeSolarConstruct& ) = 0;
-    virtual	void Visit( IqParseNodeConditional& ) = 0;
-    virtual	void Visit( IqParseNodeConditionalExpression& ) = 0;
-    virtual	void Visit( IqParseNodeTypeCast& ) = 0;
-    virtual	void Visit( IqParseNodeTriple& ) = 0;
-    virtual	void Visit( IqParseNodeSixteenTuple& ) = 0;
-    virtual	void Visit( IqParseNodeMessagePassingFunction& ) = 0;
+	virtual	void Visit( IqParseNode& ) = 0;
+	virtual	void Visit( IqParseNodeShader& ) = 0;
+	virtual	void Visit( IqParseNodeFunctionCall& ) = 0;
+	virtual	void Visit( IqParseNodeUnresolvedCall& ) = 0;
+	virtual	void Visit( IqParseNodeVariable& ) = 0;
+	virtual	void Visit( IqParseNodeArrayVariable& ) = 0;
+	virtual	void Visit( IqParseNodeVariableAssign& ) = 0;
+	virtual	void Visit( IqParseNodeArrayVariableAssign& ) = 0;
+	virtual	void Visit( IqParseNodeOperator& ) = 0;
+	virtual	void Visit( IqParseNodeMathOp& ) = 0;
+	virtual	void Visit( IqParseNodeRelationalOp& ) = 0;
+	virtual	void Visit( IqParseNodeUnaryOp& ) = 0;
+	virtual	void Visit( IqParseNodeLogicalOp& ) = 0;
+	virtual	void Visit( IqParseNodeDiscardResult& ) = 0;
+	virtual	void Visit( IqParseNodeConstantFloat& ) = 0;
+	virtual	void Visit( IqParseNodeConstantString& ) = 0;
+	virtual	void Visit( IqParseNodeWhileConstruct& ) = 0;
+	virtual	void Visit( IqParseNodeIlluminateConstruct& ) = 0;
+	virtual	void Visit( IqParseNodeIlluminanceConstruct& ) = 0;
+	virtual	void Visit( IqParseNodeSolarConstruct& ) = 0;
+	virtual	void Visit( IqParseNodeConditional& ) = 0;
+	virtual	void Visit( IqParseNodeConditionalExpression& ) = 0;
+	virtual	void Visit( IqParseNodeTypeCast& ) = 0;
+	virtual	void Visit( IqParseNodeTriple& ) = 0;
+	virtual	void Visit( IqParseNodeSixteenTuple& ) = 0;
+	virtual	void Visit( IqParseNodeMessagePassingFunction& ) = 0;
 };
 
 template <class T>
 const T* const	QueryNodeType( const T* const pNode, EqParseNodeType type )
 {
-    if ( T::m_ID == type )
-        return ( pNode );
-    else
-        return ( 0 );
+	if ( T::m_ID == type )
+		return ( pNode );
+	else
+		return ( 0 );
 }
 
 
 struct IqParseNode
 {
-    virtual	IqParseNode* pChild() const = 0;
-    virtual	IqParseNode* pParent() const = 0;
-    virtual	IqParseNode* pNextSibling() const = 0;
-    virtual	IqParseNode* pPrevSibling() const = 0;
-    virtual	TqInt	LineNo() const = 0;
-    virtual	const char*	strFileName() const = 0;
-    virtual	TqBool	IsVariableRef() const = 0;
-    virtual	TqInt	ResType() const = 0;
-    virtual	TqBool	fVarying() const = 0;
+	virtual	IqParseNode* pChild() const = 0;
+	virtual	IqParseNode* pParent() const = 0;
+	virtual	IqParseNode* pNextSibling() const = 0;
+	virtual	IqParseNode* pPrevSibling() const = 0;
+	virtual	TqInt	LineNo() const = 0;
+	virtual	const char*	strFileName() const = 0;
+	virtual	TqBool	IsVariableRef() const = 0;
+	virtual	TqInt	ResType() const = 0;
+	virtual	TqBool	fVarying() const = 0;
 
-    virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const = 0;
-    virtual	TqInt	NodeType() const = 0;
+	virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const = 0;
+	virtual	TqInt	NodeType() const = 0;
 
-    virtual	void Accept( IqParseNodeVisitor& V ) = 0;
+	virtual	void Accept( IqParseNodeVisitor& V ) = 0;
 
-    const static EqParseNodeType m_ID;
+	const static EqParseNodeType m_ID;
 };
 
 
 
 struct IqParseNodeShader
 {
-    virtual	const char*	strName() const = 0;
-    virtual	const char*	strShaderType() const = 0;
-    virtual	const EqShaderType ShaderType() const = 0;
-    virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const = 0;
-    virtual	TqInt	NodeType() const = 0;
+	virtual	const char*	strName() const = 0;
+	virtual	const char*	strShaderType() const = 0;
+	virtual	const EqShaderType ShaderType() const = 0;
+	virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const = 0;
+	virtual	TqInt	NodeType() const = 0;
 
-    virtual	void Accept( IqParseNodeVisitor& V ) = 0;
+	virtual	void Accept( IqParseNodeVisitor& V ) = 0;
 
-    const static EqParseNodeType m_ID;
+	const static EqParseNodeType m_ID;
 };
 
 
 struct IqParseNodeFunctionCall
 {
-    virtual	const char*	strName() const = 0;
-    virtual	const IqFuncDef* pFuncDef() const = 0;
-    virtual	IqFuncDef* pFuncDef() = 0;
-    virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const = 0;
-    virtual	TqInt	NodeType() const = 0;
+	virtual	const char*	strName() const = 0;
+	virtual	const IqFuncDef* pFuncDef() const = 0;
+	virtual	IqFuncDef* pFuncDef() = 0;
+	virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const = 0;
+	virtual	TqInt	NodeType() const = 0;
 
-    virtual	void Accept( IqParseNodeVisitor& V ) = 0;
+	virtual	void Accept( IqParseNodeVisitor& V ) = 0;
 
-    const static EqParseNodeType m_ID;
+	const static EqParseNodeType m_ID;
 };
 
 
 struct IqParseNodeUnresolvedCall
 {
-    virtual	const char*	strName() const = 0;
-    virtual	const IqFuncDef* pFuncDef() const = 0;
-    virtual	IqFuncDef* pFuncDef() = 0;
-    virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const = 0;
-    virtual	TqInt	NodeType() const = 0;
+	virtual	const char*	strName() const = 0;
+	virtual	const IqFuncDef* pFuncDef() const = 0;
+	virtual	IqFuncDef* pFuncDef() = 0;
+	virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const = 0;
+	virtual	TqInt	NodeType() const = 0;
 
-    virtual	void Accept( IqParseNodeVisitor& V ) = 0;
+	virtual	void Accept( IqParseNodeVisitor& V ) = 0;
 
-    const static EqParseNodeType m_ID;
+	const static EqParseNodeType m_ID;
 };
 
 
 struct IqParseNodeVariable
 {
-    virtual	const char*	strName() const = 0;
-    virtual	SqVarRef	VarRef() const = 0;
-    virtual	TqBool	IsLocal() const = 0;
-    virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const = 0;
-    virtual	TqInt	NodeType() const = 0;
+	virtual	const char*	strName() const = 0;
+	virtual	SqVarRef	VarRef() const = 0;
+	virtual	TqBool	IsLocal() const = 0;
+	virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const = 0;
+	virtual	TqInt	NodeType() const = 0;
 
-    virtual	void Accept( IqParseNodeVisitor& V ) = 0;
+	virtual	void Accept( IqParseNodeVisitor& V ) = 0;
 
-    const static EqParseNodeType m_ID;
+	const static EqParseNodeType m_ID;
 };
 
 
 struct IqParseNodeArrayVariable
 {
-    virtual	void Accept( IqParseNodeVisitor& V ) = 0;
-    virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const = 0;
-    virtual	TqInt	NodeType() const = 0;
+	virtual	void Accept( IqParseNodeVisitor& V ) = 0;
+	virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const = 0;
+	virtual	TqInt	NodeType() const = 0;
 
-    const static EqParseNodeType m_ID;
+	const static EqParseNodeType m_ID;
 };
 
 
 struct IqParseNodeVariableAssign
 {
-    virtual	TqBool fDiscardResult() const = 0;
-    virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const = 0;
-    virtual	TqInt	NodeType() const = 0;
+	virtual	TqBool fDiscardResult() const = 0;
+	virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const = 0;
+	virtual	TqInt	NodeType() const = 0;
 
-    virtual	void Accept( IqParseNodeVisitor& V ) = 0;
+	virtual	void Accept( IqParseNodeVisitor& V ) = 0;
 
-    const static EqParseNodeType m_ID;
+	const static EqParseNodeType m_ID;
 };
 
 
 struct IqParseNodeArrayVariableAssign
 {
-    virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const = 0;
-    virtual	TqInt	NodeType() const = 0;
+	virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const = 0;
+	virtual	TqInt	NodeType() const = 0;
 
-    virtual	void Accept( IqParseNodeVisitor& V ) = 0;
+	virtual	void Accept( IqParseNodeVisitor& V ) = 0;
 
-    const static EqParseNodeType m_ID;
+	const static EqParseNodeType m_ID;
 };
 
 
 struct IqParseNodeOperator
 {
-    virtual	TqInt	Operator() const = 0;
-    virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const = 0;
-    virtual	TqInt	NodeType() const = 0;
+	virtual	TqInt	Operator() const = 0;
+	virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const = 0;
+	virtual	TqInt	NodeType() const = 0;
 
-    virtual	void Accept( IqParseNodeVisitor& V ) = 0;
+	virtual	void Accept( IqParseNodeVisitor& V ) = 0;
 
-    const static EqParseNodeType m_ID;
+	const static EqParseNodeType m_ID;
 };
 
 
 struct IqParseNodeMathOp
 {
-    virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const = 0;
-    virtual	TqInt	NodeType() const = 0;
+	virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const = 0;
+	virtual	TqInt	NodeType() const = 0;
 
-    virtual	void Accept( IqParseNodeVisitor& V ) = 0;
+	virtual	void Accept( IqParseNodeVisitor& V ) = 0;
 
-    const static EqParseNodeType m_ID;
+	const static EqParseNodeType m_ID;
 };
 
 
 struct IqParseNodeRelationalOp
 {
-    virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const = 0;
-    virtual	TqInt	NodeType() const = 0;
+	virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const = 0;
+	virtual	TqInt	NodeType() const = 0;
 
-    virtual	void Accept( IqParseNodeVisitor& V ) = 0;
+	virtual	void Accept( IqParseNodeVisitor& V ) = 0;
 
-    const static EqParseNodeType m_ID;
+	const static EqParseNodeType m_ID;
 };
 
 
 struct IqParseNodeUnaryOp
 {
-    virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const = 0;
-    virtual	TqInt	NodeType() const = 0;
+	virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const = 0;
+	virtual	TqInt	NodeType() const = 0;
 
-    virtual	void Accept( IqParseNodeVisitor& V ) = 0;
+	virtual	void Accept( IqParseNodeVisitor& V ) = 0;
 
-    const static EqParseNodeType m_ID;
+	const static EqParseNodeType m_ID;
 };
 
 
 struct IqParseNodeLogicalOp
 {
-    virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const = 0;
-    virtual	TqInt	NodeType() const = 0;
+	virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const = 0;
+	virtual	TqInt	NodeType() const = 0;
 
-    virtual	void Accept( IqParseNodeVisitor& V ) = 0;
+	virtual	void Accept( IqParseNodeVisitor& V ) = 0;
 
-    const static EqParseNodeType m_ID;
+	const static EqParseNodeType m_ID;
 };
 
 struct IqParseNodeDiscardResult
 {
-    virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const = 0;
-    virtual	TqInt	NodeType() const = 0;
+	virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const = 0;
+	virtual	TqInt	NodeType() const = 0;
 
-    virtual	void Accept( IqParseNodeVisitor& V ) = 0;
+	virtual	void Accept( IqParseNodeVisitor& V ) = 0;
 
-    const static EqParseNodeType m_ID;
+	const static EqParseNodeType m_ID;
 };
 
 struct IqParseNodeConstantFloat
 {
-    virtual TqFloat Value() const = 0;
-    virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const = 0;
-    virtual	TqInt	NodeType() const = 0;
+	virtual TqFloat Value() const = 0;
+	virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const = 0;
+	virtual	TqInt	NodeType() const = 0;
 
-    virtual	void Accept( IqParseNodeVisitor& V ) = 0;
+	virtual	void Accept( IqParseNodeVisitor& V ) = 0;
 
-    const static EqParseNodeType m_ID;
+	const static EqParseNodeType m_ID;
 };
 
 struct IqParseNodeConstantString
 {
-    virtual	const char* strValue() const = 0;
-    virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const = 0;
-    virtual	TqInt	NodeType() const = 0;
+	virtual	const char* strValue() const = 0;
+	virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const = 0;
+	virtual	TqInt	NodeType() const = 0;
 
-    virtual	void Accept( IqParseNodeVisitor& V ) = 0;
+	virtual	void Accept( IqParseNodeVisitor& V ) = 0;
 
-    const static EqParseNodeType m_ID;
+	const static EqParseNodeType m_ID;
 };
 
 
 struct IqParseNodeWhileConstruct
 {
-    virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const = 0;
-    virtual	TqInt	NodeType() const = 0;
+	virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const = 0;
+	virtual	TqInt	NodeType() const = 0;
 
-    virtual	void Accept( IqParseNodeVisitor& V ) = 0;
+	virtual	void Accept( IqParseNodeVisitor& V ) = 0;
 
-    const static EqParseNodeType m_ID;
+	const static EqParseNodeType m_ID;
 };
 
 
 struct IqParseNodeIlluminateConstruct
 {
-    virtual	TqBool	fHasAxisAngle() const = 0;
-    virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const = 0;
-    virtual	TqInt	NodeType() const = 0;
+	virtual	TqBool	fHasAxisAngle() const = 0;
+	virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const = 0;
+	virtual	TqInt	NodeType() const = 0;
 
-    virtual	void Accept( IqParseNodeVisitor& V ) = 0;
+	virtual	void Accept( IqParseNodeVisitor& V ) = 0;
 
-    const static EqParseNodeType m_ID;
+	const static EqParseNodeType m_ID;
 };
 
 
 struct IqParseNodeIlluminanceConstruct
 {
-    virtual	TqBool	fHasAxisAngle() const = 0;
-    virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const = 0;
-    virtual	TqInt	NodeType() const = 0;
+	virtual	TqBool	fHasAxisAngle() const = 0;
+	virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const = 0;
+	virtual	TqInt	NodeType() const = 0;
 
-    virtual	void Accept( IqParseNodeVisitor& V ) = 0;
+	virtual	void Accept( IqParseNodeVisitor& V ) = 0;
 
-    const static EqParseNodeType m_ID;
+	const static EqParseNodeType m_ID;
 };
 
 
 struct IqParseNodeSolarConstruct
 {
-    virtual	TqBool	fHasAxisAngle() const = 0;
-    virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const = 0;
-    virtual	TqInt	NodeType() const = 0;
+	virtual	TqBool	fHasAxisAngle() const = 0;
+	virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const = 0;
+	virtual	TqInt	NodeType() const = 0;
 
-    virtual	void Accept( IqParseNodeVisitor& V ) = 0;
+	virtual	void Accept( IqParseNodeVisitor& V ) = 0;
 
-    const static EqParseNodeType m_ID;
+	const static EqParseNodeType m_ID;
 };
 
 
 struct IqParseNodeConditional
 {
-    virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const = 0;
-    virtual	TqInt	NodeType() const = 0;
+	virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const = 0;
+	virtual	TqInt	NodeType() const = 0;
 
-    virtual	void Accept( IqParseNodeVisitor& V ) = 0;
+	virtual	void Accept( IqParseNodeVisitor& V ) = 0;
 
-    const static EqParseNodeType m_ID;
+	const static EqParseNodeType m_ID;
 };
 
 
 struct IqParseNodeConditionalExpression
 {
-    virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const = 0;
-    virtual	TqInt	NodeType() const = 0;
+	virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const = 0;
+	virtual	TqInt	NodeType() const = 0;
 
-    virtual	void Accept( IqParseNodeVisitor& V ) = 0;
+	virtual	void Accept( IqParseNodeVisitor& V ) = 0;
 
-    const static EqParseNodeType m_ID;
+	const static EqParseNodeType m_ID;
 };
 
 
 struct IqParseNodeTypeCast
 {
-    virtual	TqInt CastTo() const = 0;
-    virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const = 0;
-    virtual	TqInt	NodeType() const = 0;
+	virtual	TqInt CastTo() const = 0;
+	virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const = 0;
+	virtual	TqInt	NodeType() const = 0;
 
-    virtual	void Accept( IqParseNodeVisitor& V ) = 0;
+	virtual	void Accept( IqParseNodeVisitor& V ) = 0;
 
-    const static EqParseNodeType m_ID;
+	const static EqParseNodeType m_ID;
 };
 
 
 struct IqParseNodeTriple
 {
-    virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const = 0;
-    virtual	TqInt	NodeType() const = 0;
+	virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const = 0;
+	virtual	TqInt	NodeType() const = 0;
 
-    virtual	void Accept( IqParseNodeVisitor& V ) = 0;
+	virtual	void Accept( IqParseNodeVisitor& V ) = 0;
 
-    const static EqParseNodeType m_ID;
+	const static EqParseNodeType m_ID;
 };
 
 
 struct IqParseNodeSixteenTuple
 {
-    virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const = 0;
-    virtual	TqInt	NodeType() const = 0;
+	virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const = 0;
+	virtual	TqInt	NodeType() const = 0;
 
-    virtual	void Accept( IqParseNodeVisitor& V ) = 0;
+	virtual	void Accept( IqParseNodeVisitor& V ) = 0;
 
-    const static EqParseNodeType m_ID;
+	const static EqParseNodeType m_ID;
 };
 
 struct IqParseNodeMessagePassingFunction
 {
-    virtual	SqVarRef	VarRef() const = 0;
-    virtual	TqInt	CommType() const = 0;
-    virtual CqString Extra() const = 0;
-    virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const = 0;
-    virtual	TqInt	NodeType() const = 0;
+	virtual	SqVarRef	VarRef() const = 0;
+	virtual	TqInt	CommType() const = 0;
+	virtual CqString Extra() const = 0;
+	virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const = 0;
+	virtual	TqInt	NodeType() const = 0;
 
-    virtual	void Accept( IqParseNodeVisitor& V ) = 0;
+	virtual	void Accept( IqParseNodeVisitor& V ) = 0;
 
-    const static EqParseNodeType m_ID;
+	const static EqParseNodeType m_ID;
 };
 
 

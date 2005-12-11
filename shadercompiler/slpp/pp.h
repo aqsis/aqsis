@@ -207,7 +207,7 @@
 #define	C_L		0x01	/* Letter (A-Zz-z)			*/
 #define	C_D		0x02	/* Digit (0-9)				*/
 #define	C_X		0x04	/* Hex digit (0-9 a-f|A-F)		*/
-#define	C_W		0x08	/* White space (ht, sp, etc.)		*/ 
+#define	C_W		0x08	/* White space (ht, sp, etc.)		*/
 /*			0x10	   Not used				*/
 #define	C_C		0x20	/* Special processing inside gchbuf()	*/
 #define	C_M		0x40	/* A META token (see gettoken())	*/
@@ -337,38 +337,43 @@ EXTERN	struct	pbbuf	*Pbbuf	I_ZERO;
 
 struct pbbuf
 {
-    char	pb_type;
+	char	pb_type;
 #define	PB_CHAR		0	/* pb_val.pb_char is character		*/
 #define	PB_STRING	1	/* pb_val.pb_str is ptr to string 	*/
 #define	PB_TOS		2	/* Top of pushback buffer stack		*/
-    union
-    {
-        char	*pb_str;
-        int	pb_char;
-    }
-    pb_val;
+
+	union
+	{
+		char	*pb_str;
+		int	pb_char;
+	}
+	pb_val;
 };
 
 EXTERN	FILE	*Output	I_ZERO;	/* Output file				*/
 
 struct file
 {
-    int	f_line;	/* Line number				*/
+	int	f_line;	/* Line number				*/
 #if	HOST == H_CPM		/* Path names for #includes		*/
-    int	f_disk;	/* Disk number				*/
-    int	f_user;	/* User number (< 0 if default)		*/
+
+	int	f_disk;	/* Disk number				*/
+	int	f_user;	/* User number (< 0 if default)		*/
 #endif	/* HOST == H_CPM */
 #ifdef	PP_SYSIO		/* If to use direct I/O system calls?	*/
-    int	f_fd;	/* A file descriptor			*/
+
+	int	f_fd;	/* A file descriptor			*/
 #else	/* !PP_SYSIO */
-    FILE	*f_file; /* FILE pointer				*/
+
+	FILE	*f_file; /* FILE pointer				*/
 #endif	/* PP_SYSIO */
-    char	*f_bufp; /* Pointer into buffer			*/
-    int	f_bufc;	/* Number of chars left			*/
-    int	f_eof;	/* Flag that's non-zero if in last blk	*/
-    char	f_lasteol;	/* TRUE if last char was EOL	*/
-    char	f_buf[ BUFFERSIZE ];	/* Buffer for file	*/
-    char	f_name[ FILENAMESIZE + 1 ];	/* File name	*/
+
+	char	*f_bufp; /* Pointer into buffer			*/
+	int	f_bufc;	/* Number of chars left			*/
+	int	f_eof;	/* Flag that's non-zero if in last blk	*/
+	char	f_lasteol;	/* TRUE if last char was EOL	*/
+	char	f_buf[ BUFFERSIZE ];	/* Buffer for file	*/
+	char	f_name[ FILENAMESIZE + 1 ];	/* File name	*/
 };
 
 /*
@@ -398,20 +403,21 @@ EXTERN	int	Lastnl	I_ZERO;	/* Last token processed was \n	*/
 
 struct	symtab
 {
-    struct	symtab	*s_link; /* Next in list for this chain		*/
-    char	disable; /* TRUE to disable recognition for now	*/
-    char	*s_body; /* Body of definition			*/
-    struct	param	*s_params;	/* List of parameters		*/
-    char	s_name[ 1 ];	/* Name is appended to structure*/
+	struct	symtab	*s_link; /* Next in list for this chain		*/
+	char	disable; /* TRUE to disable recognition for now	*/
+	char	*s_body; /* Body of definition			*/
+	struct	param	*s_params;	/* List of parameters		*/
+	char	s_name[ 1 ];	/* Name is appended to structure*/
 };
 
 struct	param
 {
-    struct	param	*p_link; /* Next in list				*/
-    char	p_flags; /* Flags:				*/
+	struct	param	*p_link; /* Next in list				*/
+	char	p_flags; /* Flags:				*/
 #define	PF_RQUOTES	0x01	/* Remove "" chars from parameter	*/
 #define	PF_PNLINES	0x02	/* Preserve '\n' char in parameter	*/
-    char	p_name[ 1 ];	/* Name is appended to struct	*/
+
+	char	p_name[ 1 ];	/* Name is appended to struct	*/
 };
 
 /*
@@ -420,10 +426,10 @@ struct	param
 
 struct	ppdir
 {
-    char	*pp_name;	/* #function name		*/
-    char	pp_ifif;	/* FALSE if ! to do on false #if*/
-    void	( *pp_func ) ();	/* Address of function		*/
-    int	pp_arg;		/* Argument to function		*/
+	char	*pp_name;	/* #function name		*/
+	char	pp_ifif;	/* FALSE if ! to do on false #if*/
+	void	( *pp_func ) ();	/* Address of function		*/
+	int	pp_arg;		/* Argument to function		*/
 };
 
 /*
@@ -456,32 +462,32 @@ extern void doundef();
 #ifdef	MAIN			/* If in main() module			*/
 struct	ppdir	pptab[] =
     {
-        /*	 Directive	Do within	Procedure	Arg to	  */
-        /*	   name		FALSE #ifxx	name		function  */
-        /* --------------	-----------	----------	--------  */
+	    /*	 Directive	Do within	Procedure	Arg to	  */
+	    /*	   name		FALSE #ifxx	name		function  */
+	    /* --------------	-----------	----------	--------  */
 #if	(TARGET == T_QC) OR (TARGET == T_QCX) OR (TARGET == T_TCX)
 
-        {"asm", NO, doasm, TRUE
-        },
+	    {"asm", NO, doasm, TRUE
+	    },
 #endif	/* (TARGET == T_QC) OR (TARGET == T_QCX) OR (TARGET == T_TCX) */
-        {"define", NO, dodefine, FALSE	},
-        {"elif", YES, doelse, TRUE	},
-        {"else", YES, doelse, FALSE	},
+	    {"define", NO, dodefine, FALSE	},
+	    {"elif", YES, doelse, TRUE	},
+	    {"else", YES, doelse, FALSE	},
 #if	(TARGET == T_QC) OR (TARGET == T_QCX) OR (TARGET == T_TCX)
 
-        {"endasm", NO, doasm, FALSE
-        },
+	    {"endasm", NO, doasm, FALSE
+	    },
 #endif	/* (TARGET == T_QC) OR (TARGET == T_QCX) OR (TARGET == T_TCX) */
-        {"endif", YES, doendif, EMPTY	},
-        {"error", NO, doerror, EMPTY	},
-        {"if", YES, doif, EMPTY	},
-        {"ifdef", YES, doifs, TRUE	},
-        {"ifndef", YES, doifs, FALSE	},
-        {"include", NO, doinclude, EMPTY	},
-        {"line", NO, doline, EMPTY	},
-        {"undef", NO, doundef, EMPTY	},
-        {"pragma", YES, dopragma, EMPTY	},
-        {NULL}	/* The end */
+	    {"endif", YES, doendif, EMPTY	},
+	    {"error", NO, doerror, EMPTY	},
+	    {"if", YES, doif, EMPTY	},
+	    {"ifdef", YES, doifs, TRUE	},
+	    {"ifndef", YES, doifs, FALSE	},
+	    {"include", NO, doinclude, EMPTY	},
+	    {"line", NO, doline, EMPTY	},
+	    {"undef", NO, doundef, EMPTY	},
+	    {"pragma", YES, dopragma, EMPTY	},
+	    {NULL}	/* The end */
     };
 
 #if	(TARGET == T_QC) OR (TARGET == T_QCX) OR (TARGET == T_TCX)
@@ -499,39 +505,39 @@ extern	void	pragvalue();
  */
 struct	ppdir	pragtab[] =
     {
-        /*	 Keyword	Do within	Procedure	Arg to	  */
-        /*	   name		FALSE #ifxx	name		function  */
-        /* ------------------	-----------	----------	--------  */
-        {"arg_string", NO, pragopt, EMPTY	},
+	    /*	 Keyword	Do within	Procedure	Arg to	  */
+	    /*	   name		FALSE #ifxx	name		function  */
+	    /* ------------------	-----------	----------	--------  */
+	    {"arg_string", NO, pragopt, EMPTY	},
 #if	(TARGET == T_QC) OR (TARGET == T_QCX) OR (TARGET == T_TCX)
 
-        {"asm", NO, pragasm, TRUE
-        },
-        {"asm_expand", NO, pragopt, EMPTY	},
+	    {"asm", NO, pragasm, TRUE
+	    },
+	    {"asm_expand", NO, pragopt, EMPTY	},
 #endif	/* (TARGET == T_QC) OR (TARGET == T_QCX) OR (TARGET == T_TCX) */
-        {"comment_recurse", NO, pragopt, EMPTY	},
-        {"define", NO, dodefine, FALSE	},
-        {"elif", YES, doelse, TRUE	},
-        {"else", YES, doelse, FALSE	},
+	    {"comment_recurse", NO, pragopt, EMPTY	},
+	    {"define", NO, dodefine, FALSE	},
+	    {"elif", YES, doelse, TRUE	},
+	    {"else", YES, doelse, FALSE	},
 #if	(TARGET == T_QC) OR (TARGET == T_QCX) OR (TARGET == T_TCX)
 
-        {"endasm", NO, pragasm, FALSE
-        },
+	    {"endasm", NO, pragasm, FALSE
+	    },
 #endif	/* (TARGET == T_QC) OR (TARGET == T_QCX) OR (TARGET == T_TCX) */
-        {"endif", YES, doendif, EMPTY	},
-        {"endmacro", NO, pragendm, EMPTY	},
-        {"error", NO, pragerror, FALSE	},
-        {"if", YES, doif, EMPTY	},
-        {"ifdef", YES, doifs, TRUE	},
-        {"ifndef", YES, doifs, FALSE	},
-        {"macro", NO, dodefine, TRUE	},
-        {"macro_rescan", NO, pragopt, EMPTY	},
-        {"macro_stack", NO, pragopt, EMPTY	},
-        {"message", NO, pragmsg, EMPTY	},
-        {"trigraph", NO, pragopt, EMPTY	},
-        {"undef", NO, doundef, EMPTY	},
-        {"value", NO, pragvalue, EMPTY	},
-        {NULL}	/* The end */
+	    {"endif", YES, doendif, EMPTY	},
+	    {"endmacro", NO, pragendm, EMPTY	},
+	    {"error", NO, pragerror, FALSE	},
+	    {"if", YES, doif, EMPTY	},
+	    {"ifdef", YES, doifs, TRUE	},
+	    {"ifndef", YES, doifs, FALSE	},
+	    {"macro", NO, dodefine, TRUE	},
+	    {"macro_rescan", NO, pragopt, EMPTY	},
+	    {"macro_stack", NO, pragopt, EMPTY	},
+	    {"message", NO, pragmsg, EMPTY	},
+	    {"trigraph", NO, pragopt, EMPTY	},
+	    {"undef", NO, doundef, EMPTY	},
+	    {"value", NO, pragvalue, EMPTY	},
+	    {NULL}	/* The end */
     };
 
 #else	/* !MAIN */
@@ -554,11 +560,12 @@ EXTERN	int	Maxsyms	I_ZERO;	/* Max number of symbols used	*/
 
 struct	ifstk
 {
-    char	i_state; /* The ifstack state:			*/
+	char	i_state; /* The ifstack state:			*/
 #define	IFTRUE		0	/* True - include code within #ifxx	*/
 #define	IFFALSE		1	/* False - no code within #ifxx		*/
 #define	IFNEVER		2	/* Treat as false forever after		*/
-    char	i_else;	/* True if encountered an #else		*/
+
+	char	i_else;	/* True if encountered an #else		*/
 };
 
 EXTERN	struct	ifstk	Ifstack[ IFSTACKSIZE + 1 ] I_BRZERO;

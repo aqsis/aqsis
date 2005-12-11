@@ -34,26 +34,26 @@ PtDspyError DspyFindStringInParamList(const char *string, char **result, int n, 
 	for (i = 0; i < n; i++, p++)
 	{
 		if (p->vtype == 's' &&
-            p->name[0] == string[0] &&
-            strcmp(p->name, string) == 0) 
+		        p->name[0] == string[0] &&
+		        strcmp(p->name, string) == 0)
 		{
 			*result = *(char **)p->value;
 			return(PkDspyErrorNone);
 		}
 	}
-    return(PkDspyErrorNoResource);
+	return(PkDspyErrorNoResource);
 }
 
 PtDspyError DspyFindMatrixInParamList(const char *string, float *result, int n, const UserParameter *p)
 {
 	int i;
 
-	for (i = 0; i < n; i++, p++) 
+	for (i = 0; i < n; i++, p++)
 	{
 		if (p->vtype == 'f' &&
-            p->vcount == 16 &&
-            p->name[0] == string[0] &&
-            strcmp(p->name, string) == 0)
+		        p->vcount == 16 &&
+		        p->name[0] == string[0] &&
+		        strcmp(p->name, string) == 0)
 		{
 			memcpy(result, (float *)p->value, 16 * sizeof(float));
 			return(PkDspyErrorNone);
@@ -64,15 +64,15 @@ PtDspyError DspyFindMatrixInParamList(const char *string, float *result, int n, 
 
 PtDspyError DspyFindFloatInParamList(const char *string, float *result, int n, const UserParameter *p)
 {
-    int i;
+	int i;
 
-	for (i = 0; i < n; i++, p++) 
+	for (i = 0; i < n; i++, p++)
 	{
 		if ((p->vtype == 'f' || p->vtype == 'i') &&
-			 p->name[0] == string[0] &&
-			 strcmp(p->name, string) == 0)
+		        p->name[0] == string[0] &&
+		        strcmp(p->name, string) == 0)
 		{
-			if (p->vtype == 'f') 
+			if (p->vtype == 'f')
 			{
 				*result = *(float *)p->value;
 				return(PkDspyErrorNone);
@@ -84,18 +84,18 @@ PtDspyError DspyFindFloatInParamList(const char *string, float *result, int n, c
 			}
 		}
 	}
-    return(PkDspyErrorNoResource);
+	return(PkDspyErrorNoResource);
 }
 
 PtDspyError DspyFindFloatsInParamList(const char *string, int *resultCount, float *result, int n, const UserParameter *p)
 {
 	int i, j, *ip;
 
-	for (i = 0; i < n; i++, p++) 
+	for (i = 0; i < n; i++, p++)
 	{
 		if ((p->vtype == 'f' || p->vtype == 'i') &&
-			p->name[0] == string[0] &&
-			strcmp(p->name, string) == 0)
+		        p->name[0] == string[0] &&
+		        strcmp(p->name, string) == 0)
 		{
 			if (p->vcount < *resultCount)
 				*resultCount = p->vcount;
@@ -104,7 +104,7 @@ PtDspyError DspyFindFloatsInParamList(const char *string, int *resultCount, floa
 				memcpy(result, (float *)p->value, *resultCount * sizeof(float));
 				return PkDspyErrorNone;
 			}
-            else
+			else
 			{
 				for (j = 0, ip = (int *)p->value; j < *resultCount; j++)
 					*result++ = (float)*ip++;
@@ -123,15 +123,15 @@ PtDspyError DspyFindIntInParamList(const char *string, int *result, int n, const
 	for (i = 0; i < n; i++, p++)
 	{
 		if ((p->vtype == 'i' || p->vtype == 'f') &&
-			p->name[0] == string[0] &&
-			strcmp(p->name, string) == 0)
+		        p->name[0] == string[0] &&
+		        strcmp(p->name, string) == 0)
 		{
 			if (p->vtype == 'i')
 			{
 				*result = *(int *)p->value;
 				return PkDspyErrorNone;
 			}
-            else
+			else
 			{
 				*result = (int)(*(float *)p->value);
 				return(PkDspyErrorNone);
@@ -139,7 +139,7 @@ PtDspyError DspyFindIntInParamList(const char *string, int *result, int n, const
 		}
 	}
 
-    return(PkDspyErrorNoResource);
+	return(PkDspyErrorNoResource);
 }
 
 PtDspyError DspyFindIntsInParamList(const char *string, int *resultCount, int *result, int n, const UserParameter *p)
@@ -150,12 +150,13 @@ PtDspyError DspyFindIntsInParamList(const char *string, int *resultCount, int *r
 	for (i = 0; i < n; i++, p++)
 	{
 		if ((p->vtype == 'i' || p->vtype == 'f') &&
-			p->name[0] == string[0] &&
-			strcmp(p->name, string) == 0)
+		        p->name[0] == string[0] &&
+		        strcmp(p->name, string) == 0)
 		{
 			if (p->vcount < *resultCount)
 				*resultCount = p->vcount;
-			if (p->vtype == 'i') {
+			if (p->vtype == 'i')
+			{
 				memcpy(result, (int *)p->value, *resultCount * sizeof(int));
 				return PkDspyErrorNone;
 			}
@@ -183,7 +184,7 @@ PtDspyError DspyReorderFormatting(int formatCount, PtDspyDevFormat *format, int 
 		for (j = i; j < formatCount; j++)
 		{
 			if (format[j].name[0] == outFormat[i].name[0] &&
-				strcmp(format[j].name, outFormat[i].name) == 0)
+			        strcmp(format[j].name, outFormat[i].name) == 0)
 			{
 				if (i != j)
 				{
@@ -191,7 +192,7 @@ PtDspyError DspyReorderFormatting(int formatCount, PtDspyDevFormat *format, int 
 					tmpFormat = format[i];
 					format[i] = format[j];
 					format[j] = tmpFormat;
-                }
+				}
 				if (outFormat[i].type)
 					format[i].type = outFormat[i].type;
 				break;
@@ -211,4 +212,4 @@ void DspyMemReverseCopy(unsigned char *t, const unsigned char *s, int n)
 	s += n;
 	for (i = 0; i < n; i++)
 		*t++ = *--s;
-} 
+}

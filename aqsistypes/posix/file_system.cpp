@@ -46,27 +46,27 @@ START_NAMESPACE( Aqsis )
 */
 std::list<CqString*> CqFile::Glob ( const CqString& strFileGlob )
 {
-    glob_t globbuf;
-    const char *pt = strFileGlob.c_str();
+	glob_t globbuf;
+	const char *pt = strFileGlob.c_str();
 
-    globbuf.gl_offs = 0;
-    glob( pt, GLOB_DOOFFS, NULL, &globbuf );
+	globbuf.gl_offs = 0;
+	glob( pt, GLOB_DOOFFS, NULL, &globbuf );
 
-    std::list<CqString*> result;
-    int i;
-    for ( i = 0;i < globbuf.gl_pathc;i++ )
-    {
-        result.push_front( new CqString( globbuf.gl_pathv[ i ] ) );
-    }
+	std::list<CqString*> result;
+	int i;
+	for ( i = 0;i < globbuf.gl_pathc;i++ )
+	{
+		result.push_front( new CqString( globbuf.gl_pathv[ i ] ) );
+	}
 
-    globfree( &globbuf );
-    return result;
+	globfree( &globbuf );
+	return result;
 }
 
 
 CqString CqFile::FixupPath(CqString& strPath)
 {
-    return( strPath );
+	return( strPath );
 }
 
 

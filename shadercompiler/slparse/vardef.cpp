@@ -64,7 +64,7 @@ std::vector<CqVarDef>	gLocalVars;
 
 CqVarDef::CqVarDef( const CqVarDef& from )
 {
-    *this = from;
+	*this = from;
 }
 
 
@@ -74,7 +74,7 @@ CqVarDef::CqVarDef( const CqVarDef& from )
 
 CqVarDef::~CqVarDef()
 {
-    delete( m_pDefValue );
+	delete( m_pDefValue );
 }
 
 ///---------------------------------------------------------------------
@@ -83,30 +83,30 @@ CqVarDef::~CqVarDef()
 
 CqVarDef& CqVarDef::operator=( const CqVarDef& from )
 {
-    m_Type = from.m_Type;
-    m_strName = from.m_strName;
-    m_UseCount = 0;
-    m_fExtern = from.m_fExtern;
-    m_vrExtern = from.m_vrExtern;
-    m_ArrayLength = from.m_ArrayLength;
-    m_ReadOnly = from.m_ReadOnly;
-    if ( from.m_pDefValue )
-        m_pDefValue = from.m_pDefValue->Clone( 0 );
-    else
-        m_pDefValue = 0;
+	m_Type = from.m_Type;
+	m_strName = from.m_strName;
+	m_UseCount = 0;
+	m_fExtern = from.m_fExtern;
+	m_vrExtern = from.m_vrExtern;
+	m_ArrayLength = from.m_ArrayLength;
+	m_ReadOnly = from.m_ReadOnly;
+	if ( from.m_pDefValue )
+		m_pDefValue = from.m_pDefValue->Clone( 0 );
+	else
+		m_pDefValue = 0;
 
-    return ( *this );
+	return ( *this );
 }
 
 
 const IqParseNode* CqVarDef::pInitialiser() const
 {
-    return ( m_pDefValue );
+	return ( m_pDefValue );
 }
 
 IqParseNode* CqVarDef::pInitialiser()
 {
-    return ( m_pDefValue );
+	return ( m_pDefValue );
 }
 
 
@@ -116,32 +116,32 @@ IqParseNode* CqVarDef::pInitialiser()
 
 TqBool CqVarDef::FindVariable( const char* strName, SqVarRef& Ref )
 {
-    // Search the local definitions next.
-    TqUint i;
-	 TqUlong hash = CqString::hash(strName);
+	// Search the local definitions next.
+	TqUint i;
+	TqUlong hash = CqString::hash(strName);
 
-    for ( i = 0; i < gLocalVars.size(); i++ )
-    {
+	for ( i = 0; i < gLocalVars.size(); i++ )
+	{
 		if ( CqString::hash(gLocalVars[ i ].m_strName.c_str()) == hash )
-        {
-            Ref.m_Type = VarTypeLocal;
-            Ref.m_Index = i;
-            return ( TqTrue );
-        }
-    }
+		{
+			Ref.m_Type = VarTypeLocal;
+			Ref.m_Index = i;
+			return ( TqTrue );
+		}
+	}
 
-    // Search the standard definitions first.
-    for ( i = 0; i < gcStandardVars; i++ )
-    {
-        if ( CqString::hash(gStandardVars[ i ].m_strName.c_str()) == hash )
-        {
-            Ref.m_Type = VarTypeStandard;
-            Ref.m_Index = i;
-            return ( TqTrue );
-        }
-    }
+	// Search the standard definitions first.
+	for ( i = 0; i < gcStandardVars; i++ )
+	{
+		if ( CqString::hash(gStandardVars[ i ].m_strName.c_str()) == hash )
+		{
+			Ref.m_Type = VarTypeStandard;
+			Ref.m_Index = i;
+			return ( TqTrue );
+		}
+	}
 
-    return ( TqFalse );
+	return ( TqFalse );
 }
 
 
@@ -152,21 +152,21 @@ TqBool CqVarDef::FindVariable( const char* strName, SqVarRef& Ref )
 
 TqBool CqVarDef::FindStandardVariable( const char* strName, SqVarRef& Ref )
 {
-    // Search the standard definitions only.
-    TqInt i;
+	// Search the standard definitions only.
+	TqInt i;
 	TqUlong hash = CqString::hash(strName);
 
 	for ( i = 0; i < gcStandardVars; i++ )
-    {
-        if ( CqString::hash(gStandardVars[ i ].m_strName.c_str()) == hash )
-        {
-            Ref.m_Type = VarTypeStandard;
-            Ref.m_Index = i;
-            return ( TqTrue );
-        }
-    }
+	{
+		if ( CqString::hash(gStandardVars[ i ].m_strName.c_str()) == hash )
+		{
+			Ref.m_Type = VarTypeStandard;
+			Ref.m_Index = i;
+			return ( TqTrue );
+		}
+	}
 
-    return ( TqFalse );
+	return ( TqFalse );
 }
 
 
@@ -176,8 +176,8 @@ TqBool CqVarDef::FindStandardVariable( const char* strName, SqVarRef& Ref )
 
 TqInt CqVarDef::AddVariable( CqVarDef& Def )
 {
-    gLocalVars.push_back( Def );
-    return ( gLocalVars.size() - 1 );
+	gLocalVars.push_back( Def );
+	return ( gLocalVars.size() - 1 );
 }
 
 
@@ -187,18 +187,18 @@ TqInt CqVarDef::AddVariable( CqVarDef& Def )
 
 CqVarDef* CqVarDef::GetVariablePtr( const SqVarRef& Ref )
 {
-    // Look up the variable reference according to its type.
-    if ( Ref.m_Type == VarTypeStandard && Ref.m_Index < gcStandardVars )
-        return ( &gStandardVars[ Ref.m_Index ] );
+	// Look up the variable reference according to its type.
+	if ( Ref.m_Type == VarTypeStandard && Ref.m_Index < gcStandardVars )
+		return ( &gStandardVars[ Ref.m_Index ] );
 
-    if ( Ref.m_Type == VarTypeLocal && Ref.m_Index < gLocalVars.size() )
-    {
-        if ( gLocalVars[ Ref.m_Index ].fExtern() )
-            return ( GetVariablePtr( gLocalVars[ Ref.m_Index ].vrExtern() ) );
-        else
-            return ( &gLocalVars[ Ref.m_Index ] );
-    }
-    return ( 0 );
+	if ( Ref.m_Type == VarTypeLocal && Ref.m_Index < gLocalVars.size() )
+	{
+		if ( gLocalVars[ Ref.m_Index ].fExtern() )
+			return ( GetVariablePtr( gLocalVars[ Ref.m_Index ].vrExtern() ) );
+		else
+			return ( &gLocalVars[ Ref.m_Index ] );
+	}
+	return ( 0 );
 }
 
 
@@ -208,7 +208,7 @@ CqVarDef* CqVarDef::GetVariablePtr( const SqVarRef& Ref )
 
 IqVarDef* IqVarDef::GetVariablePtr( const SqVarRef& Ref )
 {
-    return ( CqVarDef::GetVariablePtr( Ref ) );
+	return ( CqVarDef::GetVariablePtr( Ref ) );
 }
 
 

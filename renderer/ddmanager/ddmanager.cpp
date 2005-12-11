@@ -132,9 +132,9 @@ TqInt CqDDManager::CloseDisplays()
 
 TqInt CqDDManager::DisplayBucket( IqBucket* pBucket )
 {
-    static CqRandom random( 61 );
+	static CqRandom random( 61 );
 
- 	if( (pBucket->Width() == 0) || (pBucket->Height() == 0) )
+	if( (pBucket->Width() == 0) || (pBucket->Height() == 0) )
 		return(0);
 
 	TqInt	xmin = pBucket->XOrigin();
@@ -179,7 +179,7 @@ TqInt CqDDManager::DisplayBucket( IqBucket* pBucket )
 				TqInt index = 0;
 				const TqFloat* pSamples = pBucket->Data( x, y );
 				std::vector<PtDspyDevFormat>::iterator iformat;
-                double s = random.RandomFloat();
+				double s = random.RandomFloat();
 				for(iformat = i->m_formats.begin(); iformat != i->m_formats.end(); iformat++)
 				{
 					TqFloat value = pSamples[i->m_dataOffsets[index]];
@@ -400,7 +400,7 @@ void CqDDManager::LoadDisplayLibrary( SqDisplayRequest& req )
 
 	if( NULL != req.m_OpenMethod )
 	{
-		// If the quantization options haven't been set in the RiDisplay call, get the appropriate values out 
+		// If the quantization options haven't been set in the RiDisplay call, get the appropriate values out
 		// of the RiQuantize option.
 		const TqFloat* pQuant = 0;
 		if(!req.m_QuantizeSpecified || !req.m_QuantizeDitherSpecified)
@@ -416,7 +416,7 @@ void CqDDManager::LoadDisplayLibrary( SqDisplayRequest& req )
 				req.m_QuantizeMaxVal = pQuant[2];
 				req.m_QuantizeSpecified = TqTrue;
 			}
-	
+
 			if( pQuant && !req.m_QuantizeDitherSpecified)
 			{
 				req.m_QuantizeDitherVal = pQuant[3];
@@ -543,31 +543,31 @@ void CqDDManager::LoadDisplayLibrary( SqDisplayRequest& req )
 		// Check for an error
 		if( err != PkDspyErrorNone )
 		{
-			// The display did not successfully open, so clean up after it and leave the 
+			// The display did not successfully open, so clean up after it and leave the
 			// request as invalid.
 			std::cerr << error << "Cannot open display \"" << req.m_name << "\" : ";
 			switch(err)
 			{
-				case PkDspyErrorNoMemory:
+					case PkDspyErrorNoMemory:
 					std::cerr << "Out of memory" << std::endl;
 					break;
-				case PkDspyErrorUnsupported:
+					case PkDspyErrorUnsupported:
 					std::cerr << "Unsupported" << std::endl;
 					break;
-				case PkDspyErrorBadParams:
+					case PkDspyErrorBadParams:
 					std::cerr << "Bad params" << std::endl;
 					break;
-				case PkDspyErrorNoResource:
+					case PkDspyErrorNoResource:
 					std::cerr << "No resource" << std::endl;
 					break;
-				case PkDspyErrorUndefined:			
-				default:
+					case PkDspyErrorUndefined:
+					default:
 					std::cerr << "Undefined" << std::endl;
 					break;
 			}
 
 			CloseDisplayLibrary(req);
-			return;			
+			return;
 		}
 		else
 			req.m_valid = TqTrue;

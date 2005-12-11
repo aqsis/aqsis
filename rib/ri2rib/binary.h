@@ -33,39 +33,39 @@ START_NAMESPACE( libri2rib )
 
 class CqBinary : public CqOutput
 {
-private:
-    void intToChar( RtInt n, TqChar &b1, TqChar &b2, TqChar &b3, TqChar &b4 );
-    void floatToChar( RtFloat f, TqChar &b1, TqChar &b2, TqChar &b3, TqChar &b4 );
-    void addString( std::string &, TqBool &, TqUint & );
-    void encodeString( const char * );
+	private:
+		void intToChar( RtInt n, TqChar &b1, TqChar &b2, TqChar &b3, TqChar &b4 );
+		void floatToChar( RtFloat f, TqChar &b1, TqChar &b2, TqChar &b3, TqChar &b4 );
+		void addString( std::string &, TqBool &, TqUint & );
+		void encodeString( const char * );
 
-    TqBool m_aRequest[ LAST_Function ];
-    std::list<std::string> m_aStrings;
+		TqBool m_aRequest[ LAST_Function ];
+		std::list<std::string> m_aStrings;
 
-protected:
-    void printHeader();
-    void printRequest( const char *, EqFunctions );
-    void printInteger( const RtInt );
-    void printFloat( const RtFloat );
-    void printString( std::string & );
-    void printSpace()
-    {}
-    void printEOL()
-    {}
+	protected:
+		void printHeader();
+		void printRequest( const char *, EqFunctions );
+		void printInteger( const RtInt );
+		void printFloat( const RtFloat );
+		void printString( std::string & );
+		void printSpace()
+		{}
+		void printEOL()
+		{}
 
-    void printArray ( RtInt n, RtInt *p );
-    void printArray ( RtInt n, RtFloat *p );
-    void printArray ( RtInt n, RtToken *p );
-    void printToken ( RtToken t );
-    void printCharP ( const char *c );
-    void print ( const char *c );
+		void printArray ( RtInt n, RtInt *p );
+		void printArray ( RtInt n, RtFloat *p );
+		void printArray ( RtInt n, RtToken *p );
+		void printToken ( RtToken t );
+		void printCharP ( const char *c );
+		void print ( const char *c );
 
-public:
-    CqBinary( const char *, int fdesc,
-              SqOptions::EqCompression,
-              SqOptions::EqIndentation, TqInt isize );
-    ~CqBinary()
-    {}
+	public:
+		CqBinary( const char *, int fdesc,
+		          SqOptions::EqCompression,
+		          SqOptions::EqIndentation, TqInt isize );
+		~CqBinary()
+		{}
 }
 ;
 

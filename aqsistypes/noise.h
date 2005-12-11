@@ -42,41 +42,41 @@ START_NAMESPACE( Aqsis )
 
 class CqNoise
 {
-public:
+	public:
 
-    CqNoise()
-    {}
+		CqNoise()
+		{}
 
-    ~CqNoise()
-    {}
+		~CqNoise()
+		{}
 
-// These are functions with "SL-friendly" parameter lists and return types,
-// which each invoke one or three calls to one of the functions in CqNoise1234.
+		// These are functions with "SL-friendly" parameter lists and return types,
+		// which each invoke one or three calls to one of the functions in CqNoise1234.
 
-    static	TqFloat	FGNoise1( TqFloat x );
-    static  TqFloat FGPNoise1( TqFloat x, TqFloat px );
-    static	TqFloat	FGNoise2( TqFloat x, TqFloat y );
-    static	TqFloat	FGPNoise2( TqFloat x, TqFloat y, TqFloat px, TqFloat py );
-    static	TqFloat	FGNoise3( const CqVector3D& v );
-    static	TqFloat	FGPNoise3( const CqVector3D& v, const CqVector3D& pv );
-    static	TqFloat	FGNoise4( const CqVector3D& v, const TqFloat t );
-    static	TqFloat	FGPNoise4( const CqVector3D& v, const TqFloat t, const CqVector3D& pv, const TqFloat pt );
-    static	CqVector3D	PGNoise1( TqFloat x );
-    static	CqVector3D	PGPNoise1( TqFloat x, TqFloat px );
-    static	CqVector3D	PGNoise2( TqFloat x, TqFloat y );
-    static	CqVector3D	PGPNoise2( TqFloat x, TqFloat y, TqFloat px, TqFloat py );
-    static	CqVector3D	PGNoise3( const CqVector3D& v );
-    static	CqVector3D	PGPNoise3( const CqVector3D& v, const CqVector3D& pv );
-    static	CqVector3D	PGNoise4( const CqVector3D& v, TqFloat t );
-    static	CqVector3D	PGPNoise4( const CqVector3D& v, TqFloat t, const CqVector3D& pv, TqFloat pt );
-    static	CqColor	CGNoise1( TqFloat x );
-    static	CqColor	CGPNoise1( TqFloat x, TqFloat px );
-    static	CqColor	CGNoise2( TqFloat x, TqFloat y );
-    static	CqColor	CGPNoise2( TqFloat x, TqFloat y, TqFloat px, TqFloat py );
-    static	CqColor	CGNoise3( const CqVector3D& v );
-    static	CqColor	CGPNoise3( const CqVector3D& v, const CqVector3D& pv );
-    static	CqColor	CGNoise4( const CqVector3D& v, TqFloat t );
-    static	CqColor	CGPNoise4( const CqVector3D& v, TqFloat t, const CqVector3D& pv, TqFloat pt );
+		static	TqFloat	FGNoise1( TqFloat x );
+		static  TqFloat FGPNoise1( TqFloat x, TqFloat px );
+		static	TqFloat	FGNoise2( TqFloat x, TqFloat y );
+		static	TqFloat	FGPNoise2( TqFloat x, TqFloat y, TqFloat px, TqFloat py );
+		static	TqFloat	FGNoise3( const CqVector3D& v );
+		static	TqFloat	FGPNoise3( const CqVector3D& v, const CqVector3D& pv );
+		static	TqFloat	FGNoise4( const CqVector3D& v, const TqFloat t );
+		static	TqFloat	FGPNoise4( const CqVector3D& v, const TqFloat t, const CqVector3D& pv, const TqFloat pt );
+		static	CqVector3D	PGNoise1( TqFloat x );
+		static	CqVector3D	PGPNoise1( TqFloat x, TqFloat px );
+		static	CqVector3D	PGNoise2( TqFloat x, TqFloat y );
+		static	CqVector3D	PGPNoise2( TqFloat x, TqFloat y, TqFloat px, TqFloat py );
+		static	CqVector3D	PGNoise3( const CqVector3D& v );
+		static	CqVector3D	PGPNoise3( const CqVector3D& v, const CqVector3D& pv );
+		static	CqVector3D	PGNoise4( const CqVector3D& v, TqFloat t );
+		static	CqVector3D	PGPNoise4( const CqVector3D& v, TqFloat t, const CqVector3D& pv, TqFloat pt );
+		static	CqColor	CGNoise1( TqFloat x );
+		static	CqColor	CGPNoise1( TqFloat x, TqFloat px );
+		static	CqColor	CGNoise2( TqFloat x, TqFloat y );
+		static	CqColor	CGPNoise2( TqFloat x, TqFloat y, TqFloat px, TqFloat py );
+		static	CqColor	CGNoise3( const CqVector3D& v );
+		static	CqColor	CGPNoise3( const CqVector3D& v, const CqVector3D& pv );
+		static	CqColor	CGNoise4( const CqVector3D& v, TqFloat t );
+		static	CqColor	CGPNoise4( const CqVector3D& v, TqFloat t, const CqVector3D& pv, TqFloat pt );
 
 };
 

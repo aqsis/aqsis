@@ -117,7 +117,8 @@ void CqStats::PrintStats( TqInt level ) const
 	if( level > 0 )
 		TIMER_DUMP(OUT_CONSOLE, SORT_TIMES)
 
-	MSG << std::setiosflags(std::ios_base::fixed) << std::setfill(' ') << std::setprecision(6);
+		MSG << std::setiosflags(std::ios_base::fixed)
+			<< std::setfill(' ') << std::setprecision(6);
 
 	//! Most important informations
 	if ( level == 2 || level == 3 )
@@ -323,7 +324,7 @@ void CqStats::PrintStats( TqInt level ) const
 		TqFloat	_mpg_7		=	100.0f * STATS_INT_GETI( MPG_sample_coverage75_875 ) / _mpg_hits;
 		TqFloat	_mpg_8		=	100.0f * STATS_INT_GETI( MPG_sample_coverage875_100 ) / _mpg_hits;
 		TqFloat _mpg_min = 0.0f;
-		if (STATS_INT_GETF( MPG_min_area ) != FLT_MAX) 
+		if (STATS_INT_GETF( MPG_min_area ) != FLT_MAX)
 			_mpg_min = STATS_INT_GETF( MPG_min_area );
 		TqFloat _mpg_max = 0.0f;
 		if (STATS_INT_GETF( MPG_max_area ) != FLT_MIN)

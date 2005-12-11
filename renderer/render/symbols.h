@@ -43,31 +43,31 @@ START_NAMESPACE( Aqsis )
 
 struct SqParameterDeclaration
 {
-    SqParameterDeclaration() :
-            m_strName( "" ),
-            m_Type( type_invalid ),
-            m_Class( class_invalid ),
-            m_Count( 0 ),
-            m_pCreate( 0 ),
-            m_strSpace( "" )
-    {}
-    SqParameterDeclaration( const char* strName, EqVariableType Type, EqVariableClass Class, TqInt Count,
-                            CqParameter* ( *pCreate ) ( const char* strName, TqInt Count ), const char* strSpace ) :
-            m_strName( strName ),
-            m_Type( Type ),
-            m_Class( Class ),
-            m_Count( Count ),
-            m_pCreate( pCreate ),
-            m_strSpace( strSpace )
-    {}
+	SqParameterDeclaration() :
+			m_strName( "" ),
+			m_Type( type_invalid ),
+			m_Class( class_invalid ),
+			m_Count( 0 ),
+			m_pCreate( 0 ),
+			m_strSpace( "" )
+	{}
+	SqParameterDeclaration( const char* strName, EqVariableType Type, EqVariableClass Class, TqInt Count,
+	                        CqParameter* ( *pCreate ) ( const char* strName, TqInt Count ), const char* strSpace ) :
+			m_strName( strName ),
+			m_Type( Type ),
+			m_Class( Class ),
+			m_Count( Count ),
+			m_pCreate( pCreate ),
+			m_strSpace( strSpace )
+	{}
 
 
-    CqString	m_strName;										///< Name of the parameter.
-    EqVariableType	m_Type;										///< Type.
-    EqVariableClass	m_Class;									///< Class.
-    TqInt	m_Count;										///< Array length if an array.
-    CqParameter* ( *m_pCreate ) ( const char* strName, TqInt Count );		///< Constructor function.
-    CqString	m_strSpace;										///< Specification coordinate system name.
+	CqString	m_strName;										///< Name of the parameter.
+	EqVariableType	m_Type;										///< Type.
+	EqVariableClass	m_Class;									///< Class.
+	TqInt	m_Count;										///< Array length if an array.
+	CqParameter* ( *m_pCreate ) ( const char* strName, TqInt Count );		///< Constructor function.
+	CqString	m_strSpace;										///< Specification coordinate system name.
 }
 ;
 

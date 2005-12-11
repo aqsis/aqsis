@@ -27,17 +27,17 @@ USING_NAMESPACE( libri2rib );
 
 CqPLStore::CqPLStore ( va_list args )
 {
-    RtToken t;
-    RtPointer p;
-    n = 0;
-    t = va_arg( args, RtToken );
-    while ( t != RI_NULL )
-    {
-        m_Token.push_back( t );
-        p = va_arg( args, RtPointer );
-        m_Parameter.push_back( p );
+	RtToken t;
+	RtPointer p;
+	n = 0;
+	t = va_arg( args, RtToken );
+	while ( t != RI_NULL )
+	{
+		m_Token.push_back( t );
+		p = va_arg( args, RtPointer );
+		m_Parameter.push_back( p );
 
-        n++;
-        t = va_arg( args, RtToken );
-    }
+		n++;
+		t = va_arg( args, RtToken );
+	}
 }

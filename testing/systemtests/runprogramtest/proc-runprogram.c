@@ -21,7 +21,8 @@ rands(RtFloat x[])
 		xx = 2.0f * ((RtFloat)rand() / RAND_MAX) - 1.0f;
 		yy = 2.0f * ((RtFloat)rand() / RAND_MAX) - 1.0f;
 		s = xx*xx + yy*yy;
-	} while(s > 1.0f || s == 0.0f );
+	}
+	while(s > 1.0f || s == 0.0f );
 
 	x[2] = 2.0f*s - 1.0f;
 	s = (RtFloat)sqrt((1.0f-x[2]*x[2])/s);
@@ -50,17 +51,17 @@ int main(int argc, char **argv)
 		ncvs = 3 * nsegs + 1;
 		P = (RtPoint *)malloc(ncvs * ncurves * sizeof(RtPoint));
 		nvertices = (RtInt *)malloc(ncurves * sizeof(RtInt));
-	//	RiOption ( "RI2RIB_Output", ( RtToken ) "Compression", ( RtPointer ) & ri2rib_gzip, RI_NULL );
-	//	RiOption ( "RI2RIB_Output", ( RtToken ) "Type", ( RtPointer ) & ri2rib_binary, RI_NULL );
+		//	RiOption ( "RI2RIB_Output", ( RtToken ) "Compression", ( RtPointer ) & ri2rib_gzip, RI_NULL );
+		//	RiOption ( "RI2RIB_Output", ( RtToken ) "Type", ( RtPointer ) & ri2rib_binary, RI_NULL );
 		RiBegin(RI_NULL);
 		for (i = 0; i < ncurves; i++)
 		{
 			nvertices[i] = ncvs;
 			rands(point);
-			P[i*ncvs][0] = 
-			P[i*ncvs][1] = 
-			P[i*ncvs][2] = 0.0f;
-			for (j = 1; j < ncvs; j++) 
+			P[i*ncvs][0] =
+			    P[i*ncvs][1] =
+			        P[i*ncvs][2] = 0.0f;
+			for (j = 1; j < ncvs; j++)
 			{
 				P[i*ncvs+j][0] = point[0] * ((RtFloat)j/ncvs) * scale;
 				P[i*ncvs+j][1] = point[1] * ((RtFloat)j/ncvs) * scale;
@@ -71,6 +72,6 @@ int main(int argc, char **argv)
 		RiSphere(0.9f,-0.9f,0.9f,360.0f, RI_NULL);
 		RiArchiveRecord(RI_COMMENT, "\377");
 		RiEnd();
-    }
-    return 0;
+	}
+	return 0;
 }

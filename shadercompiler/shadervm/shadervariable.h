@@ -39,11 +39,11 @@
 
 
 /** \file
-
+ 
 		\brief Declares the classes for supporting shader variables on micropolygrids.
-
+ 
 		\author Paul C. Gregory (pgregory@aqsis.com)
-
+ 
 */
 
 
@@ -95,9 +95,9 @@ START_NAMESPACE( Aqsis )
 //----------------------------------------------------------------------
 
 /** \class CqShaderVariable
-
+ 
  * Abstract base class from which all shaders variables must be defined.
-
+ 
  */
 
 
@@ -106,125 +106,125 @@ class CqShaderVariable : public IqShaderData
 
 {
 
-public:
+	public:
 
-    CqShaderVariable();
+		CqShaderVariable();
 
-    CqShaderVariable( const char* strName, TqBool fParameter = TqFalse );
+		CqShaderVariable( const char* strName, TqBool fParameter = TqFalse );
 
-    virtual	~CqShaderVariable();
+		virtual	~CqShaderVariable();
 
 
 
-    virtual void GetBool( TqBool& res, TqInt index = 0 ) const
+		virtual void GetBool( TqBool& res, TqInt index = 0 ) const
 
-    {
+		{
 
-        assert( TqFalse );
+			assert( TqFalse );
 
-    }
+		}
 
-    virtual void GetBoolPtr( const TqBool*& res ) const
+		virtual void GetBoolPtr( const TqBool*& res ) const
 
-    {
+		{
 
-        assert( TqFalse );
+			assert( TqFalse );
 
-    }
+		}
 
-    virtual void GetBoolPtr( TqBool*& res )
+		virtual void GetBoolPtr( TqBool*& res )
 
-    {
+		{
 
-        assert( TqFalse );
+			assert( TqFalse );
 
-    }
+		}
 
-    virtual void SetBool( const TqBool& val )
+		virtual void SetBool( const TqBool& val )
 
-    {
+		{
 
-        assert( TqFalse );
+			assert( TqFalse );
 
-    }
+		}
 
-    virtual void SetBool( const TqBool& val, TqInt index )
+		virtual void SetBool( const TqBool& val, TqInt index )
 
-    {
+		{
 
-        assert( TqFalse );
+			assert( TqFalse );
 
-    }
+		}
 
 
 
-    /** Get the name of this variable.
+		/** Get the name of this variable.
 
-     * \return Read only reference to a CqString class.
+		 * \return Read only reference to a CqString class.
 
-     */
+		 */
 
-    virtual const CqString&	strName()
+		virtual const CqString&	strName()
 
-    {
+		{
 
-        return ( m_strName );
+			return ( m_strName );
 
-    }
+		}
 
 
 
-    /** Determine if this variable is storage for a shader argument.
+		/** Determine if this variable is storage for a shader argument.
 
-     */
+		 */
 
-    virtual TqBool fParameter() const
+		virtual TqBool fParameter() const
 
-    {
+		{
 
-        return ( m_fParameter );
+			return ( m_fParameter );
 
-    }
+		}
 
 
 
-    /** Indicate whether or not this variable is a shader argument.
+		/** Indicate whether or not this variable is a shader argument.
 
-     */
+		 */
 
-    void SetfParameter( TqBool fParameter = TqTrue )
+		void SetfParameter( TqBool fParameter = TqTrue )
 
-    {
+		{
 
-        m_fParameter = fParameter;
+			m_fParameter = fParameter;
 
-    }
+		}
 
 
 
-    virtual TqInt	ArrayLength() const
+		virtual TqInt	ArrayLength() const
 
-    {
+		{
 
-        return ( 0 );
+			return ( 0 );
 
-    }
+		}
 
-    virtual IqShaderData*	ArrayEntry( TqInt i )
+		virtual IqShaderData*	ArrayEntry( TqInt i )
 
-    {
+		{
 
-        return ( this );
+			return ( this );
 
-    }
+		}
 
 
 
-protected:
+	protected:
 
-    CqString	m_strName;		///< Name of this variable.
+		CqString	m_strName;		///< Name of this variable.
 
-    TqBool	m_fParameter;	///< Flag indicating this variable is a shader argument.
+		TqBool	m_fParameter;	///< Flag indicating this variable is a shader argument.
 
 }
 
@@ -237,9 +237,9 @@ protected:
 //----------------------------------------------------------------------
 
 /** \class CqShaderVariableArray
-
+ 
  * Array of variable pointers.
-
+ 
  */
 
 
@@ -248,505 +248,539 @@ class CqShaderVariableArray: public CqShaderVariable
 
 {
 
-public:
+	public:
 
-    /** Default constructor.
+		/** Default constructor.
 
-     * \param name Character pointer to the name to use.
+		 * \param name Character pointer to the name to use.
 
-     * \param Count the size of the array.
+		 * \param Count the size of the array.
 
-     * \param fParameter Boolean value, true indicates the shader variable is a shader parameter.
+		 * \param fParameter Boolean value, true indicates the shader variable is a shader parameter.
 
-     */
+		 */
 
-    CqShaderVariableArray( const char* name, TqInt Count, TqBool fParameter = TqFalse ) : CqShaderVariable( name, fParameter )
+		CqShaderVariableArray( const char* name, TqInt Count, TqBool fParameter = TqFalse ) : CqShaderVariable( name, fParameter )
 
-    {
+		{
 
-        assert( Count > 0 );
+			assert( Count > 0 );
 
-        m_aVariables.resize( Count );
+			m_aVariables.resize( Count );
 
-    }
+		}
 
-    /** Copy constructor.
+		/** Copy constructor.
 
-     */
+		 */
 
-    CqShaderVariableArray( const CqShaderVariableArray& From ) : CqShaderVariable( From.m_strName.c_str() )
+		CqShaderVariableArray( const CqShaderVariableArray& From ) : CqShaderVariable( From.m_strName.c_str() )
 
-    {
+		{
 
-        m_aVariables.resize( From.m_aVariables.size() );
+			m_aVariables.resize( From.m_aVariables.size() );
 
-        for ( TqUint i = 0; i < From.m_aVariables.size(); i++ )
+			for ( TqUint i = 0; i < From.m_aVariables.size(); i++ )
 
-            m_aVariables[ i ] = From.m_aVariables[ i ] ->Clone();
+				m_aVariables[ i ] = From.m_aVariables[ i ] ->Clone();
 
-    }
+		}
 
-    virtual	~CqShaderVariableArray()
+		virtual	~CqShaderVariableArray()
 
-    {
+		{
+		}
 
-    }
 
 
+		// Overridden from IqShaderData.
 
-    // Overridden from IqShaderData.
 
 
 
 
+		virtual	void	Initialise( const TqInt uGridRes, const TqInt vGridRes )
 
-    virtual	void	Initialise( const TqInt uGridRes, const TqInt vGridRes )
+		{
 
-    {
+			for ( std::vector<IqShaderData*>::iterator i = m_aVariables.begin(); i != m_aVariables.end(); i++ )
 
-        for ( std::vector<IqShaderData*>::iterator i = m_aVariables.begin(); i != m_aVariables.end(); i++ )
+				( *i ) ->Initialise( uGridRes, vGridRes );
 
-            ( *i ) ->Initialise( uGridRes, vGridRes );
+		}
 
-    }
 
 
+		virtual	void	SetSize( const TqInt size )
 
-    virtual	void	SetSize( const TqInt size )
+		{
 
-    {
+			for ( std::vector<IqShaderData*>::iterator i = m_aVariables.begin(); i != m_aVariables.end(); i++ )
 
-        for ( std::vector<IqShaderData*>::iterator i = m_aVariables.begin(); i != m_aVariables.end(); i++ )
+				( *i ) ->SetSize( size );
 
-            ( *i ) ->SetSize( size );
+		}
 
-    }
 
 
 
 
+		virtual	void	GetFloat( TqFloat& res, TqInt index = 0 ) const
 
-    virtual	void	GetFloat( TqFloat& res, TqInt index = 0 ) const
+		{
 
-    {
+			assert( TqFalse );
+			m_aVariables[ 0 ] ->GetFloat( res, index );
 
-        assert( TqFalse ); m_aVariables[ 0 ] ->GetFloat( res, index );
+		}
 
-    }
+		virtual	void	GetString( CqString& res, TqInt index = 0 ) const
 
-    virtual	void	GetString( CqString& res, TqInt index = 0 ) const
+		{
 
-    {
+			assert( TqFalse );
+			m_aVariables[ 0 ] ->GetString( res, index );
 
-        assert( TqFalse ); m_aVariables[ 0 ] ->GetString( res, index );
+		}
 
-    }
+		virtual	void	GetPoint( CqVector3D& res, TqInt index = 0 ) const
 
-    virtual	void	GetPoint( CqVector3D& res, TqInt index = 0 ) const
+		{
 
-    {
+			assert( TqFalse );
+			m_aVariables[ 0 ] ->GetPoint( res, index );
 
-        assert( TqFalse ); m_aVariables[ 0 ] ->GetPoint( res, index );
+		}
 
-    }
+		virtual	void	GetVector( CqVector3D& res, TqInt index = 0 ) const
 
-    virtual	void	GetVector( CqVector3D& res, TqInt index = 0 ) const
+		{
 
-    {
+			assert( TqFalse );
+			m_aVariables[ 0 ] ->GetVector( res, index );
 
-        assert( TqFalse ); m_aVariables[ 0 ] ->GetVector( res, index );
+		}
 
-    }
+		virtual	void	GetNormal( CqVector3D& res, TqInt index = 0 ) const
 
-    virtual	void	GetNormal( CqVector3D& res, TqInt index = 0 ) const
+		{
 
-    {
+			assert( TqFalse );
+			m_aVariables[ 0 ] ->GetNormal( res, index );
 
-        assert( TqFalse ); m_aVariables[ 0 ] ->GetNormal( res, index );
+		}
 
-    }
+		virtual	void	GetColor( CqColor& res, TqInt index = 0 ) const
 
-    virtual	void	GetColor( CqColor& res, TqInt index = 0 ) const
+		{
 
-    {
+			assert( TqFalse );
+			m_aVariables[ 0 ] ->GetColor( res, index );
 
-        assert( TqFalse ); m_aVariables[ 0 ] ->GetColor( res, index );
+		}
 
-    }
+		virtual	void	GetMatrix( CqMatrix& res, TqInt index = 0 ) const
 
-    virtual	void	GetMatrix( CqMatrix& res, TqInt index = 0 ) const
+		{
 
-    {
+			assert( TqFalse );
+			m_aVariables[ 0 ] ->GetMatrix( res, index );
 
-        assert( TqFalse ); m_aVariables[ 0 ] ->GetMatrix( res, index );
+		}
 
-    }
 
 
+		virtual	void	GetFloatPtr( const TqFloat*& res ) const
 
-    virtual	void	GetFloatPtr( const TqFloat*& res ) const
+		{
 
-    {
+			assert( TqFalse );
+			m_aVariables[ 0 ] ->GetFloatPtr( res );
 
-        assert( TqFalse ); m_aVariables[ 0 ] ->GetFloatPtr( res );
+		}
 
-    }
+		virtual	void	GetStringPtr( const CqString*& res ) const
 
-    virtual	void	GetStringPtr( const CqString*& res ) const
+		{
 
-    {
+			assert( TqFalse );
+			m_aVariables[ 0 ] ->GetStringPtr( res );
 
-        assert( TqFalse ); m_aVariables[ 0 ] ->GetStringPtr( res );
+		}
 
-    }
+		virtual	void	GetPointPtr( const CqVector3D*& res ) const
 
-    virtual	void	GetPointPtr( const CqVector3D*& res ) const
+		{
 
-    {
+			assert( TqFalse );
+			m_aVariables[ 0 ] ->GetPointPtr( res );
 
-        assert( TqFalse ); m_aVariables[ 0 ] ->GetPointPtr( res );
+		}
 
-    }
+		virtual	void	GetVectorPtr( const CqVector3D*& res ) const
 
-    virtual	void	GetVectorPtr( const CqVector3D*& res ) const
+		{
 
-    {
+			assert( TqFalse );
+			m_aVariables[ 0 ] ->GetVectorPtr( res );
 
-        assert( TqFalse ); m_aVariables[ 0 ] ->GetVectorPtr( res );
+		}
 
-    }
+		virtual	void	GetNormalPtr( const CqVector3D*& res ) const
 
-    virtual	void	GetNormalPtr( const CqVector3D*& res ) const
+		{
 
-    {
+			assert( TqFalse );
+			m_aVariables[ 0 ] ->GetNormalPtr( res );
 
-        assert( TqFalse ); m_aVariables[ 0 ] ->GetNormalPtr( res );
+		}
 
-    }
+		virtual	void	GetColorPtr( const CqColor*& res ) const
 
-    virtual	void	GetColorPtr( const CqColor*& res ) const
+		{
 
-    {
+			assert( TqFalse );
+			m_aVariables[ 0 ] ->GetColorPtr( res );
 
-        assert( TqFalse ); m_aVariables[ 0 ] ->GetColorPtr( res );
+		}
 
-    }
+		virtual	void	GetMatrixPtr( const CqMatrix*& res ) const
 
-    virtual	void	GetMatrixPtr( const CqMatrix*& res ) const
+		{
 
-    {
+			assert( TqFalse );
+			m_aVariables[ 0 ] ->GetMatrixPtr( res );
 
-        assert( TqFalse ); m_aVariables[ 0 ] ->GetMatrixPtr( res );
+		}
 
-    }
 
 
+		virtual	void	GetFloatPtr( TqFloat*& res )
 
-    virtual	void	GetFloatPtr( TqFloat*& res )
+		{
 
-    {
+			assert( TqFalse );
+			m_aVariables[ 0 ] ->GetFloatPtr( res );
 
-        assert( TqFalse ); m_aVariables[ 0 ] ->GetFloatPtr( res );
+		}
 
-    }
+		virtual	void	GetStringPtr( CqString*& res )
 
-    virtual	void	GetStringPtr( CqString*& res )
+		{
 
-    {
+			assert( TqFalse );
+			m_aVariables[ 0 ] ->GetStringPtr( res );
 
-        assert( TqFalse ); m_aVariables[ 0 ] ->GetStringPtr( res );
+		}
 
-    }
+		virtual	void	GetPointPtr( CqVector3D*& res )
 
-    virtual	void	GetPointPtr( CqVector3D*& res )
+		{
 
-    {
+			assert( TqFalse );
+			m_aVariables[ 0 ] ->GetPointPtr( res );
 
-        assert( TqFalse ); m_aVariables[ 0 ] ->GetPointPtr( res );
+		}
 
-    }
+		virtual	void	GetVectorPtr( CqVector3D*& res )
 
-    virtual	void	GetVectorPtr( CqVector3D*& res )
+		{
 
-    {
+			assert( TqFalse );
+			m_aVariables[ 0 ] ->GetVectorPtr( res );
 
-        assert( TqFalse ); m_aVariables[ 0 ] ->GetVectorPtr( res );
+		}
 
-    }
+		virtual	void	GetNormalPtr( CqVector3D*& res )
 
-    virtual	void	GetNormalPtr( CqVector3D*& res )
+		{
 
-    {
+			assert( TqFalse );
+			m_aVariables[ 0 ] ->GetNormalPtr( res );
 
-        assert( TqFalse ); m_aVariables[ 0 ] ->GetNormalPtr( res );
+		}
 
-    }
+		virtual	void	GetColorPtr( CqColor*& res )
 
-    virtual	void	GetColorPtr( CqColor*& res )
+		{
 
-    {
+			assert( TqFalse );
+			m_aVariables[ 0 ] ->GetColorPtr( res );
 
-        assert( TqFalse ); m_aVariables[ 0 ] ->GetColorPtr( res );
+		}
 
-    }
+		virtual	void	GetMatrixPtr( CqMatrix*& res )
 
-    virtual	void	GetMatrixPtr( CqMatrix*& res )
+		{
 
-    {
+			assert( TqFalse );
+			m_aVariables[ 0 ] ->GetMatrixPtr( res );
 
-        assert( TqFalse ); m_aVariables[ 0 ] ->GetMatrixPtr( res );
+		}
 
-    }
 
 
+		virtual	void	SetFloat( const TqFloat& f )
 
-    virtual	void	SetFloat( const TqFloat& f )
+		{
 
-    {
+			assert( TqFalse );
+			m_aVariables[ 0 ] ->SetFloat( f );
 
-        assert( TqFalse ); m_aVariables[ 0 ] ->SetFloat( f );
+		}
 
-    }
+		virtual	void	SetString( const CqString& s )
 
-    virtual	void	SetString( const CqString& s )
+		{
 
-    {
+			assert( TqFalse );
+			m_aVariables[ 0 ] ->SetString( s );
 
-        assert( TqFalse ); m_aVariables[ 0 ] ->SetString( s );
+		}
 
-    }
+		virtual	void	SetPoint( const CqVector3D& p )
 
-    virtual	void	SetPoint( const CqVector3D& p )
+		{
 
-    {
+			assert( TqFalse );
+			m_aVariables[ 0 ] ->SetPoint( p );
 
-        assert( TqFalse ); m_aVariables[ 0 ] ->SetPoint( p );
+		}
 
-    }
+		virtual	void	SetVector( const CqVector3D& v )
 
-    virtual	void	SetVector( const CqVector3D& v )
+		{
 
-    {
+			assert( TqFalse );
+			m_aVariables[ 0 ] ->SetVector( v );
 
-        assert( TqFalse ); m_aVariables[ 0 ] ->SetVector( v );
+		}
 
-    }
+		virtual	void	SetNormal( const CqVector3D& n )
 
-    virtual	void	SetNormal( const CqVector3D& n )
+		{
 
-    {
+			assert( TqFalse );
+			m_aVariables[ 0 ] ->SetNormal( n );
 
-        assert( TqFalse ); m_aVariables[ 0 ] ->SetNormal( n );
+		}
 
-    }
+		virtual	void	SetColor( const CqColor& c )
 
-    virtual	void	SetColor( const CqColor& c )
+		{
 
-    {
+			assert( TqFalse );
+			m_aVariables[ 0 ] ->SetColor( c );
 
-        assert( TqFalse ); m_aVariables[ 0 ] ->SetColor( c );
+		}
 
-    }
+		virtual	void	SetMatrix( const CqMatrix& m )
 
-    virtual	void	SetMatrix( const CqMatrix& m )
+		{
 
-    {
+			assert( TqFalse );
+			m_aVariables[ 0 ] ->SetMatrix( m );
 
-        assert( TqFalse ); m_aVariables[ 0 ] ->SetMatrix( m );
+		}
 
-    }
 
 
+		virtual	void	SetFloat( const TqFloat& f, TqInt index )
 
-    virtual	void	SetFloat( const TqFloat& f, TqInt index )
+		{
 
-    {
+			assert( TqFalse );
+			m_aVariables[ 0 ] ->SetFloat( f, index );
 
-        assert( TqFalse ); m_aVariables[ 0 ] ->SetFloat( f, index );
+		}
 
-    }
+		virtual	void	SetString( const CqString& s, TqInt index )
 
-    virtual	void	SetString( const CqString& s, TqInt index )
+		{
 
-    {
+			assert( TqFalse );
+			m_aVariables[ 0 ] ->SetString( s, index );
 
-        assert( TqFalse ); m_aVariables[ 0 ] ->SetString( s, index );
+		}
 
-    }
+		virtual	void	SetPoint( const CqVector3D& p, TqInt index )
 
-    virtual	void	SetPoint( const CqVector3D& p, TqInt index )
+		{
 
-    {
+			assert( TqFalse );
+			m_aVariables[ 0 ] ->SetPoint( p, index );
 
-        assert( TqFalse ); m_aVariables[ 0 ] ->SetPoint( p, index );
+		}
 
-    }
+		virtual	void	SetVector( const CqVector3D& v, TqInt index )
 
-    virtual	void	SetVector( const CqVector3D& v, TqInt index )
+		{
 
-    {
+			assert( TqFalse );
+			m_aVariables[ 0 ] ->SetVector( v, index );
 
-        assert( TqFalse ); m_aVariables[ 0 ] ->SetVector( v, index );
+		}
 
-    }
+		virtual	void	SetNormal( const CqVector3D& n, TqInt index )
 
-    virtual	void	SetNormal( const CqVector3D& n, TqInt index )
+		{
 
-    {
+			assert( TqFalse );
+			m_aVariables[ 0 ] ->SetNormal( n, index );
 
-        assert( TqFalse ); m_aVariables[ 0 ] ->SetNormal( n, index );
+		}
 
-    }
+		virtual	void	SetColor( const CqColor& c, TqInt index )
 
-    virtual	void	SetColor( const CqColor& c, TqInt index )
+		{
 
-    {
+			assert( TqFalse );
+			m_aVariables[ 0 ] ->SetColor( c, index );
 
-        assert( TqFalse ); m_aVariables[ 0 ] ->SetColor( c, index );
+		}
 
-    }
+		virtual	void	SetMatrix( const CqMatrix& m, TqInt index )
 
-    virtual	void	SetMatrix( const CqMatrix& m, TqInt index )
+		{
 
-    {
+			assert( TqFalse );
+			m_aVariables[ 0 ] ->SetMatrix( m, index );
 
-        assert( TqFalse ); m_aVariables[ 0 ] ->SetMatrix( m, index );
+		}
 
-    }
 
 
+		/** Copy the values from the passed variable into this, taking into account any class differences.
 
-    /** Copy the values from the passed variable into this, taking into account any class differences.
+		 * \param pVal The variable to copy from.
 
-     * \param pVal The variable to copy from.
+		 */
 
-     */
+		virtual	void	SetValueFromVariable( const IqShaderData* pVal )
 
-    virtual	void	SetValueFromVariable( const IqShaderData* pVal )
+		{
 
-    {
+			m_aVariables[ 0 ] ->SetValueFromVariable( pVal );
 
-        m_aVariables[ 0 ] ->SetValueFromVariable( pVal );
+		}
 
-    }
+		/** Set the all SIMD data ased on a state vector, only indexes whose bit is set are modified.
 
-    /** Set the all SIMD data ased on a state vector, only indexes whose bit is set are modified.
+		 * \param pVal The stack entry to assign.
 
-     * \param pVal The stack entry to assign.
+		 * \param index Integer SIMD index.
 
-     * \param index Integer SIMD index.
+		 */
 
-     */
+		virtual	void	SetValueFromVariable( const IqShaderData* pVal, TqInt index )
 
-    virtual	void	SetValueFromVariable( const IqShaderData* pVal, TqInt index )
+		{
 
-    {
+			m_aVariables[ 0 ] ->SetValueFromVariable( pVal, index );
 
-        m_aVariables[ 0 ] ->SetValueFromVariable( pVal, index );
+		}
 
-    }
 
 
+		virtual	IqShaderData* Clone() const
 
-    virtual	IqShaderData* Clone() const
+		{
 
-    {
+			return ( new CqShaderVariableArray( *this ) );
 
-        return ( new CqShaderVariableArray( *this ) );
+		}
 
-    }
 
 
 
 
+		virtual	EqVariableClass	Class() const
 
-    virtual	EqVariableClass	Class() const
+		{
 
-    {
+			return ( static_cast<EqVariableClass>( m_aVariables[ 0 ] ->Class() ) );
 
-        return ( static_cast<EqVariableClass>( m_aVariables[ 0 ] ->Class() ) );
+		}
 
-    }
+		virtual	EqVariableType	Type() const
 
-    virtual	EqVariableType	Type() const
+		{
 
-    {
+			return ( static_cast<EqVariableType>( m_aVariables[ 0 ] ->Type() ) );
 
-        return ( static_cast<EqVariableType>( m_aVariables[ 0 ] ->Type() ) );
+		}
 
-    }
+		virtual TqUint	Size() const
 
-    virtual TqUint	Size() const
+		{
 
-    {
+			return ( m_aVariables[ 0 ] ->Size() );
 
-        return ( m_aVariables[ 0 ] ->Size() );
+		}
 
-    }
+		virtual	TqInt	ArrayLength() const
 
-    virtual	TqInt	ArrayLength() const
+		{
 
-    {
+			return ( m_aVariables.size() );
 
-        return ( m_aVariables.size() );
+		}
 
-    }
+		virtual IqShaderData*	ArrayEntry( TqInt i )
 
-    virtual IqShaderData*	ArrayEntry( TqInt i )
+		{
 
-    {
+			assert( i < this->ArrayLength() );
 
-		assert( i < this->ArrayLength() );
+			return ( ( *this ) [ i ] );
 
-        return ( ( *this ) [ i ] );
+		}
 
-    }
 
 
+		/** Get a reference to the variable array.
 
-    /** Get a reference to the variable array.
+		 */
 
-     */
+		std::vector<IqShaderData*>& aVariables()
 
-    std::vector<IqShaderData*>& aVariables()
+		{
 
-    {
+			return ( m_aVariables );
 
-        return ( m_aVariables );
+		}
 
-    }
+		/** Get a const reference to the variable array.
 
-    /** Get a const reference to the variable array.
+		 */
 
-     */
+		const std::vector<IqShaderData*>& aVariables() const
 
-    const std::vector<IqShaderData*>& aVariables() const
+		{
 
-    {
+			return ( m_aVariables );
 
-        return ( m_aVariables );
+		}
 
-    }
+		/** Array index access to the values in the array.
 
-    /** Array index access to the values in the array.
+		 * \param index Integer index intot he array.
 
-     * \param index Integer index intot he array.
+		 */
 
-     */
+		IqShaderData* operator[] ( TqUint index ) const
 
-    IqShaderData* operator[] ( TqUint index ) const
+		{
 
-    {
+			return( m_aVariables[ index ] );
 
-        return( m_aVariables[ index ] );
+		}
 
-    }
 
 
+	private:
 
-private:
-
-    std::vector<IqShaderData*>	m_aVariables;		///< Array of pointers to variables.
+		std::vector<IqShaderData*>	m_aVariables;		///< Array of pointers to variables.
 
 }
 
@@ -761,9 +795,9 @@ private:
 //----------------------------------------------------------------------
 
 /** \class CqShaderVariableUniform
-
+ 
  * Uniform variable templatised by type.
-
+ 
  */
 
 
@@ -774,431 +808,425 @@ class CqShaderVariableUniform : public CqShaderVariable
 
 {
 
-public:
+	public:
 
-    CqShaderVariableUniform() : CqShaderVariable()
+		CqShaderVariableUniform() : CqShaderVariable()
 
-    {
+		{
 
+		}
 
-    }
+		CqShaderVariableUniform( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariable( strName, fParameter )
 
-    CqShaderVariableUniform( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariable( strName, fParameter )
+		{
 
-    {
 
+		}
 
+		CqShaderVariableUniform( const char* strName, const R& val ) : CqShaderVariable( strName ),
 
-    }
+				m_Value( val )
 
-    CqShaderVariableUniform( const char* strName, const R& val ) : CqShaderVariable( strName ),
+		{
 
-            m_Value( val )
 
-    {
 
+		}
 
+		CqShaderVariableUniform( const CqShaderVariableUniform<T, R>& val ) :
 
+				CqShaderVariable( val ),
 
-    }
+				m_Value( val.m_Value )
 
-    CqShaderVariableUniform( const CqShaderVariableUniform<T, R>& val ) :
+		{
 
-            CqShaderVariable( val ),
+		}
 
-            m_Value( val.m_Value )
+		virtual	~CqShaderVariableUniform()
 
-    {
+		{
 
+		}
 
-    }
 
-    virtual	~CqShaderVariableUniform()
 
-    {
+		virtual	void	Initialise( const TqInt uGridRes, const TqInt vGridRes )
 
+		{
+		}
 
-    }
+		virtual	void	SetSize( const TqInt size )
 
+		{}
 
 
-    virtual	void	Initialise( const TqInt uGridRes, const TqInt vGridRes )
 
-    {
 
-            }
 
-    virtual	void	SetSize( const TqInt size )
+		virtual	void	GetFloat( TqFloat& res, TqInt index = 0 ) const
 
-    {}
+		{
 
+			assert( TqFalse );
 
+		}
 
+		virtual	void	GetString( CqString& res, TqInt index = 0 ) const
 
+		{
 
-    virtual	void	GetFloat( TqFloat& res, TqInt index = 0 ) const
+			assert( TqFalse );
 
-    {
+		}
 
-        assert( TqFalse );
+		virtual	void	GetPoint( CqVector3D& res, TqInt index = 0 ) const
 
-    }
+		{
 
-    virtual	void	GetString( CqString& res, TqInt index = 0 ) const
+			assert( TqFalse );
 
-    {
+		}
 
-        assert( TqFalse );
+		virtual	void	GetVector( CqVector3D& res, TqInt index = 0 ) const
 
-    }
+		{
 
-    virtual	void	GetPoint( CqVector3D& res, TqInt index = 0 ) const
+			assert( TqFalse );
 
-    {
+		}
 
-        assert( TqFalse );
+		virtual	void	GetNormal( CqVector3D& res, TqInt index = 0 ) const
 
-    }
+		{
 
-    virtual	void	GetVector( CqVector3D& res, TqInt index = 0 ) const
+			assert( TqFalse );
 
-    {
+		}
 
-        assert( TqFalse );
+		virtual	void	GetColor( CqColor& res, TqInt index = 0 ) const
 
-    }
+		{
 
-    virtual	void	GetNormal( CqVector3D& res, TqInt index = 0 ) const
+			assert( TqFalse );
 
-    {
+		}
 
-        assert( TqFalse );
+		virtual	void	GetMatrix( CqMatrix& res, TqInt index = 0 ) const
 
-    }
+		{
 
-    virtual	void	GetColor( CqColor& res, TqInt index = 0 ) const
+			assert( TqFalse );
 
-    {
+		}
 
-        assert( TqFalse );
 
-    }
 
-    virtual	void	GetMatrix( CqMatrix& res, TqInt index = 0 ) const
+		virtual	void	GetFloatPtr( const TqFloat*& res ) const
 
-    {
+		{
 
-        assert( TqFalse );
+			assert( TqFalse );
 
-    }
+		}
 
+		virtual	void	GetStringPtr( const CqString*& res ) const
 
+		{
 
-    virtual	void	GetFloatPtr( const TqFloat*& res ) const
+			assert( TqFalse );
 
-    {
+		}
 
-        assert( TqFalse );
+		virtual	void	GetPointPtr( const CqVector3D*& res ) const
 
-    }
+		{
 
-    virtual	void	GetStringPtr( const CqString*& res ) const
+			assert( TqFalse );
 
-    {
+		}
 
-        assert( TqFalse );
+		virtual	void	GetVectorPtr( const CqVector3D*& res ) const
 
-    }
+		{
 
-    virtual	void	GetPointPtr( const CqVector3D*& res ) const
+			assert( TqFalse );
 
-    {
+		}
 
-        assert( TqFalse );
+		virtual	void	GetNormalPtr( const CqVector3D*& res ) const
 
-    }
+		{
 
-    virtual	void	GetVectorPtr( const CqVector3D*& res ) const
+			assert( TqFalse );
 
-    {
+		}
 
-        assert( TqFalse );
+		virtual	void	GetColorPtr( const CqColor*& res ) const
 
-    }
+		{
 
-    virtual	void	GetNormalPtr( const CqVector3D*& res ) const
+			assert( TqFalse );
 
-    {
+		}
 
-        assert( TqFalse );
+		virtual	void	GetMatrixPtr( const CqMatrix*& res ) const
 
-    }
+		{
 
-    virtual	void	GetColorPtr( const CqColor*& res ) const
+			assert( TqFalse );
 
-    {
+		}
 
-        assert( TqFalse );
 
-    }
 
-    virtual	void	GetMatrixPtr( const CqMatrix*& res ) const
+		virtual	void	GetFloatPtr( TqFloat*& res )
 
-    {
+		{
 
-        assert( TqFalse );
+			assert( TqFalse );
 
-    }
+		}
 
+		virtual	void	GetStringPtr( CqString*& res )
 
+		{
 
-    virtual	void	GetFloatPtr( TqFloat*& res )
+			assert( TqFalse );
 
-    {
+		}
 
-        assert( TqFalse );
+		virtual	void	GetPointPtr( CqVector3D*& res )
 
-    }
+		{
 
-    virtual	void	GetStringPtr( CqString*& res )
+			assert( TqFalse );
 
-    {
+		}
 
-        assert( TqFalse );
+		virtual	void	GetVectorPtr( CqVector3D*& res )
 
-    }
+		{
 
-    virtual	void	GetPointPtr( CqVector3D*& res )
+			assert( TqFalse );
 
-    {
+		}
 
-        assert( TqFalse );
+		virtual	void	GetNormalPtr( CqVector3D*& res )
 
-    }
+		{
 
-    virtual	void	GetVectorPtr( CqVector3D*& res )
+			assert( TqFalse );
 
-    {
+		}
 
-        assert( TqFalse );
+		virtual	void	GetColorPtr( CqColor*& res )
 
-    }
+		{
 
-    virtual	void	GetNormalPtr( CqVector3D*& res )
+			assert( TqFalse );
 
-    {
+		}
 
-        assert( TqFalse );
+		virtual	void	GetMatrixPtr( CqMatrix*& res )
 
-    }
+		{
 
-    virtual	void	GetColorPtr( CqColor*& res )
+			assert( TqFalse );
 
-    {
+		}
 
-        assert( TqFalse );
 
-    }
 
-    virtual	void	GetMatrixPtr( CqMatrix*& res )
 
-    {
 
-        assert( TqFalse );
+		virtual	void	SetFloat( const TqFloat& f )
 
-    }
+		{
 
+			assert( TqFalse );
 
+		}
 
+		virtual	void	SetString( const CqString& s )
 
+		{
 
-    virtual	void	SetFloat( const TqFloat& f )
+			assert( TqFalse );
 
-    {
+		}
 
-        assert( TqFalse );
+		virtual	void	SetPoint( const CqVector3D& p )
 
-    }
+		{
 
-    virtual	void	SetString( const CqString& s )
+			assert( TqFalse );
 
-    {
+		}
 
-        assert( TqFalse );
+		virtual	void	SetVector( const CqVector3D& v )
 
-    }
+		{
 
-    virtual	void	SetPoint( const CqVector3D& p )
+			assert( TqFalse );
 
-    {
+		}
 
-        assert( TqFalse );
+		virtual	void	SetNormal( const CqVector3D& n )
 
-    }
+		{
 
-    virtual	void	SetVector( const CqVector3D& v )
+			assert( TqFalse );
 
-    {
+		}
 
-        assert( TqFalse );
+		virtual	void	SetColor( const CqColor& c )
 
-    }
+		{
 
-    virtual	void	SetNormal( const CqVector3D& n )
+			assert( TqFalse );
 
-    {
+		}
 
-        assert( TqFalse );
+		virtual	void	SetMatrix( const CqMatrix& m )
 
-    }
+		{
 
-    virtual	void	SetColor( const CqColor& c )
+			assert( TqFalse );
 
-    {
+		}
 
-        assert( TqFalse );
 
-    }
 
-    virtual	void	SetMatrix( const CqMatrix& m )
+		virtual	void	SetFloat( const TqFloat& f, TqInt index )
 
-    {
+		{
 
-        assert( TqFalse );
+			SetFloat( f );
 
-    }
+		}
 
+		virtual	void	SetString( const CqString& s, TqInt index )
 
+		{
 
-    virtual	void	SetFloat( const TqFloat& f, TqInt index )
+			SetString( s );
 
-    {
+		}
 
-        SetFloat( f );
+		virtual	void	SetPoint( const CqVector3D& p, TqInt index )
 
-    }
+		{
 
-    virtual	void	SetString( const CqString& s, TqInt index )
+			SetPoint( p );
 
-    {
+		}
 
-        SetString( s );
+		virtual	void	SetVector( const CqVector3D& v, TqInt index )
 
-    }
+		{
 
-    virtual	void	SetPoint( const CqVector3D& p, TqInt index )
+			SetVector( v );
 
-    {
+		}
 
-        SetPoint( p );
+		virtual	void	SetNormal( const CqVector3D& n, TqInt index )
 
-    }
+		{
 
-    virtual	void	SetVector( const CqVector3D& v, TqInt index )
+			SetNormal( n );
 
-    {
+		}
 
-        SetVector( v );
+		virtual	void	SetColor( const CqColor& c, TqInt index )
 
-    }
+		{
 
-    virtual	void	SetNormal( const CqVector3D& n, TqInt index )
+			SetColor( c );
 
-    {
+		}
 
-        SetNormal( n );
+		virtual	void	SetMatrix( const CqMatrix& m, TqInt index )
 
-    }
+		{
 
-    virtual	void	SetColor( const CqColor& c, TqInt index )
+			SetMatrix( m );
 
-    {
+		}
 
-        SetColor( c );
 
-    }
 
-    virtual	void	SetMatrix( const CqMatrix& m, TqInt index )
+		/** Set the all SIMD data ased on a state vector, only indexes whose bit is set are modified.
 
-    {
+		 * \param pVal The stack entry to assign.
 
-        SetMatrix( m );
+		 * \param index Integer SIMD index.
 
-    }
+		 */
 
+		virtual	void	SetValueFromVariable( const IqShaderData* pVal, TqInt index )
 
+		{
 
-    /** Set the all SIMD data ased on a state vector, only indexes whose bit is set are modified.
+			SetValueFromVariable( pVal );
 
-     * \param pVal The stack entry to assign.
+		}
 
-     * \param index Integer SIMD index.
+		/** Copy the values from the passed variable into this, taking into account any class differences.
 
-     */
+		 * \param pVal The variable to copy from.
 
-    virtual	void	SetValueFromVariable( const IqShaderData* pVal, TqInt index )
+		 */
 
-    {
+		virtual	void	SetValueFromVariable( const IqShaderData* pVal )
 
-        SetValueFromVariable( pVal );
+		{
 
-    }
+			assert( TqFalse );
 
-    /** Copy the values from the passed variable into this, taking into account any class differences.
+		}
 
-     * \param pVal The variable to copy from.
 
-     */
 
-    virtual	void	SetValueFromVariable( const IqShaderData* pVal )
+		virtual	EqVariableClass	Class() const
 
-    {
+		{
 
-        assert( TqFalse );
+			return ( class_uniform );
 
-    }
+		}
 
+		virtual	EqVariableType	Type() const
 
+		{
 
-    virtual	EqVariableClass	Class() const
+			return ( T );
 
-    {
+		}
 
-        return ( class_uniform );
+		virtual TqUint	Size() const
 
-    }
+		{
 
-    virtual	EqVariableType	Type() const
+			return ( 1 );
 
-    {
+		}
 
-        return ( T );
 
-    }
 
-    virtual TqUint	Size() const
+		virtual	void	operator=( const CqShaderVariableUniform<T, R>& From )
 
-    {
+		{
 
-        return ( 1 );
+			m_Value = From.m_Value;
 
-    }
+		}
 
 
 
-    virtual	void	operator=( const CqShaderVariableUniform<T, R>& From )
+	protected:
 
-    {
-
-        m_Value = From.m_Value;
-
-    }
-
-
-
-protected:
-
-    R	m_Value;	///< Simgle uniform value of the appropriate type.
+		R	m_Value;	///< Simgle uniform value of the appropriate type.
 
 }
 
@@ -1212,95 +1240,93 @@ class CqShaderVariableUniformFloat : public CqShaderVariableUniform<type_float, 
 
 {
 
-public:
+	public:
 
-    CqShaderVariableUniformFloat( ) : CqShaderVariableUniform<type_float, TqFloat>()
+		CqShaderVariableUniformFloat( ) : CqShaderVariableUniform<type_float, TqFloat>()
 
-    {
+		{
+		}
 
-    }
+		CqShaderVariableUniformFloat( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableUniform<type_float, TqFloat>( strName, fParameter )
 
-    CqShaderVariableUniformFloat( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableUniform<type_float, TqFloat>( strName, fParameter )
+		{
+		}
 
-    {
+		virtual	void	GetFloat( TqFloat& res, TqInt index = 0 ) const
 
-    }
+		{
 
-    virtual	void	GetFloat( TqFloat& res, TqInt index = 0 ) const
+			res = m_Value;
 
-    {
+		}
 
-        res = m_Value;
+		virtual	void	GetFloatPtr( const TqFloat*& res ) const
 
-    }
+		{
 
-    virtual	void	GetFloatPtr( const TqFloat*& res ) const
+			res = & m_Value;
 
-    {
+		}
 
-        res = & m_Value;
+		virtual	void	SetFloat( const TqFloat& f )
 
-    }
+		{
 
-    virtual	void	SetFloat( const TqFloat& f )
+			m_Value = f;
 
-    {
+		}
 
-        m_Value = f;
+		virtual void	GetBool( TqBool& res, TqInt index = 0 ) const
 
-    }
+		{
 
-    virtual void	GetBool( TqBool& res, TqInt index = 0 ) const
+			res = m_Value != 0.0f;
 
-    {
+		}
 
-        res = m_Value != 0.0f;
+		virtual void	SetBool( const TqBool& val )
 
-    }
+		{
 
-    virtual void	SetBool( const TqBool& val )
+			m_Value = val;
 
-    {
+		}
 
-        m_Value = val;
+		virtual void	SetBool( const TqBool& val, TqInt index )
 
-    }
+		{
 
-    virtual void	SetBool( const TqBool& val, TqInt index )
+			m_Value = val;
 
-    {
+		}
 
-        m_Value = val;
+		/** Copy the values from the passed variable into this, taking into account any class differences.
 
-    }
+		 * \param pVal The variable to copy from.
 
-    /** Copy the values from the passed variable into this, taking into account any class differences.
+		 */
 
-     * \param pVal The variable to copy from.
+		virtual	void	SetValueFromVariable( const IqShaderData* pVal )
 
-     */
+		{
 
-    virtual	void	SetValueFromVariable( const IqShaderData* pVal )
+			pVal->GetFloat( m_Value );
 
-    {
+		}
 
-        pVal->GetFloat( m_Value );
+		virtual	IqShaderData* Clone() const
 
-    }
+		{
 
-    virtual	IqShaderData* Clone() const
+			CqShaderVariableUniformFloat* newVar = new CqShaderVariableUniformFloat( *this );
 
-    {
+			newVar->SetSize( Size() );
 
-        CqShaderVariableUniformFloat* newVar = new CqShaderVariableUniformFloat( *this );
+			newVar->SetValueFromVariable( this );
 
-        newVar->SetSize( Size() );
+			return ( newVar );
 
-        newVar->SetValueFromVariable( this );
-
-        return ( newVar );
-
-    }
+		}
 
 };
 
@@ -1310,81 +1336,79 @@ class CqShaderVariableUniformString : public CqShaderVariableUniform<type_string
 
 {
 
-public:
+	public:
 
-    CqShaderVariableUniformString( ) : CqShaderVariableUniform<type_string, CqString>()
+		CqShaderVariableUniformString( ) : CqShaderVariableUniform<type_string, CqString>()
 
-    {
+		{
 
+		}
 
-    }
+		CqShaderVariableUniformString( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableUniform<type_string, CqString>( strName, fParameter )
 
-    CqShaderVariableUniformString( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableUniform<type_string, CqString>( strName, fParameter )
+		{
 
-    {
+		}
 
+		virtual	void	GetString( CqString& res, TqInt index = 0 ) const
 
-    }
+		{
 
-    virtual	void	GetString( CqString& res, TqInt index = 0 ) const
+			res = m_Value;
 
-    {
+		}
 
-        res = m_Value;
+		virtual	void	GetStringPtr( const CqString*& res ) const
 
-    }
+		{
 
-    virtual	void	GetStringPtr( const CqString*& res ) const
+			res = &m_Value;
 
-    {
+		}
 
-        res = &m_Value;
+		virtual	void	SetString( const CqString& s )
 
-    }
+		{
 
-    virtual	void	SetString( const CqString& s )
+			m_Value = s;
 
-    {
+		}
 
-        m_Value = s;
+		virtual void	GetBool( TqBool& res, TqInt index = 0 ) const
 
-    }
+		{
 
-    virtual void	GetBool( TqBool& res, TqInt index = 0 ) const
+			res = m_Value.compare( "" ) == 0;
 
-    {
+		}
 
-        res = m_Value.compare( "" ) == 0;
+		/** Copy the values from the passed variable into this, taking into account any class differences.
 
-    }
+		 * \param pVal The variable to copy from.
 
-    /** Copy the values from the passed variable into this, taking into account any class differences.
+		 */
 
-     * \param pVal The variable to copy from.
+		virtual	void	SetValueFromVariable( const IqShaderData* pVal )
 
-     */
+		{
 
-    virtual	void	SetValueFromVariable( const IqShaderData* pVal )
+			pVal->GetString( m_Value );
 
-    {
+		}
 
-        pVal->GetString( m_Value );
+		virtual	IqShaderData* Clone() const
 
-    }
+		{
 
-    virtual	IqShaderData* Clone() const
+			CqShaderVariableUniformString* newVar = new CqShaderVariableUniformString( *this );
 
-    {
+			newVar->SetSize( Size() );
 
-        CqShaderVariableUniformString* newVar = new CqShaderVariableUniformString( *this );
+			newVar->SetValueFromVariable( this );
 
-        newVar->SetSize( Size() );
+			return ( newVar );
 
-        newVar->SetValueFromVariable( this );
-
-        return ( newVar );
-
-    }
+		}
 
 };
 
@@ -1394,135 +1418,133 @@ class CqShaderVariableUniformPoint : public CqShaderVariableUniform<type_point, 
 
 {
 
-public:
+	public:
 
-    CqShaderVariableUniformPoint() : CqShaderVariableUniform<type_point, CqVector3D>()
+		CqShaderVariableUniformPoint() : CqShaderVariableUniform<type_point, CqVector3D>()
 
-    {
+		{
+		}
 
-    }
+		CqShaderVariableUniformPoint( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableUniform<type_point, CqVector3D>( strName, fParameter )
 
-    CqShaderVariableUniformPoint( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableUniform<type_point, CqVector3D>( strName, fParameter )
+		{
+		}
 
-    {
+		virtual	void	GetPoint( CqVector3D& res, TqInt index = 0 ) const
 
-    }
+		{
 
-    virtual	void	GetPoint( CqVector3D& res, TqInt index = 0 ) const
+			res = m_Value;
 
-    {
+		}
 
-        res = m_Value;
+		virtual	void	GetPointPtr( const CqVector3D*& res ) const
 
-    }
+		{
 
-    virtual	void	GetPointPtr( const CqVector3D*& res ) const
+			res = &m_Value;
 
-    {
+		}
 
-        res = &m_Value;
+		virtual	void	GetPointPtr( CqVector3D*& res )
 
-    }
+		{
 
-    virtual	void	GetPointPtr( CqVector3D*& res )
+			res = &m_Value;
 
-    {
+		}
 
-        res = &m_Value;
+		virtual	void	SetPoint( const CqVector3D& p )
 
-    }
+		{
 
-    virtual	void	SetPoint( const CqVector3D& p )
+			m_Value = p;
 
-    {
+		}
 
-        m_Value = p;
+		virtual	void	GetVector( CqVector3D& res, TqInt index = 0 ) const
 
-    }
+		{
 
-    virtual	void	GetVector( CqVector3D& res, TqInt index = 0 ) const
+			res = m_Value;
 
-    {
+		}
 
-        res = m_Value;
+		virtual	void	GetVectorPtr( const CqVector3D*& res ) const
 
-    }
+		{
 
-    virtual	void	GetVectorPtr( const CqVector3D*& res ) const
+			res = &m_Value;
 
-    {
+		}
 
-        res = &m_Value;
+		virtual	void	SetVector( const CqVector3D& p )
 
-    }
+		{
 
-    virtual	void	SetVector( const CqVector3D& p )
+			m_Value = p;
 
-    {
+		}
 
-        m_Value = p;
+		virtual	void	GetNormal( CqVector3D& res, TqInt index = 0 ) const
 
-    }
+		{
 
-    virtual	void	GetNormal( CqVector3D& res, TqInt index = 0 ) const
+			res = m_Value;
 
-    {
+		}
 
-        res = m_Value;
+		virtual	void	GetNormalPtr( const CqVector3D*& res ) const
 
-    }
+		{
 
-    virtual	void	GetNormalPtr( const CqVector3D*& res ) const
+			res = &m_Value;
 
-    {
+		}
 
-        res = &m_Value;
+		virtual	void	SetNormal( const CqVector3D& p )
 
-    }
+		{
 
-    virtual	void	SetNormal( const CqVector3D& p )
+			m_Value = p;
 
-    {
+		}
 
-        m_Value = p;
+		virtual void	GetBool( TqBool& res, TqInt index = 0 ) const
 
-    }
+		{
 
-    virtual void	GetBool( TqBool& res, TqInt index = 0 ) const
+			res = ( ( m_Value.x() != 0.0f ) || ( m_Value.y() != 0.0f ) || ( m_Value.z() != 0.0f ) );
 
-    {
+		}
 
-        res = ( ( m_Value.x() != 0.0f ) || ( m_Value.y() != 0.0f ) || ( m_Value.z() != 0.0f ) );
+		/** Copy the values from the passed variable into this, taking into account any class differences.
 
-    }
+		 * \param pVal The variable to copy from.
 
-    /** Copy the values from the passed variable into this, taking into account any class differences.
+		 */
 
-     * \param pVal The variable to copy from.
+		virtual	void	SetValueFromVariable( const IqShaderData* pVal )
 
-     */
+		{
 
-    virtual	void	SetValueFromVariable( const IqShaderData* pVal )
+			pVal->GetPoint( m_Value );
 
-    {
+		}
 
-        pVal->GetPoint( m_Value );
+		virtual	IqShaderData* Clone() const
 
-    }
+		{
 
-    virtual	IqShaderData* Clone() const
+			CqShaderVariableUniformPoint* newVar = new CqShaderVariableUniformPoint( *this );
 
-    {
+			newVar->SetSize( Size() );
 
-        CqShaderVariableUniformPoint* newVar = new CqShaderVariableUniformPoint( *this );
+			newVar->SetValueFromVariable( this );
 
-        newVar->SetSize( Size() );
+			return ( newVar );
 
-        newVar->SetValueFromVariable( this );
-
-        return ( newVar );
-
-    }
+		}
 
 };
 
@@ -1532,135 +1554,133 @@ class CqShaderVariableUniformVector : public CqShaderVariableUniform<type_vector
 
 {
 
-public:
+	public:
 
-    CqShaderVariableUniformVector() : CqShaderVariableUniform<type_vector, CqVector3D>()
+		CqShaderVariableUniformVector() : CqShaderVariableUniform<type_vector, CqVector3D>()
 
-    {
+		{
+		}
 
-    }
+		CqShaderVariableUniformVector( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableUniform<type_vector, CqVector3D>( strName, fParameter )
 
-    CqShaderVariableUniformVector( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableUniform<type_vector, CqVector3D>( strName, fParameter )
+		{
+		}
 
-    {
+		virtual	void	GetPoint( CqVector3D& res, TqInt index = 0 ) const
 
-    }
+		{
 
-    virtual	void	GetPoint( CqVector3D& res, TqInt index = 0 ) const
+			res = m_Value;
 
-    {
+		}
 
-        res = m_Value;
+		virtual	void	GetPointPtr( const CqVector3D*& res ) const
 
-    }
+		{
 
-    virtual	void	GetPointPtr( const CqVector3D*& res ) const
+			res = &m_Value;
 
-    {
+		}
 
-        res = &m_Value;
+		virtual	void	GetPointPtr( CqVector3D*& res )
 
-    }
+		{
 
-    virtual	void	GetPointPtr( CqVector3D*& res )
+			res = &m_Value;
 
-    {
+		}
 
-        res = &m_Value;
+		virtual	void	SetPoint( const CqVector3D& p )
 
-    }
+		{
 
-    virtual	void	SetPoint( const CqVector3D& p )
+			m_Value = p;
 
-    {
+		}
 
-        m_Value = p;
+		virtual	void	GetVector( CqVector3D& res, TqInt index = 0 ) const
 
-    }
+		{
 
-    virtual	void	GetVector( CqVector3D& res, TqInt index = 0 ) const
+			res = m_Value;
 
-    {
+		}
 
-        res = m_Value;
+		virtual	void	GetVectorPtr( const CqVector3D*& res ) const
 
-    }
+		{
 
-    virtual	void	GetVectorPtr( const CqVector3D*& res ) const
+			res = &m_Value;
 
-    {
+		}
 
-        res = &m_Value;
+		virtual	void	SetVector( const CqVector3D& p )
 
-    }
+		{
 
-    virtual	void	SetVector( const CqVector3D& p )
+			m_Value = p;
 
-    {
+		}
 
-        m_Value = p;
+		virtual	void	GetNormal( CqVector3D& res, TqInt index = 0 ) const
 
-    }
+		{
 
-    virtual	void	GetNormal( CqVector3D& res, TqInt index = 0 ) const
+			res = m_Value;
 
-    {
+		}
 
-        res = m_Value;
+		virtual	void	GetNormalPtr( const CqVector3D*& res ) const
 
-    }
+		{
 
-    virtual	void	GetNormalPtr( const CqVector3D*& res ) const
+			res = &m_Value;
 
-    {
+		}
 
-        res = &m_Value;
+		virtual	void	SetNormal( const CqVector3D& p )
 
-    }
+		{
 
-    virtual	void	SetNormal( const CqVector3D& p )
+			m_Value = p;
 
-    {
+		}
 
-        m_Value = p;
+		virtual void	GetBool( TqBool& res, TqInt index = 0 ) const
 
-    }
+		{
 
-    virtual void	GetBool( TqBool& res, TqInt index = 0 ) const
+			res = ( ( m_Value.x() != 0.0f ) || ( m_Value.y() != 0.0f ) || ( m_Value.z() != 0.0f ) );
 
-    {
+		}
 
-        res = ( ( m_Value.x() != 0.0f ) || ( m_Value.y() != 0.0f ) || ( m_Value.z() != 0.0f ) );
+		/** Copy the values from the passed variable into this, taking into account any class differences.
 
-    }
+		 * \param pVal The variable to copy from.
 
-    /** Copy the values from the passed variable into this, taking into account any class differences.
+		 */
 
-     * \param pVal The variable to copy from.
+		virtual	void	SetValueFromVariable( const IqShaderData* pVal )
 
-     */
+		{
 
-    virtual	void	SetValueFromVariable( const IqShaderData* pVal )
+			pVal->GetVector( m_Value );
 
-    {
+		}
 
-        pVal->GetVector( m_Value );
+		virtual	IqShaderData* Clone() const
 
-    }
+		{
 
-    virtual	IqShaderData* Clone() const
+			CqShaderVariableUniformVector* newVar = new CqShaderVariableUniformVector( *this );
 
-    {
+			newVar->SetSize( Size() );
 
-        CqShaderVariableUniformVector* newVar = new CqShaderVariableUniformVector( *this );
+			newVar->SetValueFromVariable( this );
 
-        newVar->SetSize( Size() );
+			return ( newVar );
 
-        newVar->SetValueFromVariable( this );
-
-        return ( newVar );
-
-    }
+		}
 
 };
 
@@ -1670,134 +1690,132 @@ class CqShaderVariableUniformNormal : public CqShaderVariableUniform<type_normal
 
 {
 
-public:
+	public:
 
-    CqShaderVariableUniformNormal() : CqShaderVariableUniform<type_normal, CqVector3D>()
+		CqShaderVariableUniformNormal() : CqShaderVariableUniform<type_normal, CqVector3D>()
 
-    {
+		{
+		}
 
-    }
+		CqShaderVariableUniformNormal( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableUniform<type_normal, CqVector3D>( strName, fParameter )
 
-    CqShaderVariableUniformNormal( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableUniform<type_normal, CqVector3D>( strName, fParameter )
+		{}
 
-    {
-    }
+		virtual	void	GetPoint( CqVector3D& res, TqInt index = 0 ) const
 
-    virtual	void	GetPoint( CqVector3D& res, TqInt index = 0 ) const
+		{
 
-    {
+			res = m_Value;
 
-        res = m_Value;
+		}
 
-    }
+		virtual	void	GetPointPtr( const CqVector3D*& res ) const
 
-    virtual	void	GetPointPtr( const CqVector3D*& res ) const
+		{
 
-    {
+			res = &m_Value;
 
-        res = &m_Value;
+		}
 
-    }
+		virtual	void	GetPointPtr( CqVector3D*& res )
 
-    virtual	void	GetPointPtr( CqVector3D*& res )
+		{
 
-    {
+			res = &m_Value;
 
-        res = &m_Value;
+		}
 
-    }
+		virtual	void	SetPoint( const CqVector3D& p )
 
-    virtual	void	SetPoint( const CqVector3D& p )
+		{
 
-    {
+			m_Value = p;
 
-        m_Value = p;
+		}
 
-    }
+		virtual	void	GetVector( CqVector3D& res, TqInt index = 0 ) const
 
-    virtual	void	GetVector( CqVector3D& res, TqInt index = 0 ) const
+		{
 
-    {
+			res = m_Value;
 
-        res = m_Value;
+		}
 
-    }
+		virtual	void	GetVectorPtr( const CqVector3D*& res ) const
 
-    virtual	void	GetVectorPtr( const CqVector3D*& res ) const
+		{
 
-    {
+			res = &m_Value;
 
-        res = &m_Value;
+		}
 
-    }
+		virtual	void	SetVector( const CqVector3D& p )
 
-    virtual	void	SetVector( const CqVector3D& p )
+		{
 
-    {
+			m_Value = p;
 
-        m_Value = p;
+		}
 
-    }
+		virtual	void	GetNormal( CqVector3D& res, TqInt index = 0 ) const
 
-    virtual	void	GetNormal( CqVector3D& res, TqInt index = 0 ) const
+		{
 
-    {
+			res = m_Value;
 
-        res = m_Value;
+		}
 
-    }
+		virtual	void	GetNormalPtr( const CqVector3D*& res ) const
 
-    virtual	void	GetNormalPtr( const CqVector3D*& res ) const
+		{
 
-    {
+			res = &m_Value;
 
-        res = &m_Value;
+		}
 
-    }
+		virtual	void	SetNormal( const CqVector3D& p )
 
-    virtual	void	SetNormal( const CqVector3D& p )
+		{
 
-    {
+			m_Value = p;
 
-        m_Value = p;
+		}
 
-    }
+		virtual void	GetBool( TqBool& res, TqInt index = 0 ) const
 
-    virtual void	GetBool( TqBool& res, TqInt index = 0 ) const
+		{
 
-    {
+			res = ( ( m_Value.x() != 0.0f ) || ( m_Value.y() != 0.0f ) || ( m_Value.z() != 0.0f ) );
 
-        res = ( ( m_Value.x() != 0.0f ) || ( m_Value.y() != 0.0f ) || ( m_Value.z() != 0.0f ) );
+		}
 
-    }
+		/** Copy the values from the passed variable into this, taking into account any class differences.
 
-    /** Copy the values from the passed variable into this, taking into account any class differences.
+		 * \param pVal The variable to copy from.
 
-     * \param pVal The variable to copy from.
+		 */
 
-     */
+		virtual	void	SetValueFromVariable( const IqShaderData* pVal )
 
-    virtual	void	SetValueFromVariable( const IqShaderData* pVal )
+		{
 
-    {
+			pVal->GetNormal( m_Value );
 
-        pVal->GetNormal( m_Value );
+		}
 
-    }
+		virtual	IqShaderData* Clone() const
 
-    virtual	IqShaderData* Clone() const
+		{
 
-    {
+			CqShaderVariableUniformNormal* newVar = new CqShaderVariableUniformNormal( *this );
 
-        CqShaderVariableUniformNormal* newVar = new CqShaderVariableUniformNormal( *this );
+			newVar->SetSize( Size() );
 
-        newVar->SetSize( Size() );
+			newVar->SetValueFromVariable( this );
 
-        newVar->SetValueFromVariable( this );
+			return ( newVar );
 
-        return ( newVar );
-
-    }
+		}
 
 };
 
@@ -1807,81 +1825,79 @@ class CqShaderVariableUniformColor : public CqShaderVariableUniform<type_color, 
 
 {
 
-public:
+	public:
 
-    CqShaderVariableUniformColor() : CqShaderVariableUniform<type_color, CqColor>()
+		CqShaderVariableUniformColor() : CqShaderVariableUniform<type_color, CqColor>()
 
-    {
+		{
 
+		}
 
-    }
+		CqShaderVariableUniformColor( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableUniform<type_color, CqColor>( strName, fParameter )
 
-    CqShaderVariableUniformColor( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableUniform<type_color, CqColor>( strName, fParameter )
+		{
 
-    {
+		}
 
+		virtual	void	GetColor( CqColor& res, TqInt index = 0 ) const
 
-    }
+		{
 
-    virtual	void	GetColor( CqColor& res, TqInt index = 0 ) const
+			res = m_Value;
 
-    {
+		}
 
-        res = m_Value;
+		virtual	void	GetColorPtr( const CqColor*& res ) const
 
-    }
+		{
 
-    virtual	void	GetColorPtr( const CqColor*& res ) const
+			res = &m_Value;
 
-    {
+		}
 
-        res = &m_Value;
+		virtual	void	SetColor( const CqColor& c )
 
-    }
+		{
 
-    virtual	void	SetColor( const CqColor& c )
+			m_Value = c;
 
-    {
+		}
 
-        m_Value = c;
+		/** Copy the values from the passed variable into this, taking into account any class differences.
 
-    }
+		 * \param pVal The variable to copy from.
 
-    /** Copy the values from the passed variable into this, taking into account any class differences.
+		 */
 
-     * \param pVal The variable to copy from.
+		virtual	void	SetValueFromVariable( const IqShaderData* pVal )
 
-     */
+		{
 
-    virtual	void	SetValueFromVariable( const IqShaderData* pVal )
+			pVal->GetColor( m_Value );
 
-    {
+		}
 
-        pVal->GetColor( m_Value );
+		virtual void	GetBool( TqBool& res, TqInt index = 0 ) const
 
-    }
+		{
 
-    virtual void	GetBool( TqBool& res, TqInt index = 0 ) const
+			res = ( ( m_Value.fRed() != 0.0f ) || ( m_Value.fGreen() != 0.0f ) || ( m_Value.fBlue() != 0.0f ) );
 
-    {
+		}
 
-        res = ( ( m_Value.fRed() != 0.0f ) || ( m_Value.fGreen() != 0.0f ) || ( m_Value.fBlue() != 0.0f ) );
+		virtual	IqShaderData* Clone() const
 
-    }
+		{
 
-    virtual	IqShaderData* Clone() const
+			CqShaderVariableUniformColor* newVar = new CqShaderVariableUniformColor( *this );
 
-    {
+			newVar->SetSize( Size() );
 
-        CqShaderVariableUniformColor* newVar = new CqShaderVariableUniformColor( *this );
+			newVar->SetValueFromVariable( this );
 
-        newVar->SetSize( Size() );
+			return ( newVar );
 
-        newVar->SetValueFromVariable( this );
-
-        return ( newVar );
-
-    }
+		}
 
 };
 
@@ -1891,73 +1907,71 @@ class CqShaderVariableUniformMatrix : public CqShaderVariableUniform<type_matrix
 
 {
 
-public:
+	public:
 
-    CqShaderVariableUniformMatrix() : CqShaderVariableUniform<type_matrix, CqMatrix>()
+		CqShaderVariableUniformMatrix() : CqShaderVariableUniform<type_matrix, CqMatrix>()
 
-    {
+		{
 
+		}
 
-    }
+		CqShaderVariableUniformMatrix( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableUniform<type_matrix, CqMatrix>( strName, fParameter )
 
-    CqShaderVariableUniformMatrix( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableUniform<type_matrix, CqMatrix>( strName, fParameter )
+		{
 
-    {
+		}
 
+		virtual	void	GetMatrix( CqMatrix& res, TqInt index = 0 ) const
 
-    }
+		{
 
-    virtual	void	GetMatrix( CqMatrix& res, TqInt index = 0 ) const
+			res = m_Value;
 
-    {
+		}
 
-        res = m_Value;
+		virtual	void	GetMatrixPtr( const CqMatrix*& res ) const
 
-    }
+		{
 
-    virtual	void	GetMatrixPtr( const CqMatrix*& res ) const
+			res = &m_Value;
 
-    {
+		}
 
-        res = &m_Value;
+		virtual	void	SetMatrix( const CqMatrix& m )
 
-    }
+		{
 
-    virtual	void	SetMatrix( const CqMatrix& m )
+			m_Value = m;
 
-    {
+		}
 
-        m_Value = m;
+		/** Copy the values from the passed variable into this, taking into account any class differences.
 
-    }
+		 * \param pVal The variable to copy from.
 
-    /** Copy the values from the passed variable into this, taking into account any class differences.
+		 */
 
-     * \param pVal The variable to copy from.
+		virtual	void	SetValueFromVariable( const IqShaderData* pVal )
 
-     */
+		{
 
-    virtual	void	SetValueFromVariable( const IqShaderData* pVal )
+			pVal->GetMatrix( m_Value );
 
-    {
+		}
 
-        pVal->GetMatrix( m_Value );
+		virtual	IqShaderData* Clone() const
 
-    }
+		{
 
-    virtual	IqShaderData* Clone() const
+			CqShaderVariableUniformMatrix* newVar = new CqShaderVariableUniformMatrix( *this );
 
-    {
+			newVar->SetSize( Size() );
 
-        CqShaderVariableUniformMatrix* newVar = new CqShaderVariableUniformMatrix( *this );
+			newVar->SetValueFromVariable( this );
 
-        newVar->SetSize( Size() );
+			return ( newVar );
 
-        newVar->SetValueFromVariable( this );
-
-        return ( newVar );
-
-    }
+		}
 
 };
 
@@ -1968,9 +1982,9 @@ public:
 //----------------------------------------------------------------------
 
 /** \class CqShaderVariableVarying
-
+ 
  * Varying variable templatised by type.
-
+ 
  */
 
 
@@ -1981,411 +1995,411 @@ class CqShaderVariableVarying : public CqShaderVariable
 
 {
 
-public:
+	public:
 
-    CqShaderVariableVarying( ) : CqShaderVariable( )
+		CqShaderVariableVarying( ) : CqShaderVariable( )
 
-    {
+		{
 
-        m_aValue.resize( 1 );
+			m_aValue.resize( 1 );
 
-    }
+		}
 
 
 
-    CqShaderVariableVarying( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariable( strName, fParameter )
+		CqShaderVariableVarying( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariable( strName, fParameter )
 
-    {
+		{
 
-        m_aValue.resize( 1 );
-    }
+			m_aValue.resize( 1 );
+		}
 
-    CqShaderVariableVarying( const char* strName, const R& val ) : CqShaderVariable( strName )
+		CqShaderVariableVarying( const char* strName, const R& val ) : CqShaderVariable( strName )
 
-    {
+		{
 
-        m_aValue.resize( 1 );
+			m_aValue.resize( 1 );
 
-        m_aValue[ 0 ] = val;
+			m_aValue[ 0 ] = val;
 
-    }
+		}
 
-    CqShaderVariableVarying( const CqShaderVariableVarying<T, R>& val ) : CqShaderVariable( val )
+		CqShaderVariableVarying( const CqShaderVariableVarying<T, R>& val ) : CqShaderVariable( val )
 
-    {
+		{
 
-        m_aValue.resize( val.m_aValue.size() );
+			m_aValue.resize( val.m_aValue.size() );
 
-        m_aValue.assign( val.m_aValue.begin(), val.m_aValue.end() );
+			m_aValue.assign( val.m_aValue.begin(), val.m_aValue.end() );
 
-    }
+		}
 
-    virtual	~CqShaderVariableVarying()
+		virtual	~CqShaderVariableVarying()
 
-    {
+		{
 
+		}
 
-    }
 
 
+		virtual	void	Initialise( const TqInt uGridRes, const TqInt vGridRes )
 
-    virtual	void	Initialise( const TqInt uGridRes, const TqInt vGridRes )
+		{
 
-    {
+			R Def;
 
-        R Def;
+			if ( m_aValue.size() > 0 )
+				Def = m_aValue[ 0 ];
 
-        if ( m_aValue.size() > 0 ) Def = m_aValue[ 0 ];
+			m_aValue.assign( (( uGridRes + 1 ) * ( vGridRes + 1 )), Def );
 
-        m_aValue.assign( (( uGridRes + 1 ) * ( vGridRes + 1 )), Def );
+		}
 
-    }
 
 
+		virtual	void	SetSize( const TqInt size )
 
-    virtual	void	SetSize( const TqInt size )
+		{
 
-    {
+			m_aValue.resize( size );
 
-        m_aValue.resize( size );
+		}
 
-    }
 
 
+		virtual	void	GetFloat( TqFloat &res, TqInt index = 0 ) const
 
-    virtual	void	GetFloat( TqFloat &res, TqInt index = 0 ) const
+		{
 
-    {
+			assert( TqFalse );
 
-        assert( TqFalse );
+		}
 
-    }
+		virtual	void	GetString( CqString& res, TqInt index = 0 ) const
 
-    virtual	void	GetString( CqString& res, TqInt index = 0 ) const
+		{
 
-    {
+			assert( TqFalse );
 
-        assert( TqFalse );
+		}
 
-    }
+		virtual	void	GetPoint( CqVector3D& res, TqInt index = 0 ) const
 
-    virtual	void	GetPoint( CqVector3D& res, TqInt index = 0 ) const
+		{
 
-    {
+			assert( TqFalse );
 
-        assert( TqFalse );
+		}
 
-    }
+		virtual	void	GetVector( CqVector3D& res, TqInt index = 0 ) const
 
-    virtual	void	GetVector( CqVector3D& res, TqInt index = 0 ) const
+		{
 
-    {
+			assert( TqFalse );
 
-        assert( TqFalse );
+		}
 
-    }
+		virtual	void	GetNormal( CqVector3D& res, TqInt index = 0 ) const
 
-    virtual	void	GetNormal( CqVector3D& res, TqInt index = 0 ) const
+		{
 
-    {
+			assert( TqFalse );
 
-        assert( TqFalse );
+		}
 
-    }
+		virtual	void	GetColor( CqColor& res, TqInt index = 0 ) const
 
-    virtual	void	GetColor( CqColor& res, TqInt index = 0 ) const
+		{
 
-    {
+			assert( TqFalse );
 
-        assert( TqFalse );
+		}
 
-    }
+		virtual	void	GetMatrix( CqMatrix& res, TqInt index = 0 ) const
 
-    virtual	void	GetMatrix( CqMatrix& res, TqInt index = 0 ) const
+		{
 
-    {
+			assert( TqFalse );
 
-        assert( TqFalse );
+		}
 
-    }
 
 
+		virtual	void	GetFloatPtr( const TqFloat*& res ) const
 
-    virtual	void	GetFloatPtr( const TqFloat*& res ) const
+		{
 
-    {
+			assert( TqFalse );
 
-        assert( TqFalse );
+		}
 
-    }
+		virtual	void	GetStringPtr( const CqString*& res ) const
 
-    virtual	void	GetStringPtr( const CqString*& res ) const
+		{
 
-    {
+			assert( TqFalse );
 
-        assert( TqFalse );
+		}
 
-    }
+		virtual	void	GetPointPtr( const CqVector3D*& res ) const
 
-    virtual	void	GetPointPtr( const CqVector3D*& res ) const
+		{
 
-    {
+			assert( TqFalse );
 
-        assert( TqFalse );
+		}
 
-    }
+		virtual	void	GetVectorPtr( const CqVector3D*& res ) const
 
-    virtual	void	GetVectorPtr( const CqVector3D*& res ) const
+		{
 
-    {
+			assert( TqFalse );
 
-        assert( TqFalse );
+		}
 
-    }
+		virtual	void	GetNormalPtr( const CqVector3D*& res ) const
 
-    virtual	void	GetNormalPtr( const CqVector3D*& res ) const
+		{
 
-    {
+			assert( TqFalse );
 
-        assert( TqFalse );
+		}
 
-    }
+		virtual	void	GetColorPtr( const CqColor*& res ) const
 
-    virtual	void	GetColorPtr( const CqColor*& res ) const
+		{
 
-    {
+			assert( TqFalse );
 
-        assert( TqFalse );
+		}
 
-    }
+		virtual	void	GetMatrixPtr( const CqMatrix*& res ) const
 
-    virtual	void	GetMatrixPtr( const CqMatrix*& res ) const
+		{
 
-    {
+			assert( TqFalse );
 
-        assert( TqFalse );
+		}
 
-    }
 
 
+		virtual	void	GetFloatPtr( TqFloat*& res )
 
-    virtual	void	GetFloatPtr( TqFloat*& res )
+		{
 
-    {
+			assert( TqFalse );
 
-        assert( TqFalse );
+		}
 
-    }
+		virtual	void	GetStringPtr( CqString*& res )
 
-    virtual	void	GetStringPtr( CqString*& res )
+		{
 
-    {
+			assert( TqFalse );
 
-        assert( TqFalse );
+		}
 
-    }
+		virtual	void	GetPointPtr( CqVector3D*& res )
 
-    virtual	void	GetPointPtr( CqVector3D*& res )
+		{
 
-    {
+			assert( TqFalse );
 
-        assert( TqFalse );
+		}
 
-    }
+		virtual	void	GetVectorPtr( CqVector3D*& res )
 
-    virtual	void	GetVectorPtr( CqVector3D*& res )
+		{
 
-    {
+			assert( TqFalse );
 
-        assert( TqFalse );
+		}
 
-    }
+		virtual	void	GetNormalPtr( CqVector3D*& res )
 
-    virtual	void	GetNormalPtr( CqVector3D*& res )
+		{
 
-    {
+			assert( TqFalse );
 
-        assert( TqFalse );
+		}
 
-    }
+		virtual	void	GetColorPtr( CqColor*& res )
 
-    virtual	void	GetColorPtr( CqColor*& res )
+		{
 
-    {
+			assert( TqFalse );
 
-        assert( TqFalse );
+		}
 
-    }
+		virtual	void	GetMatrixPtr( CqMatrix*& res )
 
-    virtual	void	GetMatrixPtr( CqMatrix*& res )
+		{
 
-    {
+			assert( TqFalse );
 
-        assert( TqFalse );
+		}
 
-    }
 
 
+		virtual	void	SetFloat( const TqFloat& f )
 
-    virtual	void	SetFloat( const TqFloat& f )
+		{
 
-    {
+			assert( TqFalse );
 
-        assert( TqFalse );
+		}
 
-    }
+		virtual	void	SetString( const CqString& s )
 
-    virtual	void	SetString( const CqString& s )
+		{
 
-    {
+			assert( TqFalse );
 
-        assert( TqFalse );
+		}
 
-    }
+		virtual	void	SetPoint( const CqVector3D& p )
 
-    virtual	void	SetPoint( const CqVector3D& p )
+		{
 
-    {
+			assert( TqFalse );
 
-        assert( TqFalse );
+		}
 
-    }
+		virtual	void	SetVector( const CqVector3D& v )
 
-    virtual	void	SetVector( const CqVector3D& v )
+		{
 
-    {
+			assert( TqFalse );
 
-        assert( TqFalse );
+		}
 
-    }
+		virtual	void	SetNormal( const CqVector3D& n )
 
-    virtual	void	SetNormal( const CqVector3D& n )
+		{
 
-    {
+			assert( TqFalse );
 
-        assert( TqFalse );
+		}
 
-    }
+		virtual	void	SetColor( const CqColor& c )
 
-    virtual	void	SetColor( const CqColor& c )
+		{
 
-    {
+			assert( TqFalse );
 
-        assert( TqFalse );
+		}
 
-    }
+		virtual	void	SetMatrix( const CqMatrix& m )
 
-    virtual	void	SetMatrix( const CqMatrix& m )
+		{
 
-    {
+			assert( TqFalse );
 
-        assert( TqFalse );
+		}
 
-    }
 
 
+		virtual	void	SetFloat( const TqFloat& f, TqInt index )
 
-    virtual	void	SetFloat( const TqFloat& f, TqInt index )
+		{
 
-    {
+			assert( TqFalse );
 
-        assert( TqFalse );
+		}
 
-    }
+		virtual	void	SetString( const CqString& s, TqInt index )
 
-    virtual	void	SetString( const CqString& s, TqInt index )
+		{
 
-    {
+			assert( TqFalse );
 
-        assert( TqFalse );
+		}
 
-    }
+		virtual	void	SetPoint( const CqVector3D& p, TqInt index )
 
-    virtual	void	SetPoint( const CqVector3D& p, TqInt index )
+		{
 
-    {
+			assert( TqFalse );
 
-        assert( TqFalse );
+		}
 
-    }
+		virtual	void	SetVector( const CqVector3D& v, TqInt index )
 
-    virtual	void	SetVector( const CqVector3D& v, TqInt index )
+		{
 
-    {
+			assert( TqFalse );
 
-        assert( TqFalse );
+		}
 
-    }
+		virtual	void	SetNormal( const CqVector3D& n, TqInt index )
 
-    virtual	void	SetNormal( const CqVector3D& n, TqInt index )
+		{
 
-    {
+			assert( TqFalse );
 
-        assert( TqFalse );
+		}
 
-    }
+		virtual	void	SetColor( const CqColor& c, TqInt index )
 
-    virtual	void	SetColor( const CqColor& c, TqInt index )
+		{
 
-    {
+			assert( TqFalse );
 
-        assert( TqFalse );
+		}
 
-    }
+		virtual	void	SetMatrix( const CqMatrix& m, TqInt index )
 
-    virtual	void	SetMatrix( const CqMatrix& m, TqInt index )
+		{
 
-    {
+			assert( TqFalse );
 
-        assert( TqFalse );
+		}
 
-    }
 
 
+		virtual	EqVariableClass	Class() const
 
-    virtual	EqVariableClass	Class() const
+		{
 
-    {
+			return ( class_varying );
 
-        return ( class_varying );
+		}
 
-    }
+		virtual	EqVariableType	Type() const
 
-    virtual	EqVariableType	Type() const
+		{
 
-    {
+			return ( T );
 
-        return ( T );
+		}
 
-    }
+		virtual TqUint	Size() const
 
-    virtual TqUint	Size() const
+		{
 
-    {
+			return ( m_aValue.size() );
 
-        return ( m_aValue.size() );
+		}
 
-    }
 
 
+		virtual	void	operator=( const CqShaderVariableVarying<T, R>& From )
 
-    virtual	void	operator=( const CqShaderVariableVarying<T, R>& From )
+		{
 
-    {
+			// use std::vector assignment
 
-        // use std::vector assignment
+			m_aValue = From.m_aValue;
 
-        m_aValue = From.m_aValue;
+		}
 
-    }
 
 
+	protected:
 
-protected:
+		std::vector<R>	m_aValue;		///< Array of values of the appropriate type.
 
-    std::vector<R>	m_aValue;		///< Array of values of the appropriate type.
-
-    R	m_temp_R;		///< Temp value to use in template functions, problem with VC++.
+		R	m_temp_R;		///< Temp value to use in template functions, problem with VC++.
 
 }
 
@@ -2399,153 +2413,151 @@ class CqShaderVariableVaryingFloat : public CqShaderVariableVarying<type_float, 
 
 {
 
-public:
+	public:
 
-    CqShaderVariableVaryingFloat( ) : CqShaderVariableVarying<type_float, TqFloat>( )
+		CqShaderVariableVaryingFloat( ) : CqShaderVariableVarying<type_float, TqFloat>( )
 
-    {
+		{
+		}
 
-    }
+		CqShaderVariableVaryingFloat( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableVarying<type_float, TqFloat>( strName, fParameter )
 
-    CqShaderVariableVaryingFloat( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableVarying<type_float, TqFloat>( strName, fParameter )
+		{
+		}
 
-    {
+		virtual	void	GetFloat( TqFloat& res, TqInt index = 0 ) const
 
-    }
+		{
 
-    virtual	void	GetFloat( TqFloat& res, TqInt index = 0 ) const
+			res = m_aValue[ index ];
 
-    {
+		}
 
-        res = m_aValue[ index ];
+		virtual	void	GetFloatPtr( const TqFloat*& res ) const
 
-    }
+		{
 
-    virtual	void	GetFloatPtr( const TqFloat*& res ) const
+			res = &m_aValue[ 0 ];
 
-    {
+		}
 
-        res = &m_aValue[ 0 ];
+		virtual	void	GetFloatPtr( TqFloat*& res )
 
-    }
+		{
 
-    virtual	void	GetFloatPtr( TqFloat*& res )
+			res = &m_aValue[ 0 ];
 
-    {
+		}
 
-        res = &m_aValue[ 0 ];
+		virtual	void	SetFloat( const TqFloat& f, TqInt index )
 
-    }
+		{
 
-    virtual	void	SetFloat( const TqFloat& f, TqInt index )
+			m_aValue[ index ] = f;
 
-    {
+		}
 
-        m_aValue[ index ] = f;
+		virtual	void	SetFloat( const TqFloat& f )
 
-    }
+		{
 
-    virtual	void	SetFloat( const TqFloat& f )
+			m_aValue.assign( m_aValue.size(), f );
 
-    {
+		}
 
-        m_aValue.assign( m_aValue.size(), f );
+		/** Copy the values from the passed variable into this, taking into account any class differences.
 
-    }
+		 * \param pVal The variable to copy from.
 
-    /** Copy the values from the passed variable into this, taking into account any class differences.
+		 */
 
-     * \param pVal The variable to copy from.
+		virtual	void	SetValueFromVariable( const IqShaderData* pVal )
 
-     */
+		{
 
-    virtual	void	SetValueFromVariable( const IqShaderData* pVal )
+			TqUint i;
 
-    {
+			if ( pVal->Size() > 1 )
 
-        TqUint i;
+			{
 
-        if ( pVal->Size() > 1 )
+				const TqFloat * pData;
 
-        {
+				pVal->GetFloatPtr( pData );
 
-            const TqFloat * pData;
+				for ( i = 0; i < Size(); i++ )
 
-            pVal->GetFloatPtr( pData );
+					m_aValue[ i ] = pData [ i ];
 
-            for ( i = 0; i < Size(); i++ )
+			}
 
-                m_aValue[ i ] = pData [ i ];
+			else
 
-        }
+			{
 
-        else
+				TqFloat temp;
 
-        {
+				pVal->GetFloat( temp );
 
-            TqFloat temp;
+				m_aValue.assign( m_aValue.size(), temp );
 
-            pVal->GetFloat( temp );
+			}
 
-            m_aValue.assign( m_aValue.size(), temp );
+		}
 
-        }
+		virtual void	GetBool( TqBool& res, TqInt index = 0 ) const
 
-    }
+		{
 
-    virtual void	GetBool( TqBool& res, TqInt index = 0 ) const
+			res = m_aValue[ index ] != 0.0f;
 
-    {
+		}
 
-        res = m_aValue[ index ] != 0.0f;
+		virtual void	SetBool( const TqBool& val )
 
-    }
+		{
 
-    virtual void	SetBool( const TqBool& val )
+			m_aValue.assign( m_aValue.size(), val );
 
-    {
+		}
 
-        m_aValue.assign( m_aValue.size(), val );
+		virtual void	SetBool( const TqBool& val, TqInt index )
 
-    }
+		{
 
-    virtual void	SetBool( const TqBool& val, TqInt index )
+			m_aValue[ index ] = val;
 
-    {
+		}
 
-        m_aValue[ index ] = val;
+		/** Set the all SIMD data ased on a state vector, only indexes whose bit is set are modified.
 
-    }
+		 * \param pVal The stack entry to assign.
 
-    /** Set the all SIMD data ased on a state vector, only indexes whose bit is set are modified.
+		 * \param index Integer SIMD index.
 
-     * \param pVal The stack entry to assign.
+		 */
 
-     * \param index Integer SIMD index.
+		virtual	void	SetValueFromVariable( const IqShaderData* pVal, TqInt index )
 
-     */
+		{
 
-    virtual	void	SetValueFromVariable( const IqShaderData* pVal, TqInt index )
+			pVal->GetFloat( m_aValue[ index ], index );
 
-    {
+		}
 
-        pVal->GetFloat( m_aValue[ index ], index );
+		virtual	IqShaderData* Clone() const
 
-    }
+		{
 
-    virtual	IqShaderData* Clone() const
+			CqShaderVariableVaryingFloat* newVar = new CqShaderVariableVaryingFloat( *this );
 
-    {
+			newVar->SetSize( Size() );
 
-        CqShaderVariableVaryingFloat* newVar = new CqShaderVariableVaryingFloat( *this );
+			newVar->SetValueFromVariable( this );
 
-        newVar->SetSize( Size() );
+			return ( newVar );
 
-        newVar->SetValueFromVariable( this );
-
-        return ( newVar );
-
-    }
+		}
 
 };
 
@@ -2557,115 +2569,113 @@ class CqShaderVariableVaryingString : public CqShaderVariableVarying<type_string
 
 {
 
-public:
+	public:
 
-    CqShaderVariableVaryingString( ) : CqShaderVariableVarying<type_string, CqString>( )
+		CqShaderVariableVaryingString( ) : CqShaderVariableVarying<type_string, CqString>( )
 
-    {
+		{
+		}
 
-            }
+		CqShaderVariableVaryingString( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableVarying<type_string, CqString>( strName, fParameter )
 
-    CqShaderVariableVaryingString( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableVarying<type_string, CqString>( strName, fParameter )
+		{
+		}
 
-    {
+		virtual	void	GetString( CqString& res, TqInt index = 0 ) const
 
-            }
+		{
 
-    virtual	void	GetString( CqString& res, TqInt index = 0 ) const
+			res = m_aValue[ 0 ];
 
-    {
+		}
 
-        res = m_aValue[ 0 ];
+		virtual	void	GetStringPtr( const CqString*& res ) const
 
-    }
+		{
 
-    virtual	void	GetStringPtr( const CqString*& res ) const
+			res = &m_aValue[ 0 ];
 
-    {
+		}
 
-        res = &m_aValue[ 0 ];
+		virtual	void	GetStringPtr( CqString*& res )
 
-    }
+		{
 
-    virtual	void	GetStringPtr( CqString*& res )
+			res = &m_aValue[ 0 ];
 
-    {
+		}
 
-        res = &m_aValue[ 0 ];
+		virtual	void	SetString( const CqString& s, TqInt index )
 
-    }
+		{
 
-    virtual	void	SetString( const CqString& s, TqInt index )
+			m_aValue[ 0 ] = s;
 
-    {
+		}
 
-        m_aValue[ 0 ] = s;
+		virtual	void	SetString( const CqString& s )
 
-    }
+		{
 
-    virtual	void	SetString( const CqString& s )
+			m_aValue.assign( 0, s );
 
-    {
+		}
 
-        m_aValue.assign( 0, s );
+		/** Copy the values from the passed variable into this, taking into account any class differences.
 
-    }
+		 * \param pVal The variable to copy from.
 
-    /** Copy the values from the passed variable into this, taking into account any class differences.
+		 */
 
-     * \param pVal The variable to copy from.
+		virtual	void	SetValueFromVariable( const IqShaderData* pVal )
 
-     */
+		{
 
-    virtual	void	SetValueFromVariable( const IqShaderData* pVal )
+			CqString temp;
 
-    {
+			pVal->GetString( temp );
 
-        CqString temp;
+			m_aValue.assign( 0, temp );
 
-        pVal->GetString( temp );
+		}
 
-        m_aValue.assign( 0, temp );
+		virtual void	GetBool( TqBool& res, TqInt index = 0 ) const
 
-    }
+		{
 
-    virtual void	GetBool( TqBool& res, TqInt index = 0 ) const
+			res = m_aValue[ 0 ].compare( "" ) == 0;
 
-    {
+		}
 
-        res = m_aValue[ 0 ].compare( "" ) == 0;
+		/** Set the all SIMD data ased on a state vector, only indexes whose bit is set are modified.
 
-    }
+		 * \param pVal The stack entry to assign.
 
-    /** Set the all SIMD data ased on a state vector, only indexes whose bit is set are modified.
+		 * \param index Integer SIMD index.
 
-     * \param pVal The stack entry to assign.
+		 */
 
-     * \param index Integer SIMD index.
+		virtual	void	SetValueFromVariable( const IqShaderData* pVal, TqInt index )
 
-     */
+		{
 
-    virtual	void	SetValueFromVariable( const IqShaderData* pVal, TqInt index )
+			pVal->GetString( m_aValue[ 0 ], index );
 
-    {
+		}
 
-        pVal->GetString( m_aValue[ 0 ], index );
+		virtual	IqShaderData* Clone() const
 
-    }
+		{
 
-    virtual	IqShaderData* Clone() const
+			CqShaderVariableVaryingString* newVar = new CqShaderVariableVaryingString( *this );
 
-    {
+			newVar->SetSize( Size() );
 
-        CqShaderVariableVaryingString* newVar = new CqShaderVariableVaryingString( *this );
+			newVar->SetValueFromVariable( this );
 
-        newVar->SetSize( Size() );
+			return ( newVar );
 
-        newVar->SetValueFromVariable( this );
-
-        return ( newVar );
-
-    }
+		}
 
 };
 
@@ -2675,217 +2685,215 @@ class CqShaderVariableVaryingPoint : public CqShaderVariableVarying<type_point, 
 
 {
 
-public:
+	public:
 
-    CqShaderVariableVaryingPoint( ) : CqShaderVariableVarying<type_point, CqVector3D>( )
+		CqShaderVariableVaryingPoint( ) : CqShaderVariableVarying<type_point, CqVector3D>( )
 
-    {
+		{
+		}
 
-            }
+		CqShaderVariableVaryingPoint( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableVarying<type_point, CqVector3D>( strName, fParameter )
 
-    CqShaderVariableVaryingPoint( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableVarying<type_point, CqVector3D>( strName, fParameter )
+		{
+		}
 
-    {
+		virtual	void	GetPoint( CqVector3D& res, TqInt index = 0 ) const
 
-            }
+		{
 
-    virtual	void	GetPoint( CqVector3D& res, TqInt index = 0 ) const
+			res = m_aValue[ index ];
 
-    {
+		}
 
-        res = m_aValue[ index ];
+		virtual	void	GetPointPtr( const CqVector3D*& res ) const
 
-    }
+		{
 
-    virtual	void	GetPointPtr( const CqVector3D*& res ) const
+			res = &m_aValue[ 0 ];
 
-    {
+		}
 
-        res = &m_aValue[ 0 ];
+		virtual	void	GetPointPtr( CqVector3D*& res )
 
-    }
+		{
 
-    virtual	void	GetPointPtr( CqVector3D*& res )
+			res = &m_aValue[ 0 ];
 
-    {
+		}
 
-        res = &m_aValue[ 0 ];
+		virtual	void	SetPoint( const CqVector3D& p, TqInt index )
 
-    }
+		{
 
-    virtual	void	SetPoint( const CqVector3D& p, TqInt index )
+			m_aValue[ index ] = p;
 
-    {
+		}
 
-        m_aValue[ index ] = p;
+		virtual	void	SetPoint( const CqVector3D& p )
 
-    }
+		{
 
-    virtual	void	SetPoint( const CqVector3D& p )
+			m_aValue.assign( m_aValue.size(), p );
 
-    {
+		}
 
-        m_aValue.assign( m_aValue.size(), p );
+		virtual	void	GetVector( CqVector3D& res, TqInt index = 0 ) const
 
-    }
+		{
 
-    virtual	void	GetVector( CqVector3D& res, TqInt index = 0 ) const
+			GetPoint( res, index );
 
-    {
+		}
 
-        GetPoint( res, index );
+		virtual	void	GetVectorPtr( const CqVector3D*& res ) const
 
-    }
+		{
 
-    virtual	void	GetVectorPtr( const CqVector3D*& res ) const
+			res = &m_aValue[ 0 ];
 
-    {
+		}
 
-        res = &m_aValue[ 0 ];
+		virtual	void	GetVectorPtr( CqVector3D*& res )
 
-    }
+		{
 
-    virtual	void	GetVectorPtr( CqVector3D*& res )
+			res = &m_aValue[ 0 ];
 
-    {
+		}
 
-        res = &m_aValue[ 0 ];
+		virtual	void	SetVector( const CqVector3D& p, TqInt index )
 
-    }
+		{
 
-    virtual	void	SetVector( const CqVector3D& p, TqInt index )
+			SetPoint( p, index );
 
-    {
+		}
 
-        SetPoint( p, index );
+		virtual	void	SetVector( const CqVector3D& p )
 
-    }
+		{
 
-    virtual	void	SetVector( const CqVector3D& p )
+			SetPoint( p );
 
-    {
+		}
 
-        SetPoint( p );
+		virtual	void	GetNormal( CqVector3D& res, TqInt index = 0 ) const
 
-    }
+		{
 
-    virtual	void	GetNormal( CqVector3D& res, TqInt index = 0 ) const
+			GetPoint( res, index );
 
-    {
+		}
 
-        GetPoint( res, index );
+		virtual	void	GetNormalPtr( const CqVector3D*& res ) const
 
-    }
+		{
 
-    virtual	void	GetNormalPtr( const CqVector3D*& res ) const
+			res = &m_aValue[ 0 ];
 
-    {
+		}
 
-        res = &m_aValue[ 0 ];
+		virtual	void	GetNormalPtr( CqVector3D*& res )
 
-    }
+		{
 
-    virtual	void	GetNormalPtr( CqVector3D*& res )
+			res = &m_aValue[ 0 ];
 
-    {
+		}
 
-        res = &m_aValue[ 0 ];
+		virtual	void	SetNormal( const CqVector3D& p, TqInt index )
 
-    }
+		{
 
-    virtual	void	SetNormal( const CqVector3D& p, TqInt index )
+			SetPoint( p, index );
 
-    {
+		}
 
-        SetPoint( p, index );
+		virtual	void	SetNormal( const CqVector3D& p )
 
-    }
+		{
 
-    virtual	void	SetNormal( const CqVector3D& p )
+			SetPoint( p );
 
-    {
+		}
 
-        SetPoint( p );
+		virtual void	GetBool( TqBool& res, TqInt index = 0 ) const
 
-    }
+		{
 
-    virtual void	GetBool( TqBool& res, TqInt index = 0 ) const
+			res = ( ( m_aValue[ index ].x() != 0.0f ) || ( m_aValue[ index ].y() != 0.0f ) || ( m_aValue[ index ].z() != 0.0f ) );
 
-    {
+		}
 
-        res = ( ( m_aValue[ index ].x() != 0.0f ) || ( m_aValue[ index ].y() != 0.0f ) || ( m_aValue[ index ].z() != 0.0f ) );
+		/** Copy the values from the passed variable into this, taking into account any class differences.
 
-    }
+		 * \param pVal The variable to copy from.
 
-    /** Copy the values from the passed variable into this, taking into account any class differences.
+		 */
 
-     * \param pVal The variable to copy from.
+		virtual	void	SetValueFromVariable( const IqShaderData* pVal )
 
-     */
+		{
 
-    virtual	void	SetValueFromVariable( const IqShaderData* pVal )
+			TqUint i;
 
-    {
+			if ( pVal->Size() > 1 )
 
-        TqUint i;
+			{
 
-        if ( pVal->Size() > 1 )
+				const CqVector3D * pData;
 
-        {
+				pVal->GetPointPtr( pData );
 
-            const CqVector3D * pData;
+				for ( i = 0; i < Size(); i++ )
 
-            pVal->GetPointPtr( pData );
+					m_aValue[ i ] = pData [ i ];
 
-            for ( i = 0; i < Size(); i++ )
+			}
 
-                m_aValue[ i ] = pData [ i ];
+			else
 
-        }
+			{
 
-        else
+				CqVector3D temp;
 
-        {
+				pVal->GetPoint( temp );
 
-            CqVector3D temp;
+				m_aValue.assign( m_aValue.size(), temp );
 
-            pVal->GetPoint( temp );
+			}
 
-            m_aValue.assign( m_aValue.size(), temp );
+		}
 
-        }
+		/** Set the all SIMD data ased on a state vector, only indexes whose bit is set are modified.
 
-    }
+		 * \param pVal The stack entry to assign.
 
-    /** Set the all SIMD data ased on a state vector, only indexes whose bit is set are modified.
+		 * \param index Integer SIMD index.
 
-     * \param pVal The stack entry to assign.
+		 */
 
-     * \param index Integer SIMD index.
+		virtual	void	SetValueFromVariable( const IqShaderData* pVal, TqInt index )
 
-     */
+		{
 
-    virtual	void	SetValueFromVariable( const IqShaderData* pVal, TqInt index )
+			pVal->GetPoint( m_aValue[ index ], index );
 
-    {
+		}
 
-        pVal->GetPoint( m_aValue[ index ], index );
+		virtual	IqShaderData* Clone() const
 
-    }
+		{
 
-    virtual	IqShaderData* Clone() const
+			CqShaderVariableVaryingPoint* newVar = new CqShaderVariableVaryingPoint( *this );
 
-    {
+			newVar->SetSize( Size() );
 
-        CqShaderVariableVaryingPoint* newVar = new CqShaderVariableVaryingPoint( *this );
+			newVar->SetValueFromVariable( this );
 
-        newVar->SetSize( Size() );
+			return ( newVar );
 
-        newVar->SetValueFromVariable( this );
-
-        return ( newVar );
-
-    }
+		}
 
 };
 
@@ -2895,217 +2903,215 @@ class CqShaderVariableVaryingVector : public CqShaderVariableVarying<type_vector
 
 {
 
-public:
+	public:
 
-    CqShaderVariableVaryingVector( ) : CqShaderVariableVarying<type_vector, CqVector3D>( )
+		CqShaderVariableVaryingVector( ) : CqShaderVariableVarying<type_vector, CqVector3D>( )
 
-    {
+		{
+		}
 
-            }
+		CqShaderVariableVaryingVector( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableVarying<type_vector, CqVector3D>( strName, fParameter )
 
-    CqShaderVariableVaryingVector( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableVarying<type_vector, CqVector3D>( strName, fParameter )
+		{
+		}
 
-    {
+		virtual	void	GetPoint( CqVector3D& res, TqInt index = 0 ) const
 
-            }
+		{
 
-    virtual	void	GetPoint( CqVector3D& res, TqInt index = 0 ) const
+			res = m_aValue[ index ];
 
-    {
+		}
 
-        res = m_aValue[ index ];
+		virtual	void	GetPointPtr( const CqVector3D*& res ) const
 
-    }
+		{
 
-    virtual	void	GetPointPtr( const CqVector3D*& res ) const
+			res = &m_aValue[ 0 ];
 
-    {
+		}
 
-        res = &m_aValue[ 0 ];
+		virtual	void	GetPointPtr( CqVector3D*& res )
 
-    }
+		{
 
-    virtual	void	GetPointPtr( CqVector3D*& res )
+			res = &m_aValue[ 0 ];
 
-    {
+		}
 
-        res = &m_aValue[ 0 ];
+		virtual	void	SetPoint( const CqVector3D& p, TqInt index )
 
-    }
+		{
 
-    virtual	void	SetPoint( const CqVector3D& p, TqInt index )
+			m_aValue[ index ] = p;
 
-    {
+		}
 
-        m_aValue[ index ] = p;
+		virtual	void	SetPoint( const CqVector3D& p )
 
-    }
+		{
 
-    virtual	void	SetPoint( const CqVector3D& p )
+			m_aValue.assign( m_aValue.size(), p );
 
-    {
+		}
 
-        m_aValue.assign( m_aValue.size(), p );
+		virtual	void	GetVector( CqVector3D& res, TqInt index = 0 ) const
 
-    }
+		{
 
-    virtual	void	GetVector( CqVector3D& res, TqInt index = 0 ) const
+			GetPoint( res, index );
 
-    {
+		}
 
-        GetPoint( res, index );
+		virtual	void	GetVectorPtr( const CqVector3D*& res ) const
 
-    }
+		{
 
-    virtual	void	GetVectorPtr( const CqVector3D*& res ) const
+			res = &m_aValue[ 0 ];
 
-    {
+		}
 
-        res = &m_aValue[ 0 ];
+		virtual	void	GetVectorPtr( CqVector3D*& res )
 
-    }
+		{
 
-    virtual	void	GetVectorPtr( CqVector3D*& res )
+			res = &m_aValue[ 0 ];
 
-    {
+		}
 
-        res = &m_aValue[ 0 ];
+		virtual	void	SetVector( const CqVector3D& p, TqInt index )
 
-    }
+		{
 
-    virtual	void	SetVector( const CqVector3D& p, TqInt index )
+			SetPoint( p, index );
 
-    {
+		}
 
-        SetPoint( p, index );
+		virtual	void	SetVector( const CqVector3D& p )
 
-    }
+		{
 
-    virtual	void	SetVector( const CqVector3D& p )
+			SetPoint( p );
 
-    {
+		}
 
-        SetPoint( p );
+		virtual	void	GetNormal( CqVector3D& res, TqInt index = 0 ) const
 
-    }
+		{
 
-    virtual	void	GetNormal( CqVector3D& res, TqInt index = 0 ) const
+			GetPoint( res, index );
 
-    {
+		}
 
-        GetPoint( res, index );
+		virtual	void	GetNormalPtr( const CqVector3D*& res ) const
 
-    }
+		{
 
-    virtual	void	GetNormalPtr( const CqVector3D*& res ) const
+			res = &m_aValue[ 0 ];
 
-    {
+		}
 
-        res = &m_aValue[ 0 ];
+		virtual	void	GetNormalPtr( CqVector3D*& res )
 
-    }
+		{
 
-    virtual	void	GetNormalPtr( CqVector3D*& res )
+			res = &m_aValue[ 0 ];
 
-    {
+		}
 
-        res = &m_aValue[ 0 ];
+		virtual	void	SetNormal( const CqVector3D& p, TqInt index )
 
-    }
+		{
 
-    virtual	void	SetNormal( const CqVector3D& p, TqInt index )
+			SetPoint( p, index );
 
-    {
+		}
 
-        SetPoint( p, index );
+		virtual	void	SetNormal( const CqVector3D& p )
 
-    }
+		{
 
-    virtual	void	SetNormal( const CqVector3D& p )
+			SetPoint( p );
 
-    {
+		}
 
-        SetPoint( p );
+		virtual void	GetBool( TqBool& res, TqInt index = 0 ) const
 
-    }
+		{
 
-    virtual void	GetBool( TqBool& res, TqInt index = 0 ) const
+			res = ( ( m_aValue[ index ].x() != 0.0f ) || ( m_aValue[ index ].y() != 0.0f ) || ( m_aValue[ index ].z() != 0.0f ) );
 
-    {
+		}
 
-        res = ( ( m_aValue[ index ].x() != 0.0f ) || ( m_aValue[ index ].y() != 0.0f ) || ( m_aValue[ index ].z() != 0.0f ) );
+		/** Copy the values from the passed variable into this, taking into account any class differences.
 
-    }
+		 * \param pVal The variable to copy from.
 
-    /** Copy the values from the passed variable into this, taking into account any class differences.
+		 */
 
-     * \param pVal The variable to copy from.
+		virtual	void	SetValueFromVariable( const IqShaderData* pVal )
 
-     */
+		{
 
-    virtual	void	SetValueFromVariable( const IqShaderData* pVal )
+			TqUint i;
 
-    {
+			if ( pVal->Size() > 1 )
 
-        TqUint i;
+			{
 
-        if ( pVal->Size() > 1 )
+				const CqVector3D * pData;
 
-        {
+				pVal->GetVectorPtr( pData );
 
-            const CqVector3D * pData;
+				for ( i = 0; i < Size(); i++ )
 
-            pVal->GetVectorPtr( pData );
+					m_aValue[ i ] = pData [ i ];
 
-            for ( i = 0; i < Size(); i++ )
+			}
 
-                m_aValue[ i ] = pData [ i ];
+			else
 
-        }
+			{
 
-        else
+				CqVector3D temp;
 
-        {
+				pVal->GetVector( temp );
 
-            CqVector3D temp;
+				m_aValue.assign( m_aValue.size(), temp );
 
-            pVal->GetVector( temp );
+			}
 
-            m_aValue.assign( m_aValue.size(), temp );
+		}
 
-        }
+		/** Set the all SIMD data ased on a state vector, only indexes whose bit is set are modified.
 
-    }
+		 * \param pVal The stack entry to assign.
 
-    /** Set the all SIMD data ased on a state vector, only indexes whose bit is set are modified.
+		 * \param index Integer SIMD index.
 
-     * \param pVal The stack entry to assign.
+		 */
 
-     * \param index Integer SIMD index.
+		virtual	void	SetValueFromVariable( const IqShaderData* pVal, TqInt index )
 
-     */
+		{
 
-    virtual	void	SetValueFromVariable( const IqShaderData* pVal, TqInt index )
+			pVal->GetVector( m_aValue[ index ], index );
 
-    {
+		}
 
-        pVal->GetVector( m_aValue[ index ], index );
+		virtual	IqShaderData* Clone() const
 
-    }
+		{
 
-    virtual	IqShaderData* Clone() const
+			CqShaderVariableVaryingVector* newVar = new CqShaderVariableVaryingVector( *this );
 
-    {
+			newVar->SetSize( Size() );
 
-        CqShaderVariableVaryingVector* newVar = new CqShaderVariableVaryingVector( *this );
+			newVar->SetValueFromVariable( this );
 
-        newVar->SetSize( Size() );
+			return ( newVar );
 
-        newVar->SetValueFromVariable( this );
-
-        return ( newVar );
-
-    }
+		}
 
 };
 
@@ -3115,217 +3121,215 @@ class CqShaderVariableVaryingNormal : public CqShaderVariableVarying<type_normal
 
 {
 
-public:
+	public:
 
-    CqShaderVariableVaryingNormal( ) : CqShaderVariableVarying<type_normal, CqVector3D>( )
+		CqShaderVariableVaryingNormal( ) : CqShaderVariableVarying<type_normal, CqVector3D>( )
 
-    {
+		{
+		}
 
-            }
+		CqShaderVariableVaryingNormal( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableVarying<type_normal, CqVector3D>( strName, fParameter )
 
-    CqShaderVariableVaryingNormal( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableVarying<type_normal, CqVector3D>( strName, fParameter )
+		{
+		}
 
-    {
+		virtual	void	GetPoint( CqVector3D& res, TqInt index = 0 ) const
 
-            }
+		{
 
-    virtual	void	GetPoint( CqVector3D& res, TqInt index = 0 ) const
+			res = m_aValue[ index ];
 
-    {
+		}
 
-        res = m_aValue[ index ];
+		virtual	void	GetPointPtr( const CqVector3D*& res ) const
 
-    }
+		{
 
-    virtual	void	GetPointPtr( const CqVector3D*& res ) const
+			res = &m_aValue[ 0 ];
 
-    {
+		}
 
-        res = &m_aValue[ 0 ];
+		virtual	void	GetPointPtr( CqVector3D*& res )
 
-    }
+		{
 
-    virtual	void	GetPointPtr( CqVector3D*& res )
+			res = &m_aValue[ 0 ];
 
-    {
+		}
 
-        res = &m_aValue[ 0 ];
+		virtual	void	SetPoint( const CqVector3D& p, TqInt index )
 
-    }
+		{
 
-    virtual	void	SetPoint( const CqVector3D& p, TqInt index )
+			m_aValue[ index ] = p;
 
-    {
+		}
 
-        m_aValue[ index ] = p;
+		virtual	void	SetPoint( const CqVector3D& p )
 
-    }
+		{
 
-    virtual	void	SetPoint( const CqVector3D& p )
+			m_aValue.assign( m_aValue.size(), p );
 
-    {
+		}
 
-        m_aValue.assign( m_aValue.size(), p );
+		virtual	void	GetVector( CqVector3D& res, TqInt index = 0 ) const
 
-    }
+		{
 
-    virtual	void	GetVector( CqVector3D& res, TqInt index = 0 ) const
+			GetPoint( res, index );
 
-    {
+		}
 
-        GetPoint( res, index );
+		virtual	void	GetVectorPtr( const CqVector3D*& res ) const
 
-    }
+		{
 
-    virtual	void	GetVectorPtr( const CqVector3D*& res ) const
+			res = &m_aValue[ 0 ];
 
-    {
+		}
 
-        res = &m_aValue[ 0 ];
+		virtual	void	GetVectorPtr( CqVector3D*& res )
 
-    }
+		{
 
-    virtual	void	GetVectorPtr( CqVector3D*& res )
+			res = &m_aValue[ 0 ];
 
-    {
+		}
 
-        res = &m_aValue[ 0 ];
+		virtual	void	SetVector( const CqVector3D& p, TqInt index )
 
-    }
+		{
 
-    virtual	void	SetVector( const CqVector3D& p, TqInt index )
+			SetPoint( p, index );
 
-    {
+		}
 
-        SetPoint( p, index );
+		virtual	void	SetVector( const CqVector3D& p )
 
-    }
+		{
 
-    virtual	void	SetVector( const CqVector3D& p )
+			SetPoint( p );
 
-    {
+		}
 
-        SetPoint( p );
+		virtual	void	GetNormal( CqVector3D& res, TqInt index = 0 ) const
 
-    }
+		{
 
-    virtual	void	GetNormal( CqVector3D& res, TqInt index = 0 ) const
+			GetPoint( res, index );
 
-    {
+		}
 
-        GetPoint( res, index );
+		virtual	void	GetNormalPtr( const CqVector3D*& res ) const
 
-    }
+		{
 
-    virtual	void	GetNormalPtr( const CqVector3D*& res ) const
+			res = &m_aValue[ 0 ];
 
-    {
+		}
 
-        res = &m_aValue[ 0 ];
+		virtual	void	GetNormalPtr( CqVector3D*& res )
 
-    }
+		{
 
-    virtual	void	GetNormalPtr( CqVector3D*& res )
+			res = &m_aValue[ 0 ];
 
-    {
+		}
 
-        res = &m_aValue[ 0 ];
+		virtual	void	SetNormal( const CqVector3D& p, TqInt index )
 
-    }
+		{
 
-    virtual	void	SetNormal( const CqVector3D& p, TqInt index )
+			SetPoint( p, index );
 
-    {
+		}
 
-        SetPoint( p, index );
+		virtual	void	SetNormal( const CqVector3D& p )
 
-    }
+		{
 
-    virtual	void	SetNormal( const CqVector3D& p )
+			SetPoint( p );
 
-    {
+		}
 
-        SetPoint( p );
+		virtual void	GetBool( TqBool& res, TqInt index = 0 ) const
 
-    }
+		{
 
-    virtual void	GetBool( TqBool& res, TqInt index = 0 ) const
+			res = ( ( m_aValue[ index ].x() != 0.0f ) || ( m_aValue[ index ].y() != 0.0f ) || ( m_aValue[ index ].z() != 0.0f ) );
 
-    {
+		}
 
-        res = ( ( m_aValue[ index ].x() != 0.0f ) || ( m_aValue[ index ].y() != 0.0f ) || ( m_aValue[ index ].z() != 0.0f ) );
+		/** Copy the values from the passed variable into this, taking into account any class differences.
 
-    }
+		 * \param pVal The variable to copy from.
 
-    /** Copy the values from the passed variable into this, taking into account any class differences.
+		 */
 
-     * \param pVal The variable to copy from.
+		virtual	void	SetValueFromVariable( const IqShaderData* pVal )
 
-     */
+		{
 
-    virtual	void	SetValueFromVariable( const IqShaderData* pVal )
+			TqUint i;
 
-    {
+			if ( pVal->Size() > 1 )
 
-        TqUint i;
+			{
 
-        if ( pVal->Size() > 1 )
+				const CqVector3D * pData;
 
-        {
+				pVal->GetNormalPtr( pData );
 
-            const CqVector3D * pData;
+				for ( i = 0; i < Size(); i++ )
 
-            pVal->GetNormalPtr( pData );
+					m_aValue[ i ] = pData [ i ];
 
-            for ( i = 0; i < Size(); i++ )
+			}
 
-                m_aValue[ i ] = pData [ i ];
+			else
 
-        }
+			{
 
-        else
+				CqVector3D temp;
 
-        {
+				pVal->GetNormal( temp );
 
-            CqVector3D temp;
+				m_aValue.assign( m_aValue.size(), temp );
 
-            pVal->GetNormal( temp );
+			}
 
-            m_aValue.assign( m_aValue.size(), temp );
+		}
 
-        }
+		/** Set the all SIMD data ased on a state vector, only indexes whose bit is set are modified.
 
-    }
+		 * \param pVal The stack entry to assign.
 
-    /** Set the all SIMD data ased on a state vector, only indexes whose bit is set are modified.
+		 * \param index Integer SIMD index.
 
-     * \param pVal The stack entry to assign.
+		 */
 
-     * \param index Integer SIMD index.
+		virtual	void	SetValueFromVariable( const IqShaderData* pVal, TqInt index )
 
-     */
+		{
 
-    virtual	void	SetValueFromVariable( const IqShaderData* pVal, TqInt index )
+			pVal->GetNormal( m_aValue[ index ], index );
 
-    {
+		}
 
-        pVal->GetNormal( m_aValue[ index ], index );
+		virtual	IqShaderData* Clone() const
 
-    }
+		{
 
-    virtual	IqShaderData* Clone() const
+			CqShaderVariableVaryingNormal* newVar = new CqShaderVariableVaryingNormal( *this );
 
-    {
+			newVar->SetSize( Size() );
 
-        CqShaderVariableVaryingNormal* newVar = new CqShaderVariableVaryingNormal( *this );
+			newVar->SetValueFromVariable( this );
 
-        newVar->SetSize( Size() );
+			return ( newVar );
 
-        newVar->SetValueFromVariable( this );
-
-        return ( newVar );
-
-    }
+		}
 
 };
 
@@ -3335,137 +3339,135 @@ class CqShaderVariableVaryingColor : public CqShaderVariableVarying<type_color, 
 
 {
 
-public:
+	public:
 
-    CqShaderVariableVaryingColor( ) : CqShaderVariableVarying<type_color, CqColor>( )
+		CqShaderVariableVaryingColor( ) : CqShaderVariableVarying<type_color, CqColor>( )
 
-    {
+		{
+		}
 
-            }
+		CqShaderVariableVaryingColor( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableVarying<type_color, CqColor>( strName, fParameter )
 
-    CqShaderVariableVaryingColor( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableVarying<type_color, CqColor>( strName, fParameter )
+		{
+		}
 
-    {
+		virtual	void	GetColor( CqColor& res, TqInt index = 0 ) const
 
-            }
+		{
 
-    virtual	void	GetColor( CqColor& res, TqInt index = 0 ) const
+			res = m_aValue[ index ];
 
-    {
+		}
 
-        res = m_aValue[ index ];
+		virtual	void	GetColorPtr( const CqColor*& res ) const
 
-    }
+		{
 
-    virtual	void	GetColorPtr( const CqColor*& res ) const
+			res = &m_aValue[ 0 ];
 
-    {
+		}
 
-        res = &m_aValue[ 0 ];
+		virtual	void	GetColorPtr( CqColor*& res )
 
-    }
+		{
 
-    virtual	void	GetColorPtr( CqColor*& res )
+			res = &m_aValue[ 0 ];
 
-    {
+		}
 
-        res = &m_aValue[ 0 ];
+		virtual	void	SetColor( const CqColor& c, TqInt index )
 
-    }
+		{
 
-    virtual	void	SetColor( const CqColor& c, TqInt index )
+			m_aValue[ index ] = c;
 
-    {
+		}
 
-        m_aValue[ index ] = c;
+		virtual	void	SetColor( const CqColor& c )
 
-    }
+		{
 
-    virtual	void	SetColor( const CqColor& c )
+			m_aValue.assign( m_aValue.size(), c );
 
-    {
+		}
 
-        m_aValue.assign( m_aValue.size(), c );
+		/** Copy the values from the passed variable into this, taking into account any class differences.
 
-    }
+		 * \param pVal The variable to copy from.
 
-    /** Copy the values from the passed variable into this, taking into account any class differences.
+		 */
 
-     * \param pVal The variable to copy from.
+		virtual	void	SetValueFromVariable( const IqShaderData* pVal )
 
-     */
+		{
 
-    virtual	void	SetValueFromVariable( const IqShaderData* pVal )
+			TqUint i;
 
-    {
+			if ( pVal->Size() > 1 )
 
-        TqUint i;
+			{
 
-        if ( pVal->Size() > 1 )
+				const CqColor * pData;
 
-        {
+				pVal->GetColorPtr( pData );
 
-            const CqColor * pData;
+				for ( i = 0; i < Size(); i++ )
 
-            pVal->GetColorPtr( pData );
+					m_aValue[ i ] = pData [ i ];
 
-            for ( i = 0; i < Size(); i++ )
+			}
 
-                m_aValue[ i ] = pData [ i ];
+			else
 
-        }
+			{
 
-        else
+				CqColor temp;
 
-        {
+				pVal->GetColor( temp );
 
-            CqColor temp;
+				m_aValue.assign( m_aValue.size(), temp );
 
-            pVal->GetColor( temp );
+			}
 
-            m_aValue.assign( m_aValue.size(), temp );
+		}
 
-        }
+		virtual void	GetBool( TqBool& res, TqInt index = 0 ) const
 
-    }
+		{
 
-    virtual void	GetBool( TqBool& res, TqInt index = 0 ) const
+			res = ( ( m_aValue[ index ].fRed() != 0.0f ) || ( m_aValue[ index ].fGreen() != 0.0f ) || ( m_aValue[ index ].fBlue() != 0.0f ) );
 
-    {
+		}
 
-        res = ( ( m_aValue[ index ].fRed() != 0.0f ) || ( m_aValue[ index ].fGreen() != 0.0f ) || ( m_aValue[ index ].fBlue() != 0.0f ) );
+		/** Set the all SIMD data ased on a state vector, only indexes whose bit is set are modified.
 
-    }
+		 * \param pVal The stack entry to assign.
 
-    /** Set the all SIMD data ased on a state vector, only indexes whose bit is set are modified.
+		 * \param index Integer SIMD index.
 
-     * \param pVal The stack entry to assign.
+		 */
 
-     * \param index Integer SIMD index.
+		virtual	void	SetValueFromVariable( const IqShaderData* pVal, TqInt index )
 
-     */
+		{
 
-    virtual	void	SetValueFromVariable( const IqShaderData* pVal, TqInt index )
+			pVal->GetColor( m_aValue[ index ], index );
 
-    {
+		}
 
-        pVal->GetColor( m_aValue[ index ], index );
+		virtual	IqShaderData* Clone() const
 
-    }
+		{
 
-    virtual	IqShaderData* Clone() const
+			CqShaderVariableVaryingColor* newVar = new CqShaderVariableVaryingColor( *this );
 
-    {
+			newVar->SetSize( Size() );
 
-        CqShaderVariableVaryingColor* newVar = new CqShaderVariableVaryingColor( *this );
+			newVar->SetValueFromVariable( this );
 
-        newVar->SetSize( Size() );
+			return ( newVar );
 
-        newVar->SetValueFromVariable( this );
-
-        return ( newVar );
-
-    }
+		}
 
 };
 
@@ -3475,129 +3477,127 @@ class CqShaderVariableVaryingMatrix : public CqShaderVariableVarying<type_matrix
 
 {
 
-public:
+	public:
 
-    CqShaderVariableVaryingMatrix( ) : CqShaderVariableVarying<type_matrix, CqMatrix>( )
+		CqShaderVariableVaryingMatrix( ) : CqShaderVariableVarying<type_matrix, CqMatrix>( )
 
-    {
+		{
+		}
 
-            }
+		CqShaderVariableVaryingMatrix( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableVarying<type_matrix, CqMatrix>( strName, fParameter )
 
-    CqShaderVariableVaryingMatrix( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableVarying<type_matrix, CqMatrix>( strName, fParameter )
+		{
+		}
 
-    {
+		virtual	void	GetMatrix( CqMatrix& res, TqInt index = 0 ) const
 
-            }
+		{
 
-    virtual	void	GetMatrix( CqMatrix& res, TqInt index = 0 ) const
+			res = m_aValue[ index ];
 
-    {
+		}
 
-        res = m_aValue[ index ];
+		virtual	void	GetMatrixPtr( const CqMatrix*& res ) const
 
-    }
+		{
 
-    virtual	void	GetMatrixPtr( const CqMatrix*& res ) const
+			res = &m_aValue[ 0 ];
 
-    {
+		}
 
-        res = &m_aValue[ 0 ];
+		virtual	void	GetMatrixPtr( CqMatrix*& res )
 
-    }
+		{
 
-    virtual	void	GetMatrixPtr( CqMatrix*& res )
+			res = &m_aValue[ 0 ];
 
-    {
+		}
 
-        res = &m_aValue[ 0 ];
+		virtual	void	SetMatrix( const CqMatrix& m, TqInt index )
 
-    }
+		{
 
-    virtual	void	SetMatrix( const CqMatrix& m, TqInt index )
+			m_aValue[ index ] = m;
 
-    {
+		}
 
-        m_aValue[ index ] = m;
+		virtual	void	SetMatrix( const CqMatrix& m )
 
-    }
+		{
 
-    virtual	void	SetMatrix( const CqMatrix& m )
+			m_aValue.assign( m_aValue.size(), m );
 
-    {
+		}
 
-        m_aValue.assign( m_aValue.size(), m );
+		/** Copy the values from the passed variable into this, taking into account any class differences.
 
-    }
+		 * \param pVal The variable to copy from.
 
-    /** Copy the values from the passed variable into this, taking into account any class differences.
+		 */
 
-     * \param pVal The variable to copy from.
+		virtual	void	SetValueFromVariable( const IqShaderData* pVal )
 
-     */
+		{
 
-    virtual	void	SetValueFromVariable( const IqShaderData* pVal )
+			TqUint i;
 
-    {
+			if ( pVal->Size() > 1 )
 
-        TqUint i;
+			{
 
-        if ( pVal->Size() > 1 )
+				const CqMatrix * pData;
 
-        {
+				pVal->GetMatrixPtr( pData );
 
-            const CqMatrix * pData;
+				for ( i = 0; i < Size(); i++ )
 
-            pVal->GetMatrixPtr( pData );
+					m_aValue[ i ] = pData [ i ];
 
-            for ( i = 0; i < Size(); i++ )
+			}
 
-                m_aValue[ i ] = pData [ i ];
+			else
 
-        }
+			{
 
-        else
+				CqMatrix temp;
 
-        {
+				pVal->GetMatrix( temp );
 
-            CqMatrix temp;
+				m_aValue.assign( m_aValue.size(), temp );
 
-            pVal->GetMatrix( temp );
+			}
 
-            m_aValue.assign( m_aValue.size(), temp );
+		}
 
-        }
+		/** Set the all SIMD data ased on a state vector, only indexes whose bit is set are modified.
 
-    }
+		 * \param pVal The stack entry to assign.
 
-    /** Set the all SIMD data ased on a state vector, only indexes whose bit is set are modified.
+		 * \param index Integer SIMD index.
 
-     * \param pVal The stack entry to assign.
+		 */
 
-     * \param index Integer SIMD index.
+		virtual	void	SetValueFromVariable( const IqShaderData* pVal, TqInt index )
 
-     */
+		{
 
-    virtual	void	SetValueFromVariable( const IqShaderData* pVal, TqInt index )
+			pVal->GetMatrix( m_aValue[ index ], index );
 
-    {
+		}
 
-        pVal->GetMatrix( m_aValue[ index ], index );
+		virtual	IqShaderData* Clone() const
 
-    }
+		{
 
-    virtual	IqShaderData* Clone() const
+			CqShaderVariableVaryingMatrix* newVar = new CqShaderVariableVaryingMatrix( *this );
 
-    {
+			newVar->SetSize( Size() );
 
-        CqShaderVariableVaryingMatrix* newVar = new CqShaderVariableVaryingMatrix( *this );
+			newVar->SetValueFromVariable( this );
 
-        newVar->SetSize( Size() );
+			return ( newVar );
 
-        newVar->SetValueFromVariable( this );
-
-        return ( newVar );
-
-    }
+		}
 
 };
 

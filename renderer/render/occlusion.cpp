@@ -42,7 +42,7 @@ START_NAMESPACE( Aqsis )
 TqInt CqOcclusionTree::m_Tab = 0;
 
 CqOcclusionTree::CqOcclusionTree(TqInt dimension)
-    : m_Parent(0), m_Dimension(dimension)
+		: m_Parent(0), m_Dimension(dimension)
 {
 	TqChildArray::iterator child = m_Children.begin();
 	for(; child != m_Children.end(); ++child)
@@ -175,14 +175,15 @@ void CqOcclusionTree::ConstructTree()
 
 	while (ii != m_Children.end())
 	{
-	    *ii++ = 0;//CqOcclusionTreePtr();
+		*ii++ = 0;//CqOcclusionTreePtr();
 	}
 }
 
 
 void CqOcclusionTree::InitialiseBounds()
 {
-	if (m_SampleIndices.size() < 1) return;
+	if (m_SampleIndices.size() < 1)
+		return;
 
 	const SqSampleData& sample = CqBucket::ImageElement(m_SampleIndices[0].first).SampleData(m_SampleIndices[0].second);
 	TqFloat minXVal = sample.m_Position.x();
@@ -375,8 +376,7 @@ CqOcclusionTreePtr	CqOcclusionBox::m_KDTree;	///< KD Tree representing the sampl
 */
 
 CqOcclusionBox::CqOcclusionBox()
-{
-}
+{}
 
 
 //----------------------------------------------------------------------
@@ -409,8 +409,8 @@ void CqOcclusionBox::DeleteHierarchy()
 
 void CqOcclusionBox::SetupHierarchy( CqBucket* bucket, TqInt xMin, TqInt yMin, TqInt xMax, TqInt yMax )
 {
-    assert( bucket );
-    m_Bucket = bucket;
+	assert( bucket );
+	m_Bucket = bucket;
 
 	if(!m_KDTree)
 	{
@@ -434,21 +434,21 @@ void CqOcclusionBox::SetupHierarchy( CqBucket* bucket, TqInt xMin, TqInt yMin, T
 
 	m_KDTree->UpdateBounds();
 
-/*
-	static TqInt i__ = 0;
-	if(i__ == 800)
-	{
-		std::ofstream strFile("test.out");
-		strFile << "xmin = " << xMin << std::endl << "ymin = " << yMin << std::endl << "xmax = " <<  xMax << std::endl << "ymax = " << yMax << std::endl << std::endl;
-		strFile << "points = [" << std::endl;
-		strFile.close();
-		CqOcclusionTree::m_Tab = 0;
-		m_KDTree->OutputTree("test.out");
-		std::ofstream strFile2("test.out", std::ios_base::out|std::ios_base::app);
-		strFile2 << "]" << std::endl;
-	}
-	i__++;
-*/
+	/*
+		static TqInt i__ = 0;
+		if(i__ == 800)
+		{
+			std::ofstream strFile("test.out");
+			strFile << "xmin = " << xMin << std::endl << "ymin = " << yMin << std::endl << "xmax = " <<  xMax << std::endl << "ymax = " << yMax << std::endl << std::endl;
+			strFile << "points = [" << std::endl;
+			strFile.close();
+			CqOcclusionTree::m_Tab = 0;
+			m_KDTree->OutputTree("test.out");
+			std::ofstream strFile2("test.out", std::ios_base::out|std::ios_base::app);
+			strFile2 << "]" << std::endl;
+		}
+		i__++;
+	*/
 }
 
 
@@ -460,74 +460,74 @@ TqBool CqOcclusionBox::CanCull( CqBound* bound )
 
 void StoreExtraData( CqMicroPolygon* pMPG, SqImageSample& sample)
 {
-    std::map<std::string, CqRenderer::SqOutputDataEntry>& DataMap = QGetRenderContext() ->GetMapOfOutputDataEntries();
+	std::map<std::string, CqRenderer::SqOutputDataEntry>& DataMap = QGetRenderContext() ->GetMapOfOutputDataEntries();
 	std::map<std::string, CqRenderer::SqOutputDataEntry>::iterator entry;
-    for ( entry = DataMap.begin(); entry != DataMap.end(); ++entry )
-    {
-        IqShaderData* pData;
-        if ( ( pData = pMPG->pGrid() ->FindStandardVar( entry->first.c_str() ) ) != NULL )
-        {
-            switch ( pData->Type() )
-            {
-            case type_float:
-            case type_integer:
-                {
-                    TqFloat f;
-                    pData->GetFloat( f, pMPG->GetIndex() );
-                    sample.Data()[ entry->second.m_Offset ] = f;
-                    break;
-                }
-            case type_point:
-            case type_normal:
-            case type_vector:
-            case type_hpoint:
-                {
-                    CqVector3D v;
-                    pData->GetPoint( v, pMPG->GetIndex() );
-                    sample.Data()[ entry->second.m_Offset ] = v.x();
-                    sample.Data()[ entry->second.m_Offset + 1 ] = v.y();
-                    sample.Data()[ entry->second.m_Offset + 2 ] = v.z();
-                    break;
-                }
-            case type_color:
-                {
-                    CqColor c;
-                    pData->GetColor( c, pMPG->GetIndex() );
-                    sample.Data()[ entry->second.m_Offset ] = c.fRed();
-                    sample.Data()[ entry->second.m_Offset + 1 ] = c.fGreen();
-                    sample.Data()[ entry->second.m_Offset + 2 ] = c.fBlue();
-                    break;
-                }
-            case type_matrix:
-                {
-                    CqMatrix m;
-                    pData->GetMatrix( m, pMPG->GetIndex() );
-                    TqFloat* pElements = m.pElements();
-                    sample.Data()[ entry->second.m_Offset ] = pElements[ 0 ];
-                    sample.Data()[ entry->second.m_Offset + 1 ] = pElements[ 1 ];
-                    sample.Data()[ entry->second.m_Offset + 2 ] = pElements[ 2 ];
-                    sample.Data()[ entry->second.m_Offset + 3 ] = pElements[ 3 ];
-                    sample.Data()[ entry->second.m_Offset + 4 ] = pElements[ 4 ];
-                    sample.Data()[ entry->second.m_Offset + 5 ] = pElements[ 5 ];
-                    sample.Data()[ entry->second.m_Offset + 6 ] = pElements[ 6 ];
-                    sample.Data()[ entry->second.m_Offset + 7 ] = pElements[ 7 ];
-                    sample.Data()[ entry->second.m_Offset + 8 ] = pElements[ 8 ];
-                    sample.Data()[ entry->second.m_Offset + 9 ] = pElements[ 9 ];
-                    sample.Data()[ entry->second.m_Offset + 10 ] = pElements[ 10 ];
-                    sample.Data()[ entry->second.m_Offset + 11 ] = pElements[ 11 ];
-                    sample.Data()[ entry->second.m_Offset + 12 ] = pElements[ 12 ];
-                    sample.Data()[ entry->second.m_Offset + 13 ] = pElements[ 13 ];
-                    sample.Data()[ entry->second.m_Offset + 14 ] = pElements[ 14 ];
-                    sample.Data()[ entry->second.m_Offset + 15 ] = pElements[ 15 ];
-                    break;
-                }
-            default:
-                // left blank to avoid compiler warnings about unhandled
-                //  types
-                break;
-            }
-        }
-    }
+	for ( entry = DataMap.begin(); entry != DataMap.end(); ++entry )
+	{
+		IqShaderData* pData;
+		if ( ( pData = pMPG->pGrid() ->FindStandardVar( entry->first.c_str() ) ) != NULL )
+		{
+			switch ( pData->Type() )
+			{
+					case type_float:
+					case type_integer:
+					{
+						TqFloat f;
+						pData->GetFloat( f, pMPG->GetIndex() );
+						sample.Data()[ entry->second.m_Offset ] = f;
+						break;
+					}
+					case type_point:
+					case type_normal:
+					case type_vector:
+					case type_hpoint:
+					{
+						CqVector3D v;
+						pData->GetPoint( v, pMPG->GetIndex() );
+						sample.Data()[ entry->second.m_Offset ] = v.x();
+						sample.Data()[ entry->second.m_Offset + 1 ] = v.y();
+						sample.Data()[ entry->second.m_Offset + 2 ] = v.z();
+						break;
+					}
+					case type_color:
+					{
+						CqColor c;
+						pData->GetColor( c, pMPG->GetIndex() );
+						sample.Data()[ entry->second.m_Offset ] = c.fRed();
+						sample.Data()[ entry->second.m_Offset + 1 ] = c.fGreen();
+						sample.Data()[ entry->second.m_Offset + 2 ] = c.fBlue();
+						break;
+					}
+					case type_matrix:
+					{
+						CqMatrix m;
+						pData->GetMatrix( m, pMPG->GetIndex() );
+						TqFloat* pElements = m.pElements();
+						sample.Data()[ entry->second.m_Offset ] = pElements[ 0 ];
+						sample.Data()[ entry->second.m_Offset + 1 ] = pElements[ 1 ];
+						sample.Data()[ entry->second.m_Offset + 2 ] = pElements[ 2 ];
+						sample.Data()[ entry->second.m_Offset + 3 ] = pElements[ 3 ];
+						sample.Data()[ entry->second.m_Offset + 4 ] = pElements[ 4 ];
+						sample.Data()[ entry->second.m_Offset + 5 ] = pElements[ 5 ];
+						sample.Data()[ entry->second.m_Offset + 6 ] = pElements[ 6 ];
+						sample.Data()[ entry->second.m_Offset + 7 ] = pElements[ 7 ];
+						sample.Data()[ entry->second.m_Offset + 8 ] = pElements[ 8 ];
+						sample.Data()[ entry->second.m_Offset + 9 ] = pElements[ 9 ];
+						sample.Data()[ entry->second.m_Offset + 10 ] = pElements[ 10 ];
+						sample.Data()[ entry->second.m_Offset + 11 ] = pElements[ 11 ];
+						sample.Data()[ entry->second.m_Offset + 12 ] = pElements[ 12 ];
+						sample.Data()[ entry->second.m_Offset + 13 ] = pElements[ 13 ];
+						sample.Data()[ entry->second.m_Offset + 14 ] = pElements[ 14 ];
+						sample.Data()[ entry->second.m_Offset + 15 ] = pElements[ 15 ];
+						break;
+					}
+					default:
+					// left blank to avoid compiler warnings about unhandled
+					//  types
+					break;
+			}
+		}
+	}
 }
 
 
@@ -564,7 +564,7 @@ void CqOcclusionTree::SampleMPG( CqMicroPolygon* pMPG, const CqBound& bound, TqB
 			if(opaque)
 			{
 				if((currentOpaqueSample.m_flags & SqImageSample::Flag_Valid) &&
-					currentOpaqueSample.Data()[Sample_Depth] <= D)
+				        currentOpaqueSample.Data()[Sample_Depth] <= D)
 				{
 					return;
 				}
@@ -609,7 +609,7 @@ void CqOcclusionTree::SampleMPG( CqMicroPolygon* pMPG, const CqBound& bound, TqB
 				// \note: Cannot do this if there is CSG involved, as all samples must be taken and kept the same.
 				if ( sample != end && (*sample).Data()[Sample_Depth] == ImageVal.Data()[Sample_Depth] && !(*sample).m_pCSGNode )
 				{
-				    TqInt datasize = QGetRenderContext()->GetOutputDataTotalSize();
+					TqInt datasize = QGetRenderContext()->GetOutputDataTotalSize();
 					TqInt i;
 					for( i=0; i<datasize; ++i)
 						(*sample).Data()[i] = ( (*sample).Data()[i] + ImageVal.Data()[i] ) * 0.5f;
@@ -663,9 +663,9 @@ void CqOcclusionTree::SampleMPG( CqMicroPolygon* pMPG, const CqBound& bound, TqB
 				continue;
 
 			if(	   (!usingDof || ((dofboundindex >= (*child)->m_MinDofBoundIndex) && (dofboundindex <= (*child)->m_MaxDofBoundIndex )) )
-				&& (!usingMB || ((time0 <= (*child)->m_MaxTime) && (time1 >= (*child)->m_MinTime)) )
-				&& (!usingLOD || ((gridInfo.m_LodBounds[0] <= (*child)->m_MaxDetailLevel) && (gridInfo.m_LodBounds[1] >= (*child)->m_MinDetailLevel)) )
-				&& (bound.Intersects((*child)->m_MinSamplePoint, (*child)->m_MaxSamplePoint)) )
+			        && (!usingMB || ((time0 <= (*child)->m_MaxTime) && (time1 >= (*child)->m_MinTime)) )
+			        && (!usingLOD || ((gridInfo.m_LodBounds[0] <= (*child)->m_MaxDetailLevel) && (gridInfo.m_LodBounds[1] >= (*child)->m_MinDetailLevel)) )
+			        && (bound.Intersects((*child)->m_MinSamplePoint, (*child)->m_MaxSamplePoint)) )
 			{
 				if(bound.vecMin().z() <= (*child)->m_MaxOpaqueZ || !gridInfo.m_IsCullable)
 				{
@@ -680,7 +680,7 @@ void CqOcclusionTree::SampleMPG( CqMicroPolygon* pMPG, const CqBound& bound, TqB
 /*void CqOcclusionTree::OutputTree(const char* name)
 {
 	std::ofstream strFile(name, std::ios_base::out|std::ios_base::app);
-
+ 
 	strFile <<
 			"(" << m_Tab << ", " <<  
 			"(" << m_MinSamplePoint[0] << ", " << m_MinSamplePoint[1] << "), " << 
@@ -693,7 +693,7 @@ void CqOcclusionTree::SampleMPG( CqMicroPolygon* pMPG, const CqBound& bound, TqB
 			"(" << m_MinSamplePoint[0] << ", " << m_MinSamplePoint[1] << ")" <<
 			"), " << 
 			std::endl;
-
+ 
 	TqChildArray::iterator child;
 	for(child = m_Children.begin(); child != m_Children.end(); ++child)
 	{

@@ -43,56 +43,56 @@ START_NAMESPACE( Aqsis )
 */
 std::list<CqString*> CqFile::Glob ( const CqString& strFileGlob )
 {
-    _finddata_t c_file;
-    long hFile;
-    const char *pt = strFileGlob.c_str();
+	_finddata_t c_file;
+	long hFile;
+	const char *pt = strFileGlob.c_str();
 
-    char drive[_MAX_PATH];
-    char dir[_MAX_PATH];
-    char fname[_MAX_PATH];
-    char ext[_MAX_PATH];
+	char drive[_MAX_PATH];
+	char dir[_MAX_PATH];
+	char fname[_MAX_PATH];
+	char ext[_MAX_PATH];
 
-    _splitpath( pt, drive, dir, fname, ext);
+	_splitpath( pt, drive, dir, fname, ext);
 
-    CqString strPath(drive);
-    strPath += CqString(dir);
+	CqString strPath(drive);
+	strPath += CqString(dir);
 
-    std::list<CqString*> result;
-    if ( ( hFile = _findfirst( pt, &c_file ) ) != -1L )
-    {
-        /* we found something here; then we list
-        * all of them with the directory first
-        */
-	CqString* strFound = new CqString(strPath + CqString(c_file.name));
-        result.push_front( strFound );
-        while ( _findnext( hFile, &c_file ) == 0 )
-        {
-	    CqString* strFound = new CqString(strPath + CqString(c_file.name));
-	    result.push_front( strFound );
-            result.push_front( strFound );
-        }
-        _findclose( hFile );
-    }
+	std::list<CqString*> result;
+	if ( ( hFile = _findfirst( pt, &c_file ) ) != -1L )
+	{
+		/* we found something here; then we list
+		* all of them with the directory first
+		*/
+		CqString* strFound = new CqString(strPath + CqString(c_file.name));
+		result.push_front( strFound );
+		while ( _findnext( hFile, &c_file ) == 0 )
+		{
+			CqString* strFound = new CqString(strPath + CqString(c_file.name));
+			result.push_front( strFound );
+			result.push_front( strFound );
+		}
+		_findclose( hFile );
+	}
 
-    return result ;
+	return result ;
 }
 
 
 CqString CqFile::FixupPath(CqString& strPath)
 {
-    if( strPath.find("//",0,2) == 0 )
-    {
-        if(strPath[3] == '/')
-        {
-            CqString strNewPath(strPath.substr(2,1));
-            strNewPath.append(":/");
-            strNewPath.append(strPath.substr(4));
-            //std::cout << strNewPath.c_str() << std::endl;
-            return(strNewPath);
-        }
-    }
+	if( strPath.find("//",0,2) == 0 )
+	{
+		if(strPath[3] == '/')
+		{
+			CqString strNewPath(strPath.substr(2,1));
+			strNewPath.append(":/");
+			strNewPath.append(strPath.substr(4));
+			//std::cout << strNewPath.c_str() << std::endl;
+			return(strNewPath);
+		}
+	}
 
-    return( strPath );
+	return( strPath );
 }
 
 

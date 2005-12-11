@@ -38,55 +38,55 @@ START_NAMESPACE( Aqsis )
 
 class CqInlineParse
 {
-private:
-    TqUint number_of_words;
-    std::string word[ 7 ];
+	private:
+		TqUint number_of_words;
+		std::string word[ 7 ];
 
-    TqBool inline_def;
-    EqVariableClass tc;
-    EqVariableType tt;
-    TqUint size;
-    std::string identifier;
+		TqBool inline_def;
+		EqVariableClass tc;
+		EqVariableType tt;
+		TqUint size;
+		std::string identifier;
 
 
-    TqBool is_class ( const std::string &str );
-    TqBool is_type ( const std::string &str );
-    TqBool is_int ( const std::string &str );
+		TqBool is_class ( const std::string &str );
+		TqBool is_type ( const std::string &str );
+		TqBool is_int ( const std::string &str );
 
-    EqVariableClass get_class ( const std::string &str );
-    EqVariableType get_type ( const std::string &str );
-    TqUint get_size ( const std::string &str );
+		EqVariableClass get_class ( const std::string &str );
+		EqVariableType get_type ( const std::string &str );
+		TqUint get_size ( const std::string &str );
 
-    void check_syntax ();
-    void lc( std::string & );
+		void check_syntax ();
+		void lc( std::string & );
 
-public:
-    CqInlineParse()
-    {}
-    ~CqInlineParse()
-    {}
-    void parse ( std::string &str );
+	public:
+		CqInlineParse()
+		{}
+		~CqInlineParse()
+		{}
+		void parse ( std::string &str );
 
-    TqBool isInline()
-    {
-        return inline_def;
-    }
-    EqVariableClass getClass()
-    {
-        return tc;
-    }
-    EqVariableType getType()
-    {
-        return tt;
-    }
-    TqUint getQuantity()
-    {
-        return size;
-    }
-    std::string getIdentifier()
-    {
-        return identifier;
-    }
+		TqBool isInline()
+		{
+			return inline_def;
+		}
+		EqVariableClass getClass()
+		{
+			return tc;
+		}
+		EqVariableType getType()
+		{
+			return tt;
+		}
+		TqUint getQuantity()
+		{
+			return size;
+		}
+		std::string getIdentifier()
+		{
+			return identifier;
+		}
 };
 
 END_NAMESPACE( Aqsis )

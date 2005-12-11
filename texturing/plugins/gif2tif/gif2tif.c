@@ -121,12 +121,15 @@ __export char *gif2tif( char *in )
 
 
 	strcpy( tiffname, in );
-	if ( ( result = strstr( tiffname, ".gif" ) ) != 0 ) strcpy( result, ".tif" );
+	if ( ( result = strstr( tiffname, ".gif" ) ) != 0 )
+		strcpy( result, ".tif" );
 	if ( !result )
 	{
-		if ( ( result = strstr( tiffname, ".gif" ) ) != 0 ) strcpy( result, ".tif" );
+		if ( ( result = strstr( tiffname, ".gif" ) ) != 0 )
+			strcpy( result, ".tif" );
 	}
-	if ( !result ) return result;
+	if ( !result )
+		return result;
 
 	giffile = fopen( in, "rb" );
 	result = gif_open( giffile, tiffname );
@@ -322,6 +325,7 @@ DoExtension( FILE* fd, int label )
 			case 0x01:               /* Plain Text Extension */
 			str = "Plain Text Extension";
 #ifdef DEAL_WITH_THE_COMMENTS
+
 			if ( GetDataBlock( fd, ( unsigned char* ) buf ) == 0 )
 				;
 
@@ -345,8 +349,10 @@ DoExtension( FILE* fd, int label )
 
 			return FALSE;
 #else
+
 			break;
 #endif
+
 			case 0xff:               /* Application Extension */
 			str = "Application Extension";
 			break;
@@ -551,7 +557,7 @@ LWZReadByte( FILE* fd, int flag, int input_code_size )
 
 			/* if (count != 0)
 			 *    pm_message("missing EOD in data stream (common occurence)");
-			*/ 
+			*/
 			return -2;
 		}
 
@@ -626,7 +632,8 @@ static char *ReadImage( FILE* fd, int len, int height,
 	if ( ignore )
 	{
 		throw_exception( "skipping image..." );
-		while ( LWZReadByte( fd, FALSE, c ) >= 0 );
+		while ( LWZReadByte( fd, FALSE, c ) >= 0 )
+			;
 		return NULL;
 	}
 
@@ -653,11 +660,14 @@ static char *ReadImage( FILE* fd, int len, int height,
 				{
 						case 0:
 						case 1:
-						ypos += 8; break;
+						ypos += 8;
+						break;
 						case 2:
-						ypos += 4; break;
+						ypos += 4;
+						break;
 						case 3:
-						ypos += 2; break;
+						ypos += 2;
+						break;
 				}
 
 				if ( ypos >= height )
@@ -666,11 +676,14 @@ static char *ReadImage( FILE* fd, int len, int height,
 					switch ( pass )
 					{
 							case 1:
-							ypos = 4; break;
+							ypos = 4;
+							break;
 							case 2:
-							ypos = 2; break;
+							ypos = 2;
+							break;
 							case 3:
-							ypos = 1; break;
+							ypos = 1;
+							break;
 							default:
 							goto end;
 					}

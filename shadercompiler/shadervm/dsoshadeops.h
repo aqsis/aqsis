@@ -48,116 +48,118 @@ START_NAMESPACE( Aqsis )
 /**   CqDSORepository: This class is responsible for searching for shader
  * operations in extrnal shared libraries. 
  */
-class CqDSORepository: public IqDSORepository, private CqPluginBase{
+class CqDSORepository: public IqDSORepository, private CqPluginBase
+{
 
-private:
-    //
-    //---------------------------------------------------------------------
-    /** Mapping of type names and ID's that we can handle in DSO's. The type
-     * ID's are as presented from the SL compiler, the type names are those that 
-     * may be used by DSO shadeop table function prototypes.
-     */
-    void BuildTypeMaps(void)
-    {
-        m_TypeNameMap["invalid"] = type_invalid;
-        m_TypeIdMap['@'] = type_invalid;
-        m_TypeNameMap["integer"] = type_integer;
-        m_TypeIdMap['i'] = type_integer;
-        m_TypeNameMap["float"] = type_float;
-        m_TypeIdMap['f'] = type_float;
-        m_TypeNameMap["point"] = type_point;
-        m_TypeIdMap['p'] = type_point;
-        m_TypeNameMap["string"] = type_string;
-        m_TypeIdMap['s'] = type_string;
-        m_TypeNameMap["color"] = type_color;
-        m_TypeIdMap['c'] = type_color;
-        m_TypeNameMap["triple"] = type_triple;
-        m_TypeIdMap['t'] = type_triple;
-        m_TypeNameMap["hpoint"] = type_hpoint;
-        m_TypeIdMap['h'] = type_hpoint;
-        m_TypeNameMap["normal"] = type_normal;
-        m_TypeIdMap['n'] = type_normal;
-        m_TypeNameMap["vector"] = type_vector;
-        m_TypeIdMap['v'] = type_vector;
-        m_TypeNameMap["void"] = type_void;
-        m_TypeIdMap['x'] = type_void;
-        m_TypeNameMap["matrix"] = type_matrix;
-        m_TypeIdMap['m'] = type_matrix;
-        m_TypeNameMap["hextuple"] = type_sixteentuple; // ??
-        m_TypeIdMap['w'] = type_sixteentuple;
-    };
+	private:
+		//
+		//---------------------------------------------------------------------
+		/** Mapping of type names and ID's that we can handle in DSO's. The type
+		 * ID's are as presented from the SL compiler, the type names are those that 
+		 * may be used by DSO shadeop table function prototypes.
+		 */
+		void BuildTypeMaps(void)
+		{
+			m_TypeNameMap["invalid"] = type_invalid;
+			m_TypeIdMap['@'] = type_invalid;
+			m_TypeNameMap["integer"] = type_integer;
+			m_TypeIdMap['i'] = type_integer;
+			m_TypeNameMap["float"] = type_float;
+			m_TypeIdMap['f'] = type_float;
+			m_TypeNameMap["point"] = type_point;
+			m_TypeIdMap['p'] = type_point;
+			m_TypeNameMap["string"] = type_string;
+			m_TypeIdMap['s'] = type_string;
+			m_TypeNameMap["color"] = type_color;
+			m_TypeIdMap['c'] = type_color;
+			m_TypeNameMap["triple"] = type_triple;
+			m_TypeIdMap['t'] = type_triple;
+			m_TypeNameMap["hpoint"] = type_hpoint;
+			m_TypeIdMap['h'] = type_hpoint;
+			m_TypeNameMap["normal"] = type_normal;
+			m_TypeIdMap['n'] = type_normal;
+			m_TypeNameMap["vector"] = type_vector;
+			m_TypeIdMap['v'] = type_vector;
+			m_TypeNameMap["void"] = type_void;
+			m_TypeIdMap['x'] = type_void;
+			m_TypeNameMap["matrix"] = type_matrix;
+			m_TypeIdMap['m'] = type_matrix;
+			m_TypeNameMap["hextuple"] = type_sixteentuple; // ??
+			m_TypeIdMap['w'] = type_sixteentuple;
+		};
 
-public:
-    virtual void SetDSOPath(const char*);
-    CqString strPrototype(CqString*, SqDSOExternalCall*);
+	public:
+		virtual void SetDSOPath(const char*);
+		CqString strPrototype(CqString*, SqDSOExternalCall*);
 
-    CqDSORepository(CqString *searchpath): CqPluginBase()
-    {
-        BuildTypeMaps();
-        SetDSOPath(searchpath->c_str());
-    };
+		CqDSORepository(CqString *searchpath): CqPluginBase()
+		{
+			BuildTypeMaps();
+			SetDSOPath(searchpath->c_str());
+		};
 
-    CqDSORepository(): CqPluginBase()
-    {
-        BuildTypeMaps();
-        if(getenv("AQSIS_SHADER_PATH"))
-        {
-          char *dsopath = getenv("AQSIS_SHADER_PATH");
-          SetDSOPath(dsopath);
-       }
-    };
+		CqDSORepository(): CqPluginBase()
+		{
+			BuildTypeMaps();
+			if(getenv("AQSIS_SHADER_PATH"))
+			{
+				char *dsopath = getenv("AQSIS_SHADER_PATH");
+				SetDSOPath(dsopath);
+			}
+		};
 
 
-    //---------------------------------------------------------------------
-    /**   The Destructor handles the calling of shutdown on any previously
-     * initialised DSO shadeops.
-     */
-    virtual ~CqDSORepository()
-    {
-        // We should call shutdown for all init'd functions
-        while( ( m_itActiveDSOMap = m_ActiveDSOMap.begin() ) != m_ActiveDSOMap.end()){
+		//---------------------------------------------------------------------
+		/**   The Destructor handles the calling of shutdown on any previously
+		 * initialised DSO shadeops.
+		 */
+		virtual ~CqDSORepository()
+		{
+			// We should call shutdown for all init'd functions
+			while( ( m_itActiveDSOMap = m_ActiveDSOMap.begin() ) != m_ActiveDSOMap.end())
+			{
 
-            std::list<SqDSOExternalCall *> *list = (*m_itActiveDSOMap).second;
+				std::list<SqDSOExternalCall *> *list = (*m_itActiveDSOMap).second;
 
-            while( !list->empty() )
-            {
-                SqDSOExternalCall *item = list->front();
+				while( !list->empty() )
+				{
+					SqDSOExternalCall *item = list->front();
 
-                if(item->shutdown != NULL &&
-                        item->initialised)
-                    item->shutdown(item->initData);
+					if(item->shutdown != NULL &&
+					        item->initialised)
+						item->shutdown(item->initData);
 
-                delete item;
-                list->pop_front();
-            };
-            delete list;
-            m_ActiveDSOMap.erase(m_itActiveDSOMap);
-        };
-    };
+					delete item;
+					list->pop_front();
+				};
+				delete list;
+				m_ActiveDSOMap.erase(m_itActiveDSOMap);
+			};
+		};
 
-    // Utility to provide a formatted function prototype
-    CqString strPtototype(SqDSOExternalCall*);
+		// Utility to provide a formatted function prototype
+		CqString strPtototype(SqDSOExternalCall*);
 
-protected:
-    //A maps and iterators for the Type name/id mappings
-    std::map<CqString,EqVariableType> m_TypeNameMap ;
-    std::map<CqString,EqVariableType>::iterator m_itTypeNameMap ;
-    std::map<TqChar,EqVariableType> m_TypeIdMap ;
-    std::map<TqChar,EqVariableType>::iterator m_itTypeIdMap ;
+	protected:
+		//A maps and iterators for the Type name/id mappings
+		std::map<CqString,EqVariableType> m_TypeNameMap ;
+		std::map<CqString,EqVariableType>::iterator m_itTypeNameMap ;
+		std::map<TqChar,EqVariableType> m_TypeIdMap ;
+		std::map<TqChar,EqVariableType>::iterator m_itTypeIdMap ;
 
-    // A list of files (possibly also directories in future) to be searched for shadeops
-    std::list<CqString*> m_pDSOPathList;
-    // This is a map of shadeop names to descriptors of shadeop implementations that we
-    // have already found, its for efficiency and to allow us to track initiliased shadeops
-    // to be shutdown later.
-    std::map<CqString,std::list<SqDSOExternalCall*> *> m_ActiveDSOMap;
-    std::map<CqString,std::list<SqDSOExternalCall*> *>::iterator m_itActiveDSOMap;
+		// A list of files (possibly also directories in future) to be searched for shadeops
+		std::list<CqString*> m_pDSOPathList;
+		// This is a map of shadeop names to descriptors of shadeop implementations that we
+		// have already found, its for efficiency and to allow us to track initiliased shadeops
+		// to be shutdown later.
+		std::map<CqString,std::list<SqDSOExternalCall*> *> m_ActiveDSOMap;
+		std::map<CqString,std::list<SqDSOExternalCall*> *>::iterator m_itActiveDSOMap;
 
-    // Get Array of DSO entry points for a specific shadeop
-    std::list<SqDSOExternalCall*>* getShadeOpMethods(CqString*);
+		// Get Array of DSO entry points for a specific shadeop
+		std::list<SqDSOExternalCall*>* getShadeOpMethods(CqString*);
 
-    // Parse a single DSO SHADEOP_TABLE rntry
-    SqDSOExternalCall* parseShadeOpTableEntry(void*, SqShadeOp*);
+		// Parse a single DSO SHADEOP_TABLE rntry
+		SqDSOExternalCall* parseShadeOpTableEntry(void*, SqShadeOp*);
 };
 
 END_NAMESPACE( Aqsis )

@@ -42,54 +42,54 @@ START_NAMESPACE( Aqsis )
 
 class CqRiFile : public CqFile
 {
-public:
-    /** Default constructor
-     */
-    CqRiFile() : CqFile( 0 )
-    {}
-    /** Constructor taking an open stream pointer and a name.
-     * \param Stream a pointer to an already opened input stream to attach this object to.
-     * \param strRealName the name of the file associated with this stream.
-     */
-    CqRiFile( std::istream* Stream, const char* strRealName ) :
-            CqFile( Stream, strRealName )
-    {}
-    CqRiFile( const char* strFilename, const char* strSearchPathOption = "" )
-    {
-        //									std::cout << "CqRiFile::CqRiFile() " << strFilename << " - " << strSearchPathOption << std::endl;
-        Open( strFilename, strSearchPathOption );
-    }
-    /** Destructor. Takes care of closing the stream if the constructor opened it.
-     */
-    virtual	~CqRiFile()
-    {}
+	public:
+		/** Default constructor
+		 */
+		CqRiFile() : CqFile( 0 )
+		{}
+		/** Constructor taking an open stream pointer and a name.
+		 * \param Stream a pointer to an already opened input stream to attach this object to.
+		 * \param strRealName the name of the file associated with this stream.
+		 */
+		CqRiFile( std::istream* Stream, const char* strRealName ) :
+				CqFile( Stream, strRealName )
+		{}
+		CqRiFile( const char* strFilename, const char* strSearchPathOption = "" )
+		{
+			//									std::cout << "CqRiFile::CqRiFile() " << strFilename << " - " << strSearchPathOption << std::endl;
+			Open( strFilename, strSearchPathOption );
+		}
+		/** Destructor. Takes care of closing the stream if the constructor opened it.
+		 */
+		virtual	~CqRiFile()
+		{}
 
 
-    void	Open( const char* strFilename, const char* strSearchPathOption = "", std::ios::openmode mode = std::ios::in )
-    {
-        CqString SearchPath( "" );
-        if ( strSearchPathOption != "" )
-        {
-            // if not found there, search in the specified option searchpath.
-            const CqString * poptShader = QGetRenderContext() ->optCurrent().GetStringOption( "searchpath", strSearchPathOption );
-            if ( poptShader != 0 )
-                SearchPath = poptShader[ 0 ];
+		void	Open( const char* strFilename, const char* strSearchPathOption = "", std::ios::openmode mode = std::ios::in )
+		{
+			CqString SearchPath( "" );
+			if ( strSearchPathOption != "" )
+			{
+				// if not found there, search in the specified option searchpath.
+				const CqString * poptShader = QGetRenderContext() ->optCurrent().GetStringOption( "searchpath", strSearchPathOption );
+				if ( poptShader != 0 )
+					SearchPath = poptShader[ 0 ];
 
-            //std::cout << "\t" << SearchPath.c_str() << std::endl;
-        }
-        CqFile::Open( strFilename, SearchPath.c_str(), mode );
-        // If the file was not found, then try the "resource" searchpath.
-        if( !IsValid() )
-        {
-            // if not found there, search in the specified option searchpath.
-            const CqString * poptResource = QGetRenderContext() ->optCurrent().GetStringOption( "searchpath", "resource" );
-            if ( poptResource != 0 )
-            {
-                SearchPath = poptResource[ 0 ];
-                CqFile::Open( strFilename, SearchPath.c_str(), mode );
-            }
-        }
-    }
+				//std::cout << "\t" << SearchPath.c_str() << std::endl;
+			}
+			CqFile::Open( strFilename, SearchPath.c_str(), mode );
+			// If the file was not found, then try the "resource" searchpath.
+			if( !IsValid() )
+			{
+				// if not found there, search in the specified option searchpath.
+				const CqString * poptResource = QGetRenderContext() ->optCurrent().GetStringOption( "searchpath", "resource" );
+				if ( poptResource != 0 )
+				{
+					SearchPath = poptResource[ 0 ];
+					CqFile::Open( strFilename, SearchPath.c_str(), mode );
+				}
+			}
+		}
 
 };
 

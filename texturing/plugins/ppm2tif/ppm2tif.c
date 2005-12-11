@@ -62,16 +62,21 @@ __export char *ppm2tif( char *in )
 
 
 	strcpy( tiffname, in );
-	if ( ( result = strstr( tiffname, ".ppm" ) ) != 0 ) strcpy( result, ".tif" );
+	if ( ( result = strstr( tiffname, ".ppm" ) ) != 0 )
+		strcpy( result, ".tif" );
 	if ( !result )
 	{
-		if ( ( result = strstr( tiffname, ".PPM" ) ) != 0 ) strcpy( result, ".tif" );
+		if ( ( result = strstr( tiffname, ".PPM" ) ) != 0 )
+			strcpy( result, ".tif" );
 	}
-	if ( !result ) return result;
+	if ( !result )
+		return result;
 
 #ifdef AQSIS_SYSTEM_WIN32
+
 	sprintf( cmd, "ppm2tiff.exe %s %s", in, tiffname );
 #else
+
 	sprintf( cmd, "ppm2tiff %s %s", in, tiffname );
 #endif
 

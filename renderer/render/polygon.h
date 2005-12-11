@@ -41,96 +41,96 @@ START_NAMESPACE( Aqsis )
 
 class CqPolygonBase
 {
-public:
-    CqPolygonBase()
-    {
-        STATS_INC( GPR_poly );
-    }
-    virtual	~CqPolygonBase()
-    {}
+	public:
+		CqPolygonBase()
+		{
+			STATS_INC( GPR_poly );
+		}
+		virtual	~CqPolygonBase()
+		{}
 
-    virtual	CqBound	Bound() const;
-	virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits );
+		virtual	CqBound	Bound() const;
+		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits );
 
-    /** Get a reference to the surface this polygon is associated with.
-     */
-    virtual	const CqSurface& Surface() const = 0;
-    /** Get a reference to the surface this polygon is associated with.
-     */
-    virtual	CqSurface&	Surface() = 0;
+		/** Get a reference to the surface this polygon is associated with.
+		 */
+		virtual	const CqSurface& Surface() const = 0;
+		/** Get a reference to the surface this polygon is associated with.
+		 */
+		virtual	CqSurface&	Surface() = 0;
 
-    /** Get a reference to the polygon point at the specified index.
-     * \param i Integer index in of the vertex in question.
-     */
-    virtual	const	CqVector4D& PolyP( TqInt i ) const = 0;
-    /** Get a reference to the polygon normal at the specified index.
-     * \param i Integer index in of the vertex in question.
-     */
-    virtual	const	CqVector3D& PolyN( TqInt i ) const = 0;
-    /** Get a reference to the polygon vertex color at the specified index.
-     * \param i Integer index in of the vertex in question.
-     */
-    virtual	const	CqColor& PolyCs( TqInt i ) const = 0;
-    /** Get a reference to the polygon vertex opacity at the specified index.
-     * \param i Integer index in of the vertex in question.
-     */
-    virtual	const	CqColor& PolyOs( TqInt i ) const = 0;
-    /** Get a reference to the polygon texture s coordinate at the specified index.
-     * \param i Integer index in of the vertex in question.
-     */
-    virtual	const	TqFloat& Polys( TqInt i ) const = 0;
-    /** Get a reference to the polygon texture t coordinate at the specified index.
-     * \param i Integer index in of the vertex in question.
-     */
-    virtual	const	TqFloat& Polyt( TqInt i ) const = 0;
-    /** Get a reference to the polygon surface u coordinate at the specified index.
-     * \param i Integer index in of the vertex in question.
-     */
-    virtual	const	TqFloat& Polyu( TqInt i ) const = 0;
-    /** Get a reference to the polygon surface v coordinate at the specified index.
-     * \param i Integer index in of the vertex in question.
-     */
-    virtual	const	TqFloat& Polyv( TqInt i ) const = 0;
-    /** Get the real index into the points list translated from the polygon vertex index.
-     * \param i Integer index in of the vertex in question.
-     */
-    virtual	const	TqInt PolyIndex( TqInt i ) const = 0;
+		/** Get a reference to the polygon point at the specified index.
+		 * \param i Integer index in of the vertex in question.
+		 */
+		virtual	const	CqVector4D& PolyP( TqInt i ) const = 0;
+		/** Get a reference to the polygon normal at the specified index.
+		 * \param i Integer index in of the vertex in question.
+		 */
+		virtual	const	CqVector3D& PolyN( TqInt i ) const = 0;
+		/** Get a reference to the polygon vertex color at the specified index.
+		 * \param i Integer index in of the vertex in question.
+		 */
+		virtual	const	CqColor& PolyCs( TqInt i ) const = 0;
+		/** Get a reference to the polygon vertex opacity at the specified index.
+		 * \param i Integer index in of the vertex in question.
+		 */
+		virtual	const	CqColor& PolyOs( TqInt i ) const = 0;
+		/** Get a reference to the polygon texture s coordinate at the specified index.
+		 * \param i Integer index in of the vertex in question.
+		 */
+		virtual	const	TqFloat& Polys( TqInt i ) const = 0;
+		/** Get a reference to the polygon texture t coordinate at the specified index.
+		 * \param i Integer index in of the vertex in question.
+		 */
+		virtual	const	TqFloat& Polyt( TqInt i ) const = 0;
+		/** Get a reference to the polygon surface u coordinate at the specified index.
+		 * \param i Integer index in of the vertex in question.
+		 */
+		virtual	const	TqFloat& Polyu( TqInt i ) const = 0;
+		/** Get a reference to the polygon surface v coordinate at the specified index.
+		 * \param i Integer index in of the vertex in question.
+		 */
+		virtual	const	TqFloat& Polyv( TqInt i ) const = 0;
+		/** Get the real index into the points list translated from the polygon vertex index.
+		 * \param i Integer index in of the vertex in question.
+		 */
+		virtual	const	TqInt PolyIndex( TqInt i ) const = 0;
 
-    /** Determine if the polygon has the given indexed primitive variable.
-     * \param index Integer index of the variable in the range EnvVars_Cs<=index<EnvVars_Last.
-     */
-    virtual const	TqBool bHasVar( TqInt index ) const = 0;
-    /** Get the real index into the points list translated from the polygon vertex index for facevarying variables.
-     * \param i Integer index in of the vertex in question.
-     */
-    virtual	const	TqInt FaceVaryingIndex( TqInt i ) const = 0;
+		/** Determine if the polygon has the given indexed primitive variable.
+		 * \param index Integer index of the variable in the range EnvVars_Cs<=index<EnvVars_Last.
+		 */
+		virtual const	TqBool bHasVar( TqInt index ) const = 0;
+		/** Get the real index into the points list translated from the polygon vertex index for facevarying variables.
+		 * \param i Integer index in of the vertex in question.
+		 */
+		virtual	const	TqInt FaceVaryingIndex( TqInt i ) const = 0;
 
-    /** Get the number of vertices in this polygon.
-     */
-    virtual	TqInt	NumVertices() const = 0;
+		/** Get the number of vertices in this polygon.
+		 */
+		virtual	TqInt	NumVertices() const = 0;
 
-    /** Get a pointer to the attributes state associated with this polygon.
-     */
-    virtual	IqAttributes*	pAttributes() const = 0;
-    /** Get a pointer to the transfrom associated with this polygon.
-     */
-    virtual	boost::shared_ptr<IqTransform>	pTransform() const = 0;
+		/** Get a pointer to the attributes state associated with this polygon.
+		 */
+		virtual	IqAttributes*	pAttributes() const = 0;
+		/** Get a pointer to the transfrom associated with this polygon.
+		 */
+		virtual	boost::shared_ptr<IqTransform>	pTransform() const = 0;
 
-    /** Get the index of this polygon if it is a member of a polygon mesh
-     */
-    virtual const	TqInt	MeshIndex() const
-    {
-        return ( 0 );
-    }
+		/** Get the index of this polygon if it is a member of a polygon mesh
+		 */
+		virtual const	TqInt	MeshIndex() const
+		{
+			return ( 0 );
+		}
 
-    /** Get a bit vector representing the standard shader variables this polygon needs.
-     */
-    const TqInt	PolyUses() const
-    {
-        return ( Surface().Uses() );
-    }
+		/** Get a bit vector representing the standard shader variables this polygon needs.
+		 */
+		const TqInt	PolyUses() const
+		{
+			return ( Surface().Uses() );
+		}
 
-    void CreatePhantomData(CqParameter* pParam);
+		void CreatePhantomData(CqParameter* pParam);
 };
 
 
@@ -141,125 +141,129 @@ public:
 
 class CqSurfacePolygon : public CqSurface, public CqPolygonBase
 {
-public:
-    CqSurfacePolygon( TqInt cVertices );
-    CqSurfacePolygon( const CqSurfacePolygon& From );
-    virtual	~CqSurfacePolygon();
+	public:
+		CqSurfacePolygon( TqInt cVertices );
+		CqSurfacePolygon( const CqSurfacePolygon& From );
+		virtual	~CqSurfacePolygon();
 
 #ifdef _DEBUG
-    CqString className() const { return CqString("CqSurfacePolygon"); }
+
+		CqString className() const
+		{
+			return CqString("CqSurfacePolygon");
+		}
 #endif
 
-    CqSurfacePolygon& operator=( const CqSurfacePolygon& From );
-    TqBool	CheckDegenerate() const;
+		CqSurfacePolygon& operator=( const CqSurfacePolygon& From );
+		TqBool	CheckDegenerate() const;
 
-    // Overridden fro mCqSurface.
-    virtual	CqBound	Bound() const
-    {
-        return ( AdjustBoundForTransformationMotion( CqPolygonBase::Bound() ) );
-    }
-    virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
-    {
-        return ( CqPolygonBase::Split( aSplits ) );
-    }
+		// Overridden fro mCqSurface.
+		virtual	CqBound	Bound() const
+		{
+			return ( AdjustBoundForTransformationMotion( CqPolygonBase::Bound() ) );
+		}
+		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
+		{
+			return ( CqPolygonBase::Split( aSplits ) );
+		}
 
-    /** Determine whether the passed surface is valid to be used as a
-     *  frame in motion blur for this surface.
-     */
-    virtual TqBool	IsMotionBlurMatch( CqBasicSurface* pSurf )
-    {
-        return( TqFalse );
-    }
+		/** Determine whether the passed surface is valid to be used as a
+		 *  frame in motion blur for this surface.
+		 */
+		virtual TqBool	IsMotionBlurMatch( CqBasicSurface* pSurf )
+		{
+			return( TqFalse );
+		}
 
-    virtual	TqUint	cUniform() const
-    {
-        return ( 1 );
-    }
-    virtual	TqUint	cVarying() const
-    {
-        return ( m_cVertices );
-    }
-    virtual	TqUint	cVertex() const
-    {
-        return ( m_cVertices );
-    }
-    virtual	TqUint	cFaceVarying() const
-    {
-        /// \todo Must work out what this value should be.
-        return ( 1 );
-    }
+		virtual	TqUint	cUniform() const
+		{
+			return ( 1 );
+		}
+		virtual	TqUint	cVarying() const
+		{
+			return ( m_cVertices );
+		}
+		virtual	TqUint	cVertex() const
+		{
+			return ( m_cVertices );
+		}
+		virtual	TqUint	cFaceVarying() const
+		{
+			/// \todo Must work out what this value should be.
+			return ( 1 );
+		}
 
-    // Overridden from CqPolygonBase
-    virtual	const CqSurface& Surface() const
-    {
-        return ( *this );
-    }
-    virtual	CqSurface&	Surface()
-    {
-        return ( *this );
-    }
+		// Overridden from CqPolygonBase
+		virtual	const CqSurface& Surface() const
+		{
+			return ( *this );
+		}
+		virtual	CqSurface&	Surface()
+		{
+			return ( *this );
+		}
 
-    virtual	const	CqVector4D& PolyP( TqInt i ) const
-    {
-        return ( P()->pValue( i )[0] );
-    }
-    virtual	const	CqVector3D& PolyN( TqInt i ) const
-    {
-        return ( N()->pValue( i )[0] );
-    }
-    virtual	const	CqColor& PolyCs( TqInt i ) const
-    {
-        return ( Cs()->pValue( i )[0] );
-    }
-    virtual	const	CqColor& PolyOs( TqInt i ) const
-    {
-        return ( Os()->pValue( i )[0] );
-    }
-    virtual	const	TqFloat& Polys( TqInt i ) const
-    {
-        return ( s()->pValue( i )[0] );
-    }
-    virtual	const	TqFloat& Polyt( TqInt i ) const
-    {
-        return ( t()->pValue( i )[0] );
-    }
-    virtual	const	TqFloat& Polyu( TqInt i ) const
-    {
-        return ( u()->pValue( i )[0] );
-    }
-    virtual	const	TqFloat& Polyv( TqInt i ) const
-    {
-        return ( v()->pValue( i )[0] );
-    }
-    virtual	const	TqInt PolyIndex( TqInt i ) const
-    {
-        return ( i );
-    }
-    virtual	const	TqInt FaceVaryingIndex( TqInt i ) const
-    {
-        return( i );
-    }
-    virtual	const	TqBool	bHasVar(TqInt index) const
-    {
-        return ( CqSurface::bHasVar(index) );
-    }
+		virtual	const	CqVector4D& PolyP( TqInt i ) const
+		{
+			return ( P()->pValue( i )[0] );
+		}
+		virtual	const	CqVector3D& PolyN( TqInt i ) const
+		{
+			return ( N()->pValue( i )[0] );
+		}
+		virtual	const	CqColor& PolyCs( TqInt i ) const
+		{
+			return ( Cs()->pValue( i )[0] );
+		}
+		virtual	const	CqColor& PolyOs( TqInt i ) const
+		{
+			return ( Os()->pValue( i )[0] );
+		}
+		virtual	const	TqFloat& Polys( TqInt i ) const
+		{
+			return ( s()->pValue( i )[0] );
+		}
+		virtual	const	TqFloat& Polyt( TqInt i ) const
+		{
+			return ( t()->pValue( i )[0] );
+		}
+		virtual	const	TqFloat& Polyu( TqInt i ) const
+		{
+			return ( u()->pValue( i )[0] );
+		}
+		virtual	const	TqFloat& Polyv( TqInt i ) const
+		{
+			return ( v()->pValue( i )[0] );
+		}
+		virtual	const	TqInt PolyIndex( TqInt i ) const
+		{
+			return ( i );
+		}
+		virtual	const	TqInt FaceVaryingIndex( TqInt i ) const
+		{
+			return( i );
+		}
+		virtual	const	TqBool	bHasVar(TqInt index) const
+		{
+			return ( CqSurface::bHasVar(index) );
+		}
 
-    virtual	TqInt	NumVertices() const
-    {
-        return ( cVertex() );
-    }
+		virtual	TqInt	NumVertices() const
+		{
+			return ( cVertex() );
+		}
 
-    virtual	IqAttributes*	pAttributes() const
-    {
-        return ( CqSurface::pAttributes() );
-    }
-    virtual	boost::shared_ptr<IqTransform>	pTransform() const
-    {
-        return ( CqSurface::pTransform() );
-    }
+		virtual	IqAttributes*	pAttributes() const
+		{
+			return ( CqSurface::pAttributes() );
+		}
+		virtual	boost::shared_ptr<IqTransform>	pTransform() const
+		{
+			return ( CqSurface::pTransform() );
+		}
 
-protected:
-    TqInt	m_cVertices;	///< Count of vertices in this polygon.
+	protected:
+		TqInt	m_cVertices;	///< Count of vertices in this polygon.
 }
 ;
 
@@ -271,94 +275,98 @@ protected:
 
 class CqPolygonPoints : public CqSurface
 {
-public:
-    CqPolygonPoints( TqInt cVertices, TqInt cFaces, TqInt sumnVerts ) :
-            m_cVertices( cVertices ),
-            m_Transformed( TqFalse ),
-            m_cFaces( cFaces ),
-            m_sumnVerts( sumnVerts )
-    {}
-    CqPolygonPoints( const CqPolygonPoints& From ) :
-            CqSurface( From ),
-            m_cVertices( From.m_cVertices ),
-            m_Transformed( From.m_Transformed ),
-            m_cFaces( From.m_cFaces ),
-            m_sumnVerts( From.m_sumnVerts )
-    {}
-    virtual	~CqPolygonPoints()
-    {
-    }
+	public:
+		CqPolygonPoints( TqInt cVertices, TqInt cFaces, TqInt sumnVerts ) :
+				m_cVertices( cVertices ),
+				m_Transformed( TqFalse ),
+				m_cFaces( cFaces ),
+				m_sumnVerts( sumnVerts )
+		{}
+		CqPolygonPoints( const CqPolygonPoints& From ) :
+				CqSurface( From ),
+				m_cVertices( From.m_cVertices ),
+				m_Transformed( From.m_Transformed ),
+				m_cFaces( From.m_cFaces ),
+				m_sumnVerts( From.m_sumnVerts )
+		{}
+		virtual	~CqPolygonPoints()
+		{}
 
 #ifdef _DEBUG
-    CqString className() const { return CqString("CqPolygonPoints"); }
+
+		CqString className() const
+		{
+			return CqString("CqPolygonPoints");
+		}
 #endif
 
-    // Overridden from CqSurface.
-    // NOTE: These should never be called.
+		// Overridden from CqSurface.
+		// NOTE: These should never be called.
 #ifdef AQSIS_COMPILER_MSVC6
-    virtual	CqBound	Bound() const
-    {
-        static CqBound bTemp; return ( bTemp );
-    }
+		virtual	CqBound	Bound() const
+		{
+			static CqBound bTemp;
+			return ( bTemp );
+		}
 #else // AQSIS_COMPILER_MSVC6
-    virtual	CqBound	Bound() const
-    {
-        return CqBound();
-    }
+		virtual	CqBound	Bound() const
+		{
+			return CqBound();
+		}
 #endif // !AQSIS_COMPILER_MSVC6
 
-    virtual	CqMicroPolyGridBase* Dice()
-    {
-        return ( 0 );
-    }
-    virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
-    {
-        return ( 0 );
-    }
-    virtual TqBool	Diceable()
-    {
-        return ( TqFalse );
-    }
+		virtual	CqMicroPolyGridBase* Dice()
+		{
+			return ( 0 );
+		}
+		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
+		{
+			return ( 0 );
+		}
+		virtual TqBool	Diceable()
+		{
+			return ( TqFalse );
+		}
 
-    /** Determine whether the passed surface is valid to be used as a
-     *  frame in motion blur for this surface.
-     */
-    virtual TqBool	IsMotionBlurMatch( CqBasicSurface* pSurf )
-    {
-        return( TqFalse );
-    }
+		/** Determine whether the passed surface is valid to be used as a
+		 *  frame in motion blur for this surface.
+		 */
+		virtual TqBool	IsMotionBlurMatch( CqBasicSurface* pSurf )
+		{
+			return( TqFalse );
+		}
 
-    virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime = 0 );
+		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime = 0 );
 
-    virtual	TqUint	cUniform() const
-    {
-        return ( m_cFaces );
-    }
-    virtual	TqUint	cVarying() const
-    {
-        return ( m_cVertices );
-    }
-    virtual	TqUint	cVertex() const
-    {
-        return ( m_cVertices );
-    }
-    virtual	TqUint	cFaceVarying() const
-    {
-        return ( m_sumnVerts );
-    }
+		virtual	TqUint	cUniform() const
+		{
+			return ( m_cFaces );
+		}
+		virtual	TqUint	cVarying() const
+		{
+			return ( m_cVertices );
+		}
+		virtual	TqUint	cVertex() const
+		{
+			return ( m_cVertices );
+		}
+		virtual	TqUint	cFaceVarying() const
+		{
+			return ( m_sumnVerts );
+		}
 
-    /** Get the number of vertices in the list.
-     */
-    virtual	TqInt	NumVertices() const
-    {
-        return ( cVertex() );
-    }
+		/** Get the number of vertices in the list.
+		 */
+		virtual	TqInt	NumVertices() const
+		{
+			return ( cVertex() );
+		}
 
-protected:
-    TqInt	m_cVertices;		///< Count of vertices in this list.
-    TqBool	m_Transformed;		///< Flag indicatign that the list has been transformed.
-    TqInt	m_cFaces;			///< Expected count of faces referencing this list.
-    TqInt	m_sumnVerts;
+	protected:
+		TqInt	m_cVertices;		///< Count of vertices in this list.
+		TqBool	m_Transformed;		///< Flag indicatign that the list has been transformed.
+		TqInt	m_cFaces;			///< Expected count of faces referencing this list.
+		TqInt	m_sumnVerts;
 }
 ;
 
@@ -370,167 +378,172 @@ protected:
 
 class CqSurfacePointsPolygon : public CqBasicSurface, public CqPolygonBase
 {
-public:
-    CqSurfacePointsPolygon( const boost::shared_ptr<CqPolygonPoints>& pPoints, TqInt index, TqInt FaceVaryingIndex  ) : CqBasicSurface(),
-            m_pPoints( pPoints ),
-            m_Index( index ),
-            m_FaceVaryingIndex( FaceVaryingIndex )
-    {
-        STATS_INC( GPR_poly );
-    }
-    CqSurfacePointsPolygon( const CqSurfacePointsPolygon& From );
-    virtual	~CqSurfacePointsPolygon()
-    {
-    }
+	public:
+		CqSurfacePointsPolygon( const boost::shared_ptr<CqPolygonPoints>& pPoints, TqInt index, TqInt FaceVaryingIndex  ) : CqBasicSurface(),
+				m_pPoints( pPoints ),
+				m_Index( index ),
+				m_FaceVaryingIndex( FaceVaryingIndex )
+		{
+			STATS_INC( GPR_poly );
+		}
+		CqSurfacePointsPolygon( const CqSurfacePointsPolygon& From );
+		virtual	~CqSurfacePointsPolygon()
+		{}
 
-    CqSurfacePointsPolygon& operator=( const CqSurfacePointsPolygon& From );
+		CqSurfacePointsPolygon& operator=( const CqSurfacePointsPolygon& From );
 
-    std::vector<TqInt>&	aIndices()
-    {
-        return ( m_aIndices );
-    }
+		std::vector<TqInt>&	aIndices()
+		{
+			return ( m_aIndices );
+		}
 
 #ifdef _DEBUG
-    CqString className() const { return CqString("CqSurfacePointsPolygon"); }
+		CqString className() const
+		{
+			return CqString("CqSurfacePointsPolygon");
+		}
 #endif
 
-    // Overridden from CqBasicSurface
-    virtual CqMicroPolyGridBase* Dice()
-    {
-        assert(TqFalse);
-        return( 0 );
-    }
-    virtual	CqBound	Bound() const
-    {
-        return ( AdjustBoundForTransformationMotion( CqPolygonBase::Bound() ) );
-    }
-    virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
-    {
-        return ( CqPolygonBase::Split( aSplits ) );
-    }
-    virtual TqBool	Diceable()	{ return(false); }
+		// Overridden from CqBasicSurface
+		virtual CqMicroPolyGridBase* Dice()
+		{
+			assert(TqFalse);
+			return( 0 );
+		}
+		virtual	CqBound	Bound() const
+		{
+			return ( AdjustBoundForTransformationMotion( CqPolygonBase::Bound() ) );
+		}
+		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
+		{
+			return ( CqPolygonBase::Split( aSplits ) );
+		}
+		virtual TqBool	Diceable()
+		{
+			return(false);
+		}
 
-    /** Determine whether the passed surface is valid to be used as a
-     *  frame in motion blur for this surface.
-     */
-    virtual TqBool	IsMotionBlurMatch( CqBasicSurface* pSurf )
-    {
-        return( TqFalse );
-    }
+		/** Determine whether the passed surface is valid to be used as a
+		 *  frame in motion blur for this surface.
+		 */
+		virtual TqBool	IsMotionBlurMatch( CqBasicSurface* pSurf )
+		{
+			return( TqFalse );
+		}
 
-    virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime = 0 )
-    {
-        m_pPoints->Transform( matTx, matITTx, matRTx );
-    }
-    // NOTE: These should never be called.
-    virtual	TqUint	cUniform() const
-    {
-        return ( 0 );
-    }
-    virtual	TqUint	cVarying() const
-    {
-        return ( 0 );
-    }
-    virtual	TqUint	cVertex() const
-    {
-        return ( 0 );
-    }
-    virtual	TqUint	cFaceVarying() const
-    {
-        return ( 0 );
-    }
-    //---------------
+		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime = 0 )
+		{
+			m_pPoints->Transform( matTx, matITTx, matRTx );
+		}
+		// NOTE: These should never be called.
+		virtual	TqUint	cUniform() const
+		{
+			return ( 0 );
+		}
+		virtual	TqUint	cVarying() const
+		{
+			return ( 0 );
+		}
+		virtual	TqUint	cVertex() const
+		{
+			return ( 0 );
+		}
+		virtual	TqUint	cFaceVarying() const
+		{
+			return ( 0 );
+		}
+		//---------------
 
-    // Overridden from CqPolygonBase
-    virtual	const CqSurface& Surface() const
-    {
-        return ( *m_pPoints );
-    }
-    virtual	CqSurface& Surface()
-    {
-        return ( *m_pPoints );
-    }
+		// Overridden from CqPolygonBase
+		virtual	const CqSurface& Surface() const
+		{
+			return ( *m_pPoints );
+		}
+		virtual	CqSurface& Surface()
+		{
+			return ( *m_pPoints );
+		}
 
-    virtual	const CqVector4D& PolyP( TqInt i ) const
-    {
-        return ( m_pPoints->P()->pValue( m_aIndices[ i ] )[0] );
-    }
-    virtual	const CqVector3D& PolyN( TqInt i ) const
-    {
-        return ( m_pPoints->N()->pValue( m_aIndices[ i ] )[0] );
-    }
-    virtual	const CqColor& PolyCs( TqInt i ) const
-    {
-        return ( m_pPoints->Cs()->pValue( m_aIndices[ i ] )[0] );
-    }
-    virtual	const CqColor& PolyOs( TqInt i ) const
-    {
-        return ( m_pPoints->Os()->pValue( m_aIndices[ i ] )[0] );
-    }
-    virtual	const TqFloat& Polys( TqInt i ) const
-    {
-        return ( m_pPoints->s()->pValue( m_aIndices[ i ] )[0] );
-    }
-    virtual	const TqFloat& Polyt( TqInt i ) const
-    {
-        return ( m_pPoints->t()->pValue( m_aIndices[ i ] )[0] );
-    }
-    virtual	const TqFloat& Polyu( TqInt i ) const
-    {
-        return ( m_pPoints->u()->pValue( m_aIndices[ i ] )[0] );
-    }
-    virtual	const TqFloat& Polyv( TqInt i ) const
-    {
-        return ( m_pPoints->v()->pValue( m_aIndices[ i ] )[0] );
-    }
-    virtual	const	TqInt PolyIndex( TqInt i ) const
-    {
-        return ( ( (TqUint) i < m_aIndices.size() ) ? m_aIndices[ i ] : m_aIndices.back() );
-    }
-    virtual	const	TqInt FaceVaryingIndex( TqInt i ) const
-    {
-        return ( m_FaceVaryingIndex + i );
-    }
+		virtual	const CqVector4D& PolyP( TqInt i ) const
+		{
+			return ( m_pPoints->P()->pValue( m_aIndices[ i ] )[0] );
+		}
+		virtual	const CqVector3D& PolyN( TqInt i ) const
+		{
+			return ( m_pPoints->N()->pValue( m_aIndices[ i ] )[0] );
+		}
+		virtual	const CqColor& PolyCs( TqInt i ) const
+		{
+			return ( m_pPoints->Cs()->pValue( m_aIndices[ i ] )[0] );
+		}
+		virtual	const CqColor& PolyOs( TqInt i ) const
+		{
+			return ( m_pPoints->Os()->pValue( m_aIndices[ i ] )[0] );
+		}
+		virtual	const TqFloat& Polys( TqInt i ) const
+		{
+			return ( m_pPoints->s()->pValue( m_aIndices[ i ] )[0] );
+		}
+		virtual	const TqFloat& Polyt( TqInt i ) const
+		{
+			return ( m_pPoints->t()->pValue( m_aIndices[ i ] )[0] );
+		}
+		virtual	const TqFloat& Polyu( TqInt i ) const
+		{
+			return ( m_pPoints->u()->pValue( m_aIndices[ i ] )[0] );
+		}
+		virtual	const TqFloat& Polyv( TqInt i ) const
+		{
+			return ( m_pPoints->v()->pValue( m_aIndices[ i ] )[0] );
+		}
+		virtual	const	TqInt PolyIndex( TqInt i ) const
+		{
+			return ( ( (TqUint) i < m_aIndices.size() ) ? m_aIndices[ i ] : m_aIndices.back() );
+		}
+		virtual	const	TqInt FaceVaryingIndex( TqInt i ) const
+		{
+			return ( m_FaceVaryingIndex + i );
+		}
 
-    virtual	TqInt	NumVertices() const
-    {
-        return ( m_aIndices.size() );
-    }
+		virtual	TqInt	NumVertices() const
+		{
+			return ( m_aIndices.size() );
+		}
 
-    virtual	IqAttributes*	pAttributes() const
-    {
-        return ( m_pPoints->pAttributes() );
-    }
-    virtual	boost::shared_ptr<IqTransform>	pTransform() const
-    {
-        return ( m_pPoints->pTransform() );
-    }
+		virtual	IqAttributes*	pAttributes() const
+		{
+			return ( m_pPoints->pAttributes() );
+		}
+		virtual	boost::shared_ptr<IqTransform>	pTransform() const
+		{
+			return ( m_pPoints->pTransform() );
+		}
 
-    /** Determine whether this surface has the given indexed primitive variable.
-     */
-    const	TqBool	bHasVar(TqInt index) const
-    {
-        return ( m_pPoints->bHasVar(index) );
-    }
-    /** Get the index of this polygon if it is a member of a polygon mesh
-     */
-    virtual const	TqInt	MeshIndex() const
-    {
-        return ( m_Index );
-    }
+		/** Determine whether this surface has the given indexed primitive variable.
+		 */
+		const	TqBool	bHasVar(TqInt index) const
+		{
+			return ( m_pPoints->bHasVar(index) );
+		}
+		/** Get the index of this polygon if it is a member of a polygon mesh
+		 */
+		virtual const	TqInt	MeshIndex() const
+		{
+			return ( m_Index );
+		}
 
-    /** Get the start index in arrays of favevarying variables for this face.
-     */
-    TqInt FaceVaryingIndex() const
-    {
-        return( m_FaceVaryingIndex );
-    }
+		/** Get the start index in arrays of favevarying variables for this face.
+		 */
+		TqInt FaceVaryingIndex() const
+		{
+			return( m_FaceVaryingIndex );
+		}
 
-protected:
-    std::vector<TqInt>	m_aIndices;		///< Array of indices into the associated vertex list.
-    boost::shared_ptr<CqPolygonPoints>	m_pPoints;		///< Pointer to the associated CqPolygonPoints class.
-    TqInt	m_Index;		/// Polygon index, used for looking up Uniform values.
-    TqInt	m_FaceVaryingIndex;
+	protected:
+		std::vector<TqInt>	m_aIndices;		///< Array of indices into the associated vertex list.
+		boost::shared_ptr<CqPolygonPoints>	m_pPoints;		///< Pointer to the associated CqPolygonPoints class.
+		TqInt	m_Index;		/// Polygon index, used for looking up Uniform values.
+		TqInt	m_FaceVaryingIndex;
 };
 
 //----------------------------------------------------------------------
@@ -540,85 +553,84 @@ protected:
 
 class CqSurfacePointsPolygons : public CqSurface
 {
-public:
-    CqSurfacePointsPolygons(const boost::shared_ptr<CqPolygonPoints>& pPoints, TqInt NumPolys, TqInt nverts[], TqInt verts[]) :
-            m_NumPolys(NumPolys),
-            m_pPoints( pPoints )
-    {
-        m_PointCounts.resize( NumPolys );
-        TqInt i,vindex=0;
-        for( i = 0; i < NumPolys; i++ )
-        {
-            m_PointCounts[i] = nverts[i];
-            TqInt polyvertex;
-            for( polyvertex = 0; polyvertex < nverts[i]; polyvertex++ )
-                m_PointIndices.push_back( verts[vindex++] );
-        }
-        STATS_INC( GPR_poly );
-    }
-    virtual	~CqSurfacePointsPolygons()
-    {
-    }
+	public:
+		CqSurfacePointsPolygons(const boost::shared_ptr<CqPolygonPoints>& pPoints, TqInt NumPolys, TqInt nverts[], TqInt verts[]) :
+				m_NumPolys(NumPolys),
+				m_pPoints( pPoints )
+		{
+			m_PointCounts.resize( NumPolys );
+			TqInt i,vindex=0;
+			for( i = 0; i < NumPolys; i++ )
+			{
+				m_PointCounts[i] = nverts[i];
+				TqInt polyvertex;
+				for( polyvertex = 0; polyvertex < nverts[i]; polyvertex++ )
+					m_PointIndices.push_back( verts[vindex++] );
+			}
+			STATS_INC( GPR_poly );
+		}
+		virtual	~CqSurfacePointsPolygons()
+	{}
 
-    /** Get the gemoetric bound of this GPrim.
-     */
-    virtual	CqBound	Bound() const;
-    /** Dice this GPrim.
-     * \return A pointer to a new micropolygrid..
-     */
-    virtual	CqMicroPolyGridBase* Dice()
-    {
-        return(NULL);
-    }
-    /** Split this GPrim into a number of other GPrims.
-     * \param aSplits A reference to a CqBasicSurface array to fill in with the new GPrim pointers.
-     * \return Integer count of new GPrims created.
-     */
-    virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits );
-    /** Determine whether this GPrim is diceable at its current size.
-     */
-    virtual TqBool	Diceable()
-    {
-        return( TqFalse );
-    }
+		/** Get the gemoetric bound of this GPrim.
+		 */
+		virtual	CqBound	Bound() const;
+		/** Dice this GPrim.
+		 * \return A pointer to a new micropolygrid..
+		 */
+		virtual	CqMicroPolyGridBase* Dice()
+		{
+			return(NULL);
+		}
+		/** Split this GPrim into a number of other GPrims.
+		 * \param aSplits A reference to a CqBasicSurface array to fill in with the new GPrim pointers.
+		 * \return Integer count of new GPrims created.
+		 */
+		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits );
+		/** Determine whether this GPrim is diceable at its current size.
+		 */
+		virtual TqBool	Diceable()
+		{
+			return( TqFalse );
+		}
 
-    virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime = 0 )
-    {
-        assert( m_pPoints );
-        m_pPoints->Transform( matTx, matITTx, matRTx, iTime );
-    }
+		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime = 0 )
+		{
+			assert( m_pPoints );
+			m_pPoints->Transform( matTx, matITTx, matRTx, iTime );
+		}
 
-    virtual TqBool	IsMotionBlurMatch( CqBasicSurface* pSurf )
-    {
-        return( TqFalse );
-    }
+		virtual TqBool	IsMotionBlurMatch( CqBasicSurface* pSurf )
+		{
+			return( TqFalse );
+		}
 
-    virtual	TqUint	cUniform() const
-    {
-        return ( m_NumPolys );
-    }
-    virtual	TqUint	cVarying() const
-    {
-        assert( m_pPoints );
-        return ( m_pPoints->cVarying() );
-    }
-    virtual	TqUint	cVertex() const
-    {
-        assert( m_pPoints );
-        return ( m_pPoints->cVarying() );
-    }
-    virtual	TqUint	cFaceVarying() const
-    {
-        assert( m_pPoints );
-        return ( m_pPoints->cFaceVarying() );
-    }
+		virtual	TqUint	cUniform() const
+		{
+			return ( m_NumPolys );
+		}
+		virtual	TqUint	cVarying() const
+		{
+			assert( m_pPoints );
+			return ( m_pPoints->cVarying() );
+		}
+		virtual	TqUint	cVertex() const
+		{
+			assert( m_pPoints );
+			return ( m_pPoints->cVarying() );
+		}
+		virtual	TqUint	cFaceVarying() const
+		{
+			assert( m_pPoints );
+			return ( m_pPoints->cFaceVarying() );
+		}
 
 
-private:
-    TqInt	m_NumPolys;
-    boost::shared_ptr<CqPolygonPoints>	m_pPoints;		///< Pointer to the associated CqPolygonPoints class.
-    std::vector<TqInt>	m_PointCounts;
-    std::vector<TqInt>	m_PointIndices;
+	private:
+		TqInt	m_NumPolys;
+		boost::shared_ptr<CqPolygonPoints>	m_pPoints;		///< Pointer to the associated CqPolygonPoints class.
+		std::vector<TqInt>	m_PointCounts;
+		std::vector<TqInt>	m_PointIndices;
 };
 
 //-----------------------------------------------------------------------

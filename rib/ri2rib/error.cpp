@@ -47,23 +47,31 @@ USING_NAMESPACE( libri2rib );
 
 RtVoid CqError::manage ()
 {
-    RiLastError = m_Code;
-    std::cerr << m_Message1 << m_Message2 << m_Message3 << std::endl;
-    if ( m_Severity == RIE_SEVERE ) exit( EXIT_FAILURE );
+	RiLastError = m_Code;
+	std::cerr << m_Message1 << m_Message2 << m_Message3 << std::endl;
+	if ( m_Severity == RIE_SEVERE )
+		exit( EXIT_FAILURE );
 
-    if ( m_ToRib == TqTrue )
-    {
-        std::string tmp;
-        switch ( m_Severity )
-        {
-        case RIE_INFO: tmp = std::string( "INFO: " ); break;
-        case RIE_WARNING: tmp = std::string( "WARNING: " ); break;
-        case RIE_ERROR: tmp = std::string( "ERROR: " ); break;
-        default: break;
-        }
-        tmp += m_Message1 + m_Message2 + m_Message3;
-        RiArchiveRecord( RI_COMMENT, const_cast<char *> ( tmp.c_str() ) );
-    }
+	if ( m_ToRib == TqTrue )
+	{
+		std::string tmp;
+		switch ( m_Severity )
+		{
+				case RIE_INFO:
+				tmp = std::string( "INFO: " );
+				break;
+				case RIE_WARNING:
+				tmp = std::string( "WARNING: " );
+				break;
+				case RIE_ERROR:
+				tmp = std::string( "ERROR: " );
+				break;
+				default:
+				break;
+		}
+		tmp += m_Message1 + m_Message2 + m_Message3;
+		RiArchiveRecord( RI_COMMENT, const_cast<char *> ( tmp.c_str() ) );
+	}
 }
 
 

@@ -39,60 +39,80 @@ START_NAMESPACE( Aqsis )
 
 CqString CqString::ExpandEscapes() const
 {
-    CqString	strResult;
-    const TqChar*	str = c_str();
+	CqString	strResult;
+	const TqChar*	str = c_str();
 
-    if ( str != NULL )
-    {
-        TqChar c = *str++;
+	if ( str != NULL )
+	{
+		TqChar c = *str++;
 
-        while ( c != 0 )
-        {
-            if ( c >= ' ' )
-            {
-                switch ( c )
-                {
-                case '\\': strResult += '\\' + '\\';	break;
-                case '\'': strResult += '\\' + '\'';	break;
-                case '\"': strResult += '\\' + '\"';	break;
-                default: strResult += c;	break;
-                }
-            }
-            else
-            {
-                strResult += '\\';
+		while ( c != 0 )
+		{
+			if ( c >= ' ' )
+			{
+				switch ( c )
+				{
+						case '\\':
+						strResult += '\\' + '\\';
+						break;
+						case '\'':
+						strResult += '\\' + '\'';
+						break;
+						case '\"':
+						strResult += '\\' + '\"';
+						break;
+						default:
+						strResult += c;
+						break;
+				}
+			}
+			else
+			{
+				strResult += '\\';
 
-                switch ( c )
-                {
-                case '\a': strResult += 'a';	break;
-                case '\b': strResult += 'b';	break;
-                case '\n': strResult += 'n';	break;
-                case '\r': strResult += 'r';	break;
-                case '\t': strResult += 't';	break;
-                case '\0': strResult += '0';	break;
+				switch ( c )
+				{
+						case '\a':
+						strResult += 'a';
+						break;
+						case '\b':
+						strResult += 'b';
+						break;
+						case '\n':
+						strResult += 'n';
+						break;
+						case '\r':
+						strResult += 'r';
+						break;
+						case '\t':
+						strResult += 't';
+						break;
+						case '\0':
+						strResult += '0';
+						break;
 
-                default:
-                    {
-                        strResult += 'x';
-                        TqInt i;
-                        for ( i = 0;i < 4;i++ )
-                        {
-                            TqInt Value = ( ( c >> 12 ) & 0x0F );	// Get high nibble;
-                            c <<= 4;
+						default:
+						{
+							strResult += 'x';
+							TqInt i;
+							for ( i = 0;i < 4;i++ )
+							{
+								TqInt Value = ( ( c >> 12 ) & 0x0F );	// Get high nibble;
+								c <<= 4;
 
-                            if ( Value <= 9 )
-                                strResult += '0' + Value;
-                            else
-                                strResult += 'a' + Value;
-                        }
-                    }
-                    break;
-                }
-            }
-            c = *str++;
-        }
-    }
-    return ( strResult );
+								if ( Value <= 9 )
+									strResult += '0' + Value;
+								else
+									strResult += 'a' + Value;
+							}
+						}
+						break;
+				}
+			}
+			c = *str++;
+		}
+	}
+	return ( strResult );
 }
 
 
@@ -103,79 +123,89 @@ CqString CqString::ExpandEscapes() const
 
 CqString CqString::TranslateEscapes() const
 {
-    CqString	strResult;
-    const TqChar*	str = c_str();
+	CqString	strResult;
+	const TqChar*	str = c_str();
 
-    if ( str != NULL )
-    {
-        TqChar c = *str++;
+	if ( str != NULL )
+	{
+		TqChar c = *str++;
 
-        while ( c != 0 )
-        {
-            if ( c == '\\' )
-            {
-                c = *str++;
+		while ( c != 0 )
+		{
+			if ( c == '\\' )
+			{
+				c = *str++;
 
-                switch ( c )
-                {
-                case 'a': strResult += '\a';	break;
-                case 'b': strResult += '\b';	break;
-                case 'n': strResult += '\n';	break;
-                case 'r': strResult += '\r';	break;
-                case 't': strResult += '\t';	break;
+				switch ( c )
+				{
+						case 'a':
+						strResult += '\a';
+						break;
+						case 'b':
+						strResult += '\b';
+						break;
+						case 'n':
+						strResult += '\n';
+						break;
+						case 'r':
+						strResult += '\r';
+						break;
+						case 't':
+						strResult += '\t';
+						break;
 
-                case '0':
-                    {
-                        TqChar Value = 0;
+						case '0':
+						{
+							TqChar Value = 0;
 
-                        while ( ( c >= '0' && c <= '7' ) )
-                        {
-                            Value = Value * 8 + c - '0';
-                            c = *str++;
-                        }
-                        strResult += Value;
-                        str--;
-                    }
-                    break;
+							while ( ( c >= '0' && c <= '7' ) )
+							{
+								Value = Value * 8 + c - '0';
+								c = *str++;
+							}
+							strResult += Value;
+							str--;
+						}
+						break;
 
-                case 'x':
-                    {
-                        TqChar Value = 0;
+						case 'x':
+						{
+							TqChar Value = 0;
 
-                        c = *str++;
+							c = *str++;
 
-                        while ( ( c >= '0' && c <= '9' ) || ( c >= 'A' && c <= 'F' ) || ( c >= 'a' && c <= 'f' ) )
-                        {
-                            Value *= 16;
-                            if ( c >= '0' && c <= '9' )
-                                Value += c - '0';
-                            else
-                                if ( c >= 'A' && c <= 'F' )
-                                    Value += c - 'A' + 10;
-                                else
-                                    if ( c >= 'a' && c <= 'f' )
-                                        Value += c - 'a' + 10;
+							while ( ( c >= '0' && c <= '9' ) || ( c >= 'A' && c <= 'F' ) || ( c >= 'a' && c <= 'f' ) )
+							{
+								Value *= 16;
+								if ( c >= '0' && c <= '9' )
+									Value += c - '0';
+								else
+									if ( c >= 'A' && c <= 'F' )
+										Value += c - 'A' + 10;
+									else
+										if ( c >= 'a' && c <= 'f' )
+											Value += c - 'a' + 10;
 
-                            c = *str++;
-                        }
-                        strResult += Value;
-                        str--;
-                    }
-                    break;
+								c = *str++;
+							}
+							strResult += Value;
+							str--;
+						}
+						break;
 
-                default:
-                    strResult += c;
-                    break;
-                }
-            }
-            else
-                strResult += c;
+						default:
+						strResult += c;
+						break;
+				}
+			}
+			else
+				strResult += c;
 
-            c = *str++;
-        }
-    }
+			c = *str++;
+		}
+	}
 
-    return ( strResult );
+	return ( strResult );
 }
 
 
@@ -185,59 +215,59 @@ CqString CqString::TranslateEscapes() const
 
 CqString& CqString::Format( const TqChar* strFmt, ... )
 {
-    va_list marker;
-    va_start( marker, strFmt );
+	va_list marker;
+	va_start( marker, strFmt );
 
-    *this = "";
+	*this = "";
 
-    TqInt i = 0;
-    while ( strFmt[ i ] != '\0' )
-    {
-        switch ( strFmt[ i ] )
-        {
-        case '%':
-            {
-                i++;
-                switch ( strFmt[ i ] )
-                {
-                case 'f':
-                    {
-                        TqFloat val = static_cast<TqFloat>( va_arg( marker, double ) );
-                        *this += ToString(val);
-                    }
-                    break;
+	TqInt i = 0;
+	while ( strFmt[ i ] != '\0' )
+	{
+		switch ( strFmt[ i ] )
+		{
+				case '%':
+				{
+					i++;
+					switch ( strFmt[ i ] )
+					{
+							case 'f':
+							{
+								TqFloat val = static_cast<TqFloat>( va_arg( marker, double ) );
+								*this += ToString(val);
+							}
+							break;
 
-                case 'd':
-                case 'i':
-                    {
-                        TqInt val = va_arg( marker, TqInt );
-                        *this += ToString(val);
-                    }
-                    break;
+							case 'd':
+							case 'i':
+							{
+								TqInt val = va_arg( marker, TqInt );
+								*this += ToString(val);
+							}
+							break;
 
-                case 'x':
-                    {
-                        TqInt val = va_arg( marker, TqInt );
-                        *this += ToString(val);
-                    }
-                    break;
+							case 'x':
+							{
+								TqInt val = va_arg( marker, TqInt );
+								*this += ToString(val);
+							}
+							break;
 
-                case 's':
-                    *this += va_arg( marker, TqChar* );
-                    break;
-                }
-            }
-            break;
+							case 's':
+							*this += va_arg( marker, TqChar* );
+							break;
+					}
+				}
+				break;
 
-        default:
-            *this += strFmt[ i ];
-            break;
-        }
-        i++;
-    }
+				default:
+				*this += strFmt[ i ];
+				break;
+		}
+		i++;
+	}
 
-    va_end( marker );
-    return ( *this );
+	va_end( marker );
+	return ( *this );
 }
 
 CqString CqString::ToLower() const
@@ -251,32 +281,32 @@ CqString CqString::ToLower() const
 
 CqString& CqString::operator+=( const CqString& str )
 {
-    CqStringBase::operator+=( str );
-    return ( *this );
+	CqStringBase::operator+=( str );
+	return ( *this );
 }
 
 CqString& CqString::operator+=( const TqChar* str )
 {
-    CqStringBase::operator+=( str );
-    return ( *this );
+	CqStringBase::operator+=( str );
+	return ( *this );
 }
 
 CqString& CqString::operator+=( TqChar c )
 {
-    CqStringBase::operator+=( c );
-    return ( *this );
+	CqStringBase::operator+=( c );
+	return ( *this );
 }
 
 CqString& CqString::operator+=( TqInt i )
 {
-    *this += ToString(i);
-    return *this;
+	*this += ToString(i);
+	return *this;
 }
 
 CqString& CqString::operator+=( TqFloat f )
 {
-    *this += ToString(f);
-    return *this;
+	*this += ToString(f);
+	return *this;
 }
 
 
@@ -286,9 +316,9 @@ CqString& CqString::operator+=( TqFloat f )
 
 CqString operator+( const CqString& strAdd1, const CqString& strAdd2 )
 {
-    CqString strRes( strAdd1 );
-    strRes += strAdd2;
-    return ( strRes );
+	CqString strRes( strAdd1 );
+	strRes += strAdd2;
+	return ( strRes );
 }
 
 
@@ -298,9 +328,9 @@ CqString operator+( const CqString& strAdd1, const CqString& strAdd2 )
 
 CqString operator+( const TqChar* strAdd1, const CqString& strAdd2 )
 {
-    CqString strRes( strAdd1 );
-    strRes += strAdd2;
-    return ( strRes );
+	CqString strRes( strAdd1 );
+	strRes += strAdd2;
+	return ( strRes );
 }
 
 
@@ -310,9 +340,9 @@ CqString operator+( const TqChar* strAdd1, const CqString& strAdd2 )
 
 CqString operator+( const CqString& strAdd1, const TqChar* strAdd2 )
 {
-    CqString strRes( strAdd1 );
-    strRes += strAdd2;
-    return ( strRes );
+	CqString strRes( strAdd1 );
+	strRes += strAdd2;
+	return ( strRes );
 }
 
 
@@ -322,9 +352,9 @@ CqString operator+( const CqString& strAdd1, const TqChar* strAdd2 )
 
 CqString operator+( const CqString& strAdd1, TqChar ch )
 {
-    CqString strRes( strAdd1 );
-    strRes += ch;
-    return ( strRes );
+	CqString strRes( strAdd1 );
+	strRes += ch;
+	return ( strRes );
 }
 
 
@@ -334,9 +364,9 @@ CqString operator+( const CqString& strAdd1, TqChar ch )
 
 CqString operator+( TqChar ch, const CqString& strAdd2 )
 {
-    CqString strRes( ch );
-    strRes += strAdd2;
-    return ( strRes );
+	CqString strRes( ch );
+	strRes += strAdd2;
+	return ( strRes );
 }
 
 
@@ -346,7 +376,7 @@ CqString operator+( TqChar ch, const CqString& strAdd2 )
 
 CqString operator-( const CqString& strAdd1, const CqString& strAdd2 )
 {
-    return ( strAdd1 );
+	return ( strAdd1 );
 }
 
 
@@ -356,7 +386,7 @@ CqString operator-( const CqString& strAdd1, const CqString& strAdd2 )
 
 CqString operator/( const CqString&strAdd1, const CqString&strAdd2 )
 {
-    return ( strAdd1 );
+	return ( strAdd1 );
 }
 
 
@@ -366,7 +396,7 @@ CqString operator/( const CqString&strAdd1, const CqString&strAdd2 )
 
 CqString operator*( const CqString& strAdd1, const CqString& strAdd2 )
 {
-    return ( strAdd1 );
+	return ( strAdd1 );
 }
 
 
@@ -376,14 +406,14 @@ CqString operator*( const CqString& strAdd1, const CqString& strAdd2 )
 
 CqString operator*( const CqString& strAdd1, TqFloat f )
 {
-    return ( strAdd1 );
+	return ( strAdd1 );
 }
 
 
 std::ostream& operator<<( std::ostream & stmOutput, const CqString& strString )
 {
-    stmOutput << strString.c_str();
-    return ( stmOutput );
+	stmOutput << strString.c_str();
+	return ( stmOutput );
 }
 
 

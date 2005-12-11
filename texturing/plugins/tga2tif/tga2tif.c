@@ -54,44 +54,53 @@ static char tiffname[ 1024 ];
  */
 __export char *tga2tif( char *in )
 {
-int errcode;
-char cmd[1024];
-char *result = NULL;
+	int errcode;
+	char cmd[1024];
+	char *result = NULL;
 
 
 	strcpy( tiffname, in );
-	if ( ( result = strstr( tiffname, ".TGA" ) ) != 0 ) strcpy( result, ".jpg" );
+	if ( ( result = strstr( tiffname, ".TGA" ) ) != 0 )
+		strcpy( result, ".jpg" );
 	if ( !result )
 	{
-		if ( ( result = strstr( tiffname, ".tga" ) ) != 0 ) strcpy( result, ".jpg" );
+		if ( ( result = strstr( tiffname, ".tga" ) ) != 0 )
+			strcpy( result, ".jpg" );
 	}
-	if ( !result ) return result;
+	if ( !result )
+		return result;
 
 #ifdef AQSIS_SYSTEM_WIN32
+
 	sprintf(cmd, "cjpeg.exe -targa %s > %s", in, tiffname);
 #else
+
 	sprintf(cmd, "cjpeg -targa %s > %s", in, tiffname);
 #endif
 
 	errcode = system(cmd);
 
-	if (errcode == 0) 
+	if (errcode == 0)
 	{
 		/* SUCCESS */
 		extern char *jpg2tif(char *name);
-		
-        char *jpgresult = jpg2tif(tiffname);
+
+		char *jpgresult = jpg2tif(tiffname);
 
 		/* delete the temporary .ppm file */
 		unlink(tiffname);
-		if (jpgresult) 
+		if (jpgresult)
 		{
 			strcpy(tiffname, jpgresult);
 			result = tiffname;
-		} else result = NULL;
-	} else {
+		}
+		else
+			result = NULL;
+	}
+	else
+	{
 		perror(cmd);
-		result = NULL; 
+		result = NULL;
 	}
 
 

@@ -23,7 +23,8 @@ class CqFunctionSignature
 	public:
 		CqFunctionSignature(SqFuncRef ref, CqFuncDef* func, TqInt weight, TqBool mustCast) : m_ref(ref), m_func(func), m_weight(weight), m_mustCast(mustCast)
 		{}
-		~CqFunctionSignature() {}
+		~CqFunctionSignature()
+		{}
 
 		const SqFuncRef& getRef() const
 		{
@@ -66,53 +67,53 @@ class CqFunctionSignature
 
 TqInt	CqParseNodeFunctionCall::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& needsCast, TqBool CheckOnly )
 {
-    TqInt NewType = Type_Nil;
-    TqInt cSpecifiedArgs = 0;
+	TqInt NewType = Type_Nil;
+	TqInt cSpecifiedArgs = 0;
 
-	// This is the priority queue that we will build for the available 
+	// This is the priority queue that we will build for the available
 	// signatures. The top entry will be the most suitable for use.
 	std::priority_queue<CqFunctionSignature> functions;
 
-    CqString strMyName = strName();
+	CqString strMyName = strName();
 
-    // Prepare the error string.
-    CqString strErr( strFileName() );
-    strErr += " : ";
-    strErr += CqString( LineNo() );
-    strErr += " : ";
-    strErr += strMyName;
-    strErr += " : ";
-    CqString strErrDesc = "Valid function declaration not found : ";
+	// Prepare the error string.
+	CqString strErr( strFileName() );
+	strErr += " : ";
+	strErr += CqString( LineNo() );
+	strErr += " : ";
+	strErr += strMyName;
+	strErr += " : ";
+	CqString strErrDesc = "Valid function declaration not found : ";
 
-    // First discard any function possibilities which don't have the correct number of arguments.
-    // Find out how many arguments have been specified.
-    CqParseNode* pArg = m_pChild;
-    while ( pArg != 0 )
-    {
-        cSpecifiedArgs++;
-        pArg = pArg->pNext();
-    }
+	// First discard any function possibilities which don't have the correct number of arguments.
+	// Find out how many arguments have been specified.
+	CqParseNode* pArg = m_pChild;
+	while ( pArg != 0 )
+	{
+		cSpecifiedArgs++;
+		pArg = pArg->pNext();
+	}
 
 
 	// Build the queue
-    std::vector<SqFuncRef>::iterator i;
-    for ( i = m_aFuncRef.begin(); i != m_aFuncRef.end();  )
-    {
-        CqFuncDef* pfunc = CqFuncDef::GetFunctionPtr( (*i) );
-        if( pfunc != 0 )
-        {
+	std::vector<SqFuncRef>::iterator i;
+	for ( i = m_aFuncRef.begin(); i != m_aFuncRef.end();  )
+	{
+		CqFuncDef* pfunc = CqFuncDef::GetFunctionPtr( (*i) );
+		if( pfunc != 0 )
+		{
 			TqInt weight = 0;
 			TqBool mustCast = TqFalse;
-            TqInt cArgs = pfunc->cTypeSpecLength();
-            if ( ( cArgs > 0 ) &&
-                 ( ( !pfunc->fVarying() && cArgs != cSpecifiedArgs ) ||
-                   (  pfunc->fVarying() && cSpecifiedArgs < cArgs ) ) )
-            {
+			TqInt cArgs = pfunc->cTypeSpecLength();
+			if ( ( cArgs > 0 ) &&
+			        ( ( !pfunc->fVarying() && cArgs != cSpecifiedArgs ) ||
+			          (  pfunc->fVarying() && cSpecifiedArgs < cArgs ) ) )
+			{
 				// This function isn't suitable for the arguments list, as the
 				// argument counts don't match. Don't add it to the queue.
 				i = m_aFuncRef.erase(i);
 				continue;
-            }
+			}
 			else
 			{
 				// Check the return type against the possible return types requested,
@@ -123,7 +124,7 @@ TqInt	CqParseNodeFunctionCall::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& n
 					// This signature cannot return any of the required types.
 					++i;
 					continue;
-				} 
+				}
 				else
 				{
 					// A function signature that can return one of the requested types without
@@ -148,7 +149,7 @@ TqInt	CqParseNodeFunctionCall::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& n
 				while(pArg != 0)
 				{
 					CqParseNode * pNext = pArg->pNext();
-					
+
 					// Check if this is a varying length argument function.
 					if ( pfunc->cTypeSpecLength() <= iArg || ( pfunc->fVarying() && pfunc->cTypeSpecLength() == iArg ) )
 					{
@@ -180,7 +181,7 @@ TqInt	CqParseNodeFunctionCall::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& n
 					}
 
 					pArg = pNext;
-					iArg++;					
+					iArg++;
 				}
 
 				// If we got this far, the function signature matches, and we have a weight
@@ -192,28 +193,28 @@ TqInt	CqParseNodeFunctionCall::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& n
 				}
 				else
 				{
-					// If the arguments check failed, this one can actually be removed from the list on the 
+					// If the arguments check failed, this one can actually be removed from the list on the
 					// node, as the arguments aren't going to change, only the potential return type
 					// for different calls to TypeCheck.
 					i = m_aFuncRef.erase(i);
 				}
 			}
-        }
+		}
 		else
 			++i;
-    }
+	}
 
 	// If we don't have any candidate function signatures at all, then there is an error, so report
 	// it and retun nil.
-    if( functions.empty() )
-    {
+	if( functions.empty() )
+	{
 		if(!CheckOnly)
 		{
 			strErr += "Arguments to function not valid : ";
 			throw( strErr );
 		}
 		return ( Type_Nil );
-    }
+	}
 
 	const CqFunctionSignature& best = functions.top();
 	needsCast = best.needsCast();
@@ -266,50 +267,52 @@ TqInt	CqParseNodeFunctionCall::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& n
 
 void CqParseNodeFunctionCall::CheckArgCast( std::vector<TqInt>& aRes )
 {
-    // Find out how many arguments have been specified.
-    TqUint cArgs = 0;
-    std::vector<TqInt> aArgTypes;
-    CqParseNode* pArg = m_pChild;
-    while ( pArg != 0 )
-    {
-        cArgs++;
-        aArgTypes.push_back( pArg->ResType() );
-        pArg = pArg->pNext();
-    }
+	// Find out how many arguments have been specified.
+	TqUint cArgs = 0;
+	std::vector<TqInt> aArgTypes;
+	CqParseNode* pArg = m_pChild;
+	while ( pArg != 0 )
+	{
+		cArgs++;
+		aArgTypes.push_back( pArg->ResType() );
+		pArg = pArg->pNext();
+	}
 
-    // For each posible declaration...
-    TqUint i;
-    for ( i = 0; i < aRes.size(); i++ )
-    {
-        CqFuncDef* pFuncDef = CqFuncDef::GetFunctionPtr( m_aFuncRef[ aRes[ i ] ] );
-        if ( pFuncDef == 0 ) continue;
+	// For each posible declaration...
+	TqUint i;
+	for ( i = 0; i < aRes.size(); i++ )
+	{
+		CqFuncDef* pFuncDef = CqFuncDef::GetFunctionPtr( m_aFuncRef[ aRes[ i ] ] );
+		if ( pFuncDef == 0 )
+			continue;
 
-        // ...build a list of variable types from its parameter type string.
-        std::vector<TqInt>& aTypes = pFuncDef->aTypeSpec();
+		// ...build a list of variable types from its parameter type string.
+		std::vector<TqInt>& aTypes = pFuncDef->aTypeSpec();
 
-        // Check the number of arguments first.
-        if ( ( aTypes.size() != cArgs && !pFuncDef->fVarying() ) ||
-                aTypes.size() > cArgs )
-        {
-            aRes.erase( aRes.begin() + i );
-            i--;
-            continue;
-        }
+		// Check the number of arguments first.
+		if ( ( aTypes.size() != cArgs && !pFuncDef->fVarying() ) ||
+		        aTypes.size() > cArgs )
+		{
+			aRes.erase( aRes.begin() + i );
+			i--;
+			continue;
+		}
 
-        // Now check through to see if the specified arguments can be converted to the required ones.
-        TqBool	fValid = TqTrue;
-        TqUint j;
+		// Now check through to see if the specified arguments can be converted to the required ones.
+		TqBool	fValid = TqTrue;
+		TqUint j;
 		TqInt index;
-        for ( j = 0; j < aTypes.size(); j++ )
-            if ( FindCast( aArgTypes[ j ], &aTypes[ j ], 1, index ) == Type_Nil ) fValid = TqFalse;
+		for ( j = 0; j < aTypes.size(); j++ )
+			if ( FindCast( aArgTypes[ j ], &aTypes[ j ], 1, index ) == Type_Nil )
+				fValid = TqFalse;
 
-        // If we have found a match, return it.
-        if ( !fValid )
-        {
-            aRes.erase( aRes.begin() + i );
-            i--;
-        }
-    }
+		// If we have found a match, return it.
+		if ( !fValid )
+		{
+			aRes.erase( aRes.begin() + i );
+			i--;
+		}
+	}
 }
 
 
@@ -319,26 +322,27 @@ void CqParseNodeFunctionCall::CheckArgCast( std::vector<TqInt>& aRes )
 
 void CqParseNodeFunctionCall::ArgCast( TqInt iIndex )
 {
-    // NOTE: It is presumed that CheckArgCast has been called prior to this to
-    // ensure that the argument list can validly be cast the the required parameters.
+	// NOTE: It is presumed that CheckArgCast has been called prior to this to
+	// ensure that the argument list can validly be cast the the required parameters.
 
-    CqFuncDef * pFuncDef = CqFuncDef::GetFunctionPtr( m_aFuncRef[ iIndex ] );
-    if ( pFuncDef == 0 ) return ;
+	CqFuncDef * pFuncDef = CqFuncDef::GetFunctionPtr( m_aFuncRef[ iIndex ] );
+	if ( pFuncDef == 0 )
+		return ;
 
-    // Build a list of variable types from its parameter type string.
-    std::vector<TqInt>& aTypes = pFuncDef->aTypeSpec();
+	// Build a list of variable types from its parameter type string.
+	std::vector<TqInt>& aTypes = pFuncDef->aTypeSpec();
 
-    // Now convert the arguments to the correct types
-    CqParseNode* pArg = m_pChild;
-    TqUint j = 0;
-    while ( pArg != 0 && j < aTypes.size() )
-    {
-        // Must get the next here incase the check inserts a cast.
-        CqParseNode * pNext = pArg->pNext();
+	// Now convert the arguments to the correct types
+	CqParseNode* pArg = m_pChild;
+	TqUint j = 0;
+	while ( pArg != 0 && j < aTypes.size() )
+	{
+		// Must get the next here incase the check inserts a cast.
+		CqParseNode * pNext = pArg->pNext();
 		TqBool needsCast;
-        pArg->TypeCheck( &aTypes[ j++ ], 1, needsCast, TqFalse );
-        pArg = pNext;
-    }
+		pArg->TypeCheck( &aTypes[ j++ ], 1, needsCast, TqFalse );
+		pArg = pNext;
+	}
 }
 
 
@@ -350,48 +354,48 @@ void CqParseNodeFunctionCall::ArgCast( TqInt iIndex )
 
 TqInt	CqParseNodeUnresolvedCall::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& needsCast, TqBool CheckOnly )
 {
-    TqInt NewType = Type_Nil;
+	TqInt NewType = Type_Nil;
 
-    // TypeCheck the args, we don't know what types will be needed
-    // later, so there is little else we can do. While doing so, rebuild the params string for the
+	// TypeCheck the args, we don't know what types will be needed
+	// later, so there is little else we can do. While doing so, rebuild the params string for the
 	// external declaration in the .slx
 	CqString strArgTypes("");
-    CqParseNode *pArg = m_pChild;
-    while (pArg != NULL)
-    {
-        CqParseNode *pNext = pArg->pNext();
-        pArg->TypeCheck( pAllTypes(), Type_Last - 1, needsCast, TqFalse );
+	CqParseNode *pArg = m_pChild;
+	while (pArg != NULL)
+	{
+		CqParseNode *pNext = pArg->pNext();
+		pArg->TypeCheck( pAllTypes(), Type_Last - 1, needsCast, TqFalse );
 		strArgTypes+=CqParseNode::TypeIdentifier(pArg->ResType());
-        pArg = pNext;
-    };
+		pArg = pNext;
+	};
 
-	// Store the newly decided parameter list string. This now reflects the actual parameter types 
+	// Store the newly decided parameter list string. This now reflects the actual parameter types
 	// passed in.
 	m_aFuncDef.SetstrParams(strArgTypes);
 
-    // If we have no type set yet we take the first type given as an option
-    if(m_aFuncDef.Type() == Type_Nil || !CheckOnly)
-    {
-        // Is Void acceptable, if so we prefer it.
-        int i;
-        for( i=0; i < Count; i++)
-        {
-            if( pTypes[i] == Type_Void)
-                NewType = Type_Void;
-        };
-        // Otherwise we fall back to the first option given
-        if( NewType == Type_Nil )
-            NewType = pTypes[0];
+	// If we have no type set yet we take the first type given as an option
+	if(m_aFuncDef.Type() == Type_Nil || !CheckOnly)
+	{
+		// Is Void acceptable, if so we prefer it.
+		int i;
+		for( i=0; i < Count; i++)
+		{
+			if( pTypes[i] == Type_Void)
+				NewType = Type_Void;
+		};
+		// Otherwise we fall back to the first option given
+		if( NewType == Type_Nil )
+			NewType = pTypes[0];
 
-        m_aFuncDef = CqFuncDef( NewType,
-                                m_aFuncDef.strName(),
-                                "unresolved",
-                                m_aFuncDef.strParams(),
-                                m_aFuncDef.pDefNode(),
-                                m_aFuncDef.pArgs());
-    };
+		m_aFuncDef = CqFuncDef( NewType,
+		                        m_aFuncDef.strName(),
+		                        "unresolved",
+		                        m_aFuncDef.strParams(),
+		                        m_aFuncDef.pDefNode(),
+		                        m_aFuncDef.pArgs());
+	};
 
-    return m_aFuncDef.Type();
+	return m_aFuncDef.Type();
 }
 
 
@@ -401,16 +405,16 @@ TqInt	CqParseNodeUnresolvedCall::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool&
 
 TqInt	CqParseNodeVariable::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& needsCast, TqBool CheckOnly )
 {
-    // Check if the variable type matches any of the requested ones.
-    TqInt	MyType = ( ResType() & Type_Mask );
-    TqInt i;
-    for ( i = 0; i < Count; i++ )
-    {
-        if ( pTypes[ i ] == MyType )
-            return ( MyType );
-    }
-    // If we got here, we are not of the correct type, so find a suitable cast.
-    TqInt index;
+	// Check if the variable type matches any of the requested ones.
+	TqInt	MyType = ( ResType() & Type_Mask );
+	TqInt i;
+	for ( i = 0; i < Count; i++ )
+	{
+		if ( pTypes[ i ] == MyType )
+			return ( MyType );
+	}
+	// If we got here, we are not of the correct type, so find a suitable cast.
+	TqInt index;
 	TqInt NewType = FindCast( MyType, pTypes, Count, index );
 	needsCast = TqTrue;
 	if(!CheckOnly)
@@ -419,19 +423,19 @@ TqInt	CqParseNodeVariable::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& needs
 		LinkParent( pCast );
 	}
 
-    if ( NewType == Type_Nil && !CheckOnly )
-    {
-        CqString strErr( strFileName() );
-        strErr += " : ";
-        strErr += LineNo();
-        strErr += " : ";
-        strErr += "Cannot convert from type ";
-        strErr += CqParseNode::TypeName( MyType );
-        strErr += " to any of the required types";
-        throw( strErr );
-        return ( Type_Nil );
-    }
-    return ( NewType );
+	if ( NewType == Type_Nil && !CheckOnly )
+	{
+		CqString strErr( strFileName() );
+		strErr += " : ";
+		strErr += LineNo();
+		strErr += " : ";
+		strErr += "Cannot convert from type ";
+		strErr += CqParseNode::TypeName( MyType );
+		strErr += " to any of the required types";
+		throw( strErr );
+		return ( Type_Nil );
+	}
+	return ( NewType );
 }
 
 
@@ -441,39 +445,39 @@ TqInt	CqParseNodeVariable::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& needs
 
 TqInt	CqParseNodeVariableArray::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& needsCast, TqBool CheckOnly )
 {
-    // Check if the child can be made into a float.
-    TqInt aType = Type_Float;
+	// Check if the child can be made into a float.
+	TqInt aType = Type_Float;
 	TqBool temp;
-    if ( m_pChild && m_pChild->TypeCheck( &aType, 1, temp, CheckOnly ) == Type_Nil )
-    {
-        TqInt	IndexType = ( m_pChild->ResType() & Type_Mask );
-        CqString strErr( strFileName() );
-        strErr += " : ";
-        strErr += LineNo();
-        strErr += " : ";
-        strErr += "Array index must be float type : ";
-        strErr += CqParseNode::TypeName( IndexType );
-        throw( strErr );
-        return ( Type_Nil );
-    }
+	if ( m_pChild && m_pChild->TypeCheck( &aType, 1, temp, CheckOnly ) == Type_Nil )
+	{
+		TqInt	IndexType = ( m_pChild->ResType() & Type_Mask );
+		CqString strErr( strFileName() );
+		strErr += " : ";
+		strErr += LineNo();
+		strErr += " : ";
+		strErr += "Array index must be float type : ";
+		strErr += CqParseNode::TypeName( IndexType );
+		throw( strErr );
+		return ( Type_Nil );
+	}
 
 	// Check if the variable is an array.
 	CqVarDef* pVar=CqVarDef::GetVariablePtr(m_VarRef);
 	// Check if the declaration marked it as an arry
 	if(!(pVar->Type()&Type_Array))
 	{
-        TqInt	myType = ( ResType() & Type_Mask );
-        CqString strErr( strFileName() );
-        strErr += " : ";
-        strErr += LineNo();
-        strErr += " : ";
-        strErr += "Attempt to access array member of non-array type : ";
-        strErr += CqParseNode::TypeName( myType );
-        throw( strErr );
-        return ( Type_Nil );
+		TqInt	myType = ( ResType() & Type_Mask );
+		CqString strErr( strFileName() );
+		strErr += " : ";
+		strErr += LineNo();
+		strErr += " : ";
+		strErr += "Attempt to access array member of non-array type : ";
+		strErr += CqParseNode::TypeName( myType );
+		throw( strErr );
+		return ( Type_Nil );
 	}
 
-    return ( CqParseNodeVariable::TypeCheck( pTypes, Count, needsCast, CheckOnly ) );
+	return ( CqParseNodeVariable::TypeCheck( pTypes, Count, needsCast, CheckOnly ) );
 }
 
 
@@ -485,60 +489,60 @@ extern EqShaderType gShaderType;
 
 TqInt	CqParseNodeAssign::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& needsCast, TqBool CheckOnly )
 {
-    // First check if the assign is to a read only variable.
-    if( CqVarDef::GetVariablePtr( m_VarRef ) &&
-            pShaderNode() &&
-            CqVarDef::GetVariablePtr( m_VarRef )->ReadOnly( pShaderNode()->ShaderType() ) )
-    {
-        CqString strErr( strFileName() );
-        strErr += " : ";
-        strErr += LineNo();
-        strErr += " : ";
-        strErr += "Cannot access read only variable '";
-        strErr += CqVarDef::GetVariablePtr( m_VarRef )->strName();
-        strErr += "' in shader type '";
-        strErr += gShaderTypeNames[ pShaderNode()->ShaderType() ];
-        strErr += "'";
-        throw( strErr );
-        return ( Type_Nil );
-    }
+	// First check if the assign is to a read only variable.
+	if( CqVarDef::GetVariablePtr( m_VarRef ) &&
+	        pShaderNode() &&
+	        CqVarDef::GetVariablePtr( m_VarRef )->ReadOnly( pShaderNode()->ShaderType() ) )
+	{
+		CqString strErr( strFileName() );
+		strErr += " : ";
+		strErr += LineNo();
+		strErr += " : ";
+		strErr += "Cannot access read only variable '";
+		strErr += CqVarDef::GetVariablePtr( m_VarRef )->strName();
+		strErr += "' in shader type '";
+		strErr += gShaderTypeNames[ pShaderNode()->ShaderType() ];
+		strErr += "'";
+		throw( strErr );
+		return ( Type_Nil );
+	}
 
-    TqInt	MyType = ( ResType() & Type_Mask );
-    // Type check the assignment expression first.
-    CqParseNode* pExpr = m_pChild;
-    if ( pExpr->TypeCheck( &MyType, 1, needsCast, CheckOnly ) != MyType )
-        return ( Type_Nil );	// TODO: Should throw an exception here.
+	TqInt	MyType = ( ResType() & Type_Mask );
+	// Type check the assignment expression first.
+	CqParseNode* pExpr = m_pChild;
+	if ( pExpr->TypeCheck( &MyType, 1, needsCast, CheckOnly ) != MyType )
+		return ( Type_Nil );	// TODO: Should throw an exception here.
 
-    // Check if the variable type matches any of the requested ones.
-    TqInt i;
-    for ( i = 0; i < Count; i++ )
-    {
-        if ( pTypes[ i ] == MyType )
-            return ( MyType );
-    }
-    // If we got here, we are not of the correct type, so find a suitable cast.
-    TqInt index;
+	// Check if the variable type matches any of the requested ones.
+	TqInt i;
+	for ( i = 0; i < Count; i++ )
+	{
+		if ( pTypes[ i ] == MyType )
+			return ( MyType );
+	}
+	// If we got here, we are not of the correct type, so find a suitable cast.
+	TqInt index;
 	TqInt NewType = FindCast( MyType, pTypes, Count, index );
 	needsCast = TqTrue;
-    if(!CheckOnly)
+	if(!CheckOnly)
 	{
 		CqParseNodeCast* pCast = new CqParseNodeCast( NewType );
 		LinkParent( pCast );
 	}
 
-    if ( NewType == Type_Nil && !CheckOnly )
-    {
-        CqString strErr( strFileName() );
-        strErr += " : ";
-        strErr += LineNo();
-        strErr += " : ";
-        strErr += "Cannot convert from type ";
-        strErr += CqParseNode::TypeName( MyType );
-        strErr += " to any of the required types";
-        throw( strErr );
-        return ( Type_Nil );
-    }
-    return ( NewType );
+	if ( NewType == Type_Nil && !CheckOnly )
+	{
+		CqString strErr( strFileName() );
+		strErr += " : ";
+		strErr += LineNo();
+		strErr += " : ";
+		strErr += "Cannot convert from type ";
+		strErr += CqParseNode::TypeName( MyType );
+		strErr += " to any of the required types";
+		throw( strErr );
+		return ( Type_Nil );
+	}
+	return ( NewType );
 }
 
 
@@ -548,23 +552,23 @@ TqInt	CqParseNodeAssign::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& needsCa
 
 TqInt	CqParseNodeAssignArray::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& needsCast, TqBool CheckOnly )
 {
-    // Check if the child can be made into a float.
-    TqInt aType = Type_Float;
+	// Check if the child can be made into a float.
+	TqInt aType = Type_Float;
 	TqBool temp;
-    if ( m_pChild->pNext() ->TypeCheck( &aType, 1, temp, CheckOnly ) == Type_Nil )
-    {
-        TqInt	IndexType = ( m_pChild->pNext() ->ResType() & Type_Mask );
-        CqString strErr( strFileName() );
-        strErr += " : ";
-        strErr += LineNo();
-        strErr += " : ";
-        strErr += "Array index must be float type : ";
-        strErr += CqParseNode::TypeName( IndexType );
-        throw( strErr );
-        return ( Type_Nil );
-    }
+	if ( m_pChild->pNext() ->TypeCheck( &aType, 1, temp, CheckOnly ) == Type_Nil )
+	{
+		TqInt	IndexType = ( m_pChild->pNext() ->ResType() & Type_Mask );
+		CqString strErr( strFileName() );
+		strErr += " : ";
+		strErr += LineNo();
+		strErr += " : ";
+		strErr += "Array index must be float type : ";
+		strErr += CqParseNode::TypeName( IndexType );
+		throw( strErr );
+		return ( Type_Nil );
+	}
 
-    return ( CqParseNodeAssign::TypeCheck( pTypes, Count, needsCast, CheckOnly ) );
+	return ( CqParseNodeAssign::TypeCheck( pTypes, Count, needsCast, CheckOnly ) );
 }
 
 
@@ -574,45 +578,45 @@ TqInt	CqParseNodeAssignArray::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& ne
 
 TqInt	CqParseNodeOp::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& needsCast, TqBool CheckOnly )
 {
-    // Check if both arguments to the operator match type.
-    CqParseNode * pOperandA = m_pChild;
-    CqParseNode* pOperandB = m_pChild->pNext();
-    assert( pOperandA != 0 && pOperandB != 0 );
-    TqInt TypeA = ( pOperandA->ResType() & Type_Mask );
-    TqInt TypeB = ( pOperandB->ResType() & Type_Mask );
+	// Check if both arguments to the operator match type.
+	CqParseNode * pOperandA = m_pChild;
+	CqParseNode* pOperandB = m_pChild->pNext();
+	assert( pOperandA != 0 && pOperandB != 0 );
+	TqInt TypeA = ( pOperandA->ResType() & Type_Mask );
+	TqInt TypeB = ( pOperandB->ResType() & Type_Mask );
 
-    // See if they can both be cast to a requested type.
-    TqInt i;
-    for ( i = 0; i < Count; i++ )
-    {
-        TqInt index;
+	// See if they can both be cast to a requested type.
+	TqInt i;
+	for ( i = 0; i < Count; i++ )
+	{
+		TqInt index;
 		if ( FindCast( TypeA, &pTypes[ i ], 1, index ) != Type_Nil )
-        {
-            if ( FindCast( TypeB, &pTypes[ i ], 1, index ) != Type_Nil )
-            {
-                // Add any cast operators required.
-                if(!CheckOnly)
+		{
+			if ( FindCast( TypeB, &pTypes[ i ], 1, index ) != Type_Nil )
+			{
+				// Add any cast operators required.
+				if(!CheckOnly)
 				{
 					pOperandA->TypeCheck( &pTypes[ i ], 1, needsCast, CheckOnly );
 					pOperandB->TypeCheck( &pTypes[ i ], 1, needsCast, CheckOnly );
 				}
-                return ( pTypes[ i ] );
-            }
-        }
-    }
+				return ( pTypes[ i ] );
+			}
+		}
+	}
 
-    if ( !CheckOnly )
-    {
-        CqString strErr( strFileName() );
-        strErr += " : ";
-        strErr += LineNo();
-        strErr += " : ";
-        strErr += "Cannot find a suitable cast for the operands.";
-        throw( strErr );
-        return ( Type_Nil );
-    }
+	if ( !CheckOnly )
+	{
+		CqString strErr( strFileName() );
+		strErr += " : ";
+		strErr += LineNo();
+		strErr += " : ";
+		strErr += "Cannot find a suitable cast for the operands.";
+		throw( strErr );
+		return ( Type_Nil );
+	}
 
-    return ( Type_Nil );
+	return ( Type_Nil );
 }
 
 
@@ -622,20 +626,20 @@ TqInt	CqParseNodeOp::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& needsCast, 
 
 TqInt	CqParseNodeRelOp::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& needsCast, TqBool CheckOnly )
 {
-    TqInt RelType;
-    RelType = CqParseNodeOp::TypeCheck( pAllTypes(), Type_Last - 1, needsCast, CheckOnly );  
+	TqInt RelType;
+	RelType = CqParseNodeOp::TypeCheck( pAllTypes(), Type_Last - 1, needsCast, CheckOnly );
 
-    if( RelType == Type_Nil)
-    	return( RelType );
+	if( RelType == Type_Nil)
+		return( RelType );
 
-    // See if float is a requested type.
-    TqInt NewType, index;
-    if ( ( NewType = FindCast( Type_Float, pTypes, Count, index ) ) != Type_Nil )
-    {
-        if ( NewType == Type_Float ) 
+	// See if float is a requested type.
+	TqInt NewType, index;
+	if ( ( NewType = FindCast( Type_Float, pTypes, Count, index ) ) != Type_Nil )
+	{
+		if ( NewType == Type_Float )
 			return ( Type_Float );
-        else
-        {
+		else
+		{
 			needsCast = TqTrue;
 			if(!CheckOnly)
 			{
@@ -643,21 +647,21 @@ TqInt	CqParseNodeRelOp::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& needsCas
 				LinkParent( pCast );
 			}
 			return ( NewType );
-        }
-    }
+		}
+	}
 
-    if ( !CheckOnly )
-    {
-        CqString strErr( strFileName() );
-        strErr += " : ";
-        strErr += LineNo();
-        strErr += " : ";
-        strErr += "Relational can operators only return float.";
-        throw( strErr );
-        return ( Type_Nil );
-    }
+	if ( !CheckOnly )
+	{
+		CqString strErr( strFileName() );
+		strErr += " : ";
+		strErr += LineNo();
+		strErr += " : ";
+		strErr += "Relational can operators only return float.";
+		throw( strErr );
+		return ( Type_Nil );
+	}
 
-    return ( Type_Nil );
+	return ( Type_Nil );
 }
 
 
@@ -667,11 +671,11 @@ TqInt	CqParseNodeRelOp::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& needsCas
 
 TqInt	CqParseNodeUnaryOp::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& needsCast, TqBool CheckOnly )
 {
-    // Check if the operand can be cast to a requested type.
-    if ( m_pChild != 0 )
-        return ( m_pChild->TypeCheck( pTypes, Count, needsCast, CheckOnly ) );
-    else
-        return ( Type_Nil );
+	// Check if the operand can be cast to a requested type.
+	if ( m_pChild != 0 )
+		return ( m_pChild->TypeCheck( pTypes, Count, needsCast, CheckOnly ) );
+	else
+		return ( Type_Nil );
 }
 
 
@@ -681,68 +685,68 @@ TqInt	CqParseNodeUnaryOp::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& needsC
 
 TqInt	CqParseNodeMathOpDot::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& needsCast, TqBool CheckOnly )
 {
-    static TqInt aArgTypes[ 3 ] = {Type_Point, Type_Vector, Type_Normal};
+	static TqInt aArgTypes[ 3 ] = {Type_Point, Type_Vector, Type_Normal};
 
-    // Get the argument types.
-    CqParseNode* pOperandA = m_pChild;
-    CqParseNode* pOperandB = m_pChild->pNext();
-    assert( pOperandA != 0 && pOperandB != 0 );
-    TqInt TypeA = ( pOperandA->ResType() & Type_Mask );
-    TqInt TypeB = ( pOperandB->ResType() & Type_Mask );
+	// Get the argument types.
+	CqParseNode* pOperandA = m_pChild;
+	CqParseNode* pOperandB = m_pChild->pNext();
+	assert( pOperandA != 0 && pOperandB != 0 );
+	TqInt TypeA = ( pOperandA->ResType() & Type_Mask );
+	TqInt TypeB = ( pOperandB->ResType() & Type_Mask );
 
-    // Dot operator can only take normal/vector/point types, check the
-    // arguments can be made to match this, and always returns a float,
-    // check this is valid.
+	// Dot operator can only take normal/vector/point types, check the
+	// arguments can be made to match this, and always returns a float,
+	// check this is valid.
 
-    TqInt RetType, index;
-    if ( ( RetType = FindCast( Type_Float, pTypes, Count, index ) ) != Type_Nil )
-    {
-        TqBool fValid = TqFalse;
-        TqUint i;
-        for ( i = 0; i < sizeof( aArgTypes ) / sizeof( aArgTypes[ 0 ] ); i++ )
-        {
-            if ( FindCast( TypeA, &aArgTypes[ i ], 1, index ) != Type_Nil )
-            {
-                if ( FindCast( TypeB, &aArgTypes[ i ], 1, index ) != Type_Nil )
-                {
-                    // Add any cast operators required.
-                    if(!CheckOnly)
+	TqInt RetType, index;
+	if ( ( RetType = FindCast( Type_Float, pTypes, Count, index ) ) != Type_Nil )
+	{
+		TqBool fValid = TqFalse;
+		TqUint i;
+		for ( i = 0; i < sizeof( aArgTypes ) / sizeof( aArgTypes[ 0 ] ); i++ )
+		{
+			if ( FindCast( TypeA, &aArgTypes[ i ], 1, index ) != Type_Nil )
+			{
+				if ( FindCast( TypeB, &aArgTypes[ i ], 1, index ) != Type_Nil )
+				{
+					// Add any cast operators required.
+					if(!CheckOnly)
 					{
 						pOperandA->TypeCheck( &aArgTypes[ i ], 1, needsCast, CheckOnly );
 						pOperandB->TypeCheck( &aArgTypes[ i ], 1, needsCast, CheckOnly );
 					}
-                    fValid = TqTrue;
-                    break;
-                }
-            }
-        }
-        if ( fValid )
-        {
-            if ( RetType != Type_Float)
-            {
+					fValid = TqTrue;
+					break;
+				}
+			}
+		}
+		if ( fValid )
+		{
+			if ( RetType != Type_Float)
+			{
 				needsCast = TqTrue;
 				if(!CheckOnly)
 				{
 					CqParseNodeCast * pCast = new CqParseNodeCast( RetType );
 					LinkParent( pCast );
 				}
-            }
-            return ( RetType );
-        }
-    }
+			}
+			return ( RetType );
+		}
+	}
 
-    if ( !CheckOnly )
-    {
-        CqString strErr( strFileName() );
-        strErr += " : ";
-        strErr += LineNo();
-        strErr += " : ";
-        strErr += "Cannot find a suitable cast for the operands.";
-        throw( strErr );
-        return ( Type_Nil );
-    }
+	if ( !CheckOnly )
+	{
+		CqString strErr( strFileName() );
+		strErr += " : ";
+		strErr += LineNo();
+		strErr += " : ";
+		strErr += "Cannot find a suitable cast for the operands.";
+		throw( strErr );
+		return ( Type_Nil );
+	}
 
-    return ( Type_Nil );
+	return ( Type_Nil );
 }
 
 
@@ -752,38 +756,38 @@ TqInt	CqParseNodeMathOpDot::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& need
 
 TqInt CqParseNodeConst::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& needsCast, TqBool CheckOnly )
 {
-    // Check if the variable type matches any of the requested ones.
-    TqInt	MyType = ResType();
-    TqInt i;
-    for ( i = 0; i < Count; i++ )
-    {
-        if ( pTypes[ i ] == MyType )
-            return ( MyType );
-    }
-
-    // If we got here, we are not of the correct type, so find a suitable cast.
-    TqInt index;
-	TqInt NewType = FindCast( MyType, pTypes, Count, index );
-	needsCast = TqTrue;
-    if ( !CheckOnly )
-    {
-        CqParseNodeCast * pCast = new CqParseNodeCast( NewType );
-        LinkParent( pCast );
+	// Check if the variable type matches any of the requested ones.
+	TqInt	MyType = ResType();
+	TqInt i;
+	for ( i = 0; i < Count; i++ )
+	{
+		if ( pTypes[ i ] == MyType )
+			return ( MyType );
 	}
 
-    if ( NewType == Type_Nil && !CheckOnly )
-    {
-        CqString strErr( strFileName() );
-        strErr += " : ";
-        strErr += LineNo();
-        strErr += " : ";
-        strErr += "Cannot convert from type ";
-        strErr += CqParseNode::TypeName( MyType );
-        strErr += " to any of the required types";
-        throw( strErr );
-        return ( Type_Nil );
-    }
-    return ( NewType );
+	// If we got here, we are not of the correct type, so find a suitable cast.
+	TqInt index;
+	TqInt NewType = FindCast( MyType, pTypes, Count, index );
+	needsCast = TqTrue;
+	if ( !CheckOnly )
+	{
+		CqParseNodeCast * pCast = new CqParseNodeCast( NewType );
+		LinkParent( pCast );
+	}
+
+	if ( NewType == Type_Nil && !CheckOnly )
+	{
+		CqString strErr( strFileName() );
+		strErr += " : ";
+		strErr += LineNo();
+		strErr += " : ";
+		strErr += "Cannot convert from type ";
+		strErr += CqParseNode::TypeName( MyType );
+		strErr += " to any of the required types";
+		throw( strErr );
+		return ( Type_Nil );
+	}
+	return ( NewType );
 }
 
 
@@ -793,43 +797,44 @@ TqInt CqParseNodeConst::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& needsCas
 
 TqInt	CqParseNodeCast::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& needsCast, TqBool CheckOnly )
 {
-    // Perform a typecheck on the cast expression
-    CqParseNode * pExpr = m_pChild;
-    pExpr->TypeCheck( &m_tTo, 1, needsCast, CheckOnly );
+	// Perform a typecheck on the cast expression
+	CqParseNode * pExpr = m_pChild;
+	pExpr->TypeCheck( &m_tTo, 1, needsCast, CheckOnly );
 
-    // Check the return type, and add another cast if necessary.
-    // Note: We add another cast to allow for forced casts of function return types,
-    // i.e. we want the sl code "Ci=float noise(P)"
-    // to call float noise THEN cast to a color, not call color noise.
-    TqInt i;
-    for ( i = 0; i < Count; i++ )
-        if ( pTypes[ i ] == m_tTo ) return ( m_tTo );
+	// Check the return type, and add another cast if necessary.
+	// Note: We add another cast to allow for forced casts of function return types,
+	// i.e. we want the sl code "Ci=float noise(P)"
+	// to call float noise THEN cast to a color, not call color noise.
+	TqInt i;
+	for ( i = 0; i < Count; i++ )
+		if ( pTypes[ i ] == m_tTo )
+			return ( m_tTo );
 
-    TqInt index;
+	TqInt index;
 	TqInt NewType = FindCast( m_tTo, pTypes, Count, index );
-    if ( NewType == Type_Nil && !CheckOnly )
-    {
-        CqString strErr( strFileName() );
-        strErr += " : ";
-        strErr += LineNo();
-        strErr += " : ";
-        strErr += "Cannot convert from type ";
-        strErr += CqParseNode::TypeName( NewType );
-        strErr += " to any of the required types";
-        throw( strErr );
-        return ( Type_Nil );
-    }
-    else
-    {
+	if ( NewType == Type_Nil && !CheckOnly )
+	{
+		CqString strErr( strFileName() );
+		strErr += " : ";
+		strErr += LineNo();
+		strErr += " : ";
+		strErr += "Cannot convert from type ";
+		strErr += CqParseNode::TypeName( NewType );
+		strErr += " to any of the required types";
+		throw( strErr );
+		return ( Type_Nil );
+	}
+	else
+	{
 		needsCast = TqTrue;
-        if ( !CheckOnly )
-        {
-            CqParseNodeCast * pCast = new CqParseNodeCast( NewType );
-            LinkParent( pCast );
-        }
-    }
+		if ( !CheckOnly )
+		{
+			CqParseNodeCast * pCast = new CqParseNodeCast( NewType );
+			LinkParent( pCast );
+		}
+	}
 
-    return ( NewType );
+	return ( NewType );
 }
 
 
@@ -839,42 +844,43 @@ TqInt	CqParseNodeCast::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& needsCast
 
 TqInt	CqParseNodeTriple::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& needsCast, TqBool CheckOnly )
 {
-    static TqInt ExprType = Type_Float;
-    // Perform a typecheck on the three float expressions
-    CqParseNode* pExpr = m_pChild;
-    while ( pExpr != 0 )
-    {
-        pExpr->TypeCheck( &ExprType, 1, needsCast, CheckOnly );
-        pExpr = pExpr->pNext();
-    }
-    // Check if expecting a triple, if not add a cast
-    TqInt i;
-    for ( i = 0; i < Count; i++ )
-        if ( pTypes[ i ] == Type_Triple ) return ( Type_Triple );
+	static TqInt ExprType = Type_Float;
+	// Perform a typecheck on the three float expressions
+	CqParseNode* pExpr = m_pChild;
+	while ( pExpr != 0 )
+	{
+		pExpr->TypeCheck( &ExprType, 1, needsCast, CheckOnly );
+		pExpr = pExpr->pNext();
+	}
+	// Check if expecting a triple, if not add a cast
+	TqInt i;
+	for ( i = 0; i < Count; i++ )
+		if ( pTypes[ i ] == Type_Triple )
+			return ( Type_Triple );
 
-    // If we got here, we are not of the correct type, so find a suitable cast.
+	// If we got here, we are not of the correct type, so find a suitable cast.
 	needsCast = TqTrue;
-    TqInt index;
+	TqInt index;
 	TqInt NewType = FindCast( Type_Triple, pTypes, Count, index );
-    if(!CheckOnly)
+	if(!CheckOnly)
 	{
 		CqParseNodeCast* pCast = new CqParseNodeCast( NewType );
 		LinkParent( pCast );
 	}
 
-    if ( NewType == Type_Nil && !CheckOnly )
-    {
-        CqString strErr( strFileName() );
-        strErr += " : ";
-        strErr += LineNo();
-        strErr += " : ";
-        strErr += "Cannot convert from type ";
-        strErr += CqParseNode::TypeName( NewType );
-        strErr += " to any of the required types";
-        throw( strErr );
-        return ( Type_Nil );
-    }
-    return ( NewType );
+	if ( NewType == Type_Nil && !CheckOnly )
+	{
+		CqString strErr( strFileName() );
+		strErr += " : ";
+		strErr += LineNo();
+		strErr += " : ";
+		strErr += "Cannot convert from type ";
+		strErr += CqParseNode::TypeName( NewType );
+		strErr += " to any of the required types";
+		throw( strErr );
+		return ( Type_Nil );
+	}
+	return ( NewType );
 }
 
 
@@ -884,42 +890,43 @@ TqInt	CqParseNodeTriple::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& needsCa
 
 TqInt	CqParseNodeHexTuple::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& needsCast, TqBool CheckOnly )
 {
-    static TqInt ExprType = Type_Float;
-    // Perform a typecheck on the three float expressions
-    CqParseNode* pExpr = m_pChild;
-    while ( pExpr != 0 )
-    {
-        pExpr->TypeCheck( &ExprType, 1, needsCast, CheckOnly );
-        pExpr = pExpr->pNext();
-    }
-    // Check if expecting a sixteentuple, if not add a cast
-    TqInt i;
-    for ( i = 0; i < Count; i++ )
-        if ( pTypes[ i ] == Type_HexTuple ) return ( Type_HexTuple );
+	static TqInt ExprType = Type_Float;
+	// Perform a typecheck on the three float expressions
+	CqParseNode* pExpr = m_pChild;
+	while ( pExpr != 0 )
+	{
+		pExpr->TypeCheck( &ExprType, 1, needsCast, CheckOnly );
+		pExpr = pExpr->pNext();
+	}
+	// Check if expecting a sixteentuple, if not add a cast
+	TqInt i;
+	for ( i = 0; i < Count; i++ )
+		if ( pTypes[ i ] == Type_HexTuple )
+			return ( Type_HexTuple );
 
-    // If we got here, we are not of the correct type, so find a suitable cast.
+	// If we got here, we are not of the correct type, so find a suitable cast.
 	needsCast = TqTrue;
-    TqInt index;
+	TqInt index;
 	TqInt NewType = FindCast( Type_Matrix, pTypes, Count, index );
-    if(!CheckOnly)
+	if(!CheckOnly)
 	{
 		CqParseNodeCast* pCast = new CqParseNodeCast( NewType );
 		LinkParent( pCast );
 	}
 
-    if ( NewType == Type_Nil && !CheckOnly )
-    {
-        CqString strErr( strFileName() );
-        strErr += " : ";
-        strErr += LineNo();
-        strErr += " : ";
-        strErr += "Cannot convert from type ";
-        strErr += CqParseNode::TypeName( NewType );
-        strErr += " to any of the required types";
-        throw( strErr );
-        return ( Type_Nil );
-    }
-    return ( NewType );
+	if ( NewType == Type_Nil && !CheckOnly )
+	{
+		CqString strErr( strFileName() );
+		strErr += " : ";
+		strErr += LineNo();
+		strErr += " : ";
+		strErr += "Cannot convert from type ";
+		strErr += CqParseNode::TypeName( NewType );
+		strErr += " to any of the required types";
+		throw( strErr );
+		return ( Type_Nil );
+	}
+	return ( NewType );
 }
 
 
@@ -928,37 +935,37 @@ TqInt	CqParseNodeHexTuple::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& needs
 
 TqInt CqParseNodeCommFunction::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& needsCast, TqBool CheckOnly )
 {
-    // Check if the variable type matches any of the requested ones.
-    TqInt	MyType = ResType();
-    TqInt i;
-    for ( i = 0; i < Count; i++ )
-    {
-        if ( pTypes[ i ] == MyType )
-            return ( MyType );
-    }
-    // If we got here, we are not of the correct type, so find a suitable cast.
+	// Check if the variable type matches any of the requested ones.
+	TqInt	MyType = ResType();
+	TqInt i;
+	for ( i = 0; i < Count; i++ )
+	{
+		if ( pTypes[ i ] == MyType )
+			return ( MyType );
+	}
+	// If we got here, we are not of the correct type, so find a suitable cast.
 	needsCast = TqTrue;
-    TqInt index;
+	TqInt index;
 	TqInt NewType = FindCast( MyType, pTypes, Count, index );
-    if(!CheckOnly)
+	if(!CheckOnly)
 	{
 		CqParseNodeCast* pCast = new CqParseNodeCast( NewType );
 		LinkParent( pCast );
 	}
 
-    if ( NewType == Type_Nil && !CheckOnly )
-    {
-        CqString strErr( strFileName() );
-        strErr += " : ";
-        strErr += LineNo();
-        strErr += " : ";
-        strErr += "Cannot convert from type ";
-        strErr += CqParseNode::TypeName( MyType );
-        strErr += " to any of the required types";
-        throw( strErr );
-        return ( Type_Nil );
-    }
-    return ( NewType );
+	if ( NewType == Type_Nil && !CheckOnly )
+	{
+		CqString strErr( strFileName() );
+		strErr += " : ";
+		strErr += LineNo();
+		strErr += " : ";
+		strErr += "Cannot convert from type ";
+		strErr += CqParseNode::TypeName( MyType );
+		strErr += " to any of the required types";
+		throw( strErr );
+		return ( Type_Nil );
+	}
+	return ( NewType );
 }
 
 
@@ -968,52 +975,52 @@ TqInt CqParseNodeCommFunction::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& n
 
 TqInt	CqParseNodeQCond::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& needsCast, TqBool CheckOnly )
 {
-    // Ensure that the conditional expression is type checked.
-    CqParseNode * pCondExp = m_pChild;
-    assert( pCondExp != 0 );
-    pCondExp->TypeCheck( pAllTypes(), Type_Last - 1, needsCast, CheckOnly );
+	// Ensure that the conditional expression is type checked.
+	CqParseNode * pCondExp = m_pChild;
+	assert( pCondExp != 0 );
+	pCondExp->TypeCheck( pAllTypes(), Type_Last - 1, needsCast, CheckOnly );
 
-    // Check if both expressions match type.
-    CqParseNode * pTrue = m_pChild->pNext();
-    assert( pTrue != 0 );
-    CqParseNode* pFalse = pTrue->pNext();
-    assert( pFalse != 0 );
+	// Check if both expressions match type.
+	CqParseNode * pTrue = m_pChild->pNext();
+	assert( pTrue != 0 );
+	CqParseNode* pFalse = pTrue->pNext();
+	assert( pFalse != 0 );
 
-    TqInt TypeT = ( pTrue->ResType() & Type_Mask );
-    TqInt TypeF = ( pFalse->ResType() & Type_Mask );
+	TqInt TypeT = ( pTrue->ResType() & Type_Mask );
+	TqInt TypeF = ( pFalse->ResType() & Type_Mask );
 
-    // See if they can both be cast to a requested type.
-    TqInt i;
-    for ( i = 0; i < Count; i++ )
-    {
+	// See if they can both be cast to a requested type.
+	TqInt i;
+	for ( i = 0; i < Count; i++ )
+	{
 		TqInt index;
-        if ( FindCast( TypeT, &pTypes[ i ], 1, index ) != Type_Nil )
-        {
-            if ( FindCast( TypeF, &pTypes[ i ], 1, index ) != Type_Nil )
-            {
-                // Add any cast operators required.
-                if(!CheckOnly)
+		if ( FindCast( TypeT, &pTypes[ i ], 1, index ) != Type_Nil )
+		{
+			if ( FindCast( TypeF, &pTypes[ i ], 1, index ) != Type_Nil )
+			{
+				// Add any cast operators required.
+				if(!CheckOnly)
 				{
 					pTrue->TypeCheck( &pTypes[ i ], 1, needsCast, CheckOnly );
 					pFalse->TypeCheck( &pTypes[ i ], 1, needsCast, CheckOnly );
 				}
-                return ( pTypes[ i ] );
-            }
-        }
-    }
+				return ( pTypes[ i ] );
+			}
+		}
+	}
 
-    if ( !CheckOnly )
-    {
-        CqString strErr( strFileName() );
-        strErr += " : ";
-        strErr += LineNo();
-        strErr += " : ";
-        strErr += "Cannot find a suitable cast for the expressions.";
-        throw( strErr );
-        return ( Type_Nil );
-    }
+	if ( !CheckOnly )
+	{
+		CqString strErr( strFileName() );
+		strErr += " : ";
+		strErr += LineNo();
+		strErr += " : ";
+		strErr += "Cannot find a suitable cast for the expressions.";
+		throw( strErr );
+		return ( Type_Nil );
+	}
 
-    return ( Type_Nil );
+	return ( Type_Nil );
 }
 
 

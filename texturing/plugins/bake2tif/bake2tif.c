@@ -78,12 +78,15 @@ __export char *bake2tif( char *in )
 		size = atoi( result );
 
 	strcpy( tiffname, in );
-	if ( ( result = strstr( tiffname, ".bake" ) ) != 0 ) strcpy( result, ".tif" );
+	if ( ( result = strstr( tiffname, ".bake" ) ) != 0 )
+		strcpy( result, ".tif" );
 	if ( !result )
 	{
-		if ( ( result = strstr( tiffname, ".bake" ) ) != 0 ) strcpy( result, ".tif" );
+		if ( ( result = strstr( tiffname, ".bake" ) ) != 0 )
+			strcpy( result, ".tif" );
 	}
-	if ( !result ) return result;
+	if ( !result )
+		return result;
 
 	bakefile = fopen( in, "rb" );
 	result = bake_open( bakefile, tiffname );
@@ -100,18 +103,21 @@ __export char *bake2tif( char *in )
 
 static int lerp(int maxy, int miny, int maxx, int minx, int x)
 {
-int result = minx;
-float ratio = 1.0;
+	int result = minx;
+	float ratio = 1.0;
 
-    if (x == maxx) return maxy;
-    if (x == minx) return miny;
-	if (maxx == minx) return miny;
-	else 
+	if (x == maxx)
+		return maxy;
+	if (x == minx)
+		return miny;
+	if (maxx == minx)
+		return miny;
+	else
 		ratio = 1.0f - (float) (maxx - x) / (float) (maxx - minx);
 	result = miny + (int) (ratio * (maxy - miny));
 
-	
-    return result;
+
+	return result;
 }
 
 /*
@@ -135,7 +141,8 @@ static char *bake_open( FILE *bakefile, char *tiffname )
 	while ( fgets( buffer, 200, bakefile ) != NULL )
 	{
 
-		if ( 5 == sscanf( buffer, "%f %f %f %f %f", &s, &t, &r1, &g1, &b1 ) );
+		if ( 5 == sscanf( buffer, "%f %f %f %f %f", &s, &t, &r1, &g1, &b1 ) )
+			;
 		else
 		{
 			sscanf( buffer, "%f %f %f", &s, &t, &r1 );
@@ -160,36 +167,39 @@ static char *bake_open( FILE *bakefile, char *tiffname )
 	memcpy(xpixels, pixels, bytesize);
 
 
-#ifdef REMOVEDARK 
-   
+#ifdef REMOVEDARK
+
 	/* in X */
-	
+
 	for (i=0; i < size; i++)
 	{
 		for(j =0; j < size* 3; j+=3)
 		{
 			n = (i * size * 3) + j;
 			if ( ( pixels[ n ] == pixels[ n + 1 ] ) &&
-			( pixels[ n + 1 ] == pixels[ n + 2 ] ) &&
-			( pixels[ n + 2 ] == 0 ) )
+			        ( pixels[ n + 1 ] == pixels[ n + 2 ] ) &&
+			        ( pixels[ n + 2 ] == 0 ) )
 			{
 				int m = n;
-				while (m > 0) {
+				while (m > 0)
+				{
 					if (!( ( pixels[ m ] == pixels[ m + 1 ] ) &&
-					( pixels[ m + 1 ] == pixels[ m + 2 ] ) &&
-					( pixels[ m + 2 ] == 0 ) ))
-					break;
+					        ( pixels[ m + 1 ] == pixels[ m + 2 ] ) &&
+					        ( pixels[ m + 2 ] == 0 ) ))
+						break;
 					m-=3;
 				}
 				o = n;
-				while (o < bytesize-2) {
+				while (o < bytesize-2)
+				{
 					if (!( ( pixels[ o ] == pixels[ o + 1 ] ) &&
-					( pixels[ o + 1 ] == pixels[ o + 2 ] ) &&
-					( pixels[ o + 2 ] == 0 ) ))
-					break;
+					        ( pixels[ o + 1 ] == pixels[ o + 2 ] ) &&
+					        ( pixels[ o + 2 ] == 0 ) ))
+						break;
 					o+=3;
 				}
-				if ((o < bytesize-2) && (m < bytesize-2) && (n < bytesize-2)) {
+				if ((o < bytesize-2) && (m < bytesize-2) && (n < bytesize-2))
+				{
 					xpixels[ n ] = lerp(pixels[o], pixels[m], o, m, n);
 					xpixels[ n +1] = lerp(pixels[o+1], pixels[m+1], o, m, n);
 					xpixels[ n +2] = lerp(pixels[o+2], pixels[m+2], o, m, n);

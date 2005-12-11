@@ -59,21 +59,23 @@ static char tiffname[ 1024 ];
 __export char *bmp2tif( char *in )
 {
 	char *result = NULL;
-        char jpgname[1024];
-        char call[1024];
+	char jpgname[1024];
+	char call[1024];
 
 
 	strcpy( tiffname, in );
-        strcpy( jpgname, tiffname);
-	if ( ( result = strstr( jpgname, ".bmp" ) ) != 0 ) strcpy( result, ".jpg" );
+	strcpy( jpgname, tiffname);
+	if ( ( result = strstr( jpgname, ".bmp" ) ) != 0 )
+		strcpy( result, ".jpg" );
 	if ( !result )
 	{
-		if ( ( result = strstr( jpgname, ".BMP" ) ) != 0 ) strcpy( result, ".jpg" );
+		if ( ( result = strstr( jpgname, ".BMP" ) ) != 0 )
+			strcpy( result, ".jpg" );
 	}
 	sprintf( call, "cjpeg %s > %s", tiffname, jpgname );
 	system(call);
-        result = jpg2tif(jpgname);
-        unlink(jpgname);
+	result = jpg2tif(jpgname);
+	unlink(jpgname);
 	return result;
 }
 
