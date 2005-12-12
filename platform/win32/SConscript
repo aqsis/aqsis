@@ -29,6 +29,8 @@ if env['debug']:
 else:
 	env.Replace(z_lib = 'zlibstat')
 
+env.Replace(fltk_lib = 'fltk')
+
 if env['debug']:
 	env.AppendUnique(CCFLAGS=['/GX', '/MDd', '/GR', '/Zm200', '/Od', '/Zi'])
 	env.AppendUnique(CPPDEFINES=[('_DEBUG', 1)])
@@ -43,6 +45,6 @@ env.Replace(LEX = '${flex}')
 env.Replace(YACCFLAGS = '--no-lines -d')
 env.Replace(XSLTPROC = env.File('#/../win32libs/GnuWin32/bin/xsltproc'))
 
-env.Replace(display_libs = ['ws2_32', 'user32', 'gdi32', 'ole32', 'shell32', 'comctl32', 'fltk'])
+env.Replace(display_libs = ['ws2_32', 'user32', 'gdi32', 'ole32', 'shell32', 'comctl32', '$fltk_lib'])
 env.Replace(aqsis_libs = ['ws2_32', 'user32'])
 env.Replace(libaqsis_libs = ['ws2_32', 'user32'])
