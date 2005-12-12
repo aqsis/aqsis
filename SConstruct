@@ -3,7 +3,7 @@ import os.path
 import glob
 
 # Setup the common command line options.
-opts = Options(['options.cache', 'custom.py'])
+opts = Options([os.path.abspath('options.cache'), os.path.abspath('custom.py')])
 opts.Add('tiff_include_path', 'Point to the tiff header files', '')
 opts.Add('tiff_lib_path', 'Point to the tiff library files', '')
 opts.Add('boost_include_path', 'Point to the boost header files', '')
