@@ -25,6 +25,7 @@
 
 #include <aqsis.h>
 
+#include <iostream>
 #include <logging.h>
 #include <logging_streambufs.h>
 #include "sstring.h"
@@ -574,6 +575,14 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			else if ( strstr( compression, "packbits" ) != 0 )
 				pImage->m_compression = COMPRESSION_PACKBITS;
 		}
+		
+		// Check if the requested compression format is available in libtiff, if not resort to "none"
+		if(!TIFFIsCODECConfigured(pImage->m_compression))
+		{
+			std::cerr << error << "Compression type " << compression << " not supported by the libtiff implementation" << std::endl;
+			pImage->m_compression = COMPRESSION_NONE;
+		}
+
 		int quality;
 		if( DspyFindIntInParamList("quality", &quality, paramCount, parameters ) == PkDspyErrorNone )
 			pImage->m_quality = quality;

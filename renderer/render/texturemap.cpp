@@ -1489,6 +1489,12 @@ void CqTextureMap::SampleMap( TqFloat s1, TqFloat t1, TqFloat s2, TqFloat t2, Tq
  */
 void CqTextureMap::WriteImage( TIFF* ptex, TqPuchar raster, TqUlong width, TqUlong length, TqInt samples, TqInt compression, TqInt quality )
 {
+	// First check if we can support the requested compression format.
+	if(!TIFFIsCODECConfigured(compression))
+	{
+		std::cerr << error << "Compression type " << compression << " not supported by the libtiff implementation" << std::endl;
+		return;
+	}
 	TqChar version[ 80 ];
 	TIFFCreateDirectory( ptex );
 
@@ -1519,6 +1525,12 @@ void CqTextureMap::WriteImage( TIFF* ptex, TqPuchar raster, TqUlong width, TqUlo
  */
 void CqTextureMap::WriteImage( TIFF* ptex, TqFloat *raster, TqUlong width, TqUlong length, TqInt samples, TqInt compression, TqInt quality )
 {
+	// First check if we can support the requested compression format.
+	if(!TIFFIsCODECConfigured(compression))
+	{
+		std::cerr << error << "Compression type " << compression << " not supported by the libtiff implementation" << std::endl;
+		return;
+	}
 	TqChar version[ 80 ];
 	TIFFCreateDirectory( ptex );
 
@@ -1551,6 +1563,12 @@ void CqTextureMap::WriteImage( TIFF* ptex, TqFloat *raster, TqUlong width, TqUlo
  */
 void CqTextureMap::WriteImage( TIFF* ptex, TqUshort *raster, TqUlong width, TqUlong length, TqInt samples, TqInt compression, TqInt quality )
 {
+	// First check if we can support the requested compression format.
+	if(!TIFFIsCODECConfigured(compression))
+	{
+		std::cerr << error << "Compression type " << compression << " not supported by the libtiff implementation" << std::endl;
+		return;
+	}
 	TqChar version[ 80 ];
 	TIFFCreateDirectory( ptex );
 
@@ -1640,6 +1658,12 @@ void CqTextureMap::WriteTileImage( TIFF* ptex, CqTextureMapBuffer* pBuffer, TqUl
  */
 void CqTextureMap::WriteTileImage( TIFF* ptex, TqFloat *raster, TqUlong width, TqUlong length, TqUlong twidth, TqUlong tlength, TqInt samples, TqInt compression, TqInt quality )
 {
+	// First check if we can support the requested compression format.
+	if(!TIFFIsCODECConfigured(compression))
+	{
+		std::cerr << error << "Compression type " << compression << " not supported by the libtiff implementation" << std::endl;
+		return;
+	}
 	//TIFFCreateDirectory(ptex);
 	std::ostringstream version;
 	version << STRNAME << " " << VERSION_STR << std::ends;
@@ -1698,6 +1722,12 @@ void CqTextureMap::WriteTileImage( TIFF* ptex, TqFloat *raster, TqUlong width, T
  */
 void CqTextureMap::WriteTileImage( TIFF* ptex, TqUshort *raster, TqUlong width, TqUlong length, TqUlong twidth, TqUlong tlength, TqInt samples, TqInt compression, TqInt quality )
 {
+	// First check if we can support the requested compression format.
+	if(!TIFFIsCODECConfigured(compression))
+	{
+		std::cerr << error << "Compression type " << compression << " not supported by the libtiff implementation" << std::endl;
+		return;
+	}
 	//TIFFCreateDirectory(ptex);
 	std::ostringstream version;
 	version << STRNAME << " " << VERSION_STR << std::ends;
@@ -1756,6 +1786,12 @@ void CqTextureMap::WriteTileImage( TIFF* ptex, TqUshort *raster, TqUlong width, 
  */
 void CqTextureMap::WriteTileImage( TIFF* ptex, TqPuchar raster, TqUlong width, TqUlong length, TqUlong twidth, TqUlong tlength, TqInt samples, TqInt compression, TqInt quality )
 {
+	// First check if we can support the requested compression format.
+	if(!TIFFIsCODECConfigured(compression))
+	{
+		std::cerr << error << "Compression type " << compression << " not supported by the libtiff implementation" << std::endl;
+		return;
+	}
 	std::ostringstream version;
 	version << STRNAME << " " << VERSION_STR << std::ends;
 	TIFFSetField( ptex, TIFFTAG_SOFTWARE, version.str ().c_str () );
