@@ -18,7 +18,7 @@ if not conf.CheckLibWithHeader(conf.env.subst('$z_lib'), 'zlib.h', 'c++'):
 	Exit(1)
 
 # Check for the FLTK libraries and headers
-if not conf.CheckLibWithHeader(conf.env.subst('$fltk_lib'), ['stdio.h', 'FL/fl.h'], 'c++'):
+if not conf.CheckLibWithHeader(conf.env.subst('$fltk_lib'), ['stdio.h', 'FL/Fl.h'], 'c++'):
 	print 'Cannot find FLTK'
 	conf.env.Replace(display_cppdefines = ['AQSIS_NO_FLTK'])
 	conf.env.Replace(fltk_lib = '')
