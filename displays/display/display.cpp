@@ -579,7 +579,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 		// Check if the requested compression format is available in libtiff, if not resort to "none"
 		if(!TIFFIsCODECConfigured(pImage->m_compression))
 		{
-			std::cerr << error << "Compression type " << compression << " not supported by the libtiff implementation" << std::endl;
+			std::cerr << "Compression type " << compression << " not supported by the libtiff implementation" << std::endl;
 			pImage->m_compression = COMPRESSION_NONE;
 		}
 

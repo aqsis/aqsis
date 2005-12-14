@@ -1359,7 +1359,7 @@ primary
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
 							}
 	|	ARRAY_SYMBOL		{
-								$$=new CqParseNodeVariableArray($1.VarRef);	
+								$$=new CqParseNodeVariable($1.VarRef);	
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
 							}
 	|	ARRAY_SYMBOL '[' expression ']' {
