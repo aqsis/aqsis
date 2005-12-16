@@ -544,6 +544,7 @@ void RenderFile( FILE* file, std::string&  name )
 
 		/* Allow any command line arguments to override system/env settings */
 		const char* popt[1];
+		std::cerr << Aqsis::info << "Applying search paths provided at the command line" << std::endl;
 		if(!g_cl_shader_path.empty())
 		{
 			popt[0] = g_cl_shader_path.c_str();

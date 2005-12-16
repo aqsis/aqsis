@@ -491,12 +491,17 @@ void SetDefaultRiOptions( void )
 	FILE* rcfile = fopen( systemRCPath.c_str(), "rb" );
 	if (rcfile != NULL )
 	{
+		std::cerr << info << "Reading system config \"" << systemRCPath.c_str() << "\"" << std::endl;
 		CqRIBParserState currstate = librib::GetParserState();
 		if (currstate.m_pParseCallbackInterface == NULL)
 			currstate.m_pParseCallbackInterface = new librib2ri::Engine;
 		librib::Parse( rcfile, "System Config", *(currstate.m_pParseCallbackInterface), *(currstate.m_pParseErrorStream), NULL );
 		librib::SetParserState( currstate );
 		fclose(rcfile);
+	}
+	else
+	{
+		std::cerr << error << "Could not open system config (" << systemRCPath.c_str() << ")" << std::endl;
 	}
 
 	/* ...then read the .aqsisrc files in $HOME... */
@@ -511,6 +516,7 @@ void SetDefaultRiOptions( void )
 		rcfile = fopen( homeRCPath.c_str(), "rb" );
 		if (rcfile != NULL )
 		{
+			std::cerr << info << "Reading user config \"" << homeRCPath.c_str() << "\"" << std::endl;
 			CqRIBParserState currstate = librib::GetParserState();
 			if (currstate.m_pParseCallbackInterface == NULL)
 				currstate.m_pParseCallbackInterface = new librib2ri::Engine;
@@ -518,6 +524,14 @@ void SetDefaultRiOptions( void )
 			librib::SetParserState( currstate );
 			fclose(rcfile);
 		}
+		else
+		{
+			std::cerr << info << "Could not open user config (" << homeRCPath.c_str() << ")" << std::endl;
+	        }
+	}
+	else
+	{
+		std::cerr << info << "Environment variable HOME not set (skipping user config)." << std::endl;
 	}
 
 	/* ...and the current directory... */
@@ -525,6 +539,7 @@ void SetDefaultRiOptions( void )
 	rcfile = fopen( currentRCPath.c_str(), "rb" );
 	if (rcfile != NULL )
 	{
+		std::cerr << info << "Reading project config \"" << currentRCPath.c_str() << "\"" << std::endl;
 		CqRIBParserState currstate = librib::GetParserState();
 		if (currstate.m_pParseCallbackInterface == NULL)
 			currstate.m_pParseCallbackInterface = new librib2ri::Engine;
@@ -532,45 +547,80 @@ void SetDefaultRiOptions( void )
 		librib::SetParserState( currstate );
 		fclose(rcfile);
 	}
+	else
+	{
+		std::cerr << info << "Could not open project config (" << currentRCPath.c_str() << ")" << std::endl;
+        }
 
 	const char* popt[ 1 ];
 	if(getenv("AQSIS_SHADER_PATH"))
 	{
 		popt[0] = getenv("AQSIS_SHADER_PATH");
+		std::cerr << info << "Applying AQSIS_SHADER_PATH (" << popt[0] << ")" << std::endl;
 		RiOption( "searchpath", "shader", &popt, RI_NULL );
+	}
+	else
+	{
+		std::cerr << info << "AQSIS_SHADER_PATH not set" << std::endl;
 	}
 
 	if(getenv("AQSIS_ARCHIVE_PATH"))
 	{
 		popt[0] = getenv("AQSIS_ARCHIVE_PATH");
+		std::cerr << info << "Applying AQSIS_ARCHIVE_PATH (" << popt[0] << ")" << std::endl;
 		RiOption( "searchpath", "archive", &popt, RI_NULL );
+	}
+	else
+	{
+		std::cerr << info << "AQSIS_ARCHIVE_PATH not set" << std::endl;
 	}
 
 	if(getenv("AQSIS_TEXTURE_PATH"))
 	{
 		popt[0] = getenv("AQSIS_TEXTURE_PATH");
+		std::cerr << info << "Applying AQSIS_TEXTURE_PATH (" << popt[0] << ")" << std::endl;
 		RiOption( "searchpath", "texture", &popt, RI_NULL );
+	}
+	else
+	{
+		std::cerr << info << "AQSIS_TEXTURE_PATH not set" << std::endl;
 	}
 
 	if(getenv("AQSIS_DISPLAY_PATH"))
 	{
 		popt[0] = getenv("AQSIS_DISPLAY_PATH");
+		std::cerr << info << "Applying AQSIS_DISPLAY_PATH (" << popt[0] << ")" << std::endl;
 		RiOption( "searchpath", "display", &popt, RI_NULL );
+	}
+	else
+	{
+		std::cerr << info << "AQSIS_DISPLAY_PATH not set" << std::endl;
 	}
 
 	if(getenv("AQSIS_PROCEDURAL_PATH"))
 	{
 		popt[0] = getenv("AQSIS_PROCEDURAL_PATH");
+		std::cerr << info << "Applying AQSIS_PROCEDURAL_PATH (" << popt[0] << ")" << std::endl;
 		RiOption( "searchpath", "procedural", &popt, RI_NULL );
+	}
+	else
+	{
+		std::cerr << info << "AQSIS_PROCEDURAL_PATH not set" << std::endl;
 	}
 
 	if(getenv("AQSIS_PLUGIN_PATH"))
 	{
 		popt[0] = getenv("AQSIS_PLUGIN_PATH");
+		std::cerr << info << "Applying AQSIS_PLUGIN_PATH (" << popt[0] << ")" << std::endl;
 		RiOption( "searchpath", "plugin", &popt, RI_NULL );
+	}
+	else
+	{
+		std::cerr << info << "AQSIS_PLUGIN_PATH not set" << std::endl;
 	}
 
 	// Setup a default Display
+	std::cerr << info << "Setting up default display: Display \"ri.pic\" \"file\" \"rgba\"" << std::endl;
 	RiDisplay( "ri.pic", "file", "rgba", NULL );
 }
 
