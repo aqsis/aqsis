@@ -1148,7 +1148,6 @@ boost::shared_ptr<IqShader> CqRenderer::CreateShader(
 
 		if(poptDSOPath)
 		{
-			std::cout << &std::cerr << std::endl;
 			std::cerr << info << "DSO lib path set to \"" << poptDSOPath->c_str()
 			<< "\"" << std::endl;
 
