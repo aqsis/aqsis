@@ -42,7 +42,9 @@
 
 #ifndef		AQSIS_SYSTEM_WIN32
 #include	"unistd.h"
-#endif
+#else
+#include	"io.h"
+#endif		// AQSIS_SYSTEM_WIN32
 
 #if defined(AQSIS_SYSTEM_MACOSX)
 #include "Carbon/Carbon.h"

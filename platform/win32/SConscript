@@ -1,43 +1,95 @@
+import os.path
+
 Import('env opts')
 
 opts.Add(EnumOption('MSVS_VERSION', 'MS Visual C++ Version', '6.0', allowed_values=('6.0', '7.1')))
+opts.Add(BoolOption('mingw', 'Use MingW compiler', 0))
 opts.Add('bison', 'Point to the bison executable', env.File('#/../win32libs/GnuWin32/bin/bison'))
 opts.Add('flex', 'Point to the flex executable', env.File('#/../win32libs/GnuWin32/bin/flex'))
 opts.Update(env)
 
-# If the tiff include path isn't specified as an option, choose the default, of the 
-# win32libs project from CVS checked out to the same folder as 'renderer'
-if env['tiff_include_path'] == "":
-	env.Replace(tiff_include_path = env.Dir('#/../win32libs/libtiff/include'))
-if env['tiff_lib_path'] == "":
-	env.Replace(tiff_lib_path = env.Dir('#/../win32libs/libtiff/lib/vc6'))
+if not env['mingw']:
+	# If the tiff include path isn't specified as an option, choose the default, of the 
+	# win32libs project from CVS checked out to the same folder as 'renderer'
+	if env['tiff_include_path'] == "":
+		env.Replace(tiff_include_path = env.Dir('#/../win32libs/libtiff/include'))
+	if env['tiff_lib_path'] == "":
+		env.Replace(tiff_lib_path = env.Dir('#/../win32libs/libtiff/lib/vc7'))
 
-if env['debug']:
-	env.Replace(tiff_lib = 'libtiff_d')
+	if env['debug']:
+		env.Replace(tiff_lib = 'libtiff_d')
+	else:
+		env.Replace(tiff_lib = 'libtiff')
+
+	# If the zlib include path isn't specified as an option, choose the default, of the 
+	# win32libs project from CVS checked out to the same folder as 'renderer'
+	if env['zlib_include_path'] == "":
+		env.Replace(zlib_include_path = env.Dir('#/../win32libs/zlib/include'))
+	if env['zlib_lib_path'] == "":
+		env.Replace(zlib_lib_path = env.Dir('#/../win32libs/zlib/lib/vc7'))
+
+	if env['debug']:
+		env.Replace(z_lib = 'zlibstat_d')
+	else:
+		env.Replace(z_lib = 'zlibstat')
+
+	if env['debug']:
+		env.AppendUnique(CCFLAGS=['/GX', '/MTd', '/GR', '/Zm200', '/Od', '/Zi'])
+		env.AppendUnique(CPPDEFINES=[('_DEBUG', 1)])
+	else:
+		env.AppendUnique(CCFLAGS=['/GX', '/MT', '/GR', '/Zm200', '/O2'])
+
+	env.AppendUnique(CPPDEFINES=['NO_SYSLOG', 'WIN32', 'PLUGINS', ('_qBUILDING', 'CORE'), ('CORE', '1'), 'ZLIB_WINAPI'])
+
+	env.Replace(fltk_lib = 'fltk')
+	env.Replace(libaqsis_add_sources = ['libaqsis.def'])
 else:
-	env.Replace(tiff_lib = 'libtiff')
+	env.AppendUnique(CCFLAGS=['-g', '-O2'])
+	env.AppendUnique(CPPPATH = [env.Dir('#/aqsistypes/win32')])
+	env.AppendUnique(CPPDEFINES=[('NDEBUG', '1'), ('PLUGINS', '1'), 'WIN32', 'NO_SYSLOG'])
 
-# If the zlib include path isn't specified as an option, choose the default, of the 
-# win32libs project from CVS checked out to the same folder as 'renderer'
-if env['zlib_include_path'] == "":
-	env.Replace(zlib_include_path = env.Dir('#/../win32libs/zlib/include'))
-if env['zlib_lib_path'] == "":
-	env.Replace(zlib_lib_path = env.Dir('#/../win32libs/zlib/lib/vc6'))
+	# Point at the boost headers.
+	# todo: need to find a way of determining this location automatically
+	#env.Replace(boost_include_path = ['/usr/include/boost'])
+	env.Replace(boost_include_path = ['/boost/include/boost-1_33_1'])
 
-if env['debug']:
-	env.Replace(z_lib = 'zlibstat_d')
-else:
-	env.Replace(z_lib = 'zlibstat')
+	# Find out where the TIFF headers are, look in common places.
+	tiffiofile = env.FindFile('tiffio.h', ['$tiff_include_path', '/usr/include'])
+	if tiffiofile != None:
+		env.Replace(tiff_include_path = os.path.dirname(tiffiofile.abspath))
 
-env.Replace(fltk_lib = 'fltk')
+	# Find out where the TIFF libraries are, look in common places for Fink and DarwinPorts.
+	tifflibfile = env.FindFile('libtiff.a', ['$tiff_lib_path', '/usr/lib'])
+	if tifflibfile != None:
+		env.Replace(tiff_lib_path = os.path.dirname(tifflibfile.abspath))
+	env.Replace(tiff_lib = 'tiff')
 
-if env['debug']:
-	env.AppendUnique(CCFLAGS=['/GX', '/MDd', '/GR', '/Zm200', '/Od', '/Zi'])
-	env.AppendUnique(CPPDEFINES=[('_DEBUG', 1)])
-else:
-	env.AppendUnique(CCFLAGS=['/GX', '/MD', '/GR', '/Zm200', '/O2'])
+	# Find out where the JPEG headers are, look in common places for Fink and DarwinPorts.
+	jpegiofile = env.FindFile('jpeglib.h', ['$jpeg_include_path', '/usr/include', '/usr/include'])
+	if jpegiofile != None:
+		env.Replace(jpeg_include_path = os.path.dirname(jpegiofile.abspath))
 
-env.AppendUnique(CPPDEFINES=['NO_SYSLOG', 'WIN32', 'PLUGINS', ('_qBUILDING', 'CORE'), ('CORE', '1'), 'ZLIB_WINAPI'])
+	# Find out where the JPEG libraries are, look in common places for Fink and DarwinPorts.
+	jpeglibfile = env.FindFile('libjpeg.a', ['$jpeg_lib_path', '/usr/lib', '/usr/lib'])
+	if jpeglibfile != None:
+		env.Replace(jpeg_lib_path = os.path.dirname(jpeglibfile.abspath))
+	env.Replace(jpeg_lib = 'jpeg')
+
+	# Find out where the zlib headers are, look in common places for Fink and DarwinPorts.
+	zlibiofile = env.FindFile('zlib.h', ['$zlib_include_path', '/usr/include', '/usr/include'])
+	if zlibiofile != None:
+		env.Replace(zlib_include_path = os.path.dirname(zlibiofile.abspath))
+
+	# Find out where the zlib libraries are, look in common places for Fink and DarwinPorts.
+	zliblibfile = env.FindFile('libz.a', ['$zlib_lib_path', '/usr/lib', '/usr/lib'])
+	if zliblibfile != None:
+		env.Replace(zlib_lib_path = os.path.dirname(zliblibfile.abspath))
+	env.Replace(z_lib = 'z')
+
+	env.Replace(slparse_ccflags = ['-O0'])
+	env.AppendUnique(CPPDEFINES=['NO_SYSLOG', 'WIN32', 'PLUGINS', ('_qBUILDING', 'CORE'), ('CORE', '1')])
+
+
 env.AppendUnique(CPPPATH = ['#/aqsistypes/win32'])
 
 env.Replace(YACC = '${bison}')
@@ -47,4 +99,6 @@ env.Replace(XSLTPROC = env.File('#/../win32libs/GnuWin32/bin/xsltproc'))
 
 env.Replace(display_libs = ['ws2_32', 'user32', 'gdi32', 'ole32', 'shell32', 'comctl32', '$fltk_lib'])
 env.Replace(aqsis_libs = ['ws2_32', 'user32'])
+env.Replace(aqsis_cppdefines = ['AQSIS_STATIC_LINK'])
+env.Replace(rib2ri_cppdefines = ['AQSIS_STATIC_LINK'])
 env.Replace(libaqsis_libs = ['ws2_32', 'user32'])

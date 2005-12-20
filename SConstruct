@@ -16,7 +16,18 @@ opts.Add('fltk_lib_path', 'Point to the fltk library files', '')
 opts.Add(BoolOption('debug', 'Build with debug options enabled', '0'))
 
 # Create the default environment
-env = Environment(options = opts, tools = ['default', 'lex', 'yacc', 'zip', 'tar'])
+import SCons.Util
+def ENV_update(tgt_ENV, src_ENV):
+    for K in src_ENV.keys():
+        if K in tgt_ENV.keys() and K in [ 'PATH', 'LD_LIBRARY_PATH',
+                                          'LIB', 'INCLUDE' ]:
+            tgt_ENV[K]=SCons.Util.AppendPath(tgt_ENV[K], src_ENV[K])
+        else:
+            tgt_ENV[K]=src_ENV[K]
+
+env = Environment(options = opts, tools = ['mingw', 'lex', 'yacc', 'zip', 'tar'])
+
+ENV_update(env['ENV'], os.environ)
 
 
 # Create the configure object here, as you can't do it once a call

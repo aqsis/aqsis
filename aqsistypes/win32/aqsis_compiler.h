@@ -34,7 +34,15 @@
 
 /** Define the compiler.
  */
+#ifdef __GNUC__
+#define AQSIS_COMPILER_GCC		1
+#else
+#if _MSC_VER < 1300
 #define	AQSIS_COMPILER_MSVC6	1
+#else
+#define AQSIS_COMPILER_MSVC7	1
+#endif
+#endif
 
 ///----------------------------------------------------------------------
 ///
@@ -53,6 +61,7 @@
 #endif
 
 
+#if defined(AQSIS_COMPILER_MSVC6) || defined(AQSIS_COMPILER_MSVC7)
 #pragma comment( compiler )
 #pragma warning( disable : 4786 )
 #pragma warning( disable : 4305 )
@@ -61,6 +70,7 @@
 #include <sys/stat.h>
 
 #define S_ISDIR(a) (a & S_IFDIR)
+#endif
 
 #define SHARED_LIBRARY_SUFFIX ".dll"
 

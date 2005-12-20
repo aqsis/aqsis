@@ -63,14 +63,15 @@ aqsisdll_headers = Split("""
 aqsisenv = env.Copy()
 aqsisenv.AppendUnique(CPPDEFINES=[('_qBUILDING', 'CORE'), ('CORE', 1)])
 
-aqsisenv.UseTargetOptions('libaqsis')
 
-if 'win32' == aqsisenv['PLATFORM']:
-	aqsisdll_sources = aqsisdll_sources + ["libaqsis.def"]
+if env.has_key('libaqsis_add_sources'):
+	aqsisdll_sources = aqsisdll_sources + '$libaqsis_add_sources'
 
 
-aqsisenv.AppendUnique(LIBS = ['ddmanager', 'raytrace', 'rib2', 'rib2ri', 'shaderexecenv', 'shadervm', 'aqsistypes', '$tiff_lib', '$z_lib'])
+aqsisenv.Replace(LIBS = ['ddmanager', 'raytrace', 'rib2', 'rib2ri', 'shaderexecenv', 'shadervm', 'aqsistypes', '$tiff_lib', '$z_lib'])
 aqsisdll = aqsisenv.SharedLibrary('aqsis', aqsisdll_sources)
+
+aqsisenv.UseTargetOptions('libaqsis')
 
 Depends(aqsisdll, cachegen)
 Depends(aqsisdll, validategen)
