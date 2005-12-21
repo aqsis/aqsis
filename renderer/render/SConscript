@@ -65,7 +65,7 @@ aqsisenv.AppendUnique(CPPDEFINES=[('_qBUILDING', 'CORE'), ('CORE', 1)])
 
 
 if env.has_key('libaqsis_add_sources'):
-	aqsisdll_sources = aqsisdll_sources + '$libaqsis_add_sources'
+	aqsisdll_sources = aqsisdll_sources + ['$libaqsis_add_sources']
 
 
 aqsisenv.Replace(LIBS = ['ddmanager', 'raytrace', 'rib2', 'rib2ri', 'shaderexecenv', 'shadervm', 'aqsistypes', '$tiff_lib', '$z_lib'])

@@ -2089,7 +2089,7 @@ RtVoid RiArchiveRecord ( RtToken type, char *format, ... )
 
 		TqInt size = 256;
 		char* buffer = new char[ size ];
-#ifdef	AQSIS_COMPILER_MSVC6
+#if defined(AQSIS_COMPILER_MSVC6) || defined(AQSIS_COMPILER_MSVC7) 
 
 		while ( _vsnprintf( buffer, 256, format, args ) < 0 )
 #else

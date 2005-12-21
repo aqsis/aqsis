@@ -1,10 +1,6 @@
 import os.path
 
-Import('env opts')
-
-opts.Add('bison', 'Point to the bison executable', '/usr/bin/bison')
-opts.Add('flex', 'Point to the flex executable', '/usr/bin/flex')
-opts.Update(env)
+Import('env')
 
 env.AppendUnique(CCFLAGS=['-g', '-O2'])
 env.AppendUnique(CPPPATH = [env.Dir('#/aqsistypes/posix')])

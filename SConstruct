@@ -1,6 +1,13 @@
 import os
 import os.path
 import glob
+import sys
+from modulefinder import AddPackagePath
+
+from build_support import SelectBuildDir
+from build_support import print_config
+from build_support import AddSysPath
+from build_support import Glob
 
 # Setup the common command line options.
 opts = Options([os.path.abspath('options.cache'), os.path.abspath('custom.py')])
@@ -15,6 +22,18 @@ opts.Add('fltk_include_path', 'Point to the fltk header files', '')
 opts.Add('fltk_lib_path', 'Point to the fltk library files', '')
 opts.Add(BoolOption('debug', 'Build with debug options enabled', '0'))
 
+# Determine the target 
+target_config_dir =  '#' + SelectBuildDir('platform')
+Export('opts')
+
+# Read in the platform specific options.
+tempenv = Environment()
+AddSysPath(tempenv.Dir(target_config_dir).abspath)
+
+# This will hopefully import the target specific options
+import Options
+Options.PlatformOptions(opts,tempenv)
+
 # Create the default environment
 import SCons.Util
 def ENV_update(tgt_ENV, src_ENV):
@@ -25,18 +44,15 @@ def ENV_update(tgt_ENV, src_ENV):
         else:
             tgt_ENV[K]=src_ENV[K]
 
-env = Environment(options = opts, tools = ['mingw', 'lex', 'yacc', 'zip', 'tar'])
+env = Environment(options = opts, tools = ['default', 'lex', 'yacc', 'zip', 'tar'])
 
 ENV_update(env['ENV'], os.environ)
-
+env.Glob = Glob
 
 # Create the configure object here, as you can't do it once a call
 # to SConscript has been processed.
 conf = Configure(env)
 Export('env opts conf')
-
-SConscript('build_support.py')
-Import('SelectBuildDir print_config')
 
 # Setup the distribution stuff, this should be non-platform specific, the distribution
 # archive should apply to all supported platforms.
@@ -52,8 +68,10 @@ env.AppendUnique(TARSUFFIX = '.tgz')
 tar_target = env.Tar('aqsis', '$ZIPDISTDIR')
 env.Alias('dist-tar', tar_target)
 
-# Determine the target 
-target_config_dir =  '#' + SelectBuildDir('platform')
+
+# Read in the platform specific configuration.
+# Allowing it to override the settings defined above.
+SConscript(target_config_dir + os.sep + 'SConscript')
 
 # Add an option to control the root location of the 'install' target
 defout = env.Dir('#/output')
@@ -63,6 +81,10 @@ if env['debug']:
 	target_dir =  env.Dir('#/build_debug')
 opts.Add('install_prefix', 'Root folder under which to install Aqsis', defout)
 
+# Save the command line options to a cache file, allowing the user to just run scons without 
+# command line options in future runs.
+opts.Save('options.cache', env)
+
 opts.Update(env)
 
 # Setup the output directories for binaries and libraries.
@@ -71,9 +93,6 @@ env.Replace(LIBDIR = env.Dir('$install_prefix').abspath + os.sep + 'lib')
 env.Replace(SHADERDIR = env.Dir('$install_prefix').abspath + os.sep + 'shaders')
 env.Replace(SYSCONFDIR = env.Dir('$install_prefix').abspath + os.sep + 'bin')
 
-# Read in the platform specific configuration.
-# Allowing it to override the settings defined above.
-SConscript(target_config_dir + os.sep + 'SConscript')
 
 # Setup common environment settings to allow includes from the various local folders
 env.AppendUnique(CPPPATH = [target_dir.abspath, target_dir.abspath + '/aqsistypes', target_dir.abspath + '/renderer/render', target_dir.abspath + '/shadercompiler/shaderexecenv', target_dir.abspath + '/rib/rib2', target_dir.abspath + '/shadercompiler/shadervm', target_dir.abspath + '/rib/rib2ri', target_dir.abspath + '/argparse', target_dir.abspath + '/shadercompiler/slparse', target_dir.abspath + '/shadercompiler/codegenvm', target_dir.abspath + '/rib/api', '$zlib_include_path', '$tiff_include_path', '$jpeg_include_path', '$boost_include_path', '$fltk_include_path'])
@@ -92,9 +111,6 @@ SConscript('build_check.py')
 # Transfer any findings from the build_check back to the environment
 env = conf.Finish()
 
-# Save the command line options to a cache file, allowing the user to just run scons without 
-# command line options in future runs.
-opts.Save('options.cache', env)
 
 # Load the sub-project sconscript files.
 SConscript('rib/api/SConscript', build_dir=target_dir.abspath + '/rib/api')

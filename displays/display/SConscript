@@ -17,7 +17,6 @@ displayenv.AppendUnique(LIBS = ['aqsistypes', '$tiff_lib', '$z_lib', '$fltk_lib'
 displayenv.UseTargetOptions('display')
 
 display = displayenv.SharedLibrary('display', display_sources)
-print env.subst('$BINDIR')
 displayenv.Install('$BINDIR', display)
 
 Return('display')
