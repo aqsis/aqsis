@@ -58,7 +58,7 @@ def ENV_update(tgt_ENV, src_ENV):
             tgt_ENV[K]=src_ENV[K]
 
 opts.Update(tempenv)
-if tempenv['mingw']:
+if tempenv.has_key('mingw') and tempenv['mingw']:
 	env = Environment(options = opts, tools = ['mingw', 'lex', 'yacc', 'zip', 'tar'])
 else:
 	env = Environment(options = opts, tools = ['default', 'lex', 'yacc', 'zip', 'tar'])
