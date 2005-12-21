@@ -38,7 +38,6 @@ if not env['mingw']:
 	env.Replace(fltk_lib = 'fltk')
 	env.Replace(libaqsis_add_sources = ['libaqsis.def'])
 else:
-	env.Tool('mingw')
 	env.AppendUnique(CCFLAGS=['-g', '-O2'])
 	env.AppendUnique(CPPPATH = [env.Dir('#/aqsistypes/win32')])
 	env.AppendUnique(CPPDEFINES=[('NDEBUG', '1'), ('PLUGINS', '1'), 'WIN32', 'NO_SYSLOG'])
@@ -48,37 +47,22 @@ else:
 	#env.Replace(boost_include_path = ['/usr/include/boost'])
 	env.Replace(boost_include_path = ['/boost/include/boost-1_33_1'])
 
-	# Find out where the TIFF headers are, look in common places.
-	tiffiofile = env.FindFile('tiffio.h', ['$tiff_include_path', '/usr/include'])
-	if tiffiofile != None:
-		env.Replace(tiff_include_path = os.path.dirname(tiffiofile.abspath))
+	# If the tiff include path isn't specified as an option, choose the default, of the 
+	# win32libs project from CVS checked out to the same folder as 'renderer'
+	if env['tiff_include_path'] == "":
+		env.Replace(tiff_include_path = env.Dir('#/../win32libs/libtiff/include'))
+	if env['tiff_lib_path'] == "":
+		env.Replace(tiff_lib_path = env.Dir('#/../win32libs/libtiff/lib/mingw'))
 
-	# Find out where the TIFF libraries are, look in common places for Fink and DarwinPorts.
-	tifflibfile = env.FindFile('libtiff.a', ['$tiff_lib_path', '/usr/lib'])
-	if tifflibfile != None:
-		env.Replace(tiff_lib_path = os.path.dirname(tifflibfile.abspath))
 	env.Replace(tiff_lib = 'tiff')
 
-	# Find out where the JPEG headers are, look in common places for Fink and DarwinPorts.
-	jpegiofile = env.FindFile('jpeglib.h', ['$jpeg_include_path', '/usr/include', '/usr/include'])
-	if jpegiofile != None:
-		env.Replace(jpeg_include_path = os.path.dirname(jpegiofile.abspath))
+	# If the zlib include path isn't specified as an option, choose the default, of the 
+	# win32libs project from CVS checked out to the same folder as 'renderer'
+	if env['zlib_include_path'] == "":
+		env.Replace(zlib_include_path = env.Dir('#/../win32libs/zlib/include'))
+	if env['zlib_lib_path'] == "":
+		env.Replace(zlib_lib_path = env.Dir('#/../win32libs/zlib/lib/mingw'))
 
-	# Find out where the JPEG libraries are, look in common places for Fink and DarwinPorts.
-	jpeglibfile = env.FindFile('libjpeg.a', ['$jpeg_lib_path', '/usr/lib', '/usr/lib'])
-	if jpeglibfile != None:
-		env.Replace(jpeg_lib_path = os.path.dirname(jpeglibfile.abspath))
-	env.Replace(jpeg_lib = 'jpeg')
-
-	# Find out where the zlib headers are, look in common places for Fink and DarwinPorts.
-	zlibiofile = env.FindFile('zlib.h', ['$zlib_include_path', '/usr/include', '/usr/include'])
-	if zlibiofile != None:
-		env.Replace(zlib_include_path = os.path.dirname(zlibiofile.abspath))
-
-	# Find out where the zlib libraries are, look in common places for Fink and DarwinPorts.
-	zliblibfile = env.FindFile('libz.a', ['$zlib_lib_path', '/usr/lib', '/usr/lib'])
-	if zliblibfile != None:
-		env.Replace(zlib_lib_path = os.path.dirname(zliblibfile.abspath))
 	env.Replace(z_lib = 'z')
 
 	env.Replace(fltk_lib = 'fltk')
