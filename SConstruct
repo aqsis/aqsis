@@ -22,12 +22,25 @@ opts.Add('fltk_include_path', 'Point to the fltk header files', '')
 opts.Add('fltk_lib_path', 'Point to the fltk library files', '')
 opts.Add(BoolOption('debug', 'Build with debug options enabled', '0'))
 
+
+# Temporary environment for use of configuration only, mainly to determine file locations.
+# Will be replaced by the real environment when all options are set.
+tempenv = Environment(options=opts)
+
+# Add an option to control the root location of the 'install' target
+defout = tempenv.Dir('#/output')
+target_dir =  tempenv.Dir('#/build')
+if tempenv['debug']:
+	defout = tempenv.Dir('#/output_debug')
+	target_dir =  tempenv.Dir('#/build_debug')
+opts.Add('install_prefix', 'Root folder under which to install Aqsis', defout)
+opts.Add('build_prefix', 'Root folder under which to build Aqsis', target_dir)
+
 # Determine the target 
 target_config_dir =  '#' + SelectBuildDir('platform')
 Export('opts')
 
 # Read in the platform specific options.
-tempenv = Environment()
 AddSysPath(tempenv.Dir(target_config_dir).abspath)
 
 # This will hopefully import the target specific options
@@ -44,7 +57,11 @@ def ENV_update(tgt_ENV, src_ENV):
         else:
             tgt_ENV[K]=src_ENV[K]
 
-env = Environment(options = opts, tools = ['default', 'lex', 'yacc', 'zip', 'tar'])
+opts.Update(tempenv)
+if tempenv['mingw']:
+	env = Environment(options = opts, tools = ['mingw', 'lex', 'yacc', 'zip', 'tar'])
+else:
+	env = Environment(options = opts, tools = ['default', 'lex', 'yacc', 'zip', 'tar'])
 
 ENV_update(env['ENV'], os.environ)
 env.Glob = Glob
@@ -73,13 +90,6 @@ env.Alias('dist-tar', tar_target)
 # Allowing it to override the settings defined above.
 SConscript(target_config_dir + os.sep + 'SConscript')
 
-# Add an option to control the root location of the 'install' target
-defout = env.Dir('#/output')
-target_dir =  env.Dir('#/build')
-if env['debug']:
-	defout = env.Dir('#/output_debug')
-	target_dir =  env.Dir('#/build_debug')
-opts.Add('install_prefix', 'Root folder under which to install Aqsis', defout)
 
 # Save the command line options to a cache file, allowing the user to just run scons without 
 # command line options in future runs.
@@ -92,6 +102,8 @@ env.Replace(BINDIR = env.Dir('$install_prefix').abspath + os.sep + 'bin')
 env.Replace(LIBDIR = env.Dir('$install_prefix').abspath + os.sep + 'lib')
 env.Replace(SHADERDIR = env.Dir('$install_prefix').abspath + os.sep + 'shaders')
 env.Replace(SYSCONFDIR = env.Dir('$install_prefix').abspath + os.sep + 'bin')
+
+target_dir = env.Dir('$build_prefix')
 
 
 # Setup common environment settings to allow includes from the various local folders

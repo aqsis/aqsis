@@ -38,6 +38,7 @@ if not env['mingw']:
 	env.Replace(fltk_lib = 'fltk')
 	env.Replace(libaqsis_add_sources = ['libaqsis.def'])
 else:
+	env.Tool('mingw')
 	env.AppendUnique(CCFLAGS=['-g', '-O2'])
 	env.AppendUnique(CPPPATH = [env.Dir('#/aqsistypes/win32')])
 	env.AppendUnique(CPPDEFINES=[('NDEBUG', '1'), ('PLUGINS', '1'), 'WIN32', 'NO_SYSLOG'])
@@ -79,6 +80,8 @@ else:
 	if zliblibfile != None:
 		env.Replace(zlib_lib_path = os.path.dirname(zliblibfile.abspath))
 	env.Replace(z_lib = 'z')
+
+	env.Replace(fltk_lib = 'fltk')
 
 	env.Replace(slparse_ccflags = ['-O0'])
 	env.AppendUnique(CPPDEFINES=['NO_SYSLOG', 'WIN32', 'PLUGINS', ('_qBUILDING', 'CORE'), ('CORE', '1')])
