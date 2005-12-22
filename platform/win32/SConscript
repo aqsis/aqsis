@@ -38,7 +38,11 @@ if not env['mingw']:
 	env.Replace(fltk_lib = 'fltk')
 	env.Replace(libaqsis_add_sources = ['libaqsis.def'])
 else:
-	env.AppendUnique(CCFLAGS=['-g', '-O2'])
+	if env['debug']:
+		env.AppendUnique(CCFLAGS=['-g', '-O0', '-fno-common'])
+	else:
+		env.AppendUnique(CCFLAGS=['-O2', '-fno-common'])
+
 	env.AppendUnique(CPPPATH = [env.Dir('#/aqsistypes/win32')])
 	env.AppendUnique(CPPDEFINES=[('NDEBUG', '1'), ('PLUGINS', '1'), 'WIN32', 'NO_SYSLOG'])
 
