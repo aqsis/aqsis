@@ -183,7 +183,7 @@ CqDSORepository::getShadeOpMethods(CqString* pShadeOpName)
 		else
 		{
 			CqString strError = DLError();
-			std::cerr << error << "DLOpen: " << strError.c_str() << std::endl;
+			Aqsis::log() << error << "DLOpen: " << strError.c_str() << std::endl;
 		};
 	};
 	return ( oplist->empty() ? NULL : oplist );
@@ -221,7 +221,7 @@ CqDSORepository::parseShadeOpTableEntry(void* handle, SqShadeOp* pShadeOpEntry)
 	// ERROR if we cant find this types name;
 	if (m_itTypeNameMap == m_TypeNameMap.end())
 	{
-		std::cerr << warning << "Discarding DSO Table entry due to unsupported return type: \"" << strRetType.c_str() << "\"" << std::endl;
+		Aqsis::log() << warning << "Discarding DSO Table entry due to unsupported return type: \"" << strRetType.c_str() << "\"" << std::endl;
 		return NULL;
 	}
 	EqVariableType rettype = (*m_itTypeNameMap).second;
@@ -235,7 +235,7 @@ CqDSORepository::parseShadeOpTableEntry(void* handle, SqShadeOp* pShadeOpEntry)
 	DSOMethod method = (DSOMethod) DLSym (handle,&s);
 	if(method == NULL)
 	{
-		std::cerr << warning << "Discarding DSO Table entry due to unknown symbol for method: \"" << strMethodName.c_str() << "\"" << std::endl;
+		Aqsis::log() << warning << "Discarding DSO Table entry due to unknown symbol for method: \"" << strMethodName.c_str() << "\"" << std::endl;
 		return NULL;
 	};
 
@@ -257,7 +257,7 @@ CqDSORepository::parseShadeOpTableEntry(void* handle, SqShadeOp* pShadeOpEntry)
 		// ERROR if we cant find this arguments type name;
 		if (m_itTypeNameMap == m_TypeNameMap.end())
 		{
-			std::cerr << warning << "Discarding DSO Table entry due to unsupported argument type: \"" << strArgType.c_str() << "\"" << std::endl;
+			Aqsis::log() << warning << "Discarding DSO Table entry due to unsupported argument type: \"" << strArgType.c_str() << "\"" << std::endl;
 			return NULL;
 		};
 		arglist.push_back((*m_itTypeNameMap).second);
@@ -273,7 +273,7 @@ CqDSORepository::parseShadeOpTableEntry(void* handle, SqShadeOp* pShadeOpEntry)
 		initfunc = (DSOInit) DLSym(handle,&strInit);
 		if (initfunc == NULL)
 		{
-			std::cerr << warning << "Discarding DSO Table entry due to unknown symbol for init: \"" << strInit.c_str() << "\"" << std::endl;
+			Aqsis::log() << warning << "Discarding DSO Table entry due to unknown symbol for init: \"" << strInit.c_str() << "\"" << std::endl;
 			return NULL; // ERROR ;
 		};
 	}
@@ -286,7 +286,7 @@ CqDSORepository::parseShadeOpTableEntry(void* handle, SqShadeOp* pShadeOpEntry)
 		shutdownfunc = (DSOShutdown) DLSym(handle,&strShutdown);
 		if (shutdownfunc == NULL)
 		{
-			std::cerr << warning << "Discarding DSO Table entry due to unknown symbol for shutdown: \"" << strShutdown.c_str() << "\"" << std::endl;
+			Aqsis::log() << warning << "Discarding DSO Table entry due to unknown symbol for shutdown: \"" << strShutdown.c_str() << "\"" << std::endl;
 			return NULL; // ERROR ;
 		};
 	};

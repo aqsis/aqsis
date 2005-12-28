@@ -208,7 +208,7 @@ main(int argc, char* argv[])
 {
 	if (argc < 2)
 	{
-		std::cerr << "Usage: " << argv[0] << " [filename]\n";
+		Aqsis::log() << "Usage: " << argv[0] << " [filename]\n";
 		return 1;
 	}
 
@@ -221,7 +221,7 @@ main(int argc, char* argv[])
 	}
 	catch (const char* errtext)
 	{
-		std::cerr << errtext << "\n";
+		Aqsis::log() << errtext << "\n";
 		return 1;
 	}
 

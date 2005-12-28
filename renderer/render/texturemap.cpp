@@ -138,7 +138,7 @@ static void CalculateNoise(TqFloat &du, TqFloat &dv, TqInt which)
 		{
 			RD[i][0] = rd.RandomFloat();
 			RD[i][1] = rd.RandomFloat();
-			//std::cerr << warning << RD[i][0] << " " << RD[i][1] << std::endl;
+			//Aqsis::log() << warning << RD[i][0] << " " << RD[i][1] << std::endl;
 		}
 
 		i_RdIx = 0;
@@ -258,7 +258,7 @@ TqPuchar CqTextureMapBuffer::AllocSegment( TqUlong width, TqUlong height, TqInt 
 
 		if ( report )
 		{
-			std::cerr << warning << "Exceeding allocated texture memory by " << more - limit << std::endl;
+			Aqsis::log() << warning << "Exceeding allocated texture memory by " << more - limit << std::endl;
 		}
 
 		report = 0;
@@ -268,7 +268,7 @@ TqPuchar CqTextureMapBuffer::AllocSegment( TqUlong width, TqUlong height, TqInt 
 #ifdef _DEBUG
 	if ( ( more > MEG1 ) && ( ( more / ( 1024 * 1024 ) ) > megs ) )
 	{
-		std::cerr << debug << "Texturememory is more than " << megs << " megs" << std::endl;
+		Aqsis::log() << debug << "Texturememory is more than " << megs << " megs" << std::endl;
 		megs += 10;
 	}
 #endif
@@ -403,7 +403,7 @@ void CqTextureMap::CriticalMeasure()
 	if ( now - current )
 	{
 		///! \todo Review this debug message
-		std::cerr << info << "I was forced to zap the tile segment buffers for " << (int)( now - current ) / 1024 << "K" << std::endl;
+		Aqsis::log() << info << "I was forced to zap the tile segment buffers for " << (int)( now - current ) / 1024 << "K" << std::endl;
 	}
 #endif
 
@@ -437,7 +437,7 @@ TqBool CqTextureMap::CreateMIPMAP( TqBool fProtectBuffers )
 		TqInt ret = TIFFGetField( m_pImage, TIFFTAG_TILEWIDTH, &tsx );
 		if( ret )
 		{
-			std::cerr << error << "Cannot MIPMAP a tiled image \"" << m_strName.c_str() << "\"" << std::endl;
+			Aqsis::log() << error << "Cannot MIPMAP a tiled image \"" << m_strName.c_str() << "\"" << std::endl;
 			return( TqFalse );
 		}
 		// Read the whole image into a buffer.
@@ -490,7 +490,7 @@ CqTextureMap::~CqTextureMap()
 
 	if (IsVerbose())
 	{
-		std::cerr << warning << m_strName.c_str() << " its directory is now " << m_Directory << std::endl;
+		Aqsis::log() << warning << m_strName.c_str() << " its directory is now " << m_Directory << std::endl;
 	}
 
 	for ( i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
@@ -526,7 +526,7 @@ CqTextureMap::~CqTextureMap()
 
 	{
 		// We count each allocation/free at the end they should match
-		std::cerr << "alloc/free " << alloc_cnt << " " << free_cnt << " - Memory usage " << QGetRenderContext() ->Stats().GetTextureMemory() << std::endl;
+		Aqsis::log() << "alloc/free " << alloc_cnt << " " << free_cnt << " - Memory usage " << QGetRenderContext() ->Stats().GetTextureMemory() << std::endl;
 	}
 #endif
 }
@@ -587,7 +587,7 @@ CqTextureMapBuffer* CqTextureMap::GetBuffer( TqUlong s, TqUlong t, TqInt directo
 		CqRiFile	fileImage( m_strName.c_str(), "texture" );
 		if ( !fileImage.IsValid() )
 		{
-			std::cerr << error << "Cannot open texture file \"" << m_strName.c_str() << "\"" << std::endl;
+			Aqsis::log() << error << "Cannot open texture file \"" << m_strName.c_str() << "\"" << std::endl;
 			return pTMB;
 		}
 		CqString strRealName( fileImage.strRealName() );
@@ -756,7 +756,7 @@ TqBool CqTextureMap::BiLinear(TqFloat u, TqFloat v, TqInt umapsize, TqInt vmapsi
 			m_color[ c ] = 1.0f;
 		}
 
-		std::cerr << error << "Cannot find value for either pTMPB[a,b,c,d]" << std::endl;
+		Aqsis::log() << error << "Cannot find value for either pTMPB[a,b,c,d]" << std::endl;
 		Open();
 		return TqFalse;
 	}
@@ -773,7 +773,7 @@ TqBool CqTextureMap::BiLinear(TqFloat u, TqFloat v, TqInt umapsize, TqInt vmapsi
 	y3 = iv_n - pTMBc->tOrigin();
 	x4 = iu_n - pTMBd->sOrigin();
 	y4 = iv_n - pTMBd->tOrigin();
-	//std::cerr << warning << "ru, rv" << ru << " " << rv << std::endl;
+	//Aqsis::log() << warning << "ru, rv" << ru << " " << rv << std::endl;
 
 	// Bilinear interpolate the values at the corners of the sample.
 	for ( c = 0; c < m_SamplesPerPixel; c++ )
@@ -1198,7 +1198,7 @@ void CqTextureMap::Open()
 	CqRiFile	fileImage( m_strName.c_str(), "texture" );
 	if ( !fileImage.IsValid() )
 	{
-		std::cerr << error << "Cannot open texture file \"" << m_strName.c_str() << "\"" << std::endl;
+		Aqsis::log() << error << "Cannot open texture file \"" << m_strName.c_str() << "\"" << std::endl;
 		return ;
 	}
 	CqString strRealName( fileImage.strRealName() );
@@ -1222,7 +1222,7 @@ void CqTextureMap::Open()
 
 	if ( m_pImage )
 	{
-		std::cerr << info << "TextureMap: \"" << strRealName.c_str() << "\" is open" << std::endl;
+		Aqsis::log() << info << "TextureMap: \"" << strRealName.c_str() << "\" is open" << std::endl;
 		TqPchar pFormat = 0;
 		TqPchar pModes = 0;
 
@@ -1271,7 +1271,7 @@ void CqTextureMap::Open()
 
 		/* Second test; is it containing enough directories for us */
 		TqInt min = MIN(m_XRes, m_YRes );
-		TqInt directory = static_cast<TqInt>(log((double) min)/log((double) 2.0));
+		TqInt directory = static_cast<TqInt>(::log((double) min)/::log((double) 2.0));
 		bMipMap &= TIFFSetDirectory(m_pImage, directory - 1);
 
 
@@ -1364,7 +1364,7 @@ void CqTextureMap::PrepareSampleOptions( std::map<std::string, IqShaderData*>& p
 			CqString filter;
 
 			paramMap[ "filter" ] ->GetString( filter );
-			//std::cerr << warning << "filter will be " << filter << std::endl;
+			//Aqsis::log() << warning << "filter will be " << filter << std::endl;
 
 			m_FilterFunc = CalculateFilter(filter);
 
@@ -1494,7 +1494,7 @@ void CqTextureMap::WriteImage( TIFF* ptex, TqPuchar raster, TqUlong width, TqUlo
 	// First check if we can support the requested compression format.
 	if(!TIFFIsCODECConfigured(compression))
 	{
-		std::cerr << error << "Compression type " << compression << " not supported by the libtiff implementation" << std::endl;
+		Aqsis::log() << error << "Compression type " << compression << " not supported by the libtiff implementation" << std::endl;
 		return;
 	}
 	TqChar version[ 80 ];
@@ -1530,7 +1530,7 @@ void CqTextureMap::WriteImage( TIFF* ptex, TqFloat *raster, TqUlong width, TqUlo
 	// First check if we can support the requested compression format.
 	if(!TIFFIsCODECConfigured(compression))
 	{
-		std::cerr << error << "Compression type " << compression << " not supported by the libtiff implementation" << std::endl;
+		Aqsis::log() << error << "Compression type " << compression << " not supported by the libtiff implementation" << std::endl;
 		return;
 	}
 	TqChar version[ 80 ];
@@ -1568,7 +1568,7 @@ void CqTextureMap::WriteImage( TIFF* ptex, TqUshort *raster, TqUlong width, TqUl
 	// First check if we can support the requested compression format.
 	if(!TIFFIsCODECConfigured(compression))
 	{
-		std::cerr << error << "Compression type " << compression << " not supported by the libtiff implementation" << std::endl;
+		Aqsis::log() << error << "Compression type " << compression << " not supported by the libtiff implementation" << std::endl;
 		return;
 	}
 	TqChar version[ 80 ];
@@ -1663,7 +1663,7 @@ void CqTextureMap::WriteTileImage( TIFF* ptex, TqFloat *raster, TqUlong width, T
 	// First check if we can support the requested compression format.
 	if(!TIFFIsCODECConfigured(compression))
 	{
-		std::cerr << error << "Compression type " << compression << " not supported by the libtiff implementation" << std::endl;
+		Aqsis::log() << error << "Compression type " << compression << " not supported by the libtiff implementation" << std::endl;
 		return;
 	}
 	//TIFFCreateDirectory(ptex);
@@ -1727,7 +1727,7 @@ void CqTextureMap::WriteTileImage( TIFF* ptex, TqUshort *raster, TqUlong width, 
 	// First check if we can support the requested compression format.
 	if(!TIFFIsCODECConfigured(compression))
 	{
-		std::cerr << error << "Compression type " << compression << " not supported by the libtiff implementation" << std::endl;
+		Aqsis::log() << error << "Compression type " << compression << " not supported by the libtiff implementation" << std::endl;
 		return;
 	}
 	//TIFFCreateDirectory(ptex);
@@ -1791,7 +1791,7 @@ void CqTextureMap::WriteTileImage( TIFF* ptex, TqPuchar raster, TqUlong width, T
 	// First check if we can support the requested compression format.
 	if(!TIFFIsCODECConfigured(compression))
 	{
-		std::cerr << error << "Compression type " << compression << " not supported by the libtiff implementation" << std::endl;
+		Aqsis::log() << error << "Compression type " << compression << " not supported by the libtiff implementation" << std::endl;
 		return;
 	}
 	std::ostringstream version;

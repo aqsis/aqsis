@@ -28,6 +28,7 @@
 #endif
 
 
+#include "logging.h"
 #include "librib.h"
 #include "libribtypes.h"
 #include "parserstate.h"
@@ -57,7 +58,7 @@ FILE *ParseInputFile = stdin;
 CqRibBinaryDecoder *BinaryDecoder = 0;
 std::string ParseStreamName = "stdin";
 RendermanInterface* ParseCallbackInterface = 0;
-std::ostream* ParseErrorStream = &std::cerr;
+std::ostream* ParseErrorStream = &Aqsis::log();
 unsigned int ParseLineNumber;
 bool ParseSucceeded = true;
 
@@ -268,7 +269,7 @@ void ResetParser()
 	ParseInputFile = stdin;
 	ParseStreamName = "stdin";
 	ParseCallbackInterface = 0;
-	ParseErrorStream = &std::cerr;
+	ParseErrorStream = &Aqsis::log();
 	ParseLineNumber = 1;
 	ParseSucceeded = true;
 }

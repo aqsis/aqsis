@@ -60,14 +60,14 @@ int main(int argc, const char** argv)
 	ap.alias("integer", "i");
 	if (!ap.parse(argc-1, argv+1))
 	{
-		std::cerr << ap.errmsg() << std::endl << ap.usagemsg();
+		Aqsis::log() << ap.errmsg() << std::endl << ap.usagemsg();
 		return 1;
 	}
 
 	if (ap.leftovers().size() > 0)
 	{
-		std::cerr << "Extra crud \"" << ap.leftovers()[0] << "\" on command line";
-		std::cerr << std::endl << ap.usagemsg();
+		Aqsis::log() << "Extra crud \"" << ap.leftovers()[0] << "\" on command line";
+		Aqsis::log() << std::endl << ap.usagemsg();
 		return 1;
 	}
 

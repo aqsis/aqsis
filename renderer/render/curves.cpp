@@ -1363,7 +1363,7 @@ CqLinearCurvesGroup::CqLinearCurvesGroup(
 		m_nTotalVerts += nvertices[ i ];
 		if ( ( nvertices[ i ] <= 2 ) && m_periodic )
 		{
-			std::cerr << warning << "Periodic linear curves should have more than two vertices" << std::endl;
+			Aqsis::log() << warning << "Periodic linear curves should have more than two vertices" << std::endl;
 		}
 	}
 

@@ -702,7 +702,7 @@ void CqOptions::SetValueImager( char *token, char *value )
 		}
 		catch( XqException e )
 		{
-			std::cerr << error << e.strReason().c_str() << std::endl;
+			Aqsis::log() << error << e.strReason().c_str() << std::endl;
 			return;
 		}
 		m_pshadImager->pShader() ->SetArgument( Decl.m_strName, Decl.m_Type, Decl.m_strSpace, value );

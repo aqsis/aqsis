@@ -243,7 +243,7 @@ class CqBasicSurface : public IqSurface
 		{
 			if ( m_CachedBound == TqFalse && m_fDiceable )
 			{
-				std::cerr << critical << "No cached bound available" << std::endl;
+				Aqsis::log() << critical << "No cached bound available" << std::endl;
 			}
 
 			return m_Bound;

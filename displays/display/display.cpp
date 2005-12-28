@@ -579,7 +579,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 		// Check if the requested compression format is available in libtiff, if not resort to "none"
 		if(!TIFFIsCODECConfigured(pImage->m_compression))
 		{
-			std::cerr << "Compression type " << compression << " not supported by the libtiff implementation" << std::endl;
+			Aqsis::log() << "Compression type " << compression << " not supported by the libtiff implementation" << std::endl;
 			pImage->m_compression = COMPRESSION_NONE;
 		}
 
@@ -805,13 +805,13 @@ PtDspyError DspyImageDelayClose(PtDspyImageHandle image)
 
 				const TqFloat dynamicrange = maxdepth - mindepth;
 
-				/*		std::cerr << info << g_Filename << " total samples: " << totalsamples << std::endl;
-						std::cerr << info << g_Filename << " depth samples: " << samples << std::endl;
-						std::cerr << info << g_Filename << " coverage: " << static_cast<TqFloat>( samples ) / static_cast<TqFloat>( totalsamples ) << std::endl;
-						std::cerr << info << g_Filename << " minimum depth: " << mindepth << std::endl;
-						std::cerr << info << g_Filename << " maximum depth: " << maxdepth << std::endl;
-						std::cerr << info << g_Filename << " dynamic range: " << dynamicrange << std::endl;
-						std::cerr << info << g_Filename << " average depth: " << totaldepth / static_cast<TqFloat>( samples ) << std::endl;
+				/*		Aqsis::log() << info << g_Filename << " total samples: " << totalsamples << std::endl;
+						Aqsis::log() << info << g_Filename << " depth samples: " << samples << std::endl;
+						Aqsis::log() << info << g_Filename << " coverage: " << static_cast<TqFloat>( samples ) / static_cast<TqFloat>( totalsamples ) << std::endl;
+						Aqsis::log() << info << g_Filename << " minimum depth: " << mindepth << std::endl;
+						Aqsis::log() << info << g_Filename << " maximum depth: " << maxdepth << std::endl;
+						Aqsis::log() << info << g_Filename << " dynamic range: " << dynamicrange << std::endl;
+						Aqsis::log() << info << g_Filename << " average depth: " << totaldepth / static_cast<TqFloat>( samples ) << std::endl;
 				*/
 				const TqInt linelength = pImage->m_width * 3;
 				for ( TqInt y = 0;

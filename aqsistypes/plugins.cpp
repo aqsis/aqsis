@@ -62,7 +62,7 @@ void *
 CqPluginBase::DLOpen( CqString *library )
 {
 	void * handle = NULL;
-	std::cerr << info << "Loading plugin \"" << library->c_str() << "\"" << std::endl;
+	Aqsis::log() << info << "Loading plugin \"" << library->c_str() << "\"" << std::endl;
 
 #ifdef	PLUGINS
 #ifdef AQSIS_SYSTEM_WIN32

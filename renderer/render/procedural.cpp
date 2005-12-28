@@ -243,7 +243,7 @@ extern "C" RtVoid	RiProcDynamicLoad( RtPointer data, RtFloat detail )
 
 	if( !plugin->IsValid() )
 	{
-		std::cerr << error << "Problem loading Procedural DSO: [" << plugin->Error().c_str() << "]" << std::endl;
+		Aqsis::log() << error << "Problem loading Procedural DSO: [" << plugin->Error().c_str() << "]" << std::endl;
 		return;
 	}
 
@@ -437,7 +437,7 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 		if (! CreatePipe(&hChildStdoutRd, &hChildStdoutWr, NULL, 0) ||
 		        ! CreatePipe(&hChildStdinRd,  &hChildStdinWr,  NULL, 0))
 		{
-			std::cerr << error << "RiProcRunProgram: Stdout pipe creation failed" << std::endl;
+			Aqsis::log() << error << "RiProcRunProgram: Stdout pipe creation failed" << std::endl;
 			return;
 		}
 
@@ -466,7 +466,7 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 
 		if (bFuncRetn == 0)
 		{
-			std::cerr << error << "RiProcRunProgram: CreateProcess failed" << std::endl;
+			Aqsis::log() << error << "RiProcRunProgram: CreateProcess failed" << std::endl;
 			return;
 		}
 

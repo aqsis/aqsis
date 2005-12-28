@@ -24,6 +24,7 @@
 */
 
 #include "aqsis.h"
+#include "logging.h"
 
 #ifdef AQSIS_SYSTEM_WIN32
 #include <windows.h>
@@ -90,7 +91,7 @@ int main( int argc, const char** argv )
 
 	if ( argc > 1 && !ap.parse( argc - 1, argv + 1 ) )
 	{
-		std::cerr << ap.errmsg() << std::endl << ap.usagemsg();
+		Aqsis::log() << ap.errmsg() << std::endl << ap.usagemsg();
 		exit( 1 );
 	}
 
@@ -117,7 +118,7 @@ int main( int argc, const char** argv )
 	// Any leftovers are presumed to be shader names.
 	if ( ap.leftovers().size() == 0 )     // If no files specified, take input from stdin.
 	{
-		std::cerr << ap.errmsg() << std::endl << ap.usagemsg();
+		Aqsis::log() << ap.errmsg() << std::endl << ap.usagemsg();
 		exit( 1 );
 	}
 	else

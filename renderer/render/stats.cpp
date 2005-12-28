@@ -514,18 +514,18 @@ void CqStats::PrintInfo() const
 		gs = poptGridSize[ 0 ];
 	else
 		gs = 256;
-	std::cerr << info << "Image settings:" << std::endl;
-	std::cerr << info << "	Resolution: " << resX << " " << resY << std::endl;
-	std::cerr << info << "	PixelAspectRatio: " << pratio << std::endl;
-	std::cerr << info << "	Exposure:" << std::endl;
-	std::cerr << info << "		Gain: " << gain << std::endl;
-	std::cerr << info << "		Gamma: " << gamma << std::endl;
-	std::cerr << info << "Shading:" << std::endl;
-	std::cerr << info << "	Bucket size: [ " << bX << " " << bY << "]" << std::endl;
-	std::cerr << info << "	Gridsize: " << gs << std::endl;
-	std::cerr << info << "Anti-aliasing settings: " << std::endl;
-	std::cerr << info << "	PixelSamples: " << psX << " " << psY << std::endl;
-	std::cerr << info << "	FilterWidth: " << fX << " " << fY << std::endl;
+	Aqsis::log() << info << "Image settings:" << std::endl;
+	Aqsis::log() << info << "	Resolution: " << resX << " " << resY << std::endl;
+	Aqsis::log() << info << "	PixelAspectRatio: " << pratio << std::endl;
+	Aqsis::log() << info << "	Exposure:" << std::endl;
+	Aqsis::log() << info << "		Gain: " << gain << std::endl;
+	Aqsis::log() << info << "		Gamma: " << gamma << std::endl;
+	Aqsis::log() << info << "Shading:" << std::endl;
+	Aqsis::log() << info << "	Bucket size: [ " << bX << " " << bY << "]" << std::endl;
+	Aqsis::log() << info << "	Gridsize: " << gs << std::endl;
+	Aqsis::log() << info << "Anti-aliasing settings: " << std::endl;
+	Aqsis::log() << info << "	PixelSamples: " << psX << " " << psY << std::endl;
+	Aqsis::log() << info << "	FilterWidth: " << fX << " " << fY << std::endl;
 }
 //---------------------------------------------------------------------
 END_NAMESPACE( Aqsis )

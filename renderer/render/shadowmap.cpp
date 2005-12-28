@@ -138,7 +138,7 @@ CqTextureMap* CqTextureMap::GetShadowMap( const CqString& strName )
 	        TIFFGetField( pNew->m_pImage, TIFFTAG_PIXAR_TEXTUREFORMAT, &ptexfmt ) != 1 ||
 	        strcmp( ptexfmt, SHADOWMAP_HEADER ) != 0 )
 	{
-		std::cerr << error << "Map \"" << strName.c_str() << "\" is not a valid shadow map, use RiMakeShadow" << std::endl;
+		Aqsis::log() << error << "Map \"" << strName.c_str() << "\" is not a valid shadow map, use RiMakeShadow" << std::endl;
 		pNew->SetInvalid();
 	}
 	else
@@ -171,7 +171,7 @@ void CqShadowMap::LoadZFile()
 			// Check validity of shadow map.
 			if ( strncmp( strHeader, origHeader, headerLength ) != 0 )
 			{
-				std::cerr << error << "Invalid shadow map format \"" << m_strName.c_str() << "\"" << " : \"" << strHeader << "\"[" << origHeader << "]"<< std::endl;
+				Aqsis::log() << error << "Invalid shadow map format \"" << m_strName.c_str() << "\"" << " : \"" << strHeader << "\"[" << origHeader << "]"<< std::endl;
 				return ;
 			}
 
@@ -204,7 +204,7 @@ void CqShadowMap::LoadZFile()
 		}
 		else
 		{
-			std::cerr << error << "Shadow map \"" << m_strName.c_str() << "\" not found" << std::endl;
+			Aqsis::log() << error << "Shadow map \"" << m_strName.c_str() << "\" not found" << std::endl;
 		}
 	}
 }

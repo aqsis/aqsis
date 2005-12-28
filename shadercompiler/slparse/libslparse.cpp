@@ -45,7 +45,7 @@ extern void InitStandardNamespace();
 
 std::istream* ParseInputStream = &std::cin;
 CqString ParseStreamName = "stdin";
-std::ostream* ParseErrorStream = &std::cerr;
+std::ostream* ParseErrorStream = &Aqsis::log();
 TqInt ParseLineNumber;
 TqBool ParseSucceeded = true;
 
@@ -89,7 +89,7 @@ void ResetParser()
 {
 	ParseInputStream = &std::cin;
 	ParseStreamName = "stdin";
-	ParseErrorStream = &std::cerr;
+	ParseErrorStream = &Aqsis::log();
 	ParseLineNumber = 1;
 	ParseSucceeded = true;
 }

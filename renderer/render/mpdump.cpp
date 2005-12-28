@@ -52,7 +52,7 @@ void CqMPDump::open()
 		fwrite((void*)&sf, sizeof(int), 1, out);
 	}
 	else
-		std::cerr<<"Could not create '"<<filename<<"'"<<std::endl;
+		Aqsis::log()<<"Could not create '"<<filename<<"'"<<std::endl;
 }
 
 // Close the dump file
@@ -73,7 +73,7 @@ void CqMPDump::dumpImageInfo()
 
 	if (out==NULL)
 	{
-		std::cerr<<"No dump file opened!"<<std::endl;
+		Aqsis::log()<<"No dump file opened!"<<std::endl;
 		return;
 	}
 
@@ -114,7 +114,7 @@ void CqMPDump::dump(int x, int y, int idx, const SqSampleData& sd)
 
 	if (out==NULL)
 	{
-		std::cerr<<"No dump file opened!"<<std::endl;
+		Aqsis::log()<<"No dump file opened!"<<std::endl;
 		return;
 	}
 
@@ -137,7 +137,7 @@ void CqMPDump::dump(const CqMicroPolygon& mp)
 
 	if (out==NULL)
 	{
-		std::cerr<<"No dump file opened!"<<std::endl;
+		Aqsis::log()<<"No dump file opened!"<<std::endl;
 		return;
 	}
 

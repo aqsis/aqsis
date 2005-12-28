@@ -1033,7 +1033,7 @@ void CqRenderer::AddParameterDecl( const char* strName, const char* strType )
 	}
 	catch( XqException e )
 	{
-		std::cerr << error << e.strReason().c_str() << std::endl;
+		Aqsis::log() << error << e.strReason().c_str() << std::endl;
 		return;
 	}
 
@@ -1148,14 +1148,14 @@ boost::shared_ptr<IqShader> CqRenderer::CreateShader(
 
 		if(poptDSOPath)
 		{
-			std::cerr << info << "DSO lib path set to \"" << poptDSOPath->c_str()
+			Aqsis::log() << info << "DSO lib path set to \"" << poptDSOPath->c_str()
 			<< "\"" << std::endl;
 
 			pShader->SetDSOPath( poptDSOPath->c_str() );
 		}
 
 		CqString strRealName( SLXFile.strRealName() );
-		std::cerr << info << "Loading shader \"" << strName
+		Aqsis::log() << info << "Loading shader \"" << strName
 		<< "\" from file \"" << strRealName.c_str()
 		<< "\"" << std::endl;
 
@@ -1176,12 +1176,12 @@ boost::shared_ptr<IqShader> CqRenderer::CreateShader(
 		{
 			CqString strError;
 			strError.Format( "Shader \"%s\" not found", strName ? strName : "" );
-			std::cerr << error << strError.c_str() << std::endl;
+			Aqsis::log() << error << strError.c_str() << std::endl;
 			const CqString* poptShaderPath = QGetRenderContext()->optCurrent().GetStringOption("searchpath", "shader");
 			if(poptShaderPath != NULL)
-				std::cerr << info << "Shader searchpath is : " << poptShaderPath[0] << std::endl;
+				Aqsis::log() << info << "Shader searchpath is : " << poptShaderPath[0] << std::endl;
 			else
-				std::cerr << info << "No shader searchpath specified" << std::endl;
+				Aqsis::log() << info << "No shader searchpath specified" << std::endl;
 		}
 		if ( type == Type_Surface )
 		{
@@ -1237,7 +1237,7 @@ IqShader* CqRenderer::CreateShader( const char* strName, EqShaderType type )
 			pShader->SetDSOPath( poptDSOPath );
 
 			CqString strRealName( SLXFile.strRealName() );
-			std::cerr << info << "Loading shader \"" << strName << "\" from file \"" << strRealName.c_str() << "\"" << std::endl;
+			Aqsis::log() << info << "Loading shader \"" << strName << "\" from file \"" << strRealName.c_str() << "\"" << std::endl;
 
 			pShader->SetstrName( strName );
 			pShader->LoadProgram( SLXFile );
@@ -1250,7 +1250,7 @@ IqShader* CqRenderer::CreateShader( const char* strName, EqShaderType type )
 			{
 				CqString strError;
 				strError.Format( "Shader \"%s\" not found", strName ? strName : "" );
-				std::cerr << error << strError.c_str() << std::endl;
+				Aqsis::log() << error << strError.c_str() << std::endl;
 			}
 			if( type == Type_Surface )
 			{
@@ -1407,7 +1407,7 @@ TqInt CqRenderer::RegisterOutputData( const char* name )
 	}
 	catch( XqException e )
 	{
-		std::cerr << error << e.strReason().c_str() << std::endl;
+		Aqsis::log() << error << e.strReason().c_str() << std::endl;
 		return(-1);
 	}
 	if( Decl.m_Type != type_invalid )
@@ -1467,7 +1467,7 @@ TqInt CqRenderer::OutputDataIndex( const char* name )
 	}
 	catch( XqException e )
 	{
-		std::cerr << error << e.strReason().c_str() << std::endl;
+		Aqsis::log() << error << e.strReason().c_str() << std::endl;
 		return(-1);
 	}
 	if( Decl.m_Type != type_invalid )
@@ -1488,7 +1488,7 @@ TqInt CqRenderer::OutputDataSamples( const char* name )
 	}
 	catch( XqException e )
 	{
-		std::cerr << error << e.strReason().c_str() << std::endl;
+		Aqsis::log() << error << e.strReason().c_str() << std::endl;
 		return(-1);
 	}
 	if( Decl.m_Type != type_invalid )
@@ -1510,7 +1510,7 @@ TqInt CqRenderer::OutputDataType( const char* name )
 	}
 	catch( XqException e )
 	{
-		std::cerr << error << e.strReason().c_str() << std::endl;
+		Aqsis::log() << error << e.strReason().c_str() << std::endl;
 		return(-1);
 	}
 	if( Decl.m_Type != type_invalid )
@@ -1546,7 +1546,7 @@ void TIFF_ErrorHandler(const char* mdl, const char* fmt, va_list va)
 {
 	char err_string[384];
 	vsprintf( err_string, fmt, va );
-	std::cerr << error << err_string << " in file: \"" << mdl << "\"" << std::endl;
+	Aqsis::log() << error << err_string << " in file: \"" << mdl << "\"" << std::endl;
 }
 
 void TIFF_WarnHandler(const char* mdl, const char* fmt, va_list va)

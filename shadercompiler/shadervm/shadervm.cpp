@@ -938,7 +938,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 						if ( i == strlen( token ) )
 						{
 							//CqBasicError( 0, Severity_Fatal, "Invalid variable specification in slx file" );
-							std::cerr << critical << "Invalid variable specification in slx file" << std::endl;
+							Aqsis::log() << critical << "Invalid variable specification in slx file" << std::endl;
 							return ;
 						}
 						token[ strlen( token ) - 1 ] = '\0';
@@ -1001,7 +1001,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 								candidates = getShadeOpMethods(&strFunc);
 								if( candidates == NULL )
 								{
-									std::cerr << critical << "\"" << strName().c_str() << "\": No DSO found for external shadeop: \"" << strFunc.c_str() << "\"" << std::endl;
+									Aqsis::log() << critical << "\"" << strName().c_str() << "\": No DSO found for external shadeop: \"" << strFunc.c_str() << "\"" << std::endl;
 									exit(1);
 								}
 								m_ActiveDSOMap[strFunc]=candidates;
@@ -1018,7 +1018,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 							else
 							{
 								//error, we dont know this return type
-								std::cerr << critical << "\"" << strName().c_str() << "\": Invalid return type in call to external shadeop: \"" << strFunc.c_str() << "\" : \"" << strRetType.c_str() << "\"" << std::endl;
+								Aqsis::log() << critical << "\"" << strName().c_str() << "\": Invalid return type in call to external shadeop: \"" << strFunc.c_str() << "\" : \"" << strRetType.c_str() << "\"" << std::endl;
 								exit(1);
 							};
 
@@ -1034,7 +1034,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 								else
 								{
 									// Error, unknown arg type
-									std::cerr << critical << "\"" << strName().c_str() << "\": Invalid argument type in call to external shadeop: \"" << strFunc.c_str() << "\" : \"" << strArgTypes[x] << "\"" << std::endl;
+									Aqsis::log() << critical << "\"" << strName().c_str() << "\": Invalid argument type in call to external shadeop: \"" << strFunc.c_str() << "\" : \"" << strArgTypes[x] << "\"" << std::endl;
 									exit(1);
 								};
 
@@ -1066,7 +1066,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 									if ( (*candidate)->arg_types == ArgTypes)
 									{
 										CqString strProto = strPrototype(&strFunc, (*candidate));
-										std::cerr << info << "\"" << strName().c_str() << "\": Using non-void DSO shadeop:  \"" << strProto.c_str() << "\"" <<
+										Aqsis::log() << info << "\"" << strName().c_str() << "\": Using non-void DSO shadeop:  \"" << strProto.c_str() << "\"" <<
 										"\"" << strName().c_str() << "\": In place of requested void shadeop: \"" << strFunc.c_str() << "\"" <<
 										"\"" << strName().c_str() << "\": If this is not the operation you intended you should force the correct shadeop in your shader source." << std::endl;
 										forcedrop = true;
@@ -1078,7 +1078,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 
 							if(candidate == candidates->end())
 							{
-								std::cerr << critical << "\"" << strName()
+								Aqsis::log() << critical << "\"" << strName()
 								.c_str() << "\": No candidate found for call to external shadeop: \"" << strFunc.c_str() <<
 								"\"" << strName().c_str() << "\": Perhaps you need some casts?" <<
 								"\"" << strName().c_str() << "\": The following candidates are in you current DSO path:" << std::endl;
@@ -1086,7 +1086,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 								while (candidate !=candidates->end())
 								{
 									CqString strProto = strPrototype(&strFunc, (*candidate));
-									std::cerr << info << "\"" << strName().c_str() << "\": \t" << strProto.c_str() << std::endl;
+									Aqsis::log() << info << "\"" << strName().c_str() << "\": \t" << strProto.c_str() << std::endl;
 									candidate++;
 								};
 								exit(1);
@@ -1179,7 +1179,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 						CqString strErr( "Invalid opcode found : " )
 						;
 						strErr += token;
-						std::cerr << critical << strErr.c_str() << std::endl;
+						Aqsis::log() << critical << strErr.c_str() << std::endl;
 						return ;
 					}
 					break;
@@ -1477,12 +1477,12 @@ void CqShaderVM::SetArgument( const CqString& strName, EqVariableType type, cons
 		}
 		else
 		{
-			std::cerr << warning << "Type mismatch in shader \"" << m_strName.c_str() << "\"" << std::endl;
+			Aqsis::log() << warning << "Type mismatch in shader \"" << m_strName.c_str() << "\"" << std::endl;
 		}
 	}
 	else
 	{
-		std::cerr << warning << "Unknown parameter \"" << strName.c_str() << "\" in shader \"" << m_strName.c_str() << "\"" << std::endl;
+		Aqsis::log() << warning << "Unknown parameter \"" << strName.c_str() << "\" in shader \"" << m_strName.c_str() << "\"" << std::endl;
 	}
 }
 

@@ -92,7 +92,7 @@ void CqShaderVM::SO_ipushv()
 	if ( pVar->ArrayLength() == 0 )
 	{
 		// Report error.
-		std::cerr << critical << "Attempt to index a non array variable" << std::endl;
+		Aqsis::log() << critical << "Attempt to index a non array variable" << std::endl;
 		return ;
 	}
 	//If either the value or the index is varying, so must the result be.
@@ -140,7 +140,7 @@ void CqShaderVM::SO_ipop()
 	if ( pV->ArrayLength() == 0 )
 	{
 		// Report error.
-		std::cerr << critical << "Attempt to index a non array variable" << std::endl;
+		Aqsis::log() << critical << "Attempt to index a non array variable" << std::endl;
 		return ;
 	}
 	POPV( A );

@@ -205,7 +205,7 @@ CqSolidModeBlock::CqSolidModeBlock( CqString& type, const boost::shared_ptr<CqMo
 			const CqString* pattrName = m_pattrCurrent->GetStringAttribute( "identifier", "name" );
 			if ( pattrName != 0 )
 				objname = pattrName[ 0 ];
-			std::cerr << warning << "Cannot add solid block under 'Primitive' \"" << objname.c_str() << "\" solid block" << std::endl;
+			Aqsis::log() << warning << "Cannot add solid block under 'Primitive' \"" << objname.c_str() << "\" solid block" << std::endl;
 
 		}
 		else
@@ -316,7 +316,7 @@ void CqMotionModeBlock::SetDeformingSurface( const boost::shared_ptr<CqDeforming
 
 void CqModeBlock::logInvalidNesting() const
 {
-	std::cerr << critical << "Invalid context nesting" << std::endl;
+	Aqsis::log() << critical << "Invalid context nesting" << std::endl;
 }
 
 

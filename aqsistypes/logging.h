@@ -25,11 +25,14 @@
 
 START_NAMESPACE( Aqsis )
 
+/// Returns an output stream to be used for all logging
+std::ostream& log();
+
 // iostream-compatible manipulators - use these
 // at the beginning of a message to indicate its priority, e.g.
 //
-// std::cerr << info << "Informational message" << std::endl;
-// std::cerr << critical << "Critical message" << std::endl;
+// Aqsis::log() << info << "Informational message" << std::endl;
+// Aqsis::log() << critical << "Critical message" << std::endl;
 
 std::ostream& emergency(std::ostream&);
 std::ostream& alert(std::ostream&);

@@ -242,7 +242,7 @@ TqBool CqImageBuffer::CullSurface( CqBound& Bound, const boost::shared_ptr<CqBas
 			const CqString* pattrName = pSurface->pAttributes() ->GetStringAttribute( "identifier", "name" );
 			if ( pattrName != 0 )
 				objname = pattrName[ 0 ];
-			std::cerr << warning << "Max eyesplits for object \"" << objname.c_str() << "\" exceeded" << std::endl;
+			Aqsis::log() << warning << "Max eyesplits for object \"" << objname.c_str() << "\" exceeded" << std::endl;
 			return( TqTrue );
 		}
 		return ( TqFalse );
@@ -422,7 +422,7 @@ TqBool CqImageBuffer::OcclusionCullSurface( const boost::shared_ptr<CqBasicSurfa
 		const CqString* pattrName = pSurface->pAttributes() ->GetStringAttribute( "identifier", "name" );
 		if( pattrName )
 			objname = *pattrName;
-		std::cerr << info << "GPrim: \"" << objname << "\" occlusion culled" << std::endl;
+		Aqsis::log() << info << "GPrim: \"" << objname << "\" occlusion culled" << std::endl;
 		STATS_INC( GPR_culled );
 		return TqTrue;
 	}
@@ -1257,7 +1257,7 @@ void CqImageBuffer::RenderImage()
 		else if ( !pstrDepthFilter[ 0 ].compare( "average" ) )
 			depthfilter = Filter_Average;
 		else
-			std::cerr << warning << "Invalid depthfilter \"" << pstrDepthFilter[ 0 ].c_str() << "\", depthfilter set to \"min\"" << std::endl;
+			Aqsis::log() << warning << "Invalid depthfilter \"" << pstrDepthFilter[ 0 ].c_str() << "\", depthfilter set to \"min\"" << std::endl;
 	}
 
 	// Render the surface at the front of the list.

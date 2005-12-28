@@ -63,7 +63,7 @@ CqBasicSurface::CqBasicSurface() : m_fDiceable( TqTrue ), m_fDiscard( TqFalse ),
 			const CqString* pattrName = m_pAttributes->GetStringAttribute( "identifier", "name" );
 			if ( pattrName != 0 )
 				objname = pattrName[ 0 ];
-			std::cerr << warning << "Primitive \"" << objname.c_str() << "\" defined when not in 'Primitive' solid block" << std::endl;
+			Aqsis::log() << warning << "Primitive \"" << objname.c_str() << "\" defined when not in 'Primitive' solid block" << std::endl;
 		}
 	}
 

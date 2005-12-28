@@ -333,12 +333,12 @@ class	CqLogRangeCheckCallback	: public CqRangeCheckCallback
 			{
 					case CqRangeCheckCallback::UPPER_BOUND_HIT:
 					{
-						std::cerr << error << "Invalid Value for " << m_name << ". Value exceeded upper limit" << std::endl;
+						Aqsis::log() << error << "Invalid Value for " << m_name << ". Value exceeded upper limit" << std::endl;
 					}
 
 					case CqRangeCheckCallback::LOWER_BOUND_HIT:
 					{
-						std::cerr << error << "Invalid Value for " << m_name << ". Value exceeded lower limit" << std::endl;
+						Aqsis::log() << error << "Invalid Value for " << m_name << ". Value exceeded lower limit" << std::endl;
 					}
 
 					default:
@@ -491,7 +491,7 @@ void SetDefaultRiOptions( void )
 	FILE* rcfile = fopen( systemRCPath.c_str(), "rb" );
 	if (rcfile != NULL )
 	{
-		std::cerr << info << "Reading system config \"" << systemRCPath.c_str() << "\"" << std::endl;
+		Aqsis::log() << info << "Reading system config \"" << systemRCPath.c_str() << "\"" << std::endl;
 		CqRIBParserState currstate = librib::GetParserState();
 		if (currstate.m_pParseCallbackInterface == NULL)
 			currstate.m_pParseCallbackInterface = new librib2ri::Engine;
@@ -501,7 +501,7 @@ void SetDefaultRiOptions( void )
 	}
 	else
 	{
-		std::cerr << error << "Could not open system config (" << systemRCPath.c_str() << ")" << std::endl;
+		Aqsis::log() << error << "Could not open system config (" << systemRCPath.c_str() << ")" << std::endl;
 	}
 
 	/* ...then read the .aqsisrc files in $HOME... */
@@ -516,7 +516,7 @@ void SetDefaultRiOptions( void )
 		rcfile = fopen( homeRCPath.c_str(), "rb" );
 		if (rcfile != NULL )
 		{
-			std::cerr << info << "Reading user config \"" << homeRCPath.c_str() << "\"" << std::endl;
+			Aqsis::log() << info << "Reading user config \"" << homeRCPath.c_str() << "\"" << std::endl;
 			CqRIBParserState currstate = librib::GetParserState();
 			if (currstate.m_pParseCallbackInterface == NULL)
 				currstate.m_pParseCallbackInterface = new librib2ri::Engine;
@@ -526,12 +526,12 @@ void SetDefaultRiOptions( void )
 		}
 		else
 		{
-			std::cerr << info << "Could not open user config (" << homeRCPath.c_str() << ")" << std::endl;
+			Aqsis::log() << info << "Could not open user config (" << homeRCPath.c_str() << ")" << std::endl;
 	        }
 	}
 	else
 	{
-		std::cerr << info << "Environment variable HOME not set (skipping user config)." << std::endl;
+		Aqsis::log() << info << "Environment variable HOME not set (skipping user config)." << std::endl;
 	}
 
 	/* ...and the current directory... */
@@ -539,7 +539,7 @@ void SetDefaultRiOptions( void )
 	rcfile = fopen( currentRCPath.c_str(), "rb" );
 	if (rcfile != NULL )
 	{
-		std::cerr << info << "Reading project config \"" << currentRCPath.c_str() << "\"" << std::endl;
+		Aqsis::log() << info << "Reading project config \"" << currentRCPath.c_str() << "\"" << std::endl;
 		CqRIBParserState currstate = librib::GetParserState();
 		if (currstate.m_pParseCallbackInterface == NULL)
 			currstate.m_pParseCallbackInterface = new librib2ri::Engine;
@@ -549,78 +549,78 @@ void SetDefaultRiOptions( void )
 	}
 	else
 	{
-		std::cerr << info << "Could not open project config (" << currentRCPath.c_str() << ")" << std::endl;
+		Aqsis::log() << info << "Could not open project config (" << currentRCPath.c_str() << ")" << std::endl;
         }
 
 	const char* popt[ 1 ];
 	if(getenv("AQSIS_SHADER_PATH"))
 	{
 		popt[0] = getenv("AQSIS_SHADER_PATH");
-		std::cerr << info << "Applying AQSIS_SHADER_PATH (" << popt[0] << ")" << std::endl;
+		Aqsis::log() << info << "Applying AQSIS_SHADER_PATH (" << popt[0] << ")" << std::endl;
 		RiOption( "searchpath", "shader", &popt, RI_NULL );
 	}
 	else
 	{
-		std::cerr << info << "AQSIS_SHADER_PATH not set" << std::endl;
+		Aqsis::log() << info << "AQSIS_SHADER_PATH not set" << std::endl;
 	}
 
 	if(getenv("AQSIS_ARCHIVE_PATH"))
 	{
 		popt[0] = getenv("AQSIS_ARCHIVE_PATH");
-		std::cerr << info << "Applying AQSIS_ARCHIVE_PATH (" << popt[0] << ")" << std::endl;
+		Aqsis::log() << info << "Applying AQSIS_ARCHIVE_PATH (" << popt[0] << ")" << std::endl;
 		RiOption( "searchpath", "archive", &popt, RI_NULL );
 	}
 	else
 	{
-		std::cerr << info << "AQSIS_ARCHIVE_PATH not set" << std::endl;
+		Aqsis::log() << info << "AQSIS_ARCHIVE_PATH not set" << std::endl;
 	}
 
 	if(getenv("AQSIS_TEXTURE_PATH"))
 	{
 		popt[0] = getenv("AQSIS_TEXTURE_PATH");
-		std::cerr << info << "Applying AQSIS_TEXTURE_PATH (" << popt[0] << ")" << std::endl;
+		Aqsis::log() << info << "Applying AQSIS_TEXTURE_PATH (" << popt[0] << ")" << std::endl;
 		RiOption( "searchpath", "texture", &popt, RI_NULL );
 	}
 	else
 	{
-		std::cerr << info << "AQSIS_TEXTURE_PATH not set" << std::endl;
+		Aqsis::log() << info << "AQSIS_TEXTURE_PATH not set" << std::endl;
 	}
 
 	if(getenv("AQSIS_DISPLAY_PATH"))
 	{
 		popt[0] = getenv("AQSIS_DISPLAY_PATH");
-		std::cerr << info << "Applying AQSIS_DISPLAY_PATH (" << popt[0] << ")" << std::endl;
+		Aqsis::log() << info << "Applying AQSIS_DISPLAY_PATH (" << popt[0] << ")" << std::endl;
 		RiOption( "searchpath", "display", &popt, RI_NULL );
 	}
 	else
 	{
-		std::cerr << info << "AQSIS_DISPLAY_PATH not set" << std::endl;
+		Aqsis::log() << info << "AQSIS_DISPLAY_PATH not set" << std::endl;
 	}
 
 	if(getenv("AQSIS_PROCEDURAL_PATH"))
 	{
 		popt[0] = getenv("AQSIS_PROCEDURAL_PATH");
-		std::cerr << info << "Applying AQSIS_PROCEDURAL_PATH (" << popt[0] << ")" << std::endl;
+		Aqsis::log() << info << "Applying AQSIS_PROCEDURAL_PATH (" << popt[0] << ")" << std::endl;
 		RiOption( "searchpath", "procedural", &popt, RI_NULL );
 	}
 	else
 	{
-		std::cerr << info << "AQSIS_PROCEDURAL_PATH not set" << std::endl;
+		Aqsis::log() << info << "AQSIS_PROCEDURAL_PATH not set" << std::endl;
 	}
 
 	if(getenv("AQSIS_PLUGIN_PATH"))
 	{
 		popt[0] = getenv("AQSIS_PLUGIN_PATH");
-		std::cerr << info << "Applying AQSIS_PLUGIN_PATH (" << popt[0] << ")" << std::endl;
+		Aqsis::log() << info << "Applying AQSIS_PLUGIN_PATH (" << popt[0] << ")" << std::endl;
 		RiOption( "searchpath", "plugin", &popt, RI_NULL );
 	}
 	else
 	{
-		std::cerr << info << "AQSIS_PLUGIN_PATH not set" << std::endl;
+		Aqsis::log() << info << "AQSIS_PLUGIN_PATH not set" << std::endl;
 	}
 
 	// Setup a default Display
-	std::cerr << info << "Setting up default display: Display \"ri.pic\" \"file\" \"rgba\"" << std::endl;
+	Aqsis::log() << info << "Setting up default display: Display \"ri.pic\" \"file\" \"rgba\"" << std::endl;
 	RiDisplay( "ri.pic", "file", "rgba", NULL );
 }
 
@@ -846,7 +846,7 @@ RtVoid	RiWorldBegin()
 		TqFloat xwidth = QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "FilterWidth" ) [ 0 ];
 		TqFloat ywidth = QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "FilterWidth" ) [ 1 ];
 		if( filter != RiBoxFilter || xwidth != 1 || ywidth != 1)
-			std::cerr << warning << "When rendering a Z buffer the filter mode should be \"box\" with a width of 1x1" << std::endl;
+			Aqsis::log() << warning << "When rendering a Z buffer the filter mode should be \"box\" with a width of 1x1" << std::endl;
 	}
 
 
@@ -905,7 +905,7 @@ RtVoid	RiWorldEnd()
 	}
 	catch ( CqString strError )
 	{
-		std::cerr << error << strError.c_str() << std::endl;
+		Aqsis::log() << error << strError.c_str() << std::endl;
 		fFailed = TqTrue;
 	}
 
@@ -981,7 +981,7 @@ RtVoid	RiFrameAspectRatio( RtFloat frameratio )
 
 	if( !valid )
 	{
-		std::cerr << error << "RiFrameAspectRatio: Invalid RiFrameAspectRatio, aborting" << std::endl;
+		Aqsis::log() << error << "RiFrameAspectRatio: Invalid RiFrameAspectRatio, aborting" << std::endl;
 		return;
 	}
 
@@ -1062,7 +1062,7 @@ RtVoid	RiCropWindow( RtFloat left, RtFloat right, RtFloat top, RtFloat bottom )
 
 	if( !valid )
 	{
-		std::cerr << error << "Invalid RiCropWindow, aborting" << std::endl;
+		Aqsis::log() << error << "Invalid RiCropWindow, aborting" << std::endl;
 		return;
 	}
 
@@ -1110,7 +1110,7 @@ RtVoid	RiProjectionV( RtToken name, PARAMETERLIST )
 		QGetRenderContext() ->optCurrent().GetIntegerOptionWrite( "System", "Projection" ) [ 0 ] = ProjectionOrthographic ;
 	else if( name != RI_NULL )
 	{
-		std::cerr << error << "RiProjection: Invalid projection: \"" << name << "\"" << std::endl;
+		Aqsis::log() << error << "RiProjection: Invalid projection: \"" << name << "\"" << std::endl;
 		return ;
 	}
 
@@ -1160,7 +1160,7 @@ RtVoid	RiClipping( RtFloat cnear, RtFloat cfar )
 
 	if( !valid )
 	{
-		std::cerr << error << "RiClipping: Invalid RiClipping, clipping planes set to RI_EPSILON, RI_INFINITY" << std::endl;
+		Aqsis::log() << error << "RiClipping: Invalid RiClipping, clipping planes set to RI_EPSILON, RI_INFINITY" << std::endl;
 		cnear	= RI_EPSILON;
 		cfar	= RI_INFINITY;
 	}
@@ -1208,7 +1208,7 @@ RtVoid	RiDepthOfField( RtFloat fstop, RtFloat focallength, RtFloat focaldistance
 
 	if( !valid )
 	{
-		std::cerr << warning << "RiDepthOfField: Invalid DepthOfField, DepthOfField ignored" << std::endl;
+		Aqsis::log() << warning << "RiDepthOfField: Invalid DepthOfField, DepthOfField ignored" << std::endl;
 		return;
 	}
 
@@ -1264,7 +1264,7 @@ RtVoid	RiPixelVariance( RtFloat variance )
 
 	if( !valid )
 	{
-		std::cerr << warning << "RiPixelVariance: Invalid PixelVariance, PixelVariance set to 0" << std::endl;
+		Aqsis::log() << warning << "RiPixelVariance: Invalid PixelVariance, PixelVariance set to 0" << std::endl;
 		variance = 0;
 	}
 
@@ -1304,7 +1304,7 @@ RtVoid	RiPixelSamples( RtFloat xsamples, RtFloat ysamples )
 
 	if( !valid )
 	{
-		std::cerr << warning << "RiPixelSamples: Invalid PixelSamples, PixelSamples set to 1, 1" << std::endl;
+		Aqsis::log() << warning << "RiPixelSamples: Invalid PixelSamples, PixelSamples set to 1, 1" << std::endl;
 		xsamples = 1;
 		ysamples = 1;
 	}
@@ -1853,7 +1853,7 @@ RtVoid	RiHiderV( RtToken name, PARAMETERLIST )
 		}
 		catch( XqException e )
 		{
-			std::cerr << error << e.strReason().c_str() << std::endl;
+			Aqsis::log() << error << e.strReason().c_str() << std::endl;
 			continue;
 		}
 		TqUlong hash = CqString::hash(Decl.m_strName.c_str());
@@ -1879,7 +1879,7 @@ RtVoid	RiColorSamples( RtInt N, RtFloat *nRGB, RtFloat *RGBn )
 
 	Validate_RiColorSamples
 
-	std::cerr << warning << "RiColorSamples not supported" << std::endl;
+	Aqsis::log() << warning << "RiColorSamples not supported" << std::endl;
 	return ;
 }
 
@@ -1898,7 +1898,7 @@ RtVoid	RiRelativeDetail( RtFloat relativedetail )
 
 	if ( relativedetail < 0.0f )
 	{
-		std::cerr << error << "RiRelativeDetail < 0.0" << std::endl;
+		Aqsis::log() << error << "RiRelativeDetail < 0.0" << std::endl;
 	}
 	else
 	{
@@ -1955,7 +1955,7 @@ RtVoid	RiOptionV( RtToken name, PARAMETERLIST )
 		}
 		catch( XqException e )
 		{
-			std::cerr << error << e.strReason().c_str() << std::endl;
+			Aqsis::log() << error << e.strReason().c_str() << std::endl;
 			continue;
 		}
 		TqInt Type = Decl.m_Type;
@@ -1972,9 +1972,9 @@ RtVoid	RiOptionV( RtToken name, PARAMETERLIST )
 			else
 			{
 				if ( Decl.m_strName == "" )
-					std::cerr << warning << "Unrecognised declaration : " << token << std::endl;
+					Aqsis::log() << warning << "Unrecognised declaration : " << token << std::endl;
 				else
-					std::cerr << warning << "Options can only be uniform [" << token << "]" << std::endl;
+					Aqsis::log() << warning << "Options can only be uniform [" << token << "]" << std::endl;
 				return ;
 			}
 		}
@@ -2381,7 +2381,7 @@ RtLightHandle	RiAreaLightSourceV( RtToken name, PARAMETERLIST )
 
 	Validate_RiAreaLightSource
 
-	std::cerr << warning << "RiAreaLightSource not supported, will produce a point light" << std::endl;
+	Aqsis::log() << warning << "RiAreaLightSource not supported, will produce a point light" << std::endl;
 
 	return ( RiLightSourceV( name, count, tokens, values ) );
 }
@@ -2525,7 +2525,7 @@ RtVoid	RiAtmosphereV( RtToken name, PARAMETERLIST )
 //
 RtVoid	RiInterior( RtToken name, ... )
 {
-	std::cerr << warning << "RiInterior not supported" << std::endl;
+	Aqsis::log() << warning << "RiInterior not supported" << std::endl;
 	return ;
 }
 
@@ -2542,7 +2542,7 @@ RtVoid	RiInteriorV( RtToken name, PARAMETERLIST )
 
 	Validate_RiInterior
 
-	std::cerr << warning << "RiInterior not supported" << std::endl;
+	Aqsis::log() << warning << "RiInterior not supported" << std::endl;
 	return ;
 }
 
@@ -2553,7 +2553,7 @@ RtVoid	RiInteriorV( RtToken name, PARAMETERLIST )
 //
 RtVoid	RiExterior( RtToken name, ... )
 {
-	std::cerr << warning << "RiExterior not supported" << std::endl;
+	Aqsis::log() << warning << "RiExterior not supported" << std::endl;
 	return ;
 }
 
@@ -2570,7 +2570,7 @@ RtVoid	RiExteriorV( RtToken name, PARAMETERLIST )
 
 	Validate_RiExterior
 
-	std::cerr << warning << "ExInterior not supported" << std::endl;
+	Aqsis::log() << warning << "ExInterior not supported" << std::endl;
 	return ;
 }
 
@@ -2599,7 +2599,7 @@ RtVoid	RiShadingRate( RtFloat size )
 
 	if( !valid )
 	{
-		std::cerr << warning << "Invalid ShadingRate, ShadingRate set to 1" << std::endl;
+		Aqsis::log() << warning << "Invalid ShadingRate, ShadingRate set to 1" << std::endl;
 		size = 1;
 	}
 
@@ -2629,7 +2629,7 @@ RtVoid	RiShadingInterpolation( RtToken type )
 		if ( strcmp( type, RI_SMOOTH ) == 0 )
 			QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "ShadingInterpolation" ) [ 0 ] = ShadingSmooth;
 		else
-			std::cerr << error << "RiShadingInterpolation unrecognised value \"" << type << "\"" << std::endl;
+			Aqsis::log() << error << "RiShadingInterpolation unrecognised value \"" << type << "\"" << std::endl;
 
 	QGetRenderContext() ->AdvanceTime();
 	return ;
@@ -2712,7 +2712,7 @@ RtVoid	RiDetailRange( RtFloat offlow, RtFloat onlow, RtFloat onhigh, RtFloat off
 
 	if ( offlow > onlow || onhigh > offhigh )
 	{
-		std::cerr << error << "RiDetailRange invalid range" << std::endl;
+		Aqsis::log() << error << "RiDetailRange invalid range" << std::endl;
 		return ;
 	}
 
@@ -2762,7 +2762,7 @@ RtVoid	RiGeometricApproximation( RtToken type, RtFloat value )
 
 	Validate_RiGeometricApproximation
 
-	std::cerr << warning << "RiGeometricApproximation not supported" << std::endl;
+	Aqsis::log() << warning << "RiGeometricApproximation not supported" << std::endl;
 	return ;
 }
 
@@ -2916,7 +2916,7 @@ RtVoid	RiPerspective( RtFloat fov )
 
 	if ( fov <= 0 )
 	{
-		std::cerr << error << "RiPerspective invalid FOV" << std::endl;
+		Aqsis::log() << error << "RiPerspective invalid FOV" << std::endl;
 		return ;
 	}
 
@@ -3035,7 +3035,7 @@ RtVoid	RiSkew( RtFloat angle, RtFloat dx1, RtFloat dy1, RtFloat dz1,
 //
 RtVoid	RiDeformation( RtToken name, ... )
 {
-	std::cerr << warning << "RiDeformation not supported" << std::endl;
+	Aqsis::log() << warning << "RiDeformation not supported" << std::endl;
 	return ;
 }
 
@@ -3052,7 +3052,7 @@ RtVoid	RiDeformationV( RtToken name, PARAMETERLIST )
 
 	Validate_RiDeformation
 
-	std::cerr << warning << "RiDeformation not supported" << std::endl;
+	Aqsis::log() << warning << "RiDeformation not supported" << std::endl;
 	return ;
 }
 
@@ -3295,7 +3295,7 @@ RtVoid	RiAttributeV( RtToken name, PARAMETERLIST )
 			}
 			catch( XqException e )
 			{
-				std::cerr << error << e.strReason().c_str() << std::endl;
+				Aqsis::log() << error << e.strReason().c_str() << std::endl;
 				continue;
 			}
 			if ( Decl.m_strName != "" && Decl.m_Class == class_uniform )
@@ -3309,9 +3309,9 @@ RtVoid	RiAttributeV( RtToken name, PARAMETERLIST )
 			else
 			{
 				if ( Decl.m_strName == "" )
-					std::cerr << warning << "Unrecognised declaration \"" << token << "\"" << std::endl;
+					Aqsis::log() << warning << "Unrecognised declaration \"" << token << "\"" << std::endl;
 				else
-					std::cerr << warning << "Attributes can only be uniform" << std::endl;
+					Aqsis::log() << warning << "Attributes can only be uniform" << std::endl;
 				return ;
 			}
 		}
@@ -3371,7 +3371,7 @@ RtVoid	RiAttributeV( RtToken name, PARAMETERLIST )
 					}
 #ifdef REQUIRED
 					if( (strcmp(name, "identifier")==0) && (strcmp(token, "name")==0))
-						std::cerr << info << "Identifier: " << ps[ 0 ] << std::endl;
+						Aqsis::log() << info << "Identifier: " << ps[ 0 ] << std::endl;
 #endif
 
 				}
@@ -3428,7 +3428,7 @@ RtVoid	RiPolygonV( RtInt nvertices, PARAMETERLIST )
 		}
 		else
 		{
-			std::cerr << error << "Found degenerate polygon" << std::endl;
+			Aqsis::log() << error << "Found degenerate polygon" << std::endl;
 		}
 	}
 
@@ -3479,7 +3479,7 @@ RtVoid	RiGeneralPolygonV( RtInt nloops, RtInt nverts[], PARAMETERLIST )
 			const CqString* pattrName = QGetRenderContext()->pattrCurrent()->GetStringAttribute( "identifier", "name" );
 			if ( pattrName != 0 )
 				objname = pattrName[ 0 ];
-			std::cerr << warning << "Degenerate loop in GeneralPolygon object \"" << objname.c_str() << "\"" << std::endl;
+			Aqsis::log() << warning << "Degenerate loop in GeneralPolygon object \"" << objname.c_str() << "\"" << std::endl;
 		}
 	}
 
@@ -3625,7 +3625,7 @@ RtVoid RiBlobbyV( RtInt nleaf, RtInt ncode, RtInt code[], RtInt nflt, RtFloat fl
 
 	Validate_RiBlobby
 
-	std::cerr << warning << "RiBlobby not supported" << std::endl;
+	Aqsis::log() << warning << "RiBlobby not supported" << std::endl;
 
 	return ;
 }
@@ -3772,7 +3772,7 @@ RtVoid RiCurvesV( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, 
 	else
 	{
 		// the wrap mode was neither "periodic" nor "nonperiodic"
-		std::cerr << error << "RiCurves invalid wrap mode \"" << wrap << "\"" << std::endl;
+		Aqsis::log() << error << "RiCurves invalid wrap mode \"" << wrap << "\"" << std::endl;
 	}
 
 	// handle creation of linear and cubic curve groups separately
@@ -3822,7 +3822,7 @@ RtVoid RiCurvesV( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, 
 	else
 	{
 		// the type of curve was neither "linear" nor "cubic"
-		std::cerr << error << "RiCurves invalid type \"" << type << "\"" << std::endl;
+		Aqsis::log() << error << "RiCurves invalid type \"" << type << "\"" << std::endl;
 	}
 }
 
@@ -3946,7 +3946,7 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 				const CqString* pattrName = QGetRenderContext()->pattrCurrent()->GetStringAttribute( "identifier", "name" );
 				if ( pattrName != 0 )
 					objname = pattrName[ 0 ];
-				std::cerr << warning << "Degenerate loop in PointsGeneralPolygons object \"" << objname.c_str() << "\"" << std::endl;
+				Aqsis::log() << warning << "Degenerate loop in PointsGeneralPolygons object \"" << objname.c_str() << "\"" << std::endl;
 			}
 			for ( v = 0; v < nverts[ igloop ]; ++v )
 			{
@@ -4302,7 +4302,7 @@ RtVoid	RiPatchV( RtToken type, PARAMETERLIST )
 	}
 	else
 	{
-		std::cerr << error << "RiPatch invalid patch type \"" << type << "\"" << std::endl;
+		Aqsis::log() << error << "RiPatch invalid patch type \"" << type << "\"" << std::endl;
 	}
 
 	return ;
@@ -4340,10 +4340,10 @@ RtVoid	RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vw
 	Validate_RiPatchMesh
 
 	if( strcmp( uwrap, RI_PERIODIC ) && strcmp( uwrap, RI_NONPERIODIC ) )
-		std::cerr << error << "RiPatchMesh invalid u-wrap type: \"" << uwrap << "\"" << std::endl;
+		Aqsis::log() << error << "RiPatchMesh invalid u-wrap type: \"" << uwrap << "\"" << std::endl;
 
 	if( strcmp( vwrap, RI_PERIODIC ) && strcmp( vwrap, RI_NONPERIODIC ) )
-		std::cerr << error << "RiPatchMesh invalid v-wrap type: \"" << vwrap << "\"" << std::endl;
+		Aqsis::log() << error << "RiPatchMesh invalid v-wrap type: \"" << vwrap << "\"" << std::endl;
 
 	if ( strcmp( type, RI_BICUBIC ) == 0 )
 	{
@@ -4397,7 +4397,7 @@ RtVoid	RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vw
 	}
 	else
 	{
-		std::cerr << error << "RiPatchMesh invalid type \"" << type << "\"" << std::endl;
+		Aqsis::log() << error << "RiPatchMesh invalid type \"" << type << "\"" << std::endl;
 	}
 
 	return ;
@@ -4965,7 +4965,7 @@ RtVoid	RiGeometryV( RtToken type, PARAMETERLIST )
 	}
 	else
 	{
-		std::cerr << warning << "RiGeometry unrecognised type \"" << type << "\"" << std::endl;
+		Aqsis::log() << warning << "RiGeometry unrecognised type \"" << type << "\"" << std::endl;
 	}
 
 	return ;
@@ -5236,7 +5236,7 @@ RtVoid	RiMakeTextureV( RtString imagefile, RtString texturefile, RtToken swrap, 
 //
 RtVoid	RiMakeBump( RtString imagefile, RtString bumpfile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, ... )
 {
-	std::cerr << warning << "RiMakeBump not supported" << std::endl;
+	Aqsis::log() << warning << "RiMakeBump not supported" << std::endl;
 	return ;
 }
 
@@ -5253,7 +5253,7 @@ RtVoid	RiMakeBumpV( RtString imagefile, RtString bumpfile, RtToken swrap, RtToke
 
 	Validate_RiMakeBump
 
-	std::cerr << warning << "RiMakeBump not supported" << std::endl;
+	Aqsis::log() << warning << "RiMakeBump not supported" << std::endl;
 	return ;
 }
 
@@ -5427,7 +5427,7 @@ RtVoid	RiMakeCubeFaceEnvironmentV( RtString px, RtString nx, RtString py, RtStri
 
 		if ( !fValid )
 		{
-			std::cerr << error << "RiMakeCubeFaceEnvironment all images must be the same size" << std::endl;
+			Aqsis::log() << error << "RiMakeCubeFaceEnvironment all images must be the same size" << std::endl;
 			return ;
 		}
 
@@ -5641,7 +5641,7 @@ RtVoid	RiErrorIgnore( RtInt code, RtInt severity, RtString message )
 RtVoid	RiErrorPrint( RtInt code, RtInt severity, RtString message )
 {
 	// Don't use this!
-	std::cerr << error << "RiError: " << code << " : " << severity << " : " << message << std::endl;
+	Aqsis::log() << error << "RiError: " << code << " : " << severity << " : " << message << std::endl;
 	return ;
 }
 
@@ -5800,12 +5800,12 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 			}
 			else
 			{
-				std::cerr << error << "RiSubdivisionMesh contains non-manifold data" << std::endl;
+				Aqsis::log() << error << "RiSubdivisionMesh contains non-manifold data" << std::endl;
 			}
 		}
 		else
 		{
-			std::cerr << error << "RiSubdivisionMesh invalid scheme \"" << scheme << "\"" << std::endl;
+			Aqsis::log() << error << "RiSubdivisionMesh invalid scheme \"" << scheme << "\"" << std::endl;
 		}
 	}
 
@@ -5844,7 +5844,7 @@ RtVoid	RiReadArchiveV( RtToken name, RtArchiveCallback callback, PARAMETERLIST )
 		if ( ( file = fopen( strRealName.c_str(), "rb" ) ) != NULL )
 		{
 #ifdef REQUIRED
-			std::cerr << info << "RiReadArchive: Reading archive \"" << strRealName.c_str() << "\"" << std::endl;
+			Aqsis::log() << info << "RiReadArchive: Reading archive \"" << strRealName.c_str() << "\"" << std::endl;
 #endif
 
 			CqRIBParserState currstate = librib::GetParserState();
@@ -5928,7 +5928,7 @@ RtVoid RiShaderLayerV( RtToken type, RtToken name, RtToken layername, RtInt coun
 		}
 	}
 	else
-		std::cerr << error << "Layered shaders not supported for type \"" << type << "\"" << std::endl;
+		Aqsis::log() << error << "Layered shaders not supported for type \"" << type << "\"" << std::endl;
 
 	if ( newlayer && layeredshader )
 	{
@@ -5939,7 +5939,7 @@ RtVoid RiShaderLayerV( RtToken type, RtToken name, RtToken layername, RtInt coun
 
 		// Just check that the transformation hasn't changed between layers, as this is not handled.
 		if(newlayer->matCurrent() != layeredshader->matCurrent())
-			std::cerr << error << "The shader space has changed between layers, this is not supported" << std::endl;
+			Aqsis::log() << error << "The shader space has changed between layers, this is not supported" << std::endl;
 
 		// Execute the intiialisation code here, as we now have our shader context complete.
 		newlayer->PrepareDefArgs();
@@ -5965,7 +5965,7 @@ RtVoid RiConnectShaderLayers( RtToken type, RtToken layer1, RtToken variable1, R
 	else if(stringtype.compare("displacement")==0)
 		pcurr = QGetRenderContext()->pattrWriteCurrent()->pshadDisplacement(QGetRenderContext()->Time());
 	else
-		std::cerr << error << "Layered shaders not supported for type \"" << type << "\"" << std::endl;
+		Aqsis::log() << error << "Layered shaders not supported for type \"" << type << "\"" << std::endl;
 	if( pcurr && pcurr->IsLayered() )
 	{
 		// Just add this layer in
@@ -6064,7 +6064,7 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface * pSurface, PARAMETERLIST 
 			}
 			catch( XqException e )
 			{
-				std::cerr << error << e.strReason().c_str() << std::endl;
+				Aqsis::log() << error << e.strReason().c_str() << std::endl;
 				continue;
 			}
 
@@ -6331,7 +6331,7 @@ void SetShaderArgument( const boost::shared_ptr<IqShader>& pShader, const char *
 	}
 	catch( XqException e )
 	{
-		std::cerr << error << e.strReason().c_str() << std::endl;
+		Aqsis::log() << error << e.strReason().c_str() << std::endl;
 		return;
 	}
 

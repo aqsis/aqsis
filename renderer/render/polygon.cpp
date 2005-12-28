@@ -529,7 +529,7 @@ TqInt CqSurfacePointsPolygons::Split( std::vector<boost::shared_ptr<CqBasicSurfa
 				const CqString* pattrName = pSurface->pAttributes()->GetStringAttribute( "identifier", "name" );
 				if ( pattrName != 0 )
 					objname = pattrName[ 0 ];
-				std::cerr << warning << "Invalid PointsPolygon index in object \"" << objname.c_str() << "\"" << std::endl;
+				Aqsis::log() << warning << "Invalid PointsPolygon index in object \"" << objname.c_str() << "\"" << std::endl;
 
 				break;
 			}

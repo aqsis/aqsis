@@ -10,6 +10,7 @@
 #endif // AQSIS_SYSTEM_WIN32
 
 #include	"aqsis.h"
+#include	"logging.h"
 #include	"version.h"
 #include	"argparse.h"
 #include	"ri.h"
@@ -75,7 +76,7 @@ int main( int argc, const char** argv )
 
 	if ( argc > 1 && !ap.parse( argc - 1, argv + 1 ) )
 	{
-		std::cerr << ap.errmsg() << std::endl << ap.usagemsg();
+		Aqsis::log() << ap.errmsg() << std::endl << ap.usagemsg();
 		exit( 1 );
 	}
 
@@ -120,29 +121,29 @@ int main( int argc, const char** argv )
 	/* protect the s,t width */
 	if ( g_swidth < 1.0 )
 	{
-		std::cerr << "g_swidth is smaller than 1.0." << " 1.0 will be used instead." << std::endl;
+		Aqsis::log() << "g_swidth is smaller than 1.0." << " 1.0 will be used instead." << std::endl;
 		g_swidth = 1.0;
 	}
 	if ( g_twidth < 1.0 )
 	{
-		std::cerr << "g_twidth is smaller than 1.0." << " 1.0 will be used instead." << std::endl;
+		Aqsis::log() << "g_twidth is smaller than 1.0." << " 1.0 will be used instead." << std::endl;
 		g_twidth = 1.0;
 	}
 
 	/* protect the s,t wrap mode */
 	if ( !( ( g_swrap == "black" ) || ( g_swrap == "periodic" ) || ( g_swrap == "clamp" ) ) )
 	{
-		std::cerr << "Unknown s wrap mode: " << g_swrap << ". black will be used instead." << std::endl;
+		Aqsis::log() << "Unknown s wrap mode: " << g_swrap << ". black will be used instead." << std::endl;
 		g_swrap = "black";
 	}
 	if ( !( ( g_twrap == "black" ) || ( g_twrap == "periodic" ) || ( g_twrap == "clamp" ) ) )
 	{
-		std::cerr << "Unknown t wrap mode: " << g_twrap << ". black will be used instead." << std::endl;
+		Aqsis::log() << "Unknown t wrap mode: " << g_twrap << ". black will be used instead." << std::endl;
 		g_twrap = "black";
 	}
 	if ( !( ( g_wrap == "" ) || ( g_wrap == "black" ) || ( g_wrap == "periodic" ) || ( g_wrap == "clamp" ) ) )
 	{
-		std::cerr << "Unknown wrap mode: " << g_wrap << ". black will be used instead." << std::endl;
+		Aqsis::log() << "Unknown wrap mode: " << g_wrap << ". black will be used instead." << std::endl;
 		g_wrap = "black";
 	}
 
@@ -167,7 +168,7 @@ int main( int argc, const char** argv )
 	      )
 	   )
 	{
-		std::cerr << "Unknown compression mode: " << g_compress << ". none." << std::endl;
+		Aqsis::log() << "Unknown compression mode: " << g_compress << ". none." << std::endl;
 		g_compress = "none";
 	}
 
@@ -193,7 +194,7 @@ int main( int argc, const char** argv )
 	{
 		if ( ap.leftovers().size() != 7 )
 		{
-			std::cerr << "Need 6 images for cubic environment map" << std::endl;
+			Aqsis::log() << "Need 6 images for cubic environment map" << std::endl;
 			return ( -1 );
 		}
 

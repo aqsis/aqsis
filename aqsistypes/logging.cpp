@@ -54,6 +54,11 @@ START_NAMESPACE( Aqsis )
 
 //---------------------------------------------------------------------
 
+std::ostream& log()
+{
+	return std::cerr;
+}
+	
 std::ostream& critical(std::ostream& Stream)
 {
 	detail::log_level(Stream) = CRITICAL;

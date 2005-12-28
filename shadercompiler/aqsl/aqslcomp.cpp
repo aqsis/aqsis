@@ -25,6 +25,7 @@
 */
 
 #include	"aqsis.h"
+#include	"logging.h"
 #include	"logging_streambufs.h"
 
 #include	<iostream>
@@ -102,7 +103,7 @@ int main( int argc, const char** argv )
 
 	if ( argc > 1 && !ap.parse( argc - 1, argv + 1 ) )
 	{
-		std::cerr << ap.errmsg() << std::endl << ap.usagemsg();
+		Aqsis::log() << ap.errmsg() << std::endl << ap.usagemsg();
 		exit( 1 );
 	}
 
@@ -119,30 +120,30 @@ int main( int argc, const char** argv )
 	}
 
 #ifdef	AQSIS_SYSTEM_WIN32
-	std::auto_ptr<std::streambuf> ansi( new Aqsis::ansi_buf(std::cerr) );
+	std::auto_ptr<std::streambuf> ansi( new Aqsis::ansi_buf(Aqsis::log()) );
 #endif
 
-	std::auto_ptr<std::streambuf> reset_level( new Aqsis::reset_level_buf(std::cerr) );
-	std::auto_ptr<std::streambuf> show_timestamps( new Aqsis::timestamp_buf(std::cerr) );
-	std::auto_ptr<std::streambuf> fold_duplicates( new Aqsis::fold_duplicates_buf(std::cerr) );
+	std::auto_ptr<std::streambuf> reset_level( new Aqsis::reset_level_buf(Aqsis::log()) );
+	std::auto_ptr<std::streambuf> show_timestamps( new Aqsis::timestamp_buf(Aqsis::log()) );
+	std::auto_ptr<std::streambuf> fold_duplicates( new Aqsis::fold_duplicates_buf(Aqsis::log()) );
 	std::auto_ptr<std::streambuf> color_level;
 	if(!g_cl_no_color)
 	{
-		std::auto_ptr<std::streambuf> temp_color_level( new Aqsis::color_level_buf(std::cerr) );
+		std::auto_ptr<std::streambuf> temp_color_level( new Aqsis::color_level_buf(Aqsis::log()) );
 		color_level = temp_color_level;
 	}
-	std::auto_ptr<std::streambuf> show_level( new Aqsis::show_level_buf(std::cerr) );
-	std::auto_ptr<std::streambuf> filter_level( new Aqsis::filter_by_level_buf(Aqsis::DEBUG, std::cerr) );
+	std::auto_ptr<std::streambuf> show_level( new Aqsis::show_level_buf(Aqsis::log()) );
+	std::auto_ptr<std::streambuf> filter_level( new Aqsis::filter_by_level_buf(Aqsis::DEBUG, Aqsis::log()) );
 #ifdef	AQSIS_SYSTEM_POSIX
 
 	if( g_cl_syslog )
-		std::auto_ptr<std::streambuf> use_syslog( new Aqsis::syslog_buf(std::cerr) );
+		std::auto_ptr<std::streambuf> use_syslog( new Aqsis::syslog_buf(Aqsis::log()) );
 #endif	// AQSIS_SYSTEM_POSIX
 
 	// Pass the shader file through the slpp preprocessor first to generate a temporary file.
 	if ( ap.leftovers().size() == 0 )     // If no files specified, take input from stdin.
 	{
-		//if ( Parse( std::cin, "stdin", std::cerr ) )
+		//if ( Parse( std::cin, "stdin", Aqsis::log() ) )
 		//	codegen.OutputTree( GetParseTree(), g_stroutname );
 		std::cout << ap.usagemsg();
 		exit( 0 );
@@ -227,7 +228,7 @@ int main( int argc, const char** argv )
 					PreProcess(slppArgs.size(),&slppArgs[0]);
 
 					std::ifstream ppfile( tempname );
-					if ( Parse( ppfile, e->c_str(), std::cerr ) )
+					if ( Parse( ppfile, e->c_str(), Aqsis::log() ) )
 						codegen.OutputTree( GetParseTree(), g_stroutname );
 					else
 						error = true;

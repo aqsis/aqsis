@@ -1187,7 +1187,7 @@ TqInt CqRibBinaryDecoder::read( TqPchar buffer, TqUint size )
 		catch ( std::string & s )
 		{
 			if ( s != "" )
-				std::cerr << Aqsis::error << s << std::endl;
+				Aqsis::log() << Aqsis::error << s << std::endl;
 		}
 
 		n = writeToBuffer( buffer, size );
