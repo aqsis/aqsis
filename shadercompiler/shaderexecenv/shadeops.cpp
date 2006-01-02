@@ -7900,7 +7900,7 @@ void CqShaderExecEnv::SO_occlusion( IqShaderData* occlmap, IqShaderData* channel
 					// Check if the lightsource is behind the sample.
 					CqVector3D Nl = allmatrices[i] * _aq_N;
 					TqFloat cosangle = Nl * L;
-					if( cosangle < 0.0f )
+					if( cosangle <= 0.0f )
 						continue;
 					pMap->SampleMap( _aq_P, swidth, twidth, fv, i );
 					occlsum += cosangle * fv[0];
