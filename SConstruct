@@ -143,10 +143,11 @@ SConscript('shadercompiler/aqsl/SConscript', build_dir=target_dir.abspath + '/sh
 SConscript('shadercompiler/slxargs/SConscript', build_dir=target_dir.abspath + '/shadercompiler/slxargs')
 SConscript('shadercompiler/aqsltell/SConscript', build_dir=target_dir.abspath + '/shadercompiler/aqsltell')
 display = SConscript('displays/display/SConscript', build_dir=target_dir.abspath + '/displays/display')
+xpm = SConscript('displays/d_xpm/SConscript', build_dir=target_dir.abspath + '/displays/d_xpm')
 SConscript('rib/ri2rib/SConscript', build_dir=target_dir.abspath + '/rib/ri2rib')
 SConscript('rib/rib2stream/SConscript', build_dir=target_dir.abspath + '/rib/rib2stream')
 SConscript('texturing/teqser/SConscript', build_dir=target_dir.abspath + '/texturing/teqser')
-#SConscript('texturing/plugins/SConscript')
+SConscript('texturing/plugins/SConscript')
 SConscript('shaders/SConscript', build_dir=target_dir.abspath + '/shaders')
 SConscript('thirdparty/tinyxml/SConscript', build_dir=target_dir.abspath + '/thirdparty/tinyxml')
 
@@ -156,8 +157,10 @@ SConscript('thirdparty/tinyxml/SConscript', build_dir=target_dir.abspath + '/thi
 def aqsis_rc_build(target, source, env):
 	# Code to build "target" from "source"
 	displaylib = os.path.basename(display[0].path)
+	xpmlib = os.path.basename(xpm[0].path)
 	defines = {
 		"displaylib": displaylib,
+		"xpmlib": xpmlib,
 		"shaderpath": env.Dir('$SHADERDIR').abspath,
 		"displaypath": env.Dir('$BINDIR').abspath,
 	    }
