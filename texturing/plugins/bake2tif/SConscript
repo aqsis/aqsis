@@ -1,5 +1,4 @@
 Import('env')
-Import('pixelsave')
 bake2tif_sources=Split("""
 	bake2tif.c""")
 
@@ -8,6 +7,6 @@ env.UseTargetOptions('plugin')
 env.UseTargetOptions('texture_plugin')
 env.UseTargetOptions('bake2tif')
 
-bake2tif = env.SharedLibrary('bake2tif', bake2tif_sources + pixelsave, LIBS=['$tiff_lib', '$z_lib'])
+bake2tif = env.SharedLibrary('bake2tif', bake2tif_sources, LIBS=['$tiff_lib', '$z_lib', 'common'])
 
 env.Install('$BINDIR', bake2tif)
