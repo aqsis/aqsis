@@ -579,7 +579,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 		// Check if the requested compression format is available in libtiff, if not resort to "none"
 		if(!TIFFIsCODECConfigured(pImage->m_compression))
 		{
-			Aqsis::log() << "Compression type " << compression << " not supported by the libtiff implementation" << std::endl;
+			/* Aqsis::log() << "Compression type " << compression << " not supported by the libtiff implementation" << std::endl; */
 			pImage->m_compression = COMPRESSION_NONE;
 		}
 
@@ -727,7 +727,7 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 		percent = CLAMP(percent, 0.0f, 100.0f);
 		std::stringstream strTitle;
 		if (percent < 99.9f)
-			strTitle << pImage->m_filename << ": " << std::setprecision(1) << std::setw(3) << percent << "% complete" << std::ends;
+			strTitle << pImage->m_filename << ": " << std::setprecision(3) << std::setw(6) << percent << "% complete" << std::ends;
 		else
 			strTitle << pImage->m_filename << std::ends;
 		pImage->m_theWindow->label(strTitle.str().c_str());
@@ -813,6 +813,7 @@ PtDspyError DspyImageDelayClose(PtDspyImageHandle image)
 						Aqsis::log() << info << g_Filename << " dynamic range: " << dynamicrange << std::endl;
 						Aqsis::log() << info << g_Filename << " average depth: " << totaldepth / static_cast<TqFloat>( samples ) << std::endl;
 				*/
+
 				const TqInt linelength = pImage->m_width * 3;
 				for ( TqInt y = 0;
 				        y < pImage->m_height;
