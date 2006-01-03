@@ -875,6 +875,8 @@ RtVoid	RiWorldEnd()
 
 	Validate_RiWorldEnd
 
+	QGetRenderContext() ->pImage() ->PostWorld( );
+
 	TqBool fFailed = TqFalse;
 	// Call any specified pre render function.
 	if ( QGetRenderContext()->pPreRenderFunction() != NULL )
@@ -3421,9 +3423,9 @@ RtVoid	RiPolygonV( RtInt nvertices, PARAMETERLIST )
 		{
 			TqFloat time = QGetRenderContext()->Time();
 			// Transform the points into camera space for processing,
-			pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
-			                     QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
-			                     QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ) );
+			pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
+			                     QGetRenderContext() ->matNSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
+			                     QGetRenderContext() ->matVSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ) );
 			CreateGPrim( pSurface );
 		}
 		else
@@ -3674,9 +3676,9 @@ RtVoid	RiPointsV( RtInt npoints, PARAMETERLIST )
 	{
 		// Transform the points into camera space for processing,
 		// This needs to be done before initialising the KDTree as the tree must be formulated in 'current' (camera) space.
-		pPointsClass->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld(pPointsClass->pTransform() ->Time(0)), pPointsClass->pTransform() ->Time(0) ),
-		                         QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld(pPointsClass->pTransform() ->Time(0)), pPointsClass->pTransform() ->Time(0) ),
-		                         QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld(pPointsClass->pTransform() ->Time(0)), pPointsClass->pTransform() ->Time(0) ) );
+		pPointsClass->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "world", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld(pPointsClass->pTransform() ->Time(0)), pPointsClass->pTransform() ->Time(0) ),
+		                         QGetRenderContext() ->matNSpaceToSpace( "object", "world", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld(pPointsClass->pTransform() ->Time(0)), pPointsClass->pTransform() ->Time(0) ),
+		                         QGetRenderContext() ->matVSpaceToSpace( "object", "world", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld(pPointsClass->pTransform() ->Time(0)), pPointsClass->pTransform() ->Time(0) ) );
 
 		pSurface = boost::shared_ptr<CqPoints>( new CqPoints( npoints, pPointsClass ) );
 		// Initialise the KDTree for the points to contain all.
@@ -3714,7 +3716,7 @@ RtVoid	RiPointsV( RtInt npoints, PARAMETERLIST )
 		}
 		else
 		{
-			QGetRenderContext() ->pImage() ->PostSurface( pSurface );
+			QGetRenderContext() ->pImage() ->StorePrimitive( pSurface );
 			STATS_INC( GPR_created );
 		}
 	}
@@ -3788,9 +3790,9 @@ RtVoid RiCurvesV( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, 
 
 			TqFloat time = QGetRenderContext()->Time();
 			// Transform the points into camera space for processing,
-			pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
-			                     QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
-			                     QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ) );
+			pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
+			                     QGetRenderContext() ->matNSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
+			                     QGetRenderContext() ->matVSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ) );
 
 			std::vector<boost::shared_ptr<CqBasicSurface> > aSplits;
 			pSurface->Split( aSplits );
@@ -3813,9 +3815,9 @@ RtVoid RiCurvesV( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, 
 			pSurface->SetDefaultPrimitiveVariables();
 			TqFloat time = QGetRenderContext()->Time();
 			// Transform the points into camera space for processing,
-			pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
-			                     QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
-			                     QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ) );
+			pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
+			                     QGetRenderContext() ->matNSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
+			                     QGetRenderContext() ->matVSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ) );
 			CreateGPrim( pSurface );
 		}
 	}
@@ -3882,9 +3884,9 @@ RtVoid	RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETER
 		boost::shared_ptr<CqSurfacePointsPolygons> pPsPs( new CqSurfacePointsPolygons(pPointsClass, npolys, nverts, verts ) );
 		TqFloat time = QGetRenderContext()->Time();
 		// Transform the points into camera space for processing,
-		pPointsClass->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld(time), time ),
-		                         QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld(time), time ),
-		                         QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld(time), time ) );
+		pPointsClass->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "world", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld(time), time ),
+		                         QGetRenderContext() ->matNSpaceToSpace( "object", "world", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld(time), time ),
+		                         QGetRenderContext() ->matVSpaceToSpace( "object", "world", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld(time), time ) );
 		CreateGPrim(pPsPs);
 	}
 
@@ -4276,9 +4278,9 @@ RtVoid	RiPatchV( RtToken type, PARAMETERLIST )
 
 			TqFloat time = QGetRenderContext()->Time();
 			// Transform the points into camera space for processing,
-			pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
-			                     QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
-			                     QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ) );
+			pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
+			                     QGetRenderContext() ->matNSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
+			                     QGetRenderContext() ->matVSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ) );
 
 			CreateGPrim( pSurface );
 		}
@@ -4294,9 +4296,9 @@ RtVoid	RiPatchV( RtToken type, PARAMETERLIST )
 			pSurface->SetDefaultPrimitiveVariables();
 			TqFloat time = QGetRenderContext()->Time();
 			// Transform the points into camera space for processing,
-			pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
-			                     QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
-			                     QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ) );
+			pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
+			                     QGetRenderContext() ->matNSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
+			                     QGetRenderContext() ->matVSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ) );
 			CreateGPrim( pSurface );
 		}
 	}
@@ -4368,9 +4370,9 @@ RtVoid	RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vw
 				                                     () ) ->ConvertToBezierBasis( matuBasis, matvBasis );
 				TqFloat time = QGetRenderContext()->Time();
 				// Transform the points into camera space for processing,
-				(*iSS)->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
-				                   QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
-				                   QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ) );
+				(*iSS)->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
+				                   QGetRenderContext() ->matNSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
+				                   QGetRenderContext() ->matVSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ) );
 				CreateGPrim( *iSS );
 			}
 		}
@@ -4389,9 +4391,9 @@ RtVoid	RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vw
 			pSurface->SetDefaultPrimitiveVariables();
 			TqFloat time = QGetRenderContext()->Time();
 			// Transform the points into camera space for processing,
-			pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
-			                     QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
-			                     QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ) );
+			pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
+			                     QGetRenderContext() ->matNSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
+			                     QGetRenderContext() ->matVSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ) );
 			CreateGPrim( pSurface );
 		}
 	}
@@ -4461,9 +4463,9 @@ RtVoid	RiNuPatchV( RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin, RtFloa
 		pSurface->Clamp();
 		TqFloat time = QGetRenderContext()->Time();
 		// Transform the points into camera space for processing,
-		pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
-		                     QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
-		                     QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ) );
+		pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
+		                     QGetRenderContext() ->matNSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
+		                     QGetRenderContext() ->matVSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ) );
 		CreateGPrim( pSurface );
 	}
 
@@ -4570,9 +4572,9 @@ RtVoid	RiSphereV( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, 
 
 	TqFloat time = QGetRenderContext()->Time();
 	// Transform the points into camera space for processing,
-	pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
-	                     QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
-	                     QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ) );
+	pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
+	                     QGetRenderContext() ->matNSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
+	                     QGetRenderContext() ->matVSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ) );
 	CreateGPrim( pSurface );
 
 	return ;
@@ -4619,9 +4621,9 @@ RtVoid	RiConeV( RtFloat height, RtFloat radius, RtFloat thetamax, PARAMETERLIST 
 
 	TqFloat time = QGetRenderContext()->Time();
 	// Transform the points into camera space for processing,
-	pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
-	                     QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
-	                     QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ) );
+	pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
+	                     QGetRenderContext() ->matNSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
+	                     QGetRenderContext() ->matVSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ) );
 	CreateGPrim( pSurface );
 
 	return ;
@@ -4664,9 +4666,9 @@ RtVoid	RiCylinderV( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax
 
 	TqFloat time = QGetRenderContext()->Time();
 	// Transform the points into camera space for processing,
-	pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
-	                     QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
-	                     QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ) );
+	pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
+	                     QGetRenderContext() ->matNSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
+	                     QGetRenderContext() ->matVSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ) );
 	CreateGPrim( pSurface );
 
 	return ;
@@ -4711,9 +4713,9 @@ RtVoid	RiHyperboloidV( RtPoint point1, RtPoint point2, RtFloat thetamax, PARAMET
 
 	TqFloat time = QGetRenderContext()->Time();
 	// Transform the points into camera space for processing,
-	pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
-	                     QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
-	                     QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ) );
+	pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
+	                     QGetRenderContext() ->matNSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
+	                     QGetRenderContext() ->matVSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ) );
 	CreateGPrim( pSurface );
 
 	return ;
@@ -4756,9 +4758,9 @@ RtVoid	RiParaboloidV( RtFloat rmax, RtFloat zmin, RtFloat zmax, RtFloat thetamax
 
 	TqFloat time = QGetRenderContext()->Time();
 	// Transform the points into camera space for processing,
-	pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
-	                     QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
-	                     QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ) );
+	pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
+	                     QGetRenderContext() ->matNSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
+	                     QGetRenderContext() ->matVSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ) );
 	CreateGPrim( pSurface );
 
 	return ;
@@ -4801,9 +4803,9 @@ RtVoid	RiDiskV( RtFloat height, RtFloat radius, RtFloat thetamax, PARAMETERLIST 
 
 	TqFloat time = QGetRenderContext()->Time();
 	// Transform the points into camera space for processing,
-	pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
-	                     QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
-	                     QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ) );
+	pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
+	                     QGetRenderContext() ->matNSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
+	                     QGetRenderContext() ->matVSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ) );
 
 	CreateGPrim( pSurface );
 
@@ -4846,9 +4848,9 @@ RtVoid	RiTorusV( RtFloat majorrad, RtFloat minorrad, RtFloat phimin, RtFloat phi
 
 	TqFloat time = QGetRenderContext()->Time();
 	// Transform the points into camera space for processing,
-	pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
-	                     QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
-	                     QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ) );
+	pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
+	                     QGetRenderContext() ->matNSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
+	                     QGetRenderContext() ->matVSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ) );
 
 	CreateGPrim( pSurface );
 
@@ -4877,9 +4879,9 @@ RtVoid	RiProcedural( RtPointer data, RtBound bound, RtProcSubdivFunc refineproc,
 
 	boost::shared_ptr<CqProcedural> pProc( new CqProcedural(data, B, refineproc, freeproc ) );
 	TqFloat time = QGetRenderContext()->Time();
-	pProc->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pProc->pTransform() ->matObjectToWorld(time), time ),
-	                  QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pProc->pTransform() ->matObjectToWorld(time), time ),
-	                  QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pProc->pTransform() ->matObjectToWorld(time), time ) );
+	pProc->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "world", CqMatrix(), pProc->pTransform() ->matObjectToWorld(time), time ),
+	                  QGetRenderContext() ->matNSpaceToSpace( "object", "world", CqMatrix(), pProc->pTransform() ->matObjectToWorld(time), time ),
+	                  QGetRenderContext() ->matVSpaceToSpace( "object", "world", CqMatrix(), pProc->pTransform() ->matObjectToWorld(time), time ) );
 	CreateGPrim( pProc );
 
 	return ;
@@ -4941,9 +4943,9 @@ RtVoid	RiGeometryV( RtToken type, PARAMETERLIST )
 
 			TqFloat time = QGetRenderContext()->Time();
 			// Transform the points into camera space for processing,
-			pMesh->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
-			                  QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
-			                  QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ) );
+			pMesh->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
+			                  QGetRenderContext() ->matNSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
+			                  QGetRenderContext() ->matVSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ) );
 
 			CreateGPrim( boost::static_pointer_cast<CqBasicSurface>( pMesh ) );
 		}
@@ -4957,9 +4959,9 @@ RtVoid	RiGeometryV( RtToken type, PARAMETERLIST )
 
 		TqFloat time = QGetRenderContext()->Time();
 		// Transform the points into camera space for processing,
-		pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
-		                     QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
-		                     QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ) );
+		pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
+		                     QGetRenderContext() ->matNSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
+		                     QGetRenderContext() ->matVSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ) );
 
 		CreateGPrim( pSurface );
 	}
@@ -5711,9 +5713,9 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 		if ( strcmp( scheme, "catmull-clark" ) == 0 )
 		{
 			// Transform the points into camera space for processing,
-			pPointsClass->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld(pPointsClass->pTransform() ->Time(0)), pPointsClass->pTransform() ->Time(0) ),
-			                         QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld(pPointsClass->pTransform() ->Time(0)), pPointsClass->pTransform() ->Time(0) ),
-			                         QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld(pPointsClass->pTransform() ->Time(0)), pPointsClass->pTransform() ->Time(0) ) );
+			pPointsClass->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "world", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld(pPointsClass->pTransform() ->Time(0)), pPointsClass->pTransform() ->Time(0) ),
+			                         QGetRenderContext() ->matNSpaceToSpace( "object", "world", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld(pPointsClass->pTransform() ->Time(0)), pPointsClass->pTransform() ->Time(0) ),
+			                         QGetRenderContext() ->matVSpaceToSpace( "object", "world", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld(pPointsClass->pTransform() ->Time(0)), pPointsClass->pTransform() ->Time(0) ) );
 
 			boost::shared_ptr<CqSubdivision2> pSubd2( new CqSubdivision2( pPointsClass ) );
 			pSubd2->Prepare( cVerts );
@@ -6237,7 +6239,7 @@ RtVoid	CreateGPrim( const boost::shared_ptr<CqBasicSurface>& pSurface )
 	else
 	{
 		pSurface->PrepareTrimCurve();
-		QGetRenderContext() ->pImage() ->PostSurface( pSurface );
+		QGetRenderContext() ->pImage() ->StorePrimitive( pSurface );
 		STATS_INC( GPR_created );
 
 		// Add to the raytracer database also

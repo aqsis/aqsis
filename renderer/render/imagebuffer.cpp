@@ -373,6 +373,32 @@ void CqImageBuffer::PostSurface( const boost::shared_ptr<CqBasicSurface>& pSurfa
 
 }
 
+//----------------------------------------------------------------------
+/** Add a new surface to the list of surfaces in the world.
+ * \param pSurface A pointer to a CqBasicSurface derived class, surface should at this point be in world space.
+ */
+
+void CqImageBuffer::StorePrimitive( const boost::shared_ptr<CqBasicSurface>& pSurface )
+{
+	// Count the number of total gprims
+//	STATS_INC( GPR_created_total );
+
+	m_aWorld.push(pSurface);
+}
+
+void CqImageBuffer::PostWorld()
+{
+	while(!m_aWorld.empty())
+	{
+		boost::shared_ptr<CqBasicSurface> pSurface = m_aWorld.top();
+		pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "world", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(0), 0 ),
+			                     QGetRenderContext() ->matNSpaceToSpace( "world", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(0), 0 ),
+			                     QGetRenderContext() ->matVSpaceToSpace( "world", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(0), 0 ) );
+		PostSurface(pSurface);
+		m_aWorld.pop();
+	}
+}
+	
 
 //----------------------------------------------------------------------
 /** Test if this surface can be occlusion culled. If it can then
