@@ -167,6 +167,7 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase
 #endif
 
 		void	CalcNormals();
+		void	CalcSurfaceDerivatives();
 		/** Set the shading normals flag, indicating this grid has shading (N) normals already specified.
 		 * \param f The new state of the flag.
 		 */
