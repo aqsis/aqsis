@@ -27,6 +27,18 @@ if not env['mingw']:
 	else:
 		env.Replace(z_lib = 'zlibstat')
 
+	# If the jpeg include path isn't specified as an option, choose the default, of the 
+	# win32libs project from CVS checked out to the same folder as 'renderer'
+	if env['jpeg_include_path'] == "":
+		env.Replace(jpeg_include_path = env.Dir('#/../win32libs/jpeg/include'))
+	if env['jpeg_lib_path'] == "":
+		env.Replace(jpeg_lib_path = env.Dir('#/../win32libs/jpeg/lib/vc6'))
+
+	if env['debug']:
+		env.Replace(jpeg_lib = 'libjpeg_d')
+	else:
+		env.Replace(jpeg_lib = 'libjpeg')
+
 	if env['debug']:
 		env.AppendUnique(CCFLAGS=['/GX', '/MDd', '/GR', '/Zm200', '/Od', '/Zi'])
 		env.AppendUnique(CPPDEFINES=[('_DEBUG', 1)])

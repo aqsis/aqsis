@@ -8,9 +8,9 @@ if not conf.CheckLibWithHeader(conf.env.subst('$tiff_lib'), 'tiffio.h', 'c++'):
 	Exit(1)
 
 # Check for the JPEG libraries and headers
-#if not conf.CheckLibWithHeader(conf.env.subst('$jpeg_lib'), ['stdio.h', 'jpeglib.h'], 'c++'):
-#	print 'Cannot find libjpeg'
-#	Exit(1)
+if not conf.CheckLibWithHeader(conf.env.subst('$jpeg_lib'), ['stdio.h', 'jpeglib.h'], 'c++'):
+	print 'Cannot find libjpeg'
+	Exit(1)
 
 # Check for the zlib libraries and headers
 if not conf.CheckLibWithHeader(conf.env.subst('$z_lib'), 'zlib.h', 'c++'):
