@@ -7,6 +7,6 @@ env.UseTargetOptions('plugin')
 env.UseTargetOptions('texture_plugin')
 env.UseTargetOptions('bake2tif')
 
-bake2tif = env.SharedLibrary('bake2tif', bake2tif_sources, LIBS=['$tiff_lib', '$z_lib', 'common'])
+bake2tif = env.SharedLibrary('bake2tif', bake2tif_sources, LIBS=['common', '$tiff_lib', '$z_lib'])
 
 env.Install('$BINDIR', bake2tif)

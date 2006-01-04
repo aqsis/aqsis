@@ -7,6 +7,6 @@ env.UseTargetOptions('plugin')
 env.UseTargetOptions('texture_plugin')
 env.UseTargetOptions('gif2tif')
 
-gif2tif = env.SharedLibrary('gif2tif', gif2tif_sources, LIBS=['$tiff_lib', '$z_lib', 'common'])
+gif2tif = env.SharedLibrary('gif2tif', gif2tif_sources, LIBS=['common', '$tiff_lib', '$z_lib'])
 
 env.Install('$BINDIR', gif2tif)

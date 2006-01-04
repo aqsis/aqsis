@@ -81,6 +81,15 @@ else:
 
 	env.Replace(z_lib = 'z')
 
+	# If the zlib include path isn't specified as an option, choose the default, of the 
+	# win32libs project from CVS checked out to the same folder as 'renderer'
+	if env['jpeg_include_path'] == "":
+		env.Replace(jpeg_include_path = env.Dir('#/../win32libs/jpeg/include'))
+	if env['jpeg_lib_path'] == "":
+		env.Replace(jpeg_lib_path = env.Dir('#/../win32libs/jpeg/lib/mingw'))
+
+	env.Replace(jpeg_lib = 'jpeg')
+
 	env.Replace(fltk_lib = 'fltk')
 
 	env.Replace(slparse_ccflags = ['-O0'])
