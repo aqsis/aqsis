@@ -326,38 +326,98 @@ void CqMicroPolyGrid::Shade()
 	if ( USES( lUses, EnvVars_E ) )
 		pVar(EnvVars_E) ->SetVector( vecE );
 
-	// Setup varying variables.
-	TqBool bdpu, bdpv;
-	bdpu = ( USES( lUses, EnvVars_dPdu ) );
-	bdpv = ( USES( lUses, EnvVars_dPdv ) );
-	IqShaderData * pSDP = pVar(EnvVars_P);
-	TqInt proj = QGetRenderContext()->GetIntegerOption( "System", "Projection" ) [ 0 ];
+    TqInt proj = QGetRenderContext()->GetIntegerOption( "System", "Projection" ) [ 0 ];
+    TqBool bSpline = TqFalse;
+    const TqInt *pSpline = QGetRenderContext()->GetIntegerOption( "render", "spline" );
+    if (pSpline) bSpline = TqTrue;
+    
+    TqInt buRes = uRes;
+    TqInt bvRes = vRes;
 
-	for ( i = gsmin1; i >= 0; i-- )
-	{
-		if ( USES( lUses, EnvVars_du ) )
-		{
+    // Make sure uRes and vRes are at least equal to 4
+    // Otherwise spline interpolation will be off
+    if (uRes < 4) buRes = 4;
+    if (vRes < 4) bvRes = 4;
+    CqSplineCubic sp_u(buRes), sp_v(bvRes);
+    sp_u.SetBasis("catmull-rom");
+    sp_v.SetBasis("catmull-rom" );
 
-			pVar(EnvVars_du) ->SetFloat( 1.0f, i );
+    for ( i = gsmin1; i >= 0; i-- )
+    {
+       if (bSpline == TqTrue) 
+       { 
+          if ( USES( lUses, EnvVars_du ) )
+          {
+             TqFloat v1, v2;
+             TqInt GridX = i % ( uRes + 1 );
+          
+             if ( GridX < uRes ) {
+             
+                pVar(EnvVars_u) ->GetValue( v1, i + 1 );
+                pVar(EnvVars_u) ->GetValue( v2, i );
+                TqFloat dv =  v1 - v2;
+                pVar(EnvVars_du) ->SetFloat(dv, i );
+                sp_u[GridX] = CqVector4D(dv, 0, 0, 0);
+                } else {
+                   // Make sure uRes at least equal to 4
+                   if (uRes < 4) {
+                      for (TqInt k= uRes; k < 4; k++) {
+                         sp_u[k] = sp_u[uRes-1];
+                      }
+                   }
+             
+                   CqVector4D res = sp_u.Evaluate(1.0f - 1.0f/(float) uRes);
+             
+                   pVar(EnvVars_du) ->SetFloat( res.x(), i );
+                }
+          }
+          if ( USES( lUses, EnvVars_dv ) ){
+             TqFloat v1, v2;
+             TqInt GridY = ( i / ( uRes + 1 ) );
+          
+             if ( GridY < vRes ) {
+                pVar(EnvVars_v) ->GetValue( v1, i + uRes + 1 );
+                pVar(EnvVars_v) ->GetValue( v2, i );
+                TqFloat dv =  v1 - v2;
+                pVar(EnvVars_dv) ->SetFloat( dv, i );
+                sp_v[GridY] = CqVector4D(dv, 0, 0, 0);
+             } else {
+                // Make sure vRes at least equal to 4
+                if (vRes < 4) {
+                   for (TqInt k= vRes; k < 4; k++) {
+                      sp_v[k] = sp_v[vRes-1];
+                   }
+                }
+                CqVector4D res = sp_v.Evaluate(1.0f - 1.0f/(float) vRes);
+                pVar(EnvVars_dv) ->SetFloat( res.x(), i );
+             }
+          }
+       } else {
+          if ( USES( lUses, EnvVars_du ) ){
+       
+             pVar(EnvVars_du) ->SetFloat( 1.0f, i );
+       
+          }
+          if ( USES( lUses, EnvVars_dv ) ){
+       
+             pVar(EnvVars_dv) ->SetFloat( 1.0f, i );
+          }
+    
+       }
 
-		}
-		if ( USES( lUses, EnvVars_dv ) )
-		{
 
-			pVar(EnvVars_dv) ->SetFloat( 1.0f, i );
-		}
-		switch ( proj )
-		{
-				case	ProjectionOrthographic:
-				pI->SetVector( CqVector3D(0,0,1), i );
-				break;
-
-				case	ProjectionPerspective:
-				default:
-				pI->SetVector( pP[ i ], i );
-				break;
-		}
-	}
+       switch ( proj )
+       {
+       case	ProjectionOrthographic:
+          pI->SetVector( CqVector3D(0,0,1), i );
+          break;
+          
+       case	ProjectionPerspective:
+       default:
+          pI->SetVector( pP[ i ], i );
+          break;
+       }
+    }
 
 	if ( USES( lUses, EnvVars_dPdu ) || USES( lUses, EnvVars_dPdv ) )
 		CalcSurfaceDerivatives();
