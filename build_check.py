@@ -22,3 +22,9 @@ if not conf.CheckLibWithHeader(conf.env.subst('$fltk_lib'), ['stdio.h', 'FL/Fl.h
 	print 'Cannot find FLTK'
 	conf.env.Replace(display_cppdefines = ['AQSIS_NO_FLTK'])
 	conf.env.Replace(fltk_lib = '')
+
+# Check for the OpenEXR libraries and headers
+if not conf.CheckLibWithHeader(conf.env.subst('$exr_lib'), ['stdio.h', 'OpenEXR/half.h'], 'c++'):
+	print 'Cannot find OpenEXR'
+	conf.env.Replace(exr_lib = '')
+

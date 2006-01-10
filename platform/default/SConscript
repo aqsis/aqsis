@@ -43,6 +43,16 @@ if zliblibfile != None:
 	env.Replace(zlib_lib_path = os.path.dirname(zliblibfile.abspath))
 env.Replace(z_lib = 'z')
 
+# Find out where the OpenEXR libraries are, look in common places 
+exriofile = env.FindFile('half.h', ['$exr_include_path', '/usr/local/include/OpenEXR', '/opt/local/include/OpenEXR'])
+if exriofile != None:
+	env.Replace(exr_include_path = os.path.dirname(exriofile.abspath))
+
+exrlibfile = env.FindFile('libIlmImf.a', ['$exr_lib_path', '/usr/local/lib', '/opt/local/lib'])
+if exrlibfile != None:
+	env.Replace(exr_lib_path = os.path.dirname(exrlibfile.abspath))
+env.Replace(exr_lib = 'IlmImf')
+
 # Find out where the fltk headers are, look in common places for Fink and DarwinPorts.
 fltkfile = env.FindFile('FL/fl.h', ['$fltk_include_path', '/usr/include'])
 if fltkfile != None:
