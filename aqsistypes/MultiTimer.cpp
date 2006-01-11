@@ -17,6 +17,7 @@ int CHiFreqTimer::TimingDetails::testfun()
 
 void CHiFreqTimer::TimingDetails::Setup()
 {
+#ifdef WIN32
 	LARGE_INTEGER freq;
 	if (QueryPerformanceFrequency(&freq) == 0)
 	{
@@ -100,7 +101,11 @@ void CHiFreqTimer::TimingDetails::Setup()
 #endif
 
 	SetThreadPriority(Fred, CurPri);
+#else
+        clockSpeed = 1.0/(double)CLOCKS_PER_SEC;
+	perFreq = (double)0.1;
+	nextTimer = curBase = curManualBase = 0;
+#endif
 }
 #endif	// USE_TIMERS
-
 

@@ -77,9 +77,15 @@ void my_func()
 
 #ifdef USE_TIMERS
 
+#ifdef WIN32
 #pragma warning(disable:4786)	// hide stl warnings (VS6)
-
 #include <windows.h>
+#else
+typedef struct {
+    long QuadPart;
+} LARGE_INTEGER ;
+#endif
+
 #include <string>
 #include <vector>
 #include <map>
@@ -123,7 +129,11 @@ class CHiFreqTimer
 			{
 				ohs.started(manual);
 				m_running = true;
+#ifdef WIN32
 				QueryPerformanceCounter(&startTime);
+#else
+				startTime.QuadPart = clock();
+#endif
 			}
 		}
 
@@ -133,7 +143,11 @@ class CHiFreqTimer
 			{
 				// Calculate the time taken
 				LARGE_INTEGER end;
+#ifdef WIN32
 				QueryPerformanceCounter(&end);
+#else
+				end.QuadPart = clock();
+#endif
 				double diff = ((double)(end.QuadPart - startTime.QuadPart)) / timerDetails.perFreq;
 
 				m_running = false;
@@ -167,7 +181,12 @@ class CHiFreqTimer
 			return std::max<double>(total, 0.0);
 #else
 
+#ifdef WIN32
 			return std::_MAX(total, 0.0);
+#else
+                        if (total > 0.0f) return total;
+                        else return 0.0;
+#endif
 #endif
 
 		}
@@ -188,7 +207,12 @@ class CHiFreqTimer
 			return std::max<double>(min, 0.0);
 #else
 
+#ifdef WIN32
 			return std::_MAX(min, 0.0);
+#else
+                        if (min > 0.0f) return min;
+                        else return 0.0;
+#endif
 #endif
 
 		}
@@ -324,7 +348,11 @@ class CTimerFactory
 		{
 			if (!isTimerPresent(timerName))
 			{
+#ifdef WIN32
 				MessageBox(0, ("Timer not found: " + timerName).c_str(), "Error", MB_OK);
+#else
+ 				//std::cout << ("Timer not found: " + timerName).c_str() << std:endl;
+#endif
 				exit(0);
 			}
 			return getTimer(timerName);
@@ -387,7 +415,11 @@ class CTimerFactory
 		}
 		double getClockSpeedActual()
 		{
-			return CHiFreqTimer::timerDetails.clockSpeed / 1000;
+#ifdef WIN32
+			return CHiFreqTimer::timerDetails.clockSpeed / 1000.0;
+#else
+			return CHiFreqTimer::timerDetails.clockSpeed;
+#endif
 		}
 
 		const char* timeToCycles(double time)
@@ -411,8 +443,10 @@ class CTimerFactory
 				ostr << cycles / 1000 << " thousand";
 			else if (cycles < 1000000000)
 				ostr << cycles / 1000000 << " million";
+#ifdef WIN32
 			else if (cycles < 1000000000000)
 				ostr << cycles / 1000000000 << " billion";
+#endif
 
 			tempStr = ostr.str();
 			return tempStr.c_str();
@@ -493,10 +527,14 @@ class CTimerFactory
 			{
 				std::string str = ((std::ostringstream*)outStream)->str();
 
+#ifdef WIN32
 				if (dest == OUT_MSGBOX)
 					MessageBox(0, str.c_str(), "Timer Output", MB_OK);
 				else // if (dest == OUT_TRACE)
 					OutputDebugString(str.c_str());
+#else
+				//std::cout << str << std::endl;
+#endif
 
 				delete outStream;
 			}
@@ -558,7 +596,11 @@ class CTimerFactory
 			if (sort == SORT_CALLORDER)
 				std::sort(sorties.begin(), sorties.end(), ordersort());
 
+#ifdef WIN32
 			GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_STHOUSAND, &thouSep, 1);
+#else
+			thouSep = ' ';
+#endif
 			// Output times
 			for(std::vector<sorty>::iterator pos = sorties.begin(); pos != sorties.end(); pos++)
 			{
