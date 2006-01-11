@@ -11,7 +11,7 @@ else:
 #env.AppendUnique(CCFLAGS=['-O3', '-faltivec', '-finline-functions', '-ffast-math', '-fno-common'])
 
 env.AppendUnique(CPPPATH = [env.Dir('#/aqsistypes/posix')])
-env.AppendUnique(CPPDEFINES=[('NDEBUG', '1'), ('PLUGINS', '1')])
+env.AppendUnique(CPPDEFINES=[('NDEBUG', '1'), ('PLUGINS', '1'), ('USE_TIMERS', 1), ('_CLOCKTICKS', '1')])
 
 # Point at the boost headers.
 # todo: need to find a way of determining this location automatically
