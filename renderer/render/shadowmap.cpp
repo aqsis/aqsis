@@ -458,7 +458,12 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 
 	TqFloat s = lu;
 	TqInt i;
-	CqTextureMapBuffer * pTMBa = GetBuffer( 0, 0, index );
+	CqTextureMapBuffer * pTMBa = GetBuffer( lu, lv, index );
+	TqFloat rbias;
+	if ((minbias == 0.0f) && (maxbias == 0.0f))
+		rbias  = 0.5 * m_bias;
+	else
+		rbias  = 0.5 *(maxbias - minbias) + minbias;
 	for ( i = 0; i < ns; i++ )
 	{
 		TqFloat t = lv;
@@ -483,10 +488,7 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 				TqFloat mapz = pTMBa->GetValue( iu, iv, 0 );
 
 				m_rand_index = ( m_rand_index + 1 ) & 1023;
-				if ((minbias == 0.0f) && (maxbias == 0.0f))
-					bias  = m_aRand_no[m_rand_index] * 0.5 * m_bias;
-				else
-					bias  = m_aRand_no[m_rand_index] * 0.5 *(maxbias - minbias) + minbias;
+				bias  = m_aRand_no[m_rand_index] * rbias;
 
 				if ( z > mapz + bias)
 				{
