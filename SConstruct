@@ -22,6 +22,7 @@ opts.Add('fltk_include_path', 'Point to the fltk header files', '')
 opts.Add('fltk_lib_path', 'Point to the fltk library files', '')
 opts.Add('exr_include_path', 'Point to the OpenEXR header files', '')
 opts.Add('exr_lib_path', 'Point to the OpenEXR library files', '')
+opts.Add(BoolOption('no_exr', 'Build without OpenEXR support', '0'))
 opts.Add(BoolOption('debug', 'Build with debug options enabled', '0'))
 
 
@@ -146,7 +147,8 @@ SConscript('shadercompiler/slxargs/SConscript', build_dir=target_dir.abspath + '
 SConscript('shadercompiler/aqsltell/SConscript', build_dir=target_dir.abspath + '/shadercompiler/aqsltell')
 display = SConscript('displays/display/SConscript', build_dir=target_dir.abspath + '/displays/display')
 xpm = SConscript('displays/d_xpm/SConscript', build_dir=target_dir.abspath + '/displays/d_xpm')
-exr = SConscript('displays/d_exr/SConscript', build_dir=target_dir.abspath + '/displays/d_exr')
+if not env['no_exr']:
+	exr = SConscript('displays/d_exr/SConscript', build_dir=target_dir.abspath + '/displays/d_exr')
 SConscript('rib/ri2rib/SConscript', build_dir=target_dir.abspath + '/rib/ri2rib')
 SConscript('rib/rib2stream/SConscript', build_dir=target_dir.abspath + '/rib/rib2stream')
 SConscript('texturing/teqser/SConscript', build_dir=target_dir.abspath + '/texturing/teqser')
@@ -160,15 +162,18 @@ SConscript('thirdparty/tinyxml/SConscript', build_dir=target_dir.abspath + '/thi
 def aqsis_rc_build(target, source, env):
 	# Code to build "target" from "source"
 	displaylib = os.path.basename(display[0].path)
-	exrlib = os.path.basename(exr[0].path)
 	xpmlib = os.path.basename(xpm[0].path)
 	defines = {
 		"displaylib": displaylib,
 		"xpmlib": xpmlib,
-		"exrlib": exrlib,
 		"shaderpath": env.Dir('$SHADERDIR').abspath,
 		"displaypath": env.Dir('$BINDIR').abspath,
+		"exrlib": ""
 	    }
+	if not env['no_exr']:
+		exrlib = os.path.basename(exr[0].path)
+		defines["exrlib"] = exrlib
+
 	print_config("Building aqsisrc with the following settings:", defines.items())
 
 	for a_target, a_source in zip(target, source):
