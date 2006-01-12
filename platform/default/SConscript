@@ -52,6 +52,7 @@ exrlibfile = env.FindFile('libIlmImf.a', ['$exr_lib_path', '/usr/local/lib', '/o
 if exrlibfile != None:
 	env.Replace(exr_lib_path = os.path.dirname(exrlibfile.abspath))
 env.Replace(exr_lib = 'IlmImf')
+env.Replace(exr2tif_libs = ['IlmImf', 'Half', 'Iex', 'Imath'])
 
 # Find out where the fltk headers are, look in common places for Fink and DarwinPorts.
 fltkfile = env.FindFile('FL/fl.h', ['$fltk_include_path', '/usr/include'])

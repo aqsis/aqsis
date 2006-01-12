@@ -4,6 +4,8 @@ exr2tifenv.AppendUnique(CPPPATH=['$exr_include_path'])
 exr2tif_sources=Split("""
 	exr2tif.cpp""")
 
+exr2tifenv.Replace(LIBS = ['common', '$tiff_lib'])
+
 # Set any platform specific options for this target
 exr2tifenv.UseTargetOptions('plugin')
 exr2tifenv.UseTargetOptions('texture_plugin')

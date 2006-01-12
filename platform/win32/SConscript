@@ -48,7 +48,10 @@ if not env['mingw']:
 	env.AppendUnique(CPPDEFINES=['NO_SYSLOG', 'WIN32', 'PLUGINS', ('_qBUILDING', 'CORE'), ('CORE', '1'), 'ZLIB_WINAPI'])
 
 	env.Replace(fltk_lib = 'fltk')
-	env.Replace(exr_lib = 'exr')
+	env.Replace(exr_lib = 'Iex')
+	env.Replace(exr2tif_libs = ['IlmImf', 'Half', 'Iex', 'Imath'])
+	env.AppendUnique(CPPPATH = ['$exr_include_path/Iex', '$exr_include_path/IlmImf', '$exr_include_path/Imath'])
+
 	env.Replace(libaqsis_add_sources = ['libaqsis.def'])
 else:
 	if env['debug']:
@@ -92,7 +95,8 @@ else:
 	env.Replace(jpeg_lib = 'jpeg')
 
 	env.Replace(fltk_lib = 'fltk')
-	env.Replace(exr_lib = 'exr')
+	env.Replace(exr_lib = 'Iex')
+	env.Replace(exr2tif_libs = ['IlmImf', 'Half', 'Iex', 'Imath'])
 
 	env.Replace(slparse_ccflags = ['-O0'])
 	env.AppendUnique(CPPDEFINES=['NO_SYSLOG', 'WIN32', 'PLUGINS', ('_qBUILDING', 'CORE'), ('CORE', '1')])
