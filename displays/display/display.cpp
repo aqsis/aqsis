@@ -155,6 +155,8 @@ void SaveAsShadowMap(const std::string& filename, SqDisplayInstance* image, char
 			TqInt tperrow = ( image->m_width + twidth - 1 ) / twidth;
 			TqFloat* ptile = static_cast<TqFloat*>( _TIFFmalloc( tsize * sizeof( TqFloat ) ) );
 
+			TqFloat minz = FLT_MAX;
+
 			if ( ptile != NULL )
 			{
 				TqInt ctiles = tperrow * ( ( image->m_width + tlength - 1 ) / tlength );
@@ -173,8 +175,12 @@ void SaveAsShadowMap(const std::string& filename, SqDisplayInstance* image, char
 							if ( ( x + j ) < image->m_width && ( y + i ) < image->m_height )
 							{
 								TqInt ii;
-								for ( ii = 0; ii < image->m_iFormatCount; ii++ )
-									ptile[ ( i * twidth * image->m_iFormatCount ) + ( ( ( j * image->m_iFormatCount ) + ii ) ) ] = ptdata[ ( ( j * image->m_iFormatCount ) + ii ) ];
+								for ( ii = 0; ii < image->m_iFormatCount; ii++ ) 
+								{
+									TqFloat value = ptdata[ ( ( j * image->m_iFormatCount ) + ii ) ];
+									ptile[ ( i * twidth * image->m_iFormatCount ) + ( ( ( j * image->m_iFormatCount ) + ii ) ) ] = value;
+									minz = MIN(minz, value);
+								}
 							}
 						}
 						ptdata += ( image->m_width * image->m_iFormatCount );
@@ -184,6 +190,8 @@ void SaveAsShadowMap(const std::string& filename, SqDisplayInstance* image, char
 				TIFFWriteDirectory( pshadow );
 
 			}
+
+			TIFFSetField( pshadow, TIFFTAG_MINSAMPLEVALUE, minz );
 
 			TIFFClose( pshadow );
 		}

@@ -225,6 +225,13 @@ void CqShadowMap::ReadMatrices()
 
 	CqMatrix matCToW = QGetRenderContextI() ->matSpaceToSpace( "camera", "world", CqMatrix(), CqMatrix(), QGetRenderContextI()->Time() );
 
+	TqFloat minz;
+
+	if (TIFFGetField( m_pImage, TIFFTAG_MINSAMPLEVALUE, &minz ))
+	{
+		SetMinZ(minz);
+	}
+    
 	while(1)
 	{
 		TqInt reta = TIFFGetField( m_pImage, TIFFTAG_PIXAR_MATRIX_WORLDTOCAMERA, &WToC );
@@ -367,12 +374,12 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 	{
 		vecR2m = vecR3m = vecR4m = vecR1m;
 	}
-	else
-	{
-		vecR2m = matCameraToMap * R2;
-		vecR3m = matCameraToMap * R3;
-		vecR4m = matCameraToMap * R4;
-	}
+ 	else
+ 	{
+ 		vecR2m = matCameraToMap * R2;
+ 		vecR3m = matCameraToMap * R3;
+ 		vecR4m = matCameraToMap * R4;
+ 	}
 
 	TqFloat xro2 = (m_XRes - 1) * 0.5f;
 	TqFloat yro2 = (m_YRes - 1) * 0.5f;
@@ -453,21 +460,58 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 
 	// Test the samples.
 	TqInt inshadow = 0;
+	TqInt i;
 	TqFloat avz = 0.0f;
 	TqFloat sample_z = 0.0f; // How deep we're in the shadow
-
-	TqFloat s = lu;
-	TqInt i;
-	CqTextureMapBuffer * pTMBa = GetBuffer( lu, lv, index );
 	TqFloat rbias;
 	if ((minbias == 0.0f) && (maxbias == 0.0f))
 		rbias  = 0.5 * m_bias;
 	else
-		rbias  = 0.5 *(maxbias - minbias) + minbias;
+		rbias  = (0.5 * (maxbias - minbias)) + minbias;
+
+	TqFloat s = lu;
+
+	// If the absolute minimum Z value of this shadowmap is higher 
+	// than a conservative z then we could say the point is not in shadow 
+
+  	// A conservative z value is the worst case scenario
+	// for the high bias value will be between 0..2.0 * rbias
+	if ((MinZ() != RI_FLOATMAX) && (index == 0) && ((z + 2.0 * rbias) < MinZ()))
+		return;
+
+	CqTextureMapBuffer * pTMBa = GetBuffer( lu, lv, index );
+
+	TqBool valid =  pTMBa  && pTMBa->IsValid (hu, hv, index );
+
+	// Don't do the area computing of the shadow if the conservative z 
+	// value is either lower than the current minz value of the tile or 
+	// even if conservative z value is higher than the maxz value 
+	// (assuming the maxz is not infinite)
+	if ( valid )
+        {
+		TqFloat minz, maxz;
+
+		pTMBa->MinMax(minz, maxz, 0);
+		
+		if ((z + 2.0 * rbias) < minz ) 
+		{
+			return;
+		}
+		if (maxz != RI_FLOATMAX) 
+		{
+			if ((z - 2.0 * rbias) > maxz  )
+			{
+				val[0] = 1.0;
+				return;
+			}
+		}
+	}
+
 	for ( i = 0; i < ns; i++ )
 	{
 		TqFloat t = lv;
 		TqInt j;
+
 		for ( j = 0; j < nt; j++ )
 		{
 			// Jitter s and t
@@ -480,11 +524,15 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 				continue;
 
 			if( ( pTMBa == NULL )  || !pTMBa->IsValid( iu, iv, index ) )
+			{
 				pTMBa = GetBuffer( iu, iv, index );
-			if ( pTMBa != 0 && pTMBa->pVoidBufferData() != 0 )
+			}
+
+			if( ( pTMBa != NULL) && ( pTMBa->pVoidBufferData() != 0 ) )
 			{
 				iu -= pTMBa->sOrigin();
 				iv -= pTMBa->tOrigin();
+
 				TqFloat mapz = pTMBa->GetValue( iu, iv, 0 );
 
 				m_rand_index = ( m_rand_index + 1 ) & 1023;
@@ -517,7 +565,6 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 
 	val[ 0 ] = ( static_cast<TqFloat>( inshadow ) / ( ns * nt ) );
 }
-
 
 //----------------------------------------------------------------------
 /** Save the shadowmap data in system specifirc image format.

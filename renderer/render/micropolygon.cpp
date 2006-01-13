@@ -488,7 +488,7 @@ void CqMicroPolyGrid::Shade()
 	if ( pshadDisplacement )
 	{
 		//theStats.DisplacementTimer().Start();
-		TIME_SCOPE("Discplacement")
+		TIME_SCOPE("Displacement")
 		pshadDisplacement->Evaluate( m_pShaderExecEnv );
 		//theStats.DisplacementTimer().Stop();
 

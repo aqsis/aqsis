@@ -178,6 +178,12 @@ class CqTextureMapBuffer
 			TqInt iu = x * ElemSize();
 			m_pBufferData[ iv + iu + sample ] = static_cast<TqUchar>( value * 255.0f );
 		}
+
+		/** Get the min, max value of one tile/buffer
+		 *  Use only with shadowmap
+		 */
+		virtual void MinMax(TqFloat &minz, TqFloat &maxz, TqInt sample) {}
+
 		/** Get the origin of this buffer segment.
 		 */
 		TqUlong sOrigin() const
@@ -274,12 +280,14 @@ class CqFloatTextureMapBuffer : public CqTextureMapBuffer
 		{
 			return( m_Samples * sizeof(TqFloat) );
 		}
+
 		/** Get the type of the data in the buffer
 		 */
 		virtual EqBufferType	BufferType()
 		{
 			return( BufferType_Float );
 		}
+		
 }
 ;
 
@@ -313,12 +321,14 @@ class Cq16bitTextureMapBuffer : public CqTextureMapBuffer
 		{
 			return( m_Samples * sizeof(TqUshort) );
 		}
+
 		/** Get the type of the data in the buffer
 		 */
 		virtual EqBufferType	BufferType()
 		{
 			return( BufferType_Int16 );
 		}
+
 }
 ;
 
@@ -330,7 +340,7 @@ class Cq16bitTextureMapBuffer : public CqTextureMapBuffer
 class CqShadowMapBuffer : public CqTextureMapBuffer
 {
 	public:
-		CqShadowMapBuffer() : CqTextureMapBuffer()
+		CqShadowMapBuffer() : CqTextureMapBuffer(), m_computed(TqFalse)
 		{}
 		virtual	~CqShadowMapBuffer()
 		{}
@@ -357,6 +367,44 @@ class CqShadowMapBuffer : public CqTextureMapBuffer
 		{
 			return( BufferType_Float );
 		}
+	
+		
+		/** Find the min and max z value for this tile; re-use the 
+		 * previous computed values if necessary (m_computed)
+		 */
+		virtual void MinMax(TqFloat &minz, TqFloat &maxz, TqInt sample)
+		{
+			
+			if (m_computed)
+			{
+				minz = m_minz;
+				maxz = m_maxz;
+			} else 
+			{
+				TqInt multiplier = m_Width * m_Samples;
+				minz =  RI_FLOATMAX;
+				maxz =  -RI_FLOATMAX;
+				for (TqInt y = 0; y < m_Height; y++)
+					for (TqInt x = 0; x < m_Width; x++)
+					{
+						TqInt iv = y * multiplier;
+						TqInt iu = x * m_Samples;
+						TqFloat val = reinterpret_cast<TqFloat*>(m_pBufferData)[ iv + iu + sample];
+						
+						minz = MIN(val, minz);
+						maxz = MAX(val, maxz);
+					}
+				m_computed = TqTrue;
+				m_minz = minz;
+				m_maxz = maxz;
+			}
+			
+		}
+	private:
+		TqFloat m_maxz;
+		TqFloat m_minz;
+		TqBool  m_computed;
+
 }
 ;
 
@@ -599,38 +647,38 @@ class CqTextureMap : public IqTextureMap
 		TqInt m_Quality;                ///< If Jpeg compression is used than its overall quality
 
 		TqFloat m_MinZ;                 ///< Minimum Depth
-		TqUint	m_XRes;					///< Horizontal resolution.
-		TqUint	m_YRes;					///< Vertical resolution.
-		TqInt	m_PlanarConfig;			///< TIFF planar configuration type.
-		TqInt	m_SamplesPerPixel;		///< Number of samples per pixel.
-		TqInt	m_SampleFormat;			///< Format of the sample elements, i.e. RGBA, or IEEE
-		TqInt	m_BitsPerSample;		///< Number of bits per sample element, 8 or 16.
+		TqUint	m_XRes;			///< Horizontal resolution.
+		TqUint	m_YRes;			///< Vertical resolution.
+		TqInt	m_PlanarConfig;		///< TIFF planar configuration type.
+		TqInt	m_SamplesPerPixel;	///< Number of samples per pixel.
+		TqInt	m_SampleFormat;		///< Format of the sample elements, i.e. RGBA, or IEEE
+		TqInt	m_BitsPerSample;	///< Number of bits per sample element, 8 or 16.
 
-		EqTexFormat	m_Format;			///< Image storage format type.
+		EqTexFormat	m_Format;	///< Image storage format type.
 
-		CqString	m_strName;			///< Name of the image.
-		TIFF*	m_pImage;			///< Pointer to an opened TIFF image.
-		TqBool	m_IsValid;			///< Indicate whether this image has been successfully opened.
+		CqString	m_strName;	///< Name of the image.
+		TIFF*	m_pImage;		///< Pointer to an opened TIFF image.
+		TqBool	m_IsValid;		///< Indicate whether this image has been successfully opened.
 		enum EqWrapMode m_smode;        ///< Periodic, black, clamp
 		enum EqWrapMode m_tmode;        ///< Periodic, black, clamp
-		RtFilterFunc m_FilterFunc;       ///< Catmull-Rom, sinc, disk, ... pixelfilter
-		TqFloat m_swidth, m_twidth;   ///< for the pixel's filter
+		RtFilterFunc m_FilterFunc;      ///< Catmull-Rom, sinc, disk, ... pixelfilter
+		TqFloat m_swidth, m_twidth;   	///< for the pixel's filter
 		std::list<CqTextureMapBuffer*>	m_apSegments;	///< Array of cache segments related to this image.
 
-		CqMatrix	m_matWorldToScreen;		///< Matrix to convert points from world space to screen space.
+		CqMatrix	m_matWorldToScreen;	///< Matrix to convert points from world space to screen space.
 
 		TqFloat		m_sblur;
 		TqFloat		m_tblur;
 		TqFloat		m_pswidth;
-		TqFloat		m_ptwidth;
-		TqFloat		m_samples;             ///< How many samplings
-		TqFloat     m_lerp;                ///< Enable TriLinear
+		TqFloat		m_ptwidth;          
+		TqFloat		m_samples;	///< How many samplings
+		TqFloat     	m_lerp; 	///< Enable TriLinear
 		TqFloat     m_pixelvariance;       ///< Smallest Difference between two distinct samples
 		TqFloat     m_interp;              ///< Difference between m_level and m_level+1 MipMap (for TriLinear sampling)
 		TqInt       m_level;               ///< Which level of mipmap (from m_ds, m_dt)
 		TqInt       m_umapsize;            ///< Umapsize for m_level of mipmap
 		TqInt       m_vmapsize;            ///< Vmapsize for m_level of mipmap
-		TqFloat     m_ds;                  ///< delta (u2-u1)
+		TqFloat     m_ds;                  ///< delta (u2-u1) 
 		TqFloat     m_dt;                  ///< delta (v2-v1)
 
 		// Temporary values used during BiLinear and/or TriLinear sampling.
@@ -677,7 +725,7 @@ class CqEnvironmentMap : public CqTextureMap
 			return ( m_matWorldToScreen );
 		}
 		virtual void SetFov(TqFloat f)
-		{
+		{		
 			m_fov = f;
 		}
 
@@ -793,6 +841,8 @@ class CqShadowMap : public CqTextureMap
 		std::vector<CqMatrix>	m_WorldToScreenMatrices;		///< Matrix to convert points from world space to screen space.
 		std::vector<CqMatrix>	m_ITTCameraToLightMatrices;
 		TqInt	m_NumberOfMaps;
+	
+
 }
 ;
 
