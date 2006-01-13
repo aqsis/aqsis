@@ -408,7 +408,6 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 	TqUint lv = static_cast<TqInt>( FLOOR( tmin - tbo2 ) );
 	TqUint hv = static_cast<TqInt>( CEIL ( tmax + tbo2 ) );
 
-
 	if ( lu >= m_XRes || hu < 0 || lv >= m_YRes || hv < 0 )
 		return ;
 
@@ -471,6 +470,11 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 
 	TqFloat s = lu;
 
+  	// A conservative z value is the worst case scenario
+	// for the high bias value will be between 0..2.0 * rbias
+	if ((MinZ() != RI_FLOATMAX) && (index == 0) && ((z + 2.0 * rbias) < MinZ()))
+		return;
+
 	CqTextureMapBuffer * pTMBa = GetBuffer( lu, lv, index );
 
 	TqBool valid =  pTMBa  && pTMBa->IsValid (hu, hv, index );
@@ -500,6 +504,7 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 			}
 		}
 	}
+
 
 	for ( i = 0; i < ns; i++ )
 	{
