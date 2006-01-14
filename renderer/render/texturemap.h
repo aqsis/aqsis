@@ -814,6 +814,14 @@ class CqShadowMap : public CqTextureMap
 
 		virtual	void	SampleMap( CqVector3D& R, CqVector3D& swidth, CqVector3D& twidth, std::valarray<TqFloat>& val, TqInt index = 0, TqFloat* average_depth = NULL, TqFloat* shadow_depth = NULL);
 		virtual	void	SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4, std::valarray<TqFloat>& val, TqInt index = 0, TqFloat* average_depth = NULL, TqFloat* shadow_depth = NULL);
+		virtual TqDouble MinZ( TqInt index = 0 )
+                {
+ 			if (m_MinZ.size() > 0)
+				return m_MinZ[index];
+			else
+				return RI_FLOATMAX;
+
+                }
 		virtual CqMatrix& GetMatrix( TqInt which, TqInt index = 0 )
 		{
 			if ( which == 0 )
@@ -840,6 +848,7 @@ class CqShadowMap : public CqTextureMap
 		std::vector<CqMatrix>	m_WorldToCameraMatrices;		///< Matrix to convert points from world space to light space.
 		std::vector<CqMatrix>	m_WorldToScreenMatrices;		///< Matrix to convert points from world space to screen space.
 		std::vector<CqMatrix>	m_ITTCameraToLightMatrices;
+		std::vector<TqDouble>	m_MinZ;
 		TqInt	m_NumberOfMaps;
 	
 

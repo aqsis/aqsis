@@ -182,6 +182,8 @@ void CqShadowMap::LoadZFile()
 			// Save the transformation matrices.
 			m_WorldToScreenMatrices.resize(1);
 			m_WorldToCameraMatrices.resize(1);
+			m_MinZ.resize(1);
+			m_MinZ[0] = RI_FLOATMAX;
 			m_NumberOfMaps = 0;
 			file.read( reinterpret_cast<TqPchar>( matWorldToCamera()[ 0 ] ), sizeof( matWorldToCamera()[ 0 ][ 0 ] ) * 4 );
 			file.read( reinterpret_cast<TqPchar>( matWorldToCamera()[ 1 ] ), sizeof( matWorldToCamera()[ 0 ][ 0 ] ) * 4 );
@@ -225,13 +227,8 @@ void CqShadowMap::ReadMatrices()
 
 	CqMatrix matCToW = QGetRenderContextI() ->matSpaceToSpace( "camera", "world", CqMatrix(), CqMatrix(), QGetRenderContextI()->Time() );
 
-	TqFloat minz;
+	TqDouble minz;
 
-	if (TIFFGetField( m_pImage, TIFFTAG_MINSAMPLEVALUE, &minz ))
-	{
-		SetMinZ(minz);
-	}
-    
 	while(1)
 	{
 		TqInt reta = TIFFGetField( m_pImage, TIFFTAG_PIXAR_MATRIX_WORLDTOCAMERA, &WToC );
@@ -268,6 +265,11 @@ void CqShadowMap::ReadMatrices()
 		m_WorldToScreenMatrices.push_back( matWToS );
 		m_ITTCameraToLightMatrices.push_back( matITTCToL );
 
+		if (TIFFGetField( m_pImage, TIFFTAG_SMINSAMPLEVALUE, &minz ))
+		{
+			m_MinZ.push_back( minz );
+		}
+    
 		m_NumberOfMaps++;	// Increment the number of maps.
 
 		if( TIFFReadDirectory( m_pImage ) == 0 )
@@ -472,7 +474,9 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 
   	// A conservative z value is the worst case scenario
 	// for the high bias value will be between 0..2.0 * rbias
-	if ((MinZ() != RI_FLOATMAX) && (index == 0) && ((z + 2.0 * rbias) < MinZ()))
+        TqDouble minz = MinZ(index);
+
+	if ((minz != RI_FLOATMAX) && ((z + 2.0 * rbias) < minz))
 		return;
 
 	CqTextureMapBuffer * pTMBa = GetBuffer( lu, lv, index );
@@ -504,7 +508,6 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 			}
 		}
 	}
-
 
 	for ( i = 0; i < ns; i++ )
 	{
@@ -599,7 +602,12 @@ void CqShadowMap::SaveShadowMap( const CqString& strShadowName, TqBool append )
 			TIFFSetField( pshadow, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK );
 
 			// Write the floating point image to the directory.
+			TqDouble minz = RI_FLOATMAX;
 			TqFloat *depths = reinterpret_cast<TqFloat*>( m_apSegments.front() ->pVoidBufferData() );
+			for (TqInt y =0; y < YRes(); y++)
+				for (TqInt x = 0; x < XRes(); x++)
+					minz = MIN(minz, (TqDouble)depths[y*XRes() + x]);
+			TIFFSetField( pshadow, TIFFTAG_SMINSAMPLEVALUE, minz );
 			WriteTileImage( pshadow, depths, XRes(), YRes(), 32, 32, 1, m_Compression, m_Quality );
 			TIFFClose( pshadow );
 		}

@@ -150,12 +150,20 @@ void SaveAsShadowMap(const std::string& filename, SqDisplayInstance* image, char
 			TIFFSetField( pshadow, TIFFTAG_COMPRESSION, image->m_compression );
 			TIFFSetField( pshadow, TIFFTAG_DATETIME, datetime);
 
+			TqDouble minz = FLT_MAX;
+			TqFloat* ptdata = reinterpret_cast<TqFloat*>(image->m_data) ;
+			for (TqInt y = 0; y < image->m_height; y++)
+				for (TqInt x = 0; x < image->m_width; x++)
+				{
+					TqDouble value = (TqDouble) ptdata[y*image->m_width + x];
+					if (value < minz) minz = value;	
+				}
+			TIFFSetField( pshadow, TIFFTAG_SMINSAMPLEVALUE, minz );
 
 			TqInt tsize = twidth * tlength;
 			TqInt tperrow = ( image->m_width + twidth - 1 ) / twidth;
 			TqFloat* ptile = static_cast<TqFloat*>( _TIFFmalloc( tsize * sizeof( TqFloat ) ) );
 
-			TqFloat minz = FLT_MAX;
 
 			if ( ptile != NULL )
 			{
@@ -165,7 +173,7 @@ void SaveAsShadowMap(const std::string& filename, SqDisplayInstance* image, char
 				{
 					TqInt x = ( itile % tperrow ) * twidth;
 					TqInt y = ( itile / tperrow ) * tlength;
-					TqFloat* ptdata = reinterpret_cast<TqFloat*>(image->m_data) + ( ( y * image->m_width ) + x ) * image->m_iFormatCount;
+					ptdata = reinterpret_cast<TqFloat*>(image->m_data) + ( ( y * image->m_width ) + x ) * image->m_iFormatCount;
 					// Clear the tile to black.
 					memset( ptile, 0, tsize * sizeof( TqFloat ) );
 					for ( TqUlong i = 0; i < tlength; i++ )
@@ -179,7 +187,6 @@ void SaveAsShadowMap(const std::string& filename, SqDisplayInstance* image, char
 								{
 									TqFloat value = ptdata[ ( ( j * image->m_iFormatCount ) + ii ) ];
 									ptile[ ( i * twidth * image->m_iFormatCount ) + ( ( ( j * image->m_iFormatCount ) + ii ) ) ] = value;
-									minz = MIN(minz, value);
 								}
 							}
 						}
@@ -191,7 +198,6 @@ void SaveAsShadowMap(const std::string& filename, SqDisplayInstance* image, char
 
 			}
 
-			TIFFSetField( pshadow, TIFFTAG_MINSAMPLEVALUE, minz );
 
 			TIFFClose( pshadow );
 		}

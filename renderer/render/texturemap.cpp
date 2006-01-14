@@ -1705,7 +1705,10 @@ void CqTextureMap::WriteTileImage( TIFF* ptex, TqFloat *raster, TqUlong width, T
 					{
 						TqInt ii;
 						for ( ii = 0; ii < samples; ii++ )
-							ptile[ ( i * twidth * samples ) + ( ( ( j * samples ) + ii ) ) ] = ptdata[ ( ( j * samples ) + ii ) ];
+						{
+							TqFloat value = ptdata[ ( ( j * samples ) + ii ) ];
+							ptile[ ( i * twidth * samples ) + ( ( ( j * samples ) + ii ) ) ] = value;
+						}
 					}
 				}
 				ptdata += ( width * samples );
