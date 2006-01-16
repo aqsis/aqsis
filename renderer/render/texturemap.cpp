@@ -350,16 +350,21 @@ TqInt CqTextureMap::Convert( CqString &strName )
   **/
 void CqTextureMap::CriticalMeasure()
 {
-	const TqInt * poptMem = QGetRenderContextI() ->GetIntegerOption( "limits", "texturememory" );
-	TqInt current, limit, now;
+	TqInt current, now; 
+	static TqInt limit = -1;
 	std::vector<CqTextureMap*>::iterator i;
 	std::list<CqTextureMapBuffer*>::iterator j;
 
-	limit = MEG1;
+	if (limit == -1)
+	{
+		limit = MEG1;
+		const TqInt * poptMem = QGetRenderContextI() ->GetIntegerOption( "limits", "texturememory" );
+		if ( poptMem )
+			limit = poptMem[ 0 ] * 1024;
+	}
 
 	IsVerbose();
-	if ( poptMem )
-		limit = poptMem[ 0 ] * 1024;
+
 
 	now = QGetRenderContext() ->Stats().GetTextureMemory();
 
@@ -381,13 +386,29 @@ void CqTextureMap::CriticalMeasure()
 		 */
 		for ( i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
 		{
-			for ( j = ( *i ) ->m_apSegments.begin(); j != ( *i ) ->m_apSegments.end(); j++ )
+		        TqInt segments = ( *i) ->m_apSegments.size();
+			TqInt nRemainingSegments = 0;
+			j = ( *i ) ->m_apSegments.begin(); 
+			if (segments > 2) 
+			{
+				j++;
+				j++;
+				nRemainingSegments = 2;
+			}
+			
+			for ( ; j != ( *i ) ->m_apSegments.end(); j++ )
 			{
 				// Only release if not protected.
 				if ( !( *j ) ->fProtected() )
+				{
+					TqInt directory = (*j)->Directory();	
+					m_apCache[directory] = NULL;
 					( *j ) ->Release();
+				}
+				else
+					nRemainingSegments ++;
 			}
-			( *i ) ->m_apSegments.resize( 0 );
+			( *i ) ->m_apSegments.resize( nRemainingSegments );
 			current = QGetRenderContext() ->Stats().GetTextureMemory();
 			if ( ( now - current ) > ( limit / 4 ) )
 				break;
@@ -466,6 +487,7 @@ TqBool CqTextureMap::CreateMIPMAP( TqBool fProtectBuffers )
 					}
 				}
 				m_apSegments.push_back( pTMB );
+				m_apCache[directory] = pTMB;
 			}
 
 			m_xres /= 2;
@@ -556,12 +578,15 @@ void	CqTextureMapBuffer::FreeSegment( TqPuchar pBufferData, TqUlong width, TqUlo
  */
 CqTextureMapBuffer* CqTextureMap::GetBuffer( TqUlong s, TqUlong t, TqInt directory, TqBool fProt )
 {
+        //TIMER_START("GetBuffer");
 	QGetRenderContext() ->Stats().IncTextureMisses( 4 );
 
-	if ( m_apSegments.size() > 0 && m_apSegments.front() ->IsValid( s, t, directory ) )
+	CqTextureMapBuffer *hash = m_apCache[directory];
+
+	if (hash && hash->IsValid(s, t, directory))
 	{
-		QGetRenderContext() ->Stats().IncTextureHits( 1, 4 );
-		return( m_apSegments.front() );
+		//TIMER_STOP("GetBuffer");
+		return hash;
 	}
 
 	// Search already cached segments first.
@@ -573,8 +598,8 @@ CqTextureMapBuffer* CqTextureMap::GetBuffer( TqUlong s, TqUlong t, TqInt directo
 			// Move this segment to the top of the list, so that next time it is found first. This
 			// allows us to take advantage of likely spatial coherence during shading.
 			CqTextureMapBuffer* pbuffer = *i;
-			m_apSegments.erase(i);
-			m_apSegments.push_front(pbuffer);
+			m_apCache[directory] = pbuffer;
+			//TIMER_STOP("GetBuffer");
 			return ( pbuffer );
 		}
 	}
@@ -588,6 +613,7 @@ CqTextureMapBuffer* CqTextureMap::GetBuffer( TqUlong s, TqUlong t, TqInt directo
 		if ( !fileImage.IsValid() )
 		{
 			Aqsis::log() << error << "Cannot open texture file \"" << m_strName.c_str() << "\"" << std::endl;
+			//TIMER_STOP("GetBuffer");
 			return pTMB;
 		}
 		CqString strRealName( fileImage.strRealName() );
@@ -614,9 +640,6 @@ CqTextureMapBuffer* CqTextureMap::GetBuffer( TqUlong s, TqUlong t, TqInt directo
 
 			void* pData = pTMB->pVoidBufferData();
 			TIFFReadTile( m_pImage, pData, s, t, 0, 0 );
-			// Put this segment on the top of the list, so that next time it is found first. This
-			// allows us to take advantage of likely spatial coherence during shading.
-			m_apSegments.push_front( pTMB );
 		}
 		else
 		{
@@ -631,11 +654,13 @@ CqTextureMapBuffer* CqTextureMap::GetBuffer( TqUlong s, TqUlong t, TqInt directo
 				TIFFReadScanline( m_pImage, pdata, i );
 				pdata = reinterpret_cast<void*>( reinterpret_cast<char*>( pdata ) + m_XRes * pTMB->ElemSize() );
 			}
-			// Put this segment on the top of the list, so that next time it is found first. This
-			// allows us to take advantage of likely spatial coherence during shading.
-			m_apSegments.push_front( pTMB );
 		}
+		// Put this segment on the top of the list, so that next time it is found first. This
+		// allows us to take advantage of likely spatial coherence during shading.
+		m_apSegments.push_front( pTMB );
+		m_apCache[directory] = pTMB;
 	}
+	//TIMER_STOP("GetBuffer");
 	return ( pTMB );
 }
 
@@ -1300,6 +1325,7 @@ void CqTextureMap::Open()
 		}
 	}
 	m_Directory = 0;
+	m_apCache[0] = NULL;
 }
 
 //---------------------------------------------------------------------

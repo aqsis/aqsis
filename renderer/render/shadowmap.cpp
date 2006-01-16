@@ -70,6 +70,7 @@ CqShadowMap::CqShadowMap( const CqString& strName ) :
 			m_aRand_no[ i ] = random.RandomFloat(2.0);
 		m_rand_index = 0;
 	}
+	m_apCache[0] = NULL;
 }
 
 
@@ -306,7 +307,6 @@ void CqShadowMap::PrepareSampleOptions( std::map<std::string, IqShaderData*>& pa
 	}
 }
 
-
 //---------------------------------------------------------------------
 /** Sample the shadow map data to see if the point vecPoint is in shadow.
  */
@@ -332,7 +332,7 @@ void CqShadowMap::SampleMap( CqVector3D& vecPoint, CqVector3D& swidth, CqVector3
 void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4, std::valarray<TqFloat>& val, TqInt index, TqFloat* average_depth, TqFloat* shadow_depth )
 {
 	// Check the memory and make sure we don't abuse it
-	CriticalMeasure();
+	if (index == 0) CriticalMeasure();
 
 	TIME_SCOPE("Shadow Mapping")
 
@@ -453,6 +453,39 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 		}
 	}
 
+	// Is this shadowmap an occlusion map (NumPages() > 1) ?
+	// NumPages() contains the number of shadowmaps which were used 
+	// to create this occlusion map.
+	// if ns, nt is computed assuming only one shadow map; let try divide 
+	// both numbers by the sqrt() of the number of maps. 
+	//
+	// eg: assuming I have 256 shadowmaps (256x256) in one occlusion map
+	// and ns = nt = 16 (depends solely of the du,dv,blur)
+	// Than the number of computations will be at the worst case 
+	// (re-visit each Z values on each shadowmaps).  
+	// 256 shadows * ns * nt * 256 * 256. or the 4G operations. 
+	// 
+	// We need to reduce the number of operations by one or two order 
+	// of magnitude then.
+	// An solution is to divide the numbers ns,nt by the sqrt(number of shadows). 
+	// In the examples something in range of 
+	// 256x256x256 x (16 x 16) / (8 x 8)  or 256 x 256 x 256 x 2 x 2 or 64M 
+	// operations good start; but not enough.  
+	// But what happens if you only have 4 shadows ?
+	// 256x256x256 x (16 x 16) /( 2 x 2) or 256x256x256x64 about 1G 
+	// it is worst than with 256 maps. So I chose another solution is to do 
+	// following let recompute ns, nt so the number of operations will 
+	// never reach more 256k. 
+	// 1) Bigger the number of shadowmap smaller ns, nt will be required; 
+	// 2) Bigger the shadowmaps than smaller ns, nt;
+
+        if (NumPages() > 1) {
+		TqInt occl = (256 * 1024) / (NumPages() * XRes() * YRes());
+		occl = CEIL(sqrt(occl));
+		occl = MAX(2, occl);
+		ns = nt = occl;
+	}
+
 	// Setup jitter variables
 	TqFloat ds = sres / ns;
 	TqFloat dt = tres / nt;
@@ -508,6 +541,7 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 			}
 		}
 	}
+
 
 	for ( i = 0; i < ns; i++ )
 	{

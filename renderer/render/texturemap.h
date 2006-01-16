@@ -664,6 +664,7 @@ class CqTextureMap : public IqTextureMap
 		RtFilterFunc m_FilterFunc;      ///< Catmull-Rom, sinc, disk, ... pixelfilter
 		TqFloat m_swidth, m_twidth;   	///< for the pixel's filter
 		std::list<CqTextureMapBuffer*>	m_apSegments;	///< Array of cache segments related to this image.
+		std::map<TqInt, CqTextureMapBuffer*> m_apCache;	///< vector of cache segments related to this image.
 
 		CqMatrix	m_matWorldToScreen;	///< Matrix to convert points from world space to screen space.
 
