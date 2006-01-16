@@ -8,11 +8,19 @@
 #####################################################################
 
 import Blender
+reload(Blender)
 from Blender import Registry
-from ShaderEditorGUI import *
-import string
-import os
 
+import btor
+from btor.ShaderEditorGUI import *
+import string
+reload(string)
+import os
+reload(os)
+reload(btor)
+reload(btor.ShaderEditorGUI)
+from btor.ShaderEditorGUI import *
+# btor.ShaderEditorGUI = reload(btor.ShaderEditorGUI)
 # SCRIPT global state settings - (not to be confused with global settings for the renderer config)
 
 # shader search path environment variable names
@@ -29,7 +37,8 @@ state_shader = 3 # shader editor
 state_object = 4 # object editor, assignment, etc.
 state_scene = 5 # scene settings, resolution, lighting/gi
 state_dialog = 6 # save/discard/cancel dialog (it's here, because it qualifies as a "screen"
-
+error_state = 0 # error state, for displaying error messages
+error_msg = "" # the message itself
 
 # query system environment for all known renderer configuration info, e.g. SHADERS, PIXIEHOME, BMRTHOME, SHADERPATH, etc.
 try:
@@ -45,12 +54,13 @@ except:
 # probably some XML in the "script home" directory
 
 # end startup tasks
-				
+
 #####################################################################
 # master GUI routine
 # This steers the GUI events around so that the correct GUI is drawn based on the values of the 
 # state, new_state, and old_state variables. 
 #####################################################################
+
 def master_gui(): # master GUI constructor
 	# create the persistent buttons		
 	if state == state_render: # GUI state is set to render and export
@@ -72,6 +82,7 @@ def master_gui(): # master GUI constructor
 # processor routine based on the script's state variables
 #
 ######################################################################
+
 def master_event(evt, val): # master key/mouse event processor
 	if state == state_render: # GUI state is set to render and export
 		render_event(evt, val) # render event
@@ -85,7 +96,13 @@ def master_event(evt, val): # master key/mouse event processor
 		scene_event(evt, val) # scene settings event
 	if state == state_dialog: # GUI state is set to confirm dialog
 		dialog_event(evt, val) # confirm dialog event
-		
+
+######################################################################
+# master button event processor 
+# This distributes the button events received to the correct 
+# processor routine based on the script's state variables
+######################################################################		
+
 def master_bevent(evt):
 	if state == state_render: # GUI state is set to render and export
 		render_bevent(evt) # render button event
