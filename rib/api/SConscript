@@ -4,7 +4,7 @@ api_xml = Split("""
 	api.xml""")
 
 api_xsl = Split("""
-	apiheader.xsl		apicache.xsl		apivalidate.xsl""")	
+	apiheader.xsl		apicache.xsl		apivalidate.xsl		apidebug.xsl""")	
 
 
 apienv = env.Copy()
@@ -15,12 +15,14 @@ apienv.Replace(APIXML = apienv.File('api.xml'))
 cachegen = apienv.Command('ri_cache.inl', 'apicache.xsl', ['$XSLTPROC -o $TARGET $SOURCE $APIXML'])
 headergen = apienv.Command('ri.inl', 'apiheader.xsl', ['$XSLTPROC -o $TARGET $SOURCE $APIXML'])
 validategen = apienv.Command('ri_validate.inl', 'apivalidate.xsl', ['$XSLTPROC -o $TARGET $SOURCE $APIXML'])
+debuggen = apienv.Command('ri_debug.inl', 'apidebug.xsl', ['$XSLTPROC -o $TARGET $SOURCE $APIXML'])
 
 apienv.Depends(cachegen, '$APIXML')
 apienv.Depends(headergen, '$APIXML')
 apienv.Depends(validategen, '$APIXML')
+apienv.Depends(debuggen, '$APIXML')
 
-Export('cachegen validategen headergen')
+Export('cachegen validategen headergen debuggen')
 
 env.Distribute('rib/api', api_xml)
 env.Distribute('rib/api', api_xsl)
