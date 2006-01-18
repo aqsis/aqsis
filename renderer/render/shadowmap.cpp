@@ -483,7 +483,7 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 
         if (NumPages() > 1) {
 		TqInt occl = (256 * 1024) / (NumPages() * XRes() * YRes());
-		occl = CEIL(sqrt(occl));
+		occl = CEIL(sqrt(static_cast<TqFloat>(occl)));
 		occl = MAX(2, occl);
 		ns = nt = occl;
 	}
