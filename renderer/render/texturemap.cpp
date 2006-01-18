@@ -265,7 +265,7 @@ TqPuchar CqTextureMapBuffer::AllocSegment( TqUlong width, TqUlong height, TqInt 
 		m_critical = TqTrue;
 	}
 
-#ifndef _DEBUG
+#ifdef _DEBUG
 	if ( ( more > MEG1 ) && ( ( more / ( 1024 * 1024 ) ) > megs ) )
 	{
 		Aqsis::log() << debug << "Texturememory is more than " << megs << " megs" << std::endl;
@@ -368,6 +368,7 @@ void CqTextureMap::CriticalMeasure()
 
 
 	now = QGetRenderContext() ->Stats().GetTextureMemory();
+	TqBool getout = TqTrue;
 
 	if ( m_critical )
 	{
@@ -392,26 +393,33 @@ void CqTextureMap::CriticalMeasure()
 			e = (*j)->m_apFlat.end(); 
 			for ( ; i != e; i++ )
 			{
-				delete(*i);
+				if (*i) delete(*i);
 			}	
 			(*j)->m_apFlat.resize(0);
 			(*j)->m_apLast[0] = NULL;
 
 			// All MipMaps segments (flat tiles)  are the first to go 
-			for ( TqInt k = 0; k <  256; k++)
+			for ( TqInt k = 0; (k <  256) && (getout == TqFalse); k++)
 			{
 				i = (*j)->m_apMipMaps[k].begin(); 
 				e = (*j)->m_apMipMaps[k].end(); 
 				for ( ; i != e; i++ )
 				{
-					delete(*i);
+					if (*i) delete(*i);
 				}	
 				(*j)->m_apLast[k] = NULL;
 				(*j)->m_apMipMaps[k].resize(0);
+				current = QGetRenderContext() ->Stats().GetTextureMemory();
+				if ( ( now - current ) > ( limit / 4 ) ) {
+					getout = TqTrue;
+					break;
+				}
 			}
 			current = QGetRenderContext() ->Stats().GetTextureMemory();
-			if ( ( now - current ) > ( limit / 4 ) )
+			if ( ( now - current ) > ( limit / 4 ) ) {
+				getout = TqTrue;
 				break;
+			}
 
 		}
 	}
@@ -419,7 +427,7 @@ void CqTextureMap::CriticalMeasure()
 
 	m_critical = TqFalse;
 
-#ifndef _DEBUG
+#ifdef _DEBUG
 
 	if ( now - current )
 	{
@@ -537,11 +545,38 @@ CqTextureMap::~CqTextureMap()
 	m_ConvertString_Cache.resize( 0 );
 
 	// Delete any held cache buffer segments.
-	std::list<CqTextureMapBuffer*>::iterator s;
-	for ( s = m_apFlat.begin(); s != m_apFlat.end(); s++ )
-		delete( *s );
+	std::list<CqTextureMapBuffer*>::iterator l;
+	std::list<CqTextureMapBuffer*>::iterator e;
 
+	// First into the flat segments partitions
+	l = m_apFlat.begin();
+	e = m_apFlat.end();
+	for ( ; l != e; l++ )
+	{
+		if (*l) 
+		{
+			delete (*l);
+		}
+	}
 	m_apFlat.resize( 0 );
+	m_apLast[0] = NULL;
+
+	// Second into the Mipmaps segments partitions
+	for (TqInt k = 0; k < 256; k++)
+	{
+		l = m_apMipMaps[k].begin(); 
+		e = m_apMipMaps[k].end(); 
+		for ( ; l != e; l++ )
+		{
+			if (*l) 
+			{
+				delete (*l);
+			}
+		}	
+		m_apLast[k] = NULL;
+		m_apMipMaps[k].resize(0);
+	}
+
 
 
 #ifdef ALLOCSEGMENTSTATUS
@@ -1326,7 +1361,11 @@ void CqTextureMap::Open()
 	}
 	m_Directory = 0;
 	for (TqInt k=0; k < 256; k++)
+	{
 		m_apLast[k] = NULL;
+		m_apMipMaps[k].resize(0);
+	}
+	m_apFlat.resize(0);
 }
 
 //---------------------------------------------------------------------
