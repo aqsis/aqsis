@@ -265,7 +265,7 @@ TqPuchar CqTextureMapBuffer::AllocSegment( TqUlong width, TqUlong height, TqInt 
 		m_critical = TqTrue;
 	}
 
-#ifdef _DEBUG
+#ifndef _DEBUG
 	if ( ( more > MEG1 ) && ( ( more / ( 1024 * 1024 ) ) > megs ) )
 	{
 		Aqsis::log() << debug << "Texturememory is more than " << megs << " megs" << std::endl;
@@ -344,7 +344,7 @@ TqInt CqTextureMap::Convert( CqString &strName )
 /** this is used for remove any memory exceed the command Option "limits" "texturememory"
   * directive
   *   
-  * It zaps the m_apSegments for this TextureMap object completely.
+  * It zaps the m_apFlat for this TextureMap object completely.
   * The idea here is to erase any "GetBuffer()" memory to respect the directive
   * It looks into the big m_TextureMap_Cache release every things
   **/
@@ -352,8 +352,9 @@ void CqTextureMap::CriticalMeasure()
 {
 	TqInt current, now; 
 	static TqInt limit = -1;
-	std::vector<CqTextureMap*>::iterator i;
-	std::list<CqTextureMapBuffer*>::iterator j;
+	std::vector<CqTextureMap*>::iterator j;
+	std::list<CqTextureMapBuffer*>::iterator i;
+	std::list<CqTextureMapBuffer*>::iterator e;
 
 	if (limit == -1)
 	{
@@ -384,42 +385,41 @@ void CqTextureMap::CriticalMeasure()
 		 * GetBuffer() calls.
 		 *
 		 */
-		for ( i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
+		for ( j = m_TextureMap_Cache.begin(); j != m_TextureMap_Cache.end(); j++ )
 		{
-		        TqInt segments = ( *i) ->m_apSegments.size();
-			TqInt nRemainingSegments = 0;
-			j = ( *i ) ->m_apSegments.begin(); 
-			if (segments > 2) 
+			// the original segments (flat tiles)  are the first to go 
+			i = (*j)->m_apFlat.begin(); 
+			e = (*j)->m_apFlat.end(); 
+			for ( ; i != e; i++ )
 			{
-				j++;
-				j++;
-				nRemainingSegments = 2;
-			}
-			
-			for ( ; j != ( *i ) ->m_apSegments.end(); j++ )
+				delete(*i);
+			}	
+			(*j)->m_apFlat.resize(0);
+			(*j)->m_apLast[0] = NULL;
+
+			// All MipMaps segments (flat tiles)  are the first to go 
+			for ( TqInt k = 0; k <  256; k++)
 			{
-				// Only release if not protected.
-				if ( !( *j ) ->fProtected() )
+				i = (*j)->m_apMipMaps[k].begin(); 
+				e = (*j)->m_apMipMaps[k].end(); 
+				for ( ; i != e; i++ )
 				{
-					TqInt directory = (*j)->Directory();	
-					m_apCache[directory] = NULL;
-					( *j ) ->Release();
-				}
-				else
-					nRemainingSegments ++;
+					delete(*i);
+				}	
+				(*j)->m_apLast[k] = NULL;
+				(*j)->m_apMipMaps[k].resize(0);
 			}
-			( *i ) ->m_apSegments.resize( nRemainingSegments );
 			current = QGetRenderContext() ->Stats().GetTextureMemory();
 			if ( ( now - current ) > ( limit / 4 ) )
 				break;
-		}
 
+		}
 	}
 	current = QGetRenderContext() ->Stats().GetTextureMemory();
 
 	m_critical = TqFalse;
 
-#ifdef _DEBUG
+#ifndef _DEBUG
 
 	if ( now - current )
 	{
@@ -486,8 +486,8 @@ TqBool CqTextureMap::CreateMIPMAP( TqBool fProtectBuffers )
 							pTMB->SetValue( x, y, sample, accum[ sample ] );
 					}
 				}
-				m_apSegments.push_back( pTMB );
-				m_apCache[directory] = pTMB;
+				m_apFlat.push_back( pTMB );
+				m_apLast[directory%256] = pTMB;
 			}
 
 			m_xres /= 2;
@@ -538,10 +538,10 @@ CqTextureMap::~CqTextureMap()
 
 	// Delete any held cache buffer segments.
 	std::list<CqTextureMapBuffer*>::iterator s;
-	for ( s = m_apSegments.begin(); s != m_apSegments.end(); s++ )
+	for ( s = m_apFlat.begin(); s != m_apFlat.end(); s++ )
 		delete( *s );
 
-	m_apSegments.resize( 0 );
+	m_apFlat.resize( 0 );
 
 
 #ifdef ALLOCSEGMENTSTATUS
@@ -581,24 +581,24 @@ CqTextureMapBuffer* CqTextureMap::GetBuffer( TqUlong s, TqUlong t, TqInt directo
         //TIMER_START("GetBuffer");
 	QGetRenderContext() ->Stats().IncTextureMisses( 4 );
 
-	CqTextureMapBuffer *hash = m_apCache[directory];
+	CqTextureMapBuffer *lastcache = m_apLast[directory%256];
 
-	if (hash && hash->IsValid(s, t, directory))
+	if (lastcache && lastcache->IsValid(s, t, directory))
 	{
 		//TIMER_STOP("GetBuffer");
-		return hash;
+		return lastcache;
 	}
 
 	// Search already cached segments first.
-	for ( std::list<CqTextureMapBuffer*>::iterator i = m_apSegments.begin(); i != m_apSegments.end(); i++ )
+	std::list<CqTextureMapBuffer*>::iterator i = m_apMipMaps[directory%256].begin(); 
+	std::list<CqTextureMapBuffer*>::iterator e = m_apMipMaps[directory%256].end(); 
+	for ( ; i != e; i++ )
 	{
 		if ( ( *i ) ->IsValid( s, t, directory ) )
 		{
 			QGetRenderContext() ->Stats().IncTextureHits( 1, 4 );
-			// Move this segment to the top of the list, so that next time it is found first. This
-			// allows us to take advantage of likely spatial coherence during shading.
 			CqTextureMapBuffer* pbuffer = *i;
-			m_apCache[directory] = pbuffer;
+			m_apLast[directory%256] = pbuffer;
 			//TIMER_STOP("GetBuffer");
 			return ( pbuffer );
 		}
@@ -657,8 +657,8 @@ CqTextureMapBuffer* CqTextureMap::GetBuffer( TqUlong s, TqUlong t, TqInt directo
 		}
 		// Put this segment on the top of the list, so that next time it is found first. This
 		// allows us to take advantage of likely spatial coherence during shading.
-		m_apSegments.push_front( pTMB );
-		m_apCache[directory] = pTMB;
+		m_apMipMaps[directory%256].push_front( pTMB );
+		m_apLast[directory%256] = pTMB;
 	}
 	//TIMER_STOP("GetBuffer");
 	return ( pTMB );
@@ -1325,7 +1325,8 @@ void CqTextureMap::Open()
 		}
 	}
 	m_Directory = 0;
-	m_apCache[0] = NULL;
+	for (TqInt k=0; k < 256; k++)
+		m_apLast[k] = NULL;
 }
 
 //---------------------------------------------------------------------

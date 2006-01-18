@@ -70,7 +70,8 @@ CqShadowMap::CqShadowMap( const CqString& strName ) :
 			m_aRand_no[ i ] = random.RandomFloat(2.0);
 		m_rand_index = 0;
 	}
-	m_apCache[0] = NULL;
+	for (TqInt k=0; k < 256; k++)
+		m_apLast[k] = NULL;
 }
 
 
@@ -81,12 +82,12 @@ CqShadowMap::CqShadowMap( const CqString& strName ) :
 void CqShadowMap::AllocateMap( TqInt XRes, TqInt YRes )
 {
 	std::list<CqTextureMapBuffer*>::iterator s;
-	for ( s = m_apSegments.begin(); s != m_apSegments.end(); s++ )
+	for ( s = m_apFlat.begin(); s != m_apFlat.end(); s++ )
 		delete( *s );
 
 	m_XRes = XRes;
 	m_YRes = YRes;
-	m_apSegments.push_back( CreateBuffer( 0, 0, m_XRes, m_YRes, 1 ) );
+	m_apFlat.push_back( CreateBuffer( 0, 0, m_XRes, m_YRes, 1 ) );
 }
 
 
@@ -198,7 +199,7 @@ void CqShadowMap::LoadZFile()
 
 			// Now output the depth values
 			AllocateMap( m_XRes, m_YRes );
-			file.read( reinterpret_cast<TqPchar>( m_apSegments.front() ->pVoidBufferData() ), sizeof( TqFloat ) * ( m_XRes * m_YRes ) );
+			file.read( reinterpret_cast<TqPchar>( m_apFlat.front() ->pVoidBufferData() ), sizeof( TqFloat ) * ( m_XRes * m_YRes ) );
 
 			// Set the matrixes to general, not Identity as default.
 			matWorldToCamera().SetfIdentity( TqFalse );
@@ -332,7 +333,8 @@ void CqShadowMap::SampleMap( CqVector3D& vecPoint, CqVector3D& swidth, CqVector3
 void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4, std::valarray<TqFloat>& val, TqInt index, TqFloat* average_depth, TqFloat* shadow_depth )
 {
 	// Check the memory and make sure we don't abuse it
-	if (index == 0) CriticalMeasure();
+	if (index == 0)
+		CriticalMeasure();
 
 	TIME_SCOPE("Shadow Mapping")
 
@@ -613,7 +615,7 @@ void CqShadowMap::SaveShadowMap( const CqString& strShadowName, TqBool append )
 	// Save the shadowmap to a binary file.
 	if ( m_strName.compare( "" ) != 0 )
 	{
-		if ( ! m_apSegments.empty() )
+		if ( ! m_apFlat.empty() )
 		{
 			TIFF * pshadow = TIFFOpen( strShadowName.c_str(), mode );
 			TIFFCreateDirectory( pshadow );
@@ -637,7 +639,7 @@ void CqShadowMap::SaveShadowMap( const CqString& strShadowName, TqBool append )
 
 			// Write the floating point image to the directory.
 			TqDouble minz = RI_FLOATMAX;
-			TqFloat *depths = reinterpret_cast<TqFloat*>( m_apSegments.front() ->pVoidBufferData() );
+			TqFloat *depths = reinterpret_cast<TqFloat*>( m_apFlat.front() ->pVoidBufferData() );
 			for (TqInt y =0; y < YRes(); y++)
 				for (TqInt x = 0; x < XRes(); x++)
 					minz = MIN(minz, (TqDouble)depths[y*XRes() + x]);
@@ -679,7 +681,7 @@ void CqShadowMap::SaveZFile()
 			ofile.write( reinterpret_cast<TqPchar>( matWorldToScreen()[ 3 ] ), sizeof( matWorldToScreen()[ 0 ][ 0 ] ) * 4 );
 
 			// Now output the depth values
-			ofile.write( reinterpret_cast<TqPchar>( m_apSegments.front() ->pVoidBufferData() ), sizeof( TqFloat ) * ( m_XRes * m_YRes ) );
+			ofile.write( reinterpret_cast<TqPchar>( m_apFlat.front() ->pVoidBufferData() ), sizeof( TqFloat ) * ( m_XRes * m_YRes ) );
 			ofile.close();
 		}
 	}
