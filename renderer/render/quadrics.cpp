@@ -75,8 +75,8 @@ CqQuadric&	CqQuadric::operator=( const CqQuadric& From )
 
 void	CqQuadric::Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime )
 {
-	m_matTx *= matTx;
-	m_matITTx *= matITTx;
+	m_matTx.PreMultiply(matTx);
+	m_matITTx.PreMultiply(matITTx);
 }
 
 
