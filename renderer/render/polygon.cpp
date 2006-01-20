@@ -486,12 +486,12 @@ CqSurfacePointsPolygon& CqSurfacePointsPolygon::operator=( const CqSurfacePoints
 
 void	CqPolygonPoints::Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime )
 {
-	if ( m_Transformed )
-		return ;
+//	if ( m_Transformed )
+//		return ;
 
 	CqSurface::Transform( matTx, matITTx, matRTx, iTime );
 
-	m_Transformed = TqTrue;
+//	m_Transformed = TqTrue;
 }
 
 

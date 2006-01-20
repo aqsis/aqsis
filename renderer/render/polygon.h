@@ -433,7 +433,11 @@ class CqSurfacePointsPolygon : public CqBasicSurface, public CqPolygonBase
 
 		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime = 0 )
 		{
-			m_pPoints->Transform( matTx, matITTx, matRTx );
+			// \attention It is invalid to call Transform on a polygon, as the rendering process has begun so the transformation is fixed.
+			// The individual polygons cannot be transformed as they all refer to the same points class, if one polygon transforms
+			// those points, then another polygon receives the same transform, the points will be transformed twice.
+			Aqsis::log() << error << "Transform called on CqSurfacePointsPolygon" << std::endl;
+			//m_pPoints->Transform( matTx, matITTx, matRTx );
 		}
 		// NOTE: These should never be called.
 		virtual	TqUint	cUniform() const
