@@ -1,50 +1,74 @@
-# Doxyfile 1.3.2
+# Doxyfile 1.4.6
 
 #---------------------------------------------------------------------------
-# General configuration options
+# Project related configuration options
 #---------------------------------------------------------------------------
 PROJECT_NAME           = Aqsis.Render
 PROJECT_NUMBER         = 
 OUTPUT_DIRECTORY       = doxygen_docs
+CREATE_SUBDIRS         = NO
 OUTPUT_LANGUAGE        = English
 USE_WINDOWS_ENCODING   = YES
-EXTRACT_ALL            = YES
-EXTRACT_PRIVATE        = NO
-EXTRACT_STATIC         = YES
-EXTRACT_LOCAL_CLASSES  = YES
-HIDE_UNDOC_MEMBERS     = NO
-HIDE_UNDOC_CLASSES     = NO
-HIDE_FRIEND_COMPOUNDS  = NO
-HIDE_IN_BODY_DOCS      = NO
 BRIEF_MEMBER_DESC      = YES
 REPEAT_BRIEF           = YES
+ABBREVIATE_BRIEF       = "The $name class" \
+                         "The $name widget" \
+                         "The $name file" \
+                         is \
+                         provides \
+                         specifies \
+                         contains \
+                         represents \
+                         a \
+                         an \
+                         the
 ALWAYS_DETAILED_SEC    = NO
 INLINE_INHERITED_MEMB  = NO
 FULL_PATH_NAMES        = NO
 STRIP_FROM_PATH        = 
-INTERNAL_DOCS          = NO
-CASE_SENSE_NAMES       = YES
+STRIP_FROM_INC_PATH    = 
 SHORT_NAMES            = NO
-HIDE_SCOPE_NAMES       = NO
-SHOW_INCLUDE_FILES     = YES
 JAVADOC_AUTOBRIEF      = NO
 MULTILINE_CPP_IS_BRIEF = NO
 DETAILS_AT_TOP         = NO
 INHERIT_DOCS           = YES
+SEPARATE_MEMBER_PAGES  = NO
+TAB_SIZE               = 2
+ALIASES                = 
+OPTIMIZE_OUTPUT_FOR_C  = NO
+OPTIMIZE_OUTPUT_JAVA   = NO
+BUILTIN_STL_SUPPORT    = NO
+DISTRIBUTE_GROUP_DOC   = NO
+SUBGROUPING            = YES
+#---------------------------------------------------------------------------
+# Build related configuration options
+#---------------------------------------------------------------------------
+EXTRACT_ALL            = YES
+EXTRACT_PRIVATE        = NO
+EXTRACT_STATIC         = YES
+EXTRACT_LOCAL_CLASSES  = YES
+EXTRACT_LOCAL_METHODS  = NO
+HIDE_UNDOC_MEMBERS     = NO
+HIDE_UNDOC_CLASSES     = NO
+HIDE_FRIEND_COMPOUNDS  = NO
+HIDE_IN_BODY_DOCS      = NO
+INTERNAL_DOCS          = NO
+CASE_SENSE_NAMES       = YES
+HIDE_SCOPE_NAMES       = NO
+SHOW_INCLUDE_FILES     = YES
 INLINE_INFO            = YES
 SORT_MEMBER_DOCS       = YES
-DISTRIBUTE_GROUP_DOC   = NO
-TAB_SIZE               = 2
+SORT_BRIEF_DOCS        = NO
+SORT_BY_SCOPE_NAME     = NO
 GENERATE_TODOLIST      = YES
 GENERATE_TESTLIST      = YES
 GENERATE_BUGLIST       = YES
 GENERATE_DEPRECATEDLIST= YES
-ALIASES                = 
 ENABLED_SECTIONS       = 
 MAX_INITIALIZER_LINES  = 30
-OPTIMIZE_OUTPUT_FOR_C  = NO
-OPTIMIZE_OUTPUT_JAVA   = NO
 SHOW_USED_FILES        = YES
+SHOW_DIRECTORIES       = NO
+FILE_VERSION_FILTER    = 
 #---------------------------------------------------------------------------
 # configuration options related to warning and progress messages
 #---------------------------------------------------------------------------
@@ -52,38 +76,46 @@ QUIET                  = NO
 WARNINGS               = YES
 WARN_IF_UNDOCUMENTED   = YES
 WARN_IF_DOC_ERROR      = YES
+WARN_NO_PARAMDOC       = NO
 WARN_FORMAT            = "$file($line) : $text"
 WARN_LOGFILE           = 
 #---------------------------------------------------------------------------
 # configuration options related to the input files
 #---------------------------------------------------------------------------
-INPUT                  = ./aqsis \
-                         ./aqsl \
-			 ./aqsltell \
-			 ./dspylink \
-                         ./filebuffer \
-                         ./framebuffer_glut \
-                         ./framebuffer_glut_z \
-                         ./libaqsistypes \
-                         ./libaqsistypes/win32/intel \
-                         ./libargparse \
-                         ./libcodegenvm \
-                         ./libdd \
-                         ./libddmsimple \
-                         ./libddmsock \
-			 ./libraytrace \
-			 ./libri2rib \
-                         ./librib2 \
-                         ./librib2ri \
-                         ./librib2stream \
-                         ./libshaderexecenv \
-                         ./libshadervm \
-                         ./libslparse \
-			 ./libslxargs \
-                         ./render \
-                         ./shadowmap \
-                         ./slpp \
-                         ./teqser
+INPUT                  = ./aqsistypes \
+                         ./aqsistypes/posix \
+                         ./aqsistypes/win32 \
+                         ./argparse \
+                         ./displays/display \
+                         ./displays/d_exr \
+                         ./displays/d_xpm \
+                         ./renderer/aqsis \
+                         ./renderer/ddmanager \
+                         ./renderer/raytrace \
+                         ./renderer/render \
+                         ./rib/ri2rib \
+                         ./rib/rib2 \
+                         ./rib/rib2ri \
+                         ./rib/rib2stream \
+                         ./shadercompiler/aqsl \
+                         ./shadercompiler/aqsltell \
+                         ./shadercompiler/codegenvm \
+                         ./shadercompiler/shaderexecenv \
+                         ./shadercompiler/shadervm \
+                         ./shadercompiler/slparse \
+                         ./shadercompiler/slpp \
+                         ./shadercompiler/slxargs \
+                         ./texturing/teqser \
+                         ./texturing/plugins/bake2tif \
+                         ./texturing/plugins/bmp2tif \
+                         ./texturing/plugins/common \
+                         ./texturing/plugins/exr2tif \
+                         ./texturing/plugins/gif2tif \
+                         ./texturing/plugins/jpg2tif \
+                         ./texturing/plugins/pcx2tif \
+                         ./texturing/plugins/png2tif \
+                         ./texturing/plugins/ppm2tif \
+                         ./texturing/plugins/tga2tif
 FILE_PATTERNS          = *.h \
                          *.cpp \
                          *.c
@@ -96,6 +128,7 @@ EXAMPLE_PATTERNS       =
 EXAMPLE_RECURSIVE      = NO
 IMAGE_PATH             = 
 INPUT_FILTER           = 
+FILTER_PATTERNS        = 
 FILTER_SOURCE_FILES    = NO
 #---------------------------------------------------------------------------
 # configuration options related to source browsing
@@ -105,6 +138,7 @@ INLINE_SOURCES         = NO
 STRIP_CODE_COMMENTS    = YES
 REFERENCED_BY_RELATION = YES
 REFERENCES_RELATION    = YES
+USE_HTAGS              = NO
 VERBATIM_HEADERS       = NO
 #---------------------------------------------------------------------------
 # configuration options related to the alphabetical class index
@@ -172,6 +206,7 @@ GENERATE_XML           = NO
 XML_OUTPUT             = xml
 XML_SCHEMA             = 
 XML_DTD                = 
+XML_PROGRAMLISTING     = YES
 #---------------------------------------------------------------------------
 # configuration options for the AutoGen Definitions output
 #---------------------------------------------------------------------------
@@ -196,7 +231,7 @@ PREDEFINED             =
 EXPAND_AS_DEFINED      = 
 SKIP_FUNCTION_MACROS   = YES
 #---------------------------------------------------------------------------
-# Configuration::addtions related to external references   
+# Configuration::additions related to external references   
 #---------------------------------------------------------------------------
 TAGFILES               = 
 GENERATE_TAGFILE       = 
@@ -211,27 +246,25 @@ HIDE_UNDOC_RELATIONS   = YES
 HAVE_DOT               = NO
 CLASS_GRAPH            = YES
 COLLABORATION_GRAPH    = YES
+GROUP_GRAPHS           = YES
 UML_LOOK               = YES
 TEMPLATE_RELATIONS     = NO
 INCLUDE_GRAPH          = YES
 INCLUDED_BY_GRAPH      = YES
 CALL_GRAPH             = NO
 GRAPHICAL_HIERARCHY    = YES
+DIRECTORY_GRAPH        = YES
 DOT_IMAGE_FORMAT       = png
 DOT_PATH               = 
 DOTFILE_DIRS           = 
 MAX_DOT_GRAPH_WIDTH    = 1024
 MAX_DOT_GRAPH_HEIGHT   = 1024
 MAX_DOT_GRAPH_DEPTH    = 0
+DOT_TRANSPARENT        = NO
+DOT_MULTI_TARGETS      = NO
 GENERATE_LEGEND        = YES
 DOT_CLEANUP            = YES
 #---------------------------------------------------------------------------
-# Configuration::addtions related to the search engine   
+# Configuration::additions related to the search engine   
 #---------------------------------------------------------------------------
 SEARCHENGINE           = NO
-CGI_NAME               = search.cgi
-CGI_URL                = 
-DOC_URL                = 
-DOC_ABSPATH            = 
-BIN_ABSPATH            = /usr/local/bin/
-EXT_DOC_PATHS          = 
