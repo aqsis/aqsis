@@ -37,7 +37,7 @@
 #include	"color.h"
 #include	"exception.h"
 #include	"parameters.h"
-
+#include	"ishader.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -219,31 +219,11 @@ class CqOptions
 		{
 			m_funcFilter = fValue;
 		}
-		/** Get the name of the Imager shader.
-		 */
-		//		CqString	Get_imager() const
-		//		{
-		//			if( NULL == m_pParameters[ option_imager ] )	return( "null" );
-		//
-		//			return(*static_cast<CqParameterTyped<CqString>*>(m_pParameters[option_imager])->pValue());
-		//		}
-		/** Set the name of the Imager shader.
-		 * \param strValue Character pointer to name of Imager shader.
-		 */
-		//		void	Set_imager( const CqString& value )
-		//		{
-		//			if( NULL == m_pParameters[ option_imager ] )
-		//				m_pParameters[ option_imager ] = new CqParameterTypedUniform<CqString, type_string>("imager");
-		//			*static_cast<CqParameterTyped<CqString>*>(m_pParameters[ option_imager ])->pValue() = value;
-		//
-		//			LoadImager( value );
-		//		}
-		void	LoadImager( const CqString& strValue );
-		void	DeleteImager();
-		void	SetValueImager( char *token, char *value );
+		virtual void SetpshadImager( const boost::shared_ptr<IqShader>& pshadImager );
+		boost::shared_ptr<IqShader>	pshadImager() const;
 		/** Get a pointer to the imager shader.
 		 */
-		const CqImagersource*	pshadImager() const
+		const CqImagersource*	pImagerSource() const
 		{
 			return ( m_pshadImager );
 		}

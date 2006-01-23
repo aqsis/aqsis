@@ -267,7 +267,6 @@ CqOptions::CqOptions( const CqOptions& From ) :
 
 CqOptions::~CqOptions()
 {
-	DeleteImager();
 }
 
 
@@ -284,7 +283,7 @@ CqOptions& CqOptions::operator=( const CqOptions& From )
 	m_funcFilter = From.m_funcFilter;
 	m_pshadImager = From.m_pshadImager;
 
-	DeleteImager();
+	//DeleteImager();
 
 	// Copy the system options.
 	m_aOptions.resize( From.m_aOptions.size() );
@@ -576,6 +575,22 @@ const CqColor* CqOptions::GetColorOption( const char* strName, const char* strPa
 }
 
 
+void CqOptions::SetpshadImager( const boost::shared_ptr<IqShader>& pshadImager )
+{
+	delete m_pshadImager;
+
+	m_pshadImager = new CqImagersource(pshadImager, TqTrue);
+}
+
+
+boost::shared_ptr<IqShader>	CqOptions::pshadImager() const
+{
+	if(m_pshadImager)
+		return ( m_pshadImager->pShader() );
+	else
+		return boost::shared_ptr<IqShader>();
+}
+
 //---------------------------------------------------------------------
 /** Force the imager shader to be executed
  * \param gx The width of the bucket in pixels.
@@ -659,56 +674,6 @@ CqColor CqOptions::GetOpacityImager( TqFloat x, TqFloat y )
 
 	return result;
 }
-
-//---------------------------------------------------------------------
-/** Load an Imager shader find it
- * 
- * \param strName the name of the shader like background.sl, 
- * Right now it is doing nothing.
- */
-void CqOptions::LoadImager( const CqString& strName )
-{
-	DeleteImager();
-
-	boost::shared_ptr<IqShader> pShader = QGetRenderContext() ->CreateShader( strName.c_str(), Type_Imager );
-
-	if ( !pShader )
-		return ;
-
-	m_pshadImager = new CqImagersource( pShader, RI_TRUE );
-	m_pshadImager->pShader() ->PrepareDefArgs();
-
-}
-
-void CqOptions::DeleteImager()
-{
-
-	if ( m_pshadImager != NULL )
-	{
-		delete m_pshadImager;
-		m_pshadImager = NULL;
-	}
-}
-
-
-void CqOptions::SetValueImager( char *token, char *value )
-{
-	if ( m_pshadImager != NULL )
-	{
-		SqParameterDeclaration Decl;
-		try
-		{
-			Decl = QGetRenderContext()->FindParameterDecl( token );
-		}
-		catch( XqException e )
-		{
-			Aqsis::log() << error << e.strReason().c_str() << std::endl;
-			return;
-		}
-		m_pshadImager->pShader() ->SetArgument( Decl.m_strName, Decl.m_Type, Decl.m_strSpace, value );
-	}
-}
-
 
 
 //---------------------------------------------------------------------

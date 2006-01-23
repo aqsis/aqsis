@@ -1428,20 +1428,21 @@ RtVoid	RiImagerV( RtToken name, PARAMETERLIST )
 
 	Debug_RiImager
 
-	RtInt i;
+	// Find the shader.
+	boost::shared_ptr<IqShader> pshadImager = QGetRenderContext()->CreateShader( name, Type_Imager );
 
-	if ( strlen( name ) )
+	if ( pshadImager )
 	{
 		QGetRenderContext() ->optCurrent().GetStringOptionWrite( "System", "Imager" ) [ 0 ] = name ;
-		QGetRenderContext() ->optCurrent().LoadImager( name );
+		RtInt i;
 		for ( i = 0; i < count; ++i )
 		{
 			RtToken	token = tokens[ i ];
 			RtPointer	value = values[ i ];
 
-			QGetRenderContext() ->optCurrent().SetValueImager(
-			    token, static_cast<TqPchar>( value ) );
+			SetShaderArgument( pshadImager, token, static_cast<TqPchar>( value ) );
 		}
+		QGetRenderContext()->optCurrent().SetpshadImager( pshadImager );
 	}
 	return ;
 }
@@ -6149,6 +6150,19 @@ RtVoid RiShaderLayerV( RtToken type, RtToken name, RtToken layername, RtInt coun
 			QGetRenderContext() ->pattrWriteCurrent() ->SetpshadDisplacement( layeredshader, QGetRenderContext() ->Time() );
 		}
 	}
+	else if(stringtype.compare("imager")==0)
+	{
+		QGetRenderContext() ->optCurrent().GetStringOptionWrite( "System", "Imager" ) [ 0 ] = name ;
+		newlayer = QGetRenderContext()->CreateShader( name, Type_Imager );
+		layeredshader = QGetRenderContext()->optCurrent().pshadImager();
+
+		if( !layeredshader || !layeredshader->IsLayered() )
+		{
+			// Create a new layered shader and add this shader to it.
+			layeredshader = boost::shared_ptr<IqShader>(new CqLayeredShader);
+			QGetRenderContext() ->optCurrent().SetpshadImager( layeredshader );
+		}
+	}
 	else
 		Aqsis::log() << error << "Layered shaders not supported for type \"" << type << "\"" << std::endl;
 
@@ -6194,6 +6208,8 @@ RtVoid RiConnectShaderLayers( RtToken type, RtToken layer1, RtToken variable1, R
 		pcurr = QGetRenderContext()->pattrWriteCurrent()->pshadSurface(QGetRenderContext()->Time());
 	else if(stringtype.compare("displacement")==0)
 		pcurr = QGetRenderContext()->pattrWriteCurrent()->pshadDisplacement(QGetRenderContext()->Time());
+	else if(stringtype.compare("imager")==0)
+		pcurr = QGetRenderContext()->optCurrent().pshadImager();
 	else
 		Aqsis::log() << error << "Layered shaders not supported for type \"" << type << "\"" << std::endl;
 	if( pcurr && pcurr->IsLayered() )
