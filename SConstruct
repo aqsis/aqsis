@@ -210,6 +210,7 @@ def version_h_build(target, source, env):
 
 version_h = env.Command('version.h', 'version.h.in', version_h_build)
 env.Install(target_dir.abspath, version_h)
+env.Distribute('./', version_h)
 
 env.Alias('release', ['$BINDIR','$LIBDIR', '$SHADERDIR','$SYSCONFDIR'])
 Default('release')
