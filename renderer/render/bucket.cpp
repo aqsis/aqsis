@@ -728,6 +728,8 @@ void CqBucket::FilterBucket(TqBool empty)
 					pie2->SetColor( imager );
 					imager = QGetRenderContext() ->optCurrent().GetOpacityImager( x , y );
 					pie2->SetOpacity( imager );
+					TqFloat a = ( imager[0] + imager[1] + imager[2] ) / 3.0f;
+					pie2->SetAlpha( a );
 					pie2++;
 					i++;
 				}
