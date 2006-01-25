@@ -51,7 +51,7 @@ int main( int argc, const char** argv )
 	ArgParse ap;
 	RtFilterFunc filterfunc;
 
-	ap.usageHeader( ArgParse::apstring( "Usage: " ) + argv[ 0 ] + " [options] outfile" );
+	ap.usageHeader( ArgParse::apstring( "Usage: " ) + argv[ 0 ] + " [options] infile outfile" );
 	ap.argFlag( "help", "\aprint this help and exit", &g_help );
 	ap.argFlag( "version", "\aprint version information and exit", &g_version );
 	ap.argString( "compression", "=string\a[none|lzw|packbits|deflate]", &g_compress );
