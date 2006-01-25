@@ -11,6 +11,7 @@
 
 #include	"aqsis.h"
 #include	"logging.h"
+#include 	"logging_streambufs.h"
 #include	"version.h"
 #include	"argparse.h"
 #include	"ri.h"
@@ -21,6 +22,7 @@ TqBool	g_envcube = TqFalse;
 TqBool	g_envlatl = TqFalse;
 TqBool	g_shadow = TqFalse;
 
+ArgParse::apint g_cl_verbose = 1;
 ArgParse::apstring	g_swrap = "black";
 ArgParse::apstring	g_twrap = "black";
 ArgParse::apstring	g_wrap = "";
@@ -54,6 +56,11 @@ int main( int argc, const char** argv )
 	ap.usageHeader( ArgParse::apstring( "Usage: " ) + argv[ 0 ] + " [options] infile outfile" );
 	ap.argFlag( "help", "\aprint this help and exit", &g_help );
 	ap.argFlag( "version", "\aprint version information and exit", &g_version );
+	ap.argInt( "verbose", "=integer\aSet log output level\n"
+		"\a0 = errors\n"
+		"\a1 = warnings (default)\n"
+		"\a2 = information\n"
+		"\a3 = debug", &g_cl_verbose );
 	ap.argString( "compression", "=string\a[none|lzw|packbits|deflate]", &g_compress );
 	ap.argFlag( "envcube", " px nx py ny pz nz\aproduce a cubeface environment map from 6 images.", &g_envcube );
 	ap.argFlag( "envlatl", "\aproduce a latlong environment map from an image file.", &g_envlatl );
@@ -187,6 +194,16 @@ int main( int argc, const char** argv )
 	char *compression = ( char * ) g_compress.c_str();
 	float quality = ( float ) g_quality;
 
+
+	std::auto_ptr<std::streambuf> show_level( new Aqsis::show_level_buf(Aqsis::log()) );
+	Aqsis::log_level_t level = Aqsis::ERROR;
+	if( g_cl_verbose > 0 )
+		level = Aqsis::WARNING;
+	if( g_cl_verbose > 1 )
+		level = Aqsis::INFO;
+	if( g_cl_verbose > 2 )
+		level = Aqsis::DEBUG;
+	std::auto_ptr<std::streambuf> filter_level( new Aqsis::filter_by_level_buf(level, Aqsis::log()) );
 
 	RiBegin( "teqser" );
 
