@@ -580,6 +580,7 @@ void CqOptions::SetpshadImager( const boost::shared_ptr<IqShader>& pshadImager )
 	delete m_pshadImager;
 
 	m_pshadImager = new CqImagersource(pshadImager, TqTrue);
+        m_pshadImager->pShader()->PrepareDefArgs();
 }
 
 

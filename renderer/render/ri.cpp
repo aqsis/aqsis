@@ -1434,6 +1434,7 @@ RtVoid	RiImagerV( RtToken name, PARAMETERLIST )
 	if ( pshadImager )
 	{
 		QGetRenderContext() ->optCurrent().GetStringOptionWrite( "System", "Imager" ) [ 0 ] = name ;
+		QGetRenderContext()->optCurrent().SetpshadImager( pshadImager );
 		RtInt i;
 		for ( i = 0; i < count; ++i )
 		{
@@ -1442,7 +1443,6 @@ RtVoid	RiImagerV( RtToken name, PARAMETERLIST )
 
 			SetShaderArgument( pshadImager, token, static_cast<TqPchar>( value ) );
 		}
-		QGetRenderContext()->optCurrent().SetpshadImager( pshadImager );
 	}
 	return ;
 }
