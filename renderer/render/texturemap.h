@@ -68,12 +68,33 @@ enum EqBufferType
 
 //----------------------------------------------------------------------
 /** \class CqTextureMapBuffer
- * Class referencing a buffer in the image map cache. 
+ *  \brief A container for a segment of a texture map. 
+ *  
+ *  Where a texture map is stored as a tiled image, i.e. when it has been processed 
+ *  using teqser to produce a mip-mapped image, each tile will be loaded on demand
+ *  into an object of this base type.
+ *
+ *  The base class represents data as 8bit per channel integer colour data,
+ *  the base is specialised to provide buffer storage for different colour
+ *  formats.
+ *
+ *  The buffer does not actually store the data, but instead contains a reference
+ *  into the global texture cache area, a central memory area for all texture
+ *  data.
+ *
+ *  Texture buffer segments are managed by the cache manager, and will be released
+ *  if the cache usage exceeds a predefined amount. This behaviour can be controlled
+ *  by marking the buffer as protected using the fProt argument to Init, or the
+ *  SetfProtected function.
  */
 
 class CqTextureMapBuffer
 {
 	public:
+		/** \brief Default constructor.
+		 *
+		 *  Initialises the buffer to represent and empty, unprotected segment.
+		 */
 		CqTextureMapBuffer() :
 				m_pBufferData( 0 ),
 				m_sOrigin( 0 ),
@@ -84,6 +105,10 @@ class CqTextureMapBuffer
 				m_Directory( 0 ),
 				m_fProtected( TqFalse )
 		{}
+		/** \brief Destructor.
+		 *
+		 *  Automatically releases the buffer data in the cache.
+		 */
 		virtual	~CqTextureMapBuffer()
 		{
 			Release();
@@ -111,7 +136,7 @@ class CqTextureMapBuffer
 
 			m_pBufferData = AllocSegment( width, height, samples, m_fProtected );
 		}
-		/** Release this reference to the cache.
+		/** Release the area of the cache memory referenced by this buffer object..
 		 */
 		void	Release()
 		{
@@ -163,6 +188,9 @@ class CqTextureMapBuffer
 		}
 
 		/** Get the float value at the specified pixel/element (0.0 --> 1.0)
+		 *  \param x Horizontal sample position, 0.0 --> 1.0
+		 *  \param y Vertical sample position, 0.0 --> 1.0
+		 *  \param sample Index of the element to read from the sample pixel.
 		 */
 		virtual TqFloat	GetValue(TqInt x, TqInt y, TqInt sample)
 		{
@@ -171,6 +199,10 @@ class CqTextureMapBuffer
 			return ( m_pBufferData[ iv + iu + sample ] / 255.0f );
 		}
 		/** Set the float value at the specified pixel/element (0.0 --> 1.0)
+		 *  \param x Horizontal sample position, 0.0 --> 1.0
+		 *  \param y Vertical sample position, 0.0 --> 1.0
+		 *  \param sample Index of the element to modify within the chosen pixel.
+		 *  \param value The new value to assign to the element.
 		 */
 		virtual void	SetValue(TqInt x, TqInt y, TqInt sample, TqFloat value)
 		{
@@ -180,53 +212,62 @@ class CqTextureMapBuffer
 		}
 
 		/** Get the min, max value of one tile/buffer
-		 *  Use only with shadowmap
+		 *  \note Use only with shadowmap
 		 */
 		virtual void MinMax(TqFloat &minz, TqFloat &maxz, TqInt sample) {}
 
 		/** Get the origin of this buffer segment.
+		 *  \return The horizontal origin of this segment within the overall image space.
 		 */
 		TqUlong sOrigin() const
 		{
 			return ( m_sOrigin );
 		}
 		/** Get the origin of this buffer segment.
+		 *  \return The vertical origin of this segment within the overall image space.
 		 */
 		TqUlong tOrigin() const
 		{
 			return ( m_tOrigin );
 		}
 		/** Get the width of this buffer segment.
+		 *  \return The width of this segment within the overall image space.
 		 */
 		TqUlong Width() const
 		{
 			return ( m_Width );
 		}
 		/** Get the height of this buffer segment.
+		 *  \return The height of this segment within the overall image space.
 		 */
 		TqUlong Height() const
 		{
 			return ( m_Height );
 		}
 		/** Get the directory index of this buffer segment.
+		 *  \return The directory index within a multi image texture map that this segment comes from.
 		 */
 		TqInt	Directory() const
 		{
 			return ( m_Directory );
 		}
 		/** Get the number of samples per element.
+		 *  \return The number of samples that each pixel contains.
 		 */
 		TqInt	Samples() const
 		{
 			return ( m_Samples );
 		}
 		/** Get the status of the protected flag
+		 *  \return TqTrue if the data within the texture cache for this buffer is protected from being flushed.
 		 */
 		TqBool	fProtected() const
 		{
 			return( m_fProtected );
 		}
 		/** Set this buffer as protected or not.
+		 *  \param fProt Set to TqTrue to protect the data in the cache for this buffer from being flushed during
+		 *               routine cache management.
 		 */
 		void	SetfProtected( TqBool fProt = TqTrue )
 		{
