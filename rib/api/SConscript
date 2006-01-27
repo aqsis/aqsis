@@ -6,6 +6,9 @@ api_xml = Split("""
 api_xsl = Split("""
 	apiheader.xsl		apicache.xsl		apivalidate.xsl		apidebug.xsl""")	
 
+api_install_headers = Split('''
+	ri.inl
+		''')
 
 apienv = env.Copy()
 
@@ -21,6 +24,8 @@ apienv.Depends(cachegen, '$APIXML')
 apienv.Depends(headergen, '$APIXML')
 apienv.Depends(validategen, '$APIXML')
 apienv.Depends(debuggen, '$APIXML')
+
+apienv.Install('$INCLUDEDIR', api_install_headers)
 
 Export('cachegen validategen headergen debuggen')
 
