@@ -105,6 +105,7 @@ env.Replace(BINDIR = env.Dir('$install_prefix').abspath + os.sep + 'bin')
 env.Replace(LIBDIR = env.Dir('$install_prefix').abspath + os.sep + 'lib')
 env.Replace(SHADERDIR = env.Dir('$install_prefix').abspath + os.sep + 'shaders')
 env.Replace(SYSCONFDIR = env.Dir('$install_prefix').abspath + os.sep + 'bin')
+env.Replace(INCLUDEDIR = env.Dir('$install_prefix').abspath + os.sep + 'inlclude/aqsis')
 
 target_dir = env.Dir('$build_prefix')
 
@@ -146,6 +147,7 @@ SConscript('shadercompiler/aqsl/SConscript', build_dir=target_dir.abspath + '/sh
 SConscript('shadercompiler/slxargs/SConscript', build_dir=target_dir.abspath + '/shadercompiler/slxargs')
 SConscript('shadercompiler/aqsltell/SConscript', build_dir=target_dir.abspath + '/shadercompiler/aqsltell')
 display = SConscript('displays/display/SConscript', build_dir=target_dir.abspath + '/displays/display')
+SConscript('displays/display/aqfb/SConscript', build_dir=target_dir.abspath + '/displays/display/aqfb')
 xpm = SConscript('displays/d_xpm/SConscript', build_dir=target_dir.abspath + '/displays/d_xpm')
 if not env['no_exr']:
 	exr = SConscript('displays/d_exr/SConscript', build_dir=target_dir.abspath + '/displays/d_exr')
@@ -212,7 +214,7 @@ version_h = env.Command('version.h', 'version.h.in', version_h_build)
 env.Install(target_dir.abspath, version_h)
 env.Distribute('./', version_h)
 
-env.Alias('release', ['$BINDIR','$LIBDIR', '$SHADERDIR','$SYSCONFDIR'])
+env.Alias('release', ['$BINDIR','$LIBDIR', '$SHADERDIR','$SYSCONFDIR','$INCLUDEDIR'])
 Default('release')
 
 # Define any files that need to be included in a source distribution.

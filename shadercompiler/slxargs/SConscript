@@ -7,11 +7,15 @@ slxargs_sources = Split("""
 slxargs_headers = Split("""
 	slx.h""")
 
+slxargs_install_headers = Split("""
+	slx.h""")
+
 # Set any platform specific options for this target
 env.UseTargetOptions('slxargs')
 
 slxargs = env.Library('slxargs', slxargs_sources)
 env.Install('$LIBDIR', slxargs)
+env.Install('$INCLUDEDIR', slxargs_install_headers)
 
 env.Distribute('shadercompiler/slxargs', slxargs_sources)
 env.Distribute('shadercompiler/slxargs', slxargs_headers)

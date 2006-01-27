@@ -60,6 +60,11 @@ aqsisdll_headers = Split("""
 	iddmanager.h            lath.h                  render.h
 	idsoshadeops.h          lights.h                renderer.h""")
 
+aqsis_install_headers = Split('''
+	ri.h
+	shadeop.h
+	''')
+
 aqsisenv = env.Copy()
 aqsisenv.AppendUnique(CPPDEFINES=[('_qBUILDING', 'CORE'), ('CORE', 1)])
 
@@ -78,6 +83,7 @@ Depends(aqsisdll, validategen)
 Depends(aqsisdll, headergen)
 
 aqsisenv.Install('$BINDIR', aqsisdll)
+aqsisenv.Install('$INCLUDEDIR', aqsis_install_headers)
 
 #aqsisproject = aqsisenv.MSVSProject(target = 'render' + env['MSVSPROJECTSUFFIX'],
 #	srcs = aqsisdll_sources,

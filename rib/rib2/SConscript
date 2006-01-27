@@ -11,6 +11,10 @@ rib2_headers = Split("""
 	libribtypes.h
 	parserstate.h""")
 
+rib2_install_headers = Split("""
+	librib.h
+	parserstate.h""")
+
 env.CXXFile(target='parser.cpp', source='parser.yy')
 env.CXXFile(target='scanner.cpp', source='scanner.ll')
 
@@ -19,6 +23,7 @@ env.UseTargetOptions('rib2')
 
 rib2 = env.Library('rib2', rib2_sources)
 env.Install('$LIBDIR', rib2)
+env.Install('$INCLUDEDIR', rib2_install_headers)
 
 env.Distribute('rib/rib2', rib2_sources)
 env.Distribute('rib/rib2', rib2_headers)
