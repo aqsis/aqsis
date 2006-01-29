@@ -32,30 +32,30 @@ START_NAMESPACE( libri2rib )
 
 class CqASCII : public CqOutput
 {
-protected:
-    void printHeader();
-    void printRequest( const char *, EqFunctions );
-    void printInteger( const RtInt );
-    void printFloat( const RtFloat );
-    void printString( std::string & );
-    void printSpace();
-    void printEOL();
+	protected:
+		void printHeader();
+		void printRequest( const char *, EqFunctions );
+		void printInteger( const RtInt );
+		void printFloat( const RtFloat );
+		void printString( std::string & );
+		void printSpace();
+		void printEOL();
 
-    void printArray ( RtInt n, RtInt *p );
-    void printArray ( RtInt n, RtFloat *p );
-    void printArray ( RtInt n, RtToken *p );
-    void printToken ( RtToken t );
-    void printCharP ( const char *c );
-    void print ( const char *c );
+		void printArray ( RtInt n, RtInt *p );
+		void printArray ( RtInt n, RtFloat *p );
+		void printArray ( RtInt n, RtToken *p );
+		void printToken ( RtToken t );
+		void printCharP ( const char *c );
+		void print ( const char *c );
 
-public:
-    CqASCII( const char *name, int fdesc,
-             SqOptions::EqCompression comp,
-             SqOptions::EqIndentation i, TqInt isize )
-            : CqOutput( name, fdesc, comp, i, isize )
-    {}
-    ~CqASCII()
-    {}
+	public:
+		CqASCII( const char *name, int fdesc,
+		         SqOptions::EqCompression comp,
+		         SqOptions::EqIndentation i, TqInt isize )
+				: CqOutput( name, fdesc, comp, i, isize )
+		{}
+		~CqASCII()
+		{}
 }
 ;
 

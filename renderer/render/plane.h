@@ -32,43 +32,46 @@
 
 START_NAMESPACE( Aqsis )
 
-class CqPlane 
+class CqPlane
 {
 	public:
-		CqPlane(const CqVector3D& point, const CqVector3D& normal) 
+		CqPlane(const CqVector3D& point, const CqVector3D& normal)
 		{
 			m_a = normal.x();
 			m_b = normal.y();
 			m_c = normal.z();
 			m_d = -(normal*point);
 		}
-    
-		CqPlane(TqFloat a, TqFloat b, TqFloat c, TqFloat d) 
+
+		CqPlane(TqFloat a, TqFloat b, TqFloat c, TqFloat d)
 		{
 			m_a = a;
 			m_b = b;
 			m_c = c;
 			m_d = d;
 		}
-		~CqPlane()	{}
-    
+		~CqPlane()
+		{}
+
 		enum EqHalfSpace
 		{
-			Space_Negative = -1,
-			Space_On_Plane = 0,
-			Space_Positive = 1,
-		};
+		    Space_Negative = -1,
+		    Space_On_Plane = 0,
+		    Space_Positive = 1,
+	};
 
 
-		EqHalfSpace whichSide(const CqVector3D& p) 
+		EqHalfSpace whichSide(const CqVector3D& p)
 		{
 			TqFloat d = m_a*p.x() + m_b*p.y() + m_c*p.z() + m_d;
-			if(d < 0)	return(Space_Negative);
-			if(d > 0)	return(Space_Positive);
+			if(d < 0)
+				return(Space_Negative);
+			if(d > 0)
+				return(Space_Positive);
 			return(Space_On_Plane);
 		}
-    
-    private:
+
+	private:
 		TqFloat m_a, m_b, m_c, m_d;
 };
 

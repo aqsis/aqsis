@@ -40,83 +40,83 @@ class CqParameter;
 
 struct IqBucket
 {
-    /** Get the bucket size in X
-     */
-    virtual	TqInt	Width() const = 0;
-    /** Get the bucket size in Y
-     */
-    virtual	TqInt	Height() const = 0;
-    /** Get the bucket size in X including filtering extra
-     */
-    virtual	TqInt	RealWidth() const = 0;
-    /** Get the bucket size in Y including filtering extra
-     */
-    virtual	TqInt	RealHeight() const = 0;
-    /** Get the position of this bucket in X
-     */
-    virtual	TqInt	XOrigin() const = 0;
-    /** Get the position of this bucket in Y
-     */
-    virtual	TqInt	YOrigin() const = 0;
+	/** Get the bucket size in X
+	 */
+	virtual	TqInt	Width() const = 0;
+	/** Get the bucket size in Y
+	 */
+	virtual	TqInt	Height() const = 0;
+	/** Get the bucket size in X including filtering extra
+	 */
+	virtual	TqInt	RealWidth() const = 0;
+	/** Get the bucket size in Y including filtering extra
+	 */
+	virtual	TqInt	RealHeight() const = 0;
+	/** Get the position of this bucket in X
+	 */
+	virtual	TqInt	XOrigin() const = 0;
+	/** Get the position of this bucket in Y
+	 */
+	virtual	TqInt	YOrigin() const = 0;
 
-    /** Get an element color from this bucket. If the requested address is not within this bucket, returns black.
-     * \param iXPos Screen position of the requested element.
-     * \param iYPos Screen position of the requested element.
-     */
-    virtual	CqColor Color( TqInt iXPos, TqInt iYPos ) = 0;
-    /** Get an element opacity from this bucket. If the requested address is not within this bucket, returns transparent.
-     * \param iXPos Screen position of the requested element.
-     * \param iYPos Screen position of the requested element.
-     */
-    virtual	CqColor Opacity( TqInt iXPos, TqInt iYPos ) = 0;
-    /** Get an element coverage from this bucket. If the requested address is not within this bucket, returns 0.
-     * \param iXPos Screen position of the requested element.
-     * \param iYPos Screen position of the requested element.
-     */
-    virtual	TqFloat Coverage( TqInt iXPos, TqInt iYPos ) = 0;
-    /** Get an element depth from this bucket. If the requested address is not within this bucket, returns FLT_MAX.
-     * \param iXPos Screen position of the requested element.
-     * \param iYPos Screen position of the requested element.
-     */
-    virtual	TqFloat Depth( TqInt iXPos, TqInt iYPos ) = 0;
-    /** Get a pointer to the sample array
-     * \param iXPos Screen position of the requested element.
-     * \param iYPos Screen position of the requested element.
-     */
-    virtual const TqFloat* Data( TqInt iXPos, TqInt iYPos ) = 0;
+	/** Get an element color from this bucket. If the requested address is not within this bucket, returns black.
+	 * \param iXPos Screen position of the requested element.
+	 * \param iYPos Screen position of the requested element.
+	 */
+	virtual	CqColor Color( TqInt iXPos, TqInt iYPos ) = 0;
+	/** Get an element opacity from this bucket. If the requested address is not within this bucket, returns transparent.
+	 * \param iXPos Screen position of the requested element.
+	 * \param iYPos Screen position of the requested element.
+	 */
+	virtual	CqColor Opacity( TqInt iXPos, TqInt iYPos ) = 0;
+	/** Get an element coverage from this bucket. If the requested address is not within this bucket, returns 0.
+	 * \param iXPos Screen position of the requested element.
+	 * \param iYPos Screen position of the requested element.
+	 */
+	virtual	TqFloat Coverage( TqInt iXPos, TqInt iYPos ) = 0;
+	/** Get an element depth from this bucket. If the requested address is not within this bucket, returns FLT_MAX.
+	 * \param iXPos Screen position of the requested element.
+	 * \param iYPos Screen position of the requested element.
+	 */
+	virtual	TqFloat Depth( TqInt iXPos, TqInt iYPos ) = 0;
+	/** Get a pointer to the sample array
+	 * \param iXPos Screen position of the requested element.
+	 * \param iYPos Screen position of the requested element.
+	 */
+	virtual const TqFloat* Data( TqInt iXPos, TqInt iYPos ) = 0;
 };
 
 struct IqDDManager
 {
 	virtual ~IqDDManager()
 	{}
-    /** Initialise the device manager.
-     */
-    virtual	TqInt	Initialise() = 0;
-    /** Shutdown the device manager.
-     */
-    virtual	TqInt	Shutdown() = 0;
-    /** Add a display request to the managers list.
-     */
-    virtual	TqInt	AddDisplay( const TqChar* name, const TqChar* type, const TqChar* mode, TqInt modeID, TqInt dataOffset, TqInt dataSize, std::map<std::string, void*> mapOfArguments ) = 0;
-    /** Clear all display requests from the managers list.
-     */
-    virtual	TqInt	ClearDisplays() = 0;
-    /** Open all displays in the managers list.
-     */
-    virtual	TqInt	OpenDisplays() = 0;
-    /** Close all displays in the managers list, rendering is finished.
-     */
-    virtual	TqInt	CloseDisplays() = 0;
-    /** Display a bucket.
-     */
-    virtual	TqInt	DisplayBucket( IqBucket* pBucket ) = 0;
-    /** Determine if any of the displays need the named shader variable.
-     */
-    virtual TqBool	fDisplayNeeds( const TqChar* var) = 0;
-    /** Determine if any of the displays need the named shader variable.
-     */
-    virtual TqInt	Uses( ) = 0;
+	/** Initialise the device manager.
+	 */
+	virtual	TqInt	Initialise() = 0;
+	/** Shutdown the device manager.
+	 */
+	virtual	TqInt	Shutdown() = 0;
+	/** Add a display request to the managers list.
+	 */
+	virtual	TqInt	AddDisplay( const TqChar* name, const TqChar* type, const TqChar* mode, TqInt modeID, TqInt dataOffset, TqInt dataSize, std::map<std::string, void*> mapOfArguments ) = 0;
+	/** Clear all display requests from the managers list.
+	 */
+	virtual	TqInt	ClearDisplays() = 0;
+	/** Open all displays in the managers list.
+	 */
+	virtual	TqInt	OpenDisplays() = 0;
+	/** Close all displays in the managers list, rendering is finished.
+	 */
+	virtual	TqInt	CloseDisplays() = 0;
+	/** Display a bucket.
+	 */
+	virtual	TqInt	DisplayBucket( IqBucket* pBucket ) = 0;
+	/** Determine if any of the displays need the named shader variable.
+	 */
+	virtual TqBool	fDisplayNeeds( const TqChar* var) = 0;
+	/** Determine if any of the displays need the named shader variable.
+	 */
+	virtual TqInt	Uses( ) = 0;
 };
 
 

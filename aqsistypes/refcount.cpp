@@ -60,77 +60,84 @@
 typedef std::list<CqRefCount*> RefCountList;
 typedef std::list<CqRefCount*>::iterator RefCountIterator;
 typedef std::list<CqRefCount*>::reverse_iterator RefCountRIterator;
-class RefCountTracker {
-public:
-    /**
-     * Adds a reference count object to the global list.
-     * This method should be called when the object is first
-     * created (ie: not each time ADDREF is called!).
-     *
-     * \param refCount	CqRefCount object to add.
-     */
-    static void addRefCountObj(CqRefCount *refCount) {
-        theTracker()->_addRefCountObj(refCount);
-    }
-    /**
-     * Removes a reference count object from the global list.
-     * This method should be called just before the reference
-     * count object is finally released, after reaching zero
-     * references (ie: not each time RELEASEREF is called!).
-     *
-     * \param refCount	CqRefCount object to remove.
-     */
-    static void removeRefCountObj(CqRefCount *refCount) {
-        theTracker()->_removeRefCountObj(refCount);
-    }
-    /**
-     * Reports on the list of un-released CqRefCount objects.
-     * Ideally, don't call this method directly - use the
-     * global-scope function report_refcounts() instead.
-     */
-    static void report() {
-        theTracker()->_report();
-    }
+class RefCountTracker
+{
+	public:
+		/**
+		 * Adds a reference count object to the global list.
+		 * This method should be called when the object is first
+		 * created (ie: not each time ADDREF is called!).
+		 *
+		 * \param refCount	CqRefCount object to add.
+		 */
+		static void addRefCountObj(CqRefCount *refCount)
+		{
+			theTracker()->_addRefCountObj(refCount);
+		}
+		/**
+		 * Removes a reference count object from the global list.
+		 * This method should be called just before the reference
+		 * count object is finally released, after reaching zero
+		 * references (ie: not each time RELEASEREF is called!).
+		 *
+		 * \param refCount	CqRefCount object to remove.
+		 */
+		static void removeRefCountObj(CqRefCount *refCount)
+		{
+			theTracker()->_removeRefCountObj(refCount);
+		}
+		/**
+		 * Reports on the list of un-released CqRefCount objects.
+		 * Ideally, don't call this method directly - use the
+		 * global-scope function report_refcounts() instead.
+		 */
+		static void report()
+		{
+			theTracker()->_report();
+		}
 
-private:
-    void _addRefCountObj(CqRefCount *refCount) {
-        m_refCountObjs.push_back(refCount);
-    }
-    void _removeRefCountObj(CqRefCount *refCount) {
-        m_refCountObjs.remove(refCount);
-    }
-    void _report() {
-        TqInt nObjs = 0;
-        // Go through the list of un-released reference count objects,
-        // dumping each one and deleting them.
-        RefCountIterator end = m_refCountObjs.end();
-        for (RefCountIterator i = m_refCountObjs.begin(); i != end; i++)
-        {
-            (*i)->dump();
-            nObjs++;
-        }
-        // Report on the number of un-referenced objects.
-        if (nObjs == 0)
-        {
-            std::cout << "There were no un-released CqRefCounts.\n";
-        }
-        else
-        {
-            std::cout << "There were " << nObjs
-            << " un-released CqRefCount-derived classes.\n";
-        }
-        std::cout.flush();
-    }
-private:
-    RefCountList m_refCountObjs;
-    static RefCountTracker *m_tracker;
+	private:
+		void _addRefCountObj(CqRefCount *refCount)
+		{
+			m_refCountObjs.push_back(refCount);
+		}
+		void _removeRefCountObj(CqRefCount *refCount)
+		{
+			m_refCountObjs.remove(refCount);
+		}
+		void _report()
+		{
+			TqInt nObjs = 0;
+			// Go through the list of un-released reference count objects,
+			// dumping each one and deleting them.
+			RefCountIterator end = m_refCountObjs.end();
+			for (RefCountIterator i = m_refCountObjs.begin(); i != end; i++)
+			{
+				(*i)->dump();
+				nObjs++;
+			}
+			// Report on the number of un-referenced objects.
+			if (nObjs == 0)
+			{
+				std::cout << "There were no un-released CqRefCounts.\n";
+			}
+			else
+			{
+				std::cout << "There were " << nObjs
+				<< " un-released CqRefCount-derived classes.\n";
+			}
+			std::cout.flush();
+		}
+	private:
+		RefCountList m_refCountObjs;
+		static RefCountTracker *m_tracker;
 
-    static RefCountTracker* theTracker()
-    {
-        if( m_tracker == NULL )
-            m_tracker = new RefCountTracker();
-        return( m_tracker );
-    }
+		static RefCountTracker* theTracker()
+		{
+			if( m_tracker == NULL )
+				m_tracker = new RefCountTracker();
+			return( m_tracker );
+		}
 };
 /**
  * The one global instance of RefCountTracker.
@@ -142,8 +149,9 @@ RefCountTracker *RefCountTracker::m_tracker = NULL;
  * once rendering has finished and all CqRefCount objects ought
  * to have been released.
  */
-void report_refcounts() {
-    RefCountTracker::report();
+void report_refcounts()
+{
+	RefCountTracker::report();
 }
 
 
@@ -159,178 +167,180 @@ void report_refcounts() {
  * can be tracked through it's AddRef() and Release() calls, to
  * allow easier debugging.
  */
-class RefCountRecord {
-public:
-    enum EventType {
-        AddRef, Release
-    };
-    /**
-     * Constructor.
-     *
-     * \param fileName	Name of the file where a reference
-     * 			counting event occurred.
-     * \param lineNumber	Line number from the file where
-     * 			the event occurred.
-     * \param eventType	Type of the event.
-     */
-    RefCountRecord(const TqChar *fileName, TqInt lineNumber, EventType eventType)
-    {
-        m_fileName   = Aqsis::CqString(fileName);
-        m_lineNumber = lineNumber;
-        m_eventType  = eventType;
-    }
-    /**
-     * Returns the filename from the record.  This is the
-     * name of the file where a reference counting event
-     * occurred.
-     */
-    const Aqsis::CqString fileName() const
-    {
-        return m_fileName;
-    }
-    /**
-     * Returns the line number from the record.  This is
-     * the number of the line from the file where the
-     * reference counting event occurred.
-     */
-    TqInt lineNumber() const
-    {
-        return m_lineNumber;
-    }
-    /**
-     * Returns the type of event that this record represents.
-     * This can be either an AddRef or a Release event.
-     */
-    EventType eventType() const
-    {
-        return m_eventType;
-    }
-    /**
-     * Returns a string representation of the event, which
-     * includes the event type, the filename and line number.
-     */
-    void dump() const
-    {
-        Aqsis::CqString str;
+class RefCountRecord
+{
+	public:
+		enum EventType {
+		    AddRef, Release
+	};
+		/**
+		 * Constructor.
+		 *
+		 * \param fileName	Name of the file where a reference
+		 * 			counting event occurred.
+		 * \param lineNumber	Line number from the file where
+		 * 			the event occurred.
+		 * \param eventType	Type of the event.
+		 */
+		RefCountRecord(const TqChar *fileName, TqInt lineNumber, EventType eventType)
+		{
+			m_fileName   = Aqsis::CqString(fileName);
+			m_lineNumber = lineNumber;
+			m_eventType  = eventType;
+		}
+		/**
+		 * Returns the filename from the record.  This is the
+		 * name of the file where a reference counting event
+		 * occurred.
+		 */
+		const Aqsis::CqString fileName() const
+		{
+			return m_fileName;
+		}
+		/**
+		 * Returns the line number from the record.  This is
+		 * the number of the line from the file where the
+		 * reference counting event occurred.
+		 */
+		TqInt lineNumber() const
+		{
+			return m_lineNumber;
+		}
+		/**
+		 * Returns the type of event that this record represents.
+		 * This can be either an AddRef or a Release event.
+		 */
+		EventType eventType() const
+		{
+			return m_eventType;
+		}
+		/**
+		 * Returns a string representation of the event, which
+		 * includes the event type, the filename and line number.
+		 */
+		void dump() const
+		{
+			Aqsis::CqString str;
 
-        // put in the event type
-        if (eventType() == AddRef)
-            std::cout << "AddRef:  ";
-        else if (eventType() == Release)
-            std::cout << "Release: ";
-        else
-            throw;
+			// put in the event type
+			if (eventType() == AddRef)
+				std::cout << "AddRef:  ";
+			else if (eventType() == Release)
+				std::cout << "Release: ";
+			else
+				throw;
 
-        // now put in the file name and line
-        std::cout << fileName() << ": " << lineNumber();
-    }
+			// now put in the file name and line
+			std::cout << fileName() << ": " << lineNumber();
+		}
 
-private:
-    // Name of the file where the reference count event
-    //  occurred.
-    Aqsis::CqString m_fileName;
-    // Line number from the file where the reference
-    //  count event occurred.
-    TqInt m_lineNumber;
-    // Type of the event (either an AddRef or a Release).
-    EventType m_eventType;
+	private:
+		// Name of the file where the reference count event
+		//  occurred.
+		Aqsis::CqString m_fileName;
+		// Line number from the file where the reference
+		//  count event occurred.
+		TqInt m_lineNumber;
+		// Type of the event (either an AddRef or a Release).
+		EventType m_eventType;
 
 };
 
 
 CqRefCount::CqRefCount() : m_cReferences( 0 ), m_addRefCalled( TqFalse )
 {
-    // Add the reference count object to the global list.
-    RefCountTracker::addRefCountObj( this );
+	// Add the reference count object to the global list.
+	RefCountTracker::addRefCountObj( this );
 }
 
 CqRefCount::CqRefCount( const CqRefCount& From ) : m_cReferences( 0 ), m_addRefCalled( TqFalse )
 {
 
-    // Add the new reference count object to the global list.
-    RefCountTracker::addRefCountObj( this );
+	// Add the new reference count object to the global list.
+	RefCountTracker::addRefCountObj( this );
 
 }
 
 CqRefCount::~CqRefCount()
 {
-    // Trap objects that never had ADDREF called, and remove them
-    //  from the global list since they will not have been removed
-    //  during RELEASEREF
-    if ( !m_addRefCalled ) {
-        std::cout << "Warning.  Class of type "
-        << className()
-        << " never had ADDREF called.\n";
-        RefCountTracker::removeRefCountObj( this );
-    }
-    // Trap cases where delete() is called on objects while they
-    //  still have active references.
-    else if ( m_cReferences != 0 )
-    {
-        std::cout << "Warning.  Deleting class of type "
-        << className()
-        << " with " << m_cReferences
-        << " references active.\n";
-    }
+	// Trap objects that never had ADDREF called, and remove them
+	//  from the global list since they will not have been removed
+	//  during RELEASEREF
+	if ( !m_addRefCalled )
+	{
+		std::cout << "Warning.  Class of type "
+		<< className()
+		<< " never had ADDREF called.\n";
+		RefCountTracker::removeRefCountObj( this );
+	}
+	// Trap cases where delete() is called on objects while they
+	//  still have active references.
+	else if ( m_cReferences != 0 )
+	{
+		std::cout << "Warning.  Deleting class of type "
+		<< className()
+		<< " with " << m_cReferences
+		<< " references active.\n";
+	}
 }
 
 TqInt CqRefCount::RefCount() const
 {
-    return ( m_cReferences );
+	return ( m_cReferences );
 }
 
 void CqRefCount::AddRef(const TqChar* file, TqInt line)
 {
-    // Increment the number of references
-    m_cReferences++;
+	// Increment the number of references
+	m_cReferences++;
 
-    // Set the flag indicating that AddRef has been called
-    m_addRefCalled = TqTrue;
+	// Set the flag indicating that AddRef has been called
+	m_addRefCalled = TqTrue;
 
-    // Record the AddRef event.
-    RefCountRecord *rcr = new RefCountRecord(
-                              file, line, RefCountRecord::AddRef);
-    m_records.push_back(rcr);
+	// Record the AddRef event.
+	RefCountRecord *rcr = new RefCountRecord(
+	                          file, line, RefCountRecord::AddRef);
+	m_records.push_back(rcr);
 
 }
 
 void CqRefCount::Release(const TqChar* file, TqInt line)
 {
-    // Decrement the number of references.
-    if (m_cReferences > 0)
-        m_cReferences--;
+	// Decrement the number of references.
+	if (m_cReferences > 0)
+		m_cReferences--;
 
-    // Record the Release event.
-    RefCountRecord *rcr = new RefCountRecord(
-                              file, line, RefCountRecord::Release);
-    m_records.push_back(rcr);
+	// Record the Release event.
+	RefCountRecord *rcr = new RefCountRecord(
+	                          file, line, RefCountRecord::Release);
+	m_records.push_back(rcr);
 
-    // Delete the reference counting class if there are no more
-    //  references to it.
-    assert( m_cReferences >= 0 );
-    if (m_cReferences == 0)
-    {
+	// Delete the reference counting class if there are no more
+	//  references to it.
+	assert( m_cReferences >= 0 );
+	if (m_cReferences == 0)
+	{
 
-        // Delete the reference counting records that are stored.
-        RecordIterator end = m_records.end();
-        for (RecordIterator i = m_records.begin(); i != end; i++)
-        {
-            // This deletes an object of type RefCountRecord*
-            assert( (*i) != NULL );
-            delete ( *i );
-            (*i) = NULL;
-        }
-        m_records.clear();
+		// Delete the reference counting records that are stored.
+		RecordIterator end = m_records.end();
+		for (RecordIterator i = m_records.begin(); i != end; i++)
+		{
+			// This deletes an object of type RefCountRecord*
+			assert( (*i) != NULL );
+			delete ( *i );
+			(*i) = NULL;
+		}
+		m_records.clear();
 
-        // Remove the reference count object from the global list
-        //  so that it is no longer included in the un-released
-        //  list.
-        RefCountTracker::removeRefCountObj( this );
+		// Remove the reference count object from the global list
+		//  so that it is no longer included in the un-released
+		//  list.
+		RefCountTracker::removeRefCountObj( this );
 
 
-        // free the memory
-        delete( this );
-    }
+		// free the memory
+		delete( this );
+	}
 }
 
 /**
@@ -339,19 +349,19 @@ void CqRefCount::Release(const TqChar* file, TqInt line)
  */
 void CqRefCount::dump() const
 {
-    std::cout << "Reference history for un-freed CqRefCount class of type: ";
-    std::cout << className() << "\n";
-    std::cout << "\n";
+	std::cout << "Reference history for un-freed CqRefCount class of type: ";
+	std::cout << className() << "\n";
+	std::cout << "\n";
 
-    ConstRecordIterator end = m_records.end();
-    for (ConstRecordIterator i = m_records.begin(); i != end; i++)
-    {
-        (*i)->dump();
-        std::cout << "\n";
-    }
+	ConstRecordIterator end = m_records.end();
+	for (ConstRecordIterator i = m_records.begin(); i != end; i++)
+	{
+		(*i)->dump();
+		std::cout << "\n";
+	}
 
-    std::cout << m_cReferences;
-    std::cout << " references were left over in excess.\n";
+	std::cout << m_cReferences;
+	std::cout << " references were left over in excess.\n";
 }
 
 #endif ///< #ifdef _DEBUG

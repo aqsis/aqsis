@@ -32,21 +32,18 @@ START_NAMESPACE( Aqsis )
 /// Required function that implements Class Factory design pattern for Raytrace libraries
 IqRaytrace* CreateRaytracer()
 {
-    return new CqRaytrace;
+	return new CqRaytrace;
 }
 
 
 void CqRaytrace::Initialise()
-{
-}
+{}
 
 void CqRaytrace::AddPrimitive(const boost::shared_ptr<IqSurface>& pSurface)
-{
-}
+{}
 
 void CqRaytrace::Finalise()
-{
-}
+{}
 
 
 //---------------------------------------------------------------------

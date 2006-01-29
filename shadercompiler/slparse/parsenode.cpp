@@ -119,11 +119,11 @@ const EqParseNodeType IqParseNodeMessagePassingFunction::m_ID = ParseNode_Messag
 
 CqParseNodeShader* CqParseNode::pShaderNode()
 {
-    // Search up in the hierarchy.
-    CqParseNode* pShader = this;
-    while( ( NULL != pShader ) && ( pShader->NodeType() != IqParseNodeShader::m_ID ) )
-        pShader = pShader->m_pParent;
-    return( static_cast<CqParseNodeShader*>( pShader ) );
+	// Search up in the hierarchy.
+	CqParseNode* pShader = this;
+	while( ( NULL != pShader ) && ( pShader->NodeType() != IqParseNodeShader::m_ID ) )
+		pShader = pShader->m_pParent;
+	return( static_cast<CqParseNodeShader*>( pShader ) );
 }
 
 
@@ -133,7 +133,7 @@ CqParseNodeShader* CqParseNode::pShaderNode()
 
 char* CqParseNode::TypeIdentifier( int Type )
 {
-    return ( gVariableTypeIdentifiers[ Type & Type_Mask ] );
+	return ( gVariableTypeIdentifiers[ Type & Type_Mask ] );
 }
 
 
@@ -143,13 +143,13 @@ char* CqParseNode::TypeIdentifier( int Type )
 
 TqInt CqParseNode::TypeFromIdentifier( char Id )
 {
-    TqInt i;
-    for ( i = 0; i < Type_Last; i++ )
-    {
-        if ( gVariableTypeIdentifiers[ i ][ 0 ] == Id || gVariableTypeIdentifiers[ i ][ 0 ] == tolower( Id ) )
-            return ( i );
-    }
-    return ( Type_Nil );
+	TqInt i;
+	for ( i = 0; i < Type_Last; i++ )
+	{
+		if ( gVariableTypeIdentifiers[ i ][ 0 ] == Id || gVariableTypeIdentifiers[ i ][ 0 ] == tolower( Id ) )
+			return ( i );
+	}
+	return ( Type_Nil );
 }
 
 
@@ -159,7 +159,7 @@ TqInt CqParseNode::TypeFromIdentifier( char Id )
 
 char* CqParseNode::TypeName( int Type )
 {
-    return ( gVariableTypeNames[ Type & Type_Mask ] );
+	return ( gVariableTypeNames[ Type & Type_Mask ] );
 }
 
 
@@ -169,28 +169,28 @@ char* CqParseNode::TypeName( int Type )
 
 TqInt	CqParseNode::FindCast( TqInt CurrType, TqInt* pTypes, TqInt Count, TqInt& index )
 {
-    // Check if the current type exists in the list first.
-    TqInt i;
-    for ( i = 0; i < Count; i++ )
-        if ( ( pTypes[ i ] & Type_Mask ) == ( CurrType & Type_Mask ) ) 
+	// Check if the current type exists in the list first.
+	TqInt i;
+	for ( i = 0; i < Count; i++ )
+		if ( ( pTypes[ i ] & Type_Mask ) == ( CurrType & Type_Mask ) )
 		{
 			index = i;
 			return ( static_cast<TqInt>( CurrType & Type_Mask ) );
 		}
 
-    // Else search for the best option.
-    TqInt Ret = Type_Nil;
-    TqInt Pri = 0;
-    for ( i = 0; i < Count; i++ )
-    {
-        if ( m_aaTypePriorities[ CurrType & Type_Mask ][ ( pTypes[ i ] & Type_Mask ) ] > Pri )
-        {
+	// Else search for the best option.
+	TqInt Ret = Type_Nil;
+	TqInt Pri = 0;
+	for ( i = 0; i < Count; i++ )
+	{
+		if ( m_aaTypePriorities[ CurrType & Type_Mask ][ ( pTypes[ i ] & Type_Mask ) ] > Pri )
+		{
 			index = i;
-            Ret = pTypes[ i ];
-            Pri = m_aaTypePriorities[ CurrType & Type_Mask ][ ( pTypes[ i ] & Type_Mask ) ];
-        }
-    }
-    return ( Ret );
+			Ret = pTypes[ i ];
+			Pri = m_aaTypePriorities[ CurrType & Type_Mask ][ ( pTypes[ i ] & Type_Mask ) ];
+		}
+	}
+	return ( Ret );
 }
 
 
@@ -199,38 +199,38 @@ TqInt	CqParseNode::FindCast( TqInt CurrType, TqInt* pTypes, TqInt Count, TqInt& 
 
 TqInt CqParseNodeFunctionCall::ResType() const
 {
-    // The return type of a function depends on its arguments.
-    return ( CqFuncDef::GetFunctionPtr( m_aFuncRef[ 0 ] ) ->Type() );
+	// The return type of a function depends on its arguments.
+	return ( CqFuncDef::GetFunctionPtr( m_aFuncRef[ 0 ] ) ->Type() );
 }
 
 
 const char*	CqParseNodeFunctionCall::strName() const
 {
-    CqFuncDef * pFuncDef = CqFuncDef::GetFunctionPtr( m_aFuncRef[ 0 ] );
-    if ( pFuncDef != 0 )
-        return ( pFuncDef->strName() );
-    else
-        return ( "" );
+	CqFuncDef * pFuncDef = CqFuncDef::GetFunctionPtr( m_aFuncRef[ 0 ] );
+	if ( pFuncDef != 0 )
+		return ( pFuncDef->strName() );
+	else
+		return ( "" );
 }
 
 
 const IqFuncDef* CqParseNodeFunctionCall::pFuncDef() const
 {
-    CqFuncDef * pFuncDef = CqFuncDef::GetFunctionPtr( m_aFuncRef[ 0 ] );
-    if ( pFuncDef != 0 )
-        return ( pFuncDef );
-    else
-        return ( 0 );
+	CqFuncDef * pFuncDef = CqFuncDef::GetFunctionPtr( m_aFuncRef[ 0 ] );
+	if ( pFuncDef != 0 )
+		return ( pFuncDef );
+	else
+		return ( 0 );
 }
 
 
 IqFuncDef* CqParseNodeFunctionCall::pFuncDef()
 {
-    CqFuncDef * pFuncDef = CqFuncDef::GetFunctionPtr( m_aFuncRef[ 0 ] );
-    if ( pFuncDef != 0 )
-        return ( pFuncDef );
-    else
-        return ( 0 );
+	CqFuncDef * pFuncDef = CqFuncDef::GetFunctionPtr( m_aFuncRef[ 0 ] );
+	if ( pFuncDef != 0 )
+		return ( pFuncDef );
+	else
+		return ( 0 );
 }
 
 
@@ -239,25 +239,25 @@ IqFuncDef* CqParseNodeFunctionCall::pFuncDef()
 
 TqInt CqParseNodeUnresolvedCall::ResType() const
 {
-    // The return type of a function depends on its arguments.
-    return ( m_aFuncDef.Type() );
+	// The return type of a function depends on its arguments.
+	return ( m_aFuncDef.Type() );
 }
 
 
 const char*	CqParseNodeUnresolvedCall::strName() const
 {
-    return ( m_aFuncDef.strName() );
+	return ( m_aFuncDef.strName() );
 }
 
 
 const IqFuncDef* CqParseNodeUnresolvedCall::pFuncDef() const
 {
-    return ( &m_aFuncDef );
+	return ( &m_aFuncDef );
 }
 
 IqFuncDef* CqParseNodeUnresolvedCall::pFuncDef()
 {
-    return ( &m_aFuncDef );
+	return ( &m_aFuncDef );
 }
 
 
@@ -265,10 +265,10 @@ IqFuncDef* CqParseNodeUnresolvedCall::pFuncDef()
 /// CqParseNodeVariable::CqParseNodeVariable
 
 CqParseNodeVariable::CqParseNodeVariable( SqVarRef VarRef ) :
-        CqParseNode(),
-        m_VarRef( VarRef )
+		CqParseNode(),
+		m_VarRef( VarRef )
 {
-    m_fVarying = ( CqVarDef::GetVariablePtr( VarRef ) ->Type() & Type_Varying ) != 0;
+	m_fVarying = ( CqVarDef::GetVariablePtr( VarRef ) ->Type() & Type_Varying ) != 0;
 }
 
 
@@ -276,10 +276,10 @@ CqParseNodeVariable::CqParseNodeVariable( SqVarRef VarRef ) :
 /// CqParseNodeVariable::CqParseNodeVariable
 
 CqParseNodeVariable::CqParseNodeVariable( CqParseNodeVariable* pVar ) :
-        CqParseNode(),
-        m_VarRef( pVar->m_VarRef )
+		CqParseNode(),
+		m_VarRef( pVar->m_VarRef )
 {
-    m_fVarying = ( CqVarDef::GetVariablePtr( m_VarRef ) ->Type() & Type_Varying ) != 0;
+	m_fVarying = ( CqVarDef::GetVariablePtr( m_VarRef ) ->Type() & Type_Varying ) != 0;
 }
 
 
@@ -289,7 +289,7 @@ CqParseNodeVariable::CqParseNodeVariable( CqParseNodeVariable* pVar ) :
 
 const char* CqParseNodeVariable::strName() const
 {
-    return ( CqVarDef::GetVariablePtr( m_VarRef ) ->strName() );
+	return ( CqVarDef::GetVariablePtr( m_VarRef ) ->strName() );
 }
 
 
@@ -299,11 +299,11 @@ const char* CqParseNodeVariable::strName() const
 
 TqInt CqParseNodeVariable::ResType() const
 {
-    IqVarDef * pVD = IqVarDef::GetVariablePtr( m_VarRef );
-    if ( pVD )
-        return ( pVD->Type() & Type_Mask );
-    else
-        return ( Type_Nil );
+	IqVarDef * pVD = IqVarDef::GetVariablePtr( m_VarRef );
+	if ( pVD )
+		return ( pVD->Type() & Type_Mask );
+	else
+		return ( Type_Nil );
 }
 
 
@@ -312,7 +312,7 @@ TqInt CqParseNodeVariable::ResType() const
 /// Constructor from a variable reference.
 
 CqParseNodeVariableArray::CqParseNodeVariableArray( SqVarRef VarRef ) :
-        CqParseNodeVariable( VarRef )
+		CqParseNodeVariable( VarRef )
 {}
 
 
@@ -324,11 +324,11 @@ CqParseNodeVariableArray::CqParseNodeVariableArray( SqVarRef VarRef ) :
 
 
 CqParseNodeVariableArray::CqParseNodeVariableArray( CqParseNodeVariableArray* pVar ) :
-        CqParseNodeVariable( pVar )
+		CqParseNodeVariable( pVar )
 {
-    m_fVarying = ( CqVarDef::GetVariablePtr( m_VarRef ) ->Type() & Type_Varying ) != 0;
-    if ( pVar->m_pChild )
-        m_pChild = pVar->m_pChild->Clone( this );
+	m_fVarying = ( CqVarDef::GetVariablePtr( m_VarRef ) ->Type() & Type_Varying ) != 0;
+	if ( pVar->m_pChild )
+		m_pChild = pVar->m_pChild->Clone( this );
 }
 
 
@@ -338,7 +338,7 @@ CqParseNodeVariableArray::CqParseNodeVariableArray( CqParseNodeVariableArray* pV
 
 TqInt CqParseNodeAssign::ResType() const
 {
-    return ( CqVarDef::GetVariablePtr( m_VarRef ) ->Type() );
+	return ( CqVarDef::GetVariablePtr( m_VarRef ) ->Type() );
 }
 
 
@@ -348,30 +348,30 @@ TqInt CqParseNodeAssign::ResType() const
 
 TqInt CqParseNodeMathOp::ResType() const
 {
-    CqParseNode * pOperandA = m_pChild;
-    CqParseNode* pOperandB = m_pChild->pNext();
-    assert( pOperandA != 0 && pOperandB != 0 );
+	CqParseNode * pOperandA = m_pChild;
+	CqParseNode* pOperandB = m_pChild->pNext();
+	assert( pOperandA != 0 && pOperandB != 0 );
 
-    TqInt ResAType = pOperandA->ResType();
-    TqInt ResBType = pOperandB->ResType();
+	TqInt ResAType = pOperandA->ResType();
+	TqInt ResBType = pOperandB->ResType();
 
-    switch ( m_Operator )
-    {
-    case Op_Dot:
-        return ( Type_Float );
-    case Op_Mul:
-    case Op_Div:
-    case Op_Add:
-    case Op_Sub:
-    default:
-        // TODO: Should check here for valid types.
-        if ( ( ResAType & Type_Mask ) == Type_Point ||
-                ( ResAType & Type_Mask ) == Type_Color )
-            return ( ResAType );
-        else
-            return ( ResBType );
-        break;
-    }
+	switch ( m_Operator )
+	{
+			case Op_Dot:
+			return ( Type_Float );
+			case Op_Mul:
+			case Op_Div:
+			case Op_Add:
+			case Op_Sub:
+			default:
+			// TODO: Should check here for valid types.
+			if ( ( ResAType & Type_Mask ) == Type_Point ||
+			        ( ResAType & Type_Mask ) == Type_Color )
+				return ( ResAType );
+			else
+				return ( ResBType );
+			break;
+	}
 }
 
 

@@ -25,6 +25,7 @@
 
 #include <aqsis.h>
 
+#include <iostream>
 #include <logging.h>
 #include <logging_streambufs.h>
 #include "sstring.h"
@@ -47,16 +48,10 @@ using namespace Aqsis;
 #include "ndspy.h"
 
 
-#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX) || defined(SCONS_BUILD)
 #define	ZFILE_HEADER		"Aqsis ZFile" VERSION_STR
-#else // AQSIS_SYSTEM_WIN32
-#define ZFILE_HEADER "Aqsis ZFile" VERSION
-#endif // !AQSIS_SYSTEM_WIN32
 #define	SHADOWMAP_HEADER	"Shadow"
 
-#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX) || defined(SCONS_BUILD)
 #include	<version.h>
-#endif
 
 #include "display.h"
 
@@ -155,10 +150,20 @@ void SaveAsShadowMap(const std::string& filename, SqDisplayInstance* image, char
 			TIFFSetField( pshadow, TIFFTAG_COMPRESSION, image->m_compression );
 			TIFFSetField( pshadow, TIFFTAG_DATETIME, datetime);
 
+			TqDouble minz = FLT_MAX;
+			TqFloat* ptdata = reinterpret_cast<TqFloat*>(image->m_data) ;
+			for (TqInt y = 0; y < image->m_height; y++)
+				for (TqInt x = 0; x < image->m_width; x++)
+				{
+					TqDouble value = (TqDouble) ptdata[y*image->m_width + x];
+					if (value < minz) minz = value;	
+				}
+			TIFFSetField( pshadow, TIFFTAG_SMINSAMPLEVALUE, minz );
 
 			TqInt tsize = twidth * tlength;
 			TqInt tperrow = ( image->m_width + twidth - 1 ) / twidth;
 			TqFloat* ptile = static_cast<TqFloat*>( _TIFFmalloc( tsize * sizeof( TqFloat ) ) );
+
 
 			if ( ptile != NULL )
 			{
@@ -168,7 +173,7 @@ void SaveAsShadowMap(const std::string& filename, SqDisplayInstance* image, char
 				{
 					TqInt x = ( itile % tperrow ) * twidth;
 					TqInt y = ( itile / tperrow ) * tlength;
-					TqFloat* ptdata = reinterpret_cast<TqFloat*>(image->m_data) + ( ( y * image->m_width ) + x ) * image->m_iFormatCount;
+					ptdata = reinterpret_cast<TqFloat*>(image->m_data) + ( ( y * image->m_width ) + x ) * image->m_iFormatCount;
 					// Clear the tile to black.
 					memset( ptile, 0, tsize * sizeof( TqFloat ) );
 					for ( TqUlong i = 0; i < tlength; i++ )
@@ -178,8 +183,11 @@ void SaveAsShadowMap(const std::string& filename, SqDisplayInstance* image, char
 							if ( ( x + j ) < image->m_width && ( y + i ) < image->m_height )
 							{
 								TqInt ii;
-								for ( ii = 0; ii < image->m_iFormatCount; ii++ )
-									ptile[ ( i * twidth * image->m_iFormatCount ) + ( ( ( j * image->m_iFormatCount ) + ii ) ) ] = ptdata[ ( ( j * image->m_iFormatCount ) + ii ) ];
+								for ( ii = 0; ii < image->m_iFormatCount; ii++ ) 
+								{
+									TqFloat value = ptdata[ ( ( j * image->m_iFormatCount ) + ii ) ];
+									ptile[ ( i * twidth * image->m_iFormatCount ) + ( ( ( j * image->m_iFormatCount ) + ii ) ) ] = value;
+								}
 							}
 						}
 						ptdata += ( image->m_width * image->m_iFormatCount );
@@ -189,6 +197,7 @@ void SaveAsShadowMap(const std::string& filename, SqDisplayInstance* image, char
 				TIFFWriteDirectory( pshadow );
 
 			}
+
 
 			TIFFClose( pshadow );
 		}
@@ -219,10 +228,12 @@ void WriteTIFF(const std::string& filename, SqDisplayInstance* image)
 		TqInt nSecs = difftime(long_time, start);
 		sprintf(mydescription,"%d secs", nSecs);
 		start = long_time;
-	} else {
+	}
+	else
+	{
 		strcpy(mydescription, description);
 	}
-	
+
 
 	// Set common tags
 	// If in "shadowmap" mode, write as a shadowmap.
@@ -402,7 +413,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 	SqDisplayInstance* pImage;
 
 	pImage = new SqDisplayInstance;
-        flagstuff->flags = 0;
+	flagstuff->flags = 0;
 
 	time(&start);
 	if(pImage)
@@ -414,15 +425,19 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 		if(strcmp(drivername, "file")==0 || strcmp(drivername, "tiff")==0)
 			pImage->m_imageType = Type_File;
 #ifndef	AQSIS_NO_FLTK
+
 		else if(strcmp(drivername, "framebuffer")==0)
 			pImage->m_imageType = Type_Framebuffer;
 #endif // AQSIS_NO_FLTK
+
 		else if(strcmp(drivername, "zfile")==0)
 			pImage->m_imageType = Type_ZFile;
 #ifndef AQSIS_NO_FLTK
+
 		else if(strcmp(drivername, "zframebuffer")==0)
 			pImage->m_imageType = Type_ZFramebuffer;
 #endif // AQSIS_NO_FLTK
+
 		else if(strcmp(drivername, "shadow")==0)
 			pImage->m_imageType = Type_Shadowmap;
 		else
@@ -452,12 +467,12 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 		if(pImage->m_imageType == Type_File || pImage->m_imageType == Type_Framebuffer )
 		{
 			PtDspyDevFormat outFormat[] =
-				{
-					{"r", widestFormat},
-					{"g", widestFormat},
-					{"b", widestFormat},
-					{"a", widestFormat},
-				};
+			    {
+			        {"r", widestFormat},
+			        {"g", widestFormat},
+			        {"b", widestFormat},
+			        {"a", widestFormat},
+			    };
 			PtDspyError err = DspyReorderFormatting(iFormatCount, format, MIN(iFormatCount,4), outFormat);
 			if( err != PkDspyErrorNone )
 			{
@@ -507,6 +522,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			Fl::visual(FL_RGB);
 			pImage->m_theWindow->show();
 #endif // AQSIS_NO_FLTK
+
 		}
 		else
 		{
@@ -549,6 +565,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			Fl::visual(FL_RGB);
 			pImage->m_theWindow->show();
 #endif // AQSIS_NO_FLTK
+
 		}
 
 
@@ -572,6 +589,14 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			else if ( strstr( compression, "packbits" ) != 0 )
 				pImage->m_compression = COMPRESSION_PACKBITS;
 		}
+		
+		// Check if the requested compression format is available in libtiff, if not resort to "none"
+		if(!TIFFIsCODECConfigured(pImage->m_compression))
+		{
+			/* Aqsis::log() << "Compression type " << compression << " not supported by the libtiff implementation" << std::endl; */
+			pImage->m_compression = COMPRESSION_NONE;
+		}
+
 		int quality;
 		if( DspyFindIntInParamList("quality", &quality, paramCount, parameters ) == PkDspyErrorNone )
 			pImage->m_quality = quality;
@@ -589,11 +614,13 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 
 		// Determine if we are creating a combined shadow map for ambient occlusion.
 		float append;
-		if( DspyFindFloatInParamList("append", &append, paramCount, parameters ) == PkDspyErrorNone )
+		if( DspyFindFloatInParamList("append", &append, paramCount, parameters )
+		        == PkDspyErrorNone )
 			pImage->m_append = (append != 0.0f)? 1:0;
 
 		char *ydesc = NULL;
-		if (DspyFindStringInParamList("description", &ydesc, paramCount, parameters ) == PkDspyErrorNone )
+		if (DspyFindStringInParamList("description", &ydesc, paramCount, parameters )
+		        == PkDspyErrorNone )
 		{
 			// Do something about it; the user will want to add its copyright notice.
 			if (ydesc && *ydesc)
@@ -700,6 +727,7 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 				pdatarow += bucketlinelen;
 			}
 #endif // AQSIS_NO_FLTK
+
 		}
 	}
 
@@ -708,16 +736,17 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 #ifndef AQSIS_NO_FLTK
 		pImage->m_uiImageWidget->damage(1, xmin__, ymin__, xmaxplus1__-xmin__, ymaxplus1__-ymin__);
 		Fl::check();
-      	TqFloat percent = (TqFloat) ((xmaxplus1__-1) + (TqFloat)((ymaxplus1__-1) * pImage->m_width)) / (TqFloat) (pImage->m_width * pImage->m_height);
-      	percent *= 100.0f;
-      	percent = CLAMP(percent, 0.0f, 100.0f);
+		TqFloat percent = (TqFloat) ((xmaxplus1__-1) + (TqFloat)((ymaxplus1__-1) * pImage->m_width)) / (TqFloat) (pImage->m_width * pImage->m_height);
+		percent *= 100.0f;
+		percent = CLAMP(percent, 0.0f, 100.0f);
 		std::stringstream strTitle;
 		if (percent < 99.9f)
-			strTitle << pImage->m_filename << ": " << std::setprecision(1) << std::setw(3) << percent << "% complete" << std::ends;
+			strTitle << pImage->m_filename << ": " << std::setprecision(3) << std::setw(6) << percent << "% complete" << std::ends;
 		else
 			strTitle << pImage->m_filename << std::ends;
 		pImage->m_theWindow->label(strTitle.str().c_str());
 #endif // AQSIS_NO_FLTK
+
 	}
 	return(PkDspyErrorNone);
 }
@@ -737,7 +766,7 @@ PtDspyError DspyImageClose(PtDspyImageHandle image)
 	// Delete the image structure.
 	if (pImage->m_data)
 		free(pImage->m_data);
- 	if (pImage->m_hostname)
+	if (pImage->m_hostname)
 		free(pImage->m_hostname);
 	if(pImage->m_imageType == Type_ZFramebuffer)
 		free(pImage->m_zfbdata);
@@ -748,7 +777,7 @@ PtDspyError DspyImageClose(PtDspyImageHandle image)
 	}
 	delete[](pImage->m_filename);
 	delete(pImage);
-	
+
 
 	return(PkDspyErrorNone);
 }
@@ -790,14 +819,15 @@ PtDspyError DspyImageDelayClose(PtDspyImageHandle image)
 
 				const TqFloat dynamicrange = maxdepth - mindepth;
 
-				/*		std::cerr << info << g_Filename << " total samples: " << totalsamples << std::endl;
-						std::cerr << info << g_Filename << " depth samples: " << samples << std::endl;
-						std::cerr << info << g_Filename << " coverage: " << static_cast<TqFloat>( samples ) / static_cast<TqFloat>( totalsamples ) << std::endl;
-						std::cerr << info << g_Filename << " minimum depth: " << mindepth << std::endl;
-						std::cerr << info << g_Filename << " maximum depth: " << maxdepth << std::endl;
-						std::cerr << info << g_Filename << " dynamic range: " << dynamicrange << std::endl;
-						std::cerr << info << g_Filename << " average depth: " << totaldepth / static_cast<TqFloat>( samples ) << std::endl;
+				/*		Aqsis::log() << info << g_Filename << " total samples: " << totalsamples << std::endl;
+						Aqsis::log() << info << g_Filename << " depth samples: " << samples << std::endl;
+						Aqsis::log() << info << g_Filename << " coverage: " << static_cast<TqFloat>( samples ) / static_cast<TqFloat>( totalsamples ) << std::endl;
+						Aqsis::log() << info << g_Filename << " minimum depth: " << mindepth << std::endl;
+						Aqsis::log() << info << g_Filename << " maximum depth: " << maxdepth << std::endl;
+						Aqsis::log() << info << g_Filename << " dynamic range: " << dynamicrange << std::endl;
+						Aqsis::log() << info << g_Filename << " average depth: " << totaldepth / static_cast<TqFloat>( samples ) << std::endl;
 				*/
+
 				const TqInt linelength = pImage->m_width * 3;
 				for ( TqInt y = 0;
 				        y < pImage->m_height;
@@ -829,6 +859,7 @@ PtDspyError DspyImageDelayClose(PtDspyImageHandle image)
 			}
 			Fl::run();
 #endif // AQSIS_NO_FLTK
+
 		}
 		return(DspyImageClose(image));
 	}

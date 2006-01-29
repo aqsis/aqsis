@@ -41,48 +41,48 @@ START_NAMESPACE( Aqsis )
  * \param Count Integer value count, for arrays.
  */
 CqParameter::CqParameter( const char* strName, TqInt Count ) :
-        m_strName( strName ),
-        m_Count( Count )
+		m_strName( strName ),
+		m_Count( Count )
 {
-    /// \note Had to remove this as paramters are now created as part of the Renderer construction, so the
-    ///		  renderer context isn't ready yet.
-    //	QGetRenderContext() ->Stats().IncParametersAllocated();
+	/// \note Had to remove this as paramters are now created as part of the Renderer construction, so the
+	///		  renderer context isn't ready yet.
+	//	QGetRenderContext() ->Stats().IncParametersAllocated();
 
 	assert( Count >= 1 );
-    
-    STATS_INC( PRM_created );
-    STATS_INC( PRM_current );
-    TqInt cPRM = STATS_GETI( PRM_current );
-    TqInt cPeak = STATS_GETI( PRM_peak );
 
-    STATS_SETI( PRM_peak, cPRM > cPeak ? cPRM : cPeak );
-    m_hash = CqString::hash(strName);
+	STATS_INC( PRM_created );
+	STATS_INC( PRM_current );
+	TqInt cPRM = STATS_GETI( PRM_current );
+	TqInt cPeak = STATS_GETI( PRM_peak );
+
+	STATS_SETI( PRM_peak, cPRM > cPeak ? cPRM : cPeak );
+	m_hash = CqString::hash(strName);
 }
 
 /** Copy constructor
  */
 CqParameter::CqParameter( const CqParameter& From ) :
-        m_strName( From.m_strName ),
-        m_Count( From.m_Count ),
-        m_hash(From.m_hash)
+		m_strName( From.m_strName ),
+		m_Count( From.m_Count ),
+		m_hash(From.m_hash)
 {
-    /// \note Had to remove this as paramters are now created as part of the Renderer construction, so the
-    ///		  renderer context isn't ready yet.
-    //	QGetRenderContext() ->Stats().IncParametersAllocated();
-    STATS_INC( PRM_created );
-    STATS_INC( PRM_current );
-    TqInt cPRM = STATS_GETI( PRM_current );
-    TqInt cPeak = STATS_GETI( PRM_peak );
+	/// \note Had to remove this as paramters are now created as part of the Renderer construction, so the
+	///		  renderer context isn't ready yet.
+	//	QGetRenderContext() ->Stats().IncParametersAllocated();
+	STATS_INC( PRM_created );
+	STATS_INC( PRM_current );
+	TqInt cPRM = STATS_GETI( PRM_current );
+	TqInt cPeak = STATS_GETI( PRM_peak );
 
-    STATS_SETI( PRM_peak, cPRM > cPeak ? cPRM : cPeak );
+	STATS_SETI( PRM_peak, cPRM > cPeak ? cPRM : cPeak );
 }
 
 CqParameter::~CqParameter()
 {
-    /// \note Had to remove this as paramters are now created as part of the Renderer construction, so the
-    ///		  renderer context isn't ready yet.
-    //	QGetRenderContext() ->Stats().IncParametersDeallocated();
-    STATS_DEC( PRM_current );
+	/// \note Had to remove this as paramters are now created as part of the Renderer construction, so the
+	///		  renderer context isn't ready yet.
+	//	QGetRenderContext() ->Stats().IncParametersDeallocated();
+	STATS_DEC( PRM_current );
 }
 
 
@@ -276,14 +276,14 @@ CqParameter* ( *gVariableCreateFuncsFaceVaryingArray[] ) ( const char* strName, 
  */
 
 CqNamedParameterList::CqNamedParameterList( const CqNamedParameterList& From ) :
-        m_strName( From.m_strName ),
-        m_hash( From.m_hash)
+		m_strName( From.m_strName ),
+		m_hash( From.m_hash)
 {
-    TqInt i = From.m_aParameters.size();
-    while ( i-- > 0 )
-    {
-        m_aParameters.push_back( From.m_aParameters[ i ] ->Clone() );
-    }
+	TqInt i = From.m_aParameters.size();
+	while ( i-- > 0 )
+	{
+		m_aParameters.push_back( From.m_aParameters[ i ] ->Clone() );
+	}
 }
 
 

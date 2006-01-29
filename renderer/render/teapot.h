@@ -21,7 +21,7 @@
 /** \file
 		\brief Implements RiGeometry "teapot" option.
 		\author T. Burge (tburge@affine.org)
-*/ 
+*/
 /*    References:
  *          [CROW87]  Crow, F. C. The Origins of the Teapot. 
  *                    IEEE Computer Graphics and Applications, 
@@ -52,58 +52,58 @@ START_NAMESPACE( Aqsis )
 
 class CqTeapot : public CqSurface
 {
-public:
-    CqTeapot( TqBool addCrowBase );
-    CqTeapot( const CqTeapot& From )
-    {
-        *this = From;
-    }
-    virtual	~CqTeapot()
-    {}
+	public:
+		CqTeapot( TqBool addCrowBase );
+		CqTeapot( const CqTeapot& From )
+		{
+			*this = From;
+		}
+		virtual	~CqTeapot()
+		{}
 
-    virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime = 0 );
+		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime = 0 );
 
-    /** Determine whether the passed surface is valid to be used as a
-     *  frame in motion blur for this surface.
-     */
-    virtual TqBool	IsMotionBlurMatch( CqBasicSurface* pSurf )
-    {
-        return( TqFalse );
-    }
+		/** Determine whether the passed surface is valid to be used as a
+		 *  frame in motion blur for this surface.
+		 */
+		virtual TqBool	IsMotionBlurMatch( CqBasicSurface* pSurf )
+		{
+			return( TqFalse );
+		}
 
-    virtual	TqUint	cUniform() const
-    {
-        return ( 1 );
-    }
-    virtual	TqUint	cVarying() const
-    {
-        return ( 4 );
-    }
-    virtual	TqUint	cVertex() const
-    {
-        return ( 16 );
-    }
-    virtual	TqUint	cFaceVarying() const
-    {
-        /// \todo Must work out what this value should be.
-        return ( 1 );
-    }
+		virtual	TqUint	cUniform() const
+		{
+			return ( 1 );
+		}
+		virtual	TqUint	cVarying() const
+		{
+			return ( 4 );
+		}
+		virtual	TqUint	cVertex() const
+		{
+			return ( 16 );
+		}
+		virtual	TqUint	cFaceVarying() const
+		{
+			/// \todo Must work out what this value should be.
+			return ( 1 );
+		}
 
-    boost::shared_ptr<CqSurface> pPatchMeshBicubic[ 7 ];
-    TqInt cNbrPatchMeshBicubic;
+		boost::shared_ptr<CqSurface> pPatchMeshBicubic[ 7 ];
+		TqInt cNbrPatchMeshBicubic;
 
-    // Overrides from CqSurface
-    virtual	CqBound	Bound() const;
-    virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits );
+		// Overrides from CqSurface
+		virtual	CqBound	Bound() const;
+		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits );
 
-    CqTeapot&	operator=( const CqTeapot& From );
+		CqTeapot&	operator=( const CqTeapot& From );
 
-private:
-    TqBool	m_CrowBase;			///< Utah teapot was missing a bottom.  F. Crow added one.
+	private:
+		TqBool	m_CrowBase;			///< Utah teapot was missing a bottom.  F. Crow added one.
 
-protected:
-    CqMatrix	m_matTx;		///< Transformation matrix from object to camera.
-    CqMatrix	m_matITTx;		///< Inverse transpose transformation matrix, for transforming normals.
+	protected:
+		CqMatrix	m_matTx;		///< Transformation matrix from object to camera.
+		CqMatrix	m_matITTx;		///< Inverse transpose transformation matrix, for transforming normals.
 }
 ;
 

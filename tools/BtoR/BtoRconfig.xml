@@ -1,0 +1,92 @@
+<BtoR>
+	<Renderers>
+		<Renderer Name="Aqsis">
+			<Commands>
+				<Command Type="Renderer" Exe="Aqsis">
+				<Command Type="Textures" Exe="Teqser">
+			</Commands>
+			<Options>
+					<Option Name="searchpatharchive" Desc="SearchPath for Archives">
+						<Keyword Name="searchpath"/>
+						<Keyword Name="archive"/>
+						<Value Name="path" Type="String"/>
+					</Option>
+					<Option Name="searchpathdisplay" Desc="Search Path for Display Drivers">
+						<Keyword Name="searchpath"/>
+						<Keyword Name="display"/>
+						<Value Name="path" Type="String"/>						
+					</Option>
+					<Option Name="searchpathdsolibs" Desc="Search Path for DSO libs">
+						<Keyword Name="searchpath"/>
+						<Keyword Name="dsolibs"/>
+						<Value Name="path" Type="String"/>
+					</Option>
+					<Option Name="searchpathshader" Desc="Search Path for Shaders">
+						<Keyword Name="searchpath"/>
+						<Keyword Name="shader"/>
+						<Value Name="path" Type="String"/>
+					</Option>
+					<Option Name="searchpathplugin" Desc="Search Path for plugin">
+						<Keyword Name="searchpath"/>
+						<Keyword Name="plugin"/>
+						<Value Name="path" Type="String"/>
+					</Option>
+					<Option Name="searchpathprocedural" Desc="Search Path for procedurals">
+						<Keyword Name="searchpath"/>
+						<Keyword Name="procedural"/>
+						<Value Name="path" Type="String"/>
+					</Option>
+					<Option Name="searchpathtexture" Desc="Search Path for textures">
+						<Keyword Name="searchpath"/>
+						<Keyword Name="texture"/>
+						<Value Name="path" Type="String"/>
+					</Option>
+					<Option Name="limitsint[2]" Desc="Dimensions of a rendering bucket">
+						<Keyword Name="limits"/>
+						<Keyword Name="integer[2] bucketsize"/>
+						<Value Name="bucketsize" Type="int" Default="16, 16"/>
+					</Option>
+					<Option Name="gridsize" Desc="Micropolygons per grid">
+						<Keyword Name="limits"/>
+						<Keyword Name="integer gridsize"/>
+						<Value Name="gridsize" Type="int" Default="256"/>
+					</Option>
+					<Option Name="limitsintmodulo" Desc="WTF? Someone fix this">
+						<Keyword Name="limits"/>
+						<Keyword Name="integer bucketmodulo"/>
+						<Value Name="bucketmodulo" Type="int" Default="-1"/>
+					<Option Name="limitstexmem"/>
+						<Keyword Name="limits"/>
+						<Keyword Name="integer texturememory"/>
+						<Value Name="texturememory" Type="int" Default="8192"/>
+					</Option>
+					<Option Name="limitscolorthreshold">
+						<Keyword Name="limits"/>
+						<Keyword Name="color zthreshold"/>
+						<Value Name="zthreshold" Type="color" Default="1, 1, 1"/>
+					</Option>
+					<Option Name="texture">
+						<Keyword Name="texture"/>
+						<Keyword Name="lerp"/>
+						<Value Name="texturelerp" Type="int" Default="1"/>
+					</Option>
+					<Option Name="Shadowbias">
+						<Keyword Name="shadow"/>
+						<Keyword Name="float bias"/>
+						<Value Name="shadowbias" Type="float" Default="0.0"/>
+					</Option>
+					<Option Name="Shadowbias0">
+						<Keyword Name="shadow"/>
+						<Keyword Name="float bias0"/>
+						<Value Name="shadowbias" Type="float" Default="0.0"/>
+					</Option>
+					<Option Name="Shadowbias1">
+						<Keyword Name="shadow"/>
+						<Keyword Name="float bias1"/>
+						<Value Name="shadowbias" Type="float" Default="0.0"/>
+					</Option>
+			<Opions>
+			
+		</Renderer>
+	</Renderers>
+</BtoR>

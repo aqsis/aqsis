@@ -22,7 +22,7 @@
 /** \file
 		\brief Implements RiGeometry "teapot" option.
 		\author T. Burge (tburge@affine.org)
-*/ 
+*/
 /*    References:
  *          [CROW87]  Crow, F. C. The Origins of the Teapot. 
  *                    IEEE Computer Graphics and Applications, 
@@ -428,186 +428,186 @@ static CqVector3D Patch07[ 13*2 ] = { /*u=13 v=2 */
 
 CqTeapot::CqTeapot( TqBool addCrowBase ) : m_CrowBase( addCrowBase )
 {
-    int i;
-    TqInt lUses;
-    boost::shared_ptr<CqSurfacePatchMeshBicubic> pSurface( new CqSurfacePatchMeshBicubic( 13, 10, RI_TRUE, RI_TRUE ) );
-    lUses = pSurface->Uses();
+	int i;
+	TqInt lUses;
+	boost::shared_ptr<CqSurfacePatchMeshBicubic> pSurface( new CqSurfacePatchMeshBicubic( 13, 10, RI_TRUE, RI_TRUE ) );
+	lUses = pSurface->Uses();
 
 
-    // Fill in default values for all primitive variables not explicitly specified.
-    // Fill in primitive variables specified.
-    pSurface->AddPrimitiveVariable( new CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>( "P", 1 ) );
-    pSurface->P() ->SetSize( 13 * 10 );
-    for ( i = 0; i < 13*10; i++ )
-        pSurface->P()->pValue( i )[0] = Patch01[ i ];
-    pSurface->SetDefaultPrimitiveVariables();
-    pSurface->SetSurfaceParameters( *this );
+	// Fill in default values for all primitive variables not explicitly specified.
+	// Fill in primitive variables specified.
+	pSurface->AddPrimitiveVariable( new CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>( "P", 1 ) );
+	pSurface->P() ->SetSize( 13 * 10 );
+	for ( i = 0; i < 13*10; i++ )
+		pSurface->P()->pValue( i )[0] = Patch01[ i ];
+	pSurface->SetDefaultPrimitiveVariables();
+	pSurface->SetSurfaceParameters( *this );
 
-    pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<CqColor, type_color, CqColor>( "Cs" ) );
-    pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<CqColor, type_color, CqColor>( "Os" ) );
-    pSurface->Cs() ->SetSize( 130 );
-    pSurface->Os() ->SetSize( 130 );
-    for ( i = 0; i < 13*10; i++ )
-    {
-        pSurface->Cs()->pValue( i )[0] = m_pAttributes->GetColorAttribute( "System", "Color" ) [ 0 ];
-        pSurface->Os()->pValue( i )[0] = m_pAttributes->GetColorAttribute( "System", "Opacity" ) [ 0 ];
-    }
-
-
-    this->pPatchMeshBicubic[ 0 ] = pSurface;
-
-    pSurface = boost::shared_ptr<CqSurfacePatchMeshBicubic>( new CqSurfacePatchMeshBicubic( 13, 7, RI_TRUE, RI_TRUE ) );
-    lUses = pSurface->Uses();
-
-    // Fill in default values for all primitive variables not explicitly specified.
-    // Fill in primitive variables specified.
-    pSurface->AddPrimitiveVariable( new CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>( "P", 1 ) );
-    pSurface->P() ->SetSize( 13 * 7 );
-    for ( i = 0; i < 13*7; i++ )
-        pSurface->P()->pValue( i )[0] = Patch02[ i ] ;
-    pSurface->SetDefaultPrimitiveVariables();
-    pSurface->SetSurfaceParameters( *this );
-
-    pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<CqColor, type_color, CqColor>( "Cs" ) );
-    pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<CqColor, type_color, CqColor>( "Os" ) );
-    pSurface->Cs() ->SetSize( 13 * 7 );
-    pSurface->Os() ->SetSize( 13 * 7 );
-    for ( i = 0; i < 13*7; i++ )
-    {
-        pSurface->Cs()->pValue( i )[0] = m_pAttributes->GetColorAttribute( "System", "Color" ) [ 0 ];
-        pSurface->Os()->pValue( i )[0] = m_pAttributes->GetColorAttribute( "System", "Opacity" ) [ 0 ];
-    }
-    this->pPatchMeshBicubic[ 1 ] = pSurface;
-
-    pSurface = boost::shared_ptr<CqSurfacePatchMeshBicubic>( new CqSurfacePatchMeshBicubic( 4, 7, RI_TRUE, RI_TRUE ) );
-    lUses = pSurface->Uses();
-
-    // Fill in default values for all primitive variables not explicitly specified.
-    // Fill in primitive variables specified.
-    pSurface->AddPrimitiveVariable( new CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>( "P", 1 ) );
-    pSurface->P() ->SetSize( 4 * 7 );
-    for ( i = 0; i < 4*7; i++ )
-        pSurface->P()->pValue( i )[0] = Patch03[ i ] ;
-    pSurface->SetDefaultPrimitiveVariables();
-    pSurface->SetSurfaceParameters( *this );
-
-    pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<CqColor, type_color, CqColor>( "Cs" ) );
-    pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<CqColor, type_color, CqColor>( "Os" ) );
-    pSurface->Cs() ->SetSize( 4 * 7 );
-    pSurface->Os() ->SetSize( 4 * 7 );
-    for ( i = 0; i < 4*7; i++ )
-    {
-        pSurface->Cs()->pValue( i )[0] = m_pAttributes->GetColorAttribute( "System", "Color" ) [ 0 ];
-        pSurface->Os()->pValue( i )[0] = m_pAttributes->GetColorAttribute( "System", "Opacity" ) [ 0 ];
-    }
-    this->pPatchMeshBicubic[ 2 ] = pSurface;
-
-    pSurface = boost::shared_ptr<CqSurfacePatchMeshBicubic>( new CqSurfacePatchMeshBicubic( 4, 7, RI_TRUE, RI_TRUE ) );
-    lUses = pSurface->Uses();
-
-    // Fill in default values for all primitive variables not explicitly specified.
-    // Fill in primitive variables specified.
-    pSurface->AddPrimitiveVariable( new CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>( "P", 1 ) );
-    pSurface->P() ->SetSize( 4 * 7 );
-    for ( i = 0; i < 4*7; i++ )
-        pSurface->P()->pValue( i )[0] = Patch04[ i ] ;
-    pSurface->SetDefaultPrimitiveVariables();
-    pSurface->SetSurfaceParameters( *this );
-
-    pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<CqColor, type_color, CqColor>( "Cs" ) );
-    pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<CqColor, type_color, CqColor>( "Os" ) );
-    pSurface->Cs() ->SetSize( 4 * 7 );
-    pSurface->Os() ->SetSize( 4 * 7 );
-    for ( i = 0; i < 4*7; i++ )
-    {
-        pSurface->Cs()->pValue( i )[0] = m_pAttributes->GetColorAttribute( "System", "Color" ) [ 0 ];
-        pSurface->Os()->pValue( i )[0] = m_pAttributes->GetColorAttribute( "System", "Opacity" ) [ 0 ];
-    }
-    this->pPatchMeshBicubic[ 3 ] = pSurface;
-
-    pSurface = boost::shared_ptr<CqSurfacePatchMeshBicubic>( new CqSurfacePatchMeshBicubic( 4, 7, RI_TRUE, RI_TRUE ) );
-    lUses = pSurface->Uses();
-
-    // Fill in default values for all primitive variables not explicitly specified.
-    // Fill in primitive variables specified.
-    pSurface->AddPrimitiveVariable( new CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>( "P", 1 ) );
-    pSurface->P() ->SetSize( 4 * 7 );
-    for ( i = 0; i < 4*7; i++ )
-        pSurface->P()->pValue( i )[0] = Patch05[ i ] ;
-    pSurface->SetDefaultPrimitiveVariables();
-    pSurface->SetSurfaceParameters( *this );
-
-    pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<CqColor, type_color, CqColor>( "Cs" ) );
-    pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<CqColor, type_color, CqColor>( "Os" ) );
-    pSurface->Cs() ->SetSize( 4 * 7 );
-    pSurface->Os() ->SetSize( 4 * 7 );
-    for ( i = 0; i < 4*7; i++ )
-    {
-        pSurface->Cs()->pValue( i )[0] = m_pAttributes->GetColorAttribute( "System", "Color" ) [ 0 ];
-        pSurface->Os()->pValue( i )[0] = m_pAttributes->GetColorAttribute( "System", "Opacity" ) [ 0 ];
-    }
-    this->pPatchMeshBicubic[ 4 ] = pSurface;
-
-    pSurface = boost::shared_ptr<CqSurfacePatchMeshBicubic>( new CqSurfacePatchMeshBicubic( 4, 7, RI_TRUE, RI_TRUE ) );
-    lUses = pSurface->Uses();
-
-    // Fill in default values for all primitive variables not explicitly specified.
-    // Fill in primitive variables specified.
-    pSurface->AddPrimitiveVariable( new CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>( "P", 1 ) );
-    pSurface->P() ->SetSize( 4 * 7 );
-    for ( i = 0; i < 4*7; i++ )
-        pSurface->P()->pValue( i )[0] = Patch06[ i ] ;
-    pSurface->SetDefaultPrimitiveVariables();
-    pSurface->SetSurfaceParameters( *this );
-
-    pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<CqColor, type_color, CqColor>( "Cs" ) );
-    pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<CqColor, type_color, CqColor>( "Os" ) );
-    pSurface->Cs() ->SetSize( 4 * 7 );
-    pSurface->Os() ->SetSize( 4 * 7 );
-    for ( i = 0; i < 4*7; i++ )
-    {
-        pSurface->Cs()->pValue( i )[0] = m_pAttributes->GetColorAttribute( "System", "Color" ) [ 0 ];
-        pSurface->Os()->pValue( i )[0] = m_pAttributes->GetColorAttribute( "System", "Opacity" ) [ 0 ];
-    }
-    this->pPatchMeshBicubic[ 5 ] = pSurface;
-    this->cNbrPatchMeshBicubic = 6;
-    // bottom
-    if ( m_CrowBase )
-    {
-        pSurface = boost::shared_ptr<CqSurfacePatchMeshBicubic>( new CqSurfacePatchMeshBicubic( 13, 4, RI_TRUE, RI_TRUE ) );
-        lUses = pSurface->Uses();
-
-        // Fill in default values for all primitive variables not explicitly specified.
-        // Fill in primitive variables specified.
-        pSurface->AddPrimitiveVariable( new CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>( "P", 1 ) );
-        pSurface->P() ->SetSize( 13 * 4 );
-        for ( i = 0; i < 13*4; i++ )
-        {
-
-            if ( i < 13 )
-                pSurface->P()->pValue( i )[0] = CqVector3D( 0.0, 0.0, 0.0 );
-            else if ( i < 39 )
-                pSurface->P()->pValue( i )[0] = Patch01[ i - 13 ];
-            else
-                pSurface->P()->pValue( i )[0] = Patch01[ i - 13 ] * 0.85;
+	pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<CqColor, type_color, CqColor>( "Cs" ) );
+	pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<CqColor, type_color, CqColor>( "Os" ) );
+	pSurface->Cs() ->SetSize( 130 );
+	pSurface->Os() ->SetSize( 130 );
+	for ( i = 0; i < 13*10; i++ )
+	{
+		pSurface->Cs()->pValue( i )[0] = m_pAttributes->GetColorAttribute( "System", "Color" ) [ 0 ];
+		pSurface->Os()->pValue( i )[0] = m_pAttributes->GetColorAttribute( "System", "Opacity" ) [ 0 ];
+	}
 
 
-        }
-        pSurface->SetDefaultPrimitiveVariables();
-        pSurface->SetSurfaceParameters( *this );
+	this->pPatchMeshBicubic[ 0 ] = pSurface;
 
-        pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<CqColor, type_color, CqColor>( "Cs" ) );
-        pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<CqColor, type_color, CqColor>( "Os" ) );
-        pSurface->Cs() ->SetSize( 13 * 4 );
-        pSurface->Os() ->SetSize( 13 * 4 );
-        for ( i = 0; i < 13*4; i++ )
-        {
-            pSurface->Cs()->pValue( i )[0] = m_pAttributes->GetColorAttribute( "System", "Color" ) [ 0 ];
-            pSurface->Os()->pValue( i )[0] = m_pAttributes->GetColorAttribute( "System", "Opacity" ) [ 0 ];
-        }
-        this->pPatchMeshBicubic[ 6 ] = pSurface;
-        this->cNbrPatchMeshBicubic = 7;
-    }
+	pSurface = boost::shared_ptr<CqSurfacePatchMeshBicubic>( new CqSurfacePatchMeshBicubic( 13, 7, RI_TRUE, RI_TRUE ) );
+	lUses = pSurface->Uses();
+
+	// Fill in default values for all primitive variables not explicitly specified.
+	// Fill in primitive variables specified.
+	pSurface->AddPrimitiveVariable( new CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>( "P", 1 ) );
+	pSurface->P() ->SetSize( 13 * 7 );
+	for ( i = 0; i < 13*7; i++ )
+		pSurface->P()->pValue( i )[0] = Patch02[ i ] ;
+	pSurface->SetDefaultPrimitiveVariables();
+	pSurface->SetSurfaceParameters( *this );
+
+	pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<CqColor, type_color, CqColor>( "Cs" ) );
+	pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<CqColor, type_color, CqColor>( "Os" ) );
+	pSurface->Cs() ->SetSize( 13 * 7 );
+	pSurface->Os() ->SetSize( 13 * 7 );
+	for ( i = 0; i < 13*7; i++ )
+	{
+		pSurface->Cs()->pValue( i )[0] = m_pAttributes->GetColorAttribute( "System", "Color" ) [ 0 ];
+		pSurface->Os()->pValue( i )[0] = m_pAttributes->GetColorAttribute( "System", "Opacity" ) [ 0 ];
+	}
+	this->pPatchMeshBicubic[ 1 ] = pSurface;
+
+	pSurface = boost::shared_ptr<CqSurfacePatchMeshBicubic>( new CqSurfacePatchMeshBicubic( 4, 7, RI_TRUE, RI_TRUE ) );
+	lUses = pSurface->Uses();
+
+	// Fill in default values for all primitive variables not explicitly specified.
+	// Fill in primitive variables specified.
+	pSurface->AddPrimitiveVariable( new CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>( "P", 1 ) );
+	pSurface->P() ->SetSize( 4 * 7 );
+	for ( i = 0; i < 4*7; i++ )
+		pSurface->P()->pValue( i )[0] = Patch03[ i ] ;
+	pSurface->SetDefaultPrimitiveVariables();
+	pSurface->SetSurfaceParameters( *this );
+
+	pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<CqColor, type_color, CqColor>( "Cs" ) );
+	pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<CqColor, type_color, CqColor>( "Os" ) );
+	pSurface->Cs() ->SetSize( 4 * 7 );
+	pSurface->Os() ->SetSize( 4 * 7 );
+	for ( i = 0; i < 4*7; i++ )
+	{
+		pSurface->Cs()->pValue( i )[0] = m_pAttributes->GetColorAttribute( "System", "Color" ) [ 0 ];
+		pSurface->Os()->pValue( i )[0] = m_pAttributes->GetColorAttribute( "System", "Opacity" ) [ 0 ];
+	}
+	this->pPatchMeshBicubic[ 2 ] = pSurface;
+
+	pSurface = boost::shared_ptr<CqSurfacePatchMeshBicubic>( new CqSurfacePatchMeshBicubic( 4, 7, RI_TRUE, RI_TRUE ) );
+	lUses = pSurface->Uses();
+
+	// Fill in default values for all primitive variables not explicitly specified.
+	// Fill in primitive variables specified.
+	pSurface->AddPrimitiveVariable( new CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>( "P", 1 ) );
+	pSurface->P() ->SetSize( 4 * 7 );
+	for ( i = 0; i < 4*7; i++ )
+		pSurface->P()->pValue( i )[0] = Patch04[ i ] ;
+	pSurface->SetDefaultPrimitiveVariables();
+	pSurface->SetSurfaceParameters( *this );
+
+	pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<CqColor, type_color, CqColor>( "Cs" ) );
+	pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<CqColor, type_color, CqColor>( "Os" ) );
+	pSurface->Cs() ->SetSize( 4 * 7 );
+	pSurface->Os() ->SetSize( 4 * 7 );
+	for ( i = 0; i < 4*7; i++ )
+	{
+		pSurface->Cs()->pValue( i )[0] = m_pAttributes->GetColorAttribute( "System", "Color" ) [ 0 ];
+		pSurface->Os()->pValue( i )[0] = m_pAttributes->GetColorAttribute( "System", "Opacity" ) [ 0 ];
+	}
+	this->pPatchMeshBicubic[ 3 ] = pSurface;
+
+	pSurface = boost::shared_ptr<CqSurfacePatchMeshBicubic>( new CqSurfacePatchMeshBicubic( 4, 7, RI_TRUE, RI_TRUE ) );
+	lUses = pSurface->Uses();
+
+	// Fill in default values for all primitive variables not explicitly specified.
+	// Fill in primitive variables specified.
+	pSurface->AddPrimitiveVariable( new CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>( "P", 1 ) );
+	pSurface->P() ->SetSize( 4 * 7 );
+	for ( i = 0; i < 4*7; i++ )
+		pSurface->P()->pValue( i )[0] = Patch05[ i ] ;
+	pSurface->SetDefaultPrimitiveVariables();
+	pSurface->SetSurfaceParameters( *this );
+
+	pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<CqColor, type_color, CqColor>( "Cs" ) );
+	pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<CqColor, type_color, CqColor>( "Os" ) );
+	pSurface->Cs() ->SetSize( 4 * 7 );
+	pSurface->Os() ->SetSize( 4 * 7 );
+	for ( i = 0; i < 4*7; i++ )
+	{
+		pSurface->Cs()->pValue( i )[0] = m_pAttributes->GetColorAttribute( "System", "Color" ) [ 0 ];
+		pSurface->Os()->pValue( i )[0] = m_pAttributes->GetColorAttribute( "System", "Opacity" ) [ 0 ];
+	}
+	this->pPatchMeshBicubic[ 4 ] = pSurface;
+
+	pSurface = boost::shared_ptr<CqSurfacePatchMeshBicubic>( new CqSurfacePatchMeshBicubic( 4, 7, RI_TRUE, RI_TRUE ) );
+	lUses = pSurface->Uses();
+
+	// Fill in default values for all primitive variables not explicitly specified.
+	// Fill in primitive variables specified.
+	pSurface->AddPrimitiveVariable( new CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>( "P", 1 ) );
+	pSurface->P() ->SetSize( 4 * 7 );
+	for ( i = 0; i < 4*7; i++ )
+		pSurface->P()->pValue( i )[0] = Patch06[ i ] ;
+	pSurface->SetDefaultPrimitiveVariables();
+	pSurface->SetSurfaceParameters( *this );
+
+	pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<CqColor, type_color, CqColor>( "Cs" ) );
+	pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<CqColor, type_color, CqColor>( "Os" ) );
+	pSurface->Cs() ->SetSize( 4 * 7 );
+	pSurface->Os() ->SetSize( 4 * 7 );
+	for ( i = 0; i < 4*7; i++ )
+	{
+		pSurface->Cs()->pValue( i )[0] = m_pAttributes->GetColorAttribute( "System", "Color" ) [ 0 ];
+		pSurface->Os()->pValue( i )[0] = m_pAttributes->GetColorAttribute( "System", "Opacity" ) [ 0 ];
+	}
+	this->pPatchMeshBicubic[ 5 ] = pSurface;
+	this->cNbrPatchMeshBicubic = 6;
+	// bottom
+	if ( m_CrowBase )
+	{
+		pSurface = boost::shared_ptr<CqSurfacePatchMeshBicubic>( new CqSurfacePatchMeshBicubic( 13, 4, RI_TRUE, RI_TRUE ) );
+		lUses = pSurface->Uses();
+
+		// Fill in default values for all primitive variables not explicitly specified.
+		// Fill in primitive variables specified.
+		pSurface->AddPrimitiveVariable( new CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>( "P", 1 ) );
+		pSurface->P() ->SetSize( 13 * 4 );
+		for ( i = 0; i < 13*4; i++ )
+		{
+
+			if ( i < 13 )
+				pSurface->P()->pValue( i )[0] = CqVector3D( 0.0, 0.0, 0.0 );
+			else if ( i < 39 )
+				pSurface->P()->pValue( i )[0] = Patch01[ i - 13 ];
+			else
+				pSurface->P()->pValue( i )[0] = Patch01[ i - 13 ] * 0.85;
+
+
+		}
+		pSurface->SetDefaultPrimitiveVariables();
+		pSurface->SetSurfaceParameters( *this );
+
+		pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<CqColor, type_color, CqColor>( "Cs" ) );
+		pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<CqColor, type_color, CqColor>( "Os" ) );
+		pSurface->Cs() ->SetSize( 13 * 4 );
+		pSurface->Os() ->SetSize( 13 * 4 );
+		for ( i = 0; i < 13*4; i++ )
+		{
+			pSurface->Cs()->pValue( i )[0] = m_pAttributes->GetColorAttribute( "System", "Color" ) [ 0 ];
+			pSurface->Os()->pValue( i )[0] = m_pAttributes->GetColorAttribute( "System", "Opacity" ) [ 0 ];
+		}
+		this->pPatchMeshBicubic[ 6 ] = pSurface;
+		this->cNbrPatchMeshBicubic = 7;
+	}
 
 
 }
@@ -619,12 +619,12 @@ CqTeapot::CqTeapot( TqBool addCrowBase ) : m_CrowBase( addCrowBase )
 
 CqTeapot&	CqTeapot::operator=( const CqTeapot& From )
 {
-    CqSurface::operator=( From );
-    m_CrowBase = From.m_CrowBase;
-    m_matTx = From.m_matTx;
-    m_matITTx = From.m_matITTx;
+	CqSurface::operator=( From );
+	m_CrowBase = From.m_CrowBase;
+	m_matTx = From.m_matTx;
+	m_matITTx = From.m_matITTx;
 
-    return ( *this );
+	return ( *this );
 }
 
 //---------------------------------------------------------------------
@@ -633,8 +633,8 @@ CqTeapot&	CqTeapot::operator=( const CqTeapot& From )
 
 void	CqTeapot::Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime )
 {
-    m_matTx *= matTx;
-    m_matITTx *= matITTx;
+	m_matTx *= matTx;
+	m_matITTx *= matITTx;
 }
 
 
@@ -644,12 +644,12 @@ void	CqTeapot::Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const 
 
 CqBound	CqTeapot::Bound() const
 {
-    CqVector3D vecMin( -3.000, -2.0, 0.0 );
-    CqVector3D vecMax( 3.525, 2.0, ( m_CrowBase ? 3.15 : 3.15 - 0.15 /* remove bottom */ ) );
+	CqVector3D vecMin( -3.000, -2.0, 0.0 );
+	CqVector3D vecMax( 3.525, 2.0, ( m_CrowBase ? 3.15 : 3.15 - 0.15 /* remove bottom */ ) );
 
-    CqBound	B( vecMin, vecMax );
-    B.Transform( m_matTx );
-    return ( AdjustBoundForTransformationMotion( B ) );
+	CqBound	B( vecMin, vecMax );
+	B.Transform( m_matTx );
+	return ( AdjustBoundForTransformationMotion( B ) );
 }
 
 //---------------------------------------------------------------------
@@ -660,7 +660,7 @@ TqInt CqTeapot::Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits 
 {
 
 
-    return 0;
+	return 0;
 }
 
 

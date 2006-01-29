@@ -1,0 +1,50 @@
+Orientation "lh"
+#Format 200 150 1
+PixelSamples 1 1
+ShadingRate 1.0
+Option "statistics" "endofframe" [1]
+Option "searchpath" "shader" ["../../shaders:&"]
+
+FrameBegin 0
+Display "teapotgeom.xpm" "xpm" "rgba" 
+
+# Camera name: "Kamera01"
+Projection "perspective" "fov" [36.0]
+Rotate 180 0 1 0
+ConcatTransform [1.0 0.0 0.0 0  0.0 0.404164 -0.914687 0  0.0 0.914687 0.404164 0  0.955721 -5.19201 -440.081 1]
+
+WorldBegin
+Surface "plastic"
+
+# Object "Punktlicht01"
+TransformBegin
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  204.187 -437.336 53.0255 1]
+Attribute "light" "shadows" ["off"]
+LightSource "pointlight" 2 "intensity" [150000]
+TransformEnd
+
+# Object "Punktlicht02"
+TransformBegin
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  -320.159 -429.109 -87.5622 1]
+Attribute "light" "shadows" ["off"]
+LightSource "pointlight" 3 "intensity" [100000]
+TransformEnd
+
+# Object "Punktlicht03"
+TransformBegin
+ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  121.927 4.77862 516.121 1]
+Attribute "light" "shadows" ["off"]
+LightSource "pointlight" 4 "intensity" [100000]
+TransformEnd
+
+# Object "Teekanne01"
+AttributeBegin
+Color 0.603922 0.603922 0.898039
+ConcatTransform [0.906308 -0.422618 0.0 0  0.422618 0.906308 0.0 0  0.0 0.0 1.0 0  -3.28462 -0.956571 -55.6973 1]
+Scale 50 50 50
+Surface "matte"
+Geometry "teapot"
+#Sphere 2.0 -2.0 2.0 360.0
+AttributeEnd
+WorldEnd
+FrameEnd

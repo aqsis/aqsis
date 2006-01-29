@@ -47,21 +47,39 @@ aqsistypes_headers = Split("""
 	vector3d.h
 	vector4d.h""")
 
+
 if 'win32' == env['PLATFORM']:
-	aqsistypes_sources = aqsistypes_sources + ['win32/file_system.cpp']
-elif 'darwin' == env['PLATFORM']:
-	aqsistypes_sources = aqsistypes_sources + ['posix/file_system.cpp']
-elif 'posix' == env['PLATFORM']:
-	aqsistypes_sources = aqsistypes_sources + ['posix/file_system.cpp']
+	SConscript('win32/SConscript')
+else:
+	SConscript('posix/SConscript')
+
+aqsistypes_install_headers = Split('''
+	aqsis.h
+	aqsis_types.h
+	bitvector.h
+	color.h
+	exception.h
+	file.h
+	list.h
+	matrix.h
+	random.h
+	refcount.h
+	sstring.h
+	vector2d.h
+	vector3d.h
+	vector4d.h
+	''')
+
+Import('platform_sources')
+aqsistypes_sources = aqsistypes_sources + platform_sources
 
 # Set any platform specific options for this target
 env.UseTargetOptions('aqsistypes')
 
 aqsistypes = env.Library('aqsistypes', aqsistypes_sources)
 env.Install('$LIBDIR', aqsistypes)
+env.Install('$INCLUDEDIR',aqsistypes_install_headers)
 
 env.Distribute('aqsistypes', aqsistypes_sources)
 env.Distribute('aqsistypes', aqsistypes_headers)
 env.Distribute('aqsistypes', 'SConscript')
-SConscript('posix/SConscript')
-SConscript('win32/SConscript')

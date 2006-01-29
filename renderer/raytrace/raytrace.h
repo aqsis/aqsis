@@ -6,7 +6,7 @@
  *
  *	Last change by:		$Author$
  *	Last change date:	$Date$
- */ 
+ */
 //------------------------------------------------------------------------------
 
 
@@ -21,10 +21,10 @@ START_NAMESPACE( Aqsis )
 
 struct CqRaytrace : public IqRaytrace
 {
-			 CqRaytrace()
+	CqRaytrace()
 	{}
-    virtual ~CqRaytrace()
-    {}
+	virtual ~CqRaytrace()
+	{}
 
 
 	// Interface functions overridden from IqRaytrace

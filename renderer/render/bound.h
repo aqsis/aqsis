@@ -44,219 +44,241 @@ START_NAMESPACE( Aqsis )
 
 class CqBound
 {
-public:
-    CqBound( TqFloat* pBounds )
-    {
-        if ( pBounds )
-        {
-            m_vecMin.x( pBounds[ 0 ] );	m_vecMin.y( pBounds[ 2 ] );	m_vecMin.z( pBounds[ 4 ] );
-            m_vecMax.x( pBounds[ 1 ] );	m_vecMax.y( pBounds[ 3 ] );	m_vecMax.z( pBounds[ 5 ] );
-        }
-    }
+	public:
+		CqBound( TqFloat* pBounds )
+		{
+			if ( pBounds )
+			{
+				m_vecMin.x( pBounds[ 0 ] );
+				m_vecMin.y( pBounds[ 2 ] );
+				m_vecMin.z( pBounds[ 4 ] );
+				m_vecMax.x( pBounds[ 1 ] );
+				m_vecMax.y( pBounds[ 3 ] );
+				m_vecMax.z( pBounds[ 5 ] );
+			}
+		}
 
-    CqBound( TqFloat XMin = FLT_MAX, TqFloat YMin = FLT_MAX, TqFloat ZMin = FLT_MAX, TqFloat XMax = -FLT_MAX, TqFloat YMax = -FLT_MAX, TqFloat ZMax = -FLT_MAX )
-    {
-        m_vecMin.x( XMin );	m_vecMin.y( YMin );	m_vecMin.z( ZMin );
-        m_vecMax.x( XMax );	m_vecMax.y( YMax );	m_vecMax.z( ZMax );
-    }
+		CqBound( TqFloat XMin = FLT_MAX, TqFloat YMin = FLT_MAX, TqFloat ZMin = FLT_MAX, TqFloat XMax = -FLT_MAX, TqFloat YMax = -FLT_MAX, TqFloat ZMax = -FLT_MAX )
+		{
+			m_vecMin.x( XMin );
+			m_vecMin.y( YMin );
+			m_vecMin.z( ZMin );
+			m_vecMax.x( XMax );
+			m_vecMax.y( YMax );
+			m_vecMax.z( ZMax );
+		}
 
-    CqBound( const CqVector3D& vecMin, const CqVector3D& vecMax )
-    {
-        m_vecMin = vecMin;
-        m_vecMax = vecMax;
-    }
+		CqBound( const CqVector3D& vecMin, const CqVector3D& vecMax )
+		{
+			m_vecMin = vecMin;
+			m_vecMax = vecMax;
+		}
 
-    CqBound( const CqBound& From );
-    ~CqBound()
-    {}
+		CqBound( const CqBound& From );
+		~CqBound()
+		{}
 
-    const	CqVector3D&	vecMin() const
-    {
-        return ( m_vecMin );
-    }
+		const	CqVector3D&	vecMin() const
+		{
+			return ( m_vecMin );
+		}
 
-    CqVector3D&	vecMin()
-    {
-        return ( m_vecMin );
-    }
+		CqVector3D&	vecMin()
+		{
+			return ( m_vecMin );
+		}
 
-    const	CqVector3D&	vecMax() const
-    {
-        return ( m_vecMax );
-    }
+		const	CqVector3D&	vecMax() const
+		{
+			return ( m_vecMax );
+		}
 
-    CqVector3D&	vecMax()
-    {
-        return ( m_vecMax );
-    }
+		CqVector3D&	vecMax()
+		{
+			return ( m_vecMax );
+		}
 
-	CqVector3D vecCross() const
-	{
-		return( m_vecMax - m_vecMin );
-	}
+		CqVector3D vecCross() const
+		{
+			return( m_vecMax - m_vecMin );
+		}
 
-	TqFloat	Volume() const
-	{
-		return sqrt( Volume2() );
-	}
+		TqFloat	Volume() const
+		{
+			return sqrt( Volume2() );
+		}
 
-	TqFloat Volume2() const
-	{
-		return( vecCross().Magnitude2() );
-	}
+		TqFloat Volume2() const
+		{
+			return( vecCross().Magnitude2() );
+		}
 
-    CqBound&	operator=( const CqBound& From );
+		CqBound&	operator=( const CqBound& From );
 
-    void		Transform( const CqMatrix&	matTransform );
-    CqBound		Combine( const CqBound& bound );
-    CqBound&	Encapsulate( const CqBound& bound );
-    CqBound&	Encapsulate( const CqVector3D& v );
-    CqBound&	Encapsulate( const CqVector2D& v );
+		void		Transform( const CqMatrix&	matTransform );
+		CqBound		Combine( const CqBound& bound );
+		CqBound&	Encapsulate( const CqBound& bound );
+		CqBound&	Encapsulate( const CqVector3D& v );
+		CqBound&	Encapsulate( const CqVector2D& v );
 
-    TqBool	Contains2D( const CqBound& b ) const
-    {
-        if ( ( b.vecMin().x() >= vecMin().x() && b.vecMax().x() <= vecMax().x() ) &&
-             ( b.vecMin().y() >= vecMin().y() && b.vecMax().y() <= vecMax().y() ) )
-            return ( TqTrue );
-        else
-            return ( TqFalse );
-    }
-    TqBool	Contains3D( const CqVector3D& v ) const
-    {
-        if ( ( v.x() >= m_vecMin.x() && v.x() <= m_vecMax.x() ) &&
-                ( v.y() >= m_vecMin.y() && v.y() <= m_vecMax.y() ) &&
-                ( v.z() >= m_vecMin.z() && v.z() <= m_vecMax.z() ) )
-            return ( TqTrue );
-        else
-            return ( TqFalse );
-    }
-    TqBool	Contains2D( const CqVector2D& v ) const
-    {
-        if ( ( v.x() < m_vecMin.x() || v.x() > m_vecMax.x() ) ||
-                ( v.y() < m_vecMin.y() || v.y() > m_vecMax.y() ) )
-            return ( TqFalse );
-        else
-            return ( TqTrue );
-    }
+		TqBool	Contains2D( const CqBound& b ) const
+		{
+			if ( ( b.vecMin().x() >= vecMin().x() && b.vecMax().x() <= vecMax().x() ) &&
+			        ( b.vecMin().y() >= vecMin().y() && b.vecMax().y() <= vecMax().y() ) )
+				return ( TqTrue );
+			else
+				return ( TqFalse );
+		}
+		TqBool	Contains3D( const CqVector3D& v ) const
+		{
+			if ( ( v.x() >= m_vecMin.x() && v.x() <= m_vecMax.x() ) &&
+			        ( v.y() >= m_vecMin.y() && v.y() <= m_vecMax.y() ) &&
+			        ( v.z() >= m_vecMin.z() && v.z() <= m_vecMax.z() ) )
+				return ( TqTrue );
+			else
+				return ( TqFalse );
+		}
+		TqBool	Contains2D( const CqVector2D& v ) const
+		{
+			if ( ( v.x() < m_vecMin.x() || v.x() > m_vecMax.x() ) ||
+			        ( v.y() < m_vecMin.y() || v.y() > m_vecMax.y() ) )
+				return ( TqFalse );
+			else
+				return ( TqTrue );
+		}
 
-    TqBool	Intersects( const CqVector2D& min, const CqVector2D& max ) const
-    {
-        if( min.x() > m_vecMax.x() || min.y() > m_vecMax.y() ||
-		    max.x() < m_vecMin.x() || max.y() < m_vecMin.y() )
-            return ( TqFalse );
-        else
-            return ( TqTrue );
-    }
+		TqBool	Intersects( const CqVector2D& min, const CqVector2D& max ) const
+		{
+			if( min.x() > m_vecMax.x() || min.y() > m_vecMax.y() ||
+			        max.x() < m_vecMin.x() || max.y() < m_vecMin.y() )
+				return ( TqFalse );
+			else
+				return ( TqTrue );
+		}
 
-	enum EqPlaneSide
-	{
-		Side_Outside = -1,
-		Side_Both = 0,
-		Side_Inside = 1,
+		enum EqPlaneSide
+		{
+		    Side_Outside = -1,
+		    Side_Both = 0,
+		    Side_Inside = 1,
 	};
 
-    TqInt whichSideOf(CqPlane plane) 
-	{
-		TqBool inside = TqFalse;
-        TqBool outside = TqFalse;
-        
-		
-		CqVector3D p(m_vecMin.x(), m_vecMin.y(), m_vecMin.z());
-        if (plane.whichSide(p) == CqPlane::Space_Positive)
-            inside = TqTrue;
-        else
-            outside = TqTrue;
-        
-		p.z(m_vecMax.z());	// xmin, ymin, zmax
-        if (plane.whichSide(p) == CqPlane::Space_Positive) 
+		TqInt whichSideOf(CqPlane plane)
 		{
-            inside = TqTrue;
-            if (outside)	return(Side_Both);	// Both sides
-        } 
-		else 
-		{
-            outside = TqTrue;
-            if (inside)		return(Side_Both);	// Both sides
-        }
-        
-		p.z(m_vecMin.z());	
-		p.y(m_vecMax.y());	// xmin, ymax, zmin
-        if (plane.whichSide(p) == CqPlane::Space_Positive) 
-		{
-            inside = TqTrue;
-            if (outside)	return(Side_Both);	// Both sides
-        }
-		else 
-		{
-            outside = TqTrue;
-            if (inside)		return(Side_Both);	// Both sides
-        }
-        p.z(m_vecMax.z());	// xmin, ymax, zmax
-        if (plane.whichSide(p) == CqPlane::Space_Positive) 
-		{
-            inside = TqTrue;
-            if (outside)	return(Side_Both);
-        } 
-		else 
-		{
-            outside = TqTrue;
-            if (inside)		return(Side_Both);
-        }
-        p.x(m_vecMax.x());
-		p.y(m_vecMin.y());
-		p.z(m_vecMin.z());	// xmax, ymin, zmin
-        if (plane.whichSide(p) == CqPlane::Space_Positive) 
-		{
-            inside = TqTrue;
-            if (outside)	return(Side_Both);
-        }
-		else
-		{
-            outside = TqTrue;
-            if (inside)		return(Side_Both);
-        }
-		p.z(m_vecMax.z());	// xmax, ymin, zmax
-        if (plane.whichSide(p) == CqPlane::Space_Positive) 
-		{
-            inside = TqTrue;
-            if (outside)	return(Side_Both);
-        } 
-		else 
-		{
-            outside = TqTrue;
-            if (inside)		return(Side_Both);
-        }
-		p.z(m_vecMin.z());
-		p.y(m_vecMax.y());	// xmax, ymax, zmin
-        if (plane.whichSide(p) == CqPlane::Space_Positive) 
-		{
-            inside = TqTrue;
-            if (outside)	return(Side_Both);
-        } 
-		else 
-		{
-            outside = TqTrue;
-            if (inside)		return(Side_Both);
-        }
-		p.z(m_vecMax.z());	// xmax, ymax, zmax
-        if (plane.whichSide(p) == CqPlane::Space_Positive) 
-		{
-            inside = TqTrue;
-            if (outside)	return(Side_Both);
-        } 
-		else 
-		{
-            outside = TqTrue;
-            if (inside)		return(Side_Both);
-        }
-        return(inside ? Side_Inside : Side_Outside);
-    }
+			TqBool inside = TqFalse;
+			TqBool outside = TqFalse;
 
-    friend std::ostream &operator<<( std::ostream &Stream, const CqBound &Bound );
 
-private:
-    CqVector3D	m_vecMin;
-    CqVector3D	m_vecMax;
+			CqVector3D p(m_vecMin.x(), m_vecMin.y(), m_vecMin.z());
+			if (plane.whichSide(p) == CqPlane::Space_Positive)
+				inside = TqTrue;
+			else
+				outside = TqTrue;
+
+			p.z(m_vecMax.z());	// xmin, ymin, zmax
+			if (plane.whichSide(p) == CqPlane::Space_Positive)
+			{
+				inside = TqTrue;
+				if (outside)
+					return(Side_Both);	// Both sides
+			}
+			else
+			{
+				outside = TqTrue;
+				if (inside)
+					return(Side_Both);	// Both sides
+			}
+
+			p.z(m_vecMin.z());
+			p.y(m_vecMax.y());	// xmin, ymax, zmin
+			if (plane.whichSide(p) == CqPlane::Space_Positive)
+			{
+				inside = TqTrue;
+				if (outside)
+					return(Side_Both);	// Both sides
+			}
+			else
+			{
+				outside = TqTrue;
+				if (inside)
+					return(Side_Both);	// Both sides
+			}
+			p.z(m_vecMax.z());	// xmin, ymax, zmax
+			if (plane.whichSide(p) == CqPlane::Space_Positive)
+			{
+				inside = TqTrue;
+				if (outside)
+					return(Side_Both);
+			}
+			else
+			{
+				outside = TqTrue;
+				if (inside)
+					return(Side_Both);
+			}
+			p.x(m_vecMax.x());
+			p.y(m_vecMin.y());
+			p.z(m_vecMin.z());	// xmax, ymin, zmin
+			if (plane.whichSide(p) == CqPlane::Space_Positive)
+			{
+				inside = TqTrue;
+				if (outside)
+					return(Side_Both);
+			}
+			else
+			{
+				outside = TqTrue;
+				if (inside)
+					return(Side_Both);
+			}
+			p.z(m_vecMax.z());	// xmax, ymin, zmax
+			if (plane.whichSide(p) == CqPlane::Space_Positive)
+			{
+				inside = TqTrue;
+				if (outside)
+					return(Side_Both);
+			}
+			else
+			{
+				outside = TqTrue;
+				if (inside)
+					return(Side_Both);
+			}
+			p.z(m_vecMin.z());
+			p.y(m_vecMax.y());	// xmax, ymax, zmin
+			if (plane.whichSide(p) == CqPlane::Space_Positive)
+			{
+				inside = TqTrue;
+				if (outside)
+					return(Side_Both);
+			}
+			else
+			{
+				outside = TqTrue;
+				if (inside)
+					return(Side_Both);
+			}
+			p.z(m_vecMax.z());	// xmax, ymax, zmax
+			if (plane.whichSide(p) == CqPlane::Space_Positive)
+			{
+				inside = TqTrue;
+				if (outside)
+					return(Side_Both);
+			}
+			else
+			{
+				outside = TqTrue;
+				if (inside)
+					return(Side_Both);
+			}
+			return(inside ? Side_Inside : Side_Outside);
+		}
+
+		friend std::ostream &operator<<( std::ostream &Stream, const CqBound &Bound );
+
+	private:
+		CqVector3D	m_vecMin;
+		CqVector3D	m_vecMax;
 };
 
 //----------------------------------------------------------------------
@@ -265,59 +287,59 @@ private:
  */
 class CqBoundList
 {
-public:
-    CqBoundList()
-    {}
-    ~CqBoundList()
-    {
-        //for ( std::vector<CqBound*>::iterator i = m_Bounds.begin(); i != m_Bounds.end(); i++ )
-        //	delete ( *i );
-    }
+	public:
+		CqBoundList()
+		{}
+		~CqBoundList()
+		{
+			//for ( std::vector<CqBound*>::iterator i = m_Bounds.begin(); i != m_Bounds.end(); i++ )
+			//	delete ( *i );
+		}
 
-    /** Clear the list
-     */
-    void Clear()
-    {
-        //for ( std::vector<CqBound*>::iterator i = m_Bounds.begin(); i != m_Bounds.end(); i++ )
-        //	delete ( *i );
-        m_Bounds.clear();
-        m_Times.clear();
-    }
+		/** Clear the list
+		 */
+		void Clear()
+		{
+			//for ( std::vector<CqBound*>::iterator i = m_Bounds.begin(); i != m_Bounds.end(); i++ )
+			//	delete ( *i );
+			m_Bounds.clear();
+			m_Times.clear();
+		}
 
-    void SetSize( TqInt size )
-    {
-        m_Bounds.resize( size );
-        m_Times.resize( size );
-    }
-    /** Add a bound to the current list
-     * \param index The index to set in the list.
-     * \param bound The CqBound to add
-     * \param time The shutter time that this bound becomes valid at. The bound
-     *               is valid until the time of the next bound or until 1.0 if there are no more bounds.
-     */
-    void	Set( TqInt index, CqBound bound, TqFloat time )
-    {
-        assert( index < Size() );
-        m_Bounds[ index ] = bound;
-        m_Times[ index ] = time;
-    }
-    TqInt Size()
-    {
-        return m_Bounds.size();
-    }
+		void SetSize( TqInt size )
+		{
+			m_Bounds.resize( size );
+			m_Times.resize( size );
+		}
+		/** Add a bound to the current list
+		 * \param index The index to set in the list.
+		 * \param bound The CqBound to add
+		 * \param time The shutter time that this bound becomes valid at. The bound
+		 *               is valid until the time of the next bound or until 1.0 if there are no more bounds.
+		 */
+		void	Set( TqInt index, CqBound bound, TqFloat time )
+		{
+			assert( index < Size() );
+			m_Bounds[ index ] = bound;
+			m_Times[ index ] = time;
+		}
+		TqInt Size()
+		{
+			return m_Bounds.size();
+		}
 
-    CqBound& GetBound( TqInt i )
-    {
-        return m_Bounds[ i ];
-    }
-    TqFloat GetTime( TqInt i )
-    {
-        return m_Times[ i ];
-    }
+		CqBound& GetBound( TqInt i )
+		{
+			return m_Bounds[ i ];
+		}
+		TqFloat GetTime( TqInt i )
+		{
+			return m_Times[ i ];
+		}
 
-private:
-    std::vector<CqBound> m_Bounds;
-    std::vector<TqFloat> m_Times;
+	private:
+		std::vector<CqBound> m_Bounds;
+		std::vector<TqFloat> m_Times;
 };
 
 //-----------------------------------------------------------------------

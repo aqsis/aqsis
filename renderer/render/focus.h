@@ -44,7 +44,7 @@ START_NAMESPACE( Aqsis )
 
 inline	TqFloat	CircleOfConfusion(const TqFloat *p_dofdata, TqFloat depth)
 {
-    return p_dofdata[3] * fabs(1.0f / depth - 1.0f / p_dofdata[2]);
+	return p_dofdata[3] * fabs(1.0f / depth - 1.0f / p_dofdata[2]);
 }
 
 

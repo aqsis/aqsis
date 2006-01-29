@@ -35,7 +35,7 @@ START_NAMESPACE( Aqsis )
 
 CqMatrix::CqMatrix( )
 {
-    Identity();
+	Identity();
 }
 
 
@@ -48,19 +48,19 @@ CqMatrix::CqMatrix( )
 
 CqMatrix::CqMatrix( const TqFloat xs, const TqFloat ys, const TqFloat zs )
 {
-    Identity();
+	Identity();
 
-    if ( xs == 1.0f && ys == 1.0f && zs == 1.0f )
-        m_fIdentity = TqTrue;
-    else
-    {
-        m_aaElement[ 0 ][ 0 ] = xs;
-        m_aaElement[ 1 ][ 1 ] = ys;
-        m_aaElement[ 2 ][ 2 ] = zs;
-        m_aaElement[ 3 ][ 3 ] = 1.0;
+	if ( xs == 1.0f && ys == 1.0f && zs == 1.0f )
+		m_fIdentity = TqTrue;
+	else
+	{
+		m_aaElement[ 0 ][ 0 ] = xs;
+		m_aaElement[ 1 ][ 1 ] = ys;
+		m_aaElement[ 2 ][ 2 ] = zs;
+		m_aaElement[ 3 ][ 3 ] = 1.0;
 
-        m_fIdentity = TqFalse;
-    }
+		m_fIdentity = TqFalse;
+	}
 }
 
 
@@ -71,18 +71,18 @@ CqMatrix::CqMatrix( const TqFloat xs, const TqFloat ys, const TqFloat zs )
 
 CqMatrix::CqMatrix( const CqVector3D& Trans )
 {
-    Identity();
+	Identity();
 
-    if ( Trans.x() == 0.0f && Trans.y() == 0.0f && Trans.z() == 0.0f )
-        m_fIdentity = TqTrue;
-    else
-    {
-        m_fIdentity = TqFalse;
+	if ( Trans.x() == 0.0f && Trans.y() == 0.0f && Trans.z() == 0.0f )
+		m_fIdentity = TqTrue;
+	else
+	{
+		m_fIdentity = TqFalse;
 
-        m_aaElement[ 3 ][ 0 ] = Trans.x();
-        m_aaElement[ 3 ][ 1 ] = Trans.y();
-        m_aaElement[ 3 ][ 2 ] = Trans.z();
-    }
+		m_aaElement[ 3 ][ 0 ] = Trans.x();
+		m_aaElement[ 3 ][ 1 ] = Trans.y();
+		m_aaElement[ 3 ][ 2 ] = Trans.z();
+	}
 }
 
 
@@ -94,10 +94,10 @@ CqMatrix::CqMatrix( const CqVector3D& Trans )
 
 CqMatrix::CqMatrix( const TqFloat Angle, const CqVector3D Axis )
 {
-    Identity();
+	Identity();
 
-    if ( Angle != 0.0f && Axis.Magnitude() != 0.0f )
-        Rotate( Angle, Axis );
+	if ( Angle != 0.0f && Axis.Magnitude() != 0.0f )
+		Rotate( Angle, Axis );
 }
 
 
@@ -115,52 +115,52 @@ CqMatrix::CqMatrix( const TqFloat angle,
                     const TqFloat dx1, const TqFloat dy1, const TqFloat dz1,
                     const TqFloat dx2, const TqFloat dy2, const TqFloat dz2 )
 {
-    // Normalize the two vectors, and construct a third perpendicular
-    CqVector3D d1( dx1, dy1, dz1 ), d2( dx2, dy2, dz2 );
-    d1.Unit();
-    d2.Unit();
+	// Normalize the two vectors, and construct a third perpendicular
+	CqVector3D d1( dx1, dy1, dz1 ), d2( dx2, dy2, dz2 );
+	d1.Unit();
+	d2.Unit();
 
-    // Assumes angle already changed to radians.
+	// Assumes angle already changed to radians.
 
-    TqFloat d1d2dot = d1 * d2;
-    TqFloat axisangle = static_cast<TqFloat>(acos( d1d2dot ));
-    if ( angle >= axisangle || angle <= ( axisangle - PI ) )
-    {
-        // Skewed past the axes -- issue error, then just use identity matrix.
-        // No access to CqBasicError from here, so this will have to be down
-        //   in RiSkew.  That would duplicate the above math calculations
-        //   unless they were passed to this constructor which would be odd
-        //   looking:
-        // CqBasicError(0,Severity_Normal,"RiSkew angle invalid.");
-        Identity();
-    }
-    else
-    {
-        CqVector3D right = d1 % d2;
-        right.Unit();
+	TqFloat d1d2dot = d1 * d2;
+	TqFloat axisangle = static_cast<TqFloat>(acos( d1d2dot ));
+	if ( angle >= axisangle || angle <= ( axisangle - PI ) )
+	{
+		// Skewed past the axes -- issue error, then just use identity matrix.
+		// No access to CqBasicError from here, so this will have to be down
+		//   in RiSkew.  That would duplicate the above math calculations
+		//   unless they were passed to this constructor which would be odd
+		//   looking:
+		// CqBasicError(0,Severity_Normal,"RiSkew angle invalid.");
+		Identity();
+	}
+	else
+	{
+		CqVector3D right = d1 % d2;
+		right.Unit();
 
-        // d1ortho will be perpendicular to <d2> and <right> and can be
-        // used to construct a rotation matrix
-        CqVector3D d1ortho = d2 % right;
+		// d1ortho will be perpendicular to <d2> and <right> and can be
+		// used to construct a rotation matrix
+		CqVector3D d1ortho = d2 % right;
 
 
-        // 1) Rotate to a space where the skew operation is in a major plane.
-        // 2) Bend the y axis towards the z axis causing a skew.
-        // 3) Rotate back.
-        CqMatrix Rot( right[ 0 ], d1ortho[ 0 ], d2[ 0 ], 0,
-                      right[ 1 ], d1ortho[ 1 ], d2[ 1 ], 0,
-                      right[ 2 ], d1ortho[ 2 ], d2[ 2 ], 0,
-                      0, 0, 0, 1 );
-        TqFloat par = d1d2dot;               // Amount of d1 parallel to d2
-        TqFloat perp = static_cast<TqFloat>(sqrt( 1.0 - par * par ));   // Amount perpendicular
-        TqFloat s = static_cast<TqFloat>(tan( angle + acos( perp ) ) * perp - par);
-        CqMatrix Skw( 1, 0, 0, 0,
-                      0, 1, s, 0,
-                      0, 0, 1, 0,
-                      0, 0, 0, 1 );
-        // Note the Inverse of a rotation matrix is its Transpose.
-        *this = Rot.Transpose() * Skw * Rot;
-    }
+		// 1) Rotate to a space where the skew operation is in a major plane.
+		// 2) Bend the y axis towards the z axis causing a skew.
+		// 3) Rotate back.
+		CqMatrix Rot( right[ 0 ], d1ortho[ 0 ], d2[ 0 ], 0,
+		              right[ 1 ], d1ortho[ 1 ], d2[ 1 ], 0,
+		              right[ 2 ], d1ortho[ 2 ], d2[ 2 ], 0,
+		              0, 0, 0, 1 );
+		TqFloat par = d1d2dot;               // Amount of d1 parallel to d2
+		TqFloat perp = static_cast<TqFloat>(sqrt( 1.0 - par * par ));   // Amount perpendicular
+		TqFloat s = static_cast<TqFloat>(tan( angle + acos( perp ) ) * perp - par);
+		CqMatrix Skw( 1, 0, 0, 0,
+		              0, 1, s, 0,
+		              0, 0, 1, 0,
+		              0, 0, 0, 1 );
+		// Note the Inverse of a rotation matrix is its Transpose.
+		*this = Rot.Transpose() * Skw * Rot;
+	}
 }
 
 //---------------------------------------------------------------------
@@ -169,7 +169,7 @@ CqMatrix::CqMatrix( const TqFloat angle,
 
 CqMatrix::CqMatrix( const CqMatrix &From )
 {
-    *this = From;
+	*this = From;
 }
 
 //---------------------------------------------------------------------
@@ -179,7 +179,7 @@ CqMatrix::CqMatrix( const CqMatrix &From )
 
 CqMatrix::CqMatrix( TqFloat From[ 4 ][ 4 ] )
 {
-    *this = From;
+	*this = From;
 }
 
 
@@ -190,7 +190,7 @@ CqMatrix::CqMatrix( TqFloat From[ 4 ][ 4 ] )
 
 CqMatrix::CqMatrix( TqFloat From[ 16 ] )
 {
-    *this = From;
+	*this = From;
 }
 
 //---------------------------------------------------------------------
@@ -199,25 +199,25 @@ CqMatrix::CqMatrix( TqFloat From[ 16 ] )
 
 void CqMatrix::Identity()
 {
-    m_aaElement[ 0 ][ 1 ] =
-        m_aaElement[ 0 ][ 2 ] =
-            m_aaElement[ 0 ][ 3 ] =
-                m_aaElement[ 1 ][ 0 ] =
-                    m_aaElement[ 1 ][ 2 ] =
-                        m_aaElement[ 1 ][ 3 ] =
-                            m_aaElement[ 2 ][ 0 ] =
-                                m_aaElement[ 2 ][ 1 ] =
-                                    m_aaElement[ 2 ][ 3 ] =
-                                        m_aaElement[ 3 ][ 0 ] =
-                                            m_aaElement[ 3 ][ 1 ] =
-                                                m_aaElement[ 3 ][ 2 ] = 0.0f;
+	m_aaElement[ 0 ][ 1 ] =
+	    m_aaElement[ 0 ][ 2 ] =
+	        m_aaElement[ 0 ][ 3 ] =
+	            m_aaElement[ 1 ][ 0 ] =
+	                m_aaElement[ 1 ][ 2 ] =
+	                    m_aaElement[ 1 ][ 3 ] =
+	                        m_aaElement[ 2 ][ 0 ] =
+	                            m_aaElement[ 2 ][ 1 ] =
+	                                m_aaElement[ 2 ][ 3 ] =
+	                                    m_aaElement[ 3 ][ 0 ] =
+	                                        m_aaElement[ 3 ][ 1 ] =
+	                                            m_aaElement[ 3 ][ 2 ] = 0.0f;
 
-    m_aaElement[ 0 ][ 0 ] =
-        m_aaElement[ 1 ][ 1 ] =
-            m_aaElement[ 2 ][ 2 ] =
-                m_aaElement[ 3 ][ 3 ] = 1.0f;
+	m_aaElement[ 0 ][ 0 ] =
+	    m_aaElement[ 1 ][ 1 ] =
+	        m_aaElement[ 2 ][ 2 ] =
+	            m_aaElement[ 3 ][ 3 ] = 1.0f;
 
-    m_fIdentity = TqTrue;
+	m_fIdentity = TqTrue;
 }
 
 
@@ -228,8 +228,8 @@ void CqMatrix::Identity()
 
 void CqMatrix::Scale( const TqFloat S )
 {
-    if ( S != 1.0f )
-        Scale( S, S, S );
+	if ( S != 1.0f )
+		Scale( S, S, S );
 }
 
 //---------------------------------------------------------------------
@@ -241,9 +241,9 @@ void CqMatrix::Scale( const TqFloat S )
 
 void CqMatrix::Scale( const TqFloat xs, const TqFloat ys, const TqFloat zs )
 {
-    CqMatrix Scale( xs, ys, zs );
+	CqMatrix Scale( xs, ys, zs );
 
-    this->PreMultiply( Scale );
+	this->PreMultiply( Scale );
 }
 
 
@@ -255,43 +255,43 @@ void CqMatrix::Scale( const TqFloat xs, const TqFloat ys, const TqFloat zs )
 
 void CqMatrix::Rotate( const TqFloat Angle, const CqVector3D Axis )
 {
-    if ( Angle != 0.0f )
-    {
-        CqMatrix	R;
-        R.Identity();
-        CqVector3D	RotAxis = Axis;
-        R.m_fIdentity = TqFalse;
+	if ( Angle != 0.0f )
+	{
+		CqMatrix	R;
+		R.Identity();
+		CqVector3D	RotAxis = Axis;
+		R.m_fIdentity = TqFalse;
 
-        RotAxis.Unit();
+		RotAxis.Unit();
 
-        TqFloat	s = static_cast<TqFloat>( sin( Angle ) );
-        TqFloat	c = static_cast<TqFloat>( cos( Angle ) );
-        TqFloat	t = 1.0f - c;
+		TqFloat	s = static_cast<TqFloat>( sin( Angle ) );
+		TqFloat	c = static_cast<TqFloat>( cos( Angle ) );
+		TqFloat	t = 1.0f - c;
 
-        R.m_aaElement[ 0 ][ 0 ] = t * RotAxis.x() * RotAxis.x() + c;
-        R.m_aaElement[ 1 ][ 1 ] = t * RotAxis.y() * RotAxis.y() + c;
-        R.m_aaElement[ 2 ][ 2 ] = t * RotAxis.z() * RotAxis.z() + c;
+		R.m_aaElement[ 0 ][ 0 ] = t * RotAxis.x() * RotAxis.x() + c;
+		R.m_aaElement[ 1 ][ 1 ] = t * RotAxis.y() * RotAxis.y() + c;
+		R.m_aaElement[ 2 ][ 2 ] = t * RotAxis.z() * RotAxis.z() + c;
 
-        TqFloat	txy = t * RotAxis.x() * RotAxis.y();
-        TqFloat	sz = s * RotAxis.z();
+		TqFloat	txy = t * RotAxis.x() * RotAxis.y();
+		TqFloat	sz = s * RotAxis.z();
 
-        R.m_aaElement[ 0 ][ 1 ] = txy + sz;
-        R.m_aaElement[ 1 ][ 0 ] = txy - sz;
+		R.m_aaElement[ 0 ][ 1 ] = txy + sz;
+		R.m_aaElement[ 1 ][ 0 ] = txy - sz;
 
-        TqFloat	txz = t * RotAxis.x() * RotAxis.z();
-        TqFloat	sy = s * RotAxis.y();
+		TqFloat	txz = t * RotAxis.x() * RotAxis.z();
+		TqFloat	sy = s * RotAxis.y();
 
-        R.m_aaElement[ 0 ][ 2 ] = txz - sy;
-        R.m_aaElement[ 2 ][ 0 ] = txz + sy;
+		R.m_aaElement[ 0 ][ 2 ] = txz - sy;
+		R.m_aaElement[ 2 ][ 0 ] = txz + sy;
 
-        TqFloat	tyz = t * RotAxis.y() * RotAxis.z();
-        TqFloat	sx = s * RotAxis.x();
+		TqFloat	tyz = t * RotAxis.y() * RotAxis.z();
+		TqFloat	sx = s * RotAxis.x();
 
-        R.m_aaElement[ 1 ][ 2 ] = tyz + sx;
-        R.m_aaElement[ 2 ][ 1 ] = tyz - sx;
+		R.m_aaElement[ 1 ][ 2 ] = tyz + sx;
+		R.m_aaElement[ 2 ][ 1 ] = tyz - sx;
 
-        this->PreMultiply( R );
-    }
+		this->PreMultiply( R );
+	}
 }
 
 
@@ -302,8 +302,8 @@ void CqMatrix::Rotate( const TqFloat Angle, const CqVector3D Axis )
 
 void CqMatrix::Translate( const CqVector3D& Trans )
 {
-    CqMatrix matTrans( Trans );
-    this->PreMultiply( matTrans );
+	CqMatrix matTrans( Trans );
+	this->PreMultiply( matTrans );
 }
 
 
@@ -317,8 +317,8 @@ void CqMatrix::Translate( const CqVector3D& Trans )
 
 void CqMatrix::Translate( const TqFloat xt, const TqFloat yt, const TqFloat zt )
 {
-    if ( xt != 0.0f || yt != 0.0f || zt != 0.0f )
-        Translate( CqVector3D( xt, yt, zt ) );
+	if ( xt != 0.0f || yt != 0.0f || zt != 0.0f )
+		Translate( CqVector3D( xt, yt, zt ) );
 }
 
 
@@ -330,13 +330,13 @@ void CqMatrix::Translate( const TqFloat xt, const TqFloat yt, const TqFloat zt )
 
 void CqMatrix::ShearX( const TqFloat yh, const TqFloat zh )
 {
-    CqMatrix Shear;
-    Shear.m_fIdentity = TqFalse;
+	CqMatrix Shear;
+	Shear.m_fIdentity = TqFalse;
 
-    Shear.m_aaElement[ 0 ][ 1 ] = yh;
-    Shear.m_aaElement[ 0 ][ 2 ] = zh;
+	Shear.m_aaElement[ 0 ][ 1 ] = yh;
+	Shear.m_aaElement[ 0 ][ 2 ] = zh;
 
-    this->PreMultiply( Shear );
+	this->PreMultiply( Shear );
 }
 
 
@@ -348,13 +348,13 @@ void CqMatrix::ShearX( const TqFloat yh, const TqFloat zh )
 
 void CqMatrix::ShearY( const TqFloat xh, const TqFloat zh )
 {
-    CqMatrix Shear;
-    Shear.m_fIdentity = TqFalse;
+	CqMatrix Shear;
+	Shear.m_fIdentity = TqFalse;
 
-    Shear.m_aaElement[ 1 ][ 0 ] = xh;
-    Shear.m_aaElement[ 1 ][ 2 ] = zh;
+	Shear.m_aaElement[ 1 ][ 0 ] = xh;
+	Shear.m_aaElement[ 1 ][ 2 ] = zh;
 
-    this->PreMultiply( Shear );
+	this->PreMultiply( Shear );
 }
 
 //---------------------------------------------------------------------
@@ -365,13 +365,13 @@ void CqMatrix::ShearY( const TqFloat xh, const TqFloat zh )
 
 void CqMatrix::ShearZ( const TqFloat xh, const TqFloat yh )
 {
-    CqMatrix Shear;
-    Shear.m_fIdentity = TqFalse;
+	CqMatrix Shear;
+	Shear.m_fIdentity = TqFalse;
 
-    Shear.m_aaElement[ 2 ][ 0 ] = xh;
-    Shear.m_aaElement[ 2 ][ 1 ] = yh;
+	Shear.m_aaElement[ 2 ][ 0 ] = xh;
+	Shear.m_aaElement[ 2 ][ 1 ] = yh;
 
-    this->PreMultiply( Shear );
+	this->PreMultiply( Shear );
 }
 
 //---------------------------------------------------------------------
@@ -389,9 +389,9 @@ void CqMatrix::Skew( const TqFloat angle,
                      const TqFloat dx1, const TqFloat dy1, const TqFloat dz1,
                      const TqFloat dx2, const TqFloat dy2, const TqFloat dz2 )
 {
-    CqMatrix Skew( angle, dx1, dy1, dz1, dx2, dy2, dz2 );
+	CqMatrix Skew( angle, dx1, dy1, dz1, dx2, dy2, dz2 );
 
-    this->PreMultiply( Skew );
+	this->PreMultiply( Skew );
 }
 
 //---------------------------------------------------------------------
@@ -400,13 +400,13 @@ void CqMatrix::Skew( const TqFloat angle,
 
 void CqMatrix::Normalise()
 {
-    for ( TqInt i = 0; i < 4; i++ )
-    {
-        for ( TqInt j = 0; j < 4; j++ )
-        {
-            m_aaElement[ i ][ j ] /= m_aaElement[ 3 ][ 3 ];
-        }
-    }
+	for ( TqInt i = 0; i < 4; i++ )
+	{
+		for ( TqInt j = 0; j < 4; j++ )
+		{
+			m_aaElement[ i ][ j ] /= m_aaElement[ 3 ][ 3 ];
+		}
+	}
 }
 
 
@@ -418,9 +418,9 @@ void CqMatrix::Normalise()
 
 CqMatrix CqMatrix::operator*( const CqMatrix &From ) const
 {
-    CqMatrix Temp( *this );
-    Temp *= From;
-    return ( Temp );
+	CqMatrix Temp( *this );
+	Temp *= From;
+	return ( Temp );
 }
 
 
@@ -431,83 +431,83 @@ CqMatrix CqMatrix::operator*( const CqMatrix &From ) const
 
 CqMatrix &CqMatrix::operator*=( const CqMatrix &From )
 {
-    if ( m_fIdentity )
-        return ( *this = From );
-    else if ( From.m_fIdentity )
-        return ( *this );
+	if ( m_fIdentity )
+		return ( *this = From );
+	else if ( From.m_fIdentity )
+		return ( *this );
 
-    CqMatrix A( *this );
+	CqMatrix A( *this );
 
-    m_aaElement[ 0 ][ 0 ] = From.m_aaElement[ 0 ][ 0 ] * A.m_aaElement[ 0 ][ 0 ]
-                            + From.m_aaElement[ 0 ][ 1 ] * A.m_aaElement[ 1 ][ 0 ]
-                            + From.m_aaElement[ 0 ][ 2 ] * A.m_aaElement[ 2 ][ 0 ]
-                            + From.m_aaElement[ 0 ][ 3 ] * A.m_aaElement[ 3 ][ 0 ];
-    m_aaElement[ 0 ][ 1 ] = From.m_aaElement[ 0 ][ 0 ] * A.m_aaElement[ 0 ][ 1 ]
-                            + From.m_aaElement[ 0 ][ 1 ] * A.m_aaElement[ 1 ][ 1 ]
-                            + From.m_aaElement[ 0 ][ 2 ] * A.m_aaElement[ 2 ][ 1 ]
-                            + From.m_aaElement[ 0 ][ 3 ] * A.m_aaElement[ 3 ][ 1 ];
-    m_aaElement[ 0 ][ 2 ] = From.m_aaElement[ 0 ][ 0 ] * A.m_aaElement[ 0 ][ 2 ]
-                            + From.m_aaElement[ 0 ][ 1 ] * A.m_aaElement[ 1 ][ 2 ]
-                            + From.m_aaElement[ 0 ][ 2 ] * A.m_aaElement[ 2 ][ 2 ]
-                            + From.m_aaElement[ 0 ][ 3 ] * A.m_aaElement[ 3 ][ 2 ];
-    m_aaElement[ 0 ][ 3 ] = From.m_aaElement[ 0 ][ 0 ] * A.m_aaElement[ 0 ][ 3 ]
-                            + From.m_aaElement[ 0 ][ 1 ] * A.m_aaElement[ 1 ][ 3 ]
-                            + From.m_aaElement[ 0 ][ 2 ] * A.m_aaElement[ 2 ][ 3 ]
-                            + From.m_aaElement[ 0 ][ 3 ] * A.m_aaElement[ 3 ][ 3 ];
+	m_aaElement[ 0 ][ 0 ] = From.m_aaElement[ 0 ][ 0 ] * A.m_aaElement[ 0 ][ 0 ]
+	                        + From.m_aaElement[ 0 ][ 1 ] * A.m_aaElement[ 1 ][ 0 ]
+	                        + From.m_aaElement[ 0 ][ 2 ] * A.m_aaElement[ 2 ][ 0 ]
+	                        + From.m_aaElement[ 0 ][ 3 ] * A.m_aaElement[ 3 ][ 0 ];
+	m_aaElement[ 0 ][ 1 ] = From.m_aaElement[ 0 ][ 0 ] * A.m_aaElement[ 0 ][ 1 ]
+	                        + From.m_aaElement[ 0 ][ 1 ] * A.m_aaElement[ 1 ][ 1 ]
+	                        + From.m_aaElement[ 0 ][ 2 ] * A.m_aaElement[ 2 ][ 1 ]
+	                        + From.m_aaElement[ 0 ][ 3 ] * A.m_aaElement[ 3 ][ 1 ];
+	m_aaElement[ 0 ][ 2 ] = From.m_aaElement[ 0 ][ 0 ] * A.m_aaElement[ 0 ][ 2 ]
+	                        + From.m_aaElement[ 0 ][ 1 ] * A.m_aaElement[ 1 ][ 2 ]
+	                        + From.m_aaElement[ 0 ][ 2 ] * A.m_aaElement[ 2 ][ 2 ]
+	                        + From.m_aaElement[ 0 ][ 3 ] * A.m_aaElement[ 3 ][ 2 ];
+	m_aaElement[ 0 ][ 3 ] = From.m_aaElement[ 0 ][ 0 ] * A.m_aaElement[ 0 ][ 3 ]
+	                        + From.m_aaElement[ 0 ][ 1 ] * A.m_aaElement[ 1 ][ 3 ]
+	                        + From.m_aaElement[ 0 ][ 2 ] * A.m_aaElement[ 2 ][ 3 ]
+	                        + From.m_aaElement[ 0 ][ 3 ] * A.m_aaElement[ 3 ][ 3 ];
 
-    m_aaElement[ 1 ][ 0 ] = From.m_aaElement[ 1 ][ 0 ] * A.m_aaElement[ 0 ][ 0 ]
-                            + From.m_aaElement[ 1 ][ 1 ] * A.m_aaElement[ 1 ][ 0 ]
-                            + From.m_aaElement[ 1 ][ 2 ] * A.m_aaElement[ 2 ][ 0 ]
-                            + From.m_aaElement[ 1 ][ 3 ] * A.m_aaElement[ 3 ][ 0 ];
-    m_aaElement[ 1 ][ 1 ] = From.m_aaElement[ 1 ][ 0 ] * A.m_aaElement[ 0 ][ 1 ]
-                            + From.m_aaElement[ 1 ][ 1 ] * A.m_aaElement[ 1 ][ 1 ]
-                            + From.m_aaElement[ 1 ][ 2 ] * A.m_aaElement[ 2 ][ 1 ]
-                            + From.m_aaElement[ 1 ][ 3 ] * A.m_aaElement[ 3 ][ 1 ];
-    m_aaElement[ 1 ][ 2 ] = From.m_aaElement[ 1 ][ 0 ] * A.m_aaElement[ 0 ][ 2 ]
-                            + From.m_aaElement[ 1 ][ 1 ] * A.m_aaElement[ 1 ][ 2 ]
-                            + From.m_aaElement[ 1 ][ 2 ] * A.m_aaElement[ 2 ][ 2 ]
-                            + From.m_aaElement[ 1 ][ 3 ] * A.m_aaElement[ 3 ][ 2 ];
-    m_aaElement[ 1 ][ 3 ] = From.m_aaElement[ 1 ][ 0 ] * A.m_aaElement[ 0 ][ 3 ]
-                            + From.m_aaElement[ 1 ][ 1 ] * A.m_aaElement[ 1 ][ 3 ]
-                            + From.m_aaElement[ 1 ][ 2 ] * A.m_aaElement[ 2 ][ 3 ]
-                            + From.m_aaElement[ 1 ][ 3 ] * A.m_aaElement[ 3 ][ 3 ];
+	m_aaElement[ 1 ][ 0 ] = From.m_aaElement[ 1 ][ 0 ] * A.m_aaElement[ 0 ][ 0 ]
+	                        + From.m_aaElement[ 1 ][ 1 ] * A.m_aaElement[ 1 ][ 0 ]
+	                        + From.m_aaElement[ 1 ][ 2 ] * A.m_aaElement[ 2 ][ 0 ]
+	                        + From.m_aaElement[ 1 ][ 3 ] * A.m_aaElement[ 3 ][ 0 ];
+	m_aaElement[ 1 ][ 1 ] = From.m_aaElement[ 1 ][ 0 ] * A.m_aaElement[ 0 ][ 1 ]
+	                        + From.m_aaElement[ 1 ][ 1 ] * A.m_aaElement[ 1 ][ 1 ]
+	                        + From.m_aaElement[ 1 ][ 2 ] * A.m_aaElement[ 2 ][ 1 ]
+	                        + From.m_aaElement[ 1 ][ 3 ] * A.m_aaElement[ 3 ][ 1 ];
+	m_aaElement[ 1 ][ 2 ] = From.m_aaElement[ 1 ][ 0 ] * A.m_aaElement[ 0 ][ 2 ]
+	                        + From.m_aaElement[ 1 ][ 1 ] * A.m_aaElement[ 1 ][ 2 ]
+	                        + From.m_aaElement[ 1 ][ 2 ] * A.m_aaElement[ 2 ][ 2 ]
+	                        + From.m_aaElement[ 1 ][ 3 ] * A.m_aaElement[ 3 ][ 2 ];
+	m_aaElement[ 1 ][ 3 ] = From.m_aaElement[ 1 ][ 0 ] * A.m_aaElement[ 0 ][ 3 ]
+	                        + From.m_aaElement[ 1 ][ 1 ] * A.m_aaElement[ 1 ][ 3 ]
+	                        + From.m_aaElement[ 1 ][ 2 ] * A.m_aaElement[ 2 ][ 3 ]
+	                        + From.m_aaElement[ 1 ][ 3 ] * A.m_aaElement[ 3 ][ 3 ];
 
-    m_aaElement[ 2 ][ 0 ] = From.m_aaElement[ 2 ][ 0 ] * A.m_aaElement[ 0 ][ 0 ]
-                            + From.m_aaElement[ 2 ][ 1 ] * A.m_aaElement[ 1 ][ 0 ]
-                            + From.m_aaElement[ 2 ][ 2 ] * A.m_aaElement[ 2 ][ 0 ]
-                            + From.m_aaElement[ 2 ][ 3 ] * A.m_aaElement[ 3 ][ 0 ];
-    m_aaElement[ 2 ][ 1 ] = From.m_aaElement[ 2 ][ 0 ] * A.m_aaElement[ 0 ][ 1 ]
-                            + From.m_aaElement[ 2 ][ 1 ] * A.m_aaElement[ 1 ][ 1 ]
-                            + From.m_aaElement[ 2 ][ 2 ] * A.m_aaElement[ 2 ][ 1 ]
-                            + From.m_aaElement[ 2 ][ 3 ] * A.m_aaElement[ 3 ][ 1 ];
-    m_aaElement[ 2 ][ 2 ] = From.m_aaElement[ 2 ][ 0 ] * A.m_aaElement[ 0 ][ 2 ]
-                            + From.m_aaElement[ 2 ][ 1 ] * A.m_aaElement[ 1 ][ 2 ]
-                            + From.m_aaElement[ 2 ][ 2 ] * A.m_aaElement[ 2 ][ 2 ]
-                            + From.m_aaElement[ 2 ][ 3 ] * A.m_aaElement[ 3 ][ 2 ];
-    m_aaElement[ 2 ][ 3 ] = From.m_aaElement[ 2 ][ 0 ] * A.m_aaElement[ 0 ][ 3 ]
-                            + From.m_aaElement[ 2 ][ 1 ] * A.m_aaElement[ 1 ][ 3 ]
-                            + From.m_aaElement[ 2 ][ 2 ] * A.m_aaElement[ 2 ][ 3 ]
-                            + From.m_aaElement[ 2 ][ 3 ] * A.m_aaElement[ 3 ][ 3 ];
+	m_aaElement[ 2 ][ 0 ] = From.m_aaElement[ 2 ][ 0 ] * A.m_aaElement[ 0 ][ 0 ]
+	                        + From.m_aaElement[ 2 ][ 1 ] * A.m_aaElement[ 1 ][ 0 ]
+	                        + From.m_aaElement[ 2 ][ 2 ] * A.m_aaElement[ 2 ][ 0 ]
+	                        + From.m_aaElement[ 2 ][ 3 ] * A.m_aaElement[ 3 ][ 0 ];
+	m_aaElement[ 2 ][ 1 ] = From.m_aaElement[ 2 ][ 0 ] * A.m_aaElement[ 0 ][ 1 ]
+	                        + From.m_aaElement[ 2 ][ 1 ] * A.m_aaElement[ 1 ][ 1 ]
+	                        + From.m_aaElement[ 2 ][ 2 ] * A.m_aaElement[ 2 ][ 1 ]
+	                        + From.m_aaElement[ 2 ][ 3 ] * A.m_aaElement[ 3 ][ 1 ];
+	m_aaElement[ 2 ][ 2 ] = From.m_aaElement[ 2 ][ 0 ] * A.m_aaElement[ 0 ][ 2 ]
+	                        + From.m_aaElement[ 2 ][ 1 ] * A.m_aaElement[ 1 ][ 2 ]
+	                        + From.m_aaElement[ 2 ][ 2 ] * A.m_aaElement[ 2 ][ 2 ]
+	                        + From.m_aaElement[ 2 ][ 3 ] * A.m_aaElement[ 3 ][ 2 ];
+	m_aaElement[ 2 ][ 3 ] = From.m_aaElement[ 2 ][ 0 ] * A.m_aaElement[ 0 ][ 3 ]
+	                        + From.m_aaElement[ 2 ][ 1 ] * A.m_aaElement[ 1 ][ 3 ]
+	                        + From.m_aaElement[ 2 ][ 2 ] * A.m_aaElement[ 2 ][ 3 ]
+	                        + From.m_aaElement[ 2 ][ 3 ] * A.m_aaElement[ 3 ][ 3 ];
 
-    m_aaElement[ 3 ][ 0 ] = From.m_aaElement[ 3 ][ 0 ] * A.m_aaElement[ 0 ][ 0 ]
-                            + From.m_aaElement[ 3 ][ 1 ] * A.m_aaElement[ 1 ][ 0 ]
-                            + From.m_aaElement[ 3 ][ 2 ] * A.m_aaElement[ 2 ][ 0 ]
-                            + From.m_aaElement[ 3 ][ 3 ] * A.m_aaElement[ 3 ][ 0 ];
-    m_aaElement[ 3 ][ 1 ] = From.m_aaElement[ 3 ][ 0 ] * A.m_aaElement[ 0 ][ 1 ]
-                            + From.m_aaElement[ 3 ][ 1 ] * A.m_aaElement[ 1 ][ 1 ]
-                            + From.m_aaElement[ 3 ][ 2 ] * A.m_aaElement[ 2 ][ 1 ]
-                            + From.m_aaElement[ 3 ][ 3 ] * A.m_aaElement[ 3 ][ 1 ];
-    m_aaElement[ 3 ][ 2 ] = From.m_aaElement[ 3 ][ 0 ] * A.m_aaElement[ 0 ][ 2 ]
-                            + From.m_aaElement[ 3 ][ 1 ] * A.m_aaElement[ 1 ][ 2 ]
-                            + From.m_aaElement[ 3 ][ 2 ] * A.m_aaElement[ 2 ][ 2 ]
-                            + From.m_aaElement[ 3 ][ 3 ] * A.m_aaElement[ 3 ][ 2 ];
-    m_aaElement[ 3 ][ 3 ] = From.m_aaElement[ 3 ][ 0 ] * A.m_aaElement[ 0 ][ 3 ]
-                            + From.m_aaElement[ 3 ][ 1 ] * A.m_aaElement[ 1 ][ 3 ]
-                            + From.m_aaElement[ 3 ][ 2 ] * A.m_aaElement[ 2 ][ 3 ]
-                            + From.m_aaElement[ 3 ][ 3 ] * A.m_aaElement[ 3 ][ 3 ];
+	m_aaElement[ 3 ][ 0 ] = From.m_aaElement[ 3 ][ 0 ] * A.m_aaElement[ 0 ][ 0 ]
+	                        + From.m_aaElement[ 3 ][ 1 ] * A.m_aaElement[ 1 ][ 0 ]
+	                        + From.m_aaElement[ 3 ][ 2 ] * A.m_aaElement[ 2 ][ 0 ]
+	                        + From.m_aaElement[ 3 ][ 3 ] * A.m_aaElement[ 3 ][ 0 ];
+	m_aaElement[ 3 ][ 1 ] = From.m_aaElement[ 3 ][ 0 ] * A.m_aaElement[ 0 ][ 1 ]
+	                        + From.m_aaElement[ 3 ][ 1 ] * A.m_aaElement[ 1 ][ 1 ]
+	                        + From.m_aaElement[ 3 ][ 2 ] * A.m_aaElement[ 2 ][ 1 ]
+	                        + From.m_aaElement[ 3 ][ 3 ] * A.m_aaElement[ 3 ][ 1 ];
+	m_aaElement[ 3 ][ 2 ] = From.m_aaElement[ 3 ][ 0 ] * A.m_aaElement[ 0 ][ 2 ]
+	                        + From.m_aaElement[ 3 ][ 1 ] * A.m_aaElement[ 1 ][ 2 ]
+	                        + From.m_aaElement[ 3 ][ 2 ] * A.m_aaElement[ 2 ][ 2 ]
+	                        + From.m_aaElement[ 3 ][ 3 ] * A.m_aaElement[ 3 ][ 2 ];
+	m_aaElement[ 3 ][ 3 ] = From.m_aaElement[ 3 ][ 0 ] * A.m_aaElement[ 0 ][ 3 ]
+	                        + From.m_aaElement[ 3 ][ 1 ] * A.m_aaElement[ 1 ][ 3 ]
+	                        + From.m_aaElement[ 3 ][ 2 ] * A.m_aaElement[ 2 ][ 3 ]
+	                        + From.m_aaElement[ 3 ][ 3 ] * A.m_aaElement[ 3 ][ 3 ];
 
-    m_fIdentity = TqFalse;
-    return ( *this );
+	m_fIdentity = TqFalse;
+	return ( *this );
 }
 
 //---------------------------------------------------------------------
@@ -517,83 +517,83 @@ CqMatrix &CqMatrix::operator*=( const CqMatrix &From )
 
 CqMatrix& CqMatrix::PreMultiply( const CqMatrix &From )
 {
-    if ( m_fIdentity )
-        return ( *this = From );
-    else if ( From.m_fIdentity )
-        return ( *this );
+	if ( m_fIdentity )
+		return ( *this = From );
+	else if ( From.m_fIdentity )
+		return ( *this );
 
-    CqMatrix A( *this );
+	CqMatrix A( *this );
 
-    m_aaElement[ 0 ][ 0 ] = A.m_aaElement[ 0 ][ 0 ] * From.m_aaElement[ 0 ][ 0 ]
-                            + A.m_aaElement[ 0 ][ 1 ] * From.m_aaElement[ 1 ][ 0 ]
-                            + A.m_aaElement[ 0 ][ 2 ] * From.m_aaElement[ 2 ][ 0 ]
-                            + A.m_aaElement[ 0 ][ 3 ] * From.m_aaElement[ 3 ][ 0 ];
-    m_aaElement[ 0 ][ 1 ] = A.m_aaElement[ 0 ][ 0 ] * From.m_aaElement[ 0 ][ 1 ]
-                            + A.m_aaElement[ 0 ][ 1 ] * From.m_aaElement[ 1 ][ 1 ]
-                            + A.m_aaElement[ 0 ][ 2 ] * From.m_aaElement[ 2 ][ 1 ]
-                            + A.m_aaElement[ 0 ][ 3 ] * From.m_aaElement[ 3 ][ 1 ];
-    m_aaElement[ 0 ][ 2 ] = A.m_aaElement[ 0 ][ 0 ] * From.m_aaElement[ 0 ][ 2 ]
-                            + A.m_aaElement[ 0 ][ 1 ] * From.m_aaElement[ 1 ][ 2 ]
-                            + A.m_aaElement[ 0 ][ 2 ] * From.m_aaElement[ 2 ][ 2 ]
-                            + A.m_aaElement[ 0 ][ 3 ] * From.m_aaElement[ 3 ][ 2 ];
-    m_aaElement[ 0 ][ 3 ] = A.m_aaElement[ 0 ][ 0 ] * From.m_aaElement[ 0 ][ 3 ]
-                            + A.m_aaElement[ 0 ][ 1 ] * From.m_aaElement[ 1 ][ 3 ]
-                            + A.m_aaElement[ 0 ][ 2 ] * From.m_aaElement[ 2 ][ 3 ]
-                            + A.m_aaElement[ 0 ][ 3 ] * From.m_aaElement[ 3 ][ 3 ];
+	m_aaElement[ 0 ][ 0 ] = A.m_aaElement[ 0 ][ 0 ] * From.m_aaElement[ 0 ][ 0 ]
+	                        + A.m_aaElement[ 0 ][ 1 ] * From.m_aaElement[ 1 ][ 0 ]
+	                        + A.m_aaElement[ 0 ][ 2 ] * From.m_aaElement[ 2 ][ 0 ]
+	                        + A.m_aaElement[ 0 ][ 3 ] * From.m_aaElement[ 3 ][ 0 ];
+	m_aaElement[ 0 ][ 1 ] = A.m_aaElement[ 0 ][ 0 ] * From.m_aaElement[ 0 ][ 1 ]
+	                        + A.m_aaElement[ 0 ][ 1 ] * From.m_aaElement[ 1 ][ 1 ]
+	                        + A.m_aaElement[ 0 ][ 2 ] * From.m_aaElement[ 2 ][ 1 ]
+	                        + A.m_aaElement[ 0 ][ 3 ] * From.m_aaElement[ 3 ][ 1 ];
+	m_aaElement[ 0 ][ 2 ] = A.m_aaElement[ 0 ][ 0 ] * From.m_aaElement[ 0 ][ 2 ]
+	                        + A.m_aaElement[ 0 ][ 1 ] * From.m_aaElement[ 1 ][ 2 ]
+	                        + A.m_aaElement[ 0 ][ 2 ] * From.m_aaElement[ 2 ][ 2 ]
+	                        + A.m_aaElement[ 0 ][ 3 ] * From.m_aaElement[ 3 ][ 2 ];
+	m_aaElement[ 0 ][ 3 ] = A.m_aaElement[ 0 ][ 0 ] * From.m_aaElement[ 0 ][ 3 ]
+	                        + A.m_aaElement[ 0 ][ 1 ] * From.m_aaElement[ 1 ][ 3 ]
+	                        + A.m_aaElement[ 0 ][ 2 ] * From.m_aaElement[ 2 ][ 3 ]
+	                        + A.m_aaElement[ 0 ][ 3 ] * From.m_aaElement[ 3 ][ 3 ];
 
-    m_aaElement[ 1 ][ 0 ] = A.m_aaElement[ 1 ][ 0 ] * From.m_aaElement[ 0 ][ 0 ]
-                            + A.m_aaElement[ 1 ][ 1 ] * From.m_aaElement[ 1 ][ 0 ]
-                            + A.m_aaElement[ 1 ][ 2 ] * From.m_aaElement[ 2 ][ 0 ]
-                            + A.m_aaElement[ 1 ][ 3 ] * From.m_aaElement[ 3 ][ 0 ];
-    m_aaElement[ 1 ][ 1 ] = A.m_aaElement[ 1 ][ 0 ] * From.m_aaElement[ 0 ][ 1 ]
-                            + A.m_aaElement[ 1 ][ 1 ] * From.m_aaElement[ 1 ][ 1 ]
-                            + A.m_aaElement[ 1 ][ 2 ] * From.m_aaElement[ 2 ][ 1 ]
-                            + A.m_aaElement[ 1 ][ 3 ] * From.m_aaElement[ 3 ][ 1 ];
-    m_aaElement[ 1 ][ 2 ] = A.m_aaElement[ 1 ][ 0 ] * From.m_aaElement[ 0 ][ 2 ]
-                            + A.m_aaElement[ 1 ][ 1 ] * From.m_aaElement[ 1 ][ 2 ]
-                            + A.m_aaElement[ 1 ][ 2 ] * From.m_aaElement[ 2 ][ 2 ]
-                            + A.m_aaElement[ 1 ][ 3 ] * From.m_aaElement[ 3 ][ 2 ];
-    m_aaElement[ 1 ][ 3 ] = A.m_aaElement[ 1 ][ 0 ] * From.m_aaElement[ 0 ][ 3 ]
-                            + A.m_aaElement[ 1 ][ 1 ] * From.m_aaElement[ 1 ][ 3 ]
-                            + A.m_aaElement[ 1 ][ 2 ] * From.m_aaElement[ 2 ][ 3 ]
-                            + A.m_aaElement[ 1 ][ 3 ] * From.m_aaElement[ 3 ][ 3 ];
+	m_aaElement[ 1 ][ 0 ] = A.m_aaElement[ 1 ][ 0 ] * From.m_aaElement[ 0 ][ 0 ]
+	                        + A.m_aaElement[ 1 ][ 1 ] * From.m_aaElement[ 1 ][ 0 ]
+	                        + A.m_aaElement[ 1 ][ 2 ] * From.m_aaElement[ 2 ][ 0 ]
+	                        + A.m_aaElement[ 1 ][ 3 ] * From.m_aaElement[ 3 ][ 0 ];
+	m_aaElement[ 1 ][ 1 ] = A.m_aaElement[ 1 ][ 0 ] * From.m_aaElement[ 0 ][ 1 ]
+	                        + A.m_aaElement[ 1 ][ 1 ] * From.m_aaElement[ 1 ][ 1 ]
+	                        + A.m_aaElement[ 1 ][ 2 ] * From.m_aaElement[ 2 ][ 1 ]
+	                        + A.m_aaElement[ 1 ][ 3 ] * From.m_aaElement[ 3 ][ 1 ];
+	m_aaElement[ 1 ][ 2 ] = A.m_aaElement[ 1 ][ 0 ] * From.m_aaElement[ 0 ][ 2 ]
+	                        + A.m_aaElement[ 1 ][ 1 ] * From.m_aaElement[ 1 ][ 2 ]
+	                        + A.m_aaElement[ 1 ][ 2 ] * From.m_aaElement[ 2 ][ 2 ]
+	                        + A.m_aaElement[ 1 ][ 3 ] * From.m_aaElement[ 3 ][ 2 ];
+	m_aaElement[ 1 ][ 3 ] = A.m_aaElement[ 1 ][ 0 ] * From.m_aaElement[ 0 ][ 3 ]
+	                        + A.m_aaElement[ 1 ][ 1 ] * From.m_aaElement[ 1 ][ 3 ]
+	                        + A.m_aaElement[ 1 ][ 2 ] * From.m_aaElement[ 2 ][ 3 ]
+	                        + A.m_aaElement[ 1 ][ 3 ] * From.m_aaElement[ 3 ][ 3 ];
 
-    m_aaElement[ 2 ][ 0 ] = A.m_aaElement[ 2 ][ 0 ] * From.m_aaElement[ 0 ][ 0 ]
-                            + A.m_aaElement[ 2 ][ 1 ] * From.m_aaElement[ 1 ][ 0 ]
-                            + A.m_aaElement[ 2 ][ 2 ] * From.m_aaElement[ 2 ][ 0 ]
-                            + A.m_aaElement[ 2 ][ 3 ] * From.m_aaElement[ 3 ][ 0 ];
-    m_aaElement[ 2 ][ 1 ] = A.m_aaElement[ 2 ][ 0 ] * From.m_aaElement[ 0 ][ 1 ]
-                            + A.m_aaElement[ 2 ][ 1 ] * From.m_aaElement[ 1 ][ 1 ]
-                            + A.m_aaElement[ 2 ][ 2 ] * From.m_aaElement[ 2 ][ 1 ]
-                            + A.m_aaElement[ 2 ][ 3 ] * From.m_aaElement[ 3 ][ 1 ];
-    m_aaElement[ 2 ][ 2 ] = A.m_aaElement[ 2 ][ 0 ] * From.m_aaElement[ 0 ][ 2 ]
-                            + A.m_aaElement[ 2 ][ 1 ] * From.m_aaElement[ 1 ][ 2 ]
-                            + A.m_aaElement[ 2 ][ 2 ] * From.m_aaElement[ 2 ][ 2 ]
-                            + A.m_aaElement[ 2 ][ 3 ] * From.m_aaElement[ 3 ][ 2 ];
-    m_aaElement[ 2 ][ 3 ] = A.m_aaElement[ 2 ][ 0 ] * From.m_aaElement[ 0 ][ 3 ]
-                            + A.m_aaElement[ 2 ][ 1 ] * From.m_aaElement[ 1 ][ 3 ]
-                            + A.m_aaElement[ 2 ][ 2 ] * From.m_aaElement[ 2 ][ 3 ]
-                            + A.m_aaElement[ 2 ][ 3 ] * From.m_aaElement[ 3 ][ 3 ];
+	m_aaElement[ 2 ][ 0 ] = A.m_aaElement[ 2 ][ 0 ] * From.m_aaElement[ 0 ][ 0 ]
+	                        + A.m_aaElement[ 2 ][ 1 ] * From.m_aaElement[ 1 ][ 0 ]
+	                        + A.m_aaElement[ 2 ][ 2 ] * From.m_aaElement[ 2 ][ 0 ]
+	                        + A.m_aaElement[ 2 ][ 3 ] * From.m_aaElement[ 3 ][ 0 ];
+	m_aaElement[ 2 ][ 1 ] = A.m_aaElement[ 2 ][ 0 ] * From.m_aaElement[ 0 ][ 1 ]
+	                        + A.m_aaElement[ 2 ][ 1 ] * From.m_aaElement[ 1 ][ 1 ]
+	                        + A.m_aaElement[ 2 ][ 2 ] * From.m_aaElement[ 2 ][ 1 ]
+	                        + A.m_aaElement[ 2 ][ 3 ] * From.m_aaElement[ 3 ][ 1 ];
+	m_aaElement[ 2 ][ 2 ] = A.m_aaElement[ 2 ][ 0 ] * From.m_aaElement[ 0 ][ 2 ]
+	                        + A.m_aaElement[ 2 ][ 1 ] * From.m_aaElement[ 1 ][ 2 ]
+	                        + A.m_aaElement[ 2 ][ 2 ] * From.m_aaElement[ 2 ][ 2 ]
+	                        + A.m_aaElement[ 2 ][ 3 ] * From.m_aaElement[ 3 ][ 2 ];
+	m_aaElement[ 2 ][ 3 ] = A.m_aaElement[ 2 ][ 0 ] * From.m_aaElement[ 0 ][ 3 ]
+	                        + A.m_aaElement[ 2 ][ 1 ] * From.m_aaElement[ 1 ][ 3 ]
+	                        + A.m_aaElement[ 2 ][ 2 ] * From.m_aaElement[ 2 ][ 3 ]
+	                        + A.m_aaElement[ 2 ][ 3 ] * From.m_aaElement[ 3 ][ 3 ];
 
-    m_aaElement[ 3 ][ 0 ] = A.m_aaElement[ 3 ][ 0 ] * From.m_aaElement[ 0 ][ 0 ]
-                            + A.m_aaElement[ 3 ][ 1 ] * From.m_aaElement[ 1 ][ 0 ]
-                            + A.m_aaElement[ 3 ][ 2 ] * From.m_aaElement[ 2 ][ 0 ]
-                            + A.m_aaElement[ 3 ][ 3 ] * From.m_aaElement[ 3 ][ 0 ];
-    m_aaElement[ 3 ][ 1 ] = A.m_aaElement[ 3 ][ 0 ] * From.m_aaElement[ 0 ][ 1 ]
-                            + A.m_aaElement[ 3 ][ 1 ] * From.m_aaElement[ 1 ][ 1 ]
-                            + A.m_aaElement[ 3 ][ 2 ] * From.m_aaElement[ 2 ][ 1 ]
-                            + A.m_aaElement[ 3 ][ 3 ] * From.m_aaElement[ 3 ][ 1 ];
-    m_aaElement[ 3 ][ 2 ] = A.m_aaElement[ 3 ][ 0 ] * From.m_aaElement[ 0 ][ 2 ]
-                            + A.m_aaElement[ 3 ][ 1 ] * From.m_aaElement[ 1 ][ 2 ]
-                            + A.m_aaElement[ 3 ][ 2 ] * From.m_aaElement[ 2 ][ 2 ]
-                            + A.m_aaElement[ 3 ][ 3 ] * From.m_aaElement[ 3 ][ 2 ];
-    m_aaElement[ 3 ][ 3 ] = A.m_aaElement[ 3 ][ 0 ] * From.m_aaElement[ 0 ][ 3 ]
-                            + A.m_aaElement[ 3 ][ 1 ] * From.m_aaElement[ 1 ][ 3 ]
-                            + A.m_aaElement[ 3 ][ 2 ] * From.m_aaElement[ 2 ][ 3 ]
-                            + A.m_aaElement[ 3 ][ 3 ] * From.m_aaElement[ 3 ][ 3 ];
+	m_aaElement[ 3 ][ 0 ] = A.m_aaElement[ 3 ][ 0 ] * From.m_aaElement[ 0 ][ 0 ]
+	                        + A.m_aaElement[ 3 ][ 1 ] * From.m_aaElement[ 1 ][ 0 ]
+	                        + A.m_aaElement[ 3 ][ 2 ] * From.m_aaElement[ 2 ][ 0 ]
+	                        + A.m_aaElement[ 3 ][ 3 ] * From.m_aaElement[ 3 ][ 0 ];
+	m_aaElement[ 3 ][ 1 ] = A.m_aaElement[ 3 ][ 0 ] * From.m_aaElement[ 0 ][ 1 ]
+	                        + A.m_aaElement[ 3 ][ 1 ] * From.m_aaElement[ 1 ][ 1 ]
+	                        + A.m_aaElement[ 3 ][ 2 ] * From.m_aaElement[ 2 ][ 1 ]
+	                        + A.m_aaElement[ 3 ][ 3 ] * From.m_aaElement[ 3 ][ 1 ];
+	m_aaElement[ 3 ][ 2 ] = A.m_aaElement[ 3 ][ 0 ] * From.m_aaElement[ 0 ][ 2 ]
+	                        + A.m_aaElement[ 3 ][ 1 ] * From.m_aaElement[ 1 ][ 2 ]
+	                        + A.m_aaElement[ 3 ][ 2 ] * From.m_aaElement[ 2 ][ 2 ]
+	                        + A.m_aaElement[ 3 ][ 3 ] * From.m_aaElement[ 3 ][ 2 ];
+	m_aaElement[ 3 ][ 3 ] = A.m_aaElement[ 3 ][ 0 ] * From.m_aaElement[ 0 ][ 3 ]
+	                        + A.m_aaElement[ 3 ][ 1 ] * From.m_aaElement[ 1 ][ 3 ]
+	                        + A.m_aaElement[ 3 ][ 2 ] * From.m_aaElement[ 2 ][ 3 ]
+	                        + A.m_aaElement[ 3 ][ 3 ] * From.m_aaElement[ 3 ][ 3 ];
 
-    m_fIdentity = TqFalse;
-    return ( *this );
+	m_fIdentity = TqFalse;
+	return ( *this );
 }
 
 //---------------------------------------------------------------------
@@ -604,32 +604,32 @@ CqMatrix& CqMatrix::PreMultiply( const CqMatrix &From )
 
 CqVector4D CqMatrix::PreMultiply( const CqVector4D &Vector ) const
 {
-    if ( m_fIdentity )
-        return ( Vector );
+	if ( m_fIdentity )
+		return ( Vector );
 
-    CqVector4D	Result;
+	CqVector4D	Result;
 
-    Result.x( m_aaElement[ 0 ][ 0 ] * Vector.x()
-              + m_aaElement[ 0 ][ 1 ] * Vector.y()
-              + m_aaElement[ 0 ][ 2 ] * Vector.z()
-              + m_aaElement[ 0 ][ 3 ] * Vector.h() );
+	Result.x( m_aaElement[ 0 ][ 0 ] * Vector.x()
+	          + m_aaElement[ 0 ][ 1 ] * Vector.y()
+	          + m_aaElement[ 0 ][ 2 ] * Vector.z()
+	          + m_aaElement[ 0 ][ 3 ] * Vector.h() );
 
-    Result.y( m_aaElement[ 1 ][ 0 ] * Vector.x()
-              + m_aaElement[ 1 ][ 1 ] * Vector.y()
-              + m_aaElement[ 1 ][ 2 ] * Vector.z()
-              + m_aaElement[ 1 ][ 3 ] * Vector.h() );
+	Result.y( m_aaElement[ 1 ][ 0 ] * Vector.x()
+	          + m_aaElement[ 1 ][ 1 ] * Vector.y()
+	          + m_aaElement[ 1 ][ 2 ] * Vector.z()
+	          + m_aaElement[ 1 ][ 3 ] * Vector.h() );
 
-    Result.z( m_aaElement[ 2 ][ 0 ] * Vector.x()
-              + m_aaElement[ 2 ][ 1 ] * Vector.y()
-              + m_aaElement[ 2 ][ 2 ] * Vector.z()
-              + m_aaElement[ 2 ][ 3 ] * Vector.h() );
+	Result.z( m_aaElement[ 2 ][ 0 ] * Vector.x()
+	          + m_aaElement[ 2 ][ 1 ] * Vector.y()
+	          + m_aaElement[ 2 ][ 2 ] * Vector.z()
+	          + m_aaElement[ 2 ][ 3 ] * Vector.h() );
 
-    Result.h( m_aaElement[ 3 ][ 0 ] * Vector.x()
-              + m_aaElement[ 3 ][ 1 ] * Vector.y()
-              + m_aaElement[ 3 ][ 2 ] * Vector.z()
-              + m_aaElement[ 3 ][ 3 ] * Vector.h() );
+	Result.h( m_aaElement[ 3 ][ 0 ] * Vector.x()
+	          + m_aaElement[ 3 ][ 1 ] * Vector.y()
+	          + m_aaElement[ 3 ][ 2 ] * Vector.z()
+	          + m_aaElement[ 3 ][ 3 ] * Vector.h() );
 
-    return ( Result );
+	return ( Result );
 }
 
 
@@ -642,9 +642,9 @@ CqVector4D CqMatrix::PreMultiply( const CqVector4D &Vector ) const
 
 CqMatrix CqMatrix::operator*( const TqFloat S ) const
 {
-    CqMatrix Temp( *this );
-    Temp *= S;
-    return ( Temp );
+	CqMatrix Temp( *this );
+	Temp *= S;
+	return ( Temp );
 }
 
 
@@ -656,11 +656,11 @@ CqMatrix CqMatrix::operator*( const TqFloat S ) const
 
 CqMatrix &CqMatrix::operator*=( const TqFloat S )
 {
-    CqMatrix ScaleMatrix( S, S, S );
+	CqMatrix ScaleMatrix( S, S, S );
 
-    this->PreMultiply( ScaleMatrix );
+	this->PreMultiply( ScaleMatrix );
 
-    return ( *this );
+	return ( *this );
 }
 
 
@@ -672,32 +672,32 @@ CqMatrix &CqMatrix::operator*=( const TqFloat S )
 
 CqVector4D CqMatrix::operator*( const CqVector4D &Vector ) const
 {
-    if ( m_fIdentity )
-        return ( Vector );
+	if ( m_fIdentity )
+		return ( Vector );
 
-    CqVector4D	Result;
+	CqVector4D	Result;
 
-    Result.x( m_aaElement[ 0 ][ 0 ] * Vector.x()
-              + m_aaElement[ 1 ][ 0 ] * Vector.y()
-              + m_aaElement[ 2 ][ 0 ] * Vector.z()
-              + m_aaElement[ 3 ][ 0 ] * Vector.h() );
+	Result.x( m_aaElement[ 0 ][ 0 ] * Vector.x()
+	          + m_aaElement[ 1 ][ 0 ] * Vector.y()
+	          + m_aaElement[ 2 ][ 0 ] * Vector.z()
+	          + m_aaElement[ 3 ][ 0 ] * Vector.h() );
 
-    Result.y( m_aaElement[ 0 ][ 1 ] * Vector.x()
-              + m_aaElement[ 1 ][ 1 ] * Vector.y()
-              + m_aaElement[ 2 ][ 1 ] * Vector.z()
-              + m_aaElement[ 3 ][ 1 ] * Vector.h() );
+	Result.y( m_aaElement[ 0 ][ 1 ] * Vector.x()
+	          + m_aaElement[ 1 ][ 1 ] * Vector.y()
+	          + m_aaElement[ 2 ][ 1 ] * Vector.z()
+	          + m_aaElement[ 3 ][ 1 ] * Vector.h() );
 
-    Result.z( m_aaElement[ 0 ][ 2 ] * Vector.x()
-              + m_aaElement[ 1 ][ 2 ] * Vector.y()
-              + m_aaElement[ 2 ][ 2 ] * Vector.z()
-              + m_aaElement[ 3 ][ 2 ] * Vector.h() );
+	Result.z( m_aaElement[ 0 ][ 2 ] * Vector.x()
+	          + m_aaElement[ 1 ][ 2 ] * Vector.y()
+	          + m_aaElement[ 2 ][ 2 ] * Vector.z()
+	          + m_aaElement[ 3 ][ 2 ] * Vector.h() );
 
-    Result.h( m_aaElement[ 0 ][ 3 ] * Vector.x()
-              + m_aaElement[ 1 ][ 3 ] * Vector.y()
-              + m_aaElement[ 2 ][ 3 ] * Vector.z()
-              + m_aaElement[ 3 ][ 3 ] * Vector.h() );
+	Result.h( m_aaElement[ 0 ][ 3 ] * Vector.x()
+	          + m_aaElement[ 1 ][ 3 ] * Vector.y()
+	          + m_aaElement[ 2 ][ 3 ] * Vector.z()
+	          + m_aaElement[ 3 ][ 3 ] * Vector.h() );
 
-    return ( Result );
+	return ( Result );
 }
 
 
@@ -709,33 +709,33 @@ CqVector4D CqMatrix::operator*( const CqVector4D &Vector ) const
 
 CqVector3D CqMatrix::operator*( const CqVector3D &Vector ) const
 {
-    if ( m_fIdentity )
-        return ( Vector );
+	if ( m_fIdentity )
+		return ( Vector );
 
-    CqVector3D	Result;
+	CqVector3D	Result;
 
-    TqFloat h = ( m_aaElement[ 0 ][ 3 ] * Vector.x()
-                  + m_aaElement[ 1 ][ 3 ] * Vector.y()
-                  + m_aaElement[ 2 ][ 3 ] * Vector.z()
-                  + m_aaElement[ 3 ][ 3 ] );
+	TqFloat h = ( m_aaElement[ 0 ][ 3 ] * Vector.x()
+	              + m_aaElement[ 1 ][ 3 ] * Vector.y()
+	              + m_aaElement[ 2 ][ 3 ] * Vector.z()
+	              + m_aaElement[ 3 ][ 3 ] );
 
-    Result.x( ( m_aaElement[ 0 ][ 0 ] * Vector.x()
-                + m_aaElement[ 1 ][ 0 ] * Vector.y()
-                + m_aaElement[ 2 ][ 0 ] * Vector.z()
-                + m_aaElement[ 3 ][ 0 ] ) / h );
+	Result.x( ( m_aaElement[ 0 ][ 0 ] * Vector.x()
+	            + m_aaElement[ 1 ][ 0 ] * Vector.y()
+	            + m_aaElement[ 2 ][ 0 ] * Vector.z()
+	            + m_aaElement[ 3 ][ 0 ] ) / h );
 
-    Result.y( ( m_aaElement[ 0 ][ 1 ] * Vector.x()
-                + m_aaElement[ 1 ][ 1 ] * Vector.y()
-                + m_aaElement[ 2 ][ 1 ] * Vector.z()
-                + m_aaElement[ 3 ][ 1 ] ) / h );
+	Result.y( ( m_aaElement[ 0 ][ 1 ] * Vector.x()
+	            + m_aaElement[ 1 ][ 1 ] * Vector.y()
+	            + m_aaElement[ 2 ][ 1 ] * Vector.z()
+	            + m_aaElement[ 3 ][ 1 ] ) / h );
 
-    Result.z( ( m_aaElement[ 0 ][ 2 ] * Vector.x()
-                + m_aaElement[ 1 ][ 2 ] * Vector.y()
-                + m_aaElement[ 2 ][ 2 ] * Vector.z()
-                + m_aaElement[ 3 ][ 2 ] ) / h );
+	Result.z( ( m_aaElement[ 0 ][ 2 ] * Vector.x()
+	            + m_aaElement[ 1 ][ 2 ] * Vector.y()
+	            + m_aaElement[ 2 ][ 2 ] * Vector.z()
+	            + m_aaElement[ 3 ][ 2 ] ) / h );
 
 
-    return ( Result );
+	return ( Result );
 }
 
 
@@ -747,9 +747,9 @@ CqVector3D CqMatrix::operator*( const CqVector3D &Vector ) const
 
 CqMatrix CqMatrix::operator+( const CqVector4D &Vector ) const
 {
-    CqMatrix Temp( *this );
-    Temp += Vector;
-    return ( Temp );
+	CqMatrix Temp( *this );
+	Temp += Vector;
+	return ( Temp );
 }
 
 
@@ -761,11 +761,11 @@ CqMatrix CqMatrix::operator+( const CqVector4D &Vector ) const
 
 CqMatrix &CqMatrix::operator+=( const CqVector4D &Vector )
 {
-    CqMatrix Trans( Vector );
+	CqMatrix Trans( Vector );
 
-    this->PreMultiply( Trans );
+	this->PreMultiply( Trans );
 
-    return ( *this );
+	return ( *this );
 }
 
 
@@ -777,9 +777,9 @@ CqMatrix &CqMatrix::operator+=( const CqVector4D &Vector )
 
 CqMatrix CqMatrix::operator-( const CqVector4D &Vector ) const
 {
-    CqMatrix Temp( *this );
-    Temp -= Vector;
-    return ( Temp );
+	CqMatrix Temp( *this );
+	Temp -= Vector;
+	return ( Temp );
 }
 
 
@@ -790,17 +790,17 @@ CqMatrix CqMatrix::operator-( const CqVector4D &Vector ) const
 
 CqMatrix &CqMatrix::operator-=( const CqVector4D &Vector )
 {
-    CqVector4D Temp( Vector );
+	CqVector4D Temp( Vector );
 
-    Temp.x( -Temp.x() );
-    Temp.y( -Temp.y() );
-    Temp.z( -Temp.z() );
+	Temp.x( -Temp.x() );
+	Temp.y( -Temp.y() );
+	Temp.z( -Temp.z() );
 
-    CqMatrix Trans( Temp );
+	CqMatrix Trans( Temp );
 
-    this->PreMultiply( Trans );
+	this->PreMultiply( Trans );
 
-    return ( *this );
+	return ( *this );
 }
 
 
@@ -812,9 +812,9 @@ CqMatrix &CqMatrix::operator-=( const CqVector4D &Vector )
 
 CqMatrix CqMatrix::operator+( const CqMatrix &From ) const
 {
-    CqMatrix Temp( *this );
-    Temp += From;
-    return ( Temp );
+	CqMatrix Temp( *this );
+	Temp += From;
+	return ( Temp );
 }
 
 
@@ -825,26 +825,26 @@ CqMatrix CqMatrix::operator+( const CqMatrix &From ) const
 
 CqMatrix &CqMatrix::operator+=( const CqMatrix &From )
 {
-    m_aaElement[ 0 ][ 0 ] += From.m_aaElement[ 0 ][ 0 ];
-    m_aaElement[ 1 ][ 0 ] += From.m_aaElement[ 1 ][ 0 ];
-    m_aaElement[ 2 ][ 0 ] += From.m_aaElement[ 2 ][ 0 ];
-    m_aaElement[ 3 ][ 0 ] += From.m_aaElement[ 3 ][ 0 ];
-    m_aaElement[ 0 ][ 1 ] += From.m_aaElement[ 0 ][ 1 ];
-    m_aaElement[ 1 ][ 1 ] += From.m_aaElement[ 1 ][ 1 ];
-    m_aaElement[ 2 ][ 1 ] += From.m_aaElement[ 2 ][ 1 ];
-    m_aaElement[ 3 ][ 1 ] += From.m_aaElement[ 3 ][ 1 ];
-    m_aaElement[ 0 ][ 2 ] += From.m_aaElement[ 0 ][ 2 ];
-    m_aaElement[ 1 ][ 2 ] += From.m_aaElement[ 1 ][ 2 ];
-    m_aaElement[ 2 ][ 2 ] += From.m_aaElement[ 2 ][ 2 ];
-    m_aaElement[ 3 ][ 2 ] += From.m_aaElement[ 3 ][ 2 ];
-    m_aaElement[ 0 ][ 3 ] += From.m_aaElement[ 0 ][ 3 ];
-    m_aaElement[ 1 ][ 3 ] += From.m_aaElement[ 1 ][ 3 ];
-    m_aaElement[ 2 ][ 3 ] += From.m_aaElement[ 2 ][ 3 ];
-    m_aaElement[ 3 ][ 3 ] += From.m_aaElement[ 3 ][ 3 ];
+	m_aaElement[ 0 ][ 0 ] += From.m_aaElement[ 0 ][ 0 ];
+	m_aaElement[ 1 ][ 0 ] += From.m_aaElement[ 1 ][ 0 ];
+	m_aaElement[ 2 ][ 0 ] += From.m_aaElement[ 2 ][ 0 ];
+	m_aaElement[ 3 ][ 0 ] += From.m_aaElement[ 3 ][ 0 ];
+	m_aaElement[ 0 ][ 1 ] += From.m_aaElement[ 0 ][ 1 ];
+	m_aaElement[ 1 ][ 1 ] += From.m_aaElement[ 1 ][ 1 ];
+	m_aaElement[ 2 ][ 1 ] += From.m_aaElement[ 2 ][ 1 ];
+	m_aaElement[ 3 ][ 1 ] += From.m_aaElement[ 3 ][ 1 ];
+	m_aaElement[ 0 ][ 2 ] += From.m_aaElement[ 0 ][ 2 ];
+	m_aaElement[ 1 ][ 2 ] += From.m_aaElement[ 1 ][ 2 ];
+	m_aaElement[ 2 ][ 2 ] += From.m_aaElement[ 2 ][ 2 ];
+	m_aaElement[ 3 ][ 2 ] += From.m_aaElement[ 3 ][ 2 ];
+	m_aaElement[ 0 ][ 3 ] += From.m_aaElement[ 0 ][ 3 ];
+	m_aaElement[ 1 ][ 3 ] += From.m_aaElement[ 1 ][ 3 ];
+	m_aaElement[ 2 ][ 3 ] += From.m_aaElement[ 2 ][ 3 ];
+	m_aaElement[ 3 ][ 3 ] += From.m_aaElement[ 3 ][ 3 ];
 
-    m_fIdentity = TqFalse;
+	m_fIdentity = TqFalse;
 
-    return ( *this );
+	return ( *this );
 }
 
 
@@ -856,9 +856,9 @@ CqMatrix &CqMatrix::operator+=( const CqMatrix &From )
 
 CqMatrix CqMatrix::operator-( const CqMatrix &From ) const
 {
-    CqMatrix Temp( *this );
-    Temp -= From;
-    return ( Temp );
+	CqMatrix Temp( *this );
+	Temp -= From;
+	return ( Temp );
 }
 
 
@@ -869,26 +869,26 @@ CqMatrix CqMatrix::operator-( const CqMatrix &From ) const
 
 CqMatrix &CqMatrix::operator-=( const CqMatrix &From )
 {
-    m_aaElement[ 0 ][ 0 ] -= From.m_aaElement[ 0 ][ 0 ];
-    m_aaElement[ 1 ][ 0 ] -= From.m_aaElement[ 1 ][ 0 ];
-    m_aaElement[ 2 ][ 0 ] -= From.m_aaElement[ 2 ][ 0 ];
-    m_aaElement[ 3 ][ 0 ] -= From.m_aaElement[ 3 ][ 0 ];
-    m_aaElement[ 0 ][ 1 ] -= From.m_aaElement[ 0 ][ 1 ];
-    m_aaElement[ 1 ][ 1 ] -= From.m_aaElement[ 1 ][ 1 ];
-    m_aaElement[ 2 ][ 1 ] -= From.m_aaElement[ 2 ][ 1 ];
-    m_aaElement[ 3 ][ 1 ] -= From.m_aaElement[ 3 ][ 1 ];
-    m_aaElement[ 0 ][ 2 ] -= From.m_aaElement[ 0 ][ 2 ];
-    m_aaElement[ 1 ][ 2 ] -= From.m_aaElement[ 1 ][ 2 ];
-    m_aaElement[ 2 ][ 2 ] -= From.m_aaElement[ 2 ][ 2 ];
-    m_aaElement[ 3 ][ 2 ] -= From.m_aaElement[ 3 ][ 2 ];
-    m_aaElement[ 0 ][ 3 ] -= From.m_aaElement[ 0 ][ 3 ];
-    m_aaElement[ 1 ][ 3 ] -= From.m_aaElement[ 1 ][ 3 ];
-    m_aaElement[ 2 ][ 3 ] -= From.m_aaElement[ 2 ][ 3 ];
-    m_aaElement[ 3 ][ 3 ] -= From.m_aaElement[ 3 ][ 3 ];
+	m_aaElement[ 0 ][ 0 ] -= From.m_aaElement[ 0 ][ 0 ];
+	m_aaElement[ 1 ][ 0 ] -= From.m_aaElement[ 1 ][ 0 ];
+	m_aaElement[ 2 ][ 0 ] -= From.m_aaElement[ 2 ][ 0 ];
+	m_aaElement[ 3 ][ 0 ] -= From.m_aaElement[ 3 ][ 0 ];
+	m_aaElement[ 0 ][ 1 ] -= From.m_aaElement[ 0 ][ 1 ];
+	m_aaElement[ 1 ][ 1 ] -= From.m_aaElement[ 1 ][ 1 ];
+	m_aaElement[ 2 ][ 1 ] -= From.m_aaElement[ 2 ][ 1 ];
+	m_aaElement[ 3 ][ 1 ] -= From.m_aaElement[ 3 ][ 1 ];
+	m_aaElement[ 0 ][ 2 ] -= From.m_aaElement[ 0 ][ 2 ];
+	m_aaElement[ 1 ][ 2 ] -= From.m_aaElement[ 1 ][ 2 ];
+	m_aaElement[ 2 ][ 2 ] -= From.m_aaElement[ 2 ][ 2 ];
+	m_aaElement[ 3 ][ 2 ] -= From.m_aaElement[ 3 ][ 2 ];
+	m_aaElement[ 0 ][ 3 ] -= From.m_aaElement[ 0 ][ 3 ];
+	m_aaElement[ 1 ][ 3 ] -= From.m_aaElement[ 1 ][ 3 ];
+	m_aaElement[ 2 ][ 3 ] -= From.m_aaElement[ 2 ][ 3 ];
+	m_aaElement[ 3 ][ 3 ] -= From.m_aaElement[ 3 ][ 3 ];
 
-    m_fIdentity = TqFalse;
+	m_fIdentity = TqFalse;
 
-    return ( *this );
+	return ( *this );
 }
 
 
@@ -899,26 +899,26 @@ CqMatrix &CqMatrix::operator-=( const CqMatrix &From )
 
 CqMatrix &CqMatrix::operator=( const CqMatrix &From )
 {
-    m_aaElement[ 0 ][ 0 ] = From.m_aaElement[ 0 ][ 0 ];
-    m_aaElement[ 1 ][ 0 ] = From.m_aaElement[ 1 ][ 0 ];
-    m_aaElement[ 2 ][ 0 ] = From.m_aaElement[ 2 ][ 0 ];
-    m_aaElement[ 3 ][ 0 ] = From.m_aaElement[ 3 ][ 0 ];
-    m_aaElement[ 0 ][ 1 ] = From.m_aaElement[ 0 ][ 1 ];
-    m_aaElement[ 1 ][ 1 ] = From.m_aaElement[ 1 ][ 1 ];
-    m_aaElement[ 2 ][ 1 ] = From.m_aaElement[ 2 ][ 1 ];
-    m_aaElement[ 3 ][ 1 ] = From.m_aaElement[ 3 ][ 1 ];
-    m_aaElement[ 0 ][ 2 ] = From.m_aaElement[ 0 ][ 2 ];
-    m_aaElement[ 1 ][ 2 ] = From.m_aaElement[ 1 ][ 2 ];
-    m_aaElement[ 2 ][ 2 ] = From.m_aaElement[ 2 ][ 2 ];
-    m_aaElement[ 3 ][ 2 ] = From.m_aaElement[ 3 ][ 2 ];
-    m_aaElement[ 0 ][ 3 ] = From.m_aaElement[ 0 ][ 3 ];
-    m_aaElement[ 1 ][ 3 ] = From.m_aaElement[ 1 ][ 3 ];
-    m_aaElement[ 2 ][ 3 ] = From.m_aaElement[ 2 ][ 3 ];
-    m_aaElement[ 3 ][ 3 ] = From.m_aaElement[ 3 ][ 3 ];
+	m_aaElement[ 0 ][ 0 ] = From.m_aaElement[ 0 ][ 0 ];
+	m_aaElement[ 1 ][ 0 ] = From.m_aaElement[ 1 ][ 0 ];
+	m_aaElement[ 2 ][ 0 ] = From.m_aaElement[ 2 ][ 0 ];
+	m_aaElement[ 3 ][ 0 ] = From.m_aaElement[ 3 ][ 0 ];
+	m_aaElement[ 0 ][ 1 ] = From.m_aaElement[ 0 ][ 1 ];
+	m_aaElement[ 1 ][ 1 ] = From.m_aaElement[ 1 ][ 1 ];
+	m_aaElement[ 2 ][ 1 ] = From.m_aaElement[ 2 ][ 1 ];
+	m_aaElement[ 3 ][ 1 ] = From.m_aaElement[ 3 ][ 1 ];
+	m_aaElement[ 0 ][ 2 ] = From.m_aaElement[ 0 ][ 2 ];
+	m_aaElement[ 1 ][ 2 ] = From.m_aaElement[ 1 ][ 2 ];
+	m_aaElement[ 2 ][ 2 ] = From.m_aaElement[ 2 ][ 2 ];
+	m_aaElement[ 3 ][ 2 ] = From.m_aaElement[ 3 ][ 2 ];
+	m_aaElement[ 0 ][ 3 ] = From.m_aaElement[ 0 ][ 3 ];
+	m_aaElement[ 1 ][ 3 ] = From.m_aaElement[ 1 ][ 3 ];
+	m_aaElement[ 2 ][ 3 ] = From.m_aaElement[ 2 ][ 3 ];
+	m_aaElement[ 3 ][ 3 ] = From.m_aaElement[ 3 ][ 3 ];
 
-    m_fIdentity = From.m_fIdentity;
+	m_fIdentity = From.m_fIdentity;
 
-    return ( *this );
+	return ( *this );
 }
 
 //---------------------------------------------------------------------
@@ -928,26 +928,26 @@ CqMatrix &CqMatrix::operator=( const CqMatrix &From )
 
 CqMatrix &CqMatrix::operator=( TqFloat From[ 4 ][ 4 ] )
 {
-    m_aaElement[ 0 ][ 0 ] = From[ 0 ][ 0 ];
-    m_aaElement[ 1 ][ 0 ] = From[ 1 ][ 0 ];
-    m_aaElement[ 2 ][ 0 ] = From[ 2 ][ 0 ];
-    m_aaElement[ 3 ][ 0 ] = From[ 3 ][ 0 ];
-    m_aaElement[ 0 ][ 1 ] = From[ 0 ][ 1 ];
-    m_aaElement[ 1 ][ 1 ] = From[ 1 ][ 1 ];
-    m_aaElement[ 2 ][ 1 ] = From[ 2 ][ 1 ];
-    m_aaElement[ 3 ][ 1 ] = From[ 3 ][ 1 ];
-    m_aaElement[ 0 ][ 2 ] = From[ 0 ][ 2 ];
-    m_aaElement[ 1 ][ 2 ] = From[ 1 ][ 2 ];
-    m_aaElement[ 2 ][ 2 ] = From[ 2 ][ 2 ];
-    m_aaElement[ 3 ][ 2 ] = From[ 3 ][ 2 ];
-    m_aaElement[ 0 ][ 3 ] = From[ 0 ][ 3 ];
-    m_aaElement[ 1 ][ 3 ] = From[ 1 ][ 3 ];
-    m_aaElement[ 2 ][ 3 ] = From[ 2 ][ 3 ];
-    m_aaElement[ 3 ][ 3 ] = From[ 3 ][ 3 ];
+	m_aaElement[ 0 ][ 0 ] = From[ 0 ][ 0 ];
+	m_aaElement[ 1 ][ 0 ] = From[ 1 ][ 0 ];
+	m_aaElement[ 2 ][ 0 ] = From[ 2 ][ 0 ];
+	m_aaElement[ 3 ][ 0 ] = From[ 3 ][ 0 ];
+	m_aaElement[ 0 ][ 1 ] = From[ 0 ][ 1 ];
+	m_aaElement[ 1 ][ 1 ] = From[ 1 ][ 1 ];
+	m_aaElement[ 2 ][ 1 ] = From[ 2 ][ 1 ];
+	m_aaElement[ 3 ][ 1 ] = From[ 3 ][ 1 ];
+	m_aaElement[ 0 ][ 2 ] = From[ 0 ][ 2 ];
+	m_aaElement[ 1 ][ 2 ] = From[ 1 ][ 2 ];
+	m_aaElement[ 2 ][ 2 ] = From[ 2 ][ 2 ];
+	m_aaElement[ 3 ][ 2 ] = From[ 3 ][ 2 ];
+	m_aaElement[ 0 ][ 3 ] = From[ 0 ][ 3 ];
+	m_aaElement[ 1 ][ 3 ] = From[ 1 ][ 3 ];
+	m_aaElement[ 2 ][ 3 ] = From[ 2 ][ 3 ];
+	m_aaElement[ 3 ][ 3 ] = From[ 3 ][ 3 ];
 
-    m_fIdentity = TqFalse;
+	m_fIdentity = TqFalse;
 
-    return ( *this );
+	return ( *this );
 }
 
 //---------------------------------------------------------------------
@@ -957,26 +957,26 @@ CqMatrix &CqMatrix::operator=( TqFloat From[ 4 ][ 4 ] )
 
 CqMatrix &CqMatrix::operator=( TqFloat From[ 16 ] )
 {
-    m_aaElement[ 0 ][ 0 ] = From[ 0 ];
-    m_aaElement[ 0 ][ 1 ] = From[ 1 ];
-    m_aaElement[ 0 ][ 2 ] = From[ 2 ];
-    m_aaElement[ 0 ][ 3 ] = From[ 3 ];
-    m_aaElement[ 1 ][ 0 ] = From[ 4 ];
-    m_aaElement[ 1 ][ 1 ] = From[ 5 ];
-    m_aaElement[ 1 ][ 2 ] = From[ 6 ];
-    m_aaElement[ 1 ][ 3 ] = From[ 7 ];
-    m_aaElement[ 2 ][ 0 ] = From[ 8 ];
-    m_aaElement[ 2 ][ 1 ] = From[ 9 ];
-    m_aaElement[ 2 ][ 2 ] = From[ 10 ];
-    m_aaElement[ 2 ][ 3 ] = From[ 11 ];
-    m_aaElement[ 3 ][ 0 ] = From[ 12 ];
-    m_aaElement[ 3 ][ 1 ] = From[ 13 ];
-    m_aaElement[ 3 ][ 2 ] = From[ 14 ];
-    m_aaElement[ 3 ][ 3 ] = From[ 15 ];
+	m_aaElement[ 0 ][ 0 ] = From[ 0 ];
+	m_aaElement[ 0 ][ 1 ] = From[ 1 ];
+	m_aaElement[ 0 ][ 2 ] = From[ 2 ];
+	m_aaElement[ 0 ][ 3 ] = From[ 3 ];
+	m_aaElement[ 1 ][ 0 ] = From[ 4 ];
+	m_aaElement[ 1 ][ 1 ] = From[ 5 ];
+	m_aaElement[ 1 ][ 2 ] = From[ 6 ];
+	m_aaElement[ 1 ][ 3 ] = From[ 7 ];
+	m_aaElement[ 2 ][ 0 ] = From[ 8 ];
+	m_aaElement[ 2 ][ 1 ] = From[ 9 ];
+	m_aaElement[ 2 ][ 2 ] = From[ 10 ];
+	m_aaElement[ 2 ][ 3 ] = From[ 11 ];
+	m_aaElement[ 3 ][ 0 ] = From[ 12 ];
+	m_aaElement[ 3 ][ 1 ] = From[ 13 ];
+	m_aaElement[ 3 ][ 2 ] = From[ 14 ];
+	m_aaElement[ 3 ][ 3 ] = From[ 15 ];
 
-    m_fIdentity = TqFalse;
+	m_fIdentity = TqFalse;
 
-    return ( *this );
+	return ( *this );
 }
 
 
@@ -987,108 +987,108 @@ CqMatrix &CqMatrix::operator=( TqFloat From[ 16 ] )
 
 CqMatrix CqMatrix::Inverse() const
 {
-    CqMatrix b;		// b evolves from identity into inverse(a)
-    CqMatrix a( *this );	// a evolves from original matrix into identity
+	CqMatrix b;		// b evolves from identity into inverse(a)
+	CqMatrix a( *this );	// a evolves from original matrix into identity
 
-    if ( m_fIdentity )
-    {
-        b = *this;
-    }
-    else
-    {
-        b.Identity();
-        b.m_fIdentity = TqFalse;
+	if ( m_fIdentity )
+	{
+		b = *this;
+	}
+	else
+	{
+		b.Identity();
+		b.m_fIdentity = TqFalse;
 
-        TqInt i;
-        TqInt j;
-        TqInt i1;
+		TqInt i;
+		TqInt j;
+		TqInt i1;
 
-        // Loop over cols of a from left to right, eliminating above and below diag
-        for ( j = 0; j < 4; j++ )    	// Find largest pivot in column j among rows j..3
-        {
-            i1 = j;
-            for ( i = j + 1; i < 4; i++ )
-            {
-                if ( fabs( a.m_aaElement[ i ][ j ] ) > fabs( a.m_aaElement[ i1 ][ j ] ) )
-                {
-                    i1 = i;
-                }
-            }
+		// Loop over cols of a from left to right, eliminating above and below diag
+		for ( j = 0; j < 4; j++ )    	// Find largest pivot in column j among rows j..3
+		{
+			i1 = j;
+			for ( i = j + 1; i < 4; i++ )
+			{
+				if ( fabs( a.m_aaElement[ i ][ j ] ) > fabs( a.m_aaElement[ i1 ][ j ] ) )
+				{
+					i1 = i;
+				}
+			}
 
-            if ( i1 != j )
-            {
-                // Swap rows i1 and j in a and b to put pivot on diagonal
-                TqFloat temp;
+			if ( i1 != j )
+			{
+				// Swap rows i1 and j in a and b to put pivot on diagonal
+				TqFloat temp;
 
-                temp = a.m_aaElement[ i1 ][ 0 ];
-                a.m_aaElement[ i1 ][ 0 ] = a.m_aaElement[ j ][ 0 ];
-                a.m_aaElement[ j ][ 0 ] = temp;
-                temp = a.m_aaElement[ i1 ][ 1 ];
-                a.m_aaElement[ i1 ][ 1 ] = a.m_aaElement[ j ][ 1 ];
-                a.m_aaElement[ j ][ 1 ] = temp;
-                temp = a.m_aaElement[ i1 ][ 2 ];
-                a.m_aaElement[ i1 ][ 2 ] = a.m_aaElement[ j ][ 2 ];
-                a.m_aaElement[ j ][ 2 ] = temp;
-                temp = a.m_aaElement[ i1 ][ 3 ];
-                a.m_aaElement[ i1 ][ 3 ] = a.m_aaElement[ j ][ 3 ];
-                a.m_aaElement[ j ][ 3 ] = temp;
+				temp = a.m_aaElement[ i1 ][ 0 ];
+				a.m_aaElement[ i1 ][ 0 ] = a.m_aaElement[ j ][ 0 ];
+				a.m_aaElement[ j ][ 0 ] = temp;
+				temp = a.m_aaElement[ i1 ][ 1 ];
+				a.m_aaElement[ i1 ][ 1 ] = a.m_aaElement[ j ][ 1 ];
+				a.m_aaElement[ j ][ 1 ] = temp;
+				temp = a.m_aaElement[ i1 ][ 2 ];
+				a.m_aaElement[ i1 ][ 2 ] = a.m_aaElement[ j ][ 2 ];
+				a.m_aaElement[ j ][ 2 ] = temp;
+				temp = a.m_aaElement[ i1 ][ 3 ];
+				a.m_aaElement[ i1 ][ 3 ] = a.m_aaElement[ j ][ 3 ];
+				a.m_aaElement[ j ][ 3 ] = temp;
 
-                temp = b.m_aaElement[ i1 ][ 0 ];
-                b.m_aaElement[ i1 ][ 0 ] = b.m_aaElement[ j ][ 0 ];
-                b.m_aaElement[ j ][ 0 ] = temp;
-                temp = b.m_aaElement[ i1 ][ 1 ];
-                b.m_aaElement[ i1 ][ 1 ] = b.m_aaElement[ j ][ 1 ];
-                b.m_aaElement[ j ][ 1 ] = temp;
-                temp = b.m_aaElement[ i1 ][ 2 ];
-                b.m_aaElement[ i1 ][ 2 ] = b.m_aaElement[ j ][ 2 ];
-                b.m_aaElement[ j ][ 2 ] = temp;
-                temp = b.m_aaElement[ i1 ][ 3 ];
-                b.m_aaElement[ i1 ][ 3 ] = b.m_aaElement[ j ][ 3 ];
-                b.m_aaElement[ j ][ 3 ] = temp;
-            }
+				temp = b.m_aaElement[ i1 ][ 0 ];
+				b.m_aaElement[ i1 ][ 0 ] = b.m_aaElement[ j ][ 0 ];
+				b.m_aaElement[ j ][ 0 ] = temp;
+				temp = b.m_aaElement[ i1 ][ 1 ];
+				b.m_aaElement[ i1 ][ 1 ] = b.m_aaElement[ j ][ 1 ];
+				b.m_aaElement[ j ][ 1 ] = temp;
+				temp = b.m_aaElement[ i1 ][ 2 ];
+				b.m_aaElement[ i1 ][ 2 ] = b.m_aaElement[ j ][ 2 ];
+				b.m_aaElement[ j ][ 2 ] = temp;
+				temp = b.m_aaElement[ i1 ][ 3 ];
+				b.m_aaElement[ i1 ][ 3 ] = b.m_aaElement[ j ][ 3 ];
+				b.m_aaElement[ j ][ 3 ] = temp;
+			}
 
-            // Scale row j to have a unit diagonal
-            if ( a.m_aaElement[ j ][ j ] == 0.0f )
-            {
-                // Can't invert a singular matrix!
-                //				throw XssMatrix(MatrixErr_Singular, __LINE__, ssMakeWide(__FILE__));
-            }
-            TqFloat scale = 1.0f / a.m_aaElement[ j ][ j ];
-            b.m_aaElement[ j ][ 0 ] *= scale;
-            b.m_aaElement[ j ][ 1 ] *= scale;
-            b.m_aaElement[ j ][ 2 ] *= scale;
-            b.m_aaElement[ j ][ 3 ] *= scale;
-            // all elements to left of a[j][j] are already zero
-            for ( i1 = j + 1; i1 < 4; i1++ )
-            {
-                a.m_aaElement[ j ][ i1 ] *= scale;
-            }
-            a.m_aaElement[ j ][ j ] = 1.0f;
+			// Scale row j to have a unit diagonal
+			if ( a.m_aaElement[ j ][ j ] == 0.0f )
+			{
+				// Can't invert a singular matrix!
+				//				throw XssMatrix(MatrixErr_Singular, __LINE__, ssMakeWide(__FILE__));
+			}
+			TqFloat scale = 1.0f / a.m_aaElement[ j ][ j ];
+			b.m_aaElement[ j ][ 0 ] *= scale;
+			b.m_aaElement[ j ][ 1 ] *= scale;
+			b.m_aaElement[ j ][ 2 ] *= scale;
+			b.m_aaElement[ j ][ 3 ] *= scale;
+			// all elements to left of a[j][j] are already zero
+			for ( i1 = j + 1; i1 < 4; i1++ )
+			{
+				a.m_aaElement[ j ][ i1 ] *= scale;
+			}
+			a.m_aaElement[ j ][ j ] = 1.0f;
 
-            // Eliminate off-diagonal elements in column j of a, doing identical ops to b
-            for ( i = 0; i < 4; i++ )
-            {
-                if ( i != j )
-                {
-                    scale = a.m_aaElement[ i ][ j ];
-                    b.m_aaElement[ i ][ 0 ] -= scale * b.m_aaElement[ j ][ 0 ];
-                    b.m_aaElement[ i ][ 1 ] -= scale * b.m_aaElement[ j ][ 1 ];
-                    b.m_aaElement[ i ][ 2 ] -= scale * b.m_aaElement[ j ][ 2 ];
-                    b.m_aaElement[ i ][ 3 ] -= scale * b.m_aaElement[ j ][ 3 ];
+			// Eliminate off-diagonal elements in column j of a, doing identical ops to b
+			for ( i = 0; i < 4; i++ )
+			{
+				if ( i != j )
+				{
+					scale = a.m_aaElement[ i ][ j ];
+					b.m_aaElement[ i ][ 0 ] -= scale * b.m_aaElement[ j ][ 0 ];
+					b.m_aaElement[ i ][ 1 ] -= scale * b.m_aaElement[ j ][ 1 ];
+					b.m_aaElement[ i ][ 2 ] -= scale * b.m_aaElement[ j ][ 2 ];
+					b.m_aaElement[ i ][ 3 ] -= scale * b.m_aaElement[ j ][ 3 ];
 
-                    // all elements to left of a[j][j] are zero
-                    // a[j][j] is 1.0
-                    for ( i1 = j + 1; i1 < 4; i1++ )
-                    {
-                        a.m_aaElement[ i ][ i1 ] -= scale * a.m_aaElement[ j ][ i1 ];
-                    }
-                    a.m_aaElement[ i ][ j ] = 0.0f;
-                }
-            }
-        }
-    }
+					// all elements to left of a[j][j] are zero
+					// a[j][j] is 1.0
+					for ( i1 = j + 1; i1 < 4; i1++ )
+					{
+						a.m_aaElement[ i ][ i1 ] -= scale * a.m_aaElement[ j ][ i1 ];
+					}
+					a.m_aaElement[ i ][ j ] = 0.0f;
+				}
+			}
+		}
+	}
 
-    return b;
+	return b;
 }
 
 //---------------------------------------------------------------------
@@ -1097,35 +1097,35 @@ CqMatrix CqMatrix::Inverse() const
 
 CqMatrix CqMatrix::Transpose() const
 {
-    CqMatrix Temp;
+	CqMatrix Temp;
 
-    if ( m_fIdentity )
-    {
-        Temp = *this;
-    }
-    else
-    {
-        Temp.m_aaElement[ 0 ][ 0 ] = m_aaElement[ 0 ][ 0 ];
-        Temp.m_aaElement[ 0 ][ 1 ] = m_aaElement[ 1 ][ 0 ];
-        Temp.m_aaElement[ 0 ][ 2 ] = m_aaElement[ 2 ][ 0 ];
-        Temp.m_aaElement[ 0 ][ 3 ] = m_aaElement[ 3 ][ 0 ];
-        Temp.m_aaElement[ 1 ][ 0 ] = m_aaElement[ 0 ][ 1 ];
-        Temp.m_aaElement[ 1 ][ 1 ] = m_aaElement[ 1 ][ 1 ];
-        Temp.m_aaElement[ 1 ][ 2 ] = m_aaElement[ 2 ][ 1 ];
-        Temp.m_aaElement[ 1 ][ 3 ] = m_aaElement[ 3 ][ 1 ];
-        Temp.m_aaElement[ 2 ][ 0 ] = m_aaElement[ 0 ][ 2 ];
-        Temp.m_aaElement[ 2 ][ 1 ] = m_aaElement[ 1 ][ 2 ];
-        Temp.m_aaElement[ 2 ][ 2 ] = m_aaElement[ 2 ][ 2 ];
-        Temp.m_aaElement[ 2 ][ 3 ] = m_aaElement[ 3 ][ 2 ];
-        Temp.m_aaElement[ 3 ][ 0 ] = m_aaElement[ 0 ][ 3 ];
-        Temp.m_aaElement[ 3 ][ 1 ] = m_aaElement[ 1 ][ 3 ];
-        Temp.m_aaElement[ 3 ][ 2 ] = m_aaElement[ 2 ][ 3 ];
-        Temp.m_aaElement[ 3 ][ 3 ] = m_aaElement[ 3 ][ 3 ];
+	if ( m_fIdentity )
+	{
+		Temp = *this;
+	}
+	else
+	{
+		Temp.m_aaElement[ 0 ][ 0 ] = m_aaElement[ 0 ][ 0 ];
+		Temp.m_aaElement[ 0 ][ 1 ] = m_aaElement[ 1 ][ 0 ];
+		Temp.m_aaElement[ 0 ][ 2 ] = m_aaElement[ 2 ][ 0 ];
+		Temp.m_aaElement[ 0 ][ 3 ] = m_aaElement[ 3 ][ 0 ];
+		Temp.m_aaElement[ 1 ][ 0 ] = m_aaElement[ 0 ][ 1 ];
+		Temp.m_aaElement[ 1 ][ 1 ] = m_aaElement[ 1 ][ 1 ];
+		Temp.m_aaElement[ 1 ][ 2 ] = m_aaElement[ 2 ][ 1 ];
+		Temp.m_aaElement[ 1 ][ 3 ] = m_aaElement[ 3 ][ 1 ];
+		Temp.m_aaElement[ 2 ][ 0 ] = m_aaElement[ 0 ][ 2 ];
+		Temp.m_aaElement[ 2 ][ 1 ] = m_aaElement[ 1 ][ 2 ];
+		Temp.m_aaElement[ 2 ][ 2 ] = m_aaElement[ 2 ][ 2 ];
+		Temp.m_aaElement[ 2 ][ 3 ] = m_aaElement[ 3 ][ 2 ];
+		Temp.m_aaElement[ 3 ][ 0 ] = m_aaElement[ 0 ][ 3 ];
+		Temp.m_aaElement[ 3 ][ 1 ] = m_aaElement[ 1 ][ 3 ];
+		Temp.m_aaElement[ 3 ][ 2 ] = m_aaElement[ 2 ][ 3 ];
+		Temp.m_aaElement[ 3 ][ 3 ] = m_aaElement[ 3 ][ 3 ];
 
-        Temp.m_fIdentity = TqFalse;
-    }
+		Temp.m_fIdentity = TqFalse;
+	}
 
-    return ( Temp );
+	return ( Temp );
 }
 
 
@@ -1136,7 +1136,7 @@ CqMatrix CqMatrix::Transpose() const
 
 static TqFloat det2x2( TqFloat a, TqFloat b, TqFloat c, TqFloat d )
 {
-    return a * d - b * c;
+	return a * d - b * c;
 }
 
 //---------------------------------------------------------------------
@@ -1148,9 +1148,9 @@ static TqFloat det3x3( TqFloat a1, TqFloat a2, TqFloat a3,
                        TqFloat b1, TqFloat b2, TqFloat b3,
                        TqFloat c1, TqFloat c2, TqFloat c3 )
 {
-    return a1 * det2x2( b2, b3, c2, c3 ) -
-           b1 * det2x2( a2, a3, c2, c3 ) +
-           c1 * det2x2( a2, a3, b2, b3 );
+	return a1 * det2x2( b2, b3, c2, c3 ) -
+	       b1 * det2x2( a2, a3, c2, c3 ) +
+	       c1 * det2x2( a2, a3, b2, b3 );
 }
 
 
@@ -1161,31 +1161,31 @@ static TqFloat det3x3( TqFloat a1, TqFloat a2, TqFloat a3,
 
 TqFloat CqMatrix::Determinant() const
 {
-    // Assign to individual variable names to aid selecting correct elements
-    TqFloat a1 = m_aaElement[ 0 ][ 0 ];
-    TqFloat b1 = m_aaElement[ 0 ][ 1 ];
-    TqFloat c1 = m_aaElement[ 0 ][ 2 ];
-    TqFloat d1 = m_aaElement[ 0 ][ 3 ];
+	// Assign to individual variable names to aid selecting correct elements
+	TqFloat a1 = m_aaElement[ 0 ][ 0 ];
+	TqFloat b1 = m_aaElement[ 0 ][ 1 ];
+	TqFloat c1 = m_aaElement[ 0 ][ 2 ];
+	TqFloat d1 = m_aaElement[ 0 ][ 3 ];
 
-    TqFloat a2 = m_aaElement[ 1 ][ 0 ];
-    TqFloat b2 = m_aaElement[ 1 ][ 1 ];
-    TqFloat c2 = m_aaElement[ 1 ][ 2 ];
-    TqFloat d2 = m_aaElement[ 1 ][ 3 ];
+	TqFloat a2 = m_aaElement[ 1 ][ 0 ];
+	TqFloat b2 = m_aaElement[ 1 ][ 1 ];
+	TqFloat c2 = m_aaElement[ 1 ][ 2 ];
+	TqFloat d2 = m_aaElement[ 1 ][ 3 ];
 
-    TqFloat a3 = m_aaElement[ 2 ][ 0 ];
-    TqFloat b3 = m_aaElement[ 2 ][ 1 ];
-    TqFloat c3 = m_aaElement[ 2 ][ 2 ];
-    TqFloat d3 = m_aaElement[ 2 ][ 3 ];
+	TqFloat a3 = m_aaElement[ 2 ][ 0 ];
+	TqFloat b3 = m_aaElement[ 2 ][ 1 ];
+	TqFloat c3 = m_aaElement[ 2 ][ 2 ];
+	TqFloat d3 = m_aaElement[ 2 ][ 3 ];
 
-    TqFloat a4 = m_aaElement[ 3 ][ 0 ];
-    TqFloat b4 = m_aaElement[ 3 ][ 1 ];
-    TqFloat c4 = m_aaElement[ 3 ][ 2 ];
-    TqFloat d4 = m_aaElement[ 3 ][ 3 ];
+	TqFloat a4 = m_aaElement[ 3 ][ 0 ];
+	TqFloat b4 = m_aaElement[ 3 ][ 1 ];
+	TqFloat c4 = m_aaElement[ 3 ][ 2 ];
+	TqFloat d4 = m_aaElement[ 3 ][ 3 ];
 
-    return a1 * det3x3( b2, b3, b4, c2, c3, c4, d2, d3, d4 ) -
-           b1 * det3x3( a2, a3, a4, c2, c3, c4, d2, d3, d4 ) +
-           c1 * det3x3( a2, a3, a4, b2, b3, b4, d2, d3, d4 ) -
-           d1 * det3x3( a2, a3, a4, b2, b3, b4, c2, c3, c4 );
+	return a1 * det3x3( b2, b3, b4, c2, c3, c4, d2, d3, d4 ) -
+	       b1 * det3x3( a2, a3, a4, c2, c3, c4, d2, d3, d4 ) +
+	       c1 * det3x3( a2, a3, a4, b2, b3, b4, d2, d3, d4 ) -
+	       d1 * det3x3( a2, a3, a4, b2, b3, b4, c2, c3, c4 );
 }
 
 //----------------------------------------------------------------------
@@ -1197,35 +1197,35 @@ TqFloat CqMatrix::Determinant() const
 
 std::ostream &operator<<( std::ostream &Stream, const CqMatrix &Matrix )
 {
-    if ( !Matrix.fIdentity() )
-    {
-        Stream << "|" << Matrix.m_aaElement[ 0 ][ 0 ] <<
-        "," << Matrix.m_aaElement[ 0 ][ 1 ] <<
-        "," << Matrix.m_aaElement[ 0 ][ 2 ] <<
-        "," << Matrix.m_aaElement[ 0 ][ 3 ] << "|" << std::endl <<
-        "|" << Matrix.m_aaElement[ 1 ][ 0 ] <<
-        "," << Matrix.m_aaElement[ 1 ][ 1 ] <<
-        "," << Matrix.m_aaElement[ 1 ][ 2 ] <<
-        "," << Matrix.m_aaElement[ 1 ][ 3 ] << "|" << std::endl <<
-        "|" << Matrix.m_aaElement[ 2 ][ 0 ] <<
-        "," << Matrix.m_aaElement[ 2 ][ 1 ] <<
-        "," << Matrix.m_aaElement[ 2 ][ 2 ] <<
-        "," << Matrix.m_aaElement[ 2 ][ 3 ] << "|" << std::endl <<
-        "|" << Matrix.m_aaElement[ 3 ][ 0 ] <<
-        "," << Matrix.m_aaElement[ 3 ][ 1 ] <<
-        "," << Matrix.m_aaElement[ 3 ][ 2 ] <<
-        "," << Matrix.m_aaElement[ 3 ][ 3 ] << "|" << std::ends;
-    }
-    else
-    {
-        Stream <<
-        "|" << 1.0f << "," << 0.0f << "," << 0.0f << "," << 0.0f << "|" << std::endl <<
-        "|" << 0.0f << "," << 1.0f << "," << 0.0f << "," << 0.0f << "|" << std::endl <<
-        "|" << 0.0f << "," << 0.0f << "," << 1.0f << "," << 0.0f << "|" << std::endl <<
-        "|" << 0.0f << "," << 0.0f << "," << 0.0f << "," << 1.0f << "|" << std::ends;
-    }
+	if ( !Matrix.fIdentity() )
+	{
+		Stream << "|" << Matrix.m_aaElement[ 0 ][ 0 ] <<
+		"," << Matrix.m_aaElement[ 0 ][ 1 ] <<
+		"," << Matrix.m_aaElement[ 0 ][ 2 ] <<
+		"," << Matrix.m_aaElement[ 0 ][ 3 ] << "|" << std::endl <<
+		"|" << Matrix.m_aaElement[ 1 ][ 0 ] <<
+		"," << Matrix.m_aaElement[ 1 ][ 1 ] <<
+		"," << Matrix.m_aaElement[ 1 ][ 2 ] <<
+		"," << Matrix.m_aaElement[ 1 ][ 3 ] << "|" << std::endl <<
+		"|" << Matrix.m_aaElement[ 2 ][ 0 ] <<
+		"," << Matrix.m_aaElement[ 2 ][ 1 ] <<
+		"," << Matrix.m_aaElement[ 2 ][ 2 ] <<
+		"," << Matrix.m_aaElement[ 2 ][ 3 ] << "|" << std::endl <<
+		"|" << Matrix.m_aaElement[ 3 ][ 0 ] <<
+		"," << Matrix.m_aaElement[ 3 ][ 1 ] <<
+		"," << Matrix.m_aaElement[ 3 ][ 2 ] <<
+		"," << Matrix.m_aaElement[ 3 ][ 3 ] << "|" << std::ends;
+	}
+	else
+	{
+		Stream <<
+		"|" << 1.0f << "," << 0.0f << "," << 0.0f << "," << 0.0f << "|" << std::endl <<
+		"|" << 0.0f << "," << 1.0f << "," << 0.0f << "," << 0.0f << "|" << std::endl <<
+		"|" << 0.0f << "," << 0.0f << "," << 1.0f << "," << 0.0f << "|" << std::endl <<
+		"|" << 0.0f << "," << 0.0f << "," << 0.0f << "," << 1.0f << "|" << std::ends;
+	}
 
-    return ( Stream );
+	return ( Stream );
 }
 
 
@@ -1238,35 +1238,35 @@ std::ostream &operator<<( std::ostream &Stream, const CqMatrix &Matrix )
 
 std::ostream &operator<<( std::ostream &Stream, CqMatrix &Matrix )
 {
-    if ( !Matrix.fIdentity() )
-    {
-        Stream << "|" << Matrix.m_aaElement[ 0 ][ 0 ] <<
-        "," << Matrix.m_aaElement[ 0 ][ 1 ] <<
-        "," << Matrix.m_aaElement[ 0 ][ 2 ] <<
-        "," << Matrix.m_aaElement[ 0 ][ 3 ] << "|" << std::endl <<
-        "|" << Matrix.m_aaElement[ 1 ][ 0 ] <<
-        "," << Matrix.m_aaElement[ 1 ][ 1 ] <<
-        "," << Matrix.m_aaElement[ 1 ][ 2 ] <<
-        "," << Matrix.m_aaElement[ 1 ][ 3 ] << "|" << std::endl <<
-        "|" << Matrix.m_aaElement[ 2 ][ 0 ] <<
-        "," << Matrix.m_aaElement[ 2 ][ 1 ] <<
-        "," << Matrix.m_aaElement[ 2 ][ 2 ] <<
-        "," << Matrix.m_aaElement[ 2 ][ 3 ] << "|" << std::endl <<
-        "|" << Matrix.m_aaElement[ 3 ][ 0 ] <<
-        "," << Matrix.m_aaElement[ 3 ][ 1 ] <<
-        "," << Matrix.m_aaElement[ 3 ][ 2 ] <<
-        "," << Matrix.m_aaElement[ 3 ][ 3 ] << "|" << std::ends;
-    }
-    else
-    {
-        Stream <<
-        "|" << 1.0f << "," << 0.0f << "," << 0.0f << "," << 0.0f << "|" << std::endl <<
-        "|" << 0.0f << "," << 1.0f << "," << 0.0f << "," << 0.0f << "|" << std::endl <<
-        "|" << 0.0f << "," << 0.0f << "," << 1.0f << "," << 0.0f << "|" << std::endl <<
-        "|" << 0.0f << "," << 0.0f << "," << 0.0f << "," << 1.0f << "|" << std::ends;
-    }
+	if ( !Matrix.fIdentity() )
+	{
+		Stream << "|" << Matrix.m_aaElement[ 0 ][ 0 ] <<
+		"," << Matrix.m_aaElement[ 0 ][ 1 ] <<
+		"," << Matrix.m_aaElement[ 0 ][ 2 ] <<
+		"," << Matrix.m_aaElement[ 0 ][ 3 ] << "|" << std::endl <<
+		"|" << Matrix.m_aaElement[ 1 ][ 0 ] <<
+		"," << Matrix.m_aaElement[ 1 ][ 1 ] <<
+		"," << Matrix.m_aaElement[ 1 ][ 2 ] <<
+		"," << Matrix.m_aaElement[ 1 ][ 3 ] << "|" << std::endl <<
+		"|" << Matrix.m_aaElement[ 2 ][ 0 ] <<
+		"," << Matrix.m_aaElement[ 2 ][ 1 ] <<
+		"," << Matrix.m_aaElement[ 2 ][ 2 ] <<
+		"," << Matrix.m_aaElement[ 2 ][ 3 ] << "|" << std::endl <<
+		"|" << Matrix.m_aaElement[ 3 ][ 0 ] <<
+		"," << Matrix.m_aaElement[ 3 ][ 1 ] <<
+		"," << Matrix.m_aaElement[ 3 ][ 2 ] <<
+		"," << Matrix.m_aaElement[ 3 ][ 3 ] << "|" << std::ends;
+	}
+	else
+	{
+		Stream <<
+		"|" << 1.0f << "," << 0.0f << "," << 0.0f << "," << 0.0f << "|" << std::endl <<
+		"|" << 0.0f << "," << 1.0f << "," << 0.0f << "," << 0.0f << "|" << std::endl <<
+		"|" << 0.0f << "," << 0.0f << "," << 1.0f << "," << 0.0f << "|" << std::endl <<
+		"|" << 0.0f << "," << 0.0f << "," << 0.0f << "," << 1.0f << "|" << std::ends;
+	}
 
-    return ( Stream );
+	return ( Stream );
 }
 
 
@@ -1279,27 +1279,27 @@ std::ostream &operator<<( std::ostream &Stream, CqMatrix &Matrix )
 
 CqMatrix operator*( TqFloat S, const CqMatrix& a )
 {
-    CqMatrix Temp( a );
-    Temp.m_aaElement[ 0 ][ 0 ] *= S;
-    Temp.m_aaElement[ 1 ][ 0 ] *= S;
-    Temp.m_aaElement[ 2 ][ 0 ] *= S;
-    Temp.m_aaElement[ 3 ][ 0 ] *= S;
+	CqMatrix Temp( a );
+	Temp.m_aaElement[ 0 ][ 0 ] *= S;
+	Temp.m_aaElement[ 1 ][ 0 ] *= S;
+	Temp.m_aaElement[ 2 ][ 0 ] *= S;
+	Temp.m_aaElement[ 3 ][ 0 ] *= S;
 
-    Temp.m_aaElement[ 0 ][ 1 ] *= S;
-    Temp.m_aaElement[ 1 ][ 1 ] *= S;
-    Temp.m_aaElement[ 2 ][ 1 ] *= S;
-    Temp.m_aaElement[ 3 ][ 1 ] *= S;
+	Temp.m_aaElement[ 0 ][ 1 ] *= S;
+	Temp.m_aaElement[ 1 ][ 1 ] *= S;
+	Temp.m_aaElement[ 2 ][ 1 ] *= S;
+	Temp.m_aaElement[ 3 ][ 1 ] *= S;
 
-    Temp.m_aaElement[ 0 ][ 2 ] *= S;
-    Temp.m_aaElement[ 1 ][ 2 ] *= S;
-    Temp.m_aaElement[ 2 ][ 2 ] *= S;
-    Temp.m_aaElement[ 3 ][ 2 ] *= S;
+	Temp.m_aaElement[ 0 ][ 2 ] *= S;
+	Temp.m_aaElement[ 1 ][ 2 ] *= S;
+	Temp.m_aaElement[ 2 ][ 2 ] *= S;
+	Temp.m_aaElement[ 3 ][ 2 ] *= S;
 
-    Temp.m_aaElement[ 0 ][ 3 ] *= S;
-    Temp.m_aaElement[ 1 ][ 3 ] *= S;
-    Temp.m_aaElement[ 2 ][ 3 ] *= S;
-    Temp.m_aaElement[ 3 ][ 3 ] *= S;
-    return ( Temp );
+	Temp.m_aaElement[ 0 ][ 3 ] *= S;
+	Temp.m_aaElement[ 1 ][ 3 ] *= S;
+	Temp.m_aaElement[ 2 ][ 3 ] *= S;
+	Temp.m_aaElement[ 3 ][ 3 ] *= S;
+	return ( Temp );
 }
 
 
@@ -1309,31 +1309,31 @@ CqMatrix operator*( TqFloat S, const CqMatrix& a )
 
 CqVector4D operator*( const CqVector4D &Vector, const CqMatrix& Matrix )
 {
-    return ( Matrix.PreMultiply( Vector ) );
+	return ( Matrix.PreMultiply( Vector ) );
 }
 
 
 bool  operator==(const CqMatrix& A, const CqMatrix& B)
 {
-    if(	(A.m_aaElement[ 0 ][ 0 ] == B.m_aaElement[ 0 ][ 0 ]) &&
-		(A.m_aaElement[ 1 ][ 0 ] == B.m_aaElement[ 1 ][ 0 ]) &&
-		(A.m_aaElement[ 2 ][ 0 ] == B.m_aaElement[ 2 ][ 0 ]) &&
-		(A.m_aaElement[ 3 ][ 0 ] == B.m_aaElement[ 3 ][ 0 ]) &&
+	if(	(A.m_aaElement[ 0 ][ 0 ] == B.m_aaElement[ 0 ][ 0 ]) &&
+	        (A.m_aaElement[ 1 ][ 0 ] == B.m_aaElement[ 1 ][ 0 ]) &&
+	        (A.m_aaElement[ 2 ][ 0 ] == B.m_aaElement[ 2 ][ 0 ]) &&
+	        (A.m_aaElement[ 3 ][ 0 ] == B.m_aaElement[ 3 ][ 0 ]) &&
 
-		(A.m_aaElement[ 0 ][ 1 ] == B.m_aaElement[ 0 ][ 1 ]) &&
-		(A.m_aaElement[ 1 ][ 1 ] == B.m_aaElement[ 1 ][ 1 ]) &&
-		(A.m_aaElement[ 2 ][ 1 ] == B.m_aaElement[ 2 ][ 1 ]) &&
-		(A.m_aaElement[ 3 ][ 1 ] == B.m_aaElement[ 3 ][ 1 ]) &&
+	        (A.m_aaElement[ 0 ][ 1 ] == B.m_aaElement[ 0 ][ 1 ]) &&
+	        (A.m_aaElement[ 1 ][ 1 ] == B.m_aaElement[ 1 ][ 1 ]) &&
+	        (A.m_aaElement[ 2 ][ 1 ] == B.m_aaElement[ 2 ][ 1 ]) &&
+	        (A.m_aaElement[ 3 ][ 1 ] == B.m_aaElement[ 3 ][ 1 ]) &&
 
-		(A.m_aaElement[ 0 ][ 2 ] == B.m_aaElement[ 0 ][ 2 ]) &&
-		(A.m_aaElement[ 1 ][ 2 ] == B.m_aaElement[ 1 ][ 2 ]) &&
-		(A.m_aaElement[ 2 ][ 2 ] == B.m_aaElement[ 2 ][ 2 ]) &&
-		(A.m_aaElement[ 3 ][ 2 ] == B.m_aaElement[ 3 ][ 2 ]) &&
+	        (A.m_aaElement[ 0 ][ 2 ] == B.m_aaElement[ 0 ][ 2 ]) &&
+	        (A.m_aaElement[ 1 ][ 2 ] == B.m_aaElement[ 1 ][ 2 ]) &&
+	        (A.m_aaElement[ 2 ][ 2 ] == B.m_aaElement[ 2 ][ 2 ]) &&
+	        (A.m_aaElement[ 3 ][ 2 ] == B.m_aaElement[ 3 ][ 2 ]) &&
 
-		(A.m_aaElement[ 0 ][ 3 ] == B.m_aaElement[ 0 ][ 3 ]) &&
-		(A.m_aaElement[ 1 ][ 3 ] == B.m_aaElement[ 1 ][ 3 ]) &&
-		(A.m_aaElement[ 2 ][ 3 ] == B.m_aaElement[ 2 ][ 3 ]) &&
-		(A.m_aaElement[ 3 ][ 3 ] == B.m_aaElement[ 3 ][ 3 ]))
+	        (A.m_aaElement[ 0 ][ 3 ] == B.m_aaElement[ 0 ][ 3 ]) &&
+	        (A.m_aaElement[ 1 ][ 3 ] == B.m_aaElement[ 1 ][ 3 ]) &&
+	        (A.m_aaElement[ 2 ][ 3 ] == B.m_aaElement[ 2 ][ 3 ]) &&
+	        (A.m_aaElement[ 3 ][ 3 ] == B.m_aaElement[ 3 ][ 3 ]))
 		return(true);
 	else
 		return(false);

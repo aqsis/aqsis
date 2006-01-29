@@ -42,74 +42,74 @@ START_NAMESPACE( Aqsis )
  */
 class CqProcedural : public CqSurface
 {
-    //------------------------------------------------------ Public Methods
-public:
-    CqProcedural();
-    CqProcedural(RtPointer, CqBound&, RtProcSubdivFunc, RtProcFreeFunc);
-    /** Split this GPrim into a number of other GPrims.
-     * \param aSplits A reference to a CqBasicSurface array to fill in with the new GPrim pointers.
-     * \return Integer count of new GPrims created.
-     */
-    virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits );
-    virtual ~CqProcedural();
+		//------------------------------------------------------ Public Methods
+	public:
+		CqProcedural();
+		CqProcedural(RtPointer, CqBound&, RtProcSubdivFunc, RtProcFreeFunc);
+		/** Split this GPrim into a number of other GPrims.
+		 * \param aSplits A reference to a CqBasicSurface array to fill in with the new GPrim pointers.
+		 * \return Integer count of new GPrims created.
+		 */
+		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits );
+		virtual ~CqProcedural();
 
-    //---------------------------------------------- Inlined Public Methods
-public:
-    CqBound	Bound() const
-    {
-        return m_Bound;
-    };
-    virtual void    Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime = 0 );
-    /*  We have no actual geometry to dice.
-     */
-    virtual TqBool Diceable()
-    {
-        return TqFalse;
-    }
-    virtual CqMicroPolyGridBase* Dice()
-    {
-        return NULL;
-    }
+		//---------------------------------------------- Inlined Public Methods
+	public:
+		CqBound	Bound() const
+		{
+			return m_Bound;
+		};
+		virtual void    Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime = 0 );
+		/*  We have no actual geometry to dice.
+		 */
+		virtual TqBool Diceable()
+		{
+			return TqFalse;
+		}
+		virtual CqMicroPolyGridBase* Dice()
+		{
+			return NULL;
+		}
 
-    /** Determine whether the passed surface is valid to be used as a
-     *  frame in motion blur for this surface.
-     */
-    virtual TqBool	IsMotionBlurMatch( CqBasicSurface* pSurf )
-    {
-        return( TqFalse );
-    }
+		/** Determine whether the passed surface is valid to be used as a
+		 *  frame in motion blur for this surface.
+		 */
+		virtual TqBool	IsMotionBlurMatch( CqBasicSurface* pSurf )
+		{
+			return( TqFalse );
+		}
 
-    /** Returns a string name of the class. */
-    virtual CqString strName() const
-    {
-        return "CqProcedural";
-    }
-    virtual TqUint  cUniform() const
-    {
-        return ( 0 );
-    }
-    virtual TqUint  cVarying() const
-    {
-        return ( 0 );
-    }
-    virtual TqUint  cVertex() const
-    {
-        return ( 0 );
-    }
-    virtual TqUint  cFaceVarying() const
-    {
-        /// \todo Must work out what this value should be.
-        return ( 0 );
-    }
-    //------------------------------------------------------ Protexted
-protected:
-    /* Contexy saved when the Procedural was declared */
-    boost::shared_ptr<CqModeBlock> m_pconStored;
+		/** Returns a string name of the class. */
+		virtual CqString strName() const
+		{
+			return "CqProcedural";
+		}
+		virtual TqUint  cUniform() const
+		{
+			return ( 0 );
+		}
+		virtual TqUint  cVarying() const
+		{
+			return ( 0 );
+		}
+		virtual TqUint  cVertex() const
+		{
+			return ( 0 );
+		}
+		virtual TqUint  cFaceVarying() const
+		{
+			/// \todo Must work out what this value should be.
+			return ( 0 );
+		}
+		//------------------------------------------------------ Protexted
+	protected:
+		/* Contexy saved when the Procedural was declared */
+		boost::shared_ptr<CqModeBlock> m_pconStored;
 
-    /* The RIB request data */
-    RtPointer m_pData;
-    RtProcSubdivFunc m_pSubdivFunc;
-    RtProcFreeFunc m_pFreeFunc;
+		/* The RIB request data */
+		RtPointer m_pData;
+		RtProcSubdivFunc m_pSubdivFunc;
+		RtProcFreeFunc m_pFreeFunc;
 
 };
 

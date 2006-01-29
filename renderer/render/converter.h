@@ -42,21 +42,21 @@ START_NAMESPACE( Aqsis )
   */
 class CqConverter : public CqPluginBase
 {
-public:
+	public:
 
-    CqConverter( char *searchpath, char *library, char *function );
+		CqConverter( char *searchpath, char *library, char *function );
 
-    void Close();
-    void *Function();
-    const TqChar * ErrorLog();
+		void Close();
+		void *Function();
+		const TqChar * ErrorLog();
 
-protected:
-    void *m_handle;
-    void *m_function;
-    CqString m_dynamiclibrary;
-    CqString m_dynamicfunction;
-    CqString m_dynamicsearch;
-    CqString m_errorlog;
+	protected:
+		void *m_handle;
+		void *m_function;
+		CqString m_dynamiclibrary;
+		CqString m_dynamicfunction;
+		CqString m_dynamicsearch;
+		CqString m_errorlog;
 } ;
 
 

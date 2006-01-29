@@ -69,7 +69,7 @@ def UseTargetOptions(self, target_name):
 SConsEnvironment.UseTargetOptions = UseTargetOptions
 
 
-def Glob(match):
+def Glob(self, match):
     """Similar to glob.glob, except globs SCons nodes, and thus sees
     generated files and files from build directories.  Basically, it sees
     anything SCons knows about.  A key subtlety is that since this function
@@ -80,19 +80,57 @@ def Glob(match):
         fn = str(node)
         return fnmatch.fnmatch(os.path.basename(fn), match)
 
-    here = Dir('.')
+    here = self.Dir('.')
 
     children = here.all_children()
-    nodes = map(File, filter(fn_filter, children))
+    nodes = map(self.File, filter(fn_filter, children))
     node_srcs = [n.srcnode() for n in nodes]
 
     src = here.srcnode()
     if src is not here:
-        src_children = map(File, filter(fn_filter, src.all_children()))
+        src_children = map(self.File, filter(fn_filter, src.all_children()))
         for s in src_children:
             if s not in node_srcs:
-                nodes.append(File(os.path.basename(str(s))))
+                nodes.append(self.File(os.path.basename(str(s))))
 
     return nodes
 
-Export('Glob SelectBuildDir')
+def print_config(msg, two_dee_iterable):
+    # this function is handy and can be used for other configuration-printing tasks
+    print
+    print msg
+    print
+    for key, val in two_dee_iterable:
+        print "    %-20s %s" % (key, val)
+    print
+
+def AddSysPath(new_path):
+	import sys, os
+
+	# standardise
+	new_path = os.path.abspath(new_path)
+
+	# MS-Windows does not respect case
+	if sys.platform == 'win32':
+		new_path = new_path.lower()
+
+	# disallow bad paths
+	do = -1
+	if os.path.exists(new_path):
+		do = 1
+		
+		# check against all paths currently available
+		for x in sys.path:
+			x = os.path.abspath(x)
+			if sys.platform == 'win32':
+				x = x.lower()
+			if new_path in (x, x + os.sep):
+				do = 0
+
+		# add path if we don't already have it
+		if do:
+			sys.path.append(new_path)
+			pass
+
+	return do
+

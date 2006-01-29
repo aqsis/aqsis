@@ -40,15 +40,15 @@ START_NAMESPACE( Aqsis )
 
 struct SqDisplayMapEntry
 {
-    SqDisplayMapEntry()
-    {}
-    SqDisplayMapEntry( const char* strName, const char* strLocation ) :
-            m_strName( strName ),
-            m_strLocation( strLocation )
-    {}
+	SqDisplayMapEntry()
+	{}
+	SqDisplayMapEntry( const char* strName, const char* strLocation ) :
+			m_strName( strName ),
+			m_strLocation( strLocation )
+	{}
 
-    CqString	m_strName;			///< The name of the display.
-    CqString	m_strLocation;		///< The location of the driver.
+	CqString	m_strName;			///< The name of the display.
+	CqString	m_strLocation;		///< The location of the driver.
 }
 ;
 

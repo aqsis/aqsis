@@ -37,8 +37,10 @@ START_NAMESPACE( Aqsis )
 class CqClippingVolume
 {
 	public:
-		CqClippingVolume()	{}
-		~CqClippingVolume() {}
+		CqClippingVolume()
+		{}
+		~CqClippingVolume()
+		{}
 
 
 		void addPlane(const CqPlane& plane)
@@ -51,11 +53,11 @@ class CqClippingVolume
 			m_Planes.clear();
 		}
 
-		TqInt whereIs(CqBound bound) 
+		TqInt whereIs(CqBound bound)
 		{
 			TqBool bothSides = TqFalse;
 			std::vector<CqPlane>::iterator i;
-			for(i = m_Planes.begin(); i != m_Planes.end(); ++i) 
+			for(i = m_Planes.begin(); i != m_Planes.end(); ++i)
 			{
 				TqInt side = bound.whichSideOf(*i);
 				if (side == CqBound::Side_Outside)

@@ -11,7 +11,7 @@ display_headers =  Split("""
 	display.h""")
 
 
-displayenv.AppendUnique(LIBS = ['$tiff_lib', '$z_lib'])
+displayenv.AppendUnique(LIBS = ['aqsistypes', '$tiff_lib', '$z_lib', '$fltk_lib'])
 
 # Set any platform specific target options.
 displayenv.UseTargetOptions('display')

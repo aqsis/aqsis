@@ -1,5 +1,4 @@
 Import('env')
-Import('pixelsave')
 ppm2tif_sources=Split("""
 	ppm2tif.c""")
 
@@ -8,6 +7,6 @@ env.UseTargetOptions('plugin')
 env.UseTargetOptions('texture_plugin')
 env.UseTargetOptions('ppm2tif')
 
-ppm2tif = env.SharedLibrary('ppm2tif', ppm2tif_sources + pixelsave, LIBS=['$tiff_lib', '$z_lib'])
+ppm2tif = env.SharedLibrary('ppm2tif', ppm2tif_sources, LIBS=['$tiff_lib', '$z_lib', 'common'])
 
 env.Install('$BINDIR', ppm2tif)

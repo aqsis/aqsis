@@ -149,7 +149,7 @@ TqBool TestCondition(RtString condition, RtString where)
 	// If the left side is not known for now return TqTrue
 	if (!pParam)
 	{
-		std::cerr << warning << "Unknown parameter: " << A << ":" << B << std::endl;
+		Aqsis::log() << warning << "Unknown parameter: " << A << ":" << B << std::endl;
 		return TqTrue;
 	}
 
@@ -242,7 +242,7 @@ TqBool TestCondition(RtString condition, RtString where)
 			default:
 			{
 				// It is not supported than make sure we return TqTrue
-				std::cerr << warning << "this type of " << A << ":" << B << " are not supported yet!" << std::endl;
+				Aqsis::log() << warning << "this type of " << A << ":" << B << " are not supported yet!" << std::endl;
 				Ok = TqTrue;
 			}
 			break;
@@ -250,9 +250,9 @@ TqBool TestCondition(RtString condition, RtString where)
 
 #ifdef _DEBUG
 	if (Ok == TqFalse  )
-		std::cerr << info << where << ": " << condition << " is false" << std::endl;
+		Aqsis::log() << info << where << ": " << condition << " is false" << std::endl;
 	else
-		std::cerr << info << where << ": " << condition << " is true" << std::endl;
+		Aqsis::log() << info << where << ": " << condition << " is true" << std::endl;
 #endif
 
 	return Ok;

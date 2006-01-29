@@ -88,12 +88,15 @@ __export char *jpg2tif( char *in )
 
 
 	strcpy( tiffname, in );
-	if ( ( result = strstr( tiffname, ".jpg" ) ) != 0 ) strcpy( result, ".tif" );
+	if ( ( result = strstr( tiffname, ".jpg" ) ) != 0 )
+		strcpy( result, ".tif" );
 	if ( !result )
 	{
-		if ( ( result = strstr( tiffname, ".jpg" ) ) != 0 ) strcpy( result, ".tif" );
+		if ( ( result = strstr( tiffname, ".jpg" ) ) != 0 )
+			strcpy( result, ".tif" );
 	}
-	if ( !result ) return result;
+	if ( !result )
+		return result;
 
 	jpgfile = fopen( in, "rb" );
 	result = jpeg_open( jpgfile, tiffname );

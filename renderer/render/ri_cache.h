@@ -38,153 +38,153 @@ START_NAMESPACE( Aqsis )
 class RiCacheBase
 {
 	public:
-			 RiCacheBase()	:	m_count(0), m_tokens(0), m_values(0)
-					{}
-	virtual ~RiCacheBase()	
+		RiCacheBase()	:	m_count(0), m_tokens(0), m_values(0)
+		{}
+		virtual ~RiCacheBase()
+		{
+			// Delete the plist
+			int i;
+			for(i=0; i<m_count; i++)
+			{
+				SqParameterDeclaration Decl = QGetRenderContext()->FindParameterDecl( m_tokens[i] );
+				if(Decl.m_Type == type_string)
+				{
+					int size = 1;
+					switch( Decl.m_Class )
 					{
-						// Delete the plist
-						int i;
-						for(i=0; i<m_count; i++)
-						{
-							SqParameterDeclaration Decl = QGetRenderContext()->FindParameterDecl( m_tokens[i] );
-							if(Decl.m_Type == type_string)
-							{
-								int size = 1;
-								switch( Decl.m_Class )
-								{
-									case class_constant:
-										size = m_constant_size;
-									break;
+							case class_constant:
+							size = m_constant_size;
+							break;
 
-									case class_uniform:
-										size = m_uniform_size;
-									break;
+							case class_uniform:
+							size = m_uniform_size;
+							break;
 
-									case class_varying:
-										size = m_varying_size;
-									break;
+							case class_varying:
+							size = m_varying_size;
+							break;
 
-									case class_vertex:
-										size = m_vertex_size;
-									break;
+							case class_vertex:
+							size = m_vertex_size;
+							break;
 
-									case class_facevarying:
-										size = m_facevarying_size;
-									break;
-								}
-								int j;
-								for(j=0; j<size; j++)
-									delete[](reinterpret_cast<RtString*>(m_values[i])[j]);
-							}
-							delete[](m_tokens[i]);
-							delete[](m_values[i]);
-						}
-						
-						delete[] m_tokens;
-						delete[] m_values;
+							case class_facevarying:
+							size = m_facevarying_size;
+							break;
 					}
+					int j;
+					for(j=0; j<size; j++)
+						delete[](reinterpret_cast<RtString*>(m_values[i])[j]);
+				}
+				delete[](m_tokens[i]);
+				delete[](m_values[i]);
+			}
+
+			delete[] m_tokens;
+			delete[] m_values;
+		}
 
 		virtual void ReCall()=0;
 
 	protected:
-	virtual	void	CachePlist(RtInt count, RtToken tokens[], RtPointer values[], 
-								int constant_size, int uniform_size, int varying_size, int vertex_size, int facevarying_size )
-					{
-						// Cache the sizes as we need them during destruction.
-						m_constant_size = constant_size;
-						m_uniform_size = uniform_size;
-						m_varying_size = varying_size;
-						m_vertex_size = vertex_size;
-						m_facevarying_size = facevarying_size;
+		virtual	void	CachePlist(RtInt count, RtToken tokens[], RtPointer values[],
+		                        int constant_size, int uniform_size, int varying_size, int vertex_size, int facevarying_size )
+		{
+			// Cache the sizes as we need them during destruction.
+			m_constant_size = constant_size;
+			m_uniform_size = uniform_size;
+			m_varying_size = varying_size;
+			m_vertex_size = vertex_size;
+			m_facevarying_size = facevarying_size;
 
-						m_count = count;
-						m_tokens = new RtToken[count];
-						m_values = new RtPointer[count];
+			m_count = count;
+			m_tokens = new RtToken[count];
+			m_values = new RtPointer[count];
 
-						RtInt i;
-						for(i=0; i<count; i++)
+			RtInt i;
+			for(i=0; i<count; i++)
+			{
+				RtToken	token = tokens[ i ];
+				RtPointer	value = values[ i ];
+
+				RtToken newtoken = new char[strlen(token) + 1];
+				strcpy(newtoken, token);
+				m_tokens[i] = newtoken;
+
+				SqParameterDeclaration Decl = QGetRenderContext()->FindParameterDecl( token );
+
+				// Work out the amount of data to copy determined by the
+				// class, the type and the array size.
+				int size = 1;
+				switch( Decl.m_Class )
+				{
+						case class_constant:
+						size = constant_size;
+						break;
+
+						case class_uniform:
+						size = uniform_size;
+						break;
+
+						case class_varying:
+						size = varying_size;
+						break;
+
+						case class_vertex:
+						size = vertex_size;
+						break;
+
+						case class_facevarying:
+						size = facevarying_size;
+						break;
+				}
+
+				// If it is a compound type, increase the length by the number of elements.
+				if( Decl.m_Type == type_point ||
+				        Decl.m_Type == type_normal ||
+				        Decl.m_Type == type_color ||
+				        Decl.m_Type == type_vector)
+					size *= 3;
+				else if( Decl.m_Type == type_hpoint)
+					size *= 4;
+				else if( Decl.m_Type == type_matrix)
+					size *= 16;
+
+				// If it is an array, increase the size by the number of elements in the array.
+				size *= Decl.m_Count;
+
+				int j;
+				switch( Decl.m_Type )
+				{
+						case type_integer:
+						m_values[i] = CopyAtomicValue(size, reinterpret_cast<RtInt*>(values[i]));
+						break;
+
+						case type_point:
+						case type_color:
+						case type_normal:
+						case type_vector:
+						case type_hpoint:
+						case type_matrix:
+						case type_float:
+						m_values[i] = CopyAtomicValue(size, reinterpret_cast<RtFloat*>(values[i]));
+						break;
+
+						case type_string:
 						{
-							RtToken	token = tokens[ i ];
-							RtPointer	value = values[ i ];
-
-							RtToken newtoken = new char[strlen(token) + 1];
-							strcpy(newtoken, token);
-							m_tokens[i] = newtoken;
-						
-							SqParameterDeclaration Decl = QGetRenderContext()->FindParameterDecl( token );
-
-							// Work out the amount of data to copy determined by the
-							// class, the type and the array size.
-							int size = 1;
-							switch( Decl.m_Class )
+							RtString* copyvalue = new RtString[size];
+							for(j=0; j<size; j++)
 							{
-								case class_constant:
-									size = constant_size;
-								break;
-
-								case class_uniform:
-									size = uniform_size;
-								break;
-
-								case class_varying:
-									size = varying_size;
-								break;
-
-								case class_vertex:
-									size = vertex_size;
-								break;
-
-								case class_facevarying:
-									size = facevarying_size;
-								break;
+								RtString item = new char[strlen(reinterpret_cast<RtString*>(value)[j])];
+								strcpy(item, reinterpret_cast<RtString*>(value)[j]);
+								copyvalue[j] = item;
 							}
-
-							// If it is a compound type, increase the length by the number of elements.
-							if( Decl.m_Type == type_point ||
-								Decl.m_Type == type_normal ||
-								Decl.m_Type == type_color ||
-								Decl.m_Type == type_vector)
-								size *= 3;
-							else if( Decl.m_Type == type_hpoint)
-								size *= 4;
-							else if( Decl.m_Type == type_matrix)
-								size *= 16;
-
-							// If it is an array, increase the size by the number of elements in the array.
-							size *= Decl.m_Count;
-
-							int j;
-							switch( Decl.m_Type )
-							{
-								case type_integer:
-									m_values[i] = CopyAtomicValue(size, reinterpret_cast<RtInt*>(values[i]));
-								break;
-
-								case type_point:
-								case type_color:
-								case type_normal:
-								case type_vector:
-								case type_hpoint:
-								case type_matrix:
-								case type_float:
-									m_values[i] = CopyAtomicValue(size, reinterpret_cast<RtFloat*>(values[i]));
-								break;
-
-								case type_string:
-								{
-									RtString* copyvalue = new RtString[size];
-									for(j=0; j<size; j++)
-									{
-										RtString item = new char[strlen(reinterpret_cast<RtString*>(value)[j])];
-										strcpy(item, reinterpret_cast<RtString*>(value)[j]);
-										copyvalue[j] = item;
-									}
-									m_values[i] = reinterpret_cast<RtPointer>(copyvalue);
-								}
-								break;
-							}					
+							m_values[i] = reinterpret_cast<RtPointer>(copyvalue);
 						}
-					}
+						break;
+				}
+			}
+		}
 
 		template <class T>
 		RtPointer CopyAtomicValue(RtInt size, T* value)

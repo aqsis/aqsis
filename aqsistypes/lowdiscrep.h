@@ -41,28 +41,28 @@ START_NAMESPACE( Aqsis )
 
 class CqLowDiscrepancy
 {
-public:
-    /// Constructor
-    /**
-        \param p_dim The number of dimensions.
-     */
-    CqLowDiscrepancy(TqUint p_dim);
+	public:
+		/// Constructor
+		/**
+		    \param p_dim The number of dimensions.
+		 */
+		CqLowDiscrepancy(TqUint p_dim);
 
-    /// Reset to next set of bases.
-    void Reset();
+		/// Reset to next set of bases.
+		void Reset();
 
-    /// Generate low-discrepancy number
-    /**
-        \param p_axis The axis along which to generate the number.
-        \param p_i The ordinal of this sample.
-     */
-    TqFloat Generate(TqUint p_axis, TqUint p_i);
+		/// Generate low-discrepancy number
+		/**
+		    \param p_axis The axis along which to generate the number.
+		    \param p_i The ordinal of this sample.
+		 */
+		TqFloat Generate(TqUint p_axis, TqUint p_i);
 
-private:
-    CqRandom m_Random;
-    TqUint m_NextBase;
-    TqUint m_Dimensions;
-    std::vector<TqUint> m_Bases;
+	private:
+		CqRandom m_Random;
+		TqUint m_NextBase;
+		TqUint m_Dimensions;
+		std::vector<TqUint> m_Bases;
 };
 
 //-----------------------------------------------------------------------

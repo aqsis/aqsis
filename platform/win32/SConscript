@@ -1,41 +1,109 @@
-Import('env opts')
+import os.path
 
-opts.Add(EnumOption('MSVS_VERSION', 'MS Visual C++ Version', '6.0', allowed_values=('6.0', '7.1')))
-opts.Add('bison', 'Point to the bison executable', env.File('#/../win32libs/GnuWin32/bin/bison'))
-opts.Add('flex', 'Point to the flex executable', env.File('#/../win32libs/GnuWin32/bin/flex'))
-opts.Update(env)
+Import('env')
 
-# If the tiff include path isn't specified as an option, choose the default, of the 
-# win32libs project from CVS checked out to the same folder as 'renderer'
-if env['tiff_include_path'] == "":
-	env.Replace(tiff_include_path = env.Dir('#/../win32libs/libtiff/include'))
-if env['tiff_lib_path'] == "":
-	env.Replace(tiff_lib_path = env.Dir('#/../win32libs/libtiff/lib/vc6'))
+if not env['mingw']:
+	# If the tiff include path isn't specified as an option, choose the default, of the 
+	# win32libs project from CVS checked out to the same folder as 'renderer'
+	if env['tiff_include_path'] == "":
+		env.Replace(tiff_include_path = env.Dir('#/../win32libs/libtiff/include'))
+	if env['tiff_lib_path'] == "":
+		env.Replace(tiff_lib_path = env.Dir('#/../win32libs/libtiff/lib/vc6'))
 
-if env['debug']:
-	env.Replace(tiff_lib = 'libtiff_d')
+	if env['debug']:
+		env.Replace(tiff_lib = 'libtiff_d')
+	else:
+		env.Replace(tiff_lib = 'libtiff')
+
+	# If the zlib include path isn't specified as an option, choose the default, of the 
+	# win32libs project from CVS checked out to the same folder as 'renderer'
+	if env['zlib_include_path'] == "":
+		env.Replace(zlib_include_path = env.Dir('#/../win32libs/zlib/include'))
+	if env['zlib_lib_path'] == "":
+		env.Replace(zlib_lib_path = env.Dir('#/../win32libs/zlib/lib/vc6'))
+
+	if env['debug']:
+		env.Replace(z_lib = 'zlibstat_d')
+	else:
+		env.Replace(z_lib = 'zlibstat')
+
+	# If the jpeg include path isn't specified as an option, choose the default, of the 
+	# win32libs project from CVS checked out to the same folder as 'renderer'
+	if env['jpeg_include_path'] == "":
+		env.Replace(jpeg_include_path = env.Dir('#/../win32libs/jpeg/include'))
+	if env['jpeg_lib_path'] == "":
+		env.Replace(jpeg_lib_path = env.Dir('#/../win32libs/jpeg/lib/vc6'))
+
+	if env['debug']:
+		env.Replace(jpeg_lib = 'libjpeg_d')
+	else:
+		env.Replace(jpeg_lib = 'libjpeg')
+
+	if env['debug']:
+		env.AppendUnique(CCFLAGS=['/GX', '/MDd', '/GR', '/Zm200', '/Od', '/Zi'])
+		env.AppendUnique(CPPDEFINES=[('_DEBUG', 1)])
+	else:
+		env.AppendUnique(CCFLAGS=['/GX', '/MD', '/GR', '/Zm200', '/O2'])
+
+	env.AppendUnique(CPPDEFINES=['NO_SYSLOG', 'WIN32', 'PLUGINS', ('_qBUILDING', 'CORE'), ('CORE', '1'), 'ZLIB_WINAPI'])
+
+	env.Replace(fltk_lib = 'fltk')
+	env.Replace(exr_lib = 'Iex')
+	env.Replace(exr2tif_libs = ['IlmImf', 'Half', 'Iex', 'Imath'])
+	env.AppendUnique(CPPPATH = ['$exr_include_path/Iex', '$exr_include_path/IlmImf', '$exr_include_path/Imath'])
+
+	env.Replace(libaqsis_add_sources = ['libaqsis.def'])
 else:
-	env.Replace(tiff_lib = 'libtiff')
+	if env['debug']:
+		env.AppendUnique(CCFLAGS=['-g', '-O0', '-fno-common'])
+	else:
+		env.AppendUnique(CCFLAGS=['-O2', '-fno-common'])
 
-# If the zlib include path isn't specified as an option, choose the default, of the 
-# win32libs project from CVS checked out to the same folder as 'renderer'
-if env['zlib_include_path'] == "":
-	env.Replace(zlib_include_path = env.Dir('#/../win32libs/zlib/include'))
-if env['zlib_lib_path'] == "":
-	env.Replace(zlib_lib_path = env.Dir('#/../win32libs/zlib/lib/vc6'))
+	env.AppendUnique(CPPPATH = [env.Dir('#/aqsistypes/win32')])
+	env.AppendUnique(CPPDEFINES=[('NDEBUG', '1'), ('PLUGINS', '1'), 'WIN32', 'NO_SYSLOG'])
 
-if env['debug']:
-	env.Replace(z_lib = 'zlibstat_d')
-else:
-	env.Replace(z_lib = 'zlibstat')
+	# Point at the boost headers.
+	# todo: need to find a way of determining this location automatically
+	#env.Replace(boost_include_path = ['/usr/include/boost'])
+	env.Replace(boost_include_path = ['/boost/include/boost-1_33_1'])
 
-if env['debug']:
-	env.AppendUnique(CCFLAGS=['/GX', '/MDd', '/GR', '/Zm200', '/Od', '/Zi'])
-	env.AppendUnique(CPPDEFINES=[('_DEBUG', 1)])
-else:
-	env.AppendUnique(CCFLAGS=['/GX', '/MD', '/GR', '/Zm200', '/O2'])
+	# If the tiff include path isn't specified as an option, choose the default, of the 
+	# win32libs project from CVS checked out to the same folder as 'renderer'
+	if env['tiff_include_path'] == "":
+		env.Replace(tiff_include_path = env.Dir('#/../win32libs/libtiff/include'))
+	if env['tiff_lib_path'] == "":
+		env.Replace(tiff_lib_path = env.Dir('#/../win32libs/libtiff/lib/mingw'))
 
-env.AppendUnique(CPPDEFINES=['NO_SYSLOG', 'WIN32', 'PLUGINS', ('_qBUILDING', 'CORE'), ('CORE', '1'), 'ZLIB_WINAPI'])
+	env.Replace(tiff_lib = 'tiff')
+
+	# If the zlib include path isn't specified as an option, choose the default, of the 
+	# win32libs project from CVS checked out to the same folder as 'renderer'
+	if env['zlib_include_path'] == "":
+		env.Replace(zlib_include_path = env.Dir('#/../win32libs/zlib/include'))
+	if env['zlib_lib_path'] == "":
+		env.Replace(zlib_lib_path = env.Dir('#/../win32libs/zlib/lib/mingw'))
+
+	env.Replace(z_lib = 'z')
+
+	# If the zlib include path isn't specified as an option, choose the default, of the 
+	# win32libs project from CVS checked out to the same folder as 'renderer'
+	if env['jpeg_include_path'] == "":
+		env.Replace(jpeg_include_path = env.Dir('#/../win32libs/jpeg/include'))
+	if env['jpeg_lib_path'] == "":
+		env.Replace(jpeg_lib_path = env.Dir('#/../win32libs/jpeg/lib/mingw'))
+
+	env.Replace(jpeg_lib = 'jpeg')
+
+	env.Replace(fltk_lib = 'fltk')
+	env.Replace(exr_lib = 'Iex')
+	env.Replace(exr2tif_libs = ['IlmImf', 'Half', 'Iex', 'Imath'])
+
+	env.Replace(slparse_ccflags = ['-O0'])
+	env.AppendUnique(CPPDEFINES=['NO_SYSLOG', 'WIN32', 'PLUGINS', ('_qBUILDING', 'CORE'), ('CORE', '1')])
+	env.Replace(aqsis_cppdefines = ['AQSIS_STATIC_LINK'])
+	env.Replace(rib2ri_cppdefines = ['AQSIS_STATIC_LINK'])
+
+
 env.AppendUnique(CPPPATH = ['#/aqsistypes/win32'])
 
 env.Replace(YACC = '${bison}')
@@ -43,6 +111,6 @@ env.Replace(LEX = '${flex}')
 env.Replace(YACCFLAGS = '--no-lines -d')
 env.Replace(XSLTPROC = env.File('#/../win32libs/GnuWin32/bin/xsltproc'))
 
-env.Replace(display_libs = ['ws2_32', 'user32', 'gdi32', 'ole32', 'shell32', 'comctl32', 'fltk'])
+env.Replace(display_libs = ['ws2_32', 'user32', 'gdi32', 'ole32', 'shell32', 'comctl32', '$fltk_lib'])
 env.Replace(aqsis_libs = ['ws2_32', 'user32'])
 env.Replace(libaqsis_libs = ['ws2_32', 'user32'])

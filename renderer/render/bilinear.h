@@ -46,39 +46,39 @@ START_NAMESPACE( Aqsis )
 template <class T>
 T BilinearEvaluate( const T& A, const T& B, const T& C, const T& D, TqFloat s, TqFloat t )
 {
-    T AB, CD;
-    // Work out where the u points are first, then linear interpolate the v value.
-    if ( s <= 0.0 )
-    {
-        AB = A;
-        CD = C;
-    }
-    else
-    {
-        if ( s >= 1.0 )
-        {
-            AB = B;
-            CD = D;
-        }
-        else
-        {
-            AB = static_cast<T>( ( B - A ) * s + A );
-            CD = static_cast<T>( ( D - C ) * s + C );
-        }
-    }
+	T AB, CD;
+	// Work out where the u points are first, then linear interpolate the v value.
+	if ( s <= 0.0 )
+	{
+		AB = A;
+		CD = C;
+	}
+	else
+	{
+		if ( s >= 1.0 )
+		{
+			AB = B;
+			CD = D;
+		}
+		else
+		{
+			AB = static_cast<T>( ( B - A ) * s + A );
+			CD = static_cast<T>( ( D - C ) * s + C );
+		}
+	}
 
-    T R;
-    if ( t <= 0.0 )
-        R = AB;
-    else
-    {
-        if ( t >= 1.0 )
-            R = CD;
-        else
-            R = static_cast<T>( ( CD - AB ) * t + AB );
-    }
+	T R;
+	if ( t <= 0.0 )
+		R = AB;
+	else
+	{
+		if ( t >= 1.0 )
+			R = CD;
+		else
+			R = static_cast<T>( ( CD - AB ) * t + AB );
+	}
 
-    return ( R );
+	return ( R );
 }
 
 

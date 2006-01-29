@@ -38,7 +38,7 @@ START_NAMESPACE( Aqsis )
 
 CqVector3D::CqVector3D( const CqVector4D &From )
 {
-    *this = From;
+	*this = From;
 }
 
 
@@ -48,7 +48,7 @@ CqVector3D::CqVector3D( const CqVector4D &From )
 
 CqVector3D::CqVector3D( const CqColor &From )
 {
-    *this = From;
+	*this = From;
 }
 
 
@@ -58,9 +58,9 @@ CqVector3D::CqVector3D( const CqColor &From )
 
 CqVector3D operator%( const CqVector3D &a, const CqVector3D &b )
 {
-    return ( CqVector3D( ( a.m_y * b.m_z ) - ( a.m_z * b.m_y ),
-                         ( a.m_z * b.m_x ) - ( a.m_x * b.m_z ),
-                         ( a.m_x * b.m_y ) - ( a.m_y * b.m_x ) ) );
+	return ( CqVector3D( ( a.m_y * b.m_z ) - ( a.m_z * b.m_y ),
+	                     ( a.m_z * b.m_x ) - ( a.m_x * b.m_z ),
+	                     ( a.m_x * b.m_y ) - ( a.m_y * b.m_x ) ) );
 }
 
 //---------------------------------------------------------------------
@@ -69,13 +69,13 @@ CqVector3D operator%( const CqVector3D &a, const CqVector3D &b )
 
 CqVector3D &CqVector3D::operator%=( const CqVector3D &From )
 {
-    CqVector3D	vecTemp( *this );
+	CqVector3D	vecTemp( *this );
 
-    m_x = ( vecTemp.m_y * From.m_z ) - ( vecTemp.m_z * From.m_y );
-    m_y = ( vecTemp.m_z * From.m_x ) - ( vecTemp.m_x * From.m_z );
-    m_z = ( vecTemp.m_x * From.m_y ) - ( vecTemp.m_y * From.m_x );
+	m_x = ( vecTemp.m_y * From.m_z ) - ( vecTemp.m_z * From.m_y );
+	m_y = ( vecTemp.m_z * From.m_x ) - ( vecTemp.m_x * From.m_z );
+	m_z = ( vecTemp.m_x * From.m_y ) - ( vecTemp.m_y * From.m_x );
 
-    return ( *this );
+	return ( *this );
 }
 
 //---------------------------------------------------------------------
@@ -84,20 +84,20 @@ CqVector3D &CqVector3D::operator%=( const CqVector3D &From )
 
 CqVector3D &CqVector3D::operator=( const CqVector4D &From )
 {
-    if ( From.h() != 1.0 )
-    {
-        m_x = From.x() / From.h();
-        m_y = From.y() / From.h();
-        m_z = From.z() / From.h();
-    }
-    else
-    {
-        m_x = From.x();
-        m_y = From.y();
-        m_z = From.z();
-    }
+	if ( From.h() != 1.0 )
+	{
+		m_x = From.x() / From.h();
+		m_y = From.y() / From.h();
+		m_z = From.z() / From.h();
+	}
+	else
+	{
+		m_x = From.x();
+		m_y = From.y();
+		m_z = From.z();
+	}
 
-    return ( *this );
+	return ( *this );
 }
 
 
@@ -107,11 +107,11 @@ CqVector3D &CqVector3D::operator=( const CqVector4D &From )
 
 CqVector3D &CqVector3D::operator=( const CqColor &From )
 {
-    m_x = From.fRed();
-    m_y = From.fGreen();
-    m_z = From.fBlue();
+	m_x = From.fRed();
+	m_y = From.fGreen();
+	m_z = From.fBlue();
 
-    return ( *this );
+	return ( *this );
 }
 
 
@@ -124,8 +124,8 @@ CqVector3D &CqVector3D::operator=( const CqColor &From )
 
 std::ostream &operator<<( std::ostream &Stream, const CqVector3D &Vector )
 {
-    Stream << Vector.m_x << "," << Vector.m_y << "," << Vector.m_z;
-    return ( Stream );
+	Stream << Vector.m_x << "," << Vector.m_y << "," << Vector.m_z;
+	return ( Stream );
 }
 
 

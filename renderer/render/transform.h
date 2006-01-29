@@ -59,64 +59,75 @@ typedef boost::shared_ptr<CqTransform> CqTransformPtr;
 
 class CqTransform : public CqMotionSpec<SqTransformation>, public IqTransform, private boost::noncopyable
 {
-public:
-    class Set {};
-    class ConcatCurrent {};
-    class SetCurrent {};
+	public:
+		class Set
+			{}
+		;
+		class ConcatCurrent
+			{}
+		;
+		class SetCurrent
+			{}
+		;
 
-    CqTransform();
-    CqTransform( const CqTransform& From );
-    CqTransform( const CqTransformPtr& From );
-    CqTransform( const CqTransformPtr& From, TqFloat time,
-	         const CqMatrix& matTrans, const Set& set );
-    CqTransform( const CqTransformPtr& From, TqFloat time,
-	         const CqMatrix& matTrans, const ConcatCurrent& concatCurrent );
-    CqTransform( const CqTransformPtr& From, TqFloat time,
-	         const CqMatrix& matTrans, const SetCurrent& setCurrent );
-    virtual	~CqTransform();
+		CqTransform();
+		CqTransform( const CqTransform& From );
+		CqTransform( const CqTransformPtr& From );
+		CqTransform( const CqTransformPtr& From, TqFloat time,
+		             const CqMatrix& matTrans, const Set& set
+			           );
+		CqTransform( const CqTransformPtr& From, TqFloat time,
+		             const CqMatrix& matTrans, const ConcatCurrent& concatCurrent );
+		CqTransform( const CqTransformPtr& From, TqFloat time,
+		             const CqMatrix& matTrans, const SetCurrent& setCurrent );
+		virtual	~CqTransform();
 
 #ifdef _DEBUG
-    CqString className() const { return CqString("CqTransform"); }
+
+		CqString className() const
+		{
+			return CqString("CqTransform");
+		}
 #endif
 
-    // virtual	CqTransform& operator=( const CqTransform& From );
+		// virtual	CqTransform& operator=( const CqTransform& From );
 
-    void	SetCurrentTransform( TqFloat time, const CqMatrix& matTrans );
-    void	ResetTransform(const CqMatrix& mat, TqBool hand, TqBool makeStatic=TqTrue);
+		void	SetCurrentTransform( TqFloat time, const CqMatrix& matTrans );
+		void	ResetTransform(const CqMatrix& mat, TqBool hand, TqBool makeStatic=TqTrue);
 
-    virtual	const CqMatrix&	matObjectToWorld( TqFloat time ) const;
+		virtual	const CqMatrix&	matObjectToWorld( TqFloat time ) const;
 
-    virtual	TqFloat	Time( TqInt index ) const
-    {
-        return( CqMotionSpec<SqTransformation>::Time( index ) );
-    }
-    virtual	TqInt	cTimes() const
-    {
-		if(m_IsMoving)
-			return( CqMotionSpec<SqTransformation>::cTimes() );
-		else
-			return( 1 );
-    }
+		virtual	TqFloat	Time( TqInt index ) const
+		{
+			return( CqMotionSpec<SqTransformation>::Time( index ) );
+		}
+		virtual	TqInt	cTimes() const
+		{
+			if(m_IsMoving)
+				return( CqMotionSpec<SqTransformation>::cTimes() );
+			else
+				return( 1 );
+		}
 
-	virtual	TqBool GetHandedness(TqFloat time ) const;
+		virtual	TqBool GetHandedness(TqFloat time ) const;
 
-    virtual	void	ClearMotionObject( SqTransformation& A ) const;
-    virtual	SqTransformation	ConcatMotionObjects( const SqTransformation& A, const SqTransformation& B ) const;
-    virtual	SqTransformation	LinearInterpolateMotionObjects( TqFloat Fraction, const SqTransformation& A, const SqTransformation& B ) const;
+		virtual	void	ClearMotionObject( SqTransformation& A ) const;
+		virtual	SqTransformation	ConcatMotionObjects( const SqTransformation& A, const SqTransformation& B ) const;
+		virtual	SqTransformation	LinearInterpolateMotionObjects( TqFloat Fraction, const SqTransformation& A, const SqTransformation& B ) const;
 
-private:
-    void	InitialiseDefaultObject( const CqTransformPtr& From );
-    void	SetTransform( TqFloat time, const CqMatrix& matTrans );
-    void	ConcatCurrentTransform( TqFloat time, const CqMatrix& matTrans );
-	void FlipHandedness(TqFloat time )
-	{
-		m_Handedness = !m_Handedness;
-	}
+	private:
+		void	InitialiseDefaultObject( const CqTransformPtr& From );
+		void	SetTransform( TqFloat time, const CqMatrix& matTrans );
+		void	ConcatCurrentTransform( TqFloat time, const CqMatrix& matTrans );
+		void FlipHandedness(TqFloat time )
+		{
+			m_Handedness = !m_Handedness;
+		}
 
 
-	TqBool	m_IsMoving;			///< Flag indicating this transformation describes a changing transform.
-	CqMatrix	m_StaticMatrix;	///< Matrix storing the transformation should there be no motion involved.
-	TqBool	m_Handedness;	///< Current coordinate system orientation.
+		TqBool	m_IsMoving;			///< Flag indicating this transformation describes a changing transform.
+		CqMatrix	m_StaticMatrix;	///< Matrix storing the transformation should there be no motion involved.
+		TqBool	m_Handedness;	///< Current coordinate system orientation.
 }
 ;
 

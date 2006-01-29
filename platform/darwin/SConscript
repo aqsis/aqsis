@@ -1,10 +1,6 @@
 import os.path
 
-Import('env opts')
-
-opts.Add('bison', 'Point to the bison executable', '/opt/local/bin/bison')
-opts.Add('flex', 'Point to the flex executable', '/opt/local/bin/flex')
-opts.Update(env)
+Import('env')
 
 if env['debug']:
 	env.AppendUnique(CCFLAGS=['-g', '-O0', '-fno-common'])
@@ -12,8 +8,10 @@ else:
 	env.AppendUnique(CCFLAGS=['-O2', '-fno-common'])
 	env.AppendUnique(LINKFLAGS=['-Wl,-s'])
 
+#env.AppendUnique(CCFLAGS=['-O3', '-faltivec', '-finline-functions', '-ffast-math', '-fno-common'])
+
 env.AppendUnique(CPPPATH = [env.Dir('#/aqsistypes/posix')])
-env.AppendUnique(CPPDEFINES=[('NDEBUG', '1'), ('PLUGINS', '1')])
+env.AppendUnique(CPPDEFINES=[('NDEBUG', '1'), ('PLUGINS', '1'), ('USE_TIMERS', 1), ('_CLOCKTICKS', '1')])
 
 # Point at the boost headers.
 # todo: need to find a way of determining this location automatically
@@ -52,6 +50,28 @@ if zliblibfile != None:
 	env.Replace(zlib_lib_path = os.path.dirname(zliblibfile.abspath))
 env.Replace(z_lib = 'z')
 
+# Find out where the OpenEXR libraries are, look in common places for Fink and DarwinPorts.
+exriofile = env.FindFile('half.h', ['$exr_include_path', '/usr/local/include/OpenEXR', '/opt/local/include/OpenEXR'])
+if exriofile != None:
+	env.Replace(exr_include_path = os.path.dirname(exriofile.abspath))
+
+exrlibfile = env.FindFile('libIlmImf.a', ['$exr_lib_path', '/usr/local/lib', '/opt/local/lib'])
+if exrlibfile != None:
+	env.Replace(exr_lib_path = os.path.dirname(exrlibfile.abspath))
+env.Replace(exr_lib = 'IlmImf')
+env.Replace(exr2tif_libs = ['IlmImf', 'Half', 'Iex', 'Imath'])
+
+# Find out where the fltk headers are, look in common places for Fink and DarwinPorts.
+fltkfile = env.FindFile('FL/fl.h', ['$fltk_include_path', '/usr/local/include', '/opt/local/include'])
+if fltkfile != None:
+	env.Replace(fltk_include_path = os.path.split(os.path.dirname(fltkfile.abspath))[0])
+
+# Find out where the fltk libraries are, look in common places for Fink and DarwinPorts.
+fltklibfile = env.FindFile('libfltk.a', ['$fltk_lib_path', '/usr/local/lib', '/opt/local/lib'])
+if fltklibfile != None:
+	env.Replace(fltk_lib_path = os.path.dirname(fltklibfile.abspath))
+env.Replace(fltk_lib = 'fltk')
+
 # Ensure that shared libraries have their install name set to not include a path, all shared libraries we link 
 # against will be in the bin directory with the executables.
 env.AppendUnique(SHLINKFLAGS = ['-install_name', '@executable_path' + os.path.sep + '${TARGET.file}'])
@@ -65,9 +85,8 @@ env.Replace(YACC = '${bison}')
 env.Replace(LEX = '${flex}')
 env.Replace(YACCFLAGS = '--no-lines -d')
 
-env.Replace(aqsis_exe_linkflags = ['-framework', 'CoreFoundation'])
+env.Replace(aqsis_linkflags = ['-framework', 'Carbon'])
 
-env.Replace(display_cppdefines = ['AQSIS_NO_FLTK'])
 env.Replace(slparse_ccflags = ['-O0'])
 env.Replace(libaqsis_linkflags = ['-framework', 'Carbon'])
 

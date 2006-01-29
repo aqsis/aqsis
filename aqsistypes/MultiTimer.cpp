@@ -1,8 +1,8 @@
 #include "MultiTimer.h"
 
 #ifdef USE_TIMERS
-	CTimerFactory timerFactory;
-	CHiFreqTimer::TimingDetails CHiFreqTimer::timerDetails;
+CTimerFactory timerFactory;
+CHiFreqTimer::TimingDetails CHiFreqTimer::timerDetails;
 
 #ifdef _CLOCKTICKS
 int CHiFreqTimer::TimingDetails::testfun()
@@ -17,6 +17,7 @@ int CHiFreqTimer::TimingDetails::testfun()
 
 void CHiFreqTimer::TimingDetails::Setup()
 {
+#ifdef WIN32
 	LARGE_INTEGER freq;
 	if (QueryPerformanceFrequency(&freq) == 0)
 	{
@@ -33,32 +34,37 @@ void CHiFreqTimer::TimingDetails::Setup()
 	Sleep(100);
 
 	LARGE_INTEGER pTest;
-	{TIME_SCOPE("ss overhead")
-	for (i = 0; i < loops; i++)
 	{
-		QueryPerformanceCounter(&pTest);
-		QueryPerformanceCounter(&pTest);
-		QueryPerformanceCounter(&pTest);
-		QueryPerformanceCounter(&pTest);
-		QueryPerformanceCounter(&pTest);
-		QueryPerformanceCounter(&pTest);
-		QueryPerformanceCounter(&pTest);
-		QueryPerformanceCounter(&pTest);
-		QueryPerformanceCounter(&pTest);
-		QueryPerformanceCounter(&pTest);
-	}
+		TIME_SCOPE("ss overhead")
+		for (i = 0; i < loops; i++)
+		{
+			QueryPerformanceCounter(&pTest);
+			QueryPerformanceCounter(&pTest);
+			QueryPerformanceCounter(&pTest);
+			QueryPerformanceCounter(&pTest);
+			QueryPerformanceCounter(&pTest);
+			QueryPerformanceCounter(&pTest);
+			QueryPerformanceCounter(&pTest);
+			QueryPerformanceCounter(&pTest);
+			QueryPerformanceCounter(&pTest);
+			QueryPerformanceCounter(&pTest);
+		}
 	}
 	startstopOverhead = GET_TIMER("ss overhead").getTotalTime() / (loops * 10);
 	CLEAR_TIMERS
 
 	for (i = 0; i < loops; i++)
-	{TIME_SCOPE("nested")
-		{TIME_SCOPE("sub")
-	}}
+	{
+		TIME_SCOPE("nested")
+		{
+			TIME_SCOPE("sub")
+		}
+	}
 	nestedOverhead = GET_TIMER("nested").getAverageTime();
 	CLEAR_TIMERS
 	for (i = 0; i < loops; i++)
-	{TIME_SCOPE("nested")
+	{
+		TIME_SCOPE("nested")
 		{
 			TIMER_START("sub")
 			TIMER_STOP("sub")
@@ -70,31 +76,36 @@ void CHiFreqTimer::TimingDetails::Setup()
 #ifdef _CLOCKTICKS
 	// Look at clock speed
 	__int64 res;
-	{TIME_SCOPE("ticktock")
-	_asm 
 	{
-		rdtsc
-		push eax
-		push edx
-	}
-	testfun();
-	_asm
-	{
-		rdtsc
-		pop ebx
-		sub edx, ebx
-		pop ebx
-		sub eax, ebx
-		mov dword ptr [res], eax
-		mov dword ptr [res+4], edx
-	}
+		TIME_SCOPE("ticktock")
+		_asm
+		{
+		    rdtsc
+		    push eax
+		    push edx
+		}
+		testfun();
+		_asm
+		{
+		    rdtsc
+		    pop ebx
+		    sub edx, ebx
+		    pop ebx
+		    sub eax, ebx
+		    mov dword ptr [res], eax
+		    mov dword ptr [res+4], edx
+		}
 	}
 	clockSpeed = res / GET_TIMER("ticktock").getTotalTime();
 	CLEAR_TIMERS
 #endif
 
 	SetThreadPriority(Fred, CurPri);
+#else
+        clockSpeed = 1.0/(double)CLOCKS_PER_SEC;
+	perFreq = (double)0.1;
+	nextTimer = curBase = curManualBase = 0;
+#endif
 }
 #endif	// USE_TIMERS
-
 

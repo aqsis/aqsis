@@ -39,55 +39,55 @@ START_NAMESPACE( libri2rib )
 
 class CqInlineParse
 {
-private:
-    TqUint number_of_words;
-    std::string word[ 7 ];
+	private:
+		TqUint number_of_words;
+		std::string word[ 7 ];
 
-    TqBool inline_def;
-    EqTokenClass tc;
-    EqTokenType tt;
-    TqUint size;
-    std::string identifier;
+		TqBool inline_def;
+		EqTokenClass tc;
+		EqTokenType tt;
+		TqUint size;
+		std::string identifier;
 
 
-    TqBool is_class ( const std::string &str );
-    TqBool is_type ( const std::string &str );
-    TqBool is_int ( const std::string &str );
+		TqBool is_class ( const std::string &str );
+		TqBool is_type ( const std::string &str );
+		TqBool is_int ( const std::string &str );
 
-    EqTokenClass get_class ( const std::string &str );
-    EqTokenType get_type ( const std::string &str );
-    TqUint get_size ( const std::string &str );
+		EqTokenClass get_class ( const std::string &str );
+		EqTokenType get_type ( const std::string &str );
+		TqUint get_size ( const std::string &str );
 
-    void check_syntax ();
-    void lc( std::string & );
+		void check_syntax ();
+		void lc( std::string & );
 
-public:
-    CqInlineParse()
-    {}
-    ~CqInlineParse()
-    {}
-    void parse ( std::string &str );
+	public:
+		CqInlineParse()
+		{}
+		~CqInlineParse()
+		{}
+		void parse ( std::string &str );
 
-    TqBool isInline()
-    {
-        return inline_def;
-    }
-    EqTokenClass getClass()
-    {
-        return tc;
-    }
-    EqTokenType getType()
-    {
-        return tt;
-    }
-    TqUint getQuantity()
-    {
-        return size;
-    }
-    std::string getIdentifier()
-    {
-        return identifier;
-    }
+		TqBool isInline()
+		{
+			return inline_def;
+		}
+		EqTokenClass getClass()
+		{
+			return tc;
+		}
+		EqTokenType getType()
+		{
+			return tt;
+		}
+		TqUint getQuantity()
+		{
+			return size;
+		}
+		std::string getIdentifier()
+		{
+			return identifier;
+		}
 };
 
 END_NAMESPACE( libri2rib )

@@ -49,9 +49,9 @@
 
 void
 end_of_file()
-	{
+{
 	fatal("Unexpected EOF","");
-	}
+}
 
 /************************************************************************/
 /*									*/
@@ -63,12 +63,12 @@ end_of_file()
 
 void
 fatal(s1,s2)
-	char			*s1;
-	char			*s2;
-	{
+char			*s1;
+char			*s2;
+{
 	fprintf(STDERR,"FATAL: %s%s\n",s1,s2);	/* Print message */
 	exit(TRUE);
-	}
+}
 
 /************************************************************************/
 /*									*/
@@ -80,9 +80,9 @@ fatal(s1,s2)
 
 void
 illegal_symbol()
-	{
+{
 	non_fatal("Illegal symbol name: ",Token);
-	}
+}
 
 /************************************************************************/
 /*									*/
@@ -94,12 +94,12 @@ illegal_symbol()
 
 void
 non_fatal(s1,s2)
-	char			*s1;
-	char			*s2;
-	{
+char			*s1;
+char			*s2;
+{
 	prmsg("",s1,s2);
 	Errors++;			/* Count the error */
-	}
+}
 
 /************************************************************************/
 /*									*/
@@ -111,9 +111,9 @@ non_fatal(s1,s2)
 
 void
 out_of_memory()
-	{
+{
 	fatal("Out of memory","");
-	}
+}
 
 /************************************************************************/
 /*									*/
@@ -128,14 +128,14 @@ out_of_memory()
 
 void
 prmsg(s1,s2,s3)
-	char			*s1;
-	char			*s2;
-	char			*s3;
-	{
+char			*s1;
+char			*s2;
+char			*s3;
+{
 	fprintf(STDERR,"<%s> @ %u: %s%s%s\n",
-		Filestack[Filelevel >= 0 ? Filelevel : 0]->f_name,LLine,
-			s1,s2,s3);
-	}
+	        Filestack[Filelevel >= 0 ? Filelevel : 0]->f_name,LLine,
+	        s1,s2,s3);
+}
 
 /************************************************************************/
 /*									*/
@@ -147,8 +147,8 @@ prmsg(s1,s2,s3)
 
 void
 warning(s1,s2)
-	char			*s1;
-	char			*s2;
-	{
+char			*s1;
+char			*s2;
+{
 	prmsg("WARNING: ",s1,s2);
-	}
+}

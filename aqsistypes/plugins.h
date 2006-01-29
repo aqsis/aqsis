@@ -49,20 +49,20 @@ START_NAMESPACE( Aqsis )
 
 class CqPluginBase
 {
-public:
-    virtual ~CqPluginBase();
-    const CqString DLError();
+	public:
+		virtual ~CqPluginBase();
+		const CqString DLError();
 
-private:
+	private:
 
 
-protected:
-    void *DLOpen( CqString *library );
-    void DLClose( void* );
-    void *DLSym( void*, CqString* );
+	protected:
+		void *DLOpen( CqString *library );
+		void DLClose( void* );
+		void *DLSym( void*, CqString* );
 
-    // we record all the DLOpen'ed handles to close them properly on destruction.
-    std::list<void*> m_activeHandles;
+		// we record all the DLOpen'ed handles to close them properly on destruction.
+		std::list<void*> m_activeHandles;
 
 } ;
 
@@ -82,23 +82,24 @@ protected:
 
 class CqSimplePlugin : public CqPluginBase
 {
-public:
-    virtual ~CqSimplePlugin()	{}
+	public:
+		virtual ~CqSimplePlugin()
+		{}
 
-    void *SimpleDLOpen( CqString *library )
-    {
-        return(DLOpen( library ) );
-    }
-    void SimpleDLClose( void* handle )
-    {
-        DLClose( handle );
-    }
-    void *SimpleDLSym( void* handle, CqString* name )
-    {
-        return( DLSym( handle, name ) );
-    }
-private:
-protected:
+		void *SimpleDLOpen( CqString *library )
+		{
+			return(DLOpen( library ) );
+		}
+		void SimpleDLClose( void* handle )
+		{
+			DLClose( handle );
+		}
+		void *SimpleDLSym( void* handle, CqString* name )
+		{
+			return( DLSym( handle, name ) );
+		}
+	private:
+	protected:
 } ;
 
 //-----------------------------------------------------------------------

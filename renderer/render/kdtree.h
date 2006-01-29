@@ -43,14 +43,18 @@ START_NAMESPACE( Aqsis )
 template<class T>
 struct IqKDTreeData
 {
-    /** Function to sort the elements in the given array, in ascending order based on the specified dimension index.
-     */
-    virtual void SortElements(std::vector<T>& aLeaves, TqInt dimension) = 0;
-    /** Return the number of dimensions in the tree data.
-     */
-    virtual TqInt Dimensions() const = 0;
+	/** Function to sort the elements in the given array, in ascending order based on the specified dimension index.
+	 */
+	virtual void SortElements(std::vector<T>& aLeaves, TqInt dimension) = 0;
+	/** Return the number of dimensions in the tree data.
+	 */
+	virtual TqInt Dimensions() const = 0;
 #ifdef _DEBUG
-    CqString className() const { return CqString("IqKDTreeData"); }
+
+	CqString className() const
+	{
+		return CqString("IqKDTreeData");
+	}
 #endif
 };
 
@@ -58,32 +62,39 @@ struct IqKDTreeData
 template<class T>
 class CqKDTree
 {
-public:
-    CqKDTree(IqKDTreeData<T>* pDataInterface)	: m_pDataInterface( pDataInterface ), m_Dim( 0 )
-    {}
-    virtual	~CqKDTree()		{}
+	public:
+		CqKDTree(IqKDTreeData<T>* pDataInterface)	: m_pDataInterface( pDataInterface ), m_Dim( 0 )
+		{}
+		virtual	~CqKDTree()
+		{}
 
-    void	Subdivide( CqKDTree<T>& side1, CqKDTree<T>& side2 )
-    {
-        m_pDataInterface->SortElements( m_aLeaves, m_Dim );
+		void	Subdivide( CqKDTree<T>& side1, CqKDTree<T>& side2 )
+		{
+			m_pDataInterface->SortElements( m_aLeaves, m_Dim );
 
-        TqInt median = static_cast<TqInt>( aLeaves().size() / 2.0f );
+			TqInt median = static_cast<TqInt>( aLeaves().size() / 2.0f );
 
-        side1.aLeaves().assign( aLeaves().begin(), aLeaves().begin() + median );
-        side2.aLeaves().assign( aLeaves().begin() + median, aLeaves().end() );
+			side1.aLeaves().assign( aLeaves().begin(), aLeaves().begin() + median );
+			side2.aLeaves().assign( aLeaves().begin() + median, aLeaves().end() );
 
-        side1.m_Dim = ( m_Dim + 1 ) % m_pDataInterface->Dimensions();
-        side2.m_Dim = ( m_Dim + 1 ) % m_pDataInterface->Dimensions();
-    }
+			side1.m_Dim = ( m_Dim + 1 ) % m_pDataInterface->Dimensions();
+			side2.m_Dim = ( m_Dim + 1 ) % m_pDataInterface->Dimensions();
+		}
 
-    /// Accessor for leaves array
-    std::vector<T>&	aLeaves()	{return(m_aLeaves);}
-    const std::vector<T>&	aLeaves() const	{return(m_aLeaves);}
+		/// Accessor for leaves array
+		std::vector<T>&	aLeaves()
+		{
+			return(m_aLeaves);
+		}
+		const std::vector<T>&	aLeaves() const
+		{
+			return(m_aLeaves);
+		}
 
-private:
-    std::vector<T>		m_aLeaves;
-    IqKDTreeData<T>*	m_pDataInterface;
-    TqInt				m_Dim;
+	private:
+		std::vector<T>		m_aLeaves;
+		IqKDTreeData<T>*	m_pDataInterface;
+		TqInt				m_Dim;
 };
 
 END_NAMESPACE( Aqsis )

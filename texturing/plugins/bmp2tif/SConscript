@@ -1,5 +1,4 @@
 Import('env')
-Import('pixelsave')
 bmp2tif_sources=Split("""
 	bmp2tif.c""")
 
@@ -8,5 +7,5 @@ env.UseTargetOptions('plugin')
 env.UseTargetOptions('texture_plugin')
 env.UseTargetOptions('bmp2tif')
 
-bmp2tif = env.SharedLibrary('bmp2tif', bmp2tif_sources + pixelsave, LIBS=['$tiff_lib', '$z_lib', 'jpg2tif'])
+bmp2tif = env.SharedLibrary('bmp2tif', bmp2tif_sources, LIBS=['$tiff_lib', '$z_lib', 'jpg2tif', 'common'])
 env.Install('$BINDIR', bmp2tif)

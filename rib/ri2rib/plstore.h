@@ -35,23 +35,23 @@ START_NAMESPACE( libri2rib )
 
 class CqPLStore
 {
-public:
-    CqPLStore ( va_list args );
-    ~CqPLStore ()
-    {}
-private:
-    std::vector<RtToken> m_Token;
-    std::vector<RtPointer> m_Parameter;
-public:
-    RtInt n;
-    RtToken *tokens()
-    {
-        return & m_Token[ 0 ];
-    };
-    RtPointer *parms()
-    {
-        return & m_Parameter[ 0 ];
-    };
+	public:
+		CqPLStore ( va_list args );
+		~CqPLStore ()
+		{}
+	private:
+		std::vector<RtToken> m_Token;
+		std::vector<RtPointer> m_Parameter;
+	public:
+		RtInt n;
+		RtToken *tokens()
+		{
+			return & m_Token[ 0 ];
+		};
+		RtPointer *parms()
+		{
+			return & m_Parameter[ 0 ];
+		};
 };
 
 END_NAMESPACE( libri2rib )

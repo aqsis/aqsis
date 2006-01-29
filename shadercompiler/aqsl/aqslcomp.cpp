@@ -25,6 +25,7 @@
 */
 
 #include	"aqsis.h"
+#include	"logging.h"
 #include	"logging_streambufs.h"
 
 #include	<iostream>
@@ -44,9 +45,7 @@
 #include	"vmoutput.h"
 #include	"argparse.h"
 
-#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX) || defined(SCONS_BUILD)
 #include	"version.h"
-#endif
 
 using namespace Aqsis;
 
@@ -65,9 +64,10 @@ bool g_cl_syslog = false;
 void version( std::ostream& Stream )
 {
 #if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX) || defined(SCONS_BUILD)
-    Stream << "aqsl version " << VERSION_STR << std::endl;
+	Stream << "aqsl version " << VERSION_STR << std::endl;
 #else
-    Stream << "aqsl version " << VERSION << std::endl;
+
+	Stream << "aqsl version " << VERSION << std::endl;
 #endif
 }
 
@@ -88,163 +88,169 @@ int g_cslppDefArgs = sizeof( g_slppDefArgs ) / sizeof( g_slppDefArgs[0] );
  */
 int main( int argc, const char** argv )
 {
-    ArgParse ap;
-    CqCodeGenVM codegen; // Should be a pointer determined by what we want to generate
-    bool error = false; ///! Couldn't compile shader
+	ArgParse ap;
+	CqCodeGenVM codegen; // Should be a pointer determined by what we want to generate
+	bool error = false; ///! Couldn't compile shader
 
-    ap.usageHeader( ArgParse::apstring( "Usage: " ) + argv[ 0 ] + " [options] <filename>" );
-    ap.argString( "o", " %s \aspecify output filename", &g_stroutname );
-    ap.argStrings( "i", "%s \aSet path for #include files.", &g_includes );
-    ap.argStrings( "I", "%s \aSet path for #include files.", &g_includes );
-    ap.argStrings( "D", "Sym[=value] \adefine symbol <string> to have value <value> (default 1).", &g_defines );
-    ap.argStrings( "U", "Sym \aUndefine an initial symbol.", &g_undefines );
-    ap.argFlag( "help", "\aprint this help and exit", &g_help );
-    ap.argFlag( "version", "\aprint version information and exit", &g_version );
+	ap.usageHeader( ArgParse::apstring( "Usage: " ) + argv[ 0 ] + " [options] <filename>" );
+	ap.argString( "o", " %s \aspecify output filename", &g_stroutname );
+	ap.argStrings( "i", "%s \aSet path for #include files.", &g_includes );
+	ap.argStrings( "I", "%s \aSet path for #include files.", &g_includes );
+	ap.argStrings( "D", "Sym[=value] \adefine symbol <string> to have value <value> (default 1).", &g_defines );
+	ap.argStrings( "U", "Sym \aUndefine an initial symbol.", &g_undefines );
+	ap.argFlag( "help", "\aprint this help and exit", &g_help );
+	ap.argFlag( "version", "\aprint version information and exit", &g_version );
 
-    if ( argc > 1 && !ap.parse( argc - 1, argv + 1 ) )
-    {
-        std::cerr << ap.errmsg() << std::endl << ap.usagemsg();
-        exit( 1 );
-    }
+	if ( argc > 1 && !ap.parse( argc - 1, argv + 1 ) )
+	{
+		Aqsis::log() << ap.errmsg() << std::endl << ap.usagemsg();
+		exit( 1 );
+	}
 
-    if ( g_version )
-    {
-        version( std::cout );
-        exit( 0 );
-    }
+	if ( g_version )
+	{
+		version( std::cout );
+		exit( 0 );
+	}
 
-    if ( g_help )
-    {
-        std::cout << ap.usagemsg();
-        exit( 0 );
-    }
+	if ( g_help )
+	{
+		std::cout << ap.usagemsg();
+		exit( 0 );
+	}
 
 #ifdef	AQSIS_SYSTEM_WIN32
-        std::auto_ptr<std::streambuf> ansi( new Aqsis::ansi_buf(std::cerr) );
+	std::auto_ptr<std::streambuf> ansi( new Aqsis::ansi_buf(Aqsis::log()) );
 #endif
-        std::auto_ptr<std::streambuf> reset_level( new Aqsis::reset_level_buf(std::cerr) );
-        std::auto_ptr<std::streambuf> show_timestamps( new Aqsis::timestamp_buf(std::cerr) );
-        std::auto_ptr<std::streambuf> fold_duplicates( new Aqsis::fold_duplicates_buf(std::cerr) );
-        std::auto_ptr<std::streambuf> color_level;
-        if(!g_cl_no_color)
-        {
-            std::auto_ptr<std::streambuf> temp_color_level( new Aqsis::color_level_buf(std::cerr) );
-            color_level = temp_color_level;
-        }
-        std::auto_ptr<std::streambuf> show_level( new Aqsis::show_level_buf(std::cerr) );
-        std::auto_ptr<std::streambuf> filter_level( new Aqsis::filter_by_level_buf(Aqsis::DEBUG, std::cerr) );
+
+	std::auto_ptr<std::streambuf> reset_level( new Aqsis::reset_level_buf(Aqsis::log()) );
+	std::auto_ptr<std::streambuf> show_timestamps( new Aqsis::timestamp_buf(Aqsis::log()) );
+	std::auto_ptr<std::streambuf> fold_duplicates( new Aqsis::fold_duplicates_buf(Aqsis::log()) );
+	std::auto_ptr<std::streambuf> color_level;
+	if(!g_cl_no_color)
+	{
+		std::auto_ptr<std::streambuf> temp_color_level( new Aqsis::color_level_buf(Aqsis::log()) );
+		color_level = temp_color_level;
+	}
+	std::auto_ptr<std::streambuf> show_level( new Aqsis::show_level_buf(Aqsis::log()) );
+	std::auto_ptr<std::streambuf> filter_level( new Aqsis::filter_by_level_buf(Aqsis::DEBUG, Aqsis::log()) );
 #ifdef	AQSIS_SYSTEM_POSIX
-        if( g_cl_syslog )
-            std::auto_ptr<std::streambuf> use_syslog( new Aqsis::syslog_buf(std::cerr) );
+
+	if( g_cl_syslog )
+		std::auto_ptr<std::streambuf> use_syslog( new Aqsis::syslog_buf(Aqsis::log()) );
 #endif	// AQSIS_SYSTEM_POSIX
 
-    // Pass the shader file through the slpp preprocessor first to generate a temporary file.
-    if ( ap.leftovers().size() == 0 )     // If no files specified, take input from stdin.
-    {
-        //if ( Parse( std::cin, "stdin", std::cerr ) )
-        //	codegen.OutputTree( GetParseTree(), g_stroutname );
-        std::cout << ap.usagemsg();
-        exit( 0 );
-    }
-    else
-    {
-        const char* _template = "slppXXXXXX";
-        char ifile[11];
-        for ( ArgParse::apstringvec::const_iterator e = ap.leftovers().begin(); e != ap.leftovers().end(); e++ )
-        {
-            FILE *file = fopen( e->c_str(), "rb" );
-            if ( file != NULL )
-            {
-                fclose(file);
-                strcpy( ifile, _template );
-                char* tempname;
-				#ifdef	AQSIS_SYSTEM_WIN32
-                tempname = _mktemp( ifile );
-				#else
-                tempname = mktemp( ifile );
-				#endif //AQSIS_SYSTEM_WIN32
-                if( NULL != tempname )
-                {
-                    // Build the arguments array for slpp.
-                    std::vector<char*>	slppArgs;
-                    for ( int defArg = 0; defArg != g_cslppDefArgs; defArg++ )
-                    {
-                        char* Arg = new char[strlen(g_slppDefArgs[ defArg ]) + 1];
-                        sprintf( Arg, g_slppDefArgs[ defArg ] );
-                        slppArgs.push_back(Arg);
-                    }
+	// Pass the shader file through the slpp preprocessor first to generate a temporary file.
+	if ( ap.leftovers().size() == 0 )     // If no files specified, take input from stdin.
+	{
+		//if ( Parse( std::cin, "stdin", Aqsis::log() ) )
+		//	codegen.OutputTree( GetParseTree(), g_stroutname );
+		std::cout << ap.usagemsg();
+		exit( 0 );
+	}
+	else
+	{
+		const char* _template = "slppXXXXXX";
+		char ifile[11];
+		for ( ArgParse::apstringvec::const_iterator e = ap.leftovers().begin(); e != ap.leftovers().end(); e++ )
+		{
+			FILE *file = fopen( e->c_str(), "rb" );
+			if ( file != NULL )
+			{
+				fclose(file);
+				strcpy( ifile, _template );
+				char* tempname;
+#ifdef	AQSIS_SYSTEM_WIN32
 
-                    // Append the -d arguments passed in to forward them to the preprocessor.
-                    for ( ArgParse::apstringvec::const_iterator define = g_defines.begin(); define != g_defines.end(); define++ )
-                    {
-                        char* Arg = new char[strlen("-d") + 1];
-                        strcpy( Arg, "-d" );
-                        slppArgs.push_back(Arg);
-                        Arg = new char[define->size() + 1];
-                        strcpy( Arg, define->c_str() );
-                        slppArgs.push_back(Arg);
-                    }
+				tempname = _mktemp( ifile );
+#else
 
-                    // Append the -i arguments passed in to forward them to the preprocessor.
-                    for ( ArgParse::apstringvec::const_iterator include = g_includes.begin(); include != g_includes.end(); include++ )
-                    {
-                        char* Arg = new char[strlen("-i") + 1];
-                        strcpy( Arg, "-i" );
-                        slppArgs.push_back(Arg);
-                        Arg = new char[include->size() + 1];
-                        strcpy( Arg, include->c_str() );
-                        slppArgs.push_back(Arg);
-                    }
+				tempname = mktemp( ifile );
+#endif //AQSIS_SYSTEM_WIN32
 
-                    // Append the -u arguments passed in to forward them to the preprocessor.
-                    for ( ArgParse::apstringvec::const_iterator undefine = g_undefines.begin(); undefine != g_undefines.end(); undefine++ )
-                    {
-                        char* Arg = new char[strlen("-u") + 1];
-                        strcpy( Arg, "-u" );
-                        slppArgs.push_back(Arg);
-                        Arg = new char[undefine->size() + 1];
-                        strcpy( Arg, undefine->c_str() );
-                        slppArgs.push_back(Arg);
-                    }
+				if( NULL != tempname )
+				{
+					// Build the arguments array for slpp.
+					std::vector<char*>	slppArgs;
+					for ( int defArg = 0; defArg != g_cslppDefArgs; defArg++ )
+					{
+						char* Arg = new char[strlen(g_slppDefArgs[ defArg ]) + 1];
+						sprintf( Arg, g_slppDefArgs[ defArg ] );
+						slppArgs.push_back(Arg);
+					}
 
-                    // Set the output filename.
-                    char* Arg = new char[strlen("-o") + 1];
-                    strcpy( Arg, "-o" );
-                    slppArgs.push_back(Arg);
-                    Arg = new char[strlen(tempname) + 1];
-                    strcpy( Arg, tempname );
-                    slppArgs.push_back(Arg);
+					// Append the -d arguments passed in to forward them to the preprocessor.
+					for ( ArgParse::apstringvec::const_iterator define = g_defines.begin(); define != g_defines.end(); define++ )
+					{
+						char* Arg = new char[strlen("-d") + 1];
+						strcpy( Arg, "-d" );
+						slppArgs.push_back(Arg);
+						Arg = new char[define->size() + 1];
+						strcpy( Arg, define->c_str() );
+						slppArgs.push_back(Arg);
+					}
 
-                    // Set the input filename.
-                    char* fileArg = new char[e->size() + 1];
-                    sprintf( fileArg, e->c_str() );
-                    slppArgs.push_back(fileArg);
+					// Append the -i arguments passed in to forward them to the preprocessor.
+					for ( ArgParse::apstringvec::const_iterator include = g_includes.begin(); include != g_includes.end(); include++ )
+					{
+						char* Arg = new char[strlen("-i") + 1];
+						strcpy( Arg, "-i" );
+						slppArgs.push_back(Arg);
+						Arg = new char[include->size() + 1];
+						strcpy( Arg, include->c_str() );
+						slppArgs.push_back(Arg);
+					}
 
-                    PreProcess(slppArgs.size(),&slppArgs[0]);
+					// Append the -u arguments passed in to forward them to the preprocessor.
+					for ( ArgParse::apstringvec::const_iterator undefine = g_undefines.begin(); undefine != g_undefines.end(); undefine++ )
+					{
+						char* Arg = new char[strlen("-u") + 1];
+						strcpy( Arg, "-u" );
+						slppArgs.push_back(Arg);
+						Arg = new char[undefine->size() + 1];
+						strcpy( Arg, undefine->c_str() );
+						slppArgs.push_back(Arg);
+					}
 
-                    std::ifstream ppfile( tempname );
-                    if ( Parse( ppfile, e->c_str(), std::cerr ) )
-                        codegen.OutputTree( GetParseTree(), g_stroutname );
-                    else
-                        error = true;
+					// Set the output filename.
+					char* Arg = new char[strlen("-o") + 1];
+					strcpy( Arg, "-o" );
+					slppArgs.push_back(Arg);
+					Arg = new char[strlen(tempname) + 1];
+					strcpy( Arg, tempname );
+					slppArgs.push_back(Arg);
 
-                    // Delete the temporary file.
-                    ppfile.close();
-                    remove(tempname);
-                }
-                else
-                {
-                    std::cout << "Could not create temporary file for preprocessing." << std::endl;
-                    exit( -1 );
-                }
-            }
-            else
-            {
-                std::cout << "Warning: Cannot open file \"" << *e << "\"" << std::endl;
-            }
-        }
-    }
+					// Set the input filename.
+					char* fileArg = new char[e->size() + 1];
+					sprintf( fileArg, e->c_str() );
+					slppArgs.push_back(fileArg);
 
-    return error ? -1 : 0;
+					PreProcess(slppArgs.size(),&slppArgs[0]);
+
+					std::ifstream ppfile( tempname );
+					if ( Parse( ppfile, e->c_str(), Aqsis::log() ) )
+						codegen.OutputTree( GetParseTree(), g_stroutname );
+					else
+						error = true;
+
+					// Delete the temporary file.
+					ppfile.close();
+					remove
+						(tempname);
+				}
+				else
+				{
+					std::cout << "Could not create temporary file for preprocessing." << std::endl;
+					exit( -1 );
+				}
+			}
+			else
+			{
+				std::cout << "Warning: Cannot open file \"" << *e << "\"" << std::endl;
+			}
+		}
+	}
+
+	return error ? -1 : 0;
 }
 

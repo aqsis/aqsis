@@ -6,11 +6,15 @@ argparse_sources = Split("""
 argparse_headers = Split("""
 	argparse.h""")
 
+argparse_install_headers = Split("""
+	argparse.h""")
+
 # Set any platform specific options for this target
 env.UseTargetOptions('argparse')
 
 argparse = env.Library('argparse', argparse_sources)
 env.Install('$LIBDIR', argparse)
+env.Install('$INCLUDEDIR', argparse_install_headers)
 
 env.Distribute('argparse', argparse_sources)
 env.Distribute('argparse', argparse_headers)

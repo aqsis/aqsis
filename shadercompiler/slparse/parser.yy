@@ -1359,7 +1359,7 @@ primary
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
 							}
 	|	ARRAY_SYMBOL		{
-								$$=new CqParseNodeVariableArray($1.VarRef);	
+								$$=new CqParseNodeVariable($1.VarRef);	
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
 							}
 	|	ARRAY_SYMBOL '[' expression ']' {
@@ -1618,7 +1618,7 @@ procedurecall
 unresolvedcall
 	:	IDENTIFIER '(' proc_arguments ')'
 							{
-								std::cerr << warning << "Unresolved function " << $1->c_str() << " will be treated as a DSO at runtime" << std::endl;
+								Aqsis::log() << warning << "Unresolved function " << $1->c_str() << " will be treated as a DSO at runtime" << std::endl;
 								CqParseNode* pArgs=$3;
 								CqString strArgTypes("");
 								if(pArgs)
@@ -1644,7 +1644,7 @@ unresolvedcall
 								// This should in theory be the eaiest case to handle
 								// since there are no arguments that might need casting
 								// later.
-								std::cerr << warning << "Unresolved function " << $1->c_str() << " will be treated as a DSO at runtime" << std::endl;
+								Aqsis::log() << warning << "Unresolved function " << $1->c_str() << " will be treated as a DSO at runtime" << std::endl;
 								CqFuncDef func_spec(Type_Nil, $1->c_str(), "unresolved","");
 								CqParseNodeUnresolvedCall* pUFunc=new CqParseNodeUnresolvedCall(func_spec);
 								pUFunc->SetPos(ParseLineNumber,ParseStreamName.c_str());

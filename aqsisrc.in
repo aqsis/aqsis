@@ -4,6 +4,8 @@ Option "display" "string zfile" ["%(displaylib)s"]
 Option "display" "string zframebuffer" ["%(displaylib)s"]
 Option "display" "string shadow" ["%(displaylib)s"]
 Option "display" "string tiff" ["%(displaylib)s"]
+Option "display" "string xpm" ["%(xpmlib)s"]
+Option "display" "string exr" ["%(exrlib)s"]
 
 Option "searchpath" "string shader" ["%(shaderpath)s"]
 Option "searchpath" "string display" ["%(displaypath)s"]

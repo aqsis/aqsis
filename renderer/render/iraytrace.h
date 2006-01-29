@@ -6,7 +6,7 @@
  *
  *	Last change by:		$Author$
  *	Last change date:	$Date$
- */ 
+ */
 //------------------------------------------------------------------------------
 
 
@@ -22,8 +22,8 @@ struct IqSurface;
 
 struct IqRaytrace
 {
-    virtual ~IqRaytrace()
-    {}
+	virtual ~IqRaytrace()
+	{}
 
 
 	/** Initialise the raytracing subsystem.

@@ -36,73 +36,73 @@ namespace librib
 
 class CqRibBinaryDecoder
 {
-private:
-    FILE *file; // File to read from
-    z_stream zstrm; // zlib strm description
-    int zerr; // zlib error state
-    bool is_gzip; // Is this a gzip'd stream
-    int zbuffersize; // Buffer size
-    Bytef *zin, *zout; // Data buffers
-    int zavailable; // Available output bytes
-    Bytef *zcurrent; // Location in available output
+	private:
+		FILE *file; // File to read from
+		z_stream zstrm; // zlib strm description
+		int zerr; // zlib error state
+		bool is_gzip; // Is this a gzip'd stream
+		int zbuffersize; // Buffer size
+		Bytef *zin, *zout; // Data buffers
+		int zavailable; // Available output bytes
+		Bytef *zcurrent; // Location in available output
 
-    std::vector<TqChar> cv;
+		std::vector<TqChar> cv;
 
-    std::string ritab[ 256 ];
-    std::vector<std::string> stringtab;
+		std::string ritab[ 256 ];
+		std::vector<std::string> stringtab;
 
-    // Convert To Signed Integer
-    TqInt ctsi( TqChar );
-    TqInt ctsi( TqChar, TqChar );
-    TqInt ctsi( TqChar, TqChar, TqChar );
-    TqInt ctsi( TqChar, TqChar, TqChar, TqChar );
+		// Convert To Signed Integer
+		TqInt ctsi( TqChar );
+		TqInt ctsi( TqChar, TqChar );
+		TqInt ctsi( TqChar, TqChar, TqChar );
+		TqInt ctsi( TqChar, TqChar, TqChar, TqChar );
 
-    // Convert To unsigned Integer
-    TqUint ctui( TqChar );
-    TqUint ctui( TqChar, TqChar );
-    TqUint ctui( TqChar, TqChar, TqChar );
-    TqUint ctui( TqChar, TqChar, TqChar, TqChar );
+		// Convert To unsigned Integer
+		TqUint ctui( TqChar );
+		TqUint ctui( TqChar, TqChar );
+		TqUint ctui( TqChar, TqChar, TqChar );
+		TqUint ctui( TqChar, TqChar, TqChar, TqChar );
 
-    // Get Char
-    void gc( TqChar & );
+		// Get Char
+		void gc( TqChar & );
 
-    // Send N Characters
-    void snc( TqUint, std::string & );
+		// Send N Characters
+		void snc( TqUint, std::string & );
 
-    void sendFloat( std::string & );
-    void sendDouble( std::string & );
+		void sendFloat( std::string & );
+		void sendDouble( std::string & );
 
-    void readString( TqChar, std::string & );
+		void readString( TqChar, std::string & );
 
-    // Decode Next Char
-    void getNext();
-    TqInt writeToBuffer( TqPchar buffer, TqUint size );
+		// Decode Next Char
+		void getNext();
+		TqInt writeToBuffer( TqPchar buffer, TqUint size );
 
-    TqBool eof_flag;
-    TqBool fail_flag;
+		TqBool eof_flag;
+		TqBool fail_flag;
 
-    void initZlib( int buffersize = 0 );
-    CqRibBinaryDecoder( CqRibBinaryDecoder const &)
-    {}
-    CqRibBinaryDecoder const &operator=( CqRibBinaryDecoder const & )
-    {
-        return * this;
-    }
+		void initZlib( int buffersize = 0 );
+		CqRibBinaryDecoder( CqRibBinaryDecoder const &)
+		{}
+		CqRibBinaryDecoder const &operator=( CqRibBinaryDecoder const & )
+		{
+			return * this;
+		}
 
-public:
-    CqRibBinaryDecoder( std::string, int buffersize = 16384 );
-    CqRibBinaryDecoder( FILE *, int buffersize = 16384 );
-    ~CqRibBinaryDecoder();
+	public:
+		CqRibBinaryDecoder( std::string, int buffersize = 16384 );
+		CqRibBinaryDecoder( FILE *, int buffersize = 16384 );
+		~CqRibBinaryDecoder();
 
-    TqInt read( TqPchar buffer, TqUint size );
-    TqBool eof()
-    {
-        return eof_flag;
-    };
-    TqBool fail()
-    {
-        return fail_flag;
-    };
+		TqInt read( TqPchar buffer, TqUint size );
+		TqBool eof()
+		{
+			return eof_flag;
+		};
+		TqBool fail()
+		{
+			return fail_flag;
+		};
 
 };
 

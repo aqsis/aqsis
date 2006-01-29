@@ -45,57 +45,59 @@ extern void InitStandardNamespace();
 
 std::istream* ParseInputStream = &std::cin;
 CqString ParseStreamName = "stdin";
-std::ostream* ParseErrorStream = &std::cerr;
+std::ostream* ParseErrorStream = &Aqsis::log();
 TqInt ParseLineNumber;
 TqBool ParseSucceeded = true;
 
 TqBool Parse( std::istream& InputStream, const CqString StreamName, std::ostream& ErrorStream )
 {
-    ParseInputStream = &InputStream;
-    ParseStreamName = StreamName;
-    ParseErrorStream = &ErrorStream;
-    ParseLineNumber = 1;
-    ParseSucceeded = true;
+	ParseInputStream = &InputStream;
+	ParseStreamName = StreamName;
+	ParseErrorStream = &ErrorStream;
+	ParseLineNumber = 1;
+	ParseSucceeded = true;
 
-    InitStandardNamespace();
+	InitStandardNamespace();
 
-    try
-    {
+	try
+	{
 #ifdef	YYDEBUG
 		yydebug = 1;
 #endif
-        yyparse();
-        TypeCheck();
-    }
-    catch(CqString strError)
-    {
-        ( *ParseErrorStream ) << error << strError.c_str() << std::endl;
-        ( *ParseErrorStream ) << error << "Shader not compiled" << std::endl;
-        ParseSucceeded = false;
-        return( false );
-    }
-    Optimise();
 
-    std::vector<CqVarDef>::iterator iv;
-    for ( iv = gLocalVars.begin(); iv != gLocalVars.end(); iv++ )
-        if ( iv->pDefValue() ) iv->pDefValue() ->Optimise();
+		yyparse();
+		TypeCheck();
+	}
+	catch(CqString strError)
+	{
+		( *ParseErrorStream ) << error << strError.c_str() << std::endl;
+		( *ParseErrorStream ) << error << "Shader not compiled" << std::endl;
+		ParseSucceeded = false;
+		return( false );
+	}
+	Optimise();
 
-    return ParseSucceeded;
+	std::vector<CqVarDef>::iterator iv;
+	for ( iv = gLocalVars.begin(); iv != gLocalVars.end(); iv++ )
+		if ( iv->pDefValue() )
+			iv->pDefValue() ->Optimise();
+
+	return ParseSucceeded;
 }
 
 void ResetParser()
 {
-    ParseInputStream = &std::cin;
-    ParseStreamName = "stdin";
-    ParseErrorStream = &std::cerr;
-    ParseLineNumber = 1;
-    ParseSucceeded = true;
+	ParseInputStream = &std::cin;
+	ParseStreamName = "stdin";
+	ParseErrorStream = &Aqsis::log();
+	ParseLineNumber = 1;
+	ParseSucceeded = true;
 }
 
 
 IqParseNode* GetParseTree()
 {
-    return ( ParseTreePointer );
+	return ( ParseTreePointer );
 }
 
 END_NAMESPACE( Aqsis )

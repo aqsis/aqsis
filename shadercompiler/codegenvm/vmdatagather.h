@@ -43,50 +43,50 @@ START_NAMESPACE( Aqsis )
 
 class CqCodeGenDataGather : public IqParseNodeVisitor
 {
-public:
+	public:
 
-    virtual	void Visit( IqParseNode& );
-    virtual	void Visit( IqParseNodeShader& );
-    virtual	void Visit( IqParseNodeFunctionCall& );
-    virtual	void Visit( IqParseNodeUnresolvedCall& );
-    virtual	void Visit( IqParseNodeVariable& );
-    virtual	void Visit( IqParseNodeArrayVariable& );
-    virtual	void Visit( IqParseNodeVariableAssign& );
-    virtual	void Visit( IqParseNodeArrayVariableAssign& );
-    virtual	void Visit( IqParseNodeOperator& );
-    virtual	void Visit( IqParseNodeMathOp& );
-    virtual	void Visit( IqParseNodeRelationalOp& );
-    virtual	void Visit( IqParseNodeUnaryOp& );
-    virtual	void Visit( IqParseNodeLogicalOp& );
-    virtual	void Visit( IqParseNodeDiscardResult& );
-    virtual	void Visit( IqParseNodeConstantFloat& );
-    virtual	void Visit( IqParseNodeConstantString& );
-    virtual	void Visit( IqParseNodeWhileConstruct& );
-    virtual	void Visit( IqParseNodeIlluminateConstruct& );
-    virtual	void Visit( IqParseNodeIlluminanceConstruct& );
-    virtual	void Visit( IqParseNodeSolarConstruct& );
-    virtual	void Visit( IqParseNodeConditional& );
-    virtual	void Visit( IqParseNodeConditionalExpression& );
-    virtual	void Visit( IqParseNodeTypeCast& );
-    virtual	void Visit( IqParseNodeTriple& );
-    virtual	void Visit( IqParseNodeSixteenTuple& );
-    virtual	void Visit( IqParseNodeMessagePassingFunction& );
+		virtual	void Visit( IqParseNode& );
+		virtual	void Visit( IqParseNodeShader& );
+		virtual	void Visit( IqParseNodeFunctionCall& );
+		virtual	void Visit( IqParseNodeUnresolvedCall& );
+		virtual	void Visit( IqParseNodeVariable& );
+		virtual	void Visit( IqParseNodeArrayVariable& );
+		virtual	void Visit( IqParseNodeVariableAssign& );
+		virtual	void Visit( IqParseNodeArrayVariableAssign& );
+		virtual	void Visit( IqParseNodeOperator& );
+		virtual	void Visit( IqParseNodeMathOp& );
+		virtual	void Visit( IqParseNodeRelationalOp& );
+		virtual	void Visit( IqParseNodeUnaryOp& );
+		virtual	void Visit( IqParseNodeLogicalOp& );
+		virtual	void Visit( IqParseNodeDiscardResult& );
+		virtual	void Visit( IqParseNodeConstantFloat& );
+		virtual	void Visit( IqParseNodeConstantString& );
+		virtual	void Visit( IqParseNodeWhileConstruct& );
+		virtual	void Visit( IqParseNodeIlluminateConstruct& );
+		virtual	void Visit( IqParseNodeIlluminanceConstruct& );
+		virtual	void Visit( IqParseNodeSolarConstruct& );
+		virtual	void Visit( IqParseNodeConditional& );
+		virtual	void Visit( IqParseNodeConditionalExpression& );
+		virtual	void Visit( IqParseNodeTypeCast& );
+		virtual	void Visit( IqParseNodeTriple& );
+		virtual	void Visit( IqParseNodeSixteenTuple& );
+		virtual	void Visit( IqParseNodeMessagePassingFunction& );
 
-    TqInt	VariableUsage() const
-    {
-        return ( m_VariableUsage );
-    }
-    std::map<std::string, IqVarDef*>& TempVars()
-    {
-        return ( m_TempVars );
-    }
-private:
-    TqInt	m_VariableUsage;
+		TqInt	VariableUsage() const
+		{
+			return ( m_VariableUsage );
+		}
+		std::map<std::string, IqVarDef*>& TempVars()
+		{
+			return ( m_TempVars );
+		}
+	private:
+		TqInt	m_VariableUsage;
 
-    std::vector<std::vector<SqVarRefTranslator> > m_saTransTable;
-    std::deque<std::map<std::string, std::string> >	m_StackVarMap;
+		std::vector<std::vector<SqVarRefTranslator> > m_saTransTable;
+		std::deque<std::map<std::string, std::string> >	m_StackVarMap;
 
-    std::map<std::string, IqVarDef*>	m_TempVars;
+		std::map<std::string, IqVarDef*>	m_TempVars;
 };
 
 //-----------------------------------------------------------------------

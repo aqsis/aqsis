@@ -36,27 +36,30 @@
 #endif
 
 #ifdef __cplusplus
-#define EXTERN_C extern "C" 
+#define EXTERN_C extern "C"
 #else
 #define EXTERN_C
 #endif
 
-struct SqShadeOp {
-    char *m_opspec;
-    char *m_init;
-    char *m_shutdown;
+struct SqShadeOp
+{
+	char *m_opspec;
+	char *m_init;
+	char *m_shutdown;
 } ;
 
-typedef struct _STRING_DESC {
-    char *s;
-    int bufflen;
-} STRING_DESC;
+typedef struct _STRING_DESC
+{
+	char *s;
+	int bufflen;
+}
+STRING_DESC;
 
 // Some of the DSO's out there seem to use this
-#define SHADEOP_SPEC struct SqShadeOp 
+#define SHADEOP_SPEC struct SqShadeOp
 
 // Utility macro for declaring a table of shader operations
-#define SHADEOP_TABLE(opname) struct SqShadeOp EXPORT  opname ## _shadeops [] 
+#define SHADEOP_TABLE(opname) struct SqShadeOp EXPORT  opname ## _shadeops []
 
 // Utility macro for declaring a shadeop method
 #define SHADEOP(method) EXTERN_C EXPORT int method (void *initdata, int argc, void **argv)

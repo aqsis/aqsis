@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="us-ascii"?>
+<!--Created with the Blender-Python GUI Designer-->
+<Controls>
+   <Control Name="Label5" Left="88" Top="248" Width="327" Height="23" ToolTipText="" ToggleGroup="" Text="Yet more text" Value="0" Maximum="10" Minimum="0" ForeColor="-16777216" Image="" Color1="-1" Color2="-16777216" bias="0.5" Contrast="1" Zoom="5" NoiseType="1" ObjectType="0" />
+   <Control Name="Label4" Left="88" Top="224" Width="327" Height="23" ToolTipText="" ToggleGroup="" Text="Even more text" Value="0" Maximum="10" Minimum="0" ForeColor="-16777216" Image="" Color1="-1" Color2="-16777216" bias="0.5" Contrast="1" Zoom="5" NoiseType="1" ObjectType="0" />
+   <Control Name="Label3" Left="88" Top="200" Width="327" Height="23" ToolTipText="" ToggleGroup="" Text="More text" Value="0" Maximum="10" Minimum="0" ForeColor="-16777216" Image="" Color1="-1" Color2="-16777216" bias="0.5" Contrast="1" Zoom="5" NoiseType="1" ObjectType="0" />
+   <Control Name="Label2" Left="88" Top="176" Width="327" Height="23" ToolTipText="" ToggleGroup="" Text="Some more text" Value="0" Maximum="10" Minimum="0" ForeColor="-16777216" Image="" Color1="-1" Color2="-16777216" bias="0.5" Contrast="1" Zoom="5" NoiseType="1" ObjectType="0" />
+   <Control Name="Label1" Left="88" Top="152" Width="327" Height="23" ToolTipText="" ToggleGroup="" Text="Some Text" Value="0" Maximum="10" Minimum="0" ForeColor="-16777216" Image="" Color1="-1" Color2="-16777216" bias="0.5" Contrast="1" Zoom="5" NoiseType="1" ObjectType="0" />
+   <Control Name="Rectangle2" Left="72" Top="144" Width="375" Height="143" ToolTipText="" ToggleGroup="" Text="" Value="0" Maximum="10" Minimum="0" ForeColor="-4473658" Image="" Color1="-1" Color2="-16777216" bias="0.5" Contrast="1" Zoom="5" NoiseType="1" ObjectType="6" />
+   <Control Name="SaveButton" Left="360" Top="296" Width="79" Height="23" ToolTipText="" ToggleGroup="" Text="Save" Value="0" Maximum="10" Minimum="0" ForeColor="-16777216" Image="" Color1="-1" Color2="-16777216" bias="0.5" Contrast="1" Zoom="5" NoiseType="1" ObjectType="2" />
+   <Control Name="DiscardButton" Left="224" Top="296" Width="87" Height="23" ToolTipText="" ToggleGroup="" Text="Discard" Value="0" Maximum="10" Minimum="0" ForeColor="-16777216" Image="" Color1="-1" Color2="-16777216" bias="0.5" Contrast="1" Zoom="5" NoiseType="1" ObjectType="2" />
+   <Control Name="CancelButton" Left="96" Top="296" Width="87" Height="23" ToolTipText="" ToggleGroup="" Text="Cancel" Value="0" Maximum="10" Minimum="0" ForeColor="-16777216" Image="" Color1="-1" Color2="-16777216" bias="0.5" Contrast="1" Zoom="5" NoiseType="1" ObjectType="2" />
+   <Control Name="Rectangle1" Left="64" Top="136" Width="391" Height="199" ToolTipText="" ToggleGroup="" Text="" Value="0" Maximum="10" Minimum="0" ForeColor="-12757907" Image="" Color1="-1" Color2="-16777216" bias="0.5" Contrast="1" Zoom="5" NoiseType="1" ObjectType="6" />
+</Controls>

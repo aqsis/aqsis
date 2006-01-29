@@ -35,16 +35,16 @@
 
 class CqRangeCheckCallback
 {
-public:
-    virtual void operator()( int res) = 0;
-    virtual void Call( int res )
-    {
-        this->operator()( res );
-    }
+	public:
+		virtual void operator()( int res) = 0;
+		virtual void Call( int res )
+		{
+			this->operator()( res );
+		}
 
-    enum {	LOWER_BOUND_HIT,
-           UPPER_BOUND_HIT,
-           VALID	}	EqRangeCheck;
+		enum {	LOWER_BOUND_HIT,
+		       UPPER_BOUND_HIT,
+		       VALID	}	EqRangeCheck;
 };
 
 //! Range check funtion using CqRangeCheckCallback
@@ -57,20 +57,20 @@ public:
 template<class T>
 bool CheckMinMax( const T& val, const T& min, const T& max, CqRangeCheckCallback* callBack)
 {
-    if( val < min )
-    {
-        (*callBack)( CqRangeCheckCallback::LOWER_BOUND_HIT );
-        return false;
-    }
+	if( val < min )
+	{
+		(*callBack)( CqRangeCheckCallback::LOWER_BOUND_HIT );
+		return false;
+	}
 
-    if( val > max )
-    {
-        (*callBack)( CqRangeCheckCallback::UPPER_BOUND_HIT );
-        return false;
-    }
+	if( val > max )
+	{
+		(*callBack)( CqRangeCheckCallback::UPPER_BOUND_HIT );
+		return false;
+	}
 
-    (*callBack)( CqRangeCheckCallback::VALID );
-    return true;
+	(*callBack)( CqRangeCheckCallback::VALID );
+	return true;
 }
 
 #endif

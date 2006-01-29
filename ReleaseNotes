@@ -1,17 +1,16 @@
 
-
-                                  Aqsis 1.2 Relaease Notes
+                                  Aqsis 1.2 Release Notes
                                   ------------------------
  
   These are the Release notes for the Aqsis 1.2 branch.
 
-    Instaallation
+    Installation
     -------------
 
   The build system now relies on SCons on all platforms. Please refer to the INSTALL file
-for details instructions.
+for detailed instructions.
 
-    Caveates and Depreacttions relative to 1.0
+    Caveats and Deprecations relative to 1.0
     -------------------------------------------
 
   DSO Search Behaviour - The DSO search behaviour has been changed to be more in-line with

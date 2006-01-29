@@ -39,44 +39,46 @@ typedef unsigned int TqTokenId;
 
 struct SqTokenEntry
 {
-    SqTokenEntry ( std::string n, EqTokenClass tc, EqTokenType tt, TqUint qt, TqBool inln )
-            : name( n ), tclass( tc ), ttype( tt ), in_line( inln ), quantity( qt )
-    {}
-    ~SqTokenEntry()
-    {}
+	SqTokenEntry ( std::string n, EqTokenClass tc, EqTokenType tt, TqUint qt, TqBool inln )
+			: name( n ), tclass( tc ), ttype( tt ), in_line( inln ), quantity( qt )
+	{}
+	~SqTokenEntry()
+	{}
 
-    std::string name;
-    EqTokenClass tclass;
-    EqTokenType ttype;
-    TqBool in_line;
-    TqUint quantity;
+	std::string name;
+	EqTokenClass tclass;
+	EqTokenType ttype;
+	TqBool in_line;
+	TqUint quantity;
 
 #ifdef DEBUG
-    void printClassType ();
+
+	void printClassType ();
 #endif
 };
 
 
 class CqDictionary
 {
-private:
-    std::vector<SqTokenEntry> te;
-    TqUint getTypeSize ( EqTokenType );
-    TqUint getQuantity ( TqTokenId );
-    void isValid ( TqTokenId );
+	private:
+		std::vector<SqTokenEntry> te;
+		TqUint getTypeSize ( EqTokenType );
+		TqUint getQuantity ( TqTokenId );
+		void isValid ( TqTokenId );
 
-public:
-    CqDictionary();
-    ~CqDictionary()
-    {}
+	public:
+		CqDictionary();
+		~CqDictionary()
+		{}
 
-    TqTokenId addToken ( std::string n, EqTokenClass tc, EqTokenType tt, TqUint qnt = 1, TqBool inln = false );
-    TqTokenId getTokenId ( std::string n );
-    TqUint allocSize ( TqTokenId id, TqUint vertex, TqUint varying, TqUint uniform, TqUint facevarying = 0 );
-    EqTokenType getType ( TqTokenId id );
+		TqTokenId addToken ( std::string n, EqTokenClass tc, EqTokenType tt, TqUint qnt = 1, TqBool inln = false );
+		TqTokenId getTokenId ( std::string n );
+		TqUint allocSize ( TqTokenId id, TqUint vertex, TqUint varying, TqUint uniform, TqUint facevarying = 0 );
+		EqTokenType getType ( TqTokenId id );
 
 #ifdef DEBUG
-    void stats ();
+
+		void stats ();
 #endif
 };
 

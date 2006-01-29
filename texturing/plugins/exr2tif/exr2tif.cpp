@@ -96,36 +96,36 @@ static bool isOpenExrFile (const char fileName[])
 static float
 knee (float x, float f)
 {
-    return log (x * f + 1) / f;
+	return log (x * f + 1) / f;
 }
 
 
 static unsigned char
 gamma (half h, float m)
 {
-    //
-    // Conversion from half to unsigned char pixel data,
-    // with gamma correction.  The conversion is the same
-    // as in the exrdisplay program's ImageView class,
-    // except with defog, kneeLow, and kneeHigh fixed
-    // at 0.0, 0.0, and 5.0 respectively.
-    //
+	//
+	// Conversion from half to unsigned char pixel data,
+	// with gamma correction.  The conversion is the same
+	// as in the exrdisplay program's ImageView class,
+	// except with defog, kneeLow, and kneeHigh fixed
+	// at 0.0, 0.0, and 5.0 respectively.
+	//
 
-    float x = max (0.f, h * m);
+	float x = max (0.f, h * m);
 
-    if (x > 1)
-	x = 1 + knee (x - 1, 0.184874f);
+	if (x > 1)
+		x = 1 + knee (x - 1, 0.184874f);
 
-    return (unsigned char) (clamp (Math<float>::pow (x, 0.4545f) * 84.66f, 
-				   0.f,
-				   255.f));
+	return (unsigned char) (clamp (Math<float>::pow (x, 0.4545f) * 84.66f,
+	                               0.f,
+	                               255.f));
 }
 
 // Shameless copied from an example rgbaInterfaceExamples.cpp
 static void readRgba1 (const char fileName[],
-                Array2D<Rgba> &pixels,
-                int &width,
-                int &height)
+                       Array2D<Rgba> &pixels,
+                       int &width,
+                       int &height)
 {
 	//
 	// Read an RGBA image using class RgbaInputFile:
@@ -192,27 +192,27 @@ extern "C" __export char *exr2tif(char *in)
 
 	int n = 4 * width;
 
-        float exposure = 0.0;
+	float exposure = 0.0;
 
-       
+
 	result = ( char * ) getenv( "GAMMA" );
-        float sign = 1.0f;
+	float sign = 1.0f;
 
 	if ( result && ( result[ 0 ] == '-' ) )
-        {
-             result++;
-             sign = -1.0f;
-        }
+	{
+		result++;
+		sign = -1.0f;
+	}
 
 	if ( result && ( result[ 0 ] >= '0' ) && ( result[ 0 ] <= '9' ) )
 	{
-	    sscanf(result, "%f", &exposure);
-	    exposure *= sign;
-        }
+		sscanf(result, "%f", &exposure);
+		exposure *= sign;
+	}
 
 	// width * height * 4 floats
 	pixels = (unsigned char *) malloc(n * sizeof(unsigned char) *  height);
-        float m  = Math<float>::pow (2.f, clamp (exposure + 2.47393f, -20.f, 20.f));
+	float m  = Math<float>::pow (2.f, clamp (exposure + 2.47393f, -20.f, 20.f));
 
 	for (int i=0; i< height; i++)
 	{

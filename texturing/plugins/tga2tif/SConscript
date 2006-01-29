@@ -1,5 +1,4 @@
 Import('env')
-Import('pixelsave')
 tga2tif_sources=Split("""
 	tga2tif.c""")
 
@@ -8,6 +7,6 @@ env.UseTargetOptions('plugin')
 env.UseTargetOptions('texture_plugin')
 env.UseTargetOptions('tga2tif')
 
-tga2tif = env.SharedLibrary('tga2tif', tga2tif_sources + pixelsave, LIBS=['$tiff_lib', '$z_lib', 'jpg2tif'])
+tga2tif = env.SharedLibrary('tga2tif', tga2tif_sources, LIBS=['$tiff_lib', '$z_lib', 'jpg2tif', 'common'])
 
 env.Install('$BINDIR', tga2tif)

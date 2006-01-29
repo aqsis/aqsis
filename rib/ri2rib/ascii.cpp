@@ -39,107 +39,107 @@ USING_NAMESPACE( libri2rib )
 // **************************************************************
 void CqASCII::printHeader()
 {
-    OUT << "##RenderMan RIB-Structure 1.0\n";
-    OUT << "version 3.03\n";
+	OUT << "##RenderMan RIB-Structure 1.0\n";
+	OUT << "version 3.03\n";
 }
 
 void CqASCII::printRequest( const char *cp, EqFunctions )
 {
-    TqInt i;
-    switch ( m_Indentation )
-    {
-    case SqOptions::Indentation_None:
-        break;
-    case SqOptions::Indentation_Space:
-        for ( i = 0; i < m_IndentSize * m_IndentLevel; i++ )
-            OUT << ' ';
-        break;
-    case SqOptions::Indentation_Tab:
-        for ( i = 0; i < m_IndentSize * m_IndentLevel; i++ )
-            OUT << '\t';
-        break;
-    }
-    OUT << cp;
+	TqInt i;
+	switch ( m_Indentation )
+	{
+			case SqOptions::Indentation_None:
+			break;
+			case SqOptions::Indentation_Space:
+			for ( i = 0; i < m_IndentSize * m_IndentLevel; i++ )
+				OUT << ' ';
+			break;
+			case SqOptions::Indentation_Tab:
+			for ( i = 0; i < m_IndentSize * m_IndentLevel; i++ )
+				OUT << '\t';
+			break;
+	}
+	OUT << cp;
 }
 
 void CqASCII::printInteger( const RtInt i )
 {
-    OUT << i;
+	OUT << i;
 }
 
 void CqASCII::printFloat( const RtFloat f )
 {
-    OUT << f;
+	OUT << f;
 }
 
 void CqASCII::printString( std::string &str )
 {
-    OUT << '"' << str << '"';
+	OUT << '"' << str << '"';
 }
 
 void CqASCII::printSpace()
 {
-    OUT << ' ';
+	OUT << ' ';
 }
 
 void CqASCII::printEOL()
 {
-    OUT << "\n";
+	OUT << "\n";
 }
 
 void CqASCII::printArray ( RtInt n, RtInt *p )
 {
-//    if( n > 0 )
-    {
-        OUT << "[ ";
-        for ( RtInt i = 0; i < n; i++ )
-        {
-            OUT << p[ i ] << ' ';
-        }
-        OUT << ']';
-    }
+	//    if( n > 0 )
+	{
+		OUT << "[ ";
+		for ( RtInt i = 0; i < n; i++ )
+		{
+			OUT << p[ i ] << ' ';
+		}
+		OUT << ']';
+	}
 }
 
 void CqASCII::printArray ( RtInt n, RtFloat *p )
 {
-//    if( n > 0 )
-    {
-        OUT << "[ ";
-        for ( RtInt i = 0; i < n; i++ )
-        {
-            OUT << p[ i ] << ' ';
-        }
-        OUT << ']';
-    }
+	//    if( n > 0 )
+	{
+		OUT << "[ ";
+		for ( RtInt i = 0; i < n; i++ )
+		{
+			OUT << p[ i ] << ' ';
+		}
+		OUT << ']';
+	}
 }
 
 
 void CqASCII::printArray ( RtInt n, RtToken *p )
 {
-//    if( n > 0 )
-    {
-        OUT << "[ ";
-        for ( RtInt i = 0; i < n; i++ )
-        {
-            printToken(p[ i ]);
+	//    if( n > 0 )
+	{
+		OUT << "[ ";
+		for ( RtInt i = 0; i < n; i++ )
+		{
+			printToken(p[ i ]);
 			OUT << ' ';
-        }
-        OUT << ']';
-    }
+		}
+		OUT << ']';
+	}
 }
 
 
 void CqASCII::printToken( RtToken t )
 {
-    OUT << '"' << t << '"';
+	OUT << '"' << t << '"';
 }
 
 void CqASCII::printCharP( const char *c )
 {
-    OUT << '"' << c << '"';
+	OUT << '"' << c << '"';
 }
 
 void CqASCII::print( const char *c )
 {
-    OUT << c;
+	OUT << c;
 }

@@ -1729,7 +1729,7 @@
 			<NoCache/>
 			<Arguments>
 				<Argument name="type" type="RtToken"/>
-				<Argument name="" type="char *"/>
+				<Argument name="format" type="char *"/>
 				<Argument name="..." type=""/>
 			</Arguments>
 		</Procedure>
@@ -1989,7 +1989,6 @@
 		</Procedure>
 
 		<Procedure name="RiConnectShaderLayers" return="RtVoid">
-			<NoCache/>
 			<Arguments>
 				<Argument name="type" type="RtToken"/>
 				<Argument name="layer1" type="RtToken"/>

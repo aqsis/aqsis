@@ -49,89 +49,92 @@ START_NAMESPACE( Aqsis )
  */
 class CqFile
 {
-public:
-    /** Default constructor
-     */
-    CqFile() : m_pStream( 0 ), m_bInternal( TqFalse )
-    {}
-    /** Constructor taking an open stream pointer and a name.
-     * \param Stream a pointer to an already opened input stream to attach this object to.
-     * \param strRealName the name of the file associated with this stream.
-     */
-    CqFile( std::istream* Stream, const char* strRealName ) :
-            m_pStream( Stream ), m_strRealName( strRealName ), m_bInternal( TqFalse )
-    {}
-    CqFile( const char* strFilename, const char* strSearchPathOption = "" );
-    /** Dectructor. Takes care of closing the stream if the constructor opened it.
-     */
-    virtual	~CqFile()
-    {
-        if ( m_pStream != NULL && m_bInternal ) delete( m_pStream );
-    }
+	public:
+		/** Default constructor
+		 */
+		CqFile() : m_pStream( 0 ), m_bInternal( TqFalse )
+		{}
+		/** Constructor taking an open stream pointer and a name.
+		 * \param Stream a pointer to an already opened input stream to attach this object to.
+		 * \param strRealName the name of the file associated with this stream.
+		 */
+		CqFile( std::istream* Stream, const char* strRealName ) :
+				m_pStream( Stream ), m_strRealName( strRealName ), m_bInternal( TqFalse )
+		{}
+		CqFile( const char* strFilename, const char* strSearchPathOption = "" );
+		/** Dectructor. Takes care of closing the stream if the constructor opened it.
+		 */
+		virtual	~CqFile()
+		{
+			if ( m_pStream != NULL && m_bInternal )
+				delete( m_pStream );
+		}
 
-    void	Open( const char* strFilename, const char* strSearchPathOption = "", std::ios::openmode mode = std::ios::in );
-    /** Close any opened stream associated with this object.
-     */
-    void	Close()
-    {
-        if ( m_pStream != NULL ) delete( m_pStream ); m_pStream = NULL;
-    }
-    /** Find out if the stream associated with this object is valid.
-     * \return boolean indicating validity.
-     */
-    TqBool	IsValid() const
-    {
-        return ( m_pStream != NULL );
-    }
-    /** Get the name asociated with this file object.
-     * \return a read only reference to the string object.
-     */
-    const CqString&	strRealName() const
-    {
-        return ( m_strRealName );
-    }
+		void	Open( const char* strFilename, const char* strSearchPathOption = "", std::ios::openmode mode = std::ios::in );
+		/** Close any opened stream associated with this object.
+		 */
+		void	Close()
+		{
+			if ( m_pStream != NULL )
+				delete( m_pStream );
+			m_pStream = NULL;
+		}
+		/** Find out if the stream associated with this object is valid.
+		 * \return boolean indicating validity.
+		 */
+		TqBool	IsValid() const
+		{
+			return ( m_pStream != NULL );
+		}
+		/** Get the name asociated with this file object.
+		 * \return a read only reference to the string object.
+		 */
+		const CqString&	strRealName() const
+		{
+			return ( m_strRealName );
+		}
 
-    /** Cast to a stream reference.
-     */
-    operator std::istream&()
-    {
-        return ( *m_pStream );
-    }
-    /** Cast to a stream pointer.
-     */
-    operator std::istream*()
-    {
-        return ( m_pStream );
-    }
+		/** Cast to a stream reference.
+		 */
+		operator std::istream&()
+		{
+			return ( *m_pStream );
+		}
+		/** Cast to a stream pointer.
+		 */
+		operator std::istream*()
+		{
+			return ( m_pStream );
+		}
 
-    /** Get the current position within the stream if appropriate.
-     * \return long integer indicating the offest from the start.
-     */
-    TqLong	Position()
-    {
-        return ( m_pStream->tellg() );
-    }
-    /** Get the length of the stream if a file.
-     * \return the lenght as a long integer.
-     */
-    TqLong	Length()
-    {
-        /// \todo Should check if it is a file here.
-        long pos = Position();
-        m_pStream->seekg( 0, std::ios::end );
-        long len = Position();
-        m_pStream->seekg( pos, std::ios::beg );
-        return ( len );
-    }
+		/** Get the current position within the stream if appropriate.
+		 * \return long integer indicating the offest from the start.
+		 */
+		TqLong	Position()
+		{
+			return ( m_pStream->tellg() );
+		}
+		/** Get the length of the stream if a file.
+		 * \return the lenght as a long integer.
+		 */
+		TqLong	Length()
+		{
+			/// \todo Should check if it is a file here.
+			long pos = Position();
+			m_pStream->seekg( 0, std::ios::end );
+			long len = Position();
+			m_pStream->seekg( pos, std::ios::beg );
+			return ( len );
+		}
 
-    CqString FixupPath(CqString& strPath);
+		CqString FixupPath(CqString& strPath);
 
-    static std::list<CqString*> Glob( const CqString& strFileGlob );
+		static std::list<CqString*> Glob( const CqString& strFileGlob );
 
-private:
-    std::istream*	m_pStream;		///< a poimter to the stream associated with this file object.
-    CqString	m_strRealName;	///< the name of this file object, usually the filename.
-    TqBool	m_bInternal;	///< a flag indicating whether the stream originated internally, or was externally created and passed in.
+	private:
+		std::istream*	m_pStream;		///< a poimter to the stream associated with this file object.
+		CqString	m_strRealName;	///< the name of this file object, usually the filename.
+		TqBool	m_bInternal;	///< a flag indicating whether the stream originated internally, or was externally created and passed in.
 }
 ;
 

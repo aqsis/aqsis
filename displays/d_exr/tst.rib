@@ -1,0 +1,13 @@
+Declare "exrcompression" "uniform string"
+Format 720 486 1
+#Display "tst.tif" "file" "rgb"  "string compression" "packbits"
+Display "tst.exr" "exr" "rgba" "exrcompression" "zip" "quantize" [0 0 0 0]
+Display "+normal.exr" "exr" "N" "exrcompression" "zip" "quantize" [0 0 0 0]
+Projection "perspective" "fov" [35]
+Translate 0 0 8
+WorldBegin
+        Translate 0 -1.3 0
+        Rotate -90 1 0 0
+        Geometry "teapot"
+WorldEnd
+

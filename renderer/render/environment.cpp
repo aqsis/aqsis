@@ -92,7 +92,7 @@ CqTextureMap* CqTextureMap::GetLatLongMap( const CqString& strName )
 	        TIFFGetField( pNew->m_pImage, TIFFTAG_PIXAR_TEXTUREFORMAT, &ptexfmt ) != 1 ||
 	        strcmp( ptexfmt, LATLONG_HEADER ) != 0 )
 	{
-		std::cerr << error << "Map \"" << strName.c_str() << "\" is not an environment map, use RiMakeLatLongEnvironment" << std::endl;
+		Aqsis::log() << error << "Map \"" << strName.c_str() << "\" is not an environment map, use RiMakeLatLongEnvironment" << std::endl;
 
 		pNew->SetInvalid();
 	}
@@ -154,12 +154,13 @@ CqTextureMap* CqTextureMap::GetEnvironmentMap( const CqString& strName )
 	        TIFFGetField( pNew->m_pImage, TIFFTAG_PIXAR_TEXTUREFORMAT, &ptexfmt ) != 1 ||
 	        ( strcmp( ptexfmt, CUBEENVMAP_HEADER ) != 0 ) && ( strcmp( ptexfmt, LATLONG_HEADER ) != 0 ) )
 	{
-		std::cerr << error << "Map \"" << strName.c_str() << "\" is not an environment map, use RiMakeCubeFaceEnvironment" << std::endl;
+		Aqsis::log() << error << "Map \"" << strName.c_str() << "\" is not an environment map, use RiMakeCubeFaceEnvironment" << std::endl;
 		pNew->SetInvalid();
 		delete pNew;
 		pNew = NULL;
 
-	} else
+	}
+	else
 	{
 		TqFloat fov;
 		if (TIFFGetField( pNew->m_pImage, TIFFTAG_PIXAR_FOVCOT, &fov) == 1)

@@ -44,79 +44,83 @@ START_NAMESPACE( Aqsis )
 
 class CqQuadric : public CqSurface
 {
-public:
+	public:
 
-    CqQuadric();
-    virtual	~CqQuadric()
-    {}
+		CqQuadric();
+		virtual	~CqQuadric()
+		{}
 
-    CqBound	MotionBound(CqBound&	B) const;
-    virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime = 0 );
-    /** Get the number of uniform values for this GPrim.
-     */
-    virtual	TqUint	cUniform() const
-    {
-        return ( 1 );
-    }
-    virtual	TqUint	cVarying() const
-    {
-        return ( 4 );
-    }
-    virtual	TqUint	cVertex() const
-    {
-        return ( 4 );
-    }
-    virtual	TqUint	cFaceVarying() const
-    {
-        /// \todo Must work out what this value should be.
-        return ( 1 );
-    }
+		CqBound	MotionBound(CqBound&	B) const;
+		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime = 0 );
+		/** Get the number of uniform values for this GPrim.
+		 */
+		virtual	TqUint	cUniform() const
+		{
+			return ( 1 );
+		}
+		virtual	TqUint	cVarying() const
+		{
+			return ( 4 );
+		}
+		virtual	TqUint	cVertex() const
+		{
+			return ( 4 );
+		}
+		virtual	TqUint	cFaceVarying() const
+		{
+			/// \todo Must work out what this value should be.
+			return ( 1 );
+		}
 
 
-    // Overrides from CqSurface
-    virtual TqBool	Diceable();
+		// Overrides from CqSurface
+		virtual TqBool	Diceable();
 
-    /** Determine whether the passed surface is valid to be used as a
-     *  frame in motion blur for this surface.
-     */
-    virtual TqBool	IsMotionBlurMatch( CqBasicSurface* pSurf )
-    {
-        return( TqFalse );
-    }
+		/** Determine whether the passed surface is valid to be used as a
+		 *  frame in motion blur for this surface.
+		 */
+		virtual TqBool	IsMotionBlurMatch( CqBasicSurface* pSurf )
+		{
+			return( TqFalse );
+		}
 
-    TqUlong	EstimateGridSize();
-    void	Circle( const CqVector3D& O, const CqVector3D& X, const CqVector3D& Y, TqFloat r, TqFloat as, TqFloat ae, std::vector<CqVector3D>& points ) const;
-    CqBound	RevolveForBound( const std::vector<CqVector3D>& profile, const CqVector3D& S, const CqVector3D& Tvec, TqFloat theta ) const;
+		TqUlong	EstimateGridSize();
+		void	Circle( const CqVector3D& O, const CqVector3D& X, const CqVector3D& Y, TqFloat r, TqFloat as, TqFloat ae, std::vector<CqVector3D>& points ) const;
+		CqBound	RevolveForBound( const std::vector<CqVector3D>& profile, const CqVector3D& S, const CqVector3D& Tvec, TqFloat theta ) const;
 
-    virtual TqInt	DiceAll( CqMicroPolyGrid* pGrid );
+		virtual TqInt	DiceAll( CqMicroPolyGrid* pGrid );
 
-    /** Pure virtual, get a surface point.
-     * \param u Surface u coordinate.
-     * \param v Surface v coordinate.
-     * \return 3D vector representing the surface point at the specified u,v coordniates.
-     */
-    virtual	CqVector3D	DicePoint( TqInt u, TqInt v ) = 0;
-    /** Pure virtual, get a surface point and normal.
-     * \param u Surface u coordinate.
-     * \param v Surface v coordinate.
-     * \param Normal Storage for the surface normal.
-     * \return 3D vector representing the surface point at the specified u,v coordniates.
-     */
-    virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal ) = 0;
+		/** Pure virtual, get a surface point.
+		 * \param u Surface u coordinate.
+		 * \param v Surface v coordinate.
+		 * \return 3D vector representing the surface point at the specified u,v coordniates.
+		 */
+		virtual	CqVector3D	DicePoint( TqInt u, TqInt v ) = 0;
+		/** Pure virtual, get a surface point and normal.
+		 * \param u Surface u coordinate.
+		 * \param v Surface v coordinate.
+		 * \param Normal Storage for the surface normal.
+		 * \return 3D vector representing the surface point at the specified u,v coordniates.
+		 */
+		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal ) = 0;
 
-    CqQuadric&	operator=( const CqQuadric& From );
+		CqQuadric&	operator=( const CqQuadric& From );
 
-    // Derived from CqSurface
-    virtual void	NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData );
-    virtual	void	GenerateGeometricNormals( TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pNormals );
+		// Derived from CqSurface
+		virtual void	NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData );
+		virtual	void	GenerateGeometricNormals( TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pNormals );
 
 #ifdef _DEBUG
-    CqString className() const { return CqString("CqQuadric"); }
+
+		CqString className() const
+		{
+			return CqString("CqQuadric");
+		}
 #endif
 
-protected:
-    CqMatrix	m_matTx;		///< Transformation matrix from object to camera.
-    CqMatrix	m_matITTx;		///< Inverse transpose transformation matrix, for transforming normals.
+	protected:
+		CqMatrix	m_matTx;		///< Transformation matrix from object to camera.
+		CqMatrix	m_matITTx;		///< Inverse transpose transformation matrix, for transforming normals.
 
 }
 ;
@@ -130,40 +134,44 @@ protected:
 
 class CqSphere : public CqQuadric
 {
-public:
-    CqSphere( TqFloat radius = 1.0f, TqFloat zmin = -1.0f, TqFloat zmax = 1.0f, TqFloat thetamin = 0.0f, TqFloat thetamax = 360.0f );
-    CqSphere( const CqSphere& From )
-    {
-        *this = From;
-    }
-    virtual	~CqSphere()
-    {}
+	public:
+		CqSphere( TqFloat radius = 1.0f, TqFloat zmin = -1.0f, TqFloat zmax = 1.0f, TqFloat thetamin = 0.0f, TqFloat thetamax = 360.0f );
+		CqSphere( const CqSphere& From )
+		{
+			*this = From;
+		}
+		virtual	~CqSphere()
+		{}
 
-    virtual	CqBound	Bound() const;
+		virtual	CqBound	Bound() const;
 
-    virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
-    virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
-    virtual TqBool	CanGenerateNormals() const
-    {
-        return ( TqTrue );
-    }
+		virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
+		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
+		virtual TqBool	CanGenerateNormals() const
+		{
+			return ( TqTrue );
+		}
 
-    virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u );
+		virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u );
 
-    CqSphere&	operator=( const CqSphere& From );
+		CqSphere&	operator=( const CqSphere& From );
 
 #ifdef _DEBUG
-    CqString className() const { return CqString("CqSphere"); }
+
+		CqString className() const
+		{
+			return CqString("CqSphere");
+		}
 #endif
 
-private:
-    TqFloat	m_Radius;		///< Radius.
-//    TqFloat	m_ZMin;			///< Min value on z axis.
-//    TqFloat	m_ZMax;			///< Max value on z axis.
-	TqFloat	m_PhiMin;		///< Min angle about x axis.
-	TqFloat	m_PhiMax;		///< Max angle about x axis.
-    TqFloat	m_ThetaMin;		///< Min angle about z axis.
-    TqFloat	m_ThetaMax;		///< Max angle about z axis.
+	private:
+		TqFloat	m_Radius;		///< Radius.
+		//    TqFloat	m_ZMin;			///< Min value on z axis.
+		//    TqFloat	m_ZMax;			///< Max value on z axis.
+		TqFloat	m_PhiMin;		///< Min angle about x axis.
+		TqFloat	m_PhiMax;		///< Max angle about x axis.
+		TqFloat	m_ThetaMin;		///< Min angle about z axis.
+		TqFloat	m_ThetaMax;		///< Max angle about z axis.
 }
 ;
 
@@ -175,35 +183,39 @@ private:
 
 class CqCone : public CqQuadric
 {
-public:
-    CqCone( TqFloat height = 1.0f, TqFloat radius = 1.0f, TqFloat thetamin = 0.0f, TqFloat thetamax = 360.0f, TqFloat zmin = 0.0f, TqFloat zmax = 1.0f );
-    CqCone( const CqCone& From )
-    {
-        *this = From;
-    }
-    virtual	~CqCone()
-    {}
+	public:
+		CqCone( TqFloat height = 1.0f, TqFloat radius = 1.0f, TqFloat thetamin = 0.0f, TqFloat thetamax = 360.0f, TqFloat zmin = 0.0f, TqFloat zmax = 1.0f );
+		CqCone( const CqCone& From )
+		{
+			*this = From;
+		}
+		virtual	~CqCone()
+		{}
 
-    virtual	CqBound	Bound() const;
+		virtual	CqBound	Bound() const;
 
-    virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
-    virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
+		virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
+		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
 
-    virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u );
+		virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u );
 
-    CqCone&	operator=( const CqCone& From );
+		CqCone&	operator=( const CqCone& From );
 
 #ifdef _DEBUG
-    CqString className() const { return CqString("CqCone"); }
+
+		CqString className() const
+		{
+			return CqString("CqCone");
+		}
 #endif
 
-private:
-    TqFloat	m_Height;		///< Height..
-    TqFloat	m_Radius;		///< Radius.
-    TqFloat	m_vMin;			///< Min value on z axis.
-    TqFloat	m_vMax;			///< Max value on z axis.
-    TqFloat	m_ThetaMin;		///< Min angle about z axis.
-    TqFloat	m_ThetaMax;		///< Max angle about z axis.
+	private:
+		TqFloat	m_Height;		///< Height..
+		TqFloat	m_Radius;		///< Radius.
+		TqFloat	m_vMin;			///< Min value on z axis.
+		TqFloat	m_vMax;			///< Max value on z axis.
+		TqFloat	m_ThetaMin;		///< Min angle about z axis.
+		TqFloat	m_ThetaMax;		///< Max angle about z axis.
 }
 ;
 
@@ -215,38 +227,42 @@ private:
 
 class CqCylinder : public CqQuadric
 {
-public:
-    CqCylinder( TqFloat radius = 1.0f, TqFloat zmin = -1.0f, TqFloat zmax = 1.0f, TqFloat thetamin = 0.0f, TqFloat thetamax = 360.0f );
-    CqCylinder( const CqCylinder& From )
-    {
-        *this = From;
-    }
-    virtual	~CqCylinder()
-    {}
+	public:
+		CqCylinder( TqFloat radius = 1.0f, TqFloat zmin = -1.0f, TqFloat zmax = 1.0f, TqFloat thetamin = 0.0f, TqFloat thetamax = 360.0f );
+		CqCylinder( const CqCylinder& From )
+		{
+			*this = From;
+		}
+		virtual	~CqCylinder()
+		{}
 
-    virtual	CqBound	Bound() const;
+		virtual	CqBound	Bound() const;
 
-    virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
-    virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
-    virtual TqBool	CanGenerateNormals() const
-    {
-        return ( TqTrue );
-    }
+		virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
+		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
+		virtual TqBool	CanGenerateNormals() const
+		{
+			return ( TqTrue );
+		}
 
-    virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u );
+		virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u );
 
-    CqCylinder&	operator=( const CqCylinder& From );
+		CqCylinder&	operator=( const CqCylinder& From );
 
 #ifdef _DEBUG
-    CqString className() const { return CqString("CqCylinder"); }
+
+		CqString className() const
+		{
+			return CqString("CqCylinder");
+		}
 #endif
 
-private:
-    TqFloat	m_Radius;		///< Radius
-    TqFloat	m_ZMin;			///< Min value on zaxis.
-    TqFloat	m_ZMax;			///< Max value on z axis.
-    TqFloat	m_ThetaMin;		///< Min angle about z axis.
-    TqFloat	m_ThetaMax;		///< Max angle about z axis.
+	private:
+		TqFloat	m_Radius;		///< Radius
+		TqFloat	m_ZMin;			///< Min value on zaxis.
+		TqFloat	m_ZMax;			///< Max value on z axis.
+		TqFloat	m_ThetaMin;		///< Min angle about z axis.
+		TqFloat	m_ThetaMax;		///< Max angle about z axis.
 }
 ;
 
@@ -258,34 +274,38 @@ private:
 
 class CqHyperboloid : public CqQuadric
 {
-public:
-    CqHyperboloid( );
-    CqHyperboloid( CqVector3D& point1, CqVector3D& point2, TqFloat thetamin, TqFloat thetamax );
-    CqHyperboloid( const CqHyperboloid& From )
-    {
-        *this = From;
-    }
-    virtual	~CqHyperboloid()
-    {}
+	public:
+		CqHyperboloid( );
+		CqHyperboloid( CqVector3D& point1, CqVector3D& point2, TqFloat thetamin, TqFloat thetamax );
+		CqHyperboloid( const CqHyperboloid& From )
+		{
+			*this = From;
+		}
+		virtual	~CqHyperboloid()
+		{}
 
-    virtual	CqBound	Bound() const;
+		virtual	CqBound	Bound() const;
 
-    virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
-    virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
+		virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
+		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
 
-    virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u );
+		virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u );
 
-    CqHyperboloid&	operator=( const CqHyperboloid& From );
+		CqHyperboloid&	operator=( const CqHyperboloid& From );
 
 #ifdef _DEBUG
-    CqString className() const { return CqString("CqHyperboloid"); }
+
+		CqString className() const
+		{
+			return CqString("CqHyperboloid");
+		}
 #endif
 
-private:
-    CqVector3D	m_Point1;		///< Start point of line to revolve.
-    CqVector3D	m_Point2;		///< End point of line to revolve.
-    TqFloat	m_ThetaMin;		///< Min angle about z axis.
-    TqFloat	m_ThetaMax;		///< Max angle about z axis.
+	private:
+		CqVector3D	m_Point1;		///< Start point of line to revolve.
+		CqVector3D	m_Point2;		///< End point of line to revolve.
+		TqFloat	m_ThetaMin;		///< Min angle about z axis.
+		TqFloat	m_ThetaMax;		///< Max angle about z axis.
 }
 ;
 
@@ -297,34 +317,38 @@ private:
 
 class CqParaboloid : public CqQuadric
 {
-public:
-    CqParaboloid( TqFloat rmax = 1.0f, TqFloat zmin = -1.0f, TqFloat zmax = 1.0f, TqFloat thetamin = 0.0f, TqFloat thetamax = 360.0f );
-    CqParaboloid( const CqParaboloid& From )
-    {
-        *this = From;
-    }
-    virtual	~CqParaboloid()
-    {}
+	public:
+		CqParaboloid( TqFloat rmax = 1.0f, TqFloat zmin = -1.0f, TqFloat zmax = 1.0f, TqFloat thetamin = 0.0f, TqFloat thetamax = 360.0f );
+		CqParaboloid( const CqParaboloid& From )
+		{
+			*this = From;
+		}
+		virtual	~CqParaboloid()
+		{}
 
-    virtual	CqBound	Bound() const;
+		virtual	CqBound	Bound() const;
 
-    virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
-    virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
+		virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
+		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
 
-    virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u );
+		virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u );
 
-    CqParaboloid&	operator=( const CqParaboloid& From );
+		CqParaboloid&	operator=( const CqParaboloid& From );
 
 #ifdef _DEBUG
-    CqString className() const { return CqString("CqParaboloid"); }
+
+		CqString className() const
+		{
+			return CqString("CqParaboloid");
+		}
 #endif
 
-private:
-    TqFloat	m_RMax;			///< Radius at zmax.
-    TqFloat m_ZMin;			///< Min value on z axis.
-    TqFloat m_ZMax;			///< Max value on z axis.
-    TqFloat	m_ThetaMin;		///< Min angle about z axis.
-    TqFloat	m_ThetaMax;		///< Max angle about z axis.
+	private:
+		TqFloat	m_RMax;			///< Radius at zmax.
+		TqFloat m_ZMin;			///< Min value on z axis.
+		TqFloat m_ZMax;			///< Max value on z axis.
+		TqFloat	m_ThetaMin;		///< Min angle about z axis.
+		TqFloat	m_ThetaMax;		///< Max angle about z axis.
 }
 ;
 
@@ -336,35 +360,39 @@ private:
 
 class CqTorus : public CqQuadric
 {
-public:
-    CqTorus( TqFloat majorradius = 1.0f, TqFloat minorradius = 0.2f, TqFloat phimin = 0.0f, TqFloat phimax = 360.0f, TqFloat thetamin = 0.0f, TqFloat thetamax = 360.0f );
-    CqTorus( const CqTorus& From )
-    {
-        *this = From;
-    }
-    virtual	~CqTorus()
-    {}
+	public:
+		CqTorus( TqFloat majorradius = 1.0f, TqFloat minorradius = 0.2f, TqFloat phimin = 0.0f, TqFloat phimax = 360.0f, TqFloat thetamin = 0.0f, TqFloat thetamax = 360.0f );
+		CqTorus( const CqTorus& From )
+		{
+			*this = From;
+		}
+		virtual	~CqTorus()
+		{}
 
-    virtual	CqBound	Bound() const;
+		virtual	CqBound	Bound() const;
 
-    virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
-    virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
+		virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
+		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
 
-    virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u );
+		virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u );
 
-    CqTorus&	operator=( const CqTorus& From );
+		CqTorus&	operator=( const CqTorus& From );
 
 #ifdef _DEBUG
-    CqString className() const { return CqString("CqTorus"); }
+
+		CqString className() const
+		{
+			return CqString("CqTorus");
+		}
 #endif
 
-private:
-    TqFloat	m_MajorRadius;	///< Major radius.
-    TqFloat	m_MinorRadius;	///< Minor radius.
-    TqFloat m_PhiMin;		///< Min angle about ring.
-    TqFloat m_PhiMax;		///< Max angle about ring.
-    TqFloat	m_ThetaMin;		///< Min andle about z axis.
-    TqFloat	m_ThetaMax;		///< Max angle about z axis.
+	private:
+		TqFloat	m_MajorRadius;	///< Major radius.
+		TqFloat	m_MinorRadius;	///< Minor radius.
+		TqFloat m_PhiMin;		///< Min angle about ring.
+		TqFloat m_PhiMax;		///< Max angle about ring.
+		TqFloat	m_ThetaMin;		///< Min andle about z axis.
+		TqFloat	m_ThetaMax;		///< Max angle about z axis.
 }
 ;
 
@@ -376,38 +404,42 @@ private:
 
 class CqDisk : public CqQuadric
 {
-public:
-    CqDisk( TqFloat height = 0.0f, TqFloat minorradius = 0.0f, TqFloat majorradius = 1.0f, TqFloat thetamin = 0.0f, TqFloat thetamax = 360.0f );
-    CqDisk( const CqDisk& From )
-    {
-        *this = From;
-    }
-    virtual	~CqDisk()
-    {}
+	public:
+		CqDisk( TqFloat height = 0.0f, TqFloat minorradius = 0.0f, TqFloat majorradius = 1.0f, TqFloat thetamin = 0.0f, TqFloat thetamax = 360.0f );
+		CqDisk( const CqDisk& From )
+		{
+			*this = From;
+		}
+		virtual	~CqDisk()
+		{}
 
-    virtual	CqBound	Bound() const;
+		virtual	CqBound	Bound() const;
 
-    virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
-    virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
-    virtual TqBool	CanGenerateNormals() const
-    {
-        return ( TqTrue );
-    }
+		virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
+		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
+		virtual TqBool	CanGenerateNormals() const
+		{
+			return ( TqTrue );
+		}
 
-    virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u );
+		virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u );
 
-    CqDisk&	operator=( const CqDisk& From );
+		CqDisk&	operator=( const CqDisk& From );
 
 #ifdef _DEBUG
-    CqString className() const { return CqString("CqDisk"); }
+
+		CqString className() const
+		{
+			return CqString("CqDisk");
+		}
 #endif
 
-private:
-    TqFloat	m_Height;			///< Position on z axis.
-    TqFloat	m_MajorRadius;		///< Outer radius of disk.
-    TqFloat	m_MinorRadius;		///< Inner radius of disk.
-    TqFloat	m_ThetaMin;			///< Min angle about z axis.
-    TqFloat	m_ThetaMax;			///< Max angle about z axis.
+	private:
+		TqFloat	m_Height;			///< Position on z axis.
+		TqFloat	m_MajorRadius;		///< Outer radius of disk.
+		TqFloat	m_MinorRadius;		///< Inner radius of disk.
+		TqFloat	m_ThetaMin;			///< Min angle about z axis.
+		TqFloat	m_ThetaMax;			///< Max angle about z axis.
 }
 ;
 

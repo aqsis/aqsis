@@ -42,301 +42,301 @@ START_NAMESPACE( libri2rib )
 
 class CqOutput
 {
-protected:
-    enum EqFunctions{ Declare, FrameBegin, FrameEnd, WorldBegin,
-                      WorldEnd, ObjectBegin, ObjectEnd, ObjectInstance,
-                      AttributeBegin, AttributeEnd, TransformBegin, TransformEnd,
-                      SolidBegin, SolidEnd, MotionBegin, MotionEnd,
-                      Format, FrameAspectRatio, ScreenWindow, CropWindow,
-                      Projection, Clipping, ClippingPlane, DepthOfField,
-                      Shutter, PixelVariance, PixelSamples, PixelFilter,
-                      Exposure, Imager, Quantize, Display,
-                      Hider, ColorSamples, RelativeDetail, Option,
-                      Color, Opacity, TextureCoordinates, LightSource,
-                      AreaLightSource, Illuminate, Surface, Atmosphere,
-                      Interior, Exterior, ShadingRate, ShadingInterpolation,
-                      Matte, Bound, Detail, DetailRange,
-                      GeometricApproximation, Basis, TrimCurve, Orientation,
-                      ReverseOrientation, Sides, Displacement, Identity,
-                      Transform, ConcatTransform, Perspective, Translate,
-                      Rotate, Scale, Skew, Deformation,
-                      CoordinateSystem, CoordSysTransform, Attribute, Polygon,
-                      GeneralPolygon, PointsPolygons, PointsGeneralPolygons, Patch,
-                      PatchMesh, NuPatch, Sphere, Cone,
-                      Cylinder, Hyperboloid, Paraboloid, Disk,
-                      Torus, Blobby, Points, Curves,
-                      SubdivisionMesh, Procedural, Geometry, MakeTexture,
-                      MakeBump, MakeLatLongEnvironment, MakeCubeFaceEnvironment, MakeShadow,
-                      ArchiveRecord, ReadArchive, ErrorHandler, IfBegin, IfEnd, Else, ElseIf, LAST_Function };
-    // block types (used to check context nesting)
-    enum EqBlocks{
-        B_Ri, B_Frame, B_World, B_Attribute, B_Transform, B_Solid, B_Object, 
-        B_Motion
-    };
-private:
-    CqDictionary m_Dictionary;
+	protected:
+		enum EqFunctions{ Declare, FrameBegin, FrameEnd, WorldBegin,
+		                  WorldEnd, ObjectBegin, ObjectEnd, ObjectInstance,
+		                  AttributeBegin, AttributeEnd, TransformBegin, TransformEnd,
+		                  SolidBegin, SolidEnd, MotionBegin, MotionEnd,
+		                  Format, FrameAspectRatio, ScreenWindow, CropWindow,
+		                  Projection, Clipping, ClippingPlane, DepthOfField,
+		                  Shutter, PixelVariance, PixelSamples, PixelFilter,
+		                  Exposure, Imager, Quantize, Display,
+		                  Hider, ColorSamples, RelativeDetail, Option,
+		                  Color, Opacity, TextureCoordinates, LightSource,
+		                  AreaLightSource, Illuminate, Surface, Atmosphere,
+		                  Interior, Exterior, ShadingRate, ShadingInterpolation,
+		                  Matte, Bound, Detail, DetailRange,
+		                  GeometricApproximation, Basis, TrimCurve, Orientation,
+		                  ReverseOrientation, Sides, Displacement, Identity,
+		                  Transform, ConcatTransform, Perspective, Translate,
+		                  Rotate, Scale, Skew, Deformation,
+		                  CoordinateSystem, CoordSysTransform, Attribute, Polygon,
+		                  GeneralPolygon, PointsPolygons, PointsGeneralPolygons, Patch,
+		                  PatchMesh, NuPatch, Sphere, Cone,
+		                  Cylinder, Hyperboloid, Paraboloid, Disk,
+		                  Torus, Blobby, Points, Curves,
+		                  SubdivisionMesh, Procedural, Geometry, MakeTexture,
+		                  MakeBump, MakeLatLongEnvironment, MakeCubeFaceEnvironment, MakeShadow,
+		                  ArchiveRecord, ReadArchive, ErrorHandler, IfBegin, IfEnd, Else, ElseIf, LAST_Function };
+		// block types (used to check context nesting)
+		enum EqBlocks{
+		    B_Ri, B_Frame, B_World, B_Attribute, B_Transform, B_Solid, B_Object,
+		    B_Motion
+	};
+	private:
+		CqDictionary m_Dictionary;
 
-    RtInt m_ColorNComps;
-    RtInt m_ObjectHandle;
-    RtInt m_LightHandle;
+		RtInt m_ColorNComps;
+		RtInt m_ObjectHandle;
+		RtInt m_LightHandle;
 
-    struct SqSteps
-    {
-        RtInt uStep;
-        RtInt vStep;
-    };
-    std::stack<SqSteps> m_Steps;
+		struct SqSteps
+		{
+			RtInt uStep;
+			RtInt vStep;
+		};
+		std::stack<SqSteps> m_Steps;
 
-    std::vector<EqBlocks> m_nesting;
-    bool beginNesting(EqBlocks type);
-    bool endNesting(EqBlocks type);
-    bool nestingContains(EqBlocks type) const;
+		std::vector<EqBlocks> m_nesting;
+		bool beginNesting(EqBlocks type);
+		bool endNesting(EqBlocks type);
+		bool nestingContains(EqBlocks type) const;
 
-    void push();
-    void pop();
+		void push();
+		void pop();
 
-    void printPL ( RtInt n, RtToken tokens[], RtPointer parms[],
-                   RtInt vertex = 1, RtInt varying = 1, RtInt uniform = 1, RtInt facevarying = 1 );
-    std::string getFilterFuncName ( RtFilterFunc, const char * ) const;
+		void printPL ( RtInt n, RtToken tokens[], RtPointer parms[],
+		               RtInt vertex = 1, RtInt varying = 1, RtInt uniform = 1, RtInt facevarying = 1 );
+		std::string getFilterFuncName ( RtFilterFunc, const char * ) const;
 
-    CqOutput( CqOutput const & )
-    {}
-    CqOutput const &operator=( CqOutput const & )
-    {
-        return * this;
-    }
+		CqOutput( CqOutput const & )
+		{}
+		CqOutput const &operator=( CqOutput const & )
+		{
+			return * this;
+		}
 
-protected:
-    SqOptions::EqIndentation m_Indentation;
-    TqInt m_IndentSize;
-    TqInt m_IndentLevel;
+	protected:
+		SqOptions::EqIndentation m_Indentation;
+		TqInt m_IndentSize;
+		TqInt m_IndentLevel;
 
-    CqStream *out;
+		CqStream *out;
 
-    virtual void printHeader()
-    {}
-    virtual void printRequest( const char *, EqFunctions )
-    {}
-    virtual void printInteger( const RtInt )
-    {}
-    virtual void printFloat( const RtFloat )
-    {}
-    virtual void printString( std::string & )
-    {}
-    virtual void printSpace()
-    {}
-    virtual void printEOL()
-    {}
+		virtual void printHeader()
+		{}
+		virtual void printRequest( const char *, EqFunctions )
+		{}
+		virtual void printInteger( const RtInt )
+		{}
+		virtual void printFloat( const RtFloat )
+		{}
+		virtual void printString( std::string & )
+		{}
+		virtual void printSpace()
+		{}
+		virtual void printEOL()
+		{}
 
-    virtual void printArray ( RtInt n, RtInt *p )
-    {}
-    virtual void printArray ( RtInt n, RtFloat *p )
-    {}
-    virtual void printArray ( RtInt n, RtToken *p )
-    {}
-    virtual void printToken ( RtToken t )
-    {}
-    virtual void printCharP ( const char *c )
-    {}
-    virtual void print( const char *c )
-    {}
+		virtual void printArray ( RtInt n, RtInt *p )
+		{}
+		virtual void printArray ( RtInt n, RtFloat *p )
+		{}
+		virtual void printArray ( RtInt n, RtToken *p )
+		{}
+		virtual void printToken ( RtToken t )
+		{}
+		virtual void printCharP ( const char *c )
+		{}
+		virtual void print( const char *c )
+		{}
 
-public:
-    CqOutput( const char *, int fdesc,
-              SqOptions::EqCompression,
-              SqOptions::EqIndentation, TqInt isize );
-    virtual ~CqOutput();
+	public:
+		CqOutput( const char *, int fdesc,
+		          SqOptions::EqCompression,
+		          SqOptions::EqIndentation, TqInt isize );
+		virtual ~CqOutput();
 
-    RtToken RiDeclare( const char *name, const char *declaration );
+		RtToken RiDeclare( const char *name, const char *declaration );
 
-    /* RenderMan State machine */
-    RtVoid RiBegin( RtToken name );
-    RtVoid RiEnd( );
+		/* RenderMan State machine */
+		RtVoid RiBegin( RtToken name );
+		RtVoid RiEnd( );
 
-    RtVoid RiFrameBegin( RtInt frame );
-    RtVoid RiFrameEnd( );
+		RtVoid RiFrameBegin( RtInt frame );
+		RtVoid RiFrameEnd( );
 
-    RtVoid RiWorldBegin( );
-    RtVoid RiWorldEnd( );
+		RtVoid RiWorldBegin( );
+		RtVoid RiWorldEnd( );
 
-    RtObjectHandle RiObjectBegin( );
-    RtVoid RiObjectEnd( );
-    RtVoid RiObjectInstance( RtObjectHandle handle );
+		RtObjectHandle RiObjectBegin( );
+		RtVoid RiObjectEnd( );
+		RtVoid RiObjectInstance( RtObjectHandle handle );
 
-    RtVoid RiAttributeBegin( );
-    RtVoid RiAttributeEnd( );
+		RtVoid RiAttributeBegin( );
+		RtVoid RiAttributeEnd( );
 
-    RtVoid RiTransformBegin( );
-    RtVoid RiTransformEnd( );
+		RtVoid RiTransformBegin( );
+		RtVoid RiTransformEnd( );
 
-    RtVoid RiSolidBegin( RtToken operation );
-    RtVoid RiSolidEnd( );
+		RtVoid RiSolidBegin( RtToken operation );
+		RtVoid RiSolidEnd( );
 
-    RtVoid RiMotionBeginV( RtInt n, RtFloat times[] );
-    RtVoid RiMotionEnd( );
-
-
-    /* CAMERA OPTIONS */
-    RtVoid RiFormat ( RtInt xres, RtInt yres, RtFloat aspect );
-    RtVoid RiFrameAspectRatio ( RtFloat aspect );
-    RtVoid RiScreenWindow ( RtFloat left, RtFloat right, RtFloat bot, RtFloat top );
-    RtVoid RiCropWindow ( RtFloat xmin, RtFloat xmax, RtFloat ymin, RtFloat ymax );
-    RtVoid RiProjectionV ( const char *name, RtInt n, RtToken tokens[], RtPointer parms[] );
-    RtVoid RiClipping( RtFloat hither, RtFloat yon );
-    RtVoid RiClippingPlane( RtFloat x, RtFloat y, RtFloat z, RtFloat nx, RtFloat ny, RtFloat nz );
-    RtVoid RiDepthOfField ( RtFloat fstop, RtFloat focallength, RtFloat focaldistance );
-    RtVoid RiShutter( RtFloat min, RtFloat max );
-
-    /* DISPLAY OPTIONS */
-    RtVoid RiPixelVariance( RtFloat variation );
-    RtVoid RiPixelSamples( RtFloat xsamples, RtFloat ysamples );
-    RtVoid RiPixelFilter( RtFilterFunc filterfunc, RtFloat xwidth, RtFloat ywidth );
-    RtVoid RiExposure( RtFloat gain, RtFloat gamma );
-    RtVoid RiImagerV( const char *name, RtInt n, RtToken tokens[], RtPointer parms[] );
-    RtVoid RiQuantize( RtToken type, RtInt one, RtInt min, RtInt max, RtFloat ampl );
-    RtVoid RiDisplayV( const char *name, RtToken type, RtToken mode,
-                       RtInt n, RtToken tokens[], RtPointer parms[] );
-
-    /* ADDITIONAL OPTIONS */
-    RtVoid RiHiderV( const char *type, RtInt n, RtToken tokens[], RtPointer parms[] );
-    RtVoid RiColorSamples( RtInt n, RtFloat nRGB[], RtFloat RGBn[] );
-    RtVoid RiRelativeDetail( RtFloat relativedetail );
-    RtVoid RiOptionV( const char *name, RtInt n, RtToken tokens[], RtPointer parms[] );
+		RtVoid RiMotionBeginV( RtInt n, RtFloat times[] );
+		RtVoid RiMotionEnd( );
 
 
-    /* SHADING ATTRIBUTES */
-    RtVoid RiColor( RtColor color );
-    RtVoid RiOpacity( RtColor color );
-    RtVoid RiTextureCoordinates( RtFloat s1, RtFloat t1, RtFloat s2, RtFloat t2,
-                                 RtFloat s3, RtFloat t3, RtFloat s4, RtFloat t4 );
-    RtLightHandle RiLightSourceV( const char *name, RtInt n, RtToken tokens[], RtPointer parms[] );
-    RtLightHandle RiAreaLightSourceV( const char *name,
-                                      RtInt n, RtToken tokens[], RtPointer parms[] );
-    RtVoid RiIlluminate( RtLightHandle light, RtBoolean onoff );
-    RtVoid RiSurfaceV( const char *name, RtInt n, RtToken tokens[], RtPointer parms[] );
-    RtVoid RiAtmosphereV( const char *name, RtInt n, RtToken tokens[], RtPointer parms[] );
-    RtVoid RiInteriorV( const char *name, RtInt n, RtToken tokens[], RtPointer parms[] );
-    RtVoid RiExteriorV( const char *name, RtInt n, RtToken tokens[], RtPointer parms[] );
-    RtVoid RiShadingRate( RtFloat size );
-    RtVoid RiShadingInterpolation( RtToken type );
-    RtVoid RiMatte( RtBoolean onoff );
+		/* CAMERA OPTIONS */
+		RtVoid RiFormat ( RtInt xres, RtInt yres, RtFloat aspect );
+		RtVoid RiFrameAspectRatio ( RtFloat aspect );
+		RtVoid RiScreenWindow ( RtFloat left, RtFloat right, RtFloat bot, RtFloat top );
+		RtVoid RiCropWindow ( RtFloat xmin, RtFloat xmax, RtFloat ymin, RtFloat ymax );
+		RtVoid RiProjectionV ( const char *name, RtInt n, RtToken tokens[], RtPointer parms[] );
+		RtVoid RiClipping( RtFloat hither, RtFloat yon );
+		RtVoid RiClippingPlane( RtFloat x, RtFloat y, RtFloat z, RtFloat nx, RtFloat ny, RtFloat nz );
+		RtVoid RiDepthOfField ( RtFloat fstop, RtFloat focallength, RtFloat focaldistance );
+		RtVoid RiShutter( RtFloat min, RtFloat max );
 
-    /* GEOMETRY ATTRIBUTES */
-    RtVoid RiBound( RtBound );
-    RtVoid RiDetail( RtBound );
-    RtVoid RiDetailRange( RtFloat minvis, RtFloat lowtran, RtFloat uptran, RtFloat maxvis );
-    RtVoid RiGeometricApproximation( RtToken type, RtFloat value );
-    RtVoid RiBasis( RtBasis ubasis, RtInt ustep, RtBasis vbasis, RtInt vstep );
-    RtVoid RiTrimCurve( RtInt nloops, RtInt ncurves[], RtInt order[],
-                        RtFloat knot[], RtFloat min[], RtFloat max[], RtInt n[],
-                        RtFloat u[], RtFloat v[], RtFloat w[] );
-    RtVoid RiOrientation( RtToken orientation );
-    RtVoid RiReverseOrientation( );
-    RtVoid RiSides( RtInt sides );
-    RtVoid RiDisplacementV( const char *name, RtInt n, RtToken tokens[], RtPointer parms[] );
+		/* DISPLAY OPTIONS */
+		RtVoid RiPixelVariance( RtFloat variation );
+		RtVoid RiPixelSamples( RtFloat xsamples, RtFloat ysamples );
+		RtVoid RiPixelFilter( RtFilterFunc filterfunc, RtFloat xwidth, RtFloat ywidth );
+		RtVoid RiExposure( RtFloat gain, RtFloat gamma );
+		RtVoid RiImagerV( const char *name, RtInt n, RtToken tokens[], RtPointer parms[] );
+		RtVoid RiQuantize( RtToken type, RtInt one, RtInt min, RtInt max, RtFloat ampl );
+		RtVoid RiDisplayV( const char *name, RtToken type, RtToken mode,
+		                   RtInt n, RtToken tokens[], RtPointer parms[] );
 
-    /* TRANSFORMATIONS */
-    RtVoid RiIdentity( );
-    RtVoid RiTransform( RtMatrix transform );
-    RtVoid RiConcatTransform( RtMatrix transform );
-    RtVoid RiPerspective( RtFloat fov );
-    RtVoid RiTranslate( RtFloat dx, RtFloat dy, RtFloat dz );
-    RtVoid RiRotate( RtFloat angle, RtFloat dx, RtFloat dy, RtFloat dz );
-    RtVoid RiScale( RtFloat sx, RtFloat sy, RtFloat sz );
-    RtVoid RiSkew( RtFloat angle, RtFloat dx1, RtFloat dy1, RtFloat dz1,
-                   RtFloat dx2, RtFloat dy2, RtFloat dz2 );
-    RtVoid RiDeformationV( const char *name, RtInt n, RtToken tokens[], RtPointer parms[] );
-    RtVoid RiCoordinateSystem( RtToken space );
-    RtVoid RiCoordSysTransform( RtToken space );
-
-    RtVoid RiAttributeV( const char *name, RtInt n, RtToken tokens[], RtPointer parms[] );
-
-    /* PRIMITIVES */
-    RtVoid RiPolygonV( RtInt nverts, RtInt n, RtToken tokens[], RtPointer parms[] );
-    RtVoid RiGeneralPolygonV( RtInt nloops, RtInt nverts[], RtInt n,
-                              RtToken tokens[], RtPointer parms[] );
-    RtVoid RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[], RtInt n,
-                              RtToken tokens[], RtPointer parms[] );
-    RtVoid RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[],
-                                     RtInt verts[], RtInt n, RtToken tokens[],
-                                     RtPointer parms[] );
-    RtVoid RiPatchV( RtToken type, RtInt n, RtToken tokens[], RtPointer parms[] );
-    RtVoid RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap,
-                         RtInt nv, RtToken vwrap, RtInt n, RtToken tokens[],
-                         RtPointer parms[] );
-    RtVoid RiNuPatchV( RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin,
-                       RtFloat umax, RtInt nv, RtInt vorder, RtFloat vknot[],
-                       RtFloat vmin, RtFloat vmax,
-                       RtInt n, RtToken tokens[], RtPointer parms[] );
-
-    RtVoid RiSphereV( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat tmax,
-                      RtInt n, RtToken tokens[], RtPointer parms[] );
-    RtVoid RiConeV( RtFloat height, RtFloat radius, RtFloat tmax,
-                    RtInt n, RtToken tokens[], RtPointer parms[] );
-    RtVoid RiCylinderV( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat tmax,
-                        RtInt n, RtToken tokens[], RtPointer parms[] );
-    RtVoid RiHyperboloidV( RtPoint point1, RtPoint point2, RtFloat tmax,
-                           RtInt n, RtToken tokens[], RtPointer parms[] );
-    RtVoid RiParaboloidV( RtFloat rmax, RtFloat zmin, RtFloat zmax, RtFloat tmax,
-                          RtInt n, RtToken tokens[], RtPointer parms[] );
-    RtVoid RiDiskV( RtFloat height, RtFloat radius, RtFloat tmax,
-                    RtInt n, RtToken tokens[], RtPointer parms[] );
-    RtVoid RiTorusV( RtFloat majrad, RtFloat minrad, RtFloat phimin, RtFloat phimax,
-                     RtFloat tmax, RtInt n, RtToken tokens[], RtPointer parms[] );
-
-    RtVoid RiBlobbyV( RtInt nleaf, RtInt ncode, RtInt code[],
-                      RtInt nflt, RtFloat flt[],
-                      RtInt nstr, RtToken str[],
-                      RtInt n, RtToken tokens[], RtPointer parms[] );
-    RtVoid RiPointsV( RtInt npoints,
-                      RtInt n, RtToken tokens[], RtPointer parms[] );
-    RtVoid RiCurvesV( RtToken type, RtInt ncurves,
-                      RtInt nvertices[], RtToken wrap,
-                      RtInt n, RtToken tokens[], RtPointer parms[] );
-    RtVoid RiSubdivisionMeshV( RtToken mask, RtInt nf, RtInt nverts[],
-                               RtInt verts[],
-                               RtInt ntags, RtToken tags[], RtInt numargs[],
-                               RtInt intargs[], RtFloat floatargs[],
-                               RtInt n, RtToken tokens[], RtPointer parms[] );
+		/* ADDITIONAL OPTIONS */
+		RtVoid RiHiderV( const char *type, RtInt n, RtToken tokens[], RtPointer parms[] );
+		RtVoid RiColorSamples( RtInt n, RtFloat nRGB[], RtFloat RGBn[] );
+		RtVoid RiRelativeDetail( RtFloat relativedetail );
+		RtVoid RiOptionV( const char *name, RtInt n, RtToken tokens[], RtPointer parms[] );
 
 
-    RtVoid RiProcedural( RtPointer data, RtBound bound,
-                         RtVoid ( *subdivfunc ) ( RtPointer, RtFloat ),
-                         RtVoid ( *freefunc ) ( RtPointer ) );
-    RtVoid RiGeometryV( RtToken type, RtInt n, RtToken tokens[],
-                        RtPointer parms[] );
+		/* SHADING ATTRIBUTES */
+		RtVoid RiColor( RtColor color );
+		RtVoid RiOpacity( RtColor color );
+		RtVoid RiTextureCoordinates( RtFloat s1, RtFloat t1, RtFloat s2, RtFloat t2,
+		                             RtFloat s3, RtFloat t3, RtFloat s4, RtFloat t4 );
+		RtLightHandle RiLightSourceV( const char *name, RtInt n, RtToken tokens[], RtPointer parms[] );
+		RtLightHandle RiAreaLightSourceV( const char *name,
+		                                  RtInt n, RtToken tokens[], RtPointer parms[] );
+		RtVoid RiIlluminate( RtLightHandle light, RtBoolean onoff );
+		RtVoid RiSurfaceV( const char *name, RtInt n, RtToken tokens[], RtPointer parms[] );
+		RtVoid RiAtmosphereV( const char *name, RtInt n, RtToken tokens[], RtPointer parms[] );
+		RtVoid RiInteriorV( const char *name, RtInt n, RtToken tokens[], RtPointer parms[] );
+		RtVoid RiExteriorV( const char *name, RtInt n, RtToken tokens[], RtPointer parms[] );
+		RtVoid RiShadingRate( RtFloat size );
+		RtVoid RiShadingInterpolation( RtToken type );
+		RtVoid RiMatte( RtBoolean onoff );
 
-    /* MISC */
-    RtVoid RiMakeTextureV( const char *pic, const char *tex, RtToken swrap, RtToken twrap,
-                           RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth,
-                           RtInt n, RtToken tokens[], RtPointer parms[] );
-    RtVoid RiMakeBumpV( const char *pic, const char *tex, RtToken swrap, RtToken twrap,
-                        RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth,
-                        RtInt n, RtToken tokens[], RtPointer parms[] );
-    RtVoid RiMakeLatLongEnvironmentV( const char *pic, const char *tex, RtFilterFunc filterfunc,
-                                      RtFloat swidth, RtFloat twidth,
-                                      RtInt n, RtToken tokens[], RtPointer parms[] );
-    RtVoid RiMakeCubeFaceEnvironmentV( const char *px, const char *nx, const char *py, const char *ny,
-                                       const char *pz, const char *nz, const char *tex, RtFloat fov,
-                                       RtFilterFunc filterfunc, RtFloat swidth,
-                                       RtFloat ywidth,
-                                       RtInt n, RtToken tokens[], RtPointer parms[] );
-    RtVoid RiMakeShadowV( const char *pic, const char *tex,
-                          RtInt n, RtToken tokens[], RtPointer parms[] );
+		/* GEOMETRY ATTRIBUTES */
+		RtVoid RiBound( RtBound );
+		RtVoid RiDetail( RtBound );
+		RtVoid RiDetailRange( RtFloat minvis, RtFloat lowtran, RtFloat uptran, RtFloat maxvis );
+		RtVoid RiGeometricApproximation( RtToken type, RtFloat value );
+		RtVoid RiBasis( RtBasis ubasis, RtInt ustep, RtBasis vbasis, RtInt vstep );
+		RtVoid RiTrimCurve( RtInt nloops, RtInt ncurves[], RtInt order[],
+		                    RtFloat knot[], RtFloat min[], RtFloat max[], RtInt n[],
+		                    RtFloat u[], RtFloat v[], RtFloat w[] );
+		RtVoid RiOrientation( RtToken orientation );
+		RtVoid RiReverseOrientation( );
+		RtVoid RiSides( RtInt sides );
+		RtVoid RiDisplacementV( const char *name, RtInt n, RtToken tokens[], RtPointer parms[] );
 
-    /* ARCHIVE */
-    RtVoid RiArchiveRecord( RtToken type, std::string );
-    RtVoid RiReadArchiveV( RtToken name, RtArchiveCallback callback,
-                           RtInt n, RtToken tokens[], RtPointer parms[] );
+		/* TRANSFORMATIONS */
+		RtVoid RiIdentity( );
+		RtVoid RiTransform( RtMatrix transform );
+		RtVoid RiConcatTransform( RtMatrix transform );
+		RtVoid RiPerspective( RtFloat fov );
+		RtVoid RiTranslate( RtFloat dx, RtFloat dy, RtFloat dz );
+		RtVoid RiRotate( RtFloat angle, RtFloat dx, RtFloat dy, RtFloat dz );
+		RtVoid RiScale( RtFloat sx, RtFloat sy, RtFloat sz );
+		RtVoid RiSkew( RtFloat angle, RtFloat dx1, RtFloat dy1, RtFloat dz1,
+		               RtFloat dx2, RtFloat dy2, RtFloat dz2 );
+		RtVoid RiDeformationV( const char *name, RtInt n, RtToken tokens[], RtPointer parms[] );
+		RtVoid RiCoordinateSystem( RtToken space );
+		RtVoid RiCoordSysTransform( RtToken space );
 
-    /* ERROR HANDLER */
-    RtVoid RiErrorHandler( RtErrorFunc handler );
+		RtVoid RiAttributeV( const char *name, RtInt n, RtToken tokens[], RtPointer parms[] );
 
-    /* 3.04 New Condition statements */
-    RtVoid RiIfBegin( RtString condition );
-    RtVoid RiIfEnd( );
-    RtVoid RiElse();
-    RtVoid RiElseIf( RtString condition);
+		/* PRIMITIVES */
+		RtVoid RiPolygonV( RtInt nverts, RtInt n, RtToken tokens[], RtPointer parms[] );
+		RtVoid RiGeneralPolygonV( RtInt nloops, RtInt nverts[], RtInt n,
+		                          RtToken tokens[], RtPointer parms[] );
+		RtVoid RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[], RtInt n,
+		                          RtToken tokens[], RtPointer parms[] );
+		RtVoid RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[],
+		                                 RtInt verts[], RtInt n, RtToken tokens[],
+		                                 RtPointer parms[] );
+		RtVoid RiPatchV( RtToken type, RtInt n, RtToken tokens[], RtPointer parms[] );
+		RtVoid RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap,
+		                     RtInt nv, RtToken vwrap, RtInt n, RtToken tokens[],
+		                     RtPointer parms[] );
+		RtVoid RiNuPatchV( RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin,
+		                   RtFloat umax, RtInt nv, RtInt vorder, RtFloat vknot[],
+		                   RtFloat vmin, RtFloat vmax,
+		                   RtInt n, RtToken tokens[], RtPointer parms[] );
+
+		RtVoid RiSphereV( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat tmax,
+		                  RtInt n, RtToken tokens[], RtPointer parms[] );
+		RtVoid RiConeV( RtFloat height, RtFloat radius, RtFloat tmax,
+		                RtInt n, RtToken tokens[], RtPointer parms[] );
+		RtVoid RiCylinderV( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat tmax,
+		                    RtInt n, RtToken tokens[], RtPointer parms[] );
+		RtVoid RiHyperboloidV( RtPoint point1, RtPoint point2, RtFloat tmax,
+		                       RtInt n, RtToken tokens[], RtPointer parms[] );
+		RtVoid RiParaboloidV( RtFloat rmax, RtFloat zmin, RtFloat zmax, RtFloat tmax,
+		                      RtInt n, RtToken tokens[], RtPointer parms[] );
+		RtVoid RiDiskV( RtFloat height, RtFloat radius, RtFloat tmax,
+		                RtInt n, RtToken tokens[], RtPointer parms[] );
+		RtVoid RiTorusV( RtFloat majrad, RtFloat minrad, RtFloat phimin, RtFloat phimax,
+		                 RtFloat tmax, RtInt n, RtToken tokens[], RtPointer parms[] );
+
+		RtVoid RiBlobbyV( RtInt nleaf, RtInt ncode, RtInt code[],
+		                  RtInt nflt, RtFloat flt[],
+		                  RtInt nstr, RtToken str[],
+		                  RtInt n, RtToken tokens[], RtPointer parms[] );
+		RtVoid RiPointsV( RtInt npoints,
+		                  RtInt n, RtToken tokens[], RtPointer parms[] );
+		RtVoid RiCurvesV( RtToken type, RtInt ncurves,
+		                  RtInt nvertices[], RtToken wrap,
+		                  RtInt n, RtToken tokens[], RtPointer parms[] );
+		RtVoid RiSubdivisionMeshV( RtToken mask, RtInt nf, RtInt nverts[],
+		                           RtInt verts[],
+		                           RtInt ntags, RtToken tags[], RtInt numargs[],
+		                           RtInt intargs[], RtFloat floatargs[],
+		                           RtInt n, RtToken tokens[], RtPointer parms[] );
+
+
+		RtVoid RiProcedural( RtPointer data, RtBound bound,
+		                     RtVoid ( *subdivfunc ) ( RtPointer, RtFloat ),
+		                     RtVoid ( *freefunc ) ( RtPointer ) );
+		RtVoid RiGeometryV( RtToken type, RtInt n, RtToken tokens[],
+		                    RtPointer parms[] );
+
+		/* MISC */
+		RtVoid RiMakeTextureV( const char *pic, const char *tex, RtToken swrap, RtToken twrap,
+		                       RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth,
+		                       RtInt n, RtToken tokens[], RtPointer parms[] );
+		RtVoid RiMakeBumpV( const char *pic, const char *tex, RtToken swrap, RtToken twrap,
+		                    RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth,
+		                    RtInt n, RtToken tokens[], RtPointer parms[] );
+		RtVoid RiMakeLatLongEnvironmentV( const char *pic, const char *tex, RtFilterFunc filterfunc,
+		                                  RtFloat swidth, RtFloat twidth,
+		                                  RtInt n, RtToken tokens[], RtPointer parms[] );
+		RtVoid RiMakeCubeFaceEnvironmentV( const char *px, const char *nx, const char *py, const char *ny,
+		                                   const char *pz, const char *nz, const char *tex, RtFloat fov,
+		                                   RtFilterFunc filterfunc, RtFloat swidth,
+		                                   RtFloat ywidth,
+		                                   RtInt n, RtToken tokens[], RtPointer parms[] );
+		RtVoid RiMakeShadowV( const char *pic, const char *tex,
+		                      RtInt n, RtToken tokens[], RtPointer parms[] );
+
+		/* ARCHIVE */
+		RtVoid RiArchiveRecord( RtToken type, std::string );
+		RtVoid RiReadArchiveV( RtToken name, RtArchiveCallback callback,
+		                       RtInt n, RtToken tokens[], RtPointer parms[] );
+
+		/* ERROR HANDLER */
+		RtVoid RiErrorHandler( RtErrorFunc handler );
+
+		/* 3.04 New Condition statements */
+		RtVoid RiIfBegin( RtString condition );
+		RtVoid RiIfEnd( );
+		RtVoid RiElse();
+		RtVoid RiElseIf( RtString condition);
 };
 
 

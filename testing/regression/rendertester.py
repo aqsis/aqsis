@@ -45,10 +45,7 @@ CurrentConfigDir = [""]
 
 # TIFF conversion command (INPUT and OUTPUT will be replaced by the
 # corresponding file names)
-if sys.platform == 'win32':
-    TIFFConvCmd = "..\\win32libs\\bin\\tifftopnm INPUT|..\\win32libs\\bin\\pnmtotiff -color -truecolor >OUTPUT"
-else:
-    TIFFConvCmd = "tifftopnm INPUT|pnmtotiff -color -truecolor >OUTPUT"
+TIFFConvCmd = "tifftopnm INPUT|pnmtotiff -color -truecolor >OUTPUT"
 
 # AUTO keyword for the "ricalls" parameter in job descriptions
 AUTO = "_auto"

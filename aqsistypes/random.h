@@ -37,31 +37,31 @@
 
 
 START_NAMESPACE( Aqsis )
-/* 
+/*
    A C-program for MT19937, with initialization improved 2002/1/26.
    Coded by Takuji Nishimura and Makoto Matsumoto.
-
+ 
    Before using, initialize the state by using init_genrand(seed)  
    or init_by_array(init_key, key_length).
-
+ 
    Copyright (C) 1997 - 2002, Makoto Matsumoto and Takuji Nishimura,
    All rights reserved.                          
-
+ 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions
    are met:
-
+ 
      1. Redistributions of source code must retain the above copyright
         notice, this list of conditions and the following disclaimer.
-
+ 
      2. Redistributions in binary form must reproduce the above copyright
         notice, this list of conditions and the following disclaimer in the
         documentation and/or other materials provided with the distribution.
-
+ 
      3. The names of its contributors may not be used to endorse or promote 
         products derived from this software without specific prior written 
         permission.
-
+ 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -73,8 +73,8 @@ START_NAMESPACE( Aqsis )
    LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
    NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-
+ 
+ 
    Any feedback is very welcome.
    http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt.html
    email: m-mat @ math.sci.hiroshima-u.ac.jp (remove space)
@@ -87,34 +87,34 @@ START_NAMESPACE( Aqsis )
 
 class CqRandom
 {
-public:
-    CqRandom();
-    
-    CqRandom( TqUint Seed );
+	public:
+		CqRandom();
 
-    /** Get a random integer in the range (0 <= value < 2^32).
-     */
-    TqUint RandomInt();
-    
+		CqRandom( TqUint Seed );
 
-    /** Get a random integer in the specified range (0 <= value < Range).
-     * \param Range Integer max value.
-     */
-    TqUint RandomInt( TqUint Range );
-    
-    /** Get a random float (0.0 <= value < 1.0).
-     */
-    TqFloat	RandomFloat();
-   
+		/** Get a random integer in the range (0 <= value < 2^32).
+		 */
+		TqUint RandomInt();
 
-    /** Get a random float in the specified range (0 <= value < Range).
-     * \param Range The max value for the range.
-     */
-    TqFloat	RandomFloat( TqFloat Range );
-   
-    void    Reseed(TqUint Seek);
-protected:
-    void NextState();
+
+		/** Get a random integer in the specified range (0 <= value < Range).
+		 * \param Range Integer max value.
+		 */
+		TqUint RandomInt( TqUint Range );
+
+		/** Get a random float (0.0 <= value < 1.0).
+		 */
+		TqFloat	RandomFloat();
+
+
+		/** Get a random float in the specified range (0 <= value < Range).
+		 * \param Range The max value for the range.
+		 */
+		TqFloat	RandomFloat( TqFloat Range );
+
+		void    Reseed(TqUint Seek);
+	protected:
+		void NextState();
 };
 
 //-----------------------------------------------------------------------

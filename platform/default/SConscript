@@ -1,14 +1,10 @@
 import os.path
 
-Import('env opts')
-
-opts.Add('bison', 'Point to the bison executable', '/usr/bin/bison')
-opts.Add('flex', 'Point to the flex executable', '/usr/bin/flex')
-opts.Update(env)
+Import('env')
 
 env.AppendUnique(CCFLAGS=['-g', '-O2'])
 env.AppendUnique(CPPPATH = [env.Dir('#/aqsistypes/posix')])
-env.AppendUnique(CPPDEFINES=[('NDEBUG', '1'), ('PLUGINS', '1')])
+env.AppendUnique(CPPDEFINES=[('NDEBUG', '1'), ('PLUGINS', '1'), ('USE_TIMERS', 1), ('_CLOCKTICKS', '1')])
 
 # Point at the boost headers.
 # todo: need to find a way of determining this location automatically
@@ -47,7 +43,28 @@ if zliblibfile != None:
 	env.Replace(zlib_lib_path = os.path.dirname(zliblibfile.abspath))
 env.Replace(z_lib = 'z')
 
-#env.AppendUnique(SHLINKFLAGS = ['-single_module', '-flat_namespace', '-undefined', 'suppress'])
+# Find out where the OpenEXR libraries are, look in common places 
+exriofile = env.FindFile('half.h', ['$exr_include_path', '/usr/local/include/OpenEXR', '/opt/local/include/OpenEXR'])
+if exriofile != None:
+	env.Replace(exr_include_path = os.path.dirname(exriofile.abspath))
+
+exrlibfile = env.FindFile('libIlmImf.a', ['$exr_lib_path', '/usr/local/lib', '/opt/local/lib'])
+if exrlibfile != None:
+	env.Replace(exr_lib_path = os.path.dirname(exrlibfile.abspath))
+env.Replace(exr_lib = 'IlmImf')
+env.Replace(exr2tif_libs = ['IlmImf', 'Half', 'Iex', 'Imath'])
+
+# Find out where the fltk headers are, look in common places for Fink and DarwinPorts.
+fltkfile = env.FindFile('FL/fl.h', ['$fltk_include_path', '/usr/include'])
+if fltkfile != None:
+	env.Replace(fltk_include_path = os.path.split(os.path.dirname(fltkfile.abspath))[0])
+
+# Find out where the fltk libraries are, look in common places for Fink and DarwinPorts.
+fltklibfile = env.FindFile('libfltk.a', ['$fltk_lib_path', '/usr/lib'])
+if fltklibfile != None:
+	env.Replace(fltk_lib_path = os.path.dirname(fltklibfile.abspath))
+env.Replace(fltk_lib = 'fltk')
+
 
 # Setup the xsltproc program location
 env.Replace(XSLTPROC = 'xsltproc')
@@ -65,7 +82,6 @@ env.AppendUnique(CPPDEFINES=[('DEFAULT_SHADER_PATH', '\\"' + env.Dir('$install_p
 # System configuration location
 env.Replace(SYSCONFDIR = env.Dir('$install_prefix').abspath + os.sep + 'etc')
 
-env.Replace(display_cppdefines = ['AQSIS_NO_FLTK'])
 env.Replace(slparse_ccflags = ['-O0'])
 env.Replace(aqsis_libs = ['dl'])
 env.Replace(aqsltell_libs = ['dl'])

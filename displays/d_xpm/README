@@ -1,0 +1,63 @@
+
+*** XPM display driver for renderman compliant renderers. ***
+
+This driver was built specially for integrating thumbnails in liquidmaya but it works like any other display driver.
+Current implementation is supposed to work with aqsis, pixie and 3delight.
+The driver should work ok with both AIR and RenderDotC but you must build it manually.
+
+
+INSTALLATION
+
+ The driver currently works with 3delight, pixie and aqsis renderers. here are the instructions for rendering with each one:
+ 
+  AQSIS:
+  
+    - you must set $XPMRENDERER as 'aqsis' or 'Aqsis'.
+    - you must set $AQSIS_BASE_PATH to point to your aqsis installation.
+    - you must set $AQSIS_SRC to point to the libddmanager dir in the aqsis source dir.
+    - run 'make'.
+    - run 'make install' as root or with root privileges.
+    
+    This will create the file xpm.so in the $AQSIS_BASE_PATH/lib/aqsis directory and add a xpm entry to displays.ini pointing to xpm.so.
+
+  3DELIGHT:
+  
+    - you must set $XPMRENDERER as '3delight' or '3Delight'.
+    - you must set $DELIGHT to point to your 3delight installation.
+    - run 'make'.
+    - run 'make install' as root or with root privileges.
+    
+    This will create the file xpm.dpy in the $DELIGHT/displays directory.
+ 
+  PIXIE:
+  
+    - you must set $XPMRENDERER as 'pixie' or 'Pixie'.
+    - you must set $PIXIEHOME to point to your pixie installation.
+    - run 'make'.
+    - run 'make install' as root or with root privileges.
+    
+    This will create the file xpm.so in the $PIXIEHOME/lib directory.
+
+
+FEATURES
+
+ - Works in both RGB and RGBA modes.
+ - works with several renderman-compliant renderers. Fully working at least with 3Delight, Pixie and Aqsis.
+ - it uses a slight optimization according to the number of colors in the image
+
+
+LIMITATIONS AND KNOWN BUGS
+
+ - The rendering is limited to 3072x3072 resolution. This might change in the near future.
+ - The driver might not render correctly if you provide a filename with '.' characters but without extension.
+
+
+TODO LIST
+
+ - Improve the coding style, like replacing malloc/realloc/free with C++ memory implementations, probably using std::vector class
+ - Implement AIR install ( It should already work like it is )
+ - Implement RenderDotC install ( It should work already )
+
+MJO> I put a small test to know if your driver is installed correctly with 
+aqsis called testxpm.bat 
+

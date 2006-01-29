@@ -17,20 +17,20 @@ void save_tiff( char *filename,
 	char version[ 80 ];
 	unsigned char *pdata = raster;
 	TIFF* ptex = TIFFOpen( filename, "w" );
-   struct tm  *ct;
-   int    year;
-   
-   time_t long_time;
-   
-   time( &long_time );           /* Get time as long integer. */
-   ct = localtime( &long_time ); /* Convert to local time. */
-   
-   
-   year=1900 + ct->tm_year;
-   sprintf(datetime, "%04d:%02d:%02d %02d:%02d:%02d",
-      year, ct->tm_mon + 1, ct->tm_mday,
-      ct->tm_hour, ct->tm_min, ct->tm_sec);
-   
+	struct tm  *ct;
+	int    year;
+
+	time_t long_time;
+
+	time( &long_time );           /* Get time as long integer. */
+	ct = localtime( &long_time ); /* Convert to local time. */
+
+
+	year=1900 + ct->tm_year;
+	sprintf(datetime, "%04d:%02d:%02d %02d:%02d:%02d",
+	        year, ct->tm_mon + 1, ct->tm_mday,
+	        ct->tm_hour, ct->tm_min, ct->tm_sec);
+
 
 	TIFFCreateDirectory( ptex );
 
@@ -48,7 +48,7 @@ void save_tiff( char *filename,
 	TIFFSetField( ptex, TIFFTAG_COMPRESSION, COMPRESSION_PACKBITS );
 	TIFFSetField( ptex, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB );
 	TIFFSetField( ptex, TIFFTAG_ROWSPERSTRIP, 1 );
-   TIFFSetField( ptex, TIFFTAG_DATETIME, datetime);
+	TIFFSetField( ptex, TIFFTAG_DATETIME, datetime);
 
 
 	for ( i = 0; i < length; i++ )

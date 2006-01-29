@@ -13,23 +13,23 @@
 #define DSPYHLPR_H
 
 extern PtDspyError
-    DspyFindStringInParamList(const char *string, char **result,
-        int n, const UserParameter *p),
-    DspyFindMatrixInParamList(const char *string, float *result,
-        int n, const UserParameter *p),
-    DspyFindFloatInParamList(const char *string, float *result,
-        int n, const UserParameter *p),
-    DspyFindFloatsInParamList(const char *string, int *resultCount,
-        float *result, int n, const UserParameter *p),
-    DspyFindIntInParamList(const char *string, int *result, int n,
-        const UserParameter *p),
-    DspyFindIntsInParamList(const char *string, int *resultCount,
-        int *result, int n, const UserParameter *p),
-    DspyReorderFormatting(int formatCount, PtDspyDevFormat *format,
-        int outFormatCount, const PtDspyDevFormat *outFormat);
+	DspyFindStringInParamList(const char *string, char **result,
+	                          int n, const UserParameter *p),
+	DspyFindMatrixInParamList(const char *string, float *result,
+	                          int n, const UserParameter *p),
+	DspyFindFloatInParamList(const char *string, float *result,
+	                         int n, const UserParameter *p),
+	DspyFindFloatsInParamList(const char *string, int *resultCount,
+	                          float *result, int n, const UserParameter *p),
+	DspyFindIntInParamList(const char *string, int *result, int n,
+	                       const UserParameter *p),
+	DspyFindIntsInParamList(const char *string, int *resultCount,
+	                        int *result, int n, const UserParameter *p),
+	DspyReorderFormatting(int formatCount, PtDspyDevFormat *format,
+	                      int outFormatCount, const PtDspyDevFormat *outFormat);
 
 extern void
-    DspyMemReverseCopy(unsigned char *t, const unsigned char *s, int len);
+	DspyMemReverseCopy(unsigned char *t, const unsigned char *s, int len);
 
 
 #endif

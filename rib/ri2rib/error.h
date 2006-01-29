@@ -34,29 +34,29 @@ START_NAMESPACE( libri2rib )
 
 class CqError
 {
-private:
-    RtInt m_Code;
-    RtInt m_Severity;
-    std::string m_Message1;
-    std::string m_Message2;
-    std::string m_Message3;
-    TqBool m_ToRib;
+	private:
+		RtInt m_Code;
+		RtInt m_Severity;
+		std::string m_Message1;
+		std::string m_Message2;
+		std::string m_Message3;
+		TqBool m_ToRib;
 
-public:
-    CqError( RtInt cd, RtInt sev, std::string msg, TqBool tr )
-            : m_Code( cd ), m_Severity( sev ),
-            m_Message1( msg ), m_Message2 ( "" ), m_Message3( "" ), m_ToRib( tr )
-    {}
+	public:
+		CqError( RtInt cd, RtInt sev, std::string msg, TqBool tr )
+				: m_Code( cd ), m_Severity( sev ),
+				m_Message1( msg ), m_Message2 ( "" ), m_Message3( "" ), m_ToRib( tr )
+		{}
 
-    CqError( RtInt cd, RtInt sev, std::string msg1, std::string msg2, std::string msg3, TqBool tr )
-            : m_Code ( cd ), m_Severity( sev ),
-            m_Message1( msg1 ), m_Message2( msg2 ), m_Message3( msg3 ), m_ToRib( tr )
-    {}
+		CqError( RtInt cd, RtInt sev, std::string msg1, std::string msg2, std::string msg3, TqBool tr )
+				: m_Code ( cd ), m_Severity( sev ),
+				m_Message1( msg1 ), m_Message2( msg2 ), m_Message3( msg3 ), m_ToRib( tr )
+		{}
 
-    ~CqError()
-    {}
+		~CqError()
+		{}
 
-    RtVoid manage();
+		RtVoid manage();
 };
 
 END_NAMESPACE( libri2rib )

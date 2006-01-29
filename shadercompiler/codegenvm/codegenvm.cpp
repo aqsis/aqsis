@@ -35,11 +35,7 @@
 #include	<map>
 
 
-#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
 #include	"version.h"
-#endif // AQSIS_SYSTEM_WIN32
-
-
 #include	"vmdatagather.h"
 #include	"vmoutput.h"
 #include	"codegenvm.h"
@@ -50,71 +46,72 @@ START_NAMESPACE( Aqsis )
 
 void CqCodeGenVM::OutputTree( IqParseNode* pNode, std::string strOutName )
 {
-    CqCodeGenDataGather DG;
-    CqCodeGenOutput V( &DG, strOutName );
-    pNode->Accept( DG );
-    pNode->Accept( V );
+	CqCodeGenDataGather DG;
+	CqCodeGenOutput V( &DG, strOutName );
+	pNode->Accept( DG );
+	pNode->Accept( V );
 }
 
 
 void CreateTranslationTable( IqParseNode* pParam, IqParseNode* pArg, std::vector<std::vector<SqVarRefTranslator> >& Stack )
 {
-    //	assert( NULL != pParam && NULL != pArg );
+	//	assert( NULL != pParam && NULL != pArg );
 
-    std::vector<SqVarRefTranslator> aTransTable;
+	std::vector<SqVarRefTranslator> aTransTable;
 
-    while ( pParam != 0 )
-    {
-        if ( pArg->IsVariableRef() )
-        {
-            IqParseNodeVariable * pVarArg;
-            pArg->GetInterface( ParseNode_Variable, ( void** ) & pVarArg );
+	while ( pParam != 0 )
+	{
+		if ( pArg->IsVariableRef() )
+		{
+			IqParseNodeVariable * pVarArg;
+			pArg->GetInterface( ParseNode_Variable, ( void** ) & pVarArg );
 
-            IqParseNodeVariable* pParamArg;
-            if ( pParam->GetInterface( ParseNode_Variable, ( void** ) & pParamArg ) )
-            {
-                SqVarRefTranslator Trans;
-                Trans.m_From = pParamArg->VarRef();
-                Trans.m_To = pVarArg->VarRef();
-                aTransTable.push_back( Trans );
-            }
-        }
-        pParam = pParam->pNextSibling();
-        pArg = pArg->pNextSibling();
-    }
+			IqParseNodeVariable* pParamArg;
+			if ( pParam->GetInterface( ParseNode_Variable, ( void** ) & pParamArg ) )
+			{
+				SqVarRefTranslator Trans;
+				Trans.m_From = pParamArg->VarRef();
+				Trans.m_To = pVarArg->VarRef();
+				aTransTable.push_back( Trans );
+			}
+		}
+		pParam = pParam->pNextSibling();
+		pArg = pArg->pNextSibling();
+	}
 
-    Stack.push_back( aTransTable );
+	Stack.push_back( aTransTable );
 }
 
 
 IqVarDef* pTranslatedVariable( SqVarRef& Ref, std::vector<std::vector<SqVarRefTranslator> >& Stack )
 {
-    SqVarRef RealRef = Ref;
-    // Firstly see if the top translation table knows about this variable.
+	SqVarRef RealRef = Ref;
+	// Firstly see if the top translation table knows about this variable.
 
-    if ( !Stack.empty() )
-    {
-        std::vector<std::vector<SqVarRefTranslator> >::reverse_iterator iTable = Stack.rbegin();
+	if ( !Stack.empty() )
+	{
+		std::vector<std::vector<SqVarRefTranslator> >::reverse_iterator iTable = Stack.rbegin();
 
-        int depth = 0;
-        while ( iTable != Stack.rend() )
-        {
-            TqUint i;
-            for ( i = 0; i < ( *iTable ).size(); i++ )
-            {
-                if ( ( *iTable ) [ i ].m_From == RealRef )
-                {
-                    RealRef = ( *iTable ) [ i ].m_To;
-                    break;
-                }
-            }
-            // Only continue looking for nested translations if it was found at the current level.
-            if ( i == ( *iTable ).size() ) break;
-            iTable++;
-            depth++;
-        }
-    }
-    return ( CqVarDef::GetVariablePtr( RealRef ) );
+		int depth = 0;
+		while ( iTable != Stack.rend() )
+		{
+			TqUint i;
+			for ( i = 0; i < ( *iTable ).size(); i++ )
+			{
+				if ( ( *iTable ) [ i ].m_From == RealRef )
+				{
+					RealRef = ( *iTable ) [ i ].m_To;
+					break;
+				}
+			}
+			// Only continue looking for nested translations if it was found at the current level.
+			if ( i == ( *iTable ).size() )
+				break;
+			iTable++;
+			depth++;
+		}
+	}
+	return ( CqVarDef::GetVariablePtr( RealRef ) );
 }
 
 
@@ -122,38 +119,38 @@ void CreateTempMap( IqParseNode* pParam, IqParseNode* pArg, std::deque<std::map<
                     std::vector<std::vector<SqVarRefTranslator> >& Trans,
                     std::map<std::string, IqVarDef*>& TempVars )
 {
-    assert( NULL != pParam && NULL != pArg );
+	assert( NULL != pParam && NULL != pArg );
 
-    std::map<std::string, std::string> mapTrans;
-    Stack.push_back( mapTrans );
+	std::map<std::string, std::string> mapTrans;
+	Stack.push_back( mapTrans );
 
-    while ( pParam != 0 )
-    {
-        if ( !pArg->IsVariableRef() )
-        {
-            IqParseNodeVariable * pLocalVar;
-            pParam->GetInterface( ParseNode_Variable, ( void** ) & pLocalVar );
-            std::strstream strTempName;
-            strTempName << "_" << Stack.size() << "$" << pLocalVar->strName() << std::ends;
-            Stack.back() [ pLocalVar->strName() ] = std::string( strTempName.str() );
+	while ( pParam != 0 )
+	{
+		if ( !pArg->IsVariableRef() )
+		{
+			IqParseNodeVariable * pLocalVar;
+			pParam->GetInterface( ParseNode_Variable, ( void** ) & pLocalVar );
+			std::strstream strTempName;
+			strTempName << "_" << Stack.size() << "$" << pLocalVar->strName() << std::ends;
+			Stack.back() [ pLocalVar->strName() ] = std::string( strTempName.str() );
 
-            SqVarRef temp( pLocalVar->VarRef() );
-            IqVarDef* pVD = pTranslatedVariable( temp, Trans );
-            TempVars[ strTempName.str() ] = pVD;
-            pVD->IncUseCount();
-        }
-        pParam = pParam->pNextSibling();
-        pArg = pArg->pNextSibling();
-    }
+			SqVarRef temp( pLocalVar->VarRef() );
+			IqVarDef* pVD = pTranslatedVariable( temp, Trans );
+			TempVars[ strTempName.str() ] = pVD;
+			pVD->IncUseCount();
+		}
+		pParam = pParam->pNextSibling();
+		pArg = pArg->pNextSibling();
+	}
 }
 
 std::string* FindTemporaryVariable( std::string strName, std::deque<std::map<std::string, std::string> >& Stack )
 {
-    std::deque<std::map<std::string, std::string> >::reverse_iterator iStackEntry;
-    for ( iStackEntry = Stack.rbegin(); iStackEntry != Stack.rend(); iStackEntry++ )
-        if ( ( *iStackEntry ).find( strName ) != ( *iStackEntry ).end() )
-            return ( &( *iStackEntry ) [ strName ] );
-    return ( NULL );
+	std::deque<std::map<std::string, std::string> >::reverse_iterator iStackEntry;
+	for ( iStackEntry = Stack.rbegin(); iStackEntry != Stack.rend(); iStackEntry++ )
+		if ( ( *iStackEntry ).find( strName ) != ( *iStackEntry ).end() )
+			return ( &( *iStackEntry ) [ strName ] );
+	return ( NULL );
 }
 
 //-----------------------------------------------------------------------

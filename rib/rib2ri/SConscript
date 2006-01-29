@@ -6,11 +6,15 @@ rib2ri_sources = Split("""
 rib2ri_headers = Split("""
 	librib2ri.h""")
 
+rib2ri_install_headers = Split("""
+	librib2ri.h""")
+
 # Set any platform specific options for this target
 env.UseTargetOptions('rib2ri')
 
 rib2ri = env.Library('rib2ri', rib2ri_sources)
 env.Install('$LIBDIR', rib2ri)
+env.Install('$INCLUDEDIR', rib2ri_install_headers)
 
 env.Distribute('rib/rib2ri', rib2ri_sources)
 env.Distribute('rib/rib2ri', rib2ri_headers)

@@ -109,27 +109,27 @@ const TqUlong CqAttributes::CqHashTable::tableSize = 127;
 
 CqAttributes::CqAttributes()
 {
-    Attribute_stack.push_front( this );
-    m_StackIterator = Attribute_stack.begin();
+	Attribute_stack.push_front( this );
+	m_StackIterator = Attribute_stack.begin();
 
-    boost::shared_ptr<CqNamedParameterList> pdefattrs( new CqNamedParameterList( "System" ) );
+	boost::shared_ptr<CqNamedParameterList> pdefattrs( new CqNamedParameterList( "System" ) );
 
-    ADD_SYSTEM_ATTR( Color, CqColor, CqColor, type_color, CqColor( 1.0f, 1.0f, 1.0f ) );		// the current color attribute.
-    ADD_SYSTEM_ATTR( Opacity, CqColor, CqColor, type_color, CqColor( 1.0f, 1.0f, 1.0f ) );	// the current opacity attribute.
-    ADD_SYSTEM_ATTR8( TextureCoordinates, TqFloat, TqFloat, type_float, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f );	// an array of 2D vectors representing the coordinate space.
-    ADD_SYSTEM_ATTR( ShadingRate, TqFloat, TqFloat, type_float, 1.0f );					// the current effective shading rate.
-    ADD_SYSTEM_ATTR( ShadingRateSqrt, TqFloat, TqFloat, type_float, 1.0f );					// the current effective sqrt(shading rate).
-    ADD_SYSTEM_ATTR( ShadingInterpolation, TqFloat, TqInt, type_integer, ShadingConstant );	// the current shading interpolation mode.
-    ADD_SYSTEM_ATTR( Matte, TqInt, TqFloat, type_integer, 0 );				// the current state of the matte flag.
-    ADD_SYSTEM_ATTR4( DetailRange, TqFloat, TqFloat, type_float, 0.0f, 0.0f, FLT_MAX, FLT_MAX );	// the detail range minimum visible distance.
-    ADD_SYSTEM_ATTR2( Basis, CqMatrix, CqMatrix, type_matrix, RiBezierBasis, RiBezierBasis );	// the basis matrix for the u direction.
-    ADD_SYSTEM_ATTR2( BasisStep, TqInt, TqFloat, type_integer, 3, 3 );	// the steps to advance the evaluation window in the u direction.
-    ADD_SYSTEM_ATTR( Orientation, TqInt, TqFloat, type_integer, 0 );	// the orientation associated primitives are described in.
-    ADD_SYSTEM_ATTR( Sides, TqInt, TqFloat, type_integer, 2 );		// the number of visible sides associated primitives have.
-    ADD_SYSTEM_ATTR( LevelOfDetailRulerSize, TqFloat, TqFloat, type_float, FLT_MAX );		// current LOD ruler size
-    ADD_SYSTEM_ATTR2( LevelOfDetailBounds, TqFloat, TqFloat, type_float, 0.0f, 1.0f );	// relative importance bounds for this LOD representation
+	ADD_SYSTEM_ATTR( Color, CqColor, CqColor, type_color, CqColor( 1.0f, 1.0f, 1.0f ) );		// the current color attribute.
+	ADD_SYSTEM_ATTR( Opacity, CqColor, CqColor, type_color, CqColor( 1.0f, 1.0f, 1.0f ) );	// the current opacity attribute.
+	ADD_SYSTEM_ATTR8( TextureCoordinates, TqFloat, TqFloat, type_float, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f );	// an array of 2D vectors representing the coordinate space.
+	ADD_SYSTEM_ATTR( ShadingRate, TqFloat, TqFloat, type_float, 1.0f );					// the current effective shading rate.
+	ADD_SYSTEM_ATTR( ShadingRateSqrt, TqFloat, TqFloat, type_float, 1.0f );					// the current effective sqrt(shading rate).
+	ADD_SYSTEM_ATTR( ShadingInterpolation, TqFloat, TqInt, type_integer, ShadingConstant );	// the current shading interpolation mode.
+	ADD_SYSTEM_ATTR( Matte, TqInt, TqFloat, type_integer, 0 );				// the current state of the matte flag.
+	ADD_SYSTEM_ATTR4( DetailRange, TqFloat, TqFloat, type_float, 0.0f, 0.0f, FLT_MAX, FLT_MAX );	// the detail range minimum visible distance.
+	ADD_SYSTEM_ATTR2( Basis, CqMatrix, CqMatrix, type_matrix, RiBezierBasis, RiBezierBasis );	// the basis matrix for the u direction.
+	ADD_SYSTEM_ATTR2( BasisStep, TqInt, TqFloat, type_integer, 3, 3 );	// the steps to advance the evaluation window in the u direction.
+	ADD_SYSTEM_ATTR( Orientation, TqInt, TqFloat, type_integer, 0 );	// the orientation associated primitives are described in.
+	ADD_SYSTEM_ATTR( Sides, TqInt, TqFloat, type_integer, 2 );		// the number of visible sides associated primitives have.
+	ADD_SYSTEM_ATTR( LevelOfDetailRulerSize, TqFloat, TqFloat, type_float, FLT_MAX );		// current LOD ruler size
+	ADD_SYSTEM_ATTR2( LevelOfDetailBounds, TqFloat, TqFloat, type_float, 0.0f, 1.0f );	// relative importance bounds for this LOD representation
 
-    AddAttribute( pdefattrs );
+	AddAttribute( pdefattrs );
 }
 
 
@@ -139,11 +139,11 @@ CqAttributes::CqAttributes()
 
 CqAttributes::CqAttributes( const CqAttributes& From )
 {
-    *this = From;
+	*this = From;
 
-    // Register ourself with the global attribute stack.
-    Attribute_stack.push_front( this );
-    m_StackIterator = Attribute_stack.begin();
+	// Register ourself with the global attribute stack.
+	Attribute_stack.push_front( this );
+	m_StackIterator = Attribute_stack.begin();
 }
 
 
@@ -153,18 +153,18 @@ CqAttributes::CqAttributes( const CqAttributes& From )
 
 CqAttributes::~CqAttributes()
 {
-    assert( RefCount() == 0 );
+	assert( RefCount() == 0 );
 
-    // Unreference the system attributes.
-    //	TqInt i = m_aAttributes.size();
-    //	while ( i-- > 0 )
-    //	{
-    //		m_aAttributes[ i ] ->Release();
-    //		m_aAttributes[ i ] = 0;
-    //	}
+	// Unreference the system attributes.
+	//	TqInt i = m_aAttributes.size();
+	//	while ( i-- > 0 )
+	//	{
+	//		m_aAttributes[ i ] ->Release();
+	//		m_aAttributes[ i ] = 0;
+	//	}
 
-    // Remove ourself from the stack
-    Attribute_stack.erase( m_StackIterator );
+	// Remove ourself from the stack
+	Attribute_stack.erase( m_StackIterator );
 }
 
 //---------------------------------------------------------------------
@@ -173,26 +173,26 @@ CqAttributes::~CqAttributes()
 
 CqAttributes& CqAttributes::operator=( const CqAttributes& From )
 {
-    // Copy the system attributes.
-    //	m_aAttributes.resize( From.m_aAttributes.size() );
-    //	TqInt i = From.m_aAttributes.size();
-    //	while ( i-- > 0 )
-    //	{
-    //		m_aAttributes[ i ] = From.m_aAttributes[ i ];
-    //		m_aAttributes[ i ] ->AddRef();
-    //	}
-    m_aAttributes = From.m_aAttributes;
+	// Copy the system attributes.
+	//	m_aAttributes.resize( From.m_aAttributes.size() );
+	//	TqInt i = From.m_aAttributes.size();
+	//	while ( i-- > 0 )
+	//	{
+	//		m_aAttributes[ i ] = From.m_aAttributes[ i ];
+	//		m_aAttributes[ i ] ->AddRef();
+	//	}
+	m_aAttributes = From.m_aAttributes;
 
-    m_apLightsources = From.m_apLightsources;
+	m_apLightsources = From.m_apLightsources;
 
-    m_pshadDisplacement = From.m_pshadDisplacement;
-    m_pshadAreaLightSource = From.m_pshadAreaLightSource;
-    m_pshadSurface = From.m_pshadSurface;
-    m_pshadAtmosphere = From.m_pshadAtmosphere;
-    m_pshadInteriorVolume = From.m_pshadInteriorVolume;
-    m_pshadExteriorVolume = From.m_pshadExteriorVolume;
+	m_pshadDisplacement = From.m_pshadDisplacement;
+	m_pshadAreaLightSource = From.m_pshadAreaLightSource;
+	m_pshadSurface = From.m_pshadSurface;
+	m_pshadAtmosphere = From.m_pshadAtmosphere;
+	m_pshadInteriorVolume = From.m_pshadInteriorVolume;
+	m_pshadExteriorVolume = From.m_pshadExteriorVolume;
 
-    return ( *this );
+	return ( *this );
 }
 
 
@@ -205,12 +205,12 @@ CqAttributes& CqAttributes::operator=( const CqAttributes& From )
 
 const CqParameter* CqAttributes::pParameter( const char* strName, const char* strParam ) const
 {
-    const CqNamedParameterList* pList = pAttribute( strName ).get();
-    if ( pList )
-    {
-        return ( pList->pParameter( strParam ) );
-    }
-    return ( 0 );
+	const CqNamedParameterList* pList = pAttribute( strName ).get();
+	if ( pList )
+	{
+		return ( pList->pParameter( strParam ) );
+	}
+	return ( 0 );
 }
 
 
@@ -223,12 +223,12 @@ const CqParameter* CqAttributes::pParameter( const char* strName, const char* st
 
 CqParameter* CqAttributes::pParameterWrite( const char* strName, const char* strParam )
 {
-    CqNamedParameterList * pList = pAttributeWrite( strName ).get();
-    if ( pList )
-    {
-        return (pList->pParameter( strParam ) );
-    }
-    return ( 0 );
+	CqNamedParameterList * pList = pAttributeWrite( strName ).get();
+	if ( pList )
+	{
+		return (pList->pParameter( strParam ) );
+	}
+	return ( 0 );
 }
 
 
@@ -241,11 +241,11 @@ CqParameter* CqAttributes::pParameterWrite( const char* strName, const char* str
 
 TqFloat* CqAttributes::GetFloatAttributeWrite( const char* strName, const char* strParam )
 {
-    CqParameter * pParam = pParameterWrite( strName, strParam );
-    if ( pParam != 0 )
-        return ( static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParam ) ->pValue() );
-    else
-        return ( 0 );
+	CqParameter * pParam = pParameterWrite( strName, strParam );
+	if ( pParam != 0 )
+		return ( static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParam ) ->pValue() );
+	else
+		return ( 0 );
 }
 
 
@@ -258,11 +258,11 @@ TqFloat* CqAttributes::GetFloatAttributeWrite( const char* strName, const char* 
 
 TqInt* CqAttributes::GetIntegerAttributeWrite( const char* strName, const char* strParam )
 {
-    CqParameter * pParam = pParameterWrite( strName, strParam );
-    if ( pParam != 0 )
-        return ( static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParam ) ->pValue() );
-    else
-        return ( 0 );
+	CqParameter * pParam = pParameterWrite( strName, strParam );
+	if ( pParam != 0 )
+		return ( static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParam ) ->pValue() );
+	else
+		return ( 0 );
 }
 
 
@@ -275,11 +275,11 @@ TqInt* CqAttributes::GetIntegerAttributeWrite( const char* strName, const char* 
 
 CqString* CqAttributes::GetStringAttributeWrite( const char* strName, const char* strParam )
 {
-    CqParameter * pParam = pParameterWrite( strName, strParam );
-    if ( pParam != 0 )
-        return ( static_cast<CqParameterTyped<CqString, CqString>*>( pParam ) ->pValue() );
-    else
-        return ( 0 );
+	CqParameter * pParam = pParameterWrite( strName, strParam );
+	if ( pParam != 0 )
+		return ( static_cast<CqParameterTyped<CqString, CqString>*>( pParam ) ->pValue() );
+	else
+		return ( 0 );
 }
 
 
@@ -292,11 +292,11 @@ CqString* CqAttributes::GetStringAttributeWrite( const char* strName, const char
 
 CqVector3D* CqAttributes::GetPointAttributeWrite( const char* strName, const char* strParam )
 {
-    CqParameter * pParam = pParameterWrite( strName, strParam );
-    if ( pParam != 0 )
-        return ( static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParam ) ->pValue() );
-    else
-        return ( 0 );
+	CqParameter * pParam = pParameterWrite( strName, strParam );
+	if ( pParam != 0 )
+		return ( static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParam ) ->pValue() );
+	else
+		return ( 0 );
 }
 
 
@@ -309,7 +309,7 @@ CqVector3D* CqAttributes::GetPointAttributeWrite( const char* strName, const cha
 
 CqVector3D* CqAttributes::GetVectorAttributeWrite( const char* strName, const char* strParam )
 {
-    return ( GetPointAttributeWrite( strName, strParam ) );
+	return ( GetPointAttributeWrite( strName, strParam ) );
 }
 
 
@@ -322,7 +322,7 @@ CqVector3D* CqAttributes::GetVectorAttributeWrite( const char* strName, const ch
 
 CqVector3D* CqAttributes::GetNormalAttributeWrite( const char* strName, const char* strParam )
 {
-    return ( GetPointAttributeWrite( strName, strParam ) );
+	return ( GetPointAttributeWrite( strName, strParam ) );
 }
 
 
@@ -335,11 +335,11 @@ CqVector3D* CqAttributes::GetNormalAttributeWrite( const char* strName, const ch
 
 CqColor* CqAttributes::GetColorAttributeWrite( const char* strName, const char* strParam )
 {
-    CqParameter * pParam = pParameterWrite( strName, strParam );
-    if ( pParam != 0 )
-        return ( static_cast<CqParameterTyped<CqColor, CqColor>*>( pParam ) ->pValue() );
-    else
-        return ( 0 );
+	CqParameter * pParam = pParameterWrite( strName, strParam );
+	if ( pParam != 0 )
+		return ( static_cast<CqParameterTyped<CqColor, CqColor>*>( pParam ) ->pValue() );
+	else
+		return ( 0 );
 }
 
 
@@ -352,11 +352,11 @@ CqColor* CqAttributes::GetColorAttributeWrite( const char* strName, const char* 
 
 CqMatrix* CqAttributes::GetMatrixAttributeWrite( const char* strName, const char* strParam )
 {
-    CqParameter * pParam = pParameterWrite( strName, strParam );
-    if ( pParam != 0 )
-        return ( static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParam ) ->pValue() );
-    else
-        return ( 0 );
+	CqParameter * pParam = pParameterWrite( strName, strParam );
+	if ( pParam != 0 )
+		return ( static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParam ) ->pValue() );
+	else
+		return ( 0 );
 }
 
 
@@ -369,11 +369,11 @@ CqMatrix* CqAttributes::GetMatrixAttributeWrite( const char* strName, const char
 
 const TqFloat* CqAttributes::GetFloatAttribute( const char* strName, const char* strParam ) const
 {
-    const CqParameter * pParam = pParameter( strName, strParam );
-    if ( pParam != 0 )
-        return ( static_cast<const CqParameterTyped<TqFloat, TqFloat>*>( pParam ) ->pValue() );
-    else
-        return ( 0 );
+	const CqParameter * pParam = pParameter( strName, strParam );
+	if ( pParam != 0 )
+		return ( static_cast<const CqParameterTyped<TqFloat, TqFloat>*>( pParam ) ->pValue() );
+	else
+		return ( 0 );
 }
 
 
@@ -386,11 +386,11 @@ const TqFloat* CqAttributes::GetFloatAttribute( const char* strName, const char*
 
 const TqInt* CqAttributes::GetIntegerAttribute( const char* strName, const char* strParam ) const
 {
-    const CqParameter * pParam = pParameter( strName, strParam );
-    if ( pParam != 0 )
-        return ( static_cast<const CqParameterTyped<TqInt, TqFloat>*>( pParam ) ->pValue() );
-    else
-        return ( 0 );
+	const CqParameter * pParam = pParameter( strName, strParam );
+	if ( pParam != 0 )
+		return ( static_cast<const CqParameterTyped<TqInt, TqFloat>*>( pParam ) ->pValue() );
+	else
+		return ( 0 );
 }
 
 
@@ -403,11 +403,11 @@ const TqInt* CqAttributes::GetIntegerAttribute( const char* strName, const char*
 
 const CqString* CqAttributes::GetStringAttribute( const char* strName, const char* strParam ) const
 {
-    const CqParameter * pParam = pParameter( strName, strParam );
-    if ( pParam != 0 )
-        return ( static_cast<const CqParameterTyped<CqString, CqString>*>( pParam ) ->pValue() );
-    else
-        return ( 0 );
+	const CqParameter * pParam = pParameter( strName, strParam );
+	if ( pParam != 0 )
+		return ( static_cast<const CqParameterTyped<CqString, CqString>*>( pParam ) ->pValue() );
+	else
+		return ( 0 );
 }
 
 
@@ -420,11 +420,11 @@ const CqString* CqAttributes::GetStringAttribute( const char* strName, const cha
 
 const CqVector3D* CqAttributes::GetPointAttribute( const char* strName, const char* strParam ) const
 {
-    const CqParameter * pParam = pParameter( strName, strParam );
-    if ( pParam != 0 )
-        return ( static_cast<const CqParameterTyped<CqVector3D, CqVector3D>*>( pParam ) ->pValue() );
-    else
-        return ( 0 );
+	const CqParameter * pParam = pParameter( strName, strParam );
+	if ( pParam != 0 )
+		return ( static_cast<const CqParameterTyped<CqVector3D, CqVector3D>*>( pParam ) ->pValue() );
+	else
+		return ( 0 );
 }
 
 
@@ -437,7 +437,7 @@ const CqVector3D* CqAttributes::GetPointAttribute( const char* strName, const ch
 
 const CqVector3D* CqAttributes::GetVectorAttribute( const char* strName, const char* strParam ) const
 {
-    return ( GetPointAttribute( strName, strParam ) );
+	return ( GetPointAttribute( strName, strParam ) );
 }
 
 
@@ -450,7 +450,7 @@ const CqVector3D* CqAttributes::GetVectorAttribute( const char* strName, const c
 
 const CqVector3D* CqAttributes::GetNormalAttribute( const char* strName, const char* strParam ) const
 {
-    return ( GetPointAttribute( strName, strParam ) );
+	return ( GetPointAttribute( strName, strParam ) );
 }
 
 
@@ -463,11 +463,11 @@ const CqVector3D* CqAttributes::GetNormalAttribute( const char* strName, const c
 
 const CqColor* CqAttributes::GetColorAttribute( const char* strName, const char* strParam ) const
 {
-    const CqParameter * pParam = pParameter( strName, strParam );
-    if ( pParam != 0 )
-        return ( static_cast<const CqParameterTyped<CqColor, CqColor>*>( pParam ) ->pValue() );
-    else
-        return ( 0 );
+	const CqParameter * pParam = pParameter( strName, strParam );
+	if ( pParam != 0 )
+		return ( static_cast<const CqParameterTyped<CqColor, CqColor>*>( pParam ) ->pValue() );
+	else
+		return ( 0 );
 }
 
 
@@ -480,17 +480,17 @@ const CqColor* CqAttributes::GetColorAttribute( const char* strName, const char*
 
 const CqMatrix* CqAttributes::GetMatrixAttribute( const char* strName, const char* strParam ) const
 {
-    const CqParameter * pParam = pParameter( strName, strParam );
-    if ( pParam != 0 )
-        return ( static_cast<const CqParameterTyped<CqMatrix, CqMatrix>*>( pParam ) ->pValue() );
-    else
-        return ( 0 );
+	const CqParameter * pParam = pParameter( strName, strParam );
+	if ( pParam != 0 )
+		return ( static_cast<const CqParameterTyped<CqMatrix, CqMatrix>*>( pParam ) ->pValue() );
+	else
+		return ( 0 );
 }
 
 
 IqLightsource*	CqAttributes::pLight( TqInt index )
 {
-    return ( m_apLightsources[ index ].get() );
+	return ( m_apLightsources[ index ].get() );
 }
 
 //---------------------------------------------------------------------

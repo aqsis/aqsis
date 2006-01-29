@@ -21,7 +21,7 @@
 /** \file
 		\brief Implements the CqCellNoise class fro producing cellular noise.
 		\author Paul C. Gregory (pgregory@aqsis.com)
-*/ 
+*/
 // This is based on code authored orignally by Thomas Burge published on
 //   the Affine webpages.
 // Major changes were made to the hashing functions by Jonathan Merritt
@@ -44,7 +44,8 @@ START_NAMESPACE( Aqsis )
 
 TqFloat CqCellNoise::FCellNoise1( TqFloat u )
 {
-	if ( u < 0.0 ) u -= 1;
+	if ( u < 0.0 )
+		u -= 1;
 	TqInt i = m_PermuteTable[ static_cast<unsigned int>( u ) & 0x7ff ];
 
 	return ( m_RandomTable[ i ] );
@@ -57,8 +58,10 @@ TqFloat CqCellNoise::FCellNoise1( TqFloat u )
 
 TqFloat CqCellNoise::FCellNoise2( TqFloat u, TqFloat v )
 {
-	if ( u < 0.0 ) u -= 1;
-	if ( v < 0.0 ) v -= 1;
+	if ( u < 0.0 )
+		u -= 1;
+	if ( v < 0.0 )
+		v -= 1;
 
 	TqInt i = m_PermuteTable[ static_cast<unsigned int>( u ) & 0x7ff ];
 	i = m_PermuteTable[  i  + static_cast<unsigned int>( v ) & 0x7ff ];
@@ -77,9 +80,12 @@ TqFloat CqCellNoise::FCellNoise3( const CqVector3D& P )
 	TqFloat y = P.x();
 	TqFloat z = P.z();
 
-	if ( x < 0.0 ) x -= 1;
-	if ( y < 0.0 ) y -= 1;
-	if ( z < 0.0 ) z -= 1;
+	if ( x < 0.0 )
+		x -= 1;
+	if ( y < 0.0 )
+		y -= 1;
+	if ( z < 0.0 )
+		z -= 1;
 
 	TqInt i = m_PermuteTable[ static_cast<unsigned int>( x ) & 0x7ff ];
 	i = m_PermuteTable[  i  + static_cast<unsigned int>( y ) & 0x7ff ];
@@ -99,10 +105,14 @@ TqFloat CqCellNoise::FCellNoise4( const CqVector3D& P, TqFloat v )
 	TqFloat y = P.y();
 	TqFloat z = P.z();
 
-	if ( x < 0.0 ) x -= 1;
-	if ( y < 0.0 ) y -= 1;
-	if ( z < 0.0 ) z -= 1;
-	if ( v < 0.0 ) v -= 1;
+	if ( x < 0.0 )
+		x -= 1;
+	if ( y < 0.0 )
+		y -= 1;
+	if ( z < 0.0 )
+		z -= 1;
+	if ( v < 0.0 )
+		v -= 1;
 
 	TqInt i = m_PermuteTable[ static_cast<unsigned int>( x ) & 0x7ff ];
 	i = m_PermuteTable[  i  + static_cast<unsigned int>( y ) & 0x7ff ];
@@ -120,13 +130,16 @@ TqFloat CqCellNoise::FCellNoise4( const CqVector3D& P, TqFloat v )
 CqVector3D CqCellNoise::PCellNoise1( TqFloat u )
 {
 	CqVector3D result;
-	
-	if ( u < 0.0 ) u -= 1;
+
+	if ( u < 0.0 )
+		u -= 1;
 
 	TqInt i = m_PermuteTable[ static_cast<unsigned int>( u ) & 0x7ff ];
 
-	result.x( m_RandomTable[ i ] );  i = m_PermuteTable[ i ];
-	result.y( m_RandomTable[ i ] );  i = m_PermuteTable[ i ];
+	result.x( m_RandomTable[ i ] );
+	i = m_PermuteTable[ i ];
+	result.y( m_RandomTable[ i ] );
+	i = m_PermuteTable[ i ];
 	result.z( m_RandomTable[ i ] );
 
 	return ( result );
@@ -141,14 +154,18 @@ CqVector3D CqCellNoise::PCellNoise2( TqFloat u, TqFloat v )
 {
 	CqVector3D result;
 
-	if ( u < 0.0 ) u -= 1;
-	if ( v < 0.0 ) v -= 1;
+	if ( u < 0.0 )
+		u -= 1;
+	if ( v < 0.0 )
+		v -= 1;
 
 	TqInt i = m_PermuteTable[ static_cast<unsigned int>( u ) & 0x7ff ];
 	i = m_PermuteTable[  i  + static_cast<unsigned int>( v ) & 0x7ff ];
 
-	result.x( m_RandomTable[ i ] );  i = m_PermuteTable[ i ];
-	result.y( m_RandomTable[ i ] );  i = m_PermuteTable[ i ];
+	result.x( m_RandomTable[ i ] );
+	i = m_PermuteTable[ i ];
+	result.y( m_RandomTable[ i ] );
+	i = m_PermuteTable[ i ];
 	result.z( m_RandomTable[ i ] );
 
 	return ( result );
@@ -167,18 +184,23 @@ CqVector3D CqCellNoise::PCellNoise3( const CqVector3D& P )
 	TqFloat y = P.y();
 	TqFloat z = P.z();
 
-	if ( x < 0.0 ) x -= 1;
-	if ( y < 0.0 ) y -= 1;
-	if ( z < 0.0 ) z -= 1;
+	if ( x < 0.0 )
+		x -= 1;
+	if ( y < 0.0 )
+		y -= 1;
+	if ( z < 0.0 )
+		z -= 1;
 
 	TqInt i = m_PermuteTable[ static_cast<unsigned int>( x ) & 0x7ff ];
 	i = m_PermuteTable[  i  + static_cast<unsigned int>( y ) & 0x7ff ];
 	i = m_PermuteTable[  i  + static_cast<unsigned int>( z ) & 0x7ff ];
 
-	result.x( m_RandomTable[ i ] );  i = m_PermuteTable[ i ];
-	result.y( m_RandomTable[ i ] );  i = m_PermuteTable[ i ];
+	result.x( m_RandomTable[ i ] );
+	i = m_PermuteTable[ i ];
+	result.y( m_RandomTable[ i ] );
+	i = m_PermuteTable[ i ];
 	result.z( m_RandomTable[ i ] );
-	
+
 	return ( result );
 }
 
@@ -195,18 +217,24 @@ CqVector3D CqCellNoise::PCellNoise4( const CqVector3D& P, TqFloat v )
 	TqFloat y = P.y();
 	TqFloat z = P.z();
 
-	if ( x < 0.0 ) x -= 1;
-	if ( y < 0.0 ) y -= 1;
-	if ( z < 0.0 ) z -= 1;
-	if ( v < 0.0 ) v -= 1;
+	if ( x < 0.0 )
+		x -= 1;
+	if ( y < 0.0 )
+		y -= 1;
+	if ( z < 0.0 )
+		z -= 1;
+	if ( v < 0.0 )
+		v -= 1;
 
 	TqInt i = m_PermuteTable[ static_cast<unsigned int>( x ) & 0x7ff ];
 	i = m_PermuteTable[  i  + static_cast<unsigned int>( y ) & 0x7ff ];
 	i = m_PermuteTable[  i  + static_cast<unsigned int>( z ) & 0x7ff ];
 	i = m_PermuteTable[  i  + static_cast<unsigned int>( v ) & 0x7ff ];
 
-	result.x( m_RandomTable[ i ] );  i = m_PermuteTable[ i ];
-	result.y( m_RandomTable[ i ] );  i = m_PermuteTable[ i ];
+	result.x( m_RandomTable[ i ] );
+	i = m_PermuteTable[ i ];
+	result.y( m_RandomTable[ i ] );
+	i = m_PermuteTable[ i ];
 	result.z( m_RandomTable[ i ] );
 
 	return ( result );

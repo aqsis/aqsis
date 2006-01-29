@@ -1,0 +1,16 @@
+Import('env')
+
+common_sources = Split("""
+	pixelsave.c""")
+
+common_headers = Split("""
+	pixelsave.h""")
+
+# Set any platform specific options for this target
+env.UseTargetOptions('common')
+
+common = env.Library('common', common_sources)
+env.Install('$LIBDIR', common)
+
+
+

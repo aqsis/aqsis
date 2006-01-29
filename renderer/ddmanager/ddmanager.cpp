@@ -132,9 +132,9 @@ TqInt CqDDManager::CloseDisplays()
 
 TqInt CqDDManager::DisplayBucket( IqBucket* pBucket )
 {
-    static CqRandom random( 61 );
+	static CqRandom random( 61 );
 
- 	if( (pBucket->Width() == 0) || (pBucket->Height() == 0) )
+	if( (pBucket->Width() == 0) || (pBucket->Height() == 0) )
 		return(0);
 
 	TqInt	xmin = pBucket->XOrigin();
@@ -179,7 +179,7 @@ TqInt CqDDManager::DisplayBucket( IqBucket* pBucket )
 				TqInt index = 0;
 				const TqFloat* pSamples = pBucket->Data( x, y );
 				std::vector<PtDspyDevFormat>::iterator iformat;
-                double s = random.RandomFloat();
+				double s = random.RandomFloat();
 				for(iformat = i->m_formats.begin(); iformat != i->m_formats.end(); iformat++)
 				{
 					TqFloat value = pSamples[i->m_dataOffsets[index]];
@@ -400,7 +400,7 @@ void CqDDManager::LoadDisplayLibrary( SqDisplayRequest& req )
 
 	if( NULL != req.m_OpenMethod )
 	{
-		// If the quantization options haven't been set in the RiDisplay call, get the appropriate values out 
+		// If the quantization options haven't been set in the RiDisplay call, get the appropriate values out
 		// of the RiQuantize option.
 		const TqFloat* pQuant = 0;
 		if(!req.m_QuantizeSpecified || !req.m_QuantizeDitherSpecified)
@@ -416,7 +416,7 @@ void CqDDManager::LoadDisplayLibrary( SqDisplayRequest& req )
 				req.m_QuantizeMaxVal = pQuant[2];
 				req.m_QuantizeSpecified = TqTrue;
 			}
-	
+
 			if( pQuant && !req.m_QuantizeDitherSpecified)
 			{
 				req.m_QuantizeDitherVal = pQuant[3];
@@ -543,31 +543,31 @@ void CqDDManager::LoadDisplayLibrary( SqDisplayRequest& req )
 		// Check for an error
 		if( err != PkDspyErrorNone )
 		{
-			// The display did not successfully open, so clean up after it and leave the 
+			// The display did not successfully open, so clean up after it and leave the
 			// request as invalid.
-			std::cerr << error << "Cannot open display \"" << req.m_name << "\" : ";
+			Aqsis::log() << error << "Cannot open display \"" << req.m_name << "\" : ";
 			switch(err)
 			{
-				case PkDspyErrorNoMemory:
-					std::cerr << "Out of memory" << std::endl;
+					case PkDspyErrorNoMemory:
+					Aqsis::log() << "Out of memory" << std::endl;
 					break;
-				case PkDspyErrorUnsupported:
-					std::cerr << "Unsupported" << std::endl;
+					case PkDspyErrorUnsupported:
+					Aqsis::log() << "Unsupported" << std::endl;
 					break;
-				case PkDspyErrorBadParams:
-					std::cerr << "Bad params" << std::endl;
+					case PkDspyErrorBadParams:
+					Aqsis::log() << "Bad params" << std::endl;
 					break;
-				case PkDspyErrorNoResource:
-					std::cerr << "No resource" << std::endl;
+					case PkDspyErrorNoResource:
+					Aqsis::log() << "No resource" << std::endl;
 					break;
-				case PkDspyErrorUndefined:			
-				default:
-					std::cerr << "Undefined" << std::endl;
+					case PkDspyErrorUndefined:
+					default:
+					Aqsis::log() << "Undefined" << std::endl;
 					break;
 			}
 
 			CloseDisplayLibrary(req);
-			return;			
+			return;
 		}
 		else
 			req.m_valid = TqTrue;
@@ -606,7 +606,7 @@ void CqDDManager::LoadDisplayLibrary( SqDisplayRequest& req )
 				// If we got here, and didn't find it, add 0 as the offset, and issue an error.
 				if( iname == req.m_AOVnames.size() )
 				{
-					std::cerr << error << "Couldn't find format entry returned from display : " << i->name << std::endl;
+					Aqsis::log() << error << "Couldn't find format entry returned from display : " << i->name << std::endl;
 					req.m_dataOffsets.push_back(req.m_AOVOffset);
 				}
 			}
@@ -638,7 +638,7 @@ void CqDDManager::LoadDisplayLibrary( SqDisplayRequest& req )
 			}
 		}
 
-		//std::cerr << warning << "Elementsize will be " << req.m_elementSize << std::endl;
+		//Aqsis::log() << warning << "Elementsize will be " << req.m_elementSize << std::endl;
 		if( NULL != req.m_QueryMethod )
 		{
 			PtDspySizeInfo size;
@@ -694,7 +694,7 @@ void CqDDManager::InitialiseDisplayNameMap()
 	if( displays )
 		strConfigFile = displays[ 0 ] + "/" + strConfigFile;
 
-	std::cerr << info << "Loading display configuration from file \"" << strConfigFile << "\"" << std::endl;
+	Aqsis::log() << info << "Loading display configuration from file \"" << strConfigFile << "\"" << std::endl;
 
 	CqRiFile fileINI( strConfigFile.c_str(), "display" );
 	if ( fileINI.IsValid() )
@@ -722,7 +722,7 @@ void CqDDManager::InitialiseDisplayNameMap()
 	}
 	else
 	{
-		std::cerr << error << "Could not find " << strConfigFile << " configuration file." << std::endl;
+		Aqsis::log() << error << "Could not find " << strConfigFile << " configuration file." << std::endl;
 	}
 }
 
@@ -916,7 +916,7 @@ void CqDDManager::PrepareCustomParameters( std::map<std::string, void*>& mapPara
 			}
 			catch( XqException e )
 			{
-				std::cerr << error << e.strReason().c_str() << std::endl;
+				Aqsis::log() << error << e.strReason().c_str() << std::endl;
 				return;
 			}
 

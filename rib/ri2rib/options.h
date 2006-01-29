@@ -30,9 +30,9 @@ START_NAMESPACE( libri2rib )
 
 struct SqOptions
 {
-    enum EqOutputType { OutputType_Ascii, OutputType_Binary };
-    enum EqCompression { Compression_None, Compression_Gzip };
-    enum EqIndentation { Indentation_None, Indentation_Space, Indentation_Tab };
+	enum EqOutputType { OutputType_Ascii, OutputType_Binary };
+	enum EqCompression { Compression_None, Compression_Gzip };
+	enum EqIndentation { Indentation_None, Indentation_Space, Indentation_Tab };
 };
 
 END_NAMESPACE( libri2rib )

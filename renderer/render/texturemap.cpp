@@ -42,7 +42,9 @@
 
 #ifndef		AQSIS_SYSTEM_WIN32
 #include	"unistd.h"
-#endif
+#else
+#include	"io.h"
+#endif		// AQSIS_SYSTEM_WIN32
 
 #if defined(AQSIS_SYSTEM_MACOSX)
 #include "Carbon/Carbon.h"
@@ -93,9 +95,9 @@ typedef enum {
 static TqBool m_critical = TqFalse;
 
 static TqFloat sides[6][2]    =  {
-     {0.0f,0.0f}, {0.0f, ONEHALF}, {ONETHIRD, 0.0f}, {ONETHIRD,ONEHALF}, 
-     {TWOTHIRD, 0.0f}, {TWOTHIRD, ONEHALF}
-};
+                                     {0.0f,0.0f}, {0.0f, ONEHALF}, {ONETHIRD, 0.0f}, {ONETHIRD,ONEHALF},
+                                     {TWOTHIRD, 0.0f}, {TWOTHIRD, ONEHALF}
+                                 };
 
 //---------------------------------------------------------------------
 /** Static array of cached texture maps.
@@ -136,7 +138,7 @@ static void CalculateNoise(TqFloat &du, TqFloat &dv, TqInt which)
 		{
 			RD[i][0] = rd.RandomFloat();
 			RD[i][1] = rd.RandomFloat();
-			//std::cerr << warning << RD[i][0] << " " << RD[i][1] << std::endl;
+			//Aqsis::log() << warning << RD[i][0] << " " << RD[i][1] << std::endl;
 		}
 
 		i_RdIx = 0;
@@ -256,7 +258,7 @@ TqPuchar CqTextureMapBuffer::AllocSegment( TqUlong width, TqUlong height, TqInt 
 
 		if ( report )
 		{
-			std::cerr << warning << "Exceeding allocated texture memory by " << more - limit << std::endl;
+			Aqsis::log() << warning << "Exceeding allocated texture memory by " << more - limit << std::endl;
 		}
 
 		report = 0;
@@ -266,7 +268,7 @@ TqPuchar CqTextureMapBuffer::AllocSegment( TqUlong width, TqUlong height, TqInt 
 #ifdef _DEBUG
 	if ( ( more > MEG1 ) && ( ( more / ( 1024 * 1024 ) ) > megs ) )
 	{
-		std::cerr << debug << "Texturememory is more than " << megs << " megs" << std::endl;
+		Aqsis::log() << debug << "Texturememory is more than " << megs << " megs" << std::endl;
 		megs += 10;
 	}
 #endif
@@ -342,24 +344,31 @@ TqInt CqTextureMap::Convert( CqString &strName )
 /** this is used for remove any memory exceed the command Option "limits" "texturememory"
   * directive
   *   
-  * It zaps the m_apSegments for this TextureMap object completely.
+  * It zaps the m_apFlat for this TextureMap object completely.
   * The idea here is to erase any "GetBuffer()" memory to respect the directive
   * It looks into the big m_TextureMap_Cache release every things
   **/
 void CqTextureMap::CriticalMeasure()
 {
-	const TqInt * poptMem = QGetRenderContextI() ->GetIntegerOption( "limits", "texturememory" );
-	TqInt current, limit, now;
-	std::vector<CqTextureMap*>::iterator i;
-	std::list<CqTextureMapBuffer*>::iterator j;
+	TqInt current, now; 
+	static TqInt limit = -1;
+	std::vector<CqTextureMap*>::iterator j;
+	std::list<CqTextureMapBuffer*>::iterator i;
+	std::list<CqTextureMapBuffer*>::iterator e;
 
-	limit = MEG1;
+	if (limit == -1)
+	{
+		limit = MEG1;
+		const TqInt * poptMem = QGetRenderContextI() ->GetIntegerOption( "limits", "texturememory" );
+		if ( poptMem )
+			limit = poptMem[ 0 ] * 1024;
+	}
 
 	IsVerbose();
-	if ( poptMem )
-		limit = poptMem[ 0 ] * 1024;
+
 
 	now = QGetRenderContext() ->Stats().GetTextureMemory();
+	TqBool getout = TqTrue;
 
 	if ( m_critical )
 	{
@@ -377,20 +386,42 @@ void CqTextureMap::CriticalMeasure()
 		 * GetBuffer() calls.
 		 *
 		 */
-		for ( i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
+		for ( j = m_TextureMap_Cache.begin(); j != m_TextureMap_Cache.end(); j++ )
 		{
-			for ( j = ( *i ) ->m_apSegments.begin(); j != ( *i ) ->m_apSegments.end(); j++ )
+			// the original segments (flat tiles)  are the first to go 
+			i = (*j)->m_apFlat.begin(); 
+			e = (*j)->m_apFlat.end(); 
+			for ( ; i != e; i++ )
 			{
-				// Only release if not protected.
-				if ( !( *j ) ->fProtected() )
-					( *j ) ->Release();
-			}
-			( *i ) ->m_apSegments.resize( 0 );
-			current = QGetRenderContext() ->Stats().GetTextureMemory();
-			if ( ( now - current ) > ( limit / 4 ) )
-				break;
-		}
+				if (*i) delete(*i);
+			}	
+			(*j)->m_apFlat.resize(0);
+			(*j)->m_apLast[0] = NULL;
 
+			// All MipMaps segments (flat tiles)  are the first to go 
+			for ( TqInt k = 0; (k <  256) && (getout == TqFalse); k++)
+			{
+				i = (*j)->m_apMipMaps[k].begin(); 
+				e = (*j)->m_apMipMaps[k].end(); 
+				for ( ; i != e; i++ )
+				{
+					if (*i) delete(*i);
+				}	
+				(*j)->m_apLast[k] = NULL;
+				(*j)->m_apMipMaps[k].resize(0);
+				current = QGetRenderContext() ->Stats().GetTextureMemory();
+				if ( ( now - current ) > ( limit / 4 ) ) {
+					getout = TqTrue;
+					break;
+				}
+			}
+			current = QGetRenderContext() ->Stats().GetTextureMemory();
+			if ( ( now - current ) > ( limit / 4 ) ) {
+				getout = TqTrue;
+				break;
+			}
+
+		}
 	}
 	current = QGetRenderContext() ->Stats().GetTextureMemory();
 
@@ -401,7 +432,7 @@ void CqTextureMap::CriticalMeasure()
 	if ( now - current )
 	{
 		///! \todo Review this debug message
-		std::cerr << info << "I was forced to zap the tile segment buffers for " << (int)( now - current ) / 1024 << "K" << std::endl;
+		Aqsis::log() << info << "I was forced to zap the tile segment buffers for " << (int)( now - current ) / 1024 << "K" << std::endl;
 	}
 #endif
 
@@ -435,7 +466,7 @@ TqBool CqTextureMap::CreateMIPMAP( TqBool fProtectBuffers )
 		TqInt ret = TIFFGetField( m_pImage, TIFFTAG_TILEWIDTH, &tsx );
 		if( ret )
 		{
-			std::cerr << error << "Cannot MIPMAP a tiled image \"" << m_strName.c_str() << "\"" << std::endl;
+			Aqsis::log() << error << "Cannot MIPMAP a tiled image \"" << m_strName.c_str() << "\"" << std::endl;
 			return( TqFalse );
 		}
 		// Read the whole image into a buffer.
@@ -463,7 +494,8 @@ TqBool CqTextureMap::CreateMIPMAP( TqBool fProtectBuffers )
 							pTMB->SetValue( x, y, sample, accum[ sample ] );
 					}
 				}
-				m_apSegments.push_back( pTMB );
+				m_apFlat.push_back( pTMB );
+				m_apLast[directory%256] = pTMB;
 			}
 
 			m_xres /= 2;
@@ -488,7 +520,7 @@ CqTextureMap::~CqTextureMap()
 
 	if (IsVerbose())
 	{
-		std::cerr << warning << m_strName.c_str() << " its directory is now " << m_Directory << std::endl;
+		Aqsis::log() << warning << m_strName.c_str() << " its directory is now " << m_Directory << std::endl;
 	}
 
 	for ( i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
@@ -513,18 +545,45 @@ CqTextureMap::~CqTextureMap()
 	m_ConvertString_Cache.resize( 0 );
 
 	// Delete any held cache buffer segments.
-	std::list<CqTextureMapBuffer*>::iterator s;
-	for ( s = m_apSegments.begin(); s != m_apSegments.end(); s++ )
-		delete( *s );
+	std::list<CqTextureMapBuffer*>::iterator l;
+	std::list<CqTextureMapBuffer*>::iterator e;
 
-	m_apSegments.resize( 0 );
+	// First into the flat segments partitions
+	l = m_apFlat.begin();
+	e = m_apFlat.end();
+	for ( ; l != e; l++ )
+	{
+		if (*l) 
+		{
+			delete (*l);
+		}
+	}
+	m_apFlat.resize( 0 );
+	m_apLast[0] = NULL;
+
+	// Second into the Mipmaps segments partitions
+	for (TqInt k = 0; k < 256; k++)
+	{
+		l = m_apMipMaps[k].begin(); 
+		e = m_apMipMaps[k].end(); 
+		for ( ; l != e; l++ )
+		{
+			if (*l) 
+			{
+				delete (*l);
+			}
+		}	
+		m_apLast[k] = NULL;
+		m_apMipMaps[k].resize(0);
+	}
+
 
 
 #ifdef ALLOCSEGMENTSTATUS
 
 	{
 		// We count each allocation/free at the end they should match
-		std::cerr << "alloc/free " << alloc_cnt << " " << free_cnt << " - Memory usage " << QGetRenderContext() ->Stats().GetTextureMemory() << std::endl;
+		Aqsis::log() << "alloc/free " << alloc_cnt << " " << free_cnt << " - Memory usage " << QGetRenderContext() ->Stats().GetTextureMemory() << std::endl;
 	}
 #endif
 }
@@ -554,25 +613,28 @@ void	CqTextureMapBuffer::FreeSegment( TqPuchar pBufferData, TqUlong width, TqUlo
  */
 CqTextureMapBuffer* CqTextureMap::GetBuffer( TqUlong s, TqUlong t, TqInt directory, TqBool fProt )
 {
+        //TIMER_START("GetBuffer");
 	QGetRenderContext() ->Stats().IncTextureMisses( 4 );
 
-	if ( m_apSegments.size() > 0 && m_apSegments.front() ->IsValid( s, t, directory ) )
+	CqTextureMapBuffer *lastcache = m_apLast[directory%256];
+
+	if (lastcache && lastcache->IsValid(s, t, directory))
 	{
-		QGetRenderContext() ->Stats().IncTextureHits( 1, 4 );
-		return( m_apSegments.front() );
+		//TIMER_STOP("GetBuffer");
+		return lastcache;
 	}
 
 	// Search already cached segments first.
-	for ( std::list<CqTextureMapBuffer*>::iterator i = m_apSegments.begin(); i != m_apSegments.end(); i++ )
+	std::list<CqTextureMapBuffer*>::iterator i = m_apMipMaps[directory%256].begin(); 
+	std::list<CqTextureMapBuffer*>::iterator e = m_apMipMaps[directory%256].end(); 
+	for ( ; i != e; i++ )
 	{
 		if ( ( *i ) ->IsValid( s, t, directory ) )
 		{
 			QGetRenderContext() ->Stats().IncTextureHits( 1, 4 );
-			// Move this segment to the top of the list, so that next time it is found first. This
-			// allows us to take advantage of likely spatial coherence during shading.
 			CqTextureMapBuffer* pbuffer = *i;
-			m_apSegments.erase(i);
-			m_apSegments.push_front(pbuffer);
+			m_apLast[directory%256] = pbuffer;
+			//TIMER_STOP("GetBuffer");
 			return ( pbuffer );
 		}
 	}
@@ -585,7 +647,8 @@ CqTextureMapBuffer* CqTextureMap::GetBuffer( TqUlong s, TqUlong t, TqInt directo
 		CqRiFile	fileImage( m_strName.c_str(), "texture" );
 		if ( !fileImage.IsValid() )
 		{
-			std::cerr << error << "Cannot open texture file \"" << m_strName.c_str() << "\"" << std::endl;
+			Aqsis::log() << error << "Cannot open texture file \"" << m_strName.c_str() << "\"" << std::endl;
+			//TIMER_STOP("GetBuffer");
 			return pTMB;
 		}
 		CqString strRealName( fileImage.strRealName() );
@@ -612,9 +675,6 @@ CqTextureMapBuffer* CqTextureMap::GetBuffer( TqUlong s, TqUlong t, TqInt directo
 
 			void* pData = pTMB->pVoidBufferData();
 			TIFFReadTile( m_pImage, pData, s, t, 0, 0 );
-			// Put this segment on the top of the list, so that next time it is found first. This
-			// allows us to take advantage of likely spatial coherence during shading.
-			m_apSegments.push_front( pTMB );
 		}
 		else
 		{
@@ -629,11 +689,13 @@ CqTextureMapBuffer* CqTextureMap::GetBuffer( TqUlong s, TqUlong t, TqInt directo
 				TIFFReadScanline( m_pImage, pdata, i );
 				pdata = reinterpret_cast<void*>( reinterpret_cast<char*>( pdata ) + m_XRes * pTMB->ElemSize() );
 			}
-			// Put this segment on the top of the list, so that next time it is found first. This
-			// allows us to take advantage of likely spatial coherence during shading.
-			m_apSegments.push_front( pTMB );
 		}
+		// Put this segment on the top of the list, so that next time it is found first. This
+		// allows us to take advantage of likely spatial coherence during shading.
+		m_apMipMaps[directory%256].push_front( pTMB );
+		m_apLast[directory%256] = pTMB;
 	}
+	//TIMER_STOP("GetBuffer");
 	return ( pTMB );
 }
 
@@ -754,7 +816,7 @@ TqBool CqTextureMap::BiLinear(TqFloat u, TqFloat v, TqInt umapsize, TqInt vmapsi
 			m_color[ c ] = 1.0f;
 		}
 
-		std::cerr << error << "Cannot find value for either pTMPB[a,b,c,d]" << std::endl;
+		Aqsis::log() << error << "Cannot find value for either pTMPB[a,b,c,d]" << std::endl;
 		Open();
 		return TqFalse;
 	}
@@ -771,7 +833,7 @@ TqBool CqTextureMap::BiLinear(TqFloat u, TqFloat v, TqInt umapsize, TqInt vmapsi
 	y3 = iv_n - pTMBc->tOrigin();
 	x4 = iu_n - pTMBd->sOrigin();
 	y4 = iv_n - pTMBd->tOrigin();
-	//std::cerr << warning << "ru, rv" << ru << " " << rv << std::endl;
+	//Aqsis::log() << warning << "ru, rv" << ru << " " << rv << std::endl;
 
 	// Bilinear interpolate the values at the corners of the sample.
 	for ( c = 0; c < m_SamplesPerPixel; c++ )
@@ -826,9 +888,9 @@ void CqTextureMap::GetSampleWithoutBlur( TqFloat u1, TqFloat v1, TqFloat u2, TqF
 			m_lerp = 1.0f;
 
 	}
-	TqBool bLerp = (m_lerp == 1.0); 
+	TqBool bLerp = (m_lerp == 1.0);
 
-	
+
 	// Assuming this will also include the pixel at u,v multiple samplings interval
 	for (TqInt i = 0; i <= m_samples; i ++)
 	{
@@ -1196,7 +1258,7 @@ void CqTextureMap::Open()
 	CqRiFile	fileImage( m_strName.c_str(), "texture" );
 	if ( !fileImage.IsValid() )
 	{
-		std::cerr << error << "Cannot open texture file \"" << m_strName.c_str() << "\"" << std::endl;
+		Aqsis::log() << error << "Cannot open texture file \"" << m_strName.c_str() << "\"" << std::endl;
 		return ;
 	}
 	CqString strRealName( fileImage.strRealName() );
@@ -1220,7 +1282,7 @@ void CqTextureMap::Open()
 
 	if ( m_pImage )
 	{
-		std::cerr << info << "TextureMap: \"" << strRealName.c_str() << "\" is open" << std::endl;
+		Aqsis::log() << info << "TextureMap: \"" << strRealName.c_str() << "\" is open" << std::endl;
 		TqPchar pFormat = 0;
 		TqPchar pModes = 0;
 
@@ -1269,7 +1331,7 @@ void CqTextureMap::Open()
 
 		/* Second test; is it containing enough directories for us */
 		TqInt min = MIN(m_XRes, m_YRes );
-		TqInt directory = static_cast<TqInt>(log((double) min)/log((double) 2.0));
+		TqInt directory = static_cast<TqInt>(::log((double) min)/::log((double) 2.0));
 		bMipMap &= TIFFSetDirectory(m_pImage, directory - 1);
 
 
@@ -1298,6 +1360,12 @@ void CqTextureMap::Open()
 		}
 	}
 	m_Directory = 0;
+	for (TqInt k=0; k < 256; k++)
+	{
+		m_apLast[k] = NULL;
+		m_apMipMaps[k].resize(0);
+	}
+	m_apFlat.resize(0);
 }
 
 //---------------------------------------------------------------------
@@ -1352,7 +1420,7 @@ void CqTextureMap::PrepareSampleOptions( std::map<std::string, IqShaderData*>& p
 			}
 		}
 
- 		if ( paramMap.find( "samples" ) != paramMap.end() )
+		if ( paramMap.find( "samples" ) != paramMap.end() )
 		{
 			paramMap[ "samples" ] ->GetFloat( m_samples );
 		}
@@ -1362,12 +1430,12 @@ void CqTextureMap::PrepareSampleOptions( std::map<std::string, IqShaderData*>& p
 			CqString filter;
 
 			paramMap[ "filter" ] ->GetString( filter );
-			//std::cerr << warning << "filter will be " << filter << std::endl;
+			//Aqsis::log() << warning << "filter will be " << filter << std::endl;
 
 			m_FilterFunc = CalculateFilter(filter);
 
 		}
-		
+
 		if ( paramMap.find( "pixelvariance" ) != paramMap.end() )
 		{
 			paramMap[ "pixelvariance" ] ->GetFloat( m_pixelvariance );
@@ -1489,6 +1557,12 @@ void CqTextureMap::SampleMap( TqFloat s1, TqFloat t1, TqFloat s2, TqFloat t2, Tq
  */
 void CqTextureMap::WriteImage( TIFF* ptex, TqPuchar raster, TqUlong width, TqUlong length, TqInt samples, TqInt compression, TqInt quality )
 {
+	// First check if we can support the requested compression format.
+	if(!TIFFIsCODECConfigured(compression))
+	{
+		Aqsis::log() << error << "Compression type " << compression << " not supported by the libtiff implementation" << std::endl;
+		return;
+	}
 	TqChar version[ 80 ];
 	TIFFCreateDirectory( ptex );
 
@@ -1519,6 +1593,12 @@ void CqTextureMap::WriteImage( TIFF* ptex, TqPuchar raster, TqUlong width, TqUlo
  */
 void CqTextureMap::WriteImage( TIFF* ptex, TqFloat *raster, TqUlong width, TqUlong length, TqInt samples, TqInt compression, TqInt quality )
 {
+	// First check if we can support the requested compression format.
+	if(!TIFFIsCODECConfigured(compression))
+	{
+		Aqsis::log() << error << "Compression type " << compression << " not supported by the libtiff implementation" << std::endl;
+		return;
+	}
 	TqChar version[ 80 ];
 	TIFFCreateDirectory( ptex );
 
@@ -1551,6 +1631,12 @@ void CqTextureMap::WriteImage( TIFF* ptex, TqFloat *raster, TqUlong width, TqUlo
  */
 void CqTextureMap::WriteImage( TIFF* ptex, TqUshort *raster, TqUlong width, TqUlong length, TqInt samples, TqInt compression, TqInt quality )
 {
+	// First check if we can support the requested compression format.
+	if(!TIFFIsCODECConfigured(compression))
+	{
+		Aqsis::log() << error << "Compression type " << compression << " not supported by the libtiff implementation" << std::endl;
+		return;
+	}
 	TqChar version[ 80 ];
 	TIFFCreateDirectory( ptex );
 
@@ -1640,6 +1726,12 @@ void CqTextureMap::WriteTileImage( TIFF* ptex, CqTextureMapBuffer* pBuffer, TqUl
  */
 void CqTextureMap::WriteTileImage( TIFF* ptex, TqFloat *raster, TqUlong width, TqUlong length, TqUlong twidth, TqUlong tlength, TqInt samples, TqInt compression, TqInt quality )
 {
+	// First check if we can support the requested compression format.
+	if(!TIFFIsCODECConfigured(compression))
+	{
+		Aqsis::log() << error << "Compression type " << compression << " not supported by the libtiff implementation" << std::endl;
+		return;
+	}
 	//TIFFCreateDirectory(ptex);
 	std::ostringstream version;
 	version << STRNAME << " " << VERSION_STR << std::ends;
@@ -1679,7 +1771,10 @@ void CqTextureMap::WriteTileImage( TIFF* ptex, TqFloat *raster, TqUlong width, T
 					{
 						TqInt ii;
 						for ( ii = 0; ii < samples; ii++ )
-							ptile[ ( i * twidth * samples ) + ( ( ( j * samples ) + ii ) ) ] = ptdata[ ( ( j * samples ) + ii ) ];
+						{
+							TqFloat value = ptdata[ ( ( j * samples ) + ii ) ];
+							ptile[ ( i * twidth * samples ) + ( ( ( j * samples ) + ii ) ) ] = value;
+						}
 					}
 				}
 				ptdata += ( width * samples );
@@ -1698,6 +1793,12 @@ void CqTextureMap::WriteTileImage( TIFF* ptex, TqFloat *raster, TqUlong width, T
  */
 void CqTextureMap::WriteTileImage( TIFF* ptex, TqUshort *raster, TqUlong width, TqUlong length, TqUlong twidth, TqUlong tlength, TqInt samples, TqInt compression, TqInt quality )
 {
+	// First check if we can support the requested compression format.
+	if(!TIFFIsCODECConfigured(compression))
+	{
+		Aqsis::log() << error << "Compression type " << compression << " not supported by the libtiff implementation" << std::endl;
+		return;
+	}
 	//TIFFCreateDirectory(ptex);
 	std::ostringstream version;
 	version << STRNAME << " " << VERSION_STR << std::ends;
@@ -1756,6 +1857,12 @@ void CqTextureMap::WriteTileImage( TIFF* ptex, TqUshort *raster, TqUlong width, 
  */
 void CqTextureMap::WriteTileImage( TIFF* ptex, TqPuchar raster, TqUlong width, TqUlong length, TqUlong twidth, TqUlong tlength, TqInt samples, TqInt compression, TqInt quality )
 {
+	// First check if we can support the requested compression format.
+	if(!TIFFIsCODECConfigured(compression))
+	{
+		Aqsis::log() << error << "Compression type " << compression << " not supported by the libtiff implementation" << std::endl;
+		return;
+	}
 	std::ostringstream version;
 	version << STRNAME << " " << VERSION_STR << std::ends;
 	TIFFSetField( ptex, TIFFTAG_SOFTWARE, version.str ().c_str () );
@@ -1815,10 +1922,10 @@ void CqTextureMap::WriteTileImage( TIFF* ptex, TqPuchar raster, TqUlong width, T
 #define COMP_Y 1
 #define COMP_Z 2
 
-void CqEnvironmentMap::SampleMap( CqVector3D& R1, 
-		CqVector3D& R2, CqVector3D& R3, CqVector3D& R4,
-		std::valarray<TqFloat>& val, TqInt index, 
-		TqFloat* average_depth, TqFloat* shadow_depth )
+void CqEnvironmentMap::SampleMap( CqVector3D& R1,
+                                  CqVector3D& R2, CqVector3D& R3, CqVector3D& R4,
+                                  std::valarray<TqFloat>& val, TqInt index,
+                                  TqFloat* average_depth, TqFloat* shadow_depth )
 {
 	CqVector3D D;
 	TqFloat x,y;
@@ -1843,7 +1950,7 @@ void CqEnvironmentMap::SampleMap( CqVector3D& R1,
 		if (pLerp && (*pLerp > 0.0f))
 			m_lerp = 1.0f;
 	}
-	TqBool bLerp = (m_lerp == 1.0); 
+	TqBool bLerp = (m_lerp == 1.0);
 
 	if ( m_pImage != 0 )
 	{
@@ -1852,7 +1959,8 @@ void CqEnvironmentMap::SampleMap( CqVector3D& R1,
 		m_accum_color = 0.0f;
 		contrib = 0.0f;
 
-		if ((R1 * R1) == 0) return;
+		if ((R1 * R1) == 0)
+			return;
 
 		TqFloat dfovu = fabs(1.0f - m_fov)/(TqFloat) (m_XRes);
 		TqFloat dfovv = fabs(1.0f - m_fov)/(TqFloat) (m_YRes);
@@ -1950,11 +2058,11 @@ void CqEnvironmentMap::SampleMap( CqVector3D& R1,
 					break;
 			}
 
-			/* At this point: u,v are between 0..1.0 
+			/* At this point: u,v are between 0..1.0
 			* They must be remapped to their correct 
 			* position 
 			*/
-			
+
 			u = CLAMP(u, dfovu, 1.0f );
 			v = CLAMP(v, dfovv, 1.0f );
 
@@ -1963,7 +2071,7 @@ void CqEnvironmentMap::SampleMap( CqVector3D& R1,
 			u = CLAMP(u, 0.0f, 1.0f);
 			v = CLAMP(v, 0.0f, 1.0f);
 			CalculateLevel(u, v);
-			
+
 			BiLinear(u, v, m_umapsize, m_vmapsize, m_level, m_pixel_variance);
 			if (bLerp)
 				BiLinear(u, v, m_umapsize/2, m_vmapsize/2, m_level+1, m_pixel_sublevel);

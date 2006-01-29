@@ -36,78 +36,82 @@ USING_NAMESPACE( libri2rib );
 
 void CqStreamGzip::error()
 {
-    int * e = 0;
-    const char *cp = gzerror( gzf, e );
+	int * e = 0;
+	const char *cp = gzerror( gzf, e );
 
-    if ( *e == Z_ERRNO )
-    {
-        throw CqError ( RIE_SYSTEM, RIE_ERROR, strerror( errno ), TqFalse );
-    }
-    else
-    {
-        throw CqError( RIE_SYSTEM, RIE_ERROR, cp, TqFalse );
-    }
+	if ( *e == Z_ERRNO )
+	{
+		throw CqError ( RIE_SYSTEM, RIE_ERROR, strerror( errno ), TqFalse );
+	}
+	else
+	{
+		throw CqError( RIE_SYSTEM, RIE_ERROR, cp, TqFalse );
+	}
 }
 
 CqStream & CqStreamGzip::operator<< ( int i )
 {
-    if ( gzprintf( gzf, "%i", i ) == 0 ) error();
-    return *this;
+	if ( gzprintf( gzf, "%i", i ) == 0 )
+		error();
+	return *this;
 }
 
 CqStream & CqStreamGzip::operator<< ( float f )
 {
-    if ( gzprintf( gzf, "%f", f ) == 0 ) error();
-    return *this;
+	if ( gzprintf( gzf, "%f", f ) == 0 )
+		error();
+	return *this;
 }
 
 CqStream & CqStreamGzip::operator<< ( std::string s )
 {
-    if ( gzputs( gzf, s.c_str() ) == -1 ) error();
-    return *this;
+	if ( gzputs( gzf, s.c_str() ) == -1 )
+		error();
+	return *this;
 }
 
 CqStream & CqStreamGzip::operator<< ( char c )
 {
-    if ( gzputc( gzf, c ) == -1 ) error();
-    return *this;
+	if ( gzputc( gzf, c ) == -1 )
+		error();
+	return *this;
 }
 
 void CqStreamGzip::openFile( const char *name )
 {
-    gzf = gzopen( name, "wb" );
-    if ( gzf == NULL )
-    {
-        throw CqError( RIE_NOFILE, RIE_ERROR, "Unable to open file ", name, "", TqFalse );
-    }
-    gzsetparams( gzf, Z_DEFAULT_COMPRESSION, Z_DEFAULT_STRATEGY );
+	gzf = gzopen( name, "wb" );
+	if ( gzf == NULL )
+	{
+		throw CqError( RIE_NOFILE, RIE_ERROR, "Unable to open file ", name, "", TqFalse );
+	}
+	gzsetparams( gzf, Z_DEFAULT_COMPRESSION, Z_DEFAULT_STRATEGY );
 }
 
 void CqStreamGzip::openFile( int fdesc )
 {
-    gzf = gzdopen( dup( fdesc ), "wb" );
-    if ( gzf == NULL )
-    {
-        char c[ 100 ];
-        sprintf( c, "%u", fdesc );
-        throw CqError( RIE_NOFILE, RIE_ERROR, "Unable to open file with descriptor=", c, "", TqFalse );
-    }
+	gzf = gzdopen( dup( fdesc ), "wb" );
+	if ( gzf == NULL )
+	{
+		char c[ 100 ];
+		sprintf( c, "%u", fdesc );
+		throw CqError( RIE_NOFILE, RIE_ERROR, "Unable to open file with descriptor=", c, "", TqFalse );
+	}
 }
 
 void CqStreamGzip::closeFile()
 {
-    if ( gzf )
-        gzclose( gzf );
+	if ( gzf )
+		gzclose( gzf );
 }
 
 void CqStreamGzip::flushFile()
 {
-    //  At the end of a procedural RunProgram the
-    // gzip internal state must be reset.
-    if ( gzf )
-    {
-        gzflush( gzf, Z_FINISH );
-    }
+	//  At the end of a procedural RunProgram the
+	// gzip internal state must be reset.
+	if ( gzf )
+	{
+		gzflush( gzf, Z_FINISH );
+	}
 }
 
 
@@ -115,61 +119,65 @@ void CqStreamGzip::flushFile()
 
 void CqStreamFDesc::error()
 {
-    throw CqError ( RIE_SYSTEM, RIE_ERROR, strerror( errno ), TqFalse );
+	throw CqError ( RIE_SYSTEM, RIE_ERROR, strerror( errno ), TqFalse );
 }
 
 CqStream & CqStreamFDesc::operator<< ( int i )
 {
-    if ( fprintf( fstr, "%i", i ) < 0 ) error();
-    return *this;
+	if ( fprintf( fstr, "%i", i ) < 0 )
+		error();
+	return *this;
 }
 
 CqStream & CqStreamFDesc::operator<< ( float f )
 {
-    if ( fprintf( fstr, "%f", f ) < 0 ) error();
-    return *this;
+	if ( fprintf( fstr, "%f", f ) < 0 )
+		error();
+	return *this;
 }
 
 CqStream & CqStreamFDesc::operator<< ( std::string s )
 {
-    if ( fputs( s.c_str(), fstr ) == EOF ) error();
-    return *this;
+	if ( fputs( s.c_str(), fstr ) == EOF )
+		error();
+	return *this;
 }
 
 CqStream & CqStreamFDesc::operator<< ( char c )
 {
-    if ( fputc( c, fstr ) == EOF ) error();
-    return *this;
+	if ( fputc( c, fstr ) == EOF )
+		error();
+	return *this;
 }
 
 void CqStreamFDesc::openFile( const char *name )
 {
-    fstr = fopen( name, "wb" );
-    if ( fstr == NULL )
-    {
-        throw CqError( RIE_NOFILE, RIE_ERROR, "Unable to open file ", name, "", TqFalse );
-    }
+	fstr = fopen( name, "wb" );
+	if ( fstr == NULL )
+	{
+		throw CqError( RIE_NOFILE, RIE_ERROR, "Unable to open file ", name, "", TqFalse );
+	}
 }
 
 void CqStreamFDesc::openFile ( int fdesc )
 {
-    fstr = fdopen ( dup( fdesc ), "wb" );
-    if ( fstr == NULL )
-    {
-        char c[ 100 ];
-        sprintf( c, "%u", fdesc );
-        throw CqError( RIE_NOFILE, RIE_ERROR, "Unable to open file with descriptor=", c, "", TqFalse );
-    }
+	fstr = fdopen ( dup( fdesc ), "wb" );
+	if ( fstr == NULL )
+	{
+		char c[ 100 ];
+		sprintf( c, "%u", fdesc );
+		throw CqError( RIE_NOFILE, RIE_ERROR, "Unable to open file with descriptor=", c, "", TqFalse );
+	}
 }
 
 void CqStreamFDesc::closeFile()
 {
-    if ( fstr )
-        fclose( fstr );
+	if ( fstr )
+		fclose( fstr );
 }
 
 void CqStreamFDesc::flushFile()
 {
-    if ( fstr )
-        fflush( fstr );
+	if ( fstr )
+		fflush( fstr );
 }

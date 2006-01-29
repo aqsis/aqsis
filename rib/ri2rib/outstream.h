@@ -38,66 +38,66 @@ START_NAMESPACE( libri2rib )
 
 class CqStream
 {
-public:
-    virtual CqStream & operator<<( int i ) = 0;
-    virtual CqStream & operator<<( float f ) = 0;
-    virtual CqStream & operator<<( std::string s ) = 0;
-    virtual CqStream & operator<<( char c ) = 0;
+	public:
+		virtual CqStream & operator<<( int i ) = 0;
+		virtual CqStream & operator<<( float f ) = 0;
+		virtual CqStream & operator<<( std::string s ) = 0;
+		virtual CqStream & operator<<( char c ) = 0;
 
-    CqStream()
-    {}
-    virtual ~CqStream()
-    {}
+		CqStream()
+		{}
+		virtual ~CqStream()
+		{}
 
-    virtual void openFile( const char * ) = 0;
-    virtual void openFile ( int file_descriptor ) = 0;
-    virtual void closeFile() = 0;
-    virtual void flushFile() = 0;
+		virtual void openFile( const char * ) = 0;
+		virtual void openFile ( int file_descriptor ) = 0;
+		virtual void closeFile() = 0;
+		virtual void flushFile() = 0;
 };
 
 class CqStreamGzip : public CqStream
 {
-private:
-    gzFile gzf;
-    void error();
-public:
-    CqStream & operator<<( int i );
-    CqStream & operator<<( float f );
-    CqStream & operator<<( std::string s );
-    CqStream & operator<<( char c );
+	private:
+		gzFile gzf;
+		void error();
+	public:
+		CqStream & operator<<( int i );
+		CqStream & operator<<( float f );
+		CqStream & operator<<( std::string s );
+		CqStream & operator<<( char c );
 
-    CqStreamGzip()
-    {}
-    ~CqStreamGzip()
-    {}
+		CqStreamGzip()
+		{}
+		~CqStreamGzip()
+		{}
 
-    void openFile( const char * );
-    void openFile( int );
-    void closeFile();
-    void flushFile();
+		void openFile( const char * );
+		void openFile( int );
+		void closeFile();
+		void flushFile();
 };
 
 
 class CqStreamFDesc : public CqStream
 {
-private:
-    FILE* fstr;
-    void error();
-public:
-    CqStream & operator<<( int i );
-    CqStream & operator<<( float f );
-    CqStream & operator<<( std::string s );
-    CqStream & operator<<( char c );
+	private:
+		FILE* fstr;
+		void error();
+	public:
+		CqStream & operator<<( int i );
+		CqStream & operator<<( float f );
+		CqStream & operator<<( std::string s );
+		CqStream & operator<<( char c );
 
-    CqStreamFDesc()
-    {}
-    ~CqStreamFDesc()
-    {}
+		CqStreamFDesc()
+		{}
+		~CqStreamFDesc()
+		{}
 
-    void openFile( const char * );
-    void openFile( int );
-    void closeFile();
-    void flushFile();
+		void openFile( const char * );
+		void openFile( int );
+		void closeFile();
+		void flushFile();
 };
 
 
