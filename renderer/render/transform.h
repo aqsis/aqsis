@@ -115,6 +115,8 @@ class CqTransform : public CqMotionSpec<SqTransformation>, public IqTransform, p
 		virtual	SqTransformation	ConcatMotionObjects( const SqTransformation& A, const SqTransformation& B ) const;
 		virtual	SqTransformation	LinearInterpolateMotionObjects( TqFloat Fraction, const SqTransformation& A, const SqTransformation& B ) const;
 
+		CqTransform*	Inverse();
+
 	private:
 		void	InitialiseDefaultObject( const CqTransformPtr& From );
 		void	SetTransform( TqFloat time, const CqMatrix& matTrans );

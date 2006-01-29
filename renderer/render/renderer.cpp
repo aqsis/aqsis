@@ -629,10 +629,6 @@ void	CqRenderer::ptransConcatCurrentTime( const CqMatrix& matTrans )
 
 void CqRenderer::RenderWorld()
 {
-	// Check we have a valid Image buffer
-	if ( pImage() == 0 )
-		SetImage( new CqImageBuffer );
-
 	m_pDDManager->OpenDisplays();
 
 	pImage() ->RenderImage();
@@ -640,6 +636,59 @@ void CqRenderer::RenderWorld()
 	m_pDDManager->CloseDisplays();
 }
 
+
+//----------------------------------------------------------------------
+/** Render any automatic shadow passes.
+ */
+
+void CqRenderer::RenderAutoShadows()
+{
+	// Check all the lightsources for any with an attribute indicating autoshadows.
+	TqInt ilight;
+	for(ilight=0; ilight<Lightsource_stack.size(); ilight++)
+	{
+		CqLightsourcePtr light = Lightsource_stack[ilight];
+		const CqString* pMapName = light->pAttributes()->GetStringAttribute("autoshadows", "shadowmapname");
+		const CqString* pattrName = light->pAttributes()->GetStringAttribute( "identifier", "name" );
+		if(NULL != pMapName)
+		{
+			if(NULL != pattrName)
+				Aqsis::log() << info << "Rendering automatic shadow pass for lightsource : \"" << pattrName[0].c_str() << "\" to shadow map file \"" << pMapName[0].c_str() << "\"" << std::endl;
+			else
+				Aqsis::log() << info << "Rendering automatic shadow pass for lightsource : \"unnamed\" to shadow map file \"" << pMapName[0].c_str() << "\"" << std::endl;
+
+			// Store the current camera transform for later.
+			CqTransformPtr cameraTrans = QGetRenderContext()->GetCameraTransform();
+			// Now set the camera transform the to light transform (inverse because the camera transform is transforming the world into camera space).
+			CqTransformPtr lightTrans(light->pTransform()->Inverse());
+			SetCameraTransform(lightTrans);
+			optCurrent().InitialiseCamera();
+
+			// Cache the current DDManager, and replace it for the purposes of our shadow render.
+			IqDDManager* realDDManager = m_pDDManager;
+			m_pDDManager = CreateDisplayDriverManager();
+			m_pDDManager->Initialise();
+			std::map<std::string, void*> args;
+			AddDisplayRequest(pMapName[0].c_str(), "zframebuffer", "z", ModeZ, 0, 1, args);
+
+			// Cache the current imagebuffer, and replace it with a new one for the purposes of our shadow render.
+			CqImageBuffer* realImageBuffer = m_pImageBuffer;
+			m_pImageBuffer = 0;
+			SetImage( new CqImageBuffer );
+			pImage()->SetImage();
+
+			PrepareShaders();
+			PostCloneOfWorld();
+			RenderWorld();
+
+			// Now restore the stored stuff.
+			SetCameraTransform(cameraTrans);
+			optCurrent().InitialiseCamera();
+			m_pDDManager = realDDManager;
+			m_pImageBuffer = realImageBuffer;
+		}
+	}
+}
 
 
 //----------------------------------------------------------------------
@@ -1110,7 +1159,9 @@ boost::shared_ptr<IqShader> CqRenderer::getDefaultSurfaceShader()
 	m_Shaders[key] = pRet;
 
 	// return a clone of the default surface template
-	return boost::shared_ptr<IqShader>( pRet->Clone() );
+	boost::shared_ptr<IqShader> newShader(pRet->Clone());
+	m_InstancedShaders.push_back(newShader);
+	return (newShader);
 
 }
 
@@ -1129,7 +1180,9 @@ boost::shared_ptr<IqShader> CqRenderer::CreateShader(
 	if ( m_Shaders.find(key) != m_Shaders.end() )
 	{
 		// the shader template is present, so return its clone
-		return boost::shared_ptr<IqShader>( m_Shaders[key]->Clone() );
+		boost::shared_ptr<IqShader> newShader(m_Shaders[key]->Clone());
+		m_InstancedShaders.push_back(newShader);
+		return (newShader);
 	}
 
 	// we now create the shader...
@@ -1165,7 +1218,9 @@ boost::shared_ptr<IqShader> CqRenderer::CreateShader(
 		// add the shader to the map as a template and return its
 		//  clone
 		m_Shaders[key] = pRet;
-		return boost::shared_ptr<IqShader>( pRet->Clone() );
+		boost::shared_ptr<IqShader> newShader(pRet->Clone());
+		m_InstancedShaders.push_back(newShader);
+		return (newShader);
 	}
 	else
 	{
@@ -1194,7 +1249,9 @@ boost::shared_ptr<IqShader> CqRenderer::CreateShader(
 
 			// add the shader to the map and return its clone
 			m_Shaders[key] = pRet;
-			return boost::shared_ptr<IqShader>( pRet->Clone() );
+			boost::shared_ptr<IqShader> newShader(pRet->Clone());
+			m_InstancedShaders.push_back(newShader);
+			return (newShader);
 		}
 		else
 		{
@@ -1204,6 +1261,60 @@ boost::shared_ptr<IqShader> CqRenderer::CreateShader(
 	}
 
 }
+
+//----------------------------------------------------------------------
+/** Add a new surface to the list of surfaces in the world.
+ * \param pSurface A pointer to a CqBasicSurface derived class, surface should at this point be in world space.
+ */
+
+void CqRenderer::StorePrimitive( const boost::shared_ptr<CqBasicSurface>& pSurface )
+{
+	// Count the number of total gprims
+//	STATS_INC( GPR_created_total );
+
+	m_aWorld.push_back(pSurface);
+}
+
+void CqRenderer::PostWorld()
+{
+	while(!m_aWorld.empty())
+	{
+		boost::shared_ptr<CqBasicSurface> pSurface = m_aWorld.front();
+		
+		pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "world", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(0), 0 ),
+						 QGetRenderContext() ->matNSpaceToSpace( "world", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(0), 0 ),
+						 QGetRenderContext() ->matVSpaceToSpace( "world", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(0), 0 ) );
+		pImage()->PostSurface(pSurface);
+		m_aWorld.pop_front();
+	}
+}
+	
+
+void CqRenderer::PostCloneOfWorld()
+{
+	std::deque<boost::shared_ptr<CqBasicSurface> >::iterator i;
+	for(i=m_aWorld.begin(); i!=m_aWorld.end(); i++)
+	{
+		boost::shared_ptr<CqBasicSurface> pSurface((*i)->Clone());
+		pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "world", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(0), 0 ),
+						 QGetRenderContext() ->matNSpaceToSpace( "world", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(0), 0 ),
+						 QGetRenderContext() ->matVSpaceToSpace( "world", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(0), 0 ) );
+		pImage()->PostSurface(pSurface);
+	}
+}
+
+
+/** Prepare the shaders for rendering.
+ */
+void CqRenderer::PrepareShaders()
+{
+	std::vector< boost::shared_ptr<IqShader> >::iterator i;
+	for(i = m_InstancedShaders.begin(); i!=m_InstancedShaders.end(); i++)
+	{
+		(*i)->PrepareShaderForUse();
+	}
+}
+
 
 //---------------------------------------------------------------------
 /** Find a shader of the specified type with the specified name.
@@ -1552,6 +1663,14 @@ void TIFF_ErrorHandler(const char* mdl, const char* fmt, va_list va)
 void TIFF_WarnHandler(const char* mdl, const char* fmt, va_list va)
 {
 	// Ignore warnings
+}
+
+
+void	CqRenderer::SetImage( CqImageBuffer* pImage )
+{
+	if(m_pImageBuffer != NULL)
+		delete(m_pImageBuffer);
+	m_pImageBuffer = pImage;
 }
 
 //---------------------------------------------------------------------

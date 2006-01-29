@@ -61,12 +61,13 @@ CqCurve::CqCurve() : CqSurface()
 /**
  * CqCurve copy constructor.
  */
-CqCurve::CqCurve( const CqCurve &from ) : CqSurface()
-{
-	( *this ) = from;
-
-	STATS_INC( GPR_crv );
-}
+/* CqCurve::CqCurve( const CqCurve &from ) : CqSurface()
+ * {
+ * 	( *this ) = from;
+ * 
+ * 	STATS_INC( GPR_crv );
+ * }
+ */
 
 
 
@@ -178,11 +179,12 @@ CqBound CqCurve::Bound() const
  *
  * @return Reference to (*this).
  */
-CqCurve& CqCurve::operator=( const CqCurve& from )
-{
-	CqSurface::operator=( from );
-	return ( *this );
-}
+/* CqCurve& CqCurve::operator=( const CqCurve& from )
+ * {
+ * 	CqSurface::operator=( from );
+ * 	return ( *this );
+ * }
+ */
 
 
 
@@ -291,11 +293,12 @@ CqLinearCurveSegment::CqLinearCurveSegment() : CqCurve()
 /**
  * CqLinearCurveSegment copy constructor.
  */
-CqLinearCurveSegment::CqLinearCurveSegment( const CqLinearCurveSegment &from ) :
-		CqCurve()
-{
-	( *this ) = from;
-}
+/* CqLinearCurveSegment::CqLinearCurveSegment( const CqLinearCurveSegment &from ) :
+ * 		CqCurve()
+ * {
+ * 	( *this ) = from;
+ * }
+ */
 
 
 
@@ -314,13 +317,14 @@ CqLinearCurveSegment::~CqLinearCurveSegment()
  *
  * @return Reference to *this.
  */
-CqLinearCurveSegment& CqLinearCurveSegment::operator=(
-    const CqLinearCurveSegment& from
-)
-{
-	CqCurve::operator=( from );
-	return ( *this );
-}
+/* CqLinearCurveSegment& CqLinearCurveSegment::operator=(
+ *     const CqLinearCurveSegment& from
+ * )
+ * {
+ * 	CqCurve::operator=( from );
+ * 	return ( *this );
+ * }
+ */
 
 
 
@@ -683,11 +687,12 @@ CqCubicCurveSegment::CqCubicCurveSegment() : CqCurve()
 /**
  * CqCubicCurveSegment copy constructor.
  */
-CqCubicCurveSegment::CqCubicCurveSegment( const CqCubicCurveSegment &from )
-		: CqCurve()
-{
-	( *this ) = from;
-}
+/* CqCubicCurveSegment::CqCubicCurveSegment( const CqCubicCurveSegment &from )
+ * 		: CqCurve()
+ * {
+ * 	( *this ) = from;
+ * }
+ */
 
 
 
@@ -706,13 +711,14 @@ CqCubicCurveSegment::~CqCubicCurveSegment()
  *
  * @return Reference to *this.
  */
-CqCubicCurveSegment& CqCubicCurveSegment::operator=(
-    const CqCubicCurveSegment& from
-)
-{
-	CqCurve::operator=( from );
-	return ( *this );
-}
+/* CqCubicCurveSegment& CqCubicCurveSegment::operator=(
+ *     const CqCubicCurveSegment& from
+ * )
+ * {
+ * 	CqCurve::operator=( from );
+ * 	return ( *this );
+ * }
+ */
 
 
 /**
@@ -1299,10 +1305,11 @@ CqCurvesGroup::CqCurvesGroup() : CqCurve(), m_ncurves( 0 ), m_periodic( TqFalse 
 /**
  * CqCurvesGroup copy constructor.
  */
-CqCurvesGroup::CqCurvesGroup( const CqCurvesGroup& from ) : CqCurve()
-{
-	( *this ) = from;
-}
+/* CqCurvesGroup::CqCurvesGroup( const CqCurvesGroup& from ) : CqCurve()
+ * {
+ * 	( *this ) = from;
+ * }
+ */
 
 
 
@@ -1319,19 +1326,20 @@ CqCurvesGroup::~CqCurvesGroup()
  *
  * @param from  CqCurvesGroup to set this one equal to.
  */
-CqCurvesGroup& CqCurvesGroup::operator=( const CqCurvesGroup& from )
-{
-
-	// base class assignment
-	CqCurve::operator=( from );
-
-	// copy members
-	m_ncurves = from.m_ncurves;
-	m_periodic = from.m_periodic;
-	m_nvertices = from.m_nvertices;
-
-	return ( *this );
-}
+/* CqCurvesGroup& CqCurvesGroup::operator=( const CqCurvesGroup& from )
+ * {
+ * 
+ * 	// base class assignment
+ * 	CqCurve::operator=( from );
+ * 
+ * 	// copy members
+ * 	m_ncurves = from.m_ncurves;
+ * 	m_periodic = from.m_periodic;
+ * 	m_nvertices = from.m_nvertices;
+ * 
+ * 	return ( *this );
+ * }
+ */
 
 
 
@@ -1382,11 +1390,12 @@ CqLinearCurvesGroup::CqLinearCurvesGroup(
 /**
  * CqLinearCurvesGroup copy constructor.
  */
-CqLinearCurvesGroup::CqLinearCurvesGroup( const CqLinearCurvesGroup &from )
-		: CqCurvesGroup()
-{
-	( *this ) = from;
-}
+/* CqLinearCurvesGroup::CqLinearCurvesGroup( const CqLinearCurvesGroup &from )
+ * 		: CqCurvesGroup()
+ * {
+ * 	( *this ) = from;
+ * }
+ */
 
 
 /**
@@ -1406,15 +1415,16 @@ CqLinearCurvesGroup::~CqLinearCurvesGroup()
  *
  * @return Reference to *this.
  */
-CqLinearCurvesGroup& CqLinearCurvesGroup::operator=(
-    const CqLinearCurvesGroup& from
-)
-{
-	// base class assignment
-	CqCurvesGroup::operator=( from );
-
-	return ( *this );
-}
+/* CqLinearCurvesGroup& CqLinearCurvesGroup::operator=(
+ *     const CqLinearCurvesGroup& from
+ * )
+ * {
+ * 	// base class assignment
+ * 	CqCurvesGroup::operator=( from );
+ * 
+ * 	return ( *this );
+ * }
+ */
 
 
 
@@ -1661,11 +1671,12 @@ CqCubicCurvesGroup::CqCubicCurvesGroup(
 /**
  * CqCubicCurvesGroup copy constructor.
  */
-CqCubicCurvesGroup::CqCubicCurvesGroup( const CqCubicCurvesGroup &from ) :
-		CqCurvesGroup()
-{
-	( *this ) = from;
-}
+/* CqCubicCurvesGroup::CqCubicCurvesGroup( const CqCubicCurvesGroup &from ) :
+ * 		CqCurvesGroup()
+ * {
+ * 	( *this ) = from;
+ * }
+ */
 
 
 
@@ -1707,15 +1718,16 @@ TqUint CqCubicCurvesGroup::cVarying() const
  *
  * @param from  CqCubicCurvesGroup to make this one equal to.
  */
-CqCubicCurvesGroup& CqCubicCurvesGroup::operator=(
-    const CqCubicCurvesGroup& from
-)
-{
-	// base class assignment
-	CqCurvesGroup::operator=( from );
-
-	return ( *this );
-}
+/* CqCubicCurvesGroup& CqCubicCurvesGroup::operator=(
+ *     const CqCubicCurvesGroup& from
+ * )
+ * {
+ * 	// base class assignment
+ * 	CqCurvesGroup::operator=( from );
+ * 
+ * 	return ( *this );
+ * }
+ */
 
 
 

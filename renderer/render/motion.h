@@ -244,6 +244,11 @@ class CqMotionSpec
 			}
 		}
 
+		const T& GetDefaultObject() const
+		{
+			return(m_DefObject);
+		}
+
 		/** Get the motion object at the specified index.
 		 * \param iIndex Index in the array of time slots.
 		 * \return Reference to the object at the appropriate timeslot.

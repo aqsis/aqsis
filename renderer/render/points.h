@@ -91,7 +91,7 @@ class CqPointsKDTreeData : public IqKDTreeData<TqInt>
  * Class encapsulating the functionality of Points geometry.
  */
 
-class CqPoints : public CqSurface, public CqMotionSpec<boost::shared_ptr<CqPolygonPoints> >
+class CqPoints : public CqSurface//, public CqMotionSpec<boost::shared_ptr<CqPolygonPoints> >
 {
 	public:
 
@@ -128,6 +128,8 @@ class CqPoints : public CqSurface, public CqMotionSpec<boost::shared_ptr<CqPolyg
 		virtual	CqMicroPolyGridBase* Dice();
 		virtual TqBool	Diceable();
 
+		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime = 0 );
+
 		virtual void	RenderComplete()
 		{
 			ClearKDTree();
@@ -144,6 +146,11 @@ class CqPoints : public CqSurface, public CqMotionSpec<boost::shared_ptr<CqPolyg
 		virtual	CqBound	Bound() const;
 		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits );
 
+		virtual CqBasicSurface* Clone() const
+		{
+			//return(new CqPoints(*this));
+			return(NULL);
+		}
 
 		TqUint	nVertices() const
 		{
@@ -152,11 +159,13 @@ class CqPoints : public CqSurface, public CqMotionSpec<boost::shared_ptr<CqPolyg
 
 		boost::shared_ptr<CqPolygonPoints> pPoints( TqInt TimeIndex = 0 )
 		{
-			return( GetMotionObject( Time( TimeIndex ) ) );
+			return(m_pPoints);
+		//	return( GetMotionObject( Time( TimeIndex ) ) );
 		}
 		boost::shared_ptr<CqPolygonPoints> pPoints( TqInt TimeIndex = 0) const
 		{
-			return( GetMotionObject( Time( TimeIndex ) ) );
+			return(m_pPoints);
+		//	return( GetMotionObject( Time( TimeIndex ) ) );
 		}
 
 		const std::vector<CqParameter*>& aUserParams() const
@@ -277,20 +286,19 @@ class CqPoints : public CqSurface, public CqMotionSpec<boost::shared_ptr<CqPolyg
 		}
 
 	private:
-		// The copy constructor and assignment operator are private because
-		// there's a slight "gotcha" in how to use them.  You need to call
-		// InitialiseKDTree() on a CqPoints after constructing it.  Since
-		// this is only used from within CqPoints::Split*(), we can safely
-		// make this private.
-
-		CqPoints( const CqPoints& From ) : CqMotionSpec<boost::shared_ptr<CqPolygonPoints> >(From.pPoints()),
-				m_KDTreeData( this ),
-				m_KDTree( &m_KDTreeData )
-		{
-			*this = From;
-		}
-
-		CqPoints&	operator=( const CqPoints& From );
+/* 		// The copy constructor and assignment operator are private because
+ * 		// there's a slight "gotcha" in how to use them.  You need to call
+ * 		// InitialiseKDTree() on a CqPoints after constructing it.  Since
+ * 		// this is only used from within CqPoints::Split*(), we can safely
+ * 		// make this private.
+ * 
+ * 		CqPoints( const CqPoints& From ) : //CqMotionSpec<boost::shared_ptr<CqPolygonPoints> >(From.pPoints()),
+ * 				m_KDTreeData( this ),
+ * 				m_KDTree( &m_KDTreeData )
+ * 		{
+ * 			*this = From;
+ * 		}
+ */
 
 		boost::shared_ptr<CqPolygonPoints> m_pPoints;				///< Pointer to the surface storing the primtive variables.
 		TqInt	m_nVertices;					///< Number of points this surfaces represents.
@@ -548,8 +556,6 @@ class CqDeformingPointsSurface : public CqDeformingSurface
 {
 	public:
 		CqDeformingPointsSurface( const boost::shared_ptr<CqBasicSurface>& a ) : CqDeformingSurface( a )
-		{}
-		CqDeformingPointsSurface( const CqDeformingPointsSurface& From ) : CqDeformingSurface( From )
 		{}
 		virtual	~CqDeformingPointsSurface()
 		{}

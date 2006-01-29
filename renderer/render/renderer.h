@@ -172,10 +172,7 @@ class CqRenderer : public IqRenderer
 		}
 		/** Set the pointer to the current image buffer.
 		 */
-		virtual	void	SetImage( CqImageBuffer* pImage )
-		{
-			m_pImageBuffer = pImage;
-		}
+		virtual	void	SetImage( CqImageBuffer* pImage );
 
 		// Handle various coordinate system transformation requirements.
 		virtual	CqMatrix	matSpaceToSpace	( const char* strFrom, const char* strTo, const CqMatrix& matShaderToWorld, const CqMatrix& matObjectToWorld, TqFloat time );
@@ -220,6 +217,7 @@ class CqRenderer : public IqRenderer
 		// Function which can be overridden by the derived class.
 		virtual	void	Initialise();
 		virtual	void	RenderWorld();
+		virtual void	RenderAutoShadows();
 
 		virtual	void	AddDisplayRequest( const TqChar* name, const TqChar* type, const TqChar* mode, TqInt modeID, TqInt dataOffset, TqInt dataSize, std::map<std::string, void*>& mapOfArguments );
 		virtual	void	ClearDisplayRequests();
@@ -256,10 +254,18 @@ class CqRenderer : public IqRenderer
 		 */
 		virtual	void	FlushShaders()
 		{
-			//while ( m_Shaders.pFirst() != 0 )
-			//    delete( m_Shaders.pFirst() );
 			m_Shaders.clear();
+			m_InstancedShaders.clear();
 		}
+
+		/** Prepare the shaders for rendering.
+		 */
+		virtual void	PrepareShaders();
+
+		void	PostSurface( const boost::shared_ptr<CqBasicSurface>& pSurface );
+		void	StorePrimitive( const boost::shared_ptr<CqBasicSurface>& pSurface );
+		void	PostWorld();
+		void	PostCloneOfWorld();
 
 		/** Set the world to screen matrix.
 		 * \param mat The new matrix to use as the world to screen transformation.
@@ -499,9 +505,8 @@ class CqRenderer : public IqRenderer
 		IqDDManager*	m_pDDManager;
 
 		EqRenderMode	m_Mode;
-		//CqList<CqShaderRegister> m_Shaders;				///< List of registered shaders.
-		// JSM:
 		std::map< CqShaderKey, boost::shared_ptr<IqShader> > m_Shaders;
+		std::vector< boost::shared_ptr<IqShader> >  m_InstancedShaders;
 
 		TqBool	m_fSaveGPrims;
 		CqTransformPtr	m_pTransCamera;					///< The camera transform.
@@ -534,6 +539,8 @@ class CqRenderer : public IqRenderer
 		IqRaytrace*	m_pRaytracer;		///< Pointer to the raytracing subsystem interface.
 
 		CqClippingVolume	m_clippingVolume;
+
+		std::deque<boost::shared_ptr<CqBasicSurface> >	m_aWorld;
 
 	public:
 		std::vector<SqCoordSys>	m_aCoordSystems;		///< List of reistered coordinate systems.

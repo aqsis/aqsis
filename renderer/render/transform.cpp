@@ -299,6 +299,22 @@ const CqMatrix& CqTransform::matObjectToWorld( TqFloat time ) const
 
 
 //---------------------------------------------------------------------
+/** Invert the transformation
+ */
+
+CqTransform* CqTransform::Inverse( )
+{
+	CqTransform* result = new CqTransform();
+	if( m_IsMoving )
+	{
+	}
+	else
+		result->m_StaticMatrix = m_StaticMatrix.Inverse();
+	return(result);
+}
+
+
+//---------------------------------------------------------------------
 /** Get the handedness at the specified time.
  */
 

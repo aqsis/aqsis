@@ -101,6 +101,11 @@ class CqProcedural : public CqSurface
 			/// \todo Must work out what this value should be.
 			return ( 0 );
 		}
+		virtual CqBasicSurface* Clone() const
+		{
+			//return(new CqProcedural(*this));
+			return(NULL);
+		}
 		//------------------------------------------------------ Protexted
 	protected:
 		/* Contexy saved when the Procedural was declared */

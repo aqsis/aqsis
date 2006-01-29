@@ -92,14 +92,21 @@ class CqLightsource : public IqLightsource, public boost::enable_shared_from_thi
 			m_pShaderExecEnv->SetCurrentSurface(pSurface);
 			m_pShader->Evaluate( m_pShaderExecEnv );
 		}
-		/** Get a pointer to the attributes associated with this lightsource.
-		 * \return a CqAttributes pointer.
+		/** Get a pointer to the attributes state associated with this GPrim.
+		 * \return A pointer to a CqAttributes class.
 		 */
-		virtual IqAttributes*	pAttributes() const
+		virtual IqAttributes* pAttributes() const
 		{
 			return ( m_pAttributes );
 		}
 
+		/** Get a pointer to the transformation state associated with this GPrim.
+		 * \return A pointer to a CqTransform class.
+		 */
+		virtual CqTransformPtr pTransform() const
+		{
+			return ( m_pTransform );
+		}
 		// Redirect acces via IqShaderExecEnv
 		virtual	TqInt	uGridRes() const
 		{
@@ -116,11 +123,11 @@ class CqLightsource : public IqLightsource, public boost::enable_shared_from_thi
 			assert( m_pShaderExecEnv );
 			return ( m_pShaderExecEnv->GridSize() );
 		}
-		virtual	const CqMatrix&	matObjectToWorld() const
+/*		virtual	const CqMatrix&	matObjectToWorld() const
 		{
 			assert( m_pShaderExecEnv );
 			return ( m_pShaderExecEnv->matObjectToWorld() );
-		}
+		}*/
 		virtual	IqShaderData* Cs()
 		{
 			assert( m_pShaderExecEnv );
@@ -250,6 +257,7 @@ class CqLightsource : public IqLightsource, public boost::enable_shared_from_thi
 	private:
 		boost::shared_ptr<IqShader>	m_pShader;				///< Pointer to the associated shader.
 		CqAttributes*	m_pAttributes;			///< Pointer to the associated attributes.
+		CqTransformPtr m_pTransform;		///< Pointer to the transformation state associated with this GPrim.
 		boost::shared_ptr<IqShaderExecEnv>	m_pShaderExecEnv;	///< Pointer to the shader execution environment.
 }
 ;

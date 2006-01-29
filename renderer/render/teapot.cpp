@@ -617,15 +617,16 @@ CqTeapot::CqTeapot( TqBool addCrowBase ) : m_CrowBase( addCrowBase )
 /** Assignment operator.
  */
 
-CqTeapot&	CqTeapot::operator=( const CqTeapot& From )
-{
-	CqSurface::operator=( From );
-	m_CrowBase = From.m_CrowBase;
-	m_matTx = From.m_matTx;
-	m_matITTx = From.m_matITTx;
-
-	return ( *this );
-}
+/* CqTeapot&	CqTeapot::operator=( const CqTeapot& From )
+ * {
+ * 	CqSurface::operator=( From );
+ * 	m_CrowBase = From.m_CrowBase;
+ * 	m_matTx = From.m_matTx;
+ * 	m_matITTx = From.m_matITTx;
+ * 
+ * 	return ( *this );
+ * }
+ */
 
 //---------------------------------------------------------------------
 /** Transform the quadric primitive by the specified matrix.

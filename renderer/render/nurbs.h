@@ -49,7 +49,6 @@ class CqSurfaceNURBS : public CqSurface
 	private:
 	public:
 		CqSurfaceNURBS();
-		CqSurfaceNURBS( const CqSurfaceNURBS& From );
 		virtual	~CqSurfaceNURBS()
 		{}
 
@@ -197,7 +196,6 @@ class CqSurfaceNURBS : public CqSurface
 		}
 
 
-		void	operator=( const CqSurfaceNURBS& From );
 		TqInt	operator==( const CqSurfaceNURBS& from );
 		/** Get the control point at the specified u,v index.
 		 * \param u Index in the u direction.
@@ -364,6 +362,11 @@ class CqSurfaceNURBS : public CqSurface
 		virtual	void	PrepareTrimCurve()
 		{
 			m_TrimLoops.Prepare( this );
+		}
+		virtual CqBasicSurface* Clone() const
+		{
+			//return(new CqSurfaceNURBS(*this));
+			return(NULL);
 		}
 
 

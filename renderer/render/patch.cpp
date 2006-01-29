@@ -51,13 +51,14 @@ CqSurfacePatchBicubic::CqSurfacePatchBicubic() : CqSurface()
 /** Copy constructor.
  */
 
-CqSurfacePatchBicubic::CqSurfacePatchBicubic( const CqSurfacePatchBicubic& From ) :
-		CqSurface( From )
-{
-	*this = From;
-
-	STATS_INC( GPR_patch );
-}
+/* CqSurfacePatchBicubic::CqSurfacePatchBicubic( const CqSurfacePatchBicubic& From ) :
+ * 		CqSurface( From )
+ * {
+ * 	*this = From;
+ * 
+ * 	STATS_INC( GPR_patch );
+ * }
+ */
 
 
 //---------------------------------------------------------------------
@@ -72,17 +73,18 @@ CqSurfacePatchBicubic::~CqSurfacePatchBicubic()
 /** Assignment operator.
  */
 
-CqSurfacePatchBicubic& CqSurfacePatchBicubic::operator=( const CqSurfacePatchBicubic& From )
-{
-	// Perform per surface copy function
-	CqSurface::operator=( From );
-
-	//	TqInt i;
-	//	for(i=0; i<16; i++)
-	//		P()[i]=From.P()[i];
-
-	return ( *this );
-}
+/* CqSurfacePatchBicubic& CqSurfacePatchBicubic::operator=( const CqSurfacePatchBicubic& From )
+ * {
+ * 	// Perform per surface copy function
+ * 	CqSurface::operator=( From );
+ * 
+ * 	//	TqInt i;
+ * 	//	for(i=0; i<16; i++)
+ * 	//		P()[i]=From.P()[i];
+ * 
+ * 	return ( *this );
+ * }
+ */
 
 
 
@@ -628,11 +630,12 @@ CqSurfacePatchBilinear::CqSurfacePatchBilinear() : CqSurface(), m_fHasPhantomFou
 /** Copy constructor.
  */
 
-CqSurfacePatchBilinear::CqSurfacePatchBilinear( const CqSurfacePatchBilinear& From ) :
-		CqSurface( From )
-{
-	*this = From;
-}
+/* CqSurfacePatchBilinear::CqSurfacePatchBilinear( const CqSurfacePatchBilinear& From ) :
+ * 		CqSurface( From )
+ * {
+ * 	*this = From;
+ * }
+ */
 
 
 //---------------------------------------------------------------------
@@ -647,16 +650,17 @@ CqSurfacePatchBilinear::~CqSurfacePatchBilinear()
 /** Assignment operator.
  */
 
-CqSurfacePatchBilinear& CqSurfacePatchBilinear::operator=( const CqSurfacePatchBilinear& From )
-{
-	CqSurface::operator=( From );
-
-	m_fHasPhantomFourthVertex = From.m_fHasPhantomFourthVertex;
-	m_iInternalu = From.m_iInternalu;
-	m_iInternalv = From.m_iInternalv;
-
-	return ( *this );
-}
+/* CqSurfacePatchBilinear& CqSurfacePatchBilinear::operator=( const CqSurfacePatchBilinear& From )
+ * {
+ * 	CqSurface::operator=( From );
+ * 
+ * 	m_fHasPhantomFourthVertex = From.m_fHasPhantomFourthVertex;
+ * 	m_iInternalu = From.m_iInternalu;
+ * 	m_iInternalv = From.m_iInternalv;
+ * 
+ * 	return ( *this );
+ * }
+ */
 
 
 //---------------------------------------------------------------------
@@ -880,11 +884,12 @@ TqInt CqSurfacePatchBilinear::Split( std::vector<boost::shared_ptr<CqBasicSurfac
 /** Copy constructor.
  */
 
-CqSurfacePatchMeshBicubic::CqSurfacePatchMeshBicubic( const CqSurfacePatchMeshBicubic& From ) :
-		CqSurface( From )
-{
-	*this = From;
-}
+/* CqSurfacePatchMeshBicubic::CqSurfacePatchMeshBicubic( const CqSurfacePatchMeshBicubic& From ) :
+ * 		CqSurface( From )
+ * {
+ * 	*this = From;
+ * }
+ */
 
 
 //---------------------------------------------------------------------
@@ -899,21 +904,22 @@ CqSurfacePatchMeshBicubic::~CqSurfacePatchMeshBicubic()
 /** Assignment operator.
  */
 
-CqSurfacePatchMeshBicubic& CqSurfacePatchMeshBicubic::operator=( const CqSurfacePatchMeshBicubic& From )
-{
-	// Perform per surface copy function
-	CqSurface::operator=( From );
-
-	m_uPatches = From.m_uPatches;
-	m_vPatches = From.m_vPatches;
-	m_nu = From.m_nu;
-	m_nv = From.m_nv;
-	m_uPeriodic = From.m_uPeriodic;
-	m_vPeriodic = From.m_vPeriodic;
-
-	return ( *this );
-}
-
+/* CqSurfacePatchMeshBicubic& CqSurfacePatchMeshBicubic::operator=( const CqSurfacePatchMeshBicubic& From )
+ * {
+ * 	// Perform per surface copy function
+ * 	CqSurface::operator=( From );
+ * 
+ * 	m_uPatches = From.m_uPatches;
+ * 	m_vPatches = From.m_vPatches;
+ * 	m_nu = From.m_nu;
+ * 	m_nv = From.m_nv;
+ * 	m_uPeriodic = From.m_uPeriodic;
+ * 	m_vPeriodic = From.m_vPeriodic;
+ * 
+ * 	return ( *this );
+ * }
+ * 
+ */
 
 //---------------------------------------------------------------------
 /** Get the boundary extents in camera space of the surface patch mesh
@@ -1110,12 +1116,13 @@ TqInt CqSurfacePatchMeshBicubic::Split( std::vector<boost::shared_ptr<CqBasicSur
 /** Copy constructor.
  */
 
-CqSurfacePatchMeshBilinear::CqSurfacePatchMeshBilinear( const CqSurfacePatchMeshBilinear& From ) :
-		CqSurface( From )
-{
-	*this = From;
-}
-
+/* CqSurfacePatchMeshBilinear::CqSurfacePatchMeshBilinear( const CqSurfacePatchMeshBilinear& From ) :
+ * 		CqSurface( From )
+ * {
+ * 	*this = From;
+ * }
+ * 
+ */
 
 //---------------------------------------------------------------------
 /** Destructor.
@@ -1129,20 +1136,21 @@ CqSurfacePatchMeshBilinear::~CqSurfacePatchMeshBilinear()
 /** Assignment operator.
  */
 
-CqSurfacePatchMeshBilinear& CqSurfacePatchMeshBilinear::operator=( const CqSurfacePatchMeshBilinear& From )
-{
-	// Perform per surface copy function
-	CqSurface::operator=( From );
-
-	m_uPatches = From.m_uPatches;
-	m_vPatches = From.m_vPatches;
-	m_nu = From.m_nu;
-	m_nv = From.m_nv;
-	m_uPeriodic = From.m_uPeriodic;
-	m_vPeriodic = From.m_vPeriodic;
-
-	return ( *this );
-}
+/* CqSurfacePatchMeshBilinear& CqSurfacePatchMeshBilinear::operator=( const CqSurfacePatchMeshBilinear& From )
+ * {
+ * 	// Perform per surface copy function
+ * 	CqSurface::operator=( From );
+ * 
+ * 	m_uPatches = From.m_uPatches;
+ * 	m_vPatches = From.m_vPatches;
+ * 	m_nu = From.m_nu;
+ * 	m_nv = From.m_nv;
+ * 	m_uPeriodic = From.m_uPeriodic;
+ * 	m_vPeriodic = From.m_vPeriodic;
+ * 
+ * 	return ( *this );
+ * }
+ */
 
 
 //---------------------------------------------------------------------

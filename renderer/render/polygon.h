@@ -143,7 +143,8 @@ class CqSurfacePolygon : public CqSurface, public CqPolygonBase
 {
 	public:
 		CqSurfacePolygon( TqInt cVertices );
-		CqSurfacePolygon( const CqSurfacePolygon& From );
+		CqSurfacePolygon() : m_cVertices(0)
+		{}
 		virtual	~CqSurfacePolygon();
 
 #ifdef _DEBUG
@@ -154,7 +155,6 @@ class CqSurfacePolygon : public CqSurface, public CqPolygonBase
 		}
 #endif
 
-		CqSurfacePolygon& operator=( const CqSurfacePolygon& From );
 		TqBool	CheckDegenerate() const;
 
 		// Overridden fro mCqSurface.
@@ -261,6 +261,7 @@ class CqSurfacePolygon : public CqSurface, public CqPolygonBase
 		{
 			return ( CqSurface::pTransform() );
 		}
+		virtual CqBasicSurface* Clone() const;
 
 	protected:
 		TqInt	m_cVertices;	///< Count of vertices in this polygon.
@@ -282,12 +283,11 @@ class CqPolygonPoints : public CqSurface
 				m_cFaces( cFaces ),
 				m_sumnVerts( sumnVerts )
 		{}
-		CqPolygonPoints( const CqPolygonPoints& From ) :
-				CqSurface( From ),
-				m_cVertices( From.m_cVertices ),
-				m_Transformed( From.m_Transformed ),
-				m_cFaces( From.m_cFaces ),
-				m_sumnVerts( From.m_sumnVerts )
+		CqPolygonPoints() :
+				m_cVertices( 0 ),
+				m_Transformed( TqFalse ),
+				m_cFaces( 0 ),
+				m_sumnVerts( 0 )
 		{}
 		virtual	~CqPolygonPoints()
 		{}
@@ -361,6 +361,7 @@ class CqPolygonPoints : public CqSurface
 		{
 			return ( cVertex() );
 		}
+		virtual CqBasicSurface* Clone() const;
 
 	protected:
 		TqInt	m_cVertices;		///< Count of vertices in this list.
@@ -386,11 +387,8 @@ class CqSurfacePointsPolygon : public CqBasicSurface, public CqPolygonBase
 		{
 			STATS_INC( GPR_poly );
 		}
-		CqSurfacePointsPolygon( const CqSurfacePointsPolygon& From );
 		virtual	~CqSurfacePointsPolygon()
 		{}
-
-		CqSurfacePointsPolygon& operator=( const CqSurfacePointsPolygon& From );
 
 		std::vector<TqInt>&	aIndices()
 		{
@@ -455,6 +453,11 @@ class CqSurfacePointsPolygon : public CqBasicSurface, public CqPolygonBase
 		virtual	TqUint	cFaceVarying() const
 		{
 			return ( 0 );
+		}
+		virtual CqBasicSurface* Clone() const
+		{
+			//return(new CqSurfacePointsPolygon(*this));
+			return(NULL);
 		}
 		//---------------
 
@@ -558,6 +561,8 @@ class CqSurfacePointsPolygon : public CqBasicSurface, public CqPolygonBase
 class CqSurfacePointsPolygons : public CqSurface
 {
 	public:
+		CqSurfacePointsPolygons() : m_NumPolys(0)
+		{}
 		CqSurfacePointsPolygons(const boost::shared_ptr<CqPolygonPoints>& pPoints, TqInt NumPolys, TqInt nverts[], TqInt verts[]) :
 				m_NumPolys(NumPolys),
 				m_pPoints( pPoints )
@@ -628,7 +633,7 @@ class CqSurfacePointsPolygons : public CqSurface
 			assert( m_pPoints );
 			return ( m_pPoints->cFaceVarying() );
 		}
-
+		virtual CqBasicSurface* Clone() const;
 
 	private:
 		TqInt	m_NumPolys;

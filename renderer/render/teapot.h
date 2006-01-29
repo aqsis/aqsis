@@ -54,10 +54,6 @@ class CqTeapot : public CqSurface
 {
 	public:
 		CqTeapot( TqBool addCrowBase );
-		CqTeapot( const CqTeapot& From )
-		{
-			*this = From;
-		}
 		virtual	~CqTeapot()
 		{}
 
@@ -96,7 +92,11 @@ class CqTeapot : public CqSurface
 		virtual	CqBound	Bound() const;
 		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits );
 
-		CqTeapot&	operator=( const CqTeapot& From );
+		virtual CqBasicSurface* Clone() const
+		{
+			//return(new CqTeapot(*this));
+			return(NULL);
+		}
 
 	private:
 		TqBool	m_CrowBase;			///< Utah teapot was missing a bottom.  F. Crow added one.

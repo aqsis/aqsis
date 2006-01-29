@@ -291,8 +291,6 @@ class CqImageBuffer
 		void	SaveImage( const char* strName );
 
 		void	PostSurface( const boost::shared_ptr<CqBasicSurface>& pSurface );
-		void	StorePrimitive( const boost::shared_ptr<CqBasicSurface>& pSurface );
-		void	PostWorld();
 		TqBool	CullSurface( CqBound& Bound, const boost::shared_ptr<CqBasicSurface>& pSurface );
 		TqBool	OcclusionCullSurface( const boost::shared_ptr<CqBasicSurface>& pSurface );
 		void	AddMPG( CqMicroPolygon* pmpgNew );
@@ -361,7 +359,6 @@ class CqImageBuffer
 		SqGridInfo m_CurrentGridInfo;
 
 		void CacheGridInfo( CqMicroPolyGridBase* pGrid );
-		std::stack<boost::shared_ptr<CqBasicSurface> >	m_aWorld;
 };
 
 

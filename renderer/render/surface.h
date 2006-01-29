@@ -30,6 +30,7 @@
 
 #include	"aqsis.h"
 #include	<boost/enable_shared_from_this.hpp>
+#include	<boost/utility.hpp>
 
 #include	"attributes.h"
 #include	"renderer.h"
@@ -55,11 +56,10 @@ START_NAMESPACE( Aqsis )
  * Abstract base surface class, which provides interfaces to geometry.  
  */
 
-class CqBasicSurface : public IqSurface
+class CqBasicSurface : public IqSurface, private boost::noncopyable
 {
 	public:
 		CqBasicSurface();
-		CqBasicSurface( const CqBasicSurface& From );
 		virtual	~CqBasicSurface()
 		{
 			// Release our reference on the current attributes.
@@ -98,6 +98,7 @@ class CqBasicSurface : public IqSurface
 
 		virtual	void	Reset()
 		{}
+		virtual CqBasicSurface* Clone() const = 0;
 
 		virtual TqBool	IsMotionBlurMatch( CqBasicSurface* pSurf ) = 0;
 
@@ -255,8 +256,6 @@ class CqBasicSurface : public IqSurface
 		}
 		CqBound	AdjustBoundForTransformationMotion( const CqBound& B ) const;
 
-		CqBasicSurface&	operator=( const CqBasicSurface& From );
-
 		boost::shared_ptr<CqCSGTreeNode>& pCSGNode()
 		{
 			return ( m_pCSGNode );
@@ -266,6 +265,10 @@ class CqBasicSurface : public IqSurface
 		TqBool	m_fDiscard;			///< Flag to indicate that this GPrim is to be discarded.
 		TqInt	m_EyeSplitCount;	///< The number of times this GPrim has been split because if crossing the epsilon and eye planes.
 	protected:
+		/** Protected member function to clone the data, used by the Clone() functions
+		 *  on the derived classes.
+		 */
+		void CloneData(CqBasicSurface* clone) const;
 		CqAttributes* m_pAttributes;	///< Pointer to the attributes state associated with this GPrim.
 		CqTransformPtr m_pTransform;		///< Pointer to the transformation state associated with this GPrim.
 
@@ -289,7 +292,6 @@ class CqSurface : public CqBasicSurface, public boost::enable_shared_from_this<C
 {
 	public:
 		CqSurface();
-		CqSurface( const CqSurface& From );
 
 		virtual	~CqSurface()
 		{
@@ -301,7 +303,6 @@ class CqSurface : public CqBasicSurface, public boost::enable_shared_from_this<C
 
 		virtual	void	SetDefaultPrimitiveVariables( TqBool bUseDef_st = TqTrue );
 
-		CqSurface&	operator=( const CqSurface& From );
 		void ClonePrimitiveVariables( const CqSurface& From );
 
 		/** Get a reference the to P default parameter.
@@ -632,7 +633,11 @@ class CqSurface : public CqBasicSurface, public boost::enable_shared_from_this<C
 		}
 
 	protected:
-		std::vector<CqParameter*>	m_aUserParams;						///< Storage for user defined paramter variables.
+		/** Protected member function to clone the data, used by the Clone() functions
+		 *  on the derived classes.
+		 */
+		void CloneData(CqSurface* clone) const;
+		std::vector<CqParameter*>	m_aUserParams;			///< Storage for user defined paramter variables.
 		TqInt	m_aiStdPrimitiveVars[ EnvVars_Last ];		///< Quick lookup index into the primitive variables table for standard variables.
 
 		template <class T, class SLT>
@@ -688,8 +693,6 @@ class CqDeformingSurface : public CqBasicSurface, public CqMotionSpec<boost::sha
 {
 	public:
 		CqDeformingSurface( boost::shared_ptr<CqBasicSurface> const& a ) : CqBasicSurface(), CqMotionSpec<boost::shared_ptr<CqBasicSurface> >( a )
-		{}
-		CqDeformingSurface( const CqDeformingSurface& From ) : CqBasicSurface( From ), CqMotionSpec<boost::shared_ptr<CqBasicSurface> >( From )
 		{}
 		virtual	~CqDeformingSurface()
 		{}
@@ -770,6 +773,13 @@ class CqDeformingSurface : public CqBasicSurface, public CqMotionSpec<boost::sha
 			return ( f );
 		}
 
+		virtual CqBasicSurface* Clone() const
+		{
+			CqDeformingSurface* clone = new CqDeformingSurface(GetDefaultObject());
+			clone->CqMotionSpec<boost::shared_ptr<CqBasicSurface> >::operator=(*this);
+			return(clone);
+		}
+
 		/** Determine whether the passed surface is valid to be used as a
 		 *  frame in motion blur for this surface.
 		 */
@@ -786,7 +796,12 @@ class CqDeformingSurface : public CqBasicSurface, public CqMotionSpec<boost::sha
 		 */
 		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime = 0 )
 		{
-			GetMotionObject( iTime ) ->Transform( matTx, matITTx, matRTx, iTime );
+			TqInt i;
+			for ( i = 0; i < cTimes(); i++ )
+			{
+				Aqsis::log() << debug << "Transforming deforming surface at time : " << i << " : [" << cTimes() << "]" << std::endl;
+				GetMotionObject( Time(i) ) ->Transform( matTx, matITTx, matRTx, Time(i) );
+			}
 		}
 
 		/** Set the surface parameters of all GPrims to match those on the spefified one.
@@ -847,6 +862,11 @@ class CqDeformingSurface : public CqBasicSurface, public CqMotionSpec<boost::sha
 			return ( A );
 		}
 	protected:
+		/** Protected member function to clone the data, used by the Clone() functions
+		 *  on the derived classes.
+		 */
+		void CloneData(CqDeformingSurface* clone) const;
+
 };
 
 

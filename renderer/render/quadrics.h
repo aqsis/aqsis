@@ -104,7 +104,6 @@ class CqQuadric : public CqSurface
 		 */
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal ) = 0;
 
-		CqQuadric&	operator=( const CqQuadric& From );
 
 		// Derived from CqSurface
 		virtual void	NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData );
@@ -119,11 +118,12 @@ class CqQuadric : public CqSurface
 #endif
 
 	protected:
+		void CloneData( CqQuadric* clone ) const;
+
 		CqMatrix	m_matTx;		///< Transformation matrix from object to camera.
 		CqMatrix	m_matITTx;		///< Inverse transpose transformation matrix, for transforming normals.
 
-}
-;
+};
 
 
 
@@ -136,10 +136,6 @@ class CqSphere : public CqQuadric
 {
 	public:
 		CqSphere( TqFloat radius = 1.0f, TqFloat zmin = -1.0f, TqFloat zmax = 1.0f, TqFloat thetamin = 0.0f, TqFloat thetamax = 360.0f );
-		CqSphere( const CqSphere& From )
-		{
-			*this = From;
-		}
 		virtual	~CqSphere()
 		{}
 
@@ -154,7 +150,6 @@ class CqSphere : public CqQuadric
 
 		virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u );
 
-		CqSphere&	operator=( const CqSphere& From );
 
 #ifdef _DEBUG
 
@@ -163,11 +158,10 @@ class CqSphere : public CqQuadric
 			return CqString("CqSphere");
 		}
 #endif
+		virtual CqBasicSurface* Clone() const;
 
 	private:
 		TqFloat	m_Radius;		///< Radius.
-		//    TqFloat	m_ZMin;			///< Min value on z axis.
-		//    TqFloat	m_ZMax;			///< Max value on z axis.
 		TqFloat	m_PhiMin;		///< Min angle about x axis.
 		TqFloat	m_PhiMax;		///< Max angle about x axis.
 		TqFloat	m_ThetaMin;		///< Min angle about z axis.
@@ -185,10 +179,6 @@ class CqCone : public CqQuadric
 {
 	public:
 		CqCone( TqFloat height = 1.0f, TqFloat radius = 1.0f, TqFloat thetamin = 0.0f, TqFloat thetamax = 360.0f, TqFloat zmin = 0.0f, TqFloat zmax = 1.0f );
-		CqCone( const CqCone& From )
-		{
-			*this = From;
-		}
 		virtual	~CqCone()
 		{}
 
@@ -199,7 +189,6 @@ class CqCone : public CqQuadric
 
 		virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u );
 
-		CqCone&	operator=( const CqCone& From );
 
 #ifdef _DEBUG
 
@@ -208,6 +197,7 @@ class CqCone : public CqQuadric
 			return CqString("CqCone");
 		}
 #endif
+		virtual CqBasicSurface* Clone() const;
 
 	private:
 		TqFloat	m_Height;		///< Height..
@@ -229,10 +219,6 @@ class CqCylinder : public CqQuadric
 {
 	public:
 		CqCylinder( TqFloat radius = 1.0f, TqFloat zmin = -1.0f, TqFloat zmax = 1.0f, TqFloat thetamin = 0.0f, TqFloat thetamax = 360.0f );
-		CqCylinder( const CqCylinder& From )
-		{
-			*this = From;
-		}
 		virtual	~CqCylinder()
 		{}
 
@@ -247,7 +233,6 @@ class CqCylinder : public CqQuadric
 
 		virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u );
 
-		CqCylinder&	operator=( const CqCylinder& From );
 
 #ifdef _DEBUG
 
@@ -256,6 +241,7 @@ class CqCylinder : public CqQuadric
 			return CqString("CqCylinder");
 		}
 #endif
+		virtual CqBasicSurface* Clone() const;
 
 	private:
 		TqFloat	m_Radius;		///< Radius
@@ -277,10 +263,6 @@ class CqHyperboloid : public CqQuadric
 	public:
 		CqHyperboloid( );
 		CqHyperboloid( CqVector3D& point1, CqVector3D& point2, TqFloat thetamin, TqFloat thetamax );
-		CqHyperboloid( const CqHyperboloid& From )
-		{
-			*this = From;
-		}
 		virtual	~CqHyperboloid()
 		{}
 
@@ -291,7 +273,6 @@ class CqHyperboloid : public CqQuadric
 
 		virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u );
 
-		CqHyperboloid&	operator=( const CqHyperboloid& From );
 
 #ifdef _DEBUG
 
@@ -300,6 +281,7 @@ class CqHyperboloid : public CqQuadric
 			return CqString("CqHyperboloid");
 		}
 #endif
+		virtual CqBasicSurface* Clone() const;
 
 	private:
 		CqVector3D	m_Point1;		///< Start point of line to revolve.
@@ -319,10 +301,6 @@ class CqParaboloid : public CqQuadric
 {
 	public:
 		CqParaboloid( TqFloat rmax = 1.0f, TqFloat zmin = -1.0f, TqFloat zmax = 1.0f, TqFloat thetamin = 0.0f, TqFloat thetamax = 360.0f );
-		CqParaboloid( const CqParaboloid& From )
-		{
-			*this = From;
-		}
 		virtual	~CqParaboloid()
 		{}
 
@@ -333,7 +311,6 @@ class CqParaboloid : public CqQuadric
 
 		virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u );
 
-		CqParaboloid&	operator=( const CqParaboloid& From );
 
 #ifdef _DEBUG
 
@@ -342,6 +319,7 @@ class CqParaboloid : public CqQuadric
 			return CqString("CqParaboloid");
 		}
 #endif
+		virtual CqBasicSurface* Clone() const;
 
 	private:
 		TqFloat	m_RMax;			///< Radius at zmax.
@@ -362,10 +340,6 @@ class CqTorus : public CqQuadric
 {
 	public:
 		CqTorus( TqFloat majorradius = 1.0f, TqFloat minorradius = 0.2f, TqFloat phimin = 0.0f, TqFloat phimax = 360.0f, TqFloat thetamin = 0.0f, TqFloat thetamax = 360.0f );
-		CqTorus( const CqTorus& From )
-		{
-			*this = From;
-		}
 		virtual	~CqTorus()
 		{}
 
@@ -376,7 +350,6 @@ class CqTorus : public CqQuadric
 
 		virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u );
 
-		CqTorus&	operator=( const CqTorus& From );
 
 #ifdef _DEBUG
 
@@ -385,6 +358,7 @@ class CqTorus : public CqQuadric
 			return CqString("CqTorus");
 		}
 #endif
+		virtual CqBasicSurface* Clone() const;
 
 	private:
 		TqFloat	m_MajorRadius;	///< Major radius.
@@ -406,10 +380,6 @@ class CqDisk : public CqQuadric
 {
 	public:
 		CqDisk( TqFloat height = 0.0f, TqFloat minorradius = 0.0f, TqFloat majorradius = 1.0f, TqFloat thetamin = 0.0f, TqFloat thetamax = 360.0f );
-		CqDisk( const CqDisk& From )
-		{
-			*this = From;
-		}
 		virtual	~CqDisk()
 		{}
 
@@ -424,7 +394,6 @@ class CqDisk : public CqQuadric
 
 		virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u );
 
-		CqDisk&	operator=( const CqDisk& From );
 
 #ifdef _DEBUG
 
@@ -433,6 +402,7 @@ class CqDisk : public CqQuadric
 			return CqString("CqDisk");
 		}
 #endif
+		virtual CqBasicSurface* Clone() const;
 
 	private:
 		TqFloat	m_Height;			///< Position on z axis.

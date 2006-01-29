@@ -891,7 +891,10 @@ RtVoid	RiWorldEnd()
 
 	Debug_RiWorldEnd
 
-	QGetRenderContext() ->pImage() ->PostWorld( );
+	QGetRenderContext()->RenderAutoShadows();
+
+	QGetRenderContext()->PrepareShaders();
+	QGetRenderContext()->PostCloneOfWorld( );
 
 	TqBool fFailed = TqFalse;
 	// Call any specified pre render function.
@@ -3855,7 +3858,7 @@ RtVoid	RiPointsV( RtInt npoints, PARAMETERLIST )
 		}
 		else
 		{
-			QGetRenderContext() ->pImage() ->StorePrimitive( pSurface );
+			QGetRenderContext()->StorePrimitive( pSurface );
 			STATS_INC( GPR_created );
 		}
 	}
@@ -6483,7 +6486,7 @@ RtVoid	CreateGPrim( const boost::shared_ptr<CqBasicSurface>& pSurface )
 	else
 	{
 		pSurface->PrepareTrimCurve();
-		QGetRenderContext() ->pImage() ->StorePrimitive( pSurface );
+		QGetRenderContext()->StorePrimitive( pSurface );
 		STATS_INC( GPR_created );
 
 		// Add to the raytracer database also

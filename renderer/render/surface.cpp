@@ -79,7 +79,7 @@ CqBasicSurface::CqBasicSurface() : m_fDiceable( TqTrue ), m_fDiscard( TqFalse ),
 /** Copy constructor
  */
 
-CqBasicSurface::CqBasicSurface( const CqBasicSurface& From ) : m_fDiceable( TqTrue ), m_SplitDir( SplitDir_U )
+/*CqBasicSurface::CqBasicSurface( const CqBasicSurface& From ) : m_fDiceable( TqTrue ), m_SplitDir( SplitDir_U )
 {
 	*this = From;
 
@@ -97,22 +97,21 @@ CqBasicSurface::CqBasicSurface( const CqBasicSurface& From ) : m_fDiceable( TqTr
 	TqInt cGprim = STATS_GETI( GPR_current );
 	TqInt cPeak = STATS_GETI( GPR_peak );
 	STATS_SETI( GPR_peak, cGprim > cPeak ? cGprim : cPeak );
-}
+}*/
 
 
 //---------------------------------------------------------------------
-/** Assignement operator
+/** Clone the data on this CqBasicSurface into the (possibly derived) clone
+ *  passed in.
  */
 
-CqBasicSurface& CqBasicSurface::operator=( const CqBasicSurface& From )
+void CqBasicSurface::CloneData( CqBasicSurface* clone ) const
 {
-	m_fDiceable = From.m_fDiceable;
-	m_EyeSplitCount = From.m_EyeSplitCount;
-	m_fDiscard = From.m_fDiscard;
+	clone->m_fDiceable = m_fDiceable;
+	clone->m_EyeSplitCount = m_EyeSplitCount;
+	clone->m_fDiscard = m_fDiscard;
 
-	SetSurfaceParameters( From );
-
-	return ( *this );
+	clone->SetSurfaceParameters( *this );
 }
 
 
@@ -232,24 +231,27 @@ CqSurface::CqSurface() : CqBasicSurface()
 /** Copy constructor
  */
 
-CqSurface::CqSurface( const CqSurface& From )
+/*CqSurface::CqSurface( const CqSurface& From )
 {
 	*this = From;
-}
+}*/
 
 
 //---------------------------------------------------------------------
-/** Assignement operator
+/** Clone the data on this CqSurface class onto the (possibly derived) clone
+ *  passed in.
  */
 
-CqSurface& CqSurface::operator=( const CqSurface& From )
+void CqSurface::CloneData( CqSurface* clone ) const
 {
-	CqBasicSurface::operator=( From );
+	CqBasicSurface::CloneData( clone );
 	// Nullify the standard primitive variables index table.
 	TqInt i;
 	for ( i = 0; i < EnvVars_Last; i++ )
-		m_aiStdPrimitiveVars[ i ] = -1;
-	return ( *this );
+		clone->m_aiStdPrimitiveVars[ i ] = -1;
+
+	clone->ClonePrimitiveVariables(*this);
+	Aqsis::log() << debug << "P index : " << clone->m_aiStdPrimitiveVars[EnvVars_P] << /*" : value : " << clone->m_aUserParams[m_aiStdPrimitiveVars[EnvVars_P]] <<*/ std::endl;
 }
 
 //---------------------------------------------------------------------

@@ -460,11 +460,6 @@ class CqSubdivision2 : public CqMotionSpec<boost::shared_ptr<CqPolygonPoints> >
 		void		OutputMesh(const char* fname, std::vector<CqLath*>* paFaces = 0);
 		void		OutputInfo(const char* fname, std::vector<CqLath*>* paFaces = 0);
 	private:
-		///	Declared private to prevent copying.
-		CqSubdivision2(const CqSubdivision2&);
-		///	Declared private to prevent copying.
-		CqSubdivision2&	operator=(const CqSubdivision2&);
-
 		/// Array of pointers to laths, one each representing each facet.
 		std::vector<CqLath*>				m_apFacets;
 		/// Array of arrays of pointers to laths each array representing the total laths referencing a single vertex.
@@ -574,6 +569,11 @@ class CqSurfaceSubdivisionPatch : public CqBasicSurface
 
 		void StoreDice( CqMicroPolyGrid* pGrid, const boost::shared_ptr<CqPolygonPoints>& pPoints, TqInt iParam, TqInt iFVParam, TqInt iVData);
 		boost::shared_ptr<CqSubdivision2> Extract( TqInt iTime );
+		virtual CqBasicSurface* Clone() const
+		{
+			//return(new CqSurfaceSubdivisionPatch(*this));
+			return(NULL);
+		}
 
 	private:
 		boost::shared_ptr<CqSubdivision2>	m_pTopology;
@@ -660,6 +660,11 @@ class CqSurfaceSubdivisionMesh : public CqSurface
 			assert( m_pTopology );
 			assert( m_pTopology->pPoints() );
 			return ( m_pTopology->pPoints()->cFaceVarying() );
+		}
+		virtual CqBasicSurface* Clone() const
+		{
+			//return(new CqSurfaceSubdivisionMesh(*this));
+			return(NULL);
 		}
 
 	private:

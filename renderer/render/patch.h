@@ -47,7 +47,6 @@ class CqSurfacePatchBicubic : public CqSurface
 {
 	public:
 		CqSurfacePatchBicubic();
-		CqSurfacePatchBicubic( const CqSurfacePatchBicubic& From );
 		virtual	~CqSurfacePatchBicubic();
 
 #ifdef _DEBUG
@@ -151,7 +150,6 @@ class CqSurfacePatchBicubic : public CqSurface
 		{
 			return ( P()->pValue( ( iRow * 4 ) + iCol )[0] );
 		}
-		CqSurfacePatchBicubic& operator=( const CqSurfacePatchBicubic& From );
 
 		virtual	CqBound	Bound() const;
 		virtual TqBool	Diceable();
@@ -188,6 +186,12 @@ class CqSurfacePatchBicubic : public CqSurface
 
 		void	ConvertToBezierBasis( CqMatrix& matuBasis, CqMatrix& matvBasis );
 
+		virtual CqBasicSurface* Clone() const
+		{
+//			return(new CqSurfacePatchBicubic(*this));
+			return(NULL);
+		}
+
 	protected:
 };
 
@@ -201,7 +205,6 @@ class CqSurfacePatchBilinear : public CqSurface
 {
 	public:
 		CqSurfacePatchBilinear();
-		CqSurfacePatchBilinear( const CqSurfacePatchBilinear& From );
 		virtual	~CqSurfacePatchBilinear();
 
 #ifdef _DEBUG
@@ -211,8 +214,6 @@ class CqSurfacePatchBilinear : public CqSurface
 			return CqString("CqSurfacePatchBilinear");
 		}
 #endif
-
-		CqSurfacePatchBilinear& operator=( const CqSurfacePatchBilinear& From );
 
 		void	SetfHasPhantomFourthVertex(TqBool fHasPhantomFourthVertex)
 		{
@@ -253,6 +254,11 @@ class CqSurfacePatchBilinear : public CqSurface
 			/// \todo Must work out what this value should be.
 			return ( 1 );
 		}
+		virtual CqBasicSurface* Clone() const
+		{
+			//return(new CqSurfacePatchBilinear(*this));
+			return(NULL);
+		}
 
 		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits );
 		virtual	TqInt	PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u );
@@ -289,7 +295,6 @@ class CqSurfacePatchMeshBicubic : public CqSurface
 			m_uPatches = ( uPeriodic ) ? nu / uStep : ( ( nu - 4 ) / uStep ) + 1;
 			m_vPatches = ( vPeriodic ) ? nv / vStep : ( ( nv - 4 ) / vStep ) + 1;
 		}
-		CqSurfacePatchMeshBicubic( const CqSurfacePatchMeshBicubic& From );
 		virtual	~CqSurfacePatchMeshBicubic();
 
 #ifdef _DEBUG
@@ -299,8 +304,6 @@ class CqSurfacePatchMeshBicubic : public CqSurface
 			return CqString("CqSurfacePatchMeshBicubic");
 		}
 #endif
-
-		CqSurfacePatchMeshBicubic& operator=( const CqSurfacePatchMeshBicubic& From );
 
 		virtual	void	SetDefaultPrimitiveVariables( TqBool bUseDef_st = TqTrue )
 		{}
@@ -340,6 +343,11 @@ class CqSurfacePatchMeshBicubic : public CqSurface
 		{
 			/// \todo Must work out what this value should be.
 			return ( 1 );
+		}
+		virtual CqBasicSurface* Clone() const
+		{
+			//return(new CqSurfacePatchMeshBicubic(*this));
+			return(NULL);
 		}
 
 		virtual CqVector3D	SurfaceParametersAtVertex( TqInt index )
@@ -384,7 +392,6 @@ class CqSurfacePatchMeshBilinear : public CqSurface
 			m_uPatches = ( uPeriodic ) ? nu : nu - 1;
 			m_vPatches = ( vPeriodic ) ? nv : nv - 1;
 		}
-		CqSurfacePatchMeshBilinear( const CqSurfacePatchMeshBilinear& From );
 		virtual	~CqSurfacePatchMeshBilinear();
 
 		virtual	void	SetDefaultPrimitiveVariables( TqBool bUseDef_st = TqTrue )
@@ -397,8 +404,6 @@ class CqSurfacePatchMeshBilinear : public CqSurface
 			return CqString("CqSurfacePatchMeshBilinear");
 		}
 #endif
-
-		CqSurfacePatchMeshBilinear& operator=( const CqSurfacePatchMeshBilinear& From );
 
 		virtual	CqBound	Bound() const;
 		virtual	CqMicroPolyGridBase* Dice()
@@ -435,6 +440,11 @@ class CqSurfacePatchMeshBilinear : public CqSurface
 		{
 			/// \todo Must work out what this value should be.
 			return ( 1 );
+		}
+		virtual CqBasicSurface* Clone() const
+		{
+//			return(new CqSurfacePatchMeshBilinear(*this));
+			return(NULL);
 		}
 
 		virtual CqVector3D	SurfaceParametersAtVertex( TqInt index )
