@@ -9,6 +9,9 @@ from build_support import print_config
 from build_support import AddSysPath
 from build_support import Glob
 
+import version
+Export('version')
+
 # Setup the common command line options.
 opts = Options([os.path.abspath('options.cache'), os.path.abspath('custom.py')])
 opts.Add('tiff_include_path', 'Point to the tiff header files', '')
@@ -191,7 +194,6 @@ env.Depends(aqsisrc, display)
 #
 # Generate and install the version.h file from the template 'version.h.in'
 #
-import version
 def version_h_build(target, source, env):
 	# Code to build "target" from "source"
 	defines = {
@@ -212,6 +214,7 @@ def version_h_build(target, source, env):
 version_h = env.Command('version.h', 'version.h.in', version_h_build)
 env.Install(target_dir.abspath, version_h)
 env.Distribute('./', version_h)
+
 
 env.Alias('release', ['$BINDIR','$LIBDIR', '$SHADERDIR','$SYSCONFDIR','$INCLUDEDIR'])
 Default('release')

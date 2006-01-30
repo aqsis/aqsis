@@ -9,7 +9,14 @@
 
 !define PRODUCT_NAME "Aqsis"
 !define PRODUCT_FULLNAME "Aqsis Renderer"
-!define PRODUCT_VERSION "1.2.0"
+; !define PRODUCT_VERSION "1.2.0"
+!ifndef PRODUCT_VERSION
+	!error "PRODUCT_VERSION not specified"
+!endif
+; !define PRODUCT_FILE_NUMBER "1_2_0"
+!ifndef	PRODUCT_FILE_NUMBER
+	!error "PRODUCT_FILE_NUMBER not specified"
+!endif
 !define PRODUCT_PUBLISHER "Aqsis Team"
 !define PRODUCT_COPYRIGHT "Copyright (c) ${YEAR}, ${PRODUCT_PUBLISHER}."
 !define PRODUCT_COPYRIGHT_OTHER "RenderMan(r) Interface Procedures and Protocol are Copyright 1988, 1989, Pixar All Rights Reserved."
@@ -31,7 +38,7 @@
 
 Name "${PRODUCT_FULLNAME} ${PRODUCT_VERSION}"
 BrandingText "www.aqsis.org"
-OutFile "..\..\..\aqsis-setup-1_2_0.exe"
+OutFile "..\..\..\aqsis-setup-${PRODUCT_FILE_NUMBER}.exe"
 InstallDir "$PROGRAMFILES\${PRODUCT_NAME}"
 InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
 ShowInstDetails show
