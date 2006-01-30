@@ -103,6 +103,9 @@ else:
 	env.Replace(aqsis_cppdefines = ['AQSIS_STATIC_LINK'])
 	env.Replace(rib2ri_cppdefines = ['AQSIS_STATIC_LINK'])
 
+# Prepare the NSIS installer tool
+env.Tool('NSIS', toolpath=['./'])
+SConscript('#/distribution/win/nsis/SConscript')
 
 env.AppendUnique(CPPPATH = ['#/aqsistypes/win32'])
 
