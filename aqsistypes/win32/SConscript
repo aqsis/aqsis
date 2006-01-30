@@ -4,3 +4,8 @@ env.Distribute('aqsistypes/win32', 'aqsis_compiler.h')
 env.Distribute('aqsistypes/win32', 'file_system.cpp')
 env.Distribute('aqsistypes/win32', 'SConscript')
 env.Distribute('aqsistypes/win32', 'unistd.h')
+
+platform_sources = Split ("""
+		win32/file_system.cpp
+		""")
+Export(platform_sources)
