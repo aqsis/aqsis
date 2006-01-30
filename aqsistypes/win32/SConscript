@@ -8,4 +8,4 @@ env.Distribute('aqsistypes/win32', 'unistd.h')
 platform_sources = Split ("""
 		win32/file_system.cpp
 		""")
-Export(platform_sources)
+Export('platform_sources')
