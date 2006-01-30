@@ -14,3 +14,4 @@ env.Install('$LIBDIR', ddmanager)
 
 env.Distribute('renderer/ddmanager', ddmanager_sources)
 env.Distribute('renderer/ddmanager', ddmanager_headers)
+env.Distribute('renderer/ddmanager', 'SConscript')

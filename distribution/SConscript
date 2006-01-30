@@ -1,0 +1,5 @@
+Import('env')
+
+SConscript('win/SConscript')
+
+env.Distribute('distribution/', 'SConscript')
