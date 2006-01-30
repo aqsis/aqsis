@@ -105,7 +105,7 @@ env.Replace(BINDIR = env.Dir('$install_prefix').abspath + os.sep + 'bin')
 env.Replace(LIBDIR = env.Dir('$install_prefix').abspath + os.sep + 'lib')
 env.Replace(SHADERDIR = env.Dir('$install_prefix').abspath + os.sep + 'shaders')
 env.Replace(SYSCONFDIR = env.Dir('$install_prefix').abspath + os.sep + 'bin')
-env.Replace(INCLUDEDIR = env.Dir('$install_prefix').abspath + os.sep + 'inlclude/aqsis')
+env.Replace(INCLUDEDIR = env.Dir('$install_prefix').abspath + os.sep + 'include/aqsis')
 
 target_dir = env.Dir('$build_prefix')
 
