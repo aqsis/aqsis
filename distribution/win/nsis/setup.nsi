@@ -1,7 +1,8 @@
 ; Title: Aqsis 'Standard' Installer for Win32/64 (NSIS)
 ; Author: Leon Tony Atkinson
 ; Info: Last tested with NSIS 2.14
-; Other: To make updates easier, all message strings have been placed within the top 20-30 lines of this file.
+; Other: 1. To make updates easier, all message strings have been placed within the top 20-30 lines of this file.
+;        2. To build manually, without using SCons, uncomment lines 13 and 17.
 
 
 ; Helper defines
@@ -112,7 +113,6 @@ VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "${PRODUCT_VERSION}"
 
 
 ; Installation types (i.e. full/minimal/custom)
-!addplugindir plugin
 !include "TextFunc.nsh"
 !insertmacro ConfigWrite
 
@@ -140,8 +140,8 @@ SectionIn 1 2
   CreateDirectory "$SMPROGRAMS\$ICONS_GROUP"
   CreateDirectory "$SMPROGRAMS\$ICONS_GROUP\Documentation"
   CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Documentation\Readme.lnk" "$INSTDIR\doc\README.txt"
+  SetOutPath "$INSTDIR\bin"
   CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\${PRODUCT_NAME}.lnk" "$SYSDIR\cmd.exe" '/k "$INSTDIR\bin\aqsis.exe" -h'
-  ShellLink::SetShortCutWorkingDirectory "$SMPROGRAMS\$ICONS_GROUP\${PRODUCT_NAME}.lnk" "$INSTDIR\bin"
   CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Credits.lnk" "$INSTDIR\doc\AUTHORS.txt"
   CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\License.lnk" "$INSTDIR\doc\LICENSE.txt"
   !insertmacro MUI_STARTMENU_WRITE_END
@@ -161,8 +161,8 @@ SectionGroup /e "Content" SEC02
   ; Shortcuts
     !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
     CreateDirectory "$SMPROGRAMS\$ICONS_GROUP\Examples\Scenes"
+    SetOutPath "$INSTDIR\content\ribs\scenes\vase"
     CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Examples\Scenes\Vase.lnk" "$INSTDIR\content\ribs\scenes\vase\render.bat"
-    ShellLink::SetShortCutWorkingDirectory "$SMPROGRAMS\$ICONS_GROUP\Examples\Scenes\Vase.lnk" "$INSTDIR\content\ribs\scenes\vase"
     !insertmacro MUI_STARTMENU_WRITE_END
   SectionEnd
 
@@ -247,16 +247,16 @@ Var /GLOBAL QUICKLAUCH_ICON
   !insertmacro MUI_INSTALLOPTIONS_READ $DESKTOP_ICON "page_tasks.ini" "Field 3" "State"
   StrCmp $DESKTOP_ICON "1" "desktop" "desktop_end"
     desktop:
+    SetOutPath "$INSTDIR\bin"
     CreateShortCut "$DESKTOP\${PRODUCT_FULLNAME} ${PRODUCT_VERSION}.lnk" "$SYSDIR\cmd.exe" '/k "$INSTDIR\bin\aqsis.exe" -h'
-    ShellLink::SetShortCutWorkingDirectory "$DESKTOP\${PRODUCT_FULLNAME} ${PRODUCT_VERSION}.lnk" "$INSTDIR\bin"
     desktop_end:
 
   ; Create 'Quick Launch' icon
   !insertmacro MUI_INSTALLOPTIONS_READ $QUICKLAUCH_ICON "page_tasks.ini" "Field 4" "State"
   StrCmp $QUICKLAUCH_ICON "1" "quicklaunch" "quicklaunch_end"
     quicklaunch:
+    SetOutPath "$INSTDIR\bin"
     CreateShortCut "$QUICKLAUNCH\${PRODUCT_FULLNAME}.lnk" "$SYSDIR\cmd.exe" '/k "$INSTDIR\bin\aqsis.exe" -h'
-    ShellLink::SetShortCutWorkingDirectory "$QUICKLAUNCH\${PRODUCT_FULLNAME}.lnk" "$INSTDIR\bin"
     quicklaunch_end:
 
   ; Create file association(s)
