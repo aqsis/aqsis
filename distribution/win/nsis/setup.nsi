@@ -148,8 +148,13 @@ SectionIn 1 2
 SectionEnd
 
 SectionGroup /e "Content" SEC02
-  Section "Example" SEC0201
+  Section "Examples" SEC0201
   SectionIn 1 2
+    SetOutPath "$INSTDIR\content\ribs\features\layeredshaders"
+    File "..\..\..\content\ribs\features\layeredshaders\*.rib"
+    File "..\..\..\content\ribs\features\layeredshaders\*.bat"
+    File "..\..\..\content\ribs\features\layeredshaders\*.sl"
+    File "..\..\..\content\ribs\features\layeredshaders\*.tif"
     SetOutPath "$INSTDIR\content\ribs\scenes\vase"
     File "..\..\..\content\ribs\scenes\vase\*.rib"
     File "..\..\..\content\ribs\scenes\vase\*.bat"
@@ -157,12 +162,13 @@ SectionGroup /e "Content" SEC02
     File "..\..\..\content\shaders\displacement\dented.sl"
     SetOutPath "$INSTDIR\content\shaders\light"
     File "..\..\..\content\shaders\light\shadowspot.sl"
+    
 
   ; Shortcuts
     !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
-    CreateDirectory "$SMPROGRAMS\$ICONS_GROUP\Examples\Scenes"
-    SetOutPath "$INSTDIR\content\ribs\scenes\vase"
-    CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Examples\Scenes\Vase.lnk" "$INSTDIR\content\ribs\scenes\vase\render.bat"
+    CreateDirectory "$SMPROGRAMS\$ICONS_GROUP\Examples"
+    CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Examples\Features.lnk" "$INSTDIR\content\ribs\features"
+    CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Examples\Scenes.lnk" "$INSTDIR\content\ribs\scenes"
     !insertmacro MUI_STARTMENU_WRITE_END
   SectionEnd
 
@@ -197,8 +203,8 @@ SectionEnd
 ; Section descriptions
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
   !insertmacro MUI_DESCRIPTION_TEXT ${SEC01} "Rendering application and essential files only"
-  !insertmacro MUI_DESCRIPTION_TEXT ${SEC02} "Example and shader source files"
-  !insertmacro MUI_DESCRIPTION_TEXT ${SEC0201} "Example file (.rib)"
+  !insertmacro MUI_DESCRIPTION_TEXT ${SEC02} "Examples and shader source files"
+  !insertmacro MUI_DESCRIPTION_TEXT ${SEC0201} "Example files (.rib)"
   !insertmacro MUI_DESCRIPTION_TEXT ${SEC0202} "Generic shader source files (.sl)"
   !insertmacro MUI_DESCRIPTION_TEXT ${SEC03} "User guides and other information"
   !insertmacro MUI_DESCRIPTION_TEXT ${SEC04} "Include and library files"
