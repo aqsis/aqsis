@@ -231,6 +231,7 @@ Var /GLOBAL QUICKLAUCH_ICON
     path_nt:
     ReadRegStr $PATH HKCU "Environment" "PATH"
     WriteRegStr HKCU "Environment" "PATH" "$INSTDIR\bin;$PATH"
+    SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
     path_nt_end:
 
   ; Update 'PATH' for all users
@@ -239,6 +240,7 @@ Var /GLOBAL QUICKLAUCH_ICON
     path_nt_all:
     ReadRegStr $PATH HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "PATH"
     WriteRegStr HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "PATH" "$INSTDIR\bin;$PATH"
+    SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
     path_nt_all_end:
 
   ; Create 'Desktop' icon
