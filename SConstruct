@@ -102,24 +102,22 @@ env.AppendUnique(TARSUFFIX = '.tgz')
 tar_target = env.Tar('aqsis-%d_%d_%d' %(version.major, version.minor, version.build), '$ZIPDISTDIR')
 env.Alias('dist_tar', tar_target)
 
-
-# Read in the platform specific configuration.
-# Allowing it to override the settings defined above.
-SConscript(target_config_dir + os.sep + 'SConscript')
-
-
-# Save the command line options to a cache file, allowing the user to just run scons without 
-# command line options in future runs.
-opts.Save('options.cache', env)
-
-opts.Update(env)
-
 # Setup the output directories for binaries and libraries.
 env.Replace(BINDIR = env.Dir('$install_prefix').abspath + os.sep + 'bin')
 env.Replace(LIBDIR = env.Dir('$install_prefix').abspath + os.sep + 'lib')
 env.Replace(SHADERDIR = env.Dir('$install_prefix').abspath + os.sep + 'shaders')
 env.Replace(SYSCONFDIR = env.Dir('$install_prefix').abspath + os.sep + 'bin')
 env.Replace(INCLUDEDIR = env.Dir('$install_prefix').abspath + os.sep + 'include/aqsis')
+
+# Read in the platform specific configuration.
+# Allowing it to override the settings defined above.
+SConscript(target_config_dir + os.sep + 'SConscript')
+
+# Save the command line options to a cache file, allowing the user to just run scons without 
+# command line options in future runs.
+opts.Save('options.cache', env)
+
+opts.Update(env)
 
 target_dir = env.Dir('$build_prefix')
 
