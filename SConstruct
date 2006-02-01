@@ -99,7 +99,7 @@ zip_target = env.Zip('aqsis-%d_%d_%d' %(version.major, version.minor, version.bu
 env.Alias('dist_zip', zip_target)
 env.AppendUnique(TARFLAGS = '-c -z')
 env.AppendUnique(TARSUFFIX = '.tgz')
-tar_target = env.Tar('aqsis', '$ZIPDISTDIR')
+tar_target = env.Tar('aqsis-%d_%d_%d' %(version.major, version.minor, version.build), '$ZIPDISTDIR')
 env.Alias('dist_tar', tar_target)
 
 
@@ -144,6 +144,7 @@ env = conf.Finish()
 
 # Prepare the NSIS installer tool
 env.Tool('NSIS', toolpath=['./'])
+env.Distribute('./', 'NSIS.py')
 
 # Load the sub-project sconscript files.
 SConscript('rib/api/SConscript', build_dir=target_dir.abspath + '/rib/api')
