@@ -90,13 +90,17 @@ Export('env opts conf')
 
 # Setup the distribution stuff, this should be non-platform specific, the distribution
 # archive should apply to all supported platforms.
-env['ZIPDISTDIR'] = '#/dist'
+env['ZIPDISTDIR'] = '#/aqsis-%d_%d_%d' %(version.major, version.minor, version.build)
 def Distribute(dir, files):
         env.Install('$ZIPDISTDIR/%s' % dir, files)
 env.Distribute = Distribute
 env.Alias('dist', '$ZIPDISTDIR')
-zip_target = env.Zipper('aqsis', '$ZIPDISTDIR')
-env.Alias('dist-zip', zip_target)
+zip_target = env.Zip('aqsis-%d_%d_%d' %(version.major, version.minor, version.build), '$ZIPDISTDIR')
+env.Alias('dist_zip', zip_target)
+env.AppendUnique(TARFLAGS = '-c -z')
+env.AppendUnique(TARSUFFIX = '.tgz')
+tar_target = env.Tar('aqsis', '$ZIPDISTDIR')
+env.Alias('dist_tar', tar_target)
 
 
 # Read in the platform specific configuration.
