@@ -102,6 +102,8 @@ env.AppendUnique(TARSUFFIX = '.tgz')
 tar_target = env.Tar('aqsis-%d_%d_%d' %(version.major, version.minor, version.build), '$ZIPDISTDIR')
 env.Alias('dist_tar', tar_target)
 
+opts.Update(env)
+
 # Setup the output directories for binaries and libraries.
 env.Replace(BINDIR = env.Dir('$install_prefix').abspath + os.sep + 'bin')
 env.Replace(LIBDIR = env.Dir('$install_prefix').abspath + os.sep + 'lib')
