@@ -69,7 +69,7 @@ bool CqPointsKDTreeData::CqPointsKDTreeDataComparator::operator()(TqInt a, TqInt
 /** Constructor.
  */
 
-CqPoints::CqPoints( TqInt nvertices, const boost::shared_ptr<CqPolygonPoints>& pPoints ) : //CqMotionSpec<boost::shared_ptr<CqPolygonPoints> >(pPoints),
+CqPoints::CqPoints( TqInt nvertices, const boost::shared_ptr<CqPolygonPoints>& pPoints ) : 
 		m_pPoints(pPoints),
 		m_nVertices(nvertices),
 		m_KDTreeData( this ),
@@ -81,12 +81,6 @@ CqPoints::CqPoints( TqInt nvertices, const boost::shared_ptr<CqPolygonPoints>& p
 
 	m_widthParamIndex = -1;
 	m_constantwidthParamIndex = -1;
-
-/*	if( pPoints )
-	{
-		// Store the reference to our points.
-		AddTimeSlot( 0, pPoints );
-	}*/
 
 	std::vector<CqParameter*>::iterator iUP;
 	TqInt index = 0;
@@ -101,31 +95,32 @@ CqPoints::CqPoints( TqInt nvertices, const boost::shared_ptr<CqPolygonPoints>& p
 
 
 //---------------------------------------------------------------------
-/** Assignment operator.
+/** Create a clone of this points class
  */
 
-/* CqPoints&	CqPoints::operator=( const CqPoints& From ) {
- * 	CqSurface::operator=( From );
- * 	m_nVertices = From.m_nVertices;
- * 
- * 	m_KDTreeData.SetpPoints( this );
- * 
- * 	// Release the reference to our points.
- * 	m_pPoints = From.m_pPoints;
- * 	//TqInt i;
- * 	//for ( i = 0; i < From.cTimes(); i++ )
- * 	//{
- * 	//	boost::shared_ptr<CqPolygonPoints> pTimePoints = From.GetMotionObject( From.Time( i ) );
- * 	//	AddTimeSlot( From.Time( i ), pTimePoints );
- * 	//}
- * 
- * 	m_widthParamIndex = From.m_widthParamIndex;
- * 	m_constantwidthParamIndex = From.m_constantwidthParamIndex;
- * 	m_MaxWidth = From.m_MaxWidth;
- * 
- * 	return ( *this );
- * }
- */
+CqBasicSurface* CqPoints::Clone() const 
+{
+	// Make a 'complete' clone of this primitive, which means cloning the points too.
+	CqPolygonPoints* clone_points = static_cast<CqPolygonPoints*>(m_pPoints->Clone());
+
+	CqPoints* clone = new CqPoints(m_nVertices, boost::shared_ptr<CqPolygonPoints>(clone_points));
+	CqSurface::CloneData( clone );
+
+//	clone->m_nVertices = m_nVertices;
+//	clone->m_pPoints = boost::shared_ptr<CqPolygonPoints>(clone_points);
+
+//	clone->m_KDTreeData.SetpPoints( clone );
+
+//	clone->m_widthParamIndex = m_widthParamIndex;
+//	clone->m_constantwidthParamIndex = m_constantwidthParamIndex;
+//	clone->m_MaxWidth = m_MaxWidth;
+
+	clone->InitialiseKDTree();
+	clone->InitialiseMaxWidth();
+
+	return ( clone );
+}
+
 
 
 
@@ -347,25 +342,23 @@ CqBound	CqPoints::Bound() const
 
 TqInt CqPoints::Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
 {
-/* 	TqInt median = nVertices()/2;
- * 	// Split the KDTree and create two new primitives containing the split points set.
- * 	boost::shared_ptr<CqPoints> pA( new CqPoints( *this ) );
- * 	boost::shared_ptr<CqPoints> pB( new CqPoints( *this ) );
- * 
- * 	pA->m_nVertices = median;
- * 	pB->m_nVertices = nVertices()-median;
- * 
- * 	pA->SetSurfaceParameters( *this );
- * 	pB->SetSurfaceParameters( *this );
- * 
- * 	KDTree().Subdivide( pA->KDTree(), pB->KDTree() );
- * 
- * 	aSplits.push_back( pA );
- * 	aSplits.push_back( pB );
- * 
- * 	return( 2 );
- */
-	return(0);
+ 	TqInt median = nVertices()/2;
+ 	// Split the KDTree and create two new primitives containing the split points set.
+ 	boost::shared_ptr<CqPoints> pA( new CqPoints( m_nVertices, pPoints() ) );
+ 	boost::shared_ptr<CqPoints> pB( new CqPoints( m_nVertices, pPoints() ) );
+ 
+ 	pA->m_nVertices = median;
+ 	pB->m_nVertices = nVertices()-median;
+ 
+ 	pA->SetSurfaceParameters( *this );
+ 	pB->SetSurfaceParameters( *this );
+ 
+ 	KDTree().Subdivide( pA->KDTree(), pB->KDTree() );
+ 
+ 	aSplits.push_back( pA );
+ 	aSplits.push_back( pB );
+ 
+ 	return( 2 );
 }
 
 
@@ -376,24 +369,22 @@ TqInt CqPoints::Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits 
 TqInt CqPoints::CopySplit( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, CqPoints* pFrom1, CqPoints* pFrom2 )
 {
 	// Split the KDTree and create two new primitives containing the split points set.
-/* 	boost::shared_ptr<CqPoints> pA( new CqPoints( *this ) );
- * 	boost::shared_ptr<CqPoints> pB( new CqPoints( *this ) );
- * 
- * 	pA->m_nVertices = pFrom1->m_nVertices;
- * 	pB->m_nVertices = pFrom2->m_nVertices;
- * 
- * 	pA->SetSurfaceParameters( *this );
- * 	pB->SetSurfaceParameters( *this );
- * 
- * 	pA->KDTree() = pFrom1->KDTree();
- * 	pB->KDTree() = pFrom2->KDTree();
- * 
- * 	aSplits.push_back( pA );
- * 	aSplits.push_back( pB );
- * 
- * 	return( 2 );
- */
-	return(0);
+ 	boost::shared_ptr<CqPoints> pA( new CqPoints( m_nVertices, pPoints() ) );
+ 	boost::shared_ptr<CqPoints> pB( new CqPoints( m_nVertices, pPoints() ) );
+ 
+ 	pA->m_nVertices = pFrom1->m_nVertices;
+ 	pB->m_nVertices = pFrom2->m_nVertices;
+ 
+ 	pA->SetSurfaceParameters( *this );
+ 	pB->SetSurfaceParameters( *this );
+ 
+ 	pA->KDTree() = pFrom1->KDTree();
+ 	pB->KDTree() = pFrom2->KDTree();
+ 
+ 	aSplits.push_back( pA );
+ 	aSplits.push_back( pB );
+ 
+ 	return( 2 );
 }
 
 
