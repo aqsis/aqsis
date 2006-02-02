@@ -79,7 +79,7 @@ class CqQuadric : public CqSurface
 		/** Determine whether the passed surface is valid to be used as a
 		 *  frame in motion blur for this surface.
 		 */
-		virtual TqBool	IsMotionBlurMatch( CqBasicSurface* pSurf )
+		virtual TqBool	IsMotionBlurMatch( CqSurface* pSurf )
 		{
 			return( TqFalse );
 		}
@@ -148,7 +148,7 @@ class CqSphere : public CqQuadric
 			return ( TqTrue );
 		}
 
-		virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u );
+		virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, TqBool u );
 
 
 #ifdef _DEBUG
@@ -158,7 +158,7 @@ class CqSphere : public CqQuadric
 			return CqString("CqSphere");
 		}
 #endif
-		virtual CqBasicSurface* Clone() const;
+		virtual CqSurface* Clone() const;
 
 	private:
 		TqFloat	m_Radius;		///< Radius.
@@ -187,7 +187,7 @@ class CqCone : public CqQuadric
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
 
-		virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u );
+		virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, TqBool u );
 
 
 #ifdef _DEBUG
@@ -197,7 +197,7 @@ class CqCone : public CqQuadric
 			return CqString("CqCone");
 		}
 #endif
-		virtual CqBasicSurface* Clone() const;
+		virtual CqSurface* Clone() const;
 
 	private:
 		TqFloat	m_Height;		///< Height..
@@ -231,7 +231,7 @@ class CqCylinder : public CqQuadric
 			return ( TqTrue );
 		}
 
-		virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u );
+		virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, TqBool u );
 
 
 #ifdef _DEBUG
@@ -241,7 +241,7 @@ class CqCylinder : public CqQuadric
 			return CqString("CqCylinder");
 		}
 #endif
-		virtual CqBasicSurface* Clone() const;
+		virtual CqSurface* Clone() const;
 
 	private:
 		TqFloat	m_Radius;		///< Radius
@@ -271,7 +271,7 @@ class CqHyperboloid : public CqQuadric
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
 
-		virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u );
+		virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, TqBool u );
 
 
 #ifdef _DEBUG
@@ -281,7 +281,7 @@ class CqHyperboloid : public CqQuadric
 			return CqString("CqHyperboloid");
 		}
 #endif
-		virtual CqBasicSurface* Clone() const;
+		virtual CqSurface* Clone() const;
 
 	private:
 		CqVector3D	m_Point1;		///< Start point of line to revolve.
@@ -309,7 +309,7 @@ class CqParaboloid : public CqQuadric
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
 
-		virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u );
+		virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, TqBool u );
 
 
 #ifdef _DEBUG
@@ -319,7 +319,7 @@ class CqParaboloid : public CqQuadric
 			return CqString("CqParaboloid");
 		}
 #endif
-		virtual CqBasicSurface* Clone() const;
+		virtual CqSurface* Clone() const;
 
 	private:
 		TqFloat	m_RMax;			///< Radius at zmax.
@@ -348,7 +348,7 @@ class CqTorus : public CqQuadric
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
 
-		virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u );
+		virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, TqBool u );
 
 
 #ifdef _DEBUG
@@ -358,7 +358,7 @@ class CqTorus : public CqQuadric
 			return CqString("CqTorus");
 		}
 #endif
-		virtual CqBasicSurface* Clone() const;
+		virtual CqSurface* Clone() const;
 
 	private:
 		TqFloat	m_MajorRadius;	///< Major radius.
@@ -392,7 +392,7 @@ class CqDisk : public CqQuadric
 			return ( TqTrue );
 		}
 
-		virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u );
+		virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, TqBool u );
 
 
 #ifdef _DEBUG
@@ -402,7 +402,7 @@ class CqDisk : public CqQuadric
 			return CqString("CqDisk");
 		}
 #endif
-		virtual CqBasicSurface* Clone() const;
+		virtual CqSurface* Clone() const;
 
 	private:
 		TqFloat	m_Height;			///< Position on z axis.

@@ -72,7 +72,7 @@ CqBound CqPolygonBase::Bound() const
  *  everything on the right (the same side as point 3) is not.
  */
 
-TqInt CqPolygonBase::Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
+TqInt CqPolygonBase::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits )
 {
 	CqVector3D	vecN;
 	TqInt indexA, indexB, indexC, indexD;
@@ -428,7 +428,7 @@ TqBool CqSurfacePolygon::CheckDegenerate() const
 /** Create a copy of this polygon primitive.
  */
 
-CqBasicSurface* CqSurfacePolygon::Clone() const
+CqSurface* CqSurfacePolygon::Clone() const
 {
 	CqSurfacePolygon* clone = new CqSurfacePolygon();
 	CqSurface::CloneData(clone);
@@ -488,7 +488,7 @@ void	CqPolygonPoints::Transform( const CqMatrix& matTx, const CqMatrix& matITTx,
 }
 
 
-CqBasicSurface* CqPolygonPoints::Clone() const
+CqSurface* CqPolygonPoints::Clone() const
 {
 	CqPolygonPoints* clone = new CqPolygonPoints();
 	CqSurface::CloneData(clone);
@@ -512,7 +512,7 @@ CqBound	CqSurfacePointsPolygons::Bound() const
 	return(AdjustBoundForTransformationMotion( B ));
 }
 
-TqInt CqSurfacePointsPolygons::Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
+TqInt CqSurfacePointsPolygons::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits )
 {
 	TqInt	CreatedPolys = 0;
 	TqInt	iP = 0, poly;
@@ -551,7 +551,7 @@ TqInt CqSurfacePointsPolygons::Split( std::vector<boost::shared_ptr<CqBasicSurfa
 }
 
 
-CqBasicSurface* CqSurfacePointsPolygons::Clone() const
+CqSurface* CqSurfacePointsPolygons::Clone() const
 {
 	// Make a 'complete' clone of this primitive, which means cloning the points too.
 	CqPolygonPoints* clone_points = static_cast<CqPolygonPoints*>(m_pPoints->Clone());

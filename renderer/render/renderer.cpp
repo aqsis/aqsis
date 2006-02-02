@@ -1264,10 +1264,10 @@ boost::shared_ptr<IqShader> CqRenderer::CreateShader(
 
 //----------------------------------------------------------------------
 /** Add a new surface to the list of surfaces in the world.
- * \param pSurface A pointer to a CqBasicSurface derived class, surface should at this point be in world space.
+ * \param pSurface A pointer to a CqSurface derived class, surface should at this point be in world space.
  */
 
-void CqRenderer::StorePrimitive( const boost::shared_ptr<CqBasicSurface>& pSurface )
+void CqRenderer::StorePrimitive( const boost::shared_ptr<CqSurface>& pSurface )
 {
 	// Count the number of total gprims
 //	STATS_INC( GPR_created_total );
@@ -1279,7 +1279,7 @@ void CqRenderer::PostWorld()
 {
 	while(!m_aWorld.empty())
 	{
-		boost::shared_ptr<CqBasicSurface> pSurface = m_aWorld.front();
+		boost::shared_ptr<CqSurface> pSurface = m_aWorld.front();
 		
 		pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "world", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(0), 0 ),
 						 QGetRenderContext() ->matNSpaceToSpace( "world", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(0), 0 ),
@@ -1292,14 +1292,15 @@ void CqRenderer::PostWorld()
 
 void CqRenderer::PostCloneOfWorld()
 {
-	std::deque<boost::shared_ptr<CqBasicSurface> >::iterator i;
+	std::deque<boost::shared_ptr<CqSurface> >::iterator i;
 	for(i=m_aWorld.begin(); i!=m_aWorld.end(); i++)
 	{
-		boost::shared_ptr<CqBasicSurface> pSurface((*i)->Clone());
+		boost::shared_ptr<CqSurface> pSurface((*i)->Clone());
 		pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "world", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(0), 0 ),
 						 QGetRenderContext() ->matNSpaceToSpace( "world", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(0), 0 ),
 						 QGetRenderContext() ->matVSpaceToSpace( "world", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(0), 0 ) );
-		pImage()->PostSurface(pSurface);
+		boost::shared_ptr<CqSurface> base(pSurface.get());
+		pImage()->PostSurface(base);
 	}
 }
 

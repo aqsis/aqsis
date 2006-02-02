@@ -157,7 +157,7 @@ class CqSurfacePatchBicubic : public CqSurface
 		/** Determine whether the passed surface is valid to be used as a
 		 *  frame in motion blur for this surface.
 		 */
-		virtual TqBool	IsMotionBlurMatch( CqBasicSurface* pSurf )
+		virtual TqBool	IsMotionBlurMatch( CqSurface* pSurf )
 		{
 			return( TqFalse );
 		}
@@ -181,12 +181,12 @@ class CqSurfacePatchBicubic : public CqSurface
 		}
 
 		virtual void NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData );
-		virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u );
+		virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, TqBool u );
 		virtual void NaturalSubdivide( CqParameter* pParam, CqParameter* pParam1, CqParameter* pParam2, TqBool u );
 
 		void	ConvertToBezierBasis( CqMatrix& matuBasis, CqMatrix& matvBasis );
 
-		virtual CqBasicSurface* Clone() const
+		virtual CqSurface* Clone() const
 		{
 //			return(new CqSurfacePatchBicubic(*this));
 			return(NULL);
@@ -232,7 +232,7 @@ class CqSurfacePatchBilinear : public CqSurface
 		/** Determine whether the passed surface is valid to be used as a
 		 *  frame in motion blur for this surface.
 		 */
-		virtual TqBool	IsMotionBlurMatch( CqBasicSurface* pSurf )
+		virtual TqBool	IsMotionBlurMatch( CqSurface* pSurf )
 		{
 			return( TqFalse );
 		}
@@ -254,14 +254,14 @@ class CqSurfacePatchBilinear : public CqSurface
 			/// \todo Must work out what this value should be.
 			return ( 1 );
 		}
-		virtual CqBasicSurface* Clone() const
+		virtual CqSurface* Clone() const
 		{
 			//return(new CqSurfacePatchBilinear(*this));
 			return(NULL);
 		}
 
-		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits );
-		virtual	TqInt	PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u );
+		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
+		virtual	TqInt	PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, TqBool u );
 		virtual void	PostDice(CqMicroPolyGrid * pGrid)
 		{
 			if(m_fHasPhantomFourthVertex)
@@ -313,7 +313,7 @@ class CqSurfacePatchMeshBicubic : public CqSurface
 		{
 			return ( 0 );
 		}
-		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits );
+		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
 		virtual TqBool	Diceable()
 		{
 			return ( TqFalse );
@@ -322,7 +322,7 @@ class CqSurfacePatchMeshBicubic : public CqSurface
 		/** Determine whether the passed surface is valid to be used as a
 		 *  frame in motion blur for this surface.
 		 */
-		virtual TqBool	IsMotionBlurMatch( CqBasicSurface* pSurf )
+		virtual TqBool	IsMotionBlurMatch( CqSurface* pSurf )
 		{
 			return( TqFalse );
 		}
@@ -344,7 +344,7 @@ class CqSurfacePatchMeshBicubic : public CqSurface
 			/// \todo Must work out what this value should be.
 			return ( 1 );
 		}
-		virtual CqBasicSurface* Clone() const
+		virtual CqSurface* Clone() const
 		{
 			//return(new CqSurfacePatchMeshBicubic(*this));
 			return(NULL);
@@ -410,7 +410,7 @@ class CqSurfacePatchMeshBilinear : public CqSurface
 		{
 			return ( 0 );
 		}
-		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits );
+		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
 		virtual TqBool	Diceable()
 		{
 			return ( TqFalse );
@@ -419,7 +419,7 @@ class CqSurfacePatchMeshBilinear : public CqSurface
 		/** Determine whether the passed surface is valid to be used as a
 		 *  frame in motion blur for this surface.
 		 */
-		virtual TqBool	IsMotionBlurMatch( CqBasicSurface* pSurf )
+		virtual TqBool	IsMotionBlurMatch( CqSurface* pSurf )
 		{
 			return( TqFalse );
 		}
@@ -441,7 +441,7 @@ class CqSurfacePatchMeshBilinear : public CqSurface
 			/// \todo Must work out what this value should be.
 			return ( 1 );
 		}
-		virtual CqBasicSurface* Clone() const
+		virtual CqSurface* Clone() const
 		{
 //			return(new CqSurfacePatchMeshBilinear(*this));
 			return(NULL);

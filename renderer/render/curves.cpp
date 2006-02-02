@@ -431,7 +431,7 @@ void CqLinearCurveSegment::NaturalSubdivide(
  *
  * @return      The number of objects we've created.
  */
-TqInt CqLinearCurveSegment::Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
+TqInt CqLinearCurveSegment::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits )
 {
 	// Split based on the decision
 	switch( m_splitDecision )
@@ -473,7 +473,7 @@ TqInt CqLinearCurveSegment::Split( std::vector<boost::shared_ptr<CqBasicSurface>
  * @return Number of created objects.
  */
 TqInt CqLinearCurveSegment::SplitToCurves(
-    std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits
+    std::vector<boost::shared_ptr<CqSurface> >& aSplits
 )
 {
 
@@ -483,8 +483,8 @@ TqInt CqLinearCurveSegment::SplitToCurves(
 	//  to handle varying class variables because it inconveniently
 	//  sets them up to have 4 elements.
 
-	aSplits.push_back( boost::shared_ptr<CqBasicSurface>( new CqLinearCurveSegment ) );
-	aSplits.push_back( boost::shared_ptr<CqBasicSurface>( new CqLinearCurveSegment ) );
+	aSplits.push_back( boost::shared_ptr<CqSurface>( new CqLinearCurveSegment ) );
+	aSplits.push_back( boost::shared_ptr<CqSurface>( new CqLinearCurveSegment ) );
 
 	aSplits[ 0 ] ->SetSurfaceParameters( *this );
 	aSplits[ 0 ] ->SetEyeSplitCount( EyeSplitCount() );
@@ -536,7 +536,7 @@ TqInt CqLinearCurveSegment::SplitToCurves(
  * @return Number of created objects.
  */
 TqInt CqLinearCurveSegment::SplitToPatch(
-    std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits
+    std::vector<boost::shared_ptr<CqSurface> >& aSplits
 )
 {
 
@@ -917,7 +917,7 @@ void CqCubicCurveSegment::VaryingNaturalSubdivide(
  *
  * @return      The number of objects we've created.
  */
-TqInt CqCubicCurveSegment::Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
+TqInt CqCubicCurveSegment::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits )
 {
 	// Split based on the decision
 	switch( m_splitDecision )
@@ -957,7 +957,7 @@ TqInt CqCubicCurveSegment::Split( std::vector<boost::shared_ptr<CqBasicSurface> 
  * @return Number of created objects.
  */
 TqInt CqCubicCurveSegment::SplitToCurves(
-    std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits
+    std::vector<boost::shared_ptr<CqSurface> >& aSplits
 )
 {
 
@@ -967,8 +967,8 @@ TqInt CqCubicCurveSegment::SplitToCurves(
 	//  to handle varying class variables because it inconveniently
 	//  sets them up to have 4 elements.
 
-	aSplits.push_back( boost::shared_ptr<CqBasicSurface>( new CqCubicCurveSegment ) );
-	aSplits.push_back( boost::shared_ptr<CqBasicSurface>( new CqCubicCurveSegment ) );
+	aSplits.push_back( boost::shared_ptr<CqSurface>( new CqCubicCurveSegment ) );
+	aSplits.push_back( boost::shared_ptr<CqSurface>( new CqCubicCurveSegment ) );
 
 	aSplits[ 0 ] ->SetSurfaceParameters( *this );
 	aSplits[ 0 ] ->SetEyeSplitCount( EyeSplitCount() );
@@ -1038,7 +1038,7 @@ CqVector3D	CqCubicCurveSegment::CalculateTangent(TqFloat u)
  * @return Number of created objects.
  */
 TqInt CqCubicCurveSegment::SplitToPatch(
-    std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits
+    std::vector<boost::shared_ptr<CqSurface> >& aSplits
 )
 {
 
@@ -1438,7 +1438,7 @@ CqLinearCurvesGroup::~CqLinearCurvesGroup()
  *
  * @param aSplits       Vector of split objects.
  */
-TqInt CqLinearCurvesGroup::Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
+TqInt CqLinearCurvesGroup::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits )
 {
 
 	TqInt nSplits = 0;      // number of splits we've done
@@ -1742,7 +1742,7 @@ TqUint CqCubicCurvesGroup::cVarying() const
  *              created.
  */
 TqInt CqCubicCurvesGroup::Split(
-    std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits
+    std::vector<boost::shared_ptr<CqSurface> >& aSplits
 )
 {
 

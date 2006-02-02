@@ -42,7 +42,7 @@
 
 START_NAMESPACE( Aqsis )
 
-class CqBasicSurface;
+class CqSurface;
 class CqDeformingSurface;
 
 enum EqModeBlock

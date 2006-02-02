@@ -50,7 +50,7 @@ class CqPolygonBase
 		{}
 
 		virtual	CqBound	Bound() const;
-		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits );
+		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
 
 		/** Get a reference to the surface this polygon is associated with.
 		 */
@@ -162,7 +162,7 @@ class CqSurfacePolygon : public CqSurface, public CqPolygonBase
 		{
 			return ( AdjustBoundForTransformationMotion( CqPolygonBase::Bound() ) );
 		}
-		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
+		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits )
 		{
 			return ( CqPolygonBase::Split( aSplits ) );
 		}
@@ -170,7 +170,7 @@ class CqSurfacePolygon : public CqSurface, public CqPolygonBase
 		/** Determine whether the passed surface is valid to be used as a
 		 *  frame in motion blur for this surface.
 		 */
-		virtual TqBool	IsMotionBlurMatch( CqBasicSurface* pSurf )
+		virtual TqBool	IsMotionBlurMatch( CqSurface* pSurf )
 		{
 			return( TqFalse );
 		}
@@ -261,7 +261,7 @@ class CqSurfacePolygon : public CqSurface, public CqPolygonBase
 		{
 			return ( CqSurface::pTransform() );
 		}
-		virtual CqBasicSurface* Clone() const;
+		virtual CqSurface* Clone() const;
 
 	protected:
 		TqInt	m_cVertices;	///< Count of vertices in this polygon.
@@ -319,7 +319,7 @@ class CqPolygonPoints : public CqSurface
 		{
 			return ( 0 );
 		}
-		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
+		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits )
 		{
 			return ( 0 );
 		}
@@ -331,7 +331,7 @@ class CqPolygonPoints : public CqSurface
 		/** Determine whether the passed surface is valid to be used as a
 		 *  frame in motion blur for this surface.
 		 */
-		virtual TqBool	IsMotionBlurMatch( CqBasicSurface* pSurf )
+		virtual TqBool	IsMotionBlurMatch( CqSurface* pSurf )
 		{
 			return( TqFalse );
 		}
@@ -361,7 +361,7 @@ class CqPolygonPoints : public CqSurface
 		{
 			return ( cVertex() );
 		}
-		virtual CqBasicSurface* Clone() const;
+		virtual CqSurface* Clone() const;
 
 	protected:
 		TqInt	m_cVertices;		///< Count of vertices in this list.
@@ -377,10 +377,10 @@ class CqPolygonPoints : public CqSurface
  * Points polygon surface primitive, a single member of the above.
  */
 
-class CqSurfacePointsPolygon : public CqBasicSurface, public CqPolygonBase
+class CqSurfacePointsPolygon : public CqSurface, public CqPolygonBase
 {
 	public:
-		CqSurfacePointsPolygon( const boost::shared_ptr<CqPolygonPoints>& pPoints, TqInt index, TqInt FaceVaryingIndex  ) : CqBasicSurface(),
+		CqSurfacePointsPolygon( const boost::shared_ptr<CqPolygonPoints>& pPoints, TqInt index, TqInt FaceVaryingIndex  ) : CqSurface(),
 				m_pPoints( pPoints ),
 				m_Index( index ),
 				m_FaceVaryingIndex( FaceVaryingIndex )
@@ -402,7 +402,7 @@ class CqSurfacePointsPolygon : public CqBasicSurface, public CqPolygonBase
 		}
 #endif
 
-		// Overridden from CqBasicSurface
+		// Overridden from CqSurface
 		virtual CqMicroPolyGridBase* Dice()
 		{
 			assert(TqFalse);
@@ -412,7 +412,7 @@ class CqSurfacePointsPolygon : public CqBasicSurface, public CqPolygonBase
 		{
 			return ( AdjustBoundForTransformationMotion( CqPolygonBase::Bound() ) );
 		}
-		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
+		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits )
 		{
 			return ( CqPolygonBase::Split( aSplits ) );
 		}
@@ -424,7 +424,7 @@ class CqSurfacePointsPolygon : public CqBasicSurface, public CqPolygonBase
 		/** Determine whether the passed surface is valid to be used as a
 		 *  frame in motion blur for this surface.
 		 */
-		virtual TqBool	IsMotionBlurMatch( CqBasicSurface* pSurf )
+		virtual TqBool	IsMotionBlurMatch( CqSurface* pSurf )
 		{
 			return( TqFalse );
 		}
@@ -453,11 +453,6 @@ class CqSurfacePointsPolygon : public CqBasicSurface, public CqPolygonBase
 		virtual	TqUint	cFaceVarying() const
 		{
 			return ( 0 );
-		}
-		virtual CqBasicSurface* Clone() const
-		{
-			//return(new CqSurfacePointsPolygon(*this));
-			return(NULL);
 		}
 		//---------------
 
@@ -546,6 +541,11 @@ class CqSurfacePointsPolygon : public CqBasicSurface, public CqPolygonBase
 			return( m_FaceVaryingIndex );
 		}
 
+		virtual CqSurface* Clone() const
+		{
+			return(NULL);
+		}
+
 	protected:
 		std::vector<TqInt>	m_aIndices;		///< Array of indices into the associated vertex list.
 		boost::shared_ptr<CqPolygonPoints>	m_pPoints;		///< Pointer to the associated CqPolygonPoints class.
@@ -592,10 +592,10 @@ class CqSurfacePointsPolygons : public CqSurface
 			return(NULL);
 		}
 		/** Split this GPrim into a number of other GPrims.
-		 * \param aSplits A reference to a CqBasicSurface array to fill in with the new GPrim pointers.
+		 * \param aSplits A reference to a CqSurface array to fill in with the new GPrim pointers.
 		 * \return Integer count of new GPrims created.
 		 */
-		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits );
+		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
 		/** Determine whether this GPrim is diceable at its current size.
 		 */
 		virtual TqBool	Diceable()
@@ -609,7 +609,7 @@ class CqSurfacePointsPolygons : public CqSurface
 			m_pPoints->Transform( matTx, matITTx, matRTx, iTime );
 		}
 
-		virtual TqBool	IsMotionBlurMatch( CqBasicSurface* pSurf )
+		virtual TqBool	IsMotionBlurMatch( CqSurface* pSurf )
 		{
 			return( TqFalse );
 		}
@@ -633,7 +633,7 @@ class CqSurfacePointsPolygons : public CqSurface
 			assert( m_pPoints );
 			return ( m_pPoints->cFaceVarying() );
 		}
-		virtual CqBasicSurface* Clone() const;
+		virtual CqSurface* Clone() const;
 
 	private:
 		TqInt	m_NumPolys;

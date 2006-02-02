@@ -164,16 +164,16 @@ class CqCurve : public CqSurface
 		/** Determine whether the passed surface is valid to be used as a
 		 *  frame in motion blur for this surface.
 		 */
-		virtual TqBool	IsMotionBlurMatch( CqBasicSurface* pSurf )
+		virtual TqBool	IsMotionBlurMatch( CqSurface* pSurf )
 		{
 			return( TqFalse );
 		}
 		/** Copy the information about splitting and dicing from the specified GPrim.
-		 * \param From A CqBasicSurface reference to copy the information from.
+		 * \param From A CqSurface reference to copy the information from.
 		 */
-		virtual void CopySplitInfo( const CqBasicSurface* From )
+		virtual void CopySplitInfo( const CqSurface* From )
 		{
-			CqBasicSurface::CopySplitInfo( From );
+			CqSurface::CopySplitInfo( From );
 			const CqCurve* pCurve = dynamic_cast<const CqCurve*>(From);
 			if( NULL != pCurve )
 				m_splitDecision = pCurve->m_splitDecision;
@@ -276,9 +276,9 @@ class CqLinearCurveSegment : public CqCurve
 		    CqParameter* pParam1, CqParameter* pParam2,
 		    TqBool u
 		);
-		virtual TqInt Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits );
-		TqInt SplitToCurves( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits );
-		TqInt SplitToPatch( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits );
+		virtual TqInt Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
+		TqInt SplitToCurves( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
+		TqInt SplitToPatch( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
 		//---------------------------------------------- Inlined Public Methods
 	public:
 #ifdef _DEBUG
@@ -333,7 +333,7 @@ class CqLinearCurveSegment : public CqCurve
 			pTResult1->pValue() [ 1 ] = pTResult2->pValue() [ 0 ] = static_cast<T>( ( pTParam->pValue() [ 0 ] + pTParam->pValue() [ 1 ] ) * 0.5f );
 			pTResult2->pValue() [ 1 ] = pTParam->pValue() [ 1 ];
 		}
-		virtual CqBasicSurface* Clone() const
+		virtual CqSurface* Clone() const
 		{
 			//return(new CqLinearCurveSegment(*this));
 			return(NULL);
@@ -366,9 +366,9 @@ class CqCubicCurveSegment : public CqCurve
 		    CqParameter* pParam1, CqParameter* pParam2,
 		    TqBool u
 		);
-		virtual TqInt Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits );
-		TqInt SplitToCurves( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits );
-		TqInt SplitToPatch( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits );
+		virtual TqInt Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
+		TqInt SplitToCurves( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
+		TqInt SplitToPatch( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
 
 		void ConvertToBezierBasis( CqMatrix& matBasis );
 		//---------------------------------------------- Inlined Public Methods
@@ -456,7 +456,7 @@ class CqCubicCurveSegment : public CqCurve
 			pTResult1->pValue() [ 1 ] = pTResult2->pValue() [ 0 ] = static_cast<T>( ( pTParam->pValue() [ 0 ] + pTParam->pValue() [ 1 ] ) * 0.5f );
 			pTResult2->pValue() [ 1 ] = pTParam->pValue() [ 1 ];
 		}
-		virtual CqBasicSurface* Clone() const
+		virtual CqSurface* Clone() const
 		{
 			//return(new CqCubicCurveSegment(*this));
 			return(NULL);
@@ -510,7 +510,7 @@ class CqLinearCurvesGroup : public CqCurvesGroup
 		CqLinearCurvesGroup( const CqLinearCurvesGroup &from );
 		virtual ~CqLinearCurvesGroup();
 		CqLinearCurvesGroup& operator=( const CqLinearCurvesGroup& from );
-		virtual	TqInt Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits );
+		virtual	TqInt Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
 		virtual void Transform(
 		    const CqMatrix& matTx,
 		    const CqMatrix& matITTx,
@@ -551,7 +551,7 @@ class CqLinearCurvesGroup : public CqCurvesGroup
 		{
 			return "CqLinearCurvesGroup";
 		}
-		virtual CqBasicSurface* Clone() const
+		virtual CqSurface* Clone() const
 		{
 		//	return(new CqLinearCurvesGroup(*this));
 			return(NULL);
@@ -575,7 +575,7 @@ class CqCubicCurvesGroup : public CqCurvesGroup
 		);
 		virtual ~CqCubicCurvesGroup();
 		virtual	TqUint cVarying() const;
-		virtual TqInt Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits );
+		virtual TqInt Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
 		virtual void Transform(
 		    const CqMatrix& matTx,
 		    const CqMatrix& matITTx,
@@ -611,7 +611,7 @@ class CqCubicCurvesGroup : public CqCurvesGroup
 		{
 			return "CqCubicCurvesGroup";
 		}
-		virtual CqBasicSurface* Clone() const
+		virtual CqSurface* Clone() const
 		{
 			//return(new CqCubicCurvesGroup(*this));
 			return(NULL);

@@ -272,11 +272,11 @@ void CqSurfacePatchBicubic::NaturalDice( CqParameter* pParameter, TqInt uDiceSiz
 /** Split the patch into smaller patches.
  */
 
-TqInt CqSurfacePatchBicubic::PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u )
+TqInt CqSurfacePatchBicubic::PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, TqBool u )
 {
 	// Create two new surface of the appropriate type
-	aSplits.push_back( boost::shared_ptr<CqBasicSurface>( new CqSurfacePatchBicubic ) );
-	aSplits.push_back( boost::shared_ptr<CqBasicSurface>( new CqSurfacePatchBicubic ) );
+	aSplits.push_back( boost::shared_ptr<CqSurface>( new CqSurfacePatchBicubic ) );
+	aSplits.push_back( boost::shared_ptr<CqSurface>( new CqSurfacePatchBicubic ) );
 
 	return ( 2 );
 }
@@ -703,10 +703,10 @@ CqBound CqSurfacePatchBilinear::Bound() const
 /** Split the patch into smaller patches.
  */
 
-TqInt CqSurfacePatchBilinear::PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u )
+TqInt CqSurfacePatchBilinear::PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, TqBool u )
 {
-	aSplits.push_back( boost::shared_ptr<CqBasicSurface>( new CqSurfacePatchBilinear ) );
-	aSplits.push_back( boost::shared_ptr<CqBasicSurface>( new CqSurfacePatchBilinear ) );
+	aSplits.push_back( boost::shared_ptr<CqSurface>( new CqSurfacePatchBilinear ) );
+	aSplits.push_back( boost::shared_ptr<CqSurface>( new CqSurfacePatchBilinear ) );
 
 	return ( 2 );
 }
@@ -796,18 +796,18 @@ TqBool	CqSurfacePatchBilinear::Diceable()
  *  is no longer a phantom patch, the other two are.
  *
  */
-TqInt CqSurfacePatchBilinear::Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
+TqInt CqSurfacePatchBilinear::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits )
 {
 	// Create two new patches
-	aSplits.push_back( boost::shared_ptr<CqBasicSurface>( new CqSurfacePatchBilinear ) );
-	aSplits.push_back( boost::shared_ptr<CqBasicSurface>( new CqSurfacePatchBilinear ) );
+	aSplits.push_back( boost::shared_ptr<CqSurface>( new CqSurfacePatchBilinear ) );
+	aSplits.push_back( boost::shared_ptr<CqSurface>( new CqSurfacePatchBilinear ) );
 
 	// If phantom, create a further two.
 	/// \note: We can actually avoid this, as we only really need three for a phantom patch.
 	if ( m_fHasPhantomFourthVertex )
 	{
-		aSplits.push_back( boost::shared_ptr<CqBasicSurface>( new CqSurfacePatchBilinear ) );
-		aSplits.push_back( boost::shared_ptr<CqBasicSurface>( new CqSurfacePatchBilinear ) );
+		aSplits.push_back( boost::shared_ptr<CqSurface>( new CqSurfacePatchBilinear ) );
+		aSplits.push_back( boost::shared_ptr<CqSurface>( new CqSurfacePatchBilinear ) );
 	}
 	TqBool direction = SplitDir() == SplitDir_U;
 	TqBool opposite = !direction;
@@ -963,7 +963,7 @@ CqBound CqSurfacePatchMeshBicubic::Bound() const
 #define	PatchCoord(v,u)	((((v)%m_nv)*m_nu)+((u)%m_nu))
 #define	PatchCorner(v,u)	((((v)%nvaryingv)*nvaryingu)+((u)%nvaryingu));
 
-TqInt CqSurfacePatchMeshBicubic::Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
+TqInt CqSurfacePatchMeshBicubic::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits )
 {
 	TqInt cSplits = 0;
 
@@ -1195,7 +1195,7 @@ CqBound CqSurfacePatchMeshBilinear::Bound() const
 #define	PatchCoord(v,u)	((((v)%m_nv)*m_nu)+((u)%m_nu))
 #define	PatchCorner(v,u)	((((v)%nvaryingv)*nvaryingu)+((u)%nvaryingu));
 
-TqInt CqSurfacePatchMeshBilinear::Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
+TqInt CqSurfacePatchMeshBilinear::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits )
 {
 	TqInt cSplits = 0;
 

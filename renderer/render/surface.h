@@ -52,28 +52,33 @@ START_NAMESPACE( Aqsis )
 
 
 //----------------------------------------------------------------------
-/** \class CqBasicSurface
+/** \class CqSurface
  * Abstract base surface class, which provides interfaces to geometry.  
  */
 
-class CqBasicSurface : public IqSurface, private boost::noncopyable
+class CqSurface : public IqSurface, private boost::noncopyable, public boost::enable_shared_from_this<CqSurface>
 {
 	public:
-		CqBasicSurface();
-		virtual	~CqBasicSurface()
+		CqSurface();
+
+		virtual	~CqSurface()
 		{
 			// Release our reference on the current attributes.
 			if ( m_pAttributes )
 				RELEASEREF( m_pAttributes );
 			m_pAttributes = 0;
 
+			std::vector<CqParameter*>::iterator iUP;
+			for ( iUP = m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++ )
+				if ( NULL != ( *iUP ) )
+					delete( *iUP );
 			STATS_DEC( GPR_current );
 		}
 
 #ifdef _DEBUG
 		CqString className() const
 		{
-			return CqString("CqBasicSurface");
+			return CqString("CqSurface");
 		}
 #endif
 
@@ -81,54 +86,23 @@ class CqBasicSurface : public IqSurface, private boost::noncopyable
 		{
 		    SplitDir_U,
 		    SplitDir_V,
-	};
+		};
 
-		/** Dice this GPrim.
-		 * \return A pointer to a new micropolygrid..
-		 */
-		virtual	CqMicroPolyGridBase* Dice() = 0;
-		/** Split this GPrim into a number of other GPrims.
-		 * \param aSplits A reference to a CqBasicSurface array to fill in with the new GPrim pointers.
-		 * \return Integer count of new GPrims created.
-		 */
-		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits ) = 0;
-		/** Determine whether this GPrim is diceable at its current size.
-		 */
-		virtual TqBool	Diceable() = 0;
 
 		virtual	void	Reset()
 		{}
-		virtual CqBasicSurface* Clone() const = 0;
 
-		virtual TqBool	IsMotionBlurMatch( CqBasicSurface* pSurf ) = 0;
+		virtual TqBool	IsMotionBlurMatch( CqSurface* pSurf ) = 0;
 
 		virtual CqString	strName() const;
 		virtual	TqInt	Uses() const;
 
-		virtual void	PreDice( TqInt uDiceSize, TqInt vDiceSize )
-		{}
 		virtual TqInt	DiceAll( CqMicroPolyGrid* pGrid )
 		{
 			return(0);
 		}
-		virtual void	NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData )
-		{}
-		virtual void	PostDice(CqMicroPolyGrid * pGrid)
-		{}
 
-		virtual TqInt	PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u )
-		{
-			return ( 0 );
-		}
-		virtual void	NaturalSubdivide( CqParameter* pParam, CqParameter* pParam1, CqParameter* pParam2, TqBool u )
-		{}
-		virtual void	PostSubdivide(std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits)
-		{}
 		virtual void	RenderComplete()
-		{}
-		/** Prepare the trim curve once the surface has been completed.
-		 */
-		virtual	void	PrepareTrimCurve()
 		{}
 
 		/** Get the value of the dice size in u, determined during a Diceable() call
@@ -167,7 +141,7 @@ class CqBasicSurface : public IqSurface, private boost::noncopyable
 		{
 			return ( boost::static_pointer_cast<IqTransform>( m_pTransform ) );
 		}
-		virtual	void	SetSurfaceParameters( const CqBasicSurface& From );
+		virtual	void	SetSurfaceParameters( const CqSurface& From );
 		/** Force this GPrim to be undiceable, usually if it crosses the epsilon and eye plane.
 		 */
 		virtual	void	ForceUndiceable()
@@ -188,9 +162,9 @@ class CqBasicSurface : public IqSurface, private boost::noncopyable
 			m_fDiscard = TqTrue;
 		}
 		/** Copy the information about splitting and dicing from the specified GPrim.
-		 * \param From A CqBasicSurface reference to copy the information from.
+		 * \param From A CqSurface reference to copy the information from.
 		 */
-		virtual void CopySplitInfo( const CqBasicSurface* From )
+		virtual void CopySplitInfo( const CqSurface* From )
 		{
 			m_uDiceSize = From->m_uDiceSize;
 			m_vDiceSize = From->m_vDiceSize;
@@ -260,46 +234,8 @@ class CqBasicSurface : public IqSurface, private boost::noncopyable
 		{
 			return ( m_pCSGNode );
 		}
+ 		virtual CqSurface* Clone() const = 0;
 
-		TqBool	m_fDiceable;		///< Flag to indicate that this GPrim is diceable.
-		TqBool	m_fDiscard;			///< Flag to indicate that this GPrim is to be discarded.
-		TqInt	m_EyeSplitCount;	///< The number of times this GPrim has been split because if crossing the epsilon and eye planes.
-	protected:
-		/** Protected member function to clone the data, used by the Clone() functions
-		 *  on the derived classes.
-		 */
-		void CloneData(CqBasicSurface* clone) const;
-		CqAttributes* m_pAttributes;	///< Pointer to the attributes state associated with this GPrim.
-		CqTransformPtr m_pTransform;		///< Pointer to the transformation state associated with this GPrim.
-
-		TqInt	m_uDiceSize;		///< Calculated dice size to achieve an appropriate shading rate.
-		TqInt	m_vDiceSize;		///< Calculated dice size to achieve an appropriate shading rate.
-		EqSplitDir	m_SplitDir;			///< The direction to split this GPrim to achieve best results.
-		TqBool	m_CachedBound;		///< Whether or not the bound has been cached
-		CqBound	m_Bound;			///< The cached object bound
-		boost::shared_ptr<CqCSGTreeNode>	m_pCSGNode;		///< Pointer to the 'primitive' CSG node this surface belongs to, NULL if not part of a solid.
-		static TqFloat     m_fGridSize;   ///< standard sqrt(gridsize);
-}
-;
-
-
-//----------------------------------------------------------------------
-/** \class CqSurface
- * Abstract base surface class, which provides interfaces to a geometric surface.  
- */
-
-class CqSurface : public CqBasicSurface, public boost::enable_shared_from_this<CqSurface>
-{
-	public:
-		CqSurface();
-
-		virtual	~CqSurface()
-		{
-			std::vector<CqParameter*>::iterator iUP;
-			for ( iUP = m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++ )
-				if ( NULL != ( *iUP ) )
-					delete( *iUP );
-		}
 
 		virtual	void	SetDefaultPrimitiveVariables( TqBool bUseDef_st = TqTrue );
 
@@ -602,12 +538,12 @@ class CqSurface : public CqBasicSurface, public boost::enable_shared_from_this<C
 		virtual void	PostDice(CqMicroPolyGrid * pGrid)
 		{}
 
-		virtual TqInt	PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u )
+		virtual TqInt	PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, TqBool u )
 		{
 			return ( 0 );
 		}
 		virtual void	NaturalSubdivide( CqParameter* pParam, CqParameter* pParam1, CqParameter* pParam2, TqBool u );
-		virtual void	PostSubdivide(std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits)
+		virtual void	PostSubdivide(std::vector<boost::shared_ptr<CqSurface> >& aSplits)
 		{}
 
 		/** Virtual function to indicate whether a particular surface is able
@@ -623,15 +559,19 @@ class CqSurface : public CqBasicSurface, public boost::enable_shared_from_this<C
 		virtual	void	GenerateGeometricNormals( TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pNormals )
 		{}
 
-		// Derived from CqBasicSurface
-
 		virtual	CqMicroPolyGridBase* Dice();
-		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits );
+		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
 		virtual TqBool	Diceable()
 		{
 			return(false);
 		}
 
+
+
+
+		TqBool	m_fDiceable;		///< Flag to indicate that this GPrim is diceable.
+		TqBool	m_fDiscard;			///< Flag to indicate that this GPrim is to be discarded.
+		TqInt	m_EyeSplitCount;	///< The number of times this GPrim has been split because if crossing the epsilon and eye planes.
 	protected:
 		/** Protected member function to clone the data, used by the Clone() functions
 		 *  on the derived classes.
@@ -680,8 +620,19 @@ class CqSurface : public CqBasicSurface, public boost::enable_shared_from_this<C
 			}
 		}
 
+		CqAttributes* m_pAttributes;	///< Pointer to the attributes state associated with this GPrim.
+		CqTransformPtr m_pTransform;		///< Pointer to the transformation state associated with this GPrim.
+
+		TqInt	m_uDiceSize;		///< Calculated dice size to achieve an appropriate shading rate.
+		TqInt	m_vDiceSize;		///< Calculated dice size to achieve an appropriate shading rate.
+		EqSplitDir	m_SplitDir;			///< The direction to split this GPrim to achieve best results.
+		TqBool	m_CachedBound;		///< Whether or not the bound has been cached
+		CqBound	m_Bound;			///< The cached object bound
+		boost::shared_ptr<CqCSGTreeNode>	m_pCSGNode;		///< Pointer to the 'primitive' CSG node this surface belongs to, NULL if not part of a solid.
+		static TqFloat     m_fGridSize;   ///< standard sqrt(gridsize);
 }
 ;
+
 
 
 //----------------------------------------------------------------------
@@ -689,10 +640,10 @@ class CqSurface : public CqBasicSurface, public boost::enable_shared_from_this<C
  * Templatised class containing a series of motion stages of a specific surface type for motion blurring.
  */
 
-class CqDeformingSurface : public CqBasicSurface, public CqMotionSpec<boost::shared_ptr<CqBasicSurface> >
+class CqDeformingSurface : public CqSurface, public CqMotionSpec<boost::shared_ptr<CqSurface> >
 {
 	public:
-		CqDeformingSurface( boost::shared_ptr<CqBasicSurface> const& a ) : CqBasicSurface(), CqMotionSpec<boost::shared_ptr<CqBasicSurface> >( a )
+		CqDeformingSurface( boost::shared_ptr<CqSurface> const& a ) : CqSurface(), CqMotionSpec<boost::shared_ptr<CqSurface> >( a )
 		{}
 		virtual	~CqDeformingSurface()
 		{}
@@ -726,9 +677,9 @@ class CqDeformingSurface : public CqBasicSurface, public CqMotionSpec<boost::sha
 		}
 		/** Split this GPrim, creating a series of CqDeformingSurface with all times in.
 		 */
-		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
+		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits )
 		{
-			std::vector<std::vector<boost::shared_ptr<CqBasicSurface> > > aaMotionSplits;
+			std::vector<std::vector<boost::shared_ptr<CqSurface> > > aaMotionSplits;
 			aaMotionSplits.resize( cTimes() );
 			TqInt cSplits = 0;
 			TqInt i;
@@ -749,13 +700,13 @@ class CqDeformingSurface : public CqBasicSurface, public CqMotionSpec<boost::sha
 			// Now build motion surfaces from the splits and pass them back.
 			for ( i = 0; i < cSplits; i++ )
 			{
-				boost::shared_ptr<CqDeformingSurface> pNewMotion( new CqDeformingSurface( boost::shared_ptr<CqBasicSurface>() ) );
+				boost::shared_ptr<CqDeformingSurface> pNewMotion( new CqDeformingSurface( boost::shared_ptr<CqSurface>() ) );
 				pNewMotion->m_fDiceable = TqTrue;
 				pNewMotion->m_EyeSplitCount = m_EyeSplitCount;
 				TqInt j;
 				for ( j = 0; j < cTimes(); j++ )
 					pNewMotion->AddTimeSlot( Time( j ), aaMotionSplits[ j ][ i ] );
-				aSplits.push_back( boost::static_pointer_cast<CqBasicSurface>( pNewMotion ) );
+				aSplits.push_back( boost::static_pointer_cast<CqSurface>( pNewMotion ) );
 			}
 			return ( cSplits );
 		}
@@ -773,17 +724,20 @@ class CqDeformingSurface : public CqBasicSurface, public CqMotionSpec<boost::sha
 			return ( f );
 		}
 
-		virtual CqBasicSurface* Clone() const
+		virtual CqSurface* Clone() const
 		{
-			CqDeformingSurface* clone = new CqDeformingSurface(GetDefaultObject());
-			clone->CqMotionSpec<boost::shared_ptr<CqBasicSurface> >::operator=(*this);
-			return(clone);
+/* 			CqDeformingSurface* clone = new CqDeformingSurface(GetDefaultObject());
+ * 			clone->CqMotionSpec<boost::shared_ptr<CqSurface> >::operator=(*this);
+ * 			return(clone);
+ */
+			return(NULL);
 		}
+
 
 		/** Determine whether the passed surface is valid to be used as a
 		 *  frame in motion blur for this surface.
 		 */
-		virtual TqBool	IsMotionBlurMatch( CqBasicSurface* pSurf )
+		virtual TqBool	IsMotionBlurMatch( CqSurface* pSurf )
 		{
 			return( TqFalse );
 		}
@@ -807,7 +761,7 @@ class CqDeformingSurface : public CqBasicSurface, public CqMotionSpec<boost::sha
 		/** Set the surface parameters of all GPrims to match those on the spefified one.
 		 * \param From GPrim to copy parameters from.
 		 */
-		virtual	void	SetSurfaceParameters( const CqBasicSurface& From )
+		virtual	void	SetSurfaceParameters( const CqSurface& From )
 		{
 			TqInt i;
 			for ( i = 0; i < cTimes(); i++ )
@@ -817,7 +771,7 @@ class CqDeformingSurface : public CqBasicSurface, public CqMotionSpec<boost::sha
 		 */
 		virtual	void	ForceUndiceable()
 		{
-			CqBasicSurface::ForceUndiceable();
+			CqSurface::ForceUndiceable();
 			TqInt i;
 			for ( i = 0; i < cTimes(); i++ )
 				GetMotionObject( Time( i ) ) ->ForceUndiceable();
@@ -827,7 +781,7 @@ class CqDeformingSurface : public CqBasicSurface, public CqMotionSpec<boost::sha
 		 */
 		virtual	void	Discard()
 		{
-			CqBasicSurface::Discard();
+			CqSurface::Discard();
 			TqInt i;
 			for ( i = 0; i < cTimes(); i++ )
 				GetMotionObject( Time( i ) ) ->Discard();
@@ -850,14 +804,14 @@ class CqDeformingSurface : public CqBasicSurface, public CqMotionSpec<boost::sha
 			return ( GetMotionObject( Time( 0 ) ) ->cFaceVarying() );
 		}
 		// Overrides from CqMotionSpec
-		virtual	void	ClearMotionObject( boost::shared_ptr<CqBasicSurface>& A ) const
+		virtual	void	ClearMotionObject( boost::shared_ptr<CqSurface>& A ) const
 			{}
 		;
-		virtual	boost::shared_ptr<CqBasicSurface>	ConcatMotionObjects( boost::shared_ptr<CqBasicSurface> const& A, boost::shared_ptr<CqBasicSurface> const& B ) const
+		virtual	boost::shared_ptr<CqSurface>	ConcatMotionObjects( boost::shared_ptr<CqSurface> const& A, boost::shared_ptr<CqSurface> const& B ) const
 		{
 			return ( A );
 		}
-		virtual	boost::shared_ptr<CqBasicSurface>	LinearInterpolateMotionObjects( TqFloat Fraction, boost::shared_ptr<CqBasicSurface> const& A, boost::shared_ptr<CqBasicSurface> const& B ) const
+		virtual	boost::shared_ptr<CqSurface>	LinearInterpolateMotionObjects( TqFloat Fraction, boost::shared_ptr<CqSurface> const& A, boost::shared_ptr<CqSurface> const& B ) const
 		{
 			return ( A );
 		}

@@ -482,7 +482,7 @@ class CqSubdivision2 : public CqMotionSpec<boost::shared_ptr<CqPolygonPoints> >
 
 
 
-class CqSurfaceSubdivisionPatch : public CqBasicSurface
+class CqSurfaceSubdivisionPatch : public CqSurface
 {
 	public:
 		CqSurfaceSubdivisionPatch( const boost::shared_ptr<CqSubdivision2>& pTopology, CqLath* pFace, TqInt faceIndex)
@@ -551,10 +551,10 @@ class CqSurfaceSubdivisionPatch : public CqBasicSurface
 			return ( 0 );
 		}
 
-		// Implementations required by CqBasicSurface
+		// Implementations required by CqSurface
 		virtual	CqBound	Bound() const;
 		virtual	CqMicroPolyGridBase* Dice();
-		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits );
+		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
 		virtual TqBool	Diceable();
 
 		virtual	CqMicroPolyGridBase* DiceExtract();
@@ -562,16 +562,16 @@ class CqSurfaceSubdivisionPatch : public CqBasicSurface
 		/** Determine whether the passed surface is valid to be used as a
 		 *  frame in motion blur for this surface.
 		 */
-		virtual TqBool	IsMotionBlurMatch( CqBasicSurface* pSurf )
+		virtual TqBool	IsMotionBlurMatch( CqSurface* pSurf )
 		{
 			return( TqFalse );
 		}
 
 		void StoreDice( CqMicroPolyGrid* pGrid, const boost::shared_ptr<CqPolygonPoints>& pPoints, TqInt iParam, TqInt iFVParam, TqInt iVData);
 		boost::shared_ptr<CqSubdivision2> Extract( TqInt iTime );
-		virtual CqBasicSurface* Clone() const
+
+		virtual CqSurface* Clone() const
 		{
-			//return(new CqSurfaceSubdivisionPatch(*this));
 			return(NULL);
 		}
 
@@ -617,10 +617,10 @@ class CqSurfaceSubdivisionMesh : public CqSurface
 			return(NULL);
 		}
 		/** Split this GPrim into a number of other GPrims.
-		 * \param aSplits A reference to a CqBasicSurface array to fill in with the new GPrim pointers.
+		 * \param aSplits A reference to a CqSurface array to fill in with the new GPrim pointers.
 		 * \return Integer count of new GPrims created.
 		 */
-		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits );
+		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
 		/** Determine whether this GPrim is diceable at its current size.
 		 */
 		virtual TqBool	Diceable()
@@ -634,7 +634,7 @@ class CqSurfaceSubdivisionMesh : public CqSurface
 			m_pTopology->pPoints()->Transform( matTx, matITTx, matRTx, iTime );
 		}
 
-		virtual TqBool	IsMotionBlurMatch( CqBasicSurface* pSurf )
+		virtual TqBool	IsMotionBlurMatch( CqSurface* pSurf )
 		{
 			return( TqFalse );
 		}
@@ -661,7 +661,7 @@ class CqSurfaceSubdivisionMesh : public CqSurface
 			assert( m_pTopology->pPoints() );
 			return ( m_pTopology->pPoints()->cFaceVarying() );
 		}
-		virtual CqBasicSurface* Clone() const
+		virtual CqSurface* Clone() const
 		{
 			//return(new CqSurfaceSubdivisionMesh(*this));
 			return(NULL);

@@ -657,7 +657,7 @@ CqBound	CqTeapot::Bound() const
 /** Split this GPrim into bicubic patches.
  */
 
-TqInt CqTeapot::Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
+TqInt CqTeapot::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits )
 {
 
 

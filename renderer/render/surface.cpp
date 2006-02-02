@@ -32,94 +32,14 @@
 
 START_NAMESPACE( Aqsis )
 
-TqFloat CqBasicSurface::m_fGridSize = sqrt(256.0);
-
-//---------------------------------------------------------------------
-/** Default constructor
- */
-
-CqBasicSurface::CqBasicSurface() : m_fDiceable( TqTrue ), m_fDiscard( TqFalse ), m_EyeSplitCount( 0 ),
-		m_pAttributes( 0 ), m_SplitDir( SplitDir_U )
-{
-	// Set a refernce with the current attributes.
-	m_pAttributes = const_cast<CqAttributes*>( QGetRenderContext() ->pattrCurrent() );
-	ADDREF( m_pAttributes );
-
-	m_pTransform = QGetRenderContext() ->ptransCurrent();
-
-	m_CachedBound = TqFalse;
-
-	// If the current context is a solid node, and is a 'primitive', attatch this surface to the node.
-	if ( QGetRenderContext() ->pconCurrent() ->isSolid() )
-	{
-		CqModeBlock * pSolid = QGetRenderContext() ->pconCurrent().get();
-		if ( pSolid->pCSGNode() ->NodeType() == CqCSGTreeNode::CSGNodeType_Primitive )
-		{
-			m_pCSGNode = pSolid->pCSGNode();
-		}
-		else
-		{
-			CqString objname( "unnamed" );
-			const CqString* pattrName = m_pAttributes->GetStringAttribute( "identifier", "name" );
-			if ( pattrName != 0 )
-				objname = pattrName[ 0 ];
-			Aqsis::log() << warning << "Primitive \"" << objname.c_str() << "\" defined when not in 'Primitive' solid block" << std::endl;
-		}
-	}
-
-	STATS_INC( GPR_allocated );
-	STATS_INC( GPR_current );
-	TqInt cGprim = STATS_GETI( GPR_current );
-	TqInt cPeak = STATS_GETI( GPR_peak );
-	STATS_SETI( GPR_peak, cGprim > cPeak ? cGprim : cPeak );
-}
-
-
-//---------------------------------------------------------------------
-/** Copy constructor
- */
-
-/*CqBasicSurface::CqBasicSurface( const CqBasicSurface& From ) : m_fDiceable( TqTrue ), m_SplitDir( SplitDir_U )
-{
-	*this = From;
-
-	// Set a reference with the donors attributes.
-	m_pAttributes = From.m_pAttributes;
-	ADDREF( m_pAttributes );
-
-	m_pTransform = From.m_pTransform;
-
-	m_CachedBound = From.m_CachedBound;
-	m_Bound = From.m_Bound;
-
-	STATS_INC( GPR_allocated );
-	STATS_INC( GPR_current );
-	TqInt cGprim = STATS_GETI( GPR_current );
-	TqInt cPeak = STATS_GETI( GPR_peak );
-	STATS_SETI( GPR_peak, cGprim > cPeak ? cGprim : cPeak );
-}*/
-
-
-//---------------------------------------------------------------------
-/** Clone the data on this CqBasicSurface into the (possibly derived) clone
- *  passed in.
- */
-
-void CqBasicSurface::CloneData( CqBasicSurface* clone ) const
-{
-	clone->m_fDiceable = m_fDiceable;
-	clone->m_EyeSplitCount = m_EyeSplitCount;
-	clone->m_fDiscard = m_fDiscard;
-
-	clone->SetSurfaceParameters( *this );
-}
+TqFloat CqSurface::m_fGridSize = sqrt(256.0);
 
 
 //---------------------------------------------------------------------
 /** Copy the local surface parameters from the donor surface.
  */
 
-void CqBasicSurface::SetSurfaceParameters( const CqBasicSurface& From )
+void CqSurface::SetSurfaceParameters( const CqSurface& From )
 {
 	// If we already have attributes, unreference them now as we don't need them anymore.
 	if ( m_pAttributes )
@@ -140,7 +60,7 @@ void CqBasicSurface::SetSurfaceParameters( const CqBasicSurface& From )
  * otherwise return "not named"
  */
 
-CqString CqBasicSurface::strName() const
+CqString CqSurface::strName() const
 {
 	const CqString * pattrLightName = pAttributes() ->GetStringAttribute( "identifier", "name" );
 	CqString strName( "not named" );
@@ -155,7 +75,7 @@ CqString CqBasicSurface::strName() const
 /** Work out which standard shader variables this surface requires by looking at the shaders.
  */
 
-TqInt CqBasicSurface::Uses() const
+TqInt CqSurface::Uses() const
 {
 	TqInt Uses = gDefUses | QGetRenderContext()->pDDmanager()->Uses();
 	boost::shared_ptr<IqShader> pshadSurface = pAttributes() ->pshadSurface(QGetRenderContextI()->Time());
@@ -191,7 +111,7 @@ TqInt CqBasicSurface::Uses() const
 /** Adjust the bound of the quadric taking into account transformation motion blur.
  */
 
-CqBound	CqBasicSurface::AdjustBoundForTransformationMotion( const CqBound& B ) const
+CqBound	CqSurface::AdjustBoundForTransformationMotion( const CqBound& B ) const
 {
 	CqBound Bm( B );
 
@@ -219,22 +139,47 @@ CqBound	CqBasicSurface::AdjustBoundForTransformationMotion( const CqBound& B ) c
 /** Default constructor
  */
 
-CqSurface::CqSurface() : CqBasicSurface()
+CqSurface::CqSurface() : m_fDiceable( TqTrue ), m_fDiscard( TqFalse ), m_EyeSplitCount( 0 ),
+		m_pAttributes( 0 ), m_SplitDir( SplitDir_U )
 {
+	// Set a refernce with the current attributes.
+	m_pAttributes = const_cast<CqAttributes*>( QGetRenderContext() ->pattrCurrent() );
+	ADDREF( m_pAttributes );
+
+	m_pTransform = QGetRenderContext() ->ptransCurrent();
+
+	m_CachedBound = TqFalse;
+
+	// If the current context is a solid node, and is a 'primitive', attatch this surface to the node.
+	if ( QGetRenderContext() ->pconCurrent() ->isSolid() )
+	{
+		CqModeBlock * pSolid = QGetRenderContext() ->pconCurrent().get();
+		if ( pSolid->pCSGNode() ->NodeType() == CqCSGTreeNode::CSGNodeType_Primitive )
+		{
+			m_pCSGNode = pSolid->pCSGNode();
+		}
+		else
+		{
+			CqString objname( "unnamed" );
+			const CqString* pattrName = m_pAttributes->GetStringAttribute( "identifier", "name" );
+			if ( pattrName != 0 )
+				objname = pattrName[ 0 ];
+			Aqsis::log() << warning << "Primitive \"" << objname.c_str() << "\" defined when not in 'Primitive' solid block" << std::endl;
+		}
+	}
+
+
 	// Nullify the standard primitive variables index table.
 	TqInt i;
 	for ( i = 0; i < EnvVars_Last; i++ )
 		m_aiStdPrimitiveVars[ i ] = -1;
+
+	STATS_INC( GPR_allocated );
+	STATS_INC( GPR_current );
+	TqInt cGprim = STATS_GETI( GPR_current );
+	TqInt cPeak = STATS_GETI( GPR_peak );
+	STATS_SETI( GPR_peak, cGprim > cPeak ? cGprim : cPeak );
 }
-
-//---------------------------------------------------------------------
-/** Copy constructor
- */
-
-/*CqSurface::CqSurface( const CqSurface& From )
-{
-	*this = From;
-}*/
 
 
 //---------------------------------------------------------------------
@@ -244,7 +189,12 @@ CqSurface::CqSurface() : CqBasicSurface()
 
 void CqSurface::CloneData( CqSurface* clone ) const
 {
-	CqBasicSurface::CloneData( clone );
+	clone->m_fDiceable = m_fDiceable;
+	clone->m_EyeSplitCount = m_EyeSplitCount;
+	clone->m_fDiscard = m_fDiscard;
+
+	clone->SetSurfaceParameters( *this );
+
 	// Nullify the standard primitive variables index table.
 	TqInt i;
 	for ( i = 0; i < EnvVars_Last; i++ )
@@ -570,7 +520,7 @@ CqMicroPolyGridBase* CqSurface::Dice()
 }
 
 
-TqInt CqSurface::Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
+TqInt CqSurface::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits )
 {
 	TqInt cSplits = PreSubdivide( aSplits, m_SplitDir == SplitDir_U );
 
@@ -604,8 +554,8 @@ TqInt CqSurface::Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits
 
 	if ( !m_fDiceable )
 	{
-		std::vector<boost::shared_ptr<CqBasicSurface> > aSplits0;
-		std::vector<boost::shared_ptr<CqBasicSurface> > aSplits1;
+		std::vector<boost::shared_ptr<CqSurface> > aSplits0;
+		std::vector<boost::shared_ptr<CqSurface> > aSplits1;
 
 		cSplits = aSplits[ 0 ] ->Split( aSplits0 );
 		cSplits += aSplits[ 1 ] ->Split( aSplits1 );

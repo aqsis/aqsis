@@ -135,20 +135,20 @@ class CqPoints : public CqSurface
 		virtual void	RenderComplete()
 		{
 			ClearKDTree();
-			CqBasicSurface::RenderComplete();
+			CqSurface::RenderComplete();
 		}
 		/** Determine whether the passed surface is valid to be used as a
 		 *  frame in motion blur for this surface.
 		 */
-		virtual TqBool	IsMotionBlurMatch( CqBasicSurface* pSurf )
+		virtual TqBool	IsMotionBlurMatch( CqSurface* pSurf )
 		{
 			return( TqFalse );
 		}
 
 		virtual	CqBound	Bound() const;
-		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits );
+		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
 
-		virtual CqBasicSurface* Clone() const;
+		virtual CqSurface* Clone() const;
 
 		TqUint	nVertices() const
 		{
@@ -170,7 +170,7 @@ class CqPoints : public CqSurface
 		{
 			return ( pPoints()->aUserParams() );
 		}
-		TqInt CopySplit( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, CqPoints* pFrom1, CqPoints* pFrom2 );
+		TqInt CopySplit( std::vector<boost::shared_ptr<CqSurface> >& aSplits, CqPoints* pFrom1, CqPoints* pFrom2 );
 
 		/** Returns a const reference to the "constantwidth" parameter, or
 		 * NULL if the parameter is not present. */
@@ -539,7 +539,7 @@ class CqMicroPolygonMotionPoints : public CqMicroPolygon
 class CqDeformingPointsSurface : public CqDeformingSurface
 {
 	public:
-		CqDeformingPointsSurface( const boost::shared_ptr<CqBasicSurface>& a ) : CqDeformingSurface( a )
+		CqDeformingPointsSurface( const boost::shared_ptr<CqSurface>& a ) : CqDeformingSurface( a )
 		{}
 		virtual	~CqDeformingPointsSurface()
 		{}
@@ -560,9 +560,9 @@ class CqDeformingPointsSurface : public CqDeformingSurface
 		}
 		/** Split this GPrim, creating a series of CqDeformingSurface with all times in.
 		 */
-		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
+		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits )
 		{
-			std::vector<std::vector<boost::shared_ptr<CqBasicSurface> > > aaMotionSplits;
+			std::vector<std::vector<boost::shared_ptr<CqSurface> > > aaMotionSplits;
 			aaMotionSplits.resize( cTimes() );
 			TqInt cSplits = 0;
 			TqInt i;
@@ -578,7 +578,7 @@ class CqDeformingPointsSurface : public CqDeformingSurface
 			// Now build motion surfaces from the splits and pass them back.
 			for ( i = 0; i < cSplits; i++ )
 			{
-				boost::shared_ptr<CqDeformingPointsSurface> pNewMotion( new CqDeformingPointsSurface( boost::shared_ptr<CqBasicSurface>() ) );
+				boost::shared_ptr<CqDeformingPointsSurface> pNewMotion( new CqDeformingPointsSurface( boost::shared_ptr<CqSurface>() ) );
 				pNewMotion->m_fDiceable = TqTrue;
 				pNewMotion->m_EyeSplitCount = m_EyeSplitCount;
 				TqInt j;
@@ -596,7 +596,7 @@ class CqDeformingPointsSurface : public CqDeformingSurface
 				CqPoints* Points = static_cast<CqPoints*>( GetMotionObject( Time( i ) ).get() );
 				Points->ClearKDTree();
 			}
-			CqBasicSurface::RenderComplete();
+			CqSurface::RenderComplete();
 		}
 	protected:
 };

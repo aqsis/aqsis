@@ -47,10 +47,10 @@ class CqProcedural : public CqSurface
 		CqProcedural();
 		CqProcedural(RtPointer, CqBound&, RtProcSubdivFunc, RtProcFreeFunc);
 		/** Split this GPrim into a number of other GPrims.
-		 * \param aSplits A reference to a CqBasicSurface array to fill in with the new GPrim pointers.
+		 * \param aSplits A reference to a CqSurface array to fill in with the new GPrim pointers.
 		 * \return Integer count of new GPrims created.
 		 */
-		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits );
+		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
 		virtual ~CqProcedural();
 
 		//---------------------------------------------- Inlined Public Methods
@@ -74,7 +74,7 @@ class CqProcedural : public CqSurface
 		/** Determine whether the passed surface is valid to be used as a
 		 *  frame in motion blur for this surface.
 		 */
-		virtual TqBool	IsMotionBlurMatch( CqBasicSurface* pSurf )
+		virtual TqBool	IsMotionBlurMatch( CqSurface* pSurf )
 		{
 			return( TqFalse );
 		}
@@ -101,7 +101,7 @@ class CqProcedural : public CqSurface
 			/// \todo Must work out what this value should be.
 			return ( 0 );
 		}
-		virtual CqBasicSurface* Clone() const
+		virtual CqSurface* Clone() const
 		{
 			//return(new CqProcedural(*this));
 			return(NULL);

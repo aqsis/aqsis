@@ -97,7 +97,7 @@ using namespace Aqsis;
 
 static RtBoolean ProcessPrimitiveVariables( CqSurface* pSurface, PARAMETERLIST );
 static void ProcessCompression( TqInt *compress, TqInt *quality, TqInt count, RtToken *tokens, RtPointer *values );
-RtVoid	CreateGPrim( const boost::shared_ptr<CqBasicSurface>& pSurface );
+RtVoid	CreateGPrim( const boost::shared_ptr<CqSurface>& pSurface );
 void SetShaderArgument( const boost::shared_ptr<IqShader>& pShader, const char* name, TqPchar val );
 TqBool	ValidateState(...);
 
@@ -286,7 +286,7 @@ template<class T>
 inline
 RtVoid	CreateGPrim( const boost::shared_ptr<T>& pSurface )
 {
-	CreateGPrim( boost::static_pointer_cast<CqBasicSurface,T>( pSurface ) );
+	CreateGPrim( boost::static_pointer_cast<CqSurface,T>( pSurface ) );
 }
 
 //----------------------------------------------------------------------
@@ -3938,9 +3938,9 @@ RtVoid RiCurvesV( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, 
 			                     QGetRenderContext() ->matNSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
 			                     QGetRenderContext() ->matVSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ) );
 
-			std::vector<boost::shared_ptr<CqBasicSurface> > aSplits;
+			std::vector<boost::shared_ptr<CqSurface> > aSplits;
 			pSurface->Split( aSplits );
-			std::vector<boost::shared_ptr<CqBasicSurface> >::iterator iSS;
+			std::vector<boost::shared_ptr<CqSurface> >::iterator iSS;
 			for ( iSS = aSplits.begin(); iSS != aSplits.end(); ++iSS )
 			{
 				CreateGPrim( *iSS );
@@ -4513,9 +4513,9 @@ RtVoid	RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vw
 		{
 			// Fill in default values for all primitive variables not explicitly specified.
 			pSurface->SetDefaultPrimitiveVariables();
-			std::vector<boost::shared_ptr<CqBasicSurface> > aSplits;
+			std::vector<boost::shared_ptr<CqSurface> > aSplits;
 			pSurface->Split( aSplits );
-			std::vector<boost::shared_ptr<CqBasicSurface> >::iterator iSS;
+			std::vector<boost::shared_ptr<CqSurface> >::iterator iSS;
 			for ( iSS = aSplits.begin(); iSS != aSplits.end(); ++iSS )
 			{
 				CqMatrix matuBasis = pSurface->pAttributes() ->GetMatrixAttribute( "System", "Basis" ) [ 0 ];
@@ -5123,7 +5123,7 @@ RtVoid	RiGeometryV( RtToken type, PARAMETERLIST )
 			                  QGetRenderContext() ->matNSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
 			                  QGetRenderContext() ->matVSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ) );
 
-			CreateGPrim( boost::static_pointer_cast<CqBasicSurface>( pMesh ) );
+			CreateGPrim( boost::static_pointer_cast<CqSurface>( pMesh ) );
 		}
 	}
 	else if ( strcmp( type, "sphere" ) == 0 )
@@ -6452,7 +6452,7 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface * pSurface, PARAMETERLIST 
 // CreateGPrin
 // Create and register a GPrim according to the current attributes/transform
 //
-RtVoid	CreateGPrim( const boost::shared_ptr<CqBasicSurface>& pSurface )
+RtVoid	CreateGPrim( const boost::shared_ptr<CqSurface>& pSurface )
 {
 
 	if ( QGetRenderContext() ->pattrCurrent() ->GetFloatAttribute( "System", "LevelOfDetailBounds" ) [ 1 ] < 0.0f )

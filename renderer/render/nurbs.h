@@ -303,13 +303,13 @@ class CqSurfaceNURBS : public CqSurface
 		virtual	void	GenerateGeometricNormals( TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pNormals );
 
 		virtual	CqBound	Bound() const;
-		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits );
+		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
 		virtual TqBool	Diceable();
 
 		/** Determine whether the passed surface is valid to be used as a
 		 *  frame in motion blur for this surface.
 		 */
-		virtual TqBool	IsMotionBlurMatch( CqBasicSurface* pSurf )
+		virtual TqBool	IsMotionBlurMatch( CqSurface* pSurf )
 		{
 			return( TqFalse );
 		}
@@ -363,7 +363,7 @@ class CqSurfaceNURBS : public CqSurface
 		{
 			m_TrimLoops.Prepare( this );
 		}
-		virtual CqBasicSurface* Clone() const
+		virtual CqSurface* Clone() const
 		{
 			//return(new CqSurfaceNURBS(*this));
 			return(NULL);

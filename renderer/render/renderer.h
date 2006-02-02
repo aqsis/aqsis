@@ -262,8 +262,8 @@ class CqRenderer : public IqRenderer
 		 */
 		virtual void	PrepareShaders();
 
-		void	PostSurface( const boost::shared_ptr<CqBasicSurface>& pSurface );
-		void	StorePrimitive( const boost::shared_ptr<CqBasicSurface>& pSurface );
+		void	PostSurface( const boost::shared_ptr<CqSurface>& pSurface );
+		void	StorePrimitive( const boost::shared_ptr<CqSurface>& pSurface );
 		void	PostWorld();
 		void	PostCloneOfWorld();
 
@@ -540,7 +540,7 @@ class CqRenderer : public IqRenderer
 
 		CqClippingVolume	m_clippingVolume;
 
-		std::deque<boost::shared_ptr<CqBasicSurface> >	m_aWorld;
+		std::deque<boost::shared_ptr<CqSurface> >	m_aWorld;
 
 	public:
 		std::vector<SqCoordSys>	m_aCoordSystems;		///< List of reistered coordinate systems.

@@ -1349,7 +1349,7 @@ void CqSurfaceSubdivisionPatch::StoreDice( CqMicroPolyGrid* pGrid, const boost::
 	}
 }
 
-TqInt CqSurfaceSubdivisionPatch::Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
+TqInt CqSurfaceSubdivisionPatch::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits )
 {
 	assert( pTopology() );
 	assert( pTopology()->pPoints() );
@@ -1565,7 +1565,7 @@ TqInt CqSurfaceSubdivisionPatch::Split( std::vector<boost::shared_ptr<CqBasicSur
 			aSplits.push_back(apSurfaces[ 0 ]);
 		else if( apSurfaces.size() > 1 )
 		{
-			boost::shared_ptr<CqDeformingSurface> pMotionSurface( new CqDeformingSurface( boost::shared_ptr<CqBasicSurface>() ) );
+			boost::shared_ptr<CqDeformingSurface> pMotionSurface( new CqDeformingSurface( boost::shared_ptr<CqSurface>() ) );
 			for( iTime = 0; iTime < pTopology()->cTimes(); iTime++ )
 			{
 				RtFloat time = pTopology()->Time( iTime );
@@ -1763,7 +1763,7 @@ CqBound	CqSurfaceSubdivisionMesh::Bound() const
 	return( AdjustBoundForTransformationMotion( B ) );
 }
 
-TqInt CqSurfaceSubdivisionMesh::Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
+TqInt CqSurfaceSubdivisionMesh::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits )
 {
 	TqInt	CreatedPolys = 0;
 	TqInt	face;

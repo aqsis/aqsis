@@ -1515,7 +1515,7 @@ void CqSurfaceNURBS::GenerateGeometricNormals( TqInt uDiceSize, TqInt vDiceSize,
 /** Split the patch into smaller patches.
  */
 
-TqInt CqSurfaceNURBS::Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
+TqInt CqSurfaceNURBS::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits )
 {
 	TqInt cSplits = 0;
 
@@ -1579,8 +1579,8 @@ TqInt CqSurfaceNURBS::Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aS
 
 	if ( !m_fDiceable )
 	{
-		std::vector<boost::shared_ptr<CqBasicSurface> > aSplits0;
-		std::vector<boost::shared_ptr<CqBasicSurface> > aSplits1;
+		std::vector<boost::shared_ptr<CqSurface> > aSplits0;
+		std::vector<boost::shared_ptr<CqSurface> > aSplits1;
 
 		cSplits = aSplits[ 0 ] ->Split( aSplits0 );
 		cSplits += aSplits[ 1 ] ->Split( aSplits1 );

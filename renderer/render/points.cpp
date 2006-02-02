@@ -98,7 +98,7 @@ CqPoints::CqPoints( TqInt nvertices, const boost::shared_ptr<CqPolygonPoints>& p
 /** Create a clone of this points class
  */
 
-CqBasicSurface* CqPoints::Clone() const 
+CqSurface* CqPoints::Clone() const 
 {
 	// Make a 'complete' clone of this primitive, which means cloning the points too.
 	CqPolygonPoints* clone_points = static_cast<CqPolygonPoints*>(m_pPoints->Clone());
@@ -340,7 +340,7 @@ CqBound	CqPoints::Bound() const
 /** Split this GPrim into bicubic patches.
  */
 
-TqInt CqPoints::Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
+TqInt CqPoints::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits )
 {
  	TqInt median = nVertices()/2;
  	// Split the KDTree and create two new primitives containing the split points set.
@@ -366,7 +366,7 @@ TqInt CqPoints::Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits 
 /** Split the points, taking the split information from the specified donor points surfaces.
  */
 
-TqInt CqPoints::CopySplit( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, CqPoints* pFrom1, CqPoints* pFrom2 )
+TqInt CqPoints::CopySplit( std::vector<boost::shared_ptr<CqSurface> >& aSplits, CqPoints* pFrom1, CqPoints* pFrom2 )
 {
 	// Split the KDTree and create two new primitives containing the split points set.
  	boost::shared_ptr<CqPoints> pA( new CqPoints( m_nVertices, pPoints() ) );
