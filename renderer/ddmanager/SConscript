@@ -1,9 +1,11 @@
 Import('env')
 ddmanager_sources = Split("""
-	ddmanager.cpp""")
+	ddmanager.cpp
+	debugdd.cpp""")
 
 ddmanager_headers = Split("""
 	ddmanager.h
+	debugdd.h
 	ndspy.h""")
 
 # Set any platform specific options for this target

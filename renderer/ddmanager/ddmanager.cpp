@@ -38,6 +38,7 @@
 #include	"logging.h"
 #include	"ndspy.h"
 #include	"version.h"
+#include	"debugdd.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -346,52 +347,67 @@ void CqDDManager::LoadDisplayLibrary( SqDisplayRequest& req )
 		}
 	}
 
+	Aqsis::log() << debug << "Attempting to load \"" << strDriverFile.c_str() << "\" for display type \""<< displayType.c_str() << "\"" << std::endl;
+
 	// Display type not found.
 	if ( strDriverFile.empty() )
 		throw( CqString( "Invalid display type \"" ) + CqString( req.m_type ) + CqString( "\"" ) + CqString(" (") + strDriverFile + CqString(")") );
 
-	// Try to open the file to see if it's really there
-	CqRiFile fileDriver( strDriverFile.c_str(), "display" );
-
-	if ( !fileDriver.IsValid() )
-		throw( CqString( "Error loading display driver [ " ) + strDriverFile + CqString( " ]" ) );
-
-	CqString strDriverPathAndFile = fileDriver.strRealName();
-
-	// Load the dynamic obejct and locate the relevant symbols.
-	req.m_DriverHandle = m_DspyPlugin.SimpleDLOpen( &strDriverPathAndFile );
-	if( req.m_DriverHandle != NULL )
+	if( strDriverFile != "debugdd")
 	{
-		req.m_OpenMethod = (DspyImageOpenMethod)m_DspyPlugin.SimpleDLSym( req.m_DriverHandle, &m_strOpenMethod );
-		if (!req.m_OpenMethod)
+		// Try to open the file to see if it's really there
+		CqRiFile fileDriver( strDriverFile.c_str(), "display" );
+
+		if ( !fileDriver.IsValid() )
+			throw( CqString( "Error loading display driver [ " ) + strDriverFile + CqString( " ]" ) );
+
+		CqString strDriverPathAndFile = fileDriver.strRealName();
+
+		// Load the dynamic obejct and locate the relevant symbols.
+		req.m_DriverHandle = m_DspyPlugin.SimpleDLOpen( &strDriverPathAndFile );
+		if( req.m_DriverHandle != NULL )
 		{
-			m_strOpenMethod = "_" + m_strOpenMethod;
 			req.m_OpenMethod = (DspyImageOpenMethod)m_DspyPlugin.SimpleDLSym( req.m_DriverHandle, &m_strOpenMethod );
-		}
-		req.m_QueryMethod = (DspyImageQueryMethod)m_DspyPlugin.SimpleDLSym( req.m_DriverHandle, &m_strQueryMethod );
-		if (!req.m_QueryMethod)
-		{
-			m_strQueryMethod = "_" + m_strQueryMethod;
+			if (!req.m_OpenMethod)
+			{
+				m_strOpenMethod = "_" + m_strOpenMethod;
+				req.m_OpenMethod = (DspyImageOpenMethod)m_DspyPlugin.SimpleDLSym( req.m_DriverHandle, &m_strOpenMethod );
+			}
 			req.m_QueryMethod = (DspyImageQueryMethod)m_DspyPlugin.SimpleDLSym( req.m_DriverHandle, &m_strQueryMethod );
-		}
-		req.m_DataMethod = (DspyImageDataMethod)m_DspyPlugin.SimpleDLSym( req.m_DriverHandle, &m_strDataMethod );
-		if (!req.m_DataMethod)
-		{
-			m_strDataMethod = "_" + m_strDataMethod;
+			if (!req.m_QueryMethod)
+			{
+				m_strQueryMethod = "_" + m_strQueryMethod;
+				req.m_QueryMethod = (DspyImageQueryMethod)m_DspyPlugin.SimpleDLSym( req.m_DriverHandle, &m_strQueryMethod );
+			}
 			req.m_DataMethod = (DspyImageDataMethod)m_DspyPlugin.SimpleDLSym( req.m_DriverHandle, &m_strDataMethod );
-		}
-		req.m_CloseMethod = (DspyImageCloseMethod)m_DspyPlugin.SimpleDLSym( req.m_DriverHandle, &m_strCloseMethod );
-		if (!req.m_OpenMethod)
-		{
-			m_strCloseMethod = "_" + m_strCloseMethod;
+			if (!req.m_DataMethod)
+			{
+				m_strDataMethod = "_" + m_strDataMethod;
+				req.m_DataMethod = (DspyImageDataMethod)m_DspyPlugin.SimpleDLSym( req.m_DriverHandle, &m_strDataMethod );
+			}
 			req.m_CloseMethod = (DspyImageCloseMethod)m_DspyPlugin.SimpleDLSym( req.m_DriverHandle, &m_strCloseMethod );
-		}
-		req.m_DelayCloseMethod = (DspyImageDelayCloseMethod)m_DspyPlugin.SimpleDLSym( req.m_DriverHandle, &m_strDelayCloseMethod );
-		if (!req.m_DelayCloseMethod)
-		{
-			m_strDelayCloseMethod = "_" + m_strDelayCloseMethod;
+			if (!req.m_OpenMethod)
+			{
+				m_strCloseMethod = "_" + m_strCloseMethod;
+				req.m_CloseMethod = (DspyImageCloseMethod)m_DspyPlugin.SimpleDLSym( req.m_DriverHandle, &m_strCloseMethod );
+			}
 			req.m_DelayCloseMethod = (DspyImageDelayCloseMethod)m_DspyPlugin.SimpleDLSym( req.m_DriverHandle, &m_strDelayCloseMethod );
+			if (!req.m_DelayCloseMethod)
+			{
+				m_strDelayCloseMethod = "_" + m_strDelayCloseMethod;
+				req.m_DelayCloseMethod = (DspyImageDelayCloseMethod)m_DspyPlugin.SimpleDLSym( req.m_DriverHandle, &m_strDelayCloseMethod );
+			}
 		}
+	}
+	else
+	{
+		// We are using the in-library internal debugging DD.
+
+		req.m_OpenMethod =  ::DebugDspyImageOpen ;
+		req.m_QueryMethod =  ::DebugDspyImageQuery ;
+		req.m_DataMethod = ::DebugDspyImageData ;
+		req.m_CloseMethod = ::DebugDspyImageClose ;
+		req.m_DelayCloseMethod = ::DebugDspyDelayImageClose ;
 	}
 
 	// Nullified the data part
