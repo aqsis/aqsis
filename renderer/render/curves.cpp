@@ -173,18 +173,15 @@ CqBound CqCurve::Bound() const
 
 
 /**
- * CqCurve assignment operator.
+ * CqCurve CloneData function
  *
- * @param from  CqCurve to make this one equal to.
- *
- * @return Reference to (*this).
  */
-/* CqCurve& CqCurve::operator=( const CqCurve& from )
- * {
- * 	CqSurface::operator=( from );
- * 	return ( *this );
- * }
- */
+void CqCurve::CloneData(CqCurve* clone) const
+{
+	CqSurface::CloneData(clone);
+	clone->m_widthParamIndex = m_widthParamIndex;
+	clone->m_constantwidthParamIndex = m_constantwidthParamIndex;
+}
 
 
 
@@ -311,20 +308,16 @@ CqLinearCurveSegment::~CqLinearCurveSegment()
 
 
 /**
- * Assignment operator.
+ * Create a clone of this curve surface
  *
- * @param from  CqLinearCurveSegment to make this one equal to.
- *
- * @return Reference to *this.
  */
-/* CqLinearCurveSegment& CqLinearCurveSegment::operator=(
- *     const CqLinearCurveSegment& from
- * )
- * {
- * 	CqCurve::operator=( from );
- * 	return ( *this );
- * }
- */
+CqSurface* CqLinearCurveSegment::Clone() const
+{
+	CqLinearCurveSegment* clone = new CqLinearCurveSegment();
+	CqCurve::CloneData( clone );
+	return ( clone );
+}
+
 
 
 
@@ -705,20 +698,16 @@ CqCubicCurveSegment::~CqCubicCurveSegment()
 
 
 /**
- * Assignment operator.
+ * Create a clone of this curve surface
  *
- * @param from  CqCubicCurveSegment to make this one equal to.
- *
- * @return Reference to *this.
  */
-/* CqCubicCurveSegment& CqCubicCurveSegment::operator=(
- *     const CqCubicCurveSegment& from
- * )
- * {
- * 	CqCurve::operator=( from );
- * 	return ( *this );
- * }
- */
+CqSurface* CqCubicCurveSegment::Clone() const
+{
+	CqCubicCurveSegment* clone = new CqCubicCurveSegment();
+	CqCurve::CloneData( clone );
+	return ( clone );
+}
+
 
 
 /**
@@ -1322,24 +1311,20 @@ CqCurvesGroup::~CqCurvesGroup()
 
 
 /**
- * Assignment operator.
+ * Clone the data from this curve group onto the one specified.
  *
- * @param from  CqCurvesGroup to set this one equal to.
  */
-/* CqCurvesGroup& CqCurvesGroup::operator=( const CqCurvesGroup& from )
- * {
- * 
- * 	// base class assignment
- * 	CqCurve::operator=( from );
- * 
- * 	// copy members
- * 	m_ncurves = from.m_ncurves;
- * 	m_periodic = from.m_periodic;
- * 	m_nvertices = from.m_nvertices;
- * 
- * 	return ( *this );
- * }
- */
+void CqCurvesGroup::CloneData( CqCurvesGroup* clone ) const
+{
+	CqCurve::CloneData(clone);
+
+	// copy members
+	clone->m_ncurves = m_ncurves;
+	clone->m_periodic = m_periodic;
+	clone->m_nvertices = m_nvertices;
+	clone->m_nTotalVerts = m_nTotalVerts;
+}
+
 
 
 
@@ -1388,17 +1373,6 @@ CqLinearCurvesGroup::CqLinearCurvesGroup(
 
 
 /**
- * CqLinearCurvesGroup copy constructor.
- */
-/* CqLinearCurvesGroup::CqLinearCurvesGroup( const CqLinearCurvesGroup &from )
- * 		: CqCurvesGroup()
- * {
- * 	( *this ) = from;
- * }
- */
-
-
-/**
  * CqLinearCurvesGroup destructor.
  */
 CqLinearCurvesGroup::~CqLinearCurvesGroup()
@@ -1409,22 +1383,17 @@ CqLinearCurvesGroup::~CqLinearCurvesGroup()
 
 
 /**
- * Assignment operator.
+ * Create a clone of this curve group.
  *
- * @param from  CqCubicCurveSegment to set this one equal to.
- *
- * @return Reference to *this.
  */
-/* CqLinearCurvesGroup& CqLinearCurvesGroup::operator=(
- *     const CqLinearCurvesGroup& from
- * )
- * {
- * 	// base class assignment
- * 	CqCurvesGroup::operator=( from );
- * 
- * 	return ( *this );
- * }
- */
+CqSurface* CqLinearCurvesGroup::Clone() const
+{
+	CqLinearCurvesGroup* clone = new CqLinearCurvesGroup();
+	CqCurvesGroup::CloneData( clone );
+
+	return ( clone );
+}
+
 
 
 
@@ -1714,20 +1683,17 @@ TqUint CqCubicCurvesGroup::cVarying() const
 
 
 /**
- * Assignment operator.
+ * Create a clone of this curve group.
  *
- * @param from  CqCubicCurvesGroup to make this one equal to.
  */
-/* CqCubicCurvesGroup& CqCubicCurvesGroup::operator=(
- *     const CqCubicCurvesGroup& from
- * )
- * {
- * 	// base class assignment
- * 	CqCurvesGroup::operator=( from );
- * 
- * 	return ( *this );
- * }
- */
+CqSurface* CqCubicCurvesGroup::Clone() const
+{
+	CqCubicCurvesGroup* clone = new CqCubicCurvesGroup();
+	CqCurvesGroup::CloneData( clone );
+
+	return ( clone );
+}
+
 
 
 

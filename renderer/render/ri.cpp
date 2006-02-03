@@ -5926,6 +5926,8 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 			boost::shared_ptr<CqSubdivision2> pSubd2( new CqSubdivision2( pPointsClass ) );
 			pSubd2->Prepare( cVerts );
 
+			boost::shared_ptr<CqSurfaceSubdivisionMesh> pMesh( new CqSurfaceSubdivisionMesh(pSubd2, nfaces ) );
+
 			RtInt	iP = 0;
 			for ( face = 0; face < nfaces; ++face )
 			{
@@ -5957,6 +5959,8 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 							if ( intargs[ iEdge + intargIndex ] < pSubd2->cVertices() &&
 							        intargs[ iEdge + intargIndex + 1 ] < pSubd2->cVertices() )
 							{
+								// Store the sharp edge information in the top level mesh.
+								pMesh->AddSharpEdge(intargs[ iEdge + intargIndex ], intargs[ iEdge + intargIndex + 1 ], creaseSharpness);
 								// Store the crease sharpness.
 								CqLath* pEdge = pSubd2->pVertex( intargs[ iEdge + intargIndex ] );
 								std::vector<CqLath*> aQve;
@@ -5982,6 +5986,8 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 						{
 							if ( intargs[ iVertex + intargIndex ] < pSubd2->cVertices() )
 							{
+								// Store the sharp edge information in the top level mesh.
+								pMesh->AddSharpCorner(intargs[ iVertex + intargIndex ], RI_INFINITY);
 								// Store the corner sharpness.
 								CqLath* pVertex = pSubd2->pVertex( intargs[ iVertex + intargIndex ] );
 								pSubd2->AddSharpCorner( pVertex, RI_INFINITY );
@@ -6003,7 +6009,6 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 					floatargIndex += nargs[ argcIndex++ ];
 				}
 
-				boost::shared_ptr<CqSurfaceSubdivisionMesh> pMesh( new CqSurfaceSubdivisionMesh(pSubd2, nfaces ) );
 				CreateGPrim(pMesh);
 			}
 			else

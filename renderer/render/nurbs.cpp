@@ -65,34 +65,37 @@ CqSurfaceNURBS::CqSurfaceNURBS() : CqSurface(), m_uOrder( 0 ), m_vOrder( 0 ), m_
 
 
 //---------------------------------------------------------------------
-/** Assignment operator.
+/** Create a clone of this NURBS surface.
  */
 
-/* void CqSurfaceNURBS::operator=( const CqSurfaceNURBS& From )
- * {
- * 	// Use the CqSurface assignment operator.
- * 	CqSurface::operator=( From );
- * 
- * 	// Initialise the NURBS surface.
- * 	Init( From.m_uOrder, From.m_vOrder, From.m_cuVerts, From.m_cvVerts );
- * 
- * 	m_umin = From.m_umin;
- * 	m_umax = From.m_umax;
- * 	m_vmin = From.m_vmin;
- * 	m_vmax = From.m_vmax;
- * 
- * 	m_fPatchMesh = From.m_fPatchMesh;
- * 
- * 	// Copy the knot vectors.
- * 	TqInt i;
- * 	for ( i = From.m_auKnots.size() - 1; i >= 0; i-- )
- * 		m_auKnots[ i ] = From.m_auKnots[ i ];
- * 	for ( i = From.m_avKnots.size() - 1; i >= 0; i-- )
- * 		m_avKnots[ i ] = From.m_avKnots[ i ];
- * 
- * 	TrimLoops() = From.TrimLoops();
- * }
- */
+CqSurface* CqSurfaceNURBS::Clone() const
+{
+	CqSurfaceNURBS* clone = new CqSurfaceNURBS();
+
+	CqSurface::CloneData( clone );
+
+	// Initialise the NURBS surface.
+	clone->Init( m_uOrder, m_vOrder, m_cuVerts, m_cvVerts );
+
+	clone->m_umin = m_umin;
+	clone->m_umax = m_umax;
+	clone->m_vmin = m_vmin;
+	clone->m_vmax = m_vmax;
+
+	clone->m_fPatchMesh = m_fPatchMesh;
+
+	// Copy the knot vectors.
+	TqInt i;
+	for ( i = m_auKnots.size() - 1; i >= 0; i-- )
+		clone->m_auKnots[ i ] = m_auKnots[ i ];
+	for ( i = m_avKnots.size() - 1; i >= 0; i-- )
+		clone->m_avKnots[ i ] = m_avKnots[ i ];
+
+	clone->TrimLoops() = TrimLoops();
+
+	return(clone);
+}
+
 
 
 //---------------------------------------------------------------------

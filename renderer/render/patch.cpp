@@ -70,21 +70,17 @@ CqSurfacePatchBicubic::~CqSurfacePatchBicubic()
 
 
 //---------------------------------------------------------------------
-/** Assignment operator.
+/** Create a clone of this patch surface.
  */
 
-/* CqSurfacePatchBicubic& CqSurfacePatchBicubic::operator=( const CqSurfacePatchBicubic& From )
- * {
- * 	// Perform per surface copy function
- * 	CqSurface::operator=( From );
- * 
- * 	//	TqInt i;
- * 	//	for(i=0; i<16; i++)
- * 	//		P()[i]=From.P()[i];
- * 
- * 	return ( *this );
- * }
- */
+CqSurface* CqSurfacePatchBicubic::Clone() const
+{
+	CqSurfacePatchBicubic* clone = new CqSurfacePatchBicubic();
+	CqSurface::CloneData(clone);
+
+	return ( clone );
+}
+
 
 
 
@@ -647,20 +643,21 @@ CqSurfacePatchBilinear::~CqSurfacePatchBilinear()
 
 
 //---------------------------------------------------------------------
-/** Assignment operator.
+/** Create a clone of this patch surface.
  */
 
-/* CqSurfacePatchBilinear& CqSurfacePatchBilinear::operator=( const CqSurfacePatchBilinear& From )
- * {
- * 	CqSurface::operator=( From );
- * 
- * 	m_fHasPhantomFourthVertex = From.m_fHasPhantomFourthVertex;
- * 	m_iInternalu = From.m_iInternalu;
- * 	m_iInternalv = From.m_iInternalv;
- * 
- * 	return ( *this );
- * }
- */
+CqSurface* CqSurfacePatchBilinear::Clone() const
+{
+	CqSurfacePatchBilinear* clone = new CqSurfacePatchBilinear();
+	CqSurface::CloneData( clone );
+
+	clone->m_fHasPhantomFourthVertex = m_fHasPhantomFourthVertex;
+	clone->m_iInternalu = m_iInternalu;
+	clone->m_iInternalv = m_iInternalv;
+
+	return ( clone );
+}
+
 
 
 //---------------------------------------------------------------------
@@ -881,18 +878,6 @@ TqInt CqSurfacePatchBilinear::Split( std::vector<boost::shared_ptr<CqSurface> >&
 
 
 //---------------------------------------------------------------------
-/** Copy constructor.
- */
-
-/* CqSurfacePatchMeshBicubic::CqSurfacePatchMeshBicubic( const CqSurfacePatchMeshBicubic& From ) :
- * 		CqSurface( From )
- * {
- * 	*this = From;
- * }
- */
-
-
-//---------------------------------------------------------------------
 /** Destructor.
  */
 
@@ -901,25 +886,25 @@ CqSurfacePatchMeshBicubic::~CqSurfacePatchMeshBicubic()
 
 
 //---------------------------------------------------------------------
-/** Assignment operator.
+/** Create a clone of this patchmesh surface.
  */
 
-/* CqSurfacePatchMeshBicubic& CqSurfacePatchMeshBicubic::operator=( const CqSurfacePatchMeshBicubic& From )
- * {
- * 	// Perform per surface copy function
- * 	CqSurface::operator=( From );
- * 
- * 	m_uPatches = From.m_uPatches;
- * 	m_vPatches = From.m_vPatches;
- * 	m_nu = From.m_nu;
- * 	m_nv = From.m_nv;
- * 	m_uPeriodic = From.m_uPeriodic;
- * 	m_vPeriodic = From.m_vPeriodic;
- * 
- * 	return ( *this );
- * }
- * 
- */
+CqSurface* CqSurfacePatchMeshBicubic::Clone() const
+{
+	CqSurfacePatchMeshBicubic* clone = new CqSurfacePatchMeshBicubic();
+	CqSurface::CloneData( clone );
+
+	clone->m_uPatches = m_uPatches;
+	clone->m_vPatches = m_vPatches;
+	clone->m_nu = m_nu;
+	clone->m_nv = m_nv;
+	clone->m_uPeriodic = m_uPeriodic;
+	clone->m_vPeriodic = m_vPeriodic;
+
+	return ( clone );
+}
+
+
 
 //---------------------------------------------------------------------
 /** Get the boundary extents in camera space of the surface patch mesh
@@ -1133,24 +1118,24 @@ CqSurfacePatchMeshBilinear::~CqSurfacePatchMeshBilinear()
 
 
 //---------------------------------------------------------------------
-/** Assignment operator.
+/** Create a clone of this patchmesh surface.
  */
 
-/* CqSurfacePatchMeshBilinear& CqSurfacePatchMeshBilinear::operator=( const CqSurfacePatchMeshBilinear& From )
- * {
- * 	// Perform per surface copy function
- * 	CqSurface::operator=( From );
- * 
- * 	m_uPatches = From.m_uPatches;
- * 	m_vPatches = From.m_vPatches;
- * 	m_nu = From.m_nu;
- * 	m_nv = From.m_nv;
- * 	m_uPeriodic = From.m_uPeriodic;
- * 	m_vPeriodic = From.m_vPeriodic;
- * 
- * 	return ( *this );
- * }
- */
+CqSurface* CqSurfacePatchMeshBilinear::Clone() const
+{
+	CqSurfacePatchMeshBilinear* clone = new CqSurfacePatchMeshBilinear();
+	CqSurface::CloneData( clone );
+
+	clone->m_uPatches = m_uPatches;
+	clone->m_vPatches = m_vPatches;
+	clone->m_nu = m_nu;
+	clone->m_nv = m_nv;
+	clone->m_uPeriodic = m_uPeriodic;
+	clone->m_vPeriodic = m_vPeriodic;
+
+	return ( clone );
+}
+
 
 
 //---------------------------------------------------------------------

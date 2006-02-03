@@ -201,7 +201,6 @@ void CqSurface::CloneData( CqSurface* clone ) const
 		clone->m_aiStdPrimitiveVars[ i ] = -1;
 
 	clone->ClonePrimitiveVariables(*this);
-	Aqsis::log() << debug << "P index : " << clone->m_aiStdPrimitiveVars[EnvVars_P] << /*" : value : " << clone->m_aUserParams[m_aiStdPrimitiveVars[EnvVars_P]] <<*/ std::endl;
 }
 
 //---------------------------------------------------------------------

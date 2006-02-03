@@ -1299,8 +1299,7 @@ void CqRenderer::PostCloneOfWorld()
 		pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "world", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(0), 0 ),
 						 QGetRenderContext() ->matNSpaceToSpace( "world", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(0), 0 ),
 						 QGetRenderContext() ->matVSpaceToSpace( "world", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(0), 0 ) );
-		boost::shared_ptr<CqSurface> base(pSurface.get());
-		pImage()->PostSurface(base);
+		pImage()->PostSurface(pSurface);
 	}
 }
 

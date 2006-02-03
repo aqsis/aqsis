@@ -363,11 +363,7 @@ class CqSurfaceNURBS : public CqSurface
 		{
 			m_TrimLoops.Prepare( this );
 		}
-		virtual CqSurface* Clone() const
-		{
-			//return(new CqSurfaceNURBS(*this));
-			return(NULL);
-		}
+		virtual CqSurface* Clone() const;
 
 
 	protected:

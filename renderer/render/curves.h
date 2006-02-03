@@ -238,6 +238,7 @@ class CqCurve : public CqSurface
 			}
 
 		}
+		void CloneData(CqCurve* clone) const;
 		//--------------------------------------------------- Protected Members
 	protected:
 		/** Index of the width parameter within the m_aUserParams array of
@@ -333,12 +334,7 @@ class CqLinearCurveSegment : public CqCurve
 			pTResult1->pValue() [ 1 ] = pTResult2->pValue() [ 0 ] = static_cast<T>( ( pTParam->pValue() [ 0 ] + pTParam->pValue() [ 1 ] ) * 0.5f );
 			pTResult2->pValue() [ 1 ] = pTParam->pValue() [ 1 ];
 		}
-		virtual CqSurface* Clone() const
-		{
-			//return(new CqLinearCurveSegment(*this));
-			return(NULL);
-		}
-
+		virtual CqSurface* Clone() const;
 };
 
 
@@ -353,9 +349,7 @@ class CqCubicCurveSegment : public CqCurve
 		//------------------------------------------------------ Public Methods
 	public:
 		CqCubicCurveSegment();
-		CqCubicCurveSegment( const CqCubicCurveSegment &from );
 		virtual ~CqCubicCurveSegment();
-		CqCubicCurveSegment& operator=( const CqCubicCurveSegment& from );
 		void NaturalSubdivide(
 		    CqParameter* pParam,
 		    CqParameter* pParam1, CqParameter* pParam2,
@@ -456,11 +450,7 @@ class CqCubicCurveSegment : public CqCurve
 			pTResult1->pValue() [ 1 ] = pTResult2->pValue() [ 0 ] = static_cast<T>( ( pTParam->pValue() [ 0 ] + pTParam->pValue() [ 1 ] ) * 0.5f );
 			pTResult2->pValue() [ 1 ] = pTParam->pValue() [ 1 ];
 		}
-		virtual CqSurface* Clone() const
-		{
-			//return(new CqCubicCurveSegment(*this));
-			return(NULL);
-		}
+		virtual CqSurface* Clone() const;
 };
 
 
@@ -483,6 +473,7 @@ class CqCurvesGroup : public CqCurve
 			return CqString("CqCurvesGroup");
 		}
 #endif
+		void CloneData(CqCurvesGroup* clone) const;
 		//--------------------------------------------------- Protected Members
 	protected:
 		TqInt m_ncurves;       ///< Number of curves in the group.
@@ -504,12 +495,12 @@ class CqLinearCurvesGroup : public CqCurvesGroup
 {
 		//------------------------------------------------------ Public Methods
 	public:
+		CqLinearCurvesGroup()
+		{}
 		CqLinearCurvesGroup(
 		    TqInt ncurves, TqInt nvertices[], TqBool periodic = TqFalse
 		);
-		CqLinearCurvesGroup( const CqLinearCurvesGroup &from );
 		virtual ~CqLinearCurvesGroup();
-		CqLinearCurvesGroup& operator=( const CqLinearCurvesGroup& from );
 		virtual	TqInt Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
 		virtual void Transform(
 		    const CqMatrix& matTx,
@@ -551,11 +542,7 @@ class CqLinearCurvesGroup : public CqCurvesGroup
 		{
 			return "CqLinearCurvesGroup";
 		}
-		virtual CqSurface* Clone() const
-		{
-		//	return(new CqLinearCurvesGroup(*this));
-			return(NULL);
-		}
+		virtual CqSurface* Clone() const;
 };
 
 
@@ -570,6 +557,7 @@ class CqCubicCurvesGroup : public CqCurvesGroup
 {
 		//------------------------------------------------------ Public Methods
 	public:
+		CqCubicCurvesGroup() {}
 		CqCubicCurvesGroup(
 		    TqInt ncurves, TqInt nvertices[], TqBool periodic = TqFalse
 		);
@@ -611,11 +599,7 @@ class CqCubicCurvesGroup : public CqCurvesGroup
 		{
 			return "CqCubicCurvesGroup";
 		}
-		virtual CqSurface* Clone() const
-		{
-			//return(new CqCubicCurvesGroup(*this));
-			return(NULL);
-		}
+		virtual CqSurface* Clone() const;
 };
 
 

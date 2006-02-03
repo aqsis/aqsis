@@ -88,7 +88,6 @@ CqLath* CqSubdivision2::pFacet(TqInt iIndex)
 	return(m_apFacets[iIndex]);
 }
 
-
 //------------------------------------------------------------------------------
 /**
  *	Get a pointer to a lath which references the specified vertex index.
@@ -100,6 +99,38 @@ CqLath* CqSubdivision2::pFacet(TqInt iIndex)
  *	@return			Pointer to a lath on the vertex.
  */
 CqLath* CqSubdivision2::pVertex(TqInt iIndex)
+{
+	assert(iIndex < static_cast<TqInt>(m_aapVertices.size()) && m_aapVertices[iIndex].size() >= 1);
+	return(m_aapVertices[iIndex][0]);
+}
+
+//------------------------------------------------------------------------------
+/**
+ *	Get a pointer to a lath referencing the specified facet index.
+ *	The returned lath pointer can be any lath on the edge of the facet.
+ *	Asserts if the facet index is invalid.
+ *
+ *	@param	iIndex	Index of the facet to query.
+ *
+ *	@return			Pointer to a lath on the facet.
+ */
+const CqLath* CqSubdivision2::pFacet(TqInt iIndex) const
+{
+	assert(iIndex < static_cast<TqInt>(m_apFacets.size()));
+	return(m_apFacets[iIndex]);
+}
+
+//------------------------------------------------------------------------------
+/**
+ *	Get a pointer to a lath which references the specified vertex index.
+ *	The returned lath pointer can be any lath which references the vertex.
+ *	Asserts if the vertex index is invalid.
+ *
+ *	@param	iIndex	Index of the vertex to query.
+ *
+ *	@return			Pointer to a lath on the vertex.
+ */
+const CqLath* CqSubdivision2::pVertex(TqInt iIndex) const
 {
 	assert(iIndex < static_cast<TqInt>(m_aapVertices.size()) && m_aapVertices[iIndex].size() >= 1);
 	return(m_aapVertices[iIndex][0]);
@@ -496,6 +527,92 @@ CqLath* CqSubdivision2::AddFacet(TqInt cVerts, TqInt* pIndices, TqInt iFVIndex)
 	return(pFirstLath);
 }
 
+//------------------------------------------------------------------------------
+/**
+ *	Add a new facet to the topology structure.
+ *	Adds the facet by adding new laths for the specified vertex indices, and
+ *	linking them to each other clockwise about the facet. By convention, as
+ *	outside of the topology structure facets are stored counter clockwise, the
+ *	vertex indices should be passed to this function as counter clockwise and
+ *	they will be internally altered to specify the facet as clockwise.
+ *
+ *	@param	cVerts		The number of vertices in the facet.
+ *	@param	pIndices	Pointer to an array of vertex indices.
+ *	@param	pFIndices	Pointer to an array of face vertex indices.
+ *
+ *	@return				Pointer to one of the laths which represent this new
+ *						facet in the topology structure.
+ */
+CqLath* CqSubdivision2::AddFacet(TqInt cVerts, TqInt* pIndices, TqInt* pFVIndices)
+{
+	CqLath* pLastLath=NULL;
+	CqLath* pFirstLath=NULL;
+	// Add the laths for this facet, referencing the appropriate vertexes as we go.
+	for(TqInt iVert = 0; iVert < cVerts; iVert++)
+	{
+		CqLath* pNewLath = new CqLath();
+		pNewLath->SetVertexIndex(pIndices[iVert]);
+		pNewLath->SetFaceVertexIndex(pFVIndices[iVert]);
+
+		if(pLastLath)
+			pNewLath->SetpClockwiseFacet(pLastLath);
+
+		m_apLaths.push_back(pNewLath);
+		pLastLath = pNewLath;
+		if(iVert == 0)
+			pFirstLath = pLastLath;
+
+		// We also need to keep up to date a complete list of which laths refer to which
+		// vertices to aid us in finalising the topology structure later.
+		m_aapVertices[pIndices[iVert]].push_back(pLastLath);
+	}
+	// complete the chain by linking the last one as the next clockwise one to the first.
+	pFirstLath->SetpClockwiseFacet(pLastLath);
+
+	// Add the start lath in as the one referring to this facet in the list.
+	m_apFacets.push_back(pFirstLath);
+
+	return(pFirstLath);
+}
+
+
+CqSubdivision2* CqSubdivision2::Clone() const
+{
+	// Create a clone of the points class.
+	boost::shared_ptr<CqPolygonPoints> newPoints(static_cast<CqPolygonPoints*>(pPoints()->Clone()));
+
+	// Create a clone of the sds, and rebuild it with the data in this one.
+	CqSubdivision2* clone = new CqSubdivision2(newPoints);
+	clone->Prepare(cVertices());
+
+	clone->m_bInterpolateBoundary = m_bInterpolateBoundary;
+	clone->m_mapHoles = m_mapHoles;
+
+	// Create the faces in the new surface.
+	TqInt i;
+	for(i=0; i<cFacets(); i++)
+	{
+		// Read the facet indices.
+		const CqLath* faceLath = pFacet(i);
+		std::vector<const CqLath*> Qfv;
+		faceLath->Qfv(Qfv);
+		TqInt* pV = new TqInt[Qfv.size()];
+		TqInt* pFV = new TqInt[Qfv.size()];
+		std::vector<const CqLath*>::iterator j;
+		TqInt index = 0;
+		for(j=Qfv.begin(); j!=Qfv.end(); j++, index++)
+		{
+			pV[index] = (*j)->VertexIndex();
+			pFV[index] = (*j)->FaceVertexIndex();
+		}
+		clone->AddFacet(Qfv.size(), pV, pFV);
+		delete[](pV);
+		delete[](pFV);
+	}
+	clone->Finalise();
+
+	return(clone);
+}
 
 //------------------------------------------------------------------------------
 /**
@@ -1893,6 +2010,58 @@ boost::shared_ptr<CqSubdivision2> CqSurfaceSubdivisionPatch::Extract( TqInt iTim
 	}
 	pSurface->Finalise();
 	return(pSurface);
+}
+
+
+CqSurface* CqSurfaceSubdivisionMesh::Clone() const
+{
+	boost::shared_ptr<CqSubdivision2> clone_subd(m_pTopology->Clone());
+	CqSurfaceSubdivisionMesh* clone = new CqSurfaceSubdivisionMesh(clone_subd, m_NumFaces);
+	CqSurface::CloneData(clone);
+	// Now copy the tags information across.
+	clone->m_aSharpEdges = m_aSharpEdges;
+
+	std::vector<std::pair<std::pair<TqInt, TqInt>, TqFloat> >::const_iterator edge;
+	for(edge = m_aSharpEdges.begin(); edge != m_aSharpEdges.end(); edge++) 
+	{
+		TqInt a = edge->first.first;
+		TqInt b = edge->first.second;
+		TqFloat s = edge->second;
+		if ( a < clone->m_pTopology->cVertices() && b < clone->m_pTopology->cVertices() )
+		{
+			// Store the crease sharpness.
+			CqLath* pEdge = clone->m_pTopology->pVertex( a );
+			std::vector<CqLath*> aQve;
+			pEdge->Qve( aQve );
+			std::vector<CqLath*>::iterator iOpp;
+			for( iOpp = aQve.begin(); iOpp != aQve.end(); ++iOpp )
+			{
+				if( ( NULL != (*iOpp)->ec() ) && (*iOpp)->ec()->VertexIndex() == b )
+				{
+					clone->m_pTopology->AddSharpEdge( (*iOpp), s );
+					clone->m_pTopology->AddSharpEdge( (*iOpp)->ec(), s );
+					break;
+				}
+			}
+		}
+	}
+
+	clone->m_aSharpCorners = m_aSharpCorners;
+	std::vector<std::pair<TqInt, TqFloat> >::const_iterator corner;
+	for(corner = m_aSharpCorners.begin(); corner != m_aSharpCorners.end(); corner++) 
+	{
+		TqInt a = corner->first;
+		TqFloat s = corner->second;
+		if ( a < clone->m_pTopology->cVertices() )
+		{
+			// Store the corner sharpness.
+			CqLath* pVertex = clone->m_pTopology->pVertex( a );
+			clone->m_pTopology->AddSharpCorner( pVertex, s );
+		}
+	}
+
+
+	return(clone);
 }
 
 

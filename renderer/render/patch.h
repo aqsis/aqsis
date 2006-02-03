@@ -186,11 +186,7 @@ class CqSurfacePatchBicubic : public CqSurface
 
 		void	ConvertToBezierBasis( CqMatrix& matuBasis, CqMatrix& matvBasis );
 
-		virtual CqSurface* Clone() const
-		{
-//			return(new CqSurfacePatchBicubic(*this));
-			return(NULL);
-		}
+		virtual CqSurface* Clone() const;
 
 	protected:
 };
@@ -254,11 +250,7 @@ class CqSurfacePatchBilinear : public CqSurface
 			/// \todo Must work out what this value should be.
 			return ( 1 );
 		}
-		virtual CqSurface* Clone() const
-		{
-			//return(new CqSurfacePatchBilinear(*this));
-			return(NULL);
-		}
+		virtual CqSurface* Clone() const;
 
 		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
 		virtual	TqInt	PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, TqBool u );
@@ -283,6 +275,13 @@ class CqSurfacePatchBilinear : public CqSurface
 class CqSurfacePatchMeshBicubic : public CqSurface
 {
 	public:
+		CqSurfacePatchMeshBicubic() :
+				CqSurface(),
+				m_nu( 0 ),
+				m_nv( 0 ),
+				m_uPeriodic( TqFalse ),
+				m_vPeriodic( TqFalse )
+		{}
 		CqSurfacePatchMeshBicubic( TqInt nu, TqInt nv, TqBool uPeriodic = TqFalse, TqBool vPeriodic = TqFalse ) :
 				CqSurface(),
 				m_nu( nu ),
@@ -344,11 +343,7 @@ class CqSurfacePatchMeshBicubic : public CqSurface
 			/// \todo Must work out what this value should be.
 			return ( 1 );
 		}
-		virtual CqSurface* Clone() const
-		{
-			//return(new CqSurfacePatchMeshBicubic(*this));
-			return(NULL);
-		}
+		virtual CqSurface* Clone() const;
 
 		virtual CqVector3D	SurfaceParametersAtVertex( TqInt index )
 		{
@@ -382,6 +377,13 @@ class CqSurfacePatchMeshBicubic : public CqSurface
 class CqSurfacePatchMeshBilinear : public CqSurface
 {
 	public:
+		CqSurfacePatchMeshBilinear() :
+				CqSurface(),
+				m_nu( 0 ),
+				m_nv( 0 ),
+				m_uPeriodic( TqFalse ),
+				m_vPeriodic( TqFalse )
+		{}
 		CqSurfacePatchMeshBilinear( TqInt nu, TqInt nv, TqBool uPeriodic = TqFalse, TqBool vPeriodic = TqFalse ) :
 				CqSurface(),
 				m_nu( nu ),
@@ -441,11 +443,7 @@ class CqSurfacePatchMeshBilinear : public CqSurface
 			/// \todo Must work out what this value should be.
 			return ( 1 );
 		}
-		virtual CqSurface* Clone() const
-		{
-//			return(new CqSurfacePatchMeshBilinear(*this));
-			return(NULL);
-		}
+		virtual CqSurface* Clone() const;
 
 		virtual CqVector3D	SurfaceParametersAtVertex( TqInt index )
 		{

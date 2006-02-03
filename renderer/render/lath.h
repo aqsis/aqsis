@@ -160,6 +160,15 @@ class CqLath
 		void Qvf(std::vector<CqLath*>&);
 		void Qee(std::vector<CqLath*>&);
 		void Qff(std::vector<CqLath*>&);
+		void Qef(std::vector<const CqLath*>&) const;
+		void Qev(std::vector<const CqLath*>&) const;
+		void Qfe(std::vector<const CqLath*>&) const;
+		void Qve(std::vector<const CqLath*>&) const;
+		void Qfv(std::vector<const CqLath*>&) const;
+		void Qvv(std::vector<const CqLath*>&) const;
+		void Qvf(std::vector<const CqLath*>&) const;
+		void Qee(std::vector<const CqLath*>&) const;
+		void Qff(std::vector<const CqLath*>&) const;
 
 		TqInt cQfv() const;
 		TqInt cQvv() const;
@@ -361,6 +370,58 @@ inline void CqLath::Qfv(std::vector<CqLath*>& Result)
 	Qfe(Result);
 }
 
+
+//------------------------------------------------------------------------------
+/**
+ *	Get the faces surrounding an edge.
+ *	Get a list of laths representing the faces surrounding an edge, will
+ *	return just one if the edge is a boundary.
+ *
+ *	@return	Pointer to an array of lath pointers.
+ */
+inline void CqLath::Qef(std::vector<const CqLath*>& Result) const
+{
+	Result.resize(NULL != ec()? 2 : 1);
+	// Laths representing the two faces bounding an edge are given by L and L->ec(). If edge
+	// is a boundary, only L is passed back.
+	const CqLath *pTmpLath = this;
+	Result[0] = pTmpLath;
+
+	if(NULL != ec())
+		Result[1] = ec();
+}
+
+
+//------------------------------------------------------------------------------
+/**
+ *	Get the vertices surounding an edge.
+ *	Get a list of laths representing the vertices making up an edge.
+ *
+ *	@return	Pointer to an array of lath pointers.
+ */
+inline void CqLath::Qev(std::vector<const CqLath*>& Result) const
+{
+	Result.resize(2);
+	// Laths representing the two vertices of the associated edge are given by
+	// L and L->ccf(). Note we use cf here because itis guarunteed, whereas ec is not.
+	const CqLath *pTmpLath = this;
+	Result[0] = pTmpLath;
+	Result[1] = ccf();
+}
+
+
+//------------------------------------------------------------------------------
+/**
+ *	Get the vertices surrounding a facet.
+ *	Get a list of laths representing the vertices which make up the facet this
+ *	lath represents.
+ *
+ *	@return	Pointer to an array of lath pointers.
+ */
+inline void CqLath::Qfv(std::vector<const CqLath*>& Result) const
+{
+	Qfe(Result);
+}
 
 END_NAMESPACE( Aqsis )
 
