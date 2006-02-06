@@ -87,9 +87,6 @@ CqRenderer::CqRenderer() :
 {
 	m_pImageBuffer = new	CqImageBuffer();
 
-	// Initialize the default options
-	m_pOptDefault = new CqOptions();
-
 	// Initialize the default attributes, transform and camera transform
 	m_pAttrDefault  = new CqAttributes;
 	ADDREF( m_pAttrDefault );
@@ -150,13 +147,6 @@ CqRenderer::~CqRenderer()
 	// Close down the Display device manager.
 	m_pDDManager->Shutdown();
 	delete(m_pDDManager);
-
-	// Delete the default options
-	if ( m_pOptDefault )
-	{
-		delete m_pOptDefault;
-		m_pOptDefault = NULL;
-	}
 
 	// Delete the default attributes, transform and camera transform
 	if ( m_pAttrDefault )
@@ -524,17 +514,29 @@ void CqRenderer::AdvanceTime()
 /** Return a reference to the current options.
  */
 
-CqOptions& CqRenderer::optCurrent() const
+CqOptions& CqRenderer::optCurrent()
 {
 	if ( m_pconCurrent )
 		return ( m_pconCurrent->optCurrent() );
 	else
 	{
-		assert( m_pOptDefault != NULL );
-		return ( *m_pOptDefault );
+		return ( m_optDefault );
 	}
 }
 
+//----------------------------------------------------------------------
+/** Return a reference to the current options.
+ */
+
+const CqOptions& CqRenderer::optCurrent() const
+{
+	if ( m_pconCurrent )
+		return ( m_pconCurrent->optCurrent() );
+	else
+	{
+		return ( m_optDefault );
+	}
+}
 
 //----------------------------------------------------------------------
 /** Return a pointer to the current attributes.

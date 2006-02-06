@@ -894,7 +894,7 @@ RtVoid	RiWorldEnd()
 	QGetRenderContext()->RenderAutoShadows();
 
 	QGetRenderContext()->PrepareShaders();
-	QGetRenderContext()->PostCloneOfWorld( );
+	QGetRenderContext()->PostWorld( );
 
 	TqBool fFailed = TqFalse;
 	// Call any specified pre render function.

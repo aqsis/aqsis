@@ -127,7 +127,8 @@ class CqRenderer : public IqRenderer
 		virtual	void	EndObjectModeBlock();
 		virtual	void	EndMotionModeBlock();
 
-		virtual	CqOptions&	optCurrent() const;
+		virtual	CqOptions&	optCurrent();
+		virtual	const CqOptions& optCurrent() const;
 		virtual	const CqAttributes*	pattrCurrent();
 		virtual	CqAttributes*	pattrWriteCurrent();
 		virtual	CqTransformPtr	ptransCurrent();
@@ -526,7 +527,7 @@ class CqRenderer : public IqRenderer
 		TqInt	m_OutputDataOffset;
 		TqInt	m_OutputDataTotalSize;
 
-		CqOptions *m_pOptDefault;	///< Pointer to default options.
+		CqOptions m_optDefault;	///< Pointer to default options.
 		TqInt	m_FrameNo;
 		std::vector<CqObjectInstance*>	m_ObjectInstances;
 		TqBool	m_bObjectOpen;
