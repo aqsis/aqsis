@@ -691,10 +691,20 @@ void CqRenderer::RenderAutoShadows()
 			else
 				Aqsis::log() << info << "Rendering automatic shadow pass for lightsource : \"unnamed\" to shadow map file \"" << pMapName[0].c_str() << "\"" << std::endl;
 
+			// Push the options and change the relevant settings for rendering a shadow map.
+			CqOptions& opts = pushOptions();
+			opts.GetIntegerOptionWrite( "System", "Resolution" ) [ 0 ] = 300 ;
+			opts.GetIntegerOptionWrite( "System", "Resolution" ) [ 1 ] = 300 ;
+			opts.GetFloatOptionWrite( "System", "PixelAspectRatio" ) [ 0 ] = 1.0f;
+
+			// Inform the system that RiFormat has been called, as this takes priority.
+			opts.CallFormat();
+
 			// Store the current camera transform for later.
 			CqTransformPtr cameraTrans = QGetRenderContext()->GetCameraTransform();
 			// Now set the camera transform the to light transform (inverse because the camera transform is transforming the world into camera space).
 			CqTransformPtr lightTrans(light->pTransform()->Inverse());
+			Aqsis::log() << debug << "Light transform is... " << lightTrans->matObjectToWorld(0) << std::endl;
 			SetCameraTransform(lightTrans);
 			optCurrent().InitialiseCamera();
 
@@ -711,14 +721,6 @@ void CqRenderer::RenderAutoShadows()
 			SetImage( new CqImageBuffer );
 			pImage()->SetImage();
 
-			// Push the options and change the relevant settings for rendering a shadow map.
-			CqOptions& opts = pushOptions();
-			opts.GetIntegerOptionWrite( "System", "Resolution" ) [ 0 ] = 300 ;
-			opts.GetIntegerOptionWrite( "System", "Resolution" ) [ 1 ] = 300 ;
-			opts.GetFloatOptionWrite( "System", "PixelAspectRatio" ) [ 0 ] = 1.0f;
-
-			// Inform the system that RiFormat has been called, as this takes priority.
-			opts.CallFormat();
 
 			PrepareShaders();
 			PostCloneOfWorld();

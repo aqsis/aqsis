@@ -767,7 +767,7 @@ PtDspyError DspyImageClose(PtDspyImageHandle image)
 	if (pImage->m_data)
 		free(pImage->m_data);
 	if (pImage->m_hostname)
-		free(pImage->m_hostname);
+		//free(pImage->m_hostname);
 	if(pImage->m_imageType == Type_ZFramebuffer)
 		free(pImage->m_zfbdata);
 	if (description)

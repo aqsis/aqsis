@@ -74,12 +74,11 @@ CqMainModeBlock::~CqMainModeBlock()
 {
 	RELEASEREF( m_pattrCurrent );
 	// Make sure any options pushed on the stack are cleared.
-	CqOptions* opts = m_optionsStack.top();
-	while(NULL != opts)
+	while(!m_optionsStack.empty())
 	{
+		CqOptions* opts = m_optionsStack.top();
 		delete(opts);
 		m_optionsStack.pop();
-		opts = m_optionsStack.top();
 	}
 }
 
@@ -105,12 +104,11 @@ CqFrameModeBlock::~CqFrameModeBlock()
 {
 	RELEASEREF( m_pattrCurrent );
 	// Make sure any options pushed on the stack are cleared.
-	CqOptions* opts = m_optionsStack.top();
-	while(NULL != opts)
+	while(!m_optionsStack.empty())
 	{
+		CqOptions* opts = m_optionsStack.top();
 		delete(opts);
 		m_optionsStack.pop();
-		opts = m_optionsStack.top();
 	}
 }
 
