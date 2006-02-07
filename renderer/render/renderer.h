@@ -129,6 +129,8 @@ class CqRenderer : public IqRenderer
 
 		virtual	CqOptions&	optCurrent();
 		virtual	const CqOptions& optCurrent() const;
+		virtual CqOptions&	pushOptions();
+		virtual CqOptions&	popOptions();
 		virtual	const CqAttributes*	pattrCurrent();
 		virtual	CqAttributes*	pattrWriteCurrent();
 		virtual	CqTransformPtr	ptransCurrent();

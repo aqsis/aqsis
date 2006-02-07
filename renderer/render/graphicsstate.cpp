@@ -73,6 +73,14 @@ CqMainModeBlock::CqMainModeBlock( const boost::shared_ptr<CqModeBlock>& pconPare
 CqMainModeBlock::~CqMainModeBlock()
 {
 	RELEASEREF( m_pattrCurrent );
+	// Make sure any options pushed on the stack are cleared.
+	CqOptions* opts = m_optionsStack.top();
+	while(NULL != opts)
+	{
+		delete(opts);
+		m_optionsStack.pop();
+		opts = m_optionsStack.top();
+	}
 }
 
 
@@ -96,6 +104,14 @@ CqFrameModeBlock::CqFrameModeBlock( const boost::shared_ptr<CqModeBlock>& pconPa
 CqFrameModeBlock::~CqFrameModeBlock()
 {
 	RELEASEREF( m_pattrCurrent );
+	// Make sure any options pushed on the stack are cleared.
+	CqOptions* opts = m_optionsStack.top();
+	while(NULL != opts)
+	{
+		delete(opts);
+		m_optionsStack.pop();
+		opts = m_optionsStack.top();
+	}
 }
 
 

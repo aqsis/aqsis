@@ -539,6 +539,37 @@ const CqOptions& CqRenderer::optCurrent() const
 }
 
 //----------------------------------------------------------------------
+/** Push the current options allowing modification.
+ */
+
+CqOptions& CqRenderer::pushOptions()
+{
+	if ( m_pconCurrent )
+		return ( m_pconCurrent->pushOptions() );
+	else
+	{
+		// \note: cannot push/pop options outside the Main block.
+		return ( m_optDefault );
+	}
+}
+
+//----------------------------------------------------------------------
+/** Pop the last stored options.
+ */
+
+CqOptions& CqRenderer::popOptions()
+{
+	if ( m_pconCurrent )
+		return ( m_pconCurrent->popOptions() );
+	else
+	{
+		// \note: cannot push/pop options outside the Main block.
+		return ( m_optDefault );
+	}
+}
+
+
+//----------------------------------------------------------------------
 /** Return a pointer to the current attributes.
  */
 
@@ -650,6 +681,7 @@ void CqRenderer::RenderAutoShadows()
 	for(ilight=0; ilight<Lightsource_stack.size(); ilight++)
 	{
 		CqLightsourcePtr light = Lightsource_stack[ilight];
+		Aqsis::log() << "Checking light " << ilight << " for autoshadows" << std::endl;
 		const CqString* pMapName = light->pAttributes()->GetStringAttribute("autoshadows", "shadowmapname");
 		const CqString* pattrName = light->pAttributes()->GetStringAttribute( "identifier", "name" );
 		if(NULL != pMapName)
@@ -671,7 +703,7 @@ void CqRenderer::RenderAutoShadows()
 			m_pDDManager = CreateDisplayDriverManager();
 			m_pDDManager->Initialise();
 			std::map<std::string, void*> args;
-			AddDisplayRequest(pMapName[0].c_str(), "zframebuffer", "z", ModeZ, 0, 1, args);
+			AddDisplayRequest(pMapName[0].c_str(), "shadow", "z", ModeZ, 0, 1, args);
 
 			// Cache the current imagebuffer, and replace it with a new one for the purposes of our shadow render.
 			CqImageBuffer* realImageBuffer = m_pImageBuffer;
@@ -679,9 +711,20 @@ void CqRenderer::RenderAutoShadows()
 			SetImage( new CqImageBuffer );
 			pImage()->SetImage();
 
+			// Push the options and change the relevant settings for rendering a shadow map.
+			CqOptions& opts = pushOptions();
+			opts.GetIntegerOptionWrite( "System", "Resolution" ) [ 0 ] = 300 ;
+			opts.GetIntegerOptionWrite( "System", "Resolution" ) [ 1 ] = 300 ;
+			opts.GetFloatOptionWrite( "System", "PixelAspectRatio" ) [ 0 ] = 1.0f;
+
+			// Inform the system that RiFormat has been called, as this takes priority.
+			opts.CallFormat();
+
 			PrepareShaders();
 			PostCloneOfWorld();
 			RenderWorld();
+
+			popOptions();
 
 			// Now restore the stored stuff.
 			SetCameraTransform(cameraTrans);
