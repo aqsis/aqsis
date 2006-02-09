@@ -147,6 +147,14 @@ static	CqString	SO_sprintf( const char* str, int cParams, IqShaderData** apParam
 // init_illuminance()
 TqBool CqShaderExecEnv::SO_init_illuminance()
 {
+	// Check if lighting is turned off.
+	if(NULL != QGetRenderContextI())
+	{
+		const TqInt* enableLightingOpt = QGetRenderContextI()->GetIntegerOption("EnableShaders", "lighting");
+		if(NULL != enableLightingOpt && enableLightingOpt[0] == 0)
+			return(TqFalse);
+	}
+
 	m_li = -1;
 	return ( SO_advance_illuminance() );
 }
@@ -156,6 +164,14 @@ TqBool CqShaderExecEnv::SO_init_illuminance()
 // advance_illuminance()
 TqBool CqShaderExecEnv::SO_advance_illuminance()
 {
+	// Check if lighting is turned off, should never need this check as SO_init_illuminance will catch first.
+	if(NULL != QGetRenderContextI())
+	{
+		const TqInt* enableLightingOpt = QGetRenderContextI()->GetIntegerOption("EnableShaders", "lighting");
+		if(NULL != enableLightingOpt && enableLightingOpt[0] == 0)
+			return(TqFalse);
+	}
+
 	m_li++;
 	while ( m_li < m_pAttributes ->cLights() &&
 	        m_pAttributes ->pLight( m_li ) ->pShader() ->fAmbient() )
@@ -4150,6 +4166,14 @@ void CqShaderExecEnv::SO_ambient( IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
 	TqInt __iGrid;
+
+	// Check if lighting is turned off.
+	if(NULL != QGetRenderContextI())
+	{
+		const TqInt* enableLightingOpt = QGetRenderContextI()->GetIntegerOption("EnableShaders", "lighting");
+		if(NULL != enableLightingOpt && enableLightingOpt[0] == 0)
+			return;
+	}
 
 	// Use the lightsource stack on the current surface
 	if ( m_pAttributes != 0 )

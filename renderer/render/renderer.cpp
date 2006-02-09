@@ -722,10 +722,14 @@ void CqRenderer::RenderAutoShadows()
 			else
 				Aqsis::log() << info << "Rendering automatic shadow pass for lightsource : \"unnamed\" to shadow map file \"" << pMapName[0].c_str() << "\"" << std::endl;
 
+			const TqInt* pRes = light->pAttributes()->GetIntegerAttribute("autoshadows", "res");
+			TqInt res = 300;
+			if(NULL != pRes)
+				res = pRes[0];
 			// Setup a new set of options based on the current ones.
 			CqOptions opts(optCurrent());
-			opts.GetIntegerOptionWrite( "System", "Resolution" ) [ 0 ] = 300 ;
-			opts.GetIntegerOptionWrite( "System", "Resolution" ) [ 1 ] = 300 ;
+			opts.GetIntegerOptionWrite( "System", "Resolution" ) [ 0 ] = res;
+			opts.GetIntegerOptionWrite( "System", "Resolution" ) [ 1 ] = res;
 			opts.GetFloatOptionWrite( "System", "PixelAspectRatio" ) [ 0 ] = 1.0f;
 
 			// Now that the options have all been set, setup any undefined camera parameters.
@@ -735,6 +739,15 @@ void CqRenderer::RenderAutoShadows()
 			opts.GetFloatOptionWrite( "System", "ScreenWindow" ) [ 2 ] = 1.0;
 			opts.GetFloatOptionWrite( "System", "ScreenWindow" ) [ 3 ] = -1.0;
 			opts.GetIntegerOptionWrite( "System", "DisplayMode" ) [ 0 ] = ModeZ;
+
+			// Set the pixel samples to 1,1 for shadow rendering.
+			opts.GetIntegerOptionWrite( "System", "PixelSamples" ) [ 0 ] = 1;
+			opts.GetIntegerOptionWrite( "System", "PixelSamples" ) [ 1 ] = 1;
+
+			// Set the pixel filter to box, 1,1 for shadow rendering.
+			opts.SetfuncFilter( RiBoxFilter );
+			opts.GetFloatOptionWrite( "System", "FilterWidth" ) [ 0 ] = 1;
+			opts.GetFloatOptionWrite( "System", "FilterWidth" ) [ 1 ] = 1;
 
 			// Make sure the depthFilter is set to "midpoint".
 			boost::shared_ptr<CqNamedParameterList> pHiderOpt = opts.pOptionWrite( "Hider" );
