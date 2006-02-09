@@ -660,13 +660,45 @@ void	CqRenderer::ptransConcatCurrentTime( const CqMatrix& matTrans )
 /** Render all surface in the current list to the image buffer.
  */
 
-void CqRenderer::RenderWorld()
+void CqRenderer::RenderWorld(CqTransformPtr camera, CqOptions* pOpts, TqBool clone)
 {
+	// If alternative options have been specified, set them up now.
+	if(NULL != pOpts)
+	{
+		CqOptions& currOpts = pushOptions();
+		currOpts = *pOpts;
+	}
+	// If an alternative camera has been specified, use it, otherwise use the default camera setup during initialisation.
+	CqTransformPtr defaultCamera;
+	if(camera)
+	{
+		// Store the current camera transform for later.
+		defaultCamera = GetCameraTransform();
+		SetCameraTransform(camera);
+		optCurrent().InitialiseCamera();
+	}
+	pImage()->SetImage();
+	
+	PrepareShaders();
+
+	if(clone)
+		PostCloneOfWorld();
+	else
+		PostWorld();
+
 	m_pDDManager->OpenDisplays();
-
 	pImage() ->RenderImage();
-
 	m_pDDManager->CloseDisplays();
+
+	if(NULL != pOpts)
+		popOptions();
+
+	if(camera)
+	{
+		SetCameraTransform(defaultCamera);
+		optCurrent().InitialiseCamera();
+	}
+	pImage()->SetImage();
 }
 
 
@@ -690,8 +722,8 @@ void CqRenderer::RenderAutoShadows()
 			else
 				Aqsis::log() << info << "Rendering automatic shadow pass for lightsource : \"unnamed\" to shadow map file \"" << pMapName[0].c_str() << "\"" << std::endl;
 
-			// Push the options and change the relevant settings for rendering a shadow map.
-			CqOptions& opts = pushOptions();
+			// Setup a new set of options based on the current ones.
+			CqOptions opts(optCurrent());
 			opts.GetIntegerOptionWrite( "System", "Resolution" ) [ 0 ] = 300 ;
 			opts.GetIntegerOptionWrite( "System", "Resolution" ) [ 1 ] = 300 ;
 			opts.GetFloatOptionWrite( "System", "PixelAspectRatio" ) [ 0 ] = 1.0f;
@@ -704,13 +736,20 @@ void CqRenderer::RenderAutoShadows()
 			opts.GetFloatOptionWrite( "System", "ScreenWindow" ) [ 3 ] = -1.0;
 			opts.GetIntegerOptionWrite( "System", "DisplayMode" ) [ 0 ] = ModeZ;
 
-			// Store the current camera transform for later.
-			CqTransformPtr cameraTrans = QGetRenderContext()->GetCameraTransform();
+			// Make sure the depthFilter is set to "midpoint".
+			boost::shared_ptr<CqNamedParameterList> pHiderOpt = opts.pOptionWrite( "Hider" );
+			CqParameterTypedUniform<CqString, type_string, CqString>* pDepthFilterOpt = new CqParameterTypedUniform<CqString, type_string, CqString>("depthfilter");
+			pDepthFilterOpt->pValue()[0] = CqString("midpoint");
+			pHiderOpt->AddParameter(pDepthFilterOpt);
+
+			// Don't bother doing lighting calcualations.
+			boost::shared_ptr<CqNamedParameterList> pEnableShadersOpts = opts.pOptionWrite( "EnableShaders" );
+			CqParameterTypedUniform<TqInt, type_integer, TqInt>* pLightingOpt = new CqParameterTypedUniform<TqInt, type_integer, TqInt>("lighting");
+			pLightingOpt->pValue()[0] = 0;
+			pEnableShadersOpts->AddParameter(pLightingOpt);
+
 			// Now set the camera transform the to light transform (inverse because the camera transform is transforming the world into camera space).
 			CqTransformPtr lightTrans(light->pTransform()->Inverse());
-			SetCameraTransform(lightTrans);
-			opts.InitialiseCamera();
-
 
 			// Cache the current DDManager, and replace it for the purposes of our shadow render.
 			IqDDManager* realDDManager = m_pDDManager;
@@ -719,28 +758,11 @@ void CqRenderer::RenderAutoShadows()
 			std::map<std::string, void*> args;
 			AddDisplayRequest(pMapName[0].c_str(), "shadow", "z", ModeZ, 0, 1, args);
 
-			// Cache the current imagebuffer, and replace it with a new one for the purposes of our shadow render.
-			CqImageBuffer* realImageBuffer = m_pImageBuffer;
-			m_pImageBuffer = 0;
-			SetImage( new CqImageBuffer );
-			pImage()->SetImage();
+			RenderWorld(lightTrans, &opts, TqTrue);
 
-
-			PrepareShaders();
-			PostCloneOfWorld();
-			RenderWorld();
-
-			popOptions();
-
-			// Now restore the stored stuff.
-			SetCameraTransform(cameraTrans);
-			optCurrent().InitialiseCamera();
 			m_pDDManager->Shutdown();
 			delete(m_pDDManager);
 			m_pDDManager = realDDManager;
-			SetImage(realImageBuffer);
-			// Called to ensure the static bucket data is reinitialised.
-			pImage()->SetImage();
 
 			CqTextureMap::FlushCache();
 			CqOcclusionBox::DeleteHierarchy();

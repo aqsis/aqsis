@@ -823,8 +823,7 @@ RtVoid	RiWorldBegin()
 	CqTransformPtr camera(new CqTransform());
 	QGetRenderContext() ->SetCameraTransform( camera );
 	// clear the camera transform to a single state, all camera motion is now transferred to the objects.
-	QGetRenderContext()->GetCameraTransform()->ResetTransform( current->matObjectToWorld( current->Time(0) ),
-	        current->GetHandedness(QGetRenderContext()->Time()) );
+	QGetRenderContext()->GetCameraTransform()->ResetTransform( current->matObjectToWorld( current->Time(0) ), current->GetHandedness(QGetRenderContext()->Time()) );
 	QGetRenderContext() ->BeginWorldModeBlock();
 	// and then reset the current matrix to identity, ready for object transformations.
 	if ( current->cTimes() > 1 )
@@ -892,9 +891,6 @@ RtVoid	RiWorldEnd()
 	Debug_RiWorldEnd
 
 	QGetRenderContext()->RenderAutoShadows();
-
-	QGetRenderContext()->PrepareShaders();
-	QGetRenderContext()->PostWorld( );
 
 	TqBool fFailed = TqFalse;
 	// Call any specified pre render function.

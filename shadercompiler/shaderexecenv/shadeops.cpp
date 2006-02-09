@@ -174,6 +174,17 @@ void CqShaderExecEnv::ValidateIlluminanceCache( IqShaderData* pP, IqShaderData* 
 	// If this is the first call to illuminance this time round, call all lights and setup the Cl and L caches.
 	if ( !m_IlluminanceCacheValid )
 	{
+		// Check if lighting is turned off.
+		if(NULL != QGetRenderContextI())
+		{
+			const TqInt* enableLightingOpt = QGetRenderContextI()->GetIntegerOption("EnableShaders", "lighting");
+			if(NULL != enableLightingOpt && enableLightingOpt[0] == 0)
+			{
+				m_IlluminanceCacheValid = TqTrue;
+				return;
+			}
+		}
+
 		IqShaderData* Ns = (pN != NULL )? pN : N();
 		IqShaderData* Ps = (pP != NULL )? pP : P();
 		TqUint li = 0;
