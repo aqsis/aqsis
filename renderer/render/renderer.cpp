@@ -681,7 +681,6 @@ void CqRenderer::RenderAutoShadows()
 	for(ilight=0; ilight<Lightsource_stack.size(); ilight++)
 	{
 		CqLightsourcePtr light = Lightsource_stack[ilight];
-		Aqsis::log() << "Checking light " << ilight << " for autoshadows" << std::endl;
 		const CqString* pMapName = light->pAttributes()->GetStringAttribute("autoshadows", "shadowmapname");
 		const CqString* pattrName = light->pAttributes()->GetStringAttribute( "identifier", "name" );
 		if(NULL != pMapName)
@@ -703,6 +702,7 @@ void CqRenderer::RenderAutoShadows()
 			opts.GetFloatOptionWrite( "System", "ScreenWindow" ) [ 1 ] = 1.0;
 			opts.GetFloatOptionWrite( "System", "ScreenWindow" ) [ 2 ] = 1.0;
 			opts.GetFloatOptionWrite( "System", "ScreenWindow" ) [ 3 ] = -1.0;
+			opts.GetIntegerOptionWrite( "System", "DisplayMode" ) [ 0 ] = ModeZ;
 
 			// Store the current camera transform for later.
 			CqTransformPtr cameraTrans = QGetRenderContext()->GetCameraTransform();
@@ -739,6 +739,12 @@ void CqRenderer::RenderAutoShadows()
 			delete(m_pDDManager);
 			m_pDDManager = realDDManager;
 			SetImage(realImageBuffer);
+			// Called to ensure the static bucket data is reinitialised.
+			pImage()->SetImage();
+
+			CqTextureMap::FlushCache();
+			CqOcclusionBox::DeleteHierarchy();
+			clippingVolume().clear();
 		}
 	}
 }

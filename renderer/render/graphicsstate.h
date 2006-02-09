@@ -316,6 +316,7 @@ class CqMainModeBlock : public CqModeBlock
 			CqOptions* opts = m_optionsStack.top();
 			m_optCurrent = *opts;
 			m_optionsStack.pop();
+			delete(opts);
 			return(m_optCurrent);
 		}
 
@@ -383,6 +384,7 @@ class CqFrameModeBlock : public CqModeBlock
 			CqOptions* opts = m_optionsStack.top();
 			m_optCurrent = *opts;
 			m_optionsStack.pop();
+			delete(opts);
 			return(m_optCurrent);
 		}
 

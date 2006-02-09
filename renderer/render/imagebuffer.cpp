@@ -1247,6 +1247,7 @@ void CqImageBuffer::RenderImage()
 	enum EqFilterDepth depthfilter = Filter_Min;
 	if ( NULL != pstrDepthFilter )
 	{
+		Aqsis::log() << debug << "Depth filter = " << pstrDepthFilter[0].c_str() << std::endl;
 		if( !pstrDepthFilter[ 0 ].compare( "min" ) )
 			depthfilter = Filter_Min;
 		else if ( !pstrDepthFilter[ 0 ].compare( "midpoint" ) )
