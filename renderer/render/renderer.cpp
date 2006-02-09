@@ -697,16 +697,20 @@ void CqRenderer::RenderAutoShadows()
 			opts.GetIntegerOptionWrite( "System", "Resolution" ) [ 1 ] = 300 ;
 			opts.GetFloatOptionWrite( "System", "PixelAspectRatio" ) [ 0 ] = 1.0f;
 
-			// Inform the system that RiFormat has been called, as this takes priority.
-			opts.CallFormat();
+			// Now that the options have all been set, setup any undefined camera parameters.
+			opts.GetFloatOptionWrite( "System", "FrameAspectRatio" ) [ 0 ] = 1.0;
+			opts.GetFloatOptionWrite( "System", "ScreenWindow" ) [ 0 ] = -1.0 ;
+			opts.GetFloatOptionWrite( "System", "ScreenWindow" ) [ 1 ] = 1.0;
+			opts.GetFloatOptionWrite( "System", "ScreenWindow" ) [ 2 ] = 1.0;
+			opts.GetFloatOptionWrite( "System", "ScreenWindow" ) [ 3 ] = -1.0;
 
 			// Store the current camera transform for later.
 			CqTransformPtr cameraTrans = QGetRenderContext()->GetCameraTransform();
 			// Now set the camera transform the to light transform (inverse because the camera transform is transforming the world into camera space).
 			CqTransformPtr lightTrans(light->pTransform()->Inverse());
-			Aqsis::log() << debug << "Light transform is... " << lightTrans->matObjectToWorld(0) << std::endl;
 			SetCameraTransform(lightTrans);
-			optCurrent().InitialiseCamera();
+			opts.InitialiseCamera();
+
 
 			// Cache the current DDManager, and replace it for the purposes of our shadow render.
 			IqDDManager* realDDManager = m_pDDManager;
@@ -731,8 +735,10 @@ void CqRenderer::RenderAutoShadows()
 			// Now restore the stored stuff.
 			SetCameraTransform(cameraTrans);
 			optCurrent().InitialiseCamera();
+			m_pDDManager->Shutdown();
+			delete(m_pDDManager);
 			m_pDDManager = realDDManager;
-			m_pImageBuffer = realImageBuffer;
+			SetImage(realImageBuffer);
 		}
 	}
 }
