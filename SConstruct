@@ -5,9 +5,14 @@ import sys
 from modulefinder import AddPackagePath
 
 from build_support import SelectBuildDir
+from build_support import zipperFunction
 from build_support import print_config
 from build_support import AddSysPath
 from build_support import Glob
+
+
+import version
+Export('version')
 
 # Setup the common command line options.
 opts = Options([os.path.abspath('options.cache'), os.path.abspath('custom.py')])
@@ -69,6 +74,15 @@ else:
 ENV_update(env['ENV'], os.environ)
 env.Glob = Glob
 
+# add builders to zip/gtar files
+from build_support import zipperFunction
+zipBuilder = Builder(action=zipperFunction,
+   source_factory=Dir,
+   target_factory=File,
+   multi=0)
+env.Append(BUILDERS = {'Zipper':zipBuilder})
+
+
 # Create the configure object here, as you can't do it once a call
 # to SConscript has been processed.
 conf = Configure(env)
@@ -76,27 +90,17 @@ Export('env opts conf')
 
 # Setup the distribution stuff, this should be non-platform specific, the distribution
 # archive should apply to all supported platforms.
-env['ZIPDISTDIR'] = '#/dist'
+env['ZIPDISTDIR'] = '#/aqsis-%d_%d_%d' %(version.major, version.minor, version.build)
 def Distribute(dir, files):
         env.Install('$ZIPDISTDIR/%s' % dir, files)
 env.Distribute = Distribute
 env.Alias('dist', '$ZIPDISTDIR')
-zip_target = env.Zip('aqsis', '$ZIPDISTDIR')
-env.Alias('dist-zip', zip_target)
+zip_target = env.Zip('aqsis-%d_%d_%d' %(version.major, version.minor, version.build), '$ZIPDISTDIR')
+env.Alias('dist_zip', zip_target)
 env.AppendUnique(TARFLAGS = '-c -z')
 env.AppendUnique(TARSUFFIX = '.tgz')
-tar_target = env.Tar('aqsis', '$ZIPDISTDIR')
-env.Alias('dist-tar', tar_target)
-
-
-# Read in the platform specific configuration.
-# Allowing it to override the settings defined above.
-SConscript(target_config_dir + os.sep + 'SConscript')
-
-
-# Save the command line options to a cache file, allowing the user to just run scons without 
-# command line options in future runs.
-opts.Save('options.cache', env)
+tar_target = env.Tar('aqsis-%d_%d_%d' %(version.major, version.minor, version.build), '$ZIPDISTDIR')
+env.Alias('dist_tar', tar_target)
 
 opts.Update(env)
 
@@ -105,7 +109,17 @@ env.Replace(BINDIR = env.Dir('$install_prefix').abspath + os.sep + 'bin')
 env.Replace(LIBDIR = env.Dir('$install_prefix').abspath + os.sep + 'lib')
 env.Replace(SHADERDIR = env.Dir('$install_prefix').abspath + os.sep + 'shaders')
 env.Replace(SYSCONFDIR = env.Dir('$install_prefix').abspath + os.sep + 'bin')
-env.Replace(INCLUDEDIR = env.Dir('$install_prefix').abspath + os.sep + 'inlclude/aqsis')
+env.Replace(INCLUDEDIR = env.Dir('$install_prefix').abspath + os.sep + 'include/aqsis')
+
+# Read in the platform specific configuration.
+# Allowing it to override the settings defined above.
+SConscript(target_config_dir + os.sep + 'SConscript')
+
+# Save the command line options to a cache file, allowing the user to just run scons without 
+# command line options in future runs.
+opts.Save('options.cache', env)
+
+opts.Update(env)
 
 target_dir = env.Dir('$build_prefix')
 
@@ -128,6 +142,10 @@ SConscript('build_check.py')
 env = conf.Finish()
 
 
+# Prepare the NSIS installer tool
+env.Tool('NSIS', toolpath=['./'])
+env.Distribute('./', 'NSIS.py')
+
 # Load the sub-project sconscript files.
 SConscript('rib/api/SConscript', build_dir=target_dir.abspath + '/rib/api')
 SConscript('aqsistypes/SConscript', build_dir=target_dir.abspath + '/aqsistypes')
@@ -148,14 +166,17 @@ SConscript('shadercompiler/slxargs/SConscript', build_dir=target_dir.abspath + '
 SConscript('shadercompiler/aqsltell/SConscript', build_dir=target_dir.abspath + '/shadercompiler/aqsltell')
 display = SConscript('displays/display/SConscript', build_dir=target_dir.abspath + '/displays/display')
 xpm = SConscript('displays/d_xpm/SConscript', build_dir=target_dir.abspath + '/displays/d_xpm')
-if not env['no_exr']:
-	exr = SConscript('displays/d_exr/SConscript', build_dir=target_dir.abspath + '/displays/d_exr')
+SConscript('displays/d_exr/SConscript', build_dir=target_dir.abspath + '/displays/d_exr')
 SConscript('rib/ri2rib/SConscript', build_dir=target_dir.abspath + '/rib/ri2rib')
 SConscript('rib/rib2stream/SConscript', build_dir=target_dir.abspath + '/rib/rib2stream')
 SConscript('texturing/teqser/SConscript', build_dir=target_dir.abspath + '/texturing/teqser')
 SConscript('texturing/plugins/SConscript')
 SConscript('shaders/SConscript', build_dir=target_dir.abspath + '/shaders')
 SConscript('thirdparty/tinyxml/SConscript', build_dir=target_dir.abspath + '/thirdparty/tinyxml')
+SConscript('distribution/SConscript')
+
+if not env['no_exr']:
+	Import('exr')
 
 #
 # Generate and install the 'aqsisrc' configuration file from the template '.aqsisrc.in'
@@ -191,7 +212,6 @@ env.Depends(aqsisrc, display)
 #
 # Generate and install the version.h file from the template 'version.h.in'
 #
-import version
 def version_h_build(target, source, env):
 	# Code to build "target" from "source"
 	defines = {
@@ -211,7 +231,9 @@ def version_h_build(target, source, env):
 
 version_h = env.Command('version.h', 'version.h.in', version_h_build)
 env.Install(target_dir.abspath, version_h)
-env.Distribute('./', version_h)
+env.Distribute('./', 'version.py')
+env.Distribute('./', 'version.h.in')
+
 
 env.Alias('release', ['$BINDIR','$LIBDIR', '$SHADERDIR','$SYSCONFDIR','$INCLUDEDIR'])
 Default('release')
@@ -231,7 +253,11 @@ main_distfiles = Split("""
 env.Distribute('', main_distfiles)
 
 # Distribute the platform build configurations.
-platforms = glob.glob('build/*/SConscript')
+platforms = glob.glob('platform/*/SConscript')
 for platform in platforms:
 	path, name = os.path.split(platform)
 	env.Distribute(path, platform)
+options = glob.glob('platform/*/*.py')
+for option in options:
+	path, name = os.path.split(option)
+	env.Distribute(path, option)

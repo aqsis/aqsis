@@ -1,8 +1,4 @@
 Import('env')
-d_exrenv = env.Copy()
-d_exrenv.AppendUnique(CPPPATH=['#/renderer/ddmanager'])
-d_exrenv.AppendUnique(CPPPATH=['$exr_include_path'])
-d_exrenv.AppendUnique(CPPDEFINES=['D_EXR_EXPORTS'])
 
 d_exr_sources = Split("""
 	d_exr.cpp
@@ -11,13 +7,20 @@ d_exr_sources = Split("""
 d_exr_headers =  Split("""
 	dspyhlpr.h""")
 
-# Set any platform specific target options.
-d_exrenv.UseTargetOptions('exr')
+if not env['no_exr']:
+	d_exrenv = env.Copy()
+	d_exrenv.AppendUnique(CPPPATH=['#/renderer/ddmanager'])
+	d_exrenv.AppendUnique(CPPPATH=['$exr_include_path'])
+	d_exrenv.AppendUnique(CPPDEFINES=['D_EXR_EXPORTS'])
 
-exr = d_exrenv.SharedLibrary('d_exr', d_exr_sources, LIBS=['IlmImf', 'Half', 'Iex', 'Imath'])
-d_exrenv.Install('$BINDIR', exr)
 
-Return('exr')
+	# Set any platform specific target options.
+	d_exrenv.UseTargetOptions('exr')
+
+	exr = d_exrenv.SharedLibrary('d_exr', d_exr_sources, LIBS=['IlmImf', 'Half', 'Iex', 'Imath'])
+	d_exrenv.Install('$BINDIR', exr)
+
+	Export('exr')
 
 env.Distribute('displays/d_exr', d_exr_sources)
 env.Distribute('displays/d_exr', d_exr_headers)
