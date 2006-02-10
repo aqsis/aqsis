@@ -165,6 +165,16 @@ class CqLayeredShader : public IqShader
 		{
 			return ( m_strName );
 		}
+		virtual	void	PrepareShaderForUse( )
+		{
+			// Pass the argument on to the shader for each layer in the list.
+			std::vector<std::pair<CqString, boost::shared_ptr<IqShader> > >::iterator i = m_Layers.begin();
+			while( i != m_Layers.end() )
+			{
+				i->second->PrepareShaderForUse();
+				++i;
+			}
+		}
 		virtual	void	SetArgument( const CqString& name, EqVariableType type, const CqString& space, void* val )
 		{
 			// Pass the argument on to the shader for each layer in the list.

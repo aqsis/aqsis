@@ -72,7 +72,7 @@ CqBound CqPolygonBase::Bound() const
  *  everything on the right (the same side as point 3) is not.
  */
 
-TqInt CqPolygonBase::Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
+TqInt CqPolygonBase::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits )
 {
 	CqVector3D	vecN;
 	TqInt indexA, indexB, indexC, indexD;
@@ -396,16 +396,6 @@ CqSurfacePolygon::CqSurfacePolygon( TqInt cVertices ) : CqSurface(),
 
 
 //---------------------------------------------------------------------
-/** Copy constructor.
- */
-
-CqSurfacePolygon::CqSurfacePolygon( const CqSurfacePolygon& From )
-{
-	*this = From;
-}
-
-
-//---------------------------------------------------------------------
 /** Destructor.
  */
 
@@ -435,14 +425,15 @@ TqBool CqSurfacePolygon::CheckDegenerate() const
 }
 
 //---------------------------------------------------------------------
-/** Assignment operator.
+/** Create a copy of this polygon primitive.
  */
 
-CqSurfacePolygon& CqSurfacePolygon::operator=( const CqSurfacePolygon& From )
+CqSurface* CqSurfacePolygon::Clone() const
 {
-	CqSurface::operator=( From );
-	m_cVertices = From.m_cVertices;
-	return ( *this );
+	CqSurfacePolygon* clone = new CqSurfacePolygon();
+	CqSurface::CloneData(clone);
+	clone->m_cVertices = m_cVertices;
+	return ( clone );
 }
 
 
@@ -450,32 +441,34 @@ CqSurfacePolygon& CqSurfacePolygon::operator=( const CqSurfacePolygon& From )
 /** Copy constructor.
  */
 
-CqSurfacePointsPolygon::CqSurfacePointsPolygon( const CqSurfacePointsPolygon& From )
-{
-	*this = From;
-}
+/* CqSurfacePointsPolygon::CqSurfacePointsPolygon( const CqSurfacePointsPolygon& From )
+ * {
+ * 	*this = From;
+ * }
+ */
 
 
 //---------------------------------------------------------------------
 /** Assignment operator.
  */
 
-CqSurfacePointsPolygon& CqSurfacePointsPolygon::operator=( const CqSurfacePointsPolygon& From )
-{
-	TqInt i;
-	m_aIndices.resize( From.m_aIndices.size() );
-	for ( i = From.m_aIndices.size() - 1; i >= 0; i-- )
-		m_aIndices[ i ] = From.m_aIndices[ i ];
-
-	// Store the old points array pointer, as we must reference first then
-	// unreference to avoid accidental deletion if they are the same and we are the
-	// last reference.
-	m_pPoints = From.m_pPoints;
-	m_Index = From.m_Index;
-	m_FaceVaryingIndex = From.m_FaceVaryingIndex;
-
-	return ( *this );
-}
+/* CqSurfacePointsPolygon& CqSurfacePointsPolygon::operator=( const CqSurfacePointsPolygon& From )
+ * {
+ * 	TqInt i;
+ * 	m_aIndices.resize( From.m_aIndices.size() );
+ * 	for ( i = From.m_aIndices.size() - 1; i >= 0; i-- )
+ * 		m_aIndices[ i ] = From.m_aIndices[ i ];
+ * 
+ * 	// Store the old points array pointer, as we must reference first then
+ * 	// unreference to avoid accidental deletion if they are the same and we are the
+ * 	// last reference.
+ * 	m_pPoints = From.m_pPoints;
+ * 	m_Index = From.m_Index;
+ * 	m_FaceVaryingIndex = From.m_FaceVaryingIndex;
+ * 
+ * 	return ( *this );
+ * }
+ */
 
 
 
@@ -495,6 +488,18 @@ void	CqPolygonPoints::Transform( const CqMatrix& matTx, const CqMatrix& matITTx,
 }
 
 
+CqSurface* CqPolygonPoints::Clone() const
+{
+	CqPolygonPoints* clone = new CqPolygonPoints();
+	CqSurface::CloneData(clone);
+	clone->m_cVertices = m_cVertices;
+	clone->m_Transformed = m_Transformed;
+	clone->m_cFaces = m_cFaces;
+	clone->m_sumnVerts = m_sumnVerts;
+	return(clone);
+}
+
+
 CqBound	CqSurfacePointsPolygons::Bound() const
 {
 	CqBound B;
@@ -507,7 +512,7 @@ CqBound	CqSurfacePointsPolygons::Bound() const
 	return(AdjustBoundForTransformationMotion( B ));
 }
 
-TqInt CqSurfacePointsPolygons::Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
+TqInt CqSurfacePointsPolygons::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits )
 {
 	TqInt	CreatedPolys = 0;
 	TqInt	iP = 0, poly;
@@ -545,6 +550,19 @@ TqInt CqSurfacePointsPolygons::Split( std::vector<boost::shared_ptr<CqBasicSurfa
 	return( CreatedPolys );
 }
 
+
+CqSurface* CqSurfacePointsPolygons::Clone() const
+{
+	// Make a 'complete' clone of this primitive, which means cloning the points too.
+	CqPolygonPoints* clone_points = static_cast<CqPolygonPoints*>(m_pPoints->Clone());
+	CqSurfacePointsPolygons* clone = new CqSurfacePointsPolygons();
+	CqSurface::CloneData(clone);
+	clone->m_NumPolys = m_NumPolys;
+	clone->m_PointCounts = m_PointCounts;
+	clone->m_PointIndices = m_PointIndices;
+	clone->m_pPoints = boost::shared_ptr<CqPolygonPoints>(clone_points);
+	return(clone);
+}
 
 END_NAMESPACE( Aqsis )
 //---------------------------------------------------------------------

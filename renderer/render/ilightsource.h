@@ -54,7 +54,7 @@ struct IqLightsource
 	virtual	TqInt	uGridRes() const = 0;
 	virtual	TqInt	vGridRes() const = 0;
 	virtual	TqInt	GridSize() const = 0;
-	virtual	const CqMatrix&	matObjectToWorld() const = 0;
+//	virtual	const CqMatrix&	matObjectToWorld() const = 0;
 	virtual	IqShaderData* Cs() = 0;
 	virtual	IqShaderData* Os() = 0;
 	virtual	IqShaderData* Ng() = 0;

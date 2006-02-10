@@ -175,7 +175,7 @@ class CqBucket : public IqBucket
 		/** Add a GPRim to the stack of deferred GPrims.
 		* \param The Gprim to be added.
 		 */
-		void	AddGPrim( const boost::shared_ptr<CqBasicSurface>& pGPrim )
+		void	AddGPrim( const boost::shared_ptr<CqSurface>& pGPrim )
 		{
 			m_aGPrims.push(pGPrim);
 		}
@@ -208,7 +208,7 @@ class CqBucket : public IqBucket
 		}
 		/** Get a pointer to the top GPrim in the stack of deferred GPrims.
 		 */
-		boost::shared_ptr<CqBasicSurface> pTopSurface()
+		boost::shared_ptr<CqSurface> pTopSurface()
 		{
 			if (!m_aGPrims.empty())
 			{
@@ -216,7 +216,7 @@ class CqBucket : public IqBucket
 			}
 			else
 			{
-				return boost::shared_ptr<CqBasicSurface>();
+				return boost::shared_ptr<CqSurface>();
 			}
 		}
 		/** Pop the top GPrim in the stack of deferred GPrims.
@@ -292,7 +292,7 @@ class CqBucket : public IqBucket
 		// this is a compare functor for sorting surfaces in order of depth.
 		struct closest_surface
 		{
-			bool operator()(const boost::shared_ptr<CqBasicSurface>& s1, const boost::shared_ptr<CqBasicSurface>& s2) const
+			bool operator()(const boost::shared_ptr<CqSurface>& s1, const boost::shared_ptr<CqSurface>& s2) const
 			{
 				if ( s1->fCachedBound() && s2->fCachedBound() )
 				{
@@ -308,7 +308,7 @@ class CqBucket : public IqBucket
 		std::vector<CqMicroPolyGridBase*> m_agridWaiting;		///< Vector of vectors of waiting micropolygrids in this bucket
 
 		/// A sorted list of primitives for this bucket
-		std::priority_queue<boost::shared_ptr<CqBasicSurface>, std::deque<boost::shared_ptr<CqBasicSurface> >, closest_surface> m_aGPrims;
+		std::priority_queue<boost::shared_ptr<CqSurface>, std::deque<boost::shared_ptr<CqSurface> >, closest_surface> m_aGPrims;
 		TqBool	m_bProcessed;	///< Flag indicating if this bucket has been processed yet.
 }
 ;

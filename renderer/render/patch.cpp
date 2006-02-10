@@ -51,13 +51,14 @@ CqSurfacePatchBicubic::CqSurfacePatchBicubic() : CqSurface()
 /** Copy constructor.
  */
 
-CqSurfacePatchBicubic::CqSurfacePatchBicubic( const CqSurfacePatchBicubic& From ) :
-		CqSurface( From )
-{
-	*this = From;
-
-	STATS_INC( GPR_patch );
-}
+/* CqSurfacePatchBicubic::CqSurfacePatchBicubic( const CqSurfacePatchBicubic& From ) :
+ * 		CqSurface( From )
+ * {
+ * 	*this = From;
+ * 
+ * 	STATS_INC( GPR_patch );
+ * }
+ */
 
 
 //---------------------------------------------------------------------
@@ -69,20 +70,17 @@ CqSurfacePatchBicubic::~CqSurfacePatchBicubic()
 
 
 //---------------------------------------------------------------------
-/** Assignment operator.
+/** Create a clone of this patch surface.
  */
 
-CqSurfacePatchBicubic& CqSurfacePatchBicubic::operator=( const CqSurfacePatchBicubic& From )
+CqSurface* CqSurfacePatchBicubic::Clone() const
 {
-	// Perform per surface copy function
-	CqSurface::operator=( From );
+	CqSurfacePatchBicubic* clone = new CqSurfacePatchBicubic();
+	CqSurface::CloneData(clone);
 
-	//	TqInt i;
-	//	for(i=0; i<16; i++)
-	//		P()[i]=From.P()[i];
-
-	return ( *this );
+	return ( clone );
 }
+
 
 
 
@@ -270,11 +268,11 @@ void CqSurfacePatchBicubic::NaturalDice( CqParameter* pParameter, TqInt uDiceSiz
 /** Split the patch into smaller patches.
  */
 
-TqInt CqSurfacePatchBicubic::PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u )
+TqInt CqSurfacePatchBicubic::PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, TqBool u )
 {
 	// Create two new surface of the appropriate type
-	aSplits.push_back( boost::shared_ptr<CqBasicSurface>( new CqSurfacePatchBicubic ) );
-	aSplits.push_back( boost::shared_ptr<CqBasicSurface>( new CqSurfacePatchBicubic ) );
+	aSplits.push_back( boost::shared_ptr<CqSurface>( new CqSurfacePatchBicubic ) );
+	aSplits.push_back( boost::shared_ptr<CqSurface>( new CqSurfacePatchBicubic ) );
 
 	return ( 2 );
 }
@@ -628,11 +626,12 @@ CqSurfacePatchBilinear::CqSurfacePatchBilinear() : CqSurface(), m_fHasPhantomFou
 /** Copy constructor.
  */
 
-CqSurfacePatchBilinear::CqSurfacePatchBilinear( const CqSurfacePatchBilinear& From ) :
-		CqSurface( From )
-{
-	*this = From;
-}
+/* CqSurfacePatchBilinear::CqSurfacePatchBilinear( const CqSurfacePatchBilinear& From ) :
+ * 		CqSurface( From )
+ * {
+ * 	*this = From;
+ * }
+ */
 
 
 //---------------------------------------------------------------------
@@ -644,19 +643,21 @@ CqSurfacePatchBilinear::~CqSurfacePatchBilinear()
 
 
 //---------------------------------------------------------------------
-/** Assignment operator.
+/** Create a clone of this patch surface.
  */
 
-CqSurfacePatchBilinear& CqSurfacePatchBilinear::operator=( const CqSurfacePatchBilinear& From )
+CqSurface* CqSurfacePatchBilinear::Clone() const
 {
-	CqSurface::operator=( From );
+	CqSurfacePatchBilinear* clone = new CqSurfacePatchBilinear();
+	CqSurface::CloneData( clone );
 
-	m_fHasPhantomFourthVertex = From.m_fHasPhantomFourthVertex;
-	m_iInternalu = From.m_iInternalu;
-	m_iInternalv = From.m_iInternalv;
+	clone->m_fHasPhantomFourthVertex = m_fHasPhantomFourthVertex;
+	clone->m_iInternalu = m_iInternalu;
+	clone->m_iInternalv = m_iInternalv;
 
-	return ( *this );
+	return ( clone );
 }
+
 
 
 //---------------------------------------------------------------------
@@ -699,10 +700,10 @@ CqBound CqSurfacePatchBilinear::Bound() const
 /** Split the patch into smaller patches.
  */
 
-TqInt CqSurfacePatchBilinear::PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u )
+TqInt CqSurfacePatchBilinear::PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, TqBool u )
 {
-	aSplits.push_back( boost::shared_ptr<CqBasicSurface>( new CqSurfacePatchBilinear ) );
-	aSplits.push_back( boost::shared_ptr<CqBasicSurface>( new CqSurfacePatchBilinear ) );
+	aSplits.push_back( boost::shared_ptr<CqSurface>( new CqSurfacePatchBilinear ) );
+	aSplits.push_back( boost::shared_ptr<CqSurface>( new CqSurfacePatchBilinear ) );
 
 	return ( 2 );
 }
@@ -792,18 +793,18 @@ TqBool	CqSurfacePatchBilinear::Diceable()
  *  is no longer a phantom patch, the other two are.
  *
  */
-TqInt CqSurfacePatchBilinear::Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
+TqInt CqSurfacePatchBilinear::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits )
 {
 	// Create two new patches
-	aSplits.push_back( boost::shared_ptr<CqBasicSurface>( new CqSurfacePatchBilinear ) );
-	aSplits.push_back( boost::shared_ptr<CqBasicSurface>( new CqSurfacePatchBilinear ) );
+	aSplits.push_back( boost::shared_ptr<CqSurface>( new CqSurfacePatchBilinear ) );
+	aSplits.push_back( boost::shared_ptr<CqSurface>( new CqSurfacePatchBilinear ) );
 
 	// If phantom, create a further two.
 	/// \note: We can actually avoid this, as we only really need three for a phantom patch.
 	if ( m_fHasPhantomFourthVertex )
 	{
-		aSplits.push_back( boost::shared_ptr<CqBasicSurface>( new CqSurfacePatchBilinear ) );
-		aSplits.push_back( boost::shared_ptr<CqBasicSurface>( new CqSurfacePatchBilinear ) );
+		aSplits.push_back( boost::shared_ptr<CqSurface>( new CqSurfacePatchBilinear ) );
+		aSplits.push_back( boost::shared_ptr<CqSurface>( new CqSurfacePatchBilinear ) );
 	}
 	TqBool direction = SplitDir() == SplitDir_U;
 	TqBool opposite = !direction;
@@ -877,17 +878,6 @@ TqInt CqSurfacePatchBilinear::Split( std::vector<boost::shared_ptr<CqBasicSurfac
 
 
 //---------------------------------------------------------------------
-/** Copy constructor.
- */
-
-CqSurfacePatchMeshBicubic::CqSurfacePatchMeshBicubic( const CqSurfacePatchMeshBicubic& From ) :
-		CqSurface( From )
-{
-	*this = From;
-}
-
-
-//---------------------------------------------------------------------
 /** Destructor.
  */
 
@@ -896,23 +886,24 @@ CqSurfacePatchMeshBicubic::~CqSurfacePatchMeshBicubic()
 
 
 //---------------------------------------------------------------------
-/** Assignment operator.
+/** Create a clone of this patchmesh surface.
  */
 
-CqSurfacePatchMeshBicubic& CqSurfacePatchMeshBicubic::operator=( const CqSurfacePatchMeshBicubic& From )
+CqSurface* CqSurfacePatchMeshBicubic::Clone() const
 {
-	// Perform per surface copy function
-	CqSurface::operator=( From );
+	CqSurfacePatchMeshBicubic* clone = new CqSurfacePatchMeshBicubic();
+	CqSurface::CloneData( clone );
 
-	m_uPatches = From.m_uPatches;
-	m_vPatches = From.m_vPatches;
-	m_nu = From.m_nu;
-	m_nv = From.m_nv;
-	m_uPeriodic = From.m_uPeriodic;
-	m_vPeriodic = From.m_vPeriodic;
+	clone->m_uPatches = m_uPatches;
+	clone->m_vPatches = m_vPatches;
+	clone->m_nu = m_nu;
+	clone->m_nv = m_nv;
+	clone->m_uPeriodic = m_uPeriodic;
+	clone->m_vPeriodic = m_vPeriodic;
 
-	return ( *this );
+	return ( clone );
 }
+
 
 
 //---------------------------------------------------------------------
@@ -957,7 +948,7 @@ CqBound CqSurfacePatchMeshBicubic::Bound() const
 #define	PatchCoord(v,u)	((((v)%m_nv)*m_nu)+((u)%m_nu))
 #define	PatchCorner(v,u)	((((v)%nvaryingv)*nvaryingu)+((u)%nvaryingu));
 
-TqInt CqSurfacePatchMeshBicubic::Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
+TqInt CqSurfacePatchMeshBicubic::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits )
 {
 	TqInt cSplits = 0;
 
@@ -1110,12 +1101,13 @@ TqInt CqSurfacePatchMeshBicubic::Split( std::vector<boost::shared_ptr<CqBasicSur
 /** Copy constructor.
  */
 
-CqSurfacePatchMeshBilinear::CqSurfacePatchMeshBilinear( const CqSurfacePatchMeshBilinear& From ) :
-		CqSurface( From )
-{
-	*this = From;
-}
-
+/* CqSurfacePatchMeshBilinear::CqSurfacePatchMeshBilinear( const CqSurfacePatchMeshBilinear& From ) :
+ * 		CqSurface( From )
+ * {
+ * 	*this = From;
+ * }
+ * 
+ */
 
 //---------------------------------------------------------------------
 /** Destructor.
@@ -1126,23 +1118,24 @@ CqSurfacePatchMeshBilinear::~CqSurfacePatchMeshBilinear()
 
 
 //---------------------------------------------------------------------
-/** Assignment operator.
+/** Create a clone of this patchmesh surface.
  */
 
-CqSurfacePatchMeshBilinear& CqSurfacePatchMeshBilinear::operator=( const CqSurfacePatchMeshBilinear& From )
+CqSurface* CqSurfacePatchMeshBilinear::Clone() const
 {
-	// Perform per surface copy function
-	CqSurface::operator=( From );
+	CqSurfacePatchMeshBilinear* clone = new CqSurfacePatchMeshBilinear();
+	CqSurface::CloneData( clone );
 
-	m_uPatches = From.m_uPatches;
-	m_vPatches = From.m_vPatches;
-	m_nu = From.m_nu;
-	m_nv = From.m_nv;
-	m_uPeriodic = From.m_uPeriodic;
-	m_vPeriodic = From.m_vPeriodic;
+	clone->m_uPatches = m_uPatches;
+	clone->m_vPatches = m_vPatches;
+	clone->m_nu = m_nu;
+	clone->m_nv = m_nv;
+	clone->m_uPeriodic = m_uPeriodic;
+	clone->m_vPeriodic = m_vPeriodic;
 
-	return ( *this );
+	return ( clone );
 }
+
 
 
 //---------------------------------------------------------------------
@@ -1187,7 +1180,7 @@ CqBound CqSurfacePatchMeshBilinear::Bound() const
 #define	PatchCoord(v,u)	((((v)%m_nv)*m_nu)+((u)%m_nu))
 #define	PatchCorner(v,u)	((((v)%nvaryingv)*nvaryingu)+((u)%nvaryingu));
 
-TqInt CqSurfacePatchMeshBilinear::Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
+TqInt CqSurfacePatchMeshBilinear::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits )
 {
 	TqInt cSplits = 0;
 

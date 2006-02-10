@@ -65,6 +65,8 @@ class CqSubdivision2 : public CqMotionSpec<boost::shared_ptr<CqPolygonPoints> >
 
 		CqLath* pFacet(TqInt iIndex);
 		CqLath* pVertex(TqInt iIndex);
+		const CqLath* pFacet(TqInt iIndex) const;
+		const CqLath* pVertex(TqInt iIndex) const;
 
 		/// Get the number of faces representing this topology.
 		TqInt	cFacets() const
@@ -96,6 +98,7 @@ class CqSubdivision2 : public CqMotionSpec<boost::shared_ptr<CqPolygonPoints> >
 
 		void		Prepare(TqInt cVerts);
 		CqLath*		AddFacet(TqInt cVerts, TqInt* pIndices, TqInt iFVIndex);
+		CqLath*		AddFacet(TqInt cVerts, TqInt* pIndices, TqInt* pFVIndices);
 		TqBool		Finalise();
 		void		SubdivideFace(CqLath* pFace, std::vector<CqLath*>& apSubFaces);
 		TqBool		CanUsePatch( CqLath* pFace );
@@ -459,12 +462,9 @@ class CqSubdivision2 : public CqMotionSpec<boost::shared_ptr<CqPolygonPoints> >
 
 		void		OutputMesh(const char* fname, std::vector<CqLath*>* paFaces = 0);
 		void		OutputInfo(const char* fname, std::vector<CqLath*>* paFaces = 0);
-	private:
-		///	Declared private to prevent copying.
-		CqSubdivision2(const CqSubdivision2&);
-		///	Declared private to prevent copying.
-		CqSubdivision2&	operator=(const CqSubdivision2&);
 
+		CqSubdivision2* Clone() const;
+	private:
 		/// Array of pointers to laths, one each representing each facet.
 		std::vector<CqLath*>				m_apFacets;
 		/// Array of arrays of pointers to laths each array representing the total laths referencing a single vertex.
@@ -487,7 +487,7 @@ class CqSubdivision2 : public CqMotionSpec<boost::shared_ptr<CqPolygonPoints> >
 
 
 
-class CqSurfaceSubdivisionPatch : public CqBasicSurface
+class CqSurfaceSubdivisionPatch : public CqSurface
 {
 	public:
 		CqSurfaceSubdivisionPatch( const boost::shared_ptr<CqSubdivision2>& pTopology, CqLath* pFace, TqInt faceIndex)
@@ -556,10 +556,10 @@ class CqSurfaceSubdivisionPatch : public CqBasicSurface
 			return ( 0 );
 		}
 
-		// Implementations required by CqBasicSurface
+		// Implementations required by CqSurface
 		virtual	CqBound	Bound() const;
 		virtual	CqMicroPolyGridBase* Dice();
-		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits );
+		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
 		virtual TqBool	Diceable();
 
 		virtual	CqMicroPolyGridBase* DiceExtract();
@@ -567,13 +567,20 @@ class CqSurfaceSubdivisionPatch : public CqBasicSurface
 		/** Determine whether the passed surface is valid to be used as a
 		 *  frame in motion blur for this surface.
 		 */
-		virtual TqBool	IsMotionBlurMatch( CqBasicSurface* pSurf )
+		virtual TqBool	IsMotionBlurMatch( CqSurface* pSurf )
 		{
 			return( TqFalse );
 		}
 
 		void StoreDice( CqMicroPolyGrid* pGrid, const boost::shared_ptr<CqPolygonPoints>& pPoints, TqInt iParam, TqInt iFVParam, TqInt iVData);
 		boost::shared_ptr<CqSubdivision2> Extract( TqInt iTime );
+
+		virtual CqSurface* Clone() const
+		{
+			// \warning: Should never ever be cloning one of these surfaces.
+			assert(false);
+			return(NULL);
+		}
 
 	private:
 		boost::shared_ptr<CqSubdivision2>	m_pTopology;
@@ -617,10 +624,10 @@ class CqSurfaceSubdivisionMesh : public CqSurface
 			return(NULL);
 		}
 		/** Split this GPrim into a number of other GPrims.
-		 * \param aSplits A reference to a CqBasicSurface array to fill in with the new GPrim pointers.
+		 * \param aSplits A reference to a CqSurface array to fill in with the new GPrim pointers.
 		 * \return Integer count of new GPrims created.
 		 */
-		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits );
+		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
 		/** Determine whether this GPrim is diceable at its current size.
 		 */
 		virtual TqBool	Diceable()
@@ -634,7 +641,7 @@ class CqSurfaceSubdivisionMesh : public CqSurface
 			m_pTopology->pPoints()->Transform( matTx, matITTx, matRTx, iTime );
 		}
 
-		virtual TqBool	IsMotionBlurMatch( CqBasicSurface* pSurf )
+		virtual TqBool	IsMotionBlurMatch( CqSurface* pSurf )
 		{
 			return( TqFalse );
 		}
@@ -661,10 +668,22 @@ class CqSurfaceSubdivisionMesh : public CqSurface
 			assert( m_pTopology->pPoints() );
 			return ( m_pTopology->pPoints()->cFaceVarying() );
 		}
+		virtual CqSurface* Clone() const;
+
+		void AddSharpEdge(TqInt a, TqInt b, TqFloat sharpness)
+		{
+			m_aSharpEdges.push_back(std::pair<std::pair<TqInt, TqInt>, TqFloat>(std::pair<TqInt, TqInt>(a, b), sharpness));
+		}
+		void AddSharpCorner(TqInt a, TqFloat sharpness)
+		{
+			m_aSharpCorners.push_back(std::pair<TqInt, TqFloat>(a, sharpness));
+		}
 
 	private:
 		TqInt	m_NumFaces;
-		boost::shared_ptr<CqSubdivision2>	m_pTopology;		///< Pointer to the associated CqPolygonPoints class.
+		boost::shared_ptr<CqSubdivision2>	m_pTopology;		///< Pointer to the associated CqSubdivision2 class.
+		std::vector<std::pair<std::pair<TqInt,TqInt>, TqFloat> >	m_aSharpEdges; 
+		std::vector<std::pair<TqInt, TqFloat> > m_aSharpCorners; 
 };
 
 

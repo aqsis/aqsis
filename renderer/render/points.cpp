@@ -69,7 +69,8 @@ bool CqPointsKDTreeData::CqPointsKDTreeDataComparator::operator()(TqInt a, TqInt
 /** Constructor.
  */
 
-CqPoints::CqPoints( TqInt nvertices, const boost::shared_ptr<CqPolygonPoints>& pPoints ) : CqMotionSpec<boost::shared_ptr<CqPolygonPoints> >(pPoints),
+CqPoints::CqPoints( TqInt nvertices, const boost::shared_ptr<CqPolygonPoints>& pPoints ) : 
+		m_pPoints(pPoints),
 		m_nVertices(nvertices),
 		m_KDTreeData( this ),
 		m_KDTree(&m_KDTreeData),
@@ -80,12 +81,6 @@ CqPoints::CqPoints( TqInt nvertices, const boost::shared_ptr<CqPolygonPoints>& p
 
 	m_widthParamIndex = -1;
 	m_constantwidthParamIndex = -1;
-
-	if( pPoints )
-	{
-		// Store the reference to our points.
-		AddTimeSlot( 0, pPoints );
-	}
 
 	std::vector<CqParameter*>::iterator iUP;
 	TqInt index = 0;
@@ -100,30 +95,32 @@ CqPoints::CqPoints( TqInt nvertices, const boost::shared_ptr<CqPolygonPoints>& p
 
 
 //---------------------------------------------------------------------
-/** Assignment operator.
+/** Create a clone of this points class
  */
 
-CqPoints&	CqPoints::operator=( const CqPoints& From )
+CqSurface* CqPoints::Clone() const 
 {
-	CqSurface::operator=( From );
-	m_nVertices = From.m_nVertices;
+	// Make a 'complete' clone of this primitive, which means cloning the points too.
+	CqPolygonPoints* clone_points = static_cast<CqPolygonPoints*>(m_pPoints->Clone());
 
-	m_KDTreeData.SetpPoints( this );
+	CqPoints* clone = new CqPoints(m_nVertices, boost::shared_ptr<CqPolygonPoints>(clone_points));
+	CqSurface::CloneData( clone );
 
-	// Release the reference to our points.
-	TqInt i;
-	for ( i = 0; i < From.cTimes(); i++ )
-	{
-		boost::shared_ptr<CqPolygonPoints> pTimePoints = From.GetMotionObject( From.Time( i ) );
-		AddTimeSlot( From.Time( i ), pTimePoints );
-	}
+//	clone->m_nVertices = m_nVertices;
+//	clone->m_pPoints = boost::shared_ptr<CqPolygonPoints>(clone_points);
 
-	m_widthParamIndex = From.m_widthParamIndex;
-	m_constantwidthParamIndex = From.m_constantwidthParamIndex;
-	m_MaxWidth = From.m_MaxWidth;
+//	clone->m_KDTreeData.SetpPoints( clone );
 
-	return ( *this );
+//	clone->m_widthParamIndex = m_widthParamIndex;
+//	clone->m_constantwidthParamIndex = m_constantwidthParamIndex;
+//	clone->m_MaxWidth = m_MaxWidth;
+
+	clone->InitialiseKDTree();
+	clone->InitialiseMaxWidth();
+
+	return ( clone );
 }
+
 
 
 
@@ -325,12 +322,12 @@ CqBound	CqPoints::Bound() const
 	TqUint i;
 
 	TqInt t;
-	for ( t = 0; t < cTimes(); t++ )
+/*	for ( t = 0; t < cTimes(); t++ )
 	{
-		CqPolygonPoints* pTimePoints = pPoints( t ).get();
+		CqPolygonPoints* pTimePoints = pPoints( t ).get();*/
 		for( i = 0; i < nVertices(); i++ )
-			B.Encapsulate( (CqVector3D)pTimePoints->P()->pValue( m_KDTree.aLeaves()[ i ] )[0] );
-	}
+			B.Encapsulate( (CqVector3D)m_pPoints->P()->pValue( m_KDTree.aLeaves()[ i ] )[0] );
+/*	}*/
 
 	// Expand the bound to take into account the width of the particles.
 	B.vecMax() += CqVector3D( m_MaxWidth, m_MaxWidth, m_MaxWidth );
@@ -343,25 +340,25 @@ CqBound	CqPoints::Bound() const
 /** Split this GPrim into bicubic patches.
  */
 
-TqInt CqPoints::Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
+TqInt CqPoints::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits )
 {
-	TqInt median = nVertices()/2;
-	// Split the KDTree and create two new primitives containing the split points set.
-	boost::shared_ptr<CqPoints> pA( new CqPoints( *this ) );
-	boost::shared_ptr<CqPoints> pB( new CqPoints( *this ) );
-
-	pA->m_nVertices = median;
-	pB->m_nVertices = nVertices()-median;
-
-	pA->SetSurfaceParameters( *this );
-	pB->SetSurfaceParameters( *this );
-
-	KDTree().Subdivide( pA->KDTree(), pB->KDTree() );
-
-	aSplits.push_back( pA );
-	aSplits.push_back( pB );
-
-	return( 2 );
+ 	TqInt median = nVertices()/2;
+ 	// Split the KDTree and create two new primitives containing the split points set.
+ 	boost::shared_ptr<CqPoints> pA( new CqPoints( m_nVertices, pPoints() ) );
+ 	boost::shared_ptr<CqPoints> pB( new CqPoints( m_nVertices, pPoints() ) );
+ 
+ 	pA->m_nVertices = median;
+ 	pB->m_nVertices = nVertices()-median;
+ 
+ 	pA->SetSurfaceParameters( *this );
+ 	pB->SetSurfaceParameters( *this );
+ 
+ 	KDTree().Subdivide( pA->KDTree(), pB->KDTree() );
+ 
+ 	aSplits.push_back( pA );
+ 	aSplits.push_back( pB );
+ 
+ 	return( 2 );
 }
 
 
@@ -369,25 +366,25 @@ TqInt CqPoints::Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits 
 /** Split the points, taking the split information from the specified donor points surfaces.
  */
 
-TqInt CqPoints::CopySplit( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, CqPoints* pFrom1, CqPoints* pFrom2 )
+TqInt CqPoints::CopySplit( std::vector<boost::shared_ptr<CqSurface> >& aSplits, CqPoints* pFrom1, CqPoints* pFrom2 )
 {
 	// Split the KDTree and create two new primitives containing the split points set.
-	boost::shared_ptr<CqPoints> pA( new CqPoints( *this ) );
-	boost::shared_ptr<CqPoints> pB( new CqPoints( *this ) );
-
-	pA->m_nVertices = pFrom1->m_nVertices;
-	pB->m_nVertices = pFrom2->m_nVertices;
-
-	pA->SetSurfaceParameters( *this );
-	pB->SetSurfaceParameters( *this );
-
-	pA->KDTree() = pFrom1->KDTree();
-	pB->KDTree() = pFrom2->KDTree();
-
-	aSplits.push_back( pA );
-	aSplits.push_back( pB );
-
-	return( 2 );
+ 	boost::shared_ptr<CqPoints> pA( new CqPoints( m_nVertices, pPoints() ) );
+ 	boost::shared_ptr<CqPoints> pB( new CqPoints( m_nVertices, pPoints() ) );
+ 
+ 	pA->m_nVertices = pFrom1->m_nVertices;
+ 	pB->m_nVertices = pFrom2->m_nVertices;
+ 
+ 	pA->SetSurfaceParameters( *this );
+ 	pB->SetSurfaceParameters( *this );
+ 
+ 	pA->KDTree() = pFrom1->KDTree();
+ 	pB->KDTree() = pFrom2->KDTree();
+ 
+ 	aSplits.push_back( pA );
+ 	aSplits.push_back( pB );
+ 
+ 	return( 2 );
 }
 
 
@@ -437,6 +434,16 @@ void CqPoints::InitialiseMaxWidth()
 
 		m_MaxWidth = MAX(m_MaxWidth, radius );
 	}
+}
+
+//---------------------------------------------------------------------
+/** Transform the points by the transformation matrices provided.
+ */
+
+void	CqPoints::Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime )
+{
+	CqPolygonPoints* pTimePoints = pPoints( iTime ).get();
+	pTimePoints->Transform(matTx, matITTx, matRTx, 0);
 }
 
 void CqMicroPolyGridPoints::Split( CqImageBuffer* pImage, long xmin, long xmax, long ymin, long ymax )

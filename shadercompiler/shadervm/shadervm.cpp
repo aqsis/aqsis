@@ -1361,6 +1361,8 @@ void CqShaderVM::SetArgument( const CqString& strName, EqVariableType type, cons
 		// Ensure that the type passed matches what the variable expects.
 		if( m_LocalVars[ i ] ->Type() == type )
 		{
+			// Create a storage for it.
+			IqShaderData* pStoredArg = m_LocalVars[i]->Clone();
 			while ( count-- > 0 )
 			{
 				IqShaderData* pVMVal = CreateTemporaryStorage(type, class_uniform);
@@ -1425,55 +1427,19 @@ void CqShaderVM::SetArgument( const CqString& strName, EqVariableType type, cons
 						break;
 				}
 
-				CqMatrix matObjectToWorld = matCurrent();
-				if( m_pEnv )
-					matObjectToWorld = m_pEnv->pTransform()->matObjectToWorld(m_pEnv->pTransform()->Time(0));
-
-				// If it is a color or a point, ensure it is the correct 'space'
-				if ( m_LocalVars[ i ] ->Type() == type_point || m_LocalVars[ i ] ->Type() == type_hpoint )
-				{
-					CqString _strSpace( "shader" );
-					if ( strSpace.compare( "" ) != 0 )
-						_strSpace = strSpace;
-					CqVector3D p;
-					pVMVal->GetPoint( p, 0 );
-					pVMVal->SetPoint( QGetRenderContextI() ->matSpaceToSpace( _strSpace.c_str(), "camera", matCurrent(), matObjectToWorld, QGetRenderContextI()->Time() ) * p );
-				}
-				else if ( m_LocalVars[ i ] ->Type() == type_normal )
-				{
-					CqString _strSpace( "shader" );
-					if ( strSpace.compare( "" ) != 0 )
-						_strSpace = strSpace;
-					CqVector3D p;
-					pVMVal->GetNormal( p, 0 );
-					pVMVal->SetNormal( QGetRenderContextI() ->matNSpaceToSpace( _strSpace.c_str(), "camera", matCurrent(), matObjectToWorld, QGetRenderContextI()->Time() ) * p );
-				}
-				else if ( m_LocalVars[ i ] ->Type() == type_vector )
-				{
-					CqString _strSpace( "shader" );
-					if ( strSpace.compare( "" ) != 0 )
-						_strSpace = strSpace;
-					CqVector3D p;
-					pVMVal->GetVector( p, 0 );
-					pVMVal->SetVector( QGetRenderContextI() ->matVSpaceToSpace( _strSpace.c_str(), "camera", matCurrent(), matObjectToWorld, QGetRenderContextI()->Time() ) * p );
-				}
-				else if ( m_LocalVars[ i ] ->Type() == type_matrix )
-				{
-					CqString _strSpace( "shader" );
-					if ( strSpace.compare( "" ) != 0 )
-						_strSpace = strSpace;
-					CqMatrix m;
-					pVMVal->GetMatrix( m, 0 );
-					pVMVal->SetMatrix( QGetRenderContextI() ->matVSpaceToSpace( _strSpace.c_str(), "camera", matCurrent(), matObjectToWorld, QGetRenderContextI()->Time() ) * m );
-				}
-
 				if ( pArray )
-					pArray->ArrayEntry( arrayindex++ ) ->SetValueFromVariable( pVMVal );
+					pStoredArg->ArrayEntry( arrayindex++ ) ->SetValueFromVariable( pVMVal );
 				else
-					m_LocalVars[ i ] ->SetValueFromVariable( pVMVal );
+					pStoredArg->SetValueFromVariable( pVMVal );
 
 				DeleteTemporaryStorage(pVMVal);
 			}
+			SqArgumentRecord rec;
+			rec.m_Value = pStoredArg;
+			rec.m_strSpace = strSpace;
+			rec.m_strName = strName;
+			m_StoredArguments.push_back(rec);
+			Aqsis::log() << debug << "Storing argument : " << strName.c_str() << " : on : " << m_strName.c_str() << std::endl;
 		}
 		else
 		{
@@ -1483,6 +1449,85 @@ void CqShaderVM::SetArgument( const CqString& strName, EqVariableType type, cons
 	else
 	{
 		Aqsis::log() << warning << "Unknown parameter \"" << strName.c_str() << "\" in shader \"" << m_strName.c_str() << "\"" << std::endl;
+	}
+}
+
+
+void CqShaderVM::PrepareShaderForUse( )
+{
+	Aqsis::log() << debug << "Preparing shader : " << strName().c_str() << " [" << m_StoredArguments.size() << " args]"  << std::endl;
+
+	// Reinitialise the local variables to their defaults.
+	PrepareDefArgs();
+
+	// Transfer the arguments from the store onto the shader proper, ready for use.
+	TqInt i;
+	for ( i = 0; i < m_StoredArguments.size(); i++ )
+	{
+		Aqsis::log() << debug << "Setting argument : " << m_StoredArguments[i].m_strName.c_str() << " : on shader : " << strName().c_str() << std::endl;
+		TqInt varindex = FindLocalVarIndex( m_StoredArguments[i].m_strName.c_str() );
+
+		int index = 0, count = 1, arrayindex = 0;
+		IqShaderData* pArray = 0;
+
+		if ( m_StoredArguments[ i ].m_Value->ArrayLength() > 0 )
+		{
+			pArray = m_LocalVars[ varindex ];
+			count = pArray->ArrayLength();
+		}
+
+		while ( count-- > 0 )
+		{
+			// Get the specified value out.
+			IqShaderData* pVMVal = m_StoredArguments[i].m_Value;
+			CqString strSpace = m_StoredArguments[i].m_strSpace;
+			CqMatrix matObjectToWorld = matCurrent();
+//			if( m_pEnv )
+//				matObjectToWorld = m_pEnv->pTransform()->matObjectToWorld(m_pEnv->pTransform()->Time(0));
+
+			// If it is a color or a point, ensure it is the correct 'space'
+			if ( pVMVal->Type() == type_point || pVMVal->Type() == type_hpoint )
+			{
+				CqString _strSpace( "shader" );
+				if ( strSpace.compare( "" ) != 0 )
+					_strSpace = strSpace;
+				CqVector3D p;
+				pVMVal->GetPoint( p, 0 );
+				pVMVal->SetPoint( QGetRenderContextI() ->matSpaceToSpace( _strSpace.c_str(), "camera", matCurrent(), matObjectToWorld, QGetRenderContextI()->Time() ) * p );
+			}
+			else if ( pVMVal->Type() == type_normal )
+			{
+				CqString _strSpace( "shader" );
+				if ( strSpace.compare( "" ) != 0 )
+					_strSpace = strSpace;
+				CqVector3D p;
+				pVMVal->GetNormal( p, 0 );
+				pVMVal->SetNormal( QGetRenderContextI() ->matNSpaceToSpace( _strSpace.c_str(), "camera", matCurrent(), matObjectToWorld, QGetRenderContextI()->Time() ) * p );
+			}
+			else if ( pVMVal->Type() == type_vector )
+			{
+				CqString _strSpace( "shader" );
+				if ( strSpace.compare( "" ) != 0 )
+					_strSpace = strSpace;
+				CqVector3D p;
+				pVMVal->GetVector( p, 0 );
+				pVMVal->SetVector( QGetRenderContextI() ->matVSpaceToSpace( _strSpace.c_str(), "camera", matCurrent(), matObjectToWorld, QGetRenderContextI()->Time() ) * p );
+			}
+			else if ( pVMVal->Type() == type_matrix )
+			{
+				CqString _strSpace( "shader" );
+				if ( strSpace.compare( "" ) != 0 )
+					_strSpace = strSpace;
+				CqMatrix m;
+				pVMVal->GetMatrix( m, 0 );
+				pVMVal->SetMatrix( QGetRenderContextI() ->matVSpaceToSpace( _strSpace.c_str(), "camera", matCurrent(), matObjectToWorld, QGetRenderContextI()->Time() ) * m );
+			}
+
+			if ( pArray )
+				pArray->ArrayEntry( arrayindex++ ) ->SetValueFromVariable( pVMVal );
+			else
+				m_LocalVars[ varindex ] ->SetValueFromVariable( pVMVal );
+		}
 	}
 }
 

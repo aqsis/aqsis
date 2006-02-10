@@ -307,6 +307,256 @@ void CqLath::Qff(std::vector<CqLath*>& Result)
 }
 
 
+
+//------------------------------------------------------------------------------
+/**
+ *	Get the edges surrounding a facet.
+ *	Get a list of laths representing the esges making up a facet.
+ *
+ *	@return	Pointer to an array of lath pointers.
+ */
+void CqLath::Qfe(std::vector<const CqLath*>& Result) const
+{
+	TqInt len = 1;
+	const CqLath* pNext = cf();
+	const CqLath* pNexta = pNext;
+	while(this != pNext)
+	{
+		assert(NULL != pNext);
+		len++;
+		pNext = pNext->cf();
+	}
+
+	Result.resize(len);
+	// Laths representing the edges of the associated facet are obtained by following
+	// clockwise links around the face.
+	const CqLath *pTmpLath = this;
+	Result[0] = pTmpLath;
+
+	TqInt index = 1;
+	while(this != pNexta)
+	{
+		Result[index++] = pNexta;
+		pNexta = pNexta->cf();
+	}
+}
+
+
+//------------------------------------------------------------------------------
+/**
+ *	Get the edges emanating from a vertex.
+ *	Get a list of laths representing the edges which emanate from the vertex
+ *	this lath represents.
+ *
+ *	@return	Pointer to an array of lath pointers.
+ */
+void CqLath::Qve(std::vector<const CqLath*>& Result) const
+{
+	TqInt len = cQve();
+
+	const CqLath* pNext = cv();
+	const CqLath* pLast = this;
+
+	Result.resize(len);
+	TqInt index = 0;
+	// Laths representing the edges that radiate from the associated vertex are obtained by
+	// following the clockwise vertex links around the vertex.
+	const CqLath *pTmpLath = this;
+	Result[index++] = pTmpLath;
+
+	while(NULL != pNext && this != pNext)
+	{
+		Result[index++] = pNext;
+		pLast = pNext;
+		pNext = pNext->cv();
+	}
+
+	// If we hit a boundary, add the ec of this boundary edge and start again going backwards.
+	// @warning Adding ccf for the boundary edge means that the lath represents a different vertex.
+	if(NULL == pNext)
+	{
+		pLast = this;
+		pNext = ccv();
+		// We know we are going to hit a boundary in this direction as well so we can just look for that
+		// case as a terminator.
+		while(NULL != pNext)
+		{
+			Result[index++] = pNext;
+			pLast = pNext;
+			pNext = pNext->ccv();
+		}
+		// We have hit the boundary going the other way, so add the ccf of this boundary edge.
+		Result[index++] = pLast->cf();
+	}
+}
+
+
+
+//------------------------------------------------------------------------------
+/**
+ *	Get the vertices emanating from this vertex.
+ *	Get a list of laths representing the vertices emanating from the vertex
+ *	this lath represents.
+ *
+ *	@return	Pointer to an array of lath pointers.
+ */
+void CqLath::Qvv(std::vector<const CqLath*>& Result) const 
+{
+	Qve(Result);
+
+	// We can get the laths for the vertices surrounding a vertex by getting the cf() for each
+	// lath in Qev. Note we must check first if the lath in Qve represents the same vertex as this
+	// as if there is a boundary case, the lath on the clockwise boundary will already point to the
+	// opposite vertex.
+	for(std::vector<const CqLath*>::iterator iLath = Result.begin(); iLath!=Result.end(); iLath++)
+	{
+		if((*iLath)->VertexIndex() == VertexIndex())
+			(*iLath) = (*iLath)->ccf();
+	}
+}
+
+
+//------------------------------------------------------------------------------
+/**
+ *	Get the facets which share this vertex.
+ *	Get a list of laths which represent the facets which share the vertex this
+ *	lath represents.
+ *
+ *	@return	Pointer to an array of lath pointers.
+ */
+void CqLath::Qvf(std::vector<const CqLath*>& Result) const
+{
+	TqInt len = cQvf();
+
+	const CqLath* pNext = cv();
+
+	Result.resize(len);
+	TqInt index = 0;
+
+	// Laths representing the edges that radiate from the associated vertex are obtained by
+	// following the clockwise vertex links around the vertex.
+	const CqLath *pTmpLath = this;
+	Result[index++] = pTmpLath;
+
+	while(NULL != pNext && this != pNext)
+	{
+		Result[index++] = pNext;
+		pNext = pNext->cv();
+	}
+
+	// If we hit a boundary, start again going backwards.
+	if(NULL == pNext)
+	{
+		pNext = ccv();
+		// We know we are going to hit a boundary in this direction as well so we can just look for that
+		// case as a terminator.
+		while(NULL != pNext)
+		{
+			Result[index++] = pNext;
+			pNext = pNext->ccv();
+		}
+	}
+}
+
+
+//------------------------------------------------------------------------------
+/**
+ *	Get the edges emanating from this edge.
+ *	Get a list of laths which represent the edges which share a vertex with
+ *	the edge this lath represents.
+ *
+ *	@return	Pointer to an array of lath pointers.
+ */
+void CqLath::Qee(std::vector<const CqLath*>& Result) const
+{
+	Result.clear();
+	std::vector<const CqLath*> ResQve1;
+	Qve(ResQve1);
+	std::vector<const CqLath*> ResQve2;
+	ccf()->Qve(ResQve2);
+
+	// The laths representing the edges radiating from the two vertices of the edge this lath represents
+	// can be implemented by taking the union of Qve for this and cf() and removing the duplicate cf() if
+	// it exists.
+	Result.swap(ResQve1);
+	//Result.insert(Result.end(), ResQve1.begin(), ResQve1.end());
+
+	std::vector<const CqLath*>::iterator iLath;
+	TqInt len2 = 0;
+	for(iLath = ResQve2.begin(); iLath!=ResQve2.end(); iLath++)
+	{
+		if(ec() != (*iLath) && this != (*iLath))
+			len2++;
+	}
+
+	TqInt index = Result.size();
+	Result.resize( Result.size() + len2 );
+	for(iLath = ResQve2.begin(); iLath!=ResQve2.end(); iLath++)
+	{
+		if(ec() != (*iLath) && this != (*iLath))
+			Result[index++] = (*iLath);
+	}
+}
+
+
+//------------------------------------------------------------------------------
+/**
+ *	Get the facets which surround this facet.
+ *	Get a list of laths which represent the faces which share either a vertex
+ *	or an edge with the facet this lath represents.
+ *
+ *	@return	Pointer to an array of lath pointers.
+ */
+void CqLath::Qff(std::vector<const CqLath*>& Result) const
+{
+	std::vector<const CqLath*> ResQfe;
+	Qfe(ResQfe);
+
+	// The laths representing the edges radiating from the two vertices of the edge this lath represents
+	// can be implemented by taking the union of Qve for this and cf() and removing the duplicate ec() if
+	// it exists.
+	std::vector<const CqLath*>::iterator iLath;
+	TqInt len = 0;
+	for(iLath = ResQfe.begin(); iLath!=ResQfe.end(); iLath++)
+		len += (*iLath)->cQve();
+
+	Result.resize(0);
+	Result.reserve(len);
+	TqInt index = 0;
+
+	for(iLath = ResQfe.begin(); iLath!=ResQfe.end(); ++iLath)
+	{
+		std::vector<const CqLath*> ResQev;
+		(*iLath)->Qve(ResQev);
+		std::vector<const CqLath*>::iterator iEdge;
+		for(iEdge = ResQev.begin(); iEdge!=ResQev.end(); ++iEdge)
+		{
+			const CqLath* pNew = (*iEdge);
+			// Search for the new candidate by traversing the cf lists for all laths currrently in the
+			// result list.
+			TqBool fValid = TqTrue;
+			std::vector<const CqLath*>::iterator iCurr;
+			for(iCurr = Result.begin(); iCurr!=Result.end() && fValid; ++iCurr)
+			{
+				const CqLath* pVisited =(*iCurr);
+				const CqLath* pStart = pVisited;
+				do
+				{
+					if(pVisited == pNew)
+					{
+						fValid=TqFalse;
+						break;
+					}
+					pVisited = pVisited->cf();
+				}
+				while(pVisited != pStart);
+			}
+			if(fValid)
+				Result.push_back(pNew);
+		}
+	}
+}
+
 //------------------------------------------------------------------------------
 /**
  *	Get the number of vertices surrounding a facet.

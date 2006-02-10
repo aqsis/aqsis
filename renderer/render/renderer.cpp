@@ -87,9 +87,6 @@ CqRenderer::CqRenderer() :
 {
 	m_pImageBuffer = new	CqImageBuffer();
 
-	// Initialize the default options
-	m_pOptDefault = new CqOptions();
-
 	// Initialize the default attributes, transform and camera transform
 	m_pAttrDefault  = new CqAttributes;
 	ADDREF( m_pAttrDefault );
@@ -150,13 +147,6 @@ CqRenderer::~CqRenderer()
 	// Close down the Display device manager.
 	m_pDDManager->Shutdown();
 	delete(m_pDDManager);
-
-	// Delete the default options
-	if ( m_pOptDefault )
-	{
-		delete m_pOptDefault;
-		m_pOptDefault = NULL;
-	}
 
 	// Delete the default attributes, transform and camera transform
 	if ( m_pAttrDefault )
@@ -524,14 +514,57 @@ void CqRenderer::AdvanceTime()
 /** Return a reference to the current options.
  */
 
-CqOptions& CqRenderer::optCurrent() const
+CqOptions& CqRenderer::optCurrent()
 {
 	if ( m_pconCurrent )
 		return ( m_pconCurrent->optCurrent() );
 	else
 	{
-		assert( m_pOptDefault != NULL );
-		return ( *m_pOptDefault );
+		return ( m_optDefault );
+	}
+}
+
+//----------------------------------------------------------------------
+/** Return a reference to the current options.
+ */
+
+const CqOptions& CqRenderer::optCurrent() const
+{
+	if ( m_pconCurrent )
+		return ( m_pconCurrent->optCurrent() );
+	else
+	{
+		return ( m_optDefault );
+	}
+}
+
+//----------------------------------------------------------------------
+/** Push the current options allowing modification.
+ */
+
+CqOptions& CqRenderer::pushOptions()
+{
+	if ( m_pconCurrent )
+		return ( m_pconCurrent->pushOptions() );
+	else
+	{
+		// \note: cannot push/pop options outside the Main block.
+		return ( m_optDefault );
+	}
+}
+
+//----------------------------------------------------------------------
+/** Pop the last stored options.
+ */
+
+CqOptions& CqRenderer::popOptions()
+{
+	if ( m_pconCurrent )
+		return ( m_pconCurrent->popOptions() );
+	else
+	{
+		// \note: cannot push/pop options outside the Main block.
+		return ( m_optDefault );
 	}
 }
 
@@ -627,19 +660,147 @@ void	CqRenderer::ptransConcatCurrentTime( const CqMatrix& matTrans )
 /** Render all surface in the current list to the image buffer.
  */
 
-void CqRenderer::RenderWorld()
+void CqRenderer::RenderWorld(CqTransformPtr camera, CqOptions* pOpts, TqBool clone)
 {
-	// Check we have a valid Image buffer
-	if ( pImage() == 0 )
-		SetImage( new CqImageBuffer );
+	// If alternative options have been specified, set them up now.
+	if(NULL != pOpts)
+	{
+		CqOptions& currOpts = pushOptions();
+		currOpts = *pOpts;
+	}
+	// If an alternative camera has been specified, use it, otherwise use the default camera setup during initialisation.
+	CqTransformPtr defaultCamera;
+	if(camera)
+	{
+		// Store the current camera transform for later.
+		defaultCamera = GetCameraTransform();
+		SetCameraTransform(camera);
+		optCurrent().InitialiseCamera();
+	}
+	pImage()->SetImage();
+
+	// While rendering, all primitives should fasttrack straight into the pipeline, the easiest way to ensure this
+	// is to switch into 'non' multipass mode.
+	TqInt multiPass;
+	TqInt* pMultipass = GetIntegerOptionWrite("Render", "multipass");
+	if(pMultipass)
+	{
+		multiPass = pMultipass[0];
+		pMultipass[0] = 0;
+	}
+	
+	PrepareShaders();
+
+	if(clone)
+		PostCloneOfWorld();
+	else
+		PostWorld();
 
 	m_pDDManager->OpenDisplays();
-
 	pImage() ->RenderImage();
-
 	m_pDDManager->CloseDisplays();
+
+	if(NULL != pMultipass)
+		pMultipass[0] = multiPass;
+
+	if(NULL != pOpts)
+		popOptions();
+
+	if(camera)
+	{
+		SetCameraTransform(defaultCamera);
+		optCurrent().InitialiseCamera();
+	}
+	pImage()->SetImage();
 }
 
+
+//----------------------------------------------------------------------
+/** Render any automatic shadow passes.
+ */
+
+void CqRenderer::RenderAutoShadows()
+{
+	// Check if multipass rendering is switched on.
+	const TqInt* pMultipass = GetIntegerOption("Render", "multipass");
+	if(pMultipass && pMultipass[0])
+	{
+		// Check all the lightsources for any with an attribute indicating autoshadows.
+		TqInt ilight;
+		for(ilight=0; ilight<Lightsource_stack.size(); ilight++)
+		{
+			CqLightsourcePtr light = Lightsource_stack[ilight];
+			const CqString* pMapName = light->pAttributes()->GetStringAttribute("autoshadows", "shadowmapname");
+			const CqString* pattrName = light->pAttributes()->GetStringAttribute( "identifier", "name" );
+			if(NULL != pMapName)
+			{
+				if(NULL != pattrName)
+					Aqsis::log() << info << "Rendering automatic shadow pass for lightsource : \"" << pattrName[0].c_str() << "\" to shadow map file \"" << pMapName[0].c_str() << "\"" << std::endl;
+				else
+					Aqsis::log() << info << "Rendering automatic shadow pass for lightsource : \"unnamed\" to shadow map file \"" << pMapName[0].c_str() << "\"" << std::endl;
+
+				const TqInt* pRes = light->pAttributes()->GetIntegerAttribute("autoshadows", "res");
+				TqInt res = 300;
+				if(NULL != pRes)
+					res = pRes[0];
+				// Setup a new set of options based on the current ones.
+				CqOptions opts(optCurrent());
+				opts.GetIntegerOptionWrite( "System", "Resolution" ) [ 0 ] = res;
+				opts.GetIntegerOptionWrite( "System", "Resolution" ) [ 1 ] = res;
+				opts.GetFloatOptionWrite( "System", "PixelAspectRatio" ) [ 0 ] = 1.0f;
+
+				// Now that the options have all been set, setup any undefined camera parameters.
+				opts.GetFloatOptionWrite( "System", "FrameAspectRatio" ) [ 0 ] = 1.0;
+				opts.GetFloatOptionWrite( "System", "ScreenWindow" ) [ 0 ] = -1.0 ;
+				opts.GetFloatOptionWrite( "System", "ScreenWindow" ) [ 1 ] = 1.0;
+				opts.GetFloatOptionWrite( "System", "ScreenWindow" ) [ 2 ] = 1.0;
+				opts.GetFloatOptionWrite( "System", "ScreenWindow" ) [ 3 ] = -1.0;
+				opts.GetIntegerOptionWrite( "System", "DisplayMode" ) [ 0 ] = ModeZ;
+
+				// Set the pixel samples to 1,1 for shadow rendering.
+				opts.GetIntegerOptionWrite( "System", "PixelSamples" ) [ 0 ] = 1;
+				opts.GetIntegerOptionWrite( "System", "PixelSamples" ) [ 1 ] = 1;
+
+				// Set the pixel filter to box, 1,1 for shadow rendering.
+				opts.SetfuncFilter( RiBoxFilter );
+				opts.GetFloatOptionWrite( "System", "FilterWidth" ) [ 0 ] = 1;
+				opts.GetFloatOptionWrite( "System", "FilterWidth" ) [ 1 ] = 1;
+
+				// Make sure the depthFilter is set to "midpoint".
+				boost::shared_ptr<CqNamedParameterList> pHiderOpt = opts.pOptionWrite( "Hider" );
+				CqParameterTypedUniform<CqString, type_string, CqString>* pDepthFilterOpt = new CqParameterTypedUniform<CqString, type_string, CqString>("depthfilter");
+				pDepthFilterOpt->pValue()[0] = CqString("midpoint");
+				pHiderOpt->AddParameter(pDepthFilterOpt);
+
+				// Don't bother doing lighting calcualations.
+				boost::shared_ptr<CqNamedParameterList> pEnableShadersOpts = opts.pOptionWrite( "EnableShaders" );
+				CqParameterTypedUniform<TqInt, type_integer, TqInt>* pLightingOpt = new CqParameterTypedUniform<TqInt, type_integer, TqInt>("lighting");
+				pLightingOpt->pValue()[0] = 0;
+				pEnableShadersOpts->AddParameter(pLightingOpt);
+
+				// Now set the camera transform the to light transform (inverse because the camera transform is transforming the world into camera space).
+				CqTransformPtr lightTrans(light->pTransform()->Inverse());
+
+				// Cache the current DDManager, and replace it for the purposes of our shadow render.
+				IqDDManager* realDDManager = m_pDDManager;
+				m_pDDManager = CreateDisplayDriverManager();
+				m_pDDManager->Initialise();
+				std::map<std::string, void*> args;
+				AddDisplayRequest(pMapName[0].c_str(), "shadow", "z", ModeZ, 0, 1, args);
+
+				RenderWorld(lightTrans, &opts, TqTrue);
+
+				m_pDDManager->Shutdown();
+				delete(m_pDDManager);
+				m_pDDManager = realDDManager;
+
+				CqTextureMap::FlushCache();
+				CqOcclusionBox::DeleteHierarchy();
+				clippingVolume().clear();
+			}
+		}
+	}
+}
 
 
 //----------------------------------------------------------------------
@@ -1110,7 +1271,9 @@ boost::shared_ptr<IqShader> CqRenderer::getDefaultSurfaceShader()
 	m_Shaders[key] = pRet;
 
 	// return a clone of the default surface template
-	return boost::shared_ptr<IqShader>( pRet->Clone() );
+	boost::shared_ptr<IqShader> newShader(pRet->Clone());
+	m_InstancedShaders.push_back(newShader);
+	return (newShader);
 
 }
 
@@ -1129,7 +1292,9 @@ boost::shared_ptr<IqShader> CqRenderer::CreateShader(
 	if ( m_Shaders.find(key) != m_Shaders.end() )
 	{
 		// the shader template is present, so return its clone
-		return boost::shared_ptr<IqShader>( m_Shaders[key]->Clone() );
+		boost::shared_ptr<IqShader> newShader(m_Shaders[key]->Clone());
+		m_InstancedShaders.push_back(newShader);
+		return (newShader);
 	}
 
 	// we now create the shader...
@@ -1165,7 +1330,9 @@ boost::shared_ptr<IqShader> CqRenderer::CreateShader(
 		// add the shader to the map as a template and return its
 		//  clone
 		m_Shaders[key] = pRet;
-		return boost::shared_ptr<IqShader>( pRet->Clone() );
+		boost::shared_ptr<IqShader> newShader(pRet->Clone());
+		m_InstancedShaders.push_back(newShader);
+		return (newShader);
 	}
 	else
 	{
@@ -1194,7 +1361,9 @@ boost::shared_ptr<IqShader> CqRenderer::CreateShader(
 
 			// add the shader to the map and return its clone
 			m_Shaders[key] = pRet;
-			return boost::shared_ptr<IqShader>( pRet->Clone() );
+			boost::shared_ptr<IqShader> newShader(pRet->Clone());
+			m_InstancedShaders.push_back(newShader);
+			return (newShader);
 		}
 		else
 		{
@@ -1204,6 +1373,67 @@ boost::shared_ptr<IqShader> CqRenderer::CreateShader(
 	}
 
 }
+
+//----------------------------------------------------------------------
+/** Add a new surface to the list of surfaces in the world.
+ * \param pSurface A pointer to a CqSurface derived class, surface should at this point be in world space.
+ */
+
+void CqRenderer::StorePrimitive( const boost::shared_ptr<CqSurface>& pSurface )
+{
+	// If we are not in a mode that allows 'extra' passes, then fasttrack the primitive directly into the pipeline.
+	const TqInt* pMultipass = GetIntegerOption("Render", "multipass");
+	if(pMultipass && pMultipass[0])
+		m_aWorld.push_back(pSurface);
+	else
+	{
+		pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "world", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(0), 0 ),
+						 QGetRenderContext() ->matNSpaceToSpace( "world", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(0), 0 ),
+						 QGetRenderContext() ->matVSpaceToSpace( "world", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(0), 0 ) );
+		pImage()->PostSurface(pSurface);
+	}
+}
+
+void CqRenderer::PostWorld()
+{
+	while(!m_aWorld.empty())
+	{
+		boost::shared_ptr<CqSurface> pSurface = m_aWorld.front();
+		
+		pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "world", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(0), 0 ),
+						 QGetRenderContext() ->matNSpaceToSpace( "world", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(0), 0 ),
+						 QGetRenderContext() ->matVSpaceToSpace( "world", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(0), 0 ) );
+		pImage()->PostSurface(pSurface);
+		m_aWorld.pop_front();
+	}
+}
+	
+
+void CqRenderer::PostCloneOfWorld()
+{
+	std::deque<boost::shared_ptr<CqSurface> >::iterator i;
+	for(i=m_aWorld.begin(); i!=m_aWorld.end(); i++)
+	{
+		boost::shared_ptr<CqSurface> pSurface((*i)->Clone());
+		pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "world", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(0), 0 ),
+						 QGetRenderContext() ->matNSpaceToSpace( "world", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(0), 0 ),
+						 QGetRenderContext() ->matVSpaceToSpace( "world", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(0), 0 ) );
+		pImage()->PostSurface(pSurface);
+	}
+}
+
+
+/** Prepare the shaders for rendering.
+ */
+void CqRenderer::PrepareShaders()
+{
+	std::vector< boost::shared_ptr<IqShader> >::iterator i;
+	for(i = m_InstancedShaders.begin(); i!=m_InstancedShaders.end(); i++)
+	{
+		(*i)->PrepareShaderForUse();
+	}
+}
+
 
 //---------------------------------------------------------------------
 /** Find a shader of the specified type with the specified name.
@@ -1552,6 +1782,14 @@ void TIFF_ErrorHandler(const char* mdl, const char* fmt, va_list va)
 void TIFF_WarnHandler(const char* mdl, const char* fmt, va_list va)
 {
 	// Ignore warnings
+}
+
+
+void	CqRenderer::SetImage( CqImageBuffer* pImage )
+{
+	if(m_pImageBuffer != NULL)
+		delete(m_pImageBuffer);
+	m_pImageBuffer = pImage;
 }
 
 //---------------------------------------------------------------------

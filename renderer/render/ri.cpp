@@ -97,7 +97,7 @@ using namespace Aqsis;
 
 static RtBoolean ProcessPrimitiveVariables( CqSurface* pSurface, PARAMETERLIST );
 static void ProcessCompression( TqInt *compress, TqInt *quality, TqInt count, RtToken *tokens, RtPointer *values );
-RtVoid	CreateGPrim( const boost::shared_ptr<CqBasicSurface>& pSurface );
+RtVoid	CreateGPrim( const boost::shared_ptr<CqSurface>& pSurface );
 void SetShaderArgument( const boost::shared_ptr<IqShader>& pShader, const char* name, TqPchar val );
 TqBool	ValidateState(...);
 
@@ -286,7 +286,7 @@ template<class T>
 inline
 RtVoid	CreateGPrim( const boost::shared_ptr<T>& pSurface )
 {
-	CreateGPrim( boost::static_pointer_cast<CqBasicSurface,T>( pSurface ) );
+	CreateGPrim( boost::static_pointer_cast<CqSurface,T>( pSurface ) );
 }
 
 //----------------------------------------------------------------------
@@ -823,8 +823,7 @@ RtVoid	RiWorldBegin()
 	CqTransformPtr camera(new CqTransform());
 	QGetRenderContext() ->SetCameraTransform( camera );
 	// clear the camera transform to a single state, all camera motion is now transferred to the objects.
-	QGetRenderContext()->GetCameraTransform()->ResetTransform( current->matObjectToWorld( current->Time(0) ),
-	        current->GetHandedness(QGetRenderContext()->Time()) );
+	QGetRenderContext()->GetCameraTransform()->ResetTransform( current->matObjectToWorld( current->Time(0) ), current->GetHandedness(QGetRenderContext()->Time()) );
 	QGetRenderContext() ->BeginWorldModeBlock();
 	// and then reset the current matrix to identity, ready for object transformations.
 	if ( current->cTimes() > 1 )
@@ -891,7 +890,7 @@ RtVoid	RiWorldEnd()
 
 	Debug_RiWorldEnd
 
-	QGetRenderContext() ->pImage() ->PostWorld( );
+	QGetRenderContext()->RenderAutoShadows();
 
 	TqBool fFailed = TqFalse;
 	// Call any specified pre render function.
@@ -3855,7 +3854,7 @@ RtVoid	RiPointsV( RtInt npoints, PARAMETERLIST )
 		}
 		else
 		{
-			QGetRenderContext() ->pImage() ->StorePrimitive( pSurface );
+			QGetRenderContext()->StorePrimitive( pSurface );
 			STATS_INC( GPR_created );
 		}
 	}
@@ -3935,9 +3934,9 @@ RtVoid RiCurvesV( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, 
 			                     QGetRenderContext() ->matNSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
 			                     QGetRenderContext() ->matVSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ) );
 
-			std::vector<boost::shared_ptr<CqBasicSurface> > aSplits;
+			std::vector<boost::shared_ptr<CqSurface> > aSplits;
 			pSurface->Split( aSplits );
-			std::vector<boost::shared_ptr<CqBasicSurface> >::iterator iSS;
+			std::vector<boost::shared_ptr<CqSurface> >::iterator iSS;
 			for ( iSS = aSplits.begin(); iSS != aSplits.end(); ++iSS )
 			{
 				CreateGPrim( *iSS );
@@ -4510,9 +4509,9 @@ RtVoid	RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vw
 		{
 			// Fill in default values for all primitive variables not explicitly specified.
 			pSurface->SetDefaultPrimitiveVariables();
-			std::vector<boost::shared_ptr<CqBasicSurface> > aSplits;
+			std::vector<boost::shared_ptr<CqSurface> > aSplits;
 			pSurface->Split( aSplits );
-			std::vector<boost::shared_ptr<CqBasicSurface> >::iterator iSS;
+			std::vector<boost::shared_ptr<CqSurface> >::iterator iSS;
 			for ( iSS = aSplits.begin(); iSS != aSplits.end(); ++iSS )
 			{
 				CqMatrix matuBasis = pSurface->pAttributes() ->GetMatrixAttribute( "System", "Basis" ) [ 0 ];
@@ -5120,7 +5119,7 @@ RtVoid	RiGeometryV( RtToken type, PARAMETERLIST )
 			                  QGetRenderContext() ->matNSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ),
 			                  QGetRenderContext() ->matVSpaceToSpace( "object", "world", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time), time ) );
 
-			CreateGPrim( boost::static_pointer_cast<CqBasicSurface>( pMesh ) );
+			CreateGPrim( boost::static_pointer_cast<CqSurface>( pMesh ) );
 		}
 	}
 	else if ( strcmp( type, "sphere" ) == 0 )
@@ -5923,6 +5922,8 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 			boost::shared_ptr<CqSubdivision2> pSubd2( new CqSubdivision2( pPointsClass ) );
 			pSubd2->Prepare( cVerts );
 
+			boost::shared_ptr<CqSurfaceSubdivisionMesh> pMesh( new CqSurfaceSubdivisionMesh(pSubd2, nfaces ) );
+
 			RtInt	iP = 0;
 			for ( face = 0; face < nfaces; ++face )
 			{
@@ -5954,6 +5955,8 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 							if ( intargs[ iEdge + intargIndex ] < pSubd2->cVertices() &&
 							        intargs[ iEdge + intargIndex + 1 ] < pSubd2->cVertices() )
 							{
+								// Store the sharp edge information in the top level mesh.
+								pMesh->AddSharpEdge(intargs[ iEdge + intargIndex ], intargs[ iEdge + intargIndex + 1 ], creaseSharpness);
 								// Store the crease sharpness.
 								CqLath* pEdge = pSubd2->pVertex( intargs[ iEdge + intargIndex ] );
 								std::vector<CqLath*> aQve;
@@ -5979,6 +5982,8 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 						{
 							if ( intargs[ iVertex + intargIndex ] < pSubd2->cVertices() )
 							{
+								// Store the sharp edge information in the top level mesh.
+								pMesh->AddSharpCorner(intargs[ iVertex + intargIndex ], RI_INFINITY);
 								// Store the corner sharpness.
 								CqLath* pVertex = pSubd2->pVertex( intargs[ iVertex + intargIndex ] );
 								pSubd2->AddSharpCorner( pVertex, RI_INFINITY );
@@ -6000,7 +6005,6 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 					floatargIndex += nargs[ argcIndex++ ];
 				}
 
-				boost::shared_ptr<CqSurfaceSubdivisionMesh> pMesh( new CqSurfaceSubdivisionMesh(pSubd2, nfaces ) );
 				CreateGPrim(pMesh);
 			}
 			else
@@ -6449,7 +6453,7 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface * pSurface, PARAMETERLIST 
 // CreateGPrin
 // Create and register a GPrim according to the current attributes/transform
 //
-RtVoid	CreateGPrim( const boost::shared_ptr<CqBasicSurface>& pSurface )
+RtVoid	CreateGPrim( const boost::shared_ptr<CqSurface>& pSurface )
 {
 
 	if ( QGetRenderContext() ->pattrCurrent() ->GetFloatAttribute( "System", "LevelOfDetailBounds" ) [ 1 ] < 0.0f )
@@ -6483,7 +6487,7 @@ RtVoid	CreateGPrim( const boost::shared_ptr<CqBasicSurface>& pSurface )
 	else
 	{
 		pSurface->PrepareTrimCurve();
-		QGetRenderContext() ->pImage() ->StorePrimitive( pSurface );
+		QGetRenderContext()->StorePrimitive( pSurface );
 		STATS_INC( GPR_created );
 
 		// Add to the raytracer database also

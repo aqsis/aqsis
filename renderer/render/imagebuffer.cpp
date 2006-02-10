@@ -210,7 +210,7 @@ void	CqImageBuffer::Release()
     into raster space.
  
  * \param Bound CqBound containing the geometric bound in camera space.
- * \param pSurface Pointer to the CqBasicSurface derived class being processed.
+ * \param pSurface Pointer to the CqSurface derived class being processed.
  * \return Boolean indicating that the GPrim can be culled.
  
   \bug If the gprim spans the eye plane the bound is not transformed into raster
@@ -218,7 +218,7 @@ void	CqImageBuffer::Release()
    inserts EVERY gprim into buckets (using a bound that is still in camera space).
  */
 
-TqBool CqImageBuffer::CullSurface( CqBound& Bound, const boost::shared_ptr<CqBasicSurface>& pSurface )
+TqBool CqImageBuffer::CullSurface( CqBound& Bound, const boost::shared_ptr<CqSurface>& pSurface )
 {
 	// If the primitive is completely outside of the hither-yon z range, cull it.
 	if ( Bound.vecMin().z() >= QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Clipping" ) [ 1 ] ||
@@ -293,10 +293,10 @@ TqBool CqImageBuffer::CullSurface( CqBound& Bound, const boost::shared_ptr<CqBas
 
 //----------------------------------------------------------------------
 /** Add a new surface to the front of the list of waiting ones.
- * \param pSurface A pointer to a CqBasicSurface derived class, surface should at this point be in camera space.
+ * \param pSurface A pointer to a CqSurface derived class, surface should at this point be in camera space.
  */
 
-void CqImageBuffer::PostSurface( const boost::shared_ptr<CqBasicSurface>& pSurface )
+void CqImageBuffer::PostSurface( const boost::shared_ptr<CqSurface>& pSurface )
 {
 	// Count the number of total gprims
 	STATS_INC( GPR_created_total );
@@ -374,41 +374,14 @@ void CqImageBuffer::PostSurface( const boost::shared_ptr<CqBasicSurface>& pSurfa
 }
 
 //----------------------------------------------------------------------
-/** Add a new surface to the list of surfaces in the world.
- * \param pSurface A pointer to a CqBasicSurface derived class, surface should at this point be in world space.
- */
-
-void CqImageBuffer::StorePrimitive( const boost::shared_ptr<CqBasicSurface>& pSurface )
-{
-	// Count the number of total gprims
-//	STATS_INC( GPR_created_total );
-
-	m_aWorld.push(pSurface);
-}
-
-void CqImageBuffer::PostWorld()
-{
-	while(!m_aWorld.empty())
-	{
-		boost::shared_ptr<CqBasicSurface> pSurface = m_aWorld.top();
-		pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "world", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(0), 0 ),
-			                     QGetRenderContext() ->matNSpaceToSpace( "world", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(0), 0 ),
-			                     QGetRenderContext() ->matVSpaceToSpace( "world", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(0), 0 ) );
-		PostSurface(pSurface);
-		m_aWorld.pop();
-	}
-}
-	
-
-//----------------------------------------------------------------------
 /** Test if this surface can be occlusion culled. If it can then
  * transfer surface to the next bucket it covers, or delete it if it
  * covers no more.
- * \param pSurface A pointer to a CqBasicSurface derived class.
+ * \param pSurface A pointer to a CqSurface derived class.
  * \return Boolean indicating that the GPrim has been culled.
 */
 
-TqBool CqImageBuffer::OcclusionCullSurface( const boost::shared_ptr<CqBasicSurface>& pSurface )
+TqBool CqImageBuffer::OcclusionCullSurface( const boost::shared_ptr<CqSurface>& pSurface )
 {
 	CqBound RasterBound( pSurface->GetCachedRasterBound() );
 
@@ -1028,15 +1001,15 @@ void CqImageBuffer::StoreExtraData( CqMicroPolygon* pMPG, SqImageSample& sample)
     This method loops through all the gprims stored in the specified bucket
     and checks if the gprim can be diced and turned into a grid of micro
     polygons or if it is still too large and has to be split (this check
-    is done in CqBasicSurface::Diceable()).
+    is done in CqSurface::Diceable()).
  
-    The dicing is done by the gprim in CqBasicSurface::Dice(). After that
+    The dicing is done by the gprim in CqSurface::Dice(). After that
     the entire grid is shaded by calling CqMicroPolyGridBase::Shade().
     The shaded grid is then stored in the current bucket and will eventually
     be further processed by RenderMPGs().
  
     If the gprim could not yet be diced, it is split into a number of
-    smaller gprims (CqBasicSurface::Split()) which are again assigned to
+    smaller gprims (CqSurface::Split()) which are again assigned to
     buckets (this doesn't necessarily have to be the current one again)
     by calling PostSurface() (just as if it were regular gprims).
  
@@ -1066,7 +1039,7 @@ void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax, 
 	CqBucket& Bucket = CurrentBucket();
 
 	// Render any waiting subsurfaces.
-	boost::shared_ptr<CqBasicSurface> pSurface = Bucket.pTopSurface();
+	boost::shared_ptr<CqSurface> pSurface = Bucket.pTopSurface();
 	while ( pSurface )
 	{
 		if ( m_fQuit )
@@ -1137,7 +1110,7 @@ void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax, 
 			// Split it
 			{
 				TIME_SCOPE("Splits")
-				std::vector<boost::shared_ptr<CqBasicSurface> > aSplits;
+				std::vector<boost::shared_ptr<CqSurface> > aSplits;
 				TqInt cSplits = pSurface->Split( aSplits );
 				TqInt i;
 				for ( i = 0; i < cSplits; i++ )
@@ -1274,6 +1247,7 @@ void CqImageBuffer::RenderImage()
 	enum EqFilterDepth depthfilter = Filter_Min;
 	if ( NULL != pstrDepthFilter )
 	{
+		Aqsis::log() << debug << "Depth filter = " << pstrDepthFilter[0].c_str() << std::endl;
 		if( !pstrDepthFilter[ 0 ].compare( "min" ) )
 			depthfilter = Filter_Min;
 		else if ( !pstrDepthFilter[ 0 ].compare( "midpoint" ) )

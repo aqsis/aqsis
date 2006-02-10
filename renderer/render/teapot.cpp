@@ -614,18 +614,20 @@ CqTeapot::CqTeapot( TqBool addCrowBase ) : m_CrowBase( addCrowBase )
 
 
 //---------------------------------------------------------------------
-/** Assignment operator.
+/** Create a clone of this teapot surface.
  */
 
-CqTeapot&	CqTeapot::operator=( const CqTeapot& From )
+CqSurface*	CqTeapot::Clone() const
 {
-	CqSurface::operator=( From );
-	m_CrowBase = From.m_CrowBase;
-	m_matTx = From.m_matTx;
-	m_matITTx = From.m_matITTx;
+	CqTeapot* clone = new CqTeapot();
+	CqSurface::CloneData( clone );
+	clone->m_CrowBase = m_CrowBase;
+	clone->m_matTx = m_matTx;
+	clone->m_matITTx = m_matITTx;
 
-	return ( *this );
+	return ( clone );
 }
+
 
 //---------------------------------------------------------------------
 /** Transform the quadric primitive by the specified matrix.
@@ -656,7 +658,7 @@ CqBound	CqTeapot::Bound() const
 /** Split this GPrim into bicubic patches.
  */
 
-TqInt CqTeapot::Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
+TqInt CqTeapot::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits )
 {
 
 

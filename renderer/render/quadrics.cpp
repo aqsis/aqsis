@@ -54,18 +54,17 @@ CqQuadric::CqQuadric()
 
 
 //---------------------------------------------------------------------
-/** Assignment operator.
+/** Clone the data on this quadric to the (possibly derived) class
+ *  passed in.
  */
 
-CqQuadric&	CqQuadric::operator=( const CqQuadric& From )
+void CqQuadric::CloneData( CqQuadric* clone ) const
 {
-	CqSurface::operator=( From );
-	m_matTx = From.m_matTx;
-	m_matITTx = From.m_matITTx;
-	m_uDiceSize = From.m_uDiceSize;
-	m_vDiceSize = From.m_vDiceSize;
-
-	return ( *this );
+	CqSurface::CloneData( clone );
+	clone->m_matTx = m_matTx;
+	clone->m_matITTx = m_matITTx;
+	clone->m_uDiceSize = m_uDiceSize;
+	clone->m_vDiceSize = m_vDiceSize;
 }
 
 
@@ -385,19 +384,20 @@ CqSphere::CqSphere( TqFloat radius, TqFloat zmin, TqFloat zmax, TqFloat thetamin
 
 
 //---------------------------------------------------------------------
-/** Assignment operator.
+/** Create a clone of this sphere
  */
 
-CqSphere&	CqSphere::operator=( const CqSphere& From )
+CqSurface*	CqSphere::Clone( ) const
 {
-	CqQuadric::operator=( From );
-	m_Radius = From.m_Radius;
-	m_PhiMin = From.m_PhiMin;
-	m_PhiMax = From.m_PhiMax;
-	m_ThetaMin = From.m_ThetaMin;
-	m_ThetaMax = From.m_ThetaMax;
+	CqSphere* clone = new CqSphere();
+	CqQuadric::CloneData( clone );
+	clone->m_Radius = m_Radius;
+	clone->m_PhiMin = m_PhiMin;
+	clone->m_PhiMax = m_PhiMax;
+	clone->m_ThetaMin = m_ThetaMin;
+	clone->m_ThetaMax = m_ThetaMax;
 
-	return ( *this );
+	return ( clone );
 }
 
 //---------------------------------------------------------------------
@@ -425,23 +425,41 @@ CqBound	CqSphere::Bound() const
 /** Split this GPrim into a NURBS surface. Temp implementation, should split into smalled quadrics.
  */
 
-TqInt CqSphere::PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u )
+TqInt CqSphere::PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, TqBool u )
 {
 	TqFloat phicent = ( m_PhiMin + m_PhiMax ) * 0.5;
 	TqFloat arccent = ( m_ThetaMin + m_ThetaMax ) * 0.5;
 
-	boost::shared_ptr<CqSphere> pNew1( new CqSphere( *this ) );
-	boost::shared_ptr<CqSphere> pNew2( new CqSphere( *this ) );
+	boost::shared_ptr<CqSphere> pNew1( new CqSphere() );
+	boost::shared_ptr<CqSphere> pNew2( new CqSphere() );
+	pNew1->m_matTx =pNew2->m_matTx = m_matTx;
+	pNew1->m_matITTx = pNew2->m_matITTx = m_matITTx;
+	pNew1->m_fDiceable = pNew2->m_fDiceable = m_fDiceable;
+	pNew1->m_Radius = m_Radius;
+	pNew2->m_Radius = m_Radius;
+	pNew1->m_fDiceable = pNew2->m_fDiceable = m_fDiceable;
+	pNew1->m_EyeSplitCount = pNew2->m_EyeSplitCount = m_EyeSplitCount;
+	pNew1->SetSurfaceParameters( *this );
+	pNew2->SetSurfaceParameters( *this );
+	pNew1->m_fDiscard = pNew2->m_fDiscard = m_fDiscard;
 
 	if ( u )
 	{
 		pNew1->m_ThetaMax = arccent;
 		pNew2->m_ThetaMin = arccent;
+		pNew1->m_ThetaMin = m_ThetaMin;
+		pNew2->m_ThetaMax = m_ThetaMax;
+		pNew1->m_PhiMin = pNew2->m_PhiMin = m_PhiMin;
+		pNew1->m_PhiMax = pNew2->m_PhiMax = m_PhiMax;
 	}
 	else
 	{
 		pNew1->m_PhiMax = phicent;
 		pNew2->m_PhiMin = phicent;
+		pNew1->m_PhiMin = m_PhiMin;
+		pNew2->m_PhiMax = m_PhiMax;
+		pNew1->m_ThetaMin = pNew2->m_ThetaMin = m_ThetaMin;
+		pNew1->m_ThetaMax = pNew2->m_ThetaMax = m_ThetaMax;
 	}
 
 	aSplits.push_back( pNew1 );
@@ -500,21 +518,23 @@ CqCone::CqCone( TqFloat height, TqFloat radius, TqFloat thetamin, TqFloat thetam
 
 
 //---------------------------------------------------------------------
-/** Assignment operator.
+/** Create a clone of this cone
  */
 
-CqCone&	CqCone::operator=( const CqCone& From )
+CqSurface*	CqCone::Clone( ) const
 {
-	CqQuadric::operator=( From );
-	m_Height = From.m_Height;
-	m_Radius = From.m_Radius;
-	m_vMin = From.m_vMin;
-	m_vMax = From.m_vMax;
-	m_ThetaMin = From.m_ThetaMin;
-	m_ThetaMax = From.m_ThetaMax;
+	CqCone* clone = new CqCone();
+	CqQuadric::CloneData( clone );
+	clone->m_Height = m_Height;
+	clone->m_Radius = m_Radius;
+	clone->m_vMin = m_vMin;
+	clone->m_vMax = m_vMax;
+	clone->m_ThetaMin = m_ThetaMin;
+	clone->m_ThetaMax = m_ThetaMax;
 
-	return ( *this );
+	return ( clone );
 }
+
 
 
 //---------------------------------------------------------------------
@@ -543,24 +563,40 @@ CqBound	CqCone::Bound() const
 /** Split this GPrim into a NURBS surface. Temp implementation, should split into smalled quadrics.
  */
 
-TqInt CqCone::PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u )
+TqInt CqCone::PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, TqBool u )
 {
 	TqFloat vcent = ( m_vMin + m_vMax ) * 0.5;
 	TqFloat arccent = ( m_ThetaMin + m_ThetaMax ) * 0.5;
 	//TqFloat rcent=m_RMax*sqrt(zcent/m_ZMax);
 
-	boost::shared_ptr<CqCone> pNew1( new CqCone( *this ) );
-	boost::shared_ptr<CqCone> pNew2( new CqCone( *this ) );
+	boost::shared_ptr<CqCone> pNew1( new CqCone() );
+	boost::shared_ptr<CqCone> pNew2( new CqCone() );
+	pNew1->m_matTx =pNew2->m_matTx = m_matTx;
+	pNew1->m_matITTx = pNew2->m_matITTx = m_matITTx;
+	pNew1->m_fDiceable = pNew2->m_fDiceable = m_fDiceable;
+	pNew1->m_Height = pNew2->m_Height = m_Height;
+	pNew1->m_Radius = pNew2->m_Radius = m_Radius;
+	pNew1->m_EyeSplitCount = pNew2->m_EyeSplitCount = m_EyeSplitCount;
+	pNew1->SetSurfaceParameters( *this );
+	pNew2->SetSurfaceParameters( *this );
 
 	if ( u )
 	{
 		pNew1->m_ThetaMax = arccent;
 		pNew2->m_ThetaMin = arccent;
+		pNew1->m_ThetaMin = m_ThetaMin;
+		pNew2->m_ThetaMax = m_ThetaMax;
+		pNew1->m_vMin = pNew2->m_vMin = m_vMin;
+		pNew1->m_vMax = pNew2->m_vMax = m_vMax;
 	}
 	else
 	{
 		pNew1->m_vMax = vcent;
 		pNew2->m_vMin = vcent;
+		pNew1->m_vMin = m_vMin;
+		pNew2->m_vMax = m_vMax;
+		pNew1->m_ThetaMin = pNew2->m_ThetaMin = m_ThetaMin;
+		pNew1->m_ThetaMax = pNew2->m_ThetaMax = m_ThetaMax;
 	}
 
 	aSplits.push_back( pNew1 );
@@ -635,20 +671,22 @@ CqCylinder::CqCylinder( TqFloat radius, TqFloat zmin, TqFloat zmax, TqFloat thet
 
 
 //---------------------------------------------------------------------
-/** Assignment operator.
+/** Create a clone of this cylinder.
  */
 
-CqCylinder&	CqCylinder::operator=( const CqCylinder& From )
+CqSurface*	CqCylinder::Clone() const
 {
-	CqQuadric::operator=( From );
-	m_Radius = From.m_Radius;
-	m_ZMin = From.m_ZMin;
-	m_ZMax = From.m_ZMax;
-	m_ThetaMin = From.m_ThetaMin;
-	m_ThetaMax = From.m_ThetaMax;
+	CqCylinder* clone = new CqCylinder();
+	CqQuadric::CloneData( clone );
+	clone->m_Radius = m_Radius;
+	clone->m_ZMin = m_ZMin;
+	clone->m_ZMax = m_ZMax;
+	clone->m_ThetaMin = m_ThetaMin;
+	clone->m_ThetaMax = m_ThetaMax;
 
-	return ( *this );
+	return ( clone );
 }
+
 
 
 //---------------------------------------------------------------------
@@ -675,23 +713,38 @@ CqBound	CqCylinder::Bound() const
 /** Split this GPrim into a NURBS surface. Temp implementation, should split into smalled quadrics.
  */
 
-TqInt CqCylinder::PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u )
+TqInt CqCylinder::PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, TqBool u )
 {
 	TqFloat zcent = ( m_ZMin + m_ZMax ) * 0.5;
 	TqFloat arccent = ( m_ThetaMin + m_ThetaMax ) * 0.5;
 
-	boost::shared_ptr<CqCylinder> pNew1( new CqCylinder( *this ) );
-	boost::shared_ptr<CqCylinder> pNew2( new CqCylinder( *this ) );
+	boost::shared_ptr<CqCylinder> pNew1( new CqCylinder() );
+	boost::shared_ptr<CqCylinder> pNew2( new CqCylinder() );
+	pNew1->m_matTx =pNew2->m_matTx = m_matTx;
+	pNew1->m_matITTx = pNew2->m_matITTx = m_matITTx;
+	pNew1->m_fDiceable = pNew2->m_fDiceable = m_fDiceable;
+	pNew1->m_Radius = pNew2->m_Radius = m_Radius;
+	pNew1->m_EyeSplitCount = pNew2->m_EyeSplitCount = m_EyeSplitCount;
+	pNew1->SetSurfaceParameters( *this );
+	pNew2->SetSurfaceParameters( *this );
 
 	if ( u )
 	{
 		pNew1->m_ThetaMax = arccent;
 		pNew2->m_ThetaMin = arccent;
+		pNew1->m_ThetaMin = m_ThetaMin;
+		pNew2->m_ThetaMax = m_ThetaMax;
+		pNew1->m_ZMin = pNew2->m_ZMin = m_ZMin;
+		pNew1->m_ZMax = pNew2->m_ZMax = m_ZMax;
 	}
 	else
 	{
 		pNew1->m_ZMax = zcent;
 		pNew2->m_ZMin = zcent;
+		pNew1->m_ZMin = m_ZMin;
+		pNew2->m_ZMax = m_ZMax;
+		pNew1->m_ThetaMin = pNew2->m_ThetaMin = m_ThetaMin;
+		pNew1->m_ThetaMax = pNew2->m_ThetaMax = m_ThetaMax;
 	}
 
 	aSplits.push_back( pNew1 );
@@ -760,18 +813,19 @@ CqHyperboloid::CqHyperboloid( CqVector3D& point1, CqVector3D& point2, TqFloat th
 
 
 //---------------------------------------------------------------------
-/** Assignment operator.
+/** Clone a copy of this hyperboloid.
  */
 
-CqHyperboloid&	CqHyperboloid::operator=( const CqHyperboloid& From )
+CqSurface*	CqHyperboloid::Clone() const
 {
-	CqQuadric::operator=( From );
-	m_Point1 = From.m_Point1;
-	m_Point2 = From.m_Point2;
-	m_ThetaMin = From.m_ThetaMin;
-	m_ThetaMax = From.m_ThetaMax;
+	CqHyperboloid* clone = new CqHyperboloid();
+	CqQuadric::CloneData( clone );
+	clone->m_Point1 = m_Point1;
+	clone->m_Point2 = m_Point2;
+	clone->m_ThetaMin = m_ThetaMin;
+	clone->m_ThetaMax = m_ThetaMax;
 
-	return ( *this );
+	return ( clone );
 }
 
 
@@ -799,23 +853,37 @@ CqBound	CqHyperboloid::Bound() const
 /** Split this GPrim into a NURBS surface. Temp implementation, should split into smalled quadrics.
  */
 
-TqInt CqHyperboloid::PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u )
+TqInt CqHyperboloid::PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, TqBool u )
 {
 	TqFloat arccent = ( m_ThetaMin + m_ThetaMax ) * 0.5;
 	CqVector3D midpoint = ( m_Point1 + m_Point2 ) / 2.0;
 
-	boost::shared_ptr<CqHyperboloid> pNew1( new CqHyperboloid( *this ) );
-	boost::shared_ptr<CqHyperboloid> pNew2( new CqHyperboloid( *this ) );
+	boost::shared_ptr<CqHyperboloid> pNew1( new CqHyperboloid() );
+	boost::shared_ptr<CqHyperboloid> pNew2( new CqHyperboloid() );
+	pNew1->m_matTx =pNew2->m_matTx = m_matTx;
+	pNew1->m_matITTx = pNew2->m_matITTx = m_matITTx;
+	pNew1->m_fDiceable = pNew2->m_fDiceable = m_fDiceable;
+	pNew1->m_EyeSplitCount = pNew2->m_EyeSplitCount = m_EyeSplitCount;
+	pNew1->SetSurfaceParameters( *this );
+	pNew2->SetSurfaceParameters( *this );
 
 	if ( u )
 	{
 		pNew1->m_ThetaMax = arccent;
 		pNew2->m_ThetaMin = arccent;
+		pNew1->m_ThetaMin = m_ThetaMin;
+		pNew2->m_ThetaMax = m_ThetaMax;
+		pNew1->m_Point1 = pNew2->m_Point1 = m_Point1;
+		pNew1->m_Point2 = pNew2->m_Point2 = m_Point2;
 	}
 	else
 	{
 		pNew1->m_Point2 = midpoint;
 		pNew2->m_Point1 = midpoint;
+		pNew1->m_Point1 = m_Point1;
+		pNew2->m_Point2 = m_Point2;
+		pNew1->m_ThetaMin = pNew2->m_ThetaMin = m_ThetaMin;
+		pNew1->m_ThetaMax = pNew2->m_ThetaMax = m_ThetaMax;
 	}
 
 	aSplits.push_back( pNew1 );
@@ -902,20 +970,22 @@ CqParaboloid::CqParaboloid( TqFloat rmax, TqFloat zmin, TqFloat zmax, TqFloat th
 
 
 //---------------------------------------------------------------------
-/** Assignment operator.
+/** Create a clone of this paraboloid.
  */
 
-CqParaboloid&	CqParaboloid::operator=( const CqParaboloid& From )
+CqSurface*	CqParaboloid::Clone() const
 {
-	CqQuadric::operator=( From );
-	m_RMax = From.m_RMax;
-	m_ZMin = From.m_ZMin;
-	m_ZMax = From.m_ZMax;
-	m_ThetaMin = From.m_ThetaMin;
-	m_ThetaMax = From.m_ThetaMax;
+	CqParaboloid* clone = new CqParaboloid();
+	CqQuadric::CloneData( clone );
+	clone->m_RMax = m_RMax;
+	clone->m_ZMin = m_ZMin;
+	clone->m_ZMax = m_ZMax;
+	clone->m_ThetaMin = m_ThetaMin;
+	clone->m_ThetaMax = m_ThetaMax;
 
-	return ( *this );
+	return ( clone );
 }
+
 
 
 //---------------------------------------------------------------------
@@ -956,25 +1026,41 @@ CqBound	CqParaboloid::Bound() const
 /** Split this GPrim into smaller quadrics.
  */
 
-TqInt CqParaboloid::PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u )
+TqInt CqParaboloid::PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, TqBool u )
 {
 	TqFloat zcent = ( m_ZMin + m_ZMax ) * 0.5;
 	TqFloat arccent = ( m_ThetaMin + m_ThetaMax ) * 0.5;
 	TqFloat rcent = m_RMax * sqrt( zcent / m_ZMax );
 
-	boost::shared_ptr<CqParaboloid> pNew1( new CqParaboloid( *this ) );
-	boost::shared_ptr<CqParaboloid> pNew2( new CqParaboloid( *this ) );
+	boost::shared_ptr<CqParaboloid> pNew1( new CqParaboloid() );
+	boost::shared_ptr<CqParaboloid> pNew2( new CqParaboloid() );
+	pNew1->m_matTx =pNew2->m_matTx = m_matTx;
+	pNew1->m_matITTx = pNew2->m_matITTx = m_matITTx;
+	pNew1->m_fDiceable = pNew2->m_fDiceable = m_fDiceable;
+	pNew1->m_EyeSplitCount = pNew2->m_EyeSplitCount = m_EyeSplitCount;
+	pNew1->SetSurfaceParameters( *this );
+	pNew2->SetSurfaceParameters( *this );
 
 	if ( u )
 	{
 		pNew1->m_ThetaMax = arccent;
 		pNew2->m_ThetaMin = arccent;
+		pNew1->m_ThetaMin = m_ThetaMin;
+		pNew2->m_ThetaMax = m_ThetaMax;
+		pNew1->m_RMax = pNew2->m_RMax = m_RMax;
+		pNew1->m_ZMin = pNew2->m_ZMin = m_ZMin;
+		pNew1->m_ZMax = pNew2->m_ZMax = m_ZMax;
 	}
 	else
 	{
 		pNew1->m_ZMax = zcent;
 		pNew1->m_RMax = rcent;
 		pNew2->m_ZMin = zcent;
+		pNew1->m_ZMin = m_ZMin;
+		pNew2->m_ZMax = m_ZMax;
+		pNew2->m_RMax = m_RMax;
+		pNew1->m_ThetaMin = pNew2->m_ThetaMin = m_ThetaMin;
+		pNew1->m_ThetaMax = pNew2->m_ThetaMax = m_ThetaMax;
 	}
 
 	aSplits.push_back( pNew1 );
@@ -1042,21 +1128,23 @@ CqTorus::CqTorus( TqFloat majorradius, TqFloat minorradius, TqFloat phimin, TqFl
 
 
 //---------------------------------------------------------------------
-/** Assignment operator.
+/** Create a clone copy of this torus.
  */
 
-CqTorus&	CqTorus::operator=( const CqTorus& From )
+CqSurface*	CqTorus::Clone() const
 {
-	CqQuadric::operator=( From );
-	m_MajorRadius = From.m_MajorRadius;
-	m_MinorRadius = From.m_MinorRadius;
-	m_PhiMax = From.m_PhiMax;
-	m_PhiMin = From.m_PhiMin;
-	m_ThetaMin = From.m_ThetaMin;
-	m_ThetaMax = From.m_ThetaMax;
+	CqTorus* clone = new CqTorus();
+	CqQuadric::CloneData( clone );
+	clone->m_MajorRadius = m_MajorRadius;
+	clone->m_MinorRadius = m_MinorRadius;
+	clone->m_PhiMax = m_PhiMax;
+	clone->m_PhiMin = m_PhiMin;
+	clone->m_ThetaMin = m_ThetaMin;
+	clone->m_ThetaMax = m_ThetaMax;
 
-	return ( *this );
+	return ( clone );
 }
+
 
 
 //---------------------------------------------------------------------
@@ -1082,23 +1170,39 @@ CqBound	CqTorus::Bound() const
 /** Split this GPrim into a NURBS surface. Temp implementation, should split into smalled quadrics.
  */
 
-TqInt CqTorus::PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u )
+TqInt CqTorus::PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, TqBool u )
 {
 	TqFloat zcent = ( m_PhiMax + m_PhiMin ) * 0.5;
 	TqFloat arccent = ( m_ThetaMin + m_ThetaMax ) * 0.5;
 
-	boost::shared_ptr<CqTorus> pNew1( new CqTorus( *this ) );
-	boost::shared_ptr<CqTorus> pNew2( new CqTorus( *this ) );
+	boost::shared_ptr<CqTorus> pNew1( new CqTorus() );
+	boost::shared_ptr<CqTorus> pNew2( new CqTorus() );
+	pNew1->m_matTx =pNew2->m_matTx = m_matTx;
+	pNew1->m_matITTx = pNew2->m_matITTx = m_matITTx;
+	pNew1->m_fDiceable = pNew2->m_fDiceable = m_fDiceable;
+	pNew1->m_MajorRadius = pNew2->m_MajorRadius = m_MajorRadius;
+	pNew1->m_MinorRadius = pNew2->m_MinorRadius = m_MinorRadius;
+	pNew1->m_EyeSplitCount = pNew2->m_EyeSplitCount = m_EyeSplitCount;
+	pNew1->SetSurfaceParameters( *this );
+	pNew2->SetSurfaceParameters( *this );
 
 	if ( u )
 	{
 		pNew1->m_ThetaMax = arccent;
 		pNew2->m_ThetaMin = arccent;
+		pNew1->m_ThetaMin = m_ThetaMin;
+		pNew2->m_ThetaMax = m_ThetaMax;
+		pNew1->m_PhiMax = pNew2->m_PhiMax = m_PhiMax;
+		pNew1->m_PhiMin = pNew2->m_PhiMin = m_PhiMin;
 	}
 	else
 	{
 		pNew1->m_PhiMax = zcent;
 		pNew2->m_PhiMin = zcent;
+		pNew1->m_PhiMin = m_PhiMin;
+		pNew2->m_PhiMax = m_PhiMax;
+		pNew1->m_ThetaMin = pNew2->m_ThetaMin = m_ThetaMin;
+		pNew1->m_ThetaMax = pNew2->m_ThetaMax = m_ThetaMax;
 	}
 
 	aSplits.push_back( pNew1 );
@@ -1163,20 +1267,22 @@ CqDisk::CqDisk( TqFloat height, TqFloat minorradius, TqFloat majorradius, TqFloa
 
 
 //---------------------------------------------------------------------
-/** Assignment operator.
+/** Create a clone of this disk.
  */
 
-CqDisk&	CqDisk::operator=( const CqDisk& From )
+CqSurface*	CqDisk::Clone() const
 {
-	CqQuadric::operator=( From );
-	m_Height = From.m_Height;
-	m_MajorRadius = From.m_MajorRadius;
-	m_MinorRadius = From.m_MinorRadius;
-	m_ThetaMin = From.m_ThetaMin;
-	m_ThetaMax = From.m_ThetaMax;
+	CqDisk* clone = new CqDisk();
+	CqQuadric::CloneData( clone );
+	clone->m_Height = m_Height;
+	clone->m_MajorRadius = m_MajorRadius;
+	clone->m_MinorRadius = m_MinorRadius;
+	clone->m_ThetaMin = m_ThetaMin;
+	clone->m_ThetaMax = m_ThetaMax;
 
-	return ( *this );
+	return ( clone );
 }
+
 
 
 //---------------------------------------------------------------------
@@ -1203,23 +1309,38 @@ CqBound	CqDisk::Bound() const
 /** Split this GPrim into a NURBS surface. Temp implementation, should split into smalled quadrics.
  */
 
-TqInt CqDisk::PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u )
+TqInt CqDisk::PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, TqBool u )
 {
 	TqFloat zcent = ( m_MajorRadius + m_MinorRadius ) * 0.5;
 	TqFloat arccent = ( m_ThetaMin + m_ThetaMax ) * 0.5;
 
-	boost::shared_ptr<CqDisk> pNew1( new CqDisk( *this ) );
-	boost::shared_ptr<CqDisk> pNew2( new CqDisk( *this ) );
+	boost::shared_ptr<CqDisk> pNew1( new CqDisk() );
+	boost::shared_ptr<CqDisk> pNew2( new CqDisk() );
+	pNew1->m_matTx =pNew2->m_matTx = m_matTx;
+	pNew1->m_matITTx = pNew2->m_matITTx = m_matITTx;
+	pNew1->m_fDiceable = pNew2->m_fDiceable = m_fDiceable;
+	pNew1->m_Height = pNew2->m_Height = m_Height;
+	pNew1->m_EyeSplitCount = pNew2->m_EyeSplitCount = m_EyeSplitCount;
+	pNew1->SetSurfaceParameters( *this );
+	pNew2->SetSurfaceParameters( *this );
 
 	if ( u )
 	{
 		pNew1->m_ThetaMax = arccent;
 		pNew2->m_ThetaMin = arccent;
+		pNew1->m_ThetaMin = m_ThetaMin;
+		pNew2->m_ThetaMax = m_ThetaMax;
+		pNew1->m_MajorRadius = pNew2->m_MajorRadius = m_MajorRadius;
+		pNew1->m_MinorRadius = pNew2->m_MinorRadius = m_MinorRadius;
 	}
 	else
 	{
 		pNew1->m_MinorRadius = zcent;
 		pNew2->m_MajorRadius = zcent;
+		pNew1->m_MajorRadius = m_MajorRadius;
+		pNew2->m_MinorRadius = m_MinorRadius;
+		pNew1->m_ThetaMin = pNew2->m_ThetaMin = m_ThetaMin;
+		pNew1->m_ThetaMax = pNew2->m_ThetaMax = m_ThetaMax;
 	}
 
 	aSplits.push_back( pNew1 );

@@ -44,6 +44,8 @@ CqLightsource::CqLightsource( const boost::shared_ptr<IqShader>& pShader, TqBool
 	// Set a reference with the current attributes.
 	m_pAttributes = const_cast<CqAttributes*>( QGetRenderContext() ->pattrCurrent() );
 	ADDREF( m_pAttributes );
+
+	m_pTransform = QGetRenderContext() ->ptransCurrent();
 }
 
 

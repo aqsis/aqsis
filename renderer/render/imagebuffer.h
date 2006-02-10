@@ -92,7 +92,7 @@ struct SqGridInfo
   Once all the gprims are posted to the buffer the image can be rendered by calling
   RenderImage(). Now all buckets will be processed one after another. 
  
-  \see CqBucket, CqBasicSurface, CqRenderer
+  \see CqBucket, CqSurface, CqRenderer
  */
 
 class CqImageBuffer
@@ -290,11 +290,9 @@ class CqImageBuffer
 		void	DeleteImage();
 		void	SaveImage( const char* strName );
 
-		void	PostSurface( const boost::shared_ptr<CqBasicSurface>& pSurface );
-		void	StorePrimitive( const boost::shared_ptr<CqBasicSurface>& pSurface );
-		void	PostWorld();
-		TqBool	CullSurface( CqBound& Bound, const boost::shared_ptr<CqBasicSurface>& pSurface );
-		TqBool	OcclusionCullSurface( const boost::shared_ptr<CqBasicSurface>& pSurface );
+		void	PostSurface( const boost::shared_ptr<CqSurface>& pSurface );
+		TqBool	CullSurface( CqBound& Bound, const boost::shared_ptr<CqSurface>& pSurface );
+		TqBool	OcclusionCullSurface( const boost::shared_ptr<CqSurface>& pSurface );
 		void	AddMPG( CqMicroPolygon* pmpgNew );
 		TqBool	PushMPGForward( CqMicroPolygon* pmpg, TqInt Col, TqInt Row );
 		TqBool	PushMPGDown( CqMicroPolygon*, TqInt Col, TqInt Row );
@@ -361,7 +359,6 @@ class CqImageBuffer
 		SqGridInfo m_CurrentGridInfo;
 
 		void CacheGridInfo( CqMicroPolyGridBase* pGrid );
-		std::stack<boost::shared_ptr<CqBasicSurface> >	m_aWorld;
 };
 
 

@@ -73,6 +73,13 @@ CqMainModeBlock::CqMainModeBlock( const boost::shared_ptr<CqModeBlock>& pconPare
 CqMainModeBlock::~CqMainModeBlock()
 {
 	RELEASEREF( m_pattrCurrent );
+	// Make sure any options pushed on the stack are cleared.
+	while(!m_optionsStack.empty())
+	{
+		CqOptions* opts = m_optionsStack.top();
+		delete(opts);
+		m_optionsStack.pop();
+	}
 }
 
 
@@ -96,6 +103,13 @@ CqFrameModeBlock::CqFrameModeBlock( const boost::shared_ptr<CqModeBlock>& pconPa
 CqFrameModeBlock::~CqFrameModeBlock()
 {
 	RELEASEREF( m_pattrCurrent );
+	// Make sure any options pushed on the stack are cleared.
+	while(!m_optionsStack.empty())
+	{
+		CqOptions* opts = m_optionsStack.top();
+		delete(opts);
+		m_optionsStack.pop();
+	}
 }
 
 
@@ -302,7 +316,7 @@ void CqMotionModeBlock::EndMotionModeBlock()
 {
 	if( m_pDeformingSurface )
 	{
-		QGetRenderContext() ->pImage() ->PostSurface( m_pDeformingSurface );
+		QGetRenderContext()->StorePrimitive( m_pDeformingSurface );
 		STATS_INC( GPR_created );
 	}
 }

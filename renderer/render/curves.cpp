@@ -61,12 +61,13 @@ CqCurve::CqCurve() : CqSurface()
 /**
  * CqCurve copy constructor.
  */
-CqCurve::CqCurve( const CqCurve &from ) : CqSurface()
-{
-	( *this ) = from;
-
-	STATS_INC( GPR_crv );
-}
+/* CqCurve::CqCurve( const CqCurve &from ) : CqSurface()
+ * {
+ * 	( *this ) = from;
+ * 
+ * 	STATS_INC( GPR_crv );
+ * }
+ */
 
 
 
@@ -172,16 +173,14 @@ CqBound CqCurve::Bound() const
 
 
 /**
- * CqCurve assignment operator.
+ * CqCurve CloneData function
  *
- * @param from  CqCurve to make this one equal to.
- *
- * @return Reference to (*this).
  */
-CqCurve& CqCurve::operator=( const CqCurve& from )
+void CqCurve::CloneData(CqCurve* clone) const
 {
-	CqSurface::operator=( from );
-	return ( *this );
+	CqSurface::CloneData(clone);
+	clone->m_widthParamIndex = m_widthParamIndex;
+	clone->m_constantwidthParamIndex = m_constantwidthParamIndex;
 }
 
 
@@ -291,11 +290,12 @@ CqLinearCurveSegment::CqLinearCurveSegment() : CqCurve()
 /**
  * CqLinearCurveSegment copy constructor.
  */
-CqLinearCurveSegment::CqLinearCurveSegment( const CqLinearCurveSegment &from ) :
-		CqCurve()
-{
-	( *this ) = from;
-}
+/* CqLinearCurveSegment::CqLinearCurveSegment( const CqLinearCurveSegment &from ) :
+ * 		CqCurve()
+ * {
+ * 	( *this ) = from;
+ * }
+ */
 
 
 
@@ -308,19 +308,16 @@ CqLinearCurveSegment::~CqLinearCurveSegment()
 
 
 /**
- * Assignment operator.
+ * Create a clone of this curve surface
  *
- * @param from  CqLinearCurveSegment to make this one equal to.
- *
- * @return Reference to *this.
  */
-CqLinearCurveSegment& CqLinearCurveSegment::operator=(
-    const CqLinearCurveSegment& from
-)
+CqSurface* CqLinearCurveSegment::Clone() const
 {
-	CqCurve::operator=( from );
-	return ( *this );
+	CqLinearCurveSegment* clone = new CqLinearCurveSegment();
+	CqCurve::CloneData( clone );
+	return ( clone );
 }
+
 
 
 
@@ -427,7 +424,7 @@ void CqLinearCurveSegment::NaturalSubdivide(
  *
  * @return      The number of objects we've created.
  */
-TqInt CqLinearCurveSegment::Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
+TqInt CqLinearCurveSegment::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits )
 {
 	// Split based on the decision
 	switch( m_splitDecision )
@@ -469,7 +466,7 @@ TqInt CqLinearCurveSegment::Split( std::vector<boost::shared_ptr<CqBasicSurface>
  * @return Number of created objects.
  */
 TqInt CqLinearCurveSegment::SplitToCurves(
-    std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits
+    std::vector<boost::shared_ptr<CqSurface> >& aSplits
 )
 {
 
@@ -479,8 +476,8 @@ TqInt CqLinearCurveSegment::SplitToCurves(
 	//  to handle varying class variables because it inconveniently
 	//  sets them up to have 4 elements.
 
-	aSplits.push_back( boost::shared_ptr<CqBasicSurface>( new CqLinearCurveSegment ) );
-	aSplits.push_back( boost::shared_ptr<CqBasicSurface>( new CqLinearCurveSegment ) );
+	aSplits.push_back( boost::shared_ptr<CqSurface>( new CqLinearCurveSegment ) );
+	aSplits.push_back( boost::shared_ptr<CqSurface>( new CqLinearCurveSegment ) );
 
 	aSplits[ 0 ] ->SetSurfaceParameters( *this );
 	aSplits[ 0 ] ->SetEyeSplitCount( EyeSplitCount() );
@@ -532,7 +529,7 @@ TqInt CqLinearCurveSegment::SplitToCurves(
  * @return Number of created objects.
  */
 TqInt CqLinearCurveSegment::SplitToPatch(
-    std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits
+    std::vector<boost::shared_ptr<CqSurface> >& aSplits
 )
 {
 
@@ -683,11 +680,12 @@ CqCubicCurveSegment::CqCubicCurveSegment() : CqCurve()
 /**
  * CqCubicCurveSegment copy constructor.
  */
-CqCubicCurveSegment::CqCubicCurveSegment( const CqCubicCurveSegment &from )
-		: CqCurve()
-{
-	( *this ) = from;
-}
+/* CqCubicCurveSegment::CqCubicCurveSegment( const CqCubicCurveSegment &from )
+ * 		: CqCurve()
+ * {
+ * 	( *this ) = from;
+ * }
+ */
 
 
 
@@ -700,19 +698,16 @@ CqCubicCurveSegment::~CqCubicCurveSegment()
 
 
 /**
- * Assignment operator.
+ * Create a clone of this curve surface
  *
- * @param from  CqCubicCurveSegment to make this one equal to.
- *
- * @return Reference to *this.
  */
-CqCubicCurveSegment& CqCubicCurveSegment::operator=(
-    const CqCubicCurveSegment& from
-)
+CqSurface* CqCubicCurveSegment::Clone() const
 {
-	CqCurve::operator=( from );
-	return ( *this );
+	CqCubicCurveSegment* clone = new CqCubicCurveSegment();
+	CqCurve::CloneData( clone );
+	return ( clone );
 }
+
 
 
 /**
@@ -911,7 +906,7 @@ void CqCubicCurveSegment::VaryingNaturalSubdivide(
  *
  * @return      The number of objects we've created.
  */
-TqInt CqCubicCurveSegment::Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
+TqInt CqCubicCurveSegment::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits )
 {
 	// Split based on the decision
 	switch( m_splitDecision )
@@ -951,7 +946,7 @@ TqInt CqCubicCurveSegment::Split( std::vector<boost::shared_ptr<CqBasicSurface> 
  * @return Number of created objects.
  */
 TqInt CqCubicCurveSegment::SplitToCurves(
-    std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits
+    std::vector<boost::shared_ptr<CqSurface> >& aSplits
 )
 {
 
@@ -961,8 +956,8 @@ TqInt CqCubicCurveSegment::SplitToCurves(
 	//  to handle varying class variables because it inconveniently
 	//  sets them up to have 4 elements.
 
-	aSplits.push_back( boost::shared_ptr<CqBasicSurface>( new CqCubicCurveSegment ) );
-	aSplits.push_back( boost::shared_ptr<CqBasicSurface>( new CqCubicCurveSegment ) );
+	aSplits.push_back( boost::shared_ptr<CqSurface>( new CqCubicCurveSegment ) );
+	aSplits.push_back( boost::shared_ptr<CqSurface>( new CqCubicCurveSegment ) );
 
 	aSplits[ 0 ] ->SetSurfaceParameters( *this );
 	aSplits[ 0 ] ->SetEyeSplitCount( EyeSplitCount() );
@@ -1032,7 +1027,7 @@ CqVector3D	CqCubicCurveSegment::CalculateTangent(TqFloat u)
  * @return Number of created objects.
  */
 TqInt CqCubicCurveSegment::SplitToPatch(
-    std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits
+    std::vector<boost::shared_ptr<CqSurface> >& aSplits
 )
 {
 
@@ -1299,10 +1294,11 @@ CqCurvesGroup::CqCurvesGroup() : CqCurve(), m_ncurves( 0 ), m_periodic( TqFalse 
 /**
  * CqCurvesGroup copy constructor.
  */
-CqCurvesGroup::CqCurvesGroup( const CqCurvesGroup& from ) : CqCurve()
-{
-	( *this ) = from;
-}
+/* CqCurvesGroup::CqCurvesGroup( const CqCurvesGroup& from ) : CqCurve()
+ * {
+ * 	( *this ) = from;
+ * }
+ */
 
 
 
@@ -1315,23 +1311,20 @@ CqCurvesGroup::~CqCurvesGroup()
 
 
 /**
- * Assignment operator.
+ * Clone the data from this curve group onto the one specified.
  *
- * @param from  CqCurvesGroup to set this one equal to.
  */
-CqCurvesGroup& CqCurvesGroup::operator=( const CqCurvesGroup& from )
+void CqCurvesGroup::CloneData( CqCurvesGroup* clone ) const
 {
-
-	// base class assignment
-	CqCurve::operator=( from );
+	CqCurve::CloneData(clone);
 
 	// copy members
-	m_ncurves = from.m_ncurves;
-	m_periodic = from.m_periodic;
-	m_nvertices = from.m_nvertices;
-
-	return ( *this );
+	clone->m_ncurves = m_ncurves;
+	clone->m_periodic = m_periodic;
+	clone->m_nvertices = m_nvertices;
+	clone->m_nTotalVerts = m_nTotalVerts;
 }
+
 
 
 
@@ -1380,16 +1373,6 @@ CqLinearCurvesGroup::CqLinearCurvesGroup(
 
 
 /**
- * CqLinearCurvesGroup copy constructor.
- */
-CqLinearCurvesGroup::CqLinearCurvesGroup( const CqLinearCurvesGroup &from )
-		: CqCurvesGroup()
-{
-	( *this ) = from;
-}
-
-
-/**
  * CqLinearCurvesGroup destructor.
  */
 CqLinearCurvesGroup::~CqLinearCurvesGroup()
@@ -1400,21 +1383,17 @@ CqLinearCurvesGroup::~CqLinearCurvesGroup()
 
 
 /**
- * Assignment operator.
+ * Create a clone of this curve group.
  *
- * @param from  CqCubicCurveSegment to set this one equal to.
- *
- * @return Reference to *this.
  */
-CqLinearCurvesGroup& CqLinearCurvesGroup::operator=(
-    const CqLinearCurvesGroup& from
-)
+CqSurface* CqLinearCurvesGroup::Clone() const
 {
-	// base class assignment
-	CqCurvesGroup::operator=( from );
+	CqLinearCurvesGroup* clone = new CqLinearCurvesGroup();
+	CqCurvesGroup::CloneData( clone );
 
-	return ( *this );
+	return ( clone );
 }
+
 
 
 
@@ -1428,7 +1407,7 @@ CqLinearCurvesGroup& CqLinearCurvesGroup::operator=(
  *
  * @param aSplits       Vector of split objects.
  */
-TqInt CqLinearCurvesGroup::Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
+TqInt CqLinearCurvesGroup::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits )
 {
 
 	TqInt nSplits = 0;      // number of splits we've done
@@ -1661,11 +1640,12 @@ CqCubicCurvesGroup::CqCubicCurvesGroup(
 /**
  * CqCubicCurvesGroup copy constructor.
  */
-CqCubicCurvesGroup::CqCubicCurvesGroup( const CqCubicCurvesGroup &from ) :
-		CqCurvesGroup()
-{
-	( *this ) = from;
-}
+/* CqCubicCurvesGroup::CqCubicCurvesGroup( const CqCubicCurvesGroup &from ) :
+ * 		CqCurvesGroup()
+ * {
+ * 	( *this ) = from;
+ * }
+ */
 
 
 
@@ -1703,19 +1683,17 @@ TqUint CqCubicCurvesGroup::cVarying() const
 
 
 /**
- * Assignment operator.
+ * Create a clone of this curve group.
  *
- * @param from  CqCubicCurvesGroup to make this one equal to.
  */
-CqCubicCurvesGroup& CqCubicCurvesGroup::operator=(
-    const CqCubicCurvesGroup& from
-)
+CqSurface* CqCubicCurvesGroup::Clone() const
 {
-	// base class assignment
-	CqCurvesGroup::operator=( from );
+	CqCubicCurvesGroup* clone = new CqCubicCurvesGroup();
+	CqCurvesGroup::CloneData( clone );
 
-	return ( *this );
+	return ( clone );
 }
+
 
 
 
@@ -1730,7 +1708,7 @@ CqCubicCurvesGroup& CqCubicCurvesGroup::operator=(
  *              created.
  */
 TqInt CqCubicCurvesGroup::Split(
-    std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits
+    std::vector<boost::shared_ptr<CqSurface> >& aSplits
 )
 {
 

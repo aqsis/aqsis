@@ -83,7 +83,7 @@ CqProcedural::CqProcedural(RtPointer data, CqBound &B, RtProcSubdivFunc subfunc,
 
 
 
-TqInt CqProcedural::Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
+TqInt CqProcedural::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits )
 {
 	// Store current context, set current context to the stored one
 	boost::shared_ptr<CqModeBlock> pconSave = QGetRenderContext()->pconCurrent( m_pconStored );
@@ -94,7 +94,7 @@ TqInt CqProcedural::Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSpl
 	m_pconStored->m_ptransCurrent = m_pTransform;
 
 	/// \note: The bound is in "raster" coordinates by now, as during posting to the imagebuffer
-	/// the the Culling routines do the job for us, see CqBasicSurface::CacheRasterBound.
+	/// the the Culling routines do the job for us, see CqSurface::CacheRasterBound.
 	CqBound bound = m_Bound;
 	//    bound.Transform(QGetRenderContext()->matSpaceToSpace("camera", "raster"));
 	float detail = ( bound.vecMax().x() - bound.vecMin().x() ) * ( bound.vecMax().y() - bound.vecMin().y() );

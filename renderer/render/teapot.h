@@ -53,11 +53,7 @@ START_NAMESPACE( Aqsis )
 class CqTeapot : public CqSurface
 {
 	public:
-		CqTeapot( TqBool addCrowBase );
-		CqTeapot( const CqTeapot& From )
-		{
-			*this = From;
-		}
+		CqTeapot( TqBool addCrowBase = TqFalse );
 		virtual	~CqTeapot()
 		{}
 
@@ -66,7 +62,7 @@ class CqTeapot : public CqSurface
 		/** Determine whether the passed surface is valid to be used as a
 		 *  frame in motion blur for this surface.
 		 */
-		virtual TqBool	IsMotionBlurMatch( CqBasicSurface* pSurf )
+		virtual TqBool	IsMotionBlurMatch( CqSurface* pSurf )
 		{
 			return( TqFalse );
 		}
@@ -94,9 +90,9 @@ class CqTeapot : public CqSurface
 
 		// Overrides from CqSurface
 		virtual	CqBound	Bound() const;
-		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits );
+		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
 
-		CqTeapot&	operator=( const CqTeapot& From );
+		virtual CqSurface* Clone() const;
 
 	private:
 		TqBool	m_CrowBase;			///< Utah teapot was missing a bottom.  F. Crow added one.

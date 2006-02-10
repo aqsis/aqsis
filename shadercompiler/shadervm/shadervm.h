@@ -541,7 +541,8 @@ class CqShaderVM : public CqShaderStack, public IqShader, public CqDSORepository
 		{
 			return ( m_strName );
 		}
-		virtual	void	SetArgument( const CqString& name, EqVariableType type, const CqString& space, void* val );
+		virtual	void	PrepareShaderForUse( );
+		virtual void	SetArgument( const CqString& strName, EqVariableType type, const CqString& strSpace, void* pval);
 		virtual	void	SetArgument( CqParameter* pParam, IqSurface* pSurface );
 		virtual	IqShaderData*	FindArgument( const CqString& name );
 		virtual	TqBool	GetVariableValue( const char* name, IqShaderData* res );
@@ -608,14 +609,23 @@ class CqShaderVM : public CqShaderStack, public IqShader, public CqDSORepository
 		CqShaderVM&	operator=( const CqShaderVM& From );
 
 	private:
+
+		struct SqArgumentRecord
+		{
+			IqShaderData* m_Value;
+			CqString	m_strSpace;
+			CqString	m_strName;
+		};
+
 		TqInt	m_Uses;			///< Bit vector representing the system variables used by this shader.
 		CqMatrix	m_matCurrent;	///< Transformation matrix to world coordinates in effect at the time this shader was instantiated.
 		CqString	m_strName;		///< The name of this shader.
 
-		EqShaderType m_Type;							///< Shader type for libslxargs
+		EqShaderType m_Type;							///< Shader type for libslxarge
 		TqUint	m_LocalIndex;                   ///<  Local Index to speed up
 		boost::shared_ptr<IqShaderExecEnv>	m_pEnv;							///< Pointer to the current excution environment.
 		std::vector<IqShaderData*>	m_LocalVars;		///< Array of local variables.
+		std::vector<SqArgumentRecord>	m_StoredArguments;		///< Array of arguments specified during construction.
 		std::vector<UsProgramElement>	m_ProgramInit;		///< Bytecodes of the intialisation program.
 		std::vector<UsProgramElement>	m_Program;			///< Bytecodes of the main program.
 		TqInt	m_uGridRes;

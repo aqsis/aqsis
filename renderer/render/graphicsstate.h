@@ -42,7 +42,7 @@
 
 START_NAMESPACE( Aqsis )
 
-class CqBasicSurface;
+class CqSurface;
 class CqDeformingSurface;
 
 enum EqModeBlock
@@ -147,6 +147,13 @@ class CqModeBlock : public boost::enable_shared_from_this<CqModeBlock>
 		}
 
 		virtual	CqOptions&	optCurrent() = 0;
+		/** Push the current options onto a stack, allowing modification of the options
+		 * and recovery of the current state at a later point.
+		 */
+		virtual CqOptions&	pushOptions() = 0;
+		/** Pop a previously pushed copy of the options from the stack.
+		 */
+		virtual CqOptions&	popOptions() = 0;
 		/** Get a read only pointer to the current attributes.
 		 * \return a pointer to the current attributes.
 		 */
@@ -297,9 +304,25 @@ class CqMainModeBlock : public CqModeBlock
 		{
 			return ( m_optCurrent );
 		}
+		virtual CqOptions&	pushOptions()
+		{
+			CqOptions* opts = new CqOptions(m_optCurrent);
+			m_optionsStack.push(opts);
+			return(m_optCurrent);
+		}
+		virtual CqOptions&	popOptions()
+		{
+			assert(!m_optionsStack.empty());
+			CqOptions* opts = m_optionsStack.top();
+			m_optCurrent = *opts;
+			m_optionsStack.pop();
+			delete(opts);
+			return(m_optCurrent);
+		}
 
 	private:
 		CqOptions	m_optCurrent;	///< Current graphics environment options.
+		std::stack<CqOptions*>	m_optionsStack;
 }
 ;
 
@@ -349,9 +372,25 @@ class CqFrameModeBlock : public CqModeBlock
 		{
 			return ( m_optCurrent );
 		}
+		virtual CqOptions&	pushOptions()
+		{
+			CqOptions* opts = new CqOptions(m_optCurrent);
+			m_optionsStack.push(opts);
+			return(m_optCurrent);
+		}
+		virtual CqOptions&	popOptions()
+		{
+			assert(!m_optionsStack.empty());
+			CqOptions* opts = m_optionsStack.top();
+			m_optCurrent = *opts;
+			m_optionsStack.pop();
+			delete(opts);
+			return(m_optCurrent);
+		}
 
 	private:
 		CqOptions	m_optCurrent;	///< Current graphics environment components
+		std::stack<CqOptions*>	m_optionsStack;
 }
 ;
 
@@ -400,6 +439,14 @@ class CqWorldModeBlock : public CqModeBlock
 		virtual	CqOptions&	optCurrent()
 		{
 			return ( pconParent() ->optCurrent() );
+		}
+		virtual CqOptions&	pushOptions()
+		{
+			return(pconParent()->pushOptions());
+		}
+		virtual CqOptions&	popOptions()
+		{
+			return(pconParent()->popOptions());
 		}
 
 		virtual	void	AddContextLightSource( const CqLightsourcePtr& pLS );
@@ -454,6 +501,14 @@ class CqAttributeModeBlock : public CqModeBlock
 		{
 			return ( pconParent() ->optCurrent() );
 		}
+		virtual CqOptions&	pushOptions()
+		{
+			return(pconParent()->pushOptions());
+		}
+		virtual CqOptions&	popOptions()
+		{
+			return(pconParent()->popOptions());
+		}
 
 	private:
 };
@@ -504,6 +559,14 @@ class CqTransformModeBlock : public CqModeBlock
 		{
 			return ( pconParent() ->optCurrent() );
 		}
+		virtual CqOptions&	pushOptions()
+		{
+			return(pconParent()->pushOptions());
+		}
+		virtual CqOptions&	popOptions()
+		{
+			return(pconParent()->popOptions());
+		}
 
 	private:
 };
@@ -553,6 +616,14 @@ class CqSolidModeBlock : public CqModeBlock
 		virtual	CqOptions&	optCurrent()
 		{
 			return ( pconParent() ->optCurrent() );
+		}
+		virtual CqOptions&	pushOptions()
+		{
+			return(pconParent()->pushOptions());
+		}
+		virtual CqOptions&	popOptions()
+		{
+			return(pconParent()->popOptions());
 		}
 
 
@@ -616,6 +687,14 @@ class CqObjectModeBlock : public CqModeBlock
 		virtual	CqOptions&	optCurrent()
 		{
 			return ( pconParent() ->optCurrent() );
+		}
+		virtual CqOptions&	pushOptions()
+		{
+			return(pconParent()->pushOptions());
+		}
+		virtual CqOptions&	popOptions()
+		{
+			return(pconParent()->popOptions());
 		}
 		/** Get a pointer suitable for writing to the attributes at the parent context, as object context doesn't store attributes.
 		 * \return an attributes pointer.
@@ -715,6 +794,14 @@ class CqMotionModeBlock : public CqModeBlock
 		virtual	CqOptions&	optCurrent()
 		{
 			return ( pconParent() ->optCurrent() );
+		}
+		virtual CqOptions&	pushOptions()
+		{
+			return(pconParent()->pushOptions());
+		}
+		virtual CqOptions&	popOptions()
+		{
+			return(pconParent()->popOptions());
 		}
 
 		/** Get the current time, as specified at initialisation of the block.
