@@ -678,6 +678,16 @@ void CqRenderer::RenderWorld(CqTransformPtr camera, CqOptions* pOpts, TqBool clo
 		optCurrent().InitialiseCamera();
 	}
 	pImage()->SetImage();
+
+	// While rendering, all primitives should fasttrack straight into the pipeline, the easiest way to ensure this
+	// is to switch into 'non' multipass mode.
+	TqInt multiPass;
+	TqInt* pMultipass = GetIntegerOptionWrite("Render", "multipass");
+	if(pMultipass)
+	{
+		multiPass = pMultipass[0];
+		pMultipass[0] = 0;
+	}
 	
 	PrepareShaders();
 
@@ -689,6 +699,9 @@ void CqRenderer::RenderWorld(CqTransformPtr camera, CqOptions* pOpts, TqBool clo
 	m_pDDManager->OpenDisplays();
 	pImage() ->RenderImage();
 	m_pDDManager->CloseDisplays();
+
+	if(NULL != pMultipass)
+		pMultipass[0] = multiPass;
 
 	if(NULL != pOpts)
 		popOptions();
@@ -708,78 +721,83 @@ void CqRenderer::RenderWorld(CqTransformPtr camera, CqOptions* pOpts, TqBool clo
 
 void CqRenderer::RenderAutoShadows()
 {
-	// Check all the lightsources for any with an attribute indicating autoshadows.
-	TqInt ilight;
-	for(ilight=0; ilight<Lightsource_stack.size(); ilight++)
+	// Check if multipass rendering is switched on.
+	const TqInt* pMultipass = GetIntegerOption("Render", "multipass");
+	if(pMultipass && pMultipass[0])
 	{
-		CqLightsourcePtr light = Lightsource_stack[ilight];
-		const CqString* pMapName = light->pAttributes()->GetStringAttribute("autoshadows", "shadowmapname");
-		const CqString* pattrName = light->pAttributes()->GetStringAttribute( "identifier", "name" );
-		if(NULL != pMapName)
+		// Check all the lightsources for any with an attribute indicating autoshadows.
+		TqInt ilight;
+		for(ilight=0; ilight<Lightsource_stack.size(); ilight++)
 		{
-			if(NULL != pattrName)
-				Aqsis::log() << info << "Rendering automatic shadow pass for lightsource : \"" << pattrName[0].c_str() << "\" to shadow map file \"" << pMapName[0].c_str() << "\"" << std::endl;
-			else
-				Aqsis::log() << info << "Rendering automatic shadow pass for lightsource : \"unnamed\" to shadow map file \"" << pMapName[0].c_str() << "\"" << std::endl;
+			CqLightsourcePtr light = Lightsource_stack[ilight];
+			const CqString* pMapName = light->pAttributes()->GetStringAttribute("autoshadows", "shadowmapname");
+			const CqString* pattrName = light->pAttributes()->GetStringAttribute( "identifier", "name" );
+			if(NULL != pMapName)
+			{
+				if(NULL != pattrName)
+					Aqsis::log() << info << "Rendering automatic shadow pass for lightsource : \"" << pattrName[0].c_str() << "\" to shadow map file \"" << pMapName[0].c_str() << "\"" << std::endl;
+				else
+					Aqsis::log() << info << "Rendering automatic shadow pass for lightsource : \"unnamed\" to shadow map file \"" << pMapName[0].c_str() << "\"" << std::endl;
 
-			const TqInt* pRes = light->pAttributes()->GetIntegerAttribute("autoshadows", "res");
-			TqInt res = 300;
-			if(NULL != pRes)
-				res = pRes[0];
-			// Setup a new set of options based on the current ones.
-			CqOptions opts(optCurrent());
-			opts.GetIntegerOptionWrite( "System", "Resolution" ) [ 0 ] = res;
-			opts.GetIntegerOptionWrite( "System", "Resolution" ) [ 1 ] = res;
-			opts.GetFloatOptionWrite( "System", "PixelAspectRatio" ) [ 0 ] = 1.0f;
+				const TqInt* pRes = light->pAttributes()->GetIntegerAttribute("autoshadows", "res");
+				TqInt res = 300;
+				if(NULL != pRes)
+					res = pRes[0];
+				// Setup a new set of options based on the current ones.
+				CqOptions opts(optCurrent());
+				opts.GetIntegerOptionWrite( "System", "Resolution" ) [ 0 ] = res;
+				opts.GetIntegerOptionWrite( "System", "Resolution" ) [ 1 ] = res;
+				opts.GetFloatOptionWrite( "System", "PixelAspectRatio" ) [ 0 ] = 1.0f;
 
-			// Now that the options have all been set, setup any undefined camera parameters.
-			opts.GetFloatOptionWrite( "System", "FrameAspectRatio" ) [ 0 ] = 1.0;
-			opts.GetFloatOptionWrite( "System", "ScreenWindow" ) [ 0 ] = -1.0 ;
-			opts.GetFloatOptionWrite( "System", "ScreenWindow" ) [ 1 ] = 1.0;
-			opts.GetFloatOptionWrite( "System", "ScreenWindow" ) [ 2 ] = 1.0;
-			opts.GetFloatOptionWrite( "System", "ScreenWindow" ) [ 3 ] = -1.0;
-			opts.GetIntegerOptionWrite( "System", "DisplayMode" ) [ 0 ] = ModeZ;
+				// Now that the options have all been set, setup any undefined camera parameters.
+				opts.GetFloatOptionWrite( "System", "FrameAspectRatio" ) [ 0 ] = 1.0;
+				opts.GetFloatOptionWrite( "System", "ScreenWindow" ) [ 0 ] = -1.0 ;
+				opts.GetFloatOptionWrite( "System", "ScreenWindow" ) [ 1 ] = 1.0;
+				opts.GetFloatOptionWrite( "System", "ScreenWindow" ) [ 2 ] = 1.0;
+				opts.GetFloatOptionWrite( "System", "ScreenWindow" ) [ 3 ] = -1.0;
+				opts.GetIntegerOptionWrite( "System", "DisplayMode" ) [ 0 ] = ModeZ;
 
-			// Set the pixel samples to 1,1 for shadow rendering.
-			opts.GetIntegerOptionWrite( "System", "PixelSamples" ) [ 0 ] = 1;
-			opts.GetIntegerOptionWrite( "System", "PixelSamples" ) [ 1 ] = 1;
+				// Set the pixel samples to 1,1 for shadow rendering.
+				opts.GetIntegerOptionWrite( "System", "PixelSamples" ) [ 0 ] = 1;
+				opts.GetIntegerOptionWrite( "System", "PixelSamples" ) [ 1 ] = 1;
 
-			// Set the pixel filter to box, 1,1 for shadow rendering.
-			opts.SetfuncFilter( RiBoxFilter );
-			opts.GetFloatOptionWrite( "System", "FilterWidth" ) [ 0 ] = 1;
-			opts.GetFloatOptionWrite( "System", "FilterWidth" ) [ 1 ] = 1;
+				// Set the pixel filter to box, 1,1 for shadow rendering.
+				opts.SetfuncFilter( RiBoxFilter );
+				opts.GetFloatOptionWrite( "System", "FilterWidth" ) [ 0 ] = 1;
+				opts.GetFloatOptionWrite( "System", "FilterWidth" ) [ 1 ] = 1;
 
-			// Make sure the depthFilter is set to "midpoint".
-			boost::shared_ptr<CqNamedParameterList> pHiderOpt = opts.pOptionWrite( "Hider" );
-			CqParameterTypedUniform<CqString, type_string, CqString>* pDepthFilterOpt = new CqParameterTypedUniform<CqString, type_string, CqString>("depthfilter");
-			pDepthFilterOpt->pValue()[0] = CqString("midpoint");
-			pHiderOpt->AddParameter(pDepthFilterOpt);
+				// Make sure the depthFilter is set to "midpoint".
+				boost::shared_ptr<CqNamedParameterList> pHiderOpt = opts.pOptionWrite( "Hider" );
+				CqParameterTypedUniform<CqString, type_string, CqString>* pDepthFilterOpt = new CqParameterTypedUniform<CqString, type_string, CqString>("depthfilter");
+				pDepthFilterOpt->pValue()[0] = CqString("midpoint");
+				pHiderOpt->AddParameter(pDepthFilterOpt);
 
-			// Don't bother doing lighting calcualations.
-			boost::shared_ptr<CqNamedParameterList> pEnableShadersOpts = opts.pOptionWrite( "EnableShaders" );
-			CqParameterTypedUniform<TqInt, type_integer, TqInt>* pLightingOpt = new CqParameterTypedUniform<TqInt, type_integer, TqInt>("lighting");
-			pLightingOpt->pValue()[0] = 0;
-			pEnableShadersOpts->AddParameter(pLightingOpt);
+				// Don't bother doing lighting calcualations.
+				boost::shared_ptr<CqNamedParameterList> pEnableShadersOpts = opts.pOptionWrite( "EnableShaders" );
+				CqParameterTypedUniform<TqInt, type_integer, TqInt>* pLightingOpt = new CqParameterTypedUniform<TqInt, type_integer, TqInt>("lighting");
+				pLightingOpt->pValue()[0] = 0;
+				pEnableShadersOpts->AddParameter(pLightingOpt);
 
-			// Now set the camera transform the to light transform (inverse because the camera transform is transforming the world into camera space).
-			CqTransformPtr lightTrans(light->pTransform()->Inverse());
+				// Now set the camera transform the to light transform (inverse because the camera transform is transforming the world into camera space).
+				CqTransformPtr lightTrans(light->pTransform()->Inverse());
 
-			// Cache the current DDManager, and replace it for the purposes of our shadow render.
-			IqDDManager* realDDManager = m_pDDManager;
-			m_pDDManager = CreateDisplayDriverManager();
-			m_pDDManager->Initialise();
-			std::map<std::string, void*> args;
-			AddDisplayRequest(pMapName[0].c_str(), "shadow", "z", ModeZ, 0, 1, args);
+				// Cache the current DDManager, and replace it for the purposes of our shadow render.
+				IqDDManager* realDDManager = m_pDDManager;
+				m_pDDManager = CreateDisplayDriverManager();
+				m_pDDManager->Initialise();
+				std::map<std::string, void*> args;
+				AddDisplayRequest(pMapName[0].c_str(), "shadow", "z", ModeZ, 0, 1, args);
 
-			RenderWorld(lightTrans, &opts, TqTrue);
+				RenderWorld(lightTrans, &opts, TqTrue);
 
-			m_pDDManager->Shutdown();
-			delete(m_pDDManager);
-			m_pDDManager = realDDManager;
+				m_pDDManager->Shutdown();
+				delete(m_pDDManager);
+				m_pDDManager = realDDManager;
 
-			CqTextureMap::FlushCache();
-			CqOcclusionBox::DeleteHierarchy();
-			clippingVolume().clear();
+				CqTextureMap::FlushCache();
+				CqOcclusionBox::DeleteHierarchy();
+				clippingVolume().clear();
+			}
 		}
 	}
 }
@@ -1363,10 +1381,17 @@ boost::shared_ptr<IqShader> CqRenderer::CreateShader(
 
 void CqRenderer::StorePrimitive( const boost::shared_ptr<CqSurface>& pSurface )
 {
-	// Count the number of total gprims
-//	STATS_INC( GPR_created_total );
-
-	m_aWorld.push_back(pSurface);
+	// If we are not in a mode that allows 'extra' passes, then fasttrack the primitive directly into the pipeline.
+	const TqInt* pMultipass = GetIntegerOption("Render", "multipass");
+	if(pMultipass && pMultipass[0])
+		m_aWorld.push_back(pSurface);
+	else
+	{
+		pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "world", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(0), 0 ),
+						 QGetRenderContext() ->matNSpaceToSpace( "world", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(0), 0 ),
+						 QGetRenderContext() ->matVSpaceToSpace( "world", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(0), 0 ) );
+		pImage()->PostSurface(pSurface);
+	}
 }
 
 void CqRenderer::PostWorld()
