@@ -430,7 +430,7 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 
 
 	// Calculate no. of samples.
-	TqInt nt, ns;
+	TqUint nt, ns;
 
 	if ( m_samples > 0 )
 	{
@@ -496,7 +496,7 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 
 	// Test the samples.
 	TqInt inshadow = 0;
-	TqInt i;
+	TqUint i;
 	TqFloat avz = 0.0f;
 	TqFloat sample_z = 0.0f; // How deep we're in the shadow
 	TqFloat rbias;
@@ -548,7 +548,7 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 	for ( i = 0; i < ns; i++ )
 	{
 		TqFloat t = lv;
-		TqInt j;
+		TqUint j;
 
 		for ( j = 0; j < nt; j++ )
 		{
@@ -558,7 +558,7 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 			m_rand_index = ( m_rand_index + 1 ) & 1023;
 			TqInt iv = static_cast<TqUint>( t + m_aRand_no[ m_rand_index ] * jt );
 
-			if( iu < 0 || iu >= m_XRes || iv < 0 || iv >= m_YRes )
+			if( iu < 0 || iu >= (TqInt) m_XRes || iv < 0 || iv >= (TqInt) m_YRes )
 				continue;
 
 			if( ( pTMBa == NULL )  || !pTMBa->IsValid( iu, iv, index ) )
@@ -640,8 +640,8 @@ void CqShadowMap::SaveShadowMap( const CqString& strShadowName, TqBool append )
 			// Write the floating point image to the directory.
 			TqDouble minz = RI_FLOATMAX;
 			TqFloat *depths = reinterpret_cast<TqFloat*>( m_apFlat.front() ->pVoidBufferData() );
-			for (TqInt y =0; y < YRes(); y++)
-				for (TqInt x = 0; x < XRes(); x++)
+			for (TqUint y =0; y < YRes(); y++)
+				for (TqUint x = 0; x < XRes(); x++)
 					minz = MIN(minz, (TqDouble)depths[y*XRes() + x]);
 			TIFFSetField( pshadow, TIFFTAG_SMINSAMPLEVALUE, minz );
 			WriteTileImage( pshadow, depths, XRes(), YRes(), 32, 32, 1, m_Compression, m_Quality );

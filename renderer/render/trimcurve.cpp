@@ -232,8 +232,6 @@ const TqBool	CqTrimLoopArray::LineIntersects( const CqVector2D& v1, const CqVect
 	if ( m_aLoops.size() == 0 )
 		return ( TqFalse );
 
-	TqInt	cCrosses = 0;
-
 	std::vector<CqTrimLoop>::const_iterator iLoop;
 	std::vector<CqTrimLoop>::const_iterator iEnd = m_aLoops.end();
 	for ( iLoop = m_aLoops.begin(); iLoop != iEnd; iLoop++ )

@@ -35,8 +35,6 @@
 
 START_NAMESPACE( Aqsis )
 
-#pragma warning(push, 3)
-
 //---------------------------------------------------------------------
 /** Constructor both u and vbasis matrices default to bezier.
  */
@@ -1314,8 +1312,5 @@ TqInt CqSurfacePatchMeshBilinear::Split( std::vector<boost::shared_ptr<CqSurface
 	}
 	return ( cSplits );
 }
-
-
-#pragma warning(pop)
 
 END_NAMESPACE( Aqsis )

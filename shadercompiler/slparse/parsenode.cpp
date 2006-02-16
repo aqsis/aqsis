@@ -33,7 +33,7 @@ static char* gVariableTypeNames[] =
         "matrix",
         "hextuple",
     };
-static TqInt gcVariableTypeNames = sizeof( gVariableTypeNames ) / sizeof( gVariableTypeNames[ 0 ] );
+//static TqInt gcVariableTypeNames = sizeof( gVariableTypeNames ) / sizeof( gVariableTypeNames[ 0 ] );
 
 char* gShaderTypeNames[] =
     {

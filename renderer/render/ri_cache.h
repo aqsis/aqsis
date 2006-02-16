@@ -52,24 +52,26 @@ class RiCacheBase
 					int size = 1;
 					switch( Decl.m_Class )
 					{
-							case class_constant:
+						case class_constant:
 							size = m_constant_size;
 							break;
 
-							case class_uniform:
+						case class_uniform:
 							size = m_uniform_size;
 							break;
 
-							case class_varying:
+						case class_varying:
 							size = m_varying_size;
 							break;
 
-							case class_vertex:
+						case class_vertex:
 							size = m_vertex_size;
 							break;
 
-							case class_facevarying:
+						case class_facevarying:
 							size = m_facevarying_size;
+							break;
+						default:
 							break;
 					}
 					int j;
@@ -118,24 +120,27 @@ class RiCacheBase
 				int size = 1;
 				switch( Decl.m_Class )
 				{
-						case class_constant:
+					case class_constant:
 						size = constant_size;
 						break;
 
-						case class_uniform:
+					case class_uniform:
 						size = uniform_size;
 						break;
 
-						case class_varying:
+					case class_varying:
 						size = varying_size;
 						break;
 
-						case class_vertex:
+					case class_vertex:
 						size = vertex_size;
 						break;
 
-						case class_facevarying:
+					case class_facevarying:
 						size = facevarying_size;
+						break;
+
+					default:
 						break;
 				}
 
@@ -156,21 +161,21 @@ class RiCacheBase
 				int j;
 				switch( Decl.m_Type )
 				{
-						case type_integer:
+					case type_integer:
 						m_values[i] = CopyAtomicValue(size, reinterpret_cast<RtInt*>(values[i]));
 						break;
 
-						case type_point:
-						case type_color:
-						case type_normal:
-						case type_vector:
-						case type_hpoint:
-						case type_matrix:
-						case type_float:
+					case type_point:
+					case type_color:
+					case type_normal:
+					case type_vector:
+					case type_hpoint:
+					case type_matrix:
+					case type_float:
 						m_values[i] = CopyAtomicValue(size, reinterpret_cast<RtFloat*>(values[i]));
 						break;
 
-						case type_string:
+					case type_string:
 						{
 							RtString* copyvalue = new RtString[size];
 							for(j=0; j<size; j++)
@@ -181,6 +186,9 @@ class RiCacheBase
 							}
 							m_values[i] = reinterpret_cast<RtPointer>(copyvalue);
 						}
+						break;
+
+					default:
 						break;
 				}
 			}
@@ -216,3 +224,4 @@ class RiCacheBase
 END_NAMESPACE( Aqsis )
 
 #endif // RI_CACHE_H_INCLUDED
+

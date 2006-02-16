@@ -425,8 +425,8 @@ class CqShadowMapBuffer : public CqTextureMapBuffer
 				TqInt multiplier = m_Width * m_Samples;
 				minz =  RI_FLOATMAX;
 				maxz =  -RI_FLOATMAX;
-				for (TqInt y = 0; y < m_Height; y++)
-					for (TqInt x = 0; x < m_Width; x++)
+				for (TqUint y = 0; y < m_Height; y++)
+					for (TqUint x = 0; x < m_Width; x++)
 					{
 						TqInt iv = y * multiplier;
 						TqInt iu = x * m_Samples;
@@ -478,10 +478,10 @@ class CqTextureMap : public IqTextureMap
 				m_umapsize(0),
 				m_vmapsize(0),
 				m_interp(0.0),
-				m_level(0),
+				m_swidth( 1.0 ), m_twidth( 1.0 ),
 				m_ds(-1.0),
 				m_dt(-1.0),
-				m_swidth( 1.0 ), m_twidth( 1.0 )
+				m_level(0)
 
 		{
 			m_pixel_variance.resize( m_SamplesPerPixel );
@@ -703,7 +703,6 @@ class CqTextureMap : public IqTextureMap
 		enum EqWrapMode m_smode;        ///< Periodic, black, clamp
 		enum EqWrapMode m_tmode;        ///< Periodic, black, clamp
 		RtFilterFunc m_FilterFunc;      ///< Catmull-Rom, sinc, disk, ... pixelfilter
-		TqFloat m_swidth, m_twidth;   	///< for the pixel's filter
 		std::list<CqTextureMapBuffer*> m_apFlat;///< Array of segments but for non mipmaps files  
 		std::list<CqTextureMapBuffer*> m_apMipMaps[256];///< Arrays of segments per pages/directories
 		CqTextureMapBuffer *m_apLast[256];	///< vector of last segments per pages/directories
@@ -716,13 +715,14 @@ class CqTextureMap : public IqTextureMap
 		TqFloat		m_ptwidth;          
 		TqFloat		m_samples;	///< How many samplings
 		TqFloat     	m_lerp; 	///< Enable TriLinear
-		TqFloat     m_pixelvariance;       ///< Smallest Difference between two distinct samples
-		TqFloat     m_interp;              ///< Difference between m_level and m_level+1 MipMap (for TriLinear sampling)
-		TqInt       m_level;               ///< Which level of mipmap (from m_ds, m_dt)
-		TqInt       m_umapsize;            ///< Umapsize for m_level of mipmap
-		TqInt       m_vmapsize;            ///< Vmapsize for m_level of mipmap
-		TqFloat     m_ds;                  ///< delta (u2-u1) 
-		TqFloat     m_dt;                  ///< delta (v2-v1)
+		TqFloat		m_pixelvariance;      ///< Smallest Difference between two distinct samples
+		TqInt		m_umapsize;           ///< Umapsize for m_level of mipmap
+		TqInt		m_vmapsize;           ///< Vmapsize for m_level of mipmap
+		TqFloat		m_interp;             ///< Difference between m_level and m_level+1 MipMap (for TriLinear sampling)
+		TqFloat 	m_swidth, m_twidth;   ///< for the pixel's filter
+		TqFloat		m_ds;                 ///< delta (u2-u1) 
+		TqFloat		m_dt;                 ///< delta (v2-v1)
+		TqInt		m_level;              ///< Which level of mipmap (from m_ds, m_dt)
 
 		// Temporary values used during BiLinear and/or TriLinear sampling.
 		std::valarray<TqFloat>	m_pixel_variance;

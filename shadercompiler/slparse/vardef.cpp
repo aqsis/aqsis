@@ -51,7 +51,7 @@ CqVarDef	gStandardVars[] = {
 
                                CqVarDef( Type_VaryingPoint, "Ns",0,		SU|LS|VO|DI|IM ),
                            };
-TqInt	gcStandardVars = sizeof( gStandardVars ) / sizeof( gStandardVars[ 0 ] );
+TqUint	gcStandardVars = sizeof( gStandardVars ) / sizeof( gStandardVars[ 0 ] );
 
 ///---------------------------------------------------------------------
 /// Global array of standard variable definitions
@@ -153,7 +153,7 @@ TqBool CqVarDef::FindVariable( const char* strName, SqVarRef& Ref )
 TqBool CqVarDef::FindStandardVariable( const char* strName, SqVarRef& Ref )
 {
 	// Search the standard definitions only.
-	TqInt i;
+	TqUint i;
 	TqUlong hash = CqString::hash(strName);
 
 	for ( i = 0; i < gcStandardVars; i++ )

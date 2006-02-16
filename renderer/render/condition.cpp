@@ -125,7 +125,6 @@ TqBool TestCondition(RtString condition, RtString where)
 
 	TqBool Ok = TqTrue;
 	TqInt n;
-	TqInt type = 0;
 
 	// If the left side is not the right parameter than return TqTrue
 	if ((strstr(condition, "$") == 0) || (strstr(condition, ":") == 0))

@@ -39,6 +39,7 @@
 #include <stdio.h>
 #include <setjmp.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "jpeglib.h"
 

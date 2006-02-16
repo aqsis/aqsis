@@ -145,6 +145,9 @@ static	CqString	SO_sprintf( const char* str, int cParams, IqShaderData** apParam
 
 //----------------------------------------------------------------------
 // init_illuminance()
+// NOTE: There is duplication here between SO_init_illuminance and 
+// SO_advance_illuminance. This is required to ensure that the 
+// first light is not skipped.
 TqBool CqShaderExecEnv::SO_init_illuminance()
 {
 	// Check if lighting is turned off.
@@ -155,8 +158,16 @@ TqBool CqShaderExecEnv::SO_init_illuminance()
 			return(TqFalse);
 	}
 
-	m_li = -1;
-	return ( SO_advance_illuminance() );
+	m_li = 0;
+	while ( m_li < m_pAttributes ->cLights() &&
+	        m_pAttributes ->pLight( m_li ) ->pShader() ->fAmbient() )
+	{
+		m_li++;
+	}
+	if ( m_li < m_pAttributes ->cLights() )
+		return ( TqTrue );
+	else
+		return ( TqFalse );
 }
 
 
@@ -222,7 +233,7 @@ void CqShaderExecEnv::ValidateIlluminanceCache( IqShaderData* pP, IqShaderData* 
 void	CqShaderExecEnv::SO_radians( IqShaderData* degrees, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(degrees)->Class()==class_varying||__fVarying;
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
@@ -244,7 +255,7 @@ void	CqShaderExecEnv::SO_radians( IqShaderData* degrees, IqShaderData* Result, I
 void	CqShaderExecEnv::SO_degrees( IqShaderData* radians, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(radians)->Class()==class_varying||__fVarying;
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
@@ -266,7 +277,7 @@ void	CqShaderExecEnv::SO_degrees( IqShaderData* radians, IqShaderData* Result, I
 void	CqShaderExecEnv::SO_sin( IqShaderData* a, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(a)->Class()==class_varying||__fVarying;
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
@@ -288,7 +299,7 @@ void	CqShaderExecEnv::SO_sin( IqShaderData* a, IqShaderData* Result, IqShader* p
 void	CqShaderExecEnv::SO_asin( IqShaderData* a, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(a)->Class()==class_varying||__fVarying;
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
@@ -310,7 +321,7 @@ void	CqShaderExecEnv::SO_asin( IqShaderData* a, IqShaderData* Result, IqShader* 
 void	CqShaderExecEnv::SO_cos( IqShaderData* a, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(a)->Class()==class_varying||__fVarying;
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
@@ -332,7 +343,7 @@ void	CqShaderExecEnv::SO_cos( IqShaderData* a, IqShaderData* Result, IqShader* p
 void	CqShaderExecEnv::SO_acos( IqShaderData* a, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(a)->Class()==class_varying||__fVarying;
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
@@ -354,7 +365,7 @@ void	CqShaderExecEnv::SO_acos( IqShaderData* a, IqShaderData* Result, IqShader* 
 void	CqShaderExecEnv::SO_tan( IqShaderData* a, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(a)->Class()==class_varying||__fVarying;
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
@@ -376,7 +387,7 @@ void	CqShaderExecEnv::SO_tan( IqShaderData* a, IqShaderData* Result, IqShader* p
 void	CqShaderExecEnv::SO_atan( IqShaderData* yoverx, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(yoverx)->Class()==class_varying||__fVarying;
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
@@ -398,7 +409,7 @@ void	CqShaderExecEnv::SO_atan( IqShaderData* yoverx, IqShaderData* Result, IqSha
 void	CqShaderExecEnv::SO_atan( IqShaderData* y, IqShaderData* x, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(x)->Class()==class_varying||__fVarying;
 	__fVarying=(y)->Class()==class_varying||__fVarying;
@@ -423,7 +434,7 @@ void	CqShaderExecEnv::SO_atan( IqShaderData* y, IqShaderData* x, IqShaderData* R
 void	CqShaderExecEnv::SO_pow( IqShaderData* x, IqShaderData* y, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(x)->Class()==class_varying||__fVarying;
 	__fVarying=(y)->Class()==class_varying||__fVarying;
@@ -452,7 +463,7 @@ void	CqShaderExecEnv::SO_pow( IqShaderData* x, IqShaderData* y, IqShaderData* Re
 void	CqShaderExecEnv::SO_exp( IqShaderData* x, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(x)->Class()==class_varying||__fVarying;
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
@@ -474,7 +485,7 @@ void	CqShaderExecEnv::SO_exp( IqShaderData* x, IqShaderData* Result, IqShader* p
 void	CqShaderExecEnv::SO_sqrt( IqShaderData* x, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(x)->Class()==class_varying||__fVarying;
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
@@ -496,7 +507,7 @@ void	CqShaderExecEnv::SO_sqrt( IqShaderData* x, IqShaderData* Result, IqShader* 
 void	CqShaderExecEnv::SO_log( IqShaderData* x, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(x)->Class()==class_varying||__fVarying;
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
@@ -518,7 +529,7 @@ void	CqShaderExecEnv::SO_log( IqShaderData* x, IqShaderData* Result, IqShader* p
 void	CqShaderExecEnv::SO_mod( IqShaderData* a, IqShaderData* b, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(a)->Class()==class_varying||__fVarying;
 	__fVarying=(b)->Class()==class_varying||__fVarying;
@@ -549,7 +560,7 @@ void	CqShaderExecEnv::SO_mod( IqShaderData* a, IqShaderData* b, IqShaderData* Re
 void	CqShaderExecEnv::SO_log( IqShaderData* x, IqShaderData* base, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(x)->Class()==class_varying||__fVarying;
 	__fVarying=(base)->Class()==class_varying||__fVarying;
@@ -575,7 +586,7 @@ void	CqShaderExecEnv::SO_log( IqShaderData* x, IqShaderData* base, IqShaderData*
 void	CqShaderExecEnv::SO_abs( IqShaderData* x, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(x)->Class()==class_varying||__fVarying;
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
@@ -597,7 +608,7 @@ void	CqShaderExecEnv::SO_abs( IqShaderData* x, IqShaderData* Result, IqShader* p
 void	CqShaderExecEnv::SO_sign( IqShaderData* x, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(x)->Class()==class_varying||__fVarying;
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
@@ -619,7 +630,7 @@ void	CqShaderExecEnv::SO_sign( IqShaderData* x, IqShaderData* Result, IqShader* 
 void	CqShaderExecEnv::SO_min( IqShaderData* a, IqShaderData* b, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(a)->Class()==class_varying||__fVarying;
 	__fVarying=(b)->Class()==class_varying||__fVarying;
@@ -651,7 +662,7 @@ void	CqShaderExecEnv::SO_min( IqShaderData* a, IqShaderData* b, IqShaderData* Re
 void	CqShaderExecEnv::SO_max( IqShaderData* a, IqShaderData* b, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(a)->Class()==class_varying||__fVarying;
 	__fVarying=(b)->Class()==class_varying||__fVarying;
@@ -683,7 +694,7 @@ void	CqShaderExecEnv::SO_max( IqShaderData* a, IqShaderData* b, IqShaderData* Re
 void	CqShaderExecEnv::SO_pmin( IqShaderData* a, IqShaderData* b, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(a)->Class()==class_varying||__fVarying;
 	__fVarying=(b)->Class()==class_varying||__fVarying;
@@ -715,7 +726,7 @@ void	CqShaderExecEnv::SO_pmin( IqShaderData* a, IqShaderData* b, IqShaderData* R
 void	CqShaderExecEnv::SO_pmax( IqShaderData* a, IqShaderData* b, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(a)->Class()==class_varying||__fVarying;
 	__fVarying=(b)->Class()==class_varying||__fVarying;
@@ -747,7 +758,7 @@ void	CqShaderExecEnv::SO_pmax( IqShaderData* a, IqShaderData* b, IqShaderData* R
 void	CqShaderExecEnv::SO_cmin( IqShaderData* a, IqShaderData* b, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(a)->Class()==class_varying||__fVarying;
 	__fVarying=(b)->Class()==class_varying||__fVarying;
@@ -779,7 +790,7 @@ void	CqShaderExecEnv::SO_cmin( IqShaderData* a, IqShaderData* b, IqShaderData* R
 void	CqShaderExecEnv::SO_cmax( IqShaderData* a, IqShaderData* b, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(a)->Class()==class_varying||__fVarying;
 	__fVarying=(b)->Class()==class_varying||__fVarying;
@@ -811,7 +822,7 @@ void	CqShaderExecEnv::SO_cmax( IqShaderData* a, IqShaderData* b, IqShaderData* R
 void	CqShaderExecEnv::SO_clamp( IqShaderData* a, IqShaderData* _min, IqShaderData* _max, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(a)->Class()==class_varying||__fVarying;
 	__fVarying=(_min)->Class()==class_varying||__fVarying;
@@ -839,7 +850,7 @@ void	CqShaderExecEnv::SO_clamp( IqShaderData* a, IqShaderData* _min, IqShaderDat
 void	CqShaderExecEnv::SO_pclamp( IqShaderData* a, IqShaderData* _min, IqShaderData* _max, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(a)->Class()==class_varying||__fVarying;
 	__fVarying=(_min)->Class()==class_varying||__fVarying;
@@ -867,7 +878,7 @@ void	CqShaderExecEnv::SO_pclamp( IqShaderData* a, IqShaderData* _min, IqShaderDa
 void	CqShaderExecEnv::SO_cclamp( IqShaderData* a, IqShaderData* _min, IqShaderData* _max, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(a)->Class()==class_varying||__fVarying;
 	__fVarying=(_min)->Class()==class_varying||__fVarying;
@@ -895,7 +906,7 @@ void	CqShaderExecEnv::SO_cclamp( IqShaderData* a, IqShaderData* _min, IqShaderDa
 void	CqShaderExecEnv::SO_floor( IqShaderData* x, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(x)->Class()==class_varying||__fVarying;
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
@@ -917,7 +928,7 @@ void	CqShaderExecEnv::SO_floor( IqShaderData* x, IqShaderData* Result, IqShader*
 void	CqShaderExecEnv::SO_ceil( IqShaderData* x, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(x)->Class()==class_varying||__fVarying;
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
@@ -939,7 +950,7 @@ void	CqShaderExecEnv::SO_ceil( IqShaderData* x, IqShaderData* Result, IqShader* 
 void	CqShaderExecEnv::SO_round( IqShaderData* x, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 	TqFloat res;
 
 	__fVarying=(x)->Class()==class_varying||__fVarying;
@@ -966,7 +977,7 @@ void	CqShaderExecEnv::SO_round( IqShaderData* x, IqShaderData* Result, IqShader*
 void	CqShaderExecEnv::SO_step( IqShaderData* _min, IqShaderData* value, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(_min)->Class()==class_varying||__fVarying;
 	__fVarying=(value)->Class()==class_varying||__fVarying;
@@ -994,7 +1005,7 @@ void	CqShaderExecEnv::SO_step( IqShaderData* _min, IqShaderData* value, IqShader
 void	CqShaderExecEnv::SO_smoothstep( IqShaderData* _min, IqShaderData* _max, IqShaderData* value, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(value)->Class()==class_varying||__fVarying;
 	__fVarying=(_min)->Class()==class_varying||__fVarying;
@@ -1033,7 +1044,7 @@ void	CqShaderExecEnv::SO_smoothstep( IqShaderData* _min, IqShaderData* _max, IqS
 void	CqShaderExecEnv::SO_fspline( IqShaderData* value, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	CqSplineCubic spline( cParams );
 	spline.SetBasis("catmull-rom");
@@ -1090,7 +1101,7 @@ void	CqShaderExecEnv::SO_fspline( IqShaderData* value, IqShaderData* Result, IqS
 void	CqShaderExecEnv::SO_cspline( IqShaderData* value, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	CqSplineCubic spline( cParams );
 
@@ -1146,7 +1157,7 @@ void	CqShaderExecEnv::SO_cspline( IqShaderData* value, IqShaderData* Result, IqS
 void	CqShaderExecEnv::SO_pspline( IqShaderData* value, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	CqSplineCubic spline( cParams );
 
@@ -1202,7 +1213,7 @@ void	CqShaderExecEnv::SO_pspline( IqShaderData* value, IqShaderData* Result, IqS
 void	CqShaderExecEnv::SO_sfspline( IqShaderData* basis, IqShaderData* value, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	CqSplineCubic spline( cParams );
 
@@ -1264,7 +1275,7 @@ void	CqShaderExecEnv::SO_sfspline( IqShaderData* basis, IqShaderData* value, IqS
 void	CqShaderExecEnv::SO_scspline( IqShaderData* basis, IqShaderData* value, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	CqSplineCubic spline( cParams );
 
@@ -1326,7 +1337,7 @@ void	CqShaderExecEnv::SO_scspline( IqShaderData* basis, IqShaderData* value, IqS
 void	CqShaderExecEnv::SO_spspline( IqShaderData* basis, IqShaderData* value, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	CqSplineCubic spline( cParams );
 
@@ -1387,7 +1398,7 @@ void	CqShaderExecEnv::SO_fDu( IqShaderData* p, IqShaderData* Result, IqShader* p
 {
 	TqFloat Deffloat = 0.0f;
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(p)->Class()==class_varying||__fVarying;
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
@@ -1409,7 +1420,7 @@ void	CqShaderExecEnv::SO_fDv( IqShaderData* p, IqShaderData* Result, IqShader* p
 {
 	TqFloat Deffloat = 0.0f;
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(p)->Class()==class_varying||__fVarying;
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
@@ -1430,7 +1441,7 @@ void	CqShaderExecEnv::SO_fDv( IqShaderData* p, IqShaderData* Result, IqShader* p
 void	CqShaderExecEnv::SO_fDeriv( IqShaderData* p, IqShaderData* den, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(p)->Class()==class_varying||__fVarying;
 	__fVarying=(den)->Class()==class_varying||__fVarying;
@@ -1453,7 +1464,7 @@ void	CqShaderExecEnv::SO_cDu( IqShaderData* p, IqShaderData* Result, IqShader* p
 {
 	CqColor Defcol( 0.0f, 0.0f, 0.0f );
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(p)->Class()==class_varying||__fVarying;
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
@@ -1475,7 +1486,7 @@ void	CqShaderExecEnv::SO_cDv( IqShaderData* p, IqShaderData* Result, IqShader* p
 {
 	CqColor Defcol( 0.0f, 0.0f, 0.0f );
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(p)->Class()==class_varying||__fVarying;
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
@@ -1496,7 +1507,7 @@ void	CqShaderExecEnv::SO_cDv( IqShaderData* p, IqShaderData* Result, IqShader* p
 void	CqShaderExecEnv::SO_cDeriv( IqShaderData* p, IqShaderData* den, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(p)->Class()==class_varying||__fVarying;
 	__fVarying=(den)->Class()==class_varying||__fVarying;
@@ -1519,7 +1530,7 @@ void	CqShaderExecEnv::SO_pDu( IqShaderData* p, IqShaderData* Result, IqShader* p
 {
 	CqVector3D Defvec( 0.0f, 0.0f, 0.0f );
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(p)->Class()==class_varying||__fVarying;
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
@@ -1541,7 +1552,7 @@ void	CqShaderExecEnv::SO_pDv( IqShaderData* p, IqShaderData* Result, IqShader* p
 {
 	CqVector3D Defvec( 0.0f, 0.0f, 0.0f );
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(p)->Class()==class_varying||__fVarying;
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
@@ -1562,7 +1573,7 @@ void	CqShaderExecEnv::SO_pDv( IqShaderData* p, IqShaderData* Result, IqShader* p
 void	CqShaderExecEnv::SO_pDeriv( IqShaderData* p, IqShaderData* den, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(p)->Class()==class_varying||__fVarying;
 	__fVarying=(den)->Class()==class_varying||__fVarying;
@@ -1584,7 +1595,7 @@ void	CqShaderExecEnv::SO_pDeriv( IqShaderData* p, IqShaderData* den, IqShaderDat
 void	CqShaderExecEnv::SO_frandom( IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
@@ -1603,7 +1614,7 @@ void	CqShaderExecEnv::SO_frandom( IqShaderData* Result, IqShader* pShader )
 void	CqShaderExecEnv::SO_crandom( IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
@@ -1627,7 +1638,7 @@ void	CqShaderExecEnv::SO_crandom( IqShaderData* Result, IqShader* pShader )
 void	CqShaderExecEnv::SO_prandom( IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
@@ -1654,7 +1665,7 @@ void	CqShaderExecEnv::SO_prandom( IqShaderData* Result, IqShader* pShader )
 void	CqShaderExecEnv::SO_fnoise1( IqShaderData* v, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(v)->Class()==class_varying||__fVarying;
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
@@ -1678,7 +1689,7 @@ void	CqShaderExecEnv::SO_fnoise1( IqShaderData* v, IqShaderData* Result, IqShade
 void CqShaderExecEnv::SO_fnoise2( IqShaderData* u, IqShaderData* v, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(u)->Class()==class_varying||__fVarying;
 	__fVarying=(v)->Class()==class_varying||__fVarying;
@@ -1705,7 +1716,7 @@ void CqShaderExecEnv::SO_fnoise2( IqShaderData* u, IqShaderData* v, IqShaderData
 void CqShaderExecEnv::SO_fnoise3( IqShaderData* p, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(p)->Class()==class_varying||__fVarying;
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
@@ -1730,7 +1741,7 @@ void CqShaderExecEnv::SO_fnoise4( IqShaderData* p, IqShaderData* t, IqShaderData
 {
 	// TODO: Do proper 4D noise.
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(p)->Class()==class_varying||__fVarying;
 	__fVarying=(t)->Class()==class_varying||__fVarying;
@@ -1757,7 +1768,7 @@ void CqShaderExecEnv::SO_fnoise4( IqShaderData* p, IqShaderData* t, IqShaderData
 void	CqShaderExecEnv::SO_cnoise1( IqShaderData* v, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(v)->Class()==class_varying||__fVarying;
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
@@ -1781,7 +1792,7 @@ void	CqShaderExecEnv::SO_cnoise1( IqShaderData* v, IqShaderData* Result, IqShade
 void CqShaderExecEnv::SO_cnoise2( IqShaderData* u, IqShaderData* v, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(u)->Class()==class_varying||__fVarying;
 	__fVarying=(v)->Class()==class_varying||__fVarying;
@@ -1808,7 +1819,7 @@ void CqShaderExecEnv::SO_cnoise2( IqShaderData* u, IqShaderData* v, IqShaderData
 void CqShaderExecEnv::SO_cnoise3( IqShaderData* p, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(p)->Class()==class_varying||__fVarying;
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
@@ -1833,7 +1844,7 @@ void CqShaderExecEnv::SO_cnoise4( IqShaderData* p, IqShaderData* t, IqShaderData
 {
 	// TODO: Do proper 4D noise.
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(p)->Class()==class_varying||__fVarying;
 	__fVarying=(t)->Class()==class_varying||__fVarying;
@@ -1860,7 +1871,7 @@ void CqShaderExecEnv::SO_cnoise4( IqShaderData* p, IqShaderData* t, IqShaderData
 void CqShaderExecEnv::SO_pnoise1( IqShaderData* v, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(v)->Class()==class_varying||__fVarying;
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
@@ -1884,7 +1895,7 @@ void CqShaderExecEnv::SO_pnoise1( IqShaderData* v, IqShaderData* Result, IqShade
 void CqShaderExecEnv::SO_pnoise2( IqShaderData* u, IqShaderData* v, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(u)->Class()==class_varying||__fVarying;
 	__fVarying=(v)->Class()==class_varying||__fVarying;
@@ -1911,7 +1922,7 @@ void CqShaderExecEnv::SO_pnoise2( IqShaderData* u, IqShaderData* v, IqShaderData
 void CqShaderExecEnv::SO_pnoise3( IqShaderData* p, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(p)->Class()==class_varying||__fVarying;
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
@@ -1936,7 +1947,7 @@ void CqShaderExecEnv::SO_pnoise4( IqShaderData* p, IqShaderData* t, IqShaderData
 {
 	// TODO: Do proper 4D noise.
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(p)->Class()==class_varying||__fVarying;
 	__fVarying=(t)->Class()==class_varying||__fVarying;
@@ -1963,7 +1974,7 @@ void CqShaderExecEnv::SO_pnoise4( IqShaderData* p, IqShaderData* t, IqShaderData
 void	CqShaderExecEnv::SO_setcomp( IqShaderData* p, IqShaderData* index, IqShaderData* v, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(p)->Class()==class_varying||__fVarying;
 	__fVarying=(v)->Class()==class_varying||__fVarying;
@@ -1993,7 +2004,7 @@ void	CqShaderExecEnv::SO_setcomp( IqShaderData* p, IqShaderData* index, IqShader
 void	CqShaderExecEnv::SO_setxcomp( IqShaderData* p, IqShaderData* v, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(p)->Class()==class_varying||__fVarying;
 	__fVarying=(v)->Class()==class_varying||__fVarying;
@@ -2020,7 +2031,7 @@ void	CqShaderExecEnv::SO_setxcomp( IqShaderData* p, IqShaderData* v, IqShader* p
 void	CqShaderExecEnv::SO_setycomp( IqShaderData* p, IqShaderData* v, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(p)->Class()==class_varying||__fVarying;
 	__fVarying=(v)->Class()==class_varying||__fVarying;
@@ -2047,7 +2058,7 @@ void	CqShaderExecEnv::SO_setycomp( IqShaderData* p, IqShaderData* v, IqShader* p
 void	CqShaderExecEnv::SO_setzcomp( IqShaderData* p, IqShaderData* v, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(p)->Class()==class_varying||__fVarying;
 	__fVarying=(v)->Class()==class_varying||__fVarying;
@@ -2074,7 +2085,7 @@ void	CqShaderExecEnv::SO_setzcomp( IqShaderData* p, IqShaderData* v, IqShader* p
 void	CqShaderExecEnv::SO_length( IqShaderData* V, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(V)->Class()==class_varying||__fVarying;
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
@@ -2096,7 +2107,7 @@ void	CqShaderExecEnv::SO_length( IqShaderData* V, IqShaderData* Result, IqShader
 void	CqShaderExecEnv::SO_distance( IqShaderData* P1, IqShaderData* P2, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(P1)->Class()==class_varying||__fVarying;
 	__fVarying=(P2)->Class()==class_varying||__fVarying;
@@ -2125,7 +2136,7 @@ void CqShaderExecEnv::SO_area( IqShaderData* p, IqShaderData* Result, IqShader* 
 {
 	CqVector3D Defvec( 0.0f, 0.0f, 0.0f );
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	CqVector3D	vecR;
 
@@ -2157,7 +2168,7 @@ void CqShaderExecEnv::SO_area( IqShaderData* p, IqShaderData* Result, IqShader* 
 void	CqShaderExecEnv::SO_normalize( IqShaderData* V, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(V)->Class()==class_varying||__fVarying;
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
@@ -2193,7 +2204,7 @@ void	CqShaderExecEnv::SO_normalize( IqShaderData* V, IqShaderData* Result, IqSha
 void CqShaderExecEnv::SO_faceforward( IqShaderData* N, IqShaderData* I, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(N)->Class()==class_varying||__fVarying;
 	__fVarying=(I)->Class()==class_varying||__fVarying;
@@ -2224,7 +2235,7 @@ void CqShaderExecEnv::SO_faceforward( IqShaderData* N, IqShaderData* I, IqShader
 void CqShaderExecEnv::SO_faceforward2( IqShaderData* N, IqShaderData* I, IqShaderData* Nref, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(N)->Class()==class_varying||__fVarying;
 	__fVarying=(I)->Class()==class_varying||__fVarying;
@@ -2256,7 +2267,7 @@ void CqShaderExecEnv::SO_faceforward2( IqShaderData* N, IqShaderData* I, IqShade
 void CqShaderExecEnv::SO_reflect( IqShaderData* I, IqShaderData* N, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(I)->Class()==class_varying||__fVarying;
 	__fVarying=(N)->Class()==class_varying||__fVarying;
@@ -2286,7 +2297,7 @@ void CqShaderExecEnv::SO_reflect( IqShaderData* I, IqShaderData* N, IqShaderData
 void CqShaderExecEnv::SO_refract( IqShaderData* I, IqShaderData* N, IqShaderData* eta, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(I)->Class()==class_varying||__fVarying;
 	__fVarying=(N)->Class()==class_varying||__fVarying;
@@ -2321,7 +2332,7 @@ void CqShaderExecEnv::SO_refract( IqShaderData* I, IqShaderData* N, IqShaderData
 void CqShaderExecEnv::SO_fresnel( IqShaderData* I, IqShaderData* N, IqShaderData* eta, IqShaderData* Kr, IqShaderData* Kt, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(I)->Class()==class_varying||__fVarying;
 	__fVarying=(N)->Class()==class_varying||__fVarying;
@@ -2370,7 +2381,7 @@ void CqShaderExecEnv::SO_fresnel( IqShaderData* I, IqShaderData* N, IqShaderData
 void CqShaderExecEnv::SO_fresnel( IqShaderData* I, IqShaderData* N, IqShaderData* eta, IqShaderData* Kr, IqShaderData* Kt, IqShaderData* R, IqShaderData* T, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(I)->Class()==class_varying||__fVarying;
 	__fVarying=(N)->Class()==class_varying||__fVarying;
@@ -2428,7 +2439,7 @@ void CqShaderExecEnv::SO_fresnel( IqShaderData* I, IqShaderData* N, IqShaderData
 void CqShaderExecEnv::SO_transform( IqShaderData* fromspace, IqShaderData* tospace, IqShaderData* p, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	assert( pShader != 0 );
 
@@ -2481,7 +2492,7 @@ void CqShaderExecEnv::SO_transform( IqShaderData* fromspace, IqShaderData* tospa
 void CqShaderExecEnv::SO_transform( IqShaderData* tospace, IqShaderData* p, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	assert( pShader != 0 );
 
@@ -2532,7 +2543,7 @@ void CqShaderExecEnv::SO_transform( IqShaderData* tospace, IqShaderData* p, IqSh
 void CqShaderExecEnv::SO_transformm( IqShaderData* tospace, IqShaderData* p, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	assert( pShader != 0 );
 
@@ -2561,7 +2572,7 @@ void CqShaderExecEnv::SO_transformm( IqShaderData* tospace, IqShaderData* p, IqS
 void CqShaderExecEnv::SO_vtransform( IqShaderData* fromspace, IqShaderData* tospace, IqShaderData* p, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	assert( pShader != 0 );
 
@@ -2614,7 +2625,7 @@ void CqShaderExecEnv::SO_vtransform( IqShaderData* fromspace, IqShaderData* tosp
 void CqShaderExecEnv::SO_vtransform( IqShaderData* tospace, IqShaderData* p, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	assert( pShader != 0 );
 
@@ -2665,7 +2676,7 @@ void CqShaderExecEnv::SO_vtransform( IqShaderData* tospace, IqShaderData* p, IqS
 void CqShaderExecEnv::SO_vtransformm( IqShaderData* tospace, IqShaderData* p, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	assert( pShader != 0 );
 
@@ -2694,7 +2705,7 @@ void CqShaderExecEnv::SO_vtransformm( IqShaderData* tospace, IqShaderData* p, Iq
 void CqShaderExecEnv::SO_ntransform( IqShaderData* fromspace, IqShaderData* tospace, IqShaderData* p, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	assert( pShader != 0 );
 
@@ -2747,7 +2758,7 @@ void CqShaderExecEnv::SO_ntransform( IqShaderData* fromspace, IqShaderData* tosp
 void CqShaderExecEnv::SO_ntransform( IqShaderData* tospace, IqShaderData* p, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	assert( pShader != 0 );
 
@@ -2798,7 +2809,7 @@ void CqShaderExecEnv::SO_ntransform( IqShaderData* tospace, IqShaderData* p, IqS
 void CqShaderExecEnv::SO_ntransformm( IqShaderData* tospace, IqShaderData* p, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	assert( pShader != 0 );
 
@@ -2827,7 +2838,7 @@ void CqShaderExecEnv::SO_ntransformm( IqShaderData* tospace, IqShaderData* p, Iq
 void CqShaderExecEnv::SO_depth( IqShaderData* p, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	if ( NULL == QGetRenderContextI() )
 		return ;
@@ -2859,7 +2870,7 @@ void CqShaderExecEnv::SO_calculatenormal( IqShaderData* p, IqShaderData* Result,
 {
 	CqVector3D Defvec( 0.0f, 0.0f, 0.0f );
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	// Find out if the orientation is inverted.
 	TqBool CSO = pTransform()->GetHandedness(QGetRenderContextI()->Time());
@@ -2928,7 +2939,7 @@ void CqShaderExecEnv::SO_calculatenormal( IqShaderData* p, IqShaderData* Result,
 void CqShaderExecEnv::SO_cmix( IqShaderData* color0, IqShaderData* color1, IqShaderData* value, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(color0)->Class()==class_varying||__fVarying;
 	__fVarying=(color1)->Class()==class_varying||__fVarying;
@@ -2957,7 +2968,7 @@ void CqShaderExecEnv::SO_cmix( IqShaderData* color0, IqShaderData* color1, IqSha
 void	CqShaderExecEnv::SO_fmix( IqShaderData* f0, IqShaderData* f1, IqShaderData* value, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(f0)->Class()==class_varying||__fVarying;
 	__fVarying=(f1)->Class()==class_varying||__fVarying;
@@ -2985,7 +2996,7 @@ void	CqShaderExecEnv::SO_fmix( IqShaderData* f0, IqShaderData* f1, IqShaderData*
 void	CqShaderExecEnv::SO_pmix( IqShaderData* p0, IqShaderData* p1, IqShaderData* value, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(p0)->Class()==class_varying||__fVarying;
 	__fVarying=(p1)->Class()==class_varying||__fVarying;
@@ -3013,7 +3024,7 @@ void	CqShaderExecEnv::SO_pmix( IqShaderData* p0, IqShaderData* p1, IqShaderData*
 void	CqShaderExecEnv::SO_vmix( IqShaderData* v0, IqShaderData* v1, IqShaderData* value, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(v0)->Class()==class_varying||__fVarying;
 	__fVarying=(v1)->Class()==class_varying||__fVarying;
@@ -3041,7 +3052,7 @@ void	CqShaderExecEnv::SO_vmix( IqShaderData* v0, IqShaderData* v1, IqShaderData*
 void	CqShaderExecEnv::SO_nmix( IqShaderData* n0, IqShaderData* n1, IqShaderData* value, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(n0)->Class()==class_varying||__fVarying;
 	__fVarying=(n1)->Class()==class_varying||__fVarying;
@@ -3073,7 +3084,7 @@ void CqShaderExecEnv::SO_ftexture1( IqShaderData* name, IqShaderData* channel, I
 {
 	TqFloat Deffloat = 0.0f;
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	if ( NULL == QGetRenderContextI() )
 		return ;
@@ -3168,7 +3179,7 @@ void CqShaderExecEnv::SO_ftexture2( IqShaderData* name, IqShaderData* channel, I
 {
 	TqFloat Deffloat = 0.0f;
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	if ( NULL == QGetRenderContextI() )
 		return ;
@@ -3263,7 +3274,7 @@ void CqShaderExecEnv::SO_ftexture2( IqShaderData* name, IqShaderData* channel, I
 void CqShaderExecEnv::SO_ftexture3( IqShaderData* name, IqShaderData* channel, IqShaderData* s1, IqShaderData* t1, IqShaderData* s2, IqShaderData* t2, IqShaderData* s3, IqShaderData* t3, IqShaderData* s4, IqShaderData* t4, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	if ( NULL == QGetRenderContextI() )
 		return ;
@@ -3347,7 +3358,7 @@ void CqShaderExecEnv::SO_ctexture1( IqShaderData* name, IqShaderData* channel, I
 {
 	TqFloat Deffloat = 0.0f;
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	if ( NULL == QGetRenderContextI() )
 		return ;
@@ -3444,7 +3455,7 @@ void CqShaderExecEnv::SO_ctexture2( IqShaderData* name, IqShaderData* channel, I
 {
 	TqFloat Deffloat = 0.0f;
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	if ( NULL == QGetRenderContextI() )
 		return ;
@@ -3541,7 +3552,7 @@ void CqShaderExecEnv::SO_ctexture2( IqShaderData* name, IqShaderData* channel, I
 void CqShaderExecEnv::SO_ctexture3( IqShaderData* name, IqShaderData* channel, IqShaderData* s1, IqShaderData* t1, IqShaderData* s2, IqShaderData* t2, IqShaderData* s3, IqShaderData* t3, IqShaderData* s4, IqShaderData* t4, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	if ( NULL == QGetRenderContextI() )
 		return ;
@@ -3627,7 +3638,7 @@ void CqShaderExecEnv::SO_fenvironment2( IqShaderData* name, IqShaderData* channe
 {
 	CqVector3D Defvec( 0.0f, 0.0f, 0.0f );
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	if ( NULL == QGetRenderContextI() )
 		return ;
@@ -3723,7 +3734,7 @@ void CqShaderExecEnv::SO_fenvironment2( IqShaderData* name, IqShaderData* channe
 void CqShaderExecEnv::SO_fenvironment3( IqShaderData* name, IqShaderData* channel, IqShaderData* R1, IqShaderData* R2, IqShaderData* R3, IqShaderData* R4, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	if ( NULL == QGetRenderContextI() )
 		return ;
@@ -3803,7 +3814,7 @@ void CqShaderExecEnv::SO_cenvironment2( IqShaderData* name, IqShaderData* channe
 {
 	CqVector3D Defvec( 0.0f, 0.0f, 0.0f );
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	if ( NULL == QGetRenderContextI() )
 		return ;
@@ -3899,7 +3910,7 @@ void CqShaderExecEnv::SO_cenvironment2( IqShaderData* name, IqShaderData* channe
 void CqShaderExecEnv::SO_cenvironment3( IqShaderData* name, IqShaderData* channel, IqShaderData* R1, IqShaderData* R2, IqShaderData* R3, IqShaderData* R4, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	if ( NULL == QGetRenderContextI() )
 		return ;
@@ -3977,7 +3988,7 @@ void CqShaderExecEnv::SO_cenvironment3( IqShaderData* name, IqShaderData* channe
 void CqShaderExecEnv::SO_bump1( IqShaderData* name, IqShaderData* channel, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying = TqTrue;
 
@@ -3998,7 +4009,7 @@ void CqShaderExecEnv::SO_bump1( IqShaderData* name, IqShaderData* channel, IqSha
 void CqShaderExecEnv::SO_bump2( IqShaderData* name, IqShaderData* channel, IqShaderData* s, IqShaderData* t, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying = TqTrue;
 
@@ -4019,7 +4030,7 @@ void CqShaderExecEnv::SO_bump2( IqShaderData* name, IqShaderData* channel, IqSha
 void CqShaderExecEnv::SO_bump3( IqShaderData* name, IqShaderData* channel, IqShaderData* s1, IqShaderData* t1, IqShaderData* s2, IqShaderData* t2, IqShaderData* s3, IqShaderData* t3, IqShaderData* s4, IqShaderData* t4, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying = TqTrue;
 
@@ -4040,7 +4051,7 @@ void CqShaderExecEnv::SO_bump3( IqShaderData* name, IqShaderData* channel, IqSha
 void CqShaderExecEnv::SO_shadow( IqShaderData* name, IqShaderData* channel, IqShaderData* P, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	if ( NULL == QGetRenderContextI() )
 		return ;
@@ -4101,7 +4112,7 @@ void CqShaderExecEnv::SO_shadow( IqShaderData* name, IqShaderData* channel, IqSh
 void CqShaderExecEnv::SO_shadow1( IqShaderData* name, IqShaderData* channel, IqShaderData* P1, IqShaderData* P2, IqShaderData* P3, IqShaderData* P4, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	if ( NULL == QGetRenderContextI() )
 		return ;
@@ -4165,7 +4176,7 @@ void CqShaderExecEnv::SO_shadow1( IqShaderData* name, IqShaderData* channel, IqS
 void CqShaderExecEnv::SO_ambient( IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	// Check if lighting is turned off.
 	if(NULL != QGetRenderContextI())
@@ -4221,7 +4232,7 @@ void CqShaderExecEnv::SO_ambient( IqShaderData* Result, IqShader* pShader )
 void CqShaderExecEnv::SO_diffuse( IqShaderData* N, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	// If the illuminance cache is already OK, then we don't need to bother filling in the illuminance parameters.
 	if ( !m_IlluminanceCacheValid )
@@ -4309,7 +4320,7 @@ void CqShaderExecEnv::SO_diffuse( IqShaderData* N, IqShaderData* Result, IqShade
 void CqShaderExecEnv::SO_specular( IqShaderData* N, IqShaderData* V, IqShaderData* roughness, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	// If the illuminance cache is already OK, then we don't need to bother filling in the illuminance parameters.
 	if ( !m_IlluminanceCacheValid )
@@ -4403,7 +4414,7 @@ void CqShaderExecEnv::SO_specular( IqShaderData* N, IqShaderData* V, IqShaderDat
 void CqShaderExecEnv::SO_phong( IqShaderData* N, IqShaderData* V, IqShaderData* size, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	IqShaderData * pnV = pShader ->CreateTemporaryStorage( type_vector, class_varying );
 	IqShaderData* pnN = pShader ->CreateTemporaryStorage( type_normal, class_varying );
@@ -4505,7 +4516,7 @@ void CqShaderExecEnv::SO_phong( IqShaderData* N, IqShaderData* V, IqShaderData* 
 void CqShaderExecEnv::SO_trace( IqShaderData* P, IqShaderData* R, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(P)->Class()==class_varying||__fVarying;
 	__fVarying=(R)->Class()==class_varying||__fVarying;
@@ -4529,7 +4540,7 @@ void CqShaderExecEnv::SO_trace( IqShaderData* P, IqShaderData* R, IqShaderData* 
 void CqShaderExecEnv::SO_illuminance( IqShaderData* Category, IqShaderData* P, IqShaderData* Axis, IqShaderData* Angle, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__iGrid = 0;
 	CqString cat( "" );
@@ -4576,7 +4587,7 @@ void CqShaderExecEnv::SO_illuminance( IqShaderData* Category, IqShaderData* P, I
 
 				exec = TqFalse;
 				// While no matching category has been found...
-				TqInt tokenpos = 0, tokenend;
+				TqUint tokenpos = 0, tokenend;
 				while( 1 )
 				{
 					tokenend = lightcategories.find(',', tokenpos);
@@ -4650,7 +4661,7 @@ void	CqShaderExecEnv::SO_illuminance( IqShaderData* Category, IqShaderData* P, I
 void CqShaderExecEnv::SO_illuminate( IqShaderData* P, IqShaderData* Axis, IqShaderData* Angle, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	TqBool res = TqTrue;
 	if ( m_Illuminate > 0 )
@@ -4714,7 +4725,7 @@ void CqShaderExecEnv::SO_solar( IqShaderData* Axis, IqShaderData* Angle, IqShade
 {
 	// TODO: Check light cone, and exclude points outside.
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	TqBool res = TqTrue;
 	if ( m_Illuminate > 0 )
@@ -4755,7 +4766,7 @@ void	CqShaderExecEnv::SO_solar( IqShader* pShader )
 void	CqShaderExecEnv::SO_printf( IqShaderData* str, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	if ( NULL == QGetRenderContextI() )
 		return ;
@@ -4789,7 +4800,7 @@ void	CqShaderExecEnv::SO_printf( IqShaderData* str, IqShader* pShader, int cPara
 void	CqShaderExecEnv::SO_format( IqShaderData* str, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(str)->Class()==class_varying||__fVarying;
 	int ii;
@@ -4821,7 +4832,7 @@ void	CqShaderExecEnv::SO_format( IqShaderData* str, IqShaderData* Result, IqShad
 void	CqShaderExecEnv::SO_concat( IqShaderData* stra, IqShaderData* strb, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(stra)->Class()==class_varying||__fVarying;
 	__fVarying=(strb)->Class()==class_varying||__fVarying;
@@ -4862,7 +4873,7 @@ void	CqShaderExecEnv::SO_concat( IqShaderData* stra, IqShaderData* strb, IqShade
 void CqShaderExecEnv::SO_fcellnoise1( IqShaderData* v, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(v)->Class()==class_varying||__fVarying;
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
@@ -4884,7 +4895,7 @@ void CqShaderExecEnv::SO_fcellnoise1( IqShaderData* v, IqShaderData* Result, IqS
 void CqShaderExecEnv::SO_ccellnoise1( IqShaderData* v, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(v)->Class()==class_varying||__fVarying;
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
@@ -4906,7 +4917,7 @@ void CqShaderExecEnv::SO_ccellnoise1( IqShaderData* v, IqShaderData* Result, IqS
 void CqShaderExecEnv::SO_pcellnoise1( IqShaderData* v, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(v)->Class()==class_varying||__fVarying;
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
@@ -4930,7 +4941,7 @@ void CqShaderExecEnv::SO_pcellnoise1( IqShaderData* v, IqShaderData* Result, IqS
 void CqShaderExecEnv::SO_fcellnoise2( IqShaderData* u, IqShaderData* v, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(u)->Class()==class_varying||__fVarying;
 	__fVarying=(v)->Class()==class_varying||__fVarying;
@@ -4954,7 +4965,7 @@ void CqShaderExecEnv::SO_fcellnoise2( IqShaderData* u, IqShaderData* v, IqShader
 void CqShaderExecEnv::SO_ccellnoise2( IqShaderData* u, IqShaderData* v, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(u)->Class()==class_varying||__fVarying;
 	__fVarying=(v)->Class()==class_varying||__fVarying;
@@ -4978,7 +4989,7 @@ void CqShaderExecEnv::SO_ccellnoise2( IqShaderData* u, IqShaderData* v, IqShader
 void CqShaderExecEnv::SO_pcellnoise2( IqShaderData* u, IqShaderData* v, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(u)->Class()==class_varying||__fVarying;
 	__fVarying=(v)->Class()==class_varying||__fVarying;
@@ -5005,7 +5016,7 @@ void CqShaderExecEnv::SO_pcellnoise2( IqShaderData* u, IqShaderData* v, IqShader
 void CqShaderExecEnv::SO_fcellnoise3( IqShaderData* p, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(p)->Class()==class_varying||__fVarying;
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
@@ -5026,7 +5037,7 @@ void CqShaderExecEnv::SO_fcellnoise3( IqShaderData* p, IqShaderData* Result, IqS
 void CqShaderExecEnv::SO_ccellnoise3( IqShaderData* p, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(p)->Class()==class_varying||__fVarying;
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
@@ -5047,7 +5058,7 @@ void CqShaderExecEnv::SO_ccellnoise3( IqShaderData* p, IqShaderData* Result, IqS
 void CqShaderExecEnv::SO_pcellnoise3( IqShaderData* p, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(p)->Class()==class_varying||__fVarying;
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
@@ -5071,7 +5082,7 @@ void CqShaderExecEnv::SO_pcellnoise3( IqShaderData* p, IqShaderData* Result, IqS
 void CqShaderExecEnv::SO_fcellnoise4( IqShaderData* p, IqShaderData* v, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(p)->Class()==class_varying||__fVarying;
 	__fVarying=(v)->Class()==class_varying||__fVarying;
@@ -5095,7 +5106,7 @@ void CqShaderExecEnv::SO_fcellnoise4( IqShaderData* p, IqShaderData* v, IqShader
 void CqShaderExecEnv::SO_ccellnoise4( IqShaderData* p, IqShaderData* v, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(p)->Class()==class_varying||__fVarying;
 	__fVarying=(v)->Class()==class_varying||__fVarying;
@@ -5119,7 +5130,7 @@ void CqShaderExecEnv::SO_ccellnoise4( IqShaderData* p, IqShaderData* v, IqShader
 void CqShaderExecEnv::SO_pcellnoise4( IqShaderData* p, IqShaderData* v, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(p)->Class()==class_varying||__fVarying;
 	__fVarying=(v)->Class()==class_varying||__fVarying;
@@ -5149,8 +5160,7 @@ void CqShaderExecEnv::SO_pcellnoise4( IqShaderData* p, IqShaderData* v, IqShader
 
 void CqShaderExecEnv::SO_atmosphere( IqShaderData* name, IqShaderData* pV, IqShaderData* Result, IqShader* pShader )
 {
-	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	boost::shared_ptr<IqShader> pAtmosphere;
 
@@ -5174,8 +5184,7 @@ void CqShaderExecEnv::SO_atmosphere( IqShaderData* name, IqShaderData* pV, IqSha
 
 void CqShaderExecEnv::SO_displacement( IqShaderData* name, IqShaderData* pV, IqShaderData* Result, IqShader* pShader )
 {
-	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	boost::shared_ptr<IqShader> pDisplacement;
 
@@ -5199,8 +5208,7 @@ void CqShaderExecEnv::SO_displacement( IqShaderData* name, IqShaderData* pV, IqS
 
 void CqShaderExecEnv::SO_lightsource( IqShaderData* name, IqShaderData* pV, IqShaderData* Result, IqShader* pShader )
 {
-	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	// This should only be called within an Illuminance construct, so m_li should be valid.
 	boost::shared_ptr<IqShader> pLightsource;
@@ -5224,8 +5232,7 @@ void CqShaderExecEnv::SO_lightsource( IqShaderData* name, IqShaderData* pV, IqSh
 
 void CqShaderExecEnv::SO_surface( IqShaderData* name, IqShaderData* pV, IqShaderData* Result, IqShader* pShader )
 {
-	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	boost::shared_ptr<IqShader> pSurface;
 
@@ -5251,8 +5258,7 @@ void CqShaderExecEnv::SO_surface( IqShaderData* name, IqShaderData* pV, IqShader
 
 void CqShaderExecEnv::SO_attribute( IqShaderData* name, IqShaderData* pV, IqShaderData* Result, IqShader* pShader )
 {
-	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	//Find out if it is a specific attribute request
 	__iGrid = 0;
@@ -5325,8 +5331,7 @@ void CqShaderExecEnv::SO_attribute( IqShaderData* name, IqShaderData* pV, IqShad
 
 void CqShaderExecEnv::SO_option( IqShaderData* name, IqShaderData* pV, IqShaderData* Result, IqShader* pShader )
 {
-	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	if ( NULL == QGetRenderContextI() )
 		return ;
@@ -5455,8 +5460,7 @@ void CqShaderExecEnv::SO_option( IqShaderData* name, IqShaderData* pV, IqShaderD
 
 void CqShaderExecEnv::SO_rendererinfo( IqShaderData* name, IqShaderData* pV, IqShaderData* Result, IqShader* pShader )
 {
-	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__iGrid = 0;
 	CqString _aq_name;
@@ -5504,8 +5508,7 @@ void CqShaderExecEnv::SO_rendererinfo( IqShaderData* name, IqShaderData* pV, IqS
 
 void CqShaderExecEnv::SO_incident( IqShaderData* name, IqShaderData* pV, IqShaderData* Result, IqShader* pShader )
 {
-	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__iGrid = 0;
 	Result->SetValue( 0.0f, 0 );
@@ -5518,8 +5521,7 @@ void CqShaderExecEnv::SO_incident( IqShaderData* name, IqShaderData* pV, IqShade
 
 void CqShaderExecEnv::SO_opposite( IqShaderData* name, IqShaderData* pV, IqShaderData* Result, IqShader* pShader )
 {
-	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__iGrid = 0;
 	Result->SetValue( 0.0f, 0 );
@@ -5532,7 +5534,7 @@ void CqShaderExecEnv::SO_opposite( IqShaderData* name, IqShaderData* pV, IqShade
 void CqShaderExecEnv::SO_ctransform( IqShaderData* fromspace, IqShaderData* tospace, IqShaderData* c, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(c)->Class()==class_varying||__fVarying;
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
@@ -5597,7 +5599,7 @@ void CqShaderExecEnv::SO_ctransform( IqShaderData* tospace, IqShaderData* c, IqS
 void CqShaderExecEnv::SO_ptlined( IqShaderData* P0, IqShaderData* P1, IqShaderData* Q, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(P0)->Class()==class_varying||__fVarying;
 	__fVarying=(P1)->Class()==class_varying||__fVarying;
@@ -5646,7 +5648,7 @@ void CqShaderExecEnv::SO_ptlined( IqShaderData* P0, IqShaderData* P1, IqShaderDa
 void	CqShaderExecEnv::SO_inversesqrt( IqShaderData* x, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(x)->Class()==class_varying||__fVarying;
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
@@ -5669,8 +5671,7 @@ void	CqShaderExecEnv::SO_inversesqrt( IqShaderData* x, IqShaderData* Result, IqS
 void	CqShaderExecEnv::SO_match( IqShaderData* a, IqShaderData* b, IqShaderData* Result, IqShader* pShader )
 {
 	// TODO: Do this properly.
-	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__iGrid = 0;
 	float r = 0.0f;
@@ -5713,7 +5714,7 @@ void	CqShaderExecEnv::SO_match( IqShaderData* a, IqShaderData* b, IqShaderData* 
 void CqShaderExecEnv::SO_fpnoise1( IqShaderData* v, IqShaderData* period, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(v)->Class()==class_varying||__fVarying;
 	__fVarying=(period)->Class()==class_varying||__fVarying;
@@ -5740,7 +5741,7 @@ void CqShaderExecEnv::SO_fpnoise1( IqShaderData* v, IqShaderData* period, IqShad
 void CqShaderExecEnv::SO_fpnoise2( IqShaderData* u, IqShaderData* v, IqShaderData* uperiod, IqShaderData* vperiod, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(u)->Class()==class_varying||__fVarying;
 	__fVarying=(uperiod)->Class()==class_varying||__fVarying;
@@ -5774,7 +5775,7 @@ void CqShaderExecEnv::SO_fpnoise2( IqShaderData* u, IqShaderData* v, IqShaderDat
 void CqShaderExecEnv::SO_fpnoise3( IqShaderData* p, IqShaderData* pperiod, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(p)->Class()==class_varying||__fVarying;
 	__fVarying=(pperiod)->Class()==class_varying||__fVarying;
@@ -5802,7 +5803,7 @@ void CqShaderExecEnv::SO_fpnoise3( IqShaderData* p, IqShaderData* pperiod, IqSha
 void CqShaderExecEnv::SO_fpnoise4( IqShaderData* p, IqShaderData* t, IqShaderData* pperiod, IqShaderData* tperiod, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(p)->Class()==class_varying||__fVarying;
 	__fVarying=(pperiod)->Class()==class_varying||__fVarying;
@@ -5836,7 +5837,7 @@ void CqShaderExecEnv::SO_fpnoise4( IqShaderData* p, IqShaderData* t, IqShaderDat
 void CqShaderExecEnv::SO_cpnoise1( IqShaderData* v, IqShaderData* period, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(v)->Class()==class_varying||__fVarying;
 	__fVarying=(period)->Class()==class_varying||__fVarying;
@@ -5863,7 +5864,7 @@ void CqShaderExecEnv::SO_cpnoise1( IqShaderData* v, IqShaderData* period, IqShad
 void CqShaderExecEnv::SO_cpnoise2( IqShaderData* u, IqShaderData* v, IqShaderData* uperiod, IqShaderData* vperiod, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(u)->Class()==class_varying||__fVarying;
 	__fVarying=(uperiod)->Class()==class_varying||__fVarying;
@@ -5897,7 +5898,7 @@ void CqShaderExecEnv::SO_cpnoise2( IqShaderData* u, IqShaderData* v, IqShaderDat
 void CqShaderExecEnv::SO_cpnoise3( IqShaderData* p, IqShaderData* pperiod, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(p)->Class()==class_varying||__fVarying;
 	__fVarying=(pperiod)->Class()==class_varying||__fVarying;
@@ -5925,7 +5926,7 @@ void CqShaderExecEnv::SO_cpnoise3( IqShaderData* p, IqShaderData* pperiod, IqSha
 void CqShaderExecEnv::SO_cpnoise4( IqShaderData* p, IqShaderData* t, IqShaderData* pperiod, IqShaderData* tperiod, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(p)->Class()==class_varying||__fVarying;
 	__fVarying=(pperiod)->Class()==class_varying||__fVarying;
@@ -5959,7 +5960,7 @@ void CqShaderExecEnv::SO_cpnoise4( IqShaderData* p, IqShaderData* t, IqShaderDat
 void CqShaderExecEnv::SO_ppnoise1( IqShaderData* v, IqShaderData* period, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(v)->Class()==class_varying||__fVarying;
 	__fVarying=(period)->Class()==class_varying||__fVarying;
@@ -5986,7 +5987,7 @@ void CqShaderExecEnv::SO_ppnoise1( IqShaderData* v, IqShaderData* period, IqShad
 void CqShaderExecEnv::SO_ppnoise2( IqShaderData* u, IqShaderData* v, IqShaderData* uperiod, IqShaderData* vperiod, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(u)->Class()==class_varying||__fVarying;
 	__fVarying=(uperiod)->Class()==class_varying||__fVarying;
@@ -6020,7 +6021,7 @@ void CqShaderExecEnv::SO_ppnoise2( IqShaderData* u, IqShaderData* v, IqShaderDat
 void CqShaderExecEnv::SO_ppnoise3( IqShaderData* p, IqShaderData* pperiod, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(p)->Class()==class_varying||__fVarying;
 	__fVarying=(pperiod)->Class()==class_varying||__fVarying;
@@ -6048,7 +6049,7 @@ void CqShaderExecEnv::SO_ppnoise3( IqShaderData* p, IqShaderData* pperiod, IqSha
 void CqShaderExecEnv::SO_ppnoise4( IqShaderData* p, IqShaderData* t, IqShaderData* pperiod, IqShaderData* tperiod, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(p)->Class()==class_varying||__fVarying;
 	__fVarying=(pperiod)->Class()==class_varying||__fVarying;
@@ -6083,7 +6084,7 @@ void CqShaderExecEnv::SO_ppnoise4( IqShaderData* p, IqShaderData* t, IqShaderDat
 void CqShaderExecEnv::SO_rotate( IqShaderData* Q, IqShaderData* angle, IqShaderData* P0, IqShaderData* P1, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(Q)->Class()==class_varying||__fVarying;
 	__fVarying=(angle)->Class()==class_varying||__fVarying;
@@ -6122,7 +6123,7 @@ void CqShaderExecEnv::SO_filterstep( IqShaderData* edge, IqShaderData* s1, IqSha
 {
 	TqFloat Deffloat = 0.0f;
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	float _pswidth=1.0f,_ptwidth=1.0f;
 	GetFilterParams(cParams, apParams, _pswidth,_ptwidth);
@@ -6178,7 +6179,7 @@ void CqShaderExecEnv::SO_filterstep2( IqShaderData* edge, IqShaderData* s1, IqSh
 	GetFilterParams(cParams, apParams, _pswidth,_ptwidth);
 
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(edge)->Class()==class_varying||__fVarying;
 	__fVarying=(s1)->Class()==class_varying||__fVarying;
@@ -6210,7 +6211,7 @@ void CqShaderExecEnv::SO_filterstep2( IqShaderData* edge, IqShaderData* s1, IqSh
 void CqShaderExecEnv::SO_specularbrdf( IqShaderData* L, IqShaderData* N, IqShaderData* V, IqShaderData* rough, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(L)->Class()==class_varying||__fVarying;
 	__fVarying=(N)->Class()==class_varying||__fVarying;
@@ -6251,7 +6252,7 @@ void CqShaderExecEnv::SO_specularbrdf( IqShaderData* L, IqShaderData* N, IqShade
 void CqShaderExecEnv::SO_mtransform( IqShaderData* fromspace, IqShaderData* tospace, IqShaderData* m, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	assert( pShader != 0 );
 
@@ -6304,7 +6305,7 @@ void CqShaderExecEnv::SO_mtransform( IqShaderData* fromspace, IqShaderData* tosp
 void CqShaderExecEnv::SO_mtransform( IqShaderData* tospace, IqShaderData* m, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	assert( pShader != 0 );
 
@@ -6356,7 +6357,7 @@ void CqShaderExecEnv::SO_mtransform( IqShaderData* tospace, IqShaderData* m, IqS
 void CqShaderExecEnv::SO_determinant( IqShaderData* M, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(M)->Class()==class_varying||__fVarying;
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
@@ -6381,7 +6382,7 @@ void CqShaderExecEnv::SO_determinant( IqShaderData* M, IqShaderData* Result, IqS
 void CqShaderExecEnv::SO_mtranslate( IqShaderData* M, IqShaderData* V, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(M)->Class()==class_varying||__fVarying;
 	__fVarying=(V)->Class()==class_varying||__fVarying;
@@ -6409,7 +6410,7 @@ void CqShaderExecEnv::SO_mtranslate( IqShaderData* M, IqShaderData* V, IqShaderD
 void CqShaderExecEnv::SO_mrotate( IqShaderData* M, IqShaderData* angle, IqShaderData* axis, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(M)->Class()==class_varying||__fVarying;
 	__fVarying=(angle)->Class()==class_varying||__fVarying;
@@ -6440,7 +6441,7 @@ void CqShaderExecEnv::SO_mrotate( IqShaderData* M, IqShaderData* angle, IqShader
 void CqShaderExecEnv::SO_mscale( IqShaderData* M, IqShaderData* S, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(M)->Class()==class_varying||__fVarying;
 	__fVarying=(S)->Class()==class_varying||__fVarying;
@@ -6469,7 +6470,7 @@ void CqShaderExecEnv::SO_mscale( IqShaderData* M, IqShaderData* S, IqShaderData*
 void	CqShaderExecEnv::SO_setmcomp( IqShaderData* M, IqShaderData* r, IqShaderData* c, IqShaderData* v, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(M)->Class()==class_varying||__fVarying;
 	__fVarying=(r)->Class()==class_varying||__fVarying;
@@ -6504,7 +6505,7 @@ void	CqShaderExecEnv::SO_setmcomp( IqShaderData* M, IqShaderData* r, IqShaderDat
 void	CqShaderExecEnv::SO_fsplinea( IqShaderData* value, IqShaderData* a, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	assert( a->ArrayLength() > 0 );
 	assert( a->Type() == type_float );
@@ -6559,7 +6560,7 @@ void	CqShaderExecEnv::SO_fsplinea( IqShaderData* value, IqShaderData* a, IqShade
 void	CqShaderExecEnv::SO_csplinea( IqShaderData* value, IqShaderData* a, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	assert( a->ArrayLength() > 0 );
 	assert( a->Type() == type_color );
@@ -6615,7 +6616,7 @@ void	CqShaderExecEnv::SO_csplinea( IqShaderData* value, IqShaderData* a, IqShade
 void	CqShaderExecEnv::SO_psplinea( IqShaderData* value, IqShaderData* a, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	assert( a->ArrayLength() > 0 );
 	assert( a->Type() == type_point );
@@ -6671,7 +6672,7 @@ void	CqShaderExecEnv::SO_psplinea( IqShaderData* value, IqShaderData* a, IqShade
 void	CqShaderExecEnv::SO_sfsplinea( IqShaderData* basis, IqShaderData* value, IqShaderData* a, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	assert( a->ArrayLength() > 0 );
 	assert( a->Type() == type_float );
@@ -6732,7 +6733,7 @@ void	CqShaderExecEnv::SO_sfsplinea( IqShaderData* basis, IqShaderData* value, Iq
 void	CqShaderExecEnv::SO_scsplinea( IqShaderData* basis, IqShaderData* value, IqShaderData* a, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	assert( a->ArrayLength() > 0 );
 	assert( a->Type() == type_color );
@@ -6794,7 +6795,7 @@ void	CqShaderExecEnv::SO_scsplinea( IqShaderData* basis, IqShaderData* value, Iq
 void	CqShaderExecEnv::SO_spsplinea( IqShaderData* basis, IqShaderData* value, IqShaderData* a, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	assert( a->ArrayLength() > 0 );
 	assert( a->Type() == type_point );
@@ -6856,7 +6857,7 @@ void	CqShaderExecEnv::SO_spsplinea( IqShaderData* basis, IqShaderData* value, Iq
 void	CqShaderExecEnv::SO_shadername( IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
@@ -6878,7 +6879,7 @@ void	CqShaderExecEnv::SO_shadername( IqShaderData* Result, IqShader* pShader )
 void	CqShaderExecEnv::SO_shadername2( IqShaderData* shader, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	CqString strName( "" );
 	CqString strShader;
@@ -6928,8 +6929,7 @@ void	CqShaderExecEnv::SO_shadername2( IqShaderData* shader, IqShaderData* Result
 
 void CqShaderExecEnv::SO_textureinfo( IqShaderData* name, IqShaderData* dataname, IqShaderData* pV, IqShaderData* Result, IqShader* pShader )
 {
-	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	if ( NULL == QGetRenderContextI() )
 		return ;
@@ -6937,7 +6937,6 @@ void CqShaderExecEnv::SO_textureinfo( IqShaderData* name, IqShaderData* dataname
 	TqFloat Ret = 0.0f;
 	IqTextureMap* pMap = NULL;
 	IqTextureMap *pSMap = NULL;
-	IqTextureMap *pLMap = NULL;
 	IqTextureMap *pEMap = NULL;
 	IqTextureMap *pTMap = NULL;
 
@@ -7290,7 +7289,7 @@ extern "C" int bake_3( BakingData *bd, char *name, float s, float t, float *bake
 void CqShaderExecEnv::SO_bake_f( IqShaderData* name, IqShaderData* s, IqShaderData* t, IqShaderData* f, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(f)->Class()==class_varying||__fVarying;
 	__fVarying=(s)->Class()==class_varying||__fVarying;
@@ -7327,7 +7326,7 @@ void CqShaderExecEnv::SO_bake_f( IqShaderData* name, IqShaderData* s, IqShaderDa
 void CqShaderExecEnv::SO_bake_3c( IqShaderData* name, IqShaderData* s, IqShaderData* t, IqShaderData* f, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(f)->Class()==class_varying||__fVarying;
 	__fVarying=(s)->Class()==class_varying||__fVarying;
@@ -7365,7 +7364,7 @@ void CqShaderExecEnv::SO_bake_3c( IqShaderData* name, IqShaderData* s, IqShaderD
 void CqShaderExecEnv::SO_bake_3n( IqShaderData* name, IqShaderData* s, IqShaderData* t, IqShaderData* f, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(f)->Class()==class_varying||__fVarying;
 	__fVarying=(s)->Class()==class_varying||__fVarying;
@@ -7406,7 +7405,7 @@ void CqShaderExecEnv::SO_bake_3n( IqShaderData* name, IqShaderData* s, IqShaderD
 void CqShaderExecEnv::SO_bake_3p( IqShaderData* name, IqShaderData* s, IqShaderData* t, IqShaderData* f, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(f)->Class()==class_varying||__fVarying;
 	__fVarying=(s)->Class()==class_varying||__fVarying;
@@ -7447,7 +7446,7 @@ void CqShaderExecEnv::SO_bake_3p( IqShaderData* name, IqShaderData* s, IqShaderD
 void CqShaderExecEnv::SO_bake_3v( IqShaderData* name, IqShaderData* s, IqShaderData* t, IqShaderData* f, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 	__fVarying=(f)->Class()==class_varying||__fVarying;
 	__fVarying=(s)->Class()==class_varying||__fVarying;
 	__fVarying=(t)->Class()==class_varying||__fVarying;
@@ -7489,7 +7488,7 @@ void CqShaderExecEnv::SO_bake_3v( IqShaderData* name, IqShaderData* s, IqShaderD
 void CqShaderExecEnv::SO_external( DSOMethod method, void *initData, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 	int p;
@@ -7871,7 +7870,7 @@ void CqShaderExecEnv::SO_external( DSOMethod method, void *initData, IqShaderDat
 void CqShaderExecEnv::SO_occlusion( IqShaderData* occlmap, IqShaderData* channel, IqShaderData* P, IqShaderData* N, IqShaderData* samples, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
 	TqBool __fVarying=TqFalse;
-	TqInt __iGrid;
+	TqUint __iGrid;
 	static CqMatrix *allmatrices= NULL;
 	static TqUlong  allmatrix = 0;
 

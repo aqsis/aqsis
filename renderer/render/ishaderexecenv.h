@@ -134,7 +134,7 @@ struct IqShaderExecEnv
 	virtual	TqInt	vGridRes() const = 0;
 	/** Get total grid size.
 	 */
-	virtual	TqInt	GridSize() const = 0;
+	virtual	TqUint	GridSize() const = 0;
 	/** Get the matrix which describes the transformation from Object space to World space for the surface related to this execution environment.
 	 */
 	virtual	const CqMatrix&	matObjectToWorld() const = 0;

@@ -108,7 +108,6 @@ static char *ReadImage( FILE *fd, int len, int height,
                         unsigned char cmap[ 3 ][ MAXCOLORMAPSIZE ],
                         int gray, int interlace, int ignore, char* );
 static void throw_exception( char *error );
-static unsigned short swap2( unsigned short s );
 
 /* Main function to convert any gif to tif format
  * It used the standard tiff tool name gif2tiff.exe on PC
@@ -724,23 +723,6 @@ end:
 	free( image );
 
 	return ( tiffname );
-}
-
-
-/*
- * swap2() swap an short to NT compliant 
- */
-static unsigned short swap2( unsigned short s )
-{
-	short n;
-	unsigned char *c, *d;
-
-	c = ( unsigned char* ) & n;
-	d = ( unsigned char* ) & s;
-
-	c[ 0 ] = d[ 1 ];
-	c[ 1 ] = d[ 0 ];
-	return n;
 }
 
 

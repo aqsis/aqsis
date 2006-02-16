@@ -801,7 +801,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 	// Initialise the private hash keys.
 
 
-	for(i = 0; i<gcVariableTypeNames; i++)
+	for(i = 0; i< (TqUint) gcVariableTypeNames; i++)
 		itypes.push_back(CqString::hash(gVariableTypeNames[i]));
 
 
@@ -986,7 +986,6 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 							CqString strFunc, strRetType, strArgTypes ;
 							EqVariableType RetType;
 							std::list<EqVariableType> ArgTypes;
-							bool error = false; // Error in DSO resolution
 
 							*pFile >> strFunc;
 							strFunc = strFunc.substr(1,strFunc.length() - 2);
@@ -1461,14 +1460,14 @@ void CqShaderVM::PrepareShaderForUse( )
 	PrepareDefArgs();
 
 	// Transfer the arguments from the store onto the shader proper, ready for use.
-	TqInt i;
+	TqUint i;
 	for ( i = 0; i < m_StoredArguments.size(); i++ )
 	{
 		Aqsis::log() << debug << "Setting argument : " << m_StoredArguments[i].m_strName.c_str() << " : on shader : " << strName().c_str() << std::endl;
 		TqInt varindex = FindLocalVarIndex( m_StoredArguments[i].m_strName.c_str() );
 
-		int index = 0, count = 1, arrayindex = 0;
-		IqShaderData* pArray = 0;
+		int count = 1, arrayindex = 0;
+		IqShaderData* pArray = NULL;
 
 		if ( m_StoredArguments[ i ].m_Value->ArrayLength() > 0 )
 		{

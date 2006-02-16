@@ -146,9 +146,9 @@ class CqSampleDataPool
 		}
 
 	private:
-		TqInt					m_nextSlot;
-		TqInt					m_slotSize;
 		std::vector<TqFloat>	m_theDataPool;
+		TqUint					m_nextSlot;
+		TqUint					m_slotSize;
 		std::stack<TqInt>		m_freeSlots;
 };
 

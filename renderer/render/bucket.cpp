@@ -131,7 +131,7 @@ void CqBucket::PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt y
 
 	// Jitter the samplepoints and adjust them for the new bucket position.
 	TqInt which = 0;
-	TqInt numPixels = m_RealWidth*m_RealHeight;
+	//TqInt numPixels = m_RealWidth*m_RealHeight;
 	for ( TqInt i = 0; i < m_RealHeight; i++ )
 	{
 		for ( TqInt j = 0; j < m_RealWidth; j++ )
@@ -953,6 +953,11 @@ void CqBucket::ShutdownBucket()
 
 
 //---------------------------------------------------------------------
+/* Pure virtual destructor for CqBucket
+ */
+CqBucket::~CqBucket()
+{
+}
 
 END_NAMESPACE( Aqsis )
 

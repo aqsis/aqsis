@@ -92,7 +92,7 @@ void CqCodeGenOutput::Visit( IqParseNodeShader& S )
 
 	// Now that we have this information, work out which standard vars are used.
 	TqInt Use = m_pDataGather->VariableUsage();
-	TqInt i;
+	TqUint i;
 	for ( i = 0; i < EnvVars_Last; i++ )
 	{
 		if ( gStandardVars[ i ].UseCount() > 0 )

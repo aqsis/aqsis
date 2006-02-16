@@ -275,28 +275,18 @@ TqInt CqDDManager::DisplayBucket( IqBucket* pBucket )
 
 		return(0);
 
-
-
-	TqInt	xmin = pBucket->XOrigin();
-
-	TqInt	ymin = pBucket->YOrigin();
-
-	TqInt	xmaxplus1 = xmin + pBucket->Width();
-
-	TqInt	ymaxplus1 = ymin + pBucket->Height();
+	TqUint	xmin = pBucket->XOrigin();
+	TqUint	ymin = pBucket->YOrigin();
+	TqUint	xmaxplus1 = xmin + pBucket->Width();
+	TqUint	ymaxplus1 = ymin + pBucket->Height();
 
 
 
 	// If completely outside the crop rectangle, don't bother sending.
-
-	if( xmaxplus1 <= QGetRenderContext()->pImage()->CropWindowXMin() ||
-
-	        ymaxplus1 <= QGetRenderContext()->pImage()->CropWindowYMin() ||
-
-	        xmin > QGetRenderContext()->pImage()->CropWindowXMax() ||
-
-	        ymin > QGetRenderContext()->pImage()->CropWindowYMax() )
-
+	if( xmaxplus1 <= (TqUint) QGetRenderContext()->pImage()->CropWindowXMin() ||
+	        ymaxplus1 <= (TqUint) QGetRenderContext()->pImage()->CropWindowYMin() ||
+	        xmin > (TqUint) QGetRenderContext()->pImage()->CropWindowXMax() ||
+	        ymin > (TqUint) QGetRenderContext()->pImage()->CropWindowYMax() )
 		return(0);
 
 
@@ -340,17 +330,13 @@ TqInt CqDDManager::DisplayBucket( IqBucket* pBucket )
 		// Fill in the bucket data for each channel in each element, honoring the requested order and formats.
 
 		unsigned char* pdata = i->m_DataBucket;
-
-		TqInt y;
-
+		TqUint y;
 
 
 		for ( y = ymin; y < ymaxplus1; y++ )
 
 		{
-
-			TqInt x;
-
+			TqUint x;
 			for ( x = xmin; x < xmaxplus1; x++ )
 
 			{
@@ -468,9 +454,7 @@ TqInt CqDDManager::DisplayBucket( IqBucket* pBucket )
 		if(i->m_DataMethod )
 
 		{
-
-			TqInt elementsize = i->m_elementSize;
-
+			TqUint elementsize = i->m_elementSize;
 			PtDspyError err;
 
 
@@ -478,8 +462,7 @@ TqInt CqDDManager::DisplayBucket( IqBucket* pBucket )
 			if (i->m_flags.flags & PkDspyFlagsWantsScanLineOrder)
 
 			{
-
-				TqInt x, y;
+				TqUint x, y;
 
 
 
@@ -927,10 +910,8 @@ void CqDDManager::LoadDisplayLibrary( SqDisplayRequest& req )
 
 			PtDspyDevFormat fmt;
 
-			TqInt i;
-
-			for( i = 0; i < req.m_AOVSize; i++ )
-
+			TqUint i;
+			for( i = 0; i < (TqUint) req.m_AOVSize; i++ )
 			{
 
 				if(componentNames.size()>i)
@@ -1158,11 +1139,7 @@ void CqDDManager::LoadDisplayLibrary( SqDisplayRequest& req )
 				// Scan through the generated names to find the ones specified, and use the index
 
 				// of the found name as an offset into the data from the dataOffset passed in originally.
-
-				TqInt iname;
-
-
-
+				TqUint iname;
 				for(iname = 0; iname < req.m_AOVnames.size(); iname++)
 
 				{
@@ -1854,7 +1831,6 @@ void CqDDManager::PrepareCustomParameters( std::map<std::string, void*>& mapPara
 			switch ( Decl.m_Type )
 
 			{
-
 					case type_string:
 
 					{
@@ -1866,7 +1842,6 @@ void CqDDManager::PrepareCustomParameters( std::map<std::string, void*>& mapPara
 					}
 
 					break;
-
 
 
 					case type_float:
@@ -1882,7 +1857,6 @@ void CqDDManager::PrepareCustomParameters( std::map<std::string, void*>& mapPara
 					break;
 
 
-
 					case type_integer:
 
 					{
@@ -1895,6 +1869,8 @@ void CqDDManager::PrepareCustomParameters( std::map<std::string, void*>& mapPara
 
 					break;
 
+				default:
+					break;
 			}
 
 			req.m_customParams.push_back(parameter);

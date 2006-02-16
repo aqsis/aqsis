@@ -53,7 +53,7 @@ std::list<CqString*> CqFile::Glob ( const CqString& strFileGlob )
 	glob( pt, GLOB_DOOFFS, NULL, &globbuf );
 
 	std::list<CqString*> result;
-	int i;
+	TqUint i;
 	for ( i = 0;i < globbuf.gl_pathc;i++ )
 	{
 		result.push_front( new CqString( globbuf.gl_pathv[ i ] ) );

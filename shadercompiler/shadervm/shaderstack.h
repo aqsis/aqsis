@@ -44,6 +44,13 @@
 
 START_NAMESPACE( Aqsis )
 
+#define DECLARE_SHADERSTACK_TEMPS \
+static TqFloat temp_float; \
+static CqVector3D temp_point; \
+static CqColor temp_color; \
+static CqString temp_string; \
+static CqMatrix temp_matrix; 
+
 #define	OpLSS_FF(a,b,Res,State)		OpLSS(temp_float,temp_float,temp_float,a,b,Res,State)
 #define	OpLSS_PP(a,b,Res,State)		OpLSS(temp_point,temp_point,temp_float,a,b,Res,State)
 #define	OpLSS_CC(a,b,Res,State)		OpLSS(temp_color,temp_color,temp_float,a,b,Res,State)

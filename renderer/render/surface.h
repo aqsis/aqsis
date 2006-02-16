@@ -754,7 +754,7 @@ class CqDeformingSurface : public CqSurface, public CqMotionSpec<boost::shared_p
 			for ( i = 0; i < cTimes(); i++ )
 			{
 				Aqsis::log() << debug << "Transforming deforming surface at time : " << i << " : [" << cTimes() << "]" << std::endl;
-				GetMotionObject( Time(i) ) ->Transform( matTx, matITTx, matRTx, Time(i) );
+				GetMotionObject( Time(i) ) ->Transform( matTx, matITTx, matRTx, i );
 			}
 		}
 

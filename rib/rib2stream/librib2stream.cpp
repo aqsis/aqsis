@@ -1,5 +1,4 @@
 #include "librib2stream.h"
-#pragma warning (disable : 4786)
 #include "parserstate.h"
 using namespace librib;
 

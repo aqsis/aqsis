@@ -228,7 +228,6 @@ TqPuchar CqTextureMapBuffer::AllocSegment( TqUlong width, TqUlong height, TqInt 
 {
 	static TqInt limit = -1;
 	static TqInt report = 1;
-	static TqInt megs = 10; /* a number to hint it is abusing enough memory */
 	TqInt demand = width * height * ElemSize();
 
 #ifdef ALLOCSEGMENTSTATUS
@@ -285,7 +284,7 @@ TqPuchar CqTextureMapBuffer::AllocSegment( TqUlong width, TqUlong height, TqInt 
 TqInt CqTextureMap::Convert( CqString &strName )
 {
 	// Suspicious if this does not have an extension.
-	if (strName.rfind(".") == -1)
+	if (strName.rfind(".") == std::string::npos)
 		return 0;
 
 	const CqString extension = strName.substr(strName.rfind(".")).substr(1);

@@ -40,6 +40,9 @@ class CqParameter;
 
 struct IqBucket
 {
+	virtual ~IqBucket()
+	{
+	};
 	/** Get the bucket size in X
 	 */
 	virtual	TqInt	Width() const = 0;
@@ -89,7 +92,8 @@ struct IqBucket
 struct IqDDManager
 {
 	virtual ~IqDDManager()
-	{}
+	{
+	};
 	/** Initialise the device manager.
 	 */
 	virtual	TqInt	Initialise() = 0;
@@ -118,7 +122,6 @@ struct IqDDManager
 	 */
 	virtual TqInt	Uses( ) = 0;
 };
-
 
 END_NAMESPACE( Aqsis )
 

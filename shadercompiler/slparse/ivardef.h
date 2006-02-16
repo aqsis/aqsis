@@ -240,6 +240,10 @@ struct IqVarDef
 	virtual	void	SetDefaultStorage( TqInt Storage ) = 0;
 
 	static	IqVarDef*	GetVariablePtr( const SqVarRef& Ref );
+
+	virtual ~IqVarDef()
+	{
+	};
 };
 
 //-----------------------------------------------------------------------

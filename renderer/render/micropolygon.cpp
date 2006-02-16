@@ -287,8 +287,6 @@ void CqMicroPolyGrid::Shade()
 
 	static CqVector3D	vecE( 0, 0, 0 );
 
-	CqStats& theStats = QGetRenderContext() ->Stats();
-
 	boost::shared_ptr<IqShader> pshadSurface = pSurface() ->pAttributes() ->pshadSurface(QGetRenderContext()->Time());
 	boost::shared_ptr<IqShader> pshadDisplacement = pSurface() ->pAttributes() ->pshadDisplacement(QGetRenderContext()->Time());
 	boost::shared_ptr<IqShader> pshadAtmosphere = pSurface() ->pAttributes() ->pshadAtmosphere(QGetRenderContext()->Time());
@@ -1641,20 +1639,20 @@ void CqMicroPolygonMotion::BuildBoundList()
 	// better for this to be fast than accurate, it's just a guide.
 	TqFloat dx = fabs(m_Keys.front()->m_Point0.x() - m_Keys.back()->m_Point0.x());
 	TqFloat dy = fabs(m_Keys.front()->m_Point0.y() - m_Keys.back()->m_Point0.y());
-	TqInt d = static_cast<int>((dx + dy) / shadingrate) + 1; // d is always >= 1
+	TqUint d = static_cast<int>((dx + dy) / shadingrate) + 1; // d is always >= 1
 
-	TqInt timeRanges = CqBucket::NumTimeRanges();
-	TqInt divisions = MIN(d, timeRanges);
+	TqUint timeRanges = CqBucket::NumTimeRanges();
+	TqUint divisions = MIN(d, timeRanges);
 	TqFloat dt = (closetime - opentime) / divisions;
 	TqFloat time = opentime + dt;
 	TqInt startKey = 0;
-	TqInt endKey = 1;
+	TqUint endKey = 1;
 	CqBound bound = m_Keys[startKey]->GetTotalBound();
 
 	m_BoundList.SetSize( divisions );
 
 	// create a bound for each time period.
-	for(TqInt i = 0; i < divisions; i++)
+	for(TqUint i = 0; i < divisions; i++)
 	{
 		// find the fist key with a time greater than our end time.
 		while(time > m_Times[endKey] && endKey < m_Keys.size() - 1)

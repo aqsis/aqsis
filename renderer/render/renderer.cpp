@@ -681,7 +681,7 @@ void CqRenderer::RenderWorld(CqTransformPtr camera, CqOptions* pOpts, TqBool clo
 
 	// While rendering, all primitives should fasttrack straight into the pipeline, the easiest way to ensure this
 	// is to switch into 'non' multipass mode.
-	TqInt multiPass;
+	TqInt multiPass = 0;
 	TqInt* pMultipass = GetIntegerOptionWrite("Render", "multipass");
 	if(pMultipass)
 	{
@@ -726,7 +726,7 @@ void CqRenderer::RenderAutoShadows()
 	if(pMultipass && pMultipass[0])
 	{
 		// Check all the lightsources for any with an attribute indicating autoshadows.
-		TqInt ilight;
+		TqUint ilight;
 		for(ilight=0; ilight<Lightsource_stack.size(); ilight++)
 		{
 			CqLightsourcePtr light = Lightsource_stack[ilight];
@@ -1795,3 +1795,4 @@ void	CqRenderer::SetImage( CqImageBuffer* pImage )
 //---------------------------------------------------------------------
 
 END_NAMESPACE( Aqsis )
+

@@ -14,6 +14,9 @@ namespace librib
 class RendermanInterface
 {
 	public:
+		virtual ~RendermanInterface()
+		{
+		};
 		// The standard set of Renderman Interface types
 		typedef bool RtBoolean;
 		typedef int RtInt;

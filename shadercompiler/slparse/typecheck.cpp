@@ -67,7 +67,6 @@ class CqFunctionSignature
 
 TqInt	CqParseNodeFunctionCall::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& needsCast, TqBool CheckOnly )
 {
-	TqInt NewType = Type_Nil;
 	TqInt cSpecifiedArgs = 0;
 
 	// This is the priority queue that we will build for the available
@@ -151,7 +150,7 @@ TqInt	CqParseNodeFunctionCall::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& n
 					CqParseNode * pNext = pArg->pNext();
 
 					// Check if this is a varying length argument function.
-					if ( pfunc->cTypeSpecLength() <= iArg || ( pfunc->fVarying() && pfunc->cTypeSpecLength() == iArg ) )
+					if ( (TqUint) pfunc->cTypeSpecLength() <= iArg || ( pfunc->fVarying() && (TqUint) pfunc->cTypeSpecLength() == iArg ) )
 					{
 						// Not entirely happy about this, if the function takes a varying number
 						// of arguments, and this argument is amongst the varying list, then
@@ -235,7 +234,7 @@ TqInt	CqParseNodeFunctionCall::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& n
 			CqParseNode * pNext = pArg->pNext();
 			// Get the required type for the function signature.
 			TqInt argType;
-			if ( pfunc->cTypeSpecLength() <= iArg || ( pfunc->fVarying() && pfunc->cTypeSpecLength() == iArg ) )
+			if ( (TqUint) pfunc->cTypeSpecLength() <= iArg || ( pfunc->fVarying() && (TqUint) pfunc->cTypeSpecLength() == iArg ) )
 				break;
 			else
 				argType = pfunc->aTypeSpec() [ iArg ];

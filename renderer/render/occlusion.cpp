@@ -420,7 +420,6 @@ void CqOcclusionBox::SetupHierarchy( CqBucket* bucket, TqInt xMin, TqInt yMin, T
 		TqInt numsamples = bucket->PixelXSamples() * bucket->PixelYSamples();
 		for ( TqInt j = 0; j < numpixels; j++ )
 		{
-			CqImagePixel& pixel = bucket->ImageElement(j);
 			// Gather all samples within the pixel
 			for ( TqInt i = 0; i < numsamples; i++ )
 			{

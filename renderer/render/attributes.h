@@ -264,7 +264,7 @@ class CqAttributes : public CqRefCount, public IqAttributes
 		virtual CqColor*	GetColorAttributeWrite( const char* strName, const char* strParam );
 		virtual CqMatrix*	GetMatrixAttributeWrite( const char* strName, const char* strParam );
 
-		virtual	TqInt	cLights() const
+		virtual	TqUint	cLights() const
 		{
 			return ( apLights().size() );
 		}

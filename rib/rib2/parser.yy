@@ -79,7 +79,7 @@ static void yyerror(const std::string Message);
 static void ExpectRequest();
 static void ExpectParams();
 static void SkipFrame();
-static bool IsFrameSkipped(int);
+static bool IsFrameSkipped(TqUint);
 static void DiscardStringValue(char* const Value);
 static void DiscardTokenValuePairs(TokenValuePairs* const Value);
 static void DiscardArrayValue(Array* const Value);
@@ -2009,7 +2009,7 @@ static ParameterType LookupParameterType(const std::string& Name)
 
 
 std::vector<int>	FrameList;
-bool IsFrameSkipped(int number)
+bool IsFrameSkipped(TqUint number)
 {
 	// Check the frame list to see if the requested frame is included.
 	if(FrameList.size() == 0)
@@ -2052,13 +2052,13 @@ void ClearFrames()
 
 int AppendFrames(const char* frames)
 {
-	int n=0;
-	int length = strlen(frames);
+	TqUint n=0;
+	TqUint length = strlen(frames);
 	char *endptr;
 	const char* nptr = frames;
 	while(n < length)
 	{
-		int f1, f2;
+		TqUint f1, f2;
 		f1 = strtol(nptr, &endptr, 10);
 		if(endptr != nptr)
 		{
@@ -2075,9 +2075,9 @@ int AppendFrames(const char* frames)
 					// Store the range between f1 and f2;
 					if(FrameList.size() <= MAX(f1, f2))
 						FrameList.resize(MAX(f1, f2)+1, 0);
-					int start = MIN(f1, f2);
-					int end = MAX(f1, f2);
-					int i;
+					TqUint start = MIN(f1, f2);
+					TqUint end = MAX(f1, f2);
+					TqUint i;
 					for(i = start; i <= end; i++)
 						FrameList[i] = 1;
 					nptr = endptr;

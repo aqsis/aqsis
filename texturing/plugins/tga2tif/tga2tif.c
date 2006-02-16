@@ -37,6 +37,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef   __GNUC__
+#include <unistd.h>
+#endif   // __GNUC__
 
 #include "../common/pixelsave.h"
 

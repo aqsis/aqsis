@@ -48,7 +48,7 @@ class CqColor;
 class CqVector3D
 {
 	public:
-		CqVector3D()
+		CqVector3D() : m_x(0), m_y(0), m_z(0)
 		{}
 		CqVector3D( const CqVector2D &From ) : m_x( From.x() ), m_y( From.y() ), m_z( 0 )
 		{}
@@ -141,9 +141,9 @@ class CqVector3D
 					return ( m_z );
 					break;
 					default:
-					return ( m_z );
 					break;
 			}
+			return ( m_z );
 		}
 
 		/** Get the length squared.

@@ -271,7 +271,6 @@ void CqLath::Qff(std::vector<CqLath*>& Result)
 
 	Result.resize(0);
 	Result.reserve(len);
-	TqInt index = 0;
 
 	for(iLath = ResQfe.begin(); iLath!=ResQfe.end(); ++iLath)
 	{
@@ -522,7 +521,6 @@ void CqLath::Qff(std::vector<const CqLath*>& Result) const
 
 	Result.resize(0);
 	Result.reserve(len);
-	TqInt index = 0;
 
 	for(iLath = ResQfe.begin(); iLath!=ResQfe.end(); ++iLath)
 	{

@@ -46,9 +46,12 @@ class CqCodeGenVM : private IqCodeGen
 	protected:
 	public:
 		CqCodeGenVM()
-		{}
-		;
+		{
+		};
 		virtual void OutputTree( IqParseNode* pNode, std::string strOutName );
+		virtual ~CqCodeGenVM()
+		{
+		};
 };
 
 //-----------------------------------------------------------------------

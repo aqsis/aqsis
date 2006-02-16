@@ -104,13 +104,7 @@ void CqImagePixel::AllocateSamples( TqInt XSamples, TqInt YSamples )
 
 void CqImagePixel::InitialiseSamples( std::vector<CqVector2D>& vecSamples )
 {
-	TqFloat opentime = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Shutter" ) [ 0 ];
-	TqFloat closetime = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Shutter" ) [ 1 ];
-
 	TqInt numSamples = m_XSamples * m_YSamples;
-	TqFloat subcell_width = 1.0f / numSamples;
-	TqInt m = m_XSamples;
-	TqInt n = m_YSamples;
 	TqInt i, j;
 
 	vecSamples.resize(numSamples);
@@ -339,7 +333,6 @@ void CqImagePixel::Clear()
 void CqImagePixel::Combine(enum EqFilterDepth depthfilter, CqColor zThreshold)
 {
 	TqUint samplecount = 0;
-	TqUint numsamples = XSamples() * YSamples();
 	TqInt sampleIndex = 0;
 	std::vector<TqInt>::iterator end = m_SampleIndices.end();
 	for ( std::vector<TqInt>::iterator sample_index = m_SampleIndices.begin(); sample_index != end; ++sample_index )

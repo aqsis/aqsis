@@ -68,6 +68,9 @@ class CqPointsKDTreeData : public IqKDTreeData<TqInt>
 	public:
 		CqPointsKDTreeData( const CqPoints* pPoints ) : m_pPointsSurface( pPoints )
 		{}
+		virtual ~CqPointsKDTreeData()
+		{
+		};
 
 		virtual void SortElements(std::vector<TqInt>& aLeaves, TqInt dimension)
 		{
@@ -306,7 +309,7 @@ class CqMicroPolyGridPoints : public CqMicroPolyGrid
 
 		virtual	void	Split( CqImageBuffer* pImage, long xmin, long xmax, long ymin, long ymax );
 
-		virtual	TqInt	GridSize() const
+		virtual	TqUint	GridSize() const
 		{
 			assert( m_pShaderExecEnv );
 			return ( m_pShaderExecEnv->uGridRes() );

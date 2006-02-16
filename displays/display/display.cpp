@@ -77,14 +77,14 @@ START_NAMESPACE( Aqsis )
 
 
 static char datetime[21];
-static long start;
+static time_t start;
 static char* description = NULL;
 
 void SaveAsShadowMap(const std::string& filename, SqDisplayInstance* image, char *mydescription)
 {
 	TqChar version[ 80 ];
-	TqInt twidth = 32;
-	TqInt tlength = 32;
+	TqUint twidth = 32;
+	TqUint tlength = 32;
 
 	struct tm *ct;
 	int year;
@@ -160,19 +160,19 @@ void SaveAsShadowMap(const std::string& filename, SqDisplayInstance* image, char
 				}
 			TIFFSetField( pshadow, TIFFTAG_SMINSAMPLEVALUE, minz );
 
-			TqInt tsize = twidth * tlength;
-			TqInt tperrow = ( image->m_width + twidth - 1 ) / twidth;
+			TqUint tsize = twidth * tlength;
+			TqUint tperrow = ( image->m_width + twidth - 1 ) / twidth;
 			TqFloat* ptile = static_cast<TqFloat*>( _TIFFmalloc( tsize * sizeof( TqFloat ) ) );
 
 
 			if ( ptile != NULL )
 			{
-				TqInt ctiles = tperrow * ( ( image->m_width + tlength - 1 ) / tlength );
-				TqInt itile;
+				TqUint ctiles = tperrow * ( ( image->m_width + tlength - 1 ) / tlength );
+				TqUint itile;
 				for ( itile = 0; itile < ctiles; itile++ )
 				{
-					TqInt x = ( itile % tperrow ) * twidth;
-					TqInt y = ( itile / tperrow ) * tlength;
+					TqUint x = ( itile % tperrow ) * twidth;
+					TqUint y = ( itile / tperrow ) * tlength;
 					ptdata = reinterpret_cast<TqFloat*>(image->m_data) + ( ( y * image->m_width ) + x ) * image->m_iFormatCount;
 					// Clear the tile to black.
 					memset( ptile, 0, tsize * sizeof( TqFloat ) );
@@ -180,7 +180,7 @@ void SaveAsShadowMap(const std::string& filename, SqDisplayInstance* image, char
 					{
 						for ( TqUlong j = 0; j < twidth; j++ )
 						{
-							if ( ( x + j ) < image->m_width && ( y + i ) < image->m_height )
+							if ( ( x + j ) < (TqUlong) image->m_width && ( y + i ) < (TqUlong) image->m_height )
 							{
 								TqInt ii;
 								for ( ii = 0; ii < image->m_iFormatCount; ii++ ) 
@@ -225,8 +225,8 @@ void WriteTIFF(const std::string& filename, SqDisplayInstance* image)
 
 	if (description == NULL)
 	{
-		TqInt nSecs = difftime(long_time, start);
-		sprintf(mydescription,"%d secs", nSecs);
+		double nSecs = difftime(long_time, start);
+		sprintf(mydescription,"%e secs", nSecs);
 		start = long_time;
 	}
 	else
@@ -450,7 +450,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 		strcpy(pImage->m_filename, filename);
 
 		// Scan the formats table to see what the widest channel format specified is.
-		TqInt widestFormat = PkDspySigned8;
+		TqUint widestFormat = PkDspySigned8;
 		TqInt i;
 		for(i=0; i<iFormatCount; i++)
 			if(format[i].type < widestFormat)
@@ -884,14 +884,14 @@ PtDspyError DspyImageQuery(PtDspyImageHandle image,
 	switch (type)
 	{
 			case PkOverwriteQuery:
-			if (size > sizeof(overwriteInfo))
+			if ((TqUint) size > sizeof(overwriteInfo))
 				size = sizeof(overwriteInfo);
 			overwriteInfo.overwrite = 1;
 			overwriteInfo.interactive = 0;
 			memcpy(data, &overwriteInfo, size);
 			break;
 			case PkSizeQuery:
-			if (size > sizeof(sizeInfo))
+			if ((TqUint) size > sizeof(sizeInfo))
 				size = sizeof(sizeInfo);
 			if(pImage)
 			{

@@ -107,7 +107,7 @@ class CqMicroPolyGridBase : public CqRefCount
 		}
 		virtual	TqInt	uGridRes() const = 0;
 		virtual	TqInt	vGridRes() const = 0;
-		virtual	TqInt	GridSize() const = 0;
+		virtual	TqUint	GridSize() const = 0;
 		virtual IqShaderData* pVar(TqInt index) = 0;
 		/** Get the points of the triangle split line if this grid represents a triangle.
 		 */
@@ -250,7 +250,7 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase
 			assert( m_pShaderExecEnv );
 			return ( m_pShaderExecEnv->vGridRes() );
 		}
-		virtual	TqInt	GridSize() const
+		virtual	TqUint	GridSize() const
 		{
 			assert( m_pShaderExecEnv );
 			return ( m_pShaderExecEnv->GridSize() );
@@ -329,7 +329,7 @@ class CqMotionMicroPolyGrid : public CqMicroPolyGridBase, public CqMotionSpec<Cq
 			assert( GetMotionObject( Time( 0 ) ) );
 			return ( static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( 0 ) ) ) ->vGridRes() );
 		}
-		virtual	TqInt	GridSize() const
+		virtual	TqUint	GridSize() const
 		{
 			assert( GetMotionObject( Time( 0 ) ) );
 			return ( static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( 0 ) ) ) ->GridSize() );
@@ -607,25 +607,25 @@ class CqMicroPolygon : public CqRefCount
 
 		virtual const CqVector3D& PointA() const
 		{
-			CqVector3D * pP;
+			CqVector3D * pP = NULL;
 			m_pGrid->pVar(EnvVars_P) ->GetPointPtr( pP );
 			return ( pP[ GetCodedIndex( m_IndexCode, 0 ) ] );
 		}
 		virtual const CqVector3D& PointB() const
 		{
-			CqVector3D * pP;
+			CqVector3D * pP = NULL;
 			m_pGrid->pVar(EnvVars_P) ->GetPointPtr( pP );
 			return ( pP[ GetCodedIndex( m_IndexCode, 1 ) ] );
 		}
 		virtual const CqVector3D& PointC() const
 		{
-			CqVector3D * pP;
+			CqVector3D * pP = NULL;
 			m_pGrid->pVar(EnvVars_P) ->GetPointPtr( pP );
 			return ( pP[ GetCodedIndex( m_IndexCode, 2 ) ] );
 		}
 		virtual const CqVector3D& PointD() const
 		{
-			CqVector3D * pP;
+			CqVector3D * pP = NULL;
 			m_pGrid->pVar(EnvVars_P) ->GetPointPtr( pP );
 			return ( pP[ GetCodedIndex( m_IndexCode, 3 ) ] );
 		}

@@ -34,6 +34,32 @@
 
 START_NAMESPACE( Aqsis )
 
+DECLARE_SHADERSTACK_TEMPS
+
+void CqShaderVM::SO_land()
+{
+	AUTOFUNC;
+	POPV( A );
+	POPV( B );
+	RESULT(type_float, __fVarying?class_varying:class_uniform);
+	OpLAND_B( A, B, pResult, m_pEnv->RunningState() );
+	Push( pResult );
+	RELEASE( B );
+	RELEASE( A );
+}
+
+void CqShaderVM::SO_lor()
+{
+	AUTOFUNC;
+	POPV( A );
+	POPV( B );
+	RESULT(type_float, __fVarying?class_varying:class_uniform);
+	OpLOR_B( A, B, pResult, m_pEnv->RunningState() );
+	Push( pResult );
+	RELEASE( B );
+	RELEASE( A );
+}
+
 void CqShaderVM::SO_exp()
 {
 	AUTOFUNC;
@@ -776,7 +802,7 @@ void CqShaderVM::SO_illuminance2()
 
 void CqShaderVM::SO_solar()
 {
-	VARFUNC;
+	CONSTFUNC;
 	VOIDFUNC( m_pEnv->SO_solar );
 }
 

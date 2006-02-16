@@ -44,7 +44,7 @@ START_NAMESPACE( Aqsis )
 #define FADE(t) ( t * t * t * ( t * ( t * 6 - 15 ) + 10 ) )
 
 #define FASTFLOOR(x) ( ((x)>0) ? ((TqInt)x) : ((TqInt)x-1 ) )
-#define LERP(t, a, b) ((a) + (t)*((b)-(a)))
+#define NLERP(t, a, b) ((a) + (t)*((b)-(a)))
 
 
 //---------------------------------------------------------------------
@@ -168,7 +168,7 @@ TqFloat CqNoise1234::noise( TqFloat x )
 
 	n0 = grad( perm[ ix0 ], fx0 );
 	n1 = grad( perm[ ix1 ], fx1 );
-	return 0.188f * ( LERP( s, n0, n1 ) );
+	return 0.188f * ( NLERP( s, n0, n1 ) );
 }
 
 //---------------------------------------------------------------------
@@ -190,7 +190,7 @@ TqFloat CqNoise1234::pnoise( TqFloat x, TqInt px )
 
 	n0 = grad( perm[ ix0 ], fx0 );
 	n1 = grad( perm[ ix1 ], fx1 );
-	return 0.188f * ( LERP( s, n0, n1 ) );
+	return 0.188f * ( NLERP( s, n0, n1 ) );
 }
 
 
@@ -219,13 +219,13 @@ TqFloat CqNoise1234::noise( TqFloat x, TqFloat y )
 
 	nx0 = grad(perm[ix0 + perm[iy0]], fx0, fy0);
 	nx1 = grad(perm[ix0 + perm[iy1]], fx0, fy1);
-	n0 = LERP( t, nx0, nx1 );
+	n0 = NLERP( t, nx0, nx1 );
 
 	nx0 = grad(perm[ix1 + perm[iy0]], fx1, fy0);
 	nx1 = grad(perm[ix1 + perm[iy1]], fx1, fy1);
-	n1 = LERP(t, nx0, nx1);
+	n1 = NLERP(t, nx0, nx1);
 
-	return 0.507f * ( LERP( s, n0, n1 ) );
+	return 0.507f * ( NLERP( s, n0, n1 ) );
 }
 
 //---------------------------------------------------------------------
@@ -253,13 +253,13 @@ TqFloat CqNoise1234::pnoise( TqFloat x, TqFloat y, TqInt px, TqInt py )
 
 	nx0 = grad(perm[ix0 + perm[iy0]], fx0, fy0);
 	nx1 = grad(perm[ix0 + perm[iy1]], fx0, fy1);
-	n0 = LERP( t, nx0, nx1 );
+	n0 = NLERP( t, nx0, nx1 );
 
 	nx0 = grad(perm[ix1 + perm[iy0]], fx1, fy0);
 	nx1 = grad(perm[ix1 + perm[iy1]], fx1, fy1);
-	n1 = LERP(t, nx0, nx1);
+	n1 = NLERP(t, nx0, nx1);
 
-	return 0.507f * ( LERP( s, n0, n1 ) );
+	return 0.507f * ( NLERP( s, n0, n1 ) );
 }
 
 
@@ -295,25 +295,25 @@ TqFloat CqNoise1234::noise( TqFloat x, TqFloat y, TqFloat z )
 
 	nxy0 = grad(perm[ix0 + perm[iy0 + perm[iz0]]], fx0, fy0, fz0);
 	nxy1 = grad(perm[ix0 + perm[iy0 + perm[iz1]]], fx0, fy0, fz1);
-	nx0 = LERP( r, nxy0, nxy1 );
+	nx0 = NLERP( r, nxy0, nxy1 );
 
 	nxy0 = grad(perm[ix0 + perm[iy1 + perm[iz0]]], fx0, fy1, fz0);
 	nxy1 = grad(perm[ix0 + perm[iy1 + perm[iz1]]], fx0, fy1, fz1);
-	nx1 = LERP( r, nxy0, nxy1 );
+	nx1 = NLERP( r, nxy0, nxy1 );
 
-	n0 = LERP( t, nx0, nx1 );
+	n0 = NLERP( t, nx0, nx1 );
 
 	nxy0 = grad(perm[ix1 + perm[iy0 + perm[iz0]]], fx1, fy0, fz0);
 	nxy1 = grad(perm[ix1 + perm[iy0 + perm[iz1]]], fx1, fy0, fz1);
-	nx0 = LERP( r, nxy0, nxy1 );
+	nx0 = NLERP( r, nxy0, nxy1 );
 
 	nxy0 = grad(perm[ix1 + perm[iy1 + perm[iz0]]], fx1, fy1, fz0);
 	nxy1 = grad(perm[ix1 + perm[iy1 + perm[iz1]]], fx1, fy1, fz1);
-	nx1 = LERP( r, nxy0, nxy1 );
+	nx1 = NLERP( r, nxy0, nxy1 );
 
-	n1 = LERP( t, nx0, nx1 );
+	n1 = NLERP( t, nx0, nx1 );
 
-	return 0.936f * ( LERP( s, n0, n1 ) );
+	return 0.936f * ( NLERP( s, n0, n1 ) );
 }
 
 //---------------------------------------------------------------------
@@ -348,25 +348,25 @@ TqFloat CqNoise1234::pnoise( TqFloat x, TqFloat y, TqFloat z, TqInt px, TqInt py
 
 	nxy0 = grad(perm[ix0 + perm[iy0 + perm[iz0]]], fx0, fy0, fz0);
 	nxy1 = grad(perm[ix0 + perm[iy0 + perm[iz1]]], fx0, fy0, fz1);
-	nx0 = LERP( r, nxy0, nxy1 );
+	nx0 = NLERP( r, nxy0, nxy1 );
 
 	nxy0 = grad(perm[ix0 + perm[iy1 + perm[iz0]]], fx0, fy1, fz0);
 	nxy1 = grad(perm[ix0 + perm[iy1 + perm[iz1]]], fx0, fy1, fz1);
-	nx1 = LERP( r, nxy0, nxy1 );
+	nx1 = NLERP( r, nxy0, nxy1 );
 
-	n0 = LERP( t, nx0, nx1 );
+	n0 = NLERP( t, nx0, nx1 );
 
 	nxy0 = grad(perm[ix1 + perm[iy0 + perm[iz0]]], fx1, fy0, fz0);
 	nxy1 = grad(perm[ix1 + perm[iy0 + perm[iz1]]], fx1, fy0, fz1);
-	nx0 = LERP( r, nxy0, nxy1 );
+	nx0 = NLERP( r, nxy0, nxy1 );
 
 	nxy0 = grad(perm[ix1 + perm[iy1 + perm[iz0]]], fx1, fy1, fz0);
 	nxy1 = grad(perm[ix1 + perm[iy1 + perm[iz1]]], fx1, fy1, fz1);
-	nx1 = LERP( r, nxy0, nxy1 );
+	nx1 = NLERP( r, nxy0, nxy1 );
 
-	n1 = LERP( t, nx0, nx1 );
+	n1 = NLERP( t, nx0, nx1 );
 
-	return 0.936f * ( LERP( s, n0, n1 ) );
+	return 0.936f * ( NLERP( s, n0, n1 ) );
 }
 
 
@@ -409,49 +409,49 @@ TqFloat CqNoise1234::noise( TqFloat x, TqFloat y, TqFloat z, TqFloat w )
 
 	nxyz0 = grad(perm[ix0 + perm[iy0 + perm[iz0 + perm[iw0]]]], fx0, fy0, fz0, fw0);
 	nxyz1 = grad(perm[ix0 + perm[iy0 + perm[iz0 + perm[iw1]]]], fx0, fy0, fz0, fw1);
-	nxy0 = LERP( q, nxyz0, nxyz1 );
+	nxy0 = NLERP( q, nxyz0, nxyz1 );
 
 	nxyz0 = grad(perm[ix0 + perm[iy0 + perm[iz1 + perm[iw0]]]], fx0, fy0, fz1, fw0);
 	nxyz1 = grad(perm[ix0 + perm[iy0 + perm[iz1 + perm[iw1]]]], fx0, fy0, fz1, fw1);
-	nxy1 = LERP( q, nxyz0, nxyz1 );
+	nxy1 = NLERP( q, nxyz0, nxyz1 );
 
-	nx0 = LERP ( r, nxy0, nxy1 );
+	nx0 = NLERP ( r, nxy0, nxy1 );
 
 	nxyz0 = grad(perm[ix0 + perm[iy1 + perm[iz0 + perm[iw0]]]], fx0, fy1, fz0, fw0);
 	nxyz1 = grad(perm[ix0 + perm[iy1 + perm[iz0 + perm[iw1]]]], fx0, fy1, fz0, fw1);
-	nxy0 = LERP( q, nxyz0, nxyz1 );
+	nxy0 = NLERP( q, nxyz0, nxyz1 );
 
 	nxyz0 = grad(perm[ix0 + perm[iy1 + perm[iz1 + perm[iw0]]]], fx0, fy1, fz1, fw0);
 	nxyz1 = grad(perm[ix0 + perm[iy1 + perm[iz1 + perm[iw1]]]], fx0, fy1, fz1, fw1);
-	nxy1 = LERP( q, nxyz0, nxyz1 );
+	nxy1 = NLERP( q, nxyz0, nxyz1 );
 
-	nx1 = LERP ( r, nxy0, nxy1 );
+	nx1 = NLERP ( r, nxy0, nxy1 );
 
-	n0 = LERP( t, nx0, nx1 );
+	n0 = NLERP( t, nx0, nx1 );
 
 	nxyz0 = grad(perm[ix1 + perm[iy0 + perm[iz0 + perm[iw0]]]], fx1, fy0, fz0, fw0);
 	nxyz1 = grad(perm[ix1 + perm[iy0 + perm[iz0 + perm[iw1]]]], fx1, fy0, fz0, fw1);
-	nxy0 = LERP( q, nxyz0, nxyz1 );
+	nxy0 = NLERP( q, nxyz0, nxyz1 );
 
 	nxyz0 = grad(perm[ix1 + perm[iy0 + perm[iz1 + perm[iw0]]]], fx1, fy0, fz1, fw0);
 	nxyz1 = grad(perm[ix1 + perm[iy0 + perm[iz1 + perm[iw1]]]], fx1, fy0, fz1, fw1);
-	nxy1 = LERP( q, nxyz0, nxyz1 );
+	nxy1 = NLERP( q, nxyz0, nxyz1 );
 
-	nx0 = LERP ( r, nxy0, nxy1 );
+	nx0 = NLERP ( r, nxy0, nxy1 );
 
 	nxyz0 = grad(perm[ix1 + perm[iy1 + perm[iz0 + perm[iw0]]]], fx1, fy1, fz0, fw0);
 	nxyz1 = grad(perm[ix1 + perm[iy1 + perm[iz0 + perm[iw1]]]], fx1, fy1, fz0, fw1);
-	nxy0 = LERP( q, nxyz0, nxyz1 );
+	nxy0 = NLERP( q, nxyz0, nxyz1 );
 
 	nxyz0 = grad(perm[ix1 + perm[iy1 + perm[iz1 + perm[iw0]]]], fx1, fy1, fz1, fw0);
 	nxyz1 = grad(perm[ix1 + perm[iy1 + perm[iz1 + perm[iw1]]]], fx1, fy1, fz1, fw1);
-	nxy1 = LERP( q, nxyz0, nxyz1 );
+	nxy1 = NLERP( q, nxyz0, nxyz1 );
 
-	nx1 = LERP ( r, nxy0, nxy1 );
+	nx1 = NLERP ( r, nxy0, nxy1 );
 
-	n1 = LERP( t, nx0, nx1 );
+	n1 = NLERP( t, nx0, nx1 );
 
-	return 0.87f * ( LERP( s, n0, n1 ) );
+	return 0.87f * ( NLERP( s, n0, n1 ) );
 }
 
 //---------------------------------------------------------------------
@@ -494,49 +494,49 @@ TqFloat CqNoise1234::pnoise( TqFloat x, TqFloat y, TqFloat z, TqFloat w,
 
 	nxyz0 = grad(perm[ix0 + perm[iy0 + perm[iz0 + perm[iw0]]]], fx0, fy0, fz0, fw0);
 	nxyz1 = grad(perm[ix0 + perm[iy0 + perm[iz0 + perm[iw1]]]], fx0, fy0, fz0, fw1);
-	nxy0 = LERP( q, nxyz0, nxyz1 );
+	nxy0 = NLERP( q, nxyz0, nxyz1 );
 
 	nxyz0 = grad(perm[ix0 + perm[iy0 + perm[iz1 + perm[iw0]]]], fx0, fy0, fz1, fw0);
 	nxyz1 = grad(perm[ix0 + perm[iy0 + perm[iz1 + perm[iw1]]]], fx0, fy0, fz1, fw1);
-	nxy1 = LERP( q, nxyz0, nxyz1 );
+	nxy1 = NLERP( q, nxyz0, nxyz1 );
 
-	nx0 = LERP ( r, nxy0, nxy1 );
+	nx0 = NLERP ( r, nxy0, nxy1 );
 
 	nxyz0 = grad(perm[ix0 + perm[iy1 + perm[iz0 + perm[iw0]]]], fx0, fy1, fz0, fw0);
 	nxyz1 = grad(perm[ix0 + perm[iy1 + perm[iz0 + perm[iw1]]]], fx0, fy1, fz0, fw1);
-	nxy0 = LERP( q, nxyz0, nxyz1 );
+	nxy0 = NLERP( q, nxyz0, nxyz1 );
 
 	nxyz0 = grad(perm[ix0 + perm[iy1 + perm[iz1 + perm[iw0]]]], fx0, fy1, fz1, fw0);
 	nxyz1 = grad(perm[ix0 + perm[iy1 + perm[iz1 + perm[iw1]]]], fx0, fy1, fz1, fw1);
-	nxy1 = LERP( q, nxyz0, nxyz1 );
+	nxy1 = NLERP( q, nxyz0, nxyz1 );
 
-	nx1 = LERP ( r, nxy0, nxy1 );
+	nx1 = NLERP ( r, nxy0, nxy1 );
 
-	n0 = LERP( t, nx0, nx1 );
+	n0 = NLERP( t, nx0, nx1 );
 
 	nxyz0 = grad(perm[ix1 + perm[iy0 + perm[iz0 + perm[iw0]]]], fx1, fy0, fz0, fw0);
 	nxyz1 = grad(perm[ix1 + perm[iy0 + perm[iz0 + perm[iw1]]]], fx1, fy0, fz0, fw1);
-	nxy0 = LERP( q, nxyz0, nxyz1 );
+	nxy0 = NLERP( q, nxyz0, nxyz1 );
 
 	nxyz0 = grad(perm[ix1 + perm[iy0 + perm[iz1 + perm[iw0]]]], fx1, fy0, fz1, fw0);
 	nxyz1 = grad(perm[ix1 + perm[iy0 + perm[iz1 + perm[iw1]]]], fx1, fy0, fz1, fw1);
-	nxy1 = LERP( q, nxyz0, nxyz1 );
+	nxy1 = NLERP( q, nxyz0, nxyz1 );
 
-	nx0 = LERP ( r, nxy0, nxy1 );
+	nx0 = NLERP ( r, nxy0, nxy1 );
 
 	nxyz0 = grad(perm[ix1 + perm[iy1 + perm[iz0 + perm[iw0]]]], fx1, fy1, fz0, fw0);
 	nxyz1 = grad(perm[ix1 + perm[iy1 + perm[iz0 + perm[iw1]]]], fx1, fy1, fz0, fw1);
-	nxy0 = LERP( q, nxyz0, nxyz1 );
+	nxy0 = NLERP( q, nxyz0, nxyz1 );
 
 	nxyz0 = grad(perm[ix1 + perm[iy1 + perm[iz1 + perm[iw0]]]], fx1, fy1, fz1, fw0);
 	nxyz1 = grad(perm[ix1 + perm[iy1 + perm[iz1 + perm[iw1]]]], fx1, fy1, fz1, fw1);
-	nxy1 = LERP( q, nxyz0, nxyz1 );
+	nxy1 = NLERP( q, nxyz0, nxyz1 );
 
-	nx1 = LERP ( r, nxy0, nxy1 );
+	nx1 = NLERP ( r, nxy0, nxy1 );
 
-	n1 = LERP( t, nx0, nx1 );
+	n1 = NLERP( t, nx0, nx1 );
 
-	return 0.87f * ( LERP( s, n0, n1 ) );
+	return 0.87f * ( NLERP( s, n0, n1 ) );
 }
 
 //-----------------------------------------------------------------------

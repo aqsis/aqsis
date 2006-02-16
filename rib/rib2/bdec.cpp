@@ -679,7 +679,7 @@ void CqRibBinaryDecoder::getNext ()
 
 	gc( c );
 
-	if ( c < '\200' )
+	if ( (TqUint) c < 200 )
 	{
 		ostr += c;
 	}

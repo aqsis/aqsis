@@ -176,7 +176,7 @@ RtVoid PrintProgress( RtFloat percent, RtInt FrameNo )
 	TqFloat sub_minsleft = total_minsleft - ( ( TqInt ) total_hrsleft * 60.0f );
 
 	// Now print the line with substitution.
-	TqInt ipos = 0;
+	TqUint ipos = 0;
 
 	std::string strProgress;
 

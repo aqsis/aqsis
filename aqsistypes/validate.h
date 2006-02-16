@@ -36,6 +36,9 @@
 class CqRangeCheckCallback
 {
 	public:
+		virtual ~CqRangeCheckCallback()
+		{
+		};
 		virtual void operator()( int res) = 0;
 		virtual void Call( int res )
 		{

@@ -37,6 +37,7 @@
 // procedures directory under <AQSIS_BASE_PATH>
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <setjmp.h>
 #include <string.h>
 
@@ -46,6 +47,7 @@
 #define	__export	__declspec(dllexport)
 #else	// WIN32
 #define	__export
+#include <unistd.h>
 #endif	// WIN32
 
 static char tiffname[ 1024 ];

@@ -338,7 +338,7 @@ struct IqShaderData
 	/** Set the SIMD size of this variable.
 	 * \param size Integer SIMD data size.
 	 */
-	virtual void	SetSize( const TqInt size ) = 0;
+	virtual void	SetSize( const TqUint size ) = 0;
 	/** Get the length of the variable array.
 	 * \return Integer array length.
 	 */

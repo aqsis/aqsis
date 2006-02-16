@@ -1268,6 +1268,10 @@ char *SLX_TypetoStr ( SLX_TYPE type )
 			case SLX_TYPE_IMAGER:
 			slxTypeStr = ( char * ) SLX_TYPE_IMAGER_STR;
 			break;
+		        case SLX_TYPE_MATRIX:
+		        slxTypeStr = ( char * ) SLX_TYPE_MATRIX_STR;
+			break;
+
 	}
 	return slxTypeStr;
 }

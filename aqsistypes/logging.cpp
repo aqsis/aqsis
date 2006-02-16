@@ -163,7 +163,7 @@ int timestamp_buf::overflow(int c)
 		time_t current_time = time(0);
 		buffer.resize(strftime(&buffer[0], buffer.size(), "%m/%d/%Y %H:%M:%S ", localtime(&current_time)));
 
-		if(m_streambuf->sputn(&buffer[0], buffer.size()) != buffer.size())
+		if(m_streambuf->sputn(&buffer[0], buffer.size()) != (std::streamsize) buffer.size())
 			return EOF;
 	}
 
@@ -227,7 +227,7 @@ int show_level_buf::overflow(int c)
 				break;
 		}
 
-		if(m_streambuf->sputn(buffer.c_str(), buffer.size()) != buffer.size())
+		if(m_streambuf->sputn(buffer.c_str(), buffer.size()) != (std::streamsize) buffer.size())
 			return EOF;
 	}
 
@@ -413,7 +413,7 @@ bool fold_duplicates_buf::print_duplicates()
 
 		const std::string message(buffer.str());
 
-		if(m_streambuf->sputn(message.c_str(), message.size()) != message.size())
+		if(m_streambuf->sputn(message.c_str(), message.size()) != (std::streamsize) message.size())
 			return false;
 
 		m_duplicate_count = 0;
@@ -440,7 +440,7 @@ int fold_duplicates_buf::overflow(int c)
 			if(!print_duplicates())
 				return EOF;
 
-			if(m_streambuf->sputn(m_buffer.c_str(), m_buffer.size()) != m_buffer.size())
+			if(m_streambuf->sputn(m_buffer.c_str(), m_buffer.size()) != (std::streamsize) m_buffer.size())
 				return EOF;
 
 			m_last_buffer = m_buffer;

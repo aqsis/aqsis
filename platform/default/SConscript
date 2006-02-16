@@ -2,7 +2,7 @@ import os.path
 
 Import('env')
 
-env.AppendUnique(CCFLAGS=['-g', '-O2'])
+env.AppendUnique(CCFLAGS=['-Wall','-g', '-O2'])
 env.AppendUnique(CPPPATH = [env.Dir('#/aqsistypes/posix')])
 env.AppendUnique(CPPDEFINES=[('NDEBUG', '1'), ('PLUGINS', '1'), ('AQSIS_NO_FLTK',1)])
 

@@ -112,6 +112,7 @@ union UsProgramElement
 #define	RESULT(t,c)		IqShaderData* pResult=GetNextTemp(t,c); \
 						pResult->SetSize(( m_uGridRes + 1 ) * ( m_vGridRes + 1 ))
 
+#define CONSTFUNC		// Uniform function
 #define	VARFUNC			TqBool __fVarying=TqTrue;
 #define	AUTOFUNC		TqBool __fVarying=TqFalse;
 
@@ -498,12 +499,6 @@ union UsProgramElement
 						RELEASE(ValA): \
 						RELEASE(ValB): \
 						RELEASE(ValC):
-
-static TqFloat    temp_float;
-static CqVector3D temp_point;
-static CqColor temp_color;
-static CqString temp_string;
-static CqMatrix temp_matrix;
 
 //----------------------------------------------------------------------
 /** \class CqShaderVM

@@ -36,8 +36,6 @@
 
 START_NAMESPACE( Aqsis )
 
-#pragma warning(push, 3)
-
 static TqBool IntersectLine( CqVector3D& P1, CqVector3D& T1, CqVector3D& P2, CqVector3D& T2, CqVector3D& P );
 static void ProjectToLine( const CqVector3D& S, const CqVector3D& Trj, const CqVector3D& pnt, CqVector3D& p );
 
@@ -1576,8 +1574,6 @@ void ProjectToLine( const CqVector3D& S, const CqVector3D& Trj, const CqVector3D
 	p = fraction * Trj;
 	p += S;
 }
-
-#pragma warning(pop)
 
 END_NAMESPACE( Aqsis )
 //---------------------------------------------------------------------

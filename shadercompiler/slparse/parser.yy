@@ -1041,7 +1041,6 @@ loop_control
 								relation->AddFirstChild($2);
 								CqParseNode* pcomp=new CqParseNodeFloatConst(0);
 								relation->AddLastChild(pcomp);
-								CqParseNode* pNew=new CqParseNodeConditional();
 
 								$$=new CqParseNodeWhileConstruct();
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
@@ -1071,7 +1070,6 @@ loop_control
 								CqParseNode* pcomp=new CqParseNodeFloatConst(0);
 								relation->AddLastChild(pcomp);
 
-								CqParseNode* pNew=new CqParseNodeConditional();
 								$$=new CqParseNode();
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
 								$$->AddLastChild($3);

@@ -323,6 +323,10 @@ class	CqLogRangeCheckCallback	: public CqRangeCheckCallback
 		CqLogRangeCheckCallback()
 		{ }
 
+		virtual ~CqLogRangeCheckCallback()
+		{
+		}
+
 		void set
 			( const char* name )
 		{
@@ -3412,9 +3416,9 @@ RtVoid	RiAttributeV( RtToken name, PARAMETERLIST )
 		RtToken	token = tokens[ i ];
 		RtPointer	value = values[ i ];
 
-		TqInt Type;
-		TqInt Class;
-		TqBool bArray;
+		TqInt Type = 0;
+		TqInt Class = 0;
+		TqBool bArray = false;
 		CqParameter* pParam = pAttr->pParameter( token );
 		if ( pParam == 0 )
 		{
@@ -4069,19 +4073,19 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 
 	Debug_RiPointsGeneralPolygons
 
-	TqInt ipoly;
-	TqInt iloop;
-	TqInt igloop = 0;
+	TqUint ipoly;
+	TqUint iloop;
+	TqUint igloop = 0;
 	TqInt cVerts = 0;
-	TqInt igvert = 0;
+	TqUint igvert = 0;
 	TqInt initial_index;
 	TqInt sumnVerts = 0;
 
 	// Calculate how many points overall.
 	RtInt* pVerts = verts;
-	for ( ipoly = 0; ipoly < npolys; ++ipoly )
+	for ( ipoly = 0; ipoly < (TqUint) npolys; ++ipoly )
 	{
-		for ( iloop = 0; iloop < nloops[ ipoly ]; ++iloop, ++igloop )
+		for ( iloop = 0; iloop < (TqUint) nloops[ ipoly ]; ++iloop, ++igloop )
 		{
 			TqInt v;
 			sumnVerts += nverts[ igloop ];
@@ -4119,7 +4123,7 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 		std::vector<TqInt> aFVList;
 		std::vector<TqInt> aUVList;
 
-		for ( ipoly = 0; ipoly < npolys; ++ipoly )
+		for ( ipoly = 0; ipoly < (TqUint) npolys; ++ipoly )
 		{
 			initial_index = igvert;
 			// Create a general 2D polygon using the points in each loop.
@@ -4128,10 +4132,10 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 			TqUint imaxindex, iminindex;
 			imaxindex = cVerts;
 			iminindex = 0;
-			for ( iloop = 0; iloop < nloops[ ipoly ]; ++iloop, ++igloop )
+			for ( iloop = 0; iloop < (TqUint) nloops[ ipoly ]; ++iloop, ++igloop )
 			{
-				iminindex = MIN( iminindex, verts[ igvert ] );
-				imaxindex = MAX( imaxindex, verts[ igvert ] );
+				iminindex = MIN( iminindex, (TqUint) verts[ igvert ] );
+				imaxindex = MAX( imaxindex, (TqUint) verts[ igvert ] );
 				TqFloat	MinX, MaxX;
 				TqFloat	MinY, MaxY;
 				TqFloat	MinZ, MaxZ;
@@ -4209,17 +4213,17 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 			// Now triangulate the general polygon
 
 			poly.CalcOrientation();
-			TqInt iStartTri = aiTriangles.size();
+			TqUint iStartTri = aiTriangles.size();
 			poly.Triangulate( aiTriangles );
-			TqInt iEndTri = aiTriangles.size();
+			TqUint iEndTri = aiTriangles.size();
 			// Store the facevarying information
 			/// \note This code relies on the fact that vertex indices cannot be duplicated
 			/// within the loops of a single poly. Make sure this is a reasonable assumption.
-			for( TqInt ifv = iStartTri; ifv < iEndTri; ++ifv )
+			for( TqUint ifv = iStartTri; ifv < iEndTri; ++ifv )
 			{
 				TqInt ivaryingindex = aiTriangles[ ifv ];
 				TqBool found = TqFalse;
-				for( TqInt iv = initial_index; iv != igvert; ++iv )
+				for( TqUint iv = initial_index; iv != igvert; ++iv )
 				{
 					if( verts[ iv ] == ivaryingindex )
 					{
@@ -4250,25 +4254,27 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 		for( iUserParam = 0; iUserParam < count; ++iUserParam )
 		{
 			SqParameterDeclaration Decl = QGetRenderContext()->FindParameterDecl( tokens[ iUserParam ] );
-			TqInt elem_size;
+			TqInt elem_size = 0;
 			switch( Decl.m_Type )
 			{
-					case type_float:
+				case type_float:
 					elem_size = sizeof(RtFloat);
 					break;
-					case type_integer:
+				case type_integer:
 					elem_size = sizeof(RtInt);
 					break;
-					case type_vector:
-					case type_point:
-					case type_normal:
+				case type_vector:
+				case type_point:
+				case type_normal:
 					elem_size = sizeof(RtPoint);
 					break;
-					case type_color:
+				case type_color:
 					elem_size = sizeof(RtColor);
 					break;
-					case type_matrix:
+				case type_matrix:
 					elem_size = sizeof(RtMatrix);
+					break;
+				default:
 					break;
 			}
 			// Take into account array primitive variables.
@@ -6323,20 +6329,23 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface * pSurface, PARAMETERLIST 
 			TqInt cValues = 1;
 			switch ( Decl.m_Class )
 			{
-					case class_uniform:
+				case class_uniform:
 					cValues = pSurface->cUniform();
 					break;
 
-					case class_varying:
+				case class_varying:
 					cValues = pSurface->cVarying();
 					break;
 
-					case class_vertex:
+				case class_vertex:
 					cValues = pSurface->cVertex();
 					break;
 
-					case class_facevarying:
+				case class_facevarying:
 					cValues = pSurface->cFaceVarying();
+					break;
+
+				default:
 					break;
 			}
 			pNewParam->SetSize( cValues );
@@ -6441,7 +6450,6 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface * pSurface, PARAMETERLIST 
 					}
 			}
 			pSurface->AddPrimitiveVariable( pNewParam );
-			CqParameter* pP = pSurface->P();
 		}
 	}
 

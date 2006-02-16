@@ -78,7 +78,7 @@ class CqOptions
 	public:
 		CqOptions();
 		CqOptions( const CqOptions& From );
-		~CqOptions();
+		virtual ~CqOptions();
 
 		CqOptions&	operator=( const CqOptions& From );
 

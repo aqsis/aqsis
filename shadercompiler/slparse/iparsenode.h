@@ -192,6 +192,9 @@ struct IqParseNodeVisitor
 	virtual	void Visit( IqParseNodeTriple& ) = 0;
 	virtual	void Visit( IqParseNodeSixteenTuple& ) = 0;
 	virtual	void Visit( IqParseNodeMessagePassingFunction& ) = 0;
+	virtual ~IqParseNodeVisitor()
+	{
+	};
 };
 
 template <class T>
@@ -222,6 +225,10 @@ struct IqParseNode
 	virtual	void Accept( IqParseNodeVisitor& V ) = 0;
 
 	const static EqParseNodeType m_ID;
+
+	virtual ~IqParseNode()
+	{
+	};
 };
 
 
@@ -237,6 +244,10 @@ struct IqParseNodeShader
 	virtual	void Accept( IqParseNodeVisitor& V ) = 0;
 
 	const static EqParseNodeType m_ID;
+
+	virtual ~IqParseNodeShader()
+	{
+	};
 };
 
 
@@ -251,6 +262,10 @@ struct IqParseNodeFunctionCall
 	virtual	void Accept( IqParseNodeVisitor& V ) = 0;
 
 	const static EqParseNodeType m_ID;
+
+	virtual ~IqParseNodeFunctionCall()
+	{
+	};
 };
 
 
@@ -265,6 +280,10 @@ struct IqParseNodeUnresolvedCall
 	virtual	void Accept( IqParseNodeVisitor& V ) = 0;
 
 	const static EqParseNodeType m_ID;
+
+	virtual ~IqParseNodeUnresolvedCall()
+	{
+	};
 };
 
 
@@ -279,6 +298,10 @@ struct IqParseNodeVariable
 	virtual	void Accept( IqParseNodeVisitor& V ) = 0;
 
 	const static EqParseNodeType m_ID;
+
+	virtual ~IqParseNodeVariable()
+	{
+	};
 };
 
 
@@ -289,6 +312,10 @@ struct IqParseNodeArrayVariable
 	virtual	TqInt	NodeType() const = 0;
 
 	const static EqParseNodeType m_ID;
+
+	virtual ~IqParseNodeArrayVariable()
+	{
+	};
 };
 
 
@@ -301,6 +328,10 @@ struct IqParseNodeVariableAssign
 	virtual	void Accept( IqParseNodeVisitor& V ) = 0;
 
 	const static EqParseNodeType m_ID;
+
+	virtual ~IqParseNodeVariableAssign()
+	{
+	};
 };
 
 
@@ -312,6 +343,10 @@ struct IqParseNodeArrayVariableAssign
 	virtual	void Accept( IqParseNodeVisitor& V ) = 0;
 
 	const static EqParseNodeType m_ID;
+
+	virtual ~IqParseNodeArrayVariableAssign()
+	{
+	};
 };
 
 
@@ -324,6 +359,10 @@ struct IqParseNodeOperator
 	virtual	void Accept( IqParseNodeVisitor& V ) = 0;
 
 	const static EqParseNodeType m_ID;
+
+	virtual ~IqParseNodeOperator()
+	{
+	};
 };
 
 
@@ -335,6 +374,10 @@ struct IqParseNodeMathOp
 	virtual	void Accept( IqParseNodeVisitor& V ) = 0;
 
 	const static EqParseNodeType m_ID;
+
+	virtual ~IqParseNodeMathOp()
+	{
+	};
 };
 
 
@@ -346,6 +389,10 @@ struct IqParseNodeRelationalOp
 	virtual	void Accept( IqParseNodeVisitor& V ) = 0;
 
 	const static EqParseNodeType m_ID;
+
+	virtual ~IqParseNodeRelationalOp()
+	{
+	};
 };
 
 
@@ -357,6 +404,10 @@ struct IqParseNodeUnaryOp
 	virtual	void Accept( IqParseNodeVisitor& V ) = 0;
 
 	const static EqParseNodeType m_ID;
+
+	virtual ~IqParseNodeUnaryOp()
+	{
+	};
 };
 
 
@@ -368,6 +419,10 @@ struct IqParseNodeLogicalOp
 	virtual	void Accept( IqParseNodeVisitor& V ) = 0;
 
 	const static EqParseNodeType m_ID;
+
+	virtual ~IqParseNodeLogicalOp()
+	{
+	};
 };
 
 struct IqParseNodeDiscardResult
@@ -378,6 +433,10 @@ struct IqParseNodeDiscardResult
 	virtual	void Accept( IqParseNodeVisitor& V ) = 0;
 
 	const static EqParseNodeType m_ID;
+
+	virtual ~IqParseNodeDiscardResult()
+	{
+	};
 };
 
 struct IqParseNodeConstantFloat
@@ -389,6 +448,10 @@ struct IqParseNodeConstantFloat
 	virtual	void Accept( IqParseNodeVisitor& V ) = 0;
 
 	const static EqParseNodeType m_ID;
+
+	virtual ~IqParseNodeConstantFloat()
+	{
+	};
 };
 
 struct IqParseNodeConstantString
@@ -400,6 +463,10 @@ struct IqParseNodeConstantString
 	virtual	void Accept( IqParseNodeVisitor& V ) = 0;
 
 	const static EqParseNodeType m_ID;
+
+	virtual ~IqParseNodeConstantString()
+	{
+	};
 };
 
 
@@ -411,6 +478,10 @@ struct IqParseNodeWhileConstruct
 	virtual	void Accept( IqParseNodeVisitor& V ) = 0;
 
 	const static EqParseNodeType m_ID;
+
+	virtual ~IqParseNodeWhileConstruct()
+	{
+	};
 };
 
 
@@ -423,6 +494,10 @@ struct IqParseNodeIlluminateConstruct
 	virtual	void Accept( IqParseNodeVisitor& V ) = 0;
 
 	const static EqParseNodeType m_ID;
+
+	virtual ~IqParseNodeIlluminateConstruct()
+	{
+	};
 };
 
 
@@ -435,6 +510,10 @@ struct IqParseNodeIlluminanceConstruct
 	virtual	void Accept( IqParseNodeVisitor& V ) = 0;
 
 	const static EqParseNodeType m_ID;
+
+	virtual ~IqParseNodeIlluminanceConstruct()
+	{
+	};
 };
 
 
@@ -447,6 +526,10 @@ struct IqParseNodeSolarConstruct
 	virtual	void Accept( IqParseNodeVisitor& V ) = 0;
 
 	const static EqParseNodeType m_ID;
+
+	virtual ~IqParseNodeSolarConstruct()
+	{
+	};
 };
 
 
@@ -458,6 +541,10 @@ struct IqParseNodeConditional
 	virtual	void Accept( IqParseNodeVisitor& V ) = 0;
 
 	const static EqParseNodeType m_ID;
+
+	virtual ~IqParseNodeConditional()
+	{
+	};
 };
 
 
@@ -469,6 +556,10 @@ struct IqParseNodeConditionalExpression
 	virtual	void Accept( IqParseNodeVisitor& V ) = 0;
 
 	const static EqParseNodeType m_ID;
+
+	virtual ~IqParseNodeConditionalExpression()
+	{
+	};
 };
 
 
@@ -481,6 +572,10 @@ struct IqParseNodeTypeCast
 	virtual	void Accept( IqParseNodeVisitor& V ) = 0;
 
 	const static EqParseNodeType m_ID;
+
+	virtual ~IqParseNodeTypeCast()
+	{
+	};
 };
 
 
@@ -492,6 +587,10 @@ struct IqParseNodeTriple
 	virtual	void Accept( IqParseNodeVisitor& V ) = 0;
 
 	const static EqParseNodeType m_ID;
+	
+	virtual ~IqParseNodeTriple()
+	{
+	};
 };
 
 
@@ -503,6 +602,10 @@ struct IqParseNodeSixteenTuple
 	virtual	void Accept( IqParseNodeVisitor& V ) = 0;
 
 	const static EqParseNodeType m_ID;
+
+	virtual ~IqParseNodeSixteenTuple()
+	{
+	};
 };
 
 struct IqParseNodeMessagePassingFunction
@@ -516,6 +619,10 @@ struct IqParseNodeMessagePassingFunction
 	virtual	void Accept( IqParseNodeVisitor& V ) = 0;
 
 	const static EqParseNodeType m_ID;
+
+	virtual ~IqParseNodeMessagePassingFunction()
+	{
+	};
 };
 
 

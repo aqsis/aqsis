@@ -38,6 +38,8 @@ static TqInt scannerinput(char* Buffer, TqInt MaxSize);
 
 %}
 
+%option nounput
+
 D			[0-9]
 L			[a-zA-Z_]
 H			[a-fA-F0-9]

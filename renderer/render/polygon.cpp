@@ -74,7 +74,7 @@ CqBound CqPolygonBase::Bound() const
 
 TqInt CqPolygonBase::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits )
 {
-	CqVector3D	vecN;
+	CqVector3D	vecN(0,0,0);
 	TqInt indexA, indexB, indexC, indexD;
 
 	// We need to take into account Orientation here, even though most other

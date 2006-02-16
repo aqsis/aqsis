@@ -321,7 +321,6 @@ CqBound	CqPoints::Bound() const
 
 	TqUint i;
 
-	TqInt t;
 /*	for ( t = 0; t < cTimes(); t++ )
 	{
 		CqPolygonPoints* pTimePoints = pPoints( t ).get();*/

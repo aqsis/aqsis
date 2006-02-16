@@ -148,7 +148,7 @@ class CqShaderExecEnv : public IqShaderExecEnv
 		{
 			return ( m_vGridRes );
 		}
-		virtual	TqInt	GridSize() const
+		virtual	TqUint	GridSize() const
 		{
 			return ( m_GridSize );
 		}
@@ -373,7 +373,7 @@ class CqShaderExecEnv : public IqShaderExecEnv
 		TqInt	m_vGridRes;				///< The resolution of the grid in u.
 		TqInt	m_GridSize;				///< The resolution of the grid.
 		TqInt	m_GridI;				///< The current SIMD index.
-		TqInt	m_li;					///< Light index, used during illuminance loop.
+		TqUint	m_li;					///< Light index, used during illuminance loop.
 		TqInt	m_Illuminate;
 		TqBool	m_IlluminanceCacheValid;	///< Flag indicating whether the illuminance cache is valid.
 		IqAttributes* m_pAttributes;	///< Pointer to the associated attributes.

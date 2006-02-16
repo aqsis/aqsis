@@ -311,7 +311,7 @@ class CqShaderVariableArray: public CqShaderVariable
 
 
 
-		virtual	void	SetSize( const TqInt size )
+		virtual	void	SetSize( const TqUint size )
 
 		{
 
@@ -856,7 +856,7 @@ class CqShaderVariableUniform : public CqShaderVariable
 		{
 		}
 
-		virtual	void	SetSize( const TqInt size )
+		virtual	void	SetSize( const TqUint size )
 
 		{}
 
@@ -2057,7 +2057,7 @@ class CqShaderVariableVarying : public CqShaderVariable
 
 
 
-		virtual	void	SetSize( const TqInt size )
+		virtual	void	SetSize( const TqUint size )
 
 		{
 

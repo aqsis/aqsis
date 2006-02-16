@@ -38,8 +38,6 @@
 
 START_NAMESPACE( Aqsis )
 
-#pragma warning(push, 3)
-
 //---------------------------------------------------------------------
 /** Constructor.
  */
@@ -2225,6 +2223,5 @@ void CqSurfaceNURBS::SubdivideSegments( std::vector<boost::shared_ptr<CqSurfaceN
 
 
 //-------------------------------------------------------
-#pragma warning(pop)
 
 END_NAMESPACE( Aqsis )

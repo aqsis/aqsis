@@ -47,6 +47,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#ifdef   __GNUC__
+#include <unistd.h>
+#endif   // 
 
 /* #define MAIN / usefull to debug an autonomous png2tif converter */
 

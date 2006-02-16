@@ -43,6 +43,10 @@ START_NAMESPACE( Aqsis )
 template<class T>
 struct IqKDTreeData
 {
+	virtual ~IqKDTreeData()
+	{
+	};
+
 	/** Function to sort the elements in the given array, in ascending order based on the specified dimension index.
 	 */
 	virtual void SortElements(std::vector<T>& aLeaves, TqInt dimension) = 0;
@@ -66,7 +70,8 @@ class CqKDTree
 		CqKDTree(IqKDTreeData<T>* pDataInterface)	: m_pDataInterface( pDataInterface ), m_Dim( 0 )
 		{}
 		virtual	~CqKDTree()
-		{}
+		{
+		}
 
 		void	Subdivide( CqKDTree<T>& side1, CqKDTree<T>& side2 )
 		{

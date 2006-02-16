@@ -149,7 +149,7 @@ int aspXpm::saveFile()
   fileBuffer += "/* pixels */\n";     // start the pixels section
 
   // iterate through the pixels color-index entry buffer and adds the respective color tag to the fileBuffer
-  for(i=0; i<aspHeight; i++)
+  for(i=0; i< (unsigned int) aspHeight; i++)
   {
     tempStream.str("");     // cleae string stream object
 

@@ -72,6 +72,10 @@ class IqCodeGen
 {
 	public:
 		virtual void OutputTree( IqParseNode* pNode, std::string strOutName = "" ) = 0;
+
+		virtual ~IqCodeGen()
+		{
+		};
 };
 
 //-----------------------------------------------------------------------

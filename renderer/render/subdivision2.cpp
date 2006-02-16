@@ -1913,7 +1913,7 @@ boost::shared_ptr<CqSubdivision2> CqSurfaceSubdivisionPatch::Extract( TqInt iTim
 	// Find the point indices for the polygons surrounding this one.
 	// Use a map to ensure that shared vertices are only counted once.
 	std::map<TqInt, TqInt> Vertices;
-	TqInt cVerts=0;
+	TqUint cVerts=0;
 	std::vector<TqInt>	FVertices;
 
 	std::vector<CqLath*> aQff;
@@ -1935,8 +1935,6 @@ boost::shared_ptr<CqSubdivision2> CqSurfaceSubdivisionPatch::Extract( TqInt iTim
 			FVertices.push_back( (*iV)->FaceVertexIndex() );
 		}
 	}
-	TqInt cFaceVerts = FVertices.size();
-	TqInt cFaces = aQff.size();
 
 	// Create a storage class for all the points.
 	boost::shared_ptr<CqPolygonPoints> pPointsClass( new CqPolygonPoints( cVerts, aQff.size(), FVertices.size() ) );
@@ -1993,8 +1991,6 @@ boost::shared_ptr<CqSubdivision2> CqSurfaceSubdivisionPatch::Extract( TqInt iTim
 	TqUint i;
 	for( i = 0; i < cVerts; i++ )
 		pSurface->pPoints()->P()->pValue(i)[0] = static_cast<CqVector3D>( pSurface->pPoints()->P()->pValue(i)[0] );
-
-	TqInt iUses = Uses();
 
 	TqInt iP = 0;
 	for( iF = aQff.begin(); iF != aQff.end(); iF++ )

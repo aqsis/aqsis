@@ -53,6 +53,8 @@ static int scannerinput(char* Buffer, int MaxSize);
 
 %}
 
+%option nounput
+
 delim				[ \t\\]
 whitespace		{delim}+
 letter				[A-Za-z]

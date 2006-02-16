@@ -72,6 +72,10 @@ struct IqFuncDef
 	virtual	TqInt	InternalUsage() const = 0;
 
 	static	IqFuncDef*	GetFunctionPtr( const SqFuncRef& Ref );
+
+	virtual ~IqFuncDef()
+	{
+	};
 };
 
 //-----------------------------------------------------------------------

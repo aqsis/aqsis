@@ -242,6 +242,9 @@ IqShaderData* CqShaderStack::GetNextTemp( EqVariableType type, EqVariableClass _
 					}
 				}
 			}
+
+			default:
+				break;
 	}
 	assert( TqFalse );
 	return( NULL );
@@ -319,6 +322,9 @@ void CqShaderStack::Release( SqStackEntry s )
 						m_VMPool.push_back(reinterpret_cast<CqShaderVariableVaryingMatrix*>(s.m_Data) );
 					break;
 				}
+				
+				default:
+					break;
 		}
 	}
 }

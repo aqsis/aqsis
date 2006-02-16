@@ -34,6 +34,8 @@
 
 START_NAMESPACE( Aqsis )
 
+DECLARE_SHADERSTACK_TEMPS
+
 void CqShaderVM::SO_nop()
 {}
 
@@ -52,7 +54,7 @@ void CqShaderVM::SO_debug_break()
 
 void CqShaderVM::SO_pushif()
 {
-	AUTOFUNC;
+	CONSTFUNC;
 	RESULT(type_float, class_uniform);
 	pResult->SetFloat( ReadNext().m_FloatVal );
 	Push( pResult );
@@ -60,7 +62,7 @@ void CqShaderVM::SO_pushif()
 
 void CqShaderVM::SO_puship()
 {
-	AUTOFUNC;
+	CONSTFUNC;
 	TqFloat f = ReadNext().m_FloatVal;
 	TqFloat f2 = ReadNext().m_FloatVal;
 	TqFloat f3 = ReadNext().m_FloatVal;
@@ -72,7 +74,7 @@ void CqShaderVM::SO_puship()
 
 void CqShaderVM::SO_pushis()
 {
-	AUTOFUNC;
+	CONSTFUNC;
 	RESULT(type_string, class_uniform);
 	CqString * ps = ReadNext().m_pString;
 	pResult->SetValue( *ps );
@@ -121,7 +123,7 @@ void CqShaderVM::SO_pop()
 	POPV( Val );
 	TqUint ext = MAX( m_pEnv->GridSize(), pV->Size() );
 	TqBool fVarying = ext > 1;
-	TqInt i;
+	TqUint i;
 	CqBitVector& RS = m_pEnv->RunningState();
 	for ( i = 0; i < ext; i++ )
 	{
@@ -148,7 +150,7 @@ void CqShaderVM::SO_ipop()
 	//TqInt ext=__fVarying?m_pEnv->GridSize():1;
 	TqUint ext = MAX( m_pEnv->GridSize(), pV->Size() );
 	TqBool fVarying = ext > 1;
-	TqInt i;
+	TqUint i;
 	CqBitVector& RS = m_pEnv->RunningState();
 	for ( i = 0; i < ext; i++ )
 	{
@@ -485,7 +487,7 @@ void CqShaderVM::SO_jnz()
 	SqLabel lab = ReadNext().m_Label;
 	AUTOFUNC;
 	IqShaderData* f = POP.m_Data;
-	TqInt __iGrid = 0;
+	TqUint __iGrid = 0;
 	do
 	{
 		if ( !__fVarying || m_pEnv->RunningState().Value( __iGrid ) )
@@ -506,7 +508,7 @@ void CqShaderVM::SO_jz()
 	SqLabel lab = ReadNext().m_Label;
 	AUTOFUNC;
 	IqShaderData* f = POP.m_Data;
-	TqInt __iGrid = 0;
+	TqUint __iGrid = 0;
 	do
 	{
 		if ( !__fVarying || m_pEnv->RunningState().Value( __iGrid ) )
@@ -1089,7 +1091,7 @@ void CqShaderVM::SO_subfc()
 
 void CqShaderVM::SO_mulmm()
 {
-	AUTOFUNC;
+	CONSTFUNC;
 	RESULT(type_float, class_uniform);
 	pResult->SetFloat( 0.0f );
 	Push( pResult );	/* TODO: Implement matrices in the VM*/
@@ -1097,34 +1099,10 @@ void CqShaderVM::SO_mulmm()
 
 void CqShaderVM::SO_divmm()
 {
-	AUTOFUNC;
+	CONSTFUNC;
 	RESULT(type_float, class_uniform);
 	pResult->SetFloat( 0.0f );
 	Push( pResult );	/* TODO: Implement matrices in the VM*/
-}
-
-void CqShaderVM::SO_land()
-{
-	AUTOFUNC;
-	POPV( A );
-	POPV( B );
-	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	OpLAND_B( A, B, pResult, m_pEnv->RunningState() );
-	Push( pResult );
-	RELEASE( B );
-	RELEASE( A );
-}
-
-void CqShaderVM::SO_lor()
-{
-	AUTOFUNC;
-	POPV( A );
-	POPV( B );
-	RESULT(type_float, __fVarying?class_varying:class_uniform);
-	OpLOR_B( A, B, pResult, m_pEnv->RunningState() );
-	Push( pResult );
-	RELEASE( B );
-	RELEASE( A );
 }
 
 void CqShaderVM::SO_radians()

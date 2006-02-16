@@ -81,7 +81,7 @@ class CqDDManager : public IqDDManager
 			std::string m_name;
 			std::string m_type;
 			std::string m_mode;
-			TqInt		m_modeHash;
+			TqUlong		m_modeHash;
 			TqInt		m_modeID;
 			TqInt		m_AOVOffset;
 			TqInt		m_AOVSize;

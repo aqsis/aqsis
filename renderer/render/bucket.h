@@ -59,8 +59,7 @@ class CqBucket : public IqBucket
 		{
 			*this = From;
 		}
-		virtual ~CqBucket()
-		{}
+		virtual ~CqBucket();
 
 		CqBucket& operator=( const CqBucket& From )
 		{

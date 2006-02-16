@@ -385,8 +385,6 @@ TqBool CqImageBuffer::OcclusionCullSurface( const boost::shared_ptr<CqSurface>& 
 {
 	CqBound RasterBound( pSurface->GetCachedRasterBound() );
 
-	TqInt nBuckets = m_cXBuckets * m_cYBuckets;
-
 	if ( CqOcclusionBox::CanCull( &RasterBound ) )
 	{
 		// pSurface is behind everying in this bucket but it may be
@@ -458,7 +456,6 @@ void CqImageBuffer::AddMPG( CqMicroPolygon* pmpgNew )
 
 
 	// Find out the minimum bucket touched by the micropoly bound.
-	TqInt iBkt = m_cXBuckets * m_cYBuckets;
 
 	B.vecMin().x( B.vecMin().x() - m_FilterXWidth / 2.0f );
 	B.vecMin().y( B.vecMin().y() - m_FilterYWidth / 2.0f );
@@ -772,21 +769,10 @@ void CqImageBuffer::RenderMPG_MBOrDof( CqMicroPolygon* pMPG,
                                        long xmin, long xmax, long ymin, long ymax,
                                        TqBool IsMoving, TqBool UsingDof )
 {
-	CqBucket & Bucket = CurrentBucket();
-	CqStats& theStats = QGetRenderContext() ->Stats();
-
-	const TqFloat* LodBounds = m_CurrentGridInfo.m_LodBounds;
-	TqBool UsingLevelOfDetail = LodBounds[ 0 ] >= 0.0f;
-
-	TqInt sample_hits = 0;
-	TqFloat shd_rate = m_CurrentGridInfo.m_ShadingRate;
-
 	CqHitTestCache hitTestCache;
 	TqBool cachedHitData = TqFalse;
 	pMPG->CacheHitTestValues(&hitTestCache);
 	cachedHitData = TqTrue;
-
-	TqBool mustDraw = !m_CurrentGridInfo.m_IsCullable;
 
 	TqInt iXSamples = PixelXSamples();
 	TqInt iYSamples = PixelYSamples();
@@ -802,7 +788,6 @@ void CqImageBuffer::RenderMPG_MBOrDof( CqMicroPolygon* pMPG,
 
 	TqInt bound_maxMB = pMPG->cSubBounds();
 	TqInt bound_maxMB_1 = bound_maxMB - 1;
-	TqInt currentIndex = 0;
 	for ( TqInt bound_numMB = 0; bound_numMB < bound_maxMB; bound_numMB++ )
 	{
 		TqFloat time0 = m_CurrentGridInfo.m_ShutterOpenTime;
@@ -824,22 +809,22 @@ void CqImageBuffer::RenderMPG_MBOrDof( CqMicroPolygon* pMPG,
 			indexT1 = static_cast<TqInt>(CEIL((time1 - opentime) * timePerSample));
 		}
 
-		TqFloat maxCocX;
-		TqFloat maxCocY;
+		TqFloat maxCocX = 0.0f;
+		TqFloat maxCocY = 0.0f;
 
-		TqFloat bminx;
-		TqFloat bmaxx;
-		TqFloat bminy;
-		TqFloat bmaxy;
-		TqFloat bminz;
-		TqFloat bmaxz;
+		TqFloat bminx = 0.0f;
+		TqFloat bmaxx = 0.0f;
+		TqFloat bminy = 0.0f;
+		TqFloat bmaxy = 0.0f;
+		TqFloat bminz = 0.0f;
+		TqFloat bmaxz = 0.0f;
 		// these values are the bound of the mpg not including dof extension.
 		// reduce the mpg bound so it doesn't include the coc.
-		TqFloat mpgbminx;
-		TqFloat mpgbmaxx;
-		TqFloat mpgbminy;
-		TqFloat mpgbmaxy;
-		TqInt bound_maxDof;
+		TqFloat mpgbminx = 0.0f;
+		TqFloat mpgbmaxx = 0.0f;
+		TqFloat mpgbminy = 0.0f;
+		TqFloat mpgbmaxy = 0.0f;
+		TqInt bound_maxDof = 0;
 		if(UsingDof)
 		{
 			const CqVector2D& minZCoc = QGetRenderContext()->GetCircleOfConfusion( Bound.vecMin().z() );
