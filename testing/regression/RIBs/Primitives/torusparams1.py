@@ -12,7 +12,7 @@ from cgkit.riutil import *
 ######################################################################
 RiBegin(RI_NULL)
 
-RiDisplay("torusparams1.tif", "file", "rgba", "string compression", "deflate")
+RiDisplay("torusparams1.tif", "file", "rgba", "string compression", "lzw")
 #RiDisplay("test.tif", "framebuffer", "rgba")
 RiFormat(480,360,1)
 RiPixelSamples(2,2)

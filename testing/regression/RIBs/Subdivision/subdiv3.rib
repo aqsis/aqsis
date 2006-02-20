@@ -5,7 +5,7 @@ ShadingRate 1.0
 Option "searchpath" "shader" ["../shaders:&"]
 
 FrameBegin 0
-Display "subdiv3.tif" "file" "rgba" "string compression" "deflate"
+Display "subdiv3.tif" "file" "rgba" "string compression" "lzw"
 #Display "+subdiv3.tif" "framebuffer" "rgba"
 
 Projection "perspective" "fov" [35.0]

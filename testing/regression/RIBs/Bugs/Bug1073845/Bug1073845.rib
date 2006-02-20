@@ -1,6 +1,6 @@
 PixelSamples 1 1
 Format 640 480 1
-Display "Bug1073845.tif" "file" "rgb" "string compression" ["deflate"]
+Display "Bug1073845.tif" "file" "rgb" "string compression" ["lzw"]
 Option "searchpath" "shader" ["../../../shaders:&"]
 Option "searchpath" "texture" ["../../../maps:&"]
 Projection "perspective" "fov" [10]

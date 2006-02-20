@@ -4,7 +4,7 @@ ShadingRate 2
 Sides 2
 Format 200 150 -1
 #Format 100 100 1.0
-Display "eyeplanetest.tif" "file" "rgba" "string compression" "deflate"
+Display "eyeplanetest.tif" "file" "rgba" "string compression" "lzw"
 
 Projection "perspective" "fov" 20
 Rotate -90 1 0 0

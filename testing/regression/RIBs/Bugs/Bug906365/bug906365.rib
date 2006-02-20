@@ -6,7 +6,7 @@ version 3.03
 FrameBegin 1
 
    #Setup Display
-   Display "bug906365.tif" "file" "rgb" "string compression" "deflate"
+   Display "bug906365.tif" "file" "rgb" "string compression" "lzw"
    Format 640 320 1
    PixelSamples 5 5
 

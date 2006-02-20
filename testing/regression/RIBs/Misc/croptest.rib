@@ -9,7 +9,7 @@ Option "statistics" "endofframe" [1]
 
 FrameBegin 0
 
-Display "croptest.tif" "file" "rgba" "string compression" "deflate"
+Display "croptest.tif" "file" "rgba" "string compression" "lzw"
 CropWindow 0.3 0.7 0.34 0.57
 
 # Camera name: "Kamera01"

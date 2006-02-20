@@ -15,7 +15,7 @@ FrameBegin 2
 ShadingInterpolation "smooth"
 Quantize "rgba" 255 0 255 0.500000
 #Display Driver 1: 
-Display "Bug1049839.tif" "file" "rgba" "string compression" ["deflate"]
+Display "Bug1049839.tif" "file" "rgba" "string compression" ["lzw"]
 Format 320 240 1.000000
 Projection "perspective" "fov" [ 37.939575 ] 
 Clipping 0.010000 1000.000000

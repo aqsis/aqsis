@@ -5,7 +5,7 @@ ShadingRate 1.0
 Option "searchpath" "shader" ["../../shaders:&"]
 
 FrameBegin 0
-Display "sds_displacement.tif" "file" "rgba" "string compression" "deflate"
+Display "sds_displacement.tif" "file" "rgba" "string compression" "lzw"
 #Display "+sds_displacement.tif" "framebuffer" "rgba"
 
 # Camera name: "Kamera01"

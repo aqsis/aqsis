@@ -1,4 +1,4 @@
-Display "catmull-rom.tif" "file" "rgb" "string compression" "deflate"
+Display "catmull-rom.tif" "file" "rgb" "string compression" "lzw"
 Format 320 240 1
 ShadingRate 1
 Projection "perspective" "fov" 35.0

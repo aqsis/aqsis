@@ -10,7 +10,7 @@ DepthOfField 1 100 970
 
 FrameBegin 0
 
-Display "dof.tif" "file" "rgba" "string compression" "deflate"
+Display "dof.tif" "file" "rgba" "string compression" "lzw"
 
 # Camera name: "Kamera01"
 Projection "perspective" "fov" [45.0]

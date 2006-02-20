@@ -1,4 +1,4 @@
-Display "Bug1023260.tif" "file" "rgb" "string compression" ["deflate"]
+Display "Bug1023260.tif" "file" "rgb" "string compression" ["lzw"]
 Projection "perspective" "fov" 40
 Format 300 300 1
 

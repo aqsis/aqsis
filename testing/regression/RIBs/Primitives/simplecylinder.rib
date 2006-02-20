@@ -7,7 +7,7 @@ Option "statistics" "endofframe" [1]
 
 FrameBegin 0
 
-Display "simplecylinder.tif" "file" "rgba" "string compression" "deflate"
+Display "simplecylinder.tif" "file" "rgba" "string compression" "lzw"
 
 # Camera name: "Kamera01"
 Projection "perspective" "fov" [36.0]

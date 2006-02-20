@@ -6,7 +6,7 @@ Option "statistics" "endofframe" [1]
 Option "searchpath" "shader" ["../../shaders:&"]
 
 FrameBegin 0
-Display "teapotgeom.tif" "file" "rgba" "string compression" "deflate"
+Display "teapotgeom.tif" "file" "rgba" "string compression" "lzw"
 
 # Camera name: "Kamera01"
 Projection "perspective" "fov" [36.0]

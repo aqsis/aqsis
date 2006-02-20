@@ -3,7 +3,7 @@ version 3.03
 
 FrameBegin 1
 
-   Display "bug1014043.tif" "file" "rgb" "string compression" "deflate"
+   Display "bug1014043.tif" "file" "rgb" "string compression" "lzw"
    Format 320 240 1
    PixelSamples 3 3
 

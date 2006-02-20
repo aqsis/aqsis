@@ -1,6 +1,6 @@
 version 3.03
 Option "searchpath" "shader" ["../../shaders:&"]
-Display "std_st_test.tif" "file" "rgba" "string compression" "deflate"
+Display "std_st_test.tif" "file" "rgba" "string compression" "lzw"
 Format 200 150 1
 ShadingRate 2
 

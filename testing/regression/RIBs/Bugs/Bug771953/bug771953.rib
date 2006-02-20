@@ -2,7 +2,7 @@ version 3.2
 Declare "Ka" "float"
 Declare "Kd" "float"
 Format 100 100 1.0
-Display "bug771953.tif" "file" "rgba" "string compression" "deflate"
+Display "bug771953.tif" "file" "rgba" "string compression" "lzw"
 Exposure 1 1
 Clipping 0.1 20
 Projection "orthographic"

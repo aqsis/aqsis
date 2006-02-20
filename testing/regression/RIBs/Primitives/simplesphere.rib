@@ -6,7 +6,7 @@ Option "statistics" "endofframe" [1]
 Option "searchpath" "shader" ["../../shaders:&"]
 
 FrameBegin 0
-Display "simplesphere.tif" "file" "rgba" "string compression" "deflate"
+Display "simplesphere.tif" "file" "rgba" "string compression" "lzw"
 
 # Camera name: "Camera01"
 Projection "perspective" "fov" [36.0]

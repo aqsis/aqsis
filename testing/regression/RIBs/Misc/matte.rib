@@ -7,7 +7,7 @@ Option "searchpath" "shader" ["../shaders:&"]
 
 FrameBegin 0
 
-Display "matte.tif" "file" "rgba" "string compression" "deflate"
+Display "matte.tif" "file" "rgba" "string compression" "lzw"
 
 # Camera name: "Kamera01"
 Projection "orthographic"

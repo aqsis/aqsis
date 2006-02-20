@@ -276,7 +276,7 @@ MakeShadow "shad1.map" "shad1.map"
 MakeShadow "shad2.map" "shad2.map"
 
 
-Display "vase.tif" "file" "rgba" "string compression" "deflate"
+Display "vase.tif" "file" "rgba" "string compression" "lzw"
 
 FrameBegin 3
 

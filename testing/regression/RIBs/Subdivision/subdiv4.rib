@@ -5,7 +5,7 @@ ShadingRate 1.0
 Option "searchpath" "shader" ["../../shaders:&"]
 
 FrameBegin 0
-Display "subdiv4.tif" "file" "rgba" "string compression" "deflate"
+Display "subdiv4.tif" "file" "rgba" "string compression" "lzw"
 #Display "+subdiv4.tif" "framebuffer" "rgba"
 
 # Camera name: "Kamera01"

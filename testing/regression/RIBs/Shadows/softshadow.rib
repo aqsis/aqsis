@@ -40,7 +40,7 @@ MakeShadow "softshadow.z" "softshadow.map"
 # Now render the scene using the shadow map just calculated.
 #
 #
-Display "softshadow.tif" "file" "rgba" "string compression" "deflate"
+Display "softshadow.tif" "file" "rgba" "string compression" "lzw"
 Format 200 150 1
 
 PixelSamples 2 2

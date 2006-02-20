@@ -1,7 +1,7 @@
 ##RenderMan RIB-Structure 1.0
 version 3.03
 Option "searchpath" "shader" ["../shaders:&"]
-Display "readarchive.tif" "file" "rgba" "string compression" "deflate"
+Display "readarchive.tif" "file" "rgba" "string compression" "lzw"
 
 Format 200 150 1
 Option "statistics" "endofframe" [1]

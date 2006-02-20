@@ -1,6 +1,6 @@
 version 3.03
 Format 320 240 1
-Display "delayedproc.tif" "file" "rgb" "string compression" "deflate"
+Display "delayedproc.tif" "file" "rgb" "string compression" "lzw"
 Projection "perspective" "fov" [50]
 Translate 0 0 5
 WorldBegin

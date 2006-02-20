@@ -8,7 +8,7 @@ Option "statistics" "endofframe" [1]
 Option "searchpath" "shader" ["../shaders:&"]
 FrameBegin 2
 
-Display "mblur2b.tif" "file" "rgba" "string compression" "deflate"
+Display "mblur2b.tif" "file" "rgba" "string compression" "lzw"
 
 # Camera name: "Kamera01"
 Projection "perspective" "fov" [45.0]

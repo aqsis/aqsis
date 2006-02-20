@@ -1,5 +1,5 @@
 version 3.03
-Display "sticky_patch.tif" "file" "rgba" "string compression" "deflate"
+Display "sticky_patch.tif" "file" "rgba" "string compression" "lzw"
 Format 400 300 1
 ShadingRate 1
 

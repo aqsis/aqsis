@@ -45,7 +45,7 @@ MakeShadow "shadow.z" "shadow.map"
 #
 #
 
-Display "shadtest.tif" "file" "rgba" "string compression" "deflate"
+Display "shadtest.tif" "file" "rgba" "string compression" "lzw"
 
 Format 200 150 1
 

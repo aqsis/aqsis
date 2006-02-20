@@ -2,7 +2,7 @@
 version 3.03
 
 FrameBegin 1
-   Display "bug925879.tif" "file" "rgb" "string compression" "deflate"
+   Display "bug925879.tif" "file" "rgb" "string compression" "lzw"
    Format 320 240 1
 
    Projection "perspective" 

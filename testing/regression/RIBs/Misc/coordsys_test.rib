@@ -1,7 +1,7 @@
 version 3.03
 Option "searchpath" "shader" ["../shaders:&"]
 
-Display "coordsys_test.tif" "file" "rgba" "string compression" "deflate"
+Display "coordsys_test.tif" "file" "rgba" "string compression" "lzw"
 
 #Display "coordsys_test.z" "zfile" "z"
 Format 200 150 1

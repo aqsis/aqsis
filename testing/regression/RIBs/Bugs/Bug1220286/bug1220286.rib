@@ -1,6 +1,6 @@
 version 3.03
 Option "searchpath" "shader" ["."]
-Display "bug1220286.tif" "file" "rgba" "string compression" "deflate"
+Display "bug1220286.tif" "file" "rgba" "string compression" "lzw"
 Format 400 300 1.0
 ScreenWindow -1.3333333333333333 1.3333333333333333 -1.0 1.0
 Projection "perspective" "fov" [37.849288832102467]

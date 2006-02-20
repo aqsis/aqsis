@@ -6,7 +6,7 @@ Option "statistics" "endofframe" [1]
 Option "searchpath" "shader" ["../shaders:&"]
 
 FrameBegin 0
-Display "defsurf.tif" "file" "rgba" "string compression" "deflate"
+Display "defsurf.tif" "file" "rgba" "string compression" "lzw"
 #Display "+defsurf.tif" "framebuffer" "rgba"
 
 # Camera name: "Kamera01"

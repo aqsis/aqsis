@@ -15,7 +15,7 @@ FrameBegin 1
 ShadingInterpolation "smooth"
 Quantize "rgba" 255 0 255 0.500000
 #Display Driver 0: 
-Display "BugThreeLights.tif" "file" "rgb" "string compression" "deflate"
+Display "BugThreeLights.tif" "file" "rgb" "string compression" "lzw"
 Format 320 240 1.000000
 Projection "perspective" "fov" [ 42.184677 ] 
 Clipping 0.100000 1000.000000

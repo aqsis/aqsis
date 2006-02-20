@@ -1,6 +1,6 @@
 version 3.03
 Option "searchpath" "shader" ["../../shaders:&"]
-Display "tmap_test.tif" "file" "rgba" "string compression" "deflate"
+Display "tmap_test.tif" "file" "rgba" "string compression" "lzw"
 Format 200 150 1
 PixelSamples 2 2
 PixelFilter "gaussian" 2 2

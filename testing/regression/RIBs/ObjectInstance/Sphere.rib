@@ -4,7 +4,7 @@ version 3.03
 FrameBegin 1
                                                                                                                                            
    #Setup Display
-   Display "Sphere.tif" "file" "rgb" "string compression" "deflate"
+   Display "Sphere.tif" "file" "rgb" "string compression" "lzw"
    Format 320 240 1
                                                                                                                                            
    #Setup viewing transformation

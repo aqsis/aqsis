@@ -1,7 +1,7 @@
 Format 320 240 1
 PixelSamples 3 3
 ShadingRate 1.0
-Display "bug942638.tif" "file" "rgb" "string compression" "deflate"
+Display "bug942638.tif" "file" "rgb" "string compression" "lzw"
 Projection "orthographic"
 Translate 0 0 10
 Shutter 0.1 0.9

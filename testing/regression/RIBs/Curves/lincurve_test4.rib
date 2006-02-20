@@ -16,7 +16,7 @@ Option "searchpath" "shader" ["../../shaders:&"]
 
 Format 320 200 1
 PixelFilter "gaussian" 2 2
-Display "lincurve_test4.tif" "file" "rgb" "string compression" "deflate"
+Display "lincurve_test4.tif" "file" "rgb" "string compression" "lzw"
 #Display "+lincurve_test4.tif" "framebuffer" "rgb"
 
 LightSource "distantlight" 1

@@ -3,7 +3,7 @@ PixelSamples 1 1
 ShadingRate 1.0
 Option "searchpath" "shader" ["../../shaders:&"]
 
-Display "reverseorientation.tif" "file" "rgba" "string compression" "deflate"
+Display "reverseorientation.tif" "file" "rgba" "string compression" "lzw"
 
 Projection "perspective" "fov" [45.0]
 Translate 0 0 5

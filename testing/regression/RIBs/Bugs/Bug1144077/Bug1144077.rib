@@ -5,7 +5,7 @@
 
 FrameBegin 20
 	## Image Display Declaration
-	Display "Bug1144077.tif" "file" "rgb" "string compression" ["deflate"]
+	Display "Bug1144077.tif" "file" "rgb" "string compression" ["lzw"]
 	Format 320 240 1.0
 	Shutter 0.0 1.0
 	PixelFilter "catmull-rom" 2 2

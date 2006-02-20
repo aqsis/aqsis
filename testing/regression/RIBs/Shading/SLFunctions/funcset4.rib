@@ -2,7 +2,7 @@ Option "searchpath" "shader" ["../../../shaders:&"]
 Option "searchpath" "texture" ["../../../maps:&"]
 
 PixelSamples 2 2
-Display "funcset4.tif" "file" "rgba" "string compression" "deflate"
+Display "funcset4.tif" "file" "rgba" "string compression" "lzw"
 Format 320 240 1
 Projection "orthographic" 
 Translate 0 0 5

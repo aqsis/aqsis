@@ -7,7 +7,7 @@ Option "searchpath" "shader" ["../../../shaders:&"]
 
 FrameBegin 0
 
-Display "Bug1049628.tif" "file" "rgba" "string compression" "deflate"
+Display "Bug1049628.tif" "file" "rgba" "string compression" "lzw"
 
 Projection "perspective" "fov" [30.0]
 Rotate 180 0 1 0

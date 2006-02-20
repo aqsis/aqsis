@@ -1,4 +1,4 @@
-Display "linear.tif" "file" "rgb" "string compression" "deflate"
+Display "linear.tif" "file" "rgb" "string compression" "lzw"
 Format 320 240 1
 ShadingRate 1
 

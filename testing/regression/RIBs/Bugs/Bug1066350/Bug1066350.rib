@@ -2,7 +2,7 @@ Option "statistics" "endofframe" [1]
 Option "searchpath" "shader" ["../../../shaders:&"]
 PixelSamples 2 2
 Format 640 480 1
-Display "Bug1066350.tif" "file" "rgb" "string compression" ["deflate"]
+Display "Bug1066350.tif" "file" "rgb" "string compression" ["lzw"]
 WorldBegin
 Scale 0.65 0.65 0.65
 Translate 0 0 5

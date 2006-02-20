@@ -3,7 +3,7 @@ PixelSamples 1 1
 ShadingRate 1.0
 Option "searchpath" "shader" ["../../shaders:&"]
 
-Display "orientation.tif" "file" "rgba" "string compression" "deflate"
+Display "orientation.tif" "file" "rgba" "string compression" "lzw"
 Attribute "dice" "binary" [1]
 
 Projection "perspective" "fov" [45.0]

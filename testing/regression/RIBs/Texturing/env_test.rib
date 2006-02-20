@@ -2,7 +2,7 @@ version 3.03
 Option "searchpath" "shader" ["../../shaders:&"]
 Option "searchpath" "texture" ["../../maps:&"]
 
-Display "env_test.tif" "file" "rgba" "string compression" "deflate"
+Display "env_test.tif" "file" "rgba" "string compression" "lzw"
 
 Format 200 150 1
 ShadingRate 1

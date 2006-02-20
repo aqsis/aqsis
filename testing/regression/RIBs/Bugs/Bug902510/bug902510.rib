@@ -8,7 +8,7 @@ MakeTexture "texture" "texture.tif" "periodic" "periodic" "box" 1 1
 FrameBegin 1
 
    #Setup Display
-   Display "bug902510.tif" "file" "rgb" "string compression" "deflate"
+   Display "bug902510.tif" "file" "rgb" "string compression" "lzw"
    Format 320 240 1
 
    #Setup viewing transformation

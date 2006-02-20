@@ -16,7 +16,7 @@ ShadingInterpolation "smooth"
 Quantize "rgba" 255 0 255 0.500000
 Hider "hidden" "jitter" [ 0 ] "depthfilter" [ "midpoint" ] 
 #Display Driver 0: 
-Display "bug931713.tif" "file" "rgba" "string compression" "deflate" 
+Display "bug931713.tif" "file" "rgba" "string compression" "lzw" 
 Format 200 150 1.000000
 Projection "perspective" "fov" [ 48.484070 ] 
 Clipping 0.100000 1000.000000

@@ -1,5 +1,5 @@
 FrameBegin 1
-  Display "dofmb.tif" "file" "rgba" "string compression" "deflate"
+  Display "dofmb.tif" "file" "rgba" "string compression" "lzw"
   Format 360 243 0.9
   Projection "perspective" "fov" [ 41.5394 ]
   Clipping 0.1 32768

@@ -6,7 +6,7 @@ Option "statistics" "endofframe" [1]
 Option "searchpath" "shader" ["../shaders:&"]
 
 FrameBegin 0
-Display "cam_mb.tif" "file" "rgba" "string compression" "deflate"
+Display "cam_mb.tif" "file" "rgba" "string compression" "lzw"
 #Display "cam_mb.tif" "framebuffer" "rgba"
 
 Shutter 0 1

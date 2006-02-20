@@ -5,7 +5,7 @@ Projection "perspective" "fov" [10]
 Option "searchpath" "shader" ["../shaders:&"]
 ShadingRate 2
 
-Display "trim_test.tif" "file" "rgba" "string compression" "deflate"
+Display "trim_test.tif" "file" "rgba" "string compression" "lzw"
 
 LightSource "distantlight" 1
 

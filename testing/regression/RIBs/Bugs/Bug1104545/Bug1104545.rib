@@ -1,5 +1,5 @@
 PixelSamples 1 1
-Display "Bug1104545.tif" "file" "rgba" "string compression" "deflate"
+Display "Bug1104545.tif" "file" "rgba" "string compression" "lzw"
 Format 320 240 1
 
 Option "searchpath" "shader" ["../../../shaders:&"]

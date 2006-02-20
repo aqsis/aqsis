@@ -8,7 +8,7 @@ Option "searchpath" "shader" ["../shaders:&"]
 
 FrameBegin 0
 
-Display "mblur_1x1.tif" "file" "rgba" "string compression" "deflate"
+Display "mblur_1x1.tif" "file" "rgba" "string compression" "lzw"
 # Camera name: "Kamera01"
 
 Projection "perspective" "fov" [35.0]

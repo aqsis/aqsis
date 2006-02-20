@@ -9,7 +9,7 @@ Option "searchpath" "shader" ["../shaders:&"]
 
 FrameBegin 2
 
-Display "mblur2a.tif" "file" "rgba" "string compression" "deflate"
+Display "mblur2a.tif" "file" "rgba" "string compression" "lzw"
 
 # Camera name: "Kamera01"
 Projection "perspective" "fov" [45.0]

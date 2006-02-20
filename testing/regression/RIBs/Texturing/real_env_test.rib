@@ -101,7 +101,7 @@ FrameBegin 7
 	PixelSamples 2 2
 	PixelFilter "gaussian" 2 2
 	Format 320 240 1
-	Display "real_env_test.tif" "file" "rgba" "string compression" "deflate"
+	Display "real_env_test.tif" "file" "rgba" "string compression" "lzw"
 	Projection "perspective" "fov" [34.5159]
 	Clipping 0.1 100000
 	Translate 0 0 -100

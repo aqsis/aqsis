@@ -7,7 +7,7 @@ Option "searchpath" "shader" ["../shaders:&"]
 
 FrameBegin 0
 
-Display "simplenurbs.tif" "file" "rgba" "string compression" "deflate"
+Display "simplenurbs.tif" "file" "rgba" "string compression" "lzw"
 
 # Camera name: "Kamera01"
 Projection "perspective" "fov" [30.0]

@@ -1,7 +1,7 @@
 version 3.03
 Format 320 240 1
 Option "searchpath" "procedural" "$PATH:&"
-Display "runsphereproc.tif" "file" "rgb" "string compression" "deflate"
+Display "runsphereproc.tif" "file" "rgb" "string compression" "lzw"
 Projection "perspective" "fov" [50]
 Translate 0 0 5
 WorldBegin
