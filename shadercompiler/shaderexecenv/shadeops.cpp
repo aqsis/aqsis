@@ -42,6 +42,7 @@
 #include	"itexturemap.h"
 #include	"ilightsource.h"
 #include	"version.h"
+#include	"logging.h"
 
 START_NAMESPACE(    Aqsis )
 
@@ -520,7 +521,7 @@ void	CqShaderExecEnv::SO_log( IqShaderData* x, IqShaderData* Result, IqShader* p
 		{
 			TqFloat _aq_x;
 			(x)->GetFloat(_aq_x,__iGrid);
-			(Result)->SetFloat(static_cast<TqFloat>( log( _aq_x ) ),__iGrid);
+			(Result)->SetFloat(static_cast<TqFloat>( ::log( _aq_x ) ),__iGrid);
 		}
 	}
 	while( ( ++__iGrid < GridSize() ) && __fVarying);
@@ -576,7 +577,7 @@ void	CqShaderExecEnv::SO_log( IqShaderData* x, IqShaderData* base, IqShaderData*
 			(x)->GetFloat(_aq_x,__iGrid);
 			TqFloat _aq_base;
 			(base)->GetFloat(_aq_base,__iGrid);
-			(Result)->SetFloat(static_cast<TqFloat>( log( _aq_x ) / log( _aq_base ) ),__iGrid);
+			(Result)->SetFloat(static_cast<TqFloat>( ::log( _aq_x ) / ::log( _aq_base ) ),__iGrid);
 		}
 	}
 	while( ( ++__iGrid < GridSize() ) && __fVarying);
@@ -1288,8 +1289,8 @@ void	CqShaderExecEnv::SO_scspline( IqShaderData* basis, IqShaderData* value, IqS
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
-	TqFloat _aq_basis;
-	(basis)->GetFloat(_aq_basis,__iGrid);
+	CqString _aq_basis;
+	(basis)->GetString(_aq_basis,__iGrid);
 	spline.SetBasis( _aq_basis );
 
 
