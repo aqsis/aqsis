@@ -48,7 +48,7 @@ class CqColor;
 class CqVector3D
 {
 	public:
-		CqVector3D() : m_x(0), m_y(0), m_z(0)
+		CqVector3D() : m_x(0.0f), m_y(0.0f), m_z(0.0f)
 		{}
 		CqVector3D( const CqVector2D &From ) : m_x( From.x() ), m_y( From.y() ), m_z( 0 )
 		{}
@@ -108,19 +108,19 @@ class CqVector3D
 		{
 			switch ( i )
 			{
-					case 0:
+				case 0:
 					return ( m_x );
 					break;
-					case 1:
+				case 1:
 					return ( m_y );
 					break;
-					case 2:
+				case 2:
 					return ( m_z );
 					break;
-					default:
-					return ( m_z );
+				default:
 					break;
 			}
+			return ( m_z );
 		}
 
 		/** Array based component access.
@@ -131,16 +131,16 @@ class CqVector3D
 		{
 			switch ( i )
 			{
-					case 0:
+				case 0:
 					return ( m_x );
 					break;
-					case 1:
+				case 1:
 					return ( m_y );
 					break;
-					case 2:
+				case 2:
 					return ( m_z );
 					break;
-					default:
+				default:
 					break;
 			}
 			return ( m_z );

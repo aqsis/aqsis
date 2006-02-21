@@ -48,7 +48,7 @@ class CqVector4D;
 class CqVector2D
 {
 	public:
-		CqVector2D()
+		CqVector2D() : m_x(0.0f), m_y(0.0f)
 		{}
 		CqVector2D( TqFloat x, TqFloat y ) : m_x( x ), m_y( y )
 		{}
@@ -92,16 +92,16 @@ class CqVector2D
 		{
 			switch ( i )
 			{
-					case 0:
+				case 0:
 					return ( m_x );
 					break;
-					case 1:
+				case 1:
 					return ( m_y );
 					break;
-					default:
-					return ( m_y );
+				default:
 					break;
 			}
+			return ( m_y );
 		}
 
 		/** Access the components as an array.
@@ -112,16 +112,16 @@ class CqVector2D
 		{
 			switch ( i )
 			{
-					case 0:
+				case 0:
 					return ( m_x );
 					break;
-					case 1:
+				case 1:
 					return ( m_y );
 					break;
-					default:
-					return ( m_y );
+				default:
 					break;
 			}
+			return ( m_y );
 		}
 
 		/** Get the length squared.

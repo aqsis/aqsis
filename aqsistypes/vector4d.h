@@ -113,22 +113,22 @@ class CqVector4D
 		{
 			switch ( i )
 			{
-					case 0:
+				case 0:
 					return ( m_x );
 					break;
-					case 1:
+				case 1:
 					return ( m_y );
 					break;
-					case 2:
+				case 2:
 					return ( m_z );
 					break;
-					case 3:
+				case 3:
 					return ( m_h );
 					break;
-					default:
-					return ( m_h );
+				default:
 					break;
 			}
+			return ( m_h );
 		}
 
 		/** Array based component access.
@@ -139,22 +139,22 @@ class CqVector4D
 		{
 			switch ( i )
 			{
-					case 0:
+				case 0:
 					return ( m_x );
 					break;
-					case 1:
+				case 1:
 					return ( m_y );
 					break;
-					case 2:
+				case 2:
 					return ( m_z );
 					break;
-					case 3:
+				case 3:
 					return ( m_h );
 					break;
-					default:
-					return ( m_h );
+				default:
 					break;
 			}
+			return ( m_h );
 		}
 
 		/** Get the length squared.
