@@ -187,10 +187,8 @@ void CqImagePixel::InitialiseSamples( std::vector<CqVector2D>& vecSamples )
 /** Shuffle the sample data to avoid repeating patterns in the sampling.
  */
 
-void CqImagePixel::JitterSamples( std::vector<CqVector2D>& vecSamples )
+void CqImagePixel::JitterSamples( std::vector<CqVector2D>& vecSamples, TqFloat opentime, TqFloat closetime )
 {
-	TqFloat opentime = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Shutter" ) [ 0 ];
-	TqFloat closetime = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Shutter" ) [ 1 ];
 	TqInt numSamples = m_XSamples * m_YSamples;
 	TqFloat subcell_width = 1.0f / numSamples;
 	TqInt m = m_XSamples;

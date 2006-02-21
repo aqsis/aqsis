@@ -49,6 +49,18 @@ CqOcclusionTree::CqOcclusionTree(TqInt dimension)
 		(*child) = 0;
 }
 
+CqOcclusionTree::~CqOcclusionTree()
+{
+	TqChildArray::iterator child = m_Children.begin();
+	for(; child != m_Children.end(); ++child)
+	{
+		if (*child != NULL)
+		{
+			delete (*child);
+			(*child) = NULL;
+		}
+	};
+}
 
 void
 CqOcclusionTree::SplitNode(CqOcclusionTreePtr& a, CqOcclusionTreePtr& b)
@@ -125,6 +137,7 @@ void CqOcclusionTree::ConstructTree()
 	ChildQueue.push_back(this/*shared_from_this()*/);
 
 	TqInt NonLeafCount = NumSamples() >= 1 ? 1 : 0;
+	TqInt split_counter = 0;
 
 	while (NonLeafCount > 0 && ChildQueue.size() < s_ChildrenPerNode)
 	{
@@ -138,6 +151,7 @@ void CqOcclusionTree::ConstructTree()
 		CqOcclusionTreePtr a;
 		CqOcclusionTreePtr b;
 		old->SplitNode(a, b);
+		split_counter++;
 		if (a)
 		{
 			ChildQueue.push_back(a);
@@ -153,7 +167,10 @@ void CqOcclusionTree::ConstructTree()
 			{
 				++NonLeafCount;
 			}
-		}
+		};
+
+		if(split_counter >1 )
+			delete old;
 	}
 
 	TqChildArray::iterator ii;
@@ -175,7 +192,12 @@ void CqOcclusionTree::ConstructTree()
 
 	while (ii != m_Children.end())
 	{
-		*ii++ = 0;//CqOcclusionTreePtr();
+		if (*ii != NULL)
+		{
+			delete *ii;
+			*ii = NULL;
+		}
+		ii++;
 	}
 }
 
@@ -393,7 +415,8 @@ CqOcclusionBox::~CqOcclusionBox()
 */
 void CqOcclusionBox::DeleteHierarchy()
 {
-	m_KDTree = CqOcclusionTreePtr();
+	delete m_KDTree;
+	m_KDTree = NULL;
 }
 
 

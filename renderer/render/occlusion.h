@@ -72,6 +72,7 @@ class CqOcclusionTree// : public boost::enable_shared_from_this<CqOcclusionTree>
 
 	public:
 		CqOcclusionTree(TqInt dimension = 0);
+		~CqOcclusionTree();
 
 		void SortElements(TqInt dimension)
 		{

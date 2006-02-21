@@ -98,6 +98,9 @@ void CqBucket::PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt y
 
 	m_NumTimeRanges = MAX(4, m_PixelXSamples * m_PixelYSamples);
 
+        TqFloat opentime = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Shutter" ) [ 0 ];
+        TqFloat closetime = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Shutter" ) [ 1 ];
+
 	// Allocate the image element storage if this is the first bucket
 	if(m_aieImage.empty())
 	{
@@ -120,14 +123,26 @@ void CqBucket::PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt y
 				m_aieImage[which].AllocateSamples( m_PixelXSamples, m_PixelYSamples );
 				m_aieImage[which].InitialiseSamples( m_aSamplePositions[which] );
 				if(fJitter)
-					m_aieImage[which].JitterSamples(m_aSamplePositions[which]);
+					m_aieImage[which].JitterSamples(m_aSamplePositions[which], opentime, closetime);
 
 				which++;
 			}
 		}
 	}
 
-	std::random_shuffle(m_aieImage.begin(), m_aieImage.end());
+	// Shuffle the Sample and DOD positions 
+	std::vector<CqImagePixel>::iterator itPix;
+	TqUint size = m_aieImage.size();  
+	TqUint i = 0;
+	if (size > 1)
+	{
+		for( itPix = m_aieImage.begin(), i=0 ; itPix <= m_aieImage.end(), i < size - 1; itPix++, i++)
+		{
+			TqUint other = i + rand() / (RAND_MAX / (size - i) + 1);
+			(*itPix).m_SampleIndices.swap(m_aieImage[other].m_SampleIndices);  
+			(*itPix).m_DofOffsetIndices.swap(m_aieImage[other].m_DofOffsetIndices); 
+		};
+	};
 
 	// Jitter the samplepoints and adjust them for the new bucket position.
 	TqInt which = 0;

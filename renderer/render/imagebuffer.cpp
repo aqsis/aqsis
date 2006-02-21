@@ -1346,10 +1346,9 @@ void CqImageBuffer::RenderImage()
 	while( NextBucket() );
 
 	ImageComplete();
-
 	CqBucket::ShutdownBucket();
-
 	CqOcclusionBox::DeleteHierarchy();
+
 	// Pass >100 through to progress to allow it to indicate completion.
 
 	if ( pProgressHandler )

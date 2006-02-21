@@ -267,7 +267,7 @@ class CqImagePixel
 		}
 		void	AllocateSamples( TqInt XSamples, TqInt YSamples );
 		void	InitialiseSamples( std::vector<CqVector2D>& vecSamples );
-		void	JitterSamples( std::vector<CqVector2D>& vecSamples );
+		void	JitterSamples( std::vector<CqVector2D>& vecSamples, TqFloat opentime, TqFloat closetime );
 		void	OffsetSamples(CqVector2D& vecPixel, std::vector<CqVector2D>& vecSamples);
 
 		/** Get the approximate coverage of this pixel.
@@ -406,12 +406,13 @@ class CqImagePixel
 			pos.y(pos.y() * adj);
 		}
 
+		/* These are public to allow direct shuffling */
+		std::vector<TqInt> m_SampleIndices;
+		std::vector<TqInt> m_DofOffsetIndices;	///< A mapping from dof bounding-box index to the sample that contains a dof offset in that bb.
 	private:
 		TqInt	m_XSamples;						///< The number of samples in the horizontal direction.
 		TqInt	m_YSamples;						///< The number of samples in the vertical direction.
 		//std::vector<SqSampleData> m_Samples;	///< A Vector of samples. Holds position, time, dof offset etc for each sample.
-		std::vector<TqInt> m_SampleIndices;
-		std::vector<TqInt> m_DofOffsetIndices;	///< A mapping from dof bounding-box index to the sample that contains a dof offset in that bb.
 		SqImageSample	m_Data;
 }
 ;
