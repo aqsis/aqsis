@@ -35,6 +35,8 @@
 #include	"vector4d.h"
 #include	"sstring.h"
 
+#include	"logging.h"
+
 START_NAMESPACE( Aqsis )
 
 
@@ -110,11 +112,16 @@ class CqSplineCubic
 				pVals = &gHermiteBasis;
 				step = 2;
 			}
-			else if ( strName.compare( "power" ) == 0 )
+			else if (( strName.compare( "power" ) == 0 
+				|| strName.compare( "linear") == 0 ))
 			{
 				pVals = &gPowerBasis;
 				step =4;
-			}
+			}else{
+				Aqsis::log() << Aqsis::warning << "Unknown spline type \"" << strName.c_str() << "\", default to \"linear\"" << std::endl;
+				pVals = &gPowerBasis;
+				step =4;
+			};
 
 			if ( pVals )
 			{
