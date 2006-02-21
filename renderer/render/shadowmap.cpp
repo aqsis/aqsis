@@ -74,6 +74,19 @@ CqShadowMap::CqShadowMap( const CqString& strName ) :
 		m_apLast[k] = NULL;
 }
 
+//---------------------------------------------------------------------
+/** Return an index based on the spatial layer 32x32 in case of regular
+ *  shadowmap to make the search for GetBuffer() more efficient.
+ */
+TqInt CqShadowMap::PseudoMipMaps( TqUlong s, TqInt index )
+{
+	TqInt idx = index;
+	if (NumPages() == 1)
+	{
+		idx = s / 32;
+	}
+	return idx;
+}
 
 //---------------------------------------------------------------------
 /** Allocate the memory required by the depthmap.
@@ -455,6 +468,7 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 		}
 	}
 
+
 	// Is this shadowmap an occlusion map (NumPages() > 1) ?
 	// NumPages() contains the number of shadowmaps which were used 
 	// to create this occlusion map.
@@ -481,10 +495,13 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 	// 1) Bigger the number of shadowmap smaller ns, nt will be required; 
 	// 2) Bigger the shadowmaps than smaller ns, nt;
 
-        if (NumPages() > 1) {
+	if (NumPages() > 1) {
+		TqInt samples = FLOOR(sqrt(m_samples));
 		TqInt occl = (256 * 1024) / (NumPages() * XRes() * YRes());
 		occl = CEIL(sqrt(static_cast<TqFloat>(occl)));
 		occl = MAX(2, occl);
+		// Samples could overwrite after all the magic number!!
+		occl = MAX(samples, occl); 
 		ns = nt = occl;
 	}
 
@@ -514,6 +531,8 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 	if ((minz != RI_FLOATMAX) && ((z + 2.0 * rbias) < minz))
 		return;
 
+	index = PseudoMipMaps( lu , index );
+
 	CqTextureMapBuffer * pTMBa = GetBuffer( lu, lv, index );
 
 	TqBool valid =  pTMBa  && pTMBa->IsValid (hu, hv, index );
@@ -524,7 +543,8 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 	// (assuming the maxz is not infinite)
   	// A conservative z value is the worst case scenario
 	// for the high bias value will be between 0..2.0 * rbias
-	if ( valid )
+
+	if ( (NumPages() > 1) && valid )
         {
 		TqFloat minz, maxz;
 

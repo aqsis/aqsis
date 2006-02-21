@@ -845,6 +845,7 @@ class CqShadowMap : public CqTextureMap
 		void	LoadZFile();
 		void	SaveShadowMap( const CqString& strShadowName, TqBool append = TqFalse );
 		void	ReadMatrices();
+		TqInt   PseudoMipMaps( TqUlong s, TqInt index );
 
 		virtual	CqTextureMapBuffer* CreateBuffer( TqUlong xorigin, TqUlong yorigin, TqUlong width, TqUlong height, TqInt directory = 0, TqBool fProt = TqFalse )
 		{
