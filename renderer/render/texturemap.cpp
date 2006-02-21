@@ -231,7 +231,6 @@ TqPuchar CqTextureMapBuffer::AllocSegment( TqUlong width, TqUlong height, TqInt 
 	TqInt demand = width * height * ElemSize();
 
 #ifdef ALLOCSEGMENTSTATUS
-
 	alloc_cnt ++;
 #endif
 
@@ -264,13 +263,6 @@ TqPuchar CqTextureMapBuffer::AllocSegment( TqUlong width, TqUlong height, TqInt 
 		m_critical = TqTrue;
 	}
 
-#ifdef _DEBUG
-	if ( ( more > MEG1 ) && ( ( more / ( 1024 * 1024 ) ) > megs ) )
-	{
-		Aqsis::log() << debug << "Texturememory is more than " << megs << " megs" << std::endl;
-		megs += 10;
-	}
-#endif
 	QGetRenderContext() ->Stats().IncTextureMemory( demand );
 
 	// just do a malloc since the texturemapping will set individual member of the allocated buffer
@@ -620,6 +612,7 @@ CqTextureMapBuffer* CqTextureMap::GetBuffer( TqUlong s, TqUlong t, TqInt directo
 	if (lastcache && lastcache->IsValid(s, t, directory))
 	{
 		//TIMER_STOP("GetBuffer");
+		QGetRenderContext() ->Stats().IncTextureHits( 0, 4 );
 		return lastcache;
 	}
 
