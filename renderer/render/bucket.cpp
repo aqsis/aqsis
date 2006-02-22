@@ -147,12 +147,12 @@ void CqBucket::PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt y
 	// Jitter the samplepoints and adjust them for the new bucket position.
 	TqInt which = 0;
 	//TqInt numPixels = m_RealWidth*m_RealHeight;
-	for ( TqInt i = 0; i < m_RealHeight; i++ )
+	for ( TqInt ii = 0; ii < m_RealHeight; ii++ )
 	{
 		for ( TqInt j = 0; j < m_RealWidth; j++ )
 		{
 			CqVector2D bPos2( m_XOrigin, m_YOrigin );
-			bPos2 += CqVector2D( ( j - m_DiscreteShiftX ), ( i - m_DiscreteShiftY ) );
+			bPos2 += CqVector2D( ( j - m_DiscreteShiftX ), ( ii - m_DiscreteShiftY ) );
 
 			if(!empty)
 				m_aieImage[which].Clear();
