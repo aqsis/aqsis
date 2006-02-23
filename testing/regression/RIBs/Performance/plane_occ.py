@@ -1,0 +1,31 @@
+from cgkit.ri import *
+
+RiBegin (RI_NULL)
+RiOption ("statistics","endofframe",3)
+
+RiDisplay ("plane_occ.tif",RI_FILE,"rgba")
+RiFormat (512,512,1)
+RiPixelSamples (1,1)
+RiProjection (RI_ORTHOGRAPHIC)
+RiFrameBegin (1)
+RiWorldBegin ()
+RiTranslate (0,0,5)
+RiTransformBegin ()
+RiScale (.5, .5, .5)
+RiPatch(RI_BILINEAR, P=[-1,-1,0, -1,1,0, 1,-1,0, 1,1,0])
+RiTransformEnd ()
+RiWorldEnd ()
+
+RiFrameEnd ()
+RiFrameBegin (2)
+RiWorldBegin ()
+RiTranslate (0,0,5)
+RiTransformBegin ()
+RiScale (.5, .5, .5)
+RiPatch(RI_BILINEAR, P=[-1,-1,0, -1,1,0, 1,-1,0, 1,1,0])
+RiScale (.5, .5, .5)
+RiPatch(RI_BILINEAR, P=[-1,-1,1, -1,1,1, 1,-1,1, 1,1,1])
+RiTransformEnd ()
+RiWorldEnd ()
+RiFrameEnd ()
+RiEnd
