@@ -19,5 +19,5 @@ for i in xrange (0,4096*16):
     RiSphere(1,1,-1,360)
 RiTransformEnd ()
 RiWorldEnd ()
-
-RiEnd
+RiFrameEnd ()
+RiEnd ()

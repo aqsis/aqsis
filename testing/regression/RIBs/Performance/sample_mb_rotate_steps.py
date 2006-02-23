@@ -31,5 +31,5 @@ RiPatch(RI_BILINEAR, P=[-1,-1,0, -1,1,0, 1,-1,0, 1,1,0])
 RiAttributeEnd ()
 RiTransformEnd ()
 RiWorldEnd ()
-
-RiEnd
+RiFrameEnd ()
+RiEnd ()

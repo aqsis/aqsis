@@ -21,5 +21,5 @@ for i in xrange (1,25):
     RiTransformEnd ()
 RiTransformEnd ()
 RiWorldEnd ()
-
-RiEnd
+RiFrameEnd ()
+RiEnd ()

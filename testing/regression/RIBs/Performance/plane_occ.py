@@ -28,4 +28,4 @@ RiPatch(RI_BILINEAR, P=[-1,-1,1, -1,1,1, 1,-1,1, 1,1,1])
 RiTransformEnd ()
 RiWorldEnd ()
 RiFrameEnd ()
-RiEnd
+RiEnd ()

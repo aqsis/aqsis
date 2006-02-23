@@ -37,5 +37,5 @@ for i in xrange (1,25):
 
 RiTransformEnd ()
 RiWorldEnd ()
-
-RiEnd
+RiFrameEnd ()
+RiEnd ()

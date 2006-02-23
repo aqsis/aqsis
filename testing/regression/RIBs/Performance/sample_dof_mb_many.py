@@ -3,7 +3,7 @@ from cgkit.ri import *
 RiBegin (RI_NULL)
 RiOption ("statistics","endofframe",3)
 
-RiDisplay ("sample_dof_many.tif",RI_FILE,"rgba")
+RiDisplay ("sample_dof_mb_many.tif",RI_FILE,"rgba")
 RiDepthOfField (1,20,16)
 RiFormat (512,512,1)
 RiShadingRate(256)
@@ -27,5 +27,5 @@ for i in xrange (1,25):
     RiTransformEnd ()
 RiTransformEnd ()
 RiWorldEnd ()
-
-RiEnd
+RiFrameEnd ()
+RiEnd ()
