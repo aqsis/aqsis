@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 ######################################################################
-# Renderer tester v1.9
+# Renderer tester v1.10
 # Copyright 2003 Matthias Baas (baas@ira.uka.de)
 ######################################################################
 # For a short usage description call the script with the option -h or
@@ -46,6 +46,7 @@ CurrentConfigDir = [""]
 # TIFF conversion command (INPUT and OUTPUT will be replaced by the
 # corresponding file names)
 TIFFConvCmd = "tifftopnm INPUT|pnmtotiff -color -truecolor >OUTPUT"
+TIFFConvCmd = ""
 
 # AUTO keyword for the "ricalls" parameter in job descriptions
 AUTO = "_auto"
@@ -90,28 +91,31 @@ def loadImage(name):
         img = Image.open(normname)
         return img
     except:
-        # Try to convert the image and then load again using PIL...
-        path,name = os.path.split(normname)
-        tmpname = os.path.join(path,"_tmp.tif")
-        try:
-            os.remove(tmpname)
-        except:
-            pass
-        cmd = TIFFConvCmd.replace("INPUT", normname).replace("OUTPUT", tmpname)
-        print cmd
-        os.system(cmd)
-        if not os.path.exists(tmpname):
-            print 'Error while loading image "%s" via PIL. An attempt to filter the image using the netpbm tools failed.'%name
+        if TIFFConvCmd=="":
+            print 'Could not load image "%s". No conversion command specified.'%os.path.basename(name)
         else:
+            # Try to convert the image and then load again using PIL...
+            path,name = os.path.split(normname)
+            tmpname = os.path.join(path,"_tmp.tif")
             try:
-                img = Image.open(tmpname)
-                try:
-                    os.remove(tmpname)
-                except:
-                    pass
-                return img
+                os.remove(tmpname)
             except:
-                print 'Error while loading filtered image file "%s"'%name
+                pass
+            cmd = TIFFConvCmd.replace("INPUT", normname).replace("OUTPUT", tmpname)
+            print cmd
+            os.system(cmd)
+            if not os.path.exists(tmpname):
+                print 'Error while loading image "%s" via PIL. An attempt to filter the image using the netpbm tools failed.'%name
+            else:
+                try:
+                    img = Image.open(tmpname)
+                    try:
+                        os.remove(tmpname)
+                    except:
+                        pass
+                    return img
+                except:
+                    print 'Error while loading filtered image file "%s"'%name
             
         
         # Try loading with wxPython...
@@ -461,7 +465,6 @@ class Renderer:
                            stderr_buf = err)
 
         os.chdir(olddir)
-
         return res
                            
 
@@ -550,11 +553,19 @@ class Renderer:
         stdout.close()
         stderr.close()
         # Clean up the directory...
-        try:
-            os.remove("_stdout.tmp")
-            os.remove("_stderr.tmp")
-        except:
-            pass
+        # (try several times if removing didn't succeed at first as it
+        # has already happened that the above close wasn't finished yet...?)
+        trials_left = 3
+        while trials_left>0:
+            try:
+                os.remove("_stdout.tmp")
+                os.remove("_stderr.tmp")
+                trials_left = 0
+            except OSError, e:
+                time.sleep(0.1)
+                trials_left -= 1
+                if trials_left==0:
+                    print e
 
         return outbuf, errbuf
 
