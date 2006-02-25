@@ -1,0 +1,105 @@
+version 3.03
+Hider "hidden" "string depthfilter" ["midpoint"]
+# 
+# Shadow pass
+# 
+FrameBegin 0
+PixelSamples 1 1
+PixelFilter "box" 1 1
+Format 128 128 1
+ShadingRate 2
+Display "shadow.z" "zfile" "z"
+Projection "perspective" "fov" [19.7788497247]
+Scale -1 1 1
+ConcatTransform [-0.659453140866 -0.751687759072 -0.00933101617836 0.0 -0.751745671755 0.659402338179 0.00818543845012 0.0 8.67361737988e-019 0.0124124641205 -0.9999229624 0.0 0.00659453140866 -0.116607763614 9.99932293416 1.0]
+WorldBegin
+AttributeBegin
+Attribute "identifier" "name" ["Sphere"]
+ConcatTransform [1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.2 1.0]
+Color [0 1 0]
+Opacity [1 1 1]
+Surface "constant"
+Sphere 0.8 -0.8 0.8 360
+AttributeEnd
+WorldEnd
+FrameEnd
+MakeShadow "shadow.z" "shadow.map"
+# 
+# Image pass
+# 
+FrameBegin 0
+PixelSamples 2 2
+Format 320 240 1
+ShadingRate 1.0
+Display "shadowpos_60.tif" "file" "rgb" "string compression" "lzw"
+Projection "perspective" "fov" [30.0]
+Scale -1 1 1
+ConcatTransform [-0.6 -0.243820581683 -0.761939317759 0.0 -0.8 0.182865436262 0.57145448832 0.0 0.0 0.952424147199 -0.304775727104 0.0 1.66533453694e-016 -0.38096965888 5.3716721902 1.0]
+WorldBegin
+AttributeBegin
+ConcatTransform [-0.659453140866 -0.751745671755 8.67361737988e-019 0.0 -0.751687759072 0.659402338179 0.0124124641205 0.0 -0.00933101617838 0.00818543845014 -0.9999229624 0.0 0.01 0.0 10.0 1.0]
+LightSource "spot" 1 "uniform float hotspot" [14.7788497247] "uniform string shadowname" ["shadow.map"] "intensity" [1.5] "uniform float falloff" [19.7788497247] "uniform float shadow_filter" [60.0] "uniform float shadow_bias" [0.1]
+AttributeEnd
+Illuminate 1 1
+AttributeBegin
+Attribute "identifier" "name" ["Plane"]
+Color [0.8 0.6 0.6]
+Opacity [1 1 1]
+Surface "matte"
+Patch "bilinear" "P" [-5.0 -5.0 0.0 5.0 -5.0 0.0 -5.0 5.0 0.0 5.0 5.0 0.0]
+AttributeEnd
+AttributeBegin
+Color [1 1 0]
+Opacity [0.5 0.5 0.5]
+Surface "constant"
+Curves "linear" [2] "nonperiodic" "P" [0.01 0.0 10.0 11.860613372 0.0 -121.467050863] "constantwidth" [0.02]
+Curves "linear" [2] "nonperiodic" "P" [0.01 0.0 10.0 11.7128735545 -1.87721358048 -121.466882977] "constantwidth" [0.02]
+Curves "linear" [2] "nonperiodic" "P" [0.01 0.0 10.0 11.2732919467 -3.7082039325 -121.466383453] "constantwidth" [0.02]
+Curves "linear" [2] "nonperiodic" "P" [0.01 0.0 10.0 10.5526925067 -5.44788599687 -121.46556459] "constantwidth" [0.02]
+Curves "linear" [2] "nonperiodic" "P" [0.01 0.0 10.0 9.56881878417 -7.05342302751 -121.464446551] "constantwidth" [0.02]
+Curves "linear" [2] "nonperiodic" "P" [0.01 0.0 10.0 8.3458970155 -8.48528137424 -121.463056867] "constantwidth" [0.02]
+Curves "linear" [2] "nonperiodic" "P" [0.01 0.0 10.0 6.91403959327 -9.7082039325 -121.461429757] "constantwidth" [0.02]
+Curves "linear" [2] "nonperiodic" "P" [0.01 0.0 10.0 5.30850359927 -10.6920782903 -121.459605284] "constantwidth" [0.02]
+Curves "linear" [2] "nonperiodic" "P" [0.01 0.0 10.0 3.56882265814 -11.4126781955 -121.457628374] "constantwidth" [0.02]
+Curves "linear" [2] "nonperiodic" "P" [0.01 0.0 10.0 1.73783348832 -11.8522600871 -121.455547704] "constantwidth" [0.02]
+Curves "linear" [2] "nonperiodic" "P" [0.01 0.0 10.0 -0.139378880123 -12.0 -121.453414509] "constantwidth" [0.02]
+Curves "linear" [2] "nonperiodic" "P" [0.01 0.0 10.0 -2.01659124856 -11.8522600871 -121.451281313] "constantwidth" [0.02]
+Curves "linear" [2] "nonperiodic" "P" [0.01 0.0 10.0 -3.84758041838 -11.4126781955 -121.449200643] "constantwidth" [0.02]
+Curves "linear" [2] "nonperiodic" "P" [0.01 0.0 10.0 -5.58726135951 -10.6920782903 -121.447223733] "constantwidth" [0.02]
+Curves "linear" [2] "nonperiodic" "P" [0.01 0.0 10.0 -7.19279735352 -9.7082039325 -121.44539926] "constantwidth" [0.02]
+Curves "linear" [2] "nonperiodic" "P" [0.01 0.0 10.0 -8.62465477575 -8.48528137424 -121.44377215] "constantwidth" [0.02]
+Curves "linear" [2] "nonperiodic" "P" [0.01 0.0 10.0 -9.84757654442 -7.05342302751 -121.442382466] "constantwidth" [0.02]
+Curves "linear" [2] "nonperiodic" "P" [0.01 0.0 10.0 -10.8314502669 -5.44788599687 -121.441264427] "constantwidth" [0.02]
+Curves "linear" [2] "nonperiodic" "P" [0.01 0.0 10.0 -11.5520497069 -3.7082039325 -121.440445564] "constantwidth" [0.02]
+Curves "linear" [2] "nonperiodic" "P" [0.01 0.0 10.0 -11.9916313147 -1.87721358048 -121.43994604] "constantwidth" [0.02]
+Curves "linear" [2] "nonperiodic" "P" [0.01 0.0 10.0 -12.1393711322 -1.46952762459e-015 -121.439778154] "constantwidth" [0.02]
+Curves "linear" [2] "nonperiodic" "P" [0.01 0.0 10.0 -11.9916313147 1.87721358048 -121.43994604] "constantwidth" [0.02]
+Curves "linear" [2] "nonperiodic" "P" [0.01 0.0 10.0 -11.5520497069 3.7082039325 -121.440445564] "constantwidth" [0.02]
+Curves "linear" [2] "nonperiodic" "P" [0.01 0.0 10.0 -10.8314502669 5.44788599687 -121.441264427] "constantwidth" [0.02]
+Curves "linear" [2] "nonperiodic" "P" [0.01 0.0 10.0 -9.84757654442 7.05342302751 -121.442382466] "constantwidth" [0.02]
+Curves "linear" [2] "nonperiodic" "P" [0.01 0.0 10.0 -8.62465477575 8.48528137424 -121.44377215] "constantwidth" [0.02]
+Curves "linear" [2] "nonperiodic" "P" [0.01 0.0 10.0 -7.19279735352 9.7082039325 -121.44539926] "constantwidth" [0.02]
+Curves "linear" [2] "nonperiodic" "P" [0.01 0.0 10.0 -5.58726135951 10.6920782903 -121.447223733] "constantwidth" [0.02]
+Curves "linear" [2] "nonperiodic" "P" [0.01 0.0 10.0 -3.84758041838 11.4126781955 -121.449200643] "constantwidth" [0.02]
+Curves "linear" [2] "nonperiodic" "P" [0.01 0.0 10.0 -2.01659124856 11.8522600871 -121.451281313] "constantwidth" [0.02]
+Curves "linear" [2] "nonperiodic" "P" [0.01 0.0 10.0 -0.139378880123 12.0 -121.453414509] "constantwidth" [0.02]
+Curves "linear" [2] "nonperiodic" "P" [0.01 0.0 10.0 1.73783348832 11.8522600871 -121.455547704] "constantwidth" [0.02]
+Curves "linear" [2] "nonperiodic" "P" [0.01 0.0 10.0 3.56882265814 11.4126781955 -121.457628374] "constantwidth" [0.02]
+Curves "linear" [2] "nonperiodic" "P" [0.01 0.0 10.0 5.30850359927 10.6920782903 -121.459605284] "constantwidth" [0.02]
+Curves "linear" [2] "nonperiodic" "P" [0.01 0.0 10.0 6.91403959327 9.7082039325 -121.461429757] "constantwidth" [0.02]
+Curves "linear" [2] "nonperiodic" "P" [0.01 0.0 10.0 8.3458970155 8.48528137424 -121.463056867] "constantwidth" [0.02]
+Curves "linear" [2] "nonperiodic" "P" [0.01 0.0 10.0 9.56881878417 7.05342302751 -121.464446551] "constantwidth" [0.02]
+Curves "linear" [2] "nonperiodic" "P" [0.01 0.0 10.0 10.5526925067 5.44788599687 -121.46556459] "constantwidth" [0.02]
+Curves "linear" [2] "nonperiodic" "P" [0.01 0.0 10.0 11.2732919467 3.7082039325 -121.466383453] "constantwidth" [0.02]
+Curves "linear" [2] "nonperiodic" "P" [0.01 0.0 10.0 11.7128735545 1.87721358048 -121.466882977] "constantwidth" [0.02]
+AttributeEnd
+AttributeBegin
+Attribute "identifier" "name" ["Sphere"]
+ConcatTransform [1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.2 1.0]
+Color [0 1 0]
+Opacity [1 1 1]
+Surface "matte"
+Sphere 0.8 -0.8 0.8 360
+AttributeEnd
+WorldEnd
+FrameEnd
