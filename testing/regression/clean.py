@@ -27,6 +27,8 @@ rm("RegressionTests/shaders/*.i")
 
 rm("RIBs/*/*.tif")
 rm("RIBs/*/*~")
+rm("RIBs/*/*.z")
+rm("RIBs/*/*.map")
 rm("shaders/*.slx")
 rm("shaders/*.slc")
 rm("shaders/*.sdl")
