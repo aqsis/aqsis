@@ -892,8 +892,12 @@ class CqShadowMap : public CqTextureMap
 		std::vector<CqMatrix>	m_WorldToCameraMatrices;		///< Matrix to convert points from world space to light space.
 		std::vector<CqMatrix>	m_WorldToScreenMatrices;		///< Matrix to convert points from world space to screen space.
 		std::vector<CqMatrix>	m_ITTCameraToLightMatrices;
-		std::vector<TqDouble>	m_MinZ;
-		TqInt	m_NumberOfMaps;
+		std::vector<TqDouble>	m_MinZ;	///< The minimum Z value for a shadow map
+		TqInt			m_NumberOfMaps; ///< Number of occlusion maps; regular shadowmap m_NumberOfMaps == 1
+		CqVector2D		m_LastPoint;	///< The last iu,iv coords; to minimize the computation over the same point
+		TqFloat			m_Val;		///< Its value at the last iu,iv
+		TqFloat			m_Depth; 	///< Its depth at the last iu,iv
+		TqFloat			m_Average; 	///< Its average z at the last iu,iv
 	
 
 }

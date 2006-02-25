@@ -72,6 +72,10 @@ CqShadowMap::CqShadowMap( const CqString& strName ) :
 	}
 	for (TqInt k=0; k < 256; k++)
 		m_apLast[k] = NULL;
+	m_LastPoint = CqVector2D(-1, -1);
+	m_Val = 0.0f;
+	m_Depth = 0.0f;
+	m_Average = 0.0f;
 }
 
 //---------------------------------------------------------------------
@@ -436,11 +440,16 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 	TqFloat sres = (1.0 + m_pswidth/2.0) * (hu - lu);
 	TqFloat tres = (1.0 + m_ptwidth/2.0) * (hv - lv);
 
+
 	if (sres < MinSize)
 		sres = MinSize;
 	if (tres < MinSize)
 		tres = MinSize;
 
+	if (sres > m_XRes/2)
+		sres = m_XRes/2;
+	if (tres > m_YRes/2)
+		tres = m_YRes/2;
 
 	// Calculate no. of samples.
 	TqUint nt, ns;
@@ -522,7 +531,6 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 	else
 		rbias  = (0.5 * (maxbias - minbias)) + minbias;
 
-	TqFloat s = lu;
 
   	// A conservative z value is the worst case scenario
 	// for the high bias value will be between 0..2.0 * rbias
@@ -564,13 +572,30 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 		}
 	}
 
+	TqFloat sdelta = (sres - static_cast<TqFloat>(hu - lu) ) / 2.0;
+	TqFloat tdelta = (tres - static_cast<TqFloat>(hv - lv) ) / 2.0;
+	TqFloat s = lu - sdelta;
+	TqFloat t = lv - tdelta;
 
-	for ( i = 0; i < ns; i++ )
+	// Speedup for the case of normal shadowmap; if we ever recompute around the same point
+	// we will return the previous value.
+	CqVector2D vecPoint(s,t);
+	if ((NumPages() == 1) && (vecPoint.x() == m_LastPoint.x()) && (vecPoint.y() == m_LastPoint.y()))
 	{
-		TqFloat t = lv;
+		val[0] = m_Val;
+		if (average_depth)
+			*average_depth = m_Average;
+		if (shadow_depth)
+			*shadow_depth = m_Depth;
+		return;
+	}
+
+	for ( i = 0; i < ns; i++, s += ds )
+	{
+		t = lv - tdelta;
 		TqUint j;
 
-		for ( j = 0; j < nt; j++ )
+		for ( j = 0; j < nt; j++, t += dt )
 		{
 			// Jitter s and t
 			m_rand_index = ( m_rand_index + 1 ) & 1023;
@@ -579,7 +604,9 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 			TqInt iv = static_cast<TqUint>( t + m_aRand_no[ m_rand_index ] * jt );
 
 			if( iu < 0 || iu >= (TqInt) m_XRes || iv < 0 || iv >= (TqInt) m_YRes )
+			{
 				continue;
+			}
 
 			if( ( pTMBa == NULL )  || !pTMBa->IsValid( iu, iv, index ) )
 			{
@@ -603,9 +630,7 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 				}
 				avz += mapz;
 			}
-			t += dt;
 		}
-		s += ds;
 	}
 
 	if( NULL != average_depth )
@@ -622,6 +647,15 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 	}
 
 	val[ 0 ] = ( static_cast<TqFloat>( inshadow ) / ( ns * nt ) );
+
+	// Keep track of computed values it might be usefull later in the next iteration
+	if (NumPages() == 1)
+	{
+		m_LastPoint = vecPoint;
+		m_Val = val[0];
+		m_Depth = sample_z;
+		m_Average = avz;
+	}
 }
 
 //----------------------------------------------------------------------
