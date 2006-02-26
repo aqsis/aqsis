@@ -7910,7 +7910,7 @@ void CqShaderExecEnv::SO_occlusion( IqShaderData* occlmap, IqShaderData* channel
 			allmatrices = new CqMatrix[nPages+1];
 
 			TqInt j = nPages;
-			for( ; j >= 0; j-- )
+			for( ; j > 0; j-- )
 			{
 				allmatrices[j] = pMap->GetMatrix(2, j);
 			}
@@ -7930,7 +7930,7 @@ void CqShaderExecEnv::SO_occlusion( IqShaderData* occlmap, IqShaderData* channel
 				(N)->GetNormal(_aq_N,__iGrid);
 				(P)->GetPoint(_aq_P,__iGrid);
 				TqInt i = nPages;
-				for( ; i >= 0; i-- )
+				for( ; i > 0; i-- )
 				{
 					// Check if the lightsource is behind the sample.
 					CqVector3D Nl = allmatrices[i] * _aq_N;
@@ -7941,7 +7941,8 @@ void CqShaderExecEnv::SO_occlusion( IqShaderData* occlmap, IqShaderData* channel
 					occlsum += cosangle * fv[0];
 					dotsum += cosangle;
 				}
-				occlsum /= dotsum;
+				if (dotsum != 0.0f)
+					occlsum /= dotsum;
 				(Result)->SetFloat(occlsum,__iGrid);
 			}
 		}
