@@ -48,6 +48,10 @@ __Basis	gPowerBasis	= {{  1.0f,       0.0f,       0.0f,       0.0f},
                        {  0.0f,       1.0f,       0.0f,       0.0f},
                        {  0.0f,       0.0f,       1.0f,       0.0f},
                        {  0.0f,       0.0f,       0.0f,       1.0f}};
+__Basis	gLinearBasis	= {{  0.0f,       0.0f,       0.0f,       0.0f},
+                        {  0.0f,       0.0f,       0.0f,       0.0f},
+                        {  0.0f,      -1.0f,       1.0f,       0.0f},
+                        {  0.0f,       1.0f,       0.0f,       0.0f}};
 
 
 //---------------------------------------------------------------------
@@ -189,6 +193,58 @@ CqVector4D CqSplineCubic::EvaluateFD()
 TqInt CqSplineCubic::cSections() const
 {
 	return ( ( ( m_cu -4 ) / m_Step ) + 1 );
+}
+
+
+//---------------------------------------------------------------------
+/* Set the cubic spline basis matrix.
+ */
+void CqSplineCubic::SetBasis( const CqString& strName )
+{
+  __Basis * pVals = 0;
+  TqInt step = 3;
+  if ( strName.compare( "bezier" ) == 0 )
+  {
+    pVals = &gBezierBasis;
+    step = 3;
+  }
+  else if ( strName.compare( "bspline" ) == 0 )
+  {
+    pVals = &gBSplineBasis;
+    step = 1;
+  }
+  else if ( strName.compare( "catmull-rom" ) == 0 )
+  {
+    pVals = &gCatmullRomBasis;
+    step = 1;
+  }
+  else if ( strName.compare( "hermite" ) == 0 )
+  {
+    pVals = &gHermiteBasis;
+    step = 2;
+  }
+  else if ( strName.compare( "linear") == 0 )
+  {
+    pVals = &gLinearBasis;
+    step = 1;
+  }
+  else if ( strName.compare( "power" ) == 0 )
+  {
+    pVals = &gPowerBasis;
+    step = 4;
+  }else{
+    Aqsis::log() << Aqsis::warning << "Unknown spline type \"" << strName.c_str() << "\", default to \"catmull-rom\"" << std::endl;
+    pVals = &gCatmullRomBasis;
+    step = 1;
+  };
+
+  if ( pVals )
+  {
+    CqMatrix m;
+    m = *pVals;
+    SetmatBasis( m );
+    SetStep( step );
+  }
 }
 
 END_NAMESPACE( Aqsis )
