@@ -226,7 +226,7 @@ void WriteTIFF(const std::string& filename, SqDisplayInstance* image)
 	if (description == NULL)
 	{
 		double nSecs = difftime(long_time, start);
-		sprintf(mydescription,"%e secs", nSecs);
+		sprintf(mydescription,"%d secs", static_cast<TqInt>(nSecs));
 		start = long_time;
 	}
 	else
