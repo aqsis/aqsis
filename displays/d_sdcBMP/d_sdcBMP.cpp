@@ -129,6 +129,18 @@ static bool bitmapfileheader(BITMAPFILEHEADER *bfh, FILE *fp);
 static unsigned short swap2( unsigned short s );
 static unsigned long  swap4( unsigned long l );
 
+static bool lowendian()
+{
+ union { 
+    int i; 
+    char c[4]; 
+ } u; 
+
+ u.i = 1; 
+
+ return  (u.c[0] != 0); 
+}
+
 // -----------------------------------------------------------------------------
 // Global Data
 // -----------------------------------------------------------------------------
@@ -225,11 +237,12 @@ PtDspyError DspyImageOpen(PtDspyImageHandle    *image,
 	}
 
 	// Write out the BITMAPFILEHEADER
-#ifndef WIN32
-    	g_Data.bfh.bfType = swap2(g_Data.bfh.bfType);
-    	g_Data.bfh.bfSize = swap4(g_Data.bfh.bfSize);
-    	g_Data.bfh.bfOffBits = swap4(g_Data.bfh.bfOffBits);
-#endif
+	if (lowendian())
+	{
+    		g_Data.bfh.bfType = swap2(g_Data.bfh.bfType);
+    		g_Data.bfh.bfSize = swap4(g_Data.bfh.bfSize);
+    		g_Data.bfh.bfOffBits = swap4(g_Data.bfh.bfOffBits);
+	}
 	if ( ! bitmapfileheader(&g_Data.bfh, g_Data.fp) )
       
 	{
@@ -237,25 +250,27 @@ PtDspyError DspyImageOpen(PtDspyImageHandle    *image,
 		goto Exit;
 	}
 
-#ifndef WIN32
-    	g_Data.bfh.bfType = swap2(g_Data.bfh.bfType);
-    	g_Data.bfh.bfSize = swap4(g_Data.bfh.bfSize);
-    	g_Data.bfh.bfOffBits = swap4(g_Data.bfh.bfOffBits);
-#endif
+	if (lowendian())
+	{
+    		g_Data.bfh.bfType = swap2(g_Data.bfh.bfType);
+    		g_Data.bfh.bfSize = swap4(g_Data.bfh.bfSize);
+    		g_Data.bfh.bfOffBits = swap4(g_Data.bfh.bfOffBits);
+	}
 
-#ifndef WIN32
-   	g_Data.bmi.bmiHeader.biSize = swap4(g_Data.bmi.bmiHeader.biSize);
-	g_Data.bmi.bmiHeader.biWidth= swap4(g_Data.bmi.bmiHeader.biWidth);
-   	g_Data.bmi.bmiHeader.biHeight= swap4(g_Data.bmi.bmiHeader.biHeight);
-   	g_Data.bmi.bmiHeader.biPlanes = swap2(g_Data.bmi.bmiHeader.biPlanes);
-   	g_Data.bmi.bmiHeader.biBitCount = swap2(g_Data.bmi.bmiHeader.biBitCount);
-   	g_Data.bmi.bmiHeader.biCompression= swap4(g_Data.bmi.bmiHeader.biCompression); 
-   	g_Data.bmi.bmiHeader.biSizeImage= swap4(g_Data.bmi.bmiHeader.biSizeImage);
-   	g_Data.bmi.bmiHeader.biXPelsPerMeter= swap4(g_Data.bmi.bmiHeader.biXPelsPerMeter); 
-   	g_Data.bmi.bmiHeader.biYPelsPerMeter= swap4(g_Data.bmi.bmiHeader.biYPelsPerMeter); 
-   	g_Data.bmi.bmiHeader.biClrUsed= swap4(g_Data.bmi.bmiHeader.biClrUsed);
-   	g_Data.bmi.bmiHeader.biClrImportant= swap4(g_Data.bmi.bmiHeader.biClrImportant);
-#endif
+	if (lowendian())
+	{
+   		g_Data.bmi.bmiHeader.biSize = swap4(g_Data.bmi.bmiHeader.biSize);
+		g_Data.bmi.bmiHeader.biWidth= swap4(g_Data.bmi.bmiHeader.biWidth);
+   		g_Data.bmi.bmiHeader.biHeight= swap4(g_Data.bmi.bmiHeader.biHeight);
+   		g_Data.bmi.bmiHeader.biPlanes = swap2(g_Data.bmi.bmiHeader.biPlanes);
+   		g_Data.bmi.bmiHeader.biBitCount = swap2(g_Data.bmi.bmiHeader.biBitCount);
+   		g_Data.bmi.bmiHeader.biCompression= swap4(g_Data.bmi.bmiHeader.biCompression); 
+   		g_Data.bmi.bmiHeader.biSizeImage= swap4(g_Data.bmi.bmiHeader.biSizeImage);
+   		g_Data.bmi.bmiHeader.biXPelsPerMeter= swap4(g_Data.bmi.bmiHeader.biXPelsPerMeter); 
+   		g_Data.bmi.bmiHeader.biYPelsPerMeter= swap4(g_Data.bmi.bmiHeader.biYPelsPerMeter); 
+   		g_Data.bmi.bmiHeader.biClrUsed= swap4(g_Data.bmi.bmiHeader.biClrUsed);
+   		g_Data.bmi.bmiHeader.biClrImportant= swap4(g_Data.bmi.bmiHeader.biClrImportant);
+	}
 	// Write out the BITMAPINFOHEADER
 
 	if ( ! fwrite(&g_Data.bmi.bmiHeader,
@@ -268,19 +283,20 @@ PtDspyError DspyImageOpen(PtDspyImageHandle    *image,
 		goto Exit;
 	}
 
-#ifndef WIN32
-   	g_Data.bmi.bmiHeader.biSize = swap4(g_Data.bmi.bmiHeader.biSize);
-   	g_Data.bmi.bmiHeader.biWidth= swap4(g_Data.bmi.bmiHeader.biWidth);
-   	g_Data.bmi.bmiHeader.biHeight= swap4(g_Data.bmi.bmiHeader.biHeight);
-   	g_Data.bmi.bmiHeader.biPlanes = swap2(g_Data.bmi.bmiHeader.biPlanes);
-   	g_Data.bmi.bmiHeader.biBitCount = swap2(g_Data.bmi.bmiHeader.biBitCount);
-   	g_Data.bmi.bmiHeader.biCompression= swap4(g_Data.bmi.bmiHeader.biCompression); 
-   	g_Data.bmi.bmiHeader.biSizeImage= swap4(g_Data.bmi.bmiHeader.biSizeImage);
-   	g_Data.bmi.bmiHeader.biXPelsPerMeter= swap4(g_Data.bmi.bmiHeader.biXPelsPerMeter); 
-   	g_Data.bmi.bmiHeader.biYPelsPerMeter= swap4(g_Data.bmi.bmiHeader.biYPelsPerMeter); 
-   	g_Data.bmi.bmiHeader.biClrUsed= swap4(g_Data.bmi.bmiHeader.biClrUsed);
-   	g_Data.bmi.bmiHeader.biClrImportant= swap4(g_Data.bmi.bmiHeader.biClrImportant);
-#endif
+	if (lowendian())
+	{
+   		g_Data.bmi.bmiHeader.biSize = swap4(g_Data.bmi.bmiHeader.biSize);
+		g_Data.bmi.bmiHeader.biWidth= swap4(g_Data.bmi.bmiHeader.biWidth);
+   		g_Data.bmi.bmiHeader.biHeight= swap4(g_Data.bmi.bmiHeader.biHeight);
+   		g_Data.bmi.bmiHeader.biPlanes = swap2(g_Data.bmi.bmiHeader.biPlanes);
+   		g_Data.bmi.bmiHeader.biBitCount = swap2(g_Data.bmi.bmiHeader.biBitCount);
+   		g_Data.bmi.bmiHeader.biCompression= swap4(g_Data.bmi.bmiHeader.biCompression); 
+   		g_Data.bmi.bmiHeader.biSizeImage= swap4(g_Data.bmi.bmiHeader.biSizeImage);
+   		g_Data.bmi.bmiHeader.biXPelsPerMeter= swap4(g_Data.bmi.bmiHeader.biXPelsPerMeter); 
+   		g_Data.bmi.bmiHeader.biYPelsPerMeter= swap4(g_Data.bmi.bmiHeader.biYPelsPerMeter); 
+   		g_Data.bmi.bmiHeader.biClrUsed= swap4(g_Data.bmi.bmiHeader.biClrUsed);
+   		g_Data.bmi.bmiHeader.biClrImportant= swap4(g_Data.bmi.bmiHeader.biClrImportant);
+	}
 
 Exit:
 
