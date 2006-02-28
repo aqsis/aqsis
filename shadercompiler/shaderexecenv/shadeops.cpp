@@ -7872,8 +7872,6 @@ void CqShaderExecEnv::SO_occlusion( IqShaderData* occlmap, IqShaderData* channel
 {
 	TqBool __fVarying=TqFalse;
 	TqUint __iGrid;
-	static CqMatrix *allmatrices= NULL;
-	static TqUlong  allmatrix = 0;
 
 	if ( NULL == QGetRenderContextI() )
 		return ;
@@ -7902,23 +7900,15 @@ void CqShaderExecEnv::SO_occlusion( IqShaderData* occlmap, IqShaderData* channel
 		__iGrid = 0;
 		CqBitVector& RS = RunningState();
 		TqInt nPages = pMap->NumPages() - 1;
-		if (CqString::hash(_aq_occlmap.c_str()) != allmatrix)
+      		if (nPages == 0)
+      		{
+         		SO_shadow( occlmap, channel,  P, Result, pShader, cParams, apParams );
+      		} else 
 		{
-			if (allmatrices)
-				delete allmatrices;
-			allmatrix = CqString::hash(_aq_occlmap.c_str());
-			allmatrices = new CqMatrix[nPages+1];
-
-			TqInt j = nPages;
-			for( ; j > 0; j-- )
+			do
 			{
-				allmatrices[j] = pMap->GetMatrix(2, j);
-			}
-		}
-		do
-		{
-			if(!__fVarying || RS.Value( __iGrid ) )
-			{
+				if(!__fVarying || RS.Value( __iGrid ) )
+				{
 				// Storage for the final combined occlusion value.
 				TqFloat occlsum = 0.0f;
 				TqFloat dotsum = 0.0f;
@@ -7930,23 +7920,27 @@ void CqShaderExecEnv::SO_occlusion( IqShaderData* occlmap, IqShaderData* channel
 				(N)->GetNormal(_aq_N,__iGrid);
 				(P)->GetPoint(_aq_P,__iGrid);
 				TqInt i = nPages;
-				for( ; i > 0; i-- )
-				{
+					for( ; i >= 0; i-- )
+					{
 					// Check if the lightsource is behind the sample.
-					CqVector3D Nl = allmatrices[i] * _aq_N;
+					CqVector3D Nl = pMap->GetMatrix(2, i) * _aq_N;
 					TqFloat cosangle = Nl * L;
-					if( cosangle <= 0.0f )
-						continue;
-					pMap->SampleMap( _aq_P, swidth, twidth, fv, i );
-					occlsum += cosangle * fv[0];
-					dotsum += cosangle;
+
+						if( cosangle <= 0.0f )
+						{
+							continue;
+						}
+						pMap->SampleMap( _aq_P, swidth, twidth, fv, i );
+						occlsum += cosangle * fv[0];
+						dotsum += cosangle;
+					}
+					if (dotsum != 0.0f)
+						occlsum /= dotsum;
+					(Result)->SetFloat(occlsum,__iGrid);
 				}
-				if (dotsum != 0.0f)
-					occlsum /= dotsum;
-				(Result)->SetFloat(occlsum,__iGrid);
 			}
+			while( ( ++__iGrid < GridSize() ) && __fVarying);
 		}
-		while( ( ++__iGrid < GridSize() ) && __fVarying);
 	}
 	else
 	{

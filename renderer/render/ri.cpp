@@ -5773,6 +5773,7 @@ RtVoid	RiMakeOcclusionV( RtInt npics, RtString picfiles[], RtString shadowfile, 
 	TIME_SCOPE("Shadow Mapping")
 
 	RtInt index;
+        unlink(shadowfile);
 	for( index = 0; index < npics; ++index )
 	{
 		CqShadowMap ZFile( picfiles[index] );
