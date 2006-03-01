@@ -26,13 +26,13 @@
 #include	"aqsis.h"
 
 #ifdef WIN32
-#include    <windows.h>
+#include	<windows.h>
 #endif
 #include	<math.h>
 
 #include	"options.h"
 #include	"renderer.h"
-#include    "random.h"
+#include	"random.h"
 #include	"imagepixel.h"
 #include	"logging.h"
 #include	"bucket.h"
@@ -174,7 +174,15 @@ void CqImagePixel::InitialiseSamples( std::vector<CqVector2D>& vecSamples )
 	}
 
 	// we now shuffle the dof offsets but remember which one went where.
-	std::random_shuffle(m_DofOffsetIndices.begin(), m_DofOffsetIndices.end());
+	for( i = 0; i < numSamples/2; i++)
+   	{
+      		int k = random.RandomInt(numSamples/2) + numSamples/2;
+      		if (k >= numSamples) k = numSamples - 1;
+      		int tmp = m_DofOffsetIndices[i];
+      		m_DofOffsetIndices[i] = m_DofOffsetIndices[k];
+      		m_DofOffsetIndices[k] = tmp;
+   	}
+
 	for( i = 0; i < numSamples; ++i)
 	{
 		CqBucket::SamplePoints()[m_SampleIndices[m_DofOffsetIndices[i]]].m_DofOffset = tmpDofOffsets[i];
@@ -300,7 +308,15 @@ void CqImagePixel::JitterSamples( std::vector<CqVector2D>& vecSamples, TqFloat o
 	}
 
 	// we now shuffle the dof offsets but remember which one went where.
-	std::random_shuffle(m_DofOffsetIndices.begin(), m_DofOffsetIndices.end());
+	for( i = 0; i < numSamples/2; i++)
+   	{
+      		int k = random.RandomInt(numSamples/2) + numSamples/2;
+      		if (k >= numSamples) k = numSamples - 1;
+      		int tmp = m_DofOffsetIndices[i];
+      		m_DofOffsetIndices[i] = m_DofOffsetIndices[k];
+      		m_DofOffsetIndices[k] = tmp;
+   	}
+
 	for( i = 0; i < numSamples; ++i)
 	{
 		CqBucket::SamplePoints()[m_SampleIndices[m_DofOffsetIndices[i]]].m_DofOffset = tmpDofOffsets[i];

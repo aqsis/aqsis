@@ -136,9 +136,11 @@ void CqBucket::PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt y
 	TqUint i = 0;
 	if (size > 1)
 	{
+		CqRandom rand(19);
 		for( itPix = m_aieImage.begin(), i=0 ; itPix <= m_aieImage.end(), i < size - 1; itPix++, i++)
 		{
-			TqUint other = i + rand() / (RAND_MAX / (size - i) + 1);
+			TqUint other = i + rand.RandomInt(size - i);
+			if (other >= size) other = size - 1;
 			(*itPix).m_SampleIndices.swap(m_aieImage[other].m_SampleIndices);  
 			(*itPix).m_DofOffsetIndices.swap(m_aieImage[other].m_DofOffsetIndices); 
 		};

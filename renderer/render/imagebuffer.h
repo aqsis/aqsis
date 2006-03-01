@@ -71,6 +71,14 @@ struct SqGridInfo
 	TqBool			m_UsesDataMap;
 };
 
+// Enumeration of the type of rendering order of the buckets (experimental)
+enum EqBucketOrder {
+        Bucket_Horizontal = 0,
+        Bucket_Vertical,
+        Bucket_ZigZag,
+        Bucket_Circle,
+        Bucket_Random
+};
 
 
 //-----------------------------------------------------------------------
@@ -262,18 +270,8 @@ class CqImageBuffer
 		}
 		/** Move to the next bucket to process.
 		 */
-		bool NextBucket()
-		{
-			m_CurrentBucketCol++;
-			if( m_CurrentBucketCol >= m_cXBuckets )
-			{
-				m_CurrentBucketCol = 0;
-				m_CurrentBucketRow++;
-				if( m_CurrentBucketRow >= m_cYBuckets )
-					return( TqFalse );
-			}
-			return( TqTrue );
-		}
+    		TqBool NextBucket(EqBucketOrder order);
+
 		/** Get a pointer to the current bucket
 		 */
 		CqBucket& CurrentBucket()

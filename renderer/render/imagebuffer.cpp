@@ -45,6 +45,7 @@
 START_NAMESPACE( Aqsis )
 
 static TqInt bucketmodulo = -1;
+static TqInt bucketdirection = -1;
 
 //----------------------------------------------------------------------
 /** Destructor
@@ -1253,6 +1254,22 @@ void CqImageBuffer::RenderImage()
 	RtProgressFunc pProgressHandler = NULL;
 	pProgressHandler = QGetRenderContext()->pProgressHandler();
 
+	const CqString* pstrBucketOrder = QGetRenderContext() ->optCurrent().GetStringOption( "render", "bucketorder" );
+	enum EqBucketOrder order = Bucket_Horizontal;
+	if ( NULL != pstrBucketOrder )
+	{
+	if( !pstrBucketOrder[ 0 ].compare( "vertical" ) )
+		order = Bucket_Vertical;
+	else if ( !pstrBucketOrder[ 0 ].compare( "horizontal" ) )
+		order = Bucket_Horizontal;
+	else if ( !pstrBucketOrder[ 0 ].compare( "zigzag" ) )
+		order = Bucket_ZigZag;
+	else if ( !pstrBucketOrder[ 0 ].compare( "circle" ) )
+		order = Bucket_Circle;
+	else if ( !pstrBucketOrder[ 0 ].compare( "random" ) )
+		order = Bucket_Random;
+	}
+
 	do
 	{
 		TqBool bIsEmpty = IsCurrentBucketEmpty();
@@ -1342,8 +1359,7 @@ void CqImageBuffer::RenderImage()
 		}
 #endif
 		CurrentBucket().SetProcessed();
-	}
-	while( NextBucket() );
+	} while( NextBucket(order) );
 
 	ImageComplete();
 	CqBucket::ShutdownBucket();
@@ -1368,6 +1384,168 @@ void CqImageBuffer::Quit()
 	m_fQuit = TqTrue;
 }
 
+//----------------------------------------------------------------------
+/** Compute the next bucket based on the "render" "bucketorder" given.
+ */
+TqBool CqImageBuffer::NextBucket(EqBucketOrder order)
+{
+
+	TqInt cnt = 0;
+	TqInt total = ((m_cXBuckets - 1) * (m_cYBuckets - 1));
+
+
+	for (TqInt i =0; i < m_cYBuckets - 1 ; i++)
+		for (TqInt j = 0; j < m_cXBuckets - 1; j++)
+			if (Bucket(j, i).IsProcessed() )
+				cnt ++;
+         
+	if ((order != Bucket_Vertical) &&
+	        (order != Bucket_Horizontal) &&
+	        (cnt == total))
+		return TqFalse;
+
+	switch (order)
+	{
+
+		case Bucket_Random :
+		{
+			CqRandom rg;
+			do
+			{
+				m_CurrentBucketCol = (TqInt) rg.RandomFloat(m_cXBuckets);
+				m_CurrentBucketRow = (TqInt) rg.RandomFloat(m_cYBuckets);
+				m_CurrentBucketCol = CLAMP(m_CurrentBucketCol, 0, m_cXBuckets - 1);
+				m_CurrentBucketRow = CLAMP(m_CurrentBucketRow, 0, m_cYBuckets - 1);
+			}
+			while ( Bucket(m_CurrentBucketCol, m_CurrentBucketRow).IsProcessed() );
+
+		}
+		break;
+
+		case Bucket_Circle :
+		{
+			static TqInt radius = 0;
+			static float theta = 0.0f;
+
+			if ((m_CurrentBucketCol == m_CurrentBucketRow) &&
+				(m_CurrentBucketRow == 0))
+			{
+				radius = 0;
+				theta = 0.0f;
+			}
+			TqFloat r = (TqFloat) sqrt((m_cXBuckets * m_cXBuckets) + (m_cYBuckets * m_cYBuckets)) + 2;
+			TqInt midx = m_cXBuckets/2;
+			TqInt midy = m_cYBuckets/2;
+
+
+			TqFloat delta = 0.01f;
+
+			do
+			{
+				if (radius > r)
+					break;
+				m_CurrentBucketCol = midx + (TqInt) (radius * cos(theta));
+				m_CurrentBucketRow = midy + (TqInt) (radius * sin(theta));
+
+				theta += delta;
+				if (theta > 6.28f)
+				{
+					theta = 0.0f;
+					radius ++;
+				}
+				if (radius > r)
+					break;
+
+				m_CurrentBucketCol = CLAMP(m_CurrentBucketCol, 0, m_cXBuckets - 1);
+				m_CurrentBucketRow = CLAMP(m_CurrentBucketRow, 0, m_cYBuckets - 1);
+			}
+			while (Bucket(m_CurrentBucketCol, m_CurrentBucketRow).IsProcessed());
+
+			if (radius > r)
+			{
+				// Maybe a bucket was not done
+				for (TqInt i =0; i < m_cYBuckets - 1 ; i++)
+					for (TqInt j = 0; j < m_cXBuckets - 1; j++)
+						if (!Bucket(j, i).IsProcessed() )
+						{
+							m_CurrentBucketCol = j;
+							m_CurrentBucketRow = i;
+
+						}
+			}
+
+
+		}
+		break;
+
+		case Bucket_ZigZag :
+		{
+
+			if (bucketdirection == 1)
+				m_CurrentBucketCol++;
+			else
+				m_CurrentBucketCol--;
+
+			if((bucketdirection == 1) && ( m_CurrentBucketCol >= m_cXBuckets ))
+			{
+
+				m_CurrentBucketCol = m_cXBuckets-1;
+				m_CurrentBucketRow++;
+				bucketdirection = -1;
+				if( m_CurrentBucketRow >= m_cYBuckets )
+					return( TqFalse );
+
+			}
+			else if((bucketdirection == -1) && ( m_CurrentBucketCol < 0 ))
+			{
+
+				m_CurrentBucketCol = 0;
+				m_CurrentBucketRow++;
+				bucketdirection = 1;
+
+				if( m_CurrentBucketRow >= m_cYBuckets )
+					return( TqFalse );
+
+			}
+		}
+		break;
+		case Bucket_Vertical :
+		{
+
+			m_CurrentBucketRow++;
+
+			if( m_CurrentBucketRow >= m_cYBuckets )
+			{
+
+				m_CurrentBucketRow = 0;
+				m_CurrentBucketCol++;
+
+				if( m_CurrentBucketCol >= m_cXBuckets )
+					return( TqFalse );
+
+			}
+		}
+		break;
+		default:
+		case Bucket_Horizontal :
+		{
+
+			m_CurrentBucketCol++;
+
+			if( m_CurrentBucketCol >= m_cXBuckets )
+			{
+
+				m_CurrentBucketCol = 0;
+				m_CurrentBucketRow++;
+				if( m_CurrentBucketRow >= m_cYBuckets )
+					return( TqFalse );
+
+			}
+		}
+		break;
+	}
+	return( TqTrue );
+}
 
 //---------------------------------------------------------------------
 
