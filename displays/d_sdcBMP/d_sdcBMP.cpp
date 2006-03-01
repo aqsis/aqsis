@@ -53,7 +53,8 @@ typedef struct tagBITMAPFILEHEADER { // bmfh
     int     bfOffBits; 
 } BITMAPFILEHEADER; 
 
-#define BITMAPFILEHEADER_SIZEOF 14 /* instead of sizeof(BITMAPFILEHEADER) since this must be 14 */
+/* instead of sizeof(BITMAPFILEHEADER) since this must be 14 */
+#define BITMAPFILEHEADER_SIZEOF 14 
 
 typedef struct tagRGBQUAD { // rgbq 
     unsigned char rgbBlue; 
@@ -128,24 +129,12 @@ static int  DWORDALIGN(int bits);
 static bool bitmapfileheader(BITMAPFILEHEADER *bfh, FILE *fp);
 static unsigned short swap2( unsigned short s );
 static unsigned long  swap4( unsigned long l );
-
-static bool lowendian()
-{
- union { 
-    int i; 
-    char c[4]; 
- } u; 
-
- u.i = 1; 
-
- return  (u.c[0] != 0); 
-}
+static bool lowendian();
 
 // -----------------------------------------------------------------------------
 // Global Data
 // -----------------------------------------------------------------------------
 
-static AppData g_Data;
 
 //******************************************************************************
 // DspyImageOpen
@@ -167,12 +156,17 @@ PtDspyError DspyImageOpen(PtDspyImageHandle    *image,
 {
 	PtDspyError rval = PkDspyErrorNone;
 
+   static AppData g_Data;
+   AppData *pData;
+
 #if SHOW_CALLSTACK
 
 	fprintf(stderr, "sdcBMP_DspyImageOpen called.\n");
 #endif
 
-   
+   pData = (AppData *) calloc(1, sizeof(g_Data));
+   *image = pData;
+
    // Initialize our global resources
 
 	memset(&g_Data, sizeof(AppData), 0);
@@ -185,8 +179,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle    *image,
 	if ( height <= 0 )
 		height = DEFAULT_IMAGEHEIGHT;
 
-	*image = &g_Data;
-
+	
 	g_Data.FileName = strdup(filename);
 	g_Data.Channels = formatCount;
 
@@ -260,7 +253,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle    *image,
 	if (lowendian())
 	{
    		g_Data.bmi.bmiHeader.biSize = swap4(g_Data.bmi.bmiHeader.biSize);
-		g_Data.bmi.bmiHeader.biWidth= swap4(g_Data.bmi.bmiHeader.biWidth);
+		   g_Data.bmi.bmiHeader.biWidth= swap4(g_Data.bmi.bmiHeader.biWidth);
    		g_Data.bmi.bmiHeader.biHeight= swap4(g_Data.bmi.bmiHeader.biHeight);
    		g_Data.bmi.bmiHeader.biPlanes = swap2(g_Data.bmi.bmiHeader.biPlanes);
    		g_Data.bmi.bmiHeader.biBitCount = swap2(g_Data.bmi.bmiHeader.biBitCount);
@@ -286,7 +279,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle    *image,
 	if (lowendian())
 	{
    		g_Data.bmi.bmiHeader.biSize = swap4(g_Data.bmi.bmiHeader.biSize);
-		g_Data.bmi.bmiHeader.biWidth= swap4(g_Data.bmi.bmiHeader.biWidth);
+		   g_Data.bmi.bmiHeader.biWidth= swap4(g_Data.bmi.bmiHeader.biWidth);
    		g_Data.bmi.bmiHeader.biHeight= swap4(g_Data.bmi.bmiHeader.biHeight);
    		g_Data.bmi.bmiHeader.biPlanes = swap2(g_Data.bmi.bmiHeader.biPlanes);
    		g_Data.bmi.bmiHeader.biBitCount = swap2(g_Data.bmi.bmiHeader.biBitCount);
@@ -298,6 +291,9 @@ PtDspyError DspyImageOpen(PtDspyImageHandle    *image,
    		g_Data.bmi.bmiHeader.biClrImportant= swap4(g_Data.bmi.bmiHeader.biClrImportant);
 	}
 
+   
+   memcpy((void*) pData, (void *) &g_Data, sizeof(AppData));
+   
 Exit:
 
 	if ( rval != PkDspyErrorNone )
@@ -328,6 +324,7 @@ PtDspyError DspyImageQuery(PtDspyImageHandle image,
 	fprintf(stderr, "sdcBMP_DspyImageQuery called, type: %d.\n", type);
 #endif
 
+   AppData *pData = (AppData *)image;
 	PtDspyError          ret = PkDspyErrorNone;
 	PtDspyOverwriteInfo  owi;
 	PtDspySizeInfo       si;
@@ -354,8 +351,8 @@ PtDspyError DspyImageQuery(PtDspyImageHandle image,
 
 				if ( image )
 				{
-					si.width       = ((AppData *)image)->bmi.bmiHeader.biWidth;
-					si.height      = ((AppData *)image)->bmi.bmiHeader.biHeight;
+					si.width       = pData->bmi.bmiHeader.biWidth;
+					si.height      = pData->bmi.bmiHeader.biHeight;
 					si.aspectRatio = DEFAULT_PIXELASPECTRATIO;
 				}
 				else
@@ -399,6 +396,7 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 	int  r, g, b;
 	char *to;
 	long spot;
+   AppData *pData = (AppData *)image;
 
 #if SHOW_CALLSTACK
 
@@ -411,18 +409,18 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 		return PkDspyErrorBadParams;
 	}
 
-	spot  = g_Data.bfh.bfOffBits +
-	        (g_Data.RowSize * (g_Data.bmi.bmiHeader.biHeight - ymin - 1));
-	spot += g_Data.PixelBytes * xmin;
+	spot  = pData->bfh.bfOffBits +
+	        (pData->RowSize * (pData->bmi.bmiHeader.biHeight - ymin - 1));
+	spot += pData->PixelBytes * xmin;
 
-	if ( fseek(g_Data.fp, spot, SEEK_SET) != 0 )
+	if ( fseek(pData->fp, spot, SEEK_SET) != 0 )
 	{
 		fprintf(stderr, "sdcBMP_DspyImageData: Seek failure\n");
 		return PkDspyErrorUndefined;
 	}
 
 
-	to = g_Data.ImageData;
+	to = pData->ImageData;
 
 	for (x = xmin; x < xmax_plusone; x++)
 	{
@@ -431,14 +429,14 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 		if ( ! data )
 			r = g = b = 0;
 		else
-			if ( g_Data.Channels == 1 )
+			if ( pData->Channels == 1 )
 				r = g = b = data[0];
 			else
-				if ( g_Data.Channels >= 3 )
+				if ( pData->Channels >= 3 )
 				{
-					r = data[g_Data.Channels - 1];
-					g = data[g_Data.Channels - 2];
-					b = data[g_Data.Channels - 3];
+					r = data[pData->Channels - 1];
+					g = data[pData->Channels - 2];
+					b = data[pData->Channels - 3];
 				}
 
 
@@ -452,7 +450,7 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 		*to++ = b;
 	}
 
-	if ( ! fwrite(g_Data.ImageData, int(to - g_Data.ImageData), 1, g_Data.fp) )
+	if ( ! fwrite(pData->ImageData, int(to - pData->ImageData), 1, pData->fp) )
 	{
 		fprintf(stderr, "sdcBMP_DspyImageData: Error writing file\n");
 		return PkDspyErrorUndefined;
@@ -473,18 +471,21 @@ PtDspyError DspyImageClose(PtDspyImageHandle image)
 	fprintf(stderr, "sdcBMP_DspyImageClose called.\n");
 #endif
 
-	if ( g_Data.fp )
-		fclose(g_Data.fp);
-	g_Data.fp = NULL;
+   AppData *pData = (AppData *)image;
 
-	if ( g_Data.FileName )
-		free(g_Data.FileName);
-	g_Data.FileName = NULL;
+	if ( pData->fp )
+		fclose(pData->fp);
+	pData->fp = NULL;
 
-	if ( g_Data.ImageData )
-		free(g_Data.ImageData);
-	g_Data.ImageData = NULL;
+	if ( pData->FileName )
+		free(pData->FileName);
+	pData->FileName = NULL;
 
+	if ( pData->ImageData )
+		free(pData->ImageData);
+	pData->ImageData = NULL;
+
+   free(pData);
 
 	return PkDspyErrorNone;
 }
@@ -568,4 +569,16 @@ unsigned char *c, *d;
    c[3] = d[0];
    return n;
 
+}
+
+//******************************************************************************
+// Determine if we are low endian or big endian
+//******************************************************************************
+
+static bool lowendian()
+{
+ unsigned short low = 0xFFFE;
+ unsigned char * pt = (unsigned char *) &low;
+
+ return  (*pt == 0xFF); 
 }
