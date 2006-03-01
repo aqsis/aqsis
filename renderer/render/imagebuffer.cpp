@@ -1433,7 +1433,7 @@ TqBool CqImageBuffer::NextBucket(EqBucketOrder order)
 				radius = 0;
 				theta = 0.0f;
 			}
-			TqFloat r = (TqFloat) sqrt((m_cXBuckets * m_cXBuckets) + (m_cYBuckets * m_cYBuckets)) + 2;
+			TqFloat r = (TqFloat) sqrt(static_cast<double>((m_cXBuckets * m_cXBuckets) + (m_cYBuckets * m_cYBuckets))) + 2;
 			TqInt midx = m_cXBuckets/2;
 			TqInt midy = m_cYBuckets/2;
 
