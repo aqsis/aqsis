@@ -279,6 +279,35 @@ static TqUlong RIH_VISIBILITY = CqString::hash( "visibility" );
 
 RtInt	RiLastError = 0;
 
+// Mitchell Filter Declarations
+class MitchellFilter {
+public:
+   // MitchellFilter Public Methods
+   MitchellFilter(TqFloat b, TqFloat c, TqFloat xw, TqFloat yw)
+   {
+      B = b;
+      C = c;
+      invXWidth = 1.0f/xw;
+      invYWidth = 1.0f/yw;
+   }
+   TqFloat Evaluate(TqFloat x, TqFloat y) const {
+      return Evaluate(x * invXWidth) * Evaluate(y * invYWidth);
+   }
+   TqFloat Evaluate(TqFloat x) const {
+      x = fabsf(2.f * x);
+      if (x > 1.f)
+         return ((-B - 6*C) * x*x*x + (6*B + 30*C) * x*x +
+         (-12*B - 48*C) * x + (8*B + 24*C)) * (1.f/6.f);
+      else
+         return ((12 - 9*B - 6*C) * x*x*x +
+         (-18 + 12*B + 6*C) * x*x +
+         (6 - 2*B)) * (1.f/6.f);
+   }
+private:
+   TqFloat B, C;
+   TqFloat invXWidth, invYWidth;
+};
+
 //----------------------------------------------------------------------
 // CreateGPrim
 // Helper function to build a GPrim from any boost::shared_ptr<> type..
@@ -1644,6 +1673,17 @@ RtFloat	RiGaussianFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 	return exp( -2.0 * ( x * x + y * y ) );
 }
 
+ 
+//----------------------------------------------------------------------
+// RiMitchellFilter
+// Mitchell filter used as a possible value passed to RiPixelFIlter.
+//
+RtFloat	RiMitchellFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
+{
+MitchellFilter mc(1/3.0f, 2/3.0f, xwidth, ywidth);
+
+   return mc.Evaluate(x, y);
+}
 
 //----------------------------------------------------------------------
 // RiBoxFilter
@@ -5371,6 +5411,8 @@ RtVoid	RiMakeTextureV( RtString imagefile, RtString texturefile, RtToken swrap, 
 	sprintf( modes, "%s %s %s %f %f", swrap, twrap, "box", swidth, twidth );
 	if ( filterfunc == RiGaussianFilter )
 		sprintf( modes, "%s %s %s %f %f", swrap, twrap, "gaussian", swidth, twidth );
+	if ( filterfunc == RiMitchellFilter )
+		sprintf( modes, "%s %s %s %f %f", swrap, twrap, "mitchell", swidth, twidth );
 	if ( filterfunc == RiBoxFilter )
 		sprintf( modes, "%s %s %s %f %f", swrap, twrap, "box", swidth, twidth );
 	if ( filterfunc == RiTriangleFilter )
@@ -5499,6 +5541,8 @@ RtVoid	RiMakeLatLongEnvironmentV( RtString imagefile, RtString reflfile, RtFilte
 	sprintf( modes, "%s %s %s %f %f", swrap, twrap, "box", swidth, twidth );
 	if ( filterfunc == RiGaussianFilter )
 		sprintf( modes, "%s %s %s %f %f", swrap, twrap, "gaussian", swidth, twidth );
+	if ( filterfunc == RiMitchellFilter )
+		sprintf( modes, "%s %s %s %f %f", swrap, twrap, "mitchell", swidth, twidth );
 	if ( filterfunc == RiBoxFilter )
 		sprintf( modes, "%s %s %s %f %f", swrap, twrap, "box", swidth, twidth );
 	if ( filterfunc == RiTriangleFilter )

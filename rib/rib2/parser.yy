@@ -181,6 +181,7 @@ static RendermanInterface::RtInt ColorSamples = 3;
 %token	<ctype>	REQUEST_TOKEN_MAKESHADOW
 %token	<ctype>	REQUEST_TOKEN_MAKETEXTURE
 %token	<ctype>	REQUEST_TOKEN_MATTE
+%token	<ctype>	REQUEST_TOKEN_MITCHELLFILTER
 %token	<ctype>	REQUEST_TOKEN_MOTIONBEGIN
 %token	<ctype>	REQUEST_TOKEN_MOTIONEND
 %token	<ctype>	REQUEST_TOKEN_NUPATCH

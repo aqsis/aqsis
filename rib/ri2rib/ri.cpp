@@ -35,6 +35,10 @@ RtFloat RiGaussianFilter ( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth 
 {
 	return 1.0;
 }
+RtFloat RiMitchellFilter ( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
+{
+	return 1.0;
+}
 RtFloat RiBoxFilter ( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 {
 	return 1.0;

@@ -57,6 +57,11 @@ RendermanInterface::RtFloat Stream::RiBoxFilter( RtFloat x, RtFloat y, RtFloat x
 	m_Stream << "RiBoxFilter()" << std::endl;
 	return 0;
 }
+RendermanInterface::RtFloat Stream::RiMitchellFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
+{
+	m_Stream << "RiMitchellFilter()" << std::endl;
+	return 0;
+}
 RendermanInterface::RtFloat Stream::RiCatmullRomFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 {
 	m_Stream << "RiCatmullRomFilter()" << std::endl;

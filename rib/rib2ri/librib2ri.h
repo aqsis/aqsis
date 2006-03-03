@@ -24,6 +24,7 @@ class Engine :
 		virtual	RtFloat RiBesselFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth );
 		virtual	RtVoid	RiBound( RtBound bound );
 		virtual	RtFloat RiBoxFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth );
+		virtual	RtFloat RiMitchellFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth );
 		virtual	RtFloat RiCatmullRomFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth );
 		virtual	RtVoid	RiClipping( RtFloat cnear, RtFloat cfar );
 		virtual	RtVoid	RiColor( RtColor Cq );

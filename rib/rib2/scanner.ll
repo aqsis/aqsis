@@ -122,6 +122,7 @@ Basis				{ return REQUEST_TOKEN_BASIS; }
 BesselFilter			{ return REQUEST_TOKEN_BESSELFILTER; }
 Blobby      			{ return REQUEST_TOKEN_BLOBBY; }
 Bound				{ return REQUEST_TOKEN_BOUND; }
+MitchellFilter			{ return REQUEST_TOKEN_MITCHELLFILTER; }
 BoxFilter			{ return REQUEST_TOKEN_BOXFILTER; }
 CatmullRomFilter		{ return REQUEST_TOKEN_CATMULLROMFILTER; }
 Clipping			{ return REQUEST_TOKEN_CLIPPING; }

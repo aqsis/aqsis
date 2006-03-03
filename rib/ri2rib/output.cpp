@@ -303,6 +303,8 @@ std::string CqOutput::getFilterFuncName( RtFilterFunc filterfunc, const char *na
 {
 	if ( filterfunc == RiBoxFilter )
 		return "box";
+	else if ( filterfunc == RiMitchellFilter )
+		return "mitchell";
 	else if ( filterfunc == RiTriangleFilter )
 		return "triangle";
 	else if ( filterfunc == RiCatmullRomFilter )

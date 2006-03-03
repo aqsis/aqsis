@@ -51,6 +51,7 @@ class RendermanInterface
 		                          RtInt n, RtToken tokens[], RtPointer parms[] ) = 0;
 		virtual	RtVoid	RiBound( RtBound bound ) = 0;
 		virtual	RtFloat RiBoxFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth ) = 0;
+		virtual	RtFloat RiMitchellFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth ) = 0;
 		virtual	RtFloat RiCatmullRomFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth ) = 0;
 		virtual	RtVoid	RiClipping( RtFloat cnear, RtFloat cfar ) = 0;
 		virtual	RtVoid	RiColor( RtColor Cq ) = 0;

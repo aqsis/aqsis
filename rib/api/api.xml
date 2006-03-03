@@ -263,6 +263,16 @@
 			</Arguments>
 		</Procedure>
 
+		<Procedure name="RiMitchellFilter" return="RtFloat">
+			<NoCache/>
+			<Arguments>
+				<Argument name="x" type="RtFloat"/>
+				<Argument name="y" type="RtFloat"/>
+				<Argument name="xwidth" type="RtFloat"/>
+				<Argument name="ywidth" type="RtFloat"/>
+			</Arguments>
+		</Procedure>
+
 		<Procedure name="RiTriangleFilter" return="RtFloat">
 			<NoCache/>
 			<Arguments>

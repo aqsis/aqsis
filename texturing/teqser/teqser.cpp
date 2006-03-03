@@ -110,6 +110,8 @@ int main( int argc, const char** argv )
 	filterfunc = RiBoxFilter;
 	if ( g_filter == "box" )
 		filterfunc = RiBoxFilter;
+	else if ( g_filter == "mitchell" )
+		filterfunc = RiMitchellFilter;
 	else if ( g_filter == "sinc" )
 		filterfunc = RiSincFilter;
 	else if ( g_filter == "catmull-rom" )

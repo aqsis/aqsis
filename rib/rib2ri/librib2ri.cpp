@@ -52,6 +52,11 @@ RendermanInterface::RtVoid Engine::RiBound( RtBound bound )
 {
 	::RiBound( bound );
 }
+RendermanInterface::RtFloat Engine::RiMitchellFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
+{
+	return ::RiMitchellFilter( x, y, xwidth, ywidth );
+	return 0;
+}
 RendermanInterface::RtFloat Engine::RiBoxFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 {
 	return ::RiBoxFilter( x, y, xwidth, ywidth );

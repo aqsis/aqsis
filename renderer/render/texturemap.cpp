@@ -189,6 +189,8 @@ static RtFilterFunc CalculateFilter(CqString filter)
 
 	if ( filter == "gaussian" )
 		filterfunc = RiGaussianFilter;
+	if ( filter == "mitchell" )
+		filterfunc = RiMitchellFilter;
 	if ( filter == "box" )
 		filterfunc = RiBoxFilter;
 	if ( filter == "triangle" )
