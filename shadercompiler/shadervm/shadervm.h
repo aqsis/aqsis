@@ -41,6 +41,7 @@
 #include	"noise.h"
 #include	"ishaderdata.h"
 #include	"ishader.h"
+#include	"irenderer.h"
 #include	"shaderexecenv.h"
 #include	"shaderstack.h"
 #include	"shadervariable.h"
@@ -509,7 +510,13 @@ class CqShaderVM : public CqShaderStack, public IqShader, public CqDSORepository
 {
 	public:
 		CqShaderVM() : CqShaderStack(), m_Uses( 0xFFFFFFFF ), m_LocalIndex( 0 ), m_PC( 0 ), m_fAmbient( TqTrue )
-		{}
+		{
+			// Find out if this shader is being declared outside the world construct. If so
+			// if is effectively being defined in 'camera' space, which will affect the 
+			// transformation of parameters. Should only affect lightsource shaders as these
+			// are the only ones valid outside the world.
+			m_outsideWorld = !QGetRenderContextI()->IsWorldBegin();
+		}
 		CqShaderVM( const CqShaderVM& From ) : m_LocalIndex( 0 ), m_PC( 0 ), m_fAmbient( TqTrue )
 		{
 			*this = From;
@@ -629,6 +636,7 @@ class CqShaderVM : public CqShaderStack, public IqShader, public CqDSORepository
 		TqInt	m_PO;							///< Current program offset.
 		TqInt	m_PE;							///< Offset of the end of the program.
 		TqBool	m_fAmbient;						///< Flag indicating if this is an ambient light source ( if it is indeed a light source ).
+		TqBool	m_outsideWorld;						///< Flag indicating this shader was declared outside the world.
 
 		/** Determine whether the program execution has finished.
 		 */

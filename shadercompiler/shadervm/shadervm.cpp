@@ -1475,51 +1475,49 @@ void CqShaderVM::PrepareShaderForUse( )
 			count = pArray->ArrayLength();
 		}
 
+		CqString strSpace = m_StoredArguments[i].m_strSpace;
+		CqString _strSpace( "shader" );
+		if ( strSpace.compare( "" ) != 0 )
+			_strSpace = strSpace;
+		CqMatrix matObjectToWorld = matCurrent();
+		CqMatrix matTrans = matCurrent();
+		// If the shader was defined inside the world, the it was defined in 'world' space, or a transformation thereof, so we need
+		// to transform it into camera space. If not, it is defined in a transformation of 'camera' space, so we just need to transform
+		// it by it's own transformation to get it into camera space.
+		if(!m_outsideWorld)
+			matTrans = QGetRenderContextI() ->matSpaceToSpace( _strSpace.c_str(), "current", matCurrent(), matObjectToWorld, QGetRenderContextI()->Time() );
+
 		while ( count-- > 0 )
 		{
 			// Get the specified value out.
 			IqShaderData* pVMVal = m_StoredArguments[i].m_Value;
-			CqString strSpace = m_StoredArguments[i].m_strSpace;
-			CqMatrix matObjectToWorld = matCurrent();
 //			if( m_pEnv )
 //				matObjectToWorld = m_pEnv->pTransform()->matObjectToWorld(m_pEnv->pTransform()->Time(0));
 
 			// If it is a color or a point, ensure it is the correct 'space'
 			if ( pVMVal->Type() == type_point || pVMVal->Type() == type_hpoint )
 			{
-				CqString _strSpace( "shader" );
-				if ( strSpace.compare( "" ) != 0 )
-					_strSpace = strSpace;
 				CqVector3D p;
 				pVMVal->GetPoint( p, 0 );
-				pVMVal->SetPoint( QGetRenderContextI() ->matSpaceToSpace( _strSpace.c_str(), "camera", matCurrent(), matObjectToWorld, QGetRenderContextI()->Time() ) * p );
+				pVMVal->SetPoint( matTrans * p );
 			}
 			else if ( pVMVal->Type() == type_normal )
 			{
-				CqString _strSpace( "shader" );
-				if ( strSpace.compare( "" ) != 0 )
-					_strSpace = strSpace;
 				CqVector3D p;
 				pVMVal->GetNormal( p, 0 );
-				pVMVal->SetNormal( QGetRenderContextI() ->matNSpaceToSpace( _strSpace.c_str(), "camera", matCurrent(), matObjectToWorld, QGetRenderContextI()->Time() ) * p );
+				pVMVal->SetNormal( matTrans * p );
 			}
 			else if ( pVMVal->Type() == type_vector )
 			{
-				CqString _strSpace( "shader" );
-				if ( strSpace.compare( "" ) != 0 )
-					_strSpace = strSpace;
 				CqVector3D p;
 				pVMVal->GetVector( p, 0 );
-				pVMVal->SetVector( QGetRenderContextI() ->matVSpaceToSpace( _strSpace.c_str(), "camera", matCurrent(), matObjectToWorld, QGetRenderContextI()->Time() ) * p );
+				pVMVal->SetVector( matTrans * p );
 			}
 			else if ( pVMVal->Type() == type_matrix )
 			{
-				CqString _strSpace( "shader" );
-				if ( strSpace.compare( "" ) != 0 )
-					_strSpace = strSpace;
 				CqMatrix m;
 				pVMVal->GetMatrix( m, 0 );
-				pVMVal->SetMatrix( QGetRenderContextI() ->matVSpaceToSpace( _strSpace.c_str(), "camera", matCurrent(), matObjectToWorld, QGetRenderContextI()->Time() ) * m );
+				pVMVal->SetMatrix( matTrans * m );
 			}
 
 			if ( pArray )

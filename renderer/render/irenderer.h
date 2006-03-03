@@ -79,6 +79,8 @@ struct IqRenderer
 	virtual	TqFloat	Time() const = 0;
 
 	virtual	TqInt	bucketCount() = 0;
+
+	virtual	TqBool	IsWorldBegin() const = 0;
 };
 
 IqRenderer* QGetRenderContextI();
