@@ -2452,6 +2452,10 @@ RtLightHandle	RiLightSourceV( RtToken name, PARAMETERLIST )
 			SetShaderArgument( pShader, token, static_cast<TqPchar>( value ) );
 		}
 		QGetRenderContext() ->pattrWriteCurrent() ->AddLightsource( pNew );
+		// If this light is being defined outside the WorldBegin, then we can
+		// go ahead and initialise the parameters, as they are invariant under changes to the camera space.
+		if(!QGetRenderContext()->IsWorldBegin())
+			pShader->InitialiseParameters();	
 
 		// Add it as a Context light as well in case we are in a context that manages it's own lights.
 		QGetRenderContext() ->pconCurrent() ->AddContextLightSource( pNew );

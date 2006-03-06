@@ -1255,6 +1255,7 @@ CqShaderVM&	CqShaderVM::operator=( const CqShaderVM& From )
 	m_matCurrent = From.m_matCurrent;
 	m_strName = From.m_strName;
 	m_fAmbient = From.m_fAmbient;
+	m_outsideWorld = From.m_outsideWorld;
 
 	// Copy the local variables...
 	std::vector<IqShaderData*>::const_iterator i;
@@ -1454,6 +1455,15 @@ void CqShaderVM::SetArgument( const CqString& strName, EqVariableType type, cons
 
 void CqShaderVM::PrepareShaderForUse( )
 {
+	// Only do the second stage setup of the shader parameters if the shader
+	// was defined within the world. If defined outside the world, the shader state is constant
+	// irrespective of any changes introduced during the render pass (i.e. autoshadows etc.).
+	if(!m_outsideWorld)
+		InitialiseParameters();
+}
+
+void CqShaderVM::InitialiseParameters( )
+{
 	Aqsis::log() << debug << "Preparing shader : " << strName().c_str() << " [" << m_StoredArguments.size() << " args]"  << std::endl;
 
 	// Reinitialise the local variables to their defaults.
@@ -1480,19 +1490,12 @@ void CqShaderVM::PrepareShaderForUse( )
 		if ( strSpace.compare( "" ) != 0 )
 			_strSpace = strSpace;
 		CqMatrix matObjectToWorld = matCurrent();
-		CqMatrix matTrans = matCurrent();
-		// If the shader was defined inside the world, the it was defined in 'world' space, or a transformation thereof, so we need
-		// to transform it into camera space. If not, it is defined in a transformation of 'camera' space, so we just need to transform
-		// it by it's own transformation to get it into camera space.
-		if(!m_outsideWorld)
-			matTrans = QGetRenderContextI() ->matSpaceToSpace( _strSpace.c_str(), "current", matCurrent(), matObjectToWorld, QGetRenderContextI()->Time() );
+		CqMatrix matTrans = QGetRenderContextI() ->matSpaceToSpace( _strSpace.c_str(), "current", matCurrent(), matObjectToWorld, QGetRenderContextI()->Time() );
 
 		while ( count-- > 0 )
 		{
 			// Get the specified value out.
 			IqShaderData* pVMVal = m_StoredArguments[i].m_Value;
-//			if( m_pEnv )
-//				matObjectToWorld = m_pEnv->pTransform()->matObjectToWorld(m_pEnv->pTransform()->Time(0));
 
 			// If it is a color or a point, ensure it is the correct 'space'
 			if ( pVMVal->Type() == type_point || pVMVal->Type() == type_hpoint )

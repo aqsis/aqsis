@@ -63,6 +63,7 @@ struct IqShader
 	 */
 	virtual	const CqString& strName() const = 0;
 	virtual	void	PrepareShaderForUse( ) = 0;
+	virtual	void	InitialiseParameters( ) = 0;
 	virtual	void	SetArgument( const CqString& name, EqVariableType type, const CqString& space, void* val ) = 0;
 	virtual	void	SetArgument( CqParameter* pParam, IqSurface* pSurface ) = 0;
 	/** Find a named argument.

@@ -544,6 +544,7 @@ class CqShaderVM : public CqShaderStack, public IqShader, public CqDSORepository
 			return ( m_strName );
 		}
 		virtual	void	PrepareShaderForUse( );
+		virtual	void	InitialiseParameters( );
 		virtual void	SetArgument( const CqString& strName, EqVariableType type, const CqString& strSpace, void* pval);
 		virtual	void	SetArgument( CqParameter* pParam, IqSurface* pSurface );
 		virtual	IqShaderData*	FindArgument( const CqString& name );

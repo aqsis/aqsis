@@ -37,6 +37,7 @@
 #include "list.h"
 #include "ishader.h"
 #include "ishaderexecenv.h"
+#include "irenderer.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -143,7 +144,13 @@ class CqLayeredShader : public IqShader
 {
 	public:
 		CqLayeredShader() : m_Uses( 0xFFFFFFFF )
-		{}
+		{
+			// Find out if this shader is being declared outside the world construct. If so
+			// if is effectively being defined in 'camera' space, which will affect the 
+			// transformation of parameters. Should only affect lightsource shaders as these
+			// are the only ones valid outside the world.
+			m_outsideWorld = !QGetRenderContextI()->IsWorldBegin();
+		}
 		CqLayeredShader(const CqLayeredShader& from)
 		{
 			/// \todo Need to implement a proper copy constrctor, and operator=.
@@ -166,6 +173,11 @@ class CqLayeredShader : public IqShader
 			return ( m_strName );
 		}
 		virtual	void	PrepareShaderForUse( )
+		{
+			if(!m_outsideWorld)
+				InitialiseParameters();
+		}
+		virtual	void	InitialiseParameters( )
 		{
 			// Pass the argument on to the shader for each layer in the list.
 			std::vector<std::pair<CqString, boost::shared_ptr<IqShader> > >::iterator i = m_Layers.begin();
@@ -304,6 +316,7 @@ class CqLayeredShader : public IqShader
 	private:
 		CqMatrix	m_matCurrent;	///< Transformation matrix to world coordinates in effect at the time this shader was instantiated.
 		CqString	m_strName;		///< The name of this shader.
+		TqBool		m_outsideWorld;
 
 		std::vector<std::pair<CqString, boost::shared_ptr<IqShader> > >	m_Layers;
 		std::map<CqString, TqInt> m_LayerMap;
