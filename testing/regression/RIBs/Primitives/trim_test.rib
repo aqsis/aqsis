@@ -15,6 +15,7 @@ PixelFilter "gaussian" 2 2
 Exposure 1 1
 
 WorldBegin
+	Color 0.8 0.6 0.2
 	Surface "matte"
 	AttributeBegin
 		Rotate 90 1 0 0
