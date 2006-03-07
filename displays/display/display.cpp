@@ -279,7 +279,7 @@ void WriteTIFF(const std::string& filename, SqDisplayInstance* image)
 		// Write the image to a tiff file.
 		char version[ 80 ];
 
-		int ExtraSamplesTypes[ 1 ] = {EXTRASAMPLE_ASSOCALPHA};
+		short ExtraSamplesTypes[ 1 ] = {EXTRASAMPLE_ASSOCALPHA};
 
 #if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX) || defined(SCONS_BUILD)
 
@@ -294,6 +294,9 @@ void WriteTIFF(const std::string& filename, SqDisplayInstance* image)
 		TIFFSetField( pOut, TIFFTAG_SOFTWARE, ( char* ) version );
 		TIFFSetField( pOut, TIFFTAG_IMAGEWIDTH, ( uint32 ) image->m_width );
 		TIFFSetField( pOut, TIFFTAG_IMAGELENGTH, ( uint32 ) image->m_height );
+		TIFFSetField( pOut, TIFFTAG_XRESOLUTION, (float) 1.0 );
+		TIFFSetField( pOut, TIFFTAG_YRESOLUTION, (float) 1.0 );
+		TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, (short) 8 );
 		TIFFSetField( pOut, TIFFTAG_PIXAR_MATRIX_WORLDTOCAMERA, image->m_matWorldToCamera );
 		TIFFSetField( pOut, TIFFTAG_PIXAR_MATRIX_WORLDTOSCREEN, image->m_matWorldToScreen );
 		TIFFSetField( pOut, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT );
