@@ -4588,7 +4588,7 @@ void CqShaderExecEnv::SO_illuminance( IqShaderData* Category, IqShaderData* P, I
 
 				exec = TqFalse;
 				// While no matching category has been found...
-				TqUint tokenpos = 0, tokenend;
+				CqString::size_type tokenpos = 0, tokenend;
 				while( 1 )
 				{
 					tokenend = lightcategories.find(',', tokenpos);

@@ -144,8 +144,8 @@ RtVoid PrintProgress( RtFloat percent, RtInt FrameNo )
 		return ;
 	}
 
-	static long tick = 0;
-	long now;
+	static time_t tick = 0;
+	time_t now;
 
 	if ( tick == 0 )
 		time( &tick );
@@ -176,7 +176,7 @@ RtVoid PrintProgress( RtFloat percent, RtInt FrameNo )
 	TqFloat sub_minsleft = total_minsleft - ( ( TqInt ) total_hrsleft * 60.0f );
 
 	// Now print the line with substitution.
-	TqUint ipos = 0;
+	std::string::size_type ipos = 0;
 
 	std::string strProgress;
 
@@ -200,7 +200,7 @@ RtVoid PrintProgress( RtFloat percent, RtInt FrameNo )
 		;
 	while ( 1 )
 	{
-		TqUint itag;
+		std::string::size_type itag;
 		itag = strProgress.find( '%', ipos );
 		if ( itag == std::string::npos )
 		{
