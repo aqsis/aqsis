@@ -7905,55 +7905,44 @@ void CqShaderExecEnv::SO_occlusion( IqShaderData* occlmap, IqShaderData* channel
 		__iGrid = 0;
 		CqBitVector& RS = RunningState();
 		TqInt nPages = pMap->NumPages() - 1;
-      		if (nPages == 0)
-      		{
-         		SO_shadow( occlmap, channel,  P, Result, pShader, cParams, apParams );
-      		} else 
+		do
 		{
-			do
+			if(!__fVarying || RS.Value( __iGrid ) )
 			{
-				if(!__fVarying || RS.Value( __iGrid ) )
-				{
-				// Storage for the final combined occlusion value.
-				TqFloat occlsum = 0.0f;
-				TqFloat dotsum = 0.0f;
+			// Storage for the final combined occlusion value.
+			TqFloat occlsum = 0.0f;
+			TqFloat dotsum = 0.0f;
+	
+			CqVector3D swidth = 0.0f, twidth = 0.0f;
 
-				CqVector3D swidth = 0.0f, twidth = 0.0f;
+			CqVector3D _aq_N;
+			CqVector3D _aq_P;
 
-				CqVector3D _aq_N;
-				CqVector3D _aq_P;
 				(N)->GetNormal(_aq_N,__iGrid);
 				(P)->GetPoint(_aq_P,__iGrid);
 				TqInt i = nPages;
-					for( ; i >= 0; i-- )
+				for( ; i >= 0; i-- )
+				{
+				// Check if the lightsource is behind the sample.
+				CqVector3D Nl = pMap->GetMatrix(2, i) * _aq_N;
+
+				// In case of surface shader transform L
+				TqFloat cosangle = Nl * L;
+
+					if( !_aq_surface && cosangle <= 0.0f )
 					{
-					// Check if the lightsource is behind the sample.
-					CqVector3D Nl = pMap->GetMatrix(2, i) * _aq_N;
-                        		CqVector3D L1 = L;
-
-						// In case of surface shader transform L
-                        			if ( _aq_surface )
-						{
-                           				L1 = L * pMap->GetMatrix(0,i);
-						}
-
-                        			TqFloat cosangle = Nl * L1;
-
-						if( cosangle <= 0.0f )
-						{
-							continue;
-						}
-						pMap->SampleMap( _aq_P, swidth, twidth, fv, i );
-						occlsum += cosangle * fv[0];
-						dotsum += cosangle;
+						continue;
 					}
-					if (dotsum != 0.0f)
-						occlsum /= dotsum;
-					(Result)->SetFloat(occlsum,__iGrid);
+					pMap->SampleMap( _aq_P, swidth, twidth, fv, i );
+					occlsum += cosangle * fv[0];
+					dotsum += cosangle;
 				}
+				if (dotsum != 0.0f)
+					occlsum /= dotsum;
+				(Result)->SetFloat(occlsum,__iGrid);
 			}
-			while( ( ++__iGrid < GridSize() ) && __fVarying);
 		}
+		while( ( ++__iGrid < GridSize() ) && __fVarying);
 	}
 	else
 	{
