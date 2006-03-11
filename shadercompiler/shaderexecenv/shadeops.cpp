@@ -7939,6 +7939,7 @@ void CqShaderExecEnv::SO_occlusion( IqShaderData* occlmap, IqShaderData* channel
 				}
 				if (dotsum != 0.0f)
 					occlsum /= dotsum;
+				occlsum = CLAMP(occlsum, 0.0, 1.0);
 				(Result)->SetFloat(occlsum,__iGrid);
 			}
 		}
