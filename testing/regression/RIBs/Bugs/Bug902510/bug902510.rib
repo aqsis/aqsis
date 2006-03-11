@@ -3,7 +3,7 @@ version 3.03
 
 #Created with K-3D Version 0.3.0.88, http://www.k-3d.org
 
-MakeTexture "texture" "texture.tif" "periodic" "periodic" "box" 1 1
+MakeTexture "texture.map" "texture.tif" "periodic" "periodic" "box" 1 1
 
 FrameBegin 1
 
