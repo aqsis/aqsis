@@ -6,7 +6,7 @@ version 3.03
 FrameBegin 1
 
    #Setup Display
-   Display "bug938941.tif" "file" "rgb" 
+   Display "bug938941.tif" "file" "rgb" "string compression" "lzw"
    Format 320 240 1
 
    #Setup viewing transformation
