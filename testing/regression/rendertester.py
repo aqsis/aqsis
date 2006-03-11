@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 ######################################################################
-# Renderer tester v1.10
+# Renderer tester v1.11
 # Copyright 2003 Matthias Baas (baas@ira.uka.de)
 ######################################################################
 # For a short usage description call the script with the option -h or
@@ -205,6 +205,8 @@ class RenderJob:
         self.ricalls = ricalls
         self.description = description
         self.known_issues = known_issues
+
+        self.noref = False
 
         # Add job to the global list if it's allowed..
 #        if ((IncludeRIBs==None or rib in IncludeRIBs)
@@ -1167,7 +1169,7 @@ Click on the RIB name or thumbnail to display details.
 
         This method attaches the following new attributes to each job:
 
-        - noref: True if there was no reference image
+        - noref: True if there was no reference image (set in outputResult())
         - failure: True if the images were not identical
         - res: Result object
         - imgstr: HTML-Code for the image
@@ -1203,8 +1205,11 @@ Click on the RIB name or thumbnail to display details.
 
             # Attach some variables to the job object so we can access
             # them later again...
-            job.noref = (maxdiff==None)
+#            job.noref = (maxdiff==None)
             job.failure = (maxdiff!=None and max(maxdiff)>self.cmp_threshold)
+            if not job.noref and maxdiff==None:
+                job.failure = True
+                
 
             job.res = res
             job.imgstr = imgstr
@@ -1363,7 +1368,9 @@ Click on the RIB name or thumbnail to display details.
 
         for i in range(len(res.job.outimagename)):
             img,refimg,diffimg,diff2img,diffalpha,diff2alpha,maxdiff = self.compareOutput(res, i)
-            
+            if refimg==None:
+                res.job.noref = True
+                            
             if maxdiff==None:
                 res_maxdiff = None
             elif res_maxdiff!=None:
