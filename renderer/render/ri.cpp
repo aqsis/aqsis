@@ -2825,13 +2825,14 @@ RtVoid	RiDetail( RtBound bound )
 
 	CqBound Bound( bound );
 
-	Bound.Transform( QGetRenderContext() ->matSpaceToSpace( "object", "raster", CqMatrix(), QGetRenderContext() ->matCurrent( QGetRenderContext() ->Time() ), QGetRenderContext()->Time() ) );
+	TqFloat* boundAttr = QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite( "System", "LODBound" );
+	boundAttr[0] = bound[0];
+	boundAttr[1] = bound[1];
+	boundAttr[2] = bound[2];
+	boundAttr[3] = bound[3];
+	boundAttr[4] = bound[4];
+	boundAttr[5] = bound[5];
 
-	TqFloat ruler = fabs( ( Bound.vecMax().x() - Bound.vecMin().x() ) * ( Bound.vecMax().y() - Bound.vecMin().y() ) );
-
-	ruler *= QGetRenderContext() ->optCurrent().GetFloatOption( "System", "RelativeDetail" ) [ 0 ];
-
-	QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite( "System", "LevelOfDetailRulerSize" ) [ 0 ] = ruler;
 	return ;
 }
 
@@ -2856,36 +2857,11 @@ RtVoid	RiDetailRange( RtFloat offlow, RtFloat onlow, RtFloat onhigh, RtFloat off
 		return ;
 	}
 
-	TqFloat ruler = QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite( "System", "LevelOfDetailRulerSize" ) [ 0 ];
-
-	TqFloat minImportance;
-	if ( onlow == offlow )
-	{
-		minImportance = ruler < onlow ? 1.0f : 0.0f;
-	}
-	else
-	{
-		minImportance = CLAMP( ( onlow - ruler ) / ( onlow - offlow ), 0, 1 );
-	}
-
-	TqFloat maxImportance;
-	if ( onhigh == offhigh )
-	{
-		maxImportance = ruler < onhigh ? 1.0f : 0.0f;
-	}
-	else
-	{
-		maxImportance = CLAMP( ( offhigh - ruler ) / ( offhigh - onhigh ), 0, 1 );
-	}
-
-	if ( minImportance >= maxImportance )
-	{
-		// Geometry is culled.  Use the special value -1 to represent this.
-		minImportance = maxImportance = -1.0f;
-	}
-
-	QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite( "System", "LevelOfDetailBounds" ) [ 0 ] = minImportance;
-	QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite( "System", "LevelOfDetailBounds" ) [ 1 ] = maxImportance;
+	TqFloat* rangeAttr = QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite( "System", "LODRanges" );
+	rangeAttr[0] = offlow;
+	rangeAttr[1] = onlow;
+	rangeAttr[2] = onhigh;
+	rangeAttr[3] = offhigh;
 	return ;
 }
 
@@ -3871,7 +3847,7 @@ RtVoid	RiPointsV( RtInt npoints, PARAMETERLIST )
 		pSurface->InitialiseKDTree();
 		pSurface->InitialiseMaxWidth();
 
-		if ( QGetRenderContext() ->pattrCurrent() ->GetFloatAttribute( "System", "LevelOfDetailBounds" ) [ 1 ] < 0.0f )
+		if ( QGetRenderContext() ->pattrCurrent() ->GetFloatAttribute( "System", "LODBound" ) [ 1 ] < 0.0f )
 		{
 			// Cull this geometry for LOD reasons
 			return ;

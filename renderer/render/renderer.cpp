@@ -1390,7 +1390,7 @@ void CqRenderer::StorePrimitive( const boost::shared_ptr<CqSurface>& pSurface )
 		pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "world", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(0), 0 ),
 						 QGetRenderContext() ->matNSpaceToSpace( "world", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(0), 0 ),
 						 QGetRenderContext() ->matVSpaceToSpace( "world", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(0), 0 ) );
-		pImage()->PostSurface(pSurface);
+		PostSurface(pSurface);
 	}
 }
 
@@ -1403,7 +1403,7 @@ void CqRenderer::PostWorld()
 		pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "world", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(0), 0 ),
 						 QGetRenderContext() ->matNSpaceToSpace( "world", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(0), 0 ),
 						 QGetRenderContext() ->matVSpaceToSpace( "world", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(0), 0 ) );
-		pImage()->PostSurface(pSurface);
+		PostSurface(pSurface);
 		m_aWorld.pop_front();
 	}
 }
@@ -1418,8 +1418,54 @@ void CqRenderer::PostCloneOfWorld()
 		pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "world", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(0), 0 ),
 						 QGetRenderContext() ->matNSpaceToSpace( "world", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(0), 0 ),
 						 QGetRenderContext() ->matVSpaceToSpace( "world", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(0), 0 ) );
-		pImage()->PostSurface(pSurface);
+		PostSurface(pSurface);
 	}
+}
+
+
+void CqRenderer::PostSurface( const boost::shared_ptr<CqSurface>& pSurface )
+{
+	// Check the level of detail settings to see if this surface should be culled or not.
+	TqFloat* rangeAttr = pSurface->pAttributes()->GetFloatAttribute( "System", "LODRanges" );
+	TqFloat* boundAttr = pSurface->pAttributes()->GetFloatAttribute( "System", "LODBound" );
+
+	CqBound bound(boundAttr);
+	if(bound.Volume2() > 0)
+	{
+		bound.Transform( QGetRenderContext() ->matSpaceToSpace( "object", "raster", CqMatrix(), pSurface->pTransform()->matObjectToWorld( QGetRenderContext() ->Time() ), QGetRenderContext()->Time() ) );
+
+		TqFloat ruler = fabs( ( bound.vecMax().x() - bound.vecMin().x() ) * ( bound.vecMax().y() - bound.vecMin().y() ) );
+
+		ruler *= QGetRenderContext() ->optCurrent().GetFloatOption( "System", "RelativeDetail" ) [ 0 ];
+
+		CqString objname( "unnamed" );
+		const CqString* pattrName = pSurface->pAttributes()->GetStringAttribute( "identifier", "name" );
+		if ( pattrName != 0 )
+			objname = pattrName[ 0 ];
+		Aqsis::log() << info << "Object " << objname << " has an onscreen detail area of " << ruler << std::endl;
+
+		TqFloat minImportance;
+		if( rangeAttr[1] == rangeAttr[0] )
+			minImportance = ruler < rangeAttr[1] ? 1.0f : 0.0f;
+		else
+			minImportance = CLAMP( ( rangeAttr[1] - ruler ) / ( rangeAttr[1] - rangeAttr[0] ), 0, 1 );
+
+		TqFloat maxImportance;
+		if ( rangeAttr[2] == rangeAttr[3] )
+			maxImportance = ruler < rangeAttr[2] ? 1.0f : 0.0f;
+		else
+			maxImportance = CLAMP( ( rangeAttr[3] - ruler ) / ( rangeAttr[3] - rangeAttr[2] ), 0, 1 );
+
+		if ( minImportance >= maxImportance )
+			// Geomtry must be culled.
+			return;
+
+		pSurface->pAttributes()->GetFloatAttributeWrite( "System", "LevelOfDetailRulerSize" ) [ 0 ] = ruler;
+		pSurface->pAttributes()->GetFloatAttributeWrite( "System", "LevelOfDetailBounds" ) [ 0 ] = minImportance;
+		pSurface->pAttributes()->GetFloatAttributeWrite( "System", "LevelOfDetailBounds" ) [ 1 ] = maxImportance;
+	}
+
+	pImage()->PostSurface(pSurface);
 }
 
 

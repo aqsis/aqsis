@@ -128,7 +128,8 @@ CqAttributes::CqAttributes()
 	ADD_SYSTEM_ATTR( Sides, TqInt, TqFloat, type_integer, 2 );		// the number of visible sides associated primitives have.
 	ADD_SYSTEM_ATTR( LevelOfDetailRulerSize, TqFloat, TqFloat, type_float, FLT_MAX );		// current LOD ruler size
 	ADD_SYSTEM_ATTR2( LevelOfDetailBounds, TqFloat, TqFloat, type_float, 0.0f, 1.0f );	// relative importance bounds for this LOD representation
-
+	ADD_SYSTEM_ATTR6( LODBound, TqFloat, TqFloat, type_float, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f );	// object space bounds for level of detail calculation of surfaces in this attribute scope.
+	ADD_SYSTEM_ATTR4( LODRanges, TqFloat, TqFloat, type_float, 0.0f, 0.0f, 0.0f, 0.0f );	// Range values minvisible, lowertransition, uppertransition, maxvisible
 	AddAttribute( pdefattrs );
 }
 

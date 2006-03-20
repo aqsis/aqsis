@@ -302,6 +302,7 @@ void CqImageBuffer::PostSurface( const boost::shared_ptr<CqSurface>& pSurface )
 	// Count the number of total gprims
 	STATS_INC( GPR_created_total );
 
+
 	// Bound the primitive in its current space (camera) space taking into account any motion specification.
 	CqBound Bound( pSurface->Bound() );
 
