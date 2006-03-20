@@ -260,7 +260,7 @@ class CqPoints : public CqSurface
 
 		/// Initialise the KDTree to point to the whole points list.
 		void	InitialiseKDTree();
-		void CqPoints::InitialiseMaxWidth();
+		void    InitialiseMaxWidth();
 
 		virtual void	NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData );
 

@@ -51,25 +51,25 @@ class CqNoise1234
 
 		/** 1D, 2D, 3D and 4D float Perlin noise, SL "noise()"
 		 */
-		static TqFloat CqNoise1234::noise( TqFloat x );
-		static TqFloat CqNoise1234::noise( TqFloat x, TqFloat y );
-		static TqFloat CqNoise1234::noise( TqFloat x, TqFloat y, TqFloat z );
-		static TqFloat CqNoise1234::noise( TqFloat x, TqFloat y, TqFloat z, TqFloat w );
+		static TqFloat noise( TqFloat x );
+		static TqFloat noise( TqFloat x, TqFloat y );
+		static TqFloat noise( TqFloat x, TqFloat y, TqFloat z );
+		static TqFloat noise( TqFloat x, TqFloat y, TqFloat z, TqFloat w );
 
 		/** 1D, 2D, 3D and 4D float Perlin periodic noise, SL "pnoise()"
 		 */
-		static TqFloat CqNoise1234::pnoise( TqFloat x, TqInt px );
-		static TqFloat CqNoise1234::pnoise( TqFloat x, TqFloat y, TqInt px, TqInt py );
-		static TqFloat CqNoise1234::pnoise( TqFloat x, TqFloat y, TqFloat z, TqInt px, TqInt py, TqInt pz );
-		static TqFloat CqNoise1234::pnoise( TqFloat x, TqFloat y, TqFloat z, TqFloat w,
+		static TqFloat pnoise( TqFloat x, TqInt px );
+		static TqFloat pnoise( TqFloat x, TqFloat y, TqInt px, TqInt py );
+		static TqFloat pnoise( TqFloat x, TqFloat y, TqFloat z, TqInt px, TqInt py, TqInt pz );
+		static TqFloat pnoise( TqFloat x, TqFloat y, TqFloat z, TqFloat w,
 		                                    TqInt px, TqInt py, TqInt pz, TqInt pw );
 
 	private:
 		static unsigned char perm[];
-		static TqFloat  CqNoise1234::grad( TqInt hash, TqFloat x );
-		static TqFloat  CqNoise1234::grad( TqInt hash, TqFloat x, TqFloat y );
-		static TqFloat  CqNoise1234::grad( TqInt hash, TqFloat x, TqFloat y , TqFloat z );
-		static TqFloat  CqNoise1234::grad( TqInt hash, TqFloat x, TqFloat y, TqFloat z, TqFloat t );
+		static TqFloat  grad( TqInt hash, TqFloat x );
+		static TqFloat  grad( TqInt hash, TqFloat x, TqFloat y );
+		static TqFloat  grad( TqInt hash, TqFloat x, TqFloat y , TqFloat z );
+		static TqFloat  grad( TqInt hash, TqFloat x, TqFloat y, TqFloat z, TqFloat t );
 
 };
 

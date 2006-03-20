@@ -479,6 +479,12 @@ class CqColor
 		{
 			return ( CqColor( -a.m_fRed, -a.m_fGreen, -a.m_fBlue ) );
 		} // Negation
+		friend CqColor	operator%( const CqColor& a, const CqColor& b )
+		{
+			return ( a );
+		} // Implemented purely for the use of the shader VM, we have macros
+		  // that rely on the implementation of various operators for all
+		  // supported shader types.
 		/** Component wide stream output operator.
 		 *\param Stream output stream.
 		 *\param a color to serialize.
