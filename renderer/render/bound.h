@@ -45,7 +45,7 @@ START_NAMESPACE( Aqsis )
 class CqBound
 {
 	public:
-		CqBound( TqFloat* pBounds )
+		CqBound( const TqFloat* pBounds )
 		{
 			if ( pBounds )
 			{

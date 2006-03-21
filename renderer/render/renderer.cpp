@@ -1426,8 +1426,8 @@ void CqRenderer::PostCloneOfWorld()
 void CqRenderer::PostSurface( const boost::shared_ptr<CqSurface>& pSurface )
 {
 	// Check the level of detail settings to see if this surface should be culled or not.
-	TqFloat* rangeAttr = pSurface->pAttributes()->GetFloatAttribute( "System", "LODRanges" );
-	TqFloat* boundAttr = pSurface->pAttributes()->GetFloatAttribute( "System", "LODBound" );
+	const TqFloat* rangeAttr = pSurface->pAttributes()->GetFloatAttribute( "System", "LODRanges" );
+	const TqFloat* boundAttr = pSurface->pAttributes()->GetFloatAttribute( "System", "LODBound" );
 
 	CqBound bound(boundAttr);
 	if(bound.Volume2() > 0)
@@ -1460,7 +1460,7 @@ void CqRenderer::PostSurface( const boost::shared_ptr<CqSurface>& pSurface )
 			// Geomtry must be culled.
 			return;
 
-		pSurface->pAttributes()->GetFloatAttributeWrite( "System", "LevelOfDetailRulerSize" ) [ 0 ] = ruler;
+		Aqsis::log() << info << "LevelOfDetailBounds: " << minImportance << ", " << maxImportance << std::endl;
 		pSurface->pAttributes()->GetFloatAttributeWrite( "System", "LevelOfDetailBounds" ) [ 0 ] = minImportance;
 		pSurface->pAttributes()->GetFloatAttributeWrite( "System", "LevelOfDetailBounds" ) [ 1 ] = maxImportance;
 	}

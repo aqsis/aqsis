@@ -6488,13 +6488,6 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface * pSurface, PARAMETERLIST 
 //
 RtVoid	CreateGPrim( const boost::shared_ptr<CqSurface>& pSurface )
 {
-
-	if ( QGetRenderContext() ->pattrCurrent() ->GetFloatAttribute( "System", "LevelOfDetailBounds" ) [ 1 ] < 0.0f )
-	{
-		// Cull this geometry for LOD reasons.
-		return ;
-	}
-
 	// If in a motion block, confirm that the current deformation surface can accept the passed one as a keyframe.
 	if( QGetRenderContext() ->pconCurrent() ->fMotionBlock() )
 	{
