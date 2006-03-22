@@ -209,15 +209,15 @@ int main( int argc, const char** argv )
 										symPtr->svd_default.matrixval[ arrayIndex ].val[0][0] << " " <<
 										symPtr->svd_default.matrixval[ arrayIndex ].val[0][1] << " " <<
 										symPtr->svd_default.matrixval[ arrayIndex ].val[0][2] << " " <<
-										symPtr->svd_default.matrixval[ arrayIndex ].val[0][2] << std::endl << "\t\t\t" <<
+										symPtr->svd_default.matrixval[ arrayIndex ].val[0][2] << " " <<
 										symPtr->svd_default.matrixval[ arrayIndex ].val[1][0] << " " <<
 										symPtr->svd_default.matrixval[ arrayIndex ].val[1][1] << " " <<
 										symPtr->svd_default.matrixval[ arrayIndex ].val[1][2] << " " <<
-										symPtr->svd_default.matrixval[ arrayIndex ].val[1][2] << std::endl << "\t\t\t" <<
+										symPtr->svd_default.matrixval[ arrayIndex ].val[1][2] << " " <<
 										symPtr->svd_default.matrixval[ arrayIndex ].val[2][0] << " " <<
 										symPtr->svd_default.matrixval[ arrayIndex ].val[2][1] << " " <<
 										symPtr->svd_default.matrixval[ arrayIndex ].val[2][2] << " " <<
-										symPtr->svd_default.matrixval[ arrayIndex ].val[2][3] << std::endl << "\t\t\t" <<
+										symPtr->svd_default.matrixval[ arrayIndex ].val[2][3] << " " <<
 										symPtr->svd_default.matrixval[ arrayIndex ].val[3][0] << " " <<
 										symPtr->svd_default.matrixval[ arrayIndex ].val[3][1] << " " <<
 										symPtr->svd_default.matrixval[ arrayIndex ].val[3][2] << " " <<
