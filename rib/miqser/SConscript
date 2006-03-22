@@ -1,0 +1,18 @@
+Import('env')
+miqser_sources = Split("""
+	miqser.cpp""")
+
+miqserenv = env.Copy();
+
+miqserenv.AppendUnique(LIBS = ['argparse', 'ri2rib', 'rib2ri', 'rib2', 'aqsistypes'])
+
+# Set any platform specific options for this target
+miqserenv.UseTargetOptions('miqser')
+
+miqser = miqserenv.Program('miqser', miqser_sources)
+miqserenv.Install('$BINDIR', miqser)
+
+env.Distribute('rib/miqser', miqser_sources)
+env.Distribute('rib/miqser', 'SConscript')
+
+Return('miqser')
