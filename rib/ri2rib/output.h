@@ -66,8 +66,9 @@ class CqOutput
 		                  Cylinder, Hyperboloid, Paraboloid, Disk,
 		                  Torus, Blobby, Points, Curves,
 		                  SubdivisionMesh, Procedural, Geometry, MakeTexture,
-		                  MakeBump, MakeLatLongEnvironment, MakeCubeFaceEnvironment, MakeShadow,
-		                  ArchiveRecord, ReadArchive, ErrorHandler, IfBegin, IfEnd, Else, ElseIf, LAST_Function };
+		                  MakeBump, MakeLatLongEnvironment, MakeCubeFaceEnvironment, MakeShadow, MakeOcclusion,
+		                  ArchiveRecord, ReadArchive, ErrorHandler, IfBegin, IfEnd, Else, ElseIf, LAST_Function,
+	       			  ShaderLayer, ConnectShaderLayers	};
 		// block types (used to check context nesting)
 		enum EqBlocks{
 		    B_Ri, B_Frame, B_World, B_Attribute, B_Transform, B_Solid, B_Object,
@@ -323,6 +324,8 @@ class CqOutput
 		                                   RtInt n, RtToken tokens[], RtPointer parms[] );
 		RtVoid RiMakeShadowV( const char *pic, const char *tex,
 		                      RtInt n, RtToken tokens[], RtPointer parms[] );
+		RtVoid RiMakeOcclusionV( RtInt npics, RtString picfiles[], RtString shadowfile, 
+				RtInt count, RtToken tokens[], RtPointer values[] );
 
 		/* ARCHIVE */
 		RtVoid RiArchiveRecord( RtToken type, std::string );
@@ -337,6 +340,11 @@ class CqOutput
 		RtVoid RiIfEnd( );
 		RtVoid RiElse();
 		RtVoid RiElseIf( RtString condition);
+
+		/* Aqsis specific Layered shaders statements */
+		RtVoid RiShaderLayerV( RtToken type, RtToken name, RtToken layername, 
+				RtInt count, RtToken tokens[], RtPointer values[] );
+		RtVoid RiConnectShaderLayers( RtToken type, RtToken layer1, RtToken variable1, RtToken layer2, RtToken variable2 );
 };
 
 

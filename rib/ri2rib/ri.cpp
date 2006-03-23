@@ -2084,6 +2084,36 @@ RtVoid RiMakeShadowV ( RtToken pic, RtToken tex,
 	}
 }
 
+RtVoid	RiMakeOcclusion( RtInt npics, RtString picfiles[], RtString shadowfile, ... )
+{
+	try
+	{
+		va_list args;
+		va_start( args, shadowfile );
+		CqPLStore pls( args );
+		va_end( args );
+
+		RiMakeOcclusion( npics, picfiles, shadowfile, pls.n, pls.tokens(), pls.parms() );
+	}
+	catch ( CqError & r )
+	{
+		r.manage();
+	}
+}
+
+
+RtVoid	RiMakeOcclusionV( RtInt npics, RtString picfiles[], RtString shadowfile, RtInt count, RtToken tokens[], RtPointer values[] )
+{
+	try
+	{
+		context.current().RiMakeOcclusionV( npics, picfiles, shadowfile, count, tokens, values );
+	}
+	catch ( CqError & r )
+	{
+		r.manage();
+	}
+}
+
 RtVoid RiArchiveRecord ( RtToken type, char *format, ... )
 {
 	try
@@ -2223,3 +2253,45 @@ RtVoid	RiErrorAbort( RtInt code, RtInt severity, RtString message )
 {
 	return ;
 }
+
+RtVoid RiShaderLayer( RtToken type, RtToken name, RtToken layername, ... )
+{
+	try
+	{
+		va_list args;
+		va_start( args, layername );
+		CqPLStore pls( args );
+		va_end( args );
+
+		RiShaderLayer( type, name, layername, pls.n, pls.tokens(), pls.parms() );
+	}
+	catch ( CqError & r )
+	{
+		r.manage();
+	}
+}
+
+RtVoid RiShaderLayerV( RtToken type, RtToken name, RtToken layername, RtInt count, RtToken tokens[], RtPointer values[] )
+{
+	try
+	{
+		context.current().RiShaderLayerV( type, name, layername, count, tokens, values );
+	}
+	catch ( CqError & r )
+	{
+		r.manage();
+	}
+}
+
+RtVoid RiConnectShaderLayers( RtToken type, RtToken layer1, RtToken variable1, RtToken layer2, RtToken variable2 )
+{
+	try
+	{
+		context.current().RiConnectShaderLayers( type, layer1, variable1, layer2, variable2 );
+	}
+	catch ( CqError & r )
+	{
+		r.manage();
+	}
+}
+

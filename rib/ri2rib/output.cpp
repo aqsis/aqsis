@@ -1338,9 +1338,9 @@ RtVoid CqOutput::RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt n
 RtVoid CqOutput::RiPatchV( RtToken type, RtInt n, RtToken tokens[], RtPointer parms[] )
 {
 	RtInt nb;
-	if ( type == RI_BILINEAR )
+	if ( type == RI_BILINEAR || (strcmp(type, RI_BILINEAR)==0) )
 		nb = 4;
-	else if ( type == RI_BICUBIC )
+	else if ( type == RI_BICUBIC || (strcmp(type, RI_BICUBIC)==0) )
 		nb = 16;
 	else
 	{
@@ -1362,13 +1362,13 @@ RtVoid CqOutput::RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap,
 {
 	RtInt nuptch, nvptch;
 	RtInt ii = 0;
-	if ( type == RI_BILINEAR )
+	if ( type == RI_BILINEAR || (strcmp(type, RI_BILINEAR)==0) )
 	{
-		if ( uwrap == RI_PERIODIC )
+		if ( uwrap == RI_PERIODIC || (strcmp(uwrap, RI_PERIODIC) ==0) )
 		{
 			nuptch = nu;
 		}
-		else if ( uwrap == RI_NONPERIODIC )
+		else if ( uwrap == RI_NONPERIODIC || (strcmp(uwrap, RI_NONPERIODIC)==0) )
 		{
 			nuptch = nu - 1;
 			ii += 1;
@@ -1379,11 +1379,11 @@ RtVoid CqOutput::RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap,
 			               "Unknown RiPatchMesh uwrap token:", uwrap,
 			               "  RiPatchMesh instruction skipped", TqTrue );
 		}
-		if ( vwrap == RI_PERIODIC )
+		if ( vwrap == RI_PERIODIC || (strcmp(vwrap, RI_PERIODIC)==0) )
 		{
 			nvptch = nv;
 		}
-		else if ( vwrap == RI_NONPERIODIC )
+		else if ( vwrap == RI_NONPERIODIC || (strcmp(vwrap, RI_NONPERIODIC)==0) )
 		{
 			nvptch = nv - 1;
 			ii += 1;
@@ -1398,16 +1398,16 @@ RtVoid CqOutput::RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap,
 
 
 	}
-	else if ( type == RI_BICUBIC )
+	else if ( type == RI_BICUBIC || (strcmp(type, RI_BICUBIC)==0) )
 	{
 		RtInt nustep = m_Steps.top().uStep;
 		RtInt nvstep = m_Steps.top().vStep;
 
-		if ( uwrap == RI_PERIODIC )
+		if ( uwrap == RI_PERIODIC || (strcmp(uwrap, RI_PERIODIC) ==0) )
 		{
 			nuptch = nu / nustep;
 		}
-		else if ( uwrap == RI_NONPERIODIC )
+		else if ( uwrap == RI_NONPERIODIC || (strcmp(uwrap, RI_NONPERIODIC)==0) )
 		{
 			nuptch = ( nu - 4 ) / nustep + 1;
 			ii += 1;
@@ -1418,11 +1418,11 @@ RtVoid CqOutput::RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap,
 			               "Unknown RiPatchMesh uwrap token:", uwrap,
 			               "  RiPatchMesh instruction skipped", TqTrue );
 		}
-		if ( vwrap == RI_PERIODIC )
+		if ( vwrap == RI_PERIODIC || (strcmp(vwrap, RI_PERIODIC)==0) )
 		{
 			nvptch = nv / nvstep;
 		}
-		else if ( vwrap == RI_NONPERIODIC )
+		else if ( vwrap == RI_NONPERIODIC || (strcmp(vwrap, RI_NONPERIODIC)==0) )
 		{
 			nvptch = ( nv - 4 ) / nvstep + 1;
 			ii += 1;
@@ -1644,16 +1644,16 @@ RtVoid CqOutput::RiCurvesV( RtToken type, RtInt ncurves,
 {
 	RtInt i;
 	RtInt vval = 0;
-	if ( type == RI_LINEAR )
+	if ( type == RI_LINEAR || (strcmp(type, RI_LINEAR)==0) )
 	{
-		if ( wrap == RI_PERIODIC )
+		if ( wrap == RI_PERIODIC || (strcmp(wrap, RI_PERIODIC)==0) )
 		{
 			for ( i = 0; i < ncurves; i++ )
 			{
 				vval += nvertices[ i ];
 			}
 		}
-		else if ( wrap == RI_NONPERIODIC )
+		else if ( wrap == RI_NONPERIODIC || (strcmp(wrap, RI_NONPERIODIC)==0) )
 		{
 			for ( i = 0; i < ncurves; i++ )
 			{
@@ -1667,16 +1667,16 @@ RtVoid CqOutput::RiCurvesV( RtToken type, RtInt ncurves,
 			               "  RiCurves instruction skipped", TqTrue );
 		}
 	}
-	else if ( type == RI_CUBIC )
+	else if ( type == RI_CUBIC || (strcmp(type, RI_CUBIC)==0) )
 	{
-		if ( wrap == RI_PERIODIC )
+		if ( wrap == RI_PERIODIC || (strcmp(wrap, RI_PERIODIC)==0) )
 		{
 			for ( i = 0; i < ncurves; i++ )
 			{
 				vval += ( nvertices[ i ] - 4 ) / m_Steps.top().vStep;
 			}
 		}
-		else if ( wrap == RI_NONPERIODIC )
+		else if ( wrap == RI_NONPERIODIC || (strcmp(wrap, RI_NONPERIODIC)==0) )
 		{
 			for ( i = 0; i < ncurves; i++ )
 			{
@@ -1975,6 +1975,16 @@ RtVoid CqOutput::RiMakeShadowV( const char *pic, const char *tex,
 }
 
 
+RtVoid	CqOutput::RiMakeOcclusionV( RtInt npics, RtString picfiles[], RtString shadowfile, RtInt count, RtToken tokens[], RtPointer values[] )
+{
+	PR( "MakeOcclusion", MakeOcclusion );
+	S;
+	printArray(npics, picfiles); 
+	S;
+	printCharP( shadowfile );
+	S;
+	printPL(count, tokens, values);
+}
 
 
 // *******************************************************
@@ -1984,11 +1994,11 @@ RtVoid CqOutput::RiArchiveRecord( RtToken type, std::string txt )
 {
 	std::string tmp;
 
-	if ( type == RI_COMMENT )
+	if ( type == RI_COMMENT || (strcmp(type, RI_COMMENT)==0) )
 		tmp = "#";
-	else if ( type == RI_STRUCTURE )
+	else if ( type == RI_STRUCTURE || (strcmp(type, RI_STRUCTURE)==0) )
 		tmp = "##";
-	else if ( type == RI_VERBATIM )
+	else if ( type == RI_VERBATIM || (strcmp(type, RI_VERBATIM)==0) )
 	{
 		print( txt.c_str() );
 		return ;
@@ -2059,4 +2069,37 @@ RtVoid CqOutput::RiErrorHandler( RtErrorFunc handler )
 	S;
 	PS( ch );
 	EOL;
+}
+
+
+// *************************************************************
+// ******* ******* ****** LAYERED SHADERS ****** ******* *******
+// *************************************************************
+RtVoid CqOutput::RiShaderLayerV( RtToken type, RtToken name, RtToken layername, RtInt count, RtToken tokens[], RtPointer values[] )
+{
+	PR( "ShaderLayer", ShaderLayer );
+	S;
+	printToken( type );
+	S;
+	printToken( name );
+	S;
+	printToken( layername );
+	S;
+	printPL( count, tokens, values );
+}
+
+
+RtVoid CqOutput::RiConnectShaderLayers( RtToken type, RtToken layer1, RtToken variable1, RtToken layer2, RtToken variable2 )
+{
+	PR( "ConnectShaderLayers", ConnectShaderLayers);
+	S;
+	printToken( type );
+	S;
+	printToken( layer1 );
+	S;
+	printToken( variable1 );
+	S;
+	printToken( layer2 );
+	S;
+	printToken( variable2 );
 }
