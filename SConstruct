@@ -157,7 +157,7 @@ SConscript('rib/rib2ri/SConscript', build_dir=target_dir.abspath + '/rib/rib2ri'
 SConscript('shadercompiler/shaderexecenv/SConscript', build_dir=target_dir.abspath + '/shadercompiler/shaderexecenv')
 SConscript('shadercompiler/shadervm/SConscript', build_dir=target_dir.abspath + '/shadercompiler/shadervm')
 SConscript('renderer/render/SConscript', build_dir=target_dir.abspath + '/renderer/render')
-SConscript('renderer/aqsis/SConscript', build_dir=target_dir.abspath + '/renderer/aqsis')
+aqsis = SConscript('renderer/aqsis/SConscript', build_dir=target_dir.abspath + '/renderer/aqsis')
 SConscript('shadercompiler/slparse/SConscript', build_dir=target_dir.abspath + '/shadercompiler/slparse')
 SConscript('shadercompiler/codegenvm/SConscript', build_dir=target_dir.abspath + '/shadercompiler/codegenvm')
 SConscript('shadercompiler/slpp/SConscript', build_dir=target_dir.abspath + '/shadercompiler/slpp')
@@ -170,6 +170,7 @@ xpm = SConscript('displays/d_xpm/SConscript', build_dir=target_dir.abspath + '/d
 SConscript('displays/d_exr/SConscript', build_dir=target_dir.abspath + '/displays/d_exr')
 SConscript('rib/ri2rib/SConscript', build_dir=target_dir.abspath + '/rib/ri2rib')
 SConscript('rib/rib2stream/SConscript', build_dir=target_dir.abspath + '/rib/rib2stream')
+miqser = SConscript('rib/miqser/SConscript', build_dir=target_dir.abspath + '/rib/miqser')
 SConscript('texturing/teqser/SConscript', build_dir=target_dir.abspath + '/texturing/teqser')
 SConscript('texturing/plugins/SConscript')
 SConscript('shaders/SConscript', build_dir=target_dir.abspath + '/shaders')
@@ -264,3 +265,4 @@ options = glob.glob('platform/*/*.py')
 for option in options:
 	path, name = os.path.split(option)
 	env.Distribute(path, option)
+

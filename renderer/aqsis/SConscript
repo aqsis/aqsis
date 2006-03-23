@@ -15,3 +15,4 @@ aqsisenv.Install('$BINDIR', aqsis)
 env.Distribute('renderer/aqsis', aqsis_sources)
 env.Distribute('renderer/aqsis', 'SConscript')
 
+Return('aqsis')
