@@ -143,16 +143,15 @@ void CqBinary::printHeader()
 
 void CqBinary::printRequest( const char *req, EqFunctions f )
 {
-	TqInt i = f;
-	TqPchar pt = reinterpret_cast<TqPchar> ( &i );
+	TqChar code = f;
 
 	if ( m_aRequest[ f ] == TqFalse )
 	{
 		m_aRequest[ f ] = TqTrue;
-		OUT << '\314' << pt [ 0 ]; // 0xCC
-		encodeString( req );
+		OUT << '\314' << code; // 0xCC
+		encodeString(req);
 	}
-	OUT << '\246' << pt [ 0 ]; // 0xA6
+	OUT << '\246' << code; // 0xA6
 }
 
 void CqBinary::printInteger( const RtInt i )
