@@ -1882,12 +1882,6 @@ static ObjectStringHandleMap ObjectMapString;
 
 static void DeclareLightHandle(const RendermanInterface::RtInt ID, const RendermanInterface::RtLightHandle Handle)
 {
-	if(0 == Handle)
-		{
-			yyerror("NULL Light Handle");
-			return;
-		}
-
 	LightMap[ID] = Handle;
 }
 
