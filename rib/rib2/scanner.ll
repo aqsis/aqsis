@@ -228,7 +228,7 @@ ShaderLayer			{ return REQUEST_TOKEN_SHADERLAYER; }
 ConnectShaderLayers { return REQUEST_TOKEN_CONNECTSHADERLAYERS; }
 version				{ return REQUEST_TOKEN_VERSION; }
 
-{letter}({letter}|{digit})*	{ return UNKNOWN_TOKEN; }
+{letter}({letter}|{digit})*	{ lvalp->stype = new char[strlen(yytext)+1]; strcpy(lvalp->stype, yytext); return UNKNOWN_TOKEN; }
 .				{ return(yytext[0]); }
 
 <<EOF>>			{

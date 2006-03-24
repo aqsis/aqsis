@@ -23,6 +23,7 @@ using namespace librib;
 
 #include <algorithm>
 #include <iostream>
+#include <sstream>
 #include <map>
 #include <string>
 #include <vector>
@@ -1269,7 +1270,9 @@ complete_request
 				// Print the error, then force the scanner into 'request'
 				// mode which will make it ignore all parameters until the
 				// next request token.
-				yyerror("Unrecognised RIB request");
+				std::stringstream error;
+				error << "Unrecognised RIB request : " << $1 << std::ends;
+				yyerror(error.str().c_str());
 				fRecovering = true;
 				ExpectRequest();
 			}
