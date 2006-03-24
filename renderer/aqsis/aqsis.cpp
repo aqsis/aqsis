@@ -535,7 +535,7 @@ void RenderFile( FILE* file, std::string&  name )
 		RiBegin( "aqsis" );
 
 		if ( !g_cl_nostandard )
-			librib::StandardDeclarations( *renderengine );
+			librib::StandardDeclarations( renderengine );
 
 		if ( g_cl_rinfo )
 		{

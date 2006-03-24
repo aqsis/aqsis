@@ -258,12 +258,17 @@ void ProcessFile( FILE* file, std::string&  name )
 	try
 	{
 		if(g_cl_output.compare("")!=0)
-			RiBegin(g_cl_output.c_str());
+		{
+			char* outputName = new char[g_cl_output.size()+1];
+			strcpy(outputName, g_cl_output.c_str());
+			outputName[g_cl_output.size()] = '\0';
+			RiBegin(outputName);
+		}
 		else
 			RiBegin(RI_NULL);
 
 		if ( !g_cl_nostandard )
-			librib::StandardDeclarations( *engine );
+			librib::StandardDeclarations( NULL );
 
 		const char* popt[1];
 		if(!g_cl_archive_path.empty())

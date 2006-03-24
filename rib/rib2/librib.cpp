@@ -51,7 +51,7 @@ extern int yydebug;
 namespace librib
 {
 
-extern void ParserDeclare( RendermanInterface& CallbackInterface, const std::string Name, const std::string Type );
+extern void ParserDeclare( RendermanInterface* CallbackInterface, const std::string Name, const std::string Type );
 extern void	ClearDeclarations();
 
 FILE *ParseInputFile = stdin;
@@ -146,7 +146,7 @@ extern "C" const char* StandardParameters[][2] =
 	        { NULL , NULL }
 	    };
 
-void StandardDeclarations( RendermanInterface& CallbackInterface )
+void StandardDeclarations( RendermanInterface* CallbackInterface )
 {
 	// Declare standard arguments
 	unsigned int i = 0;

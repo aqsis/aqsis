@@ -35,7 +35,7 @@ using namespace librib;
 namespace librib
 {
 
-void ParserDeclare(librib::RendermanInterface& CallbackInterface, const std::string Name, const std::string Type);
+void ParserDeclare(librib::RendermanInterface* CallbackInterface, const std::string Name, const std::string Type);
 extern std::string ParseStreamName;
 extern RendermanInterface* ParseCallbackInterface;
 extern std::ostream* ParseErrorStream;
@@ -397,7 +397,7 @@ complete_request
 			{  }
 	|	declare string string
 			{
-				ParserDeclare(*ParseCallbackInterface, $2, $3);
+				ParserDeclare(ParseCallbackInterface, $2, $3);
 				DiscardStringValue($2);
 				DiscardStringValue($3);
 			}
@@ -2021,18 +2021,21 @@ bool IsFrameSkipped(TqUint number)
 namespace librib
 {
 
-void ParserDeclare(librib::RendermanInterface& CallbackInterface, const std::string Name, const std::string Type)
+void ParserDeclare(librib::RendermanInterface* CallbackInterface, const std::string Name, const std::string Type)
 {
 	if(Type_Unknown == DeclareParameterType(Name, Type))
 		yyerror("RiDeclare: Unknown type [" + Name + ", " + Type + "]");
 		
-	char *_name = new char[Name.length()+1];
-	strcpy(_name, Name.c_str());
-	char *_type = new char[Type.length()+1];
-	strcpy(_type, Type.c_str());
-	CallbackInterface.RiDeclare(_name, _type);
-	delete[](_name);
-	delete[](_type);
+	if(CallbackInterface != NULL)
+	{
+		char *_name = new char[Name.length()+1];
+		strcpy(_name, Name.c_str());
+		char *_type = new char[Type.length()+1];
+		strcpy(_type, Type.c_str());
+		CallbackInterface->RiDeclare(_name, _type);
+		delete[](_name);
+		delete[](_type);
+	}
 }
 
 void ClearDeclarations()

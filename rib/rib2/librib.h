@@ -170,7 +170,7 @@ class RendermanInterface
 extern "C"
 {
 
-	void StandardDeclarations( RendermanInterface& CallbackInterface );
+	void StandardDeclarations( RendermanInterface* CallbackInterface );
 
 	void CleanupDeclarations( RendermanInterface& CallbackInterface );
 
