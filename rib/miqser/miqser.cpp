@@ -62,6 +62,7 @@ void ProcessFile( FILE* file, std::string& name );
 // Command-line arguments
 ArgParse::apflag g_cl_pause;
 ArgParse::apflag g_cl_nostandard = 0;
+ArgParse::apflag g_cl_outstandard = 0;
 ArgParse::apflag g_cl_help = 0;
 ArgParse::apflag g_cl_version = 0;
 ArgParse::apint g_cl_verbose = 1;
@@ -97,6 +98,7 @@ int main( int argc, const char** argv )
 	ap.argString( "output", "=string\aSet the output filename, default to <stdout>", &g_cl_output );
 	ap.alias( "output", "o" );
 	ap.argFlag( "nostandard", "\aDo not declare standard RenderMan parameters", &g_cl_nostandard );
+	ap.argFlag( "outputstandard", "\aPrint the standard declarations to the resulting RIB", &g_cl_outstandard );
 	ap.argInt( "verbose", "=integer\aSet log output level\n"
 		   "\a0 = errors\n"
 		   "\a1 = warnings (default)\n"
@@ -268,7 +270,13 @@ void ProcessFile( FILE* file, std::string&  name )
 			RiBegin(RI_NULL);
 
 		if ( !g_cl_nostandard )
-			librib::StandardDeclarations( NULL );
+		{
+			if( !g_cl_outstandard )
+				librib::StandardDeclarations( NULL );
+			else
+				librib::StandardDeclarations( engine );
+		}
+
 
 		const char* popt[1];
 		if(!g_cl_archive_path.empty())
