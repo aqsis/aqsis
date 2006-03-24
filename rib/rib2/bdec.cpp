@@ -35,6 +35,7 @@
 #include "logging.h"
 
 #include <iostream>
+#include <iomanip>
 
 #include <stdio.h>
 #include "bdec.h"
@@ -679,7 +680,7 @@ void CqRibBinaryDecoder::getNext ()
 
 	gc( c );
 
-	if ( (TqUint) c < 200 )
+	if ( (TqUint) c < 127 )
 	{
 		ostr += c;
 	}
