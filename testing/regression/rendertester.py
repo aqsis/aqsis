@@ -235,7 +235,7 @@ class RenderJob:
         # to stdout)...
         if ext not in [".rib", ".gz"]:
             ribname = "_tmp.rib"
-            cmd = "./%s >%s"%(self.rib, ribname)
+            cmd = "%s >%s"%(os.path.join(".",self.rib), ribname)
             os.system(cmd)
         return ribname
 
