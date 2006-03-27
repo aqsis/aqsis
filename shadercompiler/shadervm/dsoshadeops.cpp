@@ -155,8 +155,10 @@ CqDSORepository::getShadeOpMethods(CqString* pShadeOpName)
 	std::list<CqString*>::iterator itPathEntry;
 	SqShadeOp *pTableSymbol = NULL;
 
+	Aqsis::log() << debug << "Looking for DSO candidates for shadeop \"" << pShadeOpName->c_str() << "\"" << std::endl;
 	for ( itPathEntry = m_pDSOPathList.begin() ; itPathEntry != m_pDSOPathList.end() ; itPathEntry++ )
 	{
+		Aqsis::log() << debug << "Looking in shared library : " << (*itPathEntry)->c_str() << std::endl;
 		void *handle = DLOpen( (*itPathEntry) );
 
 		if( handle != NULL )
@@ -186,6 +188,12 @@ CqDSORepository::getShadeOpMethods(CqString* pShadeOpName)
 			Aqsis::log() << error << "DLOpen: " << strError.c_str() << std::endl;
 		};
 	};
+	std::stringstream resultStr;
+	if(oplist->empty())
+		resultStr << "(none found)";
+	else
+		resultStr << "(found " << oplist->size() << " possibilities)";
+	Aqsis::log() << debug << "Finished looking for DSO candidates "<< resultStr.str().c_str() << std::endl;
 	return ( oplist->empty() ? NULL : oplist );
 };
 

@@ -2,6 +2,7 @@ PixelSamples 4 4
 Format 175 175 1
 Clipping .1 50
 Display "testtiff" "file" "rgb"
+Option "searchpath" "shader" ["&:./"]
 
 Projection "perspective" "fov" [35]
 
