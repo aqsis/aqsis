@@ -381,7 +381,7 @@ int main( int argc, const char** argv )
 	StartMemoryDebugging();
 	{
 		ArgParse ap;
-		ap.usageHeader( ArgParse::apstring( "Usage: " ) + argv[ 0 ] + " [options] [RIB file...]" );
+		ap.usageHeader( ArgParse::apstring( "Aqsis command line renderer\nUsage: " ) + argv[ 0 ] + " [options] [RIB file...]" );
 		ap.argFlag( "help", "\aPrint this help and exit", &g_cl_help );
 		ap.alias( "help" , "h" );
 		ap.argFlag( "version", "\aPrint version information and exit", &g_cl_version );
