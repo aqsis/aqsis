@@ -51,6 +51,7 @@ if not env['mingw']:
 	env.Replace(fltk_lib = 'fltk')
 	env.Replace(exr_lib = 'Iex')
 	env.Replace(exr2tif_libs = ['IlmImf', 'Half', 'Iex', 'Imath'])
+	env.Replace(display_libs = ['ws2_32', 'user32', 'gdi32', 'ole32', 'shell32', 'comctl32', '$fltk_lib'])
 	env.AppendUnique(CPPPATH = ['$exr_include_path/Iex', '$exr_include_path/IlmImf', '$exr_include_path/Imath'])
 
 	env.Replace(libaqsis_add_sources = ['libaqsis.def'])
@@ -98,6 +99,7 @@ else:
 	env.Replace(fltk_lib = 'fltk')
 	env.Replace(exr_lib = 'Iex')
 	env.Replace(exr2tif_libs = ['IlmImf', 'Half', 'Iex', 'Imath'])
+	env.Replace(display_libs = ['ws2_32', 'user32', 'gdi32', 'ole32', 'shell32', 'comctl32', 'uuid', '$fltk_lib'])
 
 	env.Replace(slparse_ccflags = ['-O0'])
 	env.AppendUnique(CPPDEFINES=['NO_SYSLOG', 'WIN32', 'PLUGINS', ('_qBUILDING', 'CORE'), ('CORE', '1')])
@@ -112,6 +114,5 @@ env.Replace(LEX = '${flex}')
 env.Replace(YACCFLAGS = '--no-lines -d')
 env.Replace(XSLTPROC = env.File('#/../win32libs/GnuWin32/bin/xsltproc'))
 
-env.Replace(display_libs = ['ws2_32', 'user32', 'gdi32', 'ole32', 'shell32', 'comctl32', '$fltk_lib'])
 env.Replace(aqsis_libs = ['ws2_32', 'user32'])
 env.Replace(libaqsis_libs = ['ws2_32', 'user32'])

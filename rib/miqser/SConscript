@@ -4,7 +4,7 @@ miqser_sources = Split("""
 
 miqserenv = env.Copy();
 
-miqserenv.AppendUnique(LIBS = ['argparse', 'ri2rib', 'rib2ri', 'rib2', 'aqsistypes'])
+miqserenv.AppendUnique(LIBS = ['argparse', 'ri2rib', 'rib2ri', 'rib2', 'aqsistypes', '$z_lib'])
 
 # Set any platform specific options for this target
 miqserenv.UseTargetOptions('miqser')

@@ -66,6 +66,8 @@
 
 #ifndef    AQSIS_SYSTEM_WIN32
 #include        "unistd.h"
+#else
+#include	"io.h"
 #endif /* AQSIS_SYSTEM_WIN32 */
 
 // These are needed to allow calculation of the default paths
