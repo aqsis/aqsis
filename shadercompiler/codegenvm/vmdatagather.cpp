@@ -120,6 +120,7 @@ void CqCodeGenDataGather::Visit( IqParseNodeFunctionCall& FC )
 				pDef->Accept( *this );
 				m_saTransTable.erase( m_saTransTable.end() - 1 );
 			}
+			m_StackVarMap.pop_back( );
 		}
 		else
 		{
@@ -131,7 +132,6 @@ void CqCodeGenDataGather::Visit( IqParseNodeFunctionCall& FC )
 				m_saTransTable.erase( m_saTransTable.end() - 1 );
 			}
 		}
-		m_StackVarMap.pop_back( );
 	}
 }
 
