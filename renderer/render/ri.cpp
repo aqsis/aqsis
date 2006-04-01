@@ -64,6 +64,8 @@
 #include	"subdivision2.h"
 #include	"condition.h"
 
+#include	"blobby.h"
+
 #ifndef    AQSIS_SYSTEM_WIN32
 #include        "unistd.h"
 #else
