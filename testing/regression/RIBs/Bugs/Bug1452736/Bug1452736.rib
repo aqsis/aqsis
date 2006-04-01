@@ -1,0 +1,26 @@
+##RenderMan RIB-Structure 1.0
+version 3.03
+
+Format 400 300 1
+PixelSamples 4 4
+Shutter 0 1
+Projection "perspective" "fov" [ 30.000000 ] 
+Display "Bug1452736.tif" "file" "rgb" "string compression" ["lzw"]
+WorldBegin
+TransformBegin
+
+Translate 0.000000 0.000000 15.000000
+Rotate 90.000000 1.000000 0.000000 0.000000
+
+MotionBegin [ 0.000000 1.000000 ]
+Translate -3 0 0
+Translate 3 0 0
+MotionEnd
+
+MotionBegin [ 0.000000 1.000000 ]
+ReadArchive "Mesh0.rib"
+ReadArchive "Mesh30.rib"
+MotionEnd
+
+TransformEnd
+WorldEnd
