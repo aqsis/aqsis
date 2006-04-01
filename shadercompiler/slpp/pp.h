@@ -314,7 +314,7 @@ extern	char	typetab[];
 #if	HOST == H_BSD
 #define	FILENAMESIZE	MAXPATHLEN
 #else	/* ! H_BSD */
-#define	FILENAMESIZE	80	/* Long enough until we find better	*/
+#define	FILENAMESIZE	1000	/* Long enough until we find better	*/
 #endif	/* HOST == H_BSD */
 #endif	/* HOST == H_CPM */
 
