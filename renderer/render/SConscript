@@ -39,6 +39,8 @@ aqsisdll_sources = Split("""
 	teapot.cpp
 	texturemap.cpp
 	transform.cpp
+	blobby.cpp
+	jules_bloomenthal.cpp
 	trimcurve.cpp""")
 
 
@@ -46,8 +48,12 @@ aqsisdll_headers = Split("""
 	attributes.h            ilightsource.h          micropolygon.h          ri.h
 	bilinear.h              imagebuffer.h           motion.h                ri_cache.h
 	bound.h                 imagepixel.h            mpdump.h                rifile.h
+	jules_bloomenthal.h
+
 	bucket.h                imagers.h               nurbs.h                 shadeop.h
-	clippingvolume.h        inlineparse.h           objectinstance.h        shaders.h
+	blobby.h		clippingvolume.h        inlineparse.h
+        objectinstance.h        shaders.h
+
 	condition.h             iraytrace.h             occlusion.h             stats.h
 	converter.h             irenderer.h             options.h               subdivision2.h
 	csgtree.h               ishader.h               parameters.h            surface.h

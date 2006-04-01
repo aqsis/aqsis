@@ -3789,7 +3789,41 @@ RtVoid RiBlobbyV( RtInt nleaf, RtInt ncode, RtInt code[], RtInt nflt, RtFloat fl
 
 	Debug_RiBlobby
 
-	Aqsis::log() << warning << "RiBlobby not supported" << std::endl;
+    	CqBlobby blobby(nleaf, ncode, code, nflt, flt);
+
+    	std::vector<CqVector3D> Vertices;
+    	std::vector<CqVector3D> Normals;
+	std::vector<std::vector<TqInt> > Polygons;
+	TqFloat shadingrate = QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite( "System", "ShadingRateSqrt" ) [ 0 ];
+
+    	blobby.polygonize(Vertices, Normals, Polygons, shadingrate/20.0f);
+
+	Aqsis::log() << info << "One blobby is polygonized with " << Vertices.size() << " " << Polygons.size() << std::endl; 
+
+    	TqInt* nvertices = new TqInt[Polygons.size()];
+    	TqInt* vertices = new TqInt[3 * Polygons.size()];
+    	TqFloat* points = new TqFloat[3 * Vertices.size()];
+
+    	TqInt* n = nvertices;
+    	TqInt* v = vertices;
+    	TqInt i;
+	for(i = 0; i < Polygons.size(); ++i)
+    	{
+        	*n++ = 3;
+        	*v++ = Polygons[i][0];
+        	*v++ = Polygons[i][1];
+        	*v++ = Polygons[i][2];
+    	}
+
+    	TqFloat* p = points;
+    	for(i = 0; i < Vertices.size(); ++i)
+    	{
+        	*p++ = Vertices[i][0];
+        	*p++ = Vertices[i][1];
+        	*p++ = Vertices[i][2];
+    	}
+
+    	RiPointsPolygons(Polygons.size(), nvertices, vertices, RI_P, points, RI_NULL);
 
 	return ;
 }
