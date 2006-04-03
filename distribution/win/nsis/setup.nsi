@@ -1,6 +1,6 @@
 ; Title: Aqsis 'Standard' Installer for Win32/64 (NSIS)
-; Author: Leon Tony Atkinson
-; Info: Last tested with NSIS 2.14
+; Author: Leon Tony Atkinson (latkinson@aqsis.org)
+; Info: Last tested with NSIS 2.15
 ; Other: 1. To make updates easier, all message strings have been placed within the top 20-30 lines of this file.
 ;        2. To build manually, without using SCons, uncomment lines 13 and 17.
 
@@ -139,9 +139,11 @@ SectionIn 1 2
   !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
   CreateDirectory "$SMPROGRAMS\$ICONS_GROUP"
   CreateDirectory "$SMPROGRAMS\$ICONS_GROUP\Documentation"
+  SetOutPath "$INSTDIR\doc"
   CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Documentation\Readme.lnk" "$INSTDIR\doc\README.txt"
   SetOutPath "$INSTDIR\bin"
   CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\${PRODUCT_NAME}.lnk" "$SYSDIR\cmd.exe" '/k "$INSTDIR\bin\aqsis.exe" -h'
+  SetOutPath "$INSTDIR\doc"
   CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Credits.lnk" "$INSTDIR\doc\AUTHORS.txt"
   CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\License.lnk" "$INSTDIR\doc\LICENSE.txt"
   !insertmacro MUI_STARTMENU_WRITE_END
@@ -167,6 +169,7 @@ SectionGroup /e "Content" SEC02
   ; Shortcuts
     !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
     CreateDirectory "$SMPROGRAMS\$ICONS_GROUP\Examples"
+    SetOutPath "$INSTDIR\content\ribs"
     CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Examples\Features.lnk" "$INSTDIR\content\ribs\features"
     CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Examples\Scenes.lnk" "$INSTDIR\content\ribs\scenes"
     !insertmacro MUI_STARTMENU_WRITE_END
@@ -188,6 +191,7 @@ SectionIn 1 2
 
 ; Shortcuts
   !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
+  ;;SetOutPath "$INSTDIR\doc"
   ;;CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Documentation\What's New.lnk" "$INSTDIR\doc\CHANGES.txt"
   !insertmacro MUI_STARTMENU_WRITE_END
 SectionEnd
@@ -212,17 +216,20 @@ SectionEnd
 
 
 Section -AdditionalIcons
-  SetOutPath $INSTDIR
   !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
   WriteIniStr "$INSTDIR\doc\website.url" "InternetShortcut" "URL" "${PRODUCT_WEB_SITE}"
+  SetOutPath "$INSTDIR\doc"
   CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Documentation\${PRODUCT_NAME} Website.lnk" "$INSTDIR\doc\website.url"
+  SetOutPath "$INSTDIR"
   CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Uninstall ${PRODUCT_NAME}.lnk" "$INSTDIR\uninst.exe"
+  SetOutPath "$INSTDIR\doc"
   CreateShortCut "$INSTDIR\LICENSE.lnk" "$INSTDIR\doc\LICENSE.txt"
   !insertmacro MUI_STARTMENU_WRITE_END
 SectionEnd
 
 
 Section -AdditionalTasks
+Var /GLOBAL AQSISHOME
 Var /GLOBAL DESKTOP_ICON
 Var /GLOBAL FILE_EXTENSION
 Var /GLOBAL PATH
@@ -265,8 +272,16 @@ Var /GLOBAL QUICKLAUCH_ICON
     CreateShortCut "$QUICKLAUNCH\${PRODUCT_FULLNAME}.lnk" "$SYSDIR\cmd.exe" '/k "$INSTDIR\bin\aqsis.exe" -h'
     quicklaunch_end:
 
+  ; Create 'AQSISHOME' for all users
+  !insertmacro MUI_INSTALLOPTIONS_READ $AQSISHOME "page_tasks.ini" "Field 5" "State"
+  StrCmp $AQSISHOME "1" "aqsishome" "aqsishome_end"
+    aqsishome:
+    WriteRegStr HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "AQSISHOME" "$INSTDIR\bin"
+    SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
+    aqsishome_end:
+
   ; Create file association(s)
-  !insertmacro MUI_INSTALLOPTIONS_READ $FILE_EXTENSION "page_tasks.ini" "Field 5" "State"
+  !insertmacro MUI_INSTALLOPTIONS_READ $FILE_EXTENSION "page_tasks.ini" "Field 6" "State"
   StrCmp $FILE_EXTENSION "1" "file" "file_end"
     file:
     WriteRegStr HKCR ".rib" "" "Aqsis.RIB"
