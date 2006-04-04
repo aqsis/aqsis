@@ -169,7 +169,7 @@ static TqBool IsVerbose()
 
 	if (bVerbose == -1)
 	{
-		const TqInt* poptVerbose = QGetRenderContext() ->optCurrent().GetIntegerOption( "statistics", "renderinfo" );
+		const TqInt* poptVerbose = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "statistics", "renderinfo" );
 
 		bVerbose = 0;
 		if (poptVerbose && *poptVerbose)
@@ -875,7 +875,7 @@ void CqTextureMap::GetSampleWithoutBlur( TqFloat u1, TqFloat v1, TqFloat u2, TqF
 	// provide to texture() call in the shader.
 	if (m_lerp == -1.0)
 	{
-		const TqInt* pLerp = QGetRenderContext() ->optCurrent().GetIntegerOption( "texture", "lerp" );
+		const TqInt* pLerp = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "texture", "lerp" );
 
 		m_lerp = 0.0f;
 		if (pLerp && (*pLerp > 0.0f))
@@ -1938,7 +1938,7 @@ void CqEnvironmentMap::SampleMap( CqVector3D& R1,
 	// provide to texture() call in the shader.
 	if (m_lerp == -1.0)
 	{
-		const TqInt* pLerp = QGetRenderContext() ->optCurrent().GetIntegerOption( "texture", "lerp" );
+		const TqInt* pLerp = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "texture", "lerp" );
 
 		m_lerp = 0.0f;
 		if (pLerp && (*pLerp > 0.0f))

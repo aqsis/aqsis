@@ -85,10 +85,10 @@ void CqImagersource::Initialise( IqBucket* pBucket )
 	m_uGridRes = uGridRes;
 	m_vGridRes = vGridRes;
 
-	TqInt mode = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "DisplayMode" ) [ 0 ];
+	TqInt mode = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "DisplayMode" ) [ 0 ];
 	TqFloat components;
 	TqInt j, i;
-	TqFloat shuttertime = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Shutter" ) [ 0 ];
+	TqFloat shuttertime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 0 ];
 
 	components = mode & ModeRGB ? 3 : 0;
 	components += mode & ModeA ? 1 : 0;

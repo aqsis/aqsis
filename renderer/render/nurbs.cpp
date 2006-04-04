@@ -1613,7 +1613,7 @@ TqBool	CqSurfaceNURBS::Diceable()
 	TqUint i;
 
 	TqFloat gs = 16.0f;
-	const TqFloat* poptGridSize = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "SqrtGridSize" );
+	const TqFloat* poptGridSize = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "SqrtGridSize" );
 	if( NULL != poptGridSize )
 		gs = poptGridSize[0];
 

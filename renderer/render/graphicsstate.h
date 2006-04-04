@@ -146,14 +146,23 @@ class CqModeBlock : public boost::enable_shared_from_this<CqModeBlock>
 			logInvalidNesting();
 		}
 
-		virtual	CqOptions&	optCurrent() = 0;
+		virtual CqOptionsPtr	poptCurrent() const
+		{
+			return( m_poptCurrent );
+		}
+		virtual CqOptionsPtr	poptWriteCurrent()
+		{
+			if(!m_poptCurrent.unique())
+				m_poptCurrent = CqOptionsPtr(new CqOptions(*m_poptCurrent.get()));
+			return(m_poptCurrent);
+		}	
 		/** Push the current options onto a stack, allowing modification of the options
 		 * and recovery of the current state at a later point.
 		 */
-		virtual CqOptions&	pushOptions() = 0;
+		virtual CqOptionsPtr	pushOptions() = 0;
 		/** Pop a previously pushed copy of the options from the stack.
 		 */
-		virtual CqOptions&	popOptions() = 0;
+		virtual CqOptionsPtr	popOptions() = 0;
 		/** Get a read only pointer to the current attributes.
 		 * \return a pointer to the current attributes.
 		 */
@@ -224,6 +233,10 @@ class CqModeBlock : public boost::enable_shared_from_this<CqModeBlock>
 		{
 			return ( m_pconParent );
 		}
+		const boost::shared_ptr<CqModeBlock>	pconParent() const
+		{
+			return ( m_pconParent );
+		}
 
 		/** Get the type.
 		 * \return a m_ModeType;
@@ -265,6 +278,7 @@ class CqModeBlock : public boost::enable_shared_from_this<CqModeBlock>
 	public:
 		CqAttributes* m_pattrCurrent;		///< The current attributes.
 		CqTransformPtr m_ptransCurrent;		///< The current transformation.
+		CqOptionsPtr m_poptCurrent;
 
 	private:
 		boost::shared_ptr<CqModeBlock>	m_pconParent;			///< The previous context.
@@ -297,32 +311,34 @@ class CqMainModeBlock : public CqModeBlock
 		virtual	void	EndMainModeBlock()
 		{}
 
-		/** Get a reference to the currently stored options.
-		 * \return an options reference.
-		 */
-		virtual	CqOptions&	optCurrent()
+		virtual CqOptionsPtr	poptCurrent() const
 		{
-			return ( m_optCurrent );
+			return( m_poptCurrent );
 		}
-		virtual CqOptions&	pushOptions()
+		virtual CqOptionsPtr	poptWriteCurrent()
 		{
-			CqOptions* opts = new CqOptions(m_optCurrent);
-			m_optionsStack.push(opts);
-			return(m_optCurrent);
+			if(!m_poptCurrent.unique())
+				m_poptCurrent = CqOptionsPtr(new CqOptions(*m_poptCurrent.get()));
+			return(m_poptCurrent);
+		}	
+		virtual CqOptionsPtr	pushOptions()
+		{
+			CqOptionsPtr opts = CqOptionsPtr(new CqOptions(*m_poptCurrent.get()));
+			m_optionsStack.push(m_poptCurrent);
+			m_poptCurrent = opts;
+			return(m_poptCurrent);
 		}
-		virtual CqOptions&	popOptions()
+		virtual CqOptionsPtr	popOptions()
 		{
 			assert(!m_optionsStack.empty());
-			CqOptions* opts = m_optionsStack.top();
-			m_optCurrent = *opts;
+			CqOptionsPtr opts = m_optionsStack.top();
+			m_poptCurrent = opts;
 			m_optionsStack.pop();
-			delete(opts);
-			return(m_optCurrent);
+			return(m_poptCurrent);
 		}
 
 	private:
-		CqOptions	m_optCurrent;	///< Current graphics environment options.
-		std::stack<CqOptions*>	m_optionsStack;
+		std::stack<CqOptionsPtr>	m_optionsStack;
 }
 ;
 
@@ -365,32 +381,34 @@ class CqFrameModeBlock : public CqModeBlock
 		virtual	void	EndFrameModeBlock()
 		{}
 
-		/** Get a reference to the currently stored options.
-		 * \return an options reference.
-		 */
-		virtual	CqOptions&	optCurrent()
+		virtual CqOptionsPtr	poptCurrent() const
 		{
-			return ( m_optCurrent );
+			return( m_poptCurrent );
 		}
-		virtual CqOptions&	pushOptions()
+		virtual CqOptionsPtr	poptWriteCurrent()
 		{
-			CqOptions* opts = new CqOptions(m_optCurrent);
-			m_optionsStack.push(opts);
-			return(m_optCurrent);
+			if(!m_poptCurrent.unique())
+				m_poptCurrent = CqOptionsPtr(new CqOptions(*m_poptCurrent.get()));
+			return(m_poptCurrent);
+		}	
+		virtual CqOptionsPtr	pushOptions()
+		{
+			CqOptionsPtr opts = CqOptionsPtr(new CqOptions(*m_poptCurrent.get()));
+			m_optionsStack.push(m_poptCurrent);
+			m_poptCurrent = opts;
+			return(m_poptCurrent);
 		}
-		virtual CqOptions&	popOptions()
+		virtual CqOptionsPtr	popOptions()
 		{
 			assert(!m_optionsStack.empty());
-			CqOptions* opts = m_optionsStack.top();
-			m_optCurrent = *opts;
+			CqOptionsPtr opts = m_optionsStack.top();
+			m_poptCurrent = opts;
 			m_optionsStack.pop();
-			delete(opts);
-			return(m_optCurrent);
+			return(m_poptCurrent);
 		}
 
 	private:
-		CqOptions	m_optCurrent;	///< Current graphics environment components
-		std::stack<CqOptions*>	m_optionsStack;
+		std::stack<CqOptionsPtr>	m_optionsStack;
 }
 ;
 
@@ -433,18 +451,19 @@ class CqWorldModeBlock : public CqModeBlock
 		virtual	void	EndWorldModeBlock()
 		{}
 
-		/** Get a reference to the options at the parent context, as world context doesn't store options.
-		 * \return an options reference.
-		 */
-		virtual	CqOptions&	optCurrent()
+		virtual CqOptionsPtr	poptCurrent() const
 		{
-			return ( pconParent() ->optCurrent() );
+			return( pconParent()->poptCurrent() );
 		}
-		virtual CqOptions&	pushOptions()
+		virtual CqOptionsPtr	poptWriteCurrent()
+		{
+			return( pconParent()->poptWriteCurrent() );
+		}	
+		virtual CqOptionsPtr	pushOptions()
 		{
 			return(pconParent()->pushOptions());
 		}
-		virtual CqOptions&	popOptions()
+		virtual CqOptionsPtr	popOptions()
 		{
 			return(pconParent()->popOptions());
 		}
@@ -494,18 +513,19 @@ class CqAttributeModeBlock : public CqModeBlock
 		virtual	void	EndAttributeModeBlock()
 		{}
 
-		/** Get a reference to the options at the parent context, as attribute context doesn't store options.
-		 * \return an options reference.
-		 */
-		virtual	CqOptions&	optCurrent()
+		virtual CqOptionsPtr	poptCurrent() const
 		{
-			return ( pconParent() ->optCurrent() );
+			return( pconParent()->poptCurrent() );
 		}
-		virtual CqOptions&	pushOptions()
+		virtual CqOptionsPtr	poptWriteCurrent()
+		{
+			return( pconParent()->poptWriteCurrent() );
+		}	
+		virtual CqOptionsPtr	pushOptions()
 		{
 			return(pconParent()->pushOptions());
 		}
-		virtual CqOptions&	popOptions()
+		virtual CqOptionsPtr	popOptions()
 		{
 			return(pconParent()->popOptions());
 		}
@@ -552,18 +572,19 @@ class CqTransformModeBlock : public CqModeBlock
 		virtual	void	EndTransformModeBlock()
 		{}
 
-		/** Get a reference to the options at the parent context, as transform context doesn't store options.
-		 * \return an options reference.
-		 */
-		virtual	CqOptions&	optCurrent()
+		virtual CqOptionsPtr	poptCurrent() const
 		{
-			return ( pconParent() ->optCurrent() );
+			return( pconParent()->poptCurrent() );
 		}
-		virtual CqOptions&	pushOptions()
+		virtual CqOptionsPtr	poptWriteCurrent()
+		{
+			return( pconParent()->poptWriteCurrent() );
+		}	
+		virtual CqOptionsPtr	pushOptions()
 		{
 			return(pconParent()->pushOptions());
 		}
-		virtual CqOptions&	popOptions()
+		virtual CqOptionsPtr	popOptions()
 		{
 			return(pconParent()->popOptions());
 		}
@@ -610,18 +631,19 @@ class CqSolidModeBlock : public CqModeBlock
 		virtual	void	EndSolidModeBlock()
 		{}
 
-		/** Get a reference to the options at the parent context, as solid context doesn't store options.
-		 * \return an options reference.
-		 */
-		virtual	CqOptions&	optCurrent()
+		virtual CqOptionsPtr	poptCurrent() const
 		{
-			return ( pconParent() ->optCurrent() );
+			return( pconParent()->poptCurrent() );
 		}
-		virtual CqOptions&	pushOptions()
+		virtual CqOptionsPtr	poptWriteCurrent()
+		{
+			return( pconParent()->poptWriteCurrent() );
+		}	
+		virtual CqOptionsPtr	pushOptions()
 		{
 			return(pconParent()->pushOptions());
 		}
-		virtual CqOptions&	popOptions()
+		virtual CqOptionsPtr	popOptions()
 		{
 			return(pconParent()->popOptions());
 		}
@@ -681,18 +703,19 @@ class CqObjectModeBlock : public CqModeBlock
 		virtual	void	EndObjectModeBlock()
 		{}
 
-		/** Get a reference to the options at the parent context, as object context doesn't store options.
-		 * \return an options reference.
-		 */
-		virtual	CqOptions&	optCurrent()
+		virtual CqOptionsPtr	poptCurrent() const
 		{
-			return ( pconParent() ->optCurrent() );
+			return( pconParent()->poptCurrent() );
 		}
-		virtual CqOptions&	pushOptions()
+		virtual CqOptionsPtr	poptWriteCurrent()
+		{
+			return( pconParent()->poptWriteCurrent() );
+		}	
+		virtual CqOptionsPtr	pushOptions()
 		{
 			return(pconParent()->pushOptions());
 		}
-		virtual CqOptions&	popOptions()
+		virtual CqOptionsPtr	popOptions()
 		{
 			return(pconParent()->popOptions());
 		}
@@ -788,18 +811,19 @@ class CqMotionModeBlock : public CqModeBlock
 		 */
 		virtual	void	EndMotionModeBlock();
 
-		/** Get a reference to the options at the parent context, as motion context doesn't store options.
-		 * \return an options reference.
-		 */
-		virtual	CqOptions&	optCurrent()
+		virtual CqOptionsPtr	poptCurrent() const
 		{
-			return ( pconParent() ->optCurrent() );
+			return( pconParent()->poptCurrent() );
 		}
-		virtual CqOptions&	pushOptions()
+		virtual CqOptionsPtr	poptWriteCurrent()
+		{
+			return( pconParent()->poptWriteCurrent() );
+		}	
+		virtual CqOptionsPtr	pushOptions()
 		{
 			return(pconParent()->pushOptions());
 		}
-		virtual CqOptions&	popOptions()
+		virtual CqOptionsPtr	popOptions()
 		{
 			return(pconParent()->popOptions());
 		}

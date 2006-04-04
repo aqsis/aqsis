@@ -652,7 +652,7 @@ void CqDDManager::LoadDisplayLibrary( SqDisplayRequest& req )
 
 	CqString displayType = req.m_type;
 
-	const CqString* poptDisplay = QGetRenderContext()->optCurrent().GetStringOption("display", displayType.c_str());
+	const CqString* poptDisplay = QGetRenderContext()->poptCurrent()->GetStringOption("display", displayType.c_str());
 
 	if(0 != poptDisplay)
 
@@ -662,7 +662,7 @@ void CqDDManager::LoadDisplayLibrary( SqDisplayRequest& req )
 
 	{
 
-		const CqString* poptDisplayMapping = QGetRenderContext()->optCurrent().GetStringOption("display", "mapping");
+		const CqString* poptDisplayMapping = QGetRenderContext()->poptCurrent()->GetStringOption("display", "mapping");
 
 		if(0 != poptDisplayMapping)
 
@@ -768,11 +768,11 @@ void CqDDManager::LoadDisplayLibrary( SqDisplayRequest& req )
 
 			if(req.m_modeID & ModeZ)
 
-				pQuant = QGetRenderContext() ->optCurrent().GetFloatOption( "Quantize", "Depth" );
+				pQuant = QGetRenderContext() ->poptCurrent()->GetFloatOption( "Quantize", "Depth" );
 
 			else
 
-				pQuant = QGetRenderContext() ->optCurrent().GetFloatOption( "Quantize", "Color" );
+				pQuant = QGetRenderContext() ->poptCurrent()->GetFloatOption( "Quantize", "Color" );
 
 			if( pQuant && !req.m_QuantizeSpecified)
 
@@ -1004,17 +1004,17 @@ void CqDDManager::LoadDisplayLibrary( SqDisplayRequest& req )
 
 		// Call the DspyImageOpen method on the display to initialise things.
 
-		TqInt xres = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "Resolution" ) [ 0 ];
+		TqInt xres = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "Resolution" ) [ 0 ];
 
-		TqInt yres = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "Resolution" ) [ 1 ];
+		TqInt yres = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "Resolution" ) [ 1 ];
 
-		TqInt xmin = static_cast<TqInt>( CLAMP( CEIL( xres * QGetRenderContext() ->optCurrent().GetFloatOption( "System", "CropWindow" ) [ 0 ] ), 0, xres ) );
+		TqInt xmin = static_cast<TqInt>( CLAMP( CEIL( xres * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 0 ] ), 0, xres ) );
 
-		TqInt xmax = static_cast<TqInt>( CLAMP( CEIL( xres * QGetRenderContext() ->optCurrent().GetFloatOption( "System", "CropWindow" ) [ 1 ] ), 0, xres ) );
+		TqInt xmax = static_cast<TqInt>( CLAMP( CEIL( xres * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 1 ] ), 0, xres ) );
 
-		TqInt ymin = static_cast<TqInt>( CLAMP( CEIL( yres * QGetRenderContext() ->optCurrent().GetFloatOption( "System", "CropWindow" ) [ 2 ] ), 0, yres ) );
+		TqInt ymin = static_cast<TqInt>( CLAMP( CEIL( yres * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 2 ] ), 0, yres ) );
 
-		TqInt ymax = static_cast<TqInt>( CLAMP( CEIL( yres * QGetRenderContext() ->optCurrent().GetFloatOption( "System", "CropWindow" ) [ 3 ] ), 0, yres ) );
+		TqInt ymax = static_cast<TqInt>( CLAMP( CEIL( yres * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 3 ] ), 0, yres ) );
 
 		PtDspyError err = (*req.m_OpenMethod)(&req.m_imageHandle,
 
@@ -1330,7 +1330,7 @@ void CqDDManager::InitialiseDisplayNameMap()
 
 	CqString strConfigFile("displays.ini");
 
-	const CqString* displays = QGetRenderContext()->optCurrent().GetStringOption( "searchpath", "display" );
+	const CqString* displays = QGetRenderContext()->poptCurrent()->GetStringOption( "searchpath", "display" );
 
 	if( displays )
 
@@ -1919,7 +1919,7 @@ void CqDDManager::PrepareSystemParameters( SqDisplayRequest& req )
 
 	// "near"
 
-	TqFloat nearval = static_cast<TqFloat>( QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Clipping" ) [ 0 ] );
+	TqFloat nearval = static_cast<TqFloat>( QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Clipping" ) [ 0 ] );
 
 	ConstructFloatsParameter("near", &nearval, 1, parameter);
 
@@ -1929,7 +1929,7 @@ void CqDDManager::PrepareSystemParameters( SqDisplayRequest& req )
 
 	// "far"
 
-	TqFloat farval = static_cast<TqFloat>( QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Clipping" ) [ 1 ] );
+	TqFloat farval = static_cast<TqFloat>( QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Clipping" ) [ 1 ] );
 
 	ConstructFloatsParameter("far", &farval, 1, parameter);
 
@@ -1941,9 +1941,9 @@ void CqDDManager::PrepareSystemParameters( SqDisplayRequest& req )
 
 	TqInt OriginalSize[2];
 
-	OriginalSize[0] = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "Resolution" ) [ 0 ];
+	OriginalSize[0] = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "Resolution" ) [ 0 ];
 
-	OriginalSize[1] = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "Resolution" ) [ 1 ];
+	OriginalSize[1] = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "Resolution" ) [ 1 ];
 
 	ConstructIntsParameter("OriginalSize", OriginalSize, 2, parameter);
 
@@ -1955,9 +1955,9 @@ void CqDDManager::PrepareSystemParameters( SqDisplayRequest& req )
 
 	TqInt origin[2];
 
-	origin[0] = static_cast<TqInt>( CLAMP( CEIL( OriginalSize[0] * QGetRenderContext() ->optCurrent().GetFloatOption( "System", "CropWindow" ) [ 0 ] ), 0, OriginalSize[0] ) );
+	origin[0] = static_cast<TqInt>( CLAMP( CEIL( OriginalSize[0] * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 0 ] ), 0, OriginalSize[0] ) );
 
-	origin[1] = static_cast<TqInt>( CLAMP( CEIL( OriginalSize[1] * QGetRenderContext() ->optCurrent().GetFloatOption( "System", "CropWindow" ) [ 2 ] ), 0, OriginalSize[1] ) );
+	origin[1] = static_cast<TqInt>( CLAMP( CEIL( OriginalSize[1] * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 2 ] ), 0, OriginalSize[1] ) );
 
 	ConstructIntsParameter("origin", origin, 2, parameter);
 
@@ -1967,7 +1967,7 @@ void CqDDManager::PrepareSystemParameters( SqDisplayRequest& req )
 
 	// "PixelAspectRatio"
 
-	TqFloat PixelAspectRatio = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "PixelAspectRatio" ) [ 0 ];
+	TqFloat PixelAspectRatio = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "PixelAspectRatio" ) [ 0 ];
 
 	ConstructFloatsParameter("PixelAspectRatio", &PixelAspectRatio, 1, parameter);
 

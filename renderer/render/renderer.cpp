@@ -95,6 +95,8 @@ CqRenderer::CqRenderer() :
 	m_pTransDefObj  = CqTransformPtr( new CqTransform );
 	m_fWorldBegin = TqFalse;
 
+	m_poptDefault = CqOptionsPtr(new CqOptions );
+
 	// Initialise the array of coordinate systems.
 	m_aCoordSystems.resize( CoordSystem_Last );
 
@@ -489,7 +491,7 @@ TqFloat	CqRenderer::Time() const
 	if ( m_pconCurrent && m_pconCurrent->Type() == Motion)
 		return ( m_pconCurrent->Time() );
 	else
-		return ( QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "Shutter" ) [ 0 ] );
+		return ( QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 0 ] );
 }
 
 
@@ -514,13 +516,13 @@ void CqRenderer::AdvanceTime()
 /** Return a reference to the current options.
  */
 
-CqOptions& CqRenderer::optCurrent()
+const CqOptionsPtr CqRenderer::poptCurrent() const
 {
 	if ( m_pconCurrent )
-		return ( m_pconCurrent->optCurrent() );
+		return ( m_pconCurrent->poptCurrent() );
 	else
 	{
-		return ( m_optDefault );
+		return ( m_poptDefault );
 	}
 }
 
@@ -528,28 +530,27 @@ CqOptions& CqRenderer::optCurrent()
 /** Return a reference to the current options.
  */
 
-const CqOptions& CqRenderer::optCurrent() const
+CqOptionsPtr CqRenderer::poptWriteCurrent()
 {
 	if ( m_pconCurrent )
-		return ( m_pconCurrent->optCurrent() );
+		return ( m_pconCurrent->poptWriteCurrent() );
 	else
 	{
-		return ( m_optDefault );
+		return ( m_poptDefault );
 	}
 }
-
 //----------------------------------------------------------------------
 /** Push the current options allowing modification.
  */
 
-CqOptions& CqRenderer::pushOptions()
+CqOptionsPtr CqRenderer::pushOptions()
 {
 	if ( m_pconCurrent )
 		return ( m_pconCurrent->pushOptions() );
 	else
 	{
 		// \note: cannot push/pop options outside the Main block.
-		return ( m_optDefault );
+		return ( m_poptDefault );
 	}
 }
 
@@ -557,14 +558,14 @@ CqOptions& CqRenderer::pushOptions()
 /** Pop the last stored options.
  */
 
-CqOptions& CqRenderer::popOptions()
+CqOptionsPtr CqRenderer::popOptions()
 {
 	if ( m_pconCurrent )
 		return ( m_pconCurrent->popOptions() );
 	else
 	{
 		// \note: cannot push/pop options outside the Main block.
-		return ( m_optDefault );
+		return ( m_poptDefault );
 	}
 }
 
@@ -663,11 +664,11 @@ void	CqRenderer::ptransConcatCurrentTime( const CqMatrix& matTrans )
 void CqRenderer::RenderWorld(CqTransformPtr camera, CqOptions* pOpts, TqBool clone)
 {
 	// If alternative options have been specified, set them up now.
-	if(NULL != pOpts)
-	{
-		CqOptions& currOpts = pushOptions();
-		currOpts = *pOpts;
-	}
+//	if(NULL != pOpts)
+//	{
+//		CqOptions& currOpts = pushOptions();
+//		currOpts = *pOpts;
+//	}
 	// If an alternative camera has been specified, use it, otherwise use the default camera setup during initialisation.
 	CqTransformPtr defaultCamera;
 	if(camera)
@@ -675,7 +676,7 @@ void CqRenderer::RenderWorld(CqTransformPtr camera, CqOptions* pOpts, TqBool clo
 		// Store the current camera transform for later.
 		defaultCamera = GetCameraTransform();
 		SetCameraTransform(camera);
-		optCurrent().InitialiseCamera();
+		poptCurrent()->InitialiseCamera();
 	}
 	pImage()->SetImage();
 
@@ -703,13 +704,13 @@ void CqRenderer::RenderWorld(CqTransformPtr camera, CqOptions* pOpts, TqBool clo
 	if(NULL != pMultipass)
 		pMultipass[0] = multiPass;
 
-	if(NULL != pOpts)
-		popOptions();
+//	if(NULL != pOpts)
+//		popOptions();
 
 	if(camera)
 	{
 		SetCameraTransform(defaultCamera);
-		optCurrent().InitialiseCamera();
+		poptCurrent()->InitialiseCamera();
 	}
 	pImage()->SetImage();
 }
@@ -744,36 +745,36 @@ void CqRenderer::RenderAutoShadows()
 				if(NULL != pRes)
 					res = pRes[0];
 				// Setup a new set of options based on the current ones.
-				CqOptions opts(optCurrent());
-				opts.GetIntegerOptionWrite( "System", "Resolution" ) [ 0 ] = res;
-				opts.GetIntegerOptionWrite( "System", "Resolution" ) [ 1 ] = res;
-				opts.GetFloatOptionWrite( "System", "PixelAspectRatio" ) [ 0 ] = 1.0f;
+				CqOptionsPtr opts = pushOptions();
+				opts->GetIntegerOptionWrite( "System", "Resolution" ) [ 0 ] = res;
+				opts->GetIntegerOptionWrite( "System", "Resolution" ) [ 1 ] = res;
+				opts->GetFloatOptionWrite( "System", "PixelAspectRatio" ) [ 0 ] = 1.0f;
 
 				// Now that the options have all been set, setup any undefined camera parameters.
-				opts.GetFloatOptionWrite( "System", "FrameAspectRatio" ) [ 0 ] = 1.0;
-				opts.GetFloatOptionWrite( "System", "ScreenWindow" ) [ 0 ] = -1.0 ;
-				opts.GetFloatOptionWrite( "System", "ScreenWindow" ) [ 1 ] = 1.0;
-				opts.GetFloatOptionWrite( "System", "ScreenWindow" ) [ 2 ] = 1.0;
-				opts.GetFloatOptionWrite( "System", "ScreenWindow" ) [ 3 ] = -1.0;
-				opts.GetIntegerOptionWrite( "System", "DisplayMode" ) [ 0 ] = ModeZ;
+				opts->GetFloatOptionWrite( "System", "FrameAspectRatio" ) [ 0 ] = 1.0;
+				opts->GetFloatOptionWrite( "System", "ScreenWindow" ) [ 0 ] = -1.0 ;
+				opts->GetFloatOptionWrite( "System", "ScreenWindow" ) [ 1 ] = 1.0;
+				opts->GetFloatOptionWrite( "System", "ScreenWindow" ) [ 2 ] = 1.0;
+				opts->GetFloatOptionWrite( "System", "ScreenWindow" ) [ 3 ] = -1.0;
+				opts->GetIntegerOptionWrite( "System", "DisplayMode" ) [ 0 ] = ModeZ;
 
 				// Set the pixel samples to 1,1 for shadow rendering.
-				opts.GetIntegerOptionWrite( "System", "PixelSamples" ) [ 0 ] = 1;
-				opts.GetIntegerOptionWrite( "System", "PixelSamples" ) [ 1 ] = 1;
+				opts->GetIntegerOptionWrite( "System", "PixelSamples" ) [ 0 ] = 1;
+				opts->GetIntegerOptionWrite( "System", "PixelSamples" ) [ 1 ] = 1;
 
 				// Set the pixel filter to box, 1,1 for shadow rendering.
-				opts.SetfuncFilter( RiBoxFilter );
-				opts.GetFloatOptionWrite( "System", "FilterWidth" ) [ 0 ] = 1;
-				opts.GetFloatOptionWrite( "System", "FilterWidth" ) [ 1 ] = 1;
+				opts->SetfuncFilter( RiBoxFilter );
+				opts->GetFloatOptionWrite( "System", "FilterWidth" ) [ 0 ] = 1;
+				opts->GetFloatOptionWrite( "System", "FilterWidth" ) [ 1 ] = 1;
 
 				// Make sure the depthFilter is set to "midpoint".
-				boost::shared_ptr<CqNamedParameterList> pHiderOpt = opts.pOptionWrite( "Hider" );
+				boost::shared_ptr<CqNamedParameterList> pHiderOpt = opts->pOptionWrite( "Hider" );
 				CqParameterTypedUniform<CqString, type_string, CqString>* pDepthFilterOpt = new CqParameterTypedUniform<CqString, type_string, CqString>("depthfilter");
 				pDepthFilterOpt->pValue()[0] = CqString("midpoint");
 				pHiderOpt->AddParameter(pDepthFilterOpt);
 
 				// Don't bother doing lighting calcualations.
-				boost::shared_ptr<CqNamedParameterList> pEnableShadersOpts = opts.pOptionWrite( "EnableShaders" );
+				boost::shared_ptr<CqNamedParameterList> pEnableShadersOpts = opts->pOptionWrite( "EnableShaders" );
 				CqParameterTypedUniform<TqInt, type_integer, TqInt>* pLightingOpt = new CqParameterTypedUniform<TqInt, type_integer, TqInt>("lighting");
 				pLightingOpt->pValue()[0] = 0;
 				pEnableShadersOpts->AddParameter(pLightingOpt);
@@ -788,7 +789,7 @@ void CqRenderer::RenderAutoShadows()
 				std::map<std::string, void*> args;
 				AddDisplayRequest(pMapName[0].c_str(), "shadow", "z", ModeZ, 0, 1, args);
 
-				RenderWorld(lightTrans, &opts, TqTrue);
+				RenderWorld(lightTrans, NULL/*&opts*/, TqTrue);
 
 				m_pDDManager->Shutdown();
 				delete(m_pDDManager);
@@ -1009,53 +1010,53 @@ CqMatrix	CqRenderer::matNSpaceToSpace( const char* strFrom, const char* strTo, c
 
 const	TqFloat*	CqRenderer::GetFloatOption( const char* strName, const char* strParam ) const
 {
-	return ( optCurrent().GetFloatOption( strName, strParam ) );
+	return ( poptCurrent()->GetFloatOption( strName, strParam ) );
 }
 
 const	TqInt*	CqRenderer::GetIntegerOption( const char* strName, const char* strParam ) const
 {
-	return ( optCurrent().GetIntegerOption( strName, strParam ) );
+	return ( poptCurrent()->GetIntegerOption( strName, strParam ) );
 }
 
 const	CqString*	CqRenderer::GetStringOption( const char* strName, const char* strParam ) const
 {
-	return ( optCurrent().GetStringOption( strName, strParam ) );
+	return ( poptCurrent()->GetStringOption( strName, strParam ) );
 }
 
 const	CqVector3D*	CqRenderer::GetPointOption( const char* strName, const char* strParam ) const
 {
-	return ( optCurrent().GetPointOption( strName, strParam ) );
+	return ( poptCurrent()->GetPointOption( strName, strParam ) );
 }
 
 const	CqColor*	CqRenderer::GetColorOption( const char* strName, const char* strParam ) const
 {
-	return ( optCurrent().GetColorOption( strName, strParam ) );
+	return ( poptCurrent()->GetColorOption( strName, strParam ) );
 }
 
 
 TqFloat*	CqRenderer::GetFloatOptionWrite( const char* strName, const char* strParam )
 {
-	return ( optCurrent().GetFloatOptionWrite( strName, strParam ) );
+	return ( poptWriteCurrent()->GetFloatOptionWrite( strName, strParam ) );
 }
 
 TqInt*	CqRenderer::GetIntegerOptionWrite( const char* strName, const char* strParam )
 {
-	return ( optCurrent().GetIntegerOptionWrite( strName, strParam ) );
+	return ( poptWriteCurrent()->GetIntegerOptionWrite( strName, strParam ) );
 }
 
 CqString*	CqRenderer::GetStringOptionWrite( const char* strName, const char* strParam )
 {
-	return ( optCurrent().GetStringOptionWrite( strName, strParam ) );
+	return ( poptWriteCurrent()->GetStringOptionWrite( strName, strParam ) );
 }
 
 CqVector3D*	CqRenderer::GetPointOptionWrite( const char* strName, const char* strParam )
 {
-	return ( optCurrent().GetPointOptionWrite( strName, strParam ) );
+	return ( poptWriteCurrent()->GetPointOptionWrite( strName, strParam ) );
 }
 
 CqColor*	CqRenderer::GetColorOptionWrite( const char* strName, const char* strParam )
 {
-	return ( optCurrent().GetColorOptionWrite( strName, strParam ) );
+	return ( poptWriteCurrent()->GetColorOptionWrite( strName, strParam ) );
 }
 
 
@@ -1266,7 +1267,7 @@ boost::shared_ptr<IqShader> CqRenderer::getDefaultSurfaceShader()
 	CqShaderVM* pShader = static_cast<CqShaderVM*>( pRet.get() );
 	pShader->SetstrName( "_def_" );
 	pShader->DefaultSurface();
-	pShader->matCurrent() = matCurrent(Time());
+	pShader->SetTransform( ptransCurrent() );
 	pShader->PrepareDefArgs();
 	m_Shaders[key] = pRet;
 
@@ -1309,7 +1310,7 @@ boost::shared_ptr<IqShader> CqRenderer::CreateShader(
 
 		CqShaderVM* pShader = static_cast<CqShaderVM*>( pRet.get() );
 		const CqString* poptDSOPath = QGetRenderContext()->
-		                              optCurrent().GetStringOption( "searchpath", "shader" );
+		                              poptCurrent()->GetStringOption( "searchpath", "shader" );
 
 		if(poptDSOPath)
 		{
@@ -1344,7 +1345,7 @@ boost::shared_ptr<IqShader> CqRenderer::CreateShader(
 			CqString strError;
 			strError.Format( "Shader \"%s\" not found", strName ? strName : "" );
 			Aqsis::log() << error << strError.c_str() << std::endl;
-			const CqString* poptShaderPath = QGetRenderContext()->optCurrent().GetStringOption("searchpath", "shader");
+			const CqString* poptShaderPath = QGetRenderContext()->poptCurrent()->GetStringOption("searchpath", "shader");
 			if(poptShaderPath != NULL)
 				Aqsis::log() << info << "Shader searchpath is : " << poptShaderPath[0] << std::endl;
 			else
@@ -1436,7 +1437,7 @@ void CqRenderer::PostSurface( const boost::shared_ptr<CqSurface>& pSurface )
 
 		TqFloat ruler = fabs( ( bound.vecMax().x() - bound.vecMin().x() ) * ( bound.vecMax().y() - bound.vecMin().y() ) );
 
-		ruler *= QGetRenderContext() ->optCurrent().GetFloatOption( "System", "RelativeDetail" ) [ 0 ];
+		ruler *= QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "RelativeDetail" ) [ 0 ];
 
 		CqString objname( "unnamed" );
 		const CqString* pattrName = pSurface->pAttributes()->GetStringAttribute( "identifier", "name" );
@@ -1509,7 +1510,7 @@ IqShader* CqRenderer::CreateShader( const char* strName, EqShaderType type )
 		if ( SLXFile.IsValid() )
 		{
 			CqShaderVM * pShader = new CqShaderVM();
-			const CqString *poptDSOPath = QGetRenderContext()->optCurrent().GetStringOption( "searchpath","shader" );
+			const CqString *poptDSOPath = QGetRenderContext()->poptCurrent()->GetStringOption( "searchpath","shader" );
 			pShader->SetDSOPath( poptDSOPath );
 
 			CqString strRealName( SLXFile.strRealName() );

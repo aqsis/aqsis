@@ -134,7 +134,7 @@ void	CqImageBuffer::SetImage()
 
 	m_XBucketSize = 16;
 	m_YBucketSize = 16;
-	const TqInt* poptBucketSize = QGetRenderContext() ->optCurrent().GetIntegerOption( "limits", "bucketsize" );
+	const TqInt* poptBucketSize = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "limits", "bucketsize" );
 	if ( poptBucketSize != 0 )
 	{
 		m_XBucketSize = poptBucketSize[ 0 ];
@@ -142,26 +142,26 @@ void	CqImageBuffer::SetImage()
 	}
 	/* add artificially a border around based on the current filterwidth so the diced primitives
 	    * may fit better within a bucket */
-	m_FilterXWidth = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "FilterWidth" ) [ 0 ];
-	m_FilterYWidth = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "FilterWidth" ) [ 1 ];
+	m_FilterXWidth = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "FilterWidth" ) [ 0 ];
+	m_FilterYWidth = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "FilterWidth" ) [ 1 ];
 
-	m_iXRes = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "Resolution" ) [ 0 ];
-	m_iYRes = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "Resolution" ) [ 1 ];
-	m_CropWindowXMin = static_cast<TqInt>( CLAMP( CEIL( m_iXRes * QGetRenderContext() ->optCurrent().GetFloatOption( "System", "CropWindow" ) [ 0 ] ), 0, m_iXRes ) );
-	m_CropWindowXMax = static_cast<TqInt>( CLAMP( CEIL( m_iXRes * QGetRenderContext() ->optCurrent().GetFloatOption( "System", "CropWindow" ) [ 1 ] ), 0, m_iXRes ) );
-	m_CropWindowYMin = static_cast<TqInt>( CLAMP( CEIL( m_iYRes * QGetRenderContext() ->optCurrent().GetFloatOption( "System", "CropWindow" ) [ 2 ] ), 0, m_iYRes ) );
-	m_CropWindowYMax = static_cast<TqInt>( CLAMP( CEIL( m_iYRes * QGetRenderContext() ->optCurrent().GetFloatOption( "System", "CropWindow" ) [ 3 ] ), 0, m_iYRes ) );
+	m_iXRes = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "Resolution" ) [ 0 ];
+	m_iYRes = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "Resolution" ) [ 1 ];
+	m_CropWindowXMin = static_cast<TqInt>( CLAMP( CEIL( m_iXRes * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 0 ] ), 0, m_iXRes ) );
+	m_CropWindowXMax = static_cast<TqInt>( CLAMP( CEIL( m_iXRes * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 1 ] ), 0, m_iXRes ) );
+	m_CropWindowYMin = static_cast<TqInt>( CLAMP( CEIL( m_iYRes * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 2 ] ), 0, m_iYRes ) );
+	m_CropWindowYMax = static_cast<TqInt>( CLAMP( CEIL( m_iYRes * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 3 ] ), 0, m_iYRes ) );
 	m_cXBuckets = ( ( m_iXRes + ( m_XBucketSize-1 ) ) / m_XBucketSize );
 	m_cYBuckets = ( ( m_iYRes + ( m_YBucketSize-1 ) ) / m_YBucketSize );
-	m_PixelXSamples = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "PixelSamples" ) [ 0 ];
-	m_PixelYSamples = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "PixelSamples" ) [ 1 ];
+	m_PixelXSamples = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "PixelSamples" ) [ 0 ];
+	m_PixelYSamples = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "PixelSamples" ) [ 1 ];
 
-	m_ClippingNear = static_cast<TqFloat>( QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Clipping" ) [ 0 ] );
-	m_ClippingFar = static_cast<TqFloat>( QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Clipping" ) [ 1 ] );
-	m_DisplayMode = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "DisplayMode" ) [ 0 ];
+	m_ClippingNear = static_cast<TqFloat>( QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Clipping" ) [ 0 ] );
+	m_ClippingFar = static_cast<TqFloat>( QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Clipping" ) [ 1 ] );
+	m_DisplayMode = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "DisplayMode" ) [ 0 ];
 
 	m_MaxEyeSplits = 10;
-	const TqInt* poptEyeSplits = QGetRenderContext() ->optCurrent().GetIntegerOption( "limits", "eyesplits" );
+	const TqInt* poptEyeSplits = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "limits", "eyesplits" );
 	if ( poptEyeSplits != 0 )
 		m_MaxEyeSplits = poptEyeSplits[ 0 ];
 
@@ -222,8 +222,8 @@ void	CqImageBuffer::Release()
 TqBool CqImageBuffer::CullSurface( CqBound& Bound, const boost::shared_ptr<CqSurface>& pSurface )
 {
 	// If the primitive is completely outside of the hither-yon z range, cull it.
-	if ( Bound.vecMin().z() >= QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Clipping" ) [ 1 ] ||
-	        Bound.vecMax().z() <= QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Clipping" ) [ 0 ] )
+	if ( Bound.vecMin().z() >= QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Clipping" ) [ 1 ] ||
+	        Bound.vecMax().z() <= QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Clipping" ) [ 0 ] )
 		return ( TqTrue );
 
 	if(QGetRenderContext()->clippingVolume().whereIs(Bound) == CqBound::Side_Outside)
@@ -621,8 +621,8 @@ void CqImageBuffer::CacheGridInfo(CqMicroPolyGridBase* pGrid)
 	m_CurrentGridInfo.m_UsesDataMap = !(QGetRenderContext() ->GetMapOfOutputDataEntries().empty());
 
 	m_CurrentGridInfo.m_ShadingRate = pGrid->pAttributes() ->GetFloatAttribute( "System", "ShadingRate" ) [ 0 ];
-	m_CurrentGridInfo.m_ShutterOpenTime = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Shutter" ) [ 0 ];
-	m_CurrentGridInfo.m_ShutterCloseTime = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Shutter" ) [ 1 ];
+	m_CurrentGridInfo.m_ShutterOpenTime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 0 ];
+	m_CurrentGridInfo.m_ShutterCloseTime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 1 ];
 
 	m_CurrentGridInfo.m_LodBounds = pGrid->pAttributes() ->GetFloatAttribute( "System", "LevelOfDetailBounds" );
 }
@@ -805,7 +805,7 @@ void CqImageBuffer::RenderMPG_MBOrDof( CqMicroPolygon* pMPG,
 			if ( bound_numMB != bound_maxMB_1 )
 				pMPG->SubBound( bound_numMB + 1, time1 );
 			else
-				time1 = closetime;//QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "Shutter" ) [ 1 ];
+				time1 = closetime;//QGetRenderContext() ->poptCurrent()->GetFloatOptionWrite( "System", "Shutter" ) [ 1 ];
 
 			indexT0 = static_cast<TqInt>(FLOOR((time0 - opentime) * timePerSample));
 			indexT1 = static_cast<TqInt>(CEIL((time1 - opentime) * timePerSample));
@@ -1211,7 +1211,7 @@ void CqImageBuffer::RenderImage()
 	{
 		// Small change which allows full control of virtual memory on NT swapping
 		bucketmodulo = m_cXBuckets;
-		TqInt *poptModulo = ( TqInt * ) QGetRenderContext() ->optCurrent().GetIntegerOption( "limits", "bucketmodulo" );
+		TqInt *poptModulo = ( TqInt * ) QGetRenderContext() ->poptCurrent()->GetIntegerOption( "limits", "bucketmodulo" );
 		if ( poptModulo != 0 )
 		{
 			bucketmodulo = poptModulo[ 0 ];
@@ -1222,12 +1222,12 @@ void CqImageBuffer::RenderImage()
 
 	TqBool fImager = TqFalse;
 	const CqString* systemOptions;
-	if( ( systemOptions = QGetRenderContext() ->optCurrent().GetStringOption( "System", "Imager" ) ) != 0 )
+	if( ( systemOptions = QGetRenderContext() ->poptCurrent()->GetStringOption( "System", "Imager" ) ) != 0 )
 		if( systemOptions[ 0 ].compare("null") != 0 )
 			fImager = TqTrue;
 
-	const CqString* pstrDepthFilter = QGetRenderContext() ->optCurrent().GetStringOption( "Hider", "depthfilter" );
-	const CqColor* pzThreshold = QGetRenderContext() ->optCurrent().GetColorOption( "limits", "zthreshold" );
+	const CqString* pstrDepthFilter = QGetRenderContext() ->poptCurrent()->GetStringOption( "Hider", "depthfilter" );
+	const CqColor* pzThreshold = QGetRenderContext() ->poptCurrent()->GetColorOption( "limits", "zthreshold" );
 	CqColor zThreshold(1.0f, 1.0f, 1.0f);	// Default threshold of 1,1,1 means that any objects that are partially transparent won't appear in shadow maps.
 	if(NULL != pzThreshold)
 		zThreshold = pzThreshold[0];
@@ -1255,7 +1255,7 @@ void CqImageBuffer::RenderImage()
 	RtProgressFunc pProgressHandler = NULL;
 	pProgressHandler = QGetRenderContext()->pProgressHandler();
 
-	const CqString* pstrBucketOrder = QGetRenderContext() ->optCurrent().GetStringOption( "render", "bucketorder" );
+	const CqString* pstrBucketOrder = QGetRenderContext() ->poptCurrent()->GetStringOption( "render", "bucketorder" );
 	enum EqBucketOrder order = Bucket_Horizontal;
 	if ( NULL != pstrBucketOrder )
 	{
@@ -1280,7 +1280,7 @@ void CqImageBuffer::RenderImage()
 
 		TqBool fImager = TqFalse;
 		const CqString* systemOptions;
-		if( ( systemOptions = QGetRenderContext() ->optCurrent().GetStringOption( "System", "Imager" ) ) != 0 )
+		if( ( systemOptions = QGetRenderContext() ->poptCurrent()->GetStringOption( "System", "Imager" ) ) != 0 )
 			if( systemOptions[ 0 ].compare("null") != 0 )
 				fImager = TqTrue;
 

@@ -47,6 +47,7 @@
 #include	"shadervariable.h"
 #include "parameters.h"
 #include 	"dsoshadeops.h"
+#include	"itransform.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -532,10 +533,17 @@ class CqShaderVM : public CqShaderStack, public IqShader, public CqDSORepository
 
 
 		// Overidden from IqShader
-		virtual	CqMatrix&	matCurrent()
+		virtual	const CqMatrix&	matCurrent()
 		{
-			return ( m_matCurrent );
+			/// \note: We can use time 0 here as shaders aren't affected by motion (currently).
+			return ( m_pTransform->matObjectToWorld(0) );
 		}
+
+		virtual void SetTransform(IqTransformPtr pTrans)
+		{
+			m_pTransform = pTrans;
+		}
+
 		virtual	void	SetstrName( const char* strName )
 		{
 			m_strName = strName;
@@ -622,12 +630,13 @@ class CqShaderVM : public CqShaderStack, public IqShader, public CqDSORepository
 		};
 
 		TqInt	m_Uses;			///< Bit vector representing the system variables used by this shader.
-		CqMatrix	m_matCurrent;	///< Transformation matrix to world coordinates in effect at the time this shader was instantiated.
 		CqString	m_strName;		///< The name of this shader.
 
 		EqShaderType m_Type;							///< Shader type for libslxarge
 		TqUint	m_LocalIndex;                   ///<  Local Index to speed up
 		boost::shared_ptr<IqShaderExecEnv>	m_pEnv;							///< Pointer to the current excution environment.
+		IqTransformPtr m_pTransform;    ///< Pointer to the transformation at the time the shader was instantiated.
+
 		std::vector<IqShaderData*>	m_LocalVars;		///< Array of local variables.
 		std::vector<SqArgumentRecord>	m_StoredArguments;		///< Array of arguments specified during construction.
 		std::vector<UsProgramElement>	m_ProgramInit;		///< Bytecodes of the intialisation program.

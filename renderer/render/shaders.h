@@ -38,6 +38,7 @@
 #include "ishader.h"
 #include "ishaderexecenv.h"
 #include "irenderer.h"
+#include "itransform.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -160,9 +161,13 @@ class CqLayeredShader : public IqShader
 
 		// Overidden from IqShader
 
-		virtual CqMatrix&	matCurrent()
+		virtual const CqMatrix&	matCurrent()
 		{
-			return ( m_matCurrent );
+			return ( m_pTransform->matObjectToWorld(0) );
+		}
+		virtual void SetTransform(IqTransformPtr pTrans)
+		{
+			m_pTransform = pTrans;
 		}
 		virtual void	SetstrName( const char* strName )
 		{
@@ -314,7 +319,7 @@ class CqLayeredShader : public IqShader
 	protected:
 		TqInt	m_Uses;			///< Bit vector representing the system variables used by this shader.
 	private:
-		CqMatrix	m_matCurrent;	///< Transformation matrix to world coordinates in effect at the time this shader was instantiated.
+		IqTransformPtr	m_pTransform;	///< Transformation transformation to world coordinates in effect at the time this shader was instantiated.
 		CqString	m_strName;		///< The name of this shader.
 		TqBool		m_outsideWorld;
 

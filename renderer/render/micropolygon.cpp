@@ -427,7 +427,7 @@ void CqMicroPolyGrid::Shade()
 
 	// Now try and cull any transparent MPs
 	cCulled = 0;
-	if ( USES( lUses, EnvVars_Os ) && QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "DisplayMode" ) [ 0 ] & ModeZ )
+	if ( USES( lUses, EnvVars_Os ) && QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "DisplayMode" ) [ 0 ] & ModeZ )
 	{
 		//theStats.OcclusionCullTimer().Start();
 		TIME_SCOPE("Occlusion Culling")
@@ -458,7 +458,7 @@ void CqMicroPolyGrid::Shade()
 
 	// Now try and cull any true transparent MPs
 	cCulled = 0;
-	if ( USES( lUses, EnvVars_Os ) && QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "DisplayMode" ) [ 0 ] & ModeRGB )
+	if ( USES( lUses, EnvVars_Os ) && QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "DisplayMode" ) [ 0 ] & ModeRGB )
 	{
 		//theStats.OcclusionCullTimer().Start();
 		TIME_SCOPE("Occlusion culling")
@@ -539,7 +539,7 @@ void CqMicroPolyGrid::Shade()
 	// Now try and cull any true transparent MPs (assigned by the shader code
 
 	cCulled = 0;
-	if ( USES( lUses, EnvVars_Os ) && QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "DisplayMode" ) [ 0 ] & ModeRGB )
+	if ( USES( lUses, EnvVars_Os ) && QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "DisplayMode" ) [ 0 ] & ModeRGB )
 	{
 		//theStats.OcclusionCullTimer().Start();
 		TIME_SCOPE("Occlusion culling")
@@ -1626,8 +1626,8 @@ void CqMicroPolygonMotion::CalculateTotalBound()
  */
 void CqMicroPolygonMotion::BuildBoundList()
 {
-	TqFloat opentime = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Shutter" ) [ 0 ];
-	TqFloat closetime = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Shutter" ) [ 1 ];
+	TqFloat opentime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 0 ];
+	TqFloat closetime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 1 ];
 	TqFloat shadingrate = pGrid() ->pAttributes() ->GetFloatAttribute( "System", "ShadingRate" ) [ 0 ];
 
 	m_BoundList.Clear();

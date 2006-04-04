@@ -73,6 +73,8 @@ enum EqProjection
  * Storage for the graphics state options.
  */
 
+class CqOptions;
+typedef boost::shared_ptr<CqOptions> CqOptionsPtr;
 class CqOptions
 {
 	public:

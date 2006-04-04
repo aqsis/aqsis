@@ -289,12 +289,12 @@ TqBool	CqPoints::Diceable()
 {
 	TqUint gridsize = 256;
 
-	const TqInt* poptGridSize = QGetRenderContext() ->optCurrent().GetIntegerOption( "limits", "gridsize" );
+	const TqInt* poptGridSize = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "limits", "gridsize" );
 
 	TqInt m_XBucketSize = 16;
 	TqInt m_YBucketSize = 16;
 
-	const TqInt* poptBucketSize = QGetRenderContext() ->optCurrent().GetIntegerOption( "limits", "bucketsize" );
+	const TqInt* poptBucketSize = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "limits", "bucketsize" );
 	if ( poptBucketSize != 0 )
 	{
 		m_XBucketSize = poptBucketSize[ 0 ];

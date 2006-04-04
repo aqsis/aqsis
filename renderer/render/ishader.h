@@ -14,6 +14,7 @@
 #define	___ishader_Loaded___
 
 #include	"aqsis.h"
+#include	"itransform.h"
 #include	<boost/shared_ptr.hpp>
 
 
@@ -55,7 +56,8 @@ struct IqShader
 	{}
 	/** Get the shader matrix, the transformation at the time this shader was instantiated.
 	 */
-	virtual	CqMatrix&	matCurrent() = 0;
+	virtual	const CqMatrix&	matCurrent() = 0;
+	virtual void SetTransform(IqTransformPtr pTrans) = 0;
 	/** Set the naem of the shader.
 	 */
 	virtual	void	SetstrName( const char* strName ) = 0;

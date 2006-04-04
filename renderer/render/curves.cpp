@@ -197,7 +197,7 @@ TqFloat CqCurve::GetGridLength() const
 	//  is 256 (16x16 micropolygon grid).
 	TqFloat micropolysPerGrid = 256;
 	const TqInt* poptGridSize =
-	    QGetRenderContext() ->optCurrent().GetIntegerOption(
+	    QGetRenderContext() ->poptCurrent()->GetIntegerOption(
 	        "limits", "gridsize"
 	    );
 	if ( poptGridSize != NULL )

@@ -71,7 +71,7 @@ class CqRiFile : public CqFile
 			if ( strSearchPathOption != "" )
 			{
 				// if not found there, search in the specified option searchpath.
-				const CqString * poptShader = QGetRenderContext() ->optCurrent().GetStringOption( "searchpath", strSearchPathOption );
+				const CqString * poptShader = QGetRenderContext() ->poptCurrent()->GetStringOption( "searchpath", strSearchPathOption );
 				if ( poptShader != 0 )
 					SearchPath = poptShader[ 0 ];
 
@@ -82,7 +82,7 @@ class CqRiFile : public CqFile
 			if( !IsValid() )
 			{
 				// if not found there, search in the specified option searchpath.
-				const CqString * poptResource = QGetRenderContext() ->optCurrent().GetStringOption( "searchpath", "resource" );
+				const CqString * poptResource = QGetRenderContext() ->poptCurrent()->GetStringOption( "searchpath", "resource" );
 				if ( poptResource != 0 )
 				{
 					SearchPath = poptResource[ 0 ];

@@ -1252,7 +1252,7 @@ void CqShaderVM::Initialise( const TqInt uGridRes, const TqInt vGridRes, const b
 CqShaderVM&	CqShaderVM::operator=( const CqShaderVM& From )
 {
 	m_Uses = From.m_Uses;
-	m_matCurrent = From.m_matCurrent;
+	m_pTransform = From.m_pTransform;
 	m_strName = From.m_strName;
 	m_fAmbient = From.m_fAmbient;
 	m_outsideWorld = From.m_outsideWorld;

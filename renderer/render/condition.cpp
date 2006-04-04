@@ -143,7 +143,7 @@ TqBool TestCondition(RtString condition, RtString where)
 	A = strtok(StringA, ":");
 	B = strtok(NULL, ":");
 
-	const CqParameter *pParam = QGetRenderContext() ->optCurrent().pParameter(A,B);
+	const CqParameter *pParam = QGetRenderContext() ->poptCurrent()->pParameter(A,B);
 
 	// If the left side is not known for now return TqTrue
 	if (!pParam)
@@ -160,7 +160,7 @@ TqBool TestCondition(RtString condition, RtString where)
 			{
 				TqInt IntC;
 
-				const TqInt *pInt = QGetRenderContext() ->optCurrent().GetIntegerOption( A, B);
+				const TqInt *pInt = QGetRenderContext() ->poptCurrent()->GetIntegerOption( A, B);
 
 				n = sscanf(condition,"$%s %s %d", StringA, Compare, &IntC);
 				if (pInt && (n == 3) )
@@ -175,7 +175,7 @@ TqBool TestCondition(RtString condition, RtString where)
 			{
 				TqFloat FloatC;
 
-				const TqFloat *pFloat = QGetRenderContext() ->optCurrent().GetFloatOption( A, B);
+				const TqFloat *pFloat = QGetRenderContext() ->poptCurrent()->GetFloatOption( A, B);
 
 				n = sscanf(condition,"$%s %s %f", StringA, Compare, &FloatC);
 				if (pFloat && (n == 3) )
@@ -193,7 +193,7 @@ TqBool TestCondition(RtString condition, RtString where)
 				TqFloat ArrayA[3], ArrayC[3];
 
 
-				const TqFloat *pVector = QGetRenderContext() ->optCurrent().GetFloatOption( A, B);
+				const TqFloat *pVector = QGetRenderContext() ->poptCurrent()->GetFloatOption( A, B);
 
 				n = sscanf(condition,"$%s %s [%f %f %f]", StringA, Compare, &ArrayC[0], &ArrayC[1], &ArrayC[2]);
 				if (pVector && (n == 5) )
@@ -212,7 +212,7 @@ TqBool TestCondition(RtString condition, RtString where)
 			{
 				char StringC[80];
 
-				const CqString *pString = QGetRenderContext() ->optCurrent().GetStringOption( A, B);
+				const CqString *pString = QGetRenderContext() ->poptCurrent()->GetStringOption( A, B);
 
 				n = sscanf(condition,"$%s %s %s", StringA, Compare, StringC);
 				if ((pString) && (n == 3) )

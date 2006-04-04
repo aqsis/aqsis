@@ -98,8 +98,8 @@ void CqBucket::PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt y
 
 	m_NumTimeRanges = MAX(4, m_PixelXSamples * m_PixelYSamples);
 
-        TqFloat opentime = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Shutter" ) [ 0 ];
-        TqFloat closetime = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Shutter" ) [ 1 ];
+        TqFloat opentime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 0 ];
+        TqFloat closetime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 1 ];
 
 	// Allocate the image element storage if this is the first bucket
 	if(m_aieImage.empty())
@@ -249,7 +249,7 @@ void CqBucket::InitialiseFilterValues()
 	m_aFilterValues.resize( numvalues );
 
 	RtFilterFunc pFilter;
-	pFilter = QGetRenderContext() ->optCurrent().funcFilter();
+	pFilter = QGetRenderContext() ->poptCurrent()->funcFilter();
 
 	// Sanity check
 	if( NULL == pFilter )
@@ -439,7 +439,7 @@ void CqBucket::FilterBucket(TqBool empty)
 
 	TqBool fImager = TqFalse;
 	const CqString* systemOptions;
-	if( ( systemOptions = QGetRenderContext() ->optCurrent().GetStringOption( "System", "Imager" ) ) != 0 )
+	if( ( systemOptions = QGetRenderContext() ->poptCurrent()->GetStringOption( "System", "Imager" ) ) != 0 )
 		if( systemOptions[ 0 ].compare("null") != 0 )
 			fImager = TqTrue;
 
@@ -719,12 +719,12 @@ void CqBucket::FilterBucket(TqBool empty)
 	endy = YOrigin() + Height();
 	endx = XOrigin() + Width();
 
-	if ( QGetRenderContext() ->optCurrent().pshadImager() && 
-		 NULL != QGetRenderContext() ->optCurrent().pImagerSource() )
+	if ( QGetRenderContext() ->poptCurrent()->pshadImager() && 
+		 NULL != QGetRenderContext() ->poptCurrent()->pImagerSource() )
 	{
 		// Init & Execute the imager shader
 
-		QGetRenderContext() ->optCurrent().InitialiseColorImager( this );
+		QGetRenderContext() ->poptCurrent()->InitialiseColorImager( this );
 		TIME_SCOPE("Imager shading")
 
 		if ( fImager )
@@ -736,14 +736,14 @@ void CqBucket::FilterBucket(TqBool empty)
 				CqImagePixel* pie2 = pie;
 				for ( x = XOrigin(); x < endx ; x++ )
 				{
-					imager = QGetRenderContext() ->optCurrent().GetColorImager( x , y );
+					imager = QGetRenderContext() ->poptCurrent()->GetColorImager( x , y );
 					// Normal case will be to poke the alpha from the image shader and
 					// multiply imager color with it... but after investigation alpha is always
 					// == 1 after a call to imager shader in 3delight and BMRT.
 					// Therefore I did not ask for alpha value and set directly the pCols[i]
 					// with imager value. see imagers.cpp
 					pie2->SetColor( imager );
-					imager = QGetRenderContext() ->optCurrent().GetOpacityImager( x , y );
+					imager = QGetRenderContext() ->poptCurrent()->GetOpacityImager( x , y );
 					pie2->SetOpacity( imager );
 					TqFloat a = ( imager[0] + imager[1] + imager[2] ) / 3.0f;
 					pie2->SetAlpha( a );
@@ -763,16 +763,16 @@ void CqBucket::FilterBucket(TqBool empty)
 
 void CqBucket::ExposeBucket()
 {
-	if ( QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Exposure" ) [ 0 ] == 1.0 &&
-	        QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Exposure" ) [ 1 ] == 1.0 )
+	if ( QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Exposure" ) [ 0 ] == 1.0 &&
+	        QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Exposure" ) [ 1 ] == 1.0 )
 		return ;
 	else
 	{
 		CqImagePixel* pie;
 		ImageElement( XOrigin(), YOrigin(), pie );
 		TqInt x, y;
-		TqFloat exposegain = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Exposure" ) [ 0 ];
-		TqFloat exposegamma = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Exposure" ) [ 1 ];
+		TqFloat exposegain = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Exposure" ) [ 0 ];
+		TqFloat exposegamma = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Exposure" ) [ 1 ];
 		TqFloat oneovergamma = 1.0f / exposegamma;
 		TqFloat endx, endy;
 		TqInt   nextx;
@@ -820,9 +820,9 @@ void CqBucket::QuantizeBucket()
 	nextx = RealWidth();
 
 
-	if ( QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "DisplayMode" ) [ 0 ] & ModeRGB )
+	if ( QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "DisplayMode" ) [ 0 ] & ModeRGB )
 	{
-		const TqFloat* pQuant = QGetRenderContext() ->optCurrent().GetFloatOption( "Quantize", "Color" );
+		const TqFloat* pQuant = QGetRenderContext() ->poptCurrent()->GetFloatOption( "Quantize", "Color" );
 		TqInt one = static_cast<TqInt>( pQuant [ 0 ] );
 		TqInt min = static_cast<TqInt>( pQuant [ 1 ] );
 		TqInt max = static_cast<TqInt>( pQuant [ 2 ] );
@@ -883,9 +883,9 @@ void CqBucket::QuantizeBucket()
 		}
 	}
 
-	if ( QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "DisplayMode" ) [ 0 ] & ModeZ )
+	if ( QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "DisplayMode" ) [ 0 ] & ModeZ )
 	{
-		const TqFloat* pQuant = QGetRenderContext() ->optCurrent().GetFloatOption( "Quantize", "Depth" );
+		const TqFloat* pQuant = QGetRenderContext() ->poptCurrent()->GetFloatOption( "Quantize", "Depth" );
 		TqInt one = static_cast<TqInt>( pQuant [ 0 ] );
 		TqInt min = static_cast<TqInt>( pQuant [ 1 ] );
 		TqInt max = static_cast<TqInt>( pQuant [ 2 ] );
@@ -917,7 +917,7 @@ void CqBucket::QuantizeBucket()
 	std::map<std::string, CqRenderer::SqOutputDataEntry>::iterator entry;
 	for( entry = DataMap.begin(); entry != DataMap.end(); entry++ )
 	{
-		const TqFloat* pQuant = QGetRenderContext() ->optCurrent().GetFloatOption( "Quantize", entry->first.c_str() );
+		const TqFloat* pQuant = QGetRenderContext() ->poptCurrent()->GetFloatOption( "Quantize", entry->first.c_str() );
 		if( NULL != pQuant )
 		{
 			TqInt startindex = entry->second.m_Offset;

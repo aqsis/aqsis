@@ -119,7 +119,8 @@ void CqShaderVM::SO_ipushv()
 void CqShaderVM::SO_pop()
 {
 	AUTOFUNC;
-	IqShaderData* pV = GetVar( ReadNext().m_iVariable );
+	TqInt iVar = ReadNext().m_iVariable;
+	IqShaderData* pV = GetVar( iVar );
 	POPV( Val );
 	TqUint ext = MAX( m_pEnv->GridSize(), pV->Size() );
 	TqBool fVarying = ext > 1;

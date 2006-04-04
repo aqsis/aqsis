@@ -1106,27 +1106,12 @@ CqMicroPolyGridBase* CqSurfaceSubdivisionPatch::Dice()
 	boost::shared_ptr<CqSubdivision2> pSurface;
 	std::vector<CqMicroPolyGridBase*> apGrids;
 
-	TqInt iTime;
-	for( iTime = 0; iTime < pTopology()->cTimes(); iTime++ )
-	{
-		pSurface = Extract(iTime);
-		boost::shared_ptr<CqSurfaceSubdivisionPatch> pPatch( new CqSurfaceSubdivisionPatch(pSurface, pSurface->pFacet(0), 0) );
-		pPatch->m_uDiceSize = m_uDiceSize;
-		pPatch->m_vDiceSize = m_vDiceSize;
-		CqMicroPolyGridBase* pGrid = pPatch->DiceExtract();
-		apGrids.push_back( pGrid );
-	}
-
-	if( apGrids.size() == 1 )
-		return( apGrids[ 0 ] );
-	else
-	{
-		CqMotionMicroPolyGrid * pGrid = new CqMotionMicroPolyGrid;
-		TqInt i;
-		for ( i = 0; i < pTopology()->cTimes(); i++ )
-			pGrid->AddTimeSlot( pTopology()->Time( i ), apGrids[ i ] );
-		return( pGrid );
-	}
+	pSurface = Extract(0);
+	boost::shared_ptr<CqSurfaceSubdivisionPatch> pPatch( new CqSurfaceSubdivisionPatch(pSurface, pSurface->pFacet(0), 0) );
+	pPatch->m_uDiceSize = m_uDiceSize;
+	pPatch->m_vDiceSize = m_vDiceSize;
+	CqMicroPolyGridBase* pGrid = pPatch->DiceExtract();
+	return pGrid;
 }
 
 
@@ -1547,149 +1532,131 @@ TqInt CqSurfaceSubdivisionPatch::Split( std::vector<boost::shared_ptr<CqSurface>
 
 		std::vector< boost::shared_ptr<CqSurfacePatchBicubic> > apSurfaces;
 
-		TqInt iTime;
+		// Create a surface patch
+		boost::shared_ptr<CqSurfacePatchBicubic> pSurface( new CqSurfacePatchBicubic() );
+		// Fill in default values for all primitive variables not explicitly specified.
+		pSurface->SetSurfaceParameters( *pTopology()->pPoints( 0 ) );
 
-		for( iTime = 0; iTime < pTopology()->cTimes(); iTime++ )
+		std::vector<CqParameter*>::iterator iUP;
+		std::vector<CqParameter*>::iterator end = pTopology()->pPoints( 0 )->aUserParams().end();
+		for ( iUP = pTopology()->pPoints( 0 )->aUserParams().begin(); iUP != end; iUP++ )
 		{
-			// Create a surface patch
-			boost::shared_ptr<CqSurfacePatchBicubic> pSurface( new CqSurfacePatchBicubic() );
-			// Fill in default values for all primitive variables not explicitly specified.
-			pSurface->SetSurfaceParameters( *pTopology()->pPoints( iTime ) );
-
-			std::vector<CqParameter*>::iterator iUP;
-			std::vector<CqParameter*>::iterator end = pTopology()->pPoints( iTime)->aUserParams().end();
-			for ( iUP = pTopology()->pPoints( iTime )->aUserParams().begin(); iUP != end; iUP++ )
+			if ( ( *iUP ) ->Class() == class_varying )
 			{
-				if ( ( *iUP ) ->Class() == class_varying )
-				{
-					// Copy any 'varying' class primitive variables.
-					CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
-					pNewUP->SetSize( pSurface->cVarying() );
-					pNewUP->SetValue( ( *iUP ), 0, aiVertices[5] );
-					pNewUP->SetValue( ( *iUP ), 1, aiVertices[6] );
-					pNewUP->SetValue( ( *iUP ), 2, aiVertices[9] );
-					pNewUP->SetValue( ( *iUP ), 3, aiVertices[10] );
-					pSurface->AddPrimitiveVariable( pNewUP );
-				}
-				else if ( ( *iUP ) ->Class() == class_vertex )
-				{
-					// Copy any 'vertex' class primitive variables.
-					CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
-					pNewUP->SetSize( pSurface->cVertex() );
-					TqUint i;
-					for( i = 0; i < pSurface->cVertex(); i++ )
-						pNewUP->SetValue( ( *iUP ), i, aiVertices[i] );
-					pSurface->AddPrimitiveVariable( pNewUP );
-				}
-				else if ( ( *iUP ) ->Class() == class_facevarying )
-				{
-					// Copy any 'facevarying' class primitive variables.
-					CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
-					pNewUP->SetSize( pSurface->cVertex() );
-					TqUint i;
-					for( i = 0; i < pSurface->cVertex(); i++ )
-						pNewUP->SetValue( ( *iUP ), i, aiFVertices[i] );
-					pSurface->AddPrimitiveVariable( pNewUP );
-				}
-				else if ( ( *iUP ) ->Class() == class_uniform )
-				{
-					// Copy any 'uniform' class primitive variables.
-					CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
-					pNewUP->SetSize( pSurface->cUniform() );
-					pNewUP->SetValue( ( *iUP ), 0, m_FaceIndex );
-					pSurface->AddPrimitiveVariable( pNewUP );
-				}
-				else if ( ( *iUP ) ->Class() == class_constant )
-				{
-					// Copy any 'constant' class primitive variables.
-					CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
-					pNewUP->SetSize( 1 );
-					pNewUP->SetValue( ( *iUP ), 0, 0 );
-					pSurface->AddPrimitiveVariable( pNewUP );
-				}
+				// Copy any 'varying' class primitive variables.
+				CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
+				pNewUP->SetSize( pSurface->cVarying() );
+				pNewUP->SetValue( ( *iUP ), 0, aiVertices[5] );
+				pNewUP->SetValue( ( *iUP ), 1, aiVertices[6] );
+				pNewUP->SetValue( ( *iUP ), 2, aiVertices[9] );
+				pNewUP->SetValue( ( *iUP ), 3, aiVertices[10] );
+				pSurface->AddPrimitiveVariable( pNewUP );
 			}
-
-			// Need to get rid of any 'h' values added to the "P" variables during multiplication.
-			TqUint i;
-			for( i = 0; i < pSurface->cVertex(); i++ )
-				pSurface->P()->pValue(i)[0] = static_cast<CqVector3D>( pSurface->P()->pValue(i)[0] );
-
-			CqMatrix matuBasis( RiBSplineBasis );
-			CqMatrix matvBasis( RiBSplineBasis );
-			pSurface->ConvertToBezierBasis( matuBasis, matvBasis );
-
-			TqInt iUses = Uses();
-
-			// If the shader needs s/t or u/v, and s/t is not specified, then at this point store the object space x,y coordinates.
-			if ( USES( iUses, EnvVars_s ) || USES( iUses, EnvVars_t ) || USES( iUses, EnvVars_u ) || USES( iUses, EnvVars_v ) )
+			else if ( ( *iUP ) ->Class() == class_vertex )
 			{
-				if ( USES( iUses, EnvVars_s ) && !pTopology()->pPoints()->bHasVar(EnvVars_s) )
-				{
-					CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pNewUP = new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "s" );
-					pNewUP->SetSize( pSurface->cVarying() );
-
-					pNewUP->pValue() [ 0 ] = 0.0f;
-					pNewUP->pValue() [ 1 ] = 1.0f;
-					pNewUP->pValue() [ 2 ] = 0.0f;
-					pNewUP->pValue() [ 3 ] = 1.0f;
-
-					pSurface->AddPrimitiveVariable( pNewUP );
-				}
-
-				if ( USES( iUses, EnvVars_t ) && !pTopology()->pPoints()->bHasVar(EnvVars_t) )
-				{
-					CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pNewUP = new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "t" );
-					pNewUP->SetSize( pSurface->cVarying() );
-
-					pNewUP->pValue() [ 0 ] = 0.0f;
-					pNewUP->pValue() [ 1 ] = 0.0f;
-					pNewUP->pValue() [ 2 ] = 1.0f;
-					pNewUP->pValue() [ 3 ] = 1.0f;
-
-					pSurface->AddPrimitiveVariable( pNewUP );
-				}
-
-				if ( USES( iUses, EnvVars_u ) && !pTopology()->pPoints()->bHasVar(EnvVars_u) )
-				{
-					CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pNewUP = new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "u" );
-					pNewUP->SetSize( pSurface->cVarying() );
-
-					pNewUP->pValue() [ 0 ] = 0.0f;
-					pNewUP->pValue() [ 1 ] = 1.0f;
-					pNewUP->pValue() [ 2 ] = 0.0f;
-					pNewUP->pValue() [ 3 ] = 1.0f;
-
-					pSurface->AddPrimitiveVariable( pNewUP );
-				}
-
-				if ( USES( iUses, EnvVars_v ) && !pTopology()->pPoints()->bHasVar(EnvVars_v) )
-				{
-					CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pNewUP = new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "v" );
-					pNewUP->SetSize( pSurface->cVarying() );
-
-					pNewUP->pValue() [ 0 ] = 0.0f;
-					pNewUP->pValue() [ 1 ] = 0.0f;
-					pNewUP->pValue() [ 2 ] = 1.0f;
-					pNewUP->pValue() [ 3 ] = 1.0f;
-
-					pSurface->AddPrimitiveVariable( pNewUP );
-				}
+				// Copy any 'vertex' class primitive variables.
+				CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
+				pNewUP->SetSize( pSurface->cVertex() );
+				TqUint i;
+				for( i = 0; i < pSurface->cVertex(); i++ )
+					pNewUP->SetValue( ( *iUP ), i, aiVertices[i] );
+				pSurface->AddPrimitiveVariable( pNewUP );
 			}
-			apSurfaces.push_back( pSurface );
+			else if ( ( *iUP ) ->Class() == class_facevarying )
+			{
+				// Copy any 'facevarying' class primitive variables.
+				CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
+				pNewUP->SetSize( pSurface->cVertex() );
+				TqUint i;
+				for( i = 0; i < pSurface->cVertex(); i++ )
+					pNewUP->SetValue( ( *iUP ), i, aiFVertices[i] );
+				pSurface->AddPrimitiveVariable( pNewUP );
+			}
+			else if ( ( *iUP ) ->Class() == class_uniform )
+			{
+				// Copy any 'uniform' class primitive variables.
+				CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
+				pNewUP->SetSize( pSurface->cUniform() );
+				pNewUP->SetValue( ( *iUP ), 0, m_FaceIndex );
+				pSurface->AddPrimitiveVariable( pNewUP );
+			}
+			else if ( ( *iUP ) ->Class() == class_constant )
+			{
+				// Copy any 'constant' class primitive variables.
+				CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
+				pNewUP->SetSize( 1 );
+				pNewUP->SetValue( ( *iUP ), 0, 0 );
+				pSurface->AddPrimitiveVariable( pNewUP );
+			}
 		}
 
-		if( apSurfaces.size() == 1 )
-			aSplits.push_back(apSurfaces[ 0 ]);
-		else if( apSurfaces.size() > 1 )
+		// Need to get rid of any 'h' values added to the "P" variables during multiplication.
+		TqUint i;
+		for( i = 0; i < pSurface->cVertex(); i++ )
+			pSurface->P()->pValue(i)[0] = static_cast<CqVector3D>( pSurface->P()->pValue(i)[0] );
+
+		CqMatrix matuBasis( RiBSplineBasis );
+		CqMatrix matvBasis( RiBSplineBasis );
+		pSurface->ConvertToBezierBasis( matuBasis, matvBasis );
+
+		TqInt iUses = Uses();
+
+		// If the shader needs s/t or u/v, and s/t is not specified, then at this point store the object space x,y coordinates.
+		if ( USES( iUses, EnvVars_s ) || USES( iUses, EnvVars_t ) || USES( iUses, EnvVars_u ) || USES( iUses, EnvVars_v ) )
 		{
-			boost::shared_ptr<CqDeformingSurface> pMotionSurface( new CqDeformingSurface( boost::shared_ptr<CqSurface>() ) );
-			for( iTime = 0; iTime < pTopology()->cTimes(); iTime++ )
+			if ( USES( iUses, EnvVars_s ) && !pTopology()->pPoints()->bHasVar(EnvVars_s) )
 			{
-				RtFloat time = pTopology()->Time( iTime );
-				pMotionSurface->AddTimeSlot( time, apSurfaces[ iTime ] );
+				CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pNewUP = new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "s" );
+				pNewUP->SetSize( pSurface->cVarying() );
+
+				pNewUP->pValue() [ 0 ] = 0.0f;
+				pNewUP->pValue() [ 1 ] = 1.0f;
+				pNewUP->pValue() [ 2 ] = 0.0f;
+				pNewUP->pValue() [ 3 ] = 1.0f;
+
+				pSurface->AddPrimitiveVariable( pNewUP );
 			}
-			aSplits.push_back(pMotionSurface);
+
+			if ( USES( iUses, EnvVars_t ) && !pTopology()->pPoints()->bHasVar(EnvVars_t) )
+			{
+				CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pNewUP = new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "t" );
+				pNewUP->SetSize( pSurface->cVarying() );
+
+				pNewUP->pValue() [ 0 ] = 0.0f;
+				pNewUP->pValue() [ 1 ] = 0.0f;
+				pNewUP->pValue() [ 2 ] = 1.0f;
+				pNewUP->pValue() [ 3 ] = 1.0f;
+
+				pSurface->AddPrimitiveVariable( pNewUP );
+			}
+
+			if ( USES( iUses, EnvVars_u ) && !pTopology()->pPoints()->bHasVar(EnvVars_u) )
+			{
+				CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pNewUP = new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "u" );
+				pNewUP->SetSize( pSurface->cVarying() );
+
+				pNewUP->pValue() [ 0 ] = 0.0f;
+				pNewUP->pValue() [ 1 ] = 1.0f;
+				pNewUP->pValue() [ 2 ] = 0.0f;
+				pNewUP->pValue() [ 3 ] = 1.0f;
+
+				pSurface->AddPrimitiveVariable( pNewUP );
+			}
+
+			if ( USES( iUses, EnvVars_v ) && !pTopology()->pPoints()->bHasVar(EnvVars_v) )
+			{
+				CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pNewUP = new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "v" );
+				pNewUP->SetSize( pSurface->cVarying() );
+
+				pNewUP->pValue() [ 0 ] = 0.0f;
+				pNewUP->pValue() [ 1 ] = 0.0f;
+				pNewUP->pValue() [ 2 ] = 1.0f;
+				pNewUP->pValue() [ 3 ] = 1.0f;
+
+				pSurface->AddPrimitiveVariable( pNewUP );
+			}
 		}
+		aSplits.push_back(pSurface);
 	}
 	else
 	{
@@ -1781,7 +1748,7 @@ TqBool CqSurfaceSubdivisionPatch::Diceable()
 	// recursive subdivision, the grid size is made smaller than usual to give
 	// us more chance to break regular parts off as a patch.
 	TqFloat gs = 8.0f;
-	const TqFloat* poptGridSize = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "SqrtGridSize" );
+	const TqFloat* poptGridSize = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "SqrtGridSize" );
 	if( poptGridSize )
 		gs = poptGridSize[0] / 2.0f;
 

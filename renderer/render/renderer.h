@@ -127,10 +127,10 @@ class CqRenderer : public IqRenderer
 		virtual	void	EndObjectModeBlock();
 		virtual	void	EndMotionModeBlock();
 
-		virtual	CqOptions&	optCurrent();
-		virtual	const CqOptions& optCurrent() const;
-		virtual CqOptions&	pushOptions();
-		virtual CqOptions&	popOptions();
+		virtual	const CqOptionsPtr	poptCurrent() const;
+		virtual	CqOptionsPtr	poptWriteCurrent();
+		virtual CqOptionsPtr	pushOptions();
+		virtual CqOptionsPtr	popOptions();
 		virtual	const CqAttributes*	pattrCurrent();
 		virtual	CqAttributes*	pattrWriteCurrent();
 		virtual	CqTransformPtr	ptransCurrent();
@@ -502,6 +502,7 @@ class CqRenderer : public IqRenderer
 		boost::shared_ptr<CqModeBlock>	m_pconCurrent;					///< Pointer to the current context.
 		CqStats	m_Stats;						///< Global statistics.
 		CqAttributes*	m_pAttrDefault;					///< Default attributes.
+		CqOptionsPtr m_poptDefault;  					///< Pointer to default options.
 		CqTransformPtr	m_pTransDefault;				///< Default transformation.
 		CqImageBuffer*	m_pImageBuffer;					///< Pointer to the current image buffer.
 
@@ -529,7 +530,7 @@ class CqRenderer : public IqRenderer
 		TqInt	m_OutputDataOffset;
 		TqInt	m_OutputDataTotalSize;
 
-		CqOptions m_optDefault;	///< Pointer to default options.
+
 		TqInt	m_FrameNo;
 		std::vector<CqObjectInstance*>	m_ObjectInstances;
 		TqBool	m_bObjectOpen;
