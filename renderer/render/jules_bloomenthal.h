@@ -53,57 +53,75 @@ START_NAMESPACE( Aqsis )
 
 class implicit_functor
 {
-public:
-	virtual ~implicit_functor() {}
+	public:
+		virtual ~implicit_functor()
+		{}
 
-	virtual TqFloat implicit_value(const CqVector3D& point) = 0;
+		virtual TqFloat implicit_value(const CqVector3D& point) = 0;
 };
 
 
 // Lattice position (centered on (0, 0, 0), signed values)
 class Location
 {
-public:
-	Location(const int I = 0, const int J = 0, const int K = 0) :
-		i(I),
-		j(J),
-		k(K)
-	{
-	}
+	public:
+		Location(const int I = 0, const int J = 0, const int K = 0) :
+				i(I),
+				j(J),
+				k(K)
+		{}
 
-	inline friend TqBool operator == (const Location& a, const Location& b)
-	{
-		return (a.i == b.i) && (a.j == b.j) && (a.k == b.k);
-	}
-	inline friend Location operator + (const Location& a, const Location& b)
-	{
-		return Location(a.i + b.i, a.j + b.j, a.k + b.k);
-	}
-	inline friend TqBool operator <= (const Location& a, const Location& b)
-	{
-		return (a.i <= b.i && a.j <= b.j && a.k <= b.k);
-	}
-	inline friend TqBool operator < (const Location& a, const Location& b)
-	{
-		return (a.i < b.i && a.j < b.j && a.k < b.k);
-	}
+		inline friend TqBool operator == (const Location& a, const Location& b)
+		{
+			return (a.i == b.i) && (a.j == b.j) && (a.k == b.k);
+		}
+		inline friend Location operator + (const Location& a, const Location& b)
+		{
+			return Location(a.i + b.i, a.j + b.j, a.k + b.k);
+		}
+		inline friend TqBool operator <= (const Location& a, const Location& b)
+		{
+			return (a.i <= b.i && a.j <= b.j && a.k <= b.k);
+		}
+		inline friend TqBool operator < (const Location& a, const Location& b)
+		{
+			return (a.i < b.i && a.j < b.j && a.k < b.k);
+		}
 
-	friend std::ostream& operator << (std::ostream& Stream, const Location& RHS)
-	{
-		Stream << RHS.i << " " << RHS.j << " " << RHS.k;
-		return Stream;
-	}
+		friend std::ostream& operator << (std::ostream& Stream, const Location& RHS)
+		{
+			Stream << RHS.i << " " << RHS.j << " " << RHS.k;
+			return Stream;
+		}
 
-	Location Left() { return Location(i-1, j, k); }
-	Location Right() { return Location(i+1, j, k); }
-	Location Bottom() { return Location(i, j-1, k); }
-	Location Top() { return Location(i, j+1, k); }
-	Location Near() { return Location(i, j, k-1); }
-	Location Far() { return Location(i, j, k+1); }
+		Location Left()
+		{
+			return Location(i-1, j, k);
+		}
+		Location Right()
+		{
+			return Location(i+1, j, k);
+		}
+		Location Bottom()
+		{
+			return Location(i, j-1, k);
+		}
+		Location Top()
+		{
+			return Location(i, j+1, k);
+		}
+		Location Near()
+		{
+			return Location(i, j, k-1);
+		}
+		Location Far()
+		{
+			return Location(i, j, k+1);
+		}
 
-	int i;
-	int j;
-	int k;
+		int i;
+		int j;
+		int k;
 };
 
 /*
@@ -122,240 +140,255 @@ public:
 template<typename type_t>
 class LocationMap
 {
-public:
-	typedef std::vector< std::pair<Location, type_t> > table_t;
+	public:
+		typedef std::vector< std::pair<Location, type_t> > table_t;
 
-	LocationMap() {}
-	~LocationMap() {}
+		LocationMap()
+		{}
+		~LocationMap()
+		{}
 
-	void insert(const Location& loc, const type_t item)
-	{
-		int key = loc.i + loc.j + loc.k;
-		m_table[key].push_back(std::pair<Location, type_t>(loc, item));
-	}
+		void insert(const Location& loc, const type_t item)
+		{
+			int key = loc.i + loc.j + loc.k;
+			m_table[key].push_back(std::pair<Location, type_t>(loc, item));
+		}
 
-	TqBool get(const Location& loc, type_t& out)
-	{
-		int key = loc.i + loc.j + loc.k;
-		table_t& table = m_table[key];
-		for(typename table_t::const_iterator t = table.begin(); t != table.end(); t++)
-			if(t->first == loc)
+		TqBool get
+			(const Location& loc, type_t& out)
+		{
+			int key = loc.i + loc.j + loc.k;
+			table_t& table = m_table[key];
+			for(typename table_t::const_iterator t = table.begin(); t != table.end(); t++)
+				if(t->first == loc)
 				{
 					out = t->second;
 					return true;
 				}
 
-		return false;
-	}
+			return false;
+		}
 
-private:
-	std::map<TqInt, std::vector< std::pair<Location, type_t> > > m_table;
+	private:
+		std::map<TqInt, std::vector< std::pair<Location, type_t> > > m_table;
 };
 
 // bloomenthal_polygonizer implementation
 class bloomenthal_polygonizer
 {
-public:
-	bloomenthal_polygonizer(
-		const TqFloat voxel_size,
-		const TqFloat threshold,
-		const TqInt xmin, const TqInt xmax,
-		const TqInt ymin, const TqInt ymax,
-		const TqInt zmin, const TqInt zmax,
-		const CqVector3D& origin,
-		implicit_functor& functor,
-		std::vector<CqVector3D>& surface_vertices,
-		std::vector<CqVector3D>& surface_normals,
-		std::vector<std::vector<TqInt> >& surface_polygons);
-
-	~bloomenthal_polygonizer();
-
-	TqBool polygonize_from_inside_point(const CqVector3D& startingpoint);
-
-	void polygonize_whole_grid();
-
-	void cross_limits() { m_keep_within_limits = false; }
-
-	// Cube corner
-	class Corner
-	{
 	public:
-		Location l;
-		CqVector3D p;
-		TqFloat value;
+		bloomenthal_polygonizer(
+		    const TqFloat voxel_size,
+		    const TqFloat threshold,
+		    const TqInt xmin, const TqInt xmax,
+		    const TqInt ymin, const TqInt ymax,
+		    const TqInt zmin, const TqInt zmax,
+		    const CqVector3D& origin,
+		    implicit_functor& functor,
+		    std::vector<CqVector3D>& surface_vertices,
+		    std::vector<CqVector3D>& surface_normals,
+		    std::vector<std::vector<TqInt> >& surface_polygons);
 
-		Corner(const Location& L) :
-			l(L)
+		~bloomenthal_polygonizer();
+
+		TqBool polygonize_from_inside_point(const CqVector3D& startingpoint);
+
+		void polygonize_whole_grid();
+
+		void cross_limits()
 		{
+			m_keep_within_limits = false;
 		}
 
-		inline friend TqBool operator == (const Corner& c1, const Corner& c2)
+		// Cube corner
+		class Corner
 		{
-			return (c1.l == c2.l) && (c1.p == c2.p) && (c1.value == c2.value);
-		}
-	};
+			public:
+				Location l;
+				CqVector3D p;
+				TqFloat value;
 
-	// Partitioning cell
-	class Cube
-	{
-	public:
-		Location l;
-		Corner* corners[8];
+				Corner(const Location& L) :
+						l(L)
+				{}
 
-		Cube(const Location& L) :
-			l(L)
-		{
-			for(int i = 0; i < 8; i++)
-				corners[i] = 0;
-		}
-	};
-
-	class Edge
-	{
-	public:
-		Edge(const Location& L1, const Location& L2, const int VID = -1) :
-			vid(VID)
-		{
-			if(L1.i > L2.i || (L1.i == L2.i && (L1.j > L2.j || (L1.j == L2.j && L1.k > L2.k))))
+				inline friend TqBool operator == (const Corner& c1, const Corner& c2)
 				{
-					l1 = L2;
-					l2 = L1;
+					return (c1.l == c2.l) && (c1.p == c2.p) && (c1.value == c2.value);
 				}
-			else
+		};
+
+		// Partitioning cell
+		class Cube
+		{
+			public:
+				Location l;
+				Corner* corners[8];
+
+				Cube(const Location& L) :
+						l(L)
 				{
-					l1 = L1;
-					l2 = L2;
+					for(int i = 0; i < 8; i++)
+						corners[i] = 0;
 				}
-		}
+		};
 
-		inline friend TqBool operator == (const Edge& e1, const Edge& e2)
+		void MarchingCube(const Cube& cube1);
+		void MakeCubeTable();
+		std::vector< std::vector< std::vector<TqInt> > > m_CubeTable;
+
+		class Edge
 		{
-			return (e1.l1 == e2.l1) && (e1.l2 == e2.l2) && (e1.vid == e2.vid);
-		}
+			public:
+				Edge(const Location& L1, const Location& L2, const int VID = -1) :
+						vid(VID)
+				{
+					if(L1.i > L2.i || (L1.i == L2.i && (L1.j > L2.j || (L1.j == L2.j && L1.k > L2.k))))
+					{
+						l1 = L2;
+						l2 = L1;
+					}
+					else
+					{
+						l1 = L1;
+						l2 = L2;
+					}
+				}
 
-		Location l1;
-		Location l2;
-		int vid;
-	};
+				inline friend TqBool operator == (const Edge& e1, const Edge& e2)
+				{
+					return (e1.l1 == e2.l1) && (e1.l2 == e2.l2) && (e1.vid == e2.vid);
+				}
 
-	class EdgeHash
-	{
-	private:
-		static const int HashBit;
-		static const int Mask;
-		static const int HashSize;
+				Location l1;
+				Location l2;
+				int vid;
+		};
 
-		inline int HashFunc(const Location& l)
+		class EdgeHash
 		{
-			return ((((l.i & Mask) << HashBit) | (l.j & Mask)) << HashBit) | (l.k & Mask);
-		}
+			private:
+				static const int HashBit;
+				static const int Mask;
+				static const int HashSize;
 
-	public:
-		EdgeHash()
-			{
-			edges.resize(HashSize*2);
-			}
+				inline int HashFunc(const Location& l)
+				{
+					return ((((l.i & Mask) << HashBit) | (l.j & Mask)) << HashBit) | (l.k & Mask);
+				}
 
-		void push_back(const Edge& Value)
-			{
-			int index = HashFunc(Value.l1) + HashFunc(Value.l2);
-			edges[index].push_back(Value);
-			}
+			public:
+				EdgeHash()
+				{
+					edges.resize(HashSize*2);
+				}
 
-		int GetValue(const Edge& Value)
-			{
-				int index = HashFunc(Value.l1) + HashFunc(Value.l2);
-				for(unsigned int n = 0; n < edges[index].size(); n++)
+				void push_back(const Edge& Value)
+				{
+					int index = HashFunc(Value.l1) + HashFunc(Value.l2);
+					edges[index].push_back(Value);
+				}
+
+				int GetValue(const Edge& Value)
+				{
+					int index = HashFunc(Value.l1) + HashFunc(Value.l2);
+					for(unsigned int n = 0; n < edges[index].size(); n++)
 					{
 						if(edges[index][n].l1 == Value.l1 && edges[index][n].l2 == Value.l2)
 							return edges[index][n].vid;
 					}
 
-				return -1;
-			}
+					return -1;
+				}
 
-	protected:
-		std::vector< std::vector<Edge> > edges;
-	};
+			protected:
+				std::vector< std::vector<Edge> > edges;
+		};
 
-private:
-	/// Polygonizer parameters
+	private:
+		/// Polygonizer parameters
 
-	// Width of the partitioning cube
-	TqFloat m_VoxelSize;
-	// Threshold value (defining the equipotential surface)
-	TqFloat m_Threshold;
-	// Grid limit corners (left-bottom-near and right-top-far)
-	Location m_MinCorner;
-	Location m_MaxCorner;
-	TqBool m_keep_within_limits;
-	// Grid center ( Location(0, 0, 0) )
-	CqVector3D m_GridOrigin;
-	// Implicit function
-	implicit_functor& m_FieldFunctor;
-	// Surface storage
-	std::vector<CqVector3D>& m_Vertices;
-	std::vector<CqVector3D>& m_normals;
-	std::vector<std::vector<TqInt> >& m_Polygons;
+		// Width of the partitioning cube
+		TqFloat m_VoxelSize;
+		// Threshold value (defining the equipotential surface)
+		TqFloat m_Threshold;
+		// Grid limit corners (left-bottom-near and right-top-far)
+		Location m_MinCorner;
+		Location m_MaxCorner;
+		TqBool m_keep_within_limits;
+		// Grid center ( Location(0, 0, 0) )
+		CqVector3D m_GridOrigin;
+		// Implicit function
+		implicit_functor& m_FieldFunctor;
+		// Surface storage
+		std::vector<CqVector3D>& m_Vertices;
+		std::vector<CqVector3D>& m_normals;
+		std::vector<std::vector<TqInt> >& m_Polygons;
 
-	/// Temp storage
+		/// Temp storage
 
-	// Active cubes
-	std::stack<Cube> m_active_cubes;
+		// Active cubes
+		std::stack<Cube> m_active_cubes;
 
-	// Centers hash
-	LocationMap<TqBool> m_centers;
-	// Return true if already set, otherwise set and return false
-	TqBool mark_center(const Location& l)
-	{
-		TqBool out;
-		if(m_centers.get(l, out))
-			return true;
+		// Centers hash
+		LocationMap<TqBool> m_centers;
+		// Return true if already set, otherwise set and return false
+		TqBool mark_center(const Location& l)
+		{
+			TqBool out;
+			if(m_centers.get(l, out))
+				return true;
 
-		m_centers.insert(l, true);
-		return false;
-	}
+			m_centers.insert(l, true);
+			return false;
+		}
 
-	// Corners hash
-	LocationMap<Corner*> m_Corners;
-	// Return corner if found, else return 0
-	Corner* get_corner(const Location& l)
-	{
-		Corner* out;
-		if(m_Corners.get(l, out))
-			return out;
+		// Corners hash
+		LocationMap<Corner*> m_Corners;
+		// Return corner if found, else return 0
+		Corner* get_corner(const Location& l)
+		{
+			Corner* out;
+			if(m_Corners.get(l, out))
+				return out;
 
-		return 0;
-	}
+			return 0;
+		}
 
-	Corner* get_cached_corner(const Location& l);
+		Corner* get_cached_corner(const Location& l);
 
-	// Edge hash
-	EdgeHash m_Edges;
+		// Edge hash
+		EdgeHash m_Edges;
 
-	// Convert between vertex and Location
-	CqVector3D location_vertex(const Location& l);
-	Location nearest_location(const CqVector3D& p);
+		// Convert between vertex and Location
+		CqVector3D location_vertex(const Location& l);
+		Location nearest_location(const CqVector3D& p);
 
-	void PolygonizeSurface(const Location& startinglocation);
+		void PolygonizeSurface(const Location& startinglocation);
 
-	// Inline functions
-	inline int bit_value(int number, int bit_number) { return (number >> bit_number) & 1; }
-	inline int invert_bit(int i, int bit) { return i ^ (1 << bit); }
+		// Inline functions
+		inline int bit_value(int number, int bit_number)
+		{
+			return (number >> bit_number) & 1;
+		}
+		inline int invert_bit(int i, int bit)
+		{
+			return i ^ (1 << bit);
+		}
 
-	CqVector3D normal(const CqVector3D& Point);
+		CqVector3D normal(const CqVector3D& Point);
 
-	TqBool SurfaceLocation(Location& startinglocation);
+		TqBool SurfaceLocation(Location& startinglocation);
 
-	// Tetrahedral Polygonization
-	void TriangulateTet(const Cube& cube1, int c1, int c2, int c3, int c4);
+		// Tetrahedral Polygonization
+		void TriangulateTet(const Cube& cube1, int c1, int c2, int c3, int c4);
 
-	void TestFace(const Location& facelocation, Cube& old, int face, int c1, int c2, int c3, int c4);
+		void TestFace(const Location& facelocation, Cube& old, int face, int c1, int c2, int c3, int c4);
 
-	int VerticeId(Corner *c1, Corner *c2);
-	void Converge(const CqVector3D& p1, const CqVector3D& p2, TqFloat v, CqVector3D& p);
+		int VerticeId(Corner *c1, Corner *c2);
+		void Converge(const CqVector3D& p1, const CqVector3D& p2, TqFloat v, CqVector3D& p);
 
-	void SaveTriangle(TqInt u, TqInt v, TqInt w);
+		void SaveTriangle(TqInt u, TqInt v, TqInt w);
 };
 
 //-----------------------------------------------------------------------

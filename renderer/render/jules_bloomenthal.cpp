@@ -24,17 +24,18 @@
 
 #include <iostream>
 #include <cmath>
-#include	<math.h>
-#include	<vector>
-#include	<list>
+#include <math.h>
+#include <vector>
+#include <list>
 #include <limits>
+#include <algorithm>
 
-#include	"aqsis.h"
-#include	"ri.h"
-#include	"vector4d.h"
-#include	"matrix.h"
+#include "aqsis.h"
+#include "ri.h"
+#include "vector4d.h"
+#include "matrix.h"
 #include "jules_bloomenthal.h"
-#include	"logging.h"
+#include "logging.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -63,34 +64,108 @@ const TqInt RBF = 5;	// right bottom far
 const TqInt RTN = 6;	// right top near
 const TqInt RTF = 7;	// right top far
 
+// Edges
+const TqInt  LB = 0;	// left bottom
+const TqInt  LT = 1;	// left top
+const TqInt  LN = 2;	// left near
+const TqInt  LF = 3;	// left far
+const TqInt  RB = 4;	// right bottom
+const TqInt  RT = 5;	// right top
+const TqInt  RN = 6;	// right near
+const TqInt  RF = 7;	// right far
+const TqInt  BN = 8;	// bottom near
+const TqInt  BF = 9;	// bottom far
+const TqInt  TN = 10;	// top near
+const TqInt  TF = 11;	// top far
+
+// Face on left when going from corner1 to corner2
+const TqInt  leftface[12] =
+    {
+        B, L, L, F, R, T, N, R, N, B, T, F
+    };
+// Face on right when going from corner1 to corner2
+const TqInt  rightface[12] =
+    {
+        L, T, N, L, B, R, R, F, B, F, N, T
+    };
+
+// Return next clockwise edge from given edge around given face
+inline TqInt next_edge(const TqInt edge, const TqInt face)
+{
+	switch(edge)
+	{
+			case LB:
+			return (face == L) ? LF : BN;
+			case LT:
+			return (face == L) ? LN : TF;
+			case LN:
+			return (face == L) ? LB : TN;
+			case LF:
+			return (face == L) ? LT : BF;
+			case RB:
+			return (face == R) ? RN : BF;
+			case RT:
+			return (face == R) ? RF : TN;
+			case RN:
+			return (face == R) ? RT : BN;
+			case RF:
+			return (face == R) ? RB : TF;
+			case BN:
+			return (face == B) ? RB : LN;
+			case BF:
+			return (face == B) ? LB : RF;
+			case TN:
+			return (face == T) ? LT : RN;
+			case TF:
+			return (face == T) ? RT : LF;
+			default:
+			Aqsis::log() << error << "next_edge(): Default Value is Reached" << std::endl;
+			break;
+	}
+
+	return LF;
+}
+
+// Corners
+// edges:                   LB, LT, LN, LF, RB, RT, RN, RF, BN, BF, TN, TF
+const TqInt corner1[12] =
+    {
+        LBN,LTN,LBN,LBF,RBN,RTN,RBN,RBF,LBN,LBF,LTN,LTF
+    };
+const TqInt corner2[12] =
+    {
+        LBF,LTF,LTN,LTF,RBF,RTF,RTN,RTF,RBN,RBF,RTN,RTF
+    };
+
 bloomenthal_polygonizer::bloomenthal_polygonizer(
-		const TqFloat voxel_size,
-		const TqFloat threshold,
-		const TqInt xmin, const int xmax,
-		const TqInt ymin, const int ymax,
-		const TqInt zmin, const int zmax,
-		const CqVector3D& origin,
-		implicit_functor& functor,
-		std::vector<CqVector3D>& surface_vertices,
-		std::vector<CqVector3D>& surface_normals,
-		std::vector<std::vector<TqInt> >& surface_polygons) :
-	m_VoxelSize(voxel_size),
-	m_Threshold(threshold),
-	m_MinCorner(Location(xmin, ymin, zmin)),
-	m_MaxCorner(Location(xmax, ymax, zmax)),
-	m_keep_within_limits(true),
-	m_GridOrigin(origin),
-	m_FieldFunctor(functor),
-	m_Vertices(surface_vertices),
-	m_normals(surface_normals),
-	m_Polygons(surface_polygons)
+    const TqFloat voxel_size,
+    const TqFloat threshold,
+    const TqInt xmin, const int xmax,
+    const TqInt ymin, const int ymax,
+    const TqInt zmin, const int zmax,
+    const CqVector3D& origin,
+    implicit_functor& functor,
+    std::vector<CqVector3D>& surface_vertices,
+    std::vector<CqVector3D>& surface_normals,
+    std::vector<std::vector<TqInt> >& surface_polygons) :
+		m_VoxelSize(voxel_size),
+		m_Threshold(threshold),
+		m_MinCorner(Location(xmin, ymin, zmin)),
+		m_MaxCorner(Location(xmax, ymax, zmax)),
+		m_keep_within_limits(true),
+		m_GridOrigin(origin),
+		m_FieldFunctor(functor),
+		m_Vertices(surface_vertices),
+		m_normals(surface_normals),
+		m_Polygons(surface_polygons)
 {
 	// Sanity checks ...
 	if(!(m_MinCorner <= nearest_location(m_GridOrigin) && nearest_location(m_GridOrigin) < m_MaxCorner))
-		{
-			Aqsis::log() << warning << "Surface Polygonizer: grid origin must be in grid, defaulting to min corner" << std::endl;
-			m_GridOrigin = location_vertex(m_MinCorner);
-		}
+	{
+		Aqsis::log() << warning << "Surface Polygonizer: grid origin must be in grid, defaulting to min corner" << std::endl;
+		m_GridOrigin = location_vertex(m_MinCorner);
+	}
+	MakeCubeTable();
 }
 
 bloomenthal_polygonizer::~bloomenthal_polygonizer()
@@ -122,15 +197,15 @@ void bloomenthal_polygonizer::polygonize_whole_grid()
 	for(Location x = m_MinCorner; x <= m_MaxCorner; x = x.Right())
 		for(Location y = x; y <= m_MaxCorner; y = y.Top())
 			for(Location z = y; z <= m_MaxCorner; z = z.Far())
-				{
-					Corner* corner = get_cached_corner(z);
-					if(corner->value < m_Threshold)
-						continue;
+			{
+				Corner* corner = get_cached_corner(z);
+				if(corner->value < m_Threshold)
+					continue;
 
-					Location surface_location = z;
-					if(SurfaceLocation(surface_location))
-						PolygonizeSurface(surface_location);
-				}
+				Location surface_location = z;
+				if(SurfaceLocation(surface_location))
+					PolygonizeSurface(surface_location);
+			}
 }
 
 // Find surface and polygonize from a known inside point
@@ -168,26 +243,31 @@ void bloomenthal_polygonizer::PolygonizeSurface(const Location& startinglocation
 
 	// Process active cubes till none left
 	while(!m_active_cubes.empty())
-		{
-			Cube c = m_active_cubes.top();
-			m_active_cubes.pop();
+	{
+		Cube c = m_active_cubes.top();
+		m_active_cubes.pop();
 
-			// Decompose into tetrahedra and polygonize
-			TriangulateTet(c, LBN, LTN, RBN, LBF);
-			TriangulateTet(c, RTN, LTN, LBF, RBN);
-			TriangulateTet(c, RTN, LTN, LTF, LBF);
-			TriangulateTet(c, RTN, RBN, LBF, RBF);
-			TriangulateTet(c, RTN, LBF, LTF, RBF);
-			TriangulateTet(c, RTN, LTF, RTF, RBF);
+#ifndef TTT
 
-			// Test six face directions, maybe add to stack
-			TestFace(c.l.Left(), c, L, LBN, LBF, LTN, LTF);
-			TestFace(c.l.Right(), c, R, RBN, RBF, RTN, RTF);
-			TestFace(c.l.Bottom(), c, B, LBN, LBF, RBN, RBF);
-			TestFace(c.l.Top(), c, T, LTN, LTF, RTN, RTF);
-			TestFace(c.l.Near(), c, N, LBN, LTN, RBN, RTN);
-			TestFace(c.l.Far(), c, F, LBF, LTF, RBF, RTF);
-		}
+		MarchingCube(c);
+#else
+		// Decompose into tetrahedra and polygonize
+		TriangulateTet(c, LBN, LTN, RBN, LBF);
+		TriangulateTet(c, RTN, LTN, LBF, RBN);
+		TriangulateTet(c, RTN, LTN, LTF, LBF);
+		TriangulateTet(c, RTN, RBN, LBF, RBF);
+		TriangulateTet(c, RTN, LBF, LTF, RBF);
+		TriangulateTet(c, RTN, LTF, RTF, RBF);
+#endif
+
+		// Test six face directions, maybe add to stack
+		TestFace(c.l.Left(), c, L, LBN, LBF, LTN, LTF);
+		TestFace(c.l.Right(), c, R, RBN, RBF, RTN, RTF);
+		TestFace(c.l.Bottom(), c, B, LBN, LBF, RBN, RBF);
+		TestFace(c.l.Top(), c, T, LTN, LTF, RTN, RTF);
+		TestFace(c.l.Near(), c, N, LBN, LTN, RBN, RTN);
+		TestFace(c.l.Far(), c, F, LBF, LTF, RBF, RTF);
+	}
 }
 
 // Find a location enclosing surface
@@ -198,19 +278,19 @@ TqBool bloomenthal_polygonizer::SurfaceLocation(Location& startinglocation)
 
 	// Top
 	do
+	{
+		Location loc1 = loc2;
+		TqFloat value1 = value2;
+
+		loc2 = loc2.Top();
+		value2 = m_FieldFunctor.implicit_value(location_vertex(loc2)) - m_Threshold;
+
+		if((value1*value2 < 0) || ((value1 == 0) && (value2 < 0)) || ((value2 == 0) && (value1 < 0)))
 		{
-			Location loc1 = loc2;
-			TqFloat value1 = value2;
-
-			loc2 = loc2.Top();
-			value2 = m_FieldFunctor.implicit_value(location_vertex(loc2)) - m_Threshold;
-
-			if((value1*value2 < 0) || ((value1 == 0) && (value2 < 0)) || ((value2 == 0) && (value1 < 0)))
-				{
-					startinglocation = loc1;
-					return true;
-				}
+			startinglocation = loc1;
+			return true;
 		}
+	}
 	while(loc2 <= m_MaxCorner);
 
 	// We reached the grid boundary: check the whole grid
@@ -262,22 +342,56 @@ void bloomenthal_polygonizer::TriangulateTet(const Cube& cube1, TqInt c1, int c2
 
 	// 14 productive tetrahedral cases (0000 and 1111 do not yield polygons)
 	switch(index)
-		{
-			case 1: SaveTriangle(e5, e6, e3); break;
-			case 2: SaveTriangle(e2, e6, e4); break;
-			case 3:	SaveTriangle(e3, e5, e4); SaveTriangle(e3, e4, e2); break;
-			case 4: SaveTriangle(e1, e4, e5); break;
-			case 5: SaveTriangle(e3, e1, e4); SaveTriangle(e3, e4, e6); break;
-			case 6: SaveTriangle(e1, e2, e6); SaveTriangle(e1, e6, e5); break;
-			case 7: SaveTriangle(e1, e2, e3); break;
-			case 8: SaveTriangle(e1, e3, e2); break;
-			case 9: SaveTriangle(e1, e5, e6); SaveTriangle(e1, e6, e2); break;
-			case 10: SaveTriangle(e1, e3, e6); SaveTriangle(e1, e6, e4); break;
-			case 11: SaveTriangle(e1, e5, e4); break;
-			case 12: SaveTriangle(e3, e2, e4); SaveTriangle(e3, e4, e5); break;
-			case 13: SaveTriangle(e6, e2, e4); break;
-			case 14: SaveTriangle(e5, e3, e6); break;
-		}
+	{
+			case 1:
+			SaveTriangle(e5, e6, e3);
+			break;
+			case 2:
+			SaveTriangle(e2, e6, e4);
+			break;
+			case 3:
+			SaveTriangle(e3, e5, e4);
+			SaveTriangle(e3, e4, e2);
+			break;
+			case 4:
+			SaveTriangle(e1, e4, e5);
+			break;
+			case 5:
+			SaveTriangle(e3, e1, e4);
+			SaveTriangle(e3, e4, e6);
+			break;
+			case 6:
+			SaveTriangle(e1, e2, e6);
+			SaveTriangle(e1, e6, e5);
+			break;
+			case 7:
+			SaveTriangle(e1, e2, e3);
+			break;
+			case 8:
+			SaveTriangle(e1, e3, e2);
+			break;
+			case 9:
+			SaveTriangle(e1, e5, e6);
+			SaveTriangle(e1, e6, e2);
+			break;
+			case 10:
+			SaveTriangle(e1, e3, e6);
+			SaveTriangle(e1, e6, e4);
+			break;
+			case 11:
+			SaveTriangle(e1, e5, e4);
+			break;
+			case 12:
+			SaveTriangle(e3, e2, e4);
+			SaveTriangle(e3, e4, e5);
+			break;
+			case 13:
+			SaveTriangle(e6, e2, e4);
+			break;
+			case 14:
+			SaveTriangle(e5, e3, e6);
+			break;
+	}
 }
 
 
@@ -292,8 +406,8 @@ void bloomenthal_polygonizer::TestFace(const Location& facelocation, Cube& old, 
 	// No surface crossing?
 	TqBool pos = old.corners[c1]->value >= m_Threshold;
 	if(((old.corners[c2]->value >= m_Threshold) == pos) &&
-		((old.corners[c3]->value >= m_Threshold) == pos) &&
-		((old.corners[c4]->value >= m_Threshold) == pos))
+	        ((old.corners[c3]->value >= m_Threshold) == pos) &&
+	        ((old.corners[c4]->value >= m_Threshold) == pos))
 		return;
 
 	// Out of bounds?
@@ -307,7 +421,10 @@ void bloomenthal_polygonizer::TestFace(const Location& facelocation, Cube& old, 
 	// Create new cube and add it to top of stack
 	Cube newc(facelocation);
 
-	const TqInt facebit[6] = {2, 2, 1, 1, 0, 0};
+	const TqInt facebit[6] =
+	    {
+	        2, 2, 1, 1, 0, 0
+	    };
 	TqInt bit = facebit[face];
 	newc.corners[invert_bit(c1, bit)] = old.corners[c1];
 	newc.corners[invert_bit(c2, bit)] = old.corners[c2];
@@ -332,11 +449,11 @@ CqVector3D bloomenthal_polygonizer::normal(const CqVector3D& Point)
 	TqFloat gz = m_FieldFunctor.implicit_value(Point + CqVector3D(0, 0, delta)) - f;
 	f = sqrt(gx*gx + gy*gy + gz*gz);
 	if(f != 0)
-		{
-			gx /= f;
-			gy /= f;
-			gz /= f;
-		}
+	{
+		gx /= f;
+		gy /= f;
+		gz /= f;
+	}
 
 	return CqVector3D(gx, gy, gz);
 }
@@ -346,13 +463,13 @@ bloomenthal_polygonizer::Corner* bloomenthal_polygonizer::get_cached_corner(cons
 {
 	Corner* c = get_corner(L);
 	if(!c)
-		{
-			c = new Corner(L);
-			c->p = location_vertex(L);
-			c->value = m_FieldFunctor.implicit_value(c->p);
+	{
+		c = new Corner(L);
+		c->p = location_vertex(L);
+		c->value = m_FieldFunctor.implicit_value(c->p);
 
-			m_Corners.insert(L, c);
-		}
+		m_Corners.insert(L, c);
+	}
 
 	return c;
 }
@@ -374,10 +491,10 @@ TqInt bloomenthal_polygonizer::VerticeId(Corner *c1, Corner *c2)
 {
 	TqInt vid = m_Edges.GetValue(Edge(c1->l, c2->l));
 	if(vid != -1)
-		{
-			// Has been previously computed, return saved index
-			return vid;
-		}
+	{
+		// Has been previously computed, return saved index
+		return vid;
+	}
 
 	// Compute index, save and return it
 	CqVector3D p;
@@ -403,16 +520,98 @@ void bloomenthal_polygonizer::Converge(const CqVector3D& p1, const CqVector3D& p
 	point = 0.5 * (pos + neg);
 
 	for(TqInt iter = 0; iter < RES; iter++)
-		{
-			if(m_FieldFunctor.implicit_value(point) >= m_Threshold)
-				pos = point;
-			else
-				neg = point;
+	{
+		if(m_FieldFunctor.implicit_value(point) >= m_Threshold)
+			pos = point;
+		else
+			neg = point;
 
-			point = 0.5 * (pos + neg);
-		}
+		point = 0.5 * (pos + neg);
+	}
 }
 
+// Triangulate the cube directly, without decomposition
+void bloomenthal_polygonizer::MarchingCube(const Cube& cube1)
+{
+	TqInt index = 0;
+	for(TqInt i = 0; i < 8; i++)
+		if(cube1.corners[i]->value >= m_Threshold)
+			index += 1 << i;
+
+	std::vector< std::vector<TqInt> > currentindex = m_CubeTable[index];
+	for(TqInt i = 0; i < currentindex.size(); i++)
+	{
+		TqInt a = 0;
+		TqInt b = 0;
+		TqInt count = 0;
+
+		for(TqInt j = 0; j < currentindex[i].size(); j++)
+		{
+			Corner* c1 = cube1.corners[corner1[currentindex[i][j]]];
+			Corner* c2 = cube1.corners[corner2[currentindex[i][j]]];
+			TqInt c = VerticeId(c1, c2);
+
+			if(++count > 2)
+				SaveTriangle(a, b, c);
+
+			if(count < 3)
+				a = b;
+			b = c;
+		}
+	}
+}
+
+// Create the 256 entry table for cubical polygonization
+void bloomenthal_polygonizer::MakeCubeTable()
+{
+	for(TqInt configuration = 0; configuration < 256; configuration++)
+	{
+		std::vector< std::vector<TqInt> > triangles;
+
+		TqInt bits[8];
+		for(TqInt c = 0; c < 8; c++)
+			bits[c] = bit_value(configuration, c);
+
+		bool done[12];
+		for(TqInt edge = 0; edge < 12; edge++)
+			done[edge] = false;
+		for(TqInt edge = 0; edge < 12; edge++)
+			if(!done[edge] && (bits[corner1[edge]] != bits[corner2[edge]]))
+			{
+				std::vector<TqInt> triangle;
+
+				// Get face that is to right of edge from pos to neg corner
+				TqInt face = bits[corner1[edge]] ? rightface[edge] : leftface[edge];
+
+				TqInt startingedge = edge, currentedge = edge;
+				do
+				{
+					currentedge = next_edge(currentedge, face);
+					done[currentedge] = true;
+
+					if(bits[corner1[currentedge]] != bits[corner2[currentedge]])
+					{
+						triangle.push_back(currentedge);
+
+						// face adjoining edge that is not the given face
+						if(face == leftface[currentedge])
+							face = rightface[currentedge];
+						else
+							face = leftface[currentedge];
+					}
+				}
+				while(currentedge != startingedge);
+
+				triangles.push_back(triangle);
+			}
+
+		m_CubeTable.push_back(triangles);
+	}
+
+	for(TqInt i = 0; i < m_CubeTable.size(); i++)
+		for(TqInt j = 0; j < m_CubeTable[i].size(); j++)
+			reverse(m_CubeTable[i][j].begin(), m_CubeTable[i][j].end());
+}
 
 END_NAMESPACE( Aqsis )
 //---------------------------------------------------------------------
