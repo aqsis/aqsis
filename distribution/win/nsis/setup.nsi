@@ -198,8 +198,8 @@ SectionEnd
 
 Section /o "Other" SEC04
 SectionIn 1
-  SetOutPath "$INSTDIR\include"
-  File "..\..\..\output\include\*.h"
+  SetOutPath "$INSTDIR\include\aqsis"
+  File "..\..\..\output\include\aqsis\*.h"
   SetOutPath "$INSTDIR\lib"
   File "..\..\..\output\lib\*.lib"
 SectionEnd
