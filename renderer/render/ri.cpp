@@ -3796,7 +3796,7 @@ RtVoid RiBlobbyV( RtInt nleaf, RtInt ncode, RtInt code[], RtInt nflt, RtFloat fl
     	std::vector<CqVector3D> Vertices;
     	std::vector<CqVector3D> Normals;
 	std::vector<std::vector<TqInt> > Polygons;
-	TqFloat shadingrate = QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite( "System", "ShadingRateSqrt" ) [ 0 ];
+	TqFloat shadingrate = QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite( "System", "ShadingRate" ) [ 0 ];
 
     	blobby.polygonize(Vertices, Normals, Polygons, shadingrate/40.0f);
 

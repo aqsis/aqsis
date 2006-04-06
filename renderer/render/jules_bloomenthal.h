@@ -1,5 +1,6 @@
+
 // A C++ Implicit Surface Polygonizer
-// Copyright 2002-2005, Romain Behar <romainbehar@yahoo.com>
+// Copyright 2002-2006, Romain Behar <romainbehar@yahoo.com>
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public
@@ -20,18 +21,19 @@
 		\author Romain Behar (romainbehar@yahoo.com)
 */
 
-//? Is .h included already?
 #ifndef JULES_BLOOMENTHAL_H_INCLUDED
 #define JULES_BLOOMENTHAL_H_INCLUDED 1
-
-#include "ri.h"
-#include "vector3d.h"
 
 #include <map>
 #include <stack>
 #include <vector>
 
+#include "ri.h"
+#include "vector3d.h"
+
+
 START_NAMESPACE( Aqsis )
+
 
 // It is based on Jules Bloomenthal's work :
 //
@@ -49,6 +51,7 @@ START_NAMESPACE( Aqsis )
 // Permission is granted to reproduce, use and distribute this code for
 // any and all purposes, provided that this notice appears in all copies.
 
+
 #include "aqsis_types.h"
 
 class implicit_functor
@@ -60,12 +63,11 @@ class implicit_functor
 		virtual TqFloat implicit_value(const CqVector3D& point) = 0;
 };
 
-
 // Lattice position (centered on (0, 0, 0), signed values)
 class Location
 {
 	public:
-		Location(const int I = 0, const int J = 0, const int K = 0) :
+		Location(const TqInt I = 0, const TqInt J = 0, const TqInt K = 0) :
 				i(I),
 				j(J),
 				k(K)
@@ -119,23 +121,10 @@ class Location
 			return Location(i, j, k+1);
 		}
 
-		int i;
-		int j;
-		int k;
+		TqInt i;
+		TqInt j;
+		TqInt k;
 };
-
-/*
-class LocationHash
-{
-public:
-	inline int HashFunc(const Location& Value)
-	{
-		static const int HashBit = 5;
-		static const int Mask = (1 << HashBit) - 1;
-		return ((Value.i & Mask) << (HashBit*2)) | ((Value.j & Mask) << HashBit) | (Value.k & Mask);
-	}
-};
-*/
 
 template<typename type_t>
 class LocationMap
@@ -150,14 +139,14 @@ class LocationMap
 
 		void insert(const Location& loc, const type_t item)
 		{
-			int key = loc.i + loc.j + loc.k;
+			TqInt key = loc.i + loc.j + loc.k;
 			m_table[key].push_back(std::pair<Location, type_t>(loc, item));
 		}
 
 		TqBool get
 			(const Location& loc, type_t& out)
 		{
-			int key = loc.i + loc.j + loc.k;
+			TqInt key = loc.i + loc.j + loc.k;
 			table_t& table = m_table[key];
 			for(typename table_t::const_iterator t = table.begin(); t != table.end(); t++)
 				if(t->first == loc)
@@ -170,16 +159,23 @@ class LocationMap
 		}
 
 	private:
-		std::map<TqInt, std::vector< std::pair<Location, type_t> > > m_table;
+		std::map<unsigned long, std::vector< std::pair<Location, type_t> > > m_table;
 };
 
 // bloomenthal_polygonizer implementation
 class bloomenthal_polygonizer
 {
 	public:
+		typedef enum
+		{
+		    MARCHINGCUBES,
+		    TETRAHEDRAL
+	} polygonization_t;
+
 		bloomenthal_polygonizer(
-		    const TqFloat voxel_size,
-		    const TqFloat threshold,
+		    const polygonization_t polygonization_type,
+		    const TqDouble voxel_size,
+		    const TqDouble threshold,
 		    const TqInt xmin, const TqInt xmax,
 		    const TqInt ymin, const TqInt ymax,
 		    const TqInt zmin, const TqInt zmax,
@@ -206,7 +202,7 @@ class bloomenthal_polygonizer
 			public:
 				Location l;
 				CqVector3D p;
-				TqFloat value;
+				TqDouble value;
 
 				Corner(const Location& L) :
 						l(L)
@@ -228,19 +224,15 @@ class bloomenthal_polygonizer
 				Cube(const Location& L) :
 						l(L)
 				{
-					for(int i = 0; i < 8; i++)
+					for(TqInt i = 0; i < 8; i++)
 						corners[i] = 0;
 				}
 		};
 
-		void MarchingCube(const Cube& cube1);
-		void MakeCubeTable();
-		std::vector< std::vector< std::vector<TqInt> > > m_CubeTable;
-
 		class Edge
 		{
 			public:
-				Edge(const Location& L1, const Location& L2, const int VID = -1) :
+				Edge(const Location& L1, const Location& L2, const TqInt VID = -1) :
 						vid(VID)
 				{
 					if(L1.i > L2.i || (L1.i == L2.i && (L1.j > L2.j || (L1.j == L2.j && L1.k > L2.k))))
@@ -262,17 +254,17 @@ class bloomenthal_polygonizer
 
 				Location l1;
 				Location l2;
-				int vid;
+				TqInt vid;
 		};
 
 		class EdgeHash
 		{
 			private:
-				static const int HashBit;
-				static const int Mask;
-				static const int HashSize;
+				static const TqInt HashBit;
+				static const TqInt Mask;
+				static const TqInt HashSize;
 
-				inline int HashFunc(const Location& l)
+				inline TqInt HashFunc(const Location& l)
 				{
 					return ((((l.i & Mask) << HashBit) | (l.j & Mask)) << HashBit) | (l.k & Mask);
 				}
@@ -285,14 +277,14 @@ class bloomenthal_polygonizer
 
 				void push_back(const Edge& Value)
 				{
-					int index = HashFunc(Value.l1) + HashFunc(Value.l2);
+					TqInt index = HashFunc(Value.l1) + HashFunc(Value.l2);
 					edges[index].push_back(Value);
 				}
 
-				int GetValue(const Edge& Value)
+				TqInt GetValue(const Edge& Value)
 				{
-					int index = HashFunc(Value.l1) + HashFunc(Value.l2);
-					for(unsigned int n = 0; n < edges[index].size(); n++)
+					TqInt index = HashFunc(Value.l1) + HashFunc(Value.l2);
+					for(TqInt n = 0; n < edges[index].size(); n++)
 					{
 						if(edges[index][n].l1 == Value.l1 && edges[index][n].l2 == Value.l2)
 							return edges[index][n].vid;
@@ -308,10 +300,12 @@ class bloomenthal_polygonizer
 	private:
 		/// Polygonizer parameters
 
+		// Polygonization type
+		polygonization_t m_Decomposition;
 		// Width of the partitioning cube
-		TqFloat m_VoxelSize;
+		TqDouble m_VoxelSize;
 		// Threshold value (defining the equipotential surface)
-		TqFloat m_Threshold;
+		TqDouble m_Threshold;
 		// Grid limit corners (left-bottom-near and right-top-far)
 		Location m_MinCorner;
 		Location m_MaxCorner;
@@ -322,7 +316,7 @@ class bloomenthal_polygonizer
 		implicit_functor& m_FieldFunctor;
 		// Surface storage
 		std::vector<CqVector3D>& m_Vertices;
-		std::vector<CqVector3D>& m_normals;
+		std::vector<CqVector3D>& m_Normals;
 		std::vector<std::vector<TqInt> >& m_Polygons;
 
 		/// Temp storage
@@ -360,6 +354,9 @@ class bloomenthal_polygonizer
 		// Edge hash
 		EdgeHash m_Edges;
 
+		// Build fast Marching Cube tables
+		std::vector< std::vector< std::vector<TqInt> > > m_CubeTable;
+
 		// Convert between vertex and Location
 		CqVector3D location_vertex(const Location& l);
 		Location nearest_location(const CqVector3D& p);
@@ -367,11 +364,11 @@ class bloomenthal_polygonizer
 		void PolygonizeSurface(const Location& startinglocation);
 
 		// Inline functions
-		inline int bit_value(int number, int bit_number)
+		inline TqInt bit_value(TqInt number, TqInt bit_number)
 		{
 			return (number >> bit_number) & 1;
 		}
-		inline int invert_bit(int i, int bit)
+		inline TqInt invert_bit(TqInt i, TqInt bit)
 		{
 			return i ^ (1 << bit);
 		}
@@ -381,12 +378,16 @@ class bloomenthal_polygonizer
 		TqBool SurfaceLocation(Location& startinglocation);
 
 		// Tetrahedral Polygonization
-		void TriangulateTet(const Cube& cube1, int c1, int c2, int c3, int c4);
+		void TriangulateTet(const Cube& cube1, TqInt c1, TqInt c2, TqInt c3, TqInt c4);
 
-		void TestFace(const Location& facelocation, Cube& old, int face, int c1, int c2, int c3, int c4);
+		// Cubical Polygonization
+		void MakeCubeTable();
+		void MarchingCube(const Cube& cube1);
 
-		int VerticeId(Corner *c1, Corner *c2);
-		void Converge(const CqVector3D& p1, const CqVector3D& p2, TqFloat v, CqVector3D& p);
+		void TestFace(const Location& facelocation, Cube& old, TqInt face, TqInt c1, TqInt c2, TqInt c3, TqInt c4);
+
+		TqInt VerticeId(Corner *c1, Corner *c2);
+		void Converge(const CqVector3D& p1, const CqVector3D& p2, double v, CqVector3D& p);
 
 		void SaveTriangle(TqInt u, TqInt v, TqInt w);
 };
@@ -395,6 +396,6 @@ class bloomenthal_polygonizer
 
 END_NAMESPACE( Aqsis )
 
-// End of #ifdef JULES_BLOOMENTHAL_H_INCLUDED
-#endif
+#endif // JULES_BLOOMENTHAL_H_INCLUDED
+
 

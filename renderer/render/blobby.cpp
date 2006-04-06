@@ -20,9 +20,9 @@
 
 
 /** \file
-\brief Implements RiBlobbyV
-\author Romain Behar (romainbehar@yahoo.com)
-\author Michel Joron (rearrange a bit)
+    \brief Implements RiBlobbyV
+    \author Romain Behar (romainbehar@yahoo.com)
+    \author Michel Joron (rearrange a bit)
 */
 /*    References:
 *          k-3d 
@@ -187,8 +187,12 @@ CqBlobby::CqBlobby(TqInt nleaf, TqInt ncode, TqInt* code, TqInt nflt, TqFloat* f
 				break;
 
 				case ELLIPSOID:
+				opcodes.push_back(CqOpcode(current_opcode, code[c++]));
+				break;
+
 				case SEGMENT:
 				opcodes.push_back(CqOpcode(current_opcode, code[c++]));
+				//m_IsComplex = TqTrue;
 				break;
 
 				case PLANE:
@@ -212,7 +216,6 @@ CqBlobby::CqBlobby(TqInt nleaf, TqInt ncode, TqInt* code, TqInt nflt, TqFloat* f
 				{
 					opcodes.push_back(CqOpcode(current_opcode, code[c], code[c+1]));
 					c += 2;
-					m_IsComplex = TqTrue;
 				}
 				break;
 
@@ -256,8 +259,8 @@ TqFloat CqBlobby::implicit_value(const CqVector3D& Point)
 				break;
 				case PLANE:
 				{
-					TqInt which = instructions[pc++].value;
-					TqInt n = instructions[pc++].value;
+					TqInt which = (TqInt) instructions[pc++].value;
+					TqInt n = (TqInt) instructions[pc++].value;
 
 					CqString depthname = Strings[which];
 					IqTextureMap* pMap = QGetRenderContextI() ->GetShadowMap( depthname );
@@ -292,21 +295,12 @@ TqFloat CqBlobby::implicit_value(const CqVector3D& Point)
 				break;
 				case SEGMENT:
 				{
-
 					const CqMatrix m = instructions[pc++].get_matrix();
 					const CqVector3D start = instructions[pc++].get_vector();
 					const CqVector3D end = instructions[pc++].get_vector();
 					const TqFloat radius = instructions[pc++].value;
 
-					if ((SegPoint == Point) &&
-					    (SegRadius == radius) &&
-					    (SegMatrix == m))
-					{
-						stack.push(SegRes);
-						break;
-					}
-					SegMatrix = m;
-					SegRadius = radius;
+
 					// I don't think I convert the equation correctly...
 					//
 					//
@@ -315,14 +309,13 @@ TqFloat CqBlobby::implicit_value(const CqVector3D& Point)
 					//
 					CqVector3D nearpt = nearest_segment_point(Point, start, end);
 					CqMatrix neareast =   (radius * translation3D(nearpt)  * m);
-					CqVector3D probably  = neareast * Point;
+					CqMatrix inverse = neareast.Inverse();
+					CqVector3D probably  = inverse * Point;
 
 					TqFloat r2 = probably.Magnitude2();
 
-					Aqsis::log() << info << "Point " << Point << " nearpt " << nearpt << " r2 " << r2 << std::endl;
+					//Aqsis::log() << info << "Point " << Point << " nearpt " << nearpt << " r2 " << r2 << std::endl;
 					TqFloat result = r2 <= 1 ? (1 - 3*r2 + 3*r2*r2 - r2*r2*r2) : 0;
-					SegRes = result;
-					SegPoint = Point;
 					stack.push(result);
 				}
 				break;
@@ -407,19 +400,37 @@ TqFloat CqBlobby::implicit_value(const CqVector3D& Point)
 /** polygonize this is where everything is going on..
 */
 
-void CqBlobby::polygonize(std::vector<CqVector3D>& Vertices, std::vector<CqVector3D>& Normals, std::vector<std::vector<TqInt> >& Polygons, TqFloat ShadingRate)
+void CqBlobby::polygonize(std::vector<CqVector3D>& Vertices, std::vector<CqVector3D>& Normals, std::vector<std::vector<TqInt> >& Polygons, TqFloat Multiplier)
 {
 	// Set up polygonizer
 
 	const CqVector3D mid = (bbox.vecMax() + bbox.vecMin())/2.0;
 	const CqVector3D length =  (bbox.vecMax() - bbox.vecMin());
 
-	TqInt n_x_over_2 = static_cast<TqInt>((fabs(length.x())+0.5) / ShadingRate / 2) + 1;
-	TqInt n_y_over_2 = static_cast<TqInt>((fabs(length.y())+0.5) / ShadingRate / 2) + 1;
-	TqInt n_z_over_2 = static_cast<TqInt>((fabs(length.z())+0.5) / ShadingRate / 2) + 1;
+	TqDouble voxel_size = Multiplier * 2.0f;
+
+	TqInt n_x_over_2 = static_cast<TqInt>((fabs(length.x())+0.5) / voxel_size / 2) + 1;
+	TqInt n_y_over_2 = static_cast<TqInt>((fabs(length.y())+0.5) / voxel_size / 2) + 1;
+	TqInt n_z_over_2 = static_cast<TqInt>((fabs(length.z())+0.5) / voxel_size / 2) + 1;
+
+
+	if (1) //m_IsComplex)
+	{
+        	TqDouble ratio = (TqDouble)std::max(std::max(n_x_over_2, n_y_over_2), n_z_over_2)/voxel_size;
+		if (ratio > 500.0)
+			voxel_size = 0.1;
+		Aqsis::log() << info << "n_x_over_2, n_y_over_2, n_z_over_2: (" << n_x_over_2 << ", " << n_y_over_2 << ", " << n_z_over_2 << "), voxel_size (" << voxel_size << ")" << " ratio " << ratio << std::endl;
+	}
+
+        // Big work is here now; polygonize everything
+	bloomenthal_polygonizer::polygonization_t which = bloomenthal_polygonizer::TETRAHEDRAL;
+
+	if (m_IsComplex)
+		which = bloomenthal_polygonizer::MARCHINGCUBES;
 
 	bloomenthal_polygonizer polygonizer(
-	    ShadingRate, // Voxel size
+	    which, // Ask for marching cube
+	    voxel_size, // Voxel size
 	    0.421875, // Threshold (blobby specific)
 	    -n_x_over_2, n_x_over_2,// Lattice X min-max
 	    -n_y_over_2, n_y_over_2, // Lattice Y min-max
@@ -429,6 +440,7 @@ void CqBlobby::polygonize(std::vector<CqVector3D>& Vertices, std::vector<CqVecto
 	    Vertices, Normals, Polygons);
 
 	polygonizer.cross_limits();
+
 
 	// Polygonize blobbies
 	TqBool missed_blobbies = TqFalse;
@@ -453,6 +465,7 @@ void CqBlobby::polygonize(std::vector<CqVector3D>& Vertices, std::vector<CqVecto
 
 	if (missed_blobbies)
 		polygonizer.polygonize_whole_grid();
+
 }
 
 void CqBlobby::build_stack(CqOpcode op)
@@ -467,7 +480,7 @@ void CqBlobby::build_stack(CqOpcode op)
 				instructions.push_back(instruction(PLANE));
 				instructions.push_back(instruction(op.index1));
 				instructions.push_back(instruction(op.index2));
-				Aqsis::log() << log << "id1 " << op.index1 << " id2 " << op.index2 << std::endl;
+				Aqsis::log() << info << "id1 " << op.index1 << " id2 " << op.index2 << std::endl;
 			}
 			break;
 
@@ -503,12 +516,15 @@ void CqBlobby::build_stack(CqOpcode op)
 				    Floats[f+8], Floats[f+9], Floats[f+10], Floats[f+11],
 				    Floats[f+12], Floats[f+13], Floats[f+14], Floats[f+15]);
 
-				grow_bound(transformation * start, radius);
-				grow_bound(transformation * end, radius);
+				grow_bound(transformation, radius);
+				CqVector3D trans_start = transformation * start;
+				grow_bound(trans_start);
+				CqVector3D trans_end = transformation * end;
+				grow_bound(trans_end);
 				origins.push_back(start);
 
 				instructions.push_back(instruction(SEGMENT));
-				instructions.push_back(instruction(transformation.Inverse()));
+				instructions.push_back(instruction(transformation));
 				instructions.push_back(instruction(start));
 				instructions.push_back(instruction(end));
 				instructions.push_back(instruction(radius));
@@ -545,8 +561,8 @@ void CqBlobby::build_stack(CqOpcode op)
 
 void CqBlobby::grow_bound(const CqMatrix& transformation, const TqFloat radius )
 {
-	TqFloat r = 0.5 * radius;
-	CqBound unit_box(- r, - r, - r, r, r, r);
+	TqFloat r = radius * 0.5;
+	CqBound unit_box(-r, -r, -r, r, r, r);
 	unit_box.Transform(transformation);
 
 	bbox.Encapsulate( unit_box);

@@ -19,13 +19,13 @@
 
 
 /** \file
-		\brief Implements RiBlobbyV option.
-	
+\brief Implements RiBlobbyV option.
+ 
 */
 /*    References:
- *          K-3d.org
- *
- */
+*          K-3d.org
+*
+*/
 
 //? Is .h included already?
 #ifndef BLOBBY_H_INCLUDED
@@ -51,6 +51,12 @@ class CqBlobby : public implicit_functor
 
 		inline TqFloat implicit_value(const CqVector3D& Point);
 		void polygonize(std::vector<CqVector3D>& Vertices, std::vector<CqVector3D>& Normals, std::vector<std::vector<TqInt> >& Polygons, TqFloat ShadingRate);
+
+		CqBound	Bound() const
+		{
+			return bbox;
+		}
+
 
 	private:
 		typedef enum
@@ -163,18 +169,14 @@ public:
 		std::vector<instruction> instructions;
 
 		std::vector<CqVector3D> origins;
-		CqBound bbox; // m_vecMin m_vecMax
-		TqBool m_IsComplex;
 
-                // Cache for the segment/blobby
-		TqFloat    SegRes;
-		CqVector3D SegPoint;
-		CqMatrix   SegMatrix;
-		TqFloat	   SegRadius;
+		CqBound bbox; // m_vecMin m_vecMax
+
+		TqBool m_IsComplex;
 };
 
 //-----------------------------------------------------------------------
 
 END_NAMESPACE( Aqsis )
 
-#endif	// !BLOBBY_H_INCLUDED
+#endif   // !BLOBBY_H_INCLUDED
