@@ -38,6 +38,7 @@
 #include	"exception.h"
 #include	"parameters.h"
 #include	"ishader.h"
+#include	"ioptions.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -46,36 +47,13 @@ class CqImagersource;
 struct IqBucket;
 
 //----------------------------------------------------------------------
-/** \enum EqDisplayMode
- */
-enum EqDisplayMode
-{
-    ModeNone = 0x0000,   	///< Invalid.
-    ModeRGB = 0x0001,   		///< Red Green and Blue channels.
-    ModeA = 0x0002,   		///< Alpha channel.
-    ModeZ = 0x0004		///< Depth channel.
-};
-
-
-//----------------------------------------------------------------------
-/** \enum EqProjection
- * Possible projection modes for the camera.
- */
-enum EqProjection
-{
-    ProjectionOrthographic,   		///< Orthographic projection.
-    ProjectionPerspective		///< Perspective projection.
-};
-
-
-//----------------------------------------------------------------------
 /** \class CqOptions
  * Storage for the graphics state options.
  */
 
 class CqOptions;
 typedef boost::shared_ptr<CqOptions> CqOptionsPtr;
-class CqOptions
+class CqOptions : public IqOptions
 {
 	public:
 		CqOptions();
@@ -151,89 +129,88 @@ class CqOptions
 		}
 		const	CqParameter* pParameter( const char* strName, const char* strParam ) const;
 		CqParameter* pParameterWrite( const char* strName, const char* strParam );
-		const	TqFloat*	GetFloatOption( const char* strName, const char* strParam ) const;
-		const	TqInt*	GetIntegerOption( const char* strName, const char* strParam ) const;
-		const	CqString* GetStringOption( const char* strName, const char* strParam ) const;
-		const	CqVector3D*	GetPointOption( const char* strName, const char* strParam ) const;
-		const	CqColor*	GetColorOption( const char* strName, const char* strParam ) const;
+		virtual const	TqFloat*	GetFloatOption( const char* strName, const char* strParam ) const;
+		virtual const	TqInt*	GetIntegerOption( const char* strName, const char* strParam ) const;
+		virtual const	CqString* GetStringOption( const char* strName, const char* strParam ) const;
+		virtual const	CqVector3D*	GetPointOption( const char* strName, const char* strParam ) const;
+		virtual const	CqColor*	GetColorOption( const char* strName, const char* strParam ) const;
 
-		TqFloat*	GetFloatOptionWrite( const char* strName, const char* strParam );
-		TqInt*	GetIntegerOptionWrite( const char* strName, const char* strParam );
-		CqString* GetStringOptionWrite( const char* strName, const char* strParam );
-		CqVector3D*	GetPointOptionWrite( const char* strName, const char* strParam );
-		CqColor*	GetColorOptionWrite( const char* strName, const char* strParam );
+		virtual TqFloat*	GetFloatOptionWrite( const char* strName, const char* strParam, TqInt arraySize = 1 );
+		virtual TqInt*	GetIntegerOptionWrite( const char* strName, const char* strParam, TqInt arraySize = 1 );
+		virtual CqString* GetStringOptionWrite( const char* strName, const char* strParam, TqInt arraySize = 1 );
+		virtual CqVector3D*	GetPointOptionWrite( const char* strName, const char* strParam, TqInt arraySize = 1 );
+		virtual CqColor*	GetColorOptionWrite( const char* strName, const char* strParam, TqInt arraySize = 1 );
 
-		void	InitialiseCamera();
+		virtual EqVariableType getParameterType(const char* strName, const char* strParam) const;
+		virtual EqVariableClass getParameterClass(const char* strName, const char* strParam) const;
+		virtual TqUint getParameterSize(const char* strName, const char* strParam) const;
+		virtual TqInt getParameterArraySize(const char* strName, const char* strParam) const;
+
+		virtual void	InitialiseCamera();
 
 		/** Indicate that the RiFormat function has been called.
 		 * This and other similar are used to overcome the problem with multiple ways to specify frame dimensions.
 		 */
-		void	CallFormat()
+		virtual void	CallFormat()
 		{
 			m_bFormatCalled = TqTrue;
 		}
 		/** Indicate that the RiScreenWindow function has been called.
 		 * This and other similar are used to overcome the problem with multiple ways to specify frame dimensions.
 		 */
-		void	CallScreenWindow()
+		virtual void	CallScreenWindow()
 		{
 			m_bScreenWindowCalled = TqTrue;
 		}
 		/** Indicate that the RiFrameAspectRatio function has been called.
 		 * This and other similar are used to overcome the problem with multiple ways to specify frame dimensions.
 		 */
-		void	CallFrameAspectRatio()
+		virtual void	CallFrameAspectRatio()
 		{
 			m_bFrameAspectRatioCalled = TqTrue;
 		}
 		/** Determine if the RiFormat function has been called.
 		 * This and other similar are used to overcome the problem with multiple ways to specify frame dimensions.
 		 */
-		TqBool	FormatCalled() const
+		virtual TqBool	FormatCalled() const
 		{
 			return ( m_bFormatCalled );
 		}
 		/** Determine if the RiScreenWindow function has been called.
 		 * This and other similar are used to overcome the problem with multiple ways to specify frame dimensions.
 		 */
-		TqBool	ScreenWindowCalled() const
+		virtual TqBool	ScreenWindowCalled() const
 		{
 			return ( m_bScreenWindowCalled );
 		}
 		/** Determine if the RiFrameAspectRatio function has been called.
 		 * This and other similar are used to overcome the problem with multiple ways to specify frame dimensions.
 		 */
-		TqBool	FrameAspectRatioCalled() const
+		virtual TqBool	FrameAspectRatioCalled() const
 		{
 			return ( m_bFrameAspectRatioCalled );
 		}
 
 		/** Get a pointer to the pixel filter function.
 		 */
-		RtFilterFunc funcFilter() const
+		virtual RtFilterFunc funcFilter() const
 		{
 			return ( m_funcFilter );
 		}
 		/** Set the pixel filter function to use.
 		 * \param fValue A pointer to a function which follows the RtFilterFunc convention.
 		 */
-		void	SetfuncFilter( const RtFilterFunc fValue )
+		virtual void	SetfuncFilter( const RtFilterFunc fValue )
 		{
 			m_funcFilter = fValue;
 		}
 		virtual void SetpshadImager( const boost::shared_ptr<IqShader>& pshadImager );
-		boost::shared_ptr<IqShader>	pshadImager() const;
-		/** Get a pointer to the imager shader.
-		 */
-		const CqImagersource*	pImagerSource() const
-		{
-			return ( m_pshadImager );
-		}
+		virtual boost::shared_ptr<IqShader>	pshadImager() const;
 
-		void	InitialiseColorImager( IqBucket* pBucket );
-		CqColor GetColorImager( TqFloat x, TqFloat y );
-		CqColor GetOpacityImager( TqFloat x, TqFloat y );
-		TqFloat GetAlphaImager( TqFloat x, TqFloat y );
+		virtual void	InitialiseColorImager( IqBucket* pBucket );
+		virtual CqColor GetColorImager( TqFloat x, TqFloat y );
+		virtual CqColor GetOpacityImager( TqFloat x, TqFloat y );
+		virtual TqFloat GetAlphaImager( TqFloat x, TqFloat y );
 
 	private:
 		std::vector<boost::shared_ptr<CqNamedParameterList> >	m_aOptions;	///< Vector of user specified options.

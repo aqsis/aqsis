@@ -412,13 +412,19 @@ CqParameter* CqOptions::pParameterWrite( const char* strName, const char* strPar
  * \return Float pointer 0 if not found.
  */
 
-TqFloat* CqOptions::GetFloatOptionWrite( const char* strName, const char* strParam )
+TqFloat* CqOptions::GetFloatOptionWrite( const char* strName, const char* strParam, TqInt arraySize )
 {
 	CqParameter * pParam = pParameterWrite( strName, strParam );
 	if ( pParam != 0 )
 		return ( static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParam ) ->pValue() );
 	else
-		return ( 0 );
+	{
+		// As we are getting a writeable copy, we should create if it doesn't exist.
+		CqNamedParameterList* pList = pOptionWrite( strName ).get();
+		CqParameterTypedUniform<TqFloat, type_float, TqFloat>* pOpt = new CqParameterTypedUniform<TqFloat, type_float, TqFloat>(strParam, arraySize);
+		pList->AddParameter(pOpt);
+		return ( pOpt->pValue() );
+	}
 }
 
 
@@ -429,13 +435,19 @@ TqFloat* CqOptions::GetFloatOptionWrite( const char* strName, const char* strPar
  * \return Integer pointer 0 if not found.
  */
 
-TqInt* CqOptions::GetIntegerOptionWrite( const char* strName, const char* strParam )
+TqInt* CqOptions::GetIntegerOptionWrite( const char* strName, const char* strParam, TqInt arraySize )
 {
 	CqParameter * pParam = pParameterWrite( strName, strParam );
 	if ( pParam != 0 )
 		return ( static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParam ) ->pValue() );
 	else
-		return ( 0 );
+	{
+		// As we are getting a writeable copy, we should create if it doesn't exist.
+		CqNamedParameterList* pList = pOptionWrite( strName ).get();
+		CqParameterTypedUniform<TqInt, type_integer, TqInt>* pOpt = new CqParameterTypedUniform<TqInt, type_integer, TqInt>(strParam, arraySize);
+		pList->AddParameter(pOpt);
+		return ( pOpt->pValue() );
+	}
 }
 
 
@@ -446,13 +458,19 @@ TqInt* CqOptions::GetIntegerOptionWrite( const char* strName, const char* strPar
  * \return CqString pointer 0 if not found.
  */
 
-CqString* CqOptions::GetStringOptionWrite( const char* strName, const char* strParam )
+CqString* CqOptions::GetStringOptionWrite( const char* strName, const char* strParam, TqInt arraySize )
 {
 	CqParameter * pParam = pParameterWrite( strName, strParam );
 	if ( pParam != 0 )
 		return ( static_cast<CqParameterTyped<CqString, CqString>*>( pParam ) ->pValue() );
 	else
-		return ( 0 );
+	{
+		// As we are getting a writeable copy, we should create if it doesn't exist.
+		CqNamedParameterList* pList = pOptionWrite( strName ).get();
+		CqParameterTypedUniform<CqString, type_string, CqString>* pOpt = new CqParameterTypedUniform<CqString, type_string, CqString>(strParam, arraySize);
+		pList->AddParameter(pOpt);
+		return ( pOpt->pValue() );
+	}
 }
 
 
@@ -463,13 +481,19 @@ CqString* CqOptions::GetStringOptionWrite( const char* strName, const char* strP
  * \return CqVector3D pointer 0 if not found.
  */
 
-CqVector3D* CqOptions::GetPointOptionWrite( const char* strName, const char* strParam )
+CqVector3D* CqOptions::GetPointOptionWrite( const char* strName, const char* strParam, TqInt arraySize )
 {
 	CqParameter * pParam = pParameterWrite( strName, strParam );
 	if ( pParam != 0 )
 		return ( static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParam ) ->pValue() );
 	else
-		return ( 0 );
+	{
+		// As we are getting a writeable copy, we should create if it doesn't exist.
+		CqNamedParameterList* pList = pOptionWrite( strName ).get();
+		CqParameterTypedUniform<CqVector3D, type_point, CqVector3D>* pOpt = new CqParameterTypedUniform<CqVector3D, type_point, CqVector3D>(strParam, arraySize);
+		pList->AddParameter(pOpt);
+		return ( pOpt->pValue() );
+	}
 }
 
 
@@ -480,13 +504,19 @@ CqVector3D* CqOptions::GetPointOptionWrite( const char* strName, const char* str
  * \return CqColor pointer 0 if not found.
  */
 
-CqColor* CqOptions::GetColorOptionWrite( const char* strName, const char* strParam )
+CqColor* CqOptions::GetColorOptionWrite( const char* strName, const char* strParam, TqInt arraySize )
 {
 	CqParameter * pParam = pParameterWrite( strName, strParam );
 	if ( pParam != 0 )
 		return ( static_cast<CqParameterTyped<CqColor, CqColor>*>( pParam ) ->pValue() );
 	else
-		return ( 0 );
+	{
+		// As we are getting a writeable copy, we should create if it doesn't exist.
+		CqNamedParameterList* pList = pOptionWrite( strName ).get();
+		CqParameterTypedUniform<CqColor, type_color, CqColor>* pOpt = new CqParameterTypedUniform<CqColor, type_color, CqColor>(strParam, arraySize);
+		pList->AddParameter(pOpt);
+		return ( pOpt->pValue() );
+	}
 }
 
 
@@ -574,6 +604,41 @@ const CqColor* CqOptions::GetColorOption( const char* strName, const char* strPa
 		return ( 0 );
 }
 
+EqVariableType CqOptions::getParameterType(const char* strName, const char* strParam) const
+{
+	const CqParameter* pParam = pParameter(strName, strParam);
+	if(pParam == NULL)
+		return type_invalid;
+	else
+		return(pParam->Type());
+}
+
+EqVariableClass CqOptions::getParameterClass(const char* strName, const char* strParam) const
+{
+	const CqParameter* pParam = pParameter(strName, strParam);
+	if(pParam == NULL)
+		return class_invalid;
+	else
+		return(pParam->Class());
+}
+
+TqUint CqOptions::getParameterSize(const char* strName, const char* strParam) const
+{
+	const CqParameter* pParam = pParameter(strName, strParam);
+	if(pParam == NULL)
+		return 0;
+	else
+		return(pParam->Size());
+}
+
+TqInt CqOptions::getParameterArraySize(const char* strName, const char* strParam) const
+{
+	const CqParameter* pParam = pParameter(strName, strParam);
+	if(pParam == NULL)
+		return 0;
+	else
+		return(pParam->Count());
+}
 
 void CqOptions::SetpshadImager( const boost::shared_ptr<IqShader>& pshadImager )
 {

@@ -127,10 +127,10 @@ class CqRenderer : public IqRenderer
 		virtual	void	EndObjectModeBlock();
 		virtual	void	EndMotionModeBlock();
 
-		virtual	const CqOptionsPtr	poptCurrent() const;
-		virtual	CqOptionsPtr	poptWriteCurrent();
-		virtual CqOptionsPtr	pushOptions();
-		virtual CqOptionsPtr	popOptions();
+		virtual	const IqOptionsPtr	poptCurrent() const;
+		virtual	IqOptionsPtr	poptWriteCurrent();
+		virtual IqOptionsPtr	pushOptions();
+		virtual IqOptionsPtr	popOptions();
 		virtual	const CqAttributes*	pattrCurrent();
 		virtual	CqAttributes*	pattrWriteCurrent();
 		virtual	CqTransformPtr	ptransCurrent();
@@ -219,7 +219,7 @@ class CqRenderer : public IqRenderer
 
 		// Function which can be overridden by the derived class.
 		virtual	void	Initialise();
-		virtual	void	RenderWorld(CqTransformPtr camera = CqTransformPtr(), CqOptions* pOpts = NULL, TqBool clone = TqFalse);
+		virtual	void	RenderWorld(CqTransformPtr camera = CqTransformPtr(), TqBool clone = TqFalse);
 		virtual void	RenderAutoShadows();
 
 		virtual	void	AddDisplayRequest( const TqChar* name, const TqChar* type, const TqChar* mode, TqInt modeID, TqInt dataOffset, TqInt dataSize, std::map<std::string, void*>& mapOfArguments );

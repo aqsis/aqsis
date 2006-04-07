@@ -143,10 +143,10 @@ TqBool TestCondition(RtString condition, RtString where)
 	A = strtok(StringA, ":");
 	B = strtok(NULL, ":");
 
-	const CqParameter *pParam = QGetRenderContext() ->poptCurrent()->pParameter(A,B);
+	EqVariableType paramType = QGetRenderContext()->poptCurrent()->getParameterType(A,B);
 
 	// If the left side is not known for now return TqTrue
-	if (!pParam)
+	if (paramType == type_invalid)
 	{
 		Aqsis::log() << warning << "Unknown parameter: " << A << ":" << B << std::endl;
 		return TqTrue;
@@ -154,7 +154,7 @@ TqBool TestCondition(RtString condition, RtString where)
 
 	// At this point the condition must be true; otherwise the return value will be TqFalse
 	Ok = TqFalse;
-	switch (pParam->Type())
+	switch (paramType)
 	{
 			case type_integer:
 			{

@@ -516,7 +516,7 @@ void CqRenderer::AdvanceTime()
 /** Return a reference to the current options.
  */
 
-const CqOptionsPtr CqRenderer::poptCurrent() const
+const IqOptionsPtr CqRenderer::poptCurrent() const
 {
 	if ( m_pconCurrent )
 		return ( m_pconCurrent->poptCurrent() );
@@ -530,7 +530,7 @@ const CqOptionsPtr CqRenderer::poptCurrent() const
 /** Return a reference to the current options.
  */
 
-CqOptionsPtr CqRenderer::poptWriteCurrent()
+IqOptionsPtr CqRenderer::poptWriteCurrent()
 {
 	if ( m_pconCurrent )
 		return ( m_pconCurrent->poptWriteCurrent() );
@@ -543,7 +543,7 @@ CqOptionsPtr CqRenderer::poptWriteCurrent()
 /** Push the current options allowing modification.
  */
 
-CqOptionsPtr CqRenderer::pushOptions()
+IqOptionsPtr CqRenderer::pushOptions()
 {
 	if ( m_pconCurrent )
 		return ( m_pconCurrent->pushOptions() );
@@ -558,7 +558,7 @@ CqOptionsPtr CqRenderer::pushOptions()
 /** Pop the last stored options.
  */
 
-CqOptionsPtr CqRenderer::popOptions()
+IqOptionsPtr CqRenderer::popOptions()
 {
 	if ( m_pconCurrent )
 		return ( m_pconCurrent->popOptions() );
@@ -661,14 +661,8 @@ void	CqRenderer::ptransConcatCurrentTime( const CqMatrix& matTrans )
 /** Render all surface in the current list to the image buffer.
  */
 
-void CqRenderer::RenderWorld(CqTransformPtr camera, CqOptions* pOpts, TqBool clone)
+void CqRenderer::RenderWorld(CqTransformPtr camera, TqBool clone)
 {
-	// If alternative options have been specified, set them up now.
-//	if(NULL != pOpts)
-//	{
-//		CqOptions& currOpts = pushOptions();
-//		currOpts = *pOpts;
-//	}
 	// If an alternative camera has been specified, use it, otherwise use the default camera setup during initialisation.
 	CqTransformPtr defaultCamera;
 	if(camera)
@@ -703,9 +697,6 @@ void CqRenderer::RenderWorld(CqTransformPtr camera, CqOptions* pOpts, TqBool clo
 
 	if(NULL != pMultipass)
 		pMultipass[0] = multiPass;
-
-//	if(NULL != pOpts)
-//		popOptions();
 
 	if(camera)
 	{
@@ -745,7 +736,7 @@ void CqRenderer::RenderAutoShadows()
 				if(NULL != pRes)
 					res = pRes[0];
 				// Setup a new set of options based on the current ones.
-				CqOptionsPtr opts = pushOptions();
+				IqOptionsPtr opts = pushOptions();
 				opts->GetIntegerOptionWrite( "System", "Resolution" ) [ 0 ] = res;
 				opts->GetIntegerOptionWrite( "System", "Resolution" ) [ 1 ] = res;
 				opts->GetFloatOptionWrite( "System", "PixelAspectRatio" ) [ 0 ] = 1.0f;
@@ -768,16 +759,10 @@ void CqRenderer::RenderAutoShadows()
 				opts->GetFloatOptionWrite( "System", "FilterWidth" ) [ 1 ] = 1;
 
 				// Make sure the depthFilter is set to "midpoint".
-				boost::shared_ptr<CqNamedParameterList> pHiderOpt = opts->pOptionWrite( "Hider" );
-				CqParameterTypedUniform<CqString, type_string, CqString>* pDepthFilterOpt = new CqParameterTypedUniform<CqString, type_string, CqString>("depthfilter");
-				pDepthFilterOpt->pValue()[0] = CqString("midpoint");
-				pHiderOpt->AddParameter(pDepthFilterOpt);
+				opts->GetStringOptionWrite( "Hider", "depthfilter" ) [ 0 ] = CqString("midpoint");
 
 				// Don't bother doing lighting calcualations.
-				boost::shared_ptr<CqNamedParameterList> pEnableShadersOpts = opts->pOptionWrite( "EnableShaders" );
-				CqParameterTypedUniform<TqInt, type_integer, TqInt>* pLightingOpt = new CqParameterTypedUniform<TqInt, type_integer, TqInt>("lighting");
-				pLightingOpt->pValue()[0] = 0;
-				pEnableShadersOpts->AddParameter(pLightingOpt);
+				opts->GetIntegerOptionWrite( "EnableShaders", "lighting" ) [ 0 ] = 0;
 
 				// Now set the camera transform the to light transform (inverse because the camera transform is transforming the world into camera space).
 				CqTransformPtr lightTrans(light->pTransform()->Inverse());
@@ -789,7 +774,7 @@ void CqRenderer::RenderAutoShadows()
 				std::map<std::string, void*> args;
 				AddDisplayRequest(pMapName[0].c_str(), "shadow", "z", ModeZ, 0, 1, args);
 
-				RenderWorld(lightTrans, NULL/*&opts*/, TqTrue);
+				RenderWorld(lightTrans, TqTrue);
 
 				m_pDDManager->Shutdown();
 				delete(m_pDDManager);

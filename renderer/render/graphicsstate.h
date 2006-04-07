@@ -146,11 +146,11 @@ class CqModeBlock : public boost::enable_shared_from_this<CqModeBlock>
 			logInvalidNesting();
 		}
 
-		virtual CqOptionsPtr	poptCurrent() const
+		virtual IqOptionsPtr	poptCurrent() const
 		{
 			return( m_poptCurrent );
 		}
-		virtual CqOptionsPtr	poptWriteCurrent()
+		virtual IqOptionsPtr	poptWriteCurrent()
 		{
 			if(!m_poptCurrent.unique())
 				m_poptCurrent = CqOptionsPtr(new CqOptions(*m_poptCurrent.get()));
@@ -159,10 +159,10 @@ class CqModeBlock : public boost::enable_shared_from_this<CqModeBlock>
 		/** Push the current options onto a stack, allowing modification of the options
 		 * and recovery of the current state at a later point.
 		 */
-		virtual CqOptionsPtr	pushOptions() = 0;
+		virtual IqOptionsPtr	pushOptions() = 0;
 		/** Pop a previously pushed copy of the options from the stack.
 		 */
-		virtual CqOptionsPtr	popOptions() = 0;
+		virtual IqOptionsPtr	popOptions() = 0;
 		/** Get a read only pointer to the current attributes.
 		 * \return a pointer to the current attributes.
 		 */
@@ -311,24 +311,24 @@ class CqMainModeBlock : public CqModeBlock
 		virtual	void	EndMainModeBlock()
 		{}
 
-		virtual CqOptionsPtr	poptCurrent() const
+		virtual IqOptionsPtr	poptCurrent() const
 		{
 			return( m_poptCurrent );
 		}
-		virtual CqOptionsPtr	poptWriteCurrent()
+		virtual IqOptionsPtr	poptWriteCurrent()
 		{
 			if(!m_poptCurrent.unique())
 				m_poptCurrent = CqOptionsPtr(new CqOptions(*m_poptCurrent.get()));
 			return(m_poptCurrent);
 		}	
-		virtual CqOptionsPtr	pushOptions()
+		virtual IqOptionsPtr	pushOptions()
 		{
 			CqOptionsPtr opts = CqOptionsPtr(new CqOptions(*m_poptCurrent.get()));
 			m_optionsStack.push(m_poptCurrent);
 			m_poptCurrent = opts;
 			return(m_poptCurrent);
 		}
-		virtual CqOptionsPtr	popOptions()
+		virtual IqOptionsPtr	popOptions()
 		{
 			assert(!m_optionsStack.empty());
 			CqOptionsPtr opts = m_optionsStack.top();
@@ -381,24 +381,24 @@ class CqFrameModeBlock : public CqModeBlock
 		virtual	void	EndFrameModeBlock()
 		{}
 
-		virtual CqOptionsPtr	poptCurrent() const
+		virtual IqOptionsPtr	poptCurrent() const
 		{
 			return( m_poptCurrent );
 		}
-		virtual CqOptionsPtr	poptWriteCurrent()
+		virtual IqOptionsPtr	poptWriteCurrent()
 		{
 			if(!m_poptCurrent.unique())
 				m_poptCurrent = CqOptionsPtr(new CqOptions(*m_poptCurrent.get()));
 			return(m_poptCurrent);
 		}	
-		virtual CqOptionsPtr	pushOptions()
+		virtual IqOptionsPtr	pushOptions()
 		{
 			CqOptionsPtr opts = CqOptionsPtr(new CqOptions(*m_poptCurrent.get()));
 			m_optionsStack.push(m_poptCurrent);
 			m_poptCurrent = opts;
 			return(m_poptCurrent);
 		}
-		virtual CqOptionsPtr	popOptions()
+		virtual IqOptionsPtr	popOptions()
 		{
 			assert(!m_optionsStack.empty());
 			CqOptionsPtr opts = m_optionsStack.top();
@@ -451,19 +451,19 @@ class CqWorldModeBlock : public CqModeBlock
 		virtual	void	EndWorldModeBlock()
 		{}
 
-		virtual CqOptionsPtr	poptCurrent() const
+		virtual IqOptionsPtr	poptCurrent() const
 		{
 			return( pconParent()->poptCurrent() );
 		}
-		virtual CqOptionsPtr	poptWriteCurrent()
+		virtual IqOptionsPtr	poptWriteCurrent()
 		{
 			return( pconParent()->poptWriteCurrent() );
 		}	
-		virtual CqOptionsPtr	pushOptions()
+		virtual IqOptionsPtr	pushOptions()
 		{
 			return(pconParent()->pushOptions());
 		}
-		virtual CqOptionsPtr	popOptions()
+		virtual IqOptionsPtr	popOptions()
 		{
 			return(pconParent()->popOptions());
 		}
@@ -513,19 +513,19 @@ class CqAttributeModeBlock : public CqModeBlock
 		virtual	void	EndAttributeModeBlock()
 		{}
 
-		virtual CqOptionsPtr	poptCurrent() const
+		virtual IqOptionsPtr	poptCurrent() const
 		{
 			return( pconParent()->poptCurrent() );
 		}
-		virtual CqOptionsPtr	poptWriteCurrent()
+		virtual IqOptionsPtr	poptWriteCurrent()
 		{
 			return( pconParent()->poptWriteCurrent() );
 		}	
-		virtual CqOptionsPtr	pushOptions()
+		virtual IqOptionsPtr	pushOptions()
 		{
 			return(pconParent()->pushOptions());
 		}
-		virtual CqOptionsPtr	popOptions()
+		virtual IqOptionsPtr	popOptions()
 		{
 			return(pconParent()->popOptions());
 		}
@@ -572,19 +572,19 @@ class CqTransformModeBlock : public CqModeBlock
 		virtual	void	EndTransformModeBlock()
 		{}
 
-		virtual CqOptionsPtr	poptCurrent() const
+		virtual IqOptionsPtr	poptCurrent() const
 		{
 			return( pconParent()->poptCurrent() );
 		}
-		virtual CqOptionsPtr	poptWriteCurrent()
+		virtual IqOptionsPtr	poptWriteCurrent()
 		{
 			return( pconParent()->poptWriteCurrent() );
 		}	
-		virtual CqOptionsPtr	pushOptions()
+		virtual IqOptionsPtr	pushOptions()
 		{
 			return(pconParent()->pushOptions());
 		}
-		virtual CqOptionsPtr	popOptions()
+		virtual IqOptionsPtr	popOptions()
 		{
 			return(pconParent()->popOptions());
 		}
@@ -631,19 +631,19 @@ class CqSolidModeBlock : public CqModeBlock
 		virtual	void	EndSolidModeBlock()
 		{}
 
-		virtual CqOptionsPtr	poptCurrent() const
+		virtual IqOptionsPtr	poptCurrent() const
 		{
 			return( pconParent()->poptCurrent() );
 		}
-		virtual CqOptionsPtr	poptWriteCurrent()
+		virtual IqOptionsPtr	poptWriteCurrent()
 		{
 			return( pconParent()->poptWriteCurrent() );
 		}	
-		virtual CqOptionsPtr	pushOptions()
+		virtual IqOptionsPtr	pushOptions()
 		{
 			return(pconParent()->pushOptions());
 		}
-		virtual CqOptionsPtr	popOptions()
+		virtual IqOptionsPtr	popOptions()
 		{
 			return(pconParent()->popOptions());
 		}
@@ -703,19 +703,19 @@ class CqObjectModeBlock : public CqModeBlock
 		virtual	void	EndObjectModeBlock()
 		{}
 
-		virtual CqOptionsPtr	poptCurrent() const
+		virtual IqOptionsPtr	poptCurrent() const
 		{
 			return( pconParent()->poptCurrent() );
 		}
-		virtual CqOptionsPtr	poptWriteCurrent()
+		virtual IqOptionsPtr	poptWriteCurrent()
 		{
 			return( pconParent()->poptWriteCurrent() );
 		}	
-		virtual CqOptionsPtr	pushOptions()
+		virtual IqOptionsPtr	pushOptions()
 		{
 			return(pconParent()->pushOptions());
 		}
-		virtual CqOptionsPtr	popOptions()
+		virtual IqOptionsPtr	popOptions()
 		{
 			return(pconParent()->popOptions());
 		}
@@ -811,19 +811,19 @@ class CqMotionModeBlock : public CqModeBlock
 		 */
 		virtual	void	EndMotionModeBlock();
 
-		virtual CqOptionsPtr	poptCurrent() const
+		virtual IqOptionsPtr	poptCurrent() const
 		{
 			return( pconParent()->poptCurrent() );
 		}
-		virtual CqOptionsPtr	poptWriteCurrent()
+		virtual IqOptionsPtr	poptWriteCurrent()
 		{
 			return( pconParent()->poptWriteCurrent() );
 		}	
-		virtual CqOptionsPtr	pushOptions()
+		virtual IqOptionsPtr	pushOptions()
 		{
 			return(pconParent()->pushOptions());
 		}
-		virtual CqOptionsPtr	popOptions()
+		virtual IqOptionsPtr	popOptions()
 		{
 			return(pconParent()->popOptions());
 		}

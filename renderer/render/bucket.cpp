@@ -720,7 +720,7 @@ void CqBucket::FilterBucket(TqBool empty)
 	endx = XOrigin() + Width();
 
 	if ( QGetRenderContext() ->poptCurrent()->pshadImager() && 
-		 NULL != QGetRenderContext() ->poptCurrent()->pImagerSource() )
+		 NULL != QGetRenderContext() ->poptCurrent()->pshadImager() )
 	{
 		// Init & Execute the imager shader
 

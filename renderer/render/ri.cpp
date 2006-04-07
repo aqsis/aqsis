@@ -686,9 +686,6 @@ RtVoid	RiBegin( RtToken name )
 	// Clear the lightsources stack.
 	Lightsource_stack.clear();
 
-	// Clear any options.
-	QGetRenderContext() ->poptWriteCurrent()->ClearOptions();
-
 	// Include the standard options (how can we opt out of this).
 	int param = 0;
 	while( StandardParameters[param][0] != NULL )
@@ -1516,17 +1513,11 @@ RtVoid	RiQuantize( RtToken type, RtInt one, RtInt min, RtInt max, RtFloat dither
 	}
 	else
 	{
-		CqNamedParameterList* pOption = QGetRenderContext() ->poptWriteCurrent()->pOptionWrite( "Quantize" ).get();
-		if( pOption )
-		{
-			CqParameterTypedUniformArray<TqFloat,type_float,TqFloat>* pQuant = new CqParameterTypedUniformArray<TqFloat,type_float,TqFloat>(type,4);
-			\
-			pQuant->pValue()[0] = static_cast<TqFloat>( one );
-			pQuant->pValue()[1] = static_cast<TqFloat>( min );
-			pQuant->pValue()[2] = static_cast<TqFloat>( max );
-			pQuant->pValue()[3] = static_cast<TqFloat>( ditheramplitude );
-			pOption->AddParameter( pQuant );
-		}
+		TqFloat* quantOpt = QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite("Quantize", type, 4);
+		quantOpt[0] = static_cast<TqFloat>( one );
+		quantOpt[1] = static_cast<TqFloat>( min );
+		quantOpt[2] = static_cast<TqFloat>( max );
+		quantOpt[3] = static_cast<TqFloat>( ditheramplitude );
 	}
 
 	return ;
@@ -2041,9 +2032,6 @@ RtVoid	RiOptionV( RtToken name, PARAMETERLIST )
 
 	Debug_RiOption
 
-	// Find the parameter on the current options.
-	CqNamedParameterList * pOpt = QGetRenderContext() ->poptWriteCurrent()->pOptionWrite( name ).get();
-
 	RtInt i;
 	for ( i = 0; i < count; ++i )
 	{
@@ -2064,220 +2052,141 @@ RtVoid	RiOptionV( RtToken name, PARAMETERLIST )
 		}
 		TqInt Type = Decl.m_Type;
 		TqInt Class = Decl.m_Class;
-		TqBool bArray = Decl.m_Count > 1;
-		CqParameter* pParam = pOpt->pParameter( Decl.m_strName.c_str() );
-		if ( pParam == 0 )
+		TqInt Count = Decl.m_Count;
+		CqString undecoratedName = Decl.m_strName;
+		TqBool bArray = Count > 1;
+		if ( Decl.m_strName == "" || Class != class_uniform )
 		{
-			if ( Decl.m_strName != "" && ( Decl.m_Class ) == class_uniform )
-			{
-				pParam = Decl.m_pCreate( Decl.m_strName.c_str(), Decl.m_Count );
-				pOpt->AddParameter( pParam );
-			}
+			if ( Decl.m_strName == "" )
+				Aqsis::log() << warning << "Unrecognised declaration : " << token << std::endl;
 			else
-			{
-				if ( Decl.m_strName == "" )
-					Aqsis::log() << warning << "Unrecognised declaration : " << token << std::endl;
-				else
-					Aqsis::log() << warning << "Options can only be uniform [" << token << "]" << std::endl;
-				return ;
-			}
-		}
-		else
-		{
-			Type = pParam->Type();
-			Class = pParam->Class();
-			bArray = pParam->Count() > 0;
+				Aqsis::log() << warning << "Options can only be uniform [" << token << "]" << std::endl;
+			return ;
 		}
 
 		switch ( Type )
 		{
-				case type_float:
-				{
-					RtFloat * pf = reinterpret_cast<RtFloat*>( value );
-					if ( bArray )
-					{
-						RtInt j;
-						for ( j = 0; j < pParam->Count(); ++j )
-							static_cast<CqParameterTypedUniformArray<RtFloat, type_float, RtFloat>*>( pParam ) ->pValue() [ j ] = pf[ j ];
-					}
-					else
-						static_cast<CqParameterTypedUniform<RtFloat, type_float, RtFloat>*>( pParam ) ->pValue() [ 0 ] = pf[ 0 ];
-				}
-				break;
+			case type_float:
+			{
+				RtFloat* pf = reinterpret_cast<RtFloat*>( value );
+				TqFloat* pOpt = QGetRenderContext()->poptWriteCurrent()->GetFloatOptionWrite(name, undecoratedName.c_str(), Count);
+				RtInt j;
+				for ( j = 0; j < Count; ++j )
+					pOpt[ j ] = pf[ j ];
+			}
+			break;
 
-				case type_integer:
-				{
-					RtInt* pi = reinterpret_cast<RtInt*>( value );
-					if ( bArray )
-					{
-						RtInt j;
-						for ( j = 0; j < pParam->Count(); ++j )
-							static_cast<CqParameterTypedUniformArray<RtInt, type_integer, RtFloat>*>( pParam ) ->pValue() [ j ] = pi[ j ];
-					}
-					else
-						static_cast<CqParameterTypedUniform<RtInt, type_integer, RtFloat>*>( pParam ) ->pValue() [ 0 ] = pi[ 0 ];
-				}
-				break;
+			case type_integer:
+			{
+				RtInt* pi = reinterpret_cast<RtInt*>( value );
+				TqInt* pOpt = QGetRenderContext()->poptWriteCurrent()->GetIntegerOptionWrite(name, undecoratedName.c_str(), Count);
+				RtInt j;
+				for ( j = 0; j < Count; ++j )
+					pOpt[ j ] = pi[ j ];
+			}
+			break;
 
-				case type_string:
+			case type_string:
+			{
+				char** ps = reinterpret_cast<char**>( value );
+				CqString* pOpt = QGetRenderContext()->poptWriteCurrent()->GetStringOptionWrite(name, undecoratedName.c_str(), Count);
+				RtInt j;
+				for ( j = 0; j < Count; ++j )
 				{
-					char** ps = reinterpret_cast<char**>( value );
-					if ( bArray )
+					CqString str( "" );
+					if ( strcmp( name, "searchpath" ) == 0 )
 					{
-						RtInt j;
-						for ( j = 0; j < pParam->Count(); ++j )
+						// Get the old value for use in escape replacement
+						CqString str_old = pOpt[ 0 ];
+						Aqsis::log() << debug << "Old searchpath = " << str_old.c_str() << std::endl;
+						// Build the string, checking for & character and replace with old string.
+						unsigned int strt = 0;
+						unsigned int len = 0;
+						while ( 1 )
 						{
-							CqString str( "" );
-							if ( strcmp( name, "searchpath" ) == 0 )
+							if ( ( len = strcspn( &ps[ j ][ strt ], "&" ) ) < strlen( &ps[ j ][ strt ] ) )
 							{
-								// Get the old value for use in escape replacement
-								CqString str_old = static_cast<CqParameterTypedUniform<CqString, type_string, CqString>*>( pParam ) ->pValue() [ 0 ];
-								// Build the string, checking for & character and replace with old string.
-								unsigned int strt = 0;
-								unsigned int len = 0;
-								while ( 1 )
-								{
-									if ( ( len = strcspn( &ps[ j ][ strt ], "&" ) ) < strlen( &ps[ j ][ strt ] ) )
-									{
-										str += CqString( ps[ j ] ).substr( strt, len );
-										str += str_old;
-										strt += len + 1;
-									}
-									else
-									{
-										str += CqString( ps[ j ] ).substr( strt );
-										break;
-									}
-								}
+								str += CqString( ps[ j ] ).substr( strt, len );
+								str += str_old;
+								strt += len + 1;
 							}
 							else
-								str = CqString( ps[ j ] );
-
-							static_cast<CqParameterTypedUniformArray<CqString, type_string, CqString>*>( pParam ) ->pValue() [ j ] = str;
-						}
-					}
-					else
-					{
-						CqString str( "" );
-						if ( strcmp( name, "searchpath" ) == 0 )
-						{
-							// Get the old value for use in escape replacement
-							CqString str_old = static_cast<CqParameterTypedUniform<CqString, type_string, CqString>*>( pParam ) ->pValue() [ 0 ];
-							// Build the string, checking for & character and replace with old string.
-							unsigned int strt = 0;
-							unsigned int len = 0;
-							while ( 1 )
 							{
-								if ( ( len = strcspn( &ps[ 0 ][ strt ], "&" ) ) < strlen( &ps[ 0 ][ strt ] ) )
-								{
-									str += CqString( ps[ 0 ] ).substr( strt, len );
-									str += str_old;
-									strt += len + 1;
-								}
-								else
-								{
-									str += CqString( ps[ 0 ] ).substr( strt );
-									break;
-								}
+								str += CqString( ps[ j ] ).substr( strt );
+								break;
 							}
 						}
-						else
-							str = CqString( ps[ 0 ] );
-
-						static_cast<CqParameterTyped<CqString, CqString>*>( pParam ) ->pValue() [ 0 ] = str;
-					}
-				}
-				break;
-
-				case type_color:
-				{
-					RtFloat * pc = reinterpret_cast<RtFloat*>( value );
-					if ( bArray )
-					{
-						RtInt j;
-						for ( j = 0; j < pParam->Count(); j+=3 )
-							static_cast<CqParameterTypedUniformArray<CqColor, type_color, CqColor>*>( pParam ) ->pValue() [ j ] = CqColor(pc[ j ], pc[ j+1 ], pc[ j+2 ]);
 					}
 					else
-						static_cast<CqParameterTypedUniform<CqColor, type_color, CqColor>*>( pParam ) ->pValue() [ 0 ] = CqColor(pc[ 0 ], pc[ 1 ], pc[ 2 ]);
-				}
-				break;
+						str = CqString( ps[ j ] );
 
-				case type_point:
-				{
-					RtFloat * pv = reinterpret_cast<RtFloat*>( value );
-					if ( bArray )
-					{
-						RtInt j;
-						for ( j = 0; j < pParam->Count(); j+=3 )
-							static_cast<CqParameterTypedUniformArray<CqVector3D, type_point, CqVector3D>*>( pParam ) ->pValue() [ j ] = CqVector3D(pv[ j ], pv[ j+1 ], pv[ j+2 ]);
-					}
-					else
-						static_cast<CqParameterTypedUniform<CqVector3D, type_point, CqVector3D>*>( pParam ) ->pValue() [ 0 ] = CqVector3D(pv[ 0 ], pv[ 1 ], pv[ 2 ]);
+					pOpt[ j ] = str;
 				}
-				break;
+			}
+			break;
 
-				case type_normal:
-				{
-					RtFloat * pv = reinterpret_cast<RtFloat*>( value );
-					if ( bArray )
-					{
-						RtInt j;
-						for ( j = 0; j < pParam->Count(); j+=3 )
-							static_cast<CqParameterTypedUniformArray<CqVector3D, type_normal, CqVector3D>*>( pParam ) ->pValue() [ j ] = CqVector3D(pv[ j ], pv[ j+1 ], pv[ j+2 ]);
-					}
-					else
-						static_cast<CqParameterTypedUniform<CqVector3D, type_normal, CqVector3D>*>( pParam ) ->pValue() [ 0 ] = CqVector3D(pv[ 0 ], pv[ 1 ], pv[ 2 ]);
-				}
-				break;
+			case type_color:
+			{
+				RtFloat* pc = reinterpret_cast<RtFloat*>( value );
+				CqColor* pOpt = QGetRenderContext()->poptWriteCurrent()->GetColorOptionWrite(name, undecoratedName.c_str(), Count);
+				RtInt j;
+				for ( j = 0; j < Count; ++j )
+					pOpt[ j ] = CqColor(pc[ (j*3) ], pc[ (j*3)+1 ], pc[ (j*3)+2 ]);
+			}
+			break;
 
-				case type_vector:
-				{
-					RtFloat * pv = reinterpret_cast<RtFloat*>( value );
-					if ( bArray )
-					{
-						RtInt j;
-						for ( j = 0; j < pParam->Count(); j+=3 )
-							static_cast<CqParameterTypedUniformArray<CqVector3D, type_vector, CqVector3D>*>( pParam ) ->pValue() [ j ] = CqVector3D(pv[ j ], pv[ j+1 ], pv[ j+2 ]);
-					}
-					else
-						static_cast<CqParameterTypedUniform<CqVector3D, type_vector, CqVector3D>*>( pParam ) ->pValue() [ 0 ] = CqVector3D(pv[ 0 ], pv[ 1 ], pv[ 2 ]);
-				}
-				break;
+			case type_point:
+			{
+				RtFloat* pc = reinterpret_cast<RtFloat*>( value );
+				CqVector3D* pOpt = QGetRenderContext()->poptWriteCurrent()->GetPointOptionWrite(name, undecoratedName.c_str(), Count);
+				RtInt j;
+				for ( j = 0; j < Count; ++j )
+					pOpt[ j ] = CqVector3D(pc[ (j*3) ], pc[ (j*3)+1 ], pc[ (j*3)+2 ]);
+			}
+			break;
 
-				case type_hpoint:
-				{
-					RtFloat * pv = reinterpret_cast<RtFloat*>( value );
-					if ( bArray )
-					{
-						RtInt j;
-						for ( j = 0; j < pParam->Count(); j+=4 )
-							static_cast<CqParameterTypedUniformArray<CqVector4D, type_hpoint, CqVector3D>*>( pParam ) ->pValue() [ j ] = CqVector4D(pv[ j ], pv[ j+1 ], pv[ j+2 ], pv[ j+3 ]);
-					}
-					else
-						static_cast<CqParameterTypedUniform<CqVector4D, type_hpoint, CqVector3D>*>( pParam ) ->pValue() [ 0 ] = CqVector4D(pv[ 0 ], pv[ 1 ], pv[ 2 ], pv[ 3 ]);
-				}
-				break;
+			case type_normal:
+			{
+				RtFloat* pc = reinterpret_cast<RtFloat*>( value );
+				CqVector3D* pOpt = QGetRenderContext()->poptWriteCurrent()->GetPointOptionWrite(name, undecoratedName.c_str(), Count);
+				RtInt j;
+				for ( j = 0; j < Count; ++j )
+					pOpt[ j ] = CqVector3D(pc[ (j*3) ], pc[ (j*3)+1 ], pc[ (j*3)+2 ]);
+			}
+			break;
 
-				case type_matrix:
-				{
-					RtFloat * pm = reinterpret_cast<RtFloat*>( value );
-					if ( bArray )
-					{
-						RtInt j;
-						for ( j = 0; j < pParam->Count(); j+=16 )
-							static_cast<CqParameterTypedUniformArray<CqMatrix, type_matrix, CqMatrix>*>( pParam ) ->pValue() [ j ] = CqMatrix(pm[ j    ], pm[ j+1  ], pm[ j+2  ], pm[ j+3  ],
+			case type_vector:
+			{
+				RtFloat* pc = reinterpret_cast<RtFloat*>( value );
+				CqVector3D* pOpt = QGetRenderContext()->poptWriteCurrent()->GetPointOptionWrite(name, undecoratedName.c_str(), Count);
+				RtInt j;
+				for ( j = 0; j < Count; ++j )
+					pOpt[ j ] = CqVector3D(pc[ (j*3) ], pc[ (j*3)+1 ], pc[ (j*3)+2 ]);
+			}
+			break;
+
+			case type_hpoint:
+			{
+/*				RtFloat* pc = reinterpret_cast<RtFloat*>( value );
+				CqVector4D* pOpt = QGetRenderContext()->poptWriteCurrent()->GetHPointOptionWrite(name, undecoratedName.c_str(), Count);
+				RtInt j;
+				for ( j = 0; j < Count; ++j )
+					pOpt[ j ] = CqVector4D(pc[ (j*4) ], pc[ (j*4)+1 ], pc[ (j*4)+2 ], pc[ (j*4)+3]); */
+			}
+			break;
+
+			case type_matrix:
+			{
+/*				RtFloat* pc = reinterpret_cast<RtFloat*>( value );
+				CqMatrix* pOpt = QGetRenderContext()->poptWriteCurrent()->GetMatrixOptionWrite(name, undecoratedName.c_str(), Count);
+				RtInt j;
+				for ( j = 0; j < Count; ++j )
+					pOpt[ j ] = CqMatrix(pm[ j    ], pm[ j+1  ], pm[ j+2  ], pm[ j+3  ],
 							        pm[ j+4  ], pm[ j+5  ], pm[ j+6  ], pm[ j+7  ],
 							        pm[ j+8  ], pm[ j+9  ], pm[ j+10 ], pm[ j+11 ],
-							        pm[ j+12 ], pm[ j+13 ], pm[ j+14 ], pm[ j+15 ]);
-					}
-					else
-						static_cast<CqParameterTypedUniform<CqMatrix, type_matrix, CqMatrix>*>( pParam ) ->pValue() [ 0 ] = CqMatrix(pm[ 0  ], pm[ 1  ], pm[ 2  ], pm[ 3  ],
-						        pm[ 4  ], pm[ 5  ], pm[ 6  ], pm[ 7  ],
-						        pm[ 8  ], pm[ 9  ], pm[ 10 ], pm[ 11 ],
-						        pm[ 12 ], pm[ 13 ], pm[ 14 ], pm[ 15 ]);
-				}
-				break;
+							        pm[ j+12 ], pm[ j+13 ], pm[ j+14 ], pm[ j+15 ]); */
+			}
+			break;
 		}
 	}
 	return ;
