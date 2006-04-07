@@ -238,10 +238,7 @@ void CqOptions::InitialiseCamera()
 
 CqOptions::CqOptions() :
 		m_funcFilter( RiGaussianFilter ),
-		m_pshadImager( NULL ),
-		m_bFrameAspectRatioCalled( TqFalse ),
-		m_bScreenWindowCalled( TqFalse ),
-		m_bFormatCalled( TqFalse )
+		m_pshadImager( NULL )
 {
 	InitialiseDefaultOptions();
 }
@@ -252,10 +249,7 @@ CqOptions::CqOptions() :
 
 CqOptions::CqOptions( const CqOptions& From ) :
 		m_funcFilter( RiGaussianFilter ),
-		m_pshadImager( NULL ),
-		m_bFrameAspectRatioCalled( TqFalse ),
-		m_bScreenWindowCalled( TqFalse ),
-		m_bFormatCalled( TqFalse )
+		m_pshadImager( NULL )
 {
 	*this = From;
 }
@@ -276,10 +270,6 @@ CqOptions::~CqOptions()
 
 CqOptions& CqOptions::operator=( const CqOptions& From )
 {
-	m_bFrameAspectRatioCalled = From.m_bFrameAspectRatioCalled;
-	m_bScreenWindowCalled = From.m_bScreenWindowCalled;
-	m_bFormatCalled = From.m_bFormatCalled;
-
 	m_funcFilter = From.m_funcFilter;
 	m_pshadImager = From.m_pshadImager;
 

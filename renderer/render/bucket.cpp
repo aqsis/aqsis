@@ -719,8 +719,7 @@ void CqBucket::FilterBucket(TqBool empty)
 	endy = YOrigin() + Height();
 	endx = XOrigin() + Width();
 
-	if ( QGetRenderContext() ->poptCurrent()->pshadImager() && 
-		 NULL != QGetRenderContext() ->poptCurrent()->pshadImager() )
+	if ( QGetRenderContext() ->poptCurrent()->pshadImager() )
 	{
 		// Init & Execute the imager shader
 

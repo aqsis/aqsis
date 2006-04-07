@@ -822,7 +822,11 @@ RtVoid	RiWorldBegin()
 	TIMER_START("Parse")
 
 	// Now that the options have all been set, setup any undefined camera parameters.
-	if ( !QGetRenderContext() ->poptWriteCurrent()->FrameAspectRatioCalled() )
+	const TqInt* pCameraOpts = QGetRenderContext()->poptCurrent()->GetIntegerOption("System", "CameraFlags");
+	TqInt cameraOpts = 0;
+	if(pCameraOpts != NULL)
+		cameraOpts = pCameraOpts[0];
+	if ( (cameraOpts & CameraFARSet) == 0 )
 	{
 		// Derive the FAR from the resolution and pixel aspect ratio.
 		RtFloat PAR = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "PixelAspectRatio" ) [ 0 ];
@@ -831,7 +835,7 @@ RtVoid	RiWorldBegin()
 		QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "FrameAspectRatio" ) [ 0 ] = ( resH * PAR ) / resV ;
 	}
 
-	if ( !QGetRenderContext() ->poptWriteCurrent()->ScreenWindowCalled() )
+	if ( ( cameraOpts & CameraScreenWindowSet) == 0 )
 	{
 		RtFloat fFAR = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "FrameAspectRatio" ) [ 0 ];
 
@@ -1003,9 +1007,6 @@ RtVoid	RiFormat( RtInt xresolution, RtInt yresolution, RtFloat pixelaspectratio 
 	QGetRenderContext() ->poptWriteCurrent()->GetIntegerOptionWrite( "System", "Resolution" ) [ 1 ] = yresolution ;
 	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "PixelAspectRatio" ) [ 0 ] = ( pixelaspectratio < 0.0 ) ? 1.0 : pixelaspectratio ;
 
-	// Inform the system that RiFormat has been called, as this takes priority.
-	QGetRenderContext() ->poptWriteCurrent()->CallFormat();
-
 	return ;
 }
 
@@ -1043,7 +1044,7 @@ RtVoid	RiFrameAspectRatio( RtFloat frameratio )
 	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "FrameAspectRatio" ) [ 0 ] = frameratio ;
 
 	// Inform the system that RiFrameAspectRatio has been called, as this takes priority.
-	QGetRenderContext() ->poptWriteCurrent()->CallFrameAspectRatio();
+	QGetRenderContext()->poptWriteCurrent()->GetIntegerOptionWrite("System", "CameraFlags")[0] |= CameraFARSet;
 
 	return ;
 }
@@ -1070,7 +1071,7 @@ RtVoid	RiScreenWindow( RtFloat left, RtFloat right, RtFloat bottom, RtFloat top 
 	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "ScreenWindow" ) [ 3 ] = bottom ;
 
 	// Inform the system that RiScreenWindow has been called, as this takes priority.
-	QGetRenderContext() ->poptWriteCurrent()->CallScreenWindow();
+	QGetRenderContext()->poptWriteCurrent()->GetIntegerOptionWrite("System", "CameraFlags")[0] |= CameraScreenWindowSet;
 
 	return ;
 }

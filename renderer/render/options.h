@@ -148,49 +148,6 @@ class CqOptions : public IqOptions
 
 		virtual void	InitialiseCamera();
 
-		/** Indicate that the RiFormat function has been called.
-		 * This and other similar are used to overcome the problem with multiple ways to specify frame dimensions.
-		 */
-		virtual void	CallFormat()
-		{
-			m_bFormatCalled = TqTrue;
-		}
-		/** Indicate that the RiScreenWindow function has been called.
-		 * This and other similar are used to overcome the problem with multiple ways to specify frame dimensions.
-		 */
-		virtual void	CallScreenWindow()
-		{
-			m_bScreenWindowCalled = TqTrue;
-		}
-		/** Indicate that the RiFrameAspectRatio function has been called.
-		 * This and other similar are used to overcome the problem with multiple ways to specify frame dimensions.
-		 */
-		virtual void	CallFrameAspectRatio()
-		{
-			m_bFrameAspectRatioCalled = TqTrue;
-		}
-		/** Determine if the RiFormat function has been called.
-		 * This and other similar are used to overcome the problem with multiple ways to specify frame dimensions.
-		 */
-		virtual TqBool	FormatCalled() const
-		{
-			return ( m_bFormatCalled );
-		}
-		/** Determine if the RiScreenWindow function has been called.
-		 * This and other similar are used to overcome the problem with multiple ways to specify frame dimensions.
-		 */
-		virtual TqBool	ScreenWindowCalled() const
-		{
-			return ( m_bScreenWindowCalled );
-		}
-		/** Determine if the RiFrameAspectRatio function has been called.
-		 * This and other similar are used to overcome the problem with multiple ways to specify frame dimensions.
-		 */
-		virtual TqBool	FrameAspectRatioCalled() const
-		{
-			return ( m_bFrameAspectRatioCalled );
-		}
-
 		/** Get a pointer to the pixel filter function.
 		 */
 		virtual RtFilterFunc funcFilter() const
@@ -217,10 +174,6 @@ class CqOptions : public IqOptions
 
 		RtFilterFunc m_funcFilter;						///< Pointer to the pixel filter function.
 		CqImagersource* m_pshadImager;		///< Pointer to the imager shader.
-
-		TqBool	m_bFrameAspectRatioCalled,   		///< Indicate RiFrameAspectRatio has been called. Calculation of the screen geometry is reliant on which of these have been called.
-		m_bScreenWindowCalled,   			///< Indicate RiScreenWindow has been called. Calculation of the screen geometry is reliant on which of these have been called.
-		m_bFormatCalled;				///< Indicate RiFormat has been called. Calculation of the screen geometry is reliant on which of these have been called.
 }
 ;
 

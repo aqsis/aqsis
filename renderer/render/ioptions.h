@@ -67,6 +67,15 @@ enum EqProjection
     ProjectionPerspective		///< Perspective projection.
 };
 
+//----------------------------------------------------------------------
+/** \enum EqCameraFlags
+ */
+enum EqCameraFlags
+{
+    CameraEmpty = 0x0000,   	///< Invalid.
+    CameraScreenWindowSet = 0x0001,   		///< RiScreenWindow has been specified
+    CameraFARSet = 0x0002,   		///< RiFrameAspectRatio has been specified
+};
 
 //----------------------------------------------------------------------
 /** \class CqOptions
@@ -111,13 +120,6 @@ struct IqOptions
 	virtual CqColor GetColorImager( TqFloat x, TqFloat y ) = 0;
 	virtual CqColor GetOpacityImager( TqFloat x, TqFloat y ) = 0;
 	virtual TqFloat GetAlphaImager( TqFloat x, TqFloat y ) = 0;
-
-	virtual void	CallFormat() = 0;
-	virtual void	CallScreenWindow() = 0;
-	virtual void	CallFrameAspectRatio() = 0;
-	virtual TqBool	FormatCalled() const = 0;
-	virtual TqBool	ScreenWindowCalled() const = 0;
-	virtual TqBool	FrameAspectRatioCalled() const = 0;
 };
 
 
