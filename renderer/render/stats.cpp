@@ -131,6 +131,7 @@ void CqStats::PrintStats( TqInt level ) const
 		TqFloat _gpr_u_q = 100.0f * STATS_INT_GETI( GPR_created_total ) / STATS_INT_GETI( GPR_allocated );
 		MSG << "Input geometry:\n\t" << STATS_INT_GETI( GPR_created ) << " primitives created\n\n"
 		<< "\t"	<<	STATS_INT_GETI( GPR_subdiv ) << " subdivision primitives\n\t"
+		<<			STATS_INT_GETI( GPR_blobbies )   << " blobbies\n\t"
 		<<			STATS_INT_GETI( GPR_nurbs )	 << " NURBS primitives\n\t"
 		<<			STATS_INT_GETI( GPR_poly )	 << " polygons\n\t"
 		<<			STATS_INT_GETI( GPR_crv )	 << " curves\n\t"

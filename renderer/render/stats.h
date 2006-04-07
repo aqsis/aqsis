@@ -189,6 +189,7 @@ class CqStats
 		       // GPrim types
 
 		       GPR_nurbs,
+                       GPR_blobbies,
 		       GPR_poly,
 		       GPR_subdiv,
 		       GPR_crv,

@@ -50,28 +50,20 @@ CqVector3D nearest_segment_point(const CqVector3D& Point, const CqVector3D& S1,
 	const CqVector3D vector = S2 - S1;
 	const CqVector3D w = Point - S1;
 
-	const CqVector3D c1 = w * vector;
-	TqFloat mag_c1 = c1.Magnitude();
-	if(mag_c1 <= 0)
+	const TqFloat c1 = CqVector3D(w * vector).Magnitude2();
+	if(c1 <= 0)
 		return S1;
 
-	const CqVector3D c2 = (vector * vector);
-	TqFloat mag_c2 = c2.Magnitude();
-	if(mag_c2 <= mag_c1)
+	const TqFloat c2 = CqVector3D(vector * vector).Magnitude2();
+	if(c2 <= c1)
 		return S2;
 
-	const CqVector3D b = c1 / c2;
-	const CqVector3D middlepoint = S1 + b.Magnitude() * vector;
+	const TqFloat b = c1 / c2;
+	const CqVector3D middlepoint = S1 + b * vector;
 	return middlepoint;
 }
 
-inline const CqMatrix translation3D(const CqVector3D& v)
-{
-	return CqMatrix( 1, 0, 0, v.x(),
-	                 0, 1, 0, v.y(),
-	                 0, 0, 1, v.z(),
-	                 0, 0, 0, 1);
-}
+
 
 /*
 * When 0<=r<=2, bump(r) is the polynomial of lowest degree with
@@ -126,7 +118,8 @@ inline const CqMatrix scaling3D(const CqVector3D& v)
 CqBlobby::CqBlobby(TqInt nleaf, TqInt ncode, TqInt* code, TqInt nflt, TqFloat* flt, TqInt nStr, char **str) : Codes(code), Floats(flt), Strings(str)
 {
 	//
-	bbox = CqBound(-0.5, -0.5, -0.5, 0.5, 0.5, 0.5);
+	TqFloat absolute = std::numeric_limits<TqFloat>::max();
+	bbox = CqBound(absolute, absolute, absolute, -absolute, -absolute, -absolute);
 	m_IsComplex = TqFalse;
 
 	// Build CqOpcode array
@@ -184,20 +177,24 @@ CqBlobby::CqBlobby(TqInt nleaf, TqInt ncode, TqInt* code, TqInt nflt, TqFloat* f
 		{
 				case CONSTANT:
 				opcodes.push_back(CqOpcode(current_opcode, code[c++]));
+				STATS_INC( GPR_blobbies );
 				break;
 
 				case ELLIPSOID:
 				opcodes.push_back(CqOpcode(current_opcode, code[c++]));
+				STATS_INC( GPR_blobbies );
 				break;
 
 				case SEGMENT:
 				opcodes.push_back(CqOpcode(current_opcode, code[c++]));
 				//m_IsComplex = TqTrue;
+				STATS_INC( GPR_blobbies );
 				break;
 
 				case PLANE:
 				opcodes.push_back(CqOpcode(current_opcode, code[c], code[c+1]));
 				c += 2;
+				STATS_INC( GPR_blobbies );
 				break;
 
 				case ADD:
@@ -254,13 +251,15 @@ TqFloat CqBlobby::implicit_value(const CqVector3D& Point)
 				case ELLIPSOID:
 				{
 					const TqFloat r2 = (instructions[pc++].get_matrix() * Point).Magnitude2();
-					stack.push(r2 <= 1 ? 1 - 3*r2 + 3*r2*r2 - r2*r2*r2 : 0);
+					TqFloat result = r2 <= 1 ? 1 - 3*r2 + 3*r2*r2 - r2*r2*r2 : 0;
+					Aqsis::log() << info << "Ellipsoid: result " << result << std::endl;
+					stack.push(result);
 				}
 				break;
 				case PLANE:
 				{
-					TqInt which = (TqInt) instructions[pc++].value;
-					TqInt n = (TqInt) instructions[pc++].value;
+					TqInt which = instructions[pc++].value;
+					TqInt n = instructions[pc++].value;
 
 					CqString depthname = Strings[which];
 					IqTextureMap* pMap = QGetRenderContextI() ->GetShadowMap( depthname );
@@ -290,6 +289,7 @@ TqFloat CqBlobby::implicit_value(const CqVector3D& Point)
 
 					Aqsis::log() << info << "A " << A << " B " << B << " C " << C << " D " << D << std::endl;
 					TqFloat result = repulsion(fv[0], A, B, C, D);
+					Aqsis::log() << info << "Plane: result " << result << std::endl;
 					stack.push(result);
 				}
 				break;
@@ -301,21 +301,15 @@ TqFloat CqBlobby::implicit_value(const CqVector3D& Point)
 					const TqFloat radius = instructions[pc++].value;
 
 
-					// I don't think I convert the equation correctly...
-					//
-					//
-					//TqFloat r2 = (k3d::inverse(k3d::translation3D(nearest_segment_point(Point, start, end)) *
-					//              k3d::scaling3D(radius) * m) * Point).Magnitude2();
-					//
 					CqVector3D nearpt = nearest_segment_point(Point, start, end);
-					CqMatrix neareast =   (radius * translation3D(nearpt)  * m);
-					CqMatrix inverse = neareast.Inverse();
-					CqVector3D probably  = inverse * Point;
 
+
+					CqVector3D probably  =   m * (Point -  nearpt) ;
 					TqFloat r2 = probably.Magnitude2();
 
-					//Aqsis::log() << info << "Point " << Point << " nearpt " << nearpt << " r2 " << r2 << std::endl;
+
 					TqFloat result = r2 <= 1 ? (1 - 3*r2 + 3*r2*r2 - r2*r2*r2) : 0;
+					Aqsis::log() << info << "Segment: result " << result << std::endl;
 					stack.push(result);
 				}
 				break;
@@ -407,26 +401,20 @@ void CqBlobby::polygonize(std::vector<CqVector3D>& Vertices, std::vector<CqVecto
 	const CqVector3D mid = (bbox.vecMax() + bbox.vecMin())/2.0;
 	const CqVector3D length =  (bbox.vecMax() - bbox.vecMin());
 
-	TqDouble voxel_size = Multiplier * 2.0f;
 
-	TqInt n_x_over_2 = static_cast<TqInt>((fabs(length.x())+0.5) / voxel_size / 2) + 1;
-	TqInt n_y_over_2 = static_cast<TqInt>((fabs(length.y())+0.5) / voxel_size / 2) + 1;
-	TqInt n_z_over_2 = static_cast<TqInt>((fabs(length.z())+0.5) / voxel_size / 2) + 1;
+	TqDouble voxel_size = Multiplier * 4.0;
 
+	TqInt n_x_over_2 = static_cast<TqInt>(2 * (fabs(length.x())+0.5) / voxel_size ) + 1;
+	TqInt n_y_over_2 = static_cast<TqInt>(2 * (fabs(length.y())+0.5) / voxel_size ) + 1;
+	TqInt n_z_over_2 = static_cast<TqInt>(2 * (fabs(length.z())+0.5) / voxel_size ) + 1;
 
-	if (1) //m_IsComplex)
-	{
-        	TqDouble ratio = (TqDouble)std::max(std::max(n_x_over_2, n_y_over_2), n_z_over_2)/voxel_size;
-		if (ratio > 500.0)
-			voxel_size = 0.1;
-		Aqsis::log() << info << "n_x_over_2, n_y_over_2, n_z_over_2: (" << n_x_over_2 << ", " << n_y_over_2 << ", " << n_z_over_2 << "), voxel_size (" << voxel_size << ")" << " ratio " << ratio << std::endl;
-	}
+	Aqsis::log() << info << "n_x_over_2, n_y_over_2, n_z_over_2: (" << n_x_over_2 << ", " << n_y_over_2 << ", " << n_z_over_2 << "), voxel_size (" << voxel_size << ")" << std::endl;
 
-        // Big work is here now; polygonize everything
 	bloomenthal_polygonizer::polygonization_t which = bloomenthal_polygonizer::TETRAHEDRAL;
 
 	if (m_IsComplex)
 		which = bloomenthal_polygonizer::MARCHINGCUBES;
+
 
 	bloomenthal_polygonizer polygonizer(
 	    which, // Ask for marching cube
@@ -435,7 +423,7 @@ void CqBlobby::polygonize(std::vector<CqVector3D>& Vertices, std::vector<CqVecto
 	    -n_x_over_2, n_x_over_2,// Lattice X min-max
 	    -n_y_over_2, n_y_over_2, // Lattice Y min-max
 	    -n_z_over_2, n_z_over_2, // Lattice Z min-max
-	    bbox.vecCross() / 2, // Lattice center
+	    mid, // Lattice center
 	    static_cast<implicit_functor&>(*this),
 	    Vertices, Normals, Polygons);
 
@@ -516,12 +504,12 @@ void CqBlobby::build_stack(CqOpcode op)
 				    Floats[f+8], Floats[f+9], Floats[f+10], Floats[f+11],
 				    Floats[f+12], Floats[f+13], Floats[f+14], Floats[f+15]);
 
+
+				bbox = CqBound(start.x(),start.y(),start.z(), end.x(), end.y(), end.z());
 				grow_bound(transformation, radius);
-				CqVector3D trans_start = transformation * start;
-				grow_bound(trans_start);
-				CqVector3D trans_end = transformation * end;
-				grow_bound(trans_end);
-				origins.push_back(start);
+
+
+				origins.push_back(transformation * (start + end)/2.0);
 
 				instructions.push_back(instruction(SEGMENT));
 				instructions.push_back(instruction(transformation));

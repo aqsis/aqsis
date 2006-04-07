@@ -3783,53 +3783,85 @@ RtVoid RiBlobby( RtInt nleaf, RtInt ncodes, RtInt codes[], RtInt nfloats, RtFloa
 RtVoid RiBlobbyV( RtInt nleaf, RtInt ncode, RtInt code[], RtInt nflt, RtFloat flt[],
                   RtInt nstr, RtString str[], PARAMETERLIST )
 {
-	Validate_Conditional
+      Validate_Conditional
+      
+      Cache_RiBlobby
+      
+      Validate_RiBlobby
+      
+      CqBlobby blobby(nleaf, ncode, code, nflt, flt, nstr, str);
 
-	Cache_RiBlobby
+      // Get back the bounding box in world coordinate
+      CqBound Bound(blobby.Bound());
+   
+      std::vector<CqVector3D> Vertices;
+      std::vector<CqVector3D> Normals;
+      std::vector<std::vector<TqInt> > Polygons;
+      TqFloat shadingrate = QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite( "System", "ShadingRate" ) [ 0 ];
 
-	Validate_RiBlobby
+    
+      // Humble way to transform the bounding box into raster
+      Bound.Transform( QGetRenderContext() ->matSpaceToSpace( "object", "raster", CqMatrix(), QGetRenderContext() ->matCurrent( QGetRenderContext() ->Time() ), QGetRenderContext()->Time() ));
+   
 
-	Debug_RiBlobby
+      TqFloat resH, resV;
+		
 
-    	CqBlobby blobby(nleaf, ncode, code, nflt, flt, nstr, str);
+      resH = Bound.vecCross().x();
+      resV = Bound.vecCross().y();
+            
 
-    	std::vector<CqVector3D> Vertices;
-    	std::vector<CqVector3D> Normals;
-	std::vector<std::vector<TqInt> > Polygons;
-	TqFloat shadingrate = QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite( "System", "ShadingRate" ) [ 0 ];
+      Aqsis::log() << info << "In Screen Bound: " << Bound << std::endl;
 
-    	blobby.polygonize(Vertices, Normals, Polygons, shadingrate/40.0f);
+      TqFloat screen_size = resH;
+      if (screen_size > resV)
+         screen_size = resV;
+      if (screen_size < 0.01) 
+         screen_size = 1.0;
 
-	Aqsis::log() << info << "One blobby is polygonized with " << Vertices.size() << " " << Polygons.size() << std::endl; 
+      TqFloat voxel_size =   2.0 * (shadingrate/ screen_size) ;
 
-    	TqInt* nvertices = new TqInt[Polygons.size()];
-    	TqInt* vertices = new TqInt[3 * Polygons.size()];
-    	TqFloat* points = new TqFloat[3 * Vertices.size()];
+      std::cerr << info << "voxel_size: " << voxel_size << std::endl;
 
-    	TqInt* n = nvertices;
-    	TqInt* v = vertices;
-    	TqInt i;
-	for(i = 0; i < Polygons.size(); ++i)
-    	{
-        	*n++ = 3;
-        	*v++ = Polygons[i][0];
-        	*v++ = Polygons[i][1];
-        	*v++ = Polygons[i][2];
-    	}
+   
+      // Polygonize this blobby; this is where it is computing intensive.
+      blobby.polygonize(Vertices, Normals, Polygons, voxel_size);
+   
+      std::cerr << info << "Polygonized : " << Vertices.size() << " " << Polygons.size() << std::endl; 
+   
+      TqInt* nvertices = new TqInt[Polygons.size()];
+      TqInt* vertices = new TqInt[3 * Polygons.size()];
+      TqFloat* points = new TqFloat[3 * Vertices.size()];
+      
+      TqInt* n = nvertices;
+      TqInt* v = vertices;
+      TqInt i;
+      for(i = 0; i < Polygons.size(); ++i)
+      {
+         *n++ = 3;
+         *v++ = Polygons[i][0];
+         *v++ = Polygons[i][1];
+         *v++ = Polygons[i][2];
+      }
+   
+      TqFloat* p = points;
+      for(i = 0; i < Vertices.size(); ++i)
+      {
+         *p++ = Vertices[i][0];
+         *p++ = Vertices[i][1];
+         *p++ = Vertices[i][2];
+      }
 
-    	TqFloat* p = points;
-    	for(i = 0; i < Vertices.size(); ++i)
-    	{
-        	*p++ = Vertices[i][0];
-        	*p++ = Vertices[i][1];
-        	*p++ = Vertices[i][2];
-    	}
-
-    	RiPointsPolygons(Polygons.size(), nvertices, vertices, RI_P, points, RI_NULL);
-
-	return ;
+      RiPointsPolygons(Polygons.size(), nvertices, vertices, RI_P, points, RI_NULL);
+   
+      // Zap the internal of the polygonization
+      Polygons.resize(0);
+      Vertices.resize(0);
+      Normals.resize(0);
+      
+   
+      return ;
 }
-
 
 //----------------------------------------------------------------------
 /** Specify a small Points primitives
