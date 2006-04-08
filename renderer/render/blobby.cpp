@@ -25,7 +25,7 @@
     \author Michel Joron (rearrange a bit)
 */
 /*    References:
-*          k-3d 
+*          k-3d
 *
 */
 
@@ -115,125 +115,288 @@ inline const CqMatrix scaling3D(const CqVector3D& v)
 	           0, 0, 0, 1);
 }
 
-CqBlobby::CqBlobby(TqInt nleaf, TqInt ncode, TqInt* code, TqInt nflt, TqFloat* flt, TqInt nStr, char **str) : Codes(code), Floats(flt), Strings(str)
+class blobby_vm_assembler
 {
-	//
-	TqFloat absolute = std::numeric_limits<TqFloat>::max();
-	bbox = CqBound(absolute, absolute, absolute, -absolute, -absolute, -absolute);
-	m_IsComplex = TqFalse;
-
-	// Build CqOpcode array
-	EqOpcodeName current_opcode;
-	TqInt int_index = 0;
-	TqInt float_index = 0;
-	for(TqInt c = 0; c < ncode;)
-	{
-		switch(code[c++])
+	public:
+		blobby_vm_assembler(TqInt nleaf, TqInt ncode, TqInt* code, TqInt nfloats, TqFloat* floats, TqInt nstrings, char** strings, CqBlobby::instructions_t& Instructions, CqBound& BBox, CqBlobby::origins_t& Origins) :
+			m_code(code),
+			m_floats(floats),
+			m_instructions(Instructions),
+			m_bbox(BBox),
+			m_origins(Origins)
 		{
-				case 0:
-				current_opcode = ADD;
-				break;
-				case 1:
-				current_opcode = MULTIPLY;
-				break;
-				case 2:
-				current_opcode = MAX;
-				break;
-				case 3:
-				current_opcode = MIN;
-				break;
-				case 4:
-				current_opcode = DIVIDE;
-				break;
-				case 5:
-				current_opcode = SUBTRACT;
-				break;
-				case 6:
-				current_opcode = NEGATE;
-				break;
-				case 7:
-				current_opcode = IDEMPOTENTATE;
-				break;
+			//
+			TqFloat absolute = std::numeric_limits<TqFloat>::max();
+			m_bbox = CqBound(absolute, absolute, absolute, -absolute, -absolute, -absolute);
 
-				case 1000:
-				current_opcode = CONSTANT;
-				break;
-				case 1001:
-				current_opcode = ELLIPSOID;
-				break;
-				case 1002:
-				current_opcode = SEGMENT;
-				break;
-				case 1003:
-				current_opcode = PLANE;
-				break;
-				default:
-				Aqsis::log() << warning << "Unknown Opcode for Blobby " << code[c-1] << std::endl;
-				current_opcode =  UNKNOWN;
-				break;
+			// Build CqOpcode stack
+			CqBlobby::EqOpcodeName current_opcode;
+			TqInt int_index = 0;
+			TqInt float_index = 0;
+			for(TqInt c = 0; c < ncode;)
+			{
+				// Find out opcode name
+				switch(code[c++])
+				{
+						case 0:
+							current_opcode = CqBlobby::ADD;
+						break;
+						case 1:
+							current_opcode = CqBlobby::MULTIPLY;
+						break;
+						case 2:
+							current_opcode = CqBlobby::MAX;
+						break;
+						case 3:
+							current_opcode = CqBlobby::MIN;
+						break;
+						case 4:
+							current_opcode = CqBlobby::DIVIDE;
+						break;
+						case 5:
+							current_opcode = CqBlobby::SUBTRACT;
+						break;
+						case 6:
+							current_opcode = CqBlobby::NEGATE;
+						break;
+						case 7:
+							current_opcode = CqBlobby::IDEMPOTENTATE;
+						break;
+
+						case 1000:
+							current_opcode = CqBlobby::CONSTANT;
+						break;
+						case 1001:
+							current_opcode = CqBlobby::ELLIPSOID;
+						break;
+						case 1002:
+							current_opcode = CqBlobby::SEGMENT;
+						break;
+						case 1003:
+							current_opcode = CqBlobby::PLANE;
+						break;
+						default:
+							Aqsis::log() << warning << "Unknown Opcode for Blobby " << code[c-1] << std::endl;
+							current_opcode =  CqBlobby::UNKNOWN;
+						break;
+				}
+
+				switch(current_opcode)
+				{
+						case CqBlobby::CONSTANT:
+							opcodes.push_back(CqOpcode(current_opcode, code[c++]));
+							STATS_INC( GPR_blobbies );
+						break;
+
+						case CqBlobby::ELLIPSOID:
+							opcodes.push_back(CqOpcode(current_opcode, code[c++]));
+							STATS_INC( GPR_blobbies );
+						break;
+
+						case CqBlobby::SEGMENT:
+							opcodes.push_back(CqOpcode(current_opcode, code[c++]));
+							STATS_INC( GPR_blobbies );
+						break;
+
+						case CqBlobby::PLANE:
+							opcodes.push_back(CqOpcode(current_opcode, code[c], code[c+1]));
+							c += 2;
+							STATS_INC( GPR_blobbies );
+						break;
+
+						case CqBlobby::ADD:
+						case CqBlobby::MULTIPLY:
+						case CqBlobby::MAX:
+						case CqBlobby::MIN:
+						{
+							TqInt n_ops = code[c];
+							opcodes.push_back(CqOpcode(current_opcode, c));
+							c += n_ops + 1;
+						}
+						break;
+
+						case CqBlobby::DIVIDE:
+						case CqBlobby::SUBTRACT:
+						{
+							opcodes.push_back(CqOpcode(current_opcode, code[c], code[c+1]));
+							c += 2;
+						}
+						break;
+
+						case CqBlobby::NEGATE:
+							opcodes.push_back(CqOpcode(current_opcode, code[c++]));
+						break;
+
+						case CqBlobby::IDEMPOTENTATE:
+							c++;
+						break;
+						default:
+							// Hopefull the following number is to skipped the unknown opcode
+							TqInt n_ops = code[c];
+							c += n_ops + 1;
+						break;
+				}
+			}
+
+			// Prepare stack for implicit function
+			build_stack(opcodes.back());
 		}
 
-		switch(current_opcode)
+	private:
+		class CqOpcode
 		{
-				case CONSTANT:
-				opcodes.push_back(CqOpcode(current_opcode, code[c++]));
-				STATS_INC( GPR_blobbies );
-				break;
+			public:
+				CqOpcode(CqBlobby::EqOpcodeName Name, const TqInt Index1, const TqInt Index2) :
+						name(Name), index1(Index1), index2(Index2)
+				{}
 
-				case ELLIPSOID:
-				opcodes.push_back(CqOpcode(current_opcode, code[c++]));
-				STATS_INC( GPR_blobbies );
-				break;
+				CqOpcode(CqBlobby::EqOpcodeName Name, const TqInt Index1) :
+						name(Name), index1(Index1), index2(0)
+				{}
 
-				case SEGMENT:
-				opcodes.push_back(CqOpcode(current_opcode, code[c++]));
-				//m_IsComplex = TqTrue;
-				STATS_INC( GPR_blobbies );
-				break;
+				CqOpcode(CqBlobby::EqOpcodeName Name) :
+						name(Name), index1(0), index2(0)
+				{}
 
-				case PLANE:
-				opcodes.push_back(CqOpcode(current_opcode, code[c], code[c+1]));
-				c += 2;
-				STATS_INC( GPR_blobbies );
-				break;
+				CqBlobby::EqOpcodeName name;
+				TqInt index1;
+				TqInt index2;
+		};
 
-				case ADD:
-				case MULTIPLY:
-				case MAX:
-				case MIN:
-				{
-					TqInt n_ops = code[c];
-					opcodes.push_back(CqOpcode(current_opcode, c));
-					c += n_ops + 1;
-				}
-				break;
+		std::vector<CqOpcode> opcodes;
 
-				case DIVIDE:
-				case SUBTRACT:
-				{
-					opcodes.push_back(CqOpcode(current_opcode, code[c], code[c+1]));
-					c += 2;
-				}
-				break;
+		void grow_bound(const CqMatrix& transformation, const TqFloat radius = 1.0)
+		{
+			TqFloat r = radius * 0.5;
+			CqBound unit_box(-r, -r, -r, r, r, r);
+			unit_box.Transform(transformation);
 
-				case NEGATE:
-				opcodes.push_back(CqOpcode(current_opcode, code[c++]));
-				break;
-
-				case IDEMPOTENTATE:
-				c++;
-				break;
-				default:
-				// Hopefull the following number is to skipped the unknown opcode
-				TqInt n_ops = code[c];
-				c += n_ops + 1;
-				break;
+			m_bbox.Encapsulate( unit_box);
 		}
-	}
 
-	// Prepare stack for implicit function
-	build_stack(opcodes.back());
+		void grow_bound(const CqVector3D& vector, const TqFloat radius = 1.0)
+		{
+			m_bbox.Encapsulate(vector);
+		}
 
+
+
+		void build_stack(CqOpcode op)
+		{
+			switch(op.name)
+			{
+					case CqBlobby::CONSTANT:
+					break;
+
+					case CqBlobby::PLANE:
+					{
+						m_instructions.push_back(CqBlobby::instruction(CqBlobby::PLANE));
+						m_instructions.push_back(CqBlobby::instruction(op.index1));
+						m_instructions.push_back(CqBlobby::instruction(op.index2));
+						Aqsis::log() << info << "id1 " << op.index1 << " id2 " << op.index2 << std::endl;
+					}
+					break;
+
+					case CqBlobby::ELLIPSOID:
+					{
+						TqInt f = op.index1;
+						CqMatrix transformation(
+						    m_floats[f], m_floats[f+1], m_floats[f+2], m_floats[f+3],
+						    m_floats[f+4], m_floats[f+5], m_floats[f+6], m_floats[f+7],
+						    m_floats[f+8], m_floats[f+9], m_floats[f+10], m_floats[f+11],
+						    m_floats[f+12], m_floats[f+13], m_floats[f+14], m_floats[f+15]);
+
+						grow_bound(transformation);
+						m_origins.push_back(CqVector3D(m_floats[f+12], m_floats[f+13], m_floats[f+14]));
+
+						m_instructions.push_back(CqBlobby::instruction(CqBlobby::ELLIPSOID));
+						m_instructions.push_back(CqBlobby::instruction(transformation.Inverse()));
+					}
+					break;
+
+					case CqBlobby::SEGMENT:
+					{
+						TqInt f = op.index1;
+						CqVector3D start(m_floats[f], m_floats[f+1], m_floats[f+2]);
+						f += 3;
+						CqVector3D end(m_floats[f], m_floats[f+1], m_floats[f+2]);
+						f += 3;
+						TqFloat radius = m_floats[f];
+						f++;
+						CqMatrix transformation(
+						    m_floats[f], m_floats[f+1], m_floats[f+2], m_floats[f+3],
+						    m_floats[f+4], m_floats[f+5], m_floats[f+6], m_floats[f+7],
+						    m_floats[f+8], m_floats[f+9], m_floats[f+10], m_floats[f+11],
+						    m_floats[f+12], m_floats[f+13], m_floats[f+14], m_floats[f+15]);
+
+
+						m_bbox = CqBound(start.x(),start.y(),start.z(), end.x(), end.y(), end.z());
+						grow_bound(transformation, radius);
+
+
+						m_origins.push_back(transformation * (start + end)/2.0);
+
+						m_instructions.push_back(CqBlobby::instruction(CqBlobby::SEGMENT));
+						m_instructions.push_back(CqBlobby::instruction(transformation));
+						m_instructions.push_back(CqBlobby::instruction(start));
+						m_instructions.push_back(CqBlobby::instruction(end));
+						m_instructions.push_back(CqBlobby::instruction(radius));
+					}
+					break;
+
+					case CqBlobby::ADD:
+					case CqBlobby::MULTIPLY:
+					case CqBlobby::MIN:
+					case CqBlobby::MAX:
+					{
+						TqInt operands = op.index1;
+						TqInt n = m_code[operands];
+						for(TqInt i = 1; i <= n; ++i)
+						{
+							build_stack(opcodes[m_code[operands + i]]);
+						}
+
+						m_instructions.push_back(CqBlobby::instruction(op.name));
+						m_instructions.push_back(CqBlobby::instruction(n));
+					}
+					break;
+					case CqBlobby::SUBTRACT:
+					case CqBlobby::DIVIDE:
+					{
+						build_stack(opcodes[op.index1]);
+						build_stack(opcodes[op.index2]);
+
+						m_instructions.push_back(CqBlobby::instruction(op.name));
+					}
+			}
+		}
+
+	TqInt* m_code;
+	TqFloat* m_floats;
+	CqBlobby::instructions_t& m_instructions;
+	CqBound& m_bbox;
+	CqBlobby::origins_t& m_origins;
+};
+
+CqBlobby::CqBlobby(TqInt nleaf, TqInt ncode, TqInt* code, TqInt nfloats, TqFloat* floats, TqInt nstrings, char** strings) : m_nleaf(nleaf), m_ncode(ncode), m_code(code), m_nfloats(nfloats), m_floats(floats), m_nstrings(nstrings), m_strings(strings)
+{
+	blobby_vm_assembler(nleaf, ncode, code, nfloats, floats, nstrings, strings, instructions, bbox, origins);
+}
+
+CqSurface* CqBlobby::Clone() const
+{
+	CqBlobby* clone = new CqBlobby(m_nleaf, m_ncode, m_code, m_nfloats, m_floats, m_nstrings, m_strings);
+
+	return ( clone );
+}
+
+TqInt CqBlobby::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits )
+{
+	// Get near clipping plane in Z (here, primitives are in camera space)
+	TqFloat z = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Clipping" ) [ 0 ];
+
+
+	return 0;
 }
 
 TqFloat CqBlobby::implicit_value(const CqVector3D& Point)
@@ -246,7 +409,7 @@ TqFloat CqBlobby::implicit_value(const CqVector3D& Point)
 		switch(instructions[pc++].opcode)
 		{
 				case CONSTANT:
-				stack.push(instructions[pc++].value);
+					stack.push(instructions[pc++].value);
 				break;
 				case ELLIPSOID:
 				{
@@ -261,7 +424,7 @@ TqFloat CqBlobby::implicit_value(const CqVector3D& Point)
 					TqInt which = instructions[pc++].value;
 					TqInt n = instructions[pc++].value;
 
-					CqString depthname = Strings[which];
+					CqString depthname = m_strings[which];
 					IqTextureMap* pMap = QGetRenderContextI() ->GetShadowMap( depthname );
 
 					TqFloat A, B, C, D;
@@ -270,10 +433,10 @@ TqFloat CqBlobby::implicit_value(const CqVector3D& Point)
 					fv[0]= 0.0f;
 
 
-					A = Floats[n];
-					B = Floats[n+1];
-					C = Floats[n+2];
-					D = Floats[n+3];
+					A = m_floats[n];
+					B = m_floats[n+1];
+					C = m_floats[n+2];
+					D = m_floats[n+3];
 
 					if ( pMap != 0 && pMap->IsValid() )
 					{
@@ -410,11 +573,7 @@ void CqBlobby::polygonize(std::vector<CqVector3D>& Vertices, std::vector<CqVecto
 
 	Aqsis::log() << info << "n_x_over_2, n_y_over_2, n_z_over_2: (" << n_x_over_2 << ", " << n_y_over_2 << ", " << n_z_over_2 << "), voxel_size (" << voxel_size << ")" << std::endl;
 
-	bloomenthal_polygonizer::polygonization_t which = bloomenthal_polygonizer::TETRAHEDRAL;
-
-	if (m_IsComplex)
-		which = bloomenthal_polygonizer::MARCHINGCUBES;
-
+	bloomenthal_polygonizer::polygonization_t which = bloomenthal_polygonizer::MARCHINGCUBES;
 
 	bloomenthal_polygonizer polygonizer(
 	    which, // Ask for marching cube
@@ -455,113 +614,6 @@ void CqBlobby::polygonize(std::vector<CqVector3D>& Vertices, std::vector<CqVecto
 		polygonizer.polygonize_whole_grid();
 
 }
-
-void CqBlobby::build_stack(CqOpcode op)
-{
-	switch(op.name)
-	{
-			case CONSTANT:
-			break;
-
-			case PLANE:
-			{
-				instructions.push_back(instruction(PLANE));
-				instructions.push_back(instruction(op.index1));
-				instructions.push_back(instruction(op.index2));
-				Aqsis::log() << info << "id1 " << op.index1 << " id2 " << op.index2 << std::endl;
-			}
-			break;
-
-			case ELLIPSOID:
-			{
-				TqInt f = op.index1;
-				CqMatrix transformation(
-				    Floats[f], Floats[f+1], Floats[f+2], Floats[f+3],
-				    Floats[f+4], Floats[f+5], Floats[f+6], Floats[f+7],
-				    Floats[f+8], Floats[f+9], Floats[f+10], Floats[f+11],
-				    Floats[f+12], Floats[f+13], Floats[f+14], Floats[f+15]);
-
-				grow_bound(transformation);
-				origins.push_back(CqVector3D(Floats[f+12], Floats[f+13], Floats[f+14]));
-
-				instructions.push_back(instruction(ELLIPSOID));
-				instructions.push_back(instruction(transformation.Inverse()));
-			}
-			break;
-
-			case SEGMENT:
-			{
-				TqInt f = op.index1;
-				CqVector3D start(Floats[f], Floats[f+1], Floats[f+2]);
-				f += 3;
-				CqVector3D end(Floats[f], Floats[f+1], Floats[f+2]);
-				f += 3;
-				TqFloat radius = Floats[f];
-				f++;
-				CqMatrix transformation(
-				    Floats[f], Floats[f+1], Floats[f+2], Floats[f+3],
-				    Floats[f+4], Floats[f+5], Floats[f+6], Floats[f+7],
-				    Floats[f+8], Floats[f+9], Floats[f+10], Floats[f+11],
-				    Floats[f+12], Floats[f+13], Floats[f+14], Floats[f+15]);
-
-
-				bbox = CqBound(start.x(),start.y(),start.z(), end.x(), end.y(), end.z());
-				grow_bound(transformation, radius);
-
-
-				origins.push_back(transformation * (start + end)/2.0);
-
-				instructions.push_back(instruction(SEGMENT));
-				instructions.push_back(instruction(transformation));
-				instructions.push_back(instruction(start));
-				instructions.push_back(instruction(end));
-				instructions.push_back(instruction(radius));
-			}
-			break;
-
-			case ADD:
-			case MULTIPLY:
-			case MIN:
-			case MAX:
-			{
-				TqInt operands = op.index1;
-				TqInt n = Codes[operands];
-				for(TqInt i = 1; i <= n; ++i)
-				{
-					build_stack(opcodes[Codes[operands + i]]);
-				}
-
-				instructions.push_back(instruction(op.name));
-				instructions.push_back(instruction(n));
-			}
-			break;
-			case SUBTRACT:
-			case DIVIDE:
-			{
-				build_stack(opcodes[op.index1]);
-				build_stack(opcodes[op.index2]);
-
-				instructions.push_back(instruction(op.name));
-			}
-
-	}
-}
-
-void CqBlobby::grow_bound(const CqMatrix& transformation, const TqFloat radius )
-{
-	TqFloat r = radius * 0.5;
-	CqBound unit_box(-r, -r, -r, r, r, r);
-	unit_box.Transform(transformation);
-
-	bbox.Encapsulate( unit_box);
-}
-
-void CqBlobby::grow_bound(const CqVector3D& vector, const TqFloat radius )
-{
-	bbox.Encapsulate(vector);
-}
-
-
 
 
 END_NAMESPACE( Aqsis )

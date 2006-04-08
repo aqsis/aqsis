@@ -1669,7 +1669,7 @@ RtFloat	RiGaussianFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 	return exp( -2.0 * ( x * x + y * y ) );
 }
 
- 
+
 //----------------------------------------------------------------------
 // RiMitchellFilter
 // Mitchell filter used as a possible value passed to RiPixelFIlter.
@@ -1692,7 +1692,7 @@ RtFloat	RiBoxFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 	 *           -xwidth/2 <= x <= xwidth/2
 	 *           -ywidth/2 <= y <= ywidth/2
 	 *    These constraints on x and y really simplifies the
-	 *       the following code to just return (1.0).  
+	 *       the following code to just return (1.0).
 	 *
 	 */
 	return MIN( ( fabs( x ) <= xwidth / 2.0 ? 1.0 : 0.0 ),
@@ -1726,7 +1726,7 @@ RtFloat	RiTriangleFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 RtFloat	RiCatmullRomFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 {
 	/*
-	 * From page 223 of [MITC88] 
+	 * From page 223 of [MITC88]
 	 *
 	 * if abs(d) < 1
 	 *    f(d) = 1/6*(  (12-9*B-9*C)*abs(d*d*d)
@@ -1763,10 +1763,10 @@ RtFloat	RiCatmullRomFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth
 	 *
 	 */
 	/*    RtFloat d, d2;
-	 
-	    d2 = x * x + y * y; // d*d 
-	    d = sqrt( d2 ); // distance from origin 
-	 
+
+	    d2 = x * x + y * y; // d*d
+	    d = sqrt( d2 ); // distance from origin
+
 	    if ( d < 1 )
 	        return ( 1.5 * d * d2 - 2.5 * d2 + 1.0 );
 	    else if ( d < 2 )
@@ -1803,7 +1803,7 @@ RtFloat	RiSincFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 
 	/* Modified version of the RI Spec 3.2 sinc filter to be
 	 *   windowed with a positive lobe of a cosine which is half
-	 *   of a cosine period.  
+	 *   of a cosine period.
 	 */
 
 	/* Uses a -PI to PI cosine window. */
@@ -2369,7 +2369,7 @@ RtLightHandle	RiLightSourceV( RtToken name, PARAMETERLIST )
 		// If this light is being defined outside the WorldBegin, then we can
 		// go ahead and initialise the parameters, as they are invariant under changes to the camera space.
 		if(!QGetRenderContext()->IsWorldBegin())
-			pShader->InitialiseParameters();	
+			pShader->InitialiseParameters();
 
 		// Add it as a Context light as well in case we are in a context that manages it's own lights.
 		QGetRenderContext() ->pconCurrent() ->AddContextLightSource( pNew );
@@ -3687,95 +3687,93 @@ RtVoid RiBlobby( RtInt nleaf, RtInt ncodes, RtInt codes[], RtInt nfloats, RtFloa
 
 //----------------------------------------------------------------------
 /** List based version of above.
- *  
+ *
  *\return	nothing
  **/
 RtVoid RiBlobbyV( RtInt nleaf, RtInt ncode, RtInt code[], RtInt nflt, RtFloat flt[],
                   RtInt nstr, RtString str[], PARAMETERLIST )
 {
-      Validate_Conditional
-      
-      Cache_RiBlobby
-      
-      Validate_RiBlobby
-      
-      CqBlobby blobby(nleaf, ncode, code, nflt, flt, nstr, str);
+	Validate_Conditional
 
-      // Get back the bounding box in world coordinate
-      CqBound Bound(blobby.Bound());
-   
-      std::vector<CqVector3D> Vertices;
-      std::vector<CqVector3D> Normals;
-      std::vector<std::vector<TqInt> > Polygons;
-      TqFloat shadingrate = QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite( "System", "ShadingRate" ) [ 0 ];
+	Cache_RiBlobby
 
-    
-      // Humble way to transform the bounding box into raster
-      Bound.Transform( QGetRenderContext() ->matSpaceToSpace( "object", "raster", CqMatrix(), QGetRenderContext() ->matCurrent( QGetRenderContext() ->Time() ), QGetRenderContext()->Time() ));
-   
+	Validate_RiBlobby
 
-      TqFloat resH, resV;
-		
+	CqBlobby blobby(nleaf, ncode, code, nflt, flt, nstr, str);
 
-      resH = Bound.vecCross().x();
-      resV = Bound.vecCross().y();
-            
+	// Get back the bounding box in world coordinate
+	CqBound Bound(blobby.Bound());
 
-      Aqsis::log() << info << "In Screen Bound: " << Bound << std::endl;
+	std::vector<CqVector3D> Vertices;
+	std::vector<CqVector3D> Normals;
+	std::vector<std::vector<TqInt> > Polygons;
+	TqFloat shadingrate = QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite( "System", "ShadingRate" ) [ 0 ];
 
-      TqFloat screen_size = resH;
-      if (screen_size > resV)
-         screen_size = resV;
-      if (screen_size < 0.01) 
-         screen_size = 1.0;
 
-      TqFloat voxel_size =   2.0 * (shadingrate/ screen_size) ;
+	// Humble way to transform the bounding box into raster
+	Bound.Transform( QGetRenderContext() ->matSpaceToSpace( "object", "raster", CqMatrix(), QGetRenderContext() ->matCurrent( QGetRenderContext() ->Time() ), QGetRenderContext()->Time() ));
 
-      std::cerr << info << "voxel_size: " << voxel_size << std::endl;
 
-   
-      // Polygonize this blobby; this is where it is computing intensive.
-      blobby.polygonize(Vertices, Normals, Polygons, voxel_size);
-   
-      std::cerr << info << "Polygonized : " << Vertices.size() << " " << Polygons.size() << std::endl; 
-   
-      TqInt* nvertices = new TqInt[Polygons.size()];
-      TqInt* vertices = new TqInt[3 * Polygons.size()];
-      TqFloat* points = new TqFloat[3 * Vertices.size()];
-      
-      TqInt* n = nvertices;
-      TqInt* v = vertices;
-      TqInt i;
-      for(i = 0; i < Polygons.size(); ++i)
-      {
-         *n++ = 3;
-         *v++ = Polygons[i][0];
-         *v++ = Polygons[i][1];
-         *v++ = Polygons[i][2];
-      }
-   
-      TqFloat* p = points;
-      for(i = 0; i < Vertices.size(); ++i)
-      {
-         *p++ = Vertices[i][0];
-         *p++ = Vertices[i][1];
-         *p++ = Vertices[i][2];
-      }
+	TqFloat resH, resV;
 
-      RiPointsPolygons(Polygons.size(), nvertices, vertices, RI_P, points, RI_NULL);
-   
-      // Zap the internal of the polygonization
-      Polygons.resize(0);
-      Vertices.resize(0);
-      Normals.resize(0);
-      
-   
-      return ;
+
+	resH = Bound.vecCross().x();
+	resV = Bound.vecCross().y();
+
+
+	Aqsis::log() << info << "In Screen Bound: " << Bound << std::endl;
+
+	TqFloat screen_size = resH;
+	if (screen_size > resV)
+		screen_size = resV;
+	if (screen_size < 0.01)
+		screen_size = 1.0;
+
+	TqFloat voxel_size = 2.0 * (shadingrate/ screen_size) ;
+
+	std::cerr << info << "voxel_size: " << voxel_size << std::endl;
+
+
+	// Polygonize this blobby; this is where it is computing intensive.
+	blobby.polygonize(Vertices, Normals, Polygons, voxel_size);
+
+	std::cerr << info << "Polygonized : " << Vertices.size() << " " << Polygons.size() << std::endl;
+
+	TqInt* nvertices = new TqInt[Polygons.size()];
+	TqInt* vertices = new TqInt[3 * Polygons.size()];
+	TqFloat* points = new TqFloat[3 * Vertices.size()];
+
+	TqInt* n = nvertices;
+	TqInt* v = vertices;
+	TqInt i;
+	for(i = 0; i < Polygons.size(); ++i)
+	{
+		*n++ = 3;
+		*v++ = Polygons[i][0];
+		*v++ = Polygons[i][1];
+		*v++ = Polygons[i][2];
+	}
+
+	TqFloat* p = points;
+	for(i = 0; i < Vertices.size(); ++i)
+	{
+		*p++ = Vertices[i][0];
+		*p++ = Vertices[i][1];
+		*p++ = Vertices[i][2];
+	}
+
+	RiPointsPolygons(Polygons.size(), nvertices, vertices, RI_P, points, RI_NULL);
+
+	delete nvertices;
+	delete vertices;
+	delete points;
+
+	return ;
 }
 
 //----------------------------------------------------------------------
 /** Specify a small Points primitives
- *  
+ *
  *\return	nothing
  **/
 RtVoid	RiPoints( RtInt nvertices, ... )
@@ -3794,7 +3792,7 @@ RtVoid	RiPoints( RtInt nvertices, ... )
 
 //----------------------------------------------------------------------
 /** List based version of above.
- *  
+ *
  *\return	nothing
  **/
 RtVoid	RiPointsV( RtInt npoints, PARAMETERLIST )
@@ -3868,7 +3866,7 @@ RtVoid	RiPointsV( RtInt npoints, PARAMETERLIST )
 
 //----------------------------------------------------------------------
 /** Specify a small line primitives
- *  
+ *
  *\param	type could be "linear" "bicubic"
  *\param	ncurves : number of vertices
  *\param	nvertices: vertices index
@@ -3892,7 +3890,7 @@ RtVoid RiCurves( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, .
 
 //----------------------------------------------------------------------
 /** List based version of above.
- *  
+ *
  *\return	nothing
  **/
 RtVoid RiCurvesV( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, PARAMETERLIST )
@@ -5796,7 +5794,7 @@ RtVoid	RiMakeOcclusionV( RtInt npics, RtString picfiles[], RtString shadowfile, 
 //----------------------------------------------------------------------
 /** Conditional handlers for 3.4 new RI Tokens
  * It calls TestCondition(); expect to modify the global variable IfOk.
- *	\param	condition	
+ *	\param	condition
  */
 RtVoid	RiIfBegin( RtString condition )
 {
@@ -6129,7 +6127,7 @@ RtVoid RiShaderLayerV( RtToken type, RtToken name, RtToken layername, RtInt coun
 	Validate_Conditional
 
 	Cache_RiShaderLayer
-	
+
 	Validate_RiShaderLayer
 
 	Debug_RiShaderLayer
@@ -6211,7 +6209,7 @@ RtVoid RiConnectShaderLayers( RtToken type, RtToken layer1, RtToken variable1, R
 	Validate_Conditional
 
 	Cache_RiConnectShaderLayers
-	
+
 	Validate_RiConnectShaderLayers
 
 	Debug_RiConnectShaderLayers
@@ -6598,13 +6596,13 @@ void SetShaderArgument( const boost::shared_ptr<IqShader>& pShader, const char *
 
 //----------------------------------------------------------------------
 /** Analyze the parameter list and figure what kind of compression is required for texturemapping output files.
- 
+
 	\param	compression	compression	Pointer to an integer to containing the TIFF compression
 	\param	quality it is the quality of jpeg's compression
 	\param	count list counter
 	\param	tokens list of tokens
 	\param	values list of values
- 
+
 	\return	nothing
  */
 

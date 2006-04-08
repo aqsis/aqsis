@@ -20,7 +20,7 @@
 
 /** \file
 \brief Implements RiBlobbyV option.
- 
+
 */
 /*    References:
 *          K-3d.org
@@ -44,60 +44,76 @@
 START_NAMESPACE( Aqsis )
 
 // CqBlobby
-class CqBlobby : public implicit_functor
+class CqBlobby : public CqSurface, public implicit_functor
 {
 	public:
-		CqBlobby(TqInt nleaf, TqInt ncode, TqInt* code, TqInt nflt, TqFloat* flt, TqInt nStr, char **str) ;
+		CqBlobby(TqInt nleaf, TqInt ncode, TqInt* code, TqInt nfloats, TqFloat* floats, TqInt nstrings, char **strings);
 
-		inline TqFloat implicit_value(const CqVector3D& Point);
-		void polygonize(std::vector<CqVector3D>& Vertices, std::vector<CqVector3D>& Normals, std::vector<std::vector<TqInt> >& Polygons, TqFloat ShadingRate);
+		/** Determine whether the passed surface is valid to be used as a
+		 *  frame in motion blur for this surface (CqSurface implementation).
+		 */
+		virtual TqBool IsMotionBlurMatch( CqSurface* pSurf )
+		{
+			return( TqFalse );
+		}
 
+		/** \todo Find out the correct values for the 4 following functions */
+		virtual	TqUint	cUniform() const
+		{
+			return ( 1 );
+		}
+		virtual	TqUint	cVarying() const
+		{
+			return ( 4 );
+		}
+		virtual	TqUint	cVertex() const
+		{
+			return ( 16 );
+		}
+		virtual	TqUint	cFaceVarying() const
+		{
+			return ( 1 );
+		}
+
+		/** Clone all CqBlobby data (CqSurface implementation).
+		 */
+		virtual CqSurface* Clone() const;
+
+		// Overrides from CqSurface
+		virtual TqInt Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
 		CqBound	Bound() const
 		{
 			return bbox;
 		}
 
+		/** Return CqBlobby's implicit value.
+		 * \param World position to compute implicit value from.
+		 */
+		inline TqFloat implicit_value(const CqVector3D& Point);
 
-	private:
+		void polygonize(std::vector<CqVector3D>& Vertices, std::vector<CqVector3D>& Normals, std::vector<std::vector<TqInt> >& Polygons, TqFloat ShadingRate);
+
+		//! Enumeration of the blobby opcodes
 		typedef enum
 		{
-		    CONSTANT,
-		    ELLIPSOID,
-		    SEGMENT,
-		    PLANE,
-		    ADD,
-		    MULTIPLY,
-		    MIN,
-		    MAX,
-		    SUBTRACT,
-		    DIVIDE,
-		    NEGATE,
-		    IDEMPOTENTATE,
-		    UNKNOWN
-	} EqOpcodeName;
+			CONSTANT,
+			ELLIPSOID,
+			SEGMENT,
+			PLANE,
+			ADD,
+			MULTIPLY,
+			MIN,
+			MAX,
+			SUBTRACT,
+			DIVIDE,
+			NEGATE,
+			IDEMPOTENTATE,
+			UNKNOWN
+		} EqOpcodeName;
 
-		class CqOpcode
-		{
-			public:
-				CqOpcode(EqOpcodeName Name, const TqInt Index1, const TqInt Index2) :
-						name(Name), index1(Index1), index2(Index2)
-				{}
-
-				CqOpcode(EqOpcodeName Name, const TqInt Index1) :
-						name(Name), index1(Index1), index2(0)
-				{}
-
-				CqOpcode(EqOpcodeName Name) :
-						name(Name), index1(0), index2(0)
-				{}
-				EqOpcodeName name;
-				TqInt index1;
-				TqInt index2;
-		};
-
+		// Blobby virtual machine instructions
 		union instruction
 		{
-public:
 			instruction(const EqOpcodeName OpCode) : opcode(OpCode)
 			{}
 			instruction(const TqInt Count) : count(Count)
@@ -148,35 +164,38 @@ public:
 			CqMatrix get_matrix() const
 			{
 				return CqMatrix(
-				           matrix[0], matrix[1], matrix[2], matrix[3],
-				           matrix[4], matrix[5], matrix[6], matrix[7],
-				           matrix[8], matrix[9], matrix[10], matrix[11],
-				           matrix[12], matrix[13], matrix[14], matrix[15]);
+					matrix[0], matrix[1], matrix[2], matrix[3],
+					matrix[4], matrix[5], matrix[6], matrix[7],
+					matrix[8], matrix[9], matrix[10], matrix[11],
+					matrix[12], matrix[13], matrix[14], matrix[15]);
 			}
 		};
 
-		void build_stack(CqOpcode op);
+		typedef std::vector<instruction> instructions_t;
 
-		void grow_bound(const CqMatrix& transformation, const TqFloat radius = 1.0f);
+		// Only useful with current J.Bloomenthal polygonizer
+		typedef std::vector<CqVector3D> origins_t;
+		origins_t origins;
 
-		void grow_bound(const CqVector3D& vector, const TqFloat radius = 1.0f);
+	private:
 
-		TqInt* Codes;
-		TqFloat* Floats;
-		char** Strings;
+		instructions_t instructions;
 
-		std::vector<CqOpcode> opcodes;
-		std::vector<instruction> instructions;
-
-		std::vector<CqVector3D> origins;
 
 		CqBound bbox; // m_vecMin m_vecMax
 
-		TqBool m_IsComplex;
+		// RenderMan primitive
+		TqInt m_nleaf;
+		TqInt m_ncode;
+		TqInt* m_code;
+		TqInt m_nfloats;
+		TqFloat* m_floats;
+		TqInt m_nstrings;
+		char** m_strings;
 };
 
 //-----------------------------------------------------------------------
 
 END_NAMESPACE( Aqsis )
 
-#endif   // !BLOBBY_H_INCLUDED
+#endif  // !BLOBBY_H_INCLUDED
