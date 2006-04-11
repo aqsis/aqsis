@@ -153,13 +153,9 @@ SectionGroup /e "Content" SEC02
   Section "Examples" SEC0201
   SectionIn 1 2
     SetOutPath "$INSTDIR\content\ribs\features\layeredshaders"
-    File "..\..\..\content\ribs\features\layeredshaders\*.rib"
-    File "..\..\..\content\ribs\features\layeredshaders\*.bat"
-    File "..\..\..\content\ribs\features\layeredshaders\*.sl"
-    File "..\..\..\content\ribs\features\layeredshaders\*.tif"
+    File /x ".svn" "..\..\..\content\ribs\features\layeredshaders\*.*"
     SetOutPath "$INSTDIR\content\ribs\scenes\vase"
-    File "..\..\..\content\ribs\scenes\vase\*.rib"
-    File "..\..\..\content\ribs\scenes\vase\*.bat"
+    File /x ".svn" "..\..\..\content\ribs\scenes\vase\*.*"
     SetOutPath "$INSTDIR\content\shaders\displacement"
     File "..\..\..\content\shaders\displacement\dented.sl"
     SetOutPath "$INSTDIR\content\shaders\light"
