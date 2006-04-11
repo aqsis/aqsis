@@ -1,18 +1,39 @@
 @ECHO OFF
 
 REM ***Compile textures***
-teqser grid.tif grid.tex
+
+ECHO === Compiling Texture(s) ===
+ECHO.
+teqser.exe "grid.tif" "grid.tex"
 IF NOT ERRORLEVEL 0 GOTO error
 
-REM ***Compile additional shaders***
-aqsl texmap.sl
+
+REM ***Compile shaders***
+
+ECHO.
+ECHO.
+ECHO === Compiling Shader(s) ===
+ECHO.
+aqsl.exe "texmap.sl"
 IF NOT ERRORLEVEL 0 GOTO error
 
-REM ***Render example file***
-aqsis -progress layered.rib
+
+REM ***Render files***
+
+ECHO.
+ECHO.
+ECHO === Rendering File(s) ===
+ECHO.
+aqsis.exe -progress "layered.rib"
 IF ERRORLEVEL 0 GOTO end
 
-:error
-echo "Render failed, see messages"
 
+REM ***Error reporting***
+
+:error
+ECHO.
+ECHO.
+ECHO An error occured, please read messages !!!
+PAUSE
+EXIT
 :end
