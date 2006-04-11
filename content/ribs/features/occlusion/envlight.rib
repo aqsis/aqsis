@@ -1,5 +1,5 @@
-Display "envlight.tif" "framebuffer" "rgb"
-Display "+envlight.tif" "file" "rgb"
+Display "envlight.tif" "file" "rgb"
+Display "+envlight.tif" "framebuffer" "rgb"
 
 Projection "perspective"  "fov" [38]
 Format 320 240 1

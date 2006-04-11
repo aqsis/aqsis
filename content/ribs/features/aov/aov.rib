@@ -1,7 +1,6 @@
 Format 320 240 1
 PixelSamples 2 2
 ShadingRate 1
-Option "searchpath" "shader" ["../shaders:&"]
 PixelFilter "gaussian" 2 2
 Shutter 0 1
 Quantize "Cs" 255 0 255 0

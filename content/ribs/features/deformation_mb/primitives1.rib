@@ -1,13 +1,12 @@
 Format 320 240 1
 PixelSamples 4 4
 ShadingRate 2
-Option "searchpath" "shader" ["../shaders:&"]
 PixelFilter "gaussian" 2 2
 Shutter 0 1
 
 FrameBegin 0
-Display "primitives1.tif" "framebuffer" "rgba"
-Display "+primitives1.tif" "file" "rgba"
+Display "primitives1.tif" "file" "rgba"
+Display "+primitives1.tif" "framebuffer" "rgba"
 Option "statistics" "endofframe" [3]
 
 Projection "perspective" "fov" [32.0]
