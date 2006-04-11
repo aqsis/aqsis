@@ -1,19 +1,18 @@
 @ECHO OFF
 
-
 REM ***Compile textures***
-
-CLS
-teqser.exe "grid.tif" "grid.tex"
-
+teqser grid.tif grid.tex
+IF NOT ERRORLEVEL 0 GOTO error
 
 REM ***Compile additional shaders***
-
-CLS
-aqsl.exe "texmap.sl"
-
+aqsl texmap.sl
+IF NOT ERRORLEVEL 0 GOTO error
 
 REM ***Render example file***
+aqsis -progress layered.rib
+IF ERRORLEVEL 0 GOTO end
 
-CLS
-aqsis.exe -progress "layered.rib"
+:error
+echo "Render failed, see messages"
+
+:end
