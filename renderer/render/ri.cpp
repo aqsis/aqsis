@@ -6149,6 +6149,7 @@ RtVoid RiShaderLayerV( RtToken type, RtToken name, RtToken layername, RtInt coun
 		{
 			// Create a new layered shader and add this shader to it.
 			layeredshader = boost::shared_ptr<IqShader>(new CqLayeredShader);
+			layeredshader->SetTransform( QGetRenderContext() ->ptransCurrent() );
 			QGetRenderContext() ->pattrWriteCurrent() ->SetpshadSurface( layeredshader, QGetRenderContext() ->Time() );
 		}
 	}
@@ -6161,6 +6162,7 @@ RtVoid RiShaderLayerV( RtToken type, RtToken name, RtToken layername, RtInt coun
 		{
 			// Create a new layered shader and add this shader to it.
 			layeredshader = boost::shared_ptr<IqShader>(new CqLayeredShader);
+			layeredshader->SetTransform( QGetRenderContext() ->ptransCurrent() );
 			QGetRenderContext() ->pattrWriteCurrent() ->SetpshadDisplacement( layeredshader, QGetRenderContext() ->Time() );
 		}
 	}
@@ -6174,6 +6176,7 @@ RtVoid RiShaderLayerV( RtToken type, RtToken name, RtToken layername, RtInt coun
 		{
 			// Create a new layered shader and add this shader to it.
 			layeredshader = boost::shared_ptr<IqShader>(new CqLayeredShader);
+			layeredshader->SetTransform( QGetRenderContext() ->ptransCurrent() );
 			QGetRenderContext() ->poptWriteCurrent()->SetpshadImager( layeredshader );
 		}
 	}
