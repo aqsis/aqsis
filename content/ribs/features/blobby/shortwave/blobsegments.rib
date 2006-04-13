@@ -1,0 +1,95 @@
+##RenderMan RIB-Structure 1.1
+##Scene C:/Render/Blobs.rib
+##Creator RhinoMan Sep 13 2005  23:50:42
+##CreationDate April 05, 2006
+##For G
+##Frames 1
+##CapabilitiesNeeded TrimCurves
+FrameBegin 1
+  Display "Blobs.tif" "file" "rgba"
+  Display "+Blobs.tif" "framebuffer" "rgba"
+  ScreenWindow -1.28487 1.28487 -1 1
+  Clipping 3.80736 87.0768
+  Format 654 509 1
+  Projection "perspective" "fov" [26.9915]
+  Transform [ -0.948091 0.181552 0.261079 0 -0.317999 -0.541285 -0.778387 0 1.38778e-016 0.821005 -0.570921 0 -0.379009 0.453624 38.1071 1 ]
+  PixelSamples 3 3
+  ShadingRate 1.0
+  Option "trace" "int maxdepth" [4]
+  Exposure 1 1.8
+  PixelFilter "gaussian" 2 2
+  Imager "background"
+    "color bgcolor" [0.627451 0.627451 0.627451]
+  LightSource "ambientlight" 5 "intensity" 0.3 "lightcolor" [1 1 1]
+  WorldBegin
+    AttributeBegin
+      Attribute "identifier" "string name" ["Light 02"]
+      Attribute "light" "float nsamples" [1]
+      TransformBegin
+        Translate 14.1651 -8.27919 -5.2746
+        Rotate -180 0 1 0
+        Rotate 0 1 0 0
+        LightSource "pointlight" 0
+          "float intensity" [1]
+          "float multiplier" [1]
+          "color lightcolor" [1 1 1]
+          "float falloff" [0]
+          "string shadowname" ["raytrace"]
+          "float shadowintensity" [1]
+          "float shadowsamples" [1]
+          "float shadowblur" [0]
+          "float shadowbias" [-1]
+          "float __nonspecular" [0]
+          "float __nondiffuse" [0]
+          "float __foglight" [1]
+      TransformEnd
+    AttributeEnd
+    Illuminate 0 1
+    AttributeBegin
+      Attribute "identifier" "string name" ["Light 01"]
+      Attribute "light" "float nsamples" [1]
+      TransformBegin
+        Translate 10.0825 12.8401 13.0054
+        Rotate -180 0 1 0
+        Rotate 0 1 0 0
+        LightSource "pointlight" 1
+          "float intensity" [1]
+          "float multiplier" [1]
+          "color lightcolor" [1 1 1]
+          "float falloff" [0]
+          "string shadowname" ["raytrace"]
+          "float shadowintensity" [1]
+          "float shadowsamples" [1]
+          "float shadowblur" [0]
+          "float shadowbias" [-1]
+          "float __nonspecular" [0]
+          "float __nondiffuse" [0]
+          "float __foglight" [1]
+      TransformEnd
+    AttributeEnd
+    Illuminate 1 1
+      AttributeBegin
+      Color [1 0 0]
+      Opacity [1 1 1]
+      Sides 2
+      Matte 0
+      Attribute "visibility" "integer camera" [1]
+      Attribute "visibility" "integer trace" [1]
+      Attribute "visibility" "integer indirect" [1]
+      Attribute "trace" "integer displacements" [0]
+      Attribute "render" "integer truedisplacement" [0]
+      Attribute "displacementbound" "float sphere" [2]
+      Attribute "visibility" "string transmission" ["Os"]
+      Surface "plastic"
+        "float Ka" [1]
+        "float Kd" [0.5]
+        "float Ks" [0.5]
+        "float roughness" [0.1]
+        "color specularcolor" [1 1 1]
+      Surface "matte"
+     ReadArchive "BlobsSegmentRA.rib"
+    AttributeEnd
+
+  WorldEnd
+FrameEnd
+
