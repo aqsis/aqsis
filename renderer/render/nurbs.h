@@ -342,8 +342,7 @@ class CqSurfaceNURBS : public CqSurface
 		 */
 		virtual	TqUint cFaceVarying() const
 		{
-			/// \todo Must work out what this value should be.
-			return ( 1 );
+			return ( cVarying() );
 		}
 
 		virtual const TqBool bCanBeTrimmed() const

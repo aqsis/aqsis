@@ -189,8 +189,7 @@ class CqSurfacePolygon : public CqSurface, public CqPolygonBase
 		}
 		virtual	TqUint	cFaceVarying() const
 		{
-			/// \todo Must work out what this value should be.
-			return ( 1 );
+			return ( cVarying() );
 		}
 
 		// Overridden from CqPolygonBase

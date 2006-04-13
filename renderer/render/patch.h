@@ -176,8 +176,7 @@ class CqSurfacePatchBicubic : public CqSurface
 		}
 		virtual	TqUint cFaceVarying() const
 		{
-			/// \todo Must work out what this value should be.
-			return ( 1 );
+			return ( cVarying() );
 		}
 
 		virtual void NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData );
@@ -247,8 +246,7 @@ class CqSurfacePatchBilinear : public CqSurface
 		}
 		virtual	TqUint	cFaceVarying() const
 		{
-			/// \todo Must work out what this value should be.
-			return ( 1 );
+			return ( cVarying() );
 		}
 		virtual CqSurface* Clone() const;
 
@@ -340,8 +338,7 @@ class CqSurfacePatchMeshBicubic : public CqSurface
 		}
 		virtual	TqUint	cFaceVarying() const
 		{
-			/// \todo Must work out what this value should be.
-			return ( 1 );
+			return ( cVarying() );
 		}
 		virtual CqSurface* Clone() const;
 
@@ -440,8 +437,7 @@ class CqSurfacePatchMeshBilinear : public CqSurface
 		}
 		virtual	TqUint	cFaceVarying() const
 		{
-			/// \todo Must work out what this value should be.
-			return ( 1 );
+			return ( cVarying() );
 		}
 		virtual CqSurface* Clone() const;
 

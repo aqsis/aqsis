@@ -126,8 +126,7 @@ class CqPoints : public CqSurface
 		}
 		virtual	TqUint	cFaceVarying() const
 		{
-			/// \todo Must work out what this value should be.
-			return ( m_nVertices );
+			return ( cVarying() );
 		}
 		// Overrides from CqSurface
 		virtual	CqMicroPolyGridBase* Dice();

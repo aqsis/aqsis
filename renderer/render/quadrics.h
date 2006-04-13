@@ -68,8 +68,7 @@ class CqQuadric : public CqSurface
 		}
 		virtual	TqUint	cFaceVarying() const
 		{
-			/// \todo Must work out what this value should be.
-			return ( 1 );
+			return ( cVarying() );
 		}
 
 
