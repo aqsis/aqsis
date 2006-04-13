@@ -423,7 +423,8 @@ TqInt CqBlobby::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits )
  */
 TqFloat CqBlobby::implicit_value(CqVector3D &Point, TqInt n, std::vector <TqFloat> &splits)
 {
-	TqFloat result = 0.0f;
+	TqFloat sum = 0.0f;
+	TqFloat result;
 	std::stack<TqFloat> stack;
 	TqInt int_index = 0;
 	stack.push(0);
@@ -433,19 +434,22 @@ TqFloat CqBlobby::implicit_value(CqVector3D &Point, TqInt n, std::vector <TqFloa
 		switch(instructions[pc++].opcode)
 		{
 				case CqBlobby::CONSTANT:
-				splits[int_index++] = instructions[pc++].value;
+					result = instructions[pc++].value;
+					sum += result;
+					splits[int_index++] = result;
 				break;
 				case CqBlobby::ELLIPSOID:
 				{
 					const TqFloat r2 = (instructions[pc++].get_matrix() * Point).Magnitude2();
-					TqFloat result = r2 <= 1 ? 1 - 3*r2 + 3*r2*r2 - r2*r2*r2 : 0;
+					result = r2 <= 1 ? 1 - 3*r2 + 3*r2*r2 - r2*r2*r2 : 0;
+					sum += result;
 					splits[int_index++] = result;
 				}
 				break;
 				case CqBlobby::PLANE:
 				{
-					TqInt which = instructions[pc++].value;
-					TqInt n = instructions[pc++].value;
+					TqInt which = (TqInt) instructions[pc++].value;
+					TqInt n = (TqInt) instructions[pc++].value;
 
 					CqString depthname = m_strings[which];
 					IqTextureMap* pMap = QGetRenderContextI() ->GetShadowMap( depthname );
@@ -472,7 +476,8 @@ TqFloat CqBlobby::implicit_value(CqVector3D &Point, TqInt n, std::vector <TqFloa
 						fv[0] = A + 1.0;
 					}
 
-					TqFloat result = repulsion(fv[0], A, B, C, D);
+					result = repulsion(fv[0], A, B, C, D);
+					sum += result;
 					splits[int_index++] = result;
 				}
 				break;
@@ -491,7 +496,8 @@ TqFloat CqBlobby::implicit_value(CqVector3D &Point, TqInt n, std::vector <TqFloa
 					TqFloat r2 = probably.Magnitude2();
 
 
-					TqFloat result = r2 <= 1 ? (1 - 3*r2 + 3*r2*r2 - r2*r2*r2) : 0;
+					result = r2 <= 1 ? (1 - 3*r2 + 3*r2*r2 - r2*r2*r2) : 0;
+					sum += result;
 					splits[int_index++] = result;
 				}
 				break;
@@ -509,10 +515,7 @@ TqFloat CqBlobby::implicit_value(CqVector3D &Point, TqInt n, std::vector <TqFloa
 			break;
 	}
 
-	for (TqInt i=0; i < n; i++)
-		result +=  splits[i];
-
-	return result;
+	return sum;
 }
 
 //---------------------------------------------------------------------
@@ -524,6 +527,7 @@ TqFloat CqBlobby::implicit_value(const CqVector3D& Point)
 {
 	std::stack<TqFloat> stack;
 	stack.push(0);
+	TqFloat result;
 
 	for(unsigned long pc = 0; pc < instructions.size(); )
 	{
@@ -535,15 +539,15 @@ TqFloat CqBlobby::implicit_value(const CqVector3D& Point)
 				case ELLIPSOID:
 				{
 					const TqFloat r2 = (instructions[pc++].get_matrix() * Point).Magnitude2();
-					TqFloat result = r2 <= 1 ? 1 - 3*r2 + 3*r2*r2 - r2*r2*r2 : 0;
+					result = r2 <= 1 ? 1 - 3*r2 + 3*r2*r2 - r2*r2*r2 : 0;
 					Aqsis::log() << info << "Ellipsoid: result " << result << std::endl;
 					stack.push(result);
 				}
 				break;
 				case PLANE:
 				{
-					TqInt which = instructions[pc++].value;
-					TqInt n = instructions[pc++].value;
+					TqInt which = (TqInt) instructions[pc++].value;
+					TqInt n = (TqInt) instructions[pc++].value;
 
 					CqString depthname = m_strings[which];
 					IqTextureMap* pMap = QGetRenderContextI() ->GetShadowMap( depthname );
@@ -572,7 +576,7 @@ TqFloat CqBlobby::implicit_value(const CqVector3D& Point)
 					}
 
 					Aqsis::log() << info << "A " << A << " B " << B << " C " << C << " D " << D << std::endl;
-					TqFloat result = repulsion(fv[0], A, B, C, D);
+					result = repulsion(fv[0], A, B, C, D);
 					Aqsis::log() << info << "Plane: result " << result << std::endl;
 					stack.push(result);
 				}
@@ -592,7 +596,7 @@ TqFloat CqBlobby::implicit_value(const CqVector3D& Point)
 					TqFloat r2 = probably.Magnitude2();
 
 
-					TqFloat result = r2 <= 1 ? (1 - 3*r2 + 3*r2*r2 - r2*r2*r2) : 0;
+					result = r2 <= 1 ? (1 - 3*r2 + 3*r2*r2 - r2*r2*r2) : 0;
 					Aqsis::log() << info << "Segment: result " << result << std::endl;
 					stack.push(result);
 				}
