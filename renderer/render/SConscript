@@ -8,6 +8,7 @@ aqsisdll_sources = Split("""
 	csgtree.cpp
 	curves.cpp
 	environment.cpp
+	filters.cpp
 	genpoly.cpp
 	graphicsstate.cpp
 	imagebuffer.cpp

@@ -43,7 +43,12 @@
 
 START_NAMESPACE( Aqsis )
 
+#define ZCLAMP  1e-6
 
+//---------------------------------------------------------------------
+/** return the closest 3d Point between a segment defined by S1, S2.
+ *  It is either S1 or S2 or a mix between S1, S2
+ */
 CqVector3D nearest_segment_point(const CqVector3D& Point, const CqVector3D& S1,
                                  const CqVector3D& S2)
 {
@@ -64,8 +69,8 @@ CqVector3D nearest_segment_point(const CqVector3D& Point, const CqVector3D& S1,
 }
 
 
-
-/*
+//---------------------------------------------------------------------
+/**
 * When 0<=r<=2, bump(r) is the polynomial of lowest degree with
 *      bump(0)=0
 *      bump'(0)=0
@@ -81,7 +86,9 @@ inline const TqFloat bump(TqFloat r)
 		return 0.0f;
 	return (((6.-r)*r-12.)*r+8.)*r*r*r;
 }
-/*
+
+//---------------------------------------------------------------------
+/**
 * When 0<=r<=1, ease(r) is the polynomial of lowest degree with
 *      ease(0)=0
 *      ease'(0)=0
@@ -97,7 +104,9 @@ inline const TqFloat ease(TqFloat r)
 	return r*r*(3.0f-2.0f*r);
 }
 
-#define ZCLAMP  1e-6
+//---------------------------------------------------------------------
+/** lowest function for Plane opcode.
+ */
 TqFloat repulsion(TqFloat z, TqFloat A, TqFloat B, TqFloat C, TqFloat D)
 {
 	if(z>=A)
@@ -106,15 +115,10 @@ TqFloat repulsion(TqFloat z, TqFloat A, TqFloat B, TqFloat C, TqFloat D)
 		z=ZCLAMP;
 	return (D*bump(z/C)-B/z)*(1.0f-ease(z/A));
 }
-inline const CqMatrix scaling3D(const CqVector3D& v)
-{
-	return CqMatrix(
-	           v.x(), 0, 0, 0,
-	           0, v.y(), 0, 0,
-	           0, 0, v.z(), 0,
-	           0, 0, 0, 1);
-}
 
+//---------------------------------------------------------------------
+/** Blobby virtual machine - calculates the value of an implicit surface at a given 3D point
+ */
 class blobby_vm_assembler
 {
 	public:
@@ -378,11 +382,17 @@ class blobby_vm_assembler
 	CqBlobby::origins_t& m_origins;
 };
 
+//---------------------------------------------------------------------
+/** Constructor.
+ */
 CqBlobby::CqBlobby(TqInt nleaf, TqInt ncode, TqInt* code, TqInt nfloats, TqFloat* floats, TqInt nstrings, char** strings) : m_nleaf(nleaf), m_ncode(ncode), m_code(code), m_nfloats(nfloats), m_floats(floats), m_nstrings(nstrings), m_strings(strings)
 {
 	blobby_vm_assembler(nleaf, ncode, code, nfloats, floats, nstrings, strings, instructions, bbox, origins);
 }
 
+//---------------------------------------------------------------------
+/** Clone in advent of copy an already diced/splitted primitive
+ */
 CqSurface* CqBlobby::Clone() const
 {
 	CqBlobby* clone = new CqBlobby(m_nleaf, m_ncode, m_code, m_nfloats, m_floats, m_nstrings, m_strings);
@@ -390,6 +400,9 @@ CqSurface* CqBlobby::Clone() const
 	return ( clone );
 }
 
+//---------------------------------------------------------------------
+/** Split the primitive and ignore it algother if the prim is behind the Z plane
+ */
 TqInt CqBlobby::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits )
 {
 	// Get near clipping plane in Z (here, primitives are in camera space)
@@ -399,6 +412,114 @@ TqInt CqBlobby::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits )
 	return 0;
 }
 
+//---------------------------------------------------------------------
+/** Return the float value based on each operands. In particular Add will 
+ *  accumulate the result of each opcode together. Now this function is 
+ *  particulary important since it is used to weight each operand and deduce 
+ *  how well will be split the parent blobby' parameters (via ri.cpp). 
+ *  Not particular intelligent since it is redoing what the next method is 
+ *  computing however more keen eyes could combine both methods together to 
+ *  raise the performance significantly.
+ */
+TqFloat CqBlobby::implicit_value(CqVector3D &Point, TqInt n, std::vector <TqFloat> &splits)
+{
+	TqFloat result = 0.0f;
+	std::stack<TqFloat> stack;
+	TqInt int_index = 0;
+	stack.push(0);
+
+	for(unsigned long pc = 0; pc < instructions.size(); )
+	{
+		switch(instructions[pc++].opcode)
+		{
+				case CqBlobby::CONSTANT:
+				splits[int_index++] = instructions[pc++].value;
+				break;
+				case CqBlobby::ELLIPSOID:
+				{
+					const TqFloat r2 = (instructions[pc++].get_matrix() * Point).Magnitude2();
+					TqFloat result = r2 <= 1 ? 1 - 3*r2 + 3*r2*r2 - r2*r2*r2 : 0;
+					splits[int_index++] = result;
+				}
+				break;
+				case CqBlobby::PLANE:
+				{
+					TqInt which = instructions[pc++].value;
+					TqInt n = instructions[pc++].value;
+
+					CqString depthname = m_strings[which];
+					IqTextureMap* pMap = QGetRenderContextI() ->GetShadowMap( depthname );
+
+					TqFloat A, B, C, D;
+					std::valarray<TqFloat> fv;
+					fv.resize(1);
+					fv[0]= 0.0f;
+
+
+					A = m_floats[n];
+					B = m_floats[n+1];
+					C = m_floats[n+2];
+					D = m_floats[n+3];
+
+					if ( pMap != 0 && pMap->IsValid() )
+					{
+						CqVector3D swidth = 0.0f, twidth = 0.0f;
+						CqVector3D _aq_P = Point;
+						pMap->SampleMap( _aq_P, swidth, twidth, fv, 0 );
+					}
+					else
+					{
+						fv[0] = A + 1.0;
+					}
+
+					TqFloat result = repulsion(fv[0], A, B, C, D);
+					splits[int_index++] = result;
+				}
+				break;
+				case CqBlobby::SEGMENT:
+				{
+					const CqMatrix m = instructions[pc++].get_matrix();
+					const CqVector3D start = instructions[pc++].get_vector();
+					const CqVector3D end = instructions[pc++].get_vector();
+					const TqFloat radius = instructions[pc++].value;
+
+
+					CqVector3D nearpt = nearest_segment_point(Point, start, end);
+
+
+					CqVector3D probably  =   m * (Point -  nearpt) ;
+					TqFloat r2 = probably.Magnitude2();
+
+
+					TqFloat result = r2 <= 1 ? (1 - 3*r2 + 3*r2*r2 - r2*r2*r2) : 0;
+					splits[int_index++] = result;
+				}
+				break;
+
+				case CqBlobby::SUBTRACT:
+				case CqBlobby::DIVIDE:
+				case CqBlobby::ADD:
+				case CqBlobby::MULTIPLY:
+				case CqBlobby::MIN:
+				case CqBlobby::MAX:
+				break;
+
+		}
+		if (int_index >= n)
+			break;
+	}
+
+	for (TqInt i=0; i < n; i++)
+		result +=  splits[i];
+
+	return result;
+}
+
+//---------------------------------------------------------------------
+/** Return the float value based on each opcodes. 
+ *  This is the most important method it is used by jules_bloomenthal.cpp to 
+ *  polygonize the primitives
+ */
 TqFloat CqBlobby::implicit_value(const CqVector3D& Point)
 {
 	std::stack<TqFloat> stack;

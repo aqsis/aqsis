@@ -89,6 +89,8 @@ class CqBlobby : public CqSurface, public implicit_functor
 		/** Return CqBlobby's implicit value.
 		 * \param World position to compute implicit value from.
 		 */
+		TqFloat implicit_value(CqVector3D &Point, TqInt n, std::vector <TqFloat> &splits);
+
 		inline TqFloat implicit_value(const CqVector3D& Point);
 
 		void polygonize(std::vector<CqVector3D>& Vertices, std::vector<CqVector3D>& Normals, std::vector<std::vector<TqInt> >& Polygons, TqFloat ShadingRate);
