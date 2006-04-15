@@ -3393,7 +3393,6 @@ RtVoid RiBlobby( RtInt nleaf, RtInt ncodes, RtInt codes[], RtInt nfloats, RtFloa
 RtVoid RiBlobbyV( RtInt nleaf, RtInt ncode, RtInt code[], RtInt nflt, RtFloat flt[],
                   RtInt nstr, RtString str[], PARAMETERLIST )
 {
-
 	Validate_Conditional
 
 	Cache_RiBlobby
@@ -3405,10 +3404,6 @@ RtVoid RiBlobbyV( RtInt nleaf, RtInt ncode, RtInt code[], RtInt nflt, RtFloat fl
 	// Get back the bounding box in world coordinate
 	CqBound Bound(blobby.Bound());
 
-	std::vector<CqVector3D> Vertices;
-	std::vector<CqVector3D> Normals;
-	std::vector<std::vector<TqInt> > Polygons;
-	TqBool Cs = TqFalse;
 
 	TqFloat shadingrate = QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite( "System", "ShadingRate" ) [ 0 ];
 /*
@@ -3447,56 +3442,37 @@ RtVoid RiBlobbyV( RtInt nleaf, RtInt ncode, RtInt code[], RtInt nflt, RtFloat fl
 		voxel_size = flatness[0];
 */
 
-	blobby.polygonize(Vertices, Normals, Polygons, voxel_size);
+	TqInt npoints;
+	TqInt npolygons;
+	TqInt* nvertices = 0;
+	TqInt* vertices = 0;
+	TqFloat* points = 0;
+	blobby.polygonize(npoints, npolygons, nvertices, vertices, points, voxel_size);
 
-	Aqsis::log() << info << "Polygonized : " << Vertices.size() << " " << Polygons.size() << std::endl;
+	Aqsis::log() << info << "Polygonized : " << npoints << " points, " << npolygons << " triangles." << std::endl;
 
-	TqInt tmp = Polygons.size();
-	TqInt* nvertices = new TqInt[Polygons.size()];
-	TqInt* vertices = new TqInt[3 * Polygons.size()];
-	TqFloat* points = new TqFloat[3 * Vertices.size()];
-	TqFloat* colors = new TqFloat[nleaf * Polygons.size()];
-
-
-	TqInt* n = nvertices;
-	TqInt* v = vertices;
-	TqInt i;
-	for(i = 0; i < Polygons.size(); ++i)
-	{
-		*n++ = 3;
-		*v++ = Polygons[i][0];
-		*v++ = Polygons[i][1];
-		*v++ = Polygons[i][2];
-	}
-
-	TqFloat* p = points;
-	for(i = 0; i < Vertices.size(); ++i)
-	{
-		*p++ = Vertices[i][0];
-		*p++ = Vertices[i][1];
-		*p++ = Vertices[i][2];
-	}
+	TqFloat* colors = new TqFloat[nleaf * npolygons];
 
 	std::vector<TqFloat> splits;
-
 	splits.resize(nleaf);
 
 	/* Parameters: RtInt count, RtToken tokens[], RtPointer values[] */
-	for (TqInt c=0; c < count; c++)
+	TqBool Cs = TqFalse;
+	for (TqInt c = 0; c < count; c++)
 	{
 		if (strstr(tokens[c], RI_CS))
 		{
 
 			CqVector3D cg;
 
-			for(i = 0; i < Vertices.size(); i++)
+			for( int i = 0; i < npoints; i++ )
 			{
 				TqFloat sum;
 				TqFloat ocolors[3];
 
-				cg[0] = Vertices[i][0];
-				cg[1] = Vertices[i][1];
-				cg[2] = Vertices[i][2];
+				cg[0] = points[i*3];
+				cg[1] = points[i*3 + 1];
+				cg[2] = points[i*3 + 2];
 
 				sum = blobby.implicit_value(cg, nleaf, splits);
 
@@ -3532,9 +3508,9 @@ RtVoid RiBlobbyV( RtInt nleaf, RtInt ncode, RtInt code[], RtInt nflt, RtFloat fl
 	}
 
 	if (Cs)
-		RiPointsPolygons(Polygons.size(), nvertices, vertices, RI_P, points, RI_CS, colors, RI_NULL);
+		RiPointsPolygons(npolygons, nvertices, vertices, RI_P, points, RI_CS, colors, RI_NULL);
 	else
-		RiPointsPolygons(Polygons.size(), nvertices, vertices, RI_P, points, RI_NULL);
+		RiPointsPolygons(npolygons, nvertices, vertices, RI_P, points, RI_NULL);
 
 
 	delete nvertices;

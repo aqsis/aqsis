@@ -1,5 +1,5 @@
 // Aqsis
-// Copyright © 2001, Paul C. Gregory
+// Copyright © 2006, Paul C. Gregory
 //
 // Contact: pgregory@aqsis.com
 //
@@ -19,7 +19,7 @@
 
 
 /** \file
-\brief Implements RiBlobbyV option.
+    \brief Declares Blobby polygonizer.
 
 */
 /*    References:
@@ -39,15 +39,13 @@
 #include "ri.h"
 #include "vector3d.h"
 
-#include "jules_bloomenthal.h"
-
 START_NAMESPACE( Aqsis )
 
 // CqBlobby
-class CqBlobby : public CqSurface, public implicit_functor
+class CqBlobby : public CqSurface
 {
 	public:
-		CqBlobby(TqInt nleaf, TqInt ncode, TqInt* code, TqInt nfloats, TqFloat* floats, TqInt nstrings, char **strings);
+		CqBlobby(TqInt nleaf, TqInt ncode, TqInt* code, TqInt nfloats, TqFloat* floats, TqInt nstrings, char** strings);
 
 		/** Determine whether the passed surface is valid to be used as a
 		 *  frame in motion blur for this surface (CqSurface implementation).
@@ -93,7 +91,7 @@ class CqBlobby : public CqSurface, public implicit_functor
 
 		inline TqFloat implicit_value(const CqVector3D& Point);
 
-		void polygonize(std::vector<CqVector3D>& Vertices, std::vector<CqVector3D>& Normals, std::vector<std::vector<TqInt> >& Polygons, TqFloat ShadingRate);
+		void polygonize(TqInt& NPoints, TqInt& NPolys, TqInt*& NVertices, TqInt*& Vertices, TqFloat*& Points, TqFloat ShadingRate);
 
 		//! Enumeration of the blobby opcodes
 		typedef enum
@@ -110,10 +108,9 @@ class CqBlobby : public CqSurface, public implicit_functor
 			DIVIDE,
 			NEGATE,
 			IDEMPOTENTATE,
-			UNKNOWN
 		} EqOpcodeName;
 
-		// Blobby virtual machine instructions
+		// Blobby virtual machine instruction
 		union instruction
 		{
 			instruction(const EqOpcodeName OpCode) : opcode(OpCode)
@@ -175,18 +172,14 @@ class CqBlobby : public CqSurface, public implicit_functor
 
 		typedef std::vector<instruction> instructions_t;
 
-		// Only useful with current J.Bloomenthal polygonizer
-		typedef std::vector<CqVector3D> origins_t;
-		origins_t origins;
-
 	private:
-
+		// Program (list of instructions) that computes implicit values
 		instructions_t instructions;
 
+		// Bounding-box
+		CqBound bbox;
 
-		CqBound bbox; // m_vecMin m_vecMax
-
-		// RenderMan primitive
+		// RenderMan primitive storage
 		TqInt m_nleaf;
 		TqInt m_ncode;
 		TqInt* m_code;
