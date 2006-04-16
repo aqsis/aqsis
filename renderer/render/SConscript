@@ -42,6 +42,7 @@ aqsisdll_sources = Split("""
 	transform.cpp
 	blobby.cpp
 	jules_bloomenthal.cpp
+	marchingcubes.cpp
 	trimcurve.cpp""")
 
 
@@ -65,6 +66,7 @@ aqsisdll_headers = Split("""
 	graphicsstate.h         itransform.h            procedural.h            trimcurve.h
 	iattributes.h           kdtree.h                quadrics.h              
 	iddmanager.h            lath.h                  render.h
+	marchingcubes.h 	lookuptable.h
 	idsoshadeops.h          lights.h                renderer.h""")
 
 aqsis_install_headers = Split('''

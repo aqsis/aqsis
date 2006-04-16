@@ -28,6 +28,11 @@
 *          K-3D
 *
 */
+#include <stdio.h>
+#include <math.h>
+#include <vector>
+#include <list>
+#include <limits>
 
 #include "aqsis.h"
 #include "ri.h"
@@ -35,13 +40,8 @@
 #include "matrix.h"
 #include "blobby.h"
 #include "itexturemap.h"
-#include <stdio.h>
-#include "MarchingCubes.h"
+#include "marchingcubes.h"
 
-#include <math.h>
-#include <vector>
-#include <list>
-#include <limits>
 
 START_NAMESPACE( Aqsis )
 
@@ -659,7 +659,10 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point )
 void CqBlobby::polygonize( TqInt& NPoints, TqInt& NPolys, TqInt*& NVertices, TqInt*& Vertices, TqFloat*& Points, TqFloat Multiplier )
 {
 	MarchingCubes mc;
-	mc.set_resolution( 60, 60, 60 );
+	TqInt Divider = 50;
+	if (Multiplier)
+        	Divider = (TqInt)ceil(0.5/(Multiplier));
+	mc.set_resolution( Divider, Divider, Divider );
 	mc.init_all();
 
 	const CqVector3D centre = ( bbox.vecMax() + bbox.vecMin() )/2.0;
@@ -668,8 +671,9 @@ void CqBlobby::polygonize( TqInt& NPoints, TqInt& NPolys, TqInt*& NVertices, TqI
 	const TqFloat length_y = length.y();
 	const TqFloat length_z = length.z();
 	const TqFloat max = std::max( length_x, std::max( length_y, length_z ) );
-	const TqFloat voxel_size = max / 59.0;
+	const TqFloat voxel_size = max / (Divider - 1.0);
 
+	Aqsis::log() << info << "Divider Blobby: " << Divider << std::endl;
 	const TqFloat x_start = centre.x() - max / 2.0;
 	const TqFloat y_start = centre.y() - max / 2.0;
 	const TqFloat z_start = centre.z() - max / 2.0;

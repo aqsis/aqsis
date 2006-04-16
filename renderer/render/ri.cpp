@@ -3406,9 +3406,7 @@ RtVoid RiBlobbyV( RtInt nleaf, RtInt ncode, RtInt code[], RtInt nflt, RtFloat fl
 
 
 	TqFloat shadingrate = QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite( "System", "ShadingRate" ) [ 0 ];
-/*
 	const TqFloat *flatness = QGetRenderContext() ->poptCurrent()->GetFloatOption( "blobby", RI_FLATNESS );
-*/
 
 
 
@@ -3437,10 +3435,8 @@ RtVoid RiBlobbyV( RtInt nleaf, RtInt ncode, RtInt code[], RtInt nflt, RtFloat fl
 
 
 	// Polygonize this blobby; this is where it is computing intensive.
-/*
-	if (*flatness )
-		voxel_size = flatness[0];
-*/
+	if (flatness && *flatness )
+		voxel_size = *flatness;
 
 	TqInt npoints;
 	TqInt npolygons;
