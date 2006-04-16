@@ -41,7 +41,6 @@ aqsisdll_sources = Split("""
 	texturemap.cpp
 	transform.cpp
 	blobby.cpp
-	jules_bloomenthal.cpp
 	marchingcubes.cpp
 	trimcurve.cpp""")
 
@@ -50,7 +49,6 @@ aqsisdll_headers = Split("""
 	attributes.h            ilightsource.h          micropolygon.h          ri.h
 	bilinear.h              imagebuffer.h           motion.h                ri_cache.h
 	bound.h                 imagepixel.h            mpdump.h                rifile.h
-	jules_bloomenthal.h
 
 	bucket.h                imagers.h               nurbs.h                 shadeop.h
 	blobby.h		clippingvolume.h        inlineparse.h

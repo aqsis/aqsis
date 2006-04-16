@@ -3399,51 +3399,38 @@ RtVoid RiBlobbyV( RtInt nleaf, RtInt ncode, RtInt code[], RtInt nflt, RtFloat fl
 
 	Validate_RiBlobby
 
+	// Initialize the blobby structure
 	CqBlobby blobby(nleaf, ncode, code, nflt, flt, nstr, str);
 
-	// Get back the bounding box in world coordinate
+	// Get back the bounding box in world coordinates
 	CqBound Bound(blobby.Bound());
 
-
-	TqFloat shadingrate = QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite( "System", "ShadingRate" ) [ 0 ];
-	const TqFloat *flatness = QGetRenderContext() ->poptCurrent()->GetFloatOption( "blobby", RI_FLATNESS );
-
-
-
-	// Humble way to transform the bounding box into raster
+	// Transform the bounding box into raster coordinates
 	Bound.Transform( QGetRenderContext() ->matSpaceToSpace( "object", "raster", CqMatrix(), QGetRenderContext() ->matCurrent( QGetRenderContext() ->Time() ), QGetRenderContext()->Time() ));
 
+	// Get bounding-box size in pixels
+	TqFloat pixels_w = Bound.vecCross().x();
+	TqFloat pixels_h = Bound.vecCross().y();
 
-	TqFloat resH, resV;
+	// Adjust to shading rate
+	//TqFloat shading_rate_h = QGetRenderContext() ->pattrCurrent() ->GetFloatAttribute( "System", "ShadingRate" ) [ 0 ];
+	// pixels_w *= shading_rate_h;
+	//TqFloat shading_rate_v = QGetRenderContext() ->pattrCurrent() ->GetFloatAttribute( "System", "ShadingRate" ) [ 1 ];
+	// pixels_h *= shading_rate_v;
 
+/*
+	const TqFloat *flatness = QGetRenderContext() ->poptCurrent()->GetFloatOption( "blobby", RI_FLATNESS );
+	if (*flatness )
+		voxel_size = flatness[0];
+*/
 
-	resH = Bound.vecCross().x();
-	resV = Bound.vecCross().y();
-
-
-	Aqsis::log() << info << "In Screen Bound: " << Bound << std::endl;
-
-	TqFloat screen_size = resH;
-	if (screen_size > resV)
-		screen_size = resV;
-	if (screen_size < 0.01)
-		screen_size = 1.0;
-
-	TqFloat voxel_size = 2.0 * (shadingrate/ screen_size) ;
-
-	Aqsis::log() << info << "voxel_size: " << voxel_size << std::endl;
-
-
-	// Polygonize this blobby; this is where it is computing intensive.
-	if (flatness && *flatness )
-		voxel_size = *flatness;
-
+	// Polygonize this blobby
 	TqInt npoints;
 	TqInt npolygons;
 	TqInt* nvertices = 0;
 	TqInt* vertices = 0;
 	TqFloat* points = 0;
-	blobby.polygonize(npoints, npolygons, nvertices, vertices, points, voxel_size);
+	blobby.polygonize(pixels_w, pixels_h, npoints, npolygons, nvertices, vertices, points);
 
 	Aqsis::log() << info << "Polygonized : " << npoints << " points, " << npolygons << " triangles." << std::endl;
 

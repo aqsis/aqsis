@@ -40,6 +40,9 @@
 #include "marchingcubes.h"
 #include "lookuptable.h"
 
+// Compute normals
+#undef COMPUTE_NORMALS
+
 // step size of the arrays of vertices and triangles
 #define ALLOC_SIZE 65536
 
@@ -999,7 +1002,9 @@ void MarchingCubes::add_triangle( const char* trig, char n, TqInt v12 )
 				_triangles = new Triangle[ 2*_Ntrigs ] ;
 				memcpy( _triangles, temp, _Ntrigs*sizeof(Triangle) ) ;
 				delete[] temp ;
+/*
 				printf("%d allocated triangles\n", _Ntrigs) ;
+*/
 				_Ntrigs *= 2 ;
 			}
 
@@ -1074,7 +1079,9 @@ void MarchingCubes::test_vertex_addition()
 		_vertices = new Vertex[ _Nverts*2 ] ;
 		memcpy( _vertices, temp, _Nverts*sizeof(Vertex) ) ;
 		delete[] temp ;
+/*
 		printf("%d allocated vertices\n", _Nverts) ;
+*/
 		_Nverts *= 2 ;
 	}
 }
@@ -1092,6 +1099,7 @@ int MarchingCubes::add_x_vertex( )
 	vert->y      = (float) _j ;
 	vert->z      = (float) _k ;
 
+#ifdef COMPUTE_NORMALS
 	vert->nx = (1-u)*get_x_grad(_i,_j,_k) + u*get_x_grad(_i+1,_j,_k) ;
 	vert->ny = (1-u)*get_y_grad(_i,_j,_k) + u*get_y_grad(_i+1,_j,_k) ;
 	vert->nz = (1-u)*get_z_grad(_i,_j,_k) + u*get_z_grad(_i+1,_j,_k) ;
@@ -1103,7 +1111,7 @@ int MarchingCubes::add_x_vertex( )
 		vert->ny /= u ;
 		vert->nz /= u ;
 	}
-
+#endif
 
 	return _nverts-1 ;
 }
@@ -1121,6 +1129,7 @@ int MarchingCubes::add_y_vertex( )
 	vert->y      = (float)_j+u;
 	vert->z      = (float) _k ;
 
+#ifdef COMPUTE_NORMALS
 	vert->nx = (1-u)*get_x_grad(_i,_j,_k) + u*get_x_grad(_i,_j+1,_k) ;
 	vert->ny = (1-u)*get_y_grad(_i,_j,_k) + u*get_y_grad(_i,_j+1,_k) ;
 	vert->nz = (1-u)*get_z_grad(_i,_j,_k) + u*get_z_grad(_i,_j+1,_k) ;
@@ -1132,6 +1141,7 @@ int MarchingCubes::add_y_vertex( )
 		vert->ny /= u ;
 		vert->nz /= u ;
 	}
+#endif
 
 	return _nverts-1 ;
 }
@@ -1149,6 +1159,7 @@ int MarchingCubes::add_z_vertex( )
 	vert->y      = (float) _j ;
 	vert->z      = (float)_k+u;
 
+#ifdef COMPUTE_NORMALS
 	vert->nx = (1-u)*get_x_grad(_i,_j,_k) + u*get_x_grad(_i,_j,_k+1) ;
 	vert->ny = (1-u)*get_y_grad(_i,_j,_k) + u*get_y_grad(_i,_j,_k+1) ;
 	vert->nz = (1-u)*get_z_grad(_i,_j,_k) + u*get_z_grad(_i,_j,_k+1) ;
@@ -1160,6 +1171,7 @@ int MarchingCubes::add_z_vertex( )
 		vert->ny /= u ;
 		vert->nz /= u ;
 	}
+#endif
 
 	return _nverts-1 ;
 }
@@ -1185,9 +1197,11 @@ int MarchingCubes::add_c_vertex( )
 		vert->x += v.x ;
 		vert->y += v.y ;
 		vert->z += v.z ;
+#ifdef COMPUTE_NORMALS
 		vert->nx += v.nx ;
 		vert->ny += v.ny ;
 		vert->nz += v.nz ;
+#endif
 	}
 	vid = get_y_vert(_i+1, _j , _k ) ;
 	if( vid != -1 )
@@ -1197,9 +1211,11 @@ int MarchingCubes::add_c_vertex( )
 		vert->x += v.x ;
 		vert->y += v.y ;
 		vert->z += v.z ;
+#ifdef COMPUTE_NORMALS
 		vert->nx += v.nx ;
 		vert->ny += v.ny ;
 		vert->nz += v.nz ;
+#endif
 	}
 	vid = get_x_vert( _i ,_j+1, _k ) ;
 	if( vid != -1 )
@@ -1209,9 +1225,11 @@ int MarchingCubes::add_c_vertex( )
 		vert->x += v.x ;
 		vert->y += v.y ;
 		vert->z += v.z ;
+#ifdef COMPUTE_NORMALS
 		vert->nx += v.nx ;
 		vert->ny += v.ny ;
 		vert->nz += v.nz ;
+#endif
 	}
 	vid = get_y_vert( _i , _j , _k ) ;
 	if( vid != -1 )
@@ -1221,9 +1239,11 @@ int MarchingCubes::add_c_vertex( )
 		vert->x += v.x ;
 		vert->y += v.y ;
 		vert->z += v.z ;
+#ifdef COMPUTE_NORMALS
 		vert->nx += v.nx ;
 		vert->ny += v.ny ;
 		vert->nz += v.nz ;
+#endif
 	}
 	vid = get_x_vert( _i , _j ,_k+1) ;
 	if( vid != -1 )
@@ -1233,9 +1253,11 @@ int MarchingCubes::add_c_vertex( )
 		vert->x += v.x ;
 		vert->y += v.y ;
 		vert->z += v.z ;
+#ifdef COMPUTE_NORMALS
 		vert->nx += v.nx ;
 		vert->ny += v.ny ;
 		vert->nz += v.nz ;
+#endif
 	}
 	vid = get_y_vert(_i+1, _j ,_k+1) ;
 	if( vid != -1 )
@@ -1245,9 +1267,11 @@ int MarchingCubes::add_c_vertex( )
 		vert->x += v.x ;
 		vert->y += v.y ;
 		vert->z += v.z ;
+#ifdef COMPUTE_NORMALS
 		vert->nx += v.nx ;
 		vert->ny += v.ny ;
 		vert->nz += v.nz ;
+#endif
 	}
 	vid = get_x_vert( _i ,_j+1,_k+1) ;
 	if( vid != -1 )
@@ -1257,9 +1281,11 @@ int MarchingCubes::add_c_vertex( )
 		vert->x += v.x ;
 		vert->y += v.y ;
 		vert->z += v.z ;
+#ifdef COMPUTE_NORMALS
 		vert->nx += v.nx ;
 		vert->ny += v.ny ;
 		vert->nz += v.nz ;
+#endif
 	}
 	vid = get_y_vert( _i , _j ,_k+1) ;
 	if( vid != -1 )
@@ -1269,9 +1295,11 @@ int MarchingCubes::add_c_vertex( )
 		vert->x += v.x ;
 		vert->y += v.y ;
 		vert->z += v.z ;
+#ifdef COMPUTE_NORMALS
 		vert->nx += v.nx ;
 		vert->ny += v.ny ;
 		vert->nz += v.nz ;
+#endif
 	}
 	vid = get_z_vert( _i , _j , _k ) ;
 	if( vid != -1 )
@@ -1281,9 +1309,11 @@ int MarchingCubes::add_c_vertex( )
 		vert->x += v.x ;
 		vert->y += v.y ;
 		vert->z += v.z ;
+#ifdef COMPUTE_NORMALS
 		vert->nx += v.nx ;
 		vert->ny += v.ny ;
 		vert->nz += v.nz ;
+#endif
 	}
 	vid = get_z_vert(_i+1, _j , _k ) ;
 	if( vid != -1 )
@@ -1293,9 +1323,11 @@ int MarchingCubes::add_c_vertex( )
 		vert->x += v.x ;
 		vert->y += v.y ;
 		vert->z += v.z ;
+#ifdef COMPUTE_NORMALS
 		vert->nx += v.nx ;
 		vert->ny += v.ny ;
 		vert->nz += v.nz ;
+#endif
 	}
 	vid = get_z_vert(_i+1,_j+1, _k ) ;
 	if( vid != -1 )
@@ -1305,9 +1337,11 @@ int MarchingCubes::add_c_vertex( )
 		vert->x += v.x ;
 		vert->y += v.y ;
 		vert->z += v.z ;
+#ifdef COMPUTE_NORMALS
 		vert->nx += v.nx ;
 		vert->ny += v.ny ;
 		vert->nz += v.nz ;
+#endif
 	}
 	vid = get_z_vert( _i ,_j+1, _k ) ;
 	if( vid != -1 )
@@ -1317,15 +1351,18 @@ int MarchingCubes::add_c_vertex( )
 		vert->x += v.x ;
 		vert->y += v.y ;
 		vert->z += v.z ;
+#ifdef COMPUTE_NORMALS
 		vert->nx += v.nx ;
 		vert->ny += v.ny ;
 		vert->nz += v.nz ;
+#endif
 	}
 
 	vert->x  /= u ;
 	vert->y  /= u ;
 	vert->z  /= u ;
 
+#ifdef COMPUTE_NORMALS
 	u = (float) sqrt( vert->nx * vert->nx + vert->ny * vert->ny +vert->nz * vert->nz ) ;
 	if( u > 0 )
 	{
@@ -1333,6 +1370,7 @@ int MarchingCubes::add_c_vertex( )
 		vert->ny /= u ;
 		vert->nz /= u ;
 	}
+#endif
 
 	return _nverts-1 ;
 }

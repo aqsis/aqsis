@@ -87,11 +87,11 @@ class CqBlobby : public CqSurface
 		/** Return CqBlobby's implicit value.
 		 * \param World position to compute implicit value from.
 		 */
-		TqFloat implicit_value(CqVector3D &Point, TqInt n, std::vector <TqFloat> &splits);
+		TqFloat implicit_value(const CqVector3D& Point, TqInt n, std::vector <TqFloat>& splits);
 
-		inline TqFloat implicit_value(const CqVector3D& Point);
+		TqFloat implicit_value(const CqVector3D& Point);
 
-		void polygonize(TqInt& NPoints, TqInt& NPolys, TqInt*& NVertices, TqInt*& Vertices, TqFloat*& Points, TqFloat ShadingRate);
+		void polygonize(TqFloat PixelsWidth, TqFloat PixelsHeight, TqInt& NPoints, TqInt& NPolys, TqInt*& NVertices, TqInt*& Vertices, TqFloat*& Points);
 
 		//! Enumeration of the blobby opcodes
 		typedef enum

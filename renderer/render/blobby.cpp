@@ -28,11 +28,6 @@
 *          K-3D
 *
 */
-#include <stdio.h>
-#include <math.h>
-#include <vector>
-#include <list>
-#include <limits>
 
 #include "aqsis.h"
 #include "ri.h"
@@ -40,8 +35,13 @@
 #include "matrix.h"
 #include "blobby.h"
 #include "itexturemap.h"
+#include <stdio.h>
 #include "marchingcubes.h"
 
+#include <math.h>
+#include <vector>
+#include <list>
+#include <limits>
 
 START_NAMESPACE( Aqsis )
 
@@ -110,12 +110,9 @@ class blobby_vm_assembler
 			m_code(code),
 			m_floats(floats),
 			m_instructions(Instructions),
-			m_bbox(BBox)
+			m_bbox(BBox),
+			m_has_bounding_box(false)
 		{
-			// Initialize bounding-box
-			TqFloat absolute = std::numeric_limits<TqFloat>::max();
-			m_bbox = CqBound(absolute, absolute, absolute, -absolute, -absolute, -absolute);
-
 			// Decode blobby instructions and store them onto a stack
 			for(TqInt c = 0; c < ncode;)
 			{
@@ -212,20 +209,46 @@ class blobby_vm_assembler
 
 		std::vector<opcode> opcodes;
 
+		/// Encapsulate a segment into the bounding-box
+		void grow_bound( const CqVector3D& Start, const CqVector3D& End, const TqFloat radius = 1.0, const CqMatrix& transformation )
+		{
+			// Radius + epsilon
+			const TqFloat r = radius * 0.5 * ( 1.0 + 1.0 / 10 );
+
+			CqBound start_box( Start.x() - r, Start.y() - r, Start.z() - r, Start.x() + r, Start.y() + r, Start.z() + r );
+			start_box.Transform( transformation );
+
+			CqBound end_box( End.x() - r, End.y() - r, End.z() - r, End.x() + r, End.y() + r, End.z() + r );
+			end_box.Transform( transformation );
+
+			start_box.Encapsulate( end_box );
+
+			encapsulate( start_box );
+		}
+
+		/// Encapsulate an ellipsoid into the bounding-box
 		void grow_bound( const CqMatrix& transformation, const TqFloat radius = 1.0 )
 		{
-			TqFloat r = radius * 0.5;
+			// Radius + epsilon
+			const TqFloat r = radius * 0.5 * ( 1.0 + 1.0 / 10 );
+
 			CqBound unit_box( -r, -r, -r, r, r, r );
 			unit_box.Transform( transformation );
 
-			m_bbox.Encapsulate( unit_box );
+			encapsulate( unit_box );
 		}
 
-		void grow_bound( const CqVector3D& vector, const TqFloat radius = 1.0 )
+		void encapsulate( const CqBound& Bound)
 		{
-			m_bbox.Encapsulate( vector );
-		}
+			if(m_has_bounding_box)
+			{
+				m_bbox.Encapsulate(Bound);
+				return;
+			}
 
+			m_bbox = Bound;
+			m_has_bounding_box = true;
+		}
 
 		/// Build implicit value evaluation program: store opcodes and parameters in execution order
 		void build_program( opcode op )
@@ -284,9 +307,7 @@ class blobby_vm_assembler
 						    m_floats[f+8], m_floats[f+9], m_floats[f+10], m_floats[f+11],
 						    m_floats[f+12], m_floats[f+13], m_floats[f+14], m_floats[f+15]);
 
-
-						m_bbox = CqBound(start.x(),start.y(),start.z(), end.x(), end.y(), end.z());
-						grow_bound(transformation, radius);
+						grow_bound(start, end, radius, transformation);
 
 						m_instructions.push_back(CqBlobby::instruction(CqBlobby::SEGMENT));
 						m_instructions.push_back(CqBlobby::instruction(transformation));
@@ -327,6 +348,7 @@ class blobby_vm_assembler
 	TqFloat* m_floats;
 	CqBlobby::instructions_t& m_instructions;
 	CqBound& m_bbox;
+	bool m_has_bounding_box;
 };
 
 //---------------------------------------------------------------------
@@ -372,11 +394,11 @@ CqVector3D nearest_segment_point( const CqVector3D& Point, const CqVector3D& S1,
 	const CqVector3D vector = S2 - S1;
 	const CqVector3D w = Point - S1;
 
-	const TqFloat c1 = CqVector3D( w * vector ).Magnitude2();
+	const TqFloat c1 = w * vector;
 	if(c1 <= 0)
 		return S1;
 
-	const TqFloat c2 = CqVector3D( vector * vector ).Magnitude2();
+	const TqFloat c2 = vector * vector;
 	if(c2 <= c1)
 		return S2;
 
@@ -395,7 +417,7 @@ CqVector3D nearest_segment_point( const CqVector3D& Point, const CqVector3D& S1,
  *  raise the performance significantly.
  */
 /** Blobby virtual machine program execution - calculates the value of an implicit surface at a given 3D point */
-TqFloat CqBlobby::implicit_value( CqVector3D &Point, TqInt n, std::vector <TqFloat> &splits )
+TqFloat CqBlobby::implicit_value( const CqVector3D& Point, TqInt n, std::vector <TqFloat> &splits )
 {
 	TqFloat sum = 0.0f;
 	TqFloat result;
@@ -462,15 +484,15 @@ TqFloat CqBlobby::implicit_value( CqVector3D &Point, TqInt n, std::vector <TqFlo
 					const CqVector3D end = instructions[pc++].get_vector();
 					const TqFloat radius = instructions[pc++].value;
 
+					// Nearest segment point
+					const CqVector3D segment_point = nearest_segment_point(Point, start, end);
+					// Translation( segment_point ) * Scaling ( radius ) * m
+					const CqMatrix transformation = CqMatrix( segment_point ) * CqMatrix( radius, radius, radius ) * m;
+					// Distance
+					const TqFloat r2 = (transformation.Inverse() * Point).Magnitude2();
+					// Value
+					const TqFloat result = (r2 <= 1) ? (1 - 3*r2 + 3*r2*r2 - r2*r2*r2) : 0;
 
-					CqVector3D nearpt = nearest_segment_point(Point, start, end);
-
-
-					CqVector3D probably  =   m * (Point -  nearpt) ;
-					TqFloat r2 = probably.Magnitude2();
-
-
-					result = r2 <= 1 ? (1 - 3*r2 + 3*r2*r2 - r2*r2*r2) : 0;
 					sum += result;
 					splits[int_index++] = result;
 				}
@@ -562,15 +584,15 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point )
 					const CqVector3D end = instructions[pc++].get_vector();
 					const TqFloat radius = instructions[pc++].value;
 
+					// Nearest segment point
+					const CqVector3D segment_point = nearest_segment_point(Point, start, end);
+					// Translation( segment_point ) * Scaling ( radius ) * m
+					const CqMatrix transformation = CqMatrix( segment_point ) * CqMatrix( radius, radius, radius ) * m;
+					// Distance
+					const TqFloat r2 = (transformation.Inverse() * Point).Magnitude2();
+					// Value
+					const TqFloat result = (r2 <= 1) ? (1 - 3*r2 + 3*r2*r2 - r2*r2*r2) : 0;
 
-					CqVector3D nearpt = nearest_segment_point(Point, start, end);
-
-
-					CqVector3D probably  =   m * (Point -  nearpt) ;
-					TqFloat r2 = probably.Magnitude2();
-
-
-					result = r2 <= 1 ? (1 - 3*r2 + 3*r2*r2 - r2*r2*r2) : 0;
 					//Aqsis::log() << info << "Segment: result " << result << std::endl;
 					stack.push(result);
 				}
@@ -652,41 +674,56 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point )
 	return stack.top();
 }
 
-//---------------------------------------------------------------------
-/** polygonize this is where everything is going on..
-*/
 
-void CqBlobby::polygonize( TqInt& NPoints, TqInt& NPolys, TqInt*& NVertices, TqInt*& Vertices, TqFloat*& Points, TqFloat Multiplier )
+/** \fn void polygonize( TqInt& NPoints, TqInt& NPolys, TqInt*& NVertices, TqInt*& Vertices, TqFloat*& Points, TqFloat PixelsWidth, TqFloat PixelsHeight )
+    \brief Polygonizes RiBlobby and outputs RiPointsPolygons data.
+    \param PixelWidth Blobby's bounding-box width in pixels.
+    \param PixelHeight Blobby's bounding-box height in pixels.
+    \param NPoints Resulting point count.
+    \param NPolys Resulting polygon count (triangles).
+    \param NVertices Polygon vertex counts array.
+    \param Vertices Polygons array.
+    \param Vertices Point Points array.
+ */
+void CqBlobby::polygonize( TqFloat PixelsWidth, TqFloat PixelsHeight, TqInt& NPoints, TqInt& NPolys, TqInt*& NVertices, TqInt*& Vertices, TqFloat*& Points )
 {
+	// Make sure the blobby is big enough to show
+	if(PixelsWidth <= 0 || PixelsHeight <= 0)
+		return;
+
+	// Get bounding-box centre and sizes
+	const CqVector3D centre = ( bbox.vecMax() + bbox.vecMin() ) / 2.0;
+	const CqVector3D length = ( bbox.vecMax() - bbox.vecMin() );
+
+	// Calculate voxel sizes and polygonization resolution
+	const TqFloat x_voxel_size = length.x() / std::ceil( PixelsWidth );
+	const TqFloat y_voxel_size = length.y() / std::ceil( PixelsHeight );
+	const TqFloat z_voxel_size = ( x_voxel_size + y_voxel_size ) / 2.0;
+
+	const int x_resolution = static_cast<int>( std::ceil( PixelsWidth ) );
+	const int y_resolution = static_cast<int>( std::ceil( PixelsHeight ) );
+	const int z_resolution = static_cast<int>( std::ceil( length.z() / z_voxel_size ) );
+
+	// Initialize Marching Cubes algorithm
 	MarchingCubes mc;
-	TqInt Divider = 50;
-	if (Multiplier)
-        	Divider = (TqInt)ceil(0.5/(Multiplier));
-	mc.set_resolution( Divider, Divider, Divider );
+	mc.set_resolution( x_resolution, y_resolution, z_resolution );
 	mc.init_all();
 
-	const CqVector3D centre = ( bbox.vecMax() + bbox.vecMin() )/2.0;
-	const CqVector3D length = ( bbox.vecMax() - bbox.vecMin() );
-	const TqFloat length_x = length.x();
-	const TqFloat length_y = length.y();
-	const TqFloat length_z = length.z();
-	const TqFloat max = std::max( length_x, std::max( length_y, length_z ) );
-	const TqFloat voxel_size = max / (Divider - 1.0);
-
-	Aqsis::log() << info << "Divider Blobby: " << Divider << std::endl;
-	const TqFloat x_start = centre.x() - max / 2.0;
-	const TqFloat y_start = centre.y() - max / 2.0;
-	const TqFloat z_start = centre.z() - max / 2.0;
+	const TqFloat x_start = centre.x() - length.x() / 2.0;
+	const TqFloat y_start = centre.y() - length.y() / 2.0;
+	const TqFloat z_start = centre.z() - length.z() / 2.0;
 
 	// Compute implicit values
 	TqFloat z = z_start;
-	for( int k = 0 ; k < mc.size_z() ; k++, z += voxel_size )
+	for( int k = 0 ; k < mc.size_z() ; k++, z += z_voxel_size )
 	{
+		Aqsis::log() << info << " blobby slice " << k << " / " << mc.size_z() << std::endl;
+
 		TqFloat y = y_start;
-		for( int j = 0 ; j < mc.size_y() ; j++, y += voxel_size )
+		for( int j = 0 ; j < mc.size_y() ; j++, y += y_voxel_size )
 		{
 			TqFloat x = x_start;
-			for( int i = 0 ; i < mc.size_x() ; i++, x += voxel_size )
+			for( int i = 0 ; i < mc.size_x() ; i++, x += x_voxel_size )
 			{
 				const TqFloat iv = implicit_value( CqVector3D( x, y, z ) );
 				mc.set_data( static_cast<float>( iv - 0.421875 ), i, j, k );
@@ -725,13 +762,13 @@ void CqBlobby::polygonize( TqInt& NPoints, TqInt& NPolys, TqInt*& NVertices, TqI
 	TqFloat* point = Points;
 	for ( int i = 0; i < nverts; i++ )
 	{
-		*point++ = x_start + voxel_size * vertices[i].x;
-		*point++ = y_start + voxel_size * vertices[i].y;
-		*point++ = z_start + voxel_size * vertices[i].z;
+		*point++ = x_start + x_voxel_size * vertices[i].x;
+		*point++ = y_start + y_voxel_size * vertices[i].y;
+		*point++ = z_start + z_voxel_size * vertices[i].z;
 	}
 
 	// Cleanup
-	mc.clean_all() ;
+	mc.clean_all();
 }
 
 
