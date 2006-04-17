@@ -64,11 +64,6 @@ else:
 	env.AppendUnique(CPPPATH = [env.Dir('#/aqsistypes/win32')])
 	env.AppendUnique(CPPDEFINES=[('NDEBUG', '1'), ('PLUGINS', '1'), 'WIN32', 'NO_SYSLOG'])
 
-	# Point at the boost headers.
-	# todo: need to find a way of determining this location automatically
-	#env.Replace(boost_include_path = ['/usr/include/boost'])
-	env.Replace(boost_include_path = ['/boost/include/boost-1_33_1'])
-
 	# If the tiff include path isn't specified as an option, choose the default, of the 
 	# win32libs project from CVS checked out to the same folder as 'renderer'
 	if env['tiff_include_path'] == "":
