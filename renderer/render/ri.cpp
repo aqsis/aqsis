@@ -3405,8 +3405,21 @@ RtVoid RiBlobbyV( RtInt nleaf, RtInt ncode, RtInt code[], RtInt nflt, RtFloat fl
 	// Get back the bounding box in world coordinates
 	CqBound Bound(blobby.Bound());
 
+	// Transform the bounding box into camera coordinates
+	Bound.Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), QGetRenderContext() ->matCurrent( QGetRenderContext() ->Time() ), QGetRenderContext()->Time() ));
+
+	// The bounding-box stops at camera's plane
+	TqFloat camera_z = QGetRenderContext() ->poptCurrent() ->GetFloatOption( "System", "Clipping" ) [ 0 ];
+	if(Bound.vecMax().z() < camera_z)
+		// Blobby's behind the camera
+		return;
+
+	if(Bound.vecMin().z() < camera_z)
+		// Cut the bounding-box with camera's plane
+		Bound = CqBound(CqVector3D(Bound.vecMin().x(), Bound.vecMin().y(), camera_z), Bound.vecMax());
+
 	// Transform the bounding box into raster coordinates
-	Bound.Transform( QGetRenderContext() ->matSpaceToSpace( "object", "raster", CqMatrix(), QGetRenderContext() ->matCurrent( QGetRenderContext() ->Time() ), QGetRenderContext()->Time() ));
+	Bound.Transform( QGetRenderContext() ->matSpaceToSpace( "camera", "raster", CqMatrix(), QGetRenderContext() ->matCurrent( QGetRenderContext() ->Time() ), QGetRenderContext()->Time() ));
 
 	// Get bounding-box size in pixels
 	TqFloat pixels_w = Bound.vecCross().x();
