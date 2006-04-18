@@ -210,7 +210,7 @@ class blobby_vm_assembler
 		std::vector<opcode> opcodes;
 
 		/// Encapsulate a segment into the bounding-box
-		void grow_bound( const CqVector3D& Start, const CqVector3D& End, const TqFloat radius = 1.0, const CqMatrix& transformation )
+		void grow_bound( const CqVector3D& Start, const CqVector3D& End, const TqFloat radius, const CqMatrix& transformation )
 		{
 			// Radius + epsilon
 			const TqFloat r = radius * 0.5 * ( 1.0 + 1.0 / 10 );
