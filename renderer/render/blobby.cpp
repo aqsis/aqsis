@@ -208,12 +208,12 @@ class blobby_vm_assembler
 		};
 
 		std::vector<opcode> opcodes;
-
+		
 		/// Encapsulate a segment into the bounding-box
 		void grow_bound( const CqVector3D& Start, const CqVector3D& End, const TqFloat radius, const CqMatrix& transformation )
 		{
 			// Radius + epsilon
-			const TqFloat r = radius * 0.5 * ( 1.0 + 1.0 / 10 );
+			const TqFloat r = radius * 0.5 * ( 1.0 + 2.0 / 10.0 );
 
 			CqBound start_box( Start.x() - r, Start.y() - r, Start.z() - r, Start.x() + r, Start.y() + r, Start.z() + r );
 			start_box.Transform( transformation );
@@ -227,10 +227,10 @@ class blobby_vm_assembler
 		}
 
 		/// Encapsulate an ellipsoid into the bounding-box
-		void grow_bound( const CqMatrix& transformation, const TqFloat radius = 1.0 )
+		void grow_bound( const CqMatrix& transformation, const TqFloat radius = 1.0)
 		{
 			// Radius + epsilon
-			const TqFloat r = radius * 0.5 * ( 1.0 + 1.0 / 10 );
+			const TqFloat r = radius * 0.5 * ( 1.0 + 2.0 / 10.0 );
 
 			CqBound unit_box( -r, -r, -r, r, r, r );
 			unit_box.Transform( transformation );
@@ -687,6 +687,8 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point )
  */
 void CqBlobby::polygonize( TqFloat PixelsWidth, TqFloat PixelsHeight, TqInt& NPoints, TqInt& NPolys, TqInt*& NVertices, TqInt*& Vertices, TqFloat*& Points )
 {
+	TqInt i, j, k;
+
 	// Make sure the blobby is big enough to show
 	if(PixelsWidth <= 0 || PixelsHeight <= 0)
 		return;
@@ -695,19 +697,47 @@ void CqBlobby::polygonize( TqFloat PixelsWidth, TqFloat PixelsHeight, TqInt& NPo
 	const CqVector3D centre = ( bbox.vecMax() + bbox.vecMin() ) / 2.0;
 	const CqVector3D length = ( bbox.vecMax() - bbox.vecMin() );
 
-	// Calculate voxel sizes and polygonization resolution
-	const TqFloat x_voxel_size = length.x() / std::ceil( PixelsWidth );
-	const TqFloat y_voxel_size = length.y() / std::ceil( PixelsHeight );
-	const TqFloat z_voxel_size = ( x_voxel_size + y_voxel_size ) / 2.0;
+	// Limit ourself to 512 max
+	if ( PixelsWidth > 512) 
+	{
+		Aqsis::log() << warning << "Reducing PixelsWidth to 512: " << PixelsWidth << std::endl;
+		PixelsWidth = 512;
+	}
 
-	const int x_resolution = static_cast<int>( std::ceil( PixelsWidth ) );
-	const int y_resolution = static_cast<int>( std::ceil( PixelsHeight ) );
-	const int z_resolution = static_cast<int>( std::ceil( length.z() / z_voxel_size ) );
+	if ( PixelsHeight > 512) 
+	{
+		Aqsis::log() << warning << "Reducing PixelsHeight to 512: " << PixelsHeight << std::endl;
+		PixelsHeight = 512;
+	}
+
+	// Calculate voxel sizes and polygonization resolution
+	TqFloat x_voxel_size = length.x() / std::ceil( PixelsWidth );
+	TqFloat y_voxel_size = length.y() / std::ceil( PixelsHeight );
+	TqFloat z_voxel_size = ( x_voxel_size + y_voxel_size ) / 2.0;
+
+	TqInt x_resolution = static_cast<int>( std::ceil( PixelsWidth ) );
+	TqInt y_resolution = static_cast<int>( std::ceil( PixelsHeight ) );
+	TqInt z_resolution = static_cast<int>( std::ceil( length.z() / z_voxel_size ) );
 
 	// Initialize Marching Cubes algorithm
 	MarchingCubes mc;
+
 	mc.set_resolution( x_resolution, y_resolution, z_resolution );
 	mc.init_all();
+
+	// Lack of memory I forced to lower the requirements to voxel_size 
+	// (x,y,z)
+	if ( (mc.size_x() != x_resolution) ||
+		(mc.size_y() != y_resolution) ||
+		(mc.size_z() != z_resolution) )
+	{
+		x_voxel_size = length.x() / mc.size_x();
+		y_voxel_size = length.y() / mc.size_y();
+		z_voxel_size = ( x_voxel_size + y_voxel_size ) / 2.0;
+		x_resolution = mc.size_x();
+		y_resolution = mc.size_y();
+		z_resolution = mc.size_z();
+	}
 
 	const TqFloat x_start = centre.x() - length.x() / 2.0;
 	const TqFloat y_start = centre.y() - length.y() / 2.0;
@@ -715,18 +745,18 @@ void CqBlobby::polygonize( TqFloat PixelsWidth, TqFloat PixelsHeight, TqInt& NPo
 
 	// Compute implicit values
 	TqFloat z = z_start;
-	for( int k = 0 ; k < mc.size_z() ; k++, z += z_voxel_size )
+	for( k = 0 ; k < mc.size_z() ; k++, z += z_voxel_size )
 	{
 		Aqsis::log() << info << " blobby slice " << k << " / " << mc.size_z() << std::endl;
 
 		TqFloat y = y_start;
-		for( int j = 0 ; j < mc.size_y() ; j++, y += y_voxel_size )
+		for( j = 0 ; j < mc.size_y() ; j++, y += y_voxel_size )
 		{
 			TqFloat x = x_start;
-			for( int i = 0 ; i < mc.size_x() ; i++, x += x_voxel_size )
+			for( i = 0 ; i < mc.size_x() ; i++, x += x_voxel_size )
 			{
 				const TqFloat iv = implicit_value( CqVector3D( x, y, z ) );
-				mc.set_data( static_cast<float>( iv - 0.421875 ), i, j, k );
+				mc.set_data( static_cast<TqFloat>( iv - 0.421875 ), i, j, k );
 			}
 		}
 	}
@@ -750,7 +780,7 @@ void CqBlobby::polygonize( TqFloat PixelsWidth, TqFloat PixelsHeight, TqInt& NPo
 	// Set vertex indices
 	TqInt* nvert = NVertices;
 	TqInt* vert = Vertices;
-	for ( int i = 0; i < ntrigs; ++i )
+	for ( i = 0; i < ntrigs; ++i )
 	{
 		*nvert++ = 3;
 		*vert++ = triangles[i].v1;
@@ -760,7 +790,7 @@ void CqBlobby::polygonize( TqFloat PixelsWidth, TqFloat PixelsHeight, TqInt& NPo
 
 	// Compute vertex positions in the blobbies world (they were returned in grid coordinates)
 	TqFloat* point = Points;
-	for ( int i = 0; i < nverts; i++ )
+	for ( i = 0; i < nverts; i++ )
 	{
 		*point++ = x_start + x_voxel_size * vertices[i].x;
 		*point++ = y_start + y_voxel_size * vertices[i].y;
@@ -770,7 +800,6 @@ void CqBlobby::polygonize( TqFloat PixelsWidth, TqFloat PixelsHeight, TqInt& NPo
 	// Cleanup
 	mc.clean_all();
 }
-
 
 END_NAMESPACE( Aqsis )
 //---------------------------------------------------------------------

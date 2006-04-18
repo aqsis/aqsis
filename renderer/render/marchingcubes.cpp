@@ -37,6 +37,9 @@
 #include <float.h>
 #include <stdio.h>
 
+#include "aqsis.h"
+#include "renderer.h"
+#include "logging.h"
 #include "marchingcubes.h"
 #include "lookuptable.h"
 
@@ -46,12 +49,13 @@
 // step size of the arrays of vertices and triangles
 #define ALLOC_SIZE 65536
 
+START_NAMESPACE( Aqsis )
+
 //_____________________________________________________________________________
 // print cube for debug
 void MarchingCubes::print_cube()
 {
-	printf( "\t%f %f %f %f %f %f %f %f\n",
-	        _cube[0], _cube[1], _cube[2], _cube[3], _cube[4], _cube[5], _cube[6], _cube[7]) ;
+	//Aqsis::log() << warning << _cube[0] << " " <<  _cube[1] << " " <<  _cube[2] << " " <<  _cube[3] << " " <<  _cube[4] << " " <<  _cube[5] << " " <<  _cube[6] << " " <<  _cube[7]) << std::endl;
 }
 
 //_____________________________________________________________________________
@@ -140,16 +144,31 @@ void MarchingCubes::run()
 void MarchingCubes::init_temps()
 //-----------------------------------------------------------------------------
 {
-	_data    = new float[_size_x * _size_y * _size_z] ;
-	_x_verts = new TqInt  [_size_x * _size_y * _size_z] ;
-	_y_verts = new TqInt  [_size_x * _size_y * _size_z] ;
-	_z_verts = new TqInt  [_size_x * _size_y * _size_z] ;
+	TqLong howmany = _size_x * _size_y * _size_z;
+	_data    = new TqFloat[ howmany ];
+	_x_verts = new TqInt  [ howmany ];
+	_y_verts = new TqInt  [ howmany ];
+	_z_verts = new TqInt  [ howmany ];
 
-	memset( _x_verts, -1, _size_x * _size_y * _size_z * sizeof( TqInt ) ) ;
-	memset( _y_verts, -1, _size_x * _size_y * _size_z * sizeof( TqInt ) ) ;
-	memset( _z_verts, -1, _size_x * _size_y * _size_z * sizeof( TqInt ) ) ;
+	while (!_x_verts || !_y_verts || !_z_verts)
+	{
+		clean_temps();
+		_size_x /= 2;
+		_size_y /= 2;
+		_size_z /= 2;
+		howmany = _size_x * _size_y * _size_z;
 
-	memset( _N, 0, 15 * sizeof(int) ) ;
+		_data    = new TqFloat[ howmany ];
+		_x_verts = new TqInt  [ howmany ];
+		_y_verts = new TqInt  [ howmany ];
+		_z_verts = new TqInt  [ howmany ];
+
+	}
+	memset( _x_verts, -1, howmany * sizeof( TqInt ) ) ;
+	memset( _y_verts, -1, howmany * sizeof( TqInt ) ) ;
+	memset( _z_verts, -1, howmany * sizeof( TqInt ) ) ;
+
+	memset( _N, 0, 15 * sizeof(TqInt) ) ;
 }
 //_____________________________________________________________________________
 
@@ -176,10 +195,14 @@ void MarchingCubes::init_all ()
 void MarchingCubes::clean_temps()
 //-----------------------------------------------------------------------------
 {
-	delete [] _data;
-	delete [] _x_verts;
-	delete [] _y_verts;
-	delete [] _z_verts;
+	if (_data)
+		delete [] _data;
+	if (_x_verts)
+		delete [] _x_verts;
+	if (_y_verts)
+		delete [] _y_verts;
+	if (_z_verts)
+		delete [] _z_verts;
 
 	_data     = (float*)NULL ;
 	_x_verts  = (int*)NULL ;
@@ -276,7 +299,7 @@ void MarchingCubes::compute_intersection_points( )
 //_____________________________________________________________________________
 // Test a face
 // if face>0 return true if the face contains a part of the surface
-bool MarchingCubes::test_face( schar face )
+bool MarchingCubes::test_face( TqChar face )
 //-----------------------------------------------------------------------------
 {
 	TqFloat A,B,C,D ;
@@ -343,7 +366,7 @@ bool MarchingCubes::test_face( schar face )
 // Test the interior of a cube
 // if s == 7, return true  if the interior is empty
 // if s ==-7, return false if the interior is empty
-bool MarchingCubes::test_interior( schar s )
+bool MarchingCubes::test_interior( TqChar s )
 //-----------------------------------------------------------------------------
 {
 	TqFloat t, At=0, Bt=0, Ct=0, Dt=0, a, b ;
@@ -1405,3 +1428,5 @@ void MarchingCubes::write(const char *fn, bool bin )
 //_____________________________________________________________________________
 
 
+//---------------------------------------------------------------------
+END_NAMESPACE( Aqsis )

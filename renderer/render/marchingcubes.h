@@ -35,13 +35,11 @@
 #endif //AQSIS_SYSTEM_WIN32
 
 #include "aqsis.h"
+#include "renderer.h"
 
-//_____________________________________________________________________________
+START_NAMESPACE( Aqsis )
+
 // types
-/** unsigned char alias */
-typedef unsigned char uchar ;
-/** signed char alias */
-typedef   signed char schar ;
 
 //-----------------------------------------------------------------------------
 // Vertex structure
@@ -182,9 +180,9 @@ protected :
   /** tesselates one cube */
   void process_cube ()             ;
   /** tests if the components of the tesselation of the cube should be connected by the interior of an ambiguous face */
-  TqBool test_face    ( schar face ) ;
+  TqBool test_face    ( TqChar face ) ;
   /** tests if the components of the tesselation of the cube should be connected through the interior of the cube */
-  TqBool test_interior( schar s )    ;
+  TqBool test_interior( TqChar s )    ;
 
 
 //-----------------------------------------------------------------------------
@@ -311,13 +309,15 @@ protected :
   TqInt       _k          ;  /**< ordinate of the active cube */
 
   TqFloat     _cube[8]    ;  /**< values of the implicit function on the active cube */
-  uchar     _lut_entry  ;  /**< cube sign representation in [0..255] */
-  uchar     _case       ;  /**< case of the active cube in [0..15] */
-  uchar     _config     ;  /**< configuration of the active cube */
-  uchar     _subconfig  ;  /**< subconfiguration of the active cube */
+  TqUchar     _lut_entry  ;  /**< cube sign representation in [0..255] */
+  TqUchar     _case       ;  /**< case of the active cube in [0..15] */
+  TqUchar     _config     ;  /**< configuration of the active cube */
+  TqUchar     _subconfig  ;  /**< subconfiguration of the active cube */
 };
 //_____________________________________________________________________________
 
+//---------------------------------------------------------------------
+END_NAMESPACE( Aqsis )
 
 #endif // _MARCHINGCUBES_H_
 

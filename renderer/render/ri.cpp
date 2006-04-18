@@ -3426,10 +3426,9 @@ RtVoid RiBlobbyV( RtInt nleaf, RtInt ncode, RtInt code[], RtInt nflt, RtFloat fl
 	TqFloat pixels_h = Bound.vecCross().y();
 
 	// Adjust to shading rate
-	//TqFloat shading_rate_h = QGetRenderContext() ->pattrCurrent() ->GetFloatAttribute( "System", "ShadingRate" ) [ 0 ];
-	// pixels_w *= shading_rate_h;
-	//TqFloat shading_rate_v = QGetRenderContext() ->pattrCurrent() ->GetFloatAttribute( "System", "ShadingRate" ) [ 1 ];
-	// pixels_h *= shading_rate_v;
+	TqFloat shading_rate = QGetRenderContext() ->pattrCurrent() ->GetFloatAttribute( "System", "ShadingRate" ) [ 0 ];
+	pixels_w /= shading_rate;
+	pixels_h /= shading_rate;
 
 /*
 	const TqFloat *flatness = QGetRenderContext() ->poptCurrent()->GetFloatOption( "blobby", RI_FLATNESS );
