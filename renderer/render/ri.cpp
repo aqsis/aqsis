@@ -3441,7 +3441,7 @@ RtVoid RiBlobbyV( RtInt nleaf, RtInt ncode, RtInt code[], RtInt nflt, RtFloat fl
 
 	Aqsis::log() << info << "Polygonized : " << npoints << " points, " << npolygons << " triangles." << std::endl;
 
-	TqFloat* colors = new TqFloat[3 * nleaf * npoints];
+	TqFloat* colors = new TqFloat[3 * npoints];
 
 	std::vector<TqFloat> splits;
 	splits.resize(nleaf);
@@ -3460,13 +3460,13 @@ RtVoid RiBlobbyV( RtInt nleaf, RtInt ncode, RtInt code[], RtInt nflt, RtFloat fl
 				TqFloat sum;
 				TqFloat ocolors[3];
 
-				cg[0] = points[i*3];
-				cg[1] = points[i*3 + 1];
-				cg[2] = points[i*3 + 2];
+				TqInt m = i * 3;
+				cg[0] = points[m];
+				cg[1] = points[m + 1];
+				cg[2] = points[m + 2];
 
 				sum = blobby.implicit_value(cg, nleaf, splits);
 
-				TqInt m = i * 3;
 				if (sum != 0.0)
 				{
 					colors[m] = colors[m+1] = colors[m+2] = 0.0f;
@@ -3497,10 +3497,28 @@ RtVoid RiBlobbyV( RtInt nleaf, RtInt ncode, RtInt code[], RtInt nflt, RtFloat fl
 		}
 	}
 
+#ifdef ONE_BIG_ONE
 	if (Cs)
 		RiPointsPolygons(npolygons, nvertices, vertices, RI_P, points, RI_CS, colors, RI_NULL);
 	else
 		RiPointsPolygons(npolygons, nvertices, vertices, RI_P, points, RI_NULL);
+#else
+	if (Cs) {
+		RiPointsPolygons(npolygons/4, nvertices, vertices, RI_P, points, RI_CS, colors, RI_NULL);
+		RiPointsPolygons(npolygons/4, nvertices, &vertices[3 *(npolygons/4)], RI_P, points, RI_CS, colors, RI_NULL);
+		RiPointsPolygons(npolygons/4, nvertices, &vertices[3 *(npolygons/2)], RI_P, points, RI_CS, colors, RI_NULL);
+		TqInt nmax = npolygons - ((3 * npolygons) / 4);
+		RiPointsPolygons(nmax, nvertices, &vertices[3 *(3 * npolygons/4)], RI_P, points, RI_CS, colors, RI_NULL);
+	}
+ 	else
+	{
+		RiPointsPolygons(npolygons/4, nvertices, vertices, RI_P, points, RI_NULL);
+		RiPointsPolygons(npolygons/4, nvertices, &vertices[3 *(npolygons/4)], RI_P, points, RI_NULL);
+		RiPointsPolygons(npolygons/4, nvertices, &vertices[3 *(npolygons/2)], RI_P, points, RI_NULL);
+		TqInt nmax = npolygons - ((3 * npolygons) / 4);
+		RiPointsPolygons(nmax, nvertices, &vertices[3 *(3 * npolygons/4)], RI_P, points, RI_NULL);
+	}
+#endif
 
 
 	delete nvertices;
