@@ -91,7 +91,7 @@ class CqBlobby : public CqSurface
 
 		TqFloat implicit_value(const CqVector3D& Point);
 
-		void polygonize(TqFloat PixelsWidth, TqFloat PixelsHeight, TqInt& NPoints, TqInt& NPolys, TqInt*& NVertices, TqInt*& Vertices, TqFloat*& Points);
+		void polygonize(TqInt PixelsWidth, TqInt PixelsHeight, TqInt& NPoints, TqInt& NPolys, TqInt*& NVertices, TqInt*& Vertices, TqFloat*& Points);
 
 		//! Enumeration of the blobby opcodes
 		typedef enum

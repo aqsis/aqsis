@@ -56,7 +56,9 @@ START_NAMESPACE( Aqsis )
 typedef struct
 {
   TqFloat  x,  y,  z ;  /**< Vertex coordinates */
+#ifdef COMPUTE_NORMALS
   TqFloat nx, ny, nz ;  /**< Vertex normal */
+#endif
 } Vertex ;
 
 //-----------------------------------------------------------------------------
@@ -90,7 +92,7 @@ public :
    * \param size_y depth  of the grid
    * \param size_z height of the grid
    */
-  MarchingCubes ( const TqInt size_x = -1, const int size_y = -1, const int size_z = -1 ) ;
+  MarchingCubes ( const TqInt size_x = -1, const TqInt size_y = -1, const TqInt size_z = -1 ) ;
   /** Destructor */
   ~MarchingCubes() ;
 
@@ -124,12 +126,12 @@ public :
    * \param size_y depth  of the grid
    * \param size_z height of the grid
    */
-  inline void set_resolution( const TqInt size_x, const int size_y, const int size_z ) { _size_x = size_x ;  _size_y = size_y ;  _size_z = size_z ; }
+  inline void set_resolution( const TqInt size_x, const TqInt size_y, const TqInt size_z ) { _size_x = size_x ;  _size_y = size_y ;  _size_z = size_z ; }
   /**
    * selects wether the algorithm will use the enhanced topologically controlled lookup table or the original MarchingCubes
-   * \param originalMC true for the original Marching Cubes
+   * \param originalMC TqTrue for the original Marching Cubes
    */
-  inline void set_method    ( const TqBool originalMC = false ) { _originalMC = originalMC ; }
+  inline void set_method    ( const TqBool originalMC = TqFalse ) { _originalMC = originalMC ; }
 
   // Data access
   /**
@@ -138,7 +140,7 @@ public :
    * \param j ordinate of the cube
    * \param k height of the cube
    */
-  inline const TqFloat get_data  ( const TqInt i, const int j, const int k ) const { return _data[ i + j*_size_x + k*_size_x*_size_y] ; }
+  inline const TqFloat get_data  ( const TqInt i, const TqInt j, const TqInt k ) const { return _data[ i + j*_size_x + k*_size_x*_size_y] ; }
   /**
    * sets a specific cube of the grid
    * \param val new value for the cube
@@ -146,7 +148,7 @@ public :
    * \param j ordinate of the cube
    * \param k height of the cube
    */
-  inline void  set_data  ( const TqFloat val, const TqInt i, const int j, const int k ) { _data[ i + j*_size_x + k*_size_x*_size_y] = val ; }
+  inline void  set_data  ( const TqFloat val, const TqInt i, const TqInt j, const TqInt k ) { _data[ i + j*_size_x + k*_size_x*_size_y] = val ; }
 
   // Data initialization
   /** inits temporary structures (must set sizes before call) : the grid and the vertex index per cube */
@@ -165,9 +167,9 @@ public :
   /**
    * GTS exportation of the generated mesh
    * \param fn  name of the GTS file to create
-   * \param bin if true, the GTS will be written in binary mode
+   * \param bin if TqTrue, the GTS will be written in binary mode
    */
-  void write( const char *fn, TqBool bin = false ) ;
+  void write( const TqChar *fn, TqBool bin = TqFalse ) ;
 
 
 //-----------------------------------------------------------------------------
@@ -197,7 +199,7 @@ protected :
    * \param n    the number of triangles to produce
    * \param v12  the index of the interior vertex to use, if necessary
    */
-  void add_triangle ( const char* trig, char n, TqInt v12 = -1 ) ;
+  void add_triangle ( const TqChar* trig, TqChar n, TqInt v12 = -1 ) ;
 
   /** tests and eventually doubles the vertex buffer capacity for a new vertex insertion */
   void test_vertex_addition() ;
@@ -216,21 +218,21 @@ protected :
    * \param j ordinate of the cube
    * \param k height of the cube
    */
-  TqFloat get_x_grad( const TqInt i, const int j, const int k ) const ;
+  TqFloat get_x_grad( const TqInt i, const TqInt j, const TqInt k ) const ;
   /**
    * interpolates the longitudinal gradient of the implicit function at the lower vertex of the specified cube
    * \param i abscisse of the cube
    * \param j ordinate of the cube
    * \param k height of the cube
    */
-  TqFloat get_y_grad( const TqInt i, const int j, const int k ) const ;
+  TqFloat get_y_grad( const TqInt i, const TqInt j, const TqInt k ) const ;
   /**
    * interpolates the vertical gradient of the implicit function at the lower vertex of the specified cube
    * \param i abscisse of the cube
    * \param j ordinate of the cube
    * \param k height of the cube
    */
-  TqFloat get_z_grad( const TqInt i, const int j, const int k ) const ;
+  TqFloat get_z_grad( const TqInt i, const TqInt j, const TqInt k ) const ;
 
   /**
    * accesses the pre-computed vertex index on the lower horizontal edge of a specific cube
@@ -238,21 +240,21 @@ protected :
    * \param j ordinate of the cube
    * \param k height of the cube
    */
-  inline TqInt   get_x_vert( const int i, const int j, const int k ) const { return _x_verts[ i + j*_size_x + k*_size_x*_size_y] ; }
+  inline TqInt   get_x_vert( const TqInt i, const TqInt j, const TqInt k ) const { return _x_verts[ i + j*_size_x + k*_size_x*_size_y] ; }
   /**
    * accesses the pre-computed vertex index on the lower longitudinal edge of a specific cube
    * \param i abscisse of the cube
    * \param j ordinate of the cube
    * \param k height of the cube
    */
-  inline TqInt   get_y_vert( const int i, const int j, const int k ) const { return _y_verts[ i + j*_size_x + k*_size_x*_size_y] ; }
+  inline TqInt   get_y_vert( const TqInt i, const TqInt j, const TqInt k ) const { return _y_verts[ i + j*_size_x + k*_size_x*_size_y] ; }
   /**
    * accesses the pre-computed vertex index on the lower vertical edge of a specific cube
    * \param i abscisse of the cube
    * \param j ordinate of the cube
    * \param k height of the cube
    */
-  inline TqInt   get_z_vert( const int i, const int j, const int k ) const { return _z_verts[ i + j*_size_x + k*_size_x*_size_y] ; }
+  inline TqInt   get_z_vert( const TqInt i, const TqInt j, const TqInt k ) const { return _z_verts[ i + j*_size_x + k*_size_x*_size_y] ; }
 
   /**
    * sets the pre-computed vertex index on the lower horizontal edge of a specific cube
@@ -261,7 +263,7 @@ protected :
    * \param j ordinate of the cube
    * \param k height of the cube
    */
-  inline void  set_x_vert( const TqInt val, const int i, const int j, const int k ) { _x_verts[ i + j*_size_x + k*_size_x*_size_y] = val ; }
+  inline void  set_x_vert( const TqInt val, const TqInt i, const TqInt j, const TqInt k ) { _x_verts[ i + j*_size_x + k*_size_x*_size_y] = val ; }
   /**
    * sets the pre-computed vertex index on the lower longitudinal edge of a specific cube
    * \param val the index of the new vertex
@@ -269,7 +271,7 @@ protected :
    * \param j ordinate of the cube
    * \param k height of the cube
    */
-  inline void  set_y_vert( const TqInt val, const int i, const int j, const int k ) { _y_verts[ i + j*_size_x + k*_size_x*_size_y] = val ; }
+  inline void  set_y_vert( const TqInt val, const TqInt i, const TqInt j, const TqInt k ) { _y_verts[ i + j*_size_x + k*_size_x*_size_y] = val ; }
   /**
    * sets the pre-computed vertex index on the lower vertical edge of a specific cube
    * \param val the index of the new vertex
@@ -277,7 +279,7 @@ protected :
    * \param j ordinate of the cube
    * \param k height of the cube
    */
-  inline void  set_z_vert( const TqInt val, const int i, const int j, const int k ) { _z_verts[ i + j*_size_x + k*_size_x*_size_y] = val ; }
+  inline void  set_z_vert( const TqInt val, const TqInt i, const TqInt j, const TqInt k ) { _z_verts[ i + j*_size_x + k*_size_x*_size_y] = val ; }
 
   /** prints cube for debug */
   void print_cube() ;

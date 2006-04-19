@@ -3422,19 +3422,14 @@ RtVoid RiBlobbyV( RtInt nleaf, RtInt ncode, RtInt code[], RtInt nflt, RtFloat fl
 	Bound.Transform( QGetRenderContext() ->matSpaceToSpace( "camera", "raster", CqMatrix(), QGetRenderContext() ->matCurrent( QGetRenderContext() ->Time() ), QGetRenderContext()->Time() ));
 
 	// Get bounding-box size in pixels
-	TqFloat pixels_w = Bound.vecCross().x();
-	TqFloat pixels_h = Bound.vecCross().y();
+	TqInt  pixels_w = static_cast<TqInt> ( Bound.vecCross().x() );
+	TqInt  pixels_h = static_cast<TqInt> ( Bound.vecCross().y() );
 
 	// Adjust to shading rate
-	TqFloat shading_rate = QGetRenderContext() ->pattrCurrent() ->GetFloatAttribute( "System", "ShadingRate" ) [ 0 ];
+	TqInt shading_rate = MAX(1, static_cast<TqInt> ( QGetRenderContext() ->pattrCurrent() ->GetFloatAttribute( "System", "ShadingRate" ) [ 0 ]));
 	pixels_w /= shading_rate;
 	pixels_h /= shading_rate;
 
-/*
-	const TqFloat *flatness = QGetRenderContext() ->poptCurrent()->GetFloatOption( "blobby", RI_FLATNESS );
-	if (*flatness )
-		voxel_size = flatness[0];
-*/
 
 	// Polygonize this blobby
 	TqInt npoints;
@@ -3446,7 +3441,7 @@ RtVoid RiBlobbyV( RtInt nleaf, RtInt ncode, RtInt code[], RtInt nflt, RtFloat fl
 
 	Aqsis::log() << info << "Polygonized : " << npoints << " points, " << npolygons << " triangles." << std::endl;
 
-	TqFloat* colors = new TqFloat[nleaf * npolygons];
+	TqFloat* colors = new TqFloat[3 * nleaf * npoints];
 
 	std::vector<TqFloat> splits;
 	splits.resize(nleaf);

@@ -40,11 +40,12 @@
 #include "aqsis.h"
 #include "renderer.h"
 #include "logging.h"
-#include "marchingcubes.h"
-#include "lookuptable.h"
 
 // Compute normals
 #undef COMPUTE_NORMALS
+
+#include "marchingcubes.h"
+#include "lookuptable.h"
 
 // step size of the arrays of vertices and triangles
 #define ALLOC_SIZE 65536
@@ -62,7 +63,7 @@ void MarchingCubes::print_cube()
 // Constructor
 MarchingCubes::MarchingCubes( const TqInt size_x /*= -1*/, const TqInt size_y /*= -1*/, const TqInt size_z /*= -1*/ ) :
 		//-----------------------------------------------------------------------------
-		_originalMC(false),
+		_originalMC(TqFalse),
 		_size_x    (size_x),
 		_size_y    (size_y),
 		_size_z    (size_z),
@@ -298,8 +299,8 @@ void MarchingCubes::compute_intersection_points( )
 
 //_____________________________________________________________________________
 // Test a face
-// if face>0 return true if the face contains a part of the surface
-bool MarchingCubes::test_face( TqChar face )
+// if face>0 return TqTrue if the face contains a part of the surface
+TqBool MarchingCubes::test_face( TqChar face )
 //-----------------------------------------------------------------------------
 {
 	TqFloat A,B,C,D ;
@@ -364,14 +365,14 @@ bool MarchingCubes::test_face( TqChar face )
 
 //_____________________________________________________________________________
 // Test the interior of a cube
-// if s == 7, return true  if the interior is empty
-// if s ==-7, return false if the interior is empty
-bool MarchingCubes::test_interior( TqChar s )
+// if s == 7, return TqTrue  if the interior is empty
+// if s ==-7, return TqFalse if the interior is empty
+TqBool MarchingCubes::test_interior( TqChar s )
 //-----------------------------------------------------------------------------
 {
 	TqFloat t, At=0, Bt=0, Ct=0, Dt=0, a, b ;
-	char  test =  0 ;
-	char  edge = -1 ; // reference edge of the triangulation
+	TqChar  test =  0 ;
+	TqChar  edge = -1 ; // reference edge of the triangulation
 
 	switch( _case )
 	{
@@ -572,7 +573,7 @@ void MarchingCubes::process_cube( )
 
 	if( _originalMC )
 	{
-		char nt = 0 ;
+		TqChar nt = 0 ;
 		while( casesClassic[_lut_entry][3*nt] != -1 )
 			nt++ ;
 		add_triangle( casesClassic[_lut_entry], nt ) ;
@@ -959,7 +960,7 @@ void MarchingCubes::process_cube( )
 
 //_____________________________________________________________________________
 // Adding triangles
-void MarchingCubes::add_triangle( const char* trig, char n, TqInt v12 )
+void MarchingCubes::add_triangle( const TqChar* trig, TqChar n, TqInt v12 )
 //-----------------------------------------------------------------------------
 {
 	TqInt    tv[3] ;
@@ -1110,7 +1111,7 @@ void MarchingCubes::test_vertex_addition()
 }
 
 
-int MarchingCubes::add_x_vertex( )
+TqInt MarchingCubes::add_x_vertex( )
 //-----------------------------------------------------------------------------
 {
 	test_vertex_addition() ;
@@ -1140,7 +1141,7 @@ int MarchingCubes::add_x_vertex( )
 }
 //-----------------------------------------------------------------------------
 
-int MarchingCubes::add_y_vertex( )
+TqInt MarchingCubes::add_y_vertex( )
 //-----------------------------------------------------------------------------
 {
 	test_vertex_addition() ;
@@ -1170,7 +1171,7 @@ int MarchingCubes::add_y_vertex( )
 }
 //-----------------------------------------------------------------------------
 
-int MarchingCubes::add_z_vertex( )
+TqInt MarchingCubes::add_z_vertex( )
 //-----------------------------------------------------------------------------
 {
 	test_vertex_addition() ;
@@ -1200,7 +1201,7 @@ int MarchingCubes::add_z_vertex( )
 }
 
 
-int MarchingCubes::add_c_vertex( )
+TqInt MarchingCubes::add_c_vertex( )
 //-----------------------------------------------------------------------------
 {
 	test_vertex_addition() ;
@@ -1209,7 +1210,10 @@ int MarchingCubes::add_c_vertex( )
 	TqFloat  u = 0 ;
 	TqInt   vid ;
 
-	vert->x = vert->y = vert->z =  vert->nx = vert->ny = vert->nz = 0 ;
+	vert->x = vert->y = vert->z =  0;
+#ifdef COMPUTE_NORMALS
+        vert->nx = vert->ny = vert->nz = 0 ;
+#endif
 
 	// Computes the average of the intersection points of the cube
 	vid = get_x_vert( _i , _j , _k ) ;
@@ -1407,7 +1411,7 @@ int MarchingCubes::add_c_vertex( )
 
 
 
-void MarchingCubes::write(const char *fn, bool bin )
+void MarchingCubes::write(const TqChar *fn, TqBool bin )
 //-----------------------------------------------------------------------------
 {
 	FILE       *fp = fopen( fn, "w" );

@@ -47,6 +47,10 @@ START_NAMESPACE( Aqsis )
 
 #define ZCLAMP  1e-6
 
+// Very experimental value it is based on marchingcubes.cpp which will allocate
+// OPTIMUM_GRID_SIZE * OPTIMUM_GRID_SIZE * OPTIMUM_GRID_SIZE *( 3 * integer + 1 float) 
+// about 32 Megs 128*128*128*16 temporary
+#define OPTIMUM_GRID_SIZE 128 
 
 //---------------------------------------------------------------------
 /**
@@ -99,7 +103,7 @@ TqFloat repulsion(TqFloat z, TqFloat A, TqFloat B, TqFloat C, TqFloat D)
 /** This class takes RiBlobby parameters as input, and returns:
     - a program that computes the associated implicit values
     - its bounding-box
-
+ 
    \param Instructions Reference to the output instruction stack forming the program that computes implicit values.
    \param BBox Reference to the Blobby's bounding-box.
  */
@@ -107,11 +111,11 @@ class blobby_vm_assembler
 {
 	public:
 		blobby_vm_assembler(TqInt nleaf, TqInt ncode, TqInt* code, TqInt nfloats, TqFloat* floats, TqInt nstrings, char** strings, CqBlobby::instructions_t& Instructions, CqBound& BBox) :
-			m_code(code),
-			m_floats(floats),
-			m_instructions(Instructions),
-			m_bbox(BBox),
-			m_has_bounding_box(false)
+				m_code(code),
+				m_floats(floats),
+				m_instructions(Instructions),
+				m_bbox(BBox),
+				m_has_bounding_box(TqFalse)
 		{
 			// Decode blobby instructions and store them onto a stack
 			for(TqInt c = 0; c < ncode;)
@@ -147,38 +151,38 @@ class blobby_vm_assembler
 						}
 						break;
 						case 4:
-							opcodes.push_back( opcode( CqBlobby::DIVIDE, c ) );
-							c += 2;
+						opcodes.push_back( opcode( CqBlobby::DIVIDE, c ) );
+						c += 2;
 						break;
 						case 5:
-							opcodes.push_back( opcode( CqBlobby::SUBTRACT, c ) );
-							c += 2;
+						opcodes.push_back( opcode( CqBlobby::SUBTRACT, c ) );
+						c += 2;
 						break;
 						case 6:
-							opcodes.push_back( opcode( CqBlobby::NEGATE, c++ ) );
+						opcodes.push_back( opcode( CqBlobby::NEGATE, c++ ) );
 						break;
 						case 7:
-							Aqsis::log() << warning << "Unhandled Blobby IDEMPOTENTATE." << std::endl;
-							c++;
+						Aqsis::log() << warning << "Unhandled Blobby IDEMPOTENTATE." << std::endl;
+						c++;
 						break;
 
 						case 1000:
-							opcodes.push_back( opcode( CqBlobby::CONSTANT, c++ ) );
-							STATS_INC( GPR_blobbies );
-							Aqsis::log() << warning << "Unhandled Blobby CONSTANT." << std::endl;
+						opcodes.push_back( opcode( CqBlobby::CONSTANT, c++ ) );
+						STATS_INC( GPR_blobbies );
+						Aqsis::log() << warning << "Unhandled Blobby CONSTANT." << std::endl;
 						break;
 						case 1001:
-							opcodes.push_back( opcode( CqBlobby::ELLIPSOID, c++ ) );
-							STATS_INC( GPR_blobbies );
+						opcodes.push_back( opcode( CqBlobby::ELLIPSOID, c++ ) );
+						STATS_INC( GPR_blobbies );
 						break;
 						case 1002:
-							opcodes.push_back( opcode( CqBlobby::SEGMENT, c++ ) );
-							STATS_INC( GPR_blobbies );
+						opcodes.push_back( opcode( CqBlobby::SEGMENT, c++ ) );
+						STATS_INC( GPR_blobbies );
 						break;
 						case 1003:
-							opcodes.push_back( opcode( CqBlobby::PLANE, c ) );
-							c += 2;
-							STATS_INC( GPR_blobbies );
+						opcodes.push_back( opcode( CqBlobby::PLANE, c ) );
+						c += 2;
+						STATS_INC( GPR_blobbies );
 						break;
 
 						default:
@@ -208,12 +212,12 @@ class blobby_vm_assembler
 		};
 
 		std::vector<opcode> opcodes;
-		
+
 		/// Encapsulate a segment into the bounding-box
 		void grow_bound( const CqVector3D& Start, const CqVector3D& End, const TqFloat radius, const CqMatrix& transformation )
 		{
 			// Radius + epsilon
-			const TqFloat r = radius * 0.5 * ( 1.0 + 2.0 / 10.0 );
+			const TqFloat r = radius * 0.6;
 
 			CqBound start_box( Start.x() - r, Start.y() - r, Start.z() - r, Start.x() + r, Start.y() + r, Start.z() + r );
 			start_box.Transform( transformation );
@@ -230,7 +234,7 @@ class blobby_vm_assembler
 		void grow_bound( const CqMatrix& transformation, const TqFloat radius = 1.0)
 		{
 			// Radius + epsilon
-			const TqFloat r = radius * 0.5 * ( 1.0 + 2.0 / 10.0 );
+			const TqFloat r = radius * 0.6;
 
 			CqBound unit_box( -r, -r, -r, r, r, r );
 			unit_box.Transform( transformation );
@@ -247,7 +251,7 @@ class blobby_vm_assembler
 			}
 
 			m_bbox = Bound;
-			m_has_bounding_box = true;
+			m_has_bounding_box = TqTrue;
 		}
 
 		/// Build implicit value evaluation program: store opcodes and parameters in execution order
@@ -256,15 +260,15 @@ class blobby_vm_assembler
 			switch( op.name )
 			{
 					case CqBlobby::CONSTANT:
-						Aqsis::log() << warning << "RiBlobby's Constant not supported." << std::endl;
+					Aqsis::log() << warning << "RiBlobby's Constant not supported." << std::endl;
 					break;
 
 					case CqBlobby::NEGATE:
-						Aqsis::log() << warning << "RiBlobby's Negate operator not supported." << std::endl;
+					Aqsis::log() << warning << "RiBlobby's Negate operator not supported." << std::endl;
 					break;
 
 					case CqBlobby::IDEMPOTENTATE:
-						Aqsis::log() << warning << "RiBlobby's Idempotate operator not supported." << std::endl;
+					Aqsis::log() << warning << "RiBlobby's Idempotate operator not supported." << std::endl;
 					break;
 
 					case CqBlobby::PLANE:
@@ -344,11 +348,11 @@ class blobby_vm_assembler
 			}
 		}
 
-	TqInt* m_code;
-	TqFloat* m_floats;
-	CqBlobby::instructions_t& m_instructions;
-	CqBound& m_bbox;
-	bool m_has_bounding_box;
+		TqInt*   m_code;
+		TqFloat* m_floats;
+		CqBlobby::instructions_t& m_instructions;
+		CqBound& m_bbox;
+		TqBool   m_has_bounding_box;
 };
 
 //---------------------------------------------------------------------
@@ -389,7 +393,7 @@ TqInt CqBlobby::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits )
     \return One of the points belonging to [S1;S2] segment, the nearest to Point.
  */
 CqVector3D nearest_segment_point( const CqVector3D& Point, const CqVector3D& S1,
-                                 const CqVector3D& S2 )
+                                  const CqVector3D& S2 )
 {
 	const CqVector3D vector = S2 - S1;
 	const CqVector3D w = Point - S1;
@@ -430,9 +434,9 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point, TqInt n, std::vector 
 		switch(instructions[pc++].opcode)
 		{
 				case CqBlobby::CONSTANT:
-					result = instructions[pc++].value;
-					sum += result;
-					splits[int_index++] = result;
+				result = instructions[pc++].value;
+				sum += result;
+				splits[int_index++] = result;
 				break;
 				case CqBlobby::ELLIPSOID:
 				{
@@ -516,7 +520,7 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point, TqInt n, std::vector 
 
 //---------------------------------------------------------------------
 /** Return the float value based on each opcodes.
- *  This is the most important method it is used by jules_bloomenthal.cpp to
+ *  This is the most important method it is used by marchingcubes.cpp to
  *  polygonize the primitives
  */
 TqFloat CqBlobby::implicit_value( const CqVector3D& Point )
@@ -530,7 +534,7 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point )
 		switch(instructions[pc++].opcode)
 		{
 				case CONSTANT:
-					stack.push(instructions[pc++].value);
+				stack.push(instructions[pc++].value);
 				break;
 				case ELLIPSOID:
 				{
@@ -623,8 +627,9 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point )
 				case ADD:
 				{
 					const TqInt count = instructions[pc++].count;
-					TqFloat sum = 0;
-					for(TqInt i = 0; i != count; ++i)
+					TqFloat sum = stack.top();
+					stack.pop();
+					for(TqInt i = 1; i != count; ++i)
 					{
 						sum += stack.top();
 						stack.pop();
@@ -635,8 +640,9 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point )
 				case MULTIPLY:
 				{
 					const TqInt count = instructions[pc++].count;
-					TqFloat product = 1;
-					for(TqInt i = 0; i != count; ++i)
+					TqFloat product = stack.top();
+					stack.pop();
+					for(TqInt i = 1; i != count; ++i)
 					{
 						product *= stack.top();
 						stack.pop();
@@ -647,10 +653,11 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point )
 				case MIN:
 				{
 					const TqInt count = instructions[pc++].count;
-					TqFloat minimum = std::numeric_limits<TqFloat>::max();
-					for(TqInt i = 0; i != count; ++i)
+					TqFloat minimum = stack.top();
+					stack.pop();
+					for(TqInt i = 1; i != count; ++i)
 					{
-						minimum = std::min(minimum, stack.top());
+						minimum = MIN(minimum, stack.top());
 						stack.pop();
 					}
 					stack.push(minimum);
@@ -659,10 +666,11 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point )
 				case MAX:
 				{
 					const TqInt count = instructions[pc++].count;
-					TqFloat maximum = -std::numeric_limits<TqFloat>::max();
-					for(TqInt i = 0; i != count; ++i)
+					TqFloat maximum = stack.top();
+					stack.pop();
+					for(TqInt i = 1; i != count; ++i)
 					{
-						maximum = std::max(maximum, stack.top());
+						maximum = MAX(maximum, stack.top());
 						stack.pop();
 					}
 					stack.push(maximum);
@@ -685,92 +693,159 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point )
     \param Vertices Polygons array.
     \param Vertices Point Points array.
  */
-void CqBlobby::polygonize( TqFloat PixelsWidth, TqFloat PixelsHeight, TqInt& NPoints, TqInt& NPolys, TqInt*& NVertices, TqInt*& Vertices, TqFloat*& Points )
+void CqBlobby::polygonize( TqInt PixelsWidth, TqInt PixelsHeight, TqInt& NPoints, TqInt& NPolys, TqInt*& NVertices, TqInt*& Vertices, TqFloat*& Points )
 {
-	TqInt i, j, k;
+	TqInt i,j,k;
 
 	// Make sure the blobby is big enough to show
 	if(PixelsWidth <= 0 || PixelsHeight <= 0)
 		return;
 
-	// Get bounding-box centre and sizes
-	const CqVector3D centre = ( bbox.vecMax() + bbox.vecMin() ) / 2.0;
+	PixelsWidth /= 2;
+	PixelsHeight /= 2;
+
+	// Get bounding-box center and sizes
+	const CqVector3D center = ( bbox.vecMax() + bbox.vecMin() ) / 2.0;
 	const CqVector3D length = ( bbox.vecMax() - bbox.vecMin() );
 
-	// Limit ourself to 512 max
-	if ( PixelsWidth > 512) 
-	{
-		Aqsis::log() << warning << "Reducing PixelsWidth to 512: " << PixelsWidth << std::endl;
-		PixelsWidth = 512;
-	}
-
-	if ( PixelsHeight > 512) 
-	{
-		Aqsis::log() << warning << "Reducing PixelsHeight to 512: " << PixelsHeight << std::endl;
-		PixelsHeight = 512;
-	}
-
 	// Calculate voxel sizes and polygonization resolution
-	TqFloat x_voxel_size = length.x() / std::ceil( PixelsWidth );
-	TqFloat y_voxel_size = length.y() / std::ceil( PixelsHeight );
+	TqFloat x_voxel_size = length.x() /  PixelsWidth;
+	TqFloat y_voxel_size = length.y() /  PixelsHeight;
 	TqFloat z_voxel_size = ( x_voxel_size + y_voxel_size ) / 2.0;
 
-	TqInt x_resolution = static_cast<int>( std::ceil( PixelsWidth ) );
-	TqInt y_resolution = static_cast<int>( std::ceil( PixelsHeight ) );
-	TqInt z_resolution = static_cast<int>( std::ceil( length.z() / z_voxel_size ) );
+	TqInt x_resolution = PixelsWidth;
+	TqInt y_resolution = PixelsHeight;
+	TqInt z_resolution = static_cast<TqInt>( ceil( length.z() / z_voxel_size) );
 
-	// Initialize Marching Cubes algorithm
-	MarchingCubes mc;
+	const TqFloat x_start = center.x() - length.x()/2.0;
+	const TqFloat y_start = center.y() - length.y()/2.0;
+	const TqFloat z_start = center.z() - length.z()/2.0;
 
-	mc.set_resolution( x_resolution, y_resolution, z_resolution );
-	mc.init_all();
+	TqInt div_z = z_resolution/OPTIMUM_GRID_SIZE + 1;
+	TqInt div_y = y_resolution/OPTIMUM_GRID_SIZE + 1;
+	TqInt div_x = x_resolution/OPTIMUM_GRID_SIZE + 1;
 
-	// Lack of memory I forced to lower the requirements to voxel_size 
-	// (x,y,z)
-	if ( (mc.size_x() != x_resolution) ||
-		(mc.size_y() != y_resolution) ||
-		(mc.size_z() != z_resolution) )
+	int nverts = 0;
+	int ntrigs = 0;
+	Vertex* vertices = 0;
+	Triangle* triangles = 0;
+
+	Aqsis::log() << info << "We will need to call mc " << div_x  * div_y * div_z << std::endl;
+	TqInt cnt = 1;
+
+	for (TqInt k1=0; k1 < div_z; k1 ++)
 	{
-		x_voxel_size = length.x() / mc.size_x();
-		y_voxel_size = length.y() / mc.size_y();
-		z_voxel_size = ( x_voxel_size + y_voxel_size ) / 2.0;
-		x_resolution = mc.size_x();
-		y_resolution = mc.size_y();
-		z_resolution = mc.size_z();
-	}
-
-	const TqFloat x_start = centre.x() - length.x() / 2.0;
-	const TqFloat y_start = centre.y() - length.y() / 2.0;
-	const TqFloat z_start = centre.z() - length.z() / 2.0;
-
-	// Compute implicit values
-	TqFloat z = z_start;
-	for( k = 0 ; k < mc.size_z() ; k++, z += z_voxel_size )
-	{
-		Aqsis::log() << info << " blobby slice " << k << " / " << mc.size_z() << std::endl;
-
-		TqFloat y = y_start;
-		for( j = 0 ; j < mc.size_y() ; j++, y += y_voxel_size )
+		for (TqInt y1=0; y1 < div_y; y1++)
 		{
-			TqFloat x = x_start;
-			for( i = 0 ; i < mc.size_x() ; i++, x += x_voxel_size )
+			for (TqInt x1=0; x1 < div_x; x1++)
 			{
-				const TqFloat iv = implicit_value( CqVector3D( x, y, z ) );
-				mc.set_data( static_cast<TqFloat>( iv - 0.421875 ), i, j, k );
+
+				TqFloat x,y,z;
+
+				z = z_start + (TqFloat) k1 * (TqFloat) OPTIMUM_GRID_SIZE * z_voxel_size;
+				TqBool isrequired = TqFalse;
+
+				// Initialize Marching Cubes algorithm
+				MarchingCubes mc(OPTIMUM_GRID_SIZE+1, OPTIMUM_GRID_SIZE+1, OPTIMUM_GRID_SIZE+1);
+
+				mc.init_all();
+
+				for( k = 0 ; k < OPTIMUM_GRID_SIZE+1; k++, z += z_voxel_size )
+				{
+					y = y_start + (TqFloat) y1 * (TqFloat)OPTIMUM_GRID_SIZE * y_voxel_size;
+					for( j = 0 ; j < OPTIMUM_GRID_SIZE+1; j++, y += y_voxel_size )
+					{
+
+						x = x_start + (TqFloat) x1 * (TqFloat)OPTIMUM_GRID_SIZE * x_voxel_size;
+						for( i = 0 ; i < OPTIMUM_GRID_SIZE+1; i++, x += x_voxel_size )
+						{
+							const TqFloat iv = implicit_value( CqVector3D( x, y, z ) );
+							isrequired |= (iv != 0.0);
+							//Aqsis::log() << info << iv << std::endl;
+							mc.set_data( static_cast<TqFloat>( iv - 0.421875 ), i, j, k );
+						}
+					}
+				}
+
+				z = z_start + (TqFloat) k1 * (TqFloat)OPTIMUM_GRID_SIZE * z_voxel_size;
+				y = y_start + (TqFloat) y1 * (TqFloat)OPTIMUM_GRID_SIZE * y_voxel_size;
+				x = x_start + (TqFloat) x1 * (TqFloat)OPTIMUM_GRID_SIZE * x_voxel_size;
+
+
+				if (!isrequired)
+				{
+					Aqsis::log() << info << "Don't need to call mc " << cnt++ << std::endl;
+					continue;
+				}
+
+				// Run Marching Cubes
+				// when we are sure it is required.
+
+
+				{
+					// Inform the status class how far we have got, and update UI.
+					float Complete = ( float ) ( cnt++ );
+					Complete /= (div_x  * div_y * div_z);
+					Complete *= 100.0f;
+					Aqsis::log() << info << "Polygonize a blobby " << Complete << "% complete" << std::endl;
+				}
+
+				mc.run() ;
+
+				if ((mc.ntrigs() == 0) || mc.nverts() == 0)
+				{
+					Aqsis::log() << info << "Don't merge the vertices they are empty " << cnt-1 << std::endl;
+					continue;
+				}
+
+				TqInt overts = nverts;
+				if (nverts == 0)
+				{
+					nverts = mc.nverts();
+					vertices = (Vertex*) malloc(nverts * sizeof(Vertex));
+
+				}
+				else
+				{
+					nverts += mc.nverts();
+					vertices = (Vertex*) realloc(vertices, nverts * sizeof(Vertex));
+
+				}
+
+				// Compute vertex positions in the blobbies world (they were returned in grid coordinates)
+				for (TqInt tmp = 0; tmp < mc.nverts(); tmp++)
+				{
+					vertices[overts+tmp].x = x + x_voxel_size * mc.vertices()[tmp].x;
+					vertices[overts+tmp].y = y + y_voxel_size * mc.vertices()[tmp].y;
+					vertices[overts+tmp].z = z + z_voxel_size * mc.vertices()[tmp].z;
+				}
+
+				TqInt otrigs = ntrigs;
+
+				if (ntrigs == 0)
+				{
+					ntrigs = mc.ntrigs();
+					triangles = (Triangle *) malloc(ntrigs * sizeof(Triangle));
+					memcpy(triangles, mc.triangles(), ntrigs * sizeof(Triangle));
+				}
+				else
+				{
+
+					ntrigs += mc.ntrigs();
+					triangles = (Triangle *) realloc(triangles,  ntrigs * sizeof(Triangle));
+					for (TqInt tmp = 0; tmp < mc.ntrigs(); tmp++)
+					{
+						triangles[otrigs+tmp].v1 = mc.triangles()[tmp].v1 + overts;
+						triangles[otrigs+tmp].v2 = mc.triangles()[tmp].v2 + overts;
+						triangles[otrigs+tmp].v3 = mc.triangles()[tmp].v3 + overts;
+					}
+				}
+
 			}
 		}
 	}
 
-	// Run Marching Cubes
-	mc.run() ;
-	mc.clean_temps() ;
 
-	const int nverts = mc.nverts();
-	const int ntrigs = mc.ntrigs();
-	const Vertex* vertices = mc.vertices();
-	const Triangle* triangles = mc.triangles();
-
-	// Allocate RiPointsPolygons structure
 	NPoints = nverts;
 	NPolys = ntrigs;
 	NVertices = new TqInt[NPolys];
@@ -788,19 +863,18 @@ void CqBlobby::polygonize( TqFloat PixelsWidth, TqFloat PixelsHeight, TqInt& NPo
 		*vert++ = triangles[i].v3;
 	}
 
-	// Compute vertex positions in the blobbies world (they were returned in grid coordinates)
+
 	TqFloat* point = Points;
 	for ( i = 0; i < nverts; i++ )
 	{
-		*point++ = x_start + x_voxel_size * vertices[i].x;
-		*point++ = y_start + y_voxel_size * vertices[i].y;
-		*point++ = z_start + z_voxel_size * vertices[i].z;
+		*point++ = vertices[i].x;
+		*point++ = vertices[i].y;
+		*point++ = vertices[i].z;
 	}
 
-	// Cleanup
-	mc.clean_all();
+	free(vertices);
+	free(triangles);
 }
-
 END_NAMESPACE( Aqsis )
 //---------------------------------------------------------------------
 
