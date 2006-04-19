@@ -66,7 +66,7 @@ private:
 // RiGaussianFilter
 // Gaussian filter used as a possible value passed to RiPixelFilter.
 //
-extern "C"
+extern "C" _qShare
  RtFloat	RiGaussianFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 {
 	/*
@@ -111,7 +111,7 @@ extern "C"
 // RiMitchellFilter
 // Mitchell filter used as a possible value passed to RiPixelFIlter.
 //
-extern "C"
+extern "C" _qShare
 RtFloat	RiMitchellFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 {
 MitchellFilter mc(1/3.0f, 2/3.0f, xwidth, ywidth);
@@ -123,7 +123,7 @@ MitchellFilter mc(1/3.0f, 2/3.0f, xwidth, ywidth);
 // RiBoxFilter
 // Box filter used as a possible value passed to RiPixelFIlter.
 //
-extern "C"
+extern "C" _qShare
 RtFloat	RiBoxFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 {
 	/* [UPST89] -- (RC p. 178) says that x and y will be in the
@@ -143,7 +143,7 @@ RtFloat	RiBoxFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 // RiTriangleFilter
 // Triangle filter used as a possible value passed to RiPixelFilter
 //
-extern "C"
+extern "C" _qShare
 RtFloat	RiTriangleFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 {
 	RtFloat	hxw = xwidth / 2.0;
@@ -163,7 +163,7 @@ RtFloat	RiTriangleFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 // RiCatmullRomFilter
 // Catmull Rom filter used as a possible value passed to RiPixelFilter.
 //
-extern "C"
+extern "C" _qShare
 RtFloat	RiCatmullRomFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 {
 	/*
@@ -227,7 +227,7 @@ RtFloat	RiCatmullRomFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth
 // RiSincFilter
 // Sinc filter used as a possible value passed to RiPixelFilter.
 //
-extern "C"
+extern "C" _qShare
 RtFloat	RiSincFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 {
 	//RtFloat d;
@@ -280,7 +280,7 @@ RtFloat	RiSincFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 // RiDiskFilter -- this is in Pixar's ri.h
 // Cylindrical filter used as a possible value passed to RiPixelFilter
 //
-extern "C"
+extern "C" _qShare
 RtFloat	RiDiskFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 {
 	double d, xx, yy;
@@ -306,7 +306,7 @@ RtFloat	RiDiskFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 // RiBesselFilter -- this is in Pixar's ri.h
 // Besselj0 filter used as a possible value passed to RiPixelFilter
 //
-extern "C"
+extern "C" _qShare
 RtFloat	RiBesselFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 {
 
