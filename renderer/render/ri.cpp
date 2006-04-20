@@ -3399,6 +3399,8 @@ RtVoid RiBlobbyV( RtInt nleaf, RtInt ncode, RtInt code[], RtInt nflt, RtFloat fl
 
 	Validate_RiBlobby
 
+	TqInt i;
+
 	// Initialize the blobby structure
 	CqBlobby blobby(nleaf, ncode, code, nflt, flt, nstr, str);
 
@@ -3497,29 +3499,32 @@ RtVoid RiBlobbyV( RtInt nleaf, RtInt ncode, RtInt code[], RtInt nflt, RtFloat fl
 		}
 	}
 
-	if (Cs) 
+	const TqInt pieces = 8;
+	TqInt m;
+
+	if (Cs)
 	{
-		RiPointsPolygons(npolygons/8, nvertices, vertices, RI_P, points, RI_CS, colors, RI_NULL);
-		RiPointsPolygons(npolygons/8, nvertices, &vertices[3 * (npolygons/8)], RI_P, points, RI_CS, colors, RI_NULL);
-		RiPointsPolygons(npolygons/8, nvertices, &vertices[3 * (npolygons/4)], RI_P, points, RI_CS, colors, RI_NULL);
-		RiPointsPolygons(npolygons/8, nvertices, &vertices[3 *(3*npolygons/8)], RI_P, points, RI_CS, colors, RI_NULL);
-		RiPointsPolygons(npolygons/8, nvertices, &vertices[3 *(npolygons/2)], RI_P, points, RI_CS, colors, RI_NULL);
-		RiPointsPolygons(npolygons/8, nvertices, &vertices[3 *(5*npolygons/8)], RI_P, points, RI_CS, colors, RI_NULL);
-		RiPointsPolygons(npolygons/8, nvertices, &vertices[3 *(3*npolygons/4)], RI_P, points, RI_CS, colors, RI_NULL);
-		TqInt nmax = npolygons - ((7 * npolygons) / 8);
-		RiPointsPolygons(nmax, nvertices, &vertices[3 *(7 * npolygons/8)], RI_P, points, RI_CS, colors, RI_NULL);
+		for (i=0; i < pieces-1; i ++)
+		{
+			m = (i * npolygons)/pieces;
+			RiPointsPolygons(npolygons/pieces, nvertices, &vertices[3 * m], RI_P, points, RI_CS, colors, RI_NULL);
+		}
+
+		m = ((pieces-1) * npolygons) / pieces;
+		TqInt nmax = npolygons - m;
+		RiPointsPolygons(nmax, nvertices, &vertices[3 * m], RI_P, points, RI_CS, colors, RI_NULL);
 	}
- 	else
+	else
 	{
-		RiPointsPolygons(npolygons/8, nvertices, vertices, RI_P, points, RI_NULL);
-		RiPointsPolygons(npolygons/8, nvertices, &vertices[3 * (npolygons/8)], RI_P, points, RI_NULL);
-		RiPointsPolygons(npolygons/8, nvertices, &vertices[3 * (npolygons/4)], RI_P, points, RI_NULL);
-		RiPointsPolygons(npolygons/8, nvertices, &vertices[3 *(3*npolygons/8)], RI_P, points, RI_NULL);
-		RiPointsPolygons(npolygons/8, nvertices, &vertices[3 *(npolygons/2)], RI_P, points, RI_NULL);
-		RiPointsPolygons(npolygons/8, nvertices, &vertices[3 *(5*npolygons/8)], RI_P, points, RI_NULL);
-		RiPointsPolygons(npolygons/8, nvertices, &vertices[3 *(3*npolygons/4)], RI_P, points, RI_NULL);
-		TqInt nmax = npolygons - ((7 * npolygons) / 8);
-		RiPointsPolygons(nmax, nvertices, &vertices[3 *(7 * npolygons/8)], RI_P, points, RI_NULL);
+		for (i=0; i < pieces-1; i ++)
+		{
+			m = (i * npolygons)/pieces;
+			RiPointsPolygons(npolygons/pieces, nvertices, &vertices[3 * m], RI_P, points, RI_NULL);
+		}
+
+		m = ((pieces-1) * npolygons) / pieces;
+		TqInt nmax = npolygons - m;
+		RiPointsPolygons(nmax, nvertices, &vertices[3 * m], RI_P, points, RI_NULL);
 	}
 
 	delete nvertices;

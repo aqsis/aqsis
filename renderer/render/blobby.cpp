@@ -217,7 +217,7 @@ class blobby_vm_assembler
 		void grow_bound( const CqVector3D& Start, const CqVector3D& End, const TqFloat radius, const CqMatrix& transformation )
 		{
 			// Radius + epsilon
-			const TqFloat r = radius * 0.6;
+			const TqFloat r = radius * 0.72;
 
 			CqBound start_box( Start.x() - r, Start.y() - r, Start.z() - r, Start.x() + r, Start.y() + r, Start.z() + r );
 			start_box.Transform( transformation );
@@ -234,7 +234,7 @@ class blobby_vm_assembler
 		void grow_bound( const CqMatrix& transformation, const TqFloat radius = 1.0)
 		{
 			// Radius + epsilon
-			const TqFloat r = radius * 0.6;
+			const TqFloat r = radius * 0.72;
 
 			CqBound unit_box( -r, -r, -r, r, r, r );
 			unit_box.Transform( transformation );
