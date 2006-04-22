@@ -967,7 +967,7 @@ void MarchingCubes::add_triangle( const TqInt* trig, TqChar n, TqInt v12 )
 
 	for( register TqInt t = 0 ; t < 3*n ; t++ )
 	{
-		register t3 = t % 3;
+		register TqInt t3 = t % 3;
 		switch( trig[t] )
 		{
 				case  0 :
