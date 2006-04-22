@@ -960,76 +960,77 @@ void MarchingCubes::process_cube( )
 
 //_____________________________________________________________________________
 // Adding triangles
-void MarchingCubes::add_triangle( const TqChar* trig, TqChar n, TqInt v12 )
+void MarchingCubes::add_triangle( const TqInt* trig, TqChar n, TqInt v12 )
 //-----------------------------------------------------------------------------
 {
 	TqInt    tv[3] ;
 
-	for( TqInt t = 0 ; t < 3*n ; t++ )
+	for( register TqInt t = 0 ; t < 3*n ; t++ )
 	{
+		register t3 = t % 3;
 		switch( trig[t] )
 		{
 				case  0 :
-				tv[ t % 3 ] = get_x_vert( _i , _j , _k ) ;
+				tv[ t3 ] = get_x_vert( _i , _j , _k ) ;
 				break ;
 				case  1 :
-				tv[ t % 3 ] = get_y_vert(_i+1, _j , _k ) ;
+				tv[ t3 ] = get_y_vert(_i+1, _j , _k ) ;
 				break ;
 				case  2 :
-				tv[ t % 3 ] = get_x_vert( _i ,_j+1, _k ) ;
+				tv[ t3 ] = get_x_vert( _i ,_j+1, _k ) ;
 				break ;
 				case  3 :
-				tv[ t % 3 ] = get_y_vert( _i , _j , _k ) ;
+				tv[ t3 ] = get_y_vert( _i , _j , _k ) ;
 				break ;
 				case  4 :
-				tv[ t % 3 ] = get_x_vert( _i , _j ,_k+1) ;
+				tv[ t3 ] = get_x_vert( _i , _j ,_k+1) ;
 				break ;
 				case  5 :
-				tv[ t % 3 ] = get_y_vert(_i+1, _j ,_k+1) ;
+				tv[ t3 ] = get_y_vert(_i+1, _j ,_k+1) ;
 				break ;
 				case  6 :
-				tv[ t % 3 ] = get_x_vert( _i ,_j+1,_k+1) ;
+				tv[ t3 ] = get_x_vert( _i ,_j+1,_k+1) ;
 				break ;
 				case  7 :
-				tv[ t % 3 ] = get_y_vert( _i , _j ,_k+1) ;
+				tv[ t3 ] = get_y_vert( _i , _j ,_k+1) ;
 				break ;
 				case  8 :
-				tv[ t % 3 ] = get_z_vert( _i , _j , _k ) ;
+				tv[ t3 ] = get_z_vert( _i , _j , _k ) ;
 				break ;
 				case  9 :
-				tv[ t % 3 ] = get_z_vert(_i+1, _j , _k ) ;
+				tv[ t3 ] = get_z_vert(_i+1, _j , _k ) ;
 				break ;
 				case 10 :
-				tv[ t % 3 ] = get_z_vert(_i+1,_j+1, _k ) ;
+				tv[ t3 ] = get_z_vert(_i+1,_j+1, _k ) ;
 				break ;
 				case 11 :
-				tv[ t % 3 ] = get_z_vert( _i ,_j+1, _k ) ;
+				tv[ t3 ] = get_z_vert( _i ,_j+1, _k ) ;
 				break ;
 				case 12 :
-				tv[ t % 3 ] = v12 ;
+				tv[ t3 ] = v12 ;
 				break ;
 				default :
 				break ;
 		}
 
-		if( tv[t%3] == -1 )
+		if( tv[t3] == -1 )
 		{
 			printf("Marching Cubes: invalid triangle %d\n", _ntrigs+1) ;
 			print_cube() ;
 		}
 
-		if( t%3 == 2 )
+		if( t3 == 2 )
 		{
 			if( _ntrigs >= _Ntrigs )
 			{
 				Triangle *temp = _triangles ;
-				_triangles = new Triangle[ 2*_Ntrigs ] ;
+				_triangles = new Triangle[ _ntrigs + 1024] ;
 				memcpy( _triangles, temp, _Ntrigs*sizeof(Triangle) ) ;
 				delete[] temp ;
 /*
 				printf("%d allocated triangles\n", _Ntrigs) ;
 */
-				_Ntrigs *= 2 ;
+				_Ntrigs = _ntrigs + 1024 ;
 			}
 
 			Triangle *T = _triangles + _ntrigs++ ;
@@ -1100,13 +1101,13 @@ void MarchingCubes::test_vertex_addition()
 	if( _nverts >= _Nverts )
 	{
 		Vertex *temp = _vertices ;
-		_vertices = new Vertex[ _Nverts*2 ] ;
+		_vertices = new Vertex[ _nverts  + 1024] ;
 		memcpy( _vertices, temp, _Nverts*sizeof(Vertex) ) ;
 		delete[] temp ;
 /*
 		printf("%d allocated vertices\n", _Nverts) ;
 */
-		_Nverts *= 2 ;
+		_Nverts = _nverts + 1024 ;
 	}
 }
 

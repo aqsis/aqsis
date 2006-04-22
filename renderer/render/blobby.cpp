@@ -63,7 +63,7 @@ START_NAMESPACE( Aqsis )
 *      bump'(2)=0
 *      bump"(2)=0
 */
-inline const TqFloat bump(TqFloat r)
+const TqFloat bump(TqFloat r)
 {
 	if(r<=0.0f || r>=2.0f)
 		return 0.0f;
@@ -78,7 +78,7 @@ inline const TqFloat bump(TqFloat r)
 *      ease(1)=1
 *      ease'(1)=0
 */
-inline const TqFloat ease(TqFloat r)
+const TqFloat ease(TqFloat r)
 {
 	if(r<=0.0f)
 		return 0.0f;
@@ -274,8 +274,8 @@ class blobby_vm_assembler
 					case CqBlobby::PLANE:
 					{
 						m_instructions.push_back(CqBlobby::instruction(CqBlobby::PLANE));
-						m_instructions.push_back(CqBlobby::instruction(m_code[op.index]));
-						m_instructions.push_back(CqBlobby::instruction(m_code[op.index + 1]));
+						m_instructions.push_back(CqBlobby::instruction((TqFloat) m_code[op.index]));
+						m_instructions.push_back(CqBlobby::instruction((TqFloat) m_code[op.index + 1]));
 						Aqsis::log() << info << "id1 " << m_code[op.index] << " id2 " << m_code[op.index + 1] << std::endl;
 					}
 					break;
@@ -433,12 +433,13 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point, TqInt n, std::vector 
 	{
 		switch(instructions[pc++].opcode)
 		{
-				case CqBlobby::CONSTANT:
-				result = instructions[pc++].value;
-				sum += result;
-				splits[int_index++] = result;
-				break;
-				case CqBlobby::ELLIPSOID:
+				case CONSTANT:
+				{
+					result = instructions[pc++].value;
+					sum += result;
+					splits[int_index++] = result;
+				} break;
+				case ELLIPSOID:
 				{
 					const TqFloat r2 = (instructions[pc++].get_matrix() * Point).Magnitude2();
 					result = r2 <= 1 ? 1 - 3*r2 + 3*r2*r2 - r2*r2*r2 : 0;
@@ -446,7 +447,7 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point, TqInt n, std::vector 
 					splits[int_index++] = result;
 				}
 				break;
-				case CqBlobby::PLANE:
+				case PLANE:
 				{
 					TqInt which = (TqInt) instructions[pc++].value;
 					TqInt n = (TqInt) instructions[pc++].value;
@@ -454,10 +455,11 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point, TqInt n, std::vector 
 					CqString depthname = m_strings[which];
 					IqTextureMap* pMap = QGetRenderContextI() ->GetShadowMap( depthname );
 
-					TqFloat A, B, C, D;
+					TqFloat A, B, C, D, avg, depth;
 					std::valarray<TqFloat> fv;
 					fv.resize(1);
 					fv[0]= 0.0f;
+					depth = -Point.z();
 
 
 					A = m_floats[n];
@@ -469,19 +471,15 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point, TqInt n, std::vector 
 					{
 						CqVector3D swidth = 0.0f, twidth = 0.0f;
 						CqVector3D _aq_P = Point;
-						pMap->SampleMap( _aq_P, swidth, twidth, fv, 0 );
-					}
-					else
-					{
-						fv[0] = A + 1.0;
+						pMap->SampleMap( _aq_P, swidth, twidth, fv, 0, &avg, &depth );
 					}
 
-					result = repulsion(fv[0], A, B, C, D);
+					result = repulsion(depth, A, B, C, D);
 					sum += result;
 					splits[int_index++] = result;
 				}
 				break;
-				case CqBlobby::SEGMENT:
+				case SEGMENT:
 				{
 					const CqMatrix m = instructions[pc++].get_matrix();
 					const CqVector3D start = instructions[pc++].get_vector();
@@ -502,12 +500,12 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point, TqInt n, std::vector 
 				}
 				break;
 
-				case CqBlobby::SUBTRACT:
-				case CqBlobby::DIVIDE:
-				case CqBlobby::ADD:
-				case CqBlobby::MULTIPLY:
-				case CqBlobby::MIN:
-				case CqBlobby::MAX:
+				case SUBTRACT:
+				case DIVIDE:
+				case ADD:
+				case MULTIPLY:
+				case MIN:
+				case MAX:
 				break;
 
 		}
@@ -534,7 +532,9 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point )
 		switch(instructions[pc++].opcode)
 		{
 				case CONSTANT:
-				stack.push(instructions[pc++].value);
+				{
+					stack.push(instructions[pc++].value);
+				}
 				break;
 				case ELLIPSOID:
 				{
@@ -552,10 +552,11 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point )
 					CqString depthname = m_strings[which];
 					IqTextureMap* pMap = QGetRenderContextI() ->GetShadowMap( depthname );
 
-					TqFloat A, B, C, D;
+					TqFloat A, B, C, D, avg, depth;
 					std::valarray<TqFloat> fv;
 					fv.resize(1);
 					fv[0]= 0.0f;
+					depth = -Point.z();
 
 
 					A = m_floats[n];
@@ -567,16 +568,11 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point )
 					{
 						CqVector3D swidth = 0.0f, twidth = 0.0f;
 						CqVector3D _aq_P = Point;
-						pMap->SampleMap( _aq_P, swidth, twidth, fv, 0 );
-					}
-					else
-					{
-						Aqsis::log() << warning << depthname << " is not found " << std::endl;
-						fv[0] = A + 1.0;
+						pMap->SampleMap( _aq_P, swidth, twidth, fv, 0, &avg, &depth );
 					}
 
 					Aqsis::log() << info << "A " << A << " B " << B << " C " << C << " D " << D << std::endl;
-					result = repulsion(fv[0], A, B, C, D);
+					result = repulsion(depth, A, B, C, D);
 					Aqsis::log() << info << "Plane: result " << result << std::endl;
 					stack.push(result);
 				}
@@ -693,13 +689,13 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point )
     \param Vertices Polygons array.
     \param Vertices Point Points array.
  */
-void CqBlobby::polygonize( TqInt PixelsWidth, TqInt PixelsHeight, TqInt& NPoints, TqInt& NPolys, TqInt*& NVertices, TqInt*& Vertices, TqFloat*& Points )
+TqInt CqBlobby::polygonize( TqInt PixelsWidth, TqInt PixelsHeight, TqInt& NPoints, TqInt& NPolys, TqInt*& NVertices, TqInt*& Vertices, TqFloat*& Points )
 {
 	TqInt i,j,k;
 
 	// Make sure the blobby is big enough to show
 	if(PixelsWidth <= 0 || PixelsHeight <= 0)
-		return;
+		return 0;
 
 	PixelsWidth /= 2;
 	PixelsHeight /= 2;
@@ -874,6 +870,7 @@ void CqBlobby::polygonize( TqInt PixelsWidth, TqInt PixelsHeight, TqInt& NPoints
 
 	free(vertices);
 	free(triangles);
+	return div_z * div_y * div_x ;
 }
 END_NAMESPACE( Aqsis )
 //---------------------------------------------------------------------

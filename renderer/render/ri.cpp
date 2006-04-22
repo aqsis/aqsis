@@ -3439,7 +3439,7 @@ RtVoid RiBlobbyV( RtInt nleaf, RtInt ncode, RtInt code[], RtInt nflt, RtFloat fl
 	TqInt* nvertices = 0;
 	TqInt* vertices = 0;
 	TqFloat* points = 0;
-	blobby.polygonize(pixels_w, pixels_h, npoints, npolygons, nvertices, vertices, points);
+	TqInt pieces = blobby.polygonize(pixels_w, pixels_h, npoints, npolygons, nvertices, vertices, points);
 
 	Aqsis::log() << info << "Polygonized : " << npoints << " points, " << npolygons << " triangles." << std::endl;
 
@@ -3499,7 +3499,7 @@ RtVoid RiBlobbyV( RtInt nleaf, RtInt ncode, RtInt code[], RtInt nflt, RtFloat fl
 		}
 	}
 
-	const TqInt pieces = 8;
+	pieces = MIN(8, pieces);
 	TqInt m;
 
 	if (Cs)
