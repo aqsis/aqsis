@@ -829,7 +829,7 @@ void CqRenderer::Initialise()
  */
 
 
-CqMatrix	CqRenderer::matSpaceToSpace( const char* strFrom, const char* strTo, const CqMatrix& matShaderToWorld, const CqMatrix& matObjectToWorld, TqFloat time )
+CqMatrix	CqRenderer::matSpaceToSpace( const char* strFrom, const char* strTo, const IqTransform* transShaderToWorld, const IqTransform* transObjectToWorld, TqFloat time )
 {
 	CqMatrix	matResult, matA, matB;
 	TqUlong fhash, thash;
@@ -842,9 +842,9 @@ CqMatrix	CqRenderer::matSpaceToSpace( const char* strFrom, const char* strTo, co
 	// Get the two component matrices.
 	// First check for special cases.
 	if ( fhash == ohash )
-		matA = matObjectToWorld;
+		matA = transObjectToWorld->matObjectToWorld(time);
 	else if ( fhash == shash )
-		matA = matShaderToWorld;
+		matA = transShaderToWorld->matObjectToWorld(time);
 	else if ( ( fhash == chash ) || ( fhash == cuhash ) )
 		//        matA = m_pTransCamera->GetMotionObjectInterpolated( time ).Inverse();
 		matA = m_pTransCamera->matObjectToWorld( time ).Inverse();
@@ -855,9 +855,9 @@ CqMatrix	CqRenderer::matSpaceToSpace( const char* strFrom, const char* strTo, co
 
 
 	if ( thash == ohash )
-		matB = matObjectToWorld.Inverse();
+		matB = transObjectToWorld->matObjectToWorld(time).Inverse();
 	else if ( thash == shash )
-		matB = matShaderToWorld.Inverse();
+		matB = transShaderToWorld->matObjectToWorld(time).Inverse();
 	else if ( ( thash == chash ) || ( thash == cuhash ) )
 		//        matB = m_pTransCamera->GetMotionObjectInterpolated( time );
 		matB = m_pTransCamera->matObjectToWorld( time );
@@ -877,7 +877,7 @@ CqMatrix	CqRenderer::matSpaceToSpace( const char* strFrom, const char* strTo, co
 /** Get the matrix to convert vectors between the specified coordinate systems.
  */
 
-CqMatrix	CqRenderer::matVSpaceToSpace( const char* strFrom, const char* strTo, const CqMatrix& matShaderToWorld, const CqMatrix& matObjectToWorld, TqFloat time )
+CqMatrix	CqRenderer::matVSpaceToSpace( const char* strFrom, const char* strTo, const IqTransform* transShaderToWorld, const IqTransform* transObjectToWorld, TqFloat time )
 {
 	CqMatrix	matResult, matA, matB;
 
@@ -890,9 +890,9 @@ CqMatrix	CqRenderer::matVSpaceToSpace( const char* strFrom, const char* strTo, c
 	// Get the two component matrices.
 	// First check for special cases.
 	if ( fhash == ohash )
-		matA = matObjectToWorld;
+		matA = transObjectToWorld->matObjectToWorld(time);
 	else if ( fhash == shash )
-		matA = matShaderToWorld;
+		matA = transShaderToWorld->matObjectToWorld(time);
 	else if ( ( fhash == chash ) || ( fhash == cuhash ) )
 		//        matA = m_pTransCamera->GetMotionObjectInterpolated( time ).Inverse();
 		matA = m_pTransCamera->matObjectToWorld( time ).Inverse();
@@ -902,9 +902,9 @@ CqMatrix	CqRenderer::matVSpaceToSpace( const char* strFrom, const char* strTo, c
 	}
 
 	if ( thash == ohash )
-		matB = matObjectToWorld.Inverse();
+		matB = transObjectToWorld->matObjectToWorld(time).Inverse();
 	else if ( thash == shash )
-		matB = matShaderToWorld.Inverse();
+		matB = transShaderToWorld->matObjectToWorld(time).Inverse();
 	else if ( ( thash == chash ) || ( thash == cuhash ) )
 		//        matB = m_pTransCamera->GetMotionObjectInterpolated( time );
 		matB = m_pTransCamera->matObjectToWorld( time );
@@ -937,7 +937,7 @@ CqMatrix	CqRenderer::matVSpaceToSpace( const char* strFrom, const char* strTo, c
 /** Get the matrix to convert normals between the specified coordinate systems.
  */
 
-CqMatrix	CqRenderer::matNSpaceToSpace( const char* strFrom, const char* strTo, const CqMatrix& matShaderToWorld, const CqMatrix& matObjectToWorld, TqFloat time )
+CqMatrix	CqRenderer::matNSpaceToSpace( const char* strFrom, const char* strTo, const IqTransform* transShaderToWorld, const IqTransform* transObjectToWorld, TqFloat time )
 {
 	CqMatrix	matResult, matA, matB;
 
@@ -950,9 +950,9 @@ CqMatrix	CqRenderer::matNSpaceToSpace( const char* strFrom, const char* strTo, c
 	// Get the two component matrices.
 	// First check for special cases.
 	if ( fhash == ohash )
-		matA = matObjectToWorld;
+		matA = transObjectToWorld->matObjectToWorld(time);
 	else if ( fhash == shash )
-		matA = matShaderToWorld;
+		matA = transShaderToWorld->matObjectToWorld(time);
 	else if ( ( fhash == chash ) || ( fhash == cuhash ) )
 		//        matA = m_pTransCamera->GetMotionObjectInterpolated( time ).Inverse();
 		matA = m_pTransCamera->matObjectToWorld( time ).Inverse();
@@ -962,9 +962,9 @@ CqMatrix	CqRenderer::matNSpaceToSpace( const char* strFrom, const char* strTo, c
 	}
 
 	if ( thash == ohash )
-		matB = matObjectToWorld.Inverse();
+		matB = transObjectToWorld->matObjectToWorld(time).Inverse();
 	else if ( thash == shash )
-		matB = matShaderToWorld.Inverse();
+		matB = transShaderToWorld->matObjectToWorld(time).Inverse();
 	else if ( ( thash == chash ) || ( thash == cuhash ) )
 		//        matB = m_pTransCamera->GetMotionObjectInterpolated( time );
 		matB = m_pTransCamera->matObjectToWorld( time );
@@ -1373,9 +1373,9 @@ void CqRenderer::StorePrimitive( const boost::shared_ptr<CqSurface>& pSurface )
 		m_aWorld.push_back(pSurface);
 	else
 	{
-		pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "world", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(0), 0 ),
-						 QGetRenderContext() ->matNSpaceToSpace( "world", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(0), 0 ),
-						 QGetRenderContext() ->matVSpaceToSpace( "world", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(0), 0 ) );
+		pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "world", "camera", NULL, pSurface->pTransform().get(), 0 ),
+						 QGetRenderContext() ->matNSpaceToSpace( "world", "camera", NULL, pSurface->pTransform().get(), 0 ),
+						 QGetRenderContext() ->matVSpaceToSpace( "world", "camera", NULL, pSurface->pTransform().get(), 0 ) );
 		PostSurface(pSurface);
 	}
 }
@@ -1386,9 +1386,9 @@ void CqRenderer::PostWorld()
 	{
 		boost::shared_ptr<CqSurface> pSurface = m_aWorld.front();
 		
-		pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "world", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(0), 0 ),
-						 QGetRenderContext() ->matNSpaceToSpace( "world", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(0), 0 ),
-						 QGetRenderContext() ->matVSpaceToSpace( "world", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(0), 0 ) );
+		pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "world", "camera", NULL, pSurface->pTransform().get(), 0 ),
+						 QGetRenderContext() ->matNSpaceToSpace( "world", "camera", NULL, pSurface->pTransform().get(), 0 ),
+						 QGetRenderContext() ->matVSpaceToSpace( "world", "camera", NULL, pSurface->pTransform().get(), 0 ) );
 		PostSurface(pSurface);
 		m_aWorld.pop_front();
 	}
@@ -1401,9 +1401,9 @@ void CqRenderer::PostCloneOfWorld()
 	for(i=m_aWorld.begin(); i!=m_aWorld.end(); i++)
 	{
 		boost::shared_ptr<CqSurface> pSurface((*i)->Clone());
-		pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "world", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(0), 0 ),
-						 QGetRenderContext() ->matNSpaceToSpace( "world", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(0), 0 ),
-						 QGetRenderContext() ->matVSpaceToSpace( "world", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(0), 0 ) );
+		pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "world", "camera", NULL, pSurface->pTransform().get(), 0 ),
+						 QGetRenderContext() ->matNSpaceToSpace( "world", "camera", NULL, pSurface->pTransform().get(), 0 ),
+						 QGetRenderContext() ->matVSpaceToSpace( "world", "camera", NULL, pSurface->pTransform().get(), 0 ) );
 		PostSurface(pSurface);
 	}
 }
@@ -1418,7 +1418,7 @@ void CqRenderer::PostSurface( const boost::shared_ptr<CqSurface>& pSurface )
 	CqBound bound(boundAttr);
 	if(bound.Volume2() > 0)
 	{
-		bound.Transform( QGetRenderContext() ->matSpaceToSpace( "object", "raster", CqMatrix(), pSurface->pTransform()->matObjectToWorld( QGetRenderContext() ->Time() ), QGetRenderContext()->Time() ) );
+		bound.Transform( QGetRenderContext() ->matSpaceToSpace( "object", "raster", NULL, pSurface->pTransform().get(), QGetRenderContext()->Time() ) );
 
 		TqFloat ruler = fabs( ( bound.vecMax().x() - bound.vecMin().x() ) * ( bound.vecMax().y() - bound.vecMin().y() ) );
 

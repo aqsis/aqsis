@@ -538,6 +538,11 @@ class CqShaderVM : public CqShaderStack, public IqShader, public CqDSORepository
 			/// \note: We can use time 0 here as shaders aren't affected by motion (currently).
 			return ( m_pTransform->matObjectToWorld(0) );
 		}
+		virtual	const IqTransform*	getTransform() const
+		{
+			/// \note: We can use time 0 here as shaders aren't affected by motion (currently).
+			return ( m_pTransform.get() );
+		}
 
 		virtual void SetTransform(IqTransformPtr pTrans)
 		{

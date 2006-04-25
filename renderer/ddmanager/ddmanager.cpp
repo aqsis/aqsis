@@ -1899,7 +1899,7 @@ void CqDDManager::PrepareSystemParameters( SqDisplayRequest& req )
 
 	// "NP"
 
-	CqMatrix matWorldToScreen = QGetRenderContext() ->matSpaceToSpace( "world", "screen", CqMatrix(), CqMatrix(), QGetRenderContextI()->Time() );
+	CqMatrix matWorldToScreen = QGetRenderContext() ->matSpaceToSpace( "world", "screen", NULL, NULL, QGetRenderContextI()->Time() );
 
 	ConstructMatrixParameter("NP", &matWorldToScreen, 1, parameter);
 
@@ -1909,7 +1909,7 @@ void CqDDManager::PrepareSystemParameters( SqDisplayRequest& req )
 
 	// "Nl"
 
-	CqMatrix matWorldToCamera = QGetRenderContext() ->matSpaceToSpace( "world", "camera", CqMatrix(), CqMatrix(), QGetRenderContextI()->Time() );
+	CqMatrix matWorldToCamera = QGetRenderContext() ->matSpaceToSpace( "world", "camera", NULL, NULL, QGetRenderContextI()->Time() );
 
 	ConstructMatrixParameter("Nl", &matWorldToCamera, 1, parameter);
 

@@ -310,7 +310,7 @@ TqUlong CqQuadric::EstimateGridSize()
 	TqFloat maxusize, maxvsize;
 	maxusize = maxvsize = 0;
 
-	CqMatrix matTx = QGetRenderContext() ->matSpaceToSpace( "camera", "raster", CqMatrix(), CqMatrix(), QGetRenderContext()->Time() ) * m_matTx;
+	CqMatrix matTx = QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, NULL, QGetRenderContext()->Time() ) * m_matTx;
 
 	m_uDiceSize = m_vDiceSize = ESTIMATEGRIDSIZE;
 

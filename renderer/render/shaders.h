@@ -165,6 +165,10 @@ class CqLayeredShader : public IqShader
 		{
 			return ( m_pTransform->matObjectToWorld(0) );
 		}
+		virtual const IqTransform*	getTransform() const
+		{
+			return ( m_pTransform.get() );
+		}
 		virtual void SetTransform(IqTransformPtr pTrans)
 		{
 			m_pTransform = pTrans;

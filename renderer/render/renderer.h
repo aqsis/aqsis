@@ -178,9 +178,9 @@ class CqRenderer : public IqRenderer
 		virtual	void	SetImage( CqImageBuffer* pImage );
 
 		// Handle various coordinate system transformation requirements.
-		virtual	CqMatrix	matSpaceToSpace	( const char* strFrom, const char* strTo, const CqMatrix& matShaderToWorld, const CqMatrix& matObjectToWorld, TqFloat time );
-		virtual	CqMatrix	matVSpaceToSpace	( const char* strFrom, const char* strTo, const CqMatrix& matShaderToWorld, const CqMatrix& matObjectToWorld, TqFloat time );
-		virtual	CqMatrix	matNSpaceToSpace	( const char* strFrom, const char* strTo, const CqMatrix& matShaderToWorld, const CqMatrix& matObjectToWorld, TqFloat time );
+		virtual	CqMatrix	matSpaceToSpace	( const char* strFrom, const char* strTo, const IqTransform* transShaderToWorld, const IqTransform* transObjectToWorld, TqFloat time );
+		virtual	CqMatrix	matVSpaceToSpace	( const char* strFrom, const char* strTo, const IqTransform* transShaderToWorld, const IqTransform* transObjectToWorld, TqFloat time );
+		virtual	CqMatrix	matNSpaceToSpace	( const char* strFrom, const char* strTo, const IqTransform* transShaderToWorld, const IqTransform* transObjectToWorld, TqFloat time );
 
 		virtual	const	TqFloat*	GetFloatOption( const char* strName, const char* strParam ) const;
 		virtual	const	TqInt*	GetIntegerOption( const char* strName, const char* strParam ) const;

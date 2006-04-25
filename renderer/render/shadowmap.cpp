@@ -244,7 +244,7 @@ void CqShadowMap::ReadMatrices()
 	// Set the number of shadow maps initially to 0.
 	m_NumberOfMaps = 0;
 
-	CqMatrix matCToW = QGetRenderContextI() ->matSpaceToSpace( "camera", "world", CqMatrix(), CqMatrix(), QGetRenderContextI()->Time() );
+	CqMatrix matCToW = QGetRenderContextI() ->matSpaceToSpace( "camera", "world", NULL, NULL, QGetRenderContextI()->Time() );
 
 	TqDouble minz;
 

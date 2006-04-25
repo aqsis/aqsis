@@ -254,7 +254,7 @@ TqBool CqImageBuffer::CullSurface( CqBound& Bound, const boost::shared_ptr<CqSur
 
 
 	// Convert the bounds to raster space.
-	Bound.Transform( QGetRenderContext() ->matSpaceToSpace( "camera", "raster", CqMatrix(), CqMatrix(), QGetRenderContext()->Time() ) );
+	Bound.Transform( QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, NULL, QGetRenderContext()->Time() ) );
 
 	// Take into account depth-of-field
 	if ( QGetRenderContext() ->UsingDepthOfField() )
@@ -319,14 +319,14 @@ void CqImageBuffer::PostSurface( const boost::shared_ptr<CqSurface>& pSurface )
 	if ( db != 0.0f )
 	{
 		CqVector3D	vecDB( db, 0, 0 );
-		CqMatrix matShaderToWorld;
+		const IqTransform* transShaderToWorld;
 		// Default "shader" space to the displacement shader, unless there isn't one, in which
 		// case use the surface shader.
 		if ( pSurface->pAttributes() ->pshadDisplacement(QGetRenderContextI()->Time()) )
-			matShaderToWorld = pSurface->pAttributes() ->pshadDisplacement(QGetRenderContextI()->Time()) ->matCurrent();
+			transShaderToWorld = pSurface->pAttributes() ->pshadDisplacement(QGetRenderContextI()->Time()) ->getTransform();
 		else if ( pSurface->pAttributes() ->pshadSurface(QGetRenderContextI()->Time()) )
-			matShaderToWorld = pSurface->pAttributes() ->pshadSurface(QGetRenderContextI()->Time()) ->matCurrent();
-		vecDB = QGetRenderContext() ->matVSpaceToSpace( strCoordinateSystem.c_str(), "camera", matShaderToWorld, pSurface->pTransform() ->matObjectToWorld(pSurface->pTransform()->Time(0)), QGetRenderContextI()->Time() ) * vecDB;
+			transShaderToWorld = pSurface->pAttributes() ->pshadSurface(QGetRenderContextI()->Time()) ->getTransform();
+		vecDB = QGetRenderContext() ->matVSpaceToSpace( strCoordinateSystem.c_str(), "camera", transShaderToWorld, pSurface->pTransform().get(), QGetRenderContextI()->Time() ) * vecDB;
 		db = vecDB.Magnitude();
 
 		Bound.vecMax() += db;

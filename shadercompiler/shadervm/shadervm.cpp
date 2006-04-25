@@ -1489,8 +1489,7 @@ void CqShaderVM::InitialiseParameters( )
 		CqString _strSpace( "shader" );
 		if ( strSpace.compare( "" ) != 0 )
 			_strSpace = strSpace;
-		CqMatrix matObjectToWorld = matCurrent();
-		CqMatrix matTrans = QGetRenderContextI() ->matSpaceToSpace( _strSpace.c_str(), "current", matCurrent(), matObjectToWorld, QGetRenderContextI()->Time() );
+		CqMatrix matTrans = QGetRenderContextI() ->matSpaceToSpace( _strSpace.c_str(), "current", getTransform(), getTransform(), QGetRenderContextI()->Time() );
 
 		while ( count-- > 0 )
 		{

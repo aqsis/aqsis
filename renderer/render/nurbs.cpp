@@ -1624,7 +1624,7 @@ TqBool	CqSurfaceNURBS::Diceable()
 
 	TqFloat ShadingRateSqrt = pAttributes() ->GetFloatAttribute( "System", "ShadingRateSqrt" ) [ 0 ];
 
-	const CqMatrix& matCtoR = QGetRenderContext() ->matSpaceToSpace( "camera", "raster", CqMatrix(), pTransform() ->matObjectToWorld(pTransform()->Time(0)), QGetRenderContext()->Time() );
+	const CqMatrix& matCtoR = QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, pTransform().get(), QGetRenderContext()->Time() );
 	for ( i = 0; i < m_cuVerts*m_cvVerts; i++ )
 	{
 		CqVector3D vT = P()->pValue( i )[0];
@@ -1710,7 +1710,7 @@ TqInt	CqSurfaceNURBS::TrimDecimation( const CqTrimCurve& Curve )
 	TqFloat Len = 0;
 	TqFloat MaxLen = 0;
 	TqInt cSegments = 0;
-	CqMatrix matCtoR = QGetRenderContext() ->matSpaceToSpace( "camera", "raster", CqMatrix(), pTransform() ->matObjectToWorld(pTransform()->Time(0)), QGetRenderContext()->Time() );
+	CqMatrix matCtoR = QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, pTransform().get(), QGetRenderContext()->Time() );
 
 	TqUint iTrimCurvePoint;
 	for ( iTrimCurvePoint = 0; iTrimCurvePoint < Curve.cVerts() - 1; iTrimCurvePoint++ )

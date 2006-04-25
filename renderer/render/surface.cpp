@@ -117,7 +117,7 @@ CqBound	CqSurface::AdjustBoundForTransformationMotion( const CqBound& B ) const
 
 	if( pTransform()->cTimes() > 1 )
 	{
-		CqMatrix matCameraToObject0 = QGetRenderContext() ->matSpaceToSpace( "camera", "object", CqMatrix(), pTransform()->matObjectToWorld( pTransform()->Time( 0 ) ), pTransform()->Time( 0 ) );
+		CqMatrix matCameraToObject0 = QGetRenderContext() ->matSpaceToSpace( "camera", "object", NULL, pTransform().get(), pTransform()->Time( 0 ) );
 		CqBound B0( B );
 		B0.Transform( matCameraToObject0 );
 
@@ -125,7 +125,7 @@ CqBound	CqSurface::AdjustBoundForTransformationMotion( const CqBound& B ) const
 		for( i = 1; i < pTransform()->cTimes(); i++ )
 		{
 			CqBound Btx( B0 );
-			CqMatrix matObjectToCameraT = QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pTransform()->matObjectToWorld( pTransform()->Time( i ) ), pTransform()->Time( i ) );
+			CqMatrix matObjectToCameraT = QGetRenderContext() ->matSpaceToSpace( "object", "camera", NULL, pTransform().get(), pTransform()->Time( i ) );
 			Btx.Transform( matObjectToCameraT );
 			Bm.Encapsulate( Btx );
 		}

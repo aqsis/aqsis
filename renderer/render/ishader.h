@@ -57,6 +57,7 @@ struct IqShader
 	/** Get the shader matrix, the transformation at the time this shader was instantiated.
 	 */
 	virtual	const CqMatrix&	matCurrent() = 0;
+	virtual const IqTransform* getTransform() const = 0;
 	virtual void SetTransform(IqTransformPtr pTrans) = 0;
 	/** Set the naem of the shader.
 	 */
