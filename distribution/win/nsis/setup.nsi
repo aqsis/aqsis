@@ -2,11 +2,12 @@
 ; Author: Leon Tony Atkinson (latkinson@aqsis.org)
 ; Info: Last tested with NSIS 2.15
 ; Other: 1. To make updates easier, all message strings have been placed within the top 20-30 lines of this file.
-;        2. To build manually, without using SCons, uncomment lines 13 and 17.
+;        2. To build manually, without using SCons, uncomment lines 10, 14 and 18.
 
 
 ; Helper defines
 !define /date YEAR "%Y"
+;;!define LIBRARY_EXTENSION ".*"
 
 !define PRODUCT_NAME "Aqsis"
 !define PRODUCT_FULLNAME "Aqsis Renderer"
