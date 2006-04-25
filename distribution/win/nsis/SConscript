@@ -2,7 +2,8 @@ Import('env version')
 
 installer1env = env.Copy()
 installer1env.Replace(NSISDEFINES = {'PRODUCT_VERSION': '%d.%d.%d' %(version.major, version.minor, version.build), 
-									 'PRODUCT_FILE_NUMBER': '%d_%d_%d' %(version.major, version.minor, version.build)})
+				 'PRODUCT_FILE_NUMBER': '%d_%d_%d' %(version.major, version.minor, version.build),
+				 'LIBRARY_EXTENSION': env['LIBSUFFIX']})
 installer1 = installer1env.Installer('setup')
 installer1env.Alias('win_installer', installer1)
 

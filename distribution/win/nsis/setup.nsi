@@ -197,7 +197,7 @@ SectionIn 1
   SetOutPath "$INSTDIR\include\aqsis"
   File "..\..\..\output\include\aqsis\*.h"
   SetOutPath "$INSTDIR\lib"
-  File "..\..\..\output\lib\*.lib"
+  File "..\..\..\output\lib\*${LIBRARY_EXTENSION}"
 SectionEnd
 
 ; Section descriptions
