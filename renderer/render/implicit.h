@@ -1,70 +1,123 @@
-/*
- * Header for user-defined implicit surface
- *
- * (c) 2003 SiTex Graphics, Inc.
- *
- */
+// Aqsis
+// Copyright © 2006, Paul C. Gregory
+//
+// Contact: pgregory@aqsis.com
+//
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public
+// License as published by the Free Software Foundation; either
+// version 2 of the License, or (at your option) any later version.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public
+// License along with this library; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+
+/** \file
+    \brief Interface to AIR' DBO
+
+*/
+
+#ifndef IMPLICIT_H_INCLUDED
+#define IMPLICIT_H_INCLUDED
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#if defined(__BORLANDC__) || defined(_MSC_VER)
-#define EXPORT __declspec (dllexport)
-#else
-#define EXPORT extern
-#endif
+#define	_qShareName	CORE
+#ifdef	WIN32
+#  ifdef	AQSIS_STATIC_LINK
+
+#    define  _qShare
+#    define	_qShareC
+#    define	_qShareM
+
+#    undef _qShareName
+
+#  else // AQSIS_DYNAMIC_LINK
+
+#    define _qExportM __declspec(dllexport)
+#    define _qImportM __declspec(dllimport)
+
+#    define _qExportC
+#    define _qImportC
+
+#    define _qExport __declspec(dllexport)
+#    define _qImport __declspec(dllimport)
+
+#    undef  _qShare
+#    undef	_qShareC
+#    undef	_qShareM
+
+#    ifdef _qBUILDING
+#      if _qBUILDING == _qShareName
+#        define _qShare _qExport
+#        define _qShareM _qExportM
+#        define _qShareC _qExportC
+#      else
+#        define _qShare _qImport
+#        define _qShareM _qImportM
+#        define _qShareC _qImportC
+#      endif
+#    else
+#      define	_qShare _qImport
+#      define _qShareM _qImportM
+#      define _qShareC _qImportC
+#    endif // _qBUILDING
+
+#    undef _qShareName
+
+#  endif	// AQSIS_DYNAMIC_LINK
+
+#else	// !WIN32
+
+#  define  _qShare
+#  define	_qShareC
+#  define	_qShareM
+
+#  undef _qShareName
+
+#endif // WIN32
 
 typedef struct {
 	int BlobbyId;
 	int OpId;
 } State;
 
-EXPORT void ImplicitBound(State *s, float *bd,
-                                          int niarg, int *iarg,
-                                          int nfarg, float *farg,
-																					int nsarg, char **sarg);
+/* Aqsis uses the same interface as AIR but the first parameter won't be 
+   meaningfull 
+*/
+_qShare void ImplicitBound(State *s, float *bd, int niarg, int *iarg,
+                                          int nfarg, float *farg, int nsarg, 
+					  char **sarg);
 
-/* ImplicitValue returns a scaled distance in *result.
-   The blob's field of influence is 0 for distances greater than 1.
-   The surface is located at distance=0.5.
- */
+_qShare void ImplicitValue(State *s, float *result, float *p, 
+					int niarg, int *iarg, int nfarg, 
+					float *farg, int nsarg, char **sarg);
 
-EXPORT void ImplicitValue(State *s, float *result,
-                                          float *p,
-                                          int niarg, int *iarg,
-                                          int nfarg, float *farg,
-																					int nsarg, char **sarg);
+_qShare void ImplicitRange(State *s, float *rng, float *bd, int niarg, 
+					int *iarg, int nfarg, float *farg, 
+					int nsarg, char **sarg);
+_qShare void ImplicitFree(State *s);
 
-
-/* ImplicitRange returns a range as two floats in rng, giving
-   the possible range of values for all points in bd.
-   If the bound is completely outside the field of the blob, the
-   function should return [1 1]
- */
-
-EXPORT void ImplicitRange(State *s, float *rng,
-                                          float *bd,
-                                          int niarg, int *iarg,
-                                          int nfarg, float *farg,
-																					int nsarg, char **sarg);
-
-/* ImplicitFree (optional) called once after processing each Blobby.
-   NB:  ImplicitFree may be called for a Blobby even though none of the
-   other functions were queried.
- */
-
-EXPORT void ImplicitFree(State *s);
-
-
-EXPORT void ImplicitMotion(State *s, float *movec,
-                           float *pt, float *times,
-                           int niarg, int *iarg,
-                           int nfarg, float *farg,
+/* Not supported for now */
+_qShare void ImplicitMotion(State *s, float *movec, float *pt, float *times,
+                           int niarg, int *iarg, int nfarg, float *farg,
                            int nsarg, char **sarg);
 
+typedef void *TqImplicitBound(State *, float *, int, int *, int , float *, int, char **);
+typedef void *TqImplicitValue(State *, float *, float *, int, int *, int, float *, int, char **);
+typedef void *TqImplicitRange(State *, float *, float *, int, int *, int, float *, int, char **);
+typedef void *TqImplicitFree (State *);
 
 #ifdef __cplusplus
 }
 #endif
 
+#endif  // !IMPLICIT_H_INCLUDED

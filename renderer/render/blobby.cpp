@@ -50,79 +50,12 @@ START_NAMESPACE( Aqsis )
 #define OPTIMUM_GRID_SIZE 127
 
 
-static void InternalImplicitBound(State *s, float *bd,
-                          int niarg, int *iarg,
-                          int nfarg, float *farg,
-                          int nsarg, char **sarg)
-{
-	bd[0]=-0.5;
-	bd[1]=0.5;
-	bd[2]=-0.5;
-	bd[3]=0.5;
-	bd[4]=-farg[0];
-	bd[5]=farg[0];
-}
-
-static float level(float v, float h)
-{
-	float r=(v/h+1.0)*0.5;
-	if (r<0.0)
-		r=0.0;
-	if (r>1.0)
-		r=1.0;
-	return r;
-}
-
-static void InternalImplicitValue(State *s, float *result, float *p,
-                          int niarg, int *iarg,
-                          int nfarg, float *farg,
-                          int nsarg, char **sarg)
-{
-	if ((p[0]<-0.5)||(p[0]>0.5)||(p[1]<-0.5)||(p[1]>0.5))
-	{
-		result[0]=1.0;
-	}
-	else
-	{
-		result[0] = level(p[2],farg[0]);
-	}
-}
-
-
-static void InternalImplicitRange(State *s, float *rng,
-                          float *bd,
-                          int niarg, int *iarg,
-                          int nfarg, float *farg,
-                          int nsarg, char **sarg)
-{
-	if ((bd[0]>0.5)||(bd[1]<-0.5)||(bd[2]>0.5)||(bd[3]<-0.5)||(bd[4]>farg[0]))
-	{
-		rng[0]=1.0;
-		rng[1]=1.0;
-	}
-	else
-	{
-		rng[0]=level(bd[4],farg[0]);
-		rng[1]=level(bd[5],farg[0]);
-	}
-}
-
-static void InternalImplicitFree(State *s)
-{}
-
-
-typedef void *fImplicitBound(State *, float *, int, int *, int , float *, int, char **);
-typedef void *fImplicitValue(State *, float *, float *, int, int *, int, float *, int, char **);
-typedef void *fImplicitRange(State *, float *, float *, int, int *, int, float *, int, char **);
-typedef void *fImplicitFree (State *);
-
 static CqSimplePlugin DBO;
-static fImplicitBound *pImplicitBound = NULL;
-static fImplicitValue *pImplicitValue = NULL;
-static fImplicitFree  *pImplicitFree  = NULL;
-static fImplicitRange *pImplicitRange = NULL;
+static TqImplicitBound *pImplicitBound = NULL;
+static TqImplicitValue *pImplicitValue = NULL;
+static TqImplicitFree  *pImplicitFree  = NULL;
+static TqImplicitRange *pImplicitRange = NULL;
 static void *DBO_handle = NULL;
-
 
 //---------------------------------------------------------------------
 /**
@@ -449,22 +382,22 @@ class blobby_vm_assembler
 							if (!pImplicitBound)
 							{
 								CqString implicitbound("ImplicitBound");
-								pImplicitBound = (fImplicitBound *) DBO.SimpleDLSym(DBO_handle, &implicitbound);
+								pImplicitBound = (TqImplicitBound *) DBO.SimpleDLSym(DBO_handle, &implicitbound);
 							}
 							if (!pImplicitValue)
 							{
 								CqString implicitvalue("ImplicitValue");
-								pImplicitValue = (fImplicitValue *) DBO.SimpleDLSym(DBO_handle, &implicitvalue );
+								pImplicitValue = (TqImplicitValue *) DBO.SimpleDLSym(DBO_handle, &implicitvalue );
 							}
 							if (!pImplicitFree)
 							{
 								CqString implicitfree("ImplicitFree");
-								pImplicitFree = (fImplicitFree *) DBO.SimpleDLSym(DBO_handle, &implicitfree);
+								pImplicitFree = (TqImplicitFree *) DBO.SimpleDLSym(DBO_handle, &implicitfree);
 							}
 							if (!pImplicitRange)
 							{
 								CqString implicitrange("ImplicitRange");
-								pImplicitRange = (fImplicitRange *) DBO.SimpleDLSym(DBO_handle, &implicitrange);
+								pImplicitRange = (TqImplicitRange *) DBO.SimpleDLSym(DBO_handle, &implicitrange);
 							}
 						}
 
@@ -475,14 +408,6 @@ class blobby_vm_assembler
 							                  0, m_code,
 							                  g, &m_floats[h],
 							                  0, 0);
-						}
-						else
-						{
-							Aqsis::log() << warning << "Using the internal dbo_plane !" << std::endl;
-							InternalImplicitBound(&s, bounds,
-							              0, m_code,
-							              g, &m_floats[h],
-							              0, 0);
 						}
 
 
@@ -777,13 +702,6 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point, TqInt n, std::vector 
 							                  g, &m_floats[h],
 							                  i, &m_strings[j]);
 						}
-						else
-						{
-							InternalImplicitValue(&s, &result, point,
-							              e, &m_code[f],
-							              g, &m_floats[h],
-							              i, &m_strings[j]);
-						}
 
 						//result += 0.421875;
 					}
@@ -956,14 +874,6 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point )
 							                  g, &m_floats[h],
 							                  i, &m_strings[j]);
 						}
-						else
-						{
-							InternalImplicitValue(&s, &result, point,
-							              e, &m_code[f],
-							              g, &m_floats[h],
-							              i, &m_strings[j]);
-						}
-
 
 						//result += 0.421875;
 					}
