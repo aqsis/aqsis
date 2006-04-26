@@ -52,7 +52,6 @@ aqsisdll_headers = Split("""
 
 	bucket.h                imagers.h               nurbs.h                 shadeop.h
 	blobby.h		clippingvolume.h        inlineparse.h
-	implicit.h
         objectinstance.h        shaders.h
 
 	condition.h             iraytrace.h             occlusion.h             stats.h

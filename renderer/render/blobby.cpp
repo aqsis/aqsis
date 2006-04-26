@@ -41,7 +41,6 @@
 #include "blobby.h"
 #include "itexturemap.h"
 #include "marchingcubes.h"
-#include "implicit.h"
 #include "plugins.h"
 
 START_NAMESPACE( Aqsis )
@@ -51,11 +50,6 @@ START_NAMESPACE( Aqsis )
 
 
 static CqSimplePlugin DBO;
-static TqImplicitBound *pImplicitBound = NULL;
-static TqImplicitValue *pImplicitValue = NULL;
-static TqImplicitFree  *pImplicitFree  = NULL;
-static TqImplicitRange *pImplicitRange = NULL;
-static void *DBO_handle = NULL;
 
 //---------------------------------------------------------------------
 /**
@@ -208,16 +202,6 @@ class blobby_vm_assembler
 						}
 						break;
 
-						case 9000:
-						{
-							STATS_INC( GPR_blobbies );
-							opcodes.push_back( opcode( CqBlobby::AIR, c ) );
-							const TqInt n_ops = code[c];
-
-							c += n_ops + 1;
-							Aqsis::log() << info << "Blobby Air: " << n_ops << std::endl;
-						}
-						break;
 						case 1000:
 						{
 							opcodes.push_back( opcode( CqBlobby::CONSTANT, c++ ) );
@@ -331,99 +315,6 @@ class blobby_vm_assembler
 					case CqBlobby::IDEMPOTENTATE:
 					{
 					Aqsis::log() << warning << "RiBlobby's Idempotate operator not supported." << std::endl;
-					}
-					break;
-
-					case CqBlobby::AIR:
-					{
-						/*
-						A dynamic blob op can be used like any other primitive blob in a Blobby object.  DBOs have two required parameters and can have an arbitrary number of float, string, or integer parameters that arepassed to the DBO functions.
-
-						9000 2  nameix transformix
-						9000 4 nameix transformix nfloat floatix
-						9000 6 nameix transformix nfloat floatix nstring stringix 
-						9000 (7+nint) nameix transformix nfloat floatix nstring stringix nintint_1...int_nint 
-
-						nameix is an index into the string array for the name of the DBO.  
-						AIR will search the proceduresearch path for a DLL or shared object with the corresponding name. 
-						transformix is an index into the float array for a matrix giving the blob-to-object space transformation.
-						floatix (if present) is the index in the float array of the first of the nfloat float parameters. 
-						stringix (if present) is the index in the string array of the first of the nstring string parameters.
-						*/
-						m_instructions.push_back(CqBlobby::instruction(CqBlobby::AIR));
-						m_instructions.push_back(CqBlobby::instruction(op.index)); // idx to count
-
-						TqInt f =  (TqInt) m_code[op.index+2]; //idx for the inverse matrix;
-
-						CqMatrix transformation(
-						    m_floats[f], m_floats[f+1], m_floats[f+2], m_floats[f+3],
-						    m_floats[f+4], m_floats[f+5], m_floats[f+6], m_floats[f+7],
-						    m_floats[f+8], m_floats[f+9], m_floats[f+10], m_floats[f+11],
-						    m_floats[f+12], m_floats[f+13], m_floats[f+14], m_floats[f+15]);
-
-						grow_bound(transformation, 1.0);
-
-						TqFloat bounds[6];
-						TqInt g =  (TqInt) m_code[op.index+3];
-						TqInt h =  (TqInt) m_code[op.index+4];
-						State s;
-
-						// Load the DBO plugin
-						if (!DBO_handle)
-						{
-							CqString dbo(m_strings[m_code[op.index+1]]);
-							DBO_handle = DBO.SimpleDLOpen(&dbo);
-						}
-
-						// Attach each API DBO functions
-						// Even if we attach them all only ImplicitBound, ImplicitValue, ImplicitFree will be used.
-						if (DBO_handle)
-						{
-							if (!pImplicitBound)
-							{
-								CqString implicitbound("ImplicitBound");
-								pImplicitBound = (TqImplicitBound *) DBO.SimpleDLSym(DBO_handle, &implicitbound);
-							}
-							if (!pImplicitValue)
-							{
-								CqString implicitvalue("ImplicitValue");
-								pImplicitValue = (TqImplicitValue *) DBO.SimpleDLSym(DBO_handle, &implicitvalue );
-							}
-							if (!pImplicitFree)
-							{
-								CqString implicitfree("ImplicitFree");
-								pImplicitFree = (TqImplicitFree *) DBO.SimpleDLSym(DBO_handle, &implicitfree);
-							}
-							if (!pImplicitRange)
-							{
-								CqString implicitrange("ImplicitRange");
-								pImplicitRange = (TqImplicitRange *) DBO.SimpleDLSym(DBO_handle, &implicitrange);
-							}
-						}
-
-						if (pImplicitBound)
-						{
-							Aqsis::log() << info << "Using the dbo plugin ..." << std::endl;
-							(*pImplicitBound)(&s, bounds,
-							                  0, m_code,
-							                  g, &m_floats[h],
-							                  0, 0);
-						}
-
-
-						grow_bound( CqVector3D(bounds[0], bounds[2], bounds[4]),
-						            CqVector3D(bounds[1], bounds[3], bounds[5]),
-						            1.0,
-						            transformation);
-
-						// Push the inverse matrix
-						m_instructions.push_back(transformation.Inverse());
-
-						// Push the center of this blobby according to its bbox
-						CqVector3D mid = (CqVector3D(bounds[0], bounds[2], bounds[4]) + CqVector3D(bounds[1], bounds[3], bounds[5])) / 2.0;
-						m_instructions.push_back(CqBlobby::instruction(mid));
-
-
 					}
 					break;
 
@@ -620,97 +511,6 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point, TqInt n, std::vector 
 				}
 				break;
 
-				case AIR:
-				{
-					/*
-					A dynamic blob op can be used like any other primitive blob in a Blobby object.  DBOs have two required parameters and can have an arbitrary number of float, string, or integer parameters that arepassed to the DBO functions.
-
-					9000 2 nameix transformix
-					9000 4 nameix transformix nfloat floatix
-					9000 6 nameix transformix nfloat floatix nstring stringix 
-					9000 (7+nint) nameix transformix nfloat floatix nstring stringix nintint_1...int_nint 
-
-					nameix is an index into the string array for the name of the DBO.  
-					AIR will search the proceduresearch path for a DLL or shared object with the corresponding name. 
-					transformix is an index into the float array for a matrix giving the blob-to-object space transformation.
-					floatix (if present) is the index in the float array of the first of the nfloat float parameters. 
-					stringix (if present) is the index in the string array of the first of the nstring string parameters.
-
-					 on the stack you will find
-
-					m_instructions.push_back(CqBlobby::instruction(CqBlobby::AIR));
-					m_instructions.push_back(CqBlobby::instruction(op.index)); // idx to Count
-					   m_instructions.push_back(transformation.Inverse()); // Push the inverse matrix
-					   m_instructions.push_back(CqBlobby::instruction(mid)); // Push the center of this blobby according to its bbox
-
-					*/
-
-					TqInt count, e, f, g, h, i, j;
-
-					e = f = g = h = i = j = 0;
-					count = instructions[pc++].count;
-
-					if (m_code[count] >= 7)
-					{
-						e = 7 - m_code[count]; // How many strings
-						f = count + 7;
-					}
-					if (m_code[count] >= 4)
-					{
-						g = m_code[count + 3]; // How many floats
-						h = m_code[count + 4]; // Idx to the floats
-					}
-					if (m_code[count] >= 6)
-					{
-						i = m_code[count + 5]; // How many strings
-						j = m_code[count + 6]; // Idx to the strings
-					}
-
-
-
-					TqFloat point[3];
-					const CqMatrix transformation = instructions[pc++].get_matrix();
-					const CqVector3D mid = instructions[pc++].get_vector();
-
-
-					State s;
-					CqVector3D tmp = transformation * Point;
-					point[0] = tmp.x();
-					point[1] = tmp.y();
-					point[2] = tmp.z();
-
-					// Eliminate the one which are outside of the plane influence.
-					// This is where I don't know; and not quite sure.
-					// in air documentation it said about this:
-					//
-					// The ImplicitValue function returns a scaled distance from point *p to the blob in *result in the
-					// range [0..1]. For blending purposes the surface of the blob is assumed to be at a distance of 0.5.
-					// Points further away than a distance of 1 are not affected by the blob.
-					//
-
-					TqBool ok =  (fabs(tmp.x() - mid.x())  <= 0.5) &&
-					             (fabs(tmp.y()- mid.y())  <= 0.5) &&
-					             (fabs(tmp.z()- mid.z()) <= 0.5) ;
-
-					if ( ok )
-					{
-
-						if (pImplicitValue )
-						{
-							(*pImplicitValue)(&s, &result, point,
-							                  e, &m_code[f],
-							                  g, &m_floats[h],
-							                  i, &m_strings[j]);
-						}
-
-						//result += 0.421875;
-					}
-
-					sum += result;
-					splits[int_index++] = result;
-				}
-				break;
-
 				case SEGMENT:
 				{
 					const CqMatrix m = instructions[pc++].get_matrix();
@@ -813,73 +613,6 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point )
 					result = repulsion(depth, A, B, C, D);
 
 					//Aqsis::log() << info << "Plane: result " << result << std::endl;
-					stack.push(result);
-				}
-				break;
-
-				case AIR:
-				{
-					TqInt count, e, f, g, h, i, j;
-
-					e = f = g = h = i = j = 0;
-					count = instructions[pc++].count;
-
-					if (m_code[count] >= 7)
-					{
-						e = 7 - m_code[count]; // How many strings
-						f = count + 7;
-					}
-					if (m_code[count] >= 4)
-					{
-						g = m_code[count + 3]; // How many floats
-						h = m_code[count + 4]; // Idx to the floats
-					}
-					if (m_code[count] >= 6)
-					{
-						i = m_code[count + 5]; // How many strings
-						j = m_code[count + 6]; // Idx to the strings
-					}
-
-
-					TqFloat point[3];
-					const CqMatrix transformation = instructions[pc++].get_matrix();
-					const CqVector3D mid = instructions[pc++].get_vector();
-
-
-					State s;
-					CqVector3D tmp = transformation * Point;
-					point[0] = tmp.x();
-					point[1] = tmp.y();
-					point[2] = tmp.z();
-
-					// Eliminate the one which are outside of the plane influence.
-					// This is where I don't know; and not quite sure.
-					// in air documentation it said about this:
-					//
-					// The ImplicitValue function returns a scaled distance from point *p to the blob in *result in the
-					// range [0..1]. For blending purposes the surface of the blob is assumed to be at a distance of 0.5.
-					// Points further away than a distance of 1 are not affected by the blob.
-					//
-
-					TqBool ok =  (fabs(tmp.x() - mid.x())  <= 0.5) &&
-					             (fabs(tmp.y()- mid.y())  <= 0.5) &&
-					             (fabs(tmp.z()- mid.z()) <= 0.5) ;
-
-					if ( ok )
-					{
-						if (pImplicitValue )
-						{
-							(*pImplicitValue)(&s, &result, point,
-							                  e, &m_code[f],
-							                  g, &m_floats[h],
-							                  i, &m_strings[j]);
-						}
-
-						//result += 0.421875;
-					}
-
-					//Aqsis::log() << info << " Result " << result << std::endl;
-
 					stack.push(result);
 				}
 				break;
@@ -1189,19 +922,6 @@ TqInt CqBlobby::polygonize( TqInt PixelsWidth, TqInt PixelsHeight, TqInt& NPoint
 	free(vertices);
 	free(triangles);
 
-	// Cleanup the DBO i/f
-	if (DBO_handle)
-	{
-		State s;
-		if (pImplicitFree)
-			(*pImplicitFree)(&s);
-		pImplicitBound = NULL;
-		pImplicitValue = NULL;
-		pImplicitFree  = NULL;
-		pImplicitRange = NULL;
-		DBO.SimpleDLClose(DBO_handle);
-		DBO_handle = NULL;
-	}
 	return div_x * div_y * div_z;
 }
 
