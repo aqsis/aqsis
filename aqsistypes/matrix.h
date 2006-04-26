@@ -87,18 +87,7 @@ class CqMatrix
 		}
 		CqMatrix( TqFloat From[ 4 ][ 4 ] );
 		CqMatrix( TqFloat From[ 16 ] );
-		CqMatrix( TqFloat f )
-		{
-			int i;
-			for( i = 0; i < 4; i++)
-			{
-				int j;
-				for( j=0; j < 4; j++ )
-				{
-					m_aaElement[ i ][ j ] = f;
-				};
-			};
-		};
+		CqMatrix( TqFloat f );
 		~CqMatrix()
 		{}
 

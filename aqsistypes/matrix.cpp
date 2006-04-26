@@ -50,10 +50,8 @@ CqMatrix::CqMatrix( const TqFloat xs, const TqFloat ys, const TqFloat zs )
 {
 	Identity();
 
-	if ( xs == 1.0f && ys == 1.0f && zs == 1.0f )
-		m_fIdentity = TqTrue;
-	else
-	{
+	if ( xs != 1.0f || ys != 1.0f || zs != 1.0f )
+  {
 		m_aaElement[ 0 ][ 0 ] = xs;
 		m_aaElement[ 1 ][ 1 ] = ys;
 		m_aaElement[ 2 ][ 2 ] = zs;
@@ -73,10 +71,8 @@ CqMatrix::CqMatrix( const CqVector3D& Trans )
 {
 	Identity();
 
-	if ( Trans.x() == 0.0f && Trans.y() == 0.0f && Trans.z() == 0.0f )
-		m_fIdentity = TqTrue;
-	else
-	{
+	if ( Trans.x() != 0.0f || Trans.y() != 0.0f || Trans.z() != 0.0f )
+  {
 		m_fIdentity = TqFalse;
 
 		m_aaElement[ 3 ][ 0 ] = Trans.x();
@@ -191,6 +187,23 @@ CqMatrix::CqMatrix( TqFloat From[ 4 ][ 4 ] )
 CqMatrix::CqMatrix( TqFloat From[ 16 ] )
 {
 	*this = From;
+}
+
+//---------------------------------------------------------------------
+/** Constructs a scaled 4x4 identity from a float
+ * \param f number to scale the identity by
+ */
+CqMatrix::CqMatrix( TqFloat f )
+{
+  Identity();
+  if(f != 1.0)
+  {
+    m_aaElement[ 0 ][ 0 ] = f;
+    m_aaElement[ 1 ][ 1 ] = f;
+    m_aaElement[ 2 ][ 2 ] = f;
+    m_aaElement[ 3 ][ 3 ] = f;
+    m_fIdentity = TqFalse;
+  }
 }
 
 //---------------------------------------------------------------------
