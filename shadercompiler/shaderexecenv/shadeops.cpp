@@ -106,7 +106,7 @@ static	CqString	SO_sprintf( const char* str, int cParams, IqShaderData** apParam
 								CqMatrix mat;
 								apParams[ ivar++ ] ->GetMatrix( mat, varyingindex );
 								CqString strVal;
-								strVal.Format( "%f,%f,%f,%f\n%f,%f,%f,%f\n%f,%f,%f,%f\n%f,%f,%f,%f",
+								strVal.Format( "[%f,%f,%f,%f,  %f,%f,%f,%f,  %f,%f,%f,%f,  %f,%f,%f,%f]",
 								               mat.Element( 0, 0 ), mat.Element( 0, 1 ), mat.Element( 0, 2 ), mat.Element( 0, 3 ),
 								               mat.Element( 1, 0 ), mat.Element( 1, 1 ), mat.Element( 1, 2 ), mat.Element( 1, 3 ),
 								               mat.Element( 2, 0 ), mat.Element( 2, 1 ), mat.Element( 2, 2 ), mat.Element( 2, 3 ),

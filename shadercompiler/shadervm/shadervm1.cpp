@@ -1092,18 +1092,26 @@ void CqShaderVM::SO_subfc()
 
 void CqShaderVM::SO_mulmm()
 {
-	CONSTFUNC;
-	RESULT(type_float, class_uniform);
-	pResult->SetFloat( 0.0f );
-	Push( pResult );	/* TODO: Implement matrices in the VM*/
+	AUTOFUNC;
+	POPV( A );
+	POPV( B );
+	RESULT(type_matrix, __fVarying?class_varying:class_uniform);
+	OpMUL_MM( A, B, pResult, m_pEnv->RunningState() );
+	Push( pResult );
+	RELEASE( B );
+	RELEASE( A );
 }
 
 void CqShaderVM::SO_divmm()
 {
-	CONSTFUNC;
-	RESULT(type_float, class_uniform);
-	pResult->SetFloat( 0.0f );
-	Push( pResult );	/* TODO: Implement matrices in the VM*/
+	AUTOFUNC;
+	POPV( A );
+	POPV( B );
+	RESULT(type_matrix, __fVarying?class_varying:class_uniform);
+	OpDIVMM( A, B, pResult, m_pEnv->RunningState() );
+	Push( pResult );
+	RELEASE( B );
+	RELEASE( A );
 }
 
 void CqShaderVM::SO_radians()

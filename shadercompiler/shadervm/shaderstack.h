@@ -99,6 +99,8 @@ static CqMatrix temp_matrix;
 #define	OpDOT_CC(a,b,Res,State)		OpDOT(temp_color,temp_color,temp_color,a,b,Res,State)
 #define	OpNEG_C(a,Res,State)		OpNEG(temp_color,a,Res,State)
 
+#define OpMUL_MM(a,b,Res,State)		OpMUL(temp_matrix,temp_matrix,temp_matrix,a,b,Res,State)
+
 #define	OpMUL_FP(a,b,Res,State)		OpMUL(temp_float,temp_point,temp_point,a,b,Res,State)
 #define	OpDIV_FP(a,b,Res,State)		OpDIV(temp_float,temp_point,temp_point,a,b,Res,State)
 #define	OpADD_FP(a,b,Res,State)		OpADD(temp_float,temp_point,temp_point,a,b,Res,State)
@@ -134,6 +136,7 @@ static CqMatrix temp_matrix;
 // Define macros for defining Opcodes efficiently
 // a The type of the first operand, used to determine templateisation, needed by VC++..
 // b The type of the second operand, used to determine templateisation, needed by VC++..
+// R The type of the result "first OP second", used to determine templateisation, needed by VC++..
 // Comp The stack entry to use as the second operand.
 // Res The stack entry to store the result in.
 // RunningState The current SIMD state.
@@ -399,7 +402,6 @@ OpABRS( != , NE )
  */
 OpABRS( *, MUL )
 /** Special case vector multiplication operator.
- * The template classes decide the cast used, there must be an appropriate operator between the two types.
  */
 inline void	OpMULV( IqShaderData* pA, IqShaderData* pB, IqShaderData* pRes, CqBitVector& RunningState )
 {
@@ -472,6 +474,72 @@ inline void	OpMULV( IqShaderData* pA, IqShaderData* pB, IqShaderData* pRes, CqBi
  * The template classes decide the cast used, there must be an appropriate operator between the two types.
  */
 OpABRS( / , DIV )
+/* Special case matrix 'division' operator (For matricies, define A / B == A * B^-1)
+ * \param pA The shader data to use as the first matrix.
+ * \param pA The shader data to use as the second matrix.
+ * \param pRes The shader data to store the results in.
+ * \param RunningState The current SIMD state.
+ */
+inline void	OpDIVMM( IqShaderData* pA, IqShaderData* pB, IqShaderData* pRes, CqBitVector& RunningState )
+{
+	CqMatrix vA;
+	CqMatrix vB;
+	CqMatrix* pdA;
+	CqMatrix* pdB;
+	TqInt i, ii;
+	
+	TqBool fAVar = pA->Size() > 1;
+	TqBool fBVar = pB->Size() > 1;
+	
+	if( fAVar && fBVar )
+	{
+		/* Both are varying, must go accross all processing each element. */
+		pA->GetValuePtr( pdA );
+		pB->GetValuePtr( pdB );
+		ii = pA->Size();
+		for ( i = 0; i < ii; i++ )
+		{
+			if ( RunningState.Value( i ) )
+				pRes->SetValue( (*pdA) * pdB->Inverse(), i );
+			pdA++;
+			pdB++;
+		}
+	}
+	else if( !fBVar && fAVar)
+	{
+		/* A is varying, can just get the *inverse* of B once */
+		ii = pA->Size();
+		pA->GetValuePtr( pdA );
+		pB->GetValue( vB );
+		vB = vB.Inverse();
+		for ( i = 0; i < ii; i++ )
+		{
+			if ( RunningState.Value( i ) )
+				pRes->SetValue( (*pdA) * vB, i );
+			pdA++;
+		}
+	}
+	else if( !fAVar && fBVar)
+	{
+		/* B is varying, can just get A's value once. */
+		ii = pB->Size();
+		pB->GetValuePtr( pdB );
+		pA->GetValue( vA );
+		for ( i = 0; i < ii; i++ )
+		{
+			if ( RunningState.Value( i ) )
+				pRes->SetValue( vA * pdB->Inverse(), i );
+			pdB++;
+		}
+	}
+	else
+	{
+		/* Both are uniform, simple one shot case. */
+		pA->GetValue( vA );
+		pB->GetValue( vB );
+		pRes->SetValue( vA * vB.Inverse() );
+	}
+}
 /* Templatised addition operator.
  * The template classes decide the cast used, there must be an appropriate operator between the two types.
  */
