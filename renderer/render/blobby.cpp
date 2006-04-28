@@ -43,6 +43,11 @@
 #include "marchingcubes.h"
 #include "plugins.h"
 
+#ifdef WIN32
+#pragma warning(disable:4786)	// hide stl warnings (VS6)
+#include <windows.h>
+#endif
+
 START_NAMESPACE( Aqsis )
 
 #define ZCLAMP  1e-6
