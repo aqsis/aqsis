@@ -1,0 +1,37 @@
+From: SiTex Graphics Support <support@sitexgraphics.com>
+Date: April 27, 2006 11:40:02 AM EDT
+To: Michel Joron <joron@videotron.ca>
+Subject: Re: implicit.h
+
+Hi Michel,
+
+Yes, you are allowed to implement AIR's interface for DBOs in aqsis.  
+You may also include the implicit.h header with aqsis if you wish.
+
+Regards,
+
+Scott Iverson
+SiTex Graphics Support
+support@sitexgraphics.com
+http://www.sitexgraphics.com
+
+
+
+Michel Joron wrote:
+> I planned to extend the blobbies support for aqsis. It is possible to 
+> refer and/or use the same interface
+> for DBO plugin for aqsis.
+> I looked for the features/capabilities of DBO plugins and it seems 
+> great in principle to re-use the interface for aqsis.
+> In particular I was looking to have at three things.
+>      implicit function
+>     bounding box capabilities
+>    something to take the motion in consideration.
+> After reading air' docs I featured out implicit.h was excellent way to 
+> do it.
+> I'm quite sure if it is legal or not to use or re-use the same 
+> SDK/Plugin.
+> What is your advise ?
+
+
+
