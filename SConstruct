@@ -175,6 +175,7 @@ SConscript('texturing/teqser/SConscript', build_dir=target_dir.abspath + '/textu
 SConscript('texturing/plugins/SConscript')
 SConscript('shaders/SConscript', build_dir=target_dir.abspath + '/shaders')
 SConscript('thirdparty/tinyxml/SConscript', build_dir=target_dir.abspath + '/thirdparty/tinyxml')
+SConscript('thirdparty/dbo_plane/SConscript', build_dir=target_dir.abspath + '/thirdparty/dbo_plane')
 SConscript('distribution/SConscript')
 
 if not env['no_exr']:

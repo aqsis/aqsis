@@ -108,6 +108,7 @@ class CqBlobby : public CqSurface
 			DIVIDE,
 			NEGATE,
 			IDEMPOTENTATE,
+			AIR,
 		} EqOpcodeName;
 
 		// Blobby virtual machine instruction

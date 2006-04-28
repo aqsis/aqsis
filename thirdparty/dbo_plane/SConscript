@@ -1,0 +1,15 @@
+Import('env')
+dbo_plane_sources=Split("""
+	dbo_plane.c""")
+
+# Set any platform specific options for this target
+env.UseTargetOptions('plugin')
+env.UseTargetOptions('texture_plugin')
+env.UseTargetOptions('dbo_plane')
+
+dbo_plane = env.SharedLibrary('dbo_plane', dbo_plane_sources, LIBS=[''])
+
+env.Install('$BINDIR', dbo_plane)
+
+env.Distribute('thirdparty/dbo_plane/dbo_plane', dbo_plane_sources)
+env.Distribute('thirdparty/dbo_plane/dbo_plane', 'SConscript')
