@@ -829,36 +829,14 @@ RtVoid	RiWorldBegin()
 	// Set the world to camera transformation matrix to the current matrix.
 
 	CqTransformPtr current( QGetRenderContext() ->ptransCurrent() );
-	CqTransformPtr camera(new CqTransform());
-	QGetRenderContext() ->SetCameraTransform( camera );
-	// clear the camera transform to a single state, all camera motion is now transferred to the objects.
-	QGetRenderContext()->GetCameraTransform()->ResetTransform( current->matObjectToWorld( current->Time(0) ), current->GetHandedness(QGetRenderContext()->Time()) );
+	QGetRenderContext() ->SetCameraTransform( current );
 	QGetRenderContext() ->BeginWorldModeBlock();
-	// and then reset the current matrix to identity, ready for object transformations.
-	if ( current->cTimes() > 1 )
-	{
-		TqInt i;
-		CqMatrix matOpenShutterInverse = current->matObjectToWorld( current->Time( 0 ) );
-		matOpenShutterInverse = matOpenShutterInverse.Inverse();
-		current->SetCurrentTransform( current->Time( 0 ), CqMatrix() );
-		for ( i = 1; i < current->cTimes(); ++i )
-		{
-			current->SetCurrentTransform( current->Time( i ), matOpenShutterInverse * current->matObjectToWorld( current->Time( i ) ) );
-		}
-		QGetRenderContext()->pconCurrent()->ptransSetCurrent(current);
+	// Reset the current transformation to identity, this now represents the object-->world transform.
+	QGetRenderContext() ->ptransSetTime( CqMatrix() );
 
-		// Store the initial object transformation (including imparted camera motion).
-		CqTransformPtr newTrans( new CqTransform( current ) );
-		QGetRenderContext()->SetDefObjTransform( newTrans );
-	}
-	else
-	{
-		QGetRenderContext() ->ptransSetTime( CqMatrix() );
-
-		// Store the initial object transformation
-		CqTransformPtr newTrans( new CqTransform() );
-		QGetRenderContext()->SetDefObjTransform( newTrans );
-	}
+	// Store the initial object transformation
+	CqTransformPtr newTrans( new CqTransform() );
+	QGetRenderContext()->SetDefObjTransform( newTrans );
 
 	// If rendering a depth buffer, check that the filter is "box" 1x1, warn if not.
 	TqInt iMode = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "DisplayMode" ) [ 0 ];

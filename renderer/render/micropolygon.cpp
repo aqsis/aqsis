@@ -690,20 +690,36 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, long y
 	CqVector3D* pP;
 	pVar(EnvVars_P) ->GetPointPtr( pP );
 
-	// Get an array of P's for all time positions.
-	std::vector<std::vector<CqVector3D> > aaPtimes;
-	aaPtimes.resize( pSurface() ->pTransform() ->cTimes() );
+	// Get an array of P's for all time positions, the transformation keyframes take 
+	// into account transformation of the camera, as well as transformation of the object.
+	// The list of keyframes is the union of the two.
+	TqInt iTime;
+	IqTransformPtr objectTransform = pSurface()->pTransform();
+	CqTransformPtr cameraTransform = QGetRenderContext()->GetCameraTransform();
+	TqInt objectTimes = objectTransform->cTimes();
+	TqInt cameraTimes = cameraTransform->cTimes();
+	std::map<TqFloat, TqInt> keyframeTimes;
+	// Add all the object transformation times to the list of keyframe points.
+	for(iTime = 0; iTime < objectTimes; iTime++)
+		keyframeTimes[objectTransform->Time(iTime)] = iTime;
+	if(cameraTimes > 1)
+		for(iTime = 0; iTime < cameraTimes; iTime++)
+			keyframeTimes[cameraTransform->Time(iTime)] = iTime;
 
-	TqInt iTime, tTime = pSurface() ->pTransform() ->cTimes();
+	TqInt tTime = keyframeTimes.size();
+	std::vector<std::vector<CqVector3D> > aaPtimes;
+	aaPtimes.resize( tTime );
+
 	CqMatrix matObjectToCameraT;
 	register TqInt i;
 	TqInt gsmin1;
 	gsmin1 = GridSize() - 1;
 
-	for ( iTime = 1; iTime < tTime; iTime++ )
+	std::map<TqFloat, TqInt>::iterator keyFrame;
+	for ( keyFrame = keyframeTimes.begin(); keyFrame!=keyframeTimes.end(); keyFrame++ )
 	{
-		matObjectToCameraT = QGetRenderContext() ->matSpaceToSpace( "object", "camera", NULL, pSurface() ->pTransform().get(), pSurface()->pTransform()->Time(iTime) );
-		aaPtimes[ iTime ].resize( gsmin1 + 1 );
+		matObjectToCameraT = QGetRenderContext() ->matSpaceToSpace( "object", "camera", NULL, pSurface() ->pTransform().get(), keyFrame->first );
+		aaPtimes[ keyFrame->second ].resize( gsmin1 + 1 );
 
 		for ( i = gsmin1; i >= 0; i-- )
 		{
@@ -716,14 +732,14 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, long y
 
 			// Make sure to retain camera space 'z' coordinate.
 			TqFloat zdepth = Point.z();
-			aaPtimes[ iTime ][ i ] = matCameraToRaster * Point;
-			aaPtimes[ iTime ][ i ].z( zdepth );
+			aaPtimes[ keyFrame->second ][ i ] = matCameraToRaster * Point;
+			aaPtimes[ keyFrame->second ][ i ].z( zdepth );
 		}
 		SqTriangleSplitLine sl;
 		CqVector3D v0, v1, v2;
-		v0 = aaPtimes[ iTime ][ 0 ];
-		v1 = aaPtimes[ iTime ][ cu ];
-		v2 = aaPtimes[ iTime ][ cv * ( cu + 1 ) ];
+		v0 = aaPtimes[ keyFrame->second ][ 0 ];
+		v1 = aaPtimes[ keyFrame->second ][ cu ];
+		v2 = aaPtimes[ keyFrame->second ][ cv * ( cu + 1 ) ];
 		// Check for clockwise, swap if not.
 		if( ( ( v1.x() - v0.x() ) * ( v2.y() - v0.y() ) - ( v1.y() - v0.y() ) * ( v2.x() - v0.x() ) ) >= 0 )
 		{
@@ -735,7 +751,7 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, long y
 			sl.m_TriangleSplitPoint1 = v2;
 			sl.m_TriangleSplitPoint2 = v1;
 		}
-		m_TriangleSplitLine.AddTimeSlot(pSurface()->pTransform()->Time( iTime ), sl );
+		m_TriangleSplitLine.AddTimeSlot(keyFrame->first, sl );
 	}
 
 	for ( i = gsmin1; i >= 0; i-- )
@@ -764,7 +780,7 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, long y
 		sl.m_TriangleSplitPoint1 = v2;
 		sl.m_TriangleSplitPoint2 = v1;
 	}
-	m_TriangleSplitLine.AddTimeSlot(pSurface()->pTransform()->Time( 0 ), sl );
+	m_TriangleSplitLine.AddTimeSlot(keyframeTimes.begin()->first, sl );
 
 	TIMER_STOP("Project points")
 
@@ -855,8 +871,9 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, long y
 				pNew->SetIndex( iIndex );
 				if ( fTrimmed )
 					pNew->MarkTrimmed();
-				for ( iTime = 0; iTime < tTime; iTime++ )
-					pNew->AppendKey( aaPtimes[ iTime ][ iIndex ], aaPtimes[ iTime ][ iIndex + 1 ], aaPtimes[ iTime ][ iIndex + cu + 2 ], aaPtimes[ iTime ][ iIndex + cu + 1 ], pSurface() ->pTransform() ->Time( iTime ) );
+				std::map<TqFloat, TqInt>::iterator keyFrame;
+				for ( keyFrame = keyframeTimes.begin(); keyFrame!=keyframeTimes.end(); keyFrame++ )
+					pNew->AppendKey( aaPtimes[ keyFrame->second ][ iIndex ], aaPtimes[ keyFrame->second ][ iIndex + 1 ], aaPtimes[ keyFrame->second ][ iIndex + cu + 2 ], aaPtimes[ keyFrame->second ][ iIndex + cu + 1 ],  keyFrame->first);
 				pImage->AddMPG( pNew );
 			}
 			else

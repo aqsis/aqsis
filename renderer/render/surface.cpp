@@ -115,17 +115,31 @@ CqBound	CqSurface::AdjustBoundForTransformationMotion( const CqBound& B ) const
 {
 	CqBound Bm( B );
 
-	if( pTransform()->cTimes() > 1 )
+	// Create a map of transformation keyframes, taking into account both object and camera motion.
+	TqInt iTime;
+	IqTransformPtr objectTransform = pTransform();
+	CqTransformPtr cameraTransform = QGetRenderContext()->GetCameraTransform();
+	TqInt objectTimes = objectTransform->cTimes();
+	TqInt cameraTimes = cameraTransform->cTimes();
+	std::map<TqFloat, TqFloat> keyframeTimes;
+	// Add all the object transformation times to the list of keyframe points.
+	for(iTime = 0; iTime < objectTimes; iTime++)
+		keyframeTimes[objectTransform->Time(iTime)] = objectTransform->Time(iTime);
+	for(iTime = 0; iTime < cameraTimes; iTime++)
+		keyframeTimes[cameraTransform->Time(iTime)] = cameraTransform->Time(iTime);
+
+	if( keyframeTimes.size() > 1 )
 	{
-		CqMatrix matCameraToObject0 = QGetRenderContext() ->matSpaceToSpace( "camera", "object", NULL, pTransform().get(), pTransform()->Time( 0 ) );
+		CqMatrix matCameraToObject0 = QGetRenderContext() ->matSpaceToSpace( "camera", "object", NULL, pTransform().get(), keyframeTimes.begin()->second );
 		CqBound B0( B );
 		B0.Transform( matCameraToObject0 );
 
 		TqInt i;
-		for( i = 1; i < pTransform()->cTimes(); i++ )
+		std::map<TqFloat, TqFloat>::iterator keyFrame;
+		for( keyFrame = keyframeTimes.begin(); keyFrame != keyframeTimes.end(); keyFrame++)
 		{
 			CqBound Btx( B0 );
-			CqMatrix matObjectToCameraT = QGetRenderContext() ->matSpaceToSpace( "object", "camera", NULL, pTransform().get(), pTransform()->Time( i ) );
+			CqMatrix matObjectToCameraT = QGetRenderContext() ->matSpaceToSpace( "object", "camera", NULL, pTransform().get(), keyFrame->second );
 			Btx.Transform( matObjectToCameraT );
 			Bm.Encapsulate( Btx );
 		}
