@@ -375,8 +375,6 @@ class blobby_vm_assembler
 						    m_floats[f+8], m_floats[f+9], m_floats[f+10], m_floats[f+11],
 						    m_floats[f+12], m_floats[f+13], m_floats[f+14], m_floats[f+15]);
 
-						grow_bound(transformation, 1.0);
-
 						TqFloat bounds[6];
 						TqInt g =  (TqInt) m_code[op.index+3];
 						TqInt h =  (TqInt) m_code[op.index+4];
@@ -454,17 +452,21 @@ class blobby_vm_assembler
 							                  0, 0);
 						}
 
-						grow_bound( CqVector3D(bounds[0], bounds[2], bounds[4]),
-						            CqVector3D(bounds[1], bounds[3], bounds[5]),
+						CqVector3D mn = CqVector3D(bounds[0], bounds[2], bounds[4]);
+						CqVector3D mx = CqVector3D(bounds[1], bounds[3], bounds[5]);
+						CqVector3D mid = (mn + mx) / 2.0; 
+						grow_bound( mn,
+						            mx,
 						            1.0,
 						            transformation);
 
 						// Push the inverse matrix
-						m_instructions.push_back(transformation.Inverse());
+						m_instructions.push_back(CqBlobby::instruction(transformation.Inverse()));
 
 						// Push the center of this blobby according to its bbox
-						CqVector3D mid = (CqVector3D(bounds[0], bounds[2], bounds[4]) + CqVector3D(bounds[1], bounds[3], bounds[5])) / 2.0;
 						m_instructions.push_back(CqBlobby::instruction(mid));
+						m_instructions.push_back(CqBlobby::instruction(mx));
+						m_instructions.push_back(CqBlobby::instruction(mn));
 
 
 					}
@@ -683,8 +685,10 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point, TqInt n, std::vector 
 
 					m_instructions.push_back(CqBlobby::instruction(CqBlobby::AIR));
 					m_instructions.push_back(CqBlobby::instruction(op.index)); // idx to Count
-					   m_instructions.push_back(transformation.Inverse()); // Push the inverse matrix
-					   m_instructions.push_back(CqBlobby::instruction(mid)); // Push the center of this blobby according to its bbox
+					m_instructions.push_back(transformation.Inverse()); // Push the inverse matrix
+					m_instructions.push_back(mid); // Push the center  of this blobby according to its bbox
+					m_instructions.push_back(mx); // Push the max  of this blobby according to its bbox
+					m_instructions.push_back(mn); // Push the min  of this blobby according to its bbox
 
 					*/
 
@@ -714,7 +718,9 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point, TqInt n, std::vector 
 					TqFloat point[3];
 					const CqMatrix transformation = instructions[pc++].get_matrix();
 					const CqVector3D mid = instructions[pc++].get_vector();
-
+					const CqVector3D mx = instructions[pc++].get_vector();
+					const CqVector3D mn = instructions[pc++].get_vector();
+					const CqBound bound(mn, mx);
 
 					TqState s;
 					CqVector3D tmp = transformation * Point;
@@ -722,31 +728,13 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point, TqInt n, std::vector 
 					point[1] = tmp.y();
 					point[2] = tmp.z();
 
-					// Eliminate the one which are outside of the plane influence.
-					// This is where I don't know; and not quite sure.
-					// in air documentation it said about this:
-					//
-					// The ImplicitValue function returns a scaled distance from point *p to the blob in *result in the
-					// range [0..1]. For blending purposes the surface of the blob is assumed to be at a distance of 0.5.
-					// Points further away than a distance of 1 are not affected by the blob.
-					//
-
-					TqBool ok =  (fabs(tmp.x() - mid.x())  <= 0.5) &&
-					             (fabs(tmp.y()- mid.y())  <= 0.5) &&
-					             (fabs(tmp.z()- mid.z()) <= 0.25) ;
-
-					if ( ok )
+					if ((point[2]>= 0.0) && bound.Contains3D(point) && pImplicitValue )
 					{
-
-						if (pImplicitValue )
-						{
-							(*pImplicitValue)(&s, &result, point,
-							                  e, &m_code[f],
-							                  g, &m_floats[h],
-							                  i, &m_strings[j]);
-						}
-
-						//result += 0.421875;
+						(*pImplicitValue)(&s, &result, point,
+							             e, &m_code[f],
+							             g, &m_floats[h],
+							             i, &m_strings[j]);
+						result = 1.0 - result;
 					}
 
 					sum += result;
@@ -887,7 +875,9 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point )
 					TqFloat point[3];
 					const CqMatrix transformation = instructions[pc++].get_matrix();
 					const CqVector3D mid = instructions[pc++].get_vector();
-
+					const CqVector3D mx = instructions[pc++].get_vector();
+					const CqVector3D mn = instructions[pc++].get_vector();
+					const CqBound bound(mn, mx);
 
 					TqState s;
 					CqVector3D tmp = transformation * Point;
@@ -895,30 +885,13 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point )
 					point[1] = tmp.y();
 					point[2] = tmp.z();
 
-					// Eliminate the one which are outside of the plane influence.
-					// This is where I don't know; and not quite sure.
-					// in air documentation it said about this:
-					//
-					// The ImplicitValue function returns a scaled distance from point *p to the blob in *result in the
-					// range [0..1]. For blending purposes the surface of the blob is assumed to be at a distance of 0.5.
-					// Points further away than a distance of 1 are not affected by the blob.
-					//
-
-					TqBool ok =  (fabs(tmp.x() - mid.x())  <= 0.5) &&
-					             (fabs(tmp.y()- mid.y())  <= 0.5) &&
-					             (fabs(tmp.z()- mid.z()) <= 0.25) ;
-
-					if ( ok )
+					if ((point[2]>= 0.0) && bound.Contains3D(point) && pImplicitValue )
 					{
-						if (pImplicitValue )
-						{
-							(*pImplicitValue)(&s, &result, point,
-							                  e, &m_code[f],
-							                  g, &m_floats[h],
-							                  i, &m_strings[j]);
-						}
-
-						//result += 0.421875;
+						(*pImplicitValue)(&s, &result, point,
+							          e, &m_code[f],
+							          g, &m_floats[h],
+							         i, &m_strings[j]);
+						result = 1.0 - result;
 					}
 
 					//Aqsis::log() << info << " Result " << result << std::endl;
