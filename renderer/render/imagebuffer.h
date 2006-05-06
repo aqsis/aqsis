@@ -268,8 +268,8 @@ class CqImageBuffer
 		{
 			return ( m_CurrentBucketRow );
 		}
-		/** Move to the next bucket to process.
-		 */
+
+		// Move to the next bucket to process.
     		TqBool NextBucket(EqBucketOrder order);
 
 		/** Get a pointer to the current bucket
