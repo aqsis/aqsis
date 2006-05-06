@@ -5,7 +5,7 @@ installer1env.Replace(NSISDEFINES = {'PRODUCT_VERSION': '%d.%d.%d' %(version.maj
 				 'PRODUCT_FILE_NUMBER': '%d_%d_%d' %(version.major, version.minor, version.build),
 				 'LIBRARY_EXTENSION': env['LIBSUFFIX']})
 installer1 = installer1env.Installer('setup')
-env.Depends('installer1', 'release')
+env.Depends(installer1, env.Alias('release'))
 installer1env.Alias('win_installer', installer1)
 
 env.Distribute('distribution/win/nsis/', 'SConscript')
