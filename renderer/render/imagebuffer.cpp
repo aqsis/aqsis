@@ -1271,6 +1271,10 @@ void CqImageBuffer::RenderImage()
 		order = Bucket_Random;
 	}
 
+	// A counter for the number of processed buckets (used for progress reporting)
+	TqInt iBucket = 0;
+
+	// Iterate over all buckets...
 	do
 	{
 		TqBool bIsEmpty = IsCurrentBucketEmpty();
@@ -1327,14 +1331,11 @@ void CqImageBuffer::RenderImage()
 		}
 
 
-
-		TqInt iBucket = ( CurrentBucketRow() * cXBuckets() ) + CurrentBucketCol();
 		if ( pProgressHandler )
 		{
 			// Inform the status class how far we have got, and update UI.
 			float Complete = ( float ) ( cXBuckets() * cYBuckets() );
-			Complete /= iBucket;
-			Complete = 100.0f / Complete;
+			Complete = 100.0f * iBucket / Complete;
 			QGetRenderContext() ->Stats().SetComplete( Complete );
 			( *pProgressHandler ) ( Complete, QGetRenderContext() ->CurrentFrame() );
 		}
@@ -1360,6 +1361,8 @@ void CqImageBuffer::RenderImage()
 		}
 #endif
 		CurrentBucket().SetProcessed();
+		// Increase the bucket counter...
+		iBucket += 1;
 	} while( NextBucket(order) );
 
 	ImageComplete();
