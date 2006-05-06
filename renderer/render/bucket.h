@@ -230,13 +230,13 @@ class CqBucket : public IqBucket
 		{
 			return ( m_aGPrims.size() );
 		}
-		/** Get a reference to the vetor of deferred MPGs.
+		/** Get a reference to the vector of deferred MPGs.
 		 */
 		std::vector<CqMicroPolygon*>& aMPGs()
 		{
 			return ( m_ampgWaiting );
 		}
-		/** Get a reference to the vetor of deferred grids.
+		/** Get a reference to the vector of deferred grids.
 		 */
 		std::vector<CqMicroPolyGridBase*>& aGrids()
 		{
