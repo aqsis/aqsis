@@ -526,6 +526,21 @@ int main( int argc, const char** argv )
 	return ( 0 );
 }
 
+/**
+  Render a RIB file.
+
+  This function reads RIB requests from the open file \a file and
+  renders the contents of the file. It is the callers responsibility
+  to close the file after the function has returned.
+
+  The RIB file is parsed by the \link librib librib \endlink library and 
+  the RIB requests are processed by the \link librib2ri::Engine 
+  RendermanInterface \endlink object defined in the librib2ri library 
+  (as returned by librib2ri::CreateRIBEngine()).
+   
+  \param file An open file handle
+  \param name The file name
+ */
 void RenderFile( FILE* file, std::string&  name )
 {
 	librib::RendermanInterface * renderengine = librib2ri::CreateRIBEngine();

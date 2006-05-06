@@ -1386,7 +1386,11 @@ void CqImageBuffer::Quit()
 }
 
 //----------------------------------------------------------------------
-/** Compute the next bucket based on the "render" "bucketorder" given.
+/** Move to the next bucket to process.
+
+  Computes the next bucket based on the "render" "bucketorder" given.
+
+  \return True if there is still an unprocessed bucket left, otherwise False.
  */
 TqBool CqImageBuffer::NextBucket(EqBucketOrder order)
 {
