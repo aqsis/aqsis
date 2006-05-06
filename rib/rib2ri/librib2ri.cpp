@@ -535,11 +535,26 @@ RendermanInterface::RtFunc Engine::GetProceduralFunction( RtToken type )
 }
 
 
+/**
+  Create an instance of a RendermanInterface that sends the requests to the RenderMan Interface "C" API.
+
+  The returned object can be used to render RIB files. When the object is no longer
+  used it must be destroyed by calling DestroyRIBEngine().
+
+  \return RendermanInterface that passes all requests to the RenderMan Interface "C" API.
+  \see DestroyRIBEngine()
+ */
 RendermanInterface* CreateRIBEngine()
 {
 	return ( new Engine() );
 }
 
+/**
+  Destroy a object created with CreateRIBEngine().
+
+  \param engine This is the return value from CreateRIBEngine()
+  \see CreateRIBEngine()
+ */
 void DestroyRIBEngine( RendermanInterface* engine )
 {
 	delete( engine );
