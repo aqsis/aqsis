@@ -89,6 +89,7 @@ struct SqDisplayInstance
 			m_RenderWholeFrame(TqFalse),
 			m_imageType(Type_File),
 			m_append(0),
+			m_pixelsReceived(0),
 			m_data(0)
 #ifndef	AQSIS_NO_FLTK
 			,
@@ -113,6 +114,8 @@ struct SqDisplayInstance
 	TqInt		m_append;
 	TqFloat		m_matWorldToCamera[ 4 ][ 4 ];
 	TqFloat		m_matWorldToScreen[ 4 ][ 4 ];
+	// The number of pixels that have already been rendered (used for progress reporting)
+	TqInt		m_pixelsReceived;
 
 	void*		m_data;
 	unsigned char*	m_zfbdata;

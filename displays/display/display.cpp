@@ -655,6 +655,8 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 	TqInt bucketlinelen = entrysize * (xmaxplus1 - xmin);
 	TqInt copylinelen = entrysize * (xmaxplus1__ - xmin__);
 
+	pImage->m_pixelsReceived += (xmaxplus1__-xmin__)*(ymaxplus1__-ymin__);
+
 	// Calculate where in the bucket we are starting from if the window is cropped.
 	TqInt row = MAX(pImage->m_origin[1] - ymin, 0);
 	TqInt col = MAX(pImage->m_origin[0] - xmin, 0);
@@ -739,12 +741,12 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 #ifndef AQSIS_NO_FLTK
 		pImage->m_uiImageWidget->damage(1, xmin__, ymin__, xmaxplus1__-xmin__, ymaxplus1__-ymin__);
 		Fl::check();
-		TqFloat percent = (TqFloat) ((xmaxplus1__-1) + (TqFloat)((ymaxplus1__-1) * pImage->m_width)) / (TqFloat) (pImage->m_width * pImage->m_height);
+		TqFloat percent = pImage->m_pixelsReceived / (TqFloat) (pImage->m_width * pImage->m_height);
 		percent *= 100.0f;
 		percent = CLAMP(percent, 0.0f, 100.0f);
 		std::stringstream strTitle;
 		if (percent < 99.9f)
-			strTitle << pImage->m_filename << ": " << std::setprecision(3) << std::setw(6) << percent << "% complete" << std::ends;
+			strTitle << pImage->m_filename << ": " << std::fixed << std::setprecision(1) << std::setw(5) << percent << "% complete" << std::ends;
 		else
 			strTitle << pImage->m_filename << std::ends;
 		pImage->m_theWindow->label(strTitle.str().c_str());
