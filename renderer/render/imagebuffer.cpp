@@ -1263,12 +1263,17 @@ void CqImageBuffer::RenderImage()
 		order = Bucket_Vertical;
 	else if ( !pstrBucketOrder[ 0 ].compare( "horizontal" ) )
 		order = Bucket_Horizontal;
+	else {
+		Aqsis::log() << warning << "Not supported \"" << pstrBucketOrder[ 0 ] << "\" " << std::endl;
+	}
+#ifdef NOTREADY
 	else if ( !pstrBucketOrder[ 0 ].compare( "zigzag" ) )
 		order = Bucket_ZigZag;
 	else if ( !pstrBucketOrder[ 0 ].compare( "circle" ) )
 		order = Bucket_Circle;
 	else if ( !pstrBucketOrder[ 0 ].compare( "random" ) )
 		order = Bucket_Random;
+#endif
 	}
 
 	// A counter for the number of processed buckets (used for progress reporting)
