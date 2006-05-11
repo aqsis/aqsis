@@ -7887,12 +7887,6 @@ void CqShaderExecEnv::SO_occlusion( IqShaderData* occlmap, IqShaderData* channel
 	TqFloat _aq_samples;
 	(samples)->GetFloat(_aq_samples,__iGrid);
 	IqTextureMap* pMap = QGetRenderContextI() ->GetShadowMap( _aq_occlmap );
-        TqBool _aq_surface = TqTrue;
-
-	// we are looking if it is a surface shader or not
-	if (matObjectToWorld().fIdentity() == TqTrue)
-		_aq_surface = TqFalse;
-
 
 	CqVector3D L(0,0,-1);
 
@@ -7929,7 +7923,7 @@ void CqShaderExecEnv::SO_occlusion( IqShaderData* occlmap, IqShaderData* channel
 				// In case of surface shader transform L
 				TqFloat cosangle = Nl * L;
 
-					if( !_aq_surface && cosangle <= 0.0f )
+					if( cosangle <= 0.0f )
 					{
 						continue;
 					}
