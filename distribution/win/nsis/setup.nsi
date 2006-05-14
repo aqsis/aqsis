@@ -40,7 +40,7 @@
 
 Name "${PRODUCT_FULLNAME} ${PRODUCT_VERSION}"
 BrandingText "www.aqsis.org"
-OutFile "..\..\..\aqsis-setup-${PRODUCT_FILE_NUMBER}.exe"
+OutFile "..\..\..\output\aqsis-setup-${PRODUCT_FILE_NUMBER}.exe"
 InstallDir "$PROGRAMFILES\${PRODUCT_NAME}"
 InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
 ShowInstDetails show
