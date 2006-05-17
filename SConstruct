@@ -96,10 +96,12 @@ def Distribute(dir, files):
 env.Distribute = Distribute
 env.Alias('dist', '$ZIPDISTDIR')
 zip_target = env.Zip('aqsis-%d_%d_%d' %(version.major, version.minor, version.build), '$ZIPDISTDIR')
+env.Depends(zip_target, env.Alias('release'))
 env.Alias('dist_zip', zip_target)
 env.AppendUnique(TARFLAGS = '-c -z')
 env.AppendUnique(TARSUFFIX = '.tgz')
 tar_target = env.Tar('aqsis-%d_%d_%d' %(version.major, version.minor, version.build), '$ZIPDISTDIR')
+env.Depends(tar_target, env.Alias('release'))
 env.Alias('dist_tar', tar_target)
 
 opts.Update(env)
