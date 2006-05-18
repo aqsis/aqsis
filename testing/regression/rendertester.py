@@ -53,6 +53,64 @@ AUTO = "_auto"
 
 ######################################################################
 
+# execute
+def execute(cmd):
+    """Execute a command and return its output.
+
+    The return value is a tuple (retval,stdout,stderr) where retval is
+    an integer with the return value of the command and stdout, stderr
+    are both lists containing the outputs of the command (each list item
+    is one line).
+    """
+
+    outbuf = []
+    errbuf = []
+
+    # Execute the command and redirect the output
+    cmd += " >_stdout.tmp 2>_stderr.tmp"
+#    print 'Executing "%s"...'%cmd
+    retval = os.system(cmd)
+
+    stdout = file("_stdout.tmp")
+    stderr = file("_stderr.tmp")
+
+    # Start executing the command...
+#    stdin, stdout, stderr = os.popen3(cmd)
+
+    # Read stdout...
+    while 1:
+        s = stdout.readline()
+        if s=="":
+            break
+        outbuf.append(s)
+
+    # Read stderr...
+    while 1:
+        s = stderr.readline()
+        if s=="":
+            break
+        errbuf.append(s)
+
+    stdout.close()
+    stderr.close()
+    # Clean up the directory...
+    # (try several times if removing didn't succeed at first as it
+    # has already happened that the above close wasn't finished yet...?)
+    trials_left = 3
+    while trials_left>0:
+        try:
+            os.remove("_stdout.tmp")
+            os.remove("_stderr.tmp")
+            trials_left = 0
+        except OSError, e:
+            time.sleep(0.1)
+            trials_left -= 1
+            if trials_left==0:
+                print e
+
+    return retval, outbuf, errbuf
+
+
 # jobAllowed
 def jobAllowed(job):
     """Return True if the job should be processed."""
@@ -427,7 +485,7 @@ class Renderer:
             os.environ[var]=val
         # Render...
         cmd = "%s %s"%(self.renderer, ribname)
-        out,err = self._execute(cmd)
+        retval,out,err = execute(cmd)
 
         # Remove temporary RIB again...
         job.releaseRIB()
@@ -489,7 +547,7 @@ class Renderer:
             print e
 
         cmd = "%s %s"%(self.shadercompiler, shname)
-        out,err = self._execute(cmd)
+        retval,out,err = execute(cmd)
 
         os.chdir(olddir)        
         return out,err
@@ -502,7 +560,7 @@ class Renderer:
             return "<unknown>"
         
         cmd = "%s %s"%(self.shadercompiler, self.scversionopt)
-        out,err = self._execute(cmd)
+        retval,out,err = execute(cmd)
         return string.join(out,"")
 
     # rendererVersion
@@ -513,63 +571,9 @@ class Renderer:
             return "<unknown>"
 
         cmd = "%s %s"%(self.renderer, self.rversionopt)
-        out,err = self._execute(cmd)
+        retval,out,err = execute(cmd)
         return string.join(out,"")
-
-    
-    def _execute(self, cmd):
-        """Execute a command and return the output to stdout and stderr.
-
-        The output is returned as a list of strings (each list element is
-        one line).
-        """
-
-        outbuf = []
-        errbuf = []
-
-        # Execute the command and redirect the output
-        cmd += " >_stdout.tmp 2>_stderr.tmp"
-#        print 'Executing "%s"...'%cmd
-        os.system(cmd)
-
-        stdout = file("_stdout.tmp")
-        stderr = file("_stderr.tmp")
-
-        # Start executing the command...
-#        stdin, stdout, stderr = os.popen3(cmd)
-
-        # Read stdout...
-        while 1:
-            s = stdout.readline()
-            if s=="":
-                break
-            outbuf.append(s)
-        
-        # Read stderr...
-        while 1:
-            s = stderr.readline()
-            if s=="":
-                break
-            errbuf.append(s)
-
-        stdout.close()
-        stderr.close()
-        # Clean up the directory...
-        # (try several times if removing didn't succeed at first as it
-        # has already happened that the above close wasn't finished yet...?)
-        trials_left = 3
-        while trials_left>0:
-            try:
-                os.remove("_stdout.tmp")
-                os.remove("_stderr.tmp")
-                trials_left = 0
-            except OSError, e:
-                time.sleep(0.1)
-                trials_left -= 1
-                if trials_left==0:
-                    print e
-
-        return outbuf, errbuf
+  
 
 ######################################################################
 
@@ -864,7 +868,6 @@ class JobDirectoryNode:
         May only be called after renderJobs() was called!
         """
         res = 0
-        res = 0
         for j in self.jobs:
             if j.failure:
                 res += 1
@@ -931,7 +934,7 @@ class RegressionTest(Task):
     """Renders jobs and compares the output with reference images."""
 
     def __init__(self, renderer, reference, jobs=AllJobs, cmp_threshold=0,
-                 create_references=False):
+                 create_references=False, pdiffcmd="pdiff"):
         """Constructor.
         """
         Task.__init__(self)
@@ -940,6 +943,7 @@ class RegressionTest(Task):
         self.jobs = self.convertJobList(jobs)
         self.cmp_threshold = cmp_threshold
         self.create_references = create_references
+        self.pdiffcmd = pdiffcmd
 
     # run
     def run(self, htmldir):
@@ -1123,15 +1127,19 @@ Click on the RIB name or thumbnail to display details.
                 smaxdiff = "???"
             else:
                 smaxdiff = str(maxdiff)
-            if maxdiff!=None and max(maxdiff)<=self.cmp_threshold:
-                col="#000000"
-                sb=""
-                eb=""
-            else:
+            if job.failure:
                 col="#ff0000"
                 sb="<b>"
                 eb="</b>"
-            html.write('<td align=center><font color=%s>%s%s%s</font>'%(col, sb, smaxdiff, eb))
+            else:
+                col="#000000"
+                sb=""
+                eb=""
+            if job.res.pdiffoutput:
+                pdiffout = job.res.pdiffoutput.split("\n")[0]+"<br>"
+            else:
+                pdiffout = ""
+            html.write('<td align=center><font color=%s>%s%s%s%s</font>'%(col, sb, pdiffout, smaxdiff, eb))
             if job.known_issues!=None:
                 html.write('<p><font size=-1>(there are known issues)</font>')
             html.write('</td><tr>')
@@ -1165,7 +1173,7 @@ Click on the RIB name or thumbnail to display details.
 
     # renderJobs
     def renderJobs(self, htmldir):
-        """Render all jobs.
+        """Render all jobs and return the root node of the result tree.
 
         This method attaches the following new attributes to each job:
 
@@ -1175,6 +1183,9 @@ Click on the RIB name or thumbnail to display details.
         - imgstr: HTML-Code for the image
         - reshtmlname: File name of the result page
         - maxdiff: Maximum pixel difference or None
+
+        The return value is a JobDirectoryNode that is the root of the
+        result tree.
         """
 
         basename = "regression_%s_"%(self.renderer.shortname)
@@ -1205,12 +1216,11 @@ Click on the RIB name or thumbnail to display details.
 
             # Attach some variables to the job object so we can access
             # them later again...
-#            job.noref = (maxdiff==None)
-            job.failure = (maxdiff!=None and max(maxdiff)>self.cmp_threshold)
-            if not job.noref and maxdiff==None:
-                job.failure = True
-                
+#            job.failure = failure
+#            if not job.noref and maxdiff==None:
+#                job.failure = True
 
+            job.failure = res.failure
             job.res = res
             job.imgstr = imgstr
             job.reshtmlname = reshtmlname
@@ -1230,6 +1240,12 @@ Click on the RIB name or thumbnail to display details.
         Returns (img,refimg,diffimg,diff2img,diffalpha,diff2alpha,maxdiff).
         The images are PIL image objects and maxdiff a list of difference
         values.
+
+        This method updates the following attributes on the RenderResult
+        object:
+
+        - failure (bool)
+        - pdiffoutput (str)
         """
         
         img = None        # output image
@@ -1261,6 +1277,26 @@ Click on the RIB name or thumbnail to display details.
                 diffimg = Image.merge("RGB", (r,g,b))
                 r,g,b,diff2alpha = diff2img.split()
                 diff2img = Image.merge("RGB", (r,g,b))
+
+
+        if self.pdiffcmd!=None and self.pdiffcmd!="" and refimg!=None:
+            pdiffcmd = "%s %s %s"%(self.pdiffcmd, res.realoutimagename[idx], refimgname)
+            print pdiffcmd
+            retval,out,err = execute(pdiffcmd)
+            out += err
+            out = "".join(out).strip()
+            print out
+            # Store the output only if there hasn't already been a failure
+            if not res.failure:
+                res.pdiffoutput = out
+            failure = not retval
+            res.failure = res.failure or failure
+        else:
+            res.pdiffoutput = None
+            if maxdiff!=None and max(maxdiff)>self.cmp_threshold:
+                res.failure = True
+            if refimg!=None and maxdiff==None:
+                res.failure = True
 
         return (img,refimg,diffimg,diff2img,diffalpha,diff2alpha,maxdiff)
   
@@ -1316,7 +1352,11 @@ Click on the RIB name or thumbnail to display details.
 
     # outputResult
     def outputResult(self, res, htmldir, htmlbasename):
-        """Creates result page and returns maxdiff."""
+        """Creates result page and returns maxdiff.
+
+        htmldir is the directory where the output file should be stored,
+        htmlbasename is its file name (without path information).
+        """
 
         res_maxdiff = [-1]
 
@@ -1364,8 +1404,10 @@ Click on the RIB name or thumbnail to display details.
      str_image, string.join(res.job.outimagename,", ")))
 
         # Output image...
-        html.write("<h2>Output %s</h2>"%str_image)
+        code = "<h2>Output %s</h2>\n"%str_image
 
+        res.failure = False
+        res.pdiffoutput = None
         for i in range(len(res.job.outimagename)):
             img,refimg,diffimg,diff2img,diffalpha,diff2alpha,maxdiff = self.compareOutput(res, i)
             if refimg==None:
@@ -1377,44 +1419,54 @@ Click on the RIB name or thumbnail to display details.
                 if max(maxdiff)>max(res_maxdiff):
                     res_maxdiff = maxdiff
             
-            html.write('Output / Reference / RGB diff / RGB binary diff')
+            code += 'Output / Reference / RGB diff / RGB binary diff'
             if diffalpha!=None:
-                html.write(' / Alpha diff / Binary alpha diff')
-            html.write('<br>\n')
+                code += ' / Alpha diff / Binary alpha diff'
+            code += '<br>\n'
 
             imgstr = self.saveResAsWeb(res, htmldir, i)
-            html.write(imgstr)
+            code += imgstr
 
             outname = res.job.outimagename[i]
             refname = "%s_ref_%s"%(res.rendererobject.shortname, outname)
             imgstr = self.saveImgAsWeb(refimg, htmldir, refname)
-            html.write(imgstr)
+            code += imgstr
     
             diffname = "%s_diff_%s"%(res.rendererobject.shortname, outname)
             imgstr = self.saveImgAsWeb(diffimg, htmldir, diffname)
-            html.write(imgstr)
+            code += imgstr
 
             diff2name = "%s_diff2_%s"%(res.rendererobject.shortname,outname)
             imgstr = self.saveImgAsWeb(diff2img, htmldir, diff2name)
-            html.write(imgstr)
+            code += imgstr
 
             if diffalpha!=None:
                 alphaname = "%s_diffa_%s"%(res.rendererobject.shortname,
                                            outname)
                 imgstr = self.saveImgAsWeb(diffalpha, htmldir, alphaname)
-                html.write(imgstr)
+                code += imgstr
 
                 alpha2name = "%s_diff2a_%s"%(res.rendererobject.shortname,
                                              outname)
                 imgstr = self.saveImgAsWeb(diff2alpha, htmldir, alpha2name)
-                html.write(imgstr)
+                code += imgstr
 
             if maxdiff==None:
                 s = "???"
             else:
                 s = str(maxdiff)
-            html.write("<p>Maximum difference: <b>%s</b>"%s)
-            html.write("<p>")
+            code += "<p>Maximum difference: <b>%s</b>"%s
+            code += "<p>"
+
+        # Write the pdiff result
+        if res.pdiffoutput:
+            html.write("<h2>pdiff result</h2>")
+            html.write("<pre>")
+            html.write(res.pdiffoutput)
+            html.write("</pre><p>")
+
+        # Write the "Output Image" section
+        html.write(code)
 
         # RIB header...
         html.write("<h2>RIB header</h2>")
