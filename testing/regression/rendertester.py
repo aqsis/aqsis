@@ -12,6 +12,7 @@
 ######################################################################
 
 import sys, os, os.path, time, string, shutil, getopt, copy, fnmatch, gzip
+import subprocess
 import copy
 import Image, ImageChops
 
@@ -57,58 +58,18 @@ AUTO = "_auto"
 def execute(cmd):
     """Execute a command and return its output.
 
+    cmd is a sequence of strings containing the executable name followed by
+    it's arguments.
+
     The return value is a tuple (retval,stdout,stderr) where retval is
     an integer with the return value of the command and stdout, stderr
     are both lists containing the outputs of the command (each list item
     is one line).
     """
-
-    outbuf = []
-    errbuf = []
-
-    # Execute the command and redirect the output
-    cmd += " >_stdout.tmp 2>_stderr.tmp"
-#    print 'Executing "%s"...'%cmd
-    retval = os.system(cmd)
-
-    stdout = file("_stdout.tmp")
-    stderr = file("_stderr.tmp")
-
-    # Start executing the command...
-#    stdin, stdout, stderr = os.popen3(cmd)
-
-    # Read stdout...
-    while 1:
-        s = stdout.readline()
-        if s=="":
-            break
-        outbuf.append(s)
-
-    # Read stderr...
-    while 1:
-        s = stderr.readline()
-        if s=="":
-            break
-        errbuf.append(s)
-
-    stdout.close()
-    stderr.close()
-    # Clean up the directory...
-    # (try several times if removing didn't succeed at first as it
-    # has already happened that the above close wasn't finished yet...?)
-    trials_left = 3
-    while trials_left>0:
-        try:
-            os.remove("_stdout.tmp")
-            os.remove("_stderr.tmp")
-            trials_left = 0
-        except OSError, e:
-            time.sleep(0.1)
-            trials_left -= 1
-            if trials_left==0:
-                print e
-
-    return retval, outbuf, errbuf
+    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    (stdout, stderr) = p.communicate()
+    p.wait()
+    return (p.returncode, stdout.splitlines(True), stderr.splitlines(True))
 
 
 # jobAllowed
@@ -484,8 +445,7 @@ class Renderer:
             print 'Setting environment variable "%s" to "%s"'%(var,val)
             os.environ[var]=val
         # Render...
-        cmd = "%s %s"%(self.renderer, ribname)
-        retval,out,err = execute(cmd)
+        retval,out,err = execute( (self.renderer, ribname) )
 
         # Remove temporary RIB again...
         job.releaseRIB()
@@ -546,10 +506,9 @@ class Renderer:
         except OSError, e:
             print e
 
-        cmd = "%s %s"%(self.shadercompiler, shname)
-        retval,out,err = execute(cmd)
+        retval,out,err = execute( (self.shadercompiler, shname) )
 
-        os.chdir(olddir)        
+        os.chdir(olddir)
         return out,err
 
     # shaderCompilerVersion
@@ -559,8 +518,7 @@ class Renderer:
         if self.scversionopt==None:
             return "<unknown>"
         
-        cmd = "%s %s"%(self.shadercompiler, self.scversionopt)
-        retval,out,err = execute(cmd)
+        retval,out,err = execute( (self.shadercompiler, self.scversionopt) )
         return string.join(out,"")
 
     # rendererVersion
@@ -570,8 +528,7 @@ class Renderer:
         if self.rversionopt==None:
             return "<unknown>"
 
-        cmd = "%s %s"%(self.renderer, self.rversionopt)
-        retval,out,err = execute(cmd)
+        retval,out,err = execute( (self.renderer, self.rversionopt) )
         return string.join(out,"")
   
 
@@ -1280,8 +1237,8 @@ Click on the RIB name or thumbnail to display details.
 
 
         if self.pdiffcmd!=None and self.pdiffcmd!="" and refimg!=None:
-            pdiffcmd = "%s %s %s"%(self.pdiffcmd, res.realoutimagename[idx], refimgname)
-            print pdiffcmd
+            pdiffcmd = (self.pdiffcmd, res.realoutimagename[idx], refimgname)
+            print "%s %s %s" % pdiffcmd
             retval,out,err = execute(pdiffcmd)
             out += err
             out = "".join(out).strip()
