@@ -66,7 +66,7 @@ def execute(cmd):
     are both lists containing the outputs of the command (each list item
     is one line).
     """
-    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     (stdout, stderr) = p.communicate()
     p.wait()
     return (p.returncode, stdout.splitlines(True), stderr.splitlines(True))
