@@ -62,7 +62,7 @@ aqsisdll_headers = Split("""
 	forwarddiff.h           isurface.h              points.h                texturemap.h
 	genpoly.h               itexturemap.h           polygon.h               transform.h
 	graphicsstate.h         itransform.h            procedural.h            trimcurve.h
-	iattributes.h           kdtree.h                quadrics.h              
+	iattributes.h           kdtree.h                quadrics.h              ioptions.h
 	iddmanager.h            lath.h                  render.h
 	marchingcubes.h 	lookuptable.h
 	idsoshadeops.h          lights.h                renderer.h""")
