@@ -31,6 +31,7 @@
 
 #include	<vector>
 #include	<list>
+#include	<deque>
 
 #include	<boost/weak_ptr.hpp>
 #include	<boost/shared_ptr.hpp>
@@ -107,9 +108,9 @@ class CqCSGTreeNode : public boost::enable_shared_from_this<CqCSGTreeNode>
 		 */
 		virtual	TqBool	EvaluateState( std::vector<TqBool>& abChildStates ) = 0;
 
-		virtual	void	ProcessSampleList( std::list<SqImageSample>& samples );
+		virtual	void	ProcessSampleList( std::deque<SqImageSample>& samples );
 
-		void	ProcessTree( std::list<SqImageSample>& samples );
+		void	ProcessTree( std::deque<SqImageSample>& samples );
 
 		static boost::shared_ptr<CqCSGTreeNode> CreateNode( CqString& type );
 		static TqBool IsRequired();
@@ -157,7 +158,7 @@ class CqCSGNodePrimitive : public CqCSGTreeNode
 		{
 			return ( CSGNodeType_Primitive );
 		}
-		virtual	void	ProcessSampleList( std::list<SqImageSample>& samples );
+		virtual	void	ProcessSampleList( std::deque<SqImageSample>& samples );
 		virtual	TqBool	EvaluateState( std::vector<TqBool>& abChildStates )
 		{
 			return ( TqTrue );

@@ -30,6 +30,7 @@
 #endif
 #include	<math.h>
 
+#include	<algorithm>
 #include	"options.h"
 #include	"renderer.h"
 #include	"random.h"
@@ -343,6 +344,14 @@ void CqImagePixel::Clear()
 //----------------------------------------------------------------------
 /** Get the color at the specified sample point by blending the colors that appear at that point.
  */
+// Ascending depth sorting function
+struct SqAscendingDepthSort
+{
+     bool operator()(const SqImageSample& splStart, const SqImageSample& splEnd)
+     {
+          return splStart.Data()[Sample_Depth] < splEnd.Data()[Sample_Depth];
+     }
+};
 
 void CqImagePixel::Combine(enum EqFilterDepth depthfilter, CqColor zThreshold)
 {
@@ -358,11 +367,13 @@ void CqImagePixel::Combine(enum EqFilterDepth depthfilter, CqColor zThreshold)
 
 		if(!samples->m_Data.empty())
 		{
+			// Sort the samples by depth.
+			std::sort(samples->m_Data.begin(), samples->m_Data.end(), SqAscendingDepthSort());
 			if(opaqueValue.m_flags & SqImageSample::Flag_Valid)
 			{
 				//	insert opaqueValue into samples in the right place.
-				std::list<SqImageSample>::iterator isi = samples->m_Data.begin();
-				std::list<SqImageSample>::iterator isend = samples->m_Data.end();
+				std::deque<SqImageSample>::iterator isi = samples->m_Data.begin();
+				std::deque<SqImageSample>::iterator isend = samples->m_Data.end();
 				while( isi != isend )
 				{
 					if((*isi).Data()[Sample_Depth] >= opaqueValue.Data()[Sample_Depth])
@@ -382,7 +393,7 @@ void CqImagePixel::Combine(enum EqFilterDepth depthfilter, CqColor zThreshold)
 					bProcessed = TqFalse;
 					//Warning ProcessTree add or remove elements in samples list
 					//We could not optimized the for loop here at all.
-					for ( std::list<SqImageSample>::iterator isample = samples->
+					for ( std::deque<SqImageSample>::iterator isample = samples->
 					        m_Data.begin();
 					        isample != samples->m_Data.end();
 					        ++isample )
@@ -403,7 +414,7 @@ void CqImagePixel::Combine(enum EqFilterDepth depthfilter, CqColor zThreshold)
 			TqFloat opaqueDepths[2] = { FLT_MAX, FLT_MAX };
 			TqFloat maxOpaqueDepth = FLT_MAX;
 
-			for ( std::list<SqImageSample>::reverse_iterator sample = samples->
+			for ( std::deque<SqImageSample>::reverse_iterator sample = samples->
 			        m_Data.rbegin();
 			        sample != samples->m_Data.rend();
 			        sample++ )
@@ -494,7 +505,7 @@ void CqImagePixel::Combine(enum EqFilterDepth depthfilter, CqColor zThreshold)
 					}
 					else if ( depthfilter == Filter_Min )
 					{
-						std::list<SqImageSample>::iterator sample;
+						std::deque<SqImageSample>::iterator sample;
 						TqFloat totDepth = 0.0f;
 						TqInt totCount = 0;
 						for ( sample = samples->m_Data.begin(); sample != samples->m_Data.end(); sample++ )
@@ -537,7 +548,7 @@ void CqImagePixel::OffsetSamples(CqVector2D& vecPixel, std::vector<CqVector2D>& 
 	}
 }
 
-//std::list<SqImageSample>& CqImagePixel::Values( TqInt index )
+//std::deque<SqImageSample>& CqImagePixel::Values( TqInt index )
 //{
 //    assert( index < m_XSamples*m_YSamples );
 //	return ( CqBucket::SamplePoints()[m_SampleIndices[ index ]].m_Data );

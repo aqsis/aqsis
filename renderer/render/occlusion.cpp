@@ -578,9 +578,7 @@ void CqOcclusionTree::SampleMPG( CqMicroPolygon* pMPG, const CqBound& bound, TqB
 
 			SqImageSample& ImageVal = opaque ? currentOpaqueSample : localImageVal;
 
-			std::list<SqImageSample>& aValues = sample.m_Data;
-			std::list<SqImageSample>::iterator sample = aValues.begin();
-			std::list<SqImageSample>::iterator end = aValues.end();
+			std::deque<SqImageSample>& aValues = sample.m_Data;
 
 			// return if the sample is occluded and can be culled.
 			if(opaque)
@@ -589,18 +587,6 @@ void CqOcclusionTree::SampleMPG( CqMicroPolygon* pMPG, const CqBound& bound, TqB
 				        currentOpaqueSample.Data()[Sample_Depth] <= D)
 				{
 					return;
-				}
-			}
-			else
-			{
-				// Sort the color/opacity into the visible point list
-				// return if the sample is occluded and can be culled.
-				while( sample != end )
-				{
-					if((*sample).Data()[Sample_Depth] >= D)
-						break;
-
-					++sample;
 				}
 			}
 
@@ -624,20 +610,9 @@ void CqOcclusionTree::SampleMPG( CqMicroPolygon* pMPG, const CqBound& bound, TqB
 				StoreExtraData(pMPG, ImageVal);
 			}
 
-			if(!opaque)
-			{
-				// If depth is exactly the same as previous sample, chances are we've
-				// hit a MPG grid line.
-				// \note: Cannot do this if there is CSG involved, as all samples must be taken and kept the same.
-				if ( sample != end && (*sample).Data()[Sample_Depth] == ImageVal.Data()[Sample_Depth] && !(*sample).m_pCSGNode )
-				{
-					TqInt datasize = QGetRenderContext()->GetOutputDataTotalSize();
-					TqInt i;
-					for( i=0; i<datasize; ++i)
-						(*sample).Data()[i] = ( (*sample).Data()[i] + ImageVal.Data()[i] ) * 0.5f;
-					return;
-				}
-			}
+			// \note: There used to be a test here to see if the current sample is 'exactly'
+			// the same depth as the nearest in the list, ostensibly to check for a 'grid line' hit
+			// but it didn't make sense, so was removed.
 
 			// Update max depth values if the sample is opaque and can occlude
 			// If the sample depth is closer than the current closest one, and is opaques
@@ -666,7 +641,7 @@ void CqOcclusionTree::SampleMPG( CqMicroPolygon* pMPG, const CqBound& bound, TqB
 
 			if(!opaque)
 			{
-				aValues.insert( sample, ImageVal );
+				aValues.push_back( ImageVal );
 			}
 			else
 			{

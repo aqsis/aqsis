@@ -143,7 +143,7 @@ TqInt CqCSGTreeNode::cChildren()
  *
  *	@param	samples	Array of samples to pass through the CSG tree.
  */
-void CqCSGTreeNode::ProcessTree( std::list<SqImageSample>& samples )
+void CqCSGTreeNode::ProcessTree( std::deque<SqImageSample>& samples )
 {
 	// Follow the tree back up to the top, then process the list from there
 	boost::shared_ptr<CqCSGTreeNode> pTop = shared_from_this();
@@ -165,7 +165,7 @@ void CqCSGTreeNode::ProcessTree( std::list<SqImageSample>& samples )
  *
  *	@param	samples	Array of samples to process.
  */
-void CqCSGTreeNode::ProcessSampleList( std::list<SqImageSample>& samples )
+void CqCSGTreeNode::ProcessSampleList( std::deque<SqImageSample>& samples )
 {
 	// First process any children nodes.
 	// Process all nodes depth first.
@@ -193,7 +193,7 @@ void CqCSGTreeNode::ProcessSampleList( std::list<SqImageSample>& samples )
 
 	// Find out if the camera is starting inside a solid. This is the case if you
 	// see an odd number of walls for that solid when looking out.
-	std::list<SqImageSample>::iterator i;
+	std::deque<SqImageSample>::iterator i;
 	TqInt j = 0;
 	for ( i = samples.begin(); i != samples.end(); ++i, ++j )
 	{
@@ -253,10 +253,10 @@ void CqCSGTreeNode::ProcessSampleList( std::list<SqImageSample>& samples )
  *
  *	@param	samples	Array of samples to process.
  */
-void CqCSGNodePrimitive::ProcessSampleList( std::list<SqImageSample>& samples )
+void CqCSGNodePrimitive::ProcessSampleList( std::deque<SqImageSample>& samples )
 {
 	// Now go through samples, clearing samples related to this node.
-	std::list<SqImageSample>::iterator i;
+	std::deque<SqImageSample>::iterator i;
 	for ( i = samples.begin(); i != samples.end(); ++i )
 	{
 		if ( i->m_pCSGNode.get() == this )

@@ -32,6 +32,7 @@
 
 #include	<vector>
 #include	<stack>
+#include	<deque>
 
 #ifdef	min
 #define	__old_min__ min
@@ -236,7 +237,7 @@ struct SqSampleData
 	TqInt		m_SubCellIndex;		///< Subcell index.
 	TqFloat		m_Time;				///< Float sample time.
 	TqFloat		m_DetailLevel;		///< Float level-of-detail sample.
-	std::list<SqImageSample>	m_Data;	///< Array of sampled surface data for this sample.
+	std::deque<SqImageSample>	m_Data;	///< Array of sampled surface data for this sample.
 	SqImageSample m_OpaqueSample;	///< Single opaque sample for optimised processing if all encountered surfaces are opaque
 };
 
