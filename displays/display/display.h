@@ -27,76 +27,39 @@
 #define	___display_Loaded___
 
 #include <aqsis.h>
+#include <iostream>
+#include <tinyxml.h>
 
-#ifndef	AQSIS_NO_FLTK
-#include <FL/Fl.H>
-#include <FL/Fl_Window.H>
-#include <FL/Fl_Box.H>
-#include <FL/Fl_Image.H>
-#include <FL/fl_draw.H>
-#endif // AQSIS_NO_LTK
 
 START_NAMESPACE( Aqsis )
 
-/** FLTK Widget used to show a constantly updating image.
- *
- */
-#ifndef	AQSIS_NO_FLTK
-class Fl_FrameBuffer_Widget : public Fl_Widget
+
+enum EqDisplayTypes 
 {
-	public:
-		Fl_FrameBuffer_Widget(int x, int y, int imageW, int imageH, int depth, unsigned char* imageD) : Fl_Widget(x,y,imageW,imageH)
-		{
-			w = imageW;
-			h = imageH;
-			d = depth;
-			image = imageD;
-		}
-
-		void draw(void)
-		{
-			fl_draw_image(image,x(),y(),w,h,d,w*d); // draw image
-		}
-
-	private:
-		int w,h,d;
-		unsigned char* image;
-};
-#endif // AQSIS_NO_FLTK
-
-enum EqDisplayTypes
-{
-    Type_File = 0,
-    Type_Framebuffer,
-    Type_ZFile,
-    Type_ZFramebuffer,
-    Type_Shadowmap,
+	Type_File = 0,
+	Type_Framebuffer,
+	Type_ZFile,
+	Type_ZFramebuffer,
+	Type_Shadowmap,
 };
 
 
 struct SqDisplayInstance
 {
 	SqDisplayInstance() :
-			m_filename(0),
-			m_width(0),
-			m_height(0),
-			m_iFormatCount(0),
-			m_format(PkDspyUnsigned8),
-			m_entrySize(0),
-			m_lineLength(0),
-			m_compression(COMPRESSION_NONE), m_quality(90),
-			m_hostname(0),
-			m_RenderWholeFrame(TqFalse),
-			m_imageType(Type_File),
-			m_append(0),
-			m_pixelsReceived(0),
-			m_data(0)
-#ifndef	AQSIS_NO_FLTK
-			,
-			m_theWindow(0),
-			m_uiImageWidget(0),
-			m_uiImage(0)
-#endif // AQSIS_NO_FLTK
+		m_filename(0),
+		m_width(0),
+		m_height(0),
+		m_iFormatCount(0),
+		m_format(PkDspyUnsigned8),
+		m_entrySize(0),
+		m_lineLength(0),
+		m_compression(COMPRESSION_NONE), m_quality(90),
+		m_hostname(0),
+		m_RenderWholeFrame(TqFalse),
+		m_imageType(Type_File),
+		m_append(0),
+		m_data(0)
 	{}
 	char*		m_filename;
 	TqInt		m_width;
@@ -109,23 +72,39 @@ struct SqDisplayInstance
 	TqInt		m_lineLength;
 	uint16		m_compression, m_quality;
 	char*		m_hostname;
+	TqInt		m_hostport;
+	int		m_socket;
 	TqBool		m_RenderWholeFrame;
 	TqInt		m_imageType;
 	TqInt		m_append;
 	TqFloat		m_matWorldToCamera[ 4 ][ 4 ];
 	TqFloat		m_matWorldToScreen[ 4 ][ 4 ];
+	char*		m_description;
 	// The number of pixels that have already been rendered (used for progress reporting)
 	TqInt		m_pixelsReceived;
 
 	void*		m_data;
 	unsigned char*	m_zfbdata;
 
-#ifndef	AQSIS_NO_FLTK
+	friend std::istream& operator >>(std::istream &is,struct SqDisplayInstance &obj);
+	friend std::ostream& operator <<(std::ostream &os,const struct SqDisplayInstance &obj);
+};
 
-	Fl_Window*	m_theWindow;
-	Fl_FrameBuffer_Widget* m_uiImageWidget;
-	Fl_RGB_Image*	m_uiImage;
-#endif // AQSIS_NO_FLTK
+std::istream& operator >>(std::istream &is,struct SqDisplayInstance &obj)
+{
+//	      is>>strVal;
+	            return is;
+}
+
+std::ostream& operator <<(std::ostream &os,const struct SqDisplayInstance &obj)
+{
+//	      os<<obj.strVal;
+	            return os;
+}
+
+struct SqNetDisplayArgs
+{
+	int x,y,w,h,d;
 };
 
 

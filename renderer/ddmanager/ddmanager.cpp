@@ -1029,23 +1029,23 @@ void CqDDManager::PrepareSystemParameters( SqDisplayRequest& req )
 	ConstructStringsParameter("Software", &Software, 1, parameter);
 	req.m_customParams.push_back(parameter);
 
-	// "HostComputer"
-	char HostComputerName[255];
-	const char* HostComputer = HostComputerName;
-#ifdef AQSIS_SYSTEM_WIN32
-
-	WSADATA wsaData;
-	WSAStartup( MAKEWORD( 2, 0 ), &wsaData );
-#endif // AQSIS_SYSTEM_WIN32
-
-	gethostname( HostComputerName, 255 );
-#ifdef	AQSIS_SYSTEM_WIN32
-
-	WSACleanup();
-#endif
-
-	ConstructStringsParameter("HostComputer", &HostComputer, 1, parameter);
-	req.m_customParams.push_back(parameter);
+//	// "HostComputer"
+//	char HostComputerName[255];
+//	const char* HostComputer = HostComputerName;
+//#ifdef AQSIS_SYSTEM_WIN32
+//
+//	WSADATA wsaData;
+//	WSAStartup( MAKEWORD( 2, 0 ), &wsaData );
+//#endif // AQSIS_SYSTEM_WIN32
+//
+//	gethostname( HostComputerName, 255 );
+//#ifdef	AQSIS_SYSTEM_WIN32
+//
+//	WSACleanup();
+//#endif
+//
+//	ConstructStringsParameter("HostComputer", &HostComputer, 1, parameter);
+//	req.m_customParams.push_back(parameter);
 }
 
 

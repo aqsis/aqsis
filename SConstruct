@@ -167,6 +167,7 @@ SConscript('shadercompiler/aqsl/SConscript', build_dir=target_dir.abspath + '/sh
 SConscript('shadercompiler/slxargs/SConscript', build_dir=target_dir.abspath + '/shadercompiler/slxargs')
 SConscript('shadercompiler/aqsltell/SConscript', build_dir=target_dir.abspath + '/shadercompiler/aqsltell')
 display = SConscript('displays/display/SConscript', build_dir=target_dir.abspath + '/displays/display')
+SConscript('displays/display/eqshibit/SConscript', build_dir=target_dir.abspath + '/displays/display/eqshibit')
 bmp = SConscript('displays/d_sdcBMP/SConscript', build_dir=target_dir.abspath + '/displays/d_sdcBMP')
 xpm = SConscript('displays/d_xpm/SConscript', build_dir=target_dir.abspath + '/displays/d_xpm')
 SConscript('displays/d_exr/SConscript', build_dir=target_dir.abspath + '/displays/d_exr')
