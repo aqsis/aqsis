@@ -14,6 +14,8 @@ from build_support import Glob
 import version
 Export('version')
 
+EnsurePythonVersion(2,4)
+
 # Setup the common command line options.
 opts = Options([os.path.abspath('options.cache'), os.path.abspath('custom.py')])
 opts.Add('tiff_include_path', 'Point to the tiff header files', '')
@@ -82,6 +84,19 @@ zipBuilder = Builder(action=zipperFunction,
    multi=0)
 env.Append(BUILDERS = {'Zipper':zipBuilder})
 
+# Modify Library and StaticLibrary Builder functions on x86_64 architecture to
+# compile objects as for shared libraries (ie use Position independent code).
+# Otherwise the static libraries cannot be linked into aqsis.so
+import platform
+if platform.machine() == 'x86_64':
+    picLibBuilder = Builder(action = Action('$ARCOM'),
+                            emitter = '$LIBEMITTER',
+                            prefix = '$LIBPREFIX',
+                            suffix = '$LIBSUFFIX',
+                            src_suffix = '$OBJSUFFIX',
+                            src_builder = 'SharedObject')
+    env['BUILDERS']['StaticLibrary'] = picLibBuilder
+    env['BUILDERS']['Library'] = picLibBuilder
 
 # Create the configure object here, as you can't do it once a call
 # to SConscript has been processed.
