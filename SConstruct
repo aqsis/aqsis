@@ -14,7 +14,7 @@ from build_support import Glob
 import version
 Export('version')
 
-EnsurePythonVersion(2,4)
+EnsurePythonVersion(2,3)
 
 # Setup the common command line options.
 opts = Options([os.path.abspath('options.cache'), os.path.abspath('custom.py')])
