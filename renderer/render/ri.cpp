@@ -41,6 +41,7 @@
 #include	"bilinear.h"
 #include	"quadrics.h"
 #include	"teapot.h"
+#include	"bunny.h"
 #include	"shaders.h"
 #include	"texturemap.h"
 #include	"objectinstance.h"
@@ -4881,8 +4882,28 @@ RtVoid	RiGeometryV( RtToken type, PARAMETERLIST )
 		                     QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ) );
 
 		CreateGPrim( pSurface );
-	}
-	else
+	} else if ( strcmp( type, "bunny" ) == 0 )
+        {
+                CqBunny bunny;
+ 
+                std::vector<RtToken> aTokens;
+		std::vector<RtPointer> aValues;
+		aTokens.clear();
+		aValues.clear();
+ 
+ 
+		aTokens.push_back(RI_P);
+		aTokens.push_back(RI_N);
+		aTokens.push_back(RI_ST);
+		aValues.push_back(bunny.Points());
+		aValues.push_back(bunny.Normals());
+		aValues.push_back(bunny.STs());
+ 
+ 
+		RiPointsPolygonsV( bunny.NVertices(), bunny.Indexes(), bunny.Vertices(), 3, &aTokens[0], &aValues[0] );
+
+
+         } else
 	{
 		Aqsis::log() << warning << "RiGeometry unrecognised type \"" << type << "\"" << std::endl;
 	}
