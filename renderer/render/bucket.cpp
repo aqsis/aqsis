@@ -452,7 +452,7 @@ void CqBucket::FilterBucket(TqBool empty)
 	if(!empty)
 	{
 		// non-seperable is faster for very small filter widths.
-		if(FilterXWidth() <= 1.0 || FilterYWidth() <= 1.0)
+		if(FilterXWidth() <= 16.0 || FilterYWidth() <= 16.0)
 			useSeperable = false;
 
 		if(useSeperable)

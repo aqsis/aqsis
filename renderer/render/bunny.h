@@ -53,36 +53,24 @@ class CqBunny
 		virtual	~CqBunny()
 		{}
 
-		/**
-		* Return the Points information 
-		              */
+		// Return the Points information 
 		TqFloat *Points( );
 
-		/**
-		* Return the Normals information 
-		              */
-		TqFloat *Normals( );
-
-		/**
-		* Return the s,t information 
-		              */
-		TqFloat *STs( );
+		// Return the s,t,w information 
+		TqFloat *S( );
+		TqFloat *T( );
+		TqFloat *W( );
 
 
-		/**
-		* Return the list of 3 side polygon information 
-		              */
+      		// Return the list of 3 side polygon information 
 		TqInt *Indexes( );
+		
+		// Return the faces (3,3,3,3..)
+		TqInt *Faces( );
 
-		/**
-		* Return the Vertices information 
-		              */
-		TqInt *Vertices( );
+		// Return the size of the Vertices' array
+		TqInt NFaces( );
 
-		/**
-		* Return the size of the Indexes
-		              */
-		TqInt NVertices( );
 
 	private:
 

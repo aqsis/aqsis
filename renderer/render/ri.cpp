@@ -4883,27 +4883,41 @@ RtVoid	RiGeometryV( RtToken type, PARAMETERLIST )
 
 		CreateGPrim( pSurface );
 	} else if ( strcmp( type, "bunny" ) == 0 )
-        {
-                CqBunny bunny;
- 
-                std::vector<RtToken> aTokens;
-		std::vector<RtPointer> aValues;
-		aTokens.clear();
-		aValues.clear();
- 
- 
-		aTokens.push_back(RI_P);
-		aTokens.push_back(RI_N);
-		aTokens.push_back(RI_ST);
-		aValues.push_back(bunny.Points());
-		aValues.push_back(bunny.Normals());
-		aValues.push_back(bunny.STs());
- 
- 
-		RiPointsPolygonsV( bunny.NVertices(), bunny.Indexes(), bunny.Vertices(), 3, &aTokens[0], &aValues[0] );
+	{
+	CqBunny bunny;
+
+	std::vector<RtToken> aTokens;
+	std::vector<RtPointer> aValues;
+	std::vector<RtToken> aTags;
+	aTokens.clear();
+	aValues.clear();
+	aTags.clear();
 
 
-         } else
+	aTokens.push_back(RI_P);
+	aTokens.push_back(RI_S);
+	aTokens.push_back(RI_T);
+	aValues.push_back(bunny.Points());
+	aValues.push_back(bunny.S());
+	aValues.push_back(bunny.T());
+	aTags.push_back("catmull-clark");
+	aTags.push_back("interpolateboundary");
+
+	static TqInt params[] = { 0, 0 };
+
+	TqInt count = 3;
+	RiSubdivisionMeshV( aTags[0],
+	                    bunny.NFaces(),
+	                    bunny.Faces(),
+	                    bunny.Indexes(),
+	                    1,
+	                    &aTags[1],
+	                    params,
+	                    0,
+	                    0,
+	                    count, &aTokens[0], &aValues[0] );
+
+	} else
 	{
 		Aqsis::log() << warning << "RiGeometry unrecognised type \"" << type << "\"" << std::endl;
 	}
