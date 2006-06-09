@@ -160,7 +160,10 @@ void CqShaderVM::SO_ipop()
 			TqFloat fIndex;
 			A->GetFloat( fIndex, i );
 			TqInt index = static_cast<unsigned int>( fIndex );
-			( *pVA ) [ index ] ->SetValueFromVariable( Val, i );
+            		if (index < pVA->ArrayLength())
+            		{
+               			( *pVA ) [ index ] ->SetValueFromVariable( Val, i );
+            		}
 		}
 	}
 	RELEASE( Val );

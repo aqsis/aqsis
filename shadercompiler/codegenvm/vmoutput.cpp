@@ -301,8 +301,16 @@ void CqCodeGenOutput::Visit( IqParseNodeArrayVariable& AV )
 	IqParseNodeVariable* pVN;
 	AV.GetInterface( ParseNode_Variable, ( void** ) & pVN );
 
-	pNode->pChild() ->Accept( *this );
-	m_slxFile << "\tipushv ";
+	IqParseNode * pExpr = pNode->pChild();
+	if ( pExpr != 0 )
+	{
+		pExpr->Accept( *this );
+		m_slxFile << "\tipushv ";
+	}
+	else
+	{
+		m_slxFile << "\tpushv ";
+	}
 
 	SqVarRef temp( pVN->VarRef() );
 	IqVarDef* pVD = pTranslatedVariable( temp, m_saTransTable );
@@ -785,7 +793,8 @@ void CqCodeGenOutput::Visit( IqParseNodeMessagePassingFunction& MPF )
 
 	IqParseNode * pExpr = pNode->pChild();
 
-	pExpr->Accept( *this );
+	if ( pExpr != 0 )
+		pExpr->Accept( *this );
 
 	CqString strCommType( "surface" );
 	switch ( MPF.CommType() )
