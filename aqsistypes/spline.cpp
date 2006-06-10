@@ -58,11 +58,11 @@ __Basis	gLinearBasis	= {{  0.0f,       0.0f,       0.0f,       0.0f},
 /** Default constructor for a cubic spline curve, defaults to bezier basis matrix.
  */
 
-CqSplineCubic::CqSplineCubic( TqInt cu ) : m_matBasis( gBezierBasis )
+CqSplineCubic::CqSplineCubic( TqInt cu ) : m_matBasis( gCatmullRomBasis )
 {
 	m_aControlPoints.resize( cu );
 	m_cu = cu;
-	m_Step = 3;
+	m_Step = 1;
 }
 
 

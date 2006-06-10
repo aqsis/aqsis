@@ -6503,23 +6503,39 @@ void	CqShaderExecEnv::SO_setmcomp( IqShaderData* M, IqShaderData* r, IqShaderDat
 
 //----------------------------------------------------------------------
 // spline(value, f1,f2,...,fn)
-void	CqShaderExecEnv::SO_fsplinea( IqShaderData* value, IqShaderData* a, IqShaderData* Result, IqShader* pShader )
+void    CqShaderExecEnv::SO_fsplinea( IqShaderData* value, IqShaderData* a, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
+	TqBool __fVaryingA=TqFalse;
 	TqUint __iGrid;
 
 	assert( a->ArrayLength() > 0 );
 	assert( a->Type() == type_float );
 
-	TqInt	cParams = a->ArrayLength();
+	TqInt    cParams = a->ArrayLength();
 	CqSplineCubic spline( cParams );
 
 	__fVarying=(value)->Class()==class_varying||__fVarying;
-	__fVarying=(a)->Class()==class_varying||__fVarying;
+	__fVaryingA=(a)->Class()==class_varying;
+	__fVarying = __fVaryingA || __fVarying;
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
+
+
+	if (!__fVaryingA)
+	{
+		TqInt j;
+		TqFloat fTemp;
+		for ( j = 0; j < cParams; j++ )
+		{
+			a->ArrayEntry( j ) ->GetFloat( fTemp, __iGrid );
+			spline[ j ] = CqVector4D( fTemp, 0.0f, 0.0f, 1.0f );
+		}
+	}
+
 	CqBitVector& RS = RunningState();
+
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -6541,13 +6557,13 @@ void	CqShaderExecEnv::SO_fsplinea( IqShaderData* value, IqShaderData* a, IqShade
 			else
 			{
 				TqInt j;
-				for ( j = 0; j < cParams; j++ )
+				for ( j = 0; __fVaryingA && j < cParams; j++ )
 				{
 					a->ArrayEntry( j ) ->GetFloat( fTemp, __iGrid );
 					spline[ j ] = CqVector4D( fTemp, 0.0f, 0.0f, 1.0f );
 				}
 
-				CqVector4D	res = spline.Evaluate( _aq_value );
+				CqVector4D    res = spline.Evaluate( _aq_value );
 				(Result)->SetFloat(res.x(),__iGrid);
 			}
 		}
@@ -6558,9 +6574,10 @@ void	CqShaderExecEnv::SO_fsplinea( IqShaderData* value, IqShaderData* a, IqShade
 
 //----------------------------------------------------------------------
 // spline(value, f1,f2,...,fn)
-void	CqShaderExecEnv::SO_csplinea( IqShaderData* value, IqShaderData* a, IqShaderData* Result, IqShader* pShader )
+void    CqShaderExecEnv::SO_csplinea( IqShaderData* value, IqShaderData* a, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
+	TqBool __fVaryingA=TqFalse;
 	TqUint __iGrid;
 
 	assert( a->ArrayLength() > 0 );
@@ -6571,11 +6588,24 @@ void	CqShaderExecEnv::SO_csplinea( IqShaderData* value, IqShaderData* a, IqShade
 	CqColor colTemp;
 
 	__fVarying=(value)->Class()==class_varying||__fVarying;
-	__fVarying=(a)->Class()==class_varying||__fVarying;
+	__fVaryingA=(a)->Class()==class_varying;
+	__fVarying = __fVaryingA || __fVarying;
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
+
+	if (!__fVaryingA)
+	{
+		TqInt j;
+		for ( j = 0; j < cParams; j++ )
+		{
+			a->ArrayEntry( j ) ->GetColor( colTemp, __iGrid );
+			spline[ j ] = CqVector4D( colTemp.fRed(), colTemp.fGreen(), colTemp.fBlue(), 1.0f );
+		}
+	}
+
 	CqBitVector& RS = RunningState();
+
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -6597,7 +6627,7 @@ void	CqShaderExecEnv::SO_csplinea( IqShaderData* value, IqShaderData* a, IqShade
 			else
 			{
 				TqInt j;
-				for ( j = 0; j < cParams; j++ )
+				for ( j = 0; __fVaryingA && j < cParams; j++ )
 				{
 					a->ArrayEntry( j ) ->GetColor( colTemp, __iGrid );
 					spline[ j ] = CqVector4D( colTemp.fRed(), colTemp.fGreen(), colTemp.fBlue(), 1.0f );
@@ -6611,27 +6641,40 @@ void	CqShaderExecEnv::SO_csplinea( IqShaderData* value, IqShaderData* a, IqShade
 	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
 }
 
-
 //----------------------------------------------------------------------
 // spline(value, f1,f2,...,fn)
-void	CqShaderExecEnv::SO_psplinea( IqShaderData* value, IqShaderData* a, IqShaderData* Result, IqShader* pShader )
+void    CqShaderExecEnv::SO_psplinea( IqShaderData* value, IqShaderData* a, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
+	TqBool __fVaryingA=TqFalse;
 	TqUint __iGrid;
 
 	assert( a->ArrayLength() > 0 );
 	assert( a->Type() == type_point );
 
-	TqInt	cParams = a->ArrayLength();
+	TqInt    cParams = a->ArrayLength();
 	CqSplineCubic spline( cParams );
 	CqVector3D vecTemp;
 
 	__fVarying=(value)->Class()==class_varying||__fVarying;
-	__fVarying=(a)->Class()==class_varying||__fVarying;
+	__fVaryingA=(a)->Class()==class_varying;
+	__fVarying = __fVaryingA || __fVarying;
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
+
+	if (!__fVaryingA)
+	{
+		TqInt j;
+		for ( j = 0; j < cParams; j++ )
+		{
+			a->ArrayEntry( j ) ->GetPoint( vecTemp, __iGrid );
+			spline[ j ] = vecTemp;
+		}
+	}
+
 	CqBitVector& RS = RunningState();
+
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -6653,13 +6696,13 @@ void	CqShaderExecEnv::SO_psplinea( IqShaderData* value, IqShaderData* a, IqShade
 			else
 			{
 				TqInt j;
-				for ( j = 0; j < cParams; j++ )
+				for ( j = 0; __fVaryingA && j < cParams; j++ )
 				{
 					a->ArrayEntry( j ) ->GetPoint( vecTemp, __iGrid );
 					spline[ j ] = vecTemp;
 				}
 
-				CqVector3D	res = spline.Evaluate( _aq_value );
+				CqVector3D    res = spline.Evaluate( _aq_value );
 				(Result)->SetPoint(res,__iGrid);
 			}
 		}
@@ -6670,19 +6713,21 @@ void	CqShaderExecEnv::SO_psplinea( IqShaderData* value, IqShaderData* a, IqShade
 
 //----------------------------------------------------------------------
 // spline(value, f1,f2,...,fn)
-void	CqShaderExecEnv::SO_sfsplinea( IqShaderData* basis, IqShaderData* value, IqShaderData* a, IqShaderData* Result, IqShader* pShader )
+void    CqShaderExecEnv::SO_sfsplinea( IqShaderData* basis, IqShaderData* value, IqShaderData* a, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
+	TqBool __fVaryingA=TqFalse;
 	TqUint __iGrid;
 
 	assert( a->ArrayLength() > 0 );
 	assert( a->Type() == type_float );
 
-	TqInt	cParams = a->ArrayLength();
+	TqInt    cParams = a->ArrayLength();
 	CqSplineCubic spline( cParams );
 
 	__fVarying=(value)->Class()==class_varying||__fVarying;
-	__fVarying=(a)->Class()==class_varying||__fVarying;
+	__fVaryingA=(a)->Class()==class_varying;
+	__fVarying = __fVaryingA || __fVarying;
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
@@ -6692,7 +6737,20 @@ void	CqShaderExecEnv::SO_sfsplinea( IqShaderData* basis, IqShaderData* value, Iq
 
 
 	__iGrid = 0;
+
+	if (!__fVaryingA)
+	{
+		TqInt j;
+		TqFloat fTemp;
+		for ( j = 0; j < cParams; j++ )
+		{
+			a->ArrayEntry( j ) ->GetFloat( fTemp, __iGrid );
+			spline[ j ] = CqVector4D( fTemp, 0.0f, 0.0f, 1.0f );
+		}
+	}
+
 	CqBitVector& RS = RunningState();
+
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -6714,13 +6772,13 @@ void	CqShaderExecEnv::SO_sfsplinea( IqShaderData* basis, IqShaderData* value, Iq
 			else
 			{
 				TqInt j;
-				for ( j = 0; j < cParams; j++ )
+				for ( j = 0; __fVaryingA && j < cParams; j++ )
 				{
 					a->ArrayEntry( j ) ->GetFloat( fTemp, __iGrid );
 					spline[ j ] = CqVector4D( fTemp, 0.0f, 0.0f, 1.0f );
 				}
 
-				CqVector4D	res = spline.Evaluate( _aq_value );
+				CqVector4D    res = spline.Evaluate( _aq_value );
 				(Result)->SetFloat(res.x(),__iGrid);
 			}
 		}
@@ -6731,20 +6789,22 @@ void	CqShaderExecEnv::SO_sfsplinea( IqShaderData* basis, IqShaderData* value, Iq
 
 //----------------------------------------------------------------------
 // spline(value, f1,f2,...,fn)
-void	CqShaderExecEnv::SO_scsplinea( IqShaderData* basis, IqShaderData* value, IqShaderData* a, IqShaderData* Result, IqShader* pShader )
+void    CqShaderExecEnv::SO_scsplinea( IqShaderData* basis, IqShaderData* value, IqShaderData* a, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
+	TqBool __fVaryingA=TqFalse;
 	TqUint __iGrid;
 
 	assert( a->ArrayLength() > 0 );
 	assert( a->Type() == type_color );
 
-	TqInt	cParams = a->ArrayLength();
+	TqInt    cParams = a->ArrayLength();
 	CqSplineCubic spline( cParams );
 	CqColor colTemp;
 
 	__fVarying=(value)->Class()==class_varying||__fVarying;
-	__fVarying=(a)->Class()==class_varying||__fVarying;
+	__fVaryingA=(a)->Class()==class_varying;
+	__fVarying = __fVaryingA || __fVarying;
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
@@ -6754,7 +6814,19 @@ void	CqShaderExecEnv::SO_scsplinea( IqShaderData* basis, IqShaderData* value, Iq
 
 
 	__iGrid = 0;
+
+	if (!__fVaryingA)
+	{
+		TqInt j;
+		for ( j = 0; j < cParams; j++ )
+		{
+			a->ArrayEntry( j ) ->GetColor( colTemp, __iGrid );
+			spline[ j ] = CqVector4D( colTemp.fRed(), colTemp.fGreen(), colTemp.fBlue(), 1.0f );
+		}
+	}
+
 	CqBitVector& RS = RunningState();
+
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -6776,13 +6848,13 @@ void	CqShaderExecEnv::SO_scsplinea( IqShaderData* basis, IqShaderData* value, Iq
 			else
 			{
 				TqInt j;
-				for ( j = 0; j < cParams; j++ )
+				for ( j = 0; __fVaryingA && j < cParams; j++ )
 				{
 					a->ArrayEntry( j ) ->GetColor( colTemp, __iGrid );
 					spline[ j ] = CqVector4D( colTemp.fRed(), colTemp.fGreen(), colTemp.fBlue(), 1.0f );
 				}
 
-				CqVector4D	res = spline.Evaluate( _aq_value );
+				CqVector4D    res = spline.Evaluate( _aq_value );
 				(Result)->SetColor(CqColor( res.x(), res.y(), res.z() ),__iGrid);
 			}
 		}
@@ -6793,20 +6865,22 @@ void	CqShaderExecEnv::SO_scsplinea( IqShaderData* basis, IqShaderData* value, Iq
 
 //----------------------------------------------------------------------
 // spline(value, f1,f2,...,fn)
-void	CqShaderExecEnv::SO_spsplinea( IqShaderData* basis, IqShaderData* value, IqShaderData* a, IqShaderData* Result, IqShader* pShader )
+void    CqShaderExecEnv::SO_spsplinea( IqShaderData* basis, IqShaderData* value, IqShaderData* a, IqShaderData* Result, IqShader* pShader )
 {
 	TqBool __fVarying=TqFalse;
+	TqBool __fVaryingA=TqFalse;
 	TqUint __iGrid;
 
 	assert( a->ArrayLength() > 0 );
 	assert( a->Type() == type_point );
 
-	TqInt	cParams = a->ArrayLength();
+	TqInt    cParams = a->ArrayLength();
 	CqSplineCubic spline( cParams );
 	CqVector3D vecTemp;
 
 	__fVarying=(value)->Class()==class_varying||__fVarying;
-	__fVarying=(a)->Class()==class_varying||__fVarying;
+	__fVaryingA=(a)->Class()==class_varying;
+	__fVarying = __fVaryingA || __fVarying;
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
 	__iGrid = 0;
@@ -6816,7 +6890,19 @@ void	CqShaderExecEnv::SO_spsplinea( IqShaderData* basis, IqShaderData* value, Iq
 
 
 	__iGrid = 0;
+
+	if (!__fVaryingA)
+	{
+		TqInt j;
+		for ( j = 0; j < cParams; j++ )
+		{
+			a->ArrayEntry( j ) ->GetPoint( vecTemp, __iGrid );
+			spline[ j ] = vecTemp;
+		}
+	}
+
 	CqBitVector& RS = RunningState();
+
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
@@ -6838,13 +6924,13 @@ void	CqShaderExecEnv::SO_spsplinea( IqShaderData* basis, IqShaderData* value, Iq
 			else
 			{
 				TqInt j;
-				for ( j = 0; j < cParams; j++ )
+				for ( j = 0; __fVaryingA && j < cParams; j++ )
 				{
 					a->ArrayEntry( j ) ->GetPoint( vecTemp, __iGrid );
 					spline[ j ] = vecTemp;
 				}
 
-				CqVector3D	res = spline.Evaluate( _aq_value );
+				CqVector3D    res = spline.Evaluate( _aq_value );
 				(Result)->SetPoint(res,__iGrid);
 			}
 		}
