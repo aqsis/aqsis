@@ -128,13 +128,26 @@ CqSurface* CqPoints::Clone() const
 /** Dice the quadric into a grid of MPGs for rendering.
  */
 
+void SetShaderArgument( boost::shared_ptr<IqShader> pShader, CqParameter* pParam, IqSurface* pSurface )
+{
+	// Find the relevant variable.
+	IqShaderData* pVar = pShader->FindArgument( pParam->strName() );
+	if ( NULL != pVar )
+	{
+		/// \todo: Find out how to handle arrays.
+		if(pVar->Type() == pParam->Type())
+			pParam->CopyToShaderVariable(pVar);
+	}
+}
+
 CqMicroPolyGridBase* CqPoints::Dice()
 {
 	assert( pPoints() );
 
 	std::vector<CqMicroPolyGrid*> apGrids;
 
-	CqMicroPolyGridPoints* pGrid = new CqMicroPolyGridPoints( nVertices(), 1, shared_from_this() );
+	CqMicroPolyGridPoints* pGrid = new CqMicroPolyGridPoints();
+	pGrid->Initialise(nVertices(), 1, shared_from_this());
 
 	TqInt lUses = Uses();
 
@@ -205,13 +218,13 @@ CqMicroPolyGridBase* CqPoints::Dice()
 		/// \todo: Must transform point/vector/normal/matrix parameter variables from 'object' space to current before setting.
 		boost::shared_ptr<IqShader> pShader;
 		if ( pShader = pGrid->pAttributes() ->pshadSurface(QGetRenderContext()->Time()) )
-			pShader->SetArgument( ( *iUP ), this );
+			SetShaderArgument( pShader, ( *iUP ), this );
 
 		if ( pShader = pGrid->pAttributes() ->pshadDisplacement(QGetRenderContext()->Time()) )
-			pShader->SetArgument( ( *iUP ), this );
+			SetShaderArgument( pShader, ( *iUP ), this );
 
 		if ( pShader = pGrid->pAttributes() ->pshadAtmosphere(QGetRenderContext()->Time()) )
-			pShader->SetArgument( ( *iUP ), this );
+			SetShaderArgument( pShader,  ( *iUP ), this );
 	}
 
 	return( pGrid );
@@ -691,7 +704,7 @@ void CqMotionMicroPolyGridPoints::Split( CqImageBuffer* pImage, long xmin, long 
 	CqMatrix matObjectToCameraT;
 	register TqInt i;
 	TqInt gsmin1;
-	gsmin1 = pGridA->GridSize() - 1;
+	gsmin1 = pGridA->pShaderExecEnv()->shadingPointCount() - 1;
 
 	for( iTime = 0; iTime < NumTimes; iTime++ )
 	{

@@ -84,10 +84,15 @@ class CqImagersource : public CqListEntry<CqImagersource>
 			assert( m_pShaderExecEnv );
 			return ( m_pShaderExecEnv->vGridRes() );
 		}
-		virtual	TqInt	GridSize() const
+		virtual	TqInt	microPolygonCount() const
 		{
 			assert( m_pShaderExecEnv );
-			return ( m_pShaderExecEnv->GridSize() );
+			return ( m_pShaderExecEnv->microPolygonCount() );
+		}
+		virtual	TqInt	shadingPointCount() const
+		{
+			assert( m_pShaderExecEnv );
+			return ( m_pShaderExecEnv->shadingPointCount() );
 		}
 		virtual	const CqMatrix&	matObjectToWorld() const
 		{

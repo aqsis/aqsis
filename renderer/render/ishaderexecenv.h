@@ -125,7 +125,7 @@ struct IqShaderExecEnv
 	virtual	~IqShaderExecEnv()
 	{}
 
-	virtual	void	Initialise( const TqInt uGridRes, const TqInt vGridRes, IqAttributes* pAttr, const boost::shared_ptr<IqTransform>& pTrans, IqShader* pShader, TqInt Uses ) = 0;
+	virtual	void	Initialise( const TqInt uGridRes, const TqInt vGridRes, TqInt microPolygonCount, TqInt shadingPointCount, IqAttributes* pAttr, const boost::shared_ptr<IqTransform>& pTrans, IqShader* pShader, TqInt Uses ) = 0;
 	/** Get grid size in u
 	 */
 	virtual	TqInt	uGridRes() const = 0;
@@ -134,7 +134,10 @@ struct IqShaderExecEnv
 	virtual	TqInt	vGridRes() const = 0;
 	/** Get total grid size.
 	 */
-	virtual	TqUint	GridSize() const = 0;
+	virtual	TqUint	microPolygonCount() const = 0;
+	/** Get shading point count.
+	 */
+	virtual	TqUint	shadingPointCount() const = 0;
 	/** Get the matrix which describes the transformation from Object space to World space for the surface related to this execution environment.
 	 */
 	virtual	const CqMatrix&	matObjectToWorld() const = 0;

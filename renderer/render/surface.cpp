@@ -438,7 +438,8 @@ CqMicroPolyGridBase* CqSurface::Dice()
 	PreDice( m_uDiceSize, m_vDiceSize );
 
 	// Create a new CqMicorPolyGrid for this patch
-	CqMicroPolyGrid* pGrid = new CqMicroPolyGrid( m_uDiceSize, m_vDiceSize, shared_from_this() );
+	CqMicroPolyGrid* pGrid = new CqMicroPolyGrid();
+	pGrid->Initialise( m_uDiceSize, m_vDiceSize, shared_from_this() );
 
 	TqInt lUses = Uses();
 

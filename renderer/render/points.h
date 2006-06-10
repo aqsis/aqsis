@@ -301,8 +301,6 @@ class CqMicroPolyGridPoints : public CqMicroPolyGrid
 	public:
 		CqMicroPolyGridPoints() : CqMicroPolyGrid()
 		{}
-		CqMicroPolyGridPoints( TqInt cu, TqInt cv, const boost::shared_ptr<CqSurface>& pSurface ) : CqMicroPolyGrid( cu, cv, pSurface )
-		{}
 		virtual	~CqMicroPolyGridPoints()
 		{}
 
@@ -312,6 +310,10 @@ class CqMicroPolyGridPoints : public CqMicroPolyGrid
 		{
 			assert( m_pShaderExecEnv );
 			return ( m_pShaderExecEnv->uGridRes() );
+		}
+		virtual	TqUint	numShadingPoints(TqInt cu, TqInt cv) const
+		{
+			return ( cu * cv );
 		}
 };
 

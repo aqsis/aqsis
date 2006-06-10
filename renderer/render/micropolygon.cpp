@@ -49,9 +49,15 @@ CqObjectPool<CqMovingMicroPolygonKey>	CqMovingMicroPolygonKey::m_thePool;
 
 CqMicroPolyGrid::CqMicroPolyGrid() : CqMicroPolyGridBase(),
 		m_bShadingNormals( TqFalse ),
-		m_bGeometricNormals( TqFalse )
+		m_bGeometricNormals( TqFalse ), 
+		m_pShaderExecEnv(new CqShaderExecEnv)
 {
 	STATS_INC( GRD_allocated );
+	STATS_INC( GRD_current );
+	STATS_INC( GRD_allocated );
+	TqInt cGRD = STATS_GETI( GRD_current );
+	TqInt cPeak = STATS_GETI( GRD_peak );
+	STATS_SETI( GRD_peak, cGRD > cPeak ? cGRD : cPeak );
 }
 
 
@@ -72,26 +78,6 @@ CqMicroPolyGrid::~CqMicroPolyGrid()
 		if( (*outputVar) )
 			delete( (*outputVar) );
 	m_apShaderOutputVariables.clear();
-}
-
-//---------------------------------------------------------------------
-/** Constructor
- */
-
-CqMicroPolyGrid::CqMicroPolyGrid( TqInt cu, TqInt cv, const boost::shared_ptr<CqSurface>& pSurface ) :
-		m_bShadingNormals( TqFalse ),
-		m_bGeometricNormals( TqFalse ),
-		m_pShaderExecEnv( new CqShaderExecEnv )
-{
-	STATS_INC( GRD_created );
-	STATS_INC( GRD_current );
-	STATS_INC( GRD_allocated );
-	TqInt cGRD = STATS_GETI( GRD_current );
-	TqInt cPeak = STATS_GETI( GRD_peak );
-	STATS_SETI( GRD_peak, cGRD > cPeak ? cGRD : cPeak );
-	// Initialise the shader execution environment
-
-	Initialise( cu, cv, pSurface );
 }
 
 
@@ -117,24 +103,24 @@ void CqMicroPolyGrid::Initialise( TqInt cu, TqInt cv, const boost::shared_ptr<Cq
 
 	/// \note This should delete through the interface that created it.
 
-	m_pShaderExecEnv->Initialise( cu, cv, pSurface->pAttributes(), pSurface->pTransform(), pSurface->pAttributes()->pshadSurface(QGetRenderContext()->Time()).get(), lUses );
+	m_pShaderExecEnv->Initialise( cu, cv, numMicroPolygons(cu, cv), numShadingPoints(cu, cv), pSurface->pAttributes(), pSurface->pTransform(), pSurface->pAttributes()->pshadSurface(QGetRenderContext()->Time()).get(), lUses );
 
 	boost::shared_ptr<IqShader> pshadSurface = pSurface ->pAttributes() ->pshadSurface(QGetRenderContext()->Time());
 	boost::shared_ptr<IqShader> pshadDisplacement = pSurface ->pAttributes() ->pshadDisplacement(QGetRenderContext()->Time());
 	boost::shared_ptr<IqShader> pshadAtmosphere = pSurface ->pAttributes() ->pshadAtmosphere(QGetRenderContext()->Time());
 
 	if ( pshadSurface )
-		pshadSurface->Initialise( cu, cv, m_pShaderExecEnv );
+		pshadSurface->Initialise( cu, cv, numShadingPoints(cu, cv), m_pShaderExecEnv );
 	if ( pshadDisplacement )
-		pshadDisplacement->Initialise( cu, cv, m_pShaderExecEnv );
+		pshadDisplacement->Initialise( cu, cv, numShadingPoints(cu, cv), m_pShaderExecEnv );
 	if ( pshadAtmosphere )
-		pshadAtmosphere->Initialise( cu, cv, m_pShaderExecEnv );
+		pshadAtmosphere->Initialise( cu, cv, numShadingPoints(cu, cv), m_pShaderExecEnv );
 
 	// Initialise the local/public culled variable.
-	m_CulledPolys.SetSize( ( cu + 1 ) * ( cv + 1 ) );
+	m_CulledPolys.SetSize( numShadingPoints(cu, cv) );
 	m_CulledPolys.SetAll( TqFalse );
 
-	TqInt size = ( cu + 1 ) * ( cv + 1 );
+	TqInt size = numMicroPolygons(cu, cv);
 
 	STATS_INC( GRD_size_4 + CLAMP( CqStats::stats_log2( size ) - 2, 0, 7 ) );
 }
@@ -259,7 +245,7 @@ void CqMicroPolyGrid::CalcSurfaceDerivatives()
 
 	TqInt i;
 
-	TqInt gsmin1 = GridSize() - 1;
+	TqInt gsmin1 = m_pShaderExecEnv->shadingPointCount() - 1;
 	for ( i = gsmin1; i >= 0; i-- )
 	{
 		if ( bdpu )
@@ -292,7 +278,7 @@ void CqMicroPolyGrid::Shade()
 	boost::shared_ptr<IqShader> pshadAtmosphere = pSurface() ->pAttributes() ->pshadAtmosphere(QGetRenderContext()->Time());
 
 	TqInt lUses = pSurface() ->Uses();
-	TqInt gs = GridSize();
+	TqInt gs = m_pShaderExecEnv->shadingPointCount();
 	TqInt uRes = uGridRes();
 	TqInt vRes = vGridRes();
 	TqInt gsmin1 = gs - 1;
@@ -574,7 +560,7 @@ void CqMicroPolyGrid::Shade()
 
 	DeleteVariables( TqFalse );
 
-	TqInt	size = GridSize();
+	TqInt	size = m_pShaderExecEnv->shadingPointCount();
 
 	STATS_INC( GRD_shd_size_4 + CLAMP( CqStats::stats_log2( size ) - 2, 0, 7 ) );
 }
@@ -713,7 +699,7 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, long y
 	CqMatrix matObjectToCameraT;
 	register TqInt i;
 	TqInt gsmin1;
-	gsmin1 = GridSize() - 1;
+	gsmin1 = m_pShaderExecEnv->shadingPointCount() - 1;
 
 	std::map<TqFloat, TqInt>::iterator keyFrame;
 	for ( keyFrame = keyframeTimes.begin(); keyFrame!=keyframeTimes.end(); keyFrame++ )
@@ -981,7 +967,7 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, 
 	CqMatrix matObjectToCameraT;
 	register TqInt i;
 	TqInt gsmin1;
-	gsmin1 = pGridA->GridSize() - 1;
+	gsmin1 = pGridA->pShaderExecEnv()->shadingPointCount() - 1;
 
 	for ( iTime = 0; iTime < tTime; iTime++ )
 	{

@@ -139,7 +139,7 @@ class CqShaderExecEnv : public IqShaderExecEnv
 #endif
 
 		// Overidden from IqShaderExecEnv, see ishaderexecenv.h for descriptions.
-		virtual	void	Initialise( const TqInt uGridRes, const TqInt vGridRes, IqAttributes* pAttr, const boost::shared_ptr<IqTransform>& pTrans, IqShader* pShader, TqInt Uses );
+		virtual	void	Initialise( const TqInt uGridRes, const TqInt vGridRes, TqInt microPolygonCount, TqInt shadingPointCount, IqAttributes* pAttr, const boost::shared_ptr<IqTransform>& pTrans, IqShader* pShader, TqInt Uses );
 		virtual	TqInt	uGridRes() const
 		{
 			return ( m_uGridRes );
@@ -148,9 +148,13 @@ class CqShaderExecEnv : public IqShaderExecEnv
 		{
 			return ( m_vGridRes );
 		}
-		virtual	TqUint	GridSize() const
+		virtual	TqUint	microPolygonCount() const
 		{
-			return ( m_GridSize );
+			return ( m_microPolygonCount );
+		}
+		virtual	TqUint	shadingPointCount() const
+		{
+			return ( m_shadingPointCount );
 		}
 		virtual	const CqMatrix&	matObjectToWorld() const;
 		const IqAttributes*	pAttributes() const
@@ -371,7 +375,8 @@ class CqShaderExecEnv : public IqShaderExecEnv
 
 		TqInt	m_uGridRes;				///< The resolution of the grid in u.
 		TqInt	m_vGridRes;				///< The resolution of the grid in u.
-		TqInt	m_GridSize;				///< The resolution of the grid.
+		TqInt	m_microPolygonCount;			///< The resolution of the grid.
+		TqInt	m_shadingPointCount;			///< The resolution of the grid.
 		TqInt	m_GridI;				///< The current SIMD index.
 		TqUint	m_li;					///< Light index, used during illuminance loop.
 		TqInt	m_Illuminate;

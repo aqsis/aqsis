@@ -99,7 +99,7 @@ void CqShaderVM::SO_ipushv()
 	}
 	//If either the value or the index is varying, so must the result be.
 	RESULT(pVar->Type(), (pVar->Size()>1 || A->Size()>1)?class_varying:class_uniform);
-	TqInt ext = m_pEnv->GridSize();
+	TqInt ext = m_pEnv->shadingPointCount();
 	TqBool fVarying = ext > 1;
 	TqInt i;
 	CqBitVector& RS = m_pEnv->RunningState();
@@ -122,7 +122,7 @@ void CqShaderVM::SO_pop()
 	TqInt iVar = ReadNext().m_iVariable;
 	IqShaderData* pV = GetVar( iVar );
 	POPV( Val );
-	TqUint ext = MAX( m_pEnv->GridSize(), pV->Size() );
+	TqUint ext = MAX( m_pEnv->shadingPointCount(), pV->Size() );
 	TqBool fVarying = ext > 1;
 	TqUint i;
 	CqBitVector& RS = m_pEnv->RunningState();
@@ -148,8 +148,8 @@ void CqShaderVM::SO_ipop()
 	}
 	POPV( A );
 	POPV( Val );
-	//TqInt ext=__fVarying?m_pEnv->GridSize():1;
-	TqUint ext = MAX( m_pEnv->GridSize(), pV->Size() );
+	//TqInt ext=__fVarying?m_pEnv->shadingPointCount():1;
+	TqUint ext = MAX( m_pEnv->shadingPointCount(), pV->Size() );
 	TqBool fVarying = ext > 1;
 	TqUint i;
 	CqBitVector& RS = m_pEnv->RunningState();
@@ -179,7 +179,7 @@ void CqShaderVM::SO_mergef()
 	POPV( T );	// True statement
 	RESULT(type_float, class_varying);
 	TqInt i;
-	TqInt ext = m_pEnv->GridSize();
+	TqInt ext = m_pEnv->shadingPointCount();
 	for ( i = 0; i < ext; i++ )
 	{
 		TqBool _aq_A;
@@ -207,7 +207,7 @@ void CqShaderVM::SO_merges()
 	POPV( T );	// True statement
 	RESULT(type_string, class_varying);
 	TqInt i;
-	TqInt ext = m_pEnv->GridSize();
+	TqInt ext = m_pEnv->shadingPointCount();
 	for ( i = 0; i < ext; i++ )
 	{
 		TqBool _aq_A;
@@ -235,7 +235,7 @@ void CqShaderVM::SO_mergep()
 	POPV( T );	// True statement
 	RESULT(type_point, class_varying);
 	TqInt i;
-	TqInt ext = m_pEnv->GridSize();
+	TqInt ext = m_pEnv->shadingPointCount();
 	for ( i = 0; i < ext; i++ )
 	{
 		TqBool _aq_A;
@@ -263,7 +263,7 @@ void CqShaderVM::SO_mergec()
 	POPV( T );	// True statement
 	RESULT(type_color, class_varying);
 	TqInt i;
-	TqInt ext = m_pEnv->GridSize();
+	TqInt ext = m_pEnv->shadingPointCount();
 	for ( i = 0; i < ext; i++ )
 	{
 		TqBool _aq_A;
@@ -433,7 +433,7 @@ void CqShaderVM::SO_S_GET()
 	POPV( A );
 	TqInt i;
 	CqBitVector& RS = m_pEnv->RunningState();
-	TqInt ext = m_pEnv->GridSize();
+	TqInt ext = m_pEnv->shadingPointCount();
 	for ( i = 0; i < ext; i++ )
 	{
 		if ( RS.Value( i ) )
@@ -502,7 +502,7 @@ void CqShaderVM::SO_jnz()
 				return ;
 		}
 	}
-	while ( ++__iGrid < m_pEnv->GridSize() );
+	while ( ++__iGrid < m_pEnv->shadingPointCount() );
 	m_PO = lab.m_Offset;
 	m_PC = lab.m_pAddress;
 }
@@ -523,7 +523,7 @@ void CqShaderVM::SO_jz()
 				return ;
 		}
 	}
-	while ( ++__iGrid < m_pEnv->GridSize() );
+	while ( ++__iGrid < m_pEnv->shadingPointCount() );
 	m_PO = lab.m_Offset;
 	m_PC = lab.m_pAddress;
 }

@@ -254,13 +254,13 @@ class CqLayeredShader : public IqShader
 				++i;
 			}
 		}
-		virtual void	Initialise( const TqInt uGridRes, const TqInt vGridRes, const boost::shared_ptr<IqShaderExecEnv>& pEnv )
+		virtual void	Initialise( const TqInt uGridRes, const TqInt vGridRes, const TqInt shadingPointCount, const boost::shared_ptr<IqShaderExecEnv>& pEnv )
 		{
 			// Call Initialise on all layers.
 			std::vector<std::pair<CqString, boost::shared_ptr<IqShader> > >::iterator i = m_Layers.begin();
 			while( i != m_Layers.end() )
 			{
-				i->second->Initialise(uGridRes, vGridRes, pEnv);
+				i->second->Initialise(uGridRes, vGridRes, shadingPointCount, pEnv);
 				++i;
 			}
 		}

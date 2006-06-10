@@ -156,10 +156,10 @@ class CqShaderVariableArray: public CqShaderVariable
 		// Overridden from IqShaderData.
 
 
-		virtual	void	Initialise( const TqInt uGridRes, const TqInt vGridRes )
+		virtual	void	Initialise( const TqInt varyingSize )
 		{
 			for ( std::vector<IqShaderData*>::iterator i = m_aVariables.begin(); i != m_aVariables.end(); i++ )
-				( *i ) ->Initialise( uGridRes, vGridRes );
+				( *i ) ->Initialise( varyingSize );
 		}
 
 		virtual	void	SetSize( const TqUint size )
@@ -452,7 +452,7 @@ class CqShaderVariableUniform : public CqShaderVariable
 		{
 		}
 
-		virtual	void	Initialise( const TqInt uGridRes, const TqInt vGridRes )
+		virtual	void	Initialise( const TqInt varyingSize )
 		{
 		}
 		virtual	void	SetSize( const TqUint size )
@@ -1054,12 +1054,12 @@ class CqShaderVariableVarying : public CqShaderVariable
 		{
 		}
 
-		virtual	void	Initialise( const TqInt uGridRes, const TqInt vGridRes )
+		virtual	void	Initialise( const TqInt varyingSize )
 		{
 			R Def;
 			if ( m_aValue.size() > 0 )
 				Def = m_aValue[ 0 ];
-			m_aValue.assign( (( uGridRes + 1 ) * ( vGridRes + 1 )), Def );
+			m_aValue.assign( varyingSize, Def );
 		}
 
 		virtual	void	SetSize( const TqUint size )

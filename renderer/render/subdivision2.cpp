@@ -1139,7 +1139,8 @@ CqMicroPolyGridBase* CqSurfaceSubdivisionPatch::DiceExtract()
 	TqInt iTime;
 	for( iTime = 0; iTime < pTopology()->cTimes(); iTime++ )
 	{
-		CqMicroPolyGrid* pGrid = new CqMicroPolyGrid( dicesize, dicesize, pTopology()->pPoints() );
+		CqMicroPolyGrid* pGrid = new CqMicroPolyGrid();
+		pGrid->Initialise( dicesize, dicesize, pTopology()->pPoints() );
 
 		boost::shared_ptr<CqPolygonPoints> pMotionPoints = pTopology()->pPoints( iTime );
 

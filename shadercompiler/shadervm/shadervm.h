@@ -571,7 +571,7 @@ class CqShaderVM : public CqShaderStack, public IqShader, public CqDSORepository
 		{
 			ExecuteInit();
 		}
-		virtual void	Initialise( const TqInt uGridRes, const TqInt vGridRes, const boost::shared_ptr<IqShaderExecEnv>& pEnv );
+		virtual void	Initialise( const TqInt uGridRes, const TqInt vGridRes, const TqInt shadingPointCount, const boost::shared_ptr<IqShaderExecEnv>& pEnv );
 		virtual	TqBool	fAmbient() const
 		{
 			return ( m_fAmbient );

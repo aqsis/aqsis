@@ -67,22 +67,22 @@ CqLightsource::~CqLightsource()
  * \param iGridRes Integer grid resolution.
  * \param iGridRes Integer grid resolution.
  */
-void CqLightsource::Initialise( TqInt uGridRes, TqInt vGridRes )
+void CqLightsource::Initialise( TqInt uGridRes, TqInt vGridRes, TqInt microPolygonCount, TqInt shadingPointCount )
 {
 	TqInt Uses = gDefLightUses;
 	if ( m_pShader )
 	{
 		Uses |= m_pShader->Uses();
-		m_pShaderExecEnv->Initialise( uGridRes, vGridRes, m_pAttributes, boost::shared_ptr<IqTransform>(), m_pShader.get(), Uses );
+		m_pShaderExecEnv->Initialise( uGridRes, vGridRes, microPolygonCount, shadingPointCount, m_pAttributes, boost::shared_ptr<IqTransform>(), m_pShader.get(), Uses );
 	}
 
 	if ( m_pShader )
-		m_pShader->Initialise( uGridRes, vGridRes, m_pShaderExecEnv );
+		m_pShader->Initialise( uGridRes, vGridRes, shadingPointCount, m_pShaderExecEnv );
 
 	if ( USES( Uses, EnvVars_L ) )
-		L() ->Initialise( uGridRes, vGridRes );
+		L() ->Initialise( shadingPointCount );
 	if ( USES( Uses, EnvVars_Cl ) )
-		Cl() ->Initialise( uGridRes, vGridRes );
+		Cl() ->Initialise( shadingPointCount );
 
 	// Initialise the geometric parameters in the shader exec env.
 	if ( USES( Uses, EnvVars_P ) )

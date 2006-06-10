@@ -1,4 +1,4 @@
-// Aqsis
+// aQSIS
 // Copyright © 1997 - 2001, Paul C. Gregory
 //
 // Contact: pgregory@aqsis.com
@@ -1228,14 +1228,14 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 /**	Ready the shader for execution.
 */
 
-void CqShaderVM::Initialise( const TqInt uGridRes, const TqInt vGridRes, const boost::shared_ptr<IqShaderExecEnv>& pEnv )
+void CqShaderVM::Initialise( const TqInt uGridRes, const TqInt vGridRes, TqInt shadingPointCount, const boost::shared_ptr<IqShaderExecEnv>& pEnv )
 {
 	m_pEnv = pEnv;
 	// Initialise local variables.
 	TqInt i;
 	for ( i = m_LocalVars.size() - 1; i >= 0;
 	        i-- )
-		m_LocalVars[ i ] ->Initialise( uGridRes, vGridRes );
+		m_LocalVars[ i ] ->Initialise( shadingPointCount );
 
 	m_uGridRes = uGridRes;
 	m_vGridRes = vGridRes;
@@ -1317,8 +1317,8 @@ void CqShaderVM::ExecuteInit()
 	boost::shared_ptr<IqShaderExecEnv> pOldEnv = m_pEnv;
 
 	boost::shared_ptr<IqShaderExecEnv> Env(new CqShaderExecEnv);
-	Env->Initialise( 1, 1, 0, boost::shared_ptr<IqTransform>(), this, m_Uses );
-	Initialise( 1, 1, Env );
+	Env->Initialise( 1, 1, 1, 1, 0, boost::shared_ptr<IqTransform>(), this, m_Uses );
+	Initialise( 1, 1, 1, Env );
 
 	// Execute the init program.
 	m_PC = &m_ProgramInit[ 0 ];
