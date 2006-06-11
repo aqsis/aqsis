@@ -49,6 +49,7 @@ struct SqParameterDeclaration
 			m_Class( class_invalid ),
 			m_Count( 0 ),
 			m_pCreate( 0 ),
+			m_hash(0),
 			m_strSpace( "" )
 	{}
 	SqParameterDeclaration( const char* strName, EqVariableType Type, EqVariableClass Class, TqInt Count,
@@ -59,10 +60,15 @@ struct SqParameterDeclaration
 			m_Count( Count ),
 			m_pCreate( pCreate ),
 			m_strSpace( strSpace )
-	{}
+	{
+		m_hash = CqString::hash(strName);
+	}
 
 
 	CqString	m_strName;										///< Name of the parameter.
+
+	TqUlong         m_hash; ///< Hash key for m_strName;
+
 	EqVariableType	m_Type;										///< Type.
 	EqVariableClass	m_Class;									///< Class.
 	TqInt	m_Count;										///< Array length if an array.

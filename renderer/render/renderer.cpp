@@ -1149,13 +1149,16 @@ SqParameterDeclaration CqRenderer::FindParameterDecl( const char* strDecl )
 
 	CqString strName = strDecl;
 	// Search the local parameter declaration list.
-	std::vector<SqParameterDeclaration>::const_iterator is;
-	std::vector<SqParameterDeclaration>::const_iterator end = m_Symbols.end();
+	std::vector<SqParameterDeclaration>::iterator is;
+	std::vector<SqParameterDeclaration>::iterator end = m_Symbols.end();
 	TqUlong hash = CqString::hash( strDecl );
 	for ( is = m_Symbols.begin(); is != end ; is++ )
 	{
-		TqUlong hash2 = CqString::hash( is->m_strName.c_str() );
-		if ( hash == hash2 )
+		if ( is->m_hash == 0)
+		{
+			is->m_hash = CqString::hash( is->m_strName.c_str() );
+		}
+		if ( hash == is->m_hash)
 			return ( *is );
 	}
 	return ( SqParameterDeclaration( "", type_invalid, class_invalid, 0, 0, "" ) );
@@ -1184,7 +1187,7 @@ void CqRenderer::AddParameterDecl( const char* strName, const char* strType )
 		return;
 	}
 
-	// Put new declaration at the top to make it take priority over pervious
+	// Put new declaration at the top to make it take priority over previous
 	m_Symbols.insert( m_Symbols.begin(), Decl );
 }
 
