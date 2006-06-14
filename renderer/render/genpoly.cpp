@@ -1,7 +1,7 @@
 // Aqsis
 // Copyright © 1997 - 2001, Paul C. Gregory
 //
-// Contact: pgregory@aqsis.com
+// Contact: pgregory@aqsis.org
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public
@@ -20,7 +20,7 @@
 
 /** \file
 		\brief Declares a class for handling general polygons with loops.
-		\author Paul C. Gregory (pgregory@aqsis.com)
+		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
 #include	"aqsis.h"
