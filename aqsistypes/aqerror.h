@@ -20,7 +20,7 @@
 /** \file
 		\brief Global Aqsis include to include all files required within Aqsis
 		\author Matthaeus G. Chajdas (Matthaeus@darkside-conflict.net)
-		\todo: <<<<Code Review>>>>
+		\todo: <b>Code Review</b>
 */
 
 //? Is .h included already?
@@ -28,7 +28,7 @@
 #define AQERROR_H_INCLUDED 1
 
 /**
- *	\todo: <<<<Code Review>>>>
+ *	\todo: <b>Code Review</b>
  */
 class CqRangeCheckCallback
 {
@@ -48,7 +48,7 @@ class CqRangeCheckCallback
  *	Do the range check
  *
  *	Calls a CqRangeCheckCallback functor class, which is responsible for the output
- *  \todo: <<<<Code Review>>>>
+ *  \todo: <b>Code Review</b>
  */
 template<class T>
 bool CheckMinMax( const T& val, const T& min, const T& max, CqRangeCheckCallback* callBack)
