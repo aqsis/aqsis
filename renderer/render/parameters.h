@@ -1189,7 +1189,6 @@ class CqParameterTypedVertexArray : public CqParameterTypedVaryingArray<T, I, SL
 		{
 			// Just promote the uniform value to varying by duplication.
 			assert( pResult->Type() == Type() );
-			assert( NULL != pSurface );
 			// Note it is assumed that the variable has been
 			// initialised to the correct size prior to calling.
 			TqUint i;
