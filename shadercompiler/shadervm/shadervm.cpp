@@ -1239,6 +1239,7 @@ void CqShaderVM::Initialise( const TqInt uGridRes, const TqInt vGridRes, TqInt s
 
 	m_uGridRes = uGridRes;
 	m_vGridRes = vGridRes;
+	m_shadingPointCount = shadingPointCount;
 
 	// Reset the program counter.
 	m_PC = 0;

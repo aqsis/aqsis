@@ -128,18 +128,6 @@ CqSurface* CqPoints::Clone() const
 /** Dice the quadric into a grid of MPGs for rendering.
  */
 
-void SetShaderArgument( boost::shared_ptr<IqShader> pShader, CqParameter* pParam, IqSurface* pSurface )
-{
-	// Find the relevant variable.
-	IqShaderData* pVar = pShader->FindArgument( pParam->strName() );
-	if ( NULL != pVar )
-	{
-		/// \todo: Find out how to handle arrays.
-		if(pVar->Type() == pParam->Type())
-			pParam->CopyToShaderVariable(pVar);
-	}
-}
-
 CqMicroPolyGridBase* CqPoints::Dice()
 {
 	assert( pPoints() );
@@ -200,7 +188,7 @@ CqMicroPolyGridBase* CqPoints::Dice()
 		CqVector3D	N(0,0,1);
 		//N = QGetRenderContext() ->matSpaceToSpace( "camera", "object", NULL, pGrid->pTransform() ) * N;
 		TqUint u;
-		for ( u = 0; u <= nVertices(); u++ )
+		for ( u = 0; u < nVertices(); u++ )
 		{
 			TqBool CSO = pTransform()->GetHandedness(pTransform()->Time(0));
 			TqBool O = pAttributes() ->GetIntegerAttribute( "System", "Orientation" ) [ 0 ] != 0;
@@ -218,13 +206,37 @@ CqMicroPolyGridBase* CqPoints::Dice()
 		/// \todo: Must transform point/vector/normal/matrix parameter variables from 'object' space to current before setting.
 		boost::shared_ptr<IqShader> pShader;
 		if ( pShader = pGrid->pAttributes() ->pshadSurface(QGetRenderContext()->Time()) )
-			SetShaderArgument( pShader, ( *iUP ), this );
+		{
+			IqShaderData* pVar = pShader->FindArgument( ( *iUP )->strName() );
+			if ( NULL != pVar )
+			{
+				/// \todo: Find out how to handle arrays.
+				if(pVar->Type() == ( *iUP )->Type())
+					NaturalDice( ( *iUP ), nVertices(), 1, pVar );
+			}
+		}
 
 		if ( pShader = pGrid->pAttributes() ->pshadDisplacement(QGetRenderContext()->Time()) )
-			SetShaderArgument( pShader, ( *iUP ), this );
+		{
+			IqShaderData* pVar = pShader->FindArgument( ( *iUP )->strName() );
+			if ( NULL != pVar )
+			{
+				/// \todo: Find out how to handle arrays.
+				if(pVar->Type() == ( *iUP )->Type())
+					NaturalDice( ( *iUP ), nVertices(), 1, pVar );
+			}
+		}
 
 		if ( pShader = pGrid->pAttributes() ->pshadAtmosphere(QGetRenderContext()->Time()) )
-			SetShaderArgument( pShader,  ( *iUP ), this );
+		{
+			IqShaderData* pVar = pShader->FindArgument( ( *iUP )->strName() );
+			if ( NULL != pVar )
+			{
+				/// \todo: Find out how to handle arrays.
+				if(pVar->Type() == ( *iUP )->Type())
+					NaturalDice( ( *iUP ), nVertices(), 1, pVar );
+			}
+		}
 	}
 
 	return( pGrid );

@@ -514,7 +514,7 @@ class CqMicroPolygon : public CqRefCount
 		 */
 		void	SetIndex( TqInt Index )
 		{
-			assert( m_pGrid != 0 && m_pGrid->m_pShaderExecEnv()->microPolygonCount() > Index );
+			assert( m_pGrid != 0 && m_pGrid->pShaderExecEnv()->microPolygonCount() > Index );
 			m_Index = Index;
 		}
 		/** Release this micropolys reference to the donor grid.
@@ -620,9 +620,9 @@ class CqMicroPolygon : public CqRefCount
 		virtual	TqBool	Sample( const SqSampleData& sample, TqFloat& D, TqFloat time, TqBool UsingDof = TqFalse );
 
 		virtual TqBool	fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const;
-		void	CacheHitTestValues(CqHitTestCache* cache, CqVector3D* points);
-		void	CacheHitTestValues(CqHitTestCache* cache);
-		void	CacheHitTestValuesDof(CqHitTestCache* cache, const CqVector2D& DofOffset, CqVector2D* coc);
+		virtual void	CacheHitTestValues(CqHitTestCache* cache, CqVector3D* points);
+		virtual void	CacheHitTestValues(CqHitTestCache* cache);
+		virtual void	CacheHitTestValuesDof(CqHitTestCache* cache, const CqVector2D& DofOffset, CqVector2D* coc);
 		void	Initialise();
 		CqVector2D ReverseBilinear( const CqVector2D& v );
 

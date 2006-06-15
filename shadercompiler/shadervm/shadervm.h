@@ -112,7 +112,7 @@ union UsProgramElement
 #define	POP				Pop(__fVarying)
 #define	RELEASE(A)		Release( _se_##A )
 #define	RESULT(t,c)		IqShaderData* pResult=GetNextTemp(t,c); \
-						pResult->SetSize(( m_uGridRes + 1 ) * ( m_vGridRes + 1 ))
+						pResult->SetSize(m_shadingPointCount)
 
 #define CONSTFUNC		// Uniform function
 #define	VARFUNC			TqBool __fVarying=TqTrue;
@@ -648,6 +648,7 @@ class CqShaderVM : public CqShaderStack, public IqShader, public CqDSORepository
 		std::vector<UsProgramElement>	m_Program;			///< Bytecodes of the main program.
 		TqInt	m_uGridRes;
 		TqInt	m_vGridRes;
+		TqInt	m_shadingPointCount;
 		UsProgramElement*	m_PC;							///< Current program pointer.
 		TqInt	m_PO;							///< Current program offset.
 		TqInt	m_PE;							///< Offset of the end of the program.

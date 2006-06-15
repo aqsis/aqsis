@@ -375,6 +375,9 @@ class CqMicroPolygonPoints : public CqMicroPolygon
 			return( b );
 		}
 		virtual	TqBool	Sample( const SqSampleData& sample, TqFloat& D, TqFloat time, TqBool UsingDof = TqFalse );
+		virtual void	CacheHitTestValues(CqHitTestCache* cache, CqVector3D* points) {}
+		virtual void	CacheHitTestValues(CqHitTestCache* cache) {}
+		virtual void	CacheHitTestValuesDof(CqHitTestCache* cache, const CqVector2D& DofOffset, CqVector2D* coc) {}
 
 
 	private:
@@ -428,6 +431,9 @@ class CqMovingMicroPolygonKeyPoints
 			}
 			return( TqFalse );
 		}
+		virtual void	CacheHitTestValues(CqHitTestCache* cache, CqVector3D* points) {}
+		virtual void	CacheHitTestValues(CqHitTestCache* cache) {}
+		virtual void	CacheHitTestValuesDof(CqHitTestCache* cache, const CqVector2D& DofOffset, CqVector2D* coc) {}
 
 		CqBound	GetTotalBound() const
 		{
