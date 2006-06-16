@@ -40,7 +40,7 @@ static TqBool IntersectLine( CqVector3D& P1, CqVector3D& T1, CqVector3D& P2, CqV
 static void ProjectToLine( const CqVector3D& S, const CqVector3D& Trj, const CqVector3D& pnt, CqVector3D& p );
 
 #define TOOLARGEQUADS 10000
-static TqUlong RIH_P = CqString::hash("P");
+static TqChar * RIH_P = (TqChar *) CqParameter::GetId("P");
 
 CqQuadric::CqQuadric()
 {
@@ -224,7 +224,7 @@ void CqQuadric::NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqInt vDi
 {
 	// Special case for "P", else normal bilinear dice for all others.
 
-	TqUlong hash = CqString::hash(pData->strName().c_str());
+	const TqChar * hash = pParameter->strName();
 	if ( hash == RIH_P )
 	{
 		CqVector3D	P;

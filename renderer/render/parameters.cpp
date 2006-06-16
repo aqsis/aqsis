@@ -36,16 +36,39 @@
 START_NAMESPACE( Aqsis )
 
 
+CqStringTable *CqParameter::m_sLocalTable = NULL;
+
+/** Clean all the strings stored into a local table of strings
+ */
+void CqParameter::Dump()
+{
+	Aqsis::log() << info << "(static local parameter' table of strings) : " << std::endl;
+	if (m_sLocalTable)
+      		m_sLocalTable->Dump();
+}
+
+/** Dump all the strings stored into a local table of strings
+ */
+void CqParameter::Wipe()
+{
+	if (m_sLocalTable)
+   	{
+		delete m_sLocalTable;
+      		m_sLocalTable = 0;
+   	}
+}
+
+
 /** Default constructor
  * \param strName Character pointer to parameter name.
  * \param Count Integer value count, for arrays.
  */
 CqParameter::CqParameter( const char* strName, TqInt Count ) :
-		m_strName( strName ),
 		m_Count( Count )
 {
-	/// \note Had to remove this as paramters are now created as part of the Renderer construction, so the
-	///		  renderer context isn't ready yet.
+	/// \note Had to remove this as paramters are now created as 
+	///	  part of the Renderer construction, so the
+	///       renderer context isn't ready yet.
 	//	QGetRenderContext() ->Stats().IncParametersAllocated();
 
 	assert( Count >= 1 );
@@ -56,6 +79,9 @@ CqParameter::CqParameter( const char* strName, TqInt Count ) :
 	TqInt cPeak = STATS_GETI( PRM_peak );
 
 	STATS_SETI( PRM_peak, cPRM > cPeak ? cPRM : cPeak );
+   	if (m_sLocalTable == NULL)
+      		m_sLocalTable = new CqStringTable;
+	m_strName = (TqChar *) m_sLocalTable->Get( strName ),
 	m_hash = CqString::hash(strName);
 }
 

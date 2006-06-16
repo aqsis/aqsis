@@ -37,12 +37,12 @@
 START_NAMESPACE( Aqsis )
 
 
-static TqUlong hwidth = CqString::hash("width");
-static TqUlong hcwidth = CqString::hash("constantwidth");
-static TqUlong hp = CqString::hash("P");
-static TqUlong hu = CqString::hash("u");
-static TqUlong hn = CqString::hash("N");
-static TqUlong hv = CqString::hash("v");
+static TqChar * hwidth = (TqChar *) CqParameter::GetId("width");
+static TqChar * hcwidth = (TqChar *) CqParameter::GetId("constantwidth");
+static TqChar * hp = (TqChar *) CqParameter::GetId("P");
+static TqChar * hu = (TqChar *) CqParameter::GetId("u");
+static TqChar * hn = (TqChar *) CqParameter::GetId("N");
+static TqChar * hv = (TqChar *) CqParameter::GetId("v");
 
 /**
  * CqCurve constructor.
@@ -92,12 +92,12 @@ void CqCurve::AddPrimitiveVariable( CqParameter* pParam )
 	CqSurface::AddPrimitiveVariable( pParam );
 
 	// trap the indexes of "width" and "constantwidth" parameters
-	if ( pParam->hash() == hwidth )
+	if ( pParam->strName() == hwidth )
 	{
 		assert( m_widthParamIndex == -1 );
 		m_widthParamIndex = m_aUserParams.size() - 1;
 	}
-	else if ( pParam->hash() == hcwidth )
+	else if ( pParam->strName() == hcwidth )
 	{
 		assert( m_constantwidthParamIndex == -1 );
 		m_constantwidthParamIndex = m_aUserParams.size() - 1;
@@ -608,10 +608,10 @@ TqInt CqLinearCurveSegment::SplitToPatch(
 	for ( iUP = m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++ )
 	{
 		if (
-		    ( ( *iUP ) ->hash() != hp ) &&
-		    ( ( *iUP ) ->hash() != hn ) &&
-		    ( ( *iUP ) ->hash() != hu ) &&
-		    ( ( *iUP ) ->hash() != hv )
+		    ( ( *iUP ) ->strName() != hp ) &&
+		    ( ( *iUP ) ->strName() != hn ) &&
+		    ( ( *iUP ) ->strName() != hu ) &&
+		    ( ( *iUP ) ->strName() != hv )
 		)
 		{
 
@@ -624,7 +624,7 @@ TqInt CqLinearCurveSegment::SplitToPatch(
 				//  variables
 				CqParameter * pNewUP =
 				    ( *iUP ) ->CloneType(
-				        ( *iUP ) ->strName().c_str(),
+				        ( *iUP ) ->strName(),
 				        ( *iUP ) ->Count()
 				    );
 				assert(
@@ -649,7 +649,7 @@ TqInt CqLinearCurveSegment::SplitToPatch(
 				// copy "uniform" or "constant" class variables
 				CqParameter * pNewUP =
 				    ( *iUP ) ->CloneType(
-				        ( *iUP ) ->strName().c_str(),
+				        ( *iUP ) ->strName(),
 				        ( *iUP ) ->Count()
 				    );
 				assert( pPatch->cUniform() == 1 );
@@ -1156,10 +1156,10 @@ TqInt CqCubicCurveSegment::SplitToPatch(
 	for ( iUP = m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++ )
 	{
 		if (
-		    ( ( *iUP ) ->hash() != hp ) &&
-		    ( ( *iUP ) ->hash() != hn ) &&
-		    ( ( *iUP ) ->hash() != hu ) &&
-		    ( ( *iUP ) ->hash() != hv )
+		    ( ( *iUP ) ->strName() != hp ) &&
+		    ( ( *iUP ) ->strName() != hn ) &&
+		    ( ( *iUP ) ->strName() != hu ) &&
+		    ( ( *iUP ) ->strName() != hv )
 		)
 		{
 
@@ -1168,7 +1168,7 @@ TqInt CqCubicCurveSegment::SplitToPatch(
 				// copy "vertex" class variables
 				CqParameter * pNewUP =
 				    ( *iUP ) ->CloneType(
-				        ( *iUP ) ->strName().c_str(),
+				        ( *iUP ) ->strName(),
 				        ( *iUP ) ->Count()
 				    );
 				pNewUP->SetSize( pPatch->cVertex() );
@@ -1197,7 +1197,7 @@ TqInt CqCubicCurveSegment::SplitToPatch(
 				// copy "varying" class variables
 				CqParameter * pNewUP =
 				    ( *iUP ) ->CloneType(
-				        ( *iUP ) ->strName().c_str(),
+				        ( *iUP ) ->strName(),
 				        ( *iUP ) ->Count()
 				    );
 				pNewUP->SetSize( pPatch->cVarying() );
@@ -1218,7 +1218,7 @@ TqInt CqCubicCurveSegment::SplitToPatch(
 				// copy "uniform" or "constant" class variables
 				CqParameter * pNewUP =
 				    ( *iUP ) ->CloneType(
-				        ( *iUP ) ->strName().c_str(),
+				        ( *iUP ) ->strName(),
 				        ( *iUP ) ->Count()
 				    );
 				assert( pPatch->cUniform() == 1 );
@@ -1486,7 +1486,7 @@ TqInt CqLinearCurvesGroup::Split( std::vector<boost::shared_ptr<CqSurface> >& aS
 					//  variables
 					CqParameter * pNewUP =
 					    ( *iUP ) ->CloneType(
-					        ( *iUP ) ->strName().c_str(),
+					        ( *iUP ) ->strName(),
 					        ( *iUP ) ->Count()
 					    );
 					assert(
@@ -1505,7 +1505,7 @@ TqInt CqLinearCurvesGroup::Split( std::vector<boost::shared_ptr<CqSurface> >& aS
 					// copy "uniform" class variables
 					CqParameter * pNewUP =
 					    ( *iUP ) ->CloneType(
-					        ( *iUP ) ->strName().c_str(),
+					        ( *iUP ) ->strName(),
 					        ( *iUP ) ->Count()
 					    );
 					pNewUP->SetSize( pSeg->cUniform() );
@@ -1518,7 +1518,7 @@ TqInt CqLinearCurvesGroup::Split( std::vector<boost::shared_ptr<CqSurface> >& aS
 					// copy "constant" class variables
 					CqParameter * pNewUP =
 					    ( *iUP ) ->CloneType(
-					        ( *iUP ) ->strName().c_str(),
+					        ( *iUP ) ->strName(),
 					        ( *iUP ) ->Count()
 					    );
 					pNewUP->SetSize( 1 );
@@ -1834,7 +1834,7 @@ TqInt CqCubicCurvesGroup::Split(
 					// copy "vertex" class variables
 					CqParameter * pNewUP =
 					    ( *iUP ) ->CloneType(
-					        ( *iUP ) ->strName().c_str(),
+					        ( *iUP ) ->strName(),
 					        ( *iUP ) ->Count()
 					    );
 					pNewUP->SetSize( pSeg->cVertex() );
@@ -1853,7 +1853,7 @@ TqInt CqCubicCurvesGroup::Split(
 					// copy "varying" class variables
 					CqParameter * pNewUP =
 					    ( *iUP ) ->CloneType(
-					        ( *iUP ) ->strName().c_str(),
+					        ( *iUP ) ->strName(),
 					        ( *iUP ) ->Count()
 					    );
 					pNewUP->SetSize( pSeg->cVarying() );
@@ -1867,7 +1867,7 @@ TqInt CqCubicCurvesGroup::Split(
 					// copy "uniform" class variables
 					CqParameter * pNewUP =
 					    ( *iUP ) ->CloneType(
-					        ( *iUP ) ->strName().c_str(),
+					        ( *iUP ) ->strName(),
 					        ( *iUP ) ->Count()
 					    );
 					pNewUP->SetSize( pSeg->cUniform() );
@@ -1880,7 +1880,7 @@ TqInt CqCubicCurvesGroup::Split(
 					// copy "constant" class variables
 					CqParameter * pNewUP =
 					    ( *iUP ) ->CloneType(
-					        ( *iUP ) ->strName().c_str(),
+					        ( *iUP ) ->strName(),
 					        ( *iUP ) ->Count()
 					    );
 					pNewUP->SetSize( 1 );

@@ -454,17 +454,17 @@ class blobby_vm_assembler
 
 						CqVector3D mn = CqVector3D(bounds[0], bounds[2], bounds[4]);
 						CqVector3D mx = CqVector3D(bounds[1], bounds[3], bounds[5]);
-						CqVector3D mid = (mn + mx) / 2.0; 
+#ifdef NONEED
 						grow_bound( mn,
 						            mx,
 						            1.0,
 						            transformation);
+#endif
 
 						// Push the inverse matrix
 						m_instructions.push_back(CqBlobby::instruction(transformation.Inverse()));
 
-						// Push the center of this blobby according to its bbox
-						m_instructions.push_back(CqBlobby::instruction(mid));
+						// Push the min,max of this blobby according to its bbox
 						m_instructions.push_back(CqBlobby::instruction(mx));
 						m_instructions.push_back(CqBlobby::instruction(mn));
 
@@ -686,7 +686,6 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point, TqInt n, std::vector 
 					m_instructions.push_back(CqBlobby::instruction(CqBlobby::AIR));
 					m_instructions.push_back(CqBlobby::instruction(op.index)); // idx to Count
 					m_instructions.push_back(transformation.Inverse()); // Push the inverse matrix
-					m_instructions.push_back(mid); // Push the center  of this blobby according to its bbox
 					m_instructions.push_back(mx); // Push the max  of this blobby according to its bbox
 					m_instructions.push_back(mn); // Push the min  of this blobby according to its bbox
 
@@ -717,7 +716,6 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point, TqInt n, std::vector 
 
 					TqFloat point[3];
 					const CqMatrix transformation = instructions[pc++].get_matrix();
-					const CqVector3D mid = instructions[pc++].get_vector();
 					const CqVector3D mx = instructions[pc++].get_vector();
 					const CqVector3D mn = instructions[pc++].get_vector();
 					const CqBound bound(mn, mx);
@@ -727,6 +725,7 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point, TqInt n, std::vector 
 					point[0] = tmp.x();
 					point[1] = tmp.y();
 					point[2] = tmp.z();
+					result = 0.0f;
 
 					if ((point[2]>= 0.0) && bound.Contains3D(point) && pImplicitValue )
 					{
@@ -874,7 +873,6 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point )
 
 					TqFloat point[3];
 					const CqMatrix transformation = instructions[pc++].get_matrix();
-					const CqVector3D mid = instructions[pc++].get_vector();
 					const CqVector3D mx = instructions[pc++].get_vector();
 					const CqVector3D mn = instructions[pc++].get_vector();
 					const CqBound bound(mn, mx);
@@ -884,6 +882,7 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point )
 					point[0] = tmp.x();
 					point[1] = tmp.y();
 					point[2] = tmp.z();
+					result = 0.0f;
 
 					if ((point[2]>= 0.0) && bound.Contains3D(point) && pImplicitValue )
 					{

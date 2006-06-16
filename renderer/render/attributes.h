@@ -296,6 +296,7 @@ class CqAttributes : public CqRefCount, public IqAttributes
 #endif
 
 	private:
+
 		class CqHashTable
 		{
 			private:

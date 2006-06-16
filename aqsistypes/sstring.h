@@ -31,6 +31,8 @@
 #include <sstream>
 #include <iostream>
 
+#include <set>
+
 #include "aqsis.h"
 
 
@@ -122,6 +124,68 @@ CqString ToString(const value_t& Value)
 	buffer << Value;
 	return CqString(buffer.str());
 }
+
+class CqCharPtrLess
+{
+	public:
+		TqBool operator()(const TqChar *v1,const TqChar *v2) const
+		{
+			register TqInt ret = 0 ;
+
+			while( ! (ret = *(TqChar *)v1 - *(TqChar *)v2) && *v2)
+				++v1, ++v2;
+
+			if ( ret < 0 )
+				return TqTrue;
+			return TqFalse;
+		};
+};
+
+typedef std::set
+	< const TqChar *, CqCharPtrLess > TqCharPtrSet;
+
+/** \class CqStringTable
+ * An table of string class; the purpose of this type of table is to reduce 
+ * the number of dangling strings, and to be fast to find out later a parameter
+ * since we just look if the pointer to the string will be equal to an existant  * row of that table. (It is used for now by CqParameters in libaqsis)
+ */
+class CqStringTable
+{
+	public:
+		CqStringTable(void)
+		{}
+		;
+
+		~CqStringTable(void);
+
+		//---------------------------------------------------------------------
+		/** Get the pointer to an existant string or the adress a new one.
+ 		*/
+		const TqChar * Get(const TqChar *str)
+		{
+			TqCharPtrSet::iterator found;
+			found = mStrings.find( str );
+			if ( found != mStrings.end() )
+				return (*found);
+
+			TqInt length = strlen(str);
+			TqChar *mem = new TqChar[length+1];
+			strcpy(mem,str);
+			mStrings.insert( mem );
+			return mem;
+		};
+
+		const TqChar * Get(const CqString &str)
+		{
+			return Get( str.c_str() );
+		};
+
+		void Dump();
+
+	private:
+		TqCharPtrSet mStrings;
+};
+
 
 //-----------------------------------------------------------------------
 

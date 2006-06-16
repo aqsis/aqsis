@@ -1282,7 +1282,7 @@ void CqSurfaceNURBS::SplitNURBS( CqSurfaceNURBS& nrbA, CqSurfaceNURBS& nrbB, TqB
 	{
 		if ( ( *iUP ) ->Class() == class_vertex )
 		{
-			CqParameter * pNewA = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
+			CqParameter * pNewA = ( *iUP ) ->CloneType( ( *iUP ) ->strName(), ( *iUP ) ->Count() );
 			pNewA->SetSize( nrbA.cuVerts() * nrbA.cvVerts() );
 			for ( i = 0L; i < nrbA.m_cvVerts; i++ )
 				for ( j = 0L; j < nrbA.m_cuVerts; j++ )
@@ -1303,7 +1303,7 @@ void CqSurfaceNURBS::SplitNURBS( CqSurfaceNURBS& nrbA, CqSurfaceNURBS& nrbB, TqB
 	{
 		if ( ( *iUP ) ->Class() == class_vertex )
 		{
-			CqParameter * pNewB = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
+			CqParameter * pNewB = ( *iUP ) ->CloneType( ( *iUP ) ->strName(), ( *iUP ) ->Count() );
 			pNewB->SetSize( nrbB.cuVerts() * nrbB.cvVerts() );
 			for ( i = 0L; i < nrbB.m_cvVerts; i++ )
 			{
@@ -2145,7 +2145,7 @@ void CqSurfaceNURBS::SubdivideSegments( std::vector<boost::shared_ptr<CqSurfaceN
 			{
 				if ( ( *iUP ) ->Class() == class_vertex )
 				{
-					CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
+					CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName(), ( *iUP ) ->Count() );
 					pNewUP->SetSize( S[ iS ] ->cVertex() );
 
 					for ( iPv = 0; iPv <= vEnd - vOffset; iPv++ )
@@ -2194,7 +2194,7 @@ void CqSurfaceNURBS::SubdivideSegments( std::vector<boost::shared_ptr<CqSurfaceN
 			{
 				if ( ( *iUP ) ->Class() == class_varying )
 				{
-					CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
+					CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName(), ( *iUP ) ->Count() );
 					pNewUP->SetSize( 4 );
 					pNewUP->SetValue( ( *iUP ), 0, iA );
 					pNewUP->SetValue( ( *iUP ), 1, iB );
@@ -2205,7 +2205,7 @@ void CqSurfaceNURBS::SubdivideSegments( std::vector<boost::shared_ptr<CqSurfaceN
 				}
 				else if ( ( *iUP ) ->Class() == class_uniform )
 				{
-					CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
+					CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName(), ( *iUP ) ->Count() );
 					pNewUP->SetSize( 1 );
 					pNewUP->SetValue( ( *iUP ), 0, iPatch );
 					S[ iPatch ] ->AddPrimitiveVariable( pNewUP );

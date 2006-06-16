@@ -117,7 +117,7 @@ class CqParameter
 
 		/** Get a reference to the parameter name.
 		 */
-		const	CqString& strName() const
+		const	TqChar * strName() const
 		{
 			return ( m_strName );
 		}
@@ -133,8 +133,21 @@ class CqParameter
 			return ( m_Count );
 		}
 
+      		static CqStringTable* m_sLocalTable;
+
+      		static const TqChar * GetId(const char *strName)
+      		{
+         		if (m_sLocalTable == NULL)
+            			m_sLocalTable = new CqStringTable;
+
+         		return m_sLocalTable->Get(strName);
+      		}
+		static void Dump();
+
+		static void Wipe();
+
 	protected:
-		CqString	m_strName;		///< String name of the parameter.
+		TqChar  *m_strName;		///< String name of the parameter.
 		TqInt	m_Count;		///< Array size of value.
 		TqUlong m_hash;
 
@@ -1437,8 +1450,9 @@ void CqParameterTypedVaryingArray<T, I, SLT>::DiceOne( TqInt u, TqInt v, IqShade
 class CqNamedParameterList
 {
 	public:
-		CqNamedParameterList( const char* strName ) : m_strName( strName )
+		CqNamedParameterList( const char* strName ) 
 		{
+			m_strName = (char *) CqParameter::GetId(strName);
 			m_hash = CqString::hash( strName );
 
 		}
@@ -1457,9 +1471,9 @@ class CqNamedParameterList
 #endif
 
 		/** Get a refernece to the option name.
-		 * \return A constant CqString reference.
+		 * \return A constant TqChar * reference.
 		 */
-		const	CqString&	strName() const
+		const	TqChar *strName() const
 		{
 			return ( m_strName );
 		}
@@ -1487,30 +1501,32 @@ class CqNamedParameterList
 		 */
 		const	CqParameter* pParameter( const char* strName ) const
 		{
-			TqUlong hash = CqString::hash( strName );
+         		const TqChar * hash = CqParameter::GetId( strName );
 			for ( std::vector<CqParameter*>::const_iterator i = m_aParameters.begin(); i != m_aParameters.end(); i++ )
-				if ( ( *i ) ->hash() == hash )
+				if ( ( *i ) ->strName() == hash )
 					return ( *i );
 			return ( 0 );
 		}
+
 		/** Get a pointer to a named parameter.
 		 * \param strName Character pointer pointing to zero terminated parameter name.
 		 * \return A pointer to a CqParameter or 0 if not found.
 		 */
 		CqParameter* pParameter( const char* strName )
 		{
-			TqUlong hash = CqString::hash( strName );
+			const TqChar * hash = CqParameter::GetId( strName );
 			for ( std::vector<CqParameter*>::iterator i = m_aParameters.begin(); i != m_aParameters.end(); i++ )
-				if ( ( *i ) ->hash() == hash )
+				if ( ( *i ) ->strName() == hash )
 					return ( *i );
 			return ( 0 );
 		}
+
 		TqUlong hash()
 		{
 			return m_hash;
 		}
 	private:
-		CqString	m_strName;			///< The name of this parameter list.
+		TqChar *m_strName;		///< The name of this parameter list.
 		std::vector<CqParameter*>	m_aParameters;		///< A vector of name/value parameters.
 		TqUlong m_hash;
 }

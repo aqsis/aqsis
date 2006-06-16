@@ -38,7 +38,7 @@ START_NAMESPACE( Aqsis )
 std::list<CqAttributes*>	Attribute_stack;
 
 
-const TqUlong CqAttributes::CqHashTable::tableSize = 127;
+const TqUlong CqAttributes::CqHashTable::tableSize = 13;
 
 
 /** A macro to take care of adding a system attribute given a name.

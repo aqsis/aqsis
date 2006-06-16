@@ -176,7 +176,7 @@ TqInt CqPolygonBase::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits 
 		std::vector<CqParameter*>::iterator end = Surface().aUserParams().end();
 		for ( iUP = Surface().aUserParams().begin(); iUP != end; iUP++ )
 		{
-			CqParameter* pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
+			CqParameter* pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName(), ( *iUP ) ->Count() );
 
 			if ( pNewUP->Class() == class_varying || pNewUP->Class() == class_vertex )
 			{
