@@ -509,12 +509,13 @@ class CqMicroPolygon : public CqRefCount
 		{
 			return( m_Index );
 		}
-		/** Set the index within the donor grid.
+		/** Set the index of the shading point associated with this
+		 *  micropolygon within the donor grid.
 		 * \param Index Integer grid index.
 		 */
 		void	SetIndex( TqInt Index )
 		{
-			assert( m_pGrid != 0 && m_pGrid->pShaderExecEnv()->microPolygonCount() > Index );
+			assert( m_pGrid != 0 && m_pGrid->pShaderExecEnv()->shadingPointCount() > Index );
 			m_Index = Index;
 		}
 		/** Release this micropolys reference to the donor grid.

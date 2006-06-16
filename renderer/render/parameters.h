@@ -1410,7 +1410,6 @@ void CqParameterTypedVaryingArray<T, I, SLT>::DiceOne( TqInt u, TqInt v, IqShade
 	assert( pResult->Type() == Type() );
 	assert( pResult->Class() == class_varying );
 	assert( Count() > ArrayIndex );
-	assert( pResult->Size() == m_aValues.size() );
 
 	T res;
 
