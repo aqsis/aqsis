@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 ######################################################################
-# Renderer tester v1.11
+# Renderer tester v1.12
 # Copyright 2003 Matthias Baas (baas@ira.uka.de)
 ######################################################################
 # For a short usage description call the script with the option -h or
@@ -1235,8 +1235,10 @@ Click on the RIB name or thumbnail to display details.
                 r,g,b,diff2alpha = diff2img.split()
                 diff2img = Image.merge("RGB", (r,g,b))
 
-
-        if self.pdiffcmd!=None and self.pdiffcmd!="" and refimg!=None:
+        if img==None:
+            res.pdiffoutput = "No output"
+            res.failure = True
+        elif self.pdiffcmd!=None and self.pdiffcmd!="" and refimg!=None:
             pdiffcmd = (self.pdiffcmd, res.realoutimagename[idx], refimgname)
             print "%s %s %s" % pdiffcmd
             retval,out,err = execute(pdiffcmd)
