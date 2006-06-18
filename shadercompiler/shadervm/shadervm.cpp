@@ -1524,7 +1524,10 @@ void CqShaderVM::InitialiseParameters( )
 			}
 
 			if ( pArray )
-				pArray->ArrayEntry( arrayindex++ ) ->SetValueFromVariable( pVMVal );
+			{
+				pArray->ArrayEntry( arrayindex ) ->SetValueFromVariable( pVMVal->ArrayEntry( arrayindex ) );
+				++arrayindex;
+			}
 			else
 				m_LocalVars[ varindex ] ->SetValueFromVariable( pVMVal );
 		}
