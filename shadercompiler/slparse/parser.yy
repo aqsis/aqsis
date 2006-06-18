@@ -398,6 +398,7 @@ formal_variable_definitions
 								while(pDecl)
 								{
 									TqInt Type=($1.Type);
+									TqInt arrayLength = 0;
 									
 									SqVarRef var;
 									TqBool fv=CqVarDef::FindVariable((strNameSpace()+pDecl->strName()).c_str(), var);
@@ -407,6 +408,7 @@ formal_variable_definitions
 										// Check if the declaration marked it as an arry
 										if(pVar->Type()&Type_Array)
 											Type=(TqInt)(Type|Type_Array);
+										arrayLength = pVar->ArrayLength();
 
 										pVar->SetType(Type);
 										// Create a variable node, in the case of local variable definition, these nodes will be removed, 
@@ -440,6 +442,15 @@ formal_variable_definitions
 													i++;
 													pInit=pInit2;
 												}
+												// Check if the right number of initialisers has been specified.
+												if(i != arrayLength)
+												{
+													CqString strError("Error: expected exactly ");
+													strError += arrayLength;
+													strError += " initialisers, got ";
+													strError += i;
+													yyerror(strError);
+												}
 												pVarNode->AddLastChild(pArrayInit);
 											}
 											else
@@ -469,6 +480,7 @@ formal_variable_definitions
 								while(pDecl)
 								{
 									TqInt Type=($2.Type);
+									TqInt arrayLength = 0;
 									
 									SqVarRef var;
 									TqBool fv=CqVarDef::FindVariable((strNameSpace()+pDecl->strName()).c_str(), var);
@@ -478,6 +490,7 @@ formal_variable_definitions
 										// Check if the declaration marked it as an arry
 										if(pVar->Type()&Type_Array)
 											Type=(TqInt)(Type|Type_Array);
+										arrayLength = pVar->ArrayLength();
 
 										pVar->SetType(Type);
 										// Create a variable node, in the case of local variable definition, these nodes will be removed, 
@@ -512,6 +525,15 @@ formal_variable_definitions
 													i++;
 													pInit=pInit2;
 												}
+												// Check if the right number of initialisers has been specified.
+												if(i != arrayLength)
+												{
+													CqString strError("Error: expected exactly ");
+													strError += arrayLength;
+													strError += " initialisers, got ";
+													strError += i;
+													yyerror(strError);
+												}
 												pVarNode->AddLastChild(pArrayInit);
 											}
 											else
@@ -545,6 +567,7 @@ variable_definitions
 								while(pDecl)
 								{
 									TqInt Type=($1.Type);
+									TqInt arrayLength = 0;
 									
 									SqVarRef var;
 									TqBool fv=CqVarDef::FindVariable((strNameSpace()+pDecl->strName()).c_str(), var);
@@ -558,6 +581,7 @@ variable_definitions
 											if( pVar->ArrayLength() <= 0 )
 												yyerror("Array length must be specified.");
 										}
+										arrayLength = pVar->ArrayLength();
 
 										pVar->SetType(Type);
 										// Create a variable node, in the case of local variable definition, these nodes will be removed, 
@@ -590,6 +614,15 @@ variable_definitions
 
 													i++;
 													pInit=pInit2;
+												}
+												// Check if the right number of initialisers has been specified.
+												if(i != arrayLength)
+												{
+													CqString strError("Error: expected exactly ");
+													strError += arrayLength;
+													strError += " initialisers, got ";
+													strError += i;
+													yyerror(strError);
 												}
 												pVarNode->AddLastChild(pArrayInit);
 											}
