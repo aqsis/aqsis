@@ -1,0 +1,11 @@
+PixelSamples 1 1
+Format 320 240 1
+Display "pnts_var_params.tif" "file" "rgb" "string compression" "lzw"
+Projection "perspective" "fov" [30.0]
+Translate 0 0 5
+WorldBegin
+Color [1 1 0]
+Surface "pnts_var_params"
+Declare "col" "varying color"
+Points "P" [-1 0 0  0 0 0  1 0 0] "width" [0.5 0.5 0.5] "col" [1 0 0  0 1 0  0 0 1]
+WorldEnd
