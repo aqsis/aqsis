@@ -1,0 +1,38 @@
+This is a Python/Open GUI library that I developed for BtoR (Blender to Renderman). It does all the things you'd expect.
+	
+Here's a short list of supported objects:
+
+	Panels - Basically a floating window, or container object.
+	Scrollpane - A scrolling panel, complete with scrollbar. You will want to create a container panel for custom objects to use with this.
+		See the custom BtoR objects for further information on how to use this. 
+	Button - A simple button.
+	ToggleButton - A button that turns on/off.
+	ToggleGroup - A manager for a group of ToggleButtons (similiar to a RadioButton group)
+	Menu - A drop-down menu. Pass an array of values for this to work. Supports reinitialization.
+	TextField - a simple text field. Currently does *NOT* support keypad entry (because I've been lazy).
+	Table - Yes, it's a table element. See the MatrixEditor object in BtoRGUIClasses.py for info on how to use it.
+	ColorButton/ColorPicker - A button/picker combo. The ColorButton acts as a launcher for the ColorPicker, and is the suggested method of using it.
+		Alternatively you can use the BtoRGUIClasses.py object ColorEditor, which supports RGB input (in blender's 0-1.0 fashion)
+	EventManager - The main manager for all the objects. Capable of spawning input and confirmation dialogs. See UITest.py for info on how to use this.
+		
+	
+Notes on lib usage:
+	Because of how blender's python implementation works, the display of dialogs will need to have two functions assigned instead of one.
+	If for instance you've decided to use a Button object to display an input dialog, you will need to assign a function to the Button's release_functions list like
+	so:
+		myButton.release_functions.append(showDialog)
+	
+	Buttons return themselves as arguments to any functions assigned, so showDialog() will have to receive an argument like so:
+		def showDialog(button):
+	
+	You will then need to ensure that your dialog a function defined to which control will pass after it's done its work.
+	See UITest.py, lines 25-34 for further information.
+	
+	
+Installation:
+	Place this lib somewhere that Python can find it. I currently use <blenderhome>.blender/scripts/bpymodules/btor/.
+	Then in your script, simply do:
+		from btor import BtoRGUIClasses as ui
+	or however your style concerns dictate.
+	
+	

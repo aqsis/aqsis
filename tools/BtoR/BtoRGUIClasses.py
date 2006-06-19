@@ -1,12 +1,11 @@
 #######################################################################
-# BtoRGUIClasses.py - Class library for the BtoR GUI system.
+# BtoRGUIClasses.py - GUI Class library for the BtoR GUI system.
 # Version 0.1a
 # Author: Bobby Parker                                                                         
 # 
 # This is the GUI library in its entirety. 
 # Todos: 
 # 	Documentation. Documentation. Documentation.
-#	Update the ScrollPane with scrollbars, or maybe a visual indicator that scrolling is available. Also, maybe i need some alternative for mac users? key-up/key-down?
 # 	Fix bugs
 # 	Come up with a more formal todo-list
 #######################################################################
@@ -87,6 +86,12 @@ class UI:
 		#solid part 
 		self.uidrawbox(gl.GL_POLYGON, minx, miny, maxx, maxy, rad, cornermask)
 		
+		#Blender.BGL.glGetFloatv(gl.GL_CURRENT_COLOR, color)
+		#oldColor = color
+		#color[0] = color[0] - 0.1
+		#color[1] = color[1] - 0.1
+		#color[2] = color[1] - 0.1
+		#Blender.BGL.glColor4fv(color)
 		# set antialias line */
 		Blender.BGL.glEnable( gl.GL_LINE_SMOOTH )
 		Blender.BGL.glEnable( gl.GL_BLEND )
@@ -96,7 +101,7 @@ class UI:
 		
 		Blender.BGL.glDisable( gl.GL_BLEND )
 		Blender.BGL.glDisable( gl.GL_LINE_SMOOTH )
-	
+		# Blender.BGL.glColor4fv(oldColor)
 	
 	def uiOutline(self, minx, miny, maxx, maxy, rad, cornermask):
 		Blender.BGL.glEnable( gl.GL_LINE_SMOOTH )
@@ -454,9 +459,26 @@ class UI:
 			Blender.BGL.glVertex2f(x, size[1])
 			Blender.BGL.glEnd()
 			x = x + gsize_x
+			
+	def callFactory(func, *args, **kws):
+		def curried(*moreargs, **morekws):
+			kws.update(morekws) # the new kws override any keywords in the original
+			print kws, " ", args
+			return func(*(args + moreargs), **kws)
+		return curried
+
 
 class EventManager(UI):
-	def __init__(self):
+	""" GUI Event Manager
+	
+	The EventManager object intercepts all events from Blender's normal events and routes them according to type. 
+	The EventManager is also capable of displaying confirmation and input dialogs.
+	
+	evt_manager = BtoRGUIClasses.EventManager()
+	evt_manager.register()
+	"""
+	def __init__(self, auto_register = False ):		
+		""" __init__(boolean auto_register) - EventManager constructor """
 		UI.__init__(self)
 		self.elements = []
 		self.z_stack = []
@@ -464,35 +486,69 @@ class EventManager(UI):
 		self.lastX = 0
 		self.lastY = 0
 		self.noComp = True
-		self.backGround = [0.65, 0.65, 0.65]
-		
+		self.backGround = [0.65, 0.65, 0.65]		
 		# register myself as the point of control
+		if auto_register:
+			self.register()
+		
 	def register(self):
+		""" register() - Register this object as the listener for Blender's events. """
 		Blender.Draw.Register(self.draw, self.event, self.bevent)
 		
 	def addElement(self, element):
-		self.elements.append(element)
-		self.z_stack.append(element)
-		self.draw_stack.append(element)
-		
+		""" addElement(UIElement element) - Add the supplied UIElement to the element list."""
+		if element not in self.elements:
+			self.elements.append(element)
+			self.z_stack.append(element)
+			self.draw_stack.append(element)
+			
 	def removeElement(self, element):		
+		""" removeElement(UIElement element) - Removes the supplied UIElement from the element list."""
 		self.elements.remove(element)
 		self.z_stack.remove(element)
 		self.draw_stack.remove(element)
 		del element
+		self.invalid = True
 		Blender.Draw.Redraw()
 	
 	def raiseElement(self, element):
+		""" raiseElement(UIElement element) - Bring the supplied UIElement to the top of the element list."""
 		self.z_stack.remove(element)
 		self.z_stack.insert(0, element)
 		self.draw_stack.remove(element)
 		self.draw_stack.append(element)
-		element.offset = 16
-		for x in self.elements:
-			if x <> element:
-				x.offset = 7
+		#element.offset = 4
+		#for x in self.elements:
+		#	if x <> element:
+		#		x.offset = 7
 		
 	def showSimpleDialog(self, title, prompt, value, function):		
+		""" showSimpleDialog(String title, String prompt, String value, function_ref function) - show a simple input dialog with a title and a prompt.
+		
+		BtoRGUIClasses.showSimpleDialog(String title, String prompt, String value, function_ref function)
+		This function displays a simple input dialog. 
+		
+		Caveats: Blender's python implementation currently doesn't allow threading support, so this dialog requires that you supply a callback function to which 
+		control will pass. When the OK or Cancel button is clicked, the dialog will close itself, and will then call the supplied function, and passes itself as an argument 
+		to this function. The supplied function can then test the dialog's state and values for further processing. 
+		
+		See the TextDialog object for more information.
+		
+		Arguments: 
+		title - A string that contains the title of the dialog.
+		prompt - A string that contains the prompt to be displayed.
+		value - A string to initialize the dialog with.
+		function - The callback function to return the output of the dialog to.
+		
+		Example:
+		def showValue(value):
+			print value
+			
+		evt_man = BtoRGUIClasses.EventManager()
+		evt_man.register()
+		evt_man.showSimpleDialog("Example Dialog", "Enter a value", "Some Value", showValue)
+		
+		"""
 		dialog = TextDialog(0, 0, 400, 400, title, prompt, value, self.closeDialog)	
 		screen = Blender.Window.GetAreaSize()
 		dialog.x = (screen[0] / 2) - (dialog.width / 2)
@@ -507,6 +563,30 @@ class EventManager(UI):
 
 		
 	def showConfirmDialog(self, title, prompt, function, discard):
+		""" showSimpleDialog(String title, String prompt, function_ref function, boolean discard) - show a simple input dialog with a title and a prompt.
+		
+		BtoRGUIClasses.showSimpleDialog(String title, String prompt, function_ref function, boolean discard)
+		This function displays a simple confirmation dialog. 
+		
+		Caveats: Blender's python implementation currently doesn't allow threading support, so this dialog requires that you supply a callback function to which 
+		control will pass. When the OK or Cancel button is clicked, the dialog will close itself, and will then call the supplied function, and passes itself as an argument 
+		to this function. The supplied function can then test the dialog's state and values for further processing. 
+		
+		Arguments: 
+		title - A string that contains the title of the dialog.
+		prompt - A string that contains the prompt to be displayed.
+		function - The callback function to return the output of the dialog to.
+		discard - A boolean value to determine whether or not a discard button is displayed.
+		
+		Example:
+		def showValue(value):
+			print value
+			
+		evt_man = BtoRGUIClasses.EventManager()
+		evt_man.register()
+		evt_man.showConfirmDialog("Example Dialog", "Enter a value", showValue, True)
+		
+		"""
 		dialog = ConfirmDialog(title, prompt, self.closeDialog, discard)
 		screen = Blender.Window.GetAreaSize()
 		dialog.x = (screen[0] / 2) - (dialog.width / 2)
@@ -519,11 +599,13 @@ class EventManager(UI):
 		self.addElement(dialog)
 		self.raiseElement(dialog)
 		
-	def closeDialog(self, dialog):		
+	def closeDialog(self, dialog):
+		
 		dialog.target_function(dialog) # fire the target function
 		self.removeElement(dialog) 
 					
-	def click_event(self):		
+	def click_event(self):	
+		""" click_event() - Dispatches all mouse clicks to registered objects."""
 		# build up the draw/event stack on click events, since that directs where the user's interest is
 		# firstly, figure out if I even need to change the current interest		
 		if self.z_stack[0].hit_test() == False and self.z_stack[0].dialog == False: # something changed, the mouse is no longer in the top-level element, so			
@@ -547,20 +629,22 @@ class EventManager(UI):
 			
 		# let's hit them all
 		self.z_stack[0].click_event()
-							
-		for element in self.z_stack: # hit the top level item first
-			if element <> self.z_stack[0]:
-				element.offset = 7
-			else:
-				element.offset = 16
+		
+		#for element in self.z_stack: # hit the top level item first
+		#	if element <> self.z_stack[0]:
+		#		element.offset = 7
+		#	else:
+		#		element.offset = 7
 			
-	def mouse_event(self):		
+	def mouse_event(self):
+		""" mouse_event() - Dispatches all mouse events (mouse movement) to registered objects."""		
 		for element in self.z_stack:	
 			element.mouse_event() 
 			# mouse events apply across the board, since everything is interested to know
 			# for cases of mouse_in/mouse_out
 			
 	def release_event(self):
+		""" release_event() - Dispatches all mouse button release events to registered objects."""
 		for element in self.z_stack:
 			element.release_event() 
 			# release events apply across the board, since everything is interested 
@@ -568,15 +652,18 @@ class EventManager(UI):
 			# I do, however, want to iterate in order of the z_stack
 	
 	def wheel_event(self, evt):
+		""" wheel_event() - Dispatches all mouse wheel events to registered objects."""
 		for element in self.z_stack: 
 			element.wheel_event(evt)
 	
 	def key_event(self, evt, val): # key events probably need to be directed to the top object(if a text field was clicked, all that)
+		""" key_event() - Dispatches all key presses to registered objects."""
 		# of course this means I now have to change my textfield class, dammit, but maybe this is better
 		
 		self.z_stack[0].key_event(evt, val)
 		
-	def draw(self):		
+	def draw(self):	
+		""" draw() - sets up the background and draws the elements in the element list."""		
 		Blender.BGL.glClearColor(self.backGround[0], self.backGround[1], self.backGround[2], 1)
 		Blender.BGL.glClear(Blender.BGL.GL_COLOR_BUFFER_BIT)
 		self.drawScreenGrid(20, 20, [0.55, 0.55, 0.55])
@@ -584,6 +671,7 @@ class EventManager(UI):
 			element.draw()
 		
 	def event(self, evt, val):
+		""" event(evt, val) - Processes incoming events and dispatches them accordingly"""
 		#process exit key first
 		if evt == Blender.Draw.ESCKEY:
 			Blender.Draw.Exit()
@@ -616,12 +704,14 @@ class EventManager(UI):
 			Blender.Draw.Redraw()
 		
 	def bevent(self, evt):
+		""" bevent(evt) - bevent processor, which doesn't really do anything since I'm not processing blender's standard buttons. """
 		pass
 		# hey presto, this doesn't do JACK because it's not needed...imagine that!
 	
 class UIElement(UI):
 	normalColor = [216, 214, 230, 255] # the normal color of the element
 	textColor = [0, 0, 0, 255] # basic text color, can be overriden for anything
+	textHiliteColor = [255, 255, 255, 255] # hilite color
 	borderColor = [0, 0, 0, 255] # basic border color
 	hoverBorderColor = [128, 128, 128, 255]
 	hoverColor = [105, 103, 127, 255]
@@ -631,9 +721,22 @@ class UIElement(UI):
 	ui = None # default UI
 	radius = 10
 	fontsize = 'normal'
-	cornermask = 0 
+	cornermask = 0
+	""" UIEement class - This defines the basic object upon which all other GUI objects are built.
 	
-	def __init__(self, x, y, width, height, name, title, parent): # default values are x, y, width, height, name, title		
+	Constructor: element = UIElement(x, y, width, height, name, title, parent, auto_register)
+	
+	Arguments: 
+	x - integer, x location
+	y - integer, y location
+	width - integer, width of the element
+	height - integer, height of the element
+	name - String, name of the element
+	title - String, title of the element
+	parent - Container object for this element. 	
+	"""
+	
+	def __init__(self, x, y, width, height, name, title, parent, auto_register): # default values are x, y, width, height, name, title		
 		# basic constructor method for all UI objects
 		self.elements = [] 
 		self.z_stack = []
@@ -674,21 +777,36 @@ class UIElement(UI):
 		self.mouse_target = None # for steering mouse input
 		#self.click_functions.append(self.stat)
 		self.dialog = False # dialog tracking function for "modal" dialogs
+		if auto_register: # automatically append myself to the parent
+			parent.addElement(self) 
 		
 		
 	def addElement(self, element):
-		self.elements.append(element) # this maintains the original order of the element list
-		self.z_stack.append(element) # the control stack
-		self.draw_stack = []
-		for element in self.z_stack:
-			self.draw_stack.append(element)
+		if element not in self.elements:
+			self.elements.append(element) # this maintains the original order of the element list
+			self.z_stack.append(element) # the control stack
+			self.draw_stack = [] # the draw stack...runs in reverse order of the control stack
+			for element in self.z_stack:
+				self.draw_stack.append(element)
+				
+			self.draw_stack.reverse()
 			
-		self.draw_stack.reverse()
-		
-	def removeElement(self, element):
+	def removeElement(self, element):		
 		self.elements.remove(element)
-		self.z_stack.remove(element)
-		self.draw_stack.remove(element)
+		print "Removed", element, " from main element stack"
+		if element in self.z_stack:			
+			self.z_stack.remove(element)
+			print "Removed", element, " from z_stack"
+		if element in self.draw_stack:			
+			self.draw_stack.remove(element)
+			print "Removed", element, " from draw_stack"
+		del element
+			
+	def clearElements(self):
+		self.elements = []
+		self.draw_stack = []
+		self.z_stack = []
+		
 		
 		
 	def draw(self):		
@@ -699,13 +817,15 @@ class UIElement(UI):
 			self.validate() # validate myself, and make sure everything is correctly offset        			
 			self.setColor(self.normalColor) # use the basic color and draw a nice box to define this component
 			self.uiRoundBox(self.absX, self.absY - self.height, self.absX + self.width, self.absY, self.radius, self.cornermask)
+			
+			for element in self.draw_stack:
+				element.draw()
+				
 			if self.outlined: # use the outline color and draw an outline
 				self.setColor(self.outlineColor)
 				self.uiOutline(self.absX, self.absY - self.height, self.absX + self.width, self.absY, self.radius, self.cornermask)
-							
-			for element in self.draw_stack:
-				element.draw()
-			
+				
+		
 	def objDebug(self):  
 		pass
 		#print "ObjectDebug: ", self.name
@@ -747,6 +867,7 @@ class UIElement(UI):
 		return rVal  	
 	
 	def click_event(self):
+		""" click_event() - Dispatches all mouse clicks to registered objects."""
 		# all UIElements will use this function, unless they override it. 
 		# I can thus supply it as a pass through function that calls 
 		# itself on every contained element of this object				
@@ -790,6 +911,7 @@ class UIElement(UI):
 				func(self)
 			
 	def key_event(self, key, val): 
+		""" key_event() - Dispatches all key press events to registered objects."""	
 		# default pass through event   
 		if self.noComp: # no selected component on the last click, so key funcs go to me
 			self.key_funcs(key, val) # target object is myself
@@ -809,6 +931,7 @@ class UIElement(UI):
 				func(self, key, val)
 			
 	def mouse_event(self):
+		""" mouse_event() - Dispatches all mouse events (mouse movement) to registered objects."""	
 		self.mouse_funcs()
 		for element in self.z_stack:
 			if element.hit_test():
@@ -823,6 +946,7 @@ class UIElement(UI):
 				func(self)   
 	
 	def wheel_event(self, evt):
+		""" wheel_event() - Dispatches all mouse wheel events to registered objects."""
 		if self.hit_test():
 			self.wheel_funcs(evt) # again, decouple functionality from the event handler and make it a function-based thing
 		for element in self.z_stack:
@@ -839,6 +963,7 @@ class UIElement(UI):
   
 
 	def stat(self, obj):
+		""" debug function """
 		print "Stat Event called from Object: ", obj.name, ", with target object:", self.name
 		print "Object bounds are:", self.bounds[0]	
 		if len(self.bounds) > 1: # there's a child object here
@@ -875,14 +1000,15 @@ class Panel(UIElement):
 	headerColor = [110, 110, 128, 255]
 	shadowColor = [85, 85, 85, 150]
 	normalColor = [198, 197, 203, 255]
+	outlineColor = [98, 98, 98, 255]
 	titleColor = [255, 255, 255, 255]
 	headerHeight = 25
 	cornermask = 15
-	offset = 4 
+	offset = 7 
 	shadowed = True
 	
-	def __init__(self, x, y, width, height, name, title, parent):
-		UIElement.__init__(self, x, y, width, height, name, title, parent) # initialize with the baseclass constructor
+	def __init__(self, x, y, width, height, name, title, parent, auto_register):
+		UIElement.__init__(self, x, y, width, height, name, title, parent, auto_register) # initialize with the baseclass constructor
 		self.move_offsetx = 0
 		self.move_offsety = 0
 		self.hasHeader = True
@@ -892,6 +1018,7 @@ class Panel(UIElement):
 		self.drawLast = None
 		self.bounds = [0, 0, 0, 0]
 		self.movable = True		
+		self.outlined = True
 		
 	def draw(self):
 		# note, internally, a panel's absX and absY variables are offset depending upon header usage
@@ -907,7 +1034,10 @@ class Panel(UIElement):
 		
 		ui.setColor(self.normalColor)
 		ui.uiRoundBox(self.absX, self.absY - self.height, self.absX + self.width, self.absY, 10, self.cornermask) # the main container
-		
+		if self.outlined:
+			self.setColor(self.outlineColor)
+			self.uiOutline(self.absX, self.absY - self.height, self.absX + self.width, self.absY, self.radius, self.cornermask)
+			
 		ui.setColor(self.headerColor)
 		headerMask = 0
 		if self.cornermask & 1:
@@ -934,8 +1064,8 @@ class Panel(UIElement):
 		# if the panel was moved, all listeners should be updated, so now
 		self.invalid = False # do I do this here? Or on valid?
 		# now that the panel is drawn, revalidate to ensure that any offsets are taken into account
-	
 		
+	
 	def mouse_event(self):			
 		if self.move == True:			
 			coords = self.area_mouse_coords()
@@ -948,12 +1078,18 @@ class Panel(UIElement):
 	def click_event(self): 
 		coords = self.area_mouse_coords()
 		if self.hasHeader: # check for a panel header
-			if (coords[0] >= self.absX and coords[0] <= self.absX + self.width) and (coords[1] <= self.absY and coords[1] >= self.absY - self.headerHeight) and self.movable:
-				# yes. The above is ugly. But it's neccessary. Don't ask. And don't fuck with it either.
-				# get the offset from where the mouse is now
-				self.move_offsetx = coords[0] - self.absX
-				self.move_offsety = coords[1] - self.absY
-				self.move = True    				
+			# now check for an element IN the header
+			found = False
+			for element in self.elements:
+				if element.hit_test():
+					found = True
+			if found == False:
+				if (coords[0] >= self.absX and coords[0] <= self.absX + self.width) and (coords[1] <= self.absY and coords[1] >= self.absY - self.headerHeight) and self.movable:
+					# yes. The above is ugly. But it's neccessary. Don't ask. And don't fuck with it either.
+					# get the offset from where the mouse is now
+					self.move_offsetx = coords[0] - self.absX
+					self.move_offsety = coords[1] - self.absY
+					self.move = True    				
 			else:				
 				UIElement.click_event(self)
 		else:			
@@ -967,26 +1103,187 @@ class Panel(UIElement):
 		# done!
 			
 
+class ScrollBar(UIElement):
+	def __init__(self, x, y, width, height, name, style, parent, auto_register):
+		# style 1 is vertical, style 2 is horizontal
+		UIElement.__init__(self, x, y, width, height, name, name, parent, auto_register)
+		self.bordered = True
+		# a scrollbar consists of 3 buttons, one of varying height/width, and two arrow buttons for up/down, left/right
+		# thus
+		if style == 1:
+			self.button1 = Button(0, 0, self.width, 15, "", "", 'tiny', self, True)
+			#self.button2 = Button(0, 15, self.width, 15, "", "", 'tiny', self, True) # at the top. I'll figure out sizing and crap later
+			self.button3 = Button(0, self.height - 15, self.width, 15, "", "", 'tiny', self, True)
+		else:
+			self.button1 = Button(0, 0, 15, self.height, "", "", 'tiny', self, True)
+			#self.button2 = Button(15, 0, 15, self.height, "", "", 'tiny', self, True)
+			self.button3 = Button(0, self.width - 15, 15, self.height, "", "", 'tiny', self, True)
+		self.style = style
+		#self.rounded = False
+		self.button1.cornermask = 0
+		self.button1.shadowed = False
+		
+		#self.button2.cornermask = 0
+		#self.button2.shadowed = False
+		
+		self.button3.cornermask = 0
+		self.button3.shadowed = False
+		
+		# ok, so...
+		self.button1.release_functions.append(self.scrollUp)
+		self.button3.release_functions.append(self.scrollDown)
+		self.scrolling = False
+		
+		self.last_y = 0
+		
+		
+		
+		
+	def scrollUp(self, obj):
+		self.parent.scrollUp()
+	
+	def scrollDown(self, obj):
+		self.parent.scrollDown()
+			
+			
+	#def mouse_event(self):
+	#	jump_dist = 0
+	#	inc = 1
+	#	
+	##		coords = self.area_mouse_coords()
+		#	# I'm scrolling, so move button two up or down depending upon the offset at hand.
+		#	# figure out a scroll percentage based on the number of elements in my parent object
+		#	# how many elements do I have?
+		#	count = len(self.parent.elements)
+		#	if count > 0: # of course, this only works if there's more than ZERO elements!
+		#		# so now hack the available space of this scrollbar into increments based on the # of elements that I have
+		#		# obviously if I go below single pixel distances, I'll have to do something different
+		#		inc = float(self.height - 30) / float(count) 
+		#		if inc < 1:
+		#			# less than single pixel values, start jumping
+		#			# ok so I know that I have more items than pixels
+		#			# so instead of dividing pixels by count, I go the other way 
+		#			# and divide count by pixels
+		#			# thus
+		#			inc = 1
+		#			jump = int(float(count) / float(self.height - 30)) # make it an int so it's happy
+		#		else:
+		#			inc = int(inc)
+		#			jump = 0
+		#		
+		#		if self.style == 1:
+		#			# vertical scrolling...I only care about the y value
+		#			
+		#			if (coords[1]  < self.button1.absY + 16) and (coords[1] > self.button3.absY): # checking for upper and lower bounds
+		#				# for scrolling, we've first established an incremental value
+		#				# now what we have to do is determine if the mouse has moved far enough of that incremental value to scroll or not.
+		#				# we will *still* move the button, but we won't actually scroll unless the mouse movement is > inc
+		#				# so:										
+		#				# get the mouse position relative to self
+		#				y_relative = self.absY - coords[1] 
+		#				
+		#				#move button 2 to it's new location
+		#				self.button2.y = y_relative
+		#				self.button2.invalid = True						
+		#				# pick a scrolling direction
+		#				if self.last_y > self.button2.y and (self.last_y - self.button2.y) > inc:
+		#					if (jump > 0):								
+		#						for x in range(jump):
+		#							self.scrollDown(None)
+		#					else:
+		#						self.scrollDown(None)
+		#				elif self.last_y < self.button2.y and (self.button2.y - self.last_y) > inc:
+		#					if jump > 0:
+		#						for x in range(jump):
+		#							self.scrollUp(None)
+		#					else:
+		#						self.scrollUp(None)						
+		#					
+		#				self.last_y = y_relative
+		#		else:
+		#			if (coords[0] > self.button1.absX + 16) and (coords[0] < self.button3.absX + self.button3.width):
+		#				x_relative = coords[0] - self.absX
+		#				self.button2.x = x_relative
+		#				self.button2.invalid = True	
+		#				self.last_x = x_relative
+			
+			
+	def click_event(self):
+		#if self.button2.hit_test():
+			# if button 2 is hit, then I know that I'm probably scrolling
+			#coords = self.area_mouse_coords()
+			#self.scrolling = True
+			#self.scrollOffsetX = coords[0] - self.button2.absX
+			#self.scrollOffsetY = coords[1] - self.button2.absY
+		#else:
+		self.button1.click_event()
+		#self.button2.click_event()
+		self.button3.click_event()
+		self.scrolling = False
+	
+	def release_event(self):
+		self.scrolling = False
+		self.button1.release_event()
+		#self.button2.release_event()
+		self.button3.release_event()
+		
+	def draw(self):
+		self.invalid = True
+		self.validate()	
+		UIElement.draw(self)
+		self.button1.invalid = True
+		self.button1.draw()
+		#self.button2.invalid = True
+		#self.button2.draw()
+		self.button3.invalid = True
+		self.button3.draw()
+		
+		if self.style == 1:
+			if self.button1.hit_test():
+				self.setColor(self.textHiliteColor)
+			else:
+				self.setColor(self.textColor)
+			# top arrow
+			Blender.BGL.glBegin(Blender.BGL.GL_POLYGON)
+			Blender.BGL.glVertex2i(self.button1.absX + (self.button1.width - 2), self.button1.absY - ((self.button1.height / 2) + 3))
+			Blender.BGL.glVertex2i(self.button1.absX + (self.button1.width - 14), self.button1.absY - ((self.button1.height / 2) + 3))
+			Blender.BGL.glVertex2i(self.button1.absX + (self.button1.width - 8), self.button1.absY - ((self.button1.height / 2) - 3))
+			Blender.BGL.glEnd()
+			
+			if self.button3.hit_test():
+				self.setColor(self.textHiliteColor)
+			else:
+				self.setColor(self.textColor)
+				
+			# bottom arrow
+			Blender.BGL.glBegin(Blender.BGL.GL_POLYGON)
+			Blender.BGL.glVertex2i(self.button3.absX + (self.button3.width - 2), self.button3.absY - ((self.button3.height / 2) - 3))
+			Blender.BGL.glVertex2i(self.button3.absX + (self.button3.width - 14), self.button3.absY - ((self.button3.height / 2) - 3))
+			Blender.BGL.glVertex2i(self.button3.absX + (self.button3.width - 8), self.button3.absY - ((self.button3.height / 2) + 3))
+			Blender.BGL.glEnd()				
+		
 class ScrollPane(UIElement):
 
-	def __init__(self, x, y, width, height, name, title, parent):
-		UIElement.__init__(self, x, y, width, height, name, title, parent)		
+	def __init__(self, x, y, width, height, name, title, parent, auto_register):
+		UIElement.__init__(self, x, y, width, height, name, title, parent, auto_register)		
 		self.currentItem = 1
 		self.cornermask = 0 # setting the cornermask to 0 for scrollpanes
 		self.wheel_functions.append(self.scroll)
 		self.validate_functions.append(self.layout)
 		self.lastItem = 0
 		self.invalid = True
+		self.scrollbar = ScrollBar(self.width - 15, 0, 15, self.height, "Scrollbar", 1, self, False)
+		self.updated = False
 
 		
 	def draw(self):
-		self.validate() 
+		self.validate() 		
 		UIElement.draw(self)
 		for element in self.draw_stack:
 			element.draw() # this draws only the objects in the draw stack
 			# the z_stack will handle click events
 			# objects not in the z_stack won't receive events
-			
+		self.scrollbar.draw()
 
 	def scroll(self, evt):		
 		if evt == Blender.Draw.WHEELUPMOUSE:
@@ -997,21 +1294,42 @@ class ScrollPane(UIElement):
 				self.currentItem = self.currentItem + 1
 		self.invalid = True
 				
-				
+	def scrollUp(self):
+		if self.currentItem > 1:
+			self.currentItem = self.currentItem - 1
+		self.invalid = True
+		print "scrolling up!"
+	
+	def scrollDown(self):
+		if self.currentItem < len(self.elements):
+			self.currentItem = self.currentItem + 1
+		self.invalid = True
+	
+	def addElement(self, element):		
+		UIElement.addElement(self, element)
+		self.updated = True		
+		self.layout()
+		
+	def removeElement(self, element):
+		UIElement.removeElement(self, element)
+		self.updated = True
+		self.layout()
+		
 	def layout(self):		
 		# now setup the z and draw stacks		
-		if self.lastItem <> self.currentItem or self.lastItem == 0: # something changed, update the layout							
+		if self.lastItem <> self.currentItem or self.lastItem == 0 or self.updated == True: # something changed, update the layout	
 			idx = 1
 			currenty = 0
 			heightlimit = self.height
 			# start out with a new z_stack - on a scroll event, the zorder is disrupted anyway, since everything is moving
 			self.z_stack = []		
 			for element in self.elements: # surf the entire element list and add when appropriate
-				if idx >= self.currentItem and currenty + element.height < heightlimit:								
+				if idx >= self.currentItem and currenty + element.height < heightlimit:		
 					element.y = currenty					
 					element.isVisible = True
-					currenty = currenty + (element.height + 2)
-					self.z_stack.append(element) # add this element to the stack				
+					currenty = currenty + (element.height + 3)
+					self.z_stack.append(element) # add this element to the stack	
+					element.invalid = True
 				else:
 					element.isVisible = False			
 				idx = idx + 1
@@ -1020,6 +1338,19 @@ class ScrollPane(UIElement):
 				self.draw_stack.append(element)
 			self.draw_stack.reverse() 
 			self.lastItem = self.currentItem
+			self.updated = False
+	
+	def mouse_event(self):
+		self.scrollbar.mouse_event()
+		UIElement.mouse_event(self)
+	
+	def click_event(self):
+		self.scrollbar.click_event()
+		UIElement.click_event(self)
+	def release_event(self):
+		self.scrollbar.release_event()
+		UIElement.release_event(self)
+
 	
 class Button(UIElement):
 	shadowColor = [100, 100, 100, 255]
@@ -1033,8 +1364,8 @@ class Button(UIElement):
 	cornermask = 0
 	transparent = False
 	
-	def __init__(self, x, y, width, height, name, title, fontsize, parent):
-		UIElement.__init__(self, x, y, width, height, name, title, parent) # initialize with the baseclass constructor
+	def __init__(self, x, y, width, height, name, title, fontsize, parent, auto_register):
+		UIElement.__init__(self, x, y, width, height, name, title, parent, auto_register) # initialize with the baseclass constructor
 		self.fontsize = fontsize
 		self.pushed = False        
 		self.value = title
@@ -1106,6 +1437,8 @@ class Button(UIElement):
 				self.setRasterPos(self.absX + push_offset + (self.width - drawWidth - 2), self.absY - push_offset - (self.height - 2))
 			
 			Blender.Draw.Text(self.title, self.fontsize)
+			
+	
 	
 		
 	def push(self, button):		
@@ -1115,6 +1448,9 @@ class Button(UIElement):
 		if self.pushed and self.hit_test(): # I have to test both to determine if the mouse was released over this component AND it was pushed			
 			UIElement.release_event(self) # use the baseclass to launch events for this component
 		self.pushed = False
+		
+	def setValue(self, value):
+		self.title = value
 			
 class ToggleButton(Button):    
 	toggleColor = [218, 127, 127]
@@ -1135,36 +1471,40 @@ class ToggleButton(Button):
 	radius = 1.5
 	push_offset = 4
 		
-	def __init__(self, x, y, width, height, name, title, fontsize, parent):
-		Button.__init__(self, x, y, width, height, name, title, fontsize, parent)
-		self.state = 0 
+	def __init__(self, x, y, width, height, name, title, fontsize, parent, auto_register):
+		Button.__init__(self, x, y, width, height, name, title, fontsize, parent, auto_register)
+		self.state = False 
 		self.release_functions.append(self.toggle)
 		
 	def toggle(self, button):		
 		self.pushed = False
 		if self.hit_test():
-			if self.state == 1:
-				self.state = 0
+			if self.state == True:
+				self.state = False
 				self.normalColor = self.upColor
 				self.textColor = self.textUpColor
 			else:
-				self.state = 1 
+				self.state = True
 				self.normalColor = self.downColor
 				self.textColor = self.textDownColor
 				
-	def set_state(self, state):		
-		if state == 0:
-			self.state = 0
+	def set_state(self, state):	
+		self.state = state
+		if state == False:			
 			self.normalColor = self.upColor
 			self.textColor = self.textUpColor
-		else:
-			self.state = 1 
+		else:			
 			self.normalColor = self.downColor
 			self.textColor = self.textDownColor
 			
 
-
-
+	def setValue(self, value): # convenience function
+		self.set_state(value)
+		
+	def getValue(self):
+		return self.state
+		
+		
 class ToggleGroup:
 	
 	def __init__(self, items):
@@ -1176,24 +1516,25 @@ class ToggleGroup:
 			item.release_functions.append(self.toggleValue) # on click funcs for this object type
 			
 	def toggleValue(self, button): 
+		print "Yo, I toggled and shit!"
 		# sticky toggle keeps the button set, no matter what 		
 		if self.stickyToggle:
 			for element in self.elements:
 				if element <> button:
-					element.set_state(0)
+					element.set_state(False)
 			# simply set the state of this button and move on
-			button.state = 1
+			button.set_state(True)
 		else:
 			# print button.state
-			if button.state == 0:
+			if button.state == False:
 				self.value = None # no value, since nothing's on
 				# do nothing, the button has been turned off
 			else: # the button was turned on, turn everything else off
 				for element in self.elements:											
 					if element <> button:						
-						element.set_state(0)
+						element.set_state(False)
 				self.value = button.name 
-				
+
 		for func in self.funcs: # iterate any functions that have been registered
 			func(self) # always return self
 		
@@ -1208,14 +1549,15 @@ class Menu(UIElement):
 	arrowShade = [200, 200, 200, 255]
 	arrowHover = [140, 140, 140, 255]
 	
-	def __init__(self, x, y, width, height, name, menu, parent):
+	def __init__(self, x, y, width, height, name, menu, parent, auto_register):
 		self.expanded = False  # this is first to deal with an issue in validate()
-		UIElement.__init__(self, x, y, width, height, name, name, parent)
+		UIElement.__init__(self, x, y, width, height, name, name, parent, auto_register)
 		self.fontsize = 'normal'				
 		self.close_functions = []
-		self.selected = 0		
+		self.selected = 0	
+		self.menu = menu		
 		# container for the invididual buttons  
-		self.panel = Panel(0, 0, 100, 100, name, name, self)
+		self.panel = Panel(0, 0, 100, 100, name, name, self, False)
 		self.panel.cornermask = 0
 		self.panel.debug = 0
 		self.panel.fontsize = 'normal'
@@ -1227,7 +1569,7 @@ class Menu(UIElement):
 		self.title = menu[0] # take the first item if initialized
 		self.radius = 1.5   
 		# base button
-		self.baseButton = Button(x, y, width - 26, height, name, name, 'normal', parent) # the base button object
+		self.baseButton = Button(x, y, width - 26, height, name, name, 'normal', parent, False) # the base button object
 		self.baseButton.cornermask = 0
 		self.baseButton.radius = 0
 		self.baseButton.push_offset = 0
@@ -1240,7 +1582,7 @@ class Menu(UIElement):
 		self.baseButton.release_functions.append(self.release)
 				
 		# arrow button        
-		self.arrowButton = Button(x + (width - 25), y, 25, height, 'ArrowButton', '', 'normal', parent)
+		self.arrowButton = Button(x + (width - 25), y, 25, height, 'ArrowButton', '', 'normal', parent, False)
 		self.arrowButton.cornermask = 0
 		self.arrowButton.radius = 0
 		self.arrowButton.push_offset = 0
@@ -1248,9 +1590,9 @@ class Menu(UIElement):
 		self.arrowButton.hoverColor = self.hoverColor
 		self.arrowButton.release_functions.append(self.release)
 				
-		for a in menu: # why shouldn't I append these to the panel?
+		for a in menu: 
 			# create some button objects here
-			self.panel.addElement(Button(0, 0, 100, 25, butIdx, a, 'normal', self.panel)) # this will self-validate
+			self.panel.addElement(Button(0, 0, 100, 25, butIdx, a, 'normal', self.panel, False)) # this will self-validate, and I bypass the auto_register
 			self.panel.elements[butIdx].release_functions.append(self.setValueAndCollapse) # on a click & release
 			self.panel.elements[butIdx].cornermask = 0
 			self.panel.elements[butIdx].shadowed = False
@@ -1265,6 +1607,7 @@ class Menu(UIElement):
 		self.validate_functions.append(self.calculateMenuSizes)
 		#self.release_functions.append(self.release)
 		self.calculateMenuSizes()
+		self.value = self.panel.elements[0].name
 		
 	def re_init(self, menu):
 		# clear the existing element list
@@ -1276,9 +1619,9 @@ class Menu(UIElement):
 		self.panel.z_stack = []
 			
 		butIdx = 0
-		for a in menu: # why shouldn't I append these to the panel?
+		for a in menu: 
 			# create some button objects here
-			self.panel.addElement(Button(0, 0, 100, 25, butIdx, a, 'normal', self.panel)) # this will self-validate
+			self.panel.addElement(Button(0, 0, 100, 25, butIdx, a, 'normal', self.panel, False)) # this will self-validate
 			self.panel.elements[butIdx].release_functions.append(self.setValueAndCollapse) # on a click & release
 			self.panel.elements[butIdx].cornermask = 0
 			self.panel.elements[butIdx].shadowed = False
@@ -1305,13 +1648,14 @@ class Menu(UIElement):
 		
 	def calculateMenuSizes(self):
 		# get the screen height first
-		size = self.get_correct_space_size()	
+		#self.debug = True
+		size = self.get_correct_space_size()			
 		self.baseButton.invalid = True
 		self.arrowButton.invalid = True
 		self.panel.invalid = True
 		panel = self.panel
 		butheight = panel.elements[0].height
-		heightlimit = size[1] - (size[1] * .25) # get the screen height - 25% of the screen height
+		heightlimit = size[1] - (size[1] * .30) # get the screen height - 25% of the screen height
 		if self.debug:
 			print "Screen size is ", size
 			print "Button height is ", butheight
@@ -1319,17 +1663,13 @@ class Menu(UIElement):
 		# get the # of buttons and multiply by button height
 		buts = len(panel.elements) # fix this by making the panel stand alone (or rely upon UIelement
 		for a in range(1, 10):
-			if (buts / a) * butheight < heightlimit:
-				columns = a
+			if (buts / a) * butheight < heightlimit:				
+				columns = a				
 				break
 		
 		# now that I have my column count
-		if self.debug:
-			print "Calculated ", columns, " columns"
-		width = self.find_widest_value()
+		width = self.find_widest_value()	
 		# button widths will initally be width
-		panelHeight = ((buts / columns) * butheight) + ((buts / columns)) + butheight # add one more button
-		panel.height = panelHeight # the height of the panel
 		panelWidth = width * columns
 		titleWidth = self.get_string_width(panel.title, panel.fontsize)
 		if panelWidth < titleWidth:
@@ -1337,11 +1677,19 @@ class Menu(UIElement):
 			width = panelWidth
 		else:
 			width = width + 20
+			panelWidth = width * columns
 		
 		# so how many buttons per column?
 		columnButs = buts / columns
-		idx = 0
+		if self.debug:
+			print "Calculated ", columns, " columns"
+			print "Using ", width, " button width"
+			print "Calculated ", columnButs, " buttons per column"
+		panelHeight = (columnButs * butheight) + columnButs +  27 # add the number of buttons per column, the 1 pixel gap per button (columnButs) and the header height
+		panel.height = panelHeight # the height of the panel
+		idx = 1
 		column = 0
+		
 		y_offset = butheight # offset for the panel title
 		for x in panel.elements:			
 			x.width = width # 20 pixels to the right of the text it will display
@@ -1351,15 +1699,16 @@ class Menu(UIElement):
 			x.x = column * x.width # this should place the button horizontally
 			# the y value should start out being subtracted from the y value of the container panel
 			# so
-			x.y = panel.y + y_offset  # use the panel's y value as a starting point 
+			x.y = y_offset  # use the panel's y value as a starting point 
 			if (idx < columnButs):
 				y_offset = y_offset + butheight + 1 # give a 1 pixel gap
 			else:
-				y_offset = 0
+				y_offset = butheight
 				idx = 0
 				# move to the next column
 				column = column + 1
-					
+			idx = idx + 1
+				
 		# size the panel that contains the buttons
 		panel.width = panelWidth
 		# where does the panel appear?
@@ -1367,17 +1716,19 @@ class Menu(UIElement):
 		if self.absX + panel.width > size[0]: # the panel overlaps the screen, adjust for the different
 			panel.x = size[0] - (panel.width + 15) # provide a 15 pixel buffer area
 		elif self.x < 0: # likely won't happen
-			panel.x = 15
-		if self.absY - panel.height < 0:
-			panel.y = 15 # 15 pixel offset
+			panel.absX = 15			
+		if (self.absY - panel.height) < 0:
+			# center vertically
+			# derive the offset needed and add 25 pixels to it
+			offset = self.absY - panel.height
+			panel.y = offset - 15
 		elif self.absY > size[1]: # this probably won't happen
 			panel.y = size[1] - 15
 	
 	def draw(self):		
 		self.validate()		
 		if self.expanded == True:                          
-			self.panel.draw() # the buttons should actually arrange themselves
-			
+			self.panel.draw() # the buttons should actually arrange themselves			
 		else:
 			if self.hit_test():
 				self.baseButton.normalColor = self.hoverColor
@@ -1447,8 +1798,11 @@ class Menu(UIElement):
 			UIElement.validate(self)
 
 	def release_event(self):
-		if self.expanded:
+		if self.expanded and self.hit_test():
 			self.panel.release_event()
+			self.release_funcs()
+		elif self.expanded and self.hit_test() == False:
+			self.expanded = False			
 		else:
 			self.baseButton.release_event()
 			self.arrowButton.release_event()
@@ -1475,6 +1829,10 @@ class Menu(UIElement):
 	
 	def getValue(self):
 		return self.baseButton.title
+	
+	def setValue(self, idx):
+		self.baseButton.title = self.panel.elements[idx].title
+		self.value = idx
 			
 		
 class TextField(Button):   
@@ -1486,8 +1844,8 @@ class TextField(Button):
 	editingColor = [255, 255, 255, 255]
 	editingBorderColor = [180, 128, 128, 255]
 	
-	def __init__(self, x, y, width, height, name, value, parent):
-		UIElement.__init__(self, x, y, width, height, name, value, parent)
+	def __init__(self, x, y, width, height, name, value, parent, auto_register):
+		UIElement.__init__(self, x, y, width, height, name, value, parent, auto_register)
 		self.cursorIndex = 0
 		self.editing = False
 		self.value = value
@@ -1529,9 +1887,9 @@ class TextField(Button):
 			self.setColor(self.borderColor)
 						
 		self.drawline(self.absX - 1, self.absY, self.absX + self.width + 1, self.absY) # top of box
-		self.drawline(self.absX - 1, self.absY + 1, self.absX - 1, self.absY - (self.height + 1)) # left hand side of box
+		self.drawline(self.absX - 1, self.absY + 1, self.absX - 1, self.absY - self.height) # left hand side of box
 		self.drawline(self.absX - 1, self.absY - (self.height), self.absX + self.width + 1, self.absY - (self.height)) # bottom of box
-		self.drawline(self.absX + self.width, self.absY - 1, self.absX + self.width, self.absY - (self.height + 1)) # right hand side of box
+		self.drawline(self.absX + self.width, self.absY + 1, self.absX + self.width, self.absY - self.height) # right hand side of box
 		
 		# there might be a cursor or selection, draw that, then draw the text 
 		# over it. each character gets drawn individually        
@@ -1569,6 +1927,8 @@ class TextField(Button):
 		else:
 			self.setRasterPos(self.absX + 2, self.absY - (self.height - 4 ))
 		Blender.Draw.Text(displayValue) 
+		
+	
 	
 	def drawCursor(self):
 		# draw a cursor at the current cursorindex
@@ -1596,6 +1956,9 @@ class TextField(Button):
 		# basic OpenGL call
 		Blender.BGL.glRecti(cursorPos, self.absY - 2, cursorPos + 4, self.absY - (self.height))
 		# done
+		
+	
+		
 
 	def drawSelectionMask(self, displayValue, displayWidth):
 		index = self.index
@@ -1645,6 +2008,8 @@ class TextField(Button):
 		else:
 			displayValue = self.strValue
 		return displayValue
+		
+	
 
 	def getNearestCharIndex(self):
 		sText = self.getVisibleText()
@@ -1675,6 +2040,7 @@ class TextField(Button):
 			rVal = idx - 1 
 		
 		return rVal 
+	
 
 	def getValue(self):
 		return self.strValue
@@ -1733,12 +2099,14 @@ class TextField(Button):
 				self.strValue = self.strValue[:self.cursorIndex] + char + self.strValue[self.cursorIndex:]
 			self.cursorIndex = self.cursorIndex + 1
 		self.value = self.strValue
-			
+		
 	def delete_char(self):
 		# delete the character at the current index
 		self.strValue = self.strValue[:self.cursorIndex - 1] + self.strValue[self.cursorIndex:]
 		self.cursorIndex = self.cursorIndex - 1
+		self.value = self.strValue
 		
+	
 	def validateFormat(self):
 		pass
 
@@ -1900,8 +2268,8 @@ class TextField(Button):
 	
 class TextItem(UIElement):
 
-	def __init__(self, x, y, name, value, parent):
-		UIElement.__init__(self, x, y, 0, 0, name, value, parent)        
+	def __init__(self, x, y, name, value, parent, auto_register):
+		UIElement.__init__(self, x, y, 0, 0, name, value, parent, auto_register)        
 		valueString = str(value)
 		self.width = self.get_string_width(valueString, self.fontsize)  # do different calcs here, since extra stuff is required
 		self.height = self.font_cell_sizes[self.fontsize][1]         
@@ -1914,12 +2282,13 @@ class TextItem(UIElement):
 			self.uiOutline(self.absX, self.absY, self.absX + self.width, self.absY - self.height, 1, 0)
 		self.setColor(self.textColor)
 		self.setRasterPos(self.absX, self.absY - (self.font_cell_sizes[self.fontsize][1] + 2))
-		Blender.Draw.Text(self.value)
+		dispValue = str(self.value)
+		Blender.Draw.Text(dispValue) # sometimes this will be a float or something
 				
 class Label(UIElement):
 
-	def __init__(self, x, y, name, value, parent):
-		UIElement.__init__(self, x, y, 0, 0, name, value, parent)
+	def __init__(self, x, y, name, value, parent, auto_register):
+		UIElement.__init__(self, x, y, 0, 0, name, value, parent, auto_register)
 		valueString = str(value)
 		self.width = self.get_string_width(valueString, self.fontsize) + 2 
 		self.height = self.font_cell_sizes[self.fontsize][1] + 2
@@ -1929,7 +2298,7 @@ class Label(UIElement):
 		else:
 			xT = 2
 			
-		self.addElement(TextItem(xT, 0, name, value, self)) # this item only has one element, but can be extended any time		
+		self.addElement(TextItem(xT, 0, name, value, self, False)) # this item only has one element, but can be extended any time		
 		self.elements[0].width = self.width
 		self.elements[0].height = self.height
 		self.elements[0].hasBorder = False
@@ -1939,7 +2308,7 @@ class Label(UIElement):
 	def draw(self):
 		self.normalColor = self.parent.normalColor
 		UIElement.draw(self) # use the baseclass and do what's needed
-	
+			
 	def setText(self, value):
 		self.elements[0].value = value
 	#def draw(self):        
@@ -1948,15 +2317,15 @@ class Label(UIElement):
 		
 		
 class Table(UIElement):
-	def __init__(self, x, y, width, height, name, value, parent):
-		UIElement.__init__(self, x, y, width, height, name, name, parent)
+	def __init__(self, x, y, width, height, name, value, parent, auto_register):
+		UIElement.__init__(self, x, y, width, height, name, name, parent, auto_register)
 		self.rows = 4
 		self.columns = 4
 		columnIdx = 0
 		columnX = 0
 		columnWidth = self.width / len(value) # width divided by columns = column width
 		for column in value:
-			self.addElement(TableColumn(columnX, 0, columnWidth, self.height, columnIdx, columnIdx, column, self))
+			self.addElement(TableColumn(columnX, 0, columnWidth, self.height, columnIdx, columnIdx, column, self, False))
 			columnX = columnX + columnWidth
 			columnIdx = columnIdx + 1
 			
@@ -1964,36 +2333,36 @@ class Table(UIElement):
 		return self.elements[column].elements[row].value
 		
 class TableColumn(UIElement):
-	def __init__(self, x, y, width, height, name, index, cells, parent):
-		UIElement.__init__(self, x, y, width, height, name, index, parent)
-		self.value = 0 # only added to support value export    
-		self.ColumnHeader = Label(0, 0, name, name, self)
+	def __init__(self, x, y, width, height, name, index, cells, parent, auto_register):
+		UIElement.__init__(self, x, y, width, height, name, index, parent, auto_register)
+		self.value = 0 # only added to support value export    		
+		self.ColumnHeader = Label(0, 0, name, name, self, True)
 		# initialize each cell
 		# cell width is tableWidth / columns
 		self.drawLast = None
 		cellHeight = self.height / len(cells) 
-		cellY = 0
+		cellY = 17
 		cellIdx = 0
 		for x in cells:
-			self.addElement(TableCell(0, cellY, self.width, cellHeight, cellIdx, x, self))
+			self.addElement(TableCell(0, cellY, self.width, cellHeight, cellIdx, x, self, False))
 			cellY = cellY + cellHeight
 			cellIdx = cellIdx + 1
 			
 	
 class TableCell(UIElement):
 	normalColor = [255, 255, 255, 255]
-	def __init__(self, x, y, width, height, name, value, parent):
-		UIElement.__init__(self, x, y, width, height, name, value, parent)
+	def __init__(self, x, y, width, height, name, value, parent, auto_register):
+		UIElement.__init__(self, x, y, width, height, name, value, parent, auto_register)
 		self.value = value
 		self.editing = False        
 		# setup the two components used, a label and an editor 
-		self.label = Label(0, 0, name, str(value), self)
+		self.label = Label(0, 0, name, str(value), self, False)
 		self.label.width = width
 		self.label.height = height
 		self.label.elements[0].hasBorder = True
 		self.label.elements[0].width = width
 		self.label.elements[0].height = height
-		self.editor = TextField(0, 0, width, height, name, value, self)
+		self.editor = TextField(0, 0, width, height, name, value, self, False)
 		self.addElement(self.label)
 		self.editor.invalid = True
 		self.editor.validate()
@@ -2020,25 +2389,6 @@ class TableCell(UIElement):
 				self.addElement(self.label)
 		UIElement.release_event(self)			
 					
-	
-class RadioButton(Button):
-
-	def __init__(self, x, y, width, height, name, title, parent):
-		Button.__init__(self, x, y, width, height, name, title, parent)
-	
-class CheckBox(Button):
-
-	def __init__(self, x, y, width, height, name, title, parent):
-		Button.__init__(self, x, y, width, height, name, title, parent)
-	
-class ActiveText(Label): 
-
-	value = ""
-	def __init__(self, x, y, name, title, parent):
-		Label.__init__(self, x, y, name, title, parent)
-	
-
-		
 class ColorPicker(Panel):
 	# color picker note...color pickers are drawn in the middle of the screen!!!
 	normalColor = UIElement.normalColor
@@ -2061,9 +2411,9 @@ class ColorPicker(Panel):
 		[224, 226, 186, 255],
 		[237, 211, 206, 255]]
 		
-	def __init__(self, x, y, name, title, parent):
+	def __init__(self, x, y, name, title, parent, auto_register):
 		
-		Panel.__init__(self, x, y, 350, 340, name, title, parent)# initialize a basic panel
+		Panel.__init__(self, x, y, 350, 340, name, title, parent, auto_register)# initialize a basic panel
 		# initialize hsv @ red
 		self.hsv = [1.0, 1.0, 1.0]
 		self.value = [255, 255, 255, 255]
@@ -2071,22 +2421,22 @@ class ColorPicker(Panel):
 		self.ok_functions = []
 		self.cancel_functions = []			
 		# add in the color select buttons
-		self.addElement(Button(270, 5, 15, 25, 'Black', '', 'normal', self))
-		self.addElement(Button(270, 30, 15, 25, 'DarkGrey', '', 'normal', self))
-		self.addElement(Button(270, 55, 15, 25, 'NotSoDarkGrey', '', 'normal', self))
-		self.addElement(Button(270, 80, 15, 25, 'SemiDarkGrey', '', 'normal', self))
-		self.addElement(Button(270, 105, 15, 25, 'MediumGrey', '', 'normal', self))
-		self.addElement(Button(270, 130, 15, 25, 'MidLightGrey', '', 'normal', self))
-		self.addElement(Button(270, 155, 15, 25, 'LightGrey', '', 'normal', self))
-		self.addElement(Button(270, 180, 15, 25, 'White', '', 'normal', self))
-		self.addElement(Button(285, 5, 15, 25, 'Burgundy', '', 'normal', self))
-		self.addElement(Button(285, 30, 15, 25, 'Violet', '', 'normal', self))
-		self.addElement(Button(285, 55, 15, 25, 'Purple', '', 'normal', self))
-		self.addElement(Button(285, 80, 15, 25, 'Teal', '', 'normal', self))
-		self.addElement(Button(285, 105, 15, 25, 'SeaGreen', '', 'normal', self))
-		self.addElement(Button(285, 130, 15, 25, 'ForestGreen', '', 'normal', self))
-		self.addElement(Button(285, 155, 15, 25, 'Khaki', '', 'normal', self))
-		self.addElement(Button(285, 180, 15, 25, 'Peach', '', 'normal', self))
+		self.addElement(Button(270, 5, 15, 25, 'Black', '', 'normal', self, False))
+		self.addElement(Button(270, 30, 15, 25, 'DarkGrey', '', 'normal', self, False))
+		self.addElement(Button(270, 55, 15, 25, 'NotSoDarkGrey', '', 'normal', self, False))
+		self.addElement(Button(270, 80, 15, 25, 'SemiDarkGrey', '', 'normal', self, False))
+		self.addElement(Button(270, 105, 15, 25, 'MediumGrey', '', 'normal', self, False))
+		self.addElement(Button(270, 130, 15, 25, 'MidLightGrey', '', 'normal', self, False))
+		self.addElement(Button(270, 155, 15, 25, 'LightGrey', '', 'normal', self, False))
+		self.addElement(Button(270, 180, 15, 25, 'White', '', 'normal', self, False))
+		self.addElement(Button(285, 5, 15, 25, 'Burgundy', '', 'normal', self, False))
+		self.addElement(Button(285, 30, 15, 25, 'Violet', '', 'normal', self, False))
+		self.addElement(Button(285, 55, 15, 25, 'Purple', '', 'normal', self, False))
+		self.addElement(Button(285, 80, 15, 25, 'Teal', '', 'normal', self, False))
+		self.addElement(Button(285, 105, 15, 25, 'SeaGreen', '', 'normal', self, False))
+		self.addElement(Button(285, 130, 15, 25, 'ForestGreen', '', 'normal', self, False))
+		self.addElement(Button(285, 155, 15, 25, 'Khaki', '', 'normal', self, False))
+		self.addElement(Button(285, 180, 15, 25, 'Peach', '', 'normal', self, False))
 		
 		idx = 0
 		for x in self.elements:
@@ -2099,27 +2449,27 @@ class ColorPicker(Panel):
 			idx = idx + 1		
 				
 		# setup the big button
-		self.addElement(Button(5, 5, 256, 256, 'Picker', '', 'normal', self))
+		self.addElement(Button(5, 5, 256, 256, 'Picker', '', 'normal', self, False))
 		self.elements[16].transparent = True # bypassing the button's draw code
 		self.elements[16].click_functions.append(self.getColor)
 		self.elements[16].outlined = True
 		# self.elements[16].draw = self.drawHSV # override the draw method of the button object to use my custom one
 		
-		self.addElement(Button(5, 260, 256, 30, 'Hue', '', 'normal', self))
+		self.addElement(Button(5, 260, 256, 30, 'Hue', '', 'normal', self, False))
 		self.elements[17].transparent = True 
 		self.elements[17].outlined = True
 		self.elements[17].click_functions.append(self.getHue)
 		# self.elements[17].draw = self.drawHue # override the draw method of the button object to use my custom drawHue method
 		self.circleCoords = [0, 0] 
 		
-		self.addElement(Button(270, 215, 30, 45, 'Current', '', 'normal', self))
+		self.addElement(Button(270, 215, 30, 45, 'Current', '', 'normal', self, False))
 		self.elements[18].outlined = True
 		self.elements[18].shadowed = False
 		self.elements[18].normalColor = self.value
 		self.elements[18].hoverColor = self.value
 		self.elements[18].downColor = self.value
 		
-		self.addElement(Button(270, 265, 30, 30, 'Old', '', 'normal', self))
+		self.addElement(Button(270, 265, 30, 30, 'Old', '', 'normal', self, False))
 		self.elements[19].outlined = True
 		self.elements[19].shadowed = False
 		self.elements[19].normalColor = self.value
@@ -2127,8 +2477,8 @@ class ColorPicker(Panel):
 		self.elements[19].downColor = self.value
 		self.elements[19].click_functions.append(self.selectPreset) # the old button is ALSO a preset...
 		
-		self.addElement(Button(40, 300, 50, 25, 'CancelButton', 'Cancel', 'normal', self))
-		self.addElement(Button(240, 300, 50, 25, 'OkButton', 'Ok', 'normal', self)) # these are probably going away
+		self.addElement(Button(40, 300, 50, 25, 'CancelButton', 'Cancel', 'normal', self, False))
+		self.addElement(Button(240, 300, 50, 25, 'OkButton', 'Ok', 'normal', self, False)) # these are probably going away
 		self.elements[21].release_functions.append(self.ok_funcs)
 		self.elements[20].release_functions.append(self.cancel_funcs)
 		# to do - Add RGB/HSV fields, maybe make a slider
@@ -2280,12 +2630,12 @@ class ColorPicker(Panel):
 		
 				
 class ColorButton(UIElement):
-	def __init__(self, x, y, width, height, name, value, parent):
+	def __init__(self, x, y, width, height, name, value, parent, auto_register):
 		# color buttons have no title
-		UIElement.__init__(self, x, y, width, height, name, '', parent)
+		UIElement.__init__(self, x, y, width, height, name, '', parent, auto_register)
 		self.normalColor = value		
 		self.picking = False
-		self.picker = ColorPicker(0, 0, 'colorPicker', "ColorPicker", parent) 
+		self.picker = ColorPicker(0, 0, 'colorPicker', "ColorPicker", parent, False) 
 		#self.mouse_functions.append(self.setAndHide) # close and hide on mouse-out 
 		self.click_functions.append(self.clicked)
 		self.value = value
@@ -2296,7 +2646,8 @@ class ColorButton(UIElement):
 		self.validate() # locate myself		
 		if self.picking:
 			self.invalid = False
-			
+			print "Hey, I'm picking!"
+			print "My name is ", self.name
 			#self.picker.validate() #
 			# position the color picker
 			screen = Blender.Window.GetAreaSize()
@@ -2311,14 +2662,14 @@ class ColorButton(UIElement):
 				self.picker.x = 0 - self.absX - x
 			else:
 				self.picker.x = x - self.absX
-
+				
 			if self.absY > y:
 				self.picker.y = self.absY - y
 			else:
 				self.picker.y = 0 - y - self.absY
-
+				
 			self.picker.invalid = True
-
+			
 			#if self.picker.absY > screen[1]: # the size of the picker is off the screen vertically				
 			#	self.picker.y = self.absY - self.height # draw at the bottom of the button 
 			#	self.picker.invalid = True
@@ -2366,20 +2717,18 @@ class ColorButton(UIElement):
 		self.hoverColor = value
 		self.normalColor = value
 		self.downColor = value
+		
 	def release_event(self):
 		if self.picking:
 			self.picker.release_event()
 		else:
 			UIElement.release_event(self)
-			
-	def getValue(self):
-		return self.value # just returns a color
 
 class TextDialog(Panel):
 	OK = 1
 	CANCEL = 0
 	def __init__(self, x, y, width, height, name, prompt, value, function):
-		Panel.__init__(self, x, y, width, height, name, name, None)	
+		Panel.__init__(self, x, y, width, height, name, name, None, False)	
 		self.button_functions = []
 		# determine how many lines I need, and if neccessary, split the lines and
 		# resize the panel
@@ -2387,7 +2736,7 @@ class TextDialog(Panel):
 		if t_width > width: # the string width is greater than the width of the panel
 			if t_width - width < 100: # if less than 100 pixels of difference, simply resize the panel
 				self.width = t_width + 10
-				self.addElement(Label(5, 30, prompt, prompt, self)) # simply add the label
+				self.addElement(Label(5, 30, prompt, prompt, self, False)) # simply add the label
 				field_y = 30 + self.font_cell_sizes[self.fontsize][1] + 8
 				field_width = t_width
 			else:
@@ -2409,31 +2758,31 @@ class TextDialog(Panel):
 						currentWidth = 0
 				label_y = 30
 				for line in lines:					
-					self.addElement(Label(5, label_y, line, line, self))
+					self.addElement(Label(5, label_y, line, line, self, False))
 					label_y = label_y + self.font_cell_sizes[self.fontsize][1] + 4 # 4 pixel gap here
 					
 				field_y = label_y
 		else:
-			self.addElement(Label(5, 30, prompt, prompt, self))
+			self.addElement(Label(5, 30, prompt, prompt, self, False))
 			field_y = 30 + self.font_cell_sizes[self.fontsize][1] + 4
 		
-		self.data = TextField(5, field_y, self.width - 5, 20, "DialogData", value, self)
-		self.addElement(self.data)
+		self.data = TextField(5, field_y, self.width - 15, 20, "DialogData", value, self, True)
+		# self.addElement(self.data) - this is now handled by auto_register
 		# get the center of the dialog, then split out
 		
 		ok_offset = self.width - 110		
 		
 		but_y = field_y + 30
-		self.ok_button = Button(ok_offset, but_y, 100, 25, "OKButton", "OK", 'normal', self)
+		self.ok_button = Button(ok_offset, but_y, 100, 25, "OKButton", "OK", 'normal', self, True)
 		self.ok_button.release_functions.append(self.button_funcs)
-		self.cancel_button = Button(10, but_y, 100, 25, "OKButton", "Cancel", 'normal', self)
+		self.cancel_button = Button(10, but_y, 100, 25, "OKButton", "Cancel", 'normal', self, True)
 		self.cancel_button.release_functions.append(self.button_funcs)		
 		self.button_functions.append(function)
-		self.addElement(self.ok_button)
-		self.addElement(self.cancel_button)
+		#self.addElement(self.ok_button)
+		#self.addElement(self.cancel_button)
 		self.state = -1
 		self.initValue = value
-		self.height = but_y + 30
+		self.height = but_y + 40
 		
 		
 		
@@ -2459,9 +2808,9 @@ class ConfirmDialog(Panel):
 	def __init__(self, name, prompt, function, discard):
 		x = 50 
 		y = 50
-		width = 300
+		width = 350
 		height = 100
-		Panel.__init__(self, x, y, width, height, name, name, None)	
+		Panel.__init__(self, x, y, width, height, name, name, None, False)	
 		self.button_functions = []
 		# determine how many lines I need, and if neccessary, split the lines and
 		# resize the panel
@@ -2469,7 +2818,7 @@ class ConfirmDialog(Panel):
 		if t_width > width: # the string width is greater than the width of the panel
 			if t_width - width < 100: # if less than 100 pixels of difference, simply resize the panel
 				self.width = t_width + 10
-				self.addElement(Label(5, 30, prompt, prompt, self)) # simply add the label
+				self.addElement(Label(5, 30, prompt, prompt, self, False)) # simply add the label
 				buts_y = 30 + self.font_cell_sizes[self.fontsize][1] + 8				
 			else:
 				# bit more complicated here. Create multiple labels...figure out how to split on whitespace
@@ -2490,32 +2839,32 @@ class ConfirmDialog(Panel):
 						currentWidth = 0
 				label_y = 30
 				for line in lines:					
-					self.addElement(Label(5, label_y, line, line, self))
+					self.addElement(Label(5, label_y, line, line, self, False))
 					label_y = label_y + self.font_cell_sizes[self.fontsize][1] + 4 # 4 pixel gap here
 					
 				buts_y = label_y
 		else:
-			self.addElement(Label(5, 30, prompt, prompt, self))
+			self.addElement(Label(5, 30, prompt, prompt, self, False))
 			buts_y = 35 + self.font_cell_sizes[self.fontsize][1] + 4
 			
 		discard_x = (self.width / 2) - 30
 		ok_offset = self.width - 75		
-		self.ok_button = Button(ok_offset, buts_y, 60, 25, "OKButton", "OK", 'normal', self)
+		self.ok_button = Button(ok_offset, buts_y, 60, 25, "OKButton", "OK", 'normal', self, True)
 		self.ok_button.release_functions.append(self.button_funcs)
-		self.cancel_button = Button(10, buts_y, 60, 25, "OKButton", "Cancel", 'normal', self)	
+		self.cancel_button = Button(10, buts_y, 60, 25, "OKButton", "Cancel", 'normal', self, True)	
 		self.cancel_button.release_functions.append(self.button_funcs)
 		self.button_functions.append(function)
-		self.addElement(self.ok_button)
-		self.addElement(self.cancel_button)
+		#self.addElement(self.ok_button)
+		#self.addElement(self.cancel_button)
 		if discard:		
 			self.discard = True
-			self.discard_button = Button(discard_x, buts_y, 60, 25, "Discard", "Discard", 'normal', self)
+			self.discard_button = Button(discard_x, buts_y, 60, 25, "Discard", "Discard", 'normal', self, True)
 			self.discard_button.release_functions.append(self.button_funcs)
-			self.addElement(self.discard_button)
+			# self.addElement(self.discard_button)
 		else:
 			self.discard = False
 			
-		self.height = buts_y + 30
+		self.height = buts_y + 40
 		
 	def button_funcs(self, button):
 		if button == self.ok_button:
@@ -2533,39 +2882,58 @@ class ConfirmDialog(Panel):
 		
 # BtoR-Specific objects
 class ColorEditor(UIElement):
-	def __init__(self, x, y, width, height, name, value, parent):
+	height = 60
+	ColorSpaces = ['rgb', 'hsv', 'hsl', 'YIQ', 'xyz', 'xyY']
+	def __init__(self, x, y, width, height, name, value, parent, auto_register):		
 		self.value = value		
-		UIElement.__init__(self, x, y, width, height, name, '', parent)		
-		self.ColorSpaces = ['rgb', 'hsv', 'hsl', 'YIQ', 'xyz', 'xyY']
-		self.addElement(Label(5, 5, "Parameter: " + name, "Parameter: " + name, self))
-		self.addElement(Label(5, 25, 'Color Space:', 'Color Space:', self))
-		width = self.get_string_width('Color Space:', 'normal') + 5
-		self.spaceMenu = Menu(width + 10, 25, 75, 20, 'Color Space:', self.ColorSpaces, self)
-		self.addElement(self.spaceMenu)
-		self.Red = TextField(width + 115, 25, 35, 20, 'Red', '1.0', self)
-		self.Green = TextField(width + 175, 25, 35, 20, 'Green', '1.0', self)
-		self.Blue = TextField(width + 235, 25, 35, 20, 'Blue', '1.0', self)
-		self.addElement(self.Red)
-		self.addElement(self.Green)
-		self.addElement(self.Blue)
-		self.label_A = Label(width + 95, 25, "Red", "R:", self)
-		self.label_B = Label(width + 155, 25, "Green", "G:", self)
-		self.label_C = Label(width + 215, 25, "Blue", "B:", self)
-		self.addElement(self.label_A)
-		self.addElement(self.label_B)
-		self.addElement(self.label_C)
-		self.colorButton = ColorButton(width + 275, 26, 45, 20, 'Picker', value, self)
-		self.addElement(self.colorButton)
+		# set my height to what I need it to be
+		UIElement.__init__(self, x, y, width, self.height, name, '', parent, auto_register)				
+		self.addElement(Label(5, 5, "Parameter: " + name, "Parameter: " + name, self, False))
+		# self.addElement(Label(5, 25, 'Color Space:', 'Color Space:', self, False))
+		# width = self.get_string_width('Color Space:', 'normal') + 5
+		# self.spaceMenu = Menu(width + 10, 25, 75, 20, 'Color Space:', self.ColorSpaces, self, True)
+		# self.addElement(self.spaceMenu)
+		# assign the value to the text boxes, and check for values > 1
+		# incoming values will be RGB 255 notation, but I want to use renderman 0-1 notation here
+		
+		self.Red = TextField(25, 25, 35, 20, 'Red', value[0], self, True)
+		self.Green = TextField(85, 25, 35, 20, 'Green', value[1], self, True)
+		self.Blue = TextField(145, 25, 35, 20, 'Blue', value[2], self, True)
+		#self.addElement(self.Red)
+		#self.addElement(self.Green)
+		#self.addElement(self.Blue)
+		self.label_A = Label(5, 25, "Red", "R:", self, True)
+		self.label_B = Label(65, 25, "Green", "G:", self, True)
+		self.label_C = Label(125, 25, "Blue", "B:", self, True)		
+		#self.addElement(self.label_A)
+		#self.addElement(self.label_B)
+		#self.addElement(self.label_C)
+		rgbValue = [value[0] * 255, value[1] * 255, value[2] * 255]
+		self.colorButton = ColorButton(225, 26, 45, 20, 'Picker', rgbValue, self, True)
+		# self.addElement(self.colorButton)
 		
 		self.Red.update_functions.append(self.updateColor)
 		self.Green.update_functions.append(self.updateColor)
 		self.Blue.update_functions.append(self.updateColor)
-		self.spaceMenu.close_functions.append(self.changeModel)
 		
 		# self.click_functions.append(self.stat)
+		self.bordered = True
+		self.colorButton.picker.ok_functions.append(self.updateFields)
+		self.colorButton.outlined = True
 		
 	def getValue(self):		
 		value = [self.spaceMenu.getValue(), self.colorButton.getValue()]
+		
+	def updateFields(self, obj):
+		# get the color of the button
+		color = self.colorButton.getValue()
+		
+		# color values in the text boxes are assigned via ye olde renderman method, i.e. 0-1
+		self.Red.setValue(float(float(color[0]) / 255))
+		self.Green.setValue(float(float(color[1]) / 255))
+		self.Blue.setValue(float(float(color[2]) / 255))
+		
+		# this is an update function to assign the color value of the button to the text editors. Fix it.
 		
 	def updateColor(self, obj):
 		if obj.isEditing == False:
@@ -2575,9 +2943,6 @@ class ColorEditor(UIElement):
 			r_s = self.Red.value
 			g_s = self.Green.value
 			b_s = self.Blue.value
-			print b_s
-			print g_s
-			print b_s
 			if float(r_s) > 1:			
 				r = int(r_s) 
 			else:
@@ -2597,8 +2962,6 @@ class ColorEditor(UIElement):
 			self.colorButton.setValue(rgb) # set the value of the color button here
 			
 	def hit_test(self):		
-		if self.spaceMenu.expanded: # if the menu is expanded, test for a hit
-			rVal = self.spaceMenu.hit_test()			
 		if self.colorButton.picking: # if the color picker is active, test for a hit
 			rVal = True # this hits all the time to prevent any object from getting in front of it
 			#rVal = self.colorButton.hit_test() 
@@ -2614,27 +2977,27 @@ class ColorEditor(UIElement):
 		
 
 class CoordinateEditor(UIElement):
+	height = 75
 	coordinateSpaces = ['current', 'object', 'shader', 'world', 'camera', 'screen', 'raster', 'NDC']
-	def __init__(self, x, y, width, height, name, value, parent):
-		if height < 55: # height value should be tested because otherwise this panel will be useless
-			height = 75            
-		UIElement.__init__(self, x, y, width, height, name, '', parent)
-		self.addElement(Label(5, 2, name, name, self))
+	def __init__(self, x, y, width, height, name, value, parent, auto_register):
+		UIElement.__init__(self, x, y, width, self.height, name, '', parent, auto_register)
+		self.addElement(Label(5, 2, name, name, self, True))
 		width = self.get_string_width("Coordinate Space:", 'normal') + 5
-		self.x_val = TextField(width + 130, 25, 30, 20, "coord_x", value[0], self)
-		self.y_val = TextField(width + 185, 25, 30, 20, "coord_y", value[1], self)
-		self.z_val = TextField(width + 240, 25, 30, 20, "coord_z", value[2], self)
-		self.addElement(self.x_val)
-		self.addElement(Label(width + 108, 28, "X:", "X:", self))
-		self.addElement(self.y_val)
-		self.addElement(Label(width + 165, 28, "Y:", "Y:", self))
-		self.addElement(self.z_val)		
-		self.addElement(Label(width + 220, 28, "Z:", "Z:", self))
+		self.x_val = TextField(width + 130, 25, 30, 20, "coord_x", value[0], self, True)
+		self.y_val = TextField(width + 185, 25, 30, 20, "coord_y", value[1], self, True)
+		self.z_val = TextField(width + 240, 25, 30, 20, "coord_z", value[2], self, True)
+		#self.addElement(self.x_val)
+		self.addElement(Label(width + 108, 28, "X:", "X:", self, False))
+		#self.addElement(self.y_val)
+		self.addElement(Label(width + 165, 28, "Y:", "Y:", self, False))
+		#self.addElement(self.z_val)		
+		self.addElement(Label(width + 220, 28, "Z:", "Z:", self, False))
 		
-		self.spaceMenu = Menu(width + 10, 25, 85, 25, "Coordinate Space:", self.coordinateSpaces, self)
-		self.addElement(self.spaceMenu)
-		self.addElement(Label(5, 25, "SpaceLabel", "Coordinate Space: ", self))
+		self.spaceMenu = Menu(width + 10, 25, 85, 25, "Coordinate Space:", self.coordinateSpaces, self, True)
+		#self.addElement(self.spaceMenu)
+		self.addElement(Label(5, 25, "SpaceLabel", "Coordinate Space: ", self, False))
 		# the rest of this should take care of itself, all I need is a getValue()
+		self.bordered = True
 		
 	def getValue(self):
 		value = []
@@ -2644,59 +3007,40 @@ class CoordinateEditor(UIElement):
 		value.append(float(self.z_val.value()))
 		return value
 		
-class ArrayEditor(UIElement):
-	#for arrays - I really need something a bit more robust and sophisticated than just a bunch of text fields
-	def __init__(self, x, y, width, height, name, value, parent):
-		UIElement.__init__(self, x, y, width, height, name, '', parent)
-		self.value = value
-		self.label = Label(5, 5, name, name, self)
-		self.addElement(self.label)
-		# get the text width 
-		width = self.get_string_width(name, 'normal') + 5
-		# initialize the editors
-		idx = 1
-		for element in self.value:
-			# get each value and iterate
-			self.addElement(TextButton(width + (idx * 25), 25, 25, idx, element, self))
-			# that should be that
-			
-	def getValue(self):
-		value = []
-		for element in self.elements:
-			if element <> self.label:
-				value.append(float(element.value)) # convert to float
-		return value
 		
 class FloatEditor(UIElement):
+	height = 50
 	# for numeric values
-	def __init__(self, x, y, width, height, name, value, parent):
-		UIElement.__init__(self, x, y, width, height, name, '', parent)
-		self.text = TextField(15, 25, 40, 20, name, value, self)
-		self.label = Label(5, 5, name, name, self)
-		self.addElement(self.label)
-		self.addElement(self.text)
+	def __init__(self, x, y, width, height, name, value, parent, auto_register):
+		UIElement.__init__(self, x, y, width, self.height, name, '', parent, auto_register)
+		self.text = TextField(15, 25, 40, 20, name, value, self, True)
+		self.label = Label(5, 5, "Parameter: " + name, "Parameter: " + name, self, True)
+		#self.addElement(self.label)
+		#self.addElement(self.text)
+		self.bordered = True
 	
 	def getValue(self):
-		return float(self.text.getValue()) # return a float from here all the time
+		return double(self.text.getValue()) # return a double from here all the time
 		
 class TextEditor(UIElement):
-		def __init__(self, x, y, width, height, name, value, parent):
-			UIElement.__init__(self, x, y, width, height, name, '', parent)
-			width = self.get_string_width(name, 'normal') + 10
-			self.text = TextField(15, 25, 200, 20, name, value, self)
-			self.label = Label(5, 5, name, name, self)			
-			self.addElement(self.label)
-			self.addElement(self.text)
-			
-		def getValue(self):
-			return self.text.getValue()
+	height = 50
+	def __init__(self, x, y, width, height, name, value, parent, auto_register):
+		UIElement.__init__(self, x, y, width, self.height, name, '', parent, auto_register)
+		width = self.get_string_width(name, 'normal') + 10
+		self.text = TextField(15, 25, 200, 20, name, value, self, True)
+		self.label = Label(5, 5, "Parameter: " + name, "Parmeter: " + name, self, True)			
+		#self.addElement(self.label)
+		#self.addElement(self.text)
+		self.bordered = True
+		
+	def getValue(self):
+		return self.text.getValue()
 			
 		
 class MatrixEditor(UIElement):
-	def __init__(self, x, y, width, height, name, value, parent):
-		if height < 125:
-			height = 125 # adjust my height cuz some idiot forgot to set it correctly		
-		UIElement.__init__(self, x, y, width, height, name, '', parent)
+	height = 140
+	def __init__(self, x, y, width, height, name, value, parent, auto_register):
+		UIElement.__init__(self, x, y, width, self.height, name, '', parent, auto_register)
 		column1 = []
 		column2 = []
 		column3 = []
@@ -2708,10 +3052,10 @@ class MatrixEditor(UIElement):
 			column3.append(val[2])
 			column4.append(val[3])
 			
-		data = Table(26, 30, 200, 80, 'Matrix', [column1, column2, column3, column4], self)
+		data = Table(26, 20, 200, 80, 'Matrix', [column1, column2, column3, column4], self, True)
 
-		self.addElement(Label(5, 5, name, name, self))
-		self.addElement(data)
+		self.addElement(Label(5, 5, "Parameter: " + name, "Parameter: " + name, self, False))
+		#self.addElement(data)
 		
 	def getValue(self):
 		value = []
@@ -2725,17 +3069,17 @@ class MatrixEditor(UIElement):
 # the following 4 objects are for guessed object types, each includes a type override button
 # to force a fallback to a string value
 class SpaceEditor(UIElement):
+	height = 35
 	Spaces = ['current', 'object', 'shader', 'world', 'camera', 'screen', 'raster', 'NDC']
-	def __init__(self, x, y, width, height, name, value, parent):
-		height = 35
-		UIElement.__init__(self, x, y, width, height, name, '', parent)
-		self.addElement(Label(5, 5, name, name, self))
+	def __init__(self, x, y, width, height, name, value, parent, auto_register):		
+		UIElement.__init__(self, x, y, width, self.height, name, '', parent, auto_register)
+		self.addElement(Label(5, 5, name, name, self, False))
 		# get the text width 
 		width = self.get_string_width(name, 'normal') + 5
-		self.spaceMenu = Menu(width + 15, 5, 100, 25, 'Coordinate Space:', self.Spaces, self)
-		self.addElement(self.spaceMenu)
-		self.overrideButton = Button(width + 120, 5, 60, 25, 'Override', 'Override', 'normal', self)
-		self.addElement(self.overrideButton)
+		self.spaceMenu = Menu(width + 15, 5, 100, 25, 'Coordinate Space:', self.Spaces, self, True)
+		#self.addElement(self.spaceMenu)
+		self.overrideButton = Button(width + 120, 5, 60, 25, 'Override', 'Override', 'normal', self, True)
+		#self.addElement(self.overrideButton)
 		self.overrideButton.release_functions.append(self.override_type)
 		self.overridden = False
 		
@@ -2744,9 +3088,9 @@ class SpaceEditor(UIElement):
 		self.elements = []
 		self.z_stack = []
 		self.draw_stack = []
-		self.addElement(Label(5, 5, self.name, self.name, self))
+		self.addElement(Label(5, 5, self.name, self.name, self, False))
 		width = self.get_string_width(self.name, 'normal') + 5
-		self.addElement(TextField(width + 10, 5, 250, 20, self.name, dispVal, self))
+		self.addElement(TextField(width + 10, 5, 250, 20, self.name, dispVal, self, False))
 		self.value = dispVal
 		self.overridden = True
 		
@@ -2759,16 +3103,17 @@ class SpaceEditor(UIElement):
 		
 
 class ProjectionEditor(UIElement):
+	height = 40
 	Projections = ['st', 'planar', 'perspective', 'spherical', 'cylindrical']
-	def __init__(self, x, y, width, height, name, value, parent):
-		UIElement.__init__(self, x, y, width, height, name, '', parent)
-		self.addElement(Label(5, 5, name, name, self))
+	def __init__(self, x, y, width, height, name, value, parent, auto_register):
+		UIElement.__init__(self, x, y, width, self.height, name, '', parent, auto_register)
+		self.addElement(Label(5, 5, name, name, self, False))
 		# get the text width 
 		width = self.get_string_width(name, 'normal') + 5
-		self.projectionMenu = Menu(width + 15, 5, 100, 25, 'Projection Type:', self.Projections, self)
-		self.addElement(self.projectionMenu)
-		self.overrideButton = Button(width + 120, 5, 60, 25, 'Override', 'Override', 'normal', self)
-		self.addElement(self.overrideButton)
+		self.projectionMenu = Menu(width + 15, 5, 100, 25, 'Projection Type:', self.Projections, self, True)
+		#self.addElement(self.projectionMenu)
+		self.overrideButton = Button(width + 120, 5, 60, 25, 'Override', 'Override', 'normal', self, True)
+		#self.addElement(self.overrideButton)
 		self.elements[2].release_functions.append(self.override_type)
 		self.overridden = False
 		
@@ -2777,9 +3122,9 @@ class ProjectionEditor(UIElement):
 		self.elements = []
 		self.z_stack = []
 		self.draw_stack = []
-		self.addElement(Label(5, 5, self.name, self.name, self))
+		self.addElement(Label(5, 5, self.name, self.name, self, False))
 		width = self.get_string_width(self.name, 'normal') + 5
-		self.addElement(TextField(width + 10, 5, 250, 20, self.name, dispVal, self))
+		self.addElement(TextField(width + 10, 5, 250, 20, self.name, dispVal, self, False))
 		self.value = dispVal
 		self.overridden = True
 		
@@ -2792,16 +3137,17 @@ class ProjectionEditor(UIElement):
 		
 	
 class ColorSpaceEditor(UIElement):
+	height = 40
 	ColorSpaces = ['rgb', 'hsv', 'hsl', 'YIQ', 'xyz', 'xyY']
-	def __init__(self, x, y, width, height, name, value, parent):
-		UIElement.__init__(self, x, y, width, height, name, '', parent)
-		self.addElement(Label(5, 5, name, name, self))
+	def __init__(self, x, y, width, height, name, value, parent, auto_register):
+		UIElement.__init__(self, x, y, width, self.height, name, '', parent, auto_register)
+		self.addElement(Label(5, 5, name, name, self, False))
 		# get the text width 
 		width = self.get_string_width(name, 'normal') + 5
-		self.colorSpaceMenu = Menu(width + 15, 5, 100, 25, 'Color Space:', self.ColorSpaces, self)
-		self.addElement(self.colorSpaceMenu)
-		self.overrideButton = Button(width + 120, 5, 60, 25, 'Override', 'Override', 'normal', self)
-		self.addElement(self.overrideButton)
+		self.colorSpaceMenu = Menu(width + 15, 5, 100, 25, 'Color Space:', self.ColorSpaces, self, True)
+		#self.addElement(self.colorSpaceMenu)
+		self.overrideButton = Button(width + 120, 5, 60, 25, 'Override', 'Override', 'normal', self, True)
+		#self.addElement(self.overrideButton)
 		self.overrideButton.release_functions.append(self.override_type)
 		self.overridden = False
 		
@@ -2810,9 +3156,9 @@ class ColorSpaceEditor(UIElement):
 		self.elements = []
 		self.z_stack = []
 		self.draw_stack = []
-		self.addElement(Label(5, 5, self.name, self.name, self))
+		self.addElement(Label(5, 5, self.name, self.name, self, False))
 		width = self.get_string_width(self.name, 'normal') + 5
-		self.addElement(TextField(width + 10, 5, 250, 20, self.name, dispVal, self))
+		self.addElement(TextField(width + 10, 5, 250, 20, self.name, dispVal, self, False))
 		self.value = dispVal
 		self.overridden = True
 		
@@ -2826,30 +3172,29 @@ class ColorSpaceEditor(UIElement):
 
 
 class FileEditor(UIElement):
-	def __init__(self, x, y, width, height, name, value, parent):
-		if height < 55:
-			height = 55
-		UIElement.__init__(self, x, y, width, height, name, '', parent)
-		self.label = Label(5, 5, name, name, self)
-		self.filename = TextField(15, 25, 200, 20, name, value, self)
-		self.browseButton = Button(218, 24, 60, 20, "Browse", "Browse", 'normal', self)
+	height = 55
+	def __init__(self, x, y, width, height, name, value, parent, auto_register):
+		UIElement.__init__(self, x, y, width, self.height, name, '', parent, auto_register)
+		self.label = Label(5, 5, name, name, self, True)
+		self.filename = TextField(15, 25, 200, 20, name, value, self, True)
+		self.browseButton = Button(218, 24, 60, 20, "Browse", "Browse", 'normal', self, True)
 		self.browseButton.release_functions.append(self.openBrowseWindow)
-		self.overrideButton = Button(285, 24, 60, 20, "Override", "Override", 'normal', self)
+		self.overrideButton = Button(285, 24, 60, 20, "Override", "Override", 'normal', self, True)
 		self.overrideButton.release_functions.append(self.override_type)
 		self.overridden = False
-		self.addElement(self.label)
-		self.addElement(self.filename)
-		self.addElement(self.browseButton)
-		self.addElement(self.overrideButton)
+		#self.addElement(self.label)
+		#self.addElement(self.filename)
+		#self.addElement(self.browseButton)
+		#self.addElement(self.overrideButton)
 		
 	def override_type(self, button):
 		dispVal = self.filename.getValue()
 		self.elements = []
 		self.z_stack = []
 		self.draw_stack = []
-		self.addElement(Label(5, 5, self.name, self.name, self))
+		self.addElement(Label(5, 5, self.name, self.name, self, False))
 		width = self.get_string_width(self.name, 'normal') + 5
-		self.addElement(TextField(width + 10, 5, 250, 20, self.name, dispVal, self))
+		self.addElement(TextField(width + 10, 5, 250, 20, self.name, dispVal, self, False))
 		self.value = dispVal
 		self.overridden = True
 	
@@ -2866,12 +3211,73 @@ class FileEditor(UIElement):
 		else:
 			value = self.filename.getValue()
 		return value
+		
+class ArrayEditor(UIElement):
+	def __init__(self, x, y, widht, height, name, class_name, values, parent, auto_register):
+		UIElement.__init__(self, x, y, height, name, '', parent, auto_register)
+		self.editorPanel = Panel(0, 0, 400, 600, "ParameterEditor", "Array Editor:", self, False) # The container for the array value itself
+		target_class = globals()[class_name]
+		idx = 0
+		self.closeButton = Button(5, 575, 50, 20, "Cancel", "Cancel", self.editorPanel, True)
+		self.okButton = Button(5, 575, self.editorPanel.width - 50,  20, "OK", "OK", self.editorPanel, True)
+		self.scrollPane = ScrollPane(0, 80, 400, 530, "scrollPane", "scrollPane", self.editorPanel, True)
+		#self.editorPane.addElement(self.scrollPane)
+		self.label = Label(5, 5, name, name, self, True)
+		#self.addElement(label)
+		self.launchButton = Button(100, 5, 100, 20, "Button", "Launch Editor", self, True)
+		self.launchButton.release_functions(self.showEditor)
+		#self.addElement(launchButton)
+		for value in values: 
+			editor = new_class(0, 0, 400, target_class.height, "Editor %d" % idx, value, self.scrollPane, True)
+			#self.scrollPane.addElement(editor)  
+		
+		# that should be that.
+		
+	def getValue(self):
+		value = []
+		for element in self.scrollPane.elements:
+			value.append(element.getValue()) # get the value in question and return it
+		return value
 
+	def showEditor(self, button):
+		# show the editor
+		self.editing = True
+		
+	def closeEditor(self, button):
+		self.editing = False
+			
+	def draw():
+		# draw the pretty picture
+		if self.editing:
+			# determine the center of the screen			
+			x = (screen[0] / 2) - (self.editorPane.width / 2)
+			y = (screen[1] / 2) + (self.editorPane.height / 2)
+			# find the offset from my button to the x/y locations of the picker
+			if self.absX > x:
+				# the distance is negative so I use a negative value
+				self.editorPane.x = 0 - self.absX - x
+			else:
+				self.editorPane.x = x - self.absX
 
+			if self.absY > y:
+				self.editorPane.y = self.absY - y
+			else:
+				self.editorPane.y = 0 - y - self.absY
 
+			self.editorPane.invalid = True
+			self.editorPane.draw()
+		else:
+			UIElement.draw(self) # self.elements will take care of everything.	
+			
+	def hit_test():
+		rval = False
+		if self.editing:
+			rval = self.editorPane.hit_test()
+		else:
+			rval = UIElement.hit_test(self)
+		return rval
+		
+		
 
-
-
-
-
-
+	
+		
