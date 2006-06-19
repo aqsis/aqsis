@@ -1073,9 +1073,19 @@ RtVoid	RiCropWindow( RtFloat left, RtFloat right, RtFloat top, RtFloat bottom )
 		valid = false;
 	}
 
+	if (bottom == top)
+	{
+		valid = false;
+	}
+
+	if (left == right)
+	{
+		valid = false;
+	}
+
 	if( !valid )
 	{
-		Aqsis::log() << error << "Invalid RiCropWindow, aborting" << std::endl;
+		Aqsis::log() << error << "Invalid RiCropWindow, ignoring" << std::endl;
 		return;
 	}
 
