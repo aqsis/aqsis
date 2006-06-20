@@ -1071,12 +1071,12 @@ RtVoid	RiCropWindow( RtFloat left, RtFloat right, RtFloat top, RtFloat bottom )
 		valid = false;
 	}
 
-	if (bottom >= top)
+	if (bottom == top)
 	{
 		valid = false;
 	}
 
-	if (left >= right)
+	if (left == right)
 	{
 		valid = false;
 	}
