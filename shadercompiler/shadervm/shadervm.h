@@ -615,6 +615,8 @@ class CqShaderVM : public CqShaderStack, public IqShader, public CqDSORepository
 
 		TqInt	GetShaderVarCount();				// for libslxargs
 		IqShaderData*	GetShaderVarAt( int varIndex );  		// for libslxargs
+		void SetType(EqShaderType type);
+
 		EqShaderType	Type()
 		{
 			return ( m_Type );

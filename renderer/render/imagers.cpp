@@ -44,6 +44,7 @@ CqImagersource::CqImagersource( const boost::shared_ptr<IqShader>& pShader, TqBo
 {
 
 	m_pAttributes = const_cast<CqAttributes*>( QGetRenderContext() ->pattrCurrent() );
+	m_pShader->SetType(Type_Imager);
 	ADDREF( m_pAttributes );
 }
 
@@ -115,7 +116,10 @@ void CqImagersource::Initialise( IqBucket* pBucket )
 	time() ->SetFloat( shuttertime );
 
 
+
 	m_pShader->Initialise( uGridRes, vGridRes, (uGridRes+1)*(vGridRes+1), m_pShaderExecEnv );
+
+
 	for ( j = 0; j < vGridRes; j++ )
 	{
 		for ( i = 0; i < uGridRes; i++ )

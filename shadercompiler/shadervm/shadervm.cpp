@@ -750,6 +750,14 @@ static TqBool notspace(char C)
 }
 
 //---------------------------------------------------------------------
+/** Set the shader type important for Imager' shader
+*/
+void CqShaderVM::SetType(EqShaderType type)
+{
+	m_Type = type;
+}
+
+//---------------------------------------------------------------------
 /** Load a token from a compiled slx file.
 */
 
@@ -1460,10 +1468,36 @@ void CqShaderVM::PrepareShaderForUse( )
 	// was defined within the world. If defined outside the world, the shader state is constant
 	// irrespective of any changes introduced during the render pass (i.e. autoshadows etc.).
 
-   // However Imager shader are defined outside of the world... therefore it is required
-   // to call InitialiseParameters().
+	// However Imager shader are defined outside of the world... therefore it is required
+	// to call InitialiseParameters().
 	if(!m_outsideWorld || m_Type == Type_Imager)
 		InitialiseParameters();
+
+ 	switch (m_Type)
+	{
+		case Type_Surface:
+			Aqsis::log() << debug << "surface shader " << strName().c_str() << std::endl;
+			break;
+		case Type_Lightsource:
+			Aqsis::log() << debug << "lightsource shader " << strName().c_str() << std::endl;
+			break;
+		case Type_Volume:
+			Aqsis::log() << debug << "volume shader " << strName().c_str() << std::endl;
+			break;
+		case Type_Displacement:
+			Aqsis::log() << debug << "displacement shader " << strName().c_str() << std::endl;
+			break;
+		case Type_Transformation:
+			Aqsis::log() << debug << "transformation shader " << strName().c_str() << std::endl;
+			break;
+		case Type_Imager:
+			Aqsis::log() << debug << "imager shader " << strName().c_str() << std::endl;
+			break;
+		default:
+			Aqsis::log() << debug << "unknown shader type " << strName().c_str() << std::endl;
+			break;
+	}	
+
 }
 
 void CqShaderVM::InitialiseParameters( )
@@ -1493,7 +1527,10 @@ void CqShaderVM::InitialiseParameters( )
 		CqString _strSpace( "shader" );
 		if ( strSpace.compare( "" ) != 0 )
 			_strSpace = strSpace;
-		CqMatrix matTrans = QGetRenderContextI() ->matSpaceToSpace( _strSpace.c_str(), "current", getTransform(), getTransform(), QGetRenderContextI()->Time() );
+		CqMatrix matTrans;
+
+		if (getTransform())
+			matTrans = QGetRenderContextI() ->matSpaceToSpace( _strSpace.c_str(), "current", getTransform(), getTransform(), QGetRenderContextI()->Time() );
 
 		while ( count-- > 0 )
 		{

@@ -320,6 +320,8 @@ class CqLayeredShader : public IqShader
 		virtual void AddLayer(const CqString& layername, const boost::shared_ptr<IqShader>& layer);
 		virtual void AddConnection(const CqString& layer1, const CqString& variable1, const CqString& layer2, const CqString& variable2);
 
+		virtual void SetType(EqShaderType type);
+
 	protected:
 		TqInt	m_Uses;			///< Bit vector representing the system variables used by this shader.
 	private:

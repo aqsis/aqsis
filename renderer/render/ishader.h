@@ -129,6 +129,7 @@ struct IqShader
 	virtual TqBool IsLayered() = 0;
 	virtual void AddLayer(const CqString& layername, const boost::shared_ptr<IqShader>& layer) = 0;
 	virtual void AddConnection(const CqString& layer1, const CqString& variable1, const CqString& layer2, const CqString& variable2) = 0;
+	virtual void SetType(EqShaderType type) = 0;
 };
 
 

@@ -108,6 +108,10 @@ void CqLayeredShader::Evaluate( const boost::shared_ptr<IqShaderExecEnv>& pEnv )
 	}
 }
 
+void CqLayeredShader::SetType( EqShaderType type)
+{
+}
+
 //---------------------------------------------------------------------
 
 END_NAMESPACE( Aqsis )
