@@ -284,10 +284,10 @@ for option in options:
 	path, name = os.path.split(option)
 	env.Distribute(path, option)
 
-bundle = env.MakeBundle('Aqsis.app', aqsis,
-			'org.aqsis.aqsis',
-			'Info.plist',
-			'APPL',
-			'AQSIS',
-			'#/platform/darwin/aqsis.icns')
-env.Alias('bundle', bundle)
+#bundle = env.MakeBundle('Aqsis.app', aqsis,
+#			'org.aqsis.aqsis',
+#			'Info.plist',
+#			'APPL',
+#			'AQSIS',
+#			'#/platform/darwin/aqsis.icns')
+#env.Alias('bundle', bundle)
