@@ -1459,7 +1459,10 @@ void CqShaderVM::PrepareShaderForUse( )
 	// Only do the second stage setup of the shader parameters if the shader
 	// was defined within the world. If defined outside the world, the shader state is constant
 	// irrespective of any changes introduced during the render pass (i.e. autoshadows etc.).
-	if(!m_outsideWorld)
+
+   // However Imager shader are defined outside of the world... therefore it is required
+   // to call InitialiseParameters().
+	if(!m_outsideWorld || m_Type == Type_Imager)
 		InitialiseParameters();
 }
 
