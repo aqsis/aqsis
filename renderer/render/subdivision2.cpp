@@ -1545,7 +1545,7 @@ TqInt CqSurfaceSubdivisionPatch::Split( std::vector<boost::shared_ptr<CqSurface>
 			if ( ( *iUP ) ->Class() == class_varying )
 			{
 				// Copy any 'varying' class primitive variables.
-				CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName(), ( *iUP ) ->Count() );
+				CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
 				pNewUP->SetSize( pSurface->cVarying() );
 				pNewUP->SetValue( ( *iUP ), 0, aiVertices[5] );
 				pNewUP->SetValue( ( *iUP ), 1, aiVertices[6] );
@@ -1556,7 +1556,7 @@ TqInt CqSurfaceSubdivisionPatch::Split( std::vector<boost::shared_ptr<CqSurface>
 			else if ( ( *iUP ) ->Class() == class_vertex )
 			{
 				// Copy any 'vertex' class primitive variables.
-				CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName(), ( *iUP ) ->Count() );
+				CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
 				pNewUP->SetSize( pSurface->cVertex() );
 				TqUint i;
 				for( i = 0; i < pSurface->cVertex(); i++ )
@@ -1566,7 +1566,7 @@ TqInt CqSurfaceSubdivisionPatch::Split( std::vector<boost::shared_ptr<CqSurface>
 			else if ( ( *iUP ) ->Class() == class_facevarying )
 			{
 				// Copy any 'facevarying' class primitive variables.
-				CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName(), ( *iUP ) ->Count() );
+				CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
 				pNewUP->SetSize( pSurface->cVertex() );
 				TqUint i;
 				for( i = 0; i < pSurface->cVertex(); i++ )
@@ -1576,7 +1576,7 @@ TqInt CqSurfaceSubdivisionPatch::Split( std::vector<boost::shared_ptr<CqSurface>
 			else if ( ( *iUP ) ->Class() == class_uniform )
 			{
 				// Copy any 'uniform' class primitive variables.
-				CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName(), ( *iUP ) ->Count() );
+				CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
 				pNewUP->SetSize( pSurface->cUniform() );
 				pNewUP->SetValue( ( *iUP ), 0, m_FaceIndex );
 				pSurface->AddPrimitiveVariable( pNewUP );
@@ -1584,7 +1584,7 @@ TqInt CqSurfaceSubdivisionPatch::Split( std::vector<boost::shared_ptr<CqSurface>
 			else if ( ( *iUP ) ->Class() == class_constant )
 			{
 				// Copy any 'constant' class primitive variables.
-				CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName(), ( *iUP ) ->Count() );
+				CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
 				pNewUP->SetSize( 1 );
 				pNewUP->SetValue( ( *iUP ), 0, 0 );
 				pSurface->AddPrimitiveVariable( pNewUP );
@@ -1919,7 +1919,7 @@ boost::shared_ptr<CqSubdivision2> CqSurfaceSubdivisionPatch::Extract( TqInt iTim
 		if ( ( *iUP ) ->Class() == class_vertex || ( *iUP ) ->Class() == class_varying )
 		{
 			// Copy any 'vertex' or 'varying' class primitive variables.
-			CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName(), ( *iUP ) ->Count() );
+			CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
 			pNewUP->SetSize( cVerts );
 			std::map<TqInt, TqInt>::iterator i;
 			for( i = Vertices.begin(); i != Vertices.end(); i++ )
@@ -1929,7 +1929,7 @@ boost::shared_ptr<CqSubdivision2> CqSurfaceSubdivisionPatch::Extract( TqInt iTim
 		else if ( ( *iUP ) ->Class() == class_facevarying )
 		{
 			// Copy any 'facevarying' class primitive variables.
-			CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName(), ( *iUP ) ->Count() );
+			CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
 			pNewUP->SetSize( FVertices.size() );
 			std::vector<TqInt>::iterator i;
 			TqInt iv = 0;
@@ -1940,7 +1940,7 @@ boost::shared_ptr<CqSubdivision2> CqSurfaceSubdivisionPatch::Extract( TqInt iTim
 		else if ( ( *iUP ) ->Class() == class_uniform )
 		{
 			// Copy any 'uniform' class primitive variables.
-			CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName(), ( *iUP ) ->Count() );
+			CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
 			pNewUP->SetSize( pSurface->pPoints()->cUniform() );
 			pNewUP->SetValue( ( *iUP ), 0, m_FaceIndex );
 			pSurface->pPoints()->AddPrimitiveVariable( pNewUP );
@@ -1948,7 +1948,7 @@ boost::shared_ptr<CqSubdivision2> CqSurfaceSubdivisionPatch::Extract( TqInt iTim
 		else if ( ( *iUP ) ->Class() == class_constant )
 		{
 			// Copy any 'constant' class primitive variables.
-			CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName(), ( *iUP ) ->Count() );
+			CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
 			pNewUP->SetSize( 1 );
 			pNewUP->SetValue( ( *iUP ), 0, 0 );
 			pSurface->pPoints()->AddPrimitiveVariable( pNewUP );

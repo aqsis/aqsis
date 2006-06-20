@@ -1542,7 +1542,7 @@ void CqShaderVM::InitialiseParameters( )
 void CqShaderVM::SetArgument( CqParameter* pParam, IqSurface* pSurface )
 {
 	// Find the relevant variable.
-	TqInt i = FindLocalVarIndex( pParam->strName() );
+	TqInt i = FindLocalVarIndex( pParam->strName().c_str() );
 	if ( i >= 0 )
 	{
 		/// \todo: Find out how to handle arrays.

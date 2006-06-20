@@ -999,7 +999,7 @@ TqInt CqSurfacePatchMeshBicubic::Split( std::vector<boost::shared_ptr<CqSurface>
 				if ( ( *iUP ) ->Class() == class_varying )
 				{
 					// Copy any 'varying' class primitive variables.
-					CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName(), ( *iUP ) ->Count() );
+					CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
 					pNewUP->SetSize( pSurface->cVarying() );
 
 					pNewUP->SetValue( ( *iUP ), 0, iTa );
@@ -1011,7 +1011,7 @@ TqInt CqSurfacePatchMeshBicubic::Split( std::vector<boost::shared_ptr<CqSurface>
 				else if ( ( *iUP ) ->Class() == class_vertex )
 				{
 					// Copy any 'vertex' class primitive variables.
-					CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName(), ( *iUP ) ->Count() );
+					CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
 					pNewUP->Clear();
 					pNewUP->SetSize( pSurface->cVertex() );
 
@@ -1031,7 +1031,7 @@ TqInt CqSurfacePatchMeshBicubic::Split( std::vector<boost::shared_ptr<CqSurface>
 				else if ( ( *iUP ) ->Class() == class_uniform )
 				{
 					// Copy any 'uniform' class primitive variables.
-					CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName(), ( *iUP ) ->Count() );
+					CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
 					pNewUP->SetSize( pSurface->cUniform() );
 					pNewUP->SetValue( ( *iUP ), 0, j );
 					pSurface->AddPrimitiveVariable( pNewUP );
@@ -1039,7 +1039,7 @@ TqInt CqSurfacePatchMeshBicubic::Split( std::vector<boost::shared_ptr<CqSurface>
 				else if ( ( *iUP ) ->Class() == class_constant )
 				{
 					// Copy any 'constant' class primitive variables.
-					CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName(), ( *iUP ) ->Count() );
+					CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
 					pNewUP->SetSize( 1 );
 					pNewUP->SetValue( ( *iUP ), 0, 0 );
 					pSurface->AddPrimitiveVariable( pNewUP );
@@ -1219,7 +1219,7 @@ TqInt CqSurfacePatchMeshBilinear::Split( std::vector<boost::shared_ptr<CqSurface
 				if ( ( *iUP ) ->Class() == class_varying )
 				{
 					// Copy any 'varying' class primitive variables.
-					CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName(), ( *iUP ) ->Count() );
+					CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
 					pNewUP->SetSize( pSurface->cVarying() );
 
 					pNewUP->SetValue( ( *iUP ), 0, iTa );
@@ -1232,7 +1232,7 @@ TqInt CqSurfacePatchMeshBilinear::Split( std::vector<boost::shared_ptr<CqSurface
 				else if ( ( *iUP ) ->Class() == class_vertex )
 				{
 					// Copy any 'vertex' class primitive variables.
-					CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName(), ( *iUP ) ->Count() );
+					CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
 					pNewUP->SetSize( pSurface->cVertex() );
 
 					iP = PatchCoord( i, j );
@@ -1249,7 +1249,7 @@ TqInt CqSurfacePatchMeshBilinear::Split( std::vector<boost::shared_ptr<CqSurface
 				else if ( ( *iUP ) ->Class() == class_uniform )
 				{
 					// Copy any 'uniform' class primitive variables.
-					CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName(), ( *iUP ) ->Count() );
+					CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
 					pNewUP->SetSize( pSurface->cUniform() );
 					pNewUP->SetValue( ( *iUP ), 0, j );
 					pSurface->AddPrimitiveVariable( pNewUP );
@@ -1257,7 +1257,7 @@ TqInt CqSurfacePatchMeshBilinear::Split( std::vector<boost::shared_ptr<CqSurface
 				else if ( ( *iUP ) ->Class() == class_constant )
 				{
 					// Copy any 'constant' class primitive variables.
-					CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName(), ( *iUP ) ->Count() );
+					CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
 					pNewUP->SetSize( 1 );
 
 					pNewUP->SetValue( ( *iUP ), 0, 0 );

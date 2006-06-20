@@ -29,7 +29,6 @@
 
 #include	"aqsis.h"
 #include	"sstring.h"
-#include 	"logging.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -418,41 +417,6 @@ std::ostream& operator<<( std::ostream & stmOutput, const CqString& strString )
 }
 
 
-// Destructor of the StringTable; for the benefit of the user display
-// all the current strings
-CqStringTable::~CqStringTable()
-{
-TqCharPtrSet::iterator i;
-
-#ifdef _DEBUG
-	Aqsis::log() << info << "StringTable(): " <<  std::endl;
-#endif
-	for (i=mStrings.begin(); i!=mStrings.end(); i++)
-	{
-		TqChar *str = (char *)(*i);
-#ifdef _DEBUG
-		Aqsis::log() << info << "\t" << str <<  std::endl;
-#endif
-		delete str;
-	}
-}
-
-//---------------------------------------------------------------------
-/** Dump the content of the table of strings to the console
- */
-
-void CqStringTable::Dump()
-{
-TqCharPtrSet::iterator i;
-
-	for (i=mStrings.begin(); i!=mStrings.end(); i++)
-	{
-		TqChar *str = (TqChar *)(*i);
-      		TqChar adress[80];
-      		sprintf(adress, ": 0x%x", &str[0]);
-		Aqsis::log() << info << "\t\t " << str << adress << std::endl;
-	}
-}
 
 //---------------------------------------------------------------------
 

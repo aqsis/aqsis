@@ -443,54 +443,54 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 		 */
 		virtual void AddPrimitiveVariable( CqParameter* pParam )
 		{
-			static TqChar * RIH_P = (TqChar *) CqParameter::GetId("P");
-			static TqChar * RIH_N = (TqChar *) CqParameter::GetId("N");
-			static TqChar * RIH_CS = (TqChar *) CqParameter::GetId("Cs");
-			static TqChar * RIH_OS = (TqChar *) CqParameter::GetId("Os");
-			static TqChar * RIH_S = (TqChar *) CqParameter::GetId("s");
-			static TqChar * RIH_T = (TqChar *) CqParameter::GetId("t") ;
-			static TqChar * RIH_U = (TqChar *) CqParameter::GetId("u");
-			static TqChar * RIH_V = (TqChar *) CqParameter::GetId("v");
+			static TqUlong RIH_P = CqString::hash("P");
+			static TqUlong RIH_N = CqString::hash("N");
+			static TqUlong RIH_CS = CqString::hash("Cs");
+			static TqUlong RIH_OS = CqString::hash("Os");
+			static TqUlong RIH_S = CqString::hash("s");
+			static TqUlong RIH_T = CqString::hash("t") ;
+			static TqUlong RIH_U = CqString::hash("u");
+			static TqUlong RIH_V = CqString::hash("v");
 
 			m_aUserParams.push_back( pParam );
 
-			if ( pParam->strName() == RIH_P )
+			if ( pParam->hash() == RIH_P )
 			{
 				assert( -1 == m_aiStdPrimitiveVars[ EnvVars_P ] );
 				m_aiStdPrimitiveVars[ EnvVars_P ] = m_aUserParams.size() - 1;
 			}
-			else if ( pParam->strName() == RIH_N )
+			else if ( pParam->hash() == RIH_N )
 			{
 				assert( -1 == m_aiStdPrimitiveVars[ EnvVars_N ] );
 				m_aiStdPrimitiveVars[ EnvVars_N ] = m_aUserParams.size() - 1;
 			}
 
-			else if ( pParam->strName() == RIH_CS )
+			else if ( pParam->hash() == RIH_CS )
 			{
 				assert( -1 == m_aiStdPrimitiveVars[ EnvVars_Cs ] );
 				m_aiStdPrimitiveVars[ EnvVars_Cs ] = m_aUserParams.size() - 1;
 			}
-			else if ( pParam->strName() == RIH_OS )
+			else if ( pParam->hash() == RIH_OS )
 			{
 				assert( -1 == m_aiStdPrimitiveVars[ EnvVars_Os ] );
 				m_aiStdPrimitiveVars[ EnvVars_Os ] = m_aUserParams.size() - 1;
 			}
-			else if ( pParam->strName() == RIH_S  )
+			else if ( pParam->hash() == RIH_S  )
 			{
 				assert( -1 == m_aiStdPrimitiveVars[ EnvVars_s ] );
 				m_aiStdPrimitiveVars[ EnvVars_s ] = m_aUserParams.size() - 1;
 			}
-			else if ( pParam->strName() == RIH_T)
+			else if ( pParam->hash() == RIH_T)
 			{
 				assert( -1 == m_aiStdPrimitiveVars[ EnvVars_t ] );
 				m_aiStdPrimitiveVars[ EnvVars_t ] = m_aUserParams.size() - 1;
 			}
-			else if ( pParam->strName() == RIH_U)
+			else if ( pParam->hash() == RIH_U)
 			{
 				assert( -1 == m_aiStdPrimitiveVars[ EnvVars_u ] );
 				m_aiStdPrimitiveVars[ EnvVars_u ] = m_aUserParams.size() - 1;
 			}
-			else if ( pParam->strName() == RIH_V )
+			else if ( pParam->hash() == RIH_V )
 			{
 				assert( -1 == m_aiStdPrimitiveVars[ EnvVars_v ] );
 				m_aiStdPrimitiveVars[ EnvVars_v ] = m_aUserParams.size() - 1;

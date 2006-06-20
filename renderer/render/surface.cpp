@@ -675,12 +675,12 @@ void	CqSurface::Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const
  */
 CqParameter* CqSurface::FindUserParam( const char* name ) const
 {
-   	const TqChar * hash = CqParameter::GetId(name );
+	TqUlong strName = CqString::hash(name );
 	std::vector<CqParameter*>::const_iterator iUP;
 	std::vector<CqParameter*>::const_iterator end = m_aUserParams.end();
 	for ( iUP = m_aUserParams.begin(); iUP != end ; iUP++ )
 	{
-		if( ( *iUP )->strName() == hash )
+		if( ( *iUP )->hash() == strName )
 			return( *iUP );
 	}
 	return( NULL );

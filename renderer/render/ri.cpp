@@ -706,8 +706,6 @@ RtVoid	RiEnd()
 	delete( QGetRenderContext() );
 	QSetRenderContext( 0 );
 
-  	CqParameter::Dump();
-
 	return ;
 }
 
