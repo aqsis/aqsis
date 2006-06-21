@@ -19,8 +19,8 @@ class UI:
 		
 	def get_string_width(self, text, fontsize):
 		# set the raster position somewhere way offscreen
-		Blender.BGL.glRasterPos2i(-100, -100)
-		width = Blender.Draw.Text(text, fontsize)    
+		#Blender.BGL.glRasterPos2i(-100, -100)
+		width = Blender.Draw.GetStringWidth(text, fontsize)    
 		return width
 	
 	def uidrawbox(self, mode, minx, miny, maxx, maxy, rad, cornermask):
@@ -410,7 +410,29 @@ class UI:
 		B = var_B * 255   
 		rgb = [R, G, B]
 		return rgb
-		
+	
+	def rgb2Float(self, color):		
+		r_s = color[0]
+		g_s = color[1]
+		b_s = color[2]
+		if float(r_s) > 1:			
+			r = int(r_s) 
+		else:
+			r = float(r_s) * 255			
+			
+		if float(g_s) > 1:
+			g = float(g_s) 
+		else:
+			g = float(g_s) * 255
+						
+		if float(b_s) > 1:
+			b = float(b_s) 
+		else:
+			b = float(b_s) * 255			
+			
+		rgb = [r, g, b, 255]
+		return rgb
+	
 	def rgbToXyz(self, value):
 		var_R = ( value[0] / 255 )        # Where R = 0 ÷ 255
 		var_G = ( value[1] / 255 )        # Where G = 0 ÷ 255
@@ -501,6 +523,7 @@ class EventManager(UI):
 			self.elements.append(element)
 			self.z_stack.append(element)
 			self.draw_stack.append(element)
+		self.raiseElement(element) # of course this does some redundant crap, but ok
 			
 	def removeElement(self, element):		
 		""" removeElement(UIElement element) - Removes the supplied UIElement from the element list."""
@@ -517,6 +540,7 @@ class EventManager(UI):
 		self.z_stack.insert(0, element)
 		self.draw_stack.remove(element)
 		self.draw_stack.append(element)
+		element.invalid = True
 		#element.offset = 4
 		#for x in self.elements:
 		#	if x <> element:
@@ -2880,15 +2904,27 @@ class ConfirmDialog(Panel):
 	def getValue(self):
 		return self.state # returns the state of the dialog
 		
+class Image(UIElement):
+	def __init__(self, x, y, width, height, image, parent, auto_register):
+		UIElement.__init__(self, x, y, width, height, "Image",  "image", parent, auto_register)
+		self.image = image
+	
+	def draw(self):
+		self.validate()
+		Blender.Draw.Image(self.image, self.absX, self.absY)
+		# that should be that. Images should be sized to whatever they need to be on creation.
+		
 # BtoR-Specific objects
 class ColorEditor(UIElement):
 	height = 60
 	ColorSpaces = ['rgb', 'hsv', 'hsl', 'YIQ', 'xyz', 'xyY']
+	paramtype = "color"
 	def __init__(self, x, y, width, height, name, value, parent, auto_register):		
 		self.value = value		
 		# set my height to what I need it to be
 		UIElement.__init__(self, x, y, width, self.height, name, '', parent, auto_register)				
 		self.addElement(Label(5, 5, "Parameter: " + name, "Parameter: " + name, self, False))
+		self.param_name = name
 		# self.addElement(Label(5, 25, 'Color Space:', 'Color Space:', self, False))
 		# width = self.get_string_width('Color Space:', 'normal') + 5
 		# self.spaceMenu = Menu(width + 10, 25, 75, 20, 'Color Space:', self.ColorSpaces, self, True)
@@ -2909,7 +2945,7 @@ class ColorEditor(UIElement):
 		#self.addElement(self.label_B)
 		#self.addElement(self.label_C)
 		rgbValue = [value[0] * 255, value[1] * 255, value[2] * 255]
-		self.colorButton = ColorButton(225, 26, 45, 20, 'Picker', rgbValue, self, True)
+		self.colorButton = ColorButton(200, 26, 45, 20, 'Picker', rgbValue, self, True)
 		# self.addElement(self.colorButton)
 		
 		self.Red.update_functions.append(self.updateColor)
@@ -2922,7 +2958,12 @@ class ColorEditor(UIElement):
 		self.colorButton.outlined = True
 		
 	def getValue(self):		
-		value = [self.spaceMenu.getValue(), self.colorButton.getValue()]
+		value = self.colorButton.getValue()
+		r = float(float(value[0]) / 255)
+		g = float(float(value[1]) / 255)
+		b = float(float(value[2]) / 255)
+		
+		return [r, g, b]
 		
 	def updateFields(self, obj):
 		# get the color of the button
@@ -2978,22 +3019,24 @@ class ColorEditor(UIElement):
 
 class CoordinateEditor(UIElement):
 	height = 75
+	paramtype = "coordinate"
 	coordinateSpaces = ['current', 'object', 'shader', 'world', 'camera', 'screen', 'raster', 'NDC']
 	def __init__(self, x, y, width, height, name, value, parent, auto_register):
 		UIElement.__init__(self, x, y, width, self.height, name, '', parent, auto_register)
 		self.addElement(Label(5, 2, name, name, self, True))
+		self.param_name = name
 		width = self.get_string_width("Coordinate Space:", 'normal') + 5
-		self.x_val = TextField(width + 130, 25, 30, 20, "coord_x", value[0], self, True)
-		self.y_val = TextField(width + 185, 25, 30, 20, "coord_y", value[1], self, True)
-		self.z_val = TextField(width + 240, 25, 30, 20, "coord_z", value[2], self, True)
+		self.x_val = TextField(width + 30, 25, 30, 20, "coord_x", value[0], self, True)
+		self.y_val = TextField(width + 85, 25, 30, 20, "coord_y", value[1], self, True)
+		self.z_val = TextField(width + 140, 25, 30, 20, "coord_z", value[2], self, True)
 		#self.addElement(self.x_val)
-		self.addElement(Label(width + 108, 28, "X:", "X:", self, False))
+		self.addElement(Label(width + 10, 28, "X:", "X:", self, False))
 		#self.addElement(self.y_val)
-		self.addElement(Label(width + 165, 28, "Y:", "Y:", self, False))
+		self.addElement(Label(width + 65, 28, "Y:", "Y:", self, False))
 		#self.addElement(self.z_val)		
-		self.addElement(Label(width + 220, 28, "Z:", "Z:", self, False))
+		self.addElement(Label(width + 120, 28, "Z:", "Z:", self, False))
 		
-		self.spaceMenu = Menu(width + 10, 25, 85, 25, "Coordinate Space:", self.coordinateSpaces, self, True)
+		# self.spaceMenu = Menu(width + 10, 25, 85, 25, "Coordinate Space:", self.coordinateSpaces, self, True)
 		#self.addElement(self.spaceMenu)
 		self.addElement(Label(5, 25, "SpaceLabel", "Coordinate Space: ", self, False))
 		# the rest of this should take care of itself, all I need is a getValue()
@@ -3010,9 +3053,11 @@ class CoordinateEditor(UIElement):
 		
 class FloatEditor(UIElement):
 	height = 50
+	paramtype = "float"
 	# for numeric values
 	def __init__(self, x, y, width, height, name, value, parent, auto_register):
 		UIElement.__init__(self, x, y, width, self.height, name, '', parent, auto_register)
+		self.param_name = name
 		self.text = TextField(15, 25, 40, 20, name, value, self, True)
 		self.label = Label(5, 5, "Parameter: " + name, "Parameter: " + name, self, True)
 		#self.addElement(self.label)
@@ -3020,12 +3065,14 @@ class FloatEditor(UIElement):
 		self.bordered = True
 	
 	def getValue(self):
-		return double(self.text.getValue()) # return a double from here all the time
+		return float(self.text.getValue()) # return a double from here all the time
 		
 class TextEditor(UIElement):
 	height = 50
+	paramtype = "string"
 	def __init__(self, x, y, width, height, name, value, parent, auto_register):
 		UIElement.__init__(self, x, y, width, self.height, name, '', parent, auto_register)
+		self.param_name = name
 		width = self.get_string_width(name, 'normal') + 10
 		self.text = TextField(15, 25, 200, 20, name, value, self, True)
 		self.label = Label(5, 5, "Parameter: " + name, "Parmeter: " + name, self, True)			
@@ -3039,8 +3086,10 @@ class TextEditor(UIElement):
 		
 class MatrixEditor(UIElement):
 	height = 140
+	paramtype = "matrix"
 	def __init__(self, x, y, width, height, name, value, parent, auto_register):
 		UIElement.__init__(self, x, y, width, self.height, name, '', parent, auto_register)
+		self.param_name = name
 		column1 = []
 		column2 = []
 		column3 = []
@@ -3070,9 +3119,11 @@ class MatrixEditor(UIElement):
 # to force a fallback to a string value
 class SpaceEditor(UIElement):
 	height = 35
+	paramtype = "string"
 	Spaces = ['current', 'object', 'shader', 'world', 'camera', 'screen', 'raster', 'NDC']
 	def __init__(self, x, y, width, height, name, value, parent, auto_register):		
 		UIElement.__init__(self, x, y, width, self.height, name, '', parent, auto_register)
+		self.param_name = name
 		self.addElement(Label(5, 5, name, name, self, False))
 		# get the text width 
 		width = self.get_string_width(name, 'normal') + 5
@@ -3104,9 +3155,11 @@ class SpaceEditor(UIElement):
 
 class ProjectionEditor(UIElement):
 	height = 40
+	paramtype = "string"
 	Projections = ['st', 'planar', 'perspective', 'spherical', 'cylindrical']
 	def __init__(self, x, y, width, height, name, value, parent, auto_register):
 		UIElement.__init__(self, x, y, width, self.height, name, '', parent, auto_register)
+		self.param_name = name
 		self.addElement(Label(5, 5, name, name, self, False))
 		# get the text width 
 		width = self.get_string_width(name, 'normal') + 5
@@ -3138,9 +3191,11 @@ class ProjectionEditor(UIElement):
 	
 class ColorSpaceEditor(UIElement):
 	height = 40
+	paramtype = "string"
 	ColorSpaces = ['rgb', 'hsv', 'hsl', 'YIQ', 'xyz', 'xyY']
 	def __init__(self, x, y, width, height, name, value, parent, auto_register):
 		UIElement.__init__(self, x, y, width, self.height, name, '', parent, auto_register)
+		self.param_name = name
 		self.addElement(Label(5, 5, name, name, self, False))
 		# get the text width 
 		width = self.get_string_width(name, 'normal') + 5
@@ -3173,8 +3228,10 @@ class ColorSpaceEditor(UIElement):
 
 class FileEditor(UIElement):
 	height = 55
+	paramtype = "string"
 	def __init__(self, x, y, width, height, name, value, parent, auto_register):
 		UIElement.__init__(self, x, y, width, self.height, name, '', parent, auto_register)
+		self.param_name = name
 		self.label = Label(5, 5, name, name, self, True)
 		self.filename = TextField(15, 25, 200, 20, name, value, self, True)
 		self.browseButton = Button(218, 24, 60, 20, "Browse", "Browse", 'normal', self, True)
@@ -3213,8 +3270,10 @@ class FileEditor(UIElement):
 		return value
 		
 class ArrayEditor(UIElement):
+	paramtype = "array"
 	def __init__(self, x, y, widht, height, name, class_name, values, parent, auto_register):
 		UIElement.__init__(self, x, y, height, name, '', parent, auto_register)
+		self.param_name = name
 		self.editorPanel = Panel(0, 0, 400, 600, "ParameterEditor", "Array Editor:", self, False) # The container for the array value itself
 		target_class = globals()[class_name]
 		idx = 0
