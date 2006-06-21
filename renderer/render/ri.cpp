@@ -1938,7 +1938,10 @@ RtVoid	RiColor( RtColor Cq )
 
 	Debug_RiColor
 
-	QGetRenderContext() ->pattrWriteCurrent() ->GetColorAttributeWrite( "System", "Color" ) [ 0 ] = CqColor( Cq );
+	CqColor color(Cq);
+	color.Clamp();
+
+	QGetRenderContext() ->pattrWriteCurrent() ->GetColorAttributeWrite( "System", "Color" ) [ 0 ] = color;
 	QGetRenderContext() ->AdvanceTime();
 	return ;
 }
@@ -1958,7 +1961,10 @@ RtVoid	RiOpacity( RtColor Os )
 
 	Debug_RiOpacity
 
-	QGetRenderContext() ->pattrWriteCurrent() ->GetColorAttributeWrite( "System", "Opacity" ) [ 0 ] = CqColor( Os );
+	CqColor opacity(Os);
+	opacity.Clamp();
+
+	QGetRenderContext() ->pattrWriteCurrent() ->GetColorAttributeWrite( "System", "Opacity" ) [ 0 ] = opacity;
 	QGetRenderContext() ->AdvanceTime();
 	return ;
 }
