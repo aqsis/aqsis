@@ -1,5 +1,5 @@
 // Aqsis
-// Copyright © 1997 - 2001, Paul C. Gregory
+// Copyright  1997 - 2001, Paul C. Gregory
 //
 // Contact: pgregory@aqsis.org
 //
@@ -1515,7 +1515,314 @@ class CqNamedParameterList
 }
 ;
 
+///////////////////////////////////////////////////////////////////////////////
+	typedef CqParameterTyped<TqFloat, TqFloat> CqFloatParameter;
+	typedef boost::shared_ptr<CqFloatParameter> CqFloatParameterPtr;
+	
+	typedef CqParameterTyped<TqInt, TqFloat> CqIntParameter;
+	typedef boost::shared_ptr<CqIntParameter> CqIntParameterPtr;
 
+	typedef CqParameterTyped<CqVector3D, CqVector3D> CqPointParameter;
+	typedef boost::shared_ptr<CqPointParameter> CqPointParameterPtr;
+
+	typedef CqParameterTyped<CqString, CqString> CqStringParameter;
+	typedef boost::shared_ptr<CqStringParameter> CqStringParameterPtr;
+
+	typedef CqParameterTyped<CqColor, CqColor> CqColorParameter;
+	typedef boost::shared_ptr<CqColorParameter> CqColorParameterPtr;
+
+	typedef CqParameterTyped<CqVector4D, CqVector3D> CqHPointParameter;
+	typedef boost::shared_ptr<CqHPointParameter> CqHPointParameterPtr;
+
+	typedef CqParameterTyped<CqVector3D, CqVector3D> CqNormalParameter;
+	typedef boost::shared_ptr<CqNormalParameter> CqNormalParameterPtr;
+
+	typedef CqParameterTyped<CqVector3D, CqVector3D> CqVectorParameter;
+	typedef boost::shared_ptr<CqVectorParameter> CqVectorParameterPtr;
+
+	typedef CqParameterTyped<CqMatrix, CqMatrix> CqMatrixParameter;
+	typedef boost::shared_ptr<CqMatrixParameter> CqMatrixParameterPtr;
+
+// Typedefs for the constants
+	typedef CqParameterTypedConstant<TqFloat, type_float, TqFloat> CqFloatConstantParameter;
+	typedef boost::shared_ptr<CqFloatConstantParameter> CqFloatConstantParameterPtr;
+	
+	typedef CqParameterTypedConstant<TqInt, type_integer, TqFloat> CqIntConstantParameter;
+	typedef boost::shared_ptr<CqIntConstantParameter> CqIntConstantParameterPtr;
+
+	typedef CqParameterTypedConstant<CqVector3D, type_point, CqVector3D> CqPointConstantParameter;
+	typedef boost::shared_ptr<CqPointConstantParameter> CqPointConstantParameterPtr;
+
+	typedef CqParameterTypedConstant<CqString, type_string, CqString> CqStringConstantParameter;
+	typedef boost::shared_ptr<CqStringConstantParameter> CqStringConstantParameterPtr;
+
+	typedef CqParameterTypedConstant<CqColor, type_color, CqColor> CqColorConstantParameter;
+	typedef boost::shared_ptr<CqColorConstantParameter> CqColorConstantParameterPtr;
+
+	typedef CqParameterTypedConstant<CqVector4D, type_hpoint, CqVector3D> CqHPointConstantParameter;
+	typedef boost::shared_ptr<CqHPointConstantParameter> CqHPointConstantParameterPtr;
+
+	typedef CqParameterTypedConstant<CqVector3D, type_normal, CqVector3D> CqNormalConstantParameter;
+	typedef boost::shared_ptr<CqNormalConstantParameter> CqNormalConstantParameterPtr;
+
+	typedef CqParameterTypedConstant<CqVector3D, type_vector, CqVector3D> CqVectorConstantParameter;
+	typedef boost::shared_ptr<CqVectorConstantParameter> CqVectorConstantParameterPtr;
+
+	typedef CqParameterTypedConstant<CqMatrix, type_matrix, CqMatrix> CqMatrixConstantParameter;
+	typedef boost::shared_ptr<CqMatrixConstantParameter> CqMatrixConstantParameterPtr;
+
+// Uniforms
+	typedef CqParameterTypedUniform<TqFloat, type_float, TqFloat> CqFloatUniformParameter;
+	typedef boost::shared_ptr<CqFloatUniformParameter> CqFloatUniformParameterPtr;
+	
+	typedef CqParameterTypedUniform<TqInt, type_integer, TqFloat> CqIntUniformParameter;
+	typedef boost::shared_ptr<CqIntUniformParameter> CqIntUniformParameterPtr;
+
+	typedef CqParameterTypedUniform<CqVector3D, type_point, CqVector3D> CqPointUniformParameter;
+	typedef boost::shared_ptr<CqPointUniformParameter> CqPointUniformParameterPtr;
+
+	typedef CqParameterTypedUniform<CqString, type_string, CqString> CqStringUniformParameter;
+	typedef boost::shared_ptr<CqStringUniformParameter> CqStringUniformParameterPtr;
+
+	typedef CqParameterTypedUniform<CqColor, type_color, CqColor> CqColorUniformParameter;
+	typedef boost::shared_ptr<CqColorUniformParameter> CqColorUniformParameterPtr;
+
+	typedef CqParameterTypedUniform<CqVector4D, type_hpoint, CqVector3D> CqHPointUniformParameter;
+	typedef boost::shared_ptr<CqHPointUniformParameter> CqHPointUniformParameterPtr;
+
+	typedef CqParameterTypedUniform<CqVector3D, type_normal, CqVector3D> CqNormalUniformParameter;
+	typedef boost::shared_ptr<CqNormalUniformParameter> CqNormalUniformParameterPtr;
+
+	typedef CqParameterTypedUniform<CqVector3D, type_vector, CqVector3D> CqVectorUniformParameter;
+	typedef boost::shared_ptr<CqVectorUniformParameter> CqVectorUniformParameterPtr;
+
+	typedef CqParameterTypedUniform<CqMatrix, type_matrix, CqMatrix> CqMatrixUniformParameter;
+	typedef boost::shared_ptr<CqMatrixUniformParameter> CqMatrixUniformParameterPtr;
+
+// Typedefs for Varying
+	typedef CqParameterTypedVarying<TqFloat, type_float, TqFloat> CqFloatVaryingParameter;
+	typedef boost::shared_ptr<CqFloatVaryingParameter> CqFloatVaryingParameterPtr;
+	
+	typedef CqParameterTypedVarying<TqInt, type_integer, TqFloat> CqIntVaryingParameter;
+	typedef boost::shared_ptr<CqIntVaryingParameter> CqIntVaryingParameterPtr;
+
+	typedef CqParameterTypedVarying<CqVector3D, type_point, CqVector3D> CqPointVaryingParameter;
+	typedef boost::shared_ptr<CqPointVaryingParameter> CqPointVaryingParameterPtr;
+
+	typedef CqParameterTypedVarying<CqString, type_string, CqString> CqStringVaryingParameter;
+	typedef boost::shared_ptr<CqStringVaryingParameter> CqStringVaryingParameterPtr;
+
+	typedef CqParameterTypedVarying<CqColor, type_color, CqColor> CqColorVaryingParameter;
+	typedef boost::shared_ptr<CqColorVaryingParameter> CqColorVaryingParameterPtr;
+
+	typedef CqParameterTypedVarying<CqVector4D, type_hpoint, CqVector3D> CqHPointVaryingParameter;
+	typedef boost::shared_ptr<CqHPointVaryingParameter> CqHPointVaryingParameterPtr;
+
+	typedef CqParameterTypedVarying<CqVector3D, type_normal, CqVector3D> CqNormalVaryingParameter;
+	typedef boost::shared_ptr<CqNormalVaryingParameter> CqNormalVaryingParameterPtr;
+
+	typedef CqParameterTypedVarying<CqVector3D, type_vector, CqVector3D> CqVectorVaryingParameter;
+	typedef boost::shared_ptr<CqVectorVaryingParameter> CqVectorVaryingParameterPtr;
+
+	typedef CqParameterTypedVarying<CqMatrix, type_matrix, CqMatrix> CqMatrixVaryingParameter;
+	typedef boost::shared_ptr<CqMatrixVaryingParameter> CqMatrixVaryingParameterPtr;
+	
+// Vertex
+	typedef CqParameterTypedVertex<TqFloat, type_float, TqFloat> CqFloatVertexParameter;
+	typedef boost::shared_ptr<CqFloatVertexParameter> CqFloatVertexParameterPtr;
+	
+	typedef CqParameterTypedVertex<TqInt, type_integer, TqFloat> CqIntVertexParameter;
+	typedef boost::shared_ptr<CqIntVertexParameter> CqIntVertexParameterPtr;
+
+	typedef CqParameterTypedVertex<CqVector3D, type_point, CqVector3D> CqPointVertexParameter;
+	typedef boost::shared_ptr<CqPointVertexParameter> CqPointVertexParameterPtr;
+
+	typedef CqParameterTypedVertex<CqString, type_string, CqString> CqStringVertexParameter;
+	typedef boost::shared_ptr<CqStringVertexParameter> CqStringVertexParameterPtr;
+
+	typedef CqParameterTypedVertex<CqColor, type_color, CqColor> CqColorVertexParameter;
+	typedef boost::shared_ptr<CqColorVertexParameter> CqColorVertexParameterPtr;
+
+	typedef CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D> CqHPointVertexParameter;
+	typedef boost::shared_ptr<CqHPointVertexParameter> CqHPointVertexParameterPtr;
+
+	typedef CqParameterTypedVertex<CqVector3D, type_normal, CqVector3D> CqNormalVertexParameter;
+	typedef boost::shared_ptr<CqNormalVertexParameter> CqNormalVertexParameterPtr;
+
+	typedef CqParameterTypedVertex<CqVector3D, type_vector, CqVector3D> CqVectorVertexParameter;
+	typedef boost::shared_ptr<CqVectorVertexParameter> CqVectorVertexParameterPtr;
+
+	typedef CqParameterTypedVertex<CqMatrix, type_matrix, CqMatrix> CqMatrixVertexParameter;
+	typedef boost::shared_ptr<CqMatrixVertexParameter> CqMatrixVertexParameterPtr;
+
+// FaceVarying
+	typedef CqParameterTypedFaceVarying<TqFloat, type_float, TqFloat> CqFloatFaceVaryingParameter;
+	typedef boost::shared_ptr<CqFloatFaceVaryingParameter> CqFloatFaceVaryingParameterPtr;
+	
+	typedef CqParameterTypedFaceVarying<TqInt, type_integer, TqFloat> CqIntFaceVaryingParameter;
+	typedef boost::shared_ptr<CqIntFaceVaryingParameter> CqIntFaceVaryingParameterPtr;
+
+	typedef CqParameterTypedFaceVarying<CqVector3D, type_point, CqVector3D> CqPointFaceVaryingParameter;
+	typedef boost::shared_ptr<CqPointFaceVaryingParameter> CqPointFaceVaryingParameterPtr;
+
+	typedef CqParameterTypedFaceVarying<CqString, type_string, CqString> CqStringFaceVaryingParameter;
+	typedef boost::shared_ptr<CqStringFaceVaryingParameter> CqStringFaceVaryingParameterPtr;
+
+	typedef CqParameterTypedFaceVarying<CqColor, type_color, CqColor> CqColorFaceVaryingParameter;
+	typedef boost::shared_ptr<CqColorFaceVaryingParameter> CqColorFaceVaryingParameterPtr;
+
+	typedef CqParameterTypedFaceVarying<CqVector4D, type_hpoint, CqVector3D> CqHPointFaceVaryingParameter;
+	typedef boost::shared_ptr<CqHPointFaceVaryingParameter> CqHPointFaceVaryingParameterPtr;
+
+	typedef CqParameterTypedFaceVarying<CqVector3D, type_normal, CqVector3D> CqNormalFaceVaryingParameter;
+	typedef boost::shared_ptr<CqNormalFaceVaryingParameter> CqNormalFaceVaryingParameterPtr;
+
+	typedef CqParameterTypedFaceVarying<CqVector3D, type_vector, CqVector3D> CqVectorFaceVaryingParameter;
+	typedef boost::shared_ptr<CqVectorFaceVaryingParameter> CqVectorFaceVaryingParameterPtr;
+
+	typedef CqParameterTypedFaceVarying<CqMatrix, type_matrix, CqMatrix> CqMatrixFaceVaryingParameter;
+	typedef boost::shared_ptr<CqMatrixFaceVaryingParameter> CqMatrixFaceVaryingParameterPtr;
+
+// Constant Array
+	typedef CqParameterTypedConstantArray<TqFloat, type_float, TqFloat> CqFloatConstantArrayParameter;
+	typedef boost::shared_ptr<CqFloatConstantArrayParameter> CqFloatConstantArrayParameterPtr;
+	
+	typedef CqParameterTypedConstantArray<TqInt, type_integer, TqFloat> CqIntConstantArrayParameter;
+	typedef boost::shared_ptr<CqIntConstantArrayParameter> CqIntConstantArrayParameterPtr;
+
+	typedef CqParameterTypedConstantArray<CqVector3D, type_point, CqVector3D> CqPointConstantArrayParameter;
+	typedef boost::shared_ptr<CqPointConstantArrayParameter> CqPointConstantArrayParameterPtr;
+
+	typedef CqParameterTypedConstantArray<CqString, type_string, CqString> CqStringConstantArrayParameter;
+	typedef boost::shared_ptr<CqStringConstantArrayParameter> CqStringConstantArrayParameterPtr;
+
+	typedef CqParameterTypedConstantArray<CqColor, type_color, CqColor> CqColorConstantArrayParameter;
+	typedef boost::shared_ptr<CqColorConstantArrayParameter> CqColorConstantArrayParameterPtr;
+
+	typedef CqParameterTypedConstantArray<CqVector4D, type_hpoint, CqVector3D> CqHPointConstantArrayParameter;
+	typedef boost::shared_ptr<CqHPointConstantArrayParameter> CqHPointConstantArrayParameterPtr;
+
+	typedef CqParameterTypedConstantArray<CqVector3D, type_normal, CqVector3D> CqNormalConstantArrayParameter;
+	typedef boost::shared_ptr<CqNormalConstantArrayParameter> CqNormalConstantArrayParameterPtr;
+
+	typedef CqParameterTypedConstantArray<CqVector3D, type_vector, CqVector3D> CqVectorConstantArrayParameter;
+	typedef boost::shared_ptr<CqVectorConstantArrayParameter> CqVectorConstantArrayParameterPtr;
+
+	typedef CqParameterTypedConstantArray<CqMatrix, type_matrix, CqMatrix> CqMatrixConstantArrayParameter;
+	typedef boost::shared_ptr<CqMatrixConstantArrayParameter> CqMatrixConstantArrayParameterPtr;
+
+// Uniform array
+	typedef CqParameterTypedUniformArray<TqFloat, type_float, TqFloat> CqFloatUniformArrayParameter;
+	typedef boost::shared_ptr<CqFloatUniformArrayParameter> CqFloatUniformArrayParameterPtr;
+	
+	typedef CqParameterTypedUniformArray<TqInt, type_integer, TqFloat> CqIntUniformArrayParameter;
+	typedef boost::shared_ptr<CqIntUniformArrayParameter> CqIntUniformArrayParameterPtr;
+
+	typedef CqParameterTypedUniformArray<CqVector3D, type_point, CqVector3D> CqPointUniformArrayParameter;
+	typedef boost::shared_ptr<CqPointUniformArrayParameter> CqPointUniformArrayParameterPtr;
+
+	typedef CqParameterTypedUniformArray<CqString, type_string, CqString> CqStringUniformArrayParameter;
+	typedef boost::shared_ptr<CqStringUniformArrayParameter> CqStringUniformArrayParameterPtr;
+
+	typedef CqParameterTypedUniformArray<CqColor, type_color, CqColor> CqColorUniformArrayParameter;
+	typedef boost::shared_ptr<CqColorUniformArrayParameter> CqColorUniformArrayParameterPtr;
+
+	typedef CqParameterTypedUniformArray<CqVector4D, type_hpoint, CqVector3D> CqHPointUniformArrayParameter;
+	typedef boost::shared_ptr<CqHPointUniformArrayParameter> CqHPointUniformArrayParameterPtr;
+
+	typedef CqParameterTypedUniformArray<CqVector3D, type_normal, CqVector3D> CqNormalUniformArrayParameter;
+	typedef boost::shared_ptr<CqNormalUniformArrayParameter> CqNormalUniformArrayParameterPtr;
+
+	typedef CqParameterTypedUniformArray<CqVector3D, type_vector, CqVector3D> CqVectorUniformArrayParameter;
+	typedef boost::shared_ptr<CqVectorUniformArrayParameter> CqVectorUniformArrayParameterPtr;
+
+	typedef CqParameterTypedUniformArray<CqMatrix, type_matrix, CqMatrix> CqMatrixUniformArrayParameter;
+	typedef boost::shared_ptr<CqMatrixUniformArrayParameter> CqMatrixUniformArrayParameterPtr;
+
+// Varying array
+	typedef CqParameterTypedVaryingArray<TqFloat, type_float, TqFloat> CqFloatVaryingArrayParameter;
+	typedef boost::shared_ptr<CqFloatVaryingArrayParameter> CqFloatVaryingArrayParameterPtr;
+	
+	typedef CqParameterTypedVaryingArray<TqInt, type_integer, TqFloat> CqIntVaryingArrayParameter;
+	typedef boost::shared_ptr<CqIntVaryingArrayParameter> CqIntVaryingArrayParameterPtr;
+
+	typedef CqParameterTypedVaryingArray<CqVector3D, type_point, CqVector3D> CqPointVaryingArrayParameter;
+	typedef boost::shared_ptr<CqPointVaryingArrayParameter> CqPointVaryingArrayParameterPtr;
+
+	typedef CqParameterTypedVaryingArray<CqString, type_string, CqString> CqStringVaryingArrayParameter;
+	typedef boost::shared_ptr<CqStringVaryingArrayParameter> CqStringVaryingArrayParameterPtr;
+
+	typedef CqParameterTypedVaryingArray<CqColor, type_color, CqColor> CqColorVaryingArrayParameter;
+	typedef boost::shared_ptr<CqColorVaryingArrayParameter> CqColorVaryingArrayParameterPtr;
+
+	typedef CqParameterTypedVaryingArray<CqVector4D, type_hpoint, CqVector3D> CqHPointVaryingArrayParameter;
+	typedef boost::shared_ptr<CqHPointVaryingArrayParameter> CqHPointVaryingArrayParameterPtr;
+
+	typedef CqParameterTypedVaryingArray<CqVector3D, type_normal, CqVector3D> CqNormalVaryingArrayParameter;
+	typedef boost::shared_ptr<CqNormalVaryingArrayParameter> CqNormalVaryingArrayParameterPtr;
+
+	typedef CqParameterTypedVaryingArray<CqVector3D, type_vector, CqVector3D> CqVectorVaryingArrayParameter;
+	typedef boost::shared_ptr<CqVectorVaryingArrayParameter> CqVectorVaryingArrayParameterPtr;
+
+	typedef CqParameterTypedVaryingArray<CqMatrix, type_matrix, CqMatrix> CqMatrixVaryingArrayParameter;
+	typedef boost::shared_ptr<CqMatrixVaryingArrayParameter> CqMatrixVaryingArrayParameterPtr;
+
+// Vertex array
+	typedef CqParameterTypedVertexArray<TqFloat, type_float, TqFloat> CqFloatVertexArrayParameter;
+	typedef boost::shared_ptr<CqFloatVertexArrayParameter> CqFloatVertexArrayParameterPtr;
+	
+	typedef CqParameterTypedVertexArray<TqInt, type_integer, TqFloat> CqIntVertexArrayParameter;
+	typedef boost::shared_ptr<CqIntVertexArrayParameter> CqIntVertexArrayParameterPtr;
+
+	typedef CqParameterTypedVertexArray<CqVector3D, type_point, CqVector3D> CqPointVertexArrayParameter;
+	typedef boost::shared_ptr<CqPointVertexArrayParameter> CqPointVertexArrayParameterPtr;
+
+	typedef CqParameterTypedVertexArray<CqString, type_string, CqString> CqStringVertexArrayParameter;
+	typedef boost::shared_ptr<CqStringVertexArrayParameter> CqStringVertexArrayParameterPtr;
+
+	typedef CqParameterTypedVertexArray<CqColor, type_color, CqColor> CqColorVertexArrayParameter;
+	typedef boost::shared_ptr<CqColorVertexArrayParameter> CqColorVertexArrayParameterPtr;
+
+	typedef CqParameterTypedVertexArray<CqVector4D, type_hpoint, CqVector3D> CqHPointVertexArrayParameter;
+	typedef boost::shared_ptr<CqHPointVertexArrayParameter> CqHPointVertexArrayParameterPtr;
+
+	typedef CqParameterTypedVertexArray<CqVector3D, type_normal, CqVector3D> CqNormalVertexArrayParameter;
+	typedef boost::shared_ptr<CqNormalVertexArrayParameter> CqNormalVertexArrayParameterPtr;
+
+	typedef CqParameterTypedVertexArray<CqVector3D, type_vector, CqVector3D> CqVectorVertexArrayParameter;
+	typedef boost::shared_ptr<CqVectorVertexArrayParameter> CqVectorVertexArrayParameterPtr;
+
+	typedef CqParameterTypedVertexArray<CqMatrix, type_matrix, CqMatrix> CqMatrixVertexArrayParameter;
+	typedef boost::shared_ptr<CqMatrixVertexArrayParameter> CqMatrixVertexArrayParameterPtr;
+
+// FaceVarying array
+	typedef CqParameterTypedFaceVaryingArray<TqFloat, type_float, TqFloat> CqFloatFaceVaryingArrayParameter;
+	typedef boost::shared_ptr<CqFloatFaceVaryingArrayParameter> CqFloatFaceVaryingArrayParameterPtr;
+	
+	typedef CqParameterTypedFaceVaryingArray<TqInt, type_integer, TqFloat> CqIntFaceVaryingArrayParameter;
+	typedef boost::shared_ptr<CqIntFaceVaryingArrayParameter> CqIntFaceVaryingArrayParameterPtr;
+
+	typedef CqParameterTypedFaceVaryingArray<CqVector3D, type_point, CqVector3D> CqPointFaceVaryingArrayParameter;
+	typedef boost::shared_ptr<CqPointFaceVaryingArrayParameter> CqPointFaceVaryingArrayParameterPtr;
+
+	typedef CqParameterTypedFaceVaryingArray<CqString, type_string, CqString> CqStringFaceVaryingArrayParameter;
+	typedef boost::shared_ptr<CqStringFaceVaryingArrayParameter> CqStringFaceVaryingArrayParameterPtr;
+
+	typedef CqParameterTypedFaceVaryingArray<CqColor, type_color, CqColor> CqColorFaceVaryingArrayParameter;
+	typedef boost::shared_ptr<CqColorFaceVaryingArrayParameter> CqColorFaceVaryingArrayParameterPtr;
+
+	typedef CqParameterTypedFaceVaryingArray<CqVector4D, type_hpoint, CqVector3D> CqHPointFaceVaryingArrayParameter;
+	typedef boost::shared_ptr<CqHPointFaceVaryingArrayParameter> CqHPointFaceVaryingArrayParameterPtr;
+
+	typedef CqParameterTypedFaceVaryingArray<CqVector3D, type_normal, CqVector3D> CqNormalFaceVaryingArrayParameter;
+	typedef boost::shared_ptr<CqNormalFaceVaryingArrayParameter> CqNormalFaceVaryingArrayParameterPtr;
+
+	typedef CqParameterTypedFaceVaryingArray<CqVector3D, type_vector, CqVector3D> CqVectorFaceVaryingArrayParameter;
+	typedef boost::shared_ptr<CqVectorFaceVaryingArrayParameter> CqVectorFaceVaryingArrayParameterPtr;
+
+	typedef CqParameterTypedFaceVaryingArray<CqMatrix, type_matrix, CqMatrix> CqMatrixFaceVaryingArrayParameter;
+	typedef boost::shared_ptr<CqMatrixFaceVaryingArrayParameter> CqMatrixFaceVaryingArrayParameterPtr;
+///////////////////////////////////////////////////////////////////////////////
 
 extern CqParameter* ( *gVariableCreateFuncsConstant[] ) ( const char* strName, TqInt Count );
 extern CqParameter* ( *gVariableCreateFuncsUniform[] ) ( const char* strName, TqInt Count );
