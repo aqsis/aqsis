@@ -37,6 +37,7 @@ enum EqVariableClass
     class_varying,
     class_vertex,
     class_facevarying,
+    class_facevertex,
 };
 
 //----------------------------------------------------------------------

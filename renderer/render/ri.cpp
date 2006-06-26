@@ -4037,7 +4037,7 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 			// Take into account array primitive variables.
 			TqInt array_size = Decl.m_Count;
 
-			if( Decl.m_Class == class_facevarying )
+			if( Decl.m_Class == class_facevarying || Decl.m_Class == class_facevertex )
 			{
 				char* pNew = static_cast<char*>( malloc( elem_size * fvcount * array_size) );
 				aNewParams.push_back( pNew );
@@ -6143,6 +6143,10 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface * pSurface, PARAMETERLIST 
 
 				case class_facevarying:
 					cValues = pSurface->cFaceVarying();
+					break;
+
+				case class_facevertex:
+					cValues = pSurface->cFaceVertex();
 					break;
 
 				default:

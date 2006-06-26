@@ -32,6 +32,7 @@ static TqUlong hconstant = CqString::hash( "constant" );
 static TqUlong hvarying = CqString::hash( "varying" );
 static TqUlong hvertex = CqString::hash( "vertex" );
 static TqUlong hfacevarying = CqString::hash( "facevarying" );
+static TqUlong hfacevertex = CqString::hash( "facevertex" );
 
 static TqUlong hfloat = CqString::hash( "float" );
 static TqUlong hpoint = CqString::hash( "point" );
@@ -210,7 +211,8 @@ TqBool CqInlineParse::is_class ( const std::string &str )
 	        ( param == huniform ) ||
 	        ( param == hvarying ) ||
 	        ( param == hvertex ) ||
-	        ( param == hfacevarying ) )
+	        ( param == hfacevarying ) ||
+	  	( param == hfacevertex ) )
 		return TqTrue;
 	return TqFalse;
 }
@@ -257,6 +259,8 @@ EqVariableClass CqInlineParse::get_class ( const std::string &str )
 		return class_vertex;
 	if ( param == hfacevarying )
 		return class_facevarying;
+	if ( param == hfacevertex )
+		return class_facevertex;
 	return ( class_constant );
 }
 

@@ -717,6 +717,49 @@ class CqParameterTypedFaceVarying : public CqParameterTypedVarying<T, I, SLT>
 
 
 //----------------------------------------------------------------------
+/** \class CqParameterTypedFaceVertex
+ * Parameter with a vertex type, templatised by value type and type id.
+ */
+
+template <class T, EqVariableType I, class SLT>
+class CqParameterTypedFaceVertex : public CqParameterTypedVertex<T, I, SLT>
+{
+	public:
+		CqParameterTypedFaceVertex( const char* strName, TqInt Count = 1 ) :
+				CqParameterTypedVertex<T, I, SLT>( strName, Count )
+		{}
+		CqParameterTypedFaceVertex( const CqParameterTypedVertex<T, I, SLT>& From ) :
+				CqParameterTypedVertex<T, I, SLT>( From )
+		{}
+		virtual	~CqParameterTypedFaceVertex()
+		{}
+
+		virtual	CqParameter* CloneType( const char* Name, TqInt Count = 1 ) const
+		{
+			return ( new CqParameterTypedFaceVertex<T, I, SLT>( Name, Count ) );
+		}
+		virtual	CqParameter* Clone() const
+		{
+			return ( new CqParameterTypedFaceVertex<T, I, SLT>( *this ) );
+		}
+		virtual	EqVariableClass	Class() const
+		{
+			return ( class_facevertex );
+		}
+
+		/** Static constructor, to allow type free parameter construction.
+		 * \param strName Character pointer to new parameter name.
+		 * \param Count Integer array size.
+		 */
+		static	CqParameter*	Create( const char* strName, TqInt Count = 1 )
+		{
+			return ( new CqParameterTypedFaceVertex<T, I, SLT>( strName, Count ) );
+		}
+
+	private:
+};
+
+//----------------------------------------------------------------------
 /** \class CqParameterTypedVaryingArray
  * Parameter with a varying array type, templatised by value type and type id.
  */
@@ -1228,9 +1271,6 @@ class CqParameterTypedFaceVaryingArray : public CqParameterTypedVaryingArray<T, 
 		CqParameterTypedFaceVaryingArray( const char* strName, TqInt Count = 1 ) :
 				CqParameterTypedVaryingArray<T, I, SLT>( strName, Count )
 		{}
-		CqParameterTypedFaceVaryingArray( const CqParameterTypedVertexArray<T, I, SLT>& From ) :
-				CqParameterTypedVaryingArray<T, I, SLT>( From )
-		{}
 		virtual	~CqParameterTypedFaceVaryingArray()
 		{}
 
@@ -1260,6 +1300,45 @@ class CqParameterTypedFaceVaryingArray : public CqParameterTypedVaryingArray<T, 
 };
 
 
+//----------------------------------------------------------------------
+/** \class CqParameterTypedFaceVertexArray
+ * Parameter with a facevertex array type, templatised by value type and type id.
+ */
+
+template <class T, EqVariableType I, class SLT>
+class CqParameterTypedFaceVertexArray : public CqParameterTypedVertexArray<T, I, SLT>
+{
+	public:
+		CqParameterTypedFaceVertexArray( const char* strName, TqInt Count = 1 ) :
+				CqParameterTypedVertexArray<T, I, SLT>( strName, Count )
+		{}
+		virtual	~CqParameterTypedFaceVertexArray()
+		{}
+
+		virtual	CqParameter* CloneType( const char* Name, TqInt Count = 1 ) const
+		{
+			return ( new CqParameterTypedFaceVertexArray<T, I, SLT>( Name, Count ) );
+		}
+		virtual	CqParameter* Clone() const
+		{
+			return ( new CqParameterTypedFaceVertexArray<T, I, SLT>( *this ) );
+		}
+		virtual	EqVariableClass	Class() const
+		{
+			return ( class_facevertex );
+		}
+
+		/** Static constructor, to allow type free parameter construction.
+		 * \param strName Character pointer to new parameter name.
+		 * \param Count Integer array size.
+		 */
+		static	CqParameter*	Create( const char* strName, TqInt Count = 1 )
+		{
+			return ( new CqParameterTypedFaceVertexArray<T, I, SLT>( strName, Count ) );
+		}
+
+	private:
+};
 
 /** Dice the value into a grid using bilinear interpolation.
  * \param u Integer dice count for the u direction.
@@ -1829,11 +1908,13 @@ extern CqParameter* ( *gVariableCreateFuncsUniform[] ) ( const char* strName, Tq
 extern CqParameter* ( *gVariableCreateFuncsVarying[] ) ( const char* strName, TqInt Count );
 extern CqParameter* ( *gVariableCreateFuncsVertex[] ) ( const char* strName, TqInt Count );
 extern CqParameter* ( *gVariableCreateFuncsFaceVarying[] ) ( const char* strName, TqInt Count );
+extern CqParameter* ( *gVariableCreateFuncsFaceVertex[] ) ( const char* strName, TqInt Count );
 extern CqParameter* ( *gVariableCreateFuncsConstantArray[] ) ( const char* strName, TqInt Count );
 extern CqParameter* ( *gVariableCreateFuncsUniformArray[] ) ( const char* strName, TqInt Count );
 extern CqParameter* ( *gVariableCreateFuncsVaryingArray[] ) ( const char* strName, TqInt Count );
 extern CqParameter* ( *gVariableCreateFuncsVertexArray[] ) ( const char* strName, TqInt Count );
 extern CqParameter* ( *gVariableCreateFuncsFaceVaryingArray[] ) ( const char* strName, TqInt Count );
+extern CqParameter* ( *gVariableCreateFuncsFaceVertexArray[] ) ( const char* strName, TqInt Count );
 
 //-----------------------------------------------------------------------
 

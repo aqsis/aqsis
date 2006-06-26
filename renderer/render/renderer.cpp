@@ -1138,6 +1138,15 @@ SqParameterDeclaration CqRenderer::FindParameterDecl( const char* strDecl )
 				}
 				break;
 
+				case class_facevertex:
+				{
+					if ( Decl.m_Count > 1 )
+						Decl.m_pCreate = gVariableCreateFuncsFaceVertexArray[ Decl.m_Type ];
+					else
+						Decl.m_pCreate = gVariableCreateFuncsFaceVertex[ Decl.m_Type ];
+				}
+				break;
+
 				default:
 				{
 					// left blank to avoid compiler warnings about unhandled types
@@ -1244,6 +1253,7 @@ boost::shared_ptr<IqShader> CqRenderer::getDefaultSurfaceShader()
 	{
 		// we must initialize the shader here.  non-default
 		//  shaders are initialized in RiSurfaceV()
+		pMapCheck->SetTransform( QGetRenderContext() ->ptransCurrent() );
 		CqShaderVM* pCreated = static_cast<CqShaderVM*>( pMapCheck.get() );
 		pCreated->PrepareDefArgs();
 

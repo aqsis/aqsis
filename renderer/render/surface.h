@@ -438,6 +438,10 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 		/* From IqSurface.
 		 */
 		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime = 0 );
+		virtual TqUint cFaceVertex() const
+		{
+			return(cFaceVarying());
+		}
 
 		/** Add a primitive variable to the array.
 		 */
