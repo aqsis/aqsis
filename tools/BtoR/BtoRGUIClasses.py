@@ -512,6 +512,8 @@ class EventManager(UI):
 		# register myself as the point of control
 		if auto_register:
 			self.register()
+			
+		self.draw_functions = []
 		
 	def register(self):
 		""" register() - Register this object as the listener for Blender's events. """
@@ -625,7 +627,8 @@ class EventManager(UI):
 		
 	def closeDialog(self, dialog):
 		
-		dialog.target_function(dialog) # fire the target function
+		if dialog.target_function != None:
+			dialog.target_function(dialog) # fire the target function
 		self.removeElement(dialog) 
 					
 	def click_event(self):	
@@ -688,6 +691,12 @@ class EventManager(UI):
 		
 	def draw(self):	
 		""" draw() - sets up the background and draws the elements in the element list."""		
+		# on screen refresh events, make any "automatic" stuff update 
+		# run this first, to ensure that whatever's registered happens correctly
+		# note that draw functions will need to remove themselves correctly from the list after they're done.
+		for func in self.draw_functions:
+			func() # should be no issue. I can use my call factory to build anything I need.
+		
 		Blender.BGL.glClearColor(self.backGround[0], self.backGround[1], self.backGround[2], 1)
 		Blender.BGL.glClear(Blender.BGL.GL_COLOR_BUFFER_BIT)
 		self.drawScreenGrid(20, 20, [0.55, 0.55, 0.55])
@@ -776,6 +785,7 @@ class UIElement(UI):
 		self.parent = parent # the parent, used for correctly positioning the element on the screen
 		self.x = x  # base horizontal value
 		self.y = y # base vertical value
+		self.image = None
 		# niggly GUI stuff
 		if parent == None:
 			self.absX = self.x
@@ -843,12 +853,15 @@ class UIElement(UI):
 			self.uiRoundBox(self.absX, self.absY - self.height, self.absX + self.width, self.absY, self.radius, self.cornermask)
 			
 			for element in self.draw_stack:
-				element.draw()
+				if element.isVisible:
+					element.draw()
 				
 			if self.outlined: # use the outline color and draw an outline
 				self.setColor(self.outlineColor)
 				self.uiOutline(self.absX, self.absY - self.height, self.absX + self.width, self.absY, self.radius, self.cornermask)
 				
+			if self.image != None:
+				self.image.draw()
 		
 	def objDebug(self):  
 		pass
@@ -872,6 +885,10 @@ class UIElement(UI):
 			else:
 				self.absX = self.parent.absX + self.x 
 				self.absY = self.parent.absY - self.y
+			if self.image != None:
+				
+				self.image.invalid = True
+				self.image.validate()
 				
 		self.invalid = False
 		for func in self.validate_functions:
@@ -1083,7 +1100,8 @@ class Panel(UIElement):
 			Blender.Draw.Text(self.title, self.fontsize)	
 		
 		for element in self.draw_stack:
-			element.draw()
+			if element.isVisible:
+				element.draw()
 		
 		# if the panel was moved, all listeners should be updated, so now
 		self.invalid = False # do I do this here? Or on valid?
@@ -1389,11 +1407,13 @@ class Button(UIElement):
 	transparent = False
 	
 	def __init__(self, x, y, width, height, name, title, fontsize, parent, auto_register):
+		self.image = None
 		UIElement.__init__(self, x, y, width, height, name, title, parent, auto_register) # initialize with the baseclass constructor
 		self.fontsize = fontsize
 		self.pushed = False        
 		self.value = title
 		self.click_functions.append(self.push)
+		
 		
 	def draw(self):
 		self.validate()
@@ -1461,7 +1481,13 @@ class Button(UIElement):
 				self.setRasterPos(self.absX + push_offset + (self.width - drawWidth - 2), self.absY - push_offset - (self.height - 2))
 			
 			Blender.Draw.Text(self.title, self.fontsize)
+		
+		for element in self.elements:
+			element.draw()
 			
+		if self.image != None:
+			self.image.validate()
+			self.image.draw()
 	
 	
 		
@@ -1475,7 +1501,7 @@ class Button(UIElement):
 		
 	def setValue(self, value):
 		self.title = value
-			
+							
 class ToggleButton(Button):    
 	toggleColor = [218, 127, 127]
 	normalColor = [218, 218, 218, 255]
@@ -1527,7 +1553,6 @@ class ToggleButton(Button):
 		
 	def getValue(self):
 		return self.state
-		
 		
 class ToggleGroup:
 	
@@ -2338,6 +2363,8 @@ class Label(UIElement):
 	#def draw(self):        
 	#	self.validate()        
 	#	UIElement.draw(self)
+	def setValue(self, value):
+		self.elements[0].value = value
 		
 		
 class Table(UIElement):
@@ -2908,11 +2935,45 @@ class Image(UIElement):
 	def __init__(self, x, y, width, height, image, parent, auto_register):
 		UIElement.__init__(self, x, y, width, height, "Image",  "image", parent, auto_register)
 		self.image = image
+		
 	
 	def draw(self):
 		self.validate()
-		Blender.Draw.Image(self.image, self.absX, self.absY)
-		# that should be that. Images should be sized to whatever they need to be on creation.
+		size = self.image.getSize()
+		if size[0] <> self.width or size[1] <> self.height:
+			# I need to zoom the image
+			# figure out the correct zoom ratio
+			x_scale = float(self.width) / float(size[0])
+			y_scale = float(self.height) / float(size[1])
+			if x_scale > y_scale:
+				zoom = x_scale
+			else:
+				zoom = y_scale
+			Blender.Draw.Image(self.image, self.absX, self.absY, zoom, zoom)
+		else:
+			Blender.Draw.Image(self.image, self.absX, self.absY)
+			# that should be that. Images should be sized to whatever they need to be on creation.
+			
+	def validate(self): 
+		# apply transforms to the x,y values of this object using the parent's absolute locations
+		if self.invalid:
+			# cascade invalidations down the chain of contained elements
+			for element in self.elements:
+				element.invalid = True
+			# image elements are different. images draw UP rather than down, so y indicates the bottom edge of the image.
+			# thus, to achieve the desired behaviour, I must adjust the my Y value to actually be Y - self.height in 
+			# my abs calculation.
+			if self.parent == None:
+				self.absX = self.x
+				self.absY = self.y - self.height
+			else:
+				
+				self.absX = self.parent.absX + self.x 
+				self.absY = self.parent.absY - (self.y + self.height)
+				
+		self.invalid = False
+		for func in self.validate_functions:
+			func()
 		
 # BtoR-Specific objects
 class ColorEditor(UIElement):
