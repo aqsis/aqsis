@@ -290,7 +290,7 @@ RtVoid PreWorld()
 {
 	if ( g_cl_fb )
 	{
-		RiDisplay( "+aqsis", "framebuffer", "rgb", NULL );
+		RiDisplay( "aqsis", "framebuffer", "rgb", NULL );
 	}
 	else if ( !g_cl_type.empty() )
 	{
