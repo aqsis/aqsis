@@ -834,7 +834,6 @@ CqMatrix	CqRenderer::matSpaceToSpace( const char* strFrom, const char* strTo, co
 	CqMatrix	matResult, matA, matB;
 	TqUlong fhash, thash;
 
-
 	// Get the hash keys for From,To spaces
 	fhash = CqString::hash( strFrom );
 	thash = CqString::hash( strTo );
@@ -842,12 +841,18 @@ CqMatrix	CqRenderer::matSpaceToSpace( const char* strFrom, const char* strTo, co
 	// Get the two component matrices.
 	// First check for special cases.
 	if ( fhash == ohash )
-		matA = transObjectToWorld->matObjectToWorld(time);
-	else if ( fhash == shash )
-		matA = transShaderToWorld->matObjectToWorld(time);
-	else if ( ( fhash == chash ) || ( fhash == cuhash ) )
-		//        matA = m_pTransCamera->GetMotionObjectInterpolated( time ).Inverse();
-		matA = m_pTransCamera->matObjectToWorld( time ).Inverse();
+	{
+		if (transObjectToWorld) 
+			matA = transObjectToWorld->matObjectToWorld(time);
+	} else if ( fhash == shash )
+	{
+		if (transShaderToWorld) 
+			matA = transShaderToWorld->matObjectToWorld(time);
+	} else if ( ( fhash == chash ) || ( fhash == cuhash ) )
+	{
+		if (m_pTransCamera) 
+			matA = m_pTransCamera->matObjectToWorld( time ).Inverse();
+	}
 	else
 	{
 		WhichMatToWorld( matA, fhash );
@@ -855,13 +860,18 @@ CqMatrix	CqRenderer::matSpaceToSpace( const char* strFrom, const char* strTo, co
 
 
 	if ( thash == ohash )
-		matB = transObjectToWorld->matObjectToWorld(time).Inverse();
-	else if ( thash == shash )
-		matB = transShaderToWorld->matObjectToWorld(time).Inverse();
-	else if ( ( thash == chash ) || ( thash == cuhash ) )
-		//        matB = m_pTransCamera->GetMotionObjectInterpolated( time );
-		matB = m_pTransCamera->matObjectToWorld( time );
-	else
+	{
+		if (transObjectToWorld)
+			matB = transObjectToWorld->matObjectToWorld(time).Inverse();
+	} else if ( thash == shash )
+	{
+		if (transShaderToWorld)
+			matB = transShaderToWorld->matObjectToWorld(time).Inverse();
+	} else if ( ( thash == chash ) || ( thash == cuhash ) )
+	{
+		if (m_pTransCamera)
+			matB = m_pTransCamera->matObjectToWorld( time );
+	} else
 	{
 		WhichMatWorldTo( matB, thash );
 	}
@@ -890,25 +900,36 @@ CqMatrix	CqRenderer::matVSpaceToSpace( const char* strFrom, const char* strTo, c
 	// Get the two component matrices.
 	// First check for special cases.
 	if ( fhash == ohash )
-		matA = transObjectToWorld->matObjectToWorld(time);
-	else if ( fhash == shash )
-		matA = transShaderToWorld->matObjectToWorld(time);
-	else if ( ( fhash == chash ) || ( fhash == cuhash ) )
-		//        matA = m_pTransCamera->GetMotionObjectInterpolated( time ).Inverse();
-		matA = m_pTransCamera->matObjectToWorld( time ).Inverse();
-	else
+	{
+		if (transObjectToWorld)
+			matA = transObjectToWorld->matObjectToWorld(time);
+	} else if ( fhash == shash )
+	{
+		if (transShaderToWorld)
+			matA = transShaderToWorld->matObjectToWorld(time);
+	} else if ( ( fhash == chash ) || ( fhash == cuhash ) )
+	{
+		if (m_pTransCamera)
+			matA = m_pTransCamera->matObjectToWorld( time ).Inverse();
+	} else
 	{
 		WhichMatToWorld ( matA, fhash );
 	}
 
 	if ( thash == ohash )
-		matB = transObjectToWorld->matObjectToWorld(time).Inverse();
-	else if ( thash == shash )
-		matB = transShaderToWorld->matObjectToWorld(time).Inverse();
+	{
+		if (transObjectToWorld)
+			matB = transObjectToWorld->matObjectToWorld(time).Inverse();
+	} else if ( thash == shash )
+	{
+		if (transShaderToWorld)
+			matB = transShaderToWorld->matObjectToWorld(time).Inverse();
+	}
 	else if ( ( thash == chash ) || ( thash == cuhash ) )
-		//        matB = m_pTransCamera->GetMotionObjectInterpolated( time );
-		matB = m_pTransCamera->matObjectToWorld( time );
-	else
+	{
+		if (m_pTransCamera)
+			matB = m_pTransCamera->matObjectToWorld( time );
+	} else
 	{
 		WhichMatWorldTo ( matB, thash );
 	}
@@ -950,25 +971,35 @@ CqMatrix	CqRenderer::matNSpaceToSpace( const char* strFrom, const char* strTo, c
 	// Get the two component matrices.
 	// First check for special cases.
 	if ( fhash == ohash )
-		matA = transObjectToWorld->matObjectToWorld(time);
-	else if ( fhash == shash )
-		matA = transShaderToWorld->matObjectToWorld(time);
-	else if ( ( fhash == chash ) || ( fhash == cuhash ) )
-		//        matA = m_pTransCamera->GetMotionObjectInterpolated( time ).Inverse();
-		matA = m_pTransCamera->matObjectToWorld( time ).Inverse();
-	else
+	{
+		if (transObjectToWorld)
+			matA = transObjectToWorld->matObjectToWorld(time);
+	} else if ( fhash == shash )
+	{
+		if (transShaderToWorld)
+			matA = transShaderToWorld->matObjectToWorld(time);
+	} else if ( ( fhash == chash ) || ( fhash == cuhash ) )
+	{
+		if (m_pTransCamera)
+			matA = m_pTransCamera->matObjectToWorld( time ).Inverse();
+	} else
 	{
 		WhichMatToWorld ( matA, fhash );
 	}
 
 	if ( thash == ohash )
-		matB = transObjectToWorld->matObjectToWorld(time).Inverse();
-	else if ( thash == shash )
-		matB = transShaderToWorld->matObjectToWorld(time).Inverse();
-	else if ( ( thash == chash ) || ( thash == cuhash ) )
-		//        matB = m_pTransCamera->GetMotionObjectInterpolated( time );
-		matB = m_pTransCamera->matObjectToWorld( time );
-	else
+	{
+		if (transObjectToWorld)
+			matB = transObjectToWorld->matObjectToWorld(time).Inverse();
+	} else if ( thash == shash )
+	{
+		if (transShaderToWorld)
+			matB = transShaderToWorld->matObjectToWorld(time).Inverse();
+	} else if ( ( thash == chash ) || ( thash == cuhash ) )
+	{
+		if (m_pTransCamera)
+			matB = m_pTransCamera->matObjectToWorld( time );
+	} else
 	{
 		WhichMatWorldTo ( matB, thash );
 	}

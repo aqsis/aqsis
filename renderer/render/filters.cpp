@@ -114,7 +114,7 @@ extern "C" _qShare
 extern "C" _qShare
 RtFloat	RiMitchellFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 {
-MitchellFilter mc(1/3.0f, 2/3.0f, xwidth, ywidth);
+MitchellFilter mc(1/3.0f, 1/3.0f, xwidth, ywidth);
 
    return mc.Evaluate(x, y);
 }
