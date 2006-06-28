@@ -6270,8 +6270,6 @@ RtVoid	CreateGPrim( const boost::shared_ptr<CqSurface>& pSurface )
 	// If in a motion block, confirm that the current deformation surface can accept the passed one as a keyframe.
 	if( QGetRenderContext() ->pconCurrent() ->fMotionBlock() )
 	{
-		pSurface->PrepareTrimCurve();
-
 		CqMotionModeBlock* pMMB = static_cast<CqMotionModeBlock*>(QGetRenderContext() ->pconCurrent().get());
 
 		CqDeformingSurface* pMS = pMMB->GetDeformingSurface().get();
@@ -6291,7 +6289,6 @@ RtVoid	CreateGPrim( const boost::shared_ptr<CqSurface>& pSurface )
 	}
 	else
 	{
-		pSurface->PrepareTrimCurve();
 		QGetRenderContext()->StorePrimitive( pSurface );
 		STATS_INC( GPR_created );
 

@@ -1420,6 +1420,7 @@ void CqRenderer::StorePrimitive( const boost::shared_ptr<CqSurface>& pSurface )
 		pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "world", "camera", NULL, pSurface->pTransform().get(), 0 ),
 						 QGetRenderContext() ->matNSpaceToSpace( "world", "camera", NULL, pSurface->pTransform().get(), 0 ),
 						 QGetRenderContext() ->matVSpaceToSpace( "world", "camera", NULL, pSurface->pTransform().get(), 0 ) );
+		pSurface->PrepareTrimCurve();
 		PostSurface(pSurface);
 	}
 }
@@ -1433,6 +1434,7 @@ void CqRenderer::PostWorld()
 		pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "world", "camera", NULL, pSurface->pTransform().get(), 0 ),
 						 QGetRenderContext() ->matNSpaceToSpace( "world", "camera", NULL, pSurface->pTransform().get(), 0 ),
 						 QGetRenderContext() ->matVSpaceToSpace( "world", "camera", NULL, pSurface->pTransform().get(), 0 ) );
+		pSurface->PrepareTrimCurve();
 		PostSurface(pSurface);
 		m_aWorld.pop_front();
 	}
@@ -1448,6 +1450,7 @@ void CqRenderer::PostCloneOfWorld()
 		pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "world", "camera", NULL, pSurface->pTransform().get(), 0 ),
 						 QGetRenderContext() ->matNSpaceToSpace( "world", "camera", NULL, pSurface->pTransform().get(), 0 ),
 						 QGetRenderContext() ->matVSpaceToSpace( "world", "camera", NULL, pSurface->pTransform().get(), 0 ) );
+		pSurface->PrepareTrimCurve();
 		PostSurface(pSurface);
 	}
 }
