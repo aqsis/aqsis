@@ -163,7 +163,7 @@ class CqRiProceduralPlugin : CqPluginBase
 			CqString strSubdivide("Subdivide");
 			CqString strFree("Free");
 
-			CqRiFile        fileDSO( strDSOName.c_str(), "procedure" );
+			CqRiFile        fileDSO( strDSOName.c_str(), "procedural" );
 			m_bIsValid = false ;
 
 			if ( !fileDSO.IsValid() )
