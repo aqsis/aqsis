@@ -46,11 +46,17 @@ class CqPLStore
 		RtInt n;
 		RtToken *tokens()
 		{
-			return & m_Token[ 0 ];
+			if(m_Token.empty())
+				return(NULL);
+			else
+				return & m_Token[ 0 ];
 		};
 		RtPointer *parms()
 		{
-			return & m_Parameter[ 0 ];
+			if(m_Parameter.empty())
+				return(NULL);
+			else
+				return & m_Parameter[ 0 ];
 		};
 };
 
