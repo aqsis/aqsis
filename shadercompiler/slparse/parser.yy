@@ -41,12 +41,15 @@ extern TqBool ParseSucceeded;
 extern TqInt	iArrayAccess;
 CqParseNode*	ParseTreePointer;
 std::vector<CqString>	ParseNameSpaceStack;
+int blockID = 0;
 std::vector<TqInt>		FunctionReturnCountStack;
 EqShaderType gShaderType;
 
 TqBool	FindVariable(const char* name, SqVarRef& ref);
 TqBool	FindFunction(const char* name, std::vector<SqFuncRef>& Ref);
 CqString strNameSpace();
+void	pushScope(CqString name);
+CqString	popScope();
 void	TypeCheck();
 void	Optimise();
 void	InitStandardNamespace();
@@ -270,7 +273,7 @@ function_definition
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
 								delete(pDecl);
 								// Function level namespace is now defunct.
-								ParseNameSpaceStack.erase(ParseNameSpaceStack.end()-1);
+								popScope();
 								FunctionReturnCountStack.erase(FunctionReturnCountStack.end()-1);
 							}
 	|	function_declaration ')' '{' statements '}'
@@ -290,7 +293,7 @@ function_definition
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
 								delete(pDecl);
 								// Function level namespace is now defunct.
-								ParseNameSpaceStack.erase(ParseNameSpaceStack.end()-1);
+								popScope();
 								FunctionReturnCountStack.erase(FunctionReturnCountStack.end()-1);
 							}
 	;
@@ -300,7 +303,7 @@ function_declaration
 								$$=new CqParseNodeDeclaration((strNameSpace()+*$2).c_str(),$1.Type);
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
 								// Store the name of the function being defined for use in variable namespacing.
-								ParseNameSpaceStack.push_back(strNameSpace()+*$2+"::");
+								pushScope(*$2);
 								// Push a new level onto the FunctionReturnCountStack.
 								FunctionReturnCountStack.push_back(0);
 							}
@@ -308,7 +311,7 @@ function_declaration
 								$$=new CqParseNodeDeclaration((strNameSpace()+*$1).c_str(),Type_Void);
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
 								// Store the name of the function being defined for use in variable namespacing.
-								ParseNameSpaceStack.push_back(strNameSpace()+*$1+"::");
+								pushScope(*$1);
 								// Push a new level onto the FunctionReturnCountStack.
 								FunctionReturnCountStack.push_back(0);
 							}
@@ -321,7 +324,7 @@ function_declaration
 								$$=new CqParseNodeDeclaration(strName.c_str(),$1.Type);
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
 								// Store the name of the function being defined for use in variable namespacing.
-								ParseNameSpaceStack.push_back(strName+"::");
+								pushScope(strName);
 								// Push a new level onto the FunctionReturnCountStack.
 								FunctionReturnCountStack.push_back(0);
 							}
@@ -334,7 +337,7 @@ function_declaration
 								$$=new CqParseNodeDeclaration(strName.c_str(),Type_Void);
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
 								// Store the name of the function being defined for use in variable namespacing.
-								ParseNameSpaceStack.push_back(strName+"::");
+								pushScope(strName);
 								// Push a new level onto the FunctionReturnCountStack.
 								FunctionReturnCountStack.push_back(0);
 							}
@@ -1009,9 +1012,22 @@ statement
 								}
 							}
 	|	function_definition
-	|	'{' statements '}'	{	$$=$2;	}
-	|	'{' '}'				{	$$=new CqParseNode(); }
-	|	';'					{	$$=new CqParseNode(); }
+	|	'{' 
+							{
+								// Introduce a new scope for the block
+								CqString scopeName("b");
+								scopeName += blockID++;
+								pushScope(scopeName);
+							}
+		statements 
+							{
+								popScope();
+							}
+		'}'				{	
+								$$=$3;	
+							}
+	|	'{' '}'		{	$$=new CqParseNode(); }
+	|	';'				{	$$=new CqParseNode(); }
 	|	IF relation statement
 							{
 								CqParseNode* pNew=new CqParseNodeConditional();
@@ -1020,7 +1036,8 @@ statement
 								pNew->AddLastChild($3);
 								$$=pNew;
 							}
-	|	IF expression statement			{
+	|	IF expression statement			
+							{
 								CqParseNode* relation=new CqParseNodeRelOp(Op_NE);
 								relation->SetPos(ParseLineNumber,ParseStreamName.c_str());
 								relation->AddFirstChild($2);
@@ -2017,6 +2034,18 @@ CqString strNameSpace()
 		strRes=ParseNameSpaceStack.back();
 
 	return(strRes);
+}
+
+void pushScope(CqString name)
+{
+	ParseNameSpaceStack.push_back(strNameSpace()+name+"::");
+}
+
+CqString popScope()
+{
+	CqString old = ParseNameSpaceStack.back();
+	ParseNameSpaceStack.erase(ParseNameSpaceStack.end()-1);
+	return old;
 }
 
 void InitStandardNamespace()

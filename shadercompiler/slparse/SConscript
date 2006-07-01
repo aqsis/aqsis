@@ -25,6 +25,9 @@ slparseenv = env.Copy()
 # Set any platform specific options for this target
 slparseenv.UseTargetOptions('slparse')
 
+if slparseenv['debug']:
+	slparseenv.AppendUnique(CPPDEFINES = ['YYDEBUG'])
+
 slparseenv.CXXFile(target='parser.cpp', source='parser.yy')
 slparseenv.CXXFile(target='scanner.cpp', source='scanner.ll')
 slparse = slparseenv.Library('slparse', slparse_sources)
