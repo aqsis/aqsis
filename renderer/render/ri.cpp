@@ -1561,28 +1561,30 @@ RtVoid	RiDisplayV( RtToken name, RtToken type, RtToken mode, PARAMETERLIST )
 		dataSize = QGetRenderContext()->OutputDataSamples( mode );
 	}
 
-
-	// Gather the additional arguments into a map to pass through to the manager.
-	std::map<std::string, void*> mapOfArguments;
-	TqInt i;
-	for( i = 0; i < count; ++i )
-		mapOfArguments[ tokens[ i ] ] = values[ i ];
-
-	// Check if the request is to add a display driver.
-	if ( strName[ 0 ] == '+' )
+	// Check if the display request is valid.
+	if(dataOffset >= 0 && dataSize >0)
 	{
-		TqInt iMode = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "DisplayMode" ) [ 0 ] | eValue;
-		QGetRenderContext() ->poptWriteCurrent()->GetIntegerOptionWrite( "System", "DisplayMode" ) [ 0 ] = iMode;
-		strName = strName.substr( 1 );
-	}
-	else
-	{
-		QGetRenderContext() ->ClearDisplayRequests();
-		QGetRenderContext() ->poptWriteCurrent()->GetIntegerOptionWrite( "System", "DisplayMode" ) [ 0 ] = eValue ;
-	}
-	// Add a display driver to the list of requested drivers.
-	QGetRenderContext() ->AddDisplayRequest( strName.c_str(), strType.c_str(), mode, eValue, dataOffset, dataSize, mapOfArguments );
+		// Gather the additional arguments into a map to pass through to the manager.
+		std::map<std::string, void*> mapOfArguments;
+		TqInt i;
+		for( i = 0; i < count; ++i )
+			mapOfArguments[ tokens[ i ] ] = values[ i ];
 
+		// Check if the request is to add a display driver.
+		if ( strName[ 0 ] == '+' )
+		{
+			TqInt iMode = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "DisplayMode" ) [ 0 ] | eValue;
+			QGetRenderContext() ->poptWriteCurrent()->GetIntegerOptionWrite( "System", "DisplayMode" ) [ 0 ] = iMode;
+			strName = strName.substr( 1 );
+		}
+		else
+		{
+			QGetRenderContext() ->ClearDisplayRequests();
+			QGetRenderContext() ->poptWriteCurrent()->GetIntegerOptionWrite( "System", "DisplayMode" ) [ 0 ] = eValue ;
+		}
+		// Add a display driver to the list of requested drivers.
+		QGetRenderContext() ->AddDisplayRequest( strName.c_str(), strType.c_str(), mode, eValue, dataOffset, dataSize, mapOfArguments );
+	}
 	return ;
 }
 

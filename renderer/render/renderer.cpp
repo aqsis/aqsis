@@ -1763,6 +1763,8 @@ TqInt CqRenderer::RegisterOutputData( const char* name )
 
 		return( DataEntry.m_Offset );
 	}
+	else
+		Aqsis::log() << error << "Unrecognised AOV output variable \"" << name << "\"" << std::endl;
 
 	return( -1 );
 }
