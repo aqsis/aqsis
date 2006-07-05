@@ -1285,8 +1285,8 @@ void CqShaderVM::SO_external()
 		Release( stackitems[x] );
 	};
 
-	//delete[]( stackitems );
-	//delete[](arg_data);
+	delete[]( stackitems );
+	delete[]( arg_data );
 
 	if( pCall->return_type != type_void )
 	{
