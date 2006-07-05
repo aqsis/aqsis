@@ -45,7 +45,7 @@
 #include	"shaderexecenv.h"
 #include	"shaderstack.h"
 #include	"shadervariable.h"
-#include "parameters.h"
+#include 	"parameters.h"
 #include 	"dsoshadeops.h"
 #include	"itransform.h"
 
@@ -190,11 +190,22 @@ union UsProgramElement
 						count->GetFloat( fc ); \
 						TqInt cParams=static_cast<TqInt>( fc ); \
 						IqShaderData** aParams=new IqShaderData*[cParams]; \
+						SqStackEntry *stackitems = new SqStackEntry[cParams];\
 						TqInt iP=0; \
-						while(iP!=cParams)	aParams[iP++]=POP.m_Data; \
+						while(iP!=cParams)	{\
+							stackitems[iP]=POP; \
+							aParams[iP]=stackitems[iP].m_Data;\
+							iP++;\
+						}\
 						RESULT(t,__fVarying?class_varying:class_uniform); \
 						Func(a,pResult,this, cParams, aParams); \
 						delete[](aParams); \
+                  				iP=0; \
+						while(iP!=cParams)	{\
+							Release( stackitems[iP]);\
+							iP++;\
+						}\
+                  				delete[](stackitems); \
 						Push(pResult); \
 						RELEASE(count); \
 						RELEASE(a);
@@ -206,11 +217,22 @@ union UsProgramElement
 						count->GetFloat( fc ); \
 						TqInt cParams=static_cast<TqInt>( fc ); \
 						IqShaderData** aParams=new IqShaderData*[cParams]; \
+						SqStackEntry *stackitems = new SqStackEntry[cParams];\
 						TqInt iP=0; \
-						while(iP!=cParams)	aParams[iP++]=POP.m_Data; \
+						while(iP!=cParams)	{\
+							stackitems[iP]=POP; \
+							aParams[iP]=stackitems[iP].m_Data;\
+							iP++;\
+						}\
 						RESULT(t,__fVarying?class_varying:class_uniform); \
 						Func(a,b,pResult,this, cParams, aParams); \
 						delete[](aParams); \
+                  				iP=0; \
+						while(iP!=cParams)	{\
+							Release( stackitems[iP]);\
+							iP++;\
+						}\
+                  				delete[](stackitems); \
 						Push(pResult); \
 						RELEASE(count); \
 						RELEASE(a); \
@@ -224,11 +246,22 @@ union UsProgramElement
 						count->GetFloat( fc ); \
 						TqInt cParams=static_cast<TqInt>( fc ); \
 						IqShaderData** aParams=new IqShaderData*[cParams]; \
+						SqStackEntry *stackitems = new SqStackEntry[cParams];\
 						TqInt iP=0; \
-						while(iP!=cParams)	aParams[iP++]=POP.m_Data; \
+						while(iP!=cParams)	{\
+							stackitems[iP]=POP; \
+							aParams[iP]=stackitems[iP].m_Data;\
+							iP++;\
+						}\
 						RESULT(t,__fVarying?class_varying:class_uniform); \
 						Func(a,b,c,pResult,this, cParams, aParams); \
 						delete[](aParams); \
+                  				iP=0; \
+						while(iP!=cParams)	{\
+							Release( stackitems[iP]);\
+							iP++;\
+						}\
+                  				delete[](stackitems); \
 						Push(pResult); \
 						RELEASE(count); \
 						RELEASE(a); \
@@ -294,10 +327,21 @@ union UsProgramElement
 						count->GetFloat( fc ); \
 						TqInt cParams=static_cast<TqInt>( fc ); \
 						IqShaderData** aParams=new IqShaderData*[cParams]; \
+						SqStackEntry *stackitems = new SqStackEntry[cParams];\
 						TqInt iP=0; \
-						while(iP!=cParams)	aParams[iP++]=POP.m_Data; \
+						while(iP!=cParams)	{\
+							stackitems[iP]=POP; \
+							aParams[iP]=stackitems[iP].m_Data;\
+							iP++;\
+						}\
 						Func(a,this, cParams, aParams); \
 						delete[](aParams); \
+                  				iP=0; \
+						while(iP!=cParams)	{\
+							Release( stackitems[iP]);\
+							iP++;\
+						}\
+                  				delete[](stackitems); \
 						RELEASE(count); \
 						RELEASE(a);
 
@@ -311,16 +355,23 @@ union UsProgramElement
 						count->GetFloat( fc ); \
 						TqInt cParams=static_cast<TqInt>( fc ) + 4; \
 						IqShaderData** apSplinePoints=new IqShaderData*[cParams]; \
+                  				SqStackEntry *stackitems = new SqStackEntry[cParams];\
 						apSplinePoints[0]=vala; \
 						apSplinePoints[1]=valb; \
 						apSplinePoints[2]=valc; \
 						apSplinePoints[3]=vald; \
 						TqInt iSP; \
-						for(iSP=4; iSP<cParams; iSP++) \
-							apSplinePoints[iSP]=POP.m_Data; \
+                  				for(iSP=4; iSP<cParams; iSP++) {\
+                     					stackitems[iSP] = POP; \
+							apSplinePoints[iSP]=stackitems[iSP].m_Data; \
+                  				}\
 						RESULT(t,__fVarying?class_varying:class_uniform); \
 						func(value,pResult,this,cParams,apSplinePoints); \
 						delete[](apSplinePoints); \
+                  				for(iSP=4; iSP<cParams; iSP++) {\
+							Release( stackitems[iSP]);\
+						}\
+                  				delete[](stackitems); \
 						Push(pResult); \
 						RELEASE(count); \
 						RELEASE(value); \
@@ -340,16 +391,23 @@ union UsProgramElement
 						count->GetFloat( fc ); \
 						TqInt cParams=static_cast<TqInt>( fc ) + 4; \
 						IqShaderData** apSplinePoints=new IqShaderData*[cParams]; \
+                  				SqStackEntry *stackitems = new SqStackEntry[cParams];\
 						apSplinePoints[0]=vala; \
 						apSplinePoints[1]=valb; \
 						apSplinePoints[2]=valc; \
 						apSplinePoints[3]=vald; \
 						TqInt iSP; \
-						for(iSP=4; iSP<cParams; iSP++) \
-							apSplinePoints[iSP]=POP.m_Data; \
+						for(iSP=4; iSP<cParams; iSP++) {\
+                     					stackitems[iSP] = POP; \
+							apSplinePoints[iSP]=stackitems[iSP].m_Data; \
+                  				}\
 						RESULT(t,__fVarying?class_varying:class_uniform); \
 						func(basis,value,pResult,this,cParams,apSplinePoints); \
 						delete[](apSplinePoints); \
+						for(iSP=4; iSP<cParams; iSP++) {\
+							Release( stackitems[iSP]);\
+						}\
+                  				delete[](stackitems); \
 						Push(pResult); \
 						RELEASE(count); \
 						RELEASE(basis); \
@@ -366,11 +424,22 @@ union UsProgramElement
 						count->GetFloat( fc ); \
 						TqInt cParams=static_cast<TqInt>( fc ); \
 						IqShaderData** aParams=new IqShaderData*[cParams]; \
+						SqStackEntry *stackitems = new SqStackEntry[cParams];\
 						TqInt iP=0; \
-						while(iP!=cParams)	aParams[iP++]=POP.m_Data; \
+						while(iP!=cParams)	{\
+							stackitems[iP]=POP; \
+							aParams[iP]=stackitems[iP].m_Data;\
+							iP++;\
+						}\
 						RESULT(t,__fVarying?class_varying:class_uniform); \
 						func(name,channel,pResult,this,cParams,aParams); \
 						delete[](aParams); \
+						iP=0; \
+						while(iP!=cParams)	{\
+							Release( stackitems[iP]);\
+							iP++;\
+						}\
+                  				delete[](stackitems); \
 						Push(pResult); \
 						RELEASE(count); \
 						RELEASE(name); \
@@ -383,11 +452,22 @@ union UsProgramElement
 						count->GetFloat( fc ); \
 						TqInt cParams=static_cast<TqInt>( fc ); \
 						IqShaderData** aParams=new IqShaderData*[cParams]; \
+						SqStackEntry *stackitems = new SqStackEntry[cParams];\
 						TqInt iP=0; \
-						while(iP!=cParams)	aParams[iP++]=POP.m_Data; \
+						while(iP!=cParams)	{\
+							stackitems[iP]=POP; \
+							aParams[iP]=stackitems[iP].m_Data;\
+							iP++;\
+						}\
 						RESULT(t,__fVarying?class_varying:class_uniform); \
 						func(name,channel,R,pResult,this, cParams, aParams); \
 						delete[](aParams); \
+                  				iP=0; \
+						while(iP!=cParams)	{\
+							Release( stackitems[iP]);\
+							iP++;\
+						}\
+                  				delete[](stackitems); \
 						Push(pResult); \
 						RELEASE(count); \
 						RELEASE(name); \
@@ -403,11 +483,22 @@ union UsProgramElement
 						count->GetFloat( fc ); \
 						TqInt cParams=static_cast<TqInt>( fc ); \
 						IqShaderData** aParams=new IqShaderData*[cParams]; \
+						SqStackEntry *stackitems = new SqStackEntry[cParams];\
 						TqInt iP=0; \
-						while(iP!=cParams)	aParams[iP++]=POP.m_Data; \
+						while(iP!=cParams)	{\
+							stackitems[iP]=POP; \
+							aParams[iP]=stackitems[iP].m_Data;\
+							iP++;\
+						}\
 						RESULT(t,__fVarying?class_varying:class_uniform); \
 						func(name,channel,P,N,samples,pResult,this, cParams, aParams); \
 						delete[](aParams); \
+                  				iP=0; \
+						while(iP!=cParams)	{\
+							Release( stackitems[iP]);\
+							iP++;\
+						}\
+                  				delete[](stackitems); \
 						Push(pResult); \
 						RELEASE(count); \
 						RELEASE(name); \
@@ -424,11 +515,22 @@ union UsProgramElement
 						count->GetFloat( fc ); \
 						TqInt cParams=static_cast<TqInt>( fc ); \
 						IqShaderData** aParams=new IqShaderData*[cParams]; \
+						SqStackEntry *stackitems = new SqStackEntry[cParams];\
 						TqInt iP=0; \
-						while(iP!=cParams)	aParams[iP++]=POP.m_Data; \
+						while(iP!=cParams)	{\
+							stackitems[iP]=POP; \
+							aParams[iP]=stackitems[iP].m_Data;\
+							iP++;\
+						}\
 						RESULT(t,__fVarying?class_varying:class_uniform); \
 						func(name,channel,s1,t1,pResult,this, cParams, aParams); \
 						delete[](aParams); \
+                  				iP=0; \
+						while(iP!=cParams)	{\
+							Release( stackitems[iP]);\
+							iP++;\
+						}\
+                  				delete[](stackitems); \
 						Push(pResult); \
 						RELEASE(count); \
 						RELEASE(name); \
@@ -446,11 +548,22 @@ union UsProgramElement
 						count->GetFloat( fc ); \
 						TqInt cParams=static_cast<TqInt>( fc ); \
 						IqShaderData** aParams=new IqShaderData*[cParams]; \
+						SqStackEntry *stackitems = new SqStackEntry[cParams];\
 						TqInt iP=0; \
-						while(iP!=cParams)	aParams[iP++]=POP.m_Data; \
+						while(iP!=cParams)	{\
+							stackitems[iP]=POP; \
+							aParams[iP]=stackitems[iP].m_Data;\
+							iP++;\
+						}\
 						RESULT(t,__fVarying?class_varying:class_uniform); \
 						func(name,channel,R1,R2,R3,R4,pResult,this,cParams,aParams); \
 						delete[](aParams); \
+                  				iP=0; \
+						while(iP!=cParams)	{\
+							Release( stackitems[iP]);\
+							iP++;\
+						}\
+                  				delete[](stackitems); \
 						Push(pResult); \
 						RELEASE(count); \
 						RELEASE(name); \
@@ -474,11 +587,22 @@ union UsProgramElement
 						count->GetFloat( fc ); \
 						TqInt cParams=static_cast<TqInt>( fc ); \
 						IqShaderData** aParams=new IqShaderData*[cParams]; \
+						SqStackEntry *stackitems = new SqStackEntry[cParams];\
 						TqInt iP=0; \
-						while(iP!=cParams)	aParams[iP++]=POP.m_Data; \
+						while(iP!=cParams)	{\
+							stackitems[iP]=POP; \
+							aParams[iP]=stackitems[iP].m_Data;\
+							iP++;\
+						}\
 						RESULT(t,__fVarying?class_varying:class_uniform); \
 						func(name,channel,s1,t1,s2,t2,s3,t3,s4,t4,pResult,this,cParams,aParams); \
 						delete[](aParams); \
+                  				iP=0; \
+						while(iP!=cParams)	{\
+							Release( stackitems[iP]);\
+							iP++;\
+						}\
+                  				delete[](stackitems); \
 						Push(pResult); \
 						RELEASE(count); \
 						RELEASE(name); \
@@ -513,7 +637,7 @@ class CqShaderVM : public CqShaderStack, public IqShader, public CqDSORepository
 		CqShaderVM() : CqShaderStack(), m_Uses( 0xFFFFFFFF ), m_LocalIndex( 0 ), m_PC( 0 ), m_fAmbient( TqTrue )
 		{
 			// Find out if this shader is being declared outside the world construct. If so
-			// if is effectively being defined in 'camera' space, which will affect the 
+			// if is effectively being defined in 'camera' space, which will affect the
 			// transformation of parameters. Should only affect lightsource shaders as these
 			// are the only ones valid outside the world.
 			if (QGetRenderContextI())

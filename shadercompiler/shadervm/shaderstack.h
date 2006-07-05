@@ -226,8 +226,8 @@ class CqShaderStack
 	public:
 		CqShaderStack() : m_iTop( 0 )
 		{
-			TqInt n = MAX(m_maxsamples, m_samples);
-			m_Stack.resize( n );
+			m_maxsamples = MAX(m_maxsamples, m_samples);
+			m_Stack.resize( m_maxsamples);
 		}
 		virtual ~CqShaderStack()
 		{
@@ -243,16 +243,16 @@ class CqShaderStack
 		 */
 		void	Push( IqShaderData* pv )
 		{
-			while ( m_iTop >= m_Stack.size() )
+			if ( m_iTop >= m_Stack.size() )
 			{
-				TqInt n = m_Stack.size() + 1;
-				m_Stack.resize( n );
-				m_Stack.reserve( n );
+				m_Stack.resize( m_iTop + 4 );
+				m_Stack.reserve( m_iTop + 4 );
 			}
 
 			m_Stack[ m_iTop ].m_Data = pv;
 			m_Stack[ m_iTop ].m_IsTemp = TqTrue;
 			m_iTop ++;
+			m_maxsamples = MAX(m_iTop, m_maxsamples);
 
 
 		}
@@ -263,17 +263,16 @@ class CqShaderStack
 		void	PushV( IqShaderData* pv )
 		{
 			assert( NULL != pv );
-			while ( m_iTop >= m_Stack.size() )
+			if ( m_iTop >= m_Stack.size() )
 			{
-				TqInt n = m_Stack.size() + 1;
-				m_Stack.resize( n );
-				m_Stack.reserve( n );
+				m_Stack.resize( m_iTop + 4 );
+				m_Stack.reserve( m_iTop + 4 );
 			}
 
 			m_Stack[ m_iTop ].m_Data = pv;
 			m_Stack[ m_iTop ].m_IsTemp = TqFalse;
 			m_iTop ++;
-
+			m_maxsamples = MAX(m_iTop, m_maxsamples);
 
 		}
 

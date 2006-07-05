@@ -490,7 +490,8 @@ void CqShaderVM::SO_jnz()
 {
 	SqLabel lab = ReadNext().m_Label;
 	AUTOFUNC;
-	IqShaderData* f = POP.m_Data;
+	SqStackEntry stack = POP;
+	IqShaderData* f = stack.m_Data;
 	TqUint __iGrid = 0;
 	do
 	{
@@ -505,13 +506,15 @@ void CqShaderVM::SO_jnz()
 	while ( ++__iGrid < m_pEnv->shadingPointCount() );
 	m_PO = lab.m_Offset;
 	m_PC = lab.m_pAddress;
+	Release(stack);
 }
 
 void CqShaderVM::SO_jz()
 {
 	SqLabel lab = ReadNext().m_Label;
 	AUTOFUNC;
-	IqShaderData* f = POP.m_Data;
+	SqStackEntry stack = POP;
+	IqShaderData* f = stack.m_Data;
 	TqUint __iGrid = 0;
 	do
 	{
@@ -526,6 +529,7 @@ void CqShaderVM::SO_jz()
 	while ( ++__iGrid < m_pEnv->shadingPointCount() );
 	m_PO = lab.m_Offset;
 	m_PC = lab.m_pAddress;
+	Release(stack);
 }
 
 void CqShaderVM::SO_jmp()
