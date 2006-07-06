@@ -183,6 +183,8 @@ SConscript('shadercompiler/slxargs/SConscript', build_dir=target_dir.abspath + '
 SConscript('shadercompiler/aqsltell/SConscript', build_dir=target_dir.abspath + '/shadercompiler/aqsltell')
 display = SConscript('displays/display/SConscript', build_dir=target_dir.abspath + '/displays/display')
 bmp = SConscript('displays/d_sdcBMP/SConscript', build_dir=target_dir.abspath + '/displays/d_sdcBMP')
+if sys.platform == 'win32':
+	win32 = SConscript('displays/d_sdcWin32/SConscript', build_dir=target_dir.abspath + '/displays/d_sdcWin32')
 xpm = SConscript('displays/d_xpm/SConscript', build_dir=target_dir.abspath + '/displays/d_xpm')
 SConscript('displays/d_exr/SConscript', build_dir=target_dir.abspath + '/displays/d_exr')
 SConscript('rib/ri2rib/SConscript', build_dir=target_dir.abspath + '/rib/ri2rib')
@@ -206,10 +208,14 @@ def aqsis_rc_build(target, source, env):
 	displaylib = os.path.basename(display[0].path)
 	xpmlib = os.path.basename(xpm[0].path)
 	bmplib = os.path.basename(bmp[0].path)
+	win32lib = ""
+	if sys.platform == 'win32':
+		win32lib = os.path.basename(win32[0].path)
 	defines = {
 		"displaylib": displaylib,
 		"xpmlib": xpmlib,
 		"bmplib": bmplib,
+		"win32lib": win32lib,
 		"shaderpath": env.Dir('$SHADERDIR').abspath,
 		"displaypath": env.Dir('$BINDIR').abspath,
 		"exrlib": ""
