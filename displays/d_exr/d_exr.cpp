@@ -102,6 +102,10 @@
 #include <ImfIntAttribute.h>
 #include <ImfFloatAttribute.h>
 #include <ImfMatrixAttribute.h>
+#include <ImfStringAttribute.h>
+#include <ImfChromaticitiesAttribute.h>
+#include <ImfStandardAttributes.h>
+#include <ImfCompressionAttribute.h>
 #include <ImfLut.h>
 #include <ImfArray.h>
 #include <ImathFun.h>
@@ -402,6 +406,12 @@ extern "C"
 				dw.max.x -= 1;
 				dw.max.y -= 1;
 			}
+
+			//
+			//Chromaticities crap
+			//
+
+			addChromaticities(header,Chromaticities());
 
 			//
 			// Camera parameters
