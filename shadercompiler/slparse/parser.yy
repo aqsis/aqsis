@@ -40,7 +40,7 @@ extern TqInt ParseLineNumber;
 extern TqBool ParseSucceeded;
 extern TqInt	iArrayAccess;
 CqParseNode*	ParseTreePointer;
-std::vector<CqString>	ParseNameSpaceStack;
+std::vector<std::pair<TqBool,CqString> >	ParseNameSpaceStack;
 int blockID = 0;
 std::vector<TqInt>		FunctionReturnCountStack;
 EqShaderType gShaderType;
@@ -48,7 +48,7 @@ EqShaderType gShaderType;
 TqBool	FindVariable(const char* name, SqVarRef& ref);
 TqBool	FindFunction(const char* name, std::vector<SqFuncRef>& Ref);
 CqString strNameSpace();
-void	pushScope(CqString name);
+void	pushScope(CqString name, TqBool terminal=TqFalse);
 CqString	popScope();
 void	TypeCheck();
 void	Optimise();
@@ -303,7 +303,7 @@ function_declaration
 								$$=new CqParseNodeDeclaration((strNameSpace()+*$2).c_str(),$1.Type);
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
 								// Store the name of the function being defined for use in variable namespacing.
-								pushScope(*$2);
+								pushScope(*$2,TqTrue);
 								// Push a new level onto the FunctionReturnCountStack.
 								FunctionReturnCountStack.push_back(0);
 							}
@@ -311,7 +311,7 @@ function_declaration
 								$$=new CqParseNodeDeclaration((strNameSpace()+*$1).c_str(),Type_Void);
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
 								// Store the name of the function being defined for use in variable namespacing.
-								pushScope(*$1);
+								pushScope(*$1,TqTrue);
 								// Push a new level onto the FunctionReturnCountStack.
 								FunctionReturnCountStack.push_back(0);
 							}
@@ -324,7 +324,7 @@ function_declaration
 								$$=new CqParseNodeDeclaration(strName.c_str(),$1.Type);
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
 								// Store the name of the function being defined for use in variable namespacing.
-								pushScope(strName);
+								pushScope(strName,TqTrue);
 								// Push a new level onto the FunctionReturnCountStack.
 								FunctionReturnCountStack.push_back(0);
 							}
@@ -337,7 +337,7 @@ function_declaration
 								$$=new CqParseNodeDeclaration(strName.c_str(),Type_Void);
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
 								// Store the name of the function being defined for use in variable namespacing.
-								pushScope(strName);
+								pushScope(strName,TqTrue);
 								// Push a new level onto the FunctionReturnCountStack.
 								FunctionReturnCountStack.push_back(0);
 							}
@@ -663,10 +663,10 @@ variable_definitions
 									TqBool fve=TqFalse;
 									if(!ParseNameSpaceStack.empty())
 									{
-										std::vector<CqString>::reverse_iterator i=ParseNameSpaceStack.rbegin()+1;
+										std::vector<std::pair<TqBool,CqString> >::reverse_iterator i=ParseNameSpaceStack.rbegin()+1;
 										while(!fve && i!=ParseNameSpaceStack.rend())
 										{
-											CqString strNS=*i;
+											CqString strNS=i->second;
 											fve=CqVarDef::FindVariable((strNS+pDecl->strName()).c_str(), varExtern);
 											i++;
 										}
@@ -2031,26 +2031,32 @@ CqString strNameSpace()
 	CqString strRes("");
 
 	if(!ParseNameSpaceStack.empty())
-		strRes=ParseNameSpaceStack.back();
+		strRes=ParseNameSpaceStack.back().second;
 
 	return(strRes);
 }
 
-void pushScope(CqString name)
+void pushScope(CqString name, TqBool terminal)
 {
-	ParseNameSpaceStack.push_back(strNameSpace()+name+"::");
+	std::pair<TqBool,CqString> n;
+	n.first = terminal;
+	n.second = strNameSpace()+name+"::";
+	ParseNameSpaceStack.push_back(n);
 }
 
 CqString popScope()
 {
-	CqString old = ParseNameSpaceStack.back();
+	CqString old = ParseNameSpaceStack.back().second;
 	ParseNameSpaceStack.erase(ParseNameSpaceStack.end()-1);
 	return old;
 }
 
 void InitStandardNamespace()
 {
-	ParseNameSpaceStack.push_back("");
+	std::pair<TqBool,CqString> n;
+	n.first = TqFalse;
+	n.second = "";
+	ParseNameSpaceStack.push_back(n);
 }
 
 void ProcessShaderArguments( CqParseNode* pArgs )
