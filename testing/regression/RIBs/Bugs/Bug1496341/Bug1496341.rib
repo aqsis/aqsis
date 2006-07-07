@@ -17,7 +17,7 @@ PixelSamples 1 1
 # NOTE: In the Imager below, the background color is ignored, and never
 # passed to the shader.
 Declare "bgcolor" "uniform color"
-Imager "background" "bgcolor" [1 1 0] "float debug" 0.0
+Imager "background" "bgcolor" [1 1 0] 
 #--- END BUG ---
 
 Projection "perspective" "fov" 45

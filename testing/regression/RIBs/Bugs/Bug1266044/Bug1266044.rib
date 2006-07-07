@@ -1,6 +1,6 @@
 PixelSamples 1 1
 Format 320 240 1
-Display "Bug1326794.tif" "file" "rgb"
+Display "Bug1266044.tif" "file" "rgb"
 Projection "perspective" "fov" [10.0]
 CropWindow 0.8 0.8 0.45 0.45
 Translate 0 0 5
