@@ -408,7 +408,7 @@ extern "C"
 			}
 
 			//
-			//Chromaticities crap
+			//Chromaticities conversion from YB/YA->RGB
 			//
 
 			addChromaticities(header,Chromaticities());
