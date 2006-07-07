@@ -8,7 +8,7 @@
 # The rendered image should show a sphere on top of a yellow background, 
 # but instead the background is white.
 
-Display "imager-parameters" "framebuffer" "rgb"
+Display "Bug1496341.tif" "file" "rgb"
 Format 320 200 1
 PixelFilter "box" 1 1
 PixelSamples 1 1
