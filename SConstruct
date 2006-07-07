@@ -181,6 +181,11 @@ SConscript('shadercompiler/slpp/SConscript', build_dir=target_dir.abspath + '/sh
 SConscript('shadercompiler/aqsl/SConscript', build_dir=target_dir.abspath + '/shadercompiler/aqsl')
 SConscript('shadercompiler/slxargs/SConscript', build_dir=target_dir.abspath + '/shadercompiler/slxargs')
 SConscript('shadercompiler/aqsltell/SConscript', build_dir=target_dir.abspath + '/shadercompiler/aqsltell')
+perceptual=Program('pdiff.c')
+perceptual_name=str(perceptual[0])
+if not os.path.exists(perceptual_name):
+	SConscript('thirdparty/pdiff/SConscript', build_dir=target_dir.abspath + '/thirdparty/pdiff')
+
 display = SConscript('displays/display/SConscript', build_dir=target_dir.abspath + '/displays/display')
 bmp = SConscript('displays/d_sdcBMP/SConscript', build_dir=target_dir.abspath + '/displays/d_sdcBMP')
 if sys.platform == 'win32':
