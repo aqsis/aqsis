@@ -324,6 +324,9 @@ static PtDspyError CreateAppWindow(const char *title, int cx, int cy)
 	RECT r;
 
 
+	if (AppActive == false)
+		InitApplication(GetModuleHandle(NULL));
+
 	// Create a window for the application
 
 	r.left   = 0;
