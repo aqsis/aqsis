@@ -14,7 +14,7 @@ d_win32_headers =  Split("""
 	""")
 
 
-d_win32env.AppendUnique(LIBS = ['kernel32.lib', 'user32.lib', 'gdi32.lib', 'winspool.lib'])
+d_win32env.AppendUnique(LIBS = ['kernel32', 'user32', 'gdi32', 'winspool'])
 
 # Set any platform specific target options.
 d_win32env.UseTargetOptions('d_win32')
