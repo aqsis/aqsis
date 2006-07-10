@@ -26,7 +26,7 @@
 
 PtDspyError DspyImageQuery(PtDspyImageHandle image,
                            PtDspyQueryType   type,
-                           size_t            size,
+                           int	             size,
                            void              *data)
 {
 #if SHOW_CALLSTACK
