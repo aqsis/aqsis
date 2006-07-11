@@ -89,6 +89,12 @@ extern "C" __declspec(dllimport) void report_refcounts();
 #include "Carbon/Carbon.h"
 #endif
 
+#if !defined(AQSIS_SYSTEM_WIN32)
+#include <sys/types.h>
+#include <sys/resource.h>
+#include <unistd.h>
+#endif
+
 // Forward declarations
 void RenderFile( FILE* file, std::string& name );
 
@@ -102,6 +108,7 @@ ArgParse::apint g_cl_endofframe = -1;
 #endif
 ArgParse::apflag g_cl_nostandard = 0;
 ArgParse::apflag g_cl_help = 0;
+ArgParse::apint g_cl_priority = 1;
 ArgParse::apflag g_cl_version = 0;
 ArgParse::apflag g_cl_fb = 0;
 ArgParse::apflag g_cl_progress = 0;
@@ -376,6 +383,117 @@ RtVoid PreWorld()
 }
 
 
+#ifndef AQSIS_SYSTEM_WIN32
+
+static void SetPriority(int priority)
+{
+	pid_t pid = getpid();
+
+        switch(priority)
+	{
+	case 0:
+		{
+		setpriority(PRIO_PROCESS, pid, 10);
+
+#if defined(_DEBUG)
+		std::cout << "Set Priority Class to Idle" << std::endl;
+#endif
+		} break;
+ 
+	case 1:
+		{
+		setpriority(PRIO_PROCESS, pid, 0);
+
+#if defined(_DEBUG)
+		std::cout << "Set Priority Class to Normal" << std::endl;
+#endif
+		}
+		break;
+	case 2:
+		{
+		int high = getpriority(PRIO_PROCESS, pid);
+		setpriority(PRIO_PROCESS, pid, high);
+
+#if defined(_DEBUG)
+		std::cout << "Set Priority Class to High" << std::endl;
+#endif
+    
+		}
+		break;
+	case 3:
+		{
+		setpriority(PRIO_PROCESS, pid, -20);
+
+#if defined(_DEBUG)
+		std::cout << "Set Priority Class to RT" << std::endl;
+#endif
+		} break;
+ 
+	default:
+		{
+		setpriority(PRIO_PROCESS, pid, 10);
+
+#if defined(_DEBUG)
+		std::cout << "Set Priority Class to Idle" << std::endl;
+#endif
+		} break;
+	}
+	 
+}
+#else
+static void SetPriority(int priority)
+{
+	switch (priority)
+	{
+	case 0:
+		{
+		SetPriorityClass(GetCurrentProcess(), IDLE_PRIORITY_CLASS);
+
+#if defined(_DEBUG)
+		std::cout << "Set Priority Class to Idle" << std::endl;
+#endif
+		} break;
+ 
+	case 1:
+		{
+		SetPriorityClass(GetCurrentProcess(), NORMAL_PRIORITY_CLASS);
+
+#if defined(_DEBUG)
+		std::cout << "Set Priority Class to Normal" << std::endl;
+#endif
+		}
+		break;
+	case 2:
+		{
+		SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
+
+#if defined(_DEBUG)
+		std::cout << "Set Priority Class to High" << std::endl;
+#endif
+    
+		}
+		break;
+	case 3:
+		{
+		SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS);
+
+#if defined(_DEBUG)
+		std::cout << "Set Priority Class to RT" << std::endl;
+#endif
+		} break;
+ 
+	default:
+		{
+		SetPriorityClass(GetCurrentProcess(), IDLE_PRIORITY_CLASS);
+
+#if defined(_DEBUG)
+		std::cout << "Set Priority Class to Idle" << std::endl;
+#endif
+		} break;
+	}
+}
+#endif
+
 int main( int argc, const char** argv )
 {
 	StartMemoryDebugging();
@@ -397,6 +515,14 @@ int main( int argc, const char** argv )
 		           "\a2 = information\n"
 		           "\a3 = debug", &g_cl_verbose );
 		ap.alias( "verbose", "v" );
+
+      		ap.argInt( "priority", "=integer\aControl the priority class of aqsis.\n"
+         		"\a0 = idle\n"
+         		"\a1 = normal(default)\n"
+         		"\a2 = high\n"
+         		"\a3 = RT", &g_cl_priority);
+      		ap.alias( "priority", "z");
+
 		ap.argFlag( "renderinfo", "\aPrint out infos about base rendering settings", &g_cl_rinfo );
 		ap.argString( "type", "=string\aSpecify a display device type to use", &g_cl_type );
 		ap.argString( "addtype", "=string\aSpecify a display device type to add", &g_cl_addtype );
@@ -444,6 +570,15 @@ int main( int argc, const char** argv )
 		{
 			std::cout << ap.usagemsg();
 			exit( 0 );
+		}
+
+      		/* Set the priority on the main thread;
+      		* gentile for single CPU XP/OS
+      		*/
+
+		if (g_cl_priority != 1)
+		{
+			SetPriority(g_cl_priority);
 		}
 
 		if ( g_cl_version )
