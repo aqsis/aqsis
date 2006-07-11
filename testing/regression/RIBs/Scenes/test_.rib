@@ -3,6 +3,7 @@ Transform [ 0.339587 -0.935774 -0.0949116 0.0 0.940575 0.337854 0.0342671
 0.0 2.77556E-17 0.100908 -0.994896 0.0 -9.46411E-17 -4.44089E-16 23.4273 
 1.0  ]
 #Generate shadow map #0 for light with handle 5
+Option "searchpath" "shader" ["../../shaders:&"]
 FrameBegin 0
 Identity
 PixelSamples 1 1
