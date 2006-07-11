@@ -1747,7 +1747,6 @@ RtVoid	RiOptionV( RtToken name, PARAMETERLIST )
 		TqInt Class = Decl.m_Class;
 		TqInt Count = Decl.m_Count;
 		CqString undecoratedName = Decl.m_strName;
-		TqBool bArray = Count > 1;
 		if ( Decl.m_strName == "" || Class != class_uniform )
 		{
 			if ( Decl.m_strName == "" )
