@@ -1929,6 +1929,8 @@ void CqEnvironmentMap::SampleMap( CqVector3D& R1,
 	TqFloat side[2];
 	register TqInt c;
 
+        u = v = 0.0f;
+
 	TIME_SCOPE("Environment mapping")
 
 	// Textures are filtered with either bilinear or trilinear mip-mapping.
