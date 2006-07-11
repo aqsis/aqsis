@@ -1394,13 +1394,11 @@ void CqParameterTypedVarying<T, I, SLT>::Dice( TqInt u, TqInt v, IqShaderData* p
 template <class T, EqVariableType I, class SLT>
 void CqParameterTypedVarying<T, I, SLT>::CopyToShaderVariable( IqShaderData* pResult )
 {
-	T res;
-
 	SLT* pResData;
 	pResult->GetValuePtr( pResData );
 	assert( NULL != pResData );
 
-	TqInt iu;
+	TqUint iu;
 	for ( iu = 0; iu <= pResult->Size(); iu++ )
 		( *pResData++ ) = pValue(iu)[0];
 }
@@ -1452,13 +1450,11 @@ void CqParameterTypedVaryingArray<T, I, SLT>::Dice( TqInt u, TqInt v, IqShaderDa
 template <class T, EqVariableType I, class SLT>
 void CqParameterTypedVaryingArray<T, I, SLT>::CopyToShaderVariable( IqShaderData* pResult )
 {
-	T res;
-
 	SLT* pResData;
 	pResult->GetValuePtr( pResData );
 	assert( NULL != pResData );
 
-	TqInt iu;
+	TqUint iu;
 	for ( iu = 0; iu <= pResult->Size(); iu++ )
 		( *pResData++ ) = pValue(iu)[0];
 }

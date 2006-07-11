@@ -2181,7 +2181,6 @@ RtVoid	RiSurfaceV( RtToken name, PARAMETERLIST )
 
 	if ( pshadSurface )
 	{
-		TqFloat time = QGetRenderContext()->Time();
 		pshadSurface->SetTransform( QGetRenderContext() ->ptransCurrent() );
 		// Execute the intiialisation code here, as we now have our shader context complete.
 		pshadSurface->PrepareDefArgs();
@@ -5927,7 +5926,6 @@ RtVoid RiShaderLayerV( RtToken type, RtToken name, RtToken layername, RtInt coun
 
 	Debug_RiShaderLayer
 
-	TqFloat time = QGetRenderContext()->Time();
 	// If the current shader for the specified type is already a layer container, add this layer to it, if not,
 	// create one and add this layer as the first.
 

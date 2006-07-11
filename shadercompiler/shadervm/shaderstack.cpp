@@ -32,8 +32,8 @@
 
 START_NAMESPACE( Aqsis )
 
-TqInt   CqShaderStack::m_samples = 18;
-TqInt   CqShaderStack::m_maxsamples = 18;
+TqUint   CqShaderStack::m_samples = 18;
+TqUint   CqShaderStack::m_maxsamples = 18;
 
 std::deque<CqShaderVariableUniformFloat*>			CqShaderStack::m_UFPool;
 std::deque<CqShaderVariableUniformPoint*>			CqShaderStack::m_UPPool;

@@ -134,7 +134,6 @@ CqBound	CqSurface::AdjustBoundForTransformationMotion( const CqBound& B ) const
 		CqBound B0( B );
 		B0.Transform( matCameraToObject0 );
 
-		TqInt i;
 		std::map<TqFloat, TqFloat>::iterator keyFrame;
 		for( keyFrame = keyframeTimes.begin(); keyFrame != keyframeTimes.end(); keyFrame++)
 		{

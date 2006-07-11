@@ -328,8 +328,7 @@ class CqShaderStack
 		 */
 		static void	SetSamples(TqInt n)
 		{
-			m_samples = n;
-
+			m_samples = (TqUint) n;
 		}
 
 
@@ -364,8 +363,8 @@ class CqShaderStack
 		static std::deque<CqShaderVariableVaryingMatrix*>			m_VMPool;
 		// SixteenTuple
 
-		static TqInt    m_samples; // by default == 18 see shaderstack.cpp
-		static TqInt    m_maxsamples;
+		static TqUint    m_samples; // by default == 18 see shaderstack.cpp
+		static TqUint    m_maxsamples;
 }
 ;
 

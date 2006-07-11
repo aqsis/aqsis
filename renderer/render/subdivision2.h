@@ -303,6 +303,7 @@ class CqSubdivision2 : public CqMotionSpec<boost::shared_ptr<CqPolygonPoints> >
 							S = static_cast<TypeA>( S * static_cast<TqFloat>(n-3) );
 							S /= n;
 
+							semiSharpPos = static_cast<TypeA>( ( R + ( S * 6.0f ) ) / 8.0f );
 							//pParam->pValue( iIndex )[0] = Q+R+S;
 							softPos = Q+R+S;
 

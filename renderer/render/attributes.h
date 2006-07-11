@@ -296,6 +296,125 @@ class CqAttributes : public CqRefCount, public IqAttributes
 #endif
 
 	private:
+#ifdef REQUIRED
+
+		class CqHashTable
+		{
+			private:
+				static const TqUlong tableSize;
+
+			public:
+				CqHashTable()
+				{
+					m_aLists.resize( tableSize );
+				}
+				virtual	~CqHashTable()
+				{}
+
+				const boost::shared_ptr<CqNamedParameterList>	Find( const TqChar* pname ) const
+				{
+					TqUlong hash = CqString::hash(pname);
+					TqInt i = _hash( pname);
+
+					if ( m_aLists[ i ].empty() )
+					{
+						boost::shared_ptr<CqNamedParameterList> retval;
+						return ( retval );
+					}
+
+
+					std::list<boost::shared_ptr<CqNamedParameterList> >::const_iterator iEntry = m_aLists[ i ].begin();
+					if ( iEntry == m_aLists[ i ].end() )
+						return ( *iEntry );
+					else
+					{
+						while ( iEntry != m_aLists[ i ].end() )
+						{
+							if ( ( *iEntry ) ->hash() == hash )
+								return ( *iEntry );
+							++iEntry;
+						}
+					}
+
+					boost::shared_ptr<CqNamedParameterList> retval;
+					return ( retval );
+				}
+
+				boost::shared_ptr<CqNamedParameterList>	Find( const TqChar* pname )
+				{
+					TqUlong hash = CqString::hash(pname);
+					TqUlong i = _hash( pname);
+
+					if ( m_aLists[ i ].empty() )
+					{
+						boost::shared_ptr<CqNamedParameterList> retval;
+						return ( retval );
+					}
+
+
+					std::list<boost::shared_ptr<CqNamedParameterList> >::const_iterator iEntry = m_aLists[ i ].begin();
+					if ( iEntry == m_aLists[ i ].end() )
+						return ( *iEntry );
+					else
+					{
+						while ( iEntry != m_aLists[ i ].end() )
+						{
+							if ( ( *iEntry ) ->hash() == hash )
+								return ( *iEntry );
+							++iEntry;
+						}
+					}
+
+					boost::shared_ptr<CqNamedParameterList> retval;
+					return ( retval );
+				}
+
+				void Add( const boost::shared_ptr<CqNamedParameterList>& pOption )
+				{
+					TqUlong hash = CqString::hash(pOption->strName().c_str());
+					TqUlong i = _hash( pOption->strName().c_str());
+					m_aLists[ i ].push_back( pOption );
+				}
+
+				void Remove( const boost::shared_ptr<CqNamedParameterList>& pOption )
+				{
+					TqUlong i = _hash( pOption->strName().c_str());
+
+					std::list<boost::shared_ptr<CqNamedParameterList> >::iterator iEntry = m_aLists[ i ].begin();
+					while ( iEntry != m_aLists[ i ].end() )
+					{
+						if ( ( *iEntry ) == pOption )
+						{
+							m_aLists[ i ].remove( *iEntry );
+							return ;
+						}
+						iEntry++;
+					}
+				}
+
+				CqHashTable& operator=( const CqHashTable& From )
+				{
+					std::vector<std::list<boost::shared_ptr<CqNamedParameterList> > >::const_iterator i;
+					for ( i = From.m_aLists.begin(); i != From.m_aLists.end(); i++ )
+					{
+						std::list<boost::shared_ptr<CqNamedParameterList> >::const_iterator i2;
+						for ( i2 = ( *i ).begin(); i2 != ( *i ).end(); i2++ )
+							Add( *i2 );
+					}
+					return ( *this );
+				}
+
+			private:
+				TqUlong _hash( const TqChar* string ) const
+				{
+					TqUlong h = string[0];
+					return (  h % tableSize ); // remainder
+				}
+
+				std::vector<std::list<boost::shared_ptr<CqNamedParameterList> > >	m_aLists;
+		};
+#else
+
 		class CqHashTable
 		{
 			private:
@@ -360,6 +479,7 @@ class CqAttributes : public CqRefCount, public IqAttributes
 			private:
 				plist_type	m_ParameterLists;
 		};
+#endif
 
 		CqHashTable	m_aAttributes;						///< a vector of user defined attribute pointers.
 
