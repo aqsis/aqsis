@@ -43,7 +43,7 @@ ShadingRate 0.5
 Identity
 Clipping 
 0.01 1000.0 
-Display "test.tif" "file" "rgb" 
+Display "test_.tif" "file" "rgb" 
 Format 320 240 -1.0 
 PixelSamples 1 1 
 Projection "perspective" "fov" [ 26.5651 ]
