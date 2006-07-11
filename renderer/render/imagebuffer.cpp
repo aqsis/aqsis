@@ -319,7 +319,7 @@ void CqImageBuffer::PostSurface( const boost::shared_ptr<CqSurface>& pSurface )
 	if ( db != 0.0f )
 	{
 		CqVector3D	vecDB( db, 0, 0 );
-		const IqTransform* transShaderToWorld;
+		const IqTransform* transShaderToWorld = NULL;
 		// Default "shader" space to the displacement shader, unless there isn't one, in which
 		// case use the surface shader.
 		if ( pSurface->pAttributes() ->pshadDisplacement(QGetRenderContextI()->Time()) )
