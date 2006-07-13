@@ -558,7 +558,8 @@ R SO_DerivType( IqShaderData* Var, IqShaderData* den, TqInt i, IqShaderExecEnv* 
 			den->GetValue( u1, i + 1 );
 			den->GetValue( u2, i );
 		}
-		if( ( val1 != val2 ) && ( u1 != u2 ) )
+		Retu = ( val1 - val2 ) / 1.0f;
+		if( u1 != u2 )
 			Retu = ( val1 - val2 ) / ( u1 - u2 );
 	}
 	else
@@ -570,7 +571,8 @@ R SO_DerivType( IqShaderData* Var, IqShaderData* den, TqInt i, IqShaderExecEnv* 
 			den->GetValue( u1, i );
 			den->GetValue( u2, i - 1 );
 		}
-		if( ( val1 != val2 ) && ( u1 != u2 ) )
+		Retu = ( val1 - val2 ) / 1.0f;
+		if( u1 != u2 )
 			Retu = ( val2 - val1 ) / ( u2 - u1 );
 	}
 
@@ -584,7 +586,8 @@ R SO_DerivType( IqShaderData* Var, IqShaderData* den, TqInt i, IqShaderExecEnv* 
 			den->GetValue( v1, i + uRes + 1 );
 			den->GetValue( v2, i );
 		}
-		if( ( val1 != val2 ) && ( v1 != v2 ) )
+		Retv = ( val1 - val2 ) / 1.0f;
+		if( v1 != v2 )
 			Retv = ( val1 - val2 ) / ( v1 - v2 );
 	}
 	else
@@ -596,7 +599,8 @@ R SO_DerivType( IqShaderData* Var, IqShaderData* den, TqInt i, IqShaderExecEnv* 
 			den->GetValue( v1, i );
 			den->GetValue( v2, i - ( uRes - 1 ) );
 		}
-		if( ( val1 != val2 ) && ( v1 != v2 ) )
+		Retv = ( val1 - val2 ) / 1.0f;
+		if( v1 != v2 )
 			Retv = ( val2 - val1 ) / ( v2 - v1 );
 	}
 
