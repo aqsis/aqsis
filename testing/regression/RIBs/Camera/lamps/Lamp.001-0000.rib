@@ -1,0 +1,11 @@
+##Scene dof.blend:*
+##Creator Blender 241 + AkhIL's ribber 0.1.1-dev
+##System Linux 2.6.13-gentoo-r5 runed on AMD Athlon(tm) XP 2500+
+##CreationDate Sun Apr 23 16:23:05 2006
+##Object Lamp.001
+##Frame 1
+#plugin = mkPass
+#ribto = "lamps/Lamp.001-0000.rib"
+LightSource "distantlight" 1 "float intensity" 1.0
+"lightcolor" [0.548801779747 0.647335708141 1.0]
+"from" [0 0 0] "to" [0 0 -1]

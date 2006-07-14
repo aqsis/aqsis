@@ -1,0 +1,19 @@
+##Scene dof.blend:*
+##Creator Blender 241 + AkhIL's ribber 0.1.1-dev
+##System Linux 2.6.13-gentoo-r5 runed on AMD Athlon(tm) XP 2500+
+##CreationDate Sun Apr 23 16:23:05 2006
+##Object Camera
+##Frame 1
+#plugin = mkCamera
+#ribto = "cameras/Camera-0000.rib"
+# OB:Camera Start
+Format 400 300 1.0
+#DOF AdvRenderman P91
+DepthOfField 2.8 2.5 43.1280212402
+Shutter 0 0.5
+Clipping 0.10000000149 100.0
+version 3.03
+Projection "perspective" "fov" [5.4961763601075004]
+Transform [0.9920884025476413 0.022692009363029737 -0.12347337462601937 0.0 0.12090266920483127 0.09218384017114202 0.98837476909846733 0.0 -0.033810460235113415 0.99548340672151714 -0.088710989853638011 0.0 -0.64046494932075571 -0.61443569710098411 39.888282252723656 1.0]
+
+# OB:Camera End

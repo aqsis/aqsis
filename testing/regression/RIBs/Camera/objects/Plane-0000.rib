@@ -1,0 +1,535 @@
+##Scene dof.blend:*
+##Creator Blender 241 + AkhIL's ribber 0.1.1-dev
+##System Linux 2.6.13-gentoo-r5 runed on AMD Athlon(tm) XP 2500+
+##CreationDate Sun Apr 23 16:23:05 2006
+##Object Plane
+##Frame 1
+#plugin = mkDupliVert
+#ribto = "objects/Plane-0000.rib"
+AttributeBegin
+
+version 3.03
+ConcatTransform [1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 1.0 38.813304901123047 0.0 1.0]
+
+Attribute "visibility" "string transmission" "opaque"
+Scale 0.431225955486 0.431225955486 0.431225955486
+#Color [0.198236777282 0.177518245816 0.464759487099]
+Surface "plastic"
+ReadArchive "objects/Cube-0000.rib"
+AttributeEnd
+#plugin = mkDupliVert
+#ribto = "objects/Plane-0000.rib"
+AttributeBegin
+
+ConcatTransform [1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 1.0 -7.5601511001586914 0.0 1.0]
+
+Attribute "visibility" "string transmission" "opaque"
+Scale 0.431225955486 0.431225955486 0.431225955486
+#Color [0.812297218993 0.25546371842 0.311851770647]
+Surface "plastic"
+ReadArchive "objects/Cube-0000.rib"
+AttributeEnd
+#plugin = mkDupliVert
+#ribto = "objects/Plane-0000.rib"
+AttributeBegin
+
+ConcatTransform [1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 -1.0000001192092896 -7.5601472854614258 0.0 1.0]
+
+Attribute "visibility" "string transmission" "opaque"
+Scale 0.431225955486 0.431225955486 0.431225955486
+#Color [0.3500372306 0.146229305688 0.380395865533]
+Surface "plastic"
+ReadArchive "objects/Cube-0000.rib"
+AttributeEnd
+#plugin = mkDupliVert
+#ribto = "objects/Plane-0000.rib"
+AttributeBegin
+
+ConcatTransform [1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 -0.99999964237213135 38.813316345214844 0.0 1.0]
+
+Attribute "visibility" "string transmission" "opaque"
+Scale 0.431225955486 0.431225955486 0.431225955486
+#Color [0.281267116426 0.805949264565 0.641467068288]
+Surface "plastic"
+ReadArchive "objects/Cube-0000.rib"
+AttributeEnd
+#plugin = mkDupliVert
+#ribto = "objects/Plane-0000.rib"
+AttributeBegin
+
+ConcatTransform [1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 1.0 36.605045318603516 0.0 1.0]
+
+Attribute "visibility" "string transmission" "opaque"
+Scale 0.431225955486 0.431225955486 0.431225955486
+#Color [0.913849953562 0.306135884714 0.5963852706]
+Surface "plastic"
+ReadArchive "objects/Cube-0000.rib"
+AttributeEnd
+#plugin = mkDupliVert
+#ribto = "objects/Plane-0000.rib"
+AttributeBegin
+
+ConcatTransform [1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 1.0 34.396785736083984 0.0 1.0]
+
+Attribute "visibility" "string transmission" "opaque"
+Scale 0.431225955486 0.431225955486 0.431225955486
+#Color [0.169612918684 0.606739335316 0.525573528795]
+Surface "plastic"
+ReadArchive "objects/Cube-0000.rib"
+AttributeEnd
+#plugin = mkDupliVert
+#ribto = "objects/Plane-0000.rib"
+AttributeBegin
+
+ConcatTransform [1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 1.0 32.188526153564453 0.0 1.0]
+
+Attribute "visibility" "string transmission" "opaque"
+Scale 0.431225955486 0.431225955486 0.431225955486
+#Color [0.391725083044 0.773926043082 0.639783943539]
+Surface "plastic"
+ReadArchive "objects/Cube-0000.rib"
+AttributeEnd
+#plugin = mkDupliVert
+#ribto = "objects/Plane-0000.rib"
+AttributeBegin
+
+ConcatTransform [1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 1.0 29.980264663696289 0.0 1.0]
+
+Attribute "visibility" "string transmission" "opaque"
+Scale 0.431225955486 0.431225955486 0.431225955486
+#Color [0.606905274761 0.884421863252 0.210608051082]
+Surface "plastic"
+ReadArchive "objects/Cube-0000.rib"
+AttributeEnd
+#plugin = mkDupliVert
+#ribto = "objects/Plane-0000.rib"
+AttributeBegin
+
+ConcatTransform [1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 1.0 27.772005081176758 0.0 1.0]
+
+Attribute "visibility" "string transmission" "opaque"
+Scale 0.431225955486 0.431225955486 0.431225955486
+#Color [0.200518901897 0.469766242117 0.070492632475]
+Surface "plastic"
+ReadArchive "objects/Cube-0000.rib"
+AttributeEnd
+#plugin = mkDupliVert
+#ribto = "objects/Plane-0000.rib"
+AttributeBegin
+
+ConcatTransform [1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 1.0 25.563745498657227 0.0 1.0]
+
+Attribute "visibility" "string transmission" "opaque"
+Scale 0.431225955486 0.431225955486 0.431225955486
+#Color [0.127058990798 0.808257612023 0.0302501091085]
+Surface "plastic"
+ReadArchive "objects/Cube-0000.rib"
+AttributeEnd
+#plugin = mkDupliVert
+#ribto = "objects/Plane-0000.rib"
+AttributeBegin
+
+ConcatTransform [1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 1.0 23.355485916137695 0.0 1.0]
+
+Attribute "visibility" "string transmission" "opaque"
+Scale 0.431225955486 0.431225955486 0.431225955486
+#Color [0.177518245816 0.125999716182 0.896861982992]
+Surface "plastic"
+ReadArchive "objects/Cube-0000.rib"
+AttributeEnd
+#plugin = mkDupliVert
+#ribto = "objects/Plane-0000.rib"
+AttributeBegin
+
+ConcatTransform [1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 1.0 21.147226333618164 0.0 1.0]
+
+Attribute "visibility" "string transmission" "opaque"
+Scale 0.431225955486 0.431225955486 0.431225955486
+#Color [0.25546371842 0.565973053969 0.829837073057]
+Surface "plastic"
+ReadArchive "objects/Cube-0000.rib"
+AttributeEnd
+#plugin = mkDupliVert
+#ribto = "objects/Plane-0000.rib"
+AttributeBegin
+
+ConcatTransform [1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 1.0 18.938966751098633 0.0 1.0]
+
+Attribute "visibility" "string transmission" "opaque"
+Scale 0.431225955486 0.431225955486 0.431225955486
+#Color [0.146229305688 0.959708267252 0.300634246146]
+Surface "plastic"
+ReadArchive "objects/Cube-0000.rib"
+AttributeEnd
+#plugin = mkDupliVert
+#ribto = "objects/Plane-0000.rib"
+AttributeBegin
+
+ConcatTransform [1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 1.0 16.730707168579102 0.0 1.0]
+
+Attribute "visibility" "string transmission" "opaque"
+Scale 0.431225955486 0.431225955486 0.431225955486
+#Color [0.805949264565 0.767600088104 0.0992043997039]
+Surface "plastic"
+ReadArchive "objects/Cube-0000.rib"
+AttributeEnd
+#plugin = mkDupliVert
+#ribto = "objects/Plane-0000.rib"
+AttributeBegin
+
+ConcatTransform [1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 1.0 14.522445678710938 0.0 1.0]
+
+Attribute "visibility" "string transmission" "opaque"
+Scale 0.431225955486 0.431225955486 0.431225955486
+#Color [0.306135884714 0.852926354705 0.747921945357]
+Surface "plastic"
+ReadArchive "objects/Cube-0000.rib"
+AttributeEnd
+#plugin = mkDupliVert
+#ribto = "objects/Plane-0000.rib"
+AttributeBegin
+
+ConcatTransform [1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 1.0 12.314186096191406 0.0 1.0]
+
+Attribute "visibility" "string transmission" "opaque"
+Scale 0.431225955486 0.431225955486 0.431225955486
+#Color [0.606739335316 0.479793397112 0.0844692580328]
+Surface "plastic"
+ReadArchive "objects/Cube-0000.rib"
+AttributeEnd
+#plugin = mkDupliVert
+#ribto = "objects/Plane-0000.rib"
+AttributeBegin
+
+ConcatTransform [1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 1.0 10.105926513671875 0.0 1.0]
+
+Attribute "visibility" "string transmission" "opaque"
+Scale 0.431225955486 0.431225955486 0.431225955486
+#Color [0.773926043082 0.0355841218455 0.837721612312]
+Surface "plastic"
+ReadArchive "objects/Cube-0000.rib"
+AttributeEnd
+#plugin = mkDupliVert
+#ribto = "objects/Plane-0000.rib"
+AttributeBegin
+
+ConcatTransform [1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 1.0 7.8976664543151855 0.0 1.0]
+
+Attribute "visibility" "string transmission" "opaque"
+Scale 0.431225955486 0.431225955486 0.431225955486
+#Color [0.884421863252 0.942685057025 0.903559398595]
+Surface "plastic"
+ReadArchive "objects/Cube-0000.rib"
+AttributeEnd
+#plugin = mkDupliVert
+#ribto = "objects/Plane-0000.rib"
+AttributeBegin
+
+ConcatTransform [1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 1.0 5.6894068717956543 0.0 1.0]
+
+Attribute "visibility" "string transmission" "opaque"
+Scale 0.431225955486 0.431225955486 0.431225955486
+#Color [0.469766242117 0.164351457318 0.429051706911]
+Surface "plastic"
+ReadArchive "objects/Cube-0000.rib"
+AttributeEnd
+#plugin = mkDupliVert
+#ribto = "objects/Plane-0000.rib"
+AttributeBegin
+
+ConcatTransform [1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 1.0 3.481147289276123 0.0 1.0]
+
+Attribute "visibility" "string transmission" "opaque"
+Scale 0.431225955486 0.431225955486 0.431225955486
+#Color [0.808257612023 0.959339224274 0.767608145415]
+Surface "plastic"
+ReadArchive "objects/Cube-0000.rib"
+AttributeEnd
+#plugin = mkDupliVert
+#ribto = "objects/Plane-0000.rib"
+AttributeBegin
+
+ConcatTransform [1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 1.0 1.2728875875473022 0.0 1.0]
+
+Attribute "visibility" "string transmission" "opaque"
+Scale 0.431225955486 0.431225955486 0.431225955486
+#Color [0.125999716182 0.826040605195 0.424800034159]
+Surface "plastic"
+ReadArchive "objects/Cube-0000.rib"
+AttributeEnd
+#plugin = mkDupliVert
+#ribto = "objects/Plane-0000.rib"
+AttributeBegin
+
+ConcatTransform [1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 1.0 -0.93537205457687378 0.0 1.0]
+
+Attribute "visibility" "string transmission" "opaque"
+Scale 0.431225955486 0.431225955486 0.431225955486
+#Color [0.565973053969 0.0849785860638 0.0253220628816]
+Surface "plastic"
+ReadArchive "objects/Cube-0000.rib"
+AttributeEnd
+#plugin = mkDupliVert
+#ribto = "objects/Plane-0000.rib"
+AttributeBegin
+
+ConcatTransform [1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 1.0 -3.1436316967010498 0.0 1.0]
+
+Attribute "visibility" "string transmission" "opaque"
+Scale 0.431225955486 0.431225955486 0.431225955486
+#Color [0.959708267252 0.0453398959409 0.721516340905]
+Surface "plastic"
+ReadArchive "objects/Cube-0000.rib"
+AttributeEnd
+#plugin = mkDupliVert
+#ribto = "objects/Plane-0000.rib"
+AttributeBegin
+
+ConcatTransform [1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 1.0 -5.3518915176391602 0.0 1.0]
+
+Attribute "visibility" "string transmission" "opaque"
+Scale 0.431225955486 0.431225955486 0.431225955486
+#Color [0.767600088104 0.253753385161 0.623989279052]
+Surface "plastic"
+ReadArchive "objects/Cube-0000.rib"
+AttributeEnd
+#plugin = mkDupliVert
+#ribto = "objects/Plane-0000.rib"
+AttributeBegin
+
+ConcatTransform [1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 -1.0000001192092896 -5.3518872261047363 0.0 1.0]
+
+Attribute "visibility" "string transmission" "opaque"
+Scale 0.431225955486 0.431225955486 0.431225955486
+#Color [0.852926354705 0.983586303947 0.949516123061]
+Surface "plastic"
+ReadArchive "objects/Cube-0000.rib"
+AttributeEnd
+#plugin = mkDupliVert
+#ribto = "objects/Plane-0000.rib"
+AttributeBegin
+
+ConcatTransform [1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 -1.0000001192092896 -3.1436269283294678 0.0 1.0]
+
+Attribute "visibility" "string transmission" "opaque"
+Scale 0.431225955486 0.431225955486 0.431225955486
+#Color [0.479793397112 0.903141918194 0.290848507916]
+Surface "plastic"
+ReadArchive "objects/Cube-0000.rib"
+AttributeEnd
+#plugin = mkDupliVert
+#ribto = "objects/Plane-0000.rib"
+AttributeBegin
+
+ConcatTransform [1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 -1.0 -0.93536645174026489 0.0 1.0]
+
+Attribute "visibility" "string transmission" "opaque"
+Scale 0.431225955486 0.431225955486 0.431225955486
+#Color [0.0355841218455 0.792921992338 0.198236777282]
+Surface "plastic"
+ReadArchive "objects/Cube-0000.rib"
+AttributeEnd
+#plugin = mkDupliVert
+#ribto = "objects/Plane-0000.rib"
+AttributeBegin
+
+ConcatTransform [1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 -1.0 1.2728935480117798 0.0 1.0]
+
+Attribute "visibility" "string transmission" "opaque"
+Scale 0.431225955486 0.431225955486 0.431225955486
+#Color [0.942685057025 0.987881816515 0.812297218993]
+Surface "plastic"
+ReadArchive "objects/Cube-0000.rib"
+AttributeEnd
+#plugin = mkDupliVert
+#ribto = "objects/Plane-0000.rib"
+AttributeBegin
+
+ConcatTransform [1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 -1.0 3.4811537265777588 0.0 1.0]
+
+Attribute "visibility" "string transmission" "opaque"
+Scale 0.431225955486 0.431225955486 0.431225955486
+#Color [0.164351457318 0.32420687139 0.3500372306]
+Surface "plastic"
+ReadArchive "objects/Cube-0000.rib"
+AttributeEnd
+#plugin = mkDupliVert
+#ribto = "objects/Plane-0000.rib"
+AttributeBegin
+
+ConcatTransform [1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 -1.0 5.6894145011901855 0.0 1.0]
+
+Attribute "visibility" "string transmission" "opaque"
+Scale 0.431225955486 0.431225955486 0.431225955486
+#Color [0.959339224274 0.688489555149 0.281267116426]
+Surface "plastic"
+ReadArchive "objects/Cube-0000.rib"
+AttributeEnd
+#plugin = mkDupliVert
+#ribto = "objects/Plane-0000.rib"
+AttributeBegin
+
+ConcatTransform [1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 -0.99999994039535522 7.897674560546875 0.0 1.0]
+
+Attribute "visibility" "string transmission" "opaque"
+Scale 0.431225955486 0.431225955486 0.431225955486
+#Color [0.826040605195 0.511601205815 0.913849953562]
+Surface "plastic"
+ReadArchive "objects/Cube-0000.rib"
+AttributeEnd
+#plugin = mkDupliVert
+#ribto = "objects/Plane-0000.rib"
+AttributeBegin
+
+ConcatTransform [1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 -0.99999994039535522 10.105934143066406 0.0 1.0]
+
+Attribute "visibility" "string transmission" "opaque"
+Scale 0.431225955486 0.431225955486 0.431225955486
+#Color [0.0849785860638 0.45022455243 0.169612918684]
+Surface "plastic"
+ReadArchive "objects/Cube-0000.rib"
+AttributeEnd
+#plugin = mkDupliVert
+#ribto = "objects/Plane-0000.rib"
+AttributeBegin
+
+ConcatTransform [1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 -0.99999994039535522 12.314194679260254 0.0 1.0]
+
+Attribute "visibility" "string transmission" "opaque"
+Scale 0.431225955486 0.431225955486 0.431225955486
+#Color [0.0453398959409 0.813104603928 0.391725083044]
+Surface "plastic"
+ReadArchive "objects/Cube-0000.rib"
+AttributeEnd
+#plugin = mkDupliVert
+#ribto = "objects/Plane-0000.rib"
+AttributeBegin
+
+ConcatTransform [1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 -0.99999988079071045 14.522454261779785 0.0 1.0]
+
+Attribute "visibility" "string transmission" "opaque"
+Scale 0.431225955486 0.431225955486 0.431225955486
+#Color [0.253753385161 0.410208899636 0.606905274761]
+Surface "plastic"
+ReadArchive "objects/Cube-0000.rib"
+AttributeEnd
+#plugin = mkDupliVert
+#ribto = "objects/Plane-0000.rib"
+AttributeBegin
+
+ConcatTransform [1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 -0.99999988079071045 16.730716705322266 0.0 1.0]
+
+Attribute "visibility" "string transmission" "opaque"
+Scale 0.431225955486 0.431225955486 0.431225955486
+#Color [0.983586303947 0.947933931113 0.200518901897]
+Surface "plastic"
+ReadArchive "objects/Cube-0000.rib"
+AttributeEnd
+#plugin = mkDupliVert
+#ribto = "objects/Plane-0000.rib"
+AttributeBegin
+
+ConcatTransform [1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 -0.99999982118606567 18.938976287841797 0.0 1.0]
+
+Attribute "visibility" "string transmission" "opaque"
+Scale 0.431225955486 0.431225955486 0.431225955486
+#Color [0.903141918194 0.244457455424 0.127058990798]
+Surface "plastic"
+ReadArchive "objects/Cube-0000.rib"
+AttributeEnd
+#plugin = mkDupliVert
+#ribto = "objects/Plane-0000.rib"
+AttributeBegin
+
+ConcatTransform [1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 -0.99999982118606567 21.147235870361328 0.0 1.0]
+
+Attribute "visibility" "string transmission" "opaque"
+Scale 0.431225955486 0.431225955486 0.431225955486
+#Color [0.792921992338 0.111356720051 0.177518245816]
+Surface "plastic"
+ReadArchive "objects/Cube-0000.rib"
+AttributeEnd
+#plugin = mkDupliVert
+#ribto = "objects/Plane-0000.rib"
+AttributeBegin
+
+ConcatTransform [1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 -0.99999982118606567 23.355495452880859 0.0 1.0]
+
+Attribute "visibility" "string transmission" "opaque"
+Scale 0.431225955486 0.431225955486 0.431225955486
+#Color [0.987881816515 0.415134030558 0.25546371842]
+Surface "plastic"
+ReadArchive "objects/Cube-0000.rib"
+AttributeEnd
+#plugin = mkDupliVert
+#ribto = "objects/Plane-0000.rib"
+AttributeBegin
+
+ConcatTransform [1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 -0.9999997615814209 25.563756942749023 0.0 1.0]
+
+Attribute "visibility" "string transmission" "opaque"
+Scale 0.431225955486 0.431225955486 0.431225955486
+#Color [0.32420687139 0.793737321924 0.146229305688]
+Surface "plastic"
+ReadArchive "objects/Cube-0000.rib"
+AttributeEnd
+#plugin = mkDupliVert
+#ribto = "objects/Plane-0000.rib"
+AttributeBegin
+
+ConcatTransform [1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 -0.9999997615814209 27.772016525268555 0.0 1.0]
+
+Attribute "visibility" "string transmission" "opaque"
+Scale 0.431225955486 0.431225955486 0.431225955486
+#Color [0.688489555149 0.348445253715 0.805949264565]
+Surface "plastic"
+ReadArchive "objects/Cube-0000.rib"
+AttributeEnd
+#plugin = mkDupliVert
+#ribto = "objects/Plane-0000.rib"
+AttributeBegin
+
+ConcatTransform [1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 -0.9999997615814209 29.980276107788086 0.0 1.0]
+
+Attribute "visibility" "string transmission" "opaque"
+Scale 0.431225955486 0.431225955486 0.431225955486
+#Color [0.511601205815 0.740319366908 0.306135884714]
+Surface "plastic"
+ReadArchive "objects/Cube-0000.rib"
+AttributeEnd
+#plugin = mkDupliVert
+#ribto = "objects/Plane-0000.rib"
+AttributeBegin
+
+ConcatTransform [1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 -0.99999970197677612 32.18853759765625 0.0 1.0]
+
+Attribute "visibility" "string transmission" "opaque"
+Scale 0.431225955486 0.431225955486 0.431225955486
+#Color [0.45022455243 0.294254405064 0.606739335316]
+Surface "plastic"
+ReadArchive "objects/Cube-0000.rib"
+AttributeEnd
+#plugin = mkDupliVert
+#ribto = "objects/Plane-0000.rib"
+AttributeBegin
+
+ConcatTransform [1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 -0.99999970197677612 34.396797180175781 0.0 1.0]
+
+Attribute "visibility" "string transmission" "opaque"
+Scale 0.431225955486 0.431225955486 0.431225955486
+#Color [0.813104603928 0.164952691595 0.773926043082]
+Surface "plastic"
+ReadArchive "objects/Cube-0000.rib"
+AttributeEnd
+#plugin = mkDupliVert
+#ribto = "objects/Plane-0000.rib"
+AttributeBegin
+
+ConcatTransform [1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 -0.99999964237213135 36.605056762695312 0.0 1.0]
+
+Attribute "visibility" "string transmission" "opaque"
+Scale 0.431225955486 0.431225955486 0.431225955486
+#Color [0.410208899636 0.213589606515 0.884421863252]
+Surface "plastic"
+ReadArchive "objects/Cube-0000.rib"
+AttributeEnd
