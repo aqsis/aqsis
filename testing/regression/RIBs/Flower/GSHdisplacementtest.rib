@@ -25,13 +25,14 @@ Surface "GSHglowoutline"
 Displacement "GSHsinedisp"
 
 Color [1 .6 0]
+Declare "truedisplacement" "integer"
 
 
 	  # body
 
 	  AttributeBegin
 		  Rotate -90 1 0 0
-		  Attribute "render" "integer truedisplacement" 1
+		  Attribute "render" "truedisplacement" [1]
 		  TransformBegin
 			  Translate 0 0 1.7
 			  Scale 1 1 1.05468457
