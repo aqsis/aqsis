@@ -36,7 +36,7 @@ Color [1 .6 0]
 			  Attribute "displacementbound" "coordinatesystem" "current"
 			  Opacity 0.5 0.5 0.5
 			  
-			  Attribute "visibility"  "trace" [1]
+			  Attribute "visibility"  "integer trace" [1]
 			  
 			  Orientation "rh"
 			  Sphere 5 -5 5 360
