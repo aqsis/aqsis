@@ -8,7 +8,8 @@ Format 640 480 1
 Projection "perspective" "fov" 30
 
 
-Translate 0 0 100
+#Translate 0 0 100
+Translate 0 0 37
 
 Rotate -22 1 0 0
 Rotate 19 0 1 0
