@@ -560,7 +560,7 @@ R SO_DerivType( IqShaderData* Var, IqShaderData* den, TqInt i, IqShaderExecEnv* 
 		}
 		Retu = val1 - val2;
 		if( u1 != u2 )
-			Retu = ( val1 - val2 ) / ( u1 - u2 );
+			Retu /= ( u1 - u2 );
 	}
 	else
 	{
@@ -573,7 +573,7 @@ R SO_DerivType( IqShaderData* Var, IqShaderData* den, TqInt i, IqShaderExecEnv* 
 		}
 		Retu = val2 - val1;
 		if( u1 != u2 )
-			Retu = ( val2 - val1 ) / ( u2 - u1 );
+			Retu /= ( u2 - u1 );
 	}
 
 	// Calculate deriviative in v
@@ -588,7 +588,7 @@ R SO_DerivType( IqShaderData* Var, IqShaderData* den, TqInt i, IqShaderExecEnv* 
 		}
 		Retv = val1 - val2;
 		if( v1 != v2 )
-			Retv = ( val1 - val2 ) / ( v1 - v2 );
+			Retv /= ( v1 - v2 );
 	}
 	else
 	{
@@ -601,7 +601,7 @@ R SO_DerivType( IqShaderData* Var, IqShaderData* den, TqInt i, IqShaderExecEnv* 
 		}
 		Retv = val2 - val1;
 		if( v1 != v2 )
-			Retv = ( val2 - val1 ) / ( v2 - v1 );
+			Retv /=  ( v2 - v1 );
 	}
 
 	return ( Retu + Retv );
