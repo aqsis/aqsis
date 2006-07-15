@@ -404,7 +404,7 @@ class CqMovingMicroPolygonKeyPoints
 		{
 			Initialise( vA, radius );
 		}
-		~CqMovingMicroPolygonKeyPoints()
+		virtual ~CqMovingMicroPolygonKeyPoints()
 		{}
 
 		/** Overridden operator new to allocate micropolys from a pool.
