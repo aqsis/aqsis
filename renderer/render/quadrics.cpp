@@ -278,7 +278,7 @@ TqBool	CqQuadric::Diceable()
 	if ( !m_fDiceable )
 		return ( TqFalse );
 
-	TqInt toomuch = EstimateGridSize();
+	TqUlong toomuch = EstimateGridSize();
 
 	m_SplitDir = ( m_uDiceSize > m_vDiceSize ) ? SplitDir_U : SplitDir_V;
 
