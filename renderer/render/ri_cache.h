@@ -79,7 +79,7 @@ class RiCacheBase
 						delete[](reinterpret_cast<RtString*>(m_values[i])[j]);
 				}
 				delete[](m_tokens[i]);
-				delete[](m_values[i]);
+				delete[](reinterpret_cast<RtString*>(m_values[i]));
 			}
 
 			delete[] m_tokens;
