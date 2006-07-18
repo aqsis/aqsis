@@ -22,4 +22,5 @@ if evt == Blender.Draw.RIGHTMOUSE:
 	
 	Blender.Registry.SetKey("BtoR_Space", changed)
 
+
  
