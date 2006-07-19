@@ -4,7 +4,7 @@ version 3.03
 #Created with K-3D Version 0.5.0.6, http://www.k-3d.org
 
 #Setup file search paths
-Option "searchpath" "shader" [ "/home/tshead/.k3d/shadercache:&" ] 
+Option "searchpath" "shader" [ "../../../shaders:&" ]
 
 FrameBegin 1
 
