@@ -805,6 +805,7 @@ class UIElement(UI):
 		self.key_functions = [self.objDebug]	
 		self.wheel_functions = [self.objDebug]	
 		self.validate_functions = [self.objDebug]
+		self.right_click_functions = [self.objDebug]
 		self.update_functions = []
 		self.parent = parent # the parent, used for correctly positioning the element on the screen
 		self.x = x  # base horizontal value
@@ -865,6 +866,7 @@ class UIElement(UI):
 		if element in self.elements:
 			self.elements.remove(element)
 		del element
+		
 			
 	def clearElements(self):
 		self.elements = []
@@ -873,6 +875,7 @@ class UIElement(UI):
 			
 	def registerCallback(self, event, callback):
 		# blackmagic and v00d00
+		# At some point, rewrite this a bit to be more interface driven so the object in question has certain signals per interface
 		self.__dict__[event + "_functions"].append(callback)
 	
 	def removeCallbacks(self, event):
@@ -1743,7 +1746,12 @@ class Menu(UIElement):
 	arrowShade = [200, 200, 200, 255]
 	arrowHover = [140, 140, 140, 255]
 	
-	def __init__(self, x, y, width, height, name, menu, parent, auto_register, enableArrowButton = True, enableMenuHeader = True):
+	def __init__(self, x, y, width, height, name, menu, parent, auto_register, 
+						enableArrowButton = True, 
+						enableMenuHeader = True, 
+						noSelect = False, 
+						baseButtonTitle = None,
+						shadowed = True):
 		self.expanded = False  # this is first to deal with an issue in validate()
 		UIElement.__init__(self, x, y, width, height, name, name, parent, auto_register)
 		self.fontsize = 'normal'				
@@ -1768,15 +1776,22 @@ class Menu(UIElement):
 		self.title = menu[0] # take the first item if initialized
 		self.radius = 1.5   
 		# base button
-		self.baseButton = Button(x, y, width - 26, height, name, name, 'normal', parent, False) # the base button object
+		if enableArrowButton:
+			self.baseButton = Button(x, y, width - 26, height, name, name, 'normal', parent, False) # the base button object
+		else:
+			self.baseButton = Button(x, y, width, height, name, name, 'normal', parent, False)
 		self.baseButton.cornermask = 0
 		self.baseButton.radius = 0
 		self.baseButton.push_offset = 0
+		self.baseButton.shadowed = shadowed
 		self.baseButton.normalColor = self.normalColor
 		self.baseButton.hoverColor = self.hoverColor
 		self.baseButton.textColor = self.textColor
 		self.baseButton.textHiliteColor = self.textHiliteColor
-		self.baseButton.title = menu[0]
+		if baseButtonTitle != None:
+			self.baseButton.title = baseButtonTitle
+		else:
+			self.baseButton.title = menu[0]
 		self.baseButton.textlocation = 1
 		self.baseButton.registerCallback("release", self.release)
 				
@@ -1788,6 +1803,8 @@ class Menu(UIElement):
 		self.arrowButton.normalColor = self.normalColor
 		self.arrowButton.hoverColor = self.hoverColor
 		self.arrowButton.registerCallback("release", self.release)
+		if not enableArrowButton:
+			self.arrowButton.isVisible = False
 				
 		for a in menu: 
 			# create some button objects here
@@ -1807,7 +1824,7 @@ class Menu(UIElement):
 		#self.registerCallback("release", self.release)
 		self.calculateMenuSizes()
 		self.value = self.panel.elements[0].name
-		
+		self.noSelect = noSelect
 	def re_init(self, menu):
 		# clear the existing element list
 		
@@ -1834,18 +1851,21 @@ class Menu(UIElement):
 		self.calculateMenuSizes()
 				
 	def setValueAndCollapse(self, button):
-		if self.hit_test():		
-			self.value = button.name # the VALUE of the menu object is the selected button index
-			self.baseButton.title = button.title # the display string is the button title that was clicked.
+		
+		if self.hit_test():
+			if not self.noSelect:
+				self.value = button.name # the VALUE of the menu object is the selected button index
+				self.baseButton.title = button.title # the display string is the button title that was clicked.
 		self.expanded = False
 		self.close_funcs()
 			# print "Return menu value ", self.value, ", and button title ", button.title
-		
+	
 	def close_funcs(self):
 		for func in self.close_functions:
 			func(self)
 		
 	def calculateMenuSizes(self):
+
 		# get the screen height first
 		#self.debug = True
 		size = self.get_correct_space_size()			
@@ -1958,18 +1978,20 @@ class Menu(UIElement):
 				self.setColor(self.baseButton.textHiliteColor) # use the text color of course
 			else:
 				self.setColor(self.baseButton.textColor) 
-				
-			Blender.BGL.glBegin(Blender.BGL.GL_POLYGON)
-			Blender.BGL.glVertex2i(self.absX + (self.width - 10), self.absY - ((self.height / 2) - 2))
-			Blender.BGL.glVertex2i(self.absX + (self.width - 16), self.absY - ((self.height / 2) - 2))
-			Blender.BGL.glVertex2i(self.absX + (self.width - 13), self.absY - ((self.height / 2) -6))
-			Blender.BGL.glEnd()
 			
-			Blender.BGL.glBegin(Blender.BGL.GL_POLYGON)
-			Blender.BGL.glVertex2i(self.absX + (self.width - 10), self.absY - ((self.height / 2) + 2))
-			Blender.BGL.glVertex2i(self.absX + (self.width - 16), self.absY - ((self.height / 2) + 2))
-			Blender.BGL.glVertex2i(self.absX + (self.width - 13), self.absY - ((self.height / 2) + 6))
-			Blender.BGL.glEnd()
+			if self.enableArrowButton:
+					
+				Blender.BGL.glBegin(Blender.BGL.GL_POLYGON)
+				Blender.BGL.glVertex2i(self.absX + (self.width - 10), self.absY - ((self.height / 2) - 2))
+				Blender.BGL.glVertex2i(self.absX + (self.width - 16), self.absY - ((self.height / 2) - 2))
+				Blender.BGL.glVertex2i(self.absX + (self.width - 13), self.absY - ((self.height / 2) -6))
+				Blender.BGL.glEnd()
+				
+				Blender.BGL.glBegin(Blender.BGL.GL_POLYGON)
+				Blender.BGL.glVertex2i(self.absX + (self.width - 10), self.absY - ((self.height / 2) + 2))
+				Blender.BGL.glVertex2i(self.absX + (self.width - 16), self.absY - ((self.height / 2) + 2))
+				Blender.BGL.glVertex2i(self.absX + (self.width - 13), self.absY - ((self.height / 2) + 6))
+				Blender.BGL.glEnd()
 						
 	def find_widest_value(self):
 		w = 0
@@ -1992,11 +2014,13 @@ class Menu(UIElement):
 			for element in self.panel.elements:
 				element.release_event()			
 			self.expanded = False
+			# print "Got a release event!"
 			self.elements = [self.baseButton, self.arrowButton]
 			self.z_stack = [self.baseButton, self.arrowButton]
 			self.draw_stack = [self.baseButton, self.arrowButton]			
 		else:
 			# close the menu
+			print "Closing down!"
 			self.expanded = False	
 			self.elements = [self.baseButton, self.arrowButton]
 			self.z_stack = [self.baseButton, self.arrowButton]
@@ -2031,9 +2055,12 @@ class Menu(UIElement):
 	def hit_test(self):
 		rVal = False
 		if self.expanded:
+			#print "have a panel"
 			rVal = self.panel.hit_test()
+			return rVal
 		else:
 			if self.enableArrowButton:
+				# print "Have arrow, will travel"
 				if self.baseButton.hit_test() or self.arrowButton.hit_test():
 					rVal = True
 				return rVal
@@ -2061,6 +2088,9 @@ class Menu(UIElement):
 		for element in self.panel.elements:
 			if element.title == value:
 				self.value = index
+				
+	def registerCallbackForElementIndex(self, idx, signal, callback):
+		self.panel.elements[idx].registerCallback(signal, callback)
 		
 class MenuBar(Panel):
 	x_offset = 15 # 15 pixel offsetx
@@ -2068,6 +2098,7 @@ class MenuBar(Panel):
 	def __init__(self, parent, auto_register):
 		# this is a menu bar, the top is dynamic, will be a standard height, and should always be drawable
 		Panel.__init__(self, 0, 0, 0, 0, "none", "", parent, auto_register)
+		self.cornermask = 0
 		# that should be that.
 		self.invalid = True
 		self.shadowed = False
@@ -2089,7 +2120,7 @@ class MenuBar(Panel):
 	
 	def validate(self): # I'm always invalid, so never set that flag.
 		screen = Blender.Window.GetAreaSize()	
-		self.absX = 1
+		self.absX = 0
 		self.absY = screen[1] - 2
 		self.height = 25
 		
@@ -2138,7 +2169,12 @@ class TextField(Button):
 		# hence, floats will restrict to floats, same goes for ints and strings
 		self.registerCallback("click", self.stat)		
 		self.validate_functions = []
+		#self.undoMenu = Menu(0, 0, 60, 0, "Local Undo", ["No undo history"], parent, False)
+		self.registerCallback("right_click", self.showUndo)
+	
 		
+	def showUndo(self):
+		print "I'm here!"
 		
 	def draw(self):
 
@@ -3183,7 +3219,9 @@ class ConfirmDialog(Panel):
 		self.ok_button.registerCallback("release", self.button_funcs)
 		self.cancel_button = Button(10, buts_y, 60, 25, "OKButton", "Cancel", 'normal', self, True)	
 		self.cancel_button.registerCallback("release", self.button_funcs)
-		self.button_functions.append(function)
+		
+		if function != None:
+			self.button_functions.append(function)
 		#self.addElement(self.ok_button)
 		#self.addElement(self.cancel_button)
 		if discard:		
@@ -3206,6 +3244,7 @@ class ConfirmDialog(Panel):
 			self.state = self.CANCEL
 		for func in self.button_functions:
 			func(self)		
+		
 		
 	def getValue(self):
 		return self.state # returns the state of the dialog

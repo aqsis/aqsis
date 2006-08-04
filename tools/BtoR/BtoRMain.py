@@ -457,7 +457,7 @@ class BtoRSettings: # an instance of this class should be passed to every base-l
 	
 	def cancel(self, button):
 		self.getSettings() # recover the stuff from the registry
-		self.update()
+		self.update(None)
 		
 	def browse(self, button):
 		self.activeButton = button
@@ -2428,6 +2428,8 @@ class MainUI:
 	# this is the main UI object, the "main menu" of sorts from which all things spring.
 	def __init__(self):
 		# find my settings
+		
+		
 		sdict = globals()
 		self.settings = sdict["instBtoRSettings"]
 		self.evt_manager = sdict["instBtoREvtManager"]
@@ -2441,33 +2443,55 @@ class MainUI:
 		#self.editor = ui.Panel(10, screen[1] - 10, 200, 205, "BtoR", "Blender to Renderman:", None, False)		
 		self.editor.outlined = True
 		p = self.editor
+		offset = 10
+		self.file_menu = ["Save", "Save to file", "Exit"]
+		width = self.editor.get_string_width("File", 'normal') + 5
 		
-		self.globalSettingsButt = ui.Button(5, 5, 100, 18, "Settings", "Global Settings", 'normal', self.editor, True) # renderer settings and paths
-		self.globalSettingsButt.registerCallback("release", self.showGlobal)
-		self.globalSettingsButt.shadowed = False
-		#self.settings.getEditor().dialog = True
-		#self.globalSettingsButt.registerCallback("release", p.callFactory(None,self.showEditor(self.settings.getEditor())))
+		self.fileMenu = ui.Menu(5, 5, 40, 18, "File", self.file_menu, self.editor, True, 
+										enableArrowButton = False, 
+										noSelect = True,
+										baseButtonTitle = "File",
+										shadowed = False)
+				
+		self.fileMenu.registerCallbackForElementIndex(0, "release",  self.dialogTest)
+				
+		self.material_menu = ["Material List", "Import from XML", "Import from another .blend", "Export to XML"]
+		self.materialMenu = ui.Menu(60, 5, 80, 18, "Materials", self.material_menu, self.editor, True, 
+										enableArrowButton = False,
+										noSelect = True,
+										baseButtonTitle = "Materials",
+										shadowed = False)
+										
+		self.materialMenu.width = self.fileMenu.get_string_width("Material", 'normal') + 5
+								
+		self.materialMenu.registerCallbackForElementIndex(0, "release", self.showMaterials)
 		
-		self.sceneSettingsButt = ui.Button(110, 5, 100, 18, "Scene Settings", "Scene Settings", 'normal', self.editor, True) # scene settings, DOF, shadows, etc.
-		self.sceneSettingsButt.registerCallback("release", self.showSceneSettings)
-		self.sceneSettingsButt.shadowed = False
-		#self.sceneSettingsButt.registerCallback("release", p.callFactory(None,self.showEditor(self.settings.getEditor())))
+		self.settings_menu = ["Global Settings", "Scene Settings"]
+		self.settingsMenu = ui.Menu(150, 5, 80, 18, "Settings", self.settings_menu, self.editor, True, enableArrowButton = False,
+										noSelect = True,
+										baseButtonTitle = "Settings",
+										shadowed = False)
+		self.settingsMenu.registerCallbackForElementIndex(0, "release", self.showGlobal)
+		self.settingsMenu.registerCallbackForElementIndex(1, "release", self.showSceneSettings)
 		
-		self.objectButt = ui.Button(215, 5, 100, 18, "Objects", "Objects", 'normal', self.editor, True) # launches a low-quality preview, preview shading rate determined by global settings
+
+		
+		self.objectButt = ui.Button(240, 5, 80, 18, "Objects", "Objects", 'normal', self.editor, True) # launches a low-quality preview, preview shading rate determined by global settings
 		self.objectButt.registerCallback("release", self.showObjectEditor)
 		self.objectButt.shadowed = False
 		#self.objectButt.registerCallback("release", p.callFactory(None, self.showEditor(self.settings.getEditor())))
 		
-		self.exportButt = ui.Button(320, 5, 100, 18, "Export", "Export", 'normal', self.editor, True)
+		self.exportButt = ui.Button(350, 5, 50, 18, "Export", "Export", 'normal', self.editor, True)
 		#self.exportButt.registerCallback("release", p.callFactory(None, self.showEditor(self.export.getEditor())))
 		self.exportButt.registerCallback("release", self.showExport)
 		self.exportButt.shadowed = False
 		
-		self.materialsButt = ui.Button(425, 5, 100, 18, "Materials", "Materials", 'normal', self.editor, True)	
-		self.materialsButt.registerCallback("release", self.showMaterials)
-		self.materialsButt.shadowed = False
-		
 		#self.materialsButt.registerCallback("release", p.callFactory(None, self.showEditor(self.materials.getEditor())))
+		
+	def dialogTest(self, button):
+		self.evt_manager.showConfirmDialog("Some prompt!", "Another Prompt!", self.hideDialog, True)
+	def hideDialog(self, dialog):
+		self.evt_manager.removeElement(dialog)
 		
 	def showEditor(self, editor):
 		self.evt_manager.addElement(editor)
