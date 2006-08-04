@@ -13,6 +13,7 @@ import os
 from btor import BtoRGUIClasses as ui
 from btor import BtoRAdapterClasses
 from btor import BtoRTypes
+reload(BtoRTypes)
 reload(ui) # remove these when released for production use
 reload(BtoRAdapterClasses)
 import cgkit
@@ -29,6 +30,7 @@ import math
 from sets import Set
 import sys
 import StringIO	
+import re
 
 class BtoRSettings: # an instance of this class should be passed to every base-level BtoR object (objects that go into the root event manager.
 	# someone with 3Delight, Prman, entropy etc can add further renderer information here
@@ -42,7 +44,7 @@ class BtoRSettings: # an instance of this class should be passed to every base-l
 			     "RenderDotC":["wrendrdc", "shaderdc", "soinfo", "texdc", "RDCROOT", "SHADERS", "MAPS", "DISPLAYS", "PROCEDURALS", None, "ARCHIVES"] }
 	cpp = "cpp"
 	# what else does BtoRSettings need to know? How about a projects directory? MRUs? TBD later I suppose
-
+	
 	def __init__(self):		
 		sdict = globals()
 
@@ -63,7 +65,7 @@ class BtoRSettings: # an instance of this class should be passed to every base-l
 		self.rendererMenu.setValue(rendererList.index(self.renderer))
 		self.rendererMenu.registerCallback("release", self.selectRenderer)
 		
-		self.useSlParams = ui.ToggleButton(5, 65, 250, 20, "Use CGKit for Shader Parameters?", "Use CGKit for Shader Parameters?", 'normal', self.editor, True)
+		self.useSlParams = ui.CheckBox(5, 65,"Use CGKit for Shader Parameters?", "Use CGKit for Shader Parameters?", True, self.editor, True)
 		self.useSlParams.setValue(self.use_slparams)		
 		
 		#self.useSlParams.upColor = [158, 178, 181, 255]
@@ -73,9 +75,9 @@ class BtoRSettings: # an instance of this class should be passed to every base-l
 		
 		width = self.editor.get_string_width("Procedurals:", 'normal') + 30
 		
-		self.renderMatsOnStartup = ui.ToggleButton(5, 90, 250, 20, "Render material previews on startup?", "Render material previews on startup?", 'normal', self.editor, True)
+		self.renderMatsOnStartup = ui.CheckBox(5, 90, "Render material previews on startup?", "Render material previews on startup?", False, self.editor, True)
 		
-		self.useShadowMaps = ui.ToggleButton(300, 65, 250, 20, "Use Shadow Maps?", "Use Shadow Maps?", 'normal', self.editor, True)
+		self.useShadowMaps = ui.CheckBox(300, 65, "Use Shadow Maps?", "Use Shadow Maps?", True, self.editor, True)
 		offset = 125
 		
 		# search paths label
@@ -138,11 +140,31 @@ class BtoRSettings: # an instance of this class should be passed to every base-l
 		# get the first shader path in the search list
 		paths = self.shaderpaths.getValue().split(";")
 		
+		self.shadersSurface = {}
+		self.shadersDisplacement = {}
+		self.shadersImager = {}
+		self.shadersVolume = {}
+		self.shadersLight = {}
+		self.surfaceFiles = {}
+		self.dispFiles = {}
+		self.volumeFiles = {}
+		self.imagerFiles = {}
+		self.lightFiles = {}
 		
 		if self.use_slparams:
 			self.getShaderSourceList(paths[0]) 
 		else:
 			self.getCompiledShaderList(paths[0]) 
+			
+		self.shadows = os.sep + "shadows" + os.sep
+		self.images = os.sep + "images" + os.sep
+		self.textures = os.sep + "textures" + os.sep
+		self.archives = os.sep + "archives" + os.sep
+		
+			
+	def getShaderSearchPaths(self):
+		pathList = self.shaderpaths.getValue().split(";")
+		return pathList
 			
 	def selectRenderer(self, button):
 		self.renderer = self.rendererMenu.getValue() 
@@ -153,7 +175,6 @@ class BtoRSettings: # an instance of this class should be passed to every base-l
 			self.getShaderSourceList(path) 
 		else:
 			self.getCompiledShaderList(path) 
-
 			
 	def getShaderParams(self, shader):	
 		# run the shader params 
@@ -260,11 +281,11 @@ class BtoRSettings: # an instance of this class should be passed to every base-l
 			
 	def getCompiledShaderList(self, shaderPath):
 		# reset the shaders lists, since I'm looking at a new path		
-		self.shadersSurface = []
-		self.shadersLight = []
-		self.shadersVolume = []
-		self.shadersDisp = []
-		self.shadersImager = []						
+		self.shadersSurface[shaderPath] = []
+		self.shadersLight[shaderPath] = []
+		self.shadersVolume[shaderPath] = []
+		self.shadersDisp[shaderPath] = []
+		self.shadersImager[shaderPath] = []						
 		if os.path.exists(shaderPath):
 			files = os.listdir(shaderPath)		
 			for file in files:
@@ -277,15 +298,15 @@ class BtoRSettings: # an instance of this class should be passed to every base-l
 						self.shaders.append(parms)
 					elif self.type == None:
 						if (parms[1] == "surface"):
-							self.shadersSurface.append(parms)
+							self.shadersSurface[shaderPath].append(parms)
 						elif (parms[1] == "imager"):
-							self.shadersImager.append(parms)
+							self.shadersImager[shaderPath].append(parms)
 						elif (parms[1] == "displacement"):
-							self.shadersDisp.append(parms)
+							self.shadersDisp[shaderPath].append(parms)
 						elif (parms[1] == "volume"):
-							self.shadersVolume.append(parms)
+							self.shadersVolume[shaderPath].append(parms)
 						elif (parms[1] == "light"):
-							self.shadersLight.append(parms)	
+							self.shadersLight[shaderPath].append(parms)	
 		else:
 			# display error dialog
 			error_state = 1
@@ -295,27 +316,22 @@ class BtoRSettings: # an instance of this class should be passed to every base-l
 	def getShaderSourceList(self, shaderPath): 
 		# maybe add some iterative thing here that pops up a progress bar
 		# reset the shader lists
-		self.shadersSurface = []
-		self.shadersDisplacement = []
-		self.shadersImager = []
-		self.shadersVolume = []
-		self.shadersLight = []
-		
+	
 		path = shaderPath.strip()
 		# test for a valid path, and bail if not valid
 		if os.path.exists(path):
 
 			# reset the global shaders lists
-			self.shadersSurface = []
-			self.surfaceFiles = []
-			self.shadersLight = []
-			self.lightFiles = []
-			self.shadersVolume = []
-			self.volumeFiles = []
-			self.shadersDisplacement = []
-			self.dispFiles = []
-			self.shadersImager = []		
-			self.imagerFiles = []
+			self.shadersSurface[shaderPath] = []
+			self.surfaceFiles[shaderPath] = []
+			self.shadersLight[shaderPath] = []
+			self.lightFiles[shaderPath] = []
+			self.shadersVolume[shaderPath] = []
+			self.volumeFiles[shaderPath] = []
+			self.shadersDisplacement[shaderPath] = []
+			self.dispFiles[shaderPath] = []
+			self.shadersImager[shaderPath] = []		
+			self.imagerFiles[shaderPath] = []
 
 			files = os.listdir(path)
 			# determine the renderer	
@@ -328,20 +344,20 @@ class BtoRSettings: # an instance of this class should be passed to every base-l
 					else:
 		
 						if (parms[0][0] == "surface"):
-							self.shadersSurface.append(parms[0])
-							self.surfaceFiles.append(file)
+							self.shadersSurface[shaderPath].append(parms[0])
+							self.surfaceFiles[shaderPath].append(file)
 						elif (parms[0][0] == "imager"):
-							self.shadersImager.append(parms[0])
-							self.imagerFiles.append(file)
+							self.shadersImager[shaderPath].append(parms[0])
+							self.imagerFiles[shaderPath].append(file)
 						elif (parms[0][0] == "displacement"):
-							self.shadersDisplacement.append(parms[0])
-							self.dispFiles.append(file)
+							self.shadersDisplacement[shaderPath].append(parms[0])
+							self.dispFiles[shaderPath].append(file)
 						elif (parms[0][0] == "volume"):
-							self.shadersVolume.append(parms[0])
-							self.volumeFiles.append(file)
+							self.shadersVolume[shaderPath].append(parms[0])
+							self.volumeFiles[shaderPath].append(file)
 						elif (parms[0][0] == "light"):
-							self.shadersLight.append(parms[0])
-							self.lightFiles.append(file)
+							self.shadersLight[shaderPath].append(parms[0])
+							self.lightFiles[shaderPath].append(file)
 				# self.makeSourceMenus() # is this even neccessary?
 				
 		else:
@@ -426,7 +442,7 @@ class BtoRSettings: # an instance of this class should be passed to every base-l
 		Blender.Registry.SetKey("BtoR", settings, True)
 		self.haveSetup = True
 		
-	def update(self):
+	def update(self, obj):
 		self.rendererMenu.setValue(self.rendererMenu.menu.index(self.renderer))
 		self.useSlParams.setValue(self.use_slparams)
 		self.binarypath.setValue(self.binaryPath)
@@ -478,11 +494,11 @@ class BtoRSettings: # an instance of this class should be passed to every base-l
 class SceneSettings:
 	filter_menu = ["None Selected", "box", "triangle", "catmull-rom", "sinc", "gaussian"]
 	def __init__(self):
-		
+				
 		sdict = globals()
 		self.settings = sdict["instBtoRSettings"]
 		self.evt_manager = sdict["instBtoREvtManager"]
-		
+		#setattr(BtoRAdapterClasses, "instBtoREvtManager", self.evt_manager)
 		#scene = Blender.Scene.GetCurrent()
 		#render = scene.getRenderingContext()
 		#gammaLevel = render.gammaLevel()
@@ -534,14 +550,22 @@ class SceneSettings:
 		self.object_data = {} # fetch what will now be adapter objects for a given scene.
 		self.camera_data = {} # I doubt this is neccessary, since the shader will now be saved per camera
 		self.light_data = {} # ditto
+		self.object_groups = {} # this *is* neccessary for instancing support
 		
 		self.lightMultiplier = 1
 		self.renderContext = Blender.Scene.GetCurrent().getRenderingContext()
 		
+		self.suzanne = BtoRAdapterClasses.IObjectAdapter(BtoRTypes.BtoRPreview(Blender.Mesh.Primitives.Monkey()))
+		
+		
 	def render(self):
 		# generate Ri calls for the scene
 		# scene = Blender.Scene.GetCurrent()
-		# render = scene.getRenderingContext()
+		# render = scene.getRenderingContext(
+		paths = self.settings.getShaderSearchPaths()
+		# search path options
+		for path in paths:
+			ri.RiOption("searchpath", "shader", path + ":&")
 		
 		
 		settings = {}
@@ -562,12 +586,27 @@ class SceneSettings:
 		
 	def renderScene(self, exportSettings):
 		""" export/render the whole scene """		
+		paths = self.settings.shaderpaths.getValue().split(";")
+		
+		#yeeehaw, it's render time!
+		# hook me up with some paths!
+		outputPath = self.settings.outputpath.getValue()
+		if not os.path.exists(outputPath):
+			os.mkdir(outputPath)
+		if not os.path.exists(outputPath + self.settings.shadows):
+			os.mkdir(outputPath + self.settings.shadows)
+		if not os.path.exists(outputPath + self.settings.archives):
+			os.mkdir(outputPath + self.settings.archives)
+		if not os.path.exists(outputPath + self.settings.images):
+			os.mkdir(outputPath + self.settings.images)
+		if not os.path.exists(outputPath + self.settings.textures):
+			os.mkdir(outputPath + self.settings.textures)
 		# get required precursor info
 		bScene = Blender.Scene.GetCurrent()
 		rend = bScene.getRenderingContext()
 		startFrame = rend.startFrame()
 		endFrame = rend.endFrame()
-		frames = range(startFrame, endFrame)
+		self.frames = range(startFrame, endFrame)
 		
 		toFile = False
 		toRender = False
@@ -580,24 +619,16 @@ class SceneSettings:
 		else:
 			toFile = False
 			filename = exportSettings.textName.getValue()
-
-		if toFile:
-			ri.RiBegin(filename)
-		elif toRender:
-			ri.RiBegin("aqsis")
-		else:
-			ri.RiBegin()
 			
-		# Global scene options
-		self.render()
-		
-		# step 1, sort out the scene
+		# step 1, sort out the scene objects
 		self.cameras = [] # temporary storage
 		self.lights = []
 		self.objects = []
+		self.shadows = {}
 		objs = Blender.Scene.GetCurrent().getChildren()
-		print len(objs), " objects found."
+		# print len(objs), " objects found."
 		# sort out the objects in this scene by type
+		objSequence = 1
 		for obj in objs:
 			print obj.getType()
 			if self.object_data.has_key(obj.getName()):
@@ -606,24 +637,45 @@ class SceneSettings:
 				bObj = BtoRTypes.__dict__["BtoR" + obj.getType()](obj)
 				self.object_data[obj.getName()] = BtoRAdapterClasses.IObjectAdapter(bObj) # add to the master object list for possible use later
 				adapter = self.object_data[obj.getName()]
-			if obj.getType() == "Camera":		
-				
+			if obj.getType() == "Camera":						
 				self.cameras.append(adapter)
 			elif obj.getType() == "Lamp":
 				self.lights.append(adapter)
 			else:
 				self.objects.append(adapter)
+			adapter.sequence = objSequence
+			objSequence = objSequence + 1
 
 		if exportSettings.renderAnimation == False:
-			frames = [1] # reset the frame list to one frame - simple fix eh?
+			self.frames = [1] # reset the frame list to one frame - simple fix eh?
+		
+		self.generateShadowMaps()
 			
-		for frame in frames:	
+		for frame in self.frames:	
 			# frame block
-			ri.RiFrameBegin(frame)
+			# Blender.Set("curfame", frame) 
 			# frame info here
 			cam = 1
 			for camera in self.cameras:
-				imgFile = os.path.splitext(filename)[0] + "_%d_%d.tif" % (cam,frame) # support both camera & frame
+				# split the filename off
+				outputname = os.path.splitext(filename)[0] + "_cam_%d_frame_%d.rib" % (cam, frame)				
+				filename = outputname + ".rib"
+				imgFile = outputname + ".tif" 
+					# Main Render Start
+				
+				if toFile:
+					ri.RiBegin(filename)
+				elif toRender:
+					ri.RiBegin("aqsis")
+				else:
+					ri.RiBegin()
+					
+				for path in paths:
+					ri.RiOption("searchpath", "shader", path + ":&")
+					
+				ri.RiFrameBegin(frame)	
+				# Global scene options
+				self.render()
 				ri.RiDisplay(imgFile, "file", "rgb")
 				# self.renderFrame(exportSettings)		
 				# ri.RiTransformBegin() this is potential
@@ -632,35 +684,88 @@ class SceneSettings:
 				self.renderWorld()
 				# ri.RiTransformEnd()
 				cam = cam + 1
-			ri.RiFrameEnd()
-			
+				ri.RiFrameEnd()			
+				ri.RiEnd()
+		
+	def generateShadowMaps(self):
+		shadowPath = self.settings.outputpath.getValue() + self.settings.shadows
+		for light in self.lights:
+			if light.objEditor.shadowMap.getValue(): # if this lamp generates a shadowMap...
+				# create a shadowmap RIB		
+				shadowList = {}
+				for direction in light.getRenderDirections():
+					# if the light's animated, then animate the shadow map
+				
+					if light.isAnimated: # the light is animated, so iterate all of the frames
+						for frame in self.frames:
+							Blender.Set("curfame", frame) 
+							shadowFile = shadowPath + light.objData["name"] + direction  + "_" + frame + ".z"
+							shadowName = shadowPath + light.objData["name"] + direction + "_" + frame + ".tx"
+							shadowRIB = shadowPath + light.objData["name"] + direction + "_" + frame + ".rib"
+							self.renderShadowMap(light, direction, shadowRIB, shadowName, shadowFile)							
+							shadowList[direction + "_" + frame] = {"rib" : shadowRIB, "shadowName" : shadowName, "shadowFile" : shadowFile }
+							
+					else:						
+						shadowName = shadowPath + light.objData["name"] + direction + ".tx"
+						shadowFile = shadowPath + light.objData["name"] + direction + ".z"
+						shadowRIB = shadowPath + light.objData["name"]  + direction + ".rib"
+						self.renderShadowMap(light, direction, shadowRIB, shadowName, shadowFile)
+						shadowList[direction] = {"rib" : shadowRIB, "shadowName" : shadowName, "shadowFile" : shadowFile}
+					print "Created shadowmap ", shadowName, " using RIB ", shadowRIB
+				# add in the shadow data to the shadows array
+				self.shadows[light.objData["name"]] = shadowList # something
+				
+	def renderShadowMap(self, light, direction, shadowRIB, shadowName, shadowFile):									
+		ri.RiBegin(shadowRIB)
+		ri.RiPixelSamples(1, 1)
+		ri.RiPixelFilter("box", 1, 1)
+		ri.RiHider("hidden", "jitter", 0)
+		ri.RiDisplay(shadowFile, "zfile", "z")
+		projection = light.getRenderProjection()
+		ri.RiProjection(projection, "fov", 92) # 92 degrees projection
+		ri.RiShadingRate(4)
+		light.doCameraTransform(direction)
+		ri.RiWorldBegin()
+		self.renderObjects()
+		ri.RiWorldEnd()
+		ri.RiMakeShadow(shadowFile, shadowName)
 		ri.RiEnd()
-
 		
 	def renderWorld(self):
-
-		ri.RiWorldBegin()
-		
+		ri.RiWorldBegin()		
 		# if we're shadowmapping, make sure to generate shadowmaps each of these - of course the question becomes how...
+		self.renderLights()		
+		ri.RiIdentity()
+		self.renderObjects()
+		ri.RiWorldEnd()
+	def renderWorldArchive(self):
+		""" render the folowing objects to archives """
+		for obj in self.objects:
+			obj.renderArchive()
+
+	def renderLights(self):
 		for light in self.lights:
+			# get the fame info
+			# frame = Blender.Get("curframe")
+			shadows = self.shadows[light.objData["name"]]
+			print shadows
+			if light.objEditor.shadowMap.getValue():
+				light.setShadowParms(shadows)			
 			light.render() 
-			
-		ri.RiIdentity() # normalize the transform matrix here.
 		
+	def renderObjects(self):
 		for obj in self.objects:
 			# get all the objects in the scene that aren't lights or cameras
 			obj.render()
 		
-		ri.RiWorldEnd()
-		# add possible support for exporting object animation stuff, but that should really be in the main scene rib
-		# need to find out exactly how to do that.
 		
 	def getEditor(self):
 		return self.editor
 		
 
 		
-	def saveSceneData(self, obj):		
+	def saveSceneData(self, obj):
+		
 		# get the material list
 		dict = globals()		
 		keys = dict.keys()
@@ -678,7 +783,7 @@ class SceneSettings:
 		obj = self.saveObjects(newdoc)
 		
 		root.appendChild(obj)
-		
+		# self.saveSceneSettings(root_element)
 		try:
 			text = Blender.Text.Get("BtoRXML")
 			found = True
@@ -689,33 +794,108 @@ class SceneSettings:
 		
 		try:
 			xmlOut = root.toprettyxml()
-			text.clear()		
+			text.clear()
+			# doesn't matter, it's getting written
 			text.write(xmlOut) # that should be that.
 		except:
 			# not found, spawn a dialog
 			traceback.print_exc()
 			self.evt_manager.showConfirmDialog("Error!", "Something went wrong. Look at the console!", None, False)
-				
+			
+	def loadSceneData(self):
+		try:
+			text = Blender.Text.Get("BtoRXML")
+			lines = text.asLines()
+			xmlData = ""
+			for line in lines:
+				xmlData = xmlData + line
+			# do something fun here
+			found = True
+		except: 
+			traceback.print_exc()
+			self.evt_manager.showConfirmDialog("Error parsing XML!", "There was an error in the BtoRXML text file!", None, False)
+			return None
+		if found:
+			try:
+				xmlScene = xml.dom.minidom.parseString(xmlData)
+				hasXMLData = True
+			except xml.parsers.expat.ExpatError:
+				hasXMLData = False	
+				# pop up an error dialog!
+				traceback.print_exc()
+				self.evt_manager.showConfirmDialog("Error parsing XML!", "There was an error in the BtoRXML text file!", None, False)
+				return None
+			if hasXMLData:
+				xmlObjects = xmlScene.getElementsByTagName("Object")
+				if len(xmlObjects) > 0:
+					for xmlObject in xmlObjects:
+						# get the name of the object in question. They should all have names.
+						objName = xmlObject.getAttribute("name")
+						# find the object in blender
+						obj = Blender.Object.Get(objName)
+						# load the target object...
+						bObj = BtoRTypes.__dict__["BtoR" + obj.getType()](obj)
+						objData = BtoRAdapterClasses.IObjectAdapter(bObj) # get an adapter
+						# test to ensure that I've got the same object type...
+						if obj.getType() != xmlObject.getAttribute("type"):
+							# just in case something went wrong here, discard most of the object data and re-initialize with just a material def
+							if xmlObject.getAttribute("material") != "":
+								objData.objData["material"] = xmlObject.getAttribute("material")
+						else:
+							# otherwise, load up the full data from the object definition
+							objData.loadData(xmlObject)
+						self.object_data[objName] = objData # stuff the adapter component into the object data
+			# return some statistics here 
+			self.evt_manager.showConfirmDialog("Scene Data Loaded!", "%d objects were successfully loaded." % len(xmlObjects), None, False)
+			
 	def saveObjects(self, xml):
 		
 		#create a root object for the XML
 		objectRoot = xml.createElement("Object_Defs")
 		
-		for key in self.object_data:			
-			objData = self.object_data[key]			
-			
-			objXml = objData.saveData(xml)
-			objectRoot.appendChild(objXml)			
+		# object save routines for each adapter
+		# get the current list of objects in the scene
+		scene = Blender.Scene.GetCurrent()
+		
+		objList = scene.getChildren()
+		for obj in objList:
+			if self.object_data.has_key(obj.getName()):
+				objXml = self.object_data[obj.getName()].saveData(xml)
+				print "XML received for ", obj.getName(), "of type ", obj.getType(), "..."
+			else:
+				# create a new adapter in case there's no data defined for it.
+				bObj = BtoRTypes.__dict__["BtoR" + obj.getType()](obj)
+				adapter = BtoRAdapterClasses.IObjectAdapter(bObj)	
+				objXml = adapter.saveData(xml)
+				self.object_data[obj.getName()] = adapter
+				print "New adapter generated for ", obj.getName(), " of type ", obj.getType(), "..."
+			objectRoot.appendChild(objXml)	# that should be successful one way or another.		
 		
 		return objectRoot
+					
+	def saveSimpleObject(self, objData, xml):
+		objXml = xml.createElement("Object")
+		for key in objData:
+			objXml.setAttribute(key, objData[key])
+		
+		return objXml
+		
+	def saveObject(self, objData, xml):
+		objXml = xml.createElement("object")
+		for key in objData:			
+			if key == "shaderparms":
+				shaderparms = objData["shaderparms"]
+				# I need to spawn an RMShader to deal with this effectively.
+				# Before I can do that, the restore needs to be in place to shove the data back into the shader 
+				for skey in shaderparms:
+					#print type(shaderparms[skey])
+					shader.setAttribute(skey, shaderparms[skey])
+					
+				objXml.appendChild(shader)
+			else:
+				objXml.setAttribute(key, objData[key])
+		return objXml				
 			
-	def getSceneData(self, obj): # I use obj here in case a button calls this
-		try:
-			text = Blender.Text.Get("BtoRXML")
-			found = True
-		except:
-			text = Blender.Text.New("BtoRXML")
-			found = False
 		
 	def saveShaderParms(self, shader, xml): # I only need to pass the shader in here
 		shaderNode = xml.createElement("Shader")				
@@ -770,6 +950,7 @@ class ObjectEditor:
 		self.evt_manager = sdict["instBtoREvtManager"]
 		self.scene = sdict["instBtoRSceneSettings"]
 		self.materials = sdict["instBtoRMaterials"]
+		self.groupList = sdict["instBtoRGroupList"]
 		setattr(BtoRAdapterClasses, "instBtoRSettings", sdict["instBtoRSettings"])
 		setattr(BtoRAdapterClasses, "instBtoREvtManager", sdict["instBtoREvtManager"])
 		setattr(BtoRAdapterClasses, "instBtoRSceneSettings", sdict["instBtoRSceneSettings"])
@@ -790,12 +971,16 @@ class ObjectEditor:
 		self.objectMenu.isVisible = False
 		self.objectMenu.registerCallback("release", self.selectObject_menu)
 		
-		typeLabelX = self.objectMenu.x + self.objectMenu.width + 10
-		typeX = typeLabelX + self.editorPanel.get_string_width("Object Type:", 'normal') + 10
-		self.editorPanel.addElement(ui.Label(typeLabelX, 30, "Object Type:", "Object Type:", self.editorPanel, False))
-		self.objectType = ui.Label(typeX, 30, "No_type", "No_type", self.editorPanel, True)
+		# typeLabelX = self.objectMenu.x + self.objectMenu.width + 10
+		# typeX = typeLabelX + self.editorPanel.get_string_width("Object Type:", 'normal') + 10
+		# self.editorPanel.addElement(ui.Label(typeLabelX, 30, "Object Type:", "Object Type:", self.editorPanel, False))
+		# self.objectType = ui.Label(typeX, 30, "No_type", "No_type", self.editorPanel, True)
+		labelX = self.objectMenu.x + self.objectMenu.width + 10
+		self.editorPanel.addElement(ui.Label(labelX, 30, "Object Groups", "Object Groups:", self.editorPanel, True))
+		# I need to know about object groups here, so look at the scene data
 		
-		self.applyAll = ui.ToggleButton(5, 70, 150, 25, "Apply to all selected", "Apply to all selected", 'normal', self.editorPanel, True)
+		
+		# self.applyAll = ui.CheckBox(5, 70, "Apply to all selected", "Apply to all selected", False, self.editorPanel, True)
 		
 		containerOffset = 110
 		containerHeight = 280
@@ -823,9 +1008,17 @@ class ObjectEditor:
 		# set up the listener for the spacehandler 
 		self.evt_manager.registerCallback("draw", self.getSelected)
 		
-		self.infoButton = ui.Button(250, 60, 150, 25, "Show object info", "Show object info", 'normal', self.editorPanel, True)
-		self.infoButton.registerCallback("release", self.showObjData)
+		# self.infoButton = ui.Button(250, 60, 150, 25, "Show object info", "Show object info", 'normal', self.editorPanel, True)
+		# self.infoButton.registerCallback("release", self.showObjData)
+		# material selector setup		
+		self.materials.select_functions.append(self.selectMaterial)
+		
+		# group selector
+		self.groupList.select_functions.append(self.selectGroup)
 
+		self.materials.loadMaterials()
+		self.scene.loadSceneData()
+		
 	def getEditor(self):
 		return self.editorPanel
 
@@ -848,10 +1041,10 @@ class ObjectEditor:
 		
 	def selectObject(self, obj):
 		""" An object's been selected, make the magic perform. """
-		print "selected an object!"
+		# print "selected an object!"
 		name = obj.getName()
 		objType = obj.getType()		
-		# so instead I 	simply retrieve the object in question
+		# so instead I simply retrieve the object in question
 		if self.scene.object_data.has_key(obj.getName()): 
 			self.objData = self.scene.object_data[obj.getName()] # fetch the adapter 
 			print self.objData
@@ -870,8 +1063,7 @@ class ObjectEditor:
 		self.objEditorPanel.invalid = True
 		self.editorPanel.addElement(self.objEditorPanel)
 		
-		# material selector setup
-		self.materials.select_functions.append(self.selectMaterial)
+
 		
 		# and finally, object checks/resets for interested objects
 		self.objData.checkReset()
@@ -882,6 +1074,12 @@ class ObjectEditor:
 		matName = button.title
 		mat = self.materials.getMaterial(matName)
 		self.objData.setMaterial(mat)
+		
+	def selectGroup(self, button):
+		self.evt_manager.removeElement(self.groupList.getEditor())
+		groupName = button.title
+		self.objData.setGroup(groupName)
+		
 		
 	def showObjData(self, button):
 		self.objData.getInfo()
@@ -1081,7 +1279,6 @@ class Material:
 		self.editorPanel.addElement(self.volumeShader)
 		self.volumeShader.registerCallback("release", self.volume.showEditor)
 		
-		
 		# Color
 		self.editorPanel.addElement(ui.Label(5, 160, "Color", "Color:", self.editorPanel, True))
 		
@@ -1137,8 +1334,10 @@ class Material:
 		self.close_button.radius = 1.5
 		#close_func = self.close_button.callFactory(self.evt_manager.removeElement, self.editorPanel)
 		self.close_button.registerCallback("release", self.close)
+		#self.previewLightMenu = ui.Menu(15, 283, 135, 25, "Preview Light Setup", ["Pointlights", "Spotlight", "Distantlight", "Hemilight"], self.editorPanel, True)
+		self.previewTypeMenu = ui.Menu(15, 250, 135, 25, "Preview Type", ["Bicubic Sphere", "Cube", "Suzanne - Mesh", "Suzanne - Subdiv", "Teapot"], self.editorPanel, True)
 		
-		self.preview_button = ui.Button(15, 275, 135, 25, "Preview Material:", "Preview Material:", 'normal', self.editorPanel, True)
+		self.preview_button = ui.Button(15, 315, 135, 25, "Preview Material:", "Preview Material:", 'normal', self.editorPanel, True)
 		self.preview_button.registerCallback("release", self.renderPreview)
 		
 		# preview image
@@ -1177,6 +1376,8 @@ class Material:
 			if self.volume.shader.shaderName() != None:
 				self.volumeShader.title = self.volume.shader.shaderName()
 			self.renderPreview(None)
+
+		
 			
 	def setImage(self, image):
 		self.image = image
@@ -1306,29 +1507,33 @@ class Material:
 	def renderPreview(self, button):
 		# here, render a preview image using the current material
 		# step 1 is to find a place to put this, so consult the BtoR settings to see where that is.
-		filename = os.path.normpath(self.settings.outputPath + os.sep + "material" + self.material.name + ".tif")
+		filename = os.path.normpath(self.settings.outputPath + os.sep + "material_" + self.material.name + ".tif")
 		# print "Selected renderer: ", self.settings.renderers[self.settings.renderer][0]
-		ri.RiBegin(self.settings.renderers[self.settings.renderer][0])
-		# ri.RiBegin(self.settings.renderer)
+		ri.RiBegin(self.settings.renderers[self.settings.renderer][0] + " -v=3") # replace this with render flags
+		# ri.RiBegin(os.path.normpath(self.settings.outputPath + os.sep + "material_" + self.material.name + ".rib"))
 		# get the shader options
 		paths = self.settings.shaderpaths.getValue().split(";")
 		# setup the shader paths
+		#sPath = ""
+		#for path in paths:
+		#	sPath = sPath + ":" + path
+		#sPath = sPath + ":@"
+		#ri.RiOption("searchpath", "shader", sPath)
+		#ri.RiOption("searchpath", "shader", paths)
 		for path in paths:
-			ri.RiOption("searchpath", "shader", "&:" + path[0])
+			ri.RiOption("searchpath", "shader", path + ":&")
 			
 		ri.RiFormat(128, 128, 1)
+		# ri.RiProjection("perspective", "fov", 22.5)
 		ri.RiAttribute("displacementbound", "coordinatesystem", "shader", "sphere", 1.5)
 		ri.RiDisplay(filename, "file", "rgba")
 		ri.RiTranslate(0, 0, 2.7)
 		ri.RiWorldBegin()
+		# ri.RiRotate(45, 1, 1, 0)
 		ri.RiAttributeBegin()
 		ri.RiCoordinateSystem("world")
 		ri.RiAttributeEnd()
-		ri.RiTransformBegin()
-		ri.RiLightSource("ambientlight", "lightcolor", [0.151, 0.151, 0.151])
-		ri.RiLightSource("distantlight", "lightcolor", [0.8, 0.8, 0.8], "from", [1, 1.5, -1], "to", [0, 0, 0], "intensity", 1)
-		ri.RiLightSource("distantlight", "lightcolor", [0.2, 0.2, 0.2], "from", [-1.3, -1.2, -1.0], "to", [0, 0, 0], "intensity", 1)
-		ri.RiTransformEnd()
+		self.renderLights()
 		ri.RiAttributeBegin() 
 		# ok here I need to get the material settings out of the material object somehow.
 		# check the value of the surface shader
@@ -1361,23 +1566,26 @@ class Material:
 		color = self.material.color()
 		opacity = self.material.opacity()
 		ri.RiTransformBegin()
-		ri.RiRotate(45, 45, 45, 0)
+		ri.RiScale(1, 1, 1)
 		ri.RiColor([color[0], color[1], color[2]])		
 		ri.RiOpacity([opacity[0], opacity[1], opacity[2]])
-		ri.RiTransformEnd()
-		ri.RiTransformBegin()
-		ri.RiRotate(90, 1, 0, 0)
-		ri.RiSphere(0.75, -0.75, 0.75, 360)
-		# cgkit.riutil.RiuGrid(thickness=0.02, cells=6, shader="matte", color=(0.9, 0.9, 0.9))
+
+		previewType = self.previewTypeMenu.getValue()
+		if previewType == "Bicubic Sphere":
+			self.renderBicubicSphere()
+		elif previewType == "Cube":
+			self.renderUnitCube()
+		elif previewType == "Suzanne - Mesh":
+			self.renderSuzanneMesh()
+		elif previewType == "Suzanne - Subdiv":
+			self.renderSuzanneSubdiv()
+		elif previewType == "Teapot":
+			self.renderTeapot()
+		else:
+			self.renderBicubicSphere()
 		ri.RiTransformEnd()
 		ri.RiAttributeEnd()
-		#ri.RiAttributeBegin()
-		#ri.RiTranslate(0,0,0.5)
-		#ri.RiScale(1, 1, 1)
-		#ri.RiColor([1, 1, 1])		
-		#ri.RiSurface("plastic")
-		#ri.RiPatch("bilinear", "P", [-1, 1, 0, 1, 1, 0, -1, -1, 0, 1 -1, 0])
-		#ri.RiAttributeEnd()
+		# self.renderBackground()
 		ri.RiWorldEnd()
 		ri.RiEnd()
 		
@@ -1385,7 +1593,127 @@ class Material:
 		self.image.setFilename(filename)
 		self.image.reload()
 		
+	def renderBicubicSphere(self):
+		ri.RiTransformBegin()
+		ri.RiRotate(90, 1, 0, 0)
+		ri.RiSphere(0.75, -0.75, 0.75, 360)
+		ri.RiTransformEnd()
+		
+	def renderSuzanneMesh(self):
+		self.scene.suzanne.isSubdiv = False
+		ri.RiRotate(180, 0, 1, 0)
+		ri.RiRotate(27, 1, 0, 0)
+		ri.RiRotate(-30, 0, 1, 0)
+		ri.RiScale(.74, .74, .74)
+		self.scene.suzanne.render()
+		
+	def renderSuzanneSubdiv(self):
+		ri.RiRotate(180, 0, 1, 0)
+		ri.RiRotate(27, 1, 0, 0)
+		ri.RiRotate(-30, 0, 1, 0)
+		ri.RiScale(.74, .74, .74)
+		self.scene.suzanne.isSubdiv = True
+		self.scene.suzanne.render()
 	
+	def renderTeapot(self):
+		ri.RiTransformBegin()
+		ri.RiTranslate(0, -.25, .5)
+		ri.RiRotate(180, 0, 0, 1)
+		ri.RiRotate(125, 1, 0, 0)
+		ri.RiRotate(-45, 0, 0, 1)
+		#ri.RiRotate(45, 0, 0, 1)
+		ri.RiScale(0.35, 0.35, 0.35)
+		teapotRIB = """
+		AttributeBegin
+		Basis "bezier" 3 "bezier" 3
+		PatchMesh "bicubic" 13 "nonperiodic" 10 "nonperiodic" "P" [1.5 0 0 1.5 0.828427 0 0.828427 1.5 0 0 1.5 0 -0.828427 1.5 0 -1.5 0.828427 0 -1.5 0 0 -1.5 -0.828427 0 -0.828427 -1.5 0 0 -1.5 0 0.828427 -1.5 0 1.5 -0.828427 0 1.5 0 0 1.5 0 0.075 1.5 0.828427 0.075 0.828427 1.5 0.075 0 1.5 0.075 -0.828427 1.5 0.075 -1.5 0.828427 0.075 -1.5 0 0.075 -1.5 -0.828427 0.075 -0.828427 -1.5 0.075 0 -1.5 0.075 0.828427 -1.5 0.075 1.5 -0.828427 0.075 1.5 0 0.075 2 0 0.3 2 1.10457 0.3 1.10457 2 0.3 0 2 0.3 -1.10457 2 0.3 -2 1.10457 0.3 -2 0 0.3 -2 -1.10457 0.3 -1.10457 -2 0.3 0 -2 0.3 1.10457 -2 0.3 2 -1.10457 0.3 2 0 0.3 2 0 0.75 2 1.10457 0.75 1.10457 2 0.75 0 2 0.75 -1.10457 2 0.75 -2 1.10457 0.75 -2 0 0.75 -2 -1.10457 0.75 -1.10457 -2 0.75 0 -2 0.75 1.10457 -2 0.75 2 -1.10457 0.75 2 0 0.75 2 0 1.2 2 1.10457 1.2 1.10457 2 1.2 0 2 1.2 -1.10457 2 1.2 -2 1.10457 1.2 -2 0 1.2 -2 -1.10457 1.2 -1.10457 -2 1.2 0 -2 1.2 1.10457 -2 1.2 2 -1.10457 1.2 2 0 1.2 1.75 0 1.725 1.75 0.966498 1.725 0.966498 1.75 1.725 0 1.75 1.725 -0.966498 1.75 1.725 -1.75 0.966498 1.725 -1.75 0 1.725 -1.75 -0.966498 1.725 -0.966498 -1.75 1.725 0 -1.75 1.725 0.966498 -1.75 1.725 1.75 -0.966498 1.725 1.75 0 1.725 1.5 0 2.25 1.5 0.828427 2.25 0.828427 1.5 2.25 0 1.5 2.25 -0.828427 1.5 2.25 -1.5 0.828427 2.25 -1.5 0 2.25 -1.5 -0.828427 2.25 -0.828427 -1.5 2.25 0 -1.5 2.25 0.828427 -1.5 2.25 1.5 -0.828427 2.25 1.5 0 2.25 1.4375 0 2.38125 1.4375 0.793909 2.38125 0.793909 1.4375 2.38125 0 1.4375 2.38125 -0.793909 1.4375 2.38125 -1.4375 0.793909 2.38125 -1.4375 0 2.38125 -1.4375 -0.793909 2.38125 -0.793909 -1.4375 2.38125 0 -1.4375 2.38125 0.793909 -1.4375 2.38125 1.4375 -0.793909 2.38125 1.4375 0 2.38125 1.3375 0 2.38125 1.3375 0.738681 2.38125 0.738681 1.3375 2.38125 0 1.3375 2.38125 -0.738681 1.3375 2.38125 -1.3375 0.738681 2.38125 -1.3375 0 2.38125 -1.3375 -0.738681 2.38125 -0.738681 -1.3375 2.38125 0 -1.3375 2.38125 0.738681 -1.3375 2.38125 1.3375 -0.738681 2.38125 1.3375 0 2.38125 1.4 0 2.25 1.4 0.773198 2.25 0.773198 1.4 2.25 0 1.4 2.25 -0.773198 1.4 2.25 -1.4 0.773198 2.25 -1.4 0 2.25 -1.4 -0.773198 2.25 -0.773198 -1.4 2.25 0 -1.4 2.25 0.773198 -1.4 2.25 1.4 -0.773198 2.25 1.4 0 2.25 ]
+		Basis "bezier" 3 "bezier" 3
+		PatchMesh "bicubic" 13 "nonperiodic" 7 "nonperiodic" "P" [1.3 0 2.25 1.3 0.71797 2.25 0.71797 1.3 2.25 0 1.3 2.25 -0.71797 1.3 2.25 -1.3 0.71797 2.25 -1.3 0 2.25 -1.3 -0.71797 2.25 -0.71797 -1.3 2.25 0 -1.3 2.25 0.71797 -1.3 2.25 1.3 -0.71797 2.25 1.3 0 2.25 1.3 0 2.4 1.3 0.71797 2.4 0.71797 1.3 2.4 0 1.3 2.4 -0.71797 1.3 2.4 -1.3 0.71797 2.4 -1.3 0 2.4 -1.3 -0.71797 2.4 -0.71797 -1.3 2.4 0 -1.3 2.4 0.71797 -1.3 2.4 1.3 -0.71797 2.4 1.3 0 2.4 0.4 0 2.4 0.4 0.220914 2.4 0.220914 0.4 2.4 0 0.4 2.4 -0.220914 0.4 2.4 -0.4 0.220914 2.4 -0.4 0 2.4 -0.4 -0.220914 2.4 -0.220914 -0.4 2.4 0 -0.4 2.4 0.220914 -0.4 2.4 0.4 -0.220914 2.4 0.4 0 2.4 0.2 0 2.55 0.2 0.110457 2.55 0.110457 0.2 2.55 0 0.2 2.55 -0.110457 0.2 2.55 -0.2 0.110457 2.55 -0.2 0 2.55 -0.2 -0.110457 2.55 -0.110457 -0.2 2.55 0 -0.2 2.55 0.110457 -0.2 2.55 0.2 -0.110457 2.55 0.2 0 2.55 0 0 2.7 0 0 2.7 0 0 2.7 0 0 2.7 0 0 2.7 0 0 2.7 0 0 2.7 0 0 2.7 0 0 2.7 0 0 2.7 0 0 2.7 0 0 2.7 0 0 2.7 0.8 0 3 0.8 0.441828 3 0.441828 0.8 3 0 0.8 3 -0.441828 0.8 3 -0.8 0.441828 3 -0.8 0 3 -0.8 -0.441828 3 -0.441828 -0.8 3 0 -0.8 3 0.441828 -0.8 3 0.8 -0.441828 3 0.8 0 3 0 0 3 0 0 3 0 0 3 0 0 3 0 0 3 0 0 3 0 0 3 0 0 3 0 0 3 0 0 3 0 0 3 0 0 3 0 0 3 ]
+		Basis "bezier" 3 "bezier" 3
+		PatchMesh "bicubic" 4 "nonperiodic" 7 "nonperiodic" "P" [-2 0 0.75 -2 0.3 0.75 -1.9 0.3 0.45 -1.9 0 0.45 -2.5 0 0.975 -2.5 0.3 0.975 -2.65 0.3 0.7875 -2.65 0 0.7875 -2.7 0 1.425 -2.7 0.3 1.425 -3 0.3 1.2 -3 0 1.2 -2.7 0 1.65 -2.7 0.3 1.65 -3 0.3 1.65 -3 0 1.65 -2.7 0 1.875 -2.7 0.3 1.875 -3 0.3 2.1 -3 0 2.1 -2.3 0 1.875 -2.3 0.3 1.875 -2.5 0.3 2.1 -2.5 0 2.1 -1.6 0 1.875 -1.6 0.3 1.875 -1.5 0.3 2.1 -1.5 0 2.1 ]
+		PatchMesh "bicubic" 4 "nonperiodic" 7 "nonperiodic" "P" [2.8 0 2.25 2.8 0.15 2.25 3.2 0.15 2.25 3.2 0 2.25 2.9 0 2.325 2.9 0.25 2.325 3.45 0.15 2.3625 3.45 0 2.3625 2.8 0 2.325 2.8 0.25 2.325 3.525 0.25 2.34375 3.525 0 2.34375 2.7 0 2.25 2.7 0.25 2.25 3.3 0.25 2.25 3.3 0 2.25 2.3 0 1.95 2.3 0.25 1.95 2.4 0.25 1.875 2.4 0 1.875 2.6 0 1.275 2.6 0.66 1.275 3.1 0.66 0.675 3.1 0 0.675 1.7 0 1.275 1.7 0.66 1.275 1.7 0.66 0.45 1.7 0 0.45 ]
+		PatchMesh "bicubic" 4 "nonperiodic" 7 "nonperiodic" "P" [-1.9 0 0.45 -1.9 -0.3 0.45 -2 -0.3 0.75 -2 0 0.75 -2.65 0 0.7875 -2.65 -0.3 0.7875 -2.5 -0.3 0.975 -2.5 0 0.975 -3 0 1.2 -3 -0.3 1.2 -2.7 -0.3 1.425 -2.7 0 1.425 -3 0 1.65 -3 -0.3 1.65 -2.7 -0.3 1.65 -2.7 0 1.65 -3 0 2.1 -3 -0.3 2.1 -2.7 -0.3 1.875 -2.7 0 1.875 -2.5 0 2.1 -2.5 -0.3 2.1 -2.3 -0.3 1.875 -2.3 0 1.875 -1.5 0 2.1 -1.5 -0.3 2.1 -1.6 -0.3 1.875 -1.6 0 1.875 ]
+		PatchMesh "bicubic" 4 "nonperiodic" 7 "nonperiodic" "P" [3.2 0 2.25 3.2 -0.15 2.25 2.8 -0.15 2.25 2.8 0 2.25 3.45 0 2.3625 3.45 -0.15 2.3625 2.9 -0.25 2.325 2.9 0 2.325 3.525 0 2.34375 3.525 -0.25 2.34375 2.8 -0.25 2.325 2.8 0 2.325 3.3 0 2.25 3.3 -0.25 2.25 2.7 -0.25 2.25 2.7 0 2.25 2.4 0 1.875 2.4 -0.25 1.875 2.3 -0.25 1.95 2.3 0 1.95 3.1 0 0.675 3.1 -0.66 0.675 2.6 -0.66 1.275 2.6 0 1.275 1.7 0 0.45 1.7 -0.66 0.45 1.7 -0.66 1.275 1.7 0 1.275 ]
+		AttributeEnd """
+		ri._ribout.write(teapotRIB)
+		ri.RiTransformEnd()
+
+		
+	def renderUnitCube(self):	
+		ri.RiRotate(63, 1, 0, 0)
+		ri.RiRotate(45, 0, 0, 1)
+		
+		#ri.RiScale(.70, .70, .70)
+		# Far
+		unitsize = .65	
+		ri.RiTransformBegin()
+		ri.RiPolygon("P", [unitsize, unitsize, unitsize, -unitsize, unitsize, unitsize, -unitsize, -unitsize, unitsize, unitsize, -unitsize, unitsize])
+		ri.RiRotate(90, 0, 1, 0)
+		# right 
+		ri.RiPolygon("P", [unitsize, unitsize, unitsize, -unitsize, unitsize, unitsize, -unitsize, -unitsize, unitsize, unitsize, -unitsize, unitsize])
+		ri.RiRotate(90, 0, 1, 0)
+		# near
+		ri.RiPolygon("P", [unitsize, unitsize, unitsize, -unitsize, unitsize, unitsize, -unitsize, -unitsize, unitsize, unitsize, -unitsize, unitsize])
+		ri.RiRotate(90, 0, 1, 0)
+		# left
+		ri.RiPolygon("P", [unitsize, unitsize, unitsize, -unitsize, unitsize, unitsize, -unitsize, -unitsize, unitsize, unitsize, -unitsize, unitsize])
+		ri.RiTransformEnd()
+		ri.RiTransformBegin()
+		ri.RiRotate(90, 1, 0, 0)
+		# bottom
+		ri.RiPolygon("P", [unitsize, unitsize, unitsize, -unitsize, unitsize, unitsize, -unitsize, -unitsize, unitsize, unitsize, -unitsize, unitsize])
+		ri.RiTransformEnd()
+		ri.RiTransformBegin()
+		ri.RiRotate(90, 1, 0, 0)
+		# top
+		ri.RiPolygon("P", [unitsize, unitsize, unitsize, -unitsize, unitsize, unitsize, -unitsize, -unitsize, unitsize, unitsize, -unitsize, unitsize])
+		ri.RiTransformEnd()
+	
+	def renderLights(self):
+		ri.RiTransformBegin()
+		# case checking needed here for lighting information
+		ri.RiLightSource("ambientlight", "lightcolor", [0.151, 0.151, 0.151])
+		ri.RiLightSource("distantlight", "lightcolor", [1, 1, 1], "from", [1, 1.5, -1], "to", [0, 0, 0], "intensity", 1)
+		ri.RiLightSource("distantlight", "lightcolor", [0.7, 0.7, 0.7], "from", [-1.3, -1.2, -1.0], "to", [0, 0, 0], "intensity", 1)
+		# ri.RiLightSource("distantlight", "lightcolor", [1, 1, 1], "from", [-1, -1.5, -1], "to", [0, 0, 0], "intensity", 1)
+		# ri.RiLightSource("distantlight", "lightcolor", [1, 1, 1], "from", [-1, 1.5, -1], "to", [0, 0, 0], "intensity", 1)
+		ri.RiTransformEnd()
+		
+	def renderBackground(self):
+		ri.RiAttributeBegin()
+		ri.RiTranslate(0, 0, 0.5)
+		ri.RiRotate(90, 0, 1, 1)
+
+		ri.RiColor([1, 1, 1])		
+		ri.RiDeclare("frequency", "uniform float")
+		ri.RiSurface("checker", "frequency", 1)
+		ri.RiTransformBegin()
+		# Far
+		unitsize = 1.5
+		ri.RiRotate(45, 1, 1, 1)
+		ri.RiPolygon("P", [unitsize, unitsize, unitsize, -unitsize, unitsize, unitsize, -unitsize, -unitsize, unitsize, unitsize, -unitsize, unitsize])
+		ri.RiRotate(90, 0, 1, 0)
+		# right 
+		ri.RiPolygon("P", [unitsize, unitsize, unitsize, -unitsize, unitsize, unitsize, -unitsize, -unitsize, unitsize, unitsize, -unitsize, unitsize])
+		ri.RiRotate(90, 0, 1, 0)
+		# near
+		ri.RiPolygon("P", [unitsize, unitsize, unitsize, -unitsize, unitsize, unitsize, -unitsize, -unitsize, unitsize, unitsize, -unitsize, unitsize])
+		ri.RiRotate(90, 0, 1, 0)
+		# left
+		ri.RiPolygon("P", [unitsize, unitsize, unitsize, -unitsize, unitsize, unitsize, -unitsize, -unitsize, unitsize, unitsize, -unitsize, unitsize])
+		ri.RiTransformEnd()
+		ri.RiTransformBegin()
+		ri.RiRotate(90, 1, 0, 0)
+		# bottom
+		ri.RiPolygon("P", [unitsize, unitsize, unitsize, -unitsize, unitsize, unitsize, -unitsize, -unitsize, unitsize, unitsize, -unitsize, unitsize])
+		ri.RiTransformEnd()
+		ri.RiTransformBegin()
+		ri.RiRotate(90, 1, 0, 0)
+		# top
+		ri.RiPolygon("P", [unitsize, unitsize, unitsize, -unitsize, unitsize, unitsize, -unitsize, -unitsize, unitsize, unitsize, -unitsize, unitsize])
+		# ri.RiPatch("bilinear", "P", [-2, 2, 0, 2, 2, 0, -2, -2, 0, 2 -2, 0])
+		ri.RiTransformEnd()
+		ri.RiAttributeEnd()
 	
 class Shader:
 	# what does this need to know?
@@ -1403,7 +1731,7 @@ class Shader:
 		else:
 			self.shader = None # no selection, we'll be assigning it as we go.
 			
-		searchpaths = self.settings.shaderpaths.getValue().split(";")		
+		self.searchpaths = self.settings.shaderpaths.getValue().split(";")		
 		self.stype = stype
 		self.material = material # parent material
 		
@@ -1416,7 +1744,7 @@ class Shader:
 		# on the shader panel, we need the shader search path (with the ability to add to the list)
 		self.editorPanel.addElement(ui.Label(5, 30, "SearchPathLabel", "Shader Search Path:", self.editorPanel, True))
 		offset = self.editorPanel.get_string_width("Shader Search Path:", 'normal') + 12
-		self.searchPaths = ui.Menu(offset, 30, 210, 20, "SearchPath",  searchpaths, self.editorPanel, True)
+		self.searchPaths = ui.Menu(offset, 30, 210, 20, "SearchPath",  self.searchpaths, self.editorPanel, True)
 		self.searchPaths.registerCallback("release", self.listShaders)
 		
 		# next we need the shader type, so I know what I'm working with.
@@ -1447,11 +1775,24 @@ class Shader:
 
 		if self.shader.shaderName() != None:
 			# set the shader name to the correct shader name in the menu
+			# first, discover the path in use
+			path = os.path.split(self.shader.filename)[0]
+			# if the path isn't the same as the selected path, generate the shader list for it and set everything up
+			if path != self.searchPaths.getValue():
+				pIndex = self.searchpaths.index(path)
+				self.searchPaths.setValue(pIndex)
+				self.listShaders(None)
 			sIndex = self.shadersMenu.index(self.shader.shaderName())
 			self.shader_menu.setValue(sIndex)
 		#else:
 		#	self.selectShader(None)
 		# otherwise, I'll be selecting a shader at the outset...
+		self.value_tables = {} # vts are referenced per shader parameter
+		self.hasValueTable = False
+		
+		
+	def getValueTable(self, parameter):
+		return value_tables[parameter]
 		
 	def listShaders(self, obj):
 		self.settings.getShaderList(self.searchPaths.getValue())
@@ -1478,52 +1819,54 @@ class Shader:
 		self.evt_manager.addElement(self.editorPanel)
 		
 	def makeShaderMenu(self):
+		# get the current shader path
+		path = self.searchPaths.getValue()
 		self.shadersMenu = []
 		self.shadersMenu.append("None Selected")
 		if self.stype == "surface":
-			self.shaders = self.settings.shadersSurface
-			for shader in self.settings.shadersSurface:
+			self.shaders = self.settings.shadersSurface[path]
+			for shader in self.settings.shadersSurface[path]:
 				self.shadersMenu.append(shader[1])
 		elif self.stype == "displacement":
-			self.shaders = self.settings.shadersDisplacement
-			for shader in self.settings.shadersDisplacement:				
+			self.shaders = self.settings.shadersDisplacement[path]
+			for shader in self.settings.shadersDisplacement[path]:				
 				self.shadersMenu.append(shader[1])
 		elif self.stype == "volume":
-			self.shaders = self.settings.shadersVolume
-			for shader in self.settings.shadersVolume:
+			self.shaders = self.settings.shadersVolume[path]
+			for shader in self.settings.shadersVolume[path]:
 				self.shadersMenu.append(shader[1])
 				
 	def selectShader(self, button):
 		# select the shader in question and then setup the params for it.
 		# ditch the current parameter editors	
-		
+		path = self.searchPaths.getValue()
 		self.scroller.clearElements()	
 		self.shader = None	# clear all the old data.
 		if self.shader_menu.getSelectedIndex() > 0:			
 			shaderID = self.shader_menu.getSelectedIndex() - 1
 			if self.stype == "surface":
-				self.shaderParms = self.settings.shadersSurface[shaderID]
+				self.shaderParms = self.settings.shadersSurface[path][shaderID]
 			elif self.stype == "displacement":
-				self.shaderParms = self.settings.shadersDisplacement[shaderID]
+				self.shaderParms = self.settings.shadersDisplacement[path][shaderID]
 			elif self.stype == "volume":
-				self.shaderParms = self.settings.shadersVolume[shaderID]
+				self.shaderParms = self.settings.shadersVolume[path][shaderID]
 			elif self.stype == "light":
-				self.shaderParms = self.settings.shadersLight[shaderID]
+				self.shaderParms = self.settings.shadersLight[path][shaderID]
 			elif self.stype == "imager":
-				self.shaderParms = self.settings.shadersImager[shaderID]				
+				self.shaderParms = self.settings.shadersImager[path][shaderID]				
 				
 			# initialize a new RMShader object
 			if self.settings.use_slparams: 
 				if self.stype == "surface":
-					file = self.settings.surfaceFiles[shaderID]
+					file = self.settings.surfaceFiles[path][shaderID]
 				elif self.stype == "displacement":				
-					file = self.settings.dispFiles[shaderID]
+					file = self.settings.dispFiles[path][shaderID]
 				elif self.stype == "volume":
-					file = self.settings.volumeFiles[shaderID]
+					file = self.settings.volumeFiles[path][shaderID]
 				elif self.stype == "light":
-					file = self.settings.lightFiles[shaderID]
+					file = self.settings.lightFiles[path][shaderID]
 				elif self.stype == "imager":
-					file = self.settings.imagerFiles[shaderID]
+					file = self.settings.imagerFiles[path][shaderID]
 					
 				# get the search path from the settings object, and use that to find the shader source
 				# hopefully it's the same as the shader name
@@ -1555,51 +1898,100 @@ class Shader:
 		
 			
 	def setupParamEditors(self):
-	
 		# iterate the current shader and setup the parameter editors for it.
 		# here I'm using the rmshader object so react accordingly
 		# iterate the slots in the RMShader object
 		# delete the current set of elements in the scroller object		
-
 		count = 0
 		for param in self.shader.shaderparams:
-			print param
+			# test here for an array value
 			normalColor = [216, 214, 220, 255]
 			#if count % 2:
 			#	normalColor = [190, 190, 190, 255]			
 			p_type = self.shader.shaderparams[param].split()[1]
+			
+			if "[" in p_type:
+				# this is an array value, react accordingly
+				# perhaps I can simply look at the _slot in the shader and decide from there?
+				arrayLen = self.shader.__dict__[param + "_slot"].size() # this should be there if everything was initialized correctly!
+				# and the type name
+				idx = p_type.index("[")
+				isArray = True
+				p_type = p_type[:idx]
+				# if of type array, setup 
+			else:
+				isArray = False
 			# get the default value from the shader
 			iParams = self.shader.params()			
 			defValue = getattr(self.shader, param)
+			size = [0, 0, self.scroller.width - 30, 0]
+			if isArray:
+				bParm = BtoRTypes.__dict__["BtoRArrayParam"](param = param, name = param, value = defValue, size=size, parent = self.scroller) # just init a basic type
+			else:
+				bParm = BtoRTypes.__dict__["BtoR" + p_type.capitalize() + "Param"](param = param, name = param, value = defValue, size=size, parent = self.scroller) # just init a basic type
+			editor = BtoRAdapterClasses.IShaderParamEditor(bParm) # that should do the trick
+			self.scroller.addElement(editor)
+			count = count + 1
+		self.scroller.invalid = True
+		self.scroller.currentItem = 1
+	
+	def declareParams(self):
+		for parm in self.shaderparams:
+			ri.RiDeclare(parm[0], parm[1])
+			
+	
+	def obfuscate(self):
+		p_type = "None"
+		if True:
 			if p_type == "float":
 				# create a float editor
-				self.scroller.addElement(ui.FloatEditor(0, 0, self.scroller.width - 30, ui.FloatEditor.height, param, defValue, self.scroller, False))
-			elif p_type == "string":
-					# time for Black Magick and v00d0u
-
-				if ("tex" in param or "map" in param or "name" in param):
-					self.scroller.addElement(ui.FileEditor(0, 0, self.scroller.width - 30, ui.FileEditor.height, param, defValue, self.scroller, False))
+				if isArray:
+					self.scroller.addElement(ui.ArrayEditor(0, 0, self.scroller.width - 30, ui.FloatEditor.height, param, "FloatEditor", defValue, arrayLen, self.scroller, False))
 				else:
-					self.scroller.addElement(ui.TextEditor(0, 0, self.scroller.width - 30, ui.TextEditor.height, param, defValue, self.scroller, False))
+					self.scroller.addElement(ui.FloatEditor(0, 0, self.scroller.width - 30, ui.FloatEditor.height, param, defValue, self.scroller, False))
+			elif p_type == "string":
+				# time for Black Magick and v00d0u
+				if ("tex" in param or "map" in param or "name" in param):
+					if isArray:
+						self.scroller.addElement(ui.ArrayEditor(0, 0, self.scroller.width - 30, ui.FileEditor.height, param, "FileEditor", defValue, arrayLen, self.scroller, False))
+					else:
+						self.scroller.addElement(ui.FileEditor(0, 0, self.scroller.width - 30, ui.FileEditor.height, param, defValue, self.scroller, False))
+				elif "space" in param or "Space" in param:
+					if isArray:
+						self.scroller.addElement(ui.ArrayEditor(0, 0, self.scroller.width - 30, ui.SpaceEditor.height, param, "SpaceEditor", defValue, arrayLen, self.scroller, False))
+					else:
+						self.scroller.addElement(ui.SpaceEditor(0, 0, self.scroller.width - 30, ui.SpaceEditor.height, param, defValue, self.scroller, False))
+				elif "proj" in param or "Proj" in param:
+					if isArray:
+						self.scroller.addElement(ui.ArrayEditor(0, 0, self.scroller.width - 30, ui.SpaceEditor.height, param, "ProjectionEditor", defValue, arrayLen, self.scroller, False))
+					else:
+						self.scroller.addElement(ui.ProjectionEditor(0, 0, self.scroller.width - 30, ui.SpaceEditor.height, param, defValue, self.scroller, False))
+				else:
+					if isArray:
+						self.scroller.addElement(ui.ArrayEditor(0, 0, self.scroller.width - 30, ui.TextEditor.height, param, "TextEditor", defValue, arrayLen, self.scroller, False))
+					else:
+						self.scroller.addElement(ui.TextEditor(0, 0, self.scroller.width - 30, ui.TextEditor.height, param, defValue, self.scroller, False))
 			elif p_type == "color":
 				color = []				
 				color.append(defValue[0])
 				color.append(defValue[1])
 				color.append(defValue[2])
-				self.scroller.addElement(ui.ColorEditor(0, 0, self.scroller.width - 30, ui.ColorEditor.height, param, color, self.scroller, False))
-			elif p_type == "point":	
-				self.scroller.addElement(ui.CoordinateEditor(0, 0, self.scroller.width - 30, ui.CoordinateEditor.height, param, defValue, self.scroller, False))
-			elif p_type == "vector":
-				self.scroller.addElement(ui.CoordinateEditor(0, 0, self.scroller.width - 30, ui.CoordinateEditor.height, param, defValue, self.scroller, False))
-			elif p_type == "normal":
-				self.scroller.addElement(ui.CoordinateEditor(0, 0, self.scroller.width - 30, ui.CoordinateEditor.height, param, defValue, self.scroller, False))
+				if isArray:
+					self.scroller.addElement(ui.ArrayEditor(0, 0, self.scroller.width - 30, ui.ColorEditor.height, param, "ColorEditor", defValue, arrayLen, self.scroller, False))
+				else:
+					self.scroller.addElement(ui.ColorEditor(0, 0, self.scroller.width - 30, ui.ColorEditor.height, param, color, self.scroller, False))
+			elif p_type in ["point", "vector", "normal"]:	
+				if isArray:
+					self.scroller.addElement(ui.ArrayEditor(0, 0, self.scroller.width - 30, ui.CoordinateEditor.height, param, "CoordinateEditor", defValue, arrayLen, self.scroller, False))
+				else:
+					self.scroller.addElement(ui.CoordinateEditor(0, 0, self.scroller.width - 30, ui.CoordinateEditor.height, param, defValue, self.scroller, False))
 			elif p_type == "matrix":
-				self.scroller.addElement(ui.MatrixEditor(0, 0, self.scroller.width - 30, ui.MatrixEditor.height, param, defValue, self.scroller, False))
-			#self.scroller.elements[count].normalColor = normalColor			
-			count = count + 1
-		self.scroller.invalid = True
-		self.scroller.currentItem = 1
-				
+				if isArray:
+					self.scroller.addElement(ui.ArrayEditor(0, 0, self.scroller.width - 30, ui.MatrixEditor.height, param, "MatrixEditor", defValue, arrayLen, self.scroller, False))
+				else:
+					self.scroller.addElement(ui.MatrixEditor(0, 0, self.scroller.width - 30, ui.MatrixEditor.height, param, defValue, self.scroller, False))
+					
+			#self.scroller.elements[count].normalColor = normalColor	
 	def initShaderParams(self, params, shader):		
 		convtypes = {"float":"double",
 				"string":"string",
@@ -1664,7 +2056,7 @@ class Shader:
 				setattr(self.shader, name, matrix)
 			
 			index = index + 1
-				
+
 class GenericShader:
 	def __init__(self, shader, s_type, parent):
 		self.parent = parent
@@ -1757,39 +2149,39 @@ class GenericShader:
 		
 	def makeShaderMenu(self):
 		self.shadersMenu = []
+		path = self.searchPaths.getValue()
 		self.shadersMenu.append("None Selected")
 		if self.s_type == "light":
-			self.shaders = self.settings.shadersLight
-			for shader in self.settings.shadersLight:
+			self.shaders = self.settings.shadersLight[path]
+			for shader in self.settings.shadersLight[path]:
 				self.shadersMenu.append(shader[1])
 		elif self.s_type == "imager":
-		    self.shaders = self.settings.shadersImager
-		    for shader in self.settings.shadersImager:
+		    self.shaders = self.settings.shadersImager[path]
+		    for shader in self.settings.shadersImager[path]:
 		        self.shadersMenu.append(shader[1])
                 
 
 	def selectShader(self, button):
 		# select the shader in question and then setup the params for it.
 		# ditch the current parameter editors	
-		
+		path = self.searchPaths.getValue()
 		self.scroller.clearElements()	
 		self.shader = None	# clear all the old data.
 		if self.shader_menu.getSelectedIndex() > 0:			
 			shaderID = self.shader_menu.getSelectedIndex() - 1
 			if self.s_type == "light":
-				self.shaderParms = self.settings.shadersLight[shaderID]
+				self.shaderParms = self.settings.shadersLight[path][shaderID]
 			elif self.s_type == "imager":
-				self.shaderParms = self.settings.shadersImager[shaderID]
+				self.shaderParms = self.settings.shadersImager[path][shaderID]
 			# initialize a new RMShader object
 			if self.settings.use_slparams: 
 				if self.s_type == "light":
-					file = self.settings.lightFiles[shaderID]
+					file = self.settings.lightFiles[path][shaderID]
 				elif self.s_type == "imager":
-					file = self.settings.imagerFiles[shaderID]
+					file = self.settings.imagerFiles[path][shaderID]
 					
 				# get the search path from the settings object, and use that to find the shader source
 				# hopefully it's the same as the shader name
-				path = self.settings.shaderPathList
 				self.shader = cgkit.rmshader.RMShader(self.searchPaths.getValue() + os.sep + file)
 				self.setupParamEditors()
 			else:
@@ -1804,7 +2196,6 @@ class GenericShader:
 			self.parent.getEditor().shaderButton.title = self.shader_menu.getValue()
 			
 	def setupParamEditors(self):
-	
 		# iterate the current shader and setup the parameter editors for it.
 		# here I'm using the rmshader object so react accordingly
 		# iterate the slots in the RMShader object
@@ -1819,6 +2210,32 @@ class GenericShader:
 			# get the default value from the shader
 			iParams = self.shader.params()			
 			defValue = getattr(self.shader, param)
+			if "[" in p_type:
+				# this is an array value, react accordingly
+				# perhaps I can simply look at the _slot in the shader and decide from there?
+				arrayLen = self.shader.__dict__[param + "_slot"].size() # this should be there if everything was initialized correctly!
+				# and the type name
+				idx = p_type.index("[")
+				isArray = True
+				p_type = p_type[:idx]
+				# if of type array, setup 
+			else:
+				isArray = False
+			# I should be able to instantiate an editor like this
+			size = [0, 0, self.scroller.width - 30, 0]
+			if isArray:
+				bParm = BtoRTypes.__dict__["BtoRArrayParam"](param = param, value = defValue, size=size, parent = self.scroller) # just init a basic type
+			else:
+				bParm = BtoRTypes.__dict__["BtoR" + p_type.capitalize() + "Param"](param = param, name = param, value = defValue, size=size, parent = self.scroller) # just init a basic type
+			editor = BtoRAdapterClasses.IShaderParamEditor(bParm) # that should do the trick
+			self.scroller.addElement(editor)
+			count = count + 1
+		self.scroller.invalid = True
+		self.scroller.currentItem = 1
+		
+	def obfuscate(self):
+		p_type = "none"
+		if True:
 			if p_type == "float":
 				# create a float editor
 				self.scroller.addElement(ui.FloatEditor(0, 0, self.scroller.width - 30, ui.FloatEditor.height, param, defValue, self.scroller, False))
@@ -1839,10 +2256,6 @@ class GenericShader:
 			elif p_type == "matrix":
 				self.scroller.addElement(ui.MatrixEditor(0, 0, self.scroller.width - 30, ui.MatrixEditor.height, param, defValue, self.scroller, False))
 			#self.scroller.elements[count].normalColor = normalColor			
-			count = count + 1
-		self.scroller.invalid = True
-		self.scroller.currentItem = 1
-		
 	def updateShaderParams(self):
 		# here I need to cobble all the parameter values together and push them into the shader itself
 		# so the material can then be exported.
@@ -1948,6 +2361,68 @@ class GenericShader:
 			# slot this attribute into the shader
 			shader.declare(atts["name"], type=convtypes[switch], default=val)
 			# shader.createSlot(atts["name"].nodeValue, convtypes[switch], None, val) # array  length is none for now, array behaviour is uncertain here	
+class GeneticParamModifier:
+	def __init__(self):
+		sdict = globals()
+		self.settings = sdict["instBtoRSettings"]
+		self.evt_manager = sdict["instBtoREvtManager"]
+		self.scene = sdict["instBtoRSceneSettings"]
+		self.materials = sdict["instBtoRMaterials"]
+		screen = Blender.Window.GetAreaSize()
+		self.editorPanel = ui.Panel(screen[0] - 200, screen[1] - 300, 400, 600, "Parameter modification:", "Parameter Modification:", None, False)
+		self.shaderName = ui.Label(5, 27, "Shader Name: %s" % shader.shadername, "Shader Name: %s" % shader.shadername, self.editorPanel, True)
+		self.parm_menu = []
+
+		self.editorPanel.addElement(ui.Label(5, 40, "Parameter:", "Parameter:", self.editorPanel, False))
+		self.parmMenu = ui.Menu(45, 40, "Parameters", self.parm_menu, self.editorPanel, True)
+		self.addButton = ui.Button(self.parmMenu.width + 45, 40, "Add Parameter", "Add Parameter", self.editorPanel, True)
+		self.addButton.registerCallback("release", self.addParm)
+		self.scrollpane = ui.ScrollPane(2, 60, self.editorPanel.width - 4, self.editorPanel.height - 70, "Scroller", "Scroller", self.editorPanel, True)
+		# I have nothing here.
+		self.assigned_parms = []
+	def init_load(self, parms):
+		""" initialize the list of ranges """
+		# remember to fix this
+	def setShader(self, shader):
+		self.assigned_parms = []
+		self.shader = shader
+		self.shaderName.setValue(shader.shaderName())
+		# get the list of parameters
+		for param in self.shader.shaderparams:
+			self.parm_menu.append(param[0])
+			self.parmMenu.reinit(self.parm_menu)
+			
+	def addParm(self, button):
+		# somehow test for duplicates		
+		parm = self.parmMenu.getValue()
+		if parm in self.assigned_parms:
+			self.evt_manager.showConfirmDialog("Error!", "You've already added that parameter!", None, False)
+		else:
+			parmType = self.shader.shaderparams[parm].split()[1].capitalize()
+			if "[" in parmType:
+				bObj = BtoRTypes.__dict__["BtoRArrayParam"](self.matName, self.shader, parm, "Array") # you know, there's no reason why this won't work...
+			else:
+				bObj = BtoRTypes.__dict__["BtoR" + parmType + "Param"](self.matName, self.shader, parm, parmType)			
+			pObj = BtoRAdapterClasses.IShaderParamUI(bObj)
+			editor = pObj.getEditor()
+			containerPane = ui.Panel(0, 0, editor.width + 15, editor.height, "container", "container", self.scrollpane, False)
+			containerPane.addElement(ui.CheckBox(0, 2, "", "", False, containerPane, False)) 
+			iPane = ui.Panel(20, 0, editor.width, editor.height, "none", "none", self.containerPane, True)
+			iPane.addElement(editor)
+			self.scrollpane.addElement(containerPane) # should be all done			
+			self.assigned_parms.append(parm)
+		
+	def removeSelectedParms(self, button):
+		# somehow determine what the selected parameter is.
+		# I suppose I have to embed all this stuff into a large toggle button?
+		toRemove = []
+		for element in self.scroller.elements:
+			if element.elements[0].getValue():
+				toRemove.append(element)
+		for element in toRemove:
+			self.scroller.removeElement(element)
+	
+
 
 class MainUI:
 	# this is the main UI object, the "main menu" of sorts from which all things spring.
@@ -1962,29 +2437,36 @@ class MainUI:
 		self.export = sdict["instBtoRExport"]
 				
 		screen = Blender.Window.GetAreaSize()		
-		self.editor = ui.Panel(10, screen[1] - 10, 200, 205, "BtoR", "Blender to Renderman:", None, False)		
+		self.editor = ui.MenuBar(None, False)
+		#self.editor = ui.Panel(10, screen[1] - 10, 200, 205, "BtoR", "Blender to Renderman:", None, False)		
 		self.editor.outlined = True
 		p = self.editor
 		
-		self.globalSettingsButt = ui.Button(50, 30, 100, 25, "Settings", "Global Settings", 'normal', self.editor, True) # renderer settings and paths
+		self.globalSettingsButt = ui.Button(5, 5, 100, 18, "Settings", "Global Settings", 'normal', self.editor, True) # renderer settings and paths
 		self.globalSettingsButt.registerCallback("release", self.showGlobal)
+		self.globalSettingsButt.shadowed = False
 		#self.settings.getEditor().dialog = True
 		#self.globalSettingsButt.registerCallback("release", p.callFactory(None,self.showEditor(self.settings.getEditor())))
 		
-		self.sceneSettingsButt = ui.Button(50, 65, 100, 25, "Scene Settings", "Scene Settings", 'normal', self.editor, True) # scene settings, DOF, shadows, etc.
+		self.sceneSettingsButt = ui.Button(110, 5, 100, 18, "Scene Settings", "Scene Settings", 'normal', self.editor, True) # scene settings, DOF, shadows, etc.
 		self.sceneSettingsButt.registerCallback("release", self.showSceneSettings)
+		self.sceneSettingsButt.shadowed = False
 		#self.sceneSettingsButt.registerCallback("release", p.callFactory(None,self.showEditor(self.settings.getEditor())))
 		
-		self.objectButt = ui.Button(50, 100, 100, 25, "Objects", "Objects", 'normal', self.editor, True) # launches a low-quality preview, preview shading rate determined by global settings
+		self.objectButt = ui.Button(215, 5, 100, 18, "Objects", "Objects", 'normal', self.editor, True) # launches a low-quality preview, preview shading rate determined by global settings
 		self.objectButt.registerCallback("release", self.showObjectEditor)
+		self.objectButt.shadowed = False
 		#self.objectButt.registerCallback("release", p.callFactory(None, self.showEditor(self.settings.getEditor())))
 		
-		self.exportButt = ui.Button(50, 135, 100, 25, "Export", "Export", 'normal', self.editor, True)
+		self.exportButt = ui.Button(320, 5, 100, 18, "Export", "Export", 'normal', self.editor, True)
 		#self.exportButt.registerCallback("release", p.callFactory(None, self.showEditor(self.export.getEditor())))
 		self.exportButt.registerCallback("release", self.showExport)
+		self.exportButt.shadowed = False
 		
-		self.materialsButt = ui.Button(50, 170, 100, 25, "Materials", "Materials", 'normal', self.editor, True)	
+		self.materialsButt = ui.Button(425, 5, 100, 18, "Materials", "Materials", 'normal', self.editor, True)	
 		self.materialsButt.registerCallback("release", self.showMaterials)
+		self.materialsButt.shadowed = False
+		
 		#self.materialsButt.registerCallback("release", p.callFactory(None, self.showEditor(self.materials.getEditor())))
 		
 	def showEditor(self, editor):
@@ -2027,13 +2509,12 @@ class MaterialList:
 		self.settings = sdict["instBtoRSettings"]
 		self.evt_manager = sdict["instBtoREvtManager"]
 		self.scene = sdict["instBtoRSceneSettings"]
-				
-	
+		
 		screen = Blender.Window.GetAreaSize()
 		
 		# self.picker.x = self.absX
-		self.editor = ui.Panel(10, screen[1] - 225, 200, 400, "Materials", "Materials:", None, False)
-		self.selector = ui.Panel(10, screen[1] - 225, 200, 375, "Materials", "Materials:", None, False)
+		self.editor = ui.Panel(10, screen[1] - 225, 200, 400, "Material Selector", "Material Editor:", None, False)
+		self.selector = ui.Panel(10, screen[1] - 225, 200, 375, "Material Selector", "Material Selector:", None, False)
 		
 		self.add_button = ui.Button(0, 370, 99, 30, "Add New", "Add New", 'normal', self.editor, True)
 		self.add_button.shadowed = False
@@ -2059,8 +2540,14 @@ class MaterialList:
 		self.close_button.radius = 1.5
 		close_func = self.close_button.callFactory(self.evt_manager.removeElement, self.editor)
 		self.close_button.registerCallback("release", self.close)
-		
 
+		self.materials = []
+		
+		self.stickyToggle = False
+		self.sel_sticky = True
+		self.select_functions = []
+		
+	def loadMaterials(self):
 		self.materials = self.getSavedMaterials()
 
 		for material in self.materials:
@@ -2068,15 +2555,10 @@ class MaterialList:
 			#self.scroller.elements.append(material.getMaterialButton())
 			material.editorButton.registerCallback("release", self.toggleOn)
 			material.selectorButton.registerCallback("release", self.select)
-			
-			
-		self.stickyToggle = False
-		self.sel_sticky = True
-		self.select_functions = []
-		
+	
 	def getMaterial(self, materialName):
 		for material in self.materials:
-			print material.materialName.getValue()
+			# print material.materialName.getValue()
 			if material.materialName.getValue() == materialName:
 				return material
 		return None
@@ -2160,15 +2642,10 @@ class MaterialList:
 			self.materials.append(material)			
 			self.scroller.lastItem = 0
 			self.sel_scroller.lastItem = 0
-
-
+			
 			material.selectorButton.registerCallback("release", self.select)
 			material.editorButton.registerCallback("release", self.toggleOn)
 		# self.evt_manager.removeElement(dialog)
-	
-	
-		
-	
 				
 	def showDeleteDialog(self, button):
 		self.evt_manager.showConfirmDialog("Delete Material?", "Delete selected material?",  self.deleteMaterial, False)
@@ -2319,7 +2796,7 @@ class MaterialList:
 			if p_type == "float":
 				parm_value = float(parm.getAttribute("value"))
 			elif p_type == "string":
-				parm_value = parm.getAttribute("value")
+				parm_value = parm.getAttribute("value").encode("ascii")
 			elif p_type == "color":
 				parm_value = cgkit.cgtypes.vec3(float(parm.getAttribute("red")), float(parm.getAttribute("green")), float(parm.getAttribute("blue")))
 			elif p_type in ["normal", "vector", "point"]:
@@ -2354,7 +2831,7 @@ class MaterialList:
 				# shader.createSlot(p_name, convtypes[p_type], None, parm_value) # Here we set the default value to the parameters incoming value.
 			
 			# and set the value 	
-			shader.getattr(p_name).setValue(parm_value)
+			setattr(shader, p_name, parm_value)
 				
 		
 	
@@ -2426,13 +2903,13 @@ class MaterialList:
 					# get the param and stuff into my dict				
 					# create the node
 					parmNode = xmlDoc.createElement("Param")
-					value = mat.surface.getattr(parm[1]).getValue()	
+					value = getattr(mat.surface, parm)	
 					# create an XML element for this value.
-					s_type = parm[0].split()[1]
+					s_type = surface.shaderparams[parm].split()[1]
 					# setup as much of the node element as I can here
-					parmNode.setAttribute("name", parm[1])
+					parmNode.setAttribute("name", parm)
 					parmNode.setAttribute("type", s_type)
-
+					
 					if s_type == "float":
 						parmNode.setAttribute("value", '%f' % value)
 					elif s_type == "string":
@@ -2475,11 +2952,11 @@ class MaterialList:
 					# get the param and stuff into my dict				
 					# create the node
 					parmNode = xmlDoc.createElement("Param")
-					value = mat.displacement.getattr(parm[1]).getValue()	
+					value = getattr(disp, parm)
 					# create an XML element for this value.
-					s_type = parm[0].split()[1]
+					s_type = disp.shaderparams[parm].split()[1]
 					# setup as much of the node element as I can here
-					parmNode.setAttribute("name", parm[1])
+					parmNode.setAttribute("name", parm)
 					parmNode.setAttribute("type", s_type)
 
 					if s_type == "float":
@@ -2511,7 +2988,7 @@ class MaterialList:
 			if mat.interiorShaderName() != None:
 				volumeNode = xmlDoc.createElement("Volume")
 				# update all the stuff...
-				mat.volume.updateShaderParams()						
+				material.volume.updateShaderParams()						
 				# get the shader information
 				volumeNode.setAttribute("name", mat.interiorShaderName())
 				
@@ -2524,11 +3001,11 @@ class MaterialList:
 					# get the param and stuff into my dict				
 					# create the node
 					parmNode = xmlDoc.createElement("Param")
-					value = mat.interior.getattr(parm[1]).getValue()	
+					value = getattr(volume, parm)
 					# create an XML element for this value.
-					s_type = parm[0].split()[1]
+					s_type = volume.shaderparams[parm].split()[1]
 					# setup as much of the node element as I can here
-					parmNode.setAttribute("name", parm[1])
+					parmNode.setAttribute("name", parm)
 					parmNode.setAttribute("type", s_type)
 
 					if s_type == "float":
@@ -2560,7 +3037,148 @@ class MaterialList:
 			matRoot.appendChild(matNode)
 			
 		return matRoot
+class GroupList:
+	def __init__(self):
+		sdict = globals()
+		self.settings = sdict["instBtoRSettings"]
+		self.evt_manager = sdict["instBtoREvtManager"]
+		self.scene = sdict["instBtoRSceneSettings"]
+		setattr(BtoRAdapterClasses, "instBtoRGroupList", self)
+		screen = Blender.Window.GetAreaSize()
+		
+		# self.picker.x = self.absX
+		self.editor = ui.Panel((screen[0] / 2) - 200 , (screen[1] / 2) + 100, 200, 400, "Object Groups", "Object Groups:", None, False)
 
+		self.add_button = ui.Button(0, 370, 99, 30, "Add New", "Add New", 'normal', self.editor, True)
+		self.add_button.shadowed = False
+		self.add_button.cornermask = 8
+		self.add_button.radius = 10
+		self.add_button.registerCallback("release", self.showAddDialog)
+		
+		self.delete_button = ui.Button(101, 370, 99, 30, "Delete", "Delete", 'normal', self.editor, True)
+		self.delete_button.shadowed = False
+		self.delete_button.cornermask = 4 
+		self.delete_button.radius = 10
+		self.delete_button.registerCallback("release", self.showDeleteDialog)
+		
+		self.sel_scroller = ui.ScrollPane(0, 27, 200, 340, "ObjectScroller", "Scroller", self.editor, True)
+		self.sel_scroller.normalColor = [185,185,185,255]
+				
+		self.close_button = ui.Button(self.editor.width - 20, 5, 14, 14, "X", "X", 'normal', self.editor, True)
+		self.close_button.shadowed = False
+		self.close_button.cornermask = 15
+		self.close_button.radius = 1.5
+		close_func = self.close_button.callFactory(self.evt_manager.removeElement, self.editor)
+		self.close_button.registerCallback("release", self.close)
+		
+		self.stickyToggle = False
+		self.sel_sticky = True
+		
+		self.select_functions = []
+		
+	def getEditor(self):
+		return self.editor
+		
+	def close(self, button):
+		self.evt_manager.removeElement(self.editor)
+		
+	def select(self, button):				
+		
+		if self.sel_sticky:
+			for element in self.sel_scroller.elements:
+				if element <> button:
+					element.set_state(False)
+			# simply set the state of this button and move on
+			button.set_state(True)
+			self.value = button.title
+		else:
+			# print button.state
+			if button.state == False:
+				self.value = None # no value, since nothing's on
+				# do nothing, the button has been turned off
+			else: # the button was turned on, turn everything else off
+				for element in self.sel_scroller.elements:											
+					if element <> button:						
+						element.set_state(False)
+				self.value = button.title
+		# now what do I do? Somehow get the selected material back to the object editor.
+	
+		for func in self.select_functions:
+			func(button) # links back to whatever's interested in selections.
+			
+	def toggleOn(self, button):
+		# sticky toggle keeps the button set, no matter what 		
+		if self.stickyToggle:
+			for element in self.sel_scroller.elements:
+				if element <> button:
+					element.set_state(False)
+			# simply set the state of this button and move on
+			button.set_state(True)
+		else:
+			# print button.state
+			if button.state == False:
+				self.value = None # no value, since nothing's on
+				# do nothing, the button has been turned off
+			else: # the button was turned on, turn everything else off
+				for element in self.sel_scroller.elements:											
+					if element <> button:						
+						element.set_state(False)
+				self.value = button.name 
+				
+	def showAddDialog(self, button): # coroutine, open the naming dialog
+		self.evt_manager.showSimpleDialog("New Object Group:", "New Object Group Name:", "ObjGroup %d" % len(self.scene.object_groups.keys()), self.addNew)
+		
+	def addNew(self, dialog):
+		self.scene.object_groups[dialog.getValue()] = [] # make it empty for the time being.
+		selectorButton = ui.ToggleButton(0, 0, 180, 35, dialog.getValue(), dialog.getValue(), 'normal', self.sel_scroller, True)
+		selectorButton.shadowed = False
+		selectorButton.outlined = True
+		selectorButton.textlocation = 1		
+		selectorButton.title = dialog.getValue()
+		self.sel_scroller.addElement(selectorButton)
+		selectorButton.registerCallback("release", self.toggleOn)
+		selectorButton.registerCallback("release", self.select)
+		
+	def showDeleteDialog(self, button):
+		self.evt_manager.showConfirmDialog("Delete Object Group?", "Delete selected object group?",  self.deleteGroup, False)
+	def deleteGroup(self, button):
+		if dialog.state == dialog.OK:
+			# find the selected material by chasing through the elements in the scroller and deleting the one that's found.
+			for element in self.sel_scroller.elements:
+				if element.getValue() == True:
+					groupName = element.getTitle()
+					self.scene.object_groups.popitem(groupName)					
+					self.sel_scroller.removeElement(element)
+					break
+	def initializeGroups(self):
+		for key in self.scene.object_groups.keys():
+			selectorButton = ui.ToggleButton(0, 0, 180, 35, dialog.getValue(), dialog.getValue(), 'normal', selector, True)
+			selectorButton.shadowed = False
+			selectorButton.outlined = True
+			selectorButton.textlocation = 1		
+			selectorButton.title = dialog.getValue()
+			self.sel_scroller.addElement(selectorButton)
+			
+	def setSelected(self, ID):
+		# print "selecting ", ID
+		for element in self.sel_scroller.elements:
+			if element.title == ID:				
+				element.set_state(True)
+			else:
+				element.set_state(False)
+				
+	def getSelectedValue(self):
+		button = None
+		for element in self.sel_scroller.elements:
+			if element.getValue():
+				button = element
+				break
+				
+		return button.title
+	
+	
+		
+		
 class ExportSettings:	
 	def __init__(self):	
 		sdict = globals()
@@ -2601,6 +3219,7 @@ class ExportSettings:
 		
 		self.camera_label = ui.Label(10, 165, "Create renderable file?", "Include camera settings? (Creates renderable file)", self.editorPanel, True)
 		self.camera_menu = ui.Menu(self.editorPanel.get_string_width("Include camera settings? (Creates renderable file)", 'normal') + 20, 165, 80, 20, "Include Camera?", ["No", "Current Camera", "Current 3D View"], self.editorPanel, True)
+		
 				
 		# self.editorPanel.addElement(ui.Label(10, 160, "Duplicate Object by:", "Duplicate Object By:", self.editorPanel, False))
 		# additive transform matrix, (or subtractive, multiplicative, divisive)
@@ -2682,7 +3301,7 @@ class ExportUI:
 		self.editorPanel.dialog = True
 		
 		self.editorPanel.addElement(ui.Label(10, 28, "Export to:", "Export to:", self.editorPanel, False))
-		export_options = ["File...", "To selected renderer...", "To a Blender Text"]
+		export_options = ["Single file...", "File with archives...", "To selected renderer...", "To a Blender Text"]
 		self.export_menu = ui.Menu(self.editorPanel.get_string_width("Export to:", 'normal') + 20, 28, 150, 20, "Export To?", export_options, self.editorPanel, True)
 		self.export_menu.registerCallback("release",self.selectExportType)
 		
@@ -2691,13 +3310,18 @@ class ExportUI:
 		self.editorPanel.addElement(self.textLabel)		
 		self.textName = ui.TextField(self.editorPanel.get_string_width("Text Name:", 'normal') + 20, 63, 300, 20, "Text Name", "RIBOutput.rib", self.editorPanel, True)
 		self.textName.isVisible = False
-				
+		
 		self.fileLabel = ui.Label(10, 63, "Export Filename:", "Export Filename:", self.editorPanel, False)
 		self.editorPanel.addElement(self.fileLabel)
 		self.filename = ui.TextField(20 + self.editorPanel.get_string_width("Export Filename:", 'normal'), 63, 250, 20, "Filename", self.settings.outputpath.getValue() + os.sep + 'output.rib', self.editorPanel, True)
 		# the filename should probably reflect the object name in question.
 		self.browseButton = ui.Button(self.filename.x + self.filename.width + 5, 63, 60, 20, "Browse", "Browse", 'normal', self.editorPanel, True)
 		self.browseButton.registerCallback("release",self.openBrowseWindow)
+		
+		self.archiveLabelA = ui.Label(10, 85, "Archives", "Archives will be written to an 'archive' subdirectory relative to the export file.", self.editorPanel, True)
+		self.archiveLabelA.isVisible = False
+		self.archiveLabelB = ui.Label(10, 105, "Archives", "Note: This overrides per-object settings.", self.editorPanel, True)
+		self.archiveLabelB.isVisible = False
 		
 		self.exportButton = ui.Button(self.editorPanel.width - 110, self.editorPanel.height - 40, 100, 25, "Export Scene", "Export Scene", 'normal',  self.editorPanel, True)
 		self.exportButton.registerCallback("release", self.doExport) # that should do it.
@@ -2714,24 +3338,36 @@ class ExportUI:
 		self.scene.renderScene(self)
 		
 	def selectExportType(self, button):
-		if self.export_menu.getSelectedIndex() == 0:
+		if self.export_menu.getSelectedIndex() in [0, 1]:
 			self.fileLabel.isVisible = True			
 			self.browseButton.isVisible = True
 			self.filename.isVisible = True			
 			self.textLabel.isVisible = False
 			self.textName.isVisible = False
-		elif self.export_menu.getSelectedIndex() == 1:
+			if self.export_menu.getSelectedIndex() == 0:
+				self.archiveLabelA.isVisible = False
+				self.archiveLabelB.isVisible = False
+
+			else:
+				self.archiveLabelA.isVisible = True
+				self.archiveLabelB.isVisible = True
+				
+		elif self.export_menu.getSelectedIndex() == 2:
 			self.textLabel.isVisible = False
 			self.textName.isVisible = False
 			self.fileLabel.isVisible = False
 			self.browseButton.isVisible = False
-			self.filename.isVisible = False			
+			self.filename.isVisible = False
+			self.archiveLabelA.isVisible = False	
+			self.archiveLabelB.isVisible = False			
 		else:
 			self.fileLabel.isVisible = False
 			self.browseButton.isVisible = False
 			self.filename.isVisible = False
 			self.textLabel.isVisible = True
 			self.textName.isVisible = True
+			self.archiveLabelA.isVisible = False
+			self.archiveLabelB.isVisible = False
 			
 	def openBrowseWindow(self, button):
 		Blender.Window.FileSelector(self.select, 'Choose a file')
@@ -2741,4 +3377,102 @@ class ExportUI:
 		
 	def close(self, button):
 		self.evt_manager.removeElement(self.editorPanel)
+
+class HelpWindow:
+	# this is based on a simple panel
+	width = 400
+	# the height is based on the text size of normal text
+	# thus, the height is a factor of the number of lines I wish to display. I figure 80 to 100 lines should suffice for the moment.		
+	
+	def __init__(self, lines, font_size = 'normal'):
+		sdict = globals()
+		self.settings = sdict["instBtoRSettings"]
+		self.evt_manager = sdict["instBtoREvtManager"]
+		
+		setattr(BtoRAdapterClasses, "instBtoRHelp", self) # and done		
+		
+		height = (ui.UIElement.font_sizes[font_size] + 4) * lines # font cell height, + a 2 pixel gutter on top and bottom for 50 lines		
+		screen = Blender.Window.GetAreaSize()
+		
+		self.editorPanel = ui.Panel((screen[0] / 2) - 100,  screen[1] - (height + 34) / 2, 400, height + 34, "Help", "Help", None, False)
+		self.editorPanel.normalColor = [255, 255, 208, 255]
+		# now that I have my panel, setup my scroller		
+		self.scroller = ui.ScrollPane(0, 27, 398, height, "Scroller", "Scroller", self.editorPanel, True)
+		self.scroller.normalColor = [255, 255, 208, 255]
+		self.font_size = font_size
+		
+		self.close_button = ui.Button(self.editorPanel.width - 20, 5, 14, 14, "X", "X", 'normal', self.editorPanel, True)
+		self.close_button.shadowed = False
+		self.close_button.cornermask = 15
+		self.close_button.radius = 1.5
+		# close_func = self.close_button.callFactory(self.evt_manager.removeElement, self.editor)
+		self.close_button.registerCallback("release", self.close)
+		self.text = "There is no help for you!"
+		self.calculateLines()
+		
+	def getEditor(self):
+		return self.editorPanel
+		
+	def setText(self, text):		
+		self.scroller.clearElements()
+		print text
+		self.text = text
+		if text != None:
+			if len(text) > 0:
+				self.calculateLines() # and done
+	
+	def close(self, button):
+		self.evt_manager.removeElement(self.editorPanel)
+		
+	def calculateLines(self):
+		# the first thing I have to look for is new lines in the string and 
+		print self.text
+		words = re.compile('[ ]+').split(self.text)
+		# words = self.text.split()
+		
+		lines = []
+		line = ""				
+		currentWidth = 0
+		for word in words:
+			if "\n" in word:
+				while "\n" in word:				
+					if len(word) == 1:
+						# this entire word is a newline
+						lines.append(line)
+					else:
+						idx = word.index("\n")
+						# now that I have this, I need to remove the first part of this word					
+						if idx == len(word) - 1: # the newline will be at the end of the word in most cases						
+							word = word[:idx - 1] # get everything before that.		
+							line = line + word 
+							lines.append(line)
+						elif idx == 0: # the newline is at the beginning of this word
+							word = word[idx + 1:]
+							line = line + word
+							lines.append(line)
+						else: # the newline is in the middle of the word
+							prefix = word[:idx - 1] # text up to
+							word = word[idx + 1:] # and the last snip
+							line = line + prefix
+							lines.append(line)
+					line = ""
+			else:
+				word = word + " " # add a space on each end
+				wordWidth = self.editorPanel.get_string_width(word, self.font_size)
+				if currentWidth + wordWidth < self.width - 10: # 5 pixel buffer zone on either side
+					line = line + word
+					currentWidth = currentWidth + wordWidth
+				else:
+					lines.append(line)
+					line = ""
+					currentWidth = 0
+		label_y = 30
+		for line in lines:					
+			self.scroller.addElement(ui.Label(5, label_y, line, line, self.scroller, False))
+			label_y = label_y + self.editorPanel.font_cell_sizes[self.font_size][1] + 4 # 4 pixel gap here
+			
+		field_y = label_y
+		for element in self.scroller.elements:
+			element.normalColor = [255, 255, 208, 255] # get that nice "help screen yellow!"
+		
 		

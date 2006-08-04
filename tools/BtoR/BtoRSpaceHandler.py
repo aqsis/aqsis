@@ -19,7 +19,7 @@ if evt == Blender.Draw.RIGHTMOUSE:
 	# on a right mouse click assume I've selected an object or unselected it
 	# simply set something in the registry to say "hey, something changed"
 	changed = { "changed" : True }
-	
+	print "changed"
 	Blender.Registry.SetKey("BtoR_Space", changed)
 
 

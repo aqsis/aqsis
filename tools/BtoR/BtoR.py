@@ -1,5 +1,6 @@
 from btor import BtoRGUIClasses as ui
 from btor import BtoRMain
+from btor import BtoRAdapterClasses
 reload(BtoRMain)
 # backGround = [0.65, 0.65, 0.65]
 
@@ -12,8 +13,15 @@ setattr(BtoRMain, "instBtoRSettings", instBtoRSettings)
 instBtoRSceneSettings = BtoRMain.SceneSettings() # then scene settings
 setattr(BtoRMain, "instBtoRSceneSettings", instBtoRSceneSettings)
 
-instBtoRMaterials = BtoRMain.MaterialList()
-setattr(BtoRMain, "instBtoRMaterials", instBtoRMaterials)
+
+setattr(BtoRMain, "instBtoRMaterials", BtoRMain.MaterialList())
+instBtoRMaterials = getattr(BtoRMain, "instBtoRMaterials")
+
+instBtoRGroupList = BtoRMain.GroupList()
+setattr(BtoRMain, "instBtoRGroupList", instBtoRGroupList)
+
+instBtoRHelp = BtoRMain.HelpWindow(25)
+setattr(BtoRMain, "instBtoRHelp", instBtoRHelp)
 
 instBtoRObjects = BtoRMain.ObjectEditor()
 setattr(BtoRMain, "instBtoRObjects", instBtoRObjects)
@@ -23,6 +31,7 @@ setattr(BtoRMain, "instBtoRExport", instBtoRExport)
 
 instBtoRMain = BtoRMain.MainUI()
 setattr(BtoRMain, "instBtoRMain", instBtoRMain)
+
 
 if instBtoRSettings.haveSetup == False:
 	instBtoREvtManager.addElement(instBtoRSettings.getEditor())		
