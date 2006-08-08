@@ -771,6 +771,7 @@ class UIElement(UI):
 	textHiliteColor = [255, 255, 255, 255] # hilite color
 	borderColor = [0, 0, 0, 255] # basic border color
 	hoverBorderColor = [128, 128, 128, 255]
+	designBorderColor = [255, 0, 0, 255]
 	hoverColor = [105, 103, 127, 255]
 	outlineColor = [0, 0, 0, 255]
 	font_sizes = { 'tiny' : 9, 'small' : 10, 'normal' : 12, 'large' : 14} # convenience item
@@ -779,6 +780,8 @@ class UIElement(UI):
 	radius = 10
 	fontsize = 'normal'
 	cornermask = 0
+	properties = ["normalColor", "textColor", "textHiliteColor", "borderColor", "hoverBorderColor", "designBorderColor", "hoverColor", "outlineColor", "radius", "fontsize", "cornermask"]
+	parameters = ["x", "y", "width", "height", "name", "title", "parent", "auto_register"]
 	""" UIEement class - This defines the basic object upon which all other GUI objects are built.
 	
 	Constructor: element = UIElement(x, y, width, height, name, title, parent, auto_register)
@@ -793,8 +796,9 @@ class UIElement(UI):
 	parent - Container object for this element. 	
 	"""
 	
-	def __init__(self, x, y, width, height, name, title, parent, auto_register): # default values are x, y, width, height, name, title		
+	def __init__(self, x, y, width, height, name, title, parent, auto_register, fontsize = 'normal'): # default values are x, y, width, height, name, title		
 		# basic constructor method for all UI objects
+		self.fontsize = fontsize
 		self.elements = [] 
 		self.z_stack = []
 		self.draw_stack = []
@@ -806,6 +810,7 @@ class UIElement(UI):
 		self.wheel_functions = [self.objDebug]	
 		self.validate_functions = [self.objDebug]
 		self.right_click_functions = [self.objDebug]
+		self.select_functions = [self.objDebug]
 		self.update_functions = []
 		self.parent = parent # the parent, used for correctly positioning the element on the screen
 		self.x = x  # base horizontal value
@@ -840,6 +845,10 @@ class UIElement(UI):
 			parent.addElement(self) 
 			
 		self.local_undo_stack = []
+		self.draggable = False
+		self.designMode = False
+		self.designMove = False
+		self.designModeSelect = False
 	
 	def getTitle(self):
 		return self.title
@@ -889,7 +898,8 @@ class UIElement(UI):
 			self.validate() # validate myself, and make sure everything is correctly offset        			
 			self.setColor(self.normalColor) # use the basic color and draw a nice box to define this component
 			self.uiRoundBox(self.absX, self.absY - self.height, self.absX + self.width, self.absY, self.radius, self.cornermask)
-			
+			#if self.designMode:
+			#	self.drawDesignGrid()
 			for element in self.draw_stack:
 				if element.isVisible:
 					element.draw()
@@ -900,6 +910,22 @@ class UIElement(UI):
 				
 			if self.image != None:
 				self.image.draw()
+			
+			if self.designModeSelect:
+				self.setColor(self.designBorderColor)
+				self.uiOutline(self.absX, self.absY - self.height, self.absX + self.wdith, self.absY, self.radius, self.cornermask)
+
+				
+	def drawDesignGrid(self):
+		self.setColor([64, 64, 64, 255])
+		rows = self.height / 5
+		columns = self.width / 5
+	
+		for row in range(rows):
+			for column in range(columns):
+				self.uiRoundBox(row, column, row+1, column + 1, 0, 0)
+	
+			
 		
 	def objDebug(self):  
 		pass
@@ -989,7 +1015,15 @@ class UIElement(UI):
 				
 			# print "Click Event received by Object: ", self.z_stack[0].name, " ## Child of ", self.name						
 		else: # no selected components
-			self.click_funcs() # fire click callbacks for this component 
+			if not self.designMode:
+				self.click_funcs() # fire click callbacks for this component 
+			
+			else:
+				self.designMove = True
+				if (coords[0] >= self.absX and coords[0] <= self.absX + self.width) and (coords[1] <= self.absY and coords[1] >= self.absY - self.headerHeight) and self.movable:
+						self.move_offsetx = coords[0] - self.absX # this actually needs to update the x and y relative
+						self.move_offsety = coords[1] - self.absY
+						self.designMove = True    	
 		
 	def click_funcs(self):
 		# print "iterating click functions!"		
@@ -1065,11 +1099,31 @@ class UIElement(UI):
 				func(self, key, val)
 			
 	def mouse_event(self):
-		""" mouse_event() - Dispatches all mouse events (mouse movement) to registered objects."""	
-		self.mouse_funcs()
-		for element in self.z_stack:
-			if element.hit_test() and element.isVisible:
-				element.mouse_event()
+		""" mouse_event() - Dispatches all mouse events (mouse movement) to registered objects."""		
+		if not self.designMode:
+			self.mouse_funcs()		
+			for element in self.z_stack:
+				if element.hit_test() and element.isVisible:
+					element.mouse_event()
+		else: # I'm in design mode
+			found = False
+			for element in self.z_stack:
+				if element.hit_test():
+					element.mouse_event()
+					found = True
+			if not found:
+				coords = self.area_mouse_coords() 
+				
+				tempx = coords[0] - self.move_offsetx
+				if tempx < 0:
+					self.x = 0
+				
+				tempy = coords[1] - self.move_offsety
+				if tempy < 0:
+					self.y = 0
+				
+				self.invalid = True # validate will continually set this false, so      
+		
 
 	def mouse_funcs(self):
 		for func in self.mouse_functions: # runs on everything, in case something is being moved or other things I can't think of right now
@@ -1107,7 +1161,16 @@ class UIElement(UI):
 		
 	def release_event(self):		
 		if self.noComp: # no child component hit, so...
-			self.release_funcs() # in truth, this should handle buttons and what-not
+			if not self.designMode:
+				self.release_funcs() # in truth, this should handle buttons and what-not
+			else:
+				if self.designMove:
+					self.designMove = False
+				if self.hit_test():
+					self.designModeSelect = True
+				else:
+					self.designModeSelect = False
+				
 		for element in self.z_stack:
 			if element.isVisible:
 				element.release_event()
@@ -1130,6 +1193,14 @@ class UIElement(UI):
 					func()
 			else:
 				func(self)
+				
+	def select_funcs(self):
+		for func in self.select_functions:
+			if func == self.objDebug:
+				if self.debug:
+					func()
+			else:
+				func(self)
 
 	
 class Panel(UIElement):
@@ -1142,13 +1213,31 @@ class Panel(UIElement):
 	cornermask = 15
 	offset = 7 
 	shadowed = True
-	
-	def __init__(self, x, y, width, height, name, title, parent, auto_register):
-		UIElement.__init__(self, x, y, width, height, name, title, parent, auto_register) # initialize with the baseclass constructor
+	properties = ["normalColor", 
+				"textColor", 
+				"textHiliteColor", 
+				"borderColor", 
+				"hoverBorderColor", 
+				"designBorderColor", 
+				"hoverColor", 
+				"outlineColor", 
+				"titleColor",
+				"shadowColor",
+				"radius", 
+				"fontsize", 
+				"cornermask",
+				"headerHeight",
+				"offset",
+				"shadowed", 
+				"outlined",
+				"hasHeader"]
+	parameters = ["x", "y", "width", "height", "name", "title", "auto_register"]
+	def __init__(self, x, y, width, height, name, title, parent, auto_register, fontsize = 'large'):
+		UIElement.__init__(self, x, y, width, height, name, title, parent, auto_register, fontsize = fontsize) # initialize with the baseclass constructor
 		self.move_offsetx = 0
 		self.move_offsety = 0
 		self.hasHeader = True
-		self.fontsize = 'large'
+		self.fontsize = fontsize
 		self.move = False
 		self.invalid = False # for items that want revalidation in case the panel was moved
 		self.drawLast = None
@@ -1241,6 +1330,14 @@ class Panel(UIElement):
 			
 
 class ScrollBar(UIElement):
+	properties = ["normalColor", 
+			"borderColor", 
+			"designBorderColor", 
+			"outlineColor", 
+			"shadowed", 
+			"style",
+			"bordered"]
+	parameters = ["x", "y", "width", "height", "name", "title", "parent", "auto_register"]
 	def __init__(self, x, y, width, height, name, style, parent, auto_register):
 		# style 1 is vertical, style 2 is horizontal
 		UIElement.__init__(self, x, y, width, height, name, name, parent, auto_register)
@@ -1400,7 +1497,14 @@ class ScrollBar(UIElement):
 			Blender.BGL.glEnd()				
 		
 class ScrollPane(UIElement):
-
+	properties = ["normalColor", 
+			"borderColor", 
+			"designBorderColor", 
+			"outlineColor", 
+			"shadowed", 
+			"style",
+			"bordered"]
+	parameters = ["x", "y", "width", "height", "name", "title", "parent", "auto_register"]
 	def __init__(self, x, y, width, height, name, title, parent, auto_register):
 		UIElement.__init__(self, x, y, width, height, name, title, parent, auto_register)		
 		self.currentItem = 1
@@ -1411,6 +1515,7 @@ class ScrollPane(UIElement):
 		self.invalid = True
 		self.scrollbar = ScrollBar(self.width - 15, 0, 15, self.height, "Scrollbar", 1, self, False)
 		self.updated = False
+		self.offset = 3
 
 		
 	def draw(self):
@@ -1466,7 +1571,7 @@ class ScrollPane(UIElement):
 				if idx >= self.currentItem and currenty + element.height < heightlimit:		
 					element.y = currenty					
 					element.isVisible = True
-					currenty = currenty + (element.height + 3)
+					currenty = currenty + (element.height + self.offset)
 					self.z_stack.append(element) # add this element to the stack	
 					element.invalid = True
 				else:
@@ -1502,10 +1607,28 @@ class Button(UIElement):
 	radius = 15    
 	cornermask = 0
 	transparent = False
-	
+	properties = ["normalColor", 
+			"textColor", 
+			"textHiliteColor", 
+			"borderColor", 
+			"hoverBorderColor", 
+			"designBorderColor", 
+			"hoverColor", 
+			"outlineColor", 
+			"titleColor",
+			"shadowColor",
+			"radius", 
+			"cornermask",
+			"headerHeight",
+			"offset",
+			"shadowed", 
+			"transparent",
+			"shadowoffset",
+			"downColor"]
+	parameters = ["x", "y", "width", "height", "name", "title", "parent", "fontsize", "auto_register"]
 	def __init__(self, x, y, width, height, name, title, fontsize, parent, auto_register):
 		self.image = None
-		UIElement.__init__(self, x, y, width, height, name, title, parent, auto_register) # initialize with the baseclass constructor
+		UIElement.__init__(self, x, y, width, height, name, title, parent, auto_register, fontsize = fontsize) # initialize with the baseclass constructor
 		self.fontsize = fontsize
 		self.pushed = False        
 		self.value = title
@@ -1617,7 +1740,29 @@ class ToggleButton(Button):
 	textlocation = 0
 	radius = 1.5
 	push_offset = 4
-		
+	properties = ["normalColor", 
+		"textColor", 
+		"textHiliteColor", 
+		"borderColor", 
+		"hoverBorderColor", 
+		"designBorderColor", 
+		"hoverColor", 
+		"outlineColor", 
+		"hoverColor",
+		"textUpColor",
+		"toggleColor",
+		"titleColor",
+		"shadowColor",
+		"downColor",
+		"radius", 
+		"cornermask",
+		"headerHeight",
+		"offset",
+		"shadowed", 
+		"transparent",
+		"shadowoffset",
+		"push_offset"]
+	parameters = ["x", "y", "width", "height", "name", "title", "parent", "fontsize", "auto_register"]
 	def __init__(self, x, y, width, height, name, title, fontsize, parent, auto_register):
 		Button.__init__(self, x, y, width, height, name, title, fontsize, parent, auto_register)
 		self.state = False 
@@ -1652,13 +1797,17 @@ class ToggleButton(Button):
 		return self.state
 class CheckBox(UIElement):
 	normalColor = [198, 197, 203, 255]
-	def __init__(self, x, y, name, title, value, parent, auto_register):
+	properties = ["normalColor", "textColor", "textHiliteColor", "borderColor", "hoverBorderColor", "designBorderColor", "hoverColor", "outlineColor", "radius", "fontsize", "cornermask"]
+	parameters = ["x", "y", "width", "height", "name", "title", "parent", "auto_register"]	
+	def __init__(self, x, y, name, title, value, parent, auto_register, fontsize = 'normal'):
 		""" __init__ function """
-		width = self.get_string_width(title, 'normal') + 15
+		width = self.get_string_width(title, fontsize) + 25
 		UIElement.__init__(self, x, y, width, self.font_cell_sizes["normal"][1] + 4, name, title, parent, auto_register)
 		self.addElement(Label(15, 0, name, title, self, auto_register))
 		self.registerCallback("release", self.toggleValue)
 		self.value = value
+		self.x_offset = 0
+		self.y_offset = 0
 		
 	def toggleValue(self, obj):
 		if self.hit_test():
@@ -1669,16 +1818,17 @@ class CheckBox(UIElement):
 			
 	def draw(self):
 		UIElement.draw(self)
-		
+		x_offset = self.x_offset
+		y_offset = self.y_offset
 		# draw the box
 		y = self.absY - 2
 		self.setColor([255, 255, 255, 255])
-		self.drawBox(self.absX, y, self.absX + 10, y - 10) # the box
+		self.drawBox(self.absX + x_offset, y - y_offset, self.absX + 10 + x_offset, y - 10 - y_offset) # the box
 		self.setColor([0, 0, 0, 255])
-		self.drawline(self.absX - 1, y, self.absX + 10, y) # top of box
-		self.drawline(self.absX - 1, y, self.absX - 1, y - 10) # left hand side of box
-		self.drawline(self.absX - 1, y - 10, self.absX + 10, y - 10) # bottom of box
-		self.drawline(self.absX + 10, y, self.absX + 10, y - 10) # right hand side of box
+		self.drawline(self.absX - 1 + x_offset, y - y_offset, self.absX + 10 + x_offset, y - y_offset) # top of box
+		self.drawline(self.absX - 1 + x_offset, y - y_offset, self.absX - 1 + x_offset, y - 10 - y_offset) # left hand side of box
+		self.drawline(self.absX - 1 + x_offset, y - 10 - y_offset, self.absX + 10 + x_offset, y - 10 - y_offset) # bottom of box
+		self.drawline(self.absX + 10 + x_offset, y - y_offset, self.absX + 10 + x_offset, y - 10 - y_offset) # right hand side of box
 		
 		# now, determine the state of the thing
 		if self.value:
@@ -1689,7 +1839,7 @@ class CheckBox(UIElement):
 			# Blender.BGL.glEnable( gl.GL_BLEND )
 			# Blender.BGL.glBlendFunc( gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA )
 			Blender.BGL.glBegin(gl.GL_POLYGON)
-			verts = [[x, y - 5],[x + 5, y - 10], [x + 9, y], [x + 5, y - 9]] 
+			verts = [[x + x_offset, y - 5 - y_offset],[x + x_offset + 5, y - 10 - y_offset], [x + x_offset + 9, y - y_offset], [x + x_offset + 5, y - 9 - y_offset]] 
 			for vert in verts:
 				Blender.BGL.glVertex2f(vert[0],vert[1])
 				
@@ -1745,16 +1895,18 @@ class Menu(UIElement):
 	textHiliteColor = [255, 255, 255, 255]
 	arrowShade = [200, 200, 200, 255]
 	arrowHover = [140, 140, 140, 255]
-	
+	properties = ["normalColor", "textColor", "textHiliteColor", "borderColor", "hoverBorderColor", 
+				"hoverColor", "outlineColor", "arrowShade", "arrowHover", "radius", "fontsize", "cornermask"]
+	parameters = ["x", "y", "width", "height", "name", "menu", "auto_register"]
 	def __init__(self, x, y, width, height, name, menu, parent, auto_register, 
 						enableArrowButton = True, 
 						enableMenuHeader = True, 
 						noSelect = False, 
 						baseButtonTitle = None,
-						shadowed = True):
+						shadowed = True, fontsize = 'normal'):
 		self.expanded = False  # this is first to deal with an issue in validate()
-		UIElement.__init__(self, x, y, width, height, name, name, parent, auto_register)
-		self.fontsize = 'normal'				
+		UIElement.__init__(self, x, y, width, height, name, name, parent, auto_register, fontsize = fontsize)
+		self.fontsize = fontsize
 		self.close_functions = []
 		self.selected = 0	
 		self.menu = menu		
@@ -1765,7 +1917,7 @@ class Menu(UIElement):
 			
 		self.panel.cornermask = 0
 		self.panel.debug = 0
-		self.panel.fontsize = 'normal'
+		self.panel.fontsize = self.fontsize
 		self.panel.movable = False
 		self.panel.panelColor = [185, 185, 185, 255]
 		self.panel.registerCallback("release", self.release)
@@ -1777,9 +1929,9 @@ class Menu(UIElement):
 		self.radius = 1.5   
 		# base button
 		if enableArrowButton:
-			self.baseButton = Button(x, y, width - 26, height, name, name, 'normal', parent, False) # the base button object
+			self.baseButton = Button(x, y, width - 26, height, name, name, self.fontsize, parent, False) # the base button object
 		else:
-			self.baseButton = Button(x, y, width, height, name, name, 'normal', parent, False)
+			self.baseButton = Button(x, y, width, height, name, name, self.fontsize, parent, False)
 		self.baseButton.cornermask = 0
 		self.baseButton.radius = 0
 		self.baseButton.push_offset = 0
@@ -1808,7 +1960,7 @@ class Menu(UIElement):
 				
 		for a in menu: 
 			# create some button objects here
-			self.panel.addElement(Button(0, 0, 100, 25, butIdx, a, 'normal', self.panel, False)) # this will self-validate, and I bypass the auto_register
+			self.panel.addElement(Button(0, 0, 100, 20, butIdx, a, self.fontsize, self.panel, False)) # this will self-validate, and I bypass the auto_register
 			self.panel.elements[butIdx].registerCallback("release", self.setValueAndCollapse) # on a click & release
 			self.panel.elements[butIdx].cornermask = 0
 			self.panel.elements[butIdx].shadowed = False
@@ -1858,8 +2010,13 @@ class Menu(UIElement):
 				self.baseButton.title = button.title # the display string is the button title that was clicked.
 		self.expanded = False
 		self.close_funcs()
+		self.select_funcs()
 			# print "Return menu value ", self.value, ", and button title ", button.title
-	
+	def setShadowed(self, value):
+		self.shadowed = value
+		self.baseButton.shadowed = value
+		self.arrowButton.shadowed = value
+		
 	def close_funcs(self):
 		for func in self.close_functions:
 			func(self)
@@ -2143,9 +2300,13 @@ class TextField(Button):
 	borderColor = [128, 128, 128, 255]
 	editingColor = [255, 255, 255, 255]
 	editingBorderColor = [180, 128, 128, 255]
-	
-	def __init__(self, x, y, width, height, name, value, parent, auto_register):
-		UIElement.__init__(self, x, y, width, height, name, value, parent, auto_register)
+	properties = ["normalColor", "textColor", "textHiliteColor", "borderColor", "hoverBorderColor", 
+				"designBorderColor", "hoverColor", "outlineColor", 
+				"editingColor", "editingBorderColor", "radius", "fontsize", "cornermask"]
+	parameters = ["x", "y", "width", "height", "name", "title", "parent", "auto_register"]
+	def __init__(self, x, y, width, height, name, value, parent, auto_register, fontsize = 'normal'):
+		UIElement.__init__(self, x, y, width, height, name, value, parent, auto_register, fontsize = fontsize)
+		self.fontsize = fontsize
 		self.cursorIndex = 0
 		self.editing = False
 		self.value = value
@@ -2160,8 +2321,7 @@ class TextField(Button):
 			self.strValue = value
 		self.selection = [0,0]
 		self.selectionColor = [200, 128, 128, 255]
-		self.index = 0
-		self.fontsize = 'normal'
+		self.index = 0		
 		self.isEditing = False
 		self.shifted = False
 		self.mouseDown = False  		
@@ -2621,11 +2781,14 @@ class TextField(Button):
 
 	
 class TextItem(UIElement):
-
-	def __init__(self, x, y, name, value, parent, auto_register):
-		UIElement.__init__(self, x, y, 0, 0, name, value, parent, auto_register)        
+	properties = ["normalColor", "textColor", "textHiliteColor", "borderColor", "hoverBorderColor", 
+				"designBorderColor", "hoverColor", "outlineColor", 
+				"editingColor", "editingBorderColor", "radius", "fontsize", "cornermask"]
+	parameters = ["x", "y", "width", "height", "name", "title", "parent", "auto_register"]
+	def __init__(self, x, y, name, value, parent, auto_register, fontsize = 'normal'):
+		UIElement.__init__(self, x, y, 0, 0, name, value, parent, auto_register, fontsize = fontsize)        
 		valueString = str(value)
-		self.fontsize = "normal"
+		self.fontsize = fontsize
 		self.width = self.get_string_width(valueString, self.fontsize)  # do different calcs here, since extra stuff is required
 		self.height = self.font_cell_sizes[self.fontsize][1]         
 		self.value = value        
@@ -2642,10 +2805,14 @@ class TextItem(UIElement):
 		Blender.Draw.Text(dispValue, self.fontsize) # sometimes this will be a float or something
 				
 class Label(UIElement):
-
-	def __init__(self, x, y, name, value, parent, auto_register):
-		UIElement.__init__(self, x, y, 0, 0, name, value, parent, auto_register)
+	properties = ["normalColor", "textColor", "textHiliteColor", "borderColor", "hoverBorderColor", 
+				"designBorderColor", "hoverColor", "outlineColor", 
+				"radius", "fontsize", "cornermask"]
+	parameters = ["x", "y", "name", "title"]
+	def __init__(self, x, y, name, value, parent, auto_register, fontsize = 'normal'):
+		UIElement.__init__(self, x, y, 0, 0, name, value, parent, auto_register, fontsize = fontsize)		
 		valueString = str(value)
+		self.fontsize = fontsize
 		self.width = self.get_string_width(valueString, self.fontsize) + 2 
 		self.height = self.font_cell_sizes[self.fontsize][1] + 2 # voila!
 		self.value = value 
@@ -2654,7 +2821,7 @@ class Label(UIElement):
 		else:
 			xT = 2
 			
-		self.addElement(TextItem(xT, 0, name, value, self, False)) # this item only has one element, but can be extended any time		
+		self.addElement(TextItem(xT, 0, name, value, self, False, fontsize = fontsize)) # this item only has one element, but can be extended any time		
 		self.elements[0].width = self.width
 		self.elements[0].height = self.height
 		self.elements[0].hasBorder = False
@@ -2678,6 +2845,10 @@ class Label(UIElement):
 		
 		
 class Table(UIElement):
+	properties = ["normalColor", "textColor", "textHiliteColor", "borderColor", "hoverBorderColor", 
+				"designBorderColor", "hoverColor", "outlineColor", 
+				"editingColor", "editingBorderColor", "radius", "fontsize", "cornermask"]
+	parameters = ["x", "y", "width", "height", "name", "title", "parent", "auto_register"]
 	def __init__(self, x, y, width, height, name, value, parent, auto_register):
 		UIElement.__init__(self, x, y, width, height, name, name, parent, auto_register)
 		self.rows = 4
@@ -2778,6 +2949,11 @@ class ColorPicker(Panel):
 		[175, 206, 145, 255],
 		[224, 226, 186, 255],
 		[237, 211, 206, 255]]
+	
+	properties = ["normalColor", "textColor", "textHiliteColor", "borderColor", "hoverBorderColor", 
+				"designBorderColor", "hoverColor", "outlineColor", 
+				"editingColor", "editingBorderColor", "radius", "fontsize", "cornermask"]
+	parameters = ["x", "y", "width", "height", "name", "title", "parent", "auto_register"]
 		
 	def __init__(self, x, y, name, title, parent, auto_register):
 		
@@ -2998,7 +3174,9 @@ class ColorPicker(Panel):
 		
 				
 class ColorButton(UIElement):
+	
 	def __init__(self, x, y, width, height, name, value, parent, auto_register):
+		# maybe I should make this standalone?
 		# color buttons have no title
 		UIElement.__init__(self, x, y, width, height, name, '', parent, auto_register)
 		self.normalColor = value		
@@ -3009,6 +3187,7 @@ class ColorButton(UIElement):
 		self.value = value
 		self.picker.ok_functions.append(self.setAndHide)
 		self.picker.cancel_functions.append(self.hide)
+		
 	
 	def draw(self):
 		self.validate() # locate myself		

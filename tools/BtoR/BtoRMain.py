@@ -78,7 +78,9 @@ class BtoRSettings: # an instance of this class should be passed to every base-l
 		self.renderMatsOnStartup = ui.CheckBox(5, 90, "Render material previews on startup?", "Render material previews on startup?", False, self.editor, True)
 		
 		self.useShadowMaps = ui.CheckBox(300, 65, "Use Shadow Maps?", "Use Shadow Maps?", True, self.editor, True)
+
 		offset = 125
+		
 		
 		# search paths label
 		self.editor.addElement(ui.Label(5, offset, "Search Paths:", "Search Paths:", self.editor, False))
@@ -151,6 +153,8 @@ class BtoRSettings: # an instance of this class should be passed to every base-l
 		self.imagerFiles = {}
 		self.lightFiles = {}
 		
+
+		
 		if self.use_slparams:
 			self.getShaderSourceList(paths[0]) 
 		else:
@@ -161,7 +165,7 @@ class BtoRSettings: # an instance of this class should be passed to every base-l
 		self.textures = os.sep + "textures" + os.sep
 		self.archives = os.sep + "archives" + os.sep
 		
-			
+
 	def getShaderSearchPaths(self):
 		pathList = self.shaderpaths.getValue().split(";")
 		return pathList
@@ -513,7 +517,12 @@ class SceneSettings:
 		self.close_button.shadowed = False
 		self.close_button.cornermask = 15
 		self.close_button.radius = 1.5
-			
+		
+		self.useAO = ui.CheckBox(250, 90, "Generate Ambient Occlusion Maps?", "Generate Ambient Occlusion Maps?", True, self.editor, True)
+		self.editor.addElement(ui.Label(250, 110, "AO shader", "AO Shader:", self.editor, True))
+		self.shaderButton = ui.Button(350, 110, 100, 25, "AO Shader", "None Selected", 'normal', self.editor, True)
+		self.shaderButton.registerCallback("release", self.showAOShader)
+		setattr(self.editor, "shaderButton", self.shaderButton)
 		# close_func = self.close_button.callFactory(self.evt_manager.removeElement, self.editor)
 		self.close_button.registerCallback("release", self.close)
 		
@@ -551,12 +560,16 @@ class SceneSettings:
 		self.camera_data = {} # I doubt this is neccessary, since the shader will now be saved per camera
 		self.light_data = {} # ditto
 		self.object_groups = {} # this *is* neccessary for instancing support
+		self.occlusion_map = []
 		
 		self.lightMultiplier = 1
 		self.renderContext = Blender.Scene.GetCurrent().getRenderingContext()
 		
 		self.suzanne = BtoRAdapterClasses.IObjectAdapter(BtoRTypes.BtoRPreview(Blender.Mesh.Primitives.Monkey()))
+		self.ao_shader = GenericShader(None, "light", self)
 		
+	def showAOShader(self, button):
+		self.evt_manager.addElement(self.ao_shader.getEditor())
 		
 	def render(self):
 		# generate Ri calls for the scene
@@ -658,8 +671,9 @@ class SceneSettings:
 			cam = 1
 			for camera in self.cameras:
 				# split the filename off
-				outputname = os.path.splitext(filename)[0] + "_cam_%d_frame_%d.rib" % (cam, frame)				
-				filename = outputname + ".rib"
+				outputPath = os.path.split(filename)[1]
+				outputname = os.path.splitext(filename)[0] + "_cam_%d_frame_%d" % (cam, frame)				
+				filename = outputname + ".rib"	 
 				imgFile = outputname + ".tif" 
 					# Main Render Start
 				
@@ -669,7 +683,14 @@ class SceneSettings:
 					ri.RiBegin("aqsis")
 				else:
 					ri.RiBegin()
-					
+				# make the occlusion pass
+				if len(self.occlusion_map) > 0:
+					maps = "["
+					for map in self.occlusion_map:
+						maps = maps + '"' + map + '" '
+					maps = maps + "]"
+					ri._ribout.write("MakeOcclusion " + maps + " " + '"' + "occlusion.sm" + '"' + "\n")
+					self.occlusion_map_file = outputPath + "occlusion.sm"
 				for path in paths:
 					ri.RiOption("searchpath", "shader", path + ":&")
 					
@@ -688,9 +709,10 @@ class SceneSettings:
 				ri.RiEnd()
 		
 	def generateShadowMaps(self):
+		self.occlusion_map = []
 		shadowPath = self.settings.outputpath.getValue() + self.settings.shadows
 		for light in self.lights:
-			if light.objEditor.shadowMap.getValue(): # if this lamp generates a shadowMap...
+			if light.getProperty("GenShadowMap"): # if this lamp generates a shadowMap...
 				# create a shadowmap RIB		
 				shadowList = {}
 				for direction in light.getRenderDirections():
@@ -716,20 +738,64 @@ class SceneSettings:
 				self.shadows[light.objData["name"]] = shadowList # something
 				
 	def renderShadowMap(self, light, direction, shadowRIB, shadowName, shadowFile):									
-		ri.RiBegin(shadowRIB)
-		ri.RiPixelSamples(1, 1)
-		ri.RiPixelFilter("box", 1, 1)
-		ri.RiHider("hidden", "jitter", 0)
-		ri.RiDisplay(shadowFile, "zfile", "z")
-		projection = light.getRenderProjection()
-		ri.RiProjection(projection, "fov", 92) # 92 degrees projection
-		ri.RiShadingRate(4)
-		light.doCameraTransform(direction)
-		ri.RiWorldBegin()
-		self.renderObjects()
-		ri.RiWorldEnd()
-		ri.RiMakeShadow(shadowFile, shadowName)
-		ri.RiEnd()
+		self.lightDebug = False
+
+		if self.lightDebug:
+			ri.RiBegin(shadowRIB + "test.rib")	
+			paths = self.settings.shaderpaths.getValue().split(";")
+			for path in paths:
+				ri.RiOption("searchpath", "shader", path + ":&")			
+			ri.RiScale(-1, -1, -1)
+			ri.RiPixelSamples(1, 1)
+			ri.RiPixelFilter("box", 1, 1)
+			ri.RiHider("hidden", "jitter", 0)
+			ri.RiDisplay(shadowFile + ".tiff", "file", "rgb")
+			#ri.RiDisplay(shadowFile, "zfile", "z")
+			projection = light.getRenderProjection()
+			ri.RiProjection(projection, "fov", 91) # 92 degrees projection
+			ri.RiShadingRate(4)
+			light.doCameraTransform(direction)
+			ri.RiWorldBegin()			
+			#ri.RiLightSource("ambientlight", "intensity", "1")
+			ri.RiTransformBegin()
+			lightParams = { "from" : [3, 3, 3], "uniform float intensity" : [8] }
+			ri.RiLightSource("pointlight", lightParams) 
+			lightParams = { "from" : [-3, 3, 3], "uniform float intensity" : [8] }
+			ri.RiLightSource("pointlight", lightParams) 
+			lightParams = { "from" : [-3, -3, 3], "uniform float intensity" : [8] }
+			ri.RiLightSource("pointlight", lightParams) 
+			lightParams = { "from" : [3, -3, 3], "uniform float intensity" : [8] }
+			ri.RiLightSource("pointlight", lightParams) 
+			ri.RiTransformEnd()
+			self.renderObjects()
+			ri.RiWorldEnd()
+			#ri.RiMakeShadow(shadowFile, shadowName)
+			ri.RiEnd()
+		else:
+			ri.RiBegin(shadowRIB)
+			paths = self.settings.shaderpaths.getValue().split(";")
+			for path in paths:
+				ri.RiOption("searchpath", "shader", path + ":&")	
+			ri.RiPixelSamples(1, 1)
+			ri.RiPixelFilter("box", 1, 1)			
+			ri.RiHider("hidden", {"jitter" : [0], "depthfilter" : "midpoint"})
+			# ri.RiDisplay(shadowFile + ".tiff", "file", "rgb")
+			ri.RiDisplay(shadowFile, "zfile", "z")
+			#ri.RiDisplay("view_from_light", "framebuffer", "rgb")
+			#params = { "uniform cd ..float intensity" : 1, "uniform point from" : [0, 0, 0], "uniform point to" : [0, 0, 1] }
+			#ri.RiLightSource("distantlight", params)
+			projection = light.getRenderProjection()			
+			ri.RiProjection(projection, "fov", 95) # 92 degrees projection
+			ri.RiShadingRate(4)
+			light.doCameraTransform(direction)
+			ri.RiWorldBegin()
+			# ri.RiReverseOrientation()
+			self.renderObjects()
+			ri.RiWorldEnd()
+			ri.RiMakeShadow(shadowFile, shadowName)
+			ri.RiEnd()
+			
+		self.occlusion_map.append(shadowFile)
 		
 	def renderWorld(self):
 		ri.RiWorldBegin()		
@@ -744,14 +810,28 @@ class SceneSettings:
 			obj.renderArchive()
 
 	def renderLights(self):
-		for light in self.lights:
-			# get the fame info
-			# frame = Blender.Get("curframe")
-			shadows = self.shadows[light.objData["name"]]
-			print shadows
-			if light.objEditor.shadowMap.getValue():
-				light.setShadowParms(shadows)			
-			light.render() 
+		# occlusion setup here
+		if self.useAO.getValue() and self.ao_shader.shader != None and len(self.occlusion_map) > 0:
+			# using occlusion
+			self.ao_shader.updateShaderParams()				
+			ri.RiLightSource(self.ao_shader.shader.shadername, self.ao_shader.shader.params())
+			for light in self.lights:
+				if light.getProperty("IncludeWithAO"):
+					if light.getProperty("GenShadowMap"):
+						shadows = self.shadows[light.objData["name"]]
+						light.setShadowParams(self.shadows)
+					light.render()
+		else:
+			for light in self.lights:
+				# get the fame info
+				# frame = Blender.Get("curframe")
+				if light.getProperty("IncludeWithAO"):
+					shadows = self.shadows[light.objData["name"]]			
+					if light.getProperty("GenShadowMap"):
+						light.setShadowParms(shadows)		
+					light.render() 
+					
+		
 		
 	def renderObjects(self):
 		for obj in self.objects:
@@ -971,17 +1051,6 @@ class ObjectEditor:
 		self.objectMenu.isVisible = False
 		self.objectMenu.registerCallback("release", self.selectObject_menu)
 		
-		# typeLabelX = self.objectMenu.x + self.objectMenu.width + 10
-		# typeX = typeLabelX + self.editorPanel.get_string_width("Object Type:", 'normal') + 10
-		# self.editorPanel.addElement(ui.Label(typeLabelX, 30, "Object Type:", "Object Type:", self.editorPanel, False))
-		# self.objectType = ui.Label(typeX, 30, "No_type", "No_type", self.editorPanel, True)
-		labelX = self.objectMenu.x + self.objectMenu.width + 10
-		self.editorPanel.addElement(ui.Label(labelX, 30, "Object Groups", "Object Groups:", self.editorPanel, True))
-		# I need to know about object groups here, so look at the scene data
-		
-		
-		# self.applyAll = ui.CheckBox(5, 70, "Apply to all selected", "Apply to all selected", False, self.editorPanel, True)
-		
 		containerOffset = 110
 		containerHeight = 280
 								
@@ -992,7 +1061,7 @@ class ObjectEditor:
 		# close_func = self.close_button.callFactory(self.evt_manager.removeElement, self.editor)
 		self.close_button.registerCallback("release", self.close)
 
-		self.objEditorPanel = ui.Panel(4, 110, 491,  280, "Empty Panel", "", None, False) # keep this one invisible
+		self.objEditorPanel = ui.Panel(4, 65, 491,  280, "Empty Panel", "", None, False) # keep this one invisible
 		self.objEditorPanel.isVisible = False
 		self.objEditorPanel.hasHeader = False
 		self.objEditorPanel.cornermask = 0
@@ -1062,8 +1131,6 @@ class ObjectEditor:
 		self.objEditorPanel.parent = self.editorPanel
 		self.objEditorPanel.invalid = True
 		self.editorPanel.addElement(self.objEditorPanel)
-		
-
 		
 		# and finally, object checks/resets for interested objects
 		self.objData.checkReset()
@@ -2135,6 +2202,7 @@ class GenericShader:
 		return self.shader.shaderfilename
 		
 	def close(self, button):		
+		self.updateShaderParams()
 		self.evt_manager.removeElement(self.editorPanel)
 		# no preview neccessar here
 		
@@ -2263,6 +2331,7 @@ class GenericShader:
 		for element in self.scroller.elements:
 			p_type = element.paramtype
 			name = element.param_name
+			print "updating ", element.param_name, " to value: ", element.getValue()
 			if p_type == "float" or p_type == "string": # lo, all my single-variable types
 				setattr(self.shader, name, self.scroller.elements[index].getValue())
 				
@@ -2275,7 +2344,7 @@ class GenericShader:
 				val = self.scroller.elements[index].getValue()
 				matrix = cgkit.cgtypes.mat4(val[0][0], val[0][1], val[0][2], val[0][3], val[1][0], val[1][1], val[1][2], val[1][3], val[2][0], val[2][1], val[2][2], val[2][3], val[3][0], val[3][1], val[3][2], val[3][3])				
 				setattr(self.shader, name, matrix)
-			
+			print getattr(self.shader, name)
 			index = index + 1
 
 	def initShaderParamsList(self, paramlist, shader):
@@ -2428,8 +2497,6 @@ class MainUI:
 	# this is the main UI object, the "main menu" of sorts from which all things spring.
 	def __init__(self):
 		# find my settings
-		
-		
 		sdict = globals()
 		self.settings = sdict["instBtoRSettings"]
 		self.evt_manager = sdict["instBtoREvtManager"]
@@ -2447,7 +2514,7 @@ class MainUI:
 		self.file_menu = ["Save", "Save to file", "Exit"]
 		width = self.editor.get_string_width("File", 'normal') + 5
 		
-		self.fileMenu = ui.Menu(5, 5, 40, 18, "File", self.file_menu, self.editor, True, 
+		self.fileMenu = ui.Menu(5, 5, 50, 18, "File", self.file_menu, self.editor, True, 
 										enableArrowButton = False, 
 										noSelect = True,
 										baseButtonTitle = "File",
@@ -3402,6 +3469,19 @@ class ExportUI:
 	def close(self, button):
 		self.evt_manager.removeElement(self.editorPanel)
 
+class LightManager:
+	""" This is the light manager. It provides direct access to lights in the scene without having to select them in the blender window. 
+	
+	     this will allow me to load light setups/looks
+	"""
+	def __init__(self):
+		# center the panel
+		screen = Blender.Window.GetAreaSize()		
+		self.editorPanel = ui.Panel((screen[0] / 2) - 225 , (screen[1] / 2) + 250 , 450, 250, "Export Scene", "Export Scene:", None, False)
+		
+		
+		
+		
 class HelpWindow:
 	# this is based on a simple panel
 	width = 400

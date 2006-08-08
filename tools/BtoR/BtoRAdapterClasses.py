@@ -21,6 +21,167 @@ import protocols
 import random
 import traceback
 
+class IProperty(protocols.Interface):
+	def getValue():
+		pass
+	def setValue():
+		pass
+		
+class Property:
+	height = 27 # should work for most
+	def __init__(self, value):
+		self.value = value
+	def setHeight(self, height):
+		self.height = height
+	def setWidth(self, width):
+		self.width = width
+	def setName(self, name):
+		self.name = name
+	def getName(self):
+		return self.name
+	def setValue(self, value):
+		self.value = value
+	def setDefault(self, default):
+		self.default = default
+	def getValue(self):
+		return self.value
+		
+protocols.declareAdapter(Property, [IProperty])
+
+class StringProperty(Property): pass
+protocols.declareAdapter(StringProperty, [IProperty], forTypes=[str])
+
+class IntProperty(Property): pass
+protocols.declareAdapter(IntProperty, [IProperty], forTypes=[int])
+
+class FloatProperty(Property): pass
+protocols.declareAdapter(FloatProperty, [IProperty], forTypes=[float])
+
+class ColorProperty(Property): pass
+protocols.declareAdapter(ColorProperty, [IProperty], forTypes=[list])
+	
+class DictProperty(Property): pass
+protocols.declareAdapter(DictProperty, [IProperty], forTypes=[dict])
+	
+class BooleanProperty(Property): pass
+protocols.declareAdapter(BooleanProperty, [IProperty], forTypes=[bool])
+
+class IPropertyEditor(protocols.Interface):
+	def getValue():
+		"""" get the value of the property """
+	def setValue():
+		""" set the value of the property """
+class PropertyEditor: # this needs no interface declaration, since all this is doing is providing a baseclass
+	fontsize = 'small'
+	def __init__(self, property):		
+		self.property = property
+		width = self.property.width
+		self.height = self.property.height		
+		self.editor = ui.Panel(0, 0, width, self.height, "", "", None, False)
+		self.editor.hasHeader = False
+		self.editor.shadowed = False
+		self.editor.normaColor = [128, 128, 128, 0]
+		self.editor.hoverColor = [128, 128, 128, 0]
+		self.editor.outlined = True
+		self.editor.cornermask = 0
+		self.editor.outlined = True
+		self.editor.cornermask = 0
+		self.label = ui.Label(2, 3, self.property.getName(), self.property.getName(), self.editor, True, fontsize = self.fontsize)
+		self.label.fontsize = 'small'
+		self.func = None
+		
+	def setValue(self, value):
+		self.property.setValue(value)
+		self.value.setValue(value)
+		
+	def setParent(self, parent):
+		self.editor.parent = parent
+		self.editor.invalid = True
+		
+	def setPropertyCallback(self, func):
+		self.func = func
+		
+	def getValue(self):
+		return self.property.getValue()
+		
+	def updateValue(self, obj):
+		self.property.setValue(obj.getValue())
+		if self.func != None:
+			self.func() # invoke the update function for this property
+			
+	def getEditor(self):
+		return self.editor
+		
+class BasicPropertyEditor(PropertyEditor):
+	#protocols.advise(instancesProvide=["IProperty"], asAdapterForTypes=[StringProperty, IntProperty, FloatProperty])
+	""" A basic property, a label and a text box """
+	def __init__(self, property):
+		PropertyEditor.__init__(self, property)
+		width = property.width
+		height = property.height
+		self.value = ui.TextField(width / 2, 0, width / 2, height, self.property.getName(), self.property.getValue(), self.editor, True, fontsize = self.fontsize)
+		self.value.registerCallback("update", self.updateValue)
+		
+protocols.declareAdapter(BasicPropertyEditor, [IPropertyEditor], forTypes=[StringProperty, IntProperty, FloatProperty])
+
+class MenuPropertyEditor(PropertyEditor):
+	#protocols.advise(instancesProvide=[IPropertyEditor], asAdapterForTypes=[DictProperty])
+	def __init__(self, property):
+		PropertyEditor.__init__(self, property)
+		width = self.property.width
+		height = self.property.height
+		menu = self.property.getValue().keys()
+		self.value = ui.Menu(width / 2, 2, width / 2, height - 4, self.property.getName(), menu, self.editor, True, fontsize = self.fontsize)
+		self.value.registerCallback("select", self.updateValue)
+		self.value.setShadowed(False)
+		# the property should handle making sure I've got the right value here I think
+	def setValue(self, value):
+		self.value.setValueString(value)
+		
+protocols.declareAdapter(MenuPropertyEditor, [IPropertyEditor], forTypes=[DictProperty])
+
+class ColorPropertyEditor(PropertyEditor):
+	#protocols.advise(instancesProvide=[IPropertyEditor], asAdapterForTypes=[ColorProperty])
+	def __init__(self, property):
+		PropertyEditor.__init__(self, property)
+		width = self.property.width
+		height = self.property.height
+		color = self.property.getValue()
+		# I need 3 RGB values
+		inc = (width / 2) / 4
+		self.R = ui.TextField((width / 2), 0, inc -1, height, "Red", color[0], self.editor, True)
+		self.G = ui.TextField((width / 2) + inc, 0, inc -1, height, "Green", color[0], self.editor, True)
+		self.B = ui.TextField((width / 2) + (inc * 2), 0, inc -1, height, "Blue", color[0], self.editor, True)
+		self.colorButton = ui.ColorButton((width / 2) + (inc * 3), 0, inc - 4, height - 2, "Color", color, self.editor, True)
+		self.colorButton.outlined = True
+		self.R.registerCallback("update", self.updateColor)
+		self.G.registerCallback("update", self.updateColor)
+		self.B.registerCallback("update", self.updateColor)
+		self.colorButton.picker.registerCallback("ok", self.updateFields)
+	def updateFields(self, color):
+		self.color_red.setValue(float(float(color[0]) / 255))
+		self.color_green.setValue(float(float(color[1]) / 255))
+		self.color_blue.setValue(float(float(color[2]) / 255))
+	
+	def updateColor(self, obj):
+		self.colorButton.setValue([self.R.getValue(), self.G.getValue(), self.B.getValue(), 255]) 
+		self.property.setValue([self.R.getValue(), self.G.getValue(), self.B.getValue(), 255])
+protocols.declareAdapter(ColorPropertyEditor, [IPropertyEditor], forTypes=[ColorProperty])
+
+class BooleanPropertyEditor(PropertyEditor):
+	def __init__(self, property):
+		PropertyEditor.__init__(self, property)
+		width = self.property.width
+		height = self.property.height
+		self.value = ui.CheckBox(width / 2 + ((width / 2) - 55), 5, "", " ", property.getValue(), self.editor, True, fontsize = self.fontsize)
+		self.value.height = 15
+		self.value.x_offset = 2
+		self.value.y_offset = 0
+		#self.value.outlined = True
+		self.value.registerCallback("release", self.updateValue)
+		# again, the property should handle this
+protocols.declareAdapter(BooleanPropertyEditor, [IPropertyEditor], forTypes=[BooleanProperty])
+
 class IObjectAdapter(protocols.Interface):
 	def render():
 		""" Render the object"""
@@ -60,11 +221,22 @@ class ObjectAdapter:
 		self.object = obj.obj # this is a BtoR object instance
 		# why can't I use the objectUI protocol to get an appropriate editor?
 		# let's do that!
-		self.objEditor = protocols.adapt(obj, IObjectUI)				
+		self.objEditor = protocols.adapt(obj, IObjectUI)		
 		self.initObjectData() # initializes object data 
+		self.properties = self.objEditor.properties
 		# self.objType = obj.obj.getType()
 	
 	# convenience method to return the editor object for this adapter
+	def getProperty(self, property):
+		if self.properties.has_key(property):
+			return self.properties[property].getValue()
+		else:
+			return False
+		
+	def setProperty(self, property, value):
+		if self.properties.has_key(property):
+			self.properties[property].setValue(value)
+		
 	def getEditor(self):
 		return self.objEditor
 
@@ -374,8 +546,7 @@ class MeshAdapter(ObjectAdapter):
 						
 			else:
 				# test for archive rendering, otherwise render to the current RIB stream
-				ri.RiAttributeBegin()
-				
+				ri.RiAttributeBegin()				
 				ri.RiAttribute("identifier", "name", [self.objData["name"]]) # give it a name
 				ri.RiTransformBegin()				
 				self.renderMaterial() # render the material				
@@ -721,28 +892,33 @@ class LampAdapter(ObjectAdapter):
 		#	ri.RiSurface(material.surfaceShaderName(), material.surfaceShaderParams(0))
 		ri.RiLightSource(self.shader.shader.shadername, self.shader.shader.params())
 		
-	def doCameraTransform(self, axis = None, direction = None):
+	def doCameraTransform(self, axis):
 		if axis != None:
 			# I still need to transform based on the light's matrix
-			# so
+			# get the inverse matrix first
+			# if this is point light, I should probably set the rotation values to zero
 			cmatrix = self.object.getMatrix()
-			translate = cmatrix.translationPart()
-			ri.RiTransform(translate)
+			sMat = Blender.Mathutils.ScaleMatrix(-1, 4)
+			
+			mat = cmatrix * sMat
+
+			ri.RiTransform(mat)
+			
+			ri.RiRotate(180, 1, 0, 0) # things are looking up!
 			# do a rotation along some axis or another			
-			if axis == "px":
-				# positive X axis
-				ri.RiRotate(90, 1, 0, 0)
-			elif axis == "py":
-				# positive Y axis 
-				ri.RiRotate(90, 0, 1, 0)
-			elif axis == "pz":
-				ri.RiRotate(180, 1, 0, 0) # rotate 180 on x & y		
-			elif axis == "nx":
-				ri.RiRotate(-90, 1, 0, 0)
-			elif axis == "ny":
+			if axis == "px":				
 				ri.RiRotate(-90, 0, 1, 0)
+			elif axis == "nx":
+				ri.RiRotate(90, 0, 1, 0)				
+			elif axis == "py":				
+				ri.RiRotate(90, 1, 0, 0)
+			elif axis == "ny":
+				ri.RiRotate(-90, 1, 0, 0)				
+				#ri.RiRotate(180, 1, 0, 0)
+			elif axis == "nz":				
+				ri.RiRotate(180, 1, 0, 0) 	
 		else:			
-			cmatrix = self.object.getInverseMatrix()
+			cmatrix = self.object.getMatrix()
 			matrix = [cmatrix[0][0],
 					cmatrix[0][1],
 					-cmatrix[0][2],
@@ -921,10 +1097,16 @@ class LampAdapter(ObjectAdapter):
 		# for the most part, follow the parameters for the given light object and stuff the values into the 
 		# shader parms 
 		if self.objData["type"] == lamp.type:
+			mat = self.object.getMatrix()
+			#trans = mat.translationPart()
+			#x = trans[0]
+			#y = trans[1]
+			#z = trans[2]
 			
 			x = self.object.matrix[3][0] / self.object.matrix[3][3]
 			y = self.object.matrix[3][1] / self.object.matrix[3][3]
 			z = self.object.matrix[3][2] / self.object.matrix[3][3]
+			
 			tox = -self.object.matrix[2][0] + self.object.matrix[3][0]
 			toy = -self.object.matrix[2][1] + self.object.matrix[3][1]
 			toz = -self.object.matrix[2][2] + self.object.matrix[3][2]
@@ -934,7 +1116,6 @@ class LampAdapter(ObjectAdapter):
 				negative = 1
 			
 			# am I going to worry about intensity and color? Maybe not, because that will change per shader I think.
-			# perhaps I should gather the parameters for the bml shader and use that as my primary lighting shader.
 			shaderParms["intensity"] = lamp.getEnergy()
 			# I'm only worried at the moment about deriving the correct shader to use as a starting point for the lamp.
 			# thus
@@ -1067,9 +1248,9 @@ class CameraAdapter(ObjectAdapter):
 			fov = 360.0 * math.atan((factor * 16.0) / camera.lens) / math.pi
 			ri.RiProjection("perspective", "fov", fov)
 			# Depth of field
-			dof = self.objEditor.getDoF()
-			if dof != None:
-				ri.RiDepthOfField(dof[0], dof[1], dof[2])
+			print self.properties
+			if self.properties["DOF"].getValue():
+				ri.RiDepthOfField(self.properties["fstop"].getValue(), self.properties["focallength"].getValue(), self.properties["focaldistance"].getValue())
 			# Depth of field done
 			
 		else:
@@ -1081,6 +1262,10 @@ class CameraAdapter(ObjectAdapter):
 		
 		# Viewpoint transform
 		cmatrix = self.object.getInverseMatrix()
+		#cmatrix = self.object.getMatrix()
+		sMat = Blender.Mathutils.ScaleMatrix(-1, 4)
+		
+		mat = cmatrix * sMat
 		matrix = [cmatrix[0][0],
 				cmatrix[0][1],
 				-cmatrix[0][2],
@@ -1098,6 +1283,7 @@ class CameraAdapter(ObjectAdapter):
 				-cmatrix[3][2],
 				cmatrix[3][3]]
 		ri.RiTransform(matrix)
+		#ri.RiRotate(180, 1, 0, 0)
 		ri.RiTranslate(0, 0, 1)
 		# that should take care of the camera
 		
@@ -1345,8 +1531,11 @@ class PreviewAdapter(ObjectAdapter):
 class ObjectUI:
 	""" Object editor panel """
 	protocols.advise(instancesProvide=[IObjectUI], asAdapterForTypes=[BtoRLattice, BtoRArmature, BtoRBasicObject, BtoREmpty, BtoRWave])
+	options = {
+		"Blank": ["Blank Property", False]
+	}
 	def __init__(self, obj):
-		dict = globals()		
+		dict = globals()	
 		self.settings = dict["instBtoRSettings"]
 		self.evt_manager = dict["instBtoREvtManager"]
 		self.scene = dict["instBtoRSceneSettings"]
@@ -1356,11 +1545,31 @@ class ObjectUI:
 		self.helpwindow = dict["instBtoRHelp"]
 		self.mat_selector = self.materials.getSelector()
 		
-		self.editorPanel = ui.Panel(4, 110, 491,  280, "Empty Panel", "", None, False)
+		self.editorPanel = ui.Panel(4, 65, 491,  320, "Empty Panel", "", None, False)
+		self.editorPanel.titleColor = [65, 65, 65, 255]
 		self.editorPanel.hasHeader = False
 		self.editorPanel.cornermask = 0
 		self.editorPanel.shadowed = False
 		self.editorPanel.outlined = False
+
+		self.scroller= ui.ScrollPane(235, 25, 240, 260, "Scroller", "Scroller", self.editorPanel, True)
+		self.properties = {}
+		self.editors = {}
+		for option in self.options:
+			propertyName = self.options[option][0]
+			propertyValue = self.options[option][1]
+			# generate a list of option panels here and allow editing
+			# create a property for each option
+			self.properties[option] = IProperty(propertyValue) # 1st item is the property name, second item is the property initializer
+			self.properties[option].setName(propertyName)
+			self.properties[option].setWidth(self.scroller.width - 15)			
+			# takes up half the available space of the main pane
+			self.editors[option] = IPropertyEditor(self.properties[option])
+			self.scroller.addElement(self.editors[option].getEditor()) # and that should be that. When this is discarded, all those go away
+			self.editors[option].setParent(self.scroller)	
+			self.scroller.offset = 0
+
+
 
 	def getEditor(self):
 		""" get the object editor for this object. """
@@ -1373,6 +1582,14 @@ class MeshUI(ObjectUI):
 	mesh_output_options = ["basic", "SubDiv"]
 	protocols.advise(instancesProvide=[IObjectUI], asAdapterForTypes=[BtoRMesh])
 	""" This is the object editor. Here you can assign materials, and set various options for the export. """
+	options = { "AutoCrease" : ["Automatic Creasing?", True], 
+			"RIBEntity" : ["Save as RIB Entity", False], 
+			"IncludeMats" : ["Include Materials in RIB Entity", True],
+			"DefineAsObj" : ["Define as RiObject", False],
+			"InplaceInstance" : ["In-Place Instancing", False],
+			"AutoRandomize" : ["Auto Randomize Material", False],
+			"OutputOptions" : ["Object Output Options:", {"Mesh" : "mesh", "Renderman Primitive" : "primtive", "RA Proxy" : "proxy", "RA Procedural" : "procedural" }]}
+				
 	def __init__(self, obj):
 		ObjectUI.__init__(self, obj)
 		
@@ -1386,32 +1603,11 @@ class MeshUI(ObjectUI):
 		self.modifyShaderParams = ui.CheckBox(10, 120, "Auto-Randomize Material?", "Auto-Randomize Material?", False, self.editorPanel, True)
 		self.modifyShaderParmsButton = ui.Button(10, 145, 150, 25, "Select Parameters", "Select Parameters", 'normal', self.editorPanel, True)
 		self.modifyShaderParmsButton.registerCallback("release", self.showParameterModifier)
-		
-		self.editorPanel.addElement(ui.Label(220, 25, "Output Type:", "Output Type:", self.editorPanel, False))
-		self.mesh_output_menu = ui.Menu(225 + self.editorPanel.get_string_width("Output Type:", 'normal'), 25, 150, 25, "Output Menu", self.object_output_options, self.editorPanel, True)
-		
-		#self.mesh_output_type_label = ui.Label(220, 60, "Mesh Type:", "Mesh Type:",self.editorPanel, True)
-		# self.mesh_output_type_menu = ui.Menu(self.mesh_output_menu.x, 60, 150, 25, "Output Mesh Type:",  ["Subdivision Surface", "RiPointsPolygons"],  self.editorPanel, True)
-		
-		# automatic subdiv crease generation using vertex normals between faces
-		self.autoCrease = ui.CheckBox(220, 65, "AutoCrease", "Automatically Crease Subdivision Surface?", False, self.editorPanel, True)
-		
-		self.outputArchive = ui.CheckBox(220, 85, "Export Archive", "Export object to RIB Entity File", False,  self.editorPanel, True)
-		self.outputArchive.registerCallback("release", self.setArchive)
-		self.includeMaterials = ui.CheckBox(245, 110, "Include Materials", "Include Materials in Archive", False, self.editorPanel, True)
-		self.includeMaterials.isVisible = False
-		
-		self.defineObject = ui.CheckBox(220, 130, "Define RiObject", "Define as RiObject", False, self.editorPanel, True)
-		self.defineObject.registerCallback("release", self.setDefine)
-		self.useInPlaceInstancing = ui.CheckBox(245, 150, "Use in-place instancing", "Use in-place instancing", False, self.editorPanel, True)
-		
-		self.editorPanel.addElement(ui.Label(220, 185, "Object Group:", "Object Group:", self.editorPanel, True))
+	
+		# self.editorPanel.addElement(ui.Label(10, 185, "Object Group:", "Object Group:", self.editorPanel, True))
 		# self.objectGroupMenu = ui.Menu(25, 215, "Object Group Menu", "Object Groups", self.scene.object_groups.keys(), self.editorPanel, True) 					
-		self.objectGroupButton = ui.Button(310, 193, 145, 25, "Object Group", "None Selected", 'normal', self.editorPanel, True)
-		self.objectGroupButton.registerCallback("release", self.showGroupSelector)
-		
-		self.defineObjectVisGroup = ui.VisibilityGroup([self.useInPlaceInstancing, self.objectGroupButton])
-		self.defineObjectVisGroup.hide()
+		# self.objectGroupButton = ui.Button(95, 185, 145, 25, "Object Group", "None Selected", 'normal', self.editorPanel, True)
+		# self.objectGroupButton.registerCallback("release", self.showGroupSelector)
 		
 		self.exportButton = ui.Button(self.editorPanel.width - 185, self.editorPanel.height - 25, 180, 25, "Export", "Export Object", 'normal', self.editorPanel, True)
 		self.exportButton.registerCallback("release", self.showExport)
@@ -1492,28 +1688,20 @@ class MeshUI(ObjectUI):
 class LampUI(ObjectUI):
 	light_output_options = ["LightSource", "AreaLightSource"]
 	protocols.advise(instancesProvide=[IObjectUI], asAdapterForTypes=[BtoRLamp])
+	options = {"IncludeWithAO" : ["Include light with AO?", False], 
+			"GenShadowMap" : ["Generate Shadow Maps", True], 
+			"ShadowMapSize" : ["Shadow Map Size", { "256" : 256, "512" : 512, "1024" : 1024, "2048" : 2048 }]}
 	def __init__(self, obj):
+		
 		ObjectUI.__init__(self, obj)
 		self.editorPanel.title = "Light Export Settings:"		
 		self.editorPanel.addElement(ui.Label(10, 25, "Light Type:", "Light Type:", self.editorPanel, False))
 		self.light_output_menu = ui.Menu(15 + self.editorPanel.get_string_width("Light Type:", 'normal'), 25, 150, 25, "Light Menu", self.light_output_options, self.editorPanel, True)
 		self.editorPanel.addElement(ui.Label(10, 65, "Light Shader:", "Light Shader:", self.editorPanel, False))
-		self.shaderButton = ui.Button(15 + self.editorPanel.get_string_width("Light Shader:", 'normal'), 65, 150, 25, "None Selected", "None Selected", 'normal', self.editorPanel, True)
+		self.shaderButton = ui.Button(15 + self.editorPanel.get_string_width("Light Shader:", 'normal'), 65, 125, 25, "None Selected", "None Selected", 'normal', self.editorPanel, True)
 		shadow = self.settings.useShadowMaps.getValue()
-		self.shadowMap = ui.CheckBox(10, 100, "Shadow Map", "Generate Shadow Map", shadow, self.editorPanel, True)
-		self.shadowMap.registerCallback("release", self.showMapRes)
-		shadow_menu = ["256", "512", "1024", "2048"]
-		self.shadowMapRes = ui.Menu(10, 125, 80, 25, "Shadow Map Resolution", shadow_menu, self.editorPanel, True)
-		self.shadowMapRes.isVisible = False
-		# self.shaderButton.registerCallback("release", self.showLightShader)
-		
-	def showMapRes(self, button):
-		if self.shadowMap.getValue():
-			self.shadowMapRes.show()
-		else:
-			self.shadowMapRes.hide()
+
 			
-		
 	def setShader(self, shader):
 		self.shaderButton.removeCallbacks("release")
 		self.shader = shader
@@ -1545,70 +1733,22 @@ class SurfaceUI(ObjectUI):
 class CameraUI(ObjectUI):
 	""" A UI for the camera type """
 	protocols.advise(instancesProvide=[IObjectUI], asAdapterForTypes=[BtoRCamera])
+	options = { "DOF" : ["Use Depth of Field?", True], 
+			"fstop" : ["F-stop", 22], 
+			"focallength" : ["Focal Length", 45],
+			"focaldistance" : ["Focal Distance:", 10] }
 	def __init__(self, obj):
 		ObjectUI.__init__(self, obj)		
 		self.editorPanel.title = "Camera Export Settings:"
 		
 		self.editorPanel.addElement(ui.Label(10, 30, "Imager Shader:", "Imager Shader:", self.editorPanel, False))
-		self.shaderButton = ui.Button(self.editorPanel.get_string_width("Imager Shader:", 'normal') + 15, 30, 150, 25, "Imager Shader", "None Selected", 'normal', self.editorPanel, True)		
+		self.shaderButton = ui.Button(self.editorPanel.get_string_width("Imager Shader:", 'normal') + 15, 30, 125, 25, "Imager Shader", "None Selected", 'normal', self.editorPanel, True)		
 		# self.shaderButton.registerCallback("release", self.shader.showEditor)
-		self.editorPanel.addElement(ui.Label(10, 80, "Depth of Field:", "Depth of Field:", self.editorPanel, False))
-		self.DoFbutton = ui.CheckBox(10, 110, "Use DoF", "Use DoF", False, self.editorPanel, True)
-		self.DoFbutton.registerCallback("release", self.toggleDoF)
-		# self.shader = GenericShader(cgkit.rmshader.RMShader(), "imager", self)
-		
-		# self.scene.imagers[obj.getName()] = self.imagerShader
-		# self.scene.object_data[obj.getName()] = objData # not neccessary
-		offset = self.DoFbutton.x + self.DoFbutton.width + 15
-		self.fstop_label = ui.Label(offset, 110, "f-Stop:", "f-Stop:", self.editorPanel, True)
-		self.fstop_label.isVisible = False
-		
-		offset = offset + self.editorPanel.get_string_width("f-Stop:", 'normal') + 10
-		self.fstop = ui.TextField(offset, 110, 25, 20, "f-Stop", 22, self.editorPanel, True)		
-		self.fstop.isVisible = False
-		
-		offset = offset +  30
-		self.focallength_label = ui.Label(offset, 110, "Focal Length:", "Focal Length:", self.editorPanel, True)
-		self.focallength_label.isVisible = False
-		
-		offset = offset + self.editorPanel.get_string_width("Focal Length:", 'normal') + 5
-		self.focallength = ui.TextField(offset, 110, 25, 20, "Focal Length", 45, self.editorPanel, True)
-		self.focallength.isVisible = False
-		
-		offset = offset + 30
-		self.focaldistance_label = ui.Label(offset, 110, "Focal Distance:", "Focal Distance:", self.editorPanel, True)
-		self.focaldistance_label.isVisible = False
-		
-		offset = offset + self.editorPanel.get_string_width("Focal Distance:", 'normal') + 5
-		self.focaldistance = ui.TextField(offset, 110, 25, 20, "Focal Distance", 10, self.editorPanel, True)
-		self.focaldistance.isVisible = False
 		
 	def setShader(self, shader):
 		self.shader = shader
 		self.shaderButton.registerCallback("release", self.shader.showEditor)
 		
-	def toggleDoF(self, button):		
-		if button.getValue():
-			self.fstop_label.isVisible = True
-			self.fstop.isVisible = True
-			self.focallength_label.isVisible = True
-			self.focallength.isVisible = True
-			self.focaldistance_label.isVisible = True
-			self.focaldistance.isVisible = True
-		else:
-			self.fstop_label.isVisible = False
-			self.fstop.isVisible = False
-			self.focallength_label.isVisible = False
-			self.focallength.isVisible = False
-			self.focaldistance_label.isVisible = False
-			self.focaldistance.isVisible = False
-			
-	def getDoF(self):
-		if self.DoFbutton.getValue():
-			dof = [self.fstop.getValue(), self.focallength.getValue(), self.focaldistance.getValue()]
-			return dof
-		else:
-			return None
 		
 class ShaderParamUI:
 	protocols.advise(instancesProvide=[IShaderParamUI], asAdapterForTypes=[BtoRStringParam, BtoRArrayParam, BtoRMatrixParam])
