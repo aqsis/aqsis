@@ -28,6 +28,7 @@ class IProperty(protocols.Interface):
 		pass
 		
 class Property:
+	protocols.advise(instancesProvide=[IProperty])
 	height = 27 # should work for most
 	def __init__(self, value, xml = None):
 		self.value = value
@@ -40,6 +41,7 @@ class Property:
 	def getName(self):
 		return self.name
 	def setValue(self, value):
+		print "Setting value of type ", type(value), " to ", value
 		self.value = value
 	def setDefault(self, default):
 		self.default = default
@@ -52,31 +54,61 @@ class Property:
 		xmlProp.setAttribute("value", str(self.getValue()))
 		#print "set property of type ", type(self.value), " to ", type(str(self.value).__name__)
 		return xmlProp
+
+
+class StringProperty(Property): 
+	protocols.advise(instancesProvide=[IProperty], asAdapterForTypes=[str])
+	pass
+
+class IntProperty(Property):
+	protocols.advise(instancesProvide=[IProperty], asAdapterForTypes=[int])
+	pass
+class FloatProperty(Property): 
+	protocols.advise(instancesProvide=[IProperty], asAdapterForTypes=[float])
+	pass
+
+class ColorProperty(Property): 
+	protocols.advise(instancesProvide=[IProperty], asAdapterForTypes=[list])
+	pass
+	
+class DictProperty(Property):
+	protocols.advise(instancesProvide=[IProperty], asAdapterForTypes=[dict])
+	def __init__(self, value):
+		# what do I do here? I want this to actually be converted to a menu
+		# thus
+		# sort the array keys
+		self.valueDict = value
+		self.keyList = value.keys()		
+		self.value = value[self.keyList[0]] # get the first value in the dictionary
+		# sort the key list, but decide how to sort it based on the type of the values provided.
+		if isinstance(self.value, int):
+			newList = []
+			for key in self.keyList:
+				newList.append(int(key))
+			newList.sort()
+			self.keyList = []
+			for key in newList:
+				self.keyList.append(str(key))
+				
+		elif isinstance(self.value, float):
+			newList = []
+			for key in keyList:
+				newList.append(float(key))
+			newList.sort()
+			self.keyList = []
+			for key in newList:
+				self.keyLIst.append(str(key))
+		else:
+			self.keyList.sort() #only strings, so sort accordingly
+			
+	def getKeys(self):
+		return self.keyList # keylist may or may not be sorted
+	def getValueByKey(self, key):
+		return valueDict[key]	
 		
-protocols.declareAdapter(Property, [IProperty])
-
-class StringProperty(Property): pass
-protocols.declareAdapter(StringProperty, [IProperty], forTypes=[str])
-
-class IntProperty(Property): pass
-
-protocols.declareAdapter(IntProperty, [IProperty], forTypes=[int])
-
-class FloatProperty(Property): pass
-
-protocols.declareAdapter(FloatProperty, [IProperty], forTypes=[float])
-
-class ColorProperty(Property): pass
-
-protocols.declareAdapter(ColorProperty, [IProperty], forTypes=[list])
-	
-class DictProperty(Property): pass
-
-protocols.declareAdapter(DictProperty, [IProperty], forTypes=[dict])
-	
-class BooleanProperty(Property): pass
-
-protocols.declareAdapter(BooleanProperty, [IProperty], forTypes=[bool])
+class BooleanProperty(Property): 
+	protocols.advise(instancesProvide=[IProperty], asAdapterForTypes=[bool])
+	pass
 
 class IPropertyEditor(protocols.Interface):
 	def getValue():
@@ -117,7 +149,13 @@ class PropertyEditor: # this needs no interface declaration, since all this is d
 		return self.property.getValue()
 		
 	def updateValue(self, obj):
-		self.property.setValue(obj.getValue())
+		if type(obj) == ui.TextField:
+			if obj.type == "int":
+				self.property.setValue(int(obj.getValue()))
+			elif obj.type == "float":
+				self.property.setValue(float(obj.getValue()))
+		else:
+			self.property.setValue(obj.getValue())
 		if self.func != None:
 			self.func() # invoke the update function for this property
 			
@@ -125,7 +163,7 @@ class PropertyEditor: # this needs no interface declaration, since all this is d
 		return self.editor
 		
 class BasicPropertyEditor(PropertyEditor):
-	#protocols.advise(instancesProvide=["IProperty"], asAdapterForTypes=[StringProperty, IntProperty, FloatProperty])
+	protocols.advise(instancesProvide=[IPropertyEditor], asAdapterForTypes=[StringProperty, IntProperty, FloatProperty])
 	""" A basic property, a label and a text box """
 	def __init__(self, property):
 		PropertyEditor.__init__(self, property)
@@ -134,28 +172,29 @@ class BasicPropertyEditor(PropertyEditor):
 		self.value = ui.TextField(width / 2, 0, width / 2, height, self.property.getName(), self.property.getValue(), self.editor, True, fontsize = self.fontsize)
 		self.value.registerCallback("update", self.updateValue)
 		
-protocols.declareAdapter(BasicPropertyEditor, [IPropertyEditor], forTypes=[StringProperty, IntProperty, FloatProperty])
+	# protocols.declareAdapter(BasicPropertyEditor, [IPropertyEditor], forTypes=[StringProperty, IntProperty, FloatProperty])
 
 class MenuPropertyEditor(PropertyEditor):
-	#protocols.advise(instancesProvide=[IPropertyEditor], asAdapterForTypes=[DictProperty])
+	protocols.advise(instancesProvide=[IPropertyEditor], asAdapterForTypes=[DictProperty])
 	def __init__(self, property):
 		PropertyEditor.__init__(self, property)
 		width = self.property.width
 		height = self.property.height
-		menu = self.property.getValue().keys()
-		self.mValue = ui.Menu(width / 2, 2, width / 2, height - 4, self.property.getName(), menu, self.editor, True, fontsize = self.fontsize)
-		self.mValue.registerCallback("select", self.updateValue)
-		self.mValue.setShadowed(False)
-		# the property should handle making sure I've got the right value here I think
+		menu = self.property.getKeys()
+		self.value = ui.Menu(width / 2, 2, width / 2, height - 4, self.property.getName(), menu, self.editor, True, fontsize = self.fontsize)
+		self.value.registerCallback("select", self.updateValue)
+		self.value.setShadowed(False)
+			
+		# the property should handle making sure I've got the right value here I think	
 	def setValue(self, value):
-		self.mValue.setValueString(value)
-		self.value = value
-	
+		# menu editors need to be slightly different
+		self.property.setValue(value)
+		self.value.setValueString(value)
 		
-protocols.declareAdapter(MenuPropertyEditor, [IPropertyEditor], forTypes=[DictProperty])
+	#protocols.declareAdapter(MenuPropertyEditor, [IPropertyEditor], forTypes=[DictProperty])
 
 class ColorPropertyEditor(PropertyEditor):
-	#protocols.advise(instancesProvide=[IPropertyEditor], asAdapterForTypes=[ColorProperty])
+	protocols.advise(instancesProvide=[IPropertyEditor], asAdapterForTypes=[ColorProperty])
 	def __init__(self, property):
 		PropertyEditor.__init__(self, property)
 		width = self.property.width
@@ -180,9 +219,10 @@ class ColorPropertyEditor(PropertyEditor):
 	def updateColor(self, obj):
 		self.colorButton.setValue([self.R.getValue(), self.G.getValue(), self.B.getValue(), 255]) 
 		self.property.setValue([self.R.getValue(), self.G.getValue(), self.B.getValue(), 255])
-protocols.declareAdapter(ColorPropertyEditor, [IPropertyEditor], forTypes=[ColorProperty])
+	#protocols.declareAdapter(ColorPropertyEditor, [IPropertyEditor], forTypes=[ColorProperty])
 
 class BooleanPropertyEditor(PropertyEditor):
+	protocols.advise(instancesProvide=[IPropertyEditor], asAdapterForTypes=[BooleanProperty])
 	def __init__(self, property):
 		PropertyEditor.__init__(self, property)
 		width = self.property.width
@@ -194,7 +234,8 @@ class BooleanPropertyEditor(PropertyEditor):
 		#self.value.outlined = True
 		self.value.registerCallback("release", self.updateValue)
 		# again, the property should handle this
-protocols.declareAdapter(BooleanPropertyEditor, [IPropertyEditor], forTypes=[BooleanProperty])
+		
+	#protocols.declareAdapter(BooleanPropertyEditor, [IPropertyEditor], forTypes=[BooleanProperty])
 
 class IObjectAdapter(protocols.Interface):
 	def render():
@@ -238,6 +279,7 @@ class ObjectAdapter:
 		self.objEditor = protocols.adapt(obj, IObjectUI)		
 		self.initObjectData() # initializes object data 
 		self.properties = self.objEditor.properties
+		self.editors = self.objEditor.editors
 		# self.objType = obj.obj.getType()
 	
 	# convenience method to return the editor object for this adapter
@@ -472,7 +514,7 @@ class ObjectAdapter:
 				
 	def loadData(self, xml):
 		""" Recreate this object from an XML representation of it. """
-		xmlTypes = { "int" : int, "str" : str, "list" : list, "dict": dict, "float" : float }
+		xmlTypes = { "int" : int, "str" : str, "list" : list, "dict": dict, "float" : float, "bool": bool }
 		self.objData = {}
 		atts = xml.attributes
 		# setup the attributes first, since I will need the shader filename if I'm using slparams		
@@ -489,7 +531,8 @@ class ObjectAdapter:
 			print xmlType
 			xmlValue= xmlProperty.getAttribute("value").encode("ascii")
 			propertyValue = xmlTypes[xmlType](xmlValue)
-			self.properties[propertyName].setValue(propertyValue) # Aaaannnnnd done.
+			self.editors[propertyName].setValue(propertyValue) # 
+			
 			
 		# setup the properties for this objects
 		
@@ -1729,6 +1772,7 @@ class LampUI(ObjectUI):
 	options = {"IncludeWithAO" : ["Include light with AO?", False], 
 			"GenShadowMap" : ["Generate Shadow Maps", True], 
 			"ShadowMapSize" : ["Shadow Map Size", { "256" : 256, "512" : 512, "1024" : 1024, "2048" : 2048 }]}
+	# update shadow map generation so that I can control when the shadows are regenerated.
 	def __init__(self, obj):
 		
 		ObjectUI.__init__(self, obj)

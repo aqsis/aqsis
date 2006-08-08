@@ -510,9 +510,6 @@ class SceneSettings:
 		
 		self.editor = ui.Panel(200, 500, 500, 300, "Scene Settings:", "Scene Settings:", None, False)
 		
-		self.saveButton = ui.Button(self.editor.width - 160, 30, 150, 25, "Save Scene Setup", "Save Scene Setup", 'normal', self.editor, True)
-		self.saveButton.registerCallback("release", self.saveSceneData)
-			
 		self.close_button = ui.Button(self.editor.width - 20, 5, 14, 14, "X", "X", 'normal', self.editor, True)
 		self.close_button.shadowed = False
 		self.close_button.cornermask = 15
@@ -739,7 +736,6 @@ class SceneSettings:
 				
 	def renderShadowMap(self, light, direction, shadowRIB, shadowName, shadowFile):									
 		self.lightDebug = False
-
 		if self.lightDebug:
 			ri.RiBegin(shadowRIB + "test.rib")	
 			paths = self.settings.shaderpaths.getValue().split(";")
@@ -824,12 +820,11 @@ class SceneSettings:
 		else:
 			for light in self.lights:
 				# get the fame info
-				# frame = Blender.Get("curframe")
-				if light.getProperty("IncludeWithAO"):
-					shadows = self.shadows[light.objData["name"]]			
-					if light.getProperty("GenShadowMap"):
-						light.setShadowParms(shadows)		
-					light.render() 
+				frame = Blender.Get("curframe")
+				shadows = self.shadows[light.objData["name"]]			
+				if light.getProperty("GenShadowMap"):
+					light.setShadowParms(shadows)		
+				light.render() 
 					
 		
 		
@@ -844,7 +839,7 @@ class SceneSettings:
 		
 
 		
-	def saveSceneData(self, obj):
+	def getSceneXMLData(self):
 		
 		# get the material list
 		dict = globals()		
@@ -864,6 +859,32 @@ class SceneSettings:
 		
 		root.appendChild(obj)
 		# self.saveSceneSettings(root_element)
+		return root
+		
+	def writeToFile(self, xml, filename):
+		try:
+			file = open(filename, 'w')
+			file.write(xml.toprettyxml())
+			file.close()
+		except: 
+			self.evt_manager.showConfirmDialog("There was an error saving the file.", "There was an error saving the file.", None, False)
+			
+	def loadFromFile(self, filename):
+		try:
+			file = open(filename, 'r')
+			xmlfile = file.readlines()
+			xmlStr = ""
+			for line in xmlfile:
+				xmlStr = xmlStr + line
+			found = True
+		except:
+			self.evt_manager.showConfirmDialog("Error parsing XML!", "There was an error in the XML file!", None, False)
+			found = False
+			return None
+		if found:
+			self.parseXML(xmlStr)
+		
+	def writeToBlenderText(self, xml):
 		try:
 			text = Blender.Text.Get("BtoRXML")
 			found = True
@@ -873,7 +894,7 @@ class SceneSettings:
 			found = False
 		
 		try:
-			xmlOut = root.toprettyxml()
+			xmlOut = xml.toprettyxml()
 			text.clear()
 			# doesn't matter, it's getting written
 			text.write(xmlOut) # that should be that.
@@ -896,37 +917,41 @@ class SceneSettings:
 			self.evt_manager.showConfirmDialog("Error parsing XML!", "There was an error in the BtoRXML text file!", None, False)
 			return None
 		if found:
-			try:
-				xmlScene = xml.dom.minidom.parseString(xmlData)
-				hasXMLData = True
-			except xml.parsers.expat.ExpatError:
-				hasXMLData = False	
-				# pop up an error dialog!
-				traceback.print_exc()
-				self.evt_manager.showConfirmDialog("Error parsing XML!", "There was an error in the BtoRXML text file!", None, False)
-				return None
-			if hasXMLData:
-				xmlObjects = xmlScene.getElementsByTagName("Object")
-				if len(xmlObjects) > 0:
-					for xmlObject in xmlObjects:
-						# get the name of the object in question. They should all have names.
-						objName = xmlObject.getAttribute("name")
-						# find the object in blender
-						obj = Blender.Object.Get(objName)
-						# load the target object...
-						bObj = BtoRTypes.__dict__["BtoR" + obj.getType()](obj)
-						objData = BtoRAdapterClasses.IObjectAdapter(bObj) # get an adapter
-						# test to ensure that I've got the same object type...
-						if obj.getType() != xmlObject.getAttribute("type"):
-							# just in case something went wrong here, discard most of the object data and re-initialize with just a material def
-							if xmlObject.getAttribute("material") != "":
-								objData.objData["material"] = xmlObject.getAttribute("material")
-						else:
-							# otherwise, load up the full data from the object definition
-							objData.loadData(xmlObject)
-						self.object_data[objName] = objData # stuff the adapter component into the object data
-			# return some statistics here 
-			self.evt_manager.showConfirmDialog("Scene Data Loaded!", "%d objects were successfully loaded." % len(xmlObjects), None, False)
+			self.parseXML(xmlData)
+
+	def parseXML(self, xmlData):
+		self.object_data = {} # clear the object data cache
+		try:
+			xmlScene = xml.dom.minidom.parseString(xmlData)
+			hasXMLData = True
+		except xml.parsers.expat.ExpatError:
+			hasXMLData = False	
+			# pop up an error dialog!
+			traceback.print_exc()
+			self.evt_manager.showConfirmDialog("Error parsing XML!", "There was an error in the BtoRXML text file!", None, False)
+			return None
+		if hasXMLData:
+			xmlObjects = xmlScene.getElementsByTagName("Object")
+			if len(xmlObjects) > 0:
+				for xmlObject in xmlObjects:
+					# get the name of the object in question. They should all have names.
+					objName = xmlObject.getAttribute("name")
+					# find the object in blender
+					obj = Blender.Object.Get(objName)
+					# load the target object...
+					bObj = BtoRTypes.__dict__["BtoR" + obj.getType()](obj)
+					objData = BtoRAdapterClasses.IObjectAdapter(bObj) # get an adapter
+					# test to ensure that I've got the same object type...
+					if obj.getType() != xmlObject.getAttribute("type"):
+						# just in case something went wrong here, discard most of the object data and re-initialize with just a material def
+						if xmlObject.getAttribute("material") != "":
+							objData.objData["material"] = xmlObject.getAttribute("material")
+					else:
+						# otherwise, load up the full data from the object definition
+						objData.loadData(xmlObject)
+					self.object_data[objName] = objData # stuff the adapter component into the object data
+		# return some statistics here 
+		self.evt_manager.showConfirmDialog("Scene Data Loaded!", "%d objects were successfully loaded." % len(xmlObjects), None, False)
 			
 	def saveObjects(self, xml):
 		
@@ -1043,7 +1068,7 @@ class ObjectEditor:
 		
 		# master panel
 		screen = Blender.Window.GetAreaSize()	
-		self.editorPanel = ui.Panel(225, screen[1] - 10, 500, 400, "Object Editor:", "Object Properties:", None, False)
+		self.editorPanel = ui.Panel(225, screen[1] - 70, 500, 400, "Object Editor:", "Object Properties:", None, False)
 		self.editorPanel.addElement(ui.Label(10, 30, "Object Name:", "Object Name:", self.editorPanel, False))
 		
 		self.objectName = ui.Label(15 + self.editorPanel.get_string_width("Object Name:", 'normal'), 30, "None Selected", "None Selected", self.editorPanel, True)
@@ -2512,7 +2537,7 @@ class MainUI:
 		self.editor.outlined = True
 		p = self.editor
 		offset = 10
-		self.file_menu = ["Save", "Save to file", "Exit"]
+		self.file_menu = ["Save to XML in .blend", "Save to XML file", "Load XML file", "Reload Blender XML", "Exit"]
 		width = self.editor.get_string_width("File", 'normal') + 5
 		
 		self.fileMenu = ui.Menu(5, 5, 50, 18, "File", self.file_menu, self.editor, True, 
@@ -2521,10 +2546,23 @@ class MainUI:
 										baseButtonTitle = "File",
 										shadowed = False)
 				
-		self.fileMenu.registerCallbackForElementIndex(0, "release",  self.dialogTest)
+		self.fileMenu.registerCallbackForElementIndex(0, "release", self.saveToXML)
+		self.fileMenu.registerCallbackForElementIndex(1, "release", self.selectSaveFile)
+		self.fileMenu.registerCallbackForElementIndex(2, "release", self.selectOpenFile)
+		self.fileMenu.registerCallbackForElementIndex(3, "release", self.reloadXML)
+		self.fileMenu.registerCallbackForElementIndex(4, "release", self.close_app)
+		
+		self.edit_menu = ["Edit Object Properties", "Lighting Manager"]
+		self.editMenu = ui.Menu(60, 5, 80, 18, "Edit Objects", self.edit_menu, self.editor, True, 
+										enableArrowButton = False,
+										noSelect = True,
+										baseButtonTitle = "Edit Objects",
+										shadowed = False)
+		self.editMenu.registerCallbackForElementIndex(0, "release", self.showObjectEditor)
+		self.editMenu.registerCallbackForElementIndex(1, "release", self.showLightingManager)
 				
 		self.material_menu = ["Material List", "Import from XML", "Import from another .blend", "Export to XML"]
-		self.materialMenu = ui.Menu(60, 5, 80, 18, "Materials", self.material_menu, self.editor, True, 
+		self.materialMenu = ui.Menu(150, 5, 80, 18, "Materials", self.material_menu, self.editor, True, 
 										enableArrowButton = False,
 										noSelect = True,
 										baseButtonTitle = "Materials",
@@ -2535,18 +2573,16 @@ class MainUI:
 		self.materialMenu.registerCallbackForElementIndex(0, "release", self.showMaterials)
 		
 		self.settings_menu = ["Global Settings", "Scene Settings"]
-		self.settingsMenu = ui.Menu(150, 5, 80, 18, "Settings", self.settings_menu, self.editor, True, enableArrowButton = False,
+		self.settingsMenu = ui.Menu(240, 5, 80, 18, "Settings", self.settings_menu, self.editor, True, enableArrowButton = False,
 										noSelect = True,
 										baseButtonTitle = "Settings",
 										shadowed = False)
 		self.settingsMenu.registerCallbackForElementIndex(0, "release", self.showGlobal)
 		self.settingsMenu.registerCallbackForElementIndex(1, "release", self.showSceneSettings)
 		
-
-		
-		self.objectButt = ui.Button(240, 5, 80, 18, "Objects", "Objects", 'normal', self.editor, True) # launches a low-quality preview, preview shading rate determined by global settings
-		self.objectButt.registerCallback("release", self.showObjectEditor)
-		self.objectButt.shadowed = False
+		#self.objectButt = ui.Button(240, 5, 80, 18, "Objects", "Objects", 'normal', self.editor, True) # launches a low-quality preview, preview shading rate determined by global settings
+		#self.objectButt.registerCallback("release", self.showObjectEditor)
+		#self.objectButt.shadowed = False
 		#self.objectButt.registerCallback("release", p.callFactory(None, self.showEditor(self.settings.getEditor())))
 		
 		self.exportButt = ui.Button(350, 5, 50, 18, "Export", "Export", 'normal', self.editor, True)
@@ -2556,8 +2592,45 @@ class MainUI:
 		
 		#self.materialsButt.registerCallback("release", p.callFactory(None, self.showEditor(self.materials.getEditor())))
 		
-	def dialogTest(self, button):
-		self.evt_manager.showConfirmDialog("Some prompt!", "Another Prompt!", self.hideDialog, True)
+	def showLightingManager(self, button):
+		pass # for the moment...
+	
+	def saveToXML(self, button):
+		xml = self.scene.getSceneXMLData()
+		self.scene.writeToBlenderText(xml)
+		
+	def reloadXML(self, button):
+		self.scene.loadSceneData()
+		
+	def close_app(self, button):
+		self.evt_manager.showConfirmDialog("Save your changes?", "Would you like to save your changes?", self.exitBtoR, True)
+		
+	def exitBtoR(self, dialog):
+		if dialog.getValue() == dialog.OK:
+			# save the file locally...
+			xml = self.scene.getSceneXMLData()
+			self.scene.writeToBlenderText(xml)
+			Blender.Draw.Exit()
+			# exit out
+		elif dialog.getValue() == dialog.DISCARD:
+			Blender.Draw.Exit()
+			# exit out
+		elif dialog.getValue() == dialog.CANCEL:
+			pass
+	
+	def selectSaveFile(self, button):
+		# get the filename first
+		Blender.Window.FileSelector(self.saveFile, "Select XML File:", "BtoRData.xml")
+		
+	def saveFile(self, filename):
+		xml = self.scene.getSceneXMLData()
+		self.scene.writeToFile(xml, filename)
+		
+	def selectOpenFile(self, button):
+		Blender.Window.FileSelector(self.openFile, "Select XML file to load:", "BtoRData.xml")		
+	def openFile(self, filename):
+		self.scene.loadFromFile(filename)
+		
 	def hideDialog(self, dialog):
 		self.evt_manager.removeElement(dialog)
 		

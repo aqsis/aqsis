@@ -725,8 +725,8 @@ class EventManager(UI):
 	def event(self, evt, val):
 		""" event(evt, val) - Processes incoming events and dispatches them accordingly"""
 		#process exit key first
-		if evt == Blender.Draw.ESCKEY:
-			Blender.Draw.Exit()
+		#if evt == Blender.Draw.ESCKEY:
+		#	Blender.Draw.Exit()
 			
 		if evt == Blender.Draw.WHEELDOWNMOUSE or evt == Blender.Draw.WHEELUPMOUSE:
 			self.wheel_event(evt)
@@ -2244,7 +2244,7 @@ class Menu(UIElement):
 		idx = 0
 		for element in self.panel.elements:
 			if element.title == value:
-				self.value = index
+				self.value = idx
 				
 	def registerCallbackForElementIndex(self, idx, signal, callback):
 		self.panel.elements[idx].registerCallback(signal, callback)
@@ -2533,7 +2533,7 @@ class TextField(Button):
 					for func in self.validate_functions:
 						func(self)
 					
-			elif self.type == "int":
+			elif self.type == "int":				
 				try:
 					test = int(value)
 					self.strValue = "%d" % value
@@ -2543,7 +2543,6 @@ class TextField(Button):
 			else:
 				# normal strings initialized as such are ok
 				self.strValue = value
-
 								
 			
 	def delete_selection(self):
