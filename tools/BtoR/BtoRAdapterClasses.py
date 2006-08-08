@@ -29,7 +29,7 @@ class IProperty(protocols.Interface):
 		
 class Property:
 	height = 27 # should work for most
-	def __init__(self, value):
+	def __init__(self, value, xml = None):
 		self.value = value
 	def setHeight(self, height):
 		self.height = height
@@ -45,6 +45,13 @@ class Property:
 		self.default = default
 	def getValue(self):
 		return self.value
+			
+	def toXML(self, xml):
+		xmlProp = xml.createElement("property")
+		xmlProp.setAttribute("type", type(self.getValue()).__name__)
+		xmlProp.setAttribute("value", str(self.getValue()))
+		#print "set property of type ", type(self.value), " to ", type(str(self.value).__name__)
+		return xmlProp
 		
 protocols.declareAdapter(Property, [IProperty])
 
@@ -52,18 +59,23 @@ class StringProperty(Property): pass
 protocols.declareAdapter(StringProperty, [IProperty], forTypes=[str])
 
 class IntProperty(Property): pass
+
 protocols.declareAdapter(IntProperty, [IProperty], forTypes=[int])
 
 class FloatProperty(Property): pass
+
 protocols.declareAdapter(FloatProperty, [IProperty], forTypes=[float])
 
 class ColorProperty(Property): pass
+
 protocols.declareAdapter(ColorProperty, [IProperty], forTypes=[list])
 	
 class DictProperty(Property): pass
+
 protocols.declareAdapter(DictProperty, [IProperty], forTypes=[dict])
 	
 class BooleanProperty(Property): pass
+
 protocols.declareAdapter(BooleanProperty, [IProperty], forTypes=[bool])
 
 class IPropertyEditor(protocols.Interface):
@@ -131,12 +143,14 @@ class MenuPropertyEditor(PropertyEditor):
 		width = self.property.width
 		height = self.property.height
 		menu = self.property.getValue().keys()
-		self.value = ui.Menu(width / 2, 2, width / 2, height - 4, self.property.getName(), menu, self.editor, True, fontsize = self.fontsize)
-		self.value.registerCallback("select", self.updateValue)
-		self.value.setShadowed(False)
+		self.mValue = ui.Menu(width / 2, 2, width / 2, height - 4, self.property.getName(), menu, self.editor, True, fontsize = self.fontsize)
+		self.mValue.registerCallback("select", self.updateValue)
+		self.mValue.setShadowed(False)
 		# the property should handle making sure I've got the right value here I think
 	def setValue(self, value):
-		self.value.setValueString(value)
+		self.mValue.setValueString(value)
+		self.value = value
+	
 		
 protocols.declareAdapter(MenuPropertyEditor, [IPropertyEditor], forTypes=[DictProperty])
 
@@ -394,6 +408,15 @@ class ObjectAdapter:
 					objXml.setAttribute(key, '%f' % self.objData[key])
 				else:
 					objXml.setAttribute(key, self.objData[key])
+
+		if len(self.properties) > 0:
+			# I've got at least one property
+			for property in self.properties:
+				xmlProp = self.properties[property].toXML(xml)
+				xmlProp.setAttribute("name", property) # set the name attribute here for the moment, but later configure a property to have a name AND a title!
+				objXml.appendChild(xmlProp)
+		
+			
 		if self.__dict__.has_key("shader"):
 			
 			if self.shader.getShaderName() not in ["None Selected", None]:
@@ -449,14 +472,29 @@ class ObjectAdapter:
 				
 	def loadData(self, xml):
 		""" Recreate this object from an XML representation of it. """
+		xmlTypes = { "int" : int, "str" : str, "list" : list, "dict": dict, "float" : float }
 		self.objData = {}
 		atts = xml.attributes
 		# setup the attributes first, since I will need the shader filename if I'm using slparams		
 		for att in range(atts.length):
 			xAtt = atts.item(att)
 			self.objData[xAtt.name] = xAtt.value.encode("ascii")
-		self.initMaterial()
 		
+		xmlProperties = xml.getElementsByTagName("property")
+		# what I should really do is move the properties from the object's UI to the object adapter, since that's really where I control the data.
+		for xmlProperty in xmlProperties:
+			# each of these is a property element
+			propertyName = xmlProperty.getAttribute("name").encode("ascii")		
+			xmlType = xmlProperty.getAttribute("type").encode("ascii")
+			print xmlType
+			xmlValue= xmlProperty.getAttribute("value").encode("ascii")
+			propertyValue = xmlTypes[xmlType](xmlValue)
+			self.properties[propertyName].setValue(propertyValue) # Aaaannnnnd done.
+			
+		# setup the properties for this objects
+		
+		
+		self.initMaterial()
 		
 		# test for any shaders
 		parms = xml.getElementsByTagName("shader")

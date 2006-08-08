@@ -1112,6 +1112,7 @@ class ObjectEditor:
 		""" An object's been selected, make the magic perform. """
 		# print "selected an object!"
 		name = obj.getName()
+		self.objectName.setValue(name)
 		objType = obj.getType()		
 		# so instead I simply retrieve the object in question
 		if self.scene.object_data.has_key(obj.getName()): 

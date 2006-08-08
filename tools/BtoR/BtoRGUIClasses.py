@@ -2840,6 +2840,7 @@ class Label(UIElement):
 	def setValue(self, value):
 		self.elements[0].value = value
 		self.value = value
+
 	def getValue(self):
 		return self.value
 		
