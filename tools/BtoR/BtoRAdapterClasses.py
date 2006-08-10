@@ -188,7 +188,7 @@ class MenuPropertyEditor(PropertyEditor):
 		# the property should handle making sure I've got the right value here I think	
 	def setValue(self, value):
 		# menu editors need to be slightly different
-		self.property.setValue(value)
+		self.property.setValue(value) 
 		self.value.setValueString(value)
 		
 	#protocols.declareAdapter(MenuPropertyEditor, [IPropertyEditor], forTypes=[DictProperty])
@@ -211,10 +211,11 @@ class ColorPropertyEditor(PropertyEditor):
 		self.G.registerCallback("update", self.updateColor)
 		self.B.registerCallback("update", self.updateColor)
 		self.colorButton.picker.registerCallback("ok", self.updateFields)
+		
 	def updateFields(self, color):
-		self.color_red.setValue(float(float(color[0]) / 255))
-		self.color_green.setValue(float(float(color[1]) / 255))
-		self.color_blue.setValue(float(float(color[2]) / 255))
+		self.R.setValue(float(float(color.value[0]) / 255))
+		self.G.setValue(float(float(color.value[1]) / 255))
+		self.B.setValue(float(float(color.value[2]) / 255))
 	
 	def updateColor(self, obj):
 		self.colorButton.setValue([self.R.getValue(), self.G.getValue(), self.B.getValue(), 255]) 
@@ -528,9 +529,12 @@ class ObjectAdapter:
 			# each of these is a property element
 			propertyName = xmlProperty.getAttribute("name").encode("ascii")		
 			xmlType = xmlProperty.getAttribute("type").encode("ascii")
-			print xmlType
+			
 			xmlValue= xmlProperty.getAttribute("value").encode("ascii")
-			propertyValue = xmlTypes[xmlType](xmlValue)
+			if xmlType == "bool":
+				propertyValue = xmlTypes[xmlType](eval(xmlValue))
+			else:
+				propertyValue = xmlTypes[xmlType](xmlValue)
 			self.editors[propertyName].setValue(propertyValue) # 
 			
 			
@@ -591,13 +595,18 @@ class MeshAdapter(ObjectAdapter):
 		if self.objData["material"] != None and self.objData["material"] != "None":
 			self.setMaterial(self.materials.getMaterial(self.objData["material"]), True)
 		
-	def render(self):
-		""" Generate Renderman data for this object."""
-		#1st test, is this is an RiObject?
-		# print "exporting!"
-		# let's assume that if I'm here, that RiBegin has already been called
-		# start gathering data
-		if ObjectAdapter.render(self) == True:			
+	def render(self, shadowPass = False, envPass = False):
+		render = False
+		if shadowPass:
+			if self.properties["RenderInShadowPass"].getValue():
+				render = True
+		elif envPass:
+			if self.properties["RenderInEnvMaps"].getValue():
+				render = True
+		else:
+			render = True
+		
+		if render:	
 			# immediately test for dupliverts
 			if self.object.enableDupVerts and len(self.object.DupObjects) > 0:
 				# I might have dupliverts, react accordingly
@@ -629,14 +638,23 @@ class MeshAdapter(ObjectAdapter):
 				# test for archive rendering, otherwise render to the current RIB stream
 				ri.RiAttributeBegin()				
 				ri.RiAttribute("identifier", "name", [self.objData["name"]]) # give it a name
-				ri.RiTransformBegin()				
-				self.renderMaterial() # render the material				
+				ri.RiTransformBegin()	 
+				if shadowPass:
+					#print "rendering object for shadowpass"
+					if self.properties["ShadowMats"].getValue():
+						#print "Rendering material in shadow pass"
+						self.renderMaterial()
+				else:
+						
+					self.renderMaterial() # render the material				
 				ri.RiTransform(self.object.matrix) # transform				
 				self.renderMeshData() # and render the mesh				
+				#self.renderArchiveCall()
 				ri.RiTransformEnd()
 				ri.RiAttributeEnd()
 				# aaaannnnnd done.
-	
+	def renderArchiveCall(self):
+		pass
 	def renderMeshData(self):
 		subsurf = False
 		modifiers = self.object.modifiers
@@ -681,11 +699,14 @@ class MeshAdapter(ObjectAdapter):
 		# add support here for detecting if materials should be exported to archives or not.
 		# I should probably add that as an option in the export settings dialog.
 		ri.RiBegin(self.objData["archive"]) 
-		# no transformations are neccessary here, unless I absolutely want them in the archive
-		# they should actually 
-		
+		# this is pure geometry here
+		ri.RiAttributeBegin()
+		ri.RiTransformBegin()
+		self.renderMeshData()
+		ri.RiTransformEnd()
+		ri.RiAttributeEnd()
 		ri.RiEnd()
-		
+	
 	def initObjectData(self):
 		""" Initialize the object data for this object. """
 		# do some mesh-related stuff
@@ -966,40 +987,41 @@ class LampAdapter(ObjectAdapter):
 	def render(self): 
 		""" Generate renderman data for this object. """
 		
-		#params = {}
-		#for param in self.shader.shader.params()
-			# get the value of each
-		#	params[param] = getattr(self.shader.shader, param)
-		#	ri.RiSurface(material.surfaceShaderName(), material.surfaceShaderParams(0))
 		ri.RiLightSource(self.shader.shader.shadername, self.shader.shader.params())
 		
 	def doCameraTransform(self, axis):
-		if axis != None:
+		if axis != None:	
 			# I still need to transform based on the light's matrix
 			# get the inverse matrix first
-			# if this is point light, I should probably set the rotation values to zero
-			cmatrix = self.object.getMatrix()
-			sMat = Blender.Mathutils.ScaleMatrix(-1, 4)
-			
-			mat = cmatrix * sMat
-
-			ri.RiTransform(mat)
-			
-			ri.RiRotate(180, 1, 0, 0) # things are looking up!
-			# do a rotation along some axis or another			
-			if axis == "px":				
-				ri.RiRotate(-90, 0, 1, 0)
-			elif axis == "nx":
-				ri.RiRotate(90, 0, 1, 0)				
+			# if this is point light, I should probably set the rotation values to zero	
+			# step 1, transform the world to left-handed
+			ri.RiScale(-1, 1, 1)
+			ri.RiRotate(180, 0, 1, 0)
+			if axis == "px":		
+				ri.RiRotate(90, 0, 1, 0)
+			elif axis == "nx":	
+				#ri.RiRotate(-90, 1, 0, 0)
+				ri.RiRotate(-90, 0, 1, 0)				
 			elif axis == "py":				
-				ri.RiRotate(90, 1, 0, 0)
+				ri.RiRotate(-90, 1, 0, 0)
 			elif axis == "ny":
-				ri.RiRotate(-90, 1, 0, 0)				
-				#ri.RiRotate(180, 1, 0, 0)
-			elif axis == "nz":				
-				ri.RiRotate(180, 1, 0, 0) 	
+				ri.RiRotate(90, 1, 0, 0)				
+			elif axis == "pz":				
+				ri.RiRotate(180, 0, 1, 0) 	
+
+			cmatrix = self.object.getInverseMatrix()
+			#sMat = Blender.Mathutils.ScaleMatrix(-1, 4, vecX)		
+			#rMat = Blender.Mathutils.RotationMatrix(180, 4, "y")
+			#mat = cmatrix * sMat * rMat
+			trans = cmatrix.translationPart()
+			print "\n"
+			print "At shadowmap generation for axis:", axis
+			print "Light translation is", trans
+			print "\n"
+			ri.RiTranslate(trans)
+			
 		else:			
-			cmatrix = self.object.getMatrix()
+			cmatrix = self.object.getInverseMatrix()
 			matrix = [cmatrix[0][0],
 					cmatrix[0][1],
 					-cmatrix[0][2],
@@ -1018,6 +1040,7 @@ class LampAdapter(ObjectAdapter):
 					cmatrix[3][3]]
 			# otherwise, do nothing
 			ri.RiTransform(matrix)
+			
 			# ri.RiTranslate(0, 0, 1) # dunno if this is neccessary here or not.
 			
 	def getRenderProjection(self):
@@ -1339,34 +1362,16 @@ class CameraAdapter(ObjectAdapter):
 			ri.RiProjection("orthographic") 
 		ri.RiFrameAspectRatio(factor)	
 		# Camera clipping
-		ri.RiClipping(camera.getClipStart(), camera.getClipEnd())
-		
+		ri.RiClipping(camera.getClipStart(), camera.getClipEnd())		
 		# Viewpoint transform
+		vecX = Blender.Mathutils.Vector(1, 0, 0)
 		cmatrix = self.object.getInverseMatrix()
-		#cmatrix = self.object.getMatrix()
-		sMat = Blender.Mathutils.ScaleMatrix(-1, 4)
-		
-		mat = cmatrix * sMat
-		matrix = [cmatrix[0][0],
-				cmatrix[0][1],
-				-cmatrix[0][2],
-				cmatrix[0][3],
-				cmatrix[1][0],
-				cmatrix[1][1],
-				-cmatrix[1][2],
-				cmatrix[1][3],
-				cmatrix[2][0],
-				cmatrix[2][1],
-				-cmatrix[2][2],
-				cmatrix[2][3],
-				cmatrix[3][0],
-				cmatrix[3][1],
-				-cmatrix[3][2],
-				cmatrix[3][3]]
-		ri.RiTransform(matrix)
-		#ri.RiRotate(180, 1, 0, 0)
+		sMat = Blender.Mathutils.ScaleMatrix(-1, 4, vecX)		
+		rMat = Blender.Mathutils.RotationMatrix(180, 4, "y")
+		mat = cmatrix * sMat * rMat
+		ri.RiTransform(mat)		
 		ri.RiTranslate(0, 0, 1)
-		# that should take care of the camera
+
 		
 	def initObjectData(self):
 		# object initia.ize
@@ -1636,7 +1641,7 @@ class ObjectUI:
 		self.scroller= ui.ScrollPane(235, 25, 240, 260, "Scroller", "Scroller", self.editorPanel, True)
 		self.properties = {}
 		self.editors = {}
-		for option in self.options:
+		for option in self.optionOrder:
 			propertyName = self.options[option][0]
 			propertyValue = self.options[option][1]
 			# generate a list of option panels here and allow editing
@@ -1666,10 +1671,38 @@ class MeshUI(ObjectUI):
 	options = { "AutoCrease" : ["Automatic Creasing?", True], 
 			"RIBEntity" : ["Save as RIB Entity", False], 
 			"IncludeMats" : ["Include Materials in RIB Entity", True],
-			"DefineAsObj" : ["Define as RiObject", False],
+			"ShadowMats" : [ "Include Materials in Shadowmap", False],
+			"RenderInShadowPass" : [ "Include object in Shadowmap", True],
+			"RenderInEnvMaps" : ["Include object in Environment Maps", True],
+			"DefineAsObj" : ["Define as RiObject", False]	,
 			"InplaceInstance" : ["In-Place Instancing", False],
+			"InstanceCount" : ["Number of Instances", 1],
 			"AutoRandomize" : ["Auto Randomize Material", False],
-			"OutputOptions" : ["Object Output Options:", {"Mesh" : "mesh", "Renderman Primitive" : "primtive", "RA Proxy" : "proxy", "RA Procedural" : "procedural" }]}
+			"OutputOptions" : ["Object Output Options:", {"Mesh" : "mesh", "Renderman Primitive" : "primtive", "RA Proxy" : "proxy", "RA Procedural" : "procedural" }],
+			"matte" : ["Treat as Matte", True],
+			"sides" : ["Sides", 1],
+			"ShadingRate" : ["Shading Rate", 1.0],
+			"dispBoundLength" : ["Displacement Bound", 2.0],
+			"dispCoords" : ["Disp Bound Coord sys", {"Object" : "object", "Shader":"shader", "NDC": "ndc", "World": "world"}] 
+			}
+	optionOrder = ["OutputOptions", 
+				"AutoCrease",
+				"RenderInShadowPass",
+				"ShadowMats",
+				"RenderInEnvMaps",
+				"DefineAsObj",
+				"InplaceInstance",
+				"InstanceCount",
+				"AutoRandomize",
+				"RIBEntity",
+				"IncludeMats",
+				"matte",
+				"sides",
+				"ShadingRate",
+				"dispBoundLength",
+				"dispCoords"]
+				
+				
 				
 	def __init__(self, obj):
 		ObjectUI.__init__(self, obj)
@@ -1681,14 +1714,9 @@ class MeshUI(ObjectUI):
 		self.materialButton.registerCallback("release", self.showMaterialSelector)
 		self.materialButton.textlocation = 1
 		
-		self.modifyShaderParams = ui.CheckBox(10, 120, "Auto-Randomize Material?", "Auto-Randomize Material?", False, self.editorPanel, True)
-		self.modifyShaderParmsButton = ui.Button(10, 145, 150, 25, "Select Parameters", "Select Parameters", 'normal', self.editorPanel, True)
-		self.modifyShaderParmsButton.registerCallback("release", self.showParameterModifier)
-	
-		# self.editorPanel.addElement(ui.Label(10, 185, "Object Group:", "Object Group:", self.editorPanel, True))
-		# self.objectGroupMenu = ui.Menu(25, 215, "Object Group Menu", "Object Groups", self.scene.object_groups.keys(), self.editorPanel, True) 					
-		# self.objectGroupButton = ui.Button(95, 185, 145, 25, "Object Group", "None Selected", 'normal', self.editorPanel, True)
-		# self.objectGroupButton.registerCallback("release", self.showGroupSelector)
+
+		#self.modifyShaderParmsButton = ui.Button(10, 145, 150, 25, "Select Parameters", "Select Parameters", 'normal', self.editorPanel, True)
+		#self.modifyShaderParmsButton.registerCallback("release", self.showParameterModifier)
 		
 		self.exportButton = ui.Button(self.editorPanel.width - 185, self.editorPanel.height - 25, 180, 25, "Export", "Export Object", 'normal', self.editorPanel, True)
 		self.exportButton.registerCallback("release", self.showExport)
@@ -1772,6 +1800,9 @@ class LampUI(ObjectUI):
 	options = {"IncludeWithAO" : ["Include light with AO?", False], 
 			"GenShadowMap" : ["Generate Shadow Maps", True], 
 			"ShadowMapSize" : ["Shadow Map Size", { "256" : 256, "512" : 512, "1024" : 1024, "2048" : 2048 }]}
+	optionOrder = ["IncludeWithAO",
+				"GenShadowMap",
+				"ShadowMapSize"]
 	# update shadow map generation so that I can control when the shadows are regenerated.
 	def __init__(self, obj):
 		
@@ -1819,6 +1850,7 @@ class CameraUI(ObjectUI):
 			"fstop" : ["F-stop", 22], 
 			"focallength" : ["Focal Length", 45],
 			"focaldistance" : ["Focal Distance:", 10] }
+	optionOrder = ["DOF", "fstop", "focallength", "focaldistance"]
 	def __init__(self, obj):
 		ObjectUI.__init__(self, obj)		
 		self.editorPanel.title = "Camera Export Settings:"

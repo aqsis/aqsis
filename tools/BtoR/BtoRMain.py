@@ -404,13 +404,13 @@ class BtoRSettings: # an instance of this class should be passed to every base-l
 				self.proceduralPathList = r"C:\Program Files\Aqsis\Procedurals"
 				self.outputPath = r'C:\temp'
 			else:
-				self.binaryPath = "/usr/aqsis/bin"
-				self.shaderPathList = "/usr/aqsis/shaders/"
-				self.texturePathList = "/usr/aqsis/textures"
-				self.displayPathList = "/usr/aqsis/displays"
-				self.archivePathList = "/usr/aqsis/archives"
-				self.proceduralPathList = "/usr/aqsis/procedurals"
-				self.outputPath = "/temp/"
+				self.binaryPath = r"/usr/aqsis/bin"
+				self.shaderPathList = r"/usr/aqsis/shaders/"
+				self.texturePathList = r"/usr/aqsis/textures"
+				self.displayPathList = r"/usr/aqsis/displays"
+				self.archivePathList = r"/usr/aqsis/archives"
+				self.proceduralPathList = r"/usr/aqsis/procedurals"
+				self.outputPath = r"/temp/"
 			self.use_slparams = True # set this to true by default
 			
 			# surf the environment and get the shader paths from the env vars for this renderer
@@ -679,15 +679,16 @@ class SceneSettings:
 				elif toRender:
 					ri.RiBegin("aqsis")
 				else:
-					ri.RiBegin()
+					ri.RiBegin()					
 				# make the occlusion pass
-				if len(self.occlusion_map) > 0:
+				if len(self.occlusion_map) > 0 and self.useAO.getValue():
 					maps = "["
 					for map in self.occlusion_map:
 						maps = maps + '"' + map + '" '
 					maps = maps + "]"
 					ri._ribout.write("MakeOcclusion " + maps + " " + '"' + "occlusion.sm" + '"' + "\n")
-					self.occlusion_map_file = outputPath + "occlusion.sm"
+					self.occlusion_map_file = outputPath + "occlusion.sm"	
+					
 				for path in paths:
 					ri.RiOption("searchpath", "shader", path + ":&")
 					
@@ -736,60 +737,31 @@ class SceneSettings:
 				
 	def renderShadowMap(self, light, direction, shadowRIB, shadowName, shadowFile):									
 		self.lightDebug = False
+		ri.RiBegin(shadowRIB)		
+
+		paths = self.settings.shaderpaths.getValue().split(";")
+		for path in paths:
+			ri.RiOption("searchpath", "shader", path + ":&")	
+		ri.RiPixelSamples(1, 1)
+		ri.RiPixelFilter("box", 1, 1)			
+		ri.RiHider("hidden", {"jitter" : [0], "depthfilter" : "midpoint"})
 		if self.lightDebug:
-			ri.RiBegin(shadowRIB + "test.rib")	
-			paths = self.settings.shaderpaths.getValue().split(";")
-			for path in paths:
-				ri.RiOption("searchpath", "shader", path + ":&")			
-			ri.RiScale(-1, -1, -1)
-			ri.RiPixelSamples(1, 1)
-			ri.RiPixelFilter("box", 1, 1)
-			ri.RiHider("hidden", "jitter", 0)
-			ri.RiDisplay(shadowFile + ".tiff", "file", "rgb")
-			#ri.RiDisplay(shadowFile, "zfile", "z")
-			projection = light.getRenderProjection()
-			ri.RiProjection(projection, "fov", 91) # 92 degrees projection
-			ri.RiShadingRate(4)
-			light.doCameraTransform(direction)
-			ri.RiWorldBegin()			
-			#ri.RiLightSource("ambientlight", "intensity", "1")
-			ri.RiTransformBegin()
-			lightParams = { "from" : [3, 3, 3], "uniform float intensity" : [8] }
-			ri.RiLightSource("pointlight", lightParams) 
-			lightParams = { "from" : [-3, 3, 3], "uniform float intensity" : [8] }
-			ri.RiLightSource("pointlight", lightParams) 
-			lightParams = { "from" : [-3, -3, 3], "uniform float intensity" : [8] }
-			ri.RiLightSource("pointlight", lightParams) 
-			lightParams = { "from" : [3, -3, 3], "uniform float intensity" : [8] }
-			ri.RiLightSource("pointlight", lightParams) 
-			ri.RiTransformEnd()
-			self.renderObjects()
-			ri.RiWorldEnd()
-			#ri.RiMakeShadow(shadowFile, shadowName)
-			ri.RiEnd()
-		else:
-			ri.RiBegin(shadowRIB)
-			paths = self.settings.shaderpaths.getValue().split(";")
-			for path in paths:
-				ri.RiOption("searchpath", "shader", path + ":&")	
-			ri.RiPixelSamples(1, 1)
-			ri.RiPixelFilter("box", 1, 1)			
-			ri.RiHider("hidden", {"jitter" : [0], "depthfilter" : "midpoint"})
+			ri.RiDisplay("view_from_light", "framebuffer", "rgb")
+			params = { "uniform cd ..float intensity" : 1, "uniform point from" : [0, 0, 0], "uniform point to" : [0, 0, 1] }
+			ri.RiLightSource("distantlight", params)
 			# ri.RiDisplay(shadowFile + ".tiff", "file", "rgb")
+		else:
 			ri.RiDisplay(shadowFile, "zfile", "z")
-			#ri.RiDisplay("view_from_light", "framebuffer", "rgb")
-			#params = { "uniform cd ..float intensity" : 1, "uniform point from" : [0, 0, 0], "uniform point to" : [0, 0, 1] }
-			#ri.RiLightSource("distantlight", params)
-			projection = light.getRenderProjection()			
-			ri.RiProjection(projection, "fov", 95) # 92 degrees projection
-			ri.RiShadingRate(4)
-			light.doCameraTransform(direction)
-			ri.RiWorldBegin()
-			# ri.RiReverseOrientation()
-			self.renderObjects()
-			ri.RiWorldEnd()
-			ri.RiMakeShadow(shadowFile, shadowName)
-			ri.RiEnd()
+		projection = light.getRenderProjection()			
+		ri.RiProjection(projection, "fov", 95) # 92 degrees projection
+		ri.RiShadingRate(4)
+		light.doCameraTransform(direction)
+		ri.RiWorldBegin()
+		# ri.RiReverseOrientation()
+		self.renderObjects(shadowPass = True)
+		ri.RiWorldEnd()
+		ri.RiMakeShadow(shadowFile, shadowName)
+		ri.RiEnd()
 			
 		self.occlusion_map.append(shadowFile)
 		
@@ -797,7 +769,7 @@ class SceneSettings:
 		ri.RiWorldBegin()		
 		# if we're shadowmapping, make sure to generate shadowmaps each of these - of course the question becomes how...
 		self.renderLights()		
-		ri.RiIdentity()
+		#ri.RiIdentity()
 		self.renderObjects()
 		ri.RiWorldEnd()
 	def renderWorldArchive(self):
@@ -814,6 +786,7 @@ class SceneSettings:
 			for light in self.lights:
 				if light.getProperty("IncludeWithAO"):
 					if light.getProperty("GenShadowMap"):
+						print light.object.getName()
 						shadows = self.shadows[light.objData["name"]]
 						light.setShadowParams(self.shadows)
 					light.render()
@@ -821,17 +794,17 @@ class SceneSettings:
 			for light in self.lights:
 				# get the fame info
 				frame = Blender.Get("curframe")
-				shadows = self.shadows[light.objData["name"]]			
 				if light.getProperty("GenShadowMap"):
-					light.setShadowParms(shadows)		
+					shadows = self.shadows[light.objData["name"]]			
+					light.setShadowParms(shadows)	
 				light.render() 
 					
 		
 		
-	def renderObjects(self):
+	def renderObjects(self, shadowPass = False):
 		for obj in self.objects:
 			# get all the objects in the scene that aren't lights or cameras
-			obj.render()
+			obj.render(shadowPass = shadowPass)
 		
 		
 	def getEditor(self):
@@ -1853,7 +1826,7 @@ class Shader:
 		self.shader_menu.registerCallback("release", self.selectShader)
 		# now that THAT nastiness is done...
 		self.scroller = ui.ScrollPane(5, 115, self.editorPanel.width - 10, self.editorPanel.height - 125, "Param Scroller", "parmScroller", self.editorPanel, True)
-		self.scroller.normalColor = [185, 185, 185, 255]
+		self.scroller.normalColor = [45, 45, 45, 255]
 		
 		self.close_button = ui.Button(self.editorPanel.width - 20, 5, 14, 14, "X", "X", 'normal', self.editorPanel, True)
 		self.close_button.shadowed = False
@@ -1917,17 +1890,38 @@ class Shader:
 		self.shadersMenu = []
 		self.shadersMenu.append("None Selected")
 		if self.stype == "surface":
-			self.shaders = self.settings.shadersSurface[path]
-			for shader in self.settings.shadersSurface[path]:
-				self.shadersMenu.append(shader[1])
+			if not self.settings.shadersSurface.has_key(path):
+				found = False
+			elif len(self.settings.shadersSurface[path]) < 1:
+				found = False
+			else:
+				self.shaders = self.settings.shadersSurface[path]
+				for shader in self.settings.shadersSurface[path]:
+					self.shadersMenu.append(shader[1])
+				found = True
 		elif self.stype == "displacement":
-			self.shaders = self.settings.shadersDisplacement[path]
-			for shader in self.settings.shadersDisplacement[path]:				
-				self.shadersMenu.append(shader[1])
+			if not self.settings.shadersDisplacement.has_key(path):
+				found = False
+			elif len(self.settings.shadersDisplacement[path]) < 1:
+				found = False
+			else:
+				self.shaders = self.settings.shadersDisplacement[path]
+				for shader in self.settings.shadersDisplacement[path]:				
+					self.shadersMenu.append(shader[1])
+				found = True
 		elif self.stype == "volume":
-			self.shaders = self.settings.shadersVolume[path]
-			for shader in self.settings.shadersVolume[path]:
-				self.shadersMenu.append(shader[1])
+			if not self.settings.shadersVolume.has_key(path):
+				found = False
+			elif len(self.settings.shadersVolume[path]) < 1:
+				found = False
+			else:
+				self.shaders = self.settings.shadersVolume[path]
+				for shader in self.settings.shadersVolume[path]:
+					self.shadersMenu.append(shader[1])
+				found = True
+			if not found:
+				self.evt_manager.showConfirmDialog("No " + self.s_type + " shaders found!", "There were no " + self.s_type + "shaders found on the selected shader path!", None, False)
+
 				
 	def selectShader(self, button):
 		# select the shader in question and then setup the params for it.
@@ -2033,58 +2027,6 @@ class Shader:
 			ri.RiDeclare(parm[0], parm[1])
 			
 	
-	def obfuscate(self):
-		p_type = "None"
-		if True:
-			if p_type == "float":
-				# create a float editor
-				if isArray:
-					self.scroller.addElement(ui.ArrayEditor(0, 0, self.scroller.width - 30, ui.FloatEditor.height, param, "FloatEditor", defValue, arrayLen, self.scroller, False))
-				else:
-					self.scroller.addElement(ui.FloatEditor(0, 0, self.scroller.width - 30, ui.FloatEditor.height, param, defValue, self.scroller, False))
-			elif p_type == "string":
-				# time for Black Magick and v00d0u
-				if ("tex" in param or "map" in param or "name" in param):
-					if isArray:
-						self.scroller.addElement(ui.ArrayEditor(0, 0, self.scroller.width - 30, ui.FileEditor.height, param, "FileEditor", defValue, arrayLen, self.scroller, False))
-					else:
-						self.scroller.addElement(ui.FileEditor(0, 0, self.scroller.width - 30, ui.FileEditor.height, param, defValue, self.scroller, False))
-				elif "space" in param or "Space" in param:
-					if isArray:
-						self.scroller.addElement(ui.ArrayEditor(0, 0, self.scroller.width - 30, ui.SpaceEditor.height, param, "SpaceEditor", defValue, arrayLen, self.scroller, False))
-					else:
-						self.scroller.addElement(ui.SpaceEditor(0, 0, self.scroller.width - 30, ui.SpaceEditor.height, param, defValue, self.scroller, False))
-				elif "proj" in param or "Proj" in param:
-					if isArray:
-						self.scroller.addElement(ui.ArrayEditor(0, 0, self.scroller.width - 30, ui.SpaceEditor.height, param, "ProjectionEditor", defValue, arrayLen, self.scroller, False))
-					else:
-						self.scroller.addElement(ui.ProjectionEditor(0, 0, self.scroller.width - 30, ui.SpaceEditor.height, param, defValue, self.scroller, False))
-				else:
-					if isArray:
-						self.scroller.addElement(ui.ArrayEditor(0, 0, self.scroller.width - 30, ui.TextEditor.height, param, "TextEditor", defValue, arrayLen, self.scroller, False))
-					else:
-						self.scroller.addElement(ui.TextEditor(0, 0, self.scroller.width - 30, ui.TextEditor.height, param, defValue, self.scroller, False))
-			elif p_type == "color":
-				color = []				
-				color.append(defValue[0])
-				color.append(defValue[1])
-				color.append(defValue[2])
-				if isArray:
-					self.scroller.addElement(ui.ArrayEditor(0, 0, self.scroller.width - 30, ui.ColorEditor.height, param, "ColorEditor", defValue, arrayLen, self.scroller, False))
-				else:
-					self.scroller.addElement(ui.ColorEditor(0, 0, self.scroller.width - 30, ui.ColorEditor.height, param, color, self.scroller, False))
-			elif p_type in ["point", "vector", "normal"]:	
-				if isArray:
-					self.scroller.addElement(ui.ArrayEditor(0, 0, self.scroller.width - 30, ui.CoordinateEditor.height, param, "CoordinateEditor", defValue, arrayLen, self.scroller, False))
-				else:
-					self.scroller.addElement(ui.CoordinateEditor(0, 0, self.scroller.width - 30, ui.CoordinateEditor.height, param, defValue, self.scroller, False))
-			elif p_type == "matrix":
-				if isArray:
-					self.scroller.addElement(ui.ArrayEditor(0, 0, self.scroller.width - 30, ui.MatrixEditor.height, param, "MatrixEditor", defValue, arrayLen, self.scroller, False))
-				else:
-					self.scroller.addElement(ui.MatrixEditor(0, 0, self.scroller.width - 30, ui.MatrixEditor.height, param, defValue, self.scroller, False))
-					
-			#self.scroller.elements[count].normalColor = normalColor	
 	def initShaderParams(self, params, shader):		
 		convtypes = {"float":"double",
 				"string":"string",
@@ -2190,7 +2132,7 @@ class GenericShader:
 		self.shader_menu.registerCallback("release", self.selectShader)
 		# now that THAT nastiness is done...
 		self.scroller = ui.ScrollPane(5, 115, self.editorPanel.width - 10, self.editorPanel.height - 125, "Param Scroller", "parmScroller", self.editorPanel, True)
-		self.scroller.normalColor = [185, 185, 185, 255]
+		self.scroller.normalColor = [45, 45, 45, 255]
 		
 		self.close_button = ui.Button(self.editorPanel.width - 20, 5, 14, 14, "X", "X", 'normal', self.editorPanel, True)
 		self.close_button.shadowed = False
@@ -2246,14 +2188,27 @@ class GenericShader:
 		path = self.searchPaths.getValue()
 		self.shadersMenu.append("None Selected")
 		if self.s_type == "light":
-			self.shaders = self.settings.shadersLight[path]
-			for shader in self.settings.shadersLight[path]:
-				self.shadersMenu.append(shader[1])
+			if not self.settings.shadersLight.has_key(path):
+				found = False
+			elif len(self.settings.shadersLight) < 1:
+				found = False
+			else:
+				self.shaders = self.settings.shadersLight[path]
+				for shader in self.settings.shadersLight[path]:
+					self.shadersMenu.append(shader[1])
+				found = True
 		elif self.s_type == "imager":
-		    self.shaders = self.settings.shadersImager[path]
-		    for shader in self.settings.shadersImager[path]:
-		        self.shadersMenu.append(shader[1])
-                
+			if not self.settings.shadersImager.has_key(path):
+				found = False
+			elif len(self.settings.shadersImager) < 1:
+				found = False
+			else:
+				found = True
+				self.shaders = self.settings.shadersImager[path]
+				for shader in self.settings.shadersImager[path]:
+					self.shadersMenu.append(shader[1])
+		if not found:
+			self.evt_manager.showConfirmDialog("No " + self.s_type + " shaders found!", "There were no " + self.s_type + "shaders found on the selected shader path!", None, False)
 
 	def selectShader(self, button):
 		# select the shader in question and then setup the params for it.
@@ -2530,6 +2485,7 @@ class MainUI:
 		self.materials = sdict["instBtoRMaterials"]
 		self.objecteditor = sdict["instBtoRObjects"]
 		self.export = sdict["instBtoRExport"]
+		self.lights = sdict["instBtoRLightManager"]
 				
 		screen = Blender.Window.GetAreaSize()		
 		self.editor = ui.MenuBar(None, False)
@@ -2580,11 +2536,6 @@ class MainUI:
 		self.settingsMenu.registerCallbackForElementIndex(0, "release", self.showGlobal)
 		self.settingsMenu.registerCallbackForElementIndex(1, "release", self.showSceneSettings)
 		
-		#self.objectButt = ui.Button(240, 5, 80, 18, "Objects", "Objects", 'normal', self.editor, True) # launches a low-quality preview, preview shading rate determined by global settings
-		#self.objectButt.registerCallback("release", self.showObjectEditor)
-		#self.objectButt.shadowed = False
-		#self.objectButt.registerCallback("release", p.callFactory(None, self.showEditor(self.settings.getEditor())))
-		
 		self.exportButt = ui.Button(350, 5, 50, 18, "Export", "Export", 'normal', self.editor, True)
 		#self.exportButt.registerCallback("release", p.callFactory(None, self.showEditor(self.export.getEditor())))
 		self.exportButt.registerCallback("release", self.showExport)
@@ -2592,8 +2543,12 @@ class MainUI:
 		
 		#self.materialsButt.registerCallback("release", p.callFactory(None, self.showEditor(self.materials.getEditor())))
 		
+		
+		
 	def showLightingManager(self, button):
-		pass # for the moment...
+		editor = self.lights.getEditor()
+		self.evt_manager.addElement(editor)
+		self.evt_manager.raiseElement(editor)
 	
 	def saveToXML(self, button):
 		xml = self.scene.getSceneXMLData()
@@ -2694,10 +2649,10 @@ class MaterialList:
 		self.delete_button.registerCallback("release", self.showDeleteDialog)
 		
 		self.scroller = ui.ScrollPane(0, 27, 200, 340, "MaterialScroller", "Scroller", self.editor, True)
-		self.scroller.normalColor = [185,185,185,255]
+		self.scroller.normalColor = [43,43,43,255]
 				
 		self.sel_scroller = ui.ScrollPane(0, 27, 200, 340, "MaterialScroller", "Scroller", self.selector, True)
-		self.sel_scroller.normalColor = [185,185,185,255]
+		self.sel_scroller.normalColor = [43,43,43,255]
 			
 		self.close_button = ui.Button(self.editor.width - 20, 5, 14, 14, "X", "X", 'normal', self.editor, True)
 		self.close_button.shadowed = False
@@ -3227,7 +3182,7 @@ class GroupList:
 		self.delete_button.registerCallback("release", self.showDeleteDialog)
 		
 		self.sel_scroller = ui.ScrollPane(0, 27, 200, 340, "ObjectScroller", "Scroller", self.editor, True)
-		self.sel_scroller.normalColor = [185,185,185,255]
+		self.sel_scroller.normalColor = [45,45,45,255]
 				
 		self.close_button = ui.Button(self.editor.width - 20, 5, 14, 14, "X", "X", 'normal', self.editor, True)
 		self.close_button.shadowed = False
@@ -3548,13 +3503,56 @@ class LightManager:
 	
 	     this will allow me to load light setups/looks
 	"""
+	options = { "GenOcclusion" : ["Generate Occlusion Maps:", True],
+		"GenShadowMaps" : ["Create Shadow Maps:", True],
+		"UseAmbient" : ["Use Ambient Light:", False],
+		"AmbIntensity" : ["Ambient Intensity:", 1.0],
+		"AmbColor" : ["Ambient Light Color:", [1.0, 1.0, 1.0]],
+		"ShadowBias":["Shadow Bias:", 1.0]}
+	optionOrder = ["GenOcclusion", "GenShadowMaps", "UseAmbient", "AmbColor", "AmbIntensity"]
+		# "UseGI" : "Use Global Illuminator", False],
+		# "SkyDOme" : ["Create Sky Dome", False],
+		# 
 	def __init__(self):
 		# center the panel
+		sdict = globals()
+		self.settings = sdict["instBtoRSettings"]
+		self.evt_manager = sdict["instBtoREvtManager"]
+		
 		screen = Blender.Window.GetAreaSize()		
-		self.editorPanel = ui.Panel((screen[0] / 2) - 225 , (screen[1] / 2) + 250 , 450, 250, "Export Scene", "Export Scene:", None, False)
+		self.editorPanel = ui.Panel((screen[0] / 2) - 225 , (screen[1] / 2) + 250 , 495, 450, "Light Manager", "Light Manager:", None, False)
 		
-		
-		
+		self.editorPanel.addElement(ui.Label(235, 27, "Lighting properties:", "Lighting Properties", self.editorPanel, False))
+		self.scroller= ui.ScrollPane(235, 50, 240, 260, "Scroller", "Scroller", self.editorPanel, True)
+		self.properties = {}
+		self.editors = {}
+		print self.options
+		for option in self.optionOrder:
+			propertyName = self.options[option][0]
+			propertyValue = self.options[option][1]
+			# generate a list of option panels here and allow editing
+			# create a property for each option
+			self.properties[option] = BtoRAdapterClasses.IProperty(propertyValue) # 1st item is the property name, second item is the property initializer
+			self.properties[option].setName(propertyName)
+			self.properties[option].setWidth(self.scroller.width - 15)			
+			# takes up half the available space of the main pane
+			self.editors[option] = BtoRAdapterClasses.IPropertyEditor(self.properties[option])
+			self.scroller.addElement(self.editors[option].getEditor()) # and that should be that. When this is discarded, all those go away
+			self.editors[option].setParent(self.scroller)	
+			self.scroller.offset = 0
+			
+		self.close_button = ui.Button(self.editorPanel.width - 20, 5, 14, 14, "X", "X", 'normal', self.editorPanel, True)
+		self.close_button.shadowed = False
+		self.close_button.cornermask = 15
+		self.close_button.radius = 1.5
+		# close_func = self.close_button.callFactory(self.evt_manager.removeElement, self.editor)
+		self.close_button.registerCallback("release", self.close)
+			
+	def getEditor(self):
+		return self.editorPanel
+	
+	def close(self, button):
+		self.evt_manager.removeElement(self.editorPanel)
 		
 class HelpWindow:
 	# this is based on a simple panel

@@ -503,7 +503,7 @@ class EventManager(UI):
 		self.lastX = 0
 		self.lastY = 0
 		self.noComp = True
-		self.backGround = [0.65, 0.65, 0.65]		
+		self.backGround = [0.4, 0.4, 0.4]		
 		# register myself as the point of control
 		if auto_register:
 			self.register()
@@ -718,7 +718,7 @@ class EventManager(UI):
 		
 		Blender.BGL.glClearColor(self.backGround[0], self.backGround[1], self.backGround[2], 1)
 		Blender.BGL.glClear(Blender.BGL.GL_COLOR_BUFFER_BIT)
-		self.drawScreenGrid(20, 20, [0.55, 0.55, 0.55])
+		self.drawScreenGrid(20, 20, [0.3, 0.3, 0.3])
 		for element in self.draw_stack:
 			element.draw()
 		
@@ -766,14 +766,15 @@ class EventManager(UI):
 
 	
 class UIElement(UI):
-	normalColor = [216, 214, 230, 255] # the normal color of the element
-	textColor = [0, 0, 0, 255] # basic text color, can be overriden for anything
+	# normal 216, 214, 230
+	normalColor = [85, 85, 85, 255] # the normal color of the element
+	textColor = [255, 255, 255, 255] # basic text color, can be overriden for anything
 	textHiliteColor = [255, 255, 255, 255] # hilite color
-	borderColor = [0, 0, 0, 255] # basic border color
-	hoverBorderColor = [128, 128, 128, 255]
+	borderColor = [43, 0, 0, 255] # basic border color
+	hoverBorderColor = [45, 45, 45, 255]
 	designBorderColor = [255, 0, 0, 255]
 	hoverColor = [105, 103, 127, 255]
-	outlineColor = [0, 0, 0, 255]
+	outlineColor = [35, 35, 35, 255]
 	font_sizes = { 'tiny' : 9, 'small' : 10, 'normal' : 12, 'large' : 14} # convenience item
 	font_cell_sizes = { 'tiny' : [5,9], 'small' : [5, 10], 'normal' : [7, 12], 'large' : [6, 14] } # replaces the above
 	ui = None # default UI
@@ -1204,10 +1205,12 @@ class UIElement(UI):
 
 	
 class Panel(UIElement):
-	headerColor = [110, 110, 128, 255]
-	shadowColor = [85, 85, 85, 150]
-	normalColor = [198, 197, 203, 255]
-	outlineColor = [98, 98, 98, 255]
+	# 198, 197, 203
+	# header, 110, 110, 128
+	headerColor = [60, 60, 60, 255]
+	shadowColor = [45, 45, 45, 150]
+	normalColor = [85, 85, 85, 255]
+	outlineColor = [58, 58, 58, 255]
 	titleColor = [255, 255, 255, 255]
 	headerHeight = 25
 	cornermask = 15
@@ -1597,9 +1600,10 @@ class ScrollPane(UIElement):
 
 	
 class Button(UIElement):
-	shadowColor = [100, 100, 100, 255]
-	downColor = [110, 110, 110, 255]
+	shadowColor = [45, 45, 45, 255]
+	downColor = [45, 45, 45, 255]
 	shadowed = True
+	outlined = True
 	shadowoffset = 4
 	textHiliteColor = [255, 255, 255, 255]
 	push_offset = 0
@@ -1633,6 +1637,7 @@ class Button(UIElement):
 		self.pushed = False        
 		self.value = title
 		self.registerCallback("click", self.push)
+		# self.outlined = True
 		
 		
 	def draw(self):
@@ -1658,7 +1663,7 @@ class Button(UIElement):
 				if self.debug:
 					print "setting normalColor", self.normalColor
 				
-			if self.shadowed == True and self.pushed == True:				
+			if self.shadowed and self.pushed:				
 				pass
 			else:            
 				self.uiRoundBox(self.absX, self.absY - self.height, self.absX + self.width, self.absY, self.radius, self.cornermask)  
@@ -1667,7 +1672,8 @@ class Button(UIElement):
 					if self.hit_test() and self.pushed == False:
 						self.setColor(self.hoverBorderColor)
 					else:
-						self.setColor(self.borderColor)    
+						self.setColor(self.outlineColor)    
+					#self.setColor(self.outlineColor)    
 					self.uiOutline(self.absX, self. absY - self.height, self.absX + self.width, self.absY, self.radius, self.cornermask)
 				
 			drawWidth = self.get_string_width(self.title, self.fontsize)
@@ -1708,8 +1714,6 @@ class Button(UIElement):
 		if self.image != None:
 			self.image.validate()
 			self.image.draw()
-	
-	
 		
 	def push(self, button):		
 		self.pushed = True
@@ -1723,9 +1727,9 @@ class Button(UIElement):
 		self.title = value
 							
 class ToggleButton(Button):    
-	toggleColor = [218, 127, 127]
-	normalColor = [218, 218, 218, 255]
-	shadowColor = [100, 100, 100, 255]
+	toggleColor = [65, 65, 65]
+	normalColor = [85, 85, 85, 255]
+	shadowColor = [45, 45, 45, 255]
 	textColor = [0, 0, 0, 255]
 	textUpColor = [0, 0, 0, 255]
 	textDownColor = [255, 255, 255, 255]
@@ -1796,7 +1800,8 @@ class ToggleButton(Button):
 	def getValue(self):
 		return self.state
 class CheckBox(UIElement):
-	normalColor = [198, 197, 203, 255]
+	# 198, 197, 203
+	normalColor = [85, 85, 85, 255]
 	properties = ["normalColor", "textColor", "textHiliteColor", "borderColor", "hoverBorderColor", "designBorderColor", "hoverColor", "outlineColor", "radius", "fontsize", "cornermask"]
 	parameters = ["x", "y", "width", "height", "name", "title", "parent", "auto_register"]	
 	def __init__(self, x, y, name, title, value, parent, auto_register, fontsize = 'normal'):
@@ -1888,16 +1893,18 @@ class ToggleGroup:
 
 class Menu(UIElement):
 	cornermask = 0
-	normalColor = [218, 218, 218, 255]
+	# normalColor = [218, 218, 218, 255]
+	normalColor = [85, 85, 85, 255]
 	hoverColor = [127, 127, 127, 255]
 	shadowColor = [208, 208, 208, 255]
-	textColor = [0, 0, 0, 255]
+	textColor = [255, 255, 255, 255]
 	textHiliteColor = [255, 255, 255, 255]
 	arrowShade = [200, 200, 200, 255]
 	arrowHover = [140, 140, 140, 255]
 	properties = ["normalColor", "textColor", "textHiliteColor", "borderColor", "hoverBorderColor", 
 				"hoverColor", "outlineColor", "arrowShade", "arrowHover", "radius", "fontsize", "cornermask"]
 	parameters = ["x", "y", "width", "height", "name", "menu", "auto_register"]
+	
 	def __init__(self, x, y, width, height, name, menu, parent, auto_register, 
 						enableArrowButton = True, 
 						enableMenuHeader = True, 
@@ -1919,7 +1926,8 @@ class Menu(UIElement):
 		self.panel.debug = 0
 		self.panel.fontsize = self.fontsize
 		self.panel.movable = False
-		self.panel.panelColor = [185, 185, 185, 255]
+		#self.panel.panelColor = [185, 185, 185, 255]
+		self.panel.normalColor = [145, 145, 145, 255]
 		self.panel.registerCallback("release", self.release)
 		self.enableArrowButton = enableArrowButton
 		self.enableMenuHeader = enableMenuHeader
@@ -1936,7 +1944,9 @@ class Menu(UIElement):
 		self.baseButton.radius = 0
 		self.baseButton.push_offset = 0
 		self.baseButton.shadowed = shadowed
-		self.baseButton.normalColor = self.normalColor
+		self.baseButton.normalColor = [85, 85, 85, 255]
+		#self.normalColor
+		
 		self.baseButton.hoverColor = self.hoverColor
 		self.baseButton.textColor = self.textColor
 		self.baseButton.textHiliteColor = self.textHiliteColor
@@ -1946,17 +1956,16 @@ class Menu(UIElement):
 			self.baseButton.title = menu[0]
 		self.baseButton.textlocation = 1
 		self.baseButton.registerCallback("release", self.release)
-				
+		
 		# arrow button        
-		self.arrowButton = Button(x + (width - 25), y, 25, height, 'ArrowButton', '', 'normal', parent, False)
-		self.arrowButton.cornermask = 0
-		self.arrowButton.radius = 0
-		self.arrowButton.push_offset = 0
-		self.arrowButton.normalColor = self.normalColor
-		self.arrowButton.hoverColor = self.hoverColor
-		self.arrowButton.registerCallback("release", self.release)
-		if not enableArrowButton:
-			self.arrowButton.isVisible = False
+		if enableArrowButton:
+			self.arrowButton = Button(x + (width - 25), y, 25, height, 'ArrowButton', '', 'normal', parent, False)
+			self.arrowButton.cornermask = 0
+			self.arrowButton.radius = 0
+			self.arrowButton.push_offset = 0
+			self.arrowButton.normalColor = self.normalColor
+			self.arrowButton.hoverColor = self.hoverColor
+			self.arrowButton.registerCallback("release", self.release)
 				
 		for a in menu: 
 			# create some button objects here
@@ -1977,9 +1986,10 @@ class Menu(UIElement):
 		self.calculateMenuSizes()
 		self.value = self.panel.elements[0].name
 		self.noSelect = noSelect
+		
+		
 	def re_init(self, menu):
 		# clear the existing element list
-		
 		for element in self.panel.elements:
 			self.panel.removeElement(element)
 		self.panel.elements = []
@@ -2027,7 +2037,8 @@ class Menu(UIElement):
 		#self.debug = True
 		size = self.get_correct_space_size()			
 		self.baseButton.invalid = True
-		self.arrowButton.invalid = True
+		if self.enableArrowButton:
+			self.arrowButton.invalid = True
 		self.panel.invalid = True
 		panel = self.panel
 		butheight = panel.elements[0].height
@@ -2118,14 +2129,13 @@ class Menu(UIElement):
 				self.panel.x = (screen[0] / 2) - (pWidth / 2)
 			self.panel.draw() # the buttons should actually arrange themselves			
 		else:
-			if self.hit_test():
+			if self.hit_test():				
 				self.baseButton.normalColor = self.hoverColor
-				self.baseButton.textColor = self.textHiliteColor
-				self.baseButton.normalColor = self.arrowHover				
-			else:
+				self.baseButton.textColor = self.textHiliteColor				
+			else:			
 				self.baseButton.normalColor = self.normalColor
 				self.baseButton.textColor = self.textColor
-				self.baseButton.normalColor = self.arrowShade				
+				
 				
 			self.baseButton.draw()
 			if self.enableArrowButton:
@@ -2172,16 +2182,28 @@ class Menu(UIElement):
 				element.release_event()			
 			self.expanded = False
 			# print "Got a release event!"
-			self.elements = [self.baseButton, self.arrowButton]
-			self.z_stack = [self.baseButton, self.arrowButton]
-			self.draw_stack = [self.baseButton, self.arrowButton]			
+			if self.enableArrowButton:
+				self.elements = [self.baseButton, self.arrowButton]
+				self.z_stack = [self.baseButton, self.arrowButton]
+				self.draw_stack = [self.baseButton, self.arrowButton]			
+
+			else:
+				self.elements = [self.baseButton]
+				self.z_stack = [self.baseButton]
+				self.draw_stack = [self.baseButton]			
 		else:
 			# close the menu
 			print "Closing down!"
-			self.expanded = False	
-			self.elements = [self.baseButton, self.arrowButton]
-			self.z_stack = [self.baseButton, self.arrowButton]
-			self.draw_stack = [self.baseButton, self.arrowButton]
+			self.expanded = False
+			if self.enableArrowButton:
+				self.elements = [self.baseButton, self.arrowButton]
+				self.z_stack = [self.baseButton, self.arrowButton]
+				self.draw_stack = [self.baseButton, self.arrowButton]
+			else:
+				self.elements = [self.baseButton]
+				self.z_stack = [self.baseButton]
+				self.draw_stack = [self.baseButton]			
+				
 
 		
 	def validate(self): # the base class validate get overriden here because the panel element of this control has to set the bounds here		
@@ -2198,14 +2220,16 @@ class Menu(UIElement):
 			self.expanded = False			
 		else:
 			self.baseButton.release_event()
-			self.arrowButton.release_event()
+			if self.enableArrowButton:
+				self.arrowButton.release_event()
 
 	def click_event(self):
 		if self.hit_test() and self.expanded:			
 			self.panel.click_event() # pass the event on to the panel so it can dispatch to its buttons
 		elif self.hit_test() and self.expanded == False:
 			self.baseButton.click_event()
-			self.arrowButton.click_event()
+			if self.enableArrowButton:
+				self.arrowButton.click_event()
 		elif self.expanded:
 			self.expanded = False
 			
@@ -2213,16 +2237,15 @@ class Menu(UIElement):
 		rVal = False
 		if self.expanded:
 			#print "have a panel"
-			rVal = self.panel.hit_test()
-			return rVal
+			rVal = self.panel.hit_test()			
 		else:
 			if self.enableArrowButton:
 				# print "Have arrow, will travel"
 				if self.baseButton.hit_test() or self.arrowButton.hit_test():
-					rVal = True
-				return rVal
+					rVal = True				
 			else:
-				return self.baseButton.hit_test()
+				rVal = self.baseButton.hit_test()
+		return rVal
 		
 
 	def getSelectedIndex(self):
@@ -2285,7 +2308,7 @@ class MenuBar(Panel):
 	#		self.layout() # just in case.
 			self.width = screen[0] - 1
 			for element in self.elements:
-				element.normalColor = [198, 197, 203, 255]
+				element.normalColor = self.normalColor
 				element.validate()
 			
 		

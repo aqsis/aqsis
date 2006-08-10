@@ -29,9 +29,11 @@ setattr(BtoRMain, "instBtoRObjects", instBtoRObjects)
 instBtoRExport = BtoRMain.ExportUI()
 setattr(BtoRMain, "instBtoRExport", instBtoRExport)
 
+instBtoRLightManager = BtoRMain.LightManager()
+setattr(BtoRMain, "instBtoRLightManager", instBtoRLightManager)
+
 instBtoRMain = BtoRMain.MainUI()
 setattr(BtoRMain, "instBtoRMain", instBtoRMain)
-
 
 if instBtoRSettings.haveSetup == False:
 	instBtoREvtManager.addElement(instBtoRSettings.getEditor())		
