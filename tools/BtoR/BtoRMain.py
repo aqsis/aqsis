@@ -887,7 +887,7 @@ class SceneSettings(BtoRObject):
 					ri.RiBegin("aqsis")
 				else:
 					ri.RiBegin()	
-
+					
 					
 				# Occlusion Map generation
 				if self.lighting.getProperty("GenOcclusion"):
@@ -945,12 +945,19 @@ class SceneSettings(BtoRObject):
 					name = extra.extraName.getValue()
 					ri.RiOption(name, variable, val) # charge on!
 				
+				
+				# Frame start
 				ri.RiFrameBegin(frame)	
 				for path in paths:
 					ri.RiOption("searchpath", "shader", path + ":&")
-				# Global scene options
+				
+				# Frame options 
 				self.render()
+				
+				# Display
 				ri.RiDisplay(imgFile, "file", "rgb")
+				
+				# AOV variables
 				for variable in self.passes: # each variable has a name, a mode, and a quantize value
 					vals = variable.passQuant.getValue().split()
 					iVal = []
@@ -959,14 +966,19 @@ class SceneSettings(BtoRObject):
 					params = { "quantize" : iVal }
 					ri.RiDisplay("+" + variable.passName.getValue() + ".tif", "file", variable.passMode.getValue(), params)
 				
-				# self.renderFrame(exportSettings)		
-				# ri.RiTransformBegin() this is potential
+	
+				# Camera transform
 				camera.render()		
+				
 				# world block
 				self.renderWorld()
+				
 				# ri.RiTransformEnd()
+				
 				cam = cam + 1
+				
 				ri.RiFrameEnd()			
+				
 				ri.RiEnd()
 			
 		self.exportObjects()
