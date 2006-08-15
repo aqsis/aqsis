@@ -21,6 +21,8 @@ if evt == Blender.Draw.RIGHTMOUSE:
 	changed = { "changed" : True }
 	print "changed"
 	Blender.Registry.SetKey("BtoR_Space", changed)
+	#Blender.Window.Redraw(Blender.Window.Types["SCRIPT"])
+	#Blender.Window.Redraw(Blender.Window.Types["SCRIPT"])
 
 
  

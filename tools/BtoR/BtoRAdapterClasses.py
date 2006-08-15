@@ -1,11 +1,10 @@
 import os
 import btor
+
 from btor import BtoRGUIClasses as ui
 from btor.BtoRTypes import *
-reload(ui)
 import cgkit
 import cgkit.rmshader
-reload(cgkit.rmshader)
 import cgkit.cgtypes
 import cgkit.quadrics
 from cgkit import ri as ri
@@ -20,7 +19,7 @@ import StringIO
 import protocols
 import random
 import traceback
-
+ 
 class IProperty(protocols.Interface):
 	def getValue():
 		pass
@@ -40,8 +39,7 @@ class Property:
 		self.name = name
 	def getName(self):
 		return self.name
-	def setValue(self, value):
-		print "Setting value of type ", type(value), " to ", value
+	def setValue(self, value):		
 		self.value = value
 	def setDefault(self, default):
 		self.default = default
@@ -53,8 +51,14 @@ class Property:
 		xmlProp.setAttribute("type", type(self.getValue()).__name__)
 		xmlProp.setAttribute("value", str(self.getValue()))
 		#print "set property of type ", type(self.value), " to ", type(str(self.value).__name__)
-		return xmlProp
-
+		return xmlProp		
+	# interface for complex properties
+	def getEditor(self):
+		return self.value.obj.getEditor()
+	def getStrValue(self):
+		return self.value.obj.getStrValue()
+	def registerCallback(self, signal, function): # this is a pass-through to maintain abstraction
+		self.value.registerCallback(signal, function) 
 
 class StringProperty(Property): 
 	protocols.advise(instancesProvide=[IProperty], asAdapterForTypes=[str])
@@ -109,6 +113,22 @@ class DictProperty(Property):
 class BooleanProperty(Property): 
 	protocols.advise(instancesProvide=[IProperty], asAdapterForTypes=[bool])
 	pass
+	
+class ComplexProperty(Property):
+	protocols.advise(instancesProvide=[IProperty], asAdapterForTypes=[BtoRShaderType])
+	pass
+class MaterialProperty(Property):
+	protocols.advise(instancesProvide=[IProperty], asAdapterForTypes=[BtoRMaterialType])
+	height = 65
+	pass
+class VectorProperty(Property):
+	protocols.advise(instancesProvide=[IProperty], asAdapterForTypes=[cgkit.cgtypes.vec3])
+	pass
+	
+class MatrixProperty(Property):
+	protocols.advise(instancesProvide=[IProperty], asAdapterForTypes=[cgkit.cgtypes.mat4])
+	height = 95
+	pass
 
 class IPropertyEditor(protocols.Interface):
 	def getValue():
@@ -117,7 +137,7 @@ class IPropertyEditor(protocols.Interface):
 		""" set the value of the property """
 class PropertyEditor: # this needs no interface declaration, since all this is doing is providing a baseclass
 	fontsize = 'small'
-	def __init__(self, property):		
+	def __init__(self, property, suppressLabel = False):		
 		self.property = property
 		width = self.property.width
 		self.height = self.property.height		
@@ -130,8 +150,9 @@ class PropertyEditor: # this needs no interface declaration, since all this is d
 		self.editor.cornermask = 0
 		self.editor.outlined = True
 		self.editor.cornermask = 0
-		self.label = ui.Label(2, 3, self.property.getName(), self.property.getName(), self.editor, True, fontsize = self.fontsize)
-		self.label.fontsize = 'small'
+		if not suppressLabel:
+			self.label = ui.Label(2, 3, self.property.getName(), self.property.getName(), self.editor, True, fontsize = self.fontsize)
+			self.label.fontsize = 'small'
 		self.func = None
 		
 	def setValue(self, value):
@@ -148,7 +169,7 @@ class PropertyEditor: # this needs no interface declaration, since all this is d
 	def getValue(self):
 		return self.property.getValue()
 		
-	def updateValue(self, obj):
+	def updateValue(self, obj):		
 		if type(obj) == ui.TextField:
 			if obj.type == "int":
 				self.property.setValue(int(obj.getValue()))
@@ -181,15 +202,28 @@ class MenuPropertyEditor(PropertyEditor):
 		width = self.property.width
 		height = self.property.height
 		menu = self.property.getKeys()
-		self.value = ui.Menu(width / 2, 2, width / 2, height - 4, self.property.getName(), menu, self.editor, True, fontsize = self.fontsize)
+		self.value = ui.Menu(width / 2, 2, width / 2, height - 4, self.property.getName(), menu, self.editor, True, fontsize = self.fontsize)		
 		self.value.registerCallback("select", self.updateValue)
 		self.value.setShadowed(False)
-			
+		self.property.setValue(self.value.getValue())
+		
 		# the property should handle making sure I've got the right value here I think	
 	def setValue(self, value):
 		# menu editors need to be slightly different
 		self.property.setValue(value) 
 		self.value.setValueString(value)
+	
+	def updateMenu(self, menu):
+		# reinit the menu, but keep the selected indesx
+		index = self.value.getSelectedIndex()
+		self.value.re_init(menu)
+		if len(self.value.elements) > index:
+			self.value.setValue(0)
+		else:
+			self.value.setValue(index)
+		
+	def renameMenuItem(self, idx, name):
+		self.value.renameElement(idx, name)
 		
 	#protocols.declareAdapter(MenuPropertyEditor, [IPropertyEditor], forTypes=[DictProperty])
 
@@ -204,22 +238,44 @@ class ColorPropertyEditor(PropertyEditor):
 		inc = (width / 2) / 4
 		self.R = ui.TextField((width / 2), 0, inc -1, height, "Red", color[0], self.editor, True)
 		self.G = ui.TextField((width / 2) + inc, 0, inc -1, height, "Green", color[0], self.editor, True)
-		self.B = ui.TextField((width / 2) + (inc * 2), 0, inc -1, height, "Blue", color[0], self.editor, True)
+		self.B = ui.TextField((width / 2) + (inc * 2), 0, inc -1, height, "Blue", color[0], self.editor, True)		
 		self.colorButton = ui.ColorButton((width / 2) + (inc * 3), 0, inc - 4, height - 2, "Color", color, self.editor, True)
-		self.colorButton.outlined = True
+		self.colorButton.outlined = True		
 		self.R.registerCallback("update", self.updateColor)
 		self.G.registerCallback("update", self.updateColor)
 		self.B.registerCallback("update", self.updateColor)
+		self.updateColor(None)
 		self.colorButton.picker.registerCallback("ok", self.updateFields)
 		
 	def updateFields(self, color):
 		self.R.setValue(float(float(color.value[0]) / 255))
 		self.G.setValue(float(float(color.value[1]) / 255))
 		self.B.setValue(float(float(color.value[2]) / 255))
+		self.property.setValue([float(float(color.value[0])/255), float(float(color.value[1]) / 255), float(float(color.value[2]) / 255)])
 	
 	def updateColor(self, obj):
-		self.colorButton.setValue([self.R.getValue(), self.G.getValue(), self.B.getValue(), 255]) 
-		self.property.setValue([self.R.getValue(), self.G.getValue(), self.B.getValue(), 255])
+		# convert to RGB 255
+		r_s = float(self.R.getValue())
+		g_s = float(self.G.getValue())
+		b_s = float(self.B.getValue())
+		if float(r_s) > 1:			
+			r = int(r_s) 
+		else:
+			r = float(r_s) * 255			
+			
+		if float(g_s) > 1:
+			g = float(g_s) 
+		else:
+			g = float(g_s) * 255
+						
+		if float(b_s) > 1:
+			b = float(b_s) 
+		else:
+			b = float(b_s) * 255			
+			
+		rgb = [r, g, b, 255]
+		self.colorButton.setValue(rgb) 
+		self.property.setValue([self.R.getValue(), self.G.getValue(), self.B.getValue()])
 	#protocols.declareAdapter(ColorPropertyEditor, [IPropertyEditor], forTypes=[ColorProperty])
 
 class BooleanPropertyEditor(PropertyEditor):
@@ -237,7 +293,156 @@ class BooleanPropertyEditor(PropertyEditor):
 		# again, the property should handle this
 		
 	#protocols.declareAdapter(BooleanPropertyEditor, [IPropertyEditor], forTypes=[BooleanProperty])
+class ComplexPropertyEditor(PropertyEditor):
+	protocols.advise(instancesProvide=[IPropertyEditor], asAdapterForTypes=[ComplexProperty])
+	def __init__(self, property):
+		sdict = globals()
+		self.evt_manager = sdict["instBtoREvtManager"]
+		PropertyEditor.__init__(self, property)
+		width = self.property.width
+		height = self.property.height
+		self.value = ui.TextField(width / 2, 0, width / 2 - height, height, self.property.getName(), self.property.getStrValue(), self.editor, True, fontsize = self.fontsize)
+		self.value.Enabled = False
+		butX = self.value.x + self.value.width + 1
+		self.triggerButton = ui.Button(butX, 0, height, height, "...", "...", 'small', self.editor, True)
+		self.triggerButton.shadowed = False
+		self.triggerButton.registerCallback("release", self.showPropertyEditor)
+		self.property.registerCallback("update", self.updateValue)
+		
+	def showPropertyEditor(self, obj):
+		self.evt_manager.addElement(self.property.getEditor())
+	
+	def updateValue(self, obj): # here, I'll be receiving a shader type, so I know that I can do shader.getName() for the value
+		self.setValue(obj.getShaderName())
+		
+	def setValue(self, value):
+		# self.property.setValue(value)
+		self.value.setValue(value)	
+		
+class MaterialPropertyEditor(PropertyEditor):
+	protocols.advise(instancesProvide=[IPropertyEditor], asAdapterForTypes=[MaterialProperty])
+	def __init__(self, property):
+		sdict = globals()
+		self.evt_manager = sdict["instBtoREvtManager"]
+		self.materials = sdict["instBtoRMaterials"]		
+		self.property = property
+		width = self.property.width
+		self.height = self.property.height		
+		self.editor = ui.Button(0, 0, width, self.height, "Assigned Material:", "Assigned Material:", 'normal', None, False)
+		self.editor.registerCallback("release", self.showMaterialSelector)
+		self.editor.textlocation = 1
+		self.editor.shadowed = False
+		#self.editor.normalColor = [128, 128, 128, 0]
+		#self.editor.hoverColor = [128, 128, 128, 0]
+		self.editor.outlined = True
+		self.editor.cornermask = 0
+		self.editor.outlined = True
+		self.editor.cornermask = 0
+		self.value = ui.Label(2, 25, "None Assigned:", "None Assigned:", self.editor, True, fontsize = self.fontsize)
+		self.value.fontsize = 'small'
+		self.value.transparent = True
+		self.func = None
+		width = self.property.width
+		height = self.property.height
+		
+	def showPropertyEditor(self, obj):
+		self.evt_manager.addElement(self.property.getEditor())
+		
+	def setValue(self, value):
+		self.evt_manager.removeElement(self.mat_selector)
+		# the button returned has the material name!
+		# So all i need to do now is...
+		if matName != None:
+			self.material = matName
+			self.materialButton.setTitle(matName)
+			self.materialButton.image = self.materials.getMaterial(matName).image
+		else:
+			self.material = obj.title
+			# self.scene.object_data[self.objectName.getValue()]["material"] = obj.title # Assign the material to the object adapter
+			# print "Assigned material ", self.scene.object_data[self.objectName.getValue()]["material"], " to ", self.objectName.getValue()
+			self.materialButton.title = obj.title			
+			self.materialButton.image = ui.Image(120, 5, 56, 56,  obj.image.image, self.materialButton, False)
+	def updateValue(self, obj):
+		if material != None:
+			self.material = material
+			if preInit == False:
+				self.objData["material"] = material.name
+			self.objEditor.materialButton.setTitle(material.name)
+			self.objEditor.setImage(material.image)
+			
+	def setMaterial(self, material):
+		if material != None:
+			self.value.setValue(material.material.name)
+			self.property.setValue(material.material.name)
+			print material.image
+			if self.editor.image == None:
+				self.editor.image = ui.Image(150, 5, 56, 56, material.image, self.editor, False)
+			else:
+				self.editor.image.image = material.image
+	
+	
+	def showMaterialSelector(self, obj):
+		""" Display a material selector window. """
+		# I should have loaded materials here, so let's do this.
+		if self.materials.getMaterialCount() < 1:
+			self.evt_manager.showConfirmDialog("No materials defined!", "You haven't defined any materials!", None, False)
+		else:
+			self.evt_manager.addElement(self.materials.getSelector())
 
+	def setImage(self, image):
+		buttonImage = ui.Image(120, 5, 56, 56, image, self.materialButton, False)
+		self.editor.image = buttonImage
+		
+	def selectMaterial(self, obj, matName = None):
+		""" material selection callback """
+		self.evt_manager.removeElement(self.mat_selector)
+		# the button returned has the material name!
+		# So all i need to do now is...
+		if matName != None:
+			self.material = matName
+			self.materialButton.setTitle(matName)
+			self.materialButton.image = self.materials.getMaterial(matName).image
+		else:
+			self.material = obj.title
+			# self.scene.object_data[self.objectName.getValue()]["material"] = obj.title # Assign the material to the object adapter
+			# print "Assigned material ", self.scene.object_data[self.objectName.getValue()]["material"], " to ", self.objectName.getValue()
+			self.materialButton.title = obj.title			
+			self.materialButton.image = ui.Image(120, 5, 56, 56,  obj.image.image, self.materialButton, False)
+class VectorPropertyEditor(PropertyEditor):
+	protocols.advise(instancesProvide=[IPropertyEditor], asAdapterForTypes=[VectorProperty])
+	def __init__(self, property):
+		PropertyEditor.__init__(self, property)
+		width = property.width
+		height = property.height
+		start = width / 2
+		inc = (width / 2) / 3 - 1
+		
+		self.x = ui.TextField(start, 0, inc - 1, height, "X", self.property.getValue()[0], self.editor, True, fontsize = self.fontsize)
+		self.x.registerCallback("update", self.updateValue)
+		start = start + inc
+		
+		self.y = ui.TextField(start, 0, inc - 1, height, "Y", self.property.getValue()[1], self.editor, True, fontsize = self.fontsize)
+		self.y.registerCallback("update", self.updateValue)
+		start = start + inc
+		
+		self.z = ui.TextField(start, 0, inc - 1, height, "Z", self.property.getValue()[2], self.editor, True, fontsize = self.fontsize)
+		self.z.registerCallback("update", self.updateValue)
+		
+	def udpateValue(self, obj):
+		self.property.value[0] = self.x.getValue()
+		self.property.value[1] = self.y.getValue()
+		self.property.value[2] = self.z.getValue()
+class MatrixPropertyEditor(PropertyEditor):
+	protocols.advise(instancesProvide=[IPropertyEditor], asAdapterForTypes=[MatrixProperty])
+	def __init__(self, property):
+		PropertyEditor.__init__(self, property)
+		width = property.width
+		height = property.height
+		x = width / 2
+		self.table = ui.Table(x, 0, x, 65, "table", property.getValue(), self.editor, True)
+		
+		
+		
 class IObjectAdapter(protocols.Interface):
 	def render():
 		""" Render the object"""
@@ -331,7 +536,41 @@ class ObjectAdapter:
 		self.objData = {}
 		self.objData["name"] = self.object.getName()
 		self.objData["type"] = self.object.getType()
-		
+	
+	def doCameraTransform(self, axis = None):			
+		if axis != None:	
+			# I still need to transform based on the light's matrix
+			# get the inverse matrix first
+			# if this is point light, I should probably set the rotation values to zero	
+			# step 1, transform the world to left-handed
+			ri.RiScale(-1, 1, 1)
+			ri.RiRotate(180, 0, 1, 0)
+			if axis == "px":		
+				ri.RiRotate(90, 0, 1, 0)
+			elif axis == "nx":	
+				#ri.RiRotate(-90, 1, 0, 0)
+				ri.RiRotate(-90, 0, 1, 0)				
+			elif axis == "py":				
+				ri.RiRotate(-90, 1, 0, 0)
+			elif axis == "ny":
+				ri.RiRotate(90, 1, 0, 0)				
+			elif axis == "pz":				
+				ri.RiRotate(180, 0, 1, 0) 	
+
+			cmatrix = self.object.getInverseMatrix()
+			#sMat = Blender.Mathutils.ScaleMatrix(-1, 4, vecX)		
+			#rMat = Blender.Mathutils.RotationMatrix(180, 4, "y")
+			#mat = cmatrix * sMat * rMat
+			trans = cmatrix.translationPart()
+			#print "\n"
+			#print "At shadowmap generation for axis:", axis
+			#print "Light translation is", trans
+			#print "\n"
+			ri.RiTranslate(trans)
+			
+		def getRenderDirections(self):
+				return ["px", "py", "pz", "nx", "ny", "nz"]
+			
 	def populateShaderParamsList(self, params, shader, initialized):
 		
 		convtypes = {"float":"double",
@@ -552,10 +791,8 @@ class ObjectAdapter:
 		
 		self.checkReset()
 			
-	def initMaterial(self):
-		pass
 	def initShader(self, useXML = False, xml = None):
-		print "Initializing a ", self.shader_type, " shader"
+		# print "Initializing a ", self.shader_type, " shader"
 		try:
 			if self.settings.use_slparams:
 				shaderPath = self.settings.shaderpaths.getValue().split(";")[0]
@@ -582,18 +819,51 @@ class ObjectAdapter:
 		
 		self.objEditor.setShader(self.shader)
 		
-		self.objEditor.shaderButton.setTitle(self.shader.getShaderName())
-		
+		# self.objEditor.shaderButton.setTitle(self.shader.getShaderName())
+	def setMaterial(self, material, preInit = False):	
+		if material != None:
+			self.material = material
+			if preInit == False:
+				self.objData["material"] = material.material.name
+			self.editors["material"].setMaterial(material)
+	def initMaterial(self):	
+		if self.objData.has_key("material"):
+			print self.objData["material"], " was found"
+			if self.objData["material"] != None and self.objData["material"] != "None":
+				self.editors["material"].setMaterial(self.materials.getMaterial(self.objData["material"]))
+			
+	def renderMaterial(self):
+		Bmaterial = self.materials.getMaterial(self.getProperty("material"))
+		if Bmaterial == "None" or Bmaterial == None:
+			# generate a default material - make sure to setup a default material button in the scene settings dialog
+			ri.RiColor(cgkit.cgtypes.vec3(1.0, 1.0, 1.0))
+			ri.RiOpacity(cgkit.cgtypes.vec3(1.0, 1.0, 1.0))
+			ri.RiSurface("matte", { "Ka" : 1.0, "Kd" : 1.0 })
+		else:
+			if Bmaterial != None:
+				material = Bmaterial.material
+				Bmaterial.getProperty("Surface").getObject().updateShaderParams()
+				Bmaterial.getProperty("Displacement").getObject().updateShaderParams()
+				Bmaterial.getProperty("Volume").getObject().updateShaderParams()
+				
+				ri.RiColor(material.color())			
+				ri.RiOpacity(material.opacity())
+				# thus
+				if material.surfaceShaderName() != None:				
+					ri.RiSurface(material.surfaceShaderName(), material.surfaceShaderParams(0))
+				if material.displacementShaderName() != None:				
+					ri.RiDisplacement(material.displacementShaderName(), material.displacementShaderParams(0))
+				if material.interiorShaderName() != None:
+					ri.RiAtmosphere(material.interiorShaderName(), material.interiorShaderParams(0))
+				
 class MeshAdapter(ObjectAdapter):
 	""" BtoR mesh Adapter """
 	protocols.advise(instancesProvide=[IObjectAdapter], asAdapterForTypes=[BtoRMesh])
 	def __init__(self, object):
 		""" Initialize a mesh export adapter """		
-		ObjectAdapter.__init__(self, object)	
-	def initMaterial(self):
-		print self.objData["material"]
-		if self.objData["material"] != None and self.objData["material"] != "None":
-			self.setMaterial(self.materials.getMaterial(self.objData["material"]), True)
+		ObjectAdapter.__init__(self, object)
+		
+
 		
 	def render(self, shadowPass = False, envPass = False):
 		render = False
@@ -644,17 +914,18 @@ class MeshAdapter(ObjectAdapter):
 					if self.properties["ShadowMats"].getValue():
 						#print "Rendering material in shadow pass"
 						self.renderMaterial()
-				else:
-						
+				elif not self.getProperty("matte"): #otherwise, the material won't get rendered if the object is a matte
 					self.renderMaterial() # render the material				
+				
 				ri.RiTransform(self.object.matrix) # transform				
-				self.renderMeshData() # and render the mesh				
-				#self.renderArchiveCall()
+				# self.renderMeshData() # and render the mesh				
+				ri.RiReadArchive(self.objData["archive"] + self.objData["name"] + ".rib") # this should read from the archive path
 				ri.RiTransformEnd()
 				ri.RiAttributeEnd()
 				# aaaannnnnd done.
-	def renderArchiveCall(self):
-		pass
+
+
+		
 	def renderMeshData(self):
 		subsurf = False
 		modifiers = self.object.modifiers
@@ -671,34 +942,13 @@ class MeshAdapter(ObjectAdapter):
 			self.renderPointsPolygons()
 		
 		
-	def renderMaterial(self):
-		if self.objData["material"] == "None":
-			# generate a default material - make sure to setup a default material button in the scene settings dialog
-			ri.RiColor(cgkit.cgtypes.vec3(1.0, 1.0, 1.0))
-			ri.RiOpacity(cgkit.cgtypes.vec3(1.0, 1.0, 1.0))
-			ri.RiSurface("matte", { "Ka" : 1.0, "Kd" : 1.0 })
+
 				
-		elif self.objData["material"] != None:			
-			Bmaterial = self.materials.getMaterial(self.objData["material"])			
-			Bmaterial.surface.updateShaderParams()
-			Bmaterial.displacement.updateShaderParams()
-			Bmaterial.volume.updateShaderParams()
-			material = Bmaterial.material
-			ri.RiColor(material.color())			
-			ri.RiOpacity(material.opacity())
-			# thus
-			if material.surfaceShaderName() != None:				
-				ri.RiSurface(material.surfaceShaderName(), material.surfaceShaderParams(0))
-			if material.displacementShaderName() != None:				
-				ri.RiDisplacement(material.displacementShaderName(), material.displacementShaderParams(0))
-			if material.interiorShaderName() != None:
-				ri.RiAtmosphere(material.interiorShaderName(), material.interiorShaderParams(0))
-				
-	def renderArchive(self, archive):
+	def renderArchive(self):
 		""" Write this object to an external archive file. """
 		# add support here for detecting if materials should be exported to archives or not.
 		# I should probably add that as an option in the export settings dialog.
-		ri.RiBegin(self.objData["archive"]) 
+		ri.RiBegin(self.objData["archive"] + self.objData["name"] + ".rib") 
 		# this is pure geometry here
 		ri.RiAttributeBegin()
 		ri.RiTransformBegin()
@@ -742,17 +992,12 @@ class MeshAdapter(ObjectAdapter):
 			
 		self.objData["material"] = "None"
 		
-	def setMaterial(self, material, preInit = False):	
-		if material != None:
-			self.material = material
-			if preInit == False:
-				self.objData["material"] = material.name
-				
-			self.objEditor.materialButton.setTitle(material.name)
-			self.objEditor.setImage(material.image)
+
 	def setGroup(self, group):
 		self.objData["group"] = group
 		self.objEditor.objectGroupButton.setTitle(group)
+
+		
 	def renderPointsPolygons(self):
 		""" Export Renderman PointsPolygons object. """
 		mesh = self.object.getData(False, True)
@@ -841,21 +1086,46 @@ class MeshAdapter(ObjectAdapter):
 			
 		nfaces = len(mesh.faces)
 		nverts = []
-		vertids = []
-		
+		vertids = []		
 		Cs = range(len(mesh.verts)) 
 		st = range(len(mesh.verts))
 		# get the faces by vertex ID
+		getCs = False
+		getSt = False
+		
+		
+		if mesh.vertexColors == 1:
+			getCs = True
+		if mesh.faceUV == 1:
+			getSt = True
+		
 		for face in mesh.faces:
 			nverts.append(len(face.v))
-			if mesh.vertexColors == 1:
-				if len(face.v) > 2:
-					for vertIdx in range(len(face.v)):
-						Cs[face.v[vertIdx].index] = face.col[vertIdx] # should actually average the vert color across
-			if mesh.faceUV == 1:
-				if len(face.v) > 2:
-					for vertIdx in range(len(face.v)):
-						st[face.v[vertIdx].index] = [face.uv[vertIdx][0], 1.0 - face.uv[vertIdx][1]]
+			vtuv = []
+			if len(face.v) > 2:
+				for vertIdx in range(len(face.v)):
+					if getCs:
+						Cs[face.v[vertIdx].index] = face.col[vertIdx]
+					if getSt:
+						st[face.v[vertIdx].index] = [face.uv[vertIdx][0],1.0 - face.uv[vertIdx][1]]
+					#else:
+					#	uv= face.uv[vertIdx]
+					#	uv= uv[0], 1.0 - uv[1]
+					#	vertTexUV[face.v[vertIdx].index] = uv
+			for vert in face.v:
+				vertids.append(vert.index)
+					
+				
+		edge_faces = self.edge_face_users(mesh)
+		
+			#if mesh.vertexColors == 1:
+			#	if len(face.v) > 2:
+			#		for vertIdx in range(len(face.v)):
+			#			Cs[face.v[vertIdx].index] = face.col[vertIdx] # should actually average the vert color across
+			#if mesh.faceUV == 1:
+			#	if len(face.v) > 2:
+			#		for vertIdx in range(len(face.v)):
+			#			st[face.v[vertIdx].index] = [face.uv[vertIdx][0], 1.0 - face.uv[vertIdx][1]]
 			#else:
 			#	if len(mesh.faces[0].uv) != 0:
 			#		vtuv = []
@@ -864,45 +1134,72 @@ class MeshAdapter(ObjectAdapter):
 			#			uv = uv[0], 1.0 - uv[1]
 			#			vertTexUV[face.v[vertIdx].index] = uv
 						
-			for vert in face.v:
-				vertids.append(vert.index)
-		
-		# get the creases
-		creases = {}
-		# develop a list of creases based on crease value.
-		for edge in mesh.edges:		
-			if edge.crease > 0:
-				if edge.crease not in creases:
-					creases[edge.crease] = []
-				creases[edge.crease].append([edge.v1.index, edge.v2.index])
-		
-		creaselist = []
-		for crease in creases: # for each crease group, create a set of vertices and merge 
-			verts = []
-			i_set = Set()
-			setlist = []
-			edgelist = creases[crease]
-			for edge in edgelist:
-				i_set.add(edge[0])
-				i_set.add(edge[1])
 			
-			for item in i_set:
-				set = Set()
-				set.add(item)
-				setlist.append(set)
+		if self.getProperty("AutoCrease"):
+			# this has to be calculated per edge, so what I probably want to do first is build up a list of face index per edge
+			# get the normals of each face in the edge_faces list
+			creases = {}
+			creaselist = range(len(mesh.edges))
+			edgeIdx = 0
+			maxAng = self.getProperty("MaxCreaseAngle")			
+			for edge in edge_faces:
+				
+				if len(edge) > 1:
+					a = edge[0]
+					b = edge[1]
+					ang = Blender.Mathutils.AngleBetweenVecs(a.no, b.no)
+					# my angle range is -90 to 90 degrees
+					# thus
+					if ang < 0:
+						ang = -ang
+						
+					if ang > maxAng:
+						factor = 1.0
+					else:
+						# calculate the value for the crease using 0-1.0 range, as applied to the range 0-maxAng.
+						factor = ang / maxAng
+					
+					creaselist[edgeIdx] = [factor, [mesh.edges[edgeIdx].v1.index, mesh.edges[edgeIdx].v2.index]] # this is 1:1 because of how I'm doing this					
+					edgeIdx = edgeIdx + 1
+					
+				
+		else:
+			# get the creases
+			creases = {}
+			# develop a list of creases based on crease value.
+			for edge in mesh.edges:		
+				if edge.crease > 0:
+					if edge.crease not in creases:
+						creases[edge.crease] = []
+					creases[edge.crease].append([edge.v1.index, edge.v2.index])
 			
-			for edge in edgelist:
-				seta = self.find_set(edge[0], setlist)
-				if edge[1] not in seta:
-					setb = self.find_set(edge[1], setlist)
-					newset = self.merge_set(seta, setb)
-					setlist.remove(seta)
-					setlist.remove(setb)
-					setlist.append(newset)
-			# print "Creases for crease level: ", crease, " are ", setlist
-			
-			for item in setlist:
-				creaselist.append([crease, item]) # this will add to the flat list of crease objects that I need.
+			creaselist = []
+			for crease in creases: # for each crease group, create a set of vertices and merge 
+				verts = []
+				i_set = Set()
+				setlist = []
+				edgelist = creases[crease]
+				for edge in edgelist:
+					i_set.add(edge[0])
+					i_set.add(edge[1])
+				
+				for item in i_set:
+					set = Set()
+					set.add(item)
+					setlist.append(set)
+				
+				for edge in edgelist:
+					seta = self.find_set(edge[0], setlist)
+					if edge[1] not in seta:
+						setb = self.find_set(edge[1], setlist)
+						newset = self.merge_set(seta, setb)
+						setlist.remove(seta)
+						setlist.remove(setb)
+						setlist.append(newset)
+				# print "Creases for crease level: ", crease, " are ", setlist
+				
+				for item in setlist:
+					creaselist.append([crease, item]) # this will add to the flat list of crease objects that I need.
 
 		# don't forget reference geometry. I need the base mesh before lattice/armature transforms are applied to it.
 		# I can probably disable all modifiers except for decimate and gather that mesh, 
@@ -918,17 +1215,17 @@ class MeshAdapter(ObjectAdapter):
 		nargs = []
 		intargs = []
 		floatargs = []
-		
+		#print creaselist
 		for crease in creaselist:
-			# print crease
-			tags.append("crease")
-			nargs.append(len(crease[1]))
-			nargs.append(1)
-			for item in crease[1]:
-				intargs.append(item)
-			
-			val = (float(crease[0]) / 255) * 5.0
-			floatargs.append(val) # normalized currently for the Aqsis renderer
+			if type(crease) != type(1):
+				tags.append("crease")		
+				nargs.append(len(crease[1]))
+				nargs.append(1)
+				for item in crease[1]:
+					intargs.append(item)
+				
+				val = (float(crease[0]) / 255) * 5.0
+				floatargs.append(val) # normalized currently for the Aqsis renderer
 		tags.append("interpolateboundary")
 		nargs.append(0)
 		nargs.append(0)
@@ -945,7 +1242,7 @@ class MeshAdapter(ObjectAdapter):
 			params["Cs"] = vCol
 		else:
 			pass
-			#params["st"] = vertTexUV
+			params["st"] = vertTexUV
 			
 		if 1 == 2: 
 			print "nfaces: ", nfaces
@@ -975,28 +1272,61 @@ class MeshAdapter(ObjectAdapter):
 		""" merge two sets """
 		return seta.union(setb)
 
+	
+	# from BpyMesh
+	def sorted_edge_indicies(self, ed):
+		i1= ed.v1.index
+		i2= ed.v2.index
+		if i1>i2:
+			i1,i2= i2,i1
+		return i1, i2
+
+	def edge_face_users(self, me):
+		''' 
+		Takes a mesh and returns a list aligned with the meshes edges.
+		Each item is a list of the faces that use the edge
+		would be the equiv for having ed.face_users as a property
+		'''
+		
+		face_edges_dict= dict([(self.sorted_edge_indicies(ed), (ed.index, [])) for ed in me.edges])
+		for f in me.faces:
+			fvi= [v.index for v in f.v]# face vert idx's
+			for i in xrange(len(f)):
+				i1= fvi[i]
+				i2= fvi[i-1]
+				
+				if i1>i2:
+					i1,i2= i2,i1
+				
+				face_edges_dict[i1,i2][1].append(f)
+		
+		face_edges= [None] * len(me.edges)
+		for ed_index, ed_faces in face_edges_dict.itervalues():
+			face_edges[ed_index]= ed_faces
+		
+		return face_edges
 		
 class LampAdapter(ObjectAdapter):
 	""" BtoR Lamp Adapter object """
 	protocols.advise(instancesProvide=[IObjectAdapter], asAdapterForTypes=[BtoRLamp])
 	def __init__(self, object):
 		""" Initialize a Lamp export adapter """
-		
 		ObjectAdapter.__init__(self, object)	
 		self.isAnimated = False 
 	def render(self): 
 		""" Generate renderman data for this object. """
-		
-		ri.RiLightSource(self.shader.shader.shadername, self.shader.shader.params())
+		shader = self.getProperty("shader").getObject().shader
+		ri.RiLightSource(shader.shadername, shader.params())
 		
 	def doCameraTransform(self, axis):
-		if axis != None:	
+
+		if axis != None:				
 			# I still need to transform based on the light's matrix
 			# get the inverse matrix first
 			# if this is point light, I should probably set the rotation values to zero	
-			# step 1, transform the world to left-handed
 			ri.RiScale(-1, 1, 1)
 			ri.RiRotate(180, 0, 1, 0)
+			
 			if axis == "px":		
 				ri.RiRotate(90, 0, 1, 0)
 			elif axis == "nx":	
@@ -1008,19 +1338,17 @@ class LampAdapter(ObjectAdapter):
 				ri.RiRotate(90, 1, 0, 0)				
 			elif axis == "pz":				
 				ri.RiRotate(180, 0, 1, 0) 	
-
-			cmatrix = self.object.getInverseMatrix()
-			#sMat = Blender.Mathutils.ScaleMatrix(-1, 4, vecX)		
-			#rMat = Blender.Mathutils.RotationMatrix(180, 4, "y")
-			#mat = cmatrix * sMat * rMat
-			trans = cmatrix.translationPart()
-			print "\n"
-			print "At shadowmap generation for axis:", axis
-			print "Light translation is", trans
-			print "\n"
-			ri.RiTranslate(trans)
 			
-		else:			
+			#cmatrix = self.object.getInverseMatrix()
+			#trans = cmatrix.translationPart()			
+		
+			#ri.RiTranslate(trans)
+			ri.RiTranslate(-self.object.LocX, -self.object.LocY, -self.object.LocZ)
+			
+				
+		else:		
+			ri.RiScale(-1, 1, 1)
+			ri.RiRotate(180, 0, 1, 0)			
 			cmatrix = self.object.getInverseMatrix()
 			matrix = [cmatrix[0][0],
 					cmatrix[0][1],
@@ -1041,6 +1369,12 @@ class LampAdapter(ObjectAdapter):
 			# otherwise, do nothing
 			ri.RiTransform(matrix)
 			
+			#vecX = Blender.Mathutils.Vector(1, 0, 0)
+			#cmatrix = self.object.getInverseMatrix()
+			#sMat = Blender.Mathutils.ScaleMatrix(-1, 4, vecX)		
+			#rMat = Blender.Mathutils.RotationMatrix(180, 4, "y")
+			#mat = cmatrix * sMat * rMat
+			#ri.RiTransform(mat)
 			# ri.RiTranslate(0, 0, 1) # dunno if this is neccessary here or not.
 			
 	def getRenderProjection(self):
@@ -1274,8 +1608,10 @@ class LampAdapter(ObjectAdapter):
 			self.initObjectData()
 			self.objData["reset"] = True
 		
+	def getSelector(self):
+		return self.objEditor.getSelector()
 
-
+	
 		
 class MBallAdapter(ObjectAdapter):
 	protocols.advise(instancesProvide=[IObjectAdapter], asAdapterForTypes=[BtoRMBall])
@@ -1327,12 +1663,12 @@ class CameraAdapter(ObjectAdapter):
 				
 	def render(self):
 		""" generate Renderman data for this object """		
-		
+		shader = self.getProperty("shader").getObject()
 		# self.objEditor.shaderButton.title = self.imagerShader.shader_menu.getValue()
-		if self.shader.shader != None:
-			if self.shader.getShaderName() != None:
-				self.shader.updateShaderParams()
-				ishader = self.shader.shader
+		if shader.shader != None:
+			if shader.getShaderName() != None:
+				shader.updateShaderParams()
+				ishader = shader.shader
 				ri.RiImager(ishader.shadername, ishader.params()) # and done
 			else:
 				bWorld = Blender.World.GetCurrent()
@@ -1348,11 +1684,15 @@ class CameraAdapter(ObjectAdapter):
 		ri.RiFormat(render.imageSizeX(), render.imageSizeY(), 1) # leave aspect at 1 for the moment
 		
 		if cType == 0:	
-			factor = render.imageSizeX() / render.imageSizeY()
-			fov = 360.0 * math.atan((factor * 16.0) / camera.lens) / math.pi
+			if render.imageSizeX() >= render.imageSizeY():
+				factor = render.imageSizeY() / float(render.imageSizeX())
+			else:
+				factor = render.imageSizeX() / float(render.imageSizeY())
+				
+			fov = 360.0 * math.atan(factor * 16.0 / camera.lens) / math.pi
+			print "Using a ", fov, " degree Field of View"
 			ri.RiProjection("perspective", "fov", fov)
-			# Depth of field
-			print self.properties
+			# Depth of field			
 			if self.properties["DOF"].getValue():
 				ri.RiDepthOfField(self.properties["fstop"].getValue(), self.properties["focallength"].getValue(), self.properties["focaldistance"].getValue())
 			# Depth of field done
@@ -1370,8 +1710,7 @@ class CameraAdapter(ObjectAdapter):
 		rMat = Blender.Mathutils.RotationMatrix(180, 4, "y")
 		mat = cmatrix * sMat * rMat
 		ri.RiTransform(mat)		
-		ri.RiTranslate(0, 0, 1)
-
+		#ri.RiTranslate(0, 0, 1)
 		
 	def initObjectData(self):
 		# object initia.ize
@@ -1387,6 +1726,7 @@ class CameraAdapter(ObjectAdapter):
 		shaderParams["bgcolor"] = [bWorld.hor[0], bWorld.hor[1], bWorld.hor[2]]
 		self.objData["shaderparams"] = shaderParams
 		self.initShader()
+
 class PreviewAdapter(ObjectAdapter):
 	protocols.advise(instancesProvide=[IObjectAdapter], asAdapterForTypes=[BtoRPreview])
 	def __init__(self, object):
@@ -1617,9 +1957,7 @@ class PreviewAdapter(ObjectAdapter):
 class ObjectUI:
 	""" Object editor panel """
 	protocols.advise(instancesProvide=[IObjectUI], asAdapterForTypes=[BtoRLattice, BtoRArmature, BtoRBasicObject, BtoREmpty, BtoRWave])
-	options = {
-		"Blank": ["Blank Property", False]
-	}
+
 	def __init__(self, obj):
 		dict = globals()	
 		self.settings = dict["instBtoRSettings"]
@@ -1629,18 +1967,20 @@ class ObjectUI:
 		self.objecteditor = dict["instBtoRObjects"]
 		self.grouplist = dict["instBtoRGroupList"]
 		self.helpwindow = dict["instBtoRHelp"]
+		self.lighting = dict["instBtoRLightManager"]
 		self.mat_selector = self.materials.getSelector()
 		
-		self.editorPanel = ui.Panel(4, 65, 491,  320, "Empty Panel", "", None, False)
-		self.editorPanel.titleColor = [65, 65, 65, 255]
+		self.editorPanel = ui.Panel(4, 50, 255,  320, "Empty Panel", "", None, False)
+		self.editorPanel.titleColor = [255,255,255, 255]
 		self.editorPanel.hasHeader = False
 		self.editorPanel.cornermask = 0
 		self.editorPanel.shadowed = False
 		self.editorPanel.outlined = False
-
-		self.scroller= ui.ScrollPane(235, 25, 240, 260, "Scroller", "Scroller", self.editorPanel, True)
+		self.editorPanel.addElement(ui.Label(10, 25, "Object Properties", "Object Properties:", self.editorPanel, True))
+		self.scroller= ui.ScrollPane(10, 50, 240, 235, "Scroller", "Scroller", self.editorPanel, True)
 		self.properties = {}
 		self.editors = {}
+
 		for option in self.optionOrder:
 			propertyName = self.options[option][0]
 			propertyValue = self.options[option][1]
@@ -1654,41 +1994,69 @@ class ObjectUI:
 			self.scroller.addElement(self.editors[option].getEditor()) # and that should be that. When this is discarded, all those go away
 			self.editors[option].setParent(self.scroller)	
 			self.scroller.offset = 0
-
-
-
+			
 	def getEditor(self):
 		""" get the object editor for this object. """
 		return self.editorPanel
 		
-
+	def reloadOptions(self):
+		self.scroller.clearElements()
+		# simple enough to reload everything from the options array
+		for option in self.optionOrder:
+			self.scroller.addElement(self.editors[option].getEditor())
+		
 
 class MeshUI(ObjectUI):
 	object_output_options = ["Mesh", "Renderman Primitive", "RA Proxy", "RA Procedural"]
 	mesh_output_options = ["basic", "SubDiv"]
 	protocols.advise(instancesProvide=[IObjectUI], asAdapterForTypes=[BtoRMesh])
 	""" This is the object editor. Here you can assign materials, and set various options for the export. """
-	options = { "AutoCrease" : ["Automatic Creasing?", True], 
+	
+
+	def __init__(self, obj):
+		self.options = { "material":["material", BtoRMaterialType("None Selected")],
+			"AutoCrease" : ["Automatic Creasing?", False], 
+			"MaxCreaseAngle" : ["Max AutoCrease Angle", 90.0],
 			"RIBEntity" : ["Save as RIB Entity", False], 
 			"IncludeMats" : ["Include Materials in RIB Entity", True],
 			"ShadowMats" : [ "Include Materials in Shadowmap", False],
 			"RenderInShadowPass" : [ "Include object in Shadowmap", True],
+			"GenEnvMaps" : ["Generate Environment Maps" , False],
+			"MapType" : ["Environment Map Type:", { "Cubic": "cubic", "Spherical": "spherical"}],
 			"RenderInEnvMaps" : ["Include object in Environment Maps", True],
+			"EnvMapPixelFilter" : ["EnvMap Pixel Filter", {"box":"box", "triangle":"triangle", "catmull-rom":"catmull-rom", "sinc":"sinc", "gaussian":"gaussian"}],
+			"EnvMapFilterX":["EnvMap Filter size X", 1],
+			"EnvMapFilterY":["EnvMap Filter size Y", 1],
+			"EnvMapSamplesX":["EnvMap Samples X", 1],
+			"EnvMapSamplesY":["EnvMap Samples Y", 1],
+			"EnvMapShadingRate" : ["EnvMapShadingRate", 1.0],
 			"DefineAsObj" : ["Define as RiObject", False]	,
 			"InplaceInstance" : ["In-Place Instancing", False],
 			"InstanceCount" : ["Number of Instances", 1],
 			"AutoRandomize" : ["Auto Randomize Material", False],
 			"OutputOptions" : ["Object Output Options:", {"Mesh" : "mesh", "Renderman Primitive" : "primtive", "RA Proxy" : "proxy", "RA Procedural" : "procedural" }],
-			"matte" : ["Treat as Matte", True],
+			"matte" : ["Treat as Matte", False],
+			"Ignore" : ["Don't Export Object:", False],
 			"sides" : ["Sides", 1],
 			"ShadingRate" : ["Shading Rate", 1.0],
 			"dispBoundLength" : ["Displacement Bound", 2.0],
-			"dispCoords" : ["Disp Bound Coord sys", {"Object" : "object", "Shader":"shader", "NDC": "ndc", "World": "world"}] 
+			"dispCoords" : ["Disp Bound Coord sys", {"Object" : "object", "Shader":"shader", "NDC": "ndc", "World": "world"}],
+			"ExportCs" : ["Export Vertex Colors(Cs)", True], 
+			"ExportSt" : ["Export Texture Coordinates(s/t)", True]
 			}
-	optionOrder = ["OutputOptions", 
+		self.optionOrder = ["material",
+				"OutputOptions", 
 				"AutoCrease",
+				"MaxCreaseAngle",
 				"RenderInShadowPass",
 				"ShadowMats",
+				"GenEnvMaps",
+				"EnvMapPixelFilter",
+				"EnvMapFilterX",
+				"EnvMapFilterY",
+				"EnvMapSamplesX",
+				"EnvMapSamplesY",
+				"EnvMapShadingRate",
 				"RenderInEnvMaps",
 				"DefineAsObj",
 				"InplaceInstance",
@@ -1697,33 +2065,18 @@ class MeshUI(ObjectUI):
 				"RIBEntity",
 				"IncludeMats",
 				"matte",
+				"Ignore",
 				"sides",
 				"ShadingRate",
 				"dispBoundLength",
-				"dispCoords"]
-				
-				
-				
-	def __init__(self, obj):
+				"dispCoords",
+				"ExportCs",
+				"ExportSt"]
+		# preinitialize a material property
 		ObjectUI.__init__(self, obj)
-		
-		self.editorPanel.title = "Mesh Export Settings:"			
-		self.editorPanel.addElement(ui.Label(10, 25, "Assigned Material", "Assigned Material:", self.editorPanel, False))
-		
-		self.materialButton = ui.Button(10, 45, 180, 65, "Material", "None Selected", 'large', self.editorPanel, True)
-		self.materialButton.registerCallback("release", self.showMaterialSelector)
-		self.materialButton.textlocation = 1
-		
-
-		#self.modifyShaderParmsButton = ui.Button(10, 145, 150, 25, "Select Parameters", "Select Parameters", 'normal', self.editorPanel, True)
-		#self.modifyShaderParmsButton.registerCallback("release", self.showParameterModifier)
 		
 		self.exportButton = ui.Button(self.editorPanel.width - 185, self.editorPanel.height - 25, 180, 25, "Export", "Export Object", 'normal', self.editorPanel, True)
 		self.exportButton.registerCallback("release", self.showExport)
-		
-		#self.helpButton = ui.Button(10, self.editorPanel.height - 25, 180, 25, "Help", "Help", 'normal', self.editorPanel, True)
-		# create a help callback
-		#self.helpButton.registerCallback("release", self.showHelp)
 		
 		self.exportSettings = btor.BtoRMain.ExportSettings()
 		self.exportSettings.export_functions.append(self.objecteditor.exportSingleObject) # this should do the trick, but should apply to every object that's exportable standalone
@@ -1733,48 +2086,10 @@ class MeshUI(ObjectUI):
 		And more lines.
 		and yet more! """
 		
-	def showParameterModifier(self, button):
-		pass
-	def showGroupSelector(self, button):
-		self.evt_manager.addElement(self.grouplist.getEditor())
 	def showHelp(self, button):
 		print "Here is my docstring!", self.__doc__
 		self.helpwindow.setText(self.helpText)
 		self.evt_manager.addElement(self.helpwindow.getEditor())
-	def setImage(self, image):
-		buttonImage = ui.Image(120, 5, 56, 56, image, self.materialButton, False)
-		self.materialButton.image = buttonImage
-
-		
-	def selectMeshOutputType(self, obj):
-		""" selector method for output menu """
-		if self.mesh_output_menu.getSelectedIndex == 0:
-			self.mesh_output_type_label.isVisible = True
-			self.mesh_output_type_menu.isVisible = True
-		else:
-			self.mesh_output_type_label.isVisible = False
-			self.mesh_output_type_menu.isVisible = False		
-	
-	def showMaterialSelector(self, obj):
-		""" Display a material selector window. """
-		# I should have loaded materials here, so let's do this.
-		self.evt_manager.addElement(self.mat_selector)
-
-	def selectMaterial(self, obj, matName = None):
-		""" material selection callback """
-		self.evt_manager.removeElement(self.mat_selector)
-		# the button returned has the material name!
-		# So all i need to do now is...
-		if matName != None:
-			self.material = matName
-			self.materialButton.setTitle(matName)
-			self.materialButton.image = self.materials.getMaterial(matName).image
-		else:
-			self.material = obj.title
-			# self.scene.object_data[self.objectName.getValue()]["material"] = obj.title # Assign the material to the object adapter
-			# print "Assigned material ", self.scene.object_data[self.objectName.getValue()]["material"], " to ", self.objectName.getValue()
-			self.materialButton.title = obj.title			
-			self.materialButton.image = ui.Image(120, 5, 56, 56,  obj.image.image, self.materialButton, False)
 		
 	def showExport(self, obj):
 		""" Display the mesh object export dialog. """
@@ -1785,47 +2100,56 @@ class MeshUI(ObjectUI):
 			self.includeMaterials.isVisible = True
 		else:
 			self.includeMaterials.isVisible = False
+			
 	def setDefine(self, obj):
 		if obj.getValue():
 			self.defineObjectVisGroup.show()
 		else:
 			self.defineObjectVisGroup.hide()
-			
 		
-		
-
 class LampUI(ObjectUI):
-	light_output_options = ["LightSource", "AreaLightSource"]
-	protocols.advise(instancesProvide=[IObjectUI], asAdapterForTypes=[BtoRLamp])
-	options = {"IncludeWithAO" : ["Include light with AO?", False], 
-			"GenShadowMap" : ["Generate Shadow Maps", True], 
-			"ShadowMapSize" : ["Shadow Map Size", { "256" : 256, "512" : 512, "1024" : 1024, "2048" : 2048 }]}
-	optionOrder = ["IncludeWithAO",
-				"GenShadowMap",
-				"ShadowMapSize"]
-	# update shadow map generation so that I can control when the shadows are regenerated.
+	protocols.advise(instancesProvide=[IObjectUI], asAdapterForTypes=[BtoRLamp])	
 	def __init__(self, obj):
-		
+		self.options = {"IncludeWithAO" : ["Include light with AO?", False], 
+				"GenShadowMap" : ["Generate Shadow Maps", True], 
+				"ShadowMapSize" : ["Shadow Map Size", { "256" : 256, "512" : 512, "1024" : 1024, "2048" : 2048 }],
+				"DepthFilter" : ["Midpoint Depthfilter?", True],
+				"ShadowmapSamples" : ["ShadowMap Samples", 1],
+				"ShadowMapJitter" : ["ShadowMap Jitter:", 0.0],
+				"ShowZBuffer" : ["Show Z Buffer:", False],
+				"Group" : ["Occlusion Group:", {"None Selected":"none Selected"}]}
+					
+		self.optionOrder = ["IncludeWithAO",
+					"GenShadowMap",
+					"Group",
+					"DepthFilter",
+					"ShadowMapJitter",
+					"ShadowMapSize",
+					"ShowZBuffer"]		
 		ObjectUI.__init__(self, obj)
-		self.editorPanel.title = "Light Export Settings:"		
-		self.editorPanel.addElement(ui.Label(10, 25, "Light Type:", "Light Type:", self.editorPanel, False))
-		self.light_output_menu = ui.Menu(15 + self.editorPanel.get_string_width("Light Type:", 'normal'), 25, 150, 25, "Light Menu", self.light_output_options, self.editorPanel, True)
-		self.editorPanel.addElement(ui.Label(10, 65, "Light Shader:", "Light Shader:", self.editorPanel, False))
-		self.shaderButton = ui.Button(15 + self.editorPanel.get_string_width("Light Shader:", 'normal'), 65, 125, 25, "None Selected", "None Selected", 'normal', self.editorPanel, True)
-		shadow = self.settings.useShadowMaps.getValue()
-
-			
+		# assign custom stuff to any properties that need it
+		self.lighting.occlListeners.append(self.editors["Group"])
+		self.editors["Group"].updateMenu(self.lighting.occlusion_menu) # to catch any stragglers
+		
+	def getSelector(self):
+		return self.selector
+		
 	def setShader(self, shader):
-		self.shaderButton.removeCallbacks("release")
-		self.shader = shader
-		self.shaderButton.registerCallback("release", self.shader.showEditor)
+		self.options["shader"] = ["Light Shader:", BtoRShaderType(shader)]
+		self.properties["shader"] = IProperty(self.options["shader"][1])
+		self.properties["shader"].setWidth(self.scroller.width - 15)
+		self.properties["shader"].setName("Imager Shader:")
+		self.optionOrder.insert(0, "shader")
+		self.editors["shader"] = IPropertyEditor(self.properties["shader"])
+		self.editors["shader"].setParent(self.scroller)	
+		self.reloadOptions()
 			
 		
 class MBallUI(ObjectUI):
 	protocols.advise(instancesProvide=[IObjectUI], asAdapterForTypes=[BtoRMBall])
 	def __init__(self, obj):
 		ObjectUI.__init__(self, obj)
-		self.editorPanel.title = "Metaball Export Settings:"
+		
 
 		
 class CurveUI(ObjectUI):
@@ -1833,14 +2157,13 @@ class CurveUI(ObjectUI):
 	protocols.advise(instancesProvide=[IObjectUI], asAdapterForTypes=[BtoRCurve])
 	def __init__(self,obj):
 		ObjectUI.__init__(self, obj)
-		self.editorPanel.title = "Curve Export Settings: "
 
 class SurfaceUI(ObjectUI):
 	""" A UI for the surface type """
 	protocols.advise(instancesProvide=[IObjectUI], asAdapterForTypes=[BtoRSurf])
 	def __init__(self, obj):
 		ObjectUI.__init__(self, obj)
-		self.editorPanel.title = "Surface Export Settings:"
+		
 
 		
 class CameraUI(ObjectUI):
@@ -1852,17 +2175,20 @@ class CameraUI(ObjectUI):
 			"focaldistance" : ["Focal Distance:", 10] }
 	optionOrder = ["DOF", "fstop", "focallength", "focaldistance"]
 	def __init__(self, obj):
-		ObjectUI.__init__(self, obj)		
-		self.editorPanel.title = "Camera Export Settings:"
-		
-		self.editorPanel.addElement(ui.Label(10, 30, "Imager Shader:", "Imager Shader:", self.editorPanel, False))
-		self.shaderButton = ui.Button(self.editorPanel.get_string_width("Imager Shader:", 'normal') + 15, 30, 125, 25, "Imager Shader", "None Selected", 'normal', self.editorPanel, True)		
+		ObjectUI.__init__(self, obj)				
+		#self.editorPanel.addElement(ui.Label(10, 30, "Imager Shader:", "Imager Shader:", self.editorPanel, False))
+		#self.shaderButton = ui.Button(self.editorPanel.get_string_width("Imager Shader:", 'normal') + 15, 30, 125, 25, "Imager Shader", "None Selected", 'normal', self.editorPanel, True)		
 		# self.shaderButton.registerCallback("release", self.shader.showEditor)
 		
 	def setShader(self, shader):
-		self.shader = shader
-		self.shaderButton.registerCallback("release", self.shader.showEditor)
-		
+		self.options["shader"] = ["Imager Shader:", BtoRShaderType(shader)]
+		self.properties["shader"] = IProperty(self.options["shader"][1])
+		self.properties["shader"].setWidth(self.scroller.width - 15)
+		self.properties["shader"].setName("Imager Shader:")
+		self.optionOrder.insert(0, "shader")
+		self.editors["shader"] = IPropertyEditor(self.properties["shader"])
+		self.editors["shader"].setParent(self.scroller)	
+		self.reloadOptions()
 		
 class ShaderParamUI:
 	protocols.advise(instancesProvide=[IShaderParamUI], asAdapterForTypes=[BtoRStringParam, BtoRArrayParam, BtoRMatrixParam])
@@ -2213,8 +2539,10 @@ class StringEditor(ShaderParamEditor):
 class MatrixEditor(ShaderParamEditor):
 	height = 140
 	paramtype = "matrix"
+	protocols.advise(instancesProvide=[IShaderParamEditor], asAdapterForTypes=[BtoRMatrixParam])
 	def __init__(self, bObj):
 		ShaderParamEditor.__init__(self, bObj)	
+		value = bObj.getValue()
 		self.param_name = self.name
 		column1 = []
 		column2 = []

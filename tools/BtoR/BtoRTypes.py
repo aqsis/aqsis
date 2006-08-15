@@ -23,6 +23,13 @@ class BtoREmpty(BtoRBasicObject): pass
 class BtoRWave(BtoRBasicObject): pass
 # preview object
 class BtoRPreview(BtoRBasicObject): pass
+# complex property types
+class BtoRShaderType(BtoRBasicObject): 
+	def getShaderName(self):
+		return self.obj.getShaderName()
+	def registerCallback(self, signal, function):
+		self.obj.registerCallback(signal, function)
+class BtoRMaterialType(BtoRBasicObject): pass
 # shader parameter objects
 class BtoRBasicParam:
 	def __init__(self, matName = None, shader = None, param = None, type = None, value = None, size = None, parent = None, name = None):
@@ -42,6 +49,8 @@ class BtoRBasicParam:
 		return self.mat
 	def getParam(self):
 		return self.param
+	def getValue(self):
+		return self.value
 		
 class BtoRFloatParam(BtoRBasicParam): pass
 class BtoRStringParam(BtoRBasicParam): pass

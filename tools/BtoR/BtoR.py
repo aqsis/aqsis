@@ -10,9 +10,11 @@ setattr(BtoRMain, "instBtoREvtManager", instBtoREvtManager)
 instBtoRSettings = BtoRMain.BtoRSettings() # then bring up the settings
 setattr(BtoRMain, "instBtoRSettings", instBtoRSettings)
 
+instBtoRLightManager = BtoRMain.LightManager()
+setattr(BtoRMain, "instBtoRLightManager", instBtoRLightManager)
+
 instBtoRSceneSettings = BtoRMain.SceneSettings() # then scene settings
 setattr(BtoRMain, "instBtoRSceneSettings", instBtoRSceneSettings)
-
 
 setattr(BtoRMain, "instBtoRMaterials", BtoRMain.MaterialList())
 instBtoRMaterials = getattr(BtoRMain, "instBtoRMaterials")
@@ -26,11 +28,7 @@ setattr(BtoRMain, "instBtoRHelp", instBtoRHelp)
 instBtoRObjects = BtoRMain.ObjectEditor()
 setattr(BtoRMain, "instBtoRObjects", instBtoRObjects)
 
-instBtoRExport = BtoRMain.ExportUI()
-setattr(BtoRMain, "instBtoRExport", instBtoRExport)
 
-instBtoRLightManager = BtoRMain.LightManager()
-setattr(BtoRMain, "instBtoRLightManager", instBtoRLightManager)
 
 instBtoRMain = BtoRMain.MainUI()
 setattr(BtoRMain, "instBtoRMain", instBtoRMain)
