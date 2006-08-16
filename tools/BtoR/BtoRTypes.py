@@ -30,6 +30,8 @@ class BtoRShaderType(BtoRBasicObject):
 	def registerCallback(self, signal, function):
 		self.obj.registerCallback(signal, function)
 class BtoRMaterialType(BtoRBasicObject): pass
+class BtoRRotationType(BtoRBasicObject): pass
+	
 # shader parameter objects
 class BtoRBasicParam:
 	def __init__(self, matName = None, shader = None, param = None, type = None, value = None, size = None, parent = None, name = None):

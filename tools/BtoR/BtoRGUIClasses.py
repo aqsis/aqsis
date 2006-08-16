@@ -2057,7 +2057,9 @@ class Menu(UIElement):
 		self.customPrompt = customPrompt
 		self.valueIsCustom = False
 		
-	
+	def key_event(self, key, val):
+		if self.customValue.isVisible:
+			self.customValue.key_event(key, val)
 	def re_init(self, menu):
 		# clear the existing element list
 		for element in self.panel.elements:
@@ -2461,7 +2463,7 @@ class TextField(Button):
 		self.mouseDown = False  		
 		self.strict = 1 # strict enforces the type that was assigned by the type of the intial value of the field
 		# hence, floats will restrict to floats, same goes for ints and strings
-		self.registerCallback("click", self.stat)		
+		# self.registerCallback("click", self.stat)		
 		self.validate_functions = []
 		#self.undoMenu = Menu(0, 0, 60, 0, "Local Undo", ["No undo history"], parent, False)
 		self.registerCallback("right_click", self.showUndo)
@@ -2817,9 +2819,7 @@ class TextField(Button):
 			special = "!@#$%^&*()"
 			# numbers = "0123456789" unneccessary
 			# shift key
-			print "Key is", key
-			print "Value is ", val
-			print "Targets are: ", Blender.Draw.LEFTBRACKETKEY, " and ", Blender.Draw.RIGHTBRACKETKEY
+
 			if (key == Blender.Draw.RIGHTSHIFTKEY or key == Blender.Draw.LEFTSHIFTKEY) and val == 0: # released
 				self.shifted = False
 			elif (key == Blender.Draw.RIGHTSHIFTKEY or key == Blender.Draw.LEFTSHIFTKEY) and val == 1: # pressed

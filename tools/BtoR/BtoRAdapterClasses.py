@@ -124,6 +124,11 @@ class MaterialProperty(Property):
 class VectorProperty(Property):
 	protocols.advise(instancesProvide=[IProperty], asAdapterForTypes=[cgkit.cgtypes.vec3])
 	pass
+
+class RotationProperty(Property):
+	protocols.advise(instancesProvide=[IProperty], asAdapterForTypes=[BtoRRotationType])
+	pass
+	
 	
 class MatrixProperty(Property):
 	protocols.advise(instancesProvide=[IProperty], asAdapterForTypes=[cgkit.cgtypes.mat4])
@@ -428,10 +433,42 @@ class VectorPropertyEditor(PropertyEditor):
 		self.z = ui.TextField(start, 0, inc - 1, height, "Z", self.property.getValue()[2], self.editor, True, fontsize = self.fontsize)
 		self.z.registerCallback("update", self.updateValue)
 		
-	def udpateValue(self, obj):
-		self.property.value[0] = self.x.getValue()
-		self.property.value[1] = self.y.getValue()
-		self.property.value[2] = self.z.getValue()
+	def updateValue(self, obj):		
+		self.property.value = cgkit.cgtypes.vec3(float(self.x.getValue()), float(self.y.getValue()), float(self.z.getValue()))
+
+class RotationPropertyEditor(PropertyEditor):
+	protocols.advise(instancesProvide=[IPropertyEditor], asAdapterForTypes=[RotationProperty])
+	def __init__(self, property):
+		PropertyEditor.__init__(self, property)
+		width = property.width
+		height = property.height
+		start = width / 2
+		inc = (width / 2) / 4 - 1
+		
+		self.angle = ui.TextField(start, 0, inc - 1, height, "angle", self.property.getValue().getObject()[0], self.editor, True, fontsize = self.fontsize)
+		self.angle.registerCallback("update", self.updateValue)
+		start = start + inc
+		
+		self.x = ui.CheckBox(start + 1, 3, "X", "X",self.property.getValue().getObject()[1], self.editor, True, fontsize = self.fontsize)
+		self.x.registerCallback("release", self.updateValue)
+		start = start + inc
+		self.x.elements[0].x = 12
+		
+		self.y = ui.CheckBox(start + 1, 3, "Y", "Y", self.property.getValue().getObject()[2], self.editor, True, fontsize = self.fontsize)
+		self.y.registerCallback("release", self.updateValue)
+		start = start + inc
+		self.y.elements[0].x = 12
+		
+		self.z = ui.CheckBox(start + 1, 3, "Z", "Z", self.property.getValue().getObject()[3], self.editor, True, fontsize = self.fontsize)
+		self.z.registerCallback("release", self.updateValue)
+		self.z.elements[0].x = 12
+		
+	def updateValue(self, obj):	
+		print "updating property value!"		
+		self.property.value.obj = [float(self.angle.getValue()), self.x.getValue(), self.y.getValue(), self.z.getValue()]
+		print "value is ", self.property.value.obj
+		print "type is ", type(self.property.value.obj)
+		
 class MatrixPropertyEditor(PropertyEditor):
 	protocols.advise(instancesProvide=[IPropertyEditor], asAdapterForTypes=[MatrixProperty])
 	def __init__(self, property):
@@ -836,11 +873,55 @@ class ObjectAdapter:
 		Bmaterial = self.materials.getMaterial(self.getProperty("material"))
 		if Bmaterial == "None" or Bmaterial == None:
 			# generate a default material - make sure to setup a default material button in the scene settings dialog
+			print "rendering matte material"
 			ri.RiColor(cgkit.cgtypes.vec3(1.0, 1.0, 1.0))
 			ri.RiOpacity(cgkit.cgtypes.vec3(1.0, 1.0, 1.0))
 			ri.RiSurface("matte", { "Ka" : 1.0, "Kd" : 1.0 })
 		else:
 			if Bmaterial != None:
+				
+				# test for a transform 
+				translated = False
+				rotated = False
+				scaled = False
+				transform = False
+				translation = Bmaterial.getProperty("Translation")
+				rotation = Bmaterial.getProperty("Rotation").obj
+				scale = Bmaterial.getProperty("Scale")
+				print "material transform info is:"
+				print translation
+				print rotation
+				print scale
+				if translation[0] <> 0.0 or translation[1] <> 0.0 or translation[1] <> 0.0:
+					translated = True
+					transform = True
+				if rotation[1] or rotation[2] or rotation[3]:
+					rotated = True
+					transform = True
+				if scale[0] != 0.0 or scale[1] != 0.0 or scale[2] != 0.0:
+					scaled = True
+					transform = True
+					
+				if transform:
+					ri.RiTransformBegin()
+					if translated:
+						ri.RiTranslate(translation)
+					if rotated:
+						# here I have to figure out the axis of rotation.
+						x, y, z = 0, 0, 0
+						if rotation[1]:
+							x = 1
+						if rotation[2]:
+							y = 1
+						if rotation[3]:
+							z = 1
+							
+						ri.RiRotate(rotation[0], x, y, z)
+					if scaled:
+						print "material scale is ", scale
+						ri.RiScale(scale[0], scale[1], scale[2])
+						
+			
 				material = Bmaterial.material
 				Bmaterial.getProperty("Surface").getObject().updateShaderParams()
 				Bmaterial.getProperty("Displacement").getObject().updateShaderParams()
@@ -855,6 +936,8 @@ class ObjectAdapter:
 					ri.RiDisplacement(material.displacementShaderName(), material.displacementShaderParams(0))
 				if material.interiorShaderName() != None:
 					ri.RiAtmosphere(material.interiorShaderName(), material.interiorShaderParams(0))
+				if transform:
+					ri.RiTransformEnd()
 				
 class MeshAdapter(ObjectAdapter):
 	""" BtoR mesh Adapter """
@@ -863,18 +946,21 @@ class MeshAdapter(ObjectAdapter):
 		""" Initialize a mesh export adapter """		
 		ObjectAdapter.__init__(self, object)
 		
-
+	
 		
 	def render(self, shadowPass = False, envPass = False):
 		render = False
+		
 		if shadowPass:
 			if self.properties["RenderInShadowPass"].getValue():
+				print "rendering shadowpass object"
 				render = True
 		elif envPass:
 			if self.properties["RenderInEnvMaps"].getValue():
 				render = True
 		else:
 			render = True
+			print "rendering object"
 		
 		if render:	
 			# immediately test for dupliverts
@@ -905,18 +991,18 @@ class MeshAdapter(ObjectAdapter):
 				ri.RiAttributeEnd()
 						
 			else:
-				# test for archive rendering, otherwise render to the current RIB stream
 				ri.RiAttributeBegin()				
 				ri.RiAttribute("identifier", "name", [self.objData["name"]]) # give it a name
-				ri.RiTransformBegin()	 
-				if shadowPass:
-					#print "rendering object for shadowpass"
-					if self.properties["ShadowMats"].getValue():
-						#print "Rendering material in shadow pass"
-						self.renderMaterial()
-				elif not self.getProperty("matte"): #otherwise, the material won't get rendered if the object is a matte
-					self.renderMaterial() # render the material				
+				ri.RiAttribute("displacementbound", "sphere", self.getProperty("DispBound"))
+				ri.RiShadingRate(self.getProperty("ShadingRate"))
 				
+				ri.RiTransformBegin()	 
+				print "Render Shadow materials", self.getProperty("ShadowMats")
+				if shadowPass and self.getProperty("ShadowMats"):					
+					self.renderMaterial()
+				elif not self.getProperty("Matte"):
+					self.renderMaterial()
+						
 				ri.RiTransform(self.object.matrix) # transform				
 				# self.renderMeshData() # and render the mesh				
 				ri.RiReadArchive(self.objData["archive"] + self.objData["name"] + ".rib") # this should read from the archive path
@@ -1320,7 +1406,8 @@ class LampAdapter(ObjectAdapter):
 		
 	def doCameraTransform(self, axis):
 
-		if axis != None:				
+		if axis != None:	
+			
 			# I still need to transform based on the light's matrix
 			# get the inverse matrix first
 			# if this is point light, I should probably set the rotation values to zero	
@@ -1392,17 +1479,17 @@ class LampAdapter(ObjectAdapter):
 		shadername = self.shader.shader.shadername
 		if shadername == "shadowpoint":
 			setattr(self.shader.shader, "sfpx", params["px"]["shadowName"])
-			print "Shadowmap: ", getattr(self.shader.shader, "sfpx")
+			#print "Shadowmap: ", getattr(self.shader.shader, "sfpx")
 			setattr(self.shader.shader, "sfpy", params["py"]["shadowName"])
-			print "Shadowmap: ", getattr(self.shader.shader, "sfpy")
+			#print "Shadowmap: ", getattr(self.shader.shader, "sfpy")
 			setattr(self.shader.shader, "sfpz", params["pz"]["shadowName"])
-			print "Shadowmap: ", getattr(self.shader.shader, "sfpz")
+			#print "Shadowmap: ", getattr(self.shader.shader, "sfpz")
 			setattr(self.shader.shader, "sfnx", params["nx"]["shadowName"])
-			print "Shadowmap: ", getattr(self.shader.shader, "sfnx")
+			#print "Shadowmap: ", getattr(self.shader.shader, "sfnx")
 			setattr(self.shader.shader, "sfny", params["ny"]["shadowName"])
-			print "Shadowmap: ", getattr(self.shader.shader, "sfny")
+			#print "Shadowmap: ", getattr(self.shader.shader, "sfny")
 			setattr(self.shader.shader, "sfnz", params["nz"]["shadowName"])
-			print "Shadowmap: ", getattr(self.shader.shader, "sfnz")
+			#print "Shadowmap: ", getattr(self.shader.shader, "sfnz")
 		elif shadername == "shadowspot" or shadername == "shadowdistant" or shadername == "bml":
 			setattr(self.shader.shader, "shadowname", params["shadow"]["shadowName"])
 			
@@ -1447,6 +1534,9 @@ class LampAdapter(ObjectAdapter):
 		shaderParms["lightcolor"] = [lamp.R, lamp.G, lamp.B]
 		self.objData["lightcolor"] = [lamp.R, lamp.G, lamp.B]
 		if lamp.type == 0 or lamp.type == 4:
+			self.object.RotX = 0.0
+			self.object.RotY = 0.0
+			self.object.RotZ = 0.0
 			self.objData["type"] = 0
 			energyRatio = lamp.dist * negative
 			# get the first selected shader path...and hope it's setup correctly
@@ -1462,6 +1552,7 @@ class LampAdapter(ObjectAdapter):
 			shaderParms["intensity"] = (energyRatio * lamp.energy) * self.scene.lightMultiplier
 			
 		elif lamp.type == 1:
+
 			self.objData["type"] = 1
 			energyRatio = negative
 			self.objData["shadername"] = "distantlight"			
@@ -1560,14 +1651,18 @@ class LampAdapter(ObjectAdapter):
 			shaderParms["from"] = [x, y, z]
 			shaderParms["lightcolor"] = [lamp.R, lamp.G, lamp.B]
 			self.objData["lightcolor"] = [lamp.R, lamp.G, lamp.B]
-			if (lamp.type == 0 or lamp.type == 4) and self.shader.getShaderName() == "pointlight":
+			if (lamp.type == 0 or lamp.type == 4) and (self.shader.getShaderName() == "pointlight" or self.shader.getShaderName() == "shadowpoint"):
+				self.object.RotX = 0.0
+				self.object.RotY = 0.0
+				self.object.RotZ = 0.0
 				energyRatio = lamp.dist * negative
 				# get the first selected shader path...and hope it's setup correctly
 				shaderParms["intensity"] = (energyRatio * lamp.energy) * self.scene.lightMultiplier
 				
 				# I will have to deal with shadowmapping at some point
 				#shaderParms["name"] = "shadowpoint"
-			elif lamp.type == 1 and self.shader.getShaderName() == "distantlight":
+			elif lamp.type == 1 and (self.shader.getShaderName() == "distantlight" or self.shader.getShaderName() == "shadowdistant"):
+
 				energyRatio = negative
 				self.objData["shadername"] = "distantlight"			
 
@@ -1684,13 +1779,14 @@ class CameraAdapter(ObjectAdapter):
 		ri.RiFormat(render.imageSizeX(), render.imageSizeY(), 1) # leave aspect at 1 for the moment
 		
 		if cType == 0:	
-			if render.imageSizeX() >= render.imageSizeY():
+			
+			if render.imageSizeY() >= render.imageSizeX():
 				factor = render.imageSizeY() / float(render.imageSizeX())
 			else:
 				factor = render.imageSizeX() / float(render.imageSizeY())
-				
-			fov = 360.0 * math.atan(factor * 16.0 / camera.lens) / math.pi
-			print "Using a ", fov, " degree Field of View"
+			# print factor
+			fov = 360.0 * math.atan(factor * (16.0 / camera.lens)) / math.pi
+			# print "Using a ", fov, " degree Field of View"
 			ri.RiProjection("perspective", "fov", fov)
 			# Depth of field			
 			if self.properties["DOF"].getValue():
@@ -2035,12 +2131,12 @@ class MeshUI(ObjectUI):
 			"InstanceCount" : ["Number of Instances", 1],
 			"AutoRandomize" : ["Auto Randomize Material", False],
 			"OutputOptions" : ["Object Output Options:", {"Mesh" : "mesh", "Renderman Primitive" : "primtive", "RA Proxy" : "proxy", "RA Procedural" : "procedural" }],
-			"matte" : ["Treat as Matte", False],
+			"Matte" : ["Treat as Matte", False],
 			"Ignore" : ["Don't Export Object:", False],
-			"sides" : ["Sides", 1],
+			"Sides" : ["Sides", 1],
 			"ShadingRate" : ["Shading Rate", 1.0],
-			"dispBoundLength" : ["Displacement Bound", 2.0],
-			"dispCoords" : ["Disp Bound Coord sys", {"Object" : "object", "Shader":"shader", "NDC": "ndc", "World": "world"}],
+			"DispBound" : ["Displacement Bound", 2.0],
+			"DispCoords" : ["Disp Bound Coord sys", {"Object" : "object", "Shader":"shader", "NDC": "ndc", "World": "world"}],
 			"ExportCs" : ["Export Vertex Colors(Cs)", True], 
 			"ExportSt" : ["Export Texture Coordinates(s/t)", True]
 			}
@@ -2058,18 +2154,11 @@ class MeshUI(ObjectUI):
 				"EnvMapSamplesY",
 				"EnvMapShadingRate",
 				"RenderInEnvMaps",
-				"DefineAsObj",
-				"InplaceInstance",
-				"InstanceCount",
-				"AutoRandomize",
-				"RIBEntity",
-				"IncludeMats",
-				"matte",
+				"Matte",
 				"Ignore",
-				"sides",
+				"Sides",
 				"ShadingRate",
-				"dispBoundLength",
-				"dispCoords",
+				"DispBound",
 				"ExportCs",
 				"ExportSt"]
 		# preinitialize a material property
@@ -2169,7 +2258,7 @@ class SurfaceUI(ObjectUI):
 class CameraUI(ObjectUI):
 	""" A UI for the camera type """
 	protocols.advise(instancesProvide=[IObjectUI], asAdapterForTypes=[BtoRCamera])
-	options = { "DOF" : ["Use Depth of Field?", True], 
+	options = { "DOF" : ["Use Depth of Field?", False], 
 			"fstop" : ["F-stop", 22], 
 			"focallength" : ["Focal Length", 45],
 			"focaldistance" : ["Focal Distance:", 10] }

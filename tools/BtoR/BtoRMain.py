@@ -570,8 +570,8 @@ class SceneSettings(BtoRObject):
 		self.renderContext = Blender.Scene.GetCurrent().getRenderingContext()
 		
 		self.editorPanel.addElement(ui.Label(5, 27, "Export Target:", "Export Target:", self.editorPanel, False))		
-		self.target_menu = ["Files...", "Selected Renderer...", "Pipeline Command"]
-		self.exportTarget = ui.Menu(87,27, 100, 25, "Export Target:", ["Files...", "Selected Renderer...", "Pipeline Command"], self.editorPanel, True)
+		target_menu = ["Selected Renderer...", "Files...", "Pipeline Command"]
+		self.exportTarget = ui.Menu(87,27, 150, 25, "Export Target:", target_menu, self.editorPanel, True, custom = True, customPrompt = "Custom Command")
 		
 		self.showSettingsButt = ui.Button(273, 27, 120, 25, ">>", "Render Settings >>", 'normal', self.editorPanel, True)
 		self.showSettingsButt.registerCallback("release", self.toggleSettings)
@@ -595,7 +595,7 @@ class SceneSettings(BtoRObject):
 		self.autoName = ui.Button(237, 95, 25, 25, "**", "**", 'normal', self.editorPanel, True)
 		self.autoName.registerCallback("release", self.setSceneName)
 		
-		self.exportButton = ui.Button(self.editorPanel.width - 165, self.editorPanel.height - 35, 150, 25, "Export:", "Export!", 'normal', self.editorPanel, True)
+		self.exportButton = ui.Button(self.editorPanel.width - 165, self.editorPanel.height - 35, 150, 25, "Export:", "Render!", 'normal', self.editorPanel, True)
 		self.exportButton.registerCallback("release", self.preRenderCheck)
 		
 		self.suzanne = BtoRAdapterClasses.IObjectAdapter(BtoRTypes.BtoRPreview(Blender.Mesh.Primitives.Monkey()))
@@ -633,9 +633,9 @@ class SceneSettings(BtoRObject):
 		self.passesScroller = ui.ScrollPane(0, 30, 290, 150, "Scroller", "Scroller", self.passesContainer, True)
 		
 		# add / delete buttons
-		self.addPass = ui.Button(5, 27, 135, 25, "Add Render Pass", "Add New Variable", 'small', self.passesPanel, True)
+		self.addPass = ui.Button(5, 27, 105, 25, "Add Render Pass", "Add New Variable", 'small', self.passesPanel, True)
 		self.addPass.registerCallback("release", self.addRenderPass)
-		self.deletePass = ui.Button(145, 27, 145, 25, "Delete Selected Pass(es)", "Delete Selected Variable(s)", 'small', self.passesPanel, True)
+		self.deletePass = ui.Button(115, 27, 145, 25, "Delete Selected Pass(es)", "Delete Selected Variable(s)", 'small', self.passesPanel, True)
 		self.deletePass.registerCallback("release", self.deletePasses)
 		self.passes = []
 		
@@ -658,28 +658,25 @@ class SceneSettings(BtoRObject):
 		keyLabel.fontsize = 'small'
 		nameLabel = ui.Label(93, 0, "Name", "Variable:", self.extrasContainer, True)
 		nameLabel.fontsize = 	'small'
-		valueLabel = ui.Label(172, 0, "Value", "Value:", self.extrasContainer, True)
+		valueLabel = ui.Label(226, 0, "Value", "Value:", self.extrasContainer, True)
 		valueLabel.fontsize = 'small'
-		typeLabel = ui.Label(247, 0, "Type", "Type:", self.extrasContainer, True)
-		typeLabel.fontsize = 'small'
 		
 		self.extrasContainer.addElement(keyLabel)
 		self.extrasContainer.addElement(nameLabel)
 		self.extrasContainer.addElement(valueLabel)
-		self.extrasContainer.addElement(typeLabel)
 		
-		self.extrasScroller = ui.ScrollPane(0, 27, 340, 150, "Scroller", "Scroller", self.extrasContainer, True)
+		self.extrasScroller = ui.ScrollPane(0, 27, 301, 150, "Scroller", "Scroller", self.extrasContainer, True)
 		
-		self.addExtraButt = ui.Button(5, 27, 135, 25, "Add Render Pass", "Add New Options", 'small', self.extrasPanel, True)
+		self.addExtraButt = ui.Button(5, 27, 135, 25, "Add Render Pass", "Add New Option", 'small', self.extrasPanel, True)
 		self.addExtraButt.registerCallback("release", self.addExtra)
 		self.deleteExtraButt = ui.Button(145, 27, 145, 25, "Delete Selected Pass(es)", "Delete Selected Option(s)", 'small', self.extrasPanel, True)
 		self.deleteExtraButt.registerCallback("release", self.deleteExtras)
-		self.extras = []
+		self.extras = []			
 		
 		self.renderAnimation = False
 		
 	def addExtra(self, button):
-		extraPanel = ui.Panel(0, 0, 324, 22, "Extra", "", self.extrasScroller, True)
+		extraPanel = ui.Panel(0, 0, 300, 22, "Extra", "", self.extrasScroller, True)
 		extraPanel.outlined = True
 		extraPanel.hasHeader = False
 		extraPanel.cornermask = 0
@@ -688,14 +685,13 @@ class SceneSettings(BtoRObject):
 		extraPanel.selector.transparent = True
 		extraPanel.selector.elements[0].transparent = True
 		extraPanel.extraName = ui.TextField(15, 0, 75, 20, "ExtraName", "Name", extraPanel, True)
-		extraPanel.extraVariable = ui.TextField(93, 0, 75, 20, "ExtraVariable", "Variable", extraPanel, True)
-		extraPanel.extraValue = ui.TextField(172, 0, 75, 20, "ExtraValue", "Value", extraPanel, True)
-		extraPanel.extraType = ui.Menu(247, 0, 75, 20, "Option Value Type", ["String", "Float"], extraPanel, True, shadowed = False) # no update type required here		
+		extraPanel.extraVariable = ui.TextField(93, 0, 130, 20, "ExtraVariable", "Variable", extraPanel, True)
+		extraPanel.extraValue = ui.TextField(226, 0, 75, 20, "ExtraValue", "Value", extraPanel, True)
 		self.extrasScroller.addElement(extraPanel)
 		self.extras.append(extraPanel)
 		
 	def addRenderPass(self, button):
-		passPanel = ui.Panel(0, 0, 274, 22, "RenderPass", "", self.passesScroller, True)
+		passPanel = ui.Panel(0, 0, 274, 22, "RenderPass", "", self.passesScroller, True)		
 		passPanel.outlined = True
 		passPanel.hasHeader = False		
 		passPanel.cornermask = 0
@@ -821,16 +817,21 @@ class SceneSettings(BtoRObject):
 		endFrame = rend.endFrame()
 		self.frames = range(startFrame, endFrame)
 		
-		toFile = False
-		toRender = False
-		if self.exportTarget.getSelectedIndex() == 0:
-			toFile = True			
-			filename = outputPath + os.sep + self.exportPrefix.getValue() # adding os.sep, just in case
-		elif exportSettings.export_menu.getSelectedIndex() == 1:
-			toRender = True			
+		self.toFile = False
+		self.toRender = False
+		self.toCustom = False
+		if self.exportTarget.getSelectedIndex() == 1:
+			self.toFile = True			
+			filename = outputPath + os.sep + self.exportPrefix.getValue() # adding os.sep, just in case 
+			print "rendering to file"
+		elif self.exportTarget.getSelectedIndex() ==  0:
+			self.toRender = True			
+			filename = outputPath + os.sep + self.exportPrefix.getValue()
+		elif self.exportTarget.getSelectedIndex() == 3:
+			self.toCustom = True
 			filename = outputPath + os.sep + self.exportPrefix.getValue()
 		else:
-			toFile = True # not adding this in just yet
+			self.toFile = True # not adding this in just yet
 			filename = outputPath + os.sep + self.exportPrefix.getValue()
 			
 		# step 1, sort out the scene objects
@@ -865,30 +866,36 @@ class SceneSettings(BtoRObject):
 		if self.renderAnimation == False:
 			self.frames = [1] # reset the frame list to one frame - simple fix eh?
 		
+		# create object archives
+		self.exportObjects()
+		
 		self.generateShadowMaps() # these need to be moved inside of the frame loop when I start adding support for animated lights
 		self.generateEnvironmentMaps()
-			
+		outputPath = os.path.split(filename)[1]
+		outputname = os.path.splitext(filename)[0] 				
+		filename = outputname + ".rib"
+		
+		if self.toFile:			
+			ri.RiBegin(filename)
+		elif self.toRender:
+			ri.RiBegin(self.settings.renderer)
+		elif self.toCustom:
+			ri.RiBegin(self.exportTarget.getValue())
+		else:
+			ri.RiBegin()	
+		
+		
 		for frame in self.frames:	
+			self.frame = frame
 			# frame block
 			#Blender.Set("curfame", frame) 			
 			cam = 1
 			for camera in self.cameras:
-				# split the filename off
-				outputPath = os.path.split(filename)[1]
-				outputname = os.path.splitext(filename)[0] + "_cam_%d_frame_%d" % (cam, frame)				
-				filename = outputname + ".rib"	 
-				imgFile = outputname + ".tif" 
+				# split the filename off			
+				imgFile = outputname + "_cam_%d_frame_%d" % (cam, frame) + ".tif" 
 				
 				# Main Render Start - Sounds just like Nasa doesn't it?
-				
-				if toFile:
-					ri.RiBegin(filename)
-				elif toRender:
-					ri.RiBegin("aqsis")
-				else:
-					ri.RiBegin()	
-					
-					
+				print "Occlusion Maps"
 				# Occlusion Map generation
 				if self.lighting.getProperty("GenOcclusion"):
 					for group in self.lighting.occlGroups:
@@ -904,7 +911,7 @@ class SceneSettings(BtoRObject):
 								
 								
 				# environment map generation
-								
+				print "Environment Maps"
 				for obj in self.objects:
 					if obj.getProperty("GenEnvMaps"):
 						# this object created some environtment maps for this frame.
@@ -919,9 +926,10 @@ class SceneSettings(BtoRObject):
 						envString = envString + "\n"
 						ri._ribout.write(envString) # environment map creation.
 						
-
+				print "Extra Options"
 				# Custom extra RiOptions
 				for extra in self.extras:
+					found = True
 					if "string" in extra.extraVariable.getValue():
 						val = extra.extraValue.getValue()
 					elif "integer" in extra.extraVariable.getValue():
@@ -940,48 +948,54 @@ class SceneSettings(BtoRObject):
 								val.append(float(sval))
 						else:
 							val = float(extra.extraValue.getValue())
-							
-					variable = '"' + extra.extraVariable.getValue() + '"'
-					name = extra.extraName.getValue()
-					ri.RiOption(name, variable, val) # charge on!
+						
+					else:
+						found = False
+					if found:
+						variable = '"' + extra.extraVariable.getValue() + '"'
+						name = extra.extraName.getValue()						
+						ri.RiOption(name, variable, val) # charge on!
+					#else:
+					#	self.evt_manager.showErrorDialog("Bad Variable Type", "Your custom option has an incorrect variable type. It should be 'string', 'integer' or 'float'.")
 				
+				print "Frame Begin"
+				ri.RiFrameBegin(frame)
 				
-				# Frame start
-				ri.RiFrameBegin(frame)	
+				# main render here
 				for path in paths:
 					ri.RiOption("searchpath", "shader", path + ":&")
 				
-				# Frame options 
+				# Global scene options				
 				self.render()
-				
-				# Display
 				ri.RiDisplay(imgFile, "file", "rgb")
+				ri.RiDisplay("+" + imgFile, "framebuffer", "rgb")
 				
-				# AOV variables
+				print "AOV passes"
+				# AOV passes
 				for variable in self.passes: # each variable has a name, a mode, and a quantize value
 					vals = variable.passQuant.getValue().split()
 					iVal = []
 					for val in vals:
 						iVal.append(int(val))
 					params = { "quantize" : iVal }
-					ri.RiDisplay("+" + variable.passName.getValue() + ".tif", "file", variable.passMode.getValue(), params)
+					ri.RiDeclare(variable.passName.getValue(), variable.types[variable.passMode.getValue()]) # add the output types to the pass panel
+					ri.RiDisplay("+" + variable.passName.getValue() + "_cam_" + cam + "_frame_" + frame + ".tif", "file", variable.passMode.getValue(), params)
 				
-	
-				# Camera transform
-				camera.render()		
+				# self.renderFrame(exportSettings)		
 				
+				print "Camera transform"
+				# camera transform
+				camera.render()	
+				
+				print "Render World"
 				# world block
 				self.renderWorld()
 				
-				# ri.RiTransformEnd()
-				
 				cam = cam + 1
-				
 				ri.RiFrameEnd()			
-				
-				ri.RiEnd()
-			
-		self.exportObjects()
+				print "Frame complete!"
+		ri.RiEnd()
+		print "Render complete!"
 		
 	def generateShadowMaps(self):
 		self.occlusion_maps = {} # each light knows whether it belongs to an occlusion group or not, so stuff shadow names into each key
@@ -991,7 +1005,6 @@ class SceneSettings(BtoRObject):
 				# create a shadowmap RIB		
 				shadowList = {}
 				for direction in light.getRenderDirections():
-					# if the light's animated, then animate the shadow map
 				
 					if light.isAnimated: # the light is animated, so iterate all of the frames
 						for frame in self.frames:
@@ -1009,6 +1022,7 @@ class SceneSettings(BtoRObject):
 						shadowRIB = shadowPath + light.objData["name"]  + direction + ".rib"
 						self.renderShadowMap(light, direction, shadowRIB, shadowName, shadowFile)
 						shadowList[direction] = {"rib" : shadowRIB, "shadowName" : shadowName, "shadowFile" : shadowFile}
+							
 					# print "Created shadowmap ", shadowName, " using RIB ", shadowRIB
 				# add in the shadow data to the shadows array
 				self.shadows[light.objData["name"]] = shadowList # something
@@ -1034,10 +1048,19 @@ class SceneSettings(BtoRObject):
 			# the map creation call here goes at the beginning of the rib file for the frame.
 	
 	def renderEnvMap(self, obj, direction, envRIB, envName, envFile):
-		ri.RiBegin(envRIB)
+		if self.toFile:
+			ri.RiBegin(envRIB)
+		elif self.toRender:
+			ri.RiBegin(self.settings.renderer)
+		elif self.toCustom:
+			ri.RiBegin(self.exportTarget.getValue())
+		else:
+			ri.RiBegin()	# for pipeline command later
+			
 		paths = self.settings.shaderpaths.getValue().split(";")
 		for path in paths:
 			ri.RiOption("searchpath", "shader", path + ":&")	
+		
 		# these options should be overriden by object level options for env-map generation.
 		ri.RiPixelSamples(obj.getProperty("EnvMapSamplesX"), obj.getProperty("EnvMapSamplesY"))
 		ri.RiPixelFilter(obj.getProperty("EnvMapPixelFilter"), obj.getProperty("EnvMapFilterX"), obj.getProperty("EnvMapFilterY"))
@@ -1051,40 +1074,52 @@ class SceneSettings(BtoRObject):
 		self.renderLights()
 		self.renderObjects(envObj = obj)
 		ri.RiWorldEnd()
-		ri.RiEnd()
+		
+		ri.RiEnd() # see above RiBegin statement
 		# add a texture make command here. in other words, get the texture tool from the main settings object		
 				
 	def renderShadowMap(self, light, direction, shadowRIB, shadowName, shadowFile):									
-		self.lightDebug = True
-		ri.RiBegin(shadowRIB)		
-		paths = self.settings.shaderpaths.getValue().split(";")
+		self.lightDebug = False
+		if self.toFile:
+			ri.RiBegin(shadowRIB)
+		elif self.toRender:
+			ri.RiBegin(self.settings.renderer)
+		elif self.toCustom:
+			ri.RiBegin(self.exportTarget.getValue())
+		else:
+			ri.RiBegin()	# for pipeline command later
+
+		paths = self.settings.shaderpaths.getValue().split(";")		
 		for path in paths:
-			ri.RiOption("searchpath", "shader", path + ":&")	
+			ri.RiOption("searchpath", "shader", path + ":&")
+		
 		size = light.getProperty("ShadowMapSize")
 		ri.RiFormat(size, size, 1)
 		ri.RiPixelSamples(1, 1)
 		ri.RiPixelFilter("box", 1, 1)			
-		ri.RiHider("hidden", {"jitter" : [0], "depthfilter" : "midpoint"})
+		ri.RiHider("hidden", {"uniform float jitter" : [0], "uniform string depthfilter" : "midpoint"})
+		
+		ri.RiDisplay(shadowFile, "zfile", "z")			
 		if light.getProperty("ShowZBuffer"):
-			ri.RiDisplay("view_from_light" + shadowName, "zframebuffer", "z")
-		else:
-			ri.RiDisplay(shadowFile, "zfile", "z")
+			ri.RiDisplay("+view_from_light" + shadowName, "zframebuffer", "z")
 		projection = light.getRenderProjection()			
 		ri.RiProjection(projection, "fov", 92) # 92 degrees projection
-		ri.RiShadingRate(4)
+		ri.RiShadingRate(4.0)
 		light.doCameraTransform(direction)
 		ri.RiWorldBegin()
 		# ri.RiReverseOrientation()		
 		self.renderObjects(shadowPass = True)
 		ri.RiWorldEnd()
 		ri.RiMakeShadow(shadowFile, shadowName)
+		
 		ri.RiEnd()
 		
-		occlProp = light.getProperty("Group")
-		if occlProp != "None Selected":
-			if not self.occlusion_maps.has_key(occlProp):
-				self.occlusion_maps[occlProp] = []
-			self.occlusion_maps[occlProp].append(shadowFile) # append to the occlusion map for this group
+		if self.lighting.getProperty("GenOcclusion"):
+			occlProp = light.getProperty("Group")
+			if occlProp != "None Selected":
+				if not self.occlusion_maps.has_key(occlProp):
+					self.occlusion_maps[occlProp] = []
+				self.occlusion_maps[occlProp].append(shadowFile) # append to the occlusion map for this group
 		
 	def renderWorld(self):
 		ri.RiWorldBegin()		
@@ -1093,6 +1128,7 @@ class SceneSettings(BtoRObject):
 		#ri.RiIdentity()
 		self.renderObjects()
 		ri.RiWorldEnd()
+		
 	def renderWorldArchive(self):
 		""" render the folowing objects to archives """
 		for obj in self.objects:
@@ -1580,33 +1616,42 @@ class ObjectEditor(BtoRObject):
 	def getSelected(self):
 		if self.editorPanel in self.evt_manager.elements: #only if this instance is up and running.
 			if self.selectionChanged():
-				objects = Blender.Object.GetSelected()
-				# get the first object
-				if len(objects) < 1:
-					self.objectName.isVisible = True
-					self.objectMenu.isVisible = False
+				try:
+					objects = Blender.Object.GetSelected()
+				
+					# got nothing
+					# get the first object
+					if len(objects) < 1:
+						self.objectName.isVisible = True
+						self.objectMenu.isVisible = False
 
-					self.objectName.setValue("None Selected")
-					self.objectType.setValue("No Type")
-					self.noPanel()
-					
-				elif len(objects) > 1:
-					self.objectName.isVisible = False
-					self.objectMenu.isVisible = True
-					self.obj_menu = [] # reset the menu
-					self.obj_types = []
-					for obj in objects:
-						self.obj_menu.append(obj.getName())
+						self.objectName.setValue("None Selected")
+						self.objectType.setValue("No Type")
+						self.noPanel()
 						
-					self.objects = objects
-					self.objectMenu.re_init(self.obj_menu)
-					self.objectMenu.setValue(1)
-					self.selectObject_menu(None)
-				else:
+					elif len(objects) > 1:
+						self.objectName.isVisible = False
+						self.objectMenu.isVisible = True
+						self.obj_menu = [] # reset the menu
+						self.obj_types = []
+						for obj in objects:
+							self.obj_menu.append(obj.getName())
+							
+						self.objects = objects
+						self.objectMenu.re_init(self.obj_menu)
+						self.objectMenu.setValue(1)
+						self.selectObject_menu(None)
+					else:
+						self.objectName.isVisible = True
+						self.objectMenu.isVisible = False
+						obj = objects[0]
+						self.selectObject(obj)
+				except:
 					self.objectName.isVisible = True
 					self.objectMenu.isVisible = False
-					obj = objects[0]
-					self.selectObject(obj)
+					self.objectType.setValue("No Type")
+					self.objectName.setValue("None Selected")
+					self.noPanel()			
 								
 	def initializeBtoRObjectData(self): # this changes to support generation of BtoR export adapters
 		# get everything in the current scene.
@@ -1686,7 +1731,7 @@ class Material(BtoRObject):
 					"Displacement" : ["Displacement Shader:", BtoRTypes.BtoRShaderType(Shader(self.material.displacement, "displacement", self))],
 					"Volume": ["Volume Shader", BtoRTypes.BtoRShaderType(Shader(self.material.interior, "volume", self))],
 					"Translation":["Translation:", cgkit.cgtypes.vec3(0, 0, 0)],
-					"Rotation":["Rotation:", cgkit.cgtypes.vec3(0, 0, 0)],
+					"Rotation":["Rotation:", BtoRTypes.BtoRRotationType([0.0, False, False, False])],
 					"Scale":["Scale:", cgkit.cgtypes.vec3(0, 0, 0)]
 		}
 		self.optionOrder = [ "MaterialName",
@@ -1703,9 +1748,6 @@ class Material(BtoRObject):
 		self.editorPanel.addElement(ui.Label(155, 27, "Material Properties:", "Material Properties:", self.editorPanel, False))
 		self.scroller= ui.ScrollPane(155, 45, 240, 200, "Scroller", "Scroller", self.editorPanel, True)
 		self.setupProperties()
-		
-		
-		
 		
 		
 		if render:
@@ -2047,9 +2089,8 @@ class Shader(BtoRObject):
 			
 			if path != spath:
 				found = False
-				for apath in self.searchpaths:
-					apath = os.path.normpath(apath)
-					
+				for apath in self.searchpaths:					
+					apath = os.path.normpath(apath)					
 					if path == apath:
 						pIndex = self.searchpaths.index(apath)
 						found = True
@@ -2926,7 +2967,7 @@ class MaterialList(BtoRObject):
 		
 		# self.picker.x = self.absX
 		self.editor = ui.Panel(10, screen[1] - 50, 200, 400, "Material Selector", "Material Editor:", None, False)
-		self.selector = ui.Panel(10, screen[1] - 225, 200, 375, "Material Selector", "Material Selector:", None, False)
+		self.selector = ui.Panel(10, screen[1] - 50, 200, 375, "Material Selector", "Material Selector:", None, False)
 		
 		self.add_button = ui.Button(0, 370, 99, 30, "Add New", "Add New", 'normal', self.editor, True)
 		self.add_button.shadowed = False
@@ -3727,9 +3768,9 @@ class LightManager(BtoRObject):
 	
 	     this will allow me to load light setups/looks
 	"""
-	options = { "GenOcclusion" : ["Generate Occlusion Maps:", True],
+	options = { "GenOcclusion" : ["Generate Occlusion Maps:", False],
 		"GenShadowMaps" : ["Create Shadow Maps:", True],
-		"UseAmbient" : ["Use Ambient Light:", False],
+		"UseAmbient" : ["Default Ambient Light:", False],
 		"AmbIntensity" : ["Ambient Intensity:", 1.0],
 		"AmbColor" : ["Ambient Light Color:", [1.0, 1.0, 1.0]]}
 	optionOrder = ["GenOcclusion", "GenShadowMaps", "UseAmbient", "AmbColor", "AmbIntensity"]
