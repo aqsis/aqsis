@@ -1073,7 +1073,7 @@ class SceneSettings(BtoRObject):
 		if self.toFile:
 			ri.RiBegin(envRIB)
 		elif self.toRender:
-			ri.RiBegin(self.settings.renderer)
+			ri.RiBegin(self.settings.renderers[self.settings.renderer][0])
 		elif self.toCustom:
 			ri.RiBegin(self.exportTarget.getValue())
 		else:
@@ -1106,7 +1106,7 @@ class SceneSettings(BtoRObject):
 		if self.toFile:
 			ri.RiBegin(shadowRIB)
 		elif self.toRender:
-			ri.RiBegin(self.settings.renderer)
+			ri.RiBegin(self.settings.renderers[self.settings.renderer][0])
 		elif self.toCustom:
 			ri.RiBegin(self.exportTarget.getValue())
 		else:
