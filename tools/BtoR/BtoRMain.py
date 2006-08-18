@@ -127,6 +127,10 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 	# what else does BtoRSettings need to know? How about a projects directory? MRUs? TBD later I suppose
 	
 	def __init__(self):		
+		self.options = {"Renderer":["Renderer:", { "Aqsis":"aqsis", "BMRT":"bmrt", "Pixie":"Pixie", "3Delight":"renderdl", "RenderDotC":"wrendrdc" }],
+					"UseSlParams":["Use CGKIT Slparams?", True],
+					"RenderMatsStartup":["Render Mats on Startup?", True]}
+						
 		sdict = globals()
 
 		if sdict.has_key("instBtoREvtManager"):
@@ -138,7 +142,7 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 				
 		self.getSettings(None)
 		screen = Blender.Window.GetAreaSize()		
-		self.editor = ui.Panel(10, screen[1] - 225, 600, 400, "GlobalSettings", "Global BtoR Settings:", None, False)
+		self.editor = ui.Panel(10, screen[1] - 225, 400, 300, "GlobalSettings", "Global BtoR Settings:", None, False)
 		self.editor.addElement(ui.Label(5, 30, "Renderer:", "Renderer:", self.editor, False))
 		rendererList = self.renderers.keys()
 		
@@ -158,57 +162,18 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 		
 		self.renderMatsOnStartup = ui.CheckBox(5, 90, "Render material previews on startup?", "Render material previews on startup?", False, self.editor, True)
 		
-		self.useShadowMaps = ui.CheckBox(300, 65, "Use Shadow Maps?", "Use Shadow Maps?", True, self.editor, True)
+		self.useShadowMaps = ui.CheckBox(5, 115, "Use Shadow Maps?", "Use Shadow Maps?", True, self.editor, True)
 
-		offset = 125
-		
-		
-		# search paths label
-		self.editor.addElement(ui.Label(5, offset, "Search Paths:", "Search Paths:", self.editor, False))
-		
-		# binary search path
-		self.editor.addElement(ui.Label(25, offset + 25, "Binaries:", "Binaries:", self.editor, False))		
-		self.binarypath = ui.TextField(width, offset + 25, self.editor.width - (45 + width), 20, "BinaryPathText", self.binaryPath, self.editor, True)		
-		self.binaryBrowse = ui.Button(self.binarypath.x + self.binarypath.width + 2, offset + 25, 30, 20, "BinaryBrowse", "...", 'normal', self.editor, True)		
-		self.binaryBrowse.registerCallback("release", self.browse)
-		
 		# shader search paths
-		self.editor.addElement(ui.Label(25, offset + 50, "Shaders:", "Shaders:", self.editor, False))		
-		self.shaderpaths = ui.TextField(width, offset + 50, self.editor.width - (45 + width), 20, "ShaderPathText", self.shaderPathList, self.editor, True)		
-		self.shaderBrowse = ui.Button(self.binarypath.x + self.binarypath.width + 2, offset + 50, 30, 20, "ShaderBrowse", "...", 'normal', self.editor, True)		
+		self.editor.addElement(ui.Label(5, 140, "Shaders:", "Shader Search Paths:", self.editor, False))		
+		self.shaderpaths = ui.TextField(5,165, self.editor.width - 45 , 20, "ShaderPathText", self.shaderPathList, self.editor, True)		
+		self.shaderBrowse = ui.Button(self.shaderpaths.x + self.shaderpaths.width + 2, 165, 30, 20, "ShaderBrowse", "...", 'normal', self.editor, True)		
 		self.shaderBrowse.registerCallback("release", self.browse)
 		
-		# texture search paths
-		self.editor.addElement(ui.Label(25, offset + 75, "Textures:", "Textures:", self.editor, False))
-		self.texturepaths = ui.TextField(width, offset + 75, self.editor.width - (45 + width), 20, "TexturePathText", self.texturePathList, self.editor, True)		
-		self.textureBrowse = ui.Button(self.binarypath.x + self.binarypath.width + 2, offset + 75, 30, 20, "TextureBrowse", "...", 'normal', self.editor, True)		
-		self.textureBrowse.registerCallback("release", self.browse)
-		
-		# archive search paths
-		self.editor.addElement(ui.Label(25, offset + 100, "Archives:", "Archives:", self.editor, False))		
-		self.archivepaths = ui.TextField(width, offset + 100, self.editor.width - (45 + width), 20, "ArchivePathText", self.archivePathList, self.editor, True)		
-		self.archiveBrowse = ui.Button(self.binarypath.x + self.binarypath.width + 2, offset + 100, 30, 20, "ArchiveBrowse", "...", 'normal', self.editor, True)		
-		self.archiveBrowse.registerCallback("release", self.browse)
-		
-		# procedural search paths
-		self.editor.addElement(ui.Label(25, offset + 125, "Procedurals:", "Procedurals:", self.editor, False))		
-		self.proceduralpaths = ui.TextField(width, offset + 125, self.editor.width - (45 + width), 20, "ProceduralsPathText", self.proceduralPathList, self.editor, True)		
-		self.proceduralBrowse = ui.Button(self.binarypath.x + self.binarypath.width + 2, offset + 125, 30, 20, "ProceduralBrowse", "...", 'normal', self.editor, True)		
-		self.proceduralBrowse.registerCallback("release", self.browse)
-		
-		# display search paths
-		self.editor.addElement(ui.Label(25, offset + 150, "Displays:", "Displays:", self.editor, False))
-		self.displaypaths = ui.TextField(width, offset + 150, self.editor.width - (45 + width), 20, "DisplaysPathText", self.displayPathList, self.editor, True)		
-		self.displayBrowse = ui.Button(self.binarypath.x + self.binarypath.width + 2, offset + 150, 30, 20, "DisplayBrowse", "...", 'normal', self.editor, True)
-		self.displayBrowse.registerCallback("release", self.browse)
-		
-		# file paths label
-		self.editor.addElement(ui.Label(10, offset + 175, "File Paths:", "File Paths:", self.editor, False))
-		
 		# output path
-		self.editor.addElement(ui.Label(25, offset + 200, "Output Path:", "Output Path:", self.editor, False))
-		self.outputpath = ui.TextField(width, offset + 200, self.editor.width - (45 + width), 20, "OutputPathText", self.outputPath, self.editor, True)
-		self.outputBrowse = ui.Button(self.outputpath.x + self.outputpath.width + 2, offset + 200, 30, 20, "OutputBrowse", "...", 'normal', self.editor, True)
+		self.editor.addElement(ui.Label(5, 190, "Output Path:", "Output Path:", self.editor, False))
+		self.outputpath = ui.TextField(5, 215, self.editor.width - 45, 20, "OutputPathText", self.outputPath, self.editor, True)
+		self.outputBrowse = ui.Button(self.outputpath.x + self.outputpath.width + 2, 215, 30, 20, "OutputBrowse", "...", 'normal', self.editor, True)
 		self.outputBrowse.registerCallback("release", self.browse)
 		
 		self.cancelButton = ui.Button(5, self.editor.height - 45, 60, 20, "Cancel", "Cancel", 'normal', self.editor, True)		
@@ -462,12 +427,7 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 			self.haveSetup = True
 			# I've got the information
 			self.renderer = settings["renderer"] # string
-			self.binaryPath = settings["Binaries"] # string
 			self.shaderPathList = settings["Shaders"] # string
-			self.texturePathList = settings["Textures"] # string
-			self.displayPathList = settings["Displays"] # string
-			self.archivePathList = settings["Archives"] # string
-			self.proceduralPathList = settings["Procedurals"] # string
 			self.outputPath = settings["outputPath"] # string
 			self.use_slparams = settings["use_slparams"] # boolean		
 				
@@ -477,20 +437,10 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 			self.renderer = "AQSIS" # this should eventually change to use settings stored in either the blender registry, or something else
 			# default to aqsis, since we've got no actual information
 			if os.name <> "posix" or os.name <> "mac":
-				self.binaryPath = r'C:\Program Files\Aqsis\\bin'
 				self.shaderPathList = r"C:\Program Files\Aqsis\Shaders" 
-				self.texturePathList = r"C:\Program Files\Aqsis\Textures"
-				self.displayPathList = r"C:\Program Files\Aqsis\Displays"
-				self.archivePathList = r"C:\Program Files\Aqsis\Archives"
-				self.proceduralPathList = r"C:\Program Files\Aqsis\Procedurals"
 				self.outputPath = r'C:\temp'
 			else:
-				self.binaryPath = r"/usr/aqsis/bin"
 				self.shaderPathList = r"/usr/aqsis/shaders/"
-				self.texturePathList = r"/usr/aqsis/textures"
-				self.displayPathList = r"/usr/aqsis/displays"
-				self.archivePathList = r"/usr/aqsis/archives"
-				self.proceduralPathList = r"/usr/aqsis/procedurals"
 				self.outputPath = r"/temp/"
 			self.use_slparams = True # set this to true by default
 			
@@ -513,12 +463,7 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 		# but for a first release, this should work OK
 		#print self.rendererMenu.getValue()
 		settings = { "renderer" : self.rendererMenu.getValue(), 
-				"Binaries" : self.binarypath.getValue(),
 				"Shaders" : self.shaderpaths.getValue(),
-				"Archives" : self.archivepaths.getValue(),
-				"Textures" : self.texturepaths.getValue(),
-				"Procedurals" : self.proceduralpaths.getValue(),
-				"Displays" : self.displaypaths.getValue(),
 				"outputPath" : self.outputpath.getValue(),
 				"use_slparams" : self.useSlParams.getValue() }
 		
@@ -530,12 +475,7 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 	def update(self, obj):
 		self.rendererMenu.setValue(self.rendererMenu.menu.index(self.renderer))
 		self.useSlParams.setValue(self.use_slparams)
-		self.binarypath.setValue(self.binaryPath)
 		self.shaderpaths.setValue(self.shaderPathList)
-		self.texturepaths.setValue(self.texturePathList)
-		self.displaypaths.setValue(self.displayPathList)
-		self.proceduralpaths.setValue(self.proceduralPathList)
-		self.archivepaths.setValue(self.archivePathList)
 		self.outputpath.setValue(self.outputPath)
 		
 
@@ -553,18 +493,8 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 		
 	def select(self, file):
 		path = os.path.dirname(file)
-		if self.activeButton == self.binaryBrowse:
-			self.binaryPath = path		
-		elif self.activeButton == self.shaderBrowse:
+		if self.activeButton == self.shaderBrowse:
 			self.shaderPathList = path		
-		elif self.activeButton == self.textureBrowse:
-			self.texturePathList = path
-		elif self.activeButton == self.displayBrowse:
-			self.displayPathList = path
-		elif self.activeButton == self.proceduralBrowse:
-			self.proceduralPathList = path
-		elif self.activeButton == self.archiveBrowse:
-			self.archivePathList = path
 		elif self.activeButton == self.outputBrowse:
 			self.outputPath = path
 		self.update()
@@ -1037,7 +967,7 @@ class SceneSettings(BtoRObject):
 						iVal.append(int(val))
 					params = { "quantize" : iVal }
 					
-					ri.RiDisplay("+" + variable.passName.getValue() + "_cam_" + cam + "_frame_" + frame + ".tif", "file", variable.passMode.getValue(), params)
+					ri.RiDisplay("+" + variable.passName.getValue() + "_cam_%d" % cam + "_frame_%d" % frame + ".tif", "file", variable.passMode.getValue(), params)
 				
 				# self.renderFrame(exportSettings)		
 				
