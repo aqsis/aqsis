@@ -1329,7 +1329,7 @@ class SceneSettings(BtoRObject):
 			found = True
 		except: 
 			traceback.print_exc()
-			self.evt_manager.showErrorDialog("Error parsing XML!", "There was an error in the BtoRXML text file or it was not found.")
+			# self.evt_manager.showErrorDialog("Error parsing XML!", "There was an error in the BtoRXML text file or it was not found.")
 			return None
 		if found:
 			self.parseXML(xmlData)
@@ -3358,7 +3358,7 @@ class MaterialList(BtoRObject):
 			else: # didn't find one...and I should add functionality to BtoRSettings to make sure this never happens
 				# not found, spawn a dialog
 				print "NO dialog!"
-				self.evt_manager.showErrorDialog("No materials were found!", "No saved materials were found in this document.")
+				#self.evt_manager.showErrorDialog("No materials were found!", "No saved materials were found in this document.")
 				
 		try:				
 			# parse the settings tree and see what we have for materials
