@@ -334,7 +334,7 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 		self.shadersSurface[shaderPath] = []
 		self.shadersLight[shaderPath] = []
 		self.shadersVolume[shaderPath] = []
-		self.shadersDisp[shaderPath] = []
+		self.shadersDisplacement[shaderPath] = []
 		self.shadersImager[shaderPath] = []						
 		if os.path.exists(shaderPath):
 			files = os.listdir(shaderPath)		
