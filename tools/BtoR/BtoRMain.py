@@ -32,6 +32,23 @@ import sys
 import StringIO	
 import re
 
+handler = """# SPACEHANDLER.VIEW3D.EVENT
+#!BPY
+
+import Blender
+
+evt = Blender.event
+
+if evt == Blender.Draw.RIGHTMOUSE:
+	# on a right mouse click assume I've selected an object or unselected it
+	# simply set something in the registry to say "hey, something changed"
+	changed = { "changed" : True }
+	print "changed"
+	Blender.Registry.SetKey("BtoR_Space", changed)
+	#Blender.Window.Redraw(Blender.Window.Types["SCRIPT"])
+	#Blender.Window.Redraw(Blender.Window.Types["SCRIPT"])
+"""
+
 class BtoRObject:
 	def getProperty(self, property):
 		if self.properties.has_key(property):
@@ -60,7 +77,42 @@ class BtoRObject:
 			self.scroller.addElement(self.editors[option].getEditor()) # and that should be that. When this is discarded, all those go away
 			self.editors[option].setParent(self.scroller)	
 			self.scroller.offset = 0
+	def saveProperties(self, doc, xml):
 		
+		if len(self.properties) > 0:			
+			# I've got at least one property
+			for property in self.properties:
+				
+				if self.properties[property].saveable:
+					xmlProp = self.properties[property].toXML(doc)
+					xmlProp.setAttribute("name", property) # set the name attribute here for the moment, but later configure a property to have a name AND a title!
+					xml.appendChild(xmlProp)		
+						
+		return xml
+		
+	def loadProperties(self, xml):
+		xmlTypes = { "int" : int, "str" : str, "list" : list, "dict": dict, "float" : float, "bool": bool }
+		xmlProperties = xml.getElementsByTagName("property")
+		# what I should really do is move the properties from the object's UI to the object adapter, since that's really where I control the data.
+		for xmlProperty in xmlProperties:
+			# each of these is a property element
+			propertyName = xmlProperty.getAttribute("name").encode("ascii")		
+			xmlType = xmlProperty.getAttribute("type").encode("ascii")			
+			xmlValue= xmlProperty.getAttribute("value").encode("ascii")			
+			if xmlType == "bool":
+				propertyValue = xmlTypes[xmlType](eval(xmlValue))
+			elif xmlType == "list":
+				print "Property Name: ", propertyName
+				propertyValue = [float(eval(xmlProperty.getAttribute("red").encode("ascii"))), 
+							float(eval(xmlProperty.getAttribute("green").encode("ascii"))),
+							float(eval(xmlProperty.getAttribute("blue").encode("ascii")))] # rebuild a pretty color!
+				print "Property Value: ", propertyValue
+			else:
+				propertyValue = xmlTypes[xmlType](xmlValue)
+			
+			self.editors[propertyName].setValue(propertyValue) # 
+			
+					
 class BtoRSettings(BtoRObject): # an instance of this class should be passed to every base-level BtoR object (objects that go into the root event manager.
 	# someone with 3Delight, Prman, entropy etc can add further renderer information here
 	# standard setup: Renderer name: [render binary, sltell binary, texture binary, shader extension, [home env vars], [shader env vars], [texture env vars], [ display env vars],
@@ -90,7 +142,7 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 		self.editor.addElement(ui.Label(5, 30, "Renderer:", "Renderer:", self.editor, False))
 		rendererList = self.renderers.keys()
 		
-		self.rendererMenu = ui.Menu(self.editor.get_string_width("Renderer:", 'normal') + 12, 30, 100, 20, "Renderer:", rendererList, self.editor, True)				
+		self.rendererMenu = ui.Menu(self.editor.get_string_width("Renderer:", 'normal') + 12, 30, 100, 20, "Renderer:", rendererList, self.editor, True, custom = False)				
 		self.rendererMenu.setValue(rendererList.index(self.renderer))
 		self.rendererMenu.registerCallback("release", self.selectRenderer)
 		
@@ -193,6 +245,7 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 		self.textures = os.sep + "textures" + os.sep
 		self.archives = os.sep + "archives" + os.sep
 		self.maps = os.sep + "maps" + os.sep
+		self.materialPreviews = os.sep + "matPreviews" + os.sep # this should use the temp directory that's defined, or maybe I should make that another user option?
 
 	def getShaderSearchPaths(self):
 		pathList = self.shaderpaths.getValue().split(";")
@@ -549,6 +602,7 @@ class SceneSettings(BtoRObject):
 		sdict = globals()
 		self.settings = sdict["instBtoRSettings"]
 		self.evt_manager = sdict["instBtoREvtManager"]
+		self.lighting = sdict["instBtoRLightManager"]
 		screen = Blender.Window.GetAreaSize()		
 		self.editorPanel = ui.Panel(25, screen[1] - 50, 400, 180, "Export Settings:", "Render Settings:", None, False)
 		
@@ -674,6 +728,8 @@ class SceneSettings(BtoRObject):
 		self.extras = []			
 		
 		self.renderAnimation = False
+		# setup the spacehandler
+		self.setSpaceHandler()
 		
 	def addExtra(self, button):
 		extraPanel = ui.Panel(0, 0, 300, 22, "Extra", "", self.extrasScroller, True)
@@ -689,6 +745,7 @@ class SceneSettings(BtoRObject):
 		extraPanel.extraValue = ui.TextField(226, 0, 75, 20, "ExtraValue", "Value", extraPanel, True)
 		self.extrasScroller.addElement(extraPanel)
 		self.extras.append(extraPanel)
+		return extraPanel
 		
 	def addRenderPass(self, button):
 		passPanel = ui.Panel(0, 0, 274, 22, "RenderPass", "", self.passesScroller, True)		
@@ -705,6 +762,7 @@ class SceneSettings(BtoRObject):
 		passPanel.passMode.registerCallback("select", self.selectPassType)
 		self.passesScroller.addElement(passPanel)
 		self.passes.append(passPanel)
+		return passPanel
 		
 	def deleteExtras(self, button):
 		selected = []
@@ -878,7 +936,7 @@ class SceneSettings(BtoRObject):
 		if self.toFile:			
 			ri.RiBegin(filename)
 		elif self.toRender:
-			ri.RiBegin(self.settings.renderer)
+			ri.RiBegin(self.settings.renderers[self.settings.renderer][0]) # replace this with render flags
 		elif self.toCustom:
 			ri.RiBegin(self.exportTarget.getValue())
 		else:
@@ -897,7 +955,7 @@ class SceneSettings(BtoRObject):
 				# Main Render Start - Sounds just like Nasa doesn't it?
 				print "Occlusion Maps"
 				# Occlusion Map generation
-				if self.lighting.getProperty("GenOcclusion"):
+				if self.lighting.getProperty("GenOcclusion") and self.lighting.getProperty("GenShadowMaps"): # yes, they *both* have to be on for SHADOWMAPPED occlusion
 					for group in self.lighting.occlGroups:
 						groupName = group.groupName.getValue()
 						if self.occlusion_maps.has_key(groupName):
@@ -978,7 +1036,7 @@ class SceneSettings(BtoRObject):
 					for val in vals:
 						iVal.append(int(val))
 					params = { "quantize" : iVal }
-					ri.RiDeclare(variable.passName.getValue(), variable.types[variable.passMode.getValue()]) # add the output types to the pass panel
+					
 					ri.RiDisplay("+" + variable.passName.getValue() + "_cam_" + cam + "_frame_" + frame + ".tif", "file", variable.passMode.getValue(), params)
 				
 				# self.renderFrame(exportSettings)		
@@ -998,35 +1056,69 @@ class SceneSettings(BtoRObject):
 		print "Render complete!"
 		
 	def generateShadowMaps(self):
-		self.occlusion_maps = {} # each light knows whether it belongs to an occlusion group or not, so stuff shadow names into each key
-		shadowPath = self.settings.outputpath.getValue() + self.settings.shadows
-		for light in self.lights:
-			if light.getProperty("GenShadowMap"): # if this lamp generates a shadowMap...
-				# create a shadowmap RIB		
-				shadowList = {}
-				for direction in light.getRenderDirections():
-				
-					if light.isAnimated: # the light is animated, so iterate all of the frames
-						for frame in self.frames:
-							Blender.Set("curfame", frame) 
-							shadow = shadowPath + light.objData["name"] + direction  + "_%d" % frame 
-							shadowFile = shadow + ".z"
+		print "Shadow Maps"
+		if self.lighting.getProperty("GenShadowMaps"):
+			self.occlusion_maps = {} # each light knows whether it belongs to an occlusion group or not, so stuff shadow names into each key
+			shadowPath = self.settings.outputpath.getValue() + self.settings.shadows
+			
+			for frame in self.frames:
+				# if I'm rendering an animation, then I need to set the current frame
+				# otherwise, not, and the above for loop will only happen once
+				if self.renderAnimation:
+					Blender.Set("curfame", frame) 
+				lightIdx = 0
+				for light in self.lights:			
+					lightIdx = lightIdx + 1
+					print "Shadowmaps for light # ", lightIdx
+					doMap = light.getProperty("GenShadowMap")					
+					print "Light shadowmap status is: ", doMap
+					render = False
+					# create a shadowmap RIB		
+					shadowList = {}
+					for direction in light.getRenderDirections():						
+						
+						if doMap == "Lazy" and not light.changed: # this test first, since if the map doesn't exist, I'll have to create it.
+							if light.shadowMaps.has_key(direction):
+								if light.isAnimated:						
+									# I should test for the existence of the file as well I suppose
+									if os.path.exists(light.shadowMaps[direction + "_%d" % frame]["shadowName"]):
+										self.shadows[light.objData["name"]] = light.shadowMaps[direction + "_%d" % frame]	
+										render = False
+										print "Found a shadowmap for " + light.objData["name"] + direction + ("_%d" % frame) + ", not rendering"
+									else: # the shadowmap doesn't exist, but will be needed, so render it
+										render = True
+										print "Rendering shadowmap for " + light.objData["name"] + direction + ("_%d" % frame)
+								else:
+									if os.path.exists(light.shadowMaps[direction + "_%d" % frame]["shadowName"]):
+										self.shadows[light.objData["name"]] = light.shadowMaps[direction] 
+										render = False
+										print "Found a shadowmap for " + light.objData["name"] + direction + ", not rendering"
+									else:
+										render = True
+										print "Rendering shadowmap for " + light.objData["name"] + direction 
+							else:
+								# if there's no key, I have to render it.
+								render = True
+						elif (doMap == "Always") or (doMap == "Lazy" and light.changed):
+							render = True
+						
+						print "light render status is: ", render
+						if render:
+							if light.isAnimated: # the light is animated, so iterate all of the frames													
+								shadow = shadowPath + light.objData["name"] + direction  + "_%d" % frame 
+								shadowKey = direction + "_%d" % frame
+							else:			
+								shadow = shadowPath + light.objData["name"] + direction
+								shadowKey = direction
+								
 							shadowName = shadow + ".tx"
+							shadowFile = shadow + ".z"
 							shadowRIB = shadow + ".rib"
-							self.renderShadowMap(light, direction, shadowRIB, shadowName, shadowFile)							
-							shadowList[direction + "_" + frame] = {"rib" : shadowRIB, "shadowName" : shadowName, "shadowFile" : shadowFile }
-							
-					else:						
-						shadowName = shadowPath + light.objData["name"] + direction + ".tx"
-						shadowFile = shadowPath + light.objData["name"] + direction + ".z"
-						shadowRIB = shadowPath + light.objData["name"]  + direction + ".rib"
-						self.renderShadowMap(light, direction, shadowRIB, shadowName, shadowFile)
-						shadowList[direction] = {"rib" : shadowRIB, "shadowName" : shadowName, "shadowFile" : shadowFile}
-							
-					# print "Created shadowmap ", shadowName, " using RIB ", shadowRIB
-				# add in the shadow data to the shadows array
-				self.shadows[light.objData["name"]] = shadowList # something
-				
+							self.renderShadowMap(light, direction, shadowRIB, shadowName, shadowFile) # render the map here.
+							shadowList[direction] = {"rib" : shadowRIB, "shadowName" : shadowName, "shadowFile" : shadowFile}
+							light.shadowMaps[shadowKey] = shadowList
+									
+						self.shadows[light.objData["name"]] = shadowList # this is the *global* shadow list that the scene maintains. This can be regenerated on each round
 				
 	def generateEnvironmentMaps(self):
 		self.envMaps = {}
@@ -1078,7 +1170,8 @@ class SceneSettings(BtoRObject):
 		ri.RiEnd() # see above RiBegin statement
 		# add a texture make command here. in other words, get the texture tool from the main settings object		
 				
-	def renderShadowMap(self, light, direction, shadowRIB, shadowName, shadowFile):									
+	def renderShadowMap(self, light, direction, shadowRIB, shadowName, shadowFile):	
+		print "Rendering shadowmap for ", light.objData["name"], "direction ", direction
 		self.lightDebug = False
 		if self.toFile:
 			ri.RiBegin(shadowRIB)
@@ -1197,6 +1290,42 @@ class SceneSettings(BtoRObject):
 		root = newdoc.createElement("BtoR")
 		newdoc.appendChild(root)
 		
+		# scene properties
+		scene = newdoc.createElement("Scene")		
+		scene = self.saveProperties(newdoc, scene )
+		
+		# now to worry about extra options and AOV variables. I only care about the variable TYPE, really, because I can regen everything from the export paths and scene name.
+		for aovPass in self.passes:
+			mode = aovPass.passMode.getValue()
+			quant = aovPass.passQuant.getValue()
+			aovXML = newdoc.createElement("AOVPass")
+			aovXML.setAttribute("PassMode", mode)
+			aovXML.setAttribute("Quantize", quant)
+			scene.appendChild(aovXML)
+		
+		for extra in self.extras:
+			extraXML = newdoc.createElement("ExtraOption")
+			extraXML.setAttribute("ExtraName", extra.extraName.getValue())
+			extraXML.setAttribute("ExtraVariable", extra.extraVariable.getValue())
+			extraXML.setAttribute("ExtraValue", extra.extraValue.getValue())
+			scene.appendChild(extraXML)			
+		
+		root.appendChild(scene)
+
+		lighting = newdoc.createElement("Lighting")
+		lighting = self.lighting.saveProperties(newdoc, lighting)
+				
+		for group in self.lighting.occlGroups:
+			occlXML = newdoc.createElement("OcclusionGroup")
+			occlXML.setAttribute("Name", group.groupName.getValue())
+			shader = group.aoShaderProperty.getValue().getObject()
+			# print shader
+			if shader.getStrValue() != "None":
+				shaderXML = shader.getShaderXML(newdoc)
+			occlXML.appendChild(shaderXML) # annnnnd done.			
+			lighting.appendChild(occlXML)
+		root.appendChild(lighting)
+		
 		mat = self.materials.saveMaterials(newdoc)
 		root.appendChild(mat)
 		
@@ -1249,6 +1378,15 @@ class SceneSettings(BtoRObject):
 			# not found, spawn a dialog
 			traceback.print_exc()
 			self.evt_manager.showErrorDialog("Error!", "Something went wrong. Look at the console!")
+	def setSpaceHandler(self):
+		global handler
+		try:
+			text = Blender.Text.Get("BtoRSpaceHandler")
+			found = True
+		except:
+			handlerText = Blender.Text.New("BtoRSpaceHandler")
+			handlerText.write(handler)
+			
 			
 	def loadSceneData(self):
 		try:
@@ -1269,7 +1407,7 @@ class SceneSettings(BtoRObject):
 	def parseXML(self, xmlData):
 		self.object_data = {} # clear the object data cache
 		try:
-			xmlScene = xml.dom.minidom.parseString(xmlData)
+			xmlData = xml.dom.minidom.parseString(xmlData)
 			hasXMLData = True
 		except xml.parsers.expat.ExpatError:
 			hasXMLData = False	
@@ -1278,7 +1416,46 @@ class SceneSettings(BtoRObject):
 			self.evt_manager.showConfirmDialog("Error parsing XML!", "There was an error in the BtoRXML text file!", None, False)
 			return None
 		if hasXMLData:
-			xmlObjects = xmlScene.getElementsByTagName("Object")
+			# deal with each in turn.
+			 
+			xmlScene = xmlData.getElementsByTagName("Scene")[0] # there should be and had *better* be only one of thse
+			
+			xmlLighting = xmlData.getElementsByTagName("Lighting")[0] # and this too
+			xmlObjects = xmlData.getElementsByTagName("Object")
+			
+			self.loadProperties(xmlScene)
+			
+			xmlAOV = xmlScene.getElementsByTagName("AOVPass")
+			for aov in xmlAOV:
+				aovPanel = self.addRenderPass(None)
+				aovPanel.passMode.setValueString(aov.getAttribute("PassMode"))
+				aovPanel.passQuant.setValue(aov.getAttribute("Quantize"))
+				
+				self.selectPassType(aovPanel.passMode)
+				
+			xmlExtras = xmlScene.getElementsByTagName("ExtraOption")
+			
+			for extra in xmlExtras:
+				extraPanel = self.addExtra(None)
+				extraPanel.extraName.setValue(extra.getAttribute("ExtraName"))
+				extraPanel.extraVariable.setValue(extra.getAttribute("ExtraVariable"))
+				extraPanel.extraValue.setValue(extra.getAttribute("ExtraValue"))
+			
+			
+			self.lighting.loadProperties(xmlLighting)
+			
+			occlGroups = xmlLighting.getElementsByTagName("OcclusionGroup")
+			
+			for group in occlGroups:
+				occl = self.lighting.addOccl(None)
+				print "Setting up an occlusion group!"
+				occl.groupName.setValue(group.getAttribute("Name"))
+				shaderXML = group.getElementsByTagName("shader")
+				print "setting up a shader from ", shaderXML
+				if len(shaderXML) > 0:
+					occl.aoShaderProperty.initShader( useXML = True, xml = shaderXML[0])
+				
+			
 			if len(xmlObjects) > 0:
 				for xmlObject in xmlObjects:
 					# get the name of the object in question. They should all have names.
@@ -1489,6 +1666,8 @@ class ObjectEditor(BtoRObject):
 		# so instead I simply retrieve the object in question
 		if self.scene.object_data.has_key(obj.getName()): 
 			self.objData = self.scene.object_data[obj.getName()] # fetch the adapter 
+			# flag the object as modified
+			
 			# print self.objData
 		else:
 			# no adapter found in the scene settings dictionary, so
@@ -1749,6 +1928,9 @@ class Material(BtoRObject):
 		self.scroller= ui.ScrollPane(155, 45, 240, 200, "Scroller", "Scroller", self.editorPanel, True)
 		self.setupProperties()
 		
+		# initialize the color and opacity properties from the material if I have one
+		self.setProperty("color", self.material.color())
+		self.setProperty("opacity", self.material.opacity())		
 		
 		if render:
 			self.renderPreview(None)
@@ -1816,7 +1998,7 @@ class Material(BtoRObject):
 		# step 1 is to find a place to put this, so consult the BtoR settings to see where that is.
 		filename = os.path.normpath(self.settings.outputPath + os.sep + "material_" + self.material.name + ".tif")
 		# print "Selected renderer: ", self.settings.renderers[self.settings.renderer][0]
-		ri.RiBegin(self.settings.renderers[self.settings.renderer][0] + " -v=3") # replace this with render flags
+		ri.RiBegin(self.settings.renderers[self.settings.renderer][0]) # replace this with render flags
 		# ri.RiBegin(os.path.normpath(self.settings.outputPath + os.sep + "material_" + self.material.name + ".rib"))
 		# get the shader options
 		paths = self.settings.shaderpaths.getValue().split(";")
@@ -2090,16 +2272,15 @@ class Shader(BtoRObject):
 			if path != spath:
 				found = False
 				for apath in self.searchpaths:					
-					apath = os.path.normpath(apath)					
-					if path == apath:
+					if path == os.path.normpath(apath):
 						pIndex = self.searchpaths.index(apath)
 						found = True
 						break
 				if found:
 					self.searchPaths.setValue(pIndex)
-					print "Setting search path"
+					# print "Setting search path"
 				else:
-					print "Appending search path: ", path
+					# print "Appending search path: ", path
 					self.searchpaths.append(path)
 					self.searchPaths.re_init(self.searchpaths)
 					self.searchPaths.setValue(self.searchpaths.index(path))
@@ -2120,11 +2301,13 @@ class Shader(BtoRObject):
 		return value_tables[parameter]
 		
 	def listShaders(self, obj):
-		self.settings.getShaderList(self.searchPaths.getValue())
-		# reset the shader list menu
-		self.shaders = []
-		self.makeShaderMenu()
-		self.shader_menu.re_init(self.shadersMenu)
+		print "listing shaders!"
+		if self.searchPaths.getValue() != "":
+			self.settings.getShaderList(self.searchPaths.getValue())
+			# reset the shader list menu
+			self.shaders = []
+			self.makeShaderMenu()
+			self.shader_menu.re_init(self.shadersMenu)
 		
 	def getShaderName(self):
 		if self.shader == None:
@@ -2366,6 +2549,8 @@ class Shader(BtoRObject):
 				setattr(self.shader, name, matrix)
 			
 			index = index + 1
+			
+		
 
 class GenericShader(BtoRObject):
 	def __init__(self, shader, s_type, parent):
@@ -2623,7 +2808,7 @@ class GenericShader(BtoRObject):
 		for element in self.scroller.elements:
 			p_type = element.paramtype
 			name = element.param_name
-			print "updating ", element.param_name, " to value: ", element.getValue()
+			# print "updating ", element.param_name, " to value: ", element.getValue()
 			if p_type == "float" or p_type == "string": # lo, all my single-variable types
 				setattr(self.shader, name, self.scroller.elements[index].getValue())
 				
@@ -2724,6 +2909,110 @@ class GenericShader(BtoRObject):
 			# shader.createSlot(atts["name"].nodeValue, convtypes[switch], None, val) # array  length is none for now, array behaviour is uncertain here	
 	def getStrValue(self):
 		return self.getShaderName()
+		
+	def getShaderXML(self, xml):
+		
+		shaderNode = xml.createElement("shader")	
+		shader = self.shader
+		# update all the stuff...
+		self.updateShaderParams()						
+		
+		# get the shader information
+		shaderNode.setAttribute("name", shader.shaderName())
+		if shader.filename != None:
+			shaderNode.setAttribute("path", os.path.normpath(shader.filename))
+		else:
+			shaderNode.setAttribute("path", "None")
+		
+			
+		for parm in shader.shaderparams:
+			# get the param and stuff into my dict				
+			# create the node
+			parmNode = xml.createElement("Param")
+			value = getattr(shader, parm)	
+			# create an XML element for this value.
+			s_type = shader.shaderparams[parm].split()[1]
+			# setup as much of the node element as I can here
+			parmNode.setAttribute("name", parm)
+			parmNode.setAttribute("type", s_type)
+			
+			if s_type == "float":
+				parmNode.setAttribute("value", '%f' % value)
+			elif s_type == "string":
+				parmNode.setAttribute("value", value)
+			elif s_type == "color":
+				parmNode.setAttribute("red", '%f' % value[0])
+				parmNode.setAttribute("green", '%f' % value[1])
+				parmNode.setAttribute("blue", '%f' % value[2])
+			elif s_type in ["point", "normal", "vector"]:
+				parmNode.setAttribute("x", '%f' % value[0])
+				parmNode.setAttribute("y", '%f' % value[1])
+				parmNode.setAttribute("z", '%f' % value[2])
+			elif s_stype == "matrix":
+				sep = "_"
+				index = 0
+				for x in range(4):
+					for y in range(4):
+						parmNode.setAttribute(sep.join(["value", index]), '%f' % value[x, y])
+						index = index + 1
+			
+			# now commit this node to the shader node
+			shaderNode.appendChild(parmNode)
+		
+		return shaderNode
+	
+	def populateShaderParams(self):
+		for parm in parms:	
+			convtypes = {"float":"double",
+					"string":"string",
+					"color":"vec3",
+					"point":"vec3",
+					"vector":"vec3",
+					"normal":"vec3",
+					"matrix":"mat4"}			
+			p_type = parm.getAttribute("type")
+			p_name = parm.getAttribute("name")
+				
+			if p_type == "float":
+				parm_value = float(parm.getAttribute("value"))
+			elif p_type == "string":
+				parm_value = parm.getAttribute("value")
+			elif p_type == "color":
+				parm_value = cgkit.cgtypes.vec3(float(parm.getAttribute("red")), float(parm.getAttribute("green")), float(parm.getAttribute("blue")))
+			elif p_type in ["normal", "vector", "point"]:
+				parm_value = cgkit.cgtypes.vec3(float(parm.getAttribute("x")), float(parm.getAttribute("y")), float(parm.getAttribute("z")))
+			elif p_type == "matrix":
+				mat_value = []
+				sep = "_"
+				index = 0
+				for x in range(4):
+					for y in range(4):
+						mat_value.append(float(parmNode.getAttribute(sep.join(["value", index]))))
+						index = index + 1
+				parm_value = cgkit.cgtypes.mat4(mat_value[0], 
+										mat_value[1], 
+										mat_value[2], 
+										mat_value[3], 
+										mat_value[4], 
+										mat_value[5], 
+										mat_value[6], 
+										mat_value[7], 
+										mat_value[8], 
+										mat_value[9],
+										mat_value[10],
+										mat_value[11],
+										mat_value[12],
+										mat_value[13],
+										mat_value[14],
+										mat_value[15])		
+						
+			if initialized == False:
+				shader.declare(p_name, type=convtypes[p_type], default=parm_value)
+				# shader.createSlot(p_name, convtypes[p_type], None, parm_value) # Here we set the default value to the parameters incoming value.
+			
+			# and set the value 
+			setattr(shader, p_name, parm_value)
+				
 class GeneticParamModifier(BtoRObject):
 	def __init__(self):
 		sdict = globals()
@@ -3171,15 +3460,15 @@ class MaterialList(BtoRObject):
 					if len(surface) > 0:
 						# new CgKit surface shader
 						
-						if surface[0].getAttribute("filename") == "None":
+						if surface[0].getAttribute("filename").encode("ascii") == "None":
 							# I don't know where the path is. Initialize a basic shader and set the slots up manually
 							surfShader = cgkit.rmshader.RMShader()
 							initialized = False
 						else:
 							if self.settings.use_slparams:
-								surfShader = cgkit.rmshader.RMShader(os.path.normpath(surface[0].getAttribute("path")))
+								surfShader = cgkit.rmshader.RMShader(os.path.normpath(surface[0].getAttribute("path").encode("ascii")))
 							else:
-								surfShader = cgkit.rmshader.RMShader(surface[0].getAttribute("path") + os.sep + surface[0].getAttribute("filename") + self.settings.renderers[self.settings.renderer][4])
+								surfShader = cgkit.rmshader.RMShader(surface[0].getAttribute("path") + os.sep + surface[0].getAttribute("filename").encode("ascii") + self.settings.renderers[self.settings.renderer][4])
 							initialized = True
 							
 						# setup the parameters
@@ -3192,13 +3481,13 @@ class MaterialList(BtoRObject):
 					if len(displacement) > 0:
 						# new CgKit displacement Shader
 						
-						if displacement[0].getAttribute("filename") == "None":
+						if displacement[0].getAttribute("filename").encode("ascii") == "None":
 							dispShader = cgkit.rmshader.RMShader()
 						else:
 							if self.settings.use_slparams:
-								dispShader = cgkit.rmshader.RMShader(os.path.normpath(displacement[0].getAttribute("path")))
+								dispShader = cgkit.rmshader.RMShader(os.path.normpath(displacement[0].getAttribute("path").encode("ascii")))
 							else:
-								dispShader = cgkit.rmshader.RMShader(displacement[0].getAttribute("path") + os.sep + displacement[0].getAttribute("name") + self.settings.renderers[self.settings.renderer][4])
+								dispShader = cgkit.rmshader.RMShader(displacement[0].getAttribute("path") + os.sep + displacement[0].getAttribute("filename").encode("ascii") + self.settings.renderers[self.settings.renderer][4])
 			
 							
 						parms = displacement[0].getElementsByTagName("Param")
@@ -3208,14 +3497,14 @@ class MaterialList(BtoRObject):
 					
 					if len(volume) > 0:
 						
-						if volume[0].getAttribute("filename") == "None":
+						if volume[0].getAttribute("filename").encode("ascii") == "None":
 							volShader = cgkit.rmshader.RMShader()
 						else:
 							# new CgKit volume shader
 							if self.settings.use_slparams:
-								volumeShader = cgkit.rmshader.RMShader(os.path.normpath(volume[0].getAttribute("path")))
+								volumeShader = cgkit.rmshader.RMShader(os.path.normpath(volume[0].getAttribute("path").encode("ascii")))
 							else:
-								volumeShader = cgkit.rmshader.RMShader(volume[0].getAttribute("path") + os.sep + volume[0].getAttribute("name") + self.settings.renderers[self.settings.renderer][4])
+								volumeShader = cgkit.rmshader.RMShader(volume[0].getAttribute("path") + os.sep + volume[0].getAttribute("name").encode("ascii") + self.settings.renderers[self.settings.renderer][4])
 			
 						parms = volume.getElementsByTagName("Param")			
 						self.populateShaderParams(parms, volumeShader, initialized)
@@ -3224,7 +3513,7 @@ class MaterialList(BtoRObject):
 						
 					# base RMMaterial
 					
-					rmmaterial = cgkit.rmshader.RMMaterial(name = name.encode("utf-8"), surface = surfShader, displacement = dispShader, 
+					rmmaterial = cgkit.rmshader.RMMaterial(name = name.encode("ascii"), surface = surfShader, displacement = dispShader, 
 												interior = volumeShader, color = matColor, opacity = matOpacity)
 					# print "Color: ", matColor
 					# B2RMaterial Editor here
@@ -3232,7 +3521,7 @@ class MaterialList(BtoRObject):
 					# set the title
 					BtoRmat.editorButton.title = name
 					BtoRmat.selectorButton.title = name
-					BtoRmat.setProperty("MaterialName", name)
+					BtoRmat.setProperty("MaterialName", name)					
 					materials.append(BtoRmat) 
 					
 					# that was easier than it seemed at first blush
@@ -3332,27 +3621,30 @@ class MaterialList(BtoRObject):
 				
 		for material in self.materials:
 
-			mat = material.material			
+			mat = material.material	
+			
 			surface = mat.surface
 			disp = mat.displacement
 			volume = mat.interior
-			color = mat.color()
+			color = material.getProperty("color")
 			
-			opacity = mat.opacity()
-			print "Here I am before fetching properties!"
+			opacity = material.getProperty("opacity")
+			
 			dispBound = material.getProperty("DispBound")
 			
 			matNode = xmlDoc.createElement("Material")
 			matNode.setAttribute("name", material.getProperty("MaterialName"))
 			matNode.setAttribute("displacementBound", "%f" % material.getProperty("DispBound")) # that should be a string value here
-			print "Here I am after fetching properties!"
+			
 			# color
+			print color
 			colorNode = xmlDoc.createElement("Color")
 			colorNode.setAttribute("red", '%f' % color[0])
 			colorNode.setAttribute("green", '%f' % color[1])
 			colorNode.setAttribute("blue", '%f' % color[2])
 			
 			#opacity
+			print opacity
 			opacityNode = xmlDoc.createElement("Opacity")
 			opacityNode.setAttribute("red", '%f' % opacity[0])
 			opacityNode.setAttribute("green", '%f' % opacity[1])
@@ -3374,7 +3666,6 @@ class MaterialList(BtoRObject):
 					surfNode.setAttribute("path", os.path.normpath(mat.surface.filename))
 				else:
 					surfNode.setAttribute("path", "None")
-				
 					
 				for parm in surface.shaderparams:
 					# get the param and stuff into my dict				
@@ -3845,7 +4136,8 @@ class LightManager(BtoRObject):
 		self.occlGroups = [] # e.g. "groupname" : [[properties],["light1", "light2", "light3"]]
 
 		self.occlIndex = 0
-		
+	
+			
 	def getSelected(self):		
 		if not self.__dict__.has_key("scene"):
 			sdict = globals()
@@ -3929,6 +4221,7 @@ class LightManager(BtoRObject):
 		# now I have to setup occlusion properties, like the occlusion shader, and the attached lights array		
 		self.occlGroups.append(occlPanel)
 		self.updateOcclusionList(None)
+		return occlPanel
 	
 	def delOccl(self, obj):
 		selected = []

@@ -18,6 +18,7 @@ import sys
 import StringIO	
 import protocols
 import random
+import md5
 import traceback
  
 class IProperty(protocols.Interface):
@@ -31,6 +32,7 @@ class Property:
 	height = 27 # should work for most
 	def __init__(self, value, xml = None):
 		self.value = value
+		self.saveable = True
 	def setHeight(self, height):
 		self.height = height
 	def setWidth(self, width):
@@ -74,10 +76,20 @@ class FloatProperty(Property):
 class ColorProperty(Property): 
 	protocols.advise(instancesProvide=[IProperty], asAdapterForTypes=[list])
 	pass
-	
+	def toXML(self, xml):
+		xmlProp = xml.createElement("property")
+		xmlProp.setAttribute("type", type(self.getValue()).__name__)
+		xmlProp.setAttribute("red", str(self.getValue()[0]))
+		xmlProp.setAttribute("green", str(self.getValue()[1]))
+		xmlProp.setAttribute("blue", str(self.getValue()[2]))
+		#print "set property of type ", type(self.value), " to ", type(str(self.value).__name__)
+		print self.getValue()
+		return xmlProp		
+
 class DictProperty(Property):
 	protocols.advise(instancesProvide=[IProperty], asAdapterForTypes=[dict])
 	def __init__(self, value):
+		self.saveable = True
 		# what do I do here? I want this to actually be converted to a menu
 		# thus
 		# sort the array keys
@@ -116,11 +128,157 @@ class BooleanProperty(Property):
 	
 class ComplexProperty(Property):
 	protocols.advise(instancesProvide=[IProperty], asAdapterForTypes=[BtoRShaderType])
-	pass
+	def __init__(self, value, xml = None):
+		sdict = globals()
+		self.settings = sdict["instBtoRSettings"]
+		Property.__init__(self, value, xml = xml)
+		self.saveable = False
+	
+	def initShader(self, useXML = False, xml = None, shaderName = None, parmList = None, shaderFileName = None):
+		# this should always have a shader, so
+		
+		s_type = self.value.getObject().s_type
+		print "Initializing a ", s_type, " shader"
+		
+		try:
+			if self.settings.use_slparams:
+				shaderPath = self.settings.shaderpaths.getValue().split(";")[0]
+				
+				initialized = True								
+				if useXML:
+					shader = cgkit.rmshader.RMShader(xml.getAttribute("path").encode("ascii"))	# this would actually be a problem. I'm not always 100% that I'll have a shader source file and so much rely 
+					# also on the shader name to get this in cases where a custom shader was entered.
+					parms = xml.getElementsByTagName("Param")
+					self.populateShaderParams(parms, shader, initialized)
+				else:
+					shader = cgkit.rmshader.RMShader(shaderFileName)
+					self.populateShaderParamsList(parmList, shader, initialized)		
+				
+			else:
+				
+				initialized = False
+				shader = cgkit.rmshader.RMShader(shaderName)
+				self.populateShaderParamsList(parmList, shader, initialized)		
+			shader = btor.BtoRMain.GenericShader(shader, s_type, self)
+		except:
+			traceback.print_exc()
+			shader = btor.BtoRMain.GenericShader(None, s_type, self)
+			
+		self.value = BtoRShaderType(shader)
+		self.editor.setValue(shader.getStrValue())
+		# I should probably update the property editor here
+		
+		
+	def populateShaderParams(self, parms, shader, initialized):
+		print parms
+		for parm in parms:	
+			convtypes = {"float":"double",
+					"string":"string",
+					"color":"vec3",
+					"point":"vec3",
+					"vector":"vec3",
+					"normal":"vec3",
+					"matrix":"mat4"}			
+			p_type = parm.getAttribute("type")
+			p_name = parm.getAttribute("name")
+				
+			if p_type == "float":
+				parm_value = float(parm.getAttribute("value"))
+			elif p_type == "string":
+				parm_value = parm.getAttribute("value").encode("ascii")
+			elif p_type == "color":
+				parm_value = cgkit.cgtypes.vec3(float(parm.getAttribute("red")), float(parm.getAttribute("green")), float(parm.getAttribute("blue")))
+			elif p_type in ["normal", "vector", "point"]:
+				parm_value = cgkit.cgtypes.vec3(float(parm.getAttribute("x")), float(parm.getAttribute("y")), float(parm.getAttribute("z")))
+			elif p_type == "matrix":
+				mat_value = []
+				sep = "_"
+				index = 0
+				for x in range(4):
+					for y in range(4):
+						mat_value.append(float(parmNode.getAttribute(sep.join(["value", index]))))
+						index = index + 1
+				parm_value = cgkit.cgtypes.mat4(mat_value[0], 
+										mat_value[1], 
+										mat_value[2], 
+										mat_value[3], 
+										mat_value[4], 
+										mat_value[5], 
+										mat_value[6], 
+										mat_value[7], 
+										mat_value[8], 
+										mat_value[9],
+										mat_value[10],
+										mat_value[11],
+										mat_value[12],
+										mat_value[13],
+										mat_value[14],
+										mat_value[15])		
+						
+			if initialized == False:
+				shader.declare(p_name, type=convtypes[p_type], default=parm_value)
+				# shader.createSlot(p_name, convtypes[p_type], None, parm_value) # Here we set the default value to the parameters incoming value.
+			# print "Assigning parameter value ", p_name, " = ", parm_value
+			# and set the value 
+			setattr(shader, p_name, parm_value)
+	
+	def populateShaderParamsList(self, params, shader, initialized):
+		
+		convtypes = {"float":"double",
+				"str":"string",
+				"vec3":"vec3",
+				"matrix":"mat4"}
+
+		val = ""
+		# print dir(shader)
+		for key in params.keys():
+			param = params[key]
+			if isinstance(param, list):				
+				if len(param) == 3:  # color, vector, normal, or point
+					ptype = "vec3"
+					val = cgkit.cgtypes.vec3(float(param[0]), float(param[1]), float(param[2]))				
+				elif len(param) == 16: # matrix
+					val = cgkit.cgtypes.mat4(float(param[0]),
+							float(param[2]),
+							float(param[2]),
+							float(param[3]),
+							float(param[4]),
+							float(param[5]),
+							float(param[6]),
+							float(param[7]),
+							float(param[8]),
+							float(param[9]),
+							float(param[10]),
+							float(param[11]),
+							float(param[12]),
+							float(param[13]),
+							float(param[14]),
+							float(param[15]))
+							
+			elif isinstance(param, float) or isinstance(param, int):
+				ptype = "float"
+				val = float(param)
+				
+			elif isinstance(param, str):
+				ptype = "string"
+				val = param			
+			
+				
+			if initialized == False:
+				shader.declare(key,type=convtypes[ptype], default=val ) # declare the shader here!
+				# shader.createSlot(key + "_slot", convtypes[ptype], None, val) # Here we set the default value to the parameters incoming value...
+			# print "Setting shader parameter ", key, " to ", val
+			# and set the value 
+			# print key, ", ", val
+			if param != None:
+				setattr(shader, key, val)
+			
 class MaterialProperty(Property):
 	protocols.advise(instancesProvide=[IProperty], asAdapterForTypes=[BtoRMaterialType])
 	height = 65
 	pass
+	def getValue(self):
+		return self.editor.value.getValue()
 class VectorProperty(Property):
 	protocols.advise(instancesProvide=[IProperty], asAdapterForTypes=[cgkit.cgtypes.vec3])
 	pass
@@ -251,6 +409,7 @@ class ColorPropertyEditor(PropertyEditor):
 		self.B.registerCallback("update", self.updateColor)
 		self.updateColor(None)
 		self.colorButton.picker.registerCallback("ok", self.updateFields)
+		self.value = self.colorButton
 		
 	def updateFields(self, color):
 		self.R.setValue(float(float(color.value[0]) / 255))
@@ -281,6 +440,15 @@ class ColorPropertyEditor(PropertyEditor):
 		rgb = [r, g, b, 255]
 		self.colorButton.setValue(rgb) 
 		self.property.setValue([self.R.getValue(), self.G.getValue(), self.B.getValue()])
+		
+	def setValue(self, color):
+		print "Setting color", color
+		self.R.setValue(color[0])
+		self.G.setValue(color[1])
+		self.B.setValue(color[2])
+		self.updateColor(None)
+		# self.property.setValue([float(float(color.value[0])/255), float(float(color.value[1]) / 255), float(float(color.value[2]) / 255)])
+		
 	#protocols.declareAdapter(ColorPropertyEditor, [IPropertyEditor], forTypes=[ColorProperty])
 
 class BooleanPropertyEditor(PropertyEditor):
@@ -313,11 +481,13 @@ class ComplexPropertyEditor(PropertyEditor):
 		self.triggerButton.shadowed = False
 		self.triggerButton.registerCallback("release", self.showPropertyEditor)
 		self.property.registerCallback("update", self.updateValue)
+		# for (this( property editor, I should set a back reference so I can update the text field with the shader when it's initialized
+		self.property.editor = self
 		
 	def showPropertyEditor(self, obj):
 		self.evt_manager.addElement(self.property.getEditor())
 	
-	def updateValue(self, obj): # here, I'll be receiving a shader type, so I know that I can do shader.getName() for the value
+	def updateValue(self, obj): 
 		self.setValue(obj.getShaderName())
 		
 	def setValue(self, value):
@@ -349,24 +519,22 @@ class MaterialPropertyEditor(PropertyEditor):
 		self.func = None
 		width = self.property.width
 		height = self.property.height
+		self.property.editor = self
 		
 	def showPropertyEditor(self, obj):
 		self.evt_manager.addElement(self.property.getEditor())
 		
-	def setValue(self, value):
-		self.evt_manager.removeElement(self.mat_selector)
+	def setValue(self, material):
+		#self.evt_manager.removeElement(self.mat_selector)
 		# the button returned has the material name!
 		# So all i need to do now is...
-		if matName != None:
-			self.material = matName
-			self.materialButton.setTitle(matName)
-			self.materialButton.image = self.materials.getMaterial(matName).image
-		else:
-			self.material = obj.title
-			# self.scene.object_data[self.objectName.getValue()]["material"] = obj.title # Assign the material to the object adapter
-			# print "Assigned material ", self.scene.object_data[self.objectName.getValue()]["material"], " to ", self.objectName.getValue()
-			self.materialButton.title = obj.title			
-			self.materialButton.image = ui.Image(120, 5, 56, 56,  obj.image.image, self.materialButton, False)
+		
+		if material != None and material != "None Assigned:":
+			self.value.setValue(material)
+			self.material = self.materials.getMaterial(material) # this should be the material name!
+			self.editor.setTitle(material)
+			self.editor.image = self.materials.getMaterial(material).image
+			
 	def updateValue(self, obj):
 		if material != None:
 			self.material = material
@@ -378,12 +546,11 @@ class MaterialPropertyEditor(PropertyEditor):
 	def setMaterial(self, material):
 		if material != None:
 			self.value.setValue(material.material.name)
-			self.property.setValue(material.material.name)
-			print material.image
+			self.property.setValue(material.material.name)			
 			if self.editor.image == None:
 				self.editor.image = ui.Image(150, 5, 56, 56, material.image, self.editor, False)
 			else:
-				self.editor.image.image = material.image
+				self.editor.image = ui.Image(150, 5, 56, 56, material.image, self.editor, False)
 	
 	
 	def showMaterialSelector(self, obj):
@@ -413,6 +580,7 @@ class MaterialPropertyEditor(PropertyEditor):
 			# print "Assigned material ", self.scene.object_data[self.objectName.getValue()]["material"], " to ", self.objectName.getValue()
 			self.materialButton.title = obj.title			
 			self.materialButton.image = ui.Image(120, 5, 56, 56,  obj.image.image, self.materialButton, False)
+			
 class VectorPropertyEditor(PropertyEditor):
 	protocols.advise(instancesProvide=[IPropertyEditor], asAdapterForTypes=[VectorProperty])
 	def __init__(self, property):
@@ -463,11 +631,8 @@ class RotationPropertyEditor(PropertyEditor):
 		self.z.registerCallback("release", self.updateValue)
 		self.z.elements[0].x = 12
 		
-	def updateValue(self, obj):	
-		print "updating property value!"		
+	def updateValue(self, obj):		
 		self.property.value.obj = [float(self.angle.getValue()), self.x.getValue(), self.y.getValue(), self.z.getValue()]
-		print "value is ", self.property.value.obj
-		print "type is ", type(self.property.value.obj)
 		
 class MatrixPropertyEditor(PropertyEditor):
 	protocols.advise(instancesProvide=[IPropertyEditor], asAdapterForTypes=[MatrixProperty])
@@ -524,6 +689,10 @@ class ObjectAdapter:
 		self.properties = self.objEditor.properties
 		self.editors = self.objEditor.editors
 		# self.objType = obj.obj.getType()
+		self.changed = False
+		
+	def genChecksum(self):
+		pass
 	
 	# convenience method to return the editor object for this adapter
 	def getProperty(self, property):
@@ -705,12 +874,17 @@ class ObjectAdapter:
 										mat_value[14],
 										mat_value[15])		
 						
+			else:
+				print "No type found, this parameter was a ", p_type
+				parm_value = None
 			if initialized == False:
 				shader.declare(p_name, type=convtypes[p_type], default=parm_value)
 				# shader.createSlot(p_name, convtypes[p_type], None, parm_value) # Here we set the default value to the parameters incoming value.
+				
 			
 			# and set the value 
-			setattr(shader, p_name, parm_value)
+			if parm_value != None:
+				setattr(shader, p_name, parm_value)
 	
 	def checkReset(self):
 		# check the object in question
@@ -731,9 +905,11 @@ class ObjectAdapter:
 		if len(self.properties) > 0:
 			# I've got at least one property
 			for property in self.properties:
-				xmlProp = self.properties[property].toXML(xml)
-				xmlProp.setAttribute("name", property) # set the name attribute here for the moment, but later configure a property to have a name AND a title!
-				objXml.appendChild(xmlProp)
+				
+				if self.properties[property].saveable:
+					xmlProp = self.properties[property].toXML(xml)
+					xmlProp.setAttribute("name", property) # set the name attribute here for the moment, but later configure a property to have a name AND a title!
+					objXml.appendChild(xmlProp)
 		
 			
 		if self.__dict__.has_key("shader"):
@@ -804,13 +980,18 @@ class ObjectAdapter:
 		for xmlProperty in xmlProperties:
 			# each of these is a property element
 			propertyName = xmlProperty.getAttribute("name").encode("ascii")		
-			xmlType = xmlProperty.getAttribute("type").encode("ascii")
-			
+			xmlType = xmlProperty.getAttribute("type").encode("ascii")			
 			xmlValue= xmlProperty.getAttribute("value").encode("ascii")
 			if xmlType == "bool":
 				propertyValue = xmlTypes[xmlType](eval(xmlValue))
+			elif xmlType == "list":
+				propertyValue = [float(eval(xmlProperty.getAttribute("red").encode("ascii"))), 
+							float(eval(xmlProperty.getAttribute("green").encode("ascii"))),
+							float(eval(xmlProperty.getAttribute("blue").encode("ascii")))] # rebuild a pretty color!
+				# print propertyValue
 			else:
 				propertyValue = xmlTypes[xmlType](xmlValue)
+				# print "Value for property ", propertyName, " is ", propertyValue
 			self.editors[propertyName].setValue(propertyValue) # 
 			
 			
@@ -842,8 +1023,8 @@ class ObjectAdapter:
 				if useXML:
 					self.populateShaderParams(xml, shader, initialized)
 				else:
-					self.populateShaderParamsList(self.objData["shaderparms"], shader, initialized)		
-				
+					if self.objData.has_key("shaderparms"):
+						self.populateShaderParamsList(self.objData["shaderparms"], shader, initialized)		
 			else:
 				
 				initialized = False
@@ -865,7 +1046,7 @@ class ObjectAdapter:
 			self.editors["material"].setMaterial(material)
 	def initMaterial(self):	
 		if self.objData.has_key("material"):
-			print self.objData["material"], " was found"
+			# print self.objData["material"], " was found"
 			if self.objData["material"] != None and self.objData["material"] != "None":
 				self.editors["material"].setMaterial(self.materials.getMaterial(self.objData["material"]))
 			
@@ -945,22 +1126,19 @@ class MeshAdapter(ObjectAdapter):
 	def __init__(self, object):
 		""" Initialize a mesh export adapter """		
 		ObjectAdapter.__init__(self, object)
-		
-	
+			
 		
 	def render(self, shadowPass = False, envPass = False):
 		render = False
 		
 		if shadowPass:
-			if self.properties["RenderInShadowPass"].getValue():
-				print "rendering shadowpass object"
+			if self.properties["RenderInShadowPass"].getValue():				
 				render = True
 		elif envPass:
 			if self.properties["RenderInEnvMaps"].getValue():
 				render = True
 		else:
-			render = True
-			print "rendering object"
+			render = True			
 		
 		if render:	
 			# immediately test for dupliverts
@@ -994,13 +1172,16 @@ class MeshAdapter(ObjectAdapter):
 				ri.RiAttributeBegin()				
 				ri.RiAttribute("identifier", "name", [self.objData["name"]]) # give it a name
 				ri.RiAttribute("displacementbound", "sphere", self.getProperty("DispBound"))
-				ri.RiShadingRate(self.getProperty("ShadingRate"))
+				srate = self.getProperty("ShadingRate")
+				sceneRate = self.scene.getProperty("ShadingRate")
+				if srate != sceneRate:
+					ri.RiShadingRate(srate)
 				
 				ri.RiTransformBegin()	 
-				print "Render Shadow materials", self.getProperty("ShadowMats")
+				
 				if shadowPass and self.getProperty("ShadowMats"):					
 					self.renderMaterial()
-				elif not self.getProperty("Matte"):
+				elif not shadowPass and not self.getProperty("Matte"):
 					self.renderMaterial()
 						
 				ri.RiTransform(self.object.matrix) # transform				
@@ -1009,6 +1190,8 @@ class MeshAdapter(ObjectAdapter):
 				ri.RiTransformEnd()
 				ri.RiAttributeEnd()
 				# aaaannnnnd done.
+				# I rendered this object, so flag the 
+				self.changed = False
 
 
 		
@@ -1399,10 +1582,59 @@ class LampAdapter(ObjectAdapter):
 		""" Initialize a Lamp export adapter """
 		ObjectAdapter.__init__(self, object)	
 		self.isAnimated = False 
+		self.shadowMaps = {} # indexed by direction_frame method
+	
+		
 	def render(self): 
 		""" Generate renderman data for this object. """
+		# I should call checkReset here to make sure I have the latest/greatest up to date data for this lamp, no?
 		shader = self.getProperty("shader").getObject().shader
 		ri.RiLightSource(shader.shadername, shader.params())
+		
+	
+	def genCheckSum(self):
+		# the only settings I care about are
+		# scale/rot/trans, obviously. I can probably get the transform matrix and use that, or make vectors of the three and go from there
+		# then I want the type
+		# the color...energy...'only shadow'...maybe the textures.
+		lamp = self.obj.getData()
+		name = self.obj.getName()
+		intensity  =  "%f" % lamp.intensity		
+		loc = "%f_%f_%f" % (self.obj.LocX, self.obj.LocY, self.obj.LocZ)
+		rot = "%f_%f_%f" % (self.obj.RotX, self.obj.RotY, self.obj.RotZ)
+		scale = "%f_%f_%f" % (self.obj.ScaleX, self.obj.ScaleY, self.obj.ScaleZ)
+		energy = "%f" % lamp.getEnergy()
+		r = "%f" % lamp.R
+		g = "%f" % lamp.G
+		b = "%f" % lamp.B
+		# lamp types 
+		# 0 - point
+		# 1 - distant/sun
+		# 2 - spot
+		# 3 - hemi
+		# 4 - area
+		seed = name + intensity + loc + rot + scale + r + g + b # and this covers the pointlight
+		if self.obj.getType() in [1, 2]:
+			# I'm interested in spotsi and bias stuff
+			# I probably want to worry about falloff too
+			bias = "%f" % lamp.bias
+			
+			samples =  "%f" % lamp.samples
+			spotsize =  "%f" % lamp.spotSize
+			spotblend =  "%f" %  lamp.spotBlend 
+			seed = seed + bias + samples + spotsize + spotblend # and this covers spots
+			
+		# now I have to worry about shader parameters being changed, because in the case of non-standard shader params (you know, different light shader), I might need to regenerate the shadow map even if the 
+		# light wasn't actually touched in blender.
+		shader = self.getProperty("shader").getObject().shader
+		shaderName = shader.shaderName() # should I worry about the filename too?
+		params = shader.params().__repr__()
+			
+		
+		hash = md5.new(seed)
+		
+		return hash
+			
 		
 	def doCameraTransform(self, axis):
 
@@ -1463,6 +1695,10 @@ class LampAdapter(ObjectAdapter):
 			#mat = cmatrix * sMat * rMat
 			#ri.RiTransform(mat)
 			# ri.RiTranslate(0, 0, 1) # dunno if this is neccessary here or not.
+			
+			# so the important thing here is to test if the object changed since last generation. So I need to save a checksum of loc/rot/scale
+			# here so that I've got something to work from. Probably also need to worry about main light settings
+		self.genChecksum()
 			
 	def getRenderProjection(self):
 		if self.object.getData().getType() == 0:
@@ -1551,6 +1787,7 @@ class LampAdapter(ObjectAdapter):
 			self.objData["shadername"] = "pointlight"			
 			shaderParms["intensity"] = (energyRatio * lamp.energy) * self.scene.lightMultiplier
 			
+			
 		elif lamp.type == 1:
 
 			self.objData["type"] = 1
@@ -1563,15 +1800,7 @@ class LampAdapter(ObjectAdapter):
 				else:
 					sFilename = "distantlight.sl"
 				self.objData["shaderfilename"] = os.path.normpath(shaderPath + os.sep + sFilename)
-
 			shaderParms["to"] = [ tox, toy, toz]
-			
-			
-			# parms for shadowMapping
-			#shaderParms["name"] = "distantshadow"
-			#shaderParms["shadowname"] = "shadow"
-			#shaderParms["shadowsamples"] = 1			
-			#shaderParms["shadowblur"] = 0.0
 			
 		elif lamp.type == 2:
 			self.objData["type"] = 2
@@ -1585,13 +1814,14 @@ class LampAdapter(ObjectAdapter):
 				sFilename = "bml.sl"
 				self.objData["shaderfilename"] = os.path.normpath(shaderPath + os.sep + sFilename)
 			
-			shaderParms["shadowbias"] = 1
+			shaderParms["shadowbias"] = lamp.bias
 			shaderParms["blur"] = 0.0
-			shaderParms["samples"] = 1
+			shaderParms["samples"] = lamp.samples
 			shaderParms["coneangle"] = (lamp.spotSize * math.pi / 360)
 			shaderParms["conedeltaangle"] = (lamp.spotBlend * (lamp.spotSize * math.pi / 360))			
 			shaderParms["to"] = [tox, toy, toz]
 			shaderParms["intensity"] = (energyRatio * lamp.energy) * self.scene.lightMultiplier	
+			
 			# This might need to be animated, so I need to add a function to deal with that
 			if self.settings.useShadowMaps.getValue():
 				shaderParms["shadowname"] = self.object.getName() + ".tx"
@@ -1674,16 +1904,16 @@ class LampAdapter(ObjectAdapter):
 				#shaderParms["shadowsamples"] = 1			
 				#shaderParms["shadowblur"] = 0.0
 				
-			elif lamp.type == 2 and self.shader.getShaderName() == "bml":
+			elif lamp.type == 2 and self.shader.getShaderName() == "bml": 
 				energyRatio = lamp.dist * negative
-				shaderParms["shadowbias"] = 1
+				shaderParms["shadowbias"] = lamp.bias
 				shaderParms["blur"] = 0.0
-				shaderParms["samples"] = 1
+				shaderParms["samples"] = lamp.samples
 				shaderParms["coneangle"] = (lamp.spotSize * math.pi / 360)
 				shaderParms["conedeltaangle"] = (lamp.spotBlend * (lamp.spotSize * math.pi / 360))			
 				shaderParms["to"] = [tox, toy, toz]
-				shaderParms["intensity"] = (energyRatio * lamp.energy) * self.scene.lightMultiplier			
-				# shaderParms["shadowname"] = None # ignore the shadow name. if that's been set, I want to keep the value
+				shaderParms["intensity"] = (energyRatio * lamp.energy) * self.scene.lightMultiplier					
+				
 							
 			elif lamp.type == 3 and self.shader.getShaderName() == "hemilight":
 				energyRatio = negative
@@ -1702,6 +1932,8 @@ class LampAdapter(ObjectAdapter):
 		else:			
 			self.initObjectData()
 			self.objData["reset"] = True
+			
+		
 		
 	def getSelector(self):
 		return self.objEditor.getSelector()
@@ -2164,11 +2396,12 @@ class MeshUI(ObjectUI):
 		# preinitialize a material property
 		ObjectUI.__init__(self, obj)
 		
-		self.exportButton = ui.Button(self.editorPanel.width - 185, self.editorPanel.height - 25, 180, 25, "Export", "Export Object", 'normal', self.editorPanel, True)
-		self.exportButton.registerCallback("release", self.showExport)
+		# commented out temporarily. Will return to service as global object editor for *all* objects, not just meshes
+		#self.exportButton = ui.Button(self.editorPanel.width - 185, self.editorPanel.height - 25, 180, 25, "Export", "Export Object", 'normal', self.editorPanel, True)
+		#self.exportButton.registerCallback("release", self.showExport)
 		
-		self.exportSettings = btor.BtoRMain.ExportSettings()
-		self.exportSettings.export_functions.append(self.objecteditor.exportSingleObject) # this should do the trick, but should apply to every object that's exportable standalone
+		#self.exportSettings = btor.BtoRMain.ExportSettings()
+		#self.exportSettings.export_functions.append(self.objecteditor.exportSingleObject) # this should do the trick, but should apply to every object that's exportable standalone
 		
 		self.helpText = """ This is a test. 
 		Here are some lines.
@@ -2199,14 +2432,14 @@ class MeshUI(ObjectUI):
 class LampUI(ObjectUI):
 	protocols.advise(instancesProvide=[IObjectUI], asAdapterForTypes=[BtoRLamp])	
 	def __init__(self, obj):
-		self.options = {"IncludeWithAO" : ["Include light with AO?", False], 
-				"GenShadowMap" : ["Generate Shadow Maps", True], 
-				"ShadowMapSize" : ["Shadow Map Size", { "256" : 256, "512" : 512, "1024" : 1024, "2048" : 2048 }],
+		self.options = {"IncludeWithAO" : ["Include light with AO?", False],
+				"GenShadowMap" : ["Render Shadow Maps:", {"Lazy" : "lazy", "Always" : "always", "Never" : "never"}, "lazy"], 
+				"ShadowMapSize" : ["Shadow Map Size", { "256" : 256, "512" : 512, "1024" : 1024, "2048" : 2048 }, "256"],
 				"DepthFilter" : ["Midpoint Depthfilter?", True],
-				"ShadowmapSamples" : ["ShadowMap Samples", 1],
+				"ShadowmapSamples" : ["ShadowMap Samples:", 1],
 				"ShadowMapJitter" : ["ShadowMap Jitter:", 0.0],
-				"ShowZBuffer" : ["Show Z Buffer:", False],
-				"Group" : ["Occlusion Group:", {"None Selected":"none Selected"}]}
+				"ShowZBuffer" : ["Show Z Buffer?", False],
+				"Group" : ["Occlusion Group:", {"None Selected":"none Selected"}, "None Selected"]}
 					
 		self.optionOrder = ["IncludeWithAO",
 					"GenShadowMap",

@@ -1954,7 +1954,7 @@ class Menu(UIElement):
 						noSelect = False, 
 						baseButtonTitle = None, outlined = True,
 						shadowed = True, fontsize = 'normal', 
-						custom = False, customPrompt = "None"):
+						custom = False, customPrompt = "None", customFunc = None):
 		self.expanded = False  # this is first to deal with an issue in validate()
 		UIElement.__init__(self, x, y, width, height, name, name, parent, auto_register, fontsize = fontsize)
 		self.fontsize = fontsize
@@ -1975,7 +1975,6 @@ class Menu(UIElement):
 		self.panel.registerCallback("release", self.release)
 		self.enableArrowButton = enableArrowButton
 		self.enableMenuHeader = enableMenuHeader
-
 		
 		butIdx = 0     
 		self.title = menu[0] # take the first item if initialized
@@ -2042,8 +2041,9 @@ class Menu(UIElement):
 			self.panel.elements[butIdx].textColor = self.baseButton.textColor
 			self.panel.elements[butIdx].textHiliteColor = self.baseButton.textHiliteColor
 			self.panel.elements[butIdx].menu_parent = self	
-
+		
 		self.customValue = TextField(0, 0, self.baseButton.width, self.baseButton.height, "Custom", " ", self, True)
+		self.customValue.registerCallback("update", self.customUpdated)
 		self.customValue.menu_parent = self
 		
 		self.customValue.isVisible = False
@@ -2056,6 +2056,11 @@ class Menu(UIElement):
 		self.custom = custom
 		self.customPrompt = customPrompt
 		self.valueIsCustom = False
+		self.custom_func = customFunc
+		
+	def customUpdated(self, obj):
+		if self.custom_func != None:
+			self.custom_func(self.customValue)
 		
 	def key_event(self, key, val):
 		if self.customValue.isVisible:
@@ -2229,6 +2234,7 @@ class Menu(UIElement):
 				self.baseButton.draw()
 			if self.custom:
 				if self.customValue.isVisible:
+					self.customValue.validate()
 					self.customValue.draw()
 			if self.enableArrowButton:
 				self.arrowButton.draw()
@@ -2303,6 +2309,7 @@ class Menu(UIElement):
 			self.panel.validate()	
 		else:
 			UIElement.validate(self)
+
 
 	def release_event(self):
 		if self.expanded and self.hit_test():
@@ -2432,7 +2439,7 @@ class TextField(Button):
 	normalColor = [255, 255, 255, 255]
 	hoverColor = [190, 110, 110, 255]
 	textColor = [0, 0, 0, 255]
-	textHiliteColor = [255, 0, 0, 255]
+	textHiliteColor = [50, 0, 0, 255]
 	borderColor = [128, 128, 128, 255]
 	editingColor = [255, 255, 255, 255]
 	editingBorderColor = [180, 128, 128, 255]
