@@ -1,3 +1,12 @@
+#!BPY
+
+# """
+# Name: 'Blender to Renderman'
+# Blender: 242
+# Group: 'Render'
+# Tooltip: 'Launch BtoR(Blender to Renderman) System'
+# """
+
 from btor import BtoRGUIClasses as ui
 from btor import BtoRMain
 from btor import BtoRAdapterClasses
@@ -33,11 +42,8 @@ setattr(BtoRMain, "instBtoRObjects", instBtoRObjects)
 instBtoRMain = BtoRMain.MainUI()
 setattr(BtoRMain, "instBtoRMain", instBtoRMain)
 
+instBtoREvtManager.addElement(instBtoRMain.getEditor())
 if instBtoRSettings.haveSetup == False:
 	instBtoREvtManager.addElement(instBtoRSettings.getEditor())		
-else:
-	#matEditor = Material(None, None)
-	instBtoREvtManager.addElement(instBtoRMain.getEditor())
-	#evt_manager.addElement(matEditor.getEditor())
 
 instBtoREvtManager.register() # fire it up
