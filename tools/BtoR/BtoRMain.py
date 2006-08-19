@@ -186,7 +186,7 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 		self.cancelButton.registerCallback("release", self.close)
 		
 		# get the first shader path in the search list
-		self.paths = self.shaderpaths.getValue().split(";")
+		paths = self.shaderpaths.getValue().split(";")
 		
 		self.shadersSurface = {}
 		self.shadersDisplacement = {}
