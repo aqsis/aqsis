@@ -1859,8 +1859,8 @@ class Material(BtoRObject):
 		self.setupProperties()
 		
 		# initialize the color and opacity properties from the material if I have one
-		self.setProperty("color", self.material.color())
-		self.setProperty("opacity", self.material.opacity())		
+		self.editors["color"].setValue(self.material.color())
+		self.editors["opacity"].setValue(self.material.opacity())		
 		
 		if render:
 			self.renderPreview(None)
@@ -3569,16 +3569,16 @@ class MaterialList(BtoRObject):
 			# color
 			print color
 			colorNode = xmlDoc.createElement("Color")
-			colorNode.setAttribute("red", '%f' % color[0])
-			colorNode.setAttribute("green", '%f' % color[1])
-			colorNode.setAttribute("blue", '%f' % color[2])
+			colorNode.setAttribute("red", '%f' % float(color[0]))
+			colorNode.setAttribute("green", '%f' % float(color[1]))
+			colorNode.setAttribute("blue", '%f' % float(color[2]))
 			
 			#opacity
 			print opacity
 			opacityNode = xmlDoc.createElement("Opacity")
-			opacityNode.setAttribute("red", '%f' % opacity[0])
-			opacityNode.setAttribute("green", '%f' % opacity[1])
-			opacityNode.setAttribute("blue", '%f' % opacity[2])
+			opacityNode.setAttribute("red", '%f' % float(opacity[0]))
+			opacityNode.setAttribute("green", '%f' % float(opacity[1]))
+			opacityNode.setAttribute("blue", '%f' % float(opacity[2]))
 			
 			matNode.appendChild(colorNode)
 			matNode.appendChild(opacityNode)

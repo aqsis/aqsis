@@ -10,6 +10,7 @@
 # 	Come up with a more formal todo-list
 #######################################################################
 import Blender
+import sys
 draw = Blender.Draw
 gl = Blender.BGL
 
@@ -738,37 +739,44 @@ class EventManager(UI):
 		#process exit key first
 		#if evt == Blender.Draw.ESCKEY:
 		#	Blender.Draw.Exit()
+		try:
+			if evt == Blender.Draw.WHEELDOWNMOUSE or evt == Blender.Draw.WHEELUPMOUSE:
+				self.wheel_event(evt)
+				Blender.Draw.Redraw()
+				
+			if evt == Blender.Draw.LEFTMOUSE and val == 1: # mouse down
+				self.click_event()
+				Blender.Draw.Redraw()
+				
+			if evt == Blender.Draw.LEFTMOUSE and val == 0: # mouse button released
+				self.release_event()            
+				Blender.Draw.Redraw()
 			
-		if evt == Blender.Draw.WHEELDOWNMOUSE or evt == Blender.Draw.WHEELUPMOUSE:
-			self.wheel_event(evt)
-			Blender.Draw.Redraw()
-			
-		if evt == Blender.Draw.LEFTMOUSE and val == 1: # mouse down
-			self.click_event()
-			Blender.Draw.Redraw()
-			
-		if evt == Blender.Draw.LEFTMOUSE and val == 0: # mouse button released
-			self.release_event()            
-			Blender.Draw.Redraw()
+			if evt == Blender.Draw.RIGHTMOUSE and val == 1: # button down
+				self.right_click_event()
+				Blender.Draw.Redraw()
+				
+			# modify the event loop so that mouse events are queued, so that mousex and mousey are both received
+			# before the mouse_event() handlers are called
+			if (evt == Blender.Draw.MOUSEX and val <> self.lastX) or (evt == Blender.Draw.MOUSEY and val <> self.lastY):
+				if evt == Blender.Draw.MOUSEX:
+					self.lastX = val
+				else:
+					self.lastY = val
+				self.mouse_event()
+						
+				Blender.Draw.Redraw()
 		
-		if evt == Blender.Draw.RIGHTMOUSE and val == 1: # button down
-			self.right_click_event()
-			Blender.Draw.Redraw()
-			
-		# modify the event loop so that mouse events are queued, so that mousex and mousey are both received
-		# before the mouse_event() handlers are called
-		if (evt == Blender.Draw.MOUSEX and val <> self.lastX) or (evt == Blender.Draw.MOUSEY and val <> self.lastY):
-			if evt == Blender.Draw.MOUSEX:
-				self.lastX = val
-			else:
-				self.lastY = val
-			self.mouse_event()
-					
-			Blender.Draw.Redraw()
-	
-		if evt > 20:
-			self.key_event(evt, val)
-			Blender.Draw.Redraw()
+			if evt > 20:
+				self.key_event(evt, val)
+				Blender.Draw.Redraw()
+		except:
+			import traceback #, StringIO
+			#st = StringIO.StringIO("")
+			traceback.print_exc(file=sys.stdout) #st)
+			#st.seek(0)
+			#st = st.read()
+			self.showErrorDialog("An error occured!", "An error has occured, see console for details");
 		
 	def bevent(self, evt):
 		""" bevent(evt) - bevent processor, which doesn't really do anything since I'm not processing blender's standard buttons. """

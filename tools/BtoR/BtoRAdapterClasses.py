@@ -2011,14 +2011,13 @@ class CameraAdapter(ObjectAdapter):
 		ri.RiFormat(render.imageSizeX(), render.imageSizeY(), 1) # leave aspect at 1 for the moment
 		
 		if cType == 0:	
-			
-			if render.imageSizeY() >= render.imageSizeX():
+			if render.imageSizeX() >= render.imageSizeY():
 				factor = render.imageSizeY() / float(render.imageSizeX())
 			else:
 				factor = render.imageSizeX() / float(render.imageSizeY())
-			# print factor
-			fov = 360.0 * math.atan(factor * (16.0 / camera.lens)) / math.pi
-			# print "Using a ", fov, " degree Field of View"
+			
+			fov = 360.0 * math.atan((16 * factor) / camera.lens) / math.pi
+			print "Using a ", fov, " degree Field of View"
 			ri.RiProjection("perspective", "fov", fov)
 			# Depth of field			
 			if self.properties["DOF"].getValue():
@@ -2028,7 +2027,7 @@ class CameraAdapter(ObjectAdapter):
 		else:
 			self.objData["scale"] = camera.getScale() 
 			ri.RiProjection("orthographic") 
-		ri.RiFrameAspectRatio(factor)	
+		# ri.RiFrameAspectRatio(factor)	
 		# Camera clipping
 		ri.RiClipping(camera.getClipStart(), camera.getClipEnd())		
 		# Viewpoint transform
