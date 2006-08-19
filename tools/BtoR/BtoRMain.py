@@ -186,7 +186,7 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 		self.cancelButton.registerCallback("release", self.close)
 		
 		# get the first shader path in the search list
-		paths = self.shaderpaths.getValue().split(";")
+		self.paths = self.shaderpaths.getValue().split(";")
 		
 		self.shadersSurface = {}
 		self.shadersDisplacement = {}
@@ -366,7 +366,7 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 	def getShaderSourceList(self, shaderPath): 
 		# maybe add some iterative thing here that pops up a progress bar
 		# reset the shader lists
-	
+		print "iterating shaders!"
 		path = shaderPath.strip()
 		# test for a valid path, and bail if not valid
 		if os.path.exists(path):
@@ -415,7 +415,22 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 			error_state = 1
 			error_message = "Invalid search path!"
 			print "Something wicked happened!"
-	
+		if len(self.shadersSurface) > 0:
+			print "Surface Shaders:"
+			print self.shadersSurface
+		if len(self.shadersImager) > 0:
+			print "Imager Shaders:"
+			print self.shadersImager
+		if len(self.shadersDisplacement) > 0:
+			print "Displacement Shaders:"
+			print self.shadersDisplacement
+		if len(self.shadersLight) > 0:
+			print "Light Shaders:"
+			print self.shadersLight
+		if len(self.shadersVolume) > 0:
+			print "Volume shaders:"
+			print self.shadersVolume
+			
 	def getSettings(self, button):
 		# let's try the Registry!
 		try:
@@ -1720,7 +1735,7 @@ class ObjectEditor(BtoRObject):
 			ri.RiEnd()
 	
 	def noPanel(self):
-		self.editorPanel.removeElement(self.objectEditorPanel)
+		self.editorPanel.removeElement(self.objEditorPanel)
 		
 	def getSelected(self):
 		if self.editorPanel in self.evt_manager.elements: #only if this instance is up and running.
@@ -1734,8 +1749,7 @@ class ObjectEditor(BtoRObject):
 						self.objectName.isVisible = True
 						self.objectMenu.isVisible = False
 
-						self.objectName.setValue("None Selected")
-						self.objectType.setValue("No Type")
+						self.objectName.setValue("None Selected")						
 						self.noPanel()
 						
 					elif len(objects) > 1:
@@ -1757,8 +1771,7 @@ class ObjectEditor(BtoRObject):
 						self.selectObject(obj)
 				except:
 					self.objectName.isVisible = True
-					self.objectMenu.isVisible = False
-					self.objectType.setValue("No Type")
+					self.objectMenu.isVisible = False					
 					self.objectName.setValue("None Selected")
 					self.noPanel()			
 								
@@ -2139,6 +2152,7 @@ class Shader(BtoRObject):
 	# the shader, as an RMShader object doesn't know its own type probably, so I have to supply it
 	# this needs to at some point construct the set of parameters that belongs to the selected shader.
 	def __init__(self, shader, stype, material):
+		print "Initializing a ", stype, " shader"
 		sdict = globals()		
 		self.settings = sdict["instBtoRSettings"]
 		self.evt_manager = sdict["instBtoREvtManager"]
@@ -2147,7 +2161,7 @@ class Shader(BtoRObject):
 			self.shader = shader
 		else:
 			self.shader = None # no selection, we'll be assigning it as we go.
-			
+		
 		self.searchpaths = self.settings.shaderpaths.getValue().split(";")		
 		self.stype = stype
 		self.material = material # parent material
@@ -2189,7 +2203,6 @@ class Shader(BtoRObject):
 		if self.shader.shaderparams != None:
 			self.setupParamEditors()
 		
-
 		if self.shader.shaderName() != None:
 			# set the shader name to the correct shader name in the menu
 			# first, discover the path in use
@@ -2263,9 +2276,12 @@ class Shader(BtoRObject):
 		
 	def makeShaderMenu(self):
 		# get the current shader path
+		print "Fetching shader data for ", self.stype, " shaders on path ", self.searchPaths.getValue()
 		path = self.searchPaths.getValue()
+
 		self.shadersMenu = []
 		self.shadersMenu.append("None Selected")
+		
 		if self.stype == "surface":
 			if not self.settings.shadersSurface.has_key(path):
 				found = False
@@ -2296,8 +2312,8 @@ class Shader(BtoRObject):
 				for shader in self.settings.shadersVolume[path]:
 					self.shadersMenu.append(shader[1])
 				found = True
-			if not found:
-				self.evt_manager.showConfirmDialog("No " + self.s_type + " shaders found!", "There were no " + self.s_type + "shaders found on the selected shader path!", None, False)
+		if not found:
+			self.evt_manager.showConfirmDialog("No " + self.stype + " shaders found!", "There were no " + self.s_type + "shaders found on the selected shader path!", None, False)
 
 				
 	def selectShader(self, button):
