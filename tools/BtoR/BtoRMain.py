@@ -412,9 +412,8 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 				
 		else:
 			# display error dialog
-			error_state = 1
-			error_message = "Invalid search path!"
-			print "Something wicked happened!"
+			self.evt_manager.showErrorDialog("Invalid shader path specified!", "Invalid shader path specified! Check your settings.")
+			
 		if len(self.shadersSurface) > 0:
 			print "Surface Shaders:"
 			print self.shadersSurface
