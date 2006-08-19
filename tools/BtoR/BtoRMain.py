@@ -2312,7 +2312,7 @@ class Shader(BtoRObject):
 					self.shadersMenu.append(shader[1])
 				found = True
 		if not found:
-			self.evt_manager.showConfirmDialog("No " + self.stype + " shaders found!", "There were no " + self.s_type + "shaders found on the selected shader path!", None, False)
+			self.evt_manager.showConfirmDialog("No " + self.stype + " shaders found!", "There were no " + self.stype + "shaders found on the selected shader path!", None, False)
 
 				
 	def selectShader(self, button):
@@ -2631,7 +2631,7 @@ class GenericShader(BtoRObject):
 					self.shadersMenu.append(shader[1])
 		if not found:
 			# find out what happened here
-			if self.s_type == "light":
+			if self.stype == "light":
 				if self.settings.shadersLight.has_key(path):
 					print "Path is registered."
 					print "Path was: ", path
@@ -2647,7 +2647,7 @@ class GenericShader(BtoRObject):
 						print item[1]
 
 					
-			self.evt_manager.showConfirmDialog("No " + self.s_type + " shaders found!", "There were no " + self.s_type + "shaders found on the selected shader path!", None, False)
+			self.evt_manager.showConfirmDialog("No " + self.stype + " shaders found!", "There were no " + self.s_type + "shaders found on the selected shader path!", None, False)
 
 	def selectShader(self, button):
 		# select the shader in question and then setup the params for it.
