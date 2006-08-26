@@ -16,6 +16,9 @@ reload(BtoRMain)
 instBtoREvtManager = ui.EventManager()  # initialize the event manager first
 setattr(BtoRMain, "instBtoREvtManager", instBtoREvtManager)
 
+instBtoRLog = BtoRMain.TextWindow()
+setattr(BtoRMain, "instBtoRLog", instBtoRLog)
+
 instBtoRSettings = BtoRMain.BtoRSettings() # then bring up the settings
 setattr(BtoRMain, "instBtoRSettings", instBtoRSettings)
 
@@ -31,12 +34,12 @@ instBtoRMaterials = getattr(BtoRMain, "instBtoRMaterials")
 instBtoRGroupList = BtoRMain.GroupList()
 setattr(BtoRMain, "instBtoRGroupList", instBtoRGroupList)
 
-instBtoRHelp = BtoRMain.HelpWindow(25)
+
+instBtoRHelp = BtoRMain.TextWindow()
 setattr(BtoRMain, "instBtoRHelp", instBtoRHelp)
 
 instBtoRObjects = BtoRMain.ObjectEditor()
 setattr(BtoRMain, "instBtoRObjects", instBtoRObjects)
-
 
 
 instBtoRMain = BtoRMain.MainUI()

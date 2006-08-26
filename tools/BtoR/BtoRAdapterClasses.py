@@ -20,6 +20,7 @@ import protocols
 import random
 import md5
 import traceback
+import re
  
 class IProperty(protocols.Interface):
 	def getValue():
@@ -33,10 +34,15 @@ class Property:
 	def __init__(self, value, xml = None):
 		self.value = value
 		self.saveable = True
+		self.labelWidth = 0
+		self.editorWidth = 0
 	def setHeight(self, height):
 		self.height = height
 	def setWidth(self, width):
 		self.width = width
+	def setCustomWidth(self, width):
+		self.editorWidth = width[0]
+		self.labelWidth = width[1]
 	def setName(self, name):
 		self.name = name
 	def getName(self):
@@ -60,8 +66,10 @@ class Property:
 	def getStrValue(self):
 		return self.value.obj.getStrValue()
 	def registerCallback(self, signal, function): # this is a pass-through to maintain abstraction
+		#if self.value.__dict__.has_key("registerCallback"): # this will bypass problems with missing values, till I fix my implementation to full provide an interface
+		print "setting callback for shader!"
 		self.value.registerCallback(signal, function) 
-
+	
 class StringProperty(Property): 
 	protocols.advise(instancesProvide=[IProperty], asAdapterForTypes=[str])
 	pass
@@ -69,13 +77,13 @@ class StringProperty(Property):
 class IntProperty(Property):
 	protocols.advise(instancesProvide=[IProperty], asAdapterForTypes=[int])
 	pass
+	
 class FloatProperty(Property): 
 	protocols.advise(instancesProvide=[IProperty], asAdapterForTypes=[float])
 	pass
 
 class ColorProperty(Property): 
-	protocols.advise(instancesProvide=[IProperty], asAdapterForTypes=[list])
-	pass
+	protocols.advise(instancesProvide=[IProperty], asAdapterForTypes=[list])	
 	def toXML(self, xml):
 		xmlProp = xml.createElement("property")
 		xmlProp.setAttribute("type", type(self.getValue()).__name__)
@@ -89,6 +97,8 @@ class ColorProperty(Property):
 class DictProperty(Property):
 	protocols.advise(instancesProvide=[IProperty], asAdapterForTypes=[dict])
 	def __init__(self, value):
+		self.labelWidth = 0
+		self.editorWidth = 0
 		self.saveable = True
 		# what do I do here? I want this to actually be converted to a menu
 		# thus
@@ -126,7 +136,7 @@ class BooleanProperty(Property):
 	protocols.advise(instancesProvide=[IProperty], asAdapterForTypes=[bool])
 	pass
 	
-class ComplexProperty(Property):
+class ShaderProperty(Property):
 	protocols.advise(instancesProvide=[IProperty], asAdapterForTypes=[BtoRShaderType])
 	def __init__(self, value, xml = None):
 		sdict = globals()
@@ -138,7 +148,7 @@ class ComplexProperty(Property):
 		# this should always have a shader, so
 		
 		s_type = self.value.getObject().s_type
-		print "Initializing a ", s_type, " shader"
+		#print "Initializing a ", s_type, " shader"
 		
 		try:
 			if self.settings.use_slparams:
@@ -272,7 +282,9 @@ class ComplexProperty(Property):
 			# print key, ", ", val
 			if param != None:
 				setattr(shader, key, val)
-			
+	def showEditor(self):
+		# print self.value.getObject()
+		self.value.getObject().showEditor()
 class MaterialProperty(Property):
 	protocols.advise(instancesProvide=[IProperty], asAdapterForTypes=[BtoRMaterialType])
 	height = 65
@@ -293,6 +305,12 @@ class MatrixProperty(Property):
 	height = 95
 	pass
 
+class CustomRIBProperty(Property):
+	protocols.advise(instancesProvide=[IProperty], asAdapterForTypes=[BtoRCustomRIB])
+	height = 20
+	pass
+	
+
 class IPropertyEditor(protocols.Interface):
 	def getValue():
 		"""" get the value of the property """
@@ -301,10 +319,14 @@ class IPropertyEditor(protocols.Interface):
 class PropertyEditor: # this needs no interface declaration, since all this is doing is providing a baseclass
 	fontsize = 'small'
 	def __init__(self, property, suppressLabel = False):		
-		self.property = property
-		width = self.property.width
+		self.property = property		
 		self.height = self.property.height		
-		self.editor = ui.Panel(0, 0, width, self.height, "", "", None, False)
+		if self.property.labelWidth > 0:
+			pWidth = self.property.editorWidth
+			lWidth = self.property.labelWidth
+		else:
+			pWidth = self.property.width
+		self.editor = ui.Panel(0, 0, pWidth, self.height, "", "", None, False)
 		self.editor.hasHeader = False
 		self.editor.shadowed = False
 		self.editor.normaColor = [128, 128, 128, 0]
@@ -317,6 +339,7 @@ class PropertyEditor: # this needs no interface declaration, since all this is d
 			self.label = ui.Label(2, 3, self.property.getName(), self.property.getName(), self.editor, True, fontsize = self.fontsize)
 			self.label.fontsize = 'small'
 		self.func = None
+		
 		
 	def setValue(self, value):
 		self.property.setValue(value)
@@ -347,7 +370,7 @@ class PropertyEditor: # this needs no interface declaration, since all this is d
 		return self.editor
 		
 class BasicPropertyEditor(PropertyEditor):
-	protocols.advise(instancesProvide=[IPropertyEditor], asAdapterForTypes=[StringProperty, IntProperty, FloatProperty])
+	protocols.advise(instancesProvide=[IPropertyEditor], asAdapterForTypes=[IntProperty, FloatProperty, BtoRFloatParam])
 	""" A basic property, a label and a text box """
 	def __init__(self, property):
 		PropertyEditor.__init__(self, property)
@@ -357,7 +380,115 @@ class BasicPropertyEditor(PropertyEditor):
 		self.value.registerCallback("update", self.updateValue)
 		
 	# protocols.declareAdapter(BasicPropertyEditor, [IPropertyEditor], forTypes=[StringProperty, IntProperty, FloatProperty])
+class StringPropertyEditor(PropertyEditor):
+	protocols.advise(instancesProvide=[IPropertyEditor], asAdapterForTypes=[StringProperty, BtoRStringParam], factoryMethod="routeProperty")
+	""" A basic property, a label and a text box """
+	def __init__(self, property):
+		PropertyEditor.__init__(self, property)
+		width = property.width
+		height = property.height
+		self.value = ui.TextField(width / 2, 0, width / 2, height, self.property.getName(), self.property.getValue(), self.editor, True, fontsize = self.fontsize)
+		self.value.registerCallback("update", self.updateValue)
+	
+	@classmethod
+	def routeProperty(cls, obj):		
+		if isinstance(obj, StringProperty):
+			#print "Returning a normal string property!"
+			# init self, I'm a string
+			return cls(obj)
+		else:
+			name = obj.getName()
+			value = obj.getValue()			
+			#print "Finding editor for ", name
+			# color space or space property most likely, react accordingly
+			spaceMatch = re.compile("space|proj", re.I)
+			fileMatch = re.compile("tex|map|name|refl", re.I)
+			if spaceMatch.search(name): # extend this to provide a nice list
+				if value in ColorSpacePropertyEditor.ColorSpaces:				
+					return ColorSpacePropertyEditor(obj)
+				elif value in SpacePropertyEditor.Spaces:
+					return SpacePropertyEditor(obj)
+				elif value in ProjectionPropertyEditor.Projections:
+					return ProjectionPropertyEditor(obj)
+			if fileMatch.search(name):
+				return FilePropertyEditor(obj)
+			else:
+				return cls(obj)
+					
+class FilePropertyEditor(PropertyEditor):
+	def __init__(self, property):		# remember to add an override button to all custom types!
+		sdict = globals()
+		self.evt_manager = sdict["instBtoREvtManager"]
+		PropertyEditor.__init__(self, property)
+		width = self.property.width
+		height = self.property.height
+		self.value = ui.TextField(width / 2, 0, width / 2 - height, height, self.property.getName(), self.property.getStrValue(), self.editor, True, fontsize = self.fontsize)
+		self.value.Enabled = False
+		butX = self.value.x + self.value.width + 1
+		self.triggerButton = ui.Button(butX, 0, height, height, "...", "...", 'small', self.editor, True)
+		self.triggerButton.shadowed = False
+		self.triggerButton.registerCallback("release", self.browse)
+		if isinstance(property, StringProperty):
+			self.property.registerCallback("update", self.updateValue)
+		# for (this( property editor, I should set a back reference so I can update the text field with the shader when it's initialized
+		self.property.editor = self
 
+	def browse(self, button):
+		""" Browser """
+		
+class SpacePropertyEditor(PropertyEditor):
+	Spaces = ['current', 'object', 'shader', 'world', 'camera', 'screen', 'raster', 'NDC']
+	def __init__(self, property):
+		PropertyEditor.__init__(self, property)
+		width = property.width
+		height = property.height
+		self.value = ui.Menu(width / 2, 2, width / 2, height - 4, self.property.getName(), self.Spaces, self.editor, True, fontsize = self.fontsize)		
+		self.value.registerCallback("select", self.updateValue)
+		self.value.setShadowed(False)
+	def setValue(self, value):
+		# menu editors need to be slightly different
+		self.property.setValue(value) 
+		self.value.setValueString(value)
+		
+	def renameMenuItem(self, idx, name):
+		self.value.renameElement(idx, name)
+		
+class ColorSpacePropertyEditor(PropertyEditor):
+	ColorSpaces = ['rgb', 'hsv', 'hsl', 'YIQ', 'xyz', 'xyY']
+	def __init__(self, property):
+		PropertyEditor.__init__(self, property)
+		width = property.width
+		height = property.height
+		self.value = ui.Menu(width / 2, 2, width / 2, height - 4, self.property.getName(), self.ColorSpaces, self.editor, True, fontsize = self.fontsize)		
+		self.value.setShadowed(False)
+		
+		self.value.registerCallback("select", self.updateValue)
+		
+	def setValue(self, value):
+		# menu editors need to be slightly different
+		self.property.setValue(value) 
+		self.value.setValueString(value)
+		
+	def renameMenuItem(self, idx, name):
+		self.value.renameElement(idx, name)
+		
+class ProjectionPropertyEditor(PropertyEditor):
+	Projections = ['st', 'planar', 'perspective', 'spherical', 'cylindrical']
+	def __init__(self, property):
+		PropertyEditor.__init__(self, property)
+		width = property.width
+		height = property.height
+		self.value = ui.Menu(width / 2, 2, width / 2, height - 4, self.property.getName(), self.Projections, self.editor, True, fontsize = self.fontsize)		
+		self.value.registerCallback("select", self.updateValue)
+		self.value.setShadowed(False)
+	def setValue(self, value):
+		# menu editors need to be slightly different
+		self.property.setValue(value) 
+		self.value.setValueString(value)
+			
+	def renameMenuItem(self, idx, name):
+		self.value.renameElement(idx, name)
+	
 class MenuPropertyEditor(PropertyEditor):
 	protocols.advise(instancesProvide=[IPropertyEditor], asAdapterForTypes=[DictProperty])
 	def __init__(self, property):
@@ -391,17 +522,19 @@ class MenuPropertyEditor(PropertyEditor):
 	#protocols.declareAdapter(MenuPropertyEditor, [IPropertyEditor], forTypes=[DictProperty])
 
 class ColorPropertyEditor(PropertyEditor):
-	protocols.advise(instancesProvide=[IPropertyEditor], asAdapterForTypes=[ColorProperty])
+	
+	protocols.advise(instancesProvide=[IPropertyEditor], asAdapterForTypes=[ColorProperty, BtoRColorParam])
 	def __init__(self, property):
 		PropertyEditor.__init__(self, property)
 		width = self.property.width
 		height = self.property.height
 		color = self.property.getValue()
+		print color
 		# I need 3 RGB values
 		inc = (width / 2) / 4
 		self.R = ui.TextField((width / 2), 0, inc -1, height, "Red", color[0], self.editor, True)
-		self.G = ui.TextField((width / 2) + inc, 0, inc -1, height, "Green", color[0], self.editor, True)
-		self.B = ui.TextField((width / 2) + (inc * 2), 0, inc -1, height, "Blue", color[0], self.editor, True)		
+		self.G = ui.TextField((width / 2) + inc, 0, inc -1, height, "Green", color[1], self.editor, True)
+		self.B = ui.TextField((width / 2) + (inc * 2), 0, inc -1, height, "Blue", color[2], self.editor, True)		
 		self.colorButton = ui.ColorButton((width / 2) + (inc * 3), 0, inc - 4, height - 2, "Color", color, self.editor, True)
 		self.colorButton.outlined = True		
 		self.R.registerCallback("update", self.updateColor)
@@ -417,7 +550,7 @@ class ColorPropertyEditor(PropertyEditor):
 		self.B.setValue(float(float(color.value[2]) / 255))
 		self.property.setValue([float(float(color.value[0])/255), float(float(color.value[1]) / 255), float(float(color.value[2]) / 255)])
 	
-	def updateColor(self, obj):
+	def updateColor(self, obj):		
 		# convert to RGB 255
 		r_s = float(self.R.getValue())
 		g_s = float(self.G.getValue())
@@ -466,8 +599,8 @@ class BooleanPropertyEditor(PropertyEditor):
 		# again, the property should handle this
 		
 	#protocols.declareAdapter(BooleanPropertyEditor, [IPropertyEditor], forTypes=[BooleanProperty])
-class ComplexPropertyEditor(PropertyEditor):
-	protocols.advise(instancesProvide=[IPropertyEditor], asAdapterForTypes=[ComplexProperty])
+class ShaderPropertyEditor(PropertyEditor):
+	protocols.advise(instancesProvide=[IPropertyEditor], asAdapterForTypes=[ShaderProperty])
 	def __init__(self, property):
 		sdict = globals()
 		self.evt_manager = sdict["instBtoREvtManager"]
@@ -483,11 +616,14 @@ class ComplexPropertyEditor(PropertyEditor):
 		self.property.registerCallback("update", self.updateValue)
 		# for (this( property editor, I should set a back reference so I can update the text field with the shader when it's initialized
 		self.property.editor = self
+		# now I need to set a callback to get the shader value when it's updated		
 		
 	def showPropertyEditor(self, obj):
-		self.evt_manager.addElement(self.property.getEditor())
+		# instead of doing this, I need to do		
+		self.property.showEditor()
 	
-	def updateValue(self, obj): 
+	def updateValue(self, obj): 	
+		print "Updating property!"
 		self.setValue(obj.getShaderName())
 		
 	def setValue(self, value):
@@ -582,7 +718,7 @@ class MaterialPropertyEditor(PropertyEditor):
 			self.materialButton.image = ui.Image(120, 5, 56, 56,  obj.image.image, self.materialButton, False)
 			
 class VectorPropertyEditor(PropertyEditor):
-	protocols.advise(instancesProvide=[IPropertyEditor], asAdapterForTypes=[VectorProperty])
+	protocols.advise(instancesProvide=[IPropertyEditor], asAdapterForTypes=[VectorProperty, BtoRPointParam, BtoRVectorParam, BtoRNormalParam])
 	def __init__(self, property):
 		PropertyEditor.__init__(self, property)
 		width = property.width
@@ -603,7 +739,11 @@ class VectorPropertyEditor(PropertyEditor):
 		
 	def updateValue(self, obj):		
 		self.property.value = cgkit.cgtypes.vec3(float(self.x.getValue()), float(self.y.getValue()), float(self.z.getValue()))
-
+	def setValue(self, value):
+		self.x.setValue(value[0])
+		self.y.setValue(value[1])
+		self.z.setValue(value[2])
+		self.property.setValue(value)
 class RotationPropertyEditor(PropertyEditor):
 	protocols.advise(instancesProvide=[IPropertyEditor], asAdapterForTypes=[RotationProperty])
 	def __init__(self, property):
@@ -635,7 +775,7 @@ class RotationPropertyEditor(PropertyEditor):
 		self.property.value.obj = [float(self.angle.getValue()), self.x.getValue(), self.y.getValue(), self.z.getValue()]
 		
 class MatrixPropertyEditor(PropertyEditor):
-	protocols.advise(instancesProvide=[IPropertyEditor], asAdapterForTypes=[MatrixProperty])
+	protocols.advise(instancesProvide=[IPropertyEditor], asAdapterForTypes=[MatrixProperty, BtoRMatrixParam])
 	def __init__(self, property):
 		PropertyEditor.__init__(self, property)
 		width = property.width
@@ -643,6 +783,16 @@ class MatrixPropertyEditor(PropertyEditor):
 		x = width / 2
 		self.table = ui.Table(x, 0, x, 65, "table", property.getValue(), self.editor, True)
 		
+class CustomRIBPropertyEditor(PropertyEditor):
+	protocols.advise(instancesProvide=[IPropertyEditor], asAdapterForTypes=[CustomRIBProperty])
+	def __init__(self, property):
+		PropertyEditor.__init__(self, property)
+		width = property.width
+		height = property.height
+		x = width / 4
+		self.value = ui.TextField(width / 2, 0, x, height, "", "No custom RIB", self.editor, True)
+		self.value.Enabled = False
+		self.trigger = ui.Button(x + 1, 0, x, height, "", "...", self.editor, True)
 		
 		
 class IObjectAdapter(protocols.Interface):
@@ -681,13 +831,14 @@ class ObjectAdapter:
 		self.evt_manager = dict["instBtoREvtManager"]
 		self.scene = dict["instBtoRSceneSettings"]
 		self.materials = dict["instBtoRMaterials"]
+		self.lighting = dict["instBtoRLightManager"]
 		self.object = obj.obj # this is a BtoR object instance
 		# why can't I use the objectUI protocol to get an appropriate editor?
 		# let's do that!
 		self.objEditor = protocols.adapt(obj, IObjectUI)		
-		self.initObjectData() # initializes object data 
 		self.properties = self.objEditor.properties
 		self.editors = self.objEditor.editors
+		self.initObjectData() # initializes object data 
 		# self.objType = obj.obj.getType()
 		self.changed = False
 		
@@ -722,7 +873,7 @@ class ObjectAdapter:
 			return func(*(args + moreargs), **kws)
 		return curried
 		
-	def render(self):
+	def render(self, shadowPass = False):
 		""" Generate Renderman data from this call. """
 		# decide here what to do with the object's data. Do I render it using the normal adapter method, or do I do something special for cases involving ReadArchive and what-not?
 		
@@ -730,13 +881,14 @@ class ObjectAdapter:
 	def renderAsCamera(self):
 		return True
 		
-	def renderArchive(self, archive):
+	def renderArchive(self):
 		# this should be all that's neccessary 
 		# I do need to handle dupliverts situations and animated curves, array modifer, all that crap.
-		ri.RiBegin(archive)
-		self.render()
-		ri.RiEnd()
-		
+		if self.__dict__.has_key("archive"):
+			ri.RiBegin(archive)
+			self.render()
+			ri.RiEnd()
+			
 	def initObjectData(self):			
 		""" Generate the object data for this  object. """
 		self.objData = {}
@@ -1185,8 +1337,11 @@ class MeshAdapter(ObjectAdapter):
 					self.renderMaterial()
 						
 				ri.RiTransform(self.object.matrix) # transform				
-				# self.renderMeshData() # and render the mesh				
-				ri.RiReadArchive(self.objData["archive"] + self.objData["name"] + ".rib") # this should read from the archive path
+				# self.renderMeshData() # and render the mesh	
+				archiveFile = self.objData["archive"] + self.objData["name"] + ".rib"
+				if self.settings.renderer == "BMRT":
+					archiveFile = archiveFile.replace("\\", "\\\\")
+				ri.RiReadArchive(archiveFile) # this should read from the archive path
 				ri.RiTransformEnd()
 				ri.RiAttributeEnd()
 				# aaaannnnnd done.
@@ -1217,7 +1372,8 @@ class MeshAdapter(ObjectAdapter):
 		""" Write this object to an external archive file. """
 		# add support here for detecting if materials should be exported to archives or not.
 		# I should probably add that as an option in the export settings dialog.
-		ri.RiBegin(self.objData["archive"] + self.objData["name"] + ".rib") 
+		
+		ri.RiBegin(self.objData["archive"] + self.objData["name"] + ".rib")  # this should be ok
 		# this is pure geometry here
 		ri.RiAttributeBegin()
 		ri.RiTransformBegin()
@@ -1485,6 +1641,7 @@ class MeshAdapter(ObjectAdapter):
 		intargs = []
 		floatargs = []
 		#print creaselist
+	
 		for crease in creaselist:
 			if type(crease) != type(1):
 				tags.append("crease")		
@@ -1498,7 +1655,7 @@ class MeshAdapter(ObjectAdapter):
 		tags.append("interpolateboundary")
 		nargs.append(0)
 		nargs.append(0)
-			
+		
 		params = {"P":points, "N":normals}
 			
 		if mesh.faceUV == 1:
@@ -1511,7 +1668,7 @@ class MeshAdapter(ObjectAdapter):
 			params["Cs"] = vCol
 		else:
 			pass
-			params["st"] = vertTexUV
+			# params["st"] = vertTexUV
 			
 		if 1 == 2: 
 			print "nfaces: ", nfaces
@@ -1529,7 +1686,7 @@ class MeshAdapter(ObjectAdapter):
 		if mesh.faceUV == 1:
 			ri.RiDeclare("st", "facevarying float[2]") # declare ST just in case
 			
-		subdiv = ri.RiSubdivisionMesh("catmull-clark", nverts, vertids, tags, nargs, intargs, floatargs, params)
+		ri.RiSubdivisionMesh("catmull-clark", nverts, vertids, tags, nargs, intargs, floatargs, params)
 				
 	def find_set(self, val, set_list):
 		""" Find a set in a set"""
@@ -1644,18 +1801,19 @@ class LampAdapter(ObjectAdapter):
 			# get the inverse matrix first
 			# if this is point light, I should probably set the rotation values to zero	
 			ri.RiScale(-1, 1, 1)
-			ri.RiRotate(180, 0, 1, 0)
-			
+						
 			if axis == "px":		
+				ri.RiRotate(180, 0, 1, 0)
 				ri.RiRotate(90, 0, 1, 0)
 			elif axis == "nx":	
+				ri.RiRotate(180, 0, 1, 0)
 				#ri.RiRotate(-90, 1, 0, 0)
 				ri.RiRotate(-90, 0, 1, 0)				
 			elif axis == "py":				
 				ri.RiRotate(-90, 1, 0, 0)
 			elif axis == "ny":
 				ri.RiRotate(90, 1, 0, 0)				
-			elif axis == "pz":				
+			elif axis == "nz":				
 				ri.RiRotate(180, 0, 1, 0) 	
 			
 			#cmatrix = self.object.getInverseMatrix()
@@ -1785,7 +1943,7 @@ class LampAdapter(ObjectAdapter):
 				self.objData["shaderfilename"] = os.path.normpath(shaderPath + os.sep + sFilename)
 				# I'm only really concerned about this if I'm using sl params
 			self.objData["shadername"] = "pointlight"			
-			shaderParms["intensity"] = (energyRatio * lamp.energy) * self.scene.lightMultiplier
+			shaderParms["intensity"] = (energyRatio * lamp.energy) * self.getProperty("Multiplier")
 			
 			
 		elif lamp.type == 1:
@@ -1820,7 +1978,7 @@ class LampAdapter(ObjectAdapter):
 			shaderParms["coneangle"] = (lamp.spotSize * math.pi / 360)
 			shaderParms["conedeltaangle"] = (lamp.spotBlend * (lamp.spotSize * math.pi / 360))			
 			shaderParms["to"] = [tox, toy, toz]
-			shaderParms["intensity"] = (energyRatio * lamp.energy) * self.scene.lightMultiplier	
+			shaderParms["intensity"] = (energyRatio * lamp.energy) * self.lighting.getProperty("Multiplier")
 			
 			# This might need to be animated, so I need to add a function to deal with that
 			if self.settings.useShadowMaps.getValue():
@@ -1887,7 +2045,7 @@ class LampAdapter(ObjectAdapter):
 				self.object.RotZ = 0.0
 				energyRatio = lamp.dist * negative
 				# get the first selected shader path...and hope it's setup correctly
-				shaderParms["intensity"] = (energyRatio * lamp.energy) * self.scene.lightMultiplier
+				shaderParms["intensity"] = (energyRatio * lamp.energy) *  self.lighting.getProperty("Multiplier")
 				
 				# I will have to deal with shadowmapping at some point
 				#shaderParms["name"] = "shadowpoint"
@@ -1904,7 +2062,7 @@ class LampAdapter(ObjectAdapter):
 				#shaderParms["shadowsamples"] = 1			
 				#shaderParms["shadowblur"] = 0.0
 				
-			elif lamp.type == 2 and self.shader.getShaderName() == "bml": 
+			elif lamp.type == 2 and (self.shader.getShaderName() == "bml" or self.shader.getShaderName() == "shadowspot" or self.shader.getShaderName() == "spotlight"): 
 				energyRatio = lamp.dist * negative
 				shaderParms["shadowbias"] = lamp.bias
 				shaderParms["blur"] = 0.0
@@ -1912,7 +2070,7 @@ class LampAdapter(ObjectAdapter):
 				shaderParms["coneangle"] = (lamp.spotSize * math.pi / 360)
 				shaderParms["conedeltaangle"] = (lamp.spotBlend * (lamp.spotSize * math.pi / 360))			
 				shaderParms["to"] = [tox, toy, toz]
-				shaderParms["intensity"] = (energyRatio * lamp.energy) * self.scene.lightMultiplier					
+				shaderParms["intensity"] = (energyRatio * lamp.energy) *  self.lighting.getProperty("Multiplier")				
 				
 							
 			elif lamp.type == 3 and self.shader.getShaderName() == "hemilight":
@@ -1964,24 +2122,87 @@ class CurveAdapter(ObjectAdapter):
 	def render(self):
 		""" generate Renderman data for this object """
 		pass
+	
+	def renderArchive(self):
+		ri.RiBegin(self.objData["archive"] + self.objData["name"] + ".rib") 
+		# this is pure geometry here
+		ri.RiAttributeBegin()
+		ri.RiTransformBegin()
+		self.renderCurveData()
+		ri.RiTransformEnd()
+		ri.RiAttributeEnd()
+		ri.RiEnd() 
+		
+	def renderCurveData(self):
+		""" renders curve data to RiCurve objects """
+		curve = self.object.getData()
+		nVerts = len(curve.verts)
+		
+		
 	def initObjectData(self):
 		""" Initialize BtoR object data for this object """
-		pass
+		# do some mesh-related stuff
+		# all I'm concerned with at the moment is whether or not the mesh in question is subsurfed or not. I don't care about levels and what-not,
+		# since I can grab that from the blender object itself.
+		self.objData = {}
+		self.objData["name"] = self.object.getName()				
+		self.objData["type"] = self.object.getType()
+		curveObject = self.object.getData()
+		self.objData["material"] = "None"
+		# so what am I doing here?
+		
 		
 class SurfaceAdapter(ObjectAdapter):
 	protocols.advise(instancesProvide=[IObjectAdapter], asAdapterForTypes=[BtoRSurf])
 	def __init__(self, object):		
 		""" Iniitialize a surface export adapter """
 		ObjectAdapter.__init__(self, object)					
-		self.editorPanel.title = "Surface Export Settings:"
+		#self.editorPanel.title = "Surface Export Settings:"
 
 	def render(self):
 		""" generate Renderman data for this object """
-		pass
+		# get some vertices
+		pts = []
+		P = []
+		uKnots = []
+		vKnots = []
+		for cur in curve:
+			if cur.isNurb():
+				print item
+				
+		
 	def initObjectData(self):
 		""" Initialize BtoR object data for this object """
-		pass
-
+		curvedata = Blender.Curve.Get(self.object.getName())		
+		print curvedata.getNumCurves(), " curves found!"
+		print curvedata.getName(), " was found of type ", type(curvedata)
+		print dir(curvedata)		
+		for cur in curvedata:
+			print len(cur)
+			print "Using python iterator method, I find..."
+			for curve in cur:				
+				print curve
+			print "Using array-access (getitem) method I find..."
+			for item in range(len(cur)):
+				print cur[item]
+			print "Explicitly accessing indexes 0-3 gives me"
+			print cur[0]
+			print cur[1]
+			print cur[2]
+			print cur[3]
+		"Explicit access method follows"
+		for curIdx in range(5):
+			try:
+				curve = curve[curIdx]
+				for cur in curve:
+					for curNu in cur:
+						print curNu
+					for item in range(len(curNu)):
+						print cur[item]
+			except:
+				print "Failure"
+				continue
+			
 
 class CameraAdapter(ObjectAdapter):
 	protocols.advise(instancesProvide=[IObjectAdapter], asAdapterForTypes=[BtoRCamera])
@@ -2307,20 +2528,20 @@ class ObjectUI:
 		self.scroller= ui.ScrollPane(10, 50, 240, 235, "Scroller", "Scroller", self.editorPanel, True)
 		self.properties = {}
 		self.editors = {}
-
-		for option in self.optionOrder:
-			propertyName = self.options[option][0]
-			propertyValue = self.options[option][1]
-			# generate a list of option panels here and allow editing
-			# create a property for each option
-			self.properties[option] = IProperty(propertyValue) # 1st item is the property name, second item is the property initializer
-			self.properties[option].setName(propertyName)
-			self.properties[option].setWidth(self.scroller.width - 15)			
-			# takes up half the available space of the main pane
-			self.editors[option] = IPropertyEditor(self.properties[option])
-			self.scroller.addElement(self.editors[option].getEditor()) # and that should be that. When this is discarded, all those go away
-			self.editors[option].setParent(self.scroller)	
-			self.scroller.offset = 0
+		if self.__dict__.has_key("optionOrder"):
+			for option in self.optionOrder:
+				propertyName = self.options[option][0]
+				propertyValue = self.options[option][1]
+				# generate a list of option panels here and allow editing
+				# create a property for each option
+				self.properties[option] = IProperty(propertyValue) # 1st item is the property name, second item is the property initializer
+				self.properties[option].setName(propertyName)
+				self.properties[option].setWidth(self.scroller.width - 15)			
+				# takes up half the available space of the main pane
+				self.editors[option] = IPropertyEditor(self.properties[option])
+				self.scroller.addElement(self.editors[option].getEditor()) # and that should be that. When this is discarded, all those go away
+				self.editors[option].setParent(self.scroller)	
+				self.scroller.offset = 0
 			
 	def getEditor(self):
 		""" get the object editor for this object. """
@@ -2432,6 +2653,7 @@ class LampUI(ObjectUI):
 	protocols.advise(instancesProvide=[IObjectUI], asAdapterForTypes=[BtoRLamp])	
 	def __init__(self, obj):
 		self.options = {"IncludeWithAO" : ["Include light with AO?", False],
+				"Multiplier" : ["Multiplier", 1],
 				"GenShadowMap" : ["Render Shadow Maps:", {"Lazy" : "lazy", "Always" : "always", "Never" : "never"}, "lazy"], 
 				"ShadowMapSize" : ["Shadow Map Size", { "256" : 256, "512" : 512, "1024" : 1024, "2048" : 2048 }, "256"],
 				"DepthFilter" : ["Midpoint Depthfilter?", True],
@@ -2441,6 +2663,7 @@ class LampUI(ObjectUI):
 				"Group" : ["Occlusion Group:", {"None Selected":"none Selected"}, "None Selected"]}
 					
 		self.optionOrder = ["IncludeWithAO",
+					"Multiplier", 
 					"GenShadowMap",
 					"Group",
 					"DepthFilter",
@@ -2452,8 +2675,17 @@ class LampUI(ObjectUI):
 		self.lighting.occlListeners.append(self.editors["Group"])
 		self.editors["Group"].updateMenu(self.lighting.occlusion_menu) # to catch any stragglers
 		
+
+		
 	def getSelector(self):
 		return self.selector
+	
+	def showShader(self):
+		if self.shaderPanel.isVisible:
+			self.shaderPanel.isVisible = False
+		else:
+			self.shaderPanel.x = self.editorPanel.parent.width + 15			
+			self.shaderPanel.isVisible = True
 		
 	def setShader(self, shader):
 		self.options["shader"] = ["Light Shader:", BtoRShaderType(shader)]
@@ -2463,6 +2695,20 @@ class LampUI(ObjectUI):
 		self.optionOrder.insert(0, "shader")
 		self.editors["shader"] = IPropertyEditor(self.properties["shader"])
 		self.editors["shader"].setParent(self.scroller)	
+		self.properties["shader"].getValue().getObject().obj_parent = self
+		
+		# shader panel setup
+
+		self.shaderPanel = self.properties["shader"].getValue().getObject().getEditor()					
+		self.shaderPanel.parent = self.editorPanel		
+		self.editorPanel.addElement(self.shaderPanel)
+		self.shaderPanel.isVisible = False
+		self.shaderPanel.shadowed = True
+		self.shaderPanel.outlined = True
+		self.shaderPanel.hasHeader = False				
+		self.shaderPanel.invalid = True
+		self.shaderPanel.validate()
+		
 		self.reloadOptions()
 			
 		
@@ -2477,7 +2723,14 @@ class CurveUI(ObjectUI):
 	""" A UI for the curve type """
 	protocols.advise(instancesProvide=[IObjectUI], asAdapterForTypes=[BtoRCurve])
 	def __init__(self,obj):
+		self.options = {  "material":["material", BtoRMaterialType("None Selected")],
+					"width" : ["Curve width:", 1.0],
+					"wrap" : ["Wrap:", {"Periodic" : "periodic", "Non-Periodic" : "nonperiodic" }],
+					"interp" : ["Interpolation:", { "Linear" : "linear", "Cubic" : "cubic" }] }
+		self.optionOrder = ["material", "width", "wrap", "interp"]
+					
 		ObjectUI.__init__(self, obj)
+		
 
 class SurfaceUI(ObjectUI):
 	""" A UI for the surface type """
@@ -2485,17 +2738,18 @@ class SurfaceUI(ObjectUI):
 	def __init__(self, obj):
 		ObjectUI.__init__(self, obj)
 		
-
+	
 		
 class CameraUI(ObjectUI):
 	""" A UI for the camera type """
 	protocols.advise(instancesProvide=[IObjectUI], asAdapterForTypes=[BtoRCamera])
-	options = { "DOF" : ["Use Depth of Field?", False], 
+
+	def __init__(self, obj):
+		self.options = { "DOF" : ["Use Depth of Field?", False], 
 			"fstop" : ["F-stop", 22], 
 			"focallength" : ["Focal Length", 45],
 			"focaldistance" : ["Focal Distance:", 10] }
-	optionOrder = ["DOF", "fstop", "focallength", "focaldistance"]
-	def __init__(self, obj):
+		self.optionOrder = ["DOF", "fstop", "focallength", "focaldistance"]
 		ObjectUI.__init__(self, obj)				
 		#self.editorPanel.addElement(ui.Label(10, 30, "Imager Shader:", "Imager Shader:", self.editorPanel, False))
 		#self.shaderButton = ui.Button(self.editorPanel.get_string_width("Imager Shader:", 'normal') + 15, 30, 125, 25, "Imager Shader", "None Selected", 'normal', self.editorPanel, True)		
@@ -2664,476 +2918,3 @@ class VecShaderParamUI(ShaderParamUI):
 		self.vRange = range(length)
 		
 		# BtoR-Specific objects
-class ShaderParamEditor(ui.UIElement):
-	protocols.advise(instancesProvide=[IShaderParamEditor])
-	def __init__(self, bObj):
-		self.obj = bObj # this is my incoming BtoRType
-		self.value = bObj.value
-		size = bObj.size
-		self.name = bObj.name		
-		self.parent = bObj.parent
-		self.param_name = bObj.name
-		ui.UIElement.__init__(self, size[0], size[1], size[2], self.height, self.name, '', bObj.parent, False)				
-		self.addElement(ui.Label(5, 5, "Parameter: " + self.name, "Parameter: " + self.name, self, False))
-		
-	def getValue(self):
-		return self.value
-	def setValue(self, value):
-		self.value = value
-class ColorParamEditor(ShaderParamEditor):
-	height = 60
-	ColorSpaces = ['rgb', 'hsv', 'hsl', 'YIQ', 'xyz', 'xyY']
-	paramtype = "color"
-	protocols.advise(instancesProvide=[IShaderParamEditor], asAdapterForTypes=[BtoRColorParam])
-	def __init__(self, bObj):		
-		ShaderParamEditor.__init__(self, bObj)
-		iVal = self.value
-		self.value = []
-		self.value.append(iVal[0])
-		self.value.append(iVal[1])
-		self.value.append(iVal[2]) # convert to an array I suppose
-		
-		self.Red = ui.TextField(25, 25, 35, 20, 'Red', self.value[0], self, True)
-		self.Green = ui.TextField(85, 25, 35, 20, 'Green', self.value[1], self, True)
-		self.Blue = ui.TextField(145, 25, 35, 20, 'Blue', self.value[2], self, True)
-		#self.addElement(self.Red)
-		#self.addElement(self.Green)
-		#self.addElement(self.Blue)
-		self.label_A = ui.Label(5, 25, "Red", "R:", self, True)
-		self.label_B = ui.Label(65, 25, "Green", "G:", self, True)
-		self.label_C = ui.Label(125, 25, "Blue", "B:", self, True)		
-		#self.addElement(self.label_A)
-		#self.addElement(self.label_B)
-		#self.addElement(self.label_C)
-		rgbValue = [self.value[0] * 255, self.value[1] * 255, self.value[2] * 255]
-		self.colorButton = ui.ColorButton(200, 26, 45, 20, 'Picker', rgbValue, self, True)
-		# self.addElement(self.colorButton)
-		
-		self.Red.registerCallback("update", self.updateColor)
-		self.Green.registerCallback("update", self.updateColor)
-		self.Blue.registerCallback("update", self.updateColor)
-		
-		# self.registerCallback("click", self.stat)
-		self.bordered = True
-		self.colorButton.picker.ok_functions.append(self.updateFields)
-		self.colorButton.outlined = True
-	
-	def setValue(self, value):
-		print "Set color: ", value
-		self.Red.setValue(value[0])
-		self.Green.setValue(value[1])
-		self.Blue.setValue(value[2])
-		self.updateColor(self.Blue)
-	
-		
-	
-	def getValue(self):		
-		value = self.colorButton.getValue()
-		r = float(float(value[0]) / 255)
-		g = float(float(value[1]) / 255)
-		b = float(float(value[2]) / 255)
-		
-		return [r, g, b]
-		
-	def updateFields(self, obj):
-		# get the color of the button
-		color = self.colorButton.getValue()
-		
-		# color values in the text boxes are assigned via ye olde renderman method, i.e. 0-1
-		self.Red.setValue(float(float(color[0]) / 255))
-		self.Green.setValue(float(float(color[1]) / 255))
-		self.Blue.setValue(float(float(color[2]) / 255))
-		
-		# this is an update function to assign the color value of the button to the text editors. Fix it.
-		
-	def updateColor(self, obj):
-		
-		if obj.isEditing == False:
-			# this function is called when any of the 3 text fields are updated
-			# so the color button can be updated with the latest color
-			# I probably need a *lot* more checking here
-			r_s = float(self.Red.getValue())
-			g_s = float(self.Green.getValue())
-			b_s = float(self.Blue.getValue())
-			if float(r_s) > 1:			
-				r = int(r_s) 
-			else:
-				r = float(r_s) * 255			
-				
-			if float(g_s) > 1:
-				g = float(g_s) 
-			else:
-				g = float(g_s) * 255
-							
-			if float(b_s) > 1:
-				b = float(b_s) 
-			else:
-				b = float(b_s) * 255			
-				
-			rgb = [r, g, b, 255]
-			self.colorButton.setValue(rgb) # set the value of the color button here
-			
-	def hit_test(self):		
-		if self.colorButton.picking: # if the color picker is active, test for a hit
-			rVal = True # this hits all the time to prevent any object from getting in front of it
-			#rVal = self.colorButton.hit_test() 
-		else: # otherwise, just my normal hit_test
-			rVal = ui.UIElement.hit_test(self)
-		return rVal
-	
-	def changeModel(self, obj):
-		value = obj.getValue()
-		self.label_A.setText(value[0] + ":")
-		self.label_B.setText(value[1] + ":")
-		self.label_C.setText(value[2] + ":")
-		
-
-class CoordinateEditor(ShaderParamEditor):
-	height = 75
-	paramtype = "coordinate"
-	coordinateSpaces = ['current', 'object', 'shader', 'world', 'camera', 'screen', 'raster', 'NDC']
-	protocols.advise(instancesProvide=[IShaderParamEditor], asAdapterForTypes=[BtoRPointParam, BtoRVectorParam, BtoRNormalParam])
-	def __init__(self, bObj):
-		ShaderParamEditor.__init__(self, bObj)
-		width = self.get_string_width("Coordinate Space:", 'normal') + 5
-		self.x_val = ui.TextField(width + 30, 25, 30, 20, "coord_x", self.value[0], self, True)
-		self.y_val = ui.TextField(width + 85, 25, 30, 20, "coord_y", self.value[1], self, True)
-		self.z_val = ui.TextField(width + 140, 25, 30, 20, "coord_z", self.value[2], self, True)
-		#self.addElement(self.x_val)
-		self.addElement(ui.Label(width + 10, 28, "X:", "X:", self, False))
-		#self.addElement(self.y_val)
-		self.addElement(ui.Label(width + 65, 28, "Y:", "Y:", self, False))
-		#self.addElement(self.z_val)		
-		self.addElement(ui.Label(width + 120, 28, "Z:", "Z:", self, False))
-		
-		# self.spaceMenu = Menu(width + 10, 25, 85, 25, "Coordinate Space:", self.coordinateSpaces, self, True)
-		#self.addElement(self.spaceMenu)
-		self.addElement(ui.Label(5, 25, "SpaceLabel", "Coordinate Space: ", self, False))
-		# the rest of this should take care of itself, all I need is a getValue()
-		self.bordered = True
-		
-	def getValue(self):
-		value = []
-		# value.append(self.spaceMenu.Value())
-		value.append(float(self.x_val.getValue()))
-		value.append(float(self.y_val.getValue()))
-		value.append(float(self.z_val.getValue()))
-		return value
-	def setValue(self, value):
-		self.x_val.setValue(value[0])
-		self.y_val.setValue(value[1])
-		self.z_val.setValue(value[2])
-		
-		
-class FloatEditor(ShaderParamEditor):
-	height = 50
-	paramtype = "float"
-	# for numeric values
-	protocols.advise(instancesProvide=[IShaderParamEditor], asAdapterForTypes=[BtoRFloatParam])
-	def __init__(self, bObj):
-		ShaderParamEditor.__init__(self, bObj)				
-		self.text = ui.TextField(15, 25, 40, 20, self.name, self.value, self, True)
-		
-		self.bordered = True
-	
-	def getValue(self):
-		return float(self.text.getValue()) # return a double from here all the time
-	def setValue(self, value):
-		self.text.setValue(value)
-		
-class StringEditor(ShaderParamEditor):
-	height = 50
-	paramtype = "string"
-	protocols.advise(instancesProvide=[IShaderParamEditor], asAdapterForTypes=[BtoRStringParam])
-	def __init__(self, bObj):
-		ShaderParamEditor.__init__(self, bObj)	
-		width = self.get_string_width(self.name, 'normal') + 10
-		self.text = ui.TextField(15, 25, 200, 20, self.name, self.value, self, True)		
-		self.bordered = True
-		
-	def getValue(self):
-		return self.text.getValue()
-	def setValue(self, value):
-		self.text.setValue(value)
-			
-		
-class MatrixEditor(ShaderParamEditor):
-	height = 140
-	paramtype = "matrix"
-	protocols.advise(instancesProvide=[IShaderParamEditor], asAdapterForTypes=[BtoRMatrixParam])
-	def __init__(self, bObj):
-		ShaderParamEditor.__init__(self, bObj)	
-		value = bObj.getValue()
-		self.param_name = self.name
-		column1 = []
-		column2 = []
-		column3 = []
-		column4 = []
-		for val in value: # presume that this array is constructed row-wise as in  [0, 0, 0, 0] being row 1
-			# convert to a column format
-			column1.append(val[0])
-			column2.append(val[1])
-			column3.append(val[2])
-			column4.append(val[3])
-			
-		data = ui.Table(26, 20, 200, 80, 'Matrix', [column1, column2, column3, column4], self, True)
-		
-	def getValue(self):
-		value = []
-		for a in range(4):
-			row = []
-			for b in range(4):
-				row.append(self.data.getValueAt(a, b))
-			value.append(row)
-		return value
-	def setValue(self, value):
-		for a in range(4):
-			for b in range(4):
-				self.data.setValueAt(a, b, value)
-
-		
-# the following 4 objects are for guessed object types, each includes a type override button
-# to force a fallback to a string value
-class SpaceEditor(ShaderParamEditor):
-	height = 35
-	paramtype = "string"
-	Spaces = ['current', 'object', 'shader', 'world', 'camera', 'screen', 'raster', 'NDC']
-	protocols.advise(instancesProvide=[IShaderParamEditor], asAdapterForTypes=[BtoRSpaceParam])
-	def __init__(self,bObj):		
-		ShaderParamEditor.__init__(self, bObj)	
-		width = self.get_string_width(self.name, 'normal') + 5
-		self.spaceMenu = ui.Menu(width + 15, 5, 100, 25, 'Coordinate Space:', self.Spaces, self, True)
-		#self.addElement(self.spaceMenu)
-		self.overrideButton = ui.Button(width + 120, 5, 60, 25, 'Override', 'Override', 'normal', self, True)
-		#self.addElement(self.overrideButton)
-		self.overrideButton.registerCallback("release", self.override_type)
-		self.overridden = False
-		
-	def override_type(self, button):
-		dispVal = self.spaceMenu.getValue()
-		self.elements = []
-		self.z_stack = []
-		self.draw_stack = []
-		self.addElement(ui.Label(5, 5, self.name, self.name, self, False))
-		width = self.get_string_width(self.name, 'normal') + 5
-		self.addElement(ui.TextField(width + 10, 5, 250, 20, self.name, dispVal, self, False))
-		self.value = dispVal
-		self.overridden = True
-		
-	def getValue(self):
-		if self.overridden:
-			value = self.elements[1].value
-		else:
-			value = self.spaceMenu.getValue()
-		return value	
-		
-	def setValue(self, value):
-		if self.overriden:
-			self.elements[1].setValue(value)
-		else:
-			self.spaceMenu.setValueString(value)
-		
-
-class ProjectionEditor(ShaderParamEditor):
-	height = 40
-	paramtype = "string"
-	Projections = ['st', 'planar', 'perspective', 'spherical', 'cylindrical']
-	protocols.advise(instancesProvide=[IShaderParamEditor], asAdapterForTypes=[BtoRProjectionParam])
-	def __init__(self, bObj):
-		ShaderParamEditor.__init__(self, bObj)	
-		width = self.get_string_width(self.name, 'normal') + 5
-		self.projectionMenu = ui.Menu(width + 15, 5, 100, 25, 'Projection Type:', self.Projections, self, True)
-		#self.addElement(self.projectionMenu)
-		self.overrideButton = ui.Button(width + 120, 5, 60, 25, 'Override', 'Override', 'normal', self, True)
-		#self.addElement(self.overrideButton)
-		self.elements[2].registerCallback("release", self.override_type)
-		self.overridden = False
-		
-	def override_type(self, button):
-		dispVal = self.projectionMenu.getValue()
-		self.elements = []
-		self.z_stack = []
-		self.draw_stack = []
-		self.addElement(ui.Label(5, 5, self.name, self.name, self, False))
-		width = self.get_string_width(self.name, 'normal') + 5
-		self.addElement(ui.TextField(width + 10, 5, 250, 20, self.name, dispVal, self, False))
-		self.value = dispVal
-		self.overridden = True
-		
-	def getValue(self):
-		if self.overridden:
-			value = self.elements[1].value
-		else:
-			value = self.projectionMenu.getValue()
-		return value	
-		
-	def setValue(self, value):
-		if self.overridden:
-			value = self.elements[1].setValue(value)
-		else:
-			self.projectionMenu.setValue(value)
-		
-	
-class ColorSpaceEditor(ShaderParamEditor):
-	height = 40
-	paramtype = "string"
-	ColorSpaces = ['rgb', 'hsv', 'hsl', 'YIQ', 'xyz', 'xyY']
-	protocols.advise(instancesProvide=[IShaderParamEditor], asAdapterForTypes=[BtoRColorSpaceParam])
-	def __init__(self, bObj):
-		ShaderParamEditor.__init__(self, bObj)	
-		width = self.get_string_width(self.name, 'normal') + 5
-		self.colorSpaceMenu = ui.Menu(width + 15, 5, 100, 25, 'Color Space:', self.ColorSpaces, self, True)
-		#self.addElement(self.colorSpaceMenu)
-		self.overrideButton = ui.Button(width + 120, 5, 60, 25, 'Override', 'Override', 'normal', self, True)
-		#self.addElement(self.overrideButton)
-		self.overrideButton.registerCallback("release", self.override_type)
-		self.overridden = False
-		
-	def override_type(self, button):
-		dispVal = self.colorSpaceMenu.getValue()
-		self.elements = []
-		self.z_stack = []
-		self.draw_stack = []
-		self.addElement(ui.Label(5, 5, self.name, self.name, self, False))
-		width = self.get_string_width(self.name, 'normal') + 5
-		self.addElement(ui.TextField(width + 10, 5, 250, 20, self.name, dispVal, self, False))
-		self.value = dispVal
-		self.overridden = True
-		
-	def getValue(self):
-		if self.overridden:
-			value = self.elements[1].value
-		else:
-			value = self.colorSpaceMenu.getValue()
-		return value	
-
-	def setValue(self, value):
-		if self.overridden:
-			value = self.elements[1].setValue(value)
-		else:
-			self.colorSpaceMenu.setValue(value)
-		
-
-
-class FileEditor(ShaderParamEditor):
-	height = 55
-	paramtype = "string"
-	protocols.advise(instancesProvide=[IShaderParamEditor], asAdapterForTypes=[BtoRFileParam])
-	def __init__(self, bObj):
-		ShaderParamEditor.__init__(self, bObj)	
-		self.param_name = name
-		self.label = ui.Label(5, 5, name, name, self, True)
-		self.filename = ui.TextField(15, 25, 150, 20, name, value, self, True)
-		self.browseButton = ui.Button(168, 24, 60, 20, "Browse", "Browse", 'normal', self, True)
-		self.browseButton.registerCallback("release", self.openBrowseWindow)
-		self.overrideButton = ui.Button(235, 24, 60, 20, "Override", "Override", 'normal', self, True)
-		self.overrideButton.registerCallback("release", self.override_type)
-		self.overridden = False
-		#self.addElement(self.label)
-		#self.addElement(self.filename)
-		#self.addElement(self.browseButton)
-		#self.addElement(self.overrideButton)
-		
-	def override_type(self, button):
-		dispVal = self.filename.getValue()
-		self.elements = []
-		self.z_stack = []
-		self.draw_stack = []
-		self.addElement(ui.Label(5, 5, self.name, self.name, self, False))
-		width = self.get_string_width(self.name, 'normal') + 5
-		self.addElement(ui.TextField(width + 10, 5, 250, 20, self.name, dispVal, self, False))
-		self.value = dispVal
-		self.overridden = True
-	
-	def openBrowseWindow(self, button):
-		Blender.Window.FileSelector(self.select, 'Choose a file')
-		
-	def select(self, file):
-		#self.filename.value = file
-		self.filename.setValue(file)
-		
-	def getValue(self):
-		if self.overridden:
-			value = self.elements[1].value			
-		else:
-			value = self.filename.getValue()
-		return value
-		
-	def setValue(self, value):
-		self.filename = value
-		
-class ArrayEditor(ShaderParamEditor):
-	paramtype = "array"
-	protocols.advise(instancesProvide=[IShaderParamEditor], asAdapterForTypes=[BtoRArrayParam])
-	def __init__(self, bObj):
-		screen = Blender.Window.GetAreaSize()		
-		ShaderParamEditor.__init__(self, bObj)	
-		self.values = value
-		self.editorPanel = ui.Panel((screen[0] / 2) - 200, (screen[1] / 2) + 300, 400, 600, "ParameterEditor", "Array Parameter: %s" % name, None, False) # The container for the array value itself
-		self.editorPanel.dialog = True
-		self.editing = False
-		idx = 0
-		#self.closeButton = Button(10, 560, 50, 25, "Cancel", "Cancel", 'normal', self.editorPanel, True)
-		# self.closeButton.registerCallback("release", self.closeEditor)
-		self.okButton = ui.Button(self.editorPanel.width - 60, 560, 50,  25, "OK", "Close", 'normal', self.editorPanel, True)
-		self.okButton.registerCallback("release", self.closeEditor)
-		self.scrollPane = ui.ScrollPane(5, 27, 390, 530, "scrollPane", "scrollPane", self.editorPanel, True)
-		self.scrollPane.normalColor = [185, 185, 185, 255]
-		#self.editorPane.addElement(self.scrollPane)
-		self.launchButton = ui.Button(0, 25, width - 25, height - 28, "Button", "Launch Editor for array parameter '%s'" % self.name, 'normal', self, True)
-		self.launchButton.registerCallback("release", self.showEditor)
-		
-		if isinstance(values, list):
-			for val in self.values: 
-				size = [0, 0, 370, 0]
-				bParm = BtoRTypes.__dict__["BtoR" + p_type.capitalize + "Param"](param = "Array index %d" % idx, value = val, size=size, parent = self.scrollPane) # just init a basic type
-				editor = BtoRAdapterClasses.IShaderParamEditor(bParm) # that should do the trick
-
-				#self.scrollPane.addElement(target_class(0, 0, 370, target_class.height, "Array index %d" % idx, value, self.scrollPane, False))
-				#self.scrollPane.addElement(editor)  
-				idx = idx + 1
-		else:
-			for idx in range(0, length):
-				size = [0, 0, 370, 0]
-				bParm = BtoRTypes.__dict__["BtoR" + p_type.capitalize + "Param"](param = "Array index %d" % idx, value = self.value, size=size, parent = self.scrollPane) # just init a basic type
-				editor = BtoRAdapterClasses.IShaderParamEditor(bParm) # that should do the trick
-
-				#self.scrollPane.addElement(target_class(0, 0, 370, target_class.height, "Array index %d" % idx, value, self.scrollPane, False))
-				#self.scrollPane.addElement(editor)  
-				idx = idx + 1
-			
-		# the only special use case I have
-		sdict = globals()
-		self.evt_manager = sdict["instBtoREvtManager"]
-		# that should be that.
-		
-	def getEditorButton(self):
-		return self.launchButton
-		
-	def getValue(self):
-		value = []
-		for element in self.scrollPane.elements:
-			value.append(element.getValue()) # get the value in question and return it
-		return value
-
-	def showEditor(self, button):
-		# show the editor
-		self.editing = True
-		# don't know that the above is stricly neccessary....and it's not
-		# so
-		self.evt_manager.addElement(self.editorPanel)
-		self.evt_manager.raiseElement(self.editorPanel)
-		
-		
-	def closeEditor(self, button):
-		self.evt_manager.removeElement(self.editorPanel)
-			
-		
-	def setValue(self, value):
-		self.value = value
-		# do nothing else
-		
-		
-
-	
-		

@@ -32,6 +32,7 @@ import sys
 import StringIO	
 import re
 
+
 handler = """# SPACEHANDLER.VIEW3D.EVENT
 #!BPY
 
@@ -77,6 +78,7 @@ class BtoRObject:
 			self.scroller.addElement(self.editors[option].getEditor()) # and that should be that. When this is discarded, all those go away
 			self.editors[option].setParent(self.scroller)	
 			self.scroller.offset = 0
+			
 	def saveProperties(self, doc, xml):
 		
 		if len(self.properties) > 0:			
@@ -141,8 +143,8 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 				# event manager instance
 				
 		self.getSettings(None)
-		screen = Blender.Window.GetAreaSize()		
-		self.editor = ui.Panel(10, screen[1] - 225, 400, 300, "GlobalSettings", "Global BtoR Settings:", None, False)
+		screen = Blender.Window.GetAreaSize()
+		self.editor = ui.Panel(10, screen[1] - 225, 400, 300, "GlobalSettings", "Global Neqsus/BtoR Settings:", None, False)
 		self.editor.addElement(ui.Label(5, 30, "Renderer:", "Renderer:", self.editor, False))
 		rendererList = self.renderers.keys()
 		
@@ -198,7 +200,7 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 		self.volumeFiles = {}
 		self.imagerFiles = {}
 		self.lightFiles = {}
-		
+		self.assets = {} # indexed by object name
 		
 		if self.use_slparams:
 			self.getShaderSourceList(paths[0]) 
@@ -211,6 +213,13 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 		self.archives = os.sep + "archives" + os.sep
 		self.maps = os.sep + "maps" + os.sep
 		self.materialPreviews = os.sep + "matPreviews" + os.sep # this should use the temp directory that's defined, or maybe I should make that another user option?
+		
+		
+	def getAssets(self, name):
+		return self.assets[name]
+		
+	def setAsset(self, name, value):
+		self.assets[name] = value
 
 	def getShaderSearchPaths(self):
 		pathList = self.shaderpaths.getValue().split(";")
@@ -358,10 +367,7 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 						elif (parms[1] == "light"):
 							self.shadersLight[shaderPath].append(parms)	
 		else:
-			# display error dialog
-			error_state = 1
-			error_message = "Invalid search path!"
-			print error_message
+			self.evt_manager.showErrorDialog("Invalid shader path specified!", "Invalid shader path specified! Check your settings.")
 	
 	def getShaderSourceList(self, shaderPath): 
 		# maybe add some iterative thing here that pops up a progress bar
@@ -414,21 +420,21 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 			# display error dialog
 			self.evt_manager.showErrorDialog("Invalid shader path specified!", "Invalid shader path specified! Check your settings.")
 			
-		if len(self.shadersSurface) > 0:
-			print "Surface Shaders:"
-			print self.shadersSurface
-		if len(self.shadersImager) > 0:
-			print "Imager Shaders:"
-			print self.shadersImager
-		if len(self.shadersDisplacement) > 0:
-			print "Displacement Shaders:"
-			print self.shadersDisplacement
-		if len(self.shadersLight) > 0:
-			print "Light Shaders:"
-			print self.shadersLight
-		if len(self.shadersVolume) > 0:
-			print "Volume shaders:"
-			print self.shadersVolume
+		#if len(self.shadersSurface) > 0:
+			#print "Surface Shaders:"
+			#print self.shadersSurface
+		#if len(self.shadersImager) > 0:
+			#print "Imager Shaders:"
+			#print self.shadersImager
+		#if len(self.shadersDisplacement) > 0:
+			#print "Displacement Shaders:"
+			#print self.shadersDisplacement
+		#if len(self.shadersLight) > 0:
+			#print "Light Shaders:"
+			#print self.shadersLight
+		#if len(self.shadersVolume) > 0:
+			#print "Volume shaders:"
+			#print self.shadersVolume
 			
 	def getSettings(self, button):
 		# let's try the Registry!
@@ -507,17 +513,17 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 		
 	def select(self, file):
 		path = os.path.dirname(file)
-		if self.activeButton == self.shaderBrowse:
-			self.shaderPathList = path		
-		elif self.activeButton == self.outputBrowse:
-			self.outputPath = path
-		self.update()
+		if not os.path.exists(path):
+			self.evt_manager.showErrorDialog("That path does not exist!", "Error! That path does not exist! Please choose one that does.")
+		else:
+			if self.activeButton == self.shaderBrowse:
+				self.shaderPathList = path		
+			elif self.activeButton == self.outputBrowse:
+				self.outputPath = path
+			self.update(None)
 		
-	
 	def getEditor(self):
 		return self.editor	
-		
-		
 		
 class SceneSettings(BtoRObject):
 	filter_menu = ["None Selected", "box", "triangle", "catmull-rom", "sinc", "gaussian"]
@@ -547,6 +553,8 @@ class SceneSettings(BtoRObject):
 		self.settings = sdict["instBtoRSettings"]
 		self.evt_manager = sdict["instBtoREvtManager"]
 		self.lighting = sdict["instBtoRLightManager"]
+		self.log = sdict["instBtoRLog"]
+		
 		screen = Blender.Window.GetAreaSize()		
 		self.editorPanel = ui.Panel(25, screen[1] - 50, 400, 180, "Export Settings:", "Render Settings:", None, False)
 		
@@ -564,7 +572,6 @@ class SceneSettings(BtoRObject):
 		self.object_groups = {} # this *is* neccessary for instancing support
 		self.occlusion_map = []
 		
-		self.lightMultiplier = 1
 		self.renderContext = Blender.Scene.GetCurrent().getRenderingContext()
 		
 		self.editorPanel.addElement(ui.Label(5, 27, "Export Target:", "Export Target:", self.editorPanel, False))		
@@ -689,6 +696,7 @@ class SceneSettings(BtoRObject):
 		extraPanel.extraValue = ui.TextField(226, 0, 75, 20, "ExtraValue", "Value", extraPanel, True)
 		self.extrasScroller.addElement(extraPanel)
 		self.extras.append(extraPanel)
+		self.log.appendText("Added an extra option\n")
 		return extraPanel
 		
 	def addRenderPass(self, button):
@@ -706,6 +714,7 @@ class SceneSettings(BtoRObject):
 		passPanel.passMode.registerCallback("select", self.selectPassType)
 		self.passesScroller.addElement(passPanel)
 		self.passes.append(passPanel)
+		self.log.appendText("Added an AOV pass\n")
 		return passPanel
 		
 	def deleteExtras(self, button):
@@ -716,6 +725,7 @@ class SceneSettings(BtoRObject):
 				selected.append(element)
 		for element in selected:
 			self.extras.remove(element)
+		self.log.appendText("Deleting extra option...\n")
 	
 	def deletePasses(self, button):
 		selected = []
@@ -725,6 +735,8 @@ class SceneSettings(BtoRObject):
 				selected.append(element)
 		for element in selected:
 			self.passes.remove(element)
+		self.log.appendText("Deleting pass...\n")
+		
 	def selectPassType(self, menu):
 		panel = menu.parent
 		panel.passName.setValue(self.exportPrefix.getValue() + "_" + panel.passMode.getValue())
@@ -732,6 +744,7 @@ class SceneSettings(BtoRObject):
 	def preRenderCheck(self, button):
 		if self.exportPrefix.getValue() == "":
 			self.evt_manager.showErrorDialog("Error: No scene name specified.", "Error! You must specify a name to export to.")
+			self.log.appendText("Render attempt failed pre-render check!\n")
 		else:
 			# spawn the render
 			self.renderScene()
@@ -897,7 +910,9 @@ class SceneSettings(BtoRObject):
 				imgFile = outputname + "_cam_%d_frame_%d" % (cam, frame) + ".tif" 
 				
 				# Main Render Start - Sounds just like Nasa doesn't it?
+
 				print "Occlusion Maps"
+				# feature masking will ignore this for renderers that don't support it.
 				# Occlusion Map generation
 				if self.lighting.getProperty("GenOcclusion") and self.lighting.getProperty("GenShadowMaps"): # yes, they *both* have to be on for SHADOWMAPPED occlusion
 					for group in self.lighting.occlGroups:
@@ -960,15 +975,19 @@ class SceneSettings(BtoRObject):
 					#else:
 					#	self.evt_manager.showErrorDialog("Bad Variable Type", "Your custom option has an incorrect variable type. It should be 'string', 'integer' or 'float'.")
 				
-				print "Frame Begin"
+				print "Frame Begin"				
 				ri.RiFrameBegin(frame)
 				
 				# main render here
 				for path in paths:
+					if self.settings.renderer == "BMRT":
+						path = path.replace("\\", "\\\\")
 					ri.RiOption("searchpath", "shader", path + ":&")
 				
 				# Global scene options				
 				self.render()
+				if self.settings.renderer == "BMRT":
+					imgFile = imgFile.replace("\\", "\\\\")
 				ri.RiDisplay(imgFile, "file", "rgb")
 				ri.RiDisplay("+" + imgFile, "framebuffer", "rgb")
 				
@@ -997,7 +1016,9 @@ class SceneSettings(BtoRObject):
 				ri.RiFrameEnd()			
 				print "Frame complete!"
 		ri.RiEnd()
+		
 		print "Render complete!"
+		self.log.appendText("Render complete!\n")
 		
 	def generateShadowMaps(self):
 		print "Shadow Maps"
@@ -1082,6 +1103,7 @@ class SceneSettings(BtoRObject):
 						envList[direction] = {"rib":envRIB, "envName":envName, "envFile":envFile}
 				self.envmaps[obj.objData["name"] + ("_%d" % frame)] = envList
 			# the map creation call here goes at the beginning of the rib file for the frame.
+		self.log.appendText("Generated environment maps...\n")
 	
 	def renderEnvMap(self, obj, direction, envRIB, envName, envFile):
 		if self.toFile:
@@ -1100,6 +1122,9 @@ class SceneSettings(BtoRObject):
 		# these options should be overriden by object level options for env-map generation.
 		ri.RiPixelSamples(obj.getProperty("EnvMapSamplesX"), obj.getProperty("EnvMapSamplesY"))
 		ri.RiPixelFilter(obj.getProperty("EnvMapPixelFilter"), obj.getProperty("EnvMapFilterX"), obj.getProperty("EnvMapFilterY"))
+		if self.settings.renderer == "BMRT":
+			envFile = envFile.replace("\\", "\\\\")
+			
 		ri.RiDisplay(envFile, "file", "rgb")
 		ri.RiProjection("perspective", "fov", 92)
 		ri.RiShadingRate(obj.getProperty("EnvMapShadingRate"))
@@ -1128,6 +1153,8 @@ class SceneSettings(BtoRObject):
 
 		paths = self.settings.shaderpaths.getValue().split(";")		
 		for path in paths:
+			if self.settings.renderer == "BMRT":
+				path = path.replace("\\", "\\\\")
 			ri.RiOption("searchpath", "shader", path + ":&")
 		
 		size = light.getProperty("ShadowMapSize")
@@ -1135,7 +1162,9 @@ class SceneSettings(BtoRObject):
 		ri.RiPixelSamples(1, 1)
 		ri.RiPixelFilter("box", 1, 1)			
 		ri.RiHider("hidden", {"uniform float jitter" : [0], "uniform string depthfilter" : "midpoint"})
-		
+		if self.settings.renderer == "BMRT":
+			shadowFile = shadowFile.replace("\\", "\\\\")
+			shadowName = shadowName.replace("\\", "\\\\")
 		ri.RiDisplay(shadowFile, "zfile", "z")			
 		if light.getProperty("ShowZBuffer"):
 			ri.RiDisplay("+view_from_light" + shadowName, "zframebuffer", "z")
@@ -1157,6 +1186,7 @@ class SceneSettings(BtoRObject):
 				if not self.occlusion_maps.has_key(occlProp):
 					self.occlusion_maps[occlProp] = []
 				self.occlusion_maps[occlProp].append(shadowFile) # append to the occlusion map for this group
+		self.log.appendText("Generated shadow maps...\n")
 		
 	def renderWorld(self):
 		ri.RiWorldBegin()		
@@ -1287,7 +1317,7 @@ class SceneSettings(BtoRObject):
 		except: 
 			traceback.print_exc()
 			self.evt_manager.showErrorDialog("There was an error saving the file.", "There was an error saving the file.")
-			
+			self.log.appendText("Error saving XML file.\n")
 	def loadFromFile(self, filename):
 		
 		try:
@@ -1298,7 +1328,8 @@ class SceneSettings(BtoRObject):
 				xmlStr = xmlStr + line
 			found = True
 		except:
-			self.evt_manager.showErrorDialog("Error parsing XML!", "There was an error in the XML file or it was not found.")			
+			self.evt_manager.showErrorDialog("Error parsing XML!", "There was an error in the XML file or it was not found.")	
+			self.log.appendText("Error loading file...\n")
 			found = False
 			return None
 		if found:
@@ -1322,6 +1353,7 @@ class SceneSettings(BtoRObject):
 			# not found, spawn a dialog
 			traceback.print_exc()
 			self.evt_manager.showErrorDialog("Error!", "Something went wrong. Look at the console!")
+			self.log.appendText("Error saving to blender text!\n")
 	def setSpaceHandler(self):
 		global handler
 		try:
@@ -1358,6 +1390,7 @@ class SceneSettings(BtoRObject):
 			# pop up an error dialog!
 			traceback.print_exc()
 			self.evt_manager.showConfirmDialog("Error parsing XML!", "There was an error in the BtoRXML text file!", None, False)
+			self.log.appendText("Error parsing XML!")
 			return None
 		if hasXMLData:
 			# deal with each in turn.
@@ -1419,7 +1452,8 @@ class SceneSettings(BtoRObject):
 						objData.loadData(xmlObject)
 					self.object_data[objName] = objData # stuff the adapter component into the object data
 		# return some statistics here 
-		self.evt_manager.showConfirmDialog("Scene Data Loaded!", "%d objects were successfully loaded." % len(xmlObjects), None, False)
+		self.log.appendText("%d objects were successfully loaded..." % len(xmlObjects))
+		#self.evt_manager.showConfirmDialog("Scene Data Loaded!", "%d objects were successfully loaded." % len(xmlObjects), None, False)
 			
 	def saveObjects(self, xml):
 		
@@ -1449,8 +1483,7 @@ class SceneSettings(BtoRObject):
 	def saveSimpleObject(self, objData, xml):
 		objXml = xml.createElement("Object")
 		for key in objData:
-			objXml.setAttribute(key, objData[key])
-		
+			objXml.setAttribute(key, objData[key])		
 		return objXml
 		
 	def saveObject(self, objData, xml):
@@ -1478,7 +1511,6 @@ class SceneSettings(BtoRObject):
 		else:
 			shaderNode.setAttribute("path", "None")
 		
-			
 		for parm in shader.shaderparams:
 			# get the param and stuff into my dict				
 			# create the node
@@ -1524,10 +1556,12 @@ class ObjectEditor(BtoRObject):
 		self.scene = sdict["instBtoRSceneSettings"]
 		self.materials = sdict["instBtoRMaterials"]
 		self.groupList = sdict["instBtoRGroupList"]
+		self.log = sdict["instBtoRLog"]
 		setattr(BtoRAdapterClasses, "instBtoRSettings", sdict["instBtoRSettings"])
 		setattr(BtoRAdapterClasses, "instBtoREvtManager", sdict["instBtoREvtManager"])
 		setattr(BtoRAdapterClasses, "instBtoRSceneSettings", sdict["instBtoRSceneSettings"])
 		setattr(BtoRAdapterClasses, "instBtoRMaterials", sdict["instBtoRMaterials"])
+		setattr(BtoRAdapterClasses, "instBtoRHelp", sdict["instBtoRHelp"])
 		setattr(BtoRAdapterClasses, "instBtoRObjects", self)
 		
 		self.debug = False
@@ -1602,27 +1636,37 @@ class ObjectEditor(BtoRObject):
 		self.selectObject(object)
 		
 	def selectObject(self, obj):
-		""" An object's been selected, make the magic perform. """
-		# print "selected an object!"
-		name = obj.getName()
+		""" An object's been selected, make the magic perform. """		
+		name = obj.getName()		
 		self.objectName.setValue(name)
-		objType = obj.getType()		
+		objType = obj.getType()	
+		self.log.appendText("Selected object " + name)	
+		# print self.scene.object_data
 		# so instead I simply retrieve the object in question
 		if self.scene.object_data.has_key(obj.getName()): 
-			self.objData = self.scene.object_data[obj.getName()] # fetch the adapter 
-			# flag the object as modified
-			
-			# print self.objData
-		else:
+			try:
+				self.objData = self.scene.object_data[obj.getName()] # fetch the adapter 
+			except:
+				traceback.print_exc()
+				self.log.appendText("Failed to fetch object data for " + name)
+			# flag the object as modified						
+		else:			
 			# no adapter found in the scene settings dictionary, so
 			# create a new one based on a returned BtoR type
-			bObj = BtoRTypes.__dict__["BtoR" + obj.getType()](obj)
-			self.objData = BtoRAdapterClasses.IObjectAdapter(bObj)		
-			self.scene.object_data[obj.getName()] = self.objData # assign the new adapter to the scene settings dict
+			try:
+				bObj = BtoRTypes.__dict__["BtoR" + obj.getType()](obj)				
+				self.objData = BtoRAdapterClasses.IObjectAdapter(bObj)
+				self.scene.object_data[obj.getName()] = self.objData # assign the new adapter to the scene settings dict
+			except:
+				traceback.print_exc()
+				self.log.appendText("Failed to allocate object adapter for " + name)
 		
 		# editor panel setup
 		self.objEditor = self.objData.getEditor()
-		self.editorPanel.removeElement(self.objEditorPanel)
+		try:			
+			self.editorPanel.removeElement(self.objEditorPanel)
+		except:
+			self.log.appendText("Failed to remove non-existent object")
 		self.objEditorPanel = self.objEditor.getEditor()
 		self.objEditorPanel.parent = self.editorPanel
 		self.objEditorPanel.invalid = True
@@ -1630,6 +1674,7 @@ class ObjectEditor(BtoRObject):
 		
 		# and finally, object checks/resets for interested objects
 		self.objData.checkReset()
+		
 		
 	def selectMaterial(self, button):
 		# set the material in the current object adapter
@@ -1734,7 +1779,8 @@ class ObjectEditor(BtoRObject):
 			ri.RiEnd()
 	
 	def noPanel(self):
-		self.editorPanel.removeElement(self.objEditorPanel)
+		if self.objEditorPanel in self.editorPanel.elements:
+			self.editorPanel.removeElement(self.objEditorPanel)
 		
 	def getSelected(self):
 		if self.editorPanel in self.evt_manager.elements: #only if this instance is up and running.
@@ -1769,10 +1815,13 @@ class ObjectEditor(BtoRObject):
 						obj = objects[0]
 						self.selectObject(obj)
 				except:
+					traceback.print_exc()
+					# there was a failure, dammit, this is where it's dying!
 					self.objectName.isVisible = True
 					self.objectMenu.isVisible = False					
 					self.objectName.setValue("None Selected")
 					self.noPanel()			
+					
 								
 	def initializeBtoRObjectData(self): # this changes to support generation of BtoR export adapters
 		# get everything in the current scene.
@@ -1842,7 +1891,6 @@ class Material(BtoRObject):
 		self.selectorButton.title = self.editorButton.title
 					
 		self.select_functions = []
-
 			
 		self.options = { "MaterialName" : ["Material Name:", self.material.name],
 					"color" : ["Color:", [1.0, 1.0, 1.0]],
@@ -1855,6 +1903,7 @@ class Material(BtoRObject):
 					"Rotation":["Rotation:", BtoRTypes.BtoRRotationType([0.0, False, False, False])],
 					"Scale":["Scale:", cgkit.cgtypes.vec3(0, 0, 0)]
 		}
+		
 		self.optionOrder = [ "MaterialName",
 						"Surface",
 						"Displacement",
@@ -1874,9 +1923,57 @@ class Material(BtoRObject):
 		self.editors["color"].setValue(self.material.color())
 		self.editors["opacity"].setValue(self.material.opacity())		
 		
+		self.surfPanel = self.properties["Surface"].getValue().getObject().getEditor()		
+		#self.properties["Surface"].getValue().getObject().registerCallback("update", self.updateShaderName)
+		self.editorPanel.addElement(self.surfPanel)
+		self.surfPanel.isVisible = False
+		self.surfPanel.shadowed = True
+		self.surfPanel.outlined = True
+		self.surfPanel.hasHeader = False				
+		self.surfPanel.invalid = True
+		self.surfPanel.validate()
+				
+		self.dispPanel = self.properties["Displacement"].getValue().getObject().getEditor()
+		#self.properties["Displacement"].getValue().getObject().registerCallback("update", self.updateShaderName)
+		self.editorPanel.addElement(self.dispPanel)
+		self.dispPanel.isVisible = False
+		self.dispPanel.shadowed = True
+		self.dispPanel.outlined = True
+		self.dispPanel.hasHeader = False
+			
+		self.volumePanel = self.properties["Volume"].getValue().getObject().getEditor()		
+		self.editorPanel.addElement(self.volumePanel)
+		self.volumePanel.isVisible = False
+		self.volumePanel.shadowed = True
+		self.volumePanel.outlined = True
+		self.volumePanel.hasHeader = False
+		
 		if render:
 			self.renderPreview(None)
-
+	
+	def showShader(self, type):
+		if type == "surface":
+			if self.surfPanel.isVisible == True:
+				self.surfPanel.isVisible = False
+			else:
+				self.surfPanel.isVisible = True
+				self.dispPanel.isVisible = False
+				self.volumePanel.isVisible = False
+		elif type == "displacement":
+			if self.dispPanel.isVisible == True:
+				self.dispPanel.isVisible = False
+			else:
+				self.surfPanel.isVisible = False
+				self.dispPanel.isVisible = True
+				self.volumePanel.isVisible = False
+		else:
+			if self.volumePanel.isVisible == True:
+				self.volumePanel.isVisible = False
+			else:
+				self.surfPanel.isVisible = False
+				self.dispPanel.isVisible = False
+				self.volumePanel.isVisible = True
+			
 	def setImage(self, image):
 		self.image = image
 			
@@ -1939,14 +2036,20 @@ class Material(BtoRObject):
 		# here, render a preview image using the current material
 		# step 1 is to find a place to put this, so consult the BtoR settings to see where that is.
 		filename = os.path.normpath(self.settings.outputPath + os.sep + "material_" + self.material.name + ".tif")
+		if self.settings.renderer == "BMRT":
+			filename = filename.replace("\\", "\\\\")
 		# print "Selected renderer: ", self.settings.renderers[self.settings.renderer][0]
-		ri.RiBegin(self.settings.renderers[self.settings.renderer][0]) # replace this with render flags
+		ri.RiBegin(self.settings.renderers[self.settings.renderer][0]) # replace this with render flags		
 		# ri.RiBegin(os.path.normpath(self.settings.outputPath + os.sep + "material_" + self.material.name + ".rib"))
 		# get the shader options
-		paths = self.settings.shaderpaths.getValue().split(";")
+		paths = self.settings.getShaderSearchPaths()
 		for path in paths:
-			ri.RiOption("searchpath", "shader", path + ":&")
-			
+			if self.settings.renderer == "BMRT":
+				ri.RiOption("searchpath", "shader", os.path.normpath(path).replace("\\", "\\\\") + ":&")
+				
+			else:
+				ri.RiOption("searchpath", "shader", os.path.normpath(path) + ":&")
+		print "Using render command: ", self.settings.renderers[self.settings.renderer][0]
 		ri.RiFormat(128, 128, 1)
 		# ri.RiProjection("perspective", "fov", 22.5)
 		ri.RiAttribute("displacementbound", "coordinatesystem", "shader", "sphere", 1.5)
@@ -2151,11 +2254,12 @@ class Shader(BtoRObject):
 	# the shader, as an RMShader object doesn't know its own type probably, so I have to supply it
 	# this needs to at some point construct the set of parameters that belongs to the selected shader.
 	def __init__(self, shader, stype, material):
-		print "Initializing a ", stype, " shader"
+		
 		sdict = globals()		
 		self.settings = sdict["instBtoRSettings"]
 		self.evt_manager = sdict["instBtoREvtManager"]
-				
+		self.log = sdict["instBtoRLog"]
+		
 		if shader <> None:
 			self.shader = shader
 		else:
@@ -2169,38 +2273,39 @@ class Shader(BtoRObject):
 		# find the center of the screen...again
 		screen = Blender.Window.GetAreaSize()
 		
-		self.editorPanel = ui.Panel(225, screen[1] - 370, 350, 500, "ShaderEditor", "Shader Parameters:" + self.stype, None, False)
-		#self.editorPanel.dialog = True
-		# on the shader panel, we need the shader search path (with the ability to add to the list)
-		self.editorPanel.addElement(ui.Label(5, 30, "SearchPathLabel", "Shader Search Path:", self.editorPanel, True))
-		offset = self.editorPanel.get_string_width("Shader Search Path:", 'normal') + 12
-		self.searchPaths = ui.Menu(offset, 30, 210, 20, "SearchPath",  self.searchpaths, self.editorPanel, True)
+		self.editorPanel = ui.Panel(410, 0, 300, 400, "ShaderEditor", "  " + stype.capitalize() + "Shader Settings:", material.getEditor(), False)
+		self.editorPanel.outlined = True
+		#self.editorPanel.hasFooter = True
+		#self.editorPanel.y_resize = True
+
+		self.editorPanel.addElement(ui.Label(5, 27, "SearchPathLabel", "Shader Search Path:", self.editorPanel, True))		
+		self.searchPaths = ui.Menu(5, 50, 210, 20, "SearchPath",  self.searchpaths, self.editorPanel, True)
 		self.searchPaths.registerCallback("release", self.listShaders)
 		
 		# next we need the shader type, so I know what I'm working with.
-		self.editorPanel.addElement(ui.Label(5, 50, "ShaderType", "Shader Type: " + stype, self.editorPanel, False))
 		
-		self.editorPanel.addElement(ui.Label(5, 80, "Shader", "Shader:", self.editorPanel, False))
+		self.editorPanel.addElement(ui.Label(5, 75, "Shader", "Shader:", self.editorPanel, False))
 		
 		# the starting shader type is Surface
 		self.shaders = []
 		self.makeShaderMenu()
-				
-		self.shader_menu = ui.Menu(self.editorPanel.get_string_width("Shader:", 'normal') + 12, 80, 150, 20, "Shaders", self.shadersMenu, self.editorPanel, True)
+		
+		self.shader_menu = ui.Menu(self.editorPanel.get_string_width("Shader:", 'normal') + 12, 75, 150, 20, "Shaders", self.shadersMenu, self.editorPanel, True)
 		self.shader_menu.registerCallback("release", self.selectShader)
 		# now that THAT nastiness is done...
 		self.scroller = ui.ScrollPane(5, 115, self.editorPanel.width - 10, self.editorPanel.height - 125, "Param Scroller", "parmScroller", self.editorPanel, True)
-		self.scroller.normalColor = [45, 45, 45, 255]
+		#self.scroller.normalColor = [45, 45, 45, 255]
 		
-		self.close_button = ui.Button(self.editorPanel.width - 20, 5, 14, 14, "X", "X", 'normal', self.editorPanel, True)
-		self.close_button.shadowed = False
-		self.close_button.cornermask = 15
-		self.close_button.radius = 1.5
+		#self.close_button = ui.Button(self.editorPanel.width - 20, 5, 14, 14, "X", "X", 'normal', self.editorPanel, True)
+		#self.close_button.shadowed = False
+		#self.close_button.cornermask = 15
+		#self.close_button.radius = 1.5
 		#close_func = self.close_button.callFactory(self.evt_manager.removeElement, self.editorPanel)
-		self.close_button.registerCallback("release", self.close)
+		#self.close_button.registerCallback("release", self.close)
 		
 		if self.shader.shaderparams != None:
-			self.setupParamEditors()
+			self.setupParamProperties()
+			# self.setupParamEditors()
 		
 		if self.shader.shaderName() != None:
 			# set the shader name to the correct shader name in the menu
@@ -2235,6 +2340,10 @@ class Shader(BtoRObject):
 		self.value_tables = {} # vts are referenced per shader parameter
 		self.hasValueTable = False
 		self.update_functions = []
+		 
+
+	def showEditor(self):
+		self.material.showShader(self.stype)
 		
 	def getStrValue(self):
 		return self.getShaderName()
@@ -2270,8 +2379,8 @@ class Shader(BtoRObject):
 	def getEditor(self):		
 		return self.editorPanel
 	
-	def showEditor(self, button):
-		self.evt_manager.addElement(self.editorPanel)
+	#def showEditor(self, button):
+	#	self.evt_manager.addElement(self.editorPanel)
 		
 	def makeShaderMenu(self):
 		# get the current shader path
@@ -2312,7 +2421,8 @@ class Shader(BtoRObject):
 					self.shadersMenu.append(shader[1])
 				found = True
 		if not found:
-			self.evt_manager.showConfirmDialog("No " + self.stype + " shaders found!", "There were no " + self.stype + "shaders found on the selected shader path!", None, False)
+			self.log.appendText("No " + self.stype + " shaders were found on the selected shader path")
+			#self.evt_manager.showConfirmDialog("No " + self.stype + " shaders found!", "There were no " + self.stype + "shaders found on the selected shader path!", None, False)
 
 				
 	def selectShader(self, button):
@@ -2351,11 +2461,13 @@ class Shader(BtoRObject):
 				# hopefully it's the same as the shader name
 				path = self.settings.shaderPathList
 				self.shader = cgkit.rmshader.RMShader(self.searchPaths.getValue() + os.sep + file)
-				self.setupParamEditors()
+				self.setupParamProperties()
+				# self.setupParamEditors()
 			else:
 				self.shader = cgkit.rmshader.RMShader()
 				self.initShaderParams(self.shaderParms, self.shader)				
-				self.setupParamEditors()
+				# self.setupParamEditors()
+				self.setupParamProperties()
 		
 		if self.shader == None:
 			self.shader = cgkit.rmshader.RMShader() # blank shader
@@ -2367,8 +2479,9 @@ class Shader(BtoRObject):
 				self.material.material.interior = self.shader
 			elif self.stype == "displacement":
 				self.material.material.displacement = self.shader
-
+		
 		for func in self.update_functions:
+			print "Running function!"
 			func(self) # pass myself back for querying purposes.
 			
 	def registerCallback(self, event, callback):
@@ -2379,8 +2492,84 @@ class Shader(BtoRObject):
 	def removeCallbacks(self, event):
 		self.__dict__[event + "_functions"] = []
 		
+	def setupProperties(self):
+		self.properties = {}		
+		self.editors = {}
+		for option in self.optionOrder:
+			propertyName = self.options[option][0]
+			propertyValue = self.options[option][1]
+			
+			# generate a list of option panels here and allow editing
+			# create a property for each option
+			self.properties[option] = propertyValue # 1st item is the property name, second item is the property initializer
+			self.properties[option].setName(propertyName)
+			self.properties[option].setWidth(self.scroller.width - 15)			
+			
+			# takes up half the available space of the main pane
+			self.editors[option] = BtoRAdapterClasses.IPropertyEditor(propertyValue)
+			self.scroller.addElement(self.editors[option].getEditor()) # and that should be that. When this is discarded, all those go away
+			self.editors[option].setParent(self.scroller)	
+			self.scroller.offset = 0
 		
-	def setupParamEditors(self):
+	def setupParamProperties(self):
+		# iterate the current shader and setup the parameter editors for it.
+		# here I'm using the rmshader object so react accordingly
+		# iterate the slots in the RMShader object
+		# delete the current set of elements in the scroller object	
+		self.options = {}
+		self.optionOrder = []
+		errors = []
+		count = 0
+		for param in self.shader.shaderparams:
+			# test here for an array value
+			normalColor = [216, 214, 220, 255]
+			#if count % 2:
+			#	normalColor = [190, 190, 190, 255]			
+			p_type = self.shader.shaderparams[param].split()[1]
+			
+			if "[" in p_type:
+				# this is an array value, react accordingly
+				# perhaps I can simply look at the _slot in the shader and decide from there?
+				arrayLen = self.shader.__dict__[param + "_slot"].size() # this should be there if everything was initialized correctly!
+				# and the type name
+				idx = p_type.index("[")
+				isArray = True
+				p_type = p_type[:idx]
+				# if of type array, setup 
+			else:
+				isArray = False
+			# get the default value from the shader			
+			defValue = getattr(self.shader, param)
+			size = [0, 0, self.scroller.width - 30, 0]
+			
+			try:
+				if isArray:
+					bParm = BtoRTypes.__dict__["BtoRArrayParam"](param = param, name = param, type = p_type, value = defValue, size=size, parent = self.scroller) # just init a basic type
+				else:					
+					bParm = BtoRTypes.__dict__["BtoR" + p_type.capitalize() + "Param"](param = param, type = p_type, name = param, value = defValue, size=size, parent = self.scroller) # just init a basic type
+				self.options[param] = [param, bParm] # so properties instantiantion works! Whee!
+				self.optionOrder.append(param)
+				
+				# so the two arrays will make sure that my properties are correctly instantiated
+				# I really need to make sure that I configure a baseClass for properties instantiation
+				
+				#editor = BtoRAdapterClasses.IShaderParamEditor(bParm) # that should do the trick
+				#self.scroller.addElement(editor)
+			except:
+				traceback.print_exc()
+				errors.append(param)
+			count = count + 1
+		#self.scroller.invalid = True
+		#self.scroller.currentItem = 1
+		print self.options
+		print self.optionOrder
+		self.setupProperties()
+		if len(errors) > 0:
+			self.evt_manager.showErrorDialog("Shader Parameter Error", "%d shader parameter(s) could not construct an editor." % len(errors))
+		# set the scrollers up
+		
+
+	def setupParamEditorsX(self):
 		# iterate the current shader and setup the parameter editors for it.
 		# here I'm using the rmshader object so react accordingly
 		# iterate the slots in the RMShader object
@@ -2473,7 +2662,7 @@ class Shader(BtoRObject):
 			# shader.createSlot(atts["name"].nodeValue, convtypes[switch], None, val) # array  length is none for now, array behaviour is uncertain here		
 	
 	
-	def updateShaderParams(self):
+	def updateShaderParamsX(self):
 		# here I need to cobble all the parameter values together and push them into the shader itself
 		# so the material can then be exported.
 		index = 0
@@ -2495,7 +2684,32 @@ class Shader(BtoRObject):
 			
 			index = index + 1
 			
-		
+	def updateShaderParams(self):
+		# here I need to cobble all the parameter values together and push them into the shader itself
+		# so the material can then be exported.
+		index = 0
+		properties = self.properties
+		for propName in properties:
+			property = properties[propName]
+			#	print "incoming value: ", propName, " ", property.getValue()
+			p_type = property.getType()
+			name =property.getName()
+			#print p_type
+			if p_type == "float":
+				setattr(self.shader, propName, float(property.getValue()))
+			elif p_type == "string": 
+				setattr(self.shader, propName, property.getValue())
+			elif p_type == "color" or p_type == "coordinate": # all vec3 types	
+				val = property.getValue()
+				vec = cgkit.cgtypes.vec3(val[0], val[1], val[2])
+				setattr(self.shader, propName, vec)
+				
+			elif p_type == "matrix": # matrix types				
+				val = property.getValue()
+				matrix = cgkit.cgtypes.mat4(val[0][0], val[0][1], val[0][2], val[0][3], val[1][0], val[1][1], val[1][2], val[1][3], val[2][0], val[2][1], val[2][2], val[2][3], val[3][0], val[3][1], val[3][2], val[3][3])				
+				setattr(self.shader, propName, matrix)
+			# print "Set value: ", getattr(self.shader, name)
+			index = index + 1
 
 class GenericShader(BtoRObject):
 	def __init__(self, shader, s_type, parent):
@@ -2504,6 +2718,9 @@ class GenericShader(BtoRObject):
 			
 		self.settings = sdict["instBtoRSettings"]
 		self.evt_manager = sdict["instBtoREvtManager"]
+		self.log = sdict["instBtoRLog"]
+		
+		
 				
 		if shader <> None:
 			self.shader = shader
@@ -2517,16 +2734,14 @@ class GenericShader(BtoRObject):
 		# find the center of the screen...again
 		screen = Blender.Window.GetAreaSize()
 		
-		self.editorPanel = ui.Panel(225, screen[1] - 370, 350, 500, "ShaderEditor", "Shader Parameters: " + self.s_type, None, False)
-		self.editorPanel.dialog = True
-		# on the shader panel, we need the shader search path (with the ability to add to the list)
-		self.editorPanel.addElement(ui.Label(5, 30, "SearchPathLabel", "Shader Search Path:", self.editorPanel, True))
-		offset = self.editorPanel.get_string_width("Shader Search Path:", 'normal') + 12
-		self.searchPaths = ui.Menu(offset, 30, 210, 20, "SearchPath",  searchpaths, self.editorPanel, True)
+		self.editorPanel = ui.Panel(410, 0, 300, 400, "ShaderEditor", "  " + s_type.capitalize() + "Shader Settings:", None, False)
+		
+		# search path label
+		self.editorPanel.addElement(ui.Label(5, 30, "SearchPathLabel", "Shader Search Path:", self.editorPanel, True))		
+		
+		self.searchPaths = ui.Menu(5, 50, 210, 20, "SearchPath",  searchpaths, self.editorPanel, True)
 		self.searchPaths.registerCallback("release", self.listShaders)
 		
-		# next we need the shader type, so I know what I'm working with.
-		self.editorPanel.addElement(ui.Label(5, 50, "ShaderType", "Shader Type: " + self.s_type, self.editorPanel, False))
 		
 		self.editorPanel.addElement(ui.Label(5, 80, "Shader", "Shader:", self.editorPanel, False))
 		
@@ -2548,7 +2763,7 @@ class GenericShader(BtoRObject):
 		
 		if self.shader != None:
 			if self.shader.shaderparams != None:
-				self.setupParamEditors()
+				self.setupParamProperties()
 		
 			if self.shader.shaderName() != None:
 				# set the shader name to the correct shader name in the menu
@@ -2584,7 +2799,24 @@ class GenericShader(BtoRObject):
 		
 	def getShaderFilename(self):
 		return self.shader.shaderfilename
-		
+	
+	def setupProperties(self):
+		self.properties = {}		
+		self.editors = {}
+		for option in self.optionOrder:
+			propertyName = self.options[option][0]
+			propertyValue = self.options[option][1]
+			# generate a list of option panels here and allow editing
+			# create a property for each option
+			self.properties[option] = propertyValue # 1st item is the property name, second item is the property initializer
+			self.properties[option].setName(propertyName)
+			self.properties[option].setWidth(self.scroller.width - 15)			
+			# takes up half the available space of the main pane
+			self.editors[option] = BtoRAdapterClasses.IPropertyEditor(propertyValue)
+			self.scroller.addElement(self.editors[option].getEditor()) # and that should be that. When this is discarded, all those go away
+			self.editors[option].setParent(self.scroller)	
+			self.scroller.offset = 0
+			
 	def close(self, button):		
 		self.updateShaderParams()
 		self.evt_manager.removeElement(self.editorPanel)
@@ -2592,13 +2824,12 @@ class GenericShader(BtoRObject):
 		
 	def getEditor(self):		
 		return self.editorPanel
-	def showEditor(self, button):
-		self.evt_manager.addElement(self.editorPanel)
+	def showEditor(self):
+		self.obj_parent.showShader()
 	def setParamValue(self, parameter, value):
-		for element in self.scroller.elements:
-			if element.param_name == parameter:
-				element.setValue(value)
-		
+		self.properties[parameter].setValue(value)
+		self.editors[parameter].setValue(value)
+
 	def makeShaderMenu(self):
 		self.shadersMenu = []
 		path = self.searchPaths.getValue()
@@ -2631,23 +2862,9 @@ class GenericShader(BtoRObject):
 					self.shadersMenu.append(shader[1])
 		if not found:
 			# find out what happened here
-			if self.stype == "light":
-				if self.settings.shadersLight.has_key(path):
-					print "Path is registered."
-					print "Path was: ", path
-					print "Shaders on path are:"
-					for item in self.settings.shadersLight[path]:
-						print item[1]
-			else:
-				if self.settings.shadersImager.has_key(path):
-					print "Path is registered."
-					print "Path was: ", path
-					print "Shaders on path are:"
-					for item in self.settings.shadersImager[path]:
-						print item[1]
-
-					
-			self.evt_manager.showConfirmDialog("No " + self.stype + " shaders found!", "There were no " + self.s_type + "shaders found on the selected shader path!", None, False)
+			self.log.appendText("No " + self.s_type + " shaders were found on the selected shader path")
+			
+			# self.evt_manager.showConfirmDialog("No " + self.s_type + " shaders found!", "There were no " + self.s_type + "shaders found on the selected shader path!", None, False)
 
 	def selectShader(self, button):
 		# select the shader in question and then setup the params for it.
@@ -2671,11 +2888,11 @@ class GenericShader(BtoRObject):
 				# get the search path from the settings object, and use that to find the shader source
 				# hopefully it's the same as the shader name
 				self.shader = cgkit.rmshader.RMShader(self.searchPaths.getValue() + os.sep + file)
-				self.setupParamEditors()
+				self.setupParamProperties()
 			else:
 				self.shader = cgkit.rmshader.RMShader()
 				self.initShaderParams(self.shaderParms, self.shader)				
-				self.setupParamEditors()
+				self.setupParamProperties()
 				 
 		if self.shader == None:
 			self.shader = cgkit.rmshader.RMShader() # blank shader
@@ -2685,7 +2902,62 @@ class GenericShader(BtoRObject):
 		for func in self.update_functions:
 			func(self) # pass myself back for querying purposes.
 			
-	def setupParamEditors(self):
+			
+	def setupParamProperties(self):
+		# iterate the current shader and setup the parameter editors for it.
+		# here I'm using the rmshader object so react accordingly
+		# iterate the slots in the RMShader object
+		# delete the current set of elements in the scroller object	
+		self.options = {}
+		self.optionOrder = []
+		errors = []
+		count = 0
+		for param in self.shader.shaderparams:
+			# test here for an array value
+			normalColor = [216, 214, 220, 255]
+			#if count % 2:
+			#	normalColor = [190, 190, 190, 255]			
+			p_type = self.shader.shaderparams[param].split()[1]
+			
+			if "[" in p_type:
+				# this is an array value, react accordingly
+				# perhaps I can simply look at the _slot in the shader and decide from there?
+				arrayLen = self.shader.__dict__[param + "_slot"].size() # this should be there if everything was initialized correctly!
+				# and the type name
+				idx = p_type.index("[")
+				isArray = True
+				p_type = p_type[:idx]
+				# if of type array, setup 
+			else:
+				isArray = False
+			# get the default value from the shader			
+			defValue = getattr(self.shader, param)
+			size = [0, 0, self.scroller.width - 30, 0]
+			
+			try:
+				if isArray:
+					bParm = BtoRTypes.__dict__["BtoRArrayParam"](param = param, name = param, value = defValue, size=size, parent = self.scroller) # just init a basic type
+				else:					
+					bParm = BtoRTypes.__dict__["BtoR" + p_type.capitalize() + "Param"](param = param, name = param, value = defValue, size=size, parent = self.scroller) # just init a basic type
+				self.options[param] = [param, bParm] # so properties instantiantion works! Whee!
+				self.optionOrder.append(param)
+				
+				# so the two arrays will make sure that my properties are correctly instantiated
+				# I really need to make sure that I configure a baseClass for properties instantiation
+				
+				#editor = BtoRAdapterClasses.IShaderParamEditor(bParm) # that should do the trick
+				#self.scroller.addElement(editor)
+			except:
+				traceback.print_exc()
+				errors.append(param)
+			count = count + 1
+
+		self.setupProperties()
+		if len(errors) > 0:
+			self.evt_manager.showErrorDialog("Shader Parameter Error", "%d shader parameter(s) could not construct an editor." % len(errors))
+		# set the scrollers up
+		
+	def setupParamEditorsX(self):
 		# iterate the current shader and setup the parameter editors for it.
 		# here I'm using the rmshader object so react accordingly
 		# iterate the slots in the RMShader object
@@ -2723,30 +2995,8 @@ class GenericShader(BtoRObject):
 		self.scroller.invalid = True
 		self.scroller.currentItem = 1
 		
-	def obfuscate(self):
-		p_type = "none"
-		if True:
-			if p_type == "float":
-				# create a float editor
-				self.scroller.addElement(ui.FloatEditor(0, 0, self.scroller.width - 30, ui.FloatEditor.height, param, defValue, self.scroller, False))
-			elif p_type == "string":
-				self.scroller.addElement(ui.TextEditor(0, 0, self.scroller.width - 30, ui.TextEditor.height, param, defValue, self.scroller, False))
-			elif p_type == "color":
-				color = []				
-				color.append(defValue[0])
-				color.append(defValue[1])
-				color.append(defValue[2])
-				self.scroller.addElement(ui.ColorEditor(0, 0, self.scroller.width - 30, ui.ColorEditor.height, param, color, self.scroller, False))
-			elif p_type == "point":	
-				self.scroller.addElement(ui.CoordinateEditor(0, 0, self.scroller.width - 30, ui.CoordinateEditor.height, param, defValue, self.scroller, False))
-			elif p_type == "vector":
-				self.scroller.addElement(ui.CoordinateEditor(0, 0, self.scroller.width - 30, ui.CoordinateEditor.height, param, defValue, self.scroller, False))
-			elif p_type == "normal":
-				self.scroller.addElement(ui.CoordinateEditor(0, 0, self.scroller.width - 30, ui.CoordinateEditor.height, param, defValue, self.scroller, False))
-			elif p_type == "matrix":
-				self.scroller.addElement(ui.MatrixEditor(0, 0, self.scroller.width - 30, ui.MatrixEditor.height, param, defValue, self.scroller, False))
-			#self.scroller.elements[count].normalColor = normalColor			
-	def updateShaderParams(self):
+		
+	def updateShaderParamsX(self):
 		# here I need to cobble all the parameter values together and push them into the shader itself
 		# so the material can then be exported.
 		index = 0
@@ -2767,6 +3017,30 @@ class GenericShader(BtoRObject):
 				matrix = cgkit.cgtypes.mat4(val[0][0], val[0][1], val[0][2], val[0][3], val[1][0], val[1][1], val[1][2], val[1][3], val[2][0], val[2][1], val[2][2], val[2][3], val[3][0], val[3][1], val[3][2], val[3][3])				
 				setattr(self.shader, name, matrix)
 			print getattr(self.shader, name)
+			index = index + 1
+			
+	def updateShaderParams(self):
+		# here I need to cobble all the parameter values together and push them into the shader itself
+		# so the material can then be exported.
+		index = 0
+		properties = self.properties
+		for propName in properties:
+			property = properties[propName]
+			p_type = property.getType()
+			name =property.getName()
+			if p_type == "float" or p_type == "string": # lo, all my single-variable types
+				setattr(self.shader, name, property.getValue()) 
+				
+			elif p_type == "color" or p_type == "coordinate": # all vec3 types	
+				val = property.getValue()
+				vec = cgkit.cgtypes.vec3(val[0], val[1], val[2])
+				setattr(self.shader, name, vec)
+				
+			elif p_type == "matrix": # matrix types				
+				val = property.getValue()
+				matrix = cgkit.cgtypes.mat4(val[0][0], val[0][1], val[0][2], val[0][3], val[1][0], val[1][1], val[1][2], val[1][3], val[2][0], val[2][1], val[2][2], val[2][3], val[3][0], val[3][1], val[3][2], val[3][3])				
+				setattr(self.shader, name, matrix)
+			
 			index = index + 1
 
 	def initShaderParamsList(self, paramlist, shader):
@@ -3032,7 +3306,8 @@ class MainUI(BtoRObject):
 		self.materials = sdict["instBtoRMaterials"]
 		self.objecteditor = sdict["instBtoRObjects"]
 		self.lights = sdict["instBtoRLightManager"]
-				
+		self.log = sdict["instBtoRLog"]
+		
 		screen = Blender.Window.GetAreaSize()		
 		self.editor = ui.MenuBar(None, False)
 		#self.editor = ui.Panel(10, screen[1] - 10, 200, 205, "BtoR", "Blender to Renderman:", None, False)		
@@ -3079,23 +3354,25 @@ class MainUI(BtoRObject):
 		self.materialMenu.registerCallbackForElementIndex(1, "release", self.selectMatLoadFile)
 		self.materialMenu.registerCallbackForElementIndex(2, "release", self.selectMatSaveFile)
 		
-		self.settings_menu = ["Global Settings"]
+		self.settings_menu = ["Global Settings", "Log Window"]
 		self.settingsMenu = ui.Menu(240, 5, 80, 18, "Settings", self.settings_menu, self.editor, True, enableArrowButton = False,
 										noSelect = True,
 										baseButtonTitle = "Settings",
 										shadowed = False,
 										outlined = False)
 		self.settingsMenu.registerCallbackForElementIndex(0, "release", self.showGlobal)
-		# self.settingsMenu.registerCallbackForElementIndex(1, "release", self.showSceneSettings)
+		self.settingsMenu.registerCallbackForElementIndex(1, "release", self.showLog)
 		
 		self.exportButt = ui.Button(350, 5, 50, 18, "Export", "Export", 'normal', self.editor, True)
-		#self.exportButt.registerCallback("release", p.callFactory(None, self.showEditor(self.export.getEditor())))
+		
 		self.exportButt.registerCallback("release", self.showExport)
 		self.exportButt.shadowed = False
 		
-		#self.materialsButt.registerCallback("release", p.callFactory(None, self.showEditor(self.materials.getEditor())))
 		
-		
+	def showLog(self, obj):
+		editor = self.log.getEditor()
+		self.evt_manager.addElement(editor)
+		self.evt_manager.raiseElement(editor)
 		
 	def showLightingManager(self, button):
 		editor = self.lights.getEditor()
@@ -3196,7 +3473,7 @@ class MaterialList(BtoRObject):
 		self.settings = sdict["instBtoRSettings"]
 		self.evt_manager = sdict["instBtoREvtManager"]
 		self.scene = sdict["instBtoRSceneSettings"]
-		
+		self.log = sdict["instBtoRLog"]
 		screen = Blender.Window.GetAreaSize()
 		
 		# self.picker.x = self.absX
@@ -3327,13 +3604,18 @@ class MaterialList(BtoRObject):
 			# assign the name
 			# create the new RMMaterial
 			rm_mat = cgkit.rmshader.RMMaterial(dialog.getValue())
+			
+			
 			material = Material(rm_mat, self.scroller, self.sel_scroller)
+			
+			
 			self.materials.append(material)			
 			self.scroller.lastItem = 0
 			self.sel_scroller.lastItem = 0
 			
 			material.selectorButton.registerCallback("release", self.select)
 			material.editorButton.registerCallback("release", self.toggleOn)
+			self.log.appendText("Created material " + dialog.getValue() + "...")
 		# self.evt_manager.removeElement(dialog)
 				
 	def showDeleteDialog(self, button):
@@ -3344,15 +3626,14 @@ class MaterialList(BtoRObject):
 			for element in self.scroller.elements:
 				if element.getValue() == True:
 					# find the parent material
-					for  material in self.materials:
+					for material in self.materials:
 						if element == material.getMaterialButton():
 							self.materials.remove(material)
 							break
-					self.scroller.removeElement(element)					
+					self.scroller.removeElement(element)	
+					# self.sel_scroller.removeElement(mater
 					parent = element.parent
-					del element
-					self.materials
-					
+					del element										
 					break
 					
 	def getSavedMaterials(self, xmldat = None):
@@ -3466,6 +3747,8 @@ class MaterialList(BtoRObject):
 					# set the title
 					BtoRmat.editorButton.title = name
 					BtoRmat.selectorButton.title = name
+					BtoRmat.selectorButton.registerCallback("release", self.select)
+					BtoRmat.editorButton.registerCallback("release", self.toggleOn)
 					BtoRmat.setProperty("MaterialName", name)					
 					materials.append(BtoRmat) 
 					
@@ -3485,7 +3768,7 @@ class MaterialList(BtoRObject):
 			found = False
 			return None
 		if found:
-			self.getSavedMaterials(xmldat = xmlStr)
+			self.materials = self.getSavedMaterials(xmldat = xmlStr)
 	
 	def populateShaderParams(self, parms, shader, initialized):
 		
@@ -4008,8 +4291,9 @@ class LightManager(BtoRObject):
 		"GenShadowMaps" : ["Create Shadow Maps:", True],
 		"UseAmbient" : ["Default Ambient Light:", False],
 		"AmbIntensity" : ["Ambient Intensity:", 1.0],
-		"AmbColor" : ["Ambient Light Color:", [1.0, 1.0, 1.0]]}
-	optionOrder = ["GenOcclusion", "GenShadowMaps", "UseAmbient", "AmbColor", "AmbIntensity"]
+		"AmbColor" : ["Ambient Light Color:", [1.0, 1.0, 1.0]],
+		"Multiplier" : ["Light Multiplier:", 1.0]}
+	optionOrder = ["GenOcclusion", "GenShadowMaps", "UseAmbient", "AmbColor", "AmbIntensity", "Multiplier"]
 		# "UseGI" : "Use Global Illuminator", False],
 		# "SkyDOme" : ["Create Sky Dome", False],
 		# 
@@ -4217,102 +4501,51 @@ class LightManager(BtoRObject):
 	def close(self, button):
 		self.evt_manager.removeElement(self.editorPanel)
 		
-class HelpWindow(BtoRObject):
-	# this is based on a simple panel
-	width = 400
-	# the height is based on the text size of normal text
-	# thus, the height is a factor of the number of lines I wish to display. I figure 80 to 100 lines should suffice for the moment.		
-	
-	def __init__(self, lines, font_size = 'normal'):
+		
+class TextWindow(BtoRObject):
+	def __init__(self):
 		sdict = globals()
-		self.settings = sdict["instBtoRSettings"]
-		self.evt_manager = sdict["instBtoREvtManager"]
 		
-		setattr(BtoRAdapterClasses, "instBtoRHelp", self) # and done		
-		
-		height = (ui.UIElement.font_sizes[font_size] + 4) * lines # font cell height, + a 2 pixel gutter on top and bottom for 50 lines		
-		screen = Blender.Window.GetAreaSize()
-		
-		self.editorPanel = ui.Panel((screen[0] / 2) - 100,  screen[1] - (height + 34) / 2, 400, height + 34, "Help", "Help", None, False)
-		self.editorPanel.normalColor = [255, 255, 208, 255]
-		# now that I have my panel, setup my scroller		
-		self.scroller = ui.ScrollPane(0, 27, 398, height, "Scroller", "Scroller", self.editorPanel, True)
-		self.scroller.normalColor = [255, 255, 208, 255]
-		self.font_size = font_size
+		self.evt_manager = sdict["instBtoREvtManager"]		
+		screen = Blender.Window.GetAreaSize()	
+		self.editorPanel = ui.Panel(10, 240, 300, 200, "Log", "BtoR Log:", None, False)
+		self.logPanel = ui.Panel(0, 27, 300, 160, "", "", self.editorPanel, True)
+		self.logPanel.shadowed = False
+		self.logPanel.hasHeader = False
+		self.logPanel.cornermask = 0
+		self.logPanel.normalColor = [255, 255, 224, 255]
+		self.valueText = ui.TextItem(3, 0, "", " ", self.logPanel, True, fontsize = 'normal', multiLine = True, ignoreWhitespace = True)
+		self.valueText.textColor = [0, 0, 0, 255]
 		
 		self.close_button = ui.Button(self.editorPanel.width - 20, 5, 14, 14, "X", "X", 'normal', self.editorPanel, True)
 		self.close_button.shadowed = False
 		self.close_button.cornermask = 15
 		self.close_button.radius = 1.5
-		# close_func = self.close_button.callFactory(self.evt_manager.removeElement, self.editor)
+		
 		self.close_button.registerCallback("release", self.close)
-		self.text = "There is no help for you!"
-		self.calculateLines()
 		
-	def getEditor(self):
-		return self.editorPanel
-		
-	def setText(self, text):		
-		self.scroller.clearElements()
-		print text
-		self.text = text
-		if text != None:
-			if len(text) > 0:
-				self.calculateLines() # and done
-	
 	def close(self, button):
 		self.evt_manager.removeElement(self.editorPanel)
 		
-	def calculateLines(self):
-		# the first thing I have to look for is new lines in the string and 
-		print self.text
-		words = re.compile('[ ]+').split(self.text)
-		# words = self.text.split()
+	def appendText(self, value):
+		self.valueText.appendLine(value)
 		
-		lines = []
-		line = ""				
-		currentWidth = 0
-		for word in words:
-			if "\n" in word:
-				while "\n" in word:				
-					if len(word) == 1:
-						# this entire word is a newline
-						lines.append(line)
-					else:
-						idx = word.index("\n")
-						# now that I have this, I need to remove the first part of this word					
-						if idx == len(word) - 1: # the newline will be at the end of the word in most cases						
-							word = word[:idx - 1] # get everything before that.		
-							line = line + word 
-							lines.append(line)
-						elif idx == 0: # the newline is at the beginning of this word
-							word = word[idx + 1:]
-							line = line + word
-							lines.append(line)
-						else: # the newline is in the middle of the word
-							prefix = word[:idx - 1] # text up to
-							word = word[idx + 1:] # and the last snip
-							line = line + prefix
-							lines.append(line)
-					line = ""
-			else:
-				word = word + " " # add a space on each end
-				wordWidth = self.editorPanel.get_string_width(word, self.font_size)
-				if currentWidth + wordWidth < self.width - 10: # 5 pixel buffer zone on either side
-					line = line + word
-					currentWidth = currentWidth + wordWidth
-				else:
-					lines.append(line)
-					line = ""
-					currentWidth = 0
-		label_y = 30
-		for line in lines:					
-			self.scroller.addElement(ui.Label(5, label_y, line, line, self.scroller, False))
-			label_y = label_y + self.editorPanel.font_cell_sizes[self.font_size][1] + 4 # 4 pixel gap here
-			
-		field_y = label_y
-		for element in self.scroller.elements:
-			element.normalColor = [255, 255, 208, 255] # get that nice "help screen yellow!"
+	def getEditor(self):
+		return self.editorPanel
+	
+	def setText(self, value):
+		self.valueText.setValue(value)
 		
+class RibBox(BtoRObject):
+	def __init__(self):
+		sdict = globals()
+		self.evt_manager = sdict["instBtoREvtManager"]
+		self.settings = sdict["instBtoRSettings"]
 		
+		screen = Blender.Window.GetAreaSize()
+		self.editor = ui.Panel(screen[0] / 2 - 150, (screen[1] / 2) + 150, 300, 300, "CustomRIB", "Custom RIB:", None, False)
+		self.text = ui.TextBox(0, 27, 300, 250, "None", "Wheeee", self.editor, True)
 
+		
+	def getEditor(self):
+		return self.editor

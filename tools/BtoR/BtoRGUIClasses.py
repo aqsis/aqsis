@@ -11,6 +11,8 @@
 #######################################################################
 import Blender
 import sys
+import string
+import math
 draw = Blender.Draw
 gl = Blender.BGL
 
@@ -24,7 +26,13 @@ class UI:
 		#Blender.BGL.glRasterPos2i(-100, -100)
 		width = Blender.Draw.GetStringWidth(text, fontsize)    
 		return width
-	
+	def buildFontTable(self, fontsize):
+		font_size_table = []
+		for char in range(16, 127):
+			c = chr(char)
+			print c
+			font_size_table.append(Blender.Draw.GetStringWidth(c, fontsize))
+		return font_size_table
 		
 	def uidrawbox(self, mode, minx, miny, maxx, maxy, rad, cornermask):
 		vec = Blender.BGL.Buffer(Blender.BGL.GL_FLOAT, [7,2], [[0.195, 0.02], [0.383, 0.067], [0.55, 0.169], [0.707, 0.293],[0.831, 0.45], [0.924, 0.617], [0.98, 0.805]])
@@ -511,6 +519,7 @@ class EventManager(UI):
 			
 		self.draw_functions = []
 		self.redraw_functions = []
+		self.screen = Blender.Window.GetAreaSize()
 		
 	def register(self):
 		""" register() - Register this object as the listener for Blender's events. """
@@ -602,6 +611,20 @@ class EventManager(UI):
 		dialog.target_function = None
 		self.addElement(dialog)
 		self.raiseElement(dialog)
+		
+	def setupFontList(self):
+		bgl_font_large = []
+		bgl_font_normal = []
+		bgl_font_small = []
+		bgl_font_tiny = []
+		charString = """ ABCDEFGHIJKLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890`,./;'[]-=<>?:"{}|~!@#$%^&*()_+"""
+		for char in charString:
+			self.bgl_font_large.append(Blender.BGL.getStringWidth(char, 'large'))
+			self.bgl_font_normal.append(Blender.BGL.getStringWidth(char, 'normal'))
+			self.bgl_font_small.append(Blender.BGL.getStringWidth(char, 'small'))
+			self.bgl_font_tiny.append(Blender.BGL.getStringWidth(char, 'tiny'))
+			
+		self.bgl_font_sizes = { "large" : bgl_font_large, "normal" : bgl_font_normal, "small" : bgl_font_small, "tiny" : bgl_font_tiny }
 		
 	def showConfirmDialog(self, title, prompt, function, discard):
 		""" showSimpleDialog(String title, String prompt, function_ref function, boolean discard) - show a simple input dialog with a title and a prompt.
@@ -727,6 +750,11 @@ class EventManager(UI):
 		for func in self.draw_functions:
 			func() # should be no issue. I can use my call factory to build anything I need.
 			
+		screen = Blender.Window.GetAreaSize()
+		if self.screen[0] != screen[0] or self.screen[1] != screen[1]:
+			for element in self.draw_stack:
+				element.invalid = True
+			self.screen = screen
 		
 		Blender.BGL.glClearColor(self.backGround[0], self.backGround[1], self.backGround[2], 1)
 		Blender.BGL.glClear(Blender.BGL.GL_COLOR_BUFFER_BIT)
@@ -752,7 +780,7 @@ class EventManager(UI):
 				self.release_event()            
 				Blender.Draw.Redraw()
 			
-			if evt == Blender.Draw.RIGHTMOUSE and val == 1: # button down
+			if evt == Blender.Draw.RIGHTMOUSE and val == 0: # button released
 				self.right_click_event()
 				Blender.Draw.Redraw()
 				
@@ -782,7 +810,7 @@ class EventManager(UI):
 		""" bevent(evt) - bevent processor, which doesn't really do anything since I'm not processing blender's standard buttons. """
 		pass
 		# hey presto, this doesn't do JACK because it's not needed...imagine that!
-
+		
 	
 class UIElement(UI):
 	# normal 216, 214, 230
@@ -853,6 +881,10 @@ class UIElement(UI):
 		self.name = name
 		self.title = title
 		self.outlined = False
+		self.parentLockWidth = False
+		self.parentLockHeight = False
+		self.gutterWidth = 5
+		self.gutterHeight = 10
 		self.debug = 0
 		self.drawLast = None		
 		self.invalid = True
@@ -967,20 +999,25 @@ class UIElement(UI):
 			for element in self.elements:
 			#	if element.isVisible: # this test probably isn't neccessary
 				element.invalid = True
-					
+			
 			if self.parent == None:
 				self.absX = self.x
 				self.absY = self.y
 			else:
 				self.absX = self.parent.absX + self.x 
-				self.absY = self.parent.absY - self.y
-			if self.image != None:
-				
+				self.absY = self.parent.absY - self.y			
+			
+			if self.image != None:				
 				self.image.invalid = True
-				self.image.validate()
-				
+				self.image.validate() 
+			if self.parentLockWidth and self.parent != None:
+				# hey dumbass, these have to be OFFSETS!
+				# width - self.x should give me the remaining width
+				self.width = self.parent.width - self.x - self.gutterWidth
+			if self.parentLockHeight and self.parent !=  None:
+				self.height = self.parent.height - self.height - self.gutterHeight
 		self.invalid = False
-		if self.isVisible: # but this might be!
+		if self.isVisible: 
 			for func in self.validate_functions:
 				func()
 	def hide(self):
@@ -1090,10 +1127,12 @@ class UIElement(UI):
 				if element.isVisible:
 					element.right_click_event()
 					break
+		else:
+			self.right_click_funcs() # fire click callbacks for this component 
 				
 		
 	def right_click_funcs(self):
-		for fun in self.right_click_functions():
+		for func in self.right_click_functions:
 			if func == self.objDebug:
 				if self.debug:
 					func()
@@ -1224,7 +1263,6 @@ class UIElement(UI):
 					func()
 			else:
 				func(self)
-
 	
 class Panel(UIElement):
 	# 198, 197, 203
@@ -1262,13 +1300,21 @@ class Panel(UIElement):
 		self.move_offsetx = 0
 		self.move_offsety = 0
 		self.hasHeader = True
+		self.hasFooter = False
 		self.fontsize = fontsize
 		self.move = False
+		self.resize = False
 		self.invalid = False # for items that want revalidation in case the panel was moved
 		self.drawLast = None
 		self.bounds = [0, 0, 0, 0]
 		self.movable = True		
 		self.outlined = True
+		self.max_height = 600
+		self.min_height = 100
+		self.max_width = 600
+		self.min_width = 200
+		self.x_resize = False
+		self.y_resize = False
 		
 	def draw(self):
 		# note, internally, a panel's absX and absY variables are offset depending upon header usage
@@ -1318,16 +1364,31 @@ class Panel(UIElement):
 		
 	
 	def mouse_event(self):			
-		if self.move == True:			
+		if self.move:			
 			coords = self.area_mouse_coords()
 			self.x = coords[0] - self.move_offsetx
 			self.y = coords[1] - self.move_offsety  
 			self.invalid = True # validate will continually set this false, so          
+		if self.resize:
+			
+			coords = self.area_mouse_coords()
+			if self.x_resize:
+				offset_x = coords[0] - self.absX + self.resize_offset_x
+				if offset_x < self.max_width and offset_x > self.min_width:
+					self.width = offset_x
+			if self.y_resize:
+				offset_y = self.absY - coords[1] + self.resize_offset_y
+				if offset_y < self.max_height and offset_y > self.min_height:
+					self.height = offset_y
+				
+					
+			self.invalid = True
 		else:
 			UIElement.mouse_event(self) # use the base class
 						
 	def click_event(self): 
 		coords = self.area_mouse_coords()
+		sized = False
 		if self.hasHeader: # check for a panel header
 			# now check for an element IN the header
 			found = False
@@ -1340,16 +1401,25 @@ class Panel(UIElement):
 					# get the offset from where the mouse is now
 					self.move_offsetx = coords[0] - self.absX
 					self.move_offsety = coords[1] - self.absY
-					self.move = True    				
-			else:				
-				UIElement.click_event(self)
-		else:			
+					self.move = True    		
+					sized = True
+		if self.hasFooter: # check for resizable footer
+			
+			if (coords[0] >= (self.absX + self.width - 10)) and (coords[0] < (self.absX + self.width)) and (coords[1] >= self.absY - self.height) and (coords[1] < self.absY - (self.height - 10)):
+				self.resize_offset_x = (self.absX + self.width) - coords[0]
+				self.resize_offset_y = coords[1] - (self.absY - self.height)
+				self.resize = True
+				sized = True
+		if not sized:
 			UIElement.click_event(self)  # use the base class for everything else
 		
 	def release_event(self):        
 		if self.move == True: # the panel was being moved                
 			self.move = False	
 			self.invalid = True	
+		elif self.resize == True:
+			self.resize = False
+			self.invalid = True
 		UIElement.release_event(self)
 		# done!
 			
@@ -1962,12 +2032,14 @@ class Menu(UIElement):
 						noSelect = False, 
 						baseButtonTitle = None, outlined = True,
 						shadowed = True, fontsize = 'normal', 
-						custom = False, customPrompt = "None", customFunc = None):
+						custom = False, customPrompt = "None", customFunc = None,
+						noButton = False):
 		self.expanded = False  # this is first to deal with an issue in validate()
 		UIElement.__init__(self, x, y, width, height, name, name, parent, auto_register, fontsize = fontsize)
 		self.fontsize = fontsize
 		self.close_functions = []
 		self.selected = 0	
+		self.noButton = noButton
 		self.menu = menu		
 		# container for the invididual buttons  
 		self.panel = Panel(0, 0, 100, 100, name, name, self, False)
@@ -2050,11 +2122,12 @@ class Menu(UIElement):
 			self.panel.elements[butIdx].textHiliteColor = self.baseButton.textHiliteColor
 			self.panel.elements[butIdx].menu_parent = self	
 		
-		self.customValue = TextField(0, 0, self.baseButton.width, self.baseButton.height, "Custom", " ", self, True)
-		self.customValue.registerCallback("update", self.customUpdated)
-		self.customValue.menu_parent = self
+		if not noButton:
+			self.customValue = TextField(0, 0, self.baseButton.width, self.baseButton.height, "Custom", " ", self, True)
+			self.customValue.registerCallback("update", self.customUpdated)
+			self.customValue.menu_parent = self
 		
-		self.customValue.isVisible = False
+			self.customValue.isVisible = False
 			
 		self.registerCallback("validate", self.calculateMenuSizes)
 		#self.registerCallback("release", self.release)
@@ -2120,6 +2193,7 @@ class Menu(UIElement):
 							self.baseButton.isVisible = True
 							self.customValue.isVisible = False
 							self.valueIsCustom = False
+		print "here!"
 		self.expanded = False
 		self.close_funcs()
 		self.select_funcs()
@@ -2134,7 +2208,6 @@ class Menu(UIElement):
 			func(self)
 		
 	def calculateMenuSizes(self):
-
 		# get the screen height first
 		#self.debug = True
 		size = self.get_correct_space_size()			
@@ -2204,33 +2277,15 @@ class Menu(UIElement):
 				
 		# size the panel that contains the buttons
 		panel.width = panelWidth
-		# where does the panel appear?
-		# size for left and right
-		if self.absX + panel.width > size[0]: # the panel overlaps the screen, adjust for the different
-			panel.x = size[0] - (panel.width + 15) # provide a 15 pixel buffer area
-		elif self.x < 0: # likely won't happen
-			panel.absX = 15			
-		if (self.absY - panel.height) < 0:
-			# center vertically
-			# derive the offset needed and add 25 pixels to it
-			offset = self.absY - panel.height
-			panel.y = offset - 15
-		elif self.absY > size[1]: # this probably won't happen
-			panel.y = size[1] - 15
-	
+		# and done. Display positioning is taken care of in validate()
+			
 	def draw(self):		
-		self.validate()		
+		self.validate()	
+		
 		if self.expanded == True: 
 			# test to see if the panel is off the screen. 
-			pX = self.panel.absX			
-			pWidth = self.panel.width
-			
-			screen = self.get_correct_space_size()
-			if pX + pWidth > screen[0]:
-				# center the panel
-				self.panel.x = (screen[0] / 2) - (pWidth / 2)
 			self.panel.draw() # the buttons should actually arrange themselves			
-		else:
+		elif not self.noButton:
 			if self.hit_test():						
 				self.baseButton.normalColor = self.hoverColor
 				self.baseButton.textColor = self.textHiliteColor				
@@ -2273,6 +2328,17 @@ class Menu(UIElement):
 			if y > w:
 				w = y		
 		return w
+	
+	def showPanel(self):
+		self.expanded = True
+		self.elements = [self.panel]
+		self.z_stack = [self.panel]
+		self.draw_stack = [self.panel]
+	def hidePanel(self):
+		self.expanded = False
+		self.elements = []
+		self.z_stack = []
+		self.draw_stack = []
 		
 	def release(self, obj):		
 		# click magic	
@@ -2297,9 +2363,8 @@ class Menu(UIElement):
 				self.elements = [self.baseButton]
 				self.z_stack = [self.baseButton]
 				self.draw_stack = [self.baseButton]			
-		else:
-			# close the menu
-			print "Closing down!"
+		elif not self.noButton:
+			# close the menu			
 			self.expanded = False
 			if self.enableArrowButton:
 				self.elements = [self.baseButton, self.arrowButton]
@@ -2313,10 +2378,16 @@ class Menu(UIElement):
 
 		
 	def validate(self): # the base class validate get overriden here because the panel element of this control has to set the bounds here		
-		if self.expanded: # I want to set a different set of bounds in the parent here			
-			self.panel.validate()	
-		else:
-			UIElement.validate(self)
+		if self.expanded: # I want to set a different set of bounds in the parent here	
+			self.panel.invalid = False
+			screen = Blender.Window.GetAreaSize()	
+			
+			if (self.panel.absX + self.panel.width) > screen[0]:				
+				self.panel.absX = screen[0] - (self.panel.width + 15) # horizontal position 15 pixels from the right of the screen
+			elif self.panel.absX < 0: # 15 pixels from the left
+				self.panel.absX = 15
+
+		UIElement.validate(self)
 
 
 	def release_event(self):
@@ -2325,7 +2396,7 @@ class Menu(UIElement):
 			self.release_funcs()
 		elif self.expanded and self.hit_test() == False:
 			self.expanded = False			
-		else:
+		elif not self.noButton:
 			if self.baseButton.isVisible:
 				self.baseButton.release_event()
 			if self.custom:
@@ -2352,13 +2423,15 @@ class Menu(UIElement):
 		if self.expanded:
 			#print "have a panel"
 			rVal = self.panel.hit_test()			
-		else:
+		elif not self.noButton:
 			if self.enableArrowButton:
 				# print "Have arrow, will travel"
 				if self.baseButton.hit_test() or self.arrowButton.hit_test():
 					rVal = True				
 			else:
 				rVal = self.baseButton.hit_test()
+		else:
+			rVal = False
 		return rVal
 		
 
@@ -2398,7 +2471,7 @@ class Menu(UIElement):
 		
 	def registerCallbackForElementIndex(self, idx, signal, callback):
 		self.panel.elements[idx].registerCallback(signal, callback)
-	
+		
 		
 class MenuBar(Panel):
 	x_offset = 15 # 15 pixel offsetx
@@ -2447,7 +2520,7 @@ class TextField(Button):
 	normalColor = [255, 255, 255, 255]
 	hoverColor = [190, 110, 110, 255]
 	textColor = [0, 0, 0, 255]
-	textHiliteColor = [50, 0, 0, 255]
+	textHiliteColor = [0, 0, 0, 255]
 	borderColor = [128, 128, 128, 255]
 	editingColor = [255, 255, 255, 255]
 	editingBorderColor = [180, 128, 128, 255]
@@ -2455,8 +2528,14 @@ class TextField(Button):
 				"designBorderColor", "hoverColor", "outlineColor", 
 				"editingColor", "editingBorderColor", "radius", "fontsize", "cornermask"]
 	parameters = ["x", "y", "width", "height", "name", "title", "parent", "auto_register"]
-	def __init__(self, x, y, width, height, name, value, parent, auto_register, fontsize = 'normal'):
+	def __init__(self, x, y, width, height, name, value, parent, auto_register, fontsize = 'normal', undo = False):
 		UIElement.__init__(self, x, y, width, height, name, value, parent, auto_register, fontsize = fontsize)
+		self.pre_update_functions = []
+		self.undo = undo
+		self.setupUndo()
+		self.undo_history = [value]
+
+		self.isUndo = False
 		self.fontsize = fontsize
 		self.cursorIndex = 0
 		self.editing = False
@@ -2478,14 +2557,10 @@ class TextField(Button):
 		self.mouseDown = False  		
 		self.strict = 1 # strict enforces the type that was assigned by the type of the intial value of the field
 		# hence, floats will restrict to floats, same goes for ints and strings
-		# self.registerCallback("click", self.stat)		
+		self.registerCallback("click", self.stat)		
 		self.validate_functions = []
 		#self.undoMenu = Menu(0, 0, 60, 0, "Local Undo", ["No undo history"], parent, False)
-		self.registerCallback("right_click", self.showUndo)
-		self.Enabled = True
-		
-	def showUndo(self):
-		print "I'm here!"
+		self.registerCallback("release", self.hideUndo)
 		
 	def draw(self):
 
@@ -2545,8 +2620,53 @@ class TextField(Button):
 			else:
 				self.setRasterPos(self.absX + 2, self.absY - (self.height - 4 ))
 			Blender.Draw.Text(displayValue) 
+			# draw anything else that needs drawing
 		
+			for element in self.elements:
+				element.draw()
 	
+	def setupUndo(self, maxLevels = 6):
+		self.undo_history = ["No undo history!"]
+		self.undo_menu = Menu(0, 0, 0, 0, "Undo", self.undo_history, self, True, noButton = True) 
+		# now I get to do something tricky to the menu component so that it's panel can be displayed without a button push
+		if self.undo: # otherwise, do nothing
+			self.undo_menu.registerCallback("select", self.updateWithUndo)
+			self.undo_menu.registerCallback("release", self.showUndo)
+			self.registerCallback("pre_update", self.addUndo)		
+			self.registerCallback("right_click", self.showUndo)
+
+		self.maxLevels = maxLevels
+		# register a callback to keep track of undos
+		self.undoUpdate = False
+		
+	def showUndo(self, obj):
+		if self.undo_menu.expanded:
+			self.undo_menu.hidePanel()
+			self.isUndo = False
+		else:
+			self.isUndo = True
+			self.undo_menu.showPanel()
+	def hideUndo(self, obj):
+		self.undo_menu.hidePanel()
+		
+	def updateWithUndo(self):		
+		if self.isEditing:
+			self.isEditing = False
+		
+		val = self.undo_stack.pop(self.undo_menu.getSelectedIndex())
+		self.setValue(val)
+		self.undo_menu.hidePanel()
+		self.isUndo = False
+		
+	def addUndo(self, value):	
+		
+		if value.getValue() not in self.undo_history:			
+			if self.undo_history[0] == "No undo history!":
+				self.undo_history = []
+			if len(self.undo_history) == self.maxLevels:
+				self.undo_history.remove(self.maxLevels - 1)
+			self.undo_history.insert(0, self.getValue())
+			self.undo_menu.re_init(self.undo_history)	
 	
 	def drawCursor(self):
 		# draw a cursor at the current cursorindex
@@ -2795,7 +2915,14 @@ class TextField(Button):
 		self.mouse_funcs() # on this control, there should be no mouse funcs except for debug
 		
 	def click_event(self): # 
-		if self.Enabled:
+		if self.isUndo and not self.undo_menu.expanded:
+			self.isUndo = False
+			
+		if self.isUndo :	
+			if self.undo_menu.expanded:
+				UIElement.click_event(self)
+	
+		else:
 			# on a click down, I should clear the selection and reset to wherever I'm at    		
 			self.mouseDown = True
 			# possible states - I'm editing already
@@ -2805,11 +2932,13 @@ class TextField(Button):
 				# get the mouse position in relation to displayed text, and move the cursor to that location
 				self.cursorIndex = self.getNearestCharIndex()
 			else:
+				for func in self.pre_update_functions:
+					func(self)
 				self.isEditing = True # invoke editing
 				# select everything in the field	
 				self.cursorIndex = self.getNearestCharIndex()
 			self.click_funcs()
-			
+		
 
 	
 	def release_event(self): # override the default release event processing
@@ -2834,7 +2963,7 @@ class TextField(Button):
 			special = "!@#$%^&*()"
 			# numbers = "0123456789" unneccessary
 			# shift key
-
+			
 			if (key == Blender.Draw.RIGHTSHIFTKEY or key == Blender.Draw.LEFTSHIFTKEY) and val == 0: # released
 				self.shifted = False
 			elif (key == Blender.Draw.RIGHTSHIFTKEY or key == Blender.Draw.LEFTSHIFTKEY) and val == 1: # pressed
@@ -2916,14 +3045,10 @@ class TextField(Button):
 					self.insert_char(";")
 				elif key == Blender.Draw.SEMICOLONKEY and self.shifted == True:
 					self.insert_char(":")
-				elif key ==Blender.Draw.LEFTBRACKETKEY and self.shifted == False:
+				elif key == Blender.Draw.LEFTBRACKETKEY and val == 1:
 					self.insert_char("[")
-				elif key ==Blender.Draw.LEFTBRACKETKEY and self.shifted == True:
-					self.insert_char("{")
-				elif key == Blender.Draw.RIGHTBRACKETKEY and self.shifted == False:
+				elif key == Blender.Draw.RIGHTBRACKETKEY and val == 1:
 					self.insert_char("]")
-				elif key == Blender.Draw.RIGHTBRACKETKEY and self.shifted == True:
-					self.insert_char("}")
 				elif (key > 47 and key < 58) and val == 0 and self.shifted == False:
 					char = "%d" % (key - 48)
 					self.insert_char(char)
@@ -2938,8 +3063,7 @@ class TextField(Button):
 			self.key_funcs(key, val) # probably won't be any but hey, you never know
 			# and wouldn't you imagine that, I was wrong, there IS a need for this!
 				
-
-	
+				
 class TextBox(UIElement):
 	normalColor = [255, 255, 255, 255]
 	hoverColor = [190, 110, 110, 255]
@@ -2953,8 +3077,11 @@ class TextBox(UIElement):
 				"editingColor", "editingBorderColor", "radius", "fontsize", "cornermask"]
 	parameters = ["x", "y", "width", "height", "name", "title", "parent", "auto_register"]
 	def __init__(self, x, y, width, height, name, value, parent, auto_register, fontsize = 'normal'):
+		self.fontTable = self.buildFontTable(fontsize)		
 		UIElement.__init__(self, x, y, width, height, name, value, parent, auto_register, fontsize = fontsize)
+		Undoable.__init__(self, self)
 		self.fontsize = fontsize
+		
 		self.cursorIndex = 0
 		self.editing = False
 		self.value = value
@@ -2967,6 +3094,7 @@ class TextBox(UIElement):
 		else:
 			self.type = "string"
 			self.strValue = value
+		self.value = self.value.replace("\t", "    ")
 		self.selection = [0,0]
 		self.selectionColor = [200, 128, 128, 255]
 		self.index = 0		
@@ -2980,350 +3108,160 @@ class TextBox(UIElement):
 		#self.undoMenu = Menu(0, 0, 60, 0, "Local Undo", ["No undo history"], parent, False)
 		self.registerCallback("right_click", self.showUndo)
 		# Ok this works on the concept of lines
-		self.enabled = True
+		self.Enabled = True
+		self.lineIndex = 0
+		self.mouse_x = 0
+		self.mouse_y = 0
+		self.clicked = False
+		self.lines = 0
 		
-	def showUndo(self):
-		print "I'm here!"
-		
-	def draw(self):
 
-		self.validate()    
-		# draw the background box
-		if self.isEditing:
-			self.setColor(self.editingColor)
-		else:
-			self.setColor(self.normalColor)
-			
-		self.drawBox(self.absX, self.absY, self.absX + self.width, self.absY - self.height)
 		
-		# draw the border
-		if self.isEditing:
-			self.setColor(self.editingBorderColor)
-		else:
-			self.setColor(self.borderColor)
-						
+	def draw(self):		
+		# figure out lines
+		self.validate()
+		
+		# component background
+		self.setColor(self.normalColor)
+		self.drawBox(self.absX, self.absY, self.absX + self.width, self.absY - self.height)
+			
+		# component border
+		self.setColor(self.borderColor)
 		self.drawline(self.absX - 1, self.absY, self.absX + self.width + 1, self.absY) # top of box
 		self.drawline(self.absX - 1, self.absY, self.absX - 1, self.absY - self.height) # left hand side of box
 		self.drawline(self.absX - 1, self.absY - (self.height), self.absX + self.width + 1, self.absY - (self.height)) # bottom of box
 		self.drawline(self.absX + self.width, self.absY, self.absX + self.width, self.absY - self.height) # right hand side of box
 		
-		# there might be a cursor or selection, draw that, then draw the text 
-		# over it. each character gets drawn individually        
-		# determine what text is to be drawn
-		if self.strValue != "" or self.strValue != None:
-			displayValue = self.getVisibleText()
-			displayWidth = self.get_string_width(displayValue, 'normal') 
+		self.drawText()
+
 			
-			if self.isEditing:               
-				if self.selection[0] < self.selection[1]:
-					# the selection box is drawn
-					self.drawSelectionMask(displayValue, displayWidth)
-				else:
-					displayValue = self.getVisibleText()
-					if self.cursorIndex > (len(displayValue) + self.index):
-						# the cursor is currently not visible, move the text
-						# subtract len(displayValue) from self.cursorIndex to get the right index
-						# required
-						self.index = self.cursorIndex - len(displayValue)
-					elif self.cursorIndex < self.index:
-						self.index = self.cursorIndex
-						
-					# the cursor box is drawn
-					self.drawCursor()
+	def drawText(self):
+		# text height/width
+		lineHeight = int(math.ceil(self.font_cell_sizes[self.fontsize][1] + 4))
+		maxLines = self.height / lineHeight  		
+		
+		# draw each character
+		
+		val = self.value
+		idx = 0
+		sIdx = 0
+		y_offset = self.absY - 2	
+		x_offset = self.absX + 2
+		charIndex = 0		
+		lineIndex = 0		
+		self.lines = 1
+		for char in val:
+			self.setRasterPos(x_offset, y_offset - lineHeight + 2)
+			if char == "\n":
+				x_offset = self.absX + 2 # line down
+				y_offset = y_offset - lineHeight
+				lineIndex = lineIndex + 1
+				self.lines = self.lines + 1
+			else:
+				if not self.clicked and self.cursorIndex == charIndex:
+					self.drawCursor(x_offset, y_offset)
 					
-			# and now draw the text
-			if self.isEditing:
-				self.setColor(self.textHiliteColor)
-			else:
-				self.setColor(self.textColor)
-			# now where do I put the text? Decide that based on the value in question
-			if self.type == "float" or self.type == "int": # numeric value, shift to the right
-				# this should equal x + (width - stringwidth)
-				self.setRasterPos(self.absX + (self.width - displayWidth), self.absY - (self.height - 4))
-			else:
-				self.setRasterPos(self.absX + 2, self.absY - (self.height - 4 ))
-			Blender.Draw.Text(displayValue) 
-		
-	
-	
-	def drawCursor(self):
-		# draw a cursor at the current cursorindex
-		# iterate the text values to find out where it's at
-		# to do this, I only need to get the text from the index to 
-		# the cursor index   
-		
-		# first problem - which side am I justifying from?
-		if self.type == "float" or self.type == "int":
-			if len(self.strValue) < 2:
-				s_width = self.get_string_width(self.strValue, 'normal')
-			else:             
-				s_width = self.get_string_width(self.strValue[self.cursorIndex:], 'normal')                            
-			cursorPos = self.absX + (self.width - s_width) 
-		else:
-			if len(self.strValue) < 2:
-				s_width = self.get_string_width(self.strValue, 'normal')
-			else:
-				s_width = self.get_string_width(self.strValue[self.index:self.cursorIndex], 'normal')        
-			cursorPos = self.absX + 2 + s_width
-				
-		# now, draw a nice box in the cursor (selection) color at 
-		# cursorPos, self.absY - 2, cursorPos + 2, self.absY - (self.height - 2)
-		self.setColor(self.selectionColor)
-		# basic OpenGL call
-		Blender.BGL.glRecti(cursorPos, self.absY - 2, cursorPos + 4, self.absY - (self.height))
-		# done
-		
-	
-		
-
-	def drawSelectionMask(self, displayValue, displayWidth):
-		index = self.index
-		self = self
-		sel_start = 0
-		sel_end = len(self.strValue) - 1
-		# deal with selected text here. Problems with this include cases where 
-		# the selection may not all be visible
-		if self.selection[0] > (index + len(displayValue)) or self.selection[1] < self.index:
-			# do nothing since the selection isn't visible. I should probably invalidate it here
-			pass
-		if self.selection[0] >= index and self.selection[0] <= (index + len(displayValue)):
-			# snip off the text that fits between index and selection[0] and measure it
-			sel_start = self.get_string_width(self.strValue[index:self.selection[0]], 'normal') 
-		elif self.index > self.selection[0]: # selection begins outside of visible area                 
-			sel_start = 0
-		if self.selection[1] > index and self.selection < index + len(displayValue):
-			# the selection end location calc depends upon the start
-			if self.selection[0] >= index and self.selection[0] <= (index + len(displayValue)):
-				# sel_start is visible, thus I measure from sel_start to the end
-				sel_end = self.get_string_width(self.strValue[self.selection[0]:self.selection[1]], 'normal')
-			else: 
-				sel_end = self.get_string_width(self.strValue[index:self.selection[1]], 'normal')
-		elif self.selection[1] > index + len(displayValue): # selection ends beyond visible area
-			sel_end = displayWidth 
-		self.setColor(self.selectionColor)
-		
-		# so all of that was to get this
-		self.drawBox(self.absX + sel_start + 2, self.absY - (self.height), self.absX + sel_end, self.absY - (self.height - self.font_cell_sizes['normal'][1]))
-		
-	def getVisibleText(self):
-		t_width = self.get_string_width(self.strValue, 'normal') # text strings are all normal
-		if t_width > self.width: # the text width is larger than the width of the control
-			# start at index and try to find a fit in the window
-			range = self.strValue[self.index:] # slice off a piece to work with
-			s_width = 0
-			testValue = ''
-			displayValue = ''
-			for x in range: 
-				testValue = testValue + x
-				s_width = self.get_string_width(testValue, 'normal')
-				if s_width > self.width:
-					# stop here
-					break
+				if lineIndex >= self.lineIndex and lineIndex < maxLines:					
+					self.setColor(self.textColor)
+					width = Blender.Draw.Text(char, self.fontsize) # increment across the control drawing each character, this is openGL shoudl be fast
 				else:
-					displayValue = displayValue + x 
-		else:
-			displayValue = self.strValue
-		return displayValue
-		
-	
+					width = Blender.Draw.GetStringWidth(char, self.fontsize)				
+				
+				# mouse position
+				if self.clicked: # the cursor moved, do something about it.
+					if self.mouse_y < y_offset and self.mouse_y > y_offset - (lineHeight + 2): # cursor is on this line
+						if self.mouse_x >= x_offset and self.mouse_x < x_offset + width:
+							# stop checking, I found my location...it's an optmization at least.
+							self.clicked = False
+							self.cursorIndex = charIndex # damn, that was easy
+							
+				x_offset = x_offset + width
+				
+				if x_offset > (self.absX + self.width) - width: # I need some arbitrary width here!! What will it be? Maybe I'll add + self.font_size_table[ord(char)]
+					y_offset = y_offset - lineHeight
+					x_offset = self.absX + 2
+					lineIndex = lineIndex + 1
+					
+			charIndex = charIndex + 1	
 
-	def getNearestCharIndex(self):
-		sText = self.getVisibleText()
-		# figure out the x/y coords for each character
-		x = self.area_mouse_coords()[0]
-		# adjust t_offset to be validated with the 
-		# actual offset of the control itself
-		# text starts 2 pixels in from self.absX, so
-		if self.type == "float" or self.type == "int":
-			t_offset = self.absX + (self.width - 2) # starting point 
-			idx = len(sText) - 1
-			while x < t_offset and idx >= 0:
-				# for each character, get its x position on the screen by calling get_string_width()
-				# and then subtracting that cumulatively from the offset until the offset is less than the
-				# the mouse coords x value  
-				t_offset = t_offset - self.get_string_width(sText[idx], 'normal')                
-				idx = idx - 1 # decrement to get the next char
-			rVal = idx + 1
-		else:
-			t_offset = self.absX + 2 # this is the starting point
-			idx = 0
-			while x > t_offset and idx < len(sText):            
-				# for each character, get its x position on the screen by calling get_string_width()
-				# and then adding that cumulatively to the offset until the offset exceeds the
-				# the mouse coords x value            
-				t_offset = t_offset + self.get_string_width(sText[idx], 'normal')
-				idx = idx + 1
-			rVal = idx - 1 
 		
-		return rVal 
+	def drawCursor(self, cursorX, y_offset):
+		self.setColor([128, 45, 45, 128])
+		Blender.BGL.glEnable(gl.GL_BLEND)
+		Blender.BGL.glShadeModel(gl.GL_SMOOTH)
+		# basic OpenGL call 
+		# enable blending here
+		Blender.BGL.glRecti(cursorX, y_offset + 2, cursorX + 4, y_offset - (self.font_cell_sizes[self.fontsize][1] + 2))
+		# done
+		Blender.BGL.glDisable(gl.GL_BLEND)
+		Blender.BGL.glShadeModel(gl.GL_FLAT)
+		
+	def drawSelection(self, start, end, y_offset):
+		self.setColor(self.selectionColor)
+		Blender.BGL.glRecti(start, y_offset + 2, end, y_offset - self.font_cell_sizes[self.fontsize] + 2)			
 	
-
 	def getValue(self):
-		return self.strValue
+		return self.value
 
 	def setValue(self, value):		
-		# if the value is either a float or int, then I know I can format them immediately
-		if isinstance(value, float):
-			# int types should be promoted automatically like
-			self.strValue = "%.3f" % value			
-		elif isinstance(value, int):		
-			# floats should automatically be stripped down to ints
-			self.strValue = "%d" % value
-		else:	
-			# if the value is a string, but the validation type is int or float, then...
-			if self.type == "float":
-				# try to initialize the value. If this fails, pop-up an error message
-				try:
-					test = float(value)
-					self.strValue = "%.3f" % value
-				except ValueError:
-					# something went terribly wrong.
-					# pop-up a dialog or something
-					for func in self.validate_functions:
-						func(self)
-					
-			elif self.type == "int":				
-				try:
-					test = int(value)
-					self.strValue = "%d" % value
-				except ValueError:
-					for func in self.validate_functions:
-						func(self)						
-			else:
-				# normal strings initialized as such are ok
-				self.strValue = value
-								
+		self.value = value.replace("\t", "    ")		
+		self.invalid = True
 			
 	def delete_selection(self):
 		deletedwidth = self.selection[1] - self.selection[0]
-		endidx = len(self.strValue) - 1
+		endidx = len(self.value) - 1
 		if self.selection[1] > 0:
 			if self.selection[0] == 0 and self.selection[1] == endidx: # delete the whole string
-				self.strValue = ""
+				self.value = ""
 			elif self.selection[0] == 0:
-				self.strValue = self.strValue[self.selection[1]:]
+				self.value = self.value[self.selection[1]:]
 			elif self.selection[1] == endidx:
-				self.strValue = self.strValue[self.selection[0]:]
+				self.value = self.value[self.selection[0]:]
 			else:
-				self.strValue = self.strValue[:self.selection[0]] + self.strValue[self.selection[1]:]
+				self.value = self.value[:self.selection[0]] + self.value[self.selection[1]:]
 			# that should be that. the draw method will handle things from here
 			# the selection should be reset by the mouse event
 			# recreate the display value somehow, or maybe intercept before I get this far?
 			
 		else: # delete an indvidual character
-			if self.cursor == 0:
-				self.strValue = self.strVvalue[1:]
-			elif self.cursor == endidx:
-				self.strValue = self.strValue[:endidx]
-		
+			if self.cursorIndex == 0:
+				self.value = self.value[1:]
+			elif self.cursorIndex == endidx:
+				self.value = self.value[:endidx]
 	
 	def insert_char(self, char):
-		if isinstance(char, float) or isinstance(char, int):
-			char = str(char)
-			
-		endidx = len(self.strValue) - 1
+		endidx = len(self.value) - 1
 		# if a selection exists, replace the text with this text
-			
 		if self.selection[1] > self.selection[0]:
-			strValue = self.strValue[0:self.selection[0]] + char + self.strValue[self.selection[1]:endidx]
+			self.value = self.value[0:self.selection[0]] + char + self.value[self.selection[1]:endidx]
 		else:
 			# insert the character where the cursor is
 			if self.cursorIndex == endidx: # cursor is at the end of the string
-				strValue = self.strValue + char
+				self.value = self.value + char
 			elif self.cursorIndex == 0: # cursor at the beginning of the string
-				strValue = char + self.strValue
+				self.value = char + self.value
 			else: # somewhere in the middle
-				strValue = self.strValue[:self.cursorIndex] + char + self.strValue[self.cursorIndex:]
-		
-		#try to convert the string value back to a float or int value. If that fails, then I know that the value isn't correct.
-		if self.type == "int":			
-			try:
-				test = int(strValue) 
-				self.strValue = strValue
-				self.cursorIndex = self.cursorIndex + 1
-			except ValueError:
-				for func in self.validate_functions:
-					func(self)				
-		elif self.type == "float":
-			try:
-				test = float(strValue)
-				self.strValue = strValue
-				self.cursorIndex = self.cursorIndex + 1
-			except ValueError:
-				for func in self.validate_functions:
-					func(self)
-		else:
-			# just add the string in, no problem
-			self.strValue = strValue			
-			self.cursorIndex = self.cursorIndex + 1
+				self.value = self.value[:self.cursorIndex] + char + self.value[self.cursorIndex:]		
+		self.cursorIndex = self.cursorIndex + 1
 
-
-		
 	def delete_char(self):
 		# delete the character at the current index
-		self.strValue = self.strValue[:self.cursorIndex - 1] + self.strValue[self.cursorIndex:]
+		self.value = self.value[:self.cursorIndex - 1] + self.value[self.cursorIndex:]
 		self.cursorIndex = self.cursorIndex - 1
-		self.value = self.strValue
+		# self.value = self.value
 		
 	
-	def validateFormat(self):
-		pass
-
-	def mouse_event(self): # drag magic
-		
-		if self.mouseDown and 4 == 5:
-			idx = self.getNearestCharIndex() + self.index # the absolute index of the nearest character
-			# where's the mouse?
-			if self.selection[0] < self.selection[1]: 
-				# there's a selection
-				# .....index..s..idx...s
-				# get the absolute index of the character
-				# char is the index in the visible string
-				# so to get that, I have to add index to char
-				if idx < self.selection[1] and idx > self.selection[0]:
-					self.selection[1] = idx
-				elif idx > self.selection[1]:
-					self.selection[1] = idx
-				elif idx < self.selection[0]:
-					self.selection[0] = idx
-		elif 4 == 5:
-			# locate the cursor
-			self.cursorIndex = self.getNearestCharIndex()
-			
+	def mouse_event(self): # drag magic		
 		self.mouse_funcs() # on this control, there should be no mouse funcs except for debug
 		
-	def click_event(self): # 
-		if self.Enabled:
-			# on a click down, I should clear the selection and reset to wherever I'm at    		
-			self.mouseDown = True
-			# possible states - I'm editing already
-			# clear the selection
-			if self.isEditing:
-				self.selection = [0, 0]
-				# get the mouse position in relation to displayed text, and move the cursor to that location
-				self.cursorIndex = self.getNearestCharIndex()
-			else:
-				self.isEditing = True # invoke editing
-				# select everything in the field	
-				self.cursorIndex = self.getNearestCharIndex()
-			self.click_funcs()
-		
+	def release_event(self):
+		screen = self.area_mouse_coords()
+		self.mouse_x = screen[0]
+		self.mouse_y = screen[1]
+		self.clicked = True
 
-	
-	def release_event(self): # override the default release event processing
-		if self.hit_test() != True: # update with the latest value
-			self.mouseDown = False
-			if self.isEditing:
-				self.isEditing = False			
-				self.update_funcs()
-		else:
-			pass
-		self.release_funcs()    
-			
-		
-		
 	def key_event(self, key, val):
-		if self.isEditing:
+		if self.hit_test():
 			# this will be a huge event handler, since it has to handle every key possible.
 			# perhaps a lookup table?
 			# in fact, that's the best way
@@ -3332,21 +3270,28 @@ class TextBox(UIElement):
 			special = "!@#$%^&*()"
 			# numbers = "0123456789" unneccessary
 			# shift key
-			
+
 			if (key == Blender.Draw.RIGHTSHIFTKEY or key == Blender.Draw.LEFTSHIFTKEY) and val == 0: # released
 				self.shifted = False
 			elif (key == Blender.Draw.RIGHTSHIFTKEY or key == Blender.Draw.LEFTSHIFTKEY) and val == 1: # pressed
 				self.shifted = True
 				
 			# special characters have to be handled a totally different way
-			# test on alphas first
+			# test on alphas first			
+				
 			if key == Blender.Draw.LEFTARROWKEY and val == 1:
 				if self.cursorIndex > 0:
 					self.cursorIndex = self.cursorIndex - 1
 					
-			elif key == Blender.Draw.RIGHTARROWKEY and val == 1:
-				if self.cursorIndex < len(self.strValue):
-					self.cursorIndex = self.cursorIndex + 1
+			elif key == Blender.Draw.RIGHTARROWKEY and val == 1:				
+				if self.cursorIndex < len(self.value):
+					self.cursorIndex = self.cursorIndex + 1 # I will track cursorIndex per line, and self.strValue will be the current selected line in multiLine mode
+			elif key == Blender.Draw.UPARROWKEY and val == 1:
+				if self.lineIndex > 0:
+					self.lineIndex = self.lineIndex - 1
+			elif key == Blender.Draw.DOWNARROWKEY and val == 1:
+				if self.lineIndex < self.lines - 1:
+					self.lineIndex = self.lineIndex + 1
 					
 			elif key == Blender.Draw.BACKSPACEKEY and val == 1:
 				if self.cursorIndex == 0:
@@ -3355,20 +3300,18 @@ class TextBox(UIElement):
 					self.delete_char()
 				
 			elif key == Blender.Draw.DELKEY and val == 1:
-				if self.cursorIndex < len(self.strValue):
+				if self.cursorIndex < len(self.value):
 					self.cursorIndex = self.cursorIndex + 1
 					self.delete_char()
 					
 			elif key == Blender.Draw.RETKEY and val == 0:
-				if self.isEditing == True:
-					self.isEditing = False
-					self.update_funcs()
+				self.insert_char("\n")
 			
 			elif key == Blender.Draw.HOMEKEY and val == 0:
 				self.cursorIndex = 0
 				
 			elif key == Blender.Draw.ENDKEY and val == 0:
-				self.cursorIndex = len(self.strValue) - 1
+				self.cursorIndex = len(self.value) - 1
 			
 			if val == 0:
 				# from here, only 0 values get passed
@@ -3413,6 +3356,16 @@ class TextBox(UIElement):
 					self.insert_char(";")
 				elif key == Blender.Draw.SEMICOLONKEY and self.shifted == True:
 					self.insert_char(":")
+				elif key ==Blender.Draw.LEFTBRACKETKEY and self.shifted == False:
+					self.insert_char("[")
+				elif key ==Blender.Draw.LEFTBRACKETKEY and self.shifted == True:
+					self.insert_char("{")
+				elif key == Blender.Draw.RIGHTBRACKETKEY and self.shifted == False:
+					self.insert_char("]")
+				elif key == Blender.Draw.RIGHTBRACKETKEY and self.shifted == True:
+					self.insert_char("}")
+				#elif key == Blender.Draw.TABKEY:
+				#	self.insert_char("    ")
 				elif (key > 47 and key < 58) and val == 0 and self.shifted == False:
 					char = "%d" % (key - 48)
 					self.insert_char(char)
@@ -3432,24 +3385,119 @@ class TextItem(UIElement):
 				"designBorderColor", "hoverColor", "outlineColor", 
 				"editingColor", "editingBorderColor", "radius", "fontsize", "cornermask"]
 	parameters = ["x", "y", "width", "height", "name", "title", "parent", "auto_register"]
-	def __init__(self, x, y, name, value, parent, auto_register, fontsize = 'normal'):
+	def __init__(self, x, y, name, value, parent, auto_register, fontsize = 'normal', multiLine = False, ignoreWhitespace = False):
+		self.multiLine = multiLine
+		self.ignoreWhitespace = ignoreWhitespace
+		self.value = value
+		self.hasBorder = False
 		UIElement.__init__(self, x, y, 0, 0, name, value, parent, auto_register, fontsize = fontsize)        
-		valueString = str(value)
-		self.fontsize = fontsize
-		self.width = self.get_string_width(valueString, self.fontsize)  # do different calcs here, since extra stuff is required
-		self.height = self.font_cell_sizes[self.fontsize][1]         
-		self.value = value        
-		self.hasBorder = 0			
+
+		if not multiLine:
+			valueString = str(value)
+			self.fontsize = fontsize
+			self.width = self.get_string_width(valueString, self.fontsize)  # do different calcs here, since extra stuff is required
+			self.height = self.font_cell_sizes[self.fontsize][1]         
+			self.value = value        
+		else:
+			self.width = parent.width
+			self.height = parent.height
+			self.lineIndex = 0 # starting out at zero line index\
+			self.registerCallback("wheel", self.scroll)
 		
+		self.valueLines = []			
+		
+
 	def draw(self):
 		self.validate()
 		if self.hasBorder:
 			self.setColor(self.borderColor)
 			self.uiOutline(self.absX, self.absY, self.absX + self.width, self.absY - self.height, 1, 0)
-		self.setColor(self.textColor)
-		self.setRasterPos(self.absX, self.absY - (self.font_cell_sizes[self.fontsize][1] + 2))
-		dispValue = str(self.value)
-		Blender.Draw.Text(dispValue, self.fontsize) # sometimes this will be a float or something
+
+		if not self.multiLine:
+			self.setColor(self.textColor)
+			self.setRasterPos(self.absX, self.absY - (self.font_cell_sizes[self.fontsize][1] + 2))
+			dispValue = str(self.value)
+			Blender.Draw.Text(dispValue, self.fontsize) # sometimes this will be a float or something
+		else:
+			offset = self.absY - (self.font_cell_sizes[self.fontsize][1] + 2)
+			self.setColor(self.textColor)
+			for line in self.displayLines:
+				self.setRasterPos(self.absX, offset)
+				offset = offset - self.font_cell_sizes[self.fontsize][1] - 6
+				Blender.Draw.Text(line, self.fontsize)
+				
+		
+	def validate(self):
+		UIElement.validate(self)
+		self.lineHeight = self.parent.height / (self.font_cell_sizes[self.fontsize][1] + 6) # add a 4 pixel gutter
+		pWidth = self.parent.width
+		if self.multiLine:
+			lines = self.value.split("\n") # splits the lines on newline characters, so I have an arbitrary method of creating lines
+			self.valueLines = []
+			for line in lines:
+				# measure each line to see if it fits into the size of the *parent*.
+				# this is important because the text item itself normally draws itself without regard to any width concerns.
+				# if not, split the line at the boundary of a given word and create a new line
+				
+				cWidth = pWidth / self.font_cell_sizes[self.fontsize][0] # this is number of characters that fit on the screen
+				if len(line) < cWidth:
+					self.valueLines.append(line)
+				else:
+					if self.ignoreWhitespace:
+						# the line is too long to display as is, so split at the word closest to the parent width
+						# working with pWidth, I can now grab a substring
+						# the width of the parent in *characters* is					
+						myLine = line
+						while len(myLine) > cWidth:
+							subStr = myLine[:cWidth]
+							self.valueLines.append(subStr)
+							myLine = myLine[cWidth:]
+						if len(myLine) > 0:
+							self.valueLines.append(myLine)	
+
+					else:
+						myLine = line
+						while len(myLine) > cWidth:
+							subStr = myLine[:cWidth]
+							# find the last whitespace
+							lIdx = rfind(subStr, " ")
+							self.valueLines.append(subStr[:lIdx])
+							myLine = myLine[lIdx:]
+						if len(myLine) > 0: # only if the line wasn't nibbled up by the above
+							self.valueLines.append(myLine)
+			
+			# now figure out exactly which lines I'm actually going to display			
+			if len(self.valueLines) > self.lineHeight:			
+				if len(self.valueLines[self.lineIndex:]) > self.lineHeight:
+					self.displayLines = self.valueLines[self.lineIndex:self.lineHeight]
+				else:
+					self.displayLines = self.valueLines[self.lineIndex:]
+			else:
+				self.displayLines = self.valueLines
+				
+	def scroll(self, evt):				
+		if evt == Blender.Draw.WHEELUPMOUSE:
+			if self.lineIndex > 1:
+				self.lineIndex = self.lineIndex - 1
+		elif evt == Blender.Draw.WHEELDOWNMOUSE:
+			if self.lineIndex < len(self.valueLines):
+				self.lineIndex = self.lineIndex + 1
+		self.invalid = True
+				
+					
+				
+	def appendLine(self, value):
+		self.value = self.value + "\n" + value
+		
+		self.validate()
+		
+	def setValue(self, value):
+		self.value = value
+		
+	def insertLine(self, value):
+		self.value = value + "\n" + self.value
+		self.validate()
+			
 				
 class Label(UIElement):
 	properties = ["normalColor", "textColor", "textHiliteColor", "borderColor", "hoverBorderColor", 
@@ -4191,3 +4239,5 @@ class VisibilityGroup: # maintains a list of objects and turns them on or off
 	def show(self):
 		for obj in self.objList:
 			obj.show()
+			
+
