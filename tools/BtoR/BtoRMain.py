@@ -537,9 +537,12 @@ class SceneSettings(BtoRObject):
 			"PixelFilter":["Pixel Filter:", {"Box":"box", "Triangle":"triangle", "Catmull-Rom":"catmull-rom", "Sinc":"sinc","Gaussian":"gaussian"}],
 			"FilterSamplesX":["Filter Samples X:", 2],
 			"FilterSamplesY":["Filter Samples Y:", 2],
-			"DefaultMaterial":["Default Material:", {"DefaultSurface":"rendDefault", "Matte":"matte", "Custom Material":"custom" }]
+			"DefaultMaterial":["Default Material:", {"DefaultSurface":"rendDefault", "Matte":"matte", "Custom Material":"custom" }],
+			"Framebuffer": ["Render to Framebuffer:", True],
+			"MaxEyesplits": ["Max Eyesplits:", 10]
 		}
 		self.optionOrder = [
+			"Framebuffer",
 			"ShadingRate",
 			"PixelSamplesX",
 			"PixelSamplesY",
@@ -548,7 +551,7 @@ class SceneSettings(BtoRObject):
 			"FilterSamplesY",
 			"Gain",
 			"Gamma",
-			"DefaultMaterial" ]
+			"MaxEyesplits" ]
 		sdict = globals()
 		self.settings = sdict["instBtoRSettings"]
 		self.evt_manager = sdict["instBtoREvtManager"]
@@ -798,7 +801,7 @@ class SceneSettings(BtoRObject):
 		ri.RiShadingRate(self.getProperty("ShadingRate"))
 		ri.RiExposure(self.getProperty("Gain"), self.getProperty("Gamma"))
 		ri.RiPixelFilter(self.getProperty("PixelFilter"), self.getProperty("FilterSamplesX"), self.getProperty("FilterSamplesY"))
-			
+		ri.RiOption("limits", "eyesplits", self.getProperty("MaxEyesplits"))
 		# custom options
 
 	def close(self, button):
@@ -974,6 +977,8 @@ class SceneSettings(BtoRObject):
 						ri.RiOption(name, variable, val) # charge on!
 					#else:
 					#	self.evt_manager.showErrorDialog("Bad Variable Type", "Your custom option has an incorrect variable type. It should be 'string', 'integer' or 'float'.")
+				# max eyesplits
+
 				
 				print "Frame Begin"				
 				ri.RiFrameBegin(frame)
@@ -989,7 +994,8 @@ class SceneSettings(BtoRObject):
 				if self.settings.renderer == "BMRT":
 					imgFile = imgFile.replace("\\", "\\\\")
 				ri.RiDisplay(imgFile, "file", "rgb")
-				ri.RiDisplay("+" + imgFile, "framebuffer", "rgb")
+				if self.getProperty("Framebuffer"):
+					ri.RiDisplay("+" + imgFile, "framebuffer", "rgb")
 				
 				print "AOV passes"
 				# AOV passes
