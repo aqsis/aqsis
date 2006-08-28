@@ -34,7 +34,6 @@ instBtoRMaterials = getattr(BtoRMain, "instBtoRMaterials")
 instBtoRGroupList = BtoRMain.GroupList()
 setattr(BtoRMain, "instBtoRGroupList", instBtoRGroupList)
 
-
 instBtoRHelp = BtoRMain.TextWindow()
 setattr(BtoRMain, "instBtoRHelp", instBtoRHelp)
 

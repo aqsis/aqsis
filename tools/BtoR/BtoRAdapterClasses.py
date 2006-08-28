@@ -1498,8 +1498,6 @@ class MeshAdapter(ObjectAdapter):
 		normals = []
 		uv = []
 		faceModes = []
-		st = []
-		
 				
 		# get the verts by ID		
 		vertTexUV = []
@@ -1524,7 +1522,11 @@ class MeshAdapter(ObjectAdapter):
 		if mesh.faceUV == 1:
 			getSt = True
 		
+		edge_faces = self.edge_face_users(mesh)
+		
+		
 		for face in mesh.faces:
+			print face.index
 			nverts.append(len(face.v))
 			vtuv = []
 			if len(face.v) > 2:
@@ -1541,8 +1543,6 @@ class MeshAdapter(ObjectAdapter):
 				vertids.append(vert.index)
 					
 				
-		edge_faces = self.edge_face_users(mesh)
-		
 			#if mesh.vertexColors == 1:
 			#	if len(face.v) > 2:
 			#		for vertIdx in range(len(face.v)):
@@ -1560,7 +1560,7 @@ class MeshAdapter(ObjectAdapter):
 			#			vertTexUV[face.v[vertIdx].index] = uv
 						
 			
-		if self.getProperty("AutoCrease"):
+		if 1 == 2:
 			# this has to be calculated per edge, so what I probably want to do first is build up a list of face index per edge
 			# get the normals of each face in the edge_faces list
 			creases = {}
@@ -1732,6 +1732,34 @@ class MeshAdapter(ObjectAdapter):
 		
 		return face_edges
 		
+	def face_edges(self, me):
+		'''
+		Returns a list alligned to the meshes faces.
+		each item is a list of lists: that is 
+		face_edges -> face indicies
+		face_edges[i] -> list referencs local faces v indicies 1,2,3 &| 4
+		face_edges[i][j] -> list of faces that this edge uses.
+		crap this is tricky to explain :/
+		'''
+		face_edges= [ [None] * len(f) for f in me.faces ]
+		
+		face_edges_dict= dict([(self.sorted_edge_indicies(ed), []) for ed in me.edges])
+		for fidx, f in enumerate(me.faces):
+			fvi= [v.index for v in f.v]# face vert idx's
+			for i in xrange(len(f)):
+				i1= fvi[i]
+				i2= fvi[i-1]
+				
+				if i1>i2:
+					i1,i2= i2,i1
+				
+				edge_face_users= face_edges_dict[i1,i2]
+				edge_face_users.append(f)
+				
+				face_edges[fidx][i]= edge_face_users
+				
+		return face_edges
+		
 class LampAdapter(ObjectAdapter):
 	""" BtoR Lamp Adapter object """
 	protocols.advise(instancesProvide=[IObjectAdapter], asAdapterForTypes=[BtoRLamp])
@@ -1806,8 +1834,7 @@ class LampAdapter(ObjectAdapter):
 				ri.RiRotate(180, 0, 1, 0)
 				ri.RiRotate(90, 0, 1, 0)
 			elif axis == "nx":	
-				ri.RiRotate(180, 0, 1, 0)
-				#ri.RiRotate(-90, 1, 0, 0)
+				ri.RiRotate(180, 0, 1, 0)			
 				ri.RiRotate(-90, 0, 1, 0)				
 			elif axis == "py":				
 				ri.RiRotate(-90, 1, 0, 0)
@@ -1816,46 +1843,32 @@ class LampAdapter(ObjectAdapter):
 			elif axis == "nz":				
 				ri.RiRotate(180, 0, 1, 0) 	
 			
-			#cmatrix = self.object.getInverseMatrix()
-			#trans = cmatrix.translationPart()			
-		
-			#ri.RiTranslate(trans)
 			ri.RiTranslate(-self.object.LocX, -self.object.LocY, -self.object.LocZ)
 			
 				
 		else:		
 			ri.RiScale(-1, 1, 1)
-			ri.RiRotate(180, 0, 1, 0)			
+			#ri.RiRotate(180, 0, 1, 0)			
 			cmatrix = self.object.getInverseMatrix()
-			matrix = [cmatrix[0][0],
-					cmatrix[0][1],
-					-cmatrix[0][2],
-					cmatrix[0][3],
-					cmatrix[1][0],
-					cmatrix[1][1],
-					-cmatrix[1][2],
-					cmatrix[1][3],
-					cmatrix[2][0],
-					cmatrix[2][1],
-					-cmatrix[2][2],
-					cmatrix[2][3],
-					cmatrix[3][0],
-					cmatrix[3][1],
-					-cmatrix[3][2],
-					cmatrix[3][3]]
-			# otherwise, do nothing
-			ri.RiTransform(matrix)
-			
-			#vecX = Blender.Mathutils.Vector(1, 0, 0)
-			#cmatrix = self.object.getInverseMatrix()
-			#sMat = Blender.Mathutils.ScaleMatrix(-1, 4, vecX)		
-			#rMat = Blender.Mathutils.RotationMatrix(180, 4, "y")
-			#mat = cmatrix * sMat * rMat
-			#ri.RiTransform(mat)
-			# ri.RiTranslate(0, 0, 1) # dunno if this is neccessary here or not.
-			
-			# so the important thing here is to test if the object changed since last generation. So I need to save a checksum of loc/rot/scale
-			# here so that I've got something to work from. Probably also need to worry about main light settings
+			#matrix = [cmatrix[0][0],
+			#		cmatrix[0][1],
+			#		-cmatrix[0][2],
+			#		cmatrix[0][3],
+			#		cmatrix[1][0],
+			#		cmatrix[1][1],
+			#		-cmatrix[1][2],
+			#		cmatrix[1][3],
+			#		cmatrix[2][0],
+			#		cmatrix[2][1],
+			#		-cmatrix[2][2],
+			#		cmatrix[2][3],
+			#		cmatrix[3][0],
+			#		cmatrix[3][1],
+			#		-cmatrix[3][2],
+			#		cmatrix[3][3]]
+
+			ri.RiTransform(cmatrix)
+
 		self.genChecksum()
 			
 	def getRenderProjection(self):
@@ -2106,10 +2119,12 @@ class MBallAdapter(ObjectAdapter):
 		
 	def render(self):
 		""" generate Renderman data for this object """
-		pass
+		# create RiBlobbies or convert to mesh depending upon renderer target and support
+		
 	def initObjectData(self):
-		""" Initialize BtoR object data for this object """
-		pass
+		""" Initialize BtoR object data for this object """		
+		print self.object
+		
 		
 class CurveAdapter(ObjectAdapter):
 	""" Curve export adapter """
@@ -2160,55 +2175,18 @@ class SurfaceAdapter(ObjectAdapter):
 		#self.editorPanel.title = "Surface Export Settings:"
 
 	def render(self):
-		""" generate Renderman data for this object """
-		# get some vertices
-		pts = []
-		P = []
-		uKnots = []
-		vKnots = []
-		for cur in curve:
-			if cur.isNurb():
-				print item
-				
+		""" generate Renderman data for this object """				
 		
 	def initObjectData(self):
 		""" Initialize BtoR object data for this object """
-		curvedata = Blender.Curve.Get(self.object.getName())		
-		print curvedata.getNumCurves(), " curves found!"
-		print curvedata.getName(), " was found of type ", type(curvedata)
-		print dir(curvedata)		
-		for cur in curvedata:
-			print len(cur)
-			print "Using python iterator method, I find..."
-			for curve in cur:				
-				print curve
-			print "Using array-access (getitem) method I find..."
-			for item in range(len(cur)):
-				print cur[item]
-			print "Explicitly accessing indexes 0-3 gives me"
-			print cur[0]
-			print cur[1]
-			print cur[2]
-			print cur[3]
-		"Explicit access method follows"
-		for curIdx in range(5):
-			try:
-				curve = curve[curIdx]
-				for cur in curve:
-					for curNu in cur:
-						print curNu
-					for item in range(len(curNu)):
-						print cur[item]
-			except:
-				print "Failure"
-				continue
+
 			
 
 class CameraAdapter(ObjectAdapter):
 	protocols.advise(instancesProvide=[IObjectAdapter], asAdapterForTypes=[BtoRCamera])
 	def __init__(self, object):		
 		ObjectAdapter.__init__(self, object)					
-				
+
 	def render(self):
 		""" generate Renderman data for this object """		
 		shader = self.getProperty("shader").getObject()
@@ -2228,7 +2206,7 @@ class CameraAdapter(ObjectAdapter):
 		scene = Blender.Scene.GetCurrent()
 		render = scene.getRenderingContext()
 		camera = self.object.getData()
-		cType = camera.getType()
+		cType = camera.getType() 
 		ri.RiFormat(render.imageSizeX(), render.imageSizeY(), 1) # leave aspect at 1 for the moment
 		
 		if cType == 0:	
@@ -2763,7 +2741,27 @@ class CameraUI(ObjectUI):
 		self.optionOrder.insert(0, "shader")
 		self.editors["shader"] = IPropertyEditor(self.properties["shader"])
 		self.editors["shader"].setParent(self.scroller)	
+		self.properties["shader"].getValue().getObject().obj_parent = self
+		
+		# shader panel setup
+		self.shaderPanel = self.properties["shader"].getValue().getObject().getEditor()					
+		self.shaderPanel.parent = self.editorPanel		
+		self.editorPanel.addElement(self.shaderPanel)
+		self.shaderPanel.isVisible = False
+		self.shaderPanel.shadowed = True
+		self.shaderPanel.outlined = True
+		self.shaderPanel.hasHeader = False				
+		self.shaderPanel.invalid = True
+		self.shaderPanel.validate()
+		
 		self.reloadOptions()
+		
+	def showShader(self):
+		if self.shaderPanel.isVisible:
+			self.shaderPanel.isVisible = False
+		else:
+			self.shaderPanel.x = self.editorPanel.parent.width + 15			
+			self.shaderPanel.isVisible = True
 		
 class ShaderParamUI:
 	protocols.advise(instancesProvide=[IShaderParamUI], asAdapterForTypes=[BtoRStringParam, BtoRArrayParam, BtoRMatrixParam])

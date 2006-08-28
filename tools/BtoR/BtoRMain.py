@@ -2777,6 +2777,7 @@ class GenericShader(BtoRObject):
 				self.shader_menu.setValue(sIndex)
 				
 		self.update_functions = []
+		self.obj_parent = None 
 		#else:
 		#	self.selectShader(None)
 		# otherwise, I'll be selecting a shader at the outset...
