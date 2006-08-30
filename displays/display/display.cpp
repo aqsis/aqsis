@@ -374,6 +374,11 @@ void WriteTIFF(const std::string& filename, SqDisplayInstance* image)
 				TIFFSetField( pOut, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB );
 				TIFFSetField( pOut, TIFFTAG_COMPRESSION, image->m_compression );
 			}
+			if (image->m_format == PkDspyUnsigned16)
+			{
+				TIFFSetField( pOut, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_INT );
+				TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, 16 );
+			}
 
 			TIFFSetField( pOut, TIFFTAG_SAMPLESPERPIXEL, image->m_iFormatCount );
 
@@ -384,11 +389,10 @@ void WriteTIFF(const std::string& filename, SqDisplayInstance* image)
 			TIFFSetField( pOut, TIFFTAG_YPOSITION, ( float ) image->m_origin[1] );
 			TIFFSetField( pOut, TIFFTAG_PLANARCONFIG, config );
 
-			TqInt	linelen = image->m_width * image->m_iFormatCount;
 			TqInt row = 0;
 			for ( row = 0; row < image->m_height; row++ )
 			{
-				if ( TIFFWriteScanline( pOut, reinterpret_cast<void*>(reinterpret_cast<float*>(image->m_data) + ( row * linelen )), row, 0 )
+				if ( TIFFWriteScanline( pOut, reinterpret_cast<void*>(reinterpret_cast<unsigned char*>(image->m_data) + ( row * image->m_lineLength )), row, 0 )
 				        < 0 )
 					break;
 			}
