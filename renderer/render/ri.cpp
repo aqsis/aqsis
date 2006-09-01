@@ -855,9 +855,6 @@ RtVoid	RiWorldBegin()
 
 	QGetRenderContext()->SetWorldBegin();
 
-	QGetRenderContext() ->poptWriteCurrent()->InitialiseCamera();
-	QGetRenderContext() ->pImage() ->SetImage();
-
 	worldrand.Reseed('a'+'q'+'s'+'i'+'s');
 
 	return ;

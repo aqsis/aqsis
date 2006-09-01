@@ -661,19 +661,8 @@ void	CqRenderer::ptransConcatCurrentTime( const CqMatrix& matTrans )
 /** Render all surface in the current list to the image buffer.
  */
 
-void CqRenderer::RenderWorld(CqTransformPtr camera, TqBool clone)
+void CqRenderer::RenderWorld(TqBool clone)
 {
-	// If an alternative camera has been specified, use it, otherwise use the default camera setup during initialisation.
-	CqTransformPtr defaultCamera;
-	if(camera)
-	{
-		// Store the current camera transform for later.
-		defaultCamera = GetCameraTransform();
-		SetCameraTransform(camera);
-		poptCurrent()->InitialiseCamera();
-	}
-	pImage()->SetImage();
-
 	// While rendering, all primitives should fasttrack straight into the pipeline, the easiest way to ensure this
 	// is to switch into 'non' multipass mode.
 	TqInt multiPass = 0;
@@ -684,6 +673,10 @@ void CqRenderer::RenderWorld(CqTransformPtr camera, TqBool clone)
 		pMultipass[0] = 0;
 	}
 	
+	// Ensure that the camera and projection matrices are initialised.
+	poptCurrent()->InitialiseCamera();
+	pImage()->SetImage();
+
 	PrepareShaders();
 
 	if(clone)
@@ -697,13 +690,6 @@ void CqRenderer::RenderWorld(CqTransformPtr camera, TqBool clone)
 
 	if(NULL != pMultipass)
 		pMultipass[0] = multiPass;
-
-	if(camera)
-	{
-		SetCameraTransform(defaultCamera);
-		poptCurrent()->InitialiseCamera();
-	}
-	pImage()->SetImage();
 }
 
 
@@ -774,7 +760,16 @@ void CqRenderer::RenderAutoShadows()
 				std::map<std::string, void*> args;
 				AddDisplayRequest(pMapName[0].c_str(), "shadow", "z", ModeZ, 0, 1, args);
 
-				RenderWorld(lightTrans, TqTrue);
+				// Store the current camera transform for later.
+				CqTransformPtr defaultCamera;
+				defaultCamera = GetCameraTransform();
+				SetCameraTransform(lightTrans);
+				
+				// Render the world
+				RenderWorld(TqTrue);
+
+				popOptions();
+				SetCameraTransform(defaultCamera);
 
 				m_pDDManager->Shutdown();
 				delete(m_pDDManager);
