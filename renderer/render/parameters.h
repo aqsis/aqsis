@@ -175,7 +175,7 @@ class CqParameterTyped : public CqParameter
 
 		virtual	void	SetValue( CqParameter* pFrom, TqInt idxTarget, TqInt idxSource )
 		{
-			assert( pFrom->Type() == Type() );
+			assert( pFrom->Type() == this->Type() );
 
 			CqParameterTyped<T, SLT>* pFromTyped = static_cast<CqParameterTyped<T, SLT>*>( pFrom );
 			*pValue( idxTarget ) = *pFromTyped->pValue( idxSource );
@@ -241,8 +241,8 @@ class CqParameterTypedVarying : public CqParameterTyped<T, SLT>
 		}
 		virtual void	Subdivide( CqParameter* pResult1, CqParameter* pResult2, TqBool u, IqSurface* pSurface = 0 )
 		{
-			assert( pResult1->Type() == Type() && pResult1->Type() == Type() &&
-			        pResult1->Class() == Class() && pResult1->Class() == Class() );
+			assert( pResult1->Type() == this->Type() && pResult1->Type() == this->Type() &&
+			        pResult1->Class() == this->Class() && pResult1->Class() == this->Class() );
 
 			CqParameterTypedVarying<T, I, SLT>* pTResult1 = static_cast<CqParameterTypedVarying<T, I, SLT>*>( pResult1 );
 			CqParameterTypedVarying<T, I, SLT>* pTResult2 = static_cast<CqParameterTypedVarying<T, I, SLT>*>( pResult2 );
@@ -384,7 +384,7 @@ class CqParameterTypedUniform : public CqParameterTyped<T, SLT>
 
 		virtual void	Subdivide( CqParameter* pResult1, CqParameter* pResult2, TqBool u, IqSurface* pSurface = 0 )
 		{
-			assert( pResult1->Type() == Type() && pResult1->Type() == Type() &&
+			assert( pResult1->Type() == this->Type() && pResult1->Type() == this->Type() &&
 			        pResult1->Class() == Class() && pResult1->Class() == Class() );
 
 			CqParameterTypedUniform<T, I, SLT>* pTResult1 = static_cast<CqParameterTypedUniform<T, I, SLT>*>( pResult1 );
@@ -394,7 +394,7 @@ class CqParameterTypedUniform : public CqParameterTyped<T, SLT>
 		virtual	void	Dice( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0 )
 		{
 			// Just promote the uniform value to varying by duplication.
-			assert( pResult->Type() == Type() );
+			assert( pResult->Type() == this->Type() );
 			// Note it is assumed that the variable has been
 			// initialised to the correct size prior to calling.
 			// Also note that the only time a Uniform value is diced is when it is on a single element, i.e. the patchmesh
@@ -408,7 +408,7 @@ class CqParameterTypedUniform : public CqParameterTyped<T, SLT>
 		virtual	void	CopyToShaderVariable( IqShaderData* pResult )
 		{
 			// Just promote the uniform value to varying by duplication.
-			assert( pResult->Type() == Type() );
+			assert( pResult->Type() == this->Type() );
 			// Note it is assumed that the variable has been
 			// initialised to the correct size prior to calling.
 			// Also note that the only time a Uniform value is diced is when it is on a single element, i.e. the patchmesh
@@ -521,8 +521,8 @@ class CqParameterTypedConstant : public CqParameterTyped<T, SLT>
 
 		virtual void	Subdivide( CqParameter* pResult1, CqParameter* pResult2, TqBool u, IqSurface* pSurface = 0 )
 		{
-			assert( pResult1->Type() == Type() && pResult1->Type() == Type() &&
-			        pResult1->Class() == Class() && pResult1->Class() == Class() );
+			assert( pResult1->Type() == this->Type() && pResult1->Type() == this->Type() &&
+			        pResult1->Class() == this->Class() && pResult1->Class() == this->Class() );
 
 			CqParameterTypedConstant<T, I, SLT>* pTResult1 = static_cast<CqParameterTypedConstant<T, I, SLT>*>( pResult1 );
 			CqParameterTypedConstant<T, I, SLT>* pTResult2 = static_cast<CqParameterTypedConstant<T, I, SLT>*>( pResult2 );
@@ -531,7 +531,7 @@ class CqParameterTypedConstant : public CqParameterTyped<T, SLT>
 		virtual	void	Dice( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0 )
 		{
 			// Just promote the constant value to varying by duplication.
-			assert( pResult->Type() == Type() );
+			assert( pResult->Type() == this->Type() );
 			// Note it is assumed that the variable has been
 			// initialised to the correct size prior to calling.
 			TqUint i;
@@ -542,7 +542,7 @@ class CqParameterTypedConstant : public CqParameterTyped<T, SLT>
 		virtual	void	CopyToShaderVariable( IqShaderData* pResult )
 		{
 			// Just promote the constant value to varying by duplication.
-			assert( pResult->Type() == Type() );
+			assert( pResult->Type() == this->Type() );
 			// Note it is assumed that the variable has been
 			// initialised to the correct size prior to calling.
 			TqUint i;
@@ -630,15 +630,15 @@ class CqParameterTypedVertex : public CqParameterTypedVarying<T, I, SLT>
 		}
 		virtual void	Subdivide( CqParameter* pResult1, CqParameter* pResult2, TqBool u, IqSurface* pSurface = 0 )
 		{
-			assert( pResult1->Type() == Type() && pResult1->Type() == Type() &&
-			        pResult1->Class() == Class() && pResult1->Class() == Class() );
+			assert( pResult1->Type() == this->Type() && pResult1->Type() == this->Type() &&
+			        pResult1->Class() == this->Class() && pResult1->Class() == this->Class() );
 
 			pSurface->NaturalSubdivide( this, pResult1, pResult2, u );
 		}
 		virtual	void	Dice( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0 )
 		{
 			// Just promote the constant value to varying by duplication.
-			assert( pResult->Type() == Type() );
+			assert( pResult->Type() == this->Type() );
 			assert( NULL != pSurface );
 			// Note it is assumed that the variable has been
 			// initialised to the correct size prior to calling.
@@ -646,7 +646,7 @@ class CqParameterTypedVertex : public CqParameterTypedVarying<T, I, SLT>
 		}
 		virtual	void	CopyToShaderVariable( IqShaderData* pResult )
 		{
-			assert( pResult->Type() == Type() );
+			assert( pResult->Type() == this->Type() );
 			TqUint i;
 			TqUint max = pResult->Size();
 			for ( i = 0; i < max ; i++ )
@@ -811,7 +811,7 @@ class CqParameterTypedVaryingArray : public CqParameterTyped<T, SLT>
 		}
 		virtual void	Subdivide( CqParameter* pResult1, CqParameter* pResult2, TqBool u, IqSurface* pSurface = 0 )
 		{
-			assert( pResult1->Type() == Type() && pResult1->Type() == Type() &&
+			assert( pResult1->Type() == this->Type() && pResult1->Type() == this->Type() &&
 			        pResult1->Class() == Class() && pResult1->Class() == Class() );
 
 			CqParameterTypedVaryingArray<T, I, SLT>* pTResult1 = static_cast<CqParameterTypedVaryingArray<T, I, SLT>*>( pResult1 );
@@ -878,8 +878,8 @@ class CqParameterTypedVaryingArray : public CqParameterTyped<T, SLT>
 
 		virtual	void	SetValue( CqParameter* pFrom, TqInt idxTarget, TqInt idxSource )
 		{
-			assert( pFrom->Type() == Type() );
-			assert( pFrom->Count() == Count() );
+			assert( pFrom->Type() == this->Type() );
+			assert( pFrom->Count() == this->Count() );
 
 			CqParameterTyped<T, SLT>* pFromTyped = static_cast<CqParameterTyped<T, SLT>*>( pFrom );
 			TqInt index;
@@ -975,7 +975,7 @@ class CqParameterTypedUniformArray : public CqParameterTyped<T, SLT>
 		virtual	void	Dice( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0 )
 		{
 			// Just promote the uniform value to varying by duplication.
-			assert( pResult->Type() == Type() );
+			assert( pResult->Type() == this->Type() );
 			// Note it is assumed that the variable has been
 			// initialised to the correct size prior to calling.
 			TqUint i;
@@ -986,7 +986,7 @@ class CqParameterTypedUniformArray : public CqParameterTyped<T, SLT>
 		virtual	void	CopyToShaderVariable( IqShaderData* pResult )
 		{
 			// Just promote the uniform value to varying by duplication.
-			assert( pResult->Type() == Type() );
+			assert( pResult->Type() == this->Type() );
 			// Note it is assumed that the variable has been
 			// initialised to the correct size prior to calling.
 			TqUint i;
@@ -998,8 +998,8 @@ class CqParameterTypedUniformArray : public CqParameterTyped<T, SLT>
 		virtual	void	DiceOne( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0, TqInt ArrayIndex = 0 )
 		{
 			// Just promote the uniform value to varying by duplication.
-			assert( pResult->Type() == Type() );
-			assert( Count() > ArrayIndex );
+			assert( pResult->Type() == this->Type() );
+			assert( this->Count() > ArrayIndex );
 			// Note it is assumed that the variable has been
 			// initialised to the correct size prior to calling.
 			TqUint i;
@@ -1109,7 +1109,7 @@ class CqParameterTypedConstantArray : public CqParameterTyped<T, SLT>
 		virtual	void	Dice( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0 )
 		{
 			// Just promote the constant value to varying by duplication.
-			assert( pResult->Type() == Type() );
+			assert( pResult->Type() == this->Type() );
 			// Note it is assumed that the variable has been
 			// initialised to the correct size prior to calling.
 			TqUint i;
@@ -1120,7 +1120,7 @@ class CqParameterTypedConstantArray : public CqParameterTyped<T, SLT>
 		virtual	void	CopyToShaderVariable( IqShaderData* pResult )
 		{
 			// Just promote the constant value to varying by duplication.
-			assert( pResult->Type() == Type() );
+			assert( pResult->Type() == this->Type() );
 			// Note it is assumed that the variable has been
 			// initialised to the correct size prior to calling.
 			TqUint i;
@@ -1132,8 +1132,8 @@ class CqParameterTypedConstantArray : public CqParameterTyped<T, SLT>
 		virtual	void	DiceOne( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0, TqInt ArrayIndex = 0 )
 		{
 			// Just promote the constant value to varying by duplication.
-			assert( pResult->Type() == Type() );
-			assert( Count() > ArrayIndex );
+			assert( pResult->Type() == this->Type() );
+			assert( this->Count() > ArrayIndex );
 			// Note it is assumed that the variable has been
 			// initialised to the correct size prior to calling.
 			TqUint i;
@@ -1222,7 +1222,7 @@ class CqParameterTypedVertexArray : public CqParameterTypedVaryingArray<T, I, SL
 		virtual	void	Dice( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0 )
 		{
 			// Just promote the uniform value to varying by duplication.
-			assert( pResult->Type() == Type() );
+			assert( pResult->Type() == this->Type() );
 			assert( NULL != pSurface );
 			// Note it is assumed that the variable has been
 			// initialised to the correct size prior to calling.
@@ -1231,7 +1231,7 @@ class CqParameterTypedVertexArray : public CqParameterTypedVaryingArray<T, I, SL
 		virtual	void	CopyToShaderVariable( IqShaderData* pResult )
 		{
 			// Just promote the uniform value to varying by duplication.
-			assert( pResult->Type() == Type() );
+			assert( pResult->Type() == this->Type() );
 			// Note it is assumed that the variable has been
 			// initialised to the correct size prior to calling.
 			TqUint i;
@@ -1413,7 +1413,7 @@ void CqParameterTypedVarying<T, I, SLT>::CopyToShaderVariable( IqShaderData* pRe
 template <class T, EqVariableType I, class SLT>
 void CqParameterTypedVaryingArray<T, I, SLT>::Dice( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface )
 {
-	assert( pResult->Type() == Type() );
+	assert( pResult->Type() == this->Type() );
 	assert( pResult->Class() == class_varying );
 	assert( pResult->Size() == m_aValues.size() );
 
@@ -1469,9 +1469,9 @@ void CqParameterTypedVaryingArray<T, I, SLT>::CopyToShaderVariable( IqShaderData
 template <class T, EqVariableType I, class SLT>
 void CqParameterTypedVaryingArray<T, I, SLT>::DiceOne( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface, TqInt ArrayIndex )
 {
-	assert( pResult->Type() == Type() );
+	assert( pResult->Type() == this->Type() );
 	assert( pResult->Class() == class_varying );
-	assert( Count() > ArrayIndex );
+	assert( this->Count() > ArrayIndex );
 
 	T res;
 
