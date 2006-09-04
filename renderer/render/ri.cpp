@@ -854,6 +854,14 @@ RtVoid	RiWorldBegin()
 
 
 	QGetRenderContext()->SetWorldBegin();
+	
+	// Ensure that the camera and projection matrices are initialised.
+	// This is also done in CqRenderer::RenderWorld, but needs to be 
+	// done here also in case we're not running in 'multipass' mode, in 
+	// which case the primitives all 'fast track' into the pipeline and
+	// therefore rely on information setup here.
+	QGetRenderContext()->poptWriteCurrent()->InitialiseCamera();
+	QGetRenderContext()->pImage()->SetImage();
 
 	worldrand.Reseed('a'+'q'+'s'+'i'+'s');
 
