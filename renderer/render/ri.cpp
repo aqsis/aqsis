@@ -3700,13 +3700,7 @@ RtVoid RiCurvesV( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, 
 			                     QGetRenderContext() ->matNSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ),
 			                     QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ) );
 
-			std::vector<boost::shared_ptr<CqSurface> > aSplits;
-			pSurface->Split( aSplits );
-			std::vector<boost::shared_ptr<CqSurface> >::iterator iSS;
-			for ( iSS = aSplits.begin(); iSS != aSplits.end(); ++iSS )
-			{
-				CreateGPrim( *iSS );
-			}
+			CreateGPrim( pSurface );
 		}
 	}
 	else if ( strcmp( type, RI_LINEAR ) == 0 )
