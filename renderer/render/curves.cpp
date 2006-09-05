@@ -1934,7 +1934,6 @@ void CqCubicCurvesGroup::Transform(
 )
 {
 
-	Aqsis::log() << error << "Transforming curve" << std::endl;
 	// make sure the "width" parameter is present
 	PopulateWidth();
 
@@ -2003,8 +2002,6 @@ void CqCubicCurvesGroup::Transform(
 			//  width
 			CqVector3D widthVector = pt_delta - pt;
 			width()->pValue( widthI )[0] = widthVector.Magnitude();
-			Aqsis::log() << error << "Before: " << horiz << " After: " << widthVector.Magnitude() << std::endl;
-
 
 			// we've finished the current width, so we move on
 			//  to the next one.  this means incrementing the width
