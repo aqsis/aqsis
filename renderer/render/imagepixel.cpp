@@ -437,7 +437,7 @@ void CqImagePixel::Combine(enum EqFilterDepth depthfilter, CqColor zThreshold)
 						);
 						sampleopacity.SetColorRGB(
 						    LERP( sample_data[Sample_Red], sampleopacity.fRed(), 0 ),
-						    LERP( sample_data[Sample_OGreen], sampleopacity.fGreen(), 0 ),
+						    LERP( sample_data[Sample_Green], sampleopacity.fGreen(), 0 ),
 						    LERP( sample_data[Sample_Blue], sampleopacity.fBlue(), 0 )
 						);
 					}
@@ -445,7 +445,7 @@ void CqImagePixel::Combine(enum EqFilterDepth depthfilter, CqColor zThreshold)
 				else
 				{
 					samplecolor = ( samplecolor *
-					                ( gColWhite - CqColor(sample_data[Sample_ORed], sample_data[Sample_OGreen], sample_data[Sample_OBlue]) ) ) +
+					                ( gColWhite - CqColor(CLAMP(sample_data[Sample_ORed], 0.0f, 1.0f), CLAMP(sample_data[Sample_OGreen], 0.0f, 1.0f), CLAMP(sample_data[Sample_OBlue], 0.0f, 1.0f)) ) ) +
 					              CqColor(sample_data[Sample_Red], sample_data[Sample_Green], sample_data[Sample_Blue]);
 					sampleopacity = ( ( gColWhite - sampleopacity ) *
 					                  CqColor(sample_data[Sample_ORed], sample_data[Sample_OGreen], sample_data[Sample_OBlue]) ) +
@@ -473,8 +473,7 @@ void CqImagePixel::Combine(enum EqFilterDepth depthfilter, CqColor zThreshold)
 			}
 
 			// Write the collapsed color values back into the opaque entry.
-			if ( !samples->m_Data.empty()
-			   )
+			if ( !samples->m_Data.empty())
 			{
 				// Make sure the extra sample data from the top entry is copied
 				// to the opaque sample, which is then sent to the display.
