@@ -113,7 +113,7 @@ TqInt CqPolygonBase::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits 
 			i++;
 		}
 		vecN = vecN0 % vecN1;
-		vecN = ( O == CSO ) ? vecN : -vecN;
+		vecN = ( (O && CSO) || (!O && !CSO) ) ? vecN : -vecN;
 		vecN.Unit();
 	}
 

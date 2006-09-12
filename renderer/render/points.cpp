@@ -192,7 +192,7 @@ CqMicroPolyGridBase* CqPoints::Dice()
 		{
 			TqBool CSO = pTransform()->GetHandedness(pTransform()->Time(0));
 			TqBool O = pAttributes() ->GetIntegerAttribute( "System", "Orientation" ) [ 0 ] != 0;
-			N = ( O == CSO ) ? N : -N;
+			N = ( (O && CSO) || (!O && !CSO) ) ? N : -N;
 			pGrid->pVar(EnvVars_Ng)->SetNormal( N, u );
 		}
 		pGrid->SetbGeometricNormals( TqTrue );

@@ -186,7 +186,7 @@ void CqMicroPolyGrid::CalcNormals()
 				vecN.Unit();
 				// Flip the normal if the 'current orientation' differs from the 'coordinate system orientation'
 				// see RiSpec 'Orientation and Sides'
-				vecN = ( O == CSO ) ? vecN : -vecN;
+				vecN = ( (O && CSO) || (!O && !CSO) ) ? vecN : -vecN;
 			}
 			else
 			{

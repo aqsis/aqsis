@@ -999,7 +999,7 @@ void CqShaderExecEnv::SO_calculatenormal( IqShaderData* p, IqShaderData* Result,
 	if( pAttributes() )
 		O = pAttributes() ->GetIntegerAttribute( "System", "Orientation" ) [ 0 ] != 0;
 	TqFloat neg = 1;
-	if ( O != CSO )
+	if ( !( (O && CSO) || (!O && !CSO) ) )
 		neg = -1;
 
 	__fVarying=(p)->Class()==class_varying;

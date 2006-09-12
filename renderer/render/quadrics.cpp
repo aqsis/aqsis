@@ -259,7 +259,7 @@ void CqQuadric::GenerateGeometricNormals( TqInt uDiceSize, TqInt vDiceSize, IqSh
 			DicePoint( u, v, N );
 			TqBool CSO = pTransform()->GetHandedness(pTransform()->Time(0));
 			TqBool O = pAttributes() ->GetIntegerAttribute( "System", "Orientation" ) [ 0 ] != 0;
-			N = ( O == CSO ) ? N : -N;
+			N = ( (O && CSO) || (!O && !CSO) ) ? N : -N;
 			pNormals->SetNormal( m_matITTx * N, igrid );
 		}
 	}
