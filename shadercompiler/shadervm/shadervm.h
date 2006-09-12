@@ -646,6 +646,12 @@ class CqShaderVM : public CqShaderStack, public IqShader, public CqDSORepository
 		CqShaderVM( const CqShaderVM& From ) : m_LocalIndex( 0 ), m_PC( 0 ), m_fAmbient( TqTrue )
 		{
 			*this = From;
+			// Find out if this shader is being declared outside the world construct. If so
+			// if is effectively being defined in 'camera' space, which will affect the
+			// transformation of parameters. Should only affect lightsource shaders as these
+			// are the only ones valid outside the world.
+			if (QGetRenderContextI())
+				m_outsideWorld = !QGetRenderContextI()->IsWorldBegin();
 		}
 		virtual ~CqShaderVM()
 		{
