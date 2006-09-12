@@ -11,12 +11,6 @@ displacement GSHsinedisp( float amplitude = 0.002, wavelength = 0.0025 )
  		+ amplitude*sin((vc/(wavelength*10.0)) * 2 * PI);
 #endif
 	
-#if defined(AQSIS) || defined(AIR) || defined(BMRT)
-        amp *= 500.0;   /* No clue why we need to multiple the value 500.0 */
-#endif
-
-
-
  	P += amp * N;
 
  	N = calculatenormal(P);

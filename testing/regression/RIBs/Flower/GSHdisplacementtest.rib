@@ -1,4 +1,4 @@
-Display "GSHdisplacementtest.tif" "file" "rgb"
+Display "GSHdisplacementtest.tif" "file" "rgb" "string compression" ["lzw"]
 
 #
 #Format 320 240 1
