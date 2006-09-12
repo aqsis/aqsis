@@ -1930,7 +1930,7 @@ CqBound CqCubicCurvesGroup::Bound() const
 	TqInt vStep = pAttributes() ->GetIntegerAttribute( "System", "BasisStep" ) [ 1 ];
 	// Create the matrix required to transform from the current basis to Bezier.
 	static CqMatrix matMim1;
-	TqInt i, j;
+	TqUint i, j;
 
 	if ( matMim1.fIdentity() )
 	{
@@ -2003,7 +2003,7 @@ CqBound CqCubicCurvesGroup::Bound() const
 
 			matCP = matConv * matCP;
 
-			for ( TqInt i = 0; i < 4; i++ )
+			for ( i = 0; i < 4; i++ )
 			{
 				CqVector4D vecV;
 				vecV.x( matCP[ 0 ][ i ] );
@@ -2031,7 +2031,7 @@ CqBound CqCubicCurvesGroup::Bound() const
 		}
 	}
 
-	for ( TqUint i = 0; i < ( *P() ).Size(); i++ )
+	for ( i = 0; i < ( *P() ).Size(); i++ )
 	{
 		// increase the maximum camera space width of the curve if
 		//  necessary
