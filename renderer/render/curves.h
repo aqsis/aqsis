@@ -564,6 +564,7 @@ class CqCubicCurvesGroup : public CqCurvesGroup
 		virtual ~CqCubicCurvesGroup();
 		virtual	TqUint cVarying() const;
 		virtual TqInt Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
+		virtual	CqBound	Bound() const;
 		virtual void Transform(
 		    const CqMatrix& matTx,
 		    const CqMatrix& matITTx,

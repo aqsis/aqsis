@@ -1915,6 +1915,148 @@ TqInt CqCubicCurvesGroup::Split(
 }
 
 
+/**
+ * Calculates bounds for a set of cubic curves.
+ *
+ * @return CqBound object containing the bounds.
+ */
+CqBound CqCubicCurvesGroup::Bound() const
+{
+	// Get the boundary in camera space.
+	CqVector3D vecA( FLT_MAX, FLT_MAX, FLT_MAX );
+	CqVector3D vecB( -FLT_MAX, -FLT_MAX, -FLT_MAX );
+	TqFloat maxCameraSpaceWidth = 0;
+	TqUint nWidthParams = cVarying();
+	TqInt vStep = pAttributes() ->GetIntegerAttribute( "System", "BasisStep" ) [ 1 ];
+	// Create the matrix required to transform from the current basis to Bezier.
+	static CqMatrix matMim1;
+	TqInt i, j;
+
+	if ( matMim1.fIdentity() )
+	{
+		for ( i = 0; i < 4; i++ )
+			for ( j = 0; j < 4; j++ )
+				matMim1[ i ][ j ] = RiBezierBasis[ i ][ j ];
+		matMim1.SetfIdentity( TqFalse );
+		matMim1 = matMim1.Inverse();
+	}
+
+	CqMatrix matMj =pAttributes() ->GetMatrixAttribute( "System", "Basis" ) [ 1 ]; 
+	CqMatrix matConv = matMj * matMim1;
+
+	matConv = matConv.Transpose();
+
+	TqInt vertexI = 0;     //< Current vertex class index.
+	// process each curve in the group.  at this level, a curve is a
+	//  set of joined piecewise-cubic curve segments.  curveN is the
+	//  index of the current curve.
+	for ( TqInt curveN = 0; curveN < m_ncurves; curveN++ )
+	{
+		// find the total number of piecewise cubic segments in the
+		//  current curve, accounting for periodic curves
+		TqInt npcSegs;
+		if ( m_periodic )
+			npcSegs = m_nvertices[ curveN ] / vStep;
+		else
+			npcSegs = ( m_nvertices[ curveN ] - 4 ) / vStep + 1;
+
+		TqInt nextCurveVertexIndex = vertexI + m_nvertices[ curveN ];
+
+		// process each piecewise cubic segment within the current
+		//  curve.  pcN is the index of the current piecewise
+		//  cubic curve segment within the current curve
+		for ( TqInt pcN = 0; pcN < npcSegs; pcN++ )
+		{
+			// the current vertex index within the current curve group
+			TqInt cvi = 0;
+
+			// each segment needs four vertex indexes, which we
+			//  calculate here.  if the index goes beyond the
+			//  number of vertices then we wrap it around,
+			//  starting back at zero.
+			TqInt vi[ 4 ];
+			vi[ 0 ] = vertexI + cvi;
+			++cvi;
+			if ( cvi >= m_nvertices[ curveN ] )
+				cvi = 0;
+			vi[ 1 ] = vertexI + cvi;
+			++cvi;
+			if ( cvi >= m_nvertices[ curveN ] )
+				cvi = 0;
+			vi[ 2 ] = vertexI + cvi;
+			++cvi;
+			if ( cvi >= m_nvertices[ curveN ] )
+				cvi = 0;
+			vi[ 3 ] = vertexI + cvi;
+			++cvi;
+
+			CqMatrix matCP;
+			for ( i = 0; i < 4; i++ )
+			{
+				CqVector4D vecV = P()->pValue( vi[ i ] )[0];
+				matCP[ 0 ][ i ] = vecV.x();
+				matCP[ 1 ][ i ] = vecV.y();
+				matCP[ 2 ][ i ] = vecV.z();
+				matCP[ 3 ][ i ] = vecV.h();
+			}
+			matCP.SetfIdentity( TqFalse );
+
+			matCP = matConv * matCP;
+
+			for ( TqInt i = 0; i < 4; i++ )
+			{
+				CqVector4D vecV;
+				vecV.x( matCP[ 0 ][ i ] );
+				vecV.y( matCP[ 1 ][ i ] );
+				vecV.z( matCP[ 2 ][ i ] );
+				vecV.h( matCP[ 3 ][ i ] );
+				vecV.Homogenize();
+				// expand the boundary if necessary to accomodate the
+				//  current vertex
+				if ( vecV.x() < vecA.x() )
+					vecA.x( vecV.x() );
+				if ( vecV.y() < vecA.y() )
+					vecA.y( vecV.y() );
+				if ( vecV.x() > vecB.x() )
+					vecB.x( vecV.x() );
+				if ( vecV.y() > vecB.y() )
+					vecB.y( vecV.y() );
+				if ( vecV.z() < vecA.z() )
+					vecA.z( vecV.z() );
+				if ( vecV.z() > vecB.z() )
+					vecB.z( vecV.z() );
+			}
+
+			vertexI += vStep;
+		}
+	}
+
+	for ( TqUint i = 0; i < ( *P() ).Size(); i++ )
+	{
+		// increase the maximum camera space width of the curve if
+		//  necessary
+		if ( i < nWidthParams )
+		{
+			TqFloat camSpaceWidth = width()->pValue( i )[0];
+			if ( camSpaceWidth > maxCameraSpaceWidth )
+			{
+				maxCameraSpaceWidth = camSpaceWidth;
+			}
+		}
+
+	}
+
+	// increase the size of the boundary by half the width of the
+	//  curve in camera space
+	vecA -= ( maxCameraSpaceWidth / 2.0 );
+	vecB += ( maxCameraSpaceWidth / 2.0 );
+
+	// return the boundary
+	CqBound	B;
+	B.vecMin() = vecA;
+	B.vecMax() = vecB;
+	return ( AdjustBoundForTransformationMotion( B ) );
+}
 
 /**
  * Transforms this GPrim using the specified matrices.
