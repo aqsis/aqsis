@@ -27,16 +27,12 @@ Translate 13.7695 -18.3593 -9.17965
 WorldBegin
 TransformBegin
 Transform [ 1 0 0 0 0 1 0 0 0 0 1 0 -20 20 30 1 ]
-LightSource "pointlight" 1 "constant float
-intensity" [ 3000 ] "constant color lightcolor" [ 1 1 1
-] "constant point from" [ 0 0 0 ] 
+LightSource "pointlight" 1 "constant float intensity" [ 3000 ] "constant color lightcolor" [ 1 1 1 ] "constant point from" [ 0 0 0 ] 
 TransformEnd
 AttributeBegin
 ConcatTransform [ 1 0 0 0 0 1 0 0 0 0 1 0 0 0
 0 1 ]
-Attribute "displacementbound" "uniform float
-sphere" [ 1 ] "uniform string coordinatesystem" [
-"world" ] 
+Attribute "displacementbound" "uniform float sphere" [ 1 ] "uniform string coordinatesystem" [ "world" ] 
 Color 1 1 1
 Opacity 1 1 1
 Matte 0
