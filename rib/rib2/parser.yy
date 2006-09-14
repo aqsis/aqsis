@@ -1218,6 +1218,13 @@ complete_request
 					strcpy(ptag, (*$5)[i]);
 					ptags[i]=ptag;
 				}
+				// Do some sanity checking on the tags data
+				if($6->Count() != $5->Count() * 2)
+				{
+					std::stringstream error;
+					error << "SubdivisionMesh: Invalid tags list, nargs length (" << $6->Count() << ") expected " << $5->Count()*2 << " (ntags (" << $5->Count() << ") times 2, see spec.)" << std::ends;
+					yyerror(error.str());
+				}
 
 				ParseCallbackInterface->RiSubdivisionMeshV(const_cast<char*>($2),
 								$3->Count(),&(*$3)[0], &(*$4)[0],
