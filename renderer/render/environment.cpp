@@ -49,18 +49,7 @@ START_NAMESPACE( Aqsis )
 
 CqTextureMap* CqTextureMap::GetLatLongMap( const CqString& strName )
 {
-	static int size = -1;
-	static CqTextureMap *previous = NULL;
 	QGetRenderContext() ->Stats().IncTextureMisses( 2 );
-
-	if ( size == static_cast<int>( m_TextureMap_Cache.size() ) )
-		if ( previous && ( previous->m_strName == strName ) )
-		{
-			QGetRenderContext() ->Stats().IncTextureHits( 0, 2 );
-			return previous;
-		}
-
-
 
 	// First search the texture map cache
 	for ( std::vector<CqTextureMap*>::iterator i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
@@ -69,17 +58,17 @@ CqTextureMap* CqTextureMap::GetLatLongMap( const CqString& strName )
 		{
 			if ( ( *i ) ->Type() == MapType_LatLong )
 			{
-				previous = *i;
-				size = m_TextureMap_Cache.size();
 				QGetRenderContext() ->Stats().IncTextureHits( 1, 2 );
 				return ( *i );
-			}
-			else
+			} else
 			{
-				return ( NULL );
+				return NULL;
 			}
 		}
 	}
+
+	QGetRenderContext() ->Stats().IncTextureHits( 0, 2 );
+
 	// If we got here, it doesn't exist yet, so we must create and load it.
 	CqTextureMap* pNew = new CqLatLongMap( strName );
 	m_TextureMap_Cache.push_back( pNew );
@@ -92,13 +81,15 @@ CqTextureMap* CqTextureMap::GetLatLongMap( const CqString& strName )
 	        TIFFGetField( pNew->m_pImage, TIFFTAG_PIXAR_TEXTUREFORMAT, &ptexfmt ) != 1 ||
 	        strcmp( ptexfmt, LATLONG_HEADER ) != 0 )
 	{
-		Aqsis::log() << error << "Map \"" << strName.c_str() << "\" is not an environment map, use RiMakeLatLongEnvironment" << std::endl;
+		static TqBool done = TqFalse;
+		if (!done)
+		{
+			Aqsis::log() << error << "Map \"" << strName.c_str() << "\" is not an environment map, use RiMakeLatLongEnvironment" << std::endl;
+			done = TqTrue;
+		}
 
 		pNew->SetInvalid();
-	}
-
-	previous = pNew;
-	size = m_TextureMap_Cache.size();
+   	}
 	return ( pNew );
 }
 
@@ -109,20 +100,7 @@ CqTextureMap* CqTextureMap::GetLatLongMap( const CqString& strName )
 
 CqTextureMap* CqTextureMap::GetEnvironmentMap( const CqString& strName )
 {
-	static int size = -1;
-	static CqTextureMap *previous = NULL;
-
 	QGetRenderContext() ->Stats().IncTextureMisses( 1 );
-
-	/* look if the last item return by this function was ok */
-	if ( size == static_cast<int>( m_TextureMap_Cache.size() ) )
-		if ( ( previous ) && ( previous->m_strName == strName ) )
-		{
-			QGetRenderContext() ->Stats().IncTextureHits( 0, 1 );
-			return previous;
-		}
-
-
 
 	// First search the texture map cache
 	for ( std::vector<CqTextureMap*>::iterator i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
@@ -131,17 +109,17 @@ CqTextureMap* CqTextureMap::GetEnvironmentMap( const CqString& strName )
 		{
 			if ( ( *i ) ->Type() == MapType_Environment )
 			{
-				previous = *i;
-				size = m_TextureMap_Cache.size();
 				QGetRenderContext() ->Stats().IncTextureHits( 1, 1 );
 				return ( *i );
-			}
-			else
+			} else
 			{
-				return ( NULL );
+				return NULL;
 			}
 		}
 	}
+
+	QGetRenderContext() ->Stats().IncTextureHits( 0, 1 );
+
 	// If we got here, it doesn't exist yet, so we must create and load it.
 	CqTextureMap* pNew = new CqEnvironmentMap( strName );
 	m_TextureMap_Cache.push_back( pNew );
@@ -154,7 +132,12 @@ CqTextureMap* CqTextureMap::GetEnvironmentMap( const CqString& strName )
 	        TIFFGetField( pNew->m_pImage, TIFFTAG_PIXAR_TEXTUREFORMAT, &ptexfmt ) != 1 ||
 	        ( strcmp( ptexfmt, CUBEENVMAP_HEADER ) != 0 ) && ( strcmp( ptexfmt, LATLONG_HEADER ) != 0 ) )
 	{
-		Aqsis::log() << error << "Map \"" << strName.c_str() << "\" is not an environment map, use RiMakeCubeFaceEnvironment" << std::endl;
+		static TqBool done = TqFalse;
+		if (!done)
+		{
+			Aqsis::log() << error << "Map \"" << strName.c_str() << "\" is not an environment map, use RiMakeCubeFaceEnvironment" << std::endl;
+			done = TqTrue;
+		}
 		pNew->SetInvalid();
 		delete pNew;
 		pNew = NULL;
@@ -175,10 +158,8 @@ CqTextureMap* CqTextureMap::GetEnvironmentMap( const CqString& strName )
 		pNew->SetInvalid();
 		delete pNew;
 		pNew = NULL;
-	}
-
-	previous = pNew;
-	size = m_TextureMap_Cache.size();
+   	} 
+   
 	return ( pNew );
 }
 

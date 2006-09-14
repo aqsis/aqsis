@@ -1493,25 +1493,25 @@ void CqShaderExecEnv::SO_occlusion( IqShaderData* occlmap, IqShaderData* channel
 		{
 			if(!__fVarying || RS.Value( __iGrid ) )
 			{
-			// Storage for the final combined occlusion value.
-			TqFloat occlsum = 0.0f;
-			TqFloat dotsum = 0.0f;
-	
-			CqVector3D swidth = 0.0f, twidth = 0.0f;
+				// Storage for the final combined occlusion value.
+				TqFloat occlsum = 0.0f;
+				TqFloat dotsum = 0.0f;
 
-			CqVector3D _aq_N;
-			CqVector3D _aq_P;
+				CqVector3D swidth = 0.0f, twidth = 0.0f;
+
+				CqVector3D _aq_N;
+				CqVector3D _aq_P;
 
 				(N)->GetNormal(_aq_N,__iGrid);
 				(P)->GetPoint(_aq_P,__iGrid);
 				TqInt i = nPages;
 				for( ; i >= 0; i-- )
 				{
-				// Check if the lightsource is behind the sample.
-				CqVector3D Nl = pMap->GetMatrix(2, i) * _aq_N;
+					// Check if the lightsource is behind the sample.
+					CqVector3D Nl = pMap->GetMatrix(2, i) * _aq_N;
 
-				// In case of surface shader transform L
-				TqFloat cosangle = Nl * L;
+					// In case of surface shader transform L
+					TqFloat cosangle = Nl * L;
 
 					if( cosangle <= 0.0f )
 					{
@@ -1580,7 +1580,10 @@ void CqShaderExecEnv::SO_textureinfo( IqShaderData* name, IqShaderData* dataname
 			pMap = pTMap;
 		}
 		else if ( pTMap )
+		{
 			delete pTMap;
+			pTMap = NULL;
+		}
 	}
 	if ( !pMap )
 	{
@@ -1590,7 +1593,10 @@ void CqShaderExecEnv::SO_textureinfo( IqShaderData* name, IqShaderData* dataname
 			pMap = pSMap;
 		}
 		else if ( pSMap )
+		{
 			delete pSMap;
+			pSMap = NULL;
+		}
 	}
 
 	if ( !pMap )
@@ -1601,7 +1607,10 @@ void CqShaderExecEnv::SO_textureinfo( IqShaderData* name, IqShaderData* dataname
 			pMap = pEMap;
 		}
 		else if ( pEMap )
+		{
 			delete pEMap;
+			pEMap = NULL;
+		}
 	}
 
 	if ( !pMap )
@@ -1612,7 +1621,10 @@ void CqShaderExecEnv::SO_textureinfo( IqShaderData* name, IqShaderData* dataname
 			pMap = pTMap;
 		}
 		else if ( pTMap )
+		{
 			delete pTMap;
+			pTMap = NULL;
+		}
 	}
 
 
@@ -1703,10 +1715,14 @@ void CqShaderExecEnv::SO_textureinfo( IqShaderData* name, IqShaderData* dataname
 		if ( ( ( pV->Type() == type_float ) && ( pV->ArrayLength() == 16 ) ) ||
 		        ( pV->Type() == type_matrix ) )
 		{
-			if ( pSMap )   // && pSMap->Type() == MapType_Shadow)
+			IqTextureMap* pTmp = NULL;
+			if (pTMap) pTmp = pTMap;
+			if (pSMap) pTmp = pSMap;
+			if ( pTmp )   // && pTmp->Type() == MapType_Shadow)
 			{
 
-				CqMatrix m = pSMap->GetMatrix( 0 );  /* WorldToCamera */
+
+				CqMatrix m = pTmp->GetMatrix( 0 );  /* WorldToCamera */
 				if ( pV->ArrayLength() == 16 )
 				{
 
@@ -1744,11 +1760,14 @@ void CqShaderExecEnv::SO_textureinfo( IqShaderData* name, IqShaderData* dataname
 		if ( ( ( pV->Type() == type_float ) && ( pV->ArrayLength() == 16 ) ) ||
 		        ( pV->Type() == type_matrix ) )
 		{
-			if ( pSMap )    // && pSMap->Type() == MapType_Shadow)
+			// init the matrix in case of wrong sl logic
+			IqTextureMap* pTmp = NULL;
+			if (pTMap) pTmp = pTMap;
+			if (pSMap) pTmp = pSMap;
+			if ( pTmp )    // && pTmp->Type() == MapType_Shadow)
 			{
 
-				CqMatrix m = pSMap->GetMatrix( 1 ); /* WorldToScreen */
-
+				CqMatrix m = pTmp->GetMatrix( 1 ); /* WorldToScreen */
 				if ( pV->ArrayLength() == 16 )
 				{
 					pV->ArrayEntry( 0 ) ->SetFloat( static_cast<TqFloat>( m[ 0 ][ 0 ] ) );

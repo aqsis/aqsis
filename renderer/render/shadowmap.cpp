@@ -116,18 +116,7 @@ void CqShadowMap::AllocateMap( TqInt XRes, TqInt YRes )
 
 CqTextureMap* CqTextureMap::GetShadowMap( const CqString& strName )
 {
-	static int size = -1;
-	static CqTextureMap *previous = NULL;
-
 	QGetRenderContext() ->Stats().IncTextureMisses( 3 );
-
-	if ( size == static_cast<int>( m_TextureMap_Cache.size() ) )
-		if ( ( previous ) && ( previous->m_strName == strName ) )
-		{
-			QGetRenderContext() ->Stats().IncTextureHits( 0, 3 );
-			return previous;
-		}
-
 
 	// First search the texture map cache
 	for ( std::vector<CqTextureMap*>::iterator i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
@@ -136,17 +125,17 @@ CqTextureMap* CqTextureMap::GetShadowMap( const CqString& strName )
 		{
 			if ( ( *i ) ->Type() == MapType_Shadow )
 			{
-				previous = *i;
-				size = m_TextureMap_Cache.size();
 				QGetRenderContext() ->Stats().IncTextureHits( 1, 3 );
 				return ( *i );
-			}
-			else
+			} else
 			{
-				return ( NULL );
+				return NULL;
 			}
 		}
 	}
+
+	QGetRenderContext() ->Stats().IncTextureHits( 0, 3 );
+
 	// If we got here, it doesn't exist yet, so we must create and load it.
 	CqShadowMap* pNew = new CqShadowMap( strName );
 	m_TextureMap_Cache.push_back( pNew );
@@ -157,14 +146,18 @@ CqTextureMap* CqTextureMap::GetShadowMap( const CqString& strName )
 	        TIFFGetField( pNew->m_pImage, TIFFTAG_PIXAR_TEXTUREFORMAT, &ptexfmt ) != 1 ||
 	        strcmp( ptexfmt, SHADOWMAP_HEADER ) != 0 )
 	{
-		Aqsis::log() << error << "Map \"" << strName.c_str() << "\" is not a valid shadow map, use RiMakeShadow" << std::endl;
+		static TqBool done = TqFalse;
+		if (!done)
+		{
+			Aqsis::log() << error << "Map \"" << strName.c_str() << "\" is not a valid shadow map, use RiMakeShadow" << std::endl;
+			done = TqTrue;
+		}
 		pNew->SetInvalid();
 	}
-	else
+   	else 
+   	{
 		pNew->ReadMatrices();
-
-	previous = pNew;
-	size = m_TextureMap_Cache.size();
+   	}
 	return ( pNew );
 }
 
