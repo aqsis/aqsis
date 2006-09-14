@@ -1288,6 +1288,7 @@ boost::shared_ptr<IqShader> CqRenderer::getDefaultSurfaceShader()
 
 	// insert the default surface template into the map
 	boost::shared_ptr<IqShader> pRet( new CqShaderVM() );
+	pRet->SetType( Type_Surface );
 	CqShaderVM* pShader = static_cast<CqShaderVM*>( pRet.get() );
 	pShader->SetstrName( "_def_" );
 	pShader->DefaultSurface();
@@ -1297,6 +1298,7 @@ boost::shared_ptr<IqShader> CqRenderer::getDefaultSurfaceShader()
 
 	// return a clone of the default surface template
 	boost::shared_ptr<IqShader> newShader(pRet->Clone());
+        newShader->SetType ( Type_Surface );
 	m_InstancedShaders.push_back(newShader);
 	return (newShader);
 
@@ -1318,6 +1320,7 @@ boost::shared_ptr<IqShader> CqRenderer::CreateShader(
 	{
 		// the shader template is present, so return its clone
 		boost::shared_ptr<IqShader> newShader(m_Shaders[key]->Clone());
+		newShader->SetType( type );
 		m_InstancedShaders.push_back(newShader);
 		return (newShader);
 	}
@@ -1356,6 +1359,7 @@ boost::shared_ptr<IqShader> CqRenderer::CreateShader(
 		//  clone
 		m_Shaders[key] = pRet;
 		boost::shared_ptr<IqShader> newShader(pRet->Clone());
+		newShader->SetType( type );
 		m_InstancedShaders.push_back(newShader);
 		return (newShader);
 	}
@@ -1379,6 +1383,7 @@ boost::shared_ptr<IqShader> CqRenderer::CreateShader(
 		{
 			boost::shared_ptr<IqShader> pRet( new CqShaderVM() );
 
+			pRet->SetType( type );
 			CqShaderVM* pShader = static_cast<CqShaderVM*>(
 			                          pRet.get() );
 			pShader->SetstrName( "null" );
@@ -1387,6 +1392,7 @@ boost::shared_ptr<IqShader> CqRenderer::CreateShader(
 			// add the shader to the map and return its clone
 			m_Shaders[key] = pRet;
 			boost::shared_ptr<IqShader> newShader(pRet->Clone());
+			newShader->SetType( type );
 			m_InstancedShaders.push_back(newShader);
 			return (newShader);
 		}
