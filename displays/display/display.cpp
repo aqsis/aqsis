@@ -670,7 +670,65 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 	if( pImage && data && xmin__ >= 0 && ymin__ >= 0 && xmaxplus1__ <= pImage->m_width && ymaxplus1__ <= pImage->m_height )
 	{
 		// If rendering to a file, or an "rgb" framebuffer, we can just copy the data.
-		if( pImage->m_imageType != Type_Framebuffer || pImage->m_iFormatCount <= 3 )
+		if (pImage->m_imageType == Type_Framebuffer)
+		{
+			unsigned int comp = entrysize/pImage->m_iFormatCount;
+			TqInt y;
+			unsigned char *unrolled = static_cast< unsigned char *>(pImage->m_data);
+
+			for ( y = ymin__; y < ymaxplus1__; y++ )
+			{
+				TqInt x;
+				unsigned char* _pdatarow = (unsigned char* )(pdatarow);
+				for ( x = xmin; x < xmaxplus1; x++ )
+				{
+					TqInt so = pImage->m_iFormatCount * (( y * pImage->m_width ) +  x );
+
+
+					switch (comp)
+					{
+
+							case 2 :
+							{
+								unsigned short *svalue = reinterpret_cast<unsigned short *>(_pdatarow);
+								unrolled[ so + 0 ] = svalue[0]/256;
+								unrolled[ so + 1 ] = svalue[1]/256;
+								unrolled[ so + 2 ] = svalue[2]/256;
+								if (pImage->m_iFormatCount == 4)
+									unrolled[ so + 3 ] = svalue[3]/256;
+							}
+							break;
+							case 4:
+							{
+
+								unsigned long *lvalue = reinterpret_cast<unsigned long *>(_pdatarow);
+								unrolled[ so + 0 ] = (lvalue[0]/256);
+								unrolled[ so + 1 ] = (lvalue[1]/256);
+								unrolled[ so + 2 ] = (lvalue[2]/256);
+								if (pImage->m_iFormatCount == 4)
+									unrolled[ so + 3 ] = (lvalue[3]/256);
+							}
+							break;
+
+							case 1:
+							default:
+							{
+								unsigned char *cvalue = reinterpret_cast<unsigned char *>(_pdatarow);
+								unrolled[ so + 0 ] = cvalue[0];
+								unrolled[ so + 1 ] = cvalue[1];
+								unrolled[ so + 2 ] = cvalue[2];
+								if (pImage->m_iFormatCount == 4)
+									unrolled[ so + 3 ] = cvalue[3];
+							}
+							break;
+					}
+					_pdatarow += entrysize;
+
+				}
+				pdatarow += bucketlinelen;
+			}
+		}
+		else if( pImage->m_imageType != Type_Framebuffer || pImage->m_iFormatCount <= 3 )
 		{
 			TqInt y;
 			for ( y = ymin__; y < ymaxplus1__; y++ )
