@@ -405,6 +405,19 @@ void WriteTIFF(const std::string& filename, SqDisplayInstance* image)
 
 END_NAMESPACE( Aqsis )
 
+void CompositeAlpha(int r, int g, int b, 
+                    unsigned char &R, unsigned char &G, unsigned char &B, 
+		    unsigned char alpha )
+{ 
+	int t;
+	// C’ = INT_PRELERP( A’, B’, b, t )
+	int R1 = static_cast<int>(INT_PRELERP( R, r, alpha, t ));
+	int G1 = static_cast<int>(INT_PRELERP( G, g, alpha, t ));
+	int B1 = static_cast<int>(INT_PRELERP( B, b, alpha, t ));
+	R = CLAMP( R1, 0, 255 );
+	G = CLAMP( G1, 0, 255 );
+	B = CLAMP( B1, 0, 255 );
+}
 
 PtDspyError DspyImageOpen(PtDspyImageHandle * image,
                           const char *drivername,
@@ -691,22 +704,32 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 							case 2 :
 							{
 								unsigned short *svalue = reinterpret_cast<unsigned short *>(_pdatarow);
-								unrolled[ so + 0 ] = svalue[0]/256;
-								unrolled[ so + 1 ] = svalue[1]/256;
-								unrolled[ so + 2 ] = svalue[2]/256;
+								unsigned char alpha = 255;
 								if (pImage->m_iFormatCount == 4)
-									unrolled[ so + 3 ] = svalue[3]/256;
+								{
+									alpha = (svalue[3]/256);
+								}
+								CompositeAlpha((int) svalue[0]/256, (int) svalue[1]/256, (int) svalue[2]/256, 
+                    unrolled[so + 0], unrolled[so + 1], unrolled[so + 2], 
+		    alpha);
+								if (pImage->m_iFormatCount == 4)
+									unrolled[ so + 3 ] = alpha;
 							}
 							break;
 							case 4:
 							{
 
 								unsigned long *lvalue = reinterpret_cast<unsigned long *>(_pdatarow);
-								unrolled[ so + 0 ] = (lvalue[0]/256);
-								unrolled[ so + 1 ] = (lvalue[1]/256);
-								unrolled[ so + 2 ] = (lvalue[2]/256);
+								unsigned char alpha = 255;
 								if (pImage->m_iFormatCount == 4)
-									unrolled[ so + 3 ] = (lvalue[3]/256);
+								{
+									alpha = (unsigned char) (lvalue[3]/256);
+								}
+								CompositeAlpha((int) lvalue[0]/256, (int) lvalue[1]/256, (int) lvalue[2]/256, 
+                    unrolled[so + 0], unrolled[so + 1], unrolled[so + 2], 
+		    alpha);
+								if (pImage->m_iFormatCount == 4)
+									unrolled[ so + 3 ] = alpha;
 							}
 							break;
 
@@ -714,11 +737,16 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 							default:
 							{
 								unsigned char *cvalue = reinterpret_cast<unsigned char *>(_pdatarow);
-								unrolled[ so + 0 ] = cvalue[0];
-								unrolled[ so + 1 ] = cvalue[1];
-								unrolled[ so + 2 ] = cvalue[2];
+								unsigned char alpha = 255;
 								if (pImage->m_iFormatCount == 4)
-									unrolled[ so + 3 ] = cvalue[3];
+								{
+									alpha = (unsigned char) (cvalue[3]);
+								}
+								CompositeAlpha((int) cvalue[0], (int) cvalue[1], (int) cvalue[2], 
+                    unrolled[so + 0], unrolled[so + 1], unrolled[so + 2], 
+		    alpha);
+								if (pImage->m_iFormatCount == 4)
+									unrolled[ so + 3 ] = alpha;
 							}
 							break;
 					}
