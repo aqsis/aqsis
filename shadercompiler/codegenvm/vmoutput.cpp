@@ -842,13 +842,13 @@ void CqCodeGenOutput::Visit( IqParseNodeMessagePassingFunction& MPF )
 	if ( pVD )
 	{
 		pVD->IncUseCount();
-		if ( strCommType != "textureinfo" )
+		if ( MPF.CommType() != CommTypeTextureInfo )
 			m_slxFile << "\t" << strCommType.c_str() << " " << pVD->strName() << std::endl;
 		else
 		{
-			CqString strExtra( MPF.Extra() );
-			m_slxFile << "\tpushv ";
-			m_slxFile << strExtra.c_str() << std::endl;
+			IqParseNode * pFileName = pExpr->pNextSibling();
+			if ( pFileName != 0 )
+				pFileName->Accept( *this );
 			m_slxFile << "\t" << strCommType.c_str() << " " << pVD->strName() << std::endl;
 		}
 	}

@@ -1873,14 +1873,9 @@ comm_function
 								
 								if(pVD!=0 && !fError)
 								{
-                                    
-	                                CqParseNode* pArgs=$3;
-                                    CqParseNodeStringConst* pString = (CqParseNodeStringConst *) pArgs;
-                                    CqString strArg("");
-                                    strArg += pString->strValue();
-								        
-									$$=new CqParseNodeCommFunction($1, strArg, $7.VarRef);
+									$$=new CqParseNodeCommFunction($1, $7.VarRef);
 								    $$->AddLastChild($5);
+								    $$->AddLastChild($3);
 								}
 								else
 								{
@@ -1924,14 +1919,9 @@ comm_function
 								
 								if(pVD!=0 && !fError)
 								{
-                                    
-	                                CqParseNode* pArgs=$3;
-                                    CqParseNodeStringConst* pString = (CqParseNodeStringConst *) pArgs;
-                                    CqString strArg("");
-                                    strArg += pString->strValue();
-								        
-									$$=new CqParseNodeCommFunction($1, strArg, $7.VarRef);
+									$$=new CqParseNodeCommFunction($1, $7.VarRef);
 								    $$->AddLastChild($5);
+								    $$->AddLastChild($3);
 								}
 								else
 								{
