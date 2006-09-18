@@ -80,6 +80,11 @@ static char datetime[21];
 static time_t start;
 static char* description = NULL;
 
+//----------------------------------------------------------------------
+/** SaveAsShadowMap() Save as a tiff an shadowmap
+*
+*/
+
 void SaveAsShadowMap(const std::string& filename, SqDisplayInstance* image, char *mydescription)
 {
 	TqChar version[ 80 ];
@@ -204,6 +209,10 @@ void SaveAsShadowMap(const std::string& filename, SqDisplayInstance* image, char
 	}
 }
 
+//----------------------------------------------------------------------
+/** WriteTIFF() Save as a tiff the output of the renderer
+*
+*/
 
 void WriteTIFF(const std::string& filename, SqDisplayInstance* image)
 {
@@ -392,7 +401,7 @@ void WriteTIFF(const std::string& filename, SqDisplayInstance* image)
 			TqInt row = 0;
 			for ( row = 0; row < image->m_height; row++ )
 			{
-				if ( TIFFWriteScanline( pOut, reinterpret_cast<void*>(reinterpret_cast<unsigned char*>(image->m_data) + ( row * image->m_lineLength )), row, 0 )
+				if ( TIFFWriteScanline( pOut, reinterpret_cast<void*>(reinterpret_cast<TqUchar*>(image->m_data) + ( row * image->m_lineLength )), row, 0 )
 				        < 0 )
 					break;
 			}
@@ -401,23 +410,27 @@ void WriteTIFF(const std::string& filename, SqDisplayInstance* image)
 	}
 }
 
+//----------------------------------------------------------------------
+/** CompositeAlpha() Composite with the alpha the end result RGB
+*
+*/
 
-
-END_NAMESPACE( Aqsis )
-
-void CompositeAlpha(int r, int g, int b, 
-                    unsigned char &R, unsigned char &G, unsigned char &B, 
-		    unsigned char alpha )
+void CompositeAlpha(TqInt r, TqInt g, TqInt b, TqUchar &R, TqUchar &G, TqUchar &B, 
+		    TqUchar alpha )
 { 
-	int t;
+	TqInt t;
 	// C’ = INT_PRELERP( A’, B’, b, t )
-	int R1 = static_cast<int>(INT_PRELERP( R, r, alpha, t ));
-	int G1 = static_cast<int>(INT_PRELERP( G, g, alpha, t ));
-	int B1 = static_cast<int>(INT_PRELERP( B, b, alpha, t ));
+	TqInt R1 = static_cast<TqInt>(INT_PRELERP( R, r, alpha, t ));
+	TqInt G1 = static_cast<TqInt>(INT_PRELERP( G, g, alpha, t ));
+	TqInt B1 = static_cast<TqInt>(INT_PRELERP( B, b, alpha, t ));
 	R = CLAMP( R1, 0, 255 );
 	G = CLAMP( G1, 0, 255 );
 	B = CLAMP( B1, 0, 255 );
 }
+
+
+END_NAMESPACE( Aqsis )
+
 
 PtDspyError DspyImageOpen(PtDspyImageHandle * image,
                           const char *drivername,
@@ -506,7 +519,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 #ifndef	AQSIS_NO_FLTK
 			// Allocate the buffer, even if the formatcount <3, always allocated 3, as that is what's needed for the
 			// display.
-			pImage->m_data = new unsigned char[ pImage->m_width * pImage->m_height * pImage->m_iFormatCount ];
+			pImage->m_data = new TqUchar[ pImage->m_width * pImage->m_height * pImage->m_iFormatCount ];
 			pImage->m_entrySize = pImage->m_iFormatCount * sizeof(char);
 
 			// Initialise the display to a checkerboard to show alpha
@@ -515,7 +528,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 				for (TqInt j = 0; j < pImage->m_width; j++)
 				{
 					int     t       = 0;
-					unsigned char d = 255;
+					TqUchar d = 255;
 
 					if ( ( (pImage->m_height - 1 - i) & 31 ) < 16 )
 						t ^= 1;
@@ -526,16 +539,16 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 					{
 						d      = 128;
 					}
-					reinterpret_cast<unsigned char*>(pImage->m_data)[pImage->m_iFormatCount * (i*pImage->m_width + j) ] = d;
-					reinterpret_cast<unsigned char*>(pImage->m_data)[pImage->m_iFormatCount * (i*pImage->m_width + j) + 1] = d;
-					reinterpret_cast<unsigned char*>(pImage->m_data)[pImage->m_iFormatCount * (i*pImage->m_width + j) + 2] = d;
+					reinterpret_cast<TqUchar*>(pImage->m_data)[pImage->m_iFormatCount * (i*pImage->m_width + j) ] = d;
+					reinterpret_cast<TqUchar*>(pImage->m_data)[pImage->m_iFormatCount * (i*pImage->m_width + j) + 1] = d;
+					reinterpret_cast<TqUchar*>(pImage->m_data)[pImage->m_iFormatCount * (i*pImage->m_width + j) + 2] = d;
 				}
 			}
 			widestFormat = PkDspyUnsigned8;
 
 
 			pImage->m_theWindow = new Fl_Window(pImage->m_width, pImage->m_height);
-			pImage->m_uiImageWidget = new Fl_FrameBuffer_Widget(0,0, pImage->m_width, pImage->m_height, pImage->m_iFormatCount, reinterpret_cast<unsigned char*>(pImage->m_data));
+			pImage->m_uiImageWidget = new Fl_FrameBuffer_Widget(0,0, pImage->m_width, pImage->m_height, pImage->m_iFormatCount, reinterpret_cast<TqUchar*>(pImage->m_data));
 			pImage->m_theWindow->resizable(pImage->m_uiImageWidget);
 			pImage->m_theWindow->label(pImage->m_filename);
 			pImage->m_theWindow->end();
@@ -549,7 +562,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			// Determine the appropriate format to save into.
 			if(widestFormat == PkDspyUnsigned8)
 			{
-				pImage->m_data = malloc( pImage->m_width * pImage->m_height * pImage->m_iFormatCount * sizeof(unsigned char));
+				pImage->m_data = malloc( pImage->m_width * pImage->m_height * pImage->m_iFormatCount * sizeof(TqUchar));
 				pImage->m_entrySize = pImage->m_iFormatCount * sizeof(char);
 			}
 			else if(widestFormat == PkDspyUnsigned16)
@@ -575,10 +588,10 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 		if(pImage->m_imageType == Type_ZFramebuffer)
 		{
 #ifndef	AQSIS_NO_FLTK
-			pImage->m_zfbdata = reinterpret_cast<unsigned char*>(malloc( pImage->m_width * pImage->m_height * 3 * sizeof(unsigned char)));
+			pImage->m_zfbdata = reinterpret_cast<TqUchar*>(malloc( pImage->m_width * pImage->m_height * 3 * sizeof(TqUchar)));
 
 			pImage->m_theWindow = new Fl_Window(pImage->m_width, pImage->m_height);
-			pImage->m_uiImageWidget = new Fl_FrameBuffer_Widget(0,0, pImage->m_width, pImage->m_height, 3, reinterpret_cast<unsigned char*>(pImage->m_zfbdata));
+			pImage->m_uiImageWidget = new Fl_FrameBuffer_Widget(0,0, pImage->m_width, pImage->m_height, 3, reinterpret_cast<TqUchar*>(pImage->m_zfbdata));
 			pImage->m_theWindow->resizable(pImage->m_uiImageWidget);
 			pImage->m_theWindow->label(pImage->m_filename);
 			pImage->m_theWindow->end();
@@ -660,7 +673,7 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
                           int ymin,
                           int ymaxplus1,
                           int entrysize,
-                          const unsigned char *data)
+                          const TqUchar *data)
 {
 	SqDisplayInstance* pImage;
 	pImage = reinterpret_cast<SqDisplayInstance*>(image);
@@ -677,7 +690,7 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 	// Calculate where in the bucket we are starting from if the window is cropped.
 	TqInt row = MAX(pImage->m_origin[1] - ymin, 0);
 	TqInt col = MAX(pImage->m_origin[0] - xmin, 0);
-	const unsigned char* pdatarow = data;
+	const TqUchar* pdatarow = data;
 	pdatarow += (row * bucketlinelen) + (col * entrysize);
 
 	if( pImage && data && xmin__ >= 0 && ymin__ >= 0 && xmaxplus1__ <= pImage->m_width && ymaxplus1__ <= pImage->m_height )
@@ -687,12 +700,12 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 		{
 			unsigned int comp = entrysize/pImage->m_iFormatCount;
 			TqInt y;
-			unsigned char *unrolled = static_cast< unsigned char *>(pImage->m_data);
+			TqUchar *unrolled = static_cast< TqUchar *>(pImage->m_data);
 
 			for ( y = ymin__; y < ymaxplus1__; y++ )
 			{
 				TqInt x;
-				unsigned char* _pdatarow = (unsigned char* )(pdatarow);
+				TqUchar* _pdatarow = (TqUchar* )(pdatarow);
 				for ( x = xmin; x < xmaxplus1; x++ )
 				{
 					TqInt so = pImage->m_iFormatCount * (( y * pImage->m_width ) +  x );
@@ -704,12 +717,12 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 							case 2 :
 							{
 								unsigned short *svalue = reinterpret_cast<unsigned short *>(_pdatarow);
-								unsigned char alpha = 255;
+								TqUchar alpha = 255;
 								if (pImage->m_iFormatCount == 4)
 								{
 									alpha = (svalue[3]/256);
 								}
-								CompositeAlpha((int) svalue[0]/256, (int) svalue[1]/256, (int) svalue[2]/256, 
+								CompositeAlpha((TqInt) svalue[0]/256, (TqInt) svalue[1]/256, (TqInt) svalue[2]/256, 
                     unrolled[so + 0], unrolled[so + 1], unrolled[so + 2], 
 		    alpha);
 								if (pImage->m_iFormatCount == 4)
@@ -720,12 +733,12 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 							{
 
 								unsigned long *lvalue = reinterpret_cast<unsigned long *>(_pdatarow);
-								unsigned char alpha = 255;
+								TqUchar alpha = 255;
 								if (pImage->m_iFormatCount == 4)
 								{
-									alpha = (unsigned char) (lvalue[3]/256);
+									alpha = (TqUchar) (lvalue[3]/256);
 								}
-								CompositeAlpha((int) lvalue[0]/256, (int) lvalue[1]/256, (int) lvalue[2]/256, 
+								CompositeAlpha((TqInt) lvalue[0]/256, (TqInt) lvalue[1]/256, (TqInt) lvalue[2]/256, 
                     unrolled[so + 0], unrolled[so + 1], unrolled[so + 2], 
 		    alpha);
 								if (pImage->m_iFormatCount == 4)
@@ -736,13 +749,13 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 							case 1:
 							default:
 							{
-								unsigned char *cvalue = reinterpret_cast<unsigned char *>(_pdatarow);
-								unsigned char alpha = 255;
+								TqUchar *cvalue = reinterpret_cast<TqUchar *>(_pdatarow);
+								TqUchar alpha = 255;
 								if (pImage->m_iFormatCount == 4)
 								{
-									alpha = (unsigned char) (cvalue[3]);
+									alpha = (TqUchar) (cvalue[3]);
 								}
-								CompositeAlpha((int) cvalue[0], (int) cvalue[1], (int) cvalue[2], 
+								CompositeAlpha((TqInt) cvalue[0], (TqInt) cvalue[1], (TqInt) cvalue[2], 
                     unrolled[so + 0], unrolled[so + 1], unrolled[so + 2], 
 		    alpha);
 								if (pImage->m_iFormatCount == 4)
@@ -770,28 +783,26 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 		// otherwise we need to do alpha blending for the alpha data to show in the framebuffer
 		else
 		{
-			TqInt t;	// Not used, just a temporary needed for the INT_PRELERP macro.
 			TqInt y;
 			for ( y = ymin__; y < ymaxplus1__; y++ )
 			{
 				TqInt x;
-				const unsigned char* _pdatarow = pdatarow;
+				const TqUchar* _pdatarow = pdatarow;
 				for ( x = xmin__; x < xmaxplus1__; x++ )
 				{
-					unsigned char alpha = _pdatarow[3];
+					TqUchar alpha = _pdatarow[3];
 					if( alpha > 0 )
 					{
 						TqInt so = ( y * pImage->m_lineLength ) + ( x * pImage->m_entrySize );
-						int r = _pdatarow[0];
-						int g = _pdatarow[1];
-						int b = _pdatarow[2];
-						// C’ = INT_PRELERP( A’, B’, b, t )
-						int R = static_cast<int>(INT_PRELERP( static_cast<int>(reinterpret_cast<unsigned char*>(pImage->m_data)[ so + 0 ]), r, alpha, t ));
-						int G = static_cast<int>(INT_PRELERP( static_cast<int>(reinterpret_cast<unsigned char*>(pImage->m_data)[ so + 1 ]), g, alpha, t ));
-						int B = static_cast<int>(INT_PRELERP( static_cast<int>(reinterpret_cast<unsigned char*>(pImage->m_data)[ so + 2 ]), b, alpha, t ));
-						reinterpret_cast<unsigned char*>(pImage->m_data)[ so + 0 ] = CLAMP( R, 0, 255 );
-						reinterpret_cast<unsigned char*>(pImage->m_data)[ so + 1 ] = CLAMP( G, 0, 255 );
-						reinterpret_cast<unsigned char*>(pImage->m_data)[ so + 2 ] = CLAMP( B, 0, 255 );
+						TqInt r = _pdatarow[0];
+						TqInt g = _pdatarow[1];
+						TqInt b = _pdatarow[2];
+						
+						TqUchar R = reinterpret_cast<TqUchar*>(pImage->m_data)[ so + 0 ];
+						TqUchar G = reinterpret_cast<TqUchar*>(pImage->m_data)[ so + 1 ];
+						TqUchar B = reinterpret_cast<TqUchar*>(pImage->m_data)[ so + 2 ];
+						CompositeAlpha(r, g, b, R, G, B, alpha );
+
 					}
 					_pdatarow += entrysize;
 				}
@@ -803,17 +814,17 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 		if(pImage->m_imageType == Type_ZFramebuffer)
 		{
 #ifndef AQSIS_NO_FLTK
-			const unsigned char* pdatarow = data;
+			const TqUchar * pdatarow = data;
 			pdatarow += (row * bucketlinelen) + (col * entrysize);
 			TqInt y;
 			for ( y = ymin__; y < ymaxplus1__; y++ )
 			{
 				TqInt x;
-				const unsigned char* _pdatarow = pdatarow;
+				const TqUchar* _pdatarow = pdatarow;
 				for ( x = xmin; x < xmaxplus1; x++ )
 				{
 					TqFloat value = reinterpret_cast<const TqFloat*>(_pdatarow)[0];
-					TqInt so = ( y * pImage->m_width * 3 * sizeof(unsigned char) ) + ( x * 3 * sizeof(unsigned char) );
+					TqInt so = ( y * pImage->m_width * 3 * sizeof(TqUchar) ) + ( x * 3 * sizeof(TqUchar) );
 					pImage->m_zfbdata[ so + 0 ] =
 					    pImage->m_zfbdata[ so + 1 ] =
 					        pImage->m_zfbdata[ so + 2 ] = value < FLT_MAX ? 255 : 0;
@@ -943,8 +954,8 @@ PtDspyError DspyImageDelayClose(PtDspyImageHandle image)
 						else
 						{
 							const TqFloat normalized = ( reinterpret_cast<const TqFloat*>(pImage->m_data)[ dataindex ] - mindepth ) / dynamicrange;
-							pImage->m_zfbdata[imageindex + 0] = static_cast<unsigned char>( 255 * ( 1.0 - normalized ) );
-							pImage->m_zfbdata[imageindex + 1] = static_cast<unsigned char>( 255 * ( 1.0 - normalized ) );
+							pImage->m_zfbdata[imageindex + 0] = static_cast<TqUchar>( 255 * ( 1.0 - normalized ) );
+							pImage->m_zfbdata[imageindex + 1] = static_cast<TqUchar>( 255 * ( 1.0 - normalized ) );
 							pImage->m_zfbdata[imageindex + 2] = 255;
 						}
 					}
