@@ -4,7 +4,7 @@
 class BtoRBasicObject:
 	def __init__(self, obj):
 		self.obj = obj
-
+		self.isRenderable = False
 	def getObject(self):
 		return self.obj
 
@@ -34,13 +34,13 @@ class BtoRMaterialType(BtoRBasicObject): pass
 class BtoRRotationType(BtoRBasicObject): pass
 class BtoRCustomRIB(BtoRBasicObject): pass
 # shader parameter objects
-class BtoRBasicParam: # this is a non-
+class BtoRBasicParam: 
 	height = 27 # should work for most
-	def __init__(self, matName = None, shader = None, param = None, type = None, value = None, size = None, parent = None, name = None):
+	def __init__(self, matName = None, shader = None, param = None, p_type = None, value = None, size = None, parent = None, name = None):
 		self.mat = matName
 		self.shader = shader
 		self.param = param
-		self.type = type
+		self.type = p_type
 		self.value = value
 		self.size = size
 		self.parent = parent

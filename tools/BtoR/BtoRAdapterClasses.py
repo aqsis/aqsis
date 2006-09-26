@@ -1,6 +1,5 @@
 import os
 import btor
-
 from btor import BtoRGUIClasses as ui
 from btor.BtoRTypes import *
 import cgkit
@@ -21,12 +20,47 @@ import random
 import md5
 import traceback
 import re
- 
+  
+# interfaces
 class IProperty(protocols.Interface):
 	def getValue():
 		pass
 	def setValue():
 		pass
+
+class IPropertyEditor(protocols.Interface):
+	def getValue():
+		"""" get the value of the property """
+	def setValue():
+		""" set the value of the property """
+		
+class IObjectAdapter(protocols.Interface):
+	def render():
+		""" Render the object"""
+	def getInfo():
+		""" Get the object's information hash. """
+	def initObjectData():
+		""" Initialize the object's BtoR data """
+	def loadData():
+		""" Load object's data """
+	def saveData():
+		""" Save object's Data """
+		
+class IObjectUI(protocols.Interface):
+	def getEditor():
+		""" Get the object's editor panel. """	
+	def setExportCallback(self, func):
+		""" Assign an export function """
+class IShaderParamUI(protocols.Interface):
+	def getVariance():
+		""" Returns a shader param that has been modified according to rules specified by the user """
+	def getEditor():
+		""" returns the UI for the shader parameter """
+class IShaderParamEditor(protocols.Interface):
+	def setValue():
+		""" Set the value of the parameter """
+	def getValue():
+		""" get the value of the parameter """
 		
 class Property:
 	protocols.advise(instancesProvide=[IProperty])
@@ -36,6 +70,7 @@ class Property:
 		self.saveable = True
 		self.labelWidth = 0
 		self.editorWidth = 0
+		self.isRenderable = False
 	def setHeight(self, height):
 		self.height = height
 	def setWidth(self, width):
@@ -69,7 +104,8 @@ class Property:
 		#if self.value.__dict__.has_key("registerCallback"): # this will bypass problems with missing values, till I fix my implementation to full provide an interface
 		print "setting callback for shader!"
 		self.value.registerCallback(signal, function) 
-	
+
+# Properties
 class StringProperty(Property): 
 	protocols.advise(instancesProvide=[IProperty], asAdapterForTypes=[str])
 	pass
@@ -130,7 +166,7 @@ class DictProperty(Property):
 	def getKeys(self):
 		return self.keyList # keylist may or may not be sorted
 	def getValueByKey(self, key):
-		return valueDict[key]	
+		return self.valueDict[key]	
 		
 class BooleanProperty(Property): 
 	protocols.advise(instancesProvide=[IProperty], asAdapterForTypes=[bool])
@@ -309,13 +345,8 @@ class CustomRIBProperty(Property):
 	protocols.advise(instancesProvide=[IProperty], asAdapterForTypes=[BtoRCustomRIB])
 	height = 20
 	pass
-	
-
-class IPropertyEditor(protocols.Interface):
-	def getValue():
-		"""" get the value of the property """
-	def setValue():
-		""" set the value of the property """
+		
+# Property Editors
 class PropertyEditor: # this needs no interface declaration, since all this is doing is providing a baseclass
 	fontsize = 'small'
 	def __init__(self, property, suppressLabel = False):		
@@ -365,7 +396,7 @@ class PropertyEditor: # this needs no interface declaration, since all this is d
 			self.property.setValue(obj.getValue())
 		if self.func != None:
 			self.func() # invoke the update function for this property
-			
+
 	def getEditor(self):
 		return self.editor
 		
@@ -384,11 +415,19 @@ class StringPropertyEditor(PropertyEditor):
 	protocols.advise(instancesProvide=[IPropertyEditor], asAdapterForTypes=[StringProperty, BtoRStringParam], factoryMethod="routeProperty")
 	""" A basic property, a label and a text box """
 	def __init__(self, property):
+		sdict = globals()
+		# self.scene = sdict["instBtoRSceneSettings"]
+		
 		PropertyEditor.__init__(self, property)
 		width = property.width
 		height = property.height
 		self.value = ui.TextField(width / 2, 0, width / 2, height, self.property.getName(), self.property.getValue(), self.editor, True, fontsize = self.fontsize)
 		self.value.registerCallback("update", self.updateValue)
+		self.value.registerCallback("right_click", self.showAssets)
+	
+	def showAssets(self, obj):
+		#self.scene.showAssets(self)
+		print "yo!"
 	
 	@classmethod
 	def routeProperty(cls, obj):		
@@ -416,6 +455,10 @@ class StringPropertyEditor(PropertyEditor):
 				return cls(obj)
 					
 class FilePropertyEditor(PropertyEditor):
+	# file property editor should have access to the global asset list. 
+	# environment & shadow maps should apply to the *assigned* object
+	# lightsources are slightly weird because they need to be both local and global (for AO purposes)
+	# environment maps are actually global namely because of multiple assignment
 	def __init__(self, property):		# remember to add an override button to all custom types!
 		sdict = globals()
 		self.evt_manager = sdict["instBtoREvtManager"]
@@ -423,16 +466,21 @@ class FilePropertyEditor(PropertyEditor):
 		width = self.property.width
 		height = self.property.height
 		self.value = ui.TextField(width / 2, 0, width / 2 - height, height, self.property.getName(), self.property.getStrValue(), self.editor, True, fontsize = self.fontsize)
-		self.value.Enabled = False
+		# self.value.Enabled = False
 		butX = self.value.x + self.value.width + 1
 		self.triggerButton = ui.Button(butX, 0, height, height, "...", "...", 'small', self.editor, True)
 		self.triggerButton.shadowed = False
 		self.triggerButton.registerCallback("release", self.browse)
-		if isinstance(property, StringProperty):
-			self.property.registerCallback("update", self.updateValue)
+		# if isinstance(property, StringProperty):
+		self.value.registerCallback("update", self.updateValue)
 		# for (this( property editor, I should set a back reference so I can update the text field with the shader when it's initialized
 		self.property.editor = self
-
+		self.value.registerCallback("right_click", self.showAssets)
+	
+	def showAssets(self, obj):
+		#self.scene.showAssets(self)
+		print "yo!"
+		
 	def browse(self, button):
 		""" Browser """
 		
@@ -495,17 +543,23 @@ class MenuPropertyEditor(PropertyEditor):
 		PropertyEditor.__init__(self, property)
 		width = self.property.width
 		height = self.property.height
-		menu = self.property.getKeys()
+		menu = self.property.getKeys()	
+		defVal = None
+		if "btor:default" in menu:
+			defVal = self.property.getValueByKey("btor:default")
+			# strip the default option out of the menu now
+			menu.remove("btor:default")			
 		self.value = ui.Menu(width / 2, 2, width / 2, height - 4, self.property.getName(), menu, self.editor, True, fontsize = self.fontsize)		
 		self.value.registerCallback("select", self.updateValue)
 		self.value.setShadowed(False)
 		self.property.setValue(self.value.getValue())
+		if defVal != None:
+			self.value.setValueString(defVal) # assigns the default value
 		
-		# the property should handle making sure I've got the right value here I think	
 	def setValue(self, value):
 		# menu editors need to be slightly different
 		self.property.setValue(value) 
-		self.value.setValueString(value)
+		self.value.setValueString(value) 
 	
 	def updateMenu(self, menu):
 		# reinit the menu, but keep the selected indesx
@@ -793,36 +847,14 @@ class CustomRIBPropertyEditor(PropertyEditor):
 		self.value = ui.TextField(width / 2, 0, x, height, "", "No custom RIB", self.editor, True)
 		self.value.Enabled = False
 		self.trigger = ui.Button(x + 1, 0, x, height, "", "...", self.editor, True)
-		
-		
-class IObjectAdapter(protocols.Interface):
-	def render():
-		""" Render the object"""
-	def getInfo():
-		""" Get the object's information hash. """
-	def initObjectData():
-		""" Initialize the object's BtoR data """
-	def loadData():
-		""" Load object's data """
-	def saveData():
-		""" Save object's Data """
+			
+
 	
-class IObjectUI(protocols.Interface):
-	def getEditor():
-		""" Get the object's editor panel. """	
-	def setExportCallback(self, func):
-		""" Assign an export function """
-class IShaderParamUI(protocols.Interface):
-	def getVariance():
-		""" Returns a shader param that has been modified according to rules specified by the user """
-	def getEditor():
-		""" returns the UI for the shader parameter """
-class IShaderParamEditor(protocols.Interface):
-	def setValue():
-		""" Set the value of the parameter """
-	def getValue():
-		""" get the value of the parameter """
-class ObjectAdapter:
+# Object Adapters
+		
+	
+
+class ObjectAdapter: # baseclass for all Blender objects
 	protocols.advise(instancesProvide=[IObjectAdapter], asAdapterForTypes=[BtoRLattice, BtoRArmature, BtoRBasicObject, BtoREmpty, BtoRWave])
 	def __init__(self, obj):
 		""" initialize an object adapter based on the incoming object """
@@ -945,6 +977,7 @@ class ObjectAdapter:
 					ptype = "vec3"
 					val = cgkit.cgtypes.vec3(float(param[0]), float(param[1]), float(param[2]))				
 				elif len(param) == 16: # matrix
+					ptype = "matrix"
 					val = cgkit.cgtypes.mat4(float(param[0]),
 							float(param[2]),
 							float(param[2]),
@@ -967,11 +1000,11 @@ class ObjectAdapter:
 				val = float(param)
 				
 			elif isinstance(param, str):
-				ptype = "string"
+				ptype = "str"
 				val = param			
 			
 				
-			if initialized == False:
+			if not initialized:				
 				shader.declare(key,type=convtypes[ptype], default=val ) # declare the shader here!
 				# shader.createSlot(key + "_slot", convtypes[ptype], None, val) # Here we set the default value to the parameters incoming value...
 			# print "Setting shader parameter ", key, " to ", val
@@ -1030,6 +1063,7 @@ class ObjectAdapter:
 				print "No type found, this parameter was a ", p_type
 				parm_value = None
 			if initialized == False:
+				print "Declaring a variable!"
 				shader.declare(p_name, type=convtypes[p_type], default=parm_value)
 				# shader.createSlot(p_name, convtypes[p_type], None, parm_value) # Here we set the default value to the parameters incoming value.
 				
@@ -1161,8 +1195,7 @@ class ObjectAdapter:
 		
 		self.checkReset()
 			
-	def initShader(self, useXML = False, xml = None):
-		# print "Initializing a ", self.shader_type, " shader"
+	def initShader(self, useXML = False, xml = None):		
 		try:
 			if self.settings.use_slparams:
 				shaderPath = self.settings.shaderpaths.getValue().split(";")[0]
@@ -1177,12 +1210,36 @@ class ObjectAdapter:
 				else:
 					if self.objData.has_key("shaderparms"):
 						self.populateShaderParamsList(self.objData["shaderparms"], shader, initialized)		
-			else:
-				
+				self.shader = btor.BtoRMain.GenericShader(shader, self.shader_type, self)
+			else:				
 				initialized = False
-				shader = cgkit.rmshader.RMShader(self.objData["shadername"])
-				self.populateShaderParamsList(self.ObjData["shaderParams"], shader, initialized)		
-			self.shader = btor.BtoRMain.GenericShader(shader, self.shader_type, self)
+				
+				shader = cgkit.rmshader.RMShader() # blank shader here
+				# sine I'm not relying upon slparams to build the light shader params for me, I must instead do something like
+				# file = os.path.basename(self.objData["shaderfilename"])
+				# so here, let's see if the light shader I want is actually in the first shader path..that should be in the filename
+				
+				# path = self.settings.getPathForShader(self.objData["shaderfilename"], self.shader_type)# here I should have a path
+				
+				#if path == None:					
+				#	self.evt_manager.showErrorDialog("Missing shader or shader path!", "Error: The default " + self.shader_type + " shader(s) could not be found! Check your setup.")
+				#	raise ValueError
+				#else:					
+				self.shader = btor.BtoRMain.GenericShader(None, self.shader_type, self)
+				#
+				#if self.shader.searchPaths.getValue() != path:
+				#	self.shader.setSearchPath(path) # set the path to the path where my light shader is. Should be the *first* path listed, if not, move on
+					# hopefully this doesn't break stuff.
+				#else: # with luck, this is always the case
+				path = os.path.split(self.objData["shaderfilename"])
+				self.shader.setSearchPath(path[0])					
+				self.shader.setShader(path[1]) # this should update the controls
+				# self.shader.shader.shadername = self.objData["shaderparms"]["shadername"]
+				self.shader.shader.filename = self.objData["shaderfilename"]
+				self.populateShaderParamsList(self.objData["shaderparms"], self.shader.shader, True)	# so I can now setup the parameters
+				# now get more wicked
+				
+
 		except:
 			traceback.print_exc()
 			self.shader = btor.BtoRMain.GenericShader(None, self.shader_type, self)
@@ -1211,8 +1268,7 @@ class ObjectAdapter:
 			ri.RiOpacity(cgkit.cgtypes.vec3(1.0, 1.0, 1.0))
 			ri.RiSurface("matte", { "Ka" : 1.0, "Kd" : 1.0 })
 		else:
-			if Bmaterial != None:
-				
+			if Bmaterial != None:				
 				# test for a transform 
 				translated = False
 				rotated = False
@@ -1260,8 +1316,8 @@ class ObjectAdapter:
 				Bmaterial.getProperty("Displacement").getObject().updateShaderParams()
 				Bmaterial.getProperty("Volume").getObject().updateShaderParams()
 				
-				ri.RiColor(material.color())			
-				ri.RiOpacity(material.opacity())
+				ri.RiColor(Bmaterial.getProperty("color"))			
+				ri.RiOpacity(Bmaterial.getProperty("opacity"))
 				# thus
 				if material.surfaceShaderName() != None:				
 					ri.RiSurface(material.surfaceShaderName(), material.surfaceShaderParams(0))
@@ -1282,17 +1338,34 @@ class MeshAdapter(ObjectAdapter):
 		
 	def render(self, shadowPass = False, envPass = False):
 		render = False
-		
+		illumList = []
+		if self.lighting.getProperty("layerLighting"):
+			# if I'm using layerLighting, then I know that all of my lights are going to be OFF by default
+			# I need to turn some lights on and off here
+			
+			for layer in self.object.layers:
+				for light in self.scene.lightingLayers[layer]:
+					if light not in illumList:
+						illumList.append(light)
+				
 		if shadowPass:
 			if self.properties["RenderInShadowPass"].getValue():				
-				render = True
+				if self.lighting.getProperty("layerLighting"): # if I'm using layerLighting, then shadowPass rendering is only neccessary if any lights are illuminating this object.
+					if len(illumList) > 0: # There's a light illuminating this object. Render it in the shadowPass
+						render = True
+				else: # if I'm not using layerLighting, then render always if RenderInShadowPass is true
+					render = True
 		elif envPass:
 			if self.properties["RenderInEnvMaps"].getValue():
 				render = True
 		else:
-			render = True			
-		
-		if render:	
+			render = True					
+			
+		if render:				
+			if len(illumList) > 0:				
+				ri.RiAttributeBegin() # push the graphics state. All lights should be off
+				for light in illumList:
+					ri.RiIlluminate(light, ri.RI_TRUE)
 			# immediately test for dupliverts
 			if self.object.enableDupVerts and len(self.object.DupObjects) > 0:
 				# I might have dupliverts, react accordingly
@@ -1347,26 +1420,30 @@ class MeshAdapter(ObjectAdapter):
 				# aaaannnnnd done.
 				# I rendered this object, so flag the 
 				self.changed = False
-
+			if len(illumList) > 0:
+				ri.RiAttributeEnd() # pop the graphics state back out
 
 		
 	def renderMeshData(self):
-		subsurf = False
-		modifiers = self.object.modifiers
-		for modifier in modifiers:			
-			if modifier.type == Blender.Modifier.Type["SUBSURF"]:
-				subsurf = True				
-			else:
-				subsurf = False
-		if subsurf:
-			# print "Exporting a subdivision mesh"
-			self.renderSubdivMesh()
+		
+		# check first for special case rendering options
+		if self.getProperty("FacePatches"):
+			self.renderFacePatches()
 		else:
-			# print "Exporting a standard mesh"
-			self.renderPointsPolygons()
-		
-		
-
+			subsurf = False
+			modifiers = self.object.modifiers
+			for modifier in modifiers:			
+				if modifier.type == Blender.Modifier.Type["SUBSURF"]:
+					subsurf = True				
+				else:
+					subsurf = False
+			
+			if subsurf:
+				# print "Exporting a subdivision mesh"
+				self.renderSubdivMesh()
+			else:
+				# print "Exporting a standard mesh"
+				self.renderPointsPolygons()
 				
 	def renderArchive(self):
 		""" Write this object to an external archive file. """
@@ -1421,15 +1498,29 @@ class MeshAdapter(ObjectAdapter):
 	def setGroup(self, group):
 		self.objData["group"] = group
 		self.objEditor.objectGroupButton.setTitle(group)
-
-		
+	
 	def renderPointsPolygons(self):
 		""" Export Renderman PointsPolygons object. """
 		mesh = self.object.getData(False, True)
 		points = []
 		normals = []
+		fvNormals = []
+		faceVarying_N = False
+		autosmooth = False
 		for v in mesh.verts:
 			points.append(v.co)
+			#if autosmooth:
+			#	normals.append(vert[4])
+			#else:
+				# setup for faceVarying normals
+				
+				# if mesh.faces[idx].smooth == 1:
+			#	if 1 == 2:
+			#		faceVarying_N = True
+			#		fvNormals.append(vert[4]) # append the normal
+			#	else:					
+					# fvNormals.append(mesh.faces[idx].no)
+			#		pass
 			normals.append(v.no)
 			# print v.index
 
@@ -1465,9 +1556,24 @@ class MeshAdapter(ObjectAdapter):
 			for v in face.v:
 				vertids.append(v.index)
 				fVerts.append(v.index)
-			# print "Face verts: ", fVerts
+				
+		# print "Face verts: ", fVerts
+		if mesh.faceUV == 1 and self.getProperty("ExportSt"):
+			ri.RiDeclare("st", "facevarying float[2]") # declare ST just in case
+			params["st"] = st
+		if mesh.vertexColors == 1 and self.getProperty("ExportCS"): 
+			vCol = []
+			for vertCol in Cs:
+				vCol.append([vertCol.r / 256.0, vertCol.g / 256.0, vertCol.b / 256.0])			
+			params["Cs"] = vCol
 			
-		params = {"P":points, "N":normals}
+		# handle normals issues
+		if faceVarying_N:
+			ri.RiDeclare("N", "facevarying normal") # declare N to be facevarying
+			params["N"] = normals
+		elif autosmooth:
+			params["N"] = normals
+		params = {"P":points }
 			
 		if mesh.faceUV == 1:
 			#print st
@@ -1488,17 +1594,216 @@ class MeshAdapter(ObjectAdapter):
 		#print params
 		ri.RiPointsGeneralPolygons(nfaces*[1], nverts, vertids, params)
 			
+	def xrenderSubdivMesh(self):
+		""" render a subdivision mesh 
+		This version reorders everything (faces, verts) in the mesh so it's sorted by z, x, y
+		"""
+		getCs = False
+		getSt = False
+		mesh = self.object.getData(False, True)		
+		vList = range(len(mesh.verts)) # vertex list
+				
+		# vertsByIndex = range(len(mesh.verts))		
+		facesByZ = range(len(mesh.faces))
+		zVerts = []
+		
+		if mesh.vertexColors == 1:
+			getCs = True
+		if mesh.faceUV == 1:
+			getSt = True
+		
+		# create a list of faces sorted by least z,x,y by using the least z,x,y vert of the face as the sorting key
+		
+		for face in mesh.faces:				
+			# build an array of z,x,y-least verts from this face, then use the least of that as an index to this face.
+			zList = []
+			for vert in face.verts:
+				zList.append((vert.co[2], vert.co[0], vert.co[1], vert.index, face.index)) # ok, both vertex and face indexes
+				vList[vert.index] = [vert.co[2], vert.co[0], vert.co[1], vert.index]
+			zList.sort()			
+			zVerts.append(zList[0])
+			
+
+		zVerts.sort() # this is now the list of *faces* by Z
+		vList.sort() # this is the list of *verts* sorted by Z
+		
+		points = []
+		crossRef = range(len(mesh.verts)) 		
+		index = 0				
+		
+		# create the cross reference list that indexes:
+		# new index (index) vs. blender index (vert[4]])
+		# so that crossRef[index] results in original vert.index
+		# face vert ID access is thus
+		# fVertIdx = crossRef[face.vert[index].index]
+		
+		for vert in vList:	
+			crossRef[vert[3]] = index # cross reference item 			
+			index = index + 1
+			points.append([vert[1], vert[2], vert[0]]) # append to the POINTS array
+		
+		
+		
+		# now generate a list of vertex IDs for each face by iterating zVerts
+		# retrieving the face index, getting the face verts, and cross-referencing them with the 
+		# new z,x,y sorted verts in points.
+		
+		vertIDs = []
+		nVerts = []
+		normals = []
+		fvNormals = []
+		
+		uv = []
+		autosmooth = False
+		faceVarying_N = False		
+		
+		Cs = range(len(mesh.verts)) 
+		st = range(len(mesh.verts))
+		
+		print facesByZ
+		
+		for zVert in zVerts:	
+			print "Zvert is:", zVert
+			idx = zVert[4]
+			face = mesh.faces[idx]
+			vertList = []
+			for vert in face.verts:
+				vertList.append((vert.co[2], vert.co[0], vert.co[1], vert.index, vert.no))						
+				
+			nVerts.append(len(vertList)) # number of verts
+			vertList.sort() # sort the verts here			
+			for vert in vertList:
+				# step one,  point data				
+				vertIDs.append(crossRef[vert[3]]) # vertex id for this vert
+				if autosmooth:
+					normals.append(vert[4])
+				else:
+					# setup for faceVarying normals
+					if mesh.faces[idx].smooth == 1:
+						faceVarying_N = True
+						fvNormals.append(vert[4]) # append the normal
+					else:
+						fvNormals.append(mesh.faces[idx].no)
+				if getCs:
+					Cs[crossRef[vert[3]]] = face.col[vert[3]] 
+				if getSt:
+					# here is an issue
+					# Do I want to test to see if this value exists already? or not? I know that I've already got a range here, so
+					st[crossRef[vert[3]]] = [face.uv[vert[3]][0],1.0 - face.uv[vert[3]][1]]
+		
+		creases = {}
+		# develop a list of creases based on crease value.
+		for edge in mesh.edges:		
+			if edge.crease > 0:
+				if edge.crease not in creases:
+					creases[edge.crease] = []
+				creases[edge.crease].append([crossRef[edge.v1.index], crossRef[edge.v2.index]])
+		
+		creaselist = []
+		for crease in creases: # for each crease group, create a set of vertices and merge 
+			verts = []
+			i_set = Set()
+			setlist = []
+			edgelist = creases[crease]
+			for edge in edgelist:
+				i_set.add(edge[0])
+				i_set.add(edge[1])
+			
+			for item in i_set:
+				set = Set()
+				set.add(item)
+				setlist.append(set)
+			
+			for edge in edgelist:
+				seta = self.find_set(edge[0], setlist)
+				if edge[1] not in seta:
+					setb = self.find_set(edge[1], setlist)
+					newset = self.merge_set(seta, setb)
+					setlist.remove(seta)
+					setlist.remove(setb)
+					setlist.append(newset)
+			# print "Creases for crease level: ", crease, " are ", setlist
+			
+			for item in setlist:
+				creaselist.append([crease, item]) # this will add to the flat list of crease objects that I need.
+				
+		tags = []
+		nargs = []
+		intargs = []
+		floatargs = []
+		
+		for crease in creaselist:
+			if type(crease) != type(1):
+				tags.append("crease")		
+				nargs.append(len(crease[1]))
+				nargs.append(1)
+				for item in crease[1]:
+					intargs.append(item)
+				
+				val = (float(crease[0]) / 255) * 5.0
+				floatargs.append(val) # normalized currently for the Aqsis renderer
+				
+		# I should make this a property
+		if self.getProperty("interpolateBoundary"):
+			tags.append("interpolateboundary")
+			nargs.append(0)
+			nargs.append(0)
+		
+		params = {"P":points }
+		if autosmooth or faceVarying_N:
+			params["N"] = normals
+		
+			
+		if mesh.faceUV == 1 and self.getProperty("ExportSt"):
+			ri.RiDeclare("st", "facevarying float[2]") # declare ST just in case
+			params["st"] = st
+		if mesh.vertexColors == 1 and self.getProperty("ExportCS"): 
+			vCol = []
+			for vertCol in Cs:
+				vCol.append([vertCol.r / 256.0, vertCol.g / 256.0, vertCol.b / 256.0])			
+			params["Cs"] = vCol
+			
+		# handle normals issues
+		if faceVarying_N:
+			ri.RiDeclare("N", "facevarying normal") # declare N to be facevarying
+		ri.RiSubdivisionMesh("catmull-clark", nVerts, vertIDs, tags, nargs, intargs, floatargs, params)
+		
+		
+	def sortFaceVerts(self, face):
+		v_list = []
+		for vert in face.verts:
+			v_list = (vert.co[2], vert.co[1], vert.co[0], vert.index)
+		
+		v_list.sort()
+		return v_list
+		
+		
+		
+		
+	def obfuscate(self):
+		# don't forget reference geometry. I need the base mesh before lattice/armature transforms are applied to it.
+		# I can probably disable all modifiers except for decimate and gather that mesh, 
+		# then turn them all back on (excepting subsurf) and gather *that* mesh
+		# then I do
+		# params["PRef"] =  refPoints
+		# for all the other stuff, I also need
+		# params["Cs"] = vertColors  # per vertex colors
+		# params["Cs"] = vertCoors # or Face UV colors		
+		# params["FModes"] = faceModes # face display modes to pass to custom shaders
+		pass
+		
+		
 		
 	def renderSubdivMesh(self):
 		""" Export Subdivision mesh. """
 		mesh = self.object.getData(False, True)
 		modifiers = self.object.modifiers
-
+		
 		points = []
 		normals = []
 		uv = []
 		faceModes = []
-				
+		
 		# get the verts by ID		
 		vertTexUV = []
 		for vert in mesh.verts:
@@ -1509,13 +1814,13 @@ class MeshAdapter(ObjectAdapter):
 			
 		nfaces = len(mesh.faces)
 		nverts = []
-		vertids = []		
+		vertids = []
+		
 		Cs = range(len(mesh.verts)) 
 		st = range(len(mesh.verts))
 		# get the faces by vertex ID
 		getCs = False
 		getSt = False
-		
 		
 		if mesh.vertexColors == 1:
 			getCs = True
@@ -1524,9 +1829,8 @@ class MeshAdapter(ObjectAdapter):
 		
 		edge_faces = self.edge_face_users(mesh)
 		
-		
 		for face in mesh.faces:
-			print face.index
+			# print face.index
 			nverts.append(len(face.v))
 			vtuv = []
 			if len(face.v) > 2:
@@ -1534,32 +1838,14 @@ class MeshAdapter(ObjectAdapter):
 					if getCs:
 						Cs[face.v[vertIdx].index] = face.col[vertIdx]
 					if getSt:
-						st[face.v[vertIdx].index] = [face.uv[vertIdx][0],1.0 - face.uv[vertIdx][1]]
-					#else:
-					#	uv= face.uv[vertIdx]
-					#	uv= uv[0], 1.0 - uv[1]
-					#	vertTexUV[face.v[vertIdx].index] = uv
+						# here is an issue
+						# Do I want to test to see if this value exists already? or not? I know that I've already got a range here, so
+						if st[face.v[vertIdx].index] == face.v[vertIdx].index:
+							st[face.v[vertIdx].index] = [face.uv[vertIdx][0],1.0 - face.uv[vertIdx][1]]
+					
 			for vert in face.v:
 				vertids.append(vert.index)
 					
-				
-			#if mesh.vertexColors == 1:
-			#	if len(face.v) > 2:
-			#		for vertIdx in range(len(face.v)):
-			#			Cs[face.v[vertIdx].index] = face.col[vertIdx] # should actually average the vert color across
-			#if mesh.faceUV == 1:
-			#	if len(face.v) > 2:
-			#		for vertIdx in range(len(face.v)):
-			#			st[face.v[vertIdx].index] = [face.uv[vertIdx][0], 1.0 - face.uv[vertIdx][1]]
-			#else:
-			#	if len(mesh.faces[0].uv) != 0:
-			#		vtuv = []
-			#		for vertIdx in range(len(face.v)):
-			#			uv = face.uv[vertIdx]
-			#			uv = uv[0], 1.0 - uv[1]
-			#			vertTexUV[face.v[vertIdx].index] = uv
-						
-			
 		if 1 == 2:
 			# this has to be calculated per edge, so what I probably want to do first is build up a list of face index per edge
 			# get the normals of each face in the edge_faces list
@@ -1587,8 +1873,8 @@ class MeshAdapter(ObjectAdapter):
 					creaselist[edgeIdx] = [factor, [mesh.edges[edgeIdx].v1.index, mesh.edges[edgeIdx].v2.index]] # this is 1:1 because of how I'm doing this					
 					edgeIdx = edgeIdx + 1
 					
-				
 		else:
+			
 			# get the creases
 			creases = {}
 			# develop a list of creases based on crease value.
@@ -1625,23 +1911,12 @@ class MeshAdapter(ObjectAdapter):
 				
 				for item in setlist:
 					creaselist.append([crease, item]) # this will add to the flat list of crease objects that I need.
-
-		# don't forget reference geometry. I need the base mesh before lattice/armature transforms are applied to it.
-		# I can probably disable all modifiers except for decimate and gather that mesh, 
-		# then turn them all back on (excepting subsurf) and gather *that* mesh
-		# then I do
-		# params["PRef"] =  refPoints
-		# for all the other stuff, I also need
-		# params["Cs"] = vertColors  # per vertex colors
-		# params["Cs"] = vertCoors # or Face UV colors		
-		# params["FModes"] = faceModes # face display modes to pass to custom shaders
-		
+			
 		tags = []
 		nargs = []
 		intargs = []
 		floatargs = []
-		#print creaselist
-	
+		
 		for crease in creaselist:
 			if type(crease) != type(1):
 				tags.append("crease")		
@@ -1652,23 +1927,22 @@ class MeshAdapter(ObjectAdapter):
 				
 				val = (float(crease[0]) / 255) * 5.0
 				floatargs.append(val) # normalized currently for the Aqsis renderer
+				
 		tags.append("interpolateboundary")
 		nargs.append(0)
 		nargs.append(0)
 		
 		params = {"P":points, "N":normals}
 			
-		if mesh.faceUV == 1:
+		if mesh.faceUV == 1 and self.getProperty("ExportSt"):
 			params["st"] = st
-		elif mesh.vertexColors == 1: 
+		if mesh.vertexColors == 1 and self.getProperty("ExportCS"): 
 			vCol = []
 			for vertCol in Cs:
-				vCol.append([vertCol.r / 256.0, vertCol.g / 256.0, vertCol.b / 256.0])
-			#print Cs
+				vCol.append([vertCol.r / 256.0, vertCol.g / 256.0, vertCol.b / 256.0])			
 			params["Cs"] = vCol
-		else:
-			pass
-			# params["st"] = vertTexUV
+			
+		# and why can't I output both?
 			
 		if 1 == 2: 
 			print "nfaces: ", nfaces
@@ -1679,11 +1953,11 @@ class MeshAdapter(ObjectAdapter):
 			print "nargs: ", nargs
 			print "intargs: ", intargs
 			print "floatargs: ", floatargs
-			print "params: ", params
+			print "params: ", params	
 			
 		
 		# and now to build the call	
-		if mesh.faceUV == 1:
+		if mesh.faceUV == 1 and self.getProperty("ExportST"):
 			ri.RiDeclare("st", "facevarying float[2]") # declare ST just in case
 			
 		ri.RiSubdivisionMesh("catmull-clark", nverts, vertids, tags, nargs, intargs, floatargs, params)
@@ -1697,8 +1971,15 @@ class MeshAdapter(ObjectAdapter):
 	def merge_set(self, seta, setb):
 		""" merge two sets """
 		return seta.union(setb)
-
-	
+		
+	def renderFacePatches(self):
+		mesh = self.object.getData(False, True)
+		for face in mesh.faces:
+			# for all faces with four verts, replace the face with a patch
+			v = face.v
+			if len(v) == 4: # render a patch
+				ri.RiPatch("bilinear", {"P":[v[0].co, v[1].co, v[3].co, v[2].co] }) 
+			
 	# from BpyMesh
 	def sorted_edge_indicies(self, ed):
 		i1= ed.v1.index
@@ -1768,15 +2049,33 @@ class LampAdapter(ObjectAdapter):
 		ObjectAdapter.__init__(self, object)	
 		self.isAnimated = False 
 		self.shadowMaps = {} # indexed by direction_frame method
-	
 		
 	def render(self): 
 		""" Generate renderman data for this object. """
 		# I should call checkReset here to make sure I have the latest/greatest up to date data for this lamp, no?
-		shader = self.getProperty("shader").getObject().shader
-		ri.RiLightSource(shader.shadername, shader.params())
+		# shader = self.getProperty("shader").getObject().shader
+		self.checkReset()
+		self.shader.updateShaderParams()
 		
+		# I should probably get the light handle here
+		if self.getProperty("transformLight"):
+			ri.RiTransformBegin()
+			ri.RiTranform(self.object.getMatrix())
+		lightHandle = ri.RiLightSource(self.shader.shader.shadername, self.shader.shader.params())
+		# I need lightHandle for turning lights on and off for layer support
+		if self.lighting.getProperty("layerLighting"):
+			# unless this light is flagged as global, turn it off in the current graphics state.
+			if not self.getProperty("globalLight"):
+				ri.RiIlluminate(lightHandle, ri.RI_FALSE)
+			for layer in self.object.layers:
+				self.scene.lightingLayers[layer].append(lightHandle)
+		if self.getProperty("transformLight"):
+			ri.RiTransformEnd()
 	
+	def generateRSL(self):
+		""" Create RSL for this light. """
+		pass
+		
 	def genCheckSum(self):
 		# the only settings I care about are
 		# scale/rot/trans, obviously. I can probably get the transform matrix and use that, or make vectors of the three and go from there
@@ -1823,7 +2122,7 @@ class LampAdapter(ObjectAdapter):
 		
 	def doCameraTransform(self, axis):
 
-		if axis != None:	
+		if axis != "shadow":	
 			
 			# I still need to transform based on the light's matrix
 			# get the inverse matrix first
@@ -1844,30 +2143,17 @@ class LampAdapter(ObjectAdapter):
 				ri.RiRotate(180, 0, 1, 0) 	
 			
 			ri.RiTranslate(-self.object.LocX, -self.object.LocY, -self.object.LocZ)
-			
 				
 		else:		
 			ri.RiScale(-1, 1, 1)
 			#ri.RiRotate(180, 0, 1, 0)			
 			cmatrix = self.object.getInverseMatrix()
-			#matrix = [cmatrix[0][0],
-			#		cmatrix[0][1],
-			#		-cmatrix[0][2],
-			#		cmatrix[0][3],
-			#		cmatrix[1][0],
-			#		cmatrix[1][1],
-			#		-cmatrix[1][2],
-			#		cmatrix[1][3],
-			#		cmatrix[2][0],
-			#		cmatrix[2][1],
-			#		-cmatrix[2][2],
-			#		cmatrix[2][3],
-			#		cmatrix[3][0],
-			#		cmatrix[3][1],
-			#		-cmatrix[3][2],
-			#		cmatrix[3][3]]
-
-			ri.RiTransform(cmatrix)
+			print cmatrix
+			matrix = [[cmatrix[0][0], cmatrix[0][1], -cmatrix[0][2], cmatrix[0][3]],
+				[cmatrix[1][0], cmatrix[1][1], -cmatrix[1][2], cmatrix[1][3]],
+				[cmatrix[2][0], cmatrix[2][1], -cmatrix[2][2], cmatrix[2][3]],
+				[cmatrix[3][0], cmatrix[3][1], -cmatrix[3][2], cmatrix[3][3]]]
+			ri.RiTransform(matrix)
 
 		self.genChecksum()
 			
@@ -1902,6 +2188,7 @@ class LampAdapter(ObjectAdapter):
 			
 		
 	def getRenderDirections(self):
+		print "Light Type is:", self.object.getData().getType()
 		if self.object.getData().getType() == 0:
 			return ["px", "py", "pz", "nx", "ny", "nz"]
 		elif self.object.getData().getType() == 1:			
@@ -1910,6 +2197,7 @@ class LampAdapter(ObjectAdapter):
 		elif self.object.getData().getType() == 2:
 			# figure out how to render the direction this light is pointing
 			return ["shadow"]
+		
 		
 	def initObjectData(self):
 		self.objData = {}
@@ -1927,11 +2215,15 @@ class LampAdapter(ObjectAdapter):
 		tox = -self.object.matrix[2][0] + self.object.matrix[3][0]
 		toy = -self.object.matrix[2][1] + self.object.matrix[3][1]
 		toz = -self.object.matrix[2][2] + self.object.matrix[3][2]
+		
 		if lamp.getMode() & lamp.Modes['Negative']:
 			negative = -1
 		else:
 			negative = 1
-		
+		if self.settings.use_slparams:
+			ext = ".sl"
+		else:
+			ext = "." + self.settings.renderers[self.settings.renderer][4]
 		# am I going to worry about intensity and color? Maybe not, because that will change per shader I think.
 		# perhaps I should gather the parameters for the bml shader and use that as my primary lighting shader.
 		shaderParms["intensity"] = lamp.getEnergy()
@@ -1940,6 +2232,8 @@ class LampAdapter(ObjectAdapter):
 		shaderParms["from"] = [x, y, z]
 		shaderParms["lightcolor"] = [lamp.R, lamp.G, lamp.B]
 		self.objData["lightcolor"] = [lamp.R, lamp.G, lamp.B]
+		
+
 		if lamp.type == 0 or lamp.type == 4:
 			self.object.RotX = 0.0
 			self.object.RotY = 0.0
@@ -1947,14 +2241,15 @@ class LampAdapter(ObjectAdapter):
 			self.objData["type"] = 0
 			energyRatio = lamp.dist * negative
 			# get the first selected shader path...and hope it's setup correctly
-			if self.settings.use_slparams:
-				shaderPath = self.settings.shaderpaths.getValue().split(";")[0]
-				if self.settings.useShadowMaps.getValue():
-					sFilename = "shadowpoint.sl"
-				else:
-					sFilename = "pointlight.sl"
-				self.objData["shaderfilename"] = os.path.normpath(shaderPath + os.sep + sFilename)
-				# I'm only really concerned about this if I'm using sl params
+		
+			shaderPath = self.settings.shaderpaths.getValue().split(";")[0]
+			if self.lighting.getProperty("GenShadowMaps"):				
+				sFilename = "shadowpoint" + ext
+			else:
+				sFilename = "pointlight" + ext
+			self.objData["shaderfilename"] = os.path.normpath(shaderPath + os.sep + sFilename)
+			# I'm only really concerned about this if I'm using sl params
+				
 			self.objData["shadername"] = "pointlight"			
 			shaderParms["intensity"] = (energyRatio * lamp.energy) * self.getProperty("Multiplier")
 			
@@ -1964,51 +2259,58 @@ class LampAdapter(ObjectAdapter):
 			self.objData["type"] = 1
 			energyRatio = negative
 			self.objData["shadername"] = "distantlight"			
-			if self.settings.use_slparams:
-				shaderPath = self.settings.shaderpaths.getValue().split(";")[0]
-				if self.settings.useShadowMaps.getValue():
-					sFilename = "shadowdistant.sl"
-				else:
-					sFilename = "distantlight.sl"
-				self.objData["shaderfilename"] = os.path.normpath(shaderPath + os.sep + sFilename)
+		
+			shaderPath = self.settings.shaderpaths.getValue().split(";")[0]
+			if self.lighting.getProperty("GenShadowMaps"):
+				sFilename = "shadowdistant" + ext
+			else:
+				sFilename = "distantlight" + ext
+			self.objData["shaderfilename"] = os.path.normpath(shaderPath + os.sep + sFilename)
 			shaderParms["to"] = [ tox, toy, toz]
+			shaderParms["intensity"] = (energyRatio * lamp.energy) * self.getProperty("Multiplier")
 			
 		elif lamp.type == 2:
 			self.objData["type"] = 2
 			energyRatio = lamp.dist * negative
-			self.objData["shadername"] = "bml"
-			if self.settings.use_slparams:				
-				shaderPath = self.settings.shaderpaths.getValue().split(";")[0]
-				#if self.settings.useShadowMaps.getValue():
-				#	sFilename = "shadowspot.sl"
-				#else:
-				sFilename = "bml.sl"
-				self.objData["shaderfilename"] = os.path.normpath(shaderPath + os.sep + sFilename)
+			shaderPath = self.settings.shaderpaths.getValue().split(";")[0]
+			#if self.settings.useShadowMaps.getValue():
+			#	sFilename = "shadowspot.sl"
+			#else:
+			if self.lighting.getProperty("GenShadowMaps"):				
+				sFilename = "shadowspot" + ext
+				self.objData["shadername"] = "shadowspot"
+			else:
+				self.objData["shadername"] = "spotlight"
+				sFilename = "spotlight" + ext
+				
+			self.objData["shaderfilename"] = os.path.normpath(shaderPath + os.sep + sFilename)
 			
-			shaderParms["shadowbias"] = lamp.bias
-			shaderParms["blur"] = 0.0
-			shaderParms["samples"] = lamp.samples
+			# shaderParms["shadowbias"] = lamp.bias
+			#shaderParms["blur"] = 0.0
+			#shaderParms["samples"] = lamp.samples
 			shaderParms["coneangle"] = (lamp.spotSize * math.pi / 360)
 			shaderParms["conedeltaangle"] = (lamp.spotBlend * (lamp.spotSize * math.pi / 360))			
 			shaderParms["to"] = [tox, toy, toz]
 			shaderParms["intensity"] = (energyRatio * lamp.energy) * self.lighting.getProperty("Multiplier")
 			
 			# This might need to be animated, so I need to add a function to deal with that
-			if self.settings.useShadowMaps.getValue():
-				shaderParms["shadowname"] = self.object.getName() + ".tx"
+			if self.lighting.getProperty("GenShadowMaps"):
+				shaderParms["shadowname"] = self.object.getName() + "shadow.tx"
 			else:
 				shaderParms["shadowname"] = None
 		elif lamp.type == 3:
 			self.objData["type"] = 3
 			energyRatio = negative
 			self.objData["shadername"] = "hemilight"
-			if self.settings.use_slparams:
-				shaderPath = self.settings.shaderpaths.getValue().split(";")[0]
-				self.objData["shaderfilename"] = os.path.normpath(shaderPath + os.sep + "hemilight.sl")
+		
+			shaderPath = self.settings.shaderpaths.getValue().split(";")[0]			
+			self.objData["shaderfilename"] = os.path.normpath(shaderPath + os.sep + "hemilight" + ext)
 
 			shaderParms["to"] = [tox, toy, toz]
 			shaderParms["falloff"] = 0
-			shaderParms["intensity"] = energyRatio * lamp.energy
+			shaderParms["intensity"] = (energyRatio * lamp.energy) * self.getProperty("Multiplier")
+
+				
 			
 		self.objData["shaderparms"] = shaderParms
 		
@@ -2016,22 +2318,17 @@ class LampAdapter(ObjectAdapter):
 				
 	def checkReset(self):
 		
-		# here I simply want to check if the lamp settings need changing or not.
+		# here I want to check if the lamp settings need changing or not.
 		# if the user has selected a shader type that doesn't match the lamp settings, all I want to affect in that case
-		# is the light color.
-		
+		# is the light color.		
 		shaderParms = self.objData["shaderparms"]
 		
 		lamp = self.object.getData()		
 		
 		# for the most part, follow the parameters for the given light object and stuff the values into the 
 		# shader parms 
-		if self.objData["type"] == lamp.type:
+		if self.getProperty("autoLighting"):
 			mat = self.object.getMatrix()
-			#trans = mat.translationPart()
-			#x = trans[0]
-			#y = trans[1]
-			#z = trans[2]
 			
 			x = self.object.matrix[3][0] / self.object.matrix[3][3]
 			y = self.object.matrix[3][1] / self.object.matrix[3][3]
@@ -2040,72 +2337,78 @@ class LampAdapter(ObjectAdapter):
 			tox = -self.object.matrix[2][0] + self.object.matrix[3][0]
 			toy = -self.object.matrix[2][1] + self.object.matrix[3][1]
 			toz = -self.object.matrix[2][2] + self.object.matrix[3][2]
-			if lamp.getMode() & lamp.Modes['Negative']:
-				negative = -1
-			else:
-				negative = 1
 			
-			# am I going to worry about intensity and color? Maybe not, because that will change per shader I think.
 			shaderParms["intensity"] = lamp.getEnergy()
-			# I'm only worried at the moment about deriving the correct shader to use as a starting point for the lamp.
-			# thus
-			shaderParms["from"] = [x, y, z]
-			shaderParms["lightcolor"] = [lamp.R, lamp.G, lamp.B]
-			self.objData["lightcolor"] = [lamp.R, lamp.G, lamp.B]
-			if (lamp.type == 0 or lamp.type == 4) and (self.shader.getShaderName() == "pointlight" or self.shader.getShaderName() == "shadowpoint"):
-				self.object.RotX = 0.0
-				self.object.RotY = 0.0
-				self.object.RotZ = 0.0
+			
+			if self.objData["type"] == lamp.type:
+				
+				if lamp.getMode() & lamp.Modes['Negative']:
+					negative = -1
+				else:
+					negative = 1
+					
+				shaderParms["from"] = [x, y, z]
+				shaderParms["lightcolor"] = [lamp.R, lamp.G, lamp.B]
+				self.objData["lightcolor"] = [lamp.R, lamp.G, lamp.B]
+				
+				if (lamp.type == 0 or lamp.type == 4) and (self.shader.getShaderName() == "pointlight" or self.shader.getShaderName() == "shadowpoint"):
+					self.object.RotX = 0.0
+					self.object.RotY = 0.0
+					self.object.RotZ = 0.0
+					energyRatio = lamp.dist * negative
+					# get the first selected shader path...and hope it's setup correctly
+					shaderParms["intensity"] = (energyRatio * lamp.energy) *  self.lighting.getProperty("Multiplier")
+					
+				elif lamp.type == 1 and (self.shader.getShaderName() == "distantlight" or self.shader.getShaderName() == "shadowdistant"):
+					energyRatio = negative
+					# self.objData["shadername"] = "distantlight"				
+					shaderParms["to"] = [ tox, toy, toz]
+					
+				elif lamp.type == 2 and (self.shader.getShaderName() == "shadowspot" or self.shader.getShaderName() == "spotlight"): 
+					energyRatio = lamp.dist * negative
+					# shaderParms["shadowbias"] = lamp.bias
+					#if self.shader.getShaderName() == "shadowspot":
+						# shaderParms["blur"] = 0.0	
+					#	shaderParms["samples"] = lamp.samples
+					shaderParms["coneangle"] = (lamp.spotSize * math.pi / 360)
+					shaderParms["conedeltaangle"] = (lamp.spotBlend * (lamp.spotSize * math.pi / 360))			
+					shaderParms["to"] = [tox, toy, toz]
+					shaderParms["intensity"] = (energyRatio * lamp.energy) *  self.lighting.getProperty("Multiplier")				
+					
+				elif lamp.type == 3 and self.shader.getShaderName() == "hemilight":
+					energyRatio = negative
+					shaderParms["to"] = [tox, toy, toz]
+					shaderParms["falloff"] = 0
+					shaderParms["intensity"] = energyRatio * lamp.energy
+				
+				self.objData["shaderparms"] = shaderParms
+				
+				# and reset the light color.
+				self.objData["lightcolor"] = [lamp.R, lamp.G, lamp.B]
+				
+				for key in shaderParms:				
+					self.shader.setParamValue(key, shaderParms[key]) 
+					
+				self.objData["reset"] = False
+			else:			
+				self.initObjectData()
+				self.objData["reset"] = True
+		else:
+			params = self.shader.shaderparams
+			if params.has_key("intensity"):
 				energyRatio = lamp.dist * negative
-				# get the first selected shader path...and hope it's setup correctly
-				shaderParms["intensity"] = (energyRatio * lamp.energy) *  self.lighting.getProperty("Multiplier")
-				
-				# I will have to deal with shadowmapping at some point
-				#shaderParms["name"] = "shadowpoint"
-			elif lamp.type == 1 and (self.shader.getShaderName() == "distantlight" or self.shader.getShaderName() == "shadowdistant"):
-
-				energyRatio = negative
-				self.objData["shadername"] = "distantlight"			
-
-				shaderParms["to"] = [ tox, toy, toz]
-							
-				# parms for shadowMapping
-				#shaderParms["name"] = "distantshadow"
-				#shaderParms["shadowname"] = "shadow"
-				#shaderParms["shadowsamples"] = 1			
-				#shaderParms["shadowblur"] = 0.0
-				
-			elif lamp.type == 2 and (self.shader.getShaderName() == "bml" or self.shader.getShaderName() == "shadowspot" or self.shader.getShaderName() == "spotlight"): 
-				energyRatio = lamp.dist * negative
-				shaderParms["shadowbias"] = lamp.bias
-				shaderParms["blur"] = 0.0
-				shaderParms["samples"] = lamp.samples
-				shaderParms["coneangle"] = (lamp.spotSize * math.pi / 360)
-				shaderParms["conedeltaangle"] = (lamp.spotBlend * (lamp.spotSize * math.pi / 360))			
+				shaderParms["intensity"] = (energyRatio * lamp.energy) * self.getProperty("Multiplier")
+			if params.has_key("from"):
+				shaderParms["from"] = [x, y, z]
+			if params.has_key("to"):
 				shaderParms["to"] = [tox, toy, toz]
-				shaderParms["intensity"] = (energyRatio * lamp.energy) *  self.lighting.getProperty("Multiplier")				
-				
-							
-			elif lamp.type == 3 and self.shader.getShaderName() == "hemilight":
-				energyRatio = negative
-				shaderParms["to"] = [tox, toy, toz]
-				shaderParms["falloff"] = 0
-				shaderParms["intensity"] = energyRatio * lamp.energy
-			
-			self.objData["shaderparms"] = shaderParms
-			
-			# and reset the light color.
-			self.objData["lightcolor"] = [lamp.R, lamp.G, lamp.B]
-			
-			for key in shaderParms:				
+			if params.has_key("lightcolor"):
+				shaderParms["lightcolor"]  = [lamp.R, lamp.G, lamp.B] 
+			for key in shaderParms:
 				self.shader.setParamValue(key, shaderParms[key])
 			self.objData["reset"] = False
-		else:			
-			self.initObjectData()
-			self.objData["reset"] = True
+		
 			
-		
-		
 	def getSelector(self):
 		return self.objEditor.getSelector()
 
@@ -2189,19 +2492,24 @@ class CameraAdapter(ObjectAdapter):
 
 	def render(self):
 		""" generate Renderman data for this object """		
-		shader = self.getProperty("shader").getObject()
+		shader = self.getProperty("shader").getObject()		
 		# self.objEditor.shaderButton.title = self.imagerShader.shader_menu.getValue()
-		if shader.shader != None:
+		if self.getProperty("autoImager"):
+			print "setting imager"
+			bWorld = Blender.World.GetCurrent()
+			if bWorld != None: 
+				if bWorld.hor != [0, 0, 0]:
+					ri.RiDeclare("bgcolor", "uniform color")
+					ri.RiDeclare("background", "uniform color")
+					iparams = { "bgcolor" : [bWorld.hor[0], bWorld.hor[1], bWorld.hor[2]], "background" : [bWorld.hor[0], bWorld.hor[1], bWorld.hor[2]] }
+					ri.RiImager( "background", iparams )
+			
+		elif shader.shader != None:
 			if shader.getShaderName() != None:
 				shader.updateShaderParams()
-				ishader = shader.shader
+				ishader = shader.shader				
 				ri.RiImager(ishader.shadername, ishader.params()) # and done
-			else:
-				bWorld = Blender.World.GetCurrent()
-				if bWorld != None: 
-					if bWorld.hor != [0, 0, 0]:
-						iparams = { "bgcolor" : [bWorld.hor[0], bWorld[1], bWorld[2]] }
-						ri.RiImager( "background", iparams )
+			
 					
 		scene = Blender.Scene.GetCurrent()
 		render = scene.getRenderingContext()
@@ -2247,11 +2555,16 @@ class CameraAdapter(ObjectAdapter):
 		self.shader_type = "imager"
 		shaderParams = {}
 		shaderPath = self.settings.shaderpaths.getValue().split(";")[0]
+		# this is a potential deficiency
 		self.objData["shaderfilename"] = os.path.normpath(shaderPath + os.sep + "background.sl")
 		bWorld = Blender.World.GetCurrent()
 		shaderParams["bgcolor"] = [bWorld.hor[0], bWorld.hor[1], bWorld.hor[2]]
+		shaderParams["background"] = [bWorld.hor[0], bWorld.hor[1], bWorld.hor[2]]
 		self.objData["shaderparams"] = shaderParams
 		self.initShader()
+		# shader should be initialized, so then
+		self.shader.setParamValue("bgcolor",shaderParams["bgcolor"])
+		self.shader.setParamValue("background", shaderParams["bgcolor"])
 
 class PreviewAdapter(ObjectAdapter):
 	protocols.advise(instancesProvide=[IObjectAdapter], asAdapterForTypes=[BtoRPreview])
@@ -2480,6 +2793,8 @@ class PreviewAdapter(ObjectAdapter):
 			ri.RiDeclare("st", "facevarying float[2]") # declare ST just in case
 			
 		subdiv = ri.RiSubdivisionMesh("catmull-clark", nverts, vertids, tags, nargs, intargs, floatargs, params)
+		
+# Object UIs
 class ObjectUI:
 	""" Object editor panel """
 	protocols.advise(instancesProvide=[IObjectUI], asAdapterForTypes=[BtoRLattice, BtoRArmature, BtoRBasicObject, BtoREmpty, BtoRWave])
@@ -2568,7 +2883,9 @@ class MeshUI(ObjectUI):
 			"DispBound" : ["Displacement Bound", 2.0],
 			"DispCoords" : ["Disp Bound Coord sys", {"Object" : "object", "Shader":"shader", "NDC": "ndc", "World": "world"}],
 			"ExportCs" : ["Export Vertex Colors(Cs)", True], 
-			"ExportSt" : ["Export Texture Coordinates(s/t)", True]
+			"ExportSt" : ["Export Texture Coordinates(s/t)", True],
+			"FacePatches":["Export Faces as Patches:", False],
+			"interpolateBoundary":["Interpolate Subdiv Boundary:", True]
 			}
 		self.optionOrder = ["material",
 				"OutputOptions", 
@@ -2590,7 +2907,9 @@ class MeshUI(ObjectUI):
 				"ShadingRate",
 				"DispBound",
 				"ExportCs",
-				"ExportSt"]
+				"ExportSt",
+				"FacePatches",
+				"interpolateBoundary"]
 		# preinitialize a material property
 		ObjectUI.__init__(self, obj)
 		
@@ -2630,8 +2949,11 @@ class MeshUI(ObjectUI):
 class LampUI(ObjectUI):
 	protocols.advise(instancesProvide=[IObjectUI], asAdapterForTypes=[BtoRLamp])	
 	def __init__(self, obj):
-		self.options = {"IncludeWithAO" : ["Include light with AO?", False],
-				"Multiplier" : ["Multiplier", 1],
+		self.options = { "globalLight":["Light is global:", False],
+				"transformLight":["Use Light Transform:", False],
+				"autoLighting":["Automatic Lighting:", True],
+				"IncludeWithAO" : ["Include light with AO?", False],
+				"Multiplier" : ["Multiplier", 1.0],
 				"GenShadowMap" : ["Render Shadow Maps:", {"Lazy" : "lazy", "Always" : "always", "Never" : "never"}, "lazy"], 
 				"ShadowMapSize" : ["Shadow Map Size", { "256" : 256, "512" : 512, "1024" : 1024, "2048" : 2048 }, "256"],
 				"DepthFilter" : ["Midpoint Depthfilter?", True],
@@ -2640,13 +2962,16 @@ class LampUI(ObjectUI):
 				"ShowZBuffer" : ["Show Z Buffer?", False],
 				"Group" : ["Occlusion Group:", {"None Selected":"none Selected"}, "None Selected"]}
 					
-		self.optionOrder = ["IncludeWithAO",
-					"Multiplier", 
+		self.optionOrder = ["globalLight",
+					"autoLighting",
 					"GenShadowMap",
-					"Group",
-					"DepthFilter",
-					"ShadowMapJitter",
 					"ShadowMapSize",
+					"ShadowMapJitter",
+					"Multiplier", 
+					"IncludeWithAO",
+					"Group",
+					"transformLight",
+					"DepthFilter",
 					"ShowZBuffer"]		
 		ObjectUI.__init__(self, obj)
 		# assign custom stuff to any properties that need it
@@ -2724,10 +3049,11 @@ class CameraUI(ObjectUI):
 
 	def __init__(self, obj):
 		self.options = { "DOF" : ["Use Depth of Field?", False], 
+			"autoImager" : ["Automatic Background:", True],
 			"fstop" : ["F-stop", 22], 
 			"focallength" : ["Focal Length", 45],
 			"focaldistance" : ["Focal Distance:", 10] }
-		self.optionOrder = ["DOF", "fstop", "focallength", "focaldistance"]
+		self.optionOrder = ["autoImager", "DOF", "fstop", "focallength", "focaldistance"]
 		ObjectUI.__init__(self, obj)				
 		#self.editorPanel.addElement(ui.Label(10, 30, "Imager Shader:", "Imager Shader:", self.editorPanel, False))
 		#self.shaderButton = ui.Button(self.editorPanel.get_string_width("Imager Shader:", 'normal') + 15, 30, 125, 25, "Imager Shader", "None Selected", 'normal', self.editorPanel, True)		
@@ -2763,6 +3089,8 @@ class CameraUI(ObjectUI):
 			self.shaderPanel.x = self.editorPanel.parent.width + 15			
 			self.shaderPanel.isVisible = True
 		
+		
+# material derivative UIs
 class ShaderParamUI:
 	protocols.advise(instancesProvide=[IShaderParamUI], asAdapterForTypes=[BtoRStringParam, BtoRArrayParam, BtoRMatrixParam])
 	def __init__(self, obj):
