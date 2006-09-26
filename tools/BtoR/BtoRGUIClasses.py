@@ -917,7 +917,7 @@ class UIElement(UI):
 				self.draw_stack.append(element)
 				
 			self.draw_stack.reverse()
-			
+	
 	def removeElement(self, element):		
 		self.elements.remove(element)
 		if element in self.z_stack:			
@@ -930,6 +930,13 @@ class UIElement(UI):
 			self.elements.remove(element)
 		del element
 		
+	def raiseElement(self, element):
+		""" raiseElement(UIElement element) - Bring the supplied UIElement to the top of the element list."""
+		self.z_stack.remove(element)
+		self.z_stack.insert(0, element)
+		self.draw_stack.remove(element)
+		self.draw_stack.append(element)
+		element.invalid = True
 			
 	def clearElements(self):
 		self.elements = []
@@ -2138,7 +2145,9 @@ class Menu(UIElement):
 		self.customPrompt = customPrompt
 		self.valueIsCustom = False
 		self.custom_func = customFunc
-		
+	def hasValue(self, value):
+		if value in self.menu:
+			return self.menu.index(value)
 	def customUpdated(self, obj):
 		if self.custom_func != None:
 			self.custom_func(self.customValue)
@@ -2457,6 +2466,7 @@ class Menu(UIElement):
 		self.value = idx
 			
 	def setValueString(self, value):
+		found = False
 		idx = 0
 		for element in self.panel.elements:
 			if element.title == value:
@@ -2471,7 +2481,11 @@ class Menu(UIElement):
 		
 	def registerCallbackForElementIndex(self, idx, signal, callback):
 		self.panel.elements[idx].registerCallback(signal, callback)
-		
+	def getValueIndex(self, value):
+		if value in self.menu:
+			return self.menu.index(value)
+		else:
+			return -1
 		
 class MenuBar(Panel):
 	x_offset = 15 # 15 pixel offsetx
@@ -4188,29 +4202,74 @@ class MsgBox(Panel):
 		
 
 class Image(UIElement):
+	useOpenGLTextures = False
 	def __init__(self, x, y, width, height, image, parent, auto_register):
 		UIElement.__init__(self, x, y, width, height, "Image",  "image", parent, auto_register)
-		self.image = image
+		if image != None:
+			self.image = image		
+			self.bindCode = self.image.getBindCode()
+			self.unbound = False
+		else:
+			self.image = None
+			self.bindCode = 0
+			self.unbound = True
+		
+	def bindImage(self):
+		self.bindCode = self.image.getBindCode()
+		
+
 		
 	
 	def draw(self):
 		self.validate()
-		size = self.image.getSize()
-		if size[0] <> self.width or size[1] <> self.height:
-			# I need to zoom the image
-			# figure out the correct zoom ratio
-			x_scale = float(self.width) / float(size[0])
-			y_scale = float(self.height) / float(size[1])
-			if x_scale > y_scale:
-				zoom = x_scale
+		if self.useOpenGLTextures:
+			self.validate()
+			# setup the texture drawing stuff
+			if self.unbound:
+				self.bindCode = self.image.getBindCode()
+				if self.bindCode == 0:
+					self.unbound = True
+			if not self.unbound:
+				gl.glBindTexture(gl.GL_TEXTURE_2D, self.bindCode)
+				
+				gl.glTexEnvf(gl.GL_TEXTURE_ENV, gl.GL_TEXTURE_ENV_MODE, gl.GL_DECAL)
+				
+				gl.glEnable(gl.GL_TEXTURE_2D)
+				gl.glTexParameterf(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_S, gl.GL_CLAMP)
+				gl.glTexParameterf(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_T, gl.GL_CLAMP)
+				gl.glTexParameterf(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_NEAREST)
+				gl.glTexParameterf(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_NEAREST)
+				
+				gl.glBegin(gl.GL_QUADS)
+				gl.glTexCoord2f(1.0, 0.0)
+				gl.glVertex2f(self.absX + self.width, self.absY - self.height)
+				gl.glTexCoord2f(1.0, 1.0)
+				gl.glVertex2f(self.absX + self.width, self.absY)
+				gl.glTexCoord2f(0.0, 1.0)
+				gl.glVertex2f(self.absX, self.absY)
+				gl.glTexCoord2f(0.0, 0.0)
+				gl.glVertex2f(self.absX, self.absY - self.height)
+				gl.glEnd()		
+				
+				gl.glDisable(gl.GL_TEXTURE_2D)			
+		else:		
+			size = self.image.getSize()
+			if size[0] <> self.width or size[1] <> self.height:
+				# I need to zoom the image
+				# figure out the correct zoom ratio
+				x_scale = float(self.width) / float(size[0])
+				y_scale = float(self.height) / float(size[1])
+				if x_scale > y_scale:
+					zoom = x_scale
+				else:
+					zoom = y_scale
+				Blender.Draw.Image(self.image, self.absX, self.absY, zoom, zoom)
 			else:
-				zoom = y_scale
-			Blender.Draw.Image(self.image, self.absX, self.absY, zoom, zoom)
-		else:
-			Blender.Draw.Image(self.image, self.absX, self.absY)
-			# that should be that. Images should be sized to whatever they need to be on creation.
+				Blender.Draw.Image(self.image, self.absX, self.absY)
+				# that should be that. Images should be sized to whatever they need to be on creation.
 			
 	def validate(self): 
+		
 		# apply transforms to the x,y values of this object using the parent's absolute locations
 		if self.invalid:
 			# cascade invalidations down the chain of contained elements
@@ -4218,18 +4277,28 @@ class Image(UIElement):
 				element.invalid = True
 			# image elements are different. images draw UP rather than down, so y indicates the bottom edge of the image.
 			# thus, to achieve the desired behaviour, I must adjust the my Y value to actually be Y - self.height in 
-			# my abs calculation.
-			if self.parent == None:
-				self.absX = self.x
-				self.absY = self.y - self.height
+			# my abs calculation UNLESS I'm using OpenGL textures
+			# 
+			if self.useOpenGLTextures:
+				if self.parent == None:
+					self.absX = self.x
+					self.absY = self.y
+				else:				
+					self.absX = self.parent.absX + self.x 
+					self.absY = self.parent.absY - self.y 
 			else:
-				
-				self.absX = self.parent.absX + self.x 
-				self.absY = self.parent.absY - (self.y + self.height)
+				if self.parent == None:
+					self.absX = self.x
+					self.absY = self.y - self.height
+				else:				
+					self.absX = self.parent.absX + self.x 
+					self.absY = self.parent.absY - (self.y + self.height)
 				
 		self.invalid = False
 		for func in self.validate_functions:
 			func()
+			
+		
 class VisibilityGroup: # maintains a list of objects and turns them on or off 
 	def __init__(self, objList):
 		self.objList = objList
