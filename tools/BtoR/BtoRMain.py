@@ -837,10 +837,11 @@ class SceneSettings(BtoRObject):
 	def setupRendererProperties(self, xml = None, sysGlobal = None):
 		
 		rproperties = self.settings.getRendererOptions()
-		for prop in rproperties:
-			self.options[prop] = rproperties[prop] 
-			# I probably don't care about ordering for the render properties, but their keys will keep them grouped anyway since dicts appear to index alphabetically
-			self.optionOrder.append(prop)
+		if rproperties != None and len(rproperties) > 0:
+			for prop in rproperties:
+				self.options[prop] = rproperties[prop] 
+				# I probably don't care about ordering for the render properties, but their keys will keep them grouped anyway since dicts appear to index alphabetically
+				self.optionOrder.append(prop)
 		self.setupProperties()		
 		
 
