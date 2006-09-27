@@ -600,12 +600,13 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 			# no info		
 			self.renderer = "AQSIS" # this should eventually change to use settings stored in either the blender registry, or something else
 			# default to aqsis, since we've got no actual information
-			if os.name <> "posix" or os.name <> "mac":
+			# if os.name <> "posix" or os.name <> "mac":
+			if sys.platform == "win32":
 				self.shaderPathList = r"C:\Program Files\Aqsis\Shaders" 
 				self.outputPath = r'C:\temp'
 			else:
 				self.shaderPathList = r"/usr/aqsis/shaders/"
-				self.outputPath = r"/temp/"
+				self.outputPath = r"/tmp/"
 			self.use_slparams = True # set this to true by default
 			
 			# surf the environment and get the shader paths from the env vars for this renderer
