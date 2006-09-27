@@ -2171,20 +2171,27 @@ class LampAdapter(ObjectAdapter):
 	def setShadowParms(self, params):
 		shadername = self.shader.shader.shadername
 		if shadername == "shadowpoint":
-			setattr(self.shader.shader, "sfpx", params["px"]["shadowName"])
+			# setattr(self.shader.shader, "sfpx", params["px"]["shadowName"])
+			self.shader.setParamValue("sfpx", params["px"]["shadowName"])
 			#print "Shadowmap: ", getattr(self.shader.shader, "sfpx")
-			setattr(self.shader.shader, "sfpy", params["py"]["shadowName"])
+			#setattr(self.shader.shader, "sfpy", params["py"]["shadowName"])
+			self.shader.setParamValue("sfpy", params["py"]["shadowName"])
 			#print "Shadowmap: ", getattr(self.shader.shader, "sfpy")
-			setattr(self.shader.shader, "sfpz", params["pz"]["shadowName"])
+			# setattr(self.shader.shader, "sfpz", params["pz"]["shadowName"])
+			self.shader.setParamValue("sfpz", params["pz"]["shadowName"])
 			#print "Shadowmap: ", getattr(self.shader.shader, "sfpz")
-			setattr(self.shader.shader, "sfnx", params["nx"]["shadowName"])
+			#setattr(self.shader.shader, "sfnx", params["nx"]["shadowName"])
+			self.shader.setParamValue("sfnx", params["nx"]["shadowName"])
 			#print "Shadowmap: ", getattr(self.shader.shader, "sfnx")
-			setattr(self.shader.shader, "sfny", params["ny"]["shadowName"])
+			#setattr(self.shader.shader, "sfny", params["ny"]["shadowName"])
+			self.shader.setParamValue("sfny", params["ny"]["shadowName"])
 			#print "Shadowmap: ", getattr(self.shader.shader, "sfny")
-			setattr(self.shader.shader, "sfnz", params["nz"]["shadowName"])
+			#setattr(self.shader.shader, "sfnz", params["nz"]["shadowName"])
+			self.shader.setParamValue("sfnz", params["nz"]["shadowName"])
 			#print "Shadowmap: ", getattr(self.shader.shader, "sfnz")
 		elif shadername == "shadowspot" or shadername == "shadowdistant" or shadername == "bml":
-			setattr(self.shader.shader, "shadowname", params["shadow"]["shadowName"])
+			# setattr(self.shader.shader, "shadowname", params["shadow"]["shadowName"])
+			self.shader.setParamValue("shadowname", params["shadow"]["shadowName"])
 			
 		
 	def getRenderDirections(self):
