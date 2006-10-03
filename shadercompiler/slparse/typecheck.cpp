@@ -848,8 +848,9 @@ TqInt	CqParseNodeTriple::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& needsCa
 	CqParseNode* pExpr = m_pChild;
 	while ( pExpr != 0 )
 	{
+		CqParseNode* pNextExpr = pExpr->pNext();
 		pExpr->TypeCheck( &ExprType, 1, needsCast, CheckOnly );
-		pExpr = pExpr->pNext();
+		pExpr = pNextExpr;
 	}
 	// Check if expecting a triple, if not add a cast
 	TqInt i;
