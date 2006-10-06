@@ -345,6 +345,7 @@ class CustomRIBProperty(Property):
 	protocols.advise(instancesProvide=[IProperty], asAdapterForTypes=[BtoRCustomRIB])
 	height = 20
 	pass
+class 
 	
 # Property Editors
 class PropertyEditor: # this needs no interface declaration, since all this is doing is providing a baseclass
@@ -459,7 +460,7 @@ class FilePropertyEditor(PropertyEditor):
 	# environment & shadow maps should apply to the *assigned* object
 	# lightsources are slightly weird because they need to be both local and global (for AO purposes)
 	# environment maps are actually global namely because of multiple assignment
-	protocols.advise(instancesProvide=[IPropertyEditor], asAdapterForTypes=[PathProperty])
+	protocols.advise(instancesProvide=[IPropertyEditor])
 	def __init__(self, property):		# remember to add an override button to all custom types!
 		sdict = globals()
 		self.evt_manager = sdict["instBtoREvtManager"]
