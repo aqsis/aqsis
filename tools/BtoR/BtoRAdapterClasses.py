@@ -188,7 +188,7 @@ class ShaderProperty(Property):
 		
 		try:
 			if self.settings.use_slparams:
-				shaderPath = self.settings.shaderpaths.getValue().split(";")[0]
+				shaderPath = self.settings.getShaderSearchPaths()[0]
 				
 				initialized = True								
 				if useXML:
@@ -345,7 +345,11 @@ class CustomRIBProperty(Property):
 	protocols.advise(instancesProvide=[IProperty], asAdapterForTypes=[BtoRCustomRIB])
 	height = 20
 	pass
-		
+class PathProperty(Property):
+	protocols.advise(instancesProvide=[IProperty], asAdapterForTypes=[BtoRPath])
+	height = 20
+	pass
+	
 # Property Editors
 class PropertyEditor: # this needs no interface declaration, since all this is doing is providing a baseclass
 	fontsize = 'small'
@@ -459,6 +463,7 @@ class FilePropertyEditor(PropertyEditor):
 	# environment & shadow maps should apply to the *assigned* object
 	# lightsources are slightly weird because they need to be both local and global (for AO purposes)
 	# environment maps are actually global namely because of multiple assignment
+	protocols.advise(instancesProvide=[IPropertyEditor], asAdapterForTypes=[PathProperty])
 	def __init__(self, property):		# remember to add an override button to all custom types!
 		sdict = globals()
 		self.evt_manager = sdict["instBtoREvtManager"]
@@ -483,6 +488,28 @@ class FilePropertyEditor(PropertyEditor):
 		
 	def browse(self, button):
 		""" Browser """
+
+class PathPropertyEditor(PropertyEditor):
+	""" Directory Browser """
+	def __init__(self, property):
+		sdict = globals()
+		self.evt_manager = sdict["instBtoREvtManager"]
+		width = self.property.width
+		height = self.property.height
+		self.value = ui.TextField(0, 0, width - 25, height, self.property.getName(), self.property.getStrValue(), self.editor, True, fontsize = self.fontsize)
+		self.triggerButton = ui.Button(width - 25, 0, 25, height, "...", "...", 'small', self.editor, True)
+		self.triggerButton.shadowed = False
+		self.triggerButton.registerCallback("release", self.browsePath)
+		self.value.registerCallback("update", self.updateValue)
+		self.property.editor = self
+		
+	def browsePath(self, button):		
+		Blender.Window.FileSelector(self.select, 'Choose any file')
+		
+	def select(self, file):
+		path = os.path.dirname(file)
+		self.value.setValue(path)
+		self.updateValue(path)
 		
 class SpacePropertyEditor(PropertyEditor):
 	Spaces = ['current', 'object', 'shader', 'world', 'camera', 'screen', 'raster', 'NDC']
@@ -1181,9 +1208,7 @@ class ObjectAdapter: # baseclass for all Blender objects
 			self.editors[propertyName].setValue(propertyValue) # 
 			
 			
-		# setup the properties for this objects
-		
-		
+		# setup the properties for this objects				
 		self.initMaterial()
 		
 		# test for any shaders
@@ -1198,7 +1223,7 @@ class ObjectAdapter: # baseclass for all Blender objects
 	def initShader(self, useXML = False, xml = None):		
 		try:
 			if self.settings.use_slparams:
-				shaderPath = self.settings.shaderpaths.getValue().split(";")[0]
+				shaderPath = self.settings.getShaderSearchPaths()[0]
 				
 				# try to find the shader file in question. In truth, the default files should exist
 				# get the first shader search path for pre-generated shaders				
@@ -1335,94 +1360,109 @@ class MeshAdapter(ObjectAdapter):
 		""" Initialize a mesh export adapter """		
 		ObjectAdapter.__init__(self, object)
 			
-		
-	def render(self, shadowPass = False, envPass = False):
+			
+	def render(self, shadowPass = False, envPass = False, renderLayers = []):
 		render = False
+		renderLayer = False
 		illumList = []
-		if self.lighting.getProperty("layerLighting"):
-			# if I'm using layerLighting, then I know that all of my lights are going to be OFF by default
-			# I need to turn some lights on and off here
-			
+		# test for layer visibility first
+		if not self.scene.getProperty("RenderLayers"):
 			for layer in self.object.layers:
-				for light in self.scene.lightingLayers[layer]:
-					if light not in illumList:
-						illumList.append(light)
-				
-		if shadowPass:
-			if self.properties["RenderInShadowPass"].getValue():				
-				if self.lighting.getProperty("layerLighting"): # if I'm using layerLighting, then shadowPass rendering is only neccessary if any lights are illuminating this object.
-					if len(illumList) > 0: # There's a light illuminating this object. Render it in the shadowPass
-						render = True
-				else: # if I'm not using layerLighting, then render always if RenderInShadowPass is true
-					render = True
-		elif envPass:
-			if self.properties["RenderInEnvMaps"].getValue():
-				render = True
+				if layer in self.scene.layers:
+					# object exists in at least one layer that's enabled
+					renderLayer = True
+					break
 		else:
-			render = True					
-			
-		if render:				
-			if len(illumList) > 0:				
-				ri.RiAttributeBegin() # push the graphics state. All lights should be off
-				for light in illumList:
-					ri.RiIlluminate(light, ri.RI_TRUE)
-			# immediately test for dupliverts
-			if self.object.enableDupVerts and len(self.object.DupObjects) > 0:
-				# I might have dupliverts, react accordingly
-				# test for rotation by object normal, etc.
-				# step 1, create an object definition
-				objSequence = ri.RiObjectBegin() # keep the sequence number for referencing the instances
-				# don't render materials here, only the object data, and for safety's sake, keep at the world origin
-				self.renderMeshData()
-				ri.RiObjectEnd()
-				# now for the instances				
-				objs = self.object.DupObjects
-				ri.RiAttributeBegin() # I do this out here, because the material attribute will remain the same for all instances
-				# unless of course I come up with a way of specifying a different material per instance...which would be really interesting.
-				self.renderMaterial() # render the material
-				instance = 1
-				for obj in objs:					
-					ri.RiTransformBegin()					
-					# transform the object
-					ri.RiAttributeBegin()
-					ri.RiAttribute("identifier", "name", self.objData["name"] + instance)
-					ri.RiTransform(obj[1]) # that should be the duplicated matrix and in fact should take into account rotations and scaling, all that
-					ri.RiObjectInstance(objSequence)	
-					ri.RiAttributeEnd()
-					ri.RiTransformEnd()
-					instance = instance + 1
-				ri.RiAttributeEnd()
-						
-			else:
-				ri.RiAttributeBegin()				
-				ri.RiAttribute("identifier", "name", [self.objData["name"]]) # give it a name
-				ri.RiAttribute("displacementbound", "sphere", self.getProperty("DispBound"))
-				srate = self.getProperty("ShadingRate")
-				sceneRate = self.scene.getProperty("ShadingRate")
-				if srate != sceneRate:
-					ri.RiShadingRate(srate)
+			renderLayer = True
 				
-				ri.RiTransformBegin()	 
-				
-				if shadowPass and self.getProperty("ShadowMats"):					
-					self.renderMaterial()
-				elif not shadowPass and not self.getProperty("Matte"):
-					self.renderMaterial()
-						
-				ri.RiTransform(self.object.matrix) # transform				
-				# self.renderMeshData() # and render the mesh	
-				archiveFile = self.objData["archive"] + self.objData["name"] + ".rib"
-				if self.settings.renderer == "BMRT":
-					archiveFile = archiveFile.replace("\\", "\\\\")
-				ri.RiReadArchive(archiveFile) # this should read from the archive path
-				ri.RiTransformEnd()
-				ri.RiAttributeEnd()
-				# aaaannnnnd done.
-				# I rendered this object, so flag the 
-				self.changed = False
-			if len(illumList) > 0:
-				ri.RiAttributeEnd() # pop the graphics state back out
+		if renderLayer:
+							
+			if shadowPass:				
+				if self.properties["RenderInShadowPass"].getValue():				
+					if self.lighting.getProperty("layerLighting"): # if I'm using layerLighting, then shadowPass rendering is only neccessary if any lights are illuminating this object.
+						for layer in self.object.layers:
+							if layer in self.scene.currentLightLayers:
+								render = True
+								break # first one wins
+					else: # if I'm not using layerLighting, then render always if RenderInShadowPass is true
+						render = True
+			elif envPass:
+				if self.properties["RenderInEnvMaps"].getValue():
+					render = True
+			else:			
+				if self.lighting.getProperty("layerLighting"):
+					# if I'm using layerLighting, then I know that all of my lights are going to be OFF by default
+					# I need to turn some lights on and off here				
+					
+					for layer in self.object.layers:
+						for light in self.scene.lightingLayers[layer]: 
+							if light not in illumList:
+								illumList.append(light)
 
+				render = True					
+					
+			if render:						
+				if not shadowPass:
+					if len(illumList) > 0:				
+						ri.RiAttributeBegin() # push the graphics state. All lights should be off
+						for light in illumList:
+							ri.RiIlluminate(light, ri.RI_TRUE)
+				# immediately test for dupliverts
+				if self.object.enableDupVerts and len(self.object.DupObjects) > 0:
+					# I might have dupliverts, react accordingly
+					# test for rotation by object normal, etc.
+					# step 1, create an object definition
+					objSequence = ri.RiObjectBegin() # keep the sequence number for referencing the instances
+					# don't render materials here, only the object data, and for safety's sake, keep at the world origin
+					self.renderMeshData()
+					ri.RiObjectEnd()
+					# now for the instances				
+					objs = self.object.DupObjects
+					ri.RiAttributeBegin() # I do this out here, because the material attribute will remain the same for all instances
+					# unless of course I come up with a way of specifying a different material per instance...which would be really interesting.
+					self.renderMaterial() # render the material
+					instance = 1
+					for obj in objs:					
+						ri.RiTransformBegin()					
+						# transform the object
+						ri.RiAttributeBegin()
+						ri.RiAttribute("identifier", "name", self.objData["name"] + instance)
+						ri.RiTransform(obj[1]) # that should be the duplicated matrix and in fact should take into account rotations and scaling, all that
+						ri.RiObjectInstance(objSequence)	
+						ri.RiAttributeEnd()
+						ri.RiTransformEnd()
+						instance = instance + 1
+					ri.RiAttributeEnd()
+				else:
+					ri.RiAttributeBegin()				
+					ri.RiAttribute("identifier", "name", [self.objData["name"]]) # give it a name
+					ri.RiAttribute("displacementbound", "sphere", self.getProperty("DispBound"))
+					srate = self.getProperty("ShadingRate")
+					sceneRate = self.scene.getProperty("ShadingRate")
+					if srate != sceneRate:
+						ri.RiShadingRate(srate)
+						
+					ri.RiTransformBegin()	 
+						
+					if shadowPass and self.getProperty("ShadowMats"):					
+						self.renderMaterial()
+					elif not shadowPass and not self.getProperty("Matte"):
+						self.renderMaterial()
+							
+					ri.RiTransform(self.object.matrix) # transform				
+					# self.renderMeshData() # and render the mesh	
+					archiveFile = self.objData["archive"] + self.objData["name"] + ".rib"
+					if self.settings.renderer == "BMRT":
+						archiveFile = archiveFile.replace("\\", "\\\\")
+					ri.RiReadArchive(archiveFile) # this should read from the archive path
+					ri.RiTransformEnd()
+					ri.RiAttributeEnd()
+					# aaaannnnnd done.
+					# I rendered this object, so flag the 
+					self.changed = False
+				if len(illumList) > 0:
+					ri.RiAttributeEnd() # pop the graphics state back out
+					
 		
 	def renderMeshData(self):
 		
@@ -2049,7 +2089,7 @@ class LampAdapter(ObjectAdapter):
 		ObjectAdapter.__init__(self, object)	
 		self.isAnimated = False 
 		self.shadowMaps = {} # indexed by direction_frame method
-		
+			
 	def render(self): 
 		""" Generate renderman data for this object. """
 		# I should call checkReset here to make sure I have the latest/greatest up to date data for this lamp, no?
@@ -2062,13 +2102,23 @@ class LampAdapter(ObjectAdapter):
 			ri.RiTransformBegin()
 			ri.RiTranform(self.object.getMatrix())
 		lightHandle = ri.RiLightSource(self.shader.shader.shadername, self.shader.shader.params())
+		
+		if self.scene.getProperty("RenderLayers"):
+			allLayers = True
+		else:
+			allLayers = False
 		# I need lightHandle for turning lights on and off for layer support
-		if self.lighting.getProperty("layerLighting"):
+		if self.lighting.getProperty("layerLighting"): # 
 			# unless this light is flagged as global, turn it off in the current graphics state.
 			if not self.getProperty("globalLight"):
 				ri.RiIlluminate(lightHandle, ri.RI_FALSE)
 			for layer in self.object.layers:
-				self.scene.lightingLayers[layer].append(lightHandle)
+				if allLayers:
+					self.scene.lightingLayers[layer].append(lightHandle)
+				else:
+					if layer in self.scene.layers: # if the current layer is ON in the global layer list, then illuminate this layer
+						self.scene.lightingLayers[layer].append(lightHandle)
+						
 		if self.getProperty("transformLight"):
 			ri.RiTransformEnd()
 	
@@ -2249,7 +2299,7 @@ class LampAdapter(ObjectAdapter):
 			energyRatio = lamp.dist * negative
 			# get the first selected shader path...and hope it's setup correctly
 		
-			shaderPath = self.settings.shaderpaths.getValue().split(";")[0]
+			shaderPath = self.settings.getShaderSearchPaths()[0]
 			if self.lighting.getProperty("GenShadowMaps"):				
 				sFilename = "shadowpoint" + ext
 			else:
@@ -2267,7 +2317,7 @@ class LampAdapter(ObjectAdapter):
 			energyRatio = negative
 			self.objData["shadername"] = "distantlight"			
 		
-			shaderPath = self.settings.shaderpaths.getValue().split(";")[0]
+			shaderPath = self.settings.getShaderSearchPaths()[0]
 			if self.lighting.getProperty("GenShadowMaps"):
 				sFilename = "shadowdistant" + ext
 			else:
@@ -2279,7 +2329,7 @@ class LampAdapter(ObjectAdapter):
 		elif lamp.type == 2:
 			self.objData["type"] = 2
 			energyRatio = lamp.dist * negative
-			shaderPath = self.settings.shaderpaths.getValue().split(";")[0]
+			shaderPath = self.settings.getShaderSearchPath()[0]
 			#if self.settings.useShadowMaps.getValue():
 			#	sFilename = "shadowspot.sl"
 			#else:
@@ -2310,7 +2360,7 @@ class LampAdapter(ObjectAdapter):
 			energyRatio = negative
 			self.objData["shadername"] = "hemilight"
 		
-			shaderPath = self.settings.shaderpaths.getValue().split(";")[0]			
+			shaderPath = self.settings.getShaderSearchPaths()[0]			
 			self.objData["shaderfilename"] = os.path.normpath(shaderPath + os.sep + "hemilight" + ext)
 
 			shaderParms["to"] = [tox, toy, toz]
@@ -2451,17 +2501,17 @@ class CurveAdapter(ObjectAdapter):
 	def renderArchive(self):
 		ri.RiBegin(self.objData["archive"] + self.objData["name"] + ".rib") 
 		# this is pure geometry here
-		ri.RiAttributeBegin()
-		ri.RiTransformBegin()
-		self.renderCurveData()
-		ri.RiTransformEnd()
-		ri.RiAttributeEnd()
-		ri.RiEnd() 
+		#ri.RiAttributeBegin()
+		#ri.RiTransformBegin()
+		#self.renderCurveData()
+		#ri.RiTransformEnd()
+		#ri.RiAttributeEnd()
+		#ri.RiEnd() 
 		
 	def renderCurveData(self):
 		""" renders curve data to RiCurve objects """
-		curve = self.object.getData()
-		nVerts = len(curve.verts)
+		#curve = self.object.getData()
+		#nVerts = len(curve.verts)
 		
 		
 	def initObjectData(self):
@@ -2472,9 +2522,9 @@ class CurveAdapter(ObjectAdapter):
 		self.objData = {}
 		self.objData["name"] = self.object.getName()				
 		self.objData["type"] = self.object.getType()
-		curveObject = self.object.getData()
+		#curveObject = self.object.getData()
 		self.objData["material"] = "None"
-		# so what am I doing here?
+		
 		
 		
 class SurfaceAdapter(ObjectAdapter):
@@ -2561,7 +2611,7 @@ class CameraAdapter(ObjectAdapter):
 		self.objData["type"] = self.object.getType() 
 		self.shader_type = "imager"
 		shaderParams = {}
-		shaderPath = self.settings.shaderpaths.getValue().split(";")[0]
+		shaderPath = self.settings.getShaderSearchPaths()[0]
 		# this is a potential deficiency
 		self.objData["shaderfilename"] = os.path.normpath(shaderPath + os.sep + "background.sl")
 		bWorld = Blender.World.GetCurrent()
@@ -2963,6 +3013,7 @@ class LampUI(ObjectUI):
 				"Multiplier" : ["Multiplier", 1.0],
 				"GenShadowMap" : ["Render Shadow Maps:", {"Lazy" : "lazy", "Always" : "always", "Never" : "never"}, "lazy"], 
 				"ShadowMapSize" : ["Shadow Map Size", { "256" : 256, "512" : 512, "1024" : 1024, "2048" : 2048 }, "256"],
+				"ShadowMapEyeSplits" : ["Max Eyesplits for Map", 5],
 				"DepthFilter" : ["Midpoint Depthfilter?", True],
 				"ShadowmapSamples" : ["ShadowMap Samples:", 1],
 				"ShadowMapJitter" : ["ShadowMap Jitter:", 0.0],

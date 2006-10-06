@@ -30,6 +30,7 @@ import math
 from sets import Set
 import sys
 import StringIO	
+import string
 import re
 import popen2
 
@@ -132,7 +133,7 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 	# assign all lists and strings to None if there's no available info or that particular renderer has no equivalent value (see Aqsis for ex. of home env vars)
 	renderers = {  "AQSIS" : ["aqsis", "aqsl", "aqsltell", "teqser", "slx", None, "AQSIS_SHADER_PATH", "AQSIS_TEXTURE_PATH", "AQSIS_DISPLAY_PATH", "AQSIS_PROCEDURAL_PATH", "AQSIS_PLUGIN_PATH", "AQSIS_ARCHIVE_PATH"],
 			     "BMRT" : ["rendrib", "slc", "slctell","mkmip","BMRTHOME", "SHADERS", "TEXTURES",None,None,None,None], 
-			     "pixie" : ["rndr", "sdr", "sdrinfo", "texmake", "PIXIEHOME", "SHADERS", None, None, None, None, None],
+			     "Pixie" : ["rndr", "sdr", "sdrinfo", "texmake", "PIXIEHOME", "SHADERS", None, None, None, None, None],
 			     "3Delight":["renderdl", "shaderdl", "shaderinfo", "tdlmake", "DELIGHT",  "DL_SHADERS", None, "DL_DISPLAYS", None, None, None],
 			     "RenderDotC":["wrendrdc", "shaderdc", "soinfo", "texdc", "RDCROOT", "SHADERS", "MAPS", "DISPLAYS", "PROCEDURALS", None, "ARCHIVES"] }
 	cpp = "cpp"
@@ -234,7 +235,6 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 	
 	}
 	
-	
 	def __init__(self):		
 		self.options = {"Renderer":["Renderer:", { "Aqsis":"aqsis", "BMRT":"bmrt", "Pixie":"rndr", "3Delight":"renderdl", "RenderDotC":"wrendrdc" }, "aqsis"],
 					"UseSlParams":["Use CGKIT Slparams?", True, True],
@@ -244,14 +244,10 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 
 		if sdict.has_key("instBtoREvtManager"):
 			self.evt_manager = sdict["instBtoREvtManager"]
-		#for key in keys:		
-		#	if isinstance(dict[key], ui.EventManager):
-		#		self.evt_manager = dict[key]
-				# event manager instance
 				
 		self.getSettings(None)
 		screen = Blender.Window.GetAreaSize()
-		self.editor = ui.Panel(10, screen[1] - 225, 400, 300, "GlobalSettings", "Global Neqsus/BtoR Settings:", None, False)
+		self.editor = ui.Panel(10, screen[1] - 225, 300, 210, "GlobalSettings", "Global Neqsus/BtoR Settings:", None, False)
 		self.editor.addElement(ui.Label(5, 30, "Renderer:", "Renderer:", self.editor, False))
 		rendererList = self.renderers.keys()
 		
@@ -265,19 +261,20 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 		width = self.editor.get_string_width("Procedurals:", 'normal') + 30
 		
 		self.renderMatsOnStartup = ui.CheckBox(5, 90, "Render material previews on startup?", "Render material previews on startup?", False, self.editor, True)
-		
-		self.useShadowMaps = ui.CheckBox(5, 115, "Use Shadow Maps?", "Use Shadow Maps?", True, self.editor, True)
 
 		# shader search paths
-		self.editor.addElement(ui.Label(5, 140, "Shaders:", "Shader Search Paths:", self.editor, False))		
-		self.shaderpaths = ui.TextField(5,165, self.editor.width - 45 , 20, "ShaderPathText", self.shaderPathList, self.editor, True)		
-		self.shaderBrowse = ui.Button(self.shaderpaths.x + self.shaderpaths.width + 2, 165, 30, 20, "ShaderBrowse", "...", 'normal', self.editor, True)		
-		self.shaderBrowse.registerCallback("release", self.browse)
+		# self.editor.addElement(ui.Label(5, 140, "Shaders:", "Shader Search Paths:", self.editor, False))	
+		self.showSearchPaths = ui.Button(self.editor.width - 90, 30, 70, 25, "Search Paths:", "Search Paths:", 'small', self.editor, True)
+		self.showSearchPaths.registerCallback("release", self.togglePaths)
+		
+		#self.shaderpaths = ui.TextField(5,165, self.editor.width - 45 , 20, "ShaderPathText", self.shaderPathList, self.editor, True)		
+		#self.shaderBrowse = ui.Button(self.shaderpaths.x + self.shaderpaths.width + 2, 165, 30, 20, "ShaderBrowse", "...", 'normal', self.editor, True)		
+		#self.shaderBrowse.registerCallback("release", self.browse)
 		
 		# output path
-		self.editor.addElement(ui.Label(5, 190, "Output Path:", "Output Path:", self.editor, False))
-		self.outputpath = ui.TextField(5, 215, self.editor.width - 45, 20, "OutputPathText", self.outputPath, self.editor, True)
-		self.outputBrowse = ui.Button(self.outputpath.x + self.outputpath.width + 2, 215, 30, 20, "OutputBrowse", "...", 'normal', self.editor, True)
+		self.editor.addElement(ui.Label(5, 110, "Output Path:", "Output Path:", self.editor, False))
+		self.outputpath = ui.TextField(5, 130, self.editor.width - 45, 20, "OutputPathText", self.outputPath, self.editor, True)
+		self.outputBrowse = ui.Button(self.outputpath.x + self.outputpath.width + 2, 130, 30, 20, "OutputBrowse", "...", 'normal', self.editor, True)
 		self.outputBrowse.registerCallback("release", self.browse)
 		
 		self.cancelButton = ui.Button(5, self.editor.height - 45, 60, 20, "Cancel", "Cancel", 'normal', self.editor, True)		
@@ -290,7 +287,7 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 		self.cancelButton.registerCallback("release", self.close)
 		
 		# get the first shader path in the search list
-		paths = self.shaderpaths.getValue().split(";")
+		# paths = self.shaderpaths.getValue().split(";")
 		
 		self.shadersSurface = {}
 		self.shadersDisplacement = {}
@@ -303,11 +300,7 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 		self.imagerFiles = {}
 		self.lightFiles = {}
 		self.assets = {} # indexed by object name
-		
-		if self.use_slparams:
-			self.getShaderSourceList(paths[0]) 
-		else:
-			self.getCompiledShaderList(paths[0]) 
+		# self.paths = {"shaders":[], "textures":[], "shadows":[] }
 			
 		self.shadows = os.sep + "shadows" + os.sep
 		self.images = os.sep + "images" + os.sep
@@ -317,6 +310,83 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 		self.shaders = os.sep + "shaders" + os.sep
 		self.materialPreviews = os.sep + "matPreviews" + os.sep # this should use the temp directory that's defined, or maybe I should make that another user option?
 		
+		self.pathsPanel = ui.Panel(305, 0, 300, 250, "", "", self.editor, True)
+		self.pathsPanel.isVisible = False
+		self.pathsPanel.shadowed = True
+		self.pathsPanel.outlined = True
+		self.pathsPanel.hasHeader = False
+		
+		self.pathsLabel = ui.Label(5, 3, "Paths", "Shader Search Paths:", self.pathsPanel, True)
+		self.pathsLabel.transparent = True
+		
+		self.pathsContainer = ui.Panel(5, 60, 292, 180, "Shader Search Paths:", " ", self.pathsPanel, True)	
+		self.pathsContainer.shadowed = False
+		self.pathsContainer.outlined = False
+		self.pathsContainer.hasHeader = False
+		# self.pathsContainer.addElement(ui.Label(20, 5, "Shader Path:", "Shader Path:", self.pathsContainer, False, fontsize = 'small'))
+		self.pathsScroller = ui.ScrollPane(0, 0, 290, 150, "Scroller", "Scroller", self.pathsContainer, True)
+		
+		self.addPass = ui.Button(5, 27, 105, 25, "Add Search Path", "Add Path", 'small', self.pathsPanel, True)
+		self.addPass.registerCallback("release", self.addPath)
+		self.deletePass = ui.Button(115, 27, 145, 25, "Delete Selected Path(s)", "Delete Selected Path(s)", 'small', self.pathsPanel, True)
+		self.deletePass.registerCallback("release", self.deletePath)
+		
+		self.paths = []
+		print self.shaderPathList
+		for path in self.shaderPathList[self.renderer]:			
+			panel = self.addPath(None, False)			
+			panel.pathName.setValue(path)
+		
+		if self.use_slparams:
+			self.getShaderSourceList(self.paths[0].pathName.getValue()) 
+		else:
+			self.getCompiledShaderList(self.paths[0].pathName.getValue()) 
+			
+	def togglePaths(self, button):
+		""" toggle the panel """
+		if self.pathsPanel.isVisible:
+			self.pathsPanel.hide()
+		else:
+			self.pathsPanel.show()
+		
+	def addPath(self, button, browse = True):
+		pathPanel = ui.Panel(0, 0, 274, 22, "RenderPass", "", self.pathsScroller, True)		
+		pathPanel.outlined = True
+		pathPanel.hasHeader = False		
+		pathPanel.cornermask = 0
+		pathPanel.shadowed = False
+		pathPanel.selector = ui.CheckBox(2, 3, " ", " ",  False, pathPanel, True) 
+		pathPanel.selector.transparent = True
+		pathPanel.selector.elements[0].transparent = True
+		pathPanel.pathName = ui.TextField(15, 0, 208, 20, "PathName", "path", pathPanel, True)
+		pathPanel.recurse = ui.CheckBox(227, 3, "", "", False, pathPanel, True, fontsize = 'tiny')
+		pathPanel.browse = ui.Button(253, 0, 20, 20, "shader", "...", 'small', pathPanel, True)
+		pathPanel.browse.shadowed = False
+		pathPanel.browse.registerCallback("release", self.browsePath)
+		self.pathsScroller.addElement(pathPanel)
+		# eventually extend so I can figure out which path type this is (shader, archive, etc)
+		self.paths.append(pathPanel)		
+		# self.log.appendText("Added an AOV pass\n")
+		if browse:
+			self.browsePath(pathPanel.browse)
+		return pathPanel
+		
+	def deletePath(self, button):
+		selected = []
+		for element in self.paths:
+			if element.selector.getValue():
+				self.pathsScroller.removeElement(element)
+				selected.append(element)
+		for element in selected:
+			self.paths.remove(element)
+		
+	def browsePath(self, button):		
+		self.target = button
+		Blender.Window.FileSelector(self.fselect, 'Choose any file')
+		
+	def fselect(self, file):					
+		path = os.path.dirname(file)
+		self.target.parent.pathName.setValue(path) # should do the job		
 		
 	def getAssets(self, name):
 		return self.assets[name]
@@ -333,12 +403,21 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 		return self.__dict__[self.renderer + "_attributes"]
 		
 	def getShaderSearchPaths(self):
-		pathList = self.shaderpaths.getValue().split(";")
-		return pathList
+		pathlist = []
+		for path in self.paths:
+			pathlist.append(path.pathName.getValue())
+		# pathList = self.shaderpaths.getValue().split(";")
+		return pathlist
 			
 	def selectRenderer(self, button):
 		self.renderer = self.rendererMenu.getValue() 
-			
+		# setup the search paths
+		self.paths = []
+		self.pathsScroller.clearElements()
+		for path in self.shaderPathList[self.renderer]:			
+			panel = self.addPath(None, False)		
+			panel.pathName.setValue(path)
+		
 	def getShaderList(self, path):
 		
 		if self.use_slparams:
@@ -590,8 +669,8 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 		if settings: # settings were found, btor was setup previously, let's get the information
 			self.haveSetup = True
 			# I've got the information
-			self.renderer = settings["renderer"] # string
-			self.shaderPathList = settings["Shaders"] # string
+			self.renderer = settings["renderer"] # string			
+			self.shaderPathList = settings["Shaders"] # string			
 			self.outputPath = settings["outputPath"] # string
 			self.use_slparams = settings["use_slparams"] # boolean		
 				
@@ -602,12 +681,14 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 			# default to aqsis, since we've got no actual information
 			# if os.name <> "posix" or os.name <> "mac":
 			if sys.platform == "win32":
-				self.shaderPathList = r"C:\Program Files\Aqsis\Shaders" 
+				defShaderPath = r"C:\Program Files\Aqsis\Shaders" 
 				self.outputPath = r'C:\temp'
 			else:
-				self.shaderPathList = r"/usr/aqsis/shaders/"
+				defShaderPath = r"/usr/aqsis/shaders/"
 				self.outputPath = r"/tmp/"
 			self.use_slparams = True # set this to true by default
+			
+			self.shaderPathList = {"AQSIS":[defShaderPath], "BMRT":[], "Pixie":[], "3Delight":[], "RenderDotC":[]}
 			
 			# surf the environment and get the shader paths from the env vars for this renderer
 			# step one, test the $HOME/shaders thing
@@ -626,9 +707,10 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 	def saveSettings(self, button):
 		# save the settings to the registry here. Mostly it's simple stuff, will probably expand, 
 		# but for a first release, this should work OK
-		#print self.rendererMenu.getValue()
+		#print self.rendererMenu.getValue()		
+		self.shaderPathList[self.rendererMenu.getValue()] = self.getShaderSearchPaths()
 		settings = { "renderer" : self.rendererMenu.getValue(), 
-				"Shaders" : self.shaderpaths.getValue(),
+				"Shaders" : self.shaderPathList,
 				"outputPath" : self.outputpath.getValue(),
 				"use_slparams" : self.useSlParams.getValue() }
 		
@@ -639,10 +721,14 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 		
 	def update(self, obj):
 		self.rendererMenu.setValue(self.rendererMenu.menu.index(self.renderer))
-		self.useSlParams.setValue(self.use_slparams)
-		self.shaderpaths.setValue(self.shaderPathList)
+		self.useSlParams.setValue(self.use_slparams)		
 		self.outputpath.setValue(self.outputPath)
-		
+		self.paths = []
+		self.pathsScroller.clearElements()
+		for path in self.paths:			
+			panel = self.addPath(None, False)
+			print panel
+			panel.pathName.setValue(path)
 
 	
 	def cancel(self, button):
@@ -669,6 +755,7 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 		
 	def getEditor(self):
 		return self.editor	
+	
 		
 class SceneSettings(BtoRObject):
 	filter_menu = ["None Selected", "box", "triangle", "catmull-rom", "sinc", "gaussian"]
@@ -683,11 +770,13 @@ class SceneSettings(BtoRObject):
 			"FilterSamplesX":["Filter Samples X:", 2],
 			"FilterSamplesY":["Filter Samples Y:", 2],
 			"DefaultMaterial":["Default Material:", {"DefaultSurface":"rendDefault", "Matte":"matte", "Custom Material":"custom" }],
-			"Framebuffer": ["Render to Framebuffer:", True]}
+			"Framebuffer": ["Render to Framebuffer:", True],
+			"RenderLayers": ["Render all Layers:", True]}
 			# "ErrHandler" : ["Error Handler:", {"Ignore":"ignore", "Print":"print", "Abort":"abort"}]
 		
 		self.optionOrder = [
 			"Framebuffer",
+			"RenderLayers",
 			"ShadingRate",
 			"PixelSamplesX",
 			"PixelSamplesY",
@@ -831,7 +920,7 @@ class SceneSettings(BtoRObject):
 		
 		self.renderAnimation = False
 		# setup the spacehandler
-		self.setupSpaceHandler()
+		self.setupSpaceHandler()		
 		
 		
 		
@@ -1000,55 +1089,56 @@ class SceneSettings(BtoRObject):
 	def renderOptions(self):
 		# iterate renderer options
 		rproperties = self.settings.getRendererOptions()
-		for property in rproperties:
-			propArray = property.split(":") # splits the option by : chars
-			# propArray[0] = category
-			# propArray[1] = type
-			# propArray[2] = name
-			render = True
-			val = self.getProperty(property) # get the value
-			print val
-			print rproperties[property]
-			if val != rproperties[property][2]:
-				x = propArray[1].find("[")
-				if x > -1:
-					# array value
-					# "integer[2]"
-					print propArray
-					z = len(propArray[1]) - 1
-					arrLen = int(propArray[1][x + 1:z])
-					v = []
-					sVal = val.split(" ")
-					if "integer" in propArray[1]:
-						for vIdx in range(arrLen):
-							v.append(int(sVal[vIdx]))
-					elif "string" in propArray[1]:
-						for vIdx in range(arrLen):
-							v.append(sVal[vIdx])
-					elif "float" in propArray[1]:
-						for vIdx in range(arrLen):
-							v.append(float(sVal[vIdx]))
-					val = v
-				else:
-					# not an array, lets' do this differently					
-					if propArray[1] == "integer":					
-						val = [int(val)]
-					elif propArray[1] == "float":
-						val = [float(val)]
-					elif propArray[1] == "string":
-						val = [str(val)]
+		if len(rproperties) > 0:
+			for property in rproperties:
+				propArray = property.split(":") # splits the option by : chars
+				# propArray[0] = category
+				# propArray[1] = type
+				# propArray[2] = name
+				render = True
+				val = self.getProperty(property) # get the value
+				print val
+				print rproperties[property]
+				if val != rproperties[property][2]:
+					x = propArray[1].find("[")
+					if x > -1:
+						# array value
+						# "integer[2]"
+						print propArray
+						z = len(propArray[1]) - 1
+						arrLen = int(propArray[1][x + 1:z])
+						v = []
+						sVal = val.split(" ")
+						if "integer" in propArray[1]:
+							for vIdx in range(arrLen):
+								v.append(int(sVal[vIdx]))
+						elif "string" in propArray[1]:
+							for vIdx in range(arrLen):
+								v.append(sVal[vIdx])
+						elif "float" in propArray[1]:
+							for vIdx in range(arrLen):
+								v.append(float(sVal[vIdx]))
+						val = v
 					else:
-						render = False
-				# here, val should be either an array or not
-				# thus, eval
-				# types and arrays should be ok now
-				# thus, the option call
-				if render:
-					ri.RiOption(propArray[0], propArray[1] + " " + propArray[2], val)
-					# similiar method needs to be applied to per-renderer Attributes
-		
-		#if self.getProperty("MaxEyesplits") != self.options["MaxEyesplits"][2]:
-		#	ri.RiOption("limits", "eyesplits", self.getProperty("MaxEyesplits"))
+						# not an array, lets' do this differently					
+						if propArray[1] == "integer":					
+							val = [int(val)]
+						elif propArray[1] == "float":
+							val = [float(val)]
+						elif propArray[1] == "string":
+							val = [str(val)]
+						else:
+							render = False
+					# here, val should be either an array or not
+					# thus, eval
+					# types and arrays should be ok now
+					# thus, the option call
+					if render:
+						ri.RiOption(propArray[0], propArray[1] + " " + propArray[2], val)
+						# similiar method needs to be applied to per-renderer Attributes
+			
+			#if self.getProperty("MaxEyesplits") != self.options["MaxEyesplits"][2]:
+			#	ri.RiOption("limits", "eyesplits", self.getProperty("MaxEyesplits"))
 		
 
 	def close(self, button):
@@ -1065,7 +1155,7 @@ class SceneSettings(BtoRObject):
 			
 	def renderScene(self):
 		""" export/render the whole scene """		
-		paths = self.settings.shaderpaths.getValue().split(";")
+		paths = self.settings.getShaderSearchPaths()
 		self.lighting = globals()["instBtoRLightManager"]
 		
 		outputPath = self.exportPath.getValue() # get the value from *here*, THIS object
@@ -1113,11 +1203,13 @@ class SceneSettings(BtoRObject):
 		self.envmaps = {}		
 		
 		# lighting layer tracking
+		self.layers = Blender.Scene.GetCurrent().getLayers()
 		self.lightingLayers = [[] for x in range(20)]
 		
 		objs = Blender.Scene.GetCurrent().getChildren()
+		
 		# print len(objs), " objects found."
-		# sort out the objects in this scene by type
+		# sort out the objects in this scene by type		
 		objSequence = 1
 		for obj in objs:
 			if self.object_data.has_key(obj.getName()):
@@ -1301,14 +1393,11 @@ class SceneSettings(BtoRObject):
 					# update the light's data
 					light.checkReset()
 					lightIdx = lightIdx + 1
-					print "Shadowmaps for light # ", lightIdx
-					doMap = light.getProperty("GenShadowMap")					
-					print "Light shadowmap status is: ", doMap
+					doMap = light.getProperty("GenShadowMap")										
 					render = False
 					# create a shadowmap RIB		
 					shadowList = {}
 					for direction in light.getRenderDirections():						
-						
 						if doMap == "Lazy" and not light.changed: # this test first, since if the map doesn't exist, I'll have to create it.
 							if light.shadowMaps.has_key(direction):
 								if light.isAnimated:						
@@ -1349,6 +1438,7 @@ class SceneSettings(BtoRObject):
 							if self.settings.renderer == "BMRT":
 								shadowFile = shadowFile.replace("\\", "\\\\")
 								shadowName = shadowName.replace("\\", "\\\\")
+							self.currentLightLayers = light.object.layers
 							self.renderShadowMap(light, direction, shadowRIB, shadowName, shadowFile) # render the map here.
 							shadowList[direction] = {"rib" : shadowRIB, "shadowName" : shadowName, "shadowFile" : shadowFile}
 							light.shadowMaps[shadowKey] = shadowList
@@ -1384,7 +1474,7 @@ class SceneSettings(BtoRObject):
 		else:
 			ri.RiBegin()	# for pipeline command later
 			
-		paths = self.settings.shaderpaths.getValue().split(";")
+		paths = self.settings.getShaderSearchPaths()
 		for path in paths:
 			ri.RiOption("searchpath", "shader", path + ":&")	
 		
@@ -1421,12 +1511,13 @@ class SceneSettings(BtoRObject):
 		else:
 			ri.RiBegin()	# for pipeline command later
 
-		paths = self.settings.shaderpaths.getValue().split(";")		
+		paths = self.settings.getShaderSearchPaths()
 		for path in paths:
 			if self.settings.renderer == "BMRT":
 				path = path.replace("\\", "\\\\")
 			ri.RiOption("searchpath", "shader", path + ":&")
-		
+		eyeSplits = light.getProperty("ShadowMapEyeSplits")
+		ri.RiOption("limits" "integer eyesplits", eyeSplits)
 		size = light.getProperty("ShadowMapSize")
 		ri.RiFormat(size, size, 1)
 		ri.RiPixelSamples(1, 1)
@@ -2540,7 +2631,7 @@ class Shader(BtoRObject):
 		else:
 			self.shader = None # no selection, we'll be assigning it as we go.
 		
-		self.searchpaths = self.settings.shaderpaths.getValue().split(";")		
+		self.searchpaths = self.settings.getShaderSearchPaths()
 		self.stype = stype
 		self.material = material # parent material
 		
@@ -3019,15 +3110,13 @@ class GenericShader(BtoRObject):
 		self.settings = sdict["instBtoRSettings"]
 		self.evt_manager = sdict["instBtoREvtManager"]
 		self.log = sdict["instBtoRLog"]
-		
-		
 				
 		if shader <> None:
 			self.shader = shader
 		else:
 			self.shader = None # no selection, we'll be assigning it as we go.
 			
-		searchpaths = self.settings.shaderpaths.getValue().split(";")	
+		searchpaths = self.settings.getShaderSearchPaths()
 		self.s_type = s_type
 		
 		# initialize the panel
