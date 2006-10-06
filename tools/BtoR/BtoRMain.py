@@ -244,7 +244,7 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 
 		if sdict.has_key("instBtoREvtManager"):
 			self.evt_manager = sdict["instBtoREvtManager"]
-				
+		self.scene = None
 		self.getSettings(None)
 		screen = Blender.Window.GetAreaSize()
 		self.editor = ui.Panel(10, screen[1] - 225, 300, 210, "GlobalSettings", "Global Neqsus/BtoR Settings:", None, False)
@@ -432,9 +432,19 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 		# setup the search paths
 		self.paths = []
 		self.pathsScroller.clearElements()
+		if self.scene == None:
+			sdict = globals()
+			if sdict.has_key("instBtoRSceneSettings"):
+				self.scene = sdict["instBtoRSceneSettings"]
+		if self.scene != None:
+			self.scene.resetProperties()
+		
 		for path in self.shaderPathList[self.renderer]:			
 			panel = self.addPath(None, False)		
-			panel.pathName.setValue(path)
+			
+			panel.pathName.setValue(path[0])
+			panel.recurse.setValue(path[1])
+			
 		
 	def getShaderList(self, path):
 		
@@ -743,6 +753,12 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 			Blender.Registry.RemoveKey("BtoR", True)
 		Blender.Registry.SetKey("BtoR", settings, True)
 		self.haveSetup = True
+		if self.scene == None:
+			sdict = globals()
+			if sdict.has_key("instBtoRSceneSettings"):
+				self.scene = sdict["instBtoRSceneSettings"]
+		if self.scene != None:
+			self.scene.resetProperties()
 		
 	def update(self, obj):
 		self.rendererMenu.setValue(self.rendererMenu.menu.index(self.renderer))
@@ -785,7 +801,7 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 class SceneSettings(BtoRObject):
 	filter_menu = ["None Selected", "box", "triangle", "catmull-rom", "sinc", "gaussian"]
 	def __init__(self):
-		self.options = {
+		self.base_options = {
 			"ShadingRate" : ["Shading Rate:", 1.0],
 			"PixelSamplesX":["Pixel Samples X:", 2],
 			"PixelSamplesY":["Pixel Samples Y:", 2],
@@ -799,7 +815,7 @@ class SceneSettings(BtoRObject):
 			"RenderLayers": ["Render all Layers:", True]}
 			# "ErrHandler" : ["Error Handler:", {"Ignore":"ignore", "Print":"print", "Abort":"abort"}]
 		
-		self.optionOrder = [
+		self.base_optionOrder = [
 			"Framebuffer",
 			"RenderLayers",
 			"ShadingRate",
@@ -811,6 +827,13 @@ class SceneSettings(BtoRObject):
 			"Gain",
 			"Gamma"]
 			
+		self.options = {}
+		self.optionOrder = []
+		for option in self.base_optionOrder:
+			self.optionOrder.append(option)
+		for key in self.base_options:
+			self.options[key] = self.base_options[key]
+		
 		sdict = globals()
 		self.settings = sdict["instBtoRSettings"]
 		self.evt_manager = sdict["instBtoREvtManager"]
@@ -958,7 +981,18 @@ class SceneSettings(BtoRObject):
 				# I probably don't care about ordering for the render properties, but their keys will keep them grouped anyway since dicts appear to index alphabetically
 				self.optionOrder.append(prop)
 		self.setupProperties()		
-		
+	
+	def resetProperties(self):
+		self.scroller.clearElements()
+		self.properties = {}
+		self.editors = {}
+		self.options = {}
+		self.optionOrder = []
+		for option in self.base_optionOrder:
+			self.optionOrder.append(option)
+		for key in self.base_options:
+			self.options[key] = self.base_options[key]
+		self.setupRendererProperties()
 
 	def deprecated(self): # now that I have the properties object
 		xmlDefValues = {}
