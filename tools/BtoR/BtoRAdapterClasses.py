@@ -345,10 +345,6 @@ class CustomRIBProperty(Property):
 	protocols.advise(instancesProvide=[IProperty], asAdapterForTypes=[BtoRCustomRIB])
 	height = 20
 	pass
-class PathProperty(Property):
-	protocols.advise(instancesProvide=[IProperty], asAdapterForTypes=[BtoRPath])
-	height = 20
-	pass
 	
 # Property Editors
 class PropertyEditor: # this needs no interface declaration, since all this is doing is providing a baseclass
