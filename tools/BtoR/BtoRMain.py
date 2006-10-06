@@ -332,10 +332,11 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 		self.deletePass.registerCallback("release", self.deletePath)
 		
 		self.paths = []
-		print self.shaderPathList
+		
 		for path in self.shaderPathList[self.renderer]:			
 			panel = self.addPath(None, False)			
-			panel.pathName.setValue(path)
+			panel.pathName.setValue(path[0])
+			panel.recurse.setValue(path[1])
 		
 		if self.use_slparams:
 			self.getShaderSourceList(self.paths[0].pathName.getValue()) 
@@ -405,8 +406,25 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 	def getShaderSearchPaths(self):
 		pathlist = []
 		for path in self.paths:
-			pathlist.append(path.pathName.getValue())
+			if path.recurse.getValue():
+				# iterate this path, returning it, and all folders
+				dirPath = path.pathName.getValue()
+				pathlist.append(dirPath)
+				for root, dir, files in os.walk(dirPath):
+					pathlist.append(root)
+					#if len(dir) > 0:
+					#	for xPath in dir:
+					#		print "adding XPath: ", xPath
+					#		if os.path.exists(xPath):
+					#			pathlist.append(xPath)
+				
+				# see if there are more folders on this path
+			else:
+				pathlist.append(path.pathName.getValue())
 		# pathList = self.shaderpaths.getValue().split(";")
+		
+		# let's make this more dynamic and test for wonderful things like..directory recursion
+		
 		return pathlist
 			
 	def selectRenderer(self, button):
@@ -688,7 +706,7 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 				self.outputPath = r"/tmp/"
 			self.use_slparams = True # set this to true by default
 			
-			self.shaderPathList = {"AQSIS":[defShaderPath], "BMRT":[], "Pixie":[], "3Delight":[], "RenderDotC":[]}
+			self.shaderPathList = {"AQSIS":[[defShaderPath, False]], "BMRT":[], "Pixie":[], "3Delight":[], "RenderDotC":[]}
 			
 			# surf the environment and get the shader paths from the env vars for this renderer
 			# step one, test the $HOME/shaders thing
@@ -708,11 +726,18 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 		# save the settings to the registry here. Mostly it's simple stuff, will probably expand, 
 		# but for a first release, this should work OK
 		#print self.rendererMenu.getValue()		
-		self.shaderPathList[self.rendererMenu.getValue()] = self.getShaderSearchPaths()
+		pathList = []
+		for path in self.paths:
+			pathItem = [path.pathName.getValue(), path.recurse.getValue()]
+			pathList.append(pathItem)
+		self.shaderPathList[self.rendererMenu.getValue()] = pathList
+		# update current path list, including whether or not I recurse
+		
 		settings = { "renderer" : self.rendererMenu.getValue(), 
 				"Shaders" : self.shaderPathList,
 				"outputPath" : self.outputpath.getValue(),
 				"use_slparams" : self.useSlParams.getValue() }
+		print "PathList = ", self.shaderPathList
 		
 		if self.haveSetup:
 			Blender.Registry.RemoveKey("BtoR", True)
