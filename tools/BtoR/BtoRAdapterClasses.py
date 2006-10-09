@@ -2447,7 +2447,7 @@ class LampAdapter(ObjectAdapter):
 		elif lamp.type == 2:
 			self.objData["type"] = 2
 			energyRatio = lamp.dist * negative
-			shaderPath = self.settings.getShaderSearchPath()[0]
+			shaderPath = self.settings.getShaderSearchPaths()[0]
 			#if self.settings.useShadowMaps.getValue():
 			#	sFilename = "shadowspot.sl"
 			#else:
