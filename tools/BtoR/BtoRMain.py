@@ -495,7 +495,6 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 		for listener in self.rendererListeners:
 			listener.updateAttributes()
 	
-			
 		
 	def getShaderList(self, path):
 		
@@ -819,7 +818,7 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 		self.pathsScroller.clearElements()
 		for path in self.paths:			
 			panel = self.addPath(None, False)
-			print panel
+			# print panel
 			panel.pathName.setValue(path)
 
 	
@@ -1644,7 +1643,7 @@ class SceneSettings(BtoRObject):
 				path = path.replace("\\", "\\\\")
 			ri.RiOption("searchpath", "shader", path + ":&")
 		eyeSplits = light.getProperty("ShadowMapEyeSplits")
-		ri.RiOption("limits" "integer eyesplits", eyeSplits)
+		ri.RiOption("limits", "integer eyesplits", eyeSplits)
 		size = light.getProperty("ShadowMapSize")
 		ri.RiFormat(size, size, 1)
 		ri.RiPixelSamples(1, 1)
