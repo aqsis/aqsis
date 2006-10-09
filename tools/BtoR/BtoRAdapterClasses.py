@@ -942,8 +942,18 @@ class ObjectAdapter: # baseclass for all Blender objects
 								render = False
 						except:
 							render = False
-			if render:				
-				ri.RiAttribute(attArray[0], attArray[2], val)
+			if render:	
+				print "arrayVal: ", attArray[0], "arrayVal", attArray[1], " arrayVal: ", attArray[2], " Value:", val
+				if attArray[0] == "" or attArray[0] == None or attArray[2] == "" or val == "" or val == None:
+					print "Bad things! Attribute didn't work!"
+				else:
+					try:
+						ri.RiAttribute(attArray[0], attArray[2], val)
+					except:
+						print "Attribute parse error!"
+						attOut = "Attribute " + '"' + attArray[0] + '" "' + attArray[2] + '" "' + val[0]
+						print attOut
+						#ri._ribout.write(attOut)
 				
 	def temp(self):
 		if len(self.rendererAtts) > 0:

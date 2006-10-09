@@ -272,6 +272,8 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 
 		if sdict.has_key("instBtoREvtManager"):
 			self.evt_manager = sdict["instBtoREvtManager"]
+		setattr(BtoRAdapterClasses, "instBtoRSettings", self)
+		setattr(BtoRAdapterClasses, "instBtoREvtManager", self.evt_manager)
 		self.scene = None
 		self.getSettings(None)
 		screen = Blender.Window.GetAreaSize()
@@ -2047,8 +2049,7 @@ class ObjectEditor(BtoRObject):
 		self.scene = sdict["instBtoRSceneSettings"]
 		self.materials = sdict["instBtoRMaterials"]
 		self.groupList = sdict["instBtoRGroupList"]
-		self.log = sdict["instBtoRLog"]
-		setattr(BtoRAdapterClasses, "instBtoRSettings", sdict["instBtoRSettings"])
+		self.log = sdict["instBtoRLog"]		
 		setattr(BtoRAdapterClasses, "instBtoREvtManager", sdict["instBtoREvtManager"])
 		setattr(BtoRAdapterClasses, "instBtoRSceneSettings", sdict["instBtoRSceneSettings"])
 		setattr(BtoRAdapterClasses, "instBtoRMaterials", sdict["instBtoRMaterials"])
@@ -5043,17 +5044,20 @@ class LightManager(BtoRObject):
 	def updateAttributes(self):
 		hiderProp = ["Hider", {"btor:default" : "stochastic", "stochastic" : "stochastic", "zbuffer" : "zbuffer", "raytrace" : "raytrace", "photon" : "photon", "opengl" : "opengl" }, "stochastic"]
 		if self.settings.renderer == "Pixie":
-			if not properties.has_key("Hider"):
-				property = IProperty(hiderProp)
+			if not self.properties.has_key("Hider"):
+				property = BtoRAdapterClasses.IProperty(hiderProp[1])
 				property.setName("Hider")
-				editor = IPropertyEditor(property)
-				self.properties.append(property)
-				self.editors.append(editor)
+				property.setWidth(self.scroller.width - 15)
+				editor = BtoRAdapterClasses.IPropertyEditor(property)
+				self.properties["Hider"] = property
+				self.editors["Hider"] = editor
+				editor.getEditor().parent = self.scroller
 				self.scroller.addElement(editor.getEditor())
+				self.scroller.raiseElement(editor.getEditor())
 		else:
-			if properties.has_key("Hider"):
-				properties.pop("Hider")
-				x = editors.pop("Hider")
+			if self.properties.has_key("Hider"):
+				self.properties.pop("Hider")
+				x = self.editors.pop("Hider")
 				self.scroller.removeElement(x.getEditor())
 			
 	def addLight(self, light):
