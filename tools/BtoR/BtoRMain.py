@@ -221,7 +221,7 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 		"render:integer:truedisplacement:none":["True Displacement:", False, False],
 		"render:float:patch_multiplier:none":["Patch Multiplier:", 1.0, 1.0],
 		"render:float:patch_maxlevel:none":["Patch Max Level:", 256, 256],
-		"render:float:patch_minlevel:none":["Patch Min Level:", 1],
+		"render:float:patch_minlevel:none":["Patch Min Level:", 1, 1],
 		"trimcurve:string:sense:none":["Inside Curve Sense:", True, True],
 		"render:integer:use_shading_rate:none":["Use Shading Rate:", True, True],
 		"light:string:shadows:lamp":["Lamp Casts Shadows:", {"btor:default":"on", "on":"on", "off":"off"}, "on"],
@@ -4113,22 +4113,23 @@ class MaterialList(BtoRObject):
 			
 	def toggleOn(self, button):
 		# sticky toggle keeps the button set, no matter what 		
-		if self.stickyToggle:
-			for element in self.scroller.elements:
-				if element <> button:
-					element.set_state(False)
-			# simply set the state of this button and move on
-			button.set_state(True)
-		else:
-			# print button.state
-			if button.state == False:
-				self.value = None # no value, since nothing's on
-				# do nothing, the button has been turned off
-			else: # the button was turned on, turn everything else off
-				for element in self.scroller.elements:											
-					if element <> button:						
+		if 1 == 2:
+			if self.stickyToggle:
+				for element in self.scroller.elements:
+					if element <> button:
 						element.set_state(False)
-				self.value = button.name 
+				# simply set the state of this button and move on
+				button.set_state(True)
+			else:
+				# print button.state
+				if button.state == False:
+					self.value = None # no value, since nothing's on
+					# do nothing, the button has been turned off
+				else: # the button was turned on, turn everything else off
+					for element in self.scroller.elements:											
+						if element <> button:						
+							element.set_state(False)
+					self.value = button.name 
 	
 	def select(self, button):				
 		
