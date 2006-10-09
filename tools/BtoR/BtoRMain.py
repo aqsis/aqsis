@@ -84,9 +84,7 @@ class BtoRObject:
 			self.editors[option].setParent(self.scroller)	
 			self.scroller.offset = 0
 			self.properties[option].optionKey = option
-			
-			
-			
+	
 		
 	def setupLightingProperties(self):
 		pass
@@ -162,9 +160,47 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 	}
 	
 	aqsis_attributes = {
-		"autoshadows:integer:res:lamp":["Autoshadows Resolution:", 300, 300],
+		"autoshadows:integer:res:lamp":["Autoshadows Res:", 300, 300],
 		"autoshadows:string:shadowmapname:lamp":["Autoshadow MapName:", "shadow", "shadow"]
 	}	
+	
+	# Pixie
+	rndr_options = {
+		"limits:int:gridsize" : ["Gridsize:", 512, 512],
+		"limits:int:inheritattributes" : ["Inherit Attributes:", False, False],
+		"limits:int:texturememory" : ["Texture Memory:", 20000, 20000],
+		"limits:int:shadercache" : ["Shader Cache:", 1000, 1000],
+		"limits:int:hiearchydepth" : ["Hiearchy Depth:", 40, 40],
+		"limits:int[2]:bucketsize" : ["Bucket Size:", "32 32", "32 32"],
+		"limits:int:eyesplits" : ["Eyesplits:", 10, 10],
+		"statistics:int:endofframe" : ["End of Frame:", 0, 0],
+		"statistics:string:filelog" : ["File Log:", "", ""],
+		"trace:int:maxdepth" : ["Max Depth:", 5, 5]
+	}
+	
+	rndr_attributes = {
+		"dice:int:minsubdivision" : ["Min subdivision:", 2, 2],
+		"dice:int:maxsubdivision" : ["Max subdivision:", 2, 2],
+		"dice:int[2]:numprobes" : ["Num Probes:", "3 3", "3 3"],
+		"dice:int:minsplits" : ["Min splits:", 2, 2],
+		"dice:float:boundexpand" : ["Bound expand:", 0.5, 0.5],
+		"dice:int:binary" : ["Binary Dice:", False, False],
+		"visbility:int:camera" : ["Camera Visibility:", 1, 1],
+		"visibility:int:trace" : ["Trace Visbility:", 1, 1],
+		"visibility:int:photon" : ["Photon Visibility:", 1, 1],
+		"visibility:string:transmission" : ["Transmission:",  {"btor:default" : "transparent", "transparent" : "transparent", "opaque" : "opaque", "shader" : "shader", "Os" : "Os" }, "transparent"],
+		"trace:int:displacements" : ["Trace Displacements:", 0, 0],
+		"trace:float:bias" : ["Trace Bias:", 0.01, 0.01],
+		"trace:int:maxdiffusedepth" : ["Max Diffuse Depth:", 1, 1],
+		"trace:int:maxspeculardepth" : ["Max Specular Depth:", 2, 2],
+		"irradiance:string:handle" : ["Irradiance Handle:", "", ""],
+		"irradiance:string:filemode" : ["Irradiance Filemode:", {"btor:default" : "None", "None":"None",  "Read":"r", "Write":"w"}, "None"],
+		"irradiance:float:maxerror" : ["Irradiance Max error:", 0.5, 0.5],
+		"photon:string:globalmap" : ["Global Photon Map:", "", ""],
+		"photon:string:causticmap" : ["Caustic Map:", "", ""],
+		"photon:string:shadingmodel" : ["Shading Model:", {"btor:default" : "matte", "matte" : "matte", "glass" : "glass", "water" : "water", "chrome" : "chrome", "transparent" : "transparent" }, "matte"],
+		"photon:int:estimator" : ["Photon Estimator:", 100, 100]
+	}
 	
 	# BMRT
 	bmrt_options = {
@@ -218,14 +254,6 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 	
 	}
 	
-	# Pixie
-	rndr_options = {
-	
-	}
-	rndr_attributes = {
-	
-	}
-	
 	# RenderDotC
 	wrendrc_options = { 
 	
@@ -247,7 +275,7 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 		self.scene = None
 		self.getSettings(None)
 		screen = Blender.Window.GetAreaSize()
-		self.editor = ui.Panel(10, screen[1] - 225, 300, 210, "GlobalSettings", "Global Neqsus/BtoR Settings:", None, False)
+		self.editor = ui.Panel(10, screen[1] - 30, 300, 210, "GlobalSettings", "Global Neqsus/BtoR Settings:", None, False)
 		self.editor.addElement(ui.Label(5, 30, "Renderer:", "Renderer:", self.editor, False))
 		rendererList = self.renderers.keys()
 		
@@ -261,7 +289,7 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 		width = self.editor.get_string_width("Procedurals:", 'normal') + 30
 		
 		self.renderMatsOnStartup = ui.CheckBox(5, 90, "Render material previews on startup?", "Render material previews on startup?", False, self.editor, True)
-
+		
 		# shader search paths
 		# self.editor.addElement(ui.Label(5, 140, "Shaders:", "Shader Search Paths:", self.editor, False))	
 		self.showSearchPaths = ui.Button(self.editor.width - 90, 30, 70, 25, "Search Paths:", "Search Paths:", 'small', self.editor, True)
@@ -319,7 +347,8 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 		self.pathsLabel = ui.Label(5, 3, "Paths", "Shader Search Paths:", self.pathsPanel, True)
 		self.pathsLabel.transparent = True
 		
-		self.pathsContainer = ui.Panel(5, 60, 292, 180, "Shader Search Paths:", " ", self.pathsPanel, True)	
+		self.pathsContainer = ui.Panel(5, 80, 292, 150, "Shader Search Paths:", " ", self.pathsPanel, True)	
+		
 		self.pathsContainer.shadowed = False
 		self.pathsContainer.outlined = False
 		self.pathsContainer.hasHeader = False
@@ -330,6 +359,8 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 		self.addPass.registerCallback("release", self.addPath)
 		self.deletePass = ui.Button(115, 27, 145, 25, "Delete Selected Path(s)", "Delete Selected Path(s)", 'small', self.pathsPanel, True)
 		self.deletePass.registerCallback("release", self.deletePath)
+		self.pathsPanel.addElement(ui.Label(220, 60, "Recurse", "Recurse", self.pathsPanel, False, fontsize = 'small'))
+		self.pathsPanel.addElement(ui.Label(25, 60, "Path", "Path", self.pathsPanel, False, fontsize = 'small'))
 		
 		self.paths = []
 		
@@ -337,11 +368,13 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 			panel = self.addPath(None, False)			
 			panel.pathName.setValue(path[0])
 			panel.recurse.setValue(path[1])
-		
-		if self.use_slparams:
-			self.getShaderSourceList(self.paths[0].pathName.getValue()) 
-		else:
-			self.getCompiledShaderList(self.paths[0].pathName.getValue()) 
+			
+		if len(self.paths) > 0:
+			if self.use_slparams:
+				self.getShaderSourceList(self.paths[0].pathName.getValue()) 
+			else:
+				self.getCompiledShaderList(self.paths[0].pathName.getValue())
+		self.rendererListeners = []
 			
 	def togglePaths(self, button):
 		""" toggle the panel """
@@ -399,9 +432,21 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 			return self.aqsis_options
 		elif self.renderer == "BMRT":
 			return self.bmrt_options
+		elif self.renderer == "Pixie":
+			return self.rndr_options
+		elif self.renderer == "3Delight":
+			return self.renderdl_options
 		
 	def getRendererAttributes(self):
-		return self.__dict__[self.renderer + "_attributes"]
+		if self.renderer == "AQSIS":
+			return self.aqsis_attributes
+		elif self.renderer == "BMRT":
+			return self.bmrt_attributes
+		elif self.renderer == "Pixie":
+			return self.rndr_attributes
+		elif self.renderer == "3Delight":
+			return self.renderdl_attributes
+
 		
 	def getShaderSearchPaths(self):
 		pathlist = []
@@ -444,6 +489,10 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 			
 			panel.pathName.setValue(path[0])
 			panel.recurse.setValue(path[1])
+		# update all the rendererChangeListeners
+		for listener in self.rendererListeners:
+			listener.updateAttributes()
+	
 			
 		
 	def getShaderList(self, path):
@@ -1168,7 +1217,7 @@ class SceneSettings(BtoRObject):
 						arrLen = int(propArray[1][x + 1:z])
 						v = []
 						sVal = val.split(" ")
-						if "integer" in propArray[1]:
+						if "integer" in propArray[1] or "integer" in propArray[1]:
 							for vIdx in range(arrLen):
 								v.append(int(sVal[vIdx]))
 						elif "string" in propArray[1]:
@@ -1180,7 +1229,7 @@ class SceneSettings(BtoRObject):
 						val = v
 					else:
 						# not an array, lets' do this differently					
-						if propArray[1] == "integer":					
+						if propArray[1] == "integer" or propArray[1] == "int":					
 							val = [int(val)]
 						elif propArray[1] == "float":
 							val = [float(val)]
@@ -1328,17 +1377,30 @@ class SceneSettings(BtoRObject):
 				# feature masking will ignore this for renderers that don't support it.
 				# Occlusion Map generation
 				if self.lighting.getProperty("GenOcclusion") and self.lighting.getProperty("GenShadowMaps"): # yes, they *both* have to be on for SHADOWMAPPED occlusion
-					for group in self.lighting.occlGroups:
-						groupName = group.groupName.getValue()
-						if self.occlusion_maps.has_key(groupName):
-							mapList = self.occlusion_maps[groupName]
-							if len(mapList) > 0:							
-								maps = "["
-								for map in mapList:
-									maps = maps + '"' + map + '" '
-								maps = maps + "]"
-								ri._ribout.write("MakeOcclusion " + maps + " " + '"' + groupName + ".sm" + '"' + "\n")
-								
+					occlMap = self.lighting.getProperty("AOShader")
+					if occlMap.getObject().shader != None:
+						# I have a shader, now
+						map = getattr(occlMap.getObject().shader, "occlfile")
+						occlString = "MakeOcclusion ["
+						for smap in self.occlusion_maps:
+							occlString = occlString + '"' + smap + '"'
+						occlString = occlString +"] " + '"' + map + '"' + "\n"
+						ri._ribout.write(occlString)
+					else:
+						self.lighting.getProperty("GenOcclusion").setValue(True)
+						
+					if 1 == 2:
+						for group in self.lighting.occlGroups:
+							groupName = group.groupName.getValue()
+							if self.occlusion_maps.has_key(groupName):
+								mapList = self.occlusion_maps[groupName]
+								if len(mapList) > 0:							
+									maps = "["
+									for map in mapList:
+										maps = maps + '"' + map + '" '
+									maps = maps + "]"
+									ri._ribout.write("MakeOcclusion " + maps + " " + '"' + groupName + ".sm" + '"' + "\n")
+					
 								
 				# environment map generation
 				print "Environment Maps"
@@ -1387,8 +1449,7 @@ class SceneSettings(BtoRObject):
 						ri.RiOption(name, variable, val) # charge on!
 					#else:
 					#	self.evt_manager.showErrorDialog("Bad Variable Type", "Your custom option has an incorrect variable type. It should be 'string', 'integer' or 'float'.")
-
-
+				
 				print "Frame Begin"				
 				ri.RiFrameBegin(frame)
 				
@@ -1418,6 +1479,11 @@ class SceneSettings(BtoRObject):
 					ri.RiDisplay("+" + variable.passName.getValue() + "_cam_%d" % cam + "_frame_%d" % frame + ".tif", "file", variable.passMode.getValue(), params)
 				
 				# self.renderFrame(exportSettings)		
+				print "Renderer-specific commands"
+				if self.settings.renderer == "Pixie":
+					if self.lighting.properties.has_key("Hider"):
+						hiderCommand = "Hider " + '"' +  self.lighting.getProperty("Hider") + '"' + "\n"
+						ri._ribout.write(hiderCommand)
 				
 				print "Camera transform"
 				# camera transform
@@ -1439,7 +1505,7 @@ class SceneSettings(BtoRObject):
 		self.shadows = {}
 		if self.lighting.getProperty("GenShadowMaps"):
 			print "Shadow Maps"
-			self.occlusion_maps = {} # each light knows whether it belongs to an occlusion group or not, so stuff shadow names into each key
+			self.occlusion_maps = [] # each light knows whether it belongs to an occlusion group or not, so stuff shadow names into each key
 			shadowPath = self.settings.outputpath.getValue() + self.settings.shadows
 			
 			for frame in self.frames:
@@ -1482,7 +1548,7 @@ class SceneSettings(BtoRObject):
 						elif (doMap == "Always") or (doMap == "Lazy" and light.changed):
 							render = True
 						
-						print "light render status is: ", render
+						# print "light render status is: ", render
 						if render:
 							if light.isAnimated: # the light is animated, so iterate all of the frames													
 								shadow = shadowPath + light.objData["name"] + direction  + "_%d" % frame 
@@ -1599,11 +1665,11 @@ class SceneSettings(BtoRObject):
 		ri.RiEnd()
 		
 		if self.lighting.getProperty("GenOcclusion"):
-			occlProp = light.getProperty("Group")
-			if occlProp != "None Selected":
-				if not self.occlusion_maps.has_key(occlProp):
-					self.occlusion_maps[occlProp] = []
-				self.occlusion_maps[occlProp].append(shadowFile) # append to the occlusion map for this group
+			#occlProp = light.getProperty("Group")
+			#if occlProp != "None Selected":z
+			#	if not self.occlusion_maps.has_key(occlProp):
+			#		self.occlusion_maps[occlProp] = []
+			self.occlusion_maps.append(shadowFile) # append to the occlusion map for this group
 		self.log.appendText("Generated shadow maps...\n")
 		
 	def renderWorld(self):
@@ -1626,10 +1692,15 @@ class SceneSettings(BtoRObject):
 		# occlusion setup here		
 		if lm.getProperty("GenOcclusion"):
 			# using occlusion
-			for group in lm.occlGroups: # render the AO ambient lights
-				shader = group.aoShaderProperty.getValue().getObject()		
-				shader.updateShaderParams()				
-				ri.RiLightSource(shader.shader.shadername, shader.shader.params())
+			#for group in lm.occlGroups: # render the AO ambient lights
+			#	shader = group.aoShaderProperty.getValue().getObject()		
+			shader = lm.getProperty("AOShader").getObject()
+			shader.updateShaderParams()				
+			ri.RiLightSource(shader.shader.shadername, shader.shader.params())
+
+			if lm.getProperty("UseAmbient"):
+				params = { "uniform float intensity" : lm.getProperty("AmbIntensity"), "lightcolor" : lm.getProperty("AmbColor") }
+				ri.RiLightSource("ambient", params)
 				
 			for light in self.lights:
 				if light.getProperty("IncludeWithAO"):
@@ -1990,7 +2061,7 @@ class ObjectEditor(BtoRObject):
 		
 		# master panel
 		screen = Blender.Window.GetAreaSize()	
-		self.editorPanel = ui.Panel(225, screen[1] - 70, 260, 400, "Object Editor:", "Object Properties:", None, False)
+		self.editorPanel = ui.Panel(10, screen[1] - 30, 260, 400, "Object Editor:", "Object Properties:", None, False)
 		self.editorPanel.addElement(ui.Label(10, 30, "Object Name:", "Object Name:", self.editorPanel, False))
 		
 		self.objectName = ui.Label(15 + self.editorPanel.get_string_width("Object Name:", 'normal'), 30, "None Selected", "None Selected", self.editorPanel, True)
@@ -2287,21 +2358,34 @@ class Material(BtoRObject):
 			
 		self.editorPanel.addElement(ui.Image(15, 65, 128, 128, self.image, self.editorPanel, False))
 		
-		
 		self.close_button = ui.Button(self.editorPanel.width - 20, 5, 14, 14, "X", "X", 'normal', self.editorPanel, True)
 		self.close_button.shadowed = False
 		self.close_button.cornermask = 15
 		self.close_button.radius = 1.5
 		self.close_button.registerCallback("release", self.close)
 		
+		self.matListPanel = ui.Panel(0, 0, 184, 52, "", "", parent, True)
+		self.matListPanel.cornermask = 0
+		self.matListPanel.radius = 1
+		self.matListPanel.shadowed = False
+		self.matListPanel.hasHeader = False
+		self.matListPanel.bordered = False
+		self.matListPanel.mat = self
+		
 		# editor button that displays the material editor
-		self.editorButton = ui.ToggleButton(0, 0, 180, 65, self.material.name, self.material.name, 'normal', parent, True)
+		self.editorButton = ui.Button(28, 0, 155, 52, self.material.name, self.material.name, 'normal', self.matListPanel, True)
 		self.editorButton.shadowed = False
 		self.editorButton.outlined = True
 		self.editorButton.textlocation = 1
+		self.editorButton.bordered = False
+		self.editorButton.mat = self
 		
 		self.editorButton.registerCallback("release", self.showEditor)		
-		self.editorButton.image = ui.Image(120, 5, 56, 56,  self.image, self.editorButton, False)
+		self.editorButton.image = ui.Image(109, 1, 48, 48,  self.image, self.editorButton, False)
+		
+		self.selector = ui.CheckBox(6, 20, "", "", False, self.matListPanel, True)
+		self.selector.transparent = True
+		self.matListPanel.selector = self.selector
 		
 		self.selectorButton = ui.ToggleButton(0, 0, 180, 65, self.material.name, self.material.name, 'normal', selector, True)
 		self.selectorButton.shadowed = False
@@ -2309,6 +2393,7 @@ class Material(BtoRObject):
 		self.selectorButton.textlocation = 1
 		self.selectorButton.image = ui.Image(120, 5, 56, 56, self.image, self.selectorButton, False)
 		self.selectorButton.title = self.editorButton.title
+		self.selectorButton.mat = self
 					
 		self.select_functions = []
 			
@@ -3162,18 +3247,17 @@ class Shader(BtoRObject):
 			index = index + 1
 
 class GenericShader(BtoRObject):
-	def __init__(self, shader, s_type, parent):
+	def __init__(self, shader, s_type, parent, passSelf = False):
 		self.parent = parent
-		sdict = globals()
-			
+		sdict = globals()		
 		self.settings = sdict["instBtoRSettings"]
 		self.evt_manager = sdict["instBtoREvtManager"]
 		self.log = sdict["instBtoRLog"]
 				
-		if shader <> None:
+		if shader != None:
 			self.shader = shader
 		else:
-			self.shader = None # no selection, we'll be assigning it as we go.
+			self.shader = cgkit.rmshader.RMShader()
 			
 		searchpaths = self.settings.getShaderSearchPaths()
 		self.s_type = s_type
@@ -3200,7 +3284,7 @@ class GenericShader(BtoRObject):
 		self.shader_menu.registerCallback("release", self.selectShader)
 		# now that THAT nastiness is done...
 		self.scroller = ui.ScrollPane(5, 115, self.editorPanel.width - 10, self.editorPanel.height - 125, "Param Scroller", "parmScroller", self.editorPanel, True)
-		self.scroller.normalColor = [45, 45, 45, 255]
+		#self.scroller.normalColor = [45, 45, 45, 255]
 		
 		self.close_button = ui.Button(self.editorPanel.width - 20, 5, 14, 14, "X", "X", 'normal', self.editorPanel, True)
 		self.close_button.shadowed = False
@@ -3217,9 +3301,12 @@ class GenericShader(BtoRObject):
 				# set the shader name to the correct shader name in the menu
 				sIndex = self.shadersMenu.index(self.shader.shaderName())
 				self.shader_menu.setValue(sIndex)
-				
+		else:
+			self.shader = rmshader.RMShader()
+			
 		self.update_functions = []
 		self.obj_parent = None 
+		self.passSelf = passSelf
 		#else:
 		#	self.selectShader(None)
 		# otherwise, I'll be selecting a shader at the outset...
@@ -3277,10 +3364,15 @@ class GenericShader(BtoRObject):
 	def getEditor(self):		
 		return self.editorPanel
 	def showEditor(self):
-		self.obj_parent.showShader()
+		if self.passSelf:
+			self.obj_parent.showShader(self)
+		else:
+			self.obj_parent.showShader()
+		
 	def setParamValue(self, parameter, value):
-		self.properties[parameter].setValue(value)
-		self.editors[parameter].setValue(value)		
+		if self.properties.has_key(parameter):
+			self.properties[parameter].setValue(value)
+			self.editors[parameter].setValue(value)		
 		# set it in the shader too, for good measure, but...why do I need to this if I'm calling updateShaderparams()?
 		# setattr(self.shader, parameter, value)
 
@@ -3968,7 +4060,7 @@ class MaterialList(BtoRObject):
 		
 		# self.picker.x = self.absX
 		self.editor = ui.Panel(10, screen[1] - 50, 200, 400, "Material Selector", "Material Editor:", None, False)
-		self.selector = ui.Panel(10, screen[1] - 50, 200, 375, "Material Selector", "Material Selector:", None, False)
+		self.selector = ui.Panel(225, screen[1] - 50, 200, 375, "Material Selector", "Material Selector:", None, False)
 		
 		self.add_button = ui.Button(0, 370, 99, 30, "Add New", "Add New", 'normal', self.editor, True)
 		self.add_button.shadowed = False
@@ -3983,10 +4075,10 @@ class MaterialList(BtoRObject):
 		self.delete_button.registerCallback("release", self.showDeleteDialog)
 		
 		self.scroller = ui.ScrollPane(0, 27, 200, 340, "MaterialScroller", "Scroller", self.editor, True)
-		self.scroller.normalColor = [43,43,43,255]
+		#self.scroller.normalColor = [43,43,43,255]
 				
 		self.sel_scroller = ui.ScrollPane(0, 27, 200, 340, "MaterialScroller", "Scroller", self.selector, True)
-		self.sel_scroller.normalColor = [43,43,43,255]
+		#self.sel_scroller.normalColor = [43,43,43,255]
 			
 		self.close_button = ui.Button(self.editor.width - 20, 5, 14, 14, "X", "X", 'normal', self.editor, True)
 		self.close_button.shadowed = False
@@ -3996,10 +4088,10 @@ class MaterialList(BtoRObject):
 		self.close_button.registerCallback("release", self.close)
 
 		self.materials = []
-		
-		self.stickyToggle = False
+				
 		self.sel_sticky = True
 		self.select_functions = []
+		
 	def getMaterialCount(self):
 		return len(self.materials)
 		
@@ -4008,8 +4100,7 @@ class MaterialList(BtoRObject):
 
 		for material in self.materials:
 			# create a button editor for each material			
-			#self.scroller.elements.append(material.getMaterialButton())
-			material.editorButton.registerCallback("release", self.toggleOn)
+			#self.scroller.elements.append(material.getMaterialButton())			
 			material.selectorButton.registerCallback("release", self.select)
 	
 	def getMaterial(self, materialName):
@@ -4098,33 +4189,32 @@ class MaterialList(BtoRObject):
 			
 			material = Material(rm_mat, self.scroller, self.sel_scroller)
 			
-			
 			self.materials.append(material)			
 			self.scroller.lastItem = 0
 			self.sel_scroller.lastItem = 0
 			
-			material.selectorButton.registerCallback("release", self.select)
-			material.editorButton.registerCallback("release", self.toggleOn)
+			material.selectorButton.registerCallback("release", self.select)			
 			self.log.appendText("Created material " + dialog.getValue() + "...")
 		# self.evt_manager.removeElement(dialog)
 				
 	def showDeleteDialog(self, button):
 		self.evt_manager.showConfirmDialog("Delete Material?", "Delete selected material?",  self.deleteMaterial, False)
+		
 	def deleteMaterial(self, dialog):
 		if dialog.state == dialog.OK:
 			# find the selected material by chasing through the elements in the scroller and deleting the one that's found.
+			selected = []
 			for element in self.scroller.elements:
-				if element.getValue() == True:
-					# find the parent material
-					for material in self.materials:
-						if element == material.getMaterialButton():
-							self.materials.remove(material)
-							break
-					self.scroller.removeElement(element)	
-					# self.sel_scroller.removeElement(mater
-					parent = element.parent
-					del element										
-					break
+				if element.selector.getValue():					
+					self.materials.remove(element.mat)
+					selected.append(element)
+							
+			for element in selected:
+				self.scroller.removeElement(element)
+				self.sel_scroller.removeElement(element.mat.selectorButton)
+				del element
+			del selected
+					
 					
 	def getSavedMaterials(self, xmldat = None):
 		# this looks for XML stored in a blender text object by the name of BtoRXMLData
@@ -4777,14 +4867,6 @@ class LightManager(BtoRObject):
 	
 	     this will allow me to load light setups/looks
 	"""
-	options = { "GenOcclusion" : ["Generate Occlusion Maps:", False],
-		"GenShadowMaps" : ["Create Shadow Maps:", True],
-		"UseAmbient" : ["Default Ambient Light:", False],
-		"AmbIntensity" : ["Ambient Intensity:", 1.0],
-		"AmbColor" : ["Ambient Light Color:", [1.0, 1.0, 1.0]],
-		"Multiplier" : ["Light Multiplier:", 1.0],
-		"layerLighting" : ["Enable lighting layers:", False]}
-	optionOrder = ["GenOcclusion", "GenShadowMaps", "layerLighting", "UseAmbient", "AmbColor", "AmbIntensity", "Multiplier"]
 		# "UseGI" : "Use Global Illuminator", False],
 		# "SkyDOme" : ["Create Sky Dome", False],
 		# 
@@ -4792,19 +4874,41 @@ class LightManager(BtoRObject):
 		# center the panel
 		sdict = globals()
 		self.settings = sdict["instBtoRSettings"]
-		self.evt_manager = sdict["instBtoREvtManager"]
+		self.evt_manager = sdict["instBtoREvtManager"]		
 		setattr(BtoRAdapterClasses, "instBtoRLightManager", self)
+		
+		self.options = { "GenOcclusion" : ["Generate Occlusion Maps:", False],
+			"GenShadowMaps" : ["Create Shadow Maps:", True],
+			"UseAmbient" : ["Default Ambient Light:", False],
+			"AmbIntensity" : ["Ambient Intensity:", 1.0],
+			"AmbColor" : ["Ambient Light Color:", [1.0, 1.0, 1.0]],
+			"Multiplier" : ["Light Multiplier:", 1.0],
+			"AOShader" : ["AO Shader:", BtoRTypes.BtoRShaderType(GenericShader(None, "light", self))],
+			"layerLighting" : ["Enable lighting layers:", False]}
+		
+		self.optionOrder = ["GenOcclusion", "GenShadowMaps", "layerLighting", "AOShader", "UseAmbient", "AmbColor", "AmbIntensity", "Multiplier"]
 
+		
 		# insert my AO shader property into the options list
 		
 		screen = Blender.Window.GetAreaSize()		
-		self.editorPanel = ui.Panel(25 , screen[1] - 35 , 380, 320, "Light Manager", "Light Manager:", None, False)
-			
+		self.editorPanel = ui.Panel(25 , screen[1] - 35 , 245, 320, "Light Manager", "Light Manager:", None, False)
+		
 		self.editorPanel.addElement(ui.Label(5, 27, "Scene Lighting properties:", "Scene Lighting Properties", self.editorPanel, False))
 		self.scroller= ui.ScrollPane(5, 50, 240, 260, "Scroller", "Scroller", self.editorPanel, True)
 		
-		#self.updateButton = ui.Button(10, self.editorPanel.height - 35, 150, 25, "Update list", "Update List", 'small', self.editorPanel, True)
-		#self.updateButton.registerCallback("release", self.updateLightList)
+		self.AOPanel = self.options["AOShader"][1].getObject().getEditor()	
+		self.AOPanel.isVisible = False
+		self.AOPanel.shadowed = True
+		self.AOPanel.outlined = True
+		self.AOPanel.hasHeader = False				
+		self.AOPanel.invalid = True
+		self.AOPanel.validate()
+		self.editorPanel.addElement(self.AOPanel)
+		self.AOPanel.parent = self.editorPanel
+		self.AOPanel.x = self.editorPanel.width + 10
+		
+		self.options["AOShader"][1].getObject().obj_parent = self
 		
 		self.close_button = ui.Button(self.editorPanel.width - 20, 5, 14, 14, "X", "X", 'normal', self.editorPanel, True)
 		self.close_button.shadowed = False
@@ -4816,7 +4920,11 @@ class LightManager(BtoRObject):
 		
 		self.occlusion_menu = ["None Selected"]
 		self.occlListeners = []
-		
+		if self.settings.renderer == "Pixie":
+			hiderProp = ["Hider", {"btor:default" : "stochastic", "stochastic" : "stochastic", "zbuffer" : "zbuffer", "raytrace" : "raytrace", "photon" : "photon", "opengl" : "opengl" }, "stochastic"]
+			self.options["Hider"] = hiderProp
+			self.optionOrder.insert(0, "Hider")
+			
 		self.setupProperties()
 		# the properties here should read in the lights that belong to which occlusion groups and what-not
 		# as well as set the groups up..but all of this will be a special case, since my properties don't actually
@@ -4824,11 +4932,14 @@ class LightManager(BtoRObject):
 		
 		#self.lightsButt = ui.Button(250, 27, 120, 25, "Lights", "Lights", 'normal', self.editorPanel, True)
 		#self.lightsButt.registerCallback("release", self.toggleLights)
-		self.occluButt = ui.Button(250, 27, 120, 25, "Occlusion", "Occlusion Groups", 'normal', self.editorPanel, True)
-		self.occluButt.registerCallback("release", self.toggleOccl)
 		
-		self.roleButt = ui.Button(250, 65, 120, 25, "Roles", "Lighting Roles", 'normal', self.editorPanel, True)
-		self.roleButt.registerCallback("release", self.toggleRole)
+		# occlusion groups here!
+		# self.occluButt = ui.Button(250, 27, 120, 25, "Occlusion", "Occlusion Groups", 'normal', self.editorPanel, True)
+		# self.occluButt.registerCallback("release", self.toggleOccl)
+		
+		# lighting roles here!
+		# self.roleButt = ui.Button(250, 27, 120, 25, "Roles", "Lighting Roles", 'normal', self.editorPanel, True)
+		# self.roleButt.registerCallback("release", self.toggleRole)
 		
 		self.rolePanel = ui.Panel(390, 0, 310, 300, "", "", self.editorPanel, True)
 		self.rolePanel.hasHeader = False
@@ -4855,7 +4966,6 @@ class LightManager(BtoRObject):
 		self.lightScroller = ui.ScrollPane(5, 35, 281, 250, "", "", self.lightsPanel, True)
 		self.lights = {}
 		
-		
 		self.occlPanel = ui.Panel(390, 0, 310, 300, "", "", self.editorPanel, True)
 		self.occlPanel.hasHeader = False
 		self.occlPanel.isVisible = False
@@ -4868,16 +4978,21 @@ class LightManager(BtoRObject):
 		self.occlAddGroup.registerCallback("release", self.addOccl)
 		#self.occlDelGroup.registerCallback("release", self.delOccl)
 		
-		
 		self.occlScroller = ui.ScrollPane(5, 65, 300, 230, "", "", self.occlPanel, True)		
 		self.occlGroups = [] # e.g. "groupname" : [[properties],["light1", "light2", "light3"]]
 		self.roles = []
 		
-		
 		# add some lighting roles, like key, fill and shadow
 		self.occlIndex = 0
+		self.settings.rendererListeners.append(self)
 		
-			
+	def showShader(self):
+		if self.AOPanel.isVisible:
+			self.AOPanel.hide()
+		else:
+			self.AOPanel.show()
+		
+		
 	def getSelected(self):		
 		if not self.__dict__.has_key("scene"):
 			sdict = globals()
@@ -4924,7 +5039,23 @@ class LightManager(BtoRObject):
 		for role in selected:
 			self.roles.remove(role)
 			self.roleScroller.removeElement(role)
-						
+			
+	def updateAttributes(self):
+		hiderProp = ["Hider", {"btor:default" : "stochastic", "stochastic" : "stochastic", "zbuffer" : "zbuffer", "raytrace" : "raytrace", "photon" : "photon", "opengl" : "opengl" }, "stochastic"]
+		if self.settings.renderer == "Pixie":
+			if not properties.has_key("Hider"):
+				property = IProperty(hiderProp)
+				property.setName("Hider")
+				editor = IPropertyEditor(property)
+				self.properties.append(property)
+				self.editors.append(editor)
+				self.scroller.addElement(editor.getEditor())
+		else:
+			if properties.has_key("Hider"):
+				properties.pop("Hider")
+				x = editors.pop("Hider")
+				self.scroller.removeElement(x.getEditor())
+			
 	def addLight(self, light):
 		lightPanel = ui.Panel(0, 0, 265, 20, light, "", self.lightScroller, True)
 		lightPanel.selector = ui.CheckBox(2, 3, " ", " ", False, lightPanel, True)
@@ -4964,7 +5095,8 @@ class LightManager(BtoRObject):
 		occlPanel.selector.elements[0].transparent = True
 		occlPanel.groupName = ui.TextField(15, 0, 75, 20, occlPanel.name, "Ambient%d" % self.occlIndex, occlPanel, True)
 		occlPanel.groupName.registerCallback("update", self.updateOcclusionList)
-		occlPanel.aoShaderProperty = BtoRAdapterClasses.IProperty(BtoRTypes.BtoRShaderType(GenericShader(None, "light", None)))
+		occlPanel.aoShaderProperty = BtoRAdapterClasses.IProperty(BtoRTypes.BtoRShaderType(GenericShader(None, "light", self, passSelf = True)))
+		occlPanel.aoShaderProperty.value.obj_parent = self
 		occlPanel.aoShaderProperty.width = 202
 		occlPanel.aoShaderProperty.height = 20
 		occlPanel.aoShaderProperty.name = "AO Shader:"
@@ -4984,7 +5116,7 @@ class LightManager(BtoRObject):
 		self.occlGroups.append(occlPanel)
 		self.updateOcclusionList(None)
 		return occlPanel
-	
+		
 	def delOccl(self, obj):
 		selected = []
 		for occl in self.occlGroups:

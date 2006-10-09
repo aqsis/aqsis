@@ -199,9 +199,7 @@ class ShaderProperty(Property):
 				else:
 					shader = cgkit.rmshader.RMShader(shaderFileName)
 					self.populateShaderParamsList(parmList, shader, initialized)		
-				
 			else:
-				
 				initialized = False
 				shader = cgkit.rmshader.RMShader(shaderName)
 				self.populateShaderParamsList(parmList, shader, initialized)		
@@ -894,9 +892,109 @@ class ObjectAdapter: # baseclass for all Blender objects
 		self.objEditor = protocols.adapt(obj, IObjectUI)		
 		self.properties = self.objEditor.properties
 		self.editors = self.objEditor.editors
+		self.rendererAtts = self.objEditor.rendererAtts
 		self.initObjectData() # initializes object data 
 		# self.objType = obj.obj.getType()
 		self.changed = False
+		
+	def renderAttributes(self):
+		# iterate renderer specific attributes
+		attributes = self.settings.getRendererAttributes()		
+		for attribute in attributes:
+			render = False
+			if attribute in self.rendererAtts: 
+				attArray = attribute.split(":")
+				val = self.rendererAtts[attribute].getValue()
+				print "Value is:", val
+				print "Default is:", attributes[attribute][2]				
+				if val != attributes[attribute][2]: # not default value, render the attribute
+					x = attArray[1].find("[")
+					if x > -1:
+						z = len(attArray[1] - 1)
+						arrLen = int(attArray[1][x + 1:z])
+						v = []
+						sVal = val.split(" ")
+						try:
+							if "integer" in attArray[1] or "int" in attArray[1]:
+								for vIdx in range(arrLen):
+									v.append(int(sVal[vIdx]))
+							elif "string" in attArray[1]:
+								for vIdx in range(arrLen):
+									v.append(sVal[vIdx])
+							elif "float" in arrArray[1]:
+									v.append(float(sVal[vIdx]))							
+							val = v
+							render = True
+						except:
+							render = False
+					else:
+						try:
+							if attArray[1] == "integer" or attArray[1] == "int":
+								val = [int(val)]
+								render = True
+							elif attArray[1] == "string":
+								val = [str(val)]
+								render = True
+							elif attArray[1] == "float":
+								val = [float(val)]
+								render = True
+							else:
+								render = False
+						except:
+							render = False
+			if render:				
+				ri.RiAttribute(attArray[0], attArray[2], val)
+				
+	def temp(self):
+		if len(self.rendererAtts) > 0:
+			for att in self.rendererAtts:
+				# for each attribute, get the value and render it
+				attArray = att.split(":") # splits the option by : chars
+				# propArray[0] = category
+				# propArray[1] = type
+				# propArray[2] = name
+				render = True
+				# get the attribute value				
+				val = self.getProperty(property) # get the value
+				print val
+				print rproperties[property]
+				if val != rproperties[property][2]:
+					x = propArray[1].find("[")
+					if x > -1:
+						# array value
+						# "integer[2]"
+						print propArray
+						z = len(propArray[1]) - 1
+						arrLen = int(propArray[1][x + 1:z])
+						v = []
+						sVal = val.split(" ")
+						if "integer" in propArray[1] or "int" in propArray[1]:
+							for vIdx in range(arrLen):
+								v.append(int(sVal[vIdx]))
+						elif "string" in propArray[1]:
+							for vIdx in range(arrLen):
+								v.append(sVal[vIdx])
+						elif "float" in propArray[1]:
+							for vIdx in range(arrLen):
+								v.append(float(sVal[vIdx]))
+						val = v
+					else:
+						# not an array, lets' do this differently					
+						if propArray[1] == "integer" or propArray[1] == "int":					
+							val = [int(val)]
+						elif propArray[1] == "float":
+							val = [float(val)]
+						elif propArray[1] == "string":
+							val = [str(val)]
+						else:
+							render = False
+					# here, val should be either an array or not
+					# thus, eval
+					# types and arrays should be ok now
+					# thus, the option call
+					if render:
+						ri.RiOption(propArray[0], propArray[1] + " " + propArray[2], val)
+
 		
 	def genChecksum(self):
 		pass
@@ -982,8 +1080,8 @@ class ObjectAdapter: # baseclass for all Blender objects
 			#print "\n"
 			ri.RiTranslate(trans)
 			
-		def getRenderDirections(self):
-				return ["px", "py", "pz", "nx", "ny", "nz"]
+	def getRenderDirections(self):
+			return ["px", "py", "pz", "nx", "ny", "nz"]
 			
 	def populateShaderParamsList(self, params, shader, initialized):
 		
@@ -1254,12 +1352,14 @@ class ObjectAdapter: # baseclass for all Blender objects
 					# hopefully this doesn't break stuff.
 				#else: # with luck, this is always the case
 				path = os.path.split(self.objData["shaderfilename"])
+				
 				self.shader.setSearchPath(path[0])					
 				self.shader.setShader(path[1]) # this should update the controls
 				# self.shader.shader.shadername = self.objData["shaderparms"]["shadername"]
-				self.shader.shader.filename = self.objData["shaderfilename"]
-				self.populateShaderParamsList(self.objData["shaderparms"], self.shader.shader, True)	# so I can now setup the parameters
-				# now get more wicked
+				if self.shader.shader != None:
+					self.shader.shader.filename = self.objData["shaderfilename"]
+					self.populateShaderParamsList(self.objData["shaderparms"], self.shader.shader, True)	# so I can now setup the parameters
+				
 				
 
 		except:
@@ -1404,6 +1504,7 @@ class MeshAdapter(ObjectAdapter):
 						ri.RiAttributeBegin() # push the graphics state. All lights should be off
 						for light in illumList:
 							ri.RiIlluminate(light, ri.RI_TRUE)
+				
 				# immediately test for dupliverts
 				if self.object.enableDupVerts and len(self.object.DupObjects) > 0:
 					# I might have dupliverts, react accordingly
@@ -1422,8 +1523,10 @@ class MeshAdapter(ObjectAdapter):
 					for obj in objs:					
 						ri.RiTransformBegin()					
 						# transform the object
-						ri.RiAttributeBegin()
+						ri.RiAttributeBegin()						
 						ri.RiAttribute("identifier", "name", self.objData["name"] + instance)
+						if not shadowPass:
+							self.renderAttributes()
 						ri.RiTransform(obj[1]) # that should be the duplicated matrix and in fact should take into account rotations and scaling, all that
 						ri.RiObjectInstance(objSequence)	
 						ri.RiAttributeEnd()
@@ -1433,6 +1536,8 @@ class MeshAdapter(ObjectAdapter):
 				else:
 					ri.RiAttributeBegin()				
 					ri.RiAttribute("identifier", "name", [self.objData["name"]]) # give it a name
+					if not shadowPass:
+						self.renderAttributes()
 					ri.RiAttribute("displacementbound", "sphere", self.getProperty("DispBound"))
 					srate = self.getProperty("ShadingRate")
 					sceneRate = self.scene.getProperty("ShadingRate")
@@ -1538,6 +1643,7 @@ class MeshAdapter(ObjectAdapter):
 	
 	def renderPointsPolygons(self):
 		""" Export Renderman PointsPolygons object. """
+		params = {}
 		mesh = self.object.getData(False, True)
 		points = []
 		normals = []
@@ -2217,28 +2323,33 @@ class LampAdapter(ObjectAdapter):
 			
 	def setShadowParms(self, params):
 		shadername = self.shader.shader.shadername
-		if shadername == "shadowpoint":
-			# setattr(self.shader.shader, "sfpx", params["px"]["shadowName"])
+		sparams = self.shader.shader.shaderparams
+		
+		#if shadername == "shadowpoint":			
+		if sparams.has_key("sfpx"):				
 			self.shader.setParamValue("sfpx", params["px"]["shadowName"])
-			#print "Shadowmap: ", getattr(self.shader.shader, "sfpx")
-			#setattr(self.shader.shader, "sfpy", params["py"]["shadowName"])
 			self.shader.setParamValue("sfpy", params["py"]["shadowName"])
-			#print "Shadowmap: ", getattr(self.shader.shader, "sfpy")
-			# setattr(self.shader.shader, "sfpz", params["pz"]["shadowName"])
 			self.shader.setParamValue("sfpz", params["pz"]["shadowName"])
-			#print "Shadowmap: ", getattr(self.shader.shader, "sfpz")
-			#setattr(self.shader.shader, "sfnx", params["nx"]["shadowName"])
 			self.shader.setParamValue("sfnx", params["nx"]["shadowName"])
-			#print "Shadowmap: ", getattr(self.shader.shader, "sfnx")
-			#setattr(self.shader.shader, "sfny", params["ny"]["shadowName"])
 			self.shader.setParamValue("sfny", params["ny"]["shadowName"])
-			#print "Shadowmap: ", getattr(self.shader.shader, "sfny")
-			#setattr(self.shader.shader, "sfnz", params["nz"]["shadowName"])
 			self.shader.setParamValue("sfnz", params["nz"]["shadowName"])
-			#print "Shadowmap: ", getattr(self.shader.shader, "sfnz")
-		elif shadername == "shadowspot" or shadername == "shadowdistant" or shadername == "bml":
+		elif sparams.has_key("px"):
+			self.shader.setParamValue("px", params["px"]["shadowName"])
+			self.shader.setParamValue("py", params["py"]["shadowName"])
+			self.shader.setParamValue("pz", params["pz"]["shadowName"])
+			self.shader.setParamValue("nx", params["nx"]["shadowName"])
+			self.shader.setParamValue("ny", params["ny"]["shadowName"])
+			self.shader.setParamValue("nz", params["nz"]["shadowName"])
+		elif sparams.has_key("shadow"):
+			if params.has_key("shadowName"):
+				self.shader.setParamValue("shadow", params["shadow"]["shadowName"])
+		elif sparams.has_key("shadowname"):
+			if params.has_key("shadowName"):
+				self.shader.setParamValue("shadowname", params["shadow"]["shadowName"])
+			
+		#elif shadername == "shadowspot" or shadername == "shadowdistant" or shadername == "bml":
 			# setattr(self.shader.shader, "shadowname", params["shadow"]["shadowName"])
-			self.shader.setParamValue("shadowname", params["shadow"]["shadowName"])
+		#	self.shader.setParamValue("shadowname", params["shadow"]["shadowName"])
 			
 		
 	def getRenderDirections(self):
@@ -2448,7 +2559,20 @@ class LampAdapter(ObjectAdapter):
 				self.initObjectData()
 				self.objData["reset"] = True
 		else:
-			params = self.shader.shaderparams
+			mat = self.object.getMatrix()
+			
+			x = self.object.matrix[3][0] / self.object.matrix[3][3]
+			y = self.object.matrix[3][1] / self.object.matrix[3][3]
+			z = self.object.matrix[3][2] / self.object.matrix[3][3]
+			
+			tox = -self.object.matrix[2][0] + self.object.matrix[3][0]
+			toy = -self.object.matrix[2][1] + self.object.matrix[3][1]
+			toz = -self.object.matrix[2][2] + self.object.matrix[3][2]
+			if lamp.getMode() & lamp.Modes['Negative']:
+				negative = -1
+			else:
+				negative = 1
+			params = self.shader.shader.shaderparams
 			if params.has_key("intensity"):
 				energyRatio = lamp.dist * negative
 				shaderParms["intensity"] = (energyRatio * lamp.energy) * self.getProperty("Multiplier")
@@ -2873,8 +2997,23 @@ class ObjectUI:
 		self.editorPanel.outlined = False
 		self.editorPanel.addElement(ui.Label(10, 25, "Object Properties", "Object Properties:", self.editorPanel, True))
 		self.scroller= ui.ScrollPane(10, 50, 240, 235, "Scroller", "Scroller", self.editorPanel, True)
+		
+		self.attButton = ui.Button(self.editorPanel.width - 90, 0, 80, 25, "Atts", "Attributes", 'small', self.editorPanel, True)
+		self.attButton.registerCallback("release", self.showAttributes)
+		
+		# hovering panel on the right for renderer-specific attributes
+		self.attributePanel = ui.Panel(self.editorPanel.width + 10, 0, 255, 320, "Atts", "  Renderer Specific Attributes", self.editorPanel, True, fontsize = 'small')
+		self.attributePanel.isVisible = False
+		self.attributePanel.hasHeader = False
+		self.attributePanel.shadowed = True
+		self.attributePanel.outlined = True
+		
+		self.attributeScroller = ui.ScrollPane(5, 25, 245, 295, "Scroller", "Scroller", self.attributePanel, True)
+		
 		self.properties = {}
 		self.editors = {}
+		
+		# setup renderer-specific options
 		if self.__dict__.has_key("optionOrder"):
 			for option in self.optionOrder:
 				propertyName = self.options[option][0]
@@ -2889,6 +3028,29 @@ class ObjectUI:
 				self.scroller.addElement(self.editors[option].getEditor()) # and that should be that. When this is discarded, all those go away
 				self.editors[option].setParent(self.scroller)	
 				self.scroller.offset = 0
+		
+		self.setupAttributes()
+		self.settings.rendererListeners.append(self)
+			
+	def setupAttributes(self):
+		self.rendererAtts = {}
+		self.rendererAttEditors = {}		
+		
+		# setup renderer attributes
+		atts = self.settings.getRendererAttributes()
+		for att in atts:
+			self.rendererAtts[att] = IProperty(atts[att][1])
+			self.rendererAtts[att].setName(atts[att][0])
+			self.rendererAtts[att].setWidth(self.attributeScroller.width - 15)
+			
+			self.rendererAttEditors[att] = IPropertyEditor(self.rendererAtts[att])
+			self.attributeScroller.addElement(self.rendererAttEditors[att].getEditor())
+			self.rendererAttEditors[att].setParent(self.attributeScroller)
+			self.attributeScroller.offset = 0
+	
+	def updateAttributes(self):
+		self.attributeScroller.clearElements()
+		self.setupAttributes()
 			
 	def getEditor(self):
 		""" get the object editor for this object. """
@@ -2899,6 +3061,12 @@ class ObjectUI:
 		# simple enough to reload everything from the options array
 		for option in self.optionOrder:
 			self.scroller.addElement(self.editors[option].getEditor())
+			
+	def showAttributes(self, button):
+		if self.attributePanel.isVisible:
+			self.attributePanel.hide()
+		else:
+			self.attributePanel.show()
 		
 
 class MeshUI(ObjectUI):
@@ -2907,7 +3075,6 @@ class MeshUI(ObjectUI):
 	protocols.advise(instancesProvide=[IObjectUI], asAdapterForTypes=[BtoRMesh])
 	""" This is the object editor. Here you can assign materials, and set various options for the export. """
 	
-
 	def __init__(self, obj):
 		self.options = { "material":["material", BtoRMaterialType("None Selected")],
 			"AutoCrease" : ["Automatic Creasing?", False], 
@@ -2939,7 +3106,7 @@ class MeshUI(ObjectUI):
 			"ExportCs" : ["Export Vertex Colors(Cs)", True], 
 			"ExportSt" : ["Export Texture Coordinates(s/t)", True],
 			"FacePatches":["Export Faces as Patches:", False],
-			"interpolateBoundary":["Interpolate Subdiv Boundary:", True]
+			"interpolateBoundary":["Interpolate Subdiv Boundary:", True]			
 			}
 		self.optionOrder = ["material",
 				"OutputOptions", 
@@ -3022,16 +3189,18 @@ class LampUI(ObjectUI):
 					"GenShadowMap",
 					"ShadowMapSize",
 					"ShadowMapJitter",
+					"ShadowMapEyeSplits",
 					"Multiplier", 
-					"IncludeWithAO",
-					"Group",
+					"IncludeWithAO",					
 					"transformLight",
 					"DepthFilter",
-					"ShowZBuffer"]		
+					"ShowZBuffer"]	
+		# occlusion group property here
+		# "Group",					
 		ObjectUI.__init__(self, obj)
 		# assign custom stuff to any properties that need it
-		self.lighting.occlListeners.append(self.editors["Group"])
-		self.editors["Group"].updateMenu(self.lighting.occlusion_menu) # to catch any stragglers
+		#self.lighting.occlListeners.append(self.editors["Group"])
+		#self.editors["Group"].updateMenu(self.lighting.occlusion_menu) # to catch any stragglers
 		
 
 		
@@ -3055,9 +3224,7 @@ class LampUI(ObjectUI):
 		self.editors["shader"].setParent(self.scroller)	
 		self.properties["shader"].getValue().getObject().obj_parent = self
 		
-		# shader panel setup
-
-		self.shaderPanel = self.properties["shader"].getValue().getObject().getEditor()					
+		self.shaderPanel = self.properties["shader"].getValue().getObject().getEditor()
 		self.shaderPanel.parent = self.editorPanel		
 		self.editorPanel.addElement(self.shaderPanel)
 		self.shaderPanel.isVisible = False

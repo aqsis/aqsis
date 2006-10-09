@@ -33,6 +33,7 @@ class BtoRShaderType(BtoRBasicObject):
 class BtoRMaterialType(BtoRBasicObject): pass
 class BtoRRotationType(BtoRBasicObject): pass
 class BtoRCustomRIB(BtoRBasicObject): pass
+		
 # shader parameter objects
 class BtoRBasicParam: 
 	height = 27 # should work for most
@@ -81,6 +82,8 @@ class BtoRBasicParam:
 		#print "set property of type ", type(self.value), " to ", type(str(self.value).__name__)
 		return xmlProp		
 		
+class BtoRPath(BtoRBasicParam):
+	pass
 class BtoRFloatParam(BtoRBasicParam): 
 	def getValue(self):
 		return float(self.value)
