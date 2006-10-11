@@ -193,7 +193,7 @@ SectionIn 1 2
   !insertmacro MUI_STARTMENU_WRITE_END
 SectionEnd
 
-Section /o "Other" SEC04
+Section /o "Libraries" SEC04
 SectionIn 1
   SetOutPath "$INSTDIR\include\aqsis"
   File "..\..\..\output\include\aqsis\*.h"
