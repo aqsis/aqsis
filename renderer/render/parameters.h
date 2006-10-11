@@ -1,7 +1,7 @@
 // Aqsis
-// Copyright © 1997 - 2001, Paul C. Gregory
+// Copyright  1997 - 2001, Paul C. Gregory
 //
-// Contact: pgregory@aqsis.com
+// Contact: pgregory@aqsis.org
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public
@@ -20,7 +20,7 @@
 
 /** \file
 		\brief Declares the classes and support structures for handling parameters attached to GPrims.
-		\author Paul C. Gregory (pgregory@aqsis.com)
+		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
 //? Is .h included already?
@@ -98,6 +98,7 @@ class CqParameter
 		 * \param pSurface Pointer to the surface we are processing used for vertex class variables to perform natural interpolation.
 		 */
 		virtual	void	Dice( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0 ) = 0;
+		virtual	void	CopyToShaderVariable( IqShaderData* pResult ) = 0;
 
 		/** Pure virtual, dice a single array element of the value into a grid using appropriate interpolation for the class.
 		 * \param u Integer dice count for the u direction.
@@ -174,7 +175,7 @@ class CqParameterTyped : public CqParameter
 
 		virtual	void	SetValue( CqParameter* pFrom, TqInt idxTarget, TqInt idxSource )
 		{
-			assert( pFrom->Type() == Type() );
+			assert( pFrom->Type() == this->Type() );
 
 			CqParameterTyped<T, SLT>* pFromTyped = static_cast<CqParameterTyped<T, SLT>*>( pFrom );
 			*pValue( idxTarget ) = *pFromTyped->pValue( idxSource );
@@ -240,8 +241,8 @@ class CqParameterTypedVarying : public CqParameterTyped<T, SLT>
 		}
 		virtual void	Subdivide( CqParameter* pResult1, CqParameter* pResult2, TqBool u, IqSurface* pSurface = 0 )
 		{
-			assert( pResult1->Type() == Type() && pResult1->Type() == Type() &&
-			        pResult1->Class() == Class() && pResult1->Class() == Class() );
+			assert( pResult1->Type() == this->Type() && pResult1->Type() == this->Type() &&
+			        pResult1->Class() == this->Class() && pResult1->Class() == this->Class() );
 
 			CqParameterTypedVarying<T, I, SLT>* pTResult1 = static_cast<CqParameterTypedVarying<T, I, SLT>*>( pResult1 );
 			CqParameterTypedVarying<T, I, SLT>* pTResult2 = static_cast<CqParameterTypedVarying<T, I, SLT>*>( pResult2 );
@@ -267,6 +268,7 @@ class CqParameterTypedVarying : public CqParameterTyped<T, SLT>
 			}
 		}
 		virtual	void	Dice( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0 );
+		virtual	void	CopyToShaderVariable( IqShaderData* pResult );
 
 		virtual	void	DiceOne( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0, TqInt ArrayIndex = 0 )
 		{
@@ -382,7 +384,7 @@ class CqParameterTypedUniform : public CqParameterTyped<T, SLT>
 
 		virtual void	Subdivide( CqParameter* pResult1, CqParameter* pResult2, TqBool u, IqSurface* pSurface = 0 )
 		{
-			assert( pResult1->Type() == Type() && pResult1->Type() == Type() &&
+			assert( pResult1->Type() == this->Type() && pResult1->Type() == this->Type() &&
 			        pResult1->Class() == Class() && pResult1->Class() == Class() );
 
 			CqParameterTypedUniform<T, I, SLT>* pTResult1 = static_cast<CqParameterTypedUniform<T, I, SLT>*>( pResult1 );
@@ -392,13 +394,27 @@ class CqParameterTypedUniform : public CqParameterTyped<T, SLT>
 		virtual	void	Dice( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0 )
 		{
 			// Just promote the uniform value to varying by duplication.
-			assert( pResult->Type() == Type() );
+			assert( pResult->Type() == this->Type() );
 			// Note it is assumed that the variable has been
 			// initialised to the correct size prior to calling.
 			// Also note that the only time a Uniform value is diced is when it is on a single element, i.e. the patchmesh
 			// has been split into isngle patches, or the polymesh has been split into polys.
 			TqUint i;
 			TqUint max = MAX( (TqUint)u * (TqUint)v, pResult->Size() );
+			for ( i = 0; i < max; i++ )
+				pResult->SetValue( m_aValues[ 0 ], i );
+		}
+
+		virtual	void	CopyToShaderVariable( IqShaderData* pResult )
+		{
+			// Just promote the uniform value to varying by duplication.
+			assert( pResult->Type() == this->Type() );
+			// Note it is assumed that the variable has been
+			// initialised to the correct size prior to calling.
+			// Also note that the only time a Uniform value is diced is when it is on a single element, i.e. the patchmesh
+			// has been split into isngle patches, or the polymesh has been split into polys.
+			TqUint i;
+			TqUint max = pResult->Size();
 			for ( i = 0; i < max; i++ )
 				pResult->SetValue( m_aValues[ 0 ], i );
 		}
@@ -505,8 +521,8 @@ class CqParameterTypedConstant : public CqParameterTyped<T, SLT>
 
 		virtual void	Subdivide( CqParameter* pResult1, CqParameter* pResult2, TqBool u, IqSurface* pSurface = 0 )
 		{
-			assert( pResult1->Type() == Type() && pResult1->Type() == Type() &&
-			        pResult1->Class() == Class() && pResult1->Class() == Class() );
+			assert( pResult1->Type() == this->Type() && pResult1->Type() == this->Type() &&
+			        pResult1->Class() == this->Class() && pResult1->Class() == this->Class() );
 
 			CqParameterTypedConstant<T, I, SLT>* pTResult1 = static_cast<CqParameterTypedConstant<T, I, SLT>*>( pResult1 );
 			CqParameterTypedConstant<T, I, SLT>* pTResult2 = static_cast<CqParameterTypedConstant<T, I, SLT>*>( pResult2 );
@@ -515,11 +531,22 @@ class CqParameterTypedConstant : public CqParameterTyped<T, SLT>
 		virtual	void	Dice( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0 )
 		{
 			// Just promote the constant value to varying by duplication.
-			assert( pResult->Type() == Type() );
+			assert( pResult->Type() == this->Type() );
 			// Note it is assumed that the variable has been
 			// initialised to the correct size prior to calling.
 			TqUint i;
 			TqUint max = MAX( (TqUint) u * (TqUint) v, pResult->Size() );
+			for ( i = 0; i < max ; i++ )
+				pResult->SetValue( m_Value, i );
+		}
+		virtual	void	CopyToShaderVariable( IqShaderData* pResult )
+		{
+			// Just promote the constant value to varying by duplication.
+			assert( pResult->Type() == this->Type() );
+			// Note it is assumed that the variable has been
+			// initialised to the correct size prior to calling.
+			TqUint i;
+			TqUint max = pResult->Size();
 			for ( i = 0; i < max ; i++ )
 				pResult->SetValue( m_Value, i );
 		}
@@ -603,19 +630,27 @@ class CqParameterTypedVertex : public CqParameterTypedVarying<T, I, SLT>
 		}
 		virtual void	Subdivide( CqParameter* pResult1, CqParameter* pResult2, TqBool u, IqSurface* pSurface = 0 )
 		{
-			assert( pResult1->Type() == Type() && pResult1->Type() == Type() &&
-			        pResult1->Class() == Class() && pResult1->Class() == Class() );
+			assert( pResult1->Type() == this->Type() && pResult1->Type() == this->Type() &&
+			        pResult1->Class() == this->Class() && pResult1->Class() == this->Class() );
 
 			pSurface->NaturalSubdivide( this, pResult1, pResult2, u );
 		}
 		virtual	void	Dice( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0 )
 		{
 			// Just promote the constant value to varying by duplication.
-			assert( pResult->Type() == Type() );
+			assert( pResult->Type() == this->Type() );
 			assert( NULL != pSurface );
 			// Note it is assumed that the variable has been
 			// initialised to the correct size prior to calling.
 			pSurface->NaturalDice( this, u, v, pResult );
+		}
+		virtual	void	CopyToShaderVariable( IqShaderData* pResult )
+		{
+			assert( pResult->Type() == this->Type() );
+			TqUint i;
+			TqUint max = pResult->Size();
+			for ( i = 0; i < max ; i++ )
+				pResult->SetValue( this->pValue(i)[0], i );
 		}
 
 		virtual	void	DiceOne( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0, TqInt ArrayIndex = 0 )
@@ -682,6 +717,49 @@ class CqParameterTypedFaceVarying : public CqParameterTypedVarying<T, I, SLT>
 
 
 //----------------------------------------------------------------------
+/** \class CqParameterTypedFaceVertex
+ * Parameter with a vertex type, templatised by value type and type id.
+ */
+
+template <class T, EqVariableType I, class SLT>
+class CqParameterTypedFaceVertex : public CqParameterTypedVertex<T, I, SLT>
+{
+	public:
+		CqParameterTypedFaceVertex( const char* strName, TqInt Count = 1 ) :
+				CqParameterTypedVertex<T, I, SLT>( strName, Count )
+		{}
+		CqParameterTypedFaceVertex( const CqParameterTypedVertex<T, I, SLT>& From ) :
+				CqParameterTypedVertex<T, I, SLT>( From )
+		{}
+		virtual	~CqParameterTypedFaceVertex()
+		{}
+
+		virtual	CqParameter* CloneType( const char* Name, TqInt Count = 1 ) const
+		{
+			return ( new CqParameterTypedFaceVertex<T, I, SLT>( Name, Count ) );
+		}
+		virtual	CqParameter* Clone() const
+		{
+			return ( new CqParameterTypedFaceVertex<T, I, SLT>( *this ) );
+		}
+		virtual	EqVariableClass	Class() const
+		{
+			return ( class_facevertex );
+		}
+
+		/** Static constructor, to allow type free parameter construction.
+		 * \param strName Character pointer to new parameter name.
+		 * \param Count Integer array size.
+		 */
+		static	CqParameter*	Create( const char* strName, TqInt Count = 1 )
+		{
+			return ( new CqParameterTypedFaceVertex<T, I, SLT>( strName, Count ) );
+		}
+
+	private:
+};
+
+//----------------------------------------------------------------------
 /** \class CqParameterTypedVaryingArray
  * Parameter with a varying array type, templatised by value type and type id.
  */
@@ -733,7 +811,7 @@ class CqParameterTypedVaryingArray : public CqParameterTyped<T, SLT>
 		}
 		virtual void	Subdivide( CqParameter* pResult1, CqParameter* pResult2, TqBool u, IqSurface* pSurface = 0 )
 		{
-			assert( pResult1->Type() == Type() && pResult1->Type() == Type() &&
+			assert( pResult1->Type() == this->Type() && pResult1->Type() == this->Type() &&
 			        pResult1->Class() == Class() && pResult1->Class() == Class() );
 
 			CqParameterTypedVaryingArray<T, I, SLT>* pTResult1 = static_cast<CqParameterTypedVaryingArray<T, I, SLT>*>( pResult1 );
@@ -768,6 +846,7 @@ class CqParameterTypedVaryingArray : public CqParameterTyped<T, SLT>
 			}
 		}
 		virtual	void	Dice( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0 );
+		virtual	void	CopyToShaderVariable( IqShaderData* pResult );
 		virtual	void	DiceOne( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0, TqInt ArrayIndex = 0 );
 
 		// Overridden from CqParameterTyped<T>
@@ -799,8 +878,8 @@ class CqParameterTypedVaryingArray : public CqParameterTyped<T, SLT>
 
 		virtual	void	SetValue( CqParameter* pFrom, TqInt idxTarget, TqInt idxSource )
 		{
-			assert( pFrom->Type() == Type() );
-			assert( pFrom->Count() == Count() );
+			assert( pFrom->Type() == this->Type() );
+			assert( pFrom->Count() == this->Count() );
 
 			CqParameterTyped<T, SLT>* pFromTyped = static_cast<CqParameterTyped<T, SLT>*>( pFrom );
 			TqInt index;
@@ -896,7 +975,7 @@ class CqParameterTypedUniformArray : public CqParameterTyped<T, SLT>
 		virtual	void	Dice( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0 )
 		{
 			// Just promote the uniform value to varying by duplication.
-			assert( pResult->Type() == Type() );
+			assert( pResult->Type() == this->Type() );
 			// Note it is assumed that the variable has been
 			// initialised to the correct size prior to calling.
 			TqUint i;
@@ -904,12 +983,23 @@ class CqParameterTypedUniformArray : public CqParameterTyped<T, SLT>
 			for ( i = 0; i < max; i++ )
 				pResult->SetValue( pValue( 0 ) [ 0 ], i );
 		}
+		virtual	void	CopyToShaderVariable( IqShaderData* pResult )
+		{
+			// Just promote the uniform value to varying by duplication.
+			assert( pResult->Type() == this->Type() );
+			// Note it is assumed that the variable has been
+			// initialised to the correct size prior to calling.
+			TqUint i;
+			TqUint max = pResult->Size();
+			for ( i = 0; i < max; i++ )
+				pResult->SetValue( pValue( 0 ) [ 0 ], i );
+		}
 
 		virtual	void	DiceOne( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0, TqInt ArrayIndex = 0 )
 		{
 			// Just promote the uniform value to varying by duplication.
-			assert( pResult->Type() == Type() );
-			assert( Count() > ArrayIndex );
+			assert( pResult->Type() == this->Type() );
+			assert( this->Count() > ArrayIndex );
 			// Note it is assumed that the variable has been
 			// initialised to the correct size prior to calling.
 			TqUint i;
@@ -1019,7 +1109,7 @@ class CqParameterTypedConstantArray : public CqParameterTyped<T, SLT>
 		virtual	void	Dice( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0 )
 		{
 			// Just promote the constant value to varying by duplication.
-			assert( pResult->Type() == Type() );
+			assert( pResult->Type() == this->Type() );
 			// Note it is assumed that the variable has been
 			// initialised to the correct size prior to calling.
 			TqUint i;
@@ -1027,12 +1117,23 @@ class CqParameterTypedConstantArray : public CqParameterTyped<T, SLT>
 			for ( i = 0; i < max; i++ )
 				pResult->SetValue( pValue( 0 ) [ 0 ], i );
 		}
+		virtual	void	CopyToShaderVariable( IqShaderData* pResult )
+		{
+			// Just promote the constant value to varying by duplication.
+			assert( pResult->Type() == this->Type() );
+			// Note it is assumed that the variable has been
+			// initialised to the correct size prior to calling.
+			TqUint i;
+			TqUint max = pResult->Size();
+			for ( i = 0; i < max; i++ )
+				pResult->SetValue( pValue( 0 ) [ 0 ], i );
+		}
 
 		virtual	void	DiceOne( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0, TqInt ArrayIndex = 0 )
 		{
 			// Just promote the constant value to varying by duplication.
-			assert( pResult->Type() == Type() );
-			assert( Count() > ArrayIndex );
+			assert( pResult->Type() == this->Type() );
+			assert( this->Count() > ArrayIndex );
 			// Note it is assumed that the variable has been
 			// initialised to the correct size prior to calling.
 			TqUint i;
@@ -1121,11 +1222,22 @@ class CqParameterTypedVertexArray : public CqParameterTypedVaryingArray<T, I, SL
 		virtual	void	Dice( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0 )
 		{
 			// Just promote the uniform value to varying by duplication.
-			assert( pResult->Type() == Type() );
+			assert( pResult->Type() == this->Type() );
 			assert( NULL != pSurface );
 			// Note it is assumed that the variable has been
 			// initialised to the correct size prior to calling.
 			pSurface->NaturalDice( this, u, v, pResult );
+		}
+		virtual	void	CopyToShaderVariable( IqShaderData* pResult )
+		{
+			// Just promote the uniform value to varying by duplication.
+			assert( pResult->Type() == this->Type() );
+			// Note it is assumed that the variable has been
+			// initialised to the correct size prior to calling.
+			TqUint i;
+			TqUint max = pResult->Size();
+			for ( i = 0; i < max; i++ )
+				pResult->SetValue( this->pValue( 0 ) [ 0 ], i );
 		}
 
 		virtual	void	DiceOne( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0, TqInt ArrayIndex = 0 )
@@ -1159,9 +1271,6 @@ class CqParameterTypedFaceVaryingArray : public CqParameterTypedVaryingArray<T, 
 		CqParameterTypedFaceVaryingArray( const char* strName, TqInt Count = 1 ) :
 				CqParameterTypedVaryingArray<T, I, SLT>( strName, Count )
 		{}
-		CqParameterTypedFaceVaryingArray( const CqParameterTypedVertexArray<T, I, SLT>& From ) :
-				CqParameterTypedVaryingArray<T, I, SLT>( From )
-		{}
 		virtual	~CqParameterTypedFaceVaryingArray()
 		{}
 
@@ -1191,6 +1300,45 @@ class CqParameterTypedFaceVaryingArray : public CqParameterTypedVaryingArray<T, 
 };
 
 
+//----------------------------------------------------------------------
+/** \class CqParameterTypedFaceVertexArray
+ * Parameter with a facevertex array type, templatised by value type and type id.
+ */
+
+template <class T, EqVariableType I, class SLT>
+class CqParameterTypedFaceVertexArray : public CqParameterTypedVertexArray<T, I, SLT>
+{
+	public:
+		CqParameterTypedFaceVertexArray( const char* strName, TqInt Count = 1 ) :
+				CqParameterTypedVertexArray<T, I, SLT>( strName, Count )
+		{}
+		virtual	~CqParameterTypedFaceVertexArray()
+		{}
+
+		virtual	CqParameter* CloneType( const char* Name, TqInt Count = 1 ) const
+		{
+			return ( new CqParameterTypedFaceVertexArray<T, I, SLT>( Name, Count ) );
+		}
+		virtual	CqParameter* Clone() const
+		{
+			return ( new CqParameterTypedFaceVertexArray<T, I, SLT>( *this ) );
+		}
+		virtual	EqVariableClass	Class() const
+		{
+			return ( class_facevertex );
+		}
+
+		/** Static constructor, to allow type free parameter construction.
+		 * \param strName Character pointer to new parameter name.
+		 * \param Count Integer array size.
+		 */
+		static	CqParameter*	Create( const char* strName, TqInt Count = 1 )
+		{
+			return ( new CqParameterTypedFaceVertexArray<T, I, SLT>( strName, Count ) );
+		}
+
+	private:
+};
 
 /** Dice the value into a grid using bilinear interpolation.
  * \param u Integer dice count for the u direction.
@@ -1243,6 +1391,17 @@ void CqParameterTypedVarying<T, I, SLT>::Dice( TqInt u, TqInt v, IqShaderData* p
 	}
 }
 
+template <class T, EqVariableType I, class SLT>
+void CqParameterTypedVarying<T, I, SLT>::CopyToShaderVariable( IqShaderData* pResult )
+{
+	SLT* pResData;
+	pResult->GetValuePtr( pResData );
+	assert( NULL != pResData );
+
+	TqUint iu;
+	for ( iu = 0; iu <= pResult->Size(); iu++ )
+		( *pResData++ ) = pValue(iu)[0];
+}
 
 /** Dice the value into a grid using bilinear interpolation.
  * \param u Integer dice count for the u direction.
@@ -1254,8 +1413,9 @@ void CqParameterTypedVarying<T, I, SLT>::Dice( TqInt u, TqInt v, IqShaderData* p
 template <class T, EqVariableType I, class SLT>
 void CqParameterTypedVaryingArray<T, I, SLT>::Dice( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface )
 {
-	assert( pResult->Type() == Type() );
+	assert( pResult->Type() == this->Type() );
 	assert( pResult->Class() == class_varying );
+	assert( pResult->Size() == m_aValues.size() );
 
 	T res;
 
@@ -1285,19 +1445,19 @@ void CqParameterTypedVaryingArray<T, I, SLT>::Dice( TqInt u, TqInt v, IqShaderDa
 			}
 		}
 	}
-	else
-	{
-		TqInt iv;
-		res = pValue( 0 ) [ 0 ];
-		for ( iv = 0; iv <= v; iv++ )
-		{
-			TqInt iu;
-			for ( iu = 0; iu <= u; iu++ )
-				( *pResData++ ) = res;
-		}
-	}
 }
 
+template <class T, EqVariableType I, class SLT>
+void CqParameterTypedVaryingArray<T, I, SLT>::CopyToShaderVariable( IqShaderData* pResult )
+{
+	SLT* pResData;
+	pResult->GetValuePtr( pResData );
+	assert( NULL != pResData );
+
+	TqUint iu;
+	for ( iu = 0; iu <= pResult->Size(); iu++ )
+		( *pResData++ ) = pValue(iu)[0];
+}
 
 /** Dice the value into a grid using bilinear interpolation.
  * \param u Integer dice count for the u direction.
@@ -1309,9 +1469,9 @@ void CqParameterTypedVaryingArray<T, I, SLT>::Dice( TqInt u, TqInt v, IqShaderDa
 template <class T, EqVariableType I, class SLT>
 void CqParameterTypedVaryingArray<T, I, SLT>::DiceOne( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface, TqInt ArrayIndex )
 {
-	assert( pResult->Type() == Type() );
+	assert( pResult->Type() == this->Type() );
 	assert( pResult->Class() == class_varying );
-	assert( Count() > ArrayIndex );
+	assert( this->Count() > ArrayIndex );
 
 	T res;
 
@@ -1341,23 +1501,11 @@ void CqParameterTypedVaryingArray<T, I, SLT>::DiceOne( TqInt u, TqInt v, IqShade
 			}
 		}
 	}
-	else
-	{
-		TqInt iv;
-		res = pValue( 0 ) [ ArrayIndex ];
-		for ( iv = 0; iv <= v; iv++ )
-		{
-			TqInt iu;
-			for ( iu = 0; iu <= u; iu++ )
-				( *pResData++ ) = res;
-		}
-	}
 }
 
 
 //----------------------------------------------------------------------
 /** \class CqNamedParameterList
- * Renderman option/attribute class, has a name and a number of parameter name/value pairs.
  */
 
 class CqNamedParameterList
@@ -1442,18 +1590,327 @@ class CqNamedParameterList
 }
 ;
 
+///////////////////////////////////////////////////////////////////////////////
+	typedef CqParameterTyped<TqFloat, TqFloat> CqFloatParameter;
+	typedef boost::shared_ptr<CqFloatParameter> CqFloatParameterPtr;
+	
+	typedef CqParameterTyped<TqInt, TqFloat> CqIntParameter;
+	typedef boost::shared_ptr<CqIntParameter> CqIntParameterPtr;
 
+	typedef CqParameterTyped<CqVector3D, CqVector3D> CqPointParameter;
+	typedef boost::shared_ptr<CqPointParameter> CqPointParameterPtr;
+
+	typedef CqParameterTyped<CqString, CqString> CqStringParameter;
+	typedef boost::shared_ptr<CqStringParameter> CqStringParameterPtr;
+
+	typedef CqParameterTyped<CqColor, CqColor> CqColorParameter;
+	typedef boost::shared_ptr<CqColorParameter> CqColorParameterPtr;
+
+	typedef CqParameterTyped<CqVector4D, CqVector3D> CqHPointParameter;
+	typedef boost::shared_ptr<CqHPointParameter> CqHPointParameterPtr;
+
+	typedef CqParameterTyped<CqVector3D, CqVector3D> CqNormalParameter;
+	typedef boost::shared_ptr<CqNormalParameter> CqNormalParameterPtr;
+
+	typedef CqParameterTyped<CqVector3D, CqVector3D> CqVectorParameter;
+	typedef boost::shared_ptr<CqVectorParameter> CqVectorParameterPtr;
+
+	typedef CqParameterTyped<CqMatrix, CqMatrix> CqMatrixParameter;
+	typedef boost::shared_ptr<CqMatrixParameter> CqMatrixParameterPtr;
+
+// Typedefs for the constants
+	typedef CqParameterTypedConstant<TqFloat, type_float, TqFloat> CqFloatConstantParameter;
+	typedef boost::shared_ptr<CqFloatConstantParameter> CqFloatConstantParameterPtr;
+	
+	typedef CqParameterTypedConstant<TqInt, type_integer, TqFloat> CqIntConstantParameter;
+	typedef boost::shared_ptr<CqIntConstantParameter> CqIntConstantParameterPtr;
+
+	typedef CqParameterTypedConstant<CqVector3D, type_point, CqVector3D> CqPointConstantParameter;
+	typedef boost::shared_ptr<CqPointConstantParameter> CqPointConstantParameterPtr;
+
+	typedef CqParameterTypedConstant<CqString, type_string, CqString> CqStringConstantParameter;
+	typedef boost::shared_ptr<CqStringConstantParameter> CqStringConstantParameterPtr;
+
+	typedef CqParameterTypedConstant<CqColor, type_color, CqColor> CqColorConstantParameter;
+	typedef boost::shared_ptr<CqColorConstantParameter> CqColorConstantParameterPtr;
+
+	typedef CqParameterTypedConstant<CqVector4D, type_hpoint, CqVector3D> CqHPointConstantParameter;
+	typedef boost::shared_ptr<CqHPointConstantParameter> CqHPointConstantParameterPtr;
+
+	typedef CqParameterTypedConstant<CqVector3D, type_normal, CqVector3D> CqNormalConstantParameter;
+	typedef boost::shared_ptr<CqNormalConstantParameter> CqNormalConstantParameterPtr;
+
+	typedef CqParameterTypedConstant<CqVector3D, type_vector, CqVector3D> CqVectorConstantParameter;
+	typedef boost::shared_ptr<CqVectorConstantParameter> CqVectorConstantParameterPtr;
+
+	typedef CqParameterTypedConstant<CqMatrix, type_matrix, CqMatrix> CqMatrixConstantParameter;
+	typedef boost::shared_ptr<CqMatrixConstantParameter> CqMatrixConstantParameterPtr;
+
+// Uniforms
+	typedef CqParameterTypedUniform<TqFloat, type_float, TqFloat> CqFloatUniformParameter;
+	typedef boost::shared_ptr<CqFloatUniformParameter> CqFloatUniformParameterPtr;
+	
+	typedef CqParameterTypedUniform<TqInt, type_integer, TqFloat> CqIntUniformParameter;
+	typedef boost::shared_ptr<CqIntUniformParameter> CqIntUniformParameterPtr;
+
+	typedef CqParameterTypedUniform<CqVector3D, type_point, CqVector3D> CqPointUniformParameter;
+	typedef boost::shared_ptr<CqPointUniformParameter> CqPointUniformParameterPtr;
+
+	typedef CqParameterTypedUniform<CqString, type_string, CqString> CqStringUniformParameter;
+	typedef boost::shared_ptr<CqStringUniformParameter> CqStringUniformParameterPtr;
+
+	typedef CqParameterTypedUniform<CqColor, type_color, CqColor> CqColorUniformParameter;
+	typedef boost::shared_ptr<CqColorUniformParameter> CqColorUniformParameterPtr;
+
+	typedef CqParameterTypedUniform<CqVector4D, type_hpoint, CqVector3D> CqHPointUniformParameter;
+	typedef boost::shared_ptr<CqHPointUniformParameter> CqHPointUniformParameterPtr;
+
+	typedef CqParameterTypedUniform<CqVector3D, type_normal, CqVector3D> CqNormalUniformParameter;
+	typedef boost::shared_ptr<CqNormalUniformParameter> CqNormalUniformParameterPtr;
+
+	typedef CqParameterTypedUniform<CqVector3D, type_vector, CqVector3D> CqVectorUniformParameter;
+	typedef boost::shared_ptr<CqVectorUniformParameter> CqVectorUniformParameterPtr;
+
+	typedef CqParameterTypedUniform<CqMatrix, type_matrix, CqMatrix> CqMatrixUniformParameter;
+	typedef boost::shared_ptr<CqMatrixUniformParameter> CqMatrixUniformParameterPtr;
+
+// Typedefs for Varying
+	typedef CqParameterTypedVarying<TqFloat, type_float, TqFloat> CqFloatVaryingParameter;
+	typedef boost::shared_ptr<CqFloatVaryingParameter> CqFloatVaryingParameterPtr;
+	
+	typedef CqParameterTypedVarying<TqInt, type_integer, TqFloat> CqIntVaryingParameter;
+	typedef boost::shared_ptr<CqIntVaryingParameter> CqIntVaryingParameterPtr;
+
+	typedef CqParameterTypedVarying<CqVector3D, type_point, CqVector3D> CqPointVaryingParameter;
+	typedef boost::shared_ptr<CqPointVaryingParameter> CqPointVaryingParameterPtr;
+
+	typedef CqParameterTypedVarying<CqString, type_string, CqString> CqStringVaryingParameter;
+	typedef boost::shared_ptr<CqStringVaryingParameter> CqStringVaryingParameterPtr;
+
+	typedef CqParameterTypedVarying<CqColor, type_color, CqColor> CqColorVaryingParameter;
+	typedef boost::shared_ptr<CqColorVaryingParameter> CqColorVaryingParameterPtr;
+
+	typedef CqParameterTypedVarying<CqVector4D, type_hpoint, CqVector3D> CqHPointVaryingParameter;
+	typedef boost::shared_ptr<CqHPointVaryingParameter> CqHPointVaryingParameterPtr;
+
+	typedef CqParameterTypedVarying<CqVector3D, type_normal, CqVector3D> CqNormalVaryingParameter;
+	typedef boost::shared_ptr<CqNormalVaryingParameter> CqNormalVaryingParameterPtr;
+
+	typedef CqParameterTypedVarying<CqVector3D, type_vector, CqVector3D> CqVectorVaryingParameter;
+	typedef boost::shared_ptr<CqVectorVaryingParameter> CqVectorVaryingParameterPtr;
+
+	typedef CqParameterTypedVarying<CqMatrix, type_matrix, CqMatrix> CqMatrixVaryingParameter;
+	typedef boost::shared_ptr<CqMatrixVaryingParameter> CqMatrixVaryingParameterPtr;
+	
+// Vertex
+	typedef CqParameterTypedVertex<TqFloat, type_float, TqFloat> CqFloatVertexParameter;
+	typedef boost::shared_ptr<CqFloatVertexParameter> CqFloatVertexParameterPtr;
+	
+	typedef CqParameterTypedVertex<TqInt, type_integer, TqFloat> CqIntVertexParameter;
+	typedef boost::shared_ptr<CqIntVertexParameter> CqIntVertexParameterPtr;
+
+	typedef CqParameterTypedVertex<CqVector3D, type_point, CqVector3D> CqPointVertexParameter;
+	typedef boost::shared_ptr<CqPointVertexParameter> CqPointVertexParameterPtr;
+
+	typedef CqParameterTypedVertex<CqString, type_string, CqString> CqStringVertexParameter;
+	typedef boost::shared_ptr<CqStringVertexParameter> CqStringVertexParameterPtr;
+
+	typedef CqParameterTypedVertex<CqColor, type_color, CqColor> CqColorVertexParameter;
+	typedef boost::shared_ptr<CqColorVertexParameter> CqColorVertexParameterPtr;
+
+	typedef CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D> CqHPointVertexParameter;
+	typedef boost::shared_ptr<CqHPointVertexParameter> CqHPointVertexParameterPtr;
+
+	typedef CqParameterTypedVertex<CqVector3D, type_normal, CqVector3D> CqNormalVertexParameter;
+	typedef boost::shared_ptr<CqNormalVertexParameter> CqNormalVertexParameterPtr;
+
+	typedef CqParameterTypedVertex<CqVector3D, type_vector, CqVector3D> CqVectorVertexParameter;
+	typedef boost::shared_ptr<CqVectorVertexParameter> CqVectorVertexParameterPtr;
+
+	typedef CqParameterTypedVertex<CqMatrix, type_matrix, CqMatrix> CqMatrixVertexParameter;
+	typedef boost::shared_ptr<CqMatrixVertexParameter> CqMatrixVertexParameterPtr;
+
+// FaceVarying
+	typedef CqParameterTypedFaceVarying<TqFloat, type_float, TqFloat> CqFloatFaceVaryingParameter;
+	typedef boost::shared_ptr<CqFloatFaceVaryingParameter> CqFloatFaceVaryingParameterPtr;
+	
+	typedef CqParameterTypedFaceVarying<TqInt, type_integer, TqFloat> CqIntFaceVaryingParameter;
+	typedef boost::shared_ptr<CqIntFaceVaryingParameter> CqIntFaceVaryingParameterPtr;
+
+	typedef CqParameterTypedFaceVarying<CqVector3D, type_point, CqVector3D> CqPointFaceVaryingParameter;
+	typedef boost::shared_ptr<CqPointFaceVaryingParameter> CqPointFaceVaryingParameterPtr;
+
+	typedef CqParameterTypedFaceVarying<CqString, type_string, CqString> CqStringFaceVaryingParameter;
+	typedef boost::shared_ptr<CqStringFaceVaryingParameter> CqStringFaceVaryingParameterPtr;
+
+	typedef CqParameterTypedFaceVarying<CqColor, type_color, CqColor> CqColorFaceVaryingParameter;
+	typedef boost::shared_ptr<CqColorFaceVaryingParameter> CqColorFaceVaryingParameterPtr;
+
+	typedef CqParameterTypedFaceVarying<CqVector4D, type_hpoint, CqVector3D> CqHPointFaceVaryingParameter;
+	typedef boost::shared_ptr<CqHPointFaceVaryingParameter> CqHPointFaceVaryingParameterPtr;
+
+	typedef CqParameterTypedFaceVarying<CqVector3D, type_normal, CqVector3D> CqNormalFaceVaryingParameter;
+	typedef boost::shared_ptr<CqNormalFaceVaryingParameter> CqNormalFaceVaryingParameterPtr;
+
+	typedef CqParameterTypedFaceVarying<CqVector3D, type_vector, CqVector3D> CqVectorFaceVaryingParameter;
+	typedef boost::shared_ptr<CqVectorFaceVaryingParameter> CqVectorFaceVaryingParameterPtr;
+
+	typedef CqParameterTypedFaceVarying<CqMatrix, type_matrix, CqMatrix> CqMatrixFaceVaryingParameter;
+	typedef boost::shared_ptr<CqMatrixFaceVaryingParameter> CqMatrixFaceVaryingParameterPtr;
+
+// Constant Array
+	typedef CqParameterTypedConstantArray<TqFloat, type_float, TqFloat> CqFloatConstantArrayParameter;
+	typedef boost::shared_ptr<CqFloatConstantArrayParameter> CqFloatConstantArrayParameterPtr;
+	
+	typedef CqParameterTypedConstantArray<TqInt, type_integer, TqFloat> CqIntConstantArrayParameter;
+	typedef boost::shared_ptr<CqIntConstantArrayParameter> CqIntConstantArrayParameterPtr;
+
+	typedef CqParameterTypedConstantArray<CqVector3D, type_point, CqVector3D> CqPointConstantArrayParameter;
+	typedef boost::shared_ptr<CqPointConstantArrayParameter> CqPointConstantArrayParameterPtr;
+
+	typedef CqParameterTypedConstantArray<CqString, type_string, CqString> CqStringConstantArrayParameter;
+	typedef boost::shared_ptr<CqStringConstantArrayParameter> CqStringConstantArrayParameterPtr;
+
+	typedef CqParameterTypedConstantArray<CqColor, type_color, CqColor> CqColorConstantArrayParameter;
+	typedef boost::shared_ptr<CqColorConstantArrayParameter> CqColorConstantArrayParameterPtr;
+
+	typedef CqParameterTypedConstantArray<CqVector4D, type_hpoint, CqVector3D> CqHPointConstantArrayParameter;
+	typedef boost::shared_ptr<CqHPointConstantArrayParameter> CqHPointConstantArrayParameterPtr;
+
+	typedef CqParameterTypedConstantArray<CqVector3D, type_normal, CqVector3D> CqNormalConstantArrayParameter;
+	typedef boost::shared_ptr<CqNormalConstantArrayParameter> CqNormalConstantArrayParameterPtr;
+
+	typedef CqParameterTypedConstantArray<CqVector3D, type_vector, CqVector3D> CqVectorConstantArrayParameter;
+	typedef boost::shared_ptr<CqVectorConstantArrayParameter> CqVectorConstantArrayParameterPtr;
+
+	typedef CqParameterTypedConstantArray<CqMatrix, type_matrix, CqMatrix> CqMatrixConstantArrayParameter;
+	typedef boost::shared_ptr<CqMatrixConstantArrayParameter> CqMatrixConstantArrayParameterPtr;
+
+// Uniform array
+	typedef CqParameterTypedUniformArray<TqFloat, type_float, TqFloat> CqFloatUniformArrayParameter;
+	typedef boost::shared_ptr<CqFloatUniformArrayParameter> CqFloatUniformArrayParameterPtr;
+	
+	typedef CqParameterTypedUniformArray<TqInt, type_integer, TqFloat> CqIntUniformArrayParameter;
+	typedef boost::shared_ptr<CqIntUniformArrayParameter> CqIntUniformArrayParameterPtr;
+
+	typedef CqParameterTypedUniformArray<CqVector3D, type_point, CqVector3D> CqPointUniformArrayParameter;
+	typedef boost::shared_ptr<CqPointUniformArrayParameter> CqPointUniformArrayParameterPtr;
+
+	typedef CqParameterTypedUniformArray<CqString, type_string, CqString> CqStringUniformArrayParameter;
+	typedef boost::shared_ptr<CqStringUniformArrayParameter> CqStringUniformArrayParameterPtr;
+
+	typedef CqParameterTypedUniformArray<CqColor, type_color, CqColor> CqColorUniformArrayParameter;
+	typedef boost::shared_ptr<CqColorUniformArrayParameter> CqColorUniformArrayParameterPtr;
+
+	typedef CqParameterTypedUniformArray<CqVector4D, type_hpoint, CqVector3D> CqHPointUniformArrayParameter;
+	typedef boost::shared_ptr<CqHPointUniformArrayParameter> CqHPointUniformArrayParameterPtr;
+
+	typedef CqParameterTypedUniformArray<CqVector3D, type_normal, CqVector3D> CqNormalUniformArrayParameter;
+	typedef boost::shared_ptr<CqNormalUniformArrayParameter> CqNormalUniformArrayParameterPtr;
+
+	typedef CqParameterTypedUniformArray<CqVector3D, type_vector, CqVector3D> CqVectorUniformArrayParameter;
+	typedef boost::shared_ptr<CqVectorUniformArrayParameter> CqVectorUniformArrayParameterPtr;
+
+	typedef CqParameterTypedUniformArray<CqMatrix, type_matrix, CqMatrix> CqMatrixUniformArrayParameter;
+	typedef boost::shared_ptr<CqMatrixUniformArrayParameter> CqMatrixUniformArrayParameterPtr;
+
+// Varying array
+	typedef CqParameterTypedVaryingArray<TqFloat, type_float, TqFloat> CqFloatVaryingArrayParameter;
+	typedef boost::shared_ptr<CqFloatVaryingArrayParameter> CqFloatVaryingArrayParameterPtr;
+	
+	typedef CqParameterTypedVaryingArray<TqInt, type_integer, TqFloat> CqIntVaryingArrayParameter;
+	typedef boost::shared_ptr<CqIntVaryingArrayParameter> CqIntVaryingArrayParameterPtr;
+
+	typedef CqParameterTypedVaryingArray<CqVector3D, type_point, CqVector3D> CqPointVaryingArrayParameter;
+	typedef boost::shared_ptr<CqPointVaryingArrayParameter> CqPointVaryingArrayParameterPtr;
+
+	typedef CqParameterTypedVaryingArray<CqString, type_string, CqString> CqStringVaryingArrayParameter;
+	typedef boost::shared_ptr<CqStringVaryingArrayParameter> CqStringVaryingArrayParameterPtr;
+
+	typedef CqParameterTypedVaryingArray<CqColor, type_color, CqColor> CqColorVaryingArrayParameter;
+	typedef boost::shared_ptr<CqColorVaryingArrayParameter> CqColorVaryingArrayParameterPtr;
+
+	typedef CqParameterTypedVaryingArray<CqVector4D, type_hpoint, CqVector3D> CqHPointVaryingArrayParameter;
+	typedef boost::shared_ptr<CqHPointVaryingArrayParameter> CqHPointVaryingArrayParameterPtr;
+
+	typedef CqParameterTypedVaryingArray<CqVector3D, type_normal, CqVector3D> CqNormalVaryingArrayParameter;
+	typedef boost::shared_ptr<CqNormalVaryingArrayParameter> CqNormalVaryingArrayParameterPtr;
+
+	typedef CqParameterTypedVaryingArray<CqVector3D, type_vector, CqVector3D> CqVectorVaryingArrayParameter;
+	typedef boost::shared_ptr<CqVectorVaryingArrayParameter> CqVectorVaryingArrayParameterPtr;
+
+	typedef CqParameterTypedVaryingArray<CqMatrix, type_matrix, CqMatrix> CqMatrixVaryingArrayParameter;
+	typedef boost::shared_ptr<CqMatrixVaryingArrayParameter> CqMatrixVaryingArrayParameterPtr;
+
+// Vertex array
+	typedef CqParameterTypedVertexArray<TqFloat, type_float, TqFloat> CqFloatVertexArrayParameter;
+	typedef boost::shared_ptr<CqFloatVertexArrayParameter> CqFloatVertexArrayParameterPtr;
+	
+	typedef CqParameterTypedVertexArray<TqInt, type_integer, TqFloat> CqIntVertexArrayParameter;
+	typedef boost::shared_ptr<CqIntVertexArrayParameter> CqIntVertexArrayParameterPtr;
+
+	typedef CqParameterTypedVertexArray<CqVector3D, type_point, CqVector3D> CqPointVertexArrayParameter;
+	typedef boost::shared_ptr<CqPointVertexArrayParameter> CqPointVertexArrayParameterPtr;
+
+	typedef CqParameterTypedVertexArray<CqString, type_string, CqString> CqStringVertexArrayParameter;
+	typedef boost::shared_ptr<CqStringVertexArrayParameter> CqStringVertexArrayParameterPtr;
+
+	typedef CqParameterTypedVertexArray<CqColor, type_color, CqColor> CqColorVertexArrayParameter;
+	typedef boost::shared_ptr<CqColorVertexArrayParameter> CqColorVertexArrayParameterPtr;
+
+	typedef CqParameterTypedVertexArray<CqVector4D, type_hpoint, CqVector3D> CqHPointVertexArrayParameter;
+	typedef boost::shared_ptr<CqHPointVertexArrayParameter> CqHPointVertexArrayParameterPtr;
+
+	typedef CqParameterTypedVertexArray<CqVector3D, type_normal, CqVector3D> CqNormalVertexArrayParameter;
+	typedef boost::shared_ptr<CqNormalVertexArrayParameter> CqNormalVertexArrayParameterPtr;
+
+	typedef CqParameterTypedVertexArray<CqVector3D, type_vector, CqVector3D> CqVectorVertexArrayParameter;
+	typedef boost::shared_ptr<CqVectorVertexArrayParameter> CqVectorVertexArrayParameterPtr;
+
+	typedef CqParameterTypedVertexArray<CqMatrix, type_matrix, CqMatrix> CqMatrixVertexArrayParameter;
+	typedef boost::shared_ptr<CqMatrixVertexArrayParameter> CqMatrixVertexArrayParameterPtr;
+
+// FaceVarying array
+	typedef CqParameterTypedFaceVaryingArray<TqFloat, type_float, TqFloat> CqFloatFaceVaryingArrayParameter;
+	typedef boost::shared_ptr<CqFloatFaceVaryingArrayParameter> CqFloatFaceVaryingArrayParameterPtr;
+	
+	typedef CqParameterTypedFaceVaryingArray<TqInt, type_integer, TqFloat> CqIntFaceVaryingArrayParameter;
+	typedef boost::shared_ptr<CqIntFaceVaryingArrayParameter> CqIntFaceVaryingArrayParameterPtr;
+
+	typedef CqParameterTypedFaceVaryingArray<CqVector3D, type_point, CqVector3D> CqPointFaceVaryingArrayParameter;
+	typedef boost::shared_ptr<CqPointFaceVaryingArrayParameter> CqPointFaceVaryingArrayParameterPtr;
+
+	typedef CqParameterTypedFaceVaryingArray<CqString, type_string, CqString> CqStringFaceVaryingArrayParameter;
+	typedef boost::shared_ptr<CqStringFaceVaryingArrayParameter> CqStringFaceVaryingArrayParameterPtr;
+
+	typedef CqParameterTypedFaceVaryingArray<CqColor, type_color, CqColor> CqColorFaceVaryingArrayParameter;
+	typedef boost::shared_ptr<CqColorFaceVaryingArrayParameter> CqColorFaceVaryingArrayParameterPtr;
+
+	typedef CqParameterTypedFaceVaryingArray<CqVector4D, type_hpoint, CqVector3D> CqHPointFaceVaryingArrayParameter;
+	typedef boost::shared_ptr<CqHPointFaceVaryingArrayParameter> CqHPointFaceVaryingArrayParameterPtr;
+
+	typedef CqParameterTypedFaceVaryingArray<CqVector3D, type_normal, CqVector3D> CqNormalFaceVaryingArrayParameter;
+	typedef boost::shared_ptr<CqNormalFaceVaryingArrayParameter> CqNormalFaceVaryingArrayParameterPtr;
+
+	typedef CqParameterTypedFaceVaryingArray<CqVector3D, type_vector, CqVector3D> CqVectorFaceVaryingArrayParameter;
+	typedef boost::shared_ptr<CqVectorFaceVaryingArrayParameter> CqVectorFaceVaryingArrayParameterPtr;
+
+	typedef CqParameterTypedFaceVaryingArray<CqMatrix, type_matrix, CqMatrix> CqMatrixFaceVaryingArrayParameter;
+	typedef boost::shared_ptr<CqMatrixFaceVaryingArrayParameter> CqMatrixFaceVaryingArrayParameterPtr;
+///////////////////////////////////////////////////////////////////////////////
 
 extern CqParameter* ( *gVariableCreateFuncsConstant[] ) ( const char* strName, TqInt Count );
 extern CqParameter* ( *gVariableCreateFuncsUniform[] ) ( const char* strName, TqInt Count );
 extern CqParameter* ( *gVariableCreateFuncsVarying[] ) ( const char* strName, TqInt Count );
 extern CqParameter* ( *gVariableCreateFuncsVertex[] ) ( const char* strName, TqInt Count );
 extern CqParameter* ( *gVariableCreateFuncsFaceVarying[] ) ( const char* strName, TqInt Count );
+extern CqParameter* ( *gVariableCreateFuncsFaceVertex[] ) ( const char* strName, TqInt Count );
 extern CqParameter* ( *gVariableCreateFuncsConstantArray[] ) ( const char* strName, TqInt Count );
 extern CqParameter* ( *gVariableCreateFuncsUniformArray[] ) ( const char* strName, TqInt Count );
 extern CqParameter* ( *gVariableCreateFuncsVaryingArray[] ) ( const char* strName, TqInt Count );
 extern CqParameter* ( *gVariableCreateFuncsVertexArray[] ) ( const char* strName, TqInt Count );
 extern CqParameter* ( *gVariableCreateFuncsFaceVaryingArray[] ) ( const char* strName, TqInt Count );
+extern CqParameter* ( *gVariableCreateFuncsFaceVertexArray[] ) ( const char* strName, TqInt Count );
 
 //-----------------------------------------------------------------------
 

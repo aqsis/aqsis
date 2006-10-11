@@ -1,7 +1,7 @@
 // Aqsis
 // Copyright 1997 - 2001, Paul C. Gregory
 //
-// Contact: pgregory@aqsis.com
+// Contact: pgregory@aqsis.org
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public
@@ -20,7 +20,8 @@
 
 /** \file
 		\brief Implement the majority of the RenderMan API functions.
-		\author Paul C. Gregory (pgregory@aqsis.com)
+		\author Paul C. Gregory (pgregory@aqsis.org)
+		\todo: <b>Code Review</b>
 */
 
 #include	"MultiTimer.h"
@@ -41,6 +42,7 @@
 #include	"bilinear.h"
 #include	"quadrics.h"
 #include	"teapot.h"
+#include	"bunny.h"
 #include	"shaders.h"
 #include	"texturemap.h"
 #include	"objectinstance.h"
@@ -852,9 +854,14 @@ RtVoid	RiWorldBegin()
 
 
 	QGetRenderContext()->SetWorldBegin();
-
-	QGetRenderContext() ->poptWriteCurrent()->InitialiseCamera();
-	QGetRenderContext() ->pImage() ->SetImage();
+	
+	// Ensure that the camera and projection matrices are initialised.
+	// This is also done in CqRenderer::RenderWorld, but needs to be 
+	// done here also in case we're not running in 'multipass' mode, in 
+	// which case the primitives all 'fast track' into the pipeline and
+	// therefore rely on information setup here.
+	QGetRenderContext()->poptWriteCurrent()->InitialiseCamera();
+	QGetRenderContext()->pImage()->SetImage();
 
 	worldrand.Reseed('a'+'q'+'s'+'i'+'s');
 
@@ -1069,9 +1076,19 @@ RtVoid	RiCropWindow( RtFloat left, RtFloat right, RtFloat top, RtFloat bottom )
 		valid = false;
 	}
 
+	if (bottom == top)
+	{
+		valid = false;
+	}
+
+	if (left == right)
+	{
+		valid = false;
+	}
+
 	if( !valid )
 	{
-		Aqsis::log() << error << "Invalid RiCropWindow, aborting" << std::endl;
+		Aqsis::log() << error << "Invalid RiCropWindow, ignoring" << std::endl;
 		return;
 	}
 
@@ -1549,28 +1566,30 @@ RtVoid	RiDisplayV( RtToken name, RtToken type, RtToken mode, PARAMETERLIST )
 		dataSize = QGetRenderContext()->OutputDataSamples( mode );
 	}
 
-
-	// Gather the additional arguments into a map to pass through to the manager.
-	std::map<std::string, void*> mapOfArguments;
-	TqInt i;
-	for( i = 0; i < count; ++i )
-		mapOfArguments[ tokens[ i ] ] = values[ i ];
-
-	// Check if the request is to add a display driver.
-	if ( strName[ 0 ] == '+' )
+	// Check if the display request is valid.
+	if(dataOffset >= 0 && dataSize >0)
 	{
-		TqInt iMode = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "DisplayMode" ) [ 0 ] | eValue;
-		QGetRenderContext() ->poptWriteCurrent()->GetIntegerOptionWrite( "System", "DisplayMode" ) [ 0 ] = iMode;
-		strName = strName.substr( 1 );
-	}
-	else
-	{
-		QGetRenderContext() ->ClearDisplayRequests();
-		QGetRenderContext() ->poptWriteCurrent()->GetIntegerOptionWrite( "System", "DisplayMode" ) [ 0 ] = eValue ;
-	}
-	// Add a display driver to the list of requested drivers.
-	QGetRenderContext() ->AddDisplayRequest( strName.c_str(), strType.c_str(), mode, eValue, dataOffset, dataSize, mapOfArguments );
+		// Gather the additional arguments into a map to pass through to the manager.
+		std::map<std::string, void*> mapOfArguments;
+		TqInt i;
+		for( i = 0; i < count; ++i )
+			mapOfArguments[ tokens[ i ] ] = values[ i ];
 
+		// Check if the request is to add a display driver.
+		if ( strName[ 0 ] == '+' )
+		{
+			TqInt iMode = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "DisplayMode" ) [ 0 ] | eValue;
+			QGetRenderContext() ->poptWriteCurrent()->GetIntegerOptionWrite( "System", "DisplayMode" ) [ 0 ] = iMode;
+			strName = strName.substr( 1 );
+		}
+		else
+		{
+			QGetRenderContext() ->ClearDisplayRequests();
+			QGetRenderContext() ->poptWriteCurrent()->GetIntegerOptionWrite( "System", "DisplayMode" ) [ 0 ] = eValue ;
+		}
+		// Add a display driver to the list of requested drivers.
+		QGetRenderContext() ->AddDisplayRequest( strName.c_str(), strType.c_str(), mode, eValue, dataOffset, dataSize, mapOfArguments );
+	}
 	return ;
 }
 
@@ -1733,7 +1752,6 @@ RtVoid	RiOptionV( RtToken name, PARAMETERLIST )
 		TqInt Class = Decl.m_Class;
 		TqInt Count = Decl.m_Count;
 		CqString undecoratedName = Decl.m_strName;
-		TqBool bArray = Count > 1;
 		if ( Decl.m_strName == "" || Class != class_uniform )
 		{
 			if ( Decl.m_strName == "" )
@@ -2161,7 +2179,6 @@ RtVoid	RiSurfaceV( RtToken name, PARAMETERLIST )
 
 	if ( pshadSurface )
 	{
-		TqFloat time = QGetRenderContext()->Time();
 		pshadSurface->SetTransform( QGetRenderContext() ->ptransCurrent() );
 		// Execute the intiialisation code here, as we now have our shader context complete.
 		pshadSurface->PrepareDefArgs();
@@ -3677,13 +3694,7 @@ RtVoid RiCurvesV( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, 
 			                     QGetRenderContext() ->matNSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ),
 			                     QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ) );
 
-			std::vector<boost::shared_ptr<CqSurface> > aSplits;
-			pSurface->Split( aSplits );
-			std::vector<boost::shared_ptr<CqSurface> >::iterator iSS;
-			for ( iSS = aSplits.begin(); iSS != aSplits.end(); ++iSS )
-			{
-				CreateGPrim( *iSS );
-			}
+			CreateGPrim( pSurface );
 		}
 	}
 	else if ( strcmp( type, RI_LINEAR ) == 0 )
@@ -4019,7 +4030,7 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 			// Take into account array primitive variables.
 			TqInt array_size = Decl.m_Count;
 
-			if( Decl.m_Class == class_facevarying )
+			if( Decl.m_Class == class_facevarying || Decl.m_Class == class_facevertex )
 			{
 				char* pNew = static_cast<char*>( malloc( elem_size * fvcount * array_size) );
 				aNewParams.push_back( pNew );
@@ -4881,8 +4892,42 @@ RtVoid	RiGeometryV( RtToken type, PARAMETERLIST )
 		                     QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ) );
 
 		CreateGPrim( pSurface );
-	}
-	else
+	} else if ( strcmp( type, "bunny" ) == 0 )
+	{
+	CqBunny bunny;
+
+	std::vector<RtToken> aTokens;
+	std::vector<RtPointer> aValues;
+	std::vector<RtToken> aTags;
+	aTokens.clear();
+	aValues.clear();
+	aTags.clear();
+
+
+	aTokens.push_back(RI_P);
+	aTokens.push_back(RI_S);
+	aTokens.push_back(RI_T);
+	aValues.push_back(bunny.Points());
+	aValues.push_back(bunny.S());
+	aValues.push_back(bunny.T());
+	aTags.push_back("catmull-clark");
+	aTags.push_back("interpolateboundary");
+
+	static TqInt params[] = { 0, 0 };
+
+	TqInt count = 3;
+	RiSubdivisionMeshV( aTags[0],
+	                    bunny.NFaces(),
+	                    bunny.Faces(),
+	                    bunny.Indexes(),
+	                    1,
+	                    &aTags[1],
+	                    params,
+	                    0,
+	                    0,
+	                    count, &aTokens[0], &aValues[0] );
+
+	} else
 	{
 		Aqsis::log() << warning << "RiGeometry unrecognised type \"" << type << "\"" << std::endl;
 	}
@@ -5873,7 +5918,6 @@ RtVoid RiShaderLayerV( RtToken type, RtToken name, RtToken layername, RtInt coun
 
 	Debug_RiShaderLayer
 
-	TqFloat time = QGetRenderContext()->Time();
 	// If the current shader for the specified type is already a layer container, add this layer to it, if not,
 	// create one and add this layer as the first.
 
@@ -6093,6 +6137,10 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface * pSurface, PARAMETERLIST 
 					cValues = pSurface->cFaceVarying();
 					break;
 
+				case class_facevertex:
+					cValues = pSurface->cFaceVertex();
+					break;
+
 				default:
 					break;
 			}
@@ -6214,8 +6262,6 @@ RtVoid	CreateGPrim( const boost::shared_ptr<CqSurface>& pSurface )
 	// If in a motion block, confirm that the current deformation surface can accept the passed one as a keyframe.
 	if( QGetRenderContext() ->pconCurrent() ->fMotionBlock() )
 	{
-		pSurface->PrepareTrimCurve();
-
 		CqMotionModeBlock* pMMB = static_cast<CqMotionModeBlock*>(QGetRenderContext() ->pconCurrent().get());
 
 		CqDeformingSurface* pMS = pMMB->GetDeformingSurface().get();
@@ -6235,7 +6281,6 @@ RtVoid	CreateGPrim( const boost::shared_ptr<CqSurface>& pSurface )
 	}
 	else
 	{
-		pSurface->PrepareTrimCurve();
 		QGetRenderContext()->StorePrimitive( pSurface );
 		STATS_INC( GPR_created );
 

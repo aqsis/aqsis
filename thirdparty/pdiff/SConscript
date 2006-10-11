@@ -1,0 +1,29 @@
+Import('env')
+
+pdiff_sources = Split("""
+	CompareArgs.cpp
+	LPyramid.cpp
+	Metric.cpp
+	PerceptualDiff.cpp
+	RGBAImage.cpp
+	""")
+pdiff_headers = Split("""
+	CompareArgs.h
+	LPyramid.h
+	Metric.h
+	RGBAImage.h
+	""")
+
+pdiffenv = env.Copy()
+
+# Set any platform specific options for this target
+pdiffenv.UseTargetOptions('pdiff')
+
+pdiff = pdiffenv.Program('pdiff', pdiff_sources)
+pdiffenv.Install('$BINDIR', pdiff)
+
+env.Distribute('aqsis/thirdparty/iv', pdiff_sources)
+env.Distribute('aqsis/thirdparty/iv', pdiff_headers)
+env.Distribute('aqsis/thirdparty/iv', 'SConscript')
+
+Return('pdiff')

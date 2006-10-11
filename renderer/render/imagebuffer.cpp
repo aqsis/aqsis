@@ -1,7 +1,7 @@
 // Aqsis
 // Copyright © 1997 - 2001, Paul C. Gregory
 //
-// Contact: pgregory@aqsis.com
+// Contact: pgregory@aqsis.org
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public
@@ -20,7 +20,7 @@
 
 /** \file
 		\brief Implements the CqImageBuffer class responsible for rendering the primitives and storing the results.
-		\author Paul C. Gregory (pgregory@aqsis.com)
+		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
 #include	"MultiTimer.h"
@@ -319,7 +319,7 @@ void CqImageBuffer::PostSurface( const boost::shared_ptr<CqSurface>& pSurface )
 	if ( db != 0.0f )
 	{
 		CqVector3D	vecDB( db, 0, 0 );
-		const IqTransform* transShaderToWorld;
+		const IqTransform* transShaderToWorld = NULL;
 		// Default "shader" space to the displacement shader, unless there isn't one, in which
 		// case use the surface shader.
 		if ( pSurface->pAttributes() ->pshadDisplacement(QGetRenderContextI()->Time()) )

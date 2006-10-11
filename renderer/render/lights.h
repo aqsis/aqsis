@@ -1,7 +1,7 @@
 // Aqsis
 // Copyright © 1997 - 2001, Paul C. Gregory
 //
-// Contact: pgregory@aqsis.com
+// Contact: pgregory@aqsis.org
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public
@@ -20,7 +20,7 @@
 
 /** \file
 		\brief Declares the classes for handling RenderMan lightsources, plus any built in sources.
-		\author Paul C. Gregory (pgregory@aqsis.com)
+		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
 //? Is .h included already?
@@ -80,7 +80,7 @@ class CqLightsource : public IqLightsource, public boost::enable_shared_from_thi
 		 * \param uGridRes Integer grid size, not used.
 		 * \param vGridRes Integer grid size, not used.
 		 */
-		virtual void	Initialise( TqInt uGridRes, TqInt vGridRes );
+		virtual void	Initialise( TqInt uGridRes, TqInt vGridRes, TqInt microPolygonCount, TqInt shadingPointCount );
 		//			void		GenerateShadowMap(const char* strShadowName);
 		/** Evaluate the shader.
 		 * \param pPs the point being lit.
@@ -118,10 +118,15 @@ class CqLightsource : public IqLightsource, public boost::enable_shared_from_thi
 			assert( m_pShaderExecEnv );
 			return ( m_pShaderExecEnv->vGridRes() );
 		}
-		virtual	TqInt	GridSize() const
+		virtual	TqInt	microPolygonCount() const
 		{
 			assert( m_pShaderExecEnv );
-			return ( m_pShaderExecEnv->GridSize() );
+			return ( m_pShaderExecEnv->microPolygonCount() );
+		}
+		virtual	TqInt	shadingPointCount() const
+		{
+			assert( m_pShaderExecEnv );
+			return ( m_pShaderExecEnv->shadingPointCount() );
 		}
 /*		virtual	const CqMatrix&	matObjectToWorld() const
 		{

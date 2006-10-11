@@ -1,7 +1,7 @@
-// Aqsis
+// aQSIS
 // Copyright © 1997 - 2001, Paul C. Gregory
 //
-// Contact: pgregory@aqsis.com
+// Contact: pgregory@aqsis.org
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public
@@ -20,7 +20,7 @@
 
 /** \file
 		\brief Implements classes and support functionality for the shader virtual machine.
-		\author Paul C. Gregory (pgregory@aqsis.com)
+		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
 #include	"aqsis.h"
@@ -750,6 +750,14 @@ static TqBool notspace(char C)
 }
 
 //---------------------------------------------------------------------
+/** Set the shader type important for Imager' shader
+*/
+void CqShaderVM::SetType(EqShaderType type)
+{
+	m_Type = type;
+}
+
+//---------------------------------------------------------------------
 /** Load a token from a compiled slx file.
 */
 
@@ -1228,17 +1236,18 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 /**	Ready the shader for execution.
 */
 
-void CqShaderVM::Initialise( const TqInt uGridRes, const TqInt vGridRes, const boost::shared_ptr<IqShaderExecEnv>& pEnv )
+void CqShaderVM::Initialise( const TqInt uGridRes, const TqInt vGridRes, TqInt shadingPointCount, const boost::shared_ptr<IqShaderExecEnv>& pEnv )
 {
 	m_pEnv = pEnv;
 	// Initialise local variables.
 	TqInt i;
 	for ( i = m_LocalVars.size() - 1; i >= 0;
 	        i-- )
-		m_LocalVars[ i ] ->Initialise( uGridRes, vGridRes );
+		m_LocalVars[ i ] ->Initialise( shadingPointCount );
 
 	m_uGridRes = uGridRes;
 	m_vGridRes = vGridRes;
+	m_shadingPointCount = shadingPointCount;
 
 	// Reset the program counter.
 	m_PC = 0;
@@ -1317,8 +1326,8 @@ void CqShaderVM::ExecuteInit()
 	boost::shared_ptr<IqShaderExecEnv> pOldEnv = m_pEnv;
 
 	boost::shared_ptr<IqShaderExecEnv> Env(new CqShaderExecEnv);
-	Env->Initialise( 1, 1, 0, boost::shared_ptr<IqTransform>(), this, m_Uses );
-	Initialise( 1, 1, Env );
+	Env->Initialise( 1, 1, 1, 1, 0, boost::shared_ptr<IqTransform>(), this, m_Uses );
+	Initialise( 1, 1, 1, Env );
 
 	// Execute the init program.
 	m_PC = &m_ProgramInit[ 0 ];
@@ -1458,8 +1467,37 @@ void CqShaderVM::PrepareShaderForUse( )
 	// Only do the second stage setup of the shader parameters if the shader
 	// was defined within the world. If defined outside the world, the shader state is constant
 	// irrespective of any changes introduced during the render pass (i.e. autoshadows etc.).
-	if(!m_outsideWorld)
+
+	// However Imager shader are defined outside of the world... therefore it is required
+	// to call InitialiseParameters().
+	if(!m_outsideWorld || m_Type == Type_Imager)
 		InitialiseParameters();
+
+ 	switch (m_Type)
+	{
+		case Type_Surface:
+			Aqsis::log() << debug << "surface shader " << strName().c_str() << std::endl;
+			break;
+		case Type_Lightsource:
+			Aqsis::log() << debug << "lightsource shader " << strName().c_str() << std::endl;
+			break;
+		case Type_Volume:
+			Aqsis::log() << debug << "volume shader " << strName().c_str() << std::endl;
+			break;
+		case Type_Displacement:
+			Aqsis::log() << debug << "displacement shader " << strName().c_str() << std::endl;
+			break;
+		case Type_Transformation:
+			Aqsis::log() << debug << "transformation shader " << strName().c_str() << std::endl;
+			break;
+		case Type_Imager:
+			Aqsis::log() << debug << "imager shader " << strName().c_str() << std::endl;
+			break;
+		default:
+			Aqsis::log() << debug << "unknown shader type " << strName().c_str() << std::endl;
+			break;
+	}	
+
 }
 
 void CqShaderVM::InitialiseParameters( )
@@ -1489,7 +1527,10 @@ void CqShaderVM::InitialiseParameters( )
 		CqString _strSpace( "shader" );
 		if ( strSpace.compare( "" ) != 0 )
 			_strSpace = strSpace;
-		CqMatrix matTrans = QGetRenderContextI() ->matSpaceToSpace( _strSpace.c_str(), "current", getTransform(), getTransform(), QGetRenderContextI()->Time() );
+		CqMatrix matTrans;
+
+		if (getTransform())
+			matTrans = QGetRenderContextI() ->matSpaceToSpace( _strSpace.c_str(), "current", getTransform(), getTransform(), QGetRenderContextI()->Time() );
 
 		while ( count-- > 0 )
 		{
@@ -1523,7 +1564,10 @@ void CqShaderVM::InitialiseParameters( )
 			}
 
 			if ( pArray )
-				pArray->ArrayEntry( arrayindex++ ) ->SetValueFromVariable( pVMVal );
+			{
+				pArray->ArrayEntry( arrayindex ) ->SetValueFromVariable( pVMVal->ArrayEntry( arrayindex ) );
+				++arrayindex;
+			}
 			else
 				m_LocalVars[ varindex ] ->SetValueFromVariable( pVMVal );
 		}

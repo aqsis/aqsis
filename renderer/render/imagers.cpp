@@ -1,7 +1,7 @@
 // Aqsis
 // Copyright ) 1997 - 2001, Paul C. Gregory
 //
-// Contact: pgregory@aqsis.com
+// Contact: pgregory@aqsis.org
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public
@@ -44,6 +44,7 @@ CqImagersource::CqImagersource( const boost::shared_ptr<IqShader>& pShader, TqBo
 {
 
 	m_pAttributes = const_cast<CqAttributes*>( QGetRenderContext() ->pattrCurrent() );
+	m_pShader->SetType(Type_Imager);
 	ADDREF( m_pAttributes );
 }
 
@@ -96,16 +97,17 @@ void CqImagersource::Initialise( IqBucket* pBucket )
 
 	TqInt Uses = ( 1 << EnvVars_P ) | ( 1 << EnvVars_Ci ) | ( 1 << EnvVars_Oi | ( 1 << EnvVars_ncomps ) | ( 1 << EnvVars_time ) | ( 1 << EnvVars_alpha ) | ( 1 << EnvVars_s ) | ( 1 << EnvVars_t ) );
 
-	m_pShaderExecEnv->Initialise( uGridRes, vGridRes, 0, boost::shared_ptr<IqTransform>(), m_pShader.get(), Uses );
+	m_pShaderExecEnv->Initialise( uGridRes, vGridRes, uGridRes * vGridRes, (uGridRes+1)*(vGridRes+1), 0, boost::shared_ptr<IqTransform>(), m_pShader.get(), Uses );
 
 	// Initialise the geometric parameters in the shader exec env.
 
-	P() ->Initialise( uGridRes, vGridRes );
-	Ci() ->Initialise( uGridRes, vGridRes );
-	Oi() ->Initialise( uGridRes, vGridRes );
-	alpha() ->Initialise( uGridRes, vGridRes );
-	s() ->Initialise( uGridRes, vGridRes );
-	t() ->Initialise( uGridRes, vGridRes );
+	TqInt numShadingPoints = (uGridRes+1) * (vGridRes+1);
+	P() ->Initialise( numShadingPoints );
+	Ci() ->Initialise( numShadingPoints );
+	Oi() ->Initialise( numShadingPoints );
+	alpha() ->Initialise( numShadingPoints );
+	s() ->Initialise( numShadingPoints );
+	t() ->Initialise( numShadingPoints );
 
 	//TODO dtime is not initialised yet
 	//dtime().Initialise(uGridRes, vGridRes, i);
@@ -114,7 +116,10 @@ void CqImagersource::Initialise( IqBucket* pBucket )
 	time() ->SetFloat( shuttertime );
 
 
-	m_pShader->Initialise( uGridRes, vGridRes, m_pShaderExecEnv );
+
+	m_pShader->Initialise( uGridRes, vGridRes, (uGridRes+1)*(vGridRes+1), m_pShaderExecEnv );
+
+
 	for ( j = 0; j < vGridRes; j++ )
 	{
 		for ( i = 0; i < uGridRes; i++ )

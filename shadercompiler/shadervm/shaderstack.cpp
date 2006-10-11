@@ -1,7 +1,7 @@
 // Aqsis
 // Copyright © 1997 - 2001, Paul C. Gregory
 //
-// Contact: pgregory@aqsis.com
+// Contact: pgregory@aqsis.org
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public
@@ -20,7 +20,7 @@
 
 /** \file
 		\brief Implements the classes and support structures for the shader VM stack.
-		\author Paul C. Gregory (pgregory@aqsis.com)
+		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
 #include	"aqsis.h"
@@ -32,8 +32,8 @@
 
 START_NAMESPACE( Aqsis )
 
-TqInt   CqShaderStack::m_samples = 18;
-TqInt   CqShaderStack::m_maxsamples = 0;
+TqUint   CqShaderStack::m_samples = 18;
+TqUint   CqShaderStack::m_maxsamples = 18;
 
 std::deque<CqShaderVariableUniformFloat*>			CqShaderStack::m_UFPool;
 std::deque<CqShaderVariableUniformPoint*>			CqShaderStack::m_UPPool;

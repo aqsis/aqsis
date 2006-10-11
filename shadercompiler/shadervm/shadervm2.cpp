@@ -1,7 +1,7 @@
 // Aqsis
 // Copyright © 1997 - 2001, Paul C. Gregory
 //
-// Contact: pgregory@aqsis.com
+// Contact: pgregory@aqsis.org
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public
@@ -20,7 +20,7 @@
 
 /** \file
 		\brief Implements functions for the shader virtual machine.
-		\author Paul C. Gregory (pgregory@aqsis.com)
+		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
 #include	"aqsis.h"
@@ -1285,8 +1285,8 @@ void CqShaderVM::SO_external()
 		Release( stackitems[x] );
 	};
 
-	//delete[]( stackitems );
-	//delete[](arg_data);
+	delete[]( stackitems );
+	delete[]( arg_data );
 
 	if( pCall->return_type != type_void )
 	{

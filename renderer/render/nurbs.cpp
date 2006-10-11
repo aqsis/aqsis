@@ -1,7 +1,7 @@
 // Aqsis
 // Copyright 1997 - 2001, Paul C. Gregory
 //
-// Contact: pgregory@aqsis.com
+// Contact: pgregory@aqsis.org
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public
@@ -20,7 +20,7 @@
 
 /** \file
 		\brief Implements the CqSurfaceNurbs classes for handling Renderman NURBS primitives.
-		\author Paul C. Gregory (pgregory@aqsis.com)
+		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
 #include	"aqsis.h"
@@ -1503,7 +1503,7 @@ void CqSurfaceNURBS::GenerateGeometricNormals( TqInt uDiceSize, TqInt vDiceSize,
 			             + m_auKnots[ m_uOrder - 1 ];
 			TqInt igrid = ( iv * ( uDiceSize + 1 ) ) + iu;
 			N = EvaluateWithNormal( su, sv, P );
-			N = ( O == CSO ) ? N : -N;
+			N = ( (O && CSO) || (!O && !CSO) ) ? N : -N;
 			pNormals->SetNormal( N, igrid );
 			/// \todo This would be more efficient if we can store the P here as well, instead of calculating it twice.
 			//pP->SetPoint( P, igrid );

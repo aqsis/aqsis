@@ -1,7 +1,7 @@
 // Aqsis
 // Copyright © 1997 - 2001, Paul C. Gregory
 //
-// Contact: pgregory@aqsis.com
+// Contact: pgregory@aqsis.org
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public
@@ -20,7 +20,7 @@
 
 /** \file
 		\brief Declares the classes for handling micropolygrids and micropolygons.
-		\author Paul C. Gregory (pgregory@aqsis.com)
+		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
 //? Is .h included already?
@@ -43,6 +43,7 @@
 #include	"motion.h"
 #include	"csgtree.h"
 #include	"refcount.h"
+#include	"logging.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -107,7 +108,8 @@ class CqMicroPolyGridBase : public CqRefCount
 		}
 		virtual	TqInt	uGridRes() const = 0;
 		virtual	TqInt	vGridRes() const = 0;
-		virtual	TqUint	GridSize() const = 0;
+		virtual	TqUint	numMicroPolygons(TqInt cu, TqInt cv) const = 0;
+		virtual	TqUint	numShadingPoints(TqInt cu, TqInt cv) const = 0;
 		virtual IqShaderData* pVar(TqInt index) = 0;
 		/** Get the points of the triangle split line if this grid represents a triangle.
 		 */
@@ -138,6 +140,7 @@ class CqMicroPolyGridBase : public CqRefCount
 				}
 		};
 		virtual	IqShaderData* FindStandardVar( const char* pname ) = 0;
+		virtual boost::shared_ptr<IqShaderExecEnv> pShaderExecEnv() = 0; 
 
 	public:
 		TqBool m_fCulled; ///< Boolean indicating the entire grid is culled.
@@ -155,7 +158,6 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase
 {
 	public:
 		CqMicroPolyGrid();
-		CqMicroPolyGrid( TqInt cu, TqInt cv, const boost::shared_ptr<CqSurface>& pSurface );
 		virtual	~CqMicroPolyGrid();
 
 #ifdef _DEBUG
@@ -250,10 +252,13 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase
 			assert( m_pShaderExecEnv );
 			return ( m_pShaderExecEnv->vGridRes() );
 		}
-		virtual	TqUint	GridSize() const
+		virtual	TqUint	numMicroPolygons(TqInt cu, TqInt cv) const
 		{
-			assert( m_pShaderExecEnv );
-			return ( m_pShaderExecEnv->GridSize() );
+			return ( cu * cv );
+		}
+		virtual	TqUint	numShadingPoints(TqInt cu, TqInt cv) const
+		{
+			return ( ( cu + 1 ) * ( cv + 1 ) );
 		}
 		virtual	const CqMatrix&	matObjectToWorld() const
 		{
@@ -281,6 +286,10 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase
 				}
 			}
 			return( pVar );
+		}
+		virtual boost::shared_ptr<IqShaderExecEnv> pShaderExecEnv() 
+		{
+			return(m_pShaderExecEnv);
 		}
 
 	private:
@@ -329,10 +338,15 @@ class CqMotionMicroPolyGrid : public CqMicroPolyGridBase, public CqMotionSpec<Cq
 			assert( GetMotionObject( Time( 0 ) ) );
 			return ( static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( 0 ) ) ) ->vGridRes() );
 		}
-		virtual	TqUint	GridSize() const
+		virtual	TqUint	numMicroPolygons(TqInt cu, TqInt cv) const
 		{
 			assert( GetMotionObject( Time( 0 ) ) );
-			return ( static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( 0 ) ) ) ->GridSize() );
+			return ( static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( 0 ) ) ) ->numMicroPolygons(cu, cv) );
+		}
+		virtual	TqUint	numShadingPoints(TqInt cu, TqInt cv) const
+		{
+			assert( GetMotionObject( Time( 0 ) ) );
+			return ( static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( 0 ) ) ) ->numShadingPoints(cu, cv) );
 		}
 		virtual IqShaderData* pVar(TqInt index)
 		{
@@ -344,6 +358,13 @@ class CqMotionMicroPolyGrid : public CqMicroPolyGridBase, public CqMotionSpec<Cq
 			assert( GetMotionObject( Time( 0 ) ) );
 			return ( static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( 0 ) ) ) ->FindStandardVar(pname) );
 		}
+
+		virtual boost::shared_ptr<IqShaderExecEnv> pShaderExecEnv() 
+		{
+			assert( GetMotionObject( Time( 0 ) ) );
+			return ( static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( 0 ) ) ) ->pShaderExecEnv() );
+		}
+
 		/** Get a pointer to the surface which this grid belongs.
 		 * Actually returns the surface pointer from the first timeslot.
 		 * \return Surface pointer, only valid during shading.
@@ -488,12 +509,13 @@ class CqMicroPolygon : public CqRefCount
 		{
 			return( m_Index );
 		}
-		/** Set the index within the donor grid.
+		/** Set the index of the shading point associated with this
+		 *  micropolygon within the donor grid.
 		 * \param Index Integer grid index.
 		 */
 		void	SetIndex( TqInt Index )
 		{
-			assert( m_pGrid != 0 && m_pGrid->GridSize() > Index );
+			assert( m_pGrid != 0 && m_pGrid->pShaderExecEnv()->shadingPointCount() > Index );
 			m_Index = Index;
 		}
 		/** Release this micropolys reference to the donor grid.
@@ -599,9 +621,9 @@ class CqMicroPolygon : public CqRefCount
 		virtual	TqBool	Sample( const SqSampleData& sample, TqFloat& D, TqFloat time, TqBool UsingDof = TqFalse );
 
 		virtual TqBool	fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const;
-		void	CacheHitTestValues(CqHitTestCache* cache, CqVector3D* points);
-		void	CacheHitTestValues(CqHitTestCache* cache);
-		void	CacheHitTestValuesDof(CqHitTestCache* cache, const CqVector2D& DofOffset, CqVector2D* coc);
+		virtual void	CacheHitTestValues(CqHitTestCache* cache, CqVector3D* points);
+		virtual void	CacheHitTestValues(CqHitTestCache* cache);
+		virtual void	CacheHitTestValuesDof(CqHitTestCache* cache, const CqVector2D& DofOffset, CqVector2D* coc);
 		void	Initialise();
 		CqVector2D ReverseBilinear( const CqVector2D& v );
 

@@ -1,7 +1,7 @@
 // Aqsis
 // Copyright c 1997 - 2001, Paul C. Gregory
 //
-// Contact: pgregory@aqsis.com
+// Contact: pgregory@aqsis.org
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public
@@ -134,7 +134,8 @@ CqMicroPolyGridBase* CqPoints::Dice()
 
 	std::vector<CqMicroPolyGrid*> apGrids;
 
-	CqMicroPolyGridPoints* pGrid = new CqMicroPolyGridPoints( nVertices(), 1, shared_from_this() );
+	CqMicroPolyGridPoints* pGrid = new CqMicroPolyGridPoints();
+	pGrid->Initialise(nVertices(), 1, shared_from_this());
 
 	TqInt lUses = Uses();
 
@@ -187,11 +188,11 @@ CqMicroPolyGridBase* CqPoints::Dice()
 		CqVector3D	N(0,0,1);
 		//N = QGetRenderContext() ->matSpaceToSpace( "camera", "object", NULL, pGrid->pTransform() ) * N;
 		TqUint u;
-		for ( u = 0; u <= nVertices(); u++ )
+		for ( u = 0; u < nVertices(); u++ )
 		{
 			TqBool CSO = pTransform()->GetHandedness(pTransform()->Time(0));
 			TqBool O = pAttributes() ->GetIntegerAttribute( "System", "Orientation" ) [ 0 ] != 0;
-			N = ( O == CSO ) ? N : -N;
+			N = ( (O && CSO) || (!O && !CSO) ) ? N : -N;
 			pGrid->pVar(EnvVars_Ng)->SetNormal( N, u );
 		}
 		pGrid->SetbGeometricNormals( TqTrue );
@@ -205,13 +206,37 @@ CqMicroPolyGridBase* CqPoints::Dice()
 		/// \todo: Must transform point/vector/normal/matrix parameter variables from 'object' space to current before setting.
 		boost::shared_ptr<IqShader> pShader;
 		if ( pShader = pGrid->pAttributes() ->pshadSurface(QGetRenderContext()->Time()) )
-			pShader->SetArgument( ( *iUP ), this );
+		{
+			IqShaderData* pVar = pShader->FindArgument( ( *iUP )->strName() );
+			if ( NULL != pVar )
+			{
+				/// \todo: Find out how to handle arrays.
+				if(pVar->Type() == ( *iUP )->Type())
+					NaturalDice( ( *iUP ), nVertices(), 1, pVar );
+			}
+		}
 
 		if ( pShader = pGrid->pAttributes() ->pshadDisplacement(QGetRenderContext()->Time()) )
-			pShader->SetArgument( ( *iUP ), this );
+		{
+			IqShaderData* pVar = pShader->FindArgument( ( *iUP )->strName() );
+			if ( NULL != pVar )
+			{
+				/// \todo: Find out how to handle arrays.
+				if(pVar->Type() == ( *iUP )->Type())
+					NaturalDice( ( *iUP ), nVertices(), 1, pVar );
+			}
+		}
 
 		if ( pShader = pGrid->pAttributes() ->pshadAtmosphere(QGetRenderContext()->Time()) )
-			pShader->SetArgument( ( *iUP ), this );
+		{
+			IqShaderData* pVar = pShader->FindArgument( ( *iUP )->strName() );
+			if ( NULL != pVar )
+			{
+				/// \todo: Find out how to handle arrays.
+				if(pVar->Type() == ( *iUP )->Type())
+					NaturalDice( ( *iUP ), nVertices(), 1, pVar );
+			}
+		}
 	}
 
 	return( pGrid );
@@ -691,7 +716,7 @@ void CqMotionMicroPolyGridPoints::Split( CqImageBuffer* pImage, long xmin, long 
 	CqMatrix matObjectToCameraT;
 	register TqInt i;
 	TqInt gsmin1;
-	gsmin1 = pGridA->GridSize() - 1;
+	gsmin1 = pGridA->pShaderExecEnv()->shadingPointCount() - 1;
 
 	for( iTime = 0; iTime < NumTimes; iTime++ )
 	{

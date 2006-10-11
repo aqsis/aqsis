@@ -1,7 +1,7 @@
 // Aqsis
 // Copyright © 1997 - 2001, Paul C. Gregory
 //
-// Contact: pgregory@aqsis.com
+// Contact: pgregory@aqsis.org
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public
@@ -20,7 +20,7 @@
 
 /** \file
 		\brief Declares the classes and support structures for the shader VM stack.
-		\author Paul C. Gregory (pgregory@aqsis.com)
+		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
 //? Is .h included already?
@@ -226,8 +226,8 @@ class CqShaderStack
 	public:
 		CqShaderStack() : m_iTop( 0 )
 		{
-			TqInt n = MAX(m_maxsamples, m_samples);
-			m_Stack.resize( n );
+			m_maxsamples = MAX(m_maxsamples, m_samples);
+			m_Stack.resize( m_maxsamples);
 		}
 		virtual ~CqShaderStack()
 		{
@@ -243,16 +243,16 @@ class CqShaderStack
 		 */
 		void	Push( IqShaderData* pv )
 		{
-			while ( m_iTop >= m_Stack.size() )
+			if ( m_iTop >= m_Stack.size() )
 			{
-				TqInt n = m_Stack.size() + 1;
-				m_Stack.resize( n );
-				m_Stack.reserve( n );
+				m_Stack.resize( m_iTop + 4 );
+				m_Stack.reserve( m_iTop + 4 );
 			}
 
 			m_Stack[ m_iTop ].m_Data = pv;
 			m_Stack[ m_iTop ].m_IsTemp = TqTrue;
 			m_iTop ++;
+			m_maxsamples = MAX(m_iTop, m_maxsamples);
 
 
 		}
@@ -263,17 +263,16 @@ class CqShaderStack
 		void	PushV( IqShaderData* pv )
 		{
 			assert( NULL != pv );
-			while ( m_iTop >= m_Stack.size() )
+			if ( m_iTop >= m_Stack.size() )
 			{
-				TqInt n = m_Stack.size() + 1;
-				m_Stack.resize( n );
-				m_Stack.reserve( n );
+				m_Stack.resize( m_iTop + 4 );
+				m_Stack.reserve( m_iTop + 4 );
 			}
 
 			m_Stack[ m_iTop ].m_Data = pv;
 			m_Stack[ m_iTop ].m_IsTemp = TqFalse;
 			m_iTop ++;
-
+			m_maxsamples = MAX(m_iTop, m_maxsamples);
 
 		}
 
@@ -329,8 +328,7 @@ class CqShaderStack
 		 */
 		static void	SetSamples(TqInt n)
 		{
-			m_samples = n;
-
+			m_samples = (TqUint) n;
 		}
 
 
@@ -365,8 +363,8 @@ class CqShaderStack
 		static std::deque<CqShaderVariableVaryingMatrix*>			m_VMPool;
 		// SixteenTuple
 
-		static TqInt    m_samples; // by default == 18 see shaderstack.cpp
-		static TqInt    m_maxsamples;
+		static TqUint    m_samples; // by default == 18 see shaderstack.cpp
+		static TqUint    m_maxsamples;
 }
 ;
 

@@ -1,7 +1,7 @@
 // Aqsis
 // Copyright © 1997 - 2001, Paul C. Gregory
 //
-// Contact: pgregory@aqsis.com
+// Contact: pgregory@aqsis.org
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public
@@ -20,7 +20,7 @@
 
 /** \file
 		\brief Implements the base CqRenderer class which is the central core of the rendering main loop.
-		\author Paul C. Gregory (pgregory@aqsis.com)
+		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
 #include	"aqsis.h"
@@ -661,19 +661,8 @@ void	CqRenderer::ptransConcatCurrentTime( const CqMatrix& matTrans )
 /** Render all surface in the current list to the image buffer.
  */
 
-void CqRenderer::RenderWorld(CqTransformPtr camera, TqBool clone)
+void CqRenderer::RenderWorld(TqBool clone)
 {
-	// If an alternative camera has been specified, use it, otherwise use the default camera setup during initialisation.
-	CqTransformPtr defaultCamera;
-	if(camera)
-	{
-		// Store the current camera transform for later.
-		defaultCamera = GetCameraTransform();
-		SetCameraTransform(camera);
-		poptCurrent()->InitialiseCamera();
-	}
-	pImage()->SetImage();
-
 	// While rendering, all primitives should fasttrack straight into the pipeline, the easiest way to ensure this
 	// is to switch into 'non' multipass mode.
 	TqInt multiPass = 0;
@@ -684,6 +673,10 @@ void CqRenderer::RenderWorld(CqTransformPtr camera, TqBool clone)
 		pMultipass[0] = 0;
 	}
 	
+	// Ensure that the camera and projection matrices are initialised.
+	poptCurrent()->InitialiseCamera();
+	pImage()->SetImage();
+
 	PrepareShaders();
 
 	if(clone)
@@ -697,13 +690,6 @@ void CqRenderer::RenderWorld(CqTransformPtr camera, TqBool clone)
 
 	if(NULL != pMultipass)
 		pMultipass[0] = multiPass;
-
-	if(camera)
-	{
-		SetCameraTransform(defaultCamera);
-		poptCurrent()->InitialiseCamera();
-	}
-	pImage()->SetImage();
 }
 
 
@@ -774,7 +760,16 @@ void CqRenderer::RenderAutoShadows()
 				std::map<std::string, void*> args;
 				AddDisplayRequest(pMapName[0].c_str(), "shadow", "z", ModeZ, 0, 1, args);
 
-				RenderWorld(lightTrans, TqTrue);
+				// Store the current camera transform for later.
+				CqTransformPtr defaultCamera;
+				defaultCamera = GetCameraTransform();
+				SetCameraTransform(lightTrans);
+				
+				// Render the world
+				RenderWorld(TqTrue);
+
+				popOptions();
+				SetCameraTransform(defaultCamera);
 
 				m_pDDManager->Shutdown();
 				delete(m_pDDManager);
@@ -834,7 +829,6 @@ CqMatrix	CqRenderer::matSpaceToSpace( const char* strFrom, const char* strTo, co
 	CqMatrix	matResult, matA, matB;
 	TqUlong fhash, thash;
 
-
 	// Get the hash keys for From,To spaces
 	fhash = CqString::hash( strFrom );
 	thash = CqString::hash( strTo );
@@ -842,12 +836,18 @@ CqMatrix	CqRenderer::matSpaceToSpace( const char* strFrom, const char* strTo, co
 	// Get the two component matrices.
 	// First check for special cases.
 	if ( fhash == ohash )
-		matA = transObjectToWorld->matObjectToWorld(time);
-	else if ( fhash == shash )
-		matA = transShaderToWorld->matObjectToWorld(time);
-	else if ( ( fhash == chash ) || ( fhash == cuhash ) )
-		//        matA = m_pTransCamera->GetMotionObjectInterpolated( time ).Inverse();
-		matA = m_pTransCamera->matObjectToWorld( time ).Inverse();
+	{
+		if (transObjectToWorld) 
+			matA = transObjectToWorld->matObjectToWorld(time);
+	} else if ( fhash == shash )
+	{
+		if (transShaderToWorld) 
+			matA = transShaderToWorld->matObjectToWorld(time);
+	} else if ( ( fhash == chash ) || ( fhash == cuhash ) )
+	{
+		if (m_pTransCamera) 
+			matA = m_pTransCamera->matObjectToWorld( time ).Inverse();
+	}
 	else
 	{
 		WhichMatToWorld( matA, fhash );
@@ -855,13 +855,18 @@ CqMatrix	CqRenderer::matSpaceToSpace( const char* strFrom, const char* strTo, co
 
 
 	if ( thash == ohash )
-		matB = transObjectToWorld->matObjectToWorld(time).Inverse();
-	else if ( thash == shash )
-		matB = transShaderToWorld->matObjectToWorld(time).Inverse();
-	else if ( ( thash == chash ) || ( thash == cuhash ) )
-		//        matB = m_pTransCamera->GetMotionObjectInterpolated( time );
-		matB = m_pTransCamera->matObjectToWorld( time );
-	else
+	{
+		if (transObjectToWorld)
+			matB = transObjectToWorld->matObjectToWorld(time).Inverse();
+	} else if ( thash == shash )
+	{
+		if (transShaderToWorld)
+			matB = transShaderToWorld->matObjectToWorld(time).Inverse();
+	} else if ( ( thash == chash ) || ( thash == cuhash ) )
+	{
+		if (m_pTransCamera)
+			matB = m_pTransCamera->matObjectToWorld( time );
+	} else
 	{
 		WhichMatWorldTo( matB, thash );
 	}
@@ -890,25 +895,36 @@ CqMatrix	CqRenderer::matVSpaceToSpace( const char* strFrom, const char* strTo, c
 	// Get the two component matrices.
 	// First check for special cases.
 	if ( fhash == ohash )
-		matA = transObjectToWorld->matObjectToWorld(time);
-	else if ( fhash == shash )
-		matA = transShaderToWorld->matObjectToWorld(time);
-	else if ( ( fhash == chash ) || ( fhash == cuhash ) )
-		//        matA = m_pTransCamera->GetMotionObjectInterpolated( time ).Inverse();
-		matA = m_pTransCamera->matObjectToWorld( time ).Inverse();
-	else
+	{
+		if (transObjectToWorld)
+			matA = transObjectToWorld->matObjectToWorld(time);
+	} else if ( fhash == shash )
+	{
+		if (transShaderToWorld)
+			matA = transShaderToWorld->matObjectToWorld(time);
+	} else if ( ( fhash == chash ) || ( fhash == cuhash ) )
+	{
+		if (m_pTransCamera)
+			matA = m_pTransCamera->matObjectToWorld( time ).Inverse();
+	} else
 	{
 		WhichMatToWorld ( matA, fhash );
 	}
 
 	if ( thash == ohash )
-		matB = transObjectToWorld->matObjectToWorld(time).Inverse();
-	else if ( thash == shash )
-		matB = transShaderToWorld->matObjectToWorld(time).Inverse();
+	{
+		if (transObjectToWorld)
+			matB = transObjectToWorld->matObjectToWorld(time).Inverse();
+	} else if ( thash == shash )
+	{
+		if (transShaderToWorld)
+			matB = transShaderToWorld->matObjectToWorld(time).Inverse();
+	}
 	else if ( ( thash == chash ) || ( thash == cuhash ) )
-		//        matB = m_pTransCamera->GetMotionObjectInterpolated( time );
-		matB = m_pTransCamera->matObjectToWorld( time );
-	else
+	{
+		if (m_pTransCamera)
+			matB = m_pTransCamera->matObjectToWorld( time );
+	} else
 	{
 		WhichMatWorldTo ( matB, thash );
 	}
@@ -950,25 +966,35 @@ CqMatrix	CqRenderer::matNSpaceToSpace( const char* strFrom, const char* strTo, c
 	// Get the two component matrices.
 	// First check for special cases.
 	if ( fhash == ohash )
-		matA = transObjectToWorld->matObjectToWorld(time);
-	else if ( fhash == shash )
-		matA = transShaderToWorld->matObjectToWorld(time);
-	else if ( ( fhash == chash ) || ( fhash == cuhash ) )
-		//        matA = m_pTransCamera->GetMotionObjectInterpolated( time ).Inverse();
-		matA = m_pTransCamera->matObjectToWorld( time ).Inverse();
-	else
+	{
+		if (transObjectToWorld)
+			matA = transObjectToWorld->matObjectToWorld(time);
+	} else if ( fhash == shash )
+	{
+		if (transShaderToWorld)
+			matA = transShaderToWorld->matObjectToWorld(time);
+	} else if ( ( fhash == chash ) || ( fhash == cuhash ) )
+	{
+		if (m_pTransCamera)
+			matA = m_pTransCamera->matObjectToWorld( time ).Inverse();
+	} else
 	{
 		WhichMatToWorld ( matA, fhash );
 	}
 
 	if ( thash == ohash )
-		matB = transObjectToWorld->matObjectToWorld(time).Inverse();
-	else if ( thash == shash )
-		matB = transShaderToWorld->matObjectToWorld(time).Inverse();
-	else if ( ( thash == chash ) || ( thash == cuhash ) )
-		//        matB = m_pTransCamera->GetMotionObjectInterpolated( time );
-		matB = m_pTransCamera->matObjectToWorld( time );
-	else
+	{
+		if (transObjectToWorld)
+			matB = transObjectToWorld->matObjectToWorld(time).Inverse();
+	} else if ( thash == shash )
+	{
+		if (transShaderToWorld)
+			matB = transShaderToWorld->matObjectToWorld(time).Inverse();
+	} else if ( ( thash == chash ) || ( thash == cuhash ) )
+	{
+		if (m_pTransCamera)
+			matB = m_pTransCamera->matObjectToWorld( time );
+	} else
 	{
 		WhichMatWorldTo ( matB, thash );
 	}
@@ -1138,6 +1164,15 @@ SqParameterDeclaration CqRenderer::FindParameterDecl( const char* strDecl )
 				}
 				break;
 
+				case class_facevertex:
+				{
+					if ( Decl.m_Count > 1 )
+						Decl.m_pCreate = gVariableCreateFuncsFaceVertexArray[ Decl.m_Type ];
+					else
+						Decl.m_pCreate = gVariableCreateFuncsFaceVertex[ Decl.m_Type ];
+				}
+				break;
+
 				default:
 				{
 					// left blank to avoid compiler warnings about unhandled types
@@ -1149,13 +1184,16 @@ SqParameterDeclaration CqRenderer::FindParameterDecl( const char* strDecl )
 
 	CqString strName = strDecl;
 	// Search the local parameter declaration list.
-	std::vector<SqParameterDeclaration>::const_iterator is;
-	std::vector<SqParameterDeclaration>::const_iterator end = m_Symbols.end();
+	std::vector<SqParameterDeclaration>::iterator is;
+	std::vector<SqParameterDeclaration>::iterator end = m_Symbols.end();
 	TqUlong hash = CqString::hash( strDecl );
 	for ( is = m_Symbols.begin(); is != end ; is++ )
 	{
-		TqUlong hash2 = CqString::hash( is->m_strName.c_str() );
-		if ( hash == hash2 )
+		if ( is->m_hash == 0)
+		{
+			is->m_hash = CqString::hash( is->m_strName.c_str() );
+		}
+		if ( hash == is->m_hash)
 			return ( *is );
 	}
 	return ( SqParameterDeclaration( "", type_invalid, class_invalid, 0, 0, "" ) );
@@ -1184,7 +1222,7 @@ void CqRenderer::AddParameterDecl( const char* strName, const char* strType )
 		return;
 	}
 
-	// Put new declaration at the top to make it take priority over pervious
+	// Put new declaration at the top to make it take priority over previous
 	m_Symbols.insert( m_Symbols.begin(), Decl );
 }
 
@@ -1241,6 +1279,7 @@ boost::shared_ptr<IqShader> CqRenderer::getDefaultSurfaceShader()
 	{
 		// we must initialize the shader here.  non-default
 		//  shaders are initialized in RiSurfaceV()
+		pMapCheck->SetTransform( QGetRenderContext() ->ptransCurrent() );
 		CqShaderVM* pCreated = static_cast<CqShaderVM*>( pMapCheck.get() );
 		pCreated->PrepareDefArgs();
 
@@ -1249,6 +1288,7 @@ boost::shared_ptr<IqShader> CqRenderer::getDefaultSurfaceShader()
 
 	// insert the default surface template into the map
 	boost::shared_ptr<IqShader> pRet( new CqShaderVM() );
+	pRet->SetType( Type_Surface );
 	CqShaderVM* pShader = static_cast<CqShaderVM*>( pRet.get() );
 	pShader->SetstrName( "_def_" );
 	pShader->DefaultSurface();
@@ -1258,6 +1298,7 @@ boost::shared_ptr<IqShader> CqRenderer::getDefaultSurfaceShader()
 
 	// return a clone of the default surface template
 	boost::shared_ptr<IqShader> newShader(pRet->Clone());
+        newShader->SetType ( Type_Surface );
 	m_InstancedShaders.push_back(newShader);
 	return (newShader);
 
@@ -1279,6 +1320,7 @@ boost::shared_ptr<IqShader> CqRenderer::CreateShader(
 	{
 		// the shader template is present, so return its clone
 		boost::shared_ptr<IqShader> newShader(m_Shaders[key]->Clone());
+		newShader->SetType( type );
 		m_InstancedShaders.push_back(newShader);
 		return (newShader);
 	}
@@ -1317,6 +1359,7 @@ boost::shared_ptr<IqShader> CqRenderer::CreateShader(
 		//  clone
 		m_Shaders[key] = pRet;
 		boost::shared_ptr<IqShader> newShader(pRet->Clone());
+		newShader->SetType( type );
 		m_InstancedShaders.push_back(newShader);
 		return (newShader);
 	}
@@ -1340,6 +1383,7 @@ boost::shared_ptr<IqShader> CqRenderer::CreateShader(
 		{
 			boost::shared_ptr<IqShader> pRet( new CqShaderVM() );
 
+			pRet->SetType( type );
 			CqShaderVM* pShader = static_cast<CqShaderVM*>(
 			                          pRet.get() );
 			pShader->SetstrName( "null" );
@@ -1348,6 +1392,7 @@ boost::shared_ptr<IqShader> CqRenderer::CreateShader(
 			// add the shader to the map and return its clone
 			m_Shaders[key] = pRet;
 			boost::shared_ptr<IqShader> newShader(pRet->Clone());
+			newShader->SetType( type );
 			m_InstancedShaders.push_back(newShader);
 			return (newShader);
 		}
@@ -1376,6 +1421,7 @@ void CqRenderer::StorePrimitive( const boost::shared_ptr<CqSurface>& pSurface )
 		pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "world", "camera", NULL, pSurface->pTransform().get(), 0 ),
 						 QGetRenderContext() ->matNSpaceToSpace( "world", "camera", NULL, pSurface->pTransform().get(), 0 ),
 						 QGetRenderContext() ->matVSpaceToSpace( "world", "camera", NULL, pSurface->pTransform().get(), 0 ) );
+		pSurface->PrepareTrimCurve();
 		PostSurface(pSurface);
 	}
 }
@@ -1389,6 +1435,7 @@ void CqRenderer::PostWorld()
 		pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "world", "camera", NULL, pSurface->pTransform().get(), 0 ),
 						 QGetRenderContext() ->matNSpaceToSpace( "world", "camera", NULL, pSurface->pTransform().get(), 0 ),
 						 QGetRenderContext() ->matVSpaceToSpace( "world", "camera", NULL, pSurface->pTransform().get(), 0 ) );
+		pSurface->PrepareTrimCurve();
 		PostSurface(pSurface);
 		m_aWorld.pop_front();
 	}
@@ -1404,6 +1451,7 @@ void CqRenderer::PostCloneOfWorld()
 		pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "world", "camera", NULL, pSurface->pTransform().get(), 0 ),
 						 QGetRenderContext() ->matNSpaceToSpace( "world", "camera", NULL, pSurface->pTransform().get(), 0 ),
 						 QGetRenderContext() ->matVSpaceToSpace( "world", "camera", NULL, pSurface->pTransform().get(), 0 ) );
+		pSurface->PrepareTrimCurve();
 		PostSurface(pSurface);
 	}
 }
@@ -1716,6 +1764,8 @@ TqInt CqRenderer::RegisterOutputData( const char* name )
 
 		return( DataEntry.m_Offset );
 	}
+	else
+		Aqsis::log() << error << "Unrecognised AOV output variable \"" << name << "\"" << std::endl;
 
 	return( -1 );
 }

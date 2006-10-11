@@ -1,6 +1,12 @@
 #!/usr/bin/python
-from cgtypes import *
-from ri import *
+try:
+	# Try to import cgkit2 modules...
+	from cgkit.cgtypes import *
+	from cgkit.ri import *
+except ImportError:
+	# ...if that failed try cgkit1
+	from cgtypes import *
+	from ri import *
 from math import *
 import getopt, sys
 

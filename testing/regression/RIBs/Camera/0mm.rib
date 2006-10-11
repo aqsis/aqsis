@@ -1,0 +1,22 @@
+##Scene dof.blend:*
+##Creator Blender 241 + AkhIL's ribber 0.1.1-dev
+##System Linux 2.6.13-gentoo-r5 runed on AMD Athlon(tm) XP 2500+
+##CreationDate Sun Apr 23 16:23:05 2006
+##Frame 1
+version 3.03
+FrameBegin 1
+	Declare "st" "facevarying float[2]"
+	Declare "shadowname" "uniform string"
+	Hider "stochastic" "float jitter" 1
+	Option "searchpath" "shader" ["&:../shaders:../../shaders"]
+	Option "limits" "int eyesplits" 5
+	PixelSamples 6 6
+	PixelFilter "catmull-rom" 3 3
+	ShadingRate 2
+	    GeometricApproximation "motionfactor" 1
+	Display "0mm.tif" "file" "rgb" "string compression" "packbits"
+	ReadArchive "cameras/Camera.002-0000.rib"
+	WorldBegin
+	    ReadArchive "wcscenes/Scene-0000_SceneBeauty.rib"
+	WorldEnd
+FrameEnd

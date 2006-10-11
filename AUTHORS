@@ -2,7 +2,7 @@ Aqsis Renderer - An open source RenderMan compliant rendering system.
 
 The following people have contributed to the development of Aqsis Renderer
 
-    1998 Paul C. Gregory		pgregory@aqsis.com
+    1998 Paul C. Gregory		pgregory@aqsis.org
 								Originator and primary developer.
 	2001 Timothy M. Shead		tshead@k-3d.com
 								Linux port.
@@ -45,5 +45,5 @@ The following people have contributed to the development of Aqsis Renderer
 	2005 Stephan Gustavvson		Re-implemented 2D/3D/4D noise.
 	2006 Romain Behar			Blobby support.
 
-	If anyone is missing from this list, please contact me at pgregory@aqsis.com.
+	If anyone is missing from this list, please contact me at pgregory@aqsis.org.
 

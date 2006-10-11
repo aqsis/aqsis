@@ -71,7 +71,7 @@ int main( int argc, const char** argv )
 	ap.argString( "tmode", "=string\a(equivalent to twrap for BMRT compatibility)", &g_swrap );
 	ap.argString( "wrap", "=string\awrap s&t [black|periodic|clamp]", &g_wrap );
 	ap.argString( "mode", "=string\as (equivalent to wrap for BMRT compatibility)", &g_wrap );
-	ap.argString( "filter", "=string\a[box|bessel|catmull-rom|disk|gaussian|sinc|triangle]", &g_filter );
+	ap.argString( "filter", "=string\a[box|bessel|catmull-rom|disk|gaussian|sinc|triangle|mitchell]", &g_filter );
 	ap.argFloat( "fov(envcube)", "=float\a[>=0.0f]", &g_fov );
 	ap.argFloat( "swidth", "=float\as width [>0.0f]", &g_swidth );
 	ap.argFloat( "twidth", "=float\at width [>0.0f]", &g_twidth );

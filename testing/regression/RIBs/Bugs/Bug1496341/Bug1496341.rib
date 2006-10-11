@@ -1,0 +1,42 @@
+# imager-parameters.rib
+#
+# This RIB file demonstrates a bug with the SVN version of Aqsis as of
+# 28th May 2006.
+#
+# Parameters are not being passed to Imager shaders.  The Imager shader
+# "background" that is distributed with Aqsis is used as an example.
+# The rendered image should show a sphere on top of a yellow background, 
+# but instead the background is white.
+
+Display "Bug1496341.tif" "file" "rgb"
+Format 320 200 1
+PixelFilter "box" 1 1
+PixelSamples 1 1
+
+#--- BUG HERE ---
+# NOTE: In the Imager below, the background color is ignored, and never
+# passed to the shader.
+Declare "bgcolor" "uniform color"
+Imager "background" "bgcolor" [1 1 0] 
+#--- END BUG ---
+
+Projection "perspective" "fov" 45
+Translate 0 0 3
+WorldBegin
+Sides 1
+Declare "from" "uniform point"
+Declare "to" "uniform point"
+Declare "lightcolor" "uniform color"
+Declare "intensity" "uniform float"
+LightSource "distantlight" 1 "from" [1 1 -1] "to" [0 0 0]
+	"lightcolor" [ 1 1 0.9 ] "intensity" 1.5
+LightSource "distantlight" 2 "from" [0 -1 0] "to" [0 0 0]
+	"lightcolor" [ 0.2 0.2 0.7 ] "intensity" 0.5
+AttributeBegin
+	ShadingRate 4
+	Declare "Ks" "uniform float"
+	Declare "roughness" "uniform float"
+	Surface "plastic" "Ks" 0.1 "roughness" 0.5
+	Sphere 1 -1 1 360
+AttributeEnd
+WorldEnd

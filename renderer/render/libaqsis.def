@@ -172,8 +172,6 @@ EXPORTS
 	?GetShaderVarCount@CqShaderVM@Aqsis@@QAEHXZ
 	?ExecuteInit@CqShaderVM@Aqsis@@QAEXXZ
 	?LoadProgram@CqShaderVM@Aqsis@@QAEXPAV?$basic_istream@DU?$char_traits@D@std@@@std@@@Z
-	?m_samples@CqShaderStack@Aqsis@@1HA
-	?m_maxsamples@CqShaderStack@Aqsis@@1HA
 	?Statistics@CqShaderStack@Aqsis@@SAXXZ
 	??4CqShaderVM@Aqsis@@QAEAAV01@ABV01@@Z
 	?GetShaderVarAt@CqShaderVM@Aqsis@@QAEPAUIqShaderData@2@H@Z

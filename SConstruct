@@ -14,6 +14,8 @@ from build_support import Glob
 import version
 Export('version')
 
+EnsurePythonVersion(2,3)
+
 # Setup the common command line options.
 opts = Options([os.path.abspath('options.cache'), os.path.abspath('custom.py')])
 opts.Add('tiff_include_path', 'Point to the tiff header files', '')
@@ -67,9 +69,9 @@ def ENV_update(tgt_ENV, src_ENV):
 
 opts.Update(tempenv)
 if tempenv.has_key('mingw') and tempenv['mingw']:
-	env = Environment(options = opts, tools = ['mingw', 'lex', 'yacc', 'zip', 'tar'])
+	env = Environment(options = opts, tools = ['mingw', 'lex', 'yacc', 'zip', 'tar'], ENV = tempenv['ENV'])
 else:
-	env = Environment(options = opts, tools = ['default', 'lex', 'yacc', 'zip', 'tar'])
+	env = Environment(options = opts, tools = ['default', 'lex', 'yacc', 'zip', 'tar'], ENV = tempenv['ENV'])
 
 ENV_update(env['ENV'], os.environ)
 env.Glob = Glob
@@ -82,6 +84,19 @@ zipBuilder = Builder(action=zipperFunction,
    multi=0)
 env.Append(BUILDERS = {'Zipper':zipBuilder})
 
+# Modify Library and StaticLibrary Builder functions on x86_64 architecture to
+# compile objects as for shared libraries (ie use Position independent code).
+# Otherwise the static libraries cannot be linked into aqsis.so
+import platform
+if platform.machine() == 'x86_64':
+    picLibBuilder = Builder(action = Action('$ARCOM'),
+                            emitter = '$LIBEMITTER',
+                            prefix = '$LIBPREFIX',
+                            suffix = '$LIBSUFFIX',
+                            src_suffix = '$OBJSUFFIX',
+                            src_builder = 'SharedObject')
+    env['BUILDERS']['StaticLibrary'] = picLibBuilder
+    env['BUILDERS']['Library'] = picLibBuilder
 
 # Create the configure object here, as you can't do it once a call
 # to SConscript has been processed.
@@ -166,9 +181,16 @@ SConscript('shadercompiler/slpp/SConscript', build_dir=target_dir.abspath + '/sh
 SConscript('shadercompiler/aqsl/SConscript', build_dir=target_dir.abspath + '/shadercompiler/aqsl')
 SConscript('shadercompiler/slxargs/SConscript', build_dir=target_dir.abspath + '/shadercompiler/slxargs')
 SConscript('shadercompiler/aqsltell/SConscript', build_dir=target_dir.abspath + '/shadercompiler/aqsltell')
+perceptual=Program('pdiff.c')
+perceptual_name=str(perceptual[0])
+if not os.path.exists(perceptual_name):
+	SConscript('thirdparty/pdiff/SConscript', build_dir=target_dir.abspath + '/thirdparty/pdiff')
+
 display = SConscript('displays/display/SConscript', build_dir=target_dir.abspath + '/displays/display')
 SConscript('displays/display/eqshibit/SConscript', build_dir=target_dir.abspath + '/displays/display/eqshibit')
 bmp = SConscript('displays/d_sdcBMP/SConscript', build_dir=target_dir.abspath + '/displays/d_sdcBMP')
+if sys.platform == 'win32':
+	win32 = SConscript('displays/d_sdcWin32/SConscript', build_dir=target_dir.abspath + '/displays/d_sdcWin32')
 xpm = SConscript('displays/d_xpm/SConscript', build_dir=target_dir.abspath + '/displays/d_xpm')
 SConscript('displays/d_exr/SConscript', build_dir=target_dir.abspath + '/displays/d_exr')
 SConscript('rib/ri2rib/SConscript', build_dir=target_dir.abspath + '/rib/ri2rib')
@@ -192,10 +214,14 @@ def aqsis_rc_build(target, source, env):
 	displaylib = os.path.basename(display[0].path)
 	xpmlib = os.path.basename(xpm[0].path)
 	bmplib = os.path.basename(bmp[0].path)
+	win32lib = ""
+	if sys.platform == 'win32':
+		win32lib = os.path.basename(win32[0].path)
 	defines = {
 		"displaylib": displaylib,
 		"xpmlib": xpmlib,
 		"bmplib": bmplib,
+		"win32lib": win32lib,
 		"shaderpath": env.Dir('$SHADERDIR').abspath,
 		"displaypath": env.Dir('$BINDIR').abspath,
 		"exrlib": ""
@@ -270,3 +296,10 @@ for option in options:
 	path, name = os.path.split(option)
 	env.Distribute(path, option)
 
+#bundle = env.MakeBundle('Aqsis.app', aqsis,
+#			'org.aqsis.aqsis',
+#			'Info.plist',
+#			'APPL',
+#			'AQSIS',
+#			'#/platform/darwin/aqsis.icns')
+#env.Alias('bundle', bundle)

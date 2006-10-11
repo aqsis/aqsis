@@ -4,7 +4,10 @@ Import('env')
 
 env.AppendUnique(CCFLAGS=['-Wall','-g', '-O2'])
 env.AppendUnique(CPPPATH = [env.Dir('#/aqsistypes/posix')])
-env.AppendUnique(CPPDEFINES=[('NDEBUG', '1'), ('PLUGINS', '1')])
+env.AppendUnique(CPPDEFINES=[('PLUGINS', '1')])
+
+if not env['debug']:
+	env.AppendUnique(CPPDEFINES=[('NDEBUG', '1')])
 
 # Point at the boost headers.
 # todo: need to find a way of determining this location automatically

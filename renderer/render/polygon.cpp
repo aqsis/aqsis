@@ -1,7 +1,7 @@
 // Aqsis
 // Copyright © 1997 - 2001, Paul C. Gregory
 //
-// Contact: pgregory@aqsis.com
+// Contact: pgregory@aqsis.org
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public
@@ -20,7 +20,7 @@
 
 /** \file
 		\brief Implements the classes and support structures for handling polygons.
-		\author Paul C. Gregory (pgregory@aqsis.com)
+		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
 #include	"aqsis.h"
@@ -113,7 +113,7 @@ TqInt CqPolygonBase::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits 
 			i++;
 		}
 		vecN = vecN0 % vecN1;
-		vecN = ( O == CSO ) ? vecN : -vecN;
+		vecN = ( (O && CSO) || (!O && !CSO) ) ? vecN : -vecN;
 		vecN.Unit();
 	}
 
@@ -198,7 +198,7 @@ TqInt CqPolygonBase::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits 
 				pNewUP->SetSize( 1 );
 				pNewUP->SetValue( ( *iUP ), 0, 0 );
 			}
-			else if ( pNewUP->Class() == class_facevarying )
+			else if ( pNewUP->Class() == class_facevarying || pNewUP->Class() == class_facevertex )
 			{
 				pNewUP->SetSize( pNew->cVarying() );
 				pNewUP->SetValue( ( *iUP ), 0, iUPAf );
@@ -310,7 +310,10 @@ TqInt CqPolygonBase::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits 
 
 void CqPolygonBase::CreatePhantomData( CqParameter* pParam )
 {
-	assert( pParam->Class() == class_varying || pParam->Class() == class_vertex || pParam->Class() == class_facevarying );
+	assert( pParam->Class() == class_varying || 
+			pParam->Class() == class_vertex || 
+			pParam->Class() == class_facevarying ||
+			pParam->Class() == class_facevertex );
 
 	TqInt iArrayCount = 1;
 	TqInt iArray;

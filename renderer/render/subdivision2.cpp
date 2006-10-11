@@ -1,7 +1,7 @@
 // Aqsis
 // Copyright © 1997 - 2001, Paul C. Gregory
 //
-// Contact: pgregory@aqsis.com
+// Contact: pgregory@aqsis.org
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public
@@ -20,7 +20,7 @@
 
 /** \file
 		\brief Implements the classes for subdivision surfaces.
-		\author Paul C. Gregory (pgregory@aqsis.com)
+		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
 #include	"subdivision2.h"
@@ -191,7 +191,7 @@ void CqSubdivision2::AddVertex(CqLath* pVertex, TqInt& iVIndex, TqInt& iFVIndex)
 				else
 					continue;
 			}
-			else if( ( *iUP )->Class() == class_facevarying )
+			else if( ( *iUP )->Class() == class_facevarying || ( *iUP )->Class() == class_facevertex )
 			{
 				assert( iFVIndex==0 || iFVIndex==iIndex );
 				iFVIndex = iIndex;
@@ -302,7 +302,7 @@ void CqSubdivision2::AddEdgeVertex(CqLath* pVertex, TqInt& iVIndex, TqInt& iFVIn
 				else
 					continue;
 			}
-			else if( ( *iUP )->Class() == class_facevarying )
+			else if( ( *iUP )->Class() == class_facevarying  || ( *iUP )->Class() == class_facevertex )
 			{
 				assert( iFVIndex==0 || iFVIndex==iIndex );
 				iFVIndex = iIndex;
@@ -406,7 +406,7 @@ void CqSubdivision2::AddFaceVertex(CqLath* pVertex, TqInt& iVIndex, TqInt& iFVIn
 				assert( iVIndex==0 || iVIndex==iIndex );
 				iVIndex = iIndex;
 			}
-			else if( ( *iUP )->Class() == class_facevarying )
+			else if( ( *iUP )->Class() == class_facevarying  || ( *iUP )->Class() == class_facevertex )
 			{
 				assert( iFVIndex==0 || iFVIndex==iIndex );
 				iFVIndex = iIndex;
@@ -1139,7 +1139,8 @@ CqMicroPolyGridBase* CqSurfaceSubdivisionPatch::DiceExtract()
 	TqInt iTime;
 	for( iTime = 0; iTime < pTopology()->cTimes(); iTime++ )
 	{
-		CqMicroPolyGrid* pGrid = new CqMicroPolyGrid( dicesize, dicesize, pTopology()->pPoints() );
+		CqMicroPolyGrid* pGrid = new CqMicroPolyGrid();
+		pGrid->Initialise( dicesize, dicesize, pTopology()->pPoints() );
 
 		boost::shared_ptr<CqPolygonPoints> pMotionPoints = pTopology()->pPoints( iTime );
 
@@ -1304,7 +1305,7 @@ static void StoreDiceAPVar( const boost::shared_ptr<IqShader>& pShader, CqParame
 	if ( pArg )
 	{
 		TqInt index = ivA;
-		if( pParam->Class() == class_facevarying )
+		if( pParam->Class() == class_facevarying || pParam->Class() == class_facevertex )
 			index = ifvA;
 
 		switch ( pParam->Type() )
@@ -1383,7 +1384,7 @@ void CqSurfaceSubdivisionPatch::StoreDice( CqMicroPolyGrid* pGrid, const boost::
 	if( ( pParam = pPoints->FindUserParam("st") ) != NULL )
 	{
 		TqInt index = iParam;
-		if( pParam->Class() == class_facevarying )
+		if( pParam->Class() == class_facevarying  || pParam->Class() == class_facevertex )
 			index = iFVParam;
 		CqParameterTyped<TqFloat, TqFloat>* pSTParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>(pParam);
 		if ( USES( lUses, EnvVars_s ) && ( NULL != pGrid->pVar(EnvVars_s) ) )
@@ -1398,7 +1399,7 @@ void CqSurfaceSubdivisionPatch::StoreDice( CqMicroPolyGrid* pGrid, const boost::
 	{
 		if( pPoints->s()->Class() == class_varying || pPoints->s()->Class() == class_vertex )
 			pGrid->pVar(EnvVars_s) ->SetFloat( pPoints->s()->pValue( iParam )[0], iData );
-		else if( pPoints->s()->Class() == class_facevarying )
+		else if( pPoints->s()->Class() == class_facevarying || pPoints->s()->Class() == class_facevertex )
 			pGrid->pVar(EnvVars_s) ->SetFloat( pPoints->s()->pValue( iFVParam )[0], iData );
 		else if( pPoints->s()->Class() == class_uniform )
 			pGrid->pVar(EnvVars_s) ->SetFloat( pPoints->s()->pValue( 0 )[0], iData );
@@ -1408,7 +1409,7 @@ void CqSurfaceSubdivisionPatch::StoreDice( CqMicroPolyGrid* pGrid, const boost::
 	{
 		if( pPoints->t()->Class() == class_varying || pPoints->t()->Class() == class_vertex )
 			pGrid->pVar(EnvVars_t) ->SetFloat( pPoints->t()->pValue( iParam )[0], iData );
-		else if( pPoints->t()->Class() == class_facevarying )
+		else if( pPoints->t()->Class() == class_facevarying || pPoints->t()->Class() == class_facevertex )
 			pGrid->pVar(EnvVars_t) ->SetFloat( pPoints->t()->pValue( iFVParam )[0], iData );
 		else if( pPoints->t()->Class() == class_uniform )
 			pGrid->pVar(EnvVars_t) ->SetFloat( pPoints->t()->pValue( 0 )[0], iData );
@@ -1418,7 +1419,7 @@ void CqSurfaceSubdivisionPatch::StoreDice( CqMicroPolyGrid* pGrid, const boost::
 	{
 		if( pPoints->Cs()->Class() == class_varying || pPoints->Cs()->Class() == class_vertex )
 			pGrid->pVar(EnvVars_Cs) ->SetColor( pPoints->Cs()->pValue(iParam)[0], iData );
-		else if( pPoints->Cs()->Class() == class_facevarying )
+		else if( pPoints->Cs()->Class() == class_facevarying || pPoints->Cs()->Class() == class_facevertex )
 			pGrid->pVar(EnvVars_Cs) ->SetColor( pPoints->Cs()->pValue(iFVParam)[0], iData );
 		else if( pPoints->Cs()->Class() == class_uniform )
 			pGrid->pVar(EnvVars_Cs) ->SetColor( pPoints->Cs()->pValue(0)[0], iData );
@@ -1428,7 +1429,7 @@ void CqSurfaceSubdivisionPatch::StoreDice( CqMicroPolyGrid* pGrid, const boost::
 	{
 		if( pPoints->Os()->Class() == class_varying || pPoints->Os()->Class() == class_vertex )
 			pGrid->pVar(EnvVars_Os) ->SetColor( pPoints->Os()->pValue(iParam)[0], iData );
-		else if( pPoints->Os()->Class() == class_facevarying )
+		else if( pPoints->Os()->Class() == class_facevarying || pPoints->Os()->Class() == class_facevertex )
 			pGrid->pVar(EnvVars_Os) ->SetColor( pPoints->Os()->pValue(iFVParam)[0], iData );
 		else if( pPoints->Os()->Class() == class_uniform )
 			pGrid->pVar(EnvVars_Os) ->SetColor( pPoints->Os()->pValue(0)[0], iData );
@@ -1566,9 +1567,19 @@ TqInt CqSurfaceSubdivisionPatch::Split( std::vector<boost::shared_ptr<CqSurface>
 			{
 				// Copy any 'facevarying' class primitive variables.
 				CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
-				pNewUP->SetSize( pSurface->cVertex() );
+				pNewUP->SetSize( pSurface->cFaceVarying() );
 				TqUint i;
-				for( i = 0; i < pSurface->cVertex(); i++ )
+				for( i = 0; i < pSurface->cFaceVarying(); i++ )
+					pNewUP->SetValue( ( *iUP ), i, aiFVertices[i] );
+				pSurface->AddPrimitiveVariable( pNewUP );
+			}
+			else if ( ( *iUP ) ->Class() == class_facevertex )
+			{
+				// Copy any 'facevertex' class primitive variables.
+				CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
+				pNewUP->SetSize( pSurface->cFaceVertex() );
+				TqUint i;
+				for( i = 0; i < pSurface->cFaceVertex(); i++ )
 					pNewUP->SetValue( ( *iUP ), i, aiFVertices[i] );
 				pSurface->AddPrimitiveVariable( pNewUP );
 			}
@@ -1925,7 +1936,7 @@ boost::shared_ptr<CqSubdivision2> CqSurfaceSubdivisionPatch::Extract( TqInt iTim
 				pNewUP->SetValue( ( *iUP ), (*i).second, (*i).first );
 			pSurface->pPoints()->AddPrimitiveVariable( pNewUP );
 		}
-		else if ( ( *iUP ) ->Class() == class_facevarying )
+		else if ( ( *iUP ) ->Class() == class_facevarying || ( *iUP )->Class() == class_facevertex )
 		{
 			// Copy any 'facevarying' class primitive variables.
 			CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );

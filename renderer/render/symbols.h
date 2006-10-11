@@ -1,7 +1,7 @@
 // Aqsis
 // Copyright © 1997 - 2001, Paul C. Gregory
 //
-// Contact: pgregory@aqsis.com
+// Contact: pgregory@aqsis.org
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public
@@ -20,7 +20,7 @@
 
 /** \file
 		\brief Declares the storage structures for renderman symbols.
-		\author Paul C. Gregory (pgregory@aqsis.com)
+		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
 //? Is .h included already?
@@ -49,7 +49,8 @@ struct SqParameterDeclaration
 			m_Class( class_invalid ),
 			m_Count( 0 ),
 			m_pCreate( 0 ),
-			m_strSpace( "" )
+			m_strSpace( "" ),
+			m_hash(0)
 	{}
 	SqParameterDeclaration( const char* strName, EqVariableType Type, EqVariableClass Class, TqInt Count,
 	                        CqParameter* ( *pCreate ) ( const char* strName, TqInt Count ), const char* strSpace ) :
@@ -59,7 +60,9 @@ struct SqParameterDeclaration
 			m_Count( Count ),
 			m_pCreate( pCreate ),
 			m_strSpace( strSpace )
-	{}
+	{
+		m_hash = CqString::hash(strName);
+	}
 
 
 	CqString	m_strName;										///< Name of the parameter.
@@ -68,6 +71,8 @@ struct SqParameterDeclaration
 	TqInt	m_Count;										///< Array length if an array.
 	CqParameter* ( *m_pCreate ) ( const char* strName, TqInt Count );		///< Constructor function.
 	CqString	m_strSpace;										///< Specification coordinate system name.
+	TqUlong         m_hash; ///< Hash key for m_strName;
+
 }
 ;
 

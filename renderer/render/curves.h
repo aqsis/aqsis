@@ -1,7 +1,7 @@
 // Aqsis
 // Copyright © 1997 - 2001, Paul C. Gregory
 //
-// Contact: pgregory@aqsis.com
+// Contact: pgregory@aqsis.org
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public
@@ -564,6 +564,7 @@ class CqCubicCurvesGroup : public CqCurvesGroup
 		virtual ~CqCubicCurvesGroup();
 		virtual	TqUint cVarying() const;
 		virtual TqInt Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
+		virtual	CqBound	Bound() const;
 		virtual void Transform(
 		    const CqMatrix& matTx,
 		    const CqMatrix& matITTx,

@@ -1,7 +1,7 @@
 // Aqsis
 // Copyright © 1997 - 2001, Paul C. Gregory
 //
-// Contact: pgregory@aqsis.com
+// Contact: pgregory@aqsis.org
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public
@@ -20,7 +20,7 @@
 
 /** \file
 		\brief Implements the CqSplineCubic class for generic spline functionality.
-		\author Paul C. Gregory (pgregory@aqsis.com)
+		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
 #include	"aqsis.h"
@@ -58,11 +58,11 @@ __Basis	gLinearBasis	= {{  0.0f,       0.0f,       0.0f,       0.0f},
 /** Default constructor for a cubic spline curve, defaults to bezier basis matrix.
  */
 
-CqSplineCubic::CqSplineCubic( TqInt cu ) : m_matBasis( gBezierBasis )
+CqSplineCubic::CqSplineCubic( TqInt cu ) : m_matBasis( gCatmullRomBasis )
 {
 	m_aControlPoints.resize( cu );
 	m_cu = cu;
-	m_Step = 3;
+	m_Step = 1;
 }
 
 

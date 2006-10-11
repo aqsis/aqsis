@@ -40,13 +40,16 @@ extern TqInt ParseLineNumber;
 extern TqBool ParseSucceeded;
 extern TqInt	iArrayAccess;
 CqParseNode*	ParseTreePointer;
-std::vector<CqString>	ParseNameSpaceStack;
+std::vector<std::pair<TqBool,CqString> >	ParseNameSpaceStack;
+int blockID = 0;
 std::vector<TqInt>		FunctionReturnCountStack;
 EqShaderType gShaderType;
 
 TqBool	FindVariable(const char* name, SqVarRef& ref);
 TqBool	FindFunction(const char* name, std::vector<SqFuncRef>& Ref);
 CqString strNameSpace();
+void	pushScope(CqString name, TqBool terminal=TqFalse);
+CqString	popScope();
 void	TypeCheck();
 void	Optimise();
 void	InitStandardNamespace();
@@ -270,7 +273,7 @@ function_definition
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
 								delete(pDecl);
 								// Function level namespace is now defunct.
-								ParseNameSpaceStack.erase(ParseNameSpaceStack.end()-1);
+								popScope();
 								FunctionReturnCountStack.erase(FunctionReturnCountStack.end()-1);
 							}
 	|	function_declaration ')' '{' statements '}'
@@ -290,7 +293,7 @@ function_definition
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
 								delete(pDecl);
 								// Function level namespace is now defunct.
-								ParseNameSpaceStack.erase(ParseNameSpaceStack.end()-1);
+								popScope();
 								FunctionReturnCountStack.erase(FunctionReturnCountStack.end()-1);
 							}
 	;
@@ -300,7 +303,7 @@ function_declaration
 								$$=new CqParseNodeDeclaration((strNameSpace()+*$2).c_str(),$1.Type);
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
 								// Store the name of the function being defined for use in variable namespacing.
-								ParseNameSpaceStack.push_back(strNameSpace()+*$2+"::");
+								pushScope(*$2,TqTrue);
 								// Push a new level onto the FunctionReturnCountStack.
 								FunctionReturnCountStack.push_back(0);
 							}
@@ -308,7 +311,7 @@ function_declaration
 								$$=new CqParseNodeDeclaration((strNameSpace()+*$1).c_str(),Type_Void);
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
 								// Store the name of the function being defined for use in variable namespacing.
-								ParseNameSpaceStack.push_back(strNameSpace()+*$1+"::");
+								pushScope(*$1,TqTrue);
 								// Push a new level onto the FunctionReturnCountStack.
 								FunctionReturnCountStack.push_back(0);
 							}
@@ -321,7 +324,7 @@ function_declaration
 								$$=new CqParseNodeDeclaration(strName.c_str(),$1.Type);
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
 								// Store the name of the function being defined for use in variable namespacing.
-								ParseNameSpaceStack.push_back(strName+"::");
+								pushScope(strName,TqTrue);
 								// Push a new level onto the FunctionReturnCountStack.
 								FunctionReturnCountStack.push_back(0);
 							}
@@ -334,7 +337,7 @@ function_declaration
 								$$=new CqParseNodeDeclaration(strName.c_str(),Type_Void);
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
 								// Store the name of the function being defined for use in variable namespacing.
-								ParseNameSpaceStack.push_back(strName+"::");
+								pushScope(strName,TqTrue);
 								// Push a new level onto the FunctionReturnCountStack.
 								FunctionReturnCountStack.push_back(0);
 							}
@@ -398,6 +401,7 @@ formal_variable_definitions
 								while(pDecl)
 								{
 									TqInt Type=($1.Type);
+									TqInt arrayLength = 0;
 									
 									SqVarRef var;
 									TqBool fv=CqVarDef::FindVariable((strNameSpace()+pDecl->strName()).c_str(), var);
@@ -407,6 +411,7 @@ formal_variable_definitions
 										// Check if the declaration marked it as an arry
 										if(pVar->Type()&Type_Array)
 											Type=(TqInt)(Type|Type_Array);
+										arrayLength = pVar->ArrayLength();
 
 										pVar->SetType(Type);
 										// Create a variable node, in the case of local variable definition, these nodes will be removed, 
@@ -440,6 +445,15 @@ formal_variable_definitions
 													i++;
 													pInit=pInit2;
 												}
+												// Check if the right number of initialisers has been specified.
+												if(i != arrayLength)
+												{
+													CqString strError("Error: expected exactly ");
+													strError += arrayLength;
+													strError += " initialisers, got ";
+													strError += i;
+													yyerror(strError);
+												}
 												pVarNode->AddLastChild(pArrayInit);
 											}
 											else
@@ -469,6 +483,7 @@ formal_variable_definitions
 								while(pDecl)
 								{
 									TqInt Type=($2.Type);
+									TqInt arrayLength = 0;
 									
 									SqVarRef var;
 									TqBool fv=CqVarDef::FindVariable((strNameSpace()+pDecl->strName()).c_str(), var);
@@ -478,6 +493,7 @@ formal_variable_definitions
 										// Check if the declaration marked it as an arry
 										if(pVar->Type()&Type_Array)
 											Type=(TqInt)(Type|Type_Array);
+										arrayLength = pVar->ArrayLength();
 
 										pVar->SetType(Type);
 										// Create a variable node, in the case of local variable definition, these nodes will be removed, 
@@ -512,6 +528,15 @@ formal_variable_definitions
 													i++;
 													pInit=pInit2;
 												}
+												// Check if the right number of initialisers has been specified.
+												if(i != arrayLength)
+												{
+													CqString strError("Error: expected exactly ");
+													strError += arrayLength;
+													strError += " initialisers, got ";
+													strError += i;
+													yyerror(strError);
+												}
 												pVarNode->AddLastChild(pArrayInit);
 											}
 											else
@@ -545,6 +570,7 @@ variable_definitions
 								while(pDecl)
 								{
 									TqInt Type=($1.Type);
+									TqInt arrayLength = 0;
 									
 									SqVarRef var;
 									TqBool fv=CqVarDef::FindVariable((strNameSpace()+pDecl->strName()).c_str(), var);
@@ -558,6 +584,7 @@ variable_definitions
 											if( pVar->ArrayLength() <= 0 )
 												yyerror("Array length must be specified.");
 										}
+										arrayLength = pVar->ArrayLength();
 
 										pVar->SetType(Type);
 										// Create a variable node, in the case of local variable definition, these nodes will be removed, 
@@ -590,6 +617,15 @@ variable_definitions
 
 													i++;
 													pInit=pInit2;
+												}
+												// Check if the right number of initialisers has been specified.
+												if(i != arrayLength)
+												{
+													CqString strError("Error: expected exactly ");
+													strError += arrayLength;
+													strError += " initialisers, got ";
+													strError += i;
+													yyerror(strError);
 												}
 												pVarNode->AddLastChild(pArrayInit);
 											}
@@ -627,10 +663,10 @@ variable_definitions
 									TqBool fve=TqFalse;
 									if(!ParseNameSpaceStack.empty())
 									{
-										std::vector<CqString>::reverse_iterator i=ParseNameSpaceStack.rbegin()+1;
+										std::vector<std::pair<TqBool,CqString> >::reverse_iterator i=ParseNameSpaceStack.rbegin()+1;
 										while(!fve && i!=ParseNameSpaceStack.rend())
 										{
-											CqString strNS=*i;
+											CqString strNS=i->second;
 											fve=CqVarDef::FindVariable((strNS+pDecl->strName()).c_str(), varExtern);
 											i++;
 										}
@@ -976,9 +1012,22 @@ statement
 								}
 							}
 	|	function_definition
-	|	'{' statements '}'	{	$$=$2;	}
-	|	'{' '}'				{	$$=new CqParseNode(); }
-	|	';'					{	$$=new CqParseNode(); }
+	|	'{' 
+							{
+								// Introduce a new scope for the block
+								CqString scopeName("b");
+								scopeName += blockID++;
+								pushScope(scopeName);
+							}
+		statements 
+							{
+								popScope();
+							}
+		'}'				{	
+								$$=$3;	
+							}
+	|	'{' '}'		{	$$=new CqParseNode(); }
+	|	';'				{	$$=new CqParseNode(); }
 	|	IF relation statement
 							{
 								CqParseNode* pNew=new CqParseNodeConditional();
@@ -987,7 +1036,8 @@ statement
 								pNew->AddLastChild($3);
 								$$=pNew;
 							}
-	|	IF expression statement			{
+	|	IF expression statement			
+							{
 								CqParseNode* relation=new CqParseNodeRelOp(Op_NE);
 								relation->SetPos(ParseLineNumber,ParseStreamName.c_str());
 								relation->AddFirstChild($2);
@@ -1823,14 +1873,9 @@ comm_function
 								
 								if(pVD!=0 && !fError)
 								{
-                                    
-	                                CqParseNode* pArgs=$3;
-                                    CqParseNodeStringConst* pString = (CqParseNodeStringConst *) pArgs;
-                                    CqString strArg("");
-                                    strArg += pString->strValue();
-								        
-									$$=new CqParseNodeCommFunction($1, strArg, $7.VarRef);
+									$$=new CqParseNodeCommFunction($1, $7.VarRef);
 								    $$->AddLastChild($5);
+								    $$->AddLastChild($3);
 								}
 								else
 								{
@@ -1874,14 +1919,9 @@ comm_function
 								
 								if(pVD!=0 && !fError)
 								{
-                                    
-	                                CqParseNode* pArgs=$3;
-                                    CqParseNodeStringConst* pString = (CqParseNodeStringConst *) pArgs;
-                                    CqString strArg("");
-                                    strArg += pString->strValue();
-								        
-									$$=new CqParseNodeCommFunction($1, strArg, $7.VarRef);
+									$$=new CqParseNodeCommFunction($1, $7.VarRef);
 								    $$->AddLastChild($5);
+								    $$->AddLastChild($3);
 								}
 								else
 								{
@@ -1981,14 +2021,32 @@ CqString strNameSpace()
 	CqString strRes("");
 
 	if(!ParseNameSpaceStack.empty())
-		strRes=ParseNameSpaceStack.back();
+		strRes=ParseNameSpaceStack.back().second;
 
 	return(strRes);
 }
 
+void pushScope(CqString name, TqBool terminal)
+{
+	std::pair<TqBool,CqString> n;
+	n.first = terminal;
+	n.second = strNameSpace()+name+"::";
+	ParseNameSpaceStack.push_back(n);
+}
+
+CqString popScope()
+{
+	CqString old = ParseNameSpaceStack.back().second;
+	ParseNameSpaceStack.erase(ParseNameSpaceStack.end()-1);
+	return old;
+}
+
 void InitStandardNamespace()
 {
-	ParseNameSpaceStack.push_back("");
+	std::pair<TqBool,CqString> n;
+	n.first = TqFalse;
+	n.second = "";
+	ParseNameSpaceStack.push_back(n);
 }
 
 void ProcessShaderArguments( CqParseNode* pArgs )

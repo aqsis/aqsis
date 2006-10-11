@@ -2,7 +2,7 @@
 // Aqsis
 // Copyright © 1997 - 2001, Paul C. Gregory
 //
-// Contact: pgregory@aqsis.com
+// Contact: pgregory@aqsis.org
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -46,11 +46,17 @@ class CqPLStore
 		RtInt n;
 		RtToken *tokens()
 		{
-			return & m_Token[ 0 ];
+			if(m_Token.empty())
+				return(NULL);
+			else
+				return & m_Token[ 0 ];
 		};
 		RtPointer *parms()
 		{
-			return & m_Parameter[ 0 ];
+			if(m_Parameter.empty())
+				return(NULL);
+			else
+				return & m_Parameter[ 0 ];
 		};
 };
 

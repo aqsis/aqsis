@@ -1,0 +1,34 @@
+##Scene dof.blend:Scene
+##Creator Blender 241 + AkhIL's ribber 0.1.1-dev
+##System Linux 2.6.13-gentoo-r5 runed on AMD Athlon(tm) XP 2500+
+##CreationDate Sun Apr 23 16:23:05 2006
+##Frame 1
+# OB:Lamp Start
+    TransformBegin
+	Transform [-0.290864646435 0.95517116785 -0.0551890581846 0.0 -0.771100819111 -0.19988335669 0.604524731636 0.0 0.566393196583 0.21839119494 0.794672250748 0.0 24.4122066498 26.5627479553 36.9430427551 1.0]
+	#hierarchy=False
+	#transform=matrix
+	ReadArchive "lamps/Lamp-0000.rib"
+    TransformEnd
+# OB:Lamp End
+# OB:Lamp.001 Start
+    TransformBegin
+	Transform [0.935485720634 -0.353223800659 -0.00997211225331 0.0 0.113979846239 0.274914234877 0.954688847065 0.0 -0.334477365017 -0.894234359264 0.297438710928 0.0 -2.51418638229 -11.513958931 1.99513459206 1.0]
+	#hierarchy=False
+	#transform=matrix
+	ReadArchive "lamps/Lamp.001-0000.rib"
+    TransformEnd
+# OB:Lamp.001 End
+# OB:Focus.001 Start
+# OB:Focus.001 End
+# OB:Focus Start
+# OB:Focus End
+# OB:Plane Start
+TransformBegin
+	ConcatTransform [1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0]
+    #transform=concatmatrix
+    #hierarchy=True
+    ReadArchive "objects/Plane-0000.rib"
+TransformEnd
+# OB:Plane End
+

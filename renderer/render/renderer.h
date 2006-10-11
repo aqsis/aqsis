@@ -1,7 +1,7 @@
 // Aqsis
 // Copyright © 1997 - 2001, Paul C. Gregory
 //
-// Contact: pgregory@aqsis.com
+// Contact: pgregory@aqsis.org
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public
@@ -20,7 +20,7 @@
 
 /** \file
 		\brief Declares the base CqRenderer class which is the central core of the rendering main loop.
-		\author Paul C. Gregory (pgregory@aqsis.com)
+		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
 //? Is renderer.h included already?
@@ -219,7 +219,7 @@ class CqRenderer : public IqRenderer
 
 		// Function which can be overridden by the derived class.
 		virtual	void	Initialise();
-		virtual	void	RenderWorld(CqTransformPtr camera = CqTransformPtr(), TqBool clone = TqFalse);
+		virtual	void	RenderWorld(TqBool clone = TqFalse);
 		virtual void	RenderAutoShadows();
 
 		virtual	void	AddDisplayRequest( const TqChar* name, const TqChar* type, const TqChar* mode, TqInt modeID, TqInt dataOffset, TqInt dataSize, std::map<std::string, void*>& mapOfArguments );

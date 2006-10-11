@@ -1,0 +1,21 @@
+Import('env')
+maketextures_sources = Split("""
+	maketextures.c
+	""")
+maketextures_headers = Split("""
+	""")
+
+maketexturesenv = env.Copy()
+
+
+# Set any platform specific options for this target
+maketexturesenv.UseTargetOptions('maketextures')
+
+maketextures = maketexturesenv.Program('maketextures', maketextures_sources)
+maketexturesenv.Install('$BINDIR', maketextures)
+
+env.Distribute('aqsis/thirdparty/maketextures', maketextures_sources)
+env.Distribute('aqsis/thirdparty/maketextures', maketextures_headers)
+env.Distribute('aqsis/thirdparty/maketextures', 'SConscript')
+
+Return('maketextures')

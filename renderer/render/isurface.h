@@ -55,9 +55,12 @@ struct IqSurface
 	/** Get the number of vertex parameters required for this GPrim.
 	 */
 	virtual	TqUint	cVertex() const = 0;
-	/** Get the number of facearying parameters required for this GPrim.
+	/** Get the number of facevarying parameters required for this GPrim.
 	 */
 	virtual	TqUint	cFaceVarying() const = 0;
+	/** Get the number of facevertex parameters required for this GPrim.
+	 */
+	virtual	TqUint	cFaceVertex() const = 0;
 
 	virtual CqString	strName() const = 0;
 	virtual	TqInt	Uses() const = 0;

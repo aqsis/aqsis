@@ -1,7 +1,7 @@
 // Aqsis
 // Copyright © 1997 - 2001, Paul C. Gregory
 //
-// Contact: pgregory@aqsis.com
+// Contact: pgregory@aqsis.org
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public
@@ -20,7 +20,7 @@
 
 /** \file
 		\brief Implements classes and support functionality for the shader virtual machine.
-		\author Paul C. Gregory (pgregory@aqsis.com)
+		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
 #include	"aqsis.h"
@@ -179,6 +179,24 @@ CqParameter* ( *gVariableCreateFuncsFaceVarying[] ) ( const char* strName, TqInt
     };
 
 
+CqParameter* ( *gVariableCreateFuncsFaceVertex[] ) ( const char* strName, TqInt Count ) =
+    {
+        0,
+        CqParameterTypedFaceVertex<TqFloat, type_float, TqFloat>::Create,
+        CqParameterTypedFaceVertex<TqInt, type_integer, TqFloat>::Create,
+        CqParameterTypedFaceVertex<CqVector3D, type_point, CqVector3D>::Create,
+        CqParameterTypedFaceVertex<CqString, type_string, CqString>::Create,
+        CqParameterTypedFaceVertex<CqColor, type_color, CqColor>::Create,
+        0,
+        CqParameterTypedFaceVertex<CqVector4D, type_hpoint, CqVector3D>::Create,
+        CqParameterTypedFaceVertex<CqVector3D, type_normal, CqVector3D>::Create,
+        CqParameterTypedFaceVertex<CqVector3D, type_vector, CqVector3D>::Create,
+        0,
+        CqParameterTypedFaceVertex<CqMatrix, type_matrix, CqMatrix>::Create,
+        0,
+        0,
+    };
+
 CqParameter* ( *gVariableCreateFuncsConstantArray[] ) ( const char* strName, TqInt Count ) =
     {
         0,
@@ -270,6 +288,23 @@ CqParameter* ( *gVariableCreateFuncsFaceVaryingArray[] ) ( const char* strName, 
         0,
     };
 
+CqParameter* ( *gVariableCreateFuncsFaceVertexArray[] ) ( const char* strName, TqInt Count ) =
+    {
+        0,
+        CqParameterTypedFaceVertexArray<TqFloat, type_float, TqFloat>::Create,
+        CqParameterTypedFaceVertexArray<TqInt, type_integer, TqFloat>::Create,
+        CqParameterTypedFaceVertexArray<CqVector3D, type_point, CqVector3D>::Create,
+        CqParameterTypedFaceVertexArray<CqString, type_string, CqString>::Create,
+        CqParameterTypedFaceVertexArray<CqColor, type_color, CqColor>::Create,
+        0,
+        CqParameterTypedFaceVertexArray<CqVector4D, type_hpoint, CqVector3D>::Create,
+        CqParameterTypedFaceVertexArray<CqVector3D, type_normal, CqVector3D>::Create,
+        CqParameterTypedFaceVertexArray<CqVector3D, type_vector, CqVector3D>::Create,
+        0,
+        CqParameterTypedFaceVertexArray<CqMatrix, type_matrix, CqMatrix>::Create,
+        0,
+        0,
+    };
 
 //---------------------------------------------------------------------
 /** Copy constructor.

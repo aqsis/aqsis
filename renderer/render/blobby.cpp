@@ -1,7 +1,7 @@
 // Aqsis
 // Copyright © 2006, Paul C. Gregory
 //
-// Contact: pgregory@aqsis.com
+// Contact: pgregory@aqsis.org
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public
@@ -158,9 +158,9 @@ class blobby_vm_assembler
 		blobby_vm_assembler(TqInt nleaf, TqInt ncode, TqInt* code, TqInt nfloats, TqFloat* floats, TqInt nstrings, char** strings, CqBlobby::instructions_t& Instructions, CqBound& BBox) :
 				m_code(code),
 				m_floats(floats),
+				m_strings(strings),
 				m_instructions(Instructions),
 				m_bbox(BBox),
-				m_strings(strings),
 				m_has_bounding_box(TqFalse)
 		{
 
@@ -611,6 +611,9 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point, TqInt n, std::vector 
 	{
 		switch(instructions[pc++].opcode)
 		{
+				case NEGATE:
+				case IDEMPOTENTATE:
+					break;
 				case CONSTANT:
 				{
 					result = instructions[pc++].value;
@@ -795,6 +798,9 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point )
 	{
 		switch(instructions[pc++].opcode)
 		{
+				case NEGATE:
+				case IDEMPOTENTATE:
+					break;
 				case CONSTANT:
 				{
 					stack.push(instructions[pc++].value);

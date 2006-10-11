@@ -37,6 +37,7 @@ enum EqVariableClass
     class_varying,
     class_vertex,
     class_facevarying,
+    class_facevertex,
 };
 
 //----------------------------------------------------------------------
@@ -309,7 +310,7 @@ struct IqShaderData
 	 * \param uGridRes The size of the SIMD grid in u.
 	 * \param vGridRes The size of the SIMD grid in v.
 	 */
-	virtual	void	Initialise( const TqInt uGridRes, const TqInt vGridRes ) = 0;
+	virtual	void	Initialise( const TqInt varyingSize ) = 0;
 	/** Create a duplicate of this variable.
 	 * \return A IqShaderData pointer.
 	 */

@@ -1,7 +1,7 @@
 // Aqsis
 // Copyright © 1997 - 2001, Paul C. Gregory
 //
-// Contact: pgregory@aqsis.com
+// Contact: pgregory@aqsis.org
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public
@@ -20,7 +20,7 @@
 
 /** \file
 		\brief Declares interface used to access the shader execution environment.
-		\author Paul C. Gregory (pgregory@aqsis.com)
+		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
 #ifndef	___ishaderexecenv_Loaded___
@@ -125,7 +125,7 @@ struct IqShaderExecEnv
 	virtual	~IqShaderExecEnv()
 	{}
 
-	virtual	void	Initialise( const TqInt uGridRes, const TqInt vGridRes, IqAttributes* pAttr, const boost::shared_ptr<IqTransform>& pTrans, IqShader* pShader, TqInt Uses ) = 0;
+	virtual	void	Initialise( const TqInt uGridRes, const TqInt vGridRes, TqInt microPolygonCount, TqInt shadingPointCount, IqAttributes* pAttr, const boost::shared_ptr<IqTransform>& pTrans, IqShader* pShader, TqInt Uses ) = 0;
 	/** Get grid size in u
 	 */
 	virtual	TqInt	uGridRes() const = 0;
@@ -134,7 +134,10 @@ struct IqShaderExecEnv
 	virtual	TqInt	vGridRes() const = 0;
 	/** Get total grid size.
 	 */
-	virtual	TqUint	GridSize() const = 0;
+	virtual	TqUint	microPolygonCount() const = 0;
+	/** Get shading point count.
+	 */
+	virtual	TqUint	shadingPointCount() const = 0;
 	/** Get the matrix which describes the transformation from Object space to World space for the surface related to this execution environment.
 	 */
 	virtual	const CqMatrix&	matObjectToWorld() const = 0;
@@ -555,8 +558,9 @@ R SO_DerivType( IqShaderData* Var, IqShaderData* den, TqInt i, IqShaderExecEnv* 
 			den->GetValue( u1, i + 1 );
 			den->GetValue( u2, i );
 		}
-		if( ( val1 != val2 ) && ( u1 != u2 ) )
-			Retu = ( val1 - val2 ) / ( u1 - u2 );
+		Retu = val1 - val2;
+		if( u1 != u2 )
+			Retu /= ( u1 - u2 );
 	}
 	else
 	{
@@ -567,8 +571,9 @@ R SO_DerivType( IqShaderData* Var, IqShaderData* den, TqInt i, IqShaderExecEnv* 
 			den->GetValue( u1, i );
 			den->GetValue( u2, i - 1 );
 		}
-		if( ( val1 != val2 ) && ( u1 != u2 ) )
-			Retu = ( val2 - val1 ) / ( u2 - u1 );
+		Retu = val2 - val1;
+		if( u1 != u2 )
+			Retu /= ( u2 - u1 );
 	}
 
 	// Calculate deriviative in v
@@ -581,8 +586,9 @@ R SO_DerivType( IqShaderData* Var, IqShaderData* den, TqInt i, IqShaderExecEnv* 
 			den->GetValue( v1, i + uRes + 1 );
 			den->GetValue( v2, i );
 		}
-		if( ( val1 != val2 ) && ( v1 != v2 ) )
-			Retv = ( val1 - val2 ) / ( v1 - v2 );
+		Retv = val1 - val2;
+		if( v1 != v2 )
+			Retv /= ( v1 - v2 );
 	}
 	else
 	{
@@ -593,8 +599,9 @@ R SO_DerivType( IqShaderData* Var, IqShaderData* den, TqInt i, IqShaderExecEnv* 
 			den->GetValue( v1, i );
 			den->GetValue( v2, i - ( uRes - 1 ) );
 		}
-		if( ( val1 != val2 ) && ( v1 != v2 ) )
-			Retv = ( val2 - val1 ) / ( v2 - v1 );
+		Retv = val2 - val1;
+		if( v1 != v2 )
+			Retv /=  ( v2 - v1 );
 	}
 
 	return ( Retu + Retv );

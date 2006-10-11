@@ -1,7 +1,16 @@
 Import('env')
 shaderexecenv_sources = Split("""
 	shaderexecenv.cpp
-	shadeops.cpp""")
+	shadeops_comp.cpp
+	shadeops_deriv.cpp
+	shadeops_illum.cpp
+	shadeops_inter.cpp
+	shadeops_math.cpp
+	shadeops_matrx.cpp
+	shadeops_rand.cpp
+	shadeops_text.cpp
+	shadeops_tmap.cpp
+""")
 
 shaderexecenv_headers = Split("""
 	shaderexecenv.h""")

@@ -1,7 +1,7 @@
 // Aqsis
 // Copyright (C) 1997 - 2001, Paul C. Gregory
 //
-// Contact: pgregory@aqsis.com
+// Contact: pgregory@aqsis.org
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public
@@ -20,7 +20,7 @@
 
 /** \file
 		\brief Implements the CqBucket class responsible for bookkeeping the primitives and storing the results.
-		\author Paul C. Gregory (pgregory@aqsis.com)
+		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
 #include	"MultiTimer.h"
@@ -452,7 +452,7 @@ void CqBucket::FilterBucket(TqBool empty)
 	if(!empty)
 	{
 		// non-seperable is faster for very small filter widths.
-		if(FilterXWidth() <= 1.0 || FilterYWidth() <= 1.0)
+		if(FilterXWidth() <= 16.0 || FilterYWidth() <= 16.0)
 			useSeperable = false;
 
 		if(useSeperable)

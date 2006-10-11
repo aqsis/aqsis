@@ -1,7 +1,7 @@
 // Aqsis
 // Copyright © 1997 - 2001, Paul C. Gregory
 //
-// Contact: pgregory@aqsis.com
+// Contact: pgregory@aqsis.org
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public
@@ -20,7 +20,7 @@
 
 /** \file
 		\brief Implements the base GPrim handling classes.
-		\author Paul C. Gregory (pgregory@aqsis.com)
+		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
 #include	"aqsis.h"
@@ -134,7 +134,6 @@ CqBound	CqSurface::AdjustBoundForTransformationMotion( const CqBound& B ) const
 		CqBound B0( B );
 		B0.Transform( matCameraToObject0 );
 
-		TqInt i;
 		std::map<TqFloat, TqFloat>::iterator keyFrame;
 		for( keyFrame = keyframeTimes.begin(); keyFrame != keyframeTimes.end(); keyFrame++)
 		{
@@ -438,7 +437,8 @@ CqMicroPolyGridBase* CqSurface::Dice()
 	PreDice( m_uDiceSize, m_vDiceSize );
 
 	// Create a new CqMicorPolyGrid for this patch
-	CqMicroPolyGrid* pGrid = new CqMicroPolyGrid( m_uDiceSize, m_vDiceSize, shared_from_this() );
+	CqMicroPolyGrid* pGrid = new CqMicroPolyGrid();
+	pGrid->Initialise( m_uDiceSize, m_vDiceSize, shared_from_this() );
 
 	TqInt lUses = Uses();
 
@@ -470,12 +470,12 @@ CqMicroPolyGridBase* CqSurface::Dice()
 			// Check if Cs has been specified by the user.
 			if ( bHasVar(varID) )
 			{
-				if( pVar(varID)->Class() == class_vertex || pVar(varID)->Class() == class_facevarying )
-					// "vertex" and "facevarying" need to be dealt with by the surface as they are diced using the
+				if( pVar(varID)->Class() == class_vertex || pVar(varID)->Class() == class_facevertex )
+					// "vertex" and "facevertex" need to be dealt with by the surface as they are diced using the
 					// natural subdivision algorithms for that particular surface.
 					NaturalDice( pVar(varID), m_uDiceSize, m_vDiceSize, pGrid->pVar(varID) );
 				else
-					// "varying" are just bilinearly interpolated, so can be handled by the primitive variable.
+					// "varying" and "facevarying" are just bilinearly interpolated, so can be handled by the primitive variable.
 					pVar(varID) ->Dice( m_uDiceSize, m_vDiceSize, pGrid->pVar(varID), this );
 
 				// Mark this as done, so that the special case default handlers later don't need to worry about it.

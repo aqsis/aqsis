@@ -1,7 +1,7 @@
 // Aqsis
 // Copyright © 1997 - 2001, Paul C. Gregory
 //
-// Contact: pgregory@aqsis.com
+// Contact: pgregory@aqsis.org
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public
@@ -20,7 +20,7 @@
 
 /** \file
 		\brief Declares the base GPrim handling classes.
-		\author Paul C. Gregory (pgregory@aqsis.com)
+		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
 //? Is .h included already?
@@ -438,6 +438,10 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 		/* From IqSurface.
 		 */
 		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime = 0 );
+		virtual TqUint cFaceVertex() const
+		{
+			return(cFaceVarying());
+		}
 
 		/** Add a primitive variable to the array.
 		 */

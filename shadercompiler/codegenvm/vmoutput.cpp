@@ -1,7 +1,7 @@
 // Aqsis
 // Copyright © 1997 - 2001, Paul C. Gregory
 //
-// Contact: pgregory@aqsis.com
+// Contact: pgregory@aqsis.org
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public
@@ -20,7 +20,7 @@
 
 /** \file
 		\brief Compiler backend to output VM code.
-		\author Paul C. Gregory (pgregory@aqsis.com)
+		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
 #include "aqsis.h"
@@ -301,8 +301,16 @@ void CqCodeGenOutput::Visit( IqParseNodeArrayVariable& AV )
 	IqParseNodeVariable* pVN;
 	AV.GetInterface( ParseNode_Variable, ( void** ) & pVN );
 
-	pNode->pChild() ->Accept( *this );
-	m_slxFile << "\tipushv ";
+	IqParseNode * pExpr = pNode->pChild();
+	if ( pExpr != 0 )
+	{
+		pExpr->Accept( *this );
+		m_slxFile << "\tipushv ";
+	}
+	else
+	{
+		m_slxFile << "\tpushv ";
+	}
 
 	SqVarRef temp( pVN->VarRef() );
 	IqVarDef* pVD = pTranslatedVariable( temp, m_saTransTable );
@@ -785,7 +793,8 @@ void CqCodeGenOutput::Visit( IqParseNodeMessagePassingFunction& MPF )
 
 	IqParseNode * pExpr = pNode->pChild();
 
-	pExpr->Accept( *this );
+	if ( pExpr != 0 )
+		pExpr->Accept( *this );
 
 	CqString strCommType( "surface" );
 	switch ( MPF.CommType() )
@@ -833,13 +842,13 @@ void CqCodeGenOutput::Visit( IqParseNodeMessagePassingFunction& MPF )
 	if ( pVD )
 	{
 		pVD->IncUseCount();
-		if ( strCommType != "textureinfo" )
+		if ( MPF.CommType() != CommTypeTextureInfo )
 			m_slxFile << "\t" << strCommType.c_str() << " " << pVD->strName() << std::endl;
 		else
 		{
-			CqString strExtra( MPF.Extra() );
-			m_slxFile << "\tpushv ";
-			m_slxFile << strExtra.c_str() << std::endl;
+			IqParseNode * pFileName = pExpr->pNextSibling();
+			if ( pFileName != 0 )
+				pFileName->Accept( *this );
 			m_slxFile << "\t" << strCommType.c_str() << " " << pVD->strName() << std::endl;
 		}
 	}

@@ -30,6 +30,7 @@ extern TqBool	FindVariable(const char* name, SqVarRef& ref);
 extern TqBool	FindFunction(const char* name, std::vector<SqFuncRef>& Ref);
 extern CqString strNameSpace();
 
+extern std::vector<std::pair<TqBool,CqString> >	ParseNameSpaceStack;
 }
 
 static TqInt scannerinput(char* Buffer, TqInt MaxSize);
@@ -198,7 +199,18 @@ TqInt check_type()
 	
 	yylval.m_pSymbol.eType=0;
 
-	if(FindVariable(strName.c_str(), var))
+	std::vector<std::pair<TqBool,CqString> >::reverse_iterator i=ParseNameSpaceStack.rbegin()+1;
+	TqBool fv = FindVariable((strNameSpace()+(char*)yytext).c_str(), var);
+	while(!fv && i!=ParseNameSpaceStack.rend())
+	{
+		CqString strNS=i->second;
+		fv=CqVarDef::FindVariable((strNS+(char*)yytext).c_str(), var);
+		// Exit on finding a terminal scope (function).
+		if(i->first)
+			break;
+		i++;
+	}
+	if(fv)
 	{
 		yylval.m_pSymbol.VarRef=var;
 		yylval.m_pSymbol.eType=1;

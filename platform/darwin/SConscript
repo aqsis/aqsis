@@ -2,6 +2,9 @@ import os.path
 
 Import('env')
 
+from bundle_tool import *
+TOOL_BUNDLE(env)
+
 if env['debug']:
 	env.AppendUnique(CCFLAGS=['-g', '-O0', '-fno-common'])
 else:

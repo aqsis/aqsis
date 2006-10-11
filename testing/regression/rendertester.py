@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 ######################################################################
-# Renderer tester v1.11
+# Renderer tester v1.12
 # Copyright 2003 Matthias Baas (baas@ira.uka.de)
 ######################################################################
 # For a short usage description call the script with the option -h or
@@ -66,7 +66,8 @@ def execute(cmd):
     are both lists containing the outputs of the command (each list item
     is one line).
     """
-    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    cmd_string = subprocess.list2cmdline(cmd)
+    p = subprocess.Popen(cmd_string, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     (stdout, stderr) = p.communicate()
     p.wait()
     return (p.returncode, stdout.splitlines(True), stderr.splitlines(True))
@@ -445,7 +446,7 @@ class Renderer:
             print 'Setting environment variable "%s" to "%s"'%(var,val)
             os.environ[var]=val
         # Render...
-        retval,out,err = execute( (self.renderer, ribname) )
+        retval,out,err = execute( self.renderer + [ribname] )
 
         # Remove temporary RIB again...
         job.releaseRIB()
@@ -506,7 +507,7 @@ class Renderer:
         except OSError, e:
             print e
 
-        retval,out,err = execute( (self.shadercompiler, shname) )
+        retval,out,err = execute( self.shadercompiler + [shname] )
 
         os.chdir(olddir)
         return out,err
@@ -518,7 +519,7 @@ class Renderer:
         if self.scversionopt==None:
             return "<unknown>"
         
-        retval,out,err = execute( (self.shadercompiler, self.scversionopt) )
+        retval,out,err = execute( self.shadercompiler + [self.scversionopt] )
         return string.join(out,"")
 
     # rendererVersion
@@ -528,7 +529,7 @@ class Renderer:
         if self.rversionopt==None:
             return "<unknown>"
 
-        retval,out,err = execute( (self.renderer, self.rversionopt) )
+        retval,out,err = execute( self.renderer + [self.rversionopt] )
         return string.join(out,"")
   
 
@@ -1235,8 +1236,10 @@ Click on the RIB name or thumbnail to display details.
                 r,g,b,diff2alpha = diff2img.split()
                 diff2img = Image.merge("RGB", (r,g,b))
 
-
-        if self.pdiffcmd!=None and self.pdiffcmd!="" and refimg!=None:
+        if img==None:
+            res.pdiffoutput = "No output"
+            res.failure = True
+        elif self.pdiffcmd!=None and self.pdiffcmd!="" and refimg!=None:
             pdiffcmd = (self.pdiffcmd, res.realoutimagename[idx], refimgname)
             print "%s %s %s" % pdiffcmd
             retval,out,err = execute(pdiffcmd)

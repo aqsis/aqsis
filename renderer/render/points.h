@@ -1,7 +1,7 @@
 // Aqsis
 // Copyright © 2001, Paul C. Gregory
 //
-// Contact: pgregory@aqsis.com
+// Contact: pgregory@aqsis.org
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public
@@ -301,8 +301,6 @@ class CqMicroPolyGridPoints : public CqMicroPolyGrid
 	public:
 		CqMicroPolyGridPoints() : CqMicroPolyGrid()
 		{}
-		CqMicroPolyGridPoints( TqInt cu, TqInt cv, const boost::shared_ptr<CqSurface>& pSurface ) : CqMicroPolyGrid( cu, cv, pSurface )
-		{}
 		virtual	~CqMicroPolyGridPoints()
 		{}
 
@@ -312,6 +310,10 @@ class CqMicroPolyGridPoints : public CqMicroPolyGrid
 		{
 			assert( m_pShaderExecEnv );
 			return ( m_pShaderExecEnv->uGridRes() );
+		}
+		virtual	TqUint	numShadingPoints(TqInt cu, TqInt cv) const
+		{
+			return ( cu * cv );
 		}
 };
 
@@ -373,6 +375,9 @@ class CqMicroPolygonPoints : public CqMicroPolygon
 			return( b );
 		}
 		virtual	TqBool	Sample( const SqSampleData& sample, TqFloat& D, TqFloat time, TqBool UsingDof = TqFalse );
+		virtual void	CacheHitTestValues(CqHitTestCache* cache, CqVector3D* points) {}
+		virtual void	CacheHitTestValues(CqHitTestCache* cache) {}
+		virtual void	CacheHitTestValuesDof(CqHitTestCache* cache, const CqVector2D& DofOffset, CqVector2D* coc) {}
 
 
 	private:
@@ -399,7 +404,7 @@ class CqMovingMicroPolygonKeyPoints
 		{
 			Initialise( vA, radius );
 		}
-		~CqMovingMicroPolygonKeyPoints()
+		virtual ~CqMovingMicroPolygonKeyPoints()
 		{}
 
 		/** Overridden operator new to allocate micropolys from a pool.
@@ -426,6 +431,9 @@ class CqMovingMicroPolygonKeyPoints
 			}
 			return( TqFalse );
 		}
+		virtual void	CacheHitTestValues(CqHitTestCache* cache, CqVector3D* points) {}
+		virtual void	CacheHitTestValues(CqHitTestCache* cache) {}
+		virtual void	CacheHitTestValuesDof(CqHitTestCache* cache, const CqVector2D& DofOffset, CqVector2D* coc) {}
 
 		CqBound	GetTotalBound() const
 		{

@@ -1,7 +1,7 @@
 // Aqsis
 // Copyright © 1997 - 2001, Paul C. Gregory
 //
-// Contact: pgregory@aqsis.com
+// Contact: pgregory@aqsis.org
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public
@@ -84,10 +84,15 @@ class CqImagersource : public CqListEntry<CqImagersource>
 			assert( m_pShaderExecEnv );
 			return ( m_pShaderExecEnv->vGridRes() );
 		}
-		virtual	TqInt	GridSize() const
+		virtual	TqInt	microPolygonCount() const
 		{
 			assert( m_pShaderExecEnv );
-			return ( m_pShaderExecEnv->GridSize() );
+			return ( m_pShaderExecEnv->microPolygonCount() );
+		}
+		virtual	TqInt	shadingPointCount() const
+		{
+			assert( m_pShaderExecEnv );
+			return ( m_pShaderExecEnv->shadingPointCount() );
 		}
 		virtual	const CqMatrix&	matObjectToWorld() const
 		{

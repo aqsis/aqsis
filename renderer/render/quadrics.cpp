@@ -2,7 +2,7 @@
 // Aqsis
 // Copyright © 1997 - 2001, Paul C. Gregory
 //
-// Contact: pgregory@aqsis.com
+// Contact: pgregory@aqsis.org
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public
@@ -21,7 +21,7 @@
 
 /** \file
 		\brief Implements the standard RenderMan quadric primitive classes.
-		\author Paul C. Gregory (pgregory@aqsis.com)
+		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
 #include	<math.h>
@@ -259,7 +259,7 @@ void CqQuadric::GenerateGeometricNormals( TqInt uDiceSize, TqInt vDiceSize, IqSh
 			DicePoint( u, v, N );
 			TqBool CSO = pTransform()->GetHandedness(pTransform()->Time(0));
 			TqBool O = pAttributes() ->GetIntegerAttribute( "System", "Orientation" ) [ 0 ] != 0;
-			N = ( O == CSO ) ? N : -N;
+			N = ( (O && CSO) || (!O && !CSO) ) ? N : -N;
 			pNormals->SetNormal( m_matITTx * N, igrid );
 		}
 	}
@@ -278,7 +278,7 @@ TqBool	CqQuadric::Diceable()
 	if ( !m_fDiceable )
 		return ( TqFalse );
 
-	TqInt toomuch = EstimateGridSize();
+	TqUlong toomuch = EstimateGridSize();
 
 	m_SplitDir = ( m_uDiceSize > m_vDiceSize ) ? SplitDir_U : SplitDir_V;
 

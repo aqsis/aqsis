@@ -1,7 +1,7 @@
 // Aqsis
 // Copyright © 1997 - 2001, Paul C. Gregory
 //
-// Contact: pgregory@aqsis.com
+// Contact: pgregory@aqsis.org
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public
@@ -20,7 +20,7 @@
 
 /** \file
 		\brief Implements the classes for handling RenderMan lightsources, plus any built in sources.
-		\author Paul C. Gregory (pgregory@aqsis.com)
+		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
 #include	"aqsis.h"
@@ -45,6 +45,7 @@ CqLightsource::CqLightsource( const boost::shared_ptr<IqShader>& pShader, TqBool
 	m_pAttributes = const_cast<CqAttributes*>( QGetRenderContext() ->pattrCurrent() );
 	ADDREF( m_pAttributes );
 
+	m_pShader->SetType(Type_Lightsource);
 	m_pTransform = QGetRenderContext() ->ptransCurrent();
 }
 
@@ -67,22 +68,22 @@ CqLightsource::~CqLightsource()
  * \param iGridRes Integer grid resolution.
  * \param iGridRes Integer grid resolution.
  */
-void CqLightsource::Initialise( TqInt uGridRes, TqInt vGridRes )
+void CqLightsource::Initialise( TqInt uGridRes, TqInt vGridRes, TqInt microPolygonCount, TqInt shadingPointCount )
 {
 	TqInt Uses = gDefLightUses;
 	if ( m_pShader )
 	{
 		Uses |= m_pShader->Uses();
-		m_pShaderExecEnv->Initialise( uGridRes, vGridRes, m_pAttributes, boost::shared_ptr<IqTransform>(), m_pShader.get(), Uses );
+		m_pShaderExecEnv->Initialise( uGridRes, vGridRes, microPolygonCount, shadingPointCount, m_pAttributes, boost::shared_ptr<IqTransform>(), m_pShader.get(), Uses );
 	}
 
 	if ( m_pShader )
-		m_pShader->Initialise( uGridRes, vGridRes, m_pShaderExecEnv );
+		m_pShader->Initialise( uGridRes, vGridRes, shadingPointCount, m_pShaderExecEnv );
 
 	if ( USES( Uses, EnvVars_L ) )
-		L() ->Initialise( uGridRes, vGridRes );
+		L() ->Initialise( shadingPointCount );
 	if ( USES( Uses, EnvVars_Cl ) )
-		Cl() ->Initialise( uGridRes, vGridRes );
+		Cl() ->Initialise( shadingPointCount );
 
 	// Initialise the geometric parameters in the shader exec env.
 	if ( USES( Uses, EnvVars_P ) )

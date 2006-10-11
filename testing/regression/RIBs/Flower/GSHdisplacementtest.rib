@@ -1,0 +1,54 @@
+Display "GSHdisplacementtest.tif" "file" "rgb" "string compression" ["lzw"]
+
+#
+#Format 320 240 1
+Format 640 480 1
+#
+
+Projection "perspective" "fov" 30
+
+
+#Translate 0 0 100
+Translate 0 0 37
+
+Rotate -22 1 0 0
+Rotate 19 0 1 0
+
+Translate 0 -1.5 0
+
+WorldBegin
+
+LightSource "ambientlight" 1 "intensity" .4
+LightSource "distantlight" 2 "intensity" .6 "from" [-4 6 -7] "to" [0 0 0]
+
+Surface "GSHglowoutline"
+Displacement "GSHsinedisp"
+
+Color [1 .6 0]
+Declare "truedisplacement" "integer"
+
+
+	  # body
+
+	  AttributeBegin
+		  Rotate -90 1 0 0
+		  Attribute "render" "truedisplacement" [1]
+		  TransformBegin
+			  Translate 0 0 1.7
+			  Scale 1 1 1.05468457
+			  Attribute "displacementbound" "sphere" [30]
+			  Attribute "displacementbound" "coordinatesystem" "current"
+			  Opacity 0.5 0.5 0.5
+			  
+			  Attribute "visibility"  "integer trace" [1]
+			  
+			  Orientation "rh"
+			  Sphere 5 -5 5 360
+			  
+			  #Rotate -90 1 0 0
+			  #Polygon "P" [-5 0 -5   5 0 -5   5 0 5  -5 0 5] 
+		  TransformEnd
+	  AttributeEnd
+
+WorldEnd
+					       

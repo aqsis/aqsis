@@ -1,7 +1,7 @@
 // Aqsis
 // Copyright © 1997 - 2001, Paul C. Gregory
 //
-// Contact: pgregory@aqsis.com
+// Contact: pgregory@aqsis.org
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public
@@ -20,7 +20,7 @@
 
 /** \file
 		\brief Declares support structures for registering shaders, and any built in shaders.
-		\author Paul C. Gregory (pgregory@aqsis.com)
+		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
 //? Is .h included already?
@@ -254,13 +254,13 @@ class CqLayeredShader : public IqShader
 				++i;
 			}
 		}
-		virtual void	Initialise( const TqInt uGridRes, const TqInt vGridRes, const boost::shared_ptr<IqShaderExecEnv>& pEnv )
+		virtual void	Initialise( const TqInt uGridRes, const TqInt vGridRes, const TqInt shadingPointCount, const boost::shared_ptr<IqShaderExecEnv>& pEnv )
 		{
 			// Call Initialise on all layers.
 			std::vector<std::pair<CqString, boost::shared_ptr<IqShader> > >::iterator i = m_Layers.begin();
 			while( i != m_Layers.end() )
 			{
-				i->second->Initialise(uGridRes, vGridRes, pEnv);
+				i->second->Initialise(uGridRes, vGridRes, shadingPointCount, pEnv);
 				++i;
 			}
 		}
@@ -319,6 +319,8 @@ class CqLayeredShader : public IqShader
 
 		virtual void AddLayer(const CqString& layername, const boost::shared_ptr<IqShader>& layer);
 		virtual void AddConnection(const CqString& layer1, const CqString& variable1, const CqString& layer2, const CqString& variable2);
+
+		virtual void SetType(EqShaderType type);
 
 	protected:
 		TqInt	m_Uses;			///< Bit vector representing the system variables used by this shader.

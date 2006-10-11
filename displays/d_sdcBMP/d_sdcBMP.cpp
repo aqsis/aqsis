@@ -394,9 +394,12 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 {
 	int  x;
 	int  r, g, b;
+     
 	char *to;
 	long spot;
-   AppData *pData = (AppData *)image;
+
+   	AppData *pData = (AppData *)image;
+   	r = g = b = 0;
 
 #if SHOW_CALLSTACK
 

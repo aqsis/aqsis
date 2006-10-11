@@ -1,7 +1,7 @@
 // Aqsis
 // Copyright © 1997 - 2001, Paul C. Gregory
 //
-// Contact: pgregory@aqsis.com
+// Contact: pgregory@aqsis.org
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public
@@ -20,7 +20,7 @@
 
 /** \file
 		\brief Implements texture map handling and cacheing classes.
-		\author Paul C. Gregory (pgregory@aqsis.com)
+		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
 #include	"MultiTimer.h"
@@ -1030,20 +1030,7 @@ void CqTextureMap::GetSample( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, st
  */
 CqTextureMap* CqTextureMap::GetTextureMap( const CqString& strName )
 {
-	static TqInt size = -1;
-	static CqTextureMap *previous = NULL;
-
 	QGetRenderContext() ->Stats().IncTextureMisses( 0 );
-
-	// look if the last item return by this function was ok
-	if ( size == static_cast<TqInt>( m_TextureMap_Cache.size() ) )
-	{
-		if ( ( previous ) && ( previous->m_strName == strName ) )
-		{
-			QGetRenderContext() ->Stats().IncTextureHits( 0, 0 );
-			return previous;
-		}
-	}
 
 	// First search the texture map cache
 	for ( std::vector<CqTextureMap*>::iterator i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
@@ -1052,17 +1039,16 @@ CqTextureMap* CqTextureMap::GetTextureMap( const CqString& strName )
 		{
 			if ( ( *i ) ->Type() == MapType_Texture )
 			{
-				previous = *i;
-				size = m_TextureMap_Cache.size();
 				QGetRenderContext() ->Stats().IncTextureHits( 1, 0 );
 				return ( *i );
-			}
-			else
+			} else
 			{
-				return ( NULL );
+				return NULL;
 			}
 		}
 	}
+
+	QGetRenderContext() ->Stats().IncTextureHits( 0, 0 );
 
 	// If we got here, it doesn't exist yet, so we must create and load it.
 	CqTextureMap* pNew = new CqTextureMap( strName );
@@ -1077,8 +1063,6 @@ CqTextureMap* CqTextureMap::GetTextureMap( const CqString& strName )
 	}
 
 	m_TextureMap_Cache.push_back( pNew );
-	previous = pNew;
-	size = m_TextureMap_Cache.size();
 	return ( pNew );
 }
 
@@ -1928,6 +1912,8 @@ void CqEnvironmentMap::SampleMap( CqVector3D& R1,
 	EOrder order;
 	TqFloat side[2];
 	register TqInt c;
+
+        u = v = 0.0f;
 
 	TIME_SCOPE("Environment mapping")
 

@@ -14,6 +14,7 @@ ECHO.
 ECHO.
 ECHO === Rendering File(s) ===
 ECHO.
+aqsis.exe -progress "occlmap.rib"
 aqsis.exe -progress "envlight.rib"
 IF ERRORLEVEL 0 GOTO end
 

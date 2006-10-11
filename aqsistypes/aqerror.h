@@ -1,6 +1,6 @@
 // Copyright © 1997 - 2001, Paul C. Gregory
 //
-// Contact: pgregory@aqsis.com
+// Contact: pgregory@aqsis.org
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public
@@ -20,12 +20,16 @@
 /** \file
 		\brief Global Aqsis include to include all files required within Aqsis
 		\author Matthaeus G. Chajdas (Matthaeus@darkside-conflict.net)
+		\todo: <b>Code Review</b>
 */
 
 //? Is .h included already?
 #ifndef AQERROR_H_INCLUDED
 #define AQERROR_H_INCLUDED 1
 
+/**
+ *	\todo: <b>Code Review</b>
+ */
 class CqRangeCheckCallback
 {
 	public:
@@ -44,6 +48,7 @@ class CqRangeCheckCallback
  *	Do the range check
  *
  *	Calls a CqRangeCheckCallback functor class, which is responsible for the output
+ *  \todo: <b>Code Review</b>
  */
 template<class T>
 bool CheckMinMax( const T& val, const T& min, const T& max, CqRangeCheckCallback* callBack)
