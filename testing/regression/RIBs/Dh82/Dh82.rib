@@ -1,0 +1,42 @@
+#RenderMan RIB-Structure 1.1
+##Scene D:\temp\p51d\p51d.3ds
+##Creator AIR Portal - x3d
+
+# Preparing the tif files to be at their best for each renderers.
+ReadArchive "textures.rib"
+
+FrameBegin 0
+Projection "perspective" "fov" 25#50#[7.375888]  #50
+LightSource "distantlight" 1 "lightcolor" [0.800 0.800 0.800]
+Scale -1 1 1
+ConcatTransform [-0.660734 0.435084 0.611664 0.000000 0.746967 0.300818 0.592916 0.000000 0.073968 0.848652 -0.523754 0.000000 0.847581 -0.325382 29.464745 1.000000 ]
+Display "Dh82.tif" "file" "rgb" "string compression" "packbits" 
+#Display "+Dh82.tif" "framebuffer" "rgb"
+Format 256 200 1
+Option "statistics" "integer endofframe" [3]
+#PixelSamples 2 2 
+#PixelFilter "gaussian" 2 2
+PixelSamples 1 1
+Exposure 1 1
+ShadingRate 1.0
+Option "render" "max_raylevel" [5]
+Option "raytrace" "background" [0 0 0]
+Option "indirect" "maxbounce" 1
+Attribute "indirect" "maxerror" 0.250000
+Attribute "indirect" "maxpixeldist" 10.000000
+Attribute "indirect" "nsamples" 256
+Option "render" "prmanspecular" [0]
+Declare "has_shadows" "string"
+Declare "background" "color"
+Declare "samples" "integer"
+Attribute "dice" "int binary" [1]
+Attribute "texture" "samples" [9]
+#Imager "fakesky"
+WorldBegin
+  LightSource "ambientlight" 999 "lightcolor" [0.200 0.200 0.200]
+
+Sides 1
+  ReadArchive "aircraft.rib"
+WorldEnd
+FrameEnd
+
