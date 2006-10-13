@@ -62,7 +62,7 @@
 				<xsl:if test="../../FaceVaryingSize">
 					<xsl:value-of select="../../FaceVaryingSize"/>
 				</xsl:if>
-				<xsl:text>//	CachePlist(count, tokens, values, constant_size, uniform_size, varying_size, vertex_size, facevarying_size);&#xa;</xsl:text>
+				<xsl:text>	DebugPlist(count, tokens, values, constant_size, uniform_size, varying_size, vertex_size, facevarying_size, _message);&#xa;</xsl:text>
 			</xsl:when>
 			<xsl:when test="contains( @type, 'Array')">
 				<xsl:choose>

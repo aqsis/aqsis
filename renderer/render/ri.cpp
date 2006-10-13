@@ -99,7 +99,7 @@ extern "C" __declspec(dllimport) void report_refcounts();
 
 using namespace Aqsis;
 
-#include	"ri_debug.inl"
+#include	"ri_debug.h"
 
 static RtBoolean ProcessPrimitiveVariables( CqSurface* pSurface, PARAMETERLIST );
 static void ProcessCompression( TqInt *compress, TqInt *quality, TqInt count, RtToken *tokens, RtPointer *values );
