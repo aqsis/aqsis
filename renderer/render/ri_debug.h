@@ -112,7 +112,7 @@ void DebugPlist(RtInt count, RtToken tokens[], RtPointer values[],
 				{
 					for(j=0; j<size; j++)
 					{
-						RtString item = new char[strlen(reinterpret_cast<RtString*>(value)[j])];
+						RtString item = new char[strlen(reinterpret_cast<RtString*>(value)[j])+1];
 						strcpy(item, reinterpret_cast<RtString*>(value)[j]);
 						_message << "\"" << item << "\" ";
 						delete[](item);
