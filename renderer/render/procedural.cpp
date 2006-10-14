@@ -263,7 +263,7 @@ extern "C" RtVoid	RiProcDynamicLoad( RtPointer data, RtFloat detail )
 //
 extern "C" RtVoid	RiProcDelayedReadArchive( RtPointer data, RtFloat detail )
 {
-	RiReadArchive( (RtToken) ((char**) data)[0], NULL );
+	RiReadArchive( (RtToken) ((char**) data)[0], NULL, RI_NULL );
 	STATS_INC( GEO_prc_created_dra );
 }
 
