@@ -1715,8 +1715,9 @@ class SceneSettings(BtoRObject):
 						if light.getProperty("GenShadowMap"):
 							# print light.object.getName()
 							#print dir(light)
-							shadows = self.shadows[light.objData["name"]]								
-							light.setShadowParms(shadows)
+							if self.shadows.has_key(light.objData["name"]):
+								shadows = self.shadows[light.objData["name"]]								
+								light.setShadowParms(shadows)
 					light.render()
 		else:
 			if lm.getProperty("UseAmbient"):
@@ -1727,8 +1728,9 @@ class SceneSettings(BtoRObject):
 				frame = Blender.Get("curframe")
 				if self.lighting.getProperty("GenShadowMaps"):
 					if light.getProperty("GenShadowMap"):
-						shadows = self.shadows[light.objData["name"]]			
-						light.setShadowParms(shadows)	
+						if self.shadows.has_key(light.objData["name"]):
+							shadows = self.shadows[light.objData["name"]]			
+							light.setShadowParms(shadows)	
 				light.render()
 				
 					

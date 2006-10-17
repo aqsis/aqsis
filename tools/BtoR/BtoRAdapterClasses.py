@@ -2377,6 +2377,8 @@ class LampAdapter(ObjectAdapter):
 		elif self.object.getData().getType() == 2:
 			# figure out how to render the direction this light is pointing
 			return ["shadow"]
+		else: 
+			return []
 		
 		
 	def initObjectData(self):
@@ -3234,7 +3236,7 @@ class LampUI(ObjectUI):
 		self.options["shader"] = ["Light Shader:", BtoRShaderType(shader)]
 		self.properties["shader"] = IProperty(self.options["shader"][1])
 		self.properties["shader"].setWidth(self.scroller.width - 15)
-		self.properties["shader"].setName("Imager Shader:")
+		self.properties["shader"].setName("Light Shader:")
 		self.optionOrder.insert(0, "shader")
 		self.editors["shader"] = IPropertyEditor(self.properties["shader"])
 		self.editors["shader"].setParent(self.scroller)	
