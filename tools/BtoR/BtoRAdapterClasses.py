@@ -2319,6 +2319,10 @@ class LampAdapter(ObjectAdapter):
 			ri.RiTransform(matrix)
 
 		self.genChecksum()
+	
+	def getClippingRange(self):
+		light = self.object.getData()		
+		return [light.getClipStart(), light.getClipEnd()]
 			
 	def getRenderProjection(self):
 		if self.object.getData().getType() == 0:
@@ -2354,7 +2358,8 @@ class LampAdapter(ObjectAdapter):
 			if params.has_key("shadowName"):
 				self.shader.setParamValue("shadow", params["shadow"]["shadowName"])
 		elif sparams.has_key("shadowname"):
-			if params.has_key("shadowName"):
+			print params
+			if params.has_key("shadow"):
 				self.shader.setParamValue("shadowname", params["shadow"]["shadowName"])
 			
 		#elif shadername == "shadowspot" or shadername == "shadowdistant" or shadername == "bml":
@@ -2682,21 +2687,22 @@ class CameraAdapter(ObjectAdapter):
 		""" generate Renderman data for this object """		
 		shader = self.getProperty("shader").getObject()		
 		# self.objEditor.shaderButton.title = self.imagerShader.shader_menu.getValue()
-		if self.getProperty("autoImager"):
-			print "setting imager"
-			bWorld = Blender.World.GetCurrent()
-			if bWorld != None: 
-				if bWorld.hor != [0, 0, 0]:
-					ri.RiDeclare("bgcolor", "uniform color")
-					ri.RiDeclare("background", "uniform color")
-					iparams = { "bgcolor" : [bWorld.hor[0], bWorld.hor[1], bWorld.hor[2]], "background" : [bWorld.hor[0], bWorld.hor[1], bWorld.hor[2]] }
-					ri.RiImager( "background", iparams )
-			
-		elif shader.shader != None:
-			if shader.getShaderName() != None:
-				shader.updateShaderParams()
-				ishader = shader.shader				
-				ri.RiImager(ishader.shadername, ishader.params()) # and done
+		if self.settings.renderer != "Pixie":
+			if self.getProperty("autoImager"):				
+				bWorld = Blender.World.GetCurrent()
+				if bWorld != None: 
+					if bWorld.hor != [0, 0, 0]:
+						ri.RiDeclare("bgcolor", "uniform color")
+						ri.RiDeclare("background", "uniform color")
+						iparams = { "bgcolor" : [bWorld.hor[0], bWorld.hor[1], bWorld.hor[2]], "background" : [bWorld.hor[0], bWorld.hor[1], bWorld.hor[2]] }
+						ri.RiImager( "background", iparams )
+				
+			elif shader.shader != None:
+				if shader.getShaderName() != None and shader.getShaderName != "None Selected":				
+					shader.updateShaderParams()
+					ishader = shader.shader					
+					if ishader.shadername != "" or ishader.shaderName() != None:
+						ri.RiImager(ishader.shadername, ishader.params()) # and done
 			
 					
 		scene = Blender.Scene.GetCurrent()

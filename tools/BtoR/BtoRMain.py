@@ -835,14 +835,12 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 		
 	def select(self, file):
 		path = os.path.dirname(file)
+		print path
 		if not os.path.exists(path):
 			self.evt_manager.showErrorDialog("That path does not exist!", "Error! That path does not exist! Please choose one that does.")
 		else:
-			if self.activeButton == self.shaderBrowse:
-				self.shaderPathList = path		
-			elif self.activeButton == self.outputBrowse:
-				self.outputPath = path
-			self.update(None)
+			self.outputpath.setValue(path)
+			
 		
 	def getEditor(self):
 		return self.editor	
@@ -1649,12 +1647,20 @@ class SceneSettings(BtoRObject):
 		ri.RiPixelSamples(1, 1)
 		ri.RiPixelFilter("box", 1, 1)			
 		ri.RiHider("hidden", {"uniform float jitter" : [0], "uniform string depthfilter" : "midpoint"})
-
+		
 		ri.RiDisplay(shadowFile, "zfile", "z")			
 		if light.getProperty("ShowZBuffer"):
-			ri.RiDisplay("+view_from_light" + shadowName, "zframebuffer", "z")
+			ri.RiDisplay("+view_from_light " + shadowName, "zframebuffer", "z")
 		projection = light.getRenderProjection()			
-		ri.RiProjection(projection, "fov", 92) # 92 degrees projection
+		if projection == "orthographic":
+			ri.RiProjection(projection)
+			# setup the clipping ratio
+			xrange = light.getClippingRange()
+			#ri.RiClipping(0.1, 1000)
+			ri.RiScreenWindow(-5, 5, -5, 5)
+			
+		else:
+			ri.RiProjection(projection, "fov", 92) # 92 degrees projection
 		ri.RiShadingRate(4.0)
 		light.doCameraTransform(direction)
 		ri.RiWorldBegin()
@@ -3445,7 +3451,9 @@ class GenericShader(BtoRObject):
 				self.shader = cgkit.rmshader.RMShader()
 				self.initCompiledShaderParams(self.shaderParms, self.shader)				
 				self.setupParamProperties()
-				 
+		else:
+			self.shader = cgkit.rmshader.RMShader()
+			
 		if self.shader == None:
 			self.shader = cgkit.rmshader.RMShader() # blank shader
 			
