@@ -17,7 +17,7 @@ def aqsl_emitter(target, source, env):
 
 # Create a builder (that uses the emitter) to build .slx files from .sl files
 # The use of abspath is so that aqsl's directory doesn't have to be added to the shell path.
-bld = Builder(action = aqsl[0].abspath + ' -o $TARGET $SOURCE',
+bld = Builder(action = '"' + aqsl[0].abspath + '"' + ' -o "$TARGET" "$SOURCE"',
               emitter = aqsl_emitter,
               suffix = '.slx', src_suffix = '.sl')
 
