@@ -2238,6 +2238,12 @@ class LampAdapter(ObjectAdapter):
 	def generateRSL(self):
 		""" Create RSL for this light. """
 		pass
+	def getScreenWindow(self, camera):
+		""" Figure out the mapping between screen space and world space for an orthographic transform """
+		# get the camera's matrix.
+		cMat = camera.getMatrix()
+		# this gives me the camera's transform matrix.
+		# now what I have to do is 
 		
 	def genCheckSum(self):
 		# the only settings I care about are
@@ -3007,7 +3013,7 @@ class ObjectUI:
 		self.lighting = dict["instBtoRLightManager"]
 		self.mat_selector = self.materials.getSelector()
 		
-		self.editorPanel = ui.Panel(4, 50, 255,  320, "Empty Panel", "", None, False)
+		self.editorPanel = ui.Panel(4, 70, 255,  320, "Empty Panel", "", None, False)
 		self.editorPanel.titleColor = [255,255,255, 255]
 		self.editorPanel.hasHeader = False
 		self.editorPanel.cornermask = 0
@@ -3199,6 +3205,7 @@ class LampUI(ObjectUI):
 				"DepthFilter" : ["Midpoint Depthfilter?", True],
 				"ShadowmapSamples" : ["ShadowMap Samples:", 1],
 				"ShadowMapJitter" : ["ShadowMap Jitter:", 0.0],
+				"ShadowMapWindow" : ["ScreenWindow Size:", {"5" : 5, "10" : 10, "15": 15, "20" : 20, "50" : 50, "100" : 100 }, "5"],
 				"ShowZBuffer" : ["Show Z Buffer?", False],
 				"Group" : ["Occlusion Group:", {"None Selected":"none Selected"}, "None Selected"]}
 					
@@ -3212,6 +3219,7 @@ class LampUI(ObjectUI):
 					"IncludeWithAO",					
 					"transformLight",
 					"DepthFilter",
+					"ShadowMapWindow",
 					"ShowZBuffer"]	
 		# occlusion group property here
 		# "Group",					
