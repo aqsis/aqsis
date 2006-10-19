@@ -29,6 +29,7 @@ opts.Add('fltk_include_path', 'Point to the fltk header files', '')
 opts.Add('fltk_lib_path', 'Point to the fltk library files', '')
 opts.Add('exr_include_path', 'Point to the OpenEXR header files', '')
 opts.Add('exr_lib_path', 'Point to the OpenEXR library files', '')
+opts.Add(BoolOption('no_fltk', 'Build without FLTK support', '0'))
 opts.Add(BoolOption('no_exr', 'Build without OpenEXR support', '0'))
 opts.Add(BoolOption('debug', 'Build with debug options enabled', '0'))
 
