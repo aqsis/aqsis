@@ -41,7 +41,7 @@
 
 	<xsl:template match="Procedure" mode="macro">
 		<xsl:if test="not(./NoCache)">
-			<xsl:value-of select="concat('#define Cache_', @name, '\&#xa;')"/>
+			<xsl:value-of select="concat('#define CACHE_', translate(@name,'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'), '\&#xa;')"/>
 			<xsl:value-of select="string('&#x9;if( QGetRenderContext()->pCurrentObject()) \&#xa;')"/>
 			<xsl:text>	{ \
 			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \

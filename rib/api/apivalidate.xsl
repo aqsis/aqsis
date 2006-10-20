@@ -15,7 +15,7 @@
 	</xsl:template>
 
 	<xsl:template match="Procedure">
-		<xsl:value-of select="concat('#define Validate_', @name)"/>
+		<xsl:value-of select="concat('#define VALIDATE_', translate(@name, 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'))"/>
 		<xsl:if test="Valid">
 			<xsl:value-of select="string(' \&#xa;')"/>
 			<xsl:text>{ \&#xa;</xsl:text>

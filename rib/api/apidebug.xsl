@@ -30,7 +30,7 @@
 	</xsl:template>
 
 	<xsl:template match="Procedure" mode="macro">
-		<xsl:value-of select="concat('#define Debug_', @name, ' ')"/>
+		<xsl:value-of select="concat('#define DEBUG_', translate(@name, 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'), ' ')"/>
 		<xsl:value-of select="concat(@name, 'Debug(')"/>
 		<xsl:apply-templates select="Arguments/Argument" mode="macro_call"/>
 		<xsl:text>);&#xa;</xsl:text>
