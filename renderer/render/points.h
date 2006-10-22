@@ -282,7 +282,15 @@ class CqPoints : public CqSurface
 		{
 			TqUint i;
 			for ( i = 0; i < nVertices(); i++ )
-				pData->SetValue( static_cast<SLT>( pParam->pValue() [ m_KDTree.aLeaves()[ i ] ] ), i );
+			{
+				IqShaderData* arrayValue;
+				TqUint j;
+				for(j = 0; j<pParam->Count(); j++)
+				{
+					arrayValue = pData->ArrayEntry(j);
+					arrayValue->SetValue( static_cast<SLT>( pParam->pValue() [ m_KDTree.aLeaves()[ i ] ] ), i );
+				}
+			}
 		}
 
 	private:

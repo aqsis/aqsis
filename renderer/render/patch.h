@@ -66,25 +66,31 @@ class CqSurfacePatchBicubic : public CqSurface
 			CqForwardDiffBezier<T> vFD3( 1.0f / vSize );
 			CqForwardDiffBezier<T> uFD0( 1.0f / uSize );
 
-			vFD0.CalcForwardDiff( pParam->pValue() [ 0 ], pParam->pValue() [ 4 ], pParam->pValue() [ 8 ], pParam->pValue() [ 12 ] );
-			vFD1.CalcForwardDiff( pParam->pValue() [ 1 ], pParam->pValue() [ 5 ], pParam->pValue() [ 9 ], pParam->pValue() [ 13 ] );
-			vFD2.CalcForwardDiff( pParam->pValue() [ 2 ], pParam->pValue() [ 6 ], pParam->pValue() [ 10 ], pParam->pValue() [ 14 ] );
-			vFD3.CalcForwardDiff( pParam->pValue() [ 3 ], pParam->pValue() [ 7 ], pParam->pValue() [ 11 ], pParam->pValue() [ 15 ] );
-
-			TqInt iv, iu;
-			for ( iv = 0; iv <= vSize; iv++ )
+			IqShaderData* arrayValue;
+			TqUint i;
+			for(i = 0; i<pParam->Count(); i++)
 			{
-				T vA = vFD0.GetValue();
-				T vB = vFD1.GetValue();
-				T vC = vFD2.GetValue();
-				T vD = vFD3.GetValue();
-				uFD0.CalcForwardDiff( vA, vB, vC, vD );
+				vFD0.CalcForwardDiff( pParam->pValue(0) [ i ], pParam->pValue(4) [ i ], pParam->pValue(8) [ i ], pParam->pValue(12) [ i ] );
+				vFD1.CalcForwardDiff( pParam->pValue(1) [ i ], pParam->pValue(5) [ i ], pParam->pValue(9) [ i ], pParam->pValue(13) [ i ] );
+				vFD2.CalcForwardDiff( pParam->pValue(2) [ i ], pParam->pValue(6) [ i ], pParam->pValue(10) [ i ], pParam->pValue(14) [ i ] );
+				vFD3.CalcForwardDiff( pParam->pValue(3) [ i ], pParam->pValue(7) [ i ], pParam->pValue(11) [ i ], pParam->pValue(15) [ i ] );
 
-				for ( iu = 0; iu <= uSize; iu++ )
+				TqInt iv, iu;
+				for ( iv = 0; iv <= vSize; iv++ )
 				{
-					T vec = uFD0.GetValue();
-					TqInt igrid = static_cast<TqInt>( ( iv * ( uSize + 1 ) ) + iu );
-					pData->SetValue( static_cast<SLT>( vec ), igrid );
+					T vA = vFD0.GetValue();
+					T vB = vFD1.GetValue();
+					T vC = vFD2.GetValue();
+					T vD = vFD3.GetValue();
+					uFD0.CalcForwardDiff( vA, vB, vC, vD );
+
+					for ( iu = 0; iu <= uSize; iu++ )
+					{
+						T vec = uFD0.GetValue();
+						TqInt igrid = static_cast<TqInt>( ( iv * ( uSize + 1 ) ) + iu );
+						arrayValue = pData->ArrayEntry(i);
+						arrayValue->SetValue( static_cast<SLT>( vec ), igrid );
+					}
 				}
 			}
 		}

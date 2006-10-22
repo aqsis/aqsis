@@ -1396,6 +1396,7 @@ CqBound CqSurfaceNURBS::Bound() const
 
 void CqSurfaceNURBS::NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData )
 {
+	assert(pParameter->Count() == pData->ArrayLength());
 	CqVector4D vec1;
 	TqInt iv;
 	for ( iv = 0; iv <= vDiceSize; iv++ )
@@ -1416,14 +1417,26 @@ void CqSurfaceNURBS::NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqIn
 					case type_float:
 					{
 						CqParameterTyped<TqFloat, TqFloat>* pTParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParameter );
-						pData->SetValue( Evaluate( su, sv, pTParam ), igrid );
+						IqShaderData* arrayValue;
+						TqUint i;
+						for(i = 0; i<pParameter->Count(); i++)
+						{
+							arrayValue = pData->ArrayEntry(i);
+							arrayValue->SetValue( Evaluate(su, sv, pTParam, i), igrid);
+						}
 						break;
 					}
 
 					case type_integer:
 					{
 						CqParameterTyped<TqInt, TqFloat>* pTParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParameter );
-						pData->SetValue( Evaluate( su, sv, pTParam ), igrid );
+						IqShaderData* arrayValue;
+						TqUint i;
+						for(i = 0; i<pParameter->Count(); i++)
+						{
+							arrayValue = pData->ArrayEntry(i);
+							arrayValue->SetValue( Evaluate(su, sv, pTParam, i), igrid);
+						}
 						break;
 					}
 
@@ -1432,35 +1445,65 @@ void CqSurfaceNURBS::NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqIn
 					case type_vector:
 					{
 						CqParameterTyped<CqVector3D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParameter );
-						pData->SetValue( Evaluate( su, sv, pTParam ), igrid );
+						IqShaderData* arrayValue;
+						TqUint i;
+						for(i = 0; i<pParameter->Count(); i++)
+						{
+							arrayValue = pData->ArrayEntry(i);
+							arrayValue->SetValue( Evaluate(su, sv, pTParam, i), igrid);
+						}
 						break;
 					}
 
 					case type_hpoint:
 					{
 						CqParameterTyped<CqVector4D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( pParameter );
-						pData->SetValue( static_cast<CqVector3D>( Evaluate( su, sv, pTParam ) ), igrid );
+						IqShaderData* arrayValue;
+						TqUint i;
+						for(i = 0; i<pParameter->Count(); i++)
+						{
+							arrayValue = pData->ArrayEntry(i);
+							arrayValue->SetValue( static_cast<CqVector3D>( Evaluate( su, sv, pTParam ) ), igrid );
+						}
 						break;
 					}
 
 					case type_color:
 					{
 						CqParameterTyped<CqColor, CqColor>* pTParam = static_cast<CqParameterTyped<CqColor, CqColor>*>( pParameter );
-						pData->SetValue( Evaluate( su, sv, pTParam ), igrid );
+						IqShaderData* arrayValue;
+						TqUint i;
+						for(i = 0; i<pParameter->Count(); i++)
+						{
+							arrayValue = pData->ArrayEntry(i);
+							arrayValue->SetValue( Evaluate(su, sv, pTParam, i), igrid);
+						}
 						break;
 					}
 
 					case type_string:
 					{
 						CqParameterTyped<CqString, CqString>* pTParam = static_cast<CqParameterTyped<CqString, CqString>*>( pParameter );
-						pData->SetValue( Evaluate( su, sv, pTParam ), igrid );
+						IqShaderData* arrayValue;
+						TqUint i;
+						for(i = 0; i<pParameter->Count(); i++)
+						{
+							arrayValue = pData->ArrayEntry(i);
+							arrayValue->SetValue( Evaluate(su, sv, pTParam, i), igrid);
+						}
 						break;
 					}
 
 					case type_matrix:
 					{
 						CqParameterTyped<CqMatrix, CqMatrix>* pTParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParameter );
-						pData->SetValue( Evaluate( su, sv, pTParam ), igrid );
+						IqShaderData* arrayValue;
+						TqUint i;
+						for(i = 0; i<pParameter->Count(); i++)
+						{
+							arrayValue = pData->ArrayEntry(i);
+							arrayValue->SetValue( Evaluate(su, sv, pTParam, i), igrid);
+						}
 						break;
 					}
 

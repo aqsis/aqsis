@@ -594,9 +594,15 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 				for ( iu = 0; iu <= uSize; iu++ )
 				{
 					TqFloat u = ( 1.0f / uSize ) * iu;
-					T vec = BilinearEvaluate( pParam->pValue() [ 0 ], pParam->pValue() [ 1 ], pParam->pValue() [ 2 ], pParam->pValue() [ 3 ], u, v );
-					TqInt igrid = static_cast<TqInt>( ( iv * ( uSize + 1 ) ) + iu );
-					pData->SetValue( static_cast<SLT>( vec ), igrid );
+					IqShaderData* arrayValue;
+					TqUint i;
+					for(i = 0; i<pParam->Count(); i++)
+					{
+						arrayValue = pData->ArrayEntry(i);
+						T vec = BilinearEvaluate( pParam->pValue(0) [ i ], pParam->pValue(1) [ i ], pParam->pValue(2) [ i ], pParam->pValue(3) [ i ], u, v );
+						TqInt igrid = static_cast<TqInt>( ( iv * ( uSize + 1 ) ) + iu );
+						arrayValue->SetValue( static_cast<SLT>( vec ), igrid );
+					}
 				}
 			}
 		}
@@ -608,19 +614,23 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 			CqParameterTyped<T, SLT>* pTResult1 = static_cast<CqParameterTyped<T, SLT>*>( pResult1 );
 			CqParameterTyped<T, SLT>* pTResult2 = static_cast<CqParameterTyped<T, SLT>*>( pResult2 );
 
-			if ( u )
+			TqUint i;
+			for(i = 0; i<pParam->Count(); i++)
 			{
-				pTResult2->pValue( 1 ) [ 0 ] = pTParam->pValue( 1 ) [ 0 ];
-				pTResult2->pValue( 3 ) [ 0 ] = pTParam->pValue( 3 ) [ 0 ];
-				pTResult1->pValue( 1 ) [ 0 ] = pTResult2->pValue( 0 ) [ 0 ] = static_cast<T>( ( pTParam->pValue( 0 ) [ 0 ] + pTParam->pValue( 1 ) [ 0 ] ) * 0.5 );
-				pTResult1->pValue( 3 ) [ 0 ] = pTResult2->pValue( 2 ) [ 0 ] = static_cast<T>( ( pTParam->pValue( 2 ) [ 0 ] + pTParam->pValue( 3 ) [ 0 ] ) * 0.5 );
-			}
-			else
-			{
-				pTResult2->pValue( 2 ) [ 0 ] = pTParam->pValue( 2 ) [ 0 ];
-				pTResult2->pValue( 3 ) [ 0 ] = pTParam->pValue( 3 ) [ 0 ];
-				pTResult1->pValue( 2 ) [ 0 ] = pTResult2->pValue( 0 ) [ 0 ] = static_cast<T>( ( pTParam->pValue( 0 ) [ 0 ] + pTParam->pValue( 2 ) [ 0 ] ) * 0.5 );
-				pTResult1->pValue( 3 ) [ 0 ] = pTResult2->pValue( 1 ) [ 0 ] = static_cast<T>( ( pTParam->pValue( 1 ) [ 0 ] + pTParam->pValue( 3 ) [ 0 ] ) * 0.5 );
+				if ( u )
+				{
+					pTResult2->pValue( 1 ) [ i ] = pTParam->pValue( 1 ) [ i ];
+					pTResult2->pValue( 3 ) [ i ] = pTParam->pValue( 3 ) [ i ];
+					pTResult1->pValue( 1 ) [ i ] = pTResult2->pValue( 0 ) [ i ] = static_cast<T>( ( pTParam->pValue( 0 ) [ i ] + pTParam->pValue( 1 ) [ i ] ) * 0.5 );
+					pTResult1->pValue( 3 ) [ i ] = pTResult2->pValue( 2 ) [ i ] = static_cast<T>( ( pTParam->pValue( 2 ) [ i ] + pTParam->pValue( 3 ) [ i ] ) * 0.5 );
+				}
+				else
+				{
+					pTResult2->pValue( 2 ) [ i ] = pTParam->pValue( 2 ) [ i ];
+					pTResult2->pValue( 3 ) [ i ] = pTParam->pValue( 3 ) [ i ];
+					pTResult1->pValue( 2 ) [ i ] = pTResult2->pValue( 0 ) [ i ] = static_cast<T>( ( pTParam->pValue( 0 ) [ i ] + pTParam->pValue( 2 ) [ i ] ) * 0.5 );
+					pTResult1->pValue( 3 ) [ i ] = pTResult2->pValue( 1 ) [ i ] = static_cast<T>( ( pTParam->pValue( 1 ) [ i ] + pTParam->pValue( 3 ) [ i ] ) * 0.5 );
+				}
 			}
 		}
 

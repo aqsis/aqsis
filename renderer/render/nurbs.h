@@ -239,7 +239,7 @@ class CqSurfaceNURBS : public CqSurface
 		void	DersBasisFunctions( TqFloat u, TqUint i, std::vector<TqFloat>& U, TqInt k, TqInt n, std::vector<std::vector<TqFloat> >& ders );
 
 		template <class T, class SLT>
-		T	Evaluate( TqFloat u, TqFloat v, CqParameterTyped<T, SLT>* pParam )
+		T	Evaluate( TqFloat u, TqFloat v, CqParameterTyped<T, SLT>* pParam, TqInt arrayIndex = 0 )
 		{
 			std::vector<TqFloat> Nu( m_uOrder );
 			std::vector<TqFloat> Nv( m_vOrder );
@@ -259,7 +259,7 @@ class CqSurfaceNURBS : public CqSurface
 				T temp = T();
 				TqUint vind = vspan - vDegree() + l;
 				for ( k = 0; k <= uDegree(); k++ )
-					temp = static_cast<T>( temp + Nu[ k ] * ( *pParam->pValue( ( vind * m_cuVerts ) + uind + k ) ) );
+					temp = static_cast<T>( temp + Nu[ k ] * ( pParam->pValue( ( vind * m_cuVerts ) + uind + k )[arrayIndex] ) );
 				S = static_cast<T>( S + Nv[ l ] * temp );
 			}
 			return ( S );
