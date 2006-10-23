@@ -27,7 +27,7 @@
     \date    12/08/2002
 */
 
-#ifndef AQSIS_SYSTEM_WIN32
+#ifndef _WIN32
 #pragma implementation
 #endif // AQSIS_SYSTEM_WIN32
 
@@ -56,27 +56,27 @@ START_NAMESPACE( Aqsis )
 // print cube for debug
 void MarchingCubes::print_cube()
 {
-	//Aqsis::log() << warning << _cube[0] << " " <<  _cube[1] << " " <<  _cube[2] << " " <<  _cube[3] << " " <<  _cube[4] << " " <<  _cube[5] << " " <<  _cube[6] << " " <<  _cube[7]) << std::endl;
+	//Aqsis::log() << warning << i_cube[0] << " " <<  i_cube[1] << " " <<  i_cube[2] << " " <<  i_cube[3] << " " <<  i_cube[4] << " " <<  i_cube[5] << " " <<  i_cube[6] << " " <<  i_cube[7]) << std::endl;
 }
 
 //_____________________________________________________________________________
 // Constructor
-MarchingCubes::MarchingCubes( const TqInt size_x /*= -1*/, const TqInt size_y /*= -1*/, const TqInt size_z /*= -1*/ ) :
+MarchingCubes::MarchingCubes( const TqInt x /*= -1*/, const TqInt y /*= -1*/, const TqInt z /*= -1*/ ) :
 		//-----------------------------------------------------------------------------
-		_originalMC(TqFalse),
-		_size_x    (size_x),
-		_size_y    (size_y),
-		_size_z    (size_z),
-		_data      ((float*)NULL),
-		_x_verts   (( TqInt *)NULL),
-		_y_verts   (( TqInt *)NULL),
-		_z_verts   (( TqInt *)NULL),
-		_nverts    (0),
-		_ntrigs    (0),
-		_Nverts    (0),
-		_Ntrigs    (0),
-		_vertices  (( Vertex *)NULL),
-		_triangles ((Triangle*)NULL)
+		i_originalMC(TqFalse),
+		i_size_x    (x),
+		i_size_y    (y),
+		i_size_z    (z),
+		i_data      ((float*)NULL),
+		i_x_verts   (( TqInt *)NULL),
+		i_y_verts   (( TqInt *)NULL),
+		i_z_verts   (( TqInt *)NULL),
+		i_nverts    (0),
+		i_ntrigs    (0),
+		i_Nverts    (0),
+		i_Ntrigs    (0),
+		i_vertices  (( Vertex *)NULL),
+		i_triangles ((Triangle*)NULL)
 {}
 //_____________________________________________________________________________
 
@@ -102,37 +102,37 @@ void MarchingCubes::run()
 
 	compute_intersection_points( ) ;
 
-	for( _k = 0 ; _k < _size_z-1 ; _k++ )
-		for( _j = 0 ; _j < _size_y-1 ; _j++ )
-			for( _i = 0 ; _i < _size_x-1 ; _i++ )
+	for( i_k = 0 ; i_k < i_size_z-1 ; i_k++ )
+		for( i_j = 0 ; i_j < i_size_y-1 ; i_j++ )
+			for( i_i = 0 ; i_i < i_size_x-1 ; i_i++ )
 			{
-				_lut_entry = 0 ;
+				i_lut_entry = 0 ;
 				for( TqInt p = 0 ; p < 8 ; ++p )
 				{
-					_cube[p] = get_data( _i+((p^(p>>1))&1), _j+((p>>1)&1), _k+((p>>2)&1) ) ;
-					if( fabs( _cube[p] ) < FLT_EPSILON )
-						_cube[p] = FLT_EPSILON ;
-					if( _cube[p] > 0 )
-						_lut_entry += 1 << p ;
+					i_cube[p] = get_data( i_i+((p^(p>>1))&1), i_j+((p>>1)&1), i_k+((p>>2)&1) ) ;
+					if( fabs( i_cube[p] ) < FLT_EPSILON )
+						i_cube[p] = FLT_EPSILON ;
+					if( i_cube[p] > 0 )
+						i_lut_entry += 1 << p ;
 				}
 				/*
-				    if( ( _cube[0] = get_data( _i , _j , _k ) ) > 0 ) _lut_entry +=   1 ;
-				    if( ( _cube[1] = get_data(_i+1, _j , _k ) ) > 0 ) _lut_entry +=   2 ;
-				    if( ( _cube[2] = get_data(_i+1,_j+1, _k ) ) > 0 ) _lut_entry +=   4 ;
-				    if( ( _cube[3] = get_data( _i ,_j+1, _k ) ) > 0 ) _lut_entry +=   8 ;
-				    if( ( _cube[4] = get_data( _i , _j ,_k+1) ) > 0 ) _lut_entry +=  16 ;
-				    if( ( _cube[5] = get_data(_i+1, _j ,_k+1) ) > 0 ) _lut_entry +=  32 ;
-				    if( ( _cube[6] = get_data(_i+1,_j+1,_k+1) ) > 0 ) _lut_entry +=  64 ;
-				    if( ( _cube[7] = get_data( _i ,_j+1,_k+1) ) > 0 ) _lut_entry += 128 ;
+				    if( ( i_cube[0] = get_data( i_i , i_j , i_k ) ) > 0 ) i_lut_entry +=   1 ;
+				    if( ( i_cube[1] = get_data(i_i+1, i_j , i_k ) ) > 0 ) i_lut_entry +=   2 ;
+				    if( ( i_cube[2] = get_data(i_i+1,i_j+1, i_k ) ) > 0 ) i_lut_entry +=   4 ;
+				    if( ( i_cube[3] = get_data( i_i ,i_j+1, i_k ) ) > 0 ) i_lut_entry +=   8 ;
+				    if( ( i_cube[4] = get_data( i_i , i_j ,i_k+1) ) > 0 ) i_lut_entry +=  16 ;
+				    if( ( i_cube[5] = get_data(i_i+1, i_j ,i_k+1) ) > 0 ) i_lut_entry +=  32 ;
+				    if( ( i_cube[6] = get_data(i_i+1,i_j+1,i_k+1) ) > 0 ) i_lut_entry +=  64 ;
+				    if( ( i_cube[7] = get_data(i_i ,i_j+1,i_k+1) ) > 0 ) i_lut_entry += 128 ;
 				*/
 				process_cube( ) ;
 			}
 
 	/*
 	  printf("Marching Cubes end: cpu %ld\n", clock() ) ;
-	  for( _i = 0 ; _i < 15 ; _i++ )
+	  for( i_i = 0 ; i_i < 15 ; i_i++ )
 	  {
-	    printf("  %7d cases %d\n", _N[_i], _i ) ;
+	    printf("  %7d cases %d\n", i_N[i_i], i_i ) ;
 	  }
 	*/
 }
@@ -145,31 +145,31 @@ void MarchingCubes::run()
 void MarchingCubes::init_temps()
 //-----------------------------------------------------------------------------
 {
-	TqLong howmany = _size_x * _size_y * _size_z;
-	_data    = new TqFloat[ howmany ];
-	_x_verts = new TqInt  [ howmany ];
-	_y_verts = new TqInt  [ howmany ];
-	_z_verts = new TqInt  [ howmany ];
+	TqLong howmany = i_size_x * i_size_y * i_size_z;
+	i_data    = new TqFloat[ howmany ];
+	i_x_verts = new TqInt  [ howmany ];
+	i_y_verts = new TqInt  [ howmany ];
+	i_z_verts = new TqInt  [ howmany ];
 
-	while (!_x_verts || !_y_verts || !_z_verts)
+	while (!i_x_verts || !i_y_verts || !i_z_verts)
 	{
 		clean_temps();
-		_size_x /= 2;
-		_size_y /= 2;
-		_size_z /= 2;
-		howmany = _size_x * _size_y * _size_z;
+		i_size_x /= 2;
+		i_size_y /= 2;
+		i_size_z /= 2;
+		howmany = i_size_x * i_size_y * i_size_z;
 
-		_data    = new TqFloat[ howmany ];
-		_x_verts = new TqInt  [ howmany ];
-		_y_verts = new TqInt  [ howmany ];
-		_z_verts = new TqInt  [ howmany ];
+		i_data    = new TqFloat[ howmany ];
+		i_x_verts = new TqInt  [ howmany ];
+		i_y_verts = new TqInt  [ howmany ];
+		i_z_verts = new TqInt  [ howmany ];
 
 	}
-	memset( _x_verts, -1, howmany * sizeof( TqInt ) ) ;
-	memset( _y_verts, -1, howmany * sizeof( TqInt ) ) ;
-	memset( _z_verts, -1, howmany * sizeof( TqInt ) ) ;
+	memset( i_x_verts, -1, howmany * sizeof( TqInt ) ) ;
+	memset( i_y_verts, -1, howmany * sizeof( TqInt ) ) ;
+	memset( i_z_verts, -1, howmany * sizeof( TqInt ) ) ;
 
-	memset( _N, 0, 15 * sizeof(TqInt) ) ;
+	memset( i_N, 0, 15 * sizeof(TqInt) ) ;
 }
 //_____________________________________________________________________________
 
@@ -182,10 +182,10 @@ void MarchingCubes::init_all ()
 {
 	init_temps() ;
 
-	_nverts = _ntrigs = 0 ;
-	_Nverts = _Ntrigs = ALLOC_SIZE ;
-	_vertices  = new Vertex  [_Nverts] ;
-	_triangles = new Triangle[_Ntrigs] ;
+	i_nverts = i_ntrigs = 0 ;
+	i_Nverts = i_Ntrigs = ALLOC_SIZE ;
+	i_vertices  = new Vertex  [i_Nverts] ;
+	i_triangles = new Triangle[i_Ntrigs] ;
 }
 //_____________________________________________________________________________
 
@@ -196,19 +196,19 @@ void MarchingCubes::init_all ()
 void MarchingCubes::clean_temps()
 //-----------------------------------------------------------------------------
 {
-	if (_data)
-		delete [] _data;
-	if (_x_verts)
-		delete [] _x_verts;
-	if (_y_verts)
-		delete [] _y_verts;
-	if (_z_verts)
-		delete [] _z_verts;
+	if (i_data)
+		delete [] i_data;
+	if (i_x_verts)
+		delete [] i_x_verts;
+	if (i_y_verts)
+		delete [] i_y_verts;
+	if (i_z_verts)
+		delete [] i_z_verts;
 
-	_data     = (float*)NULL ;
-	_x_verts  = (int*)NULL ;
-	_y_verts  = (int*)NULL ;
-	_z_verts  = (int*)NULL ;
+	i_data     = (float*)NULL ;
+	i_x_verts  = (int*)NULL ;
+	i_y_verts  = (int*)NULL ;
+	i_z_verts  = (int*)NULL ;
 }
 //_____________________________________________________________________________
 
@@ -220,14 +220,14 @@ void MarchingCubes::clean_all()
 //-----------------------------------------------------------------------------
 {
 	clean_temps() ;
-	delete [] _vertices  ;
-	delete [] _triangles ;
-	_vertices  = (Vertex   *)NULL ;
-	_triangles = (Triangle *)NULL ;
-	_nverts = _ntrigs = 0 ;
-	_Nverts = _Ntrigs = 0 ;
+	delete [] i_vertices  ;
+	delete [] i_triangles ;
+	i_vertices  = (Vertex   *)NULL ;
+	i_triangles = (Triangle *)NULL ;
+	i_nverts = i_ntrigs = 0 ;
+	i_Nverts = i_Ntrigs = 0 ;
 
-	_size_x = _size_y = _size_z = -1 ;
+	i_size_x = i_size_y = i_size_z = -1 ;
 }
 //_____________________________________________________________________________
 
@@ -242,52 +242,52 @@ void MarchingCubes::clean_all()
 void MarchingCubes::compute_intersection_points( )
 //-----------------------------------------------------------------------------
 {
-	for( _k = 0 ; _k < _size_z ; _k++ )
-		for( _j = 0 ; _j < _size_y ; _j++ )
-			for( _i = 0 ; _i < _size_x ; _i++ )
+	for( i_k = 0 ; i_k < i_size_z ; i_k++ )
+		for( i_j = 0 ; i_j < i_size_y ; i_j++ )
+			for( i_i = 0 ; i_i < i_size_x ; i_i++ )
 			{
-				_cube[0] = get_data( _i, _j, _k ) ;
-				if( _i < _size_x - 1 )
-					_cube[1] = get_data(_i+1, _j , _k ) ;
+				i_cube[0] = get_data( i_i, i_j, i_k ) ;
+				if( i_i < i_size_x - 1 )
+					i_cube[1] = get_data(i_i+1, i_j , i_k ) ;
 				else
-					_cube[1] = _cube[0] ;
+					i_cube[1] = i_cube[0] ;
 
-				if( _j < _size_y - 1 )
-					_cube[3] = get_data( _i ,_j+1, _k ) ;
+				if( i_j < i_size_y - 1 )
+					i_cube[3] = get_data( i_i ,i_j+1, i_k ) ;
 				else
-					_cube[3] = _cube[0] ;
+					i_cube[3] = i_cube[0] ;
 
-				if( _k < _size_z - 1 )
-					_cube[4] = get_data( _i , _j ,_k+1) ;
+				if( i_k < i_size_z - 1 )
+					i_cube[4] = get_data( i_i , i_j ,i_k+1) ;
 				else
-					_cube[4] = _cube[0] ;
+					i_cube[4] = i_cube[0] ;
 
-				if( fabs( _cube[0] ) < FLT_EPSILON )
-					_cube[0] = FLT_EPSILON ;
-				if( fabs( _cube[1] ) < FLT_EPSILON )
-					_cube[1] = FLT_EPSILON ;
-				if( fabs( _cube[3] ) < FLT_EPSILON )
-					_cube[3] = FLT_EPSILON ;
-				if( fabs( _cube[4] ) < FLT_EPSILON )
-					_cube[4] = FLT_EPSILON ;
+				if( fabs( i_cube[0] ) < FLT_EPSILON )
+					i_cube[0] = FLT_EPSILON ;
+				if( fabs( i_cube[1] ) < FLT_EPSILON )
+					i_cube[1] = FLT_EPSILON ;
+				if( fabs( i_cube[3] ) < FLT_EPSILON )
+					i_cube[3] = FLT_EPSILON ;
+				if( fabs( i_cube[4] ) < FLT_EPSILON )
+					i_cube[4] = FLT_EPSILON ;
 
-				if( _cube[0] < 0 )
+				if( i_cube[0] < 0 )
 				{
-					if( _cube[1] > 0 )
-						set_x_vert( add_x_vertex( ), _i,_j,_k ) ;
-					if( _cube[3] > 0 )
-						set_y_vert( add_y_vertex( ), _i,_j,_k ) ;
-					if( _cube[4] > 0 )
-						set_z_vert( add_z_vertex( ), _i,_j,_k ) ;
+					if( i_cube[1] > 0 )
+						set_x_vert( add_x_vertex( ), i_i,i_j,i_k ) ;
+					if( i_cube[3] > 0 )
+						set_y_vert( add_y_vertex( ), i_i,i_j,i_k ) ;
+					if( i_cube[4] > 0 )
+						set_z_vert( add_z_vertex( ), i_i,i_j,i_k ) ;
 				}
 				else
 				{
-					if( _cube[1] < 0 )
-						set_x_vert( add_x_vertex( ), _i,_j,_k ) ;
-					if( _cube[3] < 0 )
-						set_y_vert( add_y_vertex( ), _i,_j,_k ) ;
-					if( _cube[4] < 0 )
-						set_z_vert( add_z_vertex( ), _i,_j,_k ) ;
+					if( i_cube[1] < 0 )
+						set_x_vert( add_x_vertex( ), i_i,i_j,i_k ) ;
+					if( i_cube[3] < 0 )
+						set_y_vert( add_y_vertex( ), i_i,i_j,i_k ) ;
+					if( i_cube[4] < 0 )
+						set_z_vert( add_z_vertex( ), i_i,i_j,i_k ) ;
 				}
 			}
 }
@@ -309,45 +309,45 @@ TqBool MarchingCubes::test_face( TqChar face )
 	{
 			case -1 :
 			case 1 :
-			A = _cube[0] ;
-			B = _cube[4] ;
-			C = _cube[5] ;
-			D = _cube[1] ;
+			A = i_cube[0] ;
+			B = i_cube[4] ;
+			C = i_cube[5] ;
+			D = i_cube[1] ;
 			break ;
 			case -2 :
 			case 2 :
-			A = _cube[1] ;
-			B = _cube[5] ;
-			C = _cube[6] ;
-			D = _cube[2] ;
+			A = i_cube[1] ;
+			B = i_cube[5] ;
+			C = i_cube[6] ;
+			D = i_cube[2] ;
 			break ;
 			case -3 :
 			case 3 :
-			A = _cube[2] ;
-			B = _cube[6] ;
-			C = _cube[7] ;
-			D = _cube[3] ;
+			A = i_cube[2] ;
+			B = i_cube[6] ;
+			C = i_cube[7] ;
+			D = i_cube[3] ;
 			break ;
 			case -4 :
 			case 4 :
-			A = _cube[3] ;
-			B = _cube[7] ;
-			C = _cube[4] ;
-			D = _cube[0] ;
+			A = i_cube[3] ;
+			B = i_cube[7] ;
+			C = i_cube[4] ;
+			D = i_cube[0] ;
 			break ;
 			case -5 :
 			case 5 :
-			A = _cube[0] ;
-			B = _cube[3] ;
-			C = _cube[2] ;
-			D = _cube[1] ;
+			A = i_cube[0] ;
+			B = i_cube[3] ;
+			C = i_cube[2] ;
+			D = i_cube[1] ;
 			break ;
 			case -6 :
 			case 6 :
-			A = _cube[4] ;
-			B = _cube[7] ;
-			C = _cube[6] ;
-			D = _cube[5] ;
+			A = i_cube[4] ;
+			B = i_cube[7] ;
+			C = i_cube[6] ;
+			D = i_cube[5] ;
 			break ;
 			default :
 			printf( "Invalid face code %d\n", face ) ;
@@ -374,127 +374,127 @@ TqBool MarchingCubes::test_interior( TqChar s )
 	TqChar  test =  0 ;
 	TqChar  edge = -1 ; // reference edge of the triangulation
 
-	switch( _case )
+	switch( i_case )
 	{
 			case  4 :
 			case 10 :
-			a = ( _cube[4] - _cube[0] ) * ( _cube[6] - _cube[2] ) - ( _cube[7] - _cube[3] ) * ( _cube[5] - _cube[1] ) ;
-			b =  _cube[2] * ( _cube[4] - _cube[0] ) + _cube[0] * ( _cube[6] - _cube[2] )
-			     - _cube[1] * ( _cube[7] - _cube[3] ) - _cube[3] * ( _cube[5] - _cube[1] ) ;
+			a = ( i_cube[4] - i_cube[0] ) * ( i_cube[6] - i_cube[2] ) - ( i_cube[7] - i_cube[3] ) * ( i_cube[5] - i_cube[1] ) ;
+			b =  i_cube[2] * ( i_cube[4] - i_cube[0] ) + i_cube[0] * ( i_cube[6] - i_cube[2] )
+			     - i_cube[1] * ( i_cube[7] - i_cube[3] ) - i_cube[3] * ( i_cube[5] - i_cube[1] ) ;
 			t = - b / (2*a) ;
 			if( t<0 || t>1 )
 				return s>0 ;
 
-			At = _cube[0] + ( _cube[4] - _cube[0] ) * t ;
-			Bt = _cube[3] + ( _cube[7] - _cube[3] ) * t ;
-			Ct = _cube[2] + ( _cube[6] - _cube[2] ) * t ;
-			Dt = _cube[1] + ( _cube[5] - _cube[1] ) * t ;
+			At = i_cube[0] + ( i_cube[4] - i_cube[0] ) * t ;
+			Bt = i_cube[3] + ( i_cube[7] - i_cube[3] ) * t ;
+			Ct = i_cube[2] + ( i_cube[6] - i_cube[2] ) * t ;
+			Dt = i_cube[1] + ( i_cube[5] - i_cube[1] ) * t ;
 			break ;
 
 			case  6 :
 			case  7 :
 			case 12 :
 			case 13 :
-			switch( _case )
+			switch( i_case )
 			{
 					case  6 :
-					edge = test6 [_config][2] ;
+					edge = test6 [i_config][2] ;
 					break ;
 					case  7 :
-					edge = test7 [_config][4] ;
+					edge = test7 [i_config][4] ;
 					break ;
 					case 12 :
-					edge = test12[_config][3] ;
+					edge = test12[i_config][3] ;
 					break ;
 					case 13 :
-					edge = tiling13_5_1[_config][_subconfig][0] ;
+					edge = tiling13_5_1[i_config][i_subconfig][0] ;
 					break ;
 			}
 			switch( edge )
 			{
 					case  0 :
-					t  = _cube[0] / ( _cube[0] - _cube[1] ) ;
+					t  = i_cube[0] / ( i_cube[0] - i_cube[1] ) ;
 					At = 0 ;
-					Bt = _cube[3] + ( _cube[2] - _cube[3] ) * t ;
-					Ct = _cube[7] + ( _cube[6] - _cube[7] ) * t ;
-					Dt = _cube[4] + ( _cube[5] - _cube[4] ) * t ;
+					Bt = i_cube[3] + ( i_cube[2] - i_cube[3] ) * t ;
+					Ct = i_cube[7] + ( i_cube[6] - i_cube[7] ) * t ;
+					Dt = i_cube[4] + ( i_cube[5] - i_cube[4] ) * t ;
 					break ;
 					case  1 :
-					t  = _cube[1] / ( _cube[1] - _cube[2] ) ;
+					t  = i_cube[1] / ( i_cube[1] - i_cube[2] ) ;
 					At = 0 ;
-					Bt = _cube[0] + ( _cube[3] - _cube[0] ) * t ;
-					Ct = _cube[4] + ( _cube[7] - _cube[4] ) * t ;
-					Dt = _cube[5] + ( _cube[6] - _cube[5] ) * t ;
+					Bt = i_cube[0] + ( i_cube[3] - i_cube[0] ) * t ;
+					Ct = i_cube[4] + ( i_cube[7] - i_cube[4] ) * t ;
+					Dt = i_cube[5] + ( i_cube[6] - i_cube[5] ) * t ;
 					break ;
 					case  2 :
-					t  = _cube[2] / ( _cube[2] - _cube[3] ) ;
+					t  = i_cube[2] / ( i_cube[2] - i_cube[3] ) ;
 					At = 0 ;
-					Bt = _cube[1] + ( _cube[0] - _cube[1] ) * t ;
-					Ct = _cube[5] + ( _cube[4] - _cube[5] ) * t ;
-					Dt = _cube[6] + ( _cube[7] - _cube[6] ) * t ;
+					Bt = i_cube[1] + ( i_cube[0] - i_cube[1] ) * t ;
+					Ct = i_cube[5] + ( i_cube[4] - i_cube[5] ) * t ;
+					Dt = i_cube[6] + ( i_cube[7] - i_cube[6] ) * t ;
 					break ;
 					case  3 :
-					t  = _cube[3] / ( _cube[3] - _cube[0] ) ;
+					t  = i_cube[3] / ( i_cube[3] - i_cube[0] ) ;
 					At = 0 ;
-					Bt = _cube[2] + ( _cube[1] - _cube[2] ) * t ;
-					Ct = _cube[6] + ( _cube[5] - _cube[6] ) * t ;
-					Dt = _cube[7] + ( _cube[4] - _cube[7] ) * t ;
+					Bt = i_cube[2] + ( i_cube[1] - i_cube[2] ) * t ;
+					Ct = i_cube[6] + ( i_cube[5] - i_cube[6] ) * t ;
+					Dt = i_cube[7] + ( i_cube[4] - i_cube[7] ) * t ;
 					break ;
 					case  4 :
-					t  = _cube[4] / ( _cube[4] - _cube[5] ) ;
+					t  = i_cube[4] / ( i_cube[4] - i_cube[5] ) ;
 					At = 0 ;
-					Bt = _cube[7] + ( _cube[6] - _cube[7] ) * t ;
-					Ct = _cube[3] + ( _cube[2] - _cube[3] ) * t ;
-					Dt = _cube[0] + ( _cube[1] - _cube[0] ) * t ;
+					Bt = i_cube[7] + ( i_cube[6] - i_cube[7] ) * t ;
+					Ct = i_cube[3] + ( i_cube[2] - i_cube[3] ) * t ;
+					Dt = i_cube[0] + ( i_cube[1] - i_cube[0] ) * t ;
 					break ;
 					case  5 :
-					t  = _cube[5] / ( _cube[5] - _cube[6] ) ;
+					t  = i_cube[5] / ( i_cube[5] - i_cube[6] ) ;
 					At = 0 ;
-					Bt = _cube[4] + ( _cube[7] - _cube[4] ) * t ;
-					Ct = _cube[0] + ( _cube[3] - _cube[0] ) * t ;
-					Dt = _cube[1] + ( _cube[2] - _cube[1] ) * t ;
+					Bt = i_cube[4] + ( i_cube[7] - i_cube[4] ) * t ;
+					Ct = i_cube[0] + ( i_cube[3] - i_cube[0] ) * t ;
+					Dt = i_cube[1] + ( i_cube[2] - i_cube[1] ) * t ;
 					break ;
 					case  6 :
-					t  = _cube[6] / ( _cube[6] - _cube[7] ) ;
+					t  = i_cube[6] / ( i_cube[6] - i_cube[7] ) ;
 					At = 0 ;
-					Bt = _cube[5] + ( _cube[4] - _cube[5] ) * t ;
-					Ct = _cube[1] + ( _cube[0] - _cube[1] ) * t ;
-					Dt = _cube[2] + ( _cube[3] - _cube[2] ) * t ;
+					Bt = i_cube[5] + ( i_cube[4] - i_cube[5] ) * t ;
+					Ct = i_cube[1] + ( i_cube[0] - i_cube[1] ) * t ;
+					Dt = i_cube[2] + ( i_cube[3] - i_cube[2] ) * t ;
 					break ;
 					case  7 :
-					t  = _cube[7] / ( _cube[7] - _cube[4] ) ;
+					t  = i_cube[7] / ( i_cube[7] - i_cube[4] ) ;
 					At = 0 ;
-					Bt = _cube[6] + ( _cube[5] - _cube[6] ) * t ;
-					Ct = _cube[2] + ( _cube[1] - _cube[2] ) * t ;
-					Dt = _cube[3] + ( _cube[0] - _cube[3] ) * t ;
+					Bt = i_cube[6] + ( i_cube[5] - i_cube[6] ) * t ;
+					Ct = i_cube[2] + ( i_cube[1] - i_cube[2] ) * t ;
+					Dt = i_cube[3] + ( i_cube[0] - i_cube[3] ) * t ;
 					break ;
 					case  8 :
-					t  = _cube[0] / ( _cube[0] - _cube[4] ) ;
+					t  = i_cube[0] / ( i_cube[0] - i_cube[4] ) ;
 					At = 0 ;
-					Bt = _cube[3] + ( _cube[7] - _cube[3] ) * t ;
-					Ct = _cube[2] + ( _cube[6] - _cube[2] ) * t ;
-					Dt = _cube[1] + ( _cube[5] - _cube[1] ) * t ;
+					Bt = i_cube[3] + ( i_cube[7] - i_cube[3] ) * t ;
+					Ct = i_cube[2] + ( i_cube[6] - i_cube[2] ) * t ;
+					Dt = i_cube[1] + ( i_cube[5] - i_cube[1] ) * t ;
 					break ;
 					case  9 :
-					t  = _cube[1] / ( _cube[1] - _cube[5] ) ;
+					t  = i_cube[1] / ( i_cube[1] - i_cube[5] ) ;
 					At = 0 ;
-					Bt = _cube[0] + ( _cube[4] - _cube[0] ) * t ;
-					Ct = _cube[3] + ( _cube[7] - _cube[3] ) * t ;
-					Dt = _cube[2] + ( _cube[6] - _cube[2] ) * t ;
+					Bt = i_cube[0] + ( i_cube[4] - i_cube[0] ) * t ;
+					Ct = i_cube[3] + ( i_cube[7] - i_cube[3] ) * t ;
+					Dt = i_cube[2] + ( i_cube[6] - i_cube[2] ) * t ;
 					break ;
 					case 10 :
-					t  = _cube[2] / ( _cube[2] - _cube[6] ) ;
+					t  = i_cube[2] / ( i_cube[2] - i_cube[6] ) ;
 					At = 0 ;
-					Bt = _cube[1] + ( _cube[5] - _cube[1] ) * t ;
-					Ct = _cube[0] + ( _cube[4] - _cube[0] ) * t ;
-					Dt = _cube[3] + ( _cube[7] - _cube[3] ) * t ;
+					Bt = i_cube[1] + ( i_cube[5] - i_cube[1] ) * t ;
+					Ct = i_cube[0] + ( i_cube[4] - i_cube[0] ) * t ;
+					Dt = i_cube[3] + ( i_cube[7] - i_cube[3] ) * t ;
 					break ;
 					case 11 :
-					t  = _cube[3] / ( _cube[3] - _cube[7] ) ;
+					t  = i_cube[3] / ( i_cube[3] - i_cube[7] ) ;
 					At = 0 ;
-					Bt = _cube[2] + ( _cube[6] - _cube[2] ) * t ;
-					Ct = _cube[1] + ( _cube[5] - _cube[1] ) * t ;
-					Dt = _cube[0] + ( _cube[4] - _cube[0] ) * t ;
+					Bt = i_cube[2] + ( i_cube[6] - i_cube[2] ) * t ;
+					Ct = i_cube[1] + ( i_cube[5] - i_cube[1] ) * t ;
+					Dt = i_cube[0] + ( i_cube[4] - i_cube[0] ) * t ;
 					break ;
 					default :
 					printf( "Invalid edge %d\n", edge ) ;
@@ -504,7 +504,7 @@ TqBool MarchingCubes::test_interior( TqChar s )
 			break ;
 
 			default :
-			printf( "Invalid ambiguous case %d\n", _case ) ;
+			printf( "Invalid ambiguous case %d\n", i_case ) ;
 			print_cube() ;
 			break ;
 	}
@@ -569,378 +569,378 @@ TqBool MarchingCubes::test_interior( TqChar s )
 void MarchingCubes::process_cube( )
 //-----------------------------------------------------------------------------
 {
-	_N[_case]++ ;
+	i_N[i_case]++ ;
 
-	if( _originalMC )
+	if( i_originalMC )
 	{
 		TqChar nt = 0 ;
-		while( casesClassic[_lut_entry][3*nt] != -1 )
+		while( casesClassic[i_lut_entry][3*nt] != -1 )
 			nt++ ;
-		add_triangle( casesClassic[_lut_entry], nt ) ;
+		add_triangle( casesClassic[i_lut_entry], nt ) ;
 		return ;
 	}
 
 	TqInt   v12 = -1 ;
-	_case   = cases[_lut_entry][0] ;
-	_config = cases[_lut_entry][1] ;
-	_subconfig = 0 ;
+	i_case   = cases[i_lut_entry][0] ;
+	i_config = cases[i_lut_entry][1] ;
+	i_subconfig = 0 ;
 
-	switch( _case )
+	switch( i_case )
 	{
 			case  0 :
 			break ;
 
 			case  1 :
-			add_triangle( tiling1[_config], 1 ) ;
+			add_triangle( tiling1[i_config], 1 ) ;
 			break ;
 
 			case  2 :
-			add_triangle( tiling2[_config], 2 ) ;
+			add_triangle( tiling2[i_config], 2 ) ;
 			break ;
 
 			case  3 :
-			if( test_face( test3[_config]) )
-				add_triangle( tiling3_2[_config], 4 ) ; // 3.2
+			if( test_face( test3[i_config]) )
+				add_triangle( tiling3_2[i_config], 4 ) ; // 3.2
 			else
-				add_triangle( tiling3_1[_config], 2 ) ; // 3.1
+				add_triangle( tiling3_1[i_config], 2 ) ; // 3.1
 			break ;
 
 			case  4 :
-			if( test_interior( test4[_config]) )
-				add_triangle( tiling4_1[_config], 2 ) ; // 4.1.1
+			if( test_interior( test4[i_config]) )
+				add_triangle( tiling4_1[i_config], 2 ) ; // 4.1.1
 			else
-				add_triangle( tiling4_2[_config], 6 ) ; // 4.1.2
+				add_triangle( tiling4_2[i_config], 6 ) ; // 4.1.2
 			break ;
 
 			case  5 :
-			add_triangle( tiling5[_config], 3 ) ;
+			add_triangle( tiling5[i_config], 3 ) ;
 			break ;
 
 			case  6 :
-			if( test_face( test6[_config][0]) )
-				add_triangle( tiling6_2[_config], 5 ) ; // 6.2
+			if( test_face( test6[i_config][0]) )
+				add_triangle( tiling6_2[i_config], 5 ) ; // 6.2
 			else
 			{
-				if( test_interior( test6[_config][1]) )
-					add_triangle( tiling6_1_1[_config], 3 ) ; // 6.1.1
+				if( test_interior( test6[i_config][1]) )
+					add_triangle( tiling6_1_1[i_config], 3 ) ; // 6.1.1
 				else
-					add_triangle( tiling6_1_2[_config], 7 ) ; // 6.1.2
+					add_triangle( tiling6_1_2[i_config], 7 ) ; // 6.1.2
 			}
 			break ;
 
 			case  7 :
-			if( test_face( test7[_config][0] ) )
-				_subconfig +=  1 ;
-			if( test_face( test7[_config][1] ) )
-				_subconfig +=  2 ;
-			if( test_face( test7[_config][2] ) )
-				_subconfig +=  4 ;
-			switch( _subconfig )
+			if( test_face( test7[i_config][0] ) )
+				i_subconfig +=  1 ;
+			if( test_face( test7[i_config][1] ) )
+				i_subconfig +=  2 ;
+			if( test_face( test7[i_config][2] ) )
+				i_subconfig +=  4 ;
+			switch( i_subconfig )
 			{
 					case 0 :
-					add_triangle( tiling7_1[_config], 3 ) ;
+					add_triangle( tiling7_1[i_config], 3 ) ;
 					break ;
 					case 1 :
-					add_triangle( tiling7_2[_config][0], 5 ) ;
+					add_triangle( tiling7_2[i_config][0], 5 ) ;
 					break ;
 					case 2 :
-					add_triangle( tiling7_2[_config][1], 5 ) ;
+					add_triangle( tiling7_2[i_config][1], 5 ) ;
 					break ;
 					case 3 :
 					v12 = add_c_vertex() ;
-					add_triangle( tiling7_3[_config][0], 9, v12 ) ;
+					add_triangle( tiling7_3[i_config][0], 9, v12 ) ;
 					break ;
 					case 4 :
-					add_triangle( tiling7_2[_config][2], 5 ) ;
+					add_triangle( tiling7_2[i_config][2], 5 ) ;
 					break ;
 					case 5 :
 					v12 = add_c_vertex() ;
-					add_triangle( tiling7_3[_config][1], 9, v12 ) ;
+					add_triangle( tiling7_3[i_config][1], 9, v12 ) ;
 					break ;
 					case 6 :
 					v12 = add_c_vertex() ;
-					add_triangle( tiling7_3[_config][2], 9, v12 ) ;
+					add_triangle( tiling7_3[i_config][2], 9, v12 ) ;
 					break ;
 					case 7 :
-					if( test_interior( test7[_config][3]) )
-						add_triangle( tiling7_4_2[_config], 9 ) ;
+					if( test_interior( test7[i_config][3]) )
+						add_triangle( tiling7_4_2[i_config], 9 ) ;
 					else
-						add_triangle( tiling7_4_1[_config], 5 ) ;
+						add_triangle( tiling7_4_1[i_config], 5 ) ;
 					break ;
 			};
 			break ;
 
 			case  8 :
-			add_triangle( tiling8[_config], 2 ) ;
+			add_triangle( tiling8[i_config], 2 ) ;
 			break ;
 
 			case  9 :
-			add_triangle( tiling9[_config], 4 ) ;
+			add_triangle( tiling9[i_config], 4 ) ;
 			break ;
 
 			case 10 :
-			if( test_face( test10[_config][0]) )
+			if( test_face( test10[i_config][0]) )
 			{
-				if( test_face( test10[_config][1]) )
-					add_triangle( tiling10_1_1_[_config], 4 ) ; // 10.1.1
+				if( test_face( test10[i_config][1]) )
+					add_triangle( tiling10_1_1_[i_config], 4 ) ; // 10.1.1
 				else
 				{
 					v12 = add_c_vertex() ;
-					add_triangle( tiling10_2[_config], 8, v12 ) ; // 10.2
+					add_triangle( tiling10_2[i_config], 8, v12 ) ; // 10.2
 				}
 			}
 			else
 			{
-				if( test_face( test10[_config][1]) )
+				if( test_face( test10[i_config][1]) )
 				{
 					v12 = add_c_vertex() ;
-					add_triangle( tiling10_2_[_config], 8, v12 ) ; // 10.2
+					add_triangle( tiling10_2_[i_config], 8, v12 ) ; // 10.2
 				}
 				else
 				{
-					if( test_interior( test10[_config][2]) )
-						add_triangle( tiling10_1_1[_config], 4 ) ; // 10.1.1
+					if( test_interior( test10[i_config][2]) )
+						add_triangle( tiling10_1_1[i_config], 4 ) ; // 10.1.1
 					else
-						add_triangle( tiling10_1_2[_config], 8 ) ; // 10.1.2
+						add_triangle( tiling10_1_2[i_config], 8 ) ; // 10.1.2
 				}
 			}
 			break ;
 
 			case 11 :
-			add_triangle( tiling11[_config], 4 ) ;
+			add_triangle( tiling11[i_config], 4 ) ;
 			break ;
 
 			case 12 :
-			if( test_face( test12[_config][0]) )
+			if( test_face( test12[i_config][0]) )
 			{
-				if( test_face( test12[_config][1]) )
-					add_triangle( tiling12_1_1_[_config], 4 ) ; // 12.1.1
+				if( test_face( test12[i_config][1]) )
+					add_triangle( tiling12_1_1_[i_config], 4 ) ; // 12.1.1
 				else
 				{
 					v12 = add_c_vertex() ;
-					add_triangle( tiling12_2[_config], 8, v12 ) ; // 12.2
+					add_triangle( tiling12_2[i_config], 8, v12 ) ; // 12.2
 				}
 			}
 			else
 			{
-				if( test_face( test12[_config][1]) )
+				if( test_face( test12[i_config][1]) )
 				{
 					v12 = add_c_vertex() ;
-					add_triangle( tiling12_2_[_config], 8, v12 ) ; // 12.2
+					add_triangle( tiling12_2_[i_config], 8, v12 ) ; // 12.2
 				}
 				else
 				{
-					if( test_interior( test12[_config][2]) )
-						add_triangle( tiling12_1_1[_config], 4 ) ; // 12.1.1
+					if( test_interior( test12[i_config][2]) )
+						add_triangle( tiling12_1_1[i_config], 4 ) ; // 12.1.1
 					else
-						add_triangle( tiling12_1_2[_config], 8 ) ; // 12.1.2
+						add_triangle( tiling12_1_2[i_config], 8 ) ; // 12.1.2
 				}
 			}
 			break ;
 
 			case 13 :
-			if( test_face( test13[_config][0] ) )
-				_subconfig +=  1 ;
-			if( test_face( test13[_config][1] ) )
-				_subconfig +=  2 ;
-			if( test_face( test13[_config][2] ) )
-				_subconfig +=  4 ;
-			if( test_face( test13[_config][3] ) )
-				_subconfig +=  8 ;
-			if( test_face( test13[_config][4] ) )
-				_subconfig += 16 ;
-			if( test_face( test13[_config][5] ) )
-				_subconfig += 32 ;
-			switch( subconfig13[_subconfig] )
+			if( test_face( test13[i_config][0] ) )
+				i_subconfig +=  1 ;
+			if( test_face( test13[i_config][1] ) )
+				i_subconfig +=  2 ;
+			if( test_face( test13[i_config][2] ) )
+				i_subconfig +=  4 ;
+			if( test_face( test13[i_config][3] ) )
+				i_subconfig +=  8 ;
+			if( test_face( test13[i_config][4] ) )
+				i_subconfig += 16 ;
+			if( test_face( test13[i_config][5] ) )
+				i_subconfig += 32 ;
+			switch( subconfig13[i_subconfig] )
 			{
 					case 0 :/* 13.1 */
-					add_triangle( tiling13_1[_config], 4 ) ;
+					add_triangle( tiling13_1[i_config], 4 ) ;
 					break ;
 
 					case 1 :/* 13.2 */
-					add_triangle( tiling13_2[_config][0], 6 ) ;
+					add_triangle( tiling13_2[i_config][0], 6 ) ;
 					break ;
 					case 2 :/* 13.2 */
-					add_triangle( tiling13_2[_config][1], 6 ) ;
+					add_triangle( tiling13_2[i_config][1], 6 ) ;
 					break ;
 					case 3 :/* 13.2 */
-					add_triangle( tiling13_2[_config][2], 6 ) ;
+					add_triangle( tiling13_2[i_config][2], 6 ) ;
 					break ;
 					case 4 :/* 13.2 */
-					add_triangle( tiling13_2[_config][3], 6 ) ;
+					add_triangle( tiling13_2[i_config][3], 6 ) ;
 					break ;
 					case 5 :/* 13.2 */
-					add_triangle( tiling13_2[_config][4], 6 ) ;
+					add_triangle( tiling13_2[i_config][4], 6 ) ;
 					break ;
 					case 6 :/* 13.2 */
-					add_triangle( tiling13_2[_config][5], 6 ) ;
+					add_triangle( tiling13_2[i_config][5], 6 ) ;
 					break ;
 
 					case 7 :/* 13.3 */
 					v12 = add_c_vertex() ;
-					add_triangle( tiling13_3[_config][0], 10, v12 ) ;
+					add_triangle( tiling13_3[i_config][0], 10, v12 ) ;
 					break ;
 					case 8 :/* 13.3 */
 					v12 = add_c_vertex() ;
-					add_triangle( tiling13_3[_config][1], 10, v12 ) ;
+					add_triangle( tiling13_3[i_config][1], 10, v12 ) ;
 					break ;
 					case 9 :/* 13.3 */
 					v12 = add_c_vertex() ;
-					add_triangle( tiling13_3[_config][2], 10, v12 ) ;
+					add_triangle( tiling13_3[i_config][2], 10, v12 ) ;
 					break ;
 					case 10 :/* 13.3 */
 					v12 = add_c_vertex() ;
-					add_triangle( tiling13_3[_config][3], 10, v12 ) ;
+					add_triangle( tiling13_3[i_config][3], 10, v12 ) ;
 					break ;
 					case 11 :/* 13.3 */
 					v12 = add_c_vertex() ;
-					add_triangle( tiling13_3[_config][4], 10, v12 ) ;
+					add_triangle( tiling13_3[i_config][4], 10, v12 ) ;
 					break ;
 					case 12 :/* 13.3 */
 					v12 = add_c_vertex() ;
-					add_triangle( tiling13_3[_config][5], 10, v12 ) ;
+					add_triangle( tiling13_3[i_config][5], 10, v12 ) ;
 					break ;
 					case 13 :/* 13.3 */
 					v12 = add_c_vertex() ;
-					add_triangle( tiling13_3[_config][6], 10, v12 ) ;
+					add_triangle( tiling13_3[i_config][6], 10, v12 ) ;
 					break ;
 					case 14 :/* 13.3 */
 					v12 = add_c_vertex() ;
-					add_triangle( tiling13_3[_config][7], 10, v12 ) ;
+					add_triangle( tiling13_3[i_config][7], 10, v12 ) ;
 					break ;
 					case 15 :/* 13.3 */
 					v12 = add_c_vertex() ;
-					add_triangle( tiling13_3[_config][8], 10, v12 ) ;
+					add_triangle( tiling13_3[i_config][8], 10, v12 ) ;
 					break ;
 					case 16 :/* 13.3 */
 					v12 = add_c_vertex() ;
-					add_triangle( tiling13_3[_config][9], 10, v12 ) ;
+					add_triangle( tiling13_3[i_config][9], 10, v12 ) ;
 					break ;
 					case 17 :/* 13.3 */
 					v12 = add_c_vertex() ;
-					add_triangle( tiling13_3[_config][10], 10, v12 ) ;
+					add_triangle( tiling13_3[i_config][10], 10, v12 ) ;
 					break ;
 					case 18 :/* 13.3 */
 					v12 = add_c_vertex() ;
-					add_triangle( tiling13_3[_config][11], 10, v12 ) ;
+					add_triangle( tiling13_3[i_config][11], 10, v12 ) ;
 					break ;
 
 					case 19 :/* 13.4 */
 					v12 = add_c_vertex() ;
-					add_triangle( tiling13_4[_config][0], 12, v12 ) ;
+					add_triangle( tiling13_4[i_config][0], 12, v12 ) ;
 					break ;
 					case 20 :/* 13.4 */
 					v12 = add_c_vertex() ;
-					add_triangle( tiling13_4[_config][1], 12, v12 ) ;
+					add_triangle( tiling13_4[i_config][1], 12, v12 ) ;
 					break ;
 					case 21 :/* 13.4 */
 					v12 = add_c_vertex() ;
-					add_triangle( tiling13_4[_config][2], 12, v12 ) ;
+					add_triangle( tiling13_4[i_config][2], 12, v12 ) ;
 					break ;
 					case 22 :/* 13.4 */
 					v12 = add_c_vertex() ;
-					add_triangle( tiling13_4[_config][3], 12, v12 ) ;
+					add_triangle( tiling13_4[i_config][3], 12, v12 ) ;
 					break ;
 
 					case 23 :/* 13.5 */
-					_subconfig = 0 ;
-					if( test_interior( test13[_config][6] ) )
-						add_triangle( tiling13_5_1[_config][0], 6 ) ;
+					i_subconfig = 0 ;
+					if( test_interior( test13[i_config][6] ) )
+						add_triangle( tiling13_5_1[i_config][0], 6 ) ;
 					else
-						add_triangle( tiling13_5_2[_config][0], 10 ) ;
+						add_triangle( tiling13_5_2[i_config][0], 10 ) ;
 					break ;
 					case 24 :/* 13.5 */
-					_subconfig = 1 ;
-					if( test_interior( test13[_config][6] ) )
-						add_triangle( tiling13_5_1[_config][1], 6 ) ;
+					i_subconfig = 1 ;
+					if( test_interior( test13[i_config][6] ) )
+						add_triangle( tiling13_5_1[i_config][1], 6 ) ;
 					else
-						add_triangle( tiling13_5_2[_config][1], 10 ) ;
+						add_triangle( tiling13_5_2[i_config][1], 10 ) ;
 					break ;
 					case 25 :/* 13.5 */
-					_subconfig = 2 ;
-					if( test_interior( test13[_config][6] ) )
-						add_triangle( tiling13_5_1[_config][2], 6 ) ;
+					i_subconfig = 2 ;
+					if( test_interior( test13[i_config][6] ) )
+						add_triangle( tiling13_5_1[i_config][2], 6 ) ;
 					else
-						add_triangle( tiling13_5_2[_config][2], 10 ) ;
+						add_triangle( tiling13_5_2[i_config][2], 10 ) ;
 					break ;
 					case 26 :/* 13.5 */
-					_subconfig = 3 ;
-					if( test_interior( test13[_config][6] ) )
-						add_triangle( tiling13_5_1[_config][3], 6 ) ;
+					i_subconfig = 3 ;
+					if( test_interior( test13[i_config][6] ) )
+						add_triangle( tiling13_5_1[i_config][3], 6 ) ;
 					else
-						add_triangle( tiling13_5_2[_config][3], 10 ) ;
+						add_triangle( tiling13_5_2[i_config][3], 10 ) ;
 					break ;
 
 					case 27 :/* 13.3 */
 					v12 = add_c_vertex() ;
-					add_triangle( tiling13_3_[_config][0], 10, v12 ) ;
+					add_triangle( tiling13_3_[i_config][0], 10, v12 ) ;
 					break ;
 					case 28 :/* 13.3 */
 					v12 = add_c_vertex() ;
-					add_triangle( tiling13_3_[_config][1], 10, v12 ) ;
+					add_triangle( tiling13_3_[i_config][1], 10, v12 ) ;
 					break ;
 					case 29 :/* 13.3 */
 					v12 = add_c_vertex() ;
-					add_triangle( tiling13_3_[_config][2], 10, v12 ) ;
+					add_triangle( tiling13_3_[i_config][2], 10, v12 ) ;
 					break ;
 					case 30 :/* 13.3 */
 					v12 = add_c_vertex() ;
-					add_triangle( tiling13_3_[_config][3], 10, v12 ) ;
+					add_triangle( tiling13_3_[i_config][3], 10, v12 ) ;
 					break ;
 					case 31 :/* 13.3 */
 					v12 = add_c_vertex() ;
-					add_triangle( tiling13_3_[_config][4], 10, v12 ) ;
+					add_triangle( tiling13_3_[i_config][4], 10, v12 ) ;
 					break ;
 					case 32 :/* 13.3 */
 					v12 = add_c_vertex() ;
-					add_triangle( tiling13_3_[_config][5], 10, v12 ) ;
+					add_triangle( tiling13_3_[i_config][5], 10, v12 ) ;
 					break ;
 					case 33 :/* 13.3 */
 					v12 = add_c_vertex() ;
-					add_triangle( tiling13_3_[_config][6], 10, v12 ) ;
+					add_triangle( tiling13_3_[i_config][6], 10, v12 ) ;
 					break ;
 					case 34 :/* 13.3 */
 					v12 = add_c_vertex() ;
-					add_triangle( tiling13_3_[_config][7], 10, v12 ) ;
+					add_triangle( tiling13_3_[i_config][7], 10, v12 ) ;
 					break ;
 					case 35 :/* 13.3 */
 					v12 = add_c_vertex() ;
-					add_triangle( tiling13_3_[_config][8], 10, v12 ) ;
+					add_triangle( tiling13_3_[i_config][8], 10, v12 ) ;
 					break ;
 					case 36 :/* 13.3 */
 					v12 = add_c_vertex() ;
-					add_triangle( tiling13_3_[_config][9], 10, v12 ) ;
+					add_triangle( tiling13_3_[i_config][9], 10, v12 ) ;
 					break ;
 					case 37 :/* 13.3 */
 					v12 = add_c_vertex() ;
-					add_triangle( tiling13_3_[_config][10], 10, v12 ) ;
+					add_triangle( tiling13_3_[i_config][10], 10, v12 ) ;
 					break ;
 					case 38 :/* 13.3 */
 					v12 = add_c_vertex() ;
-					add_triangle( tiling13_3_[_config][11], 10, v12 ) ;
+					add_triangle( tiling13_3_[i_config][11], 10, v12 ) ;
 					break ;
 
 					case 39 :/* 13.2 */
-					add_triangle( tiling13_2_[_config][0], 6 ) ;
+					add_triangle( tiling13_2_[i_config][0], 6 ) ;
 					break ;
 					case 40 :/* 13.2 */
-					add_triangle( tiling13_2_[_config][1], 6 ) ;
+					add_triangle( tiling13_2_[i_config][1], 6 ) ;
 					break ;
 					case 41 :/* 13.2 */
-					add_triangle( tiling13_2_[_config][2], 6 ) ;
+					add_triangle( tiling13_2_[i_config][2], 6 ) ;
 					break ;
 					case 42 :/* 13.2 */
-					add_triangle( tiling13_2_[_config][3], 6 ) ;
+					add_triangle( tiling13_2_[i_config][3], 6 ) ;
 					break ;
 					case 43 :/* 13.2 */
-					add_triangle( tiling13_2_[_config][4], 6 ) ;
+					add_triangle( tiling13_2_[i_config][4], 6 ) ;
 					break ;
 					case 44 :/* 13.2 */
-					add_triangle( tiling13_2_[_config][5], 6 ) ;
+					add_triangle( tiling13_2_[i_config][5], 6 ) ;
 					break ;
 
 					case 45 :/* 13.1 */
-					add_triangle( tiling13_1_[_config], 4 ) ;
+					add_triangle( tiling13_1_[i_config], 4 ) ;
 					break ;
 
 					default :
@@ -950,7 +950,7 @@ void MarchingCubes::process_cube( )
 			break ;
 
 			case 14 :
-			add_triangle( tiling14[_config], 4 ) ;
+			add_triangle( tiling14[i_config], 4 ) ;
 			break ;
 	};
 }
@@ -971,40 +971,40 @@ void MarchingCubes::add_triangle( const TqInt* trig, TqChar n, TqInt v12 )
 		switch( trig[t] )
 		{
 				case  0 :
-				tv[ t3 ] = get_x_vert( _i , _j , _k ) ;
+				tv[ t3 ] = get_x_vert( i_i , i_j , i_k ) ;
 				break ;
 				case  1 :
-				tv[ t3 ] = get_y_vert(_i+1, _j , _k ) ;
+				tv[ t3 ] = get_y_vert(i_i+1, i_j , i_k ) ;
 				break ;
 				case  2 :
-				tv[ t3 ] = get_x_vert( _i ,_j+1, _k ) ;
+				tv[ t3 ] = get_x_vert( i_i ,i_j+1, i_k ) ;
 				break ;
 				case  3 :
-				tv[ t3 ] = get_y_vert( _i , _j , _k ) ;
+				tv[ t3 ] = get_y_vert( i_i , i_j , i_k ) ;
 				break ;
 				case  4 :
-				tv[ t3 ] = get_x_vert( _i , _j ,_k+1) ;
+				tv[ t3 ] = get_x_vert( i_i , i_j ,i_k+1) ;
 				break ;
 				case  5 :
-				tv[ t3 ] = get_y_vert(_i+1, _j ,_k+1) ;
+				tv[ t3 ] = get_y_vert(i_i+1, i_j ,i_k+1) ;
 				break ;
 				case  6 :
-				tv[ t3 ] = get_x_vert( _i ,_j+1,_k+1) ;
+				tv[ t3 ] = get_x_vert( i_i ,i_j+1,i_k+1) ;
 				break ;
 				case  7 :
-				tv[ t3 ] = get_y_vert( _i , _j ,_k+1) ;
+				tv[ t3 ] = get_y_vert( i_i , i_j ,i_k+1) ;
 				break ;
 				case  8 :
-				tv[ t3 ] = get_z_vert( _i , _j , _k ) ;
+				tv[ t3 ] = get_z_vert( i_i , i_j , i_k ) ;
 				break ;
 				case  9 :
-				tv[ t3 ] = get_z_vert(_i+1, _j , _k ) ;
+				tv[ t3 ] = get_z_vert(i_i+1, i_j , i_k ) ;
 				break ;
 				case 10 :
-				tv[ t3 ] = get_z_vert(_i+1,_j+1, _k ) ;
+				tv[ t3 ] = get_z_vert(i_i+1,i_j+1, i_k ) ;
 				break ;
 				case 11 :
-				tv[ t3 ] = get_z_vert( _i ,_j+1, _k ) ;
+				tv[ t3 ] = get_z_vert( i_i ,i_j+1, i_k ) ;
 				break ;
 				case 12 :
 				tv[ t3 ] = v12 ;
@@ -1015,25 +1015,25 @@ void MarchingCubes::add_triangle( const TqInt* trig, TqChar n, TqInt v12 )
 
 		if( tv[t3] == -1 )
 		{
-			printf("Marching Cubes: invalid triangle %d\n", _ntrigs+1) ;
+			printf("Marching Cubes: invalid triangle %d\n", i_ntrigs+1) ;
 			print_cube() ;
 		}
 
 		if( t3 == 2 )
 		{
-			if( _ntrigs >= _Ntrigs )
+			if( i_ntrigs >= i_Ntrigs )
 			{
-				Triangle *temp = _triangles ;
-				_triangles = new Triangle[ _ntrigs + 1024] ;
-				memcpy( _triangles, temp, _Ntrigs*sizeof(Triangle) ) ;
+				Triangle *temp = i_triangles ;
+				i_triangles = new Triangle[ i_ntrigs + 1024] ;
+				memcpy( i_triangles, temp, i_Ntrigs*sizeof(Triangle) ) ;
 				delete[] temp ;
 /*
-				printf("%d allocated triangles\n", _Ntrigs) ;
+				printf("%d allocated triangles\n", i_Ntrigs) ;
 */
-				_Ntrigs = _ntrigs + 1024 ;
+				i_Ntrigs = i_ntrigs + 1024 ;
 			}
 
-			Triangle *T = _triangles + _ntrigs++ ;
+			Triangle *T = i_triangles + i_ntrigs++ ;
 			T->v1    = tv[0] ;
 			T->v2    = tv[1] ;
 			T->v3    = tv[2] ;
@@ -1052,7 +1052,7 @@ float MarchingCubes::get_x_grad( const TqInt i, const TqInt j, const TqInt k ) c
 {
 	if( i > 0 )
 	{
-		if ( i < _size_x - 1 )
+		if ( i < i_size_x - 1 )
 			return ( get_data( i+1, j, k ) - get_data( i-1, j, k ) ) / 2 ;
 		else
 			return get_data( i, j, k ) - get_data( i-1, j, k ) ;
@@ -1067,7 +1067,7 @@ float MarchingCubes::get_y_grad( const TqInt i, const TqInt j, const TqInt k ) c
 {
 	if( j > 0 )
 	{
-		if ( j < _size_y - 1 )
+		if ( j < i_size_y - 1 )
 			return ( get_data( i, j+1, k ) - get_data( i, j-1, k ) ) / 2 ;
 		else
 			return get_data( i, j, k ) - get_data( i, j-1, k ) ;
@@ -1082,7 +1082,7 @@ float MarchingCubes::get_z_grad( const TqInt i, const TqInt j, const TqInt k ) c
 {
 	if( k > 0 )
 	{
-		if ( k < _size_z - 1 )
+		if ( k < i_size_z - 1 )
 			return ( get_data( i, j, k+1 ) - get_data( i, j, k-1 ) ) / 2 ;
 		else
 			return get_data( i, j, k ) - get_data( i, j, k-1 ) ;
@@ -1098,16 +1098,16 @@ float MarchingCubes::get_z_grad( const TqInt i, const TqInt j, const TqInt k ) c
 
 void MarchingCubes::test_vertex_addition()
 {
-	if( _nverts >= _Nverts )
+	if( i_nverts >= i_Nverts )
 	{
-		Vertex *temp = _vertices ;
-		_vertices = new Vertex[ _nverts  + 1024] ;
-		memcpy( _vertices, temp, _Nverts*sizeof(Vertex) ) ;
+		Vertex *temp = i_vertices ;
+		i_vertices = new Vertex[ i_nverts  + 1024] ;
+		memcpy( i_vertices, temp, i_Nverts*sizeof(Vertex) ) ;
 		delete[] temp ;
 /*
 		printf("%d allocated vertices\n", _Nverts) ;
 */
-		_Nverts = _nverts + 1024 ;
+		i_Nverts = i_nverts + 1024 ;
 	}
 }
 
@@ -1116,18 +1116,18 @@ TqInt MarchingCubes::add_x_vertex( )
 //-----------------------------------------------------------------------------
 {
 	test_vertex_addition() ;
-	Vertex *vert = _vertices + _nverts++ ;
+	Vertex *vert = i_vertices + i_nverts++ ;
 
-	TqFloat   u = ( _cube[0] ) / ( _cube[0] - _cube[1] ) ;
+	TqFloat   u = ( i_cube[0] ) / ( i_cube[0] - i_cube[1] ) ;
 
-	vert->x      = (float)_i+u;
-	vert->y      = (float) _j ;
-	vert->z      = (float) _k ;
+	vert->x      = (float)i_i+u;
+	vert->y      = (float) i_j ;
+	vert->z      = (float) i_k ;
 
 #ifdef COMPUTE_NORMALS
-	vert->nx = (1-u)*get_x_grad(_i,_j,_k) + u*get_x_grad(_i+1,_j,_k) ;
-	vert->ny = (1-u)*get_y_grad(_i,_j,_k) + u*get_y_grad(_i+1,_j,_k) ;
-	vert->nz = (1-u)*get_z_grad(_i,_j,_k) + u*get_z_grad(_i+1,_j,_k) ;
+	vert->nx = (1-u)*get_x_grad(i_i,i_j,i_k) + u*get_x_grad(i_i+1,i_j,i_k) ;
+	vert->ny = (1-u)*get_y_grad(i_i,i_j,i_k) + u*get_y_grad(i_i+1,i_j,i_k) ;
+	vert->nz = (1-u)*get_z_grad(i_i,i_j,i_k) + u*get_z_grad(i_i+1,i_j,i_k) ;
 
 	u = (float) sqrt( vert->nx * vert->nx + vert->ny * vert->ny +vert->nz * vert->nz ) ;
 	if( u > 0 )
@@ -1138,7 +1138,7 @@ TqInt MarchingCubes::add_x_vertex( )
 	}
 #endif
 
-	return _nverts-1 ;
+	return i_nverts-1 ;
 }
 //-----------------------------------------------------------------------------
 
@@ -1146,18 +1146,18 @@ TqInt MarchingCubes::add_y_vertex( )
 //-----------------------------------------------------------------------------
 {
 	test_vertex_addition() ;
-	Vertex *vert = _vertices + _nverts++ ;
+	Vertex *vert = i_vertices + i_nverts++ ;
 
-	TqFloat   u = ( _cube[0] ) / ( _cube[0] - _cube[3] ) ;
+	TqFloat   u = ( i_cube[0] ) / ( i_cube[0] - i_cube[3] ) ;
 
-	vert->x      = (float) _i ;
-	vert->y      = (float)_j+u;
-	vert->z      = (float) _k ;
+	vert->x      = (float) i_i ;
+	vert->y      = (float)i_j+u;
+	vert->z      = (float) i_k ;
 
 #ifdef COMPUTE_NORMALS
-	vert->nx = (1-u)*get_x_grad(_i,_j,_k) + u*get_x_grad(_i,_j+1,_k) ;
-	vert->ny = (1-u)*get_y_grad(_i,_j,_k) + u*get_y_grad(_i,_j+1,_k) ;
-	vert->nz = (1-u)*get_z_grad(_i,_j,_k) + u*get_z_grad(_i,_j+1,_k) ;
+	vert->nx = (1-u)*get_x_grad(i_i,i_j,i_k) + u*get_x_grad(i_i,i_j+1,i_k) ;
+	vert->ny = (1-u)*get_y_grad(i_i,i_j,i_k) + u*get_y_grad(i_i,i_j+1,i_k) ;
+	vert->nz = (1-u)*get_z_grad(i_i,i_j,i_k) + u*get_z_grad(i_i,i_j+1,i_k) ;
 
 	u = (float) sqrt( vert->nx * vert->nx + vert->ny * vert->ny +vert->nz * vert->nz ) ;
 	if( u > 0 )
@@ -1168,7 +1168,7 @@ TqInt MarchingCubes::add_y_vertex( )
 	}
 #endif
 
-	return _nverts-1 ;
+	return i_nverts-1 ;
 }
 //-----------------------------------------------------------------------------
 
@@ -1176,18 +1176,18 @@ TqInt MarchingCubes::add_z_vertex( )
 //-----------------------------------------------------------------------------
 {
 	test_vertex_addition() ;
-	Vertex *vert = _vertices + _nverts++ ;
+	Vertex *vert = i_vertices + i_nverts++ ;
 
-	TqFloat   u = ( _cube[0] ) / ( _cube[0] - _cube[4] ) ;
+	TqFloat   u = ( i_cube[0] ) / ( i_cube[0] - i_cube[4] ) ;
 
-	vert->x      = (float) _i ;
-	vert->y      = (float) _j ;
-	vert->z      = (float)_k+u;
+	vert->x      = (float) i_i ;
+	vert->y      = (float) i_j ;
+	vert->z      = (float)i_k+u;
 
 #ifdef COMPUTE_NORMALS
-	vert->nx = (1-u)*get_x_grad(_i,_j,_k) + u*get_x_grad(_i,_j,_k+1) ;
-	vert->ny = (1-u)*get_y_grad(_i,_j,_k) + u*get_y_grad(_i,_j,_k+1) ;
-	vert->nz = (1-u)*get_z_grad(_i,_j,_k) + u*get_z_grad(_i,_j,_k+1) ;
+	vert->nx = (1-u)*get_x_grad(i_i,i_j,i_k) + u*get_x_grad(i_i,i_j,i_k+1) ;
+	vert->ny = (1-u)*get_y_grad(i_i,i_j,i_k) + u*get_y_grad(i_i,i_j,i_k+1) ;
+	vert->nz = (1-u)*get_z_grad(i_i,i_j,i_k) + u*get_z_grad(i_i,i_j,i_k+1) ;
 
 	u = (float) sqrt( vert->nx * vert->nx + vert->ny * vert->ny +vert->nz * vert->nz ) ;
 	if( u > 0 )
@@ -1198,7 +1198,7 @@ TqInt MarchingCubes::add_z_vertex( )
 	}
 #endif
 
-	return _nverts-1 ;
+	return i_nverts-1 ;
 }
 
 
@@ -1206,7 +1206,7 @@ TqInt MarchingCubes::add_c_vertex( )
 //-----------------------------------------------------------------------------
 {
 	test_vertex_addition() ;
-	Vertex *vert = _vertices + _nverts++ ;
+	Vertex *vert = i_vertices + i_nverts++ ;
 
 	TqFloat  u = 0 ;
 	TqInt   vid ;
@@ -1217,11 +1217,11 @@ TqInt MarchingCubes::add_c_vertex( )
 #endif
 
 	// Computes the average of the intersection points of the cube
-	vid = get_x_vert( _i , _j , _k ) ;
+	vid = get_x_vert( i_i , i_j , i_k ) ;
 	if( vid != -1 )
 	{
 		++u ;
-		const Vertex &v = _vertices[vid] ;
+		const Vertex &v = i_vertices[vid] ;
 		vert->x += v.x ;
 		vert->y += v.y ;
 		vert->z += v.z ;
@@ -1231,11 +1231,11 @@ TqInt MarchingCubes::add_c_vertex( )
 		vert->nz += v.nz ;
 #endif
 	}
-	vid = get_y_vert(_i+1, _j , _k ) ;
+	vid = get_y_vert(i_i+1, i_j , i_k ) ;
 	if( vid != -1 )
 	{
 		++u ;
-		const Vertex &v = _vertices[vid] ;
+		const Vertex &v = i_vertices[vid] ;
 		vert->x += v.x ;
 		vert->y += v.y ;
 		vert->z += v.z ;
@@ -1245,11 +1245,11 @@ TqInt MarchingCubes::add_c_vertex( )
 		vert->nz += v.nz ;
 #endif
 	}
-	vid = get_x_vert( _i ,_j+1, _k ) ;
+	vid = get_x_vert( i_i ,i_j+1, i_k ) ;
 	if( vid != -1 )
 	{
 		++u ;
-		const Vertex &v = _vertices[vid] ;
+		const Vertex &v = i_vertices[vid] ;
 		vert->x += v.x ;
 		vert->y += v.y ;
 		vert->z += v.z ;
@@ -1259,11 +1259,11 @@ TqInt MarchingCubes::add_c_vertex( )
 		vert->nz += v.nz ;
 #endif
 	}
-	vid = get_y_vert( _i , _j , _k ) ;
+	vid = get_y_vert( i_i , i_j , i_k ) ;
 	if( vid != -1 )
 	{
 		++u ;
-		const Vertex &v = _vertices[vid] ;
+		const Vertex &v = i_vertices[vid] ;
 		vert->x += v.x ;
 		vert->y += v.y ;
 		vert->z += v.z ;
@@ -1273,11 +1273,11 @@ TqInt MarchingCubes::add_c_vertex( )
 		vert->nz += v.nz ;
 #endif
 	}
-	vid = get_x_vert( _i , _j ,_k+1) ;
+	vid = get_x_vert( i_i , i_j ,i_k+1) ;
 	if( vid != -1 )
 	{
 		++u ;
-		const Vertex &v = _vertices[vid] ;
+		const Vertex &v = i_vertices[vid] ;
 		vert->x += v.x ;
 		vert->y += v.y ;
 		vert->z += v.z ;
@@ -1287,11 +1287,11 @@ TqInt MarchingCubes::add_c_vertex( )
 		vert->nz += v.nz ;
 #endif
 	}
-	vid = get_y_vert(_i+1, _j ,_k+1) ;
+	vid = get_y_vert(i_i+1, i_j ,i_k+1) ;
 	if( vid != -1 )
 	{
 		++u ;
-		const Vertex &v = _vertices[vid] ;
+		const Vertex &v = i_vertices[vid] ;
 		vert->x += v.x ;
 		vert->y += v.y ;
 		vert->z += v.z ;
@@ -1301,11 +1301,11 @@ TqInt MarchingCubes::add_c_vertex( )
 		vert->nz += v.nz ;
 #endif
 	}
-	vid = get_x_vert( _i ,_j+1,_k+1) ;
+	vid = get_x_vert( i_i ,i_j+1,i_k+1) ;
 	if( vid != -1 )
 	{
 		++u ;
-		const Vertex &v = _vertices[vid] ;
+		const Vertex &v = i_vertices[vid] ;
 		vert->x += v.x ;
 		vert->y += v.y ;
 		vert->z += v.z ;
@@ -1315,11 +1315,11 @@ TqInt MarchingCubes::add_c_vertex( )
 		vert->nz += v.nz ;
 #endif
 	}
-	vid = get_y_vert( _i , _j ,_k+1) ;
+	vid = get_y_vert( i_i , i_j ,i_k+1) ;
 	if( vid != -1 )
 	{
 		++u ;
-		const Vertex &v = _vertices[vid] ;
+		const Vertex &v = i_vertices[vid] ;
 		vert->x += v.x ;
 		vert->y += v.y ;
 		vert->z += v.z ;
@@ -1329,11 +1329,11 @@ TqInt MarchingCubes::add_c_vertex( )
 		vert->nz += v.nz ;
 #endif
 	}
-	vid = get_z_vert( _i , _j , _k ) ;
+	vid = get_z_vert( i_i , i_j , i_k ) ;
 	if( vid != -1 )
 	{
 		++u ;
-		const Vertex &v = _vertices[vid] ;
+		const Vertex &v = i_vertices[vid] ;
 		vert->x += v.x ;
 		vert->y += v.y ;
 		vert->z += v.z ;
@@ -1343,11 +1343,11 @@ TqInt MarchingCubes::add_c_vertex( )
 		vert->nz += v.nz ;
 #endif
 	}
-	vid = get_z_vert(_i+1, _j , _k ) ;
+	vid = get_z_vert(i_i+1, i_j , i_k ) ;
 	if( vid != -1 )
 	{
 		++u ;
-		const Vertex &v = _vertices[vid] ;
+		const Vertex &v = i_vertices[vid] ;
 		vert->x += v.x ;
 		vert->y += v.y ;
 		vert->z += v.z ;
@@ -1357,11 +1357,11 @@ TqInt MarchingCubes::add_c_vertex( )
 		vert->nz += v.nz ;
 #endif
 	}
-	vid = get_z_vert(_i+1,_j+1, _k ) ;
+	vid = get_z_vert(i_i+1,i_j+1, i_k ) ;
 	if( vid != -1 )
 	{
 		++u ;
-		const Vertex &v = _vertices[vid] ;
+		const Vertex &v = i_vertices[vid] ;
 		vert->x += v.x ;
 		vert->y += v.y ;
 		vert->z += v.z ;
@@ -1371,11 +1371,11 @@ TqInt MarchingCubes::add_c_vertex( )
 		vert->nz += v.nz ;
 #endif
 	}
-	vid = get_z_vert( _i ,_j+1, _k ) ;
+	vid = get_z_vert( i_i ,i_j+1, i_k ) ;
 	if( vid != -1 )
 	{
 		++u ;
-		const Vertex &v = _vertices[vid] ;
+		const Vertex &v = i_vertices[vid] ;
 		vert->x += v.x ;
 		vert->y += v.y ;
 		vert->z += v.z ;
@@ -1400,7 +1400,7 @@ TqInt MarchingCubes::add_c_vertex( )
 	}
 #endif
 
-	return _nverts-1 ;
+	return i_nverts-1 ;
 }
 //_____________________________________________________________________________
 
@@ -1416,16 +1416,16 @@ void MarchingCubes::write(const TqChar *fn, TqBool bin )
 //-----------------------------------------------------------------------------
 {
 	FILE       *fp = fopen( fn, "w" );
-	fprintf(fp, "%d %d\n", _nverts, _ntrigs);
+	fprintf(fp, "%d %d\n", i_nverts, i_ntrigs);
 
 	TqInt          i ;
 
-	for ( i = 0; i < _nverts; i++ )
-		fprintf(fp, "%f %f %f\n", _vertices[i].x, _vertices[i].y, _vertices[i].z);
+	for ( i = 0; i < i_nverts; i++ )
+		fprintf(fp, "%f %f %f\n", i_vertices[i].x, i_vertices[i].y, i_vertices[i].z);
 
-	for ( i = 0; i < _ntrigs; i++ )
+	for ( i = 0; i < i_ntrigs; i++ )
 	{
-		fprintf(fp, "%d %d %d \n", _triangles[i].v1, _triangles[i].v2, _triangles[i].v3);
+		fprintf(fp, "%d %d %d \n", i_triangles[i].v1, i_triangles[i].v2, i_triangles[i].v3);
 	}
 
 	fclose( fp ) ;
