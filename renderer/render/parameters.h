@@ -1424,7 +1424,7 @@ void CqParameterTypedVaryingArray<T, I, SLT>::Dice( TqInt u, TqInt v, IqShaderDa
 	std::vector<SLT*> pResData(this->Count());
 	
 	TqInt arrayIndex;
-	for(TqInt arrayIndex = 0; arrayIndex < this->Count(); arrayIndex++)
+	for(arrayIndex = 0; arrayIndex < this->Count(); arrayIndex++)
 		pResult->ArrayEntry(arrayIndex)->GetValuePtr( pResData[arrayIndex] );
 
 	// Check if a valid 4 point quad, do nothing if not.
