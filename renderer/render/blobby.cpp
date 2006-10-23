@@ -657,8 +657,8 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point, TqInt n, std::vector 
 					if ( pMap != 0 && pMap->IsValid() )
 					{
 						CqVector3D swidth = 0.0f, twidth = 0.0f;
-						CqVector3D _aq_P = Point;
-						pMap->SampleMap( _aq_P, swidth, twidth, fv, 0, &avg, &depth );
+						CqVector3D aq_P = Point;
+						pMap->SampleMap( aq_P, swidth, twidth, fv, 0, &avg, &depth );
 					}
 
 
@@ -842,8 +842,8 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point )
 					if ( pMap != 0 && pMap->IsValid() )
 					{
 						CqVector3D swidth = 0.0f, twidth = 0.0f;
-						CqVector3D _aq_P = Point;
-						pMap->SampleMap( _aq_P, swidth, twidth, fv, 0, &avg, &depth);
+						CqVector3D aq_P = Point;
+						pMap->SampleMap( aq_P, swidth, twidth, fv, 0, &avg, &depth);
 					}
 
 					//Aqsis::log() << info << "A " << A << " B " << B << " C " << C << " D " << D << std::endl;
