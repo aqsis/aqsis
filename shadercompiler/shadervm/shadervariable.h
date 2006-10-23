@@ -107,7 +107,7 @@ class CqShaderVariable : public IqShaderData
 
 		virtual TqInt	ArrayLength() const
 		{
-			return ( 0 );
+			return ( 1 );
 		}
 		virtual IqShaderData*	ArrayEntry( TqInt i )
 		{
