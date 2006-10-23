@@ -114,12 +114,12 @@ class CqCurve : public CqSurface
 				// to convert to a patch immediatly.
 				// we really need a native dice for curves but until that time
 				// i reckon this is best.
-				m_splitDecision = Split_Patch;
+				//m_splitDecision = Split_Patch;
 
 
-				/*     const CqMatrix & matCtoR = QGetRenderContext() ->matSpaceToSpace(
+				     const CqMatrix & matCtoR = QGetRenderContext() ->matSpaceToSpace(
 				                                    "camera", "raster",
-								CqMatrix(), CqMatrix(),
+								NULL, NULL,
 								QGetRenderContextI()->Time()
 				                                );
 				     CqVector2D hull[ 2 ];     // control hull
@@ -142,8 +142,7 @@ class CqCurve : public CqSurface
 
 				     // decide whether to split into more curve segments or a patch
 				     if (
-				         ( maxwidthraster > ( 0.75 * lengthraster ) ) ||
-				         ( lengthraster <= gridlength ) ||
+					 ( lengthraster < gridlength ) ||
 				         ( !m_fDiceable )
 				     )
 				     {
@@ -155,7 +154,7 @@ class CqCurve : public CqSurface
 				         // split into smaller curves
 				         m_splitDecision = Split_Curve;
 				     }
-				*/
+				
 			}
 
 			return TqFalse;

@@ -379,6 +379,18 @@ CqVector3D	CqCubicCurveSegment::CalculateTangent(TqFloat u)
 	std::vector<CqVector4D> pg(4), pg0(4);
 	for(i=0; i <= 3; i++)
 		pg[i] = pg0[i] =*P()->pValue( i );
+	if(u == 0.0f)
+	{
+		int i1 = 1;
+		while(i1 < 3 && pg[0] == pg[i1]) ++i1;
+		return(3*(pg[i1] - pg[0]));
+	}
+	else if(u == 1.0f)
+	{
+		int i1 = 2;
+		while(i1 > 0 && pg[3] == pg[i1]) --i1;
+		return(3*(pg[3]-pg[i1]));
+	}
 	for(int j=1; j <= 3; j++)
 	{
 		for(int i=0; i <= 3-j; i++)
@@ -418,8 +430,8 @@ TqInt CqCubicCurveSegment::SplitToPatch(
 	// slightly along the curve for tangent calculation of endpoints, we avoid
 	// problems with curves that have duplicated points at one or other ends.
 	// See bug #1102605
-	CqVector3D direction0 = CalculateTangent(0.01);
-	CqVector3D direction3 = CalculateTangent(0.99);
+	CqVector3D direction0 = CalculateTangent(0.00);
+	CqVector3D direction3 = CalculateTangent(1.00);
 
 	CqVector3D direction1 = CalculateTangent(0.333);
 	CqVector3D direction2 = CalculateTangent(0.666);
@@ -783,9 +795,9 @@ TqInt CqCubicCurvesGroup::Split(
 	// information about which parameters are used
 	TqInt bUses = Uses();
 
-	TqInt vertexI = 0;     //< Current vertex class index.
-	TqInt varyingI = 0;     //< Current varying class index.
-	TqInt uniformI = 0;     //< Current uniform class index.
+	TqInt curveVertexIndexStart = 0;     //< Start vertex index of the current curve.
+	TqInt curveVaryingIndexStart = 0;     //< Start varying index of the current curve.
+	TqInt curveUniformIndexStart = 0;     //< Start uniform index of the current curve.
 	TqInt nsplits = 0;     //< Number of split objects we've created.
 
 	// process each curve in the group.  at this level, a curve is a
@@ -793,72 +805,51 @@ TqInt CqCubicCurvesGroup::Split(
 	//  index of the current curve.
 	for ( TqInt curveN = 0; curveN < m_ncurves; curveN++ )
 	{
+		TqInt nVertex = m_nvertices[ curveN ];
 		// find the total number of piecewise cubic segments in the
 		//  current curve, accounting for periodic curves
 		TqInt npcSegs;
 		if ( m_periodic )
-		{
 			npcSegs = m_nvertices[ curveN ] / vStep;
-		}
 		else
-		{
 			npcSegs = ( m_nvertices[ curveN ] - 4 ) / vStep + 1;
-		}
 
 		// find the number of varying parameters in the current curve
 		TqInt nVarying;
 		if ( m_periodic )
-		{
 			nVarying = npcSegs;
-		}
 		else
-		{
 			nVarying = npcSegs + 1;
-		}
 
-		TqInt nextCurveVertexIndex = vertexI + m_nvertices[ curveN ];
-		TqInt nextCurveVaryingIndex = varyingI + nVarying;
+		TqInt nextCurveVertexIndex = curveVertexIndexStart + nVertex;
+		TqInt nextCurveVaryingIndex = curveVaryingIndexStart + nVarying;
+		//
+		// the current vertex index within the current curve group
+		TqInt segmentVertexIndex = 0;
+
+		// the current varying index within the current curve group
+		TqInt segmentVaryingIndex = 0;
 
 		// process each piecewise cubic segment within the current
 		//  curve.  pcN is the index of the current piecewise
 		//  cubic curve segment within the current curve
 		for ( TqInt pcN = 0; pcN < npcSegs; pcN++ )
 		{
-			// the current vertex index within the current curve group
-			TqInt cvi = 0;
-
-			// the current varying index within the current curve group
-			TqInt cva = 0;
-
 			// each segment needs four vertex indexes, which we
 			//  calculate here.  if the index goes beyond the
 			//  number of vertices then we wrap it around,
 			//  starting back at zero.
 			TqInt vi[ 4 ];
-			vi[ 0 ] = vertexI + cvi;
-			++cvi;
-			if ( cvi >= m_nvertices[ curveN ] )
-				cvi = 0;
-			vi[ 1 ] = vertexI + cvi;
-			++cvi;
-			if ( cvi >= m_nvertices[ curveN ] )
-				cvi = 0;
-			vi[ 2 ] = vertexI + cvi;
-			++cvi;
-			if ( cvi >= m_nvertices[ curveN ] )
-				cvi = 0;
-			vi[ 3 ] = vertexI + cvi;
-			++cvi;
+			vi[ 0 ] = ((segmentVertexIndex+0)%nVertex) + curveVertexIndexStart;
+			vi[ 1 ] = ((segmentVertexIndex+1)%nVertex) + curveVertexIndexStart;
+			vi[ 2 ] = ((segmentVertexIndex+2)%nVertex) + curveVertexIndexStart;
+			vi[ 3 ] = ((segmentVertexIndex+3)%nVertex) + curveVertexIndexStart;
 
 			// we also need two varying indexes.  once again, we
 			//  wrap around
 			TqInt vai[ 2 ];
-			vai[ 0 ] = varyingI + cva;
-			++cva;
-			if ( cva >= nVarying )
-				cva = 0;
-			vai[ 1 ] = varyingI + cva;
-			++cva;
+			vai[ 0 ] = ((segmentVaryingIndex+0)%nVarying) + curveVaryingIndexStart;
+			vai[ 1 ] = ((segmentVaryingIndex+1)%nVarying) + curveVaryingIndexStart;
 
 			// now, we need to find the value of v at the start
 			//  and end of the current piecewise cubic curve
@@ -936,7 +927,7 @@ TqInt CqCubicCurvesGroup::Split(
 					    );
 					pNewUP->SetSize( pSeg->cUniform() );
 
-					pNewUP->SetValue( ( *iUP ), 0, uniformI );
+					pNewUP->SetValue( ( *iUP ), 0, curveUniformIndexStart );
 					pSeg->AddPrimitiveVariable( pNewUP );
 				}
 				else if ( ( *iUP ) ->Class() == class_constant )
@@ -956,8 +947,8 @@ TqInt CqCubicCurvesGroup::Split(
 
 
 
-			vertexI += vStep;
-			varyingI++;
+			segmentVertexIndex += vStep;
+			segmentVaryingIndex++;
 			nsplits++;
 
 			CqMatrix matBasis = pAttributes() ->GetMatrixAttribute( "System", "Basis" ) [ 1 ];
@@ -966,12 +957,12 @@ TqInt CqCubicCurvesGroup::Split(
 			aSplits.push_back( pSeg );
 		}
 
-		vertexI = nextCurveVertexIndex;
-		varyingI = nextCurveVaryingIndex;
+		curveVertexIndexStart = nextCurveVertexIndex;
+		curveVaryingIndexStart = nextCurveVaryingIndex;
 		// we've finished our current curve, so we can get the next
 		//  uniform parameter.  there's one uniform parameter per
 		//  facet, so each curve corresponds to a facet.
-		uniformI++;
+		curveUniformIndexStart++;
 	}
 
 	return nsplits;
@@ -1010,12 +1001,13 @@ CqBound CqCubicCurvesGroup::Bound() const
 
 	matConv = matConv.Transpose();
 
-	TqInt vertexI = 0;     //< Current vertex class index.
+	TqInt curveVertexIndexStart = 0;     //< Start vertex index of the current curve.
 	// process each curve in the group.  at this level, a curve is a
 	//  set of joined piecewise-cubic curve segments.  curveN is the
 	//  index of the current curve.
 	for ( TqInt curveN = 0; curveN < m_ncurves; curveN++ )
 	{
+		TqInt nVertex = m_nvertices[ curveN ];
 		// find the total number of piecewise cubic segments in the
 		//  current curve, accounting for periodic curves
 		TqInt npcSegs;
@@ -1024,35 +1016,25 @@ CqBound CqCubicCurvesGroup::Bound() const
 		else
 			npcSegs = ( m_nvertices[ curveN ] - 4 ) / vStep + 1;
 
-		TqInt nextCurveVertexIndex = vertexI + m_nvertices[ curveN ];
+		TqInt nextCurveVertexIndex = curveVertexIndexStart + nVertex;
+
+		// the current vertex index within the current curve group
+		TqInt segmentVertexIndex = 0;
 
 		// process each piecewise cubic segment within the current
 		//  curve.  pcN is the index of the current piecewise
 		//  cubic curve segment within the current curve
 		for ( TqInt pcN = 0; pcN < npcSegs; pcN++ )
 		{
-			// the current vertex index within the current curve group
-			TqInt cvi = 0;
-
 			// each segment needs four vertex indexes, which we
 			//  calculate here.  if the index goes beyond the
 			//  number of vertices then we wrap it around,
 			//  starting back at zero.
 			TqInt vi[ 4 ];
-			vi[ 0 ] = vertexI + cvi;
-			++cvi;
-			if ( cvi >= m_nvertices[ curveN ] )
-				cvi = 0;
-			vi[ 1 ] = vertexI + cvi;
-			++cvi;
-			if ( cvi >= m_nvertices[ curveN ] )
-				cvi = 0;
-			vi[ 2 ] = vertexI + cvi;
-			++cvi;
-			if ( cvi >= m_nvertices[ curveN ] )
-				cvi = 0;
-			vi[ 3 ] = vertexI + cvi;
-			++cvi;
+			vi[ 0 ] = ((segmentVertexIndex+0)%nVertex) + curveVertexIndexStart;
+			vi[ 1 ] = ((segmentVertexIndex+1)%nVertex) + curveVertexIndexStart;
+			vi[ 2 ] = ((segmentVertexIndex+2)%nVertex) + curveVertexIndexStart;
+			vi[ 3 ] = ((segmentVertexIndex+3)%nVertex) + curveVertexIndexStart;
 
 			CqMatrix matCP;
 			for ( i = 0; i < 4; i++ )
@@ -1091,8 +1073,9 @@ CqBound CqCubicCurvesGroup::Bound() const
 					vecB.z( vecV.z() );
 			}
 
-			vertexI += vStep;
+			segmentVertexIndex += vStep;
 		}
+		curveVertexIndexStart = nextCurveVertexIndex; 
 	}
 
 	for ( i = 0; i < ( *P() ).Size(); i++ )
