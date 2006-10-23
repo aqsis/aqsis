@@ -723,11 +723,22 @@ TqUint CqCubicCurvesGroup::cVarying() const
 
 	TqInt vStep = pAttributes() ->GetIntegerAttribute( "System", "BasisStep" ) [ 1 ];
 	TqUint varying_count = 0;
+	TqInt i;
 
-	for(TqInt i = 0; i < m_ncurves; ++i)
+	if (m_periodic) 
 	{
-		const TqUint segment_count = m_periodic ? (m_nvertices[i] / vStep) : ((m_nvertices[i] - 4) / vStep + 1);
-		varying_count += m_periodic ? segment_count : segment_count + 1;
+		for(i = 0; i < m_ncurves; ++i)
+		{
+			const TqUint segment_count = (m_nvertices[i] / vStep) ;
+			varying_count += segment_count ;
+		}
+	} else 
+	{
+		for(i = 0; i < m_ncurves; ++i)
+		{
+			const TqUint segment_count = ((m_nvertices[i] - 4) / vStep + 1);
+			varying_count += segment_count + 1;
+		}
 	}
 
 	return varying_count;
