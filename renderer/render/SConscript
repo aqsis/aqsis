@@ -7,6 +7,7 @@ aqsisdll_sources = Split("""
 	condition.cpp
 	converter.cpp
 	csgtree.cpp
+	cubiccurves.cpp
 	curves.cpp
 	environment.cpp
 	filters.cpp
@@ -18,6 +19,7 @@ aqsisdll_sources = Split("""
 	inlineparse.cpp
 	lath.cpp
 	lights.cpp
+	linearcurves.cpp
 	micropolygon.cpp
 	mpdump.cpp
 	nurbs.cpp
