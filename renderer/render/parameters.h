@@ -978,7 +978,8 @@ class CqParameterTypedUniformArray : public CqParameterTyped<T, SLT>
 			assert( pResult->Type() == this->Type() );
 			// Note it is assumed that the variable has been
 			// initialised to the correct size prior to calling.
-			TqUint i, j;
+			TqUint i; 
+			TqInt  j;
 			TqUint max = ( MAX( (TqUint)u * (TqUint) v, pResult->Size() ) );
 			for ( i = 0; i < max; ++i )
 				for( j = 0; j < this->Count(); ++j )
