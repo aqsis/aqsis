@@ -595,7 +595,7 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 				{
 					TqFloat u = ( 1.0f / uSize ) * iu;
 					IqShaderData* arrayValue;
-					TqUint i;
+					TqInt i;
 					for(i = 0; i<pParam->Count(); i++)
 					{
 						arrayValue = pData->ArrayEntry(i);
@@ -614,7 +614,7 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 			CqParameterTyped<T, SLT>* pTResult1 = static_cast<CqParameterTyped<T, SLT>*>( pResult1 );
 			CqParameterTyped<T, SLT>* pTResult2 = static_cast<CqParameterTyped<T, SLT>*>( pResult2 );
 
-			TqUint i;
+			TqInt i;
 			for(i = 0; i<pParam->Count(); i++)
 			{
 				if ( u )
