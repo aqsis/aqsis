@@ -284,7 +284,7 @@ class CqPoints : public CqSurface
 			for ( i = 0; i < nVertices(); i++ )
 			{
 				IqShaderData* arrayValue;
-				TqUint j;
+				TqInt j;
 				for(j = 0; j<pParam->Count(); j++)
 				{
 					arrayValue = pData->ArrayEntry(j);
