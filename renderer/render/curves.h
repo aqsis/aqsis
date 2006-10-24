@@ -128,15 +128,6 @@ class CqCurve : public CqSurface
 				     CqVector2D lengthVector = hull[ 1 ] - hull[ 0 ];
 				     TqFloat lengthraster = lengthVector.Magnitude();
 
-				     // find the maximum width of the line in raster space
-				     CqVector3D pp0 = hull[ 0 ] -
-				                      matCtoR * ( P()->pValue( 0 )[0] + CqVector4D( width()->pValue( 0 )[0], 0, 0, 1 ) );
-				     CqVector3D pp1 = hull[ 1 ] -
-				                      matCtoR * ( P()->pValue( 1 )[0] + CqVector4D( width()->pValue( 1 )[0], 0, 0, 1 ) );
-				     TqFloat width0 = pp0.Magnitude();
-				     TqFloat width1 = pp1.Magnitude();
-				     TqFloat maxwidthraster = ( width0 > width1 ) ? width0 : width1;
-
 				     // find the approximate "length" of a diced patch in raster space
 				     TqFloat gridlength = GetGridLength();
 
