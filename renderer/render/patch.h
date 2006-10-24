@@ -67,7 +67,7 @@ class CqSurfacePatchBicubic : public CqSurface
 			CqForwardDiffBezier<T> uFD0( 1.0f / uSize );
 
 			IqShaderData* arrayValue;
-			TqUint i;
+			TqInt i;
 			for(i = 0; i<pParam->Count(); i++)
 			{
 				vFD0.CalcForwardDiff( pParam->pValue(0) [ i ], pParam->pValue(4) [ i ], pParam->pValue(8) [ i ], pParam->pValue(12) [ i ] );
