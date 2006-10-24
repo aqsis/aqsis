@@ -371,7 +371,6 @@ class CqAttributes : public CqRefCount, public IqAttributes
 
 				void Add( const boost::shared_ptr<CqNamedParameterList>& pOption )
 				{
-					TqUlong hash = CqString::hash(pOption->strName().c_str());
 					TqUlong i = _hash( pOption->strName().c_str());
 					m_aLists[ i ].push_back( pOption );
 				}
