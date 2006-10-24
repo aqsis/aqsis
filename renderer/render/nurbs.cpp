@@ -1418,7 +1418,7 @@ void CqSurfaceNURBS::NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqIn
 					{
 						CqParameterTyped<TqFloat, TqFloat>* pTParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParameter );
 						IqShaderData* arrayValue;
-						TqUint i;
+						TqInt i;
 						for(i = 0; i<pParameter->Count(); i++)
 						{
 							arrayValue = pData->ArrayEntry(i);
@@ -1431,7 +1431,7 @@ void CqSurfaceNURBS::NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqIn
 					{
 						CqParameterTyped<TqInt, TqFloat>* pTParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParameter );
 						IqShaderData* arrayValue;
-						TqUint i;
+						TqInt i;
 						for(i = 0; i<pParameter->Count(); i++)
 						{
 							arrayValue = pData->ArrayEntry(i);
@@ -1446,7 +1446,7 @@ void CqSurfaceNURBS::NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqIn
 					{
 						CqParameterTyped<CqVector3D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParameter );
 						IqShaderData* arrayValue;
-						TqUint i;
+						TqInt i;
 						for(i = 0; i<pParameter->Count(); i++)
 						{
 							arrayValue = pData->ArrayEntry(i);
@@ -1459,7 +1459,7 @@ void CqSurfaceNURBS::NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqIn
 					{
 						CqParameterTyped<CqVector4D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( pParameter );
 						IqShaderData* arrayValue;
-						TqUint i;
+						TqInt i;
 						for(i = 0; i<pParameter->Count(); i++)
 						{
 							arrayValue = pData->ArrayEntry(i);
@@ -1472,7 +1472,7 @@ void CqSurfaceNURBS::NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqIn
 					{
 						CqParameterTyped<CqColor, CqColor>* pTParam = static_cast<CqParameterTyped<CqColor, CqColor>*>( pParameter );
 						IqShaderData* arrayValue;
-						TqUint i;
+						TqInt i;
 						for(i = 0; i<pParameter->Count(); i++)
 						{
 							arrayValue = pData->ArrayEntry(i);
@@ -1485,7 +1485,7 @@ void CqSurfaceNURBS::NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqIn
 					{
 						CqParameterTyped<CqString, CqString>* pTParam = static_cast<CqParameterTyped<CqString, CqString>*>( pParameter );
 						IqShaderData* arrayValue;
-						TqUint i;
+						TqInt i;
 						for(i = 0; i<pParameter->Count(); i++)
 						{
 							arrayValue = pData->ArrayEntry(i);
@@ -1498,7 +1498,7 @@ void CqSurfaceNURBS::NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqIn
 					{
 						CqParameterTyped<CqMatrix, CqMatrix>* pTParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParameter );
 						IqShaderData* arrayValue;
-						TqUint i;
+						TqInt i;
 						for(i = 0; i<pParameter->Count(); i++)
 						{
 							arrayValue = pData->ArrayEntry(i);
