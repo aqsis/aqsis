@@ -6,5 +6,3 @@ def PlatformOptions(opts, tempenv):
 	opts.Add(BoolOption('mingw', 'Use MingW compiler', 0))
 	opts.Add('bison', 'Point to the bison executable', tempenv.File('#/../win32libs/GnuWin32/bin/bison'))
 	opts.Add('flex', 'Point to the flex executable', tempenv.File('#/../win32libs/GnuWin32/bin/flex'))
-	# Add the GnuWin32 bin folder to the PATH, so that bison 2.1 can find m4.exe
-	tempenv.AppendENVPath('PATH', tempenv.Dir('#/../win32libs/GnuWin32/bin').abspath)

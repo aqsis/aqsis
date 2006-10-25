@@ -16,6 +16,17 @@ Export('version')
 
 EnsurePythonVersion(2,3)
 
+# Determine the target 
+target_config_dir =  '#' + SelectBuildDir('platform')
+
+# Temporary environment for use of configuration only, mainly to determine file locations.
+# Will be replaced by the real environment when all options are set.
+tempenv = Environment()
+
+# Read in the platform specific options.
+AddSysPath(tempenv.Dir(target_config_dir).abspath)
+
+
 # Setup the common command line options.
 opts = Options([os.path.abspath('options.cache'), os.path.abspath('custom.py')])
 opts.Add('tiff_include_path', 'Point to the tiff header files', '')
@@ -33,30 +44,12 @@ opts.Add(BoolOption('no_fltk', 'Build without FLTK support', '0'))
 opts.Add(BoolOption('no_exr', 'Build without OpenEXR support', '0'))
 opts.Add(BoolOption('debug', 'Build with debug options enabled', '0'))
 
-
-# Temporary environment for use of configuration only, mainly to determine file locations.
-# Will be replaced by the real environment when all options are set.
-tempenv = Environment(options=opts)
-
-# Add an option to control the root location of the 'install' target
-defout = tempenv.Dir('#/output')
-target_dir =  tempenv.Dir('#/build')
-if tempenv['debug']:
-	defout = tempenv.Dir('#/output_debug')
-	target_dir =  tempenv.Dir('#/build_debug')
-opts.Add('install_prefix', 'Root folder under which to install Aqsis', defout)
-opts.Add('build_prefix', 'Root folder under which to build Aqsis', target_dir)
-
-# Determine the target 
-target_config_dir =  '#' + SelectBuildDir('platform')
-Export('opts')
-
-# Read in the platform specific options.
-AddSysPath(tempenv.Dir(target_config_dir).abspath)
-
 # This will hopefully import the target specific options
 import Options
 Options.PlatformOptions(opts,tempenv)
+
+
+Export('opts')
 
 # Create the default environment
 import SCons.Util
@@ -70,12 +63,21 @@ def ENV_update(tgt_ENV, src_ENV):
 
 opts.Update(tempenv)
 if tempenv.has_key('mingw') and tempenv['mingw']:
-	env = Environment(options = opts, tools = ['mingw', 'lex', 'yacc', 'zip', 'tar'], ENV = tempenv['ENV'])
+	env = Environment(options = opts, tools = ['mingw', 'lex', 'yacc', 'zip', 'tar'])
 else:
-	env = Environment(options = opts, tools = ['default', 'lex', 'yacc', 'zip', 'tar'], ENV = tempenv['ENV'])
+	env = Environment(options = opts, tools = ['default', 'lex', 'yacc', 'zip', 'tar'])
 
 ENV_update(env['ENV'], os.environ)
 env.Glob = Glob
+
+# Add an option to control the root location of the 'install' target
+defout = env.Dir('#/output')
+target_dir =  env.Dir('#/build')
+if env['debug']:
+	defout = env.Dir('#/output_debug')
+	target_dir =  env.Dir('#/build_debug')
+opts.Add('install_prefix', 'Root folder under which to install Aqsis', defout)
+opts.Add('build_prefix', 'Root folder under which to build Aqsis', target_dir)
 
 # add builders to zip/gtar files
 from build_support import zipperFunction
