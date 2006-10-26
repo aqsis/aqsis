@@ -273,7 +273,7 @@ Var /GLOBAL QUICKLAUCH_ICON
   !insertmacro MUI_INSTALLOPTIONS_READ $AQSISHOME "page_tasks.ini" "Field 5" "State"
   StrCmp $AQSISHOME "1" "aqsishome" "aqsishome_end"
     aqsishome:
-    WriteRegStr HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "AQSISHOME" "$INSTDIR\bin"
+    WriteRegStr HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "AQSISHOME" "$INSTDIR"
     SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
     aqsishome_end:
 
