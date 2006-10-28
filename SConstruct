@@ -178,6 +178,7 @@ SConscript('shadercompiler/shaderexecenv/SConscript', build_dir=target_dir.abspa
 SConscript('shadercompiler/shadervm/SConscript', build_dir=target_dir.abspath + '/shadercompiler/shadervm')
 SConscript('renderer/render/SConscript', build_dir=target_dir.abspath + '/renderer/render')
 aqsis = SConscript('renderer/aqsis/SConscript', build_dir=target_dir.abspath + '/renderer/aqsis')
+Export('aqsis')
 SConscript('shadercompiler/slparse/SConscript', build_dir=target_dir.abspath + '/shadercompiler/slparse')
 SConscript('shadercompiler/codegenvm/SConscript', build_dir=target_dir.abspath + '/shadercompiler/codegenvm')
 SConscript('shadercompiler/slpp/SConscript', build_dir=target_dir.abspath + '/shadercompiler/slpp')
@@ -298,10 +299,3 @@ for option in options:
 	path, name = os.path.split(option)
 	env.Distribute(path, option)
 
-#bundle = env.MakeBundle('Aqsis.app', aqsis,
-#			'org.aqsis.aqsis',
-#			'Info.plist',
-#			'APPL',
-#			'AQSIS',
-#			'#/platform/darwin/aqsis.icns')
-#env.Alias('bundle', bundle)
