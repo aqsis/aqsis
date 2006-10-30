@@ -40,10 +40,10 @@ ArgParse::apfloat g_bake = 64.0;
 void version( std::ostream& Stream )
 {
 #if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX) || defined(SCONS_BUILD)
-	Stream << "teqser version " << VERSION_STR << std::endl << "compiled " << __DATE__ << " " << __TIME__ << "\n";
+	Stream << "teqser version " << VERSION_STR << std::endl << "compiled " << __DATE__ << " " << __TIME__ << std::endl;
 #else
 
-	Stream << "teqser version " << VERSION << std::endl << "compiled " << __DATE__ << " " << __TIME__ << "\n";
+	Stream << "teqser version " << VERSION << std::endl << "compiled " << __DATE__ << " " << __TIME__ << std::endl;
 #endif
 }
 
