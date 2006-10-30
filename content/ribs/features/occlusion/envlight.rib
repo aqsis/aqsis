@@ -12,7 +12,7 @@ Option "statistics" "endofframe" [3]
 
 WorldBegin
   LightSource "envlight" 3
-   "string filename" "occlusion.sm"
+   "string filename" "occlmap.sm"
 
   Surface "matte"
   ReadArchive "world.rib"

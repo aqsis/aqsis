@@ -6,7 +6,7 @@
 light envlight (
    float intensity = 1;
    color lightcolor = 1;
-   string filename = "occlusion.sm";
+   string filename = "occlmap.sm";
    float samples = 8;
    float blur = 0.01;
    float bias = 0.01;
