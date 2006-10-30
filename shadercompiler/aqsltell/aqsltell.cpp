@@ -103,7 +103,7 @@ int main( int argc, const char** argv )
 
 	if ( g_cl_version )
 	{
-		std::cout << "aqsltell version " << VERSION_STR << std::endl;
+		std::cout << "aqsltell version " << VERSION_STR << std::endl << __DATE__ << " " << __TIME__ << std::endl;
 		exit( 0 );
 	}
 
