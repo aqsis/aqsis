@@ -100,25 +100,25 @@ public :
 // Accessors
 public :
   /** accesses the number of vertices of the generated mesh */
-  inline const TqInt nverts() const { return i_nverts ; }
+  const TqInt nverts() const { return i_nverts ; }
   /** accesses the number of triangles of the generated mesh */
-  inline const TqInt ntrigs() const { return i_ntrigs ; }
+  const TqInt ntrigs() const { return i_ntrigs ; }
   /** accesses a specific vertex of the generated mesh */
-  inline Vertex   * vert( const TqInt i ) const { if( i < 0  || i >= i_nverts ) return ( Vertex *)NULL ; return i_vertices  + i ; }
+  Vertex   * vert( const TqInt i ) const { if( i < 0  || i >= i_nverts ) return ( Vertex *)NULL ; return i_vertices  + i ; }
   /** accesses a specific triangle of the generated mesh */
-  inline Triangle * trig( const TqInt i ) const { if( i < 0  || i >= i_ntrigs ) return (Triangle*)NULL ; return i_triangles + i ; }
+  Triangle * trig( const TqInt i ) const { if( i < 0  || i >= i_ntrigs ) return (Triangle*)NULL ; return i_triangles + i ; }
 
   /** accesses the vertex buffer of the generated mesh */
-  inline Vertex   *vertices () { return i_vertices  ; }
+  Vertex   *vertices () { return i_vertices  ; }
   /** accesses the triangle buffer of the generated mesh */
-  inline Triangle *triangles() { return i_triangles ; }
+  Triangle *triangles() { return i_triangles ; }
 
   /**  accesses the width  of the grid */
-  inline const TqInt size_x() const { return i_size_x ; }
+  const TqInt size_x() const { return i_size_x ; }
   /**  accesses the depth  of the grid */
-  inline const TqInt size_y() const { return i_size_y ; }
+  const TqInt size_y() const { return i_size_y ; }
   /**  accesses the height of the grid */
-  inline const TqInt size_z() const { return i_size_z ; }
+  const TqInt size_z() const { return i_size_z ; }
 
   /**
    * changes the size of the grid
@@ -126,12 +126,12 @@ public :
    * \param size_y depth  of the grid
    * \param size_z height of the grid
    */
-  inline void set_resolution( const TqInt size_x, const TqInt size_y, const TqInt size_z ) { i_size_x = size_x ;  i_size_y = size_y ;  i_size_z = size_z ; }
+  void set_resolution( const TqInt size_x, const TqInt size_y, const TqInt size_z ) { i_size_x = size_x ;  i_size_y = size_y ;  i_size_z = size_z ; }
   /**
    * selects wether the algorithm will use the enhanced topologically controlled lookup table or the original MarchingCubes
    * \param originalMC TqTrue for the original Marching Cubes
    */
-  inline void set_method    ( const TqBool originalMC = TqFalse ) { i_originalMC = originalMC ; }
+  void set_method    ( const TqBool originalMC = TqFalse ) { i_originalMC = originalMC ; }
 
   // Data access
   /**
@@ -140,7 +140,7 @@ public :
    * \param j ordinate of the cube
    * \param k height of the cube
    */
-  inline const TqFloat get_data  ( const TqInt i, const TqInt j, const TqInt k ) const { return i_data[ i + j*i_size_x + k*i_size_x*i_size_y] ; }
+  const TqFloat get_data  ( const TqInt i, const TqInt j, const TqInt k ) const { return i_data[ i + j*i_size_x + k*i_size_x*i_size_y] ; }
   /**
    * sets a specific cube of the grid
    * \param val new value for the cube
@@ -148,7 +148,7 @@ public :
    * \param j ordinate of the cube
    * \param k height of the cube
    */
-  inline void  set_data  ( const TqFloat val, const TqInt i, const TqInt j, const TqInt k ) { i_data[ i + j*i_size_x + k*i_size_x*i_size_y] = val ; }
+  void  set_data  ( const TqFloat val, const TqInt i, const TqInt j, const TqInt k ) { i_data[ i + j*i_size_x + k*i_size_x*i_size_y] = val ; }
 
   // Data initialization
   /** inits temporary structures (must set sizes before call) : the grid and the vertex index per cube */
@@ -240,21 +240,21 @@ protected :
    * \param j ordinate of the cube
    * \param k height of the cube
    */
-  inline TqInt   get_x_vert( const TqInt i, const TqInt j, const TqInt k ) const { return i_x_verts[ i + j*i_size_x + k*i_size_x*i_size_y] ; }
+  TqInt   get_x_vert( const TqInt i, const TqInt j, const TqInt k ) const { return i_x_verts[ i + j*i_size_x + k*i_size_x*i_size_y] ; }
   /**
    * accesses the pre-computed vertex index on the lower longitudinal edge of a specific cube
    * \param i abscisse of the cube
    * \param j ordinate of the cube
    * \param k height of the cube
    */
-  inline TqInt   get_y_vert( const TqInt i, const TqInt j, const TqInt k ) const { return i_y_verts[ i + j*i_size_x + k*i_size_x*i_size_y] ; }
+  TqInt   get_y_vert( const TqInt i, const TqInt j, const TqInt k ) const { return i_y_verts[ i + j*i_size_x + k*i_size_x*i_size_y] ; }
   /**
    * accesses the pre-computed vertex index on the lower vertical edge of a specific cube
    * \param i abscisse of the cube
    * \param j ordinate of the cube
    * \param k height of the cube
    */
-  inline TqInt   get_z_vert( const TqInt i, const TqInt j, const TqInt k ) const { return i_z_verts[ i + j*i_size_x + k*i_size_x*i_size_y] ; }
+  TqInt   get_z_vert( const TqInt i, const TqInt j, const TqInt k ) const { return i_z_verts[ i + j*i_size_x + k*i_size_x*i_size_y] ; }
 
   /**
    * sets the pre-computed vertex index on the lower horizontal edge of a specific cube
@@ -263,7 +263,7 @@ protected :
    * \param j ordinate of the cube
    * \param k height of the cube
    */
-  inline void  set_x_vert( const TqInt val, const TqInt i, const TqInt j, const TqInt k ) { i_x_verts[ i + j*i_size_x + k*i_size_x*i_size_y] = val ; }
+  void  set_x_vert( const TqInt val, const TqInt i, const TqInt j, const TqInt k ) { i_x_verts[ i + j*i_size_x + k*i_size_x*i_size_y] = val ; }
   /**
    * sets the pre-computed vertex index on the lower longitudinal edge of a specific cube
    * \param val the index of the new vertex
@@ -271,7 +271,7 @@ protected :
    * \param j ordinate of the cube
    * \param k height of the cube
    */
-  inline void  set_y_vert( const TqInt val, const TqInt i, const TqInt j, const TqInt k ) { i_y_verts[ i + j*i_size_x + k*i_size_x*i_size_y] = val ; }
+  void  set_y_vert( const TqInt val, const TqInt i, const TqInt j, const TqInt k ) { i_y_verts[ i + j*i_size_x + k*i_size_x*i_size_y] = val ; }
   /**
    * sets the pre-computed vertex index on the lower vertical edge of a specific cube
    * \param val the index of the new vertex
@@ -279,7 +279,7 @@ protected :
    * \param j ordinate of the cube
    * \param k height of the cube
    */
-  inline void  set_z_vert( const TqInt val, const TqInt i, const TqInt j, const TqInt k ) { i_z_verts[ i + j*i_size_x + k*i_size_x*i_size_y] = val ; }
+  void  set_z_vert( const TqInt val, const TqInt i, const TqInt j, const TqInt k ) { i_z_verts[ i + j*i_size_x + k*i_size_x*i_size_y] = val ; }
 
   /** prints cube for debug */
   void print_cube() ;

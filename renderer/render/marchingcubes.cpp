@@ -98,7 +98,10 @@ MarchingCubes::~MarchingCubes()
 void MarchingCubes::run()
 //-----------------------------------------------------------------------------
 {
-	/*  printf("Marching Cubes begin: cpu %ld\n", clock() ) ; */
+/*
+  	TqLong tick = clock();
+	TqDouble perclocks = 1.0/(double)CLOCKS_PER_SEC;
+*/
 
 	compute_intersection_points( ) ;
 
@@ -128,13 +131,14 @@ void MarchingCubes::run()
 				process_cube( ) ;
 			}
 
-	/*
-	  printf("Marching Cubes end: cpu %ld\n", clock() ) ;
+/*
+	  Aqsis::log() << info << "the cpu tooks " << perclocks * (TqDouble) (clock() - tick ) << " secs." << std::endl;
+
 	  for( i_i = 0 ; i_i < 15 ; i_i++ )
 	  {
-	    printf("  %7d cases %d\n", i_N[i_i], i_i ) ;
+	  	Aqsis::log() << info << i_N[i_i] << " cases " << i_i << std::endl;
 	  }
-	*/
+*/
 }
 //_____________________________________________________________________________
 
@@ -350,7 +354,7 @@ TqBool MarchingCubes::test_face( TqChar face )
 			D = i_cube[5] ;
 			break ;
 			default :
-			printf( "Invalid face code %d\n", face ) ;
+			Aqsis::log() << warning << "Invalid face code " << face << std::endl;
 			print_cube() ;
 			A = B = C = D = 0 ;
 	};
@@ -497,14 +501,14 @@ TqBool MarchingCubes::test_interior( TqChar s )
 					Dt = i_cube[0] + ( i_cube[4] - i_cube[0] ) * t ;
 					break ;
 					default :
-					printf( "Invalid edge %d\n", edge ) ;
+					Aqsis::log() << warning << "Invalid edge " << edge << std::endl;
 					print_cube() ;
 					break ;
 			}
 			break ;
 
 			default :
-			printf( "Invalid ambiguous case %d\n", i_case ) ;
+			Aqsis::log() << warning << "invalid ambiguous case " << i_case << std::endl;
 			print_cube() ;
 			break ;
 	}
@@ -944,7 +948,7 @@ void MarchingCubes::process_cube( )
 					break ;
 
 					default :
-					printf("Marching Cubes: Impossible case 13?\n" ) ;
+					Aqsis::log() << warning << "Impossible case 13 ?" << std::endl;
 					print_cube() ;
 			}
 			break ;
@@ -1015,7 +1019,7 @@ void MarchingCubes::add_triangle( const TqInt* trig, TqChar n, TqInt v12 )
 
 		if( tv[t3] == -1 )
 		{
-			printf("Marching Cubes: invalid triangle %d\n", i_ntrigs+1) ;
+			Aqsis::log() << warning << "Invalid triangle " << i_ntrigs << std::endl;
 			print_cube() ;
 		}
 
@@ -1028,7 +1032,7 @@ void MarchingCubes::add_triangle( const TqInt* trig, TqChar n, TqInt v12 )
 				memcpy( i_triangles, temp, i_Ntrigs*sizeof(Triangle) ) ;
 				delete[] temp ;
 /*
-				printf("%d allocated triangles\n", i_Ntrigs) ;
+				Aqsis::log() << warning << "allocated triangles " << i_Ntrigs << std::endl;
 */
 				i_Ntrigs = i_ntrigs + 1024 ;
 			}
@@ -1105,7 +1109,7 @@ void MarchingCubes::test_vertex_addition()
 		memcpy( i_vertices, temp, i_Nverts*sizeof(Vertex) ) ;
 		delete[] temp ;
 /*
-		printf("%d allocated vertices\n", _Nverts) ;
+		Aqsis::log() << warning << "allocated vertices " << i_Nverts << std::endl;
 */
 		i_Nverts = i_nverts + 1024 ;
 	}
