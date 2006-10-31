@@ -1,6 +1,5 @@
 Import('env')
 
-env.Distribute('distribution/win/', 'SConscript')
-
 SConscript('nsis/SConscript')
 
+env.Distribute('distribution/win/', 'SConscript')

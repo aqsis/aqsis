@@ -4,9 +4,6 @@ import fnmatch
 from string import lower, split
 import SCons
 from SCons.Script.SConscript import SConsEnvironment
-import shutil
-import os.path
-
 
 def SelectBuildDir(build_dir, platform=None):
 	# if no platform is specified, then default to sys.platform
@@ -147,64 +144,4 @@ def zipperFunction(target, source, env):
         targetName = str(target[0])
         sourceDir = str(source[0])
         distutils.archive_util.make_archive(targetName, 'zip', sourceDir)
-
-
-def accumulatorFunction(target, source, env):
-  """Function called when builder is called"""
-  destDir = str(target[0])
-  if not os.path.exists(destDir):
-      os.makedirs(destDir)
-  for s in source:
-      s = str(s)
-      if os.path.isdir(s):
-          myShutil.copytree(s, destDir, symlinks = False)
-      else:
-          shutil.copy2(s, destDir)
-
-def copytree(src, dest, symlinks=False):
-    """My own copyTree which does not fail if the directory exists.
-    
-    Recursively copy a directory tree using copy2().
-
-    If the optional symlinks flag is true, symbolic links in the
-    source tree result in symbolic links in the destination tree; if
-    it is false, the contents of the files pointed to by symbolic
-    links are copied.
-    
-    Behavior is meant to be identical to GNU 'cp -R'.    
-    """
-    def copyItems(src, dest, symlinks=False):
-        """Function that does all the work.
-        
-        It is necessary to handle the two 'cp' cases:
-        - destination does exist
-        - destination does not exist
-        
-        See 'cp -R' documentation for more details
-        """
-        for item in os.listdir(src):
-           srcPath = os.path.join(src, item)
-           if os.path.isdir(srcPath):
-               srcBasename = os.path.basename(srcPath)
-               destDirPath = os.path.join(dest, srcBasename)
-               if not os.path.exists(destDirPath):
-                   os.makedirs(destDirPath)
-               copyItems(srcPath, destDirPath)
-           elif os.path.islink(item) and symlinks:
-               linkto = os.readlink(item)
-               os.symlink(linkto, dest)
-           else:
-               shutil.copy2(srcPath, dest)
-
-    # case 'cp -R src/ dest/' where dest/ already exists
-    if os.path.exists(dest):
-       destPath = os.path.join(dest, os.path.basename(src))
-       if not os.path.exists(destPath):
-           os.makedirs(destPath)
-    # case 'cp -R src/ dest/' where dest/ does not exist
-    else:
-       os.makedirs(dest)
-       destPath = dest
-    # actually copy the files
-    copyItems(src, destPath)
 

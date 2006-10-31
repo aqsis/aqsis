@@ -47,9 +47,6 @@ aqsistypes_headers = Split("""
 	vector3d.h
 	vector4d.h""")
 
-env.Distribute('aqsistypes', aqsistypes_sources)
-env.Distribute('aqsistypes', aqsistypes_headers)
-env.Distribute('aqsistypes', 'SConscript')
 
 if 'win32' == env['PLATFORM']:
 	SConscript('win32/SConscript')
@@ -83,3 +80,6 @@ aqsistypes = env.Library('aqsistypes', aqsistypes_sources)
 env.Install('$LIBDIR', aqsistypes)
 env.Install('$INCLUDEDIR',aqsistypes_install_headers)
 
+env.Distribute('aqsistypes', aqsistypes_sources)
+env.Distribute('aqsistypes', aqsistypes_headers)
+env.Distribute('aqsistypes', 'SConscript')
