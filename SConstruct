@@ -9,6 +9,7 @@ from build_support import zipperFunction
 from build_support import print_config
 from build_support import AddSysPath
 from build_support import Glob
+from build_support import accumulatorFunction
 
 
 import version
@@ -110,9 +111,18 @@ Export('env opts conf')
 # archive should apply to all supported platforms.
 env['ZIPDISTDIR'] = '#/aqsis-%d_%d_%d' %(version.major, version.minor, version.build)
 def Distribute(dir, files):
-        env.Install('$ZIPDISTDIR/%s' % dir, files)
+	env.Accumulate('$ZIPDISTDIR/%s' %(dir), files)
 env.Distribute = Distribute
 env.Alias('dist', '$ZIPDISTDIR')
+
+# add builder to accumulate files
+accuBuilder = env.Builder(action=accumulatorFunction,
+    source_factory=SCons.Node.FS.default_fs.Entry,
+    target_factory=SCons.Node.FS.default_fs.Entry,
+    multi=1)
+env['BUILDERS']['Accumulate'] = accuBuilder
+
+
 zip_target = env.Zip('aqsis-%d_%d_%d' %(version.major, version.minor, version.build), '$ZIPDISTDIR')
 env.Depends(zip_target, env.Alias('release'))
 env.Alias('dist_zip', zip_target)
@@ -164,7 +174,39 @@ env = conf.Finish()
 
 # Prepare the NSIS installer tool
 env.Tool('NSIS', toolpath=['./'])
-env.Distribute('./', 'NSIS.py')
+
+#
+# Prepare the base level distribution files
+# These must all be done here prior to inclusion of any other SConscript files
+# otherwise an error is issued that the 'distdir' is the target of multiple 
+# builders.
+#
+# Define any files that need to be included in a source distribution.
+main_distfiles = Split("""
+	SConstruct
+	AUTHORS
+	build_check.py
+	build_support.py
+	COPYING
+	Doxyfile
+	INSTALL
+	README
+	aqsisrc.in
+	NSIS.py
+	version.py
+	version.h.in""")
+
+env.Distribute('', main_distfiles)
+
+# Distribute the platform build configurations.
+platforms = glob.glob('platform/*/SConscript')
+for platform in platforms:
+	path, name = os.path.split(platform)
+	env.Distribute(path, platform)
+options = glob.glob('platform/*/*.py')
+for option in options:
+	path, name = os.path.split(option)
+	env.Distribute(path, option)
 
 # Load the sub-project sconscript files.
 SConscript('rib/api/SConscript', build_dir=target_dir.abspath + '/rib/api')
@@ -268,34 +310,9 @@ def version_h_build(target, source, env):
 
 version_h = env.Command('version.h', 'version.h.in', version_h_build)
 env.Install(target_dir.abspath, version_h)
-env.Distribute('./', 'version.py')
-env.Distribute('./', 'version.h.in')
 
 
 env.Alias('release', ['$BINDIR','$LIBDIR', '$SHADERDIR','$SYSCONFDIR','$INCLUDEDIR'])
 Default('release')
 
-# Define any files that need to be included in a source distribution.
-main_distfiles = Split("""
-	SConstruct
-	AUTHORS
-	build_check.py
-	build_support.py
-	COPYING
-	Doxyfile
-	INSTALL
-	README
-	aqsisrc.in""")
-
-env.Distribute('', main_distfiles)
-
-# Distribute the platform build configurations.
-platforms = glob.glob('platform/*/SConscript')
-for platform in platforms:
-	path, name = os.path.split(platform)
-	env.Distribute(path, platform)
-options = glob.glob('platform/*/*.py')
-for option in options:
-	path, name = os.path.split(option)
-	env.Distribute(path, option)
 
