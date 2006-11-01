@@ -134,6 +134,10 @@ ArgParse::apintvec g_cl_frames;
 ArgParse::apintvec g_cl_res;
 ArgParse::apstringvec g_cl_options;
 
+#if ENABLE_MPDUMP
+ArgParse::apflag g_cl_mpdump = 0;
+#endif
+
 #ifdef	AQSIS_SYSTEM_POSIX
 ArgParse::apflag g_cl_syslog = 0;
 #endif	// AQSIS_SYSTEM_POSIX
@@ -325,6 +329,14 @@ RtVoid PreWorld()
 	{
 		RiFormat(g_cl_res[0], g_cl_res[1], 1.0f);
 	}
+
+#if ENABLE_MPDUMP
+	// Pass the statistics option onto Aqsis.
+	if ( g_cl_mpdump >= 0 )
+	{
+		RiOption( "mpdump", "enabled", &g_cl_mpdump, RI_NULL );
+	}
+#endif
 
 	for( ArgParse::apstringvec::iterator i = g_cl_options.begin(); i != g_cl_options.end(); ++i )
 	{
@@ -538,9 +550,11 @@ int main( int argc, const char** argv )
 		ap.argInts( "res", " x y\aSpecify the resolution of the render.", &g_cl_res, ArgParse::SEP_ARGV, 2);
 		ap.argStrings( "option", "=string\aA valid RIB Option string, can be specified multiple times.", &g_cl_options);
 #ifdef	AQSIS_SYSTEM_POSIX
-
 		ap.argFlag( "syslog", "\aLog messages to syslog", &g_cl_syslog );
 #endif	// AQSIS_SYSTEM_POSIX
+#ifdef	ENABLE_MPDUMP
+		ap.argFlag( "mpdump", "\aOutput MP list to a custom 'dump' file", &g_cl_mpdump );
+#endif	// ENABLE_MPDUMP
 
 		ap.argString( "rc", "=string\aOverride the default RIB configuration file", &g_cl_rc_path );
 		ap.argString( "shaders", "=string\aOverride the default shader searchpath(s)", &g_cl_shader_path );

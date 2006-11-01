@@ -143,6 +143,7 @@ extern "C" const char* StandardParameters[][2] =
 	        {"dither", "uniform float" },
 	        {"interpolateboundary", "uniform integer" },
 	        {"zthreshold", "uniform color" },
+		{"enabled", "uniform integer" },
 	        { NULL , NULL }
 	    };
 

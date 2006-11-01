@@ -40,7 +40,6 @@
 #include	"imagebuffer.h"
 #include	"occlusion.h"
 
-#include	"mpdump.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -451,8 +450,9 @@ void CqImageBuffer::AddMPG( CqMicroPolygon* pmpgNew )
 	}
 
 	////////// Dump the micro polygon into a dump file //////////
-#ifdef DEBUG_MPDUMP
-	mpdump.dump(*pmpgNew);
+#if ENABLE_MPDUMP
+	if(m_mpdump.IsOpen())
+		m_mpdump.dump(*pmpgNew);
 #endif
 	/////////////////////////////////////////////////////////////
 
@@ -1198,9 +1198,13 @@ TqBool CqImageBuffer::IsCurrentBucketEmpty()
 void CqImageBuffer::RenderImage()
 {
 	////////// Create a new dump file  //////////
-#ifdef DEBUG_MPDUMP
-	mpdump.open();
-	mpdump.dumpImageInfo();
+#if ENABLE_MPDUMP
+	const TqInt* poptDump = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "mpdump", "enabled" );
+	if(poptDump && (*poptDump != 0))
+	{
+		m_mpdump.open();
+		m_mpdump.dumpImageInfo();
+	}
 #endif
 	/////////////////////////////////////////////
 
@@ -1303,8 +1307,9 @@ void CqImageBuffer::RenderImage()
 		}
 
 		////////// Dump the pixel sample positions into a dump file //////////
-#ifdef DEBUG_MPDUMP
-		mpdump.dumpPixelSamples();
+#if ENABLE_MPDUMP
+		if(m_mpdump.IsOpen())
+			m_mpdump.dumpPixelSamples();
 #endif
 		/////////////////////////////////////////////////////////////////////////
 

@@ -40,11 +40,12 @@
 #include	"surface.h"
 #include	"color.h"
 #include	"vector2d.h"
-#include    "imagepixel.h"
-#include    "bucket.h"
+#include    	"imagepixel.h"
+#include    	"bucket.h"
 #include	"kdtree.h"
 #include	"occlusion.h"
 #include	"clippingvolume.h"
+#include	"mpdump.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -355,6 +356,10 @@ class CqImageBuffer
 		SqMpgSampleInfo m_CurrentMpgSampleInfo;
 
 		SqGridInfo m_CurrentGridInfo;
+
+#if ENABLE_MPDUMP
+		CqMPDump	m_mpdump;
+#endif
 
 		void CacheGridInfo( CqMicroPolyGridBase* pGrid );
 };

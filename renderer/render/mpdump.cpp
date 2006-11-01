@@ -18,8 +18,9 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 #include "mpdump.h"
+#include "imagebuffer.h"
 
-#ifdef DEBUG_MPDUMP
+#if ENABLE_MPDUMP
 
 START_NAMESPACE( Aqsis )
 
@@ -48,11 +49,11 @@ void CqMPDump::open()
 	out = fopen(filename, "wb");
 	if (out!=NULL)
 	{
-		std::cout<<"Creating '"<<filename<<"'"<<std::endl;
+		Aqsis::log() << info << "Creating '" << filename << "'" << std::endl;
 		fwrite((void*)&sf, sizeof(int), 1, out);
 	}
 	else
-		Aqsis::log()<<"Could not create '"<<filename<<"'"<<std::endl;
+		Aqsis::log() << error << "Could not create '" << filename << "'" << std::endl;
 }
 
 // Close the dump file
@@ -62,7 +63,7 @@ void CqMPDump::close()
 	{
 		fclose(out);
 		out=NULL;
-		std::cout<<mpcount<<" micro polygons dumped"<<std::endl;
+		Aqsis::log() << info << mpcount << " micro polygons dumped" << std::endl;
 	}
 }
 
@@ -73,7 +74,7 @@ void CqMPDump::dumpImageInfo()
 
 	if (out==NULL)
 	{
-		Aqsis::log()<<"No dump file opened!"<<std::endl;
+		Aqsis::log() << error << "Attempted to write to unopened mpdump file." << std::endl;
 		return;
 	}
 
@@ -114,7 +115,7 @@ void CqMPDump::dump(int x, int y, int idx, const SqSampleData& sd)
 
 	if (out==NULL)
 	{
-		Aqsis::log()<<"No dump file opened!"<<std::endl;
+		Aqsis::log() << error << "Attempted to write to unopened mpdump file." << std::endl;
 		return;
 	}
 
@@ -137,7 +138,7 @@ void CqMPDump::dump(const CqMicroPolygon& mp)
 
 	if (out==NULL)
 	{
-		Aqsis::log()<<"No dump file opened!"<<std::endl;
+		Aqsis::log() << error << "Attempted to write to unopened mpdump file." << std::endl;
 		return;
 	}
 

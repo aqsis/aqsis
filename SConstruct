@@ -43,6 +43,7 @@ opts.Add('exr_lib_path', 'Point to the OpenEXR library files', '')
 opts.Add(BoolOption('no_fltk', 'Build without FLTK support', '0'))
 opts.Add(BoolOption('no_exr', 'Build without OpenEXR support', '0'))
 opts.Add(BoolOption('debug', 'Build with debug options enabled', '0'))
+opts.Add(BoolOption('enable_mpdump', 'Build with micropolygon dumping mode enabled', '1'))
 
 # This will hopefully import the target specific options
 import Options
@@ -148,6 +149,11 @@ target_dir = env.Dir('$build_prefix')
 env.AppendUnique(CPPPATH = [target_dir.abspath, target_dir.abspath + '/aqsistypes', target_dir.abspath + '/renderer/render', target_dir.abspath + '/shadercompiler/shaderexecenv', target_dir.abspath + '/rib/rib2', target_dir.abspath + '/shadercompiler/shadervm', target_dir.abspath + '/rib/rib2ri', target_dir.abspath + '/argparse', target_dir.abspath + '/shadercompiler/slparse', target_dir.abspath + '/shadercompiler/codegenvm', target_dir.abspath + '/rib/api', '$zlib_include_path', '$tiff_include_path', '$jpeg_include_path', '$boost_include_path', '$fltk_include_path', '$exr_include_path'])
 env.AppendUnique(CPPDEFINES=[('DEFAULT_PLUGIN_PATH', '\\"' + env.Dir('${BINDIR}').abspath + '\\"')])
 env.AppendUnique(CPPDEFINES=['SCONS_BUILD'])
+
+#
+# Enable MP dumping mode if specified
+#
+env.AppendUnique(CPPDEFINES=[('ENABLE_MPDUMP', '${enable_mpdump}')])
 
 # Setup the include path to the tiff headers (should have been determined in the system specific sections above).
 env.AppendUnique(LIBPATH = ['$LIBDIR', '$BINDIR', '$tiff_lib_path', '$jpeg_lib_path', '$zlib_lib_path', '$fltk_lib_path'])
