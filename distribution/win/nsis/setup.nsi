@@ -126,6 +126,7 @@ SectionIn 1 2
   File "..\..\..\output\bin\aqsisrc"
   File "..\..\..\output\bin\*.dll"
   File "..\..\..\output\bin\*.exe"
+  File "..\..\..\output\bin\*.py"
   SetOutPath "$INSTDIR\doc"
   File "/oname=AUTHORS.txt" "..\..\..\AUTHORS"
   File "/oname=LICENSE.txt" "..\..\..\COPYING"
@@ -199,6 +200,9 @@ SectionIn 1
   File "..\..\..\output\include\aqsis\*.h"
   SetOutPath "$INSTDIR\lib"
   File "..\..\..\output\lib\*${LIBRARY_EXTENSION}"
+  File "..\..\..\output\bin\libaqsis${LIBRARY_EXTENSION}"
+  File "..\..\..\output\bin\aqsis.def"
+  File "..\..\..\output\bin\aqsis.lib"
 SectionEnd
 
 ; Section descriptions
