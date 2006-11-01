@@ -1,7 +1,7 @@
 Import('env version')
 
 use_defs = 0
-if env['mingw']:
+if env.has_key('mingw') and env['mingw']:
 	use_defs = 1
 env.Replace(NSISDEFINES = {'PRODUCT_VERSION': '%d.%d.%d' %(version.major, version.minor, version.build), 
 			 'PRODUCT_FILE_NUMBER': '%d_%d_%d' %(version.major, version.minor, version.build),
