@@ -1,0 +1,31 @@
+PixelSamples 2 2
+Format 320 240 1
+Display "Bug1102597.tif" "file" "rgb" "string compression" "packbits"
+Scale 1.5 1.5 1.5
+Translate -0.5 -0.55 5
+WorldBegin
+Surface "constant"
+
+Color 1 1 1
+Patch "bilinear" "P" [-2 2 1 2 2 1 -2 -2 1 2 -2 1]
+
+# Control polygon
+Color 0.8 0.8 0.5
+Curves "linear" [4] "nonperiodic" "P" [0 0 0 0 1 0 1 1 0 1 
+0 0] "constantwidth" [0.01]
+
+# Power basis
+Color 0.9 0.3 0.3
+Basis "bezier" 3 "power" 4
+Curves "cubic" [4] "nonperiodic" "P" [-2 0 0 3 -3 0 0 3 0 
+0 0 0] "constantwidth" [0.02]
+
+# Bezier basis 
+Translate 0 0 0.1
+Color 0.8 0.8 0.8
+Basis "bezier" 3 "bezier" 3
+Curves "cubic" [4] "nonperiodic" "P" [0 0 0 0 1 0 1 1 0 1 
+0 0] "constantwidth" [0.01]
+
+WorldEnd
+
