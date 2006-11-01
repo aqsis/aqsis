@@ -211,6 +211,7 @@ SConscript('shaders/SConscript', build_dir=target_dir.abspath + '/shaders')
 SConscript('thirdparty/tinyxml/SConscript', build_dir=target_dir.abspath + '/thirdparty/tinyxml')
 SConscript('thirdparty/dbo_plane/SConscript', build_dir=target_dir.abspath + '/thirdparty/dbo_plane')
 SConscript('distribution/SConscript')
+SConscript('tools/SConscript')
 
 if not env['no_exr']:
 	Import('exr')
