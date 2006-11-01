@@ -13,11 +13,11 @@
 ######################################################################
 
 import sys, os, os.path, struct, getopt
-from cgtypes import *
+from cgkit.cgtypes import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
-from sl import *
+from cgkit.sl import *
 
 # MicroPolygon
 class MicroPolygon:
