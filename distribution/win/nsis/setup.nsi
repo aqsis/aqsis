@@ -2,12 +2,14 @@
 ; Author: Leon Tony Atkinson (latkinson@aqsis.org)
 ; Info: Last tested with NSIS 2.15
 ; Other: 1. To make updates easier, all message strings have been placed within the top 20-30 lines of this file.
-;        2. To build manually, without using SCons, uncomment lines 10, 14 and 18.
+;        2. To build manually, without using SCons, uncomment lines 10, 11, 12, 16 and 20.
 
 
 ; Helper defines
 !define /date YEAR "%Y"
 ;;!define LIBRARY_EXTENSION ".*"
+;;!define LIBRARY_PREFIX ""
+;;!define USE_DEFS "0"
 
 !define PRODUCT_NAME "Aqsis"
 !define PRODUCT_FULLNAME "Aqsis Renderer"
@@ -199,10 +201,11 @@ SectionIn 1
   SetOutPath "$INSTDIR\include\aqsis"
   File "..\..\..\output\include\aqsis\*.h"
   SetOutPath "$INSTDIR\lib"
-  File "..\..\..\output\lib\*${LIBRARY_EXTENSION}"
-  File "..\..\..\output\bin\libaqsis${LIBRARY_EXTENSION}"
-  File "..\..\..\output\bin\aqsis.def"
-  File "..\..\..\output\bin\aqsis.lib"
+  File "..\..\..\output\lib\${LIBRARY_PREFIX}*${LIBRARY_EXTENSION}"
+  File "..\..\..\output\bin\${LIBRARY_PREFIX}aqsis${LIBRARY_EXTENSION}"
+  !if ${USE_DEFS} != 0
+    File "..\..\..\output\bin\aqsis.def"
+  !endif
 SectionEnd
 
 ; Section descriptions
