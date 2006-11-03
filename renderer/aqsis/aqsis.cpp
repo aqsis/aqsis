@@ -333,9 +333,10 @@ RtVoid PreWorld()
 
 #if ENABLE_MPDUMP
 	// Pass the statistics option onto Aqsis.
-	if ( g_cl_mpdump >= 0 )
+	if ( g_cl_mpdump )
 	{
-		RiOption( "mpdump", "enabled", &g_cl_mpdump, RI_NULL );
+		RtInt enabled = 1;
+		RiOption( "mpdump", "enabled", &enabled, RI_NULL );
 	}
 #endif
 
@@ -708,9 +709,10 @@ void RenderFile( FILE* file, std::string&  name )
 			RiOption( "statistics", "renderinfo", &g_cl_rinfo, RI_NULL );
 		}
 
-		if ( g_cl_echoapi >= 0 )
+		if ( g_cl_echoapi )
 		{
-			RiOption( "statistics", "echoapi", &g_cl_echoapi, RI_NULL );
+			RtInt echoapi = 1;
+			RiOption( "statistics", "echoapi", &echoapi, RI_NULL );
 		}
 
 		/* Allow any command line arguments to override system/env settings */
