@@ -73,12 +73,14 @@ aqsistypes_install_headers = Split('''
 Import('platform_sources')
 aqsistypes_sources = aqsistypes_sources + platform_sources
 
-# Set any platform specific options for this target
-env.UseTargetOptions('aqsistypes')
+aqsistypesenv = env.Copy()
 
-aqsistypes = env.Library('aqsistypes', aqsistypes_sources)
-env.Install('$LIBDIR', aqsistypes)
-env.Install('$INCLUDEDIR',aqsistypes_install_headers)
+# Set any platform specific options for this target
+aqsistypesenv.UseTargetOptions('aqsistypes')
+
+aqsistypes = aqsistypesenv.Library('aqsistypes', aqsistypes_sources)
+aqsistypesenv.Install('$LIBDIR', aqsistypes)
+aqsistypesenv.Install('$INCLUDEDIR',aqsistypes_install_headers)
 
 env.Distribute('aqsistypes', aqsistypes_sources)
 env.Distribute('aqsistypes', aqsistypes_headers)

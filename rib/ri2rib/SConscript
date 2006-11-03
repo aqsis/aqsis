@@ -24,11 +24,13 @@ ri2rib_headers = Split("""
 	outstream.h
 	plstore.h""")
 
-# Set any platform specific options for this target
-env.UseTargetOptions('ri2rib')
+ri2ribenv = env.Copy()
 
-ri2rib = env.Library('ri2rib', ri2rib_sources)
-env.Install('$LIBDIR', ri2rib)
+# Set any platform specific options for this target
+ri2ribenv.UseTargetOptions('ri2rib')
+
+ri2rib = ri2ribenv.Library('ri2rib', ri2rib_sources)
+ri2ribenv.Install('$LIBDIR', ri2rib)
 
 env.Distribute('rib/ri2rib', ri2rib_sources)
 env.Distribute('rib/ri2rib', ri2rib_headers)

@@ -1,15 +1,16 @@
 Import('env')
+bake2tifenv = env.Copy()
 bake2tif_sources=Split("""
 	bake2tif.c""")
 
 # Set any platform specific options for this target
-env.UseTargetOptions('plugin')
-env.UseTargetOptions('texture_plugin')
-env.UseTargetOptions('bake2tif')
+bake2tifenv.UseTargetOptions('plugin')
+bake2tifenv.UseTargetOptions('texture_plugin')
+bake2tifenv.UseTargetOptions('bake2tif')
 
-bake2tif = env.SharedLibrary('bake2tif', bake2tif_sources, LIBS=['common', '$tiff_lib', '$z_lib'])
+bake2tif = bake2tifenv.SharedLibrary('bake2tif', bake2tif_sources, LIBS=['common', '$tiff_lib', '$z_lib'])
 
-env.Install('$BINDIR', bake2tif)
+bake2tifenv.Install('$BINDIR', bake2tif)
 
 env.Distribute('texturing/plugins/bake2tif', bake2tif_sources)
 env.Distribute('texturing/plugins/bake2tif', 'SConscript')

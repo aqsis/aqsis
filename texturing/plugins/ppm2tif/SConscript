@@ -1,15 +1,16 @@
 Import('env')
+ppm2tifenv = env.Copy()
 ppm2tif_sources=Split("""
 	ppm2tif.c""")
 
 # Set any platform specific options for this target
-env.UseTargetOptions('plugin')
-env.UseTargetOptions('texture_plugin')
-env.UseTargetOptions('ppm2tif')
+ppm2tifenv.UseTargetOptions('plugin')
+ppm2tifenv.UseTargetOptions('texture_plugin')
+ppm2tifenv.UseTargetOptions('ppm2tif')
 
-ppm2tif = env.SharedLibrary('ppm2tif', ppm2tif_sources, LIBS=['$tiff_lib', '$z_lib', 'common'])
+ppm2tif = ppm2tifenv.SharedLibrary('ppm2tif', ppm2tif_sources, LIBS=['$tiff_lib', '$z_lib', 'common'])
 
-env.Install('$BINDIR', ppm2tif)
+ppm2tifenv.Install('$BINDIR', ppm2tif)
 
 env.Distribute('texturing/plugins/ppm2tif', ppm2tif_sources)
 env.Distribute('texturing/plugins/ppm2tif', 'SConscript')

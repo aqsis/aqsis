@@ -1,14 +1,17 @@
 import re
 
 Import('env')
+
 aqsl_sources = Split("""
 	aqslcomp.cpp""")
 
-# Set any platform specific options for this target
-env.UseTargetOptions('aqsl')
+aqslenv = env.Copy()
 
-aqsl = env.Program('aqsl', aqsl_sources, LIBS=['argparse', 'codegenvm', 'slpp', 'aqsistypes', 'slparse'], LIBPATH=['$LIBDIR'])
-env.Install('$BINDIR', aqsl)
+# Set any platform specific options for this target
+aqslenv.UseTargetOptions('aqsl')
+
+aqsl = aqslenv.Program('aqsl', aqsl_sources, LIBS=['argparse', 'codegenvm', 'slpp', 'aqsistypes', 'slparse'], LIBPATH=['$LIBDIR'])
+aqslenv.Install('$BINDIR', aqsl)
 
 # This emitter will be used later by a Builder, and has an explcit dependency on the mk_vds tool
 def aqsl_emitter(target, source, env):

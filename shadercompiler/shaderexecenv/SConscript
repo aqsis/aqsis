@@ -15,11 +15,13 @@ shaderexecenv_sources = Split("""
 shaderexecenv_headers = Split("""
 	shaderexecenv.h""")
 
-# Set any platform specific options for this target
-env.UseTargetOptions('shaderexecenv')
+shaderexecenvenv = env.Copy()
 
-shaderexecenv = env.Library('shaderexecenv', shaderexecenv_sources)
-env.Install('$LIBDIR', shaderexecenv)
+# Set any platform specific options for this target
+shaderexecenvenv.UseTargetOptions('shaderexecenv')
+
+shaderexecenv = shaderexecenvenv.Library('shaderexecenv', shaderexecenv_sources)
+shaderexecenvenv.Install('$LIBDIR', shaderexecenv)
 
 env.Distribute('shadercompiler/shaderexecenv', shaderexecenv_sources)
 env.Distribute('shadercompiler/shaderexecenv', shaderexecenv_headers)

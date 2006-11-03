@@ -14,11 +14,13 @@ shadervm_headers = Split("""
 	shadervariable.h
 	shadervm.h""")
 
-# Set any platform specific options for this target
-env.UseTargetOptions('shadervm')
+shadervmenv = env.Copy()
 
-shadervm = env.Library('shadervm', shadervm_sources)
-env.Install('$LIBDIR', shadervm)
+# Set any platform specific options for this target
+shadervmenv.UseTargetOptions('shadervm')
+
+shadervm = shadervmenv.Library('shadervm', shadervm_sources)
+shadervmenv.Install('$LIBDIR', shadervm)
 
 env.Distribute('shadercompiler/shadervm', shadervm_sources)
 env.Distribute('shadercompiler/shadervm', shadervm_headers)

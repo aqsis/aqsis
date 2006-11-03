@@ -16,7 +16,7 @@ slpp_headers = Split("""
 	ppext.h""")
 
 # Set any platform specific options for this target
-env.UseTargetOptions('slpplib')
+slppenv.UseTargetOptions('slpplib')
 
 slpplib = slppenv.Library('slpp', slpp_sources)
 slppenv.Install('$LIBDIR', slpplib)
