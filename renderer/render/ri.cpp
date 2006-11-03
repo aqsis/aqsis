@@ -3441,33 +3441,33 @@ RtVoid RiBlobbyV( RtInt nleaf, RtInt ncode, RtInt code[], RtInt nflt, RtFloat fl
 	{
 		for (i=0; i < pieces-1; i ++)
 		{
-			Aqsis::log() << info << "Creating RiPointsPolygons for peice " << i << "[" << pieces-1 << "]" << std::endl;
+			Aqsis::log() << info << "Creating RiPointsPolygons for piece " << i << "[" << pieces-1 << "]" << std::endl;
 			m = (i * npolygons)/pieces;
 			RiPointsPolygons(npolygons/pieces, nvertices, &vertices[3 * m], RI_P, points, RI_CS, colors, RI_NULL);
-			Aqsis::log() << info << "Done creating RiPointsPolygons for peice " << i << std::endl;
+			Aqsis::log() << info << "Done creating RiPointsPolygons for piece " << i << std::endl;
 		}
 
-		Aqsis::log() << info << "Creating RiPointsPolygons for peice " << (pieces-1) << "[" << pieces-1 << "]" << std::endl;
+		Aqsis::log() << info << "Creating RiPointsPolygons for piece " << (pieces-1) << "[" << pieces-1 << "]" << std::endl;
 		m = ((pieces-1) * npolygons) / pieces;
 		TqInt nmax = npolygons - m;
 		RiPointsPolygons(nmax, nvertices, &vertices[3 * m], RI_P, points, RI_CS, colors, RI_NULL);
-		Aqsis::log() << info << "Done creating RiPointsPolygons for peice " << (pieces-1) << std::endl;
+		Aqsis::log() << info << "Done creating RiPointsPolygons for piece " << (pieces-1) << std::endl;
 	}
 	else
 	{
 		for (i=0; i < pieces-1; i ++)
 		{
-			Aqsis::log() << info << "Creating RiPointsPolygons for peice " << i << "[" << pieces-1 << "]" << std::endl;
+			Aqsis::log() << info << "Creating RiPointsPolygons for piece " << i << "[" << pieces-1 << "]" << std::endl;
 			m = (i * npolygons)/pieces;
 			RiPointsPolygons(npolygons/pieces, nvertices, &vertices[3 * m], RI_P, points, RI_NULL);
-			Aqsis::log() << info << "Done creating RiPointsPolygons for peice " << i << std::endl;
+			Aqsis::log() << info << "Done creating RiPointsPolygons for piece " << i << std::endl;
 		}
 
-		Aqsis::log() << info << "Creating RiPointsPolygons for peice " << (pieces-1) << "[" << pieces-1 << "]" << std::endl;
+		Aqsis::log() << info << "Creating RiPointsPolygons for piece " << (pieces-1) << "[" << pieces-1 << "]" << std::endl;
 		m = ((pieces-1) * npolygons) / pieces;
 		TqInt nmax = npolygons - m;
 		RiPointsPolygons(nmax, nvertices, &vertices[3 * m], RI_P, points, RI_NULL);
-		Aqsis::log() << info << "Done creating RiPointsPolygons for peice " << (pieces-1) << std::endl;
+		Aqsis::log() << info << "Done creating RiPointsPolygons for piece " << (pieces-1) << std::endl;
 	}
 
 	Aqsis::log() << info << "Created RiPointsPolygons for Blobby" << std::endl;
