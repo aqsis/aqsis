@@ -146,7 +146,30 @@ target_dir = env.Dir('$build_prefix')
 
 
 # Setup common environment settings to allow includes from the various local folders
-env.AppendUnique(CPPPATH = [target_dir.abspath, target_dir.abspath + '/aqsistypes', target_dir.abspath + '/renderer/render', target_dir.abspath + '/shadercompiler/shaderexecenv', target_dir.abspath + '/rib/rib2', target_dir.abspath + '/shadercompiler/shadervm', target_dir.abspath + '/rib/rib2ri', target_dir.abspath + '/argparse', target_dir.abspath + '/shadercompiler/slparse', target_dir.abspath + '/shadercompiler/codegenvm', target_dir.abspath + '/rib/api', '$zlib_include_path', '$tiff_include_path', '$jpeg_include_path', '$boost_include_path', '$fltk_include_path', '$exr_include_path'])
+env.AppendUnique(
+	CPPPATH = [ target_dir.abspath + dir for dir in
+		'',
+		'/aqsistypes',
+		'/renderer/render',
+		'/shadercompiler/shaderexecenv',
+		'/rib/rib2',
+		'/shadercompiler/shadervm',
+		'/rib/rib2ri',
+		'/argparse',
+		'/shadercompiler/slparse',
+		'/shadercompiler/codegenvm',
+		'/rib/api',
+	]
+	+ [
+		'$zlib_include_path',
+		'$tiff_include_path',
+		'$jpeg_include_path',
+		'$boost_include_path',
+		'$fltk_include_path',
+		'$exr_include_path'
+	]
+)
+
 env.AppendUnique(CPPDEFINES=[('DEFAULT_PLUGIN_PATH', '\\"' + env.Dir('${BINDIR}').abspath + '\\"')])
 env.AppendUnique(CPPDEFINES=['SCONS_BUILD'])
 
