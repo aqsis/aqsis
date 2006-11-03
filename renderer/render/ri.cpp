@@ -4782,6 +4782,9 @@ RtVoid	RiGeometryV( RtToken type, PARAMETERLIST )
 	static TqInt params[] = { 0, 0 };
 
 	TqInt count = 3;
+	// Rotate and scale to match the teapot geometry
+	RiRotate(90.0, 1.0, 0.0, 0.0);
+	RiScale(1.0/30.0, 1.0/30.0, 1.0/30.0);
 	RiSubdivisionMeshV( aTags[0],
 	                    bunny.NFaces(),
 	                    bunny.Faces(),
