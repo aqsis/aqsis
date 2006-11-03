@@ -906,11 +906,7 @@ RtVoid	RiWorldEnd()
 	TIMER_STOP("Parse")
 
 
-	const TqInt* poptVerbose = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "statistics", "renderinfo" );
-	if ( poptVerbose )
-	{
-		QGetRenderContext() -> Stats().PrintInfo();
-	}
+	QGetRenderContext() -> Stats().PrintInfo();
 
 	const TqInt* poptGridSize = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "limits", "gridsize" );
 	if( NULL != poptGridSize )

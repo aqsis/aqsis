@@ -113,7 +113,6 @@ ArgParse::apflag g_cl_version = 0;
 ArgParse::apflag g_cl_fb = 0;
 ArgParse::apflag g_cl_progress = 0;
 ArgParse::apflag g_cl_Progress = 0;
-ArgParse::apflag g_cl_rinfo = 0;
 ArgParse::apflag g_cl_no_color = 0;
 ArgParse::apflag g_cl_beep = 0;
 ArgParse::apint g_cl_verbose = 1;
@@ -538,7 +537,6 @@ int main( int argc, const char** argv )
          		"\a3 = RT", &g_cl_priority);
       		ap.alias( "priority", "z");
 
-		ap.argFlag( "renderinfo", "\aPrint out infos about base rendering settings", &g_cl_rinfo );
 		ap.argString( "type", "=string\aSpecify a display device type to use", &g_cl_type );
 		ap.argString( "addtype", "=string\aSpecify a display device type to add", &g_cl_addtype );
 		ap.argString( "mode", "=string\aSpecify a display device mode to use", &g_cl_mode );
@@ -703,11 +701,6 @@ void RenderFile( FILE* file, std::string&  name )
 
 		if ( !g_cl_nostandard )
 			librib::StandardDeclarations( renderengine );
-
-		if ( g_cl_rinfo )
-		{
-			RiOption( "statistics", "renderinfo", &g_cl_rinfo, RI_NULL );
-		}
 
 		if ( g_cl_echoapi )
 		{
