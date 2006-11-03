@@ -28,7 +28,7 @@
 			</xsl:for-each>
 			<xsl:value-of select="string(') ) \&#xa;')"/>
 			<xsl:text>&#x9;{ \&#xa;</xsl:text>
-			<xsl:value-of select="concat('&#x9;&#x9;Aqsis::log() &lt;&lt; &quot;Invalid state for ', @name, ' [&quot; &lt;&lt; GetStateAsString() &lt;&lt; &quot;]&quot; &lt;&lt; std::endl; \&#xa;')"/>
+			<xsl:value-of select="concat('&#x9;&#x9;Aqsis::log() &lt;&lt; error &lt;&lt; &quot;Invalid state for ', @name, ' [&quot; &lt;&lt; GetStateAsString() &lt;&lt; &quot;]&quot; &lt;&lt; std::endl; \&#xa;')"/>
 			<xsl:value-of select="string('&#x9;&#x9;return')"/>
 			<xsl:if test="@return != 'RtVoid'">
 				<xsl:text>(0)</xsl:text>

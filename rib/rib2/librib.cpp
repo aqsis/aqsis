@@ -144,6 +144,7 @@ extern "C" const char* StandardParameters[][2] =
 	        {"interpolateboundary", "uniform integer" },
 	        {"zthreshold", "uniform color" },
 		{"enabled", "uniform integer" },
+		{"echoapi", "uniform integer" },
 	        { NULL , NULL }
 	    };
 

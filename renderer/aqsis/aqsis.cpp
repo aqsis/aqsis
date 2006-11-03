@@ -117,6 +117,7 @@ ArgParse::apflag g_cl_rinfo = 0;
 ArgParse::apflag g_cl_no_color = 0;
 ArgParse::apflag g_cl_beep = 0;
 ArgParse::apint g_cl_verbose = 1;
+ArgParse::apflag g_cl_echoapi = 0;
 ArgParse::apfloatvec g_cl_cropWindow;
 ArgParse::apstring g_cl_rc_path = "";
 ArgParse::apstring g_cl_shader_path = "";
@@ -527,6 +528,7 @@ int main( int argc, const char** argv )
 		           "\a2 = information\n"
 		           "\a3 = debug", &g_cl_verbose );
 		ap.alias( "verbose", "v" );
+		ap.argFlag( "echoapi", "\aEcho all RI API calls to the log output (experimental)", &g_cl_echoapi);
 
       		ap.argInt( "priority", "=integer\aControl the priority class of aqsis.\n"
          		"\a0 = idle\n"
@@ -704,6 +706,11 @@ void RenderFile( FILE* file, std::string&  name )
 		if ( g_cl_rinfo )
 		{
 			RiOption( "statistics", "renderinfo", &g_cl_rinfo, RI_NULL );
+		}
+
+		if ( g_cl_echoapi >= 0 )
+		{
+			RiOption( "statistics", "echoapi", &g_cl_echoapi, RI_NULL );
 		}
 
 		/* Allow any command line arguments to override system/env settings */
