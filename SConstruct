@@ -127,6 +127,8 @@ opts.Update(env)
 
 # Setup the output directories for binaries and libraries.
 env.Replace(BINDIR = env.Dir('$install_prefix').abspath + os.sep + 'bin')
+env.Replace(LIBEXECDIR = '$BINDIR')
+env.Replace(SHAREDLIBDIR = '$BINDIR')
 env.Replace(LIBDIR = env.Dir('$install_prefix').abspath + os.sep + 'lib')
 env.Replace(SHADERDIR = env.Dir('$install_prefix').abspath + os.sep + 'shaders')
 env.Replace(SYSCONFDIR = env.Dir('$install_prefix').abspath + os.sep + 'bin')

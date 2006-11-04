@@ -93,7 +93,7 @@ Depends(aqsisdll, cachegen)
 Depends(aqsisdll, validategen)
 Depends(aqsisdll, headergen)
 
-aqsisenv.Install('$BINDIR', aqsisdll)
+aqsisenv.Install('$SHAREDLIBDIR', aqsisdll)
 aqsisenv.Install('$INCLUDEDIR', aqsis_install_headers)
 
 #aqsisproject = aqsisenv.MSVSProject(target = 'render' + env['MSVSPROJECTSUFFIX'],
