@@ -1,6 +1,6 @@
 Projection "perspective" "fov" 45.0000
 
-Display "microbe.tif" "file" "rgb"
+Display "microbe.tif" "file" "rgba" "string compression" "lzw"
 Display "+microbe.tif" "framebuffer" "rgb"
 
 Format 600 400 1

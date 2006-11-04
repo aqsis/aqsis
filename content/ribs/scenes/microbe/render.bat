@@ -4,7 +4,8 @@ REM ***Compile shaders***
 
 ECHO === Compiling Shader(s) ===
 ECHO.
-aqsl.exe "../../../shaders/displacement/micro_bumps.sl" "../../../shaders/surface/microscope.sl"
+aqsl.exe "../../../shaders/displacement/micro_bumps.sl"
+aqsl.exe "../../../shaders/surface/microscope.sl"
 IF NOT ERRORLEVEL 0 GOTO error
 
 
