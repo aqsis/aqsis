@@ -100,6 +100,7 @@ else:
 	env.AppendUnique(CPPDEFINES=['NO_SYSLOG', 'WIN32', 'PLUGINS', ('_qBUILDING', 'CORE'), ('CORE', '1')])
 	env.Replace(aqsis_cppdefines = ['AQSIS_STATIC_LINK'])
 	env.Replace(rib2ri_cppdefines = ['AQSIS_STATIC_LINK'])
+	env.Replace(libaqsis_cppdefines = ['AQSIS_STATIC_LINK'])
 
 
 # Add the GnuWin32 bin folder to the PATH, so that bison 2.1 can find m4.exe
