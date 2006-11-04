@@ -4,7 +4,7 @@ ShadingRate 1.0
 Option "statistics" "endofframe" [1]
 
 FrameBegin 0
-Display "layered.tif" "file" "rgba" "string compression" "deflate"
+Display "layered.tif" "file" "rgba" "string compression" "lzw"
 Display "+layered.tif" "framebuffer" "rgb"
 
 Projection "perspective" "fov" [36.0]

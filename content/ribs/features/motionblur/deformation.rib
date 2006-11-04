@@ -5,7 +5,7 @@ PixelFilter "gaussian" 2 2
 Shutter 0 1
 
 FrameBegin 0
-Display "deformation.tif" "file" "rgba"
+Display "deformation.tif" "file" "rgba" "string compression" "lzw"
 Display "+deformation.tif" "framebuffer" "rgba"
 Option "statistics" "endofframe" [3]
 

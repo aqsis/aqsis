@@ -6,8 +6,8 @@ Shutter 0 1
 Quantize "Cs" 255 0 255 0
 
 FrameBegin 0
-Display "aov.tif" "framebuffer" "rgba"
-Display "+aov.tif" "file" "rgba"
+Display "aov.tif" "file" "rgba" "string compression" "lzw"
+Display "+aov.tif" "framebuffer" "rgb"
 Display "+aovN.tif" "file" "N" "quantize" [128 255 0 255]
 Display "+aovCs.tif" "file" "Cs"
 Display "+aovs.tif" "file" "s" "quantize" [0 255 0 255]
