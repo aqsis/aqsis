@@ -16,7 +16,7 @@ if not env['no_exr']:
 
 	exr2tif = exr2tifenv.SharedLibrary('exr2tif', exr2tif_sources, LIBS=['common', '$tiff_lib', 'IlmImf', 'Half', 'Iex', 'Imath'])
 
-	exr2tifenv.Install('$SHAREDLIBDIR', exr2tif)
+	exr2tifenv.Install('$PLUGINDIR', exr2tif)
 
 env.Distribute('texturing/plugins/exr2tif', exr2tif_sources)
 env.Distribute('texturing/plugins/exr2tif', 'SConscript')
