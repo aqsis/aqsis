@@ -51,6 +51,7 @@ aqsisdll_sources = Split("""
 aqsisdll_headers = Split("""
 	attributes.h            ilightsource.h          micropolygon.h          ri.h
 	bilinear.h              imagebuffer.h           motion.h                ri_cache.h
+	ri_debug.h
 	bound.h                 imagepixel.h            mpdump.h                rifile.h
 
 	bucket.h                bunny.h 	imagers.h               
