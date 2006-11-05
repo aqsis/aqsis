@@ -80,6 +80,10 @@ if env['debug']:
 opts.Add('install_prefix', 'Root folder under which to install Aqsis', defout)
 opts.Add('build_prefix', 'Root folder under which to build Aqsis', target_dir)
 
+# Make scons store build signatures in a single file _outside_ the install
+# hierarchy --- no more .sconsign files...
+env.SConsignFile()
+
 # add builders to zip/gtar files
 from build_support import zipperFunction
 zipBuilder = Builder(action=zipperFunction,
@@ -186,7 +190,7 @@ env.AppendUnique(LIBPATH = ['$LIBDIR', '$BINDIR', '$tiff_lib_path', '$jpeg_lib_p
 
 # Create the output for the command line options defined above and in the platform specific configuration.
 Help(opts.GenerateHelpText(env))
-	
+
 # Check for the existence of the various dependencies
 SConscript('build_check.py')
 
