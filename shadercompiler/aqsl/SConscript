@@ -10,7 +10,7 @@ aqslenv = env.Copy()
 # Set any platform specific options for this target
 aqslenv.UseTargetOptions('aqsl')
 
-aqsl = aqslenv.Program('aqsl', aqsl_sources, LIBS=['argparse', 'codegenvm', 'slpp', 'aqsistypes', 'slparse'], LIBPATH=['$LIBDIR'])
+aqsl = aqslenv.Program('aqsl', aqsl_sources, LIBS=['argparse', 'codegenvm', 'slpp', 'aqsistypes', 'slparse'])
 aqslenv.Install('$BINDIR', aqsl)
 
 # This emitter will be used later by a Builder, and has an explcit dependency on the mk_vds tool
