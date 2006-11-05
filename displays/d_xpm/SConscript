@@ -17,7 +17,7 @@ d_xpmenv.AppendUnique(LIBS = ['$tiff_lib', '$z_lib'])
 d_xpmenv.UseTargetOptions('d_xpm')
 
 d_xpm = d_xpmenv.SharedLibrary('d_xpm', d_xpm_sources)
-d_xpmenv.Install('$LIBEXECDIR', d_xpm)
+d_xpmenv.Install('$DISPLAYSDIR', d_xpm)
 
 Return('d_xpm')
 
