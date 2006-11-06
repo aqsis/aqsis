@@ -78,12 +78,18 @@ env.Replace(YACCFLAGS = '--no-lines -d')
 
 display_libs = ['tiff', 'z']
 
-# These are place holders at the moment, we need to work out the proper defines?
-env.AppendUnique(CPPDEFINES=[('DEFAULT_RC_PATH', '\\"' + env.Dir('$install_prefix').abspath + os.sep + 'etc' + '\\"')])
-env.AppendUnique(CPPDEFINES=[('DEFAULT_SHADER_PATH', '\\"' + env.Dir('$install_prefix').abspath + os.sep + 'shaders' + '\\"')])
-
 # System configuration location
-env.Replace(SYSCONFDIR = env.Dir('$install_prefix').abspath + os.sep + 'etc')
+env.Replace(RENDERENGINEDIR = '$LIBDIR')
+env.Replace(DISPLAYSDIR = env.Dir('$LIBDIR/aqsis').abspath)
+env.Replace(PLUGINDIR = env.Dir('$LIBDIR/aqsis').abspath)
+env.Replace(STATICLIBDIR = '$LIBDIR/aqsis')
+env.Replace(SHADERDIR = env.Dir('$install_prefix/share/aqsis/shaders').abspath)
+env.Replace(SYSCONFDIR = env.Dir('$install_prefix/etc/aqsis').abspath)
+
+# These are place holders at the moment, we need to work out the proper defines?
+env.AppendUnique(CPPDEFINES=[('DEFAULT_RC_PATH', '\\"' + env.Dir('$SYSCONFDIR').abspath + '\\"')])
+env.AppendUnique(CPPDEFINES=[('DEFAULT_SHADER_PATH', '\\"' + env.Dir('$SHADERDIR').abspath + '\\"')])
+
 
 env.Replace(slparse_ccflags = ['-O0'])
 env.Replace(aqsis_libs = ['dl'])

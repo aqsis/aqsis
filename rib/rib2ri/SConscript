@@ -15,7 +15,7 @@ rib2rienv = env.Copy()
 rib2rienv.UseTargetOptions('rib2ri')
 
 rib2ri = rib2rienv.Library('rib2ri', rib2ri_sources)
-rib2rienv.Install('$LIBDIR', rib2ri)
+rib2rienv.Install('$STATICLIBDIR', rib2ri)
 rib2rienv.Install('$INCLUDEDIR', rib2ri_install_headers)
 
 env.Distribute('rib/rib2ri', rib2ri_sources)

@@ -16,7 +16,7 @@ slxargsenv = env.Copy()
 slxargsenv.UseTargetOptions('slxargs')
 
 slxargs = slxargsenv.Library('slxargs', slxargs_sources)
-slxargsenv.Install('$LIBDIR', slxargs)
+slxargsenv.Install('$STATICLIBDIR', slxargs)
 slxargsenv.Install('$INCLUDEDIR', slxargs_install_headers)
 
 env.Distribute('shadercompiler/slxargs', slxargs_sources)

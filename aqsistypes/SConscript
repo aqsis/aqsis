@@ -79,7 +79,7 @@ aqsistypesenv = env.Copy()
 aqsistypesenv.UseTargetOptions('aqsistypes')
 
 aqsistypes = aqsistypesenv.Library('aqsistypes', aqsistypes_sources)
-aqsistypesenv.Install('$LIBDIR', aqsistypes)
+aqsistypesenv.Install('$STATICLIBDIR', aqsistypes)
 aqsistypesenv.Install('$INCLUDEDIR',aqsistypes_install_headers)
 
 env.Distribute('aqsistypes', aqsistypes_sources)

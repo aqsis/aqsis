@@ -135,6 +135,7 @@ env.Replace(RENDERENGINEDIR = '$BINDIR')
 env.Replace(DISPLAYSDIR = '$BINDIR')
 env.Replace(PLUGINDIR = '$BINDIR')
 env.Replace(LIBDIR = env.Dir('$install_prefix').abspath + os.sep + 'lib')
+env.Replace(STATICLIBDIR = '$LIBDIR')
 env.Replace(SHADERDIR = env.Dir('$install_prefix').abspath + os.sep + 'shaders')
 env.Replace(SYSCONFDIR = env.Dir('$install_prefix').abspath + os.sep + 'bin')
 env.Replace(INCLUDEDIR = env.Dir('$install_prefix').abspath + os.sep + 'include/aqsis')
@@ -186,7 +187,10 @@ env.AppendUnique(CPPDEFINES=['SCONS_BUILD'])
 env.AppendUnique(CPPDEFINES=[('ENABLE_MPDUMP', '${enable_mpdump}')])
 
 # Setup the include path to the tiff headers (should have been determined in the system specific sections above).
-env.AppendUnique(LIBPATH = ['$LIBDIR', '$BINDIR', '$tiff_lib_path', '$jpeg_lib_path', '$zlib_lib_path', '$fltk_lib_path'])
+env.AppendUnique(LIBPATH = ['$tiff_lib_path', '$jpeg_lib_path', '$zlib_lib_path', '$fltk_lib_path'])
+
+# More include paths; don't know if these are good practise since they're install directories...
+env.AppendUnique(LIBPATH = ['$STATICLIBDIR', '$RENDERENGINEDIR'])
 
 # Create the output for the command line options defined above and in the platform specific configuration.
 Help(opts.GenerateHelpText(env))
@@ -263,7 +267,7 @@ def aqsis_rc_build(target, source, env):
 		"bmplib": bmplib,
 		"win32lib": win32lib,
 		"shaderpath": env.Dir('$SHADERDIR').abspath,
-		"displaypath": env.Dir('$BINDIR').abspath,
+		"displaypath": env.Dir('$DISPLAYSDIR').abspath,
 		"exrlib": ""
 	    }
 	if not env['no_exr']:

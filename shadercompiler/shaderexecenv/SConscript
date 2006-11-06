@@ -21,7 +21,7 @@ shaderexecenvenv = env.Copy()
 shaderexecenvenv.UseTargetOptions('shaderexecenv')
 
 shaderexecenv = shaderexecenvenv.Library('shaderexecenv', shaderexecenv_sources)
-shaderexecenvenv.Install('$LIBDIR', shaderexecenv)
+shaderexecenvenv.Install('$STATICLIBDIR', shaderexecenv)
 
 env.Distribute('shadercompiler/shaderexecenv', shaderexecenv_sources)
 env.Distribute('shadercompiler/shaderexecenv', shaderexecenv_headers)

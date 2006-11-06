@@ -20,7 +20,7 @@ shadervmenv = env.Copy()
 shadervmenv.UseTargetOptions('shadervm')
 
 shadervm = shadervmenv.Library('shadervm', shadervm_sources)
-shadervmenv.Install('$LIBDIR', shadervm)
+shadervmenv.Install('$STATICLIBDIR', shadervm)
 
 env.Distribute('shadercompiler/shadervm', shadervm_sources)
 env.Distribute('shadercompiler/shadervm', shadervm_headers)

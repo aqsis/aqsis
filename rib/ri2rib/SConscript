@@ -30,7 +30,7 @@ ri2ribenv = env.Copy()
 ri2ribenv.UseTargetOptions('ri2rib')
 
 ri2rib = ri2ribenv.Library('ri2rib', ri2rib_sources)
-ri2ribenv.Install('$LIBDIR', ri2rib)
+ri2ribenv.Install('$STATICLIBDIR', ri2rib)
 
 env.Distribute('rib/ri2rib', ri2rib_sources)
 env.Distribute('rib/ri2rib', ri2rib_headers)

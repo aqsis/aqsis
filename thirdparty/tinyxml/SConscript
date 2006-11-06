@@ -17,7 +17,7 @@ tinyxmlenv = env.Copy()
 tinyxmlenv.UseTargetOptions('tinyxml')
 
 tinyxml = tinyxmlenv.Library('tinyxml', tinyxml_sources)
-tinyxmlenv.Install('$LIBDIR', tinyxml)
+tinyxmlenv.Install('$STATICLIBDIR', tinyxml)
 
 env.Distribute('thirdparty/tinyxml', tinyxml_sources)
 env.Distribute('thirdparty/tinyxml', tinyxml_headers)

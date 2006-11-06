@@ -11,7 +11,7 @@ raytraceenv = env.Copy()
 raytraceenv.UseTargetOptions('raytrace')
 
 raytrace = raytraceenv.Library('raytrace', raytrace_sources)
-raytraceenv.Install('$LIBDIR', raytrace)
+raytraceenv.Install('$STATICLIBDIR', raytrace)
 
 env.Distribute('renderer/raytrace', raytrace_sources)
 env.Distribute('renderer/raytrace', raytrace_headers)
