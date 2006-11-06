@@ -1,6 +1,6 @@
 ; Title: Aqsis 'Standard' Installer for Win32/64 (NSIS)
 ; Author: Leon Tony Atkinson (latkinson@aqsis.org)
-; Info: Last tested with NSIS 2.15
+; Info: Last tested with NSIS 2.21
 ; Other: 1. To make updates easier, all message strings have been placed within the top 20-30 lines of this file.
 ;        2. To build manually, without using SCons, uncomment lines 10, 11, 12, 16 and 20.
 
@@ -261,7 +261,7 @@ Var /GLOBAL QUICKLAUCH_ICON
     path_nt_all_end:
 
   ; Create 'Desktop' icon
-  !insertmacro MUI_INSTALLOPTIONS_READ $DESKTOP_ICON "page_tasks.ini" "Field 3" "State"
+  !insertmacro MUI_INSTALLOPTIONS_READ $DESKTOP_ICON "page_tasks.ini" "Field 4" "State"
   StrCmp $DESKTOP_ICON "1" "desktop" "desktop_end"
     desktop:
     SetOutPath "$INSTDIR\bin"
@@ -269,7 +269,7 @@ Var /GLOBAL QUICKLAUCH_ICON
     desktop_end:
 
   ; Create 'Quick Launch' icon
-  !insertmacro MUI_INSTALLOPTIONS_READ $QUICKLAUCH_ICON "page_tasks.ini" "Field 4" "State"
+  !insertmacro MUI_INSTALLOPTIONS_READ $QUICKLAUCH_ICON "page_tasks.ini" "Field 5" "State"
   StrCmp $QUICKLAUCH_ICON "1" "quicklaunch" "quicklaunch_end"
     quicklaunch:
     SetOutPath "$INSTDIR\bin"
@@ -277,7 +277,7 @@ Var /GLOBAL QUICKLAUCH_ICON
     quicklaunch_end:
 
   ; Create 'AQSISHOME' for all users
-  !insertmacro MUI_INSTALLOPTIONS_READ $AQSISHOME "page_tasks.ini" "Field 5" "State"
+  !insertmacro MUI_INSTALLOPTIONS_READ $AQSISHOME "page_tasks.ini" "Field 6" "State"
   StrCmp $AQSISHOME "1" "aqsishome" "aqsishome_end"
     aqsishome:
     WriteRegStr HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "AQSISHOME" "$INSTDIR"
@@ -285,7 +285,7 @@ Var /GLOBAL QUICKLAUCH_ICON
     aqsishome_end:
 
   ; Create file association(s)
-  !insertmacro MUI_INSTALLOPTIONS_READ $FILE_EXTENSION "page_tasks.ini" "Field 6" "State"
+  !insertmacro MUI_INSTALLOPTIONS_READ $FILE_EXTENSION "page_tasks.ini" "Field 7" "State"
   StrCmp $FILE_EXTENSION "1" "file" "file_end"
     file:
     WriteRegStr HKCR ".rib" "" "Aqsis.RIB"
