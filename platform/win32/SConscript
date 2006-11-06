@@ -59,7 +59,7 @@ else:
 	if env['debug']:
 		env.AppendUnique(CCFLAGS=['-g', '-O0', '-fno-common'])
 	else:
-		env.AppendUnique(CCFLAGS=['-O2', '-fno-common'])
+		env.AppendUnique(CCFLAGS=['-O1', '-fno-common'])
 
 	env.AppendUnique(CPPPATH = [env.Dir('#/aqsistypes/win32')])
 	env.AppendUnique(CPPDEFINES=[('NDEBUG', '1'), ('PLUGINS', '1'), 'WIN32', 'NO_SYSLOG'])
