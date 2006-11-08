@@ -2,8 +2,6 @@
 
 REM ***Render files***
 
-ECHO.
-ECHO.
 ECHO === Rendering File(s) ===
 ECHO.
 aqsis.exe -progress "detail.rib"
