@@ -189,9 +189,6 @@ env.AppendUnique(CPPDEFINES=[('ENABLE_MPDUMP', '${enable_mpdump}')])
 # Setup the include path to the tiff headers (should have been determined in the system specific sections above).
 env.AppendUnique(LIBPATH = ['$tiff_lib_path', '$jpeg_lib_path', '$zlib_lib_path', '$fltk_lib_path'])
 
-# More include paths; don't know if these are good practise since they're install directories...
-env.AppendUnique(LIBPATH = ['$STATICLIBDIR', '$RENDERENGINEDIR'])
-
 # Create the output for the command line options defined above and in the platform specific configuration.
 Help(opts.GenerateHelpText(env))
 
@@ -200,6 +197,9 @@ SConscript('build_check.py')
 
 # Transfer any findings from the build_check back to the environment
 env = conf.Finish()
+
+# More include paths; don't know if these are good practise since they're install directories...
+env.AppendUnique(LIBPATH = ['$STATICLIBDIR', '$RENDERENGINEDIR'])
 
 
 # Prepare the NSIS installer tool
@@ -313,7 +313,8 @@ env.Distribute('./', 'version.py')
 env.Distribute('./', 'version.h.in')
 
 
-env.Alias('release', ['$BINDIR','$LIBDIR', '$SHADERDIR','$SYSCONFDIR','$INCLUDEDIR'])
+env.Alias('release', ['$BINDIR','$RENDERENGINEDIR', '$DISPLAYSDIR', '$PLUGINDIR',
+	                  '$STATICLIBDIR', '$SHADERDIR', '$SYSCONFDIR', '$INCLUDEDIR'])
 Default('release')
 
 # Define any files that need to be included in a source distribution.

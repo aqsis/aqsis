@@ -76,15 +76,18 @@ env.Replace(YACC = '${bison}')
 env.Replace(LEX = '${flex}')
 env.Replace(YACCFLAGS = '--no-lines -d')
 
-display_libs = ['tiff', 'z']
-
-# System configuration location
-env.Replace(RENDERENGINEDIR = '$LIBDIR')
-env.Replace(DISPLAYSDIR = env.Dir('$LIBDIR/aqsis').abspath)
-env.Replace(PLUGINDIR = env.Dir('$LIBDIR/aqsis').abspath)
-env.Replace(STATICLIBDIR = '$LIBDIR/aqsis')
-env.Replace(SHADERDIR = env.Dir('$install_prefix/share/aqsis/shaders').abspath)
-env.Replace(SYSCONFDIR = env.Dir('$install_prefix/etc/aqsis').abspath)
+# Make sure any relative paths are relative to the _top_ of the scons directory structure
+for path in ('$libdir', '$libexecdir', '$sysconfdir'):
+	if env.subst(path)[0] != '/':
+		env.Replace( **{path[1:]: '#/' + env.subst(path)} )
+# Update the install paths; use env.Dir, since otherwise scons (v-0.96.1) crashes with an obscure bug.
+env.Replace(LIBDIR = env.Dir('$libdir'))
+env.Replace(RENDERENGINEDIR = env.Dir('$LIBDIR'))
+env.Replace(DISPLAYSDIR = env.Dir('$libexecdir'))
+env.Replace(PLUGINDIR = env.Dir('$LIBDIR/aqsis'))
+env.Replace(STATICLIBDIR = env.Dir('$LIBDIR/aqsis'))
+env.Replace(SHADERDIR = env.Dir('$install_prefix/share/aqsis/shaders'))
+env.Replace(SYSCONFDIR = env.Dir('$sysconfdir'))
 
 # These are place holders at the moment, we need to work out the proper defines?
 env.AppendUnique(CPPDEFINES=[('DEFAULT_RC_PATH', '\\"' + env.Dir('$SYSCONFDIR').abspath + '\\"')])
