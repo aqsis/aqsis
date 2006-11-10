@@ -20,7 +20,7 @@ if not env['no_exr']:
 	exr = d_exrenv.SharedLibrary('d_exr', d_exr_sources, LIBS=['IlmImf', 'Half', 'Iex', 'Imath'])
 	d_exrenv.Install('$DISPLAYSDIR', exr)
 
-	Export('exr')
+	Return('exr')
 
 env.Distribute('displays/d_exr', d_exr_sources)
 env.Distribute('displays/d_exr', d_exr_headers)

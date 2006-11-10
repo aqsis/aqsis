@@ -1,28 +1,28 @@
 Import('env')
-d_win32env = env.Copy()
-
-d_win32env.AppendUnique(CPPPATH=['#/renderer/ddmanager'])
-d_win32env.AppendUnique(CPPDEFINES=['d_win32_EXPORTS'])
 
 d_win32_sources = Split("""
 	d_sdcWin32.cpp
 	interface.c
 	""")
-
 d_win32_headers =  Split("""
 	d_sdcWin32.h
 	""")
 
+import sys
+if sys.platform == 'win32':
 
-d_win32env.AppendUnique(LIBS = ['kernel32', 'user32', 'gdi32', 'winspool'])
+	d_win32env = env.Copy()
+	d_win32env.AppendUnique(CPPPATH=['#/renderer/ddmanager'])
+	d_win32env.AppendUnique(CPPDEFINES=['d_win32_EXPORTS'])
+	d_win32env.AppendUnique(LIBS = ['kernel32', 'user32', 'gdi32', 'winspool'])
 
-# Set any platform specific target options.
-d_win32env.UseTargetOptions('d_win32')
+	# Set any platform specific target options.
+	d_win32env.UseTargetOptions('d_win32')
 
-d_win32 = d_win32env.SharedLibrary('d_win32', d_win32_sources)
-d_win32env.Install('$DISPLAYSDIR', d_win32)
+	d_win32 = d_win32env.SharedLibrary('d_win32', d_win32_sources)
+	d_win32env.Install('$DISPLAYSDIR', d_win32)
 
-Return('d_win32')
+	Return('d_win32')
 
 env.Distribute('displays/d_sdcwin32', d_win32_sources)
 env.Distribute('displays/d_sdcwin32', d_win32_headers)

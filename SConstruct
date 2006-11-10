@@ -155,27 +155,28 @@ target_dir = env.Dir('$build_prefix')
 
 # Setup common environment settings to allow includes from the various local folders
 env.AppendUnique(
-	CPPPATH = [ target_dir.abspath + dir for dir in
-		'',
-		'/aqsistypes',
-		'/renderer/render',
-		'/shadercompiler/shaderexecenv',
-		'/rib/rib2',
-		'/shadercompiler/shadervm',
-		'/rib/rib2ri',
-		'/argparse',
-		'/shadercompiler/slparse',
-		'/shadercompiler/codegenvm',
-		'/rib/api',
+	CPPPATH = [ os.path.join(target_dir.abspath, dir) for dir in
+		[''] + Split('''
+		aqsistypes
+		renderer/render
+		shadercompiler/shaderexecenv
+		rib/rib2
+		shadercompiler/shadervm
+		rib/rib2ri
+		argparse
+		shadercompiler/slparse
+		shadercompiler/codegenvm
+		rib/api
+		''')
 	]
-	+ [
-		'$zlib_include_path',
-		'$tiff_include_path',
-		'$jpeg_include_path',
-		'$boost_include_path',
-		'$fltk_include_path',
-		'$exr_include_path'
-	]
+	+ Split('''
+		$zlib_include_path
+		$tiff_include_path
+		$jpeg_include_path
+		$boost_include_path
+		$fltk_include_path
+		$exr_include_path
+	''')
 )
 
 env.AppendUnique(CPPDEFINES=[('DEFAULT_PLUGIN_PATH', '\\"' + env.Dir('${BINDIR}').abspath + '\\"')])
@@ -198,7 +199,7 @@ SConscript('build_check.py')
 # Transfer any findings from the build_check back to the environment
 env = conf.Finish()
 
-# More include paths; don't know if these are good practise since they're install directories...
+# More library paths; don't know if these are good practise since they're install directories...
 env.AppendUnique(LIBPATH = ['$STATICLIBDIR', '$RENDERENGINEDIR'])
 
 
@@ -206,49 +207,74 @@ env.AppendUnique(LIBPATH = ['$STATICLIBDIR', '$RENDERENGINEDIR'])
 env.Tool('NSIS', toolpath=['./'])
 env.Distribute('./', 'NSIS.py')
 
-# Load the sub-project sconscript files.
-SConscript('rib/api/SConscript', build_dir=target_dir.abspath + '/rib/api')
-SConscript('aqsistypes/SConscript', build_dir=target_dir.abspath + '/aqsistypes')
-SConscript('argparse/SConscript', build_dir=target_dir.abspath + '/argparse')
-SConscript('renderer/ddmanager/SConscript', build_dir=target_dir.abspath + '/renderer/ddmanager')
-SConscript('renderer/raytrace/SConscript', build_dir=target_dir.abspath + '/renderer/raytrace')
-SConscript('rib/rib2/SConscript', build_dir=target_dir.abspath + '/rib/rib2')
-SConscript('rib/rib2ri/SConscript', build_dir=target_dir.abspath + '/rib/rib2ri')
-SConscript('shadercompiler/shaderexecenv/SConscript', build_dir=target_dir.abspath + '/shadercompiler/shaderexecenv')
-SConscript('shadercompiler/shadervm/SConscript', build_dir=target_dir.abspath + '/shadercompiler/shadervm')
-SConscript('renderer/render/SConscript', build_dir=target_dir.abspath + '/renderer/render')
-aqsis = SConscript('renderer/aqsis/SConscript', build_dir=target_dir.abspath + '/renderer/aqsis')
-Export('aqsis')
-SConscript('shadercompiler/slparse/SConscript', build_dir=target_dir.abspath + '/shadercompiler/slparse')
-SConscript('shadercompiler/codegenvm/SConscript', build_dir=target_dir.abspath + '/shadercompiler/codegenvm')
-SConscript('shadercompiler/slpp/SConscript', build_dir=target_dir.abspath + '/shadercompiler/slpp')
-SConscript('shadercompiler/aqsl/SConscript', build_dir=target_dir.abspath + '/shadercompiler/aqsl')
-SConscript('shadercompiler/slxargs/SConscript', build_dir=target_dir.abspath + '/shadercompiler/slxargs')
-SConscript('shadercompiler/aqsltell/SConscript', build_dir=target_dir.abspath + '/shadercompiler/aqsltell')
+# Set the build directory for all sub-project build operations.
+env.BuildDir(target_dir, '.')
+
+def prependBuildDir(subDirs):
+	'''Prepend the build directory to each directory in a list, or to a string
+	if the input is simply a string'''
+	if isinstance(subDirs, str):
+		return os.path.join(target_dir.path, subDirs)
+	else:
+		return [ os.path.join(target_dir.path, subDir) for subDir in subDirs ]
+
+# Load the sub-project SConscript files.
+env.SConscript( dirs = prependBuildDir( Split('''
+	rib/api
+	aqsistypes
+	argparse
+	renderer/ddmanager
+	renderer/raytrace
+	rib/rib2
+	rib/rib2ri
+	shadercompiler/shaderexecenv
+	shadercompiler/shadervm
+	renderer/render
+	shadercompiler/slparse
+	shadercompiler/codegenvm
+	shadercompiler/slpp
+	shadercompiler/aqsl
+	shadercompiler/slxargs
+	shadercompiler/aqsltell
+	rib/ri2rib
+	rib/rib2stream
+	rib/miqser
+	texturing/teqser
+	texturing/plugins
+	shaders
+	thirdparty/tinyxml
+	thirdparty/dbo_plane
+	tools
+''') ) )
+
+# sub-project SConscript files which require extra logic
+# ( is the following kludge really still needed? )
 perceptual=Program('pdiff.c')
 perceptual_name=str(perceptual[0])
 if not os.path.exists(perceptual_name):
-	SConscript('thirdparty/pdiff/SConscript', build_dir=target_dir.abspath + '/thirdparty/pdiff')
+	env.SConscript( dirs = prependBuildDir(['thirdparty/pdiff']) )
 
-display = SConscript('displays/display/SConscript', build_dir=target_dir.abspath + '/displays/display')
-bmp = SConscript('displays/d_sdcBMP/SConscript', build_dir=target_dir.abspath + '/displays/d_sdcBMP')
-if sys.platform == 'win32':
-	win32 = SConscript('displays/d_sdcWin32/SConscript', build_dir=target_dir.abspath + '/displays/d_sdcWin32')
-xpm = SConscript('displays/d_xpm/SConscript', build_dir=target_dir.abspath + '/displays/d_xpm')
-SConscript('displays/d_exr/SConscript', build_dir=target_dir.abspath + '/displays/d_exr')
-SConscript('rib/ri2rib/SConscript', build_dir=target_dir.abspath + '/rib/ri2rib')
-SConscript('rib/rib2stream/SConscript', build_dir=target_dir.abspath + '/rib/rib2stream')
-miqser = SConscript('rib/miqser/SConscript', build_dir=target_dir.abspath + '/rib/miqser')
-SConscript('texturing/teqser/SConscript', build_dir=target_dir.abspath + '/texturing/teqser')
-SConscript('texturing/plugins/SConscript')
-SConscript('shaders/SConscript', build_dir=target_dir.abspath + '/shaders')
-SConscript('thirdparty/tinyxml/SConscript', build_dir=target_dir.abspath + '/thirdparty/tinyxml')
-SConscript('thirdparty/dbo_plane/SConscript', build_dir=target_dir.abspath + '/thirdparty/dbo_plane')
-SConscript('distribution/SConscript')
-SConscript('tools/SConscript')
+# The following SConscript calls have return values which are used below.
+(	aqsis,
+	display,
+	exr,
+	bmp,
+	win32,
+	xpm,
+) = env.SConscript( dirs = prependBuildDir( Split('''
+		renderer/aqsis
+		displays/display
+		displays/d_exr
+		displays/d_sdcBMP
+		displays/d_sdcWin32
+		displays/d_xpm
+''') ) )
 
-if not env['no_exr']:
-	Import('exr')
+# needed (?) by macosx distribution (there should be a better way to achieve
+# this than using a global? )
+Export('aqsis')
+
+env.SConscript( dirs = prependBuildDir(['distribution']) )
 
 #
 # Generate and install the 'aqsisrc' configuration file from the template '.aqsisrc.in'
@@ -283,7 +309,7 @@ def aqsis_rc_build(target, source, env):
 		aqsisrc_out.close()
 		aqsisrc_in.close()
 
-aqsisrc = env.Command('aqsisrc', 'aqsisrc.in', aqsis_rc_build)
+aqsisrc = env.Command(prependBuildDir('aqsisrc'), 'aqsisrc.in', aqsis_rc_build)
 env.Install('$SYSCONFDIR', aqsisrc)
 env.Depends(aqsisrc, display)
 
@@ -307,8 +333,7 @@ def version_h_build(target, source, env):
 		aqsisrc_out.close()
 		aqsisrc_in.close()
 
-version_h = env.Command('version.h', 'version.h.in', version_h_build)
-env.Install(target_dir.abspath, version_h)
+version_h = env.Command(prependBuildDir('version.h'), 'version.h.in', version_h_build)
 env.Distribute('./', 'version.py')
 env.Distribute('./', 'version.h.in')
 
