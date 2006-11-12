@@ -354,6 +354,10 @@ Function un.onInit
 FunctionEnd
 
 
+; Uninstaller
+!include "WordFunc.nsh"
+!insertmacro un.WordReplace
+
 Section Uninstall
   !insertmacro MUI_STARTMENU_GETFOLDER "Application" $ICONS_GROUP
   Delete "$DESKTOP\${PRODUCT_FULLNAME} ${PRODUCT_VERSION}.lnk"
@@ -363,6 +367,16 @@ Section Uninstall
   RMDir "$SMPROGRAMS\${PRODUCT_FULLNAME}"
 
   RMDir /r "$INSTDIR"
+
+  ReadRegStr $PATH_NT HKCU "Environment" "PATH"
+  ${un.WordReplace} "$PATH_NT" "$INSTDIR\bin;" "" "+" $PATH
+  WriteRegStr HKCU "Environment" "PATH" "$PATH"
+
+  ReadRegStr $PATH_NT_ALL HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "PATH"
+  ${un.WordReplace} "$PATH_NT_ALL" "$INSTDIR\bin;" "" "+" $PATH
+  WriteRegStr HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "PATH" "$PATH"
+
+  DeleteRegValue HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "AQSISHOME"
 
   DeleteRegKey HKCR ".rib"
   DeleteRegKey HKCR "Aqsis.RIB"
@@ -375,6 +389,6 @@ Section Uninstall
 
   DeleteRegKey ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}"
   DeleteRegKey HKLM "${PRODUCT_DIR_REGKEY}"
-  
+
   SetAutoClose true
 SectionEnd
