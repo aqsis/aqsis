@@ -244,7 +244,7 @@ Var /GLOBAL PATH_NT_ALL
 Var /GLOBAL QUICKLAUCH_ICON
 
   ; Update 'PATH' for current user
-  !insertmacro MUI_INSTALLOPTIONS_READ $PATH_NT "${PROJECT_ROOT}\distribution\win\nsis\page_tasks.ini" "Field 1" "State"
+  !insertmacro MUI_INSTALLOPTIONS_READ $PATH_NT "page_tasks.ini" "Field 1" "State"
   StrCmp $PATH_NT "1" "path_nt" "path_nt_end"
     path_nt:
     ReadRegStr $PATH HKCU "Environment" "PATH"
@@ -253,7 +253,7 @@ Var /GLOBAL QUICKLAUCH_ICON
     path_nt_end:
 
   ; Update 'PATH' for all users
-  !insertmacro MUI_INSTALLOPTIONS_READ $PATH_NT_ALL "${PROJECT_ROOT}\distribution\win\nsis\page_tasks.ini" "Field 2" "State"
+  !insertmacro MUI_INSTALLOPTIONS_READ $PATH_NT_ALL "page_tasks.ini" "Field 2" "State"
   StrCmp $PATH_NT_ALL "1" "path_nt_all" "path_nt_all_end"
     path_nt_all:
     ReadRegStr $PATH HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "PATH"
@@ -262,7 +262,7 @@ Var /GLOBAL QUICKLAUCH_ICON
     path_nt_all_end:
 
   ; Create 'Desktop' icon
-  !insertmacro MUI_INSTALLOPTIONS_READ $DESKTOP_ICON "${PROJECT_ROOT}\distribution\win\nsis\page_tasks.ini" "Field 4" "State"
+  !insertmacro MUI_INSTALLOPTIONS_READ $DESKTOP_ICON "page_tasks.ini" "Field 4" "State"
   StrCmp $DESKTOP_ICON "1" "desktop" "desktop_end"
     desktop:
     SetOutPath "$INSTDIR\bin"
@@ -270,7 +270,7 @@ Var /GLOBAL QUICKLAUCH_ICON
     desktop_end:
 
   ; Create 'Quick Launch' icon
-  !insertmacro MUI_INSTALLOPTIONS_READ $QUICKLAUCH_ICON "${PROJECT_ROOT}\distribution\win\nsis\page_tasks.ini" "Field 5" "State"
+  !insertmacro MUI_INSTALLOPTIONS_READ $QUICKLAUCH_ICON "page_tasks.ini" "Field 5" "State"
   StrCmp $QUICKLAUCH_ICON "1" "quicklaunch" "quicklaunch_end"
     quicklaunch:
     SetOutPath "$INSTDIR\bin"
@@ -278,7 +278,7 @@ Var /GLOBAL QUICKLAUCH_ICON
     quicklaunch_end:
 
   ; Create 'AQSISHOME' for all users
-  !insertmacro MUI_INSTALLOPTIONS_READ $AQSISHOME "${PROJECT_ROOT}\distribution\win\nsis\page_tasks.ini" "Field 6" "State"
+  !insertmacro MUI_INSTALLOPTIONS_READ $AQSISHOME "page_tasks.ini" "Field 6" "State"
   StrCmp $AQSISHOME "1" "aqsishome" "aqsishome_end"
     aqsishome:
     WriteRegStr HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "AQSISHOME" "$INSTDIR"
@@ -286,7 +286,7 @@ Var /GLOBAL QUICKLAUCH_ICON
     aqsishome_end:
 
   ; Create file association(s)
-  !insertmacro MUI_INSTALLOPTIONS_READ $FILE_EXTENSION "${PROJECT_ROOT}\distribution\win\nsis\page_tasks.ini" "Field 7" "State"
+  !insertmacro MUI_INSTALLOPTIONS_READ $FILE_EXTENSION "page_tasks.ini" "Field 7" "State"
   StrCmp $FILE_EXTENSION "1" "file" "file_end"
     file:
     WriteRegStr HKCR ".rib" "" "Aqsis.RIB"
@@ -333,13 +333,13 @@ SectionEnd
 
 
 Function .onInit
-  !insertmacro MUI_INSTALLOPTIONS_EXTRACT "${PROJECT_ROOT}\distribution\win\nsis\page_tasks.ini"
+  !insertmacro MUI_INSTALLOPTIONS_EXTRACT "page_tasks.ini"
 FunctionEnd
 
 
 Function AdditionalTasks
   !insertmacro MUI_HEADER_TEXT "Choose Additional Tasks" "Choose the additional tasks to be performed."
-  !insertmacro MUI_INSTALLOPTIONS_DISPLAY "${PROJECT_ROOT}\distribution\win\nsis\page_tasks.ini"
+  !insertmacro MUI_INSTALLOPTIONS_DISPLAY "page_tasks.ini"
 FunctionEnd
 
 
