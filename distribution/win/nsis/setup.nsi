@@ -102,7 +102,7 @@ Page custom AdditionalTasks
 
 ; Reserve files
 !insertmacro MUI_RESERVEFILE_INSTALLOPTIONS
-ReserveFile "page_tasks.ini"
+ReserveFile "${PROJECT_ROOT}\distribution\win\nsis\page_tasks.ini"
 
 
 ; Installer 'Version' tab content
