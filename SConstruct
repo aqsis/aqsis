@@ -246,7 +246,7 @@ env.AppendUnique(LIBPATH = prependBuildDir( Split('''
 ''' ) ) )
 
 # Load the sub-project SConscript files.
-env.SConscript( dirs = prependBuildDir( Split('''
+sub_sconsdirs_noret = prependBuildDir(Split('''
 	rib/api
 	aqsistypes
 	argparse
@@ -272,36 +272,43 @@ env.SConscript( dirs = prependBuildDir( Split('''
 	thirdparty/tinyxml
 	thirdparty/dbo_plane
 	tools
-''') ) )
+'''))
+env.SConscript( dirs = sub_sconsdirs_noret )
 
 # sub-project SConscript files which require extra logic
 # ( is the following kludge really still needed? )
 perceptual=Program('pdiff.c')
 perceptual_name=str(perceptual[0])
+sub_sconsdirs_misc = []
 if not os.path.exists(perceptual_name):
-	env.SConscript( dirs = prependBuildDir(['thirdparty/pdiff']) )
+	sub_sconsdirs_misc = prependBuildDir(['thirdparty/pdiff'])
+	env.SConscript( dirs = sub_sconsdirs_misc )
 
-# The following SConscript calls have return values which are used below.
-(	aqsis,
-	display,
-	exr,
-	bmp,
-	win32,
-	xpm,
-) = env.SConscript( dirs = prependBuildDir( Split('''
+# The following subdirectories have SConscript return values.
+sub_sconsdirs_withret = prependBuildDir(Split('''
 		renderer/aqsis
 		displays/display
 		displays/d_exr
 		displays/d_sdcBMP
 		displays/d_sdcWin32
 		displays/d_xpm
-''') ) )
+'''))
+(	aqsis,
+	display,
+	exr,
+	bmp,
+	win32,
+	xpm,
+) = env.SConscript( dirs = prependBuildDir(sub_sconsdirs_withret) )
 
 # needed (?) by macosx distribution (there should be a better way to achieve
 # this than using a global? )
 Export('aqsis')
 
 env.SConscript( dirs = prependBuildDir(['distribution']) )
+
+# build alias.  Note that the distribution directory is not included
+env.Alias('build', sub_sconsdirs_noret + sub_sconsdirs_misc + sub_sconsdirs_withret)
 
 #
 # Generate and install the 'aqsisrc' configuration file from the template '.aqsisrc.in'
@@ -364,8 +371,7 @@ version_h = env.Command(prependBuildDir('version.h'), 'version.h.in', version_h_
 env.Distribute('./', 'version.py')
 env.Distribute('./', 'version.h.in')
 
-
-env.Alias('release', ['$BINDIR','$RENDERENGINEDIR', '$DISPLAYSDIR', '$PLUGINDIR',
+env.Alias(['install','release'], ['$BINDIR','$RENDERENGINEDIR', '$DISPLAYSDIR', '$PLUGINDIR',
 	                  '$STATICLIBDIR', '$SHADERDIR', '$SYSCONFDIR', '$INCLUDEDIR'])
 Default('release')
 
