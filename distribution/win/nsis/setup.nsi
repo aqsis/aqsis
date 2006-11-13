@@ -101,8 +101,8 @@ Page custom AdditionalTasks
 !insertmacro MUI_LANGUAGE "English"
 
 ; Reserve files
-;;!insertmacro MUI_RESERVEFILE_INSTALLOPTIONS
-;;ReserveFile "${PROJECT_ROOT}\distribution\win\nsis\page_tasks.ini"
+!insertmacro MUI_RESERVEFILE_INSTALLOPTIONS
+ReserveFile "${PROJECT_ROOT}\distribution\win\nsis\page_tasks.ini"
 
 
 ; Installer 'Version' tab content
@@ -333,9 +333,7 @@ SectionEnd
 
 
 Function .onInit
-  !insertmacro MUI_RESERVEFILE_INSTALLOPTIONS
-  ReserveFile "${PROJECT_ROOT}\distribution\win\nsis\page_tasks.ini"
-  !insertmacro MUI_INSTALLOPTIONS_EXTRACT "page_tasks.ini"
+  !insertmacro MUI_INSTALLOPTIONS_EXTRACT_AS "${PROJECT_ROOT}\distribution\win\nsis\page_tasks.ini" "page_tasks.ini"
 FunctionEnd
 
 
