@@ -2,11 +2,12 @@
 ; Author: Leon Tony Atkinson (latkinson@aqsis.org)
 ; Info: Last tested with NSIS 2.21
 ; Other: 1. To make updates easier, all message strings have been placed within the top 20-30 lines of this file.
-;        2. To build manually, without using SCons, uncomment lines 10, 11, 12, 16 and 20.
+;        2. To build manually, without using SCons, uncomment lines 10, 11, 12, 13, 17 and 21.
 
 
 ; Helper defines
 !define /date YEAR "%Y"
+;;!define PROJECT_ROOT "C:\WINNT\Temp\aqsis\aqsis"
 ;;!define LIBRARY_EXTENSION ".*"
 ;;!define LIBRARY_PREFIX ""
 ;;!define USE_DEFS "0"
@@ -42,7 +43,7 @@
 
 Name "${PRODUCT_FULLNAME} ${PRODUCT_VERSION}"
 BrandingText "www.aqsis.org"
-OutFile "..\..\..\output\aqsis-setup-${PRODUCT_FILE_NUMBER}.exe"
+OutFile "${PROJECT_ROOT}\output\aqsis-setup-${PRODUCT_FILE_NUMBER}.exe"
 InstallDir "$PROGRAMFILES\${PRODUCT_NAME}"
 InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
 ShowInstDetails show
@@ -66,7 +67,7 @@ XPStyle on
 
 ; License page
 !define MUI_LICENSEPAGE_RADIOBUTTONS
-!insertmacro MUI_PAGE_LICENSE "..\..\..\COPYING"
+!insertmacro MUI_PAGE_LICENSE "${PROJECT_ROOT}\COPYING"
 
 ; Components page
 !insertmacro MUI_PAGE_COMPONENTS
@@ -125,16 +126,16 @@ InstType "Minimal"
 Section "!Main" SEC01
 SectionIn 1 2
   SetOutPath "$INSTDIR\bin"
-  File "..\..\..\output\bin\aqsisrc"
-  File "..\..\..\output\bin\*.dll"
-  File "..\..\..\output\bin\*.exe"
-  File "..\..\..\output\bin\*.py"
+  File "${PROJECT_ROOT}\output\bin\aqsisrc"
+  File "${PROJECT_ROOT}\output\bin\*.dll"
+  File "${PROJECT_ROOT}\output\bin\*.exe"
+  File "${PROJECT_ROOT}\output\bin\*.py"
   SetOutPath "$INSTDIR\doc"
-  File "/oname=AUTHORS.txt" "..\..\..\AUTHORS"
-  File "/oname=LICENSE.txt" "..\..\..\COPYING"
-  File "/oname=README.txt" "..\..\..\README"
+  File "/oname=AUTHORS.txt" "${PROJECT_ROOT}\AUTHORS"
+  File "/oname=LICENSE.txt" "${PROJECT_ROOT}\COPYING"
+  File "/oname=README.txt" "${PROJECT_ROOT}\README"
   SetOutPath "$INSTDIR\shaders"
-  File "..\..\..\output\shaders\*.slx"
+  File "${PROJECT_ROOT}\output\shaders\*.slx"
 
   ${ConfigWrite} "$INSTDIR\bin\aqsisrc" 'Option "searchpath" "string shader" ' '["$INSTDIR\shaders"]' $R0
   ${ConfigWrite} "$INSTDIR\bin\aqsisrc" 'Option "searchpath" "string display" ' '["$INSTDIR\bin"]' $R1
@@ -157,13 +158,13 @@ SectionGroup /e "Content" SEC02
   Section "Examples" SEC0201
   SectionIn 1 2
     SetOutPath "$INSTDIR\content\ribs\features\layeredshaders"
-    File /x ".svn" "..\..\..\content\ribs\features\layeredshaders\*.*"
+    File /x ".svn" "${PROJECT_ROOT}\content\ribs\features\layeredshaders\*.*"
     SetOutPath "$INSTDIR\content\ribs\scenes\vase"
-    File /x ".svn" "..\..\..\content\ribs\scenes\vase\*.*"
+    File /x ".svn" "${PROJECT_ROOT}\content\ribs\scenes\vase\*.*"
     SetOutPath "$INSTDIR\content\shaders\displacement"
-    File "..\..\..\content\shaders\displacement\dented.sl"
+    File "${PROJECT_ROOT}\content\shaders\displacement\dented.sl"
     SetOutPath "$INSTDIR\content\shaders\light"
-    File "..\..\..\content\shaders\light\shadowspot.sl"
+    File "${PROJECT_ROOT}\content\shaders\light\shadowspot.sl"
     
 
   ; Shortcuts
@@ -178,16 +179,16 @@ SectionGroup /e "Content" SEC02
   Section /o "Source Shaders" SEC0202
   SectionIn 1
     SetOutPath "$INSTDIR\shaders"
-    File "..\..\..\output\shaders\*.sl"
+    File "${PROJECT_ROOT}\output\shaders\*.sl"
   SectionEnd
 SectionGroupEnd
 
 Section "Documentation" SEC03
 SectionIn 1 2
   SetOutPath "$INSTDIR\doc"
-  ;;File "/oname=CHANGES.txt" "..\..\..\output\ChangeLog"
-  File "/oname=INSTALL.txt" "..\..\..\INSTALL"
-  File "/oname=NOTES.txt" "..\..\..\ReleaseNotes"
+  ;;File "/oname=CHANGES.txt" "${PROJECT_ROOT}\output\ChangeLog"
+  File "/oname=INSTALL.txt" "${PROJECT_ROOT}\INSTALL"
+  File "/oname=NOTES.txt" "${PROJECT_ROOT}\ReleaseNotes"
 
 ; Shortcuts
   !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
@@ -199,12 +200,12 @@ SectionEnd
 Section /o "Libraries" SEC04
 SectionIn 1
   SetOutPath "$INSTDIR\include\aqsis"
-  File "..\..\..\output\include\aqsis\*.h"
+  File "${PROJECT_ROOT}\output\include\aqsis\*.h"
   SetOutPath "$INSTDIR\lib"
-  File "..\..\..\output\lib\${LIBRARY_PREFIX}*${LIBRARY_EXTENSION}"
-  File "..\..\..\output\bin\${LIBRARY_PREFIX}aqsis${LIBRARY_EXTENSION}"
+  File "${PROJECT_ROOT}\output\lib\${LIBRARY_PREFIX}*${LIBRARY_EXTENSION}"
+  File "${PROJECT_ROOT}\output\bin\${LIBRARY_PREFIX}aqsis${LIBRARY_EXTENSION}"
   !if ${USE_DEFS} != 0
-    File "..\..\..\output\bin\aqsis.def"
+    File "${PROJECT_ROOT}\output\bin\aqsis.def"
   !endif
 SectionEnd
 
