@@ -7,18 +7,18 @@
 
 ; Helper defines
 !define /date YEAR "%Y"
-!define PROJECT_ROOT "C:\WINNT\Temp\aqsis\aqsis"
-!define LIBRARY_EXTENSION ".*"
-!define LIBRARY_PREFIX ""
-!define USE_DEFS "0"
+;;!define PROJECT_ROOT "C:\WINDOWS\Temp\aqsis"
+;;!define LIBRARY_EXTENSION ".*"
+;;!define LIBRARY_PREFIX ""
+;;!define USE_DEFS "0"
 
 !define PRODUCT_NAME "Aqsis"
 !define PRODUCT_FULLNAME "Aqsis Renderer"
-!define PRODUCT_VERSION "1.2.0"
+;;!define PRODUCT_VERSION "1.2.0"
 !ifndef PRODUCT_VERSION
 	!error "PRODUCT_VERSION not specified"
 !endif
-!define PRODUCT_FILE_NUMBER "1_2_0"
+;;!define PRODUCT_FILE_NUMBER "1_2_0"
 !ifndef	PRODUCT_FILE_NUMBER
 	!error "PRODUCT_FILE_NUMBER not specified"
 !endif
