@@ -333,7 +333,7 @@ SectionEnd
 
 
 Function .onInit
-  !insertmacro MUI_INSTALLOPTIONS_EXTRACT "page_tasks.ini"
+  !insertmacro MUI_INSTALLOPTIONS_EXTRACT "${PROJECT_ROOT}\distribution\win\nsis\page_tasks.ini"
 FunctionEnd
 
 
