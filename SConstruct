@@ -199,9 +199,6 @@ SConscript('build_check.py')
 # Transfer any findings from the build_check back to the environment
 env = conf.Finish()
 
-# More library paths; don't know if these are good practise since they're install directories...
-env.AppendUnique(LIBPATH = ['$STATICLIBDIR', '$RENDERENGINEDIR'])
-
 
 # Prepare the NSIS installer tool
 env.Tool('NSIS', toolpath=['./'])
@@ -214,9 +211,39 @@ def prependBuildDir(subDirs):
 	'''Prepend the build directory to each directory in a list, or to a string
 	if the input is simply a string'''
 	if isinstance(subDirs, str):
-		return os.path.join(target_dir.path, subDirs)
+		return os.path.join(target_dir.abspath, subDirs)
 	else:
-		return [ os.path.join(target_dir.path, subDir) for subDir in subDirs ]
+		return [ os.path.join(target_dir.abspath, subDir) for subDir in subDirs ]
+
+# Add paths to librarys generated in the build dir.
+env.AppendUnique(LIBPATH = prependBuildDir( Split('''
+	rib/rib2
+	rib/rib2ri
+	rib/ri2rib
+	rib/rib2stream
+	aqsistypes
+	argparse
+	renderer/ddmanager
+	renderer/raytrace
+	renderer/render
+	shadercompiler/shaderexecenv
+	shadercompiler/shadervm
+	shadercompiler/slparse
+	shadercompiler/codegenvm
+	shadercompiler/slpp
+	shadercompiler/slxargs
+	texturing/plugins/common
+	texturing/plugins/bake2tif
+	texturing/plugins/jpg2tif
+	texturing/plugins/bmp2tif
+	texturing/plugins/exr2tif
+	texturing/plugins/gif2tif
+	texturing/plugins/pcx2tif
+	texturing/plugins/ppm2tif
+	texturing/plugins/tga2tif
+	texturing/plugins/png2tif
+	thirdparty/tinyxml
+''' ) ) )
 
 # Load the sub-project SConscript files.
 env.SConscript( dirs = prependBuildDir( Split('''
