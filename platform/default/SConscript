@@ -97,7 +97,8 @@ if env.subst('$destdir') != '':
 	def InstallWithDestDir(dir, source):
 		return env.SconsInternalInstallFunc('$DESTDIR'+env.Dir(dir).abspath, source)
 	env.Install = InstallWithDestDir
-
+	# Update the install directories to reflect the changes.
+	env.Replace(INSTALL_DIRS = [ '$DESTDIR' + env.Dir(dir).abspath for dir in env['INSTALL_DIRS'] ] )
 
 # These absolute paths are necessary because there's no good general way of
 # getting a running program's install path on unix-like systems.

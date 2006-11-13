@@ -139,7 +139,9 @@ env.Replace(STATICLIBDIR = '$LIBDIR')
 env.Replace(SHADERDIR = env.Dir('$install_prefix').abspath + os.sep + 'shaders')
 env.Replace(SYSCONFDIR = env.Dir('$install_prefix').abspath + os.sep + 'bin')
 env.Replace(INCLUDEDIR = env.Dir('$install_prefix').abspath + os.sep + 'include/aqsis')
-env.Replace(DESTDIR = '')
+# The following install directories may be modified by the platform specific config files.
+env.Replace(INSTALL_DIRS = ['$BINDIR','$RENDERENGINEDIR', '$DISPLAYSDIR', '$PLUGINDIR',
+				'$STATICLIBDIR', '$SHADERDIR', '$SYSCONFDIR', '$INCLUDEDIR'] )
 
 # Read in the platform specific configuration.
 # Allowing it to override the settings defined above.
@@ -372,8 +374,7 @@ env.Distribute('./', 'version.h.in')
 # Note that the distribution directory is not included in the build alias.
 env.Alias('build', sub_sconsdirs_noret + sub_sconsdirs_misc + sub_sconsdirs_withret + [aqsisrc])
 
-env.Alias(['install','release'], ['$BINDIR','$RENDERENGINEDIR', '$DISPLAYSDIR', '$PLUGINDIR',
-	                  '$STATICLIBDIR', '$SHADERDIR', '$SYSCONFDIR', '$INCLUDEDIR'])
+env.Alias(['install','release'], env['INSTALL_DIRS'])
 Default('release')
 
 # Define any files that need to be included in a source distribution.
