@@ -7,18 +7,18 @@
 
 ; Helper defines
 !define /date YEAR "%Y"
-;;!define PROJECT_ROOT "C:\WINNT\Temp\aqsis\aqsis"
-;;!define LIBRARY_EXTENSION ".*"
-;;!define LIBRARY_PREFIX ""
-;;!define USE_DEFS "0"
+!define PROJECT_ROOT "C:\WINNT\Temp\aqsis\aqsis"
+!define LIBRARY_EXTENSION ".*"
+!define LIBRARY_PREFIX ""
+!define USE_DEFS "0"
 
 !define PRODUCT_NAME "Aqsis"
 !define PRODUCT_FULLNAME "Aqsis Renderer"
-;;!define PRODUCT_VERSION "1.2.0"
+!define PRODUCT_VERSION "1.2.0"
 !ifndef PRODUCT_VERSION
 	!error "PRODUCT_VERSION not specified"
 !endif
-;;!define PRODUCT_FILE_NUMBER "1_2_0"
+!define PRODUCT_FILE_NUMBER "1_2_0"
 !ifndef	PRODUCT_FILE_NUMBER
 	!error "PRODUCT_FILE_NUMBER not specified"
 !endif
@@ -102,7 +102,7 @@ Page custom AdditionalTasks
 
 ; Reserve files
 !insertmacro MUI_RESERVEFILE_INSTALLOPTIONS
-ReserveFile "${PROJECT_ROOT}\distribution\win\nsis\page_tasks.ini"
+ReserveFile /nonfatal "${PROJECT_ROOT}\distribution\win\nsis\page_tasks.ini"
 
 
 ; Installer 'Version' tab content
@@ -333,7 +333,7 @@ SectionEnd
 
 
 Function .onInit
-  !insertmacro MUI_INSTALLOPTIONS_EXTRACT "${PROJECT_ROOT}\distribution\win\nsis\page_tasks.ini"
+  !insertmacro MUI_INSTALLOPTIONS_EXTRACT "page_tasks.ini"
 FunctionEnd
 
 
