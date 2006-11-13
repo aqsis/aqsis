@@ -139,6 +139,7 @@ env.Replace(STATICLIBDIR = '$LIBDIR')
 env.Replace(SHADERDIR = env.Dir('$install_prefix').abspath + os.sep + 'shaders')
 env.Replace(SYSCONFDIR = env.Dir('$install_prefix').abspath + os.sep + 'bin')
 env.Replace(INCLUDEDIR = env.Dir('$install_prefix').abspath + os.sep + 'include/aqsis')
+env.Replace(DESTDIR = '')
 
 # Read in the platform specific configuration.
 # Allowing it to override the settings defined above.
@@ -307,9 +308,6 @@ Export('aqsis')
 
 env.SConscript( dirs = prependBuildDir(['distribution']) )
 
-# build alias.  Note that the distribution directory is not included
-env.Alias('build', sub_sconsdirs_noret + sub_sconsdirs_misc + sub_sconsdirs_withret)
-
 #
 # Generate and install the 'aqsisrc' configuration file from the template '.aqsisrc.in'
 #
@@ -371,8 +369,12 @@ version_h = env.Command(prependBuildDir('version.h'), 'version.h.in', version_h_
 env.Distribute('./', 'version.py')
 env.Distribute('./', 'version.h.in')
 
-env.Alias(['install','release'], ['$BINDIR','$RENDERENGINEDIR', '$DISPLAYSDIR', '$PLUGINDIR',
-	                  '$STATICLIBDIR', '$SHADERDIR', '$SYSCONFDIR', '$INCLUDEDIR'])
+# Note that the distribution directory is not included in the build alias.
+env.Alias('build', sub_sconsdirs_noret + sub_sconsdirs_misc + sub_sconsdirs_withret + [aqsisrc])
+
+env.Alias(['install','release'], [ '$DESTDIR' + env.Dir(dir).abspath for dir in
+	                  ['$BINDIR','$RENDERENGINEDIR', '$DISPLAYSDIR', '$PLUGINDIR',
+	                  '$STATICLIBDIR', '$SHADERDIR', '$SYSCONFDIR', '$INCLUDEDIR'] ] )
 Default('release')
 
 # Define any files that need to be included in a source distribution.
