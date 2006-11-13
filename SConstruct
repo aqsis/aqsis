@@ -301,7 +301,7 @@ if not os.path.exists(perceptual_name):
 # this than using a global? )
 Export('aqsis')
 
-env.SConscript( dirs = prependBuildDir(['distribution']) )
+env.SConscript( dirs = prependBuildDir(['distribution']), build_dir = '#build_dist/distribution')
 
 #
 # Generate and install the 'aqsisrc' configuration file from the template '.aqsisrc.in'
