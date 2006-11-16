@@ -17,8 +17,8 @@ aqivenv.UseTargetOptions('aqiv')
 aqiv = aqivenv.Program('aqiv', aqiv_sources)
 aqivenv.Install('$BINDIR', aqiv)
 
-env.Distribute('aqsis/thirdparty/iv', aqiv_sources)
-env.Distribute('aqsis/thirdparty/iv', aqiv_headers)
-env.Distribute('aqsis/thirdparty/iv', 'SConscript')
+env.Distribute('thirdparty/aqiv', aqiv_sources)
+env.Distribute('thirdparty/aqiv', aqiv_headers)
+env.Distribute('thirdparty/aqiv', 'SConscript')
 
 Return('aqiv')

@@ -14,8 +14,8 @@ maketexturesenv.UseTargetOptions('maketextures')
 maketextures = maketexturesenv.Program('maketextures', maketextures_sources)
 maketexturesenv.Install('$BINDIR', maketextures)
 
-env.Distribute('aqsis/thirdparty/maketextures', maketextures_sources)
-env.Distribute('aqsis/thirdparty/maketextures', maketextures_headers)
-env.Distribute('aqsis/thirdparty/maketextures', 'SConscript')
+env.Distribute('thirdparty/maketextures', maketextures_sources)
+env.Distribute('thirdparty/maketextures', maketextures_headers)
+env.Distribute('thirdparty/maketextures', 'SConscript')
 
 Return('maketextures')

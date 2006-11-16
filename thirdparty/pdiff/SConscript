@@ -22,8 +22,8 @@ pdiffenv.UseTargetOptions('pdiff')
 pdiff = pdiffenv.Program('pdiff', pdiff_sources)
 pdiffenv.Install('$BINDIR', pdiff)
 
-env.Distribute('aqsis/thirdparty/iv', pdiff_sources)
-env.Distribute('aqsis/thirdparty/iv', pdiff_headers)
-env.Distribute('aqsis/thirdparty/iv', 'SConscript')
+env.Distribute('thirdparty/pdiff', pdiff_sources)
+env.Distribute('thirdparty/pdiff', pdiff_headers)
+env.Distribute('thirdparty/pdiff', 'SConscript')
 
 Return('pdiff')
