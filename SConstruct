@@ -43,6 +43,7 @@ opts.Add('exr_lib_path', 'Point to the OpenEXR library files', '')
 opts.Add(BoolOption('no_fltk', 'Build without FLTK support', '0'))
 opts.Add(BoolOption('no_exr', 'Build without OpenEXR support', '0'))
 opts.Add(BoolOption('with_pdiff', 'Build and install the third-party pdiff utility', '1'))
+opts.Add('cachedir', 'Examine a build cache dir for previously compiled files', '')
 opts.Add(BoolOption('debug', 'Build with debug options enabled', '0'))
 opts.Add(BoolOption('enable_mpdump', 'Build with micropolygon dumping mode enabled', '1'))
 
@@ -84,6 +85,10 @@ opts.Add('build_prefix', 'Root folder under which to build Aqsis', target_dir)
 # Make scons store build signatures in a single file _outside_ the install
 # hierarchy --- no more .sconsign files...
 env.SConsignFile()
+
+if env['cachedir'] != '':
+	# Examine cachedir for identical files built during another build
+	CacheDir(env['cachedir'])
 
 # add builders to zip/gtar files
 from build_support import zipperFunction
