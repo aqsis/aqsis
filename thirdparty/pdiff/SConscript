@@ -14,16 +14,14 @@ pdiff_headers = Split("""
 	RGBAImage.h
 	""")
 
-pdiffenv = env.Copy()
+if env['with_pdiff']:
+	pdiffenv = env.Copy()
+	pdiffenv.UseTargetOptions('pdiff')
 
-# Set any platform specific options for this target
-pdiffenv.UseTargetOptions('pdiff')
-
-pdiff = pdiffenv.Program('pdiff', pdiff_sources)
-pdiffenv.Install('$BINDIR', pdiff)
+	pdiff = pdiffenv.Program('pdiff', pdiff_sources)
+	pdiffenv.Install('$BINDIR', pdiff)
 
 env.Distribute('thirdparty/pdiff', pdiff_sources)
 env.Distribute('thirdparty/pdiff', pdiff_headers)
 env.Distribute('thirdparty/pdiff', 'SConscript')
 
-Return('pdiff')

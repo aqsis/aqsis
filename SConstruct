@@ -42,6 +42,7 @@ opts.Add('exr_include_path', 'Point to the OpenEXR header files', '')
 opts.Add('exr_lib_path', 'Point to the OpenEXR library files', '')
 opts.Add(BoolOption('no_fltk', 'Build without FLTK support', '0'))
 opts.Add(BoolOption('no_exr', 'Build without OpenEXR support', '0'))
+opts.Add(BoolOption('with_pdiff', 'Build and install the third-party pdiff utility', '1'))
 opts.Add(BoolOption('debug', 'Build with debug options enabled', '0'))
 opts.Add(BoolOption('enable_mpdump', 'Build with micropolygon dumping mode enabled', '1'))
 
@@ -272,20 +273,12 @@ sub_sconsdirs_noret = prependBuildDir(Split('''
 	texturing/teqser
 	texturing/plugins
 	shaders
+	thirdparty/pdiff
 	thirdparty/tinyxml
 	thirdparty/dbo_plane
 	tools
 '''))
 env.SConscript( dirs = sub_sconsdirs_noret )
-
-# sub-project SConscript files which require extra logic
-# ( is the following kludge really still needed? )
-perceptual=Program('pdiff.c')
-perceptual_name=str(perceptual[0])
-sub_sconsdirs_misc = []
-if not os.path.exists(perceptual_name):
-	sub_sconsdirs_misc = prependBuildDir(['thirdparty/pdiff'])
-	env.SConscript( dirs = sub_sconsdirs_misc )
 
 # The following subdirectories have SConscript return values.
 sub_sconsdirs_withret = prependBuildDir(Split('''
@@ -372,7 +365,7 @@ env.Distribute('./', 'version.py')
 env.Distribute('./', 'version.h.in')
 
 # Note that the distribution directory is not included in the build alias.
-env.Alias('build', sub_sconsdirs_noret + sub_sconsdirs_misc + sub_sconsdirs_withret + [aqsisrc])
+env.Alias('build', sub_sconsdirs_noret + sub_sconsdirs_withret + [aqsisrc])
 
 env.Alias(['install','release'], env['INSTALL_DIRS'])
 Default('release')
