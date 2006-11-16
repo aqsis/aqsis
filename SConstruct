@@ -27,8 +27,14 @@ tempenv = Environment()
 AddSysPath(tempenv.Dir(target_config_dir).abspath)
 
 
-# Setup the common command line options.
-opts = Options([os.path.abspath('options.cache'), os.path.abspath('custom.py')])
+# Read in options from custom.py if it exists, or options.cache otherwise
+if os.path.exists('custom.py'):
+	print 'Using options from custom.py'
+	opts = Options(os.path.abspath('custom.py'))
+else:
+	print 'Using options from options.cache'
+	opts = Options(os.path.abspath('options.cache'))
+# Setup the command line options.
 opts.Add('tiff_include_path', 'Point to the tiff header files', '')
 opts.Add('tiff_lib_path', 'Point to the tiff library files', '')
 opts.Add('boost_include_path', 'Point to the boost header files', '')
