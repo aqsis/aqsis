@@ -1,15 +1,36 @@
 Import('env')
 
+# Temporary fix, because globbing does not work with scons 0.96.92
+# shaders = env.Glob(env, '*.sl')
+# headers = env.Glob(env, '*.h')
 
-shaders = env.Glob(env, '*.sl')
-headers = env.Glob(env, '*.h')
+shader_sources = Split("""
+	ambientlight.sl
+	background.sl
+	bumpy.sl
+	constant.sl
+	depthcue.sl
+	distantlight.sl
+	fog.sl
+	matte.sl
+	metal.sl
+	paintedplastic.sl
+	plastic.sl
+	pointlight.sl
+	shinymetal.sl
+	spotlight.sl
+	""")
+header_sources = Split("""
+	""")
 
-for shader in shaders:
+for shader in shader_sources:
 	compiled_shader = env.Shader(shader)
 	env.Install('$SHADERDIR', shader)
 	env.Install('$SHADERDIR', compiled_shader)
 
-env.Distribute('shaders', shaders)
-env.Distribute('shaders', headers)
+env.Install('$SHADERDIR', header_sources)
+
+env.Distribute('shaders', shader_sources)
+env.Distribute('shaders', header_sources)
 env.Distribute('shaders', 'SConscript')
 
