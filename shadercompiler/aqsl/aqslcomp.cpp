@@ -63,13 +63,7 @@ bool g_cl_syslog = false;
 
 void version( std::ostream& Stream )
 {
-#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX) || defined(SCONS_BUILD)
 	Stream << "aqsl version " << VERSION_STR << std::endl << "compiled " << __DATE__ << " " << __TIME__ << std::endl;
-;
-#else
-	Stream << "aqsl version " << VERSION << std::endl << "compiled " << __DATE__ << " " << __TIME__ << std::endl;
-;
-#endif
 }
 
 

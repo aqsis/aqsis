@@ -194,8 +194,7 @@ env.AppendUnique(
 	''')
 )
 
-env.AppendUnique(CPPDEFINES=[('DEFAULT_PLUGIN_PATH', '\\"' + env.Dir('${BINDIR}').abspath + '\\"')])
-env.AppendUnique(CPPDEFINES=['SCONS_BUILD'])
+env.AppendUnique(CPPDEFINES=[('DEFAULT_PLUGIN_PATH', '\\"' + env.Dir('${PLUGINDIR}').abspath + '\\"')])
 
 #
 # Enable MP dumping mode if specified

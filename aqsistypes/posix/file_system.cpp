@@ -32,11 +32,6 @@
 #include	"aqsis.h"
 
 #include	"file.h"
-#ifndef	SCONS_BUILD
-#ifndef	AQSIS_SYSTEM_MACOSX
-#include	"config.h"
-#endif	// AQSIS_SYSTEM_MACOSX
-#endif	// SCONS_BUILD
 
 START_NAMESPACE( Aqsis )
 

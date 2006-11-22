@@ -116,13 +116,7 @@ void SaveAsShadowMap(const std::string& filename, SqDisplayInstance* image, char
 			// Set common tags
 			TIFFCreateDirectory( pshadow );
 
-#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX) || defined(SCONS_BUILD)
-
 			sprintf( version, "%s %s (%s %s)", STRNAME, VERSION_STR, __DATE__, __TIME__);
-#else
-
-			sprintf( version, "%s %s (%s %s)", STRNAME, VERSION, __DATE__, __TIME__ );
-#endif
 
 			TIFFSetField( pshadow, TIFFTAG_SOFTWARE, ( char* ) version );
 			TIFFSetField( pshadow, TIFFTAG_PIXAR_MATRIX_WORLDTOCAMERA, image->m_matWorldToCamera );
@@ -134,14 +128,6 @@ void SaveAsShadowMap(const std::string& filename, SqDisplayInstance* image, char
 				TIFFSetField( pshadow, TIFFTAG_HOSTCOMPUTER, image->m_hostname );
 			TIFFSetField( pshadow, TIFFTAG_IMAGEDESCRIPTION, mydescription);
 			// Write the floating point image to the directory.
-#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX) || defined(SCONS_BUILD)
-
-			sprintf( version, "%s %s (%s %s)", STRNAME, VERSION_STR, __DATE__, __TIME__);
-#else
-
-			sprintf( version, "%s %s (%s %s)", STRNAME, VERSION, __DATE__, __TIME__ );
-#endif
-
 			TIFFSetField( pshadow, TIFFTAG_SOFTWARE, ( char* ) version );
 			TIFFSetField( pshadow, TIFFTAG_IMAGEWIDTH, image->m_width );
 			TIFFSetField( pshadow, TIFFTAG_IMAGELENGTH, image->m_height );
@@ -290,14 +276,7 @@ void WriteTIFF(const std::string& filename, SqDisplayInstance* image)
 
 		short ExtraSamplesTypes[ 1 ] = {EXTRASAMPLE_ASSOCALPHA};
 
-#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX) || defined(SCONS_BUILD)
-
 		sprintf( version, "%s %s (%s %s)", STRNAME, VERSION_STR, __DATE__, __TIME__);
-#else
-
-		sprintf( version, "%s %s (%s %s)", STRNAME, VERSION, __DATE__, __TIME__);
-#endif
-
 		bool use_logluv = false;
 
 		TIFFSetField( pOut, TIFFTAG_SOFTWARE, ( char* ) version );

@@ -80,14 +80,7 @@ void CqCodeGenOutput::Visit( IqParseNodeShader& S )
 	m_slxFile << S.strShaderType() << std::endl;
 
 	// Output version information.
-#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX) || defined(SCONS_BUILD)
-
 	m_slxFile << "AQSIS_V " << VERSION_STR << std::endl;
-#else // AQSIS_SYSTEM_WIN32
-
-	m_slxFile << "AQSIS_V " << VERSION << std::endl;
-#endif // !AQSIS_SYSTEM_WIN32
-
 	m_slxFile << std::endl << std::endl << "segment Data" << std::endl;
 
 	// Now that we have this information, work out which standard vars are used.

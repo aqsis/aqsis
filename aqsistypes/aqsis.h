@@ -26,18 +26,6 @@
 #ifndef AQSIS_H_INCLUDED
 #define AQSIS_H_INCLUDED 1
 
-#ifndef	SCONS_BUILD
-#ifdef HAVE_CONFIG_H
-#include	"config.h"
-#else
-#ifdef	__GNUC__
-#ifndef __APPLE__
-#error " If this is a POSIX system you should be sure to run configure"
-#endif /* __APPLE__ */
-#endif /* __GNUC__ */
-#endif /* HAVE_CONFIG_H */
-#endif /* SCONS_BUILD */
-
 #include	<assert.h>
 
 #include	"aqsis_types.h"
