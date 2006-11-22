@@ -111,6 +111,8 @@ if env.subst('$destdir') != '':
 env.AppendUnique(CPPDEFINES=[('DEFAULT_RC_PATH', '\\"' + env.Dir('$SYSCONFDIR').abspath + '\\"')])
 env.AppendUnique(CPPDEFINES=[('DEFAULT_SHADER_PATH', '\\"' + env.Dir('$SHADERDIR').abspath + '\\"')])
 
+env.AppendUnique(RPATH=['$RENDERENGINEDIR'])
+
 env.Replace(slparse_ccflags = ['-O0'])
 env.Replace(aqsis_libs = ['dl'])
 env.Replace(aqsltell_libs = ['dl'])
