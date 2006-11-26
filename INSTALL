@@ -98,6 +98,19 @@ The process of getting the source and building Aqsis is mainly the same as the d
 Linux
 =====
 
+Because the build system originated on windows, everything is installed by default into the 'output/' subdirectory of the source directory.  This isn't what you normally want on linux, but the install_prefix variable can be used to fix the problem.  For example, suppose we specify install_prefix='/usr/local'.
+
+If you're careful and don't build things as root, you should make use of the usual two-stage build and install.  To build the project, you can therefore run the command:
+
+scons install_prefix='/usr/local' build
+
+as a normal user, followed by
+
+scons install_prefix='/usr/local' install
+
+as root, which will copy the appropriate files into the /usr/local directory hierarchy.
+
+
 MacOSX
 ======
 
@@ -126,6 +139,6 @@ What is wrong?
 
 A: You were probably using STLport instead of the native STL version of your compiler and Aqsis just does not link with the STLport runtime library.
 
-Q: scons uses options settings (such as install_prefix, debug, etc.) that I didn’t specify (neither on the command line, nor in custom.py) and that are not the default values. Where do they come from?
+Q: scons uses options settings (such as install_prefix, debug, etc.) that I didn’t specify on the command line and that are not the default values. Where do they come from?
 
 A: When you invoke scons it saves its current options in a file called options.cache which is read the next time you invoke scons again. This means, options are sort of “sticky”, once specified they are in effect until they are specified again with a new value. If you want to go back to default values, simply delete this file. Call scons –help to inspect the current values of all variables.
