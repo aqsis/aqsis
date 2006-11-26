@@ -1,5 +1,7 @@
 Import('env')
 dbo_planeenv = env.Copy()
+dbo_plane_headers=Split("""
+	implicit.h""")
 dbo_plane_sources=Split("""
 	dbo_plane.c""")
 
@@ -12,5 +14,6 @@ dbo_plane = dbo_planeenv.SharedLibrary('dbo_plane', dbo_plane_sources, LIBS=['']
 
 dbo_planeenv.Install('$PLUGINDIR', dbo_plane)
 
+env.Distribute('thirdparty/dbo_plane', dbo_plane_headers)
 env.Distribute('thirdparty/dbo_plane', dbo_plane_sources)
 env.Distribute('thirdparty/dbo_plane', 'SConscript')
