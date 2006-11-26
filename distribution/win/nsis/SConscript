@@ -3,8 +3,9 @@ Import('env version')
 use_defs = '0'
 if env.has_key('mingw') and env['mingw']:
 	use_defs = '1'
-env.Replace(NSISDEFINES = {'PRODUCT_VERSION': '%d.%d.%d' %(version.major, version.minor, version.build), 
-			 'PRODUCT_FILE_NUMBER': '%d_%d_%d' %(version.major, version.minor, version.build),
+env.Replace(NSISDEFINES = {'PRODUCT_VERSION_MAJOR': '%d' %(version.major),
+			 'PRODUCT_VERSION_MINOR': '%d' %(version.minor),
+			 'PRODUCT_VERSION_BUILD': '%d' %(version.build),
 			 'LIBRARY_EXTENSION': env['LIBSUFFIX'],
 			 'LIBRARY_PREFIX': env['LIBPREFIX'],
 			 'USE_DEFS': use_defs, 

@@ -1,8 +1,8 @@
 ; Title: Aqsis 'Standard' Installer for Win32/64 (NSIS)
 ; Author: Leon Tony Atkinson (latkinson@aqsis.org)
 ; Info: Last tested with NSIS 2.21
-; Other: 1. To make updates easier, all message strings have been placed within the top 20-30 lines of this file.
-;        2. To build manually, without using SCons, uncomment lines 10, 11, 12, 13, 17 and 21.
+; Other: 1. To make updates easier, all message strings have been placed within the top 40-50 lines of this file.
+;        2. To build manually, without using SCons, uncomment lines 10, 11, 12, 13, 17, 21 and 25.
 
 
 ; Helper defines
@@ -14,14 +14,19 @@
 
 !define PRODUCT_NAME "Aqsis"
 !define PRODUCT_FULLNAME "Aqsis Renderer"
-;;!define PRODUCT_VERSION "1.2.0"
-!ifndef PRODUCT_VERSION
-	!error "PRODUCT_VERSION not specified"
+;;!define PRODUCT_VERSION_MAJOR "1"
+!ifndef PRODUCT_VERSION_MAJOR
+  !error "PRODUCT_VERSION_MAJOR not specified"
 !endif
-;;!define PRODUCT_FILE_NUMBER "1_2_0"
-!ifndef	PRODUCT_FILE_NUMBER
-	!error "PRODUCT_FILE_NUMBER not specified"
+;;!define PRODUCT_VERSION_MINOR "2"
+!ifndef PRODUCT_VERSION_MINOR
+  !error "PRODUCT_VERSION_MINOR not specified"
 !endif
+;;!define PRODUCT_VERSION_BUILD "0"
+!ifndef PRODUCT_VERSION_BUILD
+  !error "PRODUCT_VERSION_BUILD not specified"
+!endif
+!define PRODUCT_VERSION "${PRODUCT_VERSION_MAJOR}.${PRODUCT_VERSION_MINOR}.${PRODUCT_VERSION_BUILD}"
 !define PRODUCT_PUBLISHER "Aqsis Team"
 !define PRODUCT_COPYRIGHT "Copyright (c) ${YEAR}, ${PRODUCT_PUBLISHER}."
 !define PRODUCT_COPYRIGHT_OTHER "RenderMan(r) Interface Procedures and Protocol are Copyright 1988, 1989, Pixar All Rights Reserved."
@@ -43,7 +48,7 @@
 
 Name "${PRODUCT_FULLNAME} ${PRODUCT_VERSION}"
 BrandingText "www.aqsis.org"
-OutFile "${PROJECT_ROOT}\output\aqsis-setup-${PRODUCT_FILE_NUMBER}.exe"
+OutFile "${PROJECT_ROOT}\output\aqsis-setup-${PRODUCT_VERSION}.exe"
 InstallDir "$PROGRAMFILES\${PRODUCT_NAME}"
 InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
 ShowInstDetails show
@@ -57,10 +62,31 @@ XPStyle on
 !include "MUI.nsh"
 !define MUI_ABORTWARNING
 !define MUI_UNABORTWARNING
-;;!define MUI_HEADERIMAGE_BITMAP "${NSISDIR}\Contrib\Graphics\Header\nsis.bmp"
-;;!define MUI_HEADERIMAGE_UNBITMAP "${NSISDIR}\Contrib\Graphics\Header\nsis.bmp"
+!define MUI_HEADERIMAGE
+!define MUI_HEADERIMAGE_RIGHT
+!define MUI_HEADERIMAGE_BITMAP "${PROJECT_ROOT}\distribution\win\nsis\header.bmp"
+!define MUI_HEADERIMAGE_UNBITMAP "${PROJECT_ROOT}\distribution\win\nsis\header.bmp"
 !define MUI_ICON "${NSISDIR}\Contrib\Graphics\Icons\modern-install.ico"
 !define MUI_UNICON "${NSISDIR}\Contrib\Graphics\Icons\modern-uninstall.ico"
+!if ${PRODUCT_VERSION_MINOR} == 1
+  !define MUI_WELCOMEFINISHPAGE_BITMAP "${PROJECT_ROOT}\distribution\win\nsis\wizard.bmp"
+  !define MUI_UNWELCOMEFINISHPAGE_BITMAP "${PROJECT_ROOT}\distribution\win\nsis\wizard.bmp"
+!else if ${PRODUCT_VERSION_MINOR} == 3
+  !define MUI_WELCOMEFINISHPAGE_BITMAP "${PROJECT_ROOT}\distribution\win\nsis\wizard.bmp"
+  !define MUI_UNWELCOMEFINISHPAGE_BITMAP "${PROJECT_ROOT}\distribution\win\nsis\wizard.bmp"
+!else if ${PRODUCT_VERSION_MINOR} == 5
+  !define MUI_WELCOMEFINISHPAGE_BITMAP "${PROJECT_ROOT}\distribution\win\nsis\wizard.bmp"
+  !define MUI_UNWELCOMEFINISHPAGE_BITMAP "${PROJECT_ROOT}\distribution\win\nsis\wizard.bmp"
+!else if ${PRODUCT_VERSION_MINOR} == 7
+  !define MUI_WELCOMEFINISHPAGE_BITMAP "${PROJECT_ROOT}\distribution\win\nsis\wizard.bmp"
+  !define MUI_UNWELCOMEFINISHPAGE_BITMAP "${PROJECT_ROOT}\distribution\win\nsis\wizard.bmp"
+!else if ${PRODUCT_VERSION_MINOR} == 9
+  !define MUI_WELCOMEFINISHPAGE_BITMAP "${PROJECT_ROOT}\distribution\win\nsis\wizard.bmp"
+  !define MUI_UNWELCOMEFINISHPAGE_BITMAP "${PROJECT_ROOT}\distribution\win\nsis\wizard.bmp"
+!else
+  !define MUI_WELCOMEFINISHPAGE_BITMAP "${PROJECT_ROOT}\distribution\win\nsis\wizard-${PRODUCT_VERSION_MAJOR}.${PRODUCT_VERSION_MINOR}.bmp"
+  !define MUI_UNWELCOMEFINISHPAGE_BITMAP "${PROJECT_ROOT}\distribution\win\nsis\wizard-${PRODUCT_VERSION_MAJOR}.${PRODUCT_VERSION_MINOR}.bmp"
+!endif
 
 ; Welcome page
 !insertmacro MUI_PAGE_WELCOME
