@@ -14,32 +14,47 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires:  /sbin/ldconfig, libtiff >= 3.5.7, libjpeg >= 6b, zlib >= 1.1.4, fltk
 Requires:       libtiff >= 3.5.7, libjpeg >= 6b, zlib >= 1.1.4, fltk
 
+
 %description
 Aqsis is a cross-platform photorealistic 3D rendering solution, based on the RenderMan interface standard defined by Pixar Animation Studios.
 
 Focusing on stability and production usage features include constructive solid geometry, depth-of-field, extensible shading engine (DSOs), instancing, level-of-detail, motion blur, NURBS, procedural plugins, programmable shading, subdivision surfaces, subpixel displacements and more.
 
-The toolset itself comprises a command-line renderer, a shader compiler for shaders written using the RenderMan shading language, a texture pre-processor for optimizing textures, a RIB processor and various developer libraries to enable integration with third-party applications.
+This package contains a command-line renderer, a shader compiler for shaders written using the RenderMan shading language, a texture pre-processor for optimizing textures and a RIB processor.
 
 Aqsis is an open source project licensed under the GPL, with some parts under the LGPL.
 
 
 %package devel
 Requires:		%{name} = %{version}
-Summary:        Development files for Aqsis, an open source RenderMan-compliant 3D rendering solution
+Summary:        Development files for the open source RenderMan-compliant Aqsis 3D rendering solution
 Group:          Applications/Graphics
+
 
 %description devel
 Aqsis is a cross-platform photorealistic 3D rendering solution, based on the RenderMan interface standard defined by Pixar Animation Studios.
 
 Focusing on stability and production usage features include constructive solid geometry, depth-of-field, extensible shading engine (DSOs), instancing, level-of-detail, motion blur, NURBS, procedural plugins, programmable shading, subdivision surfaces, subpixel displacements and more.
 
-The toolset itself comprises a command-line renderer, a shader compiler for shaders written using the RenderMan shading language, a texture pre-processor for optimizing textures, a RIB processor and various developer libraries to enable integration with third-party applications.
+This package contains various developer libraries to enable integration with third-party applications.
 
 Aqsis is an open source project licensed under the GPL, with some parts under the LGPL.
 
-This packages holds the develoment files.
 
+%package data
+Requires:		%{name} = %{version}
+Summary:        Example content for the open source RenderMan-compliant Aqsis 3D rendering solution
+Group:          Applications/Graphics
+
+
+%description data
+Aqsis is a cross-platform photorealistic 3D rendering solution, based on the RenderMan interface standard defined by Pixar Animation Studios.
+
+Focusing on stability and production usage features include constructive solid geometry, depth-of-field, extensible shading engine (DSOs), instancing, level-of-detail, motion blur, NURBS, procedural plugins, programmable shading, subdivision surfaces, subpixel displacements and more.
+
+This package contains example content, including additional scenes and shaders.
+
+Aqsis is an open source project licensed under the GPL, with some parts under the LGPL.
 
 
 %prep
@@ -63,15 +78,13 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root,-)
-%doc COPYING AUTHORS README INSTALL
+%doc AUTHORS COPYING INSTALL README ReleaseNotes
 %attr(755,root,root)%{_bindir}/aqsis
 %attr(755,root,root)%{_bindir}/aqsl
 %attr(755,root,root)%{_bindir}/aqsltell
 %attr(755,root,root)%{_bindir}/miqser
 %attr(755,root,root)%{_bindir}/teqser
 %attr(755,root,root)%{_bindir}/mpanalyse.py
-%attr(755,root,root)%{_bindir}/mpanalyse.pyc
-%attr(755,root,root)%{_bindir}/mpanalyse.pyo
 %{_libdir}/%{name}/
 %{_libdir}/libaqsis.so
 %{_sysconfdir}/aqsisrc
@@ -81,6 +94,14 @@ rm -rf $RPM_BUILD_ROOT
 %files devel
 %defattr(-,root,root,-)
 %{_includedir}/%{name}/
+
+
+%files data
+%defattr(-,root,root,-)
+%{_datadir}/%{name}/content/ribs/features/layeredshaders/
+%{_datadir}/%{name}/content/ribs/scenes/vase/
+%{_datadir}/%{name}/content/shaders/displacement/dented.sl
+%{_datadir}/%{name}/content/shaders/light/shadowspot.sl
 
 
 %changelog
