@@ -1,10 +1,8 @@
 .sconf_temp
 .sconsign
-aqsisrc
 build
 build_support.pyc
 options.cache
 output
-version.h
 version.pyc
 
