@@ -6,6 +6,7 @@ if env.has_key('mingw') and env['mingw']:
 env.Replace(NSISDEFINES = {'PRODUCT_VERSION_MAJOR': '%d' %(version.major),
 			 'PRODUCT_VERSION_MINOR': '%d' %(version.minor),
 			 'PRODUCT_VERSION_BUILD': '%d' %(version.build),
+			 'PRODUCT_VERSION': '%d.%d.%d' %(version.major, version.minor, version.build),	
 			 'LIBRARY_EXTENSION': env['LIBSUFFIX'],
 			 'LIBRARY_PREFIX': env['LIBPREFIX'],
 			 'USE_DEFS': use_defs, 

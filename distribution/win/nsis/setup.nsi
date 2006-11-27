@@ -26,7 +26,9 @@
 !ifndef PRODUCT_VERSION_BUILD
   !error "PRODUCT_VERSION_BUILD not specified"
 !endif
-!define PRODUCT_VERSION "${PRODUCT_VERSION_MAJOR}.${PRODUCT_VERSION_MINOR}.${PRODUCT_VERSION_BUILD}"
+!ifndef PRODUCT_VERSION
+	!define PRODUCT_VERSION "${PRODUCT_VERSION_MAJOR}.${PRODUCT_VERSION_MINOR}.${PRODUCT_VERSION_BUILD}"
+!endif
 !define PRODUCT_PUBLISHER "Aqsis Team"
 !define PRODUCT_COPYRIGHT "Copyright (c) ${YEAR}, ${PRODUCT_PUBLISHER}."
 !define PRODUCT_COPYRIGHT_OTHER "RenderMan(r) Interface Procedures and Protocol are Copyright 1988, 1989, Pixar All Rights Reserved."
