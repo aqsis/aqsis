@@ -100,8 +100,8 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root,-)
 %{_datadir}/%{name}/content/ribs/features/layeredshaders/
 %{_datadir}/%{name}/content/ribs/scenes/vase/
-%{_datadir}/%{name}/content/shaders/displacement/dented.sl
-%{_datadir}/%{name}/content/shaders/light/shadowspot.sl
+%{_datadir}/%{name}/content/shaders/displacement/
+%{_datadir}/%{name}/content/shaders/light/
 
 
 %changelog
