@@ -35,7 +35,7 @@ the LGPL.
 %package devel
 Requires:		%{name} = %{version}
 Summary:        Development files for the open source RenderMan-compliant Aqsis 3D rendering solution
-Group:          Applications/Graphics
+Group:          Applications/Multimedia
 
 
 %description devel
