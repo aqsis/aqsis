@@ -393,6 +393,7 @@ main_distfiles = Split("""
 	Doxyfile
 	INSTALL
 	README
+	ReleaseNotes
 	aqsisrc.in""")
 
 env.Distribute('', main_distfiles)
