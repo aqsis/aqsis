@@ -4,7 +4,7 @@ Release:        1%{?dist}
 Summary:        Open source RenderMan-compliant 3D rendering solution
 
 
-Group:          Applications/Graphics
+Group:          Applications/Multimedia
 License:        GPL
 URL:            http://www.aqsis.org
 Source0:        %{name}-%{version}.tar.gz
