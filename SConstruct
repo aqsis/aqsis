@@ -149,9 +149,10 @@ env.Replace(STATICLIBDIR = '$LIBDIR')
 env.Replace(SHADERDIR = env.Dir('$install_prefix').abspath + os.sep + 'shaders')
 env.Replace(SYSCONFDIR = env.Dir('$install_prefix').abspath + os.sep + 'bin')
 env.Replace(INCLUDEDIR = env.Dir('$install_prefix').abspath + os.sep + 'include/aqsis')
+env.Replace(CONTENTDIR = env.Dir('$install_prefix').abspath + os.sep + 'content')
 # The following install directories may be modified by the platform specific config files.
 env.Replace(INSTALL_DIRS = ['$BINDIR','$RENDERENGINEDIR', '$DISPLAYSDIR', '$PLUGINDIR',
-				'$STATICLIBDIR', '$SHADERDIR', '$SYSCONFDIR', '$INCLUDEDIR'] )
+				'$STATICLIBDIR', '$SHADERDIR', '$SYSCONFDIR', '$INCLUDEDIR', '$CONTENTDIR'] )
 
 # Read in the platform specific configuration.
 # Allowing it to override the settings defined above.
@@ -285,6 +286,10 @@ sub_sconsdirs_noret = prependBuildDir(Split('''
 	thirdparty/tinyxml
 	thirdparty/dbo_plane
 	tools
+	content/ribs/scenes/vase
+	content/ribs/features/layeredshaders
+	content/shaders/light
+	content/shaders/displacement
 '''))
 env.SConscript( dirs = sub_sconsdirs_noret )
 

@@ -1,0 +1,12 @@
+Import('env')
+
+scene_data = Split("""
+	vase.rib
+	render.bat
+	""")
+
+env.Install('$CONTENTDIR/ribs/scenes/vase', scene_data)
+
+env.Distribute('content/ribs/scenes/vase', scene_data)
+env.Distribute('content/ribs/scenes/vase', 'SConscript')
+

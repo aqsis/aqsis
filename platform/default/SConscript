@@ -88,6 +88,7 @@ env.Replace(PLUGINDIR = env.Dir('$LIBDIR/aqsis'))
 env.Replace(STATICLIBDIR = env.Dir('$LIBDIR/aqsis'))
 env.Replace(SHADERDIR = env.Dir('$install_prefix/share/aqsis/shaders'))
 env.Replace(SYSCONFDIR = env.Dir('$sysconfdir'))
+env.Replace(CONTENTDIR = env.Dir('$install_prefix/share/aqsis/content'))
 
 if env.subst('$destdir') != '':
 	if 'dist' in BUILD_TARGETS or 'dist_zip' in BUILD_TARGETS or 'dist_tar' in BUILD_TARGETS:
