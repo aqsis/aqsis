@@ -8,7 +8,7 @@ Group:          Applications/Graphics
 License:        GPL
 URL:            http://www.aqsis.org
 Source0:        %{name}-%{version}.tar.gz
-#Source1:        >>>>ToDo<<<<
+#Source1:        http://download.aqsis.org/stable/source/tar/%{name}-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires:  /sbin/ldconfig, libtiff >= 3.5.7, libjpeg >= 6b, zlib >= 1.1.4, fltk
@@ -16,13 +16,20 @@ Requires:       libtiff >= 3.5.7, libjpeg >= 6b, zlib >= 1.1.4, fltk
 
 
 %description
-Aqsis is a cross-platform photorealistic 3D rendering solution, based on the RenderMan interface standard defined by Pixar Animation Studios.
+Aqsis is a cross-platform photorealistic 3D rendering solution, based on the 
+RenderMan interface standard defined by Pixar Animation Studios.
 
-Focusing on stability and production usage features include constructive solid geometry, depth-of-field, extensible shading engine (DSOs), instancing, level-of-detail, motion blur, NURBS, procedural plugins, programmable shading, subdivision surfaces, subpixel displacements and more.
+Focusing on stability and production usage features include constructive solid 
+geometry, depth-of-field, extensible shading engine (DSOs), instancing, 
+level-of-detail, motion blur, NURBS, procedural plugins, programmable shading, 
+subdivision surfaces, subpixel displacements and more.
 
-This package contains a command-line renderer, a shader compiler for shaders written using the RenderMan shading language, a texture pre-processor for optimizing textures and a RIB processor.
+This package contains a command-line renderer, a shader compiler for shaders 
+written using the RenderMan shading language, a texture pre-processor for 
+optimizing textures and a RIB processor.
 
-Aqsis is an open source project licensed under the GPL, with some parts under the LGPL.
+Aqsis is an open source project licensed under the GPL, with some parts under 
+the LGPL.
 
 
 %package devel
@@ -32,13 +39,19 @@ Group:          Applications/Graphics
 
 
 %description devel
-Aqsis is a cross-platform photorealistic 3D rendering solution, based on the RenderMan interface standard defined by Pixar Animation Studios.
+Aqsis is a cross-platform photorealistic 3D rendering solution, based on the 
+RenderMan interface standard defined by Pixar Animation Studios.
 
-Focusing on stability and production usage features include constructive solid geometry, depth-of-field, extensible shading engine (DSOs), instancing, level-of-detail, motion blur, NURBS, procedural plugins, programmable shading, subdivision surfaces, subpixel displacements and more.
+Focusing on stability and production usage features include constructive solid 
+geometry, depth-of-field, extensible shading engine (DSOs), instancing, 
+level-of-detail, motion blur, NURBS, procedural plugins, programmable shading, 
+subdivision surfaces, subpixel displacements and more.
 
-This package contains various developer libraries to enable integration with third-party applications.
+This package contains various developer libraries to enable integration with 
+third-party applications.
 
-Aqsis is an open source project licensed under the GPL, with some parts under the LGPL.
+Aqsis is an open source project licensed under the GPL, with some parts under 
+the LGPL.
 
 
 %package data
@@ -48,13 +61,18 @@ Group:          Applications/Graphics
 
 
 %description data
-Aqsis is a cross-platform photorealistic 3D rendering solution, based on the RenderMan interface standard defined by Pixar Animation Studios.
+Aqsis is a cross-platform photorealistic 3D rendering solution, based on the 
+RenderMan interface standard defined by Pixar Animation Studios.
 
-Focusing on stability and production usage features include constructive solid geometry, depth-of-field, extensible shading engine (DSOs), instancing, level-of-detail, motion blur, NURBS, procedural plugins, programmable shading, subdivision surfaces, subpixel displacements and more.
+Focusing on stability and production usage features include constructive solid 
+geometry, depth-of-field, extensible shading engine (DSOs), instancing, 
+level-of-detail, motion blur, NURBS, procedural plugins, programmable shading, 
+subdivision surfaces, subpixel displacements and more.
 
 This package contains example content, including additional scenes and shaders.
 
-Aqsis is an open source project licensed under the GPL, with some parts under the LGPL.
+Aqsis is an open source project licensed under the GPL, with some parts under 
+the LGPL.
 
 
 %prep
