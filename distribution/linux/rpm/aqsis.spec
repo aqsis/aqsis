@@ -84,7 +84,7 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root)%{_bindir}/aqsltell
 %attr(755,root,root)%{_bindir}/miqser
 %attr(755,root,root)%{_bindir}/teqser
-%attr(755,root,root)%{_bindir}/mpanalyse.py
+%attr(755,root,root)%{_bindir}/mpanalyse.p*
 %{_libdir}/%{name}/
 %{_libdir}/libaqsis.so
 %{_sysconfdir}/aqsisrc
