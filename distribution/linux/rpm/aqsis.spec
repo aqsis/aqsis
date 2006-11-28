@@ -16,19 +16,19 @@ Requires:       libtiff >= 3.5.7, libjpeg >= 6b, zlib >= 1.1.4, fltk
 
 
 %description
-Aqsis is a cross-platform photorealistic 3D rendering solution, based on the 
+Aqsis is a cross-platform photorealistic 3D rendering solution, based on the
 RenderMan interface standard defined by Pixar Animation Studios.
 
-Focusing on stability and production usage features include constructive solid 
-geometry, depth-of-field, extensible shading engine (DSOs), instancing, 
-level-of-detail, motion blur, NURBS, procedural plugins, programmable shading, 
+Focusing on stability and production usage features include constructive solid
+geometry, depth-of-field, extensible shading engine (DSOs), instancing,
+level-of-detail, motion blur, NURBS, procedural plugins, programmable shading,
 subdivision surfaces, subpixel displacements and more.
 
-This package contains a command-line renderer, a shader compiler for shaders 
-written using the RenderMan shading language, a texture pre-processor for 
+This package contains a command-line renderer, a shader compiler for shaders
+written using the RenderMan shading language, a texture pre-processor for
 optimizing textures and a RIB processor.
 
-Aqsis is an open source project licensed under the GPL, with some parts under 
+Aqsis is an open source project licensed under the GPL, with some parts under
 the LGPL.
 
 
@@ -39,39 +39,39 @@ Group:          Applications/Graphics
 
 
 %description devel
-Aqsis is a cross-platform photorealistic 3D rendering solution, based on the 
-RenderMan interface standard defined by Pixar Animation Studios.
+Aqsis is a cross-platform photorealistic 3D rendering solution, based on the
+RenderMan interface standard defined by Pixar Animation Studios
 
-Focusing on stability and production usage features include constructive solid 
-geometry, depth-of-field, extensible shading engine (DSOs), instancing, 
-level-of-detail, motion blur, NURBS, procedural plugins, programmable shading, 
+Focusing on stability and production usage features include constructive solid
+geometry, depth-of-field, extensible shading engine (DSOs), instancing,
+level-of-detail, motion blur, NURBS, procedural plugins, programmable shading,
 subdivision surfaces, subpixel displacements and more.
 
-This package contains various developer libraries to enable integration with 
+This package contains various developer libraries to enable integration with
 third-party applications.
 
-Aqsis is an open source project licensed under the GPL, with some parts under 
+Aqsis is an open source project licensed under the GPL, with some parts under
 the LGPL.
 
 
 %package data
 Requires:		%{name} = %{version}
 Summary:        Example content for the open source RenderMan-compliant Aqsis 3D rendering solution
-Group:          Applications/Graphics
+Group:          Applications/Multimedia
 
 
 %description data
-Aqsis is a cross-platform photorealistic 3D rendering solution, based on the 
+Aqsis is a cross-platform photorealistic 3D rendering solution, based on the
 RenderMan interface standard defined by Pixar Animation Studios.
 
-Focusing on stability and production usage features include constructive solid 
+Focusing on stability and production usage features include constructive solid
 geometry, depth-of-field, extensible shading engine (DSOs), instancing, 
-level-of-detail, motion blur, NURBS, procedural plugins, programmable shading, 
+level-of-detail, motion blur, NURBS, procedural plugins, programmable shading,
 subdivision surfaces, subpixel displacements and more.
 
-This package contains example content, including additional scenes and shaders.
+This package contains example content, including additional scenes and shaders
 
-Aqsis is an open source project licensed under the GPL, with some parts under 
+Aqsis is an open source project licensed under the GPL, with some parts under
 the LGPL.
 
 
@@ -103,7 +103,7 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root)%{_bindir}/miqser
 %attr(755,root,root)%{_bindir}/teqser
 %attr(755,root,root)%{_bindir}/mpanalyse.p*
-%{_libdir}/%{name}/
+%{_libdir}/%{name}/.so
 %{_libdir}/libaqsis.so
 %{_sysconfdir}/aqsisrc
 %{_datadir}/%{name}/shaders/
@@ -112,6 +112,7 @@ rm -rf $RPM_BUILD_ROOT
 %files devel
 %defattr(-,root,root,-)
 %{_includedir}/%{name}/
+%{_libdir}/%{name}/.a
 
 
 %files data
@@ -124,6 +125,6 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 
-* Wed Nov 22 2006 Tobias Sauerwein <cgtobi@gmail.com>
+* Wed Nov 22 2006 Tobias Sauerwein <cgtobi@gmail.com> - 1.1.0-1
 - Make an RPM
 
