@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 ######################################################################
 # Post process an Aqsis micro polygon dump file.
 #
