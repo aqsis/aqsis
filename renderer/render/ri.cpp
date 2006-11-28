@@ -4789,6 +4789,8 @@ RtVoid	RiGeometryV( RtToken type, PARAMETERLIST )
 
 	TqInt count = 3;
 	// Rotate and scale to match the teapot geometry
+	RiAttributeBegin();
+	RiTranslate(0.0, 0.0, 2.5);
 	RiRotate(90.0, 1.0, 0.0, 0.0);
 	RiScale(1.0/30.0, 1.0/30.0, 1.0/30.0);
 	RiSubdivisionMeshV( aTags[0],
@@ -4801,6 +4803,7 @@ RtVoid	RiGeometryV( RtToken type, PARAMETERLIST )
 	                    0,
 	                    0,
 	                    PASS_PARAMETERS );
+	RiAttributeEnd();
 
 	} else
 	{
