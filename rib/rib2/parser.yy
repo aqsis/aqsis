@@ -837,16 +837,7 @@ complete_request
 			}
     |   curves string integer_array string opttvpairs
             {
-                int vertices = 0;
-                for(int i = 0; i < $5->Count(); i++) 
-                {
-                    if($5->Tokens()[i] == std::string("P"))
-                    vertices = $5->Counts()[i] / 3;
-                }
-                if (vertices > 0)
-                    ParseCallbackInterface->RiCurvesV($2, $3->Count(), &(*$3)[0], $4, $5->Count(), $5->Tokens(), $5->Values());
-                else 
-                    yyerror("Expecting \"P\"");
+                ParseCallbackInterface->RiCurvesV($2, $3->Count(), &(*$3)[0], $4, $5->Count(), $5->Tokens(), $5->Values());
                 DiscardStringValue($2);
                 DiscardArrayValue($3); 
                 DiscardStringValue($4);  
@@ -912,6 +903,7 @@ complete_request
                 int vertices = 0;
                 for(int i = 0; i < $2->Count(); i++) 
                 {
+		    /// \todo: this will not work if "P" is specified as "vertex point P", need to investigate.
                     if($2->Tokens()[i] == std::string("P"))
                     vertices = $2->Counts()[i] / 3;
                 }
