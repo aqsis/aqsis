@@ -187,9 +187,9 @@ SectionGroup /e "Content" SEC02
   Section "Examples" SEC0201
   SectionIn 1 2
     SetOutPath "$INSTDIR\content\ribs\features\layeredshaders"
-    File /x ".svn" /x "SConscript" "${PROJECT_ROOT}\content\ribs\features\layeredshaders\*.*"
+    File /x ".svn" /x "SConscript" /x "*.sh" "${PROJECT_ROOT}\content\ribs\features\layeredshaders\*.*"
     SetOutPath "$INSTDIR\content\ribs\scenes\vase"
-    File /x ".svn" /x "SConscript" "${PROJECT_ROOT}\content\ribs\scenes\vase\*.*"
+    File /x ".svn" /x "SConscript" /x "*.sh" "${PROJECT_ROOT}\content\ribs\scenes\vase\*.*"
     SetOutPath "$INSTDIR\content\shaders\displacement"
     File "${PROJECT_ROOT}\content\shaders\displacement\dented.sl"
     SetOutPath "$INSTDIR\content\shaders\light"

@@ -1,22 +1,25 @@
 #!/usr/bin/bash
 
+# ***Compile textures***
+
+echo "=== Compiling Texture(s) ==="
+echo
+teqser "grid.tif" "grid.tex"
+
+
+# ***Compile shaders***
 
 echo 
 echo
-echo ***Compile textures***
+echo  "=== Compiling Shader(s) ==="
 echo
-teqser /usr/share/aqsis/content/ribs/features/layeredshaders/grid.tif grid.tex
+aqsl "texmap.sl"
 
 
-echo 
-echo
-echo  ***Compile shaders***
-echo
-aqsl /usr/share/aqsis/content/ribs/features/layeredshaders/texmap.sl
-
+# ***Render files***
 
 echo 
 echo
-echo ***Render files***
+echo "=== Rendering File(s) ==="
 echo
-aqsis -progress --shaders=/usr/share/aqsis/shaders:. /usr/share/aqsis/content/ribs/features/layeredshaders/layered.rib
+aqsis -progress "layered.rib"
