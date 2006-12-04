@@ -101,9 +101,13 @@ if env.subst('$destdir') != '':
 		# Replace the scons Install() function with a wrapper which modifies the
 		# install path to be prefixed by $DESTDIR
 		env.SconsInternalInstallFunc = env.Install
+		env.SconsInternalInstallAsFunc = env.InstallAs
 		def InstallWithDestDir(dir, source):
 			return env.SconsInternalInstallFunc('$DESTDIR'+env.Dir(dir).abspath, source)
+		def InstallAsWithDestDir(target, source):
+			return env.SconsInternalInstallAsFunc(['$DESTDIR'+env.File(t).abspath for t in target], source)
 		env.Install = InstallWithDestDir
+		env.InstallAs = InstallAsWithDestDir
 		# Update the install directories to reflect the changes.
 		env.Replace(INSTALL_DIRS = [ '$DESTDIR' + env.Dir(dir).abspath for dir in env['INSTALL_DIRS'] ] )
 
@@ -130,7 +134,11 @@ def symlink(env, target, source):
 	os.symlink(os.path.basename(src), trgt)
 
 def PostInstallSharedLibrary(env, basename, source):
-	env.Command('%s.%d' %(basename, version.major), source, symlink)
-	env.Command('%s' %(basename), source, symlink)
+	if env.subst('$destdir') != '':
+		env.Command(os.path.join('$DESTDIR', '%s.%d' %(basename, version.major)), source, symlink)
+		env.Command(os.path.join('$DESTDIR', '%s' %(basename)), source, symlink)
+	else:
+		env.Command('%s.%d' %(basename, version.major), source, symlink)
+		env.Command('%s' %(basename), source, symlink)
 
 env.PostInstallSharedLibrary = PostInstallSharedLibrary

@@ -96,7 +96,7 @@ Depends(aqsisdll, cachegen)
 Depends(aqsisdll, validategen)
 Depends(aqsisdll, headergen)
 
-aqsisInstall = aqsisenv.InstallAs(os.path.join('${RENDERENGINEDIR}', '%s${SHLIB_VERSION_SUFFIX}') %(aqsisdll[0]), aqsisdll)
+aqsisInstall = aqsisenv.InstallAs([os.path.join('${RENDERENGINEDIR}', '%s${SHLIB_VERSION_SUFFIX}') %(aqsisdll[0])], [aqsisdll[0]])
 aqsisenv.Install('$INCLUDEDIR', aqsis_install_headers)
 
 if env['SHLIB_VERSION_SUFFIX'] != '':
