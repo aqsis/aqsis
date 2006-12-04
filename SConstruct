@@ -154,6 +154,11 @@ env.Replace(CONTENTDIR = env.Dir('$install_prefix').abspath + os.sep + 'content'
 env.Replace(INSTALL_DIRS = ['$BINDIR','$RENDERENGINEDIR', '$DISPLAYSDIR', '$PLUGINDIR',
 				'$STATICLIBDIR', '$SHADERDIR', '$SYSCONFDIR', '$INCLUDEDIR', '$CONTENTDIR'] )
 
+# Empty implementation of PostInstallSharedLibrary function, can be overridden by platform specific config files below.
+def PostInstallSharedLibrary(env, basename, source):
+	pass
+env.PostInstallSharedLibrary = PostInstallSharedLibrary
+
 # Read in the platform specific configuration.
 # Allowing it to override the settings defined above.
 SConscript(target_config_dir + os.sep + 'SConscript')

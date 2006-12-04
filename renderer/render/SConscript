@@ -1,3 +1,5 @@
+import os
+
 Import('env cachegen headergen validategen')
 aqsisdll_sources = Split("""
 	attributes.cpp
@@ -94,8 +96,11 @@ Depends(aqsisdll, cachegen)
 Depends(aqsisdll, validategen)
 Depends(aqsisdll, headergen)
 
-aqsisenv.Install('$RENDERENGINEDIR', aqsisdll)
+aqsisInstall = aqsisenv.InstallAs(os.path.join('${RENDERENGINEDIR}', '%s${SHLIB_VERSION_SUFFIX}') %(aqsisdll[0]), aqsisdll)
 aqsisenv.Install('$INCLUDEDIR', aqsis_install_headers)
+
+if env['SHLIB_VERSION_SUFFIX'] != '':
+	aqsisenv.PostInstallSharedLibrary(aqsisenv, os.path.join('${RENDERENGINEDIR}', '%s') %(aqsisdll[0]), aqsisInstall)
 
 #aqsisproject = aqsisenv.MSVSProject(target = 'render' + env['MSVSPROJECTSUFFIX'],
 #	srcs = aqsisdll_sources,
