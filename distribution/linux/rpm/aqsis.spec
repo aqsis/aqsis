@@ -8,7 +8,7 @@ Group:          Applications/Multimedia
 License:        GPL
 URL:            http://www.aqsis.org
 Source0:        %{name}-%{version}.tar.gz
-#Source1:        http://download.aqsis.org/stable/source/tar/%{name}-%{version}.tar.gz
+#Source0:        http://download.aqsis.org/stable/source/tar/%{name}-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires:  /sbin/ldconfig, libtiff-devel >= 3.5.7, libjpeg-devel >= 6b, zlib-devel >= 1.1.4, fltk-devel, boost-devel >= 1.32.0, bison >= 1.35, flex >= 2.5.4, scons >= 0.96.1, OpenEXR-devel
