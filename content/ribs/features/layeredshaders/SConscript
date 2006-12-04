@@ -5,6 +5,7 @@ scene_data = Split("""
 	layered.rib
 	texmap.sl
 	render.bat
+	render.sh
 	""")
 
 env.Install('$CONTENTDIR/ribs/features/layeredshaders', scene_data)

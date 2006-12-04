@@ -104,7 +104,7 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root)%{_bindir}/teqser
 %attr(755,root,root)%{_bindir}/mpanalyse.p*
 %{_libdir}/%{name}/*.so
-%{_libdir}/libaqsis.so
+%{_libdir}/libaqsis.so*
 %{_sysconfdir}/aqsisrc
 %{_datadir}/%{name}/shaders/
 

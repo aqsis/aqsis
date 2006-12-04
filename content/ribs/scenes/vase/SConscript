@@ -3,6 +3,7 @@ Import('env')
 scene_data = Split("""
 	vase.rib
 	render.bat
+	render.sh
 	""")
 
 env.Install('$CONTENTDIR/ribs/scenes/vase', scene_data)
