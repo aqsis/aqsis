@@ -125,20 +125,25 @@ env.Replace(aqsis_libs = ['dl'])
 env.Replace(aqsltell_libs = ['dl'])
 env.Replace(teqser_libs = ['dl'])
 
-def symlink(env, target, source):
-	trgt = str(target[0])
-	src = str(source[0])
-
-	if os.path.islink(trgt) or os.path.exists(trgt):
-		os.remove(trgt)
-	os.symlink(os.path.basename(src), trgt)
+def Symlink(dest, src):
+	def _symlink_func(target, source, env, dest=dest, src=src):
+		dest = str(env.arg2nodes(dest, env.fs.Entry)[0])
+		src = str(env.arg2nodes(src, env.fs.Entry)[0])
+		if os.path.islink(dest) or os.path.exists(dest):
+			os.remove(dest)
+		os.symlink(os.path.basename(src), dest)
+	def _symlink_str(target, source, env, dest=dest, src=src):
+		dest = str(env.arg2nodes(dest, env.fs.Entry)[0])
+		src = str(env.arg2nodes(src, env.fs.Entry)[0])
+		print "Symlink from %s ==> %s" %(dest, src)
+	return Action(_symlink_func, strfunction=_symlink_str)
 
 def PostInstallSharedLibrary(env, basename, source):
 	if env.subst('$destdir') != '':
-		env.Command(os.path.join('$DESTDIR', '%s.%d' %(basename, version.major)), source, symlink)
-		env.Command(os.path.join('$DESTDIR', '%s' %(basename)), source, symlink)
+		env.Command(os.path.join('$DESTDIR', '%s.%d' %(basename, version.major)), os.path.join('$DESTDIR', '%s' %(source)), Symlink(os.path.join('$DESTDIR', '%s.%d' %(basename, version.major)), source))
+		env.Command(os.path.join('$DESTDIR', '%s' %(basename)), os.path.join('$DESTDIR', '%s' %(source)), Symlink(os.path.join('$DESTDIR', '%s' %(basename)), source))
 	else:
-		env.Command('%s.%d' %(basename, version.major), source, symlink)
-		env.Command('%s' %(basename), source, symlink)
+		env.Command('%s.%d' %(basename, version.major), source, Symlink('%s.%d' %(basename, version.major), source))
+		env.Command('%s' %(basename), source, Symlink('%s' %(basename), source))
 
 env.PostInstallSharedLibrary = PostInstallSharedLibrary
