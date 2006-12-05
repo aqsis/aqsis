@@ -1,3 +1,10 @@
+# Title: Aqsis Package for Linux (RPM)
+# Author: Tobias Sauerwein (cgtobi@gmail.com)
+# Info: 
+# Other: 1. To make updates easier, all message strings have been placed within the top 10-80 lines of this file.
+#        2. To build using a pre-compiled tarball comment line 18 and comment line 19.
+
+
 Name:           aqsis
 Version:        1.1.0
 Release:        1%{?dist}
@@ -7,8 +14,8 @@ Summary:        Open source RenderMan-compliant 3D rendering solution
 Group:          Applications/Multimedia
 License:        GPL
 URL:            http://www.aqsis.org
-Source0:        %{name}-%{version}.tar.gz
-#Source0:        http://download.aqsis.org/stable/source/tar/%{name}-%{version}.tar.gz
+Source:         %{name}-%{version}.tar.gz
+#Source:        http://download.aqsis.org/stable/source/tar/%{name}-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires:  /sbin/ldconfig, libtiff-devel >= 3.5.7, libjpeg-devel >= 6b, zlib-devel >= 1.1.4, fltk-devel, boost-devel >= 1.32.0, bison >= 1.35, flex >= 2.5.4, scons >= 0.96.1, OpenEXR-devel
@@ -69,7 +76,7 @@ geometry, depth-of-field, extensible shading engine (DSOs), instancing,
 level-of-detail, motion blur, NURBS, procedural plugins, programmable shading,
 subdivision surfaces, subpixel displacements and more.
 
-This package contains example content, including additional scenes and shaders
+This package contains example content, including additional scenes and shaders.
 
 Aqsis is an open source project licensed under the GPL, with some parts under
 the LGPL.
