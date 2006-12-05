@@ -2,7 +2,7 @@
 # Author: Tobias Sauerwein (cgtobi@gmail.com)
 # Info: 
 # Other: 1. To make updates easier, all message strings have been placed within the top 10-80 lines of this file.
-#        2. To build using a pre-compiled tarball comment line 18 and comment line 19.
+#        2. To build using a pre-compiled tarball comment line 18 and uncomment line 19.
 
 
 Name:           aqsis
