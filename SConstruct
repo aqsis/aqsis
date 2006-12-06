@@ -154,6 +154,12 @@ env.Replace(CONTENTDIR = env.Dir('$install_prefix').abspath + os.sep + 'content'
 env.Replace(INSTALL_DIRS = ['$BINDIR','$RENDERENGINEDIR', '$DISPLAYSDIR', '$PLUGINDIR',
 				'$STATICLIBDIR', '$SHADERDIR', '$SYSCONFDIR', '$INCLUDEDIR', '$CONTENTDIR'] )
 
+# Setup a default version of the various platform specific functions that can be overridden in the 
+# platform specific configurations below.
+def PostInstallSharedLibrary(env, basename, source):
+	pass
+env.PostInstallSharedLibrary = PostInstallSharedLibrary
+
 # Read in the platform specific configuration.
 # Allowing it to override the settings defined above.
 SConscript(target_config_dir + os.sep + 'SConscript')
@@ -194,7 +200,7 @@ libincludes = [''] + Split('''
 		$exr_include_path
 	''')
 for a in libincludes:
-	env.AppendUnique(CPPPATH = env.subst(a) )
+	env.AppendUnique(CPPPATH = [env.subst(a)] )
 
 env.AppendUnique(CPPDEFINES=[('DEFAULT_PLUGIN_PATH', '\\"' + env.Dir('${PLUGINDIR}').abspath + '\\"')])
 
