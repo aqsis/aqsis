@@ -70,6 +70,11 @@ START_NAMESPACE( Aqsis )
 //
 #define WITHFILTER       1
 
+//
+// #define FASTLOG2 if you want to experiment with integer/float multiplication
+// replacement for log2() see fastlog2()
+//
+
 // Local Constants
 typedef enum {
     PX,
@@ -212,6 +217,7 @@ static RtFilterFunc CalculateFilter(CqString filter)
 */
 static TqFloat fastlog2(TqFloat a)
 {
+#ifdef FASTLOG2
 	register TqFloat x,y;
 	x = *(int*)&a;
 	x*= 1.19209e-007; /* pow(2.0, -23) */
@@ -221,6 +227,11 @@ static TqFloat fastlog2(TqFloat a)
 	y = x - floor(x);
 	y = (y - y *y) * 0.346607f;
 	return x+y;
+#else
+static TqFloat invLog2 =  1.0f/::log(2.0f);
+
+    return ::log(a) * invLog2;
+#endif
 }
 
 //---------------------------------------------------------------------
