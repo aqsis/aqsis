@@ -150,15 +150,9 @@ env.Replace(SHADERDIR = env.Dir('$install_prefix').abspath + os.sep + 'shaders')
 env.Replace(SYSCONFDIR = env.Dir('$install_prefix').abspath + os.sep + 'bin')
 env.Replace(INCLUDEDIR = env.Dir('$install_prefix').abspath + os.sep + 'include/aqsis')
 env.Replace(CONTENTDIR = env.Dir('$install_prefix').abspath + os.sep + 'content')
-env.Replace(SHLIB_VERSION_SUFFIX = '')
 # The following install directories may be modified by the platform specific config files.
 env.Replace(INSTALL_DIRS = ['$BINDIR','$RENDERENGINEDIR', '$DISPLAYSDIR', '$PLUGINDIR',
 				'$STATICLIBDIR', '$SHADERDIR', '$SYSCONFDIR', '$INCLUDEDIR', '$CONTENTDIR'] )
-
-# Empty implementation of PostInstallSharedLibrary function, can be overridden by platform specific config files below.
-def PostInstallSharedLibrary(env, basename, source):
-	pass
-env.PostInstallSharedLibrary = PostInstallSharedLibrary
 
 # Read in the platform specific configuration.
 # Allowing it to override the settings defined above.
@@ -189,7 +183,9 @@ env.AppendUnique(
 		rib/api
 		''')
 	]
-	+ Split('''
+)
+
+libincludes = [''] + Split('''
 		$zlib_include_path
 		$tiff_include_path
 		$jpeg_include_path
@@ -197,7 +193,8 @@ env.AppendUnique(
 		$fltk_include_path
 		$exr_include_path
 	''')
-)
+for a in libincludes:
+	env.AppendUnique(CPPPATH = env.subst(a) )
 
 env.AppendUnique(CPPDEFINES=[('DEFAULT_PLUGIN_PATH', '\\"' + env.Dir('${PLUGINDIR}').abspath + '\\"')])
 
