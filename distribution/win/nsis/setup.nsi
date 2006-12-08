@@ -1,5 +1,5 @@
-; Title: Aqsis 'Standard' Installer for Win32/64 (NSIS)
-; Author: Leon Tony Atkinson (latkinson@aqsis.org)
+; Title: Aqsis Installer for Win32/64 (NSIS)
+; Author: Aqsis Team (packages@aqsis.org)
 ; Info: Last tested with NSIS 2.21
 ; Other: 1. To make updates easier, all message strings have been placed within the top 40-50 lines of this file.
 ;        2. To build manually, without using SCons, uncomment lines 10, 11, 12, 13, 17, 21 and 25.
