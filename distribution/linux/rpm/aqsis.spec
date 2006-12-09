@@ -2,7 +2,7 @@
 # Author: Aqsis Team (packages@aqsis.org)
 # Info: 
 # Other: 1. To make updates easier, all message strings have been placed within the top 10-80 lines of this file.
-#        2. To build using a pre-compiled tarball comment line 18 and uncomment line 19.
+#        2. To build using the 'Official' tarball comment line 18 and uncomment line 19.
 
 
 Name:           aqsis
@@ -20,9 +20,9 @@ Source:         %{name}-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 %if 0%{?mandriva_version}
-  BuildRequires:	bison, flex >= 2.5.4, OpenEXR-devel, boost-devel >= 1.32.0, fltk-devel >= 1.1.0, libjpeg-devel >= 6b, libtiff3-devel >= 3.5.7, libxslt-proc, scons >= 0.96.1, zlib-devel >= 1.1.4
+BuildRequires:	bison, flex >= 2.5.4, OpenEXR-devel, boost-devel >= 1.32.0, fltk-devel >= 1.1.0, libjpeg-devel >= 6b, libtiff3-devel >= 3.5.7, libxslt-proc, scons >= 0.96.1, zlib-devel >= 1.1.4
 %else
-  BuildRequires:	bison, flex >= 2.5.4, OpenEXR-devel, boost-devel >= 1.32.0, fltk-devel >= 1.1.0, libjpeg-devel >= 6b, libtiff3-devel >= 3.5.7, libxslt, scons >= 0.96.1, zlib-devel >= 1.1.4
+BuildRequires:	bison, flex >= 2.5.4, OpenEXR-devel, boost-devel >= 1.32.0, fltk-devel >= 1.1.0, libjpeg-devel >= 6b, libtiff3-devel >= 3.5.7, libxslt, scons >= 0.96.1, zlib-devel >= 1.1.4
 %endif
 Requires:		libtiff >= 3.5.7, libjpeg >= 6b, zlib >= 1.1.4, fltk >= 1.1.0, OpenEXR
 
@@ -84,12 +84,6 @@ rm -rf $RPM_BUILD_ROOT
 scons install
 
 
-# Small hack to be able to exclude (%ghost) automatically generated Python files later on.
-
-%post
-python %{_bindir}/mpanalyse.py
-
-
 %clean
 rm -rf $RPM_BUILD_ROOT
 
@@ -103,8 +97,6 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root)%{_bindir}/miqser
 %attr(755,root,root)%{_bindir}/teqser
 %attr(755,root,root)%{_bindir}/mpanalyse.py
-%ghost %{_bindir}/mpanalyse.pyc
-%ghost %{_bindir}/mpanalyse.pyo
 %{_libdir}/%{name}/*.so
 %{_libdir}/libaqsis.so*
 %{_sysconfdir}/aqsisrc
@@ -120,15 +112,14 @@ rm -rf $RPM_BUILD_ROOT
 %files data
 %defattr(-,root,root,-)
 %{_datadir}/%{name}/content/ribs/features/layeredshaders/
-%ghost %{_datadir}/%{name}/content/ribs/features/layeredshaders/*.bat
 %{_datadir}/%{name}/content/ribs/scenes/vase/
-%ghost %{_datadir}/%{name}/content/ribs/scenes/vase/*.bat
 %{_datadir}/%{name}/content/shaders/displacement/
 %{_datadir}/%{name}/content/shaders/light/
 
 
 %changelog
-
-* Wed Nov 22 2006 Tobias Sauerwein <cgtobi@gmail.com> - 1.1.0-1
-- Make an RPM
+* Fri Dec 09 2006 - latkinson@aqsis.org
+- Added Mandriva (2006 tested) support to SPEC file.
+* Wed Nov 22 2006 - cgtobi@gmail.com
+- Initial RPM/SPEC.
 
