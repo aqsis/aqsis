@@ -22,7 +22,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 %if 0%{?mandriva_version}
 BuildRequires:	bison, flex >= 2.5.4, OpenEXR-devel, boost-devel >= 1.32.0, fltk-devel >= 1.1.0, libjpeg-devel >= 6b, libtiff3-devel >= 3.5.7, libxslt-proc, scons >= 0.96.1, zlib-devel >= 1.1.4
 %else
-BuildRequires:	bison, flex >= 2.5.4, OpenEXR-devel, boost-devel >= 1.32.0, fltk-devel >= 1.1.0, libjpeg-devel >= 6b, libtiff3-devel >= 3.5.7, libxslt, scons >= 0.96.1, zlib-devel >= 1.1.4
+BuildRequires:	bison, flex >= 2.5.4, OpenEXR-devel, boost-devel >= 1.32.0, fltk-devel >= 1.1.0, libjpeg-devel >= 6b, libtiff-devel >= 3.5.7, libxslt, scons >= 0.96.1, zlib-devel >= 1.1.4
 %endif
 Requires:		libtiff >= 3.5.7, libjpeg >= 6b, zlib >= 1.1.4, fltk >= 1.1.0, OpenEXR
 
