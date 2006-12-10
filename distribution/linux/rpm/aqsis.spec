@@ -117,9 +117,9 @@ rm -rf $RPM_BUILD_ROOT
 %files data
 %defattr(-,root,root,-)
 %{_datadir}/%{name}/content/ribs/features/layeredshaders/
-%if 0%{?fedora_version}
-%ghost %{_datadir}/%{name}/content/ribs/features/layeredshaders/*.bat
+%if 0%{?mandriva_version}
 %else
+%ghost %{_datadir}/%{name}/content/ribs/features/layeredshaders/*.bat
 %endif
 %{_datadir}/%{name}/content/ribs/scenes/vase/
 %if 0%{?fedora_version}
