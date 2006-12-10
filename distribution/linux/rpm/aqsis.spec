@@ -97,6 +97,11 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root)%{_bindir}/miqser
 %attr(755,root,root)%{_bindir}/teqser
 %attr(755,root,root)%{_bindir}/mpanalyse.py
+%if 0%{?fedora_version}
+%ghost %{_bindir}/mpanalyse.pyc
+%ghost %{_bindir}/mpanalyse.pyo
+%else
+%endif
 %{_libdir}/%{name}/*.so
 %{_libdir}/libaqsis.so*
 %{_sysconfdir}/aqsisrc
@@ -112,7 +117,15 @@ rm -rf $RPM_BUILD_ROOT
 %files data
 %defattr(-,root,root,-)
 %{_datadir}/%{name}/content/ribs/features/layeredshaders/
+%if 0%{?fedora_version}
+%ghost %{_datadir}/%{name}/content/ribs/features/layeredshaders/*.bat
+%else
+%endif
 %{_datadir}/%{name}/content/ribs/scenes/vase/
+%if 0%{?fedora_version}
+%ghost %{_datadir}/%{name}/content/ribs/scenes/vase/*.bat
+%else
+%endif
 %{_datadir}/%{name}/content/shaders/displacement/
 %{_datadir}/%{name}/content/shaders/light/
 
