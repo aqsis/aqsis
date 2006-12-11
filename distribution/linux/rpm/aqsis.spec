@@ -86,6 +86,8 @@ Aqsis is an open source project licensed under the GPL, with some parts under th
 
 
 %build
+export CFLAGS=$RPM_OPT_FLAGS
+export CCFLAGS=$RPM_OPT_FLAGS
 scons build destdir=$RPM_BUILD_ROOT \
 	install_prefix=%{_prefix} \
 	sysconfdir=%{_sysconfdir}
