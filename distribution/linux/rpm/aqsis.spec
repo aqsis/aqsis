@@ -19,12 +19,24 @@ Source:         %{name}-%{version}.tar.gz
 #Source:        http://download.aqsis.org/stable/source/tar/%{name}-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-%if 0%{?mandriva_version}
-BuildRequires:	bison, flex >= 2.5.4, OpenEXR-devel, boost-devel >= 1.32.0, fltk-devel >= 1.1.0, libjpeg-devel >= 6b, libtiff3-devel >= 3.5.7, libxslt-proc, scons >= 0.96.1, zlib-devel >= 1.1.4
-%else
-BuildRequires:	bison, flex >= 2.5.4, OpenEXR-devel, boost-devel >= 1.32.0, fltk-devel >= 1.1.0, libjpeg-devel >= 6b, libtiff-devel >= 3.5.7, libxslt, scons >= 0.96.1, zlib-devel >= 1.1.4
+# Exclude OpenEXR under Fedora Core 4 (and lower)
+%if ! 0%{?fedora_version} <= 4
+BuildRequires:	OpenEXR-devel
+Requires:		OpenEXR
 %endif
-Requires:		libtiff >= 3.5.7, libjpeg >= 6b, zlib >= 1.1.4, fltk >= 1.1.0, OpenEXR
+
+# Install correct XSLT binary under Mandriva
+%if 0%{?mandriva_version}
+BuildRequires:	libxslt-proc
+%endif
+
+# Install Python distutils under SUSE 10.1 (and lower)
+%if 0%{?suse_version} <= 1010
+BuildRequires:	python-devel
+%endif
+
+BuildRequires:	bison, flex >= 2.5.4, boost-devel >= 1.32.0, fltk-devel >= 1.1.0, gcc-c++, libjpeg-devel >= 6b, libtiff-devel >= 3.7.1, libxslt-devel, scons >= 0.96.1, zlib-devel >= 1.1.4
+Requires:		libtiff >= 3.7.1, libjpeg >= 6b, zlib >= 1.1.4, fltk >= 1.1.0
 
 
 %description
@@ -88,6 +100,10 @@ scons install
 rm -rf $RPM_BUILD_ROOT
 
 
+%post   -p /sbin/ldconfig
+%postun -p /sbin/ldconfig
+
+
 %files
 %defattr(-,root,root,-)
 %doc AUTHORS COPYING INSTALL README ReleaseNotes
@@ -97,11 +113,6 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root)%{_bindir}/miqser
 %attr(755,root,root)%{_bindir}/teqser
 %attr(755,root,root)%{_bindir}/mpanalyse.py
-%if 0%{?fedora_version}
-%ghost %{_bindir}/mpanalyse.pyc
-%ghost %{_bindir}/mpanalyse.pyo
-%else
-%endif
 %{_libdir}/%{name}/*.so
 %{_libdir}/libaqsis.so*
 %{_sysconfdir}/aqsisrc
@@ -117,22 +128,15 @@ rm -rf $RPM_BUILD_ROOT
 %files data
 %defattr(-,root,root,-)
 %{_datadir}/%{name}/content/ribs/features/layeredshaders/
-%if 0%{?mandriva_version}
-%else
-%ghost %{_datadir}/%{name}/content/ribs/features/layeredshaders/*.bat
-%endif
 %{_datadir}/%{name}/content/ribs/scenes/vase/
-%if 0%{?fedora_version}
-%ghost %{_datadir}/%{name}/content/ribs/scenes/vase/*.bat
-%else
-%endif
 %{_datadir}/%{name}/content/shaders/displacement/
 %{_datadir}/%{name}/content/shaders/light/
 
 
 %changelog
+* Mon Dec 11 2006 - latkinson@aqsis.org
+- Added Fedora (Core 5 tested) and OpenSUSE (10.2 tested) support to SPEC file.
 * Fri Dec 09 2006 - latkinson@aqsis.org
 - Added Mandriva (2006 tested) support to SPEC file.
 * Wed Nov 22 2006 - cgtobi@gmail.com
 - Initial RPM/SPEC.
-
