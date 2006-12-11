@@ -499,7 +499,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			// Allocate the buffer, even if the formatcount <3, always allocated 3, as that is what's needed for the
 			// display.
 			pImage->m_data = new TqUchar[ pImage->m_width * pImage->m_height * pImage->m_iFormatCount ];
-			pImage->m_entrySize = pImage->m_iFormatCount * sizeof(char);
+			pImage->m_entrySize = pImage->m_iFormatCount * sizeof(TqChar);
 
 			// Initialise the display to a checkerboard to show alpha
 			for (TqInt i = 0; i < pImage->m_height; i ++)
@@ -542,22 +542,22 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			if(widestFormat == PkDspyUnsigned8)
 			{
 				pImage->m_data = malloc( pImage->m_width * pImage->m_height * pImage->m_iFormatCount * sizeof(TqUchar));
-				pImage->m_entrySize = pImage->m_iFormatCount * sizeof(char);
+				pImage->m_entrySize = pImage->m_iFormatCount * sizeof(TqUchar);
 			}
 			else if(widestFormat == PkDspyUnsigned16)
 			{
-				pImage->m_data = malloc( pImage->m_width * pImage->m_height * pImage->m_iFormatCount * sizeof(unsigned short));
-				pImage->m_entrySize = pImage->m_iFormatCount * sizeof(short);
+				pImage->m_data = malloc( pImage->m_width * pImage->m_height * pImage->m_iFormatCount * sizeof(TqUshort));
+				pImage->m_entrySize = pImage->m_iFormatCount * sizeof(TqUshort);
 			}
 			else if(widestFormat == PkDspyUnsigned32)
 			{
-				pImage->m_data = malloc( pImage->m_width * pImage->m_height * pImage->m_iFormatCount * sizeof(unsigned long));
-				pImage->m_entrySize = pImage->m_iFormatCount * sizeof(long);
+				pImage->m_data = malloc( pImage->m_width * pImage->m_height * pImage->m_iFormatCount * sizeof(TqUlong));
+				pImage->m_entrySize = pImage->m_iFormatCount * sizeof(TqUlong);
 			}
 			else if(widestFormat == PkDspyFloat32)
 			{
-				pImage->m_data = malloc( pImage->m_width * pImage->m_height * pImage->m_iFormatCount * sizeof(float));
-				pImage->m_entrySize = pImage->m_iFormatCount * sizeof(float);
+				pImage->m_data = malloc( pImage->m_width * pImage->m_height * pImage->m_iFormatCount * sizeof(TqFloat));
+				pImage->m_entrySize = pImage->m_iFormatCount * sizeof(TqFloat);
 			}
 		}
 		pImage->m_lineLength = pImage->m_entrySize * pImage->m_width;
@@ -677,7 +677,7 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 		// If rendering to a file, or an "rgb" framebuffer, we can just copy the data.
 		if (pImage->m_imageType == Type_Framebuffer)
 		{
-			unsigned int comp = entrysize/pImage->m_iFormatCount;
+			TqUint comp = entrysize/pImage->m_iFormatCount;
 			TqInt y;
 			TqUchar *unrolled = static_cast< TqUchar *>(pImage->m_data);
 
@@ -685,17 +685,16 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 			{
 				TqInt x;
 				TqUchar* _pdatarow = (TqUchar* )(pdatarow);
-				for ( x = xmin; x < xmaxplus1; x++ )
+				for ( x = xmin__; x < xmaxplus1__; x++ )
 				{
 					TqInt so = pImage->m_iFormatCount * (( y * pImage->m_width ) +  x );
-
 
 					switch (comp)
 					{
 
 							case 2 :
 							{
-								unsigned short *svalue = reinterpret_cast<unsigned short *>(_pdatarow);
+								TqUshort *svalue = reinterpret_cast<TqUshort *>(_pdatarow);
 								TqUchar alpha = 255;
 								if (pImage->m_iFormatCount == 4)
 								{
@@ -711,7 +710,7 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 							case 4:
 							{
 
-								unsigned long *lvalue = reinterpret_cast<unsigned long *>(_pdatarow);
+								TqUlong *lvalue = reinterpret_cast<TqUlong *>(_pdatarow);
 								TqUchar alpha = 255;
 								if (pImage->m_iFormatCount == 4)
 								{
