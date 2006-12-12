@@ -19,10 +19,9 @@ Source:         %{name}-%{version}.tar.gz
 #Source:        http://download.aqsis.org/stable/source/tar/%{name}-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-# Exclude OpenEXR under Fedora Core 4 (and lower)
-%if 0%{!?fedora_version} <= 4
-BuildRequires:	OpenEXR-devel
-Requires:		OpenEXR
+# Install required OpenEXR dependency under Fedora Core 4 (and lower)
+%if 0%{?fedora_version} <= 4
+BuildRequires:	libstdc++ >= 4.0.2
 %endif
 
 # Install correct XSLT processor under Mandriva
@@ -35,8 +34,8 @@ BuildRequires:	libxslt-proc
 BuildRequires:	python-devel
 %endif
 
-BuildRequires:	bison, flex >= 2.5.4, boost-devel >= 1.32.0, fltk-devel >= 1.1.0, gcc-c++, libjpeg-devel >= 6b, libtiff-devel >= 3.7.1, libxslt-devel, scons >= 0.96.1, zlib-devel >= 1.1.4
-Requires:		fltk >= 1.1.0, libjpeg >= 6b, libtiff >= 3.7.1, zlib >= 1.1.4
+BuildRequires:	bison, flex >= 2.5.4, boost-devel >= 1.32.0, fltk-devel >= 1.1.0, gcc-c++, libjpeg-devel >= 6b, libtiff-devel >= 3.7.1, libxslt-devel, OpenEXR-devel, scons >= 0.96.1, zlib-devel >= 1.1.4
+Requires:		fltk >= 1.1.0, libjpeg >= 6b, libtiff >= 3.7.1, OpenEXR, zlib >= 1.1.4
 
 
 %description
@@ -118,10 +117,6 @@ scons install
 
 %clean
 rm -rf $RPM_BUILD_ROOT
-
-
-%post -p /sbin/ldconfig
-%postun -p /sbin/ldconfig
 
 
 %files
