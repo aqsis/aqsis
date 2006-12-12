@@ -19,11 +19,6 @@ Source:         %{name}-%{version}.tar.gz
 #Source:        http://download.aqsis.org/stable/source/tar/%{name}-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-# Install required OpenEXR dependency under Fedora Core 4 (and lower)
-%if 0%{?fedora_version} <= 4
-BuildRequires:	libstdc++ >= 4.0.2
-%endif
-
 # Install correct XSLT processor under Mandriva
 %if 0%{?mandriva_version}
 BuildRequires:	libxslt-proc
@@ -128,6 +123,8 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root)%{_bindir}/miqser
 %attr(755,root,root)%{_bindir}/teqser
 %attr(755,root,root)%{_bindir}/mpanalyse.py
+%exclude %{_bindir}/mpanalyse.pyc
+%exclude %{_bindir}/mpanalyse.pyo
 %{_libdir}/%{name}/*.so
 %{_libdir}/libaqsis.so*
 %config %{_sysconfdir}/aqsisrc
