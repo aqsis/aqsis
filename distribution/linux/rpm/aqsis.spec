@@ -20,12 +20,12 @@ Source:         %{name}-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 # Exclude OpenEXR under Fedora Core 4 (and lower)
-%if ! 0%{?fedora_version} <= 4
+%if 0%{!?fedora_version} <= 4
 BuildRequires:	OpenEXR-devel
 Requires:		OpenEXR
 %endif
 
-# Install correct XSLT binary under Mandriva
+# Install correct XSLT processor under Mandriva
 %if 0%{?mandriva_version}
 BuildRequires:	libxslt-proc
 %endif
@@ -36,33 +36,46 @@ BuildRequires:	python-devel
 %endif
 
 BuildRequires:	bison, flex >= 2.5.4, boost-devel >= 1.32.0, fltk-devel >= 1.1.0, gcc-c++, libjpeg-devel >= 6b, libtiff-devel >= 3.7.1, libxslt-devel, scons >= 0.96.1, zlib-devel >= 1.1.4
-Requires:		libtiff >= 3.7.1, libjpeg >= 6b, zlib >= 1.1.4, fltk >= 1.1.0
+Requires:		fltk >= 1.1.0, libjpeg >= 6b, libtiff >= 3.7.1, zlib >= 1.1.4
 
 
 %description
-Aqsis is a cross-platform photorealistic 3D rendering solution, based on the RenderMan interface standard defined by Pixar Animation Studios.
+Aqsis is a cross-platform photorealistic 3D rendering solution, based 
+on the RenderMan interface standard defined by Pixar Animation Studios.
 
-Focusing on stability and production usage features include constructive solid geometry, depth-of-field, extensible shading engine (DSOs), instancing, level-of-detail, motion blur, NURBS, procedural plugins, programmable shading, subdivision surfaces, subpixel displacements and more.
+Focusing on stability and production usage features include constructive 
+solid geometry, depth-of-field, extensible shading engine (DSOs), instancing, 
+level-of-detail, motion blur, NURBS, procedural plugins, programmable shading, 
+subdivision surfaces, subpixel displacements and more.
 
-This package contains a command-line renderer, a shader compiler for shaders written using the RenderMan shading language, a texture pre-processor for optimizing textures and a RIB processor.
+This package contains a command-line renderer, a shader compiler for shaders 
+written using the RenderMan shading language, a texture pre-processor for 
+optimizing textures and a RIB processor.
 
-Aqsis is an open source project licensed under the GPL, with some parts under the LGPL.
+Aqsis is an open source project licensed under the GPL, with some parts under 
+the LGPL.
 
 
 %package devel
 Requires:		%{name} = %{version}
 Summary:        Development files for the open source RenderMan-compliant Aqsis 3D rendering solution
-Group:          Applications/Multimedia
+Group:          Development/Libraries
 
 
 %description devel
-Aqsis is a cross-platform photorealistic 3D rendering solution, based on the RenderMan interface standard defined by Pixar Animation Studios
+Aqsis is a cross-platform photorealistic 3D rendering solution, based 
+on the RenderMan interface standard defined by Pixar Animation Studios.
 
-Focusing on stability and production usage features include constructive solid geometry, depth-of-field, extensible shading engine (DSOs), instancing, level-of-detail, motion blur, NURBS, procedural plugins, programmable shading, subdivision surfaces, subpixel displacements and more.
+Focusing on stability and production usage features include constructive 
+solid geometry, depth-of-field, extensible shading engine (DSOs), instancing, 
+level-of-detail, motion blur, NURBS, procedural plugins, programmable shading, 
+subdivision surfaces, subpixel displacements and more.
 
-This package contains various developer libraries to enable integration with third-party applications.
+This package contains various developer libraries to enable integration with 
+third-party applications.
 
-Aqsis is an open source project licensed under the GPL, with some parts under the LGPL.
+Aqsis is an open source project licensed under the GPL, with some parts under 
+the LGPL.
 
 
 %package data
@@ -72,13 +85,18 @@ Group:          Applications/Multimedia
 
 
 %description data
-Aqsis is a cross-platform photorealistic 3D rendering solution, based on the RenderMan interface standard defined by Pixar Animation Studios.
+Aqsis is a cross-platform photorealistic 3D rendering solution, based 
+on the RenderMan interface standard defined by Pixar Animation Studios.
 
-Focusing on stability and production usage features include constructive solid geometry, depth-of-field, extensible shading engine (DSOs), instancing, level-of-detail, motion blur, NURBS, procedural plugins, programmable shading, subdivision surfaces, subpixel displacements and more.
+Focusing on stability and production usage features include constructive 
+solid geometry, depth-of-field, extensible shading engine (DSOs), instancing, 
+level-of-detail, motion blur, NURBS, procedural plugins, programmable shading, 
+subdivision surfaces, subpixel displacements and more.
 
 This package contains example content, including additional scenes and shaders.
 
-Aqsis is an open source project licensed under the GPL, with some parts under the LGPL.
+Aqsis is an open source project licensed under the GPL, with some parts under 
+the LGPL.
 
 
 %prep
@@ -102,7 +120,7 @@ scons install
 rm -rf $RPM_BUILD_ROOT
 
 
-%post   -p /sbin/ldconfig
+%post -p /sbin/ldconfig
 %postun -p /sbin/ldconfig
 
 
@@ -117,7 +135,7 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root)%{_bindir}/mpanalyse.py
 %{_libdir}/%{name}/*.so
 %{_libdir}/libaqsis.so*
-%{_sysconfdir}/aqsisrc
+%config %{_sysconfdir}/aqsisrc
 %{_datadir}/%{name}/shaders/
 
 
@@ -130,7 +148,9 @@ rm -rf $RPM_BUILD_ROOT
 %files data
 %defattr(-,root,root,-)
 %{_datadir}/%{name}/content/ribs/features/layeredshaders/
+%exclude %{_datadir}/%{name}/content/ribs/features/layeredshaders/*.bat
 %{_datadir}/%{name}/content/ribs/scenes/vase/
+%exclude %{_datadir}/%{name}/content/ribs/scenes/vase/*.bat
 %{_datadir}/%{name}/content/shaders/displacement/
 %{_datadir}/%{name}/content/shaders/light/
 
@@ -138,7 +158,10 @@ rm -rf $RPM_BUILD_ROOT
 %changelog
 * Mon Dec 11 2006 - latkinson@aqsis.org
 - Added Fedora (Core 5 tested) and OpenSUSE (10.2 tested) support to SPEC file.
+- Cleaned-up/optimised SPEC file.
+
 * Fri Dec 09 2006 - latkinson@aqsis.org
 - Added Mandriva (2006 tested) support to SPEC file.
+
 * Wed Nov 22 2006 - cgtobi@gmail.com
 - Initial RPM/SPEC.
