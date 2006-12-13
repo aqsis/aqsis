@@ -64,10 +64,10 @@ void CreateTranslationTable( IqParseNode* pParam, IqParseNode* pArg, std::vector
 		if ( pArg->IsVariableRef() )
 		{
 			IqParseNodeVariable * pVarArg;
-			pArg->GetInterface( ParseNode_Variable, ( void** ) & pVarArg );
+			pVarArg = static_cast<IqParseNodeVariable*>(pArg->GetInterface( ParseNode_Variable ));
 
 			IqParseNodeVariable* pParamArg;
-			if ( pParam->GetInterface( ParseNode_Variable, ( void** ) & pParamArg ) )
+			if ( ( pParamArg = static_cast<IqParseNodeVariable*>(pParam->GetInterface( ParseNode_Variable ))) != 0 )
 			{
 				SqVarRefTranslator Trans;
 				Trans.m_From = pParamArg->VarRef();
@@ -129,7 +129,7 @@ void CreateTempMap( IqParseNode* pParam, IqParseNode* pArg, std::deque<std::map<
 		if ( !pArg->IsVariableRef() )
 		{
 			IqParseNodeVariable * pLocalVar;
-			pParam->GetInterface( ParseNode_Variable, ( void** ) & pLocalVar );
+			pLocalVar = static_cast<IqParseNodeVariable*>(pParam->GetInterface( ParseNode_Variable ));
 			std::strstream strTempName;
 			strTempName << "_" << Stack.size() << "$" << pLocalVar->strName() << std::ends;
 			Stack.back() [ pLocalVar->strName() ] = std::string( strTempName.str() );
