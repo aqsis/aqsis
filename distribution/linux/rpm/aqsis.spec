@@ -1,25 +1,60 @@
 # Title: Aqsis Package for Linux (RPM)
 # Author: Aqsis Team (packages@aqsis.org)
 # Info: 
-# Other: 1. To make updates easier, all message strings have been placed within the top 10-80 lines of this file.
+# Other: 1. To make updates easier, all message strings have been placed within the top 10-40 lines of this file.
 #        2. To build using the 'Official' tarball comment line 18 and uncomment line 19.
 
+# norootforbuild
 
-Name:           aqsis
-Version:        1.1.0
-Release:        1%{?dist}
+
+%define PRODUCT_NAME aqsis
+%define PRODUCT_VERSION_MAJOR 1
+%define PRODUCT_VERSION_MINOR 2
+%define PRODUCT_VERSION_BUILD 0
+%define PRODUCT_VERSION_RELEASE 1%{?dist}
+%define PRODUCT_WEB_SITE http://www.aqsis.org
+%define PRODUCT_WEB_UPDATE http://download.aqsis.org/stable/source/tar
+
+%if 0%{?fedora_version}
+%define PRODUCT_GROUP_DATA Applications/Multimedia
+%define PRODUCT_GROUP_DEVELOP Development/Libraries
+%define PRODUCT_GROUP_MAIN Applications/Multimedia
+%define PRODUCT_VERSION_DISTRO %{PRODUCT_VERSION_RELEASE}
+%else
+%if 0%{?mandriva_version}
+%define PRODUCT_GROUP_DATA Graphics
+%define PRODUCT_GROUP_DEVELOP Development/C++
+%define PRODUCT_GROUP_MAIN Graphics
+%define PRODUCT_VERSION_DISTRO %mkrel %{PRODUCT_VERSION_RELEASE}
+%else
+%if 0%{?suse_version}
+%define PRODUCT_GROUP_DATA Productivity/Graphics/Visualization/Other
+%define PRODUCT_GROUP_DEVELOP Development/Libraries/C and C++
+%define PRODUCT_GROUP_MAIN Productivity/Graphics/Visualization/Other
+%define PRODUCT_VERSION_DISTRO %{PRODUCT_VERSION_RELEASE}
+%else
+%define PRODUCT_GROUP_DATA Applications/Multimedia
+%define PRODUCT_GROUP_DEVELOP Development/Libraries
+%define PRODUCT_GROUP_MAIN Applications/Multimedia
+%define PRODUCT_VERSION_DISTRO %{PRODUCT_VERSION_RELEASE}
+%endif
+%endif
+%endif
+
+Name:           %{PRODUCT_NAME}
+Version:        %{PRODUCT_VERSION_MAJOR}.%{PRODUCT_VERSION_MINOR}.%{PRODUCT_VERSION_BUILD}
+Release:        %{PRODUCT_VERSION_DISTRO}
 Summary:        Open source RenderMan-compliant 3D rendering solution
+Group:          %{PRODUCT_GROUP_MAIN}
 
-Group:          Applications/Multimedia
 License:        GPL
-URL:            http://www.aqsis.org
-Vendor:			Aqsis Team
-Packager:		Aqsis Team <packages@aqsis.org>
+URL:            %{PRODUCT_WEB_SITE}
 Source:         %{name}-%{version}.tar.gz
-#Source:        http://download.aqsis.org/stable/source/tar/%{name}-%{version}.tar.gz
+#Source:        %{PRODUCT_WEB_UPDATE}/%{name}-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-# Install correct XSLT processor under Mandriva
+
+# Install XSLT processor under Mandriva
 %if 0%{?mandriva_version}
 BuildRequires:	libxslt-proc
 %endif
@@ -53,7 +88,7 @@ the LGPL.
 %package devel
 Requires:		%{name} = %{version}
 Summary:        Development files for the open source RenderMan-compliant Aqsis 3D rendering solution
-Group:          Development/Libraries
+Group:          %{PRODUCT_GROUP_DEVELOP}
 
 
 %description devel
@@ -75,7 +110,7 @@ the LGPL.
 %package data
 Requires:		%{name} = %{version}
 Summary:        Example content for the open source RenderMan-compliant Aqsis 3D rendering solution
-Group:          Applications/Multimedia
+Group:          %{PRODUCT_GROUP_DATA}
 
 
 %description data
@@ -100,14 +135,14 @@ the LGPL.
 %build
 export CFLAGS=$RPM_OPT_FLAGS
 export CCFLAGS=$RPM_OPT_FLAGS
-scons build destdir=$RPM_BUILD_ROOT \
+scons -j3 build destdir=$RPM_BUILD_ROOT \
 	install_prefix=%{_prefix} \
 	sysconfdir=%{_sysconfdir}
 
 
 %install
 rm -rf $RPM_BUILD_ROOT
-scons install
+scons -j3 install
 
 
 %clean
@@ -123,8 +158,6 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root)%{_bindir}/miqser
 %attr(755,root,root)%{_bindir}/teqser
 %attr(755,root,root)%{_bindir}/mpanalyse.py
-%exclude %{_bindir}/mpanalyse.pyc
-%exclude %{_bindir}/mpanalyse.pyo
 %{_libdir}/%{name}/*.so
 %{_libdir}/libaqsis.so*
 %config %{_sysconfdir}/aqsisrc
@@ -148,12 +181,12 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
-* Mon Dec 11 2006 - latkinson@aqsis.org
+* Mon Dec 11 2006 Leon Tony Atkinson <latkinson@aqsis.org> 1.2.0-1
 - Added Fedora (Core 5 tested) and OpenSUSE (10.2 tested) support to SPEC file.
 - Cleaned-up/optimised SPEC file.
 
-* Fri Dec 09 2006 - latkinson@aqsis.org
+* Fri Dec 09 2006 Leon Tony Atkinson <latkinson@aqsis.org> 1.2.0-1
 - Added Mandriva (2006 tested) support to SPEC file.
 
-* Wed Nov 22 2006 - cgtobi@gmail.com
+* Wed Nov 22 2006 Tobias Sauerwein <cgtobi@gmail.com> 1.2.0-1
 - Initial RPM/SPEC.
