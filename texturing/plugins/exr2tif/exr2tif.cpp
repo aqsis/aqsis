@@ -221,7 +221,7 @@ extern "C" __export char *exr2tif(char *in)
 			pixels[i*n + 4*j]     = gamma(rgba[i][j].r, m); // red
 			pixels[i*n + 4*j + 1] = gamma(rgba[i][j].g, m); // green
 			pixels[i*n + 4*j + 2] = gamma(rgba[i][j].b, m); // blue
-			pixels[i*n + 4*j + 3] = rgba[i][j].a * 255; // alpha
+			pixels[i*n + 4*j + 3] = static_cast<unsigned char>(rgba[i][j].a * 255); // alpha
 		}
 	}
 

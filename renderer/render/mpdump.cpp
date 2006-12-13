@@ -95,8 +95,8 @@ void CqMPDump::dumpPixelSamples()
 		for(int j=0; j<img->BucketSize().x(); j++)
 		{
 			CqImagePixel* pie;
-			int ix = j+img->BucketPosition().x();
-			int iy = i+img->BucketPosition().y();
+			int ix = static_cast<int>(j+img->BucketPosition().x());
+			int iy = static_cast<int>(i+img->BucketPosition().y());
 			CqBucket::ImageElement(ix, iy, pie);
 			for(int k=0; k<pie->XSamples()*pie->YSamples(); k++)
 			{

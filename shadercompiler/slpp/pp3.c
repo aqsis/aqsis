@@ -152,7 +152,7 @@ doinclude()
 {
 	char			buf[TOKENSIZE];
 	register int		c;
-	register int		d;
+	register int		d = 0;
 	register char		*incf;
 	char			incfile[FILENAMESIZE + 1];
 #if	HOST != H_CPM

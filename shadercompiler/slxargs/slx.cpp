@@ -651,7 +651,7 @@ static RtInt GetCurrentShaderInfo( char * name, char * filePath )
 	int i;
 	int varCount;
 	EqShaderType aShaderType;
-	SLX_VISSYMDEF * newArray;
+	SLX_VISSYMDEF * newArray = 0;
 	int theNArgs;
 	SLX_TYPE theShaderType;
 

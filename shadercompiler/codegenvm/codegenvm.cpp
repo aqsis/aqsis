@@ -25,10 +25,7 @@
 
 #include "aqsis.h"
 
-#include	<strstream>
-#ifndef AQSIS_SYSTEM_MACOSX
 #include	<sstream>
-#endif
 #include	<fstream>
 #include	<deque>
 #include	<string>
@@ -130,7 +127,7 @@ void CreateTempMap( IqParseNode* pParam, IqParseNode* pArg, std::deque<std::map<
 		{
 			IqParseNodeVariable * pLocalVar;
 			pLocalVar = static_cast<IqParseNodeVariable*>(pParam->GetInterface( ParseNode_Variable ));
-			std::strstream strTempName;
+			std::stringstream strTempName;
 			strTempName << "_" << Stack.size() << "$" << pLocalVar->strName() << std::ends;
 			Stack.back() [ pLocalVar->strName() ] = std::string( strTempName.str() );
 

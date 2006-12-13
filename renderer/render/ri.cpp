@@ -3391,7 +3391,7 @@ RtVoid RiBlobbyV( RtInt nleaf, RtInt ncode, RtInt code[], RtInt nflt, RtFloat fl
 			for( int i = 0; i < npoints; i++ )
 			{
 				TqFloat sum;
-				TqFloat ocolors[3];
+				TqFloat ocolors[3] = {0.0f,0.0f,0.0f};
 
 				TqInt m = i * 3;
 				cg[0] = points[m];

@@ -94,7 +94,6 @@
 //
 //-----------------------------------------------------------------------------
 
-#define NDEBUG // enable assert()
 #include <assert.h>
 
 #include <ImfOutputFile.h>
@@ -661,7 +660,8 @@ extern "C"
 	                int datalen,
 	                void *data)
 	{
-		if (datalen > 0 && data)
+		unsigned int _datalen = static_cast<unsigned int>(datalen);
+		if (_datalen > 0 && data)
 		{
 			switch (querytype)
 			{
@@ -669,13 +669,13 @@ extern "C"
 					{
 						PtDspyOverwriteInfo overwriteInfo;
 
-						if (datalen > sizeof(overwriteInfo))
-							datalen = sizeof(overwriteInfo);
+						if (_datalen > sizeof(overwriteInfo))
+							_datalen = sizeof(overwriteInfo);
 
 						overwriteInfo.overwrite = 1;
 						overwriteInfo.interactive = 0;
 
-						memcpy(data, &overwriteInfo, datalen);
+						memcpy(data, &overwriteInfo, _datalen);
 					}
 					break;
 
@@ -683,8 +683,8 @@ extern "C"
 					{
 						PtDspySizeInfo sizeInfo;
 
-						if (datalen > sizeof(sizeInfo))
-							datalen = sizeof(sizeInfo);
+						if (_datalen > sizeof(sizeInfo))
+							_datalen = sizeof(sizeInfo);
 
 						const Image *image = (const Image *) pvImage;
 
@@ -711,7 +711,7 @@ extern "C"
 							sizeInfo.aspectRatio = 1.0f;
 						}
 
-						memcpy(data, &sizeInfo, datalen);
+						memcpy(data, &sizeInfo, _datalen);
 					}
 					break;
 
