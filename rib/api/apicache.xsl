@@ -13,6 +13,7 @@
 		<!--	Procedures	-->
 		<xsl:apply-templates select="Procedures/Procedure"/>
 		<xsl:apply-templates select="Procedures/Procedure" mode="macro"/>
+		<xsl:text>&#xa;&#xa;</xsl:text>
 	</xsl:template>
 
 
