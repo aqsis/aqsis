@@ -9,7 +9,7 @@
 
 %define PRODUCT_NAME aqsis
 %define PRODUCT_VERSION_MAJOR 1
-%define PRODUCT_VERSION_MINOR 2
+%define PRODUCT_VERSION_MINOR 1
 %define PRODUCT_VERSION_BUILD 0
 %define PRODUCT_VERSION_RELEASE 1%{?dist}
 %define PRODUCT_WEB_SITE http://www.aqsis.org
@@ -134,33 +134,42 @@ the LGPL.
 
 %build
 export CFLAGS=$RPM_OPT_FLAGS
-export CCFLAGS=$RPM_OPT_FLAGS
-scons -j3 build destdir=$RPM_BUILD_ROOT \
+export CXXFLAGS=$RPM_OPT_FLAGS
+scons -j 3 destdir=$RPM_BUILD_ROOT \
 	install_prefix=%{_prefix} \
-	sysconfdir=%{_sysconfdir}
-
+	sysconfdir=%{_sysconfdir} \
+	no_rpath=true \
+	build
 
 %install
 rm -rf $RPM_BUILD_ROOT
-scons -j3 install
+export CFLAGS=$RPM_OPT_FLAGS
+export CXXFLAGS=$RPM_OPT_FLAGS
+scons -j 3 install
+touch $RPM_BUILD_ROOT/bin/mpanalyse.pyc
+touch $RPM_BUILD_ROOT/bin/mpanalyse.pyo 
 
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
+%post   -p /sbin/ldconfig
+%postun -p /sbin/ldconfig
 
 %files
 %defattr(-,root,root,-)
 %doc AUTHORS COPYING INSTALL README ReleaseNotes
-%attr(755,root,root)%{_bindir}/aqsis
-%attr(755,root,root)%{_bindir}/aqsl
-%attr(755,root,root)%{_bindir}/aqsltell
-%attr(755,root,root)%{_bindir}/miqser
-%attr(755,root,root)%{_bindir}/teqser
+%{_bindir}/aqsis
+%{_bindir}/aqsl
+%{_bindir}/aqsltell
+%{_bindir}/miqser
+%{_bindir}/teqser
 %attr(755,root,root)%{_bindir}/mpanalyse.py
+%exclude %{_bindir}/mpanalyse.pyo
+%exclude %{_bindir}/mpanalyse.pyc
 %{_libdir}/%{name}/*.so
-%{_libdir}/libaqsis.so*
-%config %{_sysconfdir}/aqsisrc
+%{_libdir}/libaqsis.so.*
+%config(noreplace) %{_sysconfdir}/aqsisrc
 %{_datadir}/%{name}/shaders/
 
 
@@ -168,6 +177,7 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root,-)
 %{_includedir}/%{name}/
 %{_libdir}/%{name}/*.a
+%{_libdir}/libaqsis.so
 
 
 %files data
