@@ -130,7 +130,8 @@ env.AppendUnique(CPPDEFINES=[('DEFAULT_SHADER_PATH', '\\"' + env.Dir('$SHADERDIR
 env.Replace(SHLIB_VERSION_SUFFIX = '.%d.%d' %(version.major, version.minor))
 env.AppendUnique(SHLINKFLAGS=['-Wl,-soname=${TARGET.file}.%d' %version.major])
 
-env.AppendUnique(RPATH=['$RENDERENGINEDIR'])
+if not env['no_rpath']:
+	env.AppendUnique(RPATH=['$RENDERENGINEDIR'])
 
 env.Replace(slparse_ccflags = ['-O0'])
 env.Replace(aqsis_libs = ['dl'])
