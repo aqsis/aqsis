@@ -15,8 +15,8 @@ rib2streamenv = env.Copy()
 rib2streamenv.UseTargetOptions('rib2stream')
 
 rib2stream = rib2streamenv.Library('rib2stream', rib2stream_sources)
-rib2streamenv.Install('$STATICLIBDIR', rib2stream)
-rib2streamenv.Install('$INCLUDEDIR', rib2stream_install_headers)
+#rib2streamenv.Install('$STATICLIBDIR', rib2stream)
+#rib2streamenv.Install('$INCLUDEDIR', rib2stream_install_headers)
 
 env.Distribute('rib/rib2stream', rib2stream_sources)
 env.Distribute('rib/rib2stream', rib2stream_headers)

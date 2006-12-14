@@ -24,8 +24,8 @@ rib2env.CXXFile(target='scanner.cpp', source='scanner.ll')
 rib2env.UseTargetOptions('rib2')
 
 rib2 = rib2env.Library('rib2', rib2_sources)
-rib2env.Install('$STATICLIBDIR', rib2)
-rib2env.Install('$INCLUDEDIR', rib2_install_headers)
+#rib2env.Install('$STATICLIBDIR', rib2)
+#rib2env.Install('$INCLUDEDIR', rib2_install_headers)
 
 env.Distribute('rib/rib2', rib2_sources)
 env.Distribute('rib/rib2', rib2_headers)

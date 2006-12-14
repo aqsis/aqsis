@@ -15,7 +15,7 @@ codegenvmenv = env.Copy()
 codegenvmenv.UseTargetOptions('codegenvm')
 
 codegenvm = codegenvmenv.Library('codegenvm', codegenvm_sources)
-codegenvmenv.Install('$STATICLIBDIR', codegenvm)
+#codegenvmenv.Install('$STATICLIBDIR', codegenvm)
 
 env.Distribute('shadercompiler/codegenvm', codegenvm_sources)
 env.Distribute('shadercompiler/codegenvm', codegenvm_headers)

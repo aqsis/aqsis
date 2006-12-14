@@ -14,7 +14,8 @@ ddmanagerenv = env.Copy()
 ddmanagerenv.UseTargetOptions('ddmanager')
 
 ddmanager = ddmanagerenv.Library('ddmanager', ddmanager_sources)
-ddmanagerenv.Install('$STATICLIBDIR', ddmanager)
+#ddmanagerenv.Install('$STATICLIBDIR', ddmanager)
+ddmanagerenv.Install('$INCLUDEDIR', "ndspy.h")
 
 env.Distribute('renderer/ddmanager', ddmanager_sources)
 env.Distribute('renderer/ddmanager', ddmanager_headers)
