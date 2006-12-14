@@ -109,13 +109,20 @@ static FILE * OpenCurrentShader()
 		if( NULL != shaderInputFile )
 		{
 			char sigbuf[100];
-			fread(sigbuf, sizeof(char), 100, shaderInputFile);
-			fseek(shaderInputFile, 0, SEEK_SET);
-			sigbuf[99] = '\0';
-			if( strstr(sigbuf, "AQSIS") == NULL )
+			if(fread(sigbuf, sizeof(char), 100, shaderInputFile)<0)
 			{
-				fclose( shaderInputFile );
+				fclose(shaderInputFile);
 				shaderInputFile = NULL;
+			}
+			else
+			{
+				fseek(shaderInputFile, 0, SEEK_SET);
+				sigbuf[99] = '\0';
+				if( strstr(sigbuf, "AQSIS") == NULL )
+				{
+					fclose( shaderInputFile );
+					shaderInputFile = NULL;
+				}
 			}
 		}
 	}
