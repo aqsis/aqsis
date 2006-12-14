@@ -11,7 +11,7 @@
 %define PRODUCT_VERSION_MAJOR 1
 %define PRODUCT_VERSION_MINOR 1
 %define PRODUCT_VERSION_BUILD 0
-%define PRODUCT_VERSION_RELEASE 1%{?dist}
+%define PRODUCT_VERSION_RELEASE 1
 %define PRODUCT_WEB_SITE http://www.aqsis.org
 %define PRODUCT_WEB_UPDATE http://download.aqsis.org/stable/source/tar
 
@@ -19,31 +19,27 @@
 %define PRODUCT_GROUP_DATA Applications/Multimedia
 %define PRODUCT_GROUP_DEVELOP Development/Libraries
 %define PRODUCT_GROUP_MAIN Applications/Multimedia
-%define PRODUCT_VERSION_DISTRO %{PRODUCT_VERSION_RELEASE}
 %else
 %if 0%{?mandriva_version}
 %define PRODUCT_GROUP_DATA Graphics
 %define PRODUCT_GROUP_DEVELOP Development/C++
 %define PRODUCT_GROUP_MAIN Graphics
-%define PRODUCT_VERSION_DISTRO %mkrel %{PRODUCT_VERSION_RELEASE}
 %else
 %if 0%{?suse_version}
 %define PRODUCT_GROUP_DATA Productivity/Graphics/Visualization/Other
 %define PRODUCT_GROUP_DEVELOP Development/Libraries/C and C++
 %define PRODUCT_GROUP_MAIN Productivity/Graphics/Visualization/Other
-%define PRODUCT_VERSION_DISTRO %{PRODUCT_VERSION_RELEASE}
 %else
 %define PRODUCT_GROUP_DATA Applications/Multimedia
 %define PRODUCT_GROUP_DEVELOP Development/Libraries
 %define PRODUCT_GROUP_MAIN Applications/Multimedia
-%define PRODUCT_VERSION_DISTRO %{PRODUCT_VERSION_RELEASE}
 %endif
 %endif
 %endif
 
 Name:           %{PRODUCT_NAME}
 Version:        %{PRODUCT_VERSION_MAJOR}.%{PRODUCT_VERSION_MINOR}.%{PRODUCT_VERSION_BUILD}
-Release:        %{PRODUCT_VERSION_DISTRO}
+Release:        %{PRODUCT_VERSION_RELEASE}%{?dist}
 Summary:        Open source RenderMan-compliant 3D rendering solution
 Group:          %{PRODUCT_GROUP_MAIN}
 
@@ -135,7 +131,7 @@ the LGPL.
 %build
 export CFLAGS=$RPM_OPT_FLAGS
 export CXXFLAGS=$RPM_OPT_FLAGS
-scons -j 3 destdir=$RPM_BUILD_ROOT \
+scons %{?_smp_mflags} destdir=$RPM_BUILD_ROOT \
 	install_prefix=%{_prefix} \
 	sysconfdir=%{_sysconfdir} \
 	no_rpath=true \
@@ -145,7 +141,7 @@ scons -j 3 destdir=$RPM_BUILD_ROOT \
 rm -rf $RPM_BUILD_ROOT
 export CFLAGS=$RPM_OPT_FLAGS
 export CXXFLAGS=$RPM_OPT_FLAGS
-scons -j 3 install
+scons install
 touch $RPM_BUILD_ROOT/bin/mpanalyse.pyc
 touch $RPM_BUILD_ROOT/bin/mpanalyse.pyo 
 
@@ -164,7 +160,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/aqsltell
 %{_bindir}/miqser
 %{_bindir}/teqser
-%attr(755,root,root)%{_bindir}/mpanalyse.py
+%{_bindir}/mpanalyse.py
 %exclude %{_bindir}/mpanalyse.pyo
 %exclude %{_bindir}/mpanalyse.pyc
 %{_libdir}/%{name}/*.so
