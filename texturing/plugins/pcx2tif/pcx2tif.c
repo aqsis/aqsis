@@ -232,7 +232,9 @@ extract_pcx_colour_map(
 	/* read colour map */
 	for ( i = 0; i < size; i++ )
 	{
-		fread( &rgb, sizeof( rgb ), 1, f );
+		size_t len_read = fread( &rgb, sizeof( rgb ), 1, f );
+		if(len_read != 1)
+			return;
 		r[ i ] = rgb.r;
 		g[ i ] = rgb.g;
 		b[ i ] = rgb.b;

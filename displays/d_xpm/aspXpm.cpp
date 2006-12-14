@@ -179,7 +179,9 @@ int aspXpm::saveFile()
     return -1;
   }
 
-  fwrite( fileBuffer.c_str(), sizeof( char ), fileBuffer.length() , fhandle );      // write contents of fileBuffer to the file
+  size_t len_written = fwrite( fileBuffer.c_str(), sizeof( char ), fileBuffer.length() , fhandle );      // write contents of fileBuffer to the file
+  if(len_written != fileBuffer.length())
+	return -1;
 
   fclose( fhandle );      // closes the file
 

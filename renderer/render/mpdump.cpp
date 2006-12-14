@@ -50,7 +50,9 @@ void CqMPDump::open()
 	if (out!=NULL)
 	{
 		Aqsis::log() << info << "Creating '" << filename << "'" << std::endl;
-		fwrite((void*)&sf, sizeof(int), 1, out);
+		size_t len_written = fwrite((void*)&sf, sizeof(int), 1, out);
+		if(len_written != 1)
+			throw(XqException("Error writing mpdump file"));
 	}
 	else
 		Aqsis::log() << error << "Could not create '" << filename << "'" << std::endl;
@@ -80,9 +82,11 @@ void CqMPDump::dumpImageInfo()
 
 	int width = QGetRenderContext()->pImage()->iXRes();
 	int height = QGetRenderContext()->pImage()->iYRes();
-	fwrite((void*)&id, sizeof(short), 1, out);
-	fwrite((void*)&width, sizeof(int), 1, out);
-	fwrite((void*)&height, sizeof(int), 1, out);
+	size_t len_written = fwrite((void*)&id, sizeof(short), 1, out);
+	len_written += fwrite((void*)&width, sizeof(int), 1, out);
+	len_written += fwrite((void*)&height, sizeof(int), 1, out);
+	if(len_written != 3)
+		throw(XqException("Error writing mpdump file"));
 }
 
 // Dump all pixel samples of the current bucket
@@ -119,14 +123,16 @@ void CqMPDump::dump(int x, int y, int idx, const SqSampleData& sd)
 		return;
 	}
 
-	fwrite((void*)&id, sizeof(short), 1, out);
-	fwrite((void*)&x, sizeof(int), 1, out);
-	fwrite((void*)&y, sizeof(int), 1, out);
-	fwrite((void*)&idx, sizeof(int), 1, out);
+	size_t len_written = fwrite((void*)&id, sizeof(short), 1, out);
+	len_written += fwrite((void*)&x, sizeof(int), 1, out);
+	len_written += fwrite((void*)&y, sizeof(int), 1, out);
+	len_written += fwrite((void*)&idx, sizeof(int), 1, out);
 	f = sd.m_Position.x();
-	fwrite((void*)&f, sizeof(TqFloat), 1, out);
+	len_written += fwrite((void*)&f, sizeof(TqFloat), 1, out);
 	f = sd.m_Position.y();
-	fwrite((void*)&f, sizeof(TqFloat), 1, out);
+	len_written += fwrite((void*)&f, sizeof(TqFloat), 1, out);
+	if(len_written != 6)
+		throw(XqException("Error writing mpdump file"));
 }
 
 // Dump a micro polygon
@@ -143,7 +149,9 @@ void CqMPDump::dump(const CqMicroPolygon& mp)
 	}
 
 	mpcount++;
-	fwrite((void*)&id, sizeof(short), 1, out);
+	size_t len_written = fwrite((void*)&id, sizeof(short), 1, out);
+	if(len_written != 1)
+		throw(XqException("Error writing mpdump file"));
 
 	v = mp.PointA();
 	dumpVec3(v);
@@ -172,9 +180,11 @@ void CqMPDump::dumpVec3(const CqVector3D& v)
 	TqFloat y = v.y();
 	TqFloat z = v.z();
 
-	fwrite((void*)&x, sizeof(TqFloat), 1, out);
-	fwrite((void*)&y, sizeof(TqFloat), 1, out);
-	fwrite((void*)&z, sizeof(TqFloat), 1, out);
+	size_t len_written = fwrite((void*)&x, sizeof(TqFloat), 1, out);
+	len_written += fwrite((void*)&y, sizeof(TqFloat), 1, out);
+	len_written += fwrite((void*)&z, sizeof(TqFloat), 1, out);
+	if(len_written != 3)
+		throw(XqException("Error writing mpdump file"));
 }
 
 // Dump a color
@@ -184,9 +194,11 @@ void CqMPDump::dumpCol(const CqColor& c)
 	TqFloat g = c.fGreen();
 	TqFloat b = c.fBlue();
 
-	fwrite((void*)&r, sizeof(TqFloat), 1, out);
-	fwrite((void*)&g, sizeof(TqFloat), 1, out);
-	fwrite((void*)&b, sizeof(TqFloat), 1, out);
+	size_t len_written = fwrite((void*)&r, sizeof(TqFloat), 1, out);
+	len_written += fwrite((void*)&g, sizeof(TqFloat), 1, out);
+	len_written += fwrite((void*)&b, sizeof(TqFloat), 1, out);
+	if(len_written != 3)
+		throw(XqException("Error writing mpdump file"));
 }
 
 

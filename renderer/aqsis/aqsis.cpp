@@ -29,6 +29,7 @@
 #include "version.h"
 #include "bdec.h"
 #include "parserstate.h"
+#include "exception.h"
 
 #ifdef AQSIS_SYSTEM_WIN32
 #include <io.h>
@@ -370,7 +371,9 @@ RtVoid PreWorld()
 			writePipe = fdopen(hpipe[1],"w");
 #endif
 
-			fwrite(i->c_str(),1,i->length(),writePipe);
+			size_t len_written = fwrite(i->c_str(),1,i->length(),writePipe);
+			if(len_written != i->length())
+				throw(Aqsis::XqException("Error forwarding pipe data"));
 			fflush(writePipe);
 			fclose(writePipe);
 

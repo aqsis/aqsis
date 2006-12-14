@@ -76,7 +76,8 @@ __export char *bmp2tif( char *in )
 			strcpy( result, ".jpg" );
 	}
 	sprintf( call, "cjpeg %s > %s", tiffname, jpgname );
-	system(call);
+	if(system(call))
+		return("");
 	result = jpg2tif(jpgname);
 	unlink(jpgname);
 	return result;
