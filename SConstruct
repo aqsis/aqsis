@@ -266,7 +266,6 @@ env.AppendUnique(LIBPATH = prependBuildDir( Split('''
 	texturing/plugins/ppm2tif
 	texturing/plugins/tga2tif
 	texturing/plugins/png2tif
-	#thirdparty/tinyxml
 ''' ) ) )
 
 # Load the sub-project SConscript files.
@@ -294,7 +293,6 @@ sub_sconsdirs_noret = prependBuildDir(Split('''
 	texturing/plugins
 	shaders
 	thirdparty/pdiff
-	#thirdparty/tinyxml
 	thirdparty/dbo_plane
 	tools
 	content/ribs/scenes/vase
