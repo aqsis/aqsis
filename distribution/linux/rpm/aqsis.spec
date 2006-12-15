@@ -9,9 +9,9 @@
 
 %define PRODUCT_NAME aqsis
 %define PRODUCT_VERSION_MAJOR 1
-%define PRODUCT_VERSION_MINOR 1
+%define PRODUCT_VERSION_MINOR 2
 %define PRODUCT_VERSION_BUILD 0
-%define PRODUCT_VERSION_RELEASE 1
+%define PRODUCT_VERSION_RELEASE 0.1.alpha1
 %define PRODUCT_WEB_SITE http://www.aqsis.org
 #%define PRODUCT_WEB_UPDATE http://download.aqsis.org/stable/source/tar
 
@@ -44,7 +44,7 @@ Summary:	Open source RenderMan-compliant 3D rendering solution
 Group:		%{PRODUCT_GROUP_MAIN}
 
 License:	GPL
-URL:		%{PRODUCT_WEB_SITE}
+URL:		http://www.aqsis.org
 Source:		%{name}-%{version}.tar.gz
 #Source:	http://download.aqsis.org/stable/source/tar/%{name}-%{version}.tar.gz
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -188,15 +188,15 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
-* Thu Dec 14 2006 Tobias Sauerwein <cgtobi@gmail.com> 1.2.0-0.1.a
-- More clean-up/optimisation.
+* Thu Dec 14 2006 Tobias Sauerwein <cgtobi@gmail.com> 1.2.0-0.1.alpha1
+- More clean-up/optimisation..
 
-* Mon Dec 11 2006 Leon Tony Atkinson <latkinson@aqsis.org> 1.2.0-1a
+* Mon Dec 11 2006 Leon Tony Atkinson <latkinson@aqsis.org> 1.2.0-0.1.alpha1
 - Added Fedora (Core 5 tested) and OpenSUSE (10.2 tested) support to SPEC file.
 - Cleaned-up/optimised SPEC file.
 
-* Fri Dec 09 2006 Leon Tony Atkinson <latkinson@aqsis.org> 1.2.0-1a
+* Fri Dec 09 2006 Leon Tony Atkinson <latkinson@aqsis.org> 1.2.0-0.1.alpha1
 - Added Mandriva (2006 tested) support to SPEC file.
 
-* Wed Nov 22 2006 Tobias Sauerwein <cgtobi@gmail.com> 1.2.0-1a
+* Wed Nov 22 2006 Tobias Sauerwein <cgtobi@gmail.com> 1.2.0-0.1.aplha1
 - Initial RPM/SPEC.
