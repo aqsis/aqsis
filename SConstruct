@@ -76,7 +76,7 @@ if tempenv.has_key('mingw') and tempenv['mingw']:
 elif sys.platform == 'win32':
 	env = Environment(options = opts, tools = ['default', 'lex', 'yacc', 'zip', 'tar'])
 else:
-	env = Environment(options = opts, tools = ['default','gcc','c++','lex', 'yacc', 'zip', 'tar'])
+	env = Environment(options = opts, tools = ['default','gcc','g++','lex', 'yacc', 'zip', 'tar'])
 
 ENV_update(env['ENV'], os.environ)
 env.Glob = Glob
