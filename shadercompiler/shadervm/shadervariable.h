@@ -41,6 +41,7 @@
 #include	"matrix.h"
 #include	"color.h"
 #include	"stats.h"
+#include	"logging.h"
 
 #include	"ishaderdata.h"
 
@@ -86,7 +87,7 @@ class CqShaderVariable : public IqShaderData
 		/** Get the name of this variable.
 		 * \return Read only reference to a CqString class.
 		 */
-		virtual const CqString&	strName()
+		virtual const CqString&	strName() const
 		{
 			return ( m_strName );
 		}
@@ -469,6 +470,7 @@ class CqShaderVariableUniform : public CqShaderVariable
 		}
 		virtual	void	GetPoint( CqVector3D& res, TqInt index = 0 ) const
 		{
+			Aqsis::log() << error << "Accessing " << Type() << " as point" << std::endl;
 			assert( TqFalse );
 		}
 		virtual	void	GetVector( CqVector3D& res, TqInt index = 0 ) const
@@ -481,6 +483,7 @@ class CqShaderVariableUniform : public CqShaderVariable
 		}
 		virtual	void	GetColor( CqColor& res, TqInt index = 0 ) const
 		{
+			Aqsis::log() << error << "Accessing \"" << Type() << " " << strName().c_str() << "\" as color" << std::endl;
 			assert( TqFalse );
 		}
 		virtual	void	GetMatrix( CqMatrix& res, TqInt index = 0 ) const
