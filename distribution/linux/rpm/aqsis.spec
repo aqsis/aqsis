@@ -37,17 +37,17 @@
 %endif
 %endif
 
-Name:           %{PRODUCT_NAME}
-Version:        %{PRODUCT_VERSION_MAJOR}.%{PRODUCT_VERSION_MINOR}.%{PRODUCT_VERSION_BUILD}
-Release:        %{PRODUCT_VERSION_RELEASE}%{?dist}
-Summary:        Open source RenderMan-compliant 3D rendering solution
-Group:          %{PRODUCT_GROUP_MAIN}
+Name:		%{PRODUCT_NAME}
+Version:	%{PRODUCT_VERSION_MAJOR}.%{PRODUCT_VERSION_MINOR}.%{PRODUCT_VERSION_BUILD}
+Release:	%{PRODUCT_VERSION_RELEASE}%{?dist}
+Summary:	Open source RenderMan-compliant 3D rendering solution
+Group:		%{PRODUCT_GROUP_MAIN}
 
-License:        GPL
-URL:            %{PRODUCT_WEB_SITE}
-Source:         %{name}-%{version}.tar.gz
-#Source:        %{PRODUCT_WEB_UPDATE}/%{name}-%{version}.tar.gz
-BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+License:	GPL
+URL:		%{PRODUCT_WEB_SITE}
+Source:		%{name}-%{version}.tar.gz
+#Source:	%{PRODUCT_WEB_UPDATE}/%{name}-%{version}.tar.gz
+BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 
 # Install XSLT processor under Mandriva
@@ -82,9 +82,9 @@ the LGPL.
 
 
 %package devel
-Requires:		%{name} = %{version}
-Summary:        Development files for the open source RenderMan-compliant Aqsis 3D rendering solution
-Group:          %{PRODUCT_GROUP_DEVELOP}
+Requires:	%{name} = %{version}
+Summary:	Development files for the open source RenderMan-compliant Aqsis 3D rendering solution
+Group:		%{PRODUCT_GROUP_DEVELOP}
 
 
 %description devel
@@ -104,9 +104,9 @@ the LGPL.
 
 
 %package data
-Requires:		%{name} = %{version}
-Summary:        Example content for the open source RenderMan-compliant Aqsis 3D rendering solution
-Group:          %{PRODUCT_GROUP_DATA}
+Requires:	%{name} = %{version}
+Summary:	Example content for the open source RenderMan-compliant Aqsis 3D rendering solution
+Group:		%{PRODUCT_GROUP_DATA}
 
 
 %description data
@@ -132,10 +132,11 @@ the LGPL.
 export CFLAGS=$RPM_OPT_FLAGS
 export CXXFLAGS=$RPM_OPT_FLAGS
 scons %{?_smp_mflags} destdir=$RPM_BUILD_ROOT \
-	install_prefix=%{_prefix} \
-	sysconfdir=%{_sysconfdir} \
-	no_rpath=true \
-	build
+		install_prefix=%{_prefix} \
+		sysconfdir=%{_sysconfdir} \
+		no_rpath=true \
+		build
+
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -149,8 +150,10 @@ touch $RPM_BUILD_ROOT/bin/mpanalyse.pyo
 %clean
 rm -rf $RPM_BUILD_ROOT
 
+
 %post   -p /sbin/ldconfig
 %postun -p /sbin/ldconfig
+
 
 %files
 %defattr(-,root,root,-)
