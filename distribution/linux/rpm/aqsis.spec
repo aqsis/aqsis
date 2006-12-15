@@ -13,7 +13,7 @@
 %define PRODUCT_VERSION_BUILD 0
 %define PRODUCT_VERSION_RELEASE 1
 %define PRODUCT_WEB_SITE http://www.aqsis.org
-%define PRODUCT_WEB_UPDATE http://download.aqsis.org/stable/source/tar
+#%define PRODUCT_WEB_UPDATE http://download.aqsis.org/stable/source/tar
 
 %if 0%{?fedora_version}
 %define PRODUCT_GROUP_DATA Applications/Multimedia
@@ -46,7 +46,7 @@ Group:		%{PRODUCT_GROUP_MAIN}
 License:	GPL
 URL:		%{PRODUCT_WEB_SITE}
 Source:		%{name}-%{version}.tar.gz
-#Source:	%{PRODUCT_WEB_UPDATE}/%{name}-%{version}.tar.gz
+#Source:	http://download.aqsis.org/stable/source/tar/%{name}-%{version}.tar.gz
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 
@@ -143,8 +143,9 @@ rm -rf $RPM_BUILD_ROOT
 export CFLAGS=$RPM_OPT_FLAGS
 export CXXFLAGS=$RPM_OPT_FLAGS
 scons install
-touch $RPM_BUILD_ROOT/bin/mpanalyse.pyc
-touch $RPM_BUILD_ROOT/bin/mpanalyse.pyo 
+chmod a+rx $RPM_BUILD_ROOT%{_bindir}/mpanalyse.py
+touch $RPM_BUILD_ROOT%{_bindir}/mpanalyse.pyc
+touch $RPM_BUILD_ROOT%{_bindir}/mpanalyse.pyo
 
 
 %clean
@@ -168,7 +169,8 @@ rm -rf $RPM_BUILD_ROOT
 %exclude %{_bindir}/mpanalyse.pyc
 %{_libdir}/%{name}/*.so
 %{_libdir}/libaqsis.so.*
-%config(noreplace) %{_sysconfdir}/aqsisrc
+%config %{_sysconfdir}/aqsisrc
+%dir %{_datadir}/%{name}
 %{_datadir}/%{name}/shaders/
 
 
@@ -181,21 +183,20 @@ rm -rf $RPM_BUILD_ROOT
 
 %files data
 %defattr(-,root,root,-)
-%{_datadir}/%{name}/content/ribs/features/layeredshaders/
-%exclude %{_datadir}/%{name}/content/ribs/features/layeredshaders/*.bat
-%{_datadir}/%{name}/content/ribs/scenes/vase/
-%exclude %{_datadir}/%{name}/content/ribs/scenes/vase/*.bat
-%{_datadir}/%{name}/content/shaders/displacement/
-%{_datadir}/%{name}/content/shaders/light/
+%{_datadir}/%{name}/content/
+%exclude %{_datadir}/%{name}/content/ribs/*/*/*.bat
 
 
 %changelog
-* Mon Dec 11 2006 Leon Tony Atkinson <latkinson@aqsis.org> 1.2.0-1
+* Thu Dec 14 2006 Tobias Sauerwein <cgtobi@gmail.com> 1.2.0-0.1.a
+- More clean-up/optimisation.
+
+* Mon Dec 11 2006 Leon Tony Atkinson <latkinson@aqsis.org> 1.2.0-1a
 - Added Fedora (Core 5 tested) and OpenSUSE (10.2 tested) support to SPEC file.
 - Cleaned-up/optimised SPEC file.
 
-* Fri Dec 09 2006 Leon Tony Atkinson <latkinson@aqsis.org> 1.2.0-1
+* Fri Dec 09 2006 Leon Tony Atkinson <latkinson@aqsis.org> 1.2.0-1a
 - Added Mandriva (2006 tested) support to SPEC file.
 
-* Wed Nov 22 2006 Tobias Sauerwein <cgtobi@gmail.com> 1.2.0-1
+* Wed Nov 22 2006 Tobias Sauerwein <cgtobi@gmail.com> 1.2.0-1a
 - Initial RPM/SPEC.
