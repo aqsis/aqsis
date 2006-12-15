@@ -45,8 +45,8 @@ Group:		%{PRODUCT_GROUP_MAIN}
 
 License:	GPL
 URL:		http://www.aqsis.org
-Source:		%{name}-%{version}.tar.gz
-#Source:	http://download.aqsis.org/stable/source/tar/%{name}-%{version}.tar.gz
+Source:		%{name}-%{version}alpha1.tar.gz
+Source:	http://download.aqsis.org/stable/source/tar/%{name}-%{version}alpha1.tar.gz
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 
