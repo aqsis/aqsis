@@ -13,7 +13,7 @@
 %define PRODUCT_VERSION_BUILD 0
 %define PRODUCT_VERSION_RELEASE 0.1.alpha1
 %define PRODUCT_WEB_SITE http://www.aqsis.org
-#%define PRODUCT_WEB_UPDATE http://download.aqsis.org/stable/source/tar
+%define PRODUCT_WEB_UPDATE http://download.aqsis.org/stable/source/tar
 
 %if 0%{?fedora_version}
 %define PRODUCT_GROUP_DATA Applications/Multimedia
@@ -46,7 +46,7 @@ Group:		%{PRODUCT_GROUP_MAIN}
 License:	GPL
 URL:		http://www.aqsis.org
 Source:		%{name}-%{version}alpha1.tar.gz
-Source:	http://download.aqsis.org/stable/source/tar/%{name}-%{version}alpha1.tar.gz
+Source:		http://download.aqsis.org/stable/source/tar/%{name}-%{version}alpha1.tar.gz
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 
