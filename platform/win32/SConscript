@@ -1,6 +1,6 @@
 import os.path
 
-Import('env')
+Import('env', 'version')
 
 if not env['mingw']:
 	# If the tiff include path isn't specified as an option, choose the default, of the 
@@ -114,3 +114,11 @@ env.Replace(XSLTPROC = env.File('#/../win32libs/GnuWin32/bin/xsltproc'))
 
 env.Replace(aqsis_libs = ['ws2_32', 'user32'])
 env.Replace(libaqsis_libs = ['ws2_32', 'user32'])
+
+def PostInstallSharedLibrary(env, dir, source):
+	basename = os.path.join('%s', '%s') %(dir, source[1])
+	env.Command('%s' %(basename), source[1], Copy('$TARGET', '$SOURCE'))
+	basename = os.path.join('%s', '%s') %(dir, source[2])
+	env.Command('%s' %(basename), source[2], Copy('$TARGET', '$SOURCE'))
+
+env.PostInstallSharedLibrary = PostInstallSharedLibrary

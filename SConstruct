@@ -158,7 +158,7 @@ env.Replace(INSTALL_DIRS = ['$BINDIR','$RENDERENGINEDIR', '$DISPLAYSDIR', '$PLUG
 
 # Setup a default version of the various platform specific functions that can be overridden in the 
 # platform specific configurations below.
-def PostInstallSharedLibrary(env, basename, source):
+def PostInstallSharedLibrary(env, dir, source):
 	pass
 env.PostInstallSharedLibrary = PostInstallSharedLibrary
 

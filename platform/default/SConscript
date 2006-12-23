@@ -151,12 +151,14 @@ def Symlink(dest, src):
 		print "Symlink from %s ==> %s" %(dest, src)
 	return Action(_symlink_func, strfunction=_symlink_str)
 
-def PostInstallSharedLibrary(env, basename, source):
+def PostInstallSharedLibrary(env, dir, source):
+	basename = os.path.join('%s', '%s') %(dir, source[0])
+	sourcename = os.path.join('%s', '%s${SHLIB_VERSION_SUFFIX}') %(dir, source[0])
 	if env.subst('$destdir') != '':
-		env.Command(os.path.join('$DESTDIR', '%s.%d' %(basename, version.major)), os.path.join('$DESTDIR', '%s' %(source)), Symlink(os.path.join('$DESTDIR', '%s.%d' %(basename, version.major)), source))
-		env.Command(os.path.join('$DESTDIR', '%s' %(basename)), os.path.join('$DESTDIR', '%s' %(source)), Symlink(os.path.join('$DESTDIR', '%s' %(basename)), source))
+		env.Command(os.path.join('$DESTDIR', '%s.%d' %(basename, version.major)), os.path.join('$DESTDIR', '%s' %(sourcename)), Symlink(os.path.join('$DESTDIR', '%s.%d' %(basename, version.major)), sourcename))
+		env.Command(os.path.join('$DESTDIR', '%s' %(basename)), os.path.join('$DESTDIR', '%s' %(sourcename)), Symlink(os.path.join('$DESTDIR', '%s' %(basename)), sourcename))
 	else:
-		env.Command('%s.%d' %(basename, version.major), source, Symlink('%s.%d' %(basename, version.major), source))
-		env.Command('%s' %(basename), source, Symlink('%s' %(basename), source))
+		env.Command('%s.%d' %(basename, version.major), sourcename, Symlink('%s.%d' %(basename, version.major), sourcename))
+		env.Command('%s' %(basename), sourcename, Symlink('%s' %(basename), sourcename))
 
 env.PostInstallSharedLibrary = PostInstallSharedLibrary
