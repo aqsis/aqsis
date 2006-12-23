@@ -1321,7 +1321,8 @@ void CqTextureMap::Open()
 		/* Second test; is it containing enough directories for us */
 		TqInt min = MIN(m_XRes, m_YRes );
 		TqInt directory = static_cast<TqInt>(fastlog2(static_cast<TqFloat> (min)));
-		bMipMap &= TIFFSetDirectory(m_pImage, directory - 1);
+		if (TIFFSetDirectory(m_pImage, directory - 1) == TqFalse)
+		   bMipMap &= TIFFSetDirectory(m_pImage, directory - 2);
 
 
 		TIFFSetDirectory(m_pImage, 0 );
