@@ -901,7 +901,9 @@ void CqShaderExecEnv::SO_solar( IqShaderData* Axis, IqShaderData* Angle, IqShade
 		{
 			if ( res )
 			{
-				CqVector3D vecAxis( 0.0f, 1.0f, 0.0f );
+				CqVector3D vecAxis;
+				Ns()->GetNormal(vecAxis,__iGrid);
+				vecAxis = -vecAxis;
 				if ( NULL != Axis )
 					Axis->GetVector( vecAxis, __iGrid );
 				L() ->SetVector( vecAxis, __iGrid );
