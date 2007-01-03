@@ -52,6 +52,9 @@ TIFFConvCmd = ""
 # AUTO keyword for the "ricalls" parameter in job descriptions
 AUTO = "_auto"
 
+# Default pdiff command
+PDiffCmd = "pdiff"
+
 ######################################################################
 
 # execute
@@ -157,6 +160,12 @@ def tiff_conv_cmd(cmd):
     """Set a new conversion command."""
     global TIFFConvCmd
     TIFFConvCmd = cmd
+
+# pdiff_cmd
+def pdiff_cmd(cmd):
+    """Set a new pdiff command name."""
+    global PDiffCmd
+    PDiffCmd = cmd
 
 # include_cfg
 def include_cfg(cfg, recursive=False):
@@ -892,15 +901,18 @@ class RegressionTest(Task):
     """Renders jobs and compares the output with reference images."""
 
     def __init__(self, renderer, reference, jobs=AllJobs, cmp_threshold=0,
-                 create_references=False, pdiffcmd="pdiff"):
+                 create_references=False, pdiffcmd=None):
         """Constructor.
         """
+	global PDiffCmd
         Task.__init__(self)
         self.renderer = renderer
         self.reference = reference
         self.jobs = self.convertJobList(jobs)
         self.cmp_threshold = cmp_threshold
         self.create_references = create_references
+	if pdiffcmd==None:
+	    pdiffcmd = PDiffCmd
         self.pdiffcmd = pdiffcmd
 
     # run
