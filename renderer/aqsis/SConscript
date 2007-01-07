@@ -4,7 +4,7 @@ aqsis_sources = Split("""
 
 aqsisenv = env.Copy();
 
-aqsisenv.AppendUnique(LIBS = ['argparse', 'aqsis'])
+aqsisenv.AppendUnique(LIBS = ['argparse', 'aqsistypes', 'aqsis', 'shadervm'])
 
 # Set any platform specific options for this target
 aqsisenv.UseTargetOptions('aqsis')

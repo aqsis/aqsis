@@ -4,7 +4,7 @@ aqsltellenv.AppendUnique(CPPPATH=['#/shadercompiler/slxargs'])
 aqsltell_sources = Split("""
 	aqsltell.cpp""")
 
-aqsltellenv.AppendUnique(LIBS = ['argparse', 'slxargs', 'shadervm', 'shaderexecenv', 'aqsistypes'])
+aqsltellenv.AppendUnique(LIBS = ['argparse', 'slxargs', 'shadervm', 'aqsistypes'])
 
 # Set any platform specific options for this target
 aqsltellenv.UseTargetOptions('aqsltell')

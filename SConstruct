@@ -241,16 +241,16 @@ def prependBuildDir(subDirs):
 
 # Add paths to librarys generated in the build dir.
 env.AppendUnique(LIBPATH = prependBuildDir( Split('''
-	rib/rib2
-	rib/rib2ri
+	#rib/rib2
+	#rib/rib2ri
 	rib/ri2rib
-	rib/rib2stream
+	#rib/rib2stream
 	aqsistypes
 	argparse
-	renderer/ddmanager
-	renderer/raytrace
+	#renderer/ddmanager
+	#renderer/raytrace
 	renderer/render
-	shadercompiler/shaderexecenv
+	#shadercompiler/shaderexecenv
 	shadercompiler/shadervm
 	shadercompiler/slparse
 	shadercompiler/codegenvm

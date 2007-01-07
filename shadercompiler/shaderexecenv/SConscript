@@ -20,8 +20,12 @@ shaderexecenvenv = env.Copy()
 # Set any platform specific options for this target
 shaderexecenvenv.UseTargetOptions('shaderexecenv')
 
-shaderexecenv = shaderexecenvenv.Library('shaderexecenv', shaderexecenv_sources)
-shaderexecenvenv.Install('$STATICLIBDIR', shaderexecenv)
+shaderexecenv_objs = [shaderexecenvenv.SharedObject(file) for file in shaderexecenv_sources]
+
+Export('shaderexecenv_objs')
+
+#shaderexecenv = shaderexecenvenv.Library('shaderexecenv', shaderexecenv_sources)
+#shaderexecenvenv.Install('$STATICLIBDIR', shaderexecenv)
 
 env.Distribute('shadercompiler/shaderexecenv', shaderexecenv_sources)
 env.Distribute('shadercompiler/shaderexecenv', shaderexecenv_headers)

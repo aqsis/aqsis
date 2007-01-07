@@ -23,7 +23,11 @@ rib2env.CXXFile(target='scanner.cpp', source='scanner.ll')
 # Set any platform specific options for this target
 rib2env.UseTargetOptions('rib2')
 
-rib2 = rib2env.Library('rib2', rib2_sources)
+rib2_objs = [rib2env.SharedObject(file) for file in rib2_sources]
+
+Export('rib2_objs')
+
+#rib2 = rib2env.Library('rib2', rib2_sources)
 #rib2env.Install('$STATICLIBDIR', rib2)
 #rib2env.Install('$INCLUDEDIR', rib2_install_headers)
 

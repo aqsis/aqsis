@@ -3,7 +3,7 @@ teqserenv = env.Copy()
 teqser_sources = Split("""
 	teqser.cpp""")
 
-teqserenv.AppendUnique(LIBS = ['argparse', 'aqsis'])
+teqserenv.AppendUnique(LIBS = ['argparse', 'shadervm', 'aqsis', 'aqsistypes'])
 
 # Set any platform specific options for this target
 teqserenv.UseTargetOptions('teqser')

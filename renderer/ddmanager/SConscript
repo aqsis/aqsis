@@ -13,7 +13,11 @@ ddmanagerenv = env.Copy()
 # Set any platform specific options for this target
 ddmanagerenv.UseTargetOptions('ddmanager')
 
-ddmanager = ddmanagerenv.Library('ddmanager', ddmanager_sources)
+ddmanager_objs = [ddmanagerenv.SharedObject(file) for file in ddmanager_sources]
+
+Export('ddmanager_objs')
+
+#ddmanager = ddmanagerenv.Library('ddmanager', ddmanager_sources)
 #ddmanagerenv.Install('$STATICLIBDIR', ddmanager)
 ddmanagerenv.Install('$INCLUDEDIR', "ndspy.h")
 

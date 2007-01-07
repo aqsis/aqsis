@@ -18,8 +18,10 @@ slpp_headers = Split("""
 # Set any platform specific options for this target
 slppenv.UseTargetOptions('slpplib')
 
-slpplib = slppenv.Library('slpp', slpp_sources)
-#slppenv.Install('$STATICLIBDIR', slpplib)
+slpp_objs = [slppenv.Object(file) for file in slpp_sources]
+
+Export('slpp_objs')
+
 # Note: Need to work out how to do an executable build of slpp as well at some point.
 # There are some issues with duplicate object files.
 

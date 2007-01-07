@@ -14,8 +14,9 @@ codegenvmenv = env.Copy()
 # Set any platform specific options for this target
 codegenvmenv.UseTargetOptions('codegenvm')
 
-codegenvm = codegenvmenv.Library('codegenvm', codegenvm_sources)
-#codegenvmenv.Install('$STATICLIBDIR', codegenvm)
+codegenvm_objs = [codegenvmenv.Object(file) for file in codegenvm_sources]
+
+Export('codegenvm_objs')
 
 env.Distribute('shadercompiler/codegenvm', codegenvm_sources)
 env.Distribute('shadercompiler/codegenvm', codegenvm_headers)

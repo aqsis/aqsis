@@ -1,3 +1,4 @@
+import os
 Import('env')
 
 # Temporary fix, because globbing does not work with scons 0.96.92
@@ -24,9 +25,8 @@ header_sources = Split("""
 	""")
 
 for shader in shader_sources:
-	compiled_shader = env.Shader(shader)
 	env.Install('$SHADERDIR', shader)
-	env.Install('$SHADERDIR', compiled_shader)
+	compiled_shader = env.Shader(os.path.join('$SHADERDIR', shader))
 
 env.Install('$SHADERDIR', header_sources)
 

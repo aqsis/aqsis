@@ -10,7 +10,11 @@ raytraceenv = env.Copy()
 # Set any platform specific options for this target
 raytraceenv.UseTargetOptions('raytrace')
 
-raytrace = raytraceenv.Library('raytrace', raytrace_sources)
+raytrace_objs = [raytraceenv.SharedObject(file) for file in raytrace_sources]
+
+Export('raytrace_objs')
+
+#raytrace = raytraceenv.Library('raytrace', raytrace_sources)
 #raytraceenv.Install('$STATICLIBDIR', raytrace)
 
 env.Distribute('renderer/raytrace', raytrace_sources)

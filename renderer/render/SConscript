@@ -87,8 +87,9 @@ if env.has_key('libaqsis_add_sources'):
 	aqsisdll_sources = aqsisdll_sources + ['$libaqsis_add_sources']
 
 
-aqsisenv.Replace(LIBS = ['ddmanager', 'raytrace', 'rib2', 'rib2ri', 'shaderexecenv', 'shadervm', 'aqsistypes', '$tiff_lib', '$z_lib'])
-aqsisdll = aqsisenv.SharedLibrary('aqsis', aqsisdll_sources)
+aqsisenv.Replace(LIBS = ['shadervm', 'aqsistypes', '$tiff_lib', '$z_lib'])
+Import('ddmanager_objs raytrace_objs rib2_objs rib2ri_objs')
+aqsisdll = aqsisenv.SharedLibrary('aqsis', [aqsisdll_sources, ddmanager_objs, raytrace_objs, rib2_objs, rib2ri_objs])
 
 aqsisenv.UseTargetOptions('libaqsis')
 

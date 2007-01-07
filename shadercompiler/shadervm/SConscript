@@ -1,3 +1,4 @@
+import os
 Import('env')
 
 shadervm_sources = Split("""
@@ -19,8 +20,15 @@ shadervmenv = env.Copy()
 # Set any platform specific options for this target
 shadervmenv.UseTargetOptions('shadervm')
 
-shadervm = shadervmenv.Library('shadervm', shadervm_sources)
-shadervmenv.Install('$STATICLIBDIR', shadervm)
+shadervmenv.Replace(LIBS = ['aqsistypes'])
+
+Import('shaderexecenv_objs')
+
+shadervm = shadervmenv.SharedLibrary('shadervm', [shadervm_sources, shaderexecenv_objs])
+
+shadervmenv.InstallAs([os.path.join('${RENDERENGINEDIR}', '%s${SHLIB_VERSION_SUFFIX}') %(shadervm[0])], [shadervm[0]])
+
+shadervmenv.PostInstallSharedLibrary(shadervmenv, '${RENDERENGINEDIR}', shadervm)
 
 env.Distribute('shadercompiler/shadervm', shadervm_sources)
 env.Distribute('shadercompiler/shadervm', shadervm_headers)

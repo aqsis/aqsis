@@ -30,8 +30,10 @@ if slparseenv['debug']:
 
 slparseenv.CXXFile(target='parser.cpp', source='parser.yy')
 slparseenv.CXXFile(target='scanner.cpp', source='scanner.ll')
-slparse = slparseenv.Library('slparse', slparse_sources)
-#slparseenv.Install('$STATICLIBDIR', slparse)
+
+slparse_objs = [slparseenv.Object(file) for file in slparse_sources]
+
+Export('slparse_objs')
 
 env.Distribute('shadercompiler/slparse', slparse_sources)
 env.Distribute('shadercompiler/slparse', slparse_headers)

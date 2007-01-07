@@ -1,3 +1,4 @@
+import os
 Import('env')
 ri2rib_sources = Split("""
 	ascii.cpp
@@ -29,8 +30,12 @@ ri2ribenv = env.Copy()
 # Set any platform specific options for this target
 ri2ribenv.UseTargetOptions('ri2rib')
 
-ri2rib = ri2ribenv.Library('ri2rib', ri2rib_sources)
-ri2ribenv.Install('$STATICLIBDIR', ri2rib)
+ri2ribenv.Replace(LIBS = ['aqsistypes', '$z_lib'])
+
+ri2rib = ri2ribenv.SharedLibrary('ri2rib', ri2rib_sources)
+ri2ribenv.InstallAs([os.path.join('${RENDERENGINEDIR}', '%s${SHLIB_VERSION_SUFFIX}') %(ri2rib[0])], [ri2rib[0]])
+
+ri2ribenv.PostInstallSharedLibrary(ri2ribenv, '${RENDERENGINEDIR}', ri2rib)
 
 env.Distribute('rib/ri2rib', ri2rib_sources)
 env.Distribute('rib/ri2rib', ri2rib_headers)
