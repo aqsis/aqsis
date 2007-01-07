@@ -377,7 +377,7 @@ SqOpCodeTrans CqShaderVM::m_TransTable[] =
         {"cpnoise3", 0, &CqShaderVM::SO_cpnoise3, 0, {0}},
         {"cpnoise4", 0, &CqShaderVM::SO_cpnoise4, 0, {0}},
         {"ppnoise1", 0, &CqShaderVM::SO_ppnoise1, 0, {0}},
-        {"pnoise2", 0, &CqShaderVM::SO_ppnoise2, 0, {0}},
+        {"ppnoise2", 0, &CqShaderVM::SO_ppnoise2, 0, {0}},
         {"ppnoise3", 0, &CqShaderVM::SO_ppnoise3, 0, {0}},
         {"ppnoise4", 0, &CqShaderVM::SO_ppnoise4, 0, {0}},
 
