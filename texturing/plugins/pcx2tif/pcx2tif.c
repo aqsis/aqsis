@@ -148,7 +148,7 @@ static char *pcx_open( FILE *pcxfile, char *tiffname )
 	 * should really validate header here to make sure it is 256 RLE colour
 	 * mapped !
 	 */
-#ifndef AQSIS_SYSTEM_WIN32
+#ifndef WIN32
 	/* swap the short on Unix */
 	pcx_hdr.X1 = swap2( pcx_hdr.X1 );
 	pcx_hdr.X2 = swap2( pcx_hdr.X2 );
