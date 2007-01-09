@@ -1,0 +1,33 @@
+DESCRIPTION	"Aqsis Shader VM"
+EXPORTS
+	??0CqShaderExecEnv@Aqsis@@QAE@V?$shared_ptr@UIqRenderer@Aqsis@@@boost@@@Z
+	?ShutdownShaderEngine@CqShaderVM@Aqsis@@SAXXZ
+	?parseShadeOpTableEntry@CqDSORepository@Aqsis@@MAEPAUSqDSOExternalCall@2@PAXPAUSqShadeOp@@@Z
+	?getShadeOpMethods@CqDSORepository@Aqsis@@MAEPAV?$list@PAUSqDSOExternalCall@Aqsis@@V?$allocator@PAUSqDSOExternalCall@Aqsis@@@std@@@std@@PAVCqString@2@@Z
+	?SetDSOPath@CqDSORepository@Aqsis@@UAEXPBD@Z
+	?SetType@CqShaderVM@Aqsis@@UAEXW4EqShaderType@2@@Z
+	?DefaultSurface@CqShaderVM@Aqsis@@UAEXXZ
+	?DeleteTemporaryStorage@CqShaderVM@Aqsis@@UAEXPAUIqShaderData@2@@Z
+	?CreateTemporaryStorage@CqShaderVM@Aqsis@@UAEPAUIqShaderData@2@W4EqVariableType@2@W4EqVariableClass@2@@Z
+	?CreateVariableArray@CqShaderVM@Aqsis@@UAEPAUIqShaderData@2@W4EqVariableType@2@W4EqVariableClass@2@ABVCqString@2@H_N3@Z
+	?CreateVariable@CqShaderVM@Aqsis@@UAEPAUIqShaderData@2@W4EqVariableType@2@W4EqVariableClass@2@ABVCqString@2@_N3@Z
+	?CreateVariable@CqShaderVM@Aqsis@@UAEPAUIqShaderData@2@W4EqVariableType@2@W4EqVariableClass@2@ABVCqString@2@_N3@Z
+	?GetVariableValue@CqShaderVM@Aqsis@@UAE_NPBDPAUIqShaderData@2@@Z
+	?FindArgument@CqShaderVM@Aqsis@@UAEPAUIqShaderData@2@ABVCqString@2@@Z
+	?SetArgument@CqShaderVM@Aqsis@@UAEXABVCqString@2@W4EqVariableType@2@0PAX@Z
+	?SetArgument@CqShaderVM@Aqsis@@UAEXPAVCqParameter@2@PAUIqSurface@2@@Z
+	?InitialiseParameters@CqShaderVM@Aqsis@@UAEXXZ
+	?PrepareShaderForUse@CqShaderVM@Aqsis@@UAEXXZ
+	?m_samples@CqShaderStack@Aqsis@@1IA
+	?m_maxsamples@CqShaderStack@Aqsis@@1IA
+	?Statistics@CqShaderStack@Aqsis@@SAXXZ
+	?Execute@CqShaderVM@Aqsis@@QAEXABV?$shared_ptr@UIqShaderExecEnv@Aqsis@@@boost@@@Z
+	?gDefLightUses@Aqsis@@3HA
+	?ExecuteInit@CqShaderVM@Aqsis@@QAEXXZ
+	??4CqShaderVM@Aqsis@@QAEAAV01@ABV01@@Z
+	?LoadProgram@CqShaderVM@Aqsis@@QAEXPAV?$basic_istream@DU?$char_traits@D@std@@@std@@@Z
+	?GetShaderVarAt@CqShaderVM@Aqsis@@QAEPAUIqShaderData@2@H@Z
+	?GetShaderVarCount@CqShaderVM@Aqsis@@QAEHXZ
+	?gVariableTokens@Aqsis@@3PAKA
+	?gDefUses@Aqsis@@3HA
+	?Initialise@CqShaderVM@Aqsis@@UAEXHHHABV?$shared_ptr@UIqShaderExecEnv@Aqsis@@@boost@@@Z

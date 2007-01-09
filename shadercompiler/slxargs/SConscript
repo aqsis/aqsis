@@ -16,6 +16,9 @@ slxargsenv = env.Copy()
 # Set any platform specific options for this target
 slxargsenv.UseTargetOptions('slxargs')
 
+if env.has_key('slxargs_add_sources'):
+	slxargs_sources = slxargs_sources + ['$slxargs_add_sources']
+
 slxargsenv.Replace(LIBS = ['aqsistypes', 'shadervm'])
 slxargs = slxargsenv.SharedLibrary('slxargs', slxargs_sources)
 slxargsenv.InstallAs([os.path.join('${RENDERENGINEDIR}', '%s${SHLIB_VERSION_SUFFIX}') %(slxargs[0])], [slxargs[0]])

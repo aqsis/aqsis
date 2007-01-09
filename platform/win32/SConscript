@@ -55,7 +55,12 @@ if not env['mingw']:
 	env.AppendUnique(CPPPATH = ['$exr_include_path/Iex', '$exr_include_path/IlmImf', '$exr_include_path/Imath'])
 
 	env.Replace(libaqsis_add_sources = ['libaqsis.def'])
+	env.Replace(aqsistypes_add_sources = ['aqsistypes.def'])
+	env.Replace(shadervm_add_sources = ['shadervm.def'])
+	env.Replace(slxargs_add_sources = ['slxargs.def'])
+	env.Replace(ri2rib_add_sources = ['ri2rib.def'])
 else:
+	env.AppendUnique(SHLINKFLAGS=['-Wl,-enable-auto-import', '-Wl,-enable-runtime-pseudo-reloc'])
 	if env['debug']:
 		env.AppendUnique(CCFLAGS=['-g', '-O0', '-fno-common'])
 	else:
@@ -98,9 +103,6 @@ else:
 
 	env.Replace(slparse_ccflags = ['-O0'])
 	env.AppendUnique(CPPDEFINES=['NO_SYSLOG', 'WIN32', 'PLUGINS', ('_qBUILDING', 'CORE'), ('CORE', '1')])
-	env.Replace(aqsis_cppdefines = ['AQSIS_STATIC_LINK'])
-	env.Replace(rib2ri_cppdefines = ['AQSIS_STATIC_LINK'])
-	env.Replace(libaqsis_cppdefines = ['AQSIS_STATIC_LINK'])
 
 
 # Add the GnuWin32 bin folder to the PATH, so that bison 2.1 can find m4.exe

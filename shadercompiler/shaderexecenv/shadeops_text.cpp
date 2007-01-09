@@ -39,8 +39,6 @@
 
 START_NAMESPACE(    Aqsis )
 
-IqRenderer* QGetRenderContextI();
-
 //----------------------------------------------------------------------
 // SO_sprintf
 // Helper function to process a string inserting variable, used in printf and format.
@@ -144,7 +142,7 @@ void	CqShaderExecEnv::SO_printf( IqShaderData* str, IqShader* pShader, int cPara
 	TqBool __fVarying;
 	TqUint __iGrid;
 
-	if ( NULL == QGetRenderContextI() )
+	if ( !getRenderContext() )
 		return ;
 
 	__fVarying=(str)->Class()==class_varying;
@@ -163,7 +161,7 @@ void	CqShaderExecEnv::SO_printf( IqShaderData* str, IqShader* pShader, int cPara
 			CqString _aq_str;
 			(str)->GetString(_aq_str,__iGrid);
 			CqString strA = SO_sprintf( _aq_str.c_str(), cParams, apParams, __iGrid );
-			QGetRenderContextI() ->PrintString( strA.c_str() );
+			getRenderContext() ->PrintString( strA.c_str() );
 		}
 	}
 	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);

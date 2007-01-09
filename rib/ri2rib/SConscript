@@ -30,6 +30,9 @@ ri2ribenv = env.Copy()
 # Set any platform specific options for this target
 ri2ribenv.UseTargetOptions('ri2rib')
 
+if env.has_key('ri2rib_add_sources'):
+	ri2rib_sources = ri2rib_sources + ['$ri2rib_add_sources']
+
 ri2ribenv.Replace(LIBS = ['aqsistypes', '$z_lib'])
 
 ri2rib = ri2ribenv.SharedLibrary('ri2rib', ri2rib_sources)

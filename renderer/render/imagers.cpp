@@ -40,7 +40,7 @@ START_NAMESPACE( Aqsis )
 CqImagersource::CqImagersource( const boost::shared_ptr<IqShader>& pShader, TqBool fActive ) :
 		m_pShader( pShader ),
 		m_pAttributes( NULL ),
-		m_pShaderExecEnv( new CqShaderExecEnv )
+		m_pShaderExecEnv( new CqShaderExecEnv( boost::shared_ptr<IqRenderer>(QGetRenderContextI())) )
 {
 
 	m_pAttributes = const_cast<CqAttributes*>( QGetRenderContext() ->pattrCurrent() );

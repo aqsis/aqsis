@@ -22,6 +22,9 @@ shadervmenv.UseTargetOptions('shadervm')
 
 shadervmenv.Replace(LIBS = ['aqsistypes'])
 
+if env.has_key('shadervm_add_sources'):
+	shadervm_sources = shadervm_sources + ['$shadervm_add_sources']
+
 Import('shaderexecenv_objs')
 
 shadervm = shadervmenv.SharedLibrary('shadervm', [shadervm_sources, shaderexecenv_objs])

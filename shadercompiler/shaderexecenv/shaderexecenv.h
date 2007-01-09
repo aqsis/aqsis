@@ -43,6 +43,7 @@
 #include	"ishaderdata.h"
 #include	"ishader.h"
 #include	"ishaderexecenv.h"
+#include	"irenderer.h"
 #include	"matrix.h"
 
 #include	"iattributes.h"
@@ -127,7 +128,7 @@ extern TqInt gDefLightUses;
 class CqShaderExecEnv : public IqShaderExecEnv
 {
 	public:
-		CqShaderExecEnv();
+		CqShaderExecEnv(boost::shared_ptr<IqRenderer> pRenderContext);
 		virtual	~CqShaderExecEnv();
 
 #ifdef _DEBUG
@@ -322,6 +323,10 @@ class CqShaderExecEnv : public IqShaderExecEnv
 		{
 			return ( m_apVariables[ EnvVars_Ns ] );
 		}
+		virtual boost::shared_ptr<IqRenderer> getRenderContext() const
+		{
+			return ( m_pRenderContext );
+		}
 
 	private:
 		/** Internal function to extract additional named filter parameters from an array of stack entries.
@@ -386,6 +391,7 @@ class CqShaderExecEnv : public IqShaderExecEnv
 		CqBitVector	m_CurrentState;			///< SIMD execution state bit vector accumulator.
 		CqBitVector	m_RunningState;			///< SIMD running execution state bit vector.
 		std::stack<CqBitVector>	m_stkState;				///< Stack of execution state bit vectors.
+		boost::shared_ptr<IqRenderer>	m_pRenderContext;
 		TqInt	m_LocalIndex;			///< Local cached variable index to speed repeated access to the same local variable.
 		IqSurface*	m_pCurrentSurface;	///< Pointer to the surface being shaded.
 

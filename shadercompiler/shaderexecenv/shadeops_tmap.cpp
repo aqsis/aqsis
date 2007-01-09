@@ -40,8 +40,6 @@
 
 START_NAMESPACE(    Aqsis )
 
-IqRenderer* QGetRenderContextI();
-
 
 //----------------------------------------------------------------------
 // texture(S)
@@ -51,7 +49,7 @@ void CqShaderExecEnv::SO_ftexture1( IqShaderData* name, IqShaderData* channel, I
 	TqBool __fVarying;
 	TqUint __iGrid;
 
-	if ( NULL == QGetRenderContextI() )
+	if ( !getRenderContext() )
 		return ;
 
 	std::map<std::string, IqShaderData*> paramMap;
@@ -66,7 +64,7 @@ void CqShaderExecEnv::SO_ftexture1( IqShaderData* name, IqShaderData* channel, I
 	(name)->GetString(_aq_name,__iGrid);
 	TqFloat _aq_channel;
 	(channel)->GetFloat(_aq_channel,__iGrid);
-	IqTextureMap* pTMap = QGetRenderContextI() ->GetTextureMap( _aq_name );
+	IqTextureMap* pTMap = getRenderContext() ->GetTextureMap( _aq_name );
 	TqFloat fdu = 0.0f, fdv = 0.0f;
 	if ( m_pAttributes )
 	{
@@ -146,7 +144,7 @@ void CqShaderExecEnv::SO_ftexture2( IqShaderData* name, IqShaderData* channel, I
 	TqBool __fVarying;
 	TqUint __iGrid;
 
-	if ( NULL == QGetRenderContextI() )
+	if ( !getRenderContext() )
 		return ;
 
 	std::map<std::string, IqShaderData*> paramMap;
@@ -161,7 +159,7 @@ void CqShaderExecEnv::SO_ftexture2( IqShaderData* name, IqShaderData* channel, I
 	(name)->GetString(_aq_name,__iGrid);
 	TqFloat _aq_channel;
 	(channel)->GetFloat(_aq_channel,__iGrid);
-	IqTextureMap* pTMap = QGetRenderContextI() ->GetTextureMap( _aq_name );
+	IqTextureMap* pTMap = getRenderContext() ->GetTextureMap( _aq_name );
 	TqFloat fdu = 0.0f, fdv = 0.0f;
 	if ( m_pAttributes )
 	{
@@ -241,7 +239,7 @@ void CqShaderExecEnv::SO_ftexture3( IqShaderData* name, IqShaderData* channel, I
 	TqBool __fVarying;
 	TqUint __iGrid;
 
-	if ( NULL == QGetRenderContextI() )
+	if ( !getRenderContext() )
 		return ;
 
 	std::map<std::string, IqShaderData*> paramMap;
@@ -256,7 +254,7 @@ void CqShaderExecEnv::SO_ftexture3( IqShaderData* name, IqShaderData* channel, I
 	(name)->GetString(_aq_name,__iGrid);
 	TqFloat _aq_channel;
 	(channel)->GetFloat(_aq_channel,__iGrid);
-	IqTextureMap* pTMap = QGetRenderContextI() ->GetTextureMap( _aq_name );
+	IqTextureMap* pTMap = getRenderContext() ->GetTextureMap( _aq_name );
 
 
 
@@ -325,7 +323,7 @@ void CqShaderExecEnv::SO_ctexture1( IqShaderData* name, IqShaderData* channel, I
 	TqBool __fVarying;
 	TqUint __iGrid;
 
-	if ( NULL == QGetRenderContextI() )
+	if ( !getRenderContext() )
 		return ;
 
 	std::map<std::string, IqShaderData*> paramMap;
@@ -340,7 +338,7 @@ void CqShaderExecEnv::SO_ctexture1( IqShaderData* name, IqShaderData* channel, I
 	(name)->GetString(_aq_name,__iGrid);
 	TqFloat _aq_channel;
 	(channel)->GetFloat(_aq_channel,__iGrid);
-	IqTextureMap* pTMap = QGetRenderContextI() ->GetTextureMap( _aq_name );
+	IqTextureMap* pTMap = getRenderContext() ->GetTextureMap( _aq_name );
 	TqFloat fdu = 0.0f, fdv = 0.0f;
 	if ( m_pAttributes )
 	{
@@ -422,7 +420,7 @@ void CqShaderExecEnv::SO_ctexture2( IqShaderData* name, IqShaderData* channel, I
 	TqBool __fVarying;
 	TqUint __iGrid;
 
-	if ( NULL == QGetRenderContextI() )
+	if ( !getRenderContext() )
 		return ;
 
 	std::map<std::string, IqShaderData*> paramMap;
@@ -437,7 +435,7 @@ void CqShaderExecEnv::SO_ctexture2( IqShaderData* name, IqShaderData* channel, I
 	(name)->GetString(_aq_name,__iGrid);
 	TqFloat _aq_channel;
 	(channel)->GetFloat(_aq_channel,__iGrid);
-	IqTextureMap* pTMap = QGetRenderContextI() ->GetTextureMap( _aq_name );
+	IqTextureMap* pTMap = getRenderContext() ->GetTextureMap( _aq_name );
 	TqFloat fdu = 0.0f, fdv = 0.0f;
 	if ( m_pAttributes )
 	{
@@ -519,7 +517,7 @@ void CqShaderExecEnv::SO_ctexture3( IqShaderData* name, IqShaderData* channel, I
 	TqBool __fVarying;
 	TqUint __iGrid;
 
-	if ( NULL == QGetRenderContextI() )
+	if ( !getRenderContext() )
 		return ;
 
 	std::map<std::string, IqShaderData*> paramMap;
@@ -534,7 +532,7 @@ void CqShaderExecEnv::SO_ctexture3( IqShaderData* name, IqShaderData* channel, I
 	(name)->GetString(_aq_name,__iGrid);
 	TqFloat _aq_channel;
 	(channel)->GetFloat(_aq_channel,__iGrid);
-	IqTextureMap* pTMap = QGetRenderContextI() ->GetTextureMap( _aq_name );
+	IqTextureMap* pTMap = getRenderContext() ->GetTextureMap( _aq_name );
 
 
 
@@ -605,7 +603,7 @@ void CqShaderExecEnv::SO_fenvironment2( IqShaderData* name, IqShaderData* channe
 	TqBool __fVarying;
 	TqUint __iGrid;
 
-	if ( NULL == QGetRenderContextI() )
+	if ( !getRenderContext() )
 		return ;
 
 	std::map<std::string, IqShaderData*> paramMap;
@@ -620,12 +618,12 @@ void CqShaderExecEnv::SO_fenvironment2( IqShaderData* name, IqShaderData* channe
 	(name)->GetString(_aq_name,__iGrid);
 	TqFloat _aq_channel;
 	(channel)->GetFloat(_aq_channel,__iGrid);
-	IqTextureMap* pTMap = QGetRenderContextI() ->GetEnvironmentMap( _aq_name );
+	IqTextureMap* pTMap = getRenderContext() ->GetEnvironmentMap( _aq_name );
 
 	// Try with LatLong map file
 	if ( pTMap == 0 )
 	{
-		pTMap = QGetRenderContextI() ->GetLatLongMap( _aq_name );
+		pTMap = getRenderContext() ->GetLatLongMap( _aq_name );
 	}
 	TqFloat fdu = 0.0f, fdv = 0.0f;
 	if ( m_pAttributes )
@@ -701,7 +699,7 @@ void CqShaderExecEnv::SO_fenvironment3( IqShaderData* name, IqShaderData* channe
 	TqBool __fVarying;
 	TqUint __iGrid;
 
-	if ( NULL == QGetRenderContextI() )
+	if ( !getRenderContext() )
 		return ;
 
 	std::map<std::string, IqShaderData*> paramMap;
@@ -716,11 +714,11 @@ void CqShaderExecEnv::SO_fenvironment3( IqShaderData* name, IqShaderData* channe
 	(name)->GetString(_aq_name,__iGrid);
 	TqFloat _aq_channel;
 	(channel)->GetFloat(_aq_channel,__iGrid);
-	IqTextureMap* pTMap = QGetRenderContextI() ->GetEnvironmentMap( _aq_name );
+	IqTextureMap* pTMap = getRenderContext() ->GetEnvironmentMap( _aq_name );
 	// Try with LatLong map file
 	if ( pTMap == 0 )
 	{
-		pTMap = QGetRenderContextI() ->GetLatLongMap( _aq_name );
+		pTMap = getRenderContext() ->GetLatLongMap( _aq_name );
 	}
 
 
@@ -781,7 +779,7 @@ void CqShaderExecEnv::SO_cenvironment2( IqShaderData* name, IqShaderData* channe
 	TqBool __fVarying;
 	TqUint __iGrid;
 
-	if ( NULL == QGetRenderContextI() )
+	if ( !getRenderContext() )
 		return ;
 
 	std::map<std::string, IqShaderData*> paramMap;
@@ -796,11 +794,11 @@ void CqShaderExecEnv::SO_cenvironment2( IqShaderData* name, IqShaderData* channe
 	(name)->GetString(_aq_name,__iGrid);
 	TqFloat _aq_channel;
 	(channel)->GetFloat(_aq_channel,__iGrid);
-	IqTextureMap* pTMap = QGetRenderContextI() ->GetEnvironmentMap( _aq_name );
+	IqTextureMap* pTMap = getRenderContext() ->GetEnvironmentMap( _aq_name );
 	// Try with LatLong map file
 	if ( pTMap == 0 )
 	{
-		pTMap = QGetRenderContextI() ->GetLatLongMap( _aq_name );
+		pTMap = getRenderContext() ->GetLatLongMap( _aq_name );
 	}
 	TqFloat fdu = 0.0f, fdv = 0.0f;
 	if ( m_pAttributes )
@@ -877,7 +875,7 @@ void CqShaderExecEnv::SO_cenvironment3( IqShaderData* name, IqShaderData* channe
 	TqBool __fVarying;
 	TqUint __iGrid;
 
-	if ( NULL == QGetRenderContextI() )
+	if ( !getRenderContext() )
 		return ;
 
 	std::map<std::string, IqShaderData*> paramMap;
@@ -892,11 +890,11 @@ void CqShaderExecEnv::SO_cenvironment3( IqShaderData* name, IqShaderData* channe
 	(name)->GetString(_aq_name,__iGrid);
 	TqFloat _aq_channel;
 	(channel)->GetFloat(_aq_channel,__iGrid);
-	IqTextureMap* pTMap = QGetRenderContextI() ->GetEnvironmentMap( _aq_name );
+	IqTextureMap* pTMap = getRenderContext() ->GetEnvironmentMap( _aq_name );
 	// Try with LatLong map file
 	if ( pTMap == 0 )
 	{
-		pTMap = QGetRenderContextI() ->GetLatLongMap( _aq_name );
+		pTMap = getRenderContext() ->GetLatLongMap( _aq_name );
 	}
 	__iGrid = 0;
 
@@ -1018,7 +1016,7 @@ void CqShaderExecEnv::SO_shadow( IqShaderData* name, IqShaderData* channel, IqSh
 	TqBool __fVarying;
 	TqUint __iGrid;
 
-	if ( NULL == QGetRenderContextI() )
+	if ( !getRenderContext() )
 		return ;
 
 	std::map<std::string, IqShaderData*> paramMap;
@@ -1029,7 +1027,7 @@ void CqShaderExecEnv::SO_shadow( IqShaderData* name, IqShaderData* channel, IqSh
 	(name)->GetString(_aq_name,__iGrid);
 	TqFloat _aq_channel;
 	(channel)->GetFloat(_aq_channel,__iGrid);
-	IqTextureMap* pMap = QGetRenderContextI() ->GetShadowMap( _aq_name );
+	IqTextureMap* pMap = getRenderContext() ->GetShadowMap( _aq_name );
 
 
 	__fVarying = TqTrue;
@@ -1079,7 +1077,7 @@ void CqShaderExecEnv::SO_shadow1( IqShaderData* name, IqShaderData* channel, IqS
 	TqBool __fVarying;
 	TqUint __iGrid;
 
-	if ( NULL == QGetRenderContextI() )
+	if ( !getRenderContext() )
 		return ;
 
 	std::map<std::string, IqShaderData*> paramMap;
@@ -1090,7 +1088,7 @@ void CqShaderExecEnv::SO_shadow1( IqShaderData* name, IqShaderData* channel, IqS
 	(name)->GetString(_aq_name,__iGrid);
 	TqFloat _aq_channel;
 	(channel)->GetFloat(_aq_channel,__iGrid);
-	IqTextureMap* pMap = QGetRenderContextI() ->GetShadowMap( _aq_name );
+	IqTextureMap* pMap = getRenderContext() ->GetShadowMap( _aq_name );
 
 
 	__fVarying = TqTrue;
@@ -1463,7 +1461,7 @@ void CqShaderExecEnv::SO_occlusion( IqShaderData* occlmap, IqShaderData* channel
 	TqBool __fVarying;
 	TqUint __iGrid;
 
-	if ( NULL == QGetRenderContextI() )
+	if ( !getRenderContext() )
 		return ;
 
 	std::map<std::string, IqShaderData*> paramMap;
@@ -1476,7 +1474,7 @@ void CqShaderExecEnv::SO_occlusion( IqShaderData* occlmap, IqShaderData* channel
 	(N)->GetNormal(_aq_N,__iGrid);
 	TqFloat _aq_samples;
 	(samples)->GetFloat(_aq_samples,__iGrid);
-	IqTextureMap* pMap = QGetRenderContextI() ->GetShadowMap( _aq_occlmap );
+	IqTextureMap* pMap = getRenderContext() ->GetShadowMap( _aq_occlmap );
 
 	CqVector3D L(0,0,-1);
 
@@ -1557,7 +1555,7 @@ void CqShaderExecEnv::SO_textureinfo( IqShaderData* name, IqShaderData* dataname
 {
 	TqUint __iGrid;
 
-	if ( NULL == QGetRenderContextI() )
+	if ( !getRenderContext() )
 		return ;
 
 	TqFloat Ret = 0.0f;
@@ -1574,7 +1572,7 @@ void CqShaderExecEnv::SO_textureinfo( IqShaderData* name, IqShaderData* dataname
 
 	if ( !pMap && strstr( _aq_name.c_str(), ".tif" ) )
 	{
-		pTMap = QGetRenderContextI() ->GetTextureMap( _aq_name );
+		pTMap = getRenderContext() ->GetTextureMap( _aq_name );
 		if ( pTMap && ( pTMap->Type() == MapType_Texture ) )
 		{
 			pMap = pTMap;
@@ -1587,7 +1585,7 @@ void CqShaderExecEnv::SO_textureinfo( IqShaderData* name, IqShaderData* dataname
 	}
 	if ( !pMap )
 	{
-		pSMap = QGetRenderContextI() ->GetShadowMap( _aq_name );
+		pSMap = getRenderContext() ->GetShadowMap( _aq_name );
 		if ( pSMap && ( pSMap->Type() == MapType_Shadow ) )
 		{
 			pMap = pSMap;
@@ -1601,7 +1599,7 @@ void CqShaderExecEnv::SO_textureinfo( IqShaderData* name, IqShaderData* dataname
 
 	if ( !pMap )
 	{
-		pEMap = QGetRenderContextI() ->GetEnvironmentMap( _aq_name );
+		pEMap = getRenderContext() ->GetEnvironmentMap( _aq_name );
 		if ( pEMap && ( pEMap->Type() == MapType_Environment ) )
 		{
 			pMap = pEMap;
@@ -1615,7 +1613,7 @@ void CqShaderExecEnv::SO_textureinfo( IqShaderData* name, IqShaderData* dataname
 
 	if ( !pMap )
 	{
-		pTMap = QGetRenderContextI() ->GetTextureMap( _aq_name );
+		pTMap = getRenderContext() ->GetTextureMap( _aq_name );
 		if ( pTMap && ( pTMap->Type() == MapType_Texture ) )
 		{
 			pMap = pTMap;

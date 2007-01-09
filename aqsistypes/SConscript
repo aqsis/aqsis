@@ -79,6 +79,9 @@ aqsistypesenv = env.Copy()
 # Set any platform specific options for this target
 aqsistypesenv.UseTargetOptions('aqsistypes')
 
+if env.has_key('aqsistypes_add_sources'):
+	aqsistypes_sources = aqsistypes_sources + ['$aqsistypes_add_sources']
+
 aqsistypes = aqsistypesenv.SharedLibrary('aqsistypes', aqsistypes_sources)
 #aqsistypesenv.Install('$RENDERENGINEDIR', aqsistypes)
 aqsistypesenv.Install('$INCLUDEDIR',aqsistypes_install_headers)

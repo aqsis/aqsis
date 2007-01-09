@@ -798,7 +798,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 	EqSegment	Segment = Seg_Data;
 	std::vector<UsProgramElement>*	pProgramArea = NULL;
 	std::vector<TqInt>	aLabels;
-	boost::shared_ptr<CqShaderExecEnv> StdEnv(new CqShaderExecEnv);
+	boost::shared_ptr<CqShaderExecEnv> StdEnv(new CqShaderExecEnv(m_pEnv->getRenderContext()));
 	TqInt	array_count = 0;
 	TqUlong  htoken, i;
 	/*
@@ -1325,7 +1325,7 @@ void CqShaderVM::ExecuteInit()
 	// Fake an environment
 	boost::shared_ptr<IqShaderExecEnv> pOldEnv = m_pEnv;
 
-	boost::shared_ptr<IqShaderExecEnv> Env(new CqShaderExecEnv);
+	boost::shared_ptr<IqShaderExecEnv> Env(new CqShaderExecEnv(m_pEnv->getRenderContext()));
 	Env->Initialise( 1, 1, 1, 1, 0, boost::shared_ptr<IqTransform>(), this, m_Uses );
 	Initialise( 1, 1, 1, Env );
 
@@ -1530,7 +1530,7 @@ void CqShaderVM::InitialiseParameters( )
 		CqMatrix matTrans;
 
 		if (getTransform())
-			matTrans = QGetRenderContextI() ->matSpaceToSpace( _strSpace.c_str(), "current", getTransform(), getTransform(), QGetRenderContextI()->Time() );
+			matTrans = m_pEnv->getRenderContext() ->matSpaceToSpace( _strSpace.c_str(), "current", getTransform(), getTransform(), m_pEnv->getRenderContext()->Time() );
 
 		while ( count-- > 0 )
 		{

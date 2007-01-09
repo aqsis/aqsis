@@ -82,7 +82,7 @@ int main( int argc, const char** argv )
 	g_shader_path = DEFAULT_SHADER_PATH;
 #endif
 
-	Aqsis::QGetRenderContextI();
+	/*Aqsis::QGetRenderContextI();*/
 	ArgParse ap;
 	ap.usageHeader( ArgParse::apstring( "Usage: " ) + argv[ 0 ] + " <shadername>" );
 	ap.argFlag( "help", "\aprint this help and exit", &g_cl_help );

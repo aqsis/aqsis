@@ -39,8 +39,6 @@
 
 START_NAMESPACE(    Aqsis )
 
-IqRenderer* QGetRenderContextI();
-
 
 //----------------------------------------------------------------------
 // transform(s,s,P)
@@ -54,14 +52,14 @@ void CqShaderExecEnv::SO_transform( IqShaderData* fromspace, IqShaderData* tospa
 	__fVarying=(p)->Class()==class_varying;
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
-	if ( NULL != QGetRenderContextI() )
+	if ( getRenderContext() )
 	{
 		__iGrid = 0;
 		CqString _aq_fromspace;
 		(fromspace)->GetString(_aq_fromspace,__iGrid);
 		CqString _aq_tospace;
 		(tospace)->GetString(_aq_tospace,__iGrid);
-		const CqMatrix& mat = QGetRenderContextI() ->matSpaceToSpace( _aq_fromspace.c_str(), _aq_tospace.c_str(), pShader->getTransform(), pTransform().get(), QGetRenderContextI()->Time() );
+		const CqMatrix& mat = getRenderContext() ->matSpaceToSpace( _aq_fromspace.c_str(), _aq_tospace.c_str(), pShader->getTransform(), pTransform().get(), getRenderContext()->Time() );
 
 
 		__iGrid = 0;
@@ -107,12 +105,12 @@ void CqShaderExecEnv::SO_transform( IqShaderData* tospace, IqShaderData* p, IqSh
 	__fVarying=(p)->Class()==class_varying;
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
-	if ( NULL != QGetRenderContextI() )
+	if ( getRenderContext() )
 	{
 		__iGrid = 0;
 		CqString _aq_tospace;
 		(tospace)->GetString(_aq_tospace,__iGrid);
-		const CqMatrix& mat = QGetRenderContextI() ->matSpaceToSpace( "current", _aq_tospace.c_str(), pShader->getTransform(), pTransform().get(), QGetRenderContextI()->Time() );
+		const CqMatrix& mat = getRenderContext() ->matSpaceToSpace( "current", _aq_tospace.c_str(), pShader->getTransform(), pTransform().get(), getRenderContext()->Time() );
 
 
 		__iGrid = 0;
@@ -187,14 +185,14 @@ void CqShaderExecEnv::SO_vtransform( IqShaderData* fromspace, IqShaderData* tosp
 	__fVarying=(p)->Class()==class_varying;
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
-	if ( NULL != QGetRenderContextI() )
+	if ( getRenderContext() )
 	{
 		__iGrid = 0;
 		CqString _aq_fromspace;
 		(fromspace)->GetString(_aq_fromspace,__iGrid);
 		CqString _aq_tospace;
 		(tospace)->GetString(_aq_tospace,__iGrid);
-		const CqMatrix& mat = QGetRenderContextI() ->matVSpaceToSpace( _aq_fromspace.c_str(), _aq_tospace.c_str(), pShader->getTransform(), pTransform().get(), QGetRenderContextI()->Time() );
+		const CqMatrix& mat = getRenderContext() ->matVSpaceToSpace( _aq_fromspace.c_str(), _aq_tospace.c_str(), pShader->getTransform(), pTransform().get(), getRenderContext()->Time() );
 
 
 		__iGrid = 0;
@@ -240,12 +238,12 @@ void CqShaderExecEnv::SO_vtransform( IqShaderData* tospace, IqShaderData* p, IqS
 	__fVarying=(p)->Class()==class_varying;
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
-	if ( NULL != QGetRenderContextI() )
+	if ( getRenderContext() )
 	{
 		__iGrid = 0;
 		CqString _aq_tospace;
 		(tospace)->GetString(_aq_tospace,__iGrid);
-		const CqMatrix& mat = QGetRenderContextI() ->matVSpaceToSpace( "current", _aq_tospace.c_str(), pShader->getTransform(), pTransform().get(), QGetRenderContextI()->Time() );
+		const CqMatrix& mat = getRenderContext() ->matVSpaceToSpace( "current", _aq_tospace.c_str(), pShader->getTransform(), pTransform().get(), getRenderContext()->Time() );
 
 
 		__iGrid = 0;
@@ -320,14 +318,14 @@ void CqShaderExecEnv::SO_ntransform( IqShaderData* fromspace, IqShaderData* tosp
 	__fVarying=(p)->Class()==class_varying;
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
-	if ( NULL != QGetRenderContextI() )
+	if ( getRenderContext() )
 	{
 		__iGrid = 0;
 		CqString _aq_fromspace;
 		(fromspace)->GetString(_aq_fromspace,__iGrid);
 		CqString _aq_tospace;
 		(tospace)->GetString(_aq_tospace,__iGrid);
-		const CqMatrix& mat = QGetRenderContextI() ->matNSpaceToSpace( _aq_fromspace.c_str(), _aq_tospace.c_str(), pShader->getTransform(), pTransform().get(), QGetRenderContextI()->Time() );
+		const CqMatrix& mat = getRenderContext() ->matNSpaceToSpace( _aq_fromspace.c_str(), _aq_tospace.c_str(), pShader->getTransform(), pTransform().get(), getRenderContext()->Time() );
 		__iGrid = 0;
 
 		__iGrid = 0;
@@ -373,12 +371,12 @@ void CqShaderExecEnv::SO_ntransform( IqShaderData* tospace, IqShaderData* p, IqS
 	__fVarying=(p)->Class()==class_varying;
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
-	if ( NULL != QGetRenderContextI() )
+	if ( getRenderContext() )
 	{
 		__iGrid = 0;
 		CqString _aq_tospace;
 		(tospace)->GetString(_aq_tospace,__iGrid);
-		const CqMatrix& mat = QGetRenderContextI() ->matNSpaceToSpace( "current", _aq_tospace.c_str(), pShader->getTransform(), pTransform().get(), QGetRenderContextI()->Time() );
+		const CqMatrix& mat = getRenderContext() ->matNSpaceToSpace( "current", _aq_tospace.c_str(), pShader->getTransform(), pTransform().get(), getRenderContext()->Time() );
 		__iGrid = 0;
 
 		__iGrid = 0;
@@ -709,14 +707,14 @@ void CqShaderExecEnv::SO_mtransform( IqShaderData* fromspace, IqShaderData* tosp
 	__fVarying=(m)->Class()==class_varying;
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
-	if ( NULL != QGetRenderContextI() )
+	if ( getRenderContext() )
 	{
 		__iGrid = 0;
 		CqString _aq_fromspace;
 		(fromspace)->GetString(_aq_fromspace,__iGrid);
 		CqString _aq_tospace;
 		(tospace)->GetString(_aq_tospace,__iGrid);
-		const CqMatrix& mat = QGetRenderContextI() ->matNSpaceToSpace( _aq_fromspace.c_str(), _aq_tospace.c_str(), pShader->getTransform(), pTransform().get(), QGetRenderContextI()->Time() );
+		const CqMatrix& mat = getRenderContext() ->matNSpaceToSpace( _aq_fromspace.c_str(), _aq_tospace.c_str(), pShader->getTransform(), pTransform().get(), getRenderContext()->Time() );
 		__iGrid = 0;
 
 		__iGrid = 0;
@@ -762,12 +760,12 @@ void CqShaderExecEnv::SO_mtransform( IqShaderData* tospace, IqShaderData* m, IqS
 	__fVarying=(m)->Class()==class_varying;
 	__fVarying=(Result)->Class()==class_varying||__fVarying;
 
-	if ( NULL != QGetRenderContextI() )
+	if ( getRenderContext() )
 	{
 		__iGrid = 0;
 		CqString _aq_tospace;
 		(tospace)->GetString(_aq_tospace,__iGrid);
-		const CqMatrix& mat = QGetRenderContextI() ->matNSpaceToSpace( "current", _aq_tospace.c_str(), pShader->getTransform(), pTransform().get(), QGetRenderContextI()->Time() );
+		const CqMatrix& mat = getRenderContext() ->matNSpaceToSpace( "current", _aq_tospace.c_str(), pShader->getTransform(), pTransform().get(), getRenderContext()->Time() );
 		__iGrid = 0;
 
 		__iGrid = 0;
