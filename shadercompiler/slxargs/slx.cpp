@@ -675,7 +675,7 @@ static RtInt GetCurrentShaderInfo( char * name, char * filePath )
 
 	if ( SLXFile.IsValid() )
 	{
-		CqShaderVM * pShader = new CqShaderVM();
+		CqShaderVM * pShader = new CqShaderVM(QGetRenderContextI());
 		pShader->SetDSOPath( DSOPath );
 		pShader->LoadProgram( SLXFile );
 		pShader->SetstrName( filePath );

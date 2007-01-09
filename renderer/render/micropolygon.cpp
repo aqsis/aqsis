@@ -50,7 +50,7 @@ CqObjectPool<CqMovingMicroPolygonKey>	CqMovingMicroPolygonKey::m_thePool;
 CqMicroPolyGrid::CqMicroPolyGrid() : CqMicroPolyGridBase(),
 		m_bShadingNormals( TqFalse ),
 		m_bGeometricNormals( TqFalse ), 
-		m_pShaderExecEnv(new CqShaderExecEnv(boost::shared_ptr<IqRenderer>(QGetRenderContextI())))
+		m_pShaderExecEnv(new CqShaderExecEnv(QGetRenderContextI()))
 {
 	STATS_INC( GRD_allocated );
 	STATS_INC( GRD_current );

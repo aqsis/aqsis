@@ -277,7 +277,7 @@ struct IqShaderExecEnv
 	 */
 	virtual IqShaderData* Ns() = 0;
 
-	virtual boost::shared_ptr<IqRenderer> getRenderContext() const = 0;
+	virtual IqRenderer* getRenderContext() const = 0;
 
 	virtual	TqBool	SO_init_illuminance() = 0;
 	virtual	TqBool	SO_advance_illuminance() = 0;

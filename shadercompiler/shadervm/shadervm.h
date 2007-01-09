@@ -634,7 +634,7 @@ union UsProgramElement
 class CqShaderVM : public CqShaderStack, public IqShader, public CqDSORepository
 {
 	public:
-		CqShaderVM() : CqShaderStack(), m_Uses( 0xFFFFFFFF ), m_LocalIndex( 0 ), m_PC( 0 ), m_fAmbient( TqTrue )
+		CqShaderVM(IqRenderer* pRenderContext) : CqShaderStack(), m_Uses( 0xFFFFFFFF ), m_LocalIndex( 0 ), m_PC( 0 ), m_fAmbient( TqTrue ), m_pRenderContext(pRenderContext)
 		{
 			// Find out if this shader is being declared outside the world construct. If so
 			// if is effectively being defined in 'camera' space, which will affect the
@@ -786,6 +786,7 @@ class CqShaderVM : public CqShaderStack, public IqShader, public CqDSORepository
 		TqInt	m_PE;							///< Offset of the end of the program.
 		TqBool	m_fAmbient;						///< Flag indicating if this is an ambient light source ( if it is indeed a light source ).
 		TqBool	m_outsideWorld;						///< Flag indicating this shader was declared outside the world.
+		IqRenderer*	m_pRenderContext;
 
 		/** Determine whether the program execution has finished.
 		 */

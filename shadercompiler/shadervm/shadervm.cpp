@@ -798,7 +798,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 	EqSegment	Segment = Seg_Data;
 	std::vector<UsProgramElement>*	pProgramArea = NULL;
 	std::vector<TqInt>	aLabels;
-	boost::shared_ptr<CqShaderExecEnv> StdEnv(new CqShaderExecEnv(m_pEnv->getRenderContext()));
+	boost::shared_ptr<CqShaderExecEnv> StdEnv(new CqShaderExecEnv(NULL));
 	TqInt	array_count = 0;
 	TqUlong  htoken, i;
 	/*
@@ -1265,6 +1265,7 @@ CqShaderVM&	CqShaderVM::operator=( const CqShaderVM& From )
 	m_strName = From.m_strName;
 	m_fAmbient = From.m_fAmbient;
 	m_outsideWorld = From.m_outsideWorld;
+	m_pRenderContext = From.m_pRenderContext;
 
 	// Copy the local variables...
 	std::vector<IqShaderData*>::const_iterator i;
@@ -1325,7 +1326,7 @@ void CqShaderVM::ExecuteInit()
 	// Fake an environment
 	boost::shared_ptr<IqShaderExecEnv> pOldEnv = m_pEnv;
 
-	boost::shared_ptr<IqShaderExecEnv> Env(new CqShaderExecEnv(m_pEnv->getRenderContext()));
+	boost::shared_ptr<IqShaderExecEnv> Env(new CqShaderExecEnv(NULL));
 	Env->Initialise( 1, 1, 1, 1, 0, boost::shared_ptr<IqTransform>(), this, m_Uses );
 	Initialise( 1, 1, 1, Env );
 
@@ -1530,7 +1531,7 @@ void CqShaderVM::InitialiseParameters( )
 		CqMatrix matTrans;
 
 		if (getTransform())
-			matTrans = m_pEnv->getRenderContext() ->matSpaceToSpace( _strSpace.c_str(), "current", getTransform(), getTransform(), m_pEnv->getRenderContext()->Time() );
+			matTrans = m_pRenderContext ->matSpaceToSpace( _strSpace.c_str(), "current", getTransform(), getTransform(), m_pRenderContext->Time() );
 
 		while ( count-- > 0 )
 		{
