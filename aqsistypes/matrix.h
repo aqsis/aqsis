@@ -42,7 +42,7 @@ START_NAMESPACE( Aqsis )
  * Access to matrix elements is always row,column from 0.
  */
 
-class CqMatrix
+class COMMON_SHARE CqMatrix
 {
 	public:
 		struct NoInit
@@ -190,11 +190,11 @@ class CqMatrix
 		CqVector4D	PreMultiply( const CqVector4D &Vector ) const;
 		CqMatrix&	operator*=( const TqFloat S );
 
-		friend std::ostream &operator<<( std::ostream &Stream, const CqMatrix &Matrix );
-		friend std::ostream &operator<<( std::ostream &Stream, CqMatrix &Matrix );
-		friend CqMatrix	operator*( TqFloat S, const CqMatrix& a );
-		friend bool  operator==(const CqMatrix& A, const CqMatrix& B);
-		friend bool  operator!=(const CqMatrix& A, const CqMatrix& B);
+		COMMON_SHARE friend std::ostream &operator<<( std::ostream &Stream, const CqMatrix &Matrix );
+		COMMON_SHARE friend std::ostream &operator<<( std::ostream &Stream, CqMatrix &Matrix );
+		COMMON_SHARE friend CqMatrix	operator*( TqFloat S, const CqMatrix& a );
+		COMMON_SHARE friend bool  operator==(const CqMatrix& A, const CqMatrix& B);
+		COMMON_SHARE friend bool  operator!=(const CqMatrix& A, const CqMatrix& B);
 
 		TqFloat	Determinant() const;
 
@@ -204,11 +204,11 @@ class CqMatrix
 }
 ;
 
-std::ostream &operator<<( std::ostream &Stream, CqMatrix &Matrix );
+COMMON_SHARE std::ostream &operator<<( std::ostream &Stream, CqMatrix &Matrix );
 
 //-----------------------------------------------------------------------
 
-CqVector4D operator*( const CqVector4D &Vector, const CqMatrix& Matrix );
+COMMON_SHARE CqVector4D operator*( const CqVector4D &Vector, const CqMatrix& Matrix );
 
 END_NAMESPACE( Aqsis )
 

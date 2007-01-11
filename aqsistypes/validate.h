@@ -33,7 +33,7 @@
  * The function call takes an argument which is the result of a CheckMinMax function call.
 */
 
-class CqRangeCheckCallback
+class COMMON_SHARE CqRangeCheckCallback
 {
 	public:
 		virtual ~CqRangeCheckCallback()
@@ -77,4 +77,5 @@ bool CheckMinMax( const T& val, const T& min, const T& max, CqRangeCheckCallback
 }
 
 #endif
+
 

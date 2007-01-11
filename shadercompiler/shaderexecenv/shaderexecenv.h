@@ -49,19 +49,40 @@
 #include	"iattributes.h"
 #include	"transform.h"
 
+#ifdef	WIN32
+#  ifdef	AQSIS_STATIC_LINK
+
+#    define  SHADERCONTEXT_SHARE
+
+#  else // !AQSIS_STATIC_LINK
+
+#      ifdef SHADERCONTEXT_EXPORTS
+#        define SHADERCONTEXT_SHARE __declspec(dllexport)
+#      else
+#        define SHADERCONTEXT_SHARE __declspec(dllimport)
+#      endif
+
+#  endif	// AQSIS_STATIC_LINK
+
+#else	// !WIN32
+
+#  define  SHADERCONTEXT_SHARE
+
+#endif // WIN32
+
 START_NAMESPACE( Aqsis )
 
 
-extern char*	gVariableClassNames[];
-extern TqInt	gcVariableClassNames;
-extern char*	gVariableTypeNames[];
-extern TqInt	gcVariableTypeNames;
-extern char*	gVariableNames[];	///< Vector of variable names.
-extern TqUlong	gVariableTokens[];	///< Vector of hash key from above names.
+SHADERCONTEXT_SHARE extern char*	gVariableClassNames[];
+SHADERCONTEXT_SHARE extern TqInt	gcVariableClassNames;
+SHADERCONTEXT_SHARE extern char*	gVariableTypeNames[];
+SHADERCONTEXT_SHARE extern TqInt	gcVariableTypeNames;
+SHADERCONTEXT_SHARE extern char*	gVariableNames[];	///< Vector of variable names.
+SHADERCONTEXT_SHARE extern TqUlong	gVariableTokens[];	///< Vector of hash key from above names.
 
 
-extern TqInt gDefUses;
-extern TqInt gDefLightUses;
+SHADERCONTEXT_SHARE extern TqInt gDefUses;
+SHADERCONTEXT_SHARE extern TqInt gDefLightUses;
 
 #define	INIT_SO			TqBool __fVarying=TqFalse; /* A flag which will be set to indicate if the operation has any varying components. */ \
 						TqInt __iGrid; /* Integer index used to track progress through the varying data */
@@ -125,7 +146,7 @@ extern TqInt gDefLightUses;
  * Standard shader execution environment. Contains standard variables, and provides SIMD functionality.
  */
 
-class CqShaderExecEnv : public IqShaderExecEnv
+class SHADERCONTEXT_SHARE CqShaderExecEnv : public IqShaderExecEnv
 {
 	public:
 		CqShaderExecEnv(IqRenderer* pRenderContext);

@@ -7,7 +7,7 @@ namespace librib2ri
 {
 
 /// Implements the librib::RendermanInterface interface, and sends data to the Renderman Interface "C" API
-class Engine :
+class RIB_SHARE Engine :
 			public librib::RendermanInterface
 {
 	public:
@@ -140,8 +140,8 @@ class Engine :
 
 extern "C"
 {
-	librib::RendermanInterface* CreateRIBEngine();
-	void DestroyRIBEngine( librib::RendermanInterface* );
+	RIB_SHARE librib::RendermanInterface* CreateRIBEngine();
+	RIB_SHARE void DestroyRIBEngine( librib::RendermanInterface* );
 }
 }
 ; // namespace librib2ri

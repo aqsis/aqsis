@@ -41,6 +41,7 @@
 #include	"plugins.h"
 #include	"idsoshadeops.h"
 #include	"shadeop.h"
+#include	"shadervm_common.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -48,7 +49,7 @@ START_NAMESPACE( Aqsis )
 /**   CqDSORepository: This class is responsible for searching for shader
  * operations in extrnal shared libraries. 
  */
-class CqDSORepository: public IqDSORepository, private CqPluginBase
+class SHADERVM_SHARE CqDSORepository: public IqDSORepository, private CqPluginBase
 {
 
 	private:

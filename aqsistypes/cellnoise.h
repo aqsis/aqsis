@@ -38,7 +38,7 @@ START_NAMESPACE( Aqsis )
  * Class encapsulating the functionality of the shader cell noise functions.
  */
 
-class CqCellNoise
+class COMMON_SHARE CqCellNoise
 {
 	public:
 		// Default constructor.

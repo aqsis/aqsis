@@ -1,4 +1,3 @@
-import os
 import os.path
 import glob
 import sys
@@ -154,7 +153,7 @@ env.Replace(INCLUDEDIR = env.Dir('$install_prefix').abspath + os.sep + 'include/
 env.Replace(CONTENTDIR = env.Dir('$install_prefix').abspath + os.sep + 'content')
 # The following install directories may be modified by the platform specific config files.
 env.Replace(INSTALL_DIRS = ['$BINDIR','$RENDERENGINEDIR', '$DISPLAYSDIR', '$PLUGINDIR',
-				'$STATICLIBDIR', '$SHADERDIR', '$SYSCONFDIR', '$INCLUDEDIR', '$CONTENTDIR'] )
+				'$SHADERDIR', '$SYSCONFDIR', '$INCLUDEDIR', '$CONTENTDIR'] )
 
 # Setup a default version of the various platform specific functions that can be overridden in the 
 # platform specific configurations below.
@@ -241,16 +240,15 @@ def prependBuildDir(subDirs):
 
 # Add paths to librarys generated in the build dir.
 env.AppendUnique(LIBPATH = prependBuildDir( Split('''
-	#rib/rib2
-	#rib/rib2ri
+	rib/rib2
+	rib/rib2ri
 	rib/ri2rib
-	#rib/rib2stream
 	aqsistypes
 	argparse
-	#renderer/ddmanager
-	#renderer/raytrace
+	renderer/ddmanager
+	renderer/raytrace
 	renderer/render
-	#shadercompiler/shaderexecenv
+	shadercompiler/shaderexecenv
 	shadercompiler/shadervm
 	shadercompiler/slparse
 	shadercompiler/codegenvm

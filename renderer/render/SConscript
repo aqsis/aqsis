@@ -47,7 +47,8 @@ aqsisdll_sources = Split("""
 	transform.cpp
 	blobby.cpp
 	marchingcubes.cpp
-	trimcurve.cpp""")
+	trimcurve.cpp
+	rib2ri.cpp""")
 
 
 aqsisdll_headers = Split("""
@@ -80,7 +81,7 @@ aqsis_install_headers = Split('''
 	''')
 
 aqsisenv = env.Copy()
-aqsisenv.AppendUnique(CPPDEFINES=[('_qBUILDING', 'CORE'), ('CORE', 1)])
+aqsisenv.AppendUnique(CPPDEFINES=['RI_EXPORTS', 'RIB_EXPORTS'])
 
 
 if env.has_key('libaqsis_add_sources'):
@@ -88,8 +89,8 @@ if env.has_key('libaqsis_add_sources'):
 
 
 aqsisenv.Replace(LIBS = ['shadervm', 'aqsistypes', '$tiff_lib', '$z_lib'])
-Import('ddmanager_objs raytrace_objs rib2_objs rib2ri_objs')
-aqsisdll = aqsisenv.SharedLibrary('aqsis', [aqsisdll_sources, ddmanager_objs, raytrace_objs, rib2_objs, rib2ri_objs])
+Import('ddmanager_objs raytrace_objs rib2_objs')
+aqsisdll = aqsisenv.SharedLibrary('aqsis', [aqsisdll_sources, ddmanager_objs, raytrace_objs, rib2_objs])
 
 aqsisenv.UseTargetOptions('libaqsis')
 

@@ -42,7 +42,7 @@ START_NAMESPACE( Aqsis )
  * Class to store and manipulate three component color information.
  */
 
-class CqColor
+class COMMON_SHARE CqColor
 {
 	public:
 		/// Default constructor.
@@ -505,15 +505,15 @@ class CqColor
 
 
 /// Static white color
-extern CqColor	gColWhite;
+COMMON_SHARE extern CqColor	gColWhite;
 /// Static black color
-extern CqColor	gColBlack;
+COMMON_SHARE extern CqColor	gColBlack;
 /// Static red color
-extern CqColor	gColRed;
+COMMON_SHARE extern CqColor	gColRed;
 /// Static green color
-extern CqColor	gColGreen;
+COMMON_SHARE extern CqColor	gColGreen;
 /// Static blue color
-extern CqColor	gColBlue;
+COMMON_SHARE extern CqColor	gColBlue;
 
 //-----------------------------------------------------------------------
 

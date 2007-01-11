@@ -19,6 +19,7 @@ shadervmenv = env.Copy()
 
 # Set any platform specific options for this target
 shadervmenv.UseTargetOptions('shadervm')
+shadervmenv.AppendUnique(CPPDEFINES=['SHADERVM_EXPORTS', 'SHADERCONTEXT_EXPORTS'])
 
 shadervmenv.Replace(LIBS = ['aqsistypes'])
 
@@ -36,4 +37,5 @@ shadervmenv.PostInstallSharedLibrary(shadervmenv, '${RENDERENGINEDIR}', shadervm
 env.Distribute('shadercompiler/shadervm', shadervm_sources)
 env.Distribute('shadercompiler/shadervm', shadervm_headers)
 env.Distribute('shadercompiler/shadervm', 'SConscript')
+
 

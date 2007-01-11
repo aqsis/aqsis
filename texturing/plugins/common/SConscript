@@ -11,7 +11,6 @@ common_headers = Split("""
 commonenv.UseTargetOptions('common')
 
 common = commonenv.Library('common', common_sources)
-#commonenv.Install('$STATICLIBDIR', common)
 
 env.Distribute('texturing/plugins/common', common_sources)
 env.Distribute('texturing/plugins/common', common_headers)

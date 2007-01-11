@@ -17,8 +17,6 @@ ddmanager_objs = [ddmanagerenv.SharedObject(file) for file in ddmanager_sources]
 
 Export('ddmanager_objs')
 
-#ddmanager = ddmanagerenv.Library('ddmanager', ddmanager_sources)
-#ddmanagerenv.Install('$STATICLIBDIR', ddmanager)
 ddmanagerenv.Install('$INCLUDEDIR', "ndspy.h")
 
 env.Distribute('renderer/ddmanager', ddmanager_sources)

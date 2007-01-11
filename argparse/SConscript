@@ -15,8 +15,6 @@ argparseenv = env.Copy()
 argparseenv.UseTargetOptions('argparse')
 
 argparse = argparseenv.Library('argparse', argparse_sources)
-#argparseenv.Install('$STATICLIBDIR', argparse)
-#argparseenv.Install('$INCLUDEDIR', argparse_install_headers)
 
 env.Distribute('argparse', argparse_sources)
 env.Distribute('argparse', argparse_headers)

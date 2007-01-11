@@ -6,6 +6,7 @@
 #include <stdio.h>
 
 #include "ri.h"
+#include "rib2_common.h"
 
 namespace librib
 {
@@ -170,23 +171,23 @@ class RendermanInterface
 extern "C"
 {
 
-	void StandardDeclarations( RendermanInterface* CallbackInterface );
+	RIB_SHARE void StandardDeclarations( RendermanInterface* CallbackInterface );
 
-	void CleanupDeclarations( RendermanInterface& CallbackInterface );
+	RIB_SHARE void CleanupDeclarations( RendermanInterface& CallbackInterface );
 
 	/// Parses an input stream, using the supplied callback object and sending error data to the supplied output stream
-	bool Parse( FILE *InputStream, const std::string StreamName, RendermanInterface& CallbackInterface, std::ostream& ErrorStream, RtArchiveCallback callback);
+	RIB_SHARE bool Parse( FILE *InputStream, const std::string StreamName, RendermanInterface& CallbackInterface, std::ostream& ErrorStream, RtArchiveCallback callback);
 	/// Parse the stream held in decoder, does not close the stream
-	class CqRibBinaryDecoder;
-	bool ParseOpenStream( CqRibBinaryDecoder *decoder, const std::string StreamName, RendermanInterface& CallbackInterface, std::ostream& ErrorStream, RtArchiveCallback callback);
+	class RIB_SHARE CqRibBinaryDecoder;
+	RIB_SHARE bool ParseOpenStream( CqRibBinaryDecoder *decoder, const std::string StreamName, RendermanInterface& CallbackInterface, std::ostream& ErrorStream, RtArchiveCallback callback);
 	/// Resets the state of the parser, clearing any symbol tables, etc.
-	void ResetParser();
+	RIB_SHARE void ResetParser();
 	//
 	/// Setup the defaut setting for the archive searchpath, automatically updated when an appropriate RiOption is seen.
-	void UpdateArchivePath( std::string strPath );
+	RIB_SHARE void UpdateArchivePath( std::string strPath );
 
-	int AppendFrames(const char* frames);
-	void ClearFrames();
+	RIB_SHARE int AppendFrames(const char* frames);
+	RIB_SHARE void ClearFrames();
 }
 
 }

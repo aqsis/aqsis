@@ -47,7 +47,7 @@ START_NAMESPACE( Aqsis )
  *  
  */
 
-class CqPluginBase
+class COMMON_SHARE CqPluginBase
 {
 	public:
 		virtual ~CqPluginBase();

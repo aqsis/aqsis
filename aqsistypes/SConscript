@@ -75,6 +75,7 @@ Import('platform_sources')
 aqsistypes_sources = aqsistypes_sources + platform_sources
 
 aqsistypesenv = env.Copy()
+aqsistypesenv.AppendUnique(CPPDEFINES=['COMMON_EXPORTS'])
 
 # Set any platform specific options for this target
 aqsistypesenv.UseTargetOptions('aqsistypes')

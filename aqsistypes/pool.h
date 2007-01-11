@@ -32,7 +32,7 @@
 START_NAMESPACE( Aqsis )
 
 template <class T, TqInt CS=8>
-class CqObjectPool
+class COMMON_SHARE CqObjectPool
 {
 		struct SqLink
 		{

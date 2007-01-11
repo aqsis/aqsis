@@ -48,6 +48,8 @@
 #include 	"parameters.h"
 #include 	"dsoshadeops.h"
 #include	"itransform.h"
+#include	"shadervm_common.h"
+
 
 START_NAMESPACE( Aqsis )
 
@@ -631,7 +633,7 @@ union UsProgramElement
  * Main class handling the execution of a program in shader language bytecodes.
  */
 
-class CqShaderVM : public CqShaderStack, public IqShader, public CqDSORepository
+class SHADERVM_SHARE CqShaderVM : public CqShaderStack, public IqShader, public CqDSORepository
 {
 	public:
 		CqShaderVM(IqRenderer* pRenderContext) : CqShaderStack(), m_Uses( 0xFFFFFFFF ), m_LocalIndex( 0 ), m_PC( 0 ), m_fAmbient( TqTrue ), m_pRenderContext(pRenderContext)

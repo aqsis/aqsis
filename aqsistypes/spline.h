@@ -54,7 +54,7 @@ extern __Basis	gPowerBasis;
  * Cubic spline curve
  */
 
-class CqSplineCubic
+class COMMON_SHARE CqSplineCubic
 {
 	public:
 		CqSplineCubic( TqInt cu = 4 );

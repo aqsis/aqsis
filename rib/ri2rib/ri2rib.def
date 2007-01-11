@@ -1,7 +1,0 @@
-DESCRIPTION	"Main Aqsis rendering library"
-EXPORTS
-	RiPowerBasis
-	RiHermiteBasis
-	RiCatmullRomBasis
-	RiBSplineBasis
-	RiBezierBasis

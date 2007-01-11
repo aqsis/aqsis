@@ -38,7 +38,7 @@ START_NAMESPACE( Aqsis )
 // tag_buf
 
 /// When attached to an output stream, prepends a string "tag" to the beginning of every line of output
-class tag_buf :
+class COMMON_SHARE tag_buf :
 			public std::streambuf
 {
 	public:
@@ -61,7 +61,7 @@ class tag_buf :
 // timestamp_buf
 
 /// When attached to an output stream, prefixes every line of output with a timestamp
-class timestamp_buf :
+class COMMON_SHARE timestamp_buf :
 			public std::streambuf
 {
 	public:
@@ -82,7 +82,7 @@ class timestamp_buf :
 // show_level_buf
 
 /// When attached to an output stream, prefixes every line of output with its log-level (if any)
-class show_level_buf :
+class COMMON_SHARE show_level_buf :
 			public std::streambuf
 {
 	public:
@@ -103,7 +103,7 @@ class show_level_buf :
 // color_level_buf
 
 /// When attached to an output stream, colors output based on its log level (if any)
-class color_level_buf :
+class COMMON_SHARE color_level_buf :
 			public std::streambuf
 {
 	public:
@@ -124,7 +124,7 @@ class color_level_buf :
 // fold_duplicates_buf
 
 /// When attached to an output stream, replaces duplicate lines of output with a message indicating the number of duplicates
-class fold_duplicates_buf :
+class COMMON_SHARE fold_duplicates_buf :
 			public std::streambuf
 {
 	public:
@@ -149,7 +149,7 @@ class fold_duplicates_buf :
 // reset_level_buf
 
 /// When attached to an output stream, resets the log level to "unknown" after every line of output
-class reset_level_buf :
+class COMMON_SHARE reset_level_buf :
 			public std::streambuf
 {
 	public:
@@ -179,7 +179,7 @@ typedef enum
 } log_level_t;
 
 /// When attached to an output stream, filters-out messages below the given level
-class filter_by_level_buf :
+class COMMON_SHARE filter_by_level_buf :
 			public std::streambuf
 {
 	public:
@@ -200,7 +200,7 @@ class filter_by_level_buf :
 // syslog_buf
 
 /// When attached to an output stream, copies output to the system log
-class syslog_buf :
+class COMMON_SHARE syslog_buf :
 			public std::streambuf
 {
 	public:
@@ -225,7 +225,7 @@ class syslog_buf :
 // ansi_buf
 
 /// Scans the stream for ANSI control sequences and emulates the behaviour under Windows
-class ansi_buf :
+class COMMON_SHARE ansi_buf :
 			public std::streambuf
 {
 	public:
@@ -256,4 +256,5 @@ class ansi_buf :
 END_NAMESPACE( Aqsis )
 
 #endif	// ___logging_streambufs_Loaded___
+
 

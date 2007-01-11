@@ -1,17 +1,19 @@
 Import('env')
 miqser_sources = Split("""
-	miqser.cpp""")
+	miqser.cpp
+	rib2ri.cpp""")
 
 miqserenv = env.Copy();
+miqserenv.AppendUnique(CPPDEFINES = ['RIB_EXPORTS'])
 
 miqserenv.AppendUnique(LIBS = ['argparse', 'ri2rib', 'aqsistypes', '$z_lib'])
 
 # Set any platform specific options for this target
 miqserenv.UseTargetOptions('miqser')
 
-Import('rib2_objs rib2ri_objs')
+Import('rib2_objs')
 
-miqser = miqserenv.Program('miqser', [miqser_sources, rib2_objs, rib2ri_objs])
+miqser = miqserenv.Program('miqser', [miqser_sources, rib2_objs])
 miqserenv.Install('$BINDIR', miqser)
 
 env.Distribute('rib/miqser', miqser_sources)

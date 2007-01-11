@@ -26,6 +26,7 @@ ri2rib_headers = Split("""
 	plstore.h""")
 
 ri2ribenv = env.Copy()
+ri2ribenv.AppendUnique(CPPDEFINES = ['RI_EXPORTS'])
 
 # Set any platform specific options for this target
 ri2ribenv.UseTargetOptions('ri2rib')

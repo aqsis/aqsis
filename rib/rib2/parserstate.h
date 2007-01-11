@@ -3,6 +3,7 @@
 
 #include <map>
 #include "bdec.h"
+#include "rib2_common.h"
 
 namespace librib
 {
@@ -13,7 +14,7 @@ namespace librib
  *  this mess can dissapear if migrated to a Boost/Spirit parser in future.
  */
 
-class CqRIBParserState
+class RIB_SHARE CqRIBParserState
 {
 	public:
 
@@ -36,9 +37,9 @@ class CqRIBParserState
 };
 
 /// Retrieve the current state of the parser internal variables
-CqRIBParserState GetParserState();
+RIB_SHARE CqRIBParserState GetParserState();
 /// Retrieve the current state of the parser internal variables
-void SetParserState( CqRIBParserState& state );
+RIB_SHARE void SetParserState( CqRIBParserState& state );
 
 }
 

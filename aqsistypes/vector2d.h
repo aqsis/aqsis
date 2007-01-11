@@ -45,7 +45,7 @@ class CqVector4D;
  * \brief Define class structure for 2D vector.
  */
 
-class CqVector2D
+class COMMON_SHARE CqVector2D
 {
 	public:
 		CqVector2D() : m_x(0.0f), m_y(0.0f)

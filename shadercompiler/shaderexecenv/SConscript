@@ -16,6 +16,7 @@ shaderexecenv_headers = Split("""
 	shaderexecenv.h""")
 
 shaderexecenvenv = env.Copy()
+shaderexecenvenv.AppendUnique(CPPDEFINES=['SHADERCONTEXT_EXPORTS'])
 
 # Set any platform specific options for this target
 shaderexecenvenv.UseTargetOptions('shaderexecenv')
@@ -24,10 +25,8 @@ shaderexecenv_objs = [shaderexecenvenv.SharedObject(file) for file in shaderexec
 
 Export('shaderexecenv_objs')
 
-#shaderexecenv = shaderexecenvenv.Library('shaderexecenv', shaderexecenv_sources)
-#shaderexecenvenv.Install('$STATICLIBDIR', shaderexecenv)
-
 env.Distribute('shadercompiler/shaderexecenv', shaderexecenv_sources)
 env.Distribute('shadercompiler/shaderexecenv', shaderexecenv_headers)
 env.Distribute('shadercompiler/shaderexecenv', 'SConscript')
+
 
