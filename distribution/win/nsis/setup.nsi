@@ -52,7 +52,6 @@ Name "${PRODUCT_FULLNAME} ${PRODUCT_VERSION}"
 BrandingText "www.aqsis.org"
 OutFile "${PROJECT_ROOT}\output\aqsis-setup-${PRODUCT_VERSION}.exe"
 InstallDir "$PROGRAMFILES\${PRODUCT_NAME}"
-InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
 ShowInstDetails show
 ShowUnInstDetails show
 RequestExecutionLevel admin
