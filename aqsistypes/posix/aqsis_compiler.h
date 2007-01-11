@@ -63,4 +63,6 @@
 
 #define SHARED_LIBRARY_SUFFIX ".so"
 
+#define COMMON_SHARE
+
 #endif // AQSIS_COMPILER_H_INCLUDED
