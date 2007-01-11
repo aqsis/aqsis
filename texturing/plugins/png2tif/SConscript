@@ -8,7 +8,9 @@ png2tifenv.UseTargetOptions('plugin')
 png2tifenv.UseTargetOptions('texture_plugin')
 png2tifenv.UseTargetOptions('png2tif')
 
-png2tif = png2tifenv.SharedLibrary('png2tif', png2tif_sources, LIBS=['$tiff_lib', '$z_lib', 'ppm2tif', 'common'])
+Import('common_objs')
+
+png2tif = png2tifenv.SharedLibrary('png2tif', [png2tif_sources, common_objs], LIBS=['$tiff_lib', '$z_lib', 'ppm2tif'])
 png2tifenv.Install('$PLUGINDIR', png2tif)
 
 env.Distribute('texturing/plugins/png2tif', png2tif_sources)

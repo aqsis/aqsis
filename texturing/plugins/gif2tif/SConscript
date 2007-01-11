@@ -8,7 +8,9 @@ gif2tifenv.UseTargetOptions('plugin')
 gif2tifenv.UseTargetOptions('texture_plugin')
 gif2tifenv.UseTargetOptions('gif2tif')
 
-gif2tif = gif2tifenv.SharedLibrary('gif2tif', gif2tif_sources, LIBS=['common', '$tiff_lib', '$z_lib'])
+Import('common_objs')
+
+gif2tif = gif2tifenv.SharedLibrary('gif2tif', [gif2tif_sources, common_objs], LIBS=['$tiff_lib', '$z_lib'])
 
 gif2tifenv.Install('$PLUGINDIR', gif2tif)
 

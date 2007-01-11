@@ -10,7 +10,11 @@ common_headers = Split("""
 # Set any platform specific options for this target
 commonenv.UseTargetOptions('common')
 
-common = commonenv.Library('common', common_sources)
+#common = commonenv.Library('common', common_sources)
+
+common_objs = [commonenv.SharedObject(file) for file in common_sources]
+
+Export('common_objs')
 
 env.Distribute('texturing/plugins/common', common_sources)
 env.Distribute('texturing/plugins/common', common_headers)

@@ -8,7 +8,9 @@ jpg2tifenv.UseTargetOptions('plugin')
 jpg2tifenv.UseTargetOptions('texture_plugin')
 jpg2tifenv.UseTargetOptions('jpg2tif')
 
-jpg2tif = jpg2tifenv.SharedLibrary('jpg2tif', jpg2tif_sources, LIBS=['common', '$tiff_lib', '$z_lib', '$jpeg_lib'])
+Import('common_objs')
+
+jpg2tif = jpg2tifenv.SharedLibrary('jpg2tif', [jpg2tif_sources, common_objs], LIBS=['$tiff_lib', '$z_lib', '$jpeg_lib'])
 
 jpg2tifenv.Install('$PLUGINDIR', jpg2tif)
 

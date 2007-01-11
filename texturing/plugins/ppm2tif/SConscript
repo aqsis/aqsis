@@ -8,7 +8,9 @@ ppm2tifenv.UseTargetOptions('plugin')
 ppm2tifenv.UseTargetOptions('texture_plugin')
 ppm2tifenv.UseTargetOptions('ppm2tif')
 
-ppm2tif = ppm2tifenv.SharedLibrary('ppm2tif', ppm2tif_sources, LIBS=['$tiff_lib', '$z_lib', 'common'])
+Import('common_objs')
+
+ppm2tif = ppm2tifenv.SharedLibrary('ppm2tif', [ppm2tif_sources, common_objs], LIBS=['$tiff_lib', '$z_lib'])
 
 ppm2tifenv.Install('$PLUGINDIR', ppm2tif)
 
