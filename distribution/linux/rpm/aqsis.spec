@@ -2,65 +2,34 @@
 # Author: Aqsis Team (packages@aqsis.org)
 # Info: 
 # Other: 1. To make updates easier, all message strings have been placed within the top 10-40 lines of this file.
-#        2. To build using the 'Official' tarball comment line 18 and uncomment line 19.
-
-# norootforbuild
+#        2. To build using the 'Official' tarball comment line 24 and uncomment line 25.
 
 
 %define PRODUCT_NAME aqsis
 %define PRODUCT_VERSION_MAJOR 1
 %define PRODUCT_VERSION_MINOR 2
 %define PRODUCT_VERSION_BUILD 0
-%define PRODUCT_VERSION_RELEASE 0.1.alpha1
+%define PRODUCT_VERSION_RELEASE 0.1.alpha2
 %define PRODUCT_WEB_SITE http://www.aqsis.org
 %define PRODUCT_WEB_UPDATE http://download.aqsis.org/stable/source/tar
-
-%if 0%{?fedora_version}
-%define PRODUCT_GROUP_DATA Applications/Multimedia
-%define PRODUCT_GROUP_DEVELOP Development/Libraries
-%define PRODUCT_GROUP_MAIN Applications/Multimedia
-%else
-%if 0%{?mandriva_version}
-%define PRODUCT_GROUP_DATA Graphics
-%define PRODUCT_GROUP_DEVELOP Development/C++
-%define PRODUCT_GROUP_MAIN Graphics
-%else
-%if 0%{?suse_version}
-%define PRODUCT_GROUP_DATA Productivity/Graphics/Visualization/Other
-%define PRODUCT_GROUP_DEVELOP Development/Libraries/C and C++
-%define PRODUCT_GROUP_MAIN Productivity/Graphics/Visualization/Other
-%else
-%define PRODUCT_GROUP_DATA Applications/Multimedia
-%define PRODUCT_GROUP_DEVELOP Development/Libraries
-%define PRODUCT_GROUP_MAIN Applications/Multimedia
-%endif
-%endif
-%endif
 
 Name:		%{PRODUCT_NAME}
 Version:	%{PRODUCT_VERSION_MAJOR}.%{PRODUCT_VERSION_MINOR}.%{PRODUCT_VERSION_BUILD}
 Release:	%{PRODUCT_VERSION_RELEASE}%{?dist}
 Summary:	Open source RenderMan-compliant 3D rendering solution
-Group:		%{PRODUCT_GROUP_MAIN}
+Group:		Applications/Multimedia
 
 License:	GPL
-URL:		http://www.aqsis.org
-Source:		%{name}-%{version}alpha1.tar.gz
-Source:		http://download.aqsis.org/stable/source/tar/%{name}-%{version}alpha1.tar.gz
+URL:		%{PRODUCT_WEB_SITE}
+Source:		%{name}-%{version}%{product_version_release}.tar.gz
+#Source:		%{PRODUCT_WEB_UPDATE}/%{name}-%{version}-%{release}.tar.gz
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 
-# Install XSLT processor under Mandriva
-%if 0%{?mandriva_version}
-BuildRequires:	libxslt-proc
-%endif
+BuildRequires:	bison, boost-devel >= 1.32.0, flex >= 2.5.4, fltk-devel >= 1.1.0,
+BuildRequires:	libjpeg-devel >= 6b, libtiff-devel >= 3.7.1, libxslt, OpenEXR-devel
+BuildRequires:	scons >= 0.96.1, zlib-devel >= 1.1.4
 
-# Install Python distutils under SUSE 10.1 (and lower)
-%if 0%{?suse_version} <= 1010
-BuildRequires:	python-devel
-%endif
-
-BuildRequires:	bison, flex >= 2.5.4, boost-devel >= 1.32.0, fltk-devel >= 1.1.0, gcc-c++, libjpeg-devel >= 6b, libtiff-devel >= 3.7.1, libxslt-devel, OpenEXR-devel, scons >= 0.96.1, zlib-devel >= 1.1.4
 Requires:		fltk >= 1.1.0, libjpeg >= 6b, libtiff >= 3.7.1, OpenEXR, zlib >= 1.1.4
 
 
@@ -68,60 +37,36 @@ Requires:		fltk >= 1.1.0, libjpeg >= 6b, libtiff >= 3.7.1, OpenEXR, zlib >= 1.1.
 Aqsis is a cross-platform photorealistic 3D rendering solution, based 
 on the RenderMan interface standard defined by Pixar Animation Studios.
 
-Focusing on stability and production usage features include constructive 
-solid geometry, depth-of-field, extensible shading engine (DSOs), instancing, 
-level-of-detail, motion blur, NURBS, procedural plugins, programmable shading, 
-subdivision surfaces, subpixel displacements and more.
-
 This package contains a command-line renderer, a shader compiler for shaders 
 written using the RenderMan shading language, a texture pre-processor for 
 optimizing textures and a RIB processor.
 
-Aqsis is an open source project licensed under the GPL, with some parts under 
-the LGPL.
-
 
 %package devel
-Requires:	%{name} = %{version}
+Requires:	%{name} = %{version}-%{release}
 Summary:	Development files for the open source RenderMan-compliant Aqsis 3D rendering solution
-Group:		%{PRODUCT_GROUP_DEVELOP}
+Group:		Development/Libraries
 
 
 %description devel
 Aqsis is a cross-platform photorealistic 3D rendering solution, based 
 on the RenderMan interface standard defined by Pixar Animation Studios.
 
-Focusing on stability and production usage features include constructive 
-solid geometry, depth-of-field, extensible shading engine (DSOs), instancing, 
-level-of-detail, motion blur, NURBS, procedural plugins, programmable shading, 
-subdivision surfaces, subpixel displacements and more.
-
 This package contains various developer libraries to enable integration with 
 third-party applications.
 
-Aqsis is an open source project licensed under the GPL, with some parts under 
-the LGPL.
-
 
 %package data
-Requires:	%{name} = %{version}
+Requires:	%{name} = %{version}-%{release}
 Summary:	Example content for the open source RenderMan-compliant Aqsis 3D rendering solution
-Group:		%{PRODUCT_GROUP_DATA}
+Group:		Applications/Multimedia
 
 
 %description data
 Aqsis is a cross-platform photorealistic 3D rendering solution, based 
 on the RenderMan interface standard defined by Pixar Animation Studios.
 
-Focusing on stability and production usage features include constructive 
-solid geometry, depth-of-field, extensible shading engine (DSOs), instancing, 
-level-of-detail, motion blur, NURBS, procedural plugins, programmable shading, 
-subdivision surfaces, subpixel displacements and more.
-
 This package contains example content, including additional scenes and shaders.
-
-Aqsis is an open source project licensed under the GPL, with some parts under 
-the LGPL.
 
 
 %prep
@@ -140,8 +85,6 @@ scons %{?_smp_mflags} destdir=$RPM_BUILD_ROOT \
 
 %install
 rm -rf $RPM_BUILD_ROOT
-export CFLAGS=$RPM_OPT_FLAGS
-export CXXFLAGS=$RPM_OPT_FLAGS
 scons install
 chmod a+rx $RPM_BUILD_ROOT%{_bindir}/mpanalyse.py
 touch $RPM_BUILD_ROOT%{_bindir}/mpanalyse.pyc
@@ -167,6 +110,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/mpanalyse.py
 %exclude %{_bindir}/mpanalyse.pyo
 %exclude %{_bindir}/mpanalyse.pyc
+%dir %{_libdir}/%{name}
 %{_libdir}/%{name}/*.so
 %{_libdir}/libaqsis.so.*
 %config %{_sysconfdir}/aqsisrc
@@ -176,6 +120,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files devel
 %defattr(-,root,root,-)
+%dir %{_includedir}/%{name}
 %{_includedir}/%{name}/
 %{_libdir}/%{name}/*.a
 %{_libdir}/libaqsis.so
@@ -188,15 +133,17 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
-* Thu Dec 14 2006 Tobias Sauerwein <cgtobi@gmail.com> 1.2.0-0.1.alpha1
-- More clean-up/optimisation..
+* Thu Jan 11 2007 Leon Tony Atkinson <latkinson@aqsis.org> 1.2.0-0.1.alpha2
+- Fedora-specific clean-up/optimisation and release update
 
-* Mon Dec 11 2006 Leon Tony Atkinson <latkinson@aqsis.org> 1.2.0-0.1.alpha1
-- Added Fedora (Core 5 tested) and OpenSUSE (10.2 tested) support to SPEC file.
-- Cleaned-up/optimised SPEC file.
+* Sat Dec 23 2006 Tobias Sauerwein <tsauerwein@aqsis.org> 1.2.0-0.3.alpha1
+- Tuning to meet Fedora-Extras requirements
 
-* Fri Dec 09 2006 Leon Tony Atkinson <latkinson@aqsis.org> 1.2.0-0.1.alpha1
-- Added Mandriva (2006 tested) support to SPEC file.
+* Thu Dec 21 2006 Tobias Sauerwein <tsauerwein@aqsis.org> 1.2.0-0.2.alpha1
+- Fedora-specific clean-up/optimisation
 
-* Wed Nov 22 2006 Tobias Sauerwein <cgtobi@gmail.com> 1.2.0-0.1.aplha1
+* Thu Dec 14 2006 Tobias Sauerwein <tsauerwein@aqsis.org> 1.2.0-0.1.alpha1
+- Clean-up/optimisation
+
+* Wed Nov 22 2006 Tobias Sauerwein <tsauerwein@aqsis.org> 1.1.0-1
 - Initial RPM/SPEC.
