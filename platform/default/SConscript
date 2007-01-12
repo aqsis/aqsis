@@ -96,7 +96,7 @@ for path in ('$destdir', '$libdir', '$libexecdir', '$sysconfdir'):
 env.Replace(LIBDIR = env.Dir('$libdir'))
 env.Replace(RENDERENGINEDIR = env.Dir('$LIBDIR'))
 env.Replace(DISPLAYSDIR = env.Dir('$libexecdir'))
-env.Replace(PLUGINDIR = env.Dir('$LIBDIR/aqsis'))
+env.Replace(PLUGINDIR = env.Dir('$LIBDIR/aqsis/plugins'))
 env.Replace(STATICLIBDIR = env.Dir('$LIBDIR/aqsis'))
 env.Replace(SHADERDIR = env.Dir('$install_prefix/share/aqsis/shaders'))
 env.Replace(SYSCONFDIR = env.Dir('$sysconfdir'))
