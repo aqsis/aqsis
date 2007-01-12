@@ -151,9 +151,10 @@ env.Replace(SHADERDIR = env.Dir('$install_prefix').abspath + os.sep + 'shaders')
 env.Replace(SYSCONFDIR = env.Dir('$install_prefix').abspath + os.sep + 'bin')
 env.Replace(INCLUDEDIR = env.Dir('$install_prefix').abspath + os.sep + 'include/aqsis')
 env.Replace(CONTENTDIR = env.Dir('$install_prefix').abspath + os.sep + 'content')
+env.Replace(SCRIPTSDIR = env.Dir('$install_prefix').abspath + os.sep + 'scripts')
 # The following install directories may be modified by the platform specific config files.
 env.Replace(INSTALL_DIRS = ['$BINDIR','$RENDERENGINEDIR', '$DISPLAYSDIR', '$PLUGINDIR',
-				'$SHADERDIR', '$SYSCONFDIR', '$INCLUDEDIR', '$CONTENTDIR'] )
+				'$SHADERDIR', '$SYSCONFDIR', '$INCLUDEDIR', '$CONTENTDIR', '$SCRIPTSDIR'] )
 
 # Setup a default version of the various platform specific functions that can be overridden in the 
 # platform specific configurations below.

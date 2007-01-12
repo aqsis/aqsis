@@ -1,5 +1,5 @@
 Import('env')
-env.Install('$BINDIR', 'mpanalyse.py')
+env.Install('$SCRIPTSDIR', 'mpanalyse.py')
 
 env.Distribute('tools/mpdump', 'mpanalyse.py')
 env.Distribute('tools/mpdump', 'SConscript')
