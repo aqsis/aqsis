@@ -230,8 +230,9 @@ SectionIn 1
   SetOutPath "$INSTDIR\include\aqsis"
   File "${PROJECT_ROOT}\output\include\aqsis\*.h"
   SetOutPath "$INSTDIR\lib"
-  File "${PROJECT_ROOT}\output\lib\${LIBRARY_PREFIX}*${LIBRARY_EXTENSION}"
-  File "${PROJECT_ROOT}\output\bin\${LIBRARY_PREFIX}aqsis${LIBRARY_EXTENSION}"
+  File "${PROJECT_ROOT}\output\lib\*.*"
+  ;;File "${PROJECT_ROOT}\output\lib\${LIBRARY_PREFIX}*${LIBRARY_EXTENSION}"
+  ;;File "${PROJECT_ROOT}\output\bin\${LIBRARY_PREFIX}aqsis${LIBRARY_EXTENSION}"
   !if ${USE_DEFS} != 0
     File "${PROJECT_ROOT}\output\bin\aqsis.def"
   !endif
