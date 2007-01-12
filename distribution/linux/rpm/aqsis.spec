@@ -21,7 +21,7 @@ Group:		Applications/Multimedia
 
 License:	GPL
 URL:		%{PRODUCT_WEB_SITE}
-Source:		%{name}-%{version}%{product_version_release}.tar.gz
+Source:		%{name}-%{version}-%{release}.tar.gz
 #Source:		%{PRODUCT_WEB_UPDATE}/%{name}-%{version}-%{release}.tar.gz
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
