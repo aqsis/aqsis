@@ -13,7 +13,8 @@ shadervm_headers = Split("""
 	dsoshadeops.h
 	shaderstack.h
 	shadervariable.h
-	shadervm.h""")
+	shadervm.h
+	shadervm_common.h""")
 
 shadervmenv = env.Copy()
 

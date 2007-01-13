@@ -5,15 +5,14 @@ rib2_sources = Split("""
 	scanner.cpp
 	parser.cpp""")
 
-rib2_headers = Split("""
-	bdec.h
-	librib.h
-	libribtypes.h
-	parserstate.h""")
-
 rib2_install_headers = Split("""
 	librib.h
-	parserstate.h""")
+	parserstate.h
+	rib2_common.h""")
+
+rib2_headers = rib2_install_headers + Split("""
+	bdec.h
+	libribtypes.h""")
 
 rib2env = env.Copy()
 
