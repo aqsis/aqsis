@@ -22,13 +22,13 @@ Obtaining the sources
 
 You can either obtain the source archive or get the latest source code via SVN.
 
-With SVN, it’s recommened to check out the /trunk only, as it contains all you need to compile aqsis. If you’re on Linux, you can save even more time by skipping the Win32 Libaries and checking out /trunk/aqsis only.
+With SVN, it's recommended to check out the /trunk only, as it contains all you need to compile aqsis. If you're on Linux, you can save even more time by skipping the Win32 Libraries and checking out /trunk/aqsis only.
 
 To obtain a clean checkout from SVN, first install SVN and make sure that you either provide the full path to the svn binary (svn.exe on Windows) or that you add svn to your PATH. Then go into an empty folder and call:
 
 $ svn checkout https://svn.sourceforge.net/svnroot/aqsis/trunk
 
-This will check out by default into a folder called /trunk - just as in the repository. If you don’t want this, you can specify the target folder by passing it after the URL, like this (this will put the content of /trunk into ~/aqsis/current):
+This will check out by default into a folder called /trunk - just as in the repository. If you don't want this, you can specify the target folder by passing it after the URL, like this (this will put the content of /trunk into ~/aqsis/current):
 
 $ svn checkout https://svn.sourceforge.net/svnroot/aqsis/trunk ~/aqsis/current
 
@@ -39,7 +39,7 @@ A    trunk\aqsis\distribution
 A    trunk\aqsis\distribution\SConscript
 ...
 
-Eventually you end up with a new directory, /trunk. /trunk/aqsis containes the complete source code, while /trunk/win32libs containes libraries only interesting for Windows users.
+Eventually you end up with a new directory, /trunk. /trunk/aqsis contains the complete source code, while /trunk/win32libs contains libraries only interesting for Windows users.
 
 For more instructions on obtaining the source code via SVN see the SourceForge SVN page.
 
@@ -57,7 +57,7 @@ If there was an error after calling scons this indicates that some of the above 
 fltk_include_path = r"C:\Libs\fltk-1.1.5rc1"
 fltk_lib_path = r"C:\Libs\fltk-1.1.5rc1\lib"
 
-The syntax is plain Python code (in this example we’re using raw strings (indicated by the ‘r’ prefix) so that we don’t have to use double backslashes). You can get a list of variables to manipulate by calling
+The syntax is plain Python code (in this example we're using raw strings (indicated by the 'r' prefix) so that we don't have to use double backslashes). You can get a list of variables to manipulate by calling
 
 scons --help
 
@@ -89,7 +89,7 @@ The MinGW build relies on the availability of a zlib and libTIFF library. This c
 Building Aqsis
 --------------
 
-The process of getting the source and building Aqsis is mainly the same as the default procedure detailed above. You may need to force SCons to use the appropriate build system, and tell it where libTIFF and zlib are. You will need to convert the MSYS locations to Windows location, the ‘/usr’ folder is located at ‘C:\msys\1.0\’ in installed to the default location.
+The process of getting the source and building Aqsis is mainly the same as the default procedure detailed above. You may need to force SCons to use the appropriate build system, and tell it where libTIFF and zlib are. You will need to convert the MSYS locations to Windows location, the '/usr' folder is located at 'C:\msys\1.0\' in installed to the default location.
 
  scons mingw=true boost_include_path=<wherever you installed boost to>
 
@@ -125,9 +125,9 @@ Q (Windows): scons complains with
 Checking for main() in C++ library libtiff... no
 Cannot find libtiff
 
-but I have checked out win32libs at the correct location (or: have provided the correct paths in tiff_include_path/tiff_lib_path). What’s wrong?
+but I have checked out win32libs at the correct location (or: have provided the correct paths in tiff_include_path/tiff_lib_path). What's wrong?
 
-A: Check that you have set the environment variables for calling the Visual C++ compiler from inside a DOS box (i.e. check if you can invoke cl without getting an error). Depending on how you’ve installed MSVC this was already set up for you (and then you won’t get the above error), otherwise you have to manually call the batch file vcvars32.bat that comes with MSVC. For further information about the failure, check the config.log file in the project root, this will detail the results of the tests.
+A: Check that you have set the environment variables for calling the Visual C++ compiler from inside a DOS box (i.e. check if you can invoke cl without getting an error). Depending on how you've installed MSVC this was already set up for you (and then you won't get the above error), otherwise you have to manually call the batch file vcvars32.bat that comes with MSVC. For further information about the failure, check the config.log file in the project root, this will detail the results of the tests.
 
 Q: Aqsis compiles for a while and then linker errors like the following appear (each line mentions STL somewhere):
 
@@ -139,6 +139,6 @@ What is wrong?
 
 A: You were probably using STLport instead of the native STL version of your compiler and Aqsis just does not link with the STLport runtime library.
 
-Q: scons uses options settings (such as install_prefix, debug, etc.) that I didn’t specify on the command line and that are not the default values. Where do they come from?
+Q: scons uses options settings (such as install_prefix, debug, etc.) that I didn't specify on the command line and that are not the default values. Where do they come from?
 
-A: When you invoke scons it saves its current options in a file called options.cache which is read the next time you invoke scons again. This means, options are sort of “sticky”, once specified they are in effect until they are specified again with a new value. If you want to go back to default values, simply delete this file. Call scons –help to inspect the current values of all variables.
+A: When you invoke scons it saves its current options in a file called options.cache which is read the next time you invoke scons again. This means, options are sort of "sticky", once specified they are in effect until they are specified again with a new value. If you want to go back to default values, simply delete this file. Call scons -help to inspect the current values of all variables.
