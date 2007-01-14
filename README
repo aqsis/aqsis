@@ -40,7 +40,9 @@ Brief list of tools
    miqser   - the RIB processor
 
 * Scripts:
-   mpanalyse.py - Analysis tool for micropolygon dump format (see scripts directory)
+   mpanalyse.py - Analysis tool for micropolygon dump format (see scripts
+				  directory).  Note that mpanalyse requires cgkit and pyOpenGL
+				  as extra dependencies.
 
 
 License
