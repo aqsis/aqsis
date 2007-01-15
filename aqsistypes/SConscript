@@ -84,6 +84,7 @@ if env.has_key('aqsistypes_add_sources'):
 	aqsistypes_sources = aqsistypes_sources + ['$aqsistypes_add_sources']
 
 aqsistypes = aqsistypesenv.SharedLibrary('aqsistypes', aqsistypes_sources)
+aqsistypesenv.PostBuildSharedLibrary(aqsistypesenv, aqsistypes)
 #aqsistypesenv.Install('$RENDERENGINEDIR', aqsistypes)
 aqsistypesenv.Install('$INCLUDEDIR',aqsistypes_install_headers)
 aqsistypesenv.InstallAs([os.path.join('${RENDERENGINEDIR}', '%s${SHLIB_VERSION_SUFFIX}') %(aqsistypes[0])], [aqsistypes[0]])

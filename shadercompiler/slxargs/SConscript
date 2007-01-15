@@ -21,6 +21,7 @@ if env.has_key('slxargs_add_sources'):
 
 slxargsenv.Replace(LIBS = ['aqsistypes', 'shadervm'])
 slxargs = slxargsenv.SharedLibrary('slxargs', slxargs_sources)
+slxargsenv.PostBuildSharedLibrary(slxargsenv, slxargs)
 slxargsenv.InstallAs([os.path.join('${RENDERENGINEDIR}', '%s${SHLIB_VERSION_SUFFIX}') %(slxargs[0])], [slxargs[0]])
 
 slxargsenv.PostInstallSharedLibrary(slxargsenv, '${RENDERENGINEDIR}', slxargs)

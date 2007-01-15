@@ -87,12 +87,13 @@ aqsisenv.AppendUnique(CPPDEFINES=['RI_EXPORTS', 'RIB_EXPORTS'])
 if env.has_key('libaqsis_add_sources'):
 	aqsisdll_sources = aqsisdll_sources + ['$libaqsis_add_sources']
 
+aqsisenv.UseTargetOptions('libaqsis')
 
 aqsisenv.Replace(LIBS = ['shadervm', 'aqsistypes', '$tiff_lib', '$z_lib'])
 Import('ddmanager_objs raytrace_objs rib2_objs')
 aqsisdll = aqsisenv.SharedLibrary('aqsis', [aqsisdll_sources, ddmanager_objs, raytrace_objs, rib2_objs])
 
-aqsisenv.UseTargetOptions('libaqsis')
+aqsisenv.PostBuildSharedLibrary(aqsisenv, aqsisdll)
 
 Depends(aqsisdll, cachegen)
 Depends(aqsisdll, validategen)

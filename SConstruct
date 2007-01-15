@@ -161,6 +161,9 @@ env.Replace(INSTALL_DIRS = ['$BINDIR','$RENDERENGINEDIR', '$DISPLAYSDIR', '$PLUG
 def PostInstallSharedLibrary(env, dir, source):
 	pass
 env.PostInstallSharedLibrary = PostInstallSharedLibrary
+def PostBuildSharedLibrary(env, source):
+	pass
+env.PostBuildSharedLibrary = PostBuildSharedLibrary
 
 # Read in the platform specific configuration.
 # Allowing it to override the settings defined above.
