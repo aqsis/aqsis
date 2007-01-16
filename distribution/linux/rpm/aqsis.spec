@@ -9,7 +9,7 @@
 %define PRODUCT_VERSION_MAJOR 1
 %define PRODUCT_VERSION_MINOR 2
 %define PRODUCT_VERSION_BUILD 0
-%define PRODUCT_VERSION_RELEASE 0.1.alpha2
+%define PRODUCT_VERSION_RELEASE 0.1
 %define PRODUCT_WEB_SITE http://www.aqsis.org
 %define PRODUCT_WEB_UPDATE http://download.aqsis.org/stable/source/tar
 
@@ -27,8 +27,8 @@ BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 
 BuildRequires:	bison, boost-devel >= 1.32.0, flex >= 2.5.4, fltk-devel >= 1.1.0,
-BuildRequires:	libjpeg-devel >= 6b, libtiff-devel >= 3.7.1, libxslt, OpenEXR-devel
-BuildRequires:	scons >= 0.96.1, zlib-devel >= 1.1.4
+BuildRequires:	gcc-c++, libjpeg-devel >= 6b, libtiff-devel >= 3.7.1, libxslt,
+BuildRequires:	OpenEXR-devel, scons >= 0.96.1, zlib-devel >= 1.1.4
 
 Requires:		fltk >= 1.1.0, libjpeg >= 6b, libtiff >= 3.7.1, OpenEXR, zlib >= 1.1.4
 
@@ -76,7 +76,8 @@ This package contains example content, including additional scenes and shaders.
 %build
 export CFLAGS=$RPM_OPT_FLAGS
 export CXXFLAGS=$RPM_OPT_FLAGS
-scons %{?_smp_mflags} destdir=$RPM_BUILD_ROOT \
+scons %{?_smp_mflags} \
+		destdir=$RPM_BUILD_ROOT \
 		install_prefix=%{_prefix} \
 		sysconfdir=%{_sysconfdir} \
 		no_rpath=true \
@@ -86,9 +87,9 @@ scons %{?_smp_mflags} destdir=$RPM_BUILD_ROOT \
 %install
 rm -rf $RPM_BUILD_ROOT
 scons install
-chmod a+rx $RPM_BUILD_ROOT%{_bindir}/mpanalyse.py
-touch $RPM_BUILD_ROOT%{_bindir}/mpanalyse.pyc
-touch $RPM_BUILD_ROOT%{_bindir}/mpanalyse.pyo
+chmod a+rx $RPM_BUILD_ROOT%{_datadir}/%{name}/scripts/mpanalyse.py
+chmod a+rx $RPM_BUILD_ROOT%{_datadir}/%{name}/content/ribs/scenes/vase/render.sh
+chmod a+rx $RPM_BUILD_ROOT%{_datadir}/%{name}/content/ribs/features/layeredshaders/render.sh
 
 
 %clean
@@ -107,23 +108,21 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/aqsltell
 %{_bindir}/miqser
 %{_bindir}/teqser
+%{_libdir}/%{name}/
+%{_libdir}/*.so.*
 %{_bindir}/mpanalyse.py
 %exclude %{_bindir}/mpanalyse.pyo
 %exclude %{_bindir}/mpanalyse.pyc
-%dir %{_libdir}/%{name}
-%{_libdir}/%{name}/*.so
-%{_libdir}/libaqsis.so.*
 %config %{_sysconfdir}/aqsisrc
 %dir %{_datadir}/%{name}
 %{_datadir}/%{name}/shaders/
+%{_datadir}/%{name}/scripts/
 
 
 %files devel
 %defattr(-,root,root,-)
-%dir %{_includedir}/%{name}
 %{_includedir}/%{name}/
-%{_libdir}/%{name}/*.a
-%{_libdir}/libaqsis.so
+%{_libdir}/*.so
 
 
 %files data
