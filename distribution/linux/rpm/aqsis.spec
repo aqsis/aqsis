@@ -110,9 +110,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/teqser
 %{_libdir}/%{name}/
 %{_libdir}/*.so.*
-%{_bindir}/mpanalyse.py
-%exclude %{_bindir}/mpanalyse.pyo
-%exclude %{_bindir}/mpanalyse.pyc
 %config %{_sysconfdir}/aqsisrc
 %dir %{_datadir}/%{name}
 %{_datadir}/%{name}/shaders/
