@@ -157,7 +157,7 @@ SectionIn 1 2
   File "${PROJECT_ROOT}\output\bin\aqsisrc"
   File "${PROJECT_ROOT}\output\bin\*.dll"
   File "${PROJECT_ROOT}\output\bin\*.exe"
-  File "${PROJECT_ROOT}\output\bin\*.py"
+  ;;File "${PROJECT_ROOT}\output\bin\*.py"
   SetOutPath "$INSTDIR\doc"
   File "/oname=AUTHORS.txt" "${PROJECT_ROOT}\AUTHORS"
   File "/oname=LICENSE.txt" "${PROJECT_ROOT}\COPYING"
