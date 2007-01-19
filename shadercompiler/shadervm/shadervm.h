@@ -643,7 +643,7 @@ class SHADERVM_SHARE CqShaderVM : public CqShaderStack, public IqShader, public 
 			// transformation of parameters. Should only affect lightsource shaders as these
 			// are the only ones valid outside the world.
 			//if (QGetRenderContextI())
-			//	m_outsideWorld = !QGetRenderContextI()->IsWorldBegin();
+			m_outsideWorld = !m_pRenderContext->IsWorldBegin();
 		}
 		CqShaderVM( const CqShaderVM& From ) : m_LocalIndex( 0 ), m_PC( 0 ), m_fAmbient( TqTrue )
 		{
@@ -653,7 +653,7 @@ class SHADERVM_SHARE CqShaderVM : public CqShaderStack, public IqShader, public 
 			// transformation of parameters. Should only affect lightsource shaders as these
 			// are the only ones valid outside the world.
 			//if (QGetRenderContextI())
-			//	m_outsideWorld = !QGetRenderContextI()->IsWorldBegin();
+			m_outsideWorld = !m_pRenderContext->IsWorldBegin();
 		}
 		virtual ~CqShaderVM()
 		{
