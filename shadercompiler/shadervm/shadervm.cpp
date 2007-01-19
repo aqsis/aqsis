@@ -798,7 +798,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 	EqSegment	Segment = Seg_Data;
 	std::vector<UsProgramElement>*	pProgramArea = NULL;
 	std::vector<TqInt>	aLabels;
-	boost::shared_ptr<CqShaderExecEnv> StdEnv(new CqShaderExecEnv(NULL));
+	boost::shared_ptr<CqShaderExecEnv> StdEnv(new CqShaderExecEnv(m_pRenderContext));
 	TqInt	array_count = 0;
 	TqUlong  htoken, i;
 	/*
@@ -1326,7 +1326,7 @@ void CqShaderVM::ExecuteInit()
 	// Fake an environment
 	boost::shared_ptr<IqShaderExecEnv> pOldEnv = m_pEnv;
 
-	boost::shared_ptr<IqShaderExecEnv> Env(new CqShaderExecEnv(NULL));
+	boost::shared_ptr<IqShaderExecEnv> Env(new CqShaderExecEnv(m_pRenderContext));
 	Env->Initialise( 1, 1, 1, 1, 0, boost::shared_ptr<IqTransform>(), this, m_Uses );
 	Initialise( 1, 1, 1, Env );
 
