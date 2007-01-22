@@ -33,7 +33,7 @@
  * The function call takes an argument which is the result of a CheckMinMax function call.
 */
 
-class COMMON_SHARE CqRangeCheckCallback
+class CqRangeCheckCallback
 {
 	public:
 		virtual ~CqRangeCheckCallback()

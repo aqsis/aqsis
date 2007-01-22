@@ -13,6 +13,8 @@ slxargs_install_headers = Split("""
 
 slxargsenv = env.Copy()
 
+slxargsenv.AppendUnique(CPPDEFINES=['SLXARGS_EXPORTS'])
+
 # Set any platform specific options for this target
 slxargsenv.UseTargetOptions('slxargs')
 

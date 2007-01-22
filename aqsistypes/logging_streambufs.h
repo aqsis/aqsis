@@ -199,6 +199,7 @@ class COMMON_SHARE filter_by_level_buf :
 ///////////////////////////////////////////////////////////
 // syslog_buf
 
+#ifndef	NO_SYSLOG
 /// When attached to an output stream, copies output to the system log
 class COMMON_SHARE syslog_buf :
 			public std::streambuf
@@ -218,6 +219,7 @@ class COMMON_SHARE syslog_buf :
 		std::streambuf* const m_streambuf;
 		std::string m_buffer;
 };
+#endif //NO_SYSLOG
 
 #ifdef	AQSIS_SYSTEM_WIN32
 
