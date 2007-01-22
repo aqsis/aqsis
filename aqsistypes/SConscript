@@ -21,7 +21,6 @@ aqsistypes_sources = Split("""
 	vector4d.cpp""")
 
 aqsistypes_headers = Split("""
-	aqerror.h
 	aqsis.h
 	aqsis_types.h
 	bitvector.h
