@@ -43,7 +43,7 @@
 
 #else	// !WIN32
 
-#  define  SHADERVM_SHARE
+#  define  SLXARGS_SHARE
 
 #endif // WIN32
 
