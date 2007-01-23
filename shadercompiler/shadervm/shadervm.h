@@ -642,8 +642,10 @@ class SHADERVM_SHARE CqShaderVM : public CqShaderStack, public IqShader, public 
 			// if is effectively being defined in 'camera' space, which will affect the
 			// transformation of parameters. Should only affect lightsource shaders as these
 			// are the only ones valid outside the world.
-			//if (QGetRenderContextI())
-			m_outsideWorld = !m_pRenderContext->IsWorldBegin();
+			if (NULL != m_pRenderContext)
+				m_outsideWorld = !m_pRenderContext->IsWorldBegin();
+			else
+				m_outsideWorld = TqFalse;
 		}
 		CqShaderVM( const CqShaderVM& From ) : m_LocalIndex( 0 ), m_PC( 0 ), m_fAmbient( TqTrue )
 		{
@@ -652,8 +654,10 @@ class SHADERVM_SHARE CqShaderVM : public CqShaderStack, public IqShader, public 
 			// if is effectively being defined in 'camera' space, which will affect the
 			// transformation of parameters. Should only affect lightsource shaders as these
 			// are the only ones valid outside the world.
-			//if (QGetRenderContextI())
-			m_outsideWorld = !m_pRenderContext->IsWorldBegin();
+			if (NULL != m_pRenderContext)
+				m_outsideWorld = !m_pRenderContext->IsWorldBegin();
+			else
+				m_outsideWorld = TqFalse;
 		}
 		virtual ~CqShaderVM()
 		{
