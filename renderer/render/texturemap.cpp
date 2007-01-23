@@ -392,6 +392,7 @@ void CqTextureMap::CriticalMeasure()
 		 */
 		for ( j = m_TextureMap_Cache.begin(); j != m_TextureMap_Cache.end(); j++ )
 		{
+			Aqsis::log() << info << "Texture cache: freeing memory used by \"" << (*j)->getName().c_str() << "\"" << std::endl;
 			// the original segments (flat tiles)  are the first to go 
 			i = (*j)->m_apFlat.begin(); 
 			e = (*j)->m_apFlat.end(); 
@@ -498,7 +499,7 @@ TqBool CqTextureMap::CreateMIPMAP( TqBool fProtectBuffers )
 							pTMB->SetValue( x, y, sample, accum[ sample ] );
 					}
 				}
-				m_apFlat.push_back( pTMB );
+				m_apMipMaps[directory%256].push_back( pTMB );
 				m_apLast[directory%256] = pTMB;
 			}
 

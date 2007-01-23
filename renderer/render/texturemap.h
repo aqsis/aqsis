@@ -551,6 +551,10 @@ class CqTextureMap : public IqTextureMap
 		{
 			return ( m_matWorldToScreen );
 		}
+		virtual const CqString& getName() const
+		{
+			return ( m_strName );
+		}
 
 		/** Get the image type.
 		 */
