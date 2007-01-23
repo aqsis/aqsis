@@ -520,13 +520,10 @@ TqBool CqTextureMap::CreateMIPMAP( TqBool fProtectBuffers )
  */
 CqTextureMap::~CqTextureMap()
 {
+	// Close the file.
+	Close();
 	// Search for it in the cache and remove the reference.
 	std::vector<CqTextureMap*>::iterator i;
-
-	if (IsVerbose())
-	{
-		Aqsis::log() << warning << m_strName.c_str() << " its directory is now " << m_Directory << std::endl;
-	}
 
 	for ( i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
 	{

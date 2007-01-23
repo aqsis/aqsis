@@ -1579,7 +1579,7 @@ void CqShaderExecEnv::SO_textureinfo( IqShaderData* name, IqShaderData* dataname
 		}
 		else if ( pTMap )
 		{
-			delete pTMap;
+			//delete pTMap;
 			pTMap = NULL;
 		}
 	}
@@ -1592,7 +1592,7 @@ void CqShaderExecEnv::SO_textureinfo( IqShaderData* name, IqShaderData* dataname
 		}
 		else if ( pSMap )
 		{
-			delete pSMap;
+			//delete pSMap;
 			pSMap = NULL;
 		}
 	}
@@ -1606,7 +1606,7 @@ void CqShaderExecEnv::SO_textureinfo( IqShaderData* name, IqShaderData* dataname
 		}
 		else if ( pEMap )
 		{
-			delete pEMap;
+			//delete pEMap;
 			pEMap = NULL;
 		}
 	}
@@ -1620,7 +1620,7 @@ void CqShaderExecEnv::SO_textureinfo( IqShaderData* name, IqShaderData* dataname
 		}
 		else if ( pTMap )
 		{
-			delete pTMap;
+			//delete pTMap;
 			pTMap = NULL;
 		}
 	}
@@ -1798,7 +1798,7 @@ void CqShaderExecEnv::SO_textureinfo( IqShaderData* name, IqShaderData* dataname
 		}
 	}
 
-	delete pMap;
+	//delete pMap;
 
 	(Result)->SetFloat(Ret,__iGrid);
 
