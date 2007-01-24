@@ -556,7 +556,7 @@ int main( int argc, const char** argv )
 #ifdef	AQSIS_SYSTEM_POSIX
 		ap.argFlag( "syslog", "\aLog messages to syslog", &g_cl_syslog );
 #endif	// AQSIS_SYSTEM_POSIX
-#ifdef	ENABLE_MPDUMP
+#if	ENABLE_MPDUMP
 		ap.argFlag( "mpdump", "\aOutput MP list to a custom 'dump' file", &g_cl_mpdump );
 #endif	// ENABLE_MPDUMP
 
