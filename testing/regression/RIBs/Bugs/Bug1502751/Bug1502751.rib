@@ -1,0 +1,10 @@
+Format 320 240 1
+Display "Bug1502751.tif" "file" "rgb" "string compression" "lzw"
+PixelSamples 1 1
+Translate 0 0 5
+WorldBegin
+Surface "splinetst"
+Rotate 90 1 0 0
+Sphere 1 -1 1 360
+WorldEnd
+
