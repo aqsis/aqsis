@@ -1,0 +1,54 @@
+##RenderMan RIB-Structure 1.0
+version 3.03
+
+#Created with K-3D Version 0.5.0.37, http://www.k-3d.org
+
+#Setup file search paths
+Option "searchpath" "shader" [ "/home/tshead/.k3d/shadercache:&" ] 
+
+FrameBegin 1
+
+   #Setup options
+   Option "limits" "gridsize" [ 256 ] "bucketsize" [ 16 16 ] "eyesplits" [ 10 ] "texturememory" [ 1024 ] 
+
+   #Setup user options
+
+   #Setup Display
+   Display "Bug1410474.tif" "file" "rgb"  "string compression" "lzw"
+   Format 320 240 1
+   PixelSamples 1 1
+   PixelFilter "gaussian" 2 2
+   Exposure 1 1
+   ShadingRate 1
+   ShadingInterpolation "constant"
+   Orientation "lh"
+   Sides 2
+   CropWindow 0 1 0 1
+
+   #Setup viewing transformation
+   Projection "perspective" 
+   ScreenWindow -0.666667 0.666667 -0.5 0.5
+   Clipping 1 1000
+   Rotate -116.344 0 0 1
+   Rotate -47.9689 1 0 0
+   Rotate -123.69 0 1 0
+   Translate 15 -20 -10
+
+   WorldBegin
+      TransformBegin
+         Transform [ 1 0 0 0 0 1 0 0 0 0 1 0 -20 20 30 1 ]
+         LightSource "pointlight" 1 "constant float intensity" [ 3000 ] "constant color lightcolor" [ 1 1 1 ] "constant point from" [ 0 0 0 ] 
+      TransformEnd
+      AttributeBegin
+         ConcatTransform [ 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 ]
+         Attribute "displacementbound" "uniform float sphere" [ 1 ] "uniform string coordinatesystem" [ "world" ] 
+         Color 1 1 1
+         Opacity 1 1 1
+         Matte 0
+         Surface "plastic" "constant float Ka" [ 1 ] "constant float Kd" [ 0.5 ] "constant float Ks" [ 0.5 ] "constant float roughness" [ 0.1 ] "constant color specularcolor" [ 1 1 1 ] 
+         PointsGeneralPolygons [ 1 1 1 1 1 1 ] [ 4 4 4 4 4 4 ] [ 0 1 2 3 0 3 4 5 1 0 5 6 2 1 6 7 3 2 7 4 6 5 4 7 ] "P" [ -2.5 -2.5 2.5 2.5 -2.5 2.5 2.5 2.5 2.5 -2.5 2.5 2.5 -2.5 2.5 -2.5 -2.5 -2.5 -2.5 2.5 -2.5 -2.5 2.5 2.5 -2.5 ] 
+      AttributeEnd
+   WorldEnd
+FrameEnd
+
+ 	  	 
