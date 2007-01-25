@@ -214,26 +214,7 @@ env.AppendUnique(CPPDEFINES=[('DEFAULT_PLUGIN_PATH', '\\"' + env.Dir('${PLUGINDI
 #
 env.AppendUnique(CPPDEFINES=[('ENABLE_MPDUMP', '${enable_mpdump}')])
 
-# Setup the include path to the tiff headers (should have been determined in the system specific sections above).
-env.AppendUnique(LIBPATH = ['$tiff_lib_path', '$jpeg_lib_path', '$zlib_lib_path', '$fltk_lib_path'])
-
-# Create the output for the command line options defined above and in the platform specific configuration.
-Help(opts.GenerateHelpText(env))
-
-# Check for the existence of the various dependencies
-SConscript('build_check.py')
-
-# Transfer any findings from the build_check back to the environment
-env = conf.Finish()
-
-
-# Prepare the NSIS installer tool
-env.Tool('NSIS', toolpath=['./'])
-env.Distribute('./', 'NSIS.py')
-
-# Set the build directory for all sub-project build operations.
-env.BuildDir(target_dir, '.')
-
+# Add paths to librarys generated in the build dir.
 def prependBuildDir(subDirs):
 	'''Prepend the build directory to each directory in a list, or to a string
 	if the input is simply a string'''
@@ -241,8 +222,6 @@ def prependBuildDir(subDirs):
 		return os.path.join(target_dir.abspath, subDirs)
 	else:
 		return [ os.path.join(target_dir.abspath, subDir) for subDir in subDirs ]
-
-# Add paths to librarys generated in the build dir.
 env.AppendUnique(LIBPATH = prependBuildDir( Split('''
 	rib/rib2
 	rib/rib2ri
@@ -269,6 +248,28 @@ env.AppendUnique(LIBPATH = prependBuildDir( Split('''
 	texturing/plugins/tga2tif
 	texturing/plugins/png2tif
 ''' ) ) )
+
+# Setup the include path to the tiff headers (should have been determined in the system specific sections above).
+env.AppendUnique(LIBPATH = ['$tiff_lib_path', '$jpeg_lib_path', '$zlib_lib_path', '$fltk_lib_path'])
+
+# Create the output for the command line options defined above and in the platform specific configuration.
+Help(opts.GenerateHelpText(env))
+
+# Check for the existence of the various dependencies
+SConscript('build_check.py')
+
+# Transfer any findings from the build_check back to the environment
+env = conf.Finish()
+
+
+# Prepare the NSIS installer tool
+env.Tool('NSIS', toolpath=['./'])
+env.Distribute('./', 'NSIS.py')
+
+# Set the build directory for all sub-project build operations.
+env.BuildDir(target_dir, '.')
+
+
 
 # Load the sub-project SConscript files.
 sub_sconsdirs_noret = prependBuildDir(Split('''
