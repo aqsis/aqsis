@@ -2,14 +2,12 @@
 ; Author: Aqsis Team (packages@aqsis.org)
 ; Info: Last tested with NSIS 2.21
 ; Other: 1. To make updates easier, all message strings have been placed within the top 40-50 lines of this file.
-;        2. To build manually, without using SCons, uncomment lines 10, 11, 12, 13, 17, 21 and 25.
+;        2. To build manually, without using SCons, uncomment lines 10, 11, 15, 19 and 23.
 
 
 ; Helper defines
 !define /date YEAR "%Y"
 ;;!define PROJECT_ROOT "C:\WINDOWS\Temp\aqsis"
-;;!define LIBRARY_EXTENSION ".*"
-;;!define LIBRARY_PREFIX ""
 ;;!define USE_DEFS "0"
 
 !define PRODUCT_NAME "Aqsis"
@@ -157,7 +155,6 @@ SectionIn 1 2
   File "${PROJECT_ROOT}\output\bin\aqsisrc"
   File "${PROJECT_ROOT}\output\bin\*.dll"
   File "${PROJECT_ROOT}\output\bin\*.exe"
-  ;;File "${PROJECT_ROOT}\output\bin\*.py"
   SetOutPath "$INSTDIR\doc"
   File "/oname=AUTHORS.txt" "${PROJECT_ROOT}\AUTHORS"
   File "/oname=LICENSE.txt" "${PROJECT_ROOT}\COPYING"
@@ -204,7 +201,13 @@ SectionGroup /e "Content" SEC02
     !insertmacro MUI_STARTMENU_WRITE_END
   SectionEnd
 
-  Section /o "Source Shaders" SEC0202
+  Section /o "Scripts" SEC0202
+  SectionIn 1
+    SetOutPath "$INSTDIR\scripts"
+    File "${PROJECT_ROOT}\output\scripts\*.*"
+  SectionEnd
+
+  Section /o "Source Shaders" SEC0203
   SectionIn 1
     SetOutPath "$INSTDIR\shaders"
     File "${PROJECT_ROOT}\output\shaders\*.sl"
@@ -225,14 +228,11 @@ SectionIn 1 2
   !insertmacro MUI_STARTMENU_WRITE_END
 SectionEnd
 
-Section /o "Libraries" SEC04
+Section /o "Development" SEC04
 SectionIn 1
   SetOutPath "$INSTDIR\include\aqsis"
   File "${PROJECT_ROOT}\output\include\aqsis\*.h"
   File "${PROJECT_ROOT}\output\include\aqsis\*.inl"
-  ;;SetOutPath "$INSTDIR\lib"
-  ;;File "${PROJECT_ROOT}\output\lib\${LIBRARY_PREFIX}*${LIBRARY_EXTENSION}"
-  ;;File "${PROJECT_ROOT}\output\bin\${LIBRARY_PREFIX}aqsis${LIBRARY_EXTENSION}"
   !if ${USE_DEFS} != 0
     File "${PROJECT_ROOT}\output\bin\aqsis.def"
   !endif
@@ -241,11 +241,12 @@ SectionEnd
 ; Section descriptions
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
   !insertmacro MUI_DESCRIPTION_TEXT ${SEC01} "Rendering application and essential files only"
-  !insertmacro MUI_DESCRIPTION_TEXT ${SEC02} "Examples and shader source files"
+  !insertmacro MUI_DESCRIPTION_TEXT ${SEC02} "Examples, scripts and shader source files"
   !insertmacro MUI_DESCRIPTION_TEXT ${SEC0201} "Example files (.rib)"
-  !insertmacro MUI_DESCRIPTION_TEXT ${SEC0202} "Generic shader source files (.sl)"
+  !insertmacro MUI_DESCRIPTION_TEXT ${SEC0202} "Script files (.py)"
+  !insertmacro MUI_DESCRIPTION_TEXT ${SEC0203} "Generic shader source files (.sl)"
   !insertmacro MUI_DESCRIPTION_TEXT ${SEC03} "User guides and other information"
-  !insertmacro MUI_DESCRIPTION_TEXT ${SEC04} "Include and library files"
+  !insertmacro MUI_DESCRIPTION_TEXT ${SEC04} "Include files (.h)"
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 
