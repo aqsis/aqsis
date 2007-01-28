@@ -24,7 +24,7 @@ if sys.platform == 'win32':
 
 	Return('d_win32')
 
-env.Distribute('displays/d_sdcWin32', d_win32_sources)
-env.Distribute('displays/d_sdcWin32', d_win32_headers)
-env.Distribute('displays/d_sdcWin32', 'SConscript')
+env.Distribute(d_win32_sources)
+env.Distribute(d_win32_headers)
+env.Distribute('SConscript')
 

@@ -116,6 +116,6 @@ aqsisenv.PostInstallSharedLibrary(aqsisenv, '${RENDERENGINEDIR}', aqsisdll)
 #aqsisenv.Depends(aqsisdll, aqsisproject)
 
 
-env.Distribute('renderer/render', aqsisdll_sources)
-env.Distribute('renderer/render', aqsisdll_headers)
-env.Distribute('renderer/render', 'SConscript')
+env.Distribute(aqsisdll_sources)
+env.Distribute(aqsisdll_headers)
+env.Distribute('SConscript')

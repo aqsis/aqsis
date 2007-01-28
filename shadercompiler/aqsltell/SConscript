@@ -12,6 +12,6 @@ aqsltellenv.UseTargetOptions('aqsltell')
 aqsltell = aqsltellenv.Program('aqsltell', aqsltell_sources)
 aqsltellenv.Install('$BINDIR', aqsltell)
 
-env.Distribute('shadercompiler/aqsltell', aqsltell_sources)
-env.Distribute('shadercompiler/aqsltell', "SConscript")
+env.Distribute(aqsltell_sources)
+env.Distribute("SConscript")
 

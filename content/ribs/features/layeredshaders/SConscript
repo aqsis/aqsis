@@ -10,6 +10,6 @@ scene_data = Split("""
 
 env.Install('$CONTENTDIR/ribs/features/layeredshaders', scene_data)
 
-env.Distribute('content/ribs/features/layeredshaders', scene_data)
-env.Distribute('content/ribs/features/layeredshaders', 'SConscript')
+env.Distribute(scene_data)
+env.Distribute('SConscript')
 

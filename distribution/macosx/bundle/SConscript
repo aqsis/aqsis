@@ -9,4 +9,4 @@ if 'BUNDLE' in env['TOOLS']:
 				'aqsis.icns')
 	env.Alias('bundle', bundle)
 
-env.Distribute('distribution/macosx/bundle/', 'SConscript')
+env.Distribute('SConscript')

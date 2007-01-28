@@ -13,5 +13,5 @@ Import('common_objs')
 bmp2tif = bmp2tifenv.SharedLibrary('bmp2tif', [bmp2tif_sources, common_objs], LIBS=['$tiff_lib', '$z_lib', 'jpg2tif'])
 bmp2tifenv.Install('$PLUGINDIR', bmp2tif)
 
-env.Distribute('texturing/plugins/bmp2tif', bmp2tif_sources)
-env.Distribute('texturing/plugins/bmp2tif', 'SConscript')
+env.Distribute(bmp2tif_sources)
+env.Distribute('SConscript')

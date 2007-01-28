@@ -18,8 +18,8 @@ rib2rienv.UseTargetOptions('rib2ri')
 if env.has_key('rib2ri_add_sources'):
 	rib2ri_sources = rib2ri_sources + ['$rib2ri_add_sources']
 
-env.Distribute('rib/rib2ri', rib2ri_sources)
-env.Distribute('rib/rib2ri', rib2ri_headers)
-env.Distribute('rib/rib2ri', 'SConscript')
+env.Distribute(rib2ri_sources)
+env.Distribute(rib2ri_headers)
+env.Distribute('SConscript')
 
 Export('rib2ri_sources')

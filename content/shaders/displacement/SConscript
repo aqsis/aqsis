@@ -17,7 +17,7 @@ for shader in shader_sources:
 
 env.Install('$CONTENTDIR/shaders/displacement', header_sources)
 
-env.Distribute('content/shaders/displacement', shader_sources)
-env.Distribute('content/shaders/displacement', header_sources)
-env.Distribute('content/shaders/displacement', 'SConscript')
+env.Distribute(shader_sources)
+env.Distribute(header_sources)
+env.Distribute('SConscript')
 

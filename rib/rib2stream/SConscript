@@ -16,7 +16,7 @@ rib2streamenv.UseTargetOptions('rib2stream')
 
 rib2stream = rib2streamenv.Library('rib2stream', rib2stream_sources)
 
-env.Distribute('rib/rib2stream', rib2stream_sources)
-env.Distribute('rib/rib2stream', rib2stream_headers)
-env.Distribute('rib/rib2stream', 'SConscript')
+env.Distribute(rib2stream_sources)
+env.Distribute(rib2stream_headers)
+env.Distribute('SConscript')
 

@@ -30,7 +30,7 @@ for shader in shader_sources:
 
 env.Install('$SHADERDIR', header_sources)
 
-env.Distribute('shaders', shader_sources)
-env.Distribute('shaders', header_sources)
-env.Distribute('shaders', 'SConscript')
+env.Distribute(shader_sources)
+env.Distribute(header_sources)
+env.Distribute('SConscript')
 

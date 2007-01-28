@@ -113,8 +113,10 @@ Export('env opts conf')
 # Setup the distribution stuff, this should be non-platform specific, the distribution
 # archive should apply to all supported platforms.
 env['ZIPDISTDIR'] = env.Dir('#/aqsis-%d.%d.%d' %(version.major, version.minor, version.build))
-def Distribute(dir, files):
-        env.Install('$ZIPDISTDIR/%s' % dir, files)
+def Distribute(files, dir = None):
+	if dir is None:
+		dir = env.Dir('./').srcnode().path
+	env.Install('$ZIPDISTDIR/' + dir, files)
 env.Distribute = Distribute
 env.Alias('dist', '$ZIPDISTDIR')
 zip_target = env.Zip('aqsis-%d.%d.%d' %(version.major, version.minor, version.build), '$ZIPDISTDIR')
@@ -250,7 +252,7 @@ env = conf.Finish()
 
 # Prepare the NSIS installer tool
 env.Tool('NSIS', toolpath=['./'])
-env.Distribute('./', 'NSIS.py')
+env.Distribute('NSIS.py')
 
 # Set the build directory for all sub-project build operations.
 env.BuildDir(target_dir, '.')
@@ -372,8 +374,8 @@ def version_h_build(target, source, env):
 		aqsisrc_in.close()
 
 version_h = env.Command(prependBuildDir('version.h'), 'version.h.in', version_h_build)
-env.Distribute('./', 'version.py')
-env.Distribute('./', 'version.h.in')
+env.Distribute('version.py')
+env.Distribute('version.h.in')
 
 # Note that the distribution directory is not included in the build alias.
 env.Alias('build', sub_sconsdirs_noret + sub_sconsdirs_withret + [aqsisrc])
@@ -394,15 +396,15 @@ main_distfiles = Split("""
 	ReleaseNotes
 	aqsisrc.in""")
 
-env.Distribute('', main_distfiles)
+env.Distribute(main_distfiles)
 
 # Distribute the platform build configurations.
 platforms = glob.glob('platform/*/SConscript')
 for platform in platforms:
 	path, name = os.path.split(platform)
-	env.Distribute(path, platform)
+	env.Distribute(platform, path)
 options = glob.glob('platform/*/*.py')
 for option in options:
 	path, name = os.path.split(option)
-	env.Distribute(path, option)
+	env.Distribute(option, path)
 

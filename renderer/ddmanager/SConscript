@@ -19,6 +19,6 @@ Export('ddmanager_objs')
 
 ddmanagerenv.Install('$INCLUDEDIR', "ndspy.h")
 
-env.Distribute('renderer/ddmanager', ddmanager_sources)
-env.Distribute('renderer/ddmanager', ddmanager_headers)
-env.Distribute('renderer/ddmanager', 'SConscript')
+env.Distribute(ddmanager_sources)
+env.Distribute(ddmanager_headers)
+env.Distribute('SConscript')

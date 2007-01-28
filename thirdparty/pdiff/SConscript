@@ -21,7 +21,7 @@ if env['with_pdiff']:
 	pdiff = pdiffenv.Program('pdiff', pdiff_sources)
 	pdiffenv.Install('$BINDIR', pdiff)
 
-env.Distribute('thirdparty/pdiff', pdiff_sources)
-env.Distribute('thirdparty/pdiff', pdiff_headers)
-env.Distribute('thirdparty/pdiff', 'SConscript')
+env.Distribute(pdiff_sources)
+env.Distribute(pdiff_headers)
+env.Distribute('SConscript')
 

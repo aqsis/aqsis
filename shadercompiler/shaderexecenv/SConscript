@@ -25,8 +25,8 @@ shaderexecenv_objs = [shaderexecenvenv.SharedObject(file) for file in shaderexec
 
 Export('shaderexecenv_objs')
 
-env.Distribute('shadercompiler/shaderexecenv', shaderexecenv_sources)
-env.Distribute('shadercompiler/shaderexecenv', shaderexecenv_headers)
-env.Distribute('shadercompiler/shaderexecenv', 'SConscript')
+env.Distribute(shaderexecenv_sources)
+env.Distribute(shaderexecenv_headers)
+env.Distribute('SConscript')
 
 

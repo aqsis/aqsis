@@ -10,4 +10,4 @@ SConscript('tga2tif/SConscript')
 SConscript('png2tif/SConscript')
 SConscript('exr2tif/SConscript')
 
-env.Distribute('texturing/plugins', 'SConscript')
+env.Distribute('SConscript')

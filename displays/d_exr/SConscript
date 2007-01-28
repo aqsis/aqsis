@@ -22,11 +22,11 @@ if not env['no_exr']:
 
 	Return('exr')
 
-env.Distribute('displays/d_exr', d_exr_sources)
-env.Distribute('displays/d_exr', d_exr_headers)
-env.Distribute('displays/d_exr', 'dspyhlpr.c')
-env.Distribute('displays/d_exr', 'tst.rib')
-env.Distribute('displays/d_exr', 'exrtest.bat')
-env.Distribute('displays/d_exr', 'SConscript')
+env.Distribute(d_exr_sources)
+env.Distribute(d_exr_headers)
+env.Distribute('dspyhlpr.c')
+env.Distribute('tst.rib')
+env.Distribute('exrtest.bat')
+env.Distribute('SConscript')
 
 

@@ -18,7 +18,7 @@ codegenvm_objs = [codegenvmenv.Object(file) for file in codegenvm_sources]
 
 Export('codegenvm_objs')
 
-env.Distribute('shadercompiler/codegenvm', codegenvm_sources)
-env.Distribute('shadercompiler/codegenvm', codegenvm_headers)
-env.Distribute('shadercompiler/codegenvm', 'SConscript')
+env.Distribute(codegenvm_sources)
+env.Distribute(codegenvm_headers)
+env.Distribute('SConscript')
 

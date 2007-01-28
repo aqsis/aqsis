@@ -27,10 +27,10 @@ rib2_objs = [rib2env.SharedObject(file) for file in rib2_sources]
 
 Export('rib2_objs')
 
-env.Distribute('rib/rib2', rib2_sources)
-env.Distribute('rib/rib2', rib2_headers)
-env.Distribute('rib/rib2', 'SConscript')
-env.Distribute('rib/rib2', 'scanner.ll')
-env.Distribute('rib/rib2', 'parser.yy')
+env.Distribute(rib2_sources)
+env.Distribute(rib2_headers)
+env.Distribute('SConscript')
+env.Distribute('scanner.ll')
+env.Distribute('parser.yy')
 
 

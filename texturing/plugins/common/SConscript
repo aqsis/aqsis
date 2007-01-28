@@ -16,7 +16,7 @@ common_objs = [commonenv.SharedObject(file) for file in common_sources]
 
 Export('common_objs')
 
-env.Distribute('texturing/plugins/common', common_sources)
-env.Distribute('texturing/plugins/common', common_headers)
-env.Distribute('texturing/plugins/common', 'SConscript')
+env.Distribute(common_sources)
+env.Distribute(common_headers)
+env.Distribute('SConscript')
 

@@ -29,7 +29,7 @@ slxargsenv.InstallAs([os.path.join('${RENDERENGINEDIR}', '%s${SHLIB_VERSION_SUFF
 slxargsenv.PostInstallSharedLibrary(slxargsenv, '${RENDERENGINEDIR}', slxargs)
 slxargsenv.Install('$INCLUDEDIR', slxargs_install_headers)
 
-env.Distribute('shadercompiler/slxargs', slxargs_sources)
-env.Distribute('shadercompiler/slxargs', slxargs_headers)
-env.Distribute('shadercompiler/slxargs', 'SConscript')
+env.Distribute(slxargs_sources)
+env.Distribute(slxargs_headers)
+env.Distribute('SConscript')
 

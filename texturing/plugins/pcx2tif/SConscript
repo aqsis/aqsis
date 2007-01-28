@@ -14,5 +14,5 @@ pcx2tif = pcx2tifenv.SharedLibrary('pcx2tif', [pcx2tif_sources, common_objs], LI
 
 pcx2tifenv.Install('$PLUGINDIR', pcx2tif)
 
-env.Distribute('texturing/plugins/pcx2tif', pcx2tif_sources)
-env.Distribute('texturing/plugins/pcx2tif', 'SConscript')
+env.Distribute(pcx2tif_sources)
+env.Distribute('SConscript')

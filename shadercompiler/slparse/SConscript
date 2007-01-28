@@ -35,9 +35,9 @@ slparse_objs = [slparseenv.Object(file) for file in slparse_sources]
 
 Export('slparse_objs')
 
-env.Distribute('shadercompiler/slparse', slparse_sources)
-env.Distribute('shadercompiler/slparse', slparse_headers)
-env.Distribute('shadercompiler/slparse', 'SConscript')
-env.Distribute('shadercompiler/slparse', 'parser.yy')
-env.Distribute('shadercompiler/slparse', 'scanner.ll')
+env.Distribute(slparse_sources)
+env.Distribute(slparse_headers)
+env.Distribute('SConscript')
+env.Distribute('parser.yy')
+env.Distribute('scanner.ll')
 

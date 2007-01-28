@@ -14,5 +14,5 @@ jpg2tif = jpg2tifenv.SharedLibrary('jpg2tif', [jpg2tif_sources, common_objs], LI
 
 jpg2tifenv.Install('$PLUGINDIR', jpg2tif)
 
-env.Distribute('texturing/plugins/jpg2tif', jpg2tif_sources)
-env.Distribute('texturing/plugins/jpg2tif', 'SConscript')
+env.Distribute(jpg2tif_sources)
+env.Distribute('SConscript')

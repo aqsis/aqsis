@@ -1,4 +1,4 @@
 Import('env')
 SConscript('mpdump/SConscript')
 
-env.Distribute('tools', 'SConscript')
+env.Distribute('SConscript')

@@ -14,7 +14,7 @@ raytrace_objs = [raytraceenv.SharedObject(file) for file in raytrace_sources]
 
 Export('raytrace_objs')
 
-env.Distribute('renderer/raytrace', raytrace_sources)
-env.Distribute('renderer/raytrace', raytrace_headers)
-env.Distribute('renderer/raytrace', 'SConscript')
+env.Distribute(raytrace_sources)
+env.Distribute(raytrace_headers)
+env.Distribute('SConscript')
 

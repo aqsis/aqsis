@@ -21,7 +21,7 @@ displayenv.Install('$DISPLAYSDIR', display)
 
 Return('display')
 
-env.Distribute('displays/display', display_sources)
-env.Distribute('displays/display', display_headers)
-env.Distribute('displays/display', 'SConscript')
+env.Distribute(display_sources)
+env.Distribute(display_headers)
+env.Distribute('SConscript')
 

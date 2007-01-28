@@ -25,7 +25,7 @@ Export('slpp_objs')
 # Note: Need to work out how to do an executable build of slpp as well at some point.
 # There are some issues with duplicate object files.
 
-env.Distribute('shadercompiler/slpp', slpp_sources)
-env.Distribute('shadercompiler/slpp', slpp_headers)
-env.Distribute('shadercompiler/slpp', 'PP.DOC')
-env.Distribute('shadercompiler/slpp', 'SConscript')
+env.Distribute(slpp_sources)
+env.Distribute(slpp_headers)
+env.Distribute('PP.DOC')
+env.Distribute('SConscript')

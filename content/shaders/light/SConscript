@@ -17,7 +17,7 @@ for shader in shader_sources:
 
 env.Install('$CONTENTDIR/shaders/light', header_sources)
 
-env.Distribute('content/shaders/light', shader_sources)
-env.Distribute('content/shaders/light', header_sources)
-env.Distribute('content/shaders/light', 'SConscript')
+env.Distribute(shader_sources)
+env.Distribute(header_sources)
+env.Distribute('SConscript')
 

@@ -36,8 +36,8 @@ shadervmenv.InstallAs([os.path.join('${RENDERENGINEDIR}', '%s${SHLIB_VERSION_SUF
 
 shadervmenv.PostInstallSharedLibrary(shadervmenv, '${RENDERENGINEDIR}', shadervm)
 
-env.Distribute('shadercompiler/shadervm', shadervm_sources)
-env.Distribute('shadercompiler/shadervm', shadervm_headers)
-env.Distribute('shadercompiler/shadervm', 'SConscript')
+env.Distribute(shadervm_sources)
+env.Distribute(shadervm_headers)
+env.Distribute('SConscript')
 
 

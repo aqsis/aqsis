@@ -2,4 +2,4 @@ Import('env')
 
 SConscript('bundle/SConscript')
 
-env.Distribute('distribution/macosx/', 'SConscript')
+env.Distribute('SConscript')

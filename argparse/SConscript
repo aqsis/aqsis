@@ -16,7 +16,7 @@ argparseenv.UseTargetOptions('argparse')
 
 argparse = argparseenv.Library('argparse', argparse_sources)
 
-env.Distribute('argparse', argparse_sources)
-env.Distribute('argparse', argparse_headers)
-env.Distribute('argparse', 'SConscript')
+env.Distribute(argparse_sources)
+env.Distribute(argparse_headers)
+env.Distribute('SConscript')
 

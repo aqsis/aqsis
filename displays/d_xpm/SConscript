@@ -21,7 +21,7 @@ d_xpmenv.Install('$DISPLAYSDIR', d_xpm)
 
 Return('d_xpm')
 
-env.Distribute('displays/d_xpm', d_xpm_sources)
-env.Distribute('displays/d_xpm', d_xpm_headers)
-env.Distribute('displays/d_xpm', 'SConscript')
+env.Distribute(d_xpm_sources)
+env.Distribute(d_xpm_headers)
+env.Distribute('SConscript')
 

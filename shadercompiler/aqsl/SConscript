@@ -44,6 +44,6 @@ slscan = Scanner(function = slfile_scan,
 	skeys = ['.sl'])
 env.Append(SCANNERS = slscan)
 
-env.Distribute('shadercompiler/aqsl', aqsl_sources)
-env.Distribute('shadercompiler/aqsl', "SConscript")
+env.Distribute(aqsl_sources)
+env.Distribute("SConscript")
 

@@ -21,7 +21,7 @@ d_bmpenv.Install('$DISPLAYSDIR', d_bmp)
 
 Return('d_bmp')
 
-env.Distribute('displays/d_sdcBMP', d_bmp_sources)
-env.Distribute('displays/d_sdcBMP', d_bmp_headers)
-env.Distribute('displays/d_sdcBMP', 'SConscript')
+env.Distribute(d_bmp_sources)
+env.Distribute(d_bmp_headers)
+env.Distribute('SConscript')
 

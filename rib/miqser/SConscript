@@ -18,7 +18,7 @@ rib2ri_objs = miqserenv.StaticObject('rib2ri', rib2ri_sources)
 miqser = miqserenv.Program('miqser', [miqser_sources, rib2ri_objs, rib2_objs])
 miqserenv.Install('$BINDIR', miqser)
 
-env.Distribute('rib/miqser', miqser_sources)
-env.Distribute('rib/miqser', 'SConscript')
+env.Distribute(miqser_sources)
+env.Distribute('SConscript')
 
 Return('miqser')

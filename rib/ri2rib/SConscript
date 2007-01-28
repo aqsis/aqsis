@@ -42,6 +42,6 @@ ri2ribenv.InstallAs([os.path.join('${RENDERENGINEDIR}', '%s${SHLIB_VERSION_SUFFI
 
 ri2ribenv.PostInstallSharedLibrary(ri2ribenv, '${RENDERENGINEDIR}', ri2rib)
 
-env.Distribute('rib/ri2rib', ri2rib_sources)
-env.Distribute('rib/ri2rib', ri2rib_headers)
-env.Distribute('rib/ri2rib', 'SConscript')
+env.Distribute(ri2rib_sources)
+env.Distribute(ri2rib_headers)
+env.Distribute('SConscript')

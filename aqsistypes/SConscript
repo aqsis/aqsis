@@ -90,6 +90,6 @@ aqsistypesenv.InstallAs([os.path.join('${RENDERENGINEDIR}', '%s${SHLIB_VERSION_S
 
 aqsistypesenv.PostInstallSharedLibrary(aqsistypesenv, '${RENDERENGINEDIR}', aqsistypes)
 
-env.Distribute('aqsistypes', aqsistypes_sources)
-env.Distribute('aqsistypes', aqsistypes_headers)
-env.Distribute('aqsistypes', 'SConscript')
+env.Distribute(aqsistypes_sources)
+env.Distribute(aqsistypes_headers)
+env.Distribute('SConscript')

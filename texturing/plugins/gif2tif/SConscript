@@ -14,5 +14,5 @@ gif2tif = gif2tifenv.SharedLibrary('gif2tif', [gif2tif_sources, common_objs], LI
 
 gif2tifenv.Install('$PLUGINDIR', gif2tif)
 
-env.Distribute('texturing/plugins/gif2tif', gif2tif_sources)
-env.Distribute('texturing/plugins/gif2tif', 'SConscript')
+env.Distribute(gif2tif_sources)
+env.Distribute('SConscript')

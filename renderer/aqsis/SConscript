@@ -12,7 +12,7 @@ aqsisenv.UseTargetOptions('aqsis')
 aqsis = aqsisenv.Program('aqsis', aqsis_sources)
 aqsisenv.Install('$BINDIR', aqsis)
 
-env.Distribute('renderer/aqsis', aqsis_sources)
-env.Distribute('renderer/aqsis', 'SConscript')
+env.Distribute(aqsis_sources)
+env.Distribute('SConscript')
 
 Return('aqsis')
