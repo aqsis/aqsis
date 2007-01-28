@@ -1,7 +1,7 @@
 Import('env')
 
-rib2ri_sources = Split("""
-	librib2ri.cpp""")
+rib2ri_sources = env.File(Split("""
+	librib2ri.cpp"""))
 
 rib2ri_headers = Split("""
 	librib2ri.h""")
@@ -18,12 +18,8 @@ rib2rienv.UseTargetOptions('rib2ri')
 if env.has_key('rib2ri_add_sources'):
 	rib2ri_sources = rib2ri_sources + ['$rib2ri_add_sources']
 
-rib2ri_objs = [rib2rienv.SharedObject(file) for file in rib2ri_sources]
-
-Export('rib2ri_objs')
-
 env.Distribute('rib/rib2ri', rib2ri_sources)
 env.Distribute('rib/rib2ri', rib2ri_headers)
 env.Distribute('rib/rib2ri', 'SConscript')
 
-
+Export('rib2ri_sources')
