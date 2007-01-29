@@ -1,0 +1,23 @@
+# RIB file to test the imager alpha bug.
+# Correct rendering results can be had with output type "rgb",
+# but rendering to an "rgba" file yields incorrect alpha.
+
+Display "Bug1412162.tif" "file" "rgba"  "string compression" "lzw" # "rgb" works OK
+Format 400 400 1
+Projection "perspective" "fov" 40
+ShadingRate 1
+
+Imager "imageralphabug"
+
+Translate -0.5 -0.5 1.9
+
+WorldBegin
+
+    Color [0.5 0.5 0.5]
+    Surface "constant"
+    AttributeBegin
+        Polygon "P" [0 0 0 1 0 0 1 1 0 0 1 0]
+		"st" [0 0 1 0 1 1 0 1 0]
+    AttributeEnd
+
+WorldEnd
