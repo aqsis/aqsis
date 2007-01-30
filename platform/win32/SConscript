@@ -99,7 +99,7 @@ else:
 	if env['exr_lib_path'] == "":
 		env.Replace(exr_lib_path = env.Dir('#/../win32libs/OpenEXR/lib/mingw'))
 
-	env.Replace(exr_lib = 'Iex')
+	env.Replace(exr_lib = '')
 
 	env.Replace(fltk_lib = 'fltk')
 	env.Replace(exr2tif_libs = ['$tiff_lib', 'IlmImf', 'Half', 'Iex', 'Imath', 'IlmThread', '$z_lib'])
