@@ -17,8 +17,6 @@ if not env['no_exr']:
 	# Set any platform specific target options.
 	d_exrenv.UseTargetOptions('exr')
 
-	print d_exrenv['exr_libs']
-
 	exr = d_exrenv.SharedLibrary('d_exr', d_exr_sources)
 	d_exrenv.Install('$DISPLAYSDIR', exr)
 
