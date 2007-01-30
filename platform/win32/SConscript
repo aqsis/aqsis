@@ -83,7 +83,7 @@ else:
 
 	env.Replace(z_lib = 'z')
 
-	# If the zlib include path isn't specified as an option, choose the default, of the 
+	# If the jpeg include path isn't specified as an option, choose the default, of the 
 	# win32libs project from CVS checked out to the same folder as 'renderer'
 	if env['jpeg_include_path'] == "":
 		env.Replace(jpeg_include_path = env.Dir('#/../win32libs/jpeg/include'))
@@ -92,8 +92,16 @@ else:
 
 	env.Replace(jpeg_lib = 'jpeg')
 
-	env.Replace(fltk_lib = 'fltk')
+	# If the openexr include path isn't specified as an option, choose the default, of the 
+	# win32libs project from CVS checked out to the same folder as 'renderer'
+	if env['exr_include_path'] == "":
+		env.Replace(exr_include_path = env.Dir('#/../win32libs/OpenEXR/include'))
+	if env['exr_lib_path'] == "":
+		env.Replace(exr_lib_path = env.Dir('#/../win32libs/OpenEXR/lib/mingw'))
+
 	env.Replace(exr_lib = 'Iex')
+
+	env.Replace(fltk_lib = 'fltk')
 	env.Replace(exr2tif_libs = ['IlmImf', 'Half', 'Iex', 'Imath'])
 	env.Replace(display_libs = ['ws2_32', 'user32', 'gdi32', 'ole32', 'shell32', 'comctl32', 'uuid', '$fltk_lib'])
 

@@ -238,7 +238,7 @@ env.AppendUnique(LIBPATH = prependBuildDir( Split('''
 ''' ) ) )
 
 # Setup the include path to the tiff headers (should have been determined in the system specific sections above).
-env.AppendUnique(LIBPATH = ['$tiff_lib_path', '$jpeg_lib_path', '$zlib_lib_path', '$fltk_lib_path'])
+env.AppendUnique(LIBPATH = ['$tiff_lib_path', '$jpeg_lib_path', '$zlib_lib_path', '$fltk_lib_path', '$exr_lib_path'])
 
 # Create the output for the command line options defined above and in the platform specific configuration.
 Help(opts.GenerateHelpText(env))
