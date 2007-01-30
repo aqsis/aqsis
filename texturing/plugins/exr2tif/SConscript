@@ -16,7 +16,7 @@ if not env['no_exr']:
 	exr2tifenv.UseTargetOptions('texture_plugin')
 	exr2tifenv.UseTargetOptions('exr2tif')
 
-	exr2tif = exr2tifenv.SharedLibrary('exr2tif', [exr2tif_sources, common_objs], LIBS=['$tiff_lib', 'IlmImf', 'Half', 'Iex', 'Imath', 'IlmThread', '$z_lib'])
+	exr2tif = exr2tifenv.SharedLibrary('exr2tif', [exr2tif_sources, common_objs], LIBS=['$tiff_lib', 'IlmImf', 'Half', 'Iex', 'Imath'])
 
 	exr2tifenv.Install('$PLUGINDIR', exr2tif)
 
