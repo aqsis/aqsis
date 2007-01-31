@@ -81,6 +81,7 @@ aqsis_install_headers = Split('''
 
 aqsisenv = env.Copy()
 aqsisenv.AppendUnique(CPPDEFINES=['RI_EXPORTS', 'RIB_EXPORTS'])
+aqsisenv.AppendUnique(CPPPATH=['$tiff_include_path', '$zlib_include_path'])
 
 
 if env.has_key('libaqsis_add_sources'):

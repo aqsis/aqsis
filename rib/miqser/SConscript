@@ -4,6 +4,7 @@ miqser_sources = Split("""
 
 miqserenv = env.Copy();
 miqserenv.AppendUnique(CPPDEFINES = ['RIB_EXPORTS'])
+miqserenv.AppendUnique(CPPPATH=['$zlib_include_path'])
 
 miqserenv.AppendUnique(LIBS = ['argparse', 'ri2rib', 'aqsistypes', '$z_lib'])
 

@@ -27,6 +27,7 @@ ri2rib_headers = Split("""
 
 ri2ribenv = env.Copy()
 ri2ribenv.AppendUnique(CPPDEFINES = ['RI_EXPORTS'])
+ri2ribenv.AppendUnique(CPPPATH=['$zlib_include_path'])
 
 # Set any platform specific options for this target
 ri2ribenv.UseTargetOptions('ri2rib')

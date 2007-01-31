@@ -7,6 +7,8 @@ common_sources = Split("""
 common_headers = Split("""
 	pixelsave.h""")
 
+commonenv.AppendUnique(CPPPATH=['$tiff_include_path', '$zlib_include_path'])
+
 # Set any platform specific options for this target
 commonenv.UseTargetOptions('common')
 

@@ -13,6 +13,8 @@ if not env['no_exr']:
 	d_exrenv.AppendUnique(CPPPATH=['$exr_include_path'])
 	d_exrenv.AppendUnique(CPPDEFINES=['D_EXR_EXPORTS'])
 
+	print(d_exrenv['LIBS'])
+
 
 	# Set any platform specific target options.
 	d_exrenv.UseTargetOptions('exr')

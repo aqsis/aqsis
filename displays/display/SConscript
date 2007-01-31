@@ -12,6 +12,7 @@ display_headers =  Split("""
 
 
 displayenv.AppendUnique(LIBS = ['aqsistypes', '$tiff_lib', '$z_lib', '$fltk_lib'])
+displayenv.AppendUnique(CPPPATH=['$tiff_include_path', '$zlib_include_path', '$fltk_include_path'])
 
 # Set any platform specific target options.
 displayenv.UseTargetOptions('display')

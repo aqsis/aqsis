@@ -22,6 +22,7 @@ rib2env.CXXFile(target='scanner.cpp', source='scanner.ll')
 # Set any platform specific options for this target
 rib2env.UseTargetOptions('rib2')
 rib2env.AppendUnique(CPPDEFINES = ['RIB_EXPORTS'])
+rib2env.AppendUnique(CPPPATH=['$zlib_include_path'])
 
 rib2_objs = [rib2env.SharedObject(file) for file in rib2_sources]
 

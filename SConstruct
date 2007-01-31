@@ -192,8 +192,9 @@ libincludes = [''] + Split('''
 		$fltk_include_path
 		$exr_include_path
 	''')
-for a in libincludes:
-	env.AppendUnique(CPPPATH = [env.subst(a)] )
+#for a in libincludes:
+#	env.AppendUnique(CPPPATH = [env.subst(a)] )
+env.AppendUnique(CPPPATH = ['$boost_include_path'])
 
 env.AppendUnique(CPPDEFINES=[('DEFAULT_PLUGIN_PATH', '\\"' + env.Dir('${PLUGINDIR}').abspath + '\\"')])
 
@@ -248,7 +249,6 @@ SConscript('build_check.py')
 
 # Transfer any findings from the build_check back to the environment
 env = conf.Finish()
-
 
 # Prepare the NSIS installer tool
 env.Tool('NSIS', toolpath=['./'])

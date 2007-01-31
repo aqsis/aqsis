@@ -3,6 +3,8 @@ jpg2tifenv = env.Copy()
 jpg2tif_sources=Split("""
 	jpg2tif.c""")
 
+jpg2tifenv.AppendUnique(CPPPATH=['$jpeg_include_path'])
+
 # Set any platform specific options for this target
 jpg2tifenv.UseTargetOptions('plugin')
 jpg2tifenv.UseTargetOptions('texture_plugin')
