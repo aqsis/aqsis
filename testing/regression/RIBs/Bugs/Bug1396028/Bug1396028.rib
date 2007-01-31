@@ -3,12 +3,12 @@ Option "searchpath" "shader" ["../../../shaders:&"]
 Format 200 150 1
 PixelSamples 1 1
 ShadingRate 1.0
-PixelFilter "mitchell" 4 4 
+PixelFilter "box" 1 1 
 Option "statistics" "endofframe" [1]
 
 FrameBegin 0
 
-Display "simplecone.tif" "file" "rgb"
+Display "Bug1396028.tif" "file" "rgb" "string compression" "lzw"
 
 # Camera name: "Kamera01"
 Projection "perspective" "fov" [36.0]
