@@ -65,6 +65,21 @@ Installation
 
 See the INSTALL file for installation instructions.
 
+Credits
+-------
+
+The following libraries form part of the Aqsis product, the copyright for
+these libraries lies with the respective owners.
+
+Boost   - http://www.boost.org
+FLTK    - http://www.fltk.org
+JPEG    - http://www.ijg.org
+libpng  - http://www.libpng.org
+LibTIFF - http://www.libtiff.org
+OpenEXR - http://www.openexr.org
+zlib    - http://www.zlib.net
+
+
 
 Happy Rendering!
 The Aqsis Team
