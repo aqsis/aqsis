@@ -112,18 +112,19 @@ Export('env opts conf')
 
 # Setup the distribution stuff, this should be non-platform specific, the distribution
 # archive should apply to all supported platforms.
-env['ZIPDISTDIR'] = env.Dir('#/aqsis-%d.%d.%d' %(version.major, version.minor, version.build))
+env['ZIPDISTDIR'] = env.Dir('#/dist_aqsis-%d.%d.%d%s' %(version.major, version.minor, version.build, version.type))
 def Distribute(files, dir = None):
 	if dir is None:
 		dir = env.Dir('./').srcnode().path
 	env.Install('$ZIPDISTDIR/' + dir, files)
 env.Distribute = Distribute
 env.Alias('dist', '$ZIPDISTDIR')
-zip_target = env.Zip('aqsis-%d.%d.%d' %(version.major, version.minor, version.build), '$ZIPDISTDIR')
+archive_name = 'aqsis-%d.%d.%d%s' %(version.major, version.minor, version.build, version.type)
+zip_target = env.Zip('%s%s' %(archive_name, env['ZIPSUFFIX']), '$ZIPDISTDIR')
 env.Alias('dist_zip', zip_target)
 env.AppendUnique(TARFLAGS = ['-c', '-z'])
 env.AppendUnique(TARSUFFIX = '.gz')
-tar_target = env.Tar('aqsis-%d.%d.%d' %(version.major, version.minor, version.build), '$ZIPDISTDIR')
+tar_target = env.Tar('%s%s' %(archive_name, env['TARSUFFIX']), '$ZIPDISTDIR')
 env.Alias('dist_tar', tar_target)
 
 opts.Update(env)
@@ -362,6 +363,7 @@ def version_h_build(target, source, env):
 		"major": version.major,
 		"minor": version.minor,
 		"build": version.build,
+		"type": version.type,
 	    }
 
 	print_config("Building version.h with the following settings:", defines.items())
