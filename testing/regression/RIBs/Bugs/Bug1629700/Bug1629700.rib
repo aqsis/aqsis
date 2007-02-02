@@ -3,9 +3,9 @@ Hider "hidden" "string depthfilter" ["midpoint"]
 
 FrameBegin 0
 PixelSamples 2 2
-Format 640 480 1
+Format 320 240 1
 ShadingRate 1.0
-Display "Bug1629700.tif" "file" "rgb"
+Display "Bug1629700.tif" "file" "rgb" "string compression" "lzw"
 #Display "+Bug1629700.tif" "framebuffer" "rgb"
 Projection "perspective" "fov" [45.0]
 Scale -1 1 1
