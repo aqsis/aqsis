@@ -1,3 +1,4 @@
+Option "searchpath" "shader" ["../../../shaders:&"]
 Display "Bug1642075.tif" "file" "rgba" "string compression" "lzw"
 #Display "+Bug1642075.tif" "framebuffer" "rgb"
 
