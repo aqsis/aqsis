@@ -1,7 +1,7 @@
 Option "statistics" "endofframe" [1]
 Option "searchpath" "shader" ["../../../shaders:&"]
 PixelSamples 2 2
-Format 320 240 1
+Format 256 198 1
 Display "Bug967456.tif" "file" "rgb" "string compression" ["lzw"]
 WorldBegin
 LightSource "myLight" 0
