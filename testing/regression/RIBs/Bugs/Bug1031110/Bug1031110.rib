@@ -1,5 +1,5 @@
 version 3.03
-Option "searchpath" "shader" ["../../shaders:&"]
+Option "searchpath" "shader" ["../../../shaders:&"]
 Display "Bug1031110.tif" "file" "rgb" "string compression" "lzw"
 Format 320 240 1
 PixelSamples 2 2
