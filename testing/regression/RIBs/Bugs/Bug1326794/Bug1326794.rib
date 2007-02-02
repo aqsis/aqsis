@@ -1,6 +1,6 @@
 PixelSamples 1 1
 Format 320 240 1
-Display "Bug1326794.tif" "file" "rgb"
+Display "Bug1326794.tif" "file" "rgb""string compression" ["lzw"]
 Projection "perspective" "fov" [10.0]
 Translate 0 0 5
 WorldBegin

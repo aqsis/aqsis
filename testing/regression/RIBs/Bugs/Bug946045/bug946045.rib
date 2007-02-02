@@ -7,7 +7,7 @@ Option "searchpath" "shader" [ "../../../shaders:&" ]
 
 FrameBegin 1
 
-   Display "bug946045.tif" "file" "rgb" 
+   Display "bug946045.tif" "file" "rgb" "string compression" ["lzw"]
    Format 320 240 1
    PixelSamples 5 5
    PixelFilter "box" 1 1
