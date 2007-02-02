@@ -17,6 +17,11 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+/** \file
+		\brief Tool 'miqser' (mixer) for processing RIB files.
+		\author Paul C. Gregory (pgregory@aqsis.org)
+*/
+
 #include "aqsis.h"
 #include "exception.h"
 #include "argparse.h"
@@ -100,21 +105,21 @@ int main( int argc, const char** argv )
 	ap.argFlag( "nostandard", "\aDo not declare standard RenderMan parameters", &g_cl_nostandard );
 	ap.argFlag( "outputstandard", "\aPrint the standard declarations to the resulting RIB", &g_cl_outstandard );
 	ap.argInt( "verbose", "=integer\aSet log output level\n"
-		   "\a0 = errors\n"
-		   "\a1 = warnings (default)\n"
-		   "\a2 = information\n"
-		   "\a3 = debug", &g_cl_verbose );
+	           "\a0 = errors\n"
+	           "\a1 = warnings (default)\n"
+	           "\a2 = information\n"
+	           "\a3 = debug", &g_cl_verbose );
 	ap.alias( "verbose", "v" );
 	ap.argInt( "indentation", "=integer\aSet output indentation type\n"
-		   "\a0 = none (default)\n"
-		   "\a1 = space\n"
-		   "\a2 = tab", &g_cl_indentation );
+	           "\a0 = none (default)\n"
+	           "\a1 = space\n"
+	           "\a2 = tab", &g_cl_indentation );
 	ap.alias( "indentation", "i" );
 	ap.argInt( "indentlevel", "=integer\aSet the indetation amount", &g_cl_indentlevel);
 	ap.alias( "indentlevel", "l" );
 	ap.argInt( "compression", "=integer\aSet output compression type\n"
-		   "\a0 = none (default)\n"
-		   "\a1 = gzip", &g_cl_compression );
+	           "\a0 = none (default)\n"
+	           "\a1 = gzip", &g_cl_compression );
 	ap.argFlag( "binary", "\aOutput a binary encoded RIB file", &g_cl_binary );
 	ap.alias( "binary", "b" );
 	ap.argInts( "frames", " f1 f2\aSpecify a starting/ending frame to render (inclusive).", &g_cl_frames, ArgParse::SEP_ARGV, 2);
@@ -190,7 +195,7 @@ int main( int argc, const char** argv )
 			itype[0] = g_indentSpace;
 		else if(g_cl_indentation == 2)
 			itype[0] = g_indentTab;
-		else 
+		else
 			itype[0] = g_indentNone;
 		RiOption("RI2RIB_Indentation", "Type", &itype, RI_NULL);
 		// Output indentation level if specified
