@@ -133,7 +133,7 @@ env.Replace(SHLIB_VERSION_SUFFIX = '.%d.%d' %(version.major, version.minor))
 env.AppendUnique(SHLINKFLAGS=['-Wl,-soname=${TARGET.file}.%d' %version.major])
 
 if not env['no_rpath']:
-	env.AppendUnique(RPATH=['$RENDERENGINEDIR'])
+	env.AppendUnique(RPATH=[env.Dir('$RENDERENGINEDIR').abspath])
 
 # Prepend the aqsistypes build path to the RPATH so that aqsl can find the .so during building shaders.
 env.PrependENVPath('LD_LIBRARY_PATH', env.Dir('$build_prefix/aqsistypes').abspath)
