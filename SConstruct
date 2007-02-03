@@ -112,7 +112,7 @@ Export('env opts conf')
 
 # Setup the distribution stuff, this should be non-platform specific, the distribution
 # archive should apply to all supported platforms.
-env['ZIPDISTDIR'] = env.Dir('#/dist_aqsis-%d.%d.%d%s' %(version.major, version.minor, version.build, version.type))
+env['ZIPDISTDIR'] = env.Dir('#/aqsis-%d.%d.%d%s' %(version.major, version.minor, version.build, version.type))
 def Distribute(files, dir = None):
 	if dir is None:
 		dir = env.Dir('./').srcnode().path
