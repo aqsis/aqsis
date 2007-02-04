@@ -1,3 +1,1285 @@
+2007-02-01 14:37  pgregory
+
+	* aqsis/distribution/win/nsis/SConscript,
+	  aqsis/distribution/win/nsis/setup.nsi, aqsis/SConstruct,
+	  aqsis/version.h.in, aqsis/version.py: Update the versioning code
+	  to allow for a build 'type'. Usually from one of the following...
+	  
+	  "" - empty, for a normal release.
+	  "alpha[n]" - for one of a series of numbered alpha releases.
+	  "beta[n]" - for one of a series of numbered beta releases.
+	  "rc[n]" - for one of a series of numbered release candidate
+	  releases.
+
+2007-01-31 21:43  joron
+
+	* aqsis/testing/regression/reference/Bug1377959.tif,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1377959,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1377959/Bug1377959.rib,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1377959/cube0000.rib,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1377959/jobs.cfg: add the
+	  test case for Bug 1377959
+
+2007-01-31 20:44  joron
+
+	* aqsis/testing/regression/reference/Bug998105.tif,
+	  aqsis/testing/regression/RIBs/Bugs/Bug998105,
+	  aqsis/testing/regression/RIBs/Bugs/Bug998105/Bug998105.rib,
+	  aqsis/testing/regression/RIBs/Bugs/Bug998105/jobs.cfg: add the
+	  test case for bug 998105
+
+2007-01-31 20:28  joron
+
+	* aqsis/testing/regression/reference/Bug1310740.tif,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1310740,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1310740/Bug1310740.rib,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1310740/jobs.cfg,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1310740/particle.sl: add
+	  test case for the bug 1310740
+
+2007-01-31 19:22  joron
+
+	* aqsis/testing/regression/reference/Bug1320079.tif,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1320079,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1320079/Bug1320079.rib,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1320079/cell.sl,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1320079/jobs.cfg: add the
+	  test case for bug 1320079
+
+2007-01-31 18:38  joron
+
+	* aqsis/testing/regression/reference/Bug1336407.tif,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1336407,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1336407/Bug1336407.rib,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1336407/jobs.cfg,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1336407/rampage.sl: add
+	  the test case for bug 1336407
+
+2007-01-31 18:00  joron
+
+	* aqsis/testing/regression/RIBs/Bugs/Bug1396028/jobs.cfg: the red
+	  is ok, green is not.
+
+2007-01-31 17:58  joron
+
+	* aqsis/testing/regression/reference/Bug1396028.tif: add the test
+	  case for bug 1396028
+
+2007-01-31 17:57  joron
+
+	* aqsis/testing/regression/RIBs/Bugs/Bug1396028/Bug1396028.rib:
+	  make the right tif is produced.
+
+2007-01-31 17:55  joron
+
+	* aqsis/testing/regression/RIBs/Bugs/Bug1396028,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1396028/Bug1396028.rib,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1396028/equalng.sl,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1396028/jobs.cfg: Add a
+	  new test case for bug 1396028
+
+2007-01-31 15:30  pgregory
+
+	* aqsis/testing/regression/RIBs/Bugs/Bug1274816,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1274816/Bug1274816.rib,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1274816/jobs.cfg,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1274816/zero.sl: The
+	  repository has gotten confused, can't merge this into the
+	  release1.2.0 branch, trying to remedy.
+
+2007-01-31 15:29  pgregory
+
+	* aqsis/testing/regression/RIBs/Bugs/Bug1274816: The repository
+	  has gotten confused, can't merge this into the release1.2.0
+	  branch, trying to remedy.
+
+2007-01-31 13:54  anteru
+
+	* win32libs/jpeg/lib/vc8, win32libs/jpeg/lib/vc8/libjpeg.lib,
+	  win32libs/jpeg/lib/vc8/libjpeg_d.lib, win32libs/libtiff/lib/vc8,
+	  win32libs/libtiff/lib/vc8/libtiff.lib,
+	  win32libs/libtiff/lib/vc8/libtiff_d.lib, win32libs/zlib/lib/vc8,
+	  win32libs/zlib/lib/vc8/zlibstat.lib,
+	  win32libs/zlib/lib/vc8/zlibstat_d.lib: * added win32
+	  dependencies for Visual C++ 8
+
+2007-01-31 12:19  joron
+
+	* aqsis/testing/regression/reference/Bug1104535.tif: add the
+	  reference image for Bug1104535
+
+2007-01-31 12:05  joron
+
+	* aqsis/testing/regression/RIBs/Bugs/Bug1104535,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1104535/Bug1104535.rib,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1104535/jobs.cfg,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1104535/redefine.sl: Add a
+	  testcase for #1104535; the reference image will come later.
+
+2007-01-31 11:35  joron
+
+	* aqsis/testing/regression/RIBs/Bugs/Bug1031110/jobs.cfg: add the
+	  bluescreen.sl to list of shaders.
+
+2007-01-31 11:34  joron
+
+	* aqsis/testing/regression/RIBs/Bugs/Bug1031110/bluescreen.sl:
+	  Commit the shader for the Bug1031110
+
+2007-01-31 11:07  pgregory
+
+	* aqsis/README: Add thirdparty library credits to the readme.
+
+2007-01-31 10:59  pgregory
+
+	* win32libs/FLTK/COPYING: Added license file for FLTK libraries.
+
+2007-01-31 10:23  pgregory
+
+	* win32libs/FLTK, win32libs/FLTK/include,
+	  win32libs/FLTK/include/FL, win32libs/FLTK/include/FL/dirent.h,
+	  win32libs/FLTK/include/FL/Enumerations.H,
+	  win32libs/FLTK/include/FL/filename.H,
+	  win32libs/FLTK/include/FL/Fl.H,
+	  win32libs/FLTK/include/FL/Fl_Adjuster.H,
+	  win32libs/FLTK/include/FL/fl_ask.H,
+	  win32libs/FLTK/include/FL/Fl_Bitmap.H,
+	  win32libs/FLTK/include/FL/Fl_BMP_Image.H,
+	  win32libs/FLTK/include/FL/Fl_Box.H,
+	  win32libs/FLTK/include/FL/Fl_Browser.H,
+	  win32libs/FLTK/include/FL/Fl_Browser_.H,
+	  win32libs/FLTK/include/FL/Fl_Button.H,
+	  win32libs/FLTK/include/FL/Fl_Chart.H,
+	  win32libs/FLTK/include/FL/Fl_Check_Browser.H,
+	  win32libs/FLTK/include/FL/Fl_Check_Button.H,
+	  win32libs/FLTK/include/FL/Fl_Choice.H,
+	  win32libs/FLTK/include/FL/Fl_Clock.H,
+	  win32libs/FLTK/include/FL/Fl_Color_Chooser.H,
+	  win32libs/FLTK/include/FL/Fl_Counter.H,
+	  win32libs/FLTK/include/FL/Fl_Dial.H,
+	  win32libs/FLTK/include/FL/Fl_Double_Window.H,
+	  win32libs/FLTK/include/FL/fl_draw.H,
+	  win32libs/FLTK/include/FL/Fl_Export.H,
+	  win32libs/FLTK/include/FL/Fl_File_Browser.H,
+	  win32libs/FLTK/include/FL/Fl_File_Chooser.H,
+	  win32libs/FLTK/include/FL/Fl_File_Icon.H,
+	  win32libs/FLTK/include/FL/Fl_File_Input.H,
+	  win32libs/FLTK/include/FL/Fl_Fill_Dial.H,
+	  win32libs/FLTK/include/FL/Fl_Fill_Slider.H,
+	  win32libs/FLTK/include/FL/Fl_Float_Input.H,
+	  win32libs/FLTK/include/FL/Fl_FormsBitmap.H,
+	  win32libs/FLTK/include/FL/Fl_FormsPixmap.H,
+	  win32libs/FLTK/include/FL/Fl_Free.H,
+	  win32libs/FLTK/include/FL/Fl_GIF_Image.H,
+	  win32libs/FLTK/include/FL/Fl_Gl_Window.H,
+	  win32libs/FLTK/include/FL/Fl_Group.H,
+	  win32libs/FLTK/include/FL/Fl_Help_Dialog.H,
+	  win32libs/FLTK/include/FL/Fl_Help_View.H,
+	  win32libs/FLTK/include/FL/Fl_Hold_Browser.H,
+	  win32libs/FLTK/include/FL/Fl_Hor_Fill_Slider.H,
+	  win32libs/FLTK/include/FL/Fl_Hor_Nice_Slider.H,
+	  win32libs/FLTK/include/FL/Fl_Hor_Slider.H,
+	  win32libs/FLTK/include/FL/Fl_Hor_Value_Slider.H,
+	  win32libs/FLTK/include/FL/Fl_Image.H,
+	  win32libs/FLTK/include/FL/Fl_Input.H,
+	  win32libs/FLTK/include/FL/Fl_Input_.H,
+	  win32libs/FLTK/include/FL/Fl_Input_Choice.H,
+	  win32libs/FLTK/include/FL/Fl_Int_Input.H,
+	  win32libs/FLTK/include/FL/Fl_JPEG_Image.H,
+	  win32libs/FLTK/include/FL/Fl_Light_Button.H,
+	  win32libs/FLTK/include/FL/Fl_Line_Dial.H,
+	  win32libs/FLTK/include/FL/Fl_Menu.H,
+	  win32libs/FLTK/include/FL/Fl_Menu_.H,
+	  win32libs/FLTK/include/FL/Fl_Menu_Bar.H,
+	  win32libs/FLTK/include/FL/Fl_Menu_Button.H,
+	  win32libs/FLTK/include/FL/Fl_Menu_Item.H,
+	  win32libs/FLTK/include/FL/Fl_Menu_Window.H,
+	  win32libs/FLTK/include/FL/fl_message.H,
+	  win32libs/FLTK/include/FL/Fl_Multi_Browser.H,
+	  win32libs/FLTK/include/FL/Fl_Multi_Label.H,
+	  win32libs/FLTK/include/FL/Fl_Multiline_Input.H,
+	  win32libs/FLTK/include/FL/Fl_Multiline_Output.H,
+	  win32libs/FLTK/include/FL/Fl_Nice_Slider.H,
+	  win32libs/FLTK/include/FL/Fl_Object.H,
+	  win32libs/FLTK/include/FL/Fl_Output.H,
+	  win32libs/FLTK/include/FL/Fl_Overlay_Window.H,
+	  win32libs/FLTK/include/FL/Fl_Pack.H,
+	  win32libs/FLTK/include/FL/Fl_Pixmap.H,
+	  win32libs/FLTK/include/FL/Fl_PNG_Image.H,
+	  win32libs/FLTK/include/FL/Fl_PNM_Image.H,
+	  win32libs/FLTK/include/FL/Fl_Positioner.H,
+	  win32libs/FLTK/include/FL/Fl_Preferences.H,
+	  win32libs/FLTK/include/FL/Fl_Progress.H,
+	  win32libs/FLTK/include/FL/Fl_Radio_Button.H,
+	  win32libs/FLTK/include/FL/Fl_Radio_Light_Button.H,
+	  win32libs/FLTK/include/FL/Fl_Radio_Round_Button.H,
+	  win32libs/FLTK/include/FL/Fl_Repeat_Button.H,
+	  win32libs/FLTK/include/FL/Fl_Return_Button.H,
+	  win32libs/FLTK/include/FL/Fl_Roller.H,
+	  win32libs/FLTK/include/FL/Fl_Round_Button.H,
+	  win32libs/FLTK/include/FL/Fl_Round_Clock.H,
+	  win32libs/FLTK/include/FL/Fl_Scroll.H,
+	  win32libs/FLTK/include/FL/Fl_Scrollbar.H,
+	  win32libs/FLTK/include/FL/Fl_Secret_Input.H,
+	  win32libs/FLTK/include/FL/Fl_Select_Browser.H,
+	  win32libs/FLTK/include/FL/Fl_Shared_Image.H,
+	  win32libs/FLTK/include/FL/fl_show_colormap.H,
+	  win32libs/FLTK/include/FL/fl_show_input.H,
+	  win32libs/FLTK/include/FL/Fl_Simple_Counter.H,
+	  win32libs/FLTK/include/FL/Fl_Single_Window.H,
+	  win32libs/FLTK/include/FL/Fl_Slider.H,
+	  win32libs/FLTK/include/FL/Fl_Spinner.H,
+	  win32libs/FLTK/include/FL/Fl_Sys_Menu_Bar.H,
+	  win32libs/FLTK/include/FL/Fl_Tabs.H,
+	  win32libs/FLTK/include/FL/Fl_Text_Buffer.H,
+	  win32libs/FLTK/include/FL/Fl_Text_Display.H,
+	  win32libs/FLTK/include/FL/Fl_Text_Editor.H,
+	  win32libs/FLTK/include/FL/Fl_Tile.H,
+	  win32libs/FLTK/include/FL/Fl_Tiled_Image.H,
+	  win32libs/FLTK/include/FL/Fl_Timer.H,
+	  win32libs/FLTK/include/FL/Fl_Toggle_Button.H,
+	  win32libs/FLTK/include/FL/Fl_Toggle_Light_Button.H,
+	  win32libs/FLTK/include/FL/Fl_Toggle_Round_Button.H,
+	  win32libs/FLTK/include/FL/Fl_Tooltip.H,
+	  win32libs/FLTK/include/FL/Fl_Valuator.H,
+	  win32libs/FLTK/include/FL/Fl_Value_Input.H,
+	  win32libs/FLTK/include/FL/Fl_Value_Output.H,
+	  win32libs/FLTK/include/FL/Fl_Value_Slider.H,
+	  win32libs/FLTK/include/FL/Fl_Widget.H,
+	  win32libs/FLTK/include/FL/Fl_Window.H,
+	  win32libs/FLTK/include/FL/Fl_Wizard.H,
+	  win32libs/FLTK/include/FL/Fl_XBM_Image.H,
+	  win32libs/FLTK/include/FL/Fl_XPM_Image.H,
+	  win32libs/FLTK/include/FL/forms.H,
+	  win32libs/FLTK/include/FL/gl.h,
+	  win32libs/FLTK/include/FL/gl_draw.H,
+	  win32libs/FLTK/include/FL/gl2opengl.h,
+	  win32libs/FLTK/include/FL/glut.H,
+	  win32libs/FLTK/include/FL/images,
+	  win32libs/FLTK/include/FL/images/jconfig.h,
+	  win32libs/FLTK/include/FL/images/jerror.h,
+	  win32libs/FLTK/include/FL/images/jmorecfg.h,
+	  win32libs/FLTK/include/FL/images/jpeglib.h,
+	  win32libs/FLTK/include/FL/images/png.h,
+	  win32libs/FLTK/include/FL/images/pngconf.h,
+	  win32libs/FLTK/include/FL/images/zconf.h,
+	  win32libs/FLTK/include/FL/images/zlib.h,
+	  win32libs/FLTK/include/FL/images/zutil.h,
+	  win32libs/FLTK/include/FL/mac.H,
+	  win32libs/FLTK/include/FL/mac.r,
+	  win32libs/FLTK/include/FL/math.h,
+	  win32libs/FLTK/include/FL/win32.H,
+	  win32libs/FLTK/include/FL/x.H, win32libs/FLTK/lib,
+	  win32libs/FLTK/lib/mingw, win32libs/FLTK/lib/mingw/libfltk.a,
+	  win32libs/FLTK/lib/mingw/libfltk_forms.a,
+	  win32libs/FLTK/lib/mingw/libfltk_gl.a,
+	  win32libs/FLTK/lib/mingw/libfltk_images.a: Add mingw compiled
+	  FLTK libraries to the win32libs module to make it easier for
+	  Win32 developers to build.
+
+2007-01-31 10:20  pgregory
+
+	* aqsis/build_check.py, aqsis/displays/d_exr/SConscript,
+	  aqsis/displays/display/SConscript,
+	  aqsis/platform/win32/SConscript,
+	  aqsis/renderer/aqsis/SConscript,
+	  aqsis/renderer/render/SConscript, aqsis/rib/miqser/SConscript,
+	  aqsis/rib/ri2rib/SConscript, aqsis/rib/rib2/SConscript,
+	  aqsis/SConstruct, aqsis/texturing/plugins/common/SConscript,
+	  aqsis/texturing/plugins/jpg2tif/SConscript,
+	  aqsis/thirdparty/pdiff/SConscript: Update various build files so
+	  that libraries and include paths aren't added en masse to all
+	  modules, only those that need it.
+
+2007-01-30 22:39  pgregory
+
+	* aqsis/displays/d_exr/SConscript,
+	  aqsis/platform/default/SConscript: aargh, Linux fix again,
+	  hopefully.
+
+2007-01-30 22:29  pgregory
+
+	* aqsis/displays/d_exr/SConscript,
+	  aqsis/platform/win32/SConscript: Hopefully final changes to get
+	  the Win32 and Linux OpenEXR builds to work at the same time.
+
+2007-01-30 21:22  pgregory
+
+	* aqsis/displays/d_exr/SConscript,
+	  aqsis/texturing/plugins/exr2tif/SConscript: Fix the OpenEXR
+	  component SConscripts so that they use the platform specific
+	  library lists.
+
+2007-01-30 21:02  pgregory
+
+	* aqsis/displays/d_exr/SConscript,
+	  aqsis/platform/win32/SConscript,
+	  aqsis/texturing/plugins/exr2tif/SConscript: Fix the changes to
+	  OpenEXR support, broke Linux builds that don't use OpenEXR 1.5.0.
+
+2007-01-30 20:56  joron
+
+	* aqsis/testing/regression/reference/Bug1274816.tif,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1274816,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1274816/Bug1274816.rib,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1274816/jobs.cfg,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1274816/zero.sl: Add a new
+	  test case for bug 1274816
+
+2007-01-30 20:42  joron
+
+	* aqsis/testing/regression/reference/Bug1030761.tif,
+	  aqsis/testing/regression/reference/Bug1031110.tif,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1030761,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1030761/Bug1030761.rib,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1030761/floor.rib,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1030761/jobs.cfg,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1030761/spot.sl,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1030761/tile.rib,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1031110,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1031110/Bug1031110.rib,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1031110/gray.tif,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1031110/jobs.cfg: Add new
+	  test cases. Bug 1031110 and 1030761
+
+2007-01-30 13:36  pgregory
+
+	* aqsis/displays/d_exr/SConscript,
+	  aqsis/platform/win32/SConscript, aqsis/SConstruct,
+	  aqsis/texturing/plugins/exr2tif/SConscript: Some minor changes
+	  to library ordering and identification to get the OpenEXR
+	  support working under Win32|MinGW.
+
+2007-01-30 13:27  pgregory
+
+	* win32libs/OpenEXR/LICENSE: Added license.
+
+2007-01-30 13:23  pgregory
+
+	* win32libs/OpenEXR, win32libs/OpenEXR/include,
+	  win32libs/OpenEXR/include/half.h,
+	  win32libs/OpenEXR/include/halfFunction.h,
+	  win32libs/OpenEXR/include/halfLimits.h,
+	  win32libs/OpenEXR/include/Iex.h,
+	  win32libs/OpenEXR/include/IexBaseExc.h,
+	  win32libs/OpenEXR/include/IexErrnoExc.h,
+	  win32libs/OpenEXR/include/IexMacros.h,
+	  win32libs/OpenEXR/include/IexMathExc.h,
+	  win32libs/OpenEXR/include/IexThrowErrnoExc.h,
+	  win32libs/OpenEXR/include/IlmBaseConfig.h,
+	  win32libs/OpenEXR/include/IlmThread.h,
+	  win32libs/OpenEXR/include/IlmThreadMutex.h,
+	  win32libs/OpenEXR/include/IlmThreadPool.h,
+	  win32libs/OpenEXR/include/IlmThreadSemaphore.h,
+	  win32libs/OpenEXR/include/ImathBox.h,
+	  win32libs/OpenEXR/include/ImathBoxAlgo.h,
+	  win32libs/OpenEXR/include/ImathColor.h,
+	  win32libs/OpenEXR/include/ImathColorAlgo.h,
+	  win32libs/OpenEXR/include/ImathEuler.h,
+	  win32libs/OpenEXR/include/ImathExc.h,
+	  win32libs/OpenEXR/include/ImathFrame.h,
+	  win32libs/OpenEXR/include/ImathFrustum.h,
+	  win32libs/OpenEXR/include/ImathFun.h,
+	  win32libs/OpenEXR/include/ImathGL.h,
+	  win32libs/OpenEXR/include/ImathGLU.h,
+	  win32libs/OpenEXR/include/ImathHalfLimits.h,
+	  win32libs/OpenEXR/include/ImathInt64.h,
+	  win32libs/OpenEXR/include/ImathInterval.h,
+	  win32libs/OpenEXR/include/ImathLimits.h,
+	  win32libs/OpenEXR/include/ImathLine.h,
+	  win32libs/OpenEXR/include/ImathLineAlgo.h,
+	  win32libs/OpenEXR/include/ImathMath.h,
+	  win32libs/OpenEXR/include/ImathMatrix.h,
+	  win32libs/OpenEXR/include/ImathMatrixAlgo.h,
+	  win32libs/OpenEXR/include/ImathPlane.h,
+	  win32libs/OpenEXR/include/ImathPlatform.h,
+	  win32libs/OpenEXR/include/ImathQuat.h,
+	  win32libs/OpenEXR/include/ImathRandom.h,
+	  win32libs/OpenEXR/include/ImathRoots.h,
+	  win32libs/OpenEXR/include/ImathShear.h,
+	  win32libs/OpenEXR/include/ImathSphere.h,
+	  win32libs/OpenEXR/include/ImathVec.h,
+	  win32libs/OpenEXR/include/ImathVecAlgo.h,
+	  win32libs/OpenEXR/include/ImfArray.h,
+	  win32libs/OpenEXR/include/ImfAttribute.h,
+	  win32libs/OpenEXR/include/ImfB44Compressor.h,
+	  win32libs/OpenEXR/include/ImfBoxAttribute.h,
+	  win32libs/OpenEXR/include/ImfChannelList.h,
+	  win32libs/OpenEXR/include/ImfChannelListAttribute.h,
+	  win32libs/OpenEXR/include/ImfChromaticities.h,
+	  win32libs/OpenEXR/include/ImfChromaticitiesAttribute.h,
+	  win32libs/OpenEXR/include/ImfCompression.h,
+	  win32libs/OpenEXR/include/ImfCompressionAttribute.h,
+	  win32libs/OpenEXR/include/ImfConvert.h,
+	  win32libs/OpenEXR/include/ImfCRgbaFile.h,
+	  win32libs/OpenEXR/include/ImfDoubleAttribute.h,
+	  win32libs/OpenEXR/include/ImfEnvmap.h,
+	  win32libs/OpenEXR/include/ImfEnvmapAttribute.h,
+	  win32libs/OpenEXR/include/ImfFloatAttribute.h,
+	  win32libs/OpenEXR/include/ImfFrameBuffer.h,
+	  win32libs/OpenEXR/include/ImfFramesPerSecond.h,
+	  win32libs/OpenEXR/include/ImfHeader.h,
+	  win32libs/OpenEXR/include/ImfHuf.h,
+	  win32libs/OpenEXR/include/ImfInputFile.h,
+	  win32libs/OpenEXR/include/ImfInt64.h,
+	  win32libs/OpenEXR/include/ImfIntAttribute.h,
+	  win32libs/OpenEXR/include/ImfIO.h,
+	  win32libs/OpenEXR/include/ImfKeyCode.h,
+	  win32libs/OpenEXR/include/ImfKeyCodeAttribute.h,
+	  win32libs/OpenEXR/include/ImfLineOrder.h,
+	  win32libs/OpenEXR/include/ImfLineOrderAttribute.h,
+	  win32libs/OpenEXR/include/ImfLut.h,
+	  win32libs/OpenEXR/include/ImfMatrixAttribute.h,
+	  win32libs/OpenEXR/include/ImfName.h,
+	  win32libs/OpenEXR/include/ImfOpaqueAttribute.h,
+	  win32libs/OpenEXR/include/ImfOutputFile.h,
+	  win32libs/OpenEXR/include/ImfPixelType.h,
+	  win32libs/OpenEXR/include/ImfPreviewImage.h,
+	  win32libs/OpenEXR/include/ImfPreviewImageAttribute.h,
+	  win32libs/OpenEXR/include/ImfRational.h,
+	  win32libs/OpenEXR/include/ImfRationalAttribute.h,
+	  win32libs/OpenEXR/include/ImfRgba.h,
+	  win32libs/OpenEXR/include/ImfRgbaFile.h,
+	  win32libs/OpenEXR/include/ImfRgbaYca.h,
+	  win32libs/OpenEXR/include/ImfStandardAttributes.h,
+	  win32libs/OpenEXR/include/ImfStringAttribute.h,
+	  win32libs/OpenEXR/include/ImfTestFile.h,
+	  win32libs/OpenEXR/include/ImfThreading.h,
+	  win32libs/OpenEXR/include/ImfTileDescription.h,
+	  win32libs/OpenEXR/include/ImfTileDescriptionAttribute.h,
+	  win32libs/OpenEXR/include/ImfTiledInputFile.h,
+	  win32libs/OpenEXR/include/ImfTiledOutputFile.h,
+	  win32libs/OpenEXR/include/ImfTiledRgbaFile.h,
+	  win32libs/OpenEXR/include/ImfTimeCode.h,
+	  win32libs/OpenEXR/include/ImfTimeCodeAttribute.h,
+	  win32libs/OpenEXR/include/ImfVecAttribute.h,
+	  win32libs/OpenEXR/include/ImfVersion.h,
+	  win32libs/OpenEXR/include/ImfWav.h,
+	  win32libs/OpenEXR/include/ImfXdr.h,
+	  win32libs/OpenEXR/include/OpenEXRConfig.h,
+	  win32libs/OpenEXR/lib, win32libs/OpenEXR/lib/mingw,
+	  win32libs/OpenEXR/lib/mingw/libHalf.a,
+	  win32libs/OpenEXR/lib/mingw/libIex.a,
+	  win32libs/OpenEXR/lib/mingw/libIlmImf.a,
+	  win32libs/OpenEXR/lib/mingw/libIlmThread.a,
+	  win32libs/OpenEXR/lib/mingw/libImath.a,
+	  win32libs/OpenEXR/openexr.txt: Added statically built OpenEXR
+	  libraries for MinGW.
+
+2007-01-29 19:24  joron
+
+	* aqsis/testing/regression/reference/Bug1108592.tif,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1108592,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1108592/array_cer.sl,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1108592/Bug1108592.rib,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1108592/jobs.cfg: Add a
+	  new test case for Bug 1108592
+
+2007-01-29 18:37  joron
+
+	* aqsis/testing/regression/reference/Bug1113859.tif,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1113859,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1113859/Bug1113859.rib,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1113859/jobs.cfg: Add the
+	  new testcase for the bug 1113859
+
+2007-01-29 18:12  joron
+
+	* aqsis/testing/regression/reference/Bug1481683.tif,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1481683,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1481683/Bug1481683.rib,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1481683/divmatrix.sl,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1481683/jobs.cfg: Add
+	  regression test for Bug 1481683
+
+2007-01-29 15:05  joron
+
+	* aqsis/testing/regression/reference/Bug1407764.tif,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1407764,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1407764/Bug1407764.rib,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1407764/jobs.cfg,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1407764/maxmin.sl: Add the
+	  missing RTS bug entries.
+
+2007-01-29 14:56  joron
+
+	* aqsis/testing/regression/reference/Bug1412162.tif,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1412162,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1412162/Bug1412162.rib,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1412162/imageralphabug.sl,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1412162/jobs.cfg: Add the
+	  missing RTS bug entries.
+
+2007-01-28 14:23  c42f
+
+	* aqsis/aqsistypes/posix/SConscript, aqsis/aqsistypes/SConscript,
+	  aqsis/aqsistypes/win32/SConscript, aqsis/argparse/SConscript,
+	  aqsis/content/ribs/features/layeredshaders/SConscript,
+	  aqsis/content/ribs/scenes/vase/SConscript,
+	  aqsis/content/shaders/displacement/SConscript,
+	  aqsis/content/shaders/light/SConscript,
+	  aqsis/displays/d_exr/SConscript,
+	  aqsis/displays/d_sdcBMP/SConscript,
+	  aqsis/displays/d_sdcWin32/SConscript,
+	  aqsis/displays/d_xpm/SConscript,
+	  aqsis/displays/display/SConscript,
+	  aqsis/distribution/macosx/bundle/SConscript,
+	  aqsis/distribution/macosx/SConscript,
+	  aqsis/distribution/SConscript,
+	  aqsis/distribution/win/nsis/SConscript,
+	  aqsis/distribution/win/SConscript,
+	  aqsis/renderer/aqsis/SConscript,
+	  aqsis/renderer/ddmanager/SConscript,
+	  aqsis/renderer/raytrace/SConscript,
+	  aqsis/renderer/render/SConscript, aqsis/rib/api/SConscript,
+	  aqsis/rib/miqser/SConscript, aqsis/rib/ri2rib/SConscript,
+	  aqsis/rib/rib2/SConscript, aqsis/rib/rib2ri/SConscript,
+	  aqsis/rib/rib2stream/SConscript, aqsis/SConstruct,
+	  aqsis/shadercompiler/aqsl/SConscript,
+	  aqsis/shadercompiler/aqsltell/SConscript,
+	  aqsis/shadercompiler/codegenvm/SConscript,
+	  aqsis/shadercompiler/shaderexecenv/SConscript,
+	  aqsis/shadercompiler/shadervm/SConscript,
+	  aqsis/shadercompiler/slparse/SConscript,
+	  aqsis/shadercompiler/slpp/SConscript,
+	  aqsis/shadercompiler/slxargs/SConscript,
+	  aqsis/shaders/SConscript,
+	  aqsis/texturing/plugins/bake2tif/SConscript,
+	  aqsis/texturing/plugins/bmp2tif/SConscript,
+	  aqsis/texturing/plugins/common/SConscript,
+	  aqsis/texturing/plugins/exr2tif/SConscript,
+	  aqsis/texturing/plugins/gif2tif/SConscript,
+	  aqsis/texturing/plugins/jpg2tif/SConscript,
+	  aqsis/texturing/plugins/pcx2tif/SConscript,
+	  aqsis/texturing/plugins/png2tif/SConscript,
+	  aqsis/texturing/plugins/ppm2tif/SConscript,
+	  aqsis/texturing/plugins/SConscript,
+	  aqsis/texturing/plugins/tga2tif/SConscript,
+	  aqsis/texturing/teqser/SConscript,
+	  aqsis/thirdparty/aqiv/SConscript,
+	  aqsis/thirdparty/dbo_plane/SConscript,
+	  aqsis/thirdparty/maketextures/SConscript,
+	  aqsis/thirdparty/pdiff/SConscript,
+	  aqsis/thirdparty/tinyxml/SConscript,
+	  aqsis/tools/mpdump/SConscript, aqsis/tools/SConscript: Modify
+	  the Distribute() builder function to automatically infer the
+	  correct
+	  directory to distribute source files into. The option to
+	  explicitly specify a
+	  distribution directory still exists.
+
+2007-01-28 13:07  c42f
+
+	* aqsis/renderer/render/rib2ri.cpp,
+	  aqsis/renderer/render/SConscript, aqsis/rib/miqser/rib2ri.cpp,
+	  aqsis/rib/miqser/SConscript, aqsis/rib/rib2ri/SConscript: Remove
+	  the dummy rib2ri.cpp files from the directories rib/miqser and
+	  renderer/render.
+	  
+	  These were present to pick up the different command line
+	  #defines in the
+	  compilation environments for miqser and libaqsis. Instead we
+	  just compile
+	  rib2ri.cpp to two seperate object files where miqser and
+	  libaqsis will be
+	  built.
+
+2007-01-28 11:33  c42f
+
+	* aqsis/SConstruct: Remove hack for 64-bit systems (x86_64). This
+	  kludge is no longer needed
+	  because all shared libraries are now built directly from object
+	  files rather
+	  than from a handful of intermediate static libraries.
+
+2007-01-26 13:37  ltatkinson
+
+	* aqsis/distribution/win/nsis/setup.nsi: Updated Windows (NSIS)
+	  installer to support new 'scripts' directory, while removing
+	  deprecated entries.
+
+2007-01-26 02:21  joron
+
+	* aqsis/testing/regression/reference/Bug1102598.tif: Commit the
+	  missing reference image.
+
+2007-01-26 01:46  joron
+
+	* aqsis/testing/regression/reference/Bug1444331.tif,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1444331,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1444331/Bug1444331.rib,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1444331/jobs.cfg: Add the
+	  missing RTS bug entries.
+
+2007-01-26 01:31  joron
+
+	* aqsis/testing/regression/RIBs/Bugs/Bug940418/Bug940418.rib: Make
+	  sure it is "file" and not "framebuffer"
+
+2007-01-26 01:21  joron
+
+	* aqsis/testing/regression/RIBs/Bugs/Bug940308/jobs.cfg: add the
+	  job control for the bug940308
+
+2007-01-25 23:41  joron
+
+	* aqsis/testing/regression/reference/Bug940308.tif,
+	  aqsis/testing/regression/RIBs/Bugs/Bug940308,
+	  aqsis/testing/regression/RIBs/Bugs/Bug940308/aqsisscene.jpg,
+	  aqsis/testing/regression/RIBs/Bugs/Bug940308/Bug940308.rib,
+	  aqsis/testing/regression/RIBs/Bugs/Bug940308/correct.jpg: Add
+	  the missing RTS bug entries.
+
+2007-01-25 20:25  joron
+
+	* aqsis/testing/regression/reference/Bug940418.tif,
+	  aqsis/testing/regression/RIBs/Bugs/Bug940418,
+	  aqsis/testing/regression/RIBs/Bugs/Bug940418/Bug940418.rib,
+	  aqsis/testing/regression/RIBs/Bugs/Bug940418/jobs.cfg: Add the
+	  missing RTS bug entries.
+
+2007-01-25 20:15  joron
+
+	* aqsis/testing/regression/RIBs/Bugs/Bug1102598,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1102598/Bug1102598.rib,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1102598/jobs.cfg: Add the
+	  missing RTS bug entries.
+
+2007-01-25 20:05  joron
+
+	* aqsis/testing/regression/RIBs/Bugs/Bug1102597: It will be moved
+	  to Bug1102598
+
+2007-01-25 19:47  joron
+
+	* aqsis/testing/regression/reference/Bug1410474.tif,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1410474,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1410474/Bug1410474.rib,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1410474/jobs.cfg: Add the
+	  missing RTS bug entries.
+
+2007-01-25 19:38  joron
+
+	* aqsis/testing/regression/reference/Bug1433837.tif,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1433837,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1433837/Bug1433837.rib,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1433837/jobs.cfg,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1433837/spot.sl: Add the
+	  missing RTS bug entries.
+
+2007-01-25 18:29  joron
+
+	* aqsis/testing/regression/reference/Bug1642075.tif,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1642075,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1642075/beach.env,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1642075/beach.tif,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1642075/bluescreen.sl,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1642075/Bug1642075.rib,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1642075/imagelight.sl,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1642075/jobs.cfg: Add the
+	  missing RTS bug entries.
+
+2007-01-25 18:13  joron
+
+	* aqsis/testing/regression/reference/Bug1502751.tif,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1502751,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1502751/Bug1502751.rib,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1502751/jobs.cfg,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1502751/splinetst.sl: Add
+	  the missing RTS bug entries.
+
+2007-01-25 17:58  joron
+
+	* aqsis/testing/regression/reference/Bug1572944.tif,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1572944,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1572944/Bug1572944.rib,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1572944/jobs.cfg,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1572944/showN.sl: Add the
+	  missing RTS bug entries.
+
+2007-01-25 14:47  joron
+
+	* aqsis/testing/regression/reference/Bug1629700.tif: This is the
+	  reference image for lastest test case.
+
+2007-01-25 14:47  joron
+
+	* aqsis/testing/regression/RIBs/Bugs/Bug1629700,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1629700/Bug1629700.rib,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1629700/jobs.cfg,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1629700/pnoise_err.sl:
+	  This is the test case to illustrate the bug 1629700 is fixed.
+
+2007-01-25 14:45  joron
+
+	* aqsis/aqsistypes/noise1234.cpp: Fix Bug #1629700, the period
+	  provided is used by the modulo operation. It is illegal to
+	  provide an zero to modulo. So I prevent the period to be smaller
+	  than 1.
+	  
+
+2007-01-25 14:41  pgregory
+
+	* aqsis/SConstruct: Fix bug #1619526.
+	  
+	  Change the order of specification of LIBPATH folders so that the
+	  linker looks in the local build/ folders first for libraries, in
+	  case there is a previously installed version of Aqsis in the
+	  same system folders as the libtiff etc. libraries.
+
+2007-01-25 14:30  cgtobix
+
+	* aqsis/testing/regression/reference/Bug1162905.tif: Added
+	  reference image for Bug1162905.
+
+2007-01-25 14:28  cgtobix
+
+	* aqsis/testing/regression/RIBs/Bugs/Bug1014043/jobs.cfg,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1162905,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1162905/Bug1162905.rib,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1162905/jobs.cfg,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1379411/jobs.cfg: Added
+	  test for Bug1162905.
+
+2007-01-25 13:49  pgregory
+
+	* aqsis/testing/regression/RIBs/Bugs/Bug1379411/Bug1379411.rib,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1379411/splinebug.sl,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1586027/Bug1379411.rib,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1586027/jobs.cfg,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1586027/splinebug.sl: Fix
+	  a problem with the recent commit of a test case in the wrong
+	  folder.
+
+2007-01-25 13:46  pgregory
+
+	* aqsis/testing/regression/RIBs/Bugs/Bug1379411,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1379411/jobs.cfg:
+
+2007-01-25 13:31  cgtobix
+
+	* aqsis/testing/regression/reference/Bug1379411.tif: Added
+	  reference image for Bug1379441
+
+2007-01-25 13:30  cgtobix
+
+	* aqsis/testing/regression/RIBs/Bugs/Bug1586027/Bug1379411.rib,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1586027/jobs.cfg,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1586027/splinebug.sl:
+	  Added test for Bug1379411
+
+2007-01-25 10:56  pgregory
+
+	* win32libs/jpeg/include/jconfig.h: Fix bug #1535844.
+	  
+	  The jconfig.h file in win32libs was from the VC++ build, when
+	  used in the MinGW build, the boolean size was incorrect,
+	  compared with the MSYS built .a file in the lib/mingw folder.
+
+2007-01-24 21:48  pgregory
+
+	* aqsis/renderer/aqsis/aqsis.cpp: Fix bug #1633369, the
+	  conditional compilation was looking for the
+	  definition of ENABLE_MPDUMP instead of checking the value.
+
+2007-01-23 21:43  pgregory
+
+	* aqsis/shadercompiler/shadervm/shadervm.h: Check for a valid
+	  render context before checking if the shader is being
+	  defined outside the world. Default to not outside the world if
+	  no
+	  render context is available.
+
+2007-01-23 16:12  pgregory
+
+	* aqsis/renderer/render/texturemap.cpp,
+	  aqsis/shadercompiler/shaderexecenv/shadeops_tmap.cpp: Fix a bug
+	  in the "textureinfo" shadeop. The way it works is to query the
+	  texture machinery for a named texture, which can return a
+	  texture from the cache. If the texture is not of the right type,
+	  it deletes it and moves onto the next. This deletion removes the
+	  texture from the cache, so each time the texture is used, it had
+	  to be reloaded. Combine with the fact that the texture deletion
+	  code didn't close the file, resulted in the system exhausting
+	  all available file handles.
+	  
+	  The deletion is removed, the cache handler will deal with
+	  deleting loaded textures. And the top level texture destructor
+	  now closes the file.
+
+2007-01-23 11:49  pgregory
+
+	* aqsis/renderer/render/itexturemap.h,
+	  aqsis/renderer/render/texturemap.cpp,
+	  aqsis/renderer/render/texturemap.h: Fix bug #1638918.
+	  
+	  The mipmapping code was storing the resulting texturemap buffers
+	  in the m_apFlats section, when they should have been stored in
+	  the m_apMipMaps section of the caching data. The result is that
+	  when a "non-converted" texture was flushed from the cache, the
+	  m_apFlats list was cleared (clearing all the mipmaps) but only
+	  the first m_apLast entry was cleared. So when a new request for
+	  data from that texture came along, the m_apLast entry for the
+	  requested MipMap level pointed to a deleted buffer.
+
+2007-01-22 21:04  pgregory
+
+	* aqsis/aqsistypes/SConscript: Remove aqerror.h from the
+	  SConscript header files for aqsistypes, it's
+	  not used and not necessary.
+
+2007-01-22 13:20  pgregory
+
+	* aqsis/shadercompiler/slxargs/slx.h: Fix a typo in the sharing
+	  code, affecting only non-Win32 builds.
+
+2007-01-22 11:50  pgregory
+
+	* aqsis/aqsistypes/aqerror.h,
+	  aqsis/aqsistypes/logging_streambufs.h,
+	  aqsis/aqsistypes/validate.h,
+	  aqsis/shadercompiler/slxargs/SConscript,
+	  aqsis/shadercompiler/slxargs/slx.h: Merge from
+	  branches/release1.2.0 740:741
+
+2007-01-21 21:25  pgregory
+
+	* aqsis/distribution/win/nsis/setup.nsi: Add *.inl to the include
+	  folder files, to catch ri.inl.
+
+2007-01-19 15:42  pgregory
+
+	* aqsis/renderer/render/imagers.cpp,
+	  aqsis/shadercompiler/shadervm/shadervm.cpp: Fix a couple of
+	  outstanding regressions introduced by the library refactor.
+	  The imager shaders were being constructed with a CqShaderExecEnv
+	  with NULL render context, resulting in a crash.
+	  The initialisation execution function on the shaderVM was being
+	  run against a similar CqShaderExecEnv with NULL render context,
+	  resulting in failed transform() functions. The effect was
+	  visible as differences in lighting, as "from" on the standard
+	  shaders is initialised to (0,0,0) in "shader" space, so has a
+	  transform in the initialisation code.
+
+2007-01-19 11:45  pgregory
+
+	* aqsis/shadercompiler/shadervm/shadervm.h: Fix a problem
+	  introduced with the library refactor, specifically the code to
+	  separate the shaderVM from the renderer core. The code to define
+	  whether a shader was instantiated inside or outside the
+	  RiWorldBegin call was commented out during refactoring, and not
+	  reintroduced. The result being that the status of that flag was
+	  random, based on the contents of memory, resulting in some
+	  strange behaviour with lighting, for instance, the rendered
+	  image looking different depending on the command line arguments
+	  given.
+
+2007-01-18 01:39  ltatkinson
+
+	* aqsis/distribution/win/nsis/setup.nsi: Removed unnecessary
+	  Python entry from Win32 (NSIS) installer.
+
+2007-01-17 22:02  minty
+
+	* aqsis/AUTHORS: Convert the AUTHORS file to utf-8 for the Fedora
+	  Police
+
+2007-01-16 02:04  ltatkinson
+
+	* aqsis/distribution/linux/rpm/aqsis.spec: Fixed oversight (typos)
+	  in previous Linux (SPEC) installer commit.
+
+2007-01-16 01:50  ltatkinson
+
+	* aqsis/distribution/linux/rpm/aqsis.spec: Updated Linux (SPEC)
+	  installer to reflect recent changes within the codebase.
+
+2007-01-15 12:35  pgregory
+
+	* aqsis/renderer/render/SConscript: Fix the order of library
+	  setup, accidentally broke it in the last change.
+
+2007-01-15 12:20  joron
+
+	* aqsis/shadercompiler/slpp/pp7.c: THis will fix the crash when
+	  the user uses aqsl with -DAQSIS.
+
+2007-01-15 12:02  pgregory
+
+	* aqsis/aqsistypes/SConscript, aqsis/platform/default/SConscript,
+	  aqsis/renderer/render/SConscript, aqsis/rib/ri2rib/SConscript,
+	  aqsis/SConstruct, aqsis/shadercompiler/shadervm/SConscript,
+	  aqsis/shadercompiler/slxargs/SConscript: Update the building of
+	  shared libraries so that on Linux symlinks to
+	  versioned files are setup during build. This is so that aqsl can
+	  find
+	  the libaqsistypes.so.1 file it needs when compiling shaders
+	  during a
+	  build.
+
+2007-01-15 10:36  pgregory
+
+	* aqsis/content/shaders/displacement/SConscript,
+	  aqsis/content/shaders/light/SConscript,
+	  aqsis/platform/default/SConscript,
+	  aqsis/platform/win32/SConscript,
+	  aqsis/shadercompiler/aqsl/SConscript, aqsis/shaders/SConscript:
+	  Revert the modification to shift the compilation of shaders to
+	  the 'install' phase. This was done as aqsl relies on
+	  aqsistypes.dll/libaqsistypes.so, which was only really available
+	  after install. However, the solution doesn't work in all cases,
+	  firstly, it only works if RPATH is being used, and then only if
+	  an alternative destdir isn't specified. As the RPM build
+	  precludes the use or rpath, and needs destdir, and only does a
+	  'build', this couldn't work.
+	  
+	  Now the aqsistypes build dir is added to the PATH/RPATH in the
+	  system specific SConscripts, which isn't ideal but should ensure
+	  that the build completes.
+
+2007-01-14 12:47  c42f
+
+	* aqsis/README: Add note on dependencies of mpanalyse.py to the
+	  README
+
+2007-01-14 01:07  ltatkinson
+
+	* aqsis/content/ribs/features/curves/render.sh,
+	  aqsis/content/ribs/features/levelofdetail/render.sh,
+	  aqsis/content/ribs/features/motionblur/render_camera.sh,
+	  aqsis/content/ribs/features/motionblur/render_deformation.sh,
+	  aqsis/content/ribs/features/multipass/render.sh,
+	  aqsis/content/ribs/features/objectinstance/render.sh,
+	  aqsis/content/ribs/features/occlusion/render.sh,
+	  aqsis/content/ribs/features/shadows/render.sh,
+	  aqsis/content/ribs/features/solidmodeling/render.sh,
+	  aqsis/content/ribs/features/subdivision/render.sh,
+	  aqsis/content/ribs/features/textures/render.sh,
+	  aqsis/content/ribs/scenes/microbe/render.sh: Added *nix 'render'
+	  scripts to all example content.
+
+2007-01-13 22:18  pgregory
+
+	* aqsis/platform/default/SConscript: Fix bug #1632725. Before the
+	  library refactor the executables needed to be linked against
+	  libdl, as it's functionality is required by the CqPlugin class
+	  (libaqsistypes). However,
+	  now, libaqsistypes is a shared library, so IT needs to be linked
+	  against libdl, and not
+	  the executables. Not sure why including fltk support masked the
+	  problem, but it seems to
+	  work now.
+
+2007-01-13 12:46  c42f
+
+	* aqsis/INSTALL, aqsis/README: Minor changes: fix some spelling
+	  mistakes, and make INSTALL use standard
+	  7-bit ascii.
+
+2007-01-13 10:59  cgtobix
+
+	* aqsis/content/ribs/features/layeredshaders/render.sh,
+	  aqsis/content/ribs/scenes/vase/render.sh: fixed shebang in
+	  rener.sh
+
+2007-01-13 10:56  cgtobix
+
+	* aqsis/content/ribs/features/layeredshaders/render.sh,
+	  aqsis/content/ribs/scenes/vase/render.sh: fixed shebang in
+	  rener.sh
+
+2007-01-13 03:45  c42f
+
+	* aqsis/rib/rib2/SConscript,
+	  aqsis/shadercompiler/shadervm/SConscript: Make sure
+	  shadervm_common.h and rib2_common.h are distributed.
+
+2007-01-12 23:16  pgregory
+
+	* aqsis/platform/default/SConscript: Move the plugins into
+	  lib/aqsis/plugins off the install_prefix.
+
+2007-01-12 15:57  cgtobix
+
+	* aqsis/platform/default/SConscript, aqsis/SConstruct,
+	  aqsis/tools/mpdump/SConscript: Moved mpanalyse.py to its own
+	  scripts folder
+
+2007-01-12 15:55  c42f
+
+	* aqsis/README: Update README file to be relevant to aqsis-1.2
+	  release.
+
+2007-01-12 01:01  ltatkinson
+
+	* aqsis/distribution/win/nsis/setup.nsi: Removed 'lib' section
+	  within Win32 (NSIS) installer, due to recent changed within the
+	  codebase.
+
+2007-01-12 00:58  ltatkinson
+
+	* aqsis/distribution/linux/rpm/aqsis.spec: Fixed typo in Linux
+	  (SPEC) installer 'Source' entry.
+
+2007-01-12 00:53  ltatkinson
+
+	* aqsis/distribution/win/nsis/setup.nsi: Fix Win32 (NSIS)
+	  installer 'lib' directory issue, due to changes recently made
+	  within the codebase.
+
+2007-01-11 23:53  ltatkinson
+
+	* aqsis/distribution/linux/rpm/aqsis.spec: Updated Linux (SPEC)
+	  installer as per a recent discussion on Fedora's bug tracker -
+	  https://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=167147#c32
+
+2007-01-11 23:14  ltatkinson
+
+	* aqsis/distribution/win/nsis/page_tasks.ini,
+	  aqsis/distribution/win/nsis/setup.nsi: Updated Win32 (NSIS)
+	  installer to fix an issue when choosing an installation path,
+	  should Aqsis already be installed.
+
+2007-01-11 15:54  c42f
+
+	* aqsis/aqsistypes/posix/aqsis_compiler.h: #define COMMON_SHARE to
+	  be an empty string on posix.
+
+2007-01-11 13:31  pgregory
+
+	* aqsis/texturing/plugins/bake2tif/SConscript,
+	  aqsis/texturing/plugins/bmp2tif/SConscript,
+	  aqsis/texturing/plugins/common/SConscript,
+	  aqsis/texturing/plugins/exr2tif/SConscript,
+	  aqsis/texturing/plugins/gif2tif/SConscript,
+	  aqsis/texturing/plugins/jpg2tif/SConscript,
+	  aqsis/texturing/plugins/pcx2tif/SConscript,
+	  aqsis/texturing/plugins/png2tif/SConscript,
+	  aqsis/texturing/plugins/ppm2tif/SConscript,
+	  aqsis/texturing/plugins/tga2tif/SConscript: Fix the plugins to
+	  use common via shared objects, rather than a static library.
+	  Required by Fedora RPM compliance, all files in a .so must be
+	  compiled with -fPIC.
+
+2007-01-11 13:08  pgregory
+
+	* aqsis/aqsistypes/aqsistypes.def, aqsis/aqsistypes/bitvector.h,
+	  aqsis/aqsistypes/cellnoise.h, aqsis/aqsistypes/color.h,
+	  aqsis/aqsistypes/file.h, aqsis/aqsistypes/list.h,
+	  aqsis/aqsistypes/logging.h,
+	  aqsis/aqsistypes/logging_streambufs.h,
+	  aqsis/aqsistypes/matrix.h, aqsis/aqsistypes/noise.h,
+	  aqsis/aqsistypes/plugins.h, aqsis/aqsistypes/pool.h,
+	  aqsis/aqsistypes/random.h, aqsis/aqsistypes/refcount.h,
+	  aqsis/aqsistypes/SConscript, aqsis/aqsistypes/spline.h,
+	  aqsis/aqsistypes/sstring.h, aqsis/aqsistypes/validate.h,
+	  aqsis/aqsistypes/vector2d.h, aqsis/aqsistypes/vector3d.h,
+	  aqsis/aqsistypes/vector4d.h,
+	  aqsis/aqsistypes/win32/aqsis_compiler.h,
+	  aqsis/argparse/SConscript, aqsis/platform/win32/SConscript,
+	  aqsis/renderer/ddmanager/SConscript,
+	  aqsis/renderer/raytrace/SConscript,
+	  aqsis/renderer/render/filters.cpp,
+	  aqsis/renderer/render/libaqsis.def, aqsis/renderer/render/ri.h,
+	  aqsis/renderer/render/rib2ri.cpp,
+	  aqsis/renderer/render/SConscript, aqsis/rib/api/apiheader.xsl,
+	  aqsis/rib/miqser/rib2ri.cpp, aqsis/rib/miqser/SConscript,
+	  aqsis/rib/ri2rib/ri2rib.def, aqsis/rib/ri2rib/SConscript,
+	  aqsis/rib/rib2/bdec.h, aqsis/rib/rib2/librib.h,
+	  aqsis/rib/rib2/parserstate.h, aqsis/rib/rib2/rib2_common.h,
+	  aqsis/rib/rib2/SConscript, aqsis/rib/rib2ri/librib2ri.h,
+	  aqsis/rib/rib2ri/SConscript, aqsis/rib/rib2stream/SConscript,
+	  aqsis/SConstruct, aqsis/shadercompiler/shaderexecenv/SConscript,
+	  aqsis/shadercompiler/shaderexecenv/shaderexecenv.h,
+	  aqsis/shadercompiler/shadervm/dsoshadeops.h,
+	  aqsis/shadercompiler/shadervm/SConscript,
+	  aqsis/shadercompiler/shadervm/shaderstack.h,
+	  aqsis/shadercompiler/shadervm/shadervm.def,
+	  aqsis/shadercompiler/shadervm/shadervm.h,
+	  aqsis/shadercompiler/shadervm/shadervm_common.h,
+	  aqsis/shadercompiler/slxargs/slxargs.def,
+	  aqsis/texturing/plugins/common/SConscript: Fixup the Win32 build
+	  in the light of the latest library scheme updates. Now shared
+	  libraries are built on Win32 using __declspec(...) instead of
+	  .def files. This allows much finer control over what gets
+	  exported, without the complexity of adding decorated names to a
+	  .def file.
+	  
+	  Note: this will break the Win32 NSIS installer.
+
+2007-01-10 14:00  joron
+
+	* aqsis/testing/regression/reference/Bug1629458.tif: Commit the
+	  reference image for the new bug case.
+
+2007-01-09 23:06  pgregory
+
+	* aqsis/renderer/render/imagers.cpp,
+	  aqsis/renderer/render/ishaderexecenv.h,
+	  aqsis/renderer/render/lights.cpp,
+	  aqsis/renderer/render/micropolygon.cpp,
+	  aqsis/renderer/render/renderer.cpp,
+	  aqsis/shadercompiler/shaderexecenv/shaderexecenv.cpp,
+	  aqsis/shadercompiler/shaderexecenv/shaderexecenv.h,
+	  aqsis/shadercompiler/shadervm/shadervm.cpp,
+	  aqsis/shadercompiler/shadervm/shadervm.h,
+	  aqsis/shadercompiler/slxargs/slx.cpp: Fix some problems with the
+	  changes to the shadervm separation from the
+	  renderer context. Now the VM and the execenv (shader context)
+	  have their
+	  own pointers to the renderer context. Not ideal, but it works
+	  for now,
+	  needs looking at post 1.2.
+
+2007-01-09 18:24  joron
+
+	* aqsis/texturing/plugins/pcx2tif/pcx2tif.c: Make sure on
+	  something different than win32 it swaps.
+
+2007-01-09 09:10  pgregory
+
+	* aqsis/aqsistypes/aqsistypes.def, aqsis/aqsistypes/SConscript,
+	  aqsis/platform/win32/SConscript,
+	  aqsis/renderer/render/imagers.cpp,
+	  aqsis/renderer/render/ishaderexecenv.h,
+	  aqsis/renderer/render/libaqsis.def,
+	  aqsis/renderer/render/lights.cpp,
+	  aqsis/renderer/render/micropolygon.cpp,
+	  aqsis/rib/ri2rib/ri2rib.def, aqsis/rib/ri2rib/SConscript,
+	  aqsis/rib/rib2ri/SConscript,
+	  aqsis/shadercompiler/aqsltell/aqsltell.cpp,
+	  aqsis/shadercompiler/shaderexecenv/shadeops_illum.cpp,
+	  aqsis/shadercompiler/shaderexecenv/shadeops_inter.cpp,
+	  aqsis/shadercompiler/shaderexecenv/shadeops_matrx.cpp,
+	  aqsis/shadercompiler/shaderexecenv/shadeops_text.cpp,
+	  aqsis/shadercompiler/shaderexecenv/shadeops_tmap.cpp,
+	  aqsis/shadercompiler/shaderexecenv/shaderexecenv.cpp,
+	  aqsis/shadercompiler/shaderexecenv/shaderexecenv.h,
+	  aqsis/shadercompiler/shadervm/SConscript,
+	  aqsis/shadercompiler/shadervm/shadervm.cpp,
+	  aqsis/shadercompiler/shadervm/shadervm.def,
+	  aqsis/shadercompiler/shadervm/shadervm.h,
+	  aqsis/shadercompiler/slxargs/SConscript,
+	  aqsis/shadercompiler/slxargs/slxargs.def: Initial work to try to
+	  get the new library structure to work under windows.
+
+2007-01-07 21:26  pgregory
+
+	* aqsis/aqsistypes/SConscript,
+	  aqsis/content/shaders/displacement/SConscript,
+	  aqsis/content/shaders/light/SConscript,
+	  aqsis/renderer/aqsis/SConscript,
+	  aqsis/renderer/ddmanager/SConscript,
+	  aqsis/renderer/raytrace/SConscript,
+	  aqsis/renderer/render/SConscript, aqsis/rib/miqser/SConscript,
+	  aqsis/rib/ri2rib/SConscript, aqsis/rib/rib2/SConscript,
+	  aqsis/rib/rib2ri/SConscript, aqsis/SConstruct,
+	  aqsis/shadercompiler/aqsl/SConscript,
+	  aqsis/shadercompiler/aqsltell/SConscript,
+	  aqsis/shadercompiler/codegenvm/SConscript,
+	  aqsis/shadercompiler/shaderexecenv/SConscript,
+	  aqsis/shadercompiler/shadervm/SConscript,
+	  aqsis/shadercompiler/slparse/SConscript,
+	  aqsis/shadercompiler/slpp/SConscript,
+	  aqsis/shadercompiler/slxargs/SConscript,
+	  aqsis/shaders/SConscript, aqsis/texturing/teqser/SConscript:
+	  Refactor the library structure to avoid the use of static
+	  libraries, to
+	  now use shared libraries for all the shared functionality. This
+	  should
+	  help us to comply with stringent Fedora conditions.
+	  
+	  libaqsis.so - as before, but now without the aqsistypes
+	  functionality
+	  (see below).
+	  libaqsistypes.so - all common functionality, required for
+	  various
+	  things, including the developer libraries.
+	  libslxargs.so - as before, libaqsistypes.so needs to be linked
+	  in when
+	  using.
+	  libri2rib.so - as before, libaqsistypes.so needs to be linked in
+	  when
+	  using.
+	  libshadervm.so - new combined shader vm shared library,
+	  including the
+	  old libshaderexecenv.a, used by libslxargs.so, and libaqsis.so.
+	  
+	  Previous other static libraries are removed, and the object
+	  files are
+	  directly linked into the shared libraries/applications that need
+	  them,
+	  thus avoiding the mixing of static and shared compilation that
+	  is a
+	  problem for gcc.
+
+2007-01-07 04:37  c42f
+
+	* aqsis/testing/regression/RIBs/Bugs/Bug1629458,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1629458/Bug1629458.rib,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1629458/jobs.cfg,
+	  aqsis/testing/regression/RIBs/Bugs/Bug1629458/vnoise.sl: Add
+	  regression test for Bug 1629458.
+
+2007-01-07 03:52  c42f
+
+	* aqsis/shadercompiler/slparse/funcdef.cpp: Fix bug
+	  [ 1629458 ] vector noise(...) functions missing from shading
+	  language
+	  
+	  Create a set of noise functions with Type_Vector as the output
+	  type, which are
+	  otherwise identicle to the "point" versions of the noise
+	  functions (including
+	  sharing shadervm opcodes - is this a good idea?)
+
+2007-01-07 02:41  c42f
+
+	* aqsis/shadercompiler/shadervm/shadervm.cpp: Correct
+	  non-existance of the opcode ppnoise2. SO_ppnoise2 was
+	  incorrectly
+	  mapped to pnoise2.
+
+2007-01-03 13:34  mbaas
+
+	* aqsis/testing/regression/rendertester.py: Made the name of the
+	  pdiff command customizable (the default name is still 'pdiff'
+	  instead of 'perceptualdiff').
+
+2007-01-02 07:27  pgregory
+
+	* aqsis/shadercompiler/shaderexecenv/shadeops_illum.cpp: Fix the
+	  'solar' SL construct so that the 'L' variable is more
+	  appropriate in the case of a solar() call with no arguments.
+	  
+	  When used with no direction, solar is meant to represent a light
+	  coming
+	  from all directions at infinity. The new implementation uses the
+	  inverse
+	  of the surface normal, 'Ns' to represent a "good" incoming light
+	  direction. Should be better for illumination map usage, as
+	  intended by
+	  the spec.
+
+2006-12-23 14:38  joron
+
+	* aqsis/renderer/render/texturemap.cpp: make sure
+	  mipmapped'texture are better recognized by texturemap.cpp (mingw)
+
+2006-12-23 12:42  pgregory
+
+	* aqsis/platform/default/SConscript,
+	  aqsis/platform/win32/SConscript,
+	  aqsis/renderer/render/SConscript, aqsis/SConstruct: Fixup the
+	  way that PostInstallSharedLibrary works so that it can
+	  automatically copy the necessary linker specification files on
+	  Windows.
+
+2006-12-18 10:26  pgregory
+
+	* aqsis/ChangeLog.txt: Added ChangeLog.txt, see the release
+	  procedure on the Wiki for generation instructions.
+
 2006-12-18 10:17  ltatkinson
 
 	* aqsis/distribution/linux/rpm/aqsis.spec: Minor formatting change
