@@ -128,7 +128,6 @@ void SaveAsShadowMap(const std::string& filename, SqDisplayInstance* image, char
 				TIFFSetField( pshadow, TIFFTAG_HOSTCOMPUTER, image->m_hostname );
 			TIFFSetField( pshadow, TIFFTAG_IMAGEDESCRIPTION, mydescription);
 			// Write the floating point image to the directory.
-			TIFFSetField( pshadow, TIFFTAG_SOFTWARE, ( char* ) version );
 			TIFFSetField( pshadow, TIFFTAG_IMAGEWIDTH, image->m_width );
 			TIFFSetField( pshadow, TIFFTAG_IMAGELENGTH, image->m_height );
 			TIFFSetField( pshadow, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG );
