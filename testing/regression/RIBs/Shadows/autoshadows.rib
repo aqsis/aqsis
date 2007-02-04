@@ -1,0 +1,50 @@
+version 3.03
+
+Option "searchpath" "shader" ["../../shaders:&"]
+
+Display "autoshadows.tif" "file" "rgba" "string compression" "lzw"
+Hider "hidden" "depthfilter" "midpoint"
+
+Format 320 240 1
+
+PixelSamples 1 1
+PixelFilter "box" 1 1
+Clipping 0.2 10
+ShadingRate 1
+
+FrameBegin 1
+
+Projection "perspective" "fov" 45
+Translate 0 0 5
+Rotate -20 1 0 0
+
+Declare "shadowname" "uniform string"
+
+Option "Render" "integer multipass" [ 1 ]
+WorldBegin
+  LightSource "ambientlight" 0 "intensity" [0.2]
+  AttributeBegin
+    Attribute "autoshadows" "string shadowmapname" ["shadow_auto1.map"]
+    Translate 5 5 -5
+    Rotate -45 0.0 1.0 0.0
+    Rotate 35 1.0 0.0 0.0
+    LightSource "shadowspot" 1 "intensity" [45] "coneangle" [0.5] "shadowname" ["shadow_auto1.map"] "lightcolor" [1 0 0]
+  AttributeEnd
+  AttributeBegin
+    Attribute "autoshadows" "string shadowmapname" ["shadow_auto2.map"]
+    Translate -5 5 0
+    Rotate 90 0.0 1.0 0.0
+    Rotate 35 1.0 0.0 0.0
+    LightSource "shadowspot" 2 "intensity" [45] "coneangle" [0.5] "shadowname" ["shadow_auto2.map"] "lightcolor" [0 0 1]
+  AttributeEnd
+  Illuminate 1 1
+  Illuminate 2 1
+
+  Color [1 1 1]
+  Surface "matte"
+  Sphere 1 -1 1 360
+  Orientation "rh"
+  Patch "bilinear" "P" [-10 -1 -10 10 -1 -10 -10 -1  10 10 -1  10]
+WorldEnd
+
+FrameEnd
