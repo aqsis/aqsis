@@ -128,12 +128,18 @@ class COMMON_SHARE CqVector2D
 		 */
 		TqFloat	Magnitude2() const
 		{
+			if (m_y == 0.0) return (m_x * m_x);
+			else if (m_x == 0.0) return (m_y * m_y);
+			else
 			return ( ( m_x * m_x ) + ( m_y * m_y ) );
 		}
 		/** Get the length.
 		 */
 		TqFloat	Magnitude() const
 		{
+			if (m_y == 0.0) return fabs(m_x);
+			else if (m_x == 0.0) return fabs(m_y);
+			else
 			return ( sqrt( ( m_x * m_x ) + ( m_y * m_y ) ) );
 		}
 		void	Unit()

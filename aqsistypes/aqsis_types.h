@@ -58,7 +58,7 @@ typedef	bool	TqBool;
 
 
 /// Linearly interpolate between the two given values to the point t, 0>=t<=1.
-#define LERP(t,x0,x1)  ((x0) + (t)*((x1)-(x0)))
+#define LERP(t,x0,x1)  ((1.0-t)*(x0) + (t*x1))
 
 /// Clamp the given value a, to be with the extents of the given range.
 #define	CLAMP(a,min,max)	((a)<(min)?(min):((a)>(max)?(max):(a)))
