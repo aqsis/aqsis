@@ -110,6 +110,8 @@ void CqFile::Open( const char* strFilename, const char* strSearchPathOption, std
 					break;
 			}
 		}
+		if ( !pFStream->is_open() )
+			delete pFStream;
 	}
 	else
 		m_pStream = pFStream;
