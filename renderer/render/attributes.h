@@ -32,6 +32,8 @@
 #include	<list>
 #include	<map>
 
+#include	<boost/weak_ptr.hpp>
+
 #include	"aqsis.h"
 
 #include	"color.h"
@@ -125,29 +127,27 @@ class CqAttributes : public CqRefCount, public IqAttributes
 		/** Add a lightsource to the current available list.
 		 * \param pL a pointer to the new lightsource.
 		 */
-		void	AddLightsource( const boost::shared_ptr<CqLightsource>& pL )
+		void AddLightsource( const boost::shared_ptr<CqLightsource>& pL )
 		{
 			// Check if the ligthsource is already active
-			std::vector<boost::shared_ptr<CqLightsource> >::iterator end = m_apLightsources.end();
-			for ( std::vector<boost::shared_ptr<CqLightsource> >::iterator i = m_apLightsources.begin(); i != end; i++ )
+			std::vector<boost::weak_ptr<CqLightsource> >::iterator end = m_apLightsources.end();
+			for ( std::vector<boost::weak_ptr<CqLightsource> >::iterator i = m_apLightsources.begin(); i != end; i++ )
 			{
-				if ( ( i->get
-				        () ) == pL.get() )
+				if ( boost::shared_ptr<CqLightsource>(*i) == pL )
 					return ;
 			}
-			m_apLightsources.push_back( pL );
+			m_apLightsources.push_back( boost::weak_ptr<CqLightsource>(pL) );
 		}
 		/** Remove a lightsource from the current available list.
 		 * \param pL a pointer to the lightsource to remove.
 		 */
-		void	RemoveLightsource( const boost::shared_ptr<CqLightsource>& pL )
+		void RemoveLightsource( const boost::shared_ptr<CqLightsource>& pL )
 		{
 			// Check if the ligthsource is in the active list.
-			std::vector<boost::shared_ptr<CqLightsource> >::iterator end = m_apLightsources.end();
-			for ( std::vector<boost::shared_ptr<CqLightsource> >::iterator i = m_apLightsources.begin(); i != end; i++ )
+			std::vector<boost::weak_ptr<CqLightsource> >::iterator end = m_apLightsources.end();
+			for ( std::vector<boost::weak_ptr<CqLightsource> >::iterator i = m_apLightsources.begin(); i != end; i++ )
 			{
-				if ( i->get
-				        () == pL.get() )
+				if ( boost::shared_ptr<CqLightsource>(*i) == pL )
 				{
 					m_apLightsources.erase( i );
 					return ;
@@ -157,7 +157,7 @@ class CqAttributes : public CqRefCount, public IqAttributes
 		/** Get a reference to the lightsource list.
 		 * \return a reference to the vector of lightsource pointers.
 		 */
-		virtual const	std::vector<boost::shared_ptr<CqLightsource> >&	apLights() const
+		virtual const std::vector<boost::weak_ptr<CqLightsource> >& apLights() const
 		{
 			return ( m_apLightsources );
 		}
@@ -490,7 +490,7 @@ class CqAttributes : public CqRefCount, public IqAttributes
 		boost::shared_ptr<IqShader> m_pshadExteriorVolume;          ///< a pointer to the current exterior shader.
 
 		CqTrimLoopArray m_TrimLoops;					///< the array of closed trimcurve loops.
-		std::vector<boost::shared_ptr<CqLightsource> > m_apLightsources;	///< a vector of currently available lightsources.
+		std::vector<boost::weak_ptr<CqLightsource> > m_apLightsources;	///< a set of currently available lightsources.
 
 		std::list<CqAttributes*>::iterator	m_StackIterator;	///< the index of this attribute state in the global stack, used for destroying when last reference is removed.
 }
