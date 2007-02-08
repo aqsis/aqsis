@@ -16,9 +16,9 @@ Hider "hidden" "jitter" [1]
 PixelFilter "catmull-rom" 3 3
 #Shutter 1 1.25
 Shutter 0.0416667 0.0520833
-Format 320 200 1
 Format 640 400 1
-Display "smoky.tif" "file" "rgb" "string compression" "lzw"
+Format 320 200 1
+Display "smoky.tif" "file" "rgb" "string compression" "packbits"
 Imager "background" "color" [.6 .6 .8]
 Clipping 0.1 1000
 Projection "perspective" "fov" [54.4322]
