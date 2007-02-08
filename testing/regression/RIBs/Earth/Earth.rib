@@ -1,0 +1,32 @@
+##RenderMan RIB
+version 3.03
+MakeLatLongEnvironment "world.3x5400x2700.jpg" "earth.env" "box" 1 1
+# Main scene
+FrameBegin  0
+
+	ShadingRate 1
+	PixelSamples 2 2
+	PixelFilter "gaussian" 2 2
+	Format 320 240 1
+	Display "Earth.tif" "file" "rgba" "string compression" "lzw"
+	Projection "perspective" "fov" 17#[34.5159]
+	Clipping 0.1 100000
+	Translate 0 0 -100
+	Rotate -31 1 0 0
+	Rotate 135 0 1 0
+	Translate -400 -350 -400
+	WorldBegin 
+		# BEGIN MODEL: sphere01_1-sphere01_2
+		AttributeBegin 
+			ConcatTransform [1 0 0 0 0 1 0 0 0 0 1 0 0.369004 0.738007 0 1]
+			AttributeBegin 
+				Attribute "identifier" "name" ["sphere01_1-sphere01_2"]
+				Sides 1
+				Color [1 1 1]
+				Surface "shinymetal" "Ks" [0.5] "texturename" ["earth.env"]
+				Sphere 38 -38 38 360
+			AttributeEnd 
+		AttributeEnd 
+		# END MODEL: sphere01_1-sphere01_2
+	WorldEnd 
+FrameEnd 
