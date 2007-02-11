@@ -2017,9 +2017,11 @@ RtLightHandle	RiLightSourceV( RtToken name, PARAMETERLIST )
 	//IqShader * pShader = static_cast<CqShader*>( QGetRenderContext() ->CreateShader( name, Type_Lightsource ) );
 	boost::shared_ptr<IqShader> pShader = QGetRenderContext()->CreateShader( name, Type_Lightsource );
 
-	// TODO: Report error.
 	if ( !pShader )
-		return ( 0 );
+	{
+		Aqsis::log() << error << "Couldn't create light source shader \"" << name << "\"\n";
+		return 0;
+	}
 
 	pShader->SetTransform( QGetRenderContext() ->ptransCurrent() );
 	CqLightsourcePtr pNew( new CqLightsource( pShader, RI_TRUE ) );
