@@ -50,8 +50,8 @@ CqOutput::CqOutput( const char *name, int fdesc,
                     SqOptions::EqIndentation i, TqInt isize )
 		:
 		m_ColorNComps( 3 ),
-		m_ObjectHandle( 0 ),
-		m_LightHandle( 0 ),
+		m_ObjectHandle( 1 ),
+		m_LightHandle( 1 ),
 		m_Indentation( i ),
 		m_IndentSize( isize ),
 		m_IndentLevel( 0 )
