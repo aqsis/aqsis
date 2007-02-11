@@ -31,6 +31,8 @@
 #include "inlineparse.h"
 #include "context.h"
 
+#include "stddef.h"
+
 USING_NAMESPACE( libri2rib );
 
 #define PR(x,y)  printRequest(x,y)
@@ -430,7 +432,7 @@ RtObjectHandle CqOutput::RiObjectBegin( )
 
 		m_IndentLevel++;
 		push();
-		return ( RtObjectHandle ) m_ObjectHandle++;
+		return reinterpret_cast<RtObjectHandle>(static_cast<ptrdiff_t>(m_ObjectHandle++));
 	}
 	else
 	{
@@ -456,7 +458,7 @@ RtVoid CqOutput::RiObjectInstance( RtObjectHandle handle )
 {
 	PR( "ObjectInstance", ObjectInstance );
 	S;
-	PI( ( RtInt ) handle );
+	PI( static_cast<RtInt>(reinterpret_cast<ptrdiff_t>(handle)) );
 	EOL;
 }
 
@@ -863,7 +865,7 @@ RtLightHandle CqOutput::RiLightSourceV( const char *name, RtInt n, RtToken token
 	S;
 	printPL( n, tokens, parms );
 
-	return ( RtLightHandle ) m_LightHandle++;
+	return reinterpret_cast<RtLightHandle>(static_cast<ptrdiff_t>(m_LightHandle++));
 }
 
 RtLightHandle CqOutput::RiAreaLightSourceV( const char *name,
@@ -877,14 +879,14 @@ RtLightHandle CqOutput::RiAreaLightSourceV( const char *name,
 	S;
 	printPL( n, tokens, parms );
 
-	return ( RtLightHandle ) m_LightHandle++;
+	return reinterpret_cast<RtLightHandle>(static_cast<ptrdiff_t>(m_LightHandle++));
 }
 
 RtVoid CqOutput::RiIlluminate( RtLightHandle light, RtBoolean onoff )
 {
 	PR( "Illuminate", Illuminate );
 	S;
-	PI( ( RtInt ) light );
+	PI( static_cast<RtInt>(reinterpret_cast<ptrdiff_t>(light)) );
 	S;
 
 	if ( onoff == RI_TRUE )
