@@ -15,12 +15,14 @@ if os.environ.has_key('CXXFLAGS'):
 if os.environ.has_key('LDFLAGS'):
 	env.AppendUnique(LINKFLAGS = SCons.Util.CLVar(os.environ['LDFLAGS']))
 
-env.AppendUnique(CCFLAGS=['-Wall','-g', '-O2'])
+env.AppendUnique(CCFLAGS=['-Wall','-g'])
+
 env.AppendUnique(CPPPATH = [env.Dir('#/aqsistypes/posix')])
 env.AppendUnique(CPPDEFINES=[('PLUGINS', '1')])
 
 if not env['debug']:
 	env.AppendUnique(CPPDEFINES=[('NDEBUG', '1')])
+	env.AppendUnique(CCFLAGS=['-O2'])
 
 # Point at the boost headers.
 # todo: need to find a way of determining this location automatically
