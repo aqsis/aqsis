@@ -31,6 +31,7 @@
 
 #include	<sstream>
 #include	<ctype.h>
+#include	<stddef.h>
 
 #include	"shadervm.h"
 #include	"symbols.h"
@@ -1104,8 +1105,13 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 								// We have an initialiser we have not run yet
 								if((*candidate)->init)
 								{
+									// WARNING: future bug on x86_64 if threading is implemented:
+									//
+									// The first (int) parameter to the initialiser should be a _unique_ thread identifier.
+									// Casting to a smaller type (on x86_64, sizeof(int) < sizeof(void*) ) makes the result
+									// possibly non-unique per thread.
 									(*candidate)->initData =
-									    ((*candidate)->init)((int)((void*)this),NULL);
+									    ((*candidate)->init)(static_cast<int>(reinterpret_cast<ptrdiff_t>(this)),NULL);
 								};
 								(*candidate)->initialised = true;
 							};
