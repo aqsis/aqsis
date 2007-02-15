@@ -154,11 +154,6 @@ SectionIn 1 2
   SetOutPath "$INSTDIR\bin"
   File "${PROJECT_ROOT}\output\bin\aqsisrc"
   File "${PROJECT_ROOT}\output\bin\*.dll"
-  File "${PROJECT_ROOT}\output\bin\libaqsis.a"
-  File "${PROJECT_ROOT}\output\bin\libaqsistypes.a"
-  File "${PROJECT_ROOT}\output\bin\libri2rib.a"
-  File "${PROJECT_ROOT}\output\bin\libshadervm.a"
-  File "${PROJECT_ROOT}\output\bin\libslxargs.a"
   File "${PROJECT_ROOT}\output\bin\*.exe"
   SetOutPath "$INSTDIR\doc"
   File "/oname=AUTHORS.txt" "${PROJECT_ROOT}\AUTHORS"
@@ -233,8 +228,14 @@ SectionIn 1 2
   !insertmacro MUI_STARTMENU_WRITE_END
 SectionEnd
 
-Section /o "Development" SEC04
+Section /o "Includes" SEC04
 SectionIn 1
+  SetOutPath "$INSTDIR\lib"
+  File "${PROJECT_ROOT}\output\bin\libaqsis.a"
+  File "${PROJECT_ROOT}\output\bin\libaqsistypes.a"
+  File "${PROJECT_ROOT}\output\bin\libri2rib.a"
+  File "${PROJECT_ROOT}\output\bin\libshadervm.a"
+  File "${PROJECT_ROOT}\output\bin\libslxargs.a"
   SetOutPath "$INSTDIR\include\aqsis"
   File "${PROJECT_ROOT}\output\include\aqsis\*.h"
   File "${PROJECT_ROOT}\output\include\aqsis\*.inl"
@@ -251,7 +252,7 @@ SectionEnd
   !insertmacro MUI_DESCRIPTION_TEXT ${SEC0202} "Script files (.py)"
   !insertmacro MUI_DESCRIPTION_TEXT ${SEC0203} "Generic shader source files (.sl)"
   !insertmacro MUI_DESCRIPTION_TEXT ${SEC03} "User guides and other information"
-  !insertmacro MUI_DESCRIPTION_TEXT ${SEC04} "Include files (.h)"
+  !insertmacro MUI_DESCRIPTION_TEXT ${SEC04} "Header and library files"
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 
