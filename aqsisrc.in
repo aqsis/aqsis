@@ -6,6 +6,7 @@ Option "display" "string shadow" ["%(displaylib)s"]
 Option "display" "string tiff" ["%(displaylib)s"]
 Option "display" "string xpm" ["%(xpmlib)s"]
 Option "display" "string exr" ["%(exrlib)s"]
+Option "display" "string bmp" ["%(bmplib)s"]
 Option "display" "string debugdd" ["debugdd"]
 
 Option "searchpath" "string shader" ["%(shaderpath)s"]
