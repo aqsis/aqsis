@@ -51,7 +51,7 @@
 START_NAMESPACE( Aqsis )
 
 #define ZCLAMP  1e-6
-#define OPTIMUM_GRID_SIZE 127
+#define OPTIMUM_GRID_SIZE 15
 
 typedef struct {
 	int BlobbyId;
