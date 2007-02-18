@@ -202,7 +202,7 @@ env.AppendUnique(CPPDEFINES=[('DEFAULT_PLUGIN_PATH', '\\"' + env.Dir('${PLUGINDI
 #
 # Enable MP dumping mode if specified
 #
-env.AppendUnique(CPPDEFINES=[('ENABLE_MPDUMP', '${enable_mpdump}')])
+env.AppendUnique(CPPDEFINES=[('ENABLE_MPDUMP', env.subst('${enable_mpdump}'))])
 
 # Add paths to librarys generated in the build dir.
 def prependBuildDir(subDirs):
