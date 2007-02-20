@@ -75,6 +75,12 @@ void CqCodeGenOutput::Visit( IqParseNodeShader& S )
 	m_StackVarMap.push_back( temp );
 
 	m_slxFile.open( strOutName().c_str() );
+	if (m_slxFile.fail( ) )
+	{
+		std::cout << "... " << strOutName().c_str() << " the file could not be openned" << std::endl;
+		exit(2);
+	}
+
 	std::cout << "... " << strOutName().c_str() << std::endl;
 
 	m_slxFile << S.strShaderType() << std::endl;
