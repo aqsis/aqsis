@@ -5741,6 +5741,69 @@ RtVoid	RiClippingPlane( RtFloat x, RtFloat y, RtFloat z, RtFloat nx, RtFloat ny,
 }
 
 
+//----------------------------------------------------------------------
+// RiResource
+//
+RtVoid	RiResource( RtToken handle, RtToken type, ... )
+{
+	EXTRACT_PARAMETERS( type )
+
+	RiResourceV( handle, type, PASS_PARAMETERS );
+}
+
+
+//----------------------------------------------------------------------
+// RiResourceV
+//
+RtVoid	RiResourceV( RtToken handle, RtToken type, PARAMETERLIST )
+{
+
+	VALIDATE_CONDITIONAL
+
+	CACHE_RIRESOURCE
+
+	VALIDATE_RIRESOURCE
+
+	DEBUG_RIRESOURCE
+
+	return;
+}
+
+
+//----------------------------------------------------------------------
+// RiResourceBegin
+//
+RtVoid	RiResourceBegin()
+{
+	VALIDATE_CONDITIONAL
+
+	CACHE_RIRESOURCEBEGIN
+
+	VALIDATE_RIRESOURCEBEGIN
+
+	DEBUG_RIRESOURCEBEGIN
+
+	return ;
+}
+
+
+//----------------------------------------------------------------------
+// RiResourceEnd
+//
+RtVoid	RiResourceEnd()
+{
+	VALIDATE_CONDITIONAL
+
+	CACHE_RIRESOURCEEND
+
+	VALIDATE_RIRESOURCEEND
+
+	DEBUG_RIRESOURCEEND
+
+	return ;
+}
+
+
 RtVoid RiShaderLayer( RtToken type, RtToken name, RtToken layername, ... )
 {
 	EXTRACT_PARAMETERS( layername )

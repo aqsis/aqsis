@@ -2007,7 +2007,19 @@
 				<Argument name="variable2" type="RtToken"/>
 			</Arguments>
 		</Procedure>
-
+		<Procedure name="RiResource" return="RtVoid">
+			<Arguments>
+				<Argument name="handle" type="RtToken"/>
+				<Argument name="type" type="RtToken"/>	
+				<Argument name="plist" type="PARAMETERLIST"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiResourceBegin" return="RtVoid">
+			<Arguments/>
+		</Procedure>
+		<Procedure name="RiResourceEnd" return="RtVoid">
+			<Arguments/>
+		</Procedure>
 	</Procedures>
 </RiAPI>
 
