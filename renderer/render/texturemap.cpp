@@ -252,7 +252,12 @@ TqPuchar CqTextureMapBuffer::AllocSegment( TqUlong width, TqUlong height, TqInt 
 		const TqInt * poptMem = QGetRenderContextI() ->GetIntegerOption( "limits", "texturememory" );
 		limit = MEG1;
 		if ( poptMem )
-			limit = poptMem[ 0 ] * 1024;
+		{
+			if ( poptMem[0] < INT_MAX/1024)
+				limit = poptMem[ 0 ] * 1024;
+			else  limit = INT_MAX;
+		}
+		Aqsis::log() << info << "Set the cache limit to be " << limit << std::endl;
 	}
 
 	TqInt more = QGetRenderContext() ->Stats().GetTextureMemory() + demand;
