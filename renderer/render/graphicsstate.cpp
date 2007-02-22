@@ -334,6 +334,29 @@ void CqMotionModeBlock::SetDeformingSurface( const boost::shared_ptr<CqDeforming
 	m_pDeformingSurface = pDeformingSurface;
 }
 
+//---------------------------------------------------------------------
+/** Default constructor.
+ */
+
+CqResourceModeBlock::CqResourceModeBlock( const boost::shared_ptr<CqModeBlock>& pconParent ) : CqModeBlock( pconParent, Attribute )
+{
+	// Create new Attributes as they must be pushed/popped by the state change.
+/*	m_pattrCurrent = new CqAttributes( *pconParent->m_pattrCurrent );
+	ADDREF( m_pattrCurrent );
+	m_ptransCurrent = CqTransformPtr( new CqTransform(*pconParent->m_ptransCurrent.get() ) );
+	m_poptCurrent = CqOptionsPtr( new CqOptions(*pconParent->m_poptCurrent.get() ) );*/
+}
+
+
+//---------------------------------------------------------------------
+/** Destructor.
+ */
+
+CqResourceModeBlock::~CqResourceModeBlock()
+{
+//	RELEASEREF( m_pattrCurrent );
+}
+
 void CqModeBlock::logInvalidNesting() const
 {
 	Aqsis::log() << critical << "Invalid context nesting" << std::endl;

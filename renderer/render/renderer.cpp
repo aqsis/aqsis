@@ -362,6 +362,27 @@ boost::shared_ptr<CqModeBlock>	CqRenderer::BeginMotionModeBlock( TqInt N, TqFloa
 		return boost::shared_ptr<CqModeBlock>( );
 }
 
+//---------------------------------------------------------------------
+/** Create a new resource context.
+ */
+
+boost::shared_ptr<CqModeBlock>	CqRenderer::BeginResourceModeBlock()
+{
+	// XXX: Error checking may eventually be unnecessary.  - ajb
+	if ( m_pconCurrent )
+	{
+		boost::shared_ptr<CqModeBlock> pconNew = m_pconCurrent->BeginResourceModeBlock();
+		if ( pconNew )
+		{
+			m_pconCurrent = pconNew;
+			return ( pconNew );
+		}
+		else
+			return boost::shared_ptr<CqModeBlock>( );
+	}
+	else
+		return boost::shared_ptr<CqModeBlock>( );
+}
 
 //----------------------------------------------------------------------
 /** Delete the current context presuming it is a main context.
@@ -480,6 +501,19 @@ void	CqRenderer::EndMotionModeBlock()
 	}
 }
 
+//
+//----------------------------------------------------------------------
+/** Delete the current context presuming it is a resource context.
+ */
+
+void	CqRenderer::EndResourceModeBlock()
+{
+	if ( m_pconCurrent && (m_pconCurrent->Type() == Resource))
+	{
+		m_pconCurrent->EndResourceModeBlock();
+		m_pconCurrent = m_pconCurrent->pconParent();
+	}
+}
 
 //----------------------------------------------------------------------
 /** Get the current shutter time, always returns 0.0 unless within a motion block,

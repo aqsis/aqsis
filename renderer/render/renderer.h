@@ -117,6 +117,7 @@ class CqRenderer : public IqRenderer
 		virtual	boost::shared_ptr<CqModeBlock>	BeginSolidModeBlock( CqString& type );
 		virtual	boost::shared_ptr<CqModeBlock>	BeginObjectModeBlock();
 		virtual	boost::shared_ptr<CqModeBlock>	BeginMotionModeBlock( TqInt N, TqFloat times[] );
+		virtual	boost::shared_ptr<CqModeBlock>	BeginResourceModeBlock();
 
 		virtual	void	EndMainModeBlock();
 		virtual	void	EndFrameModeBlock();
@@ -126,6 +127,7 @@ class CqRenderer : public IqRenderer
 		virtual	void	EndSolidModeBlock();
 		virtual	void	EndObjectModeBlock();
 		virtual	void	EndMotionModeBlock();
+		virtual	void	EndResourceModeBlock();
 
 		virtual	const IqOptionsPtr	poptCurrent() const;
 		virtual	IqOptionsPtr	poptWriteCurrent();

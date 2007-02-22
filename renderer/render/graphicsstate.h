@@ -55,7 +55,8 @@ enum EqModeBlock
     Transform,
     Solid,
     Object,
-    Motion
+    Motion,	
+    Resource
 };
 
 //----------------------------------------------------------------------
@@ -80,6 +81,7 @@ class CqModeBlock : public boost::enable_shared_from_this<CqModeBlock>
 		virtual	boost::shared_ptr<CqModeBlock>	BeginSolidModeBlock( CqString& type );
 		virtual	boost::shared_ptr<CqModeBlock>	BeginObjectModeBlock();
 		virtual	boost::shared_ptr<CqModeBlock>	BeginMotionModeBlock( TqInt N, TqFloat times[] );
+		virtual	boost::shared_ptr<CqModeBlock>	BeginResourceModeBlock();
 
 #ifdef _DEBUG
 
@@ -145,7 +147,13 @@ class CqModeBlock : public boost::enable_shared_from_this<CqModeBlock>
 		{
 			logInvalidNesting();
 		}
-
+		/** Delete the main context, overridable per derived class.
+		 * \warning If called at this level it is an error, as only the appropriate context can delete itself.
+		 */
+		virtual	void	EndResourceModeBlock()
+		{
+			logInvalidNesting();
+		}
 		virtual IqOptionsPtr	poptCurrent() const
 		{
 			return( m_poptCurrent );
@@ -872,6 +880,64 @@ class CqMotionModeBlock : public CqModeBlock
 }
 ;
 
+//----------------------------------------------------------------------
+/** Define the context that exists between calls to RiResourceBegin/RiResourceEnd.
+ */
+
+class CqResourceModeBlock : public CqModeBlock
+{
+	public:
+		CqResourceModeBlock( const boost::shared_ptr<CqModeBlock>& pconParent );
+		virtual	~CqResourceModeBlock();
+
+		/** Create a main context.
+		 * \warning It is an error to call this within a attribute context.
+		 */
+		virtual	boost::shared_ptr<CqModeBlock>	BeginMainModeBlock()
+		{
+			return boost::shared_ptr<CqModeBlock>();
+		}	// Error
+		/** Create a frame context.
+		 * \warning It is an error to call this within a attribute context.
+		 */
+		virtual	boost::shared_ptr<CqModeBlock>	BeginFrameModeBlock()
+		{
+			return boost::shared_ptr<CqModeBlock>();
+		}	// Error
+		/** Create a world context.
+		 * \warning It is an error to call this within a attribute context.
+		 */
+		virtual	boost::shared_ptr<CqModeBlock>	BeginWorldModeBlock()
+		{
+			return boost::shared_ptr<CqModeBlock>();
+		}	// Error
+
+		/** Delete the attribute context.
+		 * \attention This is the only valid context deletion from within this block.
+		 */
+		virtual	void	EndResourceModeBlock()
+		{}
+
+		virtual IqOptionsPtr	poptCurrent() const
+		{
+			return( pconParent()->poptCurrent() );
+		}
+		virtual IqOptionsPtr	poptWriteCurrent()
+		{
+			return( pconParent()->poptWriteCurrent() );
+		}	
+		virtual IqOptionsPtr	pushOptions()
+		{
+			return(pconParent()->pushOptions());
+		}
+		virtual IqOptionsPtr	popOptions()
+		{
+			return(pconParent()->popOptions());
+		}
+
+	private:
+};
+
 
 //***
 // Note: These inline functions are defined here to allow full definition of all
@@ -965,6 +1031,15 @@ inline boost::shared_ptr<CqModeBlock> CqModeBlock::BeginMotionModeBlock( TqInt N
 	return boost::shared_ptr<CqModeBlock>( new CqMotionModeBlock( N, times, shared_from_this() ) );
 }
 
+//----------------------------------------------------------------------
+/** Create a new resource context, and link it to the current one.
+ * \return a pointer to the new context.
+ */
+
+inline boost::shared_ptr<CqModeBlock> CqModeBlock::BeginResourceModeBlock()
+{
+	return boost::shared_ptr<CqModeBlock>( new CqResourceModeBlock( shared_from_this() ) );
+}
 //-----------------------------------------------------------------------
 
 END_NAMESPACE( Aqsis )

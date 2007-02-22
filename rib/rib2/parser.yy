@@ -1,5 +1,5 @@
 /* -------------- declaration section -------------- */
-%expect 46
+%expect 47
 
 %{
 
