@@ -134,6 +134,9 @@ class RendermanInterface
 		virtual	RtVoid	RiRelativeDetail( RtFloat relativedetail ) = 0;
 		virtual	RtVoid	RiReverseOrientation() = 0;
 		virtual	RtVoid	RiRotate( RtFloat angle, RtFloat dx, RtFloat dy, RtFloat dz ) = 0;
+		virtual RtVoid	RiResourceV( RtToken handle, RtToken type, RtInt count, RtToken tokens[], RtPointer values[]) = 0;
+		virtual RtVoid	RiResourceBegin() = 0;
+		virtual RtVoid	RiResourceEnd() = 0;
 		virtual	RtVoid	RiScale( RtFloat sx, RtFloat sy, RtFloat sz ) = 0;
 		virtual	RtVoid	RiScreenWindow( RtFloat left, RtFloat right, RtFloat bottom, RtFloat top ) = 0;
 		virtual	RtVoid	RiShadingInterpolation( RtToken type ) = 0;

@@ -406,6 +406,18 @@ RendermanInterface::RtVoid Stream::RiRotate( RtFloat angle, RtFloat dx, RtFloat 
 {
 	m_Stream << "RiRotate()" << std::endl;
 }
+RendermanInterface::RtVoid Stream::RiResourceV(RtToken handle, RtToken type, RtInt count, RtToken tokens[], RtPointer values[])
+{
+	m_Stream << "RiResource()" << std::endl;
+}
+RendermanInterface::RtVoid Stream::RiResourceBegin()
+{
+	m_Stream << "RiResourceBegin()" << std::endl;
+}
+RendermanInterface::RtVoid Stream::RiResourceEnd()
+{
+	m_Stream << "RiResourceEnd()" << std::endl;
+}
 RendermanInterface::RtVoid Stream::RiScale( RtFloat sx, RtFloat sy, RtFloat sz )
 {
 	m_Stream << "RiScale()" << std::endl;

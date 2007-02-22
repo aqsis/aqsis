@@ -205,6 +205,9 @@ static RendermanInterface::RtInt ColorSamples = 3;
 %token	<ctype>	REQUEST_TOKEN_POLYGON
 %token	<ctype>	REQUEST_TOKEN_PROCEDURAL
 %token	<ctype>	REQUEST_TOKEN_PROJECTION
+%token  <ctype> REQUEST_TOKEN_RESOURCE
+%token  <ctype> REQUEST_TOKEN_RESOURCEBEGIN
+%token  <ctype> REQUEST_TOKEN_RESOURCEEND
 %token	<ctype>	REQUEST_TOKEN_QUANTIZE
 %token	<ctype>	REQUEST_TOKEN_READARCHIVE
 %token	<ctype>	REQUEST_TOKEN_RELATIVEDETAIL
@@ -323,6 +326,9 @@ static RendermanInterface::RtInt ColorSamples = 3;
 %type	<ctype>	relativedetail
 %type	<ctype>	reverseorientation
 %type	<ctype>	rotate
+%type	<ctype> resource
+%type	<ctype>	resourcebegin
+%type	<ctype>	resourceend
 %type	<ctype>	scale
 %type	<ctype>	screenwindow
 %type	<ctype>	shadinginterpolation
@@ -1264,6 +1270,21 @@ complete_request
 				DiscardStringValue($5);
 				DiscardStringValue($6);
 			}
+	|	resource string string opttvpairs
+			{
+				ParseCallbackInterface->RiResourceV(const_cast<char*>($2), const_cast<char*>($3), $4->Count(), $4->Tokens(), $4->Values());
+				DiscardStringValue($2);
+				DiscardStringValue($3);
+				DiscardTokenValuePairs($4);
+			}
+	|	resourcebegin
+			{
+				ParseCallbackInterface->RiResourceBegin();
+			}
+	|	resourceend
+			{
+				ParseCallbackInterface->RiResourceEnd();
+			}
 	|	UNKNOWN_TOKEN
 			{
 				// Print the error, then force the scanner into 'request'
@@ -1377,6 +1398,9 @@ readarchive: REQUEST_TOKEN_READARCHIVE	{ ExpectParams(); };
 relativedetail : REQUEST_TOKEN_RELATIVEDETAIL	{ ExpectParams(); };
 reverseorientation : REQUEST_TOKEN_REVERSEORIENTATION	{ ExpectParams(); };
 rotate : REQUEST_TOKEN_ROTATE	{ ExpectParams(); };
+resource : REQUEST_TOKEN_RESOURCE	{ ExpectParams(); };
+resourcebegin : REQUEST_TOKEN_RESOURCEBEGIN	{ ExpectParams(); };
+resourceend : REQUEST_TOKEN_RESOURCEEND	{ ExpectParams(); };
 scale : REQUEST_TOKEN_SCALE	{ ExpectParams(); };
 screenwindow : REQUEST_TOKEN_SCREENWINDOW	{ ExpectParams(); };
 shadinginterpolation : REQUEST_TOKEN_SHADINGINTERPOLATION	{ ExpectParams(); };

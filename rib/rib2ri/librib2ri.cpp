@@ -382,6 +382,18 @@ RendermanInterface::RtVoid Engine::RiRotate( RtFloat angle, RtFloat dx, RtFloat 
 {
 	::RiRotate( angle, dx, dy, dz );
 }
+RendermanInterface::RtVoid Engine::RiResourceV(RtToken handle, RtToken type, RtInt count, RtToken tokens[], RtPointer values[])
+{
+	::RiResource(handle, type, count, tokens, values);
+}
+RendermanInterface::RtVoid Engine::RiResourceBegin()
+{
+	::RiResourceBegin();
+}
+RendermanInterface::RtVoid Engine::RiResourceEnd()
+{
+	::RiResourceEnd();
+}
 RendermanInterface::RtVoid Engine::RiScale( RtFloat sx, RtFloat sy, RtFloat sz )
 {
 	::RiScale( sx, sy, sz );

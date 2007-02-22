@@ -106,6 +106,9 @@ class RIB_SHARE Engine :
 		virtual	RtVoid	RiRelativeDetail( RtFloat relativedetail );
 		virtual	RtVoid	RiReverseOrientation();
 		virtual	RtVoid	RiRotate( RtFloat angle, RtFloat dx, RtFloat dy, RtFloat dz );
+		virtual RtVoid	RiResourceV( RtToken handle, RtToken type, RtInt count, RtToken tokens[], RtPointer values[]);
+		virtual RtVoid	RiResourceBegin();
+		virtual RtVoid	RiResourceEnd();
 		virtual	RtVoid	RiScale( RtFloat sx, RtFloat sy, RtFloat sz );
 		virtual	RtVoid	RiScreenWindow( RtFloat left, RtFloat right, RtFloat bottom, RtFloat top );
 		virtual	RtVoid	RiShadingInterpolation( RtToken type );

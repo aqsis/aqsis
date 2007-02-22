@@ -1179,6 +1179,43 @@ RtVoid CqOutput::RiRotate( RtFloat angle, RtFloat dx, RtFloat dy, RtFloat dz )
 	EOL;
 }
 
+RtVoid CqOutput::RiResourceV ( RtToken handle, RtToken type, RtInt n, RtToken tokens[], RtPointer parms[] )
+{
+	PR( "Resource", Projection );
+	S;
+	printToken( handle );
+	S;
+	printToken( type );
+	S;
+	printPL( n, tokens, parms );
+}
+
+RtVoid CqOutput::RiResourceBegin( )
+{
+	if (beginNesting(B_Resource))
+	{
+		PR( "ResourceBegin", ResourceBegin );
+		EOL;
+
+		m_IndentLevel++;
+		push();
+	}
+}
+
+RtVoid CqOutput::RiResourceEnd( )
+{
+	if (endNesting(B_Resource))
+	{
+		m_IndentLevel--;
+		if ( m_IndentLevel < 0 )
+			m_IndentLevel = 0;
+		pop();
+
+		PR( "ResourceEnd", ResourceEnd );
+		EOL;
+	}
+}
+
 RtVoid CqOutput::RiScale( RtFloat sx, RtFloat sy, RtFloat sz )
 {
 	PR( "Scale", Scale );
