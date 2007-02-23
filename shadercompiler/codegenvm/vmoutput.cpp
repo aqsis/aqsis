@@ -77,8 +77,8 @@ void CqCodeGenOutput::Visit( IqParseNodeShader& S )
 	m_slxFile.open( strOutName().c_str() );
 	if (m_slxFile.fail( ) )
 	{
-		std::cout << "... " << strOutName().c_str() << " the file could not be openned" << std::endl;
-		exit(2);
+		std::cout << "Warning: Cannot open file \"" << strOutName().c_str() << "\"" << std::endl;
+		exit( 1 );
 	}
 
 	std::cout << "... " << strOutName().c_str() << std::endl;
