@@ -500,7 +500,10 @@ void CqShaderVM::SO_jnz()
 			TqBool _f;
 			f->GetBool( _f, __iGrid );
 			if ( !_f )
+			{
+				Release(stack);
 				return ;
+			}
 		}
 	}
 	while ( ++__iGrid < m_pEnv->shadingPointCount() );
@@ -523,7 +526,10 @@ void CqShaderVM::SO_jz()
 			TqBool _f;
 			f->GetBool( _f, __iGrid );
 			if ( _f )
+			{
+				Release(stack);
 				return ;
+			}
 		}
 	}
 	while ( ++__iGrid < m_pEnv->shadingPointCount() );
