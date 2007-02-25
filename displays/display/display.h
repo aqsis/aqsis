@@ -90,7 +90,8 @@ struct SqDisplayInstance
 			m_imageType(Type_File),
 			m_append(0),
 			m_pixelsReceived(0),
-			m_data(0)
+			m_data(0),
+			m_zfbdata(0)
 #ifndef	AQSIS_NO_FLTK
 			,
 			m_theWindow(0),

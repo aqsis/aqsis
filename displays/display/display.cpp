@@ -497,7 +497,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 #ifndef	AQSIS_NO_FLTK
 			// Allocate the buffer, even if the formatcount <3, always allocated 3, as that is what's needed for the
 			// display.
-			pImage->m_data = new TqUchar[ pImage->m_width * pImage->m_height * pImage->m_iFormatCount ];
+			pImage->m_data = malloc( pImage->m_width * pImage->m_height * pImage->m_iFormatCount * sizeof(TqUchar));
 			pImage->m_entrySize = pImage->m_iFormatCount * sizeof(TqChar);
 
 			// Initialise the display to a checkerboard to show alpha
