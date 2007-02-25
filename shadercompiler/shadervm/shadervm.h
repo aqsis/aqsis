@@ -28,6 +28,7 @@
 #define SHADERVM_H_INCLUDED 1
 
 #include	<vector>
+#include	<list>
 #include	<boost/shared_ptr.hpp>
 
 #include	"aqsis.h"
@@ -665,6 +666,8 @@ class SHADERVM_SHARE CqShaderVM : public CqShaderStack, public IqShader, public 
 			for ( std::vector<IqShaderData*>::iterator i = m_LocalVars.begin(); i != m_LocalVars.end(); i++ )
 				if ( ( *i ) != NULL )
 					delete( *i );
+			for ( std::list<CqString*>::iterator i = m_ProgramStrings.begin(); i != m_ProgramStrings.end(); i++ )
+				delete *i;
 		}
 
 
@@ -784,6 +787,7 @@ class SHADERVM_SHARE CqShaderVM : public CqShaderStack, public IqShader, public 
 		std::vector<SqArgumentRecord>	m_StoredArguments;		///< Array of arguments specified during construction.
 		std::vector<UsProgramElement>	m_ProgramInit;		///< Bytecodes of the intialisation program.
 		std::vector<UsProgramElement>	m_Program;			///< Bytecodes of the main program.
+		std::list<CqString*>			m_ProgramStrings;	///< Strings used by the program, which are stored additionally as UsProgramElements.
 		TqInt	m_uGridRes;
 		TqInt	m_vGridRes;
 		TqInt	m_shadingPointCount;
@@ -872,10 +876,11 @@ class SHADERVM_SHARE CqShaderVM : public CqShaderStack, public IqShader, public 
 		 */
 		void	AddString( const char* s, std::vector<UsProgramElement>* pProgramArea )
 		{
-			CqString * ps = new CqString( s );	// MGC: MEMLEAK , cleanup missing
+			CqString* ps = new CqString( s );
 			UsProgramElement E;
 			E.m_pString = ps;
 			pProgramArea->push_back( E );
+			m_ProgramStrings.push_back( ps ); // Store here as well to avoid mem leak.
 		}
 		/** Add an variable index value to the program area.
 		 * \param iVar Integer variable index to add, top bit indicates system variable.
