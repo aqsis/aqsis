@@ -26,7 +26,9 @@
 #ifndef	___display_Loaded___
 #define	___display_Loaded___
 
-#include <aqsis.h>
+#include "aqsis.h"
+
+#include "sstring.h"
 
 #ifndef	AQSIS_NO_FLTK
 #include <FL/Fl.H>
@@ -77,7 +79,7 @@ enum EqDisplayTypes
 struct SqDisplayInstance
 {
 	SqDisplayInstance() :
-			m_filename(0),
+			m_filename(),
 			m_width(0),
 			m_height(0),
 			m_iFormatCount(0),
@@ -85,7 +87,7 @@ struct SqDisplayInstance
 			m_entrySize(0),
 			m_lineLength(0),
 			m_compression(COMPRESSION_NONE), m_quality(90),
-			m_hostname(0),
+			m_hostname(),
 			m_RenderWholeFrame(TqFalse),
 			m_imageType(Type_File),
 			m_append(0),
@@ -99,7 +101,7 @@ struct SqDisplayInstance
 			m_uiImage(0)
 #endif // AQSIS_NO_FLTK
 	{}
-	char*		m_filename;
+	CqString	m_filename;
 	TqInt		m_width;
 	TqInt		m_height;
 	TqInt		m_OriginalSize[2];
@@ -109,7 +111,7 @@ struct SqDisplayInstance
 	TqInt		m_entrySize;
 	TqInt		m_lineLength;
 	uint16		m_compression, m_quality;
-	char*		m_hostname;
+	CqString	m_hostname;
 	TqBool		m_RenderWholeFrame;
 	TqInt		m_imageType;
 	TqInt		m_append;

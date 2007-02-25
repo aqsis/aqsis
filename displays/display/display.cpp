@@ -28,7 +28,6 @@
 #include <iostream>
 #include <logging.h>
 #include <logging_streambufs.h>
-#include "sstring.h"
 
 #include <tiffio.h>
 
@@ -78,7 +77,7 @@ START_NAMESPACE( Aqsis )
 
 static char datetime[21];
 static time_t start;
-static char* description = NULL;
+static CqString description;
 
 //----------------------------------------------------------------------
 /** SaveAsShadowMap() Save as a tiff an shadowmap
@@ -124,8 +123,8 @@ void SaveAsShadowMap(const std::string& filename, SqDisplayInstance* image, char
 			TIFFSetField( pshadow, TIFFTAG_PIXAR_TEXTUREFORMAT, SHADOWMAP_HEADER );
 			TIFFSetField( pshadow, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK );
 
-			if (image->m_hostname)
-				TIFFSetField( pshadow, TIFFTAG_HOSTCOMPUTER, image->m_hostname );
+			if (!image->m_hostname.empty())
+				TIFFSetField( pshadow, TIFFTAG_HOSTCOMPUTER, image->m_hostname.c_str() );
 			TIFFSetField( pshadow, TIFFTAG_IMAGEDESCRIPTION, mydescription);
 			// Write the floating point image to the directory.
 			TIFFSetField( pshadow, TIFFTAG_IMAGEWIDTH, image->m_width );
@@ -217,7 +216,7 @@ void WriteTIFF(const std::string& filename, SqDisplayInstance* image)
 	sprintf(datetime, "%04d:%02d:%02d %02d:%02d:%02d", year, ct->tm_mon + 1,
 	        ct->tm_mday, ct->tm_hour, ct->tm_min, ct->tm_sec);
 
-	if (description == NULL)
+	if (description.empty())
 	{
 		double nSecs = difftime(long_time, start);
 		sprintf(mydescription,"%d secs", static_cast<TqInt>(nSecs));
@@ -225,7 +224,7 @@ void WriteTIFF(const std::string& filename, SqDisplayInstance* image)
 	}
 	else
 	{
-		strcpy(mydescription, description);
+		strcpy(mydescription, description.c_str());
 	}
 
 
@@ -289,8 +288,8 @@ void WriteTIFF(const std::string& filename, SqDisplayInstance* image)
 		TIFFSetField( pOut, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT );
 		TIFFSetField( pOut, TIFFTAG_SAMPLESPERPIXEL, image->m_iFormatCount );
 		TIFFSetField( pOut, TIFFTAG_DATETIME, datetime);
-		if (image->m_hostname)
-			TIFFSetField( pOut, TIFFTAG_HOSTCOMPUTER, image->m_hostname );
+		if (!image->m_hostname.empty())
+			TIFFSetField( pOut, TIFFTAG_HOSTCOMPUTER, image->m_hostname.c_str() );
 		TIFFSetField( pOut, TIFFTAG_IMAGEDESCRIPTION, mydescription);
 
 
@@ -457,8 +456,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 
 		*image = pImage;
 
-		pImage->m_filename = new char[strlen(filename)+1];
-		strcpy(pImage->m_filename, filename);
+		pImage->m_filename = filename;
 
 		// Scan the formats table to see what the widest channel format specified is.
 		TqUint widestFormat = PkDspySigned8;
@@ -528,7 +526,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			pImage->m_theWindow = new Fl_Window(pImage->m_width, pImage->m_height);
 			pImage->m_uiImageWidget = new Fl_FrameBuffer_Widget(0,0, pImage->m_width, pImage->m_height, pImage->m_iFormatCount, reinterpret_cast<TqUchar*>(pImage->m_data));
 			pImage->m_theWindow->resizable(pImage->m_uiImageWidget);
-			pImage->m_theWindow->label(pImage->m_filename);
+			pImage->m_theWindow->label(pImage->m_filename.c_str());
 			pImage->m_theWindow->end();
 			Fl::visual(FL_RGB);
 			pImage->m_theWindow->show();
@@ -571,7 +569,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			pImage->m_theWindow = new Fl_Window(pImage->m_width, pImage->m_height);
 			pImage->m_uiImageWidget = new Fl_FrameBuffer_Widget(0,0, pImage->m_width, pImage->m_height, 3, reinterpret_cast<TqUchar*>(pImage->m_zfbdata));
 			pImage->m_theWindow->resizable(pImage->m_uiImageWidget);
-			pImage->m_theWindow->label(pImage->m_filename);
+			pImage->m_theWindow->label(pImage->m_filename.c_str());
 			pImage->m_theWindow->end();
 			Fl::visual(FL_RGB);
 			pImage->m_theWindow->show();
@@ -585,7 +583,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 		char* hostname;
 		if( DspyFindStringInParamList("HostComputer", &hostname, paramCount, parameters ) == PkDspyErrorNone )
 		{
-			pImage->m_hostname= strdup(hostname);
+			pImage->m_hostname = hostname;
 		}
 		if( DspyFindStringInParamList("compression", &compression, paramCount, parameters ) == PkDspyErrorNone )
 		{
@@ -635,7 +633,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 		{
 			// Do something about it; the user will want to add its copyright notice.
 			if (ydesc && *ydesc)
-				description = strdup(ydesc);
+				description = ydesc;
 		}
 	}
 	else
@@ -849,16 +847,9 @@ PtDspyError DspyImageClose(PtDspyImageHandle image)
 	// Delete the image structure.
 	if (pImage->m_data)
 		free(pImage->m_data);
-	if (pImage->m_hostname)
-		//free(pImage->m_hostname);
 	if(pImage->m_imageType == Type_ZFramebuffer)
 		free(pImage->m_zfbdata);
-	if (description)
-	{
-		free(description);
-		description = NULL;
-	}
-	delete[](pImage->m_filename);
+	description = "";
 	delete(pImage);
 
 
