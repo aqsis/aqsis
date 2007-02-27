@@ -1206,13 +1206,13 @@ void CqTextureMap::ImageFilterVal( CqTextureMapBuffer* pData, TqInt x, TqInt y, 
 				TqInt ypos = (TqInt) (fy*m_YRes-1) + j;
 				TqInt xpos = (TqInt) (fx*m_XRes-1) + i;
 				if (ypos < 0)
-					continue;
+					ypos = 0;
 				if (xpos < 0)
-					continue;
+					xpos = 0;
 				if (ypos > (TqInt) m_YRes - 1)
-					continue;
+					ypos = m_YRes - 1;
 				if (xpos > (TqInt) m_XRes - 1)
-					continue;
+					xpos = m_XRes - 1;
 				/* ponderate the value */
 				for ( isample = 0; isample < SamplesPerPixel(); isample++ )
 					accum[ isample ] += (pData->GetValue( xpos, ypos, isample ) * mul);
