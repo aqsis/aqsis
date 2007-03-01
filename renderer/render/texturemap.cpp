@@ -468,7 +468,7 @@ void CqTextureMap::Close()
  */
 TqBool CqTextureMap::CreateMIPMAP( TqBool fProtectBuffers )
 {
-
+	CqImageFilter(m_swidth, m_twidth, m_FilterFunc);
 	if ( m_pImage != 0 )
 	{
 		// Check if the format is normal scanline, otherwise we are unable to MIPMAP it yet.

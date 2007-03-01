@@ -685,6 +685,31 @@ class CqTextureMap : public IqTextureMap
 		void   CalculateLevel(TqFloat ds, TqFloat dt);
 
 	protected:
+		class CqImageFilter
+		{
+			public:
+				CqImageFilter(TqInt swidth, TqInt twidth, RtFilterFunc pFilter) : m_swidth(swidth), m_twidth(twidth)
+				{
+					m_weights.resize(((swidth*2)+1)*((twidth*2)+1));
+					TqInt tt = 0;
+					for(TqInt t = -twidth; t <= twidth; t++, tt++)
+					{
+						TqInt ss = 0;
+						for(TqInt s = -swidth; s <= swidth; s++, ss++)
+						{
+							TqFloat weight = ( *pFilter ) ( (TqFloat) ss, (TqFloat) tt, (TqFloat) swidth, (TqFloat) twidth );
+							m_weights[(ss*((swidth*2)+1))+tt] = weight;
+						}
+					}
+				}
+				
+				~CqImageFilter()	{}
+
+			private:
+				std::vector<TqFloat>	m_weights;
+				TqInt			m_swidth;
+				TqInt			m_twidth;
+		};
 		static	std::vector<CqTextureMap*>	m_TextureMap_Cache;	///< Static array of loaded textures.
 		static std::vector<CqString*>	m_ConvertString_Cache; ///< Static array of filename (after conversion)
 
