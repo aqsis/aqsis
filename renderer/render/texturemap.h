@@ -645,7 +645,7 @@ class CqTextureMap : public IqTextureMap
 		static	CqTextureMap* GetShadowMap( const CqString& strName );
 		static	CqTextureMap* GetLatLongMap( const CqString& strName );
 
-		void	ImageFilterVal( CqTextureMapBuffer* pData, TqInt x, TqInt y, TqInt directory, TqInt m_xres, TqInt m_yres, std::vector<TqFloat>& accum );
+		//void	ImageFilterVal( CqTextureMapBuffer* pData, TqInt x, TqInt y, TqInt directory, TqInt m_xres, TqInt m_yres, std::vector<TqFloat>& accum );
 
 		void Interpreted( TqPchar mode );
 
@@ -688,16 +688,17 @@ class CqTextureMap : public IqTextureMap
 		class CqImageFilter
 		{
 			public:
-				CqImageFilter(TqInt swidth, TqInt twidth, RtFilterFunc pFilter) : m_swidth(swidth), m_twidth(twidth)
+				CqImageFilter(TqInt swidth, TqInt twidth, TqInt xres, TqInt yres, RtFilterFunc pFilter) : m_swidth(swidth), m_twidth(twidth), m_xres(xres), m_yres(yres)
 				{
 					m_weights.resize(((swidth*2)+1)*((twidth*2)+1));
 					TqInt tt = 0;
-					for(TqInt t = -twidth; t <= twidth; t++, tt++)
+					for(TqFloat t = -twidth; t <= twidth; t++, tt++)
 					{
 						TqInt ss = 0;
-						for(TqInt s = -swidth; s <= swidth; s++, ss++)
+						for(TqFloat s = -swidth; s <= swidth; s++, ss++)
 						{
-							TqFloat weight = ( *pFilter ) ( (TqFloat) ss, (TqFloat) tt, (TqFloat) swidth, (TqFloat) twidth );
+							TqFloat weight = ( *pFilter ) ( fabs(s), fabs(t), (TqFloat) swidth, (TqFloat) twidth );
+							std::cout << "s: " << s << " t: " << t << " weight: " << weight << std::endl;
 							m_weights[(ss*((swidth*2)+1))+tt] = weight;
 						}
 					}
@@ -705,10 +706,15 @@ class CqTextureMap : public IqTextureMap
 				
 				~CqImageFilter()	{}
 
+				
+			void	ImageFilterVal( CqTextureMapBuffer* pData, TqInt x, TqInt y, TqInt samplesPerPixel, TqInt xres, TqInt yres, std::vector<TqFloat>& accum );
+
 			private:
 				std::vector<TqFloat>	m_weights;
 				TqInt			m_swidth;
 				TqInt			m_twidth;
+				TqInt			m_xres;
+				TqInt			m_yres;
 		};
 		static	std::vector<CqTextureMap*>	m_TextureMap_Cache;	///< Static array of loaded textures.
 		static std::vector<CqString*>	m_ConvertString_Cache; ///< Static array of filename (after conversion)

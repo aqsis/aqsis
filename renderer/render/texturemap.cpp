@@ -468,7 +468,6 @@ void CqTextureMap::Close()
  */
 TqBool CqTextureMap::CreateMIPMAP( TqBool fProtectBuffers )
 {
-	CqImageFilter(m_swidth, m_twidth, m_FilterFunc);
 	if ( m_pImage != 0 )
 	{
 		// Check if the format is normal scanline, otherwise we are unable to MIPMAP it yet.
@@ -482,23 +481,24 @@ TqBool CqTextureMap::CreateMIPMAP( TqBool fProtectBuffers )
 		// Read the whole image into a buffer.
 		CqTextureMapBuffer * pBuffer = GetBuffer( 0, 0, 0, fProtectBuffers );
 
-		TqInt m_xres = m_XRes;
-		TqInt m_yres = m_YRes;
+		TqInt xres = m_XRes;
+		TqInt yres = m_YRes;
 		TqInt directory = 0;
 
 		do
 		{
-			CqTextureMapBuffer* pTMB = CreateBuffer( 0, 0, m_xres, m_yres, directory, fProtectBuffers );
+			CqImageFilter filter((m_swidth*(1<<directory)), (m_twidth*(1<<directory)), m_XRes, m_YRes, m_FilterFunc);
+			CqTextureMapBuffer* pTMB = CreateBuffer( 0, 0, xres, yres, directory, fProtectBuffers );
 
 			if ( pTMB->pVoidBufferData() != NULL )
 			{
-				for ( TqInt y = 0; y < m_yres; y++ )
+				for ( TqInt y = 0; y < yres; y++ )
 				{
 					//unsigned char accum[ 4 ];
 					std::vector<TqFloat> accum;
-					for ( TqInt x = 0; x < m_xres; x++ )
+					for ( TqInt x = 0; x < xres; x++ )
 					{
-						ImageFilterVal( pBuffer, x, y, directory, m_xres, m_yres, accum );
+						filter.ImageFilterVal( pBuffer, x, y, SamplesPerPixel(), xres, yres, accum );
 
 						for ( TqInt sample = 0; sample < m_SamplesPerPixel; sample++ )
 							pTMB->SetValue( x, y, sample, accum[ sample ] );
@@ -508,12 +508,12 @@ TqBool CqTextureMap::CreateMIPMAP( TqBool fProtectBuffers )
 				m_apLast[directory%256] = pTMB;
 			}
 
-			m_xres /= 2;
-			m_yres /= 2;
+			xres /= 2;
+			yres /= 2;
 			directory++;
 
 		}
-		while ( ( m_xres > 2 ) && ( m_yres > 2 ) ) ;
+		while ( ( xres > 2 ) && ( yres > 2 ) ) ;
 	}
 	return( TqTrue );
 }
@@ -1158,82 +1158,57 @@ void CqTextureMap::Interpreted( TqPchar mode )
   *   (X1,Y1) and (X2,Y2) (-0.5, -0.5) ... (0.5, 0.5) giving 9 samples -0.5, 0.0, 0.5 in X and in Y.
   *
   **/
-void CqTextureMap::ImageFilterVal( CqTextureMapBuffer* pData, TqInt x, TqInt y, TqInt directory,  TqInt m_xres, TqInt m_yres, std::vector<TqFloat>& accum )
+void CqTextureMap::CqImageFilter::ImageFilterVal( CqTextureMapBuffer* pData, TqInt x, TqInt y, TqInt samplesPerPixel,  TqInt xres, TqInt yres, std::vector<TqFloat>& accum )
 {
-	RtFilterFunc pFilter = m_FilterFunc;
-
-	TqInt delta = ( 1 << directory );
-	TqFloat div = 0.0;
-	TqFloat mul;
-	TqFloat fx, fy;
-	register TqInt isample;
-	TqInt xdelta = MAX(FLOOR(m_swidth) * (delta/2), 1);
-	TqInt ydelta = MAX(FLOOR(m_twidth) * (delta/2), 1);
-	TqInt xdelta2 = xdelta * 2;
-	TqInt ydelta2 = ydelta * 2;
-
-
-	// Increase the precision after the middle (0.5 and up make sure we will hit the borner at 1.0)
-	fx = (TqFloat) (x)/ (TqFloat) (m_xres - 1);
-
-
-	// Increase the precision after the middle (0.5 and up make sure we will hit the borner at 1.0)
-	fy = (TqFloat) (y)/ (TqFloat) (m_yres - 1 );
-
-
 	// Clear the accumulator
-	accum.assign( SamplesPerPixel(), 0.0f );
+	accum.assign( samplesPerPixel, 0.0f );
 
-	if ( directory )
+	TqInt isample;
+	TqFloat i, j;
+	TqFloat div = 0.0f;
+
+	for ( isample = 0; isample < samplesPerPixel; isample++ )
+		accum[ isample ]= 0.0;
+	
+	TqFloat fx = (TqFloat) (x)/ (TqFloat) (xres - 1);
+	TqFloat fy = (TqFloat) (y)/ (TqFloat) (yres - 1);
+
+	/* From -twidth to +twidth */
+	TqInt tt = 0;
+	for ( j = - m_twidth; j <= m_twidth; j++, tt++ )
 	{
-		TqInt i, j;
-
-		for ( isample = 0; isample < SamplesPerPixel(); isample++ )
-			accum[ isample ]= 0.0;
-
-		/* From -twidth to +twidth */
-		for ( j = - ydelta; j <= ydelta; j++ )
+		/* From -swidth to +swidth */
+		TqInt ss = 0;
+		for ( i = -m_swidth; i <= m_swidth; i++, ss++)
 		{
-			/* From -swidth to +swidth */
-			for ( i = -xdelta; i <= xdelta; i++)
-			{
-				/* find the filter value */
-				mul = ( *pFilter ) ( (TqFloat) i, (TqFloat) j, (TqFloat) xdelta2, (TqFloat) ydelta2 );
-				if (mul == 0.0)
-					continue;
+			/* find the filter value */
+			TqFloat weight = m_weights[(ss*((m_swidth*2)+1))+tt];
+//			std::cout << "s: " << i << " t: " << j << " weight: " << weight << std::endl;
+			if (weight == 0.0)
+				continue;
 
-				/* find the value in the original image */
-				TqInt ypos = (TqInt) (fy*m_YRes-1) + j;
-				TqInt xpos = (TqInt) (fx*m_XRes-1) + i;
-				if (ypos < 0)
-					ypos = 0;
-				if (xpos < 0)
-					xpos = 0;
-				if (ypos > (TqInt) m_YRes - 1)
-					ypos = m_YRes - 1;
-				if (xpos > (TqInt) m_XRes - 1)
-					xpos = m_XRes - 1;
-				/* ponderate the value */
-				for ( isample = 0; isample < SamplesPerPixel(); isample++ )
-					accum[ isample ] += (pData->GetValue( xpos, ypos, isample ) * mul);
+			/* find the value in the original image */
+			TqInt ypos = (TqInt) ((fy*m_xres-1) + j);
+			TqInt xpos = (TqInt) ((fx*m_xres-1) + i);
+			if (ypos < 0)
+				ypos = 0;
+			if (xpos < 0)
+				xpos = 0;
+			if (ypos > (TqInt) m_yres - 1)
+				ypos = m_yres - 1;
+			if (xpos > (TqInt) m_xres - 1)
+				xpos = m_xres - 1;
+			for ( isample = 0; isample < samplesPerPixel; isample++ )
+				accum[ isample ] += (pData->GetValue( xpos, ypos, isample ) * weight);
 
-				/* accumulate the ponderation factor */
-				div += mul;
-			}
+			/* accumulate the weighting factor */
+			div += weight;
 		}
-
-		/* use the accumulated ponderation factor */
-		for ( isample = 0; isample < SamplesPerPixel(); isample++ )
-			accum[ isample ] /= static_cast<TqFloat>( div );
-	}
-	else
-	{
-		/* copy the byte don't bother much */
-		for ( isample = 0; isample < SamplesPerPixel(); isample++ )
-			accum[ isample ] = ( pData->GetValue( x, y, isample ) );
-
 	}
 
+	/* use the accumulated weighting factor */
+	for ( isample = 0; isample < samplesPerPixel; isample++ )
+		accum[ isample ] /= static_cast<TqFloat>( div );
 }
 
 //---------------------------------------------------------------------
