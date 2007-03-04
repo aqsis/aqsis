@@ -698,7 +698,7 @@ class CqTextureMap : public IqTextureMap
 						for(TqFloat s = -swidth; s <= swidth; s++, ss++)
 						{
 							TqFloat weight = ( *pFilter ) ( fabs(s), fabs(t), (TqFloat) swidth, (TqFloat) twidth );
-							std::cout << "s: " << s << " t: " << t << " weight: " << weight << std::endl;
+							//std::cout << "s: " << s << " t: " << t << " weight: " << weight << std::endl;
 							m_weights[(ss*((swidth*2)+1))+tt] = weight;
 						}
 					}

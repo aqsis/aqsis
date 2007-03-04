@@ -479,26 +479,33 @@ TqBool CqTextureMap::CreateMIPMAP( TqBool fProtectBuffers )
 			return( TqFalse );
 		}
 		// Read the whole image into a buffer.
-		CqTextureMapBuffer * pBuffer = GetBuffer( 0, 0, 0, fProtectBuffers );
+		CqTextureMapBuffer* pBuffer = GetBuffer( 0, 0, 0, fProtectBuffers );
+		TqInt prevdistance = 0;
+		TqInt prevxres = m_XRes;
+		TqInt prevyres = m_YRes;
+		TqInt currxres = m_XRes;
+		TqInt curryres = m_YRes;
+		TqInt swidth = 0;
+		TqInt twidth = 0;
 
-		TqInt xres = m_XRes;
-		TqInt yres = m_YRes;
 		TqInt directory = 0;
 
 		do
 		{
-			CqImageFilter filter((m_swidth*(1<<directory)), (m_twidth*(1<<directory)), m_XRes, m_YRes, m_FilterFunc);
-			CqTextureMapBuffer* pTMB = CreateBuffer( 0, 0, xres, yres, directory, fProtectBuffers );
+			std::cout << "Downsampling from " << prevxres << ", " << prevyres << " to " << currxres << ", " << curryres << " using a filter of width " << swidth << ", " << twidth << std::endl;
+			CqImageFilter filter(swidth, twidth, prevxres, prevyres, m_FilterFunc);
+			CqTextureMapBuffer* pTMB = CreateBuffer( 0, 0, currxres, curryres, directory, fProtectBuffers );
+			CqTextureMapBuffer* pPrevBuffer = GetBuffer(0, 0, directory - prevdistance, fProtectBuffers );
 
 			if ( pTMB->pVoidBufferData() != NULL )
 			{
-				for ( TqInt y = 0; y < yres; y++ )
+				for ( TqInt y = 0; y < curryres; y++ )
 				{
 					//unsigned char accum[ 4 ];
 					std::vector<TqFloat> accum;
-					for ( TqInt x = 0; x < xres; x++ )
+					for ( TqInt x = 0; x < currxres; x++ )
 					{
-						filter.ImageFilterVal( pBuffer, x, y, SamplesPerPixel(), xres, yres, accum );
+						filter.ImageFilterVal( pPrevBuffer, x, y, SamplesPerPixel(), currxres, curryres, accum );
 
 						for ( TqInt sample = 0; sample < m_SamplesPerPixel; sample++ )
 							pTMB->SetValue( x, y, sample, accum[ sample ] );
@@ -508,12 +515,23 @@ TqBool CqTextureMap::CreateMIPMAP( TqBool fProtectBuffers )
 				m_apLast[directory%256] = pTMB;
 			}
 
-			xres /= 2;
-			yres /= 2;
+			currxres /= 2;
+			curryres /= 2;
 			directory++;
+			swidth = m_swidth*(1<<prevdistance);
+			twidth = m_twidth*(1<<prevdistance);
 
+			if(prevdistance < 2)
+			{
+				prevdistance += 1;
+			}
+			else
+			{
+				prevxres /= 2;
+				prevyres /= 2;
+			}
 		}
-		while ( ( xres > 2 ) && ( yres > 2 ) ) ;
+		while ( ( currxres > 1 ) && ( curryres > 1 ) ) ;
 	}
 	return( TqTrue );
 }
