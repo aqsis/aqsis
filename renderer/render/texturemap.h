@@ -688,18 +688,18 @@ class CqTextureMap : public IqTextureMap
 		class CqImageFilter
 		{
 			public:
-				CqImageFilter(TqInt swidth, TqInt twidth, TqInt xres, TqInt yres, RtFilterFunc pFilter) : m_swidth(swidth), m_twidth(twidth), m_xres(xres), m_yres(yres)
+				CqImageFilter(TqFloat swidth, TqFloat twidth, TqInt xres, TqInt yres, RtFilterFunc pFilter) : m_swidth(swidth), m_twidth(twidth), m_xres(xres), m_yres(yres), m_pFilter(pFilter)
 				{
-					m_weights.resize(((swidth*2)+1)*((twidth*2)+1));
-					TqInt tt = 0;
-					for(TqFloat t = -twidth; t <= twidth; t++, tt++)
+					TqFloat srad = (swidth*0.5);
+					TqFloat trad = (twidth*0.5);
+					m_weights.resize(static_cast<size_t>(swidth+1)*static_cast<size_t>(twidth+1));
+					TqInt weightOffset = 0;
+					for(TqFloat t = -trad; t <= trad; t++)
 					{
-						TqInt ss = 0;
-						for(TqFloat s = -swidth; s <= swidth; s++, ss++)
+						for(TqFloat s = -srad; s <= srad; s++)
 						{
-							TqFloat weight = ( *pFilter ) ( fabs(s), fabs(t), (TqFloat) swidth, (TqFloat) twidth );
-							//std::cout << "s: " << s << " t: " << t << " weight: " << weight << std::endl;
-							m_weights[(ss*((swidth*2)+1))+tt] = weight;
+							TqFloat weight = ( *pFilter ) ( s, t, swidth, twidth );
+							m_weights[weightOffset++] = weight;
 						}
 					}
 				}
@@ -711,10 +711,11 @@ class CqTextureMap : public IqTextureMap
 
 			private:
 				std::vector<TqFloat>	m_weights;
-				TqInt			m_swidth;
-				TqInt			m_twidth;
+				TqFloat			m_swidth;
+				TqFloat			m_twidth;
 				TqInt			m_xres;
 				TqInt			m_yres;
+				RtFilterFunc	m_pFilter;
 		};
 		static	std::vector<CqTextureMap*>	m_TextureMap_Cache;	///< Static array of loaded textures.
 		static std::vector<CqString*>	m_ConvertString_Cache; ///< Static array of filename (after conversion)

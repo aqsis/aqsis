@@ -485,14 +485,13 @@ TqBool CqTextureMap::CreateMIPMAP( TqBool fProtectBuffers )
 		TqInt prevyres = m_YRes;
 		TqInt currxres = m_XRes;
 		TqInt curryres = m_YRes;
-		TqInt swidth = 0;
-		TqInt twidth = 0;
+		TqFloat swidth = 0;
+		TqFloat twidth = 0;
 
 		TqInt directory = 0;
 
 		do
 		{
-			std::cout << "Downsampling from " << prevxres << ", " << prevyres << " to " << currxres << ", " << curryres << " using a filter of width " << swidth << ", " << twidth << std::endl;
 			CqImageFilter filter(swidth, twidth, prevxres, prevyres, m_FilterFunc);
 			CqTextureMapBuffer* pTMB = CreateBuffer( 0, 0, currxres, curryres, directory, fProtectBuffers );
 			CqTextureMapBuffer* pPrevBuffer = GetBuffer(0, 0, directory - prevdistance, fProtectBuffers );
@@ -1182,51 +1181,53 @@ void CqTextureMap::CqImageFilter::ImageFilterVal( CqTextureMapBuffer* pData, TqI
 	accum.assign( samplesPerPixel, 0.0f );
 
 	TqInt isample;
-	TqFloat i, j;
+	TqInt sampleCol, sampleRow;
 	TqFloat div = 0.0f;
+
+	TqFloat heightTransform = static_cast<TqFloat>(m_yres)/static_cast<TqFloat>(yres);
+	TqFloat widthTransform = static_cast<TqFloat>(m_xres)/static_cast<TqFloat>(xres);
 
 	for ( isample = 0; isample < samplesPerPixel; isample++ )
 		accum[ isample ]= 0.0;
 	
-	TqFloat fx = (TqFloat) (x)/ (TqFloat) (xres - 1);
-	TqFloat fy = (TqFloat) (y)/ (TqFloat) (yres - 1);
+	TqInt fx = static_cast<TqInt>(CEIL((m_swidth-1)/2));
+	TqInt fy = static_cast<TqInt>(CEIL((m_twidth-1)/2));
+	TqInt weightOffset = 0;
 
-	/* From -twidth to +twidth */
-	TqInt tt = 0;
-	for ( j = - m_twidth; j <= m_twidth; j++, tt++ )
+	for ( sampleRow = y-fy; sampleRow <= y+fy; sampleRow++ )
 	{
-		/* From -swidth to +swidth */
-		TqInt ss = 0;
-		for ( i = -m_swidth; i <= m_swidth; i++, ss++)
+		TqInt ypos = static_cast<TqInt>(heightTransform * sampleRow);
+		// \todo: This behaviour should be based on the wrap mode.
+		if (ypos < 0) ypos = 0;
+		if (ypos > (TqInt) m_yres - 1) ypos = m_yres - 1;
+		for ( sampleCol = x-fx; sampleCol <= x+fx; sampleCol++)
 		{
 			/* find the filter value */
-			TqFloat weight = m_weights[(ss*((m_swidth*2)+1))+tt];
-//			std::cout << "s: " << i << " t: " << j << " weight: " << weight << std::endl;
-			if (weight == 0.0)
-				continue;
+			TqFloat weight = m_weights[weightOffset++];
 
-			/* find the value in the original image */
-			TqInt ypos = (TqInt) ((fy*m_xres-1) + j);
-			TqInt xpos = (TqInt) ((fx*m_xres-1) + i);
-			if (ypos < 0)
-				ypos = 0;
-			if (xpos < 0)
-				xpos = 0;
-			if (ypos > (TqInt) m_yres - 1)
-				ypos = m_yres - 1;
-			if (xpos > (TqInt) m_xres - 1)
-				xpos = m_xres - 1;
-			for ( isample = 0; isample < samplesPerPixel; isample++ )
-				accum[ isample ] += (pData->GetValue( xpos, ypos, isample ) * weight);
+			TqInt xpos = static_cast<TqInt>(widthTransform * sampleCol);
+			// \todo: This behaviour should be based on the wrap mode.
+			if (xpos < 0) xpos = 0;
+			if (xpos > (TqInt) m_xres - 1) xpos = m_xres - 1;
+			if( (weight != 0.0) && (sampleCol>=0) && (sampleCol<m_xres) && (sampleRow>=0) && (sampleRow<m_yres) )
+			{
+				for ( isample = 0; isample < samplesPerPixel; isample++ )
+					accum[ isample ] += (pData->GetValue( xpos, ypos, isample ) * weight);
 
-			/* accumulate the weighting factor */
-			div += weight;
+				/* accumulate the weighting factor */
+				div += weight;
+			}
 		}
 	}
 
 	/* use the accumulated weighting factor */
 	for ( isample = 0; isample < samplesPerPixel; isample++ )
-		accum[ isample ] /= static_cast<TqFloat>( div );
+	{
+		TqFloat sampleVal = accum[isample];
+		sampleVal /= div;
+		sampleVal = CLAMP(sampleVal, 0.0f, 1.0f);
+		accum[ isample ] = sampleVal;
+	}
 }
 
 //---------------------------------------------------------------------
