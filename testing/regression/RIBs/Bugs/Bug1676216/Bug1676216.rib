@@ -18,6 +18,7 @@ Rotate -47.9689 1 0 0
 Rotate -123.69 0 1 0
 Translate 15 -20 -10
 
+ShadingRate 2.0
 WorldBegin
 TransformBegin
 Transform [1 0 0 0 0 1 0 0 0 0 1 0 -20 20 30 1 ]
