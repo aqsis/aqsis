@@ -849,7 +849,7 @@ complete_request
                 DiscardStringValue($4);  
 		DiscardTokenValuePairs($5);
             }
-    |   blobby integer integer_array float_array string_array opttvpairs
+    |   blobby integer integer_array float_array string_array_or_empty opttvpairs
             {
                 ParseCallbackInterface->RiBlobbyV($2, $3->Count(), &(*$3)[0], 
                         $4->Count(), &(*$4)[0],
