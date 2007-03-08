@@ -15,7 +15,7 @@
 	</xsl:template>
 
 	<xsl:template match="Procedure">
-		<xsl:value-of select="concat('#define VALIDATE_', translate(@name, 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'))"/>
+		<xsl:value-of select="concat('#define VALIDATE_', translate(Name, 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'))"/>
 		<xsl:if test="Valid">
 			<xsl:value-of select="string(' \&#xa;')"/>
 			<xsl:text>{ \&#xa;</xsl:text>
@@ -28,9 +28,9 @@
 			</xsl:for-each>
 			<xsl:value-of select="string(') ) \&#xa;')"/>
 			<xsl:text>&#x9;{ \&#xa;</xsl:text>
-			<xsl:value-of select="concat('&#x9;&#x9;Aqsis::log() &lt;&lt; error &lt;&lt; &quot;Invalid state for ', @name, ' [&quot; &lt;&lt; GetStateAsString() &lt;&lt; &quot;]&quot; &lt;&lt; std::endl; \&#xa;')"/>
+			<xsl:value-of select="concat('&#x9;&#x9;Aqsis::log() &lt;&lt; error &lt;&lt; &quot;Invalid state for ', Name, ' [&quot; &lt;&lt; GetStateAsString() &lt;&lt; &quot;]&quot; &lt;&lt; std::endl; \&#xa;')"/>
 			<xsl:value-of select="string('&#x9;&#x9;return')"/>
-			<xsl:if test="@return != 'RtVoid'">
+			<xsl:if test="ReturnType != 'RtVoid'">
 				<xsl:text>(0)</xsl:text>
 			</xsl:if>
 			<xsl:text>; \&#xa;</xsl:text>

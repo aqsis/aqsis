@@ -24,16 +24,16 @@
 	<!--	Procedure	-->
 	<xsl:template match="Procedure">
 		<xsl:choose>
-			<xsl:when test="Arguments/Argument[last()]/@type = 'PARAMETERLIST'">
-				<xsl:value-of select="concat('&#x9;RI_SHARE ', @return, ' ', @name, '( ')"/>
+			<xsl:when test="Arguments/Argument[last()]/Type = 'PARAMETERLIST'">
+				<xsl:value-of select="concat('&#x9;RI_SHARE ', ReturnType, ' ', Name, '( ')"/>
 				<xsl:apply-templates select="Arguments/Argument[position()&lt;last()]"/>
 				<xsl:value-of select="string(', ... );&#xa;')"/>
-				<xsl:value-of select="concat('&#x9;RI_SHARE ', @return, ' ', @name, 'V( ')"/>
+				<xsl:value-of select="concat('&#x9;RI_SHARE ', ReturnType, ' ', Name, 'V( ')"/>
 				<xsl:apply-templates select="Arguments/Argument"/>
 				<xsl:value-of select="string(' );&#xa;')"/>
 			</xsl:when>
 			<xsl:otherwise>
-				<xsl:value-of select="concat('&#x9;RI_SHARE ', @return, ' ', @name, '( ')"/>
+				<xsl:value-of select="concat('&#x9;RI_SHARE ', ReturnType, ' ', Name, '( ')"/>
 				<xsl:apply-templates select="Arguments/Argument"/>
 				<xsl:value-of select="string(' );&#xa;')"/>
 			</xsl:otherwise>
@@ -44,14 +44,14 @@
 	<!--	Argument	-->
 	<xsl:template match="Argument">
 		<xsl:choose>
-			<xsl:when test="@type = 'PARAMETERLIST'">
+			<xsl:when test="Type = 'PARAMETERLIST'">
 				<xsl:text>RtInt count, RtToken tokens[], RtPointer values[]</xsl:text>
 			</xsl:when>
-			<xsl:when test="contains( @type, 'Array')">
-				<xsl:value-of select="concat(substring-before(@type, 'Array'), ' ', @name, '[]')"/>
+			<xsl:when test="contains( Type, 'Array')">
+				<xsl:value-of select="concat(substring-before(Type, 'Array'), ' ', Name, '[]')"/>
 			</xsl:when>
 			<xsl:otherwise>
-				<xsl:value-of select="concat(@type, ' ', @name)"/>
+				<xsl:value-of select="concat(Type, ' ', Name)"/>
 			</xsl:otherwise>
 		</xsl:choose>
 		<xsl:if test="last() != position()">
