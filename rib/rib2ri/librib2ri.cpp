@@ -506,6 +506,8 @@ RendermanInterface::RtFilterFunc Engine::GetFilterFunction( RtToken type )
 		return ( &::RiGaussianFilter );
 	else if ( strcmp( type, "triangle" ) == 0 )
 		return ( &::RiTriangleFilter );
+	else if ( strcmp( type, "mitchell" ) == 0 )
+		return ( &::RiMitchellFilter );
 	else if ( strcmp( type, "catmull-rom" ) == 0 )
 		return ( &::RiCatmullRomFilter );
 	else if ( strcmp( type, "sinc" ) == 0 )
