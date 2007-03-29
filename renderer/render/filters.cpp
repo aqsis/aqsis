@@ -34,10 +34,10 @@
 START_NAMESPACE( Aqsis )
 
 // Mitchell Filter Declarations
-class MitchellFilter {
+class CqMitchellFilter {
 public:
-   // MitchellFilter Public Methods
-   MitchellFilter(TqFloat b, TqFloat c, TqFloat xw, TqFloat yw)
+   // CqMitchellFilter Public Methods
+   CqMitchellFilter(TqFloat b, TqFloat c, TqFloat xw, TqFloat yw)
    {
       B = b;
       C = c;
@@ -116,7 +116,7 @@ extern "C"
 extern "C" 
 RtFloat	RiMitchellFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 {
-	Aqsis::MitchellFilter mc(1/3.0f, 1/3.0f, xwidth, ywidth);
+	Aqsis::CqMitchellFilter mc(1/3.0f, 1/3.0f, xwidth, ywidth);
 
 	return mc.Evaluate(x, y);
 }
