@@ -1617,8 +1617,7 @@ RtVoid	RiHiderV( RtToken name, PARAMETERLIST )
 	}
 
 	// Check options.
-	TqInt i;
-	for ( i = 0; i < count; ++i )
+	for ( TqInt i = 0; i < count; ++i )
 	{
 		SqParameterDeclaration Decl;
 		try
@@ -1712,8 +1711,7 @@ RtVoid	RiOptionV( RtToken name, PARAMETERLIST )
 
 	DEBUG_RIOPTION
 
-	RtInt i;
-	for ( i = 0; i < count; ++i )
+	for ( TqInt i = 0; i < count; ++i )
 	{
 		RtToken	token = tokens[ i ];
 		RtPointer	value = values[ i ];
@@ -2992,8 +2990,7 @@ RtVoid	RiAttributeV( RtToken name, PARAMETERLIST )
 	// Find the parameter on the current options.
 	CqNamedParameterList * pAttr = QGetRenderContext() ->pattrWriteCurrent() ->pAttributeWrite( name ).get();
 
-	RtInt i;
-	for ( i = 0; i < count; ++i )
+	for ( TqInt i = 0; i < count; ++i )
 	{
 		RtToken	token = tokens[ i ];
 		RtPointer	value = values[ i ];
