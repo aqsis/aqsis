@@ -19,7 +19,7 @@
 #ifndef	___logging_Loaded___
 #define	___logging_Loaded___
 
-#include <iosfwd>
+#include <iostream>
 
 #include "aqsis.h"
 
