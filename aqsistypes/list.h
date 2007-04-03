@@ -38,7 +38,7 @@ START_NAMESPACE( Aqsis )
  */
 
 template <class T>
-class COMMON_SHARE CqListEntry
+class /*COMMON_SHARE*/ CqListEntry
 {
 	public:
 		CqListEntry() : m_pPrevious( 0 ), m_pNext( 0 ), m_Invalid( TqFalse )

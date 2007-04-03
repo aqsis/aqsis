@@ -196,7 +196,6 @@ libincludes = [''] + Split('''
 #for a in libincludes:
 #	env.AppendUnique(CPPPATH = [env.subst(a)] )
 env.AppendUnique(CPPPATH = ['$boost_include_path'])
-
 env.AppendUnique(CPPDEFINES=[('DEFAULT_PLUGIN_PATH', '\\"' + env.Dir('${PLUGINDIR}').abspath + '\\"')])
 
 #
@@ -409,4 +408,5 @@ options = glob.glob('platform/*/*.py')
 for option in options:
 	path, name = os.path.split(option)
 	env.Distribute(option, path)
+
 
