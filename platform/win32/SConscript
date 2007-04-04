@@ -127,9 +127,15 @@ if not env['mingw']:
 		
 	env.AppendUnique(CPPDEFINES=['NO_SYSLOG', 'WIN32', 'PLUGINS', 'USE_WIN32_FILEIO'])
 		
-	env.Replace(exr_lib = 'Iex')
-	env.Replace(exr2tif_libs = ['IlmImf', 'Half', 'Iex', 'Imath'])
-	env.Replace(exr_libs = ['IlmImf', 'Half', 'Iex', 'Imath', 'IlmThread', '$z_lib'])
+	if env['debug']:
+		env.Replace(exr_lib = 'Iex_d')
+		env.Replace(exr2tif_libs = ['IlmImf_d', 'Half_d', 'Iex_d', 'Imath_d', 'IlmThread_d'])
+		env.Replace(exr_libs = ['IlmImf_d', 'Half_d', 'Iex_d', 'Imath_d', 'IlmThread_d', '$z_lib'])
+	else:
+		env.Replace(exr_lib = 'Iex')
+		env.Replace(exr2tif_libs = ['IlmImf', 'Half', 'Iex', 'Imath', 'IlmThread'])
+		env.Replace(exr_libs = ['IlmImf', 'Half', 'Iex', 'Imath', 'IlmThread', '$z_lib'])
+	
 	env.Replace(display_libs = ['ws2_32', 'user32', 'gdi32', 'ole32', 'shell32', 'comctl32', '$fltk_lib'])
 	env.AppendUnique(CPPPATH = ['$exr_include_path/Iex', '$exr_include_path/IlmImf', '$exr_include_path/Imath',
 		'$psdk_include_path', '$psdk_include_path'])
