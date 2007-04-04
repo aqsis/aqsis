@@ -11,7 +11,6 @@ def getCompilerShortcut (msvs_version):
 		return 'vc7'
 	else:
 		return 'vc6'
-		
 	# note that 2002 is not supported.
 	
 def setupVCLibraries(env):
@@ -60,7 +59,21 @@ def setupVCLibraries(env):
 		env.Replace(fltk_lib = 'fltkd')	# FLTK uses d by default as the suffix for debug builds
 	else:
 		env.Replace(fltk_lib = 'fltk')
+	
+	# Set up OpenEXR
+	if env['debug']:
+		env.Replace(exr_lib = 'Iex_d')
+		env.Replace(exr2tif_libs = ['IlmImf_d', 'Half_d', 'Iex_d', 'Imath_d', 'IlmThread_d'])
+		env.Replace(exr_libs = ['IlmImf_d', 'Half_d', 'Iex_d', 'Imath_d', 'IlmThread_d', '$z_lib'])
+	else:
+		env.Replace(exr_lib = 'Iex')
+		env.Replace(exr2tif_libs = ['IlmImf', 'Half', 'Iex', 'Imath', 'IlmThread'])
+		env.Replace(exr_libs = ['IlmImf', 'Half', 'Iex', 'Imath', 'IlmThread', '$z_lib'])
+	
+	env.AppendUnique(CPPPATH = ['$exr_include_path/Iex', '$exr_include_path/IlmImf', '$exr_include_path/Imath',
+		'$psdk_include_path', '$psdk_include_path'])
 
+		
 # Compiler specific settings
 if not env['mingw']:
 	# MS Visual C++ build
@@ -79,7 +92,7 @@ if not env['mingw']:
 		else:	# Release
 			env.AppendUnique(CCFLAGS=[
 				'/Ox',		# Full optimization
-				'/GL'		# Whole-program optimization
+				'/GL'		# Whole-program optimization, needed for LTCG
 				])
 			
 			if (env['SSE'] != 'off'):
@@ -89,10 +102,10 @@ if not env['mingw']:
 					env.AppendUnique(CCFLAGS=['/arch:SSE2'])
 					
 			if (env['FP_Fast']):
-				env.AppendUnique(CCFLAGS=['/fp:fast'])
+				env.AppendUnique(CCFLAGS=['/fp:fast']) # /fp:strict is the default
 				
 			env.AppendUnique(LINKFLAGS=[
-				'/LTCG:STATUS' # Link-time code generation
+				'/LTCG:STATUS' # Link-time code generation with progress status
 				])
 		
 		# Common VC8 options
@@ -112,7 +125,7 @@ if not env['mingw']:
 		else:
 			env.AppendUnique(CCFLAGS=['/GX', '/MD', '/GR', '/Zm200', '/O2'])
 	
-	# Common options
+	# Common options to all MSVC versions
 	if env['debug']:
 		env.AppendUnique(CCFLAGS=[
 				'/MDd'		# multi-threaded debug dll
@@ -126,19 +139,10 @@ if not env['mingw']:
 		env.AppendUnique(CPPDEFINES=[('NDEBUG', '1')])		
 		
 	env.AppendUnique(CPPDEFINES=['NO_SYSLOG', 'WIN32', 'PLUGINS', 'USE_WIN32_FILEIO'])
-		
-	if env['debug']:
-		env.Replace(exr_lib = 'Iex_d')
-		env.Replace(exr2tif_libs = ['IlmImf_d', 'Half_d', 'Iex_d', 'Imath_d', 'IlmThread_d'])
-		env.Replace(exr_libs = ['IlmImf_d', 'Half_d', 'Iex_d', 'Imath_d', 'IlmThread_d', '$z_lib'])
-	else:
-		env.Replace(exr_lib = 'Iex')
-		env.Replace(exr2tif_libs = ['IlmImf', 'Half', 'Iex', 'Imath', 'IlmThread'])
-		env.Replace(exr_libs = ['IlmImf', 'Half', 'Iex', 'Imath', 'IlmThread', '$z_lib'])
 	
 	env.Replace(display_libs = ['ws2_32', 'user32', 'gdi32', 'ole32', 'shell32', 'comctl32', '$fltk_lib'])
-	env.AppendUnique(CPPPATH = ['$exr_include_path/Iex', '$exr_include_path/IlmImf', '$exr_include_path/Imath',
-		'$psdk_include_path', '$psdk_include_path'])
+	
+	# This is needed for the Express Editions
 	env.AppendUnique(LIBPATH = ['$psdk_lib_path'])
 else:
 	# MinGW (gcc) build
