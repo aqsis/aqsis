@@ -1,4 +1,4 @@
-Import('env')
+Import('env', 'embedManifest')
 aqsltellenv = env.Copy()
 aqsltellenv.AppendUnique(CPPPATH=['#/shadercompiler/slxargs'])
 aqsltell_sources = Split("""
@@ -11,8 +11,7 @@ aqsltellenv.UseTargetOptions('aqsltell')
 
 aqsltell = aqsltellenv.Program('aqsltell', aqsltell_sources)
 
-if env['MSVS_VERSION'] == '8.0':
-	aqsltellenv.AddPostAction(aqsltell, 'mt.exe -nologo -manifest ${TARGET}.manifest -outputresource:$TARGET;1')
+embedManifest(env, aqsltellenv, aqsltell, 'EXE')
 	
 aqsltellenv.Install('$BINDIR', aqsltell)
 

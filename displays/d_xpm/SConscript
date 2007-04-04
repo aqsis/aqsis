@@ -1,4 +1,4 @@
-Import('env')
+Import('env', 'embedManifest')
 d_xpmenv = env.Copy()
 d_xpmenv.AppendUnique(CPPPATH=['#/renderer/ddmanager'])
 d_xpmenv.AppendUnique(CPPDEFINES=['d_xpm_EXPORTS'])
@@ -18,8 +18,7 @@ d_xpmenv.UseTargetOptions('d_xpm')
 
 d_xpm = d_xpmenv.SharedLibrary('d_xpm', d_xpm_sources)
 
-if env['MSVS_VERSION'] == '8.0':
-		d_xpmenv.AddPostAction(d_xpm, 'mt.exe -nologo -manifest ${TARGET}.manifest -outputresource:$TARGET;2')
+embedManifest(env, d_xpmenv, d_xpm, 'DLL')
 
 d_xpmenv.Install('$DISPLAYSDIR', d_xpm)
 

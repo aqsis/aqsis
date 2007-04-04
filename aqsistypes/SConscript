@@ -1,5 +1,5 @@
 import os
-Import('env')
+Import('env', 'embedManifest')
 aqsistypes_sources = Split("""
 	bitvector.cpp
 	cellnoise.cpp
@@ -84,8 +84,7 @@ if env.has_key('aqsistypes_add_sources'):
 
 aqsistypes = aqsistypesenv.SharedLibrary('aqsistypes', aqsistypes_sources)
 
-if env['MSVS_VERSION'] == '8.0':
-	aqsistypesenv.AddPostAction(aqsistypes, 'mt.exe -nologo -manifest ${TARGET}.manifest -outputresource:$TARGET;2')
+embedManifest(env, aqsistypesenv, aqsistypes, 'DLL')
 
 aqsistypesenv.PostBuildSharedLibrary(aqsistypesenv, aqsistypes)
 #aqsistypesenv.Install('$RENDERENGINEDIR', aqsistypes)

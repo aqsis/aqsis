@@ -1,5 +1,5 @@
 import os
-Import('env')
+Import('env', 'embedManifest')
 ri2rib_sources = Split("""
 	ascii.cpp
 	binary.cpp
@@ -39,8 +39,7 @@ ri2ribenv.Replace(LIBS = ['aqsistypes', '$z_lib'])
 
 ri2rib = ri2ribenv.SharedLibrary('ri2rib', ri2rib_sources)
 
-if env['MSVS_VERSION'] == '8.0':
-	ri2ribenv.AddPostAction(ri2rib, 'mt.exe -nologo -manifest ${TARGET}.manifest -outputresource:$TARGET;2')
+embedManifest(env, ri2ribenv, ri2rib, 'DLL')
 	
 ri2ribenv.PostBuildSharedLibrary(ri2ribenv, ri2rib)
 ri2ribenv.InstallAs([os.path.join('${RENDERENGINEDIR}', '%s${SHLIB_VERSION_SUFFIX}') %(ri2rib[0])], [ri2rib[0]])

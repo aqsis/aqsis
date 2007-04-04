@@ -1,4 +1,4 @@
-Import('env')
+Import('env', 'embedManifest')
 teqserenv = env.Copy()
 teqser_sources = Split("""
 	teqser.cpp""")
@@ -10,8 +10,7 @@ teqserenv.UseTargetOptions('teqser')
 
 teqser = teqserenv.Program('teqser', teqser_sources)
 
-if env['MSVS_VERSION'] == '8.0':
-	teqserenv.AddPostAction(teqser, 'mt.exe -nologo -manifest ${TARGET}.manifest -outputresource:$TARGET;1')
+embedManifest(env, teqserenv, teqser, 'EXE')
 
 teqserenv.Install('$BINDIR', teqser)
 

@@ -1,4 +1,4 @@
-Import('env')
+Import('env', 'embedManifest')
 displayenv = env.Copy()
 displayenv.AppendUnique(CPPPATH=['#/renderer/ddmanager'])
 displayenv.AppendUnique(CPPDEFINES=['DISPLAY_EXPORTS'])
@@ -19,8 +19,8 @@ displayenv.UseTargetOptions('display')
 
 display = displayenv.SharedLibrary('display', display_sources)
 
-if env['MSVS_VERSION'] == '8.0':
-	displayenv.AddPostAction(display, 'mt.exe -nologo -manifest ${TARGET}.manifest -outputresource:$TARGET;2')
+embedManifest(env, displayenv, display, 'DLL')
+
 	
 displayenv.Install('$DISPLAYSDIR', display)
 

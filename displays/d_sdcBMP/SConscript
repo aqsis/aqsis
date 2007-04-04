@@ -1,4 +1,4 @@
-Import('env')
+Import('env', 'embedManifest')
 d_bmpenv = env.Copy()
 d_bmpenv.AppendUnique(CPPPATH=['#/renderer/ddmanager'])
 d_bmpenv.AppendUnique(CPPDEFINES=['d_bmp_EXPORTS'])
@@ -18,9 +18,8 @@ d_bmpenv.UseTargetOptions('d_bmp')
 
 d_bmp = d_bmpenv.SharedLibrary('d_bmp', d_bmp_sources)
 
-if env['MSVS_VERSION'] == '8.0':
-		d_bmpenv.AddPostAction(d_bmp, 'mt.exe -nologo -manifest ${TARGET}.manifest -outputresource:$TARGET;2')
-	
+embedManifest(env, d_bmpenv, d_bmp, 'DLL')
+		
 d_bmpenv.Install('$DISPLAYSDIR', d_bmp)
 
 Return('d_bmp')

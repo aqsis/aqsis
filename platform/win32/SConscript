@@ -14,9 +14,9 @@ def getCompilerShortcut (msvs_version):
 		
 	# note that 2002 is not supported.
 	
-
-if not env['mingw']:
-	# MS Visual C++ build
+def setupVCLibraries(env):
+	'''Checks if the paths for each library and sets up default paths
+	that point into win32libs'''
 	compiler_shortcut = getCompilerShortcut (env ['MSVS_VERSION'])
 	
 	# If the tiff include path isn't specified as an option, choose the default, of the 
@@ -55,40 +55,75 @@ if not env['mingw']:
 	else:
 		env.Replace(jpeg_lib = 'libjpeg')
 	
+	# Set the right name for FLTK
 	if env['debug']:
 		env.Replace(fltk_lib = 'fltkd')	# FLTK uses d by default as the suffix for debug builds
 	else:
 		env.Replace(fltk_lib = 'fltk')
+
+# Compiler specific settings
+if not env['mingw']:
+	# MS Visual C++ build
+	setupVCLibraries(env)
 
 	# Set up build options
 	if env['MSVS_VERSION'] == '8.0':
 		# MSVC 2005
 		if env['debug']:
 			env.AppendUnique(CCFLAGS=[
-				'/EHsc',	# exception handling
 				'/RTC1',	# run-time checks
-				'/MDd', 	# multi-threaded debug dll
-				'/GS',		# buffer overflow checks
-				'/GR',		# RTTI
 				'/Od',		# no optimization
 				'/Zi',		# debug informations
-				'/W4',
-				'/Wp64'])
-			env.AppendUnique(CPPDEFINES=[('_DEBUG', 1), '_CRT_SECURE_NO_DEPRECATE'])
-			env.AppendUnique(LINKFLAGS=['/DEBUG'])
-		else:
-			env.AppendUnique(CCFLAGS=['/EHsc', '/MD', '/GS', '/GR', '/O2', '/Wp64'])
-			env.AppendUnique(CPPDEFINES=['_CRT_SECURE_NO_DEPRECATE', ('NDEBUG', '1')])
-			env.AppendUnique(LINKFLAGS=['/LTCG'])
+				'/W4'		# warning level 4
+				])
+		else:	# Release
+			env.AppendUnique(CCFLAGS=[
+				'/Ox',		# Full optimization
+				'/GL'		# Whole-program optimization
+				])
+			
+			if (env['SSE'] != 'Off'):
+				if env['SSE'] == 'SSE1':
+					env.AppendUnique(CCFLAGS=['/arch:SSE'])
+				else:	#SSE2
+					env.AppendUnique(CCFLAGS=['/arch:SSE2'])
+					
+			if (env['FP_Fast']):
+				env.AppendUnique(CCFLAGS=['/fp:fast'])
+				
+			env.AppendUnique(LINKFLAGS=[
+				'/LTCG:STATUS' # Link-time code generation
+				])
+		
+		# Common VC8 options
+		env.AppendUnique(CCFLAGS=[
+				'/EHsc',	# exception handling
+				'/GR',		# RTTI
+				'/GS', 		# buffer overflow checks
+				'/Wp64'		# 64-bit portability warnings
+				])
+		env.AppendUnique(CPPDEFINES=[
+				'_CRT_SECURE_NO_DEPRECATE'
+				])
 	else:
 		#MSVC6, 2003
 		if env['debug']:
 			env.AppendUnique(CCFLAGS=['/GX', '/MDd', '/GR', '/Zm200', '/Od', '/Zi'])
-			env.AppendUnique(CPPDEFINES=[('_DEBUG', 1)])
-			env.AppendUnique(LINKFLAGS=['/DEBUG'])
 		else:
 			env.AppendUnique(CCFLAGS=['/GX', '/MD', '/GR', '/Zm200', '/O2'])
-			env.AppendUnique(CPPDEFINES=[('NDEBUG', '1')])
+	
+	# Common options
+	if env['debug']:
+		env.AppendUnique(CCFLAGS=[
+				'/MDd'		# multi-threaded debug dll
+							])
+		env.AppendUnique(CPPDEFINES=[('_DEBUG', 1)])
+		env.AppendUnique(LINKFLAGS=['/DEBUG'])	
+	else: # Release
+		env.AppendUnique(CCFLAGS=[
+				'/MD'		# multi-threaded dll
+							])
+		env.AppendUnique(CPPDEFINES=[('NDEBUG', '1')])		
 		
 	env.AppendUnique(CPPDEFINES=['NO_SYSLOG', 'WIN32', 'PLUGINS', 'USE_WIN32_FILEIO'])
 		
@@ -181,6 +216,7 @@ env.Replace(aqsis_libs = ['ws2_32', 'user32'])
 env.Replace(libaqsis_libs = ['ws2_32', 'user32'])
 
 def PostInstallSharedLibrary(env, dir, source):
+	'''Copy the .exp/.lib file to the target folder'''
 	basename = os.path.join('%s', '%s') %(dir, source[1])
 	env.Command('%s' %(basename), source[1], Copy('$TARGET', '$SOURCE'))
 	basename = os.path.join('%s', '%s') %(dir, source[2])

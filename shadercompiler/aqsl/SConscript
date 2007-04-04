@@ -1,6 +1,6 @@
 import re
 
-Import('env')
+Import('env', 'embedManifest')
 
 aqsl_sources = Split("""
 	aqslcomp.cpp""")
@@ -14,8 +14,7 @@ Import('slparse_objs slpp_objs codegenvm_objs')
 
 aqsl = aqslenv.Program('aqsl', [aqsl_sources, slparse_objs, slpp_objs, codegenvm_objs], LIBS=['argparse', 'aqsistypes'])
 
-if env['MSVS_VERSION'] == '8.0':
-	aqslenv.AddPostAction(aqsl, 'mt.exe -nologo -manifest ${TARGET}.manifest -outputresource:$TARGET;1')
+embedManifest(env, aqslenv, aqsl, 'EXE')
 
 installed_aqsl = aqslenv.Install('$BINDIR', aqsl)
 

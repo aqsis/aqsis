@@ -145,3 +145,14 @@ def zipperFunction(target, source, env):
         sourceDir = str(source[0])
         distutils.archive_util.make_archive(targetName, 'zip', sourceDir)
 
+def embedManifest(env, targetenv, source, type):
+	'''Embed manifests for a DLL or EXE if VC8 is used
+	type is either DLL or EXE (as a string)
+	'''
+	suffix = '1' # EXE
+	
+	if (type == 'DLL'):
+		suffix = '2' # DLL
+		
+	if ('win32' == env['PLATFORM']) and (env['MSVS_VERSION'] == '8.0'):
+		targetenv.AddPostAction(source, 'mt.exe -nologo -manifest ${TARGET}.manifest -outputresource:$TARGET;' + suffix)

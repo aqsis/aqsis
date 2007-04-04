@@ -1,4 +1,4 @@
-Import('env')
+Import('env', 'embedManifest')
 miqser_sources = Split("""
 	miqser.cpp""")
 
@@ -18,8 +18,7 @@ rib2ri_objs = miqserenv.StaticObject('rib2ri', rib2ri_sources)
 
 miqser = miqserenv.Program('miqser', [miqser_sources, rib2ri_objs, rib2_objs])
 
-if env['MSVS_VERSION'] == '8.0':
-		miqserenv.AddPostAction(miqser, 'mt.exe -nologo -manifest ${TARGET}.manifest -outputresource:$TARGET;1')
+embedManifest(env, miqserenv, miqser, 'EXE')
 		
 miqserenv.Install('$BINDIR', miqser)
 

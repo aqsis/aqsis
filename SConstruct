@@ -8,7 +8,8 @@ from build_support import zipperFunction
 from build_support import print_config
 from build_support import AddSysPath
 from build_support import Glob
-
+from build_support import embedManifest
+Export('embedManifest')
 
 import version
 Export('version')
@@ -25,7 +26,6 @@ tempenv = Environment()
 # Read in the platform specific options.
 AddSysPath(tempenv.Dir(target_config_dir).abspath)
 
-
 # Read in options from custom.py if it exists, or options.cache otherwise
 if os.path.exists('custom.py'):
 	print 'Using options from custom.py'
@@ -33,6 +33,7 @@ if os.path.exists('custom.py'):
 else:
 	print 'Using options from options.cache'
 	opts = Options(os.path.abspath('options.cache'))
+
 # Setup the command line options.
 opts.Add('tiff_include_path', 'Point to the tiff header files', '')
 opts.Add('tiff_lib_path', 'Point to the tiff library files', '')
@@ -56,10 +57,10 @@ opts.Add(BoolOption('enable_mpdump', 'Build with micropolygon dumping mode enabl
 import Options
 Options.PlatformOptions(opts,tempenv)
 
-
 Export('opts')
 
 # Create the default environment
+# Set up the tools, compiler, etc.
 import SCons.Util
 def ENV_update(tgt_ENV, src_ENV):
     for K in src_ENV.keys():
@@ -70,6 +71,7 @@ def ENV_update(tgt_ENV, src_ENV):
             tgt_ENV[K]=src_ENV[K]
 
 opts.Update(tempenv)
+
 if tempenv.has_key('mingw') and tempenv['mingw']:
 	env = Environment(options = opts, tools = ['mingw', 'lex', 'yacc', 'zip', 'tar'])
 elif sys.platform == 'win32':
@@ -98,7 +100,6 @@ if env['cachedir'] != '':
 	CacheDir(env['cachedir'])
 
 # add builders to zip/gtar files
-from build_support import zipperFunction
 zipBuilder = Builder(action=zipperFunction,
    source_factory=Dir,
    target_factory=File,
@@ -147,6 +148,9 @@ env.Replace(INSTALL_DIRS = ['$BINDIR','$RENDERENGINEDIR', '$DISPLAYSDIR', '$PLUG
 
 # Setup a default version of the various platform specific functions that can be overridden in the 
 # platform specific configurations below.
+# PostInstallSharedLibrary is called right after the library has been installed
+# to its target folder
+# PostBuildSharedLibrary is called just after building
 def PostInstallSharedLibrary(env, dir, source):
 	pass
 env.PostInstallSharedLibrary = PostInstallSharedLibrary
@@ -256,8 +260,6 @@ env.Distribute('NSIS.py')
 
 # Set the build directory for all sub-project build operations.
 env.BuildDir(target_dir, '.')
-
-
 
 # Load the sub-project SConscript files.
 sub_sconsdirs_noret = prependBuildDir(Split('''
@@ -408,5 +410,3 @@ options = glob.glob('platform/*/*.py')
 for option in options:
 	path, name = os.path.split(option)
 	env.Distribute(option, path)
-
-

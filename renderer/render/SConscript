@@ -1,6 +1,6 @@
 import os
 
-Import('env cachegen headergen validategen')
+Import('env cachegen headergen validategen', 'embedManifest')
 aqsisdll_sources = Split("""
 	attributes.cpp
 	bound.cpp
@@ -99,8 +99,7 @@ rib2ri_objs = aqsisenv.SharedObject('rib2ri', rib2ri_sources)
 
 aqsisdll = aqsisenv.SharedLibrary('aqsis', [aqsisdll_sources, ddmanager_objs, raytrace_objs, rib2ri_objs, rib2_objs])
 
-if env['MSVS_VERSION'] == '8.0':
-		aqsisenv.AddPostAction(aqsisdll, 'mt.exe -nologo -manifest ${TARGET}.manifest -outputresource:$TARGET;2')
+embedManifest(env, aqsisenv, aqsisdll, 'DLL')
 
 aqsisenv.PostBuildSharedLibrary(aqsisenv, aqsisdll)
 

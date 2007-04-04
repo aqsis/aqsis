@@ -1,4 +1,4 @@
-Import('env')
+Import('env', 'embedManifest')
 pcx2tifenv = env.Copy()
 pcx2tif_sources=Split("""
 	pcx2tif.c""")
@@ -12,8 +12,7 @@ Import('common_objs')
 
 pcx2tif = pcx2tifenv.SharedLibrary('pcx2tif', [pcx2tif_sources, common_objs], LIBS=['$tiff_lib', '$z_lib'])
 
-if env['MSVS_VERSION'] == '8.0':
-		pcx2tifenv.AddPostAction(pcx2tif, 'mt.exe -nologo -manifest ${TARGET}.manifest -outputresource:$TARGET;2')
+embedManifest(env, pcx2tifenv, pcx2tif, 'DLL')
 
 pcx2tifenv.Install('$PLUGINDIR', pcx2tif)
 
