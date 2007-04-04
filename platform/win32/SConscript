@@ -82,7 +82,7 @@ if not env['mingw']:
 				'/GL'		# Whole-program optimization
 				])
 			
-			if (env['SSE'] != 'Off'):
+			if (env['SSE'] != 'off'):
 				if env['SSE'] == 'SSE1':
 					env.AppendUnique(CCFLAGS=['/arch:SSE'])
 				else:	#SSE2
