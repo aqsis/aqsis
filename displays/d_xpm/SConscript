@@ -17,6 +17,10 @@ d_xpmenv.AppendUnique(LIBS = ['$tiff_lib', '$z_lib'])
 d_xpmenv.UseTargetOptions('d_xpm')
 
 d_xpm = d_xpmenv.SharedLibrary('d_xpm', d_xpm_sources)
+
+if env['MSVS_VERSION'] == '8.0':
+		d_xpmenv.AddPostAction(d_xpm, 'mt.exe -nologo -manifest ${TARGET}.manifest -outputresource:$TARGET;2')
+
 d_xpmenv.Install('$DISPLAYSDIR', d_xpm)
 
 Return('d_xpm')

@@ -12,6 +12,9 @@ dbo_planeenv.UseTargetOptions('dbo_plane')
 
 dbo_plane = dbo_planeenv.SharedLibrary('dbo_plane', dbo_plane_sources, LIBS=[''])
 
+if env['MSVS_VERSION'] == '8.0':
+	dbo_planeenv.AddPostAction(dbo_plane, 'mt.exe -nologo -manifest ${TARGET}.manifest -outputresource:$TARGET;2')
+	
 dbo_planeenv.Install('$PLUGINDIR', dbo_plane)
 
 env.Distribute(dbo_plane_headers)

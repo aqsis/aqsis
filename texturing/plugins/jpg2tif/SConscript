@@ -14,6 +14,9 @@ Import('common_objs')
 
 jpg2tif = jpg2tifenv.SharedLibrary('jpg2tif', [jpg2tif_sources, common_objs], LIBS=['$tiff_lib', '$z_lib', '$jpeg_lib'])
 
+if env['MSVS_VERSION'] == '8.0':
+		jpg2tifenv.AddPostAction(jpg2tif, 'mt.exe -nologo -manifest ${TARGET}.manifest -outputresource:$TARGET;2')
+
 jpg2tifenv.Install('$PLUGINDIR', jpg2tif)
 
 env.Distribute(jpg2tif_sources)

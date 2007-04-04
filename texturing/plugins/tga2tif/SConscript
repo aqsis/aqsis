@@ -12,6 +12,9 @@ Import('common_objs')
 
 tga2tif = tga2tifenv.SharedLibrary('tga2tif', [tga2tif_sources, common_objs], LIBS=['$tiff_lib', '$z_lib', 'jpg2tif'])
 
+if env['MSVS_VERSION'] == '8.0':
+	tga2tifenv.AddPostAction(tga2tif, 'mt.exe -nologo -manifest ${TARGET}.manifest -outputresource:$TARGET;2')
+
 tga2tifenv.Install('$PLUGINDIR', tga2tif)
 
 env.Distribute(tga2tif_sources)

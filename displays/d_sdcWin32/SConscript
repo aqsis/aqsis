@@ -20,6 +20,10 @@ if sys.platform == 'win32':
 	d_win32env.UseTargetOptions('d_win32')
 
 	d_win32 = d_win32env.SharedLibrary('d_win32', d_win32_sources)
+	
+	if env['MSVS_VERSION'] == '8.0':
+		d_win32env.AddPostAction(d_win32, 'mt.exe -nologo -manifest ${TARGET}.manifest -outputresource:$TARGET;2')
+
 	d_win32env.Install('$DISPLAYSDIR', d_win32)
 
 	Return('d_win32')

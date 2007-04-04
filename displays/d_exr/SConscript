@@ -17,6 +17,10 @@ if not env['no_exr']:
 	d_exrenv.UseTargetOptions('exr')
 
 	exr = d_exrenv.SharedLibrary('d_exr', d_exr_sources)
+	
+	if env['MSVS_VERSION'] == '8.0':
+		d_exrenv.AddPostAction(exr, 'mt.exe -nologo -manifest ${TARGET}.manifest -outputresource:$TARGET;2')
+	
 	d_exrenv.Install('$DISPLAYSDIR', exr)
 
 	Return('exr')

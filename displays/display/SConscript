@@ -18,6 +18,10 @@ displayenv.AppendUnique(CPPPATH=['$tiff_include_path', '$zlib_include_path', '$f
 displayenv.UseTargetOptions('display')
 
 display = displayenv.SharedLibrary('display', display_sources)
+
+if env['MSVS_VERSION'] == '8.0':
+	displayenv.AddPostAction(display, 'mt.exe -nologo -manifest ${TARGET}.manifest -outputresource:$TARGET;2')
+	
 displayenv.Install('$DISPLAYSDIR', display)
 
 Return('display')

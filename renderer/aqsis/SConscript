@@ -11,6 +11,10 @@ aqsisenv.AppendUnique(CPPPATH=['$zlib_include_path'])
 aqsisenv.UseTargetOptions('aqsis')
 
 aqsis = aqsisenv.Program('aqsis', aqsis_sources)
+
+if env['MSVS_VERSION'] == '8.0':
+	aqsisenv.AddPostAction(aqsis, 'mt.exe -nologo -manifest ${TARGET}.manifest -outputresource:$TARGET;1')
+
 aqsisenv.Install('$BINDIR', aqsis)
 
 env.Distribute(aqsis_sources)

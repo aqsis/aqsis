@@ -11,6 +11,9 @@ bake2tifenv.UseTargetOptions('bake2tif')
 Import('common_objs')
 bake2tif = bake2tifenv.SharedLibrary('bake2tif', [bake2tif_sources, common_objs], LIBS=['$tiff_lib', '$z_lib'])
 
+if env['MSVS_VERSION'] == '8.0':
+	bake2tifenv.AddPostAction(bake2tif, 'mt.exe -nologo -manifest ${TARGET}.manifest -outputresource:$TARGET;2')
+
 bake2tifenv.Install('$PLUGINDIR', bake2tif)
 
 env.Distribute(bake2tif_sources)

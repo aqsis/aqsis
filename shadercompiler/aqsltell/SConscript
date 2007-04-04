@@ -10,6 +10,10 @@ aqsltellenv.AppendUnique(LIBS = ['argparse', 'slxargs', 'shadervm', 'aqsistypes'
 aqsltellenv.UseTargetOptions('aqsltell')
 
 aqsltell = aqsltellenv.Program('aqsltell', aqsltell_sources)
+
+if env['MSVS_VERSION'] == '8.0':
+	aqsltellenv.AddPostAction(aqsltell, 'mt.exe -nologo -manifest ${TARGET}.manifest -outputresource:$TARGET;1')
+	
 aqsltellenv.Install('$BINDIR', aqsltell)
 
 env.Distribute(aqsltell_sources)

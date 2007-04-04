@@ -9,6 +9,10 @@ teqserenv.AppendUnique(LIBS = ['argparse', 'shadervm', 'aqsis', 'aqsistypes'])
 teqserenv.UseTargetOptions('teqser')
 
 teqser = teqserenv.Program('teqser', teqser_sources)
+
+if env['MSVS_VERSION'] == '8.0':
+	teqserenv.AddPostAction(teqser, 'mt.exe -nologo -manifest ${TARGET}.manifest -outputresource:$TARGET;1')
+
 teqserenv.Install('$BINDIR', teqser)
 
 env.Distribute(teqser_sources)

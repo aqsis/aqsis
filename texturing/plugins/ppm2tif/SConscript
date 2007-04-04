@@ -12,6 +12,9 @@ Import('common_objs')
 
 ppm2tif = ppm2tifenv.SharedLibrary('ppm2tif', [ppm2tif_sources, common_objs], LIBS=['$tiff_lib', '$z_lib'])
 
+if env['MSVS_VERSION'] == '8.0':
+	ppm2tifenv.AddPostAction(ppm2tif, 'mt.exe -nologo -manifest ${TARGET}.manifest -outputresource:$TARGET;2')
+
 ppm2tifenv.Install('$PLUGINDIR', ppm2tif)
 
 env.Distribute(ppm2tif_sources)

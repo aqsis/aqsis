@@ -98,6 +98,10 @@ Import('ddmanager_objs raytrace_objs rib2_objs rib2ri_sources')
 rib2ri_objs = aqsisenv.SharedObject('rib2ri', rib2ri_sources)
 
 aqsisdll = aqsisenv.SharedLibrary('aqsis', [aqsisdll_sources, ddmanager_objs, raytrace_objs, rib2ri_objs, rib2_objs])
+
+if env['MSVS_VERSION'] == '8.0':
+		aqsisenv.AddPostAction(aqsisdll, 'mt.exe -nologo -manifest ${TARGET}.manifest -outputresource:$TARGET;2')
+
 aqsisenv.PostBuildSharedLibrary(aqsisenv, aqsisdll)
 
 Depends(aqsisdll, cachegen)

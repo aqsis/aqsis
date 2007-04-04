@@ -11,6 +11,10 @@ png2tifenv.UseTargetOptions('png2tif')
 Import('common_objs')
 
 png2tif = png2tifenv.SharedLibrary('png2tif', [png2tif_sources, common_objs], LIBS=['$tiff_lib', '$z_lib', 'ppm2tif'])
+
+if env['MSVS_VERSION'] == '8.0':
+	png2tifenv.AddPostAction(png2tif, 'mt.exe -nologo -manifest ${TARGET}.manifest -outputresource:$TARGET;2')
+
 png2tifenv.Install('$PLUGINDIR', png2tif)
 
 env.Distribute(png2tif_sources)

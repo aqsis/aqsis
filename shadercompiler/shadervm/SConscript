@@ -30,6 +30,10 @@ if env.has_key('shadervm_add_sources'):
 Import('shaderexecenv_objs')
 
 shadervm = shadervmenv.SharedLibrary('shadervm', [shadervm_sources, shaderexecenv_objs])
+
+if env['MSVS_VERSION'] == '8.0':
+	shadervmenv.AddPostAction(shadervm, 'mt.exe -nologo -manifest ${TARGET}.manifest -outputresource:$TARGET;2')
+
 shadervmenv.PostBuildSharedLibrary(shadervmenv, shadervm)
 
 shadervmenv.InstallAs([os.path.join('${RENDERENGINEDIR}', '%s${SHLIB_VERSION_SUFFIX}') %(shadervm[0])], [shadervm[0]])

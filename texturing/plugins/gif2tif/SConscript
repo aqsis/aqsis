@@ -12,6 +12,9 @@ Import('common_objs')
 
 gif2tif = gif2tifenv.SharedLibrary('gif2tif', [gif2tif_sources, common_objs], LIBS=['$tiff_lib', '$z_lib'])
 
+if env['MSVS_VERSION'] == '8.0':
+		gif2tifenv.AddPostAction(gif2tif, 'mt.exe -nologo -manifest ${TARGET}.manifest -outputresource:$TARGET;2')
+
 gif2tifenv.Install('$PLUGINDIR', gif2tif)
 
 env.Distribute(gif2tif_sources)

@@ -11,6 +11,10 @@ bmp2tifenv.UseTargetOptions('bmp2tif')
 Import('common_objs')
 
 bmp2tif = bmp2tifenv.SharedLibrary('bmp2tif', [bmp2tif_sources, common_objs], LIBS=['$tiff_lib', '$z_lib', 'jpg2tif'])
+
+if env['MSVS_VERSION'] == '8.0':
+	bmp2tifenv.AddPostAction(bmp2tif, 'mt.exe -nologo -manifest ${TARGET}.manifest -outputresource:$TARGET;2')
+	
 bmp2tifenv.Install('$PLUGINDIR', bmp2tif)
 
 env.Distribute(bmp2tif_sources)

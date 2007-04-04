@@ -17,6 +17,10 @@ d_bmpenv.AppendUnique(LIBS = ['$tiff_lib', '$z_lib'])
 d_bmpenv.UseTargetOptions('d_bmp')
 
 d_bmp = d_bmpenv.SharedLibrary('d_bmp', d_bmp_sources)
+
+if env['MSVS_VERSION'] == '8.0':
+		d_bmpenv.AddPostAction(d_bmp, 'mt.exe -nologo -manifest ${TARGET}.manifest -outputresource:$TARGET;2')
+	
 d_bmpenv.Install('$DISPLAYSDIR', d_bmp)
 
 Return('d_bmp')

@@ -17,6 +17,9 @@ if not env['no_exr']:
 	exr2tifenv.UseTargetOptions('exr2tif')
 
 	exr2tif = exr2tifenv.SharedLibrary('exr2tif', [exr2tif_sources, common_objs])
+	
+	if env['MSVS_VERSION'] == '8.0':
+		exr2tifenv.AddPostAction(exr2tif, 'mt.exe -nologo -manifest ${TARGET}.manifest -outputresource:$TARGET;2')
 
 	exr2tifenv.Install('$PLUGINDIR', exr2tif)
 

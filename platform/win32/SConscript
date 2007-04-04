@@ -2,16 +2,22 @@ import os.path
 
 Import('env', 'version')
 
+def getCompilerShortcut (msvs_version):
+	'''Return the shortcut ending for a given MS Visual Studio version.
+	This ending is used while looking for precompiled binaries.'''
+	if msvs_version == '8.0':
+		return 'vc8'
+	elif msvs_version == '7.1':
+		return 'vc7'
+	else:
+		return 'vc6'
+		
+	# note that 2002 is not supported.
+	
+
 if not env['mingw']:
 	# MS Visual C++ build
-	compiler_shortcut = ''	# try this for precompiled libs
-	if env['MSVS_VERSION'] == '8.0':
-		compiler_shortcut = 'vc8'
-	elif env['MSVS_VERSION'] == '7.1':
-		compiler_shortcut = 'vc7'
-	else:
-		compiler_shortcut = 'vc6'
-	# note that 2002 is not supported.
+	compiler_shortcut = getCompilerShortcut (env ['MSVS_VERSION'])
 	
 	# If the tiff include path isn't specified as an option, choose the default, of the 
 	# win32libs project from SVN checked out to the same folder as 'aqsis'
@@ -54,6 +60,7 @@ if not env['mingw']:
 	else:
 		env.Replace(fltk_lib = 'fltk')
 
+	# Set up build options
 	if env['MSVS_VERSION'] == '8.0':
 		# MSVC 2005
 		if env['debug']:
@@ -66,13 +73,13 @@ if not env['mingw']:
 				'/Od',		# no optimization
 				'/Zi',		# debug informations
 				'/W4',
-			'/Wp64'])
+				'/Wp64'])
 			env.AppendUnique(CPPDEFINES=[('_DEBUG', 1), '_CRT_SECURE_NO_DEPRECATE'])
 			env.AppendUnique(LINKFLAGS=['/DEBUG'])
 		else:
 			env.AppendUnique(CCFLAGS=['/EHsc', '/MD', '/GS', '/GR', '/O2', '/Wp64'])
 			env.AppendUnique(CPPDEFINES=['_CRT_SECURE_NO_DEPRECATE', ('NDEBUG', '1')])
-			env.AppendUnique(LINKFLAGS=['/MANIFEST', '/LTCG'])
+			env.AppendUnique(LINKFLAGS=['/LTCG'])
 	else:
 		#MSVC6, 2003
 		if env['debug']:
@@ -178,5 +185,5 @@ def PostInstallSharedLibrary(env, dir, source):
 	env.Command('%s' %(basename), source[1], Copy('$TARGET', '$SOURCE'))
 	basename = os.path.join('%s', '%s') %(dir, source[2])
 	env.Command('%s' %(basename), source[2], Copy('$TARGET', '$SOURCE'))
-
+	
 env.PostInstallSharedLibrary = PostInstallSharedLibrary

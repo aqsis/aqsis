@@ -23,10 +23,16 @@ if env.has_key('slxargs_add_sources'):
 
 slxargsenv.Replace(LIBS = ['aqsistypes', 'shadervm'])
 slxargs = slxargsenv.SharedLibrary('slxargs', slxargs_sources)
+
+if env['MSVS_VERSION'] == '8.0':
+	slxargsenv.AddPostAction(slxargs, 'mt.exe -nologo -manifest ${TARGET}.manifest -outputresource:$TARGET;2')
+	
 slxargsenv.PostBuildSharedLibrary(slxargsenv, slxargs)
 slxargsenv.InstallAs([os.path.join('${RENDERENGINEDIR}', '%s${SHLIB_VERSION_SUFFIX}') %(slxargs[0])], [slxargs[0]])
 
 slxargsenv.PostInstallSharedLibrary(slxargsenv, '${RENDERENGINEDIR}', slxargs)
+
+
 slxargsenv.Install('$INCLUDEDIR', slxargs_install_headers)
 
 env.Distribute(slxargs_sources)
