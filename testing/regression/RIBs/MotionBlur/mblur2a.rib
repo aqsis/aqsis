@@ -3,6 +3,7 @@ Format 200 150 1
 PixelSamples 4 4
 PixelFilter "gaussian" 2 2
 ShadingRate 1.0
+Shutter 1.5 2.5
 
 Option "statistics" "endofframe" [1]
 Option "searchpath" "shader" ["../shaders:&"]
