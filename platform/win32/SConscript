@@ -227,7 +227,6 @@ env.Replace(libaqsis_libs = ['ws2_32', 'user32'])
 
 def PostInstallSharedLibrary(env, dir, source):
 	'''Copy the .exp/.lib file to the target folder'''
-	print env.Dump ()
 	basename = os.path.join('%s', '%s') %(dir, source[1])
 	env.Command('%s' %(basename), source[1], Copy('$TARGET', '$SOURCE'))
 	basename = os.path.join('%s', '%s') %(dir, source[2])
