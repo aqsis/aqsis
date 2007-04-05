@@ -86,7 +86,6 @@ if not env['mingw']:
 			env.AppendUnique(CCFLAGS=[
 				'/RTC1',	# run-time checks
 				'/Od',		# no optimization
-				'/Zi',		# debug informations
 				'/W4'		# warning level 4
 				])
 		else:	# Release
@@ -105,7 +104,7 @@ if not env['mingw']:
 				env.AppendUnique(CCFLAGS=['/fp:fast']) # /fp:strict is the default
 				
 			env.AppendUnique(LINKFLAGS=[
-				'/LTCG:STATUS' # Link-time code generation with progress status
+				'/LTCG' 	# Link-time code generation
 				])
 		
 		# Common VC8 options
@@ -121,13 +120,14 @@ if not env['mingw']:
 	else:
 		#MSVC6, 2003
 		if env['debug']:
-			env.AppendUnique(CCFLAGS=['/GX', '/MDd', '/GR', '/Zm200', '/Od', '/Zi'])
+			env.AppendUnique(CCFLAGS=['/GX', '/GR', '/Zm200', '/Od'])
 		else:
-			env.AppendUnique(CCFLAGS=['/GX', '/MD', '/GR', '/Zm200', '/O2'])
+			env.AppendUnique(CCFLAGS=['/GX', '/GR', '/Zm200', '/O2'])
 	
 	# Common options to all MSVC versions
 	if env['debug']:
 		env.AppendUnique(CCFLAGS=[
+				'/Z7',		# debug informations
 				'/MDd'		# multi-threaded debug dll
 							])
 		env.AppendUnique(CPPDEFINES=[('_DEBUG', 1)])
@@ -227,6 +227,7 @@ env.Replace(libaqsis_libs = ['ws2_32', 'user32'])
 
 def PostInstallSharedLibrary(env, dir, source):
 	'''Copy the .exp/.lib file to the target folder'''
+	print env.Dump ()
 	basename = os.path.join('%s', '%s') %(dir, source[1])
 	env.Command('%s' %(basename), source[1], Copy('$TARGET', '$SOURCE'))
 	basename = os.path.join('%s', '%s') %(dir, source[2])
