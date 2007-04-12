@@ -9,7 +9,6 @@ from build_support import print_config
 from build_support import AddSysPath
 from build_support import Glob
 from build_support import embedManifest
-from build_support import getSVNRevision
 Export('embedManifest')
 
 import version
@@ -361,13 +360,11 @@ env.Depends(aqsisrc, display)
 #
 def version_h_build(target, source, env):
 	# Code to build "target" from "source"
-	revision = getSVNRevision()
 	defines = {
 		"major": version.major,
 		"minor": version.minor,
 		"build": version.build,
 		"type": version.type,
-		"revision": revision.encode('ascii', 'replace')
 	    }
 
 	print_config("Building version.h with the following settings:", defines.items())

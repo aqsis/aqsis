@@ -150,7 +150,7 @@ int main( int argc, const char** argv )
 
 	if ( g_cl_version )
 	{
-		std::cout << "miqser version " << VERSION_STR_PRINT
+		std::cout << "miqser version " << VERSION_STR
 #ifdef _DEBUG
 		<< " (debug build)"
 #endif

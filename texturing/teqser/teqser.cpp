@@ -61,7 +61,7 @@ ArgParse::apfloat g_bake = 64.0;
 
 void version( std::ostream& Stream )
 {
-	Stream << "teqser version " << VERSION_STR_PRINT << std::endl << "compiled " << __DATE__ << " " << __TIME__ << std::endl;
+	Stream << "teqser version " << VERSION_STR << std::endl << "compiled " << __DATE__ << " " << __TIME__ << std::endl;
 }
 
 

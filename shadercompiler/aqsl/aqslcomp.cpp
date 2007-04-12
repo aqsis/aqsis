@@ -63,7 +63,7 @@ bool g_cl_syslog = false;
 
 void version( std::ostream& Stream )
 {
-	Stream << "aqsl version " << VERSION_STR_PRINT << std::endl << "compiled " << __DATE__ << " " << __TIME__ << std::endl;
+	Stream << "aqsl version " << VERSION_STR << std::endl << "compiled " << __DATE__ << " " << __TIME__ << std::endl;
 }
 
 
