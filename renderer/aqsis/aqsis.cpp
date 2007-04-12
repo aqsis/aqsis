@@ -601,7 +601,7 @@ int main( int argc, const char** argv )
 
 		if ( g_cl_version )
 		{
-			std::cout << "aqsis version " << VERSION_STR
+			std::cout << "aqsis version " << VERSION_STR_PRINT
 #ifdef _DEBUG
 			<< " (debug build)"
 #endif
