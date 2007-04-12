@@ -161,7 +161,7 @@ def embedManifest(env, targetenv, source, type):
 def getSVNRevision():
 	scm_command = 'svn info --xml'
 
-	if os.system(scm_command) <= 0
+	if os.system(scm_command) <= 0:
 		scm_resource = os.popen(scm_command).read()
 		scm_resourcepp = xml.dom.minidom.parseString(scm_resource)
 		scm_revision = scm_resourcepp.getElementsByTagName('entry')[0].attributes['revision']
