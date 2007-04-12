@@ -36,5 +36,6 @@
 #define	BUILD %(build)i
 #define TYPE %(type)s
 #define	VERSION_STR	"%(major)i.%(minor)i.%(build)i%(type)s"
+#define VERSION_STR_PRINT  "%(major)i.%(minor)i.%(build)i%(type)s %(revision)s"
 
 #endif	// !VERSION_H_INCLUDED
