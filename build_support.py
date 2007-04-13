@@ -158,8 +158,8 @@ def embedManifest(env, targetenv, source, type):
 	if ('win32' == env['PLATFORM']) and (env['MSVS_VERSION'] == '8.0'):
 		targetenv.AddPostAction(source, 'mt.exe -nologo -manifest ${TARGET}.manifest -outputresource:$TARGET;' + suffix)
 
-def getSVNRevision():
-	scm_command = 'svn info --xml'
+def getSCMRevision():
+	scm_command = 'svn info --xml ' + os.getcwd()
 
 	if os.system(scm_command) <= 0:
 		scm_resource = os.popen(scm_command).read()

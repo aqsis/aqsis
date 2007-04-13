@@ -9,7 +9,7 @@ from build_support import print_config
 from build_support import AddSysPath
 from build_support import Glob
 from build_support import embedManifest
-from build_support import getSVNRevision
+from build_support import getSCMRevision
 Export('embedManifest')
 
 import version
@@ -361,7 +361,7 @@ env.Depends(aqsisrc, display)
 #
 def version_h_build(target, source, env):
 	# Code to build "target" from "source"
-	revision = getSVNRevision()
+	revision = getSCMRevision()
 	defines = {
 		"major": version.major,
 		"minor": version.minor,
