@@ -5,7 +5,7 @@ static char datetime[20];
 /*
  * save to filename a tiff file
  */
-void save_tiff( char *filename,
+extern inline void save_tiff( char *filename,
                 unsigned char *raster,
                 int width,
                 int length,
