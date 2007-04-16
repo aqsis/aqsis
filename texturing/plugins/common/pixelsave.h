@@ -12,7 +12,11 @@
  *
  * Since this function is used now in jpg2tif, gif2tif, pcx2tif  plugins
  */
-extern inline void save_tiff( char *filename, unsigned char *raster,
+extern
+#ifndef WIN32
+inline
+#endif
+void save_tiff( char *filename, unsigned char *raster,
 	                       int width, int length, int samples, char *conversion );
 
 #endif
