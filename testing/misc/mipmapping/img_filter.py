@@ -313,7 +313,7 @@ def plotWindowFuncs(N):
 
 if __name__ == '__main__':
 	# Choose image
-	im = imread('lena_std.png')[:,:,:3]
+	im = imread('lena_std.png')[:,:,:3]/256.0
 	#im = getGridImg(246, 20)
 
 	# Compare odd and even filter sizes on the same image
