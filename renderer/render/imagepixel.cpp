@@ -502,7 +502,7 @@ void CqImagePixel::Combine(enum EqFilterDepth depthfilter, CqColor zThreshold)
 					{
 						opaqueValue.Data()[Sample_Depth] = maxOpaqueDepth;
 					}
-					else if ( depthfilter == Filter_Min )
+					else if ( depthfilter == Filter_Average )
 					{
 						std::deque<SqImageSample>::iterator sample;
 						TqFloat totDepth = 0.0f;
