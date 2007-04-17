@@ -171,51 +171,51 @@ class CqAttributes : public CqRefCount, public IqAttributes
 			GetIntegerAttributeWrite( "System", "Orientation" ) [ 0 ] = ( co ) ? 1 : 0;
 		}
 
-		virtual boost::shared_ptr<IqShader> pshadDisplacement( TqFloat time ) const
+		virtual boost::shared_ptr<IqShader> pshadDisplacement( TqFloat /* time */) const
 		{
 			return ( m_pshadDisplacement );
 		}
-		virtual void SetpshadDisplacement( const boost::shared_ptr<IqShader>& pshadDisplacement, TqFloat time )
+		virtual void SetpshadDisplacement( const boost::shared_ptr<IqShader>& pshadDisplacement, TqFloat /* time */ )
 		{
 			m_pshadDisplacement = pshadDisplacement;
 		}
-		virtual boost::shared_ptr<IqShader> pshadAreaLightSource( TqFloat time ) const
+		virtual boost::shared_ptr<IqShader> pshadAreaLightSource( TqFloat /* time */ ) const
 		{
 			return ( m_pshadAreaLightSource );
 		}
-		virtual void SetpshadAreaLightSource( const boost::shared_ptr<IqShader>& pshadAreaLightSource, TqFloat time )
+		virtual void SetpshadAreaLightSource( const boost::shared_ptr<IqShader>& pshadAreaLightSource, TqFloat /* time */ )
 		{
 			m_pshadAreaLightSource = pshadAreaLightSource;
 		}
-		virtual boost::shared_ptr<IqShader> pshadSurface( TqFloat time ) const
+		virtual boost::shared_ptr<IqShader> pshadSurface( TqFloat /* time */ ) const
 		{
 			return ( m_pshadSurface );
 		}
-		virtual void SetpshadSurface( const boost::shared_ptr<IqShader>& pshadSurface, TqFloat time )
+		virtual void SetpshadSurface( const boost::shared_ptr<IqShader>& pshadSurface, TqFloat /* time */ )
 		{
 			m_pshadSurface = pshadSurface;
 		}
-		virtual boost::shared_ptr<IqShader> pshadAtmosphere( TqFloat time ) const
+		virtual boost::shared_ptr<IqShader> pshadAtmosphere( TqFloat /* time */ ) const
 		{
 			return ( m_pshadAtmosphere );
 		}
-		virtual void SetpshadAtmosphere( const boost::shared_ptr<IqShader>& pshadAtmosphere, TqFloat time )
+		virtual void SetpshadAtmosphere( const boost::shared_ptr<IqShader>& pshadAtmosphere, TqFloat /* time */ )
 		{
 			m_pshadAtmosphere = pshadAtmosphere;
 		}
-		virtual boost::shared_ptr<IqShader> pshadExteriorVolume( TqFloat time ) const
+		virtual boost::shared_ptr<IqShader> pshadExteriorVolume( TqFloat /* time */ ) const
 		{
 			return ( m_pshadExteriorVolume );
 		}
-		virtual void SetpshadExteriorVolume( const boost::shared_ptr<IqShader>& pshadExteriorVolume, TqFloat time )
+		virtual void SetpshadExteriorVolume( const boost::shared_ptr<IqShader>& pshadExteriorVolume, TqFloat /* time */ )
 		{
 			m_pshadExteriorVolume = pshadExteriorVolume;
 		}
-		virtual boost::shared_ptr<IqShader> pshadAreaInteriorVolume( TqFloat time ) const
+		virtual boost::shared_ptr<IqShader> pshadAreaInteriorVolume( TqFloat /* time */ ) const
 		{
 			return ( m_pshadInteriorVolume );
 		}
-		virtual void SetpshadInteriorVolume( const boost::shared_ptr<IqShader>& pshadInteriorVolume, TqFloat time )
+		virtual void SetpshadInteriorVolume( const boost::shared_ptr<IqShader>& pshadInteriorVolume, TqFloat /* time */ )
 		{
 			m_pshadInteriorVolume = pshadInteriorVolume;
 		}

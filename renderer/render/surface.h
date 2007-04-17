@@ -97,6 +97,9 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 		virtual CqString	strName() const;
 		virtual	TqInt	Uses() const;
 
+		/**
+		* \todo Review: Unused parameter pGrid
+		*/
 		virtual TqInt	DiceAll( CqMicroPolyGrid* pGrid )
 		{
 			return(0);
@@ -121,6 +124,7 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 
 		/** Get the surface paramter values for the given vertex index. Used when constructing a surface
 		 * using "Pz" point specification.
+		 * \todo Review: Unused parameter index
 		 */
 		virtual CqVector3D	SurfaceParametersAtVertex( TqInt index )
 		{
@@ -509,12 +513,14 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 			return ( TqFalse );
 		}
 		/** Determine if the specified point is trimmed.
+		 * \todo Review: Unused parameter p
 		 */
 		virtual	const	TqBool	bIsPointTrimmed( const CqVector2D& p ) const
 		{
 			return ( TqFalse );
 		}
 		/** Determine if the specified edge crosses the trimming curves.
+		 * \todo Review: Unused parameter v1, v2
 		 */
 		virtual	const	TqBool	bIsLineIntersecting( const CqVector2D& v1, const CqVector2D& v2 ) const
 		{
@@ -523,6 +529,7 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 		/** Determine the level at which to split a trim curve according
 		 * to its screen size after application to the surface paramters of this
 		 * surface.
+		 * \todo Review: Unused parameter Curve. Shouldn't it be curve?
 		 */
 		virtual	TqInt	TrimDecimation( const CqTrimCurve& Curve )
 		{
@@ -536,18 +543,22 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 		void	uSubdivideUserParameters( CqSurface* pA, CqSurface* pB );
 		void	vSubdivideUserParameters( CqSurface* pA, CqSurface* pB );
 
-		virtual void	PreDice( TqInt uDiceSize, TqInt vDiceSize )
+		virtual void	PreDice( TqInt /* uDiceSize */, TqInt /* vDiceSize */ )
 		{}
-		virtual void	NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData );
-		virtual void	PostDice(CqMicroPolyGrid * pGrid)
+		virtual void	NaturalDice( CqParameter* pParameter, TqInt uDiceSize,
+			TqInt vDiceSize, IqShaderData* pData);
+		virtual void	PostDice(CqMicroPolyGrid * /* pGrid */)
 		{}
 
+		/**
+		 * \todo Review: Unused parameter aSplits, u
+		 */
 		virtual TqInt	PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, TqBool u )
 		{
 			return ( 0 );
 		}
 		virtual void	NaturalSubdivide( CqParameter* pParam, CqParameter* pParam1, CqParameter* pParam2, TqBool u );
-		virtual void	PostSubdivide(std::vector<boost::shared_ptr<CqSurface> >& aSplits)
+		virtual void	PostSubdivide(std::vector<boost::shared_ptr<CqSurface> >& /* aSplits */)
 		{}
 
 		/** Virtual function to indicate whether a particular surface is able
@@ -560,18 +571,20 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 
 		/** Virtual function to genrate and fill in geomtric normals if a surface is able to do so.
 		 */
-		virtual	void	GenerateGeometricNormals( TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pNormals )
+		virtual	void	GenerateGeometricNormals( TqInt /* uDiceSize */, TqInt /* vDiceSize */,
+			IqShaderData* /* pNormals */ )
 		{}
 
 		virtual	CqMicroPolyGridBase* Dice();
 		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
+		
+		/**
+		 * \todo Review: Could this be const?
+		 */
 		virtual TqBool	Diceable()
 		{
 			return(false);
 		}
-
-
-
 
 		TqBool	m_fDiceable;		///< Flag to indicate that this GPrim is diceable.
 		TqBool	m_fDiscard;			///< Flag to indicate that this GPrim is to be discarded.

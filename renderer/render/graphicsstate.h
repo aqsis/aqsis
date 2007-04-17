@@ -376,9 +376,9 @@ class CqFrameModeBlock : public CqModeBlock
 			return boost::shared_ptr<CqModeBlock>();
 		}	// Error
 		/** Create a solid context.
-		 * \warning It is an error to call this within a frame context.
+		 * \warning It is an error to call this within a frame context
 		 */
-		virtual	boost::shared_ptr<CqModeBlock>	BeginSolidModeBlock( CqString& type )
+		virtual	boost::shared_ptr<CqModeBlock>	BeginSolidModeBlock( CqString& /* type */ )
 		{
 			return boost::shared_ptr<CqModeBlock>();
 		}	// Error
@@ -795,7 +795,7 @@ class CqMotionModeBlock : public CqModeBlock
 		/** Create a solid context.
 		 * \warning It is an error to call this within a motion context.
 		 */
-		virtual	boost::shared_ptr<CqModeBlock>	BeginSolidModeBlock( CqString& type )
+		virtual	boost::shared_ptr<CqModeBlock>	BeginSolidModeBlock( CqString& /* type */ )
 		{
 			return boost::shared_ptr<CqModeBlock>();
 		}		// Error
@@ -809,7 +809,7 @@ class CqMotionModeBlock : public CqModeBlock
 		/** Create a motion context.
 		 * \warning It is an error to call this within a motion context.
 		 */
-		virtual	boost::shared_ptr<CqModeBlock>	BeginMotionModeBlock( TqInt N, TqFloat times[] )
+		virtual	boost::shared_ptr<CqModeBlock>	BeginMotionModeBlock( TqInt /* N */, TqFloat /* times */[] )
 		{
 			return boost::shared_ptr<CqModeBlock>();
 		}		// Error

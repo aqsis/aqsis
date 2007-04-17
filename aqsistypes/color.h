@@ -479,7 +479,7 @@ class COMMON_SHARE CqColor
 		{
 			return ( CqColor( -a.m_fRed, -a.m_fGreen, -a.m_fBlue ) );
 		} // Negation
-		friend CqColor	operator%( const CqColor& a, const CqColor& b )
+		friend CqColor	operator%( const CqColor& a, const CqColor& /* b */ ) // b is unused
 		{
 			return ( a );
 		} // Implemented purely for the use of the shader VM, we have macros

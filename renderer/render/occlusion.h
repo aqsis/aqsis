@@ -82,6 +82,10 @@ class CqOcclusionTree// : public boost::enable_shared_from_this<CqOcclusionTree>
 		{
 			return(2);
 		}
+
+		/**
+		* \todo Review: Unused parameter index; Could this be const?
+		*/
 		SqSampleData& Sample(TqInt index = 0)
 		{
 			return(CqBucket::ImageElement(m_SampleIndices[0].first).SampleData(m_SampleIndices[0].second));

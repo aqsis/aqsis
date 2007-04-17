@@ -121,7 +121,7 @@ class CqTransform : public CqMotionSpec<SqTransformation>, public IqTransform, p
 		void	InitialiseDefaultObject( const CqTransformPtr& From );
 		void	SetTransform( TqFloat time, const CqMatrix& matTrans );
 		void	ConcatCurrentTransform( TqFloat time, const CqMatrix& matTrans );
-		void FlipHandedness(TqFloat time )
+		void FlipHandedness(TqFloat /* time */ )
 		{
 			m_Handedness = !m_Handedness;
 		}

@@ -89,7 +89,7 @@ class CqParameter
 		 * \param u Boolean indicating whether to split in the u direction, false indicates split in v.
 		 * \param pSurface Pointer to the surface which this paramter belongs, used if the surface has special handling of parameter splitting.
 		 */
-		virtual void	Subdivide( CqParameter* pResult1, CqParameter* pResult2, TqBool u, IqSurface* pSurface = 0 )
+		virtual void	Subdivide( CqParameter* /* pResult1 */, CqParameter* /* pResult2 */, TqBool /* u */, IqSurface* /* pSurface */ = 0 )
 		{}
 		/** Pure virtual, dice the value into a grid using appropriate interpolation for the class.
 		 * \param u Integer dice count for the u direction.
