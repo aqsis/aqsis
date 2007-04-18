@@ -1,12 +1,21 @@
 Import('env version')
 
-env.Replace(NSISDEFINES = {'PRODUCT_VERSION': '%d.%d.%d' %(version.major, version.minor, version.build), 
-			 'PRODUCT_FILE_NUMBER': '%d_%d_%d' %(version.major, version.minor, version.build),
-			 'LIBRARY_EXTENSION': env['LIBSUFFIX']})
+use_defs = '0'
+if env.has_key('mingw') and env['mingw']:
+	use_defs = '1'
+env.Replace(NSISDEFINES = {'PRODUCT_VERSION_MAJOR': '%d' %(version.major),
+			 'PRODUCT_VERSION_MINOR': '%d' %(version.minor),
+			 'PRODUCT_VERSION_BUILD': '%d' %(version.build),
+			 'PRODUCT_VERSION_TYPE': '%s' %(version.type),
+			 'PRODUCT_VERSION': '%d.%d.%d%s' %(version.major, version.minor, version.build, version.type),	
+			 'LIBRARY_EXTENSION': env['LIBSUFFIX'],
+			 'LIBRARY_PREFIX': env['LIBPREFIX'],
+			 'USE_DEFS': use_defs, 
+			 'PROJECT_ROOT': env.Dir('#/').abspath})
 installer1 = env.Installer('setup')
 env.Depends(installer1, env.Alias('release'))
 env.Alias('win_installer', installer1)
 
-env.Distribute('distribution/win/nsis/', 'SConscript')
-env.Distribute('distribution/win/nsis/', 'setup.nsi')
-env.Distribute('distribution/win/nsis/', 'page_tasks.ini')
+env.Distribute('SConscript')
+env.Distribute('setup.nsi')
+env.Distribute('page_tasks.ini')

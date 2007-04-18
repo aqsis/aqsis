@@ -28,6 +28,7 @@
 #define SHADERVM_H_INCLUDED 1
 
 #include	<vector>
+#include	<list>
 #include	<boost/shared_ptr.hpp>
 
 #include	"aqsis.h"
@@ -48,6 +49,8 @@
 #include 	"parameters.h"
 #include 	"dsoshadeops.h"
 #include	"itransform.h"
+#include	"shadervm_common.h"
+
 
 START_NAMESPACE( Aqsis )
 
@@ -631,17 +634,19 @@ union UsProgramElement
  * Main class handling the execution of a program in shader language bytecodes.
  */
 
-class CqShaderVM : public CqShaderStack, public IqShader, public CqDSORepository
+class SHADERVM_SHARE CqShaderVM : public CqShaderStack, public IqShader, public CqDSORepository
 {
 	public:
-		CqShaderVM() : CqShaderStack(), m_Uses( 0xFFFFFFFF ), m_LocalIndex( 0 ), m_PC( 0 ), m_fAmbient( TqTrue )
+		CqShaderVM(IqRenderer* pRenderContext) : CqShaderStack(), m_Uses( 0xFFFFFFFF ), m_LocalIndex( 0 ), m_PC( 0 ), m_fAmbient( TqTrue ), m_pRenderContext(pRenderContext)
 		{
 			// Find out if this shader is being declared outside the world construct. If so
 			// if is effectively being defined in 'camera' space, which will affect the
 			// transformation of parameters. Should only affect lightsource shaders as these
 			// are the only ones valid outside the world.
-			if (QGetRenderContextI())
-				m_outsideWorld = !QGetRenderContextI()->IsWorldBegin();
+			if (NULL != m_pRenderContext)
+				m_outsideWorld = !m_pRenderContext->IsWorldBegin();
+			else
+				m_outsideWorld = TqFalse;
 		}
 		CqShaderVM( const CqShaderVM& From ) : m_LocalIndex( 0 ), m_PC( 0 ), m_fAmbient( TqTrue )
 		{
@@ -650,8 +655,10 @@ class CqShaderVM : public CqShaderStack, public IqShader, public CqDSORepository
 			// if is effectively being defined in 'camera' space, which will affect the
 			// transformation of parameters. Should only affect lightsource shaders as these
 			// are the only ones valid outside the world.
-			if (QGetRenderContextI())
-				m_outsideWorld = !QGetRenderContextI()->IsWorldBegin();
+			if (NULL != m_pRenderContext)
+				m_outsideWorld = !m_pRenderContext->IsWorldBegin();
+			else
+				m_outsideWorld = TqFalse;
 		}
 		virtual ~CqShaderVM()
 		{
@@ -659,6 +666,8 @@ class CqShaderVM : public CqShaderStack, public IqShader, public CqDSORepository
 			for ( std::vector<IqShaderData*>::iterator i = m_LocalVars.begin(); i != m_LocalVars.end(); i++ )
 				if ( ( *i ) != NULL )
 					delete( *i );
+			for ( std::list<CqString*>::iterator i = m_ProgramStrings.begin(); i != m_ProgramStrings.end(); i++ )
+				delete *i;
 		}
 
 
@@ -778,6 +787,7 @@ class CqShaderVM : public CqShaderStack, public IqShader, public CqDSORepository
 		std::vector<SqArgumentRecord>	m_StoredArguments;		///< Array of arguments specified during construction.
 		std::vector<UsProgramElement>	m_ProgramInit;		///< Bytecodes of the intialisation program.
 		std::vector<UsProgramElement>	m_Program;			///< Bytecodes of the main program.
+		std::list<CqString*>			m_ProgramStrings;	///< Strings used by the program, which are stored additionally as UsProgramElements.
 		TqInt	m_uGridRes;
 		TqInt	m_vGridRes;
 		TqInt	m_shadingPointCount;
@@ -786,6 +796,7 @@ class CqShaderVM : public CqShaderStack, public IqShader, public CqDSORepository
 		TqInt	m_PE;							///< Offset of the end of the program.
 		TqBool	m_fAmbient;						///< Flag indicating if this is an ambient light source ( if it is indeed a light source ).
 		TqBool	m_outsideWorld;						///< Flag indicating this shader was declared outside the world.
+		IqRenderer*	m_pRenderContext;
 
 		/** Determine whether the program execution has finished.
 		 */
@@ -865,10 +876,11 @@ class CqShaderVM : public CqShaderStack, public IqShader, public CqDSORepository
 		 */
 		void	AddString( const char* s, std::vector<UsProgramElement>* pProgramArea )
 		{
-			CqString * ps = new CqString( s );	// MGC: MEMLEAK , cleanup missing
+			CqString* ps = new CqString( s );
 			UsProgramElement E;
 			E.m_pString = ps;
 			pProgramArea->push_back( E );
+			m_ProgramStrings.push_back( ps ); // Store here as well to avoid mem leak.
 		}
 		/** Add an variable index value to the program area.
 		 * \param iVar Integer variable index to add, top bit indicates system variable.

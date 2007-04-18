@@ -43,24 +43,46 @@
 #include	"ishaderdata.h"
 #include	"ishader.h"
 #include	"ishaderexecenv.h"
+#include	"irenderer.h"
 #include	"matrix.h"
 
 #include	"iattributes.h"
 #include	"transform.h"
 
+#ifdef	WIN32
+#  ifdef	AQSIS_STATIC_LINK
+
+#    define  SHADERCONTEXT_SHARE
+
+#  else // !AQSIS_STATIC_LINK
+
+#      ifdef SHADERCONTEXT_EXPORTS
+#        define SHADERCONTEXT_SHARE __declspec(dllexport)
+#      else
+#        define SHADERCONTEXT_SHARE __declspec(dllimport)
+#      endif
+
+#  endif	// AQSIS_STATIC_LINK
+
+#else	// !WIN32
+
+#  define  SHADERCONTEXT_SHARE
+
+#endif // WIN32
+
 START_NAMESPACE( Aqsis )
 
 
-extern char*	gVariableClassNames[];
-extern TqInt	gcVariableClassNames;
-extern char*	gVariableTypeNames[];
-extern TqInt	gcVariableTypeNames;
-extern char*	gVariableNames[];	///< Vector of variable names.
-extern TqUlong	gVariableTokens[];	///< Vector of hash key from above names.
+SHADERCONTEXT_SHARE extern char*	gVariableClassNames[];
+SHADERCONTEXT_SHARE extern TqInt	gcVariableClassNames;
+SHADERCONTEXT_SHARE extern char*	gVariableTypeNames[];
+SHADERCONTEXT_SHARE extern TqInt	gcVariableTypeNames;
+SHADERCONTEXT_SHARE extern char*	gVariableNames[];	///< Vector of variable names.
+SHADERCONTEXT_SHARE extern TqUlong	gVariableTokens[];	///< Vector of hash key from above names.
 
 
-extern TqInt gDefUses;
-extern TqInt gDefLightUses;
+SHADERCONTEXT_SHARE extern TqInt gDefUses;
+SHADERCONTEXT_SHARE extern TqInt gDefLightUses;
 
 #define	INIT_SO			TqBool __fVarying=TqFalse; /* A flag which will be set to indicate if the operation has any varying components. */ \
 						TqInt __iGrid; /* Integer index used to track progress through the varying data */
@@ -124,10 +146,10 @@ extern TqInt gDefLightUses;
  * Standard shader execution environment. Contains standard variables, and provides SIMD functionality.
  */
 
-class CqShaderExecEnv : public IqShaderExecEnv
+class SHADERCONTEXT_SHARE CqShaderExecEnv : public IqShaderExecEnv
 {
 	public:
-		CqShaderExecEnv();
+		CqShaderExecEnv(IqRenderer* pRenderContext);
 		virtual	~CqShaderExecEnv();
 
 #ifdef _DEBUG
@@ -322,6 +344,10 @@ class CqShaderExecEnv : public IqShaderExecEnv
 		{
 			return ( m_apVariables[ EnvVars_Ns ] );
 		}
+		virtual IqRenderer* getRenderContext() const
+		{
+			return ( m_pRenderContext );
+		}
 
 	private:
 		/** Internal function to extract additional named filter parameters from an array of stack entries.
@@ -386,6 +412,7 @@ class CqShaderExecEnv : public IqShaderExecEnv
 		CqBitVector	m_CurrentState;			///< SIMD execution state bit vector accumulator.
 		CqBitVector	m_RunningState;			///< SIMD running execution state bit vector.
 		std::stack<CqBitVector>	m_stkState;				///< Stack of execution state bit vectors.
+		IqRenderer*	m_pRenderContext;
 		TqInt	m_LocalIndex;			///< Local cached variable index to speed repeated access to the same local variable.
 		IqSurface*	m_pCurrentSurface;	///< Pointer to the surface being shaded.
 

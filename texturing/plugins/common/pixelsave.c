@@ -5,6 +5,10 @@ static char datetime[20];
 /*
  * save to filename a tiff file
  */
+extern 
+#ifndef WIN32
+inline
+#endif
 void save_tiff( char *filename,
                 unsigned char *raster,
                 int width,

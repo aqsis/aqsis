@@ -1,5 +1,5 @@
 /* -------------- declaration section -------------- */
-%expect 46
+%expect 47
 
 %{
 
@@ -205,6 +205,9 @@ static RendermanInterface::RtInt ColorSamples = 3;
 %token	<ctype>	REQUEST_TOKEN_POLYGON
 %token	<ctype>	REQUEST_TOKEN_PROCEDURAL
 %token	<ctype>	REQUEST_TOKEN_PROJECTION
+%token  <ctype> REQUEST_TOKEN_RESOURCE
+%token  <ctype> REQUEST_TOKEN_RESOURCEBEGIN
+%token  <ctype> REQUEST_TOKEN_RESOURCEEND
 %token	<ctype>	REQUEST_TOKEN_QUANTIZE
 %token	<ctype>	REQUEST_TOKEN_READARCHIVE
 %token	<ctype>	REQUEST_TOKEN_RELATIVEDETAIL
@@ -323,6 +326,9 @@ static RendermanInterface::RtInt ColorSamples = 3;
 %type	<ctype>	relativedetail
 %type	<ctype>	reverseorientation
 %type	<ctype>	rotate
+%type	<ctype> resource
+%type	<ctype>	resourcebegin
+%type	<ctype>	resourceend
 %type	<ctype>	scale
 %type	<ctype>	screenwindow
 %type	<ctype>	shadinginterpolation
@@ -837,22 +843,13 @@ complete_request
 			}
     |   curves string integer_array string opttvpairs
             {
-                int vertices = 0;
-                for(int i = 0; i < $5->Count(); i++) 
-                {
-                    if($5->Tokens()[i] == std::string("P"))
-                    vertices = $5->Counts()[i] / 3;
-                }
-                if (vertices > 0)
-                    ParseCallbackInterface->RiCurvesV($2, $3->Count(), &(*$3)[0], $4, $5->Count(), $5->Tokens(), $5->Values());
-                else 
-                    yyerror("Expecting \"P\"");
+                ParseCallbackInterface->RiCurvesV($2, $3->Count(), &(*$3)[0], $4, $5->Count(), $5->Tokens(), $5->Values());
                 DiscardStringValue($2);
                 DiscardArrayValue($3); 
                 DiscardStringValue($4);  
 		DiscardTokenValuePairs($5);
             }
-    |   blobby integer integer_array float_array string_array opttvpairs
+    |   blobby integer integer_array float_array string_array_or_empty opttvpairs
             {
                 ParseCallbackInterface->RiBlobbyV($2, $3->Count(), &(*$3)[0], 
                         $4->Count(), &(*$4)[0],
@@ -912,6 +909,7 @@ complete_request
                 int vertices = 0;
                 for(int i = 0; i < $2->Count(); i++) 
                 {
+		    /// \todo: this will not work if "P" is specified as "vertex point P", need to investigate.
                     if($2->Tokens()[i] == std::string("P"))
                     vertices = $2->Counts()[i] / 3;
                 }
@@ -1272,6 +1270,21 @@ complete_request
 				DiscardStringValue($5);
 				DiscardStringValue($6);
 			}
+	|	resource string string opttvpairs
+			{
+				ParseCallbackInterface->RiResourceV(const_cast<char*>($2), const_cast<char*>($3), $4->Count(), $4->Tokens(), $4->Values());
+				DiscardStringValue($2);
+				DiscardStringValue($3);
+				DiscardTokenValuePairs($4);
+			}
+	|	resourcebegin
+			{
+				ParseCallbackInterface->RiResourceBegin();
+			}
+	|	resourceend
+			{
+				ParseCallbackInterface->RiResourceEnd();
+			}
 	|	UNKNOWN_TOKEN
 			{
 				// Print the error, then force the scanner into 'request'
@@ -1385,6 +1398,9 @@ readarchive: REQUEST_TOKEN_READARCHIVE	{ ExpectParams(); };
 relativedetail : REQUEST_TOKEN_RELATIVEDETAIL	{ ExpectParams(); };
 reverseorientation : REQUEST_TOKEN_REVERSEORIENTATION	{ ExpectParams(); };
 rotate : REQUEST_TOKEN_ROTATE	{ ExpectParams(); };
+resource : REQUEST_TOKEN_RESOURCE	{ ExpectParams(); };
+resourcebegin : REQUEST_TOKEN_RESOURCEBEGIN	{ ExpectParams(); };
+resourceend : REQUEST_TOKEN_RESOURCEEND	{ ExpectParams(); };
 scale : REQUEST_TOKEN_SCALE	{ ExpectParams(); };
 screenwindow : REQUEST_TOKEN_SCREENWINDOW	{ ExpectParams(); };
 shadinginterpolation : REQUEST_TOKEN_SHADINGINTERPOLATION	{ ExpectParams(); };

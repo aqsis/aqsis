@@ -60,7 +60,7 @@ void CqCodeGenDataGather::Visit( IqParseNode& N )
 void CqCodeGenDataGather::Visit( IqParseNodeShader& S )
 {
 	IqParseNode * pNode;
-	S.GetInterface( ParseNode_Base, ( void** ) & pNode );
+	pNode = static_cast<IqParseNode*>(S.GetInterface( ParseNode_Base ));
 
 	// Clear the temp variables array.
 	TempVars().clear();
@@ -81,7 +81,7 @@ void CqCodeGenDataGather::Visit( IqParseNodeFunctionCall& FC )
 	// Output the function name.
 	IqFuncDef * pFunc = FC.pFuncDef();
 	IqParseNode* pNode;
-	FC.GetInterface( ParseNode_Base, ( void** ) & pNode );
+	pNode = static_cast<IqParseNode*>(FC.GetInterface( ParseNode_Base ));
 	IqParseNode* pArguments = pNode->pChild();
 
 	if ( !pFunc->fLocal() )
@@ -138,7 +138,7 @@ void CqCodeGenDataGather::Visit( IqParseNodeFunctionCall& FC )
 void CqCodeGenDataGather::Visit( IqParseNodeUnresolvedCall& UFC )
 {
 	IqParseNode * pNode;
-	UFC.GetInterface( ParseNode_Base, ( void** ) & pNode );
+	pNode = static_cast<IqParseNode*>(UFC.GetInterface( ParseNode_Base ));
 	IqParseNode* pArguments = pNode->pChild();
 
 	IqParseNode * pArg = pArguments;
@@ -152,7 +152,7 @@ void CqCodeGenDataGather::Visit( IqParseNodeUnresolvedCall& UFC )
 void CqCodeGenDataGather::Visit( IqParseNodeVariable& V )
 {
 	IqParseNodeVariable * pVN;
-	V.GetInterface( ParseNode_Variable, ( void** ) & pVN );
+	pVN = static_cast<IqParseNodeVariable*>(V.GetInterface( ParseNode_Variable ));
 
 	SqVarRef temp( pVN->VarRef() );
 	IqVarDef* pVD = pTranslatedVariable( temp, m_saTransTable );
@@ -163,10 +163,10 @@ void CqCodeGenDataGather::Visit( IqParseNodeVariable& V )
 void CqCodeGenDataGather::Visit( IqParseNodeArrayVariable& AV )
 {
 	IqParseNode * pNode;
-	AV.GetInterface( ParseNode_Base, ( void** ) & pNode );
+	pNode = static_cast<IqParseNode*>(AV.GetInterface( ParseNode_Base ));
 
 	IqParseNodeVariable* pVN;
-	AV.GetInterface( ParseNode_Variable, ( void** ) & pVN );
+	pVN = static_cast<IqParseNodeVariable*>(AV.GetInterface( ParseNode_Variable ));
 
 	pNode->pChild() ->Accept( *this );
 
@@ -179,10 +179,10 @@ void CqCodeGenDataGather::Visit( IqParseNodeArrayVariable& AV )
 void CqCodeGenDataGather::Visit( IqParseNodeVariableAssign& VA )
 {
 	IqParseNode * pNode;
-	VA.GetInterface( ParseNode_Base, ( void** ) & pNode );
+	pNode = static_cast<IqParseNode*>(VA.GetInterface( ParseNode_Base ));
 
 	IqParseNodeVariable* pVN;
-	VA.GetInterface( ParseNode_Variable, ( void** ) & pVN );
+	pVN = static_cast<IqParseNodeVariable*>(VA.GetInterface( ParseNode_Variable ));
 
 	IqParseNode * pExpr = pNode->pChild();
 	if ( pExpr != 0 )
@@ -198,13 +198,13 @@ void CqCodeGenDataGather::Visit( IqParseNodeArrayVariableAssign& AVA )
 {
 	// Output the assignment expression
 	IqParseNode * pNode;
-	AVA.GetInterface( ParseNode_Base, ( void** ) & pNode );
+	pNode = static_cast<IqParseNode*>(AVA.GetInterface( ParseNode_Base ));
 
 	IqParseNodeVariable* pVN;
-	AVA.GetInterface( ParseNode_Variable, ( void** ) & pVN );
+	pVN = static_cast<IqParseNodeVariable*>(AVA.GetInterface( ParseNode_Variable ));
 
 	IqParseNodeVariableAssign* pVA;
-	AVA.GetInterface( ParseNode_VariableAssign, ( void** ) & pVA );
+	pVA = static_cast<IqParseNodeVariableAssign*>(AVA.GetInterface( ParseNode_VariableAssign ));
 
 	IqParseNode * pExpr = pNode->pChild();
 	if ( pExpr != 0 )
@@ -222,7 +222,7 @@ void CqCodeGenDataGather::Visit( IqParseNodeArrayVariableAssign& AVA )
 void CqCodeGenDataGather::Visit( IqParseNodeOperator& OP )
 {
 	IqParseNode * pNode;
-	OP.GetInterface( ParseNode_Base, ( void** ) & pNode );
+	pNode = static_cast<IqParseNode*>(OP.GetInterface( ParseNode_Base ));
 
 	IqParseNode* pOperandA = pNode->pChild();
 	IqParseNode* pOperandB = pOperandA->pNextSibling();
@@ -236,35 +236,35 @@ void CqCodeGenDataGather::Visit( IqParseNodeOperator& OP )
 void CqCodeGenDataGather::Visit( IqParseNodeMathOp& OP )
 {
 	IqParseNodeOperator * pOp;
-	OP.GetInterface( ParseNode_Operator, ( void** ) & pOp );
+	pOp = static_cast<IqParseNodeOperator*>(OP.GetInterface( ParseNode_Operator ));
 	Visit( *pOp );
 }
 
 void CqCodeGenDataGather::Visit( IqParseNodeRelationalOp& OP )
 {
 	IqParseNodeOperator * pOp;
-	OP.GetInterface( ParseNode_Operator, ( void** ) & pOp );
+	pOp = static_cast<IqParseNodeOperator*>(OP.GetInterface( ParseNode_Operator ));
 	Visit( *pOp );
 }
 
 void CqCodeGenDataGather::Visit( IqParseNodeUnaryOp& OP )
 {
 	IqParseNodeOperator * pOp;
-	OP.GetInterface( ParseNode_Operator, ( void** ) & pOp );
+	pOp = static_cast<IqParseNodeOperator*>(OP.GetInterface( ParseNode_Operator ));
 	Visit( *pOp );
 }
 
 void CqCodeGenDataGather::Visit( IqParseNodeLogicalOp& OP )
 {
 	IqParseNodeOperator * pOp;
-	OP.GetInterface( ParseNode_Operator, ( void** ) & pOp );
+	pOp = static_cast<IqParseNodeOperator*>(OP.GetInterface( ParseNode_Operator ));
 	Visit( *pOp );
 }
 
 void CqCodeGenDataGather::Visit( IqParseNodeDiscardResult& DR )
 {
 	IqParseNode * pNode;
-	DR.GetInterface( ParseNode_Base, ( void** ) & pNode );
+	pNode = static_cast<IqParseNode*>(DR.GetInterface( ParseNode_Base ));
 
 	IqParseNode * pNext = pNode->pChild();
 	while ( pNext )
@@ -283,7 +283,7 @@ void CqCodeGenDataGather::Visit( IqParseNodeConstantString& S )
 void CqCodeGenDataGather::Visit( IqParseNodeWhileConstruct& WC )
 {
 	IqParseNode * pNode;
-	WC.GetInterface( ParseNode_Base, ( void** ) & pNode );
+	pNode = static_cast<IqParseNode*>(WC.GetInterface( ParseNode_Base ));
 
 	IqParseNode* pArg = pNode->pChild();
 	assert( pArg != 0 );
@@ -300,7 +300,7 @@ void CqCodeGenDataGather::Visit( IqParseNodeWhileConstruct& WC )
 void CqCodeGenDataGather::Visit( IqParseNodeIlluminateConstruct& IC )
 {
 	IqParseNode * pNode;
-	IC.GetInterface( ParseNode_Base, ( void** ) & pNode );
+	pNode = static_cast<IqParseNode*>(IC.GetInterface( ParseNode_Base ));
 
 	IqParseNode* pArg = pNode->pChild();
 	assert( pArg != 0 );
@@ -314,7 +314,7 @@ void CqCodeGenDataGather::Visit( IqParseNodeIlluminateConstruct& IC )
 void CqCodeGenDataGather::Visit( IqParseNodeIlluminanceConstruct& IC )
 {
 	IqParseNode * pNode;
-	IC.GetInterface( ParseNode_Base, ( void** ) & pNode );
+	pNode = static_cast<IqParseNode*>(IC.GetInterface( ParseNode_Base ));
 
 	IqParseNode* pArg = pNode->pChild();
 	assert( pArg != 0 );
@@ -334,7 +334,7 @@ void CqCodeGenDataGather::Visit( IqParseNodeIlluminanceConstruct& IC )
 void CqCodeGenDataGather::Visit( IqParseNodeSolarConstruct& SC )
 {
 	IqParseNode * pNode;
-	SC.GetInterface( ParseNode_Base, ( void** ) & pNode );
+	pNode = static_cast<IqParseNode*>(SC.GetInterface( ParseNode_Base ));
 
 	IqParseNode* pArg = pNode->pChild();
 	if ( NULL != pArg )
@@ -349,7 +349,7 @@ void CqCodeGenDataGather::Visit( IqParseNodeSolarConstruct& SC )
 void CqCodeGenDataGather::Visit( IqParseNodeConditional& C )
 {
 	IqParseNode * pNode;
-	C.GetInterface( ParseNode_Base, ( void** ) & pNode );
+	pNode = static_cast<IqParseNode*>(C.GetInterface( ParseNode_Base ));
 
 	IqParseNode* pArg = pNode->pChild();
 	assert( pArg != 0 );
@@ -366,7 +366,7 @@ void CqCodeGenDataGather::Visit( IqParseNodeConditional& C )
 void CqCodeGenDataGather::Visit( IqParseNodeConditionalExpression& CE )
 {
 	IqParseNode * pNode;
-	CE.GetInterface( ParseNode_Base, ( void** ) & pNode );
+	pNode = static_cast<IqParseNode*>(CE.GetInterface( ParseNode_Base ));
 
 	IqParseNode * pArg = pNode->pChild();
 	assert( pArg != 0 );
@@ -382,7 +382,7 @@ void CqCodeGenDataGather::Visit( IqParseNodeConditionalExpression& CE )
 void CqCodeGenDataGather::Visit( IqParseNodeTypeCast& TC )
 {
 	IqParseNode * pNode;
-	TC.GetInterface( ParseNode_Base, ( void** ) & pNode );
+	pNode = static_cast<IqParseNode*>(TC.GetInterface( ParseNode_Base ));
 
 	IqParseNode * pOperand = pNode->pChild();
 	assert( pOperand != 0 );
@@ -393,7 +393,7 @@ void CqCodeGenDataGather::Visit( IqParseNodeTypeCast& TC )
 void CqCodeGenDataGather::Visit( IqParseNodeTriple& T )
 {
 	IqParseNode * pNode;
-	T.GetInterface( ParseNode_Base, ( void** ) & pNode );
+	pNode = static_cast<IqParseNode*>(T.GetInterface( ParseNode_Base ));
 
 	IqParseNode * pA = pNode->pChild();
 	assert( pA != 0 );
@@ -410,7 +410,7 @@ void CqCodeGenDataGather::Visit( IqParseNodeTriple& T )
 void CqCodeGenDataGather::Visit( IqParseNodeSixteenTuple& ST )
 {
 	IqParseNode * pNode;
-	ST.GetInterface( ParseNode_Base, ( void** ) & pNode );
+	pNode = static_cast<IqParseNode*>(ST.GetInterface( ParseNode_Base ));
 
 	IqParseNode * p00 = pNode->pChild();
 	assert( p00 != 0 );
@@ -469,7 +469,7 @@ void CqCodeGenDataGather::Visit( IqParseNodeSixteenTuple& ST )
 void CqCodeGenDataGather::Visit( IqParseNodeMessagePassingFunction& MPF )
 {
 	IqParseNode * pNode;
-	MPF.GetInterface( ParseNode_Base, ( void** ) & pNode );
+	pNode = static_cast<IqParseNode*>(MPF.GetInterface( ParseNode_Base ));
 
 	IqParseNode * pExpr = pNode->pChild();
 

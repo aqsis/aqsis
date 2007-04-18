@@ -557,20 +557,20 @@ void CqDDManager::LoadDisplayLibrary( SqDisplayRequest& req )
 			switch(err)
 			{
 					case PkDspyErrorNoMemory:
-					Aqsis::log() << "Out of memory" << std::endl;
+					Aqsis::log() << error << "Out of memory" << std::endl;
 					break;
 					case PkDspyErrorUnsupported:
-					Aqsis::log() << "Unsupported" << std::endl;
+					Aqsis::log() << error << "Unsupported" << std::endl;
 					break;
 					case PkDspyErrorBadParams:
-					Aqsis::log() << "Bad params" << std::endl;
+					Aqsis::log() << error << "Bad params" << std::endl;
 					break;
 					case PkDspyErrorNoResource:
-					Aqsis::log() << "No resource" << std::endl;
+					Aqsis::log() << error << "No resource" << std::endl;
 					break;
 					case PkDspyErrorUndefined:
 					default:
-					Aqsis::log() << "Undefined" << std::endl;
+					Aqsis::log() << error << "Undefined" << std::endl;
 					break;
 			}
 

@@ -1,0 +1,41 @@
+version 3.03
+PixelSamples 8 8
+PixelFilter "catmull-rom" 5 5
+Format 320 200 1
+Shutter 0 1
+Display "Bug1162905.tif" "file" "rgb" "string compression" "lzw"
+Projection "perspective" "fov" [30.0]
+# === Camera Motion Blur ===
+MotionBegin [0 1]
+Translate -2 0 10
+Translate 2 0 10
+MotionEnd
+# === End of Camera Motion Blur ===
+FrameBegin 1
+WorldBegin
+# === Start of red sphere ===
+# This sphere uses RiConcatTransform and 
+# appears to show correct camera motion blur.
+# Transform equivalent to:
+#     Translate 0 1.2 0
+AttributeBegin
+ConcatTransform [1 0 0 0 0 1 0 0 0 0 1 0 0 1.2 0 1]
+Color [1 0 0]
+Sphere 1 -1 1 360.0
+AttributeEnd
+# === End of red sphere ===
+# === Start of green sphere ===
+# This sphere uses RiTransform, and does not 
+# show any camera motion blur.
+# Transform equivalent to:
+#     Translate 0 -1.2 0
+AttributeBegin
+Transform [1 0 0 0 0 1 0 0 0 0 1 0 0 -1.2 0 1]
+Color [0 1 0]
+Sphere 1 -1 1 360.0
+AttributeEnd
+# === End of green sphere ===
+WorldEnd
+FrameEnd
+
+ 	  	 

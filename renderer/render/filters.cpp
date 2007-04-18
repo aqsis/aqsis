@@ -34,10 +34,10 @@
 START_NAMESPACE( Aqsis )
 
 // Mitchell Filter Declarations
-class MitchellFilter {
+class CqMitchellFilter {
 public:
-   // MitchellFilter Public Methods
-   MitchellFilter(TqFloat b, TqFloat c, TqFloat xw, TqFloat yw)
+   // CqMitchellFilter Public Methods
+   CqMitchellFilter(TqFloat b, TqFloat c, TqFloat xw, TqFloat yw)
    {
       B = b;
       C = c;
@@ -62,11 +62,13 @@ private:
    TqFloat invXWidth, invYWidth;
 };
 
+END_NAMESPACE( Aqsis )
+
 //----------------------------------------------------------------------
 // RiGaussianFilter
 // Gaussian filter used as a possible value passed to RiPixelFilter.
 //
-extern "C" _qShare
+extern "C" 
  RtFloat	RiGaussianFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 {
 	/*
@@ -111,19 +113,19 @@ extern "C" _qShare
 // RiMitchellFilter
 // Mitchell filter used as a possible value passed to RiPixelFIlter.
 //
-extern "C" _qShare
+extern "C" 
 RtFloat	RiMitchellFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 {
-MitchellFilter mc(1/3.0f, 1/3.0f, xwidth, ywidth);
+	Aqsis::CqMitchellFilter mc(1/3.0f, 1/3.0f, xwidth, ywidth);
 
-   return mc.Evaluate(x, y);
+	return mc.Evaluate(x, y);
 }
 
 //----------------------------------------------------------------------
 // RiBoxFilter
 // Box filter used as a possible value passed to RiPixelFIlter.
 //
-extern "C" _qShare
+extern "C" 
 RtFloat	RiBoxFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 {
 	/* [UPST89] -- (RC p. 178) says that x and y will be in the
@@ -143,7 +145,7 @@ RtFloat	RiBoxFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 // RiTriangleFilter
 // Triangle filter used as a possible value passed to RiPixelFilter
 //
-extern "C" _qShare
+extern "C" 
 RtFloat	RiTriangleFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 {
 	RtFloat	hxw = xwidth / 2.0;
@@ -163,7 +165,7 @@ RtFloat	RiTriangleFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 // RiCatmullRomFilter
 // Catmull Rom filter used as a possible value passed to RiPixelFilter.
 //
-extern "C" _qShare
+extern "C" 
 RtFloat	RiCatmullRomFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 {
 	/*
@@ -227,7 +229,7 @@ RtFloat	RiCatmullRomFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth
 // RiSincFilter
 // Sinc filter used as a possible value passed to RiPixelFilter.
 //
-extern "C" _qShare
+extern "C" 
 RtFloat	RiSincFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 {
 	//RtFloat d;
@@ -280,7 +282,7 @@ RtFloat	RiSincFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 // RiDiskFilter -- this is in Pixar's ri.h
 // Cylindrical filter used as a possible value passed to RiPixelFilter
 //
-extern "C" _qShare
+extern "C" 
 RtFloat	RiDiskFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 {
 	double d, xx, yy;
@@ -306,7 +308,7 @@ RtFloat	RiDiskFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 // RiBesselFilter -- this is in Pixar's ri.h
 // Besselj0 filter used as a possible value passed to RiPixelFilter
 //
-extern "C" _qShare
+extern "C" 
 RtFloat	RiBesselFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 {
 
@@ -339,8 +341,8 @@ RtFloat	RiBesselFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 	}
 }
 
-END_NAMESPACE( Aqsis )
 //---------------------------------------------------------------------
+
 
 
 

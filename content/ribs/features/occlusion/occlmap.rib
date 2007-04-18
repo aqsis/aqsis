@@ -1,711 +1,118 @@
-##RenderMan RIB-Structure 1.1
-##CreationDate Sat Jul 05 22:47:50 2003
-##For Paul Gregory
-version 3.2
+version 3.03
 Hider "hidden" "string depthfilter" ["midpoint"]
-ScreenWindow -9.0 9.0 -9.0 9.0
+PixelSamples 1 1
+PixelFilter "box" 1 1
+ScreenWindow -15 15 -15 15
 Format 256 256 1
-Clipping 1 18.0
+Clipping 1 30
 FrameBegin 1
-Display "occlusion.sm" "shadow" "z" "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate 8.4837598236210159 1.0 0.0 0.0
-Rotate 161.9048215244155 0.0 1.0 0.0
-Translate -2.4519190486329712 1.3424511434629622 -8.5548768492811025
+Display "occlmap.sm" "shadow" "z" "string compression" ["lzw"]
+Transform [0.0 0.0 1.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 15.0 1.0]
 WorldBegin
 ReadArchive "world.rib"
 WorldEnd
 FrameEnd
 FrameBegin 2
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate -35.896699358794642 1.0 0.0 0.0
-Rotate -65.6906365198938 0.0 1.0 0.0
-Translate 4.9839137437938259 -6.5141233837125689 3.7049696808735297
+Display "occlmap.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
+Transform [1.0 0.0 0.0 0.0 0.0 -0.831469612303 -0.55557023302 0.0 0.0 0.55557023302 -0.831469612303 0.0 0.0 8.881784197e-016 15.0 1.0]
 WorldBegin
 ReadArchive "world.rib"
 WorldEnd
 FrameEnd
 FrameBegin 3
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate -34.396580244393164 1.0 0.0 0.0
-Rotate -43.706507784782765 0.0 1.0 0.0
-Translate 0.84034923622469937 -6.1616396261326694 6.505998023274234
+Display "occlmap.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
+Transform [0.821397356799 0.274420083528 0.5 0.0 0.570356364253 -0.395205428378 -0.720073806729 0.0 0.0 0.876644903674 -0.481137935381 0.0 0.0 0.0 15.0 1.0]
 WorldBegin
 ReadArchive "world.rib"
 WorldEnd
 FrameEnd
 FrameBegin 4
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate 32.9814744267739 1.0 0.0 0.0
-Rotate 79.257596297323019 0.0 1.0 0.0
-Translate -6.6388276193249043 5.8405319860949705 1.6775440263344397
+Display "occlmap.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
+Transform [0.861773760164 -0.0857087293899 -0.5 0.0 -0.507292801342 -0.145599412824 -0.849384968487 0.0 0.0 0.985624078791 -0.168953174898 0.0 1.49880108324e-015 0.0 15.0 1.0]
 WorldBegin
 ReadArchive "world.rib"
 WorldEnd
 FrameEnd
 FrameBegin 5
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate 26.995748814231185 1.0 0.0 0.0
-Rotate 144.44070165400302 0.0 1.0 0.0
-Translate -2.5243978216115837 4.5848879374287659 -7.3216267481662083
+Display "occlmap.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
+Transform [0.65419799021 -0.0975960532258 0.75 0.0 0.756323336679 0.0844177863836 -0.648728485375 0.0 1.38777878078e-017 0.991639373833 0.129040118813 0.0 3.05311331772e-016 0.0 15.0 1.0]
 WorldBegin
 ReadArchive "world.rib"
 WorldEnd
 FrameEnd
 FrameBegin 6
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate -10.247662392610795 1.0 0.0 0.0
-Rotate 168.70747202847642 0.0 1.0 0.0
-Translate -0.67714063571570349 -1.6270859225564667 -8.8257618345432984
+Display "occlmap.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
+Transform [0.955013206752 0.159529855921 -0.25 0.0 -0.296563273063 0.513728883896 -0.805066990331 0.0 2.77555756156e-017 0.842990426352 0.537928565033 0.0 -2.22044604925e-016 7.77156117238e-016 15.0 1.0]
 WorldBegin
 ReadArchive "world.rib"
 WorldEnd
 FrameEnd
 FrameBegin 7
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate 38.407824602211811 1.0 0.0 0.0
-Rotate 126.86596732205392 0.0 1.0 0.0
-Translate -0.96573032572214423 7.1353135138564792 -5.3995060882415622
+Display "occlmap.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
+Transform [0.906849568257 -0.339299072431 0.25 0.0 0.421454458456 0.7300746526 -0.537928565033 0.0 -2.77555756156e-017 0.593183901568 0.805066990331 0.0 4.4408920985e-016 2.22044604925e-016 15.0 1.0]
 WorldBegin
 ReadArchive "world.rib"
 WorldEnd
 FrameEnd
 FrameBegin 8
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate -12.932922255339715 1.0 0.0 0.0
-Rotate -157.61167901934905 0.0 1.0 0.0
-Translate 2.7348542613862654 -2.0667185671449357 -8.3216132169907873
+Display "occlmap.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
+Transform [0.169562072786 0.639334578662 -0.75 0.0 -0.985519509433 0.109999746655 -0.129040118813 0.0 1.38777878078e-017 0.761019942093 0.648728485375 0.0 2.22044604925e-016 0.0 15.0 1.0]
 WorldBegin
 ReadArchive "world.rib"
 WorldEnd
 FrameEnd
 FrameBegin 9
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate 33.81121735531196 1.0 0.0 0.0
-Rotate -130.68045122285105 0.0 1.0 0.0
-Translate 3.2019409031454753 6.0275268683921395 -5.8665572786409221
+Display "occlmap.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
+Transform [-0.107316855224 -0.472078481383 0.875 0.0 0.994224870231 -0.0509562570378 0.0944476960218 0.0 -6.93889390391e-018 0.880082591172 0.474820632151 0.0 2.77555756156e-016 -8.881784197e-016 15.0 1.0]
 WorldBegin
 ReadArchive "world.rib"
 WorldEnd
 FrameEnd
 FrameBegin 10
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate 1.9865204631346915 1.0 0.0 0.0
-Rotate -99.189541927552895 0.0 1.0 0.0
-Translate 8.8790030108965876 0.31216700006645975 -1.4373090469898449
+Display "occlmap.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
+Transform [-0.975238132214 0.18244337608 -0.125 0.0 -0.221157377167 -0.804520923526 0.55121275215 0.0 1.38777878078e-017 0.565208367005 0.824948181322 0.0 -2.22044604925e-016 1.11022302463e-016 15.0 1.0]
 WorldBegin
 ReadArchive "world.rib"
 WorldEnd
 FrameEnd
 FrameBegin 11
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate 4.1678296236358667 1.0 0.0 0.0
-Rotate -129.08629477922415 0.0 1.0 0.0
-Translate 6.9549213569032551 0.65583833308288719 -5.6744114232358971
+Display "occlmap.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
+Transform [-0.899226074656 -0.225316370154 0.375 0.0 0.437484247327 -0.463126058429 0.770792960103 0.0 0.0 0.857173720633 0.515027390199 0.0 6.66133814775e-016 8.881784197e-016 15.0 1.0]
 WorldBegin
 ReadArchive "world.rib"
 WorldEnd
 FrameEnd
 FrameBegin 12
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate 22.457426446208711 1.0 0.0 0.0
-Rotate 122.39164637501612 0.0 1.0 0.0
-Translate -6.6268906188820402 3.7200896493927647 -4.8213331896742035
+Display "occlmap.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
+Transform [-0.774661307012 0.0963060715594 -0.625 0.0 -0.632376358998 -0.117974978359 0.765625264122 0.0 0.0 0.988335492159 0.152292333812 0.0 1.19348975147e-015 -1.11022302463e-016 15.0 1.0]
 WorldBegin
 ReadArchive "world.rib"
 WorldEnd
 FrameEnd
 FrameBegin 13
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate 11.434647841794723 1.0 0.0 0.0
-Rotate 89.490217737702565 0.0 1.0 0.0
-Translate -8.813614159158373 1.8203827595222797 0.08007535399287137
+Display "occlmap.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
+Transform [-0.774661307012 0.0963060715594 0.625 0.0 0.632376358998 0.117974978359 0.765625264122 0.0 -1.38777878078e-017 0.988335492159 -0.152292333812 0.0 4.16333634234e-016 -1.11022302463e-016 15.0 1.0]
 WorldBegin
 ReadArchive "world.rib"
 WorldEnd
 FrameEnd
 FrameBegin 14
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate -40.289200401694906 1.0 0.0 0.0
-Rotate -107.40027147078872 0.0 1.0 0.0
-Translate 3.9427061428975372 -7.6296390615242649 -2.6914078214981001
+Display "occlmap.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
+Transform [-0.899226074656 -0.225316370154 -0.375 0.0 -0.437484247327 0.463126058429 0.770792960103 0.0 0.0 0.857173720633 -0.515027390199 0.0 4.4408920985e-016 -4.4408920985e-016 15.0 1.0]
 WorldBegin
 ReadArchive "world.rib"
 WorldEnd
 FrameEnd
 FrameBegin 15
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate 31.342186301282315 1.0 0.0 0.0
-Rotate -43.507050560463995 0.0 1.0 0.0
-Translate 2.8891461348330973 5.4811661425975293 6.5276069373715719
+Display "occlmap.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
+Transform [-0.975238132214 0.18244337608 0.125 0.0 0.221157377167 0.804520923526 0.55121275215 0.0 0.0 0.565208367005 -0.824948181322 0.0 0.0 5.55111512313e-017 15.0 1.0]
 WorldBegin
 ReadArchive "world.rib"
 WorldEnd
 FrameEnd
 FrameBegin 16
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate -34.376949136298343 1.0 0.0 0.0
-Rotate 78.304850024792998 0.0 1.0 0.0
-Translate -6.3056927035419283 -6.1571116933807533 1.8243396404540699
-WorldBegin
-ReadArchive "world.rib"
-WorldEnd
-FrameEnd
-FrameBegin 17
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate 23.039028575287908 1.0 0.0 0.0
-Rotate -63.879987798883455 0.0 1.0 0.0
-Translate 7.116919080797981 3.8275106374304824 3.9622752450744914
-WorldBegin
-ReadArchive "world.rib"
-WorldEnd
-FrameEnd
-FrameBegin 18
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate -40.833073996871072 1.0 0.0 0.0
-Rotate 113.55607802015302 0.0 1.0 0.0
-Translate -2.7515214715535059 -7.7776622269754316 -3.5968180207872087
-WorldBegin
-ReadArchive "world.rib"
-WorldEnd
-FrameEnd
-FrameBegin 19
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate 18.919852841320569 1.0 0.0 0.0
-Rotate 35.093969472047014 0.0 1.0 0.0
-Translate -4.154112490938207 3.0848731752207943 7.3638921030549014
-WorldBegin
-ReadArchive "world.rib"
-WorldEnd
-FrameEnd
-FrameBegin 20
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate 7.8247773388889446 1.0 0.0 0.0
-Rotate 140.82637849106214 0.0 1.0 0.0
-Translate -5.5488840200878347 1.2368119272476004 -6.9771184874726018
-WorldBegin
-ReadArchive "world.rib"
-WorldEnd
-FrameEnd
-FrameBegin 21
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate 18.385432533718767 1.0 0.0 0.0
-Rotate 68.826060081473898 0.0 1.0 0.0
-Translate -7.8411756165287478 2.9913602639335237 3.2508043192592444
-WorldBegin
-ReadArchive "world.rib"
-WorldEnd
-FrameEnd
-FrameBegin 22
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate 44.562019587556051 1.0 0.0 0.0
-Rotate 87.243071665799775 0.0 1.0 0.0
-Translate -1.5006460070216034 8.863445584872073 0.43289020042253801
-WorldBegin
-ReadArchive "world.rib"
-WorldEnd
-FrameEnd
-FrameBegin 23
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate 31.096467078997541 1.0 0.0 0.0
-Rotate 101.54670248798276 0.0 1.0 0.0
-Translate -6.9488976704184031 5.4283902344509052 -1.80149954997822
-WorldBegin
-ReadArchive "world.rib"
-WorldEnd
-FrameEnd
-FrameBegin 24
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate -37.621909198393254 1.0 0.0 0.0
-Rotate 62.103850083129522 0.0 1.0 0.0
-Translate -3.8929417248643308 -6.9364171632945055 4.2108338442122983
-WorldBegin
-ReadArchive "world.rib"
-WorldEnd
-FrameEnd
-FrameBegin 25
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate 23.858701834612827 1.0 0.0 0.0
-Rotate -127.07567886888438 0.0 1.0 0.0
-Translate 5.9762956275068566 3.9804925226732908 -5.4258243474687271
-WorldBegin
-ReadArchive "world.rib"
-WorldEnd
-FrameEnd
-FrameBegin 26
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate 16.332514458493879 1.0 0.0 0.0
-Rotate -22.047628560350844 0.0 1.0 0.0
-Translate 2.1114087070731782 2.6373291857085213 8.3418491977442031
-WorldBegin
-ReadArchive "world.rib"
-WorldEnd
-FrameEnd
-FrameBegin 27
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate -22.943039172739383 1.0 0.0 0.0
-Rotate -50.340881190908213 0.0 1.0 0.0
-Translate 5.7873030761852826 -3.8097182808894199 5.7439681166100938
-WorldBegin
-ReadArchive "world.rib"
-WorldEnd
-FrameEnd
-FrameBegin 28
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate -35.848891100819017 1.0 0.0 0.0
-Rotate -92.106705672638881 0.0 1.0 0.0
-Translate 6.2133412848758089 -6.5026864453387754 -0.3308459932735735
-WorldBegin
-ReadArchive "world.rib"
-WorldEnd
-FrameEnd
-FrameBegin 29
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate 35.733098379929913 1.0 0.0 0.0
-Rotate 50.502311453557375 0.0 1.0 0.0
-Translate -2.5109342553556875 6.4750429462482479 5.7244238146316695
-WorldBegin
-ReadArchive "world.rib"
-WorldEnd
-FrameEnd
-FrameBegin 30
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate -42.635820162841853 1.0 0.0 0.0
-Rotate 83.136282718057018 0.0 1.0 0.0
-Translate -3.3436706991958673 -8.2863145159001679 1.0755733349805581
-WorldBegin
-ReadArchive "world.rib"
-WorldEnd
-FrameEnd
-FrameBegin 31
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate -21.667181090627487 1.0 0.0 0.0
-Rotate -135.47177453492603 0.0 1.0 0.0
-Translate 5.2008086989490856 -3.5755647786915046 -6.4161456802597838
-WorldBegin
-ReadArchive "world.rib"
-WorldEnd
-FrameEnd
-FrameBegin 32
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate -3.0763223192868345 1.0 0.0 0.0
-Rotate -41.759928947894146 0.0 1.0 0.0
-Translate 5.974550878653206 -0.48369246965634533 6.7134777420634943
-WorldBegin
-ReadArchive "world.rib"
-WorldEnd
-FrameEnd
-FrameBegin 33
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate -5.9629424307045076 1.0 0.0 0.0
-Rotate 49.940128968907025 0.0 1.0 0.0
-Translate -6.823905116650228 -0.94005322335746233 5.7922896074186481
-WorldBegin
-ReadArchive "world.rib"
-WorldEnd
-FrameEnd
-FrameBegin 34
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate 24.563926809818927 1.0 0.0 0.0
-Rotate -151.72358377246883 0.0 1.0 0.0
-Translate 1.1204578148177906 4.1136695779424484 -7.926051784383227
-WorldBegin
-ReadArchive "world.rib"
-WorldEnd
-FrameEnd
-FrameBegin 35
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate -37.926013292765823 1.0 0.0 0.0
-Rotate 99.078993632549043 0.0 1.0 0.0
-Translate -5.4591882454668141 -7.0128736527729938 -1.4201643675291109
-WorldBegin
-ReadArchive "world.rib"
-WorldEnd
-FrameEnd
-FrameBegin 36
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate -30.200644028598472 1.0 0.0 0.0
-Rotate 40.068291102355225 0.0 1.0 0.0
-Translate -2.4744641843187822 -5.238260517000362 6.8874998189879229
-WorldBegin
-ReadArchive "world.rib"
-WorldEnd
-FrameEnd
-FrameBegin 37
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate 17.930439510697671 1.0 0.0 0.0
-Rotate -41.624621457921279 0.0 1.0 0.0
-Translate 5.2209466391340253 2.9122019423206464 6.727614438897267
-WorldBegin
-ReadArchive "world.rib"
-WorldEnd
-FrameEnd
-FrameBegin 38
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate -41.606433976242698 1.0 0.0 0.0
-Rotate -65.717330523306842 0.0 1.0 0.0
-Translate 1.8502279179442831 -7.9923813944382394 3.7011479702245142
-WorldBegin
-ReadArchive "world.rib"
-WorldEnd
-FrameEnd
-FrameBegin 39
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate -31.76740210834075 1.0 0.0 0.0
-Rotate 120.77786241944854 0.0 1.0 0.0
-Translate -5.3600656441813994 -5.5731499818479433 -4.6053985245464384
-WorldBegin
-ReadArchive "world.rib"
-WorldEnd
-FrameEnd
-FrameBegin 40
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate 6.4763200799749772 1.0 0.0 0.0
-Rotate -150.88516744657815 0.0 1.0 0.0
-Translate 4.2582085739465656 1.0216527330204466 -7.8628166348885298
-WorldBegin
-ReadArchive "world.rib"
-WorldEnd
-FrameEnd
-FrameBegin 41
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate -18.347185811068588 1.0 0.0 0.0
-Rotate 19.530979388214703 0.0 1.0 0.0
-Translate -0.38051638249171915 -2.9846902697543851 8.4821477985407032
-WorldBegin
-ReadArchive "world.rib"
-WorldEnd
-FrameEnd
-FrameBegin 42
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate 34.869656894512438 1.0 0.0 0.0
-Rotate 122.54037517186613 0.0 1.0 0.0
-Translate -4.2701038109931133 6.2714037400458738 -4.8410441614057493
-WorldBegin
-ReadArchive "world.rib"
-WorldEnd
-FrameEnd
-FrameBegin 43
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate 29.452947104564011 1.0 0.0 0.0
-Rotate 56.997052998220731 0.0 1.0 0.0
-Translate -5.5803444794276542 5.0822026142071905 4.9021395409623878
-WorldBegin
-ReadArchive "world.rib"
-WorldEnd
-FrameEnd
-FrameBegin 44
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate -26.470512579103914 1.0 0.0 0.0
-Rotate 95.710613091578722 0.0 1.0 0.0
-Translate -7.7533603129342739 -4.4814526744978105 -0.89553659001301678
-WorldBegin
-ReadArchive "world.rib"
-WorldEnd
-FrameEnd
-FrameBegin 45
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate -11.04936143020751 1.0 0.0 0.0
-Rotate 150.74192771100445 0.0 1.0 0.0
-Translate -4.0323486619624971 -1.7574707698695355 -7.8518444178055038
-WorldBegin
-ReadArchive "world.rib"
-WorldEnd
-FrameEnd
-FrameBegin 46
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate 40.389558792269128 1.0 0.0 0.0
-Rotate 72.492059688651153 0.0 1.0 0.0
-Translate -3.8785369278624682 7.6567727680801712 2.7075417036849281
-WorldBegin
-ReadArchive "world.rib"
-WorldEnd
-FrameEnd
-FrameBegin 47
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate 40.094184146363695 1.0 0.0 0.0
-Rotate -57.684004027485216 0.0 1.0 0.0
-Translate 0.66208292926555012 7.577142506976994 4.8112947970102118
-WorldBegin
-ReadArchive "world.rib"
-WorldEnd
-FrameEnd
-FrameBegin 48
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate -21.668422106303726 1.0 0.0 0.0
-Rotate -93.798252680152018 0.0 1.0 0.0
-Translate 8.2376136350172633 -3.5757904870733745 -0.59619123839017318
-WorldBegin
-ReadArchive "world.rib"
-WorldEnd
-FrameEnd
-FrameBegin 49
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate 35.926745876009207 1.0 0.0 0.0
-Rotate -64.902552942366299 0.0 1.0 0.0
-Translate 4.8887240364950229 6.521318337719177 3.8174316540212461
-WorldBegin
-ReadArchive "world.rib"
-WorldEnd
-FrameEnd
-FrameBegin 50
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate -34.572194942966348 1.0 0.0 0.0
-Rotate -129.93322360877286 0.0 1.0 0.0
-Translate 3.0262052110426505 -6.2022401383285519 -5.7770493582074005
-WorldBegin
-ReadArchive "world.rib"
-WorldEnd
-FrameEnd
-FrameBegin 51
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate 25.248321573326201 1.0 0.0 0.0
-Rotate 28.860807130293058 0.0 1.0 0.0
-Translate -0.92580273289132853 4.2443532823904793 7.8821541797932442
-WorldBegin
-ReadArchive "world.rib"
-WorldEnd
-FrameEnd
-FrameBegin 52
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate -15.246913095907763 1.0 0.0 0.0
-Rotate 128.55867991280647 0.0 1.0 0.0
-Translate -6.5963376665629783 -2.4531607037594791 -5.6098424175918504
-WorldBegin
-ReadArchive "world.rib"
-WorldEnd
-FrameEnd
-FrameBegin 53
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate -44.837406116475158 1.0 0.0 0.0
-Rotate 95.239749051351183 0.0 1.0 0.0
-Translate -0.48858475521440381 -8.949064034281843 -0.82191109452012612
-WorldBegin
-ReadArchive "world.rib"
-WorldEnd
-FrameEnd
-FrameBegin 54
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate -13.345910303965752 1.0 0.0 0.0
-Rotate 28.679908848123478 0.0 1.0 0.0
-Translate -3.7546102117198608 -2.135125849225286 7.8958305304773946
-WorldBegin
-ReadArchive "world.rib"
-WorldEnd
-FrameEnd
-FrameBegin 55
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate -30.063165233250427 1.0 0.0 0.0
-Rotate -113.52979138333525 0.0 1.0 0.0
-Translate 6.399403941887936 -5.2093901493295531 -3.5930326272686934
-WorldBegin
-ReadArchive "world.rib"
-WorldEnd
-FrameEnd
-FrameBegin 56
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate 3.9277775918523248 1.0 0.0 0.0
-Rotate 5.8226929566756116 0.0 1.0 0.0
-Translate -0.67217050121943867 0.61794216417857217 8.953565451763934
-WorldBegin
-ReadArchive "world.rib"
-WorldEnd
-FrameEnd
-FrameBegin 57
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate 40.59867734340812 1.0 0.0 0.0
-Rotate 94.335167308527176 0.0 1.0 0.0
-Translate -4.586716377934847 7.7135725665810613 -0.68031693237217261
-WorldBegin
-ReadArchive "world.rib"
-WorldEnd
-FrameEnd
-FrameBegin 58
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate -27.471336131110917 1.0 0.0 0.0
-Rotate -148.43807380646265 0.0 1.0 0.0
-Translate 0.54296693925747774 -4.6793822990178233 -7.668674474934507
-WorldBegin
-ReadArchive "world.rib"
-WorldEnd
-FrameEnd
-FrameBegin 59
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate -13.013018551085896 1.0 0.0 0.0
-Rotate -114.60813781222123 0.0 1.0 0.0
-Translate 7.9138207295171084 -2.0799677784277235 -3.7476893550250057
-WorldBegin
-ReadArchive "world.rib"
-WorldEnd
-FrameEnd
-FrameBegin 60
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate -25.239788449653489 1.0 0.0 0.0
-Rotate 53.302305113137649 0.0 1.0 0.0
-Translate -5.837197268703 -4.2427149147898948 5.378336006430394
-WorldBegin
-ReadArchive "world.rib"
-WorldEnd
-FrameEnd
-FrameBegin 61
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate -41.784766870040158 1.0 0.0 0.0
-Rotate -116.24539283098088 0.0 1.0 0.0
-Translate 0.69007464262692864 -8.0426240641830375 -3.9799491391005541
-WorldBegin
-ReadArchive "world.rib"
-WorldEnd
-FrameEnd
-FrameBegin 62
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate 9.9085219627987815 1.0 0.0 0.0
-Rotate -78.197557605207081 0.0 1.0 0.0
-Translate 8.6683165919885479 1.5721308872277744 1.8408400078443652
-WorldBegin
-ReadArchive "world.rib"
-WorldEnd
-FrameEnd
-FrameBegin 63
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate -22.102882936733209 1.0 0.0 0.0
-Rotate -31.347631050500585 0.0 1.0 0.0
-Translate 2.9261471468933973 -3.6550485607814172 7.6862398409792885
-WorldBegin
-ReadArchive "world.rib"
-WorldEnd
-FrameEnd
-FrameBegin 64
-Display "occlusion.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
-Identity
-Rotate 0 0.0 0.0 1.0
-Rotate -28.705773655774848 1.0 0.0 0.0
-Rotate 140.71522909842045 0.0 1.0 0.0
-Translate -2.8606498714177779 -4.9285349023363692 -6.9660768033097149
+Display "occlmap.sm" "shadow" "z" "float append" [1.0] "string compression" ["lzw"]
+Transform [-0.107316855224 -0.472078481383 -0.875 0.0 -0.994224870231 0.0509562570378 0.0944476960218 0.0 0.0 0.880082591172 -0.474820632151 0.0 -1.11022302463e-016 0.0 15.0 1.0]
 WorldBegin
 ReadArchive "world.rib"
 WorldEnd

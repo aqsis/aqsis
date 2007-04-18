@@ -114,12 +114,12 @@ class CqCurve : public CqSurface
 				// to convert to a patch immediatly.
 				// we really need a native dice for curves but until that time
 				// i reckon this is best.
-				m_splitDecision = Split_Patch;
+				//m_splitDecision = Split_Patch;
 
 
-				/*     const CqMatrix & matCtoR = QGetRenderContext() ->matSpaceToSpace(
+				     const CqMatrix & matCtoR = QGetRenderContext() ->matSpaceToSpace(
 				                                    "camera", "raster",
-								CqMatrix(), CqMatrix(),
+								NULL, NULL,
 								QGetRenderContextI()->Time()
 				                                );
 				     CqVector2D hull[ 2 ];     // control hull
@@ -128,22 +128,12 @@ class CqCurve : public CqSurface
 				     CqVector2D lengthVector = hull[ 1 ] - hull[ 0 ];
 				     TqFloat lengthraster = lengthVector.Magnitude();
 
-				     // find the maximum width of the line in raster space
-				     CqVector3D pp0 = hull[ 0 ] -
-				                      matCtoR * ( P()->pValue( 0 )[0] + CqVector4D( width()->pValue( 0 )[0], 0, 0, 1 ) );
-				     CqVector3D pp1 = hull[ 1 ] -
-				                      matCtoR * ( P()->pValue( 1 )[0] + CqVector4D( width()->pValue( 1 )[0], 0, 0, 1 ) );
-				     TqFloat width0 = pp0.Magnitude();
-				     TqFloat width1 = pp1.Magnitude();
-				     TqFloat maxwidthraster = ( width0 > width1 ) ? width0 : width1;
-
 				     // find the approximate "length" of a diced patch in raster space
 				     TqFloat gridlength = GetGridLength();
 
 				     // decide whether to split into more curve segments or a patch
 				     if (
-				         ( maxwidthraster > ( 0.75 * lengthraster ) ) ||
-				         ( lengthraster <= gridlength ) ||
+					 ( lengthraster < gridlength ) ||
 				         ( !m_fDiceable )
 				     )
 				     {
@@ -155,7 +145,7 @@ class CqCurve : public CqSurface
 				         // split into smaller curves
 				         m_splitDecision = Split_Curve;
 				     }
-				*/
+				
 			}
 
 			return TqFalse;

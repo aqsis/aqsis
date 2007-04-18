@@ -5,29 +5,33 @@ rib2_sources = Split("""
 	scanner.cpp
 	parser.cpp""")
 
-rib2_headers = Split("""
-	bdec.h
-	librib.h
-	libribtypes.h
-	parserstate.h""")
-
 rib2_install_headers = Split("""
 	librib.h
-	parserstate.h""")
+	parserstate.h
+	rib2_common.h""")
 
-env.CXXFile(target='parser.cpp', source='parser.yy')
-env.CXXFile(target='scanner.cpp', source='scanner.ll')
+rib2_headers = rib2_install_headers + Split("""
+	bdec.h
+	libribtypes.h""")
+
+rib2env = env.Copy()
+
+rib2env.CXXFile(target='parser.cpp', source='parser.yy')
+rib2env.CXXFile(target='scanner.cpp', source='scanner.ll')
 
 # Set any platform specific options for this target
-env.UseTargetOptions('rib2')
+rib2env.UseTargetOptions('rib2')
+rib2env.AppendUnique(CPPDEFINES = ['RIB_EXPORTS'])
+rib2env.AppendUnique(CPPPATH=['$zlib_include_path'])
 
-rib2 = env.Library('rib2', rib2_sources)
-env.Install('$LIBDIR', rib2)
-env.Install('$INCLUDEDIR', rib2_install_headers)
+rib2_objs = [rib2env.SharedObject(file) for file in rib2_sources]
 
-env.Distribute('rib/rib2', rib2_sources)
-env.Distribute('rib/rib2', rib2_headers)
-env.Distribute('rib/rib2', 'SConscript')
-env.Distribute('rib/rib2', 'scanner.ll')
-env.Distribute('rib/rib2', 'parser.yy')
+Export('rib2_objs')
+
+env.Distribute(rib2_sources)
+env.Distribute(rib2_headers)
+env.Distribute('SConscript')
+env.Distribute('scanner.ll')
+env.Distribute('parser.yy')
+
 

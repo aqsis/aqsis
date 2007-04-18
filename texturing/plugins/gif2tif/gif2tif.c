@@ -97,7 +97,6 @@ Gif89 = { -1, -1, -1, 0 };
 
 static char tiffname[ 1024 ];
 static char *gif_open( FILE * infile, char *filename );
-static char *ReadGIF( FILE* fd, char* );
 static int ReadColorMap( FILE* fd, int number,
                          unsigned char buffer[ 3 ][ MAXCOLORMAPSIZE ], int *flag );
 static int DoExtension( FILE* fd, int label );

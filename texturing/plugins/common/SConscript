@@ -1,4 +1,5 @@
 Import('env')
+commonenv = env.Copy()
 
 common_sources = Split("""
 	pixelsave.c""")
@@ -6,13 +7,18 @@ common_sources = Split("""
 common_headers = Split("""
 	pixelsave.h""")
 
+commonenv.AppendUnique(CPPPATH=['$tiff_include_path', '$zlib_include_path'])
+
 # Set any platform specific options for this target
-env.UseTargetOptions('common')
+commonenv.UseTargetOptions('common')
 
-common = env.Library('common', common_sources)
-env.Install('$LIBDIR', common)
+#common = commonenv.Library('common', common_sources)
 
-env.Distribute('texturing/plugins/common', common_sources)
-env.Distribute('texturing/plugins/common', common_headers)
-env.Distribute('texturing/plugins/common', 'SConscript')
+common_objs = [commonenv.SharedObject(file) for file in common_sources]
+
+Export('common_objs')
+
+env.Distribute(common_sources)
+env.Distribute(common_headers)
+env.Distribute('SConscript')
 

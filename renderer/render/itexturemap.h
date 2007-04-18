@@ -96,6 +96,9 @@ struct IqTextureMap
 	/** Get the image type.
 	 */
 	virtual	EqMapType	Type() const = 0;
+	/** Get the image name.
+	 */
+	virtual	const CqString&	getName() const = 0;
 	/** Open this image ready for reading.
 	 */
 	virtual	void	Open() = 0;

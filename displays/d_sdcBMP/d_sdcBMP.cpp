@@ -507,7 +507,7 @@ static int DWORDALIGN(int bits)
 //******************************************************************************
 // ExitApplication
 //******************************************************************************
-
+#if 0
 static bool ExitApplication()
 {
 #if SHOW_CALLSTACK
@@ -516,6 +516,7 @@ static bool ExitApplication()
 
 	return true;
 }
+#endif
 
 //******************************************************************************
 // Save an header for bitmap; must be save field by field since the sizeof is 14

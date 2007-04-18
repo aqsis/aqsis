@@ -29,6 +29,7 @@
 #include "version.h"
 #include "bdec.h"
 #include "parserstate.h"
+#include "exception.h"
 
 #ifdef AQSIS_SYSTEM_WIN32
 #include <io.h>
@@ -113,10 +114,10 @@ ArgParse::apflag g_cl_version = 0;
 ArgParse::apflag g_cl_fb = 0;
 ArgParse::apflag g_cl_progress = 0;
 ArgParse::apflag g_cl_Progress = 0;
-ArgParse::apflag g_cl_rinfo = 0;
 ArgParse::apflag g_cl_no_color = 0;
 ArgParse::apflag g_cl_beep = 0;
 ArgParse::apint g_cl_verbose = 1;
+ArgParse::apflag g_cl_echoapi = 0;
 ArgParse::apfloatvec g_cl_cropWindow;
 ArgParse::apstring g_cl_rc_path = "";
 ArgParse::apstring g_cl_shader_path = "";
@@ -133,6 +134,10 @@ ArgParse::apstring g_cl_framesList = "";
 ArgParse::apintvec g_cl_frames;
 ArgParse::apintvec g_cl_res;
 ArgParse::apstringvec g_cl_options;
+
+#if ENABLE_MPDUMP
+ArgParse::apflag g_cl_mpdump = 0;
+#endif
 
 #ifdef	AQSIS_SYSTEM_POSIX
 ArgParse::apflag g_cl_syslog = 0;
@@ -326,6 +331,15 @@ RtVoid PreWorld()
 		RiFormat(g_cl_res[0], g_cl_res[1], 1.0f);
 	}
 
+#if ENABLE_MPDUMP
+	// Pass the statistics option onto Aqsis.
+	if ( g_cl_mpdump )
+	{
+		RtInt enabled = 1;
+		RiOption( "mpdump", "enabled", &enabled, RI_NULL );
+	}
+#endif
+
 	for( ArgParse::apstringvec::iterator i = g_cl_options.begin(); i != g_cl_options.end(); ++i )
 	{
 		// This is not pretty, gzopen attempts to read a gzip header
@@ -357,7 +371,9 @@ RtVoid PreWorld()
 			writePipe = fdopen(hpipe[1],"w");
 #endif
 
-			fwrite(i->c_str(),1,i->length(),writePipe);
+			size_t len_written = fwrite(i->c_str(),1,i->length(),writePipe);
+			if(len_written != i->length())
+				throw(Aqsis::XqException("Error forwarding pipe data"));
 			fflush(writePipe);
 			fclose(writePipe);
 
@@ -515,6 +531,7 @@ int main( int argc, const char** argv )
 		           "\a2 = information\n"
 		           "\a3 = debug", &g_cl_verbose );
 		ap.alias( "verbose", "v" );
+		ap.argFlag( "echoapi", "\aEcho all RI API calls to the log output (experimental)", &g_cl_echoapi);
 
       		ap.argInt( "priority", "=integer\aControl the priority class of aqsis.\n"
          		"\a0 = idle\n"
@@ -523,7 +540,6 @@ int main( int argc, const char** argv )
          		"\a3 = RT", &g_cl_priority);
       		ap.alias( "priority", "z");
 
-		ap.argFlag( "renderinfo", "\aPrint out infos about base rendering settings", &g_cl_rinfo );
 		ap.argString( "type", "=string\aSpecify a display device type to use", &g_cl_type );
 		ap.argString( "addtype", "=string\aSpecify a display device type to add", &g_cl_addtype );
 		ap.argString( "mode", "=string\aSpecify a display device mode to use", &g_cl_mode );
@@ -538,9 +554,11 @@ int main( int argc, const char** argv )
 		ap.argInts( "res", " x y\aSpecify the resolution of the render.", &g_cl_res, ArgParse::SEP_ARGV, 2);
 		ap.argStrings( "option", "=string\aA valid RIB Option string, can be specified multiple times.", &g_cl_options);
 #ifdef	AQSIS_SYSTEM_POSIX
-
 		ap.argFlag( "syslog", "\aLog messages to syslog", &g_cl_syslog );
 #endif	// AQSIS_SYSTEM_POSIX
+#if	ENABLE_MPDUMP
+		ap.argFlag( "mpdump", "\aOutput MP list to a custom 'dump' file", &g_cl_mpdump );
+#endif	// ENABLE_MPDUMP
 
 		ap.argString( "rc", "=string\aOverride the default RIB configuration file", &g_cl_rc_path );
 		ap.argString( "shaders", "=string\aOverride the default shader searchpath(s)", &g_cl_shader_path );
@@ -583,7 +601,7 @@ int main( int argc, const char** argv )
 
 		if ( g_cl_version )
 		{
-			std::cout << "aqsis version " << VERSION_STR
+			std::cout << "aqsis version " << VERSION_STR_PRINT
 #ifdef _DEBUG
 			<< " (debug build)"
 #endif
@@ -687,9 +705,10 @@ void RenderFile( FILE* file, std::string&  name )
 		if ( !g_cl_nostandard )
 			librib::StandardDeclarations( renderengine );
 
-		if ( g_cl_rinfo )
+		if ( g_cl_echoapi )
 		{
-			RiOption( "statistics", "renderinfo", &g_cl_rinfo, RI_NULL );
+			RtInt echoapi = 1;
+			RiOption( "statistics", "echoapi", &echoapi, RI_NULL );
 		}
 
 		/* Allow any command line arguments to override system/env settings */

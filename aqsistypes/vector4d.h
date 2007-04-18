@@ -36,7 +36,7 @@ START_NAMESPACE( Aqsis )
 
 //-----------------------------------------------------------------------
 
-class CqVector3D;
+class COMMON_SHARE CqVector3D;
 
 //----------------------------------------------------------------------
 /** \class CqVector4D
@@ -228,9 +228,9 @@ class CqVector4D
 			return ( CqVector4D( -v.m_x, -v.m_y, -v.m_z, v.m_h ) );
 		} // Negation
 
-		friend TqFloat	operator*( const CqVector4D& a, const CqVector4D& b );
-		friend CqVector4D	operator%( const CqVector4D& a, const CqVector4D& b );	// X product
-		friend std::ostream &operator<<( std::ostream &Stream, const CqVector4D &Vector );
+		COMMON_SHARE friend TqFloat	operator*( const CqVector4D& a, const CqVector4D& b );
+		COMMON_SHARE friend CqVector4D	operator%( const CqVector4D& a, const CqVector4D& b );	// X product
+		COMMON_SHARE friend std::ostream &operator<<( std::ostream &Stream, const CqVector4D &Vector );
 
 	protected:
 		TqFloat	m_x;	///< X component.

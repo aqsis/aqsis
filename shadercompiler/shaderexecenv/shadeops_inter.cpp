@@ -44,8 +44,6 @@
 
 START_NAMESPACE(    Aqsis )
 
-IqRenderer* QGetRenderContextI();
-
 static TqFloat match(const char *string, const char *pattern);
 
 //----------------------------------------------------------------------
@@ -58,8 +56,8 @@ void CqShaderExecEnv::SO_atmosphere( IqShaderData* name, IqShaderData* pV, IqSha
 
 	boost::shared_ptr<IqShader> pAtmosphere;
 
-	if ( NULL != m_pAttributes && (m_pAttributes ->pshadAtmosphere(QGetRenderContextI()->Time())) )
-		pAtmosphere = m_pAttributes ->pshadAtmosphere(QGetRenderContextI()->Time());
+	if ( NULL != m_pAttributes && (m_pAttributes ->pshadAtmosphere(getRenderContext()->Time())) )
+		pAtmosphere = m_pAttributes ->pshadAtmosphere(getRenderContext()->Time());
 
 	__iGrid = 0;
 	CqString _aq_name;
@@ -82,8 +80,8 @@ void CqShaderExecEnv::SO_displacement( IqShaderData* name, IqShaderData* pV, IqS
 
 	boost::shared_ptr<IqShader> pDisplacement;
 
-	if ( NULL != m_pAttributes && (m_pAttributes ->pshadDisplacement(QGetRenderContextI()->Time())) )
-		pDisplacement = m_pAttributes ->pshadDisplacement(QGetRenderContextI()->Time());
+	if ( NULL != m_pAttributes && (m_pAttributes ->pshadDisplacement(getRenderContext()->Time())) )
+		pDisplacement = m_pAttributes ->pshadDisplacement(getRenderContext()->Time());
 
 	__iGrid = 0;
 	CqString _aq_name;
@@ -132,8 +130,8 @@ void CqShaderExecEnv::SO_surface( IqShaderData* name, IqShaderData* pV, IqShader
 
 	if ( GetCurrentSurface() &&
 	        NULL != GetCurrentSurface()->pAttributes() &&
-	        GetCurrentSurface()->pAttributes() ->pshadSurface(QGetRenderContextI()->Time()) )
-		pSurface = GetCurrentSurface()->pAttributes() ->pshadSurface(QGetRenderContextI()->Time());
+	        GetCurrentSurface()->pAttributes() ->pshadSurface(getRenderContext()->Time()) )
+		pSurface = GetCurrentSurface()->pAttributes() ->pshadSurface(getRenderContext()->Time());
 
 	__iGrid = 0;
 	CqString _aq_name;
@@ -227,7 +225,7 @@ void CqShaderExecEnv::SO_option( IqShaderData* name, IqShaderData* pV, IqShaderD
 {
 	TqUint __iGrid;
 
-	if ( NULL == QGetRenderContextI() )
+	if ( !getRenderContext() )
 		return ;
 
 	__iGrid = 0;
@@ -243,9 +241,9 @@ void CqShaderExecEnv::SO_option( IqShaderData* name, IqShaderData* pV, IqShaderD
 		{
 			if ( pV->ArrayLength() >= 3 )
 			{
-				pV->ArrayEntry( 0 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContextI() ->GetIntegerOption( "System", "Resolution" ) [ 0 ] ) );
-				pV->ArrayEntry( 1 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContextI() ->GetIntegerOption( "System", "Resolution" ) [ 1 ] ) );
-				pV->ArrayEntry( 2 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContextI() ->GetFloatOption( "System", "PixelAspectRatio" ) [ 2 ] ) );
+				pV->ArrayEntry( 0 ) ->SetFloat( static_cast<TqFloat>( getRenderContext() ->GetIntegerOption( "System", "Resolution" ) [ 0 ] ) );
+				pV->ArrayEntry( 1 ) ->SetFloat( static_cast<TqFloat>( getRenderContext() ->GetIntegerOption( "System", "Resolution" ) [ 1 ] ) );
+				pV->ArrayEntry( 2 ) ->SetFloat( static_cast<TqFloat>( getRenderContext() ->GetFloatOption( "System", "PixelAspectRatio" ) [ 2 ] ) );
 				Ret = 1.0f;
 			}
 		}
@@ -257,10 +255,10 @@ void CqShaderExecEnv::SO_option( IqShaderData* name, IqShaderData* pV, IqShaderD
 		{
 			if ( pV->ArrayLength() >= 4 )
 			{
-				pV->ArrayEntry( 0 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContextI() ->GetFloatOption( "System", "CropWindow" ) [ 0 ] ) );
-				pV->ArrayEntry( 1 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContextI() ->GetFloatOption( "System", "CropWindow" ) [ 1 ] ) );
-				pV->ArrayEntry( 2 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContextI() ->GetFloatOption( "System", "CropWindow" ) [ 2 ] ) );
-				pV->ArrayEntry( 3 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContextI() ->GetFloatOption( "System", "CropWindow" ) [ 3 ] ) );
+				pV->ArrayEntry( 0 ) ->SetFloat( static_cast<TqFloat>( getRenderContext() ->GetFloatOption( "System", "CropWindow" ) [ 0 ] ) );
+				pV->ArrayEntry( 1 ) ->SetFloat( static_cast<TqFloat>( getRenderContext() ->GetFloatOption( "System", "CropWindow" ) [ 1 ] ) );
+				pV->ArrayEntry( 2 ) ->SetFloat( static_cast<TqFloat>( getRenderContext() ->GetFloatOption( "System", "CropWindow" ) [ 2 ] ) );
+				pV->ArrayEntry( 3 ) ->SetFloat( static_cast<TqFloat>( getRenderContext() ->GetFloatOption( "System", "CropWindow" ) [ 3 ] ) );
 				Ret = 1.0f;
 			}
 		}
@@ -269,7 +267,7 @@ void CqShaderExecEnv::SO_option( IqShaderData* name, IqShaderData* pV, IqShaderD
 	{
 		if ( pV->Type() == type_float )
 		{
-			pV->SetFloat( static_cast<TqFloat>( QGetRenderContextI() ->GetFloatOption( "System", "FrameAspectRatio" ) [ 0 ] ) );
+			pV->SetFloat( static_cast<TqFloat>( getRenderContext() ->GetFloatOption( "System", "FrameAspectRatio" ) [ 0 ] ) );
 			Ret = 1.0f;
 		}
 	}
@@ -280,9 +278,9 @@ void CqShaderExecEnv::SO_option( IqShaderData* name, IqShaderData* pV, IqShaderD
 		{
 			if ( pV->ArrayLength() >= 3 )
 			{
-				pV->ArrayEntry( 0 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContextI() ->GetFloatOption( "System", "DepthOfField" ) [ 0 ] ) );
-				pV->ArrayEntry( 1 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContextI() ->GetFloatOption( "System", "DepthOfField" ) [ 1 ] ) );
-				pV->ArrayEntry( 2 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContextI() ->GetFloatOption( "System", "DepthOfField" ) [ 2 ] ) );
+				pV->ArrayEntry( 0 ) ->SetFloat( static_cast<TqFloat>( getRenderContext() ->GetFloatOption( "System", "DepthOfField" ) [ 0 ] ) );
+				pV->ArrayEntry( 1 ) ->SetFloat( static_cast<TqFloat>( getRenderContext() ->GetFloatOption( "System", "DepthOfField" ) [ 1 ] ) );
+				pV->ArrayEntry( 2 ) ->SetFloat( static_cast<TqFloat>( getRenderContext() ->GetFloatOption( "System", "DepthOfField" ) [ 2 ] ) );
 				Ret = 1.0f;
 			}
 		}
@@ -294,8 +292,8 @@ void CqShaderExecEnv::SO_option( IqShaderData* name, IqShaderData* pV, IqShaderD
 		{
 			if ( pV->ArrayLength() >= 2 )
 			{
-				pV->ArrayEntry( 0 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContextI() ->GetFloatOption( "System", "Shutter" ) [ 0 ] ) );
-				pV->ArrayEntry( 1 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContextI() ->GetFloatOption( "System", "Shutter" ) [ 1 ] ) );
+				pV->ArrayEntry( 0 ) ->SetFloat( static_cast<TqFloat>( getRenderContext() ->GetFloatOption( "System", "Shutter" ) [ 0 ] ) );
+				pV->ArrayEntry( 1 ) ->SetFloat( static_cast<TqFloat>( getRenderContext() ->GetFloatOption( "System", "Shutter" ) [ 1 ] ) );
 				Ret = 1.0f;
 			}
 		}
@@ -307,8 +305,8 @@ void CqShaderExecEnv::SO_option( IqShaderData* name, IqShaderData* pV, IqShaderD
 		{
 			if ( pV->ArrayLength() >= 2 )
 			{
-				pV->ArrayEntry( 0 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContextI() ->GetFloatOption( "System", "Clipping" ) [ 0 ] ) );
-				pV->ArrayEntry( 1 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContextI() ->GetFloatOption( "System", "Clipping" ) [ 1 ] ) );
+				pV->ArrayEntry( 0 ) ->SetFloat( static_cast<TqFloat>( getRenderContext() ->GetFloatOption( "System", "Clipping" ) [ 0 ] ) );
+				pV->ArrayEntry( 1 ) ->SetFloat( static_cast<TqFloat>( getRenderContext() ->GetFloatOption( "System", "Clipping" ) [ 1 ] ) );
 				Ret = 1.0f;
 			}
 		}
@@ -325,18 +323,18 @@ void CqShaderExecEnv::SO_option( IqShaderData* name, IqShaderData* pV, IqShaderD
 
 			Ret = 1.0f;
 
-			if ( NULL != QGetRenderContextI() ->GetStringOption( strName.c_str(), strParam.c_str() ) )
-				pV->SetString( QGetRenderContextI() ->GetStringOption( strName.c_str(), strParam.c_str() ) [ 0 ] );
-			else if ( NULL != QGetRenderContextI() ->GetIntegerOption( strName.c_str(), strParam.c_str() ) )
-				pV->SetFloat( QGetRenderContextI() ->GetIntegerOption( strName.c_str(), strParam.c_str() ) [ 0 ] );
+			if ( NULL != getRenderContext() ->GetStringOption( strName.c_str(), strParam.c_str() ) )
+				pV->SetString( getRenderContext() ->GetStringOption( strName.c_str(), strParam.c_str() ) [ 0 ] );
+			else if ( NULL != getRenderContext() ->GetIntegerOption( strName.c_str(), strParam.c_str() ) )
+				pV->SetFloat( getRenderContext() ->GetIntegerOption( strName.c_str(), strParam.c_str() ) [ 0 ] );
 
-			else if ( NULL != QGetRenderContextI() ->GetPointOption( strName.c_str(), strParam.c_str() ) )
-				pV->SetPoint( QGetRenderContextI() ->GetPointOption( strName.c_str(), strParam.c_str() ) [ 0 ] );
+			else if ( NULL != getRenderContext() ->GetPointOption( strName.c_str(), strParam.c_str() ) )
+				pV->SetPoint( getRenderContext() ->GetPointOption( strName.c_str(), strParam.c_str() ) [ 0 ] );
 
-			else if ( NULL != QGetRenderContextI() ->GetColorOption( strName.c_str(), strParam.c_str() ) )
-				pV->SetColor( QGetRenderContextI() ->GetColorOption( strName.c_str(), strParam.c_str() ) [ 0 ] );
-			else if ( NULL != QGetRenderContextI() ->GetFloatOption( strName.c_str(), strParam.c_str() ) )
-				pV->SetFloat( QGetRenderContextI() ->GetFloatOption( strName.c_str(), strParam.c_str() ) [ 0 ] );
+			else if ( NULL != getRenderContext() ->GetColorOption( strName.c_str(), strParam.c_str() ) )
+				pV->SetColor( getRenderContext() ->GetColorOption( strName.c_str(), strParam.c_str() ) [ 0 ] );
+			else if ( NULL != getRenderContext() ->GetFloatOption( strName.c_str(), strParam.c_str() ) )
+				pV->SetFloat( getRenderContext() ->GetFloatOption( strName.c_str(), strParam.c_str() ) [ 0 ] );
 			/* did not deal with Vector, Normal and Matrix yet */
 			else
 				Ret = 0.0f;
@@ -496,9 +494,9 @@ void	CqShaderExecEnv::SO_shadername2( IqShaderData* shader, IqShaderData* Result
 	boost::shared_ptr<IqShader> pAtmosphere;
 	if( m_pAttributes )
 	{
-		pSurface = m_pAttributes ->pshadSurface(QGetRenderContextI()->Time());
-		pDisplacement = m_pAttributes ->pshadDisplacement(QGetRenderContextI()->Time());
-		pAtmosphere = m_pAttributes ->pshadAtmosphere(QGetRenderContextI()->Time());
+		pSurface = m_pAttributes ->pshadSurface(getRenderContext()->Time());
+		pDisplacement = m_pAttributes ->pshadDisplacement(getRenderContext()->Time());
+		pAtmosphere = m_pAttributes ->pshadAtmosphere(getRenderContext()->Time());
 	}
 
 	__fVarying=(Result)->Class()==class_varying;

@@ -22,22 +22,8 @@
 	Contains the CqMPDump class that's used for writing a dump file for debugging.
  */
 
-// Create a dump file?
-#ifdef __GNUC__
-// GCC
-#ifndef NDEBUG
-                #define DEBUG_MPDUMP 1
-        #endif
-#else
-// MSVC
-#ifdef _DEBUG
-                #define DEBUG_MPDUMP _DEBUG
-        #endif
-#endif
-
-
 // If we're not including the dump code then skip this file
-#ifdef DEBUG_MPDUMP
+#if ENABLE_MPDUMP
 
 
 #ifndef MPDUMP_H
@@ -45,7 +31,7 @@
 
 #include	"micropolygon.h"
 #include	"renderer.h"
-#include	"imagebuffer.h"
+//#include	"imagebuffer.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -94,6 +80,11 @@ class CqMPDump
 		   Close the dump file.
 		 */
 		void close();
+
+		TqBool IsOpen()
+		{
+			return(NULL != out);
+		}
 
 		/**
 			Dump global image infos.
@@ -152,10 +143,8 @@ class CqMPDump
 };
 
 
-extern CqMPDump mpdump;
-
 END_NAMESPACE( Aqsis )
 
 #endif // MPDUMP_H
 
-#endif // DEBUG_MPDUMP
+#endif // ENABLE_MPDUMP

@@ -489,7 +489,7 @@ const CqMatrix* CqAttributes::GetMatrixAttribute( const char* strName, const cha
 
 IqLightsource*	CqAttributes::pLight( TqInt index )
 {
-	return ( m_apLightsources[ index ].get() );
+	return ( boost::shared_ptr<CqLightsource>(m_apLightsources[index]).get() );
 }
 
 //---------------------------------------------------------------------

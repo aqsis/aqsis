@@ -74,4 +74,18 @@
 
 #define SHARED_LIBRARY_SUFFIX ".dll"
 
+#ifdef	AQSIS_STATIC_LINK
+
+#  define  COMMON_SHARE
+
+#else // !AQSIS_STATIC_LINK
+
+#    ifdef COMMON_EXPORTS
+#      define COMMON_SHARE __declspec(dllexport)
+#    else
+#      define COMMON_SHARE __declspec(dllimport)
+#    endif
+
+#endif	// AQSIS_STATIC_LINK
+
 #endif // AQSIS_COMPILER_H_INCLUDED

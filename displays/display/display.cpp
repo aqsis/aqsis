@@ -28,7 +28,6 @@
 #include <iostream>
 #include <logging.h>
 #include <logging_streambufs.h>
-#include "sstring.h"
 
 #include <tiffio.h>
 
@@ -41,18 +40,12 @@ using namespace Aqsis;
 #include <sstream>
 #include <string>
 #include <fstream>
-#include <tinyxml.h>
 #include <algorithm>
 #include <float.h>
 #include <time.h>
 
-#include <signal.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-
 #include "ndspy.h"
+
 
 #define	ZFILE_HEADER		"Aqsis ZFile" VERSION_STR
 #define	SHADOWMAP_HEADER	"Shadow"
@@ -84,7 +77,7 @@ START_NAMESPACE( Aqsis )
 
 static char datetime[21];
 static time_t start;
-static char* description = NULL;
+static CqString description;
 
 //----------------------------------------------------------------------
 /** SaveAsShadowMap() Save as a tiff an shadowmap
@@ -122,13 +115,7 @@ void SaveAsShadowMap(const std::string& filename, SqDisplayInstance* image, char
 			// Set common tags
 			TIFFCreateDirectory( pshadow );
 
-#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX) || defined(SCONS_BUILD)
-
 			sprintf( version, "%s %s (%s %s)", STRNAME, VERSION_STR, __DATE__, __TIME__);
-#else
-
-			sprintf( version, "%s %s (%s %s)", STRNAME, VERSION, __DATE__, __TIME__ );
-#endif
 
 			TIFFSetField( pshadow, TIFFTAG_SOFTWARE, ( char* ) version );
 			TIFFSetField( pshadow, TIFFTAG_PIXAR_MATRIX_WORLDTOCAMERA, image->m_matWorldToCamera );
@@ -136,19 +123,10 @@ void SaveAsShadowMap(const std::string& filename, SqDisplayInstance* image, char
 			TIFFSetField( pshadow, TIFFTAG_PIXAR_TEXTUREFORMAT, SHADOWMAP_HEADER );
 			TIFFSetField( pshadow, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK );
 
-			if (image->m_hostname)
-				TIFFSetField( pshadow, TIFFTAG_HOSTCOMPUTER, image->m_hostname );
+			if (!image->m_hostname.empty())
+				TIFFSetField( pshadow, TIFFTAG_HOSTCOMPUTER, image->m_hostname.c_str() );
 			TIFFSetField( pshadow, TIFFTAG_IMAGEDESCRIPTION, mydescription);
 			// Write the floating point image to the directory.
-#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX) || defined(SCONS_BUILD)
-
-			sprintf( version, "%s %s (%s %s)", STRNAME, VERSION_STR, __DATE__, __TIME__);
-#else
-
-			sprintf( version, "%s %s (%s %s)", STRNAME, VERSION, __DATE__, __TIME__ );
-#endif
-
-			TIFFSetField( pshadow, TIFFTAG_SOFTWARE, ( char* ) version );
 			TIFFSetField( pshadow, TIFFTAG_IMAGEWIDTH, image->m_width );
 			TIFFSetField( pshadow, TIFFTAG_IMAGELENGTH, image->m_height );
 			TIFFSetField( pshadow, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG );
@@ -238,7 +216,7 @@ void WriteTIFF(const std::string& filename, SqDisplayInstance* image)
 	sprintf(datetime, "%04d:%02d:%02d %02d:%02d:%02d", year, ct->tm_mon + 1,
 	        ct->tm_mday, ct->tm_hour, ct->tm_min, ct->tm_sec);
 
-	if (description == NULL)
+	if (description.empty())
 	{
 		double nSecs = difftime(long_time, start);
 		sprintf(mydescription,"%d secs", static_cast<TqInt>(nSecs));
@@ -246,8 +224,9 @@ void WriteTIFF(const std::string& filename, SqDisplayInstance* image)
 	}
 	else
 	{
-		strcpy(mydescription, description);
+		strcpy(mydescription, description.c_str());
 	}
+
 
 	// Set common tags
 	// If in "shadowmap" mode, write as a shadowmap.
@@ -295,14 +274,7 @@ void WriteTIFF(const std::string& filename, SqDisplayInstance* image)
 
 		short ExtraSamplesTypes[ 1 ] = {EXTRASAMPLE_ASSOCALPHA};
 
-#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX) || defined(SCONS_BUILD)
-
 		sprintf( version, "%s %s (%s %s)", STRNAME, VERSION_STR, __DATE__, __TIME__);
-#else
-
-		sprintf( version, "%s %s (%s %s)", STRNAME, VERSION, __DATE__, __TIME__);
-#endif
-
 		bool use_logluv = false;
 
 		TIFFSetField( pOut, TIFFTAG_SOFTWARE, ( char* ) version );
@@ -316,8 +288,8 @@ void WriteTIFF(const std::string& filename, SqDisplayInstance* image)
 		TIFFSetField( pOut, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT );
 		TIFFSetField( pOut, TIFFTAG_SAMPLESPERPIXEL, image->m_iFormatCount );
 		TIFFSetField( pOut, TIFFTAG_DATETIME, datetime);
-		if (image->m_hostname)
-			TIFFSetField( pOut, TIFFTAG_HOSTCOMPUTER, image->m_hostname );
+		if (!image->m_hostname.empty())
+			TIFFSetField( pOut, TIFFTAG_HOSTCOMPUTER, image->m_hostname.c_str() );
 		TIFFSetField( pOut, TIFFTAG_IMAGEDESCRIPTION, mydescription);
 
 
@@ -449,7 +421,6 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
                           PtFlagStuff *flagstuff)
 {
 	SqDisplayInstance* pImage;
-	static TqInt iFramebufferPID = 0;
 
 	pImage = new SqDisplayInstance;
 	flagstuff->flags = 0;
@@ -463,10 +434,20 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 		// Determine the display type from the list that we support.
 		if(strcmp(drivername, "file")==0 || strcmp(drivername, "tiff")==0)
 			pImage->m_imageType = Type_File;
+#ifndef	AQSIS_NO_FLTK
+
+		else if(strcmp(drivername, "framebuffer")==0)
+			pImage->m_imageType = Type_Framebuffer;
+#endif // AQSIS_NO_FLTK
+
 		else if(strcmp(drivername, "zfile")==0)
 			pImage->m_imageType = Type_ZFile;
-		else if(strcmp(drivername, "framebuffer")==0 || strcmp(drivername, "zframebuffer")==0)
-			pImage->m_imageType = Type_Framebuffer;
+#ifndef AQSIS_NO_FLTK
+
+		else if(strcmp(drivername, "zframebuffer")==0)
+			pImage->m_imageType = Type_ZFramebuffer;
+#endif // AQSIS_NO_FLTK
+
 		else if(strcmp(drivername, "shadow")==0)
 			pImage->m_imageType = Type_Shadowmap;
 		else
@@ -475,8 +456,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 
 		*image = pImage;
 
-		pImage->m_filename = new char[strlen(filename)+1];
-		strcpy(pImage->m_filename, filename);
+		pImage->m_filename = filename;
 
 		// Scan the formats table to see what the widest channel format specified is.
 		TqUint widestFormat = PkDspySigned8;
@@ -493,7 +473,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			widestFormat = PkDspyUnsigned32;
 
 		// If we are recieving "rgba" data, ensure that it is in the correct order.
-		if(pImage->m_imageType == Type_File )
+		if(pImage->m_imageType == Type_File || pImage->m_imageType == Type_Framebuffer )
 		{
 			PtDspyDevFormat outFormat[] =
 			    {
@@ -510,13 +490,13 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 		}
 
 		// Create and initialise a byte array if rendering 8bit image, or we are in framebuffer mode
-		if(pImage->m_imageType != Type_Framebuffer)
+		if(pImage->m_imageType == Type_Framebuffer)
 		{
 #ifndef	AQSIS_NO_FLTK
 			// Allocate the buffer, even if the formatcount <3, always allocated 3, as that is what's needed for the
 			// display.
-			pImage->m_data = new TqUchar[ pImage->m_width * pImage->m_height * pImage->m_iFormatCount ];
-			pImage->m_entrySize = pImage->m_iFormatCount * sizeof(char);
+			pImage->m_data = malloc( pImage->m_width * pImage->m_height * pImage->m_iFormatCount * sizeof(TqUchar));
+			pImage->m_entrySize = pImage->m_iFormatCount * sizeof(TqChar);
 
 			// Initialise the display to a checkerboard to show alpha
 			for (TqInt i = 0; i < pImage->m_height; i ++)
@@ -546,7 +526,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			pImage->m_theWindow = new Fl_Window(pImage->m_width, pImage->m_height);
 			pImage->m_uiImageWidget = new Fl_FrameBuffer_Widget(0,0, pImage->m_width, pImage->m_height, pImage->m_iFormatCount, reinterpret_cast<TqUchar*>(pImage->m_data));
 			pImage->m_theWindow->resizable(pImage->m_uiImageWidget);
-			pImage->m_theWindow->label(pImage->m_filename);
+			pImage->m_theWindow->label(pImage->m_filename.c_str());
 			pImage->m_theWindow->end();
 			Fl::visual(FL_RGB);
 			pImage->m_theWindow->show();
@@ -559,25 +539,24 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			if(widestFormat == PkDspyUnsigned8)
 			{
 				pImage->m_data = malloc( pImage->m_width * pImage->m_height * pImage->m_iFormatCount * sizeof(TqUchar));
-				pImage->m_entrySize = pImage->m_iFormatCount * sizeof(char);
+				pImage->m_entrySize = pImage->m_iFormatCount * sizeof(TqUchar);
 			}
 			else if(widestFormat == PkDspyUnsigned16)
 			{
-				pImage->m_data = malloc( pImage->m_width * pImage->m_height * pImage->m_iFormatCount * sizeof(unsigned short));
-				pImage->m_entrySize = pImage->m_iFormatCount * sizeof(short);
+				pImage->m_data = malloc( pImage->m_width * pImage->m_height * pImage->m_iFormatCount * sizeof(TqUshort));
+				pImage->m_entrySize = pImage->m_iFormatCount * sizeof(TqUshort);
 			}
 			else if(widestFormat == PkDspyUnsigned32)
 			{
-				pImage->m_data = malloc( pImage->m_width * pImage->m_height * pImage->m_iFormatCount * sizeof(unsigned long));
-				pImage->m_entrySize = pImage->m_iFormatCount * sizeof(long);
+				pImage->m_data = malloc( pImage->m_width * pImage->m_height * pImage->m_iFormatCount * sizeof(TqUlong));
+				pImage->m_entrySize = pImage->m_iFormatCount * sizeof(TqUlong);
 			}
 			else if(widestFormat == PkDspyFloat32)
 			{
-				pImage->m_data = malloc( pImage->m_width * pImage->m_height * pImage->m_iFormatCount * sizeof(float));
-				pImage->m_entrySize = pImage->m_iFormatCount * sizeof(float);
+				pImage->m_data = malloc( pImage->m_width * pImage->m_height * pImage->m_iFormatCount * sizeof(TqFloat));
+				pImage->m_entrySize = pImage->m_iFormatCount * sizeof(TqFloat);
 			}
-		}; 
-
+		}
 		pImage->m_lineLength = pImage->m_entrySize * pImage->m_width;
 		pImage->m_format = widestFormat;
 
@@ -590,7 +569,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			pImage->m_theWindow = new Fl_Window(pImage->m_width, pImage->m_height);
 			pImage->m_uiImageWidget = new Fl_FrameBuffer_Widget(0,0, pImage->m_width, pImage->m_height, 3, reinterpret_cast<TqUchar*>(pImage->m_zfbdata));
 			pImage->m_theWindow->resizable(pImage->m_uiImageWidget);
-			pImage->m_theWindow->label(pImage->m_filename);
+			pImage->m_theWindow->label(pImage->m_filename.c_str());
 			pImage->m_theWindow->end();
 			Fl::visual(FL_RGB);
 			pImage->m_theWindow->show();
@@ -601,6 +580,11 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 
 		// Extract any important data from the user parameters.
 		char* compression;
+		char* hostname;
+		if( DspyFindStringInParamList("HostComputer", &hostname, paramCount, parameters ) == PkDspyErrorNone )
+		{
+			pImage->m_hostname = hostname;
+		}
 		if( DspyFindStringInParamList("compression", &compression, paramCount, parameters ) == PkDspyErrorNone )
 		{
 			if ( strstr( compression, "none" ) != 0 )
@@ -649,103 +633,10 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 		{
 			// Do something about it; the user will want to add its copyright notice.
 			if (ydesc && *ydesc)
-				pImage->m_description = strdup(ydesc);
+				description = ydesc;
 		}
-
-		if(pImage->m_imageType == Type_Framebuffer )
-		{
-			// We need to start a framebuffer if none is running yet
-			// Need to create our actual socket
-
-			// Check if the user has specified any options
-			char *hostname = NULL;
-			char *hostport = NULL;
-
-			if( DspyFindStringInParamList("HostComputer", &hostname, paramCount, parameters ) == PkDspyErrorNone )
-			{
-				pImage->m_hostname = strdup(hostname);
-				Aqsis::log() << debug << "FB host specified: " << pImage->m_hostname << std::endl;
-			} else {
-				Aqsis::log() << debug << "FB not host specified" << std::endl;
-				pImage->m_hostname =  NULL;
-			};
-			if( DspyFindStringInParamList("HostPort", &hostport, paramCount, parameters ) == PkDspyErrorNone )
-			{
-				pImage->m_hostport = atoi(strdup(hostport));
-				Aqsis::log() << debug << "FB port specified" << pImage->m_hostport << std::endl;
-			} else {
-				Aqsis::log() << debug << "FB port not specified" << std::endl;
-				pImage->m_hostport = 0;
-			};
-
-			if( pImage->m_hostname == NULL  )
-			{
-				//No host specified
-				pImage->m_hostname = "127.0.0.1";
-				if( !pImage->m_hostport )  
-				{
-					pImage->m_hostport = atoi("48515");
-				};
-				Aqsis::log() << info << "Will try to start a framebuffer" << std::endl;
-				//Local FB requested, we've not run one yet
-				// XXX Need to Abstract this for windows to work
-				int pid = fork();
-				if (pid != -1)
-				{
-					if (pid)
-					{
-						Aqsis::log() << info << "Starting the framebuffer" << std::endl;
-						sleep(1); //Give it time to startup
-					}
-					else
-					{
-						// TODO: need to pass verbosity level for logginng
-						char *argv[4] = {"eqshibit","-i","127.0.0.1",NULL};
-              					signal(SIGHUP, SIG_IGN);
-						execvp("eqshibit",argv);
-					}
-				} 
-				else
-				{
-					// An error occurred
-					Aqsis::log() << error << "Could not fork()" << std::endl;
-					return(PkDspyErrorNoMemory);
-				};
-			}; 
-
-			// The FB should be running at this point.
-			// Lets try and connect
-
-			int sock = socket(AF_INET,SOCK_STREAM,0);
-		        sockaddr_in adServer;
-
-			bzero((char *) &adServer, sizeof(adServer)); 
-			adServer.sin_family = AF_INET;
-			adServer.sin_addr.s_addr = inet_addr(pImage->m_hostname);
-		       	if (adServer.sin_addr.s_addr == (in_addr_t) -1)
-			{
-			       	Aqsis::log() << error << "Invalid IP address" << std::endl;;
-				return(PkDspyErrorNoMemory);
-			};
-			adServer.sin_port = htons(pImage->m_hostport);
-
-			if( connect(sock,(const struct sockaddr*) &adServer, sizeof(sockaddr_in)))
-			{
-				return(PkDspyErrorNoMemory);
-			}
-			pImage->m_socket = sock;
-			
-			//need to write the display description here
-			//Probably need to read back a "OK" status or something like that
-			// Check if the user has specified any options
-			
-			TiXmlDocument displaydoc("display.xml");
-			TiXmlDeclaration* displaydecl = new TiXmlDeclaration("1.0","","yes");
-			displaydoc.LinkEndChild(displaydecl);
-			displaydoc.Print();
-
-		}
-	} else 
+	}
+	else
 		return(PkDspyErrorNoMemory);
 
 	return(PkDspyErrorNone);
@@ -778,18 +669,12 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 	const TqUchar* pdatarow = data;
 	pdatarow += (row * bucketlinelen) + (col * entrysize);
 
-	if(pImage->m_imageType == Type_Framebuffer)
-	{
-		// Write our data out to the Framebuffer socket
-		return(PkDspyErrorNone);
-	}
-
 	if( pImage && data && xmin__ >= 0 && ymin__ >= 0 && xmaxplus1__ <= pImage->m_width && ymaxplus1__ <= pImage->m_height )
 	{
 		// If rendering to a file, or an "rgb" framebuffer, we can just copy the data.
 		if (pImage->m_imageType == Type_Framebuffer)
 		{
-			unsigned int comp = entrysize/pImage->m_iFormatCount;
+			TqUint comp = entrysize/pImage->m_iFormatCount;
 			TqInt y;
 			TqUchar *unrolled = static_cast< TqUchar *>(pImage->m_data);
 
@@ -797,17 +682,16 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 			{
 				TqInt x;
 				TqUchar* _pdatarow = (TqUchar* )(pdatarow);
-				for ( x = xmin; x < xmaxplus1; x++ )
+				for ( x = xmin__; x < xmaxplus1__; x++ )
 				{
 					TqInt so = pImage->m_iFormatCount * (( y * pImage->m_width ) +  x );
-
 
 					switch (comp)
 					{
 
 							case 2 :
 							{
-								unsigned short *svalue = reinterpret_cast<unsigned short *>(_pdatarow);
+								TqUshort *svalue = reinterpret_cast<TqUshort *>(_pdatarow);
 								TqUchar alpha = 255;
 								if (pImage->m_iFormatCount == 4)
 								{
@@ -823,7 +707,7 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 							case 4:
 							{
 
-								unsigned long *lvalue = reinterpret_cast<unsigned long *>(_pdatarow);
+								TqUlong *lvalue = reinterpret_cast<TqUlong *>(_pdatarow);
 								TqUchar alpha = 255;
 								if (pImage->m_iFormatCount == 4)
 								{
@@ -928,9 +812,22 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 		}
 	}
 
-	if(pImage->m_imageType == Type_Framebuffer)
+	if(pImage->m_imageType == Type_Framebuffer || pImage->m_imageType == Type_ZFramebuffer)
 	{
-		// Write our data out to the Framebuffer socket
+#ifndef AQSIS_NO_FLTK
+		pImage->m_uiImageWidget->damage(1, xmin__, ymin__, xmaxplus1__-xmin__, ymaxplus1__-ymin__);
+		Fl::check();
+		TqFloat percent = pImage->m_pixelsReceived / (TqFloat) (pImage->m_width * pImage->m_height);
+		percent *= 100.0f;
+		percent = CLAMP(percent, 0.0f, 100.0f);
+		std::stringstream strTitle;
+		if (percent < 99.9f)
+			strTitle << pImage->m_filename << ": " << std::fixed << std::setprecision(1) << std::setw(5) << percent << "% complete" << std::ends;
+		else
+			strTitle << pImage->m_filename << std::ends;
+		pImage->m_theWindow->label(strTitle.str().c_str());
+#endif // AQSIS_NO_FLTK
+
 	}
 	return(PkDspyErrorNone);
 }
@@ -941,12 +838,6 @@ PtDspyError DspyImageClose(PtDspyImageHandle image)
 	SqDisplayInstance* pImage;
 	pImage = reinterpret_cast<SqDisplayInstance*>(image);
 
-	if(pImage->m_imageType == Type_Framebuffer)
-	{
-		// Close the socket
-		return(PkDspyErrorNone);
-	}
-
 	// Write the image to disk
 	if( pImage->m_imageType == Type_File ||
 	        pImage->m_imageType == Type_ZFile ||
@@ -956,14 +847,9 @@ PtDspyError DspyImageClose(PtDspyImageHandle image)
 	// Delete the image structure.
 	if (pImage->m_data)
 		free(pImage->m_data);
- 	if (pImage->m_hostname)
-		free(pImage->m_hostname);
-	if (description)
-	{
-		free(description);
-		description = NULL;
-	}
-	delete[](pImage->m_filename);
+	if(pImage->m_imageType == Type_ZFramebuffer)
+		free(pImage->m_zfbdata);
+	description = "";
 	delete(pImage);
 
 
@@ -976,14 +862,9 @@ PtDspyError DspyImageDelayClose(PtDspyImageHandle image)
 	SqDisplayInstance* pImage;
 	pImage = reinterpret_cast<SqDisplayInstance*>(image);
 
-	if(pImage->m_imageType == Type_Framebuffer)
-	{
-		// Write our data out to the Framebuffer socket
-	}
-
 	if(pImage && pImage->m_data)
 	{
-		if(pImage->m_imageType == Type_Framebuffer)
+		if(pImage->m_imageType == Type_Framebuffer || pImage->m_imageType == Type_ZFramebuffer)
 		{
 #ifndef	AQSIS_NO_FLTK
 			if( pImage->m_imageType == Type_ZFramebuffer )
@@ -1070,13 +951,6 @@ PtDspyError DspyImageQuery(PtDspyImageHandle image,
 
 	PtDspyOverwriteInfo overwriteInfo;
 	PtDspySizeInfo sizeInfo;
-
-	if(pImage->m_imageType == Type_Framebuffer)
-	{
-		// Write our data out to the Framebuffer socket
-		return(PkDspyErrorNone);
-	}
-
 
 	if(size <= 0 || !data)
 		return PkDspyErrorBadParams;

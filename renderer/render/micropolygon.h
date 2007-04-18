@@ -125,8 +125,15 @@ class CqMicroPolyGridBase : public CqRefCount
 				CqTriangleSplitLine( const SqTriangleSplitLine& def = SqTriangleSplitLine() ) : CqMotionSpec<SqTriangleSplitLine>( def )
 				{}
 
+				/**
+				* \todo Review: Unused parameter A
+				*/		
 				virtual	void	ClearMotionObject( SqTriangleSplitLine& A ) const
-					{}
+				{}
+
+				/**
+				* \todo Review: Unused parameter B
+				*/		
 				virtual	SqTriangleSplitLine	ConcatMotionObjects( const SqTriangleSplitLine& A, const SqTriangleSplitLine& B ) const
 				{
 					return( A );
@@ -323,9 +330,12 @@ class CqMotionMicroPolyGrid : public CqMicroPolyGridBase, public CqMotionSpec<Cq
 		virtual	void	Split( CqImageBuffer* pImage, long xmin, long xmax, long ymin, long ymax );
 		virtual	void	Shade();
 		virtual	void	TransferOutputVariables();
+		
+		/**
+		* \todo Review: Unused parameter all
+		*/		
 		void DeleteVariables( TqBool all )
 		{}
-
 
 		// Redirect acces via IqShaderExecEnv
 		virtual	TqInt	uGridRes() const
@@ -388,17 +398,21 @@ class CqMotionMicroPolyGrid : public CqMicroPolyGridBase, public CqMotionSpec<Cq
 			return ( static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( 0 ) ) ) ->pCSGNode() );
 		}
 
+		/**
+		* \todo Review: Unused parameter A
+		*/		
 		virtual	void	ClearMotionObject( CqMicroPolyGridBase*& A ) const
-			{}
+		{}
+
 		/** Overridden from CqMotionSpec, does nothing.
 		 */
-		virtual	CqMicroPolyGridBase* ConcatMotionObjects( CqMicroPolyGridBase* const & A, CqMicroPolyGridBase* const & B ) const
+		virtual	CqMicroPolyGridBase* ConcatMotionObjects( CqMicroPolyGridBase* const & /* A */, CqMicroPolyGridBase* const & B ) const
 		{
 			return ( B );
 		}
 		/** Overridden from CqMotionSpec, does nothing.
 		 */
-		virtual	CqMicroPolyGridBase* LinearInterpolateMotionObjects( TqFloat Fraction, CqMicroPolyGridBase* const & A, CqMicroPolyGridBase* const & B ) const
+		virtual	CqMicroPolyGridBase* LinearInterpolateMotionObjects( TqFloat /* Fraction */, CqMicroPolyGridBase* const & A, CqMicroPolyGridBase* const & /* B */ ) const
 		{
 			return ( A );
 		}
@@ -441,6 +455,7 @@ class CqMicroPolygon : public CqRefCount
 		virtual	~CqMicroPolygon();
 
 		/** Overridden operator new to allocate micropolys from a pool.
+		 * \todo Review: Unused parameter size
 		 */
 		void* operator new( size_t size )
 		{
@@ -568,6 +583,10 @@ class CqMicroPolygon : public CqRefCount
 		{
 			return ( 1 );
 		}
+
+		/**
+		* \todo Review: Unused parameter iIndex
+		*/				
 		virtual	CqBound SubBound( TqInt iIndex, TqFloat& time )
 		{
 			time = 0.0f;
@@ -682,8 +701,11 @@ class CqMicroPolygon : public CqRefCount
 
 		CqHitTestCache* m_pHitTestCache; // struct to hold cached values used in the point-in-poly test
 	private:
-		CqMicroPolygon( const CqMicroPolygon& From )
-	{}
+		/**
+		* \todo Review: operator= defined, but empty copy-ctor.
+		*/
+		CqMicroPolygon( const CqMicroPolygon& From)
+		{}
 
 		static	CqObjectPool<CqMicroPolygon> m_thePool;
 }
@@ -709,6 +731,7 @@ class CqMovingMicroPolygonKey
 		{}
 
 		/** Overridden operator new to allocate micropolys from a pool.
+		 * \todo Review: Unused parameter size
 		 */
 		void* operator new( size_t size )
 		{
@@ -852,6 +875,9 @@ class CqMicroPolygonMotion : public CqMicroPolygon
 		std::vector<CqMovingMicroPolygonKey*>	m_Keys;
 		TqBool	m_fTrimmed;		///< Flag indicating that the MPG spans a trim curve.
 
+		/**
+		* \todo Review Empty copy-ctor, but default operator=!
+		*/
 		CqMicroPolygonMotion( const CqMicroPolygonMotion& From )
 		{}
 }

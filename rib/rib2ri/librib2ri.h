@@ -7,7 +7,7 @@ namespace librib2ri
 {
 
 /// Implements the librib::RendermanInterface interface, and sends data to the Renderman Interface "C" API
-class Engine :
+class RIB_SHARE Engine :
 			public librib::RendermanInterface
 {
 	public:
@@ -106,6 +106,9 @@ class Engine :
 		virtual	RtVoid	RiRelativeDetail( RtFloat relativedetail );
 		virtual	RtVoid	RiReverseOrientation();
 		virtual	RtVoid	RiRotate( RtFloat angle, RtFloat dx, RtFloat dy, RtFloat dz );
+		virtual RtVoid	RiResourceV( RtToken handle, RtToken type, RtInt count, RtToken tokens[], RtPointer values[]);
+		virtual RtVoid	RiResourceBegin();
+		virtual RtVoid	RiResourceEnd();
 		virtual	RtVoid	RiScale( RtFloat sx, RtFloat sy, RtFloat sz );
 		virtual	RtVoid	RiScreenWindow( RtFloat left, RtFloat right, RtFloat bottom, RtFloat top );
 		virtual	RtVoid	RiShadingInterpolation( RtToken type );
@@ -140,8 +143,8 @@ class Engine :
 
 extern "C"
 {
-	librib::RendermanInterface* CreateRIBEngine();
-	void DestroyRIBEngine( librib::RendermanInterface* );
+	RIB_SHARE librib::RendermanInterface* CreateRIBEngine();
+	RIB_SHARE void DestroyRIBEngine( librib::RendermanInterface* );
 }
 }
 ; // namespace librib2ri

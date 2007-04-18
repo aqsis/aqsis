@@ -58,6 +58,7 @@ static char tiffname[ 1024 ];
  * It used the standard tiff tool name bmp2tiff.exe on PC
  * or bmp2tiff on unix
  */
+extern char *jpg2tif( char *in);
 __export char *bmp2tif( char *in )
 {
 	char *result = NULL;
@@ -75,7 +76,8 @@ __export char *bmp2tif( char *in )
 			strcpy( result, ".jpg" );
 	}
 	sprintf( call, "cjpeg %s > %s", tiffname, jpgname );
-	system(call);
+	if(system(call))
+		return("");
 	result = jpg2tif(jpgname);
 	unlink(jpgname);
 	return result;

@@ -42,7 +42,7 @@ START_NAMESPACE( Aqsis )
  * Class to store and manipulate three component color information.
  */
 
-class CqColor
+class COMMON_SHARE CqColor
 {
 	public:
 		/// Default constructor.
@@ -479,7 +479,7 @@ class CqColor
 		{
 			return ( CqColor( -a.m_fRed, -a.m_fGreen, -a.m_fBlue ) );
 		} // Negation
-		friend CqColor	operator%( const CqColor& a, const CqColor& b )
+		friend CqColor	operator%( const CqColor& a, const CqColor& /* b */ ) // b is unused
 		{
 			return ( a );
 		} // Implemented purely for the use of the shader VM, we have macros
@@ -505,15 +505,15 @@ class CqColor
 
 
 /// Static white color
-extern CqColor	gColWhite;
+COMMON_SHARE extern CqColor	gColWhite;
 /// Static black color
-extern CqColor	gColBlack;
+COMMON_SHARE extern CqColor	gColBlack;
 /// Static red color
-extern CqColor	gColRed;
+COMMON_SHARE extern CqColor	gColRed;
 /// Static green color
-extern CqColor	gColGreen;
+COMMON_SHARE extern CqColor	gColGreen;
 /// Static blue color
-extern CqColor	gColBlue;
+COMMON_SHARE extern CqColor	gColBlue;
 
 //-----------------------------------------------------------------------
 

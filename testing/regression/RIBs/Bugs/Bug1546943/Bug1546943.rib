@@ -18,8 +18,8 @@ FrameBegin 1
 ShadingInterpolation "smooth"
 Quantize "rgba" 65535 0 65535 0.500000
 #Display Drivers:
-Display "output16.tif" "file" "rgba"    
-Display "+Bug1546943.tif" "file" "rgba" "quantize" [0 255 0 255]
+#Display "output16.tif" "file" "rgba"    "string compression" ["lzw"]
+Display "Bug1546943.tif" "file" "rgba" "quantize" [0 255 0 255] "string compression" ["lzw"]"string compression" ["lzw"]
 Format 640 400 1.000000
 Format 160 100 1.0
 Projection "perspective" "fov" [ 35.637779 ] 

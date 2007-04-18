@@ -41,6 +41,7 @@
 #include	"ishaderdata.h"
 #include	"bitvector.h"
 #include	"shadervariable.h"
+#include	"shadervm_common.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -221,7 +222,7 @@ struct	SqStackEntry
 	IqShaderData*	m_Data;
 };
 
-class CqShaderStack
+class SHADERVM_SHARE CqShaderStack
 {
 	public:
 		CqShaderStack() : m_iTop( 0 )

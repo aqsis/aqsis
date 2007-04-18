@@ -34,18 +34,8 @@
 #define	VERMAJOR %(major)i
 #define	VERMINOR %(minor)i
 #define	BUILD %(build)i
-#define	VERSION_STR	"%(major)i.%(minor)i.%(build)i"
-
-#define GET_VERSION_FROM_STRING(a,b,c) TqInt __s=0,__e; \
-			__s+=strVersion.find_first_of("0123456789",__s);	__e=strVersion.find_first_of(".",__s); \
-			a=CqString(strVersion.substr(__s,__e)).ToDecInt();	__s+=__e;				  \
-			__s+=strVersion.find_first_of("0123456789",__s);	__e=strVersion.find_first_of(".",__s); \
-			b=CqString(strVersion.substr(__s,__e)).ToDecInt();	__s+=__e;				  \
-			__s+=strVersion.find_first_of("0123456789",__s);	__e=strVersion.find_first_of(".",__s); \
-			c=CqString(strVersion.substr(__s,__e)).ToDecInt();
-
-#define CHECK_NEWER_VERSION(a,b,c) (((a)>VERMAJOR) || \
-				((a)==VERMAJOR && (b)>VERMINOR) || \
-				((a)==VERMAJOR && (b)==VERMINOR && (c)>BUILD))
+#define TYPE %(type)s
+#define	VERSION_STR	"%(major)i.%(minor)i.%(build)i%(type)s"
+#define VERSION_STR_PRINT  "%(major)i.%(minor)i.%(build)i%(type)s %(revision)s"
 
 #endif	// !VERSION_H_INCLUDED

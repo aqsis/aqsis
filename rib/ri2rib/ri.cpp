@@ -982,6 +982,59 @@ RtVoid RiTranslate ( RtFloat dx, RtFloat dy, RtFloat dz )
 	}
 }
 
+RtVoid RiResource ( RtToken handle, RtToken type , ... )
+{
+	try
+	{
+		va_list args;
+		va_start( args, type );
+		CqPLStore pls( args );
+		va_end( args );
+
+		RiResourceV( handle, type, pls.n, pls.tokens(), pls.parms() );
+	}
+	catch ( CqError & r )
+	{
+		r.manage();
+	}
+}
+
+RtVoid RiResourceV ( RtToken handle, RtToken type, RtInt n, RtToken tokens[], RtPointer parms[] )
+{
+	try
+	{
+		context.current().RiResourceV( handle, type, n, tokens, parms );
+	}
+	catch ( CqError & r )
+	{
+		r.manage();
+	}
+}
+
+RtVoid RiResourceBegin ( void )
+{
+	try
+	{
+		context.current().RiResourceBegin();
+	}
+	catch ( CqError & r )
+	{
+		r.manage();
+	}
+}
+
+RtVoid RiResourceEnd ( void )
+{
+	try
+	{
+		context.current().RiResourceEnd();
+	}
+	catch ( CqError & r )
+	{
+		r.manage();
+	}
+}
+
 RtVoid RiRotate ( RtFloat angle, RtFloat dx, RtFloat dy, RtFloat dz )
 {
 	try

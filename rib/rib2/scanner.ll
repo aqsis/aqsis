@@ -200,6 +200,9 @@ ReadArchive			{ return REQUEST_TOKEN_READARCHIVE; }
 RelativeDetail			{ return REQUEST_TOKEN_RELATIVEDETAIL; }
 ReverseOrientation		{ return REQUEST_TOKEN_REVERSEORIENTATION; }
 Rotate				{ return REQUEST_TOKEN_ROTATE; }
+Resource			{ return REQUEST_TOKEN_RESOURCE; }
+ResourceBegin			{ return REQUEST_TOKEN_RESOURCEBEGIN; }
+ResourceEnd			{ return REQUEST_TOKEN_RESOURCEEND; }
 Scale				{ return REQUEST_TOKEN_SCALE; }
 ScreenWindow			{ return REQUEST_TOKEN_SCREENWINDOW; }
 ShadingInterpolation		{ return REQUEST_TOKEN_SHADINGINTERPOLATION; }

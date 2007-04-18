@@ -1,23 +1,31 @@
-; Title: Aqsis 'Standard' Installer for Win32/64 (NSIS)
-; Author: Leon Tony Atkinson (latkinson@aqsis.org)
-; Info: Last tested with NSIS 2.15
-; Other: 1. To make updates easier, all message strings have been placed within the top 20-30 lines of this file.
-;        2. To build manually, without using SCons, uncomment lines 10, 14 and 18.
+; Title: Aqsis Installer for Win32/64 (NSIS)
+; Author: Aqsis Team (packages@aqsis.org)
+; Info: Last tested with NSIS 2.21
+; Other: 1. To make updates easier, all message strings have been placed within the top 40-50 lines of this file.
+;        2. To build manually, without using SCons, uncomment lines 10, 11, 15, 19 and 23.
 
 
 ; Helper defines
 !define /date YEAR "%Y"
-;;!define LIBRARY_EXTENSION ".*"
+;;!define PROJECT_ROOT "C:\WINDOWS\Temp\aqsis"
+;;!define USE_DEFS "0"
 
 !define PRODUCT_NAME "Aqsis"
 !define PRODUCT_FULLNAME "Aqsis Renderer"
-;;!define PRODUCT_VERSION "1.2.0"
-!ifndef PRODUCT_VERSION
-	!error "PRODUCT_VERSION not specified"
+;;!define PRODUCT_VERSION_MAJOR "1"
+!ifndef PRODUCT_VERSION_MAJOR
+  !error "PRODUCT_VERSION_MAJOR not specified"
 !endif
-;;!define PRODUCT_FILE_NUMBER "1_2_0"
-!ifndef	PRODUCT_FILE_NUMBER
-	!error "PRODUCT_FILE_NUMBER not specified"
+;;!define PRODUCT_VERSION_MINOR "2"
+!ifndef PRODUCT_VERSION_MINOR
+  !error "PRODUCT_VERSION_MINOR not specified"
+!endif
+;;!define PRODUCT_VERSION_BUILD "0"
+!ifndef PRODUCT_VERSION_BUILD
+  !error "PRODUCT_VERSION_BUILD not specified"
+!endif
+!ifndef PRODUCT_VERSION
+	!define PRODUCT_VERSION "${PRODUCT_VERSION_MAJOR}.${PRODUCT_VERSION_MINOR}.${PRODUCT_VERSION_BUILD}"
 !endif
 !define PRODUCT_PUBLISHER "Aqsis Team"
 !define PRODUCT_COPYRIGHT "Copyright (c) ${YEAR}, ${PRODUCT_PUBLISHER}."
@@ -40,11 +48,11 @@
 
 Name "${PRODUCT_FULLNAME} ${PRODUCT_VERSION}"
 BrandingText "www.aqsis.org"
-OutFile "..\..\..\output\aqsis-setup-${PRODUCT_FILE_NUMBER}.exe"
+OutFile "${PROJECT_ROOT}\output\aqsis-setup-${PRODUCT_VERSION}.exe"
 InstallDir "$PROGRAMFILES\${PRODUCT_NAME}"
-InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
 ShowInstDetails show
 ShowUnInstDetails show
+RequestExecutionLevel admin
 SetCompressor lzma
 CRCCheck on
 XPStyle on
@@ -54,17 +62,38 @@ XPStyle on
 !include "MUI.nsh"
 !define MUI_ABORTWARNING
 !define MUI_UNABORTWARNING
-;;!define MUI_HEADERIMAGE_BITMAP "${NSISDIR}\Contrib\Graphics\Header\nsis.bmp"
-;;!define MUI_HEADERIMAGE_UNBITMAP "${NSISDIR}\Contrib\Graphics\Header\nsis.bmp"
+!define MUI_HEADERIMAGE
+!define MUI_HEADERIMAGE_RIGHT
+!define MUI_HEADERIMAGE_BITMAP "${PROJECT_ROOT}\distribution\win\nsis\header.bmp"
+!define MUI_HEADERIMAGE_UNBITMAP "${PROJECT_ROOT}\distribution\win\nsis\header.bmp"
 !define MUI_ICON "${NSISDIR}\Contrib\Graphics\Icons\modern-install.ico"
 !define MUI_UNICON "${NSISDIR}\Contrib\Graphics\Icons\modern-uninstall.ico"
+!if ${PRODUCT_VERSION_MINOR} == 1
+  !define MUI_WELCOMEFINISHPAGE_BITMAP "${PROJECT_ROOT}\distribution\win\nsis\wizard.bmp"
+  !define MUI_UNWELCOMEFINISHPAGE_BITMAP "${PROJECT_ROOT}\distribution\win\nsis\wizard.bmp"
+!else if ${PRODUCT_VERSION_MINOR} == 3
+  !define MUI_WELCOMEFINISHPAGE_BITMAP "${PROJECT_ROOT}\distribution\win\nsis\wizard.bmp"
+  !define MUI_UNWELCOMEFINISHPAGE_BITMAP "${PROJECT_ROOT}\distribution\win\nsis\wizard.bmp"
+!else if ${PRODUCT_VERSION_MINOR} == 5
+  !define MUI_WELCOMEFINISHPAGE_BITMAP "${PROJECT_ROOT}\distribution\win\nsis\wizard.bmp"
+  !define MUI_UNWELCOMEFINISHPAGE_BITMAP "${PROJECT_ROOT}\distribution\win\nsis\wizard.bmp"
+!else if ${PRODUCT_VERSION_MINOR} == 7
+  !define MUI_WELCOMEFINISHPAGE_BITMAP "${PROJECT_ROOT}\distribution\win\nsis\wizard.bmp"
+  !define MUI_UNWELCOMEFINISHPAGE_BITMAP "${PROJECT_ROOT}\distribution\win\nsis\wizard.bmp"
+!else if ${PRODUCT_VERSION_MINOR} == 9
+  !define MUI_WELCOMEFINISHPAGE_BITMAP "${PROJECT_ROOT}\distribution\win\nsis\wizard.bmp"
+  !define MUI_UNWELCOMEFINISHPAGE_BITMAP "${PROJECT_ROOT}\distribution\win\nsis\wizard.bmp"
+!else
+  !define MUI_WELCOMEFINISHPAGE_BITMAP "${PROJECT_ROOT}\distribution\win\nsis\wizard-${PRODUCT_VERSION_MAJOR}.${PRODUCT_VERSION_MINOR}.bmp"
+  !define MUI_UNWELCOMEFINISHPAGE_BITMAP "${PROJECT_ROOT}\distribution\win\nsis\wizard-${PRODUCT_VERSION_MAJOR}.${PRODUCT_VERSION_MINOR}.bmp"
+!endif
 
 ; Welcome page
 !insertmacro MUI_PAGE_WELCOME
 
 ; License page
 !define MUI_LICENSEPAGE_RADIOBUTTONS
-!insertmacro MUI_PAGE_LICENSE "..\..\..\COPYING"
+!insertmacro MUI_PAGE_LICENSE "${PROJECT_ROOT}\COPYING"
 
 ; Components page
 !insertmacro MUI_PAGE_COMPONENTS
@@ -99,11 +128,11 @@ Page custom AdditionalTasks
 
 ; Reserve files
 !insertmacro MUI_RESERVEFILE_INSTALLOPTIONS
-ReserveFile "page_tasks.ini"
+ReserveFile "${PROJECT_ROOT}\distribution\win\nsis\page_tasks.ini"
 
 
 ; Installer 'Version' tab content
-VIProductVersion "${PRODUCT_VERSION}.0"
+VIProductVersion "${PRODUCT_VERSION_MAJOR}.${PRODUCT_VERSION_MINOR}.${PRODUCT_VERSION_BUILD}.0"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "${PRODUCT_VERSION}"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "FileDescription" "${PRODUCT_FULLNAME}"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "${PRODUCT_COPYRIGHT}"
@@ -123,15 +152,15 @@ InstType "Minimal"
 Section "!Main" SEC01
 SectionIn 1 2
   SetOutPath "$INSTDIR\bin"
-  File "..\..\..\output\bin\aqsisrc"
-  File "..\..\..\output\bin\*.dll"
-  File "..\..\..\output\bin\*.exe"
+  File "${PROJECT_ROOT}\output\bin\aqsisrc"
+  File "${PROJECT_ROOT}\output\bin\*.dll"
+  File "${PROJECT_ROOT}\output\bin\*.exe"
   SetOutPath "$INSTDIR\doc"
-  File "/oname=AUTHORS.txt" "..\..\..\AUTHORS"
-  File "/oname=LICENSE.txt" "..\..\..\COPYING"
-  File "/oname=README.txt" "..\..\..\README"
+  File "/oname=AUTHORS.txt" "${PROJECT_ROOT}\AUTHORS"
+  File "/oname=LICENSE.txt" "${PROJECT_ROOT}\COPYING"
+  File "/oname=README.txt" "${PROJECT_ROOT}\README"
   SetOutPath "$INSTDIR\shaders"
-  File "..\..\..\output\shaders\*.slx"
+  File "${PROJECT_ROOT}\output\shaders\*.slx"
 
   ${ConfigWrite} "$INSTDIR\bin\aqsisrc" 'Option "searchpath" "string shader" ' '["$INSTDIR\shaders"]' $R0
   ${ConfigWrite} "$INSTDIR\bin\aqsisrc" 'Option "searchpath" "string display" ' '["$INSTDIR\bin"]' $R1
@@ -154,13 +183,13 @@ SectionGroup /e "Content" SEC02
   Section "Examples" SEC0201
   SectionIn 1 2
     SetOutPath "$INSTDIR\content\ribs\features\layeredshaders"
-    File /x ".svn" "..\..\..\content\ribs\features\layeredshaders\*.*"
+    File /x ".svn" /x "SConscript" /x "*.sh" "${PROJECT_ROOT}\content\ribs\features\layeredshaders\*.*"
     SetOutPath "$INSTDIR\content\ribs\scenes\vase"
-    File /x ".svn" "..\..\..\content\ribs\scenes\vase\*.*"
+    File /x ".svn" /x "SConscript" /x "*.sh" "${PROJECT_ROOT}\content\ribs\scenes\vase\*.*"
     SetOutPath "$INSTDIR\content\shaders\displacement"
-    File "..\..\..\content\shaders\displacement\dented.sl"
+    File "${PROJECT_ROOT}\content\shaders\displacement\dented.sl"
     SetOutPath "$INSTDIR\content\shaders\light"
-    File "..\..\..\content\shaders\light\shadowspot.sl"
+    File "${PROJECT_ROOT}\content\shaders\light\shadowspot.sl"
     
 
   ; Shortcuts
@@ -172,19 +201,25 @@ SectionGroup /e "Content" SEC02
     !insertmacro MUI_STARTMENU_WRITE_END
   SectionEnd
 
-  Section /o "Source Shaders" SEC0202
+  Section /o "Scripts" SEC0202
+  SectionIn 1
+    SetOutPath "$INSTDIR\scripts"
+    File "${PROJECT_ROOT}\output\scripts\*.*"
+  SectionEnd
+
+  Section /o "Source Shaders" SEC0203
   SectionIn 1
     SetOutPath "$INSTDIR\shaders"
-    File "..\..\..\output\shaders\*.sl"
+    File "${PROJECT_ROOT}\output\shaders\*.sl"
   SectionEnd
 SectionGroupEnd
 
 Section "Documentation" SEC03
 SectionIn 1 2
   SetOutPath "$INSTDIR\doc"
-  ;;File "/oname=CHANGES.txt" "..\..\..\output\ChangeLog"
-  File "/oname=INSTALL.txt" "..\..\..\INSTALL"
-  File "/oname=NOTES.txt" "..\..\..\ReleaseNotes"
+  ;;File "/oname=CHANGES.txt" "${PROJECT_ROOT}\output\ChangeLog"
+  File "/oname=INSTALL.txt" "${PROJECT_ROOT}\INSTALL"
+  File "/oname=NOTES.txt" "${PROJECT_ROOT}\ReleaseNotes"
 
 ; Shortcuts
   !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
@@ -193,20 +228,29 @@ SectionIn 1 2
   !insertmacro MUI_STARTMENU_WRITE_END
 SectionEnd
 
-Section /o "Other" SEC04
+Section /o "Libraries" SEC04
 SectionIn 1
   SetOutPath "$INSTDIR\include\aqsis"
-  File "..\..\..\output\include\aqsis\*.h"
+  File "${PROJECT_ROOT}\output\include\aqsis\*.h"
+  File "${PROJECT_ROOT}\output\include\aqsis\*.inl"
   SetOutPath "$INSTDIR\lib"
-  File "..\..\..\output\lib\*${LIBRARY_EXTENSION}"
+  File "${PROJECT_ROOT}\output\bin\libaqsis.a"
+  File "${PROJECT_ROOT}\output\bin\libaqsistypes.a"
+  File "${PROJECT_ROOT}\output\bin\libri2rib.a"
+  File "${PROJECT_ROOT}\output\bin\libshadervm.a"
+  File "${PROJECT_ROOT}\output\bin\libslxargs.a"
+  !if ${USE_DEFS} != 0
+    File "${PROJECT_ROOT}\output\bin\aqsis.def"
+  !endif
 SectionEnd
 
 ; Section descriptions
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
   !insertmacro MUI_DESCRIPTION_TEXT ${SEC01} "Rendering application and essential files only"
-  !insertmacro MUI_DESCRIPTION_TEXT ${SEC02} "Examples and shader source files"
+  !insertmacro MUI_DESCRIPTION_TEXT ${SEC02} "Examples, scripts and shader source files"
   !insertmacro MUI_DESCRIPTION_TEXT ${SEC0201} "Example files (.rib)"
-  !insertmacro MUI_DESCRIPTION_TEXT ${SEC0202} "Generic shader source files (.sl)"
+  !insertmacro MUI_DESCRIPTION_TEXT ${SEC0202} "Script files (.py)"
+  !insertmacro MUI_DESCRIPTION_TEXT ${SEC0203} "Generic shader source files (.sl)"
   !insertmacro MUI_DESCRIPTION_TEXT ${SEC03} "User guides and other information"
   !insertmacro MUI_DESCRIPTION_TEXT ${SEC04} "Include and library files"
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
@@ -254,7 +298,7 @@ Var /GLOBAL QUICKLAUCH_ICON
     path_nt_all_end:
 
   ; Create 'Desktop' icon
-  !insertmacro MUI_INSTALLOPTIONS_READ $DESKTOP_ICON "page_tasks.ini" "Field 3" "State"
+  !insertmacro MUI_INSTALLOPTIONS_READ $DESKTOP_ICON "page_tasks.ini" "Field 4" "State"
   StrCmp $DESKTOP_ICON "1" "desktop" "desktop_end"
     desktop:
     SetOutPath "$INSTDIR\bin"
@@ -262,7 +306,7 @@ Var /GLOBAL QUICKLAUCH_ICON
     desktop_end:
 
   ; Create 'Quick Launch' icon
-  !insertmacro MUI_INSTALLOPTIONS_READ $QUICKLAUCH_ICON "page_tasks.ini" "Field 4" "State"
+  !insertmacro MUI_INSTALLOPTIONS_READ $QUICKLAUCH_ICON "page_tasks.ini" "Field 5" "State"
   StrCmp $QUICKLAUCH_ICON "1" "quicklaunch" "quicklaunch_end"
     quicklaunch:
     SetOutPath "$INSTDIR\bin"
@@ -270,15 +314,15 @@ Var /GLOBAL QUICKLAUCH_ICON
     quicklaunch_end:
 
   ; Create 'AQSISHOME' for all users
-  !insertmacro MUI_INSTALLOPTIONS_READ $AQSISHOME "page_tasks.ini" "Field 5" "State"
+  !insertmacro MUI_INSTALLOPTIONS_READ $AQSISHOME "page_tasks.ini" "Field 6" "State"
   StrCmp $AQSISHOME "1" "aqsishome" "aqsishome_end"
     aqsishome:
-    WriteRegStr HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "AQSISHOME" "$INSTDIR\bin"
+    WriteRegStr HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "AQSISHOME" "$INSTDIR"
     SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
     aqsishome_end:
 
   ; Create file association(s)
-  !insertmacro MUI_INSTALLOPTIONS_READ $FILE_EXTENSION "page_tasks.ini" "Field 6" "State"
+  !insertmacro MUI_INSTALLOPTIONS_READ $FILE_EXTENSION "page_tasks.ini" "Field 7" "State"
   StrCmp $FILE_EXTENSION "1" "file" "file_end"
     file:
     WriteRegStr HKCR ".rib" "" "Aqsis.RIB"
@@ -325,7 +369,7 @@ SectionEnd
 
 
 Function .onInit
-  !insertmacro MUI_INSTALLOPTIONS_EXTRACT "page_tasks.ini"
+  !insertmacro MUI_INSTALLOPTIONS_EXTRACT_AS "${PROJECT_ROOT}\distribution\win\nsis\page_tasks.ini" "page_tasks.ini"
 FunctionEnd
 
 
@@ -347,6 +391,10 @@ Function un.onInit
 FunctionEnd
 
 
+; Uninstaller
+!include "WordFunc.nsh"
+!insertmacro un.WordReplace
+
 Section Uninstall
   !insertmacro MUI_STARTMENU_GETFOLDER "Application" $ICONS_GROUP
   Delete "$DESKTOP\${PRODUCT_FULLNAME} ${PRODUCT_VERSION}.lnk"
@@ -356,6 +404,16 @@ Section Uninstall
   RMDir "$SMPROGRAMS\${PRODUCT_FULLNAME}"
 
   RMDir /r "$INSTDIR"
+
+  ReadRegStr $PATH_NT HKCU "Environment" "PATH"
+  ${un.WordReplace} "$PATH_NT" "$INSTDIR\bin;" "" "+" $PATH
+  WriteRegStr HKCU "Environment" "PATH" "$PATH"
+
+  ReadRegStr $PATH_NT_ALL HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "PATH"
+  ${un.WordReplace} "$PATH_NT_ALL" "$INSTDIR\bin;" "" "+" $PATH
+  WriteRegStr HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "PATH" "$PATH"
+
+  DeleteRegValue HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "AQSISHOME"
 
   DeleteRegKey HKCR ".rib"
   DeleteRegKey HKCR "Aqsis.RIB"
@@ -368,6 +426,6 @@ Section Uninstall
 
   DeleteRegKey ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}"
   DeleteRegKey HKLM "${PRODUCT_DIR_REGKEY}"
-  
+
   SetAutoClose true
 SectionEnd

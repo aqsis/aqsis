@@ -70,6 +70,11 @@ START_NAMESPACE( Aqsis )
 //
 #define WITHFILTER       1
 
+//
+// #define FASTLOG2 if you want to experiment with integer/float multiplication
+// replacement for log2() see fastlog2()
+//
+
 // Local Constants
 typedef enum {
     PX,
@@ -212,6 +217,7 @@ static RtFilterFunc CalculateFilter(CqString filter)
 */
 static TqFloat fastlog2(TqFloat a)
 {
+#ifdef FASTLOG2
 	register TqFloat x,y;
 	x = *(int*)&a;
 	x*= 1.19209e-007; /* pow(2.0, -23) */
@@ -221,6 +227,11 @@ static TqFloat fastlog2(TqFloat a)
 	y = x - floor(x);
 	y = (y - y *y) * 0.346607f;
 	return x+y;
+#else
+static TqFloat invLog2 =  1.0f/::log(2.0f);
+
+    return ::log(a) * invLog2;
+#endif
 }
 
 //---------------------------------------------------------------------
@@ -241,7 +252,12 @@ TqPuchar CqTextureMapBuffer::AllocSegment( TqUlong width, TqUlong height, TqInt 
 		const TqInt * poptMem = QGetRenderContextI() ->GetIntegerOption( "limits", "texturememory" );
 		limit = MEG1;
 		if ( poptMem )
-			limit = poptMem[ 0 ] * 1024;
+		{
+			if ( poptMem[0] < INT_MAX/1024)
+				limit = poptMem[ 0 ] * 1024;
+			else  limit = INT_MAX;
+		}
+		Aqsis::log() << info << "Set the cache limit to be " << limit << std::endl;
 	}
 
 	TqInt more = QGetRenderContext() ->Stats().GetTextureMemory() + demand;
@@ -381,6 +397,7 @@ void CqTextureMap::CriticalMeasure()
 		 */
 		for ( j = m_TextureMap_Cache.begin(); j != m_TextureMap_Cache.end(); j++ )
 		{
+			Aqsis::log() << info << "Texture cache: freeing memory used by \"" << (*j)->getName().c_str() << "\"" << std::endl;
 			// the original segments (flat tiles)  are the first to go 
 			i = (*j)->m_apFlat.begin(); 
 			e = (*j)->m_apFlat.end(); 
@@ -451,7 +468,6 @@ void CqTextureMap::Close()
  */
 TqBool CqTextureMap::CreateMIPMAP( TqBool fProtectBuffers )
 {
-
 	if ( m_pImage != 0 )
 	{
 		// Check if the format is normal scanline, otherwise we are unable to MIPMAP it yet.
@@ -463,40 +479,58 @@ TqBool CqTextureMap::CreateMIPMAP( TqBool fProtectBuffers )
 			return( TqFalse );
 		}
 		// Read the whole image into a buffer.
-		CqTextureMapBuffer * pBuffer = GetBuffer( 0, 0, 0, fProtectBuffers );
+		CqTextureMapBuffer* pBuffer = GetBuffer( 0, 0, 0, fProtectBuffers );
+		TqInt prevdistance = 0;
+		TqInt prevxres = m_XRes;
+		TqInt prevyres = m_YRes;
+		TqInt currxres = m_XRes;
+		TqInt curryres = m_YRes;
+		TqFloat swidth = 0;
+		TqFloat twidth = 0;
 
-		TqInt m_xres = m_XRes;
-		TqInt m_yres = m_YRes;
 		TqInt directory = 0;
 
 		do
 		{
-			CqTextureMapBuffer* pTMB = CreateBuffer( 0, 0, m_xres, m_yres, directory, fProtectBuffers );
+			CqImageFilter filter(swidth, twidth, prevxres, prevyres, m_FilterFunc);
+			CqTextureMapBuffer* pTMB = CreateBuffer( 0, 0, currxres, curryres, directory, fProtectBuffers );
+			CqTextureMapBuffer* pPrevBuffer = GetBuffer(0, 0, directory - prevdistance, fProtectBuffers );
 
 			if ( pTMB->pVoidBufferData() != NULL )
 			{
-				for ( TqInt y = 0; y < m_yres; y++ )
+				for ( TqInt y = 0; y < curryres; y++ )
 				{
 					//unsigned char accum[ 4 ];
 					std::vector<TqFloat> accum;
-					for ( TqInt x = 0; x < m_xres; x++ )
+					for ( TqInt x = 0; x < currxres; x++ )
 					{
-						ImageFilterVal( pBuffer, x, y, directory, m_xres, m_yres, accum );
+						filter.ImageFilterVal( pPrevBuffer, x, y, SamplesPerPixel(), currxres, curryres, accum );
 
 						for ( TqInt sample = 0; sample < m_SamplesPerPixel; sample++ )
 							pTMB->SetValue( x, y, sample, accum[ sample ] );
 					}
 				}
-				m_apFlat.push_back( pTMB );
+				m_apMipMaps[directory%256].push_back( pTMB );
 				m_apLast[directory%256] = pTMB;
 			}
 
-			m_xres /= 2;
-			m_yres /= 2;
+			currxres /= 2;
+			curryres /= 2;
 			directory++;
+			swidth = m_swidth*(1<<prevdistance);
+			twidth = m_twidth*(1<<prevdistance);
 
+			if(prevdistance < 2)
+			{
+				prevdistance += 1;
+			}
+			else
+			{
+				prevxres /= 2;
+				prevyres /= 2;
+			}
 		}
-		while ( ( m_xres > 2 ) && ( m_yres > 2 ) ) ;
+		while ( ( currxres > 1 ) && ( curryres > 1 ) ) ;
 	}
 	return( TqTrue );
 }
@@ -508,13 +542,10 @@ TqBool CqTextureMap::CreateMIPMAP( TqBool fProtectBuffers )
  */
 CqTextureMap::~CqTextureMap()
 {
+	// Close the file.
+	Close();
 	// Search for it in the cache and remove the reference.
 	std::vector<CqTextureMap*>::iterator i;
-
-	if (IsVerbose())
-	{
-		Aqsis::log() << warning << m_strName.c_str() << " its directory is now " << m_Directory << std::endl;
-	}
 
 	for ( i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
 	{
@@ -1144,82 +1175,59 @@ void CqTextureMap::Interpreted( TqPchar mode )
   *   (X1,Y1) and (X2,Y2) (-0.5, -0.5) ... (0.5, 0.5) giving 9 samples -0.5, 0.0, 0.5 in X and in Y.
   *
   **/
-void CqTextureMap::ImageFilterVal( CqTextureMapBuffer* pData, TqInt x, TqInt y, TqInt directory,  TqInt m_xres, TqInt m_yres, std::vector<TqFloat>& accum )
+void CqTextureMap::CqImageFilter::ImageFilterVal( CqTextureMapBuffer* pData, TqInt x, TqInt y, TqInt samplesPerPixel,  TqInt xres, TqInt yres, std::vector<TqFloat>& accum )
 {
-	RtFilterFunc pFilter = m_FilterFunc;
-
-	TqInt delta = ( 1 << directory );
-	TqFloat div = 0.0;
-	TqFloat mul;
-	TqFloat fx, fy;
-	register TqInt isample;
-	TqInt xdelta = MAX(FLOOR(m_swidth) * (delta/2), 1);
-	TqInt ydelta = MAX(FLOOR(m_twidth) * (delta/2), 1);
-	TqInt xdelta2 = xdelta * 2;
-	TqInt ydelta2 = ydelta * 2;
-
-
-	// Increase the precision after the middle (0.5 and up make sure we will hit the borner at 1.0)
-	fx = (TqFloat) (x)/ (TqFloat) (m_xres - 1);
-
-
-	// Increase the precision after the middle (0.5 and up make sure we will hit the borner at 1.0)
-	fy = (TqFloat) (y)/ (TqFloat) (m_yres - 1 );
-
-
 	// Clear the accumulator
-	accum.assign( SamplesPerPixel(), 0.0f );
+	accum.assign( samplesPerPixel, 0.0f );
 
-	if ( directory )
+	TqInt isample;
+	TqInt sampleCol, sampleRow;
+	TqFloat div = 0.0f;
+
+	TqFloat heightTransform = static_cast<TqFloat>(m_yres)/static_cast<TqFloat>(yres);
+	TqFloat widthTransform = static_cast<TqFloat>(m_xres)/static_cast<TqFloat>(xres);
+
+	for ( isample = 0; isample < samplesPerPixel; isample++ )
+		accum[ isample ]= 0.0;
+	
+	TqInt fx = static_cast<TqInt>(CEIL((m_swidth-1)/2));
+	TqInt fy = static_cast<TqInt>(CEIL((m_twidth-1)/2));
+	TqInt weightOffset = 0;
+
+	for ( sampleRow = y-fy; sampleRow <= y+fy; sampleRow++ )
 	{
-		TqInt i, j;
-
-		for ( isample = 0; isample < SamplesPerPixel(); isample++ )
-			accum[ isample ]= 0.0;
-
-		/* From -twidth to +twidth */
-		for ( j = - ydelta; j <= ydelta; j++ )
+		TqInt ypos = static_cast<TqInt>(heightTransform * sampleRow);
+		// \todo: This behaviour should be based on the wrap mode.
+		if (ypos < 0) ypos = 0;
+		if (ypos > (TqInt) m_yres - 1) ypos = m_yres - 1;
+		for ( sampleCol = x-fx; sampleCol <= x+fx; sampleCol++)
 		{
-			/* From -swidth to +swidth */
-			for ( i = -xdelta; i <= xdelta; i++)
+			/* find the filter value */
+			TqFloat weight = m_weights[weightOffset++];
+
+			TqInt xpos = static_cast<TqInt>(widthTransform * sampleCol);
+			// \todo: This behaviour should be based on the wrap mode.
+			if (xpos < 0) xpos = 0;
+			if (xpos > (TqInt) m_xres - 1) xpos = m_xres - 1;
+			if( (weight != 0.0) && (sampleCol>=0) && (sampleCol<m_xres) && (sampleRow>=0) && (sampleRow<m_yres) )
 			{
-				/* find the filter value */
-				mul = ( *pFilter ) ( (TqFloat) i, (TqFloat) j, (TqFloat) xdelta2, (TqFloat) ydelta2 );
-				if (mul == 0.0)
-					continue;
+				for ( isample = 0; isample < samplesPerPixel; isample++ )
+					accum[ isample ] += (pData->GetValue( xpos, ypos, isample ) * weight);
 
-				/* find the value in the original image */
-				TqInt ypos = (TqInt) (fy*m_YRes-1) + j;
-				TqInt xpos = (TqInt) (fx*m_XRes-1) + i;
-				if (ypos < 0)
-					continue;
-				if (xpos < 0)
-					continue;
-				if (ypos > (TqInt) m_YRes - 1)
-					continue;
-				if (xpos > (TqInt) m_XRes - 1)
-					continue;
-				/* ponderate the value */
-				for ( isample = 0; isample < SamplesPerPixel(); isample++ )
-					accum[ isample ] += (pData->GetValue( xpos, ypos, isample ) * mul);
-
-				/* accumulate the ponderation factor */
-				div += mul;
+				/* accumulate the weighting factor */
+				div += weight;
 			}
 		}
-
-		/* use the accumulated ponderation factor */
-		for ( isample = 0; isample < SamplesPerPixel(); isample++ )
-			accum[ isample ] /= static_cast<TqFloat>( div );
 	}
-	else
+
+	/* use the accumulated weighting factor */
+	for ( isample = 0; isample < samplesPerPixel; isample++ )
 	{
-		/* copy the byte don't bother much */
-		for ( isample = 0; isample < SamplesPerPixel(); isample++ )
-			accum[ isample ] = ( pData->GetValue( x, y, isample ) );
-
+		TqFloat sampleVal = accum[isample];
+		sampleVal /= div;
+		sampleVal = CLAMP(sampleVal, 0.0f, 1.0f);
+		accum[ isample ] = sampleVal;
 	}
-
 }
 
 //---------------------------------------------------------------------
@@ -1309,8 +1317,9 @@ void CqTextureMap::Open()
 
 		/* Second test; is it containing enough directories for us */
 		TqInt min = MIN(m_XRes, m_YRes );
-		TqInt directory = static_cast<TqInt>(::log((double) min)/::log((double) 2.0));
-		bMipMap &= TIFFSetDirectory(m_pImage, directory - 1);
+		TqInt directory = static_cast<TqInt>(fastlog2(static_cast<TqFloat> (min)));
+		if (TIFFSetDirectory(m_pImage, directory - 1) == TqFalse)
+		   bMipMap &= TIFFSetDirectory(m_pImage, directory - 2);
 
 
 		TIFFSetDirectory(m_pImage, 0 );

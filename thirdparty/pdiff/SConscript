@@ -14,16 +14,18 @@ pdiff_headers = Split("""
 	RGBAImage.h
 	""")
 
-pdiffenv = env.Copy()
+if env['with_pdiff']:
+	pdiffenv = env.Copy()
 
-# Set any platform specific options for this target
-pdiffenv.UseTargetOptions('pdiff')
+	pdiffenv.AppendUnique(LIBS = ['$tiff_lib', '$z_lib'])
+	pdiffenv.AppendUnique(CPPPATH=['$tiff_include_path', '$zlib_include_path'])
 
-pdiff = pdiffenv.Program('pdiff', pdiff_sources)
-pdiffenv.Install('$BINDIR', pdiff)
+	pdiffenv.UseTargetOptions('pdiff')
 
-env.Distribute('aqsis/thirdparty/iv', pdiff_sources)
-env.Distribute('aqsis/thirdparty/iv', pdiff_headers)
-env.Distribute('aqsis/thirdparty/iv', 'SConscript')
+	pdiff = pdiffenv.Program('pdiff', pdiff_sources)
+	pdiffenv.Install('$BINDIR', pdiff)
 
-Return('pdiff')
+env.Distribute(pdiff_sources)
+env.Distribute(pdiff_headers)
+env.Distribute('SConscript')
+

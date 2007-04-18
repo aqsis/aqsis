@@ -835,14 +835,12 @@ class BtoRSettings(BtoRObject): # an instance of this class should be passed to 
 		
 	def select(self, file):
 		path = os.path.dirname(file)
+		print path
 		if not os.path.exists(path):
 			self.evt_manager.showErrorDialog("That path does not exist!", "Error! That path does not exist! Please choose one that does.")
 		else:
-			if self.activeButton == self.shaderBrowse:
-				self.shaderPathList = path		
-			elif self.activeButton == self.outputBrowse:
-				self.outputPath = path
-			self.update(None)
+			self.outputpath.setValue(path)
+			
 		
 	def getEditor(self):
 		return self.editor	
@@ -1649,12 +1647,21 @@ class SceneSettings(BtoRObject):
 		ri.RiPixelSamples(1, 1)
 		ri.RiPixelFilter("box", 1, 1)			
 		ri.RiHider("hidden", {"uniform float jitter" : [0], "uniform string depthfilter" : "midpoint"})
-
+		
 		ri.RiDisplay(shadowFile, "zfile", "z")			
 		if light.getProperty("ShowZBuffer"):
-			ri.RiDisplay("+view_from_light" + shadowName, "zframebuffer", "z")
+			ri.RiDisplay("+view_from_light " + shadowName, "zframebuffer", "z")
 		projection = light.getRenderProjection()			
-		ri.RiProjection(projection, "fov", 92) # 92 degrees projection
+		if projection == "orthographic":
+			ri.RiProjection(projection)
+			# setup the clipping ratio
+			xrange = light.getClippingRange()
+			#ri.RiClipping(0.1, 1000)
+			ri.RiClipping(xrange[0], xrange[1])
+			screenVal = int(light.getProperty("ShadowMapWindow"))
+			ri.RiScreenWindow(0 - screenVal, screenVal, 0 - screenVal, screenVal)
+		else:
+			ri.RiProjection(projection, "fov", 92) # 92 degrees projection
 		ri.RiShadingRate(4.0)
 		light.doCameraTransform(direction)
 		ri.RiWorldBegin()
@@ -1709,8 +1716,9 @@ class SceneSettings(BtoRObject):
 						if light.getProperty("GenShadowMap"):
 							# print light.object.getName()
 							#print dir(light)
-							shadows = self.shadows[light.objData["name"]]								
-							light.setShadowParms(shadows)
+							if self.shadows.has_key(light.objData["name"]):
+								shadows = self.shadows[light.objData["name"]]								
+								light.setShadowParms(shadows)
 					light.render()
 		else:
 			if lm.getProperty("UseAmbient"):
@@ -1721,8 +1729,9 @@ class SceneSettings(BtoRObject):
 				frame = Blender.Get("curframe")
 				if self.lighting.getProperty("GenShadowMaps"):
 					if light.getProperty("GenShadowMap"):
-						shadows = self.shadows[light.objData["name"]]			
-						light.setShadowParms(shadows)	
+						if self.shadows.has_key(light.objData["name"]):
+							shadows = self.shadows[light.objData["name"]]			
+							light.setShadowParms(shadows)	
 				light.render()
 				
 					
@@ -2078,7 +2087,10 @@ class ObjectEditor(BtoRObject):
 		self.close_button.radius = 1.5
 		# close_func = self.close_button.callFactory(self.evt_manager.removeElement, self.editor)
 		self.close_button.registerCallback("release", self.close)
-
+		
+		self.reset_button = ui.Button(15, 50, 130, 15, "Reset", "Reset Object Data", 'small', self.editorPanel, True)
+		self.reset_button.registerCallback("release", self.resetObject)
+		
 		self.objEditorPanel = ui.Panel(4, 70, 491,  280, "Empty Panel", "", None, False) # keep this one invisible
 		self.objEditorPanel.isVisible = False
 		self.objEditorPanel.hasHeader = False
@@ -2166,6 +2178,23 @@ class ObjectEditor(BtoRObject):
 		# and finally, object checks/resets for interested objects
 		self.objData.checkReset()
 		
+	def resetObject(self, button):
+		""" reset this object's data """
+		if self.objData != None:
+			try:			
+				self.editorPanel.removeElement(self.objEditorPanel)	
+			except: 
+				print "No panel found"
+			try:
+				objName = self.objData.object.getName() 
+				self.scene.object_data.pop(objName) #removes the reference from objectData
+				self.objData = None
+				self.objEditorPanel = None
+				print "reselecting ", objName
+				self.selectObject(Blender.Object.Get(objName))
+			except:
+				print "Bad things happened"
+				traceback.print_exc()
 		
 	def selectMaterial(self, button):
 		# set the material in the current object adapter
@@ -3445,7 +3474,9 @@ class GenericShader(BtoRObject):
 				self.shader = cgkit.rmshader.RMShader()
 				self.initCompiledShaderParams(self.shaderParms, self.shader)				
 				self.setupParamProperties()
-				 
+		else:
+			self.shader = cgkit.rmshader.RMShader()
+			
 		if self.shader == None:
 			self.shader = cgkit.rmshader.RMShader() # blank shader
 			

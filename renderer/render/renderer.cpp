@@ -362,6 +362,27 @@ boost::shared_ptr<CqModeBlock>	CqRenderer::BeginMotionModeBlock( TqInt N, TqFloa
 		return boost::shared_ptr<CqModeBlock>( );
 }
 
+//---------------------------------------------------------------------
+/** Create a new resource context.
+ */
+
+boost::shared_ptr<CqModeBlock>	CqRenderer::BeginResourceModeBlock()
+{
+	// XXX: Error checking may eventually be unnecessary.  - ajb
+	if ( m_pconCurrent )
+	{
+		boost::shared_ptr<CqModeBlock> pconNew = m_pconCurrent->BeginResourceModeBlock();
+		if ( pconNew )
+		{
+			m_pconCurrent = pconNew;
+			return ( pconNew );
+		}
+		else
+			return boost::shared_ptr<CqModeBlock>( );
+	}
+	else
+		return boost::shared_ptr<CqModeBlock>( );
+}
 
 //----------------------------------------------------------------------
 /** Delete the current context presuming it is a main context.
@@ -480,6 +501,19 @@ void	CqRenderer::EndMotionModeBlock()
 	}
 }
 
+//
+//----------------------------------------------------------------------
+/** Delete the current context presuming it is a resource context.
+ */
+
+void	CqRenderer::EndResourceModeBlock()
+{
+	if ( m_pconCurrent && (m_pconCurrent->Type() == Resource))
+	{
+		m_pconCurrent->EndResourceModeBlock();
+		m_pconCurrent = m_pconCurrent->pconParent();
+	}
+}
 
 //----------------------------------------------------------------------
 /** Get the current shutter time, always returns 0.0 unless within a motion block,
@@ -1287,7 +1321,7 @@ boost::shared_ptr<IqShader> CqRenderer::getDefaultSurfaceShader()
 	}
 
 	// insert the default surface template into the map
-	boost::shared_ptr<IqShader> pRet( new CqShaderVM() );
+	boost::shared_ptr<IqShader> pRet( new CqShaderVM(this) );
 	pRet->SetType( Type_Surface );
 	CqShaderVM* pShader = static_cast<CqShaderVM*>( pRet.get() );
 	pShader->SetstrName( "_def_" );
@@ -1333,7 +1367,7 @@ boost::shared_ptr<IqShader> CqRenderer::CreateShader(
 	CqRiFile SLXFile( strFilename.c_str(), "shader" );
 	if ( SLXFile.IsValid() )
 	{
-		boost::shared_ptr<IqShader> pRet( new CqShaderVM() );
+		boost::shared_ptr<IqShader> pRet( new CqShaderVM(this) );
 
 		CqShaderVM* pShader = static_cast<CqShaderVM*>( pRet.get() );
 		const CqString* poptDSOPath = QGetRenderContext()->
@@ -1381,7 +1415,7 @@ boost::shared_ptr<IqShader> CqRenderer::CreateShader(
 		}
 		if ( type == Type_Surface )
 		{
-			boost::shared_ptr<IqShader> pRet( new CqShaderVM() );
+			boost::shared_ptr<IqShader> pRet( new CqShaderVM(this) );
 
 			pRet->SetType( type );
 			CqShaderVM* pShader = static_cast<CqShaderVM*>(
@@ -1542,7 +1576,7 @@ IqShader* CqRenderer::CreateShader( const char* strName, EqShaderType type )
 		CqRiFile SLXFile( strFilename.c_str(), "shader" );
 		if ( SLXFile.IsValid() )
 		{
-			CqShaderVM * pShader = new CqShaderVM();
+			CqShaderVM * pShader = new CqShaderVM(this);
 			const CqString *poptDSOPath = QGetRenderContext()->poptCurrent()->GetStringOption( "searchpath","shader" );
 			pShader->SetDSOPath( poptDSOPath );
 
@@ -1564,7 +1598,7 @@ IqShader* CqRenderer::CreateShader( const char* strName, EqShaderType type )
 			}
 			if( type == Type_Surface )
 			{
-				CqShaderVM * pShader = new CqShaderVM();
+				CqShaderVM * pShader = new CqShaderVM(this);
 				pShader->SetstrName( "null" );
 				pShader->DefaultSurface();
 				RegisterShader( strName, type, pShader );

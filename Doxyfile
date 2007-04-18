@@ -93,6 +93,7 @@ INPUT                  = ./aqsistypes \
                          ./renderer/ddmanager \
                          ./renderer/raytrace \
                          ./renderer/render \
+                         ./rib/miqser \
                          ./rib/ri2rib \
                          ./rib/rib2 \
                          ./rib/rib2ri \

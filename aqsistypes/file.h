@@ -47,7 +47,7 @@ START_NAMESPACE( Aqsis )
 /** \class CqFile
  *  \brief Standard handling of all file types utilising the searchpath options.
  */
-class CqFile
+class COMMON_SHARE CqFile
 {
 	public:
 		/** Default constructor

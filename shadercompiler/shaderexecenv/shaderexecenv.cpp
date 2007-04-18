@@ -132,7 +132,7 @@ TqInt	gDefLightUses = ( 1 << EnvVars_P ) | ( 1 << EnvVars_L ) | ( 1 << EnvVars_P
 /** Constructor.
  */
 
-CqShaderExecEnv::CqShaderExecEnv() : m_li( 0 ), m_Illuminate( 0 ), m_pAttributes( 0 ), m_LocalIndex( 0 )
+CqShaderExecEnv::CqShaderExecEnv(IqRenderer* pRenderContext) : m_li( 0 ), m_Illuminate( 0 ), m_pAttributes( 0 ), m_pRenderContext(pRenderContext), m_LocalIndex( 0 )
 {
 	m_apVariables.resize( EnvVars_Last );
 	TqInt i;
@@ -261,10 +261,10 @@ void CqShaderExecEnv::Initialise( const TqInt uGridRes, const TqInt vGridRes, Tq
 		// First try setting this to the shutter open time
 		// @todo: Think about an algorithm which distributes samples in time
 
-		const TqFloat* shutter = QGetRenderContextI()->GetFloatOption( "System", "Shutter" );
+		const TqFloat* shutter = getRenderContext()->GetFloatOption( "System", "Shutter" );
 		if( shutter )
 		{
-			const TqFloat* shutteroffset = QGetRenderContextI()->GetFloatOption( "shutter", "offset" );
+			const TqFloat* shutteroffset = getRenderContext()->GetFloatOption( "shutter", "offset" );
 			float offset = 0;
 			if( shutteroffset != 0 )
 			{

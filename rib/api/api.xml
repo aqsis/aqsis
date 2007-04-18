@@ -1,10 +1,18 @@
-<?xml version="1.0" ?>
+<?xml version="1.0"?>
 <RiAPI>
 	<Procedures>
-		<Procedure name="RiDeclare" return="RtToken">
+		<Procedure>
+			<Name>RiDeclare</Name>
+			<ReturnType>RtToken</ReturnType>
 			<Arguments>
-				<Argument name="name" type="RtString"/>
-				<Argument name="declaration" type="RtString"/>
+				<Argument>
+					<Name>name</Name>
+					<Type>RtString</Type>
+				</Argument>
+				<Argument>
+					<Name>declaration</Name>
+					<Type>RtString</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<Outside/>
@@ -19,17 +27,24 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiBegin" return="RtVoid">
+		<Procedure>
+			<Name>RiBegin</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<NoCache/>
 			<Arguments>
-				<Argument name="name" type="RtToken"/>
+				<Argument>
+					<Name>name</Name>
+					<Type>RtToken</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<Outside/>
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiEnd" return="RtVoid">
+		<Procedure>
+			<Name>RiEnd</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<NoCache/>
 			<Arguments/>
 			<Valid>
@@ -37,23 +52,32 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiFrameBegin" return="RtVoid">
+		<Procedure>
+			<Name>RiFrameBegin</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="number" type="RtInt"/>
+				<Argument>
+					<Name>number</Name>
+					<Type>RtInt</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<BeginEnd/>
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiFrameEnd" return="RtVoid">
+		<Procedure>
+			<Name>RiFrameEnd</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments/>
 			<Valid>
 				<Frame/>
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiWorldBegin" return="RtVoid">
+		<Procedure>
+			<Name>RiWorldBegin</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments/>
 			<Valid>
 				<BeginEnd/>
@@ -61,18 +85,31 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiWorldEnd" return="RtVoid">
+		<Procedure>
+			<Name>RiWorldEnd</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments/>
 			<Valid>
 				<World/>
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiFormat" return="RtVoid">
+		<Procedure>
+			<Name>RiFormat</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="xresolution" type="RtInt"/>
-				<Argument name="yresolution" type="RtInt"/>
-				<Argument name="pixelaspectratio" type="RtFloat"/>
+				<Argument>
+					<Name>xresolution</Name>
+					<Type>RtInt</Type>
+				</Argument>
+				<Argument>
+					<Name>yresolution</Name>
+					<Type>RtInt</Type>
+				</Argument>
+				<Argument>
+					<Name>pixelaspectratio</Name>
+					<Type>RtFloat</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<BeginEnd/>
@@ -80,9 +117,14 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiFrameAspectRatio" return="RtVoid">
+		<Procedure>
+			<Name>RiFrameAspectRatio</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="frameratio" type="RtFloat"/>
+				<Argument>
+					<Name>frameratio</Name>
+					<Type>RtFloat</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<BeginEnd/>
@@ -90,12 +132,26 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiScreenWindow" return="RtVoid">
+		<Procedure>
+			<Name>RiScreenWindow</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="left" type="RtFloat"/>
-				<Argument name="right" type="RtFloat"/>
-				<Argument name="bottom" type="RtFloat"/>
-				<Argument name="top" type="RtFloat"/>
+				<Argument>
+					<Name>left</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>right</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>bottom</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>top</Name>
+					<Type>RtFloat</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<BeginEnd/>
@@ -103,12 +159,26 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiCropWindow" return="RtVoid">
+		<Procedure>
+			<Name>RiCropWindow</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="left" type="RtFloat"/>
-				<Argument name="right" type="RtFloat"/>
-				<Argument name="top" type="RtFloat"/>
-				<Argument name="bottom" type="RtFloat"/>
+				<Argument>
+					<Name>left</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>right</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>top</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>bottom</Name>
+					<Type>RtFloat</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<BeginEnd/>
@@ -116,10 +186,18 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiProjection" return="RtVoid">
+		<Procedure>
+			<Name>RiProjection</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="name" type="RtToken"/>
-				<Argument name="plist" type="PARAMETERLIST"/>
+				<Argument>
+					<Name>name</Name>
+					<Type>RtToken</Type>
+				</Argument>
+				<Argument>
+					<Name>plist</Name>
+					<Type>PARAMETERLIST</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<BeginEnd/>
@@ -127,10 +205,18 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiClipping" return="RtVoid">
+		<Procedure>
+			<Name>RiClipping</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="cnear" type="RtFloat"/>
-				<Argument name="cfar" type="RtFloat"/>
+				<Argument>
+					<Name>cnear</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>cfar</Name>
+					<Type>RtFloat</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<BeginEnd/>
@@ -138,11 +224,22 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiDepthOfField" return="RtVoid">
+		<Procedure>
+			<Name>RiDepthOfField</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="fstop" type="RtFloat"/>
-				<Argument name="focallength" type="RtFloat"/>
-				<Argument name="focaldistance" type="RtFloat"/>
+				<Argument>
+					<Name>fstop</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>focallength</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>focaldistance</Name>
+					<Type>RtFloat</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<BeginEnd/>
@@ -150,10 +247,18 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiShutter" return="RtVoid">
+		<Procedure>
+			<Name>RiShutter</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="opentime" type="RtFloat"/>
-				<Argument name="closetime" type="RtFloat"/>
+				<Argument>
+					<Name>opentime</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>closetime</Name>
+					<Type>RtFloat</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<BeginEnd/>
@@ -161,9 +266,14 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiPixelVariance" return="RtVoid">
+		<Procedure>
+			<Name>RiPixelVariance</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="variance" type="RtFloat"/>
+				<Argument>
+					<Name>variance</Name>
+					<Type>RtFloat</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<BeginEnd/>
@@ -171,10 +281,18 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiPixelSamples" return="RtVoid">
+		<Procedure>
+			<Name>RiPixelSamples</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="xsamples" type="RtFloat"/>
-				<Argument name="ysamples" type="RtFloat"/>
+				<Argument>
+					<Name>xsamples</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>ysamples</Name>
+					<Type>RtFloat</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<BeginEnd/>
@@ -182,11 +300,22 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiPixelFilter" return="RtVoid">
+		<Procedure>
+			<Name>RiPixelFilter</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="function" type="RtFilterFunc"/>
-				<Argument name="xwidth" type="RtFloat"/>
-				<Argument name="ywidth" type="RtFloat"/>
+				<Argument>
+					<Name>function</Name>
+					<Type>RtFilterFunc</Type>
+				</Argument>
+				<Argument>
+					<Name>xwidth</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>ywidth</Name>
+					<Type>RtFloat</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<BeginEnd/>
@@ -194,10 +323,18 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiExposure" return="RtVoid">
+		<Procedure>
+			<Name>RiExposure</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="gain" type="RtFloat"/>
-				<Argument name="gamma" type="RtFloat"/>
+				<Argument>
+					<Name>gain</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>gamma</Name>
+					<Type>RtFloat</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<BeginEnd/>
@@ -205,10 +342,18 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiImager" return="RtVoid">
+		<Procedure>
+			<Name>RiImager</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="name" type="RtToken"/>
-				<Argument name="plist" type="PARAMETERLIST"/>
+				<Argument>
+					<Name>name</Name>
+					<Type>RtToken</Type>
+				</Argument>
+				<Argument>
+					<Name>plist</Name>
+					<Type>PARAMETERLIST</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<BeginEnd/>
@@ -216,13 +361,30 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiQuantize" return="RtVoid">
+		<Procedure>
+			<Name>RiQuantize</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="type" type="RtToken"/>
-				<Argument name="one" type="RtInt"/>
-				<Argument name="min" type="RtInt"/>
-				<Argument name="max" type="RtInt"/>
-				<Argument name="ditheramplitude" type="RtFloat"/>
+				<Argument>
+					<Name>type</Name>
+					<Type>RtToken</Type>
+				</Argument>
+				<Argument>
+					<Name>one</Name>
+					<Type>RtInt</Type>
+				</Argument>
+				<Argument>
+					<Name>min</Name>
+					<Type>RtInt</Type>
+				</Argument>
+				<Argument>
+					<Name>max</Name>
+					<Type>RtInt</Type>
+				</Argument>
+				<Argument>
+					<Name>ditheramplitude</Name>
+					<Type>RtFloat</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<BeginEnd/>
@@ -230,12 +392,26 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiDisplay" return="RtVoid">
+		<Procedure>
+			<Name>RiDisplay</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="name" type="RtToken"/>
-				<Argument name="type" type="RtToken"/>
-				<Argument name="mode" type="RtToken"/>
-				<Argument name="plist" type="PARAMETERLIST"/>
+				<Argument>
+					<Name>name</Name>
+					<Type>RtToken</Type>
+				</Argument>
+				<Argument>
+					<Name>type</Name>
+					<Type>RtToken</Type>
+				</Argument>
+				<Argument>
+					<Name>mode</Name>
+					<Type>RtToken</Type>
+				</Argument>
+				<Argument>
+					<Name>plist</Name>
+					<Type>PARAMETERLIST</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<BeginEnd/>
@@ -243,90 +419,210 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiGaussianFilter" return="RtFloat">
+		<Procedure>
+			<Name>RiGaussianFilter</Name>
+			<ReturnType>RtFloat</ReturnType>
 			<NoCache/>
 			<Arguments>
-				<Argument name="x" type="RtFloat"/>
-				<Argument name="y" type="RtFloat"/>
-				<Argument name="xwidth" type="RtFloat"/>
-				<Argument name="ywidth" type="RtFloat"/>
+				<Argument>
+					<Name>x</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>y</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>xwidth</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>ywidth</Name>
+					<Type>RtFloat</Type>
+				</Argument>
 			</Arguments>
 		</Procedure>
 
-		<Procedure name="RiBoxFilter" return="RtFloat">
+		<Procedure>
+			<Name>RiBoxFilter</Name>
+			<ReturnType>RtFloat</ReturnType>
 			<NoCache/>
 			<Arguments>
-				<Argument name="x" type="RtFloat"/>
-				<Argument name="y" type="RtFloat"/>
-				<Argument name="xwidth" type="RtFloat"/>
-				<Argument name="ywidth" type="RtFloat"/>
+				<Argument>
+					<Name>x</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>y</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>xwidth</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>ywidth</Name>
+					<Type>RtFloat</Type>
+				</Argument>
 			</Arguments>
 		</Procedure>
 
-		<Procedure name="RiMitchellFilter" return="RtFloat">
+		<Procedure>
+			<Name>RiMitchellFilter</Name>
+			<ReturnType>RtFloat</ReturnType>
 			<NoCache/>
 			<Arguments>
-				<Argument name="x" type="RtFloat"/>
-				<Argument name="y" type="RtFloat"/>
-				<Argument name="xwidth" type="RtFloat"/>
-				<Argument name="ywidth" type="RtFloat"/>
+				<Argument>
+					<Name>x</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>y</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>xwidth</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>ywidth</Name>
+					<Type>RtFloat</Type>
+				</Argument>
 			</Arguments>
 		</Procedure>
 
-		<Procedure name="RiTriangleFilter" return="RtFloat">
+		<Procedure>
+			<Name>RiTriangleFilter</Name>
+			<ReturnType>RtFloat</ReturnType>
 			<NoCache/>
 			<Arguments>
-				<Argument name="x" type="RtFloat"/>
-				<Argument name="y" type="RtFloat"/>
-				<Argument name="xwidth" type="RtFloat"/>
-				<Argument name="ywidth" type="RtFloat"/>
+				<Argument>
+					<Name>x</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>y</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>xwidth</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>ywidth</Name>
+					<Type>RtFloat</Type>
+				</Argument>
 			</Arguments>
 		</Procedure>
 
-		<Procedure name="RiCatmullRomFilter" return="RtFloat">
+		<Procedure>
+			<Name>RiCatmullRomFilter</Name>
+			<ReturnType>RtFloat</ReturnType>
 			<NoCache/>
 			<Arguments>
-				<Argument name="x" type="RtFloat"/>
-				<Argument name="y" type="RtFloat"/>
-				<Argument name="xwidth" type="RtFloat"/>
-				<Argument name="ywidth" type="RtFloat"/>
+				<Argument>
+					<Name>x</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>y</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>xwidth</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>ywidth</Name>
+					<Type>RtFloat</Type>
+				</Argument>
 			</Arguments>
 		</Procedure>
 
-		<Procedure name="RiSincFilter" return="RtFloat">
+		<Procedure>
+			<Name>RiSincFilter</Name>
+			<ReturnType>RtFloat</ReturnType>
 			<NoCache/>
 			<Arguments>
-				<Argument name="x" type="RtFloat"/>
-				<Argument name="y" type="RtFloat"/>
-				<Argument name="xwidth" type="RtFloat"/>
-				<Argument name="ywidth" type="RtFloat"/>
+				<Argument>
+					<Name>x</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>y</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>xwidth</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>ywidth</Name>
+					<Type>RtFloat</Type>
+				</Argument>
 			</Arguments>
 		</Procedure>
 
-		<Procedure name="RiDiskFilter" return="RtFloat">
+		<Procedure>
+			<Name>RiDiskFilter</Name>
+			<ReturnType>RtFloat</ReturnType>
 			<NoCache/>
 			<Arguments>
-				<Argument name="x" type="RtFloat"/>
-				<Argument name="y" type="RtFloat"/>
-				<Argument name="xwidth" type="RtFloat"/>
-				<Argument name="ywidth" type="RtFloat"/>
+				<Argument>
+					<Name>x</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>y</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>xwidth</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>ywidth</Name>
+					<Type>RtFloat</Type>
+				</Argument>
 			</Arguments>
 		</Procedure>
 
-		<Procedure name="RiBesselFilter" return="RtFloat">
+		<Procedure>
+			<Name>RiBesselFilter</Name>
+			<ReturnType>RtFloat</ReturnType>
 			<NoCache/>
 			<Arguments>
-				<Argument name="x" type="RtFloat"/>
-				<Argument name="y" type="RtFloat"/>
-				<Argument name="xwidth" type="RtFloat"/>
-				<Argument name="ywidth" type="RtFloat"/>
+				<Argument>
+					<Name>x</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>y</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>xwidth</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>ywidth</Name>
+					<Type>RtFloat</Type>
+				</Argument>
 			</Arguments>
 		</Procedure>
 
-		<Procedure name="RiHider" return="RtVoid">
+		<Procedure>
+			<Name>RiHider</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="name" type="RtToken"/>
-				<Argument name="plist" type="PARAMETERLIST"/>
+				<Argument>
+					<Name>name</Name>
+					<Type>RtToken</Type>
+				</Argument>
+				<Argument>
+					<Name>plist</Name>
+					<Type>PARAMETERLIST</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<BeginEnd/>
@@ -334,14 +630,25 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiColorSamples" return="RtVoid">
+		<Procedure>
+			<Name>RiColorSamples</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="N" type="RtInt"/>
-				<Argument name="nRGB" type="RtFloatArray">
+				<Argument>
+					<Name>N</Name>
+					<Type>RtInt</Type>
+				</Argument>
+				<Argument>
+					<Name>nRGB</Name>
+					<Type>RtFloatArray</Type>
+				
 					<Length>		int __nRGB_length = N;
 </Length>
 				</Argument>
-				<Argument name="RGBn" type="RtFloatArray">
+				<Argument>
+					<Name>RGBn</Name>
+					<Type>RtFloatArray</Type>
+				
 					<Length>		int __RGBn_length = N;
 </Length>
 				</Argument>
@@ -352,9 +659,14 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiRelativeDetail" return="RtVoid">
+		<Procedure>
+			<Name>RiRelativeDetail</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="relativedetail" type="RtFloat"/>
+				<Argument>
+					<Name>relativedetail</Name>
+					<Type>RtFloat</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<BeginEnd/>
@@ -362,10 +674,18 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiOption" return="RtVoid">
+		<Procedure>
+			<Name>RiOption</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="name" type="RtToken"/>
-				<Argument name="plist" type="PARAMETERLIST"/>
+				<Argument>
+					<Name>name</Name>
+					<Type>RtToken</Type>
+				</Argument>
+				<Argument>
+					<Name>plist</Name>
+					<Type>PARAMETERLIST</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<BeginEnd/>
@@ -373,7 +693,9 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiAttributeBegin" return="RtVoid">
+		<Procedure>
+			<Name>RiAttributeBegin</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments/>
 			<Valid>
 				<World/>
@@ -384,16 +706,23 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiAttributeEnd" return="RtVoid">
+		<Procedure>
+			<Name>RiAttributeEnd</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments/>
 			<Valid>
 				<Attribute/>
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiColor" return="RtVoid">
+		<Procedure>
+			<Name>RiColor</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="Cq" type="RtColor"/>
+				<Argument>
+					<Name>Cq</Name>
+					<Type>RtColor</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<BeginEnd/>
@@ -407,9 +736,14 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiOpacity" return="RtVoid">
+		<Procedure>
+			<Name>RiOpacity</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="Os" type="RtColor"/>
+				<Argument>
+					<Name>Os</Name>
+					<Type>RtColor</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<BeginEnd/>
@@ -423,16 +757,42 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiTextureCoordinates" return="RtVoid">
+		<Procedure>
+			<Name>RiTextureCoordinates</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="s1" type="RtFloat"/>
-				<Argument name="t1" type="RtFloat"/>
-				<Argument name="s2" type="RtFloat"/>
-				<Argument name="t2" type="RtFloat"/>
-				<Argument name="s3" type="RtFloat"/>
-				<Argument name="t3" type="RtFloat"/>
-				<Argument name="s4" type="RtFloat"/>
-				<Argument name="t4" type="RtFloat"/>
+				<Argument>
+					<Name>s1</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>t1</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>s2</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>t2</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>s3</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>t3</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>s4</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>t4</Name>
+					<Type>RtFloat</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<BeginEnd/>
@@ -446,10 +806,18 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiLightSource" return="RtLightHandle">
+		<Procedure>
+			<Name>RiLightSource</Name>
+			<ReturnType>RtLightHandle</ReturnType>
 			<Arguments>
-				<Argument name="name" type="RtToken"/>
-				<Argument name="plist" type="PARAMETERLIST"/>
+				<Argument>
+					<Name>name</Name>
+					<Type>RtToken</Type>
+				</Argument>
+				<Argument>
+					<Name>plist</Name>
+					<Type>PARAMETERLIST</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<BeginEnd/>
@@ -462,10 +830,18 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiAreaLightSource" return="RtLightHandle">
+		<Procedure>
+			<Name>RiAreaLightSource</Name>
+			<ReturnType>RtLightHandle</ReturnType>
 			<Arguments>
-				<Argument name="name" type="RtToken"/>
-				<Argument name="plist" type="PARAMETERLIST"/>
+				<Argument>
+					<Name>name</Name>
+					<Type>RtToken</Type>
+				</Argument>
+				<Argument>
+					<Name>plist</Name>
+					<Type>PARAMETERLIST</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<BeginEnd/>
@@ -478,44 +854,18 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiIlluminate" return="RtVoid">
+		<Procedure>
+			<Name>RiIlluminate</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="light" type="RtLightHandle"/>
-				<Argument name="onoff" type="RtBoolean"/>
-			</Arguments>
-			<Valid>
-				<BeginEnd/>
-				<Frame/>
-				<World/>
-				<Attribute/>
-				<Transform/>
-				<Solid/>
-				<Object Aqsis="true"/>
-				<Motion/>
-			</Valid>
-		</Procedure>
-
-		<Procedure name="RiSurface" return="RtVoid">
-			<Arguments>
-				<Argument name="name" type="RtToken"/>
-				<Argument name="plist" type="PARAMETERLIST"/>
-			</Arguments>
-			<Valid>
-				<BeginEnd/>
-				<Frame/>
-				<World/>
-				<Attribute/>
-				<Transform/>
-				<Solid/>
-				<Object Aqsis="true"/>
-				<Motion/>
-			</Valid>
-		</Procedure>
-
-		<Procedure name="RiAtmosphere" return="RtVoid">
-			<Arguments>
-				<Argument name="name" type="RtToken"/>
-				<Argument name="plist" type="PARAMETERLIST"/>
+				<Argument>
+					<Name>light</Name>
+					<Type>RtLightHandle</Type>
+				</Argument>
+				<Argument>
+					<Name>onoff</Name>
+					<Type>RtBoolean</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<BeginEnd/>
@@ -529,10 +879,18 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiInterior" return="RtVoid">
+		<Procedure>
+			<Name>RiSurface</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="name" type="RtToken"/>
-				<Argument name="plist" type="PARAMETERLIST"/>
+				<Argument>
+					<Name>name</Name>
+					<Type>RtToken</Type>
+				</Argument>
+				<Argument>
+					<Name>plist</Name>
+					<Type>PARAMETERLIST</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<BeginEnd/>
@@ -546,10 +904,18 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiExterior" return="RtVoid">
+		<Procedure>
+			<Name>RiAtmosphere</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="name" type="RtToken"/>
-				<Argument name="plist" type="PARAMETERLIST"/>
+				<Argument>
+					<Name>name</Name>
+					<Type>RtToken</Type>
+				</Argument>
+				<Argument>
+					<Name>plist</Name>
+					<Type>PARAMETERLIST</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<BeginEnd/>
@@ -563,9 +929,18 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiShadingRate" return="RtVoid">
+		<Procedure>
+			<Name>RiInterior</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="size" type="RtFloat"/>
+				<Argument>
+					<Name>name</Name>
+					<Type>RtToken</Type>
+				</Argument>
+				<Argument>
+					<Name>plist</Name>
+					<Type>PARAMETERLIST</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<BeginEnd/>
@@ -579,9 +954,18 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiShadingInterpolation" return="RtVoid">
+		<Procedure>
+			<Name>RiExterior</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="type" type="RtToken"/>
+				<Argument>
+					<Name>name</Name>
+					<Type>RtToken</Type>
+				</Argument>
+				<Argument>
+					<Name>plist</Name>
+					<Type>PARAMETERLIST</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<BeginEnd/>
@@ -595,9 +979,14 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiMatte" return="RtVoid">
+		<Procedure>
+			<Name>RiShadingRate</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="onoff" type="RtBoolean"/>
+				<Argument>
+					<Name>size</Name>
+					<Type>RtFloat</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<BeginEnd/>
@@ -611,9 +1000,14 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiBound" return="RtVoid">
+		<Procedure>
+			<Name>RiShadingInterpolation</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="bound" type="RtBound"/>
+				<Argument>
+					<Name>type</Name>
+					<Type>RtToken</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<BeginEnd/>
@@ -627,9 +1021,14 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiDetail" return="RtVoid">
+		<Procedure>
+			<Name>RiMatte</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="bound" type="RtBound"/>
+				<Argument>
+					<Name>onoff</Name>
+					<Type>RtBoolean</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<BeginEnd/>
@@ -643,12 +1042,14 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiDetailRange" return="RtVoid">
+		<Procedure>
+			<Name>RiBound</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="offlow" type="RtFloat"/>
-				<Argument name="onlow" type="RtFloat"/>
-				<Argument name="onhigh" type="RtFloat"/>
-				<Argument name="offhigh" type="RtFloat"/>
+				<Argument>
+					<Name>bound</Name>
+					<Type>RtBound</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<BeginEnd/>
@@ -662,10 +1063,14 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiGeometricApproximation" return="RtVoid">
+		<Procedure>
+			<Name>RiDetail</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="type" type="RtToken"/>
-				<Argument name="value" type="RtFloat"/>
+				<Argument>
+					<Name>bound</Name>
+					<Type>RtBound</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<BeginEnd/>
@@ -679,9 +1084,26 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiOrientation" return="RtVoid">
+		<Procedure>
+			<Name>RiDetailRange</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="orientation" type="RtToken"/>
+				<Argument>
+					<Name>offlow</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>onlow</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>onhigh</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>offhigh</Name>
+					<Type>RtFloat</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<BeginEnd/>
@@ -695,7 +1117,55 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiReverseOrientation" return="RtVoid">
+		<Procedure>
+			<Name>RiGeometricApproximation</Name>
+			<ReturnType>RtVoid</ReturnType>
+			<Arguments>
+				<Argument>
+					<Name>type</Name>
+					<Type>RtToken</Type>
+				</Argument>
+				<Argument>
+					<Name>value</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+			</Arguments>
+			<Valid>
+				<BeginEnd/>
+				<Frame/>
+				<World/>
+				<Attribute/>
+				<Transform/>
+				<Solid/>
+				<Object Aqsis="true"/>
+				<Motion/>
+			</Valid>
+		</Procedure>
+
+		<Procedure>
+			<Name>RiOrientation</Name>
+			<ReturnType>RtVoid</ReturnType>
+			<Arguments>
+				<Argument>
+					<Name>orientation</Name>
+					<Type>RtToken</Type>
+				</Argument>
+			</Arguments>
+			<Valid>
+				<BeginEnd/>
+				<Frame/>
+				<World/>
+				<Attribute/>
+				<Transform/>
+				<Solid/>
+				<Object Aqsis="true"/>
+				<Motion/>
+			</Valid>
+		</Procedure>
+
+		<Procedure>
+			<Name>RiReverseOrientation</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments/>
 			<Valid>
 				<BeginEnd/>
@@ -709,9 +1179,14 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiSides" return="RtVoid">
+		<Procedure>
+			<Name>RiSides</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="nsides" type="RtInt"/>
+				<Argument>
+					<Name>nsides</Name>
+					<Type>RtInt</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<BeginEnd/>
@@ -725,7 +1200,9 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiIdentity" return="RtVoid">
+		<Procedure>
+			<Name>RiIdentity</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments/>
 			<Valid>
 				<BeginEnd/>
@@ -739,9 +1216,14 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiTransform" return="RtVoid">
+		<Procedure>
+			<Name>RiTransform</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="transform" type="RtMatrix"/>
+				<Argument>
+					<Name>transform</Name>
+					<Type>RtMatrix</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<BeginEnd/>
@@ -755,9 +1237,14 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiConcatTransform" return="RtVoid">
+		<Procedure>
+			<Name>RiConcatTransform</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="transform" type="RtMatrix"/>
+				<Argument>
+					<Name>transform</Name>
+					<Type>RtMatrix</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<BeginEnd/>
@@ -771,9 +1258,14 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiPerspective" return="RtVoid">
+		<Procedure>
+			<Name>RiPerspective</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="fov" type="RtFloat"/>
+				<Argument>
+					<Name>fov</Name>
+					<Type>RtFloat</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<BeginEnd/>
@@ -787,11 +1279,22 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiTranslate" return="RtVoid">
+		<Procedure>
+			<Name>RiTranslate</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="dx" type="RtFloat"/>
-				<Argument name="dy" type="RtFloat"/>
-				<Argument name="dz" type="RtFloat"/>
+				<Argument>
+					<Name>dx</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>dy</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>dz</Name>
+					<Type>RtFloat</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<BeginEnd/>
@@ -805,12 +1308,26 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiRotate" return="RtVoid">
+		<Procedure>
+			<Name>RiRotate</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="angle" type="RtFloat"/>
-				<Argument name="dx" type="RtFloat"/>
-				<Argument name="dy" type="RtFloat"/>
-				<Argument name="dz" type="RtFloat"/>
+				<Argument>
+					<Name>angle</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>dx</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>dy</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>dz</Name>
+					<Type>RtFloat</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<BeginEnd/>
@@ -824,11 +1341,22 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiScale" return="RtVoid">
+		<Procedure>
+			<Name>RiScale</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="sx" type="RtFloat"/>
-				<Argument name="sy" type="RtFloat"/>
-				<Argument name="sz" type="RtFloat"/>
+				<Argument>
+					<Name>sx</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>sy</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>sz</Name>
+					<Type>RtFloat</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<BeginEnd/>
@@ -842,15 +1370,38 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiSkew" return="RtVoid">
+		<Procedure>
+			<Name>RiSkew</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="angle" type="RtFloat"/>
-				<Argument name="dx1" type="RtFloat"/>
-				<Argument name="dy1" type="RtFloat"/>
-				<Argument name="dz1" type="RtFloat"/>
-				<Argument name="dx2" type="RtFloat"/>
-				<Argument name="dy2" type="RtFloat"/>
-				<Argument name="dz2" type="RtFloat"/>
+				<Argument>
+					<Name>angle</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>dx1</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>dy1</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>dz1</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>dx2</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>dy2</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>dz2</Name>
+					<Type>RtFloat</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<BeginEnd/>
@@ -864,10 +1415,18 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiDeformation" return="RtVoid">
+		<Procedure>
+			<Name>RiDeformation</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="name" type="RtToken"/>
-				<Argument name="plist" type="PARAMETERLIST"/>
+				<Argument>
+					<Name>name</Name>
+					<Type>RtToken</Type>
+				</Argument>
+				<Argument>
+					<Name>plist</Name>
+					<Type>PARAMETERLIST</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<BeginEnd/>
@@ -881,10 +1440,18 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiDisplacement" return="RtVoid">
+		<Procedure>
+			<Name>RiDisplacement</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="name" type="RtToken"/>
-				<Argument name="plist" type="PARAMETERLIST"/>
+				<Argument>
+					<Name>name</Name>
+					<Type>RtToken</Type>
+				</Argument>
+				<Argument>
+					<Name>plist</Name>
+					<Type>PARAMETERLIST</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<BeginEnd/>
@@ -898,9 +1465,14 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiCoordinateSystem" return="RtVoid">
+		<Procedure>
+			<Name>RiCoordinateSystem</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="space" type="RtToken"/>
+				<Argument>
+					<Name>space</Name>
+					<Type>RtToken</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<BeginEnd/>
@@ -913,12 +1485,26 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiTransformPoints" return="RtPoint*">
+		<Procedure>
+			<Name>RiTransformPoints</Name>
+			<ReturnType>RtPoint*</ReturnType>
 			<Arguments>
-				<Argument name="fromspace" type="RtToken"/>
-				<Argument name="tospace" type="RtToken"/>
-				<Argument name="npoints" type="RtInt"/>
-				<Argument name="points" type="RtPointArray">
+				<Argument>
+					<Name>fromspace</Name>
+					<Type>RtToken</Type>
+				</Argument>
+				<Argument>
+					<Name>tospace</Name>
+					<Type>RtToken</Type>
+				</Argument>
+				<Argument>
+					<Name>npoints</Name>
+					<Type>RtInt</Type>
+				</Argument>
+				<Argument>
+					<Name>points</Name>
+					<Type>RtPointArray</Type>
+				
 					<Length>		int __points_length = npoints;
 </Length>
 				</Argument>
@@ -934,7 +1520,9 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiTransformBegin" return="RtVoid">
+		<Procedure>
+			<Name>RiTransformBegin</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments/>
 			<Valid>
 				<BeginEnd/>
@@ -947,17 +1535,27 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiTransformEnd" return="RtVoid">
+		<Procedure>
+			<Name>RiTransformEnd</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments/>
 			<Valid>
 				<Transform/>
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiAttribute" return="RtVoid">
+		<Procedure>
+			<Name>RiAttribute</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="name" type="RtToken"/>
-				<Argument name="plist" type="PARAMETERLIST"/>
+				<Argument>
+					<Name>name</Name>
+					<Type>RtToken</Type>
+				</Argument>
+				<Argument>
+					<Name>plist</Name>
+					<Type>PARAMETERLIST</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<BeginEnd/>
@@ -971,14 +1569,25 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiPolygon" return="RtVoid">
+		<Procedure>
+			<Name>RiPolygon</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="nvertices" type="RtInt"/>
-				<Argument name="plist" type="PARAMETERLIST"/>
+				<Argument>
+					<Name>nvertices</Name>
+					<Type>RtInt</Type>
+				</Argument>
+				<Argument>
+					<Name>plist</Name>
+					<Type>PARAMETERLIST</Type>
+				</Argument>
 			</Arguments>
-			<VaryingSize>&#x9;&#x9;varying_size = nvertices;&#xa;</VaryingSize>
-			<VertexSize>&#x9;&#x9;vertex_size = nvertices;&#xa;</VertexSize>
-			<FaceVaryingSize>&#x9;&#x9;facevarying_size = nvertices;&#xa;</FaceVaryingSize>
+			<VaryingSize>		varying_size = nvertices;
+</VaryingSize>
+			<VertexSize>		vertex_size = nvertices;
+</VertexSize>
+			<FaceVaryingSize>		facevarying_size = nvertices;
+</FaceVaryingSize>
 			<Valid>
 				<World/>
 				<Attribute/>
@@ -989,24 +1598,37 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiGeneralPolygon" return="RtVoid">
+		<Procedure>
+			<Name>RiGeneralPolygon</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="nloops" type="RtInt"/>
-				<Argument name="nverts" type="RtIntArray">
+				<Argument>
+					<Name>nloops</Name>
+					<Type>RtInt</Type>
+				</Argument>
+				<Argument>
+					<Name>nverts</Name>
+					<Type>RtIntArray</Type>
+				
 					<Length>		int __nverts_length = nloops;
 </Length>
 				</Argument>
-				<Argument name="plist" type="PARAMETERLIST"/>
+				<Argument>
+					<Name>plist</Name>
+					<Type>PARAMETERLIST</Type>
+				</Argument>
 			</Arguments>
-			<VaryingSize>&#x9;&#x9;varying_size = 0;
+			<VaryingSize>		varying_size = 0;
 		{
 			int __i;
 			for(__i=0;__i&lt;nloops;__i++)
 				varying_size+=nverts[__i];
 		}
 </VaryingSize>
-			<VertexSize>&#x9;&#x9;vertex_size = varying_size;&#xa;</VertexSize>
-			<FaceVaryingSize>&#x9;&#x9;facevarying_size = varying_size;&#xa;</FaceVaryingSize>
+			<VertexSize>		vertex_size = varying_size;
+</VertexSize>
+			<FaceVaryingSize>		facevarying_size = varying_size;
+</FaceVaryingSize>
 			<Valid>
 				<World/>
 				<Attribute/>
@@ -1017,14 +1639,25 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiPointsPolygons" return="RtVoid">
+		<Procedure>
+			<Name>RiPointsPolygons</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="npolys" type="RtInt"/>
-				<Argument name="nverts" type="RtIntArray">
+				<Argument>
+					<Name>npolys</Name>
+					<Type>RtInt</Type>
+				</Argument>
+				<Argument>
+					<Name>nverts</Name>
+					<Type>RtIntArray</Type>
+				
 					<Length>		int __nverts_length = npolys;
 </Length>
 				</Argument>
-				<Argument name="verts" type="RtIntArray">
+				<Argument>
+					<Name>verts</Name>
+					<Type>RtIntArray</Type>
+				
 					<Length>		int __verts_length = 0;
 		{
 			int __i;
@@ -1033,7 +1666,10 @@
 		}
 </Length>
 				</Argument>
-				<Argument name="plist" type="PARAMETERLIST"/>
+				<Argument>
+					<Name>plist</Name>
+					<Type>PARAMETERLIST</Type>
+				</Argument>
 			</Arguments>
 			<VaryingSize>		varying_size=0;
 		{
@@ -1044,7 +1680,8 @@
 		}
 		varying_size+=1;
 </VaryingSize>
-			<VertexSize>		vertex_size=varying_size;&#xa;</VertexSize>
+			<VertexSize>		vertex_size=varying_size;
+</VertexSize>
 			<FaceVaryingSize>		facevarying_size=0;
 		{
 			int __i;
@@ -1062,13 +1699,25 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiPointsGeneralPolygons" return="RtVoid">
+		<Procedure>
+			<Name>RiPointsGeneralPolygons</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="npolys" type="RtInt"/>
-				<Argument name="nloops" type="RtIntArray">
-					<Length>		int __nloops_length = npolys;&#xa;</Length>
+				<Argument>
+					<Name>npolys</Name>
+					<Type>RtInt</Type>
 				</Argument>
-				<Argument name="nverts" type="RtIntArray">
+				<Argument>
+					<Name>nloops</Name>
+					<Type>RtIntArray</Type>
+				
+					<Length>		int __nloops_length = npolys;
+</Length>
+				</Argument>
+				<Argument>
+					<Name>nverts</Name>
+					<Type>RtIntArray</Type>
+				
 					<Length>		int __nverts_length = 0;
 		{
 			int __i;
@@ -1077,7 +1726,10 @@
 		}
 </Length>
 				</Argument>
-				<Argument name="verts" type="RtIntArray">
+				<Argument>
+					<Name>verts</Name>
+					<Type>RtIntArray</Type>
+				
 					<Length>		int __verts_length = 0;
 		{
 			int __i;
@@ -1086,7 +1738,10 @@
 		}
 </Length>
 				</Argument>
-				<Argument name="plist" type="PARAMETERLIST"/>
+				<Argument>
+					<Name>plist</Name>
+					<Type>PARAMETERLIST</Type>
+				</Argument>
 			</Arguments>
 			<VaryingSize>		varying_size=0;
 		{
@@ -1097,7 +1752,8 @@
 		}
 		varying_size+=1;
 </VaryingSize>
-			<VertexSize>		vertex_size=varying_size;&#xa;</VertexSize>
+			<VertexSize>		vertex_size=varying_size;
+</VertexSize>
 			<FaceVaryingSize>		facevarying_size=0;
 		{
 			int __i;
@@ -1115,12 +1771,26 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiBasis" return="RtVoid">
+		<Procedure>
+			<Name>RiBasis</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="ubasis" type="RtBasis"/>
-				<Argument name="ustep" type="RtInt"/>
-				<Argument name="vbasis" type="RtBasis"/>
-				<Argument name="vstep" type="RtInt"/>
+				<Argument>
+					<Name>ubasis</Name>
+					<Type>RtBasis</Type>
+				</Argument>
+				<Argument>
+					<Name>ustep</Name>
+					<Type>RtInt</Type>
+				</Argument>
+				<Argument>
+					<Name>vbasis</Name>
+					<Type>RtBasis</Type>
+				</Argument>
+				<Argument>
+					<Name>vstep</Name>
+					<Type>RtInt</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<BeginEnd/>
@@ -1134,17 +1804,27 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiPatch" return="RtVoid">
+		<Procedure>
+			<Name>RiPatch</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="type" type="RtToken"/>
-				<Argument name="plist" type="PARAMETERLIST"/>
+				<Argument>
+					<Name>type</Name>
+					<Type>RtToken</Type>
+				</Argument>
+				<Argument>
+					<Name>plist</Name>
+					<Type>PARAMETERLIST</Type>
+				</Argument>
 			</Arguments>
-			<VaryingSize>&#x9;&#x9;varying_size = 4;&#xa;</VaryingSize>
-			<VertexSize>&#x9;&#x9;vertex_size = 4;
+			<VaryingSize>		varying_size = 4;
+</VaryingSize>
+			<VertexSize>		vertex_size = 4;
 		if(strcmp(type, "bicubic")==0)
 			vertex_size=16;
 </VertexSize>
-			<FaceVaryingSize>&#x9;&#x9;facevarying_size = varying_size;&#xa;</FaceVaryingSize>
+			<FaceVaryingSize>		facevarying_size = varying_size;
+</FaceVaryingSize>
 			<Valid>
 				<World/>
 				<Attribute/>
@@ -1155,14 +1835,34 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiPatchMesh" return="RtVoid">
+		<Procedure>
+			<Name>RiPatchMesh</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="type" type="RtToken"/>
-				<Argument name="nu" type="RtInt"/>
-				<Argument name="uwrap" type="RtToken"/>
-				<Argument name="nv" type="RtInt"/>
-				<Argument name="vwrap" type="RtToken"/>
-				<Argument name="plist" type="PARAMETERLIST"/>
+				<Argument>
+					<Name>type</Name>
+					<Type>RtToken</Type>
+				</Argument>
+				<Argument>
+					<Name>nu</Name>
+					<Type>RtInt</Type>
+				</Argument>
+				<Argument>
+					<Name>uwrap</Name>
+					<Type>RtToken</Type>
+				</Argument>
+				<Argument>
+					<Name>nv</Name>
+					<Type>RtInt</Type>
+				</Argument>
+				<Argument>
+					<Name>vwrap</Name>
+					<Type>RtToken</Type>
+				</Argument>
+				<Argument>
+					<Name>plist</Name>
+					<Type>PARAMETERLIST</Type>
+				</Argument>
 			</Arguments>
 			<UniformSize>
 		if(strcmp(type, "bilinear")==0)
@@ -1178,8 +1878,8 @@
 		}
 		else
 		{
-			int ustep = QGetRenderContext() ->pattrCurrent()->GetIntegerAttribute( "System", "BasisStep" ) [ 0 ];
-			int vstep = QGetRenderContext() ->pattrCurrent()->GetIntegerAttribute( "System", "BasisStep" ) [ 1 ];
+			int ustep = QGetRenderContext() -&gt;pattrCurrent()-&gt;GetIntegerAttribute( "System", "BasisStep" ) [ 0 ];
+			int vstep = QGetRenderContext() -&gt;pattrCurrent()-&gt;GetIntegerAttribute( "System", "BasisStep" ) [ 1 ];
 			if(strcmp(uwrap, "periodic")==0)
 				uniform_size = nu/ustep;
 			else
@@ -1195,12 +1895,13 @@
 			varying_size = nu*nv;
 		else
 		{
-			int ustep = QGetRenderContext() ->pattrCurrent()->GetIntegerAttribute( "System", "BasisStep" ) [ 0 ];
-			int vstep = QGetRenderContext() ->pattrCurrent()->GetIntegerAttribute( "System", "BasisStep" ) [ 1 ];
+			int ustep = QGetRenderContext() -&gt;pattrCurrent()-&gt;GetIntegerAttribute( "System", "BasisStep" ) [ 0 ];
+			int vstep = QGetRenderContext() -&gt;pattrCurrent()-&gt;GetIntegerAttribute( "System", "BasisStep" ) [ 1 ];
 			varying_size = (nu/ustep)*(nv/vstep);
 		}
 </VaryingSize>
-			<VertexSize>		vertex_size=nu*nv;&#xa;</VertexSize>
+			<VertexSize>		vertex_size=nu*nv;
+</VertexSize>
 			<Valid>
 				<World/>
 				<Attribute/>
@@ -1211,27 +1912,67 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiNuPatch" return="RtVoid">
+		<Procedure>
+			<Name>RiNuPatch</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="nu" type="RtInt"/>
-				<Argument name="uorder" type="RtInt"/>
-				<Argument name="uknot" type="RtFloatArray">
-					<Length>		int __uknot_length = nu + uorder;&#xa;</Length>
+				<Argument>
+					<Name>nu</Name>
+					<Type>RtInt</Type>
 				</Argument>
-				<Argument name="umin" type="RtFloat"/>
-				<Argument name="umax" type="RtFloat"/>
-				<Argument name="nv" type="RtInt"/>
-				<Argument name="vorder" type="RtInt"/>
-				<Argument name="vknot" type="RtFloatArray">
-					<Length>		int __vknot_length = nv + vorder;&#xa;</Length>
+				<Argument>
+					<Name>uorder</Name>
+					<Type>RtInt</Type>
 				</Argument>
-				<Argument name="vmin" type="RtFloat"/>
-				<Argument name="vmax" type="RtFloat"/>
-				<Argument name="plist" type="PARAMETERLIST"/>
+				<Argument>
+					<Name>uknot</Name>
+					<Type>RtFloatArray</Type>
+				
+					<Length>		int __uknot_length = nu + uorder;
+</Length>
+				</Argument>
+				<Argument>
+					<Name>umin</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>umax</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>nv</Name>
+					<Type>RtInt</Type>
+				</Argument>
+				<Argument>
+					<Name>vorder</Name>
+					<Type>RtInt</Type>
+				</Argument>
+				<Argument>
+					<Name>vknot</Name>
+					<Type>RtFloatArray</Type>
+				
+					<Length>		int __vknot_length = nv + vorder;
+</Length>
+				</Argument>
+				<Argument>
+					<Name>vmin</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>vmax</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>plist</Name>
+					<Type>PARAMETERLIST</Type>
+				</Argument>
 			</Arguments>
-			<UniformSize>		uniform_size=(1+nu-uorder+1)*(1+nv-vorder+1);&#xa;</UniformSize>
-			<VaryingSize>		varying_size=(1+nu-uorder+1)*(1+nv-vorder+1);&#xa;</VaryingSize>
-			<VertexSize>		vertex_size=nu*nv;&#xa;</VertexSize>
+			<UniformSize>		uniform_size=(1+nu-uorder+1)*(1+nv-vorder+1);
+</UniformSize>
+			<VaryingSize>		varying_size=(1+nu-uorder+1)*(1+nv-vorder+1);
+</VaryingSize>
+			<VertexSize>		vertex_size=nu*nv;
+</VertexSize>
 			<Valid>
 				<World/>
 				<Attribute/>
@@ -1242,13 +1983,25 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiTrimCurve" return="RtVoid">
+		<Procedure>
+			<Name>RiTrimCurve</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="nloops" type="RtInt"/>
-				<Argument name="ncurves" type="RtIntArray">
-					<Length>		int __ncurves_length = nloops;&#xa;</Length>
+				<Argument>
+					<Name>nloops</Name>
+					<Type>RtInt</Type>
 				</Argument>
-				<Argument name="order" type="RtIntArray">
+				<Argument>
+					<Name>ncurves</Name>
+					<Type>RtIntArray</Type>
+				
+					<Length>		int __ncurves_length = nloops;
+</Length>
+				</Argument>
+				<Argument>
+					<Name>order</Name>
+					<Type>RtIntArray</Type>
+				
 					<Length>		int __order_length = 0;
 		{
 			int __i;
@@ -1257,7 +2010,10 @@
 		}
 </Length>
 				</Argument>
-				<Argument name="knot" type="RtFloatArray">
+				<Argument>
+					<Name>knot</Name>
+					<Type>RtFloatArray</Type>
+				
 					<Length>		int __knot_length = 0;
 		{
 			int __i;
@@ -1266,16 +2022,31 @@
 		}
 </Length>
 				</Argument>
-				<Argument name="min" type="RtFloatArray">
-					<Length>		int __min_length = __order_length;&#xa;</Length>
+				<Argument>
+					<Name>min</Name>
+					<Type>RtFloatArray</Type>
+				
+					<Length>		int __min_length = __order_length;
+</Length>
 				</Argument>
-				<Argument name="max" type="RtFloatArray">
-					<Length>		int __max_length = __order_length;&#xa;</Length>
+				<Argument>
+					<Name>max</Name>
+					<Type>RtFloatArray</Type>
+				
+					<Length>		int __max_length = __order_length;
+</Length>
 				</Argument>
-				<Argument name="n" type="RtIntArray">
-					<Length>		int __n_length = __order_length;&#xa;</Length>
+				<Argument>
+					<Name>n</Name>
+					<Type>RtIntArray</Type>
+				
+					<Length>		int __n_length = __order_length;
+</Length>
 				</Argument>
-				<Argument name="u" type="RtFloatArray">
+				<Argument>
+					<Name>u</Name>
+					<Type>RtFloatArray</Type>
+				
 					<Length>		int __u_length = 0;
 		{
 			int __i;
@@ -1284,11 +2055,19 @@
 		}
 </Length>
 				</Argument>
-				<Argument name="v" type="RtFloatArray">
-					<Length>		int __v_length = __u_length;&#xa;</Length>
+				<Argument>
+					<Name>v</Name>
+					<Type>RtFloatArray</Type>
+				
+					<Length>		int __v_length = __u_length;
+</Length>
 				</Argument>
-				<Argument name="w" type="RtFloatArray">
-					<Length>		int __w_length = __u_length;&#xa;</Length>
+				<Argument>
+					<Name>w</Name>
+					<Type>RtFloatArray</Type>
+				
+					<Length>		int __w_length = __u_length;
+</Length>
 				</Argument>
 			</Arguments>
 			<Valid>
@@ -1301,17 +2080,37 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiSphere" return="RtVoid">
+		<Procedure>
+			<Name>RiSphere</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="radius" type="RtFloat"/>
-				<Argument name="zmin" type="RtFloat"/>
-				<Argument name="zmax" type="RtFloat"/>
-				<Argument name="thetamax" type="RtFloat"/>
-				<Argument name="plist" type="PARAMETERLIST"/>
+				<Argument>
+					<Name>radius</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>zmin</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>zmax</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>thetamax</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>plist</Name>
+					<Type>PARAMETERLIST</Type>
+				</Argument>
 			</Arguments>
-			<VaryingSize>&#x9;&#x9;varying_size = 4;&#xa;</VaryingSize>
-			<VertexSize>&#x9;&#x9;vertex_size = 4;&#xa;</VertexSize>
-			<FaceVaryingSize>&#x9;&#x9;facevarying_size = 4;&#xa;</FaceVaryingSize>
+			<VaryingSize>		varying_size = 4;
+</VaryingSize>
+			<VertexSize>		vertex_size = 4;
+</VertexSize>
+			<FaceVaryingSize>		facevarying_size = 4;
+</FaceVaryingSize>
 			<Valid>
 				<World/>
 				<Attribute/>
@@ -1322,16 +2121,33 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiCone" return="RtVoid">
+		<Procedure>
+			<Name>RiCone</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="height" type="RtFloat"/>
-				<Argument name="radius" type="RtFloat"/>
-				<Argument name="thetamax" type="RtFloat"/>
-				<Argument name="plist" type="PARAMETERLIST"/>
+				<Argument>
+					<Name>height</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>radius</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>thetamax</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>plist</Name>
+					<Type>PARAMETERLIST</Type>
+				</Argument>
 			</Arguments>
-			<VaryingSize>&#x9;&#x9;varying_size = 4;&#xa;</VaryingSize>
-			<VertexSize>&#x9;&#x9;vertex_size = 4;&#xa;</VertexSize>
-			<FaceVaryingSize>&#x9;&#x9;facevarying_size = 4;&#xa;</FaceVaryingSize>
+			<VaryingSize>		varying_size = 4;
+</VaryingSize>
+			<VertexSize>		vertex_size = 4;
+</VertexSize>
+			<FaceVaryingSize>		facevarying_size = 4;
+</FaceVaryingSize>
 			<Valid>
 				<World/>
 				<Attribute/>
@@ -1342,17 +2158,37 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiCylinder" return="RtVoid">
+		<Procedure>
+			<Name>RiCylinder</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="radius" type="RtFloat"/>
-				<Argument name="zmin" type="RtFloat"/>
-				<Argument name="zmax" type="RtFloat"/>
-				<Argument name="thetamax" type="RtFloat"/>
-				<Argument name="plist" type="PARAMETERLIST"/>
+				<Argument>
+					<Name>radius</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>zmin</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>zmax</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>thetamax</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>plist</Name>
+					<Type>PARAMETERLIST</Type>
+				</Argument>
 			</Arguments>
-			<VaryingSize>&#x9;&#x9;varying_size = 4;&#xa;</VaryingSize>
-			<VertexSize>&#x9;&#x9;vertex_size = 4;&#xa;</VertexSize>
-			<FaceVaryingSize>&#x9;&#x9;facevarying_size = 4;&#xa;</FaceVaryingSize>
+			<VaryingSize>		varying_size = 4;
+</VaryingSize>
+			<VertexSize>		vertex_size = 4;
+</VertexSize>
+			<FaceVaryingSize>		facevarying_size = 4;
+</FaceVaryingSize>
 			<Valid>
 				<World/>
 				<Attribute/>
@@ -1363,16 +2199,33 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiHyperboloid" return="RtVoid">
+		<Procedure>
+			<Name>RiHyperboloid</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="point1" type="RtPoint"/>
-				<Argument name="point2" type="RtPoint"/>
-				<Argument name="thetamax" type="RtFloat"/>
-				<Argument name="plist" type="PARAMETERLIST"/>
+				<Argument>
+					<Name>point1</Name>
+					<Type>RtPoint</Type>
+				</Argument>
+				<Argument>
+					<Name>point2</Name>
+					<Type>RtPoint</Type>
+				</Argument>
+				<Argument>
+					<Name>thetamax</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>plist</Name>
+					<Type>PARAMETERLIST</Type>
+				</Argument>
 			</Arguments>
-			<VaryingSize>&#x9;&#x9;varying_size = 4;&#xa;</VaryingSize>
-			<VertexSize>&#x9;&#x9;vertex_size = 4;&#xa;</VertexSize>
-			<FaceVaryingSize>&#x9;&#x9;facevarying_size = 4;&#xa;</FaceVaryingSize>
+			<VaryingSize>		varying_size = 4;
+</VaryingSize>
+			<VertexSize>		vertex_size = 4;
+</VertexSize>
+			<FaceVaryingSize>		facevarying_size = 4;
+</FaceVaryingSize>
 			<Valid>
 				<World/>
 				<Attribute/>
@@ -1383,17 +2236,37 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiParaboloid" return="RtVoid">
+		<Procedure>
+			<Name>RiParaboloid</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="rmax" type="RtFloat"/>
-				<Argument name="zmin" type="RtFloat"/>
-				<Argument name="zmax" type="RtFloat"/>
-				<Argument name="thetamax" type="RtFloat"/>
-				<Argument name="plist" type="PARAMETERLIST"/>
+				<Argument>
+					<Name>rmax</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>zmin</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>zmax</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>thetamax</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>plist</Name>
+					<Type>PARAMETERLIST</Type>
+				</Argument>
 			</Arguments>
-			<VaryingSize>&#x9;&#x9;varying_size = 4;&#xa;</VaryingSize>
-			<VertexSize>&#x9;&#x9;vertex_size = 4;&#xa;</VertexSize>
-			<FaceVaryingSize>&#x9;&#x9;facevarying_size = 4;&#xa;</FaceVaryingSize>
+			<VaryingSize>		varying_size = 4;
+</VaryingSize>
+			<VertexSize>		vertex_size = 4;
+</VertexSize>
+			<FaceVaryingSize>		facevarying_size = 4;
+</FaceVaryingSize>
 			<Valid>
 				<World/>
 				<Attribute/>
@@ -1404,16 +2277,33 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiDisk" return="RtVoid">
+		<Procedure>
+			<Name>RiDisk</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="height" type="RtFloat"/>
-				<Argument name="radius" type="RtFloat"/>
-				<Argument name="thetamax" type="RtFloat"/>
-				<Argument name="plist" type="PARAMETERLIST"/>
+				<Argument>
+					<Name>height</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>radius</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>thetamax</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>plist</Name>
+					<Type>PARAMETERLIST</Type>
+				</Argument>
 			</Arguments>
-			<VaryingSize>&#x9;&#x9;varying_size = 4;&#xa;</VaryingSize>
-			<VertexSize>&#x9;&#x9;vertex_size = 4;&#xa;</VertexSize>
-			<FaceVaryingSize>&#x9;&#x9;facevarying_size = 4;&#xa;</FaceVaryingSize>
+			<VaryingSize>		varying_size = 4;
+</VaryingSize>
+			<VertexSize>		vertex_size = 4;
+</VertexSize>
+			<FaceVaryingSize>		facevarying_size = 4;
+</FaceVaryingSize>
 			<Valid>
 				<World/>
 				<Attribute/>
@@ -1424,18 +2314,41 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiTorus" return="RtVoid">
+		<Procedure>
+			<Name>RiTorus</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="majorrad" type="RtFloat"/>
-				<Argument name="minorrad" type="RtFloat"/>
-				<Argument name="phimin" type="RtFloat"/>
-				<Argument name="phimax" type="RtFloat"/>
-				<Argument name="thetamax" type="RtFloat"/>
-				<Argument name="plist" type="PARAMETERLIST"/>
+				<Argument>
+					<Name>majorrad</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>minorrad</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>phimin</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>phimax</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>thetamax</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>plist</Name>
+					<Type>PARAMETERLIST</Type>
+				</Argument>
 			</Arguments>
-			<VaryingSize>&#x9;&#x9;varying_size = 4;&#xa;</VaryingSize>
-			<VertexSize>&#x9;&#x9;vertex_size = 4;&#xa;</VertexSize>
-			<FaceVaryingSize>&#x9;&#x9;facevarying_size = 4;&#xa;</FaceVaryingSize>
+			<VaryingSize>		varying_size = 4;
+</VaryingSize>
+			<VertexSize>		vertex_size = 4;
+</VertexSize>
+			<FaceVaryingSize>		facevarying_size = 4;
+</FaceVaryingSize>
 			<Valid>
 				<World/>
 				<Attribute/>
@@ -1446,12 +2359,26 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiProcedural" return="RtVoid">
+		<Procedure>
+			<Name>RiProcedural</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="data" type="RtPointer"/>
-				<Argument name="bound" type="RtBound"/>
-				<Argument name="refineproc" type="RtProcSubdivFunc"/>
-				<Argument name="freeproc" type="RtProcFreeFunc"/>
+				<Argument>
+					<Name>data</Name>
+					<Type>RtPointer</Type>
+				</Argument>
+				<Argument>
+					<Name>bound</Name>
+					<Type>RtBound</Type>
+				</Argument>
+				<Argument>
+					<Name>refineproc</Name>
+					<Type>RtProcSubdivFunc</Type>
+				</Argument>
+				<Argument>
+					<Name>freeproc</Name>
+					<Type>RtProcFreeFunc</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<World/>
@@ -1462,10 +2389,18 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiGeometry" return="RtVoid">
+		<Procedure>
+			<Name>RiGeometry</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="type" type="RtToken"/>
-				<Argument name="plist" type="PARAMETERLIST"/>
+				<Argument>
+					<Name>type</Name>
+					<Type>RtToken</Type>
+				</Argument>
+				<Argument>
+					<Name>plist</Name>
+					<Type>PARAMETERLIST</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<World/>
@@ -1476,9 +2411,14 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiSolidBegin" return="RtVoid">
+		<Procedure>
+			<Name>RiSolidBegin</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="type" type="RtToken"/>
+				<Argument>
+					<Name>type</Name>
+					<Type>RtToken</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<World/>
@@ -1489,14 +2429,18 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiSolidEnd" return="RtVoid">
+		<Procedure>
+			<Name>RiSolidEnd</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments/>
 			<Valid>
 				<Solid/>
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiObjectBegin" return="RtObjectHandle">
+		<Procedure>
+			<Name>RiObjectBegin</Name>
+			<ReturnType>RtObjectHandle</ReturnType>
 			<Arguments/>
 			<Valid>
 				<BeginEnd/>
@@ -1508,16 +2452,23 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiObjectEnd" return="RtVoid">
+		<Procedure>
+			<Name>RiObjectEnd</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments/>
 			<Valid>
 				<Object/>
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiObjectInstance" return="RtVoid">
+		<Procedure>
+			<Name>RiObjectInstance</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="handle" type="RtObjectHandle"/>
+				<Argument>
+					<Name>handle</Name>
+					<Type>RtObjectHandle</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<World/>
@@ -1528,11 +2479,19 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiMotionBegin" return="RtVoid">
+		<Procedure>
+			<Name>RiMotionBegin</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<NoCache/>
 			<Arguments>
-				<Argument name="N" type="RtInt"/>
-				<Argument name="..." type=""/>
+				<Argument>
+					<Name>N</Name>
+					<Type>RtInt</Type>
+				</Argument>
+				<Argument>
+					<Name>...</Name>
+					<Type></Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<BeginEnd/>
@@ -1545,10 +2504,18 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiMotionBeginV" return="RtVoid">
+		<Procedure>
+			<Name>RiMotionBeginV</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="N" type="RtInt"/>
-				<Argument name="times" type="RtFloatArray">
+				<Argument>
+					<Name>N</Name>
+					<Type>RtInt</Type>
+				</Argument>
+				<Argument>
+					<Name>times</Name>
+					<Type>RtFloatArray</Type>
+				
 					<Length>		int __times_length = N;
 </Length>
 				</Argument>
@@ -1564,23 +2531,51 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiMotionEnd" return="RtVoid">
+		<Procedure>
+			<Name>RiMotionEnd</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments/>
 			<Valid>
 				<Motion/>
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiMakeTexture" return="RtVoid">
+		<Procedure>
+			<Name>RiMakeTexture</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="imagefile" type="RtString"/>
-				<Argument name="texturefile" type="RtString"/>
-				<Argument name="swrap" type="RtToken"/>
-				<Argument name="twrap" type="RtToken"/>
-				<Argument name="filterfunc" type="RtFilterFunc"/>
-				<Argument name="swidth" type="RtFloat"/>
-				<Argument name="twidth" type="RtFloat"/>
-				<Argument name="plist" type="PARAMETERLIST"/>
+				<Argument>
+					<Name>imagefile</Name>
+					<Type>RtString</Type>
+				</Argument>
+				<Argument>
+					<Name>texturefile</Name>
+					<Type>RtString</Type>
+				</Argument>
+				<Argument>
+					<Name>swrap</Name>
+					<Type>RtToken</Type>
+				</Argument>
+				<Argument>
+					<Name>twrap</Name>
+					<Type>RtToken</Type>
+				</Argument>
+				<Argument>
+					<Name>filterfunc</Name>
+					<Type>RtFilterFunc</Type>
+				</Argument>
+				<Argument>
+					<Name>swidth</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>twidth</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>plist</Name>
+					<Type>PARAMETERLIST</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<BeginEnd/>
@@ -1588,16 +2583,42 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiMakeBump" return="RtVoid">
+		<Procedure>
+			<Name>RiMakeBump</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="imagefile" type="RtString"/>
-				<Argument name="bumpfile" type="RtString"/>
-				<Argument name="swrap" type="RtToken"/>
-				<Argument name="twrap" type="RtToken"/>
-				<Argument name="filterfunc" type="RtFilterFunc"/>
-				<Argument name="swidth" type="RtFloat"/>
-				<Argument name="twidth" type="RtFloat"/>
-				<Argument name="plist" type="PARAMETERLIST"/>
+				<Argument>
+					<Name>imagefile</Name>
+					<Type>RtString</Type>
+				</Argument>
+				<Argument>
+					<Name>bumpfile</Name>
+					<Type>RtString</Type>
+				</Argument>
+				<Argument>
+					<Name>swrap</Name>
+					<Type>RtToken</Type>
+				</Argument>
+				<Argument>
+					<Name>twrap</Name>
+					<Type>RtToken</Type>
+				</Argument>
+				<Argument>
+					<Name>filterfunc</Name>
+					<Type>RtFilterFunc</Type>
+				</Argument>
+				<Argument>
+					<Name>swidth</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>twidth</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>plist</Name>
+					<Type>PARAMETERLIST</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<BeginEnd/>
@@ -1605,14 +2626,34 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiMakeLatLongEnvironment" return="RtVoid">
+		<Procedure>
+			<Name>RiMakeLatLongEnvironment</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="imagefile" type="RtString"/>
-				<Argument name="reflfile" type="RtString"/>
-				<Argument name="filterfunc" type="RtFilterFunc"/>
-				<Argument name="swidth" type="RtFloat"/>
-				<Argument name="twidth" type="RtFloat"/>
-				<Argument name="plist" type="PARAMETERLIST"/>
+				<Argument>
+					<Name>imagefile</Name>
+					<Type>RtString</Type>
+				</Argument>
+				<Argument>
+					<Name>reflfile</Name>
+					<Type>RtString</Type>
+				</Argument>
+				<Argument>
+					<Name>filterfunc</Name>
+					<Type>RtFilterFunc</Type>
+				</Argument>
+				<Argument>
+					<Name>swidth</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>twidth</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>plist</Name>
+					<Type>PARAMETERLIST</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<BeginEnd/>
@@ -1620,20 +2661,58 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiMakeCubeFaceEnvironment" return="RtVoid">
+		<Procedure>
+			<Name>RiMakeCubeFaceEnvironment</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="px" type="RtString"/>
-				<Argument name="nx" type="RtString"/>
-				<Argument name="py" type="RtString"/>
-				<Argument name="ny" type="RtString"/>
-				<Argument name="pz" type="RtString"/>
-				<Argument name="nz" type="RtString"/>
-				<Argument name="reflfile" type="RtString"/>
-				<Argument name="fov" type="RtFloat"/>
-				<Argument name="filterfunc" type="RtFilterFunc"/>
-				<Argument name="swidth" type="RtFloat"/>
-				<Argument name="twidth" type="RtFloat"/>
-				<Argument name="plist" type="PARAMETERLIST"/>
+				<Argument>
+					<Name>px</Name>
+					<Type>RtString</Type>
+				</Argument>
+				<Argument>
+					<Name>nx</Name>
+					<Type>RtString</Type>
+				</Argument>
+				<Argument>
+					<Name>py</Name>
+					<Type>RtString</Type>
+				</Argument>
+				<Argument>
+					<Name>ny</Name>
+					<Type>RtString</Type>
+				</Argument>
+				<Argument>
+					<Name>pz</Name>
+					<Type>RtString</Type>
+				</Argument>
+				<Argument>
+					<Name>nz</Name>
+					<Type>RtString</Type>
+				</Argument>
+				<Argument>
+					<Name>reflfile</Name>
+					<Type>RtString</Type>
+				</Argument>
+				<Argument>
+					<Name>fov</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>filterfunc</Name>
+					<Type>RtFilterFunc</Type>
+				</Argument>
+				<Argument>
+					<Name>swidth</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>twidth</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>plist</Name>
+					<Type>PARAMETERLIST</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<BeginEnd/>
@@ -1641,11 +2720,22 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiMakeShadow" return="RtVoid">
+		<Procedure>
+			<Name>RiMakeShadow</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="picfile" type="RtString"/>
-				<Argument name="shadowfile" type="RtString"/>
-				<Argument name="plist" type="PARAMETERLIST"/>
+				<Argument>
+					<Name>picfile</Name>
+					<Type>RtString</Type>
+				</Argument>
+				<Argument>
+					<Name>shadowfile</Name>
+					<Type>RtString</Type>
+				</Argument>
+				<Argument>
+					<Name>plist</Name>
+					<Type>PARAMETERLIST</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<BeginEnd/>
@@ -1653,15 +2743,29 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiMakeOcclusion" return="RtVoid">
+		<Procedure>
+			<Name>RiMakeOcclusion</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="npics" type="RtInt"/>
-				<Argument name="picfiles" type="RtStringArray">
+				<Argument>
+					<Name>npics</Name>
+					<Type>RtInt</Type>
+				</Argument>
+				<Argument>
+					<Name>picfiles</Name>
+					<Type>RtStringArray</Type>
+				
 					<Length>		int __picfiles_length = npics;
 </Length>
 				</Argument>
-				<Argument name="shadowfile" type="RtString"/>
-				<Argument name="plist" type="PARAMETERLIST"/>
+				<Argument>
+					<Name>shadowfile</Name>
+					<Type>RtString</Type>
+				</Argument>
+				<Argument>
+					<Name>plist</Name>
+					<Type>PARAMETERLIST</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<BeginEnd/>
@@ -1669,31 +2773,50 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiElse" return="RtVoid">
+		<Procedure>
+			<Name>RiElse</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
 			</Arguments>
 		</Procedure>
 
-		<Procedure name="RiElseIf" return="RtVoid">
+		<Procedure>
+			<Name>RiElseIf</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="condition" type="RtString"/>
+				<Argument>
+					<Name>condition</Name>
+					<Type>RtString</Type>
+				</Argument>
 			</Arguments>
 		</Procedure>
 
-		<Procedure name="RiIfEnd" return="RtVoid">
+		<Procedure>
+			<Name>RiIfEnd</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
 			</Arguments>
 		</Procedure>
 
-		<Procedure name="RiIfBegin" return="RtVoid">
+		<Procedure>
+			<Name>RiIfBegin</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="condition" type="RtString"/>
+				<Argument>
+					<Name>condition</Name>
+					<Type>RtString</Type>
+				</Argument>
 			</Arguments>
 		</Procedure>
 
-		<Procedure name="RiErrorHandler" return="RtVoid">
+		<Procedure>
+			<Name>RiErrorHandler</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="handler" type="RtErrorFunc"/>
+				<Argument>
+					<Name>handler</Name>
+					<Type>RtErrorFunc</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<Outside/>
@@ -1708,87 +2831,192 @@
 			</Valid>
 		</Procedure>
 		
-		<Procedure name="RiErrorIgnore" return="RtVoid">
+		<Procedure>
+			<Name>RiErrorIgnore</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<NoCache/>
 			<Arguments>
-				<Argument name="code" type="RtInt"/>
-				<Argument name="severity" type="RtInt"/>
-				<Argument name="message" type="RtString"/>
+				<Argument>
+					<Name>code</Name>
+					<Type>RtInt</Type>
+				</Argument>
+				<Argument>
+					<Name>severity</Name>
+					<Type>RtInt</Type>
+				</Argument>
+				<Argument>
+					<Name>message</Name>
+					<Type>RtString</Type>
+				</Argument>
 			</Arguments>
 		</Procedure>
 		
-		<Procedure name="RiErrorPrint" return="RtVoid">
+		<Procedure>
+			<Name>RiErrorPrint</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<NoCache/>
 			<Arguments>
-				<Argument name="code" type="RtInt"/>
-				<Argument name="severity" type="RtInt"/>
-				<Argument name="message" type="RtString"/>
+				<Argument>
+					<Name>code</Name>
+					<Type>RtInt</Type>
+				</Argument>
+				<Argument>
+					<Name>severity</Name>
+					<Type>RtInt</Type>
+				</Argument>
+				<Argument>
+					<Name>message</Name>
+					<Type>RtString</Type>
+				</Argument>
 			</Arguments>
 		</Procedure>
 		
-		<Procedure name="RiErrorAbort" return="RtVoid">
+		<Procedure>
+			<Name>RiErrorAbort</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<NoCache/>
 			<Arguments>
-				<Argument name="code" type="RtInt"/>
-				<Argument name="severity" type="RtInt"/>
-				<Argument name="message" type="RtString"/>
+				<Argument>
+					<Name>code</Name>
+					<Type>RtInt</Type>
+				</Argument>
+				<Argument>
+					<Name>severity</Name>
+					<Type>RtInt</Type>
+				</Argument>
+				<Argument>
+					<Name>message</Name>
+					<Type>RtString</Type>
+				</Argument>
 			</Arguments>
 		</Procedure>
 		
-		<Procedure name="RiArchiveRecord" return="RtVoid">
+		<Procedure>
+			<Name>RiArchiveRecord</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<NoCache/>
 			<Arguments>
-				<Argument name="type" type="RtToken"/>
-				<Argument name="format" type="char *"/>
-				<Argument name="..." type=""/>
+				<Argument>
+					<Name>type</Name>
+					<Type>RtToken</Type>
+				</Argument>
+				<Argument>
+					<Name>format</Name>
+					<Type>char *</Type>
+				</Argument>
+				<Argument>
+					<Name>...</Name>
+					<Type></Type>
+				</Argument>
 			</Arguments>
 		</Procedure>
 		
-		<Procedure name="RiGetContext" return="RtContextHandle">
+		<Procedure>
+			<Name>RiGetContext</Name>
+			<ReturnType>RtContextHandle</ReturnType>
 			<NoCache/>
 			<Arguments/>
 		</Procedure>
 		
-		<Procedure name="RiContext" return="RtVoid">
+		<Procedure>
+			<Name>RiContext</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<NoCache/>
 			<Arguments>
-				<Argument name="handle" type="RtContextHandle"/>
+				<Argument>
+					<Name>handle</Name>
+					<Type>RtContextHandle</Type>
+				</Argument>
 			</Arguments>
 		</Procedure>
 		
-		<Procedure name="RiClippingPlane" return="RtVoid">
+		<Procedure>
+			<Name>RiClippingPlane</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="x" type="RtFloat"/>
-				<Argument name="y" type="RtFloat"/>
-				<Argument name="z" type="RtFloat"/>
-				<Argument name="nx" type="RtFloat"/>
-				<Argument name="ny" type="RtFloat"/>
-				<Argument name="nz" type="RtFloat"/>
+				<Argument>
+					<Name>x</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>y</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>z</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>nx</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>ny</Name>
+					<Type>RtFloat</Type>
+				</Argument>
+				<Argument>
+					<Name>nz</Name>
+					<Type>RtFloat</Type>
+				</Argument>
 			</Arguments>
 		</Procedure>
 		
-		<Procedure name="RiCoordSysTransform" return="RtVoid">
+		<Procedure>
+			<Name>RiCoordSysTransform</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="space" type="RtToken"/>
+				<Argument>
+					<Name>space</Name>
+					<Type>RtToken</Type>
+				</Argument>
 			</Arguments>
 		</Procedure>
 		
-		<Procedure name="RiBlobby" return="RtVoid">
+		<Procedure>
+			<Name>RiBlobby</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="nleaf" type="RtInt"/>
-				<Argument name="ncode" type="RtInt"/>
-				<Argument name="code" type="RtIntArray">
-					<Length>		int __code_length = ncode;&#xa;</Length>
+				<Argument>
+					<Name>nleaf</Name>
+					<Type>RtInt</Type>
 				</Argument>
-				<Argument name="nflt" type="RtInt"/>
-				<Argument name="flt" type="RtFloatArray">
-					<Length>		int __flt_length = nflt;&#xa;</Length>
+				<Argument>
+					<Name>ncode</Name>
+					<Type>RtInt</Type>
 				</Argument>
-				<Argument name="nstr" type="RtInt"/>
-				<Argument name="str" type="RtTokenArray">
-					<Length>		int __str_length = nstr;&#xa;</Length>
+				<Argument>
+					<Name>code</Name>
+					<Type>RtIntArray</Type>
+				
+					<Length>		int __code_length = ncode;
+</Length>
 				</Argument>
-				<Argument name="plist" type="PARAMETERLIST"/>
+				<Argument>
+					<Name>nflt</Name>
+					<Type>RtInt</Type>
+				</Argument>
+				<Argument>
+					<Name>flt</Name>
+					<Type>RtFloatArray</Type>
+				
+					<Length>		int __flt_length = nflt;
+</Length>
+				</Argument>
+				<Argument>
+					<Name>nstr</Name>
+					<Type>RtInt</Type>
+				</Argument>
+				<Argument>
+					<Name>str</Name>
+					<Type>RtTokenArray</Type>
+				
+					<Length>		int __str_length = nstr;
+</Length>
+				</Argument>
+				<Argument>
+					<Name>plist</Name>
+					<Type>PARAMETERLIST</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<World/>
@@ -1800,14 +3028,25 @@
 			</Valid>
 		</Procedure>
 		
-		<Procedure name="RiPoints" return="RtVoid">
+		<Procedure>
+			<Name>RiPoints</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="npoints" type="RtInt"/>
-				<Argument name="plist" type="PARAMETERLIST"/>
+				<Argument>
+					<Name>npoints</Name>
+					<Type>RtInt</Type>
+				</Argument>
+				<Argument>
+					<Name>plist</Name>
+					<Type>PARAMETERLIST</Type>
+				</Argument>
 			</Arguments>
-			<VaryingSize>		varying_size = npoints;&#xa;</VaryingSize>
-			<VertexSize>		vertex_size = npoints;&#xa;</VertexSize>
-			<FaceVaryingSize>		facevarying_size = npoints;&#xa;</FaceVaryingSize>
+			<VaryingSize>		varying_size = npoints;
+</VaryingSize>
+			<VertexSize>		vertex_size = npoints;
+</VertexSize>
+			<FaceVaryingSize>		facevarying_size = npoints;
+</FaceVaryingSize>
 			<Valid>
 				<World/>
 				<Attribute/>
@@ -1818,17 +3057,36 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiCurves" return="RtVoid">
+		<Procedure>
+			<Name>RiCurves</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="type" type="RtToken"/>
-				<Argument name="ncurves" type="RtInt"/>
-				<Argument name="nvertices" type="RtIntArray">
-					<Length>		int __nvertices_length = ncurves;&#xa;</Length>
+				<Argument>
+					<Name>type</Name>
+					<Type>RtToken</Type>
 				</Argument>
-				<Argument name="wrap" type="RtToken"/>
-				<Argument name="plist" type="PARAMETERLIST"/>
+				<Argument>
+					<Name>ncurves</Name>
+					<Type>RtInt</Type>
+				</Argument>
+				<Argument>
+					<Name>nvertices</Name>
+					<Type>RtIntArray</Type>
+				
+					<Length>		int __nvertices_length = ncurves;
+</Length>
+				</Argument>
+				<Argument>
+					<Name>wrap</Name>
+					<Type>RtToken</Type>
+				</Argument>
+				<Argument>
+					<Name>plist</Name>
+					<Type>PARAMETERLIST</Type>
+				</Argument>
 			</Arguments>
-			<UniformSize>		uniform_size = ncurves;&#xa;</UniformSize>
+			<UniformSize>		uniform_size = ncurves;
+</UniformSize>
 			<VaryingSize>		varying_size = 0;
 		{
 			int __i;
@@ -1836,7 +3094,7 @@
 			{
 				if(strcmp(type, "cubic")==0)
 				{
-					int step = QGetRenderContext() ->pattrCurrent()->GetIntegerAttribute( "System", "BasisStep" ) [ 0 ];
+					int step = QGetRenderContext() -&gt;pattrCurrent()-&gt;GetIntegerAttribute( "System", "BasisStep" ) [ 0 ];
 					if(strcmp(wrap, "periodic")==0)
 						varying_size+=nvertices[__i]/step;
 					else
@@ -1870,14 +3128,29 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiSubdivisionMesh" return="RtVoid">
+		<Procedure>
+			<Name>RiSubdivisionMesh</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="scheme" type="RtToken"/>
-				<Argument name="nfaces" type="RtInt"/>
-				<Argument name="nvertices" type="RtIntArray">
-					<Length>		int __nvertices_length = nfaces;&#xa;</Length>
+				<Argument>
+					<Name>scheme</Name>
+					<Type>RtToken</Type>
 				</Argument>
-				<Argument name="vertices" type="RtIntArray">
+				<Argument>
+					<Name>nfaces</Name>
+					<Type>RtInt</Type>
+				</Argument>
+				<Argument>
+					<Name>nvertices</Name>
+					<Type>RtIntArray</Type>
+				
+					<Length>		int __nvertices_length = nfaces;
+</Length>
+				</Argument>
+				<Argument>
+					<Name>vertices</Name>
+					<Type>RtIntArray</Type>
+				
 					<Length>		int __vertices_length = 0;
 		{
 			int __i;
@@ -1886,14 +3159,27 @@
 		}
 </Length>
 				</Argument>
-				<Argument name="ntags" type="RtInt"/>
-				<Argument name="tags" type="RtTokenArray">
+				<Argument>
+					<Name>ntags</Name>
+					<Type>RtInt</Type>
+				</Argument>
+				<Argument>
+					<Name>tags</Name>
+					<Type>RtTokenArray</Type>
+				
 					<Length>		int __tags_length = ntags;</Length>
 				</Argument>
-				<Argument name="nargs" type="RtIntArray">
-					<Length>		int __nargs_length = ntags*2;&#xa;</Length>
+				<Argument>
+					<Name>nargs</Name>
+					<Type>RtIntArray</Type>
+				
+					<Length>		int __nargs_length = ntags*2;
+</Length>
 				</Argument>
-				<Argument name="intargs" type="RtIntArray">
+				<Argument>
+					<Name>intargs</Name>
+					<Type>RtIntArray</Type>
+				
 					<Length>		int __intargs_length = 0;
 		{
 			int __i;
@@ -1902,7 +3188,10 @@
 		}
 </Length>
 				</Argument>
-				<Argument name="floatargs" type="RtFloatArray">
+				<Argument>
+					<Name>floatargs</Name>
+					<Type>RtFloatArray</Type>
+				
 					<Length>		int __floatargs_length = 0;
 		{
 			int __i;
@@ -1911,7 +3200,10 @@
 		}
 </Length>
 				</Argument>
-				<Argument name="plist" type="PARAMETERLIST"/>
+				<Argument>
+					<Name>plist</Name>
+					<Type>PARAMETERLIST</Type>
+				</Argument>
 			</Arguments>
 			<VaryingSize>		varying_size=0;
 		{
@@ -1922,7 +3214,8 @@
 		}
 		varying_size+=1;
 </VaryingSize>
-			<VertexSize>		vertex_size=varying_size;&#xa;</VertexSize>
+			<VertexSize>		vertex_size=varying_size;
+</VertexSize>
 			<FaceVaryingSize>		facevarying_size=0;
 		{
 			int __i;
@@ -1940,51 +3233,105 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiReadArchive" return="RtVoid">
+		<Procedure>
+			<Name>RiReadArchive</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="name" type="RtToken"/>
-				<Argument name="callback" type="RtArchiveCallback"/>
-				<Argument name="plist" type="PARAMETERLIST"/>
+				<Argument>
+					<Name>name</Name>
+					<Type>RtToken</Type>
+				</Argument>
+				<Argument>
+					<Name>callback</Name>
+					<Type>RtArchiveCallback</Type>
+				</Argument>
+				<Argument>
+					<Name>plist</Name>
+					<Type>PARAMETERLIST</Type>
+				</Argument>
 			</Arguments>
 		</Procedure>
 
-		<Procedure name="RiProcFree" return="RtVoid">
+		<Procedure>
+			<Name>RiProcFree</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<NoCache/>
 			<Arguments>
-				<Argument name="data" type="RtPointer"/>
+				<Argument>
+					<Name>data</Name>
+					<Type>RtPointer</Type>
+				</Argument>
 			</Arguments>
 		</Procedure>
 
-		<Procedure name="RiProcDelayedReadArchive" return="RtVoid">
+		<Procedure>
+			<Name>RiProcDelayedReadArchive</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<NoCache/>
 			<Arguments>
-				<Argument name="data" type="RtPointer"/>
-				<Argument name="detail" type="RtFloat"/>
+				<Argument>
+					<Name>data</Name>
+					<Type>RtPointer</Type>
+				</Argument>
+				<Argument>
+					<Name>detail</Name>
+					<Type>RtFloat</Type>
+				</Argument>
 			</Arguments>
 		</Procedure>
 
-		<Procedure name="RiProcRunProgram" return="RtVoid">
+		<Procedure>
+			<Name>RiProcRunProgram</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<NoCache/>
 			<Arguments>
-				<Argument name="data" type="RtPointer"/>
-				<Argument name="detail" type="RtFloat"/>
+				<Argument>
+					<Name>data</Name>
+					<Type>RtPointer</Type>
+				</Argument>
+				<Argument>
+					<Name>detail</Name>
+					<Type>RtFloat</Type>
+				</Argument>
 			</Arguments>
 		</Procedure>
 
-		<Procedure name="RiProcDynamicLoad" return="RtVoid">
+		<Procedure>
+			<Name>RiProcDynamicLoad</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<NoCache/>
 			<Arguments>
-				<Argument name="data" type="RtPointer"/>
-				<Argument name="detail" type="RtFloat"/>
+				<Argument>
+					<Name>data</Name>
+					<Type>RtPointer</Type>
+				</Argument>
+				<Argument>
+					<Name>detail</Name>
+					<Type>RtFloat</Type>
+				</Argument>
 			</Arguments>
 		</Procedure>
 
-		<Procedure name="RiShaderLayer" return="RtVoid">
+		<Procedure>
+			<Name>RiShaderLayer</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="type" type="RtToken"/>
-				<Argument name="name" type="RtToken"/>
-				<Argument name="layername" type="RtToken"/>
-				<Argument name="plist" type="PARAMETERLIST"/>
+				<Argument>
+					<Name>type</Name>
+					<Type>RtToken</Type>
+				</Argument>
+				<Argument>
+					<Name>name</Name>
+					<Type>RtToken</Type>
+				</Argument>
+				<Argument>
+					<Name>layername</Name>
+					<Type>RtToken</Type>
+				</Argument>
+				<Argument>
+					<Name>plist</Name>
+					<Type>PARAMETERLIST</Type>
+				</Argument>
 			</Arguments>
 			<Valid>
 				<BeginEnd/>
@@ -1998,16 +3345,59 @@
 			</Valid>
 		</Procedure>
 
-		<Procedure name="RiConnectShaderLayers" return="RtVoid">
+		<Procedure>
+			<Name>RiConnectShaderLayers</Name>
+			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
-				<Argument name="type" type="RtToken"/>
-				<Argument name="layer1" type="RtToken"/>
-				<Argument name="variable1" type="RtToken"/>
-				<Argument name="layer2" type="RtToken"/>
-				<Argument name="variable2" type="RtToken"/>
+				<Argument>
+					<Name>type</Name>
+					<Type>RtToken</Type>
+				</Argument>
+				<Argument>
+					<Name>layer1</Name>
+					<Type>RtToken</Type>
+				</Argument>
+				<Argument>
+					<Name>variable1</Name>
+					<Type>RtToken</Type>
+				</Argument>
+				<Argument>
+					<Name>layer2</Name>
+					<Type>RtToken</Type>
+				</Argument>
+				<Argument>
+					<Name>variable2</Name>
+					<Type>RtToken</Type>
+				</Argument>
 			</Arguments>
 		</Procedure>
-
+		<Procedure>
+			<Name>RiResource</Name>
+			<ReturnType>RtVoid</ReturnType>
+			<Arguments>
+				<Argument>
+					<Name>handle</Name>
+					<Type>RtToken</Type>
+				</Argument>
+				<Argument>
+					<Name>type</Name>
+					<Type>RtToken</Type>
+				</Argument>	
+				<Argument>
+					<Name>plist</Name>
+					<Type>PARAMETERLIST</Type>
+				</Argument>
+			</Arguments>
+		</Procedure>
+		<Procedure>
+			<Name>RiResourceBegin</Name>
+			<ReturnType>RtVoid</ReturnType>
+			<Arguments/>
+		</Procedure>
+		<Procedure>
+			<Name>RiResourceEnd</Name>
+			<ReturnType>RtVoid</ReturnType>
+			<Arguments/>
+		</Procedure>
 	</Procedures>
 </RiAPI>
-

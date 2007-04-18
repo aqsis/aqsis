@@ -1,107 +1,144 @@
-Aqsis Rendering System INSTALL - Prerequisites
------------------------------------------------
+Building Aqsis
+--------------
 
-On all platforms, the following libraries and tools are required to build Aqsis.
+As of version 1.1.0 Aqsis is using SCons as its build system on all platforms (yes, even on Windows), so the following instructions apply to all systems.
+Requirements
 
- * boost       (version 1.32.0+)
- * libtiff.lib (version 3.7.1+)
- * flex        (version 2.5.4+)
- * bison       (version 1.35+)
- * FLTK        (version 1.1.x)
- * libzlib     (version 1.1.4+)
- * libjpeg     (version 6b+)
- * xsltproc
+Building Aqsis requires a C++ compiler and the following tools and libraries:
 
-Aqsis Rendering System INSTALL - Posix systems
------------------------------------------------
+    * SCons (v0.96.1+, SCons in turn requires Python)
+    * boost (v1.32.0+)
+    * libtiff.lib (v3.7.1+)
+    * flex (v2.5.4) (2.5.31 causes problems, see FAQ 2.2)
+    * bison (v1.35+)
+    * FLTK (v1.1.x) - optional, but required for framebuffer rendering
+    * libzlib (v1.1.4+)
+    * libjpeg (v6b+)
+    * xsltproc
+    * OpenEXR - if you want to read and write OpenEXR HDR image files
 
-* Generated files (e.g. configure, Makefile.in) are not stored in CVS; if you
-are building from a CVS tree, you need to generate these files from the 
-top-level directory:
+Win32: For the convenience of Windows users, most of the above stuff is readily available in the win32libs directory in the Aqsis SVN repository. However, you still have to get SCons, boost and FLTK.
+Obtaining the sources
 
-	./bootstrap
+You can either obtain the source archive or get the latest source code via SVN.
 
-* Now (regardless of where how you obtained the source), you need to configure
-it for your system.  Note that currently shared libraries are turned-off by 
-default, and the default install prefix is "/usr/local/aqsis". You can obtain a
-listing of available configuration options by doing:
+With SVN, it's recommended to check out the /trunk only, as it contains all you need to compile aqsis. If you're on Linux, you can save even more time by skipping the Win32 Libraries and checking out /trunk/aqsis only.
 
-	./configure --help
+To obtain a clean checkout from SVN, first install SVN and make sure that you either provide the full path to the svn binary (svn.exe on Windows) or that you add svn to your PATH. Then go into an empty folder and call:
 
-* Once you've decided which (if any) configuration options you want to override,
-you can run the configure script:
+$ svn checkout https://svn.sourceforge.net/svnroot/aqsis/trunk
 
-	./configure <options>
+This will check out by default into a folder called /trunk - just as in the repository. If you don't want this, you can specify the target folder by passing it after the URL, like this (this will put the content of /trunk into ~/aqsis/current):
 
-* Assuming there were no errors, you may now build the project:
+$ svn checkout https://svn.sourceforge.net/svnroot/aqsis/trunk ~/aqsis/current
 
-	make
+If everything works fine, you should see some output like ...
 
-* Now, run the built-in tests, which will render a sample image of a vase and
-teapot (ribfiles/vase.rib):
+A    trunk\aqsis
+A    trunk\aqsis\distribution
+A    trunk\aqsis\distribution\SConscript
+...
 
-	make check
+Eventually you end up with a new directory, /trunk. /trunk/aqsis contains the complete source code, while /trunk/win32libs contains libraries only interesting for Windows users.
 
-* You're now ready to install the Aqsis binaries for general use on your host.
-You will have to have root access:
+For more instructions on obtaining the source code via SVN see the SourceForge SVN page.
 
-	su -c "make install"
+Building
+========
 
-* If you want to make a copy of the Aqsis source available for others, you can
-roll your own distribution tarball:
+If you already believe you meet all of the above requirements and the compiler/linker will be able to find everything then go ahead and call
 
-	make distcheck
+scons
 
-* Contact the Aqsis mailing list, <aqsis-development@lists.sourceforge.net> 
-with any questions.
+inside the aqsis directory (Windows users have to do this inside a DOS box). If all goes well you will find a shiny new version of Aqsis in the newly created output directory.
+
+If there was an error after calling scons this indicates that some of the above components are either entirely missing or located in a non-standard path. In the latter case, you can tell scons about the location of your libraries in a file called custom.py (you have to create that file yourself inside the aqsis directory). This file simply contains variable assignments such as
+
+fltk_include_path = r"C:\Libs\fltk-1.1.5rc1"
+fltk_lib_path = r"C:\Libs\fltk-1.1.5rc1\lib"
+
+The syntax is plain Python code (in this example we're using raw strings (indicated by the 'r' prefix) so that we don't have to use double backslashes). You can get a list of variables to manipulate by calling
+
+scons --help
+
+This will output a list of available variables together with their default values and their current values. Note that you can also call scons --help-options to get a list of available options that are passed directly to the scons tool.
+
+System Specific Details
+=======================
+
+Win32 - MSVC6.0/MSVC7.x
+=======================
+
+The native build environment for Aqsis on Windows is MSVC6.
+
+The package also compiles with VC7.1 (.NET 2003) and maybe even newer versions, but the resulting executable is not equivalent to the MSVC6 version. The VC7.1 version of Aqsis crashes on some scenes and may produce incorrect results if certain features are used.
+
+Win32 - MingW
+=============
+
+Prerequisites
+
+    * MinGW (v3.1.0-1)
+
+Install MinGW.
+
+The MinGW build relies on the availability of a zlib and libTIFF library. This can be achieved by either getting the source and building it yourself, or alternatively, just getting the win32libs folder from SVN at https://svn.sourceforge.net/svnroot/aqsis/trunk/win32libs, which contains the necessary libs and headers.
+
+  Note: Getting the win32libs SVN folder will also ensure you have a working copy of bison, flex and xsltproc from the requirements list above. 
+
+Building Aqsis
+--------------
+
+The process of getting the source and building Aqsis is mainly the same as the default procedure detailed above. You may need to force SCons to use the appropriate build system, and tell it where libTIFF and zlib are. You will need to convert the MSYS locations to Windows location, the '/usr' folder is located at 'C:\msys\1.0\' in installed to the default location.
+
+ scons mingw=true boost_include_path=<wherever you installed boost to>
+
+  Note: You will need to ensure that the MinGW bin directory is on your path, i.e. C:\MinGW\bin.
+
+Linux
+=====
+
+Because the build system originated on windows, everything is installed by default into the 'output/' subdirectory of the source directory.  This isn't what you normally want on linux, but the install_prefix variable can be used to fix the problem.  For example, suppose we specify install_prefix='/usr/local'.
+
+If you're careful and don't build things as root, you should make use of the usual two-stage build and install.  To build the project, you can therefore run the command:
+
+scons install_prefix='/usr/local' build
+
+as a normal user, followed by
+
+scons install_prefix='/usr/local' install
+
+as root, which will copy the appropriate files into the /usr/local directory hierarchy.
 
 
+MacOSX
+======
 
+Installing
 
+...
+Troubleshooting
+===============
 
-Aqsis Rendering System INSTALL - Windows binary installation
-------------------------------------------------------------
+Q (Windows): scons complains with
 
-Simply download and run the executable installer.
+Checking for main() in C++ library libtiff... no
+Cannot find libtiff
 
+but I have checked out win32libs at the correct location (or: have provided the correct paths in tiff_include_path/tiff_lib_path). What's wrong?
 
+A: Check that you have set the environment variables for calling the Visual C++ compiler from inside a DOS box (i.e. check if you can invoke cl without getting an error). Depending on how you've installed MSVC this was already set up for you (and then you won't get the above error), otherwise you have to manually call the batch file vcvars32.bat that comes with MSVC. For further information about the failure, check the config.log file in the project root, this will detail the results of the tests.
 
+Q: Aqsis compiles for a while and then linker errors like the following appear (each line mentions STL somewhere):
 
+...
+renderer.obj : error LNK2001: unresolved external symbol "protected: virtual class _STL::list<struct Aqsis::SqDSOExternalCall *,class _STL::allocator<struct Aqsis::SqDSOExternalCall *> > * __thiscall Aqsis::CqDSORepository::getShadeOpMethods(class Aqsis::CqString *)" (?getShadeOpMethods@CqDSORepository@Aqsis@@MAEPAV?$list@PAUSqDSOExternalCall@Aqsis@@V?$allocator@PAUSqDSOExternalCall@Aqsis@@@_STL@@@_STL@@PAVCqString@2@@Z)
+renderer.obj : error LNK2001: unresolved external symbol "public: void __thiscall Aqsis::CqShaderVM::LoadProgram(class _STL::basic_istream<char,class _STL::char_traits<char> > *)" (?LoadProgram@CqShaderVM@Aqsis@@QAEXPAV?$basic_istream@DV?$char_traits@D@_STL@@@_STL@@@Z)
 
-Aqsis Rendering System INSTALL - Compiling under Windows (From CVS)
--------------------------------------------------------------------
+What is wrong?
 
-Requirements:
-	
-	CVS Projects:
-		renderer
-		win32libs
+A: You were probably using STLport instead of the native STL version of your compiler and Aqsis just does not link with the STLport runtime library.
 
-	Tools:
+Q: scons uses options settings (such as install_prefix, debug, etc.) that I didn't specify on the command line and that are not the default values. Where do they come from?
 
-		MSVC++ 6.0
-		bison		1.35-4 (http://sourceforge.net/projects/gnuwin32/)
-					Included in the win32libs project
-		flex		2.5.4a (http://sourceforge.net/projects/gnuwin32/)
-					Included in the win32libs project
-		xsltproc		Included in the win32libs project
-
-
-	Libraries:
-
-		boost		1.32.0 (http://www.boost.org)
-					Only the main boost package is needed
-		libtiff		3.5.7 (http://sourceforge.net/projects/gnuwin32/)
-					Included in the win32libs project
-		libjpeg		6b (http://sourceforge.net/projects/gnuwin32/)
-					Included in the win32libs project
-		zlib		1.1.4 (http://sourceforge.net/projects/gnuwin32/)
-					Included in the win32libs project
-
-	Load the Renderer.dsw workspace from the Aqsis/Renderer directory, select 
-	the "All - Release" project and build all.
-
-
-
-Happy Rendering!
-The Aqsis Team
+A: When you invoke scons it saves its current options in a file called options.cache which is read the next time you invoke scons again. This means, options are sort of "sticky", once specified they are in effect until they are specified again with a new value. If you want to go back to default values, simply delete this file. Call scons -help to inspect the current values of all variables.

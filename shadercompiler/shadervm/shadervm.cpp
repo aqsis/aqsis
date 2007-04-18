@@ -31,6 +31,7 @@
 
 #include	<sstream>
 #include	<ctype.h>
+#include	<stddef.h>
 
 #include	"shadervm.h"
 #include	"symbols.h"
@@ -377,7 +378,7 @@ SqOpCodeTrans CqShaderVM::m_TransTable[] =
         {"cpnoise3", 0, &CqShaderVM::SO_cpnoise3, 0, {0}},
         {"cpnoise4", 0, &CqShaderVM::SO_cpnoise4, 0, {0}},
         {"ppnoise1", 0, &CqShaderVM::SO_ppnoise1, 0, {0}},
-        {"pnoise2", 0, &CqShaderVM::SO_ppnoise2, 0, {0}},
+        {"ppnoise2", 0, &CqShaderVM::SO_ppnoise2, 0, {0}},
         {"ppnoise3", 0, &CqShaderVM::SO_ppnoise3, 0, {0}},
         {"ppnoise4", 0, &CqShaderVM::SO_ppnoise4, 0, {0}},
 
@@ -798,7 +799,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 	EqSegment	Segment = Seg_Data;
 	std::vector<UsProgramElement>*	pProgramArea = NULL;
 	std::vector<TqInt>	aLabels;
-	boost::shared_ptr<CqShaderExecEnv> StdEnv(new CqShaderExecEnv);
+	boost::shared_ptr<CqShaderExecEnv> StdEnv(new CqShaderExecEnv(m_pRenderContext));
 	TqInt	array_count = 0;
 	TqUlong  htoken, i;
 	/*
@@ -1104,8 +1105,13 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 								// We have an initialiser we have not run yet
 								if((*candidate)->init)
 								{
+									// WARNING: future bug on x86_64 if threading is implemented:
+									//
+									// The first (int) parameter to the initialiser should be a _unique_ thread identifier.
+									// Casting to a smaller type (on x86_64, sizeof(int) < sizeof(void*) ) makes the result
+									// possibly non-unique per thread.
 									(*candidate)->initData =
-									    ((*candidate)->init)((int)((void*)this),NULL);
+									    ((*candidate)->init)(static_cast<int>(reinterpret_cast<ptrdiff_t>(this)),NULL);
 								};
 								(*candidate)->initialised = true;
 							};
@@ -1265,6 +1271,7 @@ CqShaderVM&	CqShaderVM::operator=( const CqShaderVM& From )
 	m_strName = From.m_strName;
 	m_fAmbient = From.m_fAmbient;
 	m_outsideWorld = From.m_outsideWorld;
+	m_pRenderContext = From.m_pRenderContext;
 
 	// Copy the local variables...
 	std::vector<IqShaderData*>::const_iterator i;
@@ -1325,7 +1332,7 @@ void CqShaderVM::ExecuteInit()
 	// Fake an environment
 	boost::shared_ptr<IqShaderExecEnv> pOldEnv = m_pEnv;
 
-	boost::shared_ptr<IqShaderExecEnv> Env(new CqShaderExecEnv);
+	boost::shared_ptr<IqShaderExecEnv> Env(new CqShaderExecEnv(m_pRenderContext));
 	Env->Initialise( 1, 1, 1, 1, 0, boost::shared_ptr<IqTransform>(), this, m_Uses );
 	Initialise( 1, 1, 1, Env );
 
@@ -1530,7 +1537,7 @@ void CqShaderVM::InitialiseParameters( )
 		CqMatrix matTrans;
 
 		if (getTransform())
-			matTrans = QGetRenderContextI() ->matSpaceToSpace( _strSpace.c_str(), "current", getTransform(), getTransform(), QGetRenderContextI()->Time() );
+			matTrans = m_pRenderContext ->matSpaceToSpace( _strSpace.c_str(), "current", getTransform(), getTransform(), m_pRenderContext->Time() );
 
 		while ( count-- > 0 )
 		{

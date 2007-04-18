@@ -300,7 +300,7 @@ struct IqShaderData
 	/** Get the name of this variable.
 	 * \return Read only reference to a CqString class.
 	 */
-	virtual	const CqString&	strName() = 0;
+	virtual	const CqString&	strName() const = 0;
 	/** Determine whether this data storage represents a shader argument.
 	 * \return Read only reference to a CqString class.
 	 */

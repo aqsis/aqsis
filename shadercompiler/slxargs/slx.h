@@ -26,6 +26,27 @@
 #ifndef SLX_H_INCLUDED
 #define SLX_H_INCLUDED 1
 
+#ifdef	WIN32
+#  ifdef	AQSIS_STATIC_LINK
+
+#    define  SLXARGS_SHARE
+
+#  else // !AQSIS_STATIC_LINK
+
+#      ifdef SLXARGS_EXPORTS
+#        define SLXARGS_SHARE __declspec(dllexport)
+#      else
+#        define SLXARGS_SHARE __declspec(dllimport)
+#      endif
+
+#  endif	// AQSIS_STATIC_LINK
+
+#else	// !WIN32
+
+#  define  SLXARGS_SHARE
+
+#endif // WIN32
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -98,20 +119,20 @@ extern "C"
 
 #define NULL_SLXVISSYMDEF ((SLX_VISSYMDEF *)0)
 
-	extern void SLX_SetPath ( char * path );
-	extern char *SLX_GetPath ( void );
-	extern int SLX_SetShader ( char * name );
-	extern char *SLX_GetName ( void );
-	extern SLX_TYPE SLX_GetType ( void );
-	extern int SLX_GetNArgs ( void );
-	extern SLX_VISSYMDEF *SLX_GetArgById ( int id );
-	extern SLX_VISSYMDEF *SLX_GetArgByName ( char * name );
-	extern SLX_VISSYMDEF *SLX_GetArrayArgElement( SLX_VISSYMDEF * array, int index );
-	extern void SLX_EndShader ( void );
-	extern char *SLX_TypetoStr ( SLX_TYPE type );
-	extern char *SLX_StortoStr ( SLX_STORAGE storage );
-	extern char *SLX_DetailtoStr ( SLX_DETAIL detail );
-	extern void SLX_SetDSOPath ( char * path );
+	SLXARGS_SHARE extern void SLX_SetPath ( char * path );
+	SLXARGS_SHARE extern char *SLX_GetPath ( void );
+	SLXARGS_SHARE extern int SLX_SetShader ( char * name );
+	SLXARGS_SHARE extern char *SLX_GetName ( void );
+	SLXARGS_SHARE extern SLX_TYPE SLX_GetType ( void );
+	SLXARGS_SHARE extern int SLX_GetNArgs ( void );
+	SLXARGS_SHARE extern SLX_VISSYMDEF *SLX_GetArgById ( int id );
+	SLXARGS_SHARE extern SLX_VISSYMDEF *SLX_GetArgByName ( char * name );
+	SLXARGS_SHARE extern SLX_VISSYMDEF *SLX_GetArrayArgElement( SLX_VISSYMDEF * array, int index );
+	SLXARGS_SHARE extern void SLX_EndShader ( void );
+	SLXARGS_SHARE extern char *SLX_TypetoStr ( SLX_TYPE type );
+	SLXARGS_SHARE extern char *SLX_StortoStr ( SLX_STORAGE storage );
+	SLXARGS_SHARE extern char *SLX_DetailtoStr ( SLX_DETAIL detail );
+	SLXARGS_SHARE extern void SLX_SetDSOPath ( char * path );
 
 #ifdef __cplusplus
 }

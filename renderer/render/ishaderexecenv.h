@@ -42,6 +42,7 @@ struct IqSurface;
 struct IqAttributes;
 struct IqTransform;
 struct IqShader;
+struct IqRenderer;
 
 /** \enum EqEnvVars
  * Identifiers for the standard environment variables.
@@ -275,6 +276,8 @@ struct IqShaderExecEnv
 	/** Get a reference to the Ns standard variable.
 	 */
 	virtual IqShaderData* Ns() = 0;
+
+	virtual IqRenderer* getRenderContext() const = 0;
 
 	virtual	TqBool	SO_init_illuminance() = 0;
 	virtual	TqBool	SO_advance_illuminance() = 0;

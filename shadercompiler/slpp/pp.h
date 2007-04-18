@@ -30,10 +30,12 @@
 #ifdef	MAIN
 #define	EXTERN			/* Inside main() routine, make internal */
 #define	I_BRZERO	={0}
+#define	I_BR2ZERO	={{0}}
 #define	I_ZERO		=0
 #else	/* !MAIN */
 #define	EXTERN		extern	/* Define for creating external refs	*/
 #define	I_BRZERO
+#define	I_BR2ZERO
 #define	I_ZERO
 #endif	/* MAIN */
 
@@ -568,7 +570,7 @@ struct	ifstk
 	char	i_else;	/* True if encountered an #else		*/
 };
 
-EXTERN	struct	ifstk	Ifstack[ IFSTACKSIZE + 1 ] I_BRZERO;
+EXTERN	struct	ifstk	Ifstack[ IFSTACKSIZE + 1 ] I_BR2ZERO;
 EXTERN	int	Iflevel	I_ZERO;	/* Index into Ifstack		*/
 EXTERN	int	Ifstate	I_ZERO;	/* Current state of #if		*/
 

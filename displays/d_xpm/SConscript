@@ -1,4 +1,4 @@
-Import('env')
+Import('env', 'embedManifest')
 d_xpmenv = env.Copy()
 d_xpmenv.AppendUnique(CPPPATH=['#/renderer/ddmanager'])
 d_xpmenv.AppendUnique(CPPDEFINES=['d_xpm_EXPORTS'])
@@ -17,11 +17,14 @@ d_xpmenv.AppendUnique(LIBS = ['$tiff_lib', '$z_lib'])
 d_xpmenv.UseTargetOptions('d_xpm')
 
 d_xpm = d_xpmenv.SharedLibrary('d_xpm', d_xpm_sources)
-d_xpmenv.Install('$BINDIR', d_xpm)
+
+embedManifest(env, d_xpmenv, d_xpm, 'DLL')
+
+d_xpmenv.Install('$DISPLAYSDIR', d_xpm)
 
 Return('d_xpm')
 
-env.Distribute('displays/d_xpm', d_xpm_sources)
-env.Distribute('displays/d_xpm', d_xpm_headers)
-env.Distribute('displays/d_xpm', 'SConscript')
+env.Distribute(d_xpm_sources)
+env.Distribute(d_xpm_headers)
+env.Distribute('SConscript')
 

@@ -1,15 +1,19 @@
-Import('env')
+Import('env', 'embedManifest')
+teqserenv = env.Copy()
 teqser_sources = Split("""
 	teqser.cpp""")
 
-env.AppendUnique(LIBS = ['argparse', 'aqsis'])
+teqserenv.AppendUnique(LIBS = ['argparse', 'shadervm', 'aqsis', 'aqsistypes'])
 
 # Set any platform specific options for this target
-env.UseTargetOptions('teqser')
+teqserenv.UseTargetOptions('teqser')
 
-teqser = env.Program('teqser', teqser_sources)
-env.Install('$BINDIR', teqser)
+teqser = teqserenv.Program('teqser', teqser_sources)
 
-env.Distribute('texturing/teqser', teqser_sources)
-env.Distribute('texturing/teqser', "SConscript")
+embedManifest(env, teqserenv, teqser, 'EXE')
+
+teqserenv.Install('$BINDIR', teqser)
+
+env.Distribute(teqser_sources)
+env.Distribute("SConscript")
 

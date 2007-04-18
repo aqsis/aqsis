@@ -220,6 +220,7 @@ TqInt check_type()
 			Ret=ARRAY_SYMBOL;
 		else
 			Ret=SYMBOL;
+		return(Ret);
 	}
 
 	// Check the type against global variables.
@@ -234,6 +235,7 @@ TqInt check_type()
 			Ret=ARRAY_SYMBOL;
 		else
 			Ret=SYMBOL;
+		return(Ret);
 	}
 
 	// Check the type against known functions.
@@ -243,6 +245,7 @@ TqInt check_type()
 		yylval.m_pSymbol.FuncRef=func[0];
 		yylval.m_pSymbol.eType|=2;
 		Ret=SYMBOL;
+		return(Ret);
 	}
 
 	return(Ret);

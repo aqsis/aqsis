@@ -59,7 +59,7 @@ class CqOutput
 		                  GeometricApproximation, Basis, TrimCurve, Orientation,
 		                  ReverseOrientation, Sides, Displacement, Identity,
 		                  Transform, ConcatTransform, Perspective, Translate,
-		                  Rotate, Scale, Skew, Deformation,
+		                  Rotate, Resource, ResourceBegin, ResourceEnd, Scale, Skew, Deformation,
 		                  CoordinateSystem, CoordSysTransform, Attribute, Polygon,
 		                  GeneralPolygon, PointsPolygons, PointsGeneralPolygons, Patch,
 		                  PatchMesh, NuPatch, Sphere, Cone,
@@ -72,7 +72,7 @@ class CqOutput
 		// block types (used to check context nesting)
 		enum EqBlocks{
 		    B_Ri, B_Frame, B_World, B_Attribute, B_Transform, B_Solid, B_Object,
-		    B_Motion
+		    B_Motion, B_Resource
 	};
 	private:
 		CqDictionary m_Dictionary;
@@ -243,6 +243,9 @@ class CqOutput
 		RtVoid RiPerspective( RtFloat fov );
 		RtVoid RiTranslate( RtFloat dx, RtFloat dy, RtFloat dz );
 		RtVoid RiRotate( RtFloat angle, RtFloat dx, RtFloat dy, RtFloat dz );
+		RtVoid RiResourceV( RtToken handle, RtToken type, RtInt count, RtToken tokens[], RtPointer values[]);
+		RtVoid RiResourceBegin();
+		RtVoid RiResourceEnd();
 		RtVoid RiScale( RtFloat sx, RtFloat sy, RtFloat sz );
 		RtVoid RiSkew( RtFloat angle, RtFloat dx1, RtFloat dy1, RtFloat dz1,
 		               RtFloat dx2, RtFloat dy2, RtFloat dz2 );

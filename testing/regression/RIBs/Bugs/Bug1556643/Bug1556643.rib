@@ -4,7 +4,7 @@ Option "limits" "gridsize" [ 256 ] "bucketsize" [ 16
 16 ] "eyesplits" [ 10 ] "texturememory" [ 1024 ] 
 
 #Setup Display
-Display "Bug1556643.tif" "file" "rgb" 
+Display "Bug1556643.tif" "file" "rgb" "string compression" ["lzw"]
 Format 320 240 1
 PixelSamples 1 1
 PixelFilter "gaussian" 2 2

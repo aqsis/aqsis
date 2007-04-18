@@ -23,10 +23,9 @@ WorldBegin
 AttributeBegin
 Surface "constant"
 Color [ 0.8 0.8 0.8 ]
-Scale 0.015 0.015 0.015
-Translate 1 -0.8 1
-#Rotate 50 0 1 0
 Rotate 170 0 1 0
+Scale 0.45 0.45 0.45
+Rotate -90 1 0 0
 Geometry "bunny"
 AttributeEnd
 
@@ -53,10 +52,9 @@ WorldBegin
 AttributeBegin
 Surface "constant"
 Color [ 0.8 0.8 0.8 ]
-Scale 0.015 0.015 0.015
-Translate 1 -0.8 1
-#Rotate 50 0 1 0
 Rotate 170 0 1 0
+Scale 0.45 0.45 0.45
+Rotate -90 1 0 0
 Geometry "bunny"
 AttributeEnd
 
@@ -155,10 +153,9 @@ Surface "cellnoisetest" "float Ks" 1.0
 Orientation "lh"
 #Surface "constant"
 Color [ 0.8 0.8 0.8 ]
-Scale 0.015 0.015 0.015
-Translate 1 -0.8 1
-#Rotate 50 0 1 0
 Rotate 170 0 1 0
+Scale 0.45 0.45 0.45
+Rotate -90 1 0 0
 Geometry "bunny"
 AttributeEnd
 

@@ -40,7 +40,7 @@ START_NAMESPACE( Aqsis )
  * over 1D to 4D domains.
  */
 
-class CqNoise
+class COMMON_SHARE CqNoise
 {
 	public:
 

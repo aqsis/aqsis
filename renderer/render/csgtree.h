@@ -149,6 +149,10 @@ class CqCSGNodePrimitive : public CqCSGTreeNode
 			assert( TqFalse );
 			return ( m_lDefPrimChildren );
 		}
+
+		/**
+		* @todo Review: Unused parameter pChild
+		*/
 		virtual	void	AddChild( const boost::weak_ptr<CqCSGTreeNode>& pChild )
 		{
 			assert( TqFalse );
@@ -159,6 +163,10 @@ class CqCSGNodePrimitive : public CqCSGTreeNode
 			return ( CSGNodeType_Primitive );
 		}
 		virtual	void	ProcessSampleList( std::deque<SqImageSample>& samples );
+		
+		/**
+		* @todo Review: Unused parameter abChildStates
+		*/
 		virtual	TqBool	EvaluateState( std::vector<TqBool>& abChildStates )
 		{
 			return ( TqTrue );

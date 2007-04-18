@@ -85,7 +85,7 @@ START_NAMESPACE( Aqsis )
  * A random number generator class.
  */
 
-class CqRandom
+class COMMON_SHARE CqRandom
 {
 	public:
 		CqRandom();

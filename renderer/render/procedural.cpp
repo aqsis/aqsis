@@ -263,7 +263,7 @@ extern "C" RtVoid	RiProcDynamicLoad( RtPointer data, RtFloat detail )
 //
 extern "C" RtVoid	RiProcDelayedReadArchive( RtPointer data, RtFloat detail )
 {
-	RiReadArchive( (RtToken) ((char**) data)[0], NULL );
+	RiReadArchive( (RtToken) ((char**) data)[0], NULL, RI_NULL );
 	STATS_INC( GEO_prc_created_dra );
 }
 
@@ -301,8 +301,10 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 		// We don't have an active RunProgram for the specifed
 		// program. We need to try and fork a new one
 		CqRiProceduralRunProgram *run_proc = new CqRiProceduralRunProgram;
-		pipe( run_proc->fd_in ) ;
-		pipe( run_proc->fd_out ) ;
+		if( pipe( run_proc->fd_in ) || pipe( run_proc->fd_out ) )
+		{
+			throw(XqException("Error creating pipes"));
+		}
 
 		run_proc->pid = fork() ;
 
@@ -351,10 +353,12 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 			close(run_proc->fd_in[0]);
 
 			close( STDIN_FILENO );
-			dup( run_proc->fd_out[0] );
+			if(dup( run_proc->fd_out[0] )<0)
+				throw(XqException("Error preparing stdin for RunProgram"));
 			//			setvbuf( stdin, NULL, _IONBF, 0 );
 			close( STDOUT_FILENO );
-			dup( run_proc->fd_in[1] );
+			if(dup( run_proc->fd_in[1] )<0)
+				throw(XqException("Error preparing stdout for RunProgram"));
 			//			setvbuf( stdout, NULL, _IONBF, 0 );
 
 			// We should use the procedurals searchpath here

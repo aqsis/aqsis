@@ -30,11 +30,12 @@
 #include <stdio.h>
 #include <zlib.h>
 #include "aqsis.h"
+#include "rib2_common.h"
 
 namespace librib
 {
 
-class CqRibBinaryDecoder
+class RIB_SHARE CqRibBinaryDecoder
 {
 	private:
 		FILE *file; // File to read from
@@ -109,4 +110,5 @@ class CqRibBinaryDecoder
 } // namespace librib
 
 #endif
+
 

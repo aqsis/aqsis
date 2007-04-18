@@ -8,12 +8,17 @@ ddmanager_headers = Split("""
 	debugdd.h
 	ndspy.h""")
 
+ddmanagerenv = env.Copy()
+
 # Set any platform specific options for this target
-env.UseTargetOptions('ddmanager')
+ddmanagerenv.UseTargetOptions('ddmanager')
 
-ddmanager = env.Library('ddmanager', ddmanager_sources)
-env.Install('$LIBDIR', ddmanager)
+ddmanager_objs = [ddmanagerenv.SharedObject(file) for file in ddmanager_sources]
 
-env.Distribute('renderer/ddmanager', ddmanager_sources)
-env.Distribute('renderer/ddmanager', ddmanager_headers)
-env.Distribute('renderer/ddmanager', 'SConscript')
+Export('ddmanager_objs')
+
+ddmanagerenv.Install('$INCLUDEDIR', "ndspy.h")
+
+env.Distribute(ddmanager_sources)
+env.Distribute(ddmanager_headers)
+env.Distribute('SConscript')

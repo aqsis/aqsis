@@ -16,14 +16,16 @@ slpp_headers = Split("""
 	ppext.h""")
 
 # Set any platform specific options for this target
-env.UseTargetOptions('slpplib')
+slppenv.UseTargetOptions('slpplib')
 
-slpplib = slppenv.Library('slpp', slpp_sources)
-slppenv.Install('$LIBDIR', slpplib)
+slpp_objs = [slppenv.Object(file) for file in slpp_sources]
+
+Export('slpp_objs')
+
 # Note: Need to work out how to do an executable build of slpp as well at some point.
 # There are some issues with duplicate object files.
 
-env.Distribute('shadercompiler/slpp', slpp_sources)
-env.Distribute('shadercompiler/slpp', slpp_headers)
-env.Distribute('shadercompiler/slpp', 'PP.DOC')
-env.Distribute('shadercompiler/slpp', 'SConscript')
+env.Distribute(slpp_sources)
+env.Distribute(slpp_headers)
+env.Distribute('PP.DOC')
+env.Distribute('SConscript')

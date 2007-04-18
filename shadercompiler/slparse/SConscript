@@ -30,12 +30,14 @@ if slparseenv['debug']:
 
 slparseenv.CXXFile(target='parser.cpp', source='parser.yy')
 slparseenv.CXXFile(target='scanner.cpp', source='scanner.ll')
-slparse = slparseenv.Library('slparse', slparse_sources)
-slparseenv.Install('$LIBDIR', slparse)
 
-env.Distribute('shadercompiler/slparse', slparse_sources)
-env.Distribute('shadercompiler/slparse', slparse_headers)
-env.Distribute('shadercompiler/slparse', 'SConscript')
-env.Distribute('shadercompiler/slparse', 'parser.yy')
-env.Distribute('shadercompiler/slparse', 'scanner.ll')
+slparse_objs = [slparseenv.Object(file) for file in slparse_sources]
+
+Export('slparse_objs')
+
+env.Distribute(slparse_sources)
+env.Distribute(slparse_headers)
+env.Distribute('SConscript')
+env.Distribute('parser.yy')
+env.Distribute('scanner.ll')
 

@@ -97,6 +97,9 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 		virtual CqString	strName() const;
 		virtual	TqInt	Uses() const;
 
+		/**
+		* \todo Review: Unused parameter pGrid
+		*/
 		virtual TqInt	DiceAll( CqMicroPolyGrid* pGrid )
 		{
 			return(0);
@@ -121,6 +124,7 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 
 		/** Get the surface paramter values for the given vertex index. Used when constructing a surface
 		 * using "Pz" point specification.
+		 * \todo Review: Unused parameter index
 		 */
 		virtual CqVector3D	SurfaceParametersAtVertex( TqInt index )
 		{
@@ -509,12 +513,14 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 			return ( TqFalse );
 		}
 		/** Determine if the specified point is trimmed.
+		 * \todo Review: Unused parameter p
 		 */
 		virtual	const	TqBool	bIsPointTrimmed( const CqVector2D& p ) const
 		{
 			return ( TqFalse );
 		}
 		/** Determine if the specified edge crosses the trimming curves.
+		 * \todo Review: Unused parameter v1, v2
 		 */
 		virtual	const	TqBool	bIsLineIntersecting( const CqVector2D& v1, const CqVector2D& v2 ) const
 		{
@@ -523,6 +529,7 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 		/** Determine the level at which to split a trim curve according
 		 * to its screen size after application to the surface paramters of this
 		 * surface.
+		 * \todo Review: Unused parameter Curve. Shouldn't it be curve?
 		 */
 		virtual	TqInt	TrimDecimation( const CqTrimCurve& Curve )
 		{
@@ -536,18 +543,22 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 		void	uSubdivideUserParameters( CqSurface* pA, CqSurface* pB );
 		void	vSubdivideUserParameters( CqSurface* pA, CqSurface* pB );
 
-		virtual void	PreDice( TqInt uDiceSize, TqInt vDiceSize )
+		virtual void	PreDice( TqInt /* uDiceSize */, TqInt /* vDiceSize */ )
 		{}
-		virtual void	NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData );
-		virtual void	PostDice(CqMicroPolyGrid * pGrid)
+		virtual void	NaturalDice( CqParameter* pParameter, TqInt uDiceSize,
+			TqInt vDiceSize, IqShaderData* pData);
+		virtual void	PostDice(CqMicroPolyGrid * /* pGrid */)
 		{}
 
+		/**
+		 * \todo Review: Unused parameter aSplits, u
+		 */
 		virtual TqInt	PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, TqBool u )
 		{
 			return ( 0 );
 		}
 		virtual void	NaturalSubdivide( CqParameter* pParam, CqParameter* pParam1, CqParameter* pParam2, TqBool u );
-		virtual void	PostSubdivide(std::vector<boost::shared_ptr<CqSurface> >& aSplits)
+		virtual void	PostSubdivide(std::vector<boost::shared_ptr<CqSurface> >& /* aSplits */)
 		{}
 
 		/** Virtual function to indicate whether a particular surface is able
@@ -560,18 +571,20 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 
 		/** Virtual function to genrate and fill in geomtric normals if a surface is able to do so.
 		 */
-		virtual	void	GenerateGeometricNormals( TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pNormals )
+		virtual	void	GenerateGeometricNormals( TqInt /* uDiceSize */, TqInt /* vDiceSize */,
+			IqShaderData* /* pNormals */ )
 		{}
 
 		virtual	CqMicroPolyGridBase* Dice();
 		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
+		
+		/**
+		 * \todo Review: Could this be const?
+		 */
 		virtual TqBool	Diceable()
 		{
 			return(false);
 		}
-
-
-
 
 		TqBool	m_fDiceable;		///< Flag to indicate that this GPrim is diceable.
 		TqBool	m_fDiscard;			///< Flag to indicate that this GPrim is to be discarded.
@@ -594,9 +607,15 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 				for ( iu = 0; iu <= uSize; iu++ )
 				{
 					TqFloat u = ( 1.0f / uSize ) * iu;
-					T vec = BilinearEvaluate( pParam->pValue() [ 0 ], pParam->pValue() [ 1 ], pParam->pValue() [ 2 ], pParam->pValue() [ 3 ], u, v );
-					TqInt igrid = static_cast<TqInt>( ( iv * ( uSize + 1 ) ) + iu );
-					pData->SetValue( static_cast<SLT>( vec ), igrid );
+					IqShaderData* arrayValue;
+					TqInt i;
+					for(i = 0; i<pParam->Count(); i++)
+					{
+						arrayValue = pData->ArrayEntry(i);
+						T vec = BilinearEvaluate( pParam->pValue(0) [ i ], pParam->pValue(1) [ i ], pParam->pValue(2) [ i ], pParam->pValue(3) [ i ], u, v );
+						TqInt igrid = static_cast<TqInt>( ( iv * ( uSize + 1 ) ) + iu );
+						arrayValue->SetValue( static_cast<SLT>( vec ), igrid );
+					}
 				}
 			}
 		}
@@ -608,19 +627,23 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 			CqParameterTyped<T, SLT>* pTResult1 = static_cast<CqParameterTyped<T, SLT>*>( pResult1 );
 			CqParameterTyped<T, SLT>* pTResult2 = static_cast<CqParameterTyped<T, SLT>*>( pResult2 );
 
-			if ( u )
+			TqInt i;
+			for(i = 0; i<pParam->Count(); i++)
 			{
-				pTResult2->pValue( 1 ) [ 0 ] = pTParam->pValue( 1 ) [ 0 ];
-				pTResult2->pValue( 3 ) [ 0 ] = pTParam->pValue( 3 ) [ 0 ];
-				pTResult1->pValue( 1 ) [ 0 ] = pTResult2->pValue( 0 ) [ 0 ] = static_cast<T>( ( pTParam->pValue( 0 ) [ 0 ] + pTParam->pValue( 1 ) [ 0 ] ) * 0.5 );
-				pTResult1->pValue( 3 ) [ 0 ] = pTResult2->pValue( 2 ) [ 0 ] = static_cast<T>( ( pTParam->pValue( 2 ) [ 0 ] + pTParam->pValue( 3 ) [ 0 ] ) * 0.5 );
-			}
-			else
-			{
-				pTResult2->pValue( 2 ) [ 0 ] = pTParam->pValue( 2 ) [ 0 ];
-				pTResult2->pValue( 3 ) [ 0 ] = pTParam->pValue( 3 ) [ 0 ];
-				pTResult1->pValue( 2 ) [ 0 ] = pTResult2->pValue( 0 ) [ 0 ] = static_cast<T>( ( pTParam->pValue( 0 ) [ 0 ] + pTParam->pValue( 2 ) [ 0 ] ) * 0.5 );
-				pTResult1->pValue( 3 ) [ 0 ] = pTResult2->pValue( 1 ) [ 0 ] = static_cast<T>( ( pTParam->pValue( 1 ) [ 0 ] + pTParam->pValue( 3 ) [ 0 ] ) * 0.5 );
+				if ( u )
+				{
+					pTResult2->pValue( 1 ) [ i ] = pTParam->pValue( 1 ) [ i ];
+					pTResult2->pValue( 3 ) [ i ] = pTParam->pValue( 3 ) [ i ];
+					pTResult1->pValue( 1 ) [ i ] = pTResult2->pValue( 0 ) [ i ] = static_cast<T>( ( pTParam->pValue( 0 ) [ i ] + pTParam->pValue( 1 ) [ i ] ) * 0.5 );
+					pTResult1->pValue( 3 ) [ i ] = pTResult2->pValue( 2 ) [ i ] = static_cast<T>( ( pTParam->pValue( 2 ) [ i ] + pTParam->pValue( 3 ) [ i ] ) * 0.5 );
+				}
+				else
+				{
+					pTResult2->pValue( 2 ) [ i ] = pTParam->pValue( 2 ) [ i ];
+					pTResult2->pValue( 3 ) [ i ] = pTParam->pValue( 3 ) [ i ];
+					pTResult1->pValue( 2 ) [ i ] = pTResult2->pValue( 0 ) [ i ] = static_cast<T>( ( pTParam->pValue( 0 ) [ i ] + pTParam->pValue( 2 ) [ i ] ) * 0.5 );
+					pTResult1->pValue( 3 ) [ i ] = pTResult2->pValue( 1 ) [ i ] = static_cast<T>( ( pTParam->pValue( 1 ) [ i ] + pTParam->pValue( 3 ) [ i ] ) * 0.5 );
+				}
 			}
 		}
 

@@ -411,9 +411,18 @@ TqFloat* CqOptions::GetFloatOptionWrite( const char* strName, const char* strPar
 	{
 		// As we are getting a writeable copy, we should create if it doesn't exist.
 		CqNamedParameterList* pList = pOptionWrite( strName ).get();
-		CqParameterTypedUniform<TqFloat, type_float, TqFloat>* pOpt = new CqParameterTypedUniform<TqFloat, type_float, TqFloat>(strParam, arraySize);
-		pList->AddParameter(pOpt);
-		return ( pOpt->pValue() );
+		if(arraySize <= 1)
+		{	
+			CqParameterTypedUniform<TqFloat, type_float, TqFloat>* pOpt = new CqParameterTypedUniform<TqFloat, type_float, TqFloat>(strParam, arraySize);
+			pList->AddParameter(pOpt);
+			return ( pOpt->pValue() );
+		}
+		else
+		{
+			CqParameterTypedUniformArray<TqFloat, type_float, TqFloat>* pOpt = new CqParameterTypedUniformArray<TqFloat, type_float, TqFloat>(strParam, arraySize);
+			pList->AddParameter(pOpt);
+			return ( pOpt->pValue() );
+		}
 	}
 }
 
@@ -434,9 +443,18 @@ TqInt* CqOptions::GetIntegerOptionWrite( const char* strName, const char* strPar
 	{
 		// As we are getting a writeable copy, we should create if it doesn't exist.
 		CqNamedParameterList* pList = pOptionWrite( strName ).get();
-		CqParameterTypedUniform<TqInt, type_integer, TqInt>* pOpt = new CqParameterTypedUniform<TqInt, type_integer, TqInt>(strParam, arraySize);
-		pList->AddParameter(pOpt);
-		return ( pOpt->pValue() );
+		if(arraySize <= 1)
+		{
+			CqParameterTypedUniform<TqInt, type_integer, TqInt>* pOpt = new CqParameterTypedUniform<TqInt, type_integer, TqInt>(strParam, arraySize);
+			pList->AddParameter(pOpt);
+			return ( pOpt->pValue() );
+		}
+		else
+		{
+			CqParameterTypedUniformArray<TqInt, type_integer, TqInt>* pOpt = new CqParameterTypedUniformArray<TqInt, type_integer, TqInt>(strParam, arraySize);
+			pList->AddParameter(pOpt);
+			return ( pOpt->pValue() );
+		}
 	}
 }
 
@@ -457,9 +475,18 @@ CqString* CqOptions::GetStringOptionWrite( const char* strName, const char* strP
 	{
 		// As we are getting a writeable copy, we should create if it doesn't exist.
 		CqNamedParameterList* pList = pOptionWrite( strName ).get();
-		CqParameterTypedUniform<CqString, type_string, CqString>* pOpt = new CqParameterTypedUniform<CqString, type_string, CqString>(strParam, arraySize);
-		pList->AddParameter(pOpt);
-		return ( pOpt->pValue() );
+		if(arraySize <= 1)
+		{
+			CqParameterTypedUniform<CqString, type_string, CqString>* pOpt = new CqParameterTypedUniform<CqString, type_string, CqString>(strParam, arraySize);
+			pList->AddParameter(pOpt);
+			return ( pOpt->pValue() );
+		}
+		else
+		{
+			CqParameterTypedUniformArray<CqString, type_string, CqString>* pOpt = new CqParameterTypedUniformArray<CqString, type_string, CqString>(strParam, arraySize);
+			pList->AddParameter(pOpt);
+			return ( pOpt->pValue() );
+		}
 	}
 }
 
@@ -480,9 +507,18 @@ CqVector3D* CqOptions::GetPointOptionWrite( const char* strName, const char* str
 	{
 		// As we are getting a writeable copy, we should create if it doesn't exist.
 		CqNamedParameterList* pList = pOptionWrite( strName ).get();
-		CqParameterTypedUniform<CqVector3D, type_point, CqVector3D>* pOpt = new CqParameterTypedUniform<CqVector3D, type_point, CqVector3D>(strParam, arraySize);
-		pList->AddParameter(pOpt);
-		return ( pOpt->pValue() );
+		if(arraySize <= 1)
+		{
+			CqParameterTypedUniform<CqVector3D, type_point, CqVector3D>* pOpt = new CqParameterTypedUniform<CqVector3D, type_point, CqVector3D>(strParam, arraySize);
+			pList->AddParameter(pOpt);
+			return ( pOpt->pValue() );
+		}
+		else
+		{
+			CqParameterTypedUniformArray<CqVector3D, type_point, CqVector3D>* pOpt = new CqParameterTypedUniformArray<CqVector3D, type_point, CqVector3D>(strParam, arraySize);
+			pList->AddParameter(pOpt);
+			return ( pOpt->pValue() );
+		}
 	}
 }
 
@@ -503,9 +539,18 @@ CqColor* CqOptions::GetColorOptionWrite( const char* strName, const char* strPar
 	{
 		// As we are getting a writeable copy, we should create if it doesn't exist.
 		CqNamedParameterList* pList = pOptionWrite( strName ).get();
-		CqParameterTypedUniform<CqColor, type_color, CqColor>* pOpt = new CqParameterTypedUniform<CqColor, type_color, CqColor>(strParam, arraySize);
-		pList->AddParameter(pOpt);
-		return ( pOpt->pValue() );
+		if( arraySize <= 1)
+		{
+			CqParameterTypedUniform<CqColor, type_color, CqColor>* pOpt = new CqParameterTypedUniform<CqColor, type_color, CqColor>(strParam, arraySize);
+			pList->AddParameter(pOpt);
+			return ( pOpt->pValue() );
+		}
+		else
+		{
+			CqParameterTypedUniformArray<CqColor, type_color, CqColor>* pOpt = new CqParameterTypedUniformArray<CqColor, type_color, CqColor>(strParam, arraySize);
+			pList->AddParameter(pOpt);
+			return ( pOpt->pValue() );
+		}
 	}
 }
 

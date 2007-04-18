@@ -1,4 +1,5 @@
-Import('env')
+import os
+Import('env', 'embedManifest')
 aqsistypes_sources = Split("""
 	bitvector.cpp
 	cellnoise.cpp
@@ -20,7 +21,6 @@ aqsistypes_sources = Split("""
 	vector4d.cpp""")
 
 aqsistypes_headers = Split("""
-	aqerror.h
 	aqsis.h
 	aqsis_types.h
 	bitvector.h
@@ -73,13 +73,26 @@ aqsistypes_install_headers = Split('''
 Import('platform_sources')
 aqsistypes_sources = aqsistypes_sources + platform_sources
 
+aqsistypesenv = env.Copy()
+aqsistypesenv.AppendUnique(CPPDEFINES=['COMMON_EXPORTS'])
+
 # Set any platform specific options for this target
-env.UseTargetOptions('aqsistypes')
+aqsistypesenv.UseTargetOptions('aqsistypes')
 
-aqsistypes = env.Library('aqsistypes', aqsistypes_sources)
-env.Install('$LIBDIR', aqsistypes)
-env.Install('$INCLUDEDIR',aqsistypes_install_headers)
+if env.has_key('aqsistypes_add_sources'):
+	aqsistypes_sources = aqsistypes_sources + ['$aqsistypes_add_sources']
 
-env.Distribute('aqsistypes', aqsistypes_sources)
-env.Distribute('aqsistypes', aqsistypes_headers)
-env.Distribute('aqsistypes', 'SConscript')
+aqsistypes = aqsistypesenv.SharedLibrary('aqsistypes', aqsistypes_sources)
+
+embedManifest(env, aqsistypesenv, aqsistypes, 'DLL')
+
+aqsistypesenv.PostBuildSharedLibrary(aqsistypesenv, aqsistypes)
+#aqsistypesenv.Install('$RENDERENGINEDIR', aqsistypes)
+aqsistypesenv.Install('$INCLUDEDIR',aqsistypes_install_headers)
+aqsistypesenv.InstallAs([os.path.join('${RENDERENGINEDIR}', '%s${SHLIB_VERSION_SUFFIX}') %(aqsistypes[0])], [aqsistypes[0]])
+
+aqsistypesenv.PostInstallSharedLibrary(aqsistypesenv, '${RENDERENGINEDIR}', aqsistypes)
+
+env.Distribute(aqsistypes_sources)
+env.Distribute(aqsistypes_headers)
+env.Distribute('SConscript')

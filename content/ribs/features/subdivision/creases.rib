@@ -1,6 +1,6 @@
 Format 400 300 1
-Display "creases.tif" "file" "rgba"
-Display "+creases.tif" "framebuffer" "rgba"
+Display "creases.tif" "file" "rgba" "string compression" "lzw"
+Display "+creases.tif" "framebuffer" "rgb"
 
 Projection "perspective" "fov" 50.000000
 WorldBegin

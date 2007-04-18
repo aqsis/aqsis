@@ -1,0 +1,15 @@
+Import('env')
+
+scene_data = Split("""
+	grid.tif
+	layered.rib
+	texmap.sl
+	render.bat
+	render.sh
+	""")
+
+env.Install('$CONTENTDIR/ribs/features/layeredshaders', scene_data)
+
+env.Distribute(scene_data)
+env.Distribute('SConscript')
+

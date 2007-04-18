@@ -5,13 +5,16 @@ raytrace_sources = Split("""
 raytrace_headers = Split("""
 	raytrace.h""")
 
+raytraceenv = env.Copy()
+
 # Set any platform specific options for this target
-env.UseTargetOptions('raytrace')
+raytraceenv.UseTargetOptions('raytrace')
 
-raytrace = env.Library('raytrace', raytrace_sources)
-env.Install('$LIBDIR', raytrace)
+raytrace_objs = [raytraceenv.SharedObject(file) for file in raytrace_sources]
 
-env.Distribute('renderer/raytrace', raytrace_sources)
-env.Distribute('renderer/raytrace', raytrace_headers)
-env.Distribute('renderer/raytrace', 'SConscript')
+Export('raytrace_objs')
+
+env.Distribute(raytrace_sources)
+env.Distribute(raytrace_headers)
+env.Distribute('SConscript')
 

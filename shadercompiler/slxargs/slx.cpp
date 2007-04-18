@@ -109,13 +109,20 @@ static FILE * OpenCurrentShader()
 		if( NULL != shaderInputFile )
 		{
 			char sigbuf[100];
-			fread(sigbuf, sizeof(char), 100, shaderInputFile);
-			fseek(shaderInputFile, 0, SEEK_SET);
-			sigbuf[99] = '\0';
-			if( strstr(sigbuf, "AQSIS") == NULL )
+			if(fread(sigbuf, sizeof(char), 100, shaderInputFile)<0)
 			{
-				fclose( shaderInputFile );
+				fclose(shaderInputFile);
 				shaderInputFile = NULL;
+			}
+			else
+			{
+				fseek(shaderInputFile, 0, SEEK_SET);
+				sigbuf[99] = '\0';
+				if( strstr(sigbuf, "AQSIS") == NULL )
+				{
+					fclose( shaderInputFile );
+					shaderInputFile = NULL;
+				}
 			}
 		}
 	}
@@ -651,7 +658,7 @@ static RtInt GetCurrentShaderInfo( char * name, char * filePath )
 	int i;
 	int varCount;
 	EqShaderType aShaderType;
-	SLX_VISSYMDEF * newArray;
+	SLX_VISSYMDEF * newArray = 0;
 	int theNArgs;
 	SLX_TYPE theShaderType;
 
@@ -668,7 +675,7 @@ static RtInt GetCurrentShaderInfo( char * name, char * filePath )
 
 	if ( SLXFile.IsValid() )
 	{
-		CqShaderVM * pShader = new CqShaderVM();
+		CqShaderVM * pShader = new CqShaderVM(QGetRenderContextI());
 		pShader->SetDSOPath( DSOPath );
 		pShader->LoadProgram( SLXFile );
 		pShader->SetstrName( filePath );

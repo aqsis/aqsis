@@ -117,7 +117,6 @@ extern "C" const char* StandardParameters[][2] =
 	        {"auto_shadows", "uniform string" },
 	        {"endofframe", "uniform integer" },
 	        {"offset", "uniform float"},
-	        {"renderinfo", "uniform integer" },
 	        {"sphere", "uniform float" },
 	        {"coordinatesystem", "uniform string" },
 	        {"shadows", "uniform string" },
@@ -143,6 +142,8 @@ extern "C" const char* StandardParameters[][2] =
 	        {"dither", "uniform float" },
 	        {"interpolateboundary", "uniform integer" },
 	        {"zthreshold", "uniform color" },
+		{"enabled", "uniform integer" },
+		{"echoapi", "uniform integer" },
 	        { NULL , NULL }
 	    };
 

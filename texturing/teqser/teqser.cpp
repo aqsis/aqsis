@@ -1,5 +1,27 @@
-// teqser.cpp : Defines the entry point for the console application.
+// Aqsis
+// Copyright 1997 - 2001, Paul C. Gregory
 //
+// Contact: pgregory@aqsis.org
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public
+// License as published by the Free Software Foundation; either
+// version 2 of the License, or (at your option) any later version.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public
+// License along with this library; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+/** \file
+		\brief Tool 'teqser' (texturizer or texer) for preprocessing 
+tiff files.
+		\author Paul C. Gregory (pgregory@aqsis.org)
+*/
 
 #include	<stdio.h>
 
@@ -39,12 +61,7 @@ ArgParse::apfloat g_bake = 64.0;
 
 void version( std::ostream& Stream )
 {
-#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX) || defined(SCONS_BUILD)
-	Stream << "teqser version " << VERSION_STR << std::endl;
-#else
-
-	Stream << "teqser version " << VERSION << std::endl;
-#endif
+	Stream << "teqser version " << VERSION_STR_PRINT << std::endl << "compiled " << __DATE__ << " " << __TIME__ << std::endl;
 }
 
 

@@ -421,22 +421,13 @@ TqUint CqSurfaceNURBS::InsertKnotU( TqFloat u, TqInt r )
 	if ( r <= 0 )
 		return ( 0 );
 
-
-	m_cuVerts = m_cuVerts + r;
-	m_auKnots.resize( m_cuVerts + m_uOrder );
-
-	std::vector<TqFloat>	auHold( m_auKnots );
-	// Load new knot vector
-	// Copy up to the insertion point.
-	for ( i = 0;i <= k;i++ )
-		m_auKnots[ i ] = auHold[ i ];
-	// Add the specified value 'r' times at the insertion point.
-	for ( i = 1;i <= r;i++ )
-		m_auKnots[ k + i ] = u;
-	// Copy after the insertion point up to the end.
-	for ( i = k + 1; i < static_cast<TqInt>( m_auKnots.size() ); i++ )
-		m_auKnots[ i + r ] = auHold[ i ];
-
+	std::vector<TqFloat> auHold(m_auKnots);
+	// Reserve more space for new knots.
+	m_cuVerts += r;
+	m_auKnots.reserve( m_cuVerts + m_uOrder );
+	// Insert r new knots.
+	std::vector<TqFloat> newKnots(r, u);
+	m_auKnots.insert(m_auKnots.begin()+(k+1), newKnots.begin(), newKnots.end());
 
 	// Now process all the 'vertex' class variables.
 	std::vector<CqParameter*>::iterator iUP;
@@ -610,19 +601,13 @@ TqUint CqSurfaceNURBS::InsertKnotV( TqFloat v, TqInt r )
 	if ( r <= 0 )
 		return ( 0 );
 
-	// Work on a copy.
-	m_cvVerts = m_cvVerts + r;
-	m_avKnots.resize( m_cvVerts + m_vOrder );
-	std::vector<TqFloat>	avHold( m_avKnots );
-
-	// Load new knot vector
-	for ( i = 0;i <= k;i++ )
-		m_avKnots[ i ] = avHold[ i ];
-	for ( i = 1;i <= r;i++ )
-		m_avKnots[ k + i ] = v;
-	size = static_cast<TqInt>( m_avKnots.size() );
-	for ( i = k + 1;i < size; i++ )
-		m_avKnots[ i + r ] = avHold[ i ];
+	std::vector<TqFloat> avHold(m_avKnots);
+	// Reserve more space for new knots.
+	m_cvVerts += r;
+	m_avKnots.reserve( m_cvVerts + m_vOrder );
+	// Insert r new knots
+	std::vector<TqFloat> newKnots(r, v);
+	m_avKnots.insert(m_avKnots.begin()+(k+1), newKnots.begin(), newKnots.end());
 
 	// Now process all the 'vertex' class variables.
 	std::vector<CqParameter*>::iterator iUP;
@@ -1396,6 +1381,7 @@ CqBound CqSurfaceNURBS::Bound() const
 
 void CqSurfaceNURBS::NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData )
 {
+	assert(pParameter->Count() == pData->ArrayLength());
 	CqVector4D vec1;
 	TqInt iv;
 	for ( iv = 0; iv <= vDiceSize; iv++ )
@@ -1416,14 +1402,26 @@ void CqSurfaceNURBS::NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqIn
 					case type_float:
 					{
 						CqParameterTyped<TqFloat, TqFloat>* pTParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParameter );
-						pData->SetValue( Evaluate( su, sv, pTParam ), igrid );
+						IqShaderData* arrayValue;
+						TqInt i;
+						for(i = 0; i<pParameter->Count(); i++)
+						{
+							arrayValue = pData->ArrayEntry(i);
+							arrayValue->SetValue( Evaluate(su, sv, pTParam, i), igrid);
+						}
 						break;
 					}
 
 					case type_integer:
 					{
 						CqParameterTyped<TqInt, TqFloat>* pTParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParameter );
-						pData->SetValue( Evaluate( su, sv, pTParam ), igrid );
+						IqShaderData* arrayValue;
+						TqInt i;
+						for(i = 0; i<pParameter->Count(); i++)
+						{
+							arrayValue = pData->ArrayEntry(i);
+							arrayValue->SetValue( Evaluate(su, sv, pTParam, i), igrid);
+						}
 						break;
 					}
 
@@ -1432,35 +1430,65 @@ void CqSurfaceNURBS::NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqIn
 					case type_vector:
 					{
 						CqParameterTyped<CqVector3D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParameter );
-						pData->SetValue( Evaluate( su, sv, pTParam ), igrid );
+						IqShaderData* arrayValue;
+						TqInt i;
+						for(i = 0; i<pParameter->Count(); i++)
+						{
+							arrayValue = pData->ArrayEntry(i);
+							arrayValue->SetValue( Evaluate(su, sv, pTParam, i), igrid);
+						}
 						break;
 					}
 
 					case type_hpoint:
 					{
 						CqParameterTyped<CqVector4D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( pParameter );
-						pData->SetValue( static_cast<CqVector3D>( Evaluate( su, sv, pTParam ) ), igrid );
+						IqShaderData* arrayValue;
+						TqInt i;
+						for(i = 0; i<pParameter->Count(); i++)
+						{
+							arrayValue = pData->ArrayEntry(i);
+							arrayValue->SetValue( static_cast<CqVector3D>( Evaluate( su, sv, pTParam ) ), igrid );
+						}
 						break;
 					}
 
 					case type_color:
 					{
 						CqParameterTyped<CqColor, CqColor>* pTParam = static_cast<CqParameterTyped<CqColor, CqColor>*>( pParameter );
-						pData->SetValue( Evaluate( su, sv, pTParam ), igrid );
+						IqShaderData* arrayValue;
+						TqInt i;
+						for(i = 0; i<pParameter->Count(); i++)
+						{
+							arrayValue = pData->ArrayEntry(i);
+							arrayValue->SetValue( Evaluate(su, sv, pTParam, i), igrid);
+						}
 						break;
 					}
 
 					case type_string:
 					{
 						CqParameterTyped<CqString, CqString>* pTParam = static_cast<CqParameterTyped<CqString, CqString>*>( pParameter );
-						pData->SetValue( Evaluate( su, sv, pTParam ), igrid );
+						IqShaderData* arrayValue;
+						TqInt i;
+						for(i = 0; i<pParameter->Count(); i++)
+						{
+							arrayValue = pData->ArrayEntry(i);
+							arrayValue->SetValue( Evaluate(su, sv, pTParam, i), igrid);
+						}
 						break;
 					}
 
 					case type_matrix:
 					{
 						CqParameterTyped<CqMatrix, CqMatrix>* pTParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParameter );
-						pData->SetValue( Evaluate( su, sv, pTParam ), igrid );
+						IqShaderData* arrayValue;
+						TqInt i;
+						for(i = 0; i<pParameter->Count(); i++)
+						{
+							arrayValue = pData->ArrayEntry(i);
+							arrayValue->SetValue( Evaluate(su, sv, pTParam, i), igrid);
+						}
 						break;
 					}
 

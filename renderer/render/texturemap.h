@@ -551,6 +551,10 @@ class CqTextureMap : public IqTextureMap
 		{
 			return ( m_matWorldToScreen );
 		}
+		virtual const CqString& getName() const
+		{
+			return ( m_strName );
+		}
 
 		/** Get the image type.
 		 */
@@ -641,7 +645,7 @@ class CqTextureMap : public IqTextureMap
 		static	CqTextureMap* GetShadowMap( const CqString& strName );
 		static	CqTextureMap* GetLatLongMap( const CqString& strName );
 
-		void	ImageFilterVal( CqTextureMapBuffer* pData, TqInt x, TqInt y, TqInt directory, TqInt m_xres, TqInt m_yres, std::vector<TqFloat>& accum );
+		//void	ImageFilterVal( CqTextureMapBuffer* pData, TqInt x, TqInt y, TqInt directory, TqInt m_xres, TqInt m_yres, std::vector<TqFloat>& accum );
 
 		void Interpreted( TqPchar mode );
 
@@ -681,6 +685,38 @@ class CqTextureMap : public IqTextureMap
 		void   CalculateLevel(TqFloat ds, TqFloat dt);
 
 	protected:
+		class CqImageFilter
+		{
+			public:
+				CqImageFilter(TqFloat swidth, TqFloat twidth, TqInt xres, TqInt yres, RtFilterFunc pFilter) : m_swidth(swidth), m_twidth(twidth), m_xres(xres), m_yres(yres), m_pFilter(pFilter)
+				{
+					TqFloat srad = (swidth*0.5);
+					TqFloat trad = (twidth*0.5);
+					m_weights.resize(static_cast<size_t>(swidth+1)*static_cast<size_t>(twidth+1));
+					TqInt weightOffset = 0;
+					for(TqFloat t = -trad; t <= trad; t++)
+					{
+						for(TqFloat s = -srad; s <= srad; s++)
+						{
+							TqFloat weight = ( *pFilter ) ( s, t, swidth, twidth );
+							m_weights[weightOffset++] = weight;
+						}
+					}
+				}
+				
+				~CqImageFilter()	{}
+
+				
+			void	ImageFilterVal( CqTextureMapBuffer* pData, TqInt x, TqInt y, TqInt samplesPerPixel, TqInt xres, TqInt yres, std::vector<TqFloat>& accum );
+
+			private:
+				std::vector<TqFloat>	m_weights;
+				TqFloat			m_swidth;
+				TqFloat			m_twidth;
+				TqInt			m_xres;
+				TqInt			m_yres;
+				RtFilterFunc	m_pFilter;
+		};
 		static	std::vector<CqTextureMap*>	m_TextureMap_Cache;	///< Static array of loaded textures.
 		static std::vector<CqString*>	m_ConvertString_Cache; ///< Static array of filename (after conversion)
 

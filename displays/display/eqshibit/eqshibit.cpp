@@ -69,11 +69,7 @@ ArgParse::apint 	g_cl_verbose = 1;
 
 void version( std::ostream& Stream )
 {
-#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX) || defined(SCONS_BUILD)
-	Stream << "eqshibit version " << VERSION_STR << std::endl;
-#else
-	Stream << "eqshibit version " << VERSION << std::endl;
-#endif
+	Stream << "eqshibit version " << VERSION_STR_PRINT << std::endl;
 }
 
 

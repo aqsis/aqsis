@@ -1,4 +1,5 @@
-Import('env')
+import os
+Import('env', 'embedManifest')
 ri2rib_sources = Split("""
 	ascii.cpp
 	binary.cpp
@@ -24,12 +25,27 @@ ri2rib_headers = Split("""
 	outstream.h
 	plstore.h""")
 
+ri2ribenv = env.Copy()
+ri2ribenv.AppendUnique(CPPDEFINES = ['RI_EXPORTS'])
+ri2ribenv.AppendUnique(CPPPATH=['$zlib_include_path'])
+
 # Set any platform specific options for this target
-env.UseTargetOptions('ri2rib')
+ri2ribenv.UseTargetOptions('ri2rib')
 
-ri2rib = env.Library('ri2rib', ri2rib_sources)
-env.Install('$LIBDIR', ri2rib)
+if env.has_key('ri2rib_add_sources'):
+	ri2rib_sources = ri2rib_sources + ['$ri2rib_add_sources']
 
-env.Distribute('rib/ri2rib', ri2rib_sources)
-env.Distribute('rib/ri2rib', ri2rib_headers)
-env.Distribute('rib/ri2rib', 'SConscript')
+ri2ribenv.Replace(LIBS = ['aqsistypes', '$z_lib'])
+
+ri2rib = ri2ribenv.SharedLibrary('ri2rib', ri2rib_sources)
+
+embedManifest(env, ri2ribenv, ri2rib, 'DLL')
+	
+ri2ribenv.PostBuildSharedLibrary(ri2ribenv, ri2rib)
+ri2ribenv.InstallAs([os.path.join('${RENDERENGINEDIR}', '%s${SHLIB_VERSION_SUFFIX}') %(ri2rib[0])], [ri2rib[0]])
+
+ri2ribenv.PostInstallSharedLibrary(ri2ribenv, '${RENDERENGINEDIR}', ri2rib)
+
+env.Distribute(ri2rib_sources)
+env.Distribute(ri2rib_headers)
+env.Distribute('SConscript')

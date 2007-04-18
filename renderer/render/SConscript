@@ -1,4 +1,6 @@
-Import('env cachegen headergen validategen')
+import os
+
+Import('env cachegen headergen validategen', 'embedManifest')
 aqsisdll_sources = Split("""
 	attributes.cpp
 	bound.cpp
@@ -7,6 +9,7 @@ aqsisdll_sources = Split("""
 	condition.cpp
 	converter.cpp
 	csgtree.cpp
+	cubiccurves.cpp
 	curves.cpp
 	environment.cpp
 	filters.cpp
@@ -18,6 +21,7 @@ aqsisdll_sources = Split("""
 	inlineparse.cpp
 	lath.cpp
 	lights.cpp
+	linearcurves.cpp
 	micropolygon.cpp
 	mpdump.cpp
 	nurbs.cpp
@@ -49,6 +53,7 @@ aqsisdll_sources = Split("""
 aqsisdll_headers = Split("""
 	attributes.h            ilightsource.h          micropolygon.h          ri.h
 	bilinear.h              imagebuffer.h           motion.h                ri_cache.h
+	ri_debug.h
 	bound.h                 imagepixel.h            mpdump.h                rifile.h
 
 	bucket.h                bunny.h 	imagers.h               
@@ -75,24 +80,37 @@ aqsis_install_headers = Split('''
 	''')
 
 aqsisenv = env.Copy()
-aqsisenv.AppendUnique(CPPDEFINES=[('_qBUILDING', 'CORE'), ('CORE', 1)])
+aqsisenv.AppendUnique(CPPDEFINES=['RI_EXPORTS', 'RIB_EXPORTS'])
+aqsisenv.AppendUnique(CPPPATH=['$tiff_include_path', '$zlib_include_path'])
 
 
 if env.has_key('libaqsis_add_sources'):
 	aqsisdll_sources = aqsisdll_sources + ['$libaqsis_add_sources']
 
 
-aqsisenv.Replace(LIBS = ['ddmanager', 'raytrace', 'rib2', 'rib2ri', 'shaderexecenv', 'shadervm', 'aqsistypes', '$tiff_lib', '$z_lib'])
-aqsisdll = aqsisenv.SharedLibrary('aqsis', aqsisdll_sources)
+aqsisenv.Replace(LIBS = ['shadervm', 'aqsistypes', '$tiff_lib', '$z_lib'])
 
 aqsisenv.UseTargetOptions('libaqsis')
+
+Import('ddmanager_objs raytrace_objs rib2_objs rib2ri_sources')
+
+# compile rib2ri here to catch aqsisenv #defines
+rib2ri_objs = aqsisenv.SharedObject('rib2ri', rib2ri_sources)
+
+aqsisdll = aqsisenv.SharedLibrary('aqsis', [aqsisdll_sources, ddmanager_objs, raytrace_objs, rib2ri_objs, rib2_objs])
+
+embedManifest(env, aqsisenv, aqsisdll, 'DLL')
+
+aqsisenv.PostBuildSharedLibrary(aqsisenv, aqsisdll)
 
 Depends(aqsisdll, cachegen)
 Depends(aqsisdll, validategen)
 Depends(aqsisdll, headergen)
 
-aqsisenv.Install('$BINDIR', aqsisdll)
+aqsisInstall = aqsisenv.InstallAs([os.path.join('${RENDERENGINEDIR}', '%s${SHLIB_VERSION_SUFFIX}') %(aqsisdll[0])], [aqsisdll[0]])
 aqsisenv.Install('$INCLUDEDIR', aqsis_install_headers)
+
+aqsisenv.PostInstallSharedLibrary(aqsisenv, '${RENDERENGINEDIR}', aqsisdll)
 
 #aqsisproject = aqsisenv.MSVSProject(target = 'render' + env['MSVSPROJECTSUFFIX'],
 #	srcs = aqsisdll_sources,
@@ -102,6 +120,6 @@ aqsisenv.Install('$INCLUDEDIR', aqsis_install_headers)
 #aqsisenv.Depends(aqsisdll, aqsisproject)
 
 
-env.Distribute('renderer/render', aqsisdll_sources)
-env.Distribute('renderer/render', aqsisdll_headers)
-env.Distribute('renderer/render', 'SConscript')
+env.Distribute(aqsisdll_sources)
+env.Distribute(aqsisdll_headers)
+env.Distribute('SConscript')

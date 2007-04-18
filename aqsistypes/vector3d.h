@@ -45,7 +45,7 @@ class CqColor;
  * \brief Define class structure for 3D vector.
  */
 
-class CqVector3D
+class COMMON_SHARE CqVector3D
 {
 	public:
 		CqVector3D() : m_x(0.0f), m_y(0.0f), m_z(0.0f)
@@ -345,8 +345,8 @@ class CqVector3D
 		{
 			return ( a.m_x * b.m_x + a.m_y * b.m_y + a.m_z * b.m_z );
 		} // Dot product
-		friend CqVector3D	operator%( const CqVector3D& a, const CqVector3D& b );	// X product
-		friend std::ostream &operator<<( std::ostream &Stream, const CqVector3D &Vector );
+		COMMON_SHARE friend CqVector3D	operator%( const CqVector3D& a, const CqVector3D& b );	// X product
+		COMMON_SHARE friend std::ostream &operator<<( std::ostream &Stream, const CqVector3D &Vector );
 
 	protected:
 		TqFloat	m_x;	///< X component.

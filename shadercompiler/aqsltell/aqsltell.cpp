@@ -82,7 +82,7 @@ int main( int argc, const char** argv )
 	g_shader_path = DEFAULT_SHADER_PATH;
 #endif
 
-	Aqsis::QGetRenderContextI();
+	/*Aqsis::QGetRenderContextI();*/
 	ArgParse ap;
 	ap.usageHeader( ArgParse::apstring( "Usage: " ) + argv[ 0 ] + " <shadername>" );
 	ap.argFlag( "help", "\aprint this help and exit", &g_cl_help );
@@ -103,7 +103,7 @@ int main( int argc, const char** argv )
 
 	if ( g_cl_version )
 	{
-		std::cout << "aqsltell version " << VERSION_STR << std::endl;
+		std::cout << "aqsltell version " << VERSION_STR_PRINT << std::endl << "compiled " << __DATE__ << " " << __TIME__ << std::endl;
 		exit( 0 );
 	}
 

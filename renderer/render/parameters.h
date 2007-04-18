@@ -89,7 +89,7 @@ class CqParameter
 		 * \param u Boolean indicating whether to split in the u direction, false indicates split in v.
 		 * \param pSurface Pointer to the surface which this paramter belongs, used if the surface has special handling of parameter splitting.
 		 */
-		virtual void	Subdivide( CqParameter* pResult1, CqParameter* pResult2, TqBool u, IqSurface* pSurface = 0 )
+		virtual void	Subdivide( CqParameter* /* pResult1 */, CqParameter* /* pResult2 */, TqBool /* u */, IqSurface* /* pSurface */ = 0 )
 		{}
 		/** Pure virtual, dice the value into a grid using appropriate interpolation for the class.
 		 * \param u Integer dice count for the u direction.
@@ -978,10 +978,12 @@ class CqParameterTypedUniformArray : public CqParameterTyped<T, SLT>
 			assert( pResult->Type() == this->Type() );
 			// Note it is assumed that the variable has been
 			// initialised to the correct size prior to calling.
-			TqUint i;
+			TqUint i; 
+			TqInt  j;
 			TqUint max = ( MAX( (TqUint)u * (TqUint) v, pResult->Size() ) );
-			for ( i = 0; i < max; i++ )
-				pResult->SetValue( pValue( 0 ) [ 0 ], i );
+			for ( i = 0; i < max; ++i )
+				for( j = 0; j < this->Count(); ++j )
+					pResult->SetValue( pValue( 0 ) [ j ], i );
 		}
 		virtual	void	CopyToShaderVariable( IqShaderData* pResult )
 		{
@@ -1112,10 +1114,12 @@ class CqParameterTypedConstantArray : public CqParameterTyped<T, SLT>
 			assert( pResult->Type() == this->Type() );
 			// Note it is assumed that the variable has been
 			// initialised to the correct size prior to calling.
-			TqUint i;
+			TqUint i; 
+			TqInt  j;
 			TqUint max = ( MAX( (TqUint) u * (TqUint) v, pResult->Size() ) );
-			for ( i = 0; i < max; i++ )
-				pResult->SetValue( pValue( 0 ) [ 0 ], i );
+			for ( i = 0; i < max; ++i )
+				for( j = 0; j < this->Count(); ++j )
+					pResult->SetValue( pValue( 0 ) [ j ], i );
 		}
 		virtual	void	CopyToShaderVariable( IqShaderData* pResult )
 		{
@@ -1419,9 +1423,11 @@ void CqParameterTypedVaryingArray<T, I, SLT>::Dice( TqInt u, TqInt v, IqShaderDa
 
 	T res;
 
-	SLT* pResData;
-	pResult->GetValuePtr( pResData );
-	assert( NULL != pResData );
+	std::vector<SLT*> pResData(this->Count());
+	
+	TqInt arrayIndex;
+	for(arrayIndex = 0; arrayIndex < this->Count(); arrayIndex++)
+		pResult->ArrayEntry(arrayIndex)->GetValuePtr( pResData[arrayIndex] );
 
 	// Check if a valid 4 point quad, do nothing if not.
 	if ( m_aValues.size() == 4 )
@@ -1436,12 +1442,15 @@ void CqParameterTypedVaryingArray<T, I, SLT>::Dice( TqInt u, TqInt v, IqShaderDa
 			TqInt iu;
 			for ( iu = 0; iu <= u; iu++ )
 			{
-				res = BilinearEvaluate<T>( pValue( 0 ) [ 0 ],
-				                           pValue( 1 ) [ 0 ],
-				                           pValue( 2 ) [ 0 ],
-				                           pValue( 3 ) [ 0 ],
-				                           iu * diu, iv * div );
-				( *pResData++ ) = res;
+				for( arrayIndex = 0; arrayIndex < this->Count(); arrayIndex++ )
+				{
+					res = BilinearEvaluate<T>( pValue( 0 ) [ arrayIndex ],
+								   pValue( 1 ) [ arrayIndex ],
+								   pValue( 2 ) [ arrayIndex ],
+								   pValue( 3 ) [ arrayIndex ],
+								   iu * diu, iv * div );
+					( *(pResData[arrayIndex])++ ) = res;
+				}
 			}
 		}
 	}

@@ -90,11 +90,12 @@ class CqParseNode : public CqListEntry<CqParseNode>, public IqParseNode
 		{
 			return ( m_fVarying );
 		}
-		virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const
+		virtual	void*	GetInterface( EqParseNodeType type) const
 		{
-			if ( ( *pNode = ( void* ) QueryNodeType<IqParseNode>( this, type ) ) != 0 )
-				return ( TqTrue );
-			return ( TqFalse );
+			void* pNode;
+			if ( ( pNode = ( void* ) QueryNodeType<IqParseNode>( this, type ) ) != 0 )
+				return ( pNode );
+			return ( 0 );
 		}
 		virtual	TqInt	NodeType() const
 		{
@@ -290,11 +291,12 @@ class CqParseNodeShader : public CqParseNode, public IqParseNodeShader
 		}
 
 		// Overridden from IqParseNode
-		virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const
+		virtual	void*	GetInterface( EqParseNodeType type) const
 		{
-			if ( ( *pNode = ( void* ) QueryNodeType<IqParseNodeShader>( this, type ) ) != 0 )
-				return ( TqTrue );
-			return ( CqParseNode::GetInterface( type, pNode ) );
+			void* pNode;
+			if ( ( pNode = ( void* ) QueryNodeType<IqParseNodeShader>( this, type ) ) != 0 )
+				return ( pNode );
+			return ( CqParseNode::GetInterface( type ) );
 		}
 		virtual	TqInt	NodeType() const
 		{
@@ -353,11 +355,12 @@ class CqParseNodeFunctionCall : public CqParseNode, public IqParseNodeFunctionCa
 		virtual	IqFuncDef* pFuncDef();
 
 		// Overridden from IqParseNode
-		virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const
+		virtual	void*	GetInterface( EqParseNodeType type) const
 		{
-			if ( ( *pNode = ( void* ) QueryNodeType<IqParseNodeFunctionCall>( this, type ) ) != 0 )
-				return ( TqTrue );
-			return ( CqParseNode::GetInterface( type, pNode ) );
+			void* pNode;
+			if ( ( pNode = ( void* ) QueryNodeType<IqParseNodeFunctionCall>( this, type ) ) != 0 )
+				return ( pNode );
+			return ( CqParseNode::GetInterface( type ) );
 		}
 		virtual	TqInt	NodeType() const
 		{
@@ -415,11 +418,12 @@ class CqParseNodeUnresolvedCall : public CqParseNode, public IqParseNodeUnresolv
 		virtual	IqFuncDef* pFuncDef();
 
 		// Overridden from IqParseNode
-		virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const
+		virtual	void*	GetInterface( EqParseNodeType type) const
 		{
-			if ( ( *pNode = ( void* ) QueryNodeType<IqParseNodeUnresolvedCall>( this, type ) ) != 0 )
-				return ( TqTrue );
-			return ( CqParseNode::GetInterface( type, pNode ) );
+			void* pNode;
+			if ( ( pNode = ( void* ) QueryNodeType<IqParseNodeUnresolvedCall>( this, type ) ) != 0 )
+				return ( pNode );
+			return ( CqParseNode::GetInterface( type ) );
 		}
 		virtual	TqInt	NodeType() const
 		{
@@ -493,11 +497,12 @@ class CqParseNodeVariable : public CqParseNode, public IqParseNodeVariable
 		{
 			return ( TqTrue );
 		}
-		virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const
+		virtual	void*	GetInterface( EqParseNodeType type) const
 		{
-			if ( ( *pNode = ( void* ) QueryNodeType<IqParseNodeVariable>( this, type ) ) != 0 )
-				return ( TqTrue );
-			return ( CqParseNode::GetInterface( type, pNode ) );
+			void* pNode;
+			if ( ( pNode = ( void* ) QueryNodeType<IqParseNodeVariable>( this, type ) ) != 0 )
+				return ( pNode );
+			return ( CqParseNode::GetInterface( type ) );
 		}
 		virtual	TqInt	NodeType() const
 		{
@@ -566,11 +571,12 @@ class CqParseNodeVariableArray : public CqParseNodeVariable, public IqParseNodeA
 
 
 
-		virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const
+		virtual	void*	GetInterface( EqParseNodeType type) const
 		{
-			if ( ( *pNode = ( void* ) QueryNodeType<IqParseNodeArrayVariable>( this, type ) ) != 0 )
-				return ( TqTrue );
-			return ( CqParseNodeVariable::GetInterface( type, pNode ) );
+			void* pNode;
+			if ( ( pNode = ( void* ) QueryNodeType<IqParseNodeArrayVariable>( this, type ) ) != 0 )
+				return ( pNode );
+			return ( CqParseNodeVariable::GetInterface( type ) );
 		}
 		virtual	TqInt	NodeType() const
 		{
@@ -625,11 +631,12 @@ class CqParseNodeAssign : public CqParseNodeVariable, public IqParseNodeVariable
 			return ( m_fNoDup );
 		}
 		// Overridden from IqParseNode
-		virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const
+		virtual	void*	GetInterface( EqParseNodeType type) const
 		{
-			if ( ( *pNode = ( void* ) QueryNodeType<IqParseNodeVariableAssign>( this, type ) ) != 0 )
-				return ( TqTrue );
-			return ( CqParseNodeVariable::GetInterface( type, pNode ) );
+			void* pNode;
+			if ( ( pNode = ( void* ) QueryNodeType<IqParseNodeVariableAssign>( this, type ) ) != 0 )
+				return ( pNode );
+			return ( CqParseNodeVariable::GetInterface( type ) );
 		}
 		virtual	TqInt	NodeType() const
 		{
@@ -700,11 +707,12 @@ class CqParseNodeAssignArray : public CqParseNodeAssign, public IqParseNodeArray
 
 
 
-		virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const
+		virtual	void*	GetInterface( EqParseNodeType type) const
 		{
-			if ( ( *pNode = ( void* ) QueryNodeType<IqParseNodeArrayVariableAssign>( this, type ) ) != 0 )
-				return ( TqTrue );
-			return ( CqParseNodeAssign::GetInterface( type, pNode ) );
+			void* pNode;
+			if ( ( pNode = ( void* ) QueryNodeType<IqParseNodeArrayVariableAssign>( this, type ) ) != 0 )
+				return ( pNode );
+			return ( CqParseNodeAssign::GetInterface( type ) );
 		}
 		virtual	TqInt	NodeType() const
 		{
@@ -750,11 +758,12 @@ class CqParseNodeOp : public CqParseNode, public IqParseNodeOperator
 
 
 
-		virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const
+		virtual	void*	GetInterface( EqParseNodeType type) const
 		{
-			if ( ( *pNode = ( void* ) QueryNodeType<IqParseNodeOperator>( this, type ) ) != 0 )
-				return ( TqTrue );
-			return ( CqParseNode::GetInterface( type, pNode ) );
+			void* pNode;
+			if ( ( pNode = ( void* ) QueryNodeType<IqParseNodeOperator>( this, type ) ) != 0 )
+				return ( pNode );
+			return ( CqParseNode::GetInterface( type ) );
 		}
 		virtual	void	Accept( IqParseNodeVisitor &V)
 		{
@@ -796,11 +805,12 @@ class CqParseNodeMathOp : public CqParseNodeOp, public IqParseNodeMathOp
 			return ( m_Operator );
 		}
 		// Overridden from IqParseNode
-		virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const
+		virtual	void*	GetInterface( EqParseNodeType type) const
 		{
-			if ( ( *pNode = ( void* ) QueryNodeType<IqParseNodeMathOp>( this, type ) ) != 0 )
-				return ( TqTrue );
-			return ( CqParseNodeOp::GetInterface( type, pNode ) );
+			void* pNode;
+			if ( ( pNode = ( void* ) QueryNodeType<IqParseNodeMathOp>( this, type ) ) != 0 )
+				return ( pNode );
+			return ( CqParseNodeOp::GetInterface( type ) );
 		}
 		virtual	TqInt	NodeType() const
 		{
@@ -875,11 +885,12 @@ class CqParseNodeRelOp : public CqParseNodeOp, public IqParseNodeRelationalOp
 			return ( m_Operator );
 		}
 		// Overridden from IqParseNode
-		virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const
+		virtual	void*	GetInterface( EqParseNodeType type) const
 		{
-			if ( ( *pNode = ( void* ) QueryNodeType<IqParseNodeRelationalOp>( this, type ) ) != 0 )
-				return ( TqTrue );
-			return ( CqParseNodeOp::GetInterface( type, pNode ) );
+			void* pNode;
+			if ( ( pNode = ( void* ) QueryNodeType<IqParseNodeRelationalOp>( this, type ) ) != 0 )
+				return ( pNode );
+			return ( CqParseNodeOp::GetInterface( type ) );
 		}
 		virtual	TqInt	NodeType() const
 		{
@@ -938,11 +949,12 @@ class CqParseNodeUnaryOp : public CqParseNodeOp, public IqParseNodeUnaryOp
 			return ( m_Operator );
 		}
 		// Overridden from IqParseNode
-		virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const
+		virtual	void*	GetInterface( EqParseNodeType type) const
 		{
-			if ( ( *pNode = ( void* ) QueryNodeType<IqParseNodeUnaryOp>( this, type ) ) != 0 )
-				return ( TqTrue );
-			return ( CqParseNodeOp::GetInterface( type, pNode ) );
+			void* pNode;
+			if ( ( pNode = ( void* ) QueryNodeType<IqParseNodeUnaryOp>( this, type ) ) != 0 )
+				return ( pNode );
+			return ( CqParseNodeOp::GetInterface( type ) );
 		}
 		virtual	TqInt	NodeType() const
 		{
@@ -996,11 +1008,12 @@ class CqParseNodeLogicalOp : public CqParseNodeOp, public IqParseNodeLogicalOp
 			return ( m_Operator );
 		}
 		// Overridden from IqParseNode
-		virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const
+		virtual	void*	GetInterface( EqParseNodeType type) const
 		{
-			if ( ( *pNode = ( void* ) QueryNodeType<IqParseNodeLogicalOp>( this, type ) ) != 0 )
-				return ( TqTrue );
-			return ( CqParseNodeOp::GetInterface( type, pNode ) );
+			void* pNode;
+			if ( ( pNode = ( void* ) QueryNodeType<IqParseNodeLogicalOp>( this, type ) ) != 0 )
+				return ( pNode );
+			return ( CqParseNodeOp::GetInterface( type ) );
 		}
 		virtual	TqInt	NodeType() const
 		{
@@ -1051,11 +1064,12 @@ class CqParseNodeDrop : public CqParseNode, public IqParseNodeDiscardResult
 
 
 
-		virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const
+		virtual	void*	GetInterface( EqParseNodeType type) const
 		{
-			if ( ( *pNode = ( void* ) QueryNodeType<IqParseNodeDiscardResult>( this, type ) ) != 0 )
-				return ( TqTrue );
-			return ( CqParseNode::GetInterface( type, pNode ) );
+			void* pNode;
+			if ( ( pNode = ( void* ) QueryNodeType<IqParseNodeDiscardResult>( this, type ) ) != 0 )
+				return ( pNode );
+			return ( CqParseNode::GetInterface( type ) );
 		}
 		virtual	TqInt	NodeType() const
 		{
@@ -1128,11 +1142,12 @@ class CqParseNodeFloatConst : public CqParseNodeConst, public IqParseNodeConstan
 			return ( m_Value );
 		}
 		// Overridden from IqParseNode
-		virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const
+		virtual	void*	GetInterface( EqParseNodeType type) const
 		{
-			if ( ( *pNode = ( void* ) QueryNodeType<IqParseNodeConstantFloat>( this, type ) ) != 0 )
-				return ( TqTrue );
-			return ( CqParseNode::GetInterface( type, pNode ) );
+			void* pNode;
+			if ( ( pNode = ( void* ) QueryNodeType<IqParseNodeConstantFloat>( this, type ) ) != 0 )
+				return ( pNode );
+			return ( CqParseNode::GetInterface( type ) );
 		}
 		virtual	TqInt	NodeType() const
 		{
@@ -1189,11 +1204,12 @@ class CqParseNodeStringConst : public CqParseNodeConst, public IqParseNodeConsta
 			return ( m_Value.c_str() );
 		}
 		// Overridden from IqParseNode
-		virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const
+		virtual	void*	GetInterface( EqParseNodeType type) const
 		{
-			if ( ( *pNode = ( void* ) QueryNodeType<IqParseNodeConstantString>( this, type ) ) != 0 )
-				return ( TqTrue );
-			return ( CqParseNode::GetInterface( type, pNode ) );
+			void* pNode;
+			if ( ( pNode = ( void* ) QueryNodeType<IqParseNodeConstantString>( this, type ) ) != 0 )
+				return ( pNode );
+			return ( CqParseNode::GetInterface( type ) );
 		}
 		virtual	TqInt	NodeType() const
 		{
@@ -1244,11 +1260,12 @@ class CqParseNodeWhileConstruct : public CqParseNode, public IqParseNodeWhileCon
 
 
 
-		virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const
+		virtual	void*	GetInterface( EqParseNodeType type) const
 		{
-			if ( ( *pNode = ( void* ) QueryNodeType<IqParseNodeWhileConstruct>( this, type ) ) != 0 )
-				return ( TqTrue );
-			return ( CqParseNode::GetInterface( type, pNode ) );
+			void* pNode;
+			if ( ( pNode = ( void* ) QueryNodeType<IqParseNodeWhileConstruct>( this, type ) ) != 0 )
+				return ( pNode );
+			return ( CqParseNode::GetInterface( type ) );
 		}
 		virtual	TqInt	NodeType() const
 		{
@@ -1300,11 +1317,12 @@ class CqParseNodeIlluminateConstruct : public CqParseNode, public IqParseNodeIll
 			return ( m_fAxisAngle );
 		}
 		// Overridden from IqParseNode
-		virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const
+		virtual	void*	GetInterface( EqParseNodeType type) const
 		{
-			if ( ( *pNode = ( void* ) QueryNodeType<IqParseNodeIlluminateConstruct>( this, type ) ) != 0 )
-				return ( TqTrue );
-			return ( CqParseNode::GetInterface( type, pNode ) );
+			void* pNode;
+			if ( ( pNode = ( void* ) QueryNodeType<IqParseNodeIlluminateConstruct>( this, type ) ) != 0 )
+				return ( pNode );
+			return ( CqParseNode::GetInterface( type ) );
 		}
 		virtual	TqInt	NodeType() const
 		{
@@ -1357,11 +1375,12 @@ class CqParseNodeIlluminanceConstruct : public CqParseNode, public IqParseNodeIl
 			return ( m_fAxisAngle );
 		}
 		// Overridden from IqParseNode
-		virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const
+		virtual	void*	GetInterface( EqParseNodeType type) const
 		{
-			if ( ( *pNode = ( void* ) QueryNodeType<IqParseNodeIlluminanceConstruct>( this, type ) ) != 0 )
-				return ( TqTrue );
-			return ( CqParseNode::GetInterface( type, pNode ) );
+			void* pNode;
+			if ( ( pNode = ( void* ) QueryNodeType<IqParseNodeIlluminanceConstruct>( this, type ) ) != 0 )
+				return ( pNode );
+			return ( CqParseNode::GetInterface( type ) );
 		}
 		virtual	TqInt	NodeType() const
 		{
@@ -1414,11 +1433,12 @@ class CqParseNodeSolarConstruct : public CqParseNode, public IqParseNodeSolarCon
 			return ( m_fAxisAngle );
 		}
 		// Overridden from IqParseNode
-		virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const
+		virtual	void*	GetInterface( EqParseNodeType type) const
 		{
-			if ( ( *pNode = ( void* ) QueryNodeType<IqParseNodeSolarConstruct>( this, type ) ) != 0 )
-				return ( TqTrue );
-			return ( CqParseNode::GetInterface( type, pNode ) );
+			void* pNode;
+			if ( ( pNode = ( void* ) QueryNodeType<IqParseNodeSolarConstruct>( this, type ) ) != 0 )
+				return ( pNode );
+			return ( CqParseNode::GetInterface( type ) );
 		}
 		virtual	TqInt	NodeType() const
 		{
@@ -1465,11 +1485,12 @@ class CqParseNodeConditional : public CqParseNode, public IqParseNodeConditional
 
 
 
-		virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const
+		virtual	void*	GetInterface( EqParseNodeType type) const
 		{
-			if ( ( *pNode = ( void* ) QueryNodeType<IqParseNodeConditional>( this, type ) ) != 0 )
-				return ( TqTrue );
-			return ( CqParseNode::GetInterface( type, pNode ) );
+			void* pNode;
+			if ( ( pNode = ( void* ) QueryNodeType<IqParseNodeConditional>( this, type ) ) != 0 )
+				return ( pNode );
+			return ( CqParseNode::GetInterface( type ) );
 		}
 		virtual	TqInt	NodeType() const
 		{
@@ -1533,11 +1554,12 @@ class CqParseNodeQCond : public CqParseNode, public IqParseNodeConditionalExpres
 
 
 
-		virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const
+		virtual	void*	GetInterface( EqParseNodeType type) const
 		{
-			if ( ( *pNode = ( void* ) QueryNodeType<IqParseNodeConditionalExpression>( this, type ) ) != 0 )
-				return ( TqTrue );
-			return ( CqParseNode::GetInterface( type, pNode ) );
+			void* pNode;
+			if ( ( pNode = ( void* ) QueryNodeType<IqParseNodeConditionalExpression>( this, type ) ) != 0 )
+				return ( pNode );
+			return ( CqParseNode::GetInterface( type ) );
 		}
 		virtual	TqInt	NodeType() const
 		{
@@ -1592,11 +1614,12 @@ class CqParseNodeCast : public CqParseNode, public IqParseNodeTypeCast
 			return ( m_tTo );
 		}
 		// Overridden from IqParseNode
-		virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const
+		virtual	void*	GetInterface( EqParseNodeType type) const
 		{
-			if ( ( *pNode = ( void* ) QueryNodeType<IqParseNodeTypeCast>( this, type ) ) != 0 )
-				return ( TqTrue );
-			return ( CqParseNode::GetInterface( type, pNode ) );
+			void* pNode;
+			if ( ( pNode = ( void* ) QueryNodeType<IqParseNodeTypeCast>( this, type ) ) != 0 )
+				return ( pNode );
+			return ( CqParseNode::GetInterface( type ) );
 		}
 		virtual	TqInt	NodeType() const
 		{
@@ -1648,11 +1671,12 @@ class CqParseNodeTriple : public CqParseNode, public IqParseNodeTriple
 
 
 
-		virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const
+		virtual	void*	GetInterface( EqParseNodeType type) const
 		{
-			if ( ( *pNode = ( void* ) QueryNodeType<IqParseNodeTriple>( this, type ) ) != 0 )
-				return ( TqTrue );
-			return ( CqParseNode::GetInterface( type, pNode ) );
+			void* pNode;
+			if ( ( pNode = ( void* ) QueryNodeType<IqParseNodeTriple>( this, type ) ) != 0 )
+				return ( pNode );
+			return ( CqParseNode::GetInterface( type ) );
 		}
 		virtual	TqInt	NodeType() const
 		{
@@ -1702,11 +1726,12 @@ class CqParseNodeHexTuple : public CqParseNode, public IqParseNodeSixteenTuple
 
 
 
-		virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const
+		virtual	void*	GetInterface( EqParseNodeType type) const
 		{
-			if ( ( *pNode = ( void* ) QueryNodeType<IqParseNodeSixteenTuple>( this, type ) ) != 0 )
-				return ( TqTrue );
-			return ( CqParseNode::GetInterface( type, pNode ) );
+			void* pNode;
+			if ( ( pNode = ( void* ) QueryNodeType<IqParseNodeSixteenTuple>( this, type ) ) != 0 )
+				return ( pNode );
+			return ( CqParseNode::GetInterface( type ) );
 		}
 		virtual	TqInt	NodeType() const
 		{
@@ -1782,11 +1807,12 @@ class CqParseNodeCommFunction : public CqParseNode, public IqParseNodeMessagePas
 			return ( m_commType );
 		}
 		// Overridden from IqParseNode
-		virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const
+		virtual	void*	GetInterface( EqParseNodeType type) const
 		{
-			if ( ( *pNode = ( void* ) QueryNodeType<IqParseNodeMessagePassingFunction>( this, type ) ) != 0 )
-				return ( TqTrue );
-			return ( CqParseNode::GetInterface( type, pNode ) );
+			void* pNode;
+			if ( ( pNode = ( void* ) QueryNodeType<IqParseNodeMessagePassingFunction>( this, type ) ) != 0 )
+				return ( pNode );
+			return ( CqParseNode::GetInterface( type ) );
 		}
 		virtual	TqInt	NodeType() const
 		{

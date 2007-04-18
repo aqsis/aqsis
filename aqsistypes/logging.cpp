@@ -56,6 +56,7 @@ START_NAMESPACE( Aqsis )
 
 std::ostream& log()
 {
+	detail::log_level(std::cerr) = 0;
 	return std::cerr;
 }
 	

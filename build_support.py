@@ -4,6 +4,7 @@ import fnmatch
 from string import lower, split
 import SCons
 from SCons.Script.SConscript import SConsEnvironment
+import xml.dom.minidom
 
 def SelectBuildDir(build_dir, platform=None):
 	# if no platform is specified, then default to sys.platform
@@ -145,3 +146,26 @@ def zipperFunction(target, source, env):
         sourceDir = str(source[0])
         distutils.archive_util.make_archive(targetName, 'zip', sourceDir)
 
+def embedManifest(env, targetenv, source, type):
+	'''Embed manifests for a DLL or EXE if VC8 is used
+	type is either DLL or EXE (as a string)
+	'''
+	suffix = '1' # EXE
+	
+	if (type == 'DLL'):
+		suffix = '2' # DLL
+		
+	if ('win32' == env['PLATFORM']) and (env['MSVS_VERSION'] == '8.0'):
+		targetenv.AddPostAction(source, 'mt.exe -nologo -manifest ${TARGET}.manifest -outputresource:$TARGET;' + suffix)
+
+def getSCMRevision():
+	scm_command = 'svn info --xml ' + os.getcwd()
+
+	if os.system(scm_command) <= 0:
+		scm_resource = os.popen(scm_command).read()
+		scm_resourcepp = xml.dom.minidom.parseString(scm_resource)
+		scm_revision = scm_resourcepp.getElementsByTagName('entry')[0].attributes['revision']
+		scm_revisionpp = scm_revision.value
+		return "(revision " + scm_revisionpp + ")"
+	else:
+		return ""

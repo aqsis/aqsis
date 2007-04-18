@@ -71,7 +71,7 @@ typedef std::vector<RefCountRecord*>::const_iterator ConstRecordIterator;
  * the last class has called Release(), the reference counter realises
  * that nobody needs it anymore and automatically deletes itself.
  */
-class CqRefCount
+class COMMON_SHARE CqRefCount
 {
 
 #ifdef _DEBUG

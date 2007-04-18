@@ -1,0 +1,13 @@
+Declare "texturememory" "integer"
+Option "limits" "texturememory" [8196]
+MakeTexture "82ABANDP.tif" "82ABANDP.tx" "periodic"  "periodic" "box" 1.0 1.0
+MakeTexture "82aBLW.tif" "82aBLW.tx" "periodic"  "periodic" "box" 1.0 1.0
+MakeTexture "82aBRW.tif" "82aBRW.tx" "periodic"  "periodic" "box" 1.0 1.0
+MakeTexture "82aCFUS.tif" "82aCFUS.tx" "periodic"  "periodic" "box" 1.0 1.0
+MakeTexture "82aFFUS.tif" "82aFFUS.tx" "periodic"  "periodic" "box" 1.0 1.0
+MakeTexture "82aPANEL.tif" "82aPANEL.tx" "periodic"  "periodic" "box" 1.0 1.0
+MakeTexture "82apilot.tif" "82apilot.tx" "periodic"  "periodic" "box" 1.0 1.0
+MakeTexture "82aRFUS.tif" "82aRFUS.tx" "periodic"  "periodic" "box" 1.0 1.0
+MakeTexture "82aSTABS.tif" "82aSTABS.tx" "periodic"  "periodic" "box" 1.0 1.0
+MakeTexture "82aTLW.tif" "82aTLW.tx" "periodic"  "periodic" "box" 1.0 1.0
+MakeTexture "82aTRW.tif" "82aTRW.tx" "periodic"  "periodic" "box" 1.0 1.0

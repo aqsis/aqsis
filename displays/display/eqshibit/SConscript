@@ -13,6 +13,6 @@ eqshibitenv.UseTargetOptions('eqshibit')
 eqshibit = eqshibitenv.Program('eqshibit', eqshibit_sources, LIBS=['aqsistypes','argparse','fltk','m','Xext','X11','supc++','tinyxml'], LIBPATH=['$LIBDIR','/usr/X11R6/lib'])
 eqshibitenv.Install('$BINDIR', eqshibit)
 
-env.Distribute('displays/display/eqshibit', eqshibit_sources)
-env.Distribute('displays/display/eqshibit', "SConscript")
+env.Distribute(eqshibit_sources)
+env.Distribute('SConscript')
 

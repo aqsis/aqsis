@@ -1,18 +1,23 @@
-Import('env')
+Import('env', 'embedManifest')
+
 aqsis_sources = Split("""
 	aqsis.cpp""")
 
 aqsisenv = env.Copy();
 
-aqsisenv.AppendUnique(LIBS = ['argparse', 'aqsis'])
+aqsisenv.AppendUnique(LIBS = ['argparse', 'aqsistypes', 'aqsis', 'shadervm'])
+aqsisenv.AppendUnique(CPPPATH=['$zlib_include_path'])
 
 # Set any platform specific options for this target
 aqsisenv.UseTargetOptions('aqsis')
 
 aqsis = aqsisenv.Program('aqsis', aqsis_sources)
+
+embedManifest(env, aqsisenv, aqsis, 'EXE')
+
 aqsisenv.Install('$BINDIR', aqsis)
 
-env.Distribute('renderer/aqsis', aqsis_sources)
-env.Distribute('renderer/aqsis', 'SConscript')
+env.Distribute(aqsis_sources)
+env.Distribute('SConscript')
 
 Return('aqsis')

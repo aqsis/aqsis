@@ -1,0 +1,23 @@
+Import('env')
+
+# Temporary fix, because globbing does not work with scons 0.96.92
+# shaders = env.Glob(env, '*.sl')
+# headers = env.Glob(env, '*.h')
+
+shader_sources = Split("""
+	dented.sl
+	""")
+header_sources = Split("""
+	""")
+
+for shader in shader_sources:
+	compiled_shader = env.Shader(shader)
+	env.Install('$CONTENTDIR/shaders/displacement', shader)
+	env.Install('$CONTENTDIR/shaders/displacement', compiled_shader)
+
+env.Install('$CONTENTDIR/shaders/displacement', header_sources)
+
+env.Distribute(shader_sources)
+env.Distribute(header_sources)
+env.Distribute('SConscript')
+

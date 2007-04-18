@@ -183,6 +183,7 @@ TqFloat CqNoise1234::pnoise( TqFloat x, TqInt px )
 	ix0 = FASTFLOOR( x ); // Integer part of x
 	fx0 = x - ix0;       // Fractional part of x
 	fx1 = fx0 - 1.0f;
+	if (px < 1) px = 1;
 	ix1 = (( ix0 + 1 ) % px) & 0xff; // Wrap to 0..px-1 *and* wrap to 0..255
 	ix0 = ( ix0 % px ) & 0xff;      // (because px might be greater than 256)
 
@@ -243,6 +244,8 @@ TqFloat CqNoise1234::pnoise( TqFloat x, TqFloat y, TqInt px, TqInt py )
 	fy0 = y - iy0;        // Fractional part of y
 	fx1 = fx0 - 1.0f;
 	fy1 = fy0 - 1.0f;
+	if (px < 1) px = 1;
+	if (py < 1) py = 1;
 	ix1 = (( ix0 + 1 ) % px) & 0xff;  // Wrap to 0..px-1 and wrap to 0..255
 	iy1 = (( iy0 + 1 ) % py) & 0xff;  // Wrap to 0..py-1 and wrap to 0..255
 	ix0 = ( ix0 % px ) & 0xff;
@@ -335,6 +338,9 @@ TqFloat CqNoise1234::pnoise( TqFloat x, TqFloat y, TqFloat z, TqInt px, TqInt py
 	fx1 = fx0 - 1.0f;
 	fy1 = fy0 - 1.0f;
 	fz1 = fz0 - 1.0f;
+	if (px < 1) px = 1;
+	if (py < 1) py = 1;
+	if (pz < 1) pz = 1;
 	ix1 = (( ix0 + 1 ) % px ) & 0xff; // Wrap to 0..px-1 and wrap to 0..255
 	iy1 = (( iy0 + 1 ) % py ) & 0xff; // Wrap to 0..py-1 and wrap to 0..255
 	iz1 = (( iz0 + 1 ) % pz ) & 0xff; // Wrap to 0..pz-1 and wrap to 0..255
@@ -478,6 +484,10 @@ TqFloat CqNoise1234::pnoise( TqFloat x, TqFloat y, TqFloat z, TqFloat w,
 	fy1 = fy0 - 1.0f;
 	fz1 = fz0 - 1.0f;
 	fw1 = fw0 - 1.0f;
+	if (px < 1) px = 1;
+	if (py < 1) py = 1;
+	if (pz < 1) pz = 1;
+	if (pw < 1) pw = 1;
 	ix1 = (( ix0 + 1 ) % px ) & 0xff;  // Wrap to 0..px-1 and wrap to 0..255
 	iy1 = (( iy0 + 1 ) % py ) & 0xff;  // Wrap to 0..py-1 and wrap to 0..255
 	iz1 = (( iz0 + 1 ) % pz ) & 0xff;  // Wrap to 0..pz-1 and wrap to 0..255

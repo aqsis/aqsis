@@ -4,7 +4,8 @@ REM ***Compile shaders***
 
 ECHO === Compiling Shader(s) ===
 ECHO.
-aqsl.exe "../../../shaders/displacement/dented.sl" "../../../shaders/light/shadowspot.sl"
+aqsl.exe "../../../shaders/displacement/dented.sl"
+aqsl.exe "../../../shaders/light/shadowspot.sl"
 IF NOT ERRORLEVEL 0 GOTO error
 
 

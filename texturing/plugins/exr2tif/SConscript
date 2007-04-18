@@ -1,4 +1,4 @@
-Import('env')
+Import('env', 'embedManifest')
 
 exr2tif_sources=Split("""
 	exr2tif.cpp""")
@@ -7,16 +7,20 @@ if not env['no_exr']:
 	exr2tifenv = env.Copy()
 	exr2tifenv.AppendUnique(CPPPATH=['$exr_include_path'])
 
-	exr2tifenv.Replace(LIBS = ['common', '$tiff_lib'])
+	Import('common_objs')
+
+	exr2tifenv.Replace(LIBS = ['$tiff_lib'])
 
 	# Set any platform specific options for this target
 	exr2tifenv.UseTargetOptions('plugin')
 	exr2tifenv.UseTargetOptions('texture_plugin')
 	exr2tifenv.UseTargetOptions('exr2tif')
 
-	exr2tif = exr2tifenv.SharedLibrary('exr2tif', exr2tif_sources, LIBS=['common', '$tiff_lib', 'IlmImf', 'Half', 'Iex', 'Imath'])
+	exr2tif = exr2tifenv.SharedLibrary('exr2tif', [exr2tif_sources, common_objs])
+		
+	embedManifest(env, exr2tifenv, exr2tif, 'DLL')
+	
+	exr2tifenv.Install('$PLUGINDIR', exr2tif)
 
-	exr2tifenv.Install('$BINDIR', exr2tif)
-
-env.Distribute('texturing/plugins/exr2tif', exr2tif_sources)
-env.Distribute('texturing/plugins/exr2tif', 'SConscript')
+env.Distribute(exr2tif_sources)
+env.Distribute('SConscript')

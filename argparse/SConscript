@@ -9,14 +9,14 @@ argparse_headers = Split("""
 argparse_install_headers = Split("""
 	argparse.h""")
 
+argparseenv = env.Copy()
+
 # Set any platform specific options for this target
-env.UseTargetOptions('argparse')
+argparseenv.UseTargetOptions('argparse')
 
-argparse = env.Library('argparse', argparse_sources)
-env.Install('$LIBDIR', argparse)
-env.Install('$INCLUDEDIR', argparse_install_headers)
+argparse = argparseenv.Library('argparse', argparse_sources)
 
-env.Distribute('argparse', argparse_sources)
-env.Distribute('argparse', argparse_headers)
-env.Distribute('argparse', 'SConscript')
+env.Distribute(argparse_sources)
+env.Distribute(argparse_headers)
+env.Distribute('SConscript')
 

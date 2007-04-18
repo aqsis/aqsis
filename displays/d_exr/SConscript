@@ -1,4 +1,4 @@
-Import('env')
+Import('env', 'embedManifest')
 
 d_exr_sources = Split("""
 	d_exr.cpp
@@ -13,16 +13,22 @@ if not env['no_exr']:
 	d_exrenv.AppendUnique(CPPPATH=['$exr_include_path'])
 	d_exrenv.AppendUnique(CPPDEFINES=['D_EXR_EXPORTS'])
 
-
 	# Set any platform specific target options.
 	d_exrenv.UseTargetOptions('exr')
 
-	exr = d_exrenv.SharedLibrary('d_exr', d_exr_sources, LIBS=['IlmImf', 'Half', 'Iex', 'Imath'])
-	d_exrenv.Install('$BINDIR', exr)
+	exr = d_exrenv.SharedLibrary('d_exr', d_exr_sources)
+		
+	embedManifest(env, d_exrenv, exr, 'DLL')
 
-	Export('exr')
+	d_exrenv.Install('$DISPLAYSDIR', exr)
 
-env.Distribute('displays/d_exr', d_exr_sources)
-env.Distribute('displays/d_exr', d_exr_headers)
-env.Distribute('displays/d_exr', 'SConscript')
+	Return('exr')
+
+env.Distribute(d_exr_sources)
+env.Distribute(d_exr_headers)
+env.Distribute('dspyhlpr.c')
+env.Distribute('tst.rib')
+env.Distribute('exrtest.bat')
+env.Distribute('SConscript')
+
 

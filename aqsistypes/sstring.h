@@ -43,7 +43,7 @@ typedef std::string CqStringBase;
  * An extended string class, derived from std::string
  */
 
-class CqString : public CqStringBase
+class COMMON_SHARE CqString : public CqStringBase
 {
 	public:
 		CqString() : CqStringBase()
@@ -100,19 +100,19 @@ class CqString : public CqStringBase
 
 
 // Some useful functions
-std::ostream& operator<<( std::ostream & stmOutput, const CqString& strString );
-CqString operator+( const CqString& strAdd1, const CqString& strAdd2 );
-CqString operator+( const TqChar* strAdd1, const CqString& strAdd2 );
-CqString operator+( const CqString& strAdd1, const TqChar* strAdd2 );
-CqString operator+( const CqString& strAdd1, TqChar ch );
-CqString operator+( TqChar ch, const CqString& strAdd2 );
+COMMON_SHARE std::ostream& operator<<( std::ostream & stmOutput, const CqString& strString );
+COMMON_SHARE CqString operator+( const CqString& strAdd1, const CqString& strAdd2 );
+COMMON_SHARE CqString operator+( const TqChar* strAdd1, const CqString& strAdd2 );
+COMMON_SHARE CqString operator+( const CqString& strAdd1, const TqChar* strAdd2 );
+COMMON_SHARE CqString operator+( const CqString& strAdd1, TqChar ch );
+COMMON_SHARE CqString operator+( TqChar ch, const CqString& strAdd2 );
 
 // These must be defined so that std::string can be used as a type in the ShaderVM and
 // in the parameter dicing code.
-CqString operator/( const CqString& strAdd1, const CqString& strAdd2 );
-CqString operator*( const CqString& strAdd1, const CqString& strAdd2 );
-CqString operator*( const CqString& strAdd1, TqFloat f );
-CqString operator-( const CqString& strAdd1, const CqString& strAdd2 );
+COMMON_SHARE CqString operator/( const CqString& strAdd1, const CqString& strAdd2 );
+COMMON_SHARE CqString operator*( const CqString& strAdd1, const CqString& strAdd2 );
+COMMON_SHARE CqString operator*( const CqString& strAdd1, TqFloat f );
+COMMON_SHARE CqString operator-( const CqString& strAdd1, const CqString& strAdd2 );
 
 /// The ultimate function for converting anything into a string
 template<typename value_t>
@@ -128,4 +128,5 @@ CqString ToString(const value_t& Value)
 END_NAMESPACE( Aqsis )
 
 #endif	// !SSTRING_H_INCLUDED
+
 

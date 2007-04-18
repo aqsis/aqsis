@@ -40,8 +40,6 @@
 
 START_NAMESPACE(    Aqsis )
 
-IqRenderer* QGetRenderContextI();
-
 //----------------------------------------------------------------------
 // init_illuminance()
 // NOTE: There is duplication here between SO_init_illuminance and 
@@ -50,9 +48,9 @@ IqRenderer* QGetRenderContextI();
 TqBool CqShaderExecEnv::SO_init_illuminance()
 {
 	// Check if lighting is turned off.
-	if(NULL != QGetRenderContextI())
+	if(getRenderContext())
 	{
-		const TqInt* enableLightingOpt = QGetRenderContextI()->GetIntegerOption("EnableShaders", "lighting");
+		const TqInt* enableLightingOpt = getRenderContext()->GetIntegerOption("EnableShaders", "lighting");
 		if(NULL != enableLightingOpt && enableLightingOpt[0] == 0)
 			return(TqFalse);
 	}
@@ -75,9 +73,9 @@ TqBool CqShaderExecEnv::SO_init_illuminance()
 TqBool CqShaderExecEnv::SO_advance_illuminance()
 {
 	// Check if lighting is turned off, should never need this check as SO_init_illuminance will catch first.
-	if(NULL != QGetRenderContextI())
+	if(getRenderContext())
 	{
-		const TqInt* enableLightingOpt = QGetRenderContextI()->GetIntegerOption("EnableShaders", "lighting");
+		const TqInt* enableLightingOpt = getRenderContext()->GetIntegerOption("EnableShaders", "lighting");
 		if(NULL != enableLightingOpt && enableLightingOpt[0] == 0)
 			return(TqFalse);
 	}
@@ -101,9 +99,9 @@ void CqShaderExecEnv::ValidateIlluminanceCache( IqShaderData* pP, IqShaderData* 
 	if ( !m_IlluminanceCacheValid )
 	{
 		// Check if lighting is turned off.
-		if(NULL != QGetRenderContextI())
+		if(getRenderContext())
 		{
-			const TqInt* enableLightingOpt = QGetRenderContextI()->GetIntegerOption("EnableShaders", "lighting");
+			const TqInt* enableLightingOpt = getRenderContext()->GetIntegerOption("EnableShaders", "lighting");
 			if(NULL != enableLightingOpt && enableLightingOpt[0] == 0)
 			{
 				m_IlluminanceCacheValid = TqTrue;
@@ -307,7 +305,7 @@ void CqShaderExecEnv::SO_depth( IqShaderData* p, IqShaderData* Result, IqShader*
 	TqBool __fVarying;
 	TqUint __iGrid;
 
-	if ( NULL == QGetRenderContextI() )
+	if (!getRenderContext() )
 		return ;
 
 	__fVarying=(p)->Class()==class_varying;
@@ -322,8 +320,8 @@ void CqShaderExecEnv::SO_depth( IqShaderData* p, IqShaderData* Result, IqShader*
 			CqVector3D _aq_p;
 			(p)->GetPoint(_aq_p,__iGrid);
 			TqFloat d = _aq_p.z();
-			d = ( d - QGetRenderContextI() ->GetFloatOption( "System", "Clipping" ) [ 0 ] ) /
-			    ( QGetRenderContextI() ->GetFloatOption( "System", "Clipping" ) [ 1 ] - QGetRenderContextI() ->GetFloatOption( "System", "Clipping" ) [ 0 ] );
+			d = ( d - getRenderContext() ->GetFloatOption( "System", "Clipping" ) [ 0 ] ) /
+			    ( getRenderContext() ->GetFloatOption( "System", "Clipping" ) [ 1 ] - getRenderContext() ->GetFloatOption( "System", "Clipping" ) [ 0 ] );
 			(Result)->SetFloat(d,__iGrid);
 		}
 	}
@@ -340,9 +338,9 @@ void CqShaderExecEnv::SO_ambient( IqShaderData* Result, IqShader* pShader )
 	TqUint __iGrid;
 
 	// Check if lighting is turned off.
-	if(NULL != QGetRenderContextI())
+	if(getRenderContext())
 	{
-		const TqInt* enableLightingOpt = QGetRenderContextI()->GetIntegerOption("EnableShaders", "lighting");
+		const TqInt* enableLightingOpt = getRenderContext()->GetIntegerOption("EnableShaders", "lighting");
 		if(NULL != enableLightingOpt && enableLightingOpt[0] == 0)
 			return;
 	}
@@ -901,7 +899,9 @@ void CqShaderExecEnv::SO_solar( IqShaderData* Axis, IqShaderData* Angle, IqShade
 		{
 			if ( res )
 			{
-				CqVector3D vecAxis( 0.0f, 1.0f, 0.0f );
+				CqVector3D vecAxis;
+				Ns()->GetNormal(vecAxis,__iGrid);
+				vecAxis = -vecAxis;
 				if ( NULL != Axis )
 					Axis->GetVector( vecAxis, __iGrid );
 				L() ->SetVector( vecAxis, __iGrid );
@@ -994,7 +994,7 @@ void CqShaderExecEnv::SO_calculatenormal( IqShaderData* p, IqShaderData* Result,
 	TqUint __iGrid;
 
 	// Find out if the orientation is inverted.
-	TqBool CSO = pTransform()->GetHandedness(QGetRenderContextI()->Time());
+	TqBool CSO = pTransform()->GetHandedness(getRenderContext()->Time());
 	TqBool O = TqFalse;
 	if( pAttributes() )
 		O = pAttributes() ->GetIntegerAttribute( "System", "Orientation" ) [ 0 ] != 0;

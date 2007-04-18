@@ -1,0 +1,81 @@
+version 3.03
+Orientation "rh"
+Hider "hidden" "string depthfilter" ["midpoint"]
+
+######################################################################
+# Create shadow map:
+######################################################################
+
+FrameBegin 0
+PixelSamples 1 1
+Format 512 512 1
+ShadingRate 2
+Display "shadow.z" "zfile" "z"
+Projection "perspective" "fov" [52.499996185302734]
+Scale -1 1 1
+ConcatTransform [0.99999999999999845 -5.611598249286975e-008 -7.6602240639021432e-009 0.0 -5.6636406346529883e-008 -0.99081114273960103 -0.13525265033648223 0.0 -1.6543612251060553e-024 0.13525265033648351 -0.99081114273960258 0.0 4.21157579080274e-007 6.2101238766853673 195.42420453511133 1.0]
+WorldBegin
+
+AttributeBegin
+Attribute "identifier" "name" ["Floor"]
+ConcatTransform [1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0]
+Color [0.90 0.83 0.60]
+Opacity [1.0 1.0 1.0]
+Surface "matte"
+ReadArchive "floor.rib"
+AttributeEnd
+
+AttributeBegin
+Attribute "identifier" "name" ["Tile"]
+ConcatTransform [1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0]
+Color [0.29 0.33 0.84]
+Opacity [1.0 1.0 1.0]
+Surface "matte"
+ReadArchive "tile.rib"
+AttributeEnd
+
+WorldEnd
+FrameEnd
+MakeShadow "shadow.z" "shadow.map"
+
+######################################################################
+# Render image:
+######################################################################
+
+FrameBegin 0
+PixelSamples 1 1
+Format 640 480 1
+ShadingRate 1
+Display "Bug1030761.tif" "file" "rgb" "string compression" "lzw"
+Projection "perspective" "fov" [34.515877018981698]
+Scale -1 1 1
+ConcatTransform [-0.93467083787114869 -0.19367633008064652 -0.29812732850199558 0.0 -0.35551431030725655 0.50918799177404628 0.78379663446577097 0.0 0.0 0.83858038863284046 -0.54477787381683718 0.0 -1.1770875481882788 -0.42107751121942083 162.0110242377076 0.99999999999999978]
+WorldBegin
+
+AttributeBegin
+Attribute "identifier" "name" ["Spot01"]
+ConcatTransform [0.99999999999999845 -5.6636406346529883e-008 -1.6543612251060553e-024 0.0 -5.611598249286975e-008 -0.99081114273960091 0.13525265033648246 0.0 -7.6602240639022028e-009 -0.13525265033648329 -0.99081114273960258 0.0 1.4243228179111611e-006 32.584701538085938 192.78854370117187 1.0]
+LightSource "spot" 1 "uniform string shadowname" ["shadow.map"] "uniform float width" [15.1]
+AttributeEnd
+Illuminate 1 1
+
+AttributeBegin
+Attribute "identifier" "name" ["Floor"]
+ConcatTransform [1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0]
+Color [0.90 0.83 0.60]
+Opacity [1.0 1.0 1.0]
+Surface "matte"
+ReadArchive "floor.rib"
+AttributeEnd
+
+AttributeBegin
+Attribute "identifier" "name" ["Tile"]
+ConcatTransform [1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0]
+Color [0.29 0.33 0.84]
+Opacity [1.0 1.0 1.0]
+Surface "matte"
+ReadArchive "tile.rib"
+AttributeEnd
+
+WorldEnd
+FrameEnd

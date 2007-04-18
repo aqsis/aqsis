@@ -1,14 +1,20 @@
-Import('env')
+Import('env', 'embedManifest')
+bmp2tifenv = env.Copy()
 bmp2tif_sources=Split("""
 	bmp2tif.c""")
 
 # Set any platform specific options for this target
-env.UseTargetOptions('plugin')
-env.UseTargetOptions('texture_plugin')
-env.UseTargetOptions('bmp2tif')
+bmp2tifenv.UseTargetOptions('plugin')
+bmp2tifenv.UseTargetOptions('texture_plugin')
+bmp2tifenv.UseTargetOptions('bmp2tif')
 
-bmp2tif = env.SharedLibrary('bmp2tif', bmp2tif_sources, LIBS=['$tiff_lib', '$z_lib', 'jpg2tif', 'common'])
-env.Install('$BINDIR', bmp2tif)
+Import('common_objs')
 
-env.Distribute('texturing/plugins/bmp2tif', bmp2tif_sources)
-env.Distribute('texturing/plugins/bmp2tif', 'SConscript')
+bmp2tif = bmp2tifenv.SharedLibrary('bmp2tif', [bmp2tif_sources, common_objs], LIBS=['$tiff_lib', '$z_lib', 'jpg2tif'])
+
+embedManifest(env, bmp2tifenv, bmp2tif, 'DLL')
+	
+bmp2tifenv.Install('$PLUGINDIR', bmp2tif)
+
+env.Distribute(bmp2tif_sources)
+env.Distribute('SConscript')

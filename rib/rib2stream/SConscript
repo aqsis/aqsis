@@ -9,14 +9,14 @@ rib2stream_headers = Split("""
 rib2stream_install_headers = Split("""
 	librib2stream.h""")
 
+rib2streamenv = env.Copy()
+
 # Set any platform specific options for this target
-env.UseTargetOptions('rib2stream')
+rib2streamenv.UseTargetOptions('rib2stream')
 
-rib2stream = env.Library('rib2stream', rib2stream_sources)
-env.Install('$LIBDIR', rib2stream)
-env.Install('$INCLUDEDIR', rib2stream_install_headers)
+rib2stream = rib2streamenv.Library('rib2stream', rib2stream_sources)
 
-env.Distribute('rib/rib2stream', rib2stream_sources)
-env.Distribute('rib/rib2stream', rib2stream_headers)
-env.Distribute('rib/rib2stream', 'SConscript')
+env.Distribute(rib2stream_sources)
+env.Distribute(rib2stream_headers)
+env.Distribute('SConscript')
 

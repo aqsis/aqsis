@@ -151,7 +151,7 @@ char			**argv;
 	int			ofile;
 	char			*s;
 	char			*s2;
-	int			i;
+	int			i = 0;
 #if	DEBUG
 
 	int			n;

@@ -1,0 +1,12 @@
+Import('env version aqsis')
+
+if 'BUNDLE' in env['TOOLS']:
+	bundle = env.MakeBundle('Aqsis.app', aqsis,
+				'org.aqsis.aqsis',
+				'Info.plist',
+				'APPL',
+				'AQSIS',
+				'aqsis.icns')
+	env.Alias('bundle', bundle)
+
+env.Distribute('SConscript')

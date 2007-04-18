@@ -9,7 +9,8 @@ if env['debug']:
 	env.AppendUnique(CCFLAGS=['-g', '-O0', '-fno-common'])
 else:
 	env.AppendUnique(CCFLAGS=['-O2', '-fno-common'])
-	env.AppendUnique(LINKFLAGS=['-Wl,-s'])
+#	Commented this line out, as there is a bug in gcc 4.0.1 on MacOSX, -s corrupts executables.
+#	env.AppendUnique(LINKFLAGS=['-Wl,-s'])
 
 #env.AppendUnique(CCFLAGS=['-O3', '-faltivec', '-finline-functions', '-ffast-math', '-fno-common'])
 

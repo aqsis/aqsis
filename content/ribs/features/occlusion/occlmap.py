@@ -133,9 +133,9 @@ def usage():
 
 try:
 	output = "occlmap"
-	radius = 1
+	radius = 15
 	scene = "world.rib"
-	count = 64
+	count = 16
 	iterations = 5000
 	mapsize = 256
 	hints = 0
