@@ -1,0 +1,46 @@
+# data file for the Fltk User Interface Designer (fluid)
+version 1.0107 
+header_name {.h} 
+code_name {.cpp}
+class CqEqshibitMainWindow {open
+} {
+  Function {CqEqshibitMainWindow()} {open
+  } {
+    Fl_Window m_window {open
+      private xywh {334 189 685 485} type Double
+      code0 {\#include "eqshibit.h"}
+      code1 {\#include <Fl/Fl_Browser.H>} visible
+    } {
+      Fl_Menu_Bar {} {open
+        xywh {0 0 685 25}
+      } {
+        Submenu {} {
+          label Catalog open
+          xywh {0 0 100 20}
+        } {
+          MenuItem m_menuCatalogNew {
+            label New
+            private xywh {0 0 100 20} shortcut 0x4006e
+          }
+          MenuItem m_menuCatalogOpen {
+            label Open
+            private xywh {0 0 100 20} shortcut 0x4006f
+          }
+          MenuItem m_menuCatalogSave {
+            label Save
+            private xywh {0 0 100 20} shortcut 0x40073
+          }
+        }
+      }
+      Fl_Tabs m_tabCatalogs {open
+        private xywh {0 25 685 460}
+      } {}
+    }
+  }
+  Function {newCatalog()} {open
+  } {
+    code {Fl_Browser *o = new Fl_Browser(0, 35, 200, 200, "Catalog");
+m_tabCatalogs->add(o);} {selected
+    }
+  }
+} 
