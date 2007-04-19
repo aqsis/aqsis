@@ -204,6 +204,6 @@ int main( int argc, const char** argv )
 	Fl_Window *window = new Fl_Window(0,0);
 	window->show();
 
-        return Fl::run();
+	return Fl::run();
 }
 

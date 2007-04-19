@@ -241,6 +241,7 @@ env.AppendUnique(LIBPATH = prependBuildDir( Split('''
 	texturing/plugins/ppm2tif
 	texturing/plugins/tga2tif
 	texturing/plugins/png2tif
+	thirdparty/tinyxml
 ''' ) ) )
 
 # Setup the include path to the tiff headers (should have been determined in the system specific sections above).
@@ -288,13 +289,14 @@ sub_sconsdirs_noret = prependBuildDir(Split('''
 	shaders
 	thirdparty/pdiff
 	thirdparty/dbo_plane
+	thirdparty/tinyxml
 	tools
 	content/ribs/scenes/vase
 	content/ribs/features/layeredshaders
 	content/shaders/light
 	content/shaders/displacement
-	displays/display/eqshibit
 '''))
+
 env.SConscript( dirs = sub_sconsdirs_noret )
 
 # The following subdirectories have SConscript return values.
@@ -305,6 +307,7 @@ sub_sconsdirs_withret = prependBuildDir(Split('''
 		displays/d_sdcBMP
 		displays/d_sdcWin32
 		displays/d_xpm
+		displays/eqshibit
 '''))
 (	aqsis,
 	display,
@@ -312,6 +315,7 @@ sub_sconsdirs_withret = prependBuildDir(Split('''
 	bmp,
 	win32,
 	xpm,
+	eqshibitdisplay,
 ) = env.SConscript( dirs = prependBuildDir(sub_sconsdirs_withret) )
 
 # needed (?) by macosx distribution (there should be a better way to achieve
@@ -326,6 +330,7 @@ env.SConscript( dirs = prependBuildDir(['distribution']) )
 def aqsis_rc_build(target, source, env):
 	# Code to build "target" from "source"
 	displaylib = os.path.basename(display[0].path)
+	eqshibitdisplaylib = os.path.basename(eqshibitdisplay[0].path)
 	xpmlib = os.path.basename(xpm[0].path)
 	bmplib = os.path.basename(bmp[0].path)
 	win32lib = ""
@@ -333,6 +338,7 @@ def aqsis_rc_build(target, source, env):
 		win32lib = os.path.basename(win32[0].path)
 	defines = {
 		"displaylib": displaylib,
+		"eqshibitdisplaylib": eqshibitdisplaylib,
 		"xpmlib": xpmlib,
 		"bmplib": bmplib,
 		"win32lib": win32lib,

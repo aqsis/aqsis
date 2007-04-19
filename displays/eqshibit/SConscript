@@ -1,0 +1,51 @@
+Import('env', 'embedManifest')
+eqshibitappenv = env.Copy()
+eqshibitdisplayenv = env.Copy()
+
+eqshibitappenv.AppendUnique(CPPPATH = ['#/aqsis/aqsistypes'])
+eqshibitappenv.AppendUnique(LIBS = ['$tiff_lib', '$fltk_lib','#/thirdparty/tinyxml'])
+eqshibitappenv.AppendUnique(CPPDEFINES=['EQSHIBIT_APP_EXPORTS'])
+
+eqshibitdisplayenv.AppendUnique(CPPPATH=['#/renderer/ddmanager','#/thirdparty/tinyxml'])
+
+eqshibitapp_sources = Split("""
+	eqshibit.cpp""")
+
+# Set any platform specific options for this target
+eqshibitappenv.UseTargetOptions('eqshibitapp')
+
+
+eqshibitapp = eqshibitappenv.Program('eqshibit', eqshibitapp_sources, LIBS=['aqsistypes','argparse','fltk','m','Xext','X11','supc++','tinyxml'], LIBPATH=['$LIBDIR','/usr/X11R6/lib'])
+eqshibitappenv.Install('$BINDIR', eqshibitapp)
+embedManifest(env, eqshibitappenv, eqshibitapp, 'EXE')
+
+env.Distribute(eqshibitapp_sources)
+
+# Display driver for communicating with eqshibit
+eqshibitdisplay_sources = Split("""
+	eqshibitdisplay.cpp
+	displayhelpers.c""")
+
+eqshibitdisplay_headers =  Split("""
+	eqshibitdisplay.h""")
+
+
+eqshibitdisplayenv.AppendUnique(LIBS = ['aqsistypes', 'tinyxml'])
+eqshibitdisplayenv.AppendUnique(CPPPATH = ['#/thirdparty/tinyxml'])
+
+# Set any platform specific target options.
+eqshibitdisplayenv.UseTargetOptions('eqshibitdisplay')
+
+eqshibitdisplay = eqshibitdisplayenv.SharedLibrary('eqshibit', eqshibitdisplay_sources)
+
+embedManifest(env, eqshibitdisplayenv, eqshibitdisplay, 'DLL')
+
+	
+eqshibitdisplayenv.Install('$DISPLAYSDIR', eqshibitdisplay)
+
+Return('eqshibitdisplay')
+
+env.Distribute(eqshibitdisplay_sources)
+env.Distribute(eqshibitdisplay_headers)
+
+env.Distribute('SConscript')
