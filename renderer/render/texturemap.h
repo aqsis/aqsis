@@ -685,39 +685,39 @@ class CqTextureMap : public IqTextureMap
 		void   CalculateLevel(TqFloat ds, TqFloat dt);
 
 	protected:
-		class CqImageFilter
+		/** \brief Class to handle downsampling of images by a factor of 2 for mipmap generation.
+		 */
+		class CqImageDownsampler
 		{
 			public:
-				CqImageFilter(TqFloat swidth, TqFloat twidth, TqInt xres, TqInt yres, RtFilterFunc pFilter) : m_swidth(swidth), m_twidth(twidth), m_xres(xres), m_yres(yres), m_pFilter(pFilter)
-				{
-					TqFloat srad = (swidth*0.5);
-					TqFloat trad = (twidth*0.5);
-					m_weights.resize(static_cast<size_t>(swidth+1)*static_cast<size_t>(twidth+1));
-					TqInt weightOffset = 0;
-					for(TqFloat t = -trad; t <= trad; t++)
-					{
-						for(TqFloat s = -srad; s <= srad; s++)
-						{
-							TqFloat weight = ( *pFilter ) ( s, t, swidth, twidth );
-							m_weights[weightOffset++] = weight;
-						}
-					}
-				}
-				
-				~CqImageFilter()	{}
+				/** \brief Constructor
+				 * \param swidth
+				 * \param twidth
+				 */
+				CqImageDownsampler(TqFloat sWidth, TqFloat tWidth, RtFilterFunc filterFunc, EqWrapMode sWrapMode, EqWrapMode tWrapMode);
+				// Use default destructor.
 
-				
-			void	ImageFilterVal( CqTextureMapBuffer* pData, TqInt x, TqInt y, TqInt samplesPerPixel, TqInt xres, TqInt yres, std::vector<TqFloat>& accum );
-
+				/** \brief Downsample an image by a factor of two.
+				 */
+				CqTextureMapBuffer* downsample(CqTextureMapBuffer* inBuf, CqTextureMap& texMap, TqInt directory, TqBool protectBuffer);
 			private:
-				std::vector<TqFloat>	m_weights;
-				TqFloat			m_swidth;
-				TqFloat			m_twidth;
-				TqInt			m_xres;
-				TqInt			m_yres;
-				RtFilterFunc	m_pFilter;
+				void computeFilterKernel(TqFloat sWidth, TqFloat tWidth, RtFilterFunc filterFunc, TqBool evenFilterS, TqBool evenFilterT);
+
+				// Filter parameters for the convolution kernel.
+				TqInt m_sNumPts;
+				TqInt m_tNumPts;
+				TqInt m_sStartOffset;
+				TqInt m_tStartOffset;
+				std::vector<TqFloat> m_weights;
+				// Other members
+				TqFloat m_sWidth;
+				TqFloat m_tWidth;
+				RtFilterFunc m_filterFunc;
+				EqWrapMode m_sWrapMode;
+				EqWrapMode m_tWrapMode;
 		};
-		static	std::vector<CqTextureMap*>	m_TextureMap_Cache;	///< Static array of loaded textures.
+
+		static std::vector<CqTextureMap*>	m_TextureMap_Cache;	///< Static array of loaded textures.
 		static std::vector<CqString*>	m_ConvertString_Cache; ///< Static array of filename (after conversion)
 
 		TqInt m_Compression;            ///< TIFF Compression model
