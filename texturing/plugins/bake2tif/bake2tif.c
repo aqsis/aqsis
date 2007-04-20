@@ -131,15 +131,25 @@ static char *bake_open( FILE *bakefile, char *tiffname )
 	unsigned char *pixels;
 	unsigned char *xpixels;
 	char buffer[ 200 ];
-	int i, j, n, o;
+	int i, j, k, n, o;
 	int x, y;
+	float mins, mint, maxs, maxt;
 	int bytesize = size * size * 3;
+	int count, number;
+	count = 1024 * 1024;
+	number = 0;
 
 	h = w = size;
 	pixels = ( unsigned char * ) calloc( 3, size * size );
 
+	float *temporary;
+
+        temporary = (float *) malloc(count *  5 * sizeof(float));
+
+	/* printf( "Parse the bake file \n"); */
 	while ( fgets( buffer, 200, bakefile ) != NULL )
 	{
+	 	k = number * 5;
 
 		if ( 5 == sscanf( buffer, "%f %f %f %f %f", &s, &t, &r1, &g1, &b1 ) )
 			;
@@ -148,9 +158,68 @@ static char *bake_open( FILE *bakefile, char *tiffname )
 			sscanf( buffer, "%f %f %f", &s, &t, &r1 );
 			g1 = b1 = r1;
 		}
+		temporary[k] = s;
+		temporary[k+1] = t;
+		temporary[k+2] = r1;
+		temporary[k+3] = g1;
+		temporary[k+4] = b1;
 
-		// When we have some collision ? What should be nice
-		// to accumulate the RGB values instead ?
+		number++;
+		if (number >= (count - 1))
+		{
+			count += 1024;
+			temporary = (float *)  realloc((void *) temporary, count * 5 * sizeof(float));
+		}
+		/* printf("%d\n", number); */
+	}
+	/* printf("done\nFind the max, min of s,t.\n"); */
+	mins = maxs = temporary[0]; 
+	mint = maxt = temporary[1];
+
+        /* Find the min,max of s and t */
+	for (i=0; i < number; i++)
+	{
+		k = i * 5;
+
+		if (mins > temporary[k])
+			mins = temporary[k];
+		if (mint > temporary[k+1])
+			mint = temporary[k+1];
+		if (maxs < temporary[k])
+			maxs = temporary[k];
+		if (maxt < temporary[k+1])
+			maxt = temporary[k+1];
+	}
+
+	/* printf("Delta s,t (%f) (%f) : %f %f %f %f\n", maxs - mins, maxt - mint, mins, maxs, mint, maxt); */
+
+	/* Now save the s,t */
+	for (i=0; i < number; i++)
+	{
+		k = i * 5;
+
+		s = temporary[k];
+		t = temporary[k+1];
+		r1 = temporary[k+2];
+		g1 = temporary[k+3];
+		b1 = temporary[k+4];
+
+		/* Normalize the s,t between 0..1.0 */
+		if ((maxs - mins) != 0.0)
+			s = (s - mins) / (maxs - mins);
+		else {
+			if (s < 0.0) s *= -1.0;
+			if (s > 1.0) s = 1.0;
+		}
+		if ((maxt - mint) != 0.0)
+			t = (t - mint) / (maxt - mint);
+		else {
+			if (t < 0.0) t *= -1.0;
+			if (t > 1.0) t = 1.0;
+		}
+		/* When we have some collision ? What should be nice
+		 * to accumulate the RGB values instead ?
+		 */
 		x = (int)( s * ( size - 1 ) );
 		y = (int)( t * ( size - 1 ) );
 		n = ( y * size ) + x;
@@ -161,6 +230,7 @@ static char *bake_open( FILE *bakefile, char *tiffname )
 		pixels [ n + 2 ] = (int)(b1 * 255);
 
 	}
+	/* printf("convert to rgb\n"); */
 
 	xpixels = ( unsigned char * ) calloc( 3, size * size );
 
