@@ -53,6 +53,7 @@ using namespace Aqsis;
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include "eqshibit.h"
+#include "eqshibit_ui.h"
 
 #define INT_MULT(a,b,t) ( (t) = (a) * (b) + 0x80, ( ( ( (t)>>8 ) + (t) )>>8 ) )
 #define INT_PRELERP(p, q, a, t) ( (p) + (q) - INT_MULT( a, p, t) )
@@ -65,7 +66,7 @@ bool 			g_cl_no_color = false;
 bool 			g_cl_syslog = false;
 ArgParse::apint 	g_cl_verbose = 1;
 
-
+CqEqshibitMainWindow *window = 0;
 
 void version( std::ostream& Stream )
 {
@@ -80,6 +81,9 @@ void HandleConnection(int sock, void *data)
 	int clientlen = sizeof(adClient);
 	
 	cllientsock = accept(sock, (struct sockaddr*) &adClient, (socklen_t*) &clientlen);
+	
+	if(window)
+		window->addImageToCurrentCatalog("Hello");
 
 	Fl_Window *window = new Fl_Window(300,180);
 	Fl_Box *box = new Fl_Box(20,40,260,100,"Hello, World!");
@@ -91,23 +95,13 @@ void HandleConnection(int sock, void *data)
 	window->show();
 }
 
-Fl_FrameBuffer_Widget::Fl_FrameBuffer_Widget(int sock) : Fl_Widget(0,0,0,0,"unknown")
-{
-	clientsock = sock;
-
-	// We need to read this stuff in from the socket
-	//     w = imageW;
-	//     h = imageH;
-	//     d = depth;
-	//     image = imageD;
-}
 
 void Fl_FrameBuffer_Widget::draw(void)
 {
 	fl_draw_image(image,x(),y(),w,h,d,w*d); // draw image
 }
 
-int main( int argc, const char** argv )
+int main( int argc, char** argv )
 {
 	// Create listening socket. 
 	// Setup fltk. 
@@ -139,7 +133,8 @@ int main( int argc, const char** argv )
 #endif  // AQSIS_SYSTEM_POSIX
 
 
-	if ( argc > 1 && !ap.parse( argc - 1, argv + 1 ) )
+	const char **c_argv = const_cast<const char**>(argv);
+	if ( argc > 1 && !ap.parse( argc - 1, c_argv + 1 ) )
 	{
 		std::cerr << ap.errmsg() << std::endl << ap.usagemsg();
  		exit( 1 );
@@ -201,8 +196,11 @@ int main( int argc, const char** argv )
 	
 	Fl::add_fd(supersockfd,&HandleConnection);
 
-	Fl_Window *window = new Fl_Window(0,0);
-	window->show();
+	window = new CqEqshibitMainWindow();
+	char *internalArgs[] = {
+		"eqshibit"
+	};
+	window->show(1, internalArgs);
 
 	return Fl::run();
 }

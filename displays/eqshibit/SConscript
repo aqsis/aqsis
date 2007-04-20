@@ -1,53 +1,60 @@
 Import('env', 'embedManifest')
 eqshibitappenv = env.Copy()
-eqshibitdisplayenv = env.Copy()
 
-eqshibitappenv.AppendUnique(CPPPATH = ['#/aqsis/aqsistypes'])
+eqshibitappenv.AppendUnique(CPPPATH = ['#/aqsis/aqsistypes', '#/thirdparty/tinyxml', '#/renderer/ddmanager'])
 eqshibitappenv.AppendUnique(LIBS = ['$tiff_lib', '$fltk_lib','#/thirdparty/tinyxml'])
 eqshibitappenv.AppendUnique(LIBPATH = ['/usr/X11R6/lib'])
 eqshibitappenv.AppendUnique(CPPDEFINES=['EQSHIBIT_APP_EXPORTS'])
 
-eqshibitdisplayenv.AppendUnique(CPPPATH=['#/renderer/ddmanager','#/thirdparty/tinyxml'])
-
 eqshibitapp_sources = Split("""
 	eqshibit.cpp
+	eqshibitbase.cpp
 	eqshibit_ui.cpp""")
+
+eqshibitapp_headers =  Split("""
+	eqshibit.h
+	eqshibitbase.h
+	eqshibit_ui.h""")
 
 # Set any platform specific options for this target
 eqshibitappenv.UseTargetOptions('eqshibitapp')
-
 
 eqshibitapp = eqshibitappenv.Program('eqshibit', eqshibitapp_sources, LIBS=['aqsistypes','argparse','fltk','m','Xext','X11','supc++','tinyxml'])
 eqshibitappenv.Install('$BINDIR', eqshibitapp)
 embedManifest(env, eqshibitappenv, eqshibitapp, 'EXE')
 
 env.Distribute(eqshibitapp_sources)
+env.Distribute(eqshibitapp_headers)
+env.Distribute('eqshibit_ui.fl')
 
 # Display driver for communicating with eqshibit
-#eqshibitdisplay_sources = Split("""
-#	eqshibitdisplay.cpp
-#	displayhelpers.c""")
+eqshibitdisplayenv = env.Copy()
+eqshibitdisplayenv.AppendUnique(CPPPATH=['#/renderer/ddmanager','#/thirdparty/tinyxml'])
 
-#eqshibitdisplay_headers =  Split("""
-#	eqshibitdisplay.h""")
+eqshibitdisplay_sources = Split("""
+	eqshibitdisplay.cpp
+	displayhelpers.c""")
+
+eqshibitdisplay_headers =  Split("""
+	eqshibitdisplay.h""")
 
 
-#eqshibitdisplayenv.AppendUnique(LIBS = ['aqsistypes', 'tinyxml'])
-#eqshibitdisplayenv.AppendUnique(CPPPATH = ['#/thirdparty/tinyxml'])
+eqshibitdisplayenv.AppendUnique(LIBS = ['aqsistypes', 'tinyxml'])
+eqshibitdisplayenv.AppendUnique(CPPPATH = ['#/thirdparty/tinyxml'])
 
 # Set any platform specific target options.
-#eqshibitdisplayenv.UseTargetOptions('eqshibitdisplay')
+eqshibitdisplayenv.UseTargetOptions('eqshibitdisplay')
 
-#eqshibitdisplay = eqshibitdisplayenv.SharedLibrary('eqshibit', eqshibitdisplay_sources)
+eqshibitdisplay = eqshibitdisplayenv.SharedLibrary('eqshibit', eqshibitdisplay_sources)
 
-#embedManifest(env, eqshibitdisplayenv, eqshibitdisplay, 'DLL')
+embedManifest(env, eqshibitdisplayenv, eqshibitdisplay, 'DLL')
 
 	
-#eqshibitdisplayenv.Install('$DISPLAYSDIR', eqshibitdisplay)
+eqshibitdisplayenv.Install('$DISPLAYSDIR', eqshibitdisplay)
 
-#Return('eqshibitdisplay')
+Return('eqshibitdisplay')
 
-#env.Distribute(eqshibitdisplay_sources)
-#env.Distribute(eqshibitdisplay_headers)
+env.Distribute(eqshibitdisplay_sources)
+env.Distribute(eqshibitdisplay_headers)
 
 env.Distribute('SConscript')

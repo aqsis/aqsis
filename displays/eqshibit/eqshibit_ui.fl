@@ -2,14 +2,16 @@
 version 1.0107 
 header_name {.h} 
 code_name {.cpp}
-class CqEqshibitMainWindow {open
+class CqEqshibitMainWindow {open : {public Aqsis::CqEqshibitBase}
 } {
   Function {CqEqshibitMainWindow()} {open
   } {
     Fl_Window m_window {open
-      private xywh {334 189 685 485} type Double
+      private xywh {320 140 685 485} type Double resizable
       code0 {\#include "eqshibit.h"}
-      code1 {\#include <Fl/Fl_Browser.H>} visible
+      code1 {\#include "eqshibitbase.h"}
+      code2 {\#include <stdio.h>}
+      code3 {\#include <FL/Fl_Browser.H>} visible
     } {
       Fl_Menu_Bar {} {open
         xywh {0 0 685 25}
@@ -20,6 +22,7 @@ class CqEqshibitMainWindow {open
         } {
           MenuItem m_menuCatalogNew {
             label New
+            callback {addNewCatalog("Catalog1");}
             private xywh {0 0 100 20} shortcut 0x4006e
           }
           MenuItem m_menuCatalogOpen {
@@ -33,14 +36,31 @@ class CqEqshibitMainWindow {open
         }
       }
       Fl_Tabs m_tabCatalogs {open
-        private xywh {0 25 685 460}
+        private xywh {0 25 685 460} resizable
       } {}
     }
   }
-  Function {newCatalog()} {open
+  Function {addNewCatalog(std::string name)} {open return_type {virtual void}
   } {
-    code {Fl_Browser *o = new Fl_Browser(0, 35, 200, 200, "Catalog");
-m_tabCatalogs->add(o);} {selected
+    code {CqEqshibitBase::addNewCatalog(name);
+Fl_Browser *o = new Fl_Browser(0, 50, 685, 435, name.c_str());
+m_tabCatalogs->add(o);
+m_tabCatalogs->resizable(o);
+m_tabCatalogs->init_sizes();
+m_tabCatalogs->redraw();} {}
+  }
+  Function {show(int argc, char **argv)} {open
+  } {
+    code {m_window->show(argc, argv);} {}
+  }
+  Function {addImageToCurrentCatalog(std::string name)} {open return_type {virtual void}
+  } {
+    code {CqEqshibitBase::addImageToCurrentCatalog(name);
+// Should update catalog list here to match the base, but for
+// now we'll just add the name to the browser.
+Fl_Widget* current = m_tabCatalogs->value();
+Fl_Browser* bcurr = static_cast<Fl_Browser*>(current);
+bcurr->add(name.c_str());} {selected
     }
   }
 } 

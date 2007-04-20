@@ -23,36 +23,36 @@
 		\author Paul C. Gregory (pgregory@aqsis.com)
 */
 
-#ifndef	___display_Loaded___
-#define	___display_Loaded___
+#ifndef	___eqshibitbase_Loaded___
+#define	___eqshibitbase_Loaded___
 
 #include <aqsis.h>
-//#include <../display.h>
-
-#include <FL/Fl.H>
-#include <FL/Fl_Window.H>
-#include <FL/Fl_Box.H>
-#include <FL/Fl_Image.H>
-#include <FL/fl_draw.H>
 
 #include <map>
-
-/** FLTK Widget used to show a constantly updating image.
- *
- */
-class Fl_FrameBuffer_Widget : public Fl_Widget 
-{
-public: 
-	Fl_FrameBuffer_Widget(int x, int y, int width, int height) : Fl_Widget(x,y,width,height)
-	{}
-	void draw(void);
-
-private:
-	int w,h,d;
-	unsigned char* image;
-};
+#include <string>
+#include <list>
 
 START_NAMESPACE( Aqsis )
+
+typedef	std::list<std::string> TqEqshibitCatalog;
+
+class CqEqshibitBase
+{
+public:
+	CqEqshibitBase()		{}
+	virtual ~CqEqshibitBase()	{}
+
+	virtual void	addNewCatalog(std::string name);
+	void	setCurrentCatalog(std::string name);
+	TqEqshibitCatalog& currentCatalog();
+	std::string currentCatalogName();
+	virtual void	addImageToCurrentCatalog(std::string name);
+
+private:
+	std::map<std::string, TqEqshibitCatalog>	m_catalogs;
+	std::string	m_currentCatalogName;
+};
+
 
 //-----------------------------------------------------------------------
 
