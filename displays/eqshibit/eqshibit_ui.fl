@@ -11,7 +11,7 @@ class CqEqshibitMainWindow {open : {public Aqsis::CqEqshibitBase}
       code0 {\#include "eqshibit.h"}
       code1 {\#include "eqshibitbase.h"}
       code2 {\#include <stdio.h>}
-      code3 {\#include <FL/Fl_Browser.H>} visible
+      code3 {\#include <FL/Fl_Multi_Browser.H>} visible
     } {
       Fl_Menu_Bar {} {open
         xywh {0 0 685 25}
@@ -43,11 +43,12 @@ class CqEqshibitMainWindow {open : {public Aqsis::CqEqshibitBase}
   Function {addNewCatalog(std::string name)} {open return_type {virtual void}
   } {
     code {CqEqshibitBase::addNewCatalog(name);
-Fl_Browser *o = new Fl_Browser(0, 50, 685, 435, name.c_str());
+Fl_Multi_Browser *o = new Fl_Multi_Browser(0, 50, 685, 435, name.c_str());
 m_tabCatalogs->add(o);
 m_tabCatalogs->resizable(o);
 m_tabCatalogs->init_sizes();
-m_tabCatalogs->redraw();} {}
+m_tabCatalogs->redraw();} {selected
+    }
   }
   Function {show(int argc, char **argv)} {open
   } {
@@ -59,8 +60,7 @@ m_tabCatalogs->redraw();} {}
 // Should update catalog list here to match the base, but for
 // now we'll just add the name to the browser.
 Fl_Widget* current = m_tabCatalogs->value();
-Fl_Browser* bcurr = static_cast<Fl_Browser*>(current);
-bcurr->add(name.c_str());} {selected
-    }
+Fl_Multi_Browser* bcurr = static_cast<Fl_Multi_Browser*>(current);
+bcurr->add(name.c_str());} {}
   }
 } 
