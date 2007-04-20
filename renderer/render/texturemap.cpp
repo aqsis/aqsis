@@ -399,21 +399,21 @@ void CqTextureMap::CqImageDownsampler::computeFilterKernel(TqFloat sWidth, TqFlo
 	m_weights.resize(m_tNumPts * m_sNumPts);
 	TqUint weightOffset = 0;
 	TqFloat sum = 0;
-	Aqsis::log() << "filter points (s,t) =\n";
+	Aqsis::log() << info << "filter points (s,t) =\n";
 	for(TqInt i = 0; i < m_tNumPts; i++)
 	{
 		// overall division by 2 is to downsample the image by a factor of 2.
 		TqFloat t = (-(m_tNumPts-1)/2.0 + i)/2;
-		Aqsis::log() << "[";
+		Aqsis::log() << info << "[";
 		for(TqInt j = 0; j < m_sNumPts; j++)
 		{
 			TqFloat s = (-(m_sNumPts-1)/2.0 + j)/2;
-			Aqsis::log() << "(" << s << ", " << t << "), "; 
+			Aqsis::log() << info << "(" << s << ", " << t << "), "; 
 			m_weights[weightOffset] = (*filterFunc) (s, t, sWidth/2, tWidth/2);
 			sum += m_weights[weightOffset];
 			weightOffset++;
 		}
-		Aqsis::log() << "]\n";
+		Aqsis::log() << info << "]\n";
 	}
 	// normalise the filter
 	for(std::vector<TqFloat>::iterator i = m_weights.begin(), end = m_weights.end(); i != end; i++)
@@ -421,17 +421,17 @@ void CqTextureMap::CqImageDownsampler::computeFilterKernel(TqFloat sWidth, TqFlo
 
 	// print the filter kernel.
 	weightOffset = 0;
-	Aqsis::log() << "filter Kernel =\n";
+	Aqsis::log() << info << "filter Kernel =\n";
 	for(TqInt t = 0; t < m_tNumPts; t++)
 	{
-		Aqsis::log() << "[";
+		Aqsis::log() << info << "[";
 		for(TqInt s = 0; s < m_sNumPts; s++)
 		{
-			Aqsis::log() << m_weights[weightOffset++] << ", "; 
+			Aqsis::log() << info << m_weights[weightOffset++] << ", "; 
 		}
-		Aqsis::log() << "]\n";
+		Aqsis::log() << info << "]\n";
 	}
-	Aqsis::log() << "\n";
+	Aqsis::log() << info << "\n";
 }
 
 
