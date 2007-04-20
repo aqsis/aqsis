@@ -136,13 +136,13 @@ static char *bake_open( FILE *bakefile, char *tiffname )
 	float mins, mint, maxs, maxt;
 	int bytesize = size * size * 3;
 	int count, number;
+	float *temporary;
+
 	count = 1024 * 1024;
 	number = 0;
 
 	h = w = size;
 	pixels = ( unsigned char * ) calloc( 3, size * size );
-
-	float *temporary;
 
         temporary = (float *) malloc(count *  5 * sizeof(float));
 
@@ -172,6 +172,7 @@ static char *bake_open( FILE *bakefile, char *tiffname )
 		}
 		/* printf("%d\n", number); */
 	}
+
 	/* printf("done\nFind the max, min of s,t.\n"); */
 	mins = maxs = temporary[0]; 
 	mint = maxt = temporary[1];
