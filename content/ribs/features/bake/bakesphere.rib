@@ -1,18 +1,11 @@
 Orientation "lh"
 Format 320 240 1
-#PixelSamples 2 2
-#ShadingRate 0.25
-Option "limits" "gridsize" [32 32]
-Option "statistics" "endofframe" [1]
-Option "searchpath" "shader" ["../shaders:&"]
+Option "searchpath" "shader" ["../../../shaders/surface:../../../shaders/imager:&"]
 LightSource "ambientlight" 1 
 Declare "pass" "string"
-#Option "user" "pass" "test"  #### use the sphere.bake.tx 
-Option "user" "pass" "bake"  #### create sphere.bake.bake -> teqser sphere.bake.bake sphere.bake.tx
+Option "user" "pass" "bake"		# create 'sphere.bake.bake'
 
-FrameBegin 0
-Display "baketest.tif" "file" "rgb"
-Display "+baketest.tif" "framebuffer" "rgb"
+Display "bakesphere.tif" "file" "rgba"
 
 # Camera name: "Kamera01"
 Projection "perspective" "fov" [36.0]
@@ -21,7 +14,7 @@ ConcatTransform [1.0 0.0 0.0 0  0.0 0.435544 -0.900167 0  0.0 0.900167 0.435544 
 
 WorldBegin
 # Default-Surface
-Surface "expensive" "string objname" "sphere" # that will create sphere.bake.bake or use sphere.bake.tx
+Surface "expensive" "string objname" "sphere"	# create 'sphere.bake.bake' or use 'sphere.bake.tex'
 
 # Object "Punktlicht01"
 TransformBegin
@@ -51,4 +44,3 @@ ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  0.0 0.0 0.0 1]
 Sphere 100.0 -100.0 100.0 360
 AttributeEnd
 WorldEnd
-FrameEnd

@@ -9,7 +9,7 @@ uniform string passname = "";
 uniform string bakefilename = "";
 uniform string filename = "";
 bakefilename = concat (objname, ".", bakename, ".bake");
-filename = concat (objname, ".", bakename, ".tx");
+filename = concat (objname, ".", bakename, ".tex");
 
 option ("user:pass", passname);
 
