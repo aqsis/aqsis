@@ -337,9 +337,9 @@ CqTextureMapBuffer* CqTextureMap::CqImageDownsampler::downsample(CqTextureMapBuf
 	TqInt samplesPerPixel = inBuf->Samples();
 	TqBool imEvenS = !(imWidth % 2);
 	TqBool imEvenT = !(imHeight % 2);
-	if(m_weights.empty() || !(!(m_sNumPts % 2) && imEvenS) || !(!(m_tNumPts % 2) && imEvenT))
+	if(m_weights.empty() || !((m_sNumPts % 2) ^ imEvenS) || !((m_tNumPts % 2) ^ imEvenT))
 	{
-		// recalculate filter kernel if cached one isn't appropriate
+		// recalculate filter kernel if cached one isn't the right size.
 		computeFilterKernel(m_sWidth, m_tWidth, m_filterFunc, imEvenS, imEvenT);
 	}
 	// Make a new buffer to store the downsampled image in.
@@ -383,12 +383,12 @@ void CqTextureMap::CqImageDownsampler::computeFilterKernel(TqFloat sWidth, TqFlo
 {
 	// set up filter sizes & offsets
 	if(evenFilterS) // for even-sized images in s
-		m_sNumPts = std::max(2*static_cast<TqInt>((sWidth-1)/2), 2);
+		m_sNumPts = std::max(2*static_cast<TqInt>((sWidth+1)/2), 2);
 	else // for odd-sized images in s
 		m_sNumPts = std::max(2*static_cast<TqInt>(sWidth/2) + 1, 3);
 
 	if(evenFilterT) // for even-sized images in t
-		m_tNumPts = std::max(2*static_cast<TqInt>((tWidth-1)/2), 2);
+		m_tNumPts = std::max(2*static_cast<TqInt>((tWidth+1)/2), 2);
 	else // for odd-sized images in t
 		m_tNumPts = std::max(2*static_cast<TqInt>(tWidth/2) + 1, 3);
 
@@ -399,39 +399,35 @@ void CqTextureMap::CqImageDownsampler::computeFilterKernel(TqFloat sWidth, TqFlo
 	m_weights.resize(m_tNumPts * m_sNumPts);
 	TqUint weightOffset = 0;
 	TqFloat sum = 0;
-	Aqsis::log() << info << "filter points (s,t) =\n";
 	for(TqInt i = 0; i < m_tNumPts; i++)
 	{
 		// overall division by 2 is to downsample the image by a factor of 2.
 		TqFloat t = (-(m_tNumPts-1)/2.0 + i)/2;
-		Aqsis::log() << info << "[";
 		for(TqInt j = 0; j < m_sNumPts; j++)
 		{
 			TqFloat s = (-(m_sNumPts-1)/2.0 + j)/2;
-			Aqsis::log() << info << "(" << s << ", " << t << "), "; 
 			m_weights[weightOffset] = (*filterFunc) (s, t, sWidth/2, tWidth/2);
 			sum += m_weights[weightOffset];
 			weightOffset++;
 		}
-		Aqsis::log() << info << "]\n";
 	}
 	// normalise the filter
 	for(std::vector<TqFloat>::iterator i = m_weights.begin(), end = m_weights.end(); i != end; i++)
 		*i /= sum;
 
-	// print the filter kernel.
+	// print the filter kernel to the debug stream.
 	weightOffset = 0;
-	Aqsis::log() << info << "filter Kernel =\n";
+	Aqsis::log() << debug << "filter Kernel =\n";
 	for(TqInt t = 0; t < m_tNumPts; t++)
 	{
-		Aqsis::log() << info << "[";
+		Aqsis::log() << debug << "[";
 		for(TqInt s = 0; s < m_sNumPts; s++)
 		{
-			Aqsis::log() << info << m_weights[weightOffset++] << ", "; 
+			Aqsis::log() << debug << m_weights[weightOffset++] << ", "; 
 		}
-		Aqsis::log() << info << "]\n";
+		Aqsis::log() << debug << "]\n";
 	}
-	Aqsis::log() << info << "\n";
+	Aqsis::log() << debug << "\n";
 }
 
 
