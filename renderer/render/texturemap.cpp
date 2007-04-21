@@ -311,127 +311,6 @@ void	CqTextureMapBuffer::FreeSegment( TqPuchar pBufferData, TqUlong width, TqUlo
 
 
 //----------------------------------------------------------------------
-// Implementation of CqTextureMap::CqImageDownsampler
-//----------------------------------------------------------------------
-CqTextureMap::CqImageDownsampler::CqImageDownsampler(TqFloat sWidth, TqFloat tWidth, RtFilterFunc filterFunc, EqWrapMode sWrapMode, EqWrapMode tWrapMode)
-	: m_sNumPts(0),
-	m_tNumPts(0),
-	m_sStartOffset(0),
-	m_tStartOffset(0),
-	m_weights(0),
-	m_sWidth(sWidth),
-	m_tWidth(tWidth),
-	m_filterFunc(filterFunc),
-	m_sWrapMode(sWrapMode),
-	m_tWrapMode(tWrapMode)
-{ }
-
-
-//----------------------------------------------------------------------
-CqTextureMapBuffer* CqTextureMap::CqImageDownsampler::downsample(CqTextureMapBuffer* inBuf, CqTextureMap& texMap, TqInt directory, TqBool protectBuffer)
-{
-	TqInt imWidth = inBuf->Width();
-	TqInt imHeight = inBuf->Height();
-	TqInt newWidth = (imWidth+1)/2;
-	TqInt newHeight = (imHeight+1)/2;
-	TqInt samplesPerPixel = inBuf->Samples();
-	TqBool imEvenS = !(imWidth % 2);
-	TqBool imEvenT = !(imHeight % 2);
-	if(m_weights.empty() || !((m_sNumPts % 2) ^ imEvenS) || !((m_tNumPts % 2) ^ imEvenT))
-	{
-		// recalculate filter kernel if cached one isn't the right size.
-		computeFilterKernel(m_sWidth, m_tWidth, m_filterFunc, imEvenS, imEvenT);
-	}
-	// Make a new buffer to store the downsampled image in.
-	CqTextureMapBuffer* outBuf = texMap.CreateBuffer(0, 0, newWidth, newHeight, directory, protectBuffer);
-	if(outBuf->pVoidBufferData() == NULL)
-		throw XqException("Cannot create buffer for downsampled image");
-	std::vector<TqFloat> accum(samplesPerPixel);
-	for(TqInt y = 0; y < newHeight; y++)
-	{
-		for(TqInt x = 0; x < newWidth; x++)
-		{
-			// s = x = inner loop = 1st var in TMB.GetValue ~ width
-			// t = y = outer loop = 2nd var in TMB.GetValue ~ height
-			TqInt weightOffset = 0;
-			accum.assign(samplesPerPixel, 0);
-			for(TqInt j = 0; j < m_tNumPts; j++)
-			{
-				/// \todo: Respect tWrapMode, sWrapMode.  At the moment we just clamp by default.
-				TqInt ypos = 2*y + m_tStartOffset + j;
-				ypos = clamp(ypos, 0, imHeight-1); // clamp mode
-				//ypos = (ypos + imHeight) % imHeight; // wrap mode
-				for(TqInt i = 0; i < m_sNumPts; i++)
-				{
-					TqInt xpos = 2*x + m_sStartOffset + i;
-					xpos = clamp(xpos, 0, imWidth-1);
-					TqFloat weight = m_weights[weightOffset++];
-					for(TqInt sample = 0; sample < samplesPerPixel; sample++)
-						accum[sample] += weight * inBuf->GetValue(xpos, ypos, sample);
-				}
-			}
-			for(TqInt sample = 0; sample < samplesPerPixel; sample++)
-				outBuf->SetValue(x, y, sample, CLAMP(accum[sample], 0.0, 1.0));
-		}
-	}
-	return outBuf;
-}
-
-
-//----------------------------------------------------------------------
-void CqTextureMap::CqImageDownsampler::computeFilterKernel(TqFloat sWidth, TqFloat tWidth, RtFilterFunc filterFunc, TqBool evenFilterS, TqBool evenFilterT)
-{
-	// set up filter sizes & offsets
-	if(evenFilterS) // for even-sized images in s
-		m_sNumPts = std::max(2*static_cast<TqInt>((sWidth+1)/2), 2);
-	else // for odd-sized images in s
-		m_sNumPts = std::max(2*static_cast<TqInt>(sWidth/2) + 1, 3);
-
-	if(evenFilterT) // for even-sized images in t
-		m_tNumPts = std::max(2*static_cast<TqInt>((tWidth+1)/2), 2);
-	else // for odd-sized images in t
-		m_tNumPts = std::max(2*static_cast<TqInt>(tWidth/2) + 1, 3);
-
-	m_sStartOffset = -(m_sNumPts-1)/2;
-	m_tStartOffset = -(m_tNumPts-1)/2;
-
-	// set up filter weights
-	m_weights.resize(m_tNumPts * m_sNumPts);
-	TqUint weightOffset = 0;
-	TqFloat sum = 0;
-	for(TqInt i = 0; i < m_tNumPts; i++)
-	{
-		// overall division by 2 is to downsample the image by a factor of 2.
-		TqFloat t = (-(m_tNumPts-1)/2.0 + i)/2;
-		for(TqInt j = 0; j < m_sNumPts; j++)
-		{
-			TqFloat s = (-(m_sNumPts-1)/2.0 + j)/2;
-			m_weights[weightOffset] = (*filterFunc) (s, t, sWidth/2, tWidth/2);
-			sum += m_weights[weightOffset];
-			weightOffset++;
-		}
-	}
-	// normalise the filter
-	for(std::vector<TqFloat>::iterator i = m_weights.begin(), end = m_weights.end(); i != end; i++)
-		*i /= sum;
-
-	// print the filter kernel to the debug stream.
-	weightOffset = 0;
-	Aqsis::log() << debug << "filter Kernel =\n";
-	for(TqInt t = 0; t < m_tNumPts; t++)
-	{
-		Aqsis::log() << debug << "[";
-		for(TqInt s = 0; s < m_sNumPts; s++)
-		{
-			Aqsis::log() << debug << m_weights[weightOffset++] << ", "; 
-		}
-		Aqsis::log() << debug << "]\n";
-	}
-	Aqsis::log() << debug << "\n";
-}
-
-
-//----------------------------------------------------------------------
 // Implementation of CqTextureMap
 //----------------------------------------------------------------------
 
@@ -1916,6 +1795,128 @@ void CqTextureMap::WriteTileImage( TIFF* ptex, TqPuchar raster, TqUlong width, T
 		TIFFWriteDirectory( ptex );
 		_TIFFfree( ptile );
 	}
+}
+
+
+//----------------------------------------------------------------------
+// Implementation of CqImageDownsampler
+//----------------------------------------------------------------------
+CqImageDownsampler::CqImageDownsampler(TqFloat sWidth, TqFloat tWidth, RtFilterFunc filterFunc, EqWrapMode sWrapMode, EqWrapMode tWrapMode)
+	: m_sNumPts(0),
+	m_tNumPts(0),
+	m_sStartOffset(0),
+	m_tStartOffset(0),
+	m_weights(0),
+	m_sWidth(sWidth),
+	m_tWidth(tWidth),
+	m_filterFunc(filterFunc),
+	m_sWrapMode(sWrapMode),
+	m_tWrapMode(tWrapMode)
+{ }
+
+
+//----------------------------------------------------------------------
+CqTextureMapBuffer* CqImageDownsampler::downsample(CqTextureMapBuffer* inBuf, CqTextureMap& texMap, TqInt directory, TqBool protectBuffer)
+{
+	TqInt imWidth = inBuf->Width();
+	TqInt imHeight = inBuf->Height();
+	TqInt newWidth = (imWidth+1)/2;
+	TqInt newHeight = (imHeight+1)/2;
+	TqInt samplesPerPixel = inBuf->Samples();
+	TqBool imEvenS = !(imWidth % 2);
+	TqBool imEvenT = !(imHeight % 2);
+	if(m_weights.empty() || !((m_sNumPts % 2) ^ imEvenS) || !((m_tNumPts % 2) ^ imEvenT))
+	{
+		// recalculate filter kernel if cached one isn't the right size.
+		computeFilterKernel(m_sWidth, m_tWidth, m_filterFunc, imEvenS, imEvenT);
+	}
+	// Make a new buffer to store the downsampled image in.
+	CqTextureMapBuffer* outBuf = texMap.CreateBuffer(0, 0, newWidth, newHeight, directory, protectBuffer);
+	if(outBuf->pVoidBufferData() == NULL)
+		throw XqException("Cannot create buffer for downsampled image");
+	std::vector<TqFloat> accum(samplesPerPixel);
+	for(TqInt y = 0; y < newHeight; y++)
+	{
+		for(TqInt x = 0; x < newWidth; x++)
+		{
+			// s ~ x ~ inner loop ~ 1st var in TMB.GetValue ~ width
+			// t ~ y ~ outer loop ~ 2nd var in TMB.GetValue ~ height
+			TqInt weightOffset = 0;
+			accum.assign(samplesPerPixel, 0);
+			for(TqInt j = 0; j < m_tNumPts; j++)
+			{
+				/// \todo: Respect tWrapMode, sWrapMode.  At the moment we just clamp by default.
+				TqInt ypos = 2*y + m_tStartOffset + j;
+				ypos = clamp(ypos, 0, imHeight-1); // clamp mode
+				//ypos = (ypos + imHeight) % imHeight; // wrap mode
+				for(TqInt i = 0; i < m_sNumPts; i++)
+				{
+					TqInt xpos = 2*x + m_sStartOffset + i;
+					xpos = clamp(xpos, 0, imWidth-1);
+					TqFloat weight = m_weights[weightOffset++];
+					for(TqInt sample = 0; sample < samplesPerPixel; sample++)
+						accum[sample] += weight * inBuf->GetValue(xpos, ypos, sample);
+				}
+			}
+			for(TqInt sample = 0; sample < samplesPerPixel; sample++)
+				outBuf->SetValue(x, y, sample, CLAMP(accum[sample], 0.0, 1.0));
+		}
+	}
+	//Aqsis::log() << "downsample to width = " << outBuf->Width() << "\n";
+	return outBuf;
+}
+
+
+//----------------------------------------------------------------------
+void CqImageDownsampler::computeFilterKernel(TqFloat sWidth, TqFloat tWidth, RtFilterFunc filterFunc, TqBool evenFilterS, TqBool evenFilterT)
+{
+	// set up filter sizes & offsets
+	if(evenFilterS) // for even-sized images in s
+		m_sNumPts = std::max(2*static_cast<TqInt>((sWidth+1)/2), 2);
+	else // for odd-sized images in s
+		m_sNumPts = std::max(2*static_cast<TqInt>(sWidth/2) + 1, 3);
+
+	if(evenFilterT) // for even-sized images in t
+		m_tNumPts = std::max(2*static_cast<TqInt>((tWidth+1)/2), 2);
+	else // for odd-sized images in t
+		m_tNumPts = std::max(2*static_cast<TqInt>(tWidth/2) + 1, 3);
+
+	m_sStartOffset = -(m_sNumPts-1)/2;
+	m_tStartOffset = -(m_tNumPts-1)/2;
+
+	// set up filter weights
+	m_weights.resize(m_tNumPts * m_sNumPts);
+	TqUint weightOffset = 0;
+	TqFloat sum = 0;
+	for(TqInt j = 0; j < m_tNumPts; j++)
+	{
+		// overall division by 2 is to downsample the image by a factor of 2.
+		TqFloat t = (-(m_tNumPts-1)/2.0 + j)/2;
+		for(TqInt i = 0; i < m_sNumPts; i++)
+		{
+			TqFloat s = (-(m_sNumPts-1)/2.0 + i)/2;
+			m_weights[weightOffset] = (*filterFunc) (s, t, sWidth/2, tWidth/2);
+			sum += m_weights[weightOffset];
+			weightOffset++;
+		}
+	}
+	// normalise the filter
+	for(std::vector<TqFloat>::iterator i = m_weights.begin(), end = m_weights.end(); i != end; i++)
+		*i /= sum;
+
+	// print the filter kernel to the log at debug priority
+	weightOffset = 0;
+	Aqsis::log() << debug << "filter Kernel =\n";
+	for(TqInt j = 0; j < m_tNumPts; j++)
+	{
+		Aqsis::log() << debug << "[";
+		for(TqInt i = 0; i < m_sNumPts; i++)
+		{
+			Aqsis::log() << debug << m_weights[weightOffset++] << ", "; 
+		}
+		Aqsis::log() << debug << "]\n";
+	}
+	Aqsis::log() << debug << "\n";
 }
 
 
