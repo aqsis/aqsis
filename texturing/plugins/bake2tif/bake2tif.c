@@ -195,10 +195,10 @@ static char *bake_open( FILE *bakefile, char *tiffname )
 
 
 	if ((mins >= 0.0 && maxs <= 1.0) &&
-	    (maxs >= 0.0 && maxt <= 1.0) )
+	    (maxt >= 0.0 && maxt <= 1.0) )
 		normalized = 0;
 
-	if (normalized == 0)
+	if (normalized == 1)
 	{
 		printf("bake2tif normalizes the keys (normally s,t)\n");
 		printf("\t(min_s, max_s): (%f, %f)\n\t(min_t, max_t): (%f, %f)\n", mins, maxs, mint, maxt );
