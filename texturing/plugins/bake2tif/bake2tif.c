@@ -134,6 +134,7 @@ static char *bake_open( FILE *bakefile, char *tiffname )
 	int i, j, k, n, o;
 	int x, y;
 	float mins, mint, maxs, maxt;
+	int normalized = 1;
 	int bytesize = size * size * 3;
 	int count, number;
 	float *temporary;
@@ -192,7 +193,16 @@ static char *bake_open( FILE *bakefile, char *tiffname )
 			maxt = temporary[k+1];
 	}
 
-	/* printf("Delta s,t (%f) (%f) : %f %f %f %f\n", maxs - mins, maxt - mint, mins, maxs, mint, maxt); */
+
+	if ((mins >= 0.0 && maxs <= 1.0) &&
+	    (maxs >= 0.0 && maxt <= 1.0) )
+		normalized = 0;
+
+	if (normalized == 0)
+	{
+		printf("bake2tif normalizes the keys (normally s,t)\n");
+		printf("\t(min_s, max_s): (%f, %f)\n\t(min_t, max_t): (%f, %f)\n", mins, maxs, mint, maxt );
+	}
 
 	/* Now save the s,t */
 	for (i=0; i < number; i++)
@@ -205,18 +215,26 @@ static char *bake_open( FILE *bakefile, char *tiffname )
 		g1 = temporary[k+3];
 		b1 = temporary[k+4];
 
-		/* Normalize the s,t between 0..1.0 */
-		if ((maxs - mins) != 0.0)
-			s = (s - mins) / (maxs - mins);
-		else {
-			if (s < 0.0) s *= -1.0;
-			if (s > 1.0) s = 1.0;
-		}
-		if ((maxt - mint) != 0.0)
-			t = (t - mint) / (maxt - mint);
-		else {
-			if (t < 0.0) t *= -1.0;
-			if (t > 1.0) t = 1.0;
+		/* Normalize the s,t between 0..1.0  only if required
+                 */
+		if (normalized)
+		{
+			if ( (maxs - mins) != 0.0)
+			{
+				s = (s - mins) / (maxs - mins);
+			}
+			else {
+				if (s < 0.0) s *= -1.0;
+				if (s > 1.0) s = 1.0;
+			}
+			if ((maxt - mint) != 0.0)
+			{
+				t = (t - mint) / (maxt - mint);
+			}
+			else {
+				if (t < 0.0) t *= -1.0;
+				if (t > 1.0) t = 1.0;
+			}
 		}
 		/* When we have some collision ? What should be nice
 		 * to accumulate the RGB values instead ?
@@ -290,6 +308,7 @@ static char *bake_open( FILE *bakefile, char *tiffname )
 
 	free( pixels );
 	free( xpixels );
+	free(temporary);
 
 	return tiffname;
 }
