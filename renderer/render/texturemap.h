@@ -743,23 +743,32 @@ class CqTextureMap : public IqTextureMap
 
 
 //----------------------------------------------------------------------
-/** \brief Class to handle downsampling of images by a factor of 2 for mipmap generation.
+/** \brief Class to handle downsampling of images by a factor of 2 for mipmap
+ * generation.
  */
 class CqImageDownsampler
 {
 	public:
-		/** \brief Constructor
-		 * \param swidth
-		 * \param twidth
+		/** \brief Construct an image downsampler 
+		 *
+		 * \param sWidth  filter width in s direction
+		 * \param tWidth  filter width in t direction
+		 * \param filterFunc  function returning filter coefficients
+		 * \param sWrapMode  texture wrapping mode in s direction
+		 * \param tWrapMode  texture wrapping mode in t direction
 		 */
 		CqImageDownsampler(TqFloat sWidth, TqFloat tWidth, RtFilterFunc filterFunc, EqWrapMode sWrapMode, EqWrapMode tWrapMode);
-		// Use default destructor.
 
 		/** \brief Downsample an image by a factor of two.
 		 */
 		CqTextureMapBuffer* downsample(CqTextureMapBuffer* inBuf, CqTextureMap& texMap, TqInt directory, TqBool protectBuffer);
 	private:
+		/** \brief Compute and cache filter kernel values for the given filter function.
+		 */
 		void computeFilterKernel(TqFloat sWidth, TqFloat tWidth, RtFilterFunc filterFunc, TqBool evenFilterS, TqBool evenFilterT);
+		/** \brief Wrap a position at the image edges according to current wrapmode
+		 */
+		inline TqInt edgeWrap(TqInt pos, TqInt posMax, EqWrapMode mode);
 
 		// Filter parameters for the convolution kernel.
 		TqInt m_sNumPts;
@@ -941,6 +950,27 @@ class CqShadowMap : public CqTextureMap
 
 }
 ;
+
+
+//=======================================================================
+// Implementation details for inline functions
+//-----------------------------------------------------------------------
+TqInt CqImageDownsampler::edgeWrap(TqInt pos, TqInt posMax, EqWrapMode mode)
+{
+	switch(mode)
+	{
+		case WrapMode_Clamp:
+		return clamp(pos, 0, posMax-1);
+		break;
+		case WrapMode_Periodic:
+		return pos = (pos + posMax) % posMax;
+		break;
+		case WrapMode_Black:
+		default:
+		return pos;
+	}
+}
+
 
 //-----------------------------------------------------------------------
 

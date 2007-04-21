@@ -1435,6 +1435,7 @@ void CqTextureMap::SampleMap( TqFloat s1, TqFloat t1, TqFloat s2, TqFloat t2, Tq
 }
 
 
+/// \todo Review: much code duplication between various overloaded versions of WriteImage and WriteTileImage.
 //----------------------------------------------------------------------
 /** Write an image to an open TIFF file in the current directory as straight storage.
  * as unsigned char values
@@ -1845,24 +1846,24 @@ CqTextureMapBuffer* CqImageDownsampler::downsample(CqTextureMapBuffer* inBuf, Cq
 			accum.assign(samplesPerPixel, 0);
 			for(TqInt j = 0; j < m_tNumPts; j++)
 			{
-				/// \todo: Respect tWrapMode, sWrapMode.  At the moment we just clamp by default.
-				TqInt ypos = 2*y + m_tStartOffset + j;
-				ypos = clamp(ypos, 0, imHeight-1); // clamp mode
-				//ypos = (ypos + imHeight) % imHeight; // wrap mode
+				TqInt ypos = edgeWrap(2*y + m_tStartOffset + j, imHeight, m_tWrapMode);
 				for(TqInt i = 0; i < m_sNumPts; i++)
 				{
-					TqInt xpos = 2*x + m_sStartOffset + i;
-					xpos = clamp(xpos, 0, imWidth-1);
-					TqFloat weight = m_weights[weightOffset++];
-					for(TqInt sample = 0; sample < samplesPerPixel; sample++)
-						accum[sample] += weight * inBuf->GetValue(xpos, ypos, sample);
+					TqInt xpos = edgeWrap(2*x + m_sStartOffset + i, imWidth, m_sWrapMode);
+					if(!((m_tWrapMode == WrapMode_Black && (ypos < 0 || ypos >= imHeight))
+							|| (m_sWrapMode == WrapMode_Black && (xpos < 0 || xpos >= imWidth))))
+					{
+						TqFloat weight = m_weights[weightOffset];
+						for(TqInt sample = 0; sample < samplesPerPixel; sample++)
+							accum[sample] += weight * inBuf->GetValue(xpos, ypos, sample);
+					}
+					weightOffset++;
 				}
 			}
 			for(TqInt sample = 0; sample < samplesPerPixel; sample++)
 				outBuf->SetValue(x, y, sample, CLAMP(accum[sample], 0.0, 1.0));
 		}
 	}
-	//Aqsis::log() << "downsample to width = " << outBuf->Width() << "\n";
 	return outBuf;
 }
 
