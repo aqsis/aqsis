@@ -5065,8 +5065,9 @@ RtVoid	RiMakeTextureV( RtString imagefile, RtString texturefile, RtToken swrap, 
 		TIFFSetField( ptex, TIFFTAG_PIXAR_TEXTUREFORMAT, MIPMAP_HEADER );
 		TIFFSetField( ptex, TIFFTAG_PIXAR_WRAPMODES, modes );
 		TIFFSetField( ptex, TIFFTAG_COMPRESSION, Source.Compression() ); /* COMPRESSION_DEFLATE */
-		int log2 = MIN( Source.XRes(), Source.YRes() );
-		log2 = ( int ) ( log( static_cast<float>(log2) ) / log( 2.0 ) );
+		/// \todo :  The number of mipmap levels used is not consistent with other renderers (at least, 3delight).  The calculation of log2 here (not elsewhere) rectifies that problem.  The calculation should probably really go into the CqTextureMap class.
+		int log2 = MIN(Source.XRes(), Source.YRes());
+		log2 = static_cast<int> ( ceil(log(static_cast<float>(log2))/log(2.0)) ) + 1;
 
 
 		for ( int i = 0; i < log2; ++i )
