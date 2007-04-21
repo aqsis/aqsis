@@ -27,8 +27,6 @@
 #ifndef TEXTUREMAP_H_INCLUDED
 #define TEXTUREMAP_H_INCLUDED 1
 
-#undef		min
-#undef		max
 
 #include	<vector>
 #include	<list>
@@ -45,6 +43,9 @@
 #include	"ri.h"
 #include	"ishaderexecenv.h"
 #include	"lowdiscrep.h"
+
+#undef		min
+#undef		max
 
 START_NAMESPACE( Aqsis )
 
