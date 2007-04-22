@@ -72,17 +72,6 @@ extern "C"
 }
 #endif
 
-int sendMessage(const char* msg, int len, int socket)
-{
-    TqInt tot = 0, need = len;
-    while ( need > 0 )
-    {
-        TqInt n = send( socket, msg + tot, need, 0 );
-        need -= n;
-        tot += n;
-    }
-}
-
 
 PtDspyError DspyImageOpen(PtDspyImageHandle * image,
                           const char *drivername,
@@ -291,9 +280,9 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 	const unsigned char* pdatarow = data;
 	pdatarow += (row * bucketlinelen) + (col * entrysize);
 
-	std::stringstream msg;
-	msg << "Bucket : " << pImage->m_pixelsReceived << "\r\n" << std::ends;
-	sendMessage(msg.str().c_str(), msg.str().length(), pImage->m_socket);
+	SqDDMessageData* msg = SqDDMessageData::Construct(xmin, xmaxplus1, ymin, ymaxplus1, entrysize, data, bucketlinelen * (ymaxplus1 - ymin));
+	msg->Send(pImage->m_socket);
+	msg->Destroy();
 
 #ifdef __REQUIRED
 	if( pImage && data && xmin__ >= 0 && ymin__ >= 0 && xmaxplus1__ <= pImage->m_width && ymaxplus1__ <= pImage->m_height )

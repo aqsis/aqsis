@@ -89,7 +89,7 @@ void HandleData(int sock, void *data)
 	}
 	if(numRead == sizeof(msg))
 	{
-		std::cout << "Message ID: " << msg.m_MessageID << "(" << std::hex << msg.m_MessageID << ")" << " length: " << msg.m_MessageLength << std::endl;
+		std::cout << "Message ID: " << msg.m_MessageID << "(" << std::hex << msg.m_MessageID << ")" << std::dec << " length: " << msg.m_MessageLength << std::endl;
 		int msgToRead = msg.m_MessageLength - numRead;
 		char *buff = new char[msgToRead];
 		bptr = buff;
