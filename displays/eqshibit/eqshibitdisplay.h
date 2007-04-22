@@ -32,6 +32,7 @@
 #include "tinyxml.h"
 #include "ndspy.h"
 
+static const int INVALID_SOCKET = -1;
 
 START_NAMESPACE( Aqsis )
 

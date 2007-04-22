@@ -54,6 +54,7 @@ using namespace Aqsis;
 #include "version.h"
 
 #include "eqshibitdisplay.h"
+#include "displaydriver.h"
 #include "tinyxml.h"
 
 // From displayhelpers.c
@@ -70,6 +71,18 @@ extern "C"
 #ifdef __cplusplus
 }
 #endif
+
+int sendMessage(const char* msg, int len, int socket)
+{
+    TqInt tot = 0, need = len;
+    while ( need > 0 )
+    {
+        TqInt n = send( socket, msg + tot, need, 0 );
+        need -= n;
+        tot += n;
+    }
+}
+
 
 PtDspyError DspyImageOpen(PtDspyImageHandle * image,
                           const char *drivername,
@@ -232,9 +245,13 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 
 			if( connect(sock,(const struct sockaddr*) &adServer, sizeof(sockaddr_in)))
 			{
-				return(PkDspyErrorNoMemory);
+				return(PkDspyErrorUndefined);
 			}
 			pImage->m_socket = sock;
+
+			// Send an OPEN message.
+			SqDDMessageOpen msg(width, height, widestFormat, pImage->m_origin[0], pImage->m_origin[1], pImage->m_origin[0] + width, pImage->m_origin[1] + height);
+			msg.Send(pImage->m_socket);
 			
 			TiXmlDocument displaydoc("display.xml");
 			TiXmlDeclaration* displaydecl = new TiXmlDeclaration("1.0","","yes");
@@ -274,11 +291,9 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 	const unsigned char* pdatarow = data;
 	pdatarow += (row * bucketlinelen) + (col * entrysize);
 
-	if(pImage->m_imageType == Type_Framebuffer)
-	{
-		// Write our data out to the Framebuffer socket
-		return(PkDspyErrorNone);
-	}
+	std::stringstream msg;
+	msg << "Bucket : " << pImage->m_pixelsReceived << "\r\n" << std::ends;
+	sendMessage(msg.str().c_str(), msg.str().length(), pImage->m_socket);
 
 #ifdef __REQUIRED
 	if( pImage && data && xmin__ >= 0 && ymin__ >= 0 && xmaxplus1__ <= pImage->m_width && ymaxplus1__ <= pImage->m_height )
@@ -337,10 +352,13 @@ PtDspyError DspyImageClose(PtDspyImageHandle image)
 	SqDisplayInstance* pImage;
 	pImage = reinterpret_cast<SqDisplayInstance*>(image);
 
-	if(pImage->m_imageType == Type_Framebuffer)
+	// Close the socket
+	if(pImage && pImage->m_socket != INVALID_SOCKET)
 	{
-		// Close the socket
-		return(PkDspyErrorNone);
+		SqDDMessageClose msg;
+		msg.Send(pImage->m_socket);
+		close(pImage->m_socket);
+		pImage->m_socket = INVALID_SOCKET;
 	}
 
 	// Delete the image structure.
@@ -360,6 +378,15 @@ PtDspyError DspyImageDelayClose(PtDspyImageHandle image)
 {
 	SqDisplayInstance* pImage;
 	pImage = reinterpret_cast<SqDisplayInstance*>(image);
+	
+	// Close the socket
+	if(pImage && pImage->m_socket != INVALID_SOCKET)
+	{
+		SqDDMessageClose msg;
+		msg.Send(pImage->m_socket);
+		close(pImage->m_socket);
+		pImage->m_socket = INVALID_SOCKET;
+	}
 
 	if(pImage && pImage->m_data)
 	{

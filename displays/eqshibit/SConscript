@@ -9,11 +9,15 @@ eqshibitappenv.AppendUnique(CPPDEFINES=['EQSHIBIT_APP_EXPORTS'])
 eqshibitapp_sources = Split("""
 	eqshibit.cpp
 	eqshibitbase.cpp
+	ddserver.cpp
+	ddclient.cpp
 	eqshibit_ui.cpp""")
 
 eqshibitapp_headers =  Split("""
 	eqshibit.h
 	eqshibitbase.h
+	ddserver.h
+	ddclient.h
 	eqshibit_ui.h""")
 
 # Set any platform specific options for this target

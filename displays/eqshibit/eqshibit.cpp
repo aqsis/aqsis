@@ -35,16 +35,8 @@
 
 using namespace Aqsis;
 
-#include <iomanip>
-#include <ios>
-#include <iostream>
-#include <memory>
-#include <sstream>
 #include <string>
-#include <fstream>
-#include <algorithm>
-#include <float.h>
-#include <time.h>
+#include <list>
 
 #include <version.h>
 
@@ -54,6 +46,9 @@ using namespace Aqsis;
 #include <arpa/inet.h>
 #include "eqshibit.h"
 #include "eqshibit_ui.h"
+#include "ddserver.h"
+#include "ddclient.h"
+#include "displaydriver.h"
 
 #define INT_MULT(a,b,t) ( (t) = (a) * (b) + 0x80, ( ( ( (t)>>8 ) + (t) )>>8 ) )
 #define INT_PRELERP(p, q, a, t) ( (p) + (q) - INT_MULT( a, p, t) )
@@ -73,26 +68,73 @@ void version( std::ostream& Stream )
 	Stream << "eqshibit version " << VERSION_STR_PRINT << std::endl;
 }
 
+CqDDServer g_theServer;
+std::map<int, CqDDClient> g_theClients;
+
+void HandleData(int sock, void *data)
+{
+	CqDDClient thisClient = g_theClients[sock];
+	SqDDMessageBase msg;
+	char	*bptr;
+	int	i, numRead=0;
+
+	bptr = reinterpret_cast<char*>(&msg);
+	while(numRead < sizeof(msg))	
+	{
+		i = read(sock,bptr,sizeof(msg) - numRead);
+		if(i<=0) 
+			break;
+		bptr += i;
+		numRead += i;
+	}
+	if(numRead == sizeof(msg))
+	{
+		std::cout << "Message ID: " << msg.m_MessageID << "(" << std::hex << msg.m_MessageID << ")" << " length: " << msg.m_MessageLength << std::endl;
+		int msgToRead = msg.m_MessageLength - numRead;
+		char *buff = new char[msgToRead];
+		bptr = buff;
+		numRead = 0;
+		while(numRead < msgToRead)
+		{
+			i = read(sock,bptr,msgToRead - numRead);
+			if(i<=0) 
+				break;
+			bptr += i;
+			numRead += i;
+		}
+		delete[](buff);
+		std::cout << "Read: " << numRead << std::endl;
+		if(msg.m_MessageID == MessageID_Close)
+		{
+			std::cout << "Closing socket" << std::endl;
+			Fl::remove_fd(sock);
+			close(sock);
+		}
+	}		
+}
 
 void HandleConnection(int sock, void *data)
 {
-	int cllientsock;
-	sockaddr_in adClient;
-	int clientlen = sizeof(adClient);
-	
-	cllientsock = accept(sock, (struct sockaddr*) &adClient, (socklen_t*) &clientlen);
-	
-	if(window)
-		window->addImageToCurrentCatalog("Hello");
+	Aqsis::log() << Aqsis::info << "Connection established with display server" << std::endl;
 
-	Fl_Window *window = new Fl_Window(300,180);
-	Fl_Box *box = new Fl_Box(20,40,260,100,"Hello, World!");
-	box->box(FL_UP_BOX);
-	box->labelsize(36);
-	box->labelfont(FL_BOLD+FL_ITALIC);
-	box->labeltype(FL_SHADOW_LABEL);
-	window->end();
-	window->show();
+	CqDDClient newClient;
+	
+	if(g_theServer.Accept(newClient))
+	{
+		g_theClients[newClient.Socket()] = newClient;
+		Fl::add_fd(newClient.Socket(), FL_READ, &HandleData);
+		if(window)
+			window->addImageToCurrentCatalog("Hello");
+
+		Fl_Window *window = new Fl_Window(300,180);
+		Fl_Box *box = new Fl_Box(20,40,260,100,"Hello, World!");
+		box->box(FL_UP_BOX);
+		box->labelsize(36);
+		box->labelfont(FL_BOLD+FL_ITALIC);
+		box->labeltype(FL_SHADOW_LABEL);
+		window->end();
+		window->show();
+	}
 }
 
 
@@ -100,6 +142,7 @@ void Fl_FrameBuffer_Widget::draw(void)
 {
 	fl_draw_image(image,x(),y(),w,h,d,w*d); // draw image
 }
+
 
 int main( int argc, char** argv )
 {
@@ -109,9 +152,6 @@ int main( int argc, char** argv )
 	// run fltk
 	// blah
 	ArgParse ap;
-
-	int supersockfd, portno;
-	sockaddr_in adListen;
 
 	// Set up the options
 	ap.usageHeader( ArgParse::apstring( "Usage: " ) + argv[ 0 ] + " [options]" );
@@ -173,28 +213,11 @@ int main( int argc, char** argv )
 		std::auto_ptr<std::streambuf> use_syslog( new Aqsis::syslog_buf(std::cerr) );
 #endif  // AQSIS_SYSTEM_POSIX
 
-	supersockfd = socket(AF_INET, SOCK_STREAM,0);
-	if (supersockfd < 0) 
-           std::cerr << error << "Failed to open  socket" << std::endl;
+	int portno = atoi(g_strPort.c_str());
+	if(!g_theServer.Prepare(portno))
+		Aqsis::log() << Aqsis::error << "Cannot open server on the specified port" << std::endl;
 
-        bzero((char *) &adListen, sizeof(adListen));
-	portno = atoi(g_strPort.c_str());
-	adListen.sin_family = AF_INET;
-	adListen.sin_addr.s_addr = inet_addr(g_strInterface.c_str());
-	if (adListen.sin_addr.s_addr == (in_addr_t) -1)
-           std::cerr << error << "Invalid IP address" << std::endl;;
-	adListen.sin_port = htons(portno);
-
-	if (bind(supersockfd, (struct sockaddr *) &adListen,
-		sizeof(adListen)) < 0) 
-	{
-		Aqsis::log() << Aqsis::info << "Binding failed, framebuffer may already be running" << std::endl;
-		return 1;
-
-	};
-	listen(supersockfd,5);
-	
-	Fl::add_fd(supersockfd,&HandleConnection);
+	Fl::add_fd(g_theServer.Socket(),&HandleConnection);
 
 	window = new CqEqshibitMainWindow();
 	char *internalArgs[] = {
