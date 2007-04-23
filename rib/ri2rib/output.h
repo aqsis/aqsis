@@ -67,8 +67,10 @@ class CqOutput
 		                  Torus, Blobby, Points, Curves,
 		                  SubdivisionMesh, Procedural, Geometry, MakeTexture,
 		                  MakeBump, MakeLatLongEnvironment, MakeCubeFaceEnvironment, MakeShadow, MakeOcclusion,
-		                  ArchiveRecord, ReadArchive, ErrorHandler, IfBegin, IfEnd, Else, ElseIf, LAST_Function,
-	       			  ShaderLayer, ConnectShaderLayers	};
+		                  ArchiveRecord, ReadArchive, ErrorHandler, IfBegin, IfEnd, Else, ElseIf,
+		                  ShaderLayer, ConnectShaderLayers,
+		                  LAST_Function,
+		};
 		// block types (used to check context nesting)
 		enum EqBlocks{
 		    B_Ri, B_Frame, B_World, B_Attribute, B_Transform, B_Solid, B_Object,
