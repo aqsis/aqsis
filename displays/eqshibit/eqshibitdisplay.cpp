@@ -284,54 +284,6 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 	msg->Send(pImage->m_socket);
 	msg->Destroy();
 
-#ifdef __REQUIRED
-	if( pImage && data && xmin__ >= 0 && ymin__ >= 0 && xmaxplus1__ <= pImage->m_width && ymaxplus1__ <= pImage->m_height )
-	{
-		// If rendering to a file, or an "rgb" framebuffer, we can just copy the data.
-		if( pImage->m_iFormatCount <= 3 )
-		{
-			TqInt y;
-			for ( y = ymin__; y < ymaxplus1__; y++ )
-			{
-				// Copy a whole row at a time, as we know it is being sent in the proper format and order.
-				TqInt so = ( y * pImage->m_lineLength ) + ( xmin__ * pImage->m_entrySize );
-				memcpy(reinterpret_cast<char*>(pImage->m_data)+so, reinterpret_cast<const void*>(pdatarow), copylinelen);
-				pdatarow += bucketlinelen;
-			}
-		}
-		// otherwise we need to do alpha blending for the alpha data to show in the framebuffer
-		else
-		{
-			TqInt t;	// Not used, just a temporary needed for the INT_PRELERP macro.
-			TqInt y;
-			for ( y = ymin__; y < ymaxplus1__; y++ )
-			{
-				TqInt x;
-				const unsigned char* _pdatarow = pdatarow;
-				for ( x = xmin__; x < xmaxplus1__; x++ )
-				{
-					unsigned char alpha = _pdatarow[3];
-					if( alpha > 0 )
-					{
-						TqInt so = ( y * pImage->m_lineLength ) + ( x * pImage->m_entrySize );
-						int r = _pdatarow[0];
-						int g = _pdatarow[1];
-						int b = _pdatarow[2];
-						// C’ = INT_PRELERP( A’, B’, b, t )
-						int R = static_cast<int>(INT_PRELERP( static_cast<int>(reinterpret_cast<unsigned char*>(pImage->m_data)[ so + 0 ]), r, alpha, t ));
-						int G = static_cast<int>(INT_PRELERP( static_cast<int>(reinterpret_cast<unsigned char*>(pImage->m_data)[ so + 1 ]), g, alpha, t ));
-						int B = static_cast<int>(INT_PRELERP( static_cast<int>(reinterpret_cast<unsigned char*>(pImage->m_data)[ so + 2 ]), b, alpha, t ));
-						reinterpret_cast<unsigned char*>(pImage->m_data)[ so + 0 ] = CLAMP( R, 0, 255 );
-						reinterpret_cast<unsigned char*>(pImage->m_data)[ so + 1 ] = CLAMP( G, 0, 255 );
-						reinterpret_cast<unsigned char*>(pImage->m_data)[ so + 2 ] = CLAMP( B, 0, 255 );
-					}
-					_pdatarow += entrysize;
-				}
-				pdatarow += bucketlinelen;
-			}
-		}
-	}
-#endif
 	return(PkDspyErrorNone);
 }
 
@@ -397,46 +349,43 @@ PtDspyError DspyImageQuery(PtDspyImageHandle image,
 	PtDspyOverwriteInfo overwriteInfo;
 	PtDspySizeInfo sizeInfo;
 
-	if(pImage->m_imageType == Type_Framebuffer)
-	{
-		// Write our data out to the Framebuffer socket
-		return(PkDspyErrorNone);
-	}
-
-
 	if(size <= 0 || !data)
 		return PkDspyErrorBadParams;
 
 	switch (type)
 	{
 			case PkOverwriteQuery:
-			if ((TqUint) size > sizeof(overwriteInfo))
-				size = sizeof(overwriteInfo);
-			overwriteInfo.overwrite = 1;
-			overwriteInfo.interactive = 0;
-			memcpy(data, &overwriteInfo, size);
+			{
+				if ((TqUint) size > sizeof(overwriteInfo))
+					size = sizeof(overwriteInfo);
+				overwriteInfo.overwrite = 1;
+				overwriteInfo.interactive = 0;
+				memcpy(data, &overwriteInfo, size);
+			}
 			break;
 			case PkSizeQuery:
-			if ((TqUint) size > sizeof(sizeInfo))
-				size = sizeof(sizeInfo);
-			if(pImage)
 			{
-				if(!pImage->m_width || !pImage->m_height)
+				if ((TqUint) size > sizeof(sizeInfo))
+					size = sizeof(sizeInfo);
+				if(pImage)
 				{
-					pImage->m_width = 640;
-					pImage->m_height = 480;
+					if(!pImage->m_width || !pImage->m_height)
+					{
+						pImage->m_width = 640;
+						pImage->m_height = 480;
+					}
+					sizeInfo.width = pImage->m_width;
+					sizeInfo.height = pImage->m_height;
+					sizeInfo.aspectRatio = 1.0f;
 				}
-				sizeInfo.width = pImage->m_width;
-				sizeInfo.height = pImage->m_height;
-				sizeInfo.aspectRatio = 1.0f;
+				else
+				{
+					sizeInfo.width = 640;
+					sizeInfo.height = 480;
+					sizeInfo.aspectRatio = 1.0f;
+				}
+				memcpy(data, &sizeInfo, size);
 			}
-			else
-			{
-				sizeInfo.width = 640;
-				sizeInfo.height = 480;
-				sizeInfo.aspectRatio = 1.0f;
-			}
-			memcpy(data, &sizeInfo, size);
 			break;
 			default:
 			return PkDspyErrorUnsupported;

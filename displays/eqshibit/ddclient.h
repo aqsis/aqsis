@@ -30,6 +30,12 @@
 #include	<vector>
 #include	<string>
 
+#include <FL/Fl.H>
+#include <FL/Fl_Window.H>
+#include <FL/Fl_Box.H>
+#include <FL/Fl_Image.H>
+#include <FL/fl_draw.H>
+
 #ifdef AQSIS_SYSTEM_WIN32
 
 #include	<winsock2.h>
@@ -41,8 +47,9 @@ typedef int SOCKET;
 #endif // !AQSIS_SYSTEM_WIN32
 
 #include	"aqsis.h"
+#include	"ndspy.h"
 
-#define		AQSIS_DD_PORT	27747	///< Aqsis display driver port ( AQSIS on phone keypad )
+class Fl_FrameBuffer_Widget;
 
 START_NAMESPACE( Aqsis )
 
@@ -57,7 +64,8 @@ class CqDDClient
 {
 public:
     CqDDClient( const TqChar* name, const TqChar* type, const TqChar* mode, TqInt modeID, TqInt dataoffset = 0, TqInt datasize = 0 );
-	CqDDClient() {}
+	CqDDClient() : m_data(0) 
+	{}
     ~CqDDClient();
 
     /** Close the socket this client is associated with.
@@ -123,6 +131,39 @@ public:
     {
         return( m_modeID );
     }
+	TqUlong	GetWidth()
+	{
+		return(m_width);
+	}
+	TqUlong GetHeight()
+	{
+		return( m_height );
+	}
+	void SetWidth(TqUlong width)
+	{
+		m_width = width;
+	}
+	void SetHeight(TqUlong height)
+	{
+		m_height = height;
+	}
+	TqInt GetChannels()
+	{
+		return( m_channels );
+	}
+	void SetChannels(TqInt channels)
+	{
+		m_channels = channels;
+	}
+	void* data()
+	{
+		return( m_data );
+	}
+
+	void PrepareImageBuffer()
+	{
+		m_data = reinterpret_cast<char*>(malloc( m_width * m_height * m_channels * sizeof(TqUchar)));
+	}
 
 private:
     SOCKET	m_Socket;			///< Socket ID of the client.
@@ -132,7 +173,15 @@ private:
     TqInt		m_modeID;
     TqInt		m_dataOffset;
     TqInt		m_dataSize;
+	TqUlong		m_width;
+	TqUlong		m_height;
+	TqInt		m_channels;
     TqUlong m_hMode;
+	char*		m_data;
+public:
+	Fl_Window*	m_theWindow;
+	Fl_FrameBuffer_Widget* m_uiImageWidget;
+	Fl_RGB_Image*	m_uiImage;
 };
 
 END_NAMESPACE( Aqsis )

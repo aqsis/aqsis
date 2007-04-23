@@ -94,6 +94,7 @@ struct SqDDMessageBase
 			tot += n;
 		}
 		Aqsis::log() << info << "Sent: " << m_MessageID << " : " << m_MessageLength << " : " << tot << std::endl;
+		return( tot );
 	}
 	
 };

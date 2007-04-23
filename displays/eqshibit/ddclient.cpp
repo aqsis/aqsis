@@ -72,13 +72,16 @@ CqDDClient::CqDDClient( const TqChar* name, const TqChar* type, const TqChar* mo
         m_strMode( mode ),
         m_modeID( modeID ),
         m_dataOffset( dataOffset ),
-        m_dataSize( dataSize )
+        m_dataSize( dataSize ),
+		m_data( 0 )
 {
     m_hMode = CqString::hash( mode );
 }
 
 CqDDClient::~CqDDClient()
-{}
+{
+	free(m_data);
+}
 
 
 //---------------------------------------------------------------------

@@ -73,10 +73,10 @@ std::map<int, CqDDClient> g_theClients;
 
 void HandleData(int sock, void *data)
 {
-	CqDDClient thisClient = g_theClients[sock];
+	CqDDClient& thisClient = g_theClients[sock];
 	SqDDMessageBase msg;
 	char	*bptr;
-	int	i, numRead=0;
+	unsigned int	i, numRead=0;
 
 	bptr = reinterpret_cast<char*>(&msg);
 	while(numRead < sizeof(msg))	
@@ -91,8 +91,9 @@ void HandleData(int sock, void *data)
 	{
 		std::cout << "Message ID: " << msg.m_MessageID << "(" << std::hex << msg.m_MessageID << ")" << std::dec << " length: " << msg.m_MessageLength << std::endl;
 		int msgToRead = msg.m_MessageLength - numRead;
-		char *buff = new char[msgToRead];
-		bptr = buff;
+		char *buff = new char[msgToRead + sizeof(msg)];
+		memcpy(buff, &msg, sizeof(msg));
+		bptr = buff + sizeof(msg);
 		numRead = 0;
 		while(numRead < msgToRead)
 		{
@@ -102,14 +103,59 @@ void HandleData(int sock, void *data)
 			bptr += i;
 			numRead += i;
 		}
-		delete[](buff);
-		std::cout << "Read: " << numRead << std::endl;
-		if(msg.m_MessageID == MessageID_Close)
+		std::cout << "Read: " << numRead << " : " << msg.m_MessageID << std::endl;
+		if(msg.m_MessageID == MessageID_Open)
+		{
+			std::cout << "Now processing the Open message" << std::endl;
+			SqDDMessageOpen* openMsg = reinterpret_cast<SqDDMessageOpen*>(buff);
+			thisClient.SetWidth(openMsg->m_XRes);
+			thisClient.SetHeight(openMsg->m_YRes);
+			thisClient.SetChannels(openMsg->m_Channels);
+
+			thisClient.PrepareImageBuffer();
+
+			// Initialise the display to a checkerboard to show alpha
+			for (TqUlong i = 0; i < thisClient.GetHeight(); i ++)
+			{
+				for (TqUlong j = 0; j < thisClient.GetWidth(); j++)
+				{
+					int     t       = 0;
+					TqUchar d = 255;
+
+					if ( ( (thisClient.GetHeight() - 1 - i) & 31 ) < 16 )
+						t ^= 1;
+					if ( ( j & 31 ) < 16 )
+						t ^= 1;
+
+					if ( t )
+					{
+						d      = 128;
+					}
+					reinterpret_cast<TqUchar*>(thisClient.data())[thisClient.GetChannels() * (i*thisClient.GetWidth() + j) ] = d;
+					reinterpret_cast<TqUchar*>(thisClient.data())[thisClient.GetChannels() * (i*thisClient.GetWidth() + j) + 1] = d;
+					reinterpret_cast<TqUchar*>(thisClient.data())[thisClient.GetChannels() * (i*thisClient.GetWidth() + j) + 2] = d;
+				}
+			}
+
+			std::cout << "Creating a new FB window" << std::endl;
+			thisClient.m_theWindow = new Fl_Window(thisClient.GetWidth(), thisClient.GetHeight());
+			thisClient.m_uiImageWidget = new Fl_FrameBuffer_Widget(0,0, thisClient.GetWidth(), thisClient.GetHeight(), thisClient.GetChannels(), reinterpret_cast<TqUchar*>(thisClient.data()));
+			thisClient.m_theWindow->resizable(thisClient.m_uiImageWidget);
+//			thisClient.m_theWindow->label(thisClient.m_image.m_filename.c_str());
+			thisClient.m_theWindow->end();
+			Fl::visual(FL_RGB);
+			thisClient.m_theWindow->show();
+		}
+		else if(msg.m_MessageID == MessageID_Data)
+		{
+		}
+		else if(msg.m_MessageID == MessageID_Close)
 		{
 			std::cout << "Closing socket" << std::endl;
 			Fl::remove_fd(sock);
 			close(sock);
 		}
+		delete[](buff);
 	}		
 }
 
@@ -126,14 +172,6 @@ void HandleConnection(int sock, void *data)
 		if(window)
 			window->addImageToCurrentCatalog("Hello");
 
-		Fl_Window *window = new Fl_Window(300,180);
-		Fl_Box *box = new Fl_Box(20,40,260,100,"Hello, World!");
-		box->box(FL_UP_BOX);
-		box->labelsize(36);
-		box->labelfont(FL_BOLD+FL_ITALIC);
-		box->labeltype(FL_SHADOW_LABEL);
-		window->end();
-		window->show();
 	}
 }
 
