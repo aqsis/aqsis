@@ -66,6 +66,25 @@ static char tiffname[ 1024 ];
 
 static int size = SIZE;
 
+/*
+ * reversed strstr()
+ */
+static char *strrstr(char *s1, char *sub)
+{
+	int s, t;
+	s = t = 0;
+	if (s1)
+		s = strlen(s1);
+	if (sub)
+		t = strlen(sub);
+	char *pt = NULL;
+
+  	if ((pt = strstr(&s1[s - t], sub)) != NULL)
+		return pt;
+
+  	return pt;
+}
+
 __export char *bake2tif( char *in )
 {
 	FILE * bakefile;
@@ -78,11 +97,11 @@ __export char *bake2tif( char *in )
 		size = atoi( result );
 
 	strcpy( tiffname, in );
-	if ( ( result = strstr( tiffname, ".bake" ) ) != 0 )
+	if ( ( result = strrstr( tiffname, ".bake" ) ) != 0 )
 		strcpy( result, ".tif" );
 	if ( !result )
 	{
-		if ( ( result = strstr( tiffname, ".bake" ) ) != 0 )
+		if ( ( result = strrstr( tiffname, ".bake" ) ) != 0 )
 			strcpy( result, ".tif" );
 	}
 	if ( !result )
