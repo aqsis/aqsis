@@ -68,6 +68,24 @@ void version( std::ostream& Stream )
 	Stream << "eqshibit version " << VERSION_STR_PRINT << std::endl;
 }
 
+//----------------------------------------------------------------------
+/** CompositeAlpha() Composite with the alpha the end result RGB
+*
+*/
+
+void CompositeAlpha(TqInt r, TqInt g, TqInt b, unsigned char &R, unsigned char &G, unsigned char &B, 
+		    unsigned char alpha )
+{ 
+	TqInt t;
+	// C’ = INT_PRELERP( A’, B’, b, t )
+	TqInt R1 = static_cast<TqInt>(INT_PRELERP( R, r, alpha, t ));
+	TqInt G1 = static_cast<TqInt>(INT_PRELERP( G, g, alpha, t ));
+	TqInt B1 = static_cast<TqInt>(INT_PRELERP( B, b, alpha, t ));
+	R = CLAMP( R1, 0, 255 );
+	G = CLAMP( G1, 0, 255 );
+	B = CLAMP( B1, 0, 255 );
+}
+
 CqDDServer g_theServer;
 std::map<int, CqDDClient> g_theClients;
 
@@ -92,6 +110,7 @@ void HandleData(int sock, void *data)
 		std::cout << "Message ID: " << msg.m_MessageID << "(" << std::hex << msg.m_MessageID << ")" << std::dec << " length: " << msg.m_MessageLength << std::endl;
 		int msgToRead = msg.m_MessageLength - numRead;
 		char *buff = new char[msgToRead + sizeof(msg)];
+		memset(buff, '\0', msgToRead + sizeof(msg));
 		memcpy(buff, &msg, sizeof(msg));
 		bptr = buff + sizeof(msg);
 		numRead = 0;
@@ -111,6 +130,9 @@ void HandleData(int sock, void *data)
 			thisClient.SetWidth(openMsg->m_XRes);
 			thisClient.SetHeight(openMsg->m_YRes);
 			thisClient.SetChannels(openMsg->m_Channels);
+			thisClient.setOrigin(openMsg->m_originX, openMsg->m_originY);
+			thisClient.setOriginalSize(openMsg->m_originalSizeX, openMsg->m_originalSizeY);
+			thisClient.setFormat(openMsg->m_format);
 
 			thisClient.PrepareImageBuffer();
 
@@ -131,15 +153,15 @@ void HandleData(int sock, void *data)
 					{
 						d      = 128;
 					}
-					reinterpret_cast<TqUchar*>(thisClient.data())[thisClient.GetChannels() * (i*thisClient.GetWidth() + j) ] = d;
-					reinterpret_cast<TqUchar*>(thisClient.data())[thisClient.GetChannels() * (i*thisClient.GetWidth() + j) + 1] = d;
-					reinterpret_cast<TqUchar*>(thisClient.data())[thisClient.GetChannels() * (i*thisClient.GetWidth() + j) + 2] = d;
+					thisClient.data()[thisClient.GetChannels() * (i*thisClient.GetWidth() + j) ] = d;
+					thisClient.data()[thisClient.GetChannels() * (i*thisClient.GetWidth() + j) + 1] = d;
+					thisClient.data()[thisClient.GetChannels() * (i*thisClient.GetWidth() + j) + 2] = d;
 				}
 			}
 
 			std::cout << "Creating a new FB window" << std::endl;
 			thisClient.m_theWindow = new Fl_Window(thisClient.GetWidth(), thisClient.GetHeight());
-			thisClient.m_uiImageWidget = new Fl_FrameBuffer_Widget(0,0, thisClient.GetWidth(), thisClient.GetHeight(), thisClient.GetChannels(), reinterpret_cast<TqUchar*>(thisClient.data()));
+			thisClient.m_uiImageWidget = new Fl_FrameBuffer_Widget(0,0, thisClient.GetWidth(), thisClient.GetHeight(), thisClient.GetChannels(), thisClient.data());
 			thisClient.m_theWindow->resizable(thisClient.m_uiImageWidget);
 //			thisClient.m_theWindow->label(thisClient.m_image.m_filename.c_str());
 			thisClient.m_theWindow->end();
@@ -148,6 +170,96 @@ void HandleData(int sock, void *data)
 		}
 		else if(msg.m_MessageID == MessageID_Data)
 		{
+			SqDDMessageData* dataMsg = reinterpret_cast<SqDDMessageData*>(buff);
+			TqInt xmin__ = MAX((dataMsg->m_XMin - thisClient.originX()), 0);
+			TqInt ymin__ = MAX((dataMsg->m_YMin - thisClient.originY()), 0);
+			TqInt xmaxplus1__ = MIN((dataMsg->m_XMaxPlus1 - thisClient.originX()), thisClient.GetWidth());
+			TqInt ymaxplus1__ = MIN((dataMsg->m_YMaxPlus1 - thisClient.originY()), thisClient.GetHeight());
+			TqInt bucketlinelen = dataMsg->m_ElementSize * (dataMsg->m_XMaxPlus1 - dataMsg->m_XMin); TqInt copylinelen = dataMsg->m_ElementSize * (xmaxplus1__ - xmin__); 
+			std::cout << "Render: " << xmin__ << ", " << ymin__ << " --> " << xmaxplus1__ << ", " << ymaxplus1__ << " [dlen: " << dataMsg->m_DataLength << "]" << std::endl;
+			
+			char* pdatarow = (char*)(dataMsg->m_Data);
+			// Calculate where in the bucket we are starting from if the window is cropped.
+			TqInt row = 0;
+			if(thisClient.originY() > dataMsg->m_YMin)
+				row = thisClient.originY() - dataMsg->m_YMin;
+			TqInt col = 0;
+			if(thisClient.originX() > dataMsg->m_XMin)
+				col = thisClient.originX() - dataMsg->m_XMin;
+			pdatarow += (row * bucketlinelen) + (col * dataMsg->m_ElementSize);
+
+			if( thisClient.data() && xmin__ >= 0 && ymin__ >= 0 && xmaxplus1__ <= thisClient.GetWidth() && ymaxplus1__ <= thisClient.GetHeight() )
+			{
+				TqUint comp = dataMsg->m_ElementSize/thisClient.GetChannels();
+				TqInt y;
+				unsigned char *unrolled = thisClient.data();
+
+				for ( y = ymin__; y < ymaxplus1__; y++ )
+				{
+					TqInt x;
+					char* _pdatarow = pdatarow;
+					for ( x = xmin__; x < xmaxplus1__; x++ )
+					{
+						TqInt so = thisClient.GetChannels() * (( y * thisClient.GetWidth() ) +  x );
+						switch (comp)
+						{
+							case 2 :
+							{
+								TqUshort *svalue = reinterpret_cast<TqUshort *>(_pdatarow);
+								TqUchar alpha = 255;
+								if (thisClient.GetChannels() == 4)
+								{
+									alpha = (svalue[3]/256);
+								}
+								CompositeAlpha((TqInt) svalue[0]/256, (TqInt) svalue[1]/256, (TqInt) svalue[2]/256, 
+												unrolled[so + 0], unrolled[so + 1], unrolled[so + 2], 
+												alpha);
+								if (thisClient.GetChannels() == 4)
+									unrolled[ so + 3 ] = alpha;
+							}
+							break;
+							case 4:
+							{
+
+								TqUlong *lvalue = reinterpret_cast<TqUlong *>(_pdatarow);
+								TqUchar alpha = 255;
+								if (thisClient.GetChannels() == 4)
+								{
+									alpha = (TqUchar) (lvalue[3]/256);
+								}
+								CompositeAlpha((TqInt) lvalue[0]/256, (TqInt) lvalue[1]/256, (TqInt) lvalue[2]/256, 
+												unrolled[so + 0], unrolled[so + 1], unrolled[so + 2], 
+												alpha);
+								if (thisClient.GetChannels() == 4)
+									unrolled[ so + 3 ] = alpha;
+							}
+							break;
+
+							case 1:
+							default:
+							{
+								TqUchar *cvalue = reinterpret_cast<TqUchar *>(_pdatarow);
+								TqUchar alpha = 255;
+								if (thisClient.GetChannels() == 4)
+								{
+									alpha = (TqUchar) (cvalue[3]);
+								}
+								CompositeAlpha((TqInt) cvalue[0], (TqInt) cvalue[1], (TqInt) cvalue[2], 
+												unrolled[so + 0], unrolled[so + 1], unrolled[so + 2], 
+												alpha);
+								if (thisClient.GetChannels() == 4)
+									unrolled[ so + 3 ] = alpha;
+							}
+							break;
+						}
+						_pdatarow += dataMsg->m_ElementSize;
+
+					}
+					pdatarow += bucketlinelen;
+				}
+				thisClient.m_uiImageWidget->damage(1, xmin__, ymin__, xmaxplus1__-xmin__, ymaxplus1__-ymin__);
+				Fl::check();
+			}
 		}
 		else if(msg.m_MessageID == MessageID_Close)
 		{

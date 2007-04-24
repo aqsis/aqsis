@@ -239,7 +239,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			pImage->m_socket = sock;
 
 			// Send an OPEN message.
-			SqDDMessageOpen msg(width, height, widestFormat, pImage->m_origin[0], pImage->m_origin[1], pImage->m_origin[0] + width, pImage->m_origin[1] + height);
+			SqDDMessageOpen msg(width, height, iFormatCount, pImage->m_origin[0], pImage->m_origin[1], pImage->m_OriginalSize[0], pImage->m_OriginalSize[1], widestFormat);
 			msg.Send(pImage->m_socket);
 			
 			TiXmlDocument displaydoc("display.xml");
@@ -265,21 +265,7 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 	SqDisplayInstance* pImage;
 	pImage = reinterpret_cast<SqDisplayInstance*>(image);
 
-	TqInt xmin__ = MAX((xmin-pImage->m_origin[0]), 0);
-	TqInt ymin__ = MAX((ymin-pImage->m_origin[1]), 0);
-	TqInt xmaxplus1__ = MIN((xmaxplus1-pImage->m_origin[0]), pImage->m_width);
-	TqInt ymaxplus1__ = MIN((ymaxplus1-pImage->m_origin[1]), pImage->m_height);
 	TqInt bucketlinelen = entrysize * (xmaxplus1 - xmin);
-	TqInt copylinelen = entrysize * (xmaxplus1__ - xmin__);
-
-	pImage->m_pixelsReceived += (xmaxplus1__-xmin__)*(ymaxplus1__-ymin__);
-
-	// Calculate where in the bucket we are starting from if the window is cropped.
-	TqInt row = MAX(pImage->m_origin[1] - ymin, 0);
-	TqInt col = MAX(pImage->m_origin[0] - xmin, 0);
-	const unsigned char* pdatarow = data;
-	pdatarow += (row * bucketlinelen) + (col * entrysize);
-
 	SqDDMessageData* msg = SqDDMessageData::Construct(xmin, xmaxplus1, ymin, ymaxplus1, entrysize, data, bucketlinelen * (ymaxplus1 - ymin));
 	msg->Send(pImage->m_socket);
 	msg->Destroy();

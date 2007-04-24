@@ -95,41 +95,9 @@ public:
     {
         return ( m_strName );
     }
-    TqUlong&	hMode()
-    {
-        return ( m_hMode );
-    }
     void	SetstrName( const TqChar* name )
     {
         m_strName = name;
-    }
-    CqString&	strType()
-    {
-        return ( m_strType );
-    }
-    void	SetstrType( const TqChar* type )
-    {
-        m_strType = type;
-    }
-    CqString&	strMode()
-    {
-        return ( m_strMode );
-    }
-    void	SetstrMode( const TqChar* mode )
-    {
-        m_strMode = mode;
-    }
-    TqInt GetdataOffset() const
-    {
-        return( m_dataOffset );
-    }
-    TqInt GetdataSize() const
-    {
-        return( m_dataSize );
-    }
-    TqInt GetmodeID() const
-    {
-        return( m_modeID );
     }
 	TqUlong	GetWidth()
 	{
@@ -155,29 +123,62 @@ public:
 	{
 		m_channels = channels;
 	}
-	void* data()
+	unsigned char* data()
 	{
 		return( m_data );
+	}
+	TqUlong originX() const
+	{
+		return( m_originX );
+	}
+	TqUlong originY() const
+	{
+		return( m_originY );
+	}
+	TqUlong originalSizeX() const
+	{
+		return( m_originalSizeX );
+	}
+	TqUlong originalSizeY() const
+	{
+		return( m_originalSizeY );
+	}
+	void setOrigin(TqUlong originX, TqUlong originY)
+	{
+		m_originX = originX;
+		m_originY = originY;
+	}
+	void setOriginalSize(TqUlong originalSizeX, TqUlong originalSizeY)
+	{
+		m_originalSizeX = originalSizeX;
+		m_originalSizeY = originalSizeY;
+	}
+	TqInt	format() const
+	{
+		return(m_format);
+	}
+	void	setFormat(TqInt format)
+	{
+		m_format = format;
 	}
 
 	void PrepareImageBuffer()
 	{
-		m_data = reinterpret_cast<char*>(malloc( m_width * m_height * m_channels * sizeof(TqUchar)));
+		m_data = reinterpret_cast<unsigned char*>(malloc( m_width * m_height * m_channels * sizeof(TqUchar)));
 	}
 
 private:
     SOCKET	m_Socket;			///< Socket ID of the client.
     CqString	m_strName;			///< Display name.
-    CqString	m_strType;			///< Display type.
-    CqString	m_strMode;			///< Display mode.
-    TqInt		m_modeID;
-    TqInt		m_dataOffset;
-    TqInt		m_dataSize;
 	TqUlong		m_width;
 	TqUlong		m_height;
 	TqInt		m_channels;
-    TqUlong m_hMode;
-	char*		m_data;
+	TqUlong		m_originX;
+	TqUlong		m_originY;
+	TqUlong		m_originalSizeX;
+	TqUlong		m_originalSizeY;
+	TqInt		m_format;
+	unsigned char*		m_data;
 public:
 	Fl_Window*	m_theWindow;
 	Fl_FrameBuffer_Widget* m_uiImageWidget;

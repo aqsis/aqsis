@@ -68,14 +68,8 @@ START_NAMESPACE( Aqsis )
 CqDDClient::CqDDClient( const TqChar* name, const TqChar* type, const TqChar* mode, TqInt modeID, TqInt dataOffset, TqInt dataSize ) :
         m_Socket( INVALID_SOCKET ),
         m_strName( name ),
-        m_strType( type ),
-        m_strMode( mode ),
-        m_modeID( modeID ),
-        m_dataOffset( dataOffset ),
-        m_dataSize( dataSize ),
 		m_data( 0 )
 {
-    m_hMode = CqString::hash( mode );
 }
 
 CqDDClient::~CqDDClient()
