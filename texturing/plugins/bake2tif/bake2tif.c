@@ -72,13 +72,14 @@ static int size = SIZE;
 static char *strrstr(char *s1, char *sub)
 {
 	int s, t;
+	char *pt = NULL;
+	
 	s = t = 0;
 	if (s1)
 		s = strlen(s1);
 	if (sub)
 		t = strlen(sub);
-	char *pt = NULL;
-
+	
   	if ((pt = strstr(&s1[s - t], sub)) != NULL)
 		return pt;
 
