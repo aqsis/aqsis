@@ -49,6 +49,7 @@ using namespace Aqsis;
 #include "ddserver.h"
 #include "displayserverimage.h"
 #include "displaydriver.h"
+#include "framebuffer.h"
 
 #define INT_MULT(a,b,t) ( (t) = (a) * (b) + 0x80, ( ( ( (t)>>8 ) + (t) )>>8 ) )
 #define INT_PRELERP(p, q, a, t) ( (p) + (q) - INT_MULT( a, p, t) )
