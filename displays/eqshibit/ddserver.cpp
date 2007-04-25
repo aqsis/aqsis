@@ -59,7 +59,7 @@ typedef sockaddr* PSOCKADDR;
 #include	"render.h"
 #include	"displaydriver.h"
 #include	"ddserver.h"
-#include	"ddclient.h"
+#include	"displayserverimage.h"
 #include	"imagebuffer.h"
 #include	"rifile.h"
 
@@ -215,13 +215,13 @@ TqBool CqDDServer::Listen()
 /** Set ip the thread to wait for client connection requests.
  */
 
-TqBool CqDDServer::Accept( CqDDClient& dd )
+TqBool CqDDServer::Accept( CqDisplayServerImage& dd )
 {
     SOCKET c;
 
     if ( ( c = accept( Socket(), NULL, NULL ) ) != INVALID_SOCKET )
     {
-        dd.SetSocket( c );
+        dd.setSocket( c );
         return( TqTrue );
     }
     return ( TqFalse );

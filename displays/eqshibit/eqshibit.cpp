@@ -47,7 +47,7 @@ using namespace Aqsis;
 #include "eqshibit.h"
 #include "eqshibit_ui.h"
 #include "ddserver.h"
-#include "ddclient.h"
+#include "displayserverimage.h"
 #include "displaydriver.h"
 
 #define INT_MULT(a,b,t) ( (t) = (a) * (b) + 0x80, ( ( ( (t)>>8 ) + (t) )>>8 ) )
@@ -87,11 +87,11 @@ void CompositeAlpha(TqInt r, TqInt g, TqInt b, unsigned char &R, unsigned char &
 }
 
 CqDDServer g_theServer;
-std::map<int, CqDDClient> g_theClients;
+std::map<int, CqDisplayServerImage> g_theClients;
 
 void HandleData(int sock, void *data)
 {
-	CqDDClient& thisClient = g_theClients[sock];
+	CqDisplayServerImage& thisClient = g_theClients[sock];
 	SqDDMessageBase msg;
 	char	*bptr;
 	unsigned int	i, numRead=0;
@@ -108,7 +108,7 @@ void HandleData(int sock, void *data)
 	if(numRead == sizeof(msg))
 	{
 		std::cout << "Message ID: " << msg.m_MessageID << "(" << std::hex << msg.m_MessageID << ")" << std::dec << " length: " << msg.m_MessageLength << std::endl;
-		int msgToRead = msg.m_MessageLength - numRead;
+		unsigned int msgToRead = msg.m_MessageLength - numRead;
 		char *buff = new char[msgToRead + sizeof(msg)];
 		memset(buff, '\0', msgToRead + sizeof(msg));
 		memcpy(buff, &msg, sizeof(msg));
@@ -127,24 +127,22 @@ void HandleData(int sock, void *data)
 		{
 			std::cout << "Now processing the Open message" << std::endl;
 			SqDDMessageOpen* openMsg = reinterpret_cast<SqDDMessageOpen*>(buff);
-			thisClient.SetWidth(openMsg->m_XRes);
-			thisClient.SetHeight(openMsg->m_YRes);
-			thisClient.SetChannels(openMsg->m_Channels);
+			thisClient.setImageSize(openMsg->m_XRes, openMsg->m_YRes);
+			thisClient.setChannels(openMsg->m_Channels);
 			thisClient.setOrigin(openMsg->m_originX, openMsg->m_originY);
-			thisClient.setOriginalSize(openMsg->m_originalSizeX, openMsg->m_originalSizeY);
-			thisClient.setFormat(openMsg->m_format);
+			thisClient.setFrameSize(openMsg->m_originalSizeX, openMsg->m_originalSizeY);
 
 			thisClient.PrepareImageBuffer();
 
 			// Initialise the display to a checkerboard to show alpha
-			for (TqUlong i = 0; i < thisClient.GetHeight(); i ++)
+			for (TqUlong i = 0; i < thisClient.imageHeight(); i ++)
 			{
-				for (TqUlong j = 0; j < thisClient.GetWidth(); j++)
+				for (TqUlong j = 0; j < thisClient.imageWidth(); j++)
 				{
 					int     t       = 0;
 					TqUchar d = 255;
 
-					if ( ( (thisClient.GetHeight() - 1 - i) & 31 ) < 16 )
+					if ( ( (thisClient.imageHeight() - 1 - i) & 31 ) < 16 )
 						t ^= 1;
 					if ( ( j & 31 ) < 16 )
 						t ^= 1;
@@ -153,68 +151,68 @@ void HandleData(int sock, void *data)
 					{
 						d      = 128;
 					}
-					thisClient.data()[thisClient.GetChannels() * (i*thisClient.GetWidth() + j) ] = d;
-					thisClient.data()[thisClient.GetChannels() * (i*thisClient.GetWidth() + j) + 1] = d;
-					thisClient.data()[thisClient.GetChannels() * (i*thisClient.GetWidth() + j) + 2] = d;
+					thisClient.data()[thisClient.channels() * (i*thisClient.imageWidth() + j) ] = d;
+					thisClient.data()[thisClient.channels() * (i*thisClient.imageWidth() + j) + 1] = d;
+					thisClient.data()[thisClient.channels() * (i*thisClient.imageWidth() + j) + 2] = d;
 				}
 			}
 
 			std::cout << "Creating a new FB window" << std::endl;
-			thisClient.m_theWindow = new Fl_Window(thisClient.GetWidth(), thisClient.GetHeight());
-			thisClient.m_uiImageWidget = new Fl_FrameBuffer_Widget(0,0, thisClient.GetWidth(), thisClient.GetHeight(), thisClient.GetChannels(), thisClient.data());
-			thisClient.m_theWindow->resizable(thisClient.m_uiImageWidget);
+			//thisClient.m_theWindow = new Fl_Window(thisClient.GetWidth(), thisClient.GetHeight());
+			//thisClient.m_uiImageWidget = new Fl_FrameBuffer_Widget(0,0, thisClient.GetWidth(), thisClient.GetHeight(), thisClient.GetChannels(), thisClient.data());
+			//thisClient.m_theWindow->resizable(thisClient.m_uiImageWidget);
 //			thisClient.m_theWindow->label(thisClient.m_image.m_filename.c_str());
-			thisClient.m_theWindow->end();
-			Fl::visual(FL_RGB);
-			thisClient.m_theWindow->show();
+			//thisClient.m_theWindow->end();
+			//Fl::visual(FL_RGB);
+			//thisClient.m_theWindow->show();
 		}
 		else if(msg.m_MessageID == MessageID_Data)
 		{
 			SqDDMessageData* dataMsg = reinterpret_cast<SqDDMessageData*>(buff);
-			TqInt xmin__ = MAX((dataMsg->m_XMin - thisClient.originX()), 0);
-			TqInt ymin__ = MAX((dataMsg->m_YMin - thisClient.originY()), 0);
-			TqInt xmaxplus1__ = MIN((dataMsg->m_XMaxPlus1 - thisClient.originX()), thisClient.GetWidth());
-			TqInt ymaxplus1__ = MIN((dataMsg->m_YMaxPlus1 - thisClient.originY()), thisClient.GetHeight());
-			TqInt bucketlinelen = dataMsg->m_ElementSize * (dataMsg->m_XMaxPlus1 - dataMsg->m_XMin); TqInt copylinelen = dataMsg->m_ElementSize * (xmaxplus1__ - xmin__); 
+			TqUlong xmin__ = MAX((dataMsg->m_XMin - thisClient.originX()), 0);
+			TqUlong ymin__ = MAX((dataMsg->m_YMin - thisClient.originY()), 0);
+			TqUlong xmaxplus1__ = MIN((dataMsg->m_XMaxPlus1 - thisClient.originX()), thisClient.imageWidth());
+			TqUlong ymaxplus1__ = MIN((dataMsg->m_YMaxPlus1 - thisClient.originY()), thisClient.imageWidth());
+			TqUlong bucketlinelen = dataMsg->m_ElementSize * (dataMsg->m_XMaxPlus1 - dataMsg->m_XMin); 
 			std::cout << "Render: " << xmin__ << ", " << ymin__ << " --> " << xmaxplus1__ << ", " << ymaxplus1__ << " [dlen: " << dataMsg->m_DataLength << "]" << std::endl;
 			
 			char* pdatarow = (char*)(dataMsg->m_Data);
 			// Calculate where in the bucket we are starting from if the window is cropped.
 			TqInt row = 0;
-			if(thisClient.originY() > dataMsg->m_YMin)
+			if(thisClient.originY() > static_cast<TqUlong>(dataMsg->m_YMin))
 				row = thisClient.originY() - dataMsg->m_YMin;
 			TqInt col = 0;
-			if(thisClient.originX() > dataMsg->m_XMin)
+			if(thisClient.originX() > static_cast<TqUlong>(dataMsg->m_XMin))
 				col = thisClient.originX() - dataMsg->m_XMin;
 			pdatarow += (row * bucketlinelen) + (col * dataMsg->m_ElementSize);
 
-			if( thisClient.data() && xmin__ >= 0 && ymin__ >= 0 && xmaxplus1__ <= thisClient.GetWidth() && ymaxplus1__ <= thisClient.GetHeight() )
+			if( thisClient.data() && xmin__ >= 0 && ymin__ >= 0 && xmaxplus1__ <= thisClient.imageWidth() && ymaxplus1__ <= thisClient.imageHeight() )
 			{
-				TqUint comp = dataMsg->m_ElementSize/thisClient.GetChannels();
-				TqInt y;
+				TqUint comp = dataMsg->m_ElementSize/thisClient.channels();
+				TqUlong y;
 				unsigned char *unrolled = thisClient.data();
 
 				for ( y = ymin__; y < ymaxplus1__; y++ )
 				{
-					TqInt x;
+					TqUlong x;
 					char* _pdatarow = pdatarow;
 					for ( x = xmin__; x < xmaxplus1__; x++ )
 					{
-						TqInt so = thisClient.GetChannels() * (( y * thisClient.GetWidth() ) +  x );
+						TqInt so = thisClient.channels() * (( y * thisClient.imageWidth() ) +  x );
 						switch (comp)
 						{
 							case 2 :
 							{
 								TqUshort *svalue = reinterpret_cast<TqUshort *>(_pdatarow);
 								TqUchar alpha = 255;
-								if (thisClient.GetChannels() == 4)
+								if (thisClient.channels() == 4)
 								{
 									alpha = (svalue[3]/256);
 								}
 								CompositeAlpha((TqInt) svalue[0]/256, (TqInt) svalue[1]/256, (TqInt) svalue[2]/256, 
 												unrolled[so + 0], unrolled[so + 1], unrolled[so + 2], 
 												alpha);
-								if (thisClient.GetChannels() == 4)
+								if (thisClient.channels() == 4)
 									unrolled[ so + 3 ] = alpha;
 							}
 							break;
@@ -223,14 +221,14 @@ void HandleData(int sock, void *data)
 
 								TqUlong *lvalue = reinterpret_cast<TqUlong *>(_pdatarow);
 								TqUchar alpha = 255;
-								if (thisClient.GetChannels() == 4)
+								if (thisClient.channels() == 4)
 								{
 									alpha = (TqUchar) (lvalue[3]/256);
 								}
 								CompositeAlpha((TqInt) lvalue[0]/256, (TqInt) lvalue[1]/256, (TqInt) lvalue[2]/256, 
 												unrolled[so + 0], unrolled[so + 1], unrolled[so + 2], 
 												alpha);
-								if (thisClient.GetChannels() == 4)
+								if (thisClient.channels() == 4)
 									unrolled[ so + 3 ] = alpha;
 							}
 							break;
@@ -240,14 +238,14 @@ void HandleData(int sock, void *data)
 							{
 								TqUchar *cvalue = reinterpret_cast<TqUchar *>(_pdatarow);
 								TqUchar alpha = 255;
-								if (thisClient.GetChannels() == 4)
+								if (thisClient.channels() == 4)
 								{
 									alpha = (TqUchar) (cvalue[3]);
 								}
 								CompositeAlpha((TqInt) cvalue[0], (TqInt) cvalue[1], (TqInt) cvalue[2], 
 												unrolled[so + 0], unrolled[so + 1], unrolled[so + 2], 
 												alpha);
-								if (thisClient.GetChannels() == 4)
+								if (thisClient.channels() == 4)
 									unrolled[ so + 3 ] = alpha;
 							}
 							break;
@@ -257,8 +255,8 @@ void HandleData(int sock, void *data)
 					}
 					pdatarow += bucketlinelen;
 				}
-				thisClient.m_uiImageWidget->damage(1, xmin__, ymin__, xmaxplus1__-xmin__, ymaxplus1__-ymin__);
-				Fl::check();
+				//thisClient.m_uiImageWidget->damage(1, xmin__, ymin__, xmaxplus1__-xmin__, ymaxplus1__-ymin__);
+				//Fl::check();
 			}
 		}
 		else if(msg.m_MessageID == MessageID_Close)
@@ -266,6 +264,7 @@ void HandleData(int sock, void *data)
 			std::cout << "Closing socket" << std::endl;
 			Fl::remove_fd(sock);
 			close(sock);
+			thisClient.close();
 		}
 		delete[](buff);
 	}		
@@ -275,12 +274,12 @@ void HandleConnection(int sock, void *data)
 {
 	Aqsis::log() << Aqsis::info << "Connection established with display server" << std::endl;
 
-	CqDDClient newClient;
+	CqDisplayServerImage newClient;
 	
 	if(g_theServer.Accept(newClient))
 	{
-		g_theClients[newClient.Socket()] = newClient;
-		Fl::add_fd(newClient.Socket(), FL_READ, &HandleData);
+		g_theClients[newClient.socket()] = newClient;
+		Fl::add_fd(newClient.socket(), FL_READ, &HandleData);
 		if(window)
 			window->addImageToCurrentCatalog("Hello");
 

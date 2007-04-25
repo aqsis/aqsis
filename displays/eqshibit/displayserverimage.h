@@ -19,13 +19,13 @@
 
 
 /** \file
-		\brief Display driver server handler.
+		\brief Declares an image class getting it's data from the Dspy server.
 		\author Paul C. Gregory (pgregory@aqsis.com)
 */
 
-//? Is context.h included already?
-#ifndef DDSERVER_H_INCLUDED
-#define DDSERVER_H_INCLUDED 1
+//? Is ddclient.h included already?
+#ifndef DISPLAYSERVERIMAGE_H_INCLUDED
+#define DISPLAYSERVERIMAGE_H_INCLUDED 1
 
 #include	<vector>
 #include	<string>
@@ -41,58 +41,53 @@ typedef int SOCKET;
 #endif // !AQSIS_SYSTEM_WIN32
 
 #include	"aqsis.h"
-
-#define		AQSIS_DD_PORT	48515	///< Aqsis display driver port ( AQSIS on phone keypad )
+#include	"ndspy.h"
+#include	"image.h"
 
 START_NAMESPACE( Aqsis )
 
 struct SqDDMessageBase;
-class CqDisplayServerImage;
 
 //---------------------------------------------------------------------
-/** \class CqDDServer
+/** \class CqDDClient
  * Class encapsulating the display driver server thread.
  */
 
-class CqDDServer
+class CqDisplayServerImage : public CqImage
 {
 public:
-    CqDDServer();
-    CqDDServer( TqInt port );
-    ~CqDDServer();
+    CqDisplayServerImage( const CqString name) : CqImage(name)
+	{}
+	CqDisplayServerImage() : CqImage() 
+	{}
+    virtual ~CqDisplayServerImage()
+	{}
 
-    TqBool	Prepare( TqInt port );
-    TqBool	Open();
-    /** Close the socket this server is associated with.
-     */
-    void	Close();
-    TqBool	Bind( TqInt port );
-    TqBool	Listen();
-    TqBool	Accept( CqDisplayServerImage& dd );
+    void	close();
+    void	sendData( void* buffer, TqInt len );
+    void	sendMsg( SqDDMessageBase* pMsg );
+    void	receive( void* buffer, TqInt len );
     /** Get a reference to the socket ID.
      */
-    SOCKET&	Socket()
+    void	setSocket( SOCKET s )
     {
-        return ( m_Socket );
+        m_socket = s;
+    }
+    SOCKET& socket()
+    {
+        return ( m_socket );
     }
     /** Get a reference to the socket ID.
      */
-    const SOCKET& Socket() const
+    const SOCKET& socket() const
     {
-        return ( m_Socket );
+        return ( m_socket );
     }
-    /** Get the current port.
-     */
-    int getPort() const
-    {
-        return ( m_Port );
-    }
+
+
 private:
-    SOCKET	m_Socket;			///< Socket ID of the server.
-    int m_Port;				///< Port number used by this server.
+    SOCKET	m_socket;			///< Socket ID of the client.
 };
-
-
 
 END_NAMESPACE( Aqsis )
 

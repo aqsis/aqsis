@@ -10,14 +10,15 @@ eqshibitapp_sources = Split("""
 	eqshibit.cpp
 	eqshibitbase.cpp
 	ddserver.cpp
-	ddclient.cpp
+	displayserverimage.cpp
 	eqshibit_ui.cpp""")
 
 eqshibitapp_headers =  Split("""
 	eqshibit.h
 	eqshibitbase.h
 	ddserver.h
-	ddclient.h
+	image.h
+	displayserverimage.h
 	eqshibit_ui.h""")
 
 # Set any platform specific options for this target
