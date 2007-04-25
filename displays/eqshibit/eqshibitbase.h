@@ -34,7 +34,7 @@
 
 START_NAMESPACE( Aqsis )
 
-typedef	std::list<std::string> TqEqshibitCatalog;
+typedef	std::list<std::string> TqEqshibitBook;
 
 class CqEqshibitBase
 {
@@ -42,15 +42,15 @@ public:
 	CqEqshibitBase()		{}
 	virtual ~CqEqshibitBase()	{}
 
-	virtual void	addNewCatalog(std::string name);
-	void	setCurrentCatalog(std::string name);
-	TqEqshibitCatalog& currentCatalog();
-	std::string currentCatalogName();
-	virtual void	addImageToCurrentCatalog(std::string name);
+	virtual void	addNewBook(std::string name);
+	void	setCurrentBook(std::string name);
+	TqEqshibitBook& currentBook();
+	std::string currentBookName();
+	virtual void	addImageToCurrentBook(std::string name);
 
 private:
-	std::map<std::string, TqEqshibitCatalog>	m_catalogs;
-	std::string	m_currentCatalogName;
+	std::map<std::string, TqEqshibitBook>	m_books;
+	std::string	m_currentBookName;
 };
 
 

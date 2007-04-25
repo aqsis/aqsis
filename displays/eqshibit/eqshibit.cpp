@@ -282,7 +282,7 @@ void HandleConnection(int sock, void *data)
 		g_theClients[newClient.socket()] = newClient;
 		Fl::add_fd(newClient.socket(), FL_READ, &HandleData);
 		if(window)
-			window->addImageToCurrentCatalog("Hello");
+			window->addImageToCurrentBook("Hello");
 
 	}
 }

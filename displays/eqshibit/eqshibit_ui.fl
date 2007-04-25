@@ -17,49 +17,49 @@ class CqEqshibitMainWindow {open : {public Aqsis::CqEqshibitBase}
         xywh {0 0 685 25}
       } {
         Submenu {} {
-          label Catalog open
+          label Book open
           xywh {0 0 100 20}
         } {
-          MenuItem m_menuCatalogNew {
+          MenuItem m_menuBookNew {
             label New
-            callback {addNewCatalog("Catalog1");}
+            callback {addNewBook("Book1");}
             private xywh {0 0 100 20} shortcut 0x4006e
           }
-          MenuItem m_menuCatalogOpen {
+          MenuItem m_menuBookOpen {
             label Open
             private xywh {0 0 100 20} shortcut 0x4006f
           }
-          MenuItem m_menuCatalogSave {
+          MenuItem m_menuBookSave {
             label Save
             private xywh {0 0 100 20} shortcut 0x40073
           }
         }
       }
-      Fl_Tabs m_tabCatalogs {open
+      Fl_Tabs m_tabBooks {open
         private xywh {0 25 685 460} resizable
       } {}
     }
   }
-  Function {addNewCatalog(std::string name)} {open return_type {virtual void}
+  Function {addNewBook(std::string name)} {open return_type {virtual void}
   } {
-    code {CqEqshibitBase::addNewCatalog(name);
+    code {CqEqshibitBase::addNewBook(name);
 Fl_Multi_Browser *o = new Fl_Multi_Browser(0, 50, 685, 435, name.c_str());
-m_tabCatalogs->add(o);
-m_tabCatalogs->resizable(o);
-m_tabCatalogs->init_sizes();
-m_tabCatalogs->redraw();} {selected
+m_tabBooks->add(o);
+m_tabBooks->resizable(o);
+m_tabBooks->init_sizes();
+m_tabBooks->redraw();} {selected
     }
   }
   Function {show(int argc, char **argv)} {open
   } {
     code {m_window->show(argc, argv);} {}
   }
-  Function {addImageToCurrentCatalog(std::string name)} {open return_type {virtual void}
+  Function {addImageToCurrentBook(std::string name)} {open return_type {virtual void}
   } {
-    code {CqEqshibitBase::addImageToCurrentCatalog(name);
-// Should update catalog list here to match the base, but for
+    code {CqEqshibitBase::addImageToCurrentBook(name);
+// Should update book list here to match the base, but for
 // now we'll just add the name to the browser.
-Fl_Widget* current = m_tabCatalogs->value();
+Fl_Widget* current = m_tabBooks->value();
 Fl_Multi_Browser* bcurr = static_cast<Fl_Multi_Browser*>(current);
 bcurr->add(name.c_str());} {}
   }

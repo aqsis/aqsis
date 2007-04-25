@@ -31,41 +31,41 @@
 START_NAMESPACE( Aqsis )
 
 
-void CqEqshibitBase::addNewCatalog(std::string name)
+void CqEqshibitBase::addNewBook(std::string name)
 {
-	m_catalogs[name] = TqEqshibitCatalog();
-	m_currentCatalogName = name;
+	m_books[name] = TqEqshibitBook();
+	m_currentBookName = name;
 }
 
-void CqEqshibitBase::setCurrentCatalog(std::string name)
+void CqEqshibitBase::setCurrentBook(std::string name)
 {
-	if(m_catalogs.find(name) != m_catalogs.end())
-		m_currentCatalogName = name;
-}
-
-
-TqEqshibitCatalog& CqEqshibitBase::currentCatalog()
-{
-	return(m_catalogs.find(m_currentCatalogName)->second);
+	if(m_books.find(name) != m_books.end())
+		m_currentBookName = name;
 }
 
 
-std::string CqEqshibitBase::currentCatalogName()
+TqEqshibitBook& CqEqshibitBase::currentBook()
 {
-	return( m_currentCatalogName );
+	return(m_books.find(m_currentBookName)->second);
 }
 
-void CqEqshibitBase::addImageToCurrentCatalog(std::string name)
+
+std::string CqEqshibitBase::currentBookName()
 {
-	if(m_currentCatalogName.empty())
+	return( m_currentBookName );
+}
+
+void CqEqshibitBase::addImageToCurrentBook(std::string name)
+{
+	if(m_currentBookName.empty())
 	{
 		std::cout << "Adding image" << std::endl;
-		std::map<std::string, TqEqshibitCatalog>::size_type numCatalogs = m_catalogs.size();
-		std::stringstream strCatName;
-		strCatName << "Catalog" << numCatalogs+1;
-		addNewCatalog(strCatName.str());
+		std::map<std::string, TqEqshibitBook>::size_type numBooks = m_books.size();
+		std::stringstream strBkName;
+		strBkName << "Book" << numBooks+1;
+		addNewBook(strBkName.str());
 	}
-	currentCatalog().push_back(name);	
+	currentBook().push_back(name);	
 }
 
 //---------------------------------------------------------------------
