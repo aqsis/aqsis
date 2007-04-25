@@ -66,7 +66,7 @@ CqEqshibitMainWindow *window = 0;
 
 void version( std::ostream& Stream )
 {
-	Stream << "eqshibit version " << VERSION_STR_PRINT << std::endl;
+	Stream << "eqshibit version " << VERSION_STR_PRINT << std::endl << "compiled " << __DATE__ << " " << __TIME__ << std::endl;
 }
 
 //----------------------------------------------------------------------
