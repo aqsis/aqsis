@@ -159,13 +159,11 @@ void HandleData(int sock, void *data)
 			}
 
 			std::cout << "Creating a new FB window" << std::endl;
-			//thisClient.m_theWindow = new Fl_Window(thisClient.GetWidth(), thisClient.GetHeight());
-			//thisClient.m_uiImageWidget = new Fl_FrameBuffer_Widget(0,0, thisClient.GetWidth(), thisClient.GetHeight(), thisClient.GetChannels(), thisClient.data());
-			//thisClient.m_theWindow->resizable(thisClient.m_uiImageWidget);
-//			thisClient.m_theWindow->label(thisClient.m_image.m_filename.c_str());
-			//thisClient.m_theWindow->end();
-			//Fl::visual(FL_RGB);
-			//thisClient.m_theWindow->show();
+			boost::shared_ptr<CqFramebuffer> fb(new CqFramebuffer(thisClient.imageWidth(), thisClient.imageHeight()));
+			fb->show();
+			boost::shared_ptr<CqImage> ip(&thisClient);
+			fb->connect(ip);
+			std::cout << "Done" << std::endl;
 		}
 		else if(msg.m_MessageID == MessageID_Data)
 		{
@@ -288,10 +286,6 @@ void HandleConnection(int sock, void *data)
 }
 
 
-void Fl_FrameBuffer_Widget::draw(void)
-{
-	fl_draw_image(image,x(),y(),w,h,d,w*d); // draw image
-}
 
 
 int main( int argc, char** argv )

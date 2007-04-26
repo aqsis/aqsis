@@ -34,7 +34,7 @@
 #include <FL/fl_draw.H>
 
 #include	"aqsis.h"
-#include	"image.h"
+#include	"conduit.h"
 #include 	<boost/shared_ptr.hpp>
 
 /** FLTK Widget used to show a constantly updating image.
@@ -65,6 +65,8 @@ class Fl_FrameBuffer_Widget : public Fl_Widget
 
 START_NAMESPACE( Aqsis )
 
+class CqImage;
+
 //---------------------------------------------------------------------
 /** \class CqFramebuffer
  * Class encapsulating the framebuffer window.
@@ -76,6 +78,20 @@ public:
     CqFramebuffer( TqUlong width, TqUlong height );
     ~CqFramebuffer();
 
+	void show();
+
+	void connect(boost::shared_ptr<CqImage>& image);
+	//void connect(boost::shared_ptr<CqConduit<CqImage, CqFramebuffer> >& conduit);
+	void disconnect();
+
+	boost::shared_ptr<CqImage>& image()
+	{
+		return( m_associatedImage );
+	}
+	const boost::shared_ptr<CqImage>& image() const
+	{
+		return( m_associatedImage );
+	}
 
 private:
 	Fl_Window*	m_theWindow;

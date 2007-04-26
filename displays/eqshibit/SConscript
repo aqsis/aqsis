@@ -10,6 +10,8 @@ eqshibitapp_sources = Split("""
 	eqshibit.cpp
 	eqshibitbase.cpp
 	ddserver.cpp
+	image.cpp
+	framebuffer.cpp
 	displayserverimage.cpp
 	eqshibit_ui.cpp""")
 
@@ -18,6 +20,8 @@ eqshibitapp_headers =  Split("""
 	eqshibitbase.h
 	ddserver.h
 	image.h
+	book.h
+	framebuffer.h
 	displayserverimage.h
 	eqshibit_ui.h""")
 

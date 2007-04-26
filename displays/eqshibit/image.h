@@ -30,9 +30,15 @@
 #include	<vector>
 #include	<string>
 
+#include	<boost/shared_ptr.hpp>
+
 #include	"aqsis.h"
+#include	"sstring.h"
+#include	"conduit.h"
 
 START_NAMESPACE( Aqsis )
+
+class CqFramebuffer;
 
 //---------------------------------------------------------------------
 /** \class CqImage
@@ -111,6 +117,18 @@ public:
 		m_imageHeight = imageHeight;
 	}
 
+	//void connect(boost::shared_ptr<CqFramebuffer>& fb);
+	//void connect(boost::shared_ptr<CqConduit<CqImage, CqFramebuffer> >& fb);
+	//void disconnect();
+	//boost::shared_ptr<CqFramebuffer>& framebuffer()
+	//{
+	//	return(m_associatedFB->b());
+	//}
+	//const boost::shared_ptr<CqFramebuffer>& framebuffer() const
+	//{
+	//	return(m_associatedFB->b());
+	//}
+
 	void PrepareImageBuffer()
 	{
 		m_data = reinterpret_cast<unsigned char*>(malloc( m_imageWidth * m_imageHeight * m_channels * sizeof(TqUchar)));
@@ -126,6 +144,8 @@ protected:
 	TqUlong			m_originX;
 	TqUlong			m_originY;
 	TqInt			m_channels;
+
+	//boost::shared_ptr<CqConduit<CqImage, CqFramebuffer> >	m_associatedFB;
 };
 
 END_NAMESPACE( Aqsis )
