@@ -34,7 +34,6 @@
 #include <FL/fl_draw.H>
 
 #include	"aqsis.h"
-#include	"conduit.h"
 #include 	<boost/shared_ptr.hpp>
 
 /** FLTK Widget used to show a constantly updating image.
@@ -92,6 +91,8 @@ public:
 	{
 		return( m_associatedImage );
 	}
+
+	void update(int X, int Y, int W, int H);
 
 private:
 	Fl_Window*	m_theWindow;

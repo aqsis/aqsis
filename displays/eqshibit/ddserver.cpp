@@ -215,13 +215,13 @@ TqBool CqDDServer::Listen()
 /** Set ip the thread to wait for client connection requests.
  */
 
-TqBool CqDDServer::Accept( CqDisplayServerImage& dd )
+TqBool CqDDServer::Accept( boost::shared_ptr<CqDisplayServerImage> dd )
 {
     SOCKET c;
 
     if ( ( c = accept( Socket(), NULL, NULL ) ) != INVALID_SOCKET )
     {
-        dd.setSocket( c );
+        dd->setSocket( c );
         return( TqTrue );
     }
     return ( TqFalse );

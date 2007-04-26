@@ -34,7 +34,6 @@
 
 #include	"aqsis.h"
 #include	"sstring.h"
-#include	"conduit.h"
 
 START_NAMESPACE( Aqsis )
 

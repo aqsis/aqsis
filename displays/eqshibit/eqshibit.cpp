@@ -88,11 +88,12 @@ void CompositeAlpha(TqInt r, TqInt g, TqInt b, unsigned char &R, unsigned char &
 }
 
 CqDDServer g_theServer;
-std::map<int, CqDisplayServerImage> g_theClients;
+std::map<int, boost::shared_ptr<CqImage> > g_theClients;
+std::list<boost::shared_ptr<CqFramebuffer> > g_theFramebuffers;
 
 void HandleData(int sock, void *data)
 {
-	CqDisplayServerImage& thisClient = g_theClients[sock];
+	boost::shared_ptr<CqImage> thisClient = g_theClients[sock];
 	SqDDMessageBase msg;
 	char	*bptr;
 	unsigned int	i, numRead=0;
@@ -128,22 +129,22 @@ void HandleData(int sock, void *data)
 		{
 			std::cout << "Now processing the Open message" << std::endl;
 			SqDDMessageOpen* openMsg = reinterpret_cast<SqDDMessageOpen*>(buff);
-			thisClient.setImageSize(openMsg->m_XRes, openMsg->m_YRes);
-			thisClient.setChannels(openMsg->m_Channels);
-			thisClient.setOrigin(openMsg->m_originX, openMsg->m_originY);
-			thisClient.setFrameSize(openMsg->m_originalSizeX, openMsg->m_originalSizeY);
+			thisClient->setImageSize(openMsg->m_XRes, openMsg->m_YRes);
+			thisClient->setChannels(openMsg->m_Channels);
+			thisClient->setOrigin(openMsg->m_originX, openMsg->m_originY);
+			thisClient->setFrameSize(openMsg->m_originalSizeX, openMsg->m_originalSizeY);
 
-			thisClient.PrepareImageBuffer();
+			thisClient->PrepareImageBuffer();
 
 			// Initialise the display to a checkerboard to show alpha
-			for (TqUlong i = 0; i < thisClient.imageHeight(); i ++)
+			for (TqUlong i = 0; i < thisClient->imageHeight(); i ++)
 			{
-				for (TqUlong j = 0; j < thisClient.imageWidth(); j++)
+				for (TqUlong j = 0; j < thisClient->imageWidth(); j++)
 				{
 					int     t       = 0;
 					TqUchar d = 255;
 
-					if ( ( (thisClient.imageHeight() - 1 - i) & 31 ) < 16 )
+					if ( ( (thisClient->imageHeight() - 1 - i) & 31 ) < 16 )
 						t ^= 1;
 					if ( ( j & 31 ) < 16 )
 						t ^= 1;
@@ -152,44 +153,43 @@ void HandleData(int sock, void *data)
 					{
 						d      = 128;
 					}
-					thisClient.data()[thisClient.channels() * (i*thisClient.imageWidth() + j) ] = d;
-					thisClient.data()[thisClient.channels() * (i*thisClient.imageWidth() + j) + 1] = d;
-					thisClient.data()[thisClient.channels() * (i*thisClient.imageWidth() + j) + 2] = d;
+					thisClient->data()[thisClient->channels() * (i*thisClient->imageWidth() + j) ] = d;
+					thisClient->data()[thisClient->channels() * (i*thisClient->imageWidth() + j) + 1] = d;
+					thisClient->data()[thisClient->channels() * (i*thisClient->imageWidth() + j) + 2] = d;
 				}
 			}
 
 			std::cout << "Creating a new FB window" << std::endl;
-			boost::shared_ptr<CqFramebuffer> fb(new CqFramebuffer(thisClient.imageWidth(), thisClient.imageHeight()));
+			boost::shared_ptr<CqFramebuffer> fb(new CqFramebuffer(thisClient->imageWidth(), thisClient->imageHeight()));
+			g_theFramebuffers.push_back(fb);
 			fb->show();
-			boost::shared_ptr<CqImage> ip(&thisClient);
-			fb->connect(ip);
-			std::cout << "Done" << std::endl;
+			fb->connect(thisClient);
 		}
 		else if(msg.m_MessageID == MessageID_Data)
 		{
 			SqDDMessageData* dataMsg = reinterpret_cast<SqDDMessageData*>(buff);
-			TqUlong xmin__ = MAX((dataMsg->m_XMin - thisClient.originX()), 0);
-			TqUlong ymin__ = MAX((dataMsg->m_YMin - thisClient.originY()), 0);
-			TqUlong xmaxplus1__ = MIN((dataMsg->m_XMaxPlus1 - thisClient.originX()), thisClient.imageWidth());
-			TqUlong ymaxplus1__ = MIN((dataMsg->m_YMaxPlus1 - thisClient.originY()), thisClient.imageWidth());
+			TqUlong xmin__ = MAX((dataMsg->m_XMin - thisClient->originX()), 0);
+			TqUlong ymin__ = MAX((dataMsg->m_YMin - thisClient->originY()), 0);
+			TqUlong xmaxplus1__ = MIN((dataMsg->m_XMaxPlus1 - thisClient->originX()), thisClient->imageWidth());
+			TqUlong ymaxplus1__ = MIN((dataMsg->m_YMaxPlus1 - thisClient->originY()), thisClient->imageWidth());
 			TqUlong bucketlinelen = dataMsg->m_ElementSize * (dataMsg->m_XMaxPlus1 - dataMsg->m_XMin); 
 			std::cout << "Render: " << xmin__ << ", " << ymin__ << " --> " << xmaxplus1__ << ", " << ymaxplus1__ << " [dlen: " << dataMsg->m_DataLength << "]" << std::endl;
 			
 			char* pdatarow = (char*)(dataMsg->m_Data);
 			// Calculate where in the bucket we are starting from if the window is cropped.
 			TqInt row = 0;
-			if(thisClient.originY() > static_cast<TqUlong>(dataMsg->m_YMin))
-				row = thisClient.originY() - dataMsg->m_YMin;
+			if(thisClient->originY() > static_cast<TqUlong>(dataMsg->m_YMin))
+				row = thisClient->originY() - dataMsg->m_YMin;
 			TqInt col = 0;
-			if(thisClient.originX() > static_cast<TqUlong>(dataMsg->m_XMin))
-				col = thisClient.originX() - dataMsg->m_XMin;
+			if(thisClient->originX() > static_cast<TqUlong>(dataMsg->m_XMin))
+				col = thisClient->originX() - dataMsg->m_XMin;
 			pdatarow += (row * bucketlinelen) + (col * dataMsg->m_ElementSize);
 
-			if( thisClient.data() && xmin__ >= 0 && ymin__ >= 0 && xmaxplus1__ <= thisClient.imageWidth() && ymaxplus1__ <= thisClient.imageHeight() )
+			if( thisClient->data() && xmin__ >= 0 && ymin__ >= 0 && xmaxplus1__ <= thisClient->imageWidth() && ymaxplus1__ <= thisClient->imageHeight() )
 			{
-				TqUint comp = dataMsg->m_ElementSize/thisClient.channels();
+				TqUint comp = dataMsg->m_ElementSize/thisClient->channels();
 				TqUlong y;
-				unsigned char *unrolled = thisClient.data();
+				unsigned char *unrolled = thisClient->data();
 
 				for ( y = ymin__; y < ymaxplus1__; y++ )
 				{
@@ -197,21 +197,21 @@ void HandleData(int sock, void *data)
 					char* _pdatarow = pdatarow;
 					for ( x = xmin__; x < xmaxplus1__; x++ )
 					{
-						TqInt so = thisClient.channels() * (( y * thisClient.imageWidth() ) +  x );
+						TqInt so = thisClient->channels() * (( y * thisClient->imageWidth() ) +  x );
 						switch (comp)
 						{
 							case 2 :
 							{
 								TqUshort *svalue = reinterpret_cast<TqUshort *>(_pdatarow);
 								TqUchar alpha = 255;
-								if (thisClient.channels() == 4)
+								if (thisClient->channels() == 4)
 								{
 									alpha = (svalue[3]/256);
 								}
 								CompositeAlpha((TqInt) svalue[0]/256, (TqInt) svalue[1]/256, (TqInt) svalue[2]/256, 
 												unrolled[so + 0], unrolled[so + 1], unrolled[so + 2], 
 												alpha);
-								if (thisClient.channels() == 4)
+								if (thisClient->channels() == 4)
 									unrolled[ so + 3 ] = alpha;
 							}
 							break;
@@ -220,14 +220,14 @@ void HandleData(int sock, void *data)
 
 								TqUlong *lvalue = reinterpret_cast<TqUlong *>(_pdatarow);
 								TqUchar alpha = 255;
-								if (thisClient.channels() == 4)
+								if (thisClient->channels() == 4)
 								{
 									alpha = (TqUchar) (lvalue[3]/256);
 								}
 								CompositeAlpha((TqInt) lvalue[0]/256, (TqInt) lvalue[1]/256, (TqInt) lvalue[2]/256, 
 												unrolled[so + 0], unrolled[so + 1], unrolled[so + 2], 
 												alpha);
-								if (thisClient.channels() == 4)
+								if (thisClient->channels() == 4)
 									unrolled[ so + 3 ] = alpha;
 							}
 							break;
@@ -237,14 +237,14 @@ void HandleData(int sock, void *data)
 							{
 								TqUchar *cvalue = reinterpret_cast<TqUchar *>(_pdatarow);
 								TqUchar alpha = 255;
-								if (thisClient.channels() == 4)
+								if (thisClient->channels() == 4)
 								{
 									alpha = (TqUchar) (cvalue[3]);
 								}
 								CompositeAlpha((TqInt) cvalue[0], (TqInt) cvalue[1], (TqInt) cvalue[2], 
 												unrolled[so + 0], unrolled[so + 1], unrolled[so + 2], 
 												alpha);
-								if (thisClient.channels() == 4)
+								if (thisClient->channels() == 4)
 									unrolled[ so + 3 ] = alpha;
 							}
 							break;
@@ -254,8 +254,8 @@ void HandleData(int sock, void *data)
 					}
 					pdatarow += bucketlinelen;
 				}
-				//thisClient.m_uiImageWidget->damage(1, xmin__, ymin__, xmaxplus1__-xmin__, ymaxplus1__-ymin__);
-				//Fl::check();
+				g_theFramebuffers.front()->update(xmin__, ymin__, xmaxplus1__-xmin__, ymaxplus1__-ymin__);
+				Fl::check();
 			}
 		}
 		else if(msg.m_MessageID == MessageID_Close)
@@ -263,7 +263,8 @@ void HandleData(int sock, void *data)
 			std::cout << "Closing socket" << std::endl;
 			Fl::remove_fd(sock);
 			close(sock);
-			thisClient.close();
+			boost::shared_ptr<CqDisplayServerImage> dsImage = boost::dynamic_pointer_cast<CqDisplayServerImage>(thisClient);
+			dsImage->close();
 		}
 		delete[](buff);
 	}		
@@ -273,12 +274,12 @@ void HandleConnection(int sock, void *data)
 {
 	Aqsis::log() << Aqsis::info << "Connection established with display server" << std::endl;
 
-	CqDisplayServerImage newClient;
+	boost::shared_ptr<CqDisplayServerImage> newClient(new CqDisplayServerImage());
 	
 	if(g_theServer.Accept(newClient))
 	{
-		g_theClients[newClient.socket()] = newClient;
-		Fl::add_fd(newClient.socket(), FL_READ, &HandleData);
+		g_theClients[newClient->socket()] = newClient;
+		Fl::add_fd(newClient->socket(), FL_READ, &HandleData);
 		if(window)
 			window->addImageToCurrentBook("Hello");
 

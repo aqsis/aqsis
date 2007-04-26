@@ -41,8 +41,7 @@ typedef int SOCKET;
 #endif // !AQSIS_SYSTEM_WIN32
 
 #include	"aqsis.h"
-
-#define		AQSIS_DD_PORT	48515	///< Aqsis display driver port ( AQSIS on phone keypad )
+#include	"boost/shared_ptr.hpp"
 
 START_NAMESPACE( Aqsis )
 
@@ -68,7 +67,7 @@ public:
     void	Close();
     TqBool	Bind( TqInt port );
     TqBool	Listen();
-    TqBool	Accept( CqDisplayServerImage& dd );
+    TqBool	Accept( boost::shared_ptr<CqDisplayServerImage> dd );
     /** Get a reference to the socket ID.
      */
     SOCKET&	Socket()

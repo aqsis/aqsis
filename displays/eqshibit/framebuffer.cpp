@@ -62,18 +62,18 @@ void CqFramebuffer::show()
 void CqFramebuffer::connect(boost::shared_ptr<CqImage>& image)
 {
 	m_associatedImage = image;	
+	m_uiImageWidget->setImageData(image->data());
 }
-
-/*void CqFramebuffer::connect(boost::shared_ptr<CqConduit<CqImage, CqFramebuffer> >& conduit)
-{
-	if(m_associatedImage)
-		m_associatedImage.reset();
-	m_associatedImage = conduit;
-}*/
 
 void CqFramebuffer::disconnect()
 {
 	m_associatedImage.reset();
+	m_uiImageWidget->setImageData(0);
+}
+
+void CqFramebuffer::update(int X, int Y, int W, int H)
+{
+	m_uiImageWidget->damage(1, X, Y, W, H);
 }
 
 END_NAMESPACE( Aqsis )
