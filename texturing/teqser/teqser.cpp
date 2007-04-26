@@ -78,24 +78,24 @@ int main( int argc, const char** argv )
 		"\a1 = warnings (default)\n"
 		"\a2 = information\n"
 		"\a3 = debug", &g_cl_verbose );
-	ap.argString( "compression", "=string\a[none|lzw|packbits|deflate]", &g_compress );
+	ap.argString( "compression", "=string\a[none|lzw|packbits|deflate] (default: " + g_compress + ")", &g_compress );
 	ap.argFlag( "envcube", " px nx py ny pz nz\aproduce a cubeface environment map from 6 images.", &g_envcube );
 	ap.argFlag( "envlatl", "\aproduce a latlong environment map from an image file.", &g_envlatl );
 	ap.argFlag( "shadow", "\aproduce a shadow map from a z file.", &g_shadow );
-	ap.argString( "swrap", "=string\as wrap [black|periodic|clamp]", &g_swrap );
+	ap.argString( "swrap", "=string\as wrap [black|periodic|clamp] (default: " + g_swrap + ")", &g_swrap );
 	ap.argString( "smode", "=string\a(equivalent to swrap for BMRT compatibility)", &g_swrap );
-	ap.argString( "twrap", "=string\at wrap [black|periodic|clamp]", &g_twrap );
+	ap.argString( "twrap", "=string\at wrap [black|periodic|clamp] (default: " + g_twrap + ")", &g_twrap );
 	ap.argString( "tmode", "=string\a(equivalent to twrap for BMRT compatibility)", &g_swrap );
 	ap.argString( "wrap", "=string\awrap s&t [black|periodic|clamp]", &g_wrap );
 	ap.argString( "mode", "=string\as (equivalent to wrap for BMRT compatibility)", &g_wrap );
-	ap.argString( "filter", "=string\a[box|bessel|catmull-rom|disk|gaussian|sinc|triangle|mitchell]", &g_filter );
-	ap.argFloat( "fov(envcube)", "=float\a[>=0.0f]", &g_fov );
-	ap.argFloat( "swidth", "=float\as width [>0.0f]", &g_swidth );
-	ap.argFloat( "twidth", "=float\at width [>0.0f]", &g_twidth );
-	ap.argFloat( "width", "=float\awidth [>0,0f] set both swidth and twidth", &g_width );
-	ap.argFloat( "quality", "=float\a[>=1.0f && <= 100.0f]", &g_quality );
-	ap.argFloat( "bake", "=float\a[>=2.0f && <= 2048.0f]", &g_bake );
-	ap.argString( "resize", "=string\a[up|down|round|up-|down-|round-]\n\aNot used, for BMRT compatibility only!", &g_resize );
+	ap.argString( "filter", "=string\a[box|bessel|catmull-rom|disk|gaussian|sinc|triangle|mitchell] (default: " + g_filter + ")", &g_filter );
+	ap.argFloat( "fov(envcube)", "=float\a[>=0.0f] (default: " + g_fov + ")", &g_fov );
+	ap.argFloat( "swidth", "=float\as width [>0.0f] (default: " + g_swidth + ")", &g_swidth );
+	ap.argFloat( "twidth", "=float\at width [>0.0f] (default: " + g_twidth + ")", &g_twidth );
+	ap.argFloat( "width", "=float\awidth [>0,0f] set both swidth and twidth (default: " + g_width + ")", &g_width );
+	ap.argFloat( "quality", "=float\a[>=1.0f && <= 100.0f] (default: " + g_quality + ")", &g_quality );
+	ap.argFloat( "bake", "=float\a[>=2.0f && <= 2048.0f] (default: " + g_bake + ")", &g_bake );
+	ap.argString( "resize", "=string\a[up|down|round|up-|down-|round-] (default: " + g_resize + ")\n\aNot used, for BMRT compatibility only!", &g_resize );
 
 
 	if ( argc > 1 && !ap.parse( argc - 1, argv + 1 ) )
