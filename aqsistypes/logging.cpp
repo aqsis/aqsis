@@ -282,13 +282,13 @@ int color_level_buf::overflow(int c)
 				buffer = "\033[1;31m";
 				break;
 				case WARNING:
-				buffer = "\033[1;33m";
+				buffer = "\033[36m";
 				break;
 				case INFO:
 				buffer = "\033[0m";
 				break;
 				case DEBUG:
-				buffer = "\033[1;32m";
+				buffer = "\033[32m";
 				break;
 				default:
 				buffer = "\033[0m";
