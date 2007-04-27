@@ -89,12 +89,12 @@ int main( int argc, const char** argv )
 	ap.argString( "wrap", "=string\awrap s&t [black|periodic|clamp]", &g_wrap );
 	ap.argString( "mode", "=string\as (equivalent to wrap for BMRT compatibility)", &g_wrap );
 	ap.argString( "filter", "=string\a[box|bessel|catmull-rom|disk|gaussian|sinc|triangle|mitchell] (default: " + g_filter + ")", &g_filter );
-	ap.argFloat( "fov(envcube)", "=float\a[>=0.0f] (default: " + g_fov + ")", &g_fov );
-	ap.argFloat( "swidth", "=float\as width [>0.0f] (default: " + g_swidth + ")", &g_swidth );
-	ap.argFloat( "twidth", "=float\at width [>0.0f] (default: " + g_twidth + ")", &g_twidth );
-	ap.argFloat( "width", "=float\awidth [>0,0f] set both swidth and twidth (default: " + g_width + ")", &g_width );
-	ap.argFloat( "quality", "=float\a[>=1.0f && <= 100.0f] (default: " + g_quality + ")", &g_quality );
-	ap.argFloat( "bake", "=float\a[>=2.0f && <= 2048.0f] (default: " + g_bake + ")", &g_bake );
+	ap.argFloat( "fov(envcube)", "=float\a[>=0.0f] (default: " + CqString([g_fov]) + ")", &g_fov );
+	ap.argFloat( "swidth", "=float\as width [>0.0f] (default: " + CqString([g_swidth]) + ")", &g_swidth );
+	ap.argFloat( "twidth", "=float\at width [>0.0f] (default: " + CqString([g_twidth]) + ")", &g_twidth );
+	ap.argFloat( "width", "=float\awidth [>0,0f] set both swidth and twidth (default: " + CqString([g_width]) + ")", &g_width );
+	ap.argFloat( "quality", "=float\a[>=1.0f && <= 100.0f] (default: " + CqString([g_quality]) + ")", &g_quality );
+	ap.argFloat( "bake", "=float\a[>=2.0f && <= 2048.0f] (default: " + CqString([g_bake]) + ")", &g_bake );
 	ap.argString( "resize", "=string\a[up|down|round|up-|down-|round-] (default: " + g_resize + ")\n\aNot used, for BMRT compatibility only!", &g_resize );
 
 
