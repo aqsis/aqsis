@@ -74,7 +74,7 @@ class CqImage;
 class CqFramebuffer
 {
 public:
-    CqFramebuffer( TqUlong width, TqUlong height );
+    CqFramebuffer( TqUlong width, TqUlong height, TqInt depth );
     ~CqFramebuffer();
 
 	void show();

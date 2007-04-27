@@ -50,6 +50,7 @@ using namespace Aqsis;
 #include "displayserverimage.h"
 #include "displaydriver.h"
 #include "framebuffer.h"
+#include "book.h"
 
 #define INT_MULT(a,b,t) ( (t) = (a) * (b) + 0x80, ( ( ( (t)>>8 ) + (t) )>>8 ) )
 #define INT_PRELERP(p, q, a, t) ( (p) + (q) - INT_MULT( a, p, t) )
@@ -88,12 +89,11 @@ void CompositeAlpha(TqInt r, TqInt g, TqInt b, unsigned char &R, unsigned char &
 }
 
 CqDDServer g_theServer;
-std::map<int, boost::shared_ptr<CqImage> > g_theClients;
-std::list<boost::shared_ptr<CqFramebuffer> > g_theFramebuffers;
+std::map<int, boost::shared_ptr<CqDisplayServerImage> >	g_theClients;
 
 void HandleData(int sock, void *data)
 {
-	boost::shared_ptr<CqImage> thisClient = g_theClients[sock];
+	boost::shared_ptr<CqDisplayServerImage> thisClient = g_theClients[sock];
 	SqDDMessageBase msg;
 	char	*bptr;
 	unsigned int	i, numRead=0;
@@ -160,10 +160,11 @@ void HandleData(int sock, void *data)
 			}
 
 			std::cout << "Creating a new FB window" << std::endl;
-			boost::shared_ptr<CqFramebuffer> fb(new CqFramebuffer(thisClient->imageWidth(), thisClient->imageHeight()));
-			g_theFramebuffers.push_back(fb);
+			boost::shared_ptr<CqFramebuffer> fb(new CqFramebuffer(thisClient->imageWidth(), thisClient->imageHeight(), thisClient->channels()));
+			window->currentBook()->setFramebuffer(fb);
 			fb->show();
-			fb->connect(thisClient);
+			boost::shared_ptr<CqImage> baseImage = boost::static_pointer_cast<CqImage>(thisClient);
+			fb->connect(baseImage);
 		}
 		else if(msg.m_MessageID == MessageID_Data)
 		{
@@ -254,7 +255,7 @@ void HandleData(int sock, void *data)
 					}
 					pdatarow += bucketlinelen;
 				}
-				g_theFramebuffers.front()->update(xmin__, ymin__, xmaxplus1__-xmin__, ymaxplus1__-ymin__);
+				window->currentBook()->framebuffer()->update(xmin__, ymin__, xmaxplus1__-xmin__, ymaxplus1__-ymin__);
 				Fl::check();
 			}
 		}
@@ -263,8 +264,7 @@ void HandleData(int sock, void *data)
 			std::cout << "Closing socket" << std::endl;
 			Fl::remove_fd(sock);
 			close(sock);
-			boost::shared_ptr<CqDisplayServerImage> dsImage = boost::dynamic_pointer_cast<CqDisplayServerImage>(thisClient);
-			dsImage->close();
+			thisClient->close();
 		}
 		delete[](buff);
 	}		
@@ -274,15 +274,14 @@ void HandleConnection(int sock, void *data)
 {
 	Aqsis::log() << Aqsis::info << "Connection established with display server" << std::endl;
 
-	boost::shared_ptr<CqDisplayServerImage> newClient(new CqDisplayServerImage());
+	boost::shared_ptr<CqDisplayServerImage> newImage(new CqDisplayServerImage());
 	
-	if(g_theServer.Accept(newClient))
+	if(g_theServer.Accept(newImage))
 	{
-		g_theClients[newClient->socket()] = newClient;
-		Fl::add_fd(newClient->socket(), FL_READ, &HandleData);
+		g_theClients[newImage->socket()] = newImage;
+		Fl::add_fd(newImage->socket(), FL_READ, &HandleData);
 		if(window)
-			window->addImageToCurrentBook("Hello");
-
+			window->addImageToCurrentBook("Unnamed");
 	}
 }
 

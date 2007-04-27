@@ -36,10 +36,10 @@ void Fl_FrameBuffer_Widget::draw(void)
 
 START_NAMESPACE( Aqsis )
 
-CqFramebuffer::CqFramebuffer(TqUlong width, TqUlong height)
+CqFramebuffer::CqFramebuffer(TqUlong width, TqUlong height, TqInt depth)
 {
 	m_theWindow = new Fl_Window(width, height);
-	m_uiImageWidget = new Fl_FrameBuffer_Widget(0,0, width, height, 4, 0);
+	m_uiImageWidget = new Fl_FrameBuffer_Widget(0,0, width, height, depth, 0);
 	m_theWindow->resizable(m_uiImageWidget);
 //	m_theWindow->label(thisClient.m_image.m_filename.c_str());
 	m_theWindow->end();

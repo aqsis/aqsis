@@ -12,6 +12,7 @@ eqshibitapp_sources = Split("""
 	ddserver.cpp
 	image.cpp
 	framebuffer.cpp
+	book.cpp
 	displayserverimage.cpp
 	eqshibit_ui.cpp""")
 

@@ -26,15 +26,16 @@
 #ifndef	___eqshibitbase_Loaded___
 #define	___eqshibitbase_Loaded___
 
-#include <aqsis.h>
+#include "aqsis.h"
+#include "book.h"
 
 #include <map>
 #include <string>
 #include <list>
 
-START_NAMESPACE( Aqsis )
+#include "boost/shared_ptr.hpp"
 
-typedef	std::list<std::string> TqEqshibitBook;
+START_NAMESPACE( Aqsis )
 
 class CqEqshibitBase
 {
@@ -44,12 +45,12 @@ public:
 
 	virtual void	addNewBook(std::string name);
 	void	setCurrentBook(std::string name);
-	TqEqshibitBook& currentBook();
+	boost::shared_ptr<CqBook>& currentBook();
 	std::string currentBookName();
 	virtual void	addImageToCurrentBook(std::string name);
 
 private:
-	std::map<std::string, TqEqshibitBook>	m_books;
+	std::map<std::string, boost::shared_ptr<CqBook> >	m_books;
 	std::string	m_currentBookName;
 };
 

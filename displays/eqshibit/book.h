@@ -27,12 +27,17 @@
 #ifndef BOOK_H_INCLUDED
 #define BOOK_H_INCLUDED 1
 
-#include 	<boost/shared_ptr.h>
+#include 	<boost/shared_ptr.hpp>
+#include	<list>
 
 #include	"aqsis.h"
+#include	"sstring.h"
 #include	"ndspy.h"
 
 START_NAMESPACE( Aqsis )
+
+class CqFramebuffer;
+class CqImage;
 
 //---------------------------------------------------------------------
 /** \class CqBook
@@ -44,7 +49,8 @@ class CqBook
 public:
     CqBook( const CqString& name ) : m_name(name)
 	{}
-    ~CqBook();
+    ~CqBook()
+	{}
 
     CqString&	name()
     {
@@ -55,8 +61,25 @@ public:
         m_name = name;
     }
 
+	boost::shared_ptr<CqFramebuffer> framebuffer()
+	{
+		return(m_framebuffer);
+	}
+	void setFramebuffer(boost::shared_ptr<CqFramebuffer>& fb)
+	{
+		m_framebuffer = fb;
+	}
+
+	void addImage(boost::shared_ptr<CqImage>& image);
+	std::list<boost::shared_ptr<CqImage> >::iterator	images()
+	{
+		return(m_images.begin());
+	}
+
 private:
     CqString	m_name;			///< Book name.
+	std::list<boost::shared_ptr<CqImage> > m_images;
+	boost::shared_ptr<CqFramebuffer> m_framebuffer;
 };
 
 END_NAMESPACE( Aqsis )

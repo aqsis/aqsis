@@ -24,8 +24,7 @@
 */
 
 #include "eqshibitbase.h"
-#include <sstream>
-#include <iostream>
+#include "book.h"
 
 
 START_NAMESPACE( Aqsis )
@@ -33,7 +32,8 @@ START_NAMESPACE( Aqsis )
 
 void CqEqshibitBase::addNewBook(std::string name)
 {
-	m_books[name] = TqEqshibitBook();
+	boost::shared_ptr<CqBook> newBook(new CqBook(name));
+	m_books[name] = newBook;
 	m_currentBookName = name;
 }
 
@@ -44,7 +44,7 @@ void CqEqshibitBase::setCurrentBook(std::string name)
 }
 
 
-TqEqshibitBook& CqEqshibitBase::currentBook()
+boost::shared_ptr<CqBook>& CqEqshibitBase::currentBook()
 {
 	return(m_books.find(m_currentBookName)->second);
 }
@@ -60,12 +60,12 @@ void CqEqshibitBase::addImageToCurrentBook(std::string name)
 	if(m_currentBookName.empty())
 	{
 		std::cout << "Adding image" << std::endl;
-		std::map<std::string, TqEqshibitBook>::size_type numBooks = m_books.size();
+		std::map<std::string, boost::shared_ptr<CqBook> >::size_type numBooks = m_books.size();
 		std::stringstream strBkName;
 		strBkName << "Book" << numBooks+1;
 		addNewBook(strBkName.str());
 	}
-	currentBook().push_back(name);	
+	//currentBook().push_back(name);	
 }
 
 //---------------------------------------------------------------------

@@ -56,79 +56,67 @@ public:
 		free(m_data);
 	}
 
-    CqString&	name()
+    virtual CqString&	name()
     {
         return ( m_name );
     }
-    void	setName( const CqString& name )
+    virtual void	setName( const CqString& name )
     {
         m_name = name;
     }
-	TqUlong	frameWidth()
+	virtual TqUlong	frameWidth()
 	{
 		return( m_frameWidth );
 	}
-	TqUlong frameHeight()
+	virtual TqUlong frameHeight()
 	{
 		return( m_frameHeight );
 	}
-	void setFrameSize(TqUlong width, TqUlong height)
+	virtual void setFrameSize(TqUlong width, TqUlong height)
 	{
 		m_frameWidth = width;
 		m_frameHeight = height;
 	}
-	TqInt channels()
+	virtual TqInt channels()
 	{
 		return( m_channels );
 	}
-	void setChannels(TqInt channels)
+	virtual void setChannels(TqInt channels)
 	{
 		m_channels = channels;
 	}
-	unsigned char* data()
+	virtual unsigned char* data()
 	{
 		return( m_data );
 	}
-	TqUlong originX() const
+	virtual TqUlong originX() const
 	{
 		return( m_originX );
 	}
-	TqUlong originY() const
+	virtual TqUlong originY() const
 	{
 		return( m_originY );
 	}
-	void setOrigin(TqUlong originX, TqUlong originY)
+	virtual void setOrigin(TqUlong originX, TqUlong originY)
 	{
 		m_originX = originX;
 		m_originY = originY;
 	}
-	TqUlong imageWidth() const
+	virtual TqUlong imageWidth() const
 	{
 		return( m_imageWidth );
 	}
-	TqUlong imageHeight() const
+	virtual TqUlong imageHeight() const
 	{
 		return( m_imageHeight );
 	}
-	void setImageSize(TqUlong imageWidth, TqUlong imageHeight)
+	virtual void setImageSize(TqUlong imageWidth, TqUlong imageHeight)
 	{
 		m_imageWidth = imageWidth;
 		m_imageHeight = imageHeight;
 	}
 
-	//void connect(boost::shared_ptr<CqFramebuffer>& fb);
-	//void connect(boost::shared_ptr<CqConduit<CqImage, CqFramebuffer> >& fb);
-	//void disconnect();
-	//boost::shared_ptr<CqFramebuffer>& framebuffer()
-	//{
-	//	return(m_associatedFB->b());
-	//}
-	//const boost::shared_ptr<CqFramebuffer>& framebuffer() const
-	//{
-	//	return(m_associatedFB->b());
-	//}
-
-	void PrepareImageBuffer()
+	virtual void PrepareImageBuffer()
 	{
 		m_data = reinterpret_cast<unsigned char*>(malloc( m_imageWidth * m_imageHeight * m_channels * sizeof(TqUchar)));
 	}

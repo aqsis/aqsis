@@ -1,7 +1,7 @@
 // Aqsis
 // Copyright © 1997 - 2001, Paul C. Gregory
 //
-// Contact: pgregory@aqsis.com
+// Contact: pgregory@aqsis.org
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public
@@ -19,14 +19,19 @@
 
 
 /** \file
-		\brief Implements the basic image functionality.
-		\author Paul C. Gregory (pgregory@aqsis.com)
+		\brief Implements the common book class functionality.
+		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include "image.h"
-#include "framebuffer.h"
+#include "book.h"
 
 
 START_NAMESPACE( Aqsis )
 
+void CqBook::addImage(boost::shared_ptr<CqImage>& image)
+{
+	m_images.push_back(image);
+}
+
 END_NAMESPACE( Aqsis )
+
