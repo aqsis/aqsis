@@ -243,6 +243,8 @@ void CqDisplayServerImage::acceptData(SqDDMessageData* dataMsg)
 			}
 			pdatarow += bucketlinelen;
 		}
+		if(m_updateCallback)
+			m_updateCallback(xmin__, ymin__, xmaxplus1__-xmin__, ymaxplus1__-ymin__);
 	}
 }
 

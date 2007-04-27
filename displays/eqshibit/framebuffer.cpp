@@ -26,6 +26,8 @@
 #include "framebuffer.h"
 #include "image.h"
 
+#include "boost/bind.hpp"
+
 
 void Fl_FrameBuffer_Widget::draw(void)
 {
@@ -63,6 +65,9 @@ void CqFramebuffer::connect(boost::shared_ptr<CqImage>& image)
 {
 	m_associatedImage = image;	
 	m_uiImageWidget->setImageData(image->data());
+	boost::function<void(int,int,int,int)> f;
+	f = boost::bind(&CqFramebuffer::update, this, _1, _2, _3, _4);
+	image->setUpdateCallback(f);
 }
 
 void CqFramebuffer::disconnect()
@@ -74,6 +79,7 @@ void CqFramebuffer::disconnect()
 void CqFramebuffer::update(int X, int Y, int W, int H)
 {
 	m_uiImageWidget->damage(1, X, Y, W, H);
+	Fl::check();
 }
 
 END_NAMESPACE( Aqsis )

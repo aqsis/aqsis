@@ -31,6 +31,7 @@
 #include	<string>
 
 #include	<boost/shared_ptr.hpp>
+#include	<boost/function.hpp>
 
 #include	"aqsis.h"
 #include	"sstring.h"
@@ -117,6 +118,8 @@ public:
 	}
 
 	virtual void PrepareImageBuffer();
+	
+	virtual void setUpdateCallback(boost::function<void(int,int,int,int)> f);
 
 protected:
     CqString		m_name;			///< Display name.
@@ -129,7 +132,7 @@ protected:
 	TqUlong			m_originY;
 	TqInt			m_channels;
 
-	//boost::shared_ptr<CqConduit<CqImage, CqFramebuffer> >	m_associatedFB;
+	boost::function<void(int,int,int,int)> m_updateCallback;
 };
 
 END_NAMESPACE( Aqsis )

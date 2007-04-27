@@ -127,12 +127,6 @@ void HandleData(int sock, void *data)
 		{
 			SqDDMessageData* dataMsg = reinterpret_cast<SqDDMessageData*>(buff);
 			thisClient->acceptData(dataMsg);
-			TqUlong xmin__ = MAX((dataMsg->m_XMin - thisClient->originX()), 0);
-			TqUlong ymin__ = MAX((dataMsg->m_YMin - thisClient->originY()), 0);
-			TqUlong xmaxplus1__ = MIN((dataMsg->m_XMaxPlus1 - thisClient->originX()), thisClient->imageWidth());
-			TqUlong ymaxplus1__ = MIN((dataMsg->m_YMaxPlus1 - thisClient->originY()), thisClient->imageWidth());
-			window->currentBook()->framebuffer()->update(xmin__, ymin__, xmaxplus1__-xmin__, ymaxplus1__-ymin__);
-			Fl::check();
 		}
 		else if(msg.m_MessageID == MessageID_Close)
 		{

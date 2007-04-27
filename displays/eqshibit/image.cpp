@@ -56,5 +56,9 @@ void CqImage::PrepareImageBuffer()
 	}
 }
 
+void CqImage::setUpdateCallback(boost::function<void(int,int,int,int)> f)
+{
+	m_updateCallback = f;
+}
 
 END_NAMESPACE( Aqsis )
