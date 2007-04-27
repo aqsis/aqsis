@@ -37,6 +37,7 @@ tiff files.
 #include	"version.h"
 #include	"argparse.h"
 #include	"ri.h"
+#include	"sstring.h"
 
 TqBool	g_version = TqFalse;
 TqBool	g_help = TqFalse;
