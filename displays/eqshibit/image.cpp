@@ -29,4 +29,32 @@
 
 START_NAMESPACE( Aqsis )
 
+void CqImage::PrepareImageBuffer()
+{
+	m_data = reinterpret_cast<unsigned char*>(malloc( m_imageWidth * m_imageHeight * m_channels * sizeof(TqUchar)));
+	// Initialise the display to a checkerboard to show alpha
+	for (TqUlong i = 0; i < imageHeight(); i ++)
+	{
+		for (TqUlong j = 0; j < imageWidth(); j++)
+		{
+			int     t       = 0;
+			TqUchar d = 255;
+
+			if ( ( (imageHeight() - 1 - i) & 31 ) < 16 )
+				t ^= 1;
+			if ( ( j & 31 ) < 16 )
+				t ^= 1;
+
+			if ( t )
+			{
+				d      = 128;
+			}
+			data()[channels() * (i*imageWidth() + j) ] = d;
+			data()[channels() * (i*imageWidth() + j) + 1] = d;
+			data()[channels() * (i*imageWidth() + j) + 2] = d;
+		}
+	}
+}
+
+
 END_NAMESPACE( Aqsis )

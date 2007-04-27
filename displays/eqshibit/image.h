@@ -116,10 +116,7 @@ public:
 		m_imageHeight = imageHeight;
 	}
 
-	virtual void PrepareImageBuffer()
-	{
-		m_data = reinterpret_cast<unsigned char*>(malloc( m_imageWidth * m_imageHeight * m_channels * sizeof(TqUchar)));
-	}
+	virtual void PrepareImageBuffer();
 
 protected:
     CqString		m_name;			///< Display name.

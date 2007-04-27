@@ -47,6 +47,7 @@ typedef int SOCKET;
 START_NAMESPACE( Aqsis )
 
 struct SqDDMessageBase;
+struct SqDDMessageData;
 
 //---------------------------------------------------------------------
 /** \class CqDDClient
@@ -84,6 +85,7 @@ public:
         return ( m_socket );
     }
 
+	void acceptData(SqDDMessageData* dataMsg);
 
 private:
     SOCKET	m_socket;			///< Socket ID of the client.

@@ -52,8 +52,6 @@ using namespace Aqsis;
 #include "framebuffer.h"
 #include "book.h"
 
-#define INT_MULT(a,b,t) ( (t) = (a) * (b) + 0x80, ( ( ( (t)>>8 ) + (t) )>>8 ) )
-#define INT_PRELERP(p, q, a, t) ( (p) + (q) - INT_MULT( a, p, t) )
 
 ArgParse::apstring      g_strInterface = "127.0.0.1";
 ArgParse::apstring      g_strPort = "48515";
@@ -70,23 +68,6 @@ void version( std::ostream& Stream )
 	Stream << "eqshibit version " << VERSION_STR_PRINT << std::endl << "compiled " << __DATE__ << " " << __TIME__ << std::endl;
 }
 
-//----------------------------------------------------------------------
-/** CompositeAlpha() Composite with the alpha the end result RGB
-*
-*/
-
-void CompositeAlpha(TqInt r, TqInt g, TqInt b, unsigned char &R, unsigned char &G, unsigned char &B, 
-		    unsigned char alpha )
-{ 
-	TqInt t;
-	// C’ = INT_PRELERP( A’, B’, b, t )
-	TqInt R1 = static_cast<TqInt>(INT_PRELERP( R, r, alpha, t ));
-	TqInt G1 = static_cast<TqInt>(INT_PRELERP( G, g, alpha, t ));
-	TqInt B1 = static_cast<TqInt>(INT_PRELERP( B, b, alpha, t ));
-	R = CLAMP( R1, 0, 255 );
-	G = CLAMP( G1, 0, 255 );
-	B = CLAMP( B1, 0, 255 );
-}
 
 CqDDServer g_theServer;
 std::map<int, boost::shared_ptr<CqDisplayServerImage> >	g_theClients;
@@ -133,31 +114,7 @@ void HandleData(int sock, void *data)
 			thisClient->setChannels(openMsg->m_Channels);
 			thisClient->setOrigin(openMsg->m_originX, openMsg->m_originY);
 			thisClient->setFrameSize(openMsg->m_originalSizeX, openMsg->m_originalSizeY);
-
 			thisClient->PrepareImageBuffer();
-
-			// Initialise the display to a checkerboard to show alpha
-			for (TqUlong i = 0; i < thisClient->imageHeight(); i ++)
-			{
-				for (TqUlong j = 0; j < thisClient->imageWidth(); j++)
-				{
-					int     t       = 0;
-					TqUchar d = 255;
-
-					if ( ( (thisClient->imageHeight() - 1 - i) & 31 ) < 16 )
-						t ^= 1;
-					if ( ( j & 31 ) < 16 )
-						t ^= 1;
-
-					if ( t )
-					{
-						d      = 128;
-					}
-					thisClient->data()[thisClient->channels() * (i*thisClient->imageWidth() + j) ] = d;
-					thisClient->data()[thisClient->channels() * (i*thisClient->imageWidth() + j) + 1] = d;
-					thisClient->data()[thisClient->channels() * (i*thisClient->imageWidth() + j) + 2] = d;
-				}
-			}
 
 			std::cout << "Creating a new FB window" << std::endl;
 			boost::shared_ptr<CqFramebuffer> fb(new CqFramebuffer(thisClient->imageWidth(), thisClient->imageHeight(), thisClient->channels()));
@@ -169,95 +126,13 @@ void HandleData(int sock, void *data)
 		else if(msg.m_MessageID == MessageID_Data)
 		{
 			SqDDMessageData* dataMsg = reinterpret_cast<SqDDMessageData*>(buff);
+			thisClient->acceptData(dataMsg);
 			TqUlong xmin__ = MAX((dataMsg->m_XMin - thisClient->originX()), 0);
 			TqUlong ymin__ = MAX((dataMsg->m_YMin - thisClient->originY()), 0);
 			TqUlong xmaxplus1__ = MIN((dataMsg->m_XMaxPlus1 - thisClient->originX()), thisClient->imageWidth());
 			TqUlong ymaxplus1__ = MIN((dataMsg->m_YMaxPlus1 - thisClient->originY()), thisClient->imageWidth());
-			TqUlong bucketlinelen = dataMsg->m_ElementSize * (dataMsg->m_XMaxPlus1 - dataMsg->m_XMin); 
-			std::cout << "Render: " << xmin__ << ", " << ymin__ << " --> " << xmaxplus1__ << ", " << ymaxplus1__ << " [dlen: " << dataMsg->m_DataLength << "]" << std::endl;
-			
-			char* pdatarow = (char*)(dataMsg->m_Data);
-			// Calculate where in the bucket we are starting from if the window is cropped.
-			TqInt row = 0;
-			if(thisClient->originY() > static_cast<TqUlong>(dataMsg->m_YMin))
-				row = thisClient->originY() - dataMsg->m_YMin;
-			TqInt col = 0;
-			if(thisClient->originX() > static_cast<TqUlong>(dataMsg->m_XMin))
-				col = thisClient->originX() - dataMsg->m_XMin;
-			pdatarow += (row * bucketlinelen) + (col * dataMsg->m_ElementSize);
-
-			if( thisClient->data() && xmin__ >= 0 && ymin__ >= 0 && xmaxplus1__ <= thisClient->imageWidth() && ymaxplus1__ <= thisClient->imageHeight() )
-			{
-				TqUint comp = dataMsg->m_ElementSize/thisClient->channels();
-				TqUlong y;
-				unsigned char *unrolled = thisClient->data();
-
-				for ( y = ymin__; y < ymaxplus1__; y++ )
-				{
-					TqUlong x;
-					char* _pdatarow = pdatarow;
-					for ( x = xmin__; x < xmaxplus1__; x++ )
-					{
-						TqInt so = thisClient->channels() * (( y * thisClient->imageWidth() ) +  x );
-						switch (comp)
-						{
-							case 2 :
-							{
-								TqUshort *svalue = reinterpret_cast<TqUshort *>(_pdatarow);
-								TqUchar alpha = 255;
-								if (thisClient->channels() == 4)
-								{
-									alpha = (svalue[3]/256);
-								}
-								CompositeAlpha((TqInt) svalue[0]/256, (TqInt) svalue[1]/256, (TqInt) svalue[2]/256, 
-												unrolled[so + 0], unrolled[so + 1], unrolled[so + 2], 
-												alpha);
-								if (thisClient->channels() == 4)
-									unrolled[ so + 3 ] = alpha;
-							}
-							break;
-							case 4:
-							{
-
-								TqUlong *lvalue = reinterpret_cast<TqUlong *>(_pdatarow);
-								TqUchar alpha = 255;
-								if (thisClient->channels() == 4)
-								{
-									alpha = (TqUchar) (lvalue[3]/256);
-								}
-								CompositeAlpha((TqInt) lvalue[0]/256, (TqInt) lvalue[1]/256, (TqInt) lvalue[2]/256, 
-												unrolled[so + 0], unrolled[so + 1], unrolled[so + 2], 
-												alpha);
-								if (thisClient->channels() == 4)
-									unrolled[ so + 3 ] = alpha;
-							}
-							break;
-
-							case 1:
-							default:
-							{
-								TqUchar *cvalue = reinterpret_cast<TqUchar *>(_pdatarow);
-								TqUchar alpha = 255;
-								if (thisClient->channels() == 4)
-								{
-									alpha = (TqUchar) (cvalue[3]);
-								}
-								CompositeAlpha((TqInt) cvalue[0], (TqInt) cvalue[1], (TqInt) cvalue[2], 
-												unrolled[so + 0], unrolled[so + 1], unrolled[so + 2], 
-												alpha);
-								if (thisClient->channels() == 4)
-									unrolled[ so + 3 ] = alpha;
-							}
-							break;
-						}
-						_pdatarow += dataMsg->m_ElementSize;
-
-					}
-					pdatarow += bucketlinelen;
-				}
-				window->currentBook()->framebuffer()->update(xmin__, ymin__, xmaxplus1__-xmin__, ymaxplus1__-ymin__);
-				Fl::check();
-			}
+			window->currentBook()->framebuffer()->update(xmin__, ymin__, xmaxplus1__-xmin__, ymaxplus1__-ymin__);
+			Fl::check();
 		}
 		else if(msg.m_MessageID == MessageID_Close)
 		{

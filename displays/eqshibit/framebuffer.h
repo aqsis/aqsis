@@ -80,7 +80,6 @@ public:
 	void show();
 
 	void connect(boost::shared_ptr<CqImage>& image);
-	//void connect(boost::shared_ptr<CqConduit<CqImage, CqFramebuffer> >& conduit);
 	void disconnect();
 
 	boost::shared_ptr<CqImage>& image()

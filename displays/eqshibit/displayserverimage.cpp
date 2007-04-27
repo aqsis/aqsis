@@ -132,4 +132,118 @@ void CqDisplayServerImage::receive( void* buffer, TqInt len )
     }
 }
 
+
+//----------------------------------------------------------------------
+/** CompositeAlpha() Composite with the alpha the end result RGB
+*
+*/
+
+#define INT_MULT(a,b,t) ( (t) = (a) * (b) + 0x80, ( ( ( (t)>>8 ) + (t) )>>8 ) )
+#define INT_PRELERP(p, q, a, t) ( (p) + (q) - INT_MULT( a, p, t) )
+
+void CompositeAlpha(TqInt r, TqInt g, TqInt b, unsigned char &R, unsigned char &G, unsigned char &B, 
+		    unsigned char alpha )
+{ 
+	TqInt t;
+	// C’ = INT_PRELERP( A’, B’, b, t )
+	TqInt R1 = static_cast<TqInt>(INT_PRELERP( R, r, alpha, t ));
+	TqInt G1 = static_cast<TqInt>(INT_PRELERP( G, g, alpha, t ));
+	TqInt B1 = static_cast<TqInt>(INT_PRELERP( B, b, alpha, t ));
+	R = CLAMP( R1, 0, 255 );
+	G = CLAMP( G1, 0, 255 );
+	B = CLAMP( B1, 0, 255 );
+}
+
+
+void CqDisplayServerImage::acceptData(SqDDMessageData* dataMsg)
+{
+	TqUlong xmin__ = MAX((dataMsg->m_XMin - originX()), 0);
+	TqUlong ymin__ = MAX((dataMsg->m_YMin - originY()), 0);
+	TqUlong xmaxplus1__ = MIN((dataMsg->m_XMaxPlus1 - originX()), imageWidth());
+	TqUlong ymaxplus1__ = MIN((dataMsg->m_YMaxPlus1 - originY()), imageWidth());
+	TqUlong bucketlinelen = dataMsg->m_ElementSize * (dataMsg->m_XMaxPlus1 - dataMsg->m_XMin); 
+	std::cout << "Render: " << xmin__ << ", " << ymin__ << " --> " << xmaxplus1__ << ", " << ymaxplus1__ << " [dlen: " << dataMsg->m_DataLength << "]" << std::endl;
+	
+	char* pdatarow = (char*)(dataMsg->m_Data);
+	// Calculate where in the bucket we are starting from if the window is cropped.
+	TqInt row = 0;
+	if(originY() > static_cast<TqUlong>(dataMsg->m_YMin))
+		row = originY() - dataMsg->m_YMin;
+	TqInt col = 0;
+	if(originX() > static_cast<TqUlong>(dataMsg->m_XMin))
+		col = originX() - dataMsg->m_XMin;
+	pdatarow += (row * bucketlinelen) + (col * dataMsg->m_ElementSize);
+
+	if( data() && xmin__ >= 0 && ymin__ >= 0 && xmaxplus1__ <= imageWidth() && ymaxplus1__ <= imageHeight() )
+	{
+		TqUint comp = dataMsg->m_ElementSize/channels();
+		TqUlong y;
+		unsigned char *unrolled = data();
+
+		for ( y = ymin__; y < ymaxplus1__; y++ )
+		{
+			TqUlong x;
+			char* _pdatarow = pdatarow;
+			for ( x = xmin__; x < xmaxplus1__; x++ )
+			{
+				TqInt so = channels() * (( y * imageWidth() ) +  x );
+				switch (comp)
+				{
+					case 2 :
+					{
+						TqUshort *svalue = reinterpret_cast<TqUshort *>(_pdatarow);
+						TqUchar alpha = 255;
+						if (channels() == 4)
+						{
+							alpha = (svalue[3]/256);
+						}
+						CompositeAlpha((TqInt) svalue[0]/256, (TqInt) svalue[1]/256, (TqInt) svalue[2]/256, 
+										unrolled[so + 0], unrolled[so + 1], unrolled[so + 2], 
+										alpha);
+						if (channels() == 4)
+							unrolled[ so + 3 ] = alpha;
+					}
+					break;
+					case 4:
+					{
+
+						TqUlong *lvalue = reinterpret_cast<TqUlong *>(_pdatarow);
+						TqUchar alpha = 255;
+						if (channels() == 4)
+						{
+							alpha = (TqUchar) (lvalue[3]/256);
+						}
+						CompositeAlpha((TqInt) lvalue[0]/256, (TqInt) lvalue[1]/256, (TqInt) lvalue[2]/256, 
+										unrolled[so + 0], unrolled[so + 1], unrolled[so + 2], 
+										alpha);
+						if (channels() == 4)
+							unrolled[ so + 3 ] = alpha;
+					}
+					break;
+
+					case 1:
+					default:
+					{
+						TqUchar *cvalue = reinterpret_cast<TqUchar *>(_pdatarow);
+						TqUchar alpha = 255;
+						if (channels() == 4)
+						{
+							alpha = (TqUchar) (cvalue[3]);
+						}
+						CompositeAlpha((TqInt) cvalue[0], (TqInt) cvalue[1], (TqInt) cvalue[2], 
+										unrolled[so + 0], unrolled[so + 1], unrolled[so + 2], 
+										alpha);
+						if (channels() == 4)
+							unrolled[ so + 3 ] = alpha;
+					}
+					break;
+				}
+				_pdatarow += dataMsg->m_ElementSize;
+
+			}
+			pdatarow += bucketlinelen;
+		}
+	}
+}
+
 END_NAMESPACE( Aqsis )
