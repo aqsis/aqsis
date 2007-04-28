@@ -162,7 +162,7 @@ void CqDisplayServerImage::acceptData(SqDDMessageData* dataMsg)
 	TqUlong xmaxplus1__ = MIN((dataMsg->m_XMaxPlus1 - originX()), imageWidth());
 	TqUlong ymaxplus1__ = MIN((dataMsg->m_YMaxPlus1 - originY()), imageWidth());
 	TqUlong bucketlinelen = dataMsg->m_ElementSize * (dataMsg->m_XMaxPlus1 - dataMsg->m_XMin); 
-	std::cout << "Render: " << xmin__ << ", " << ymin__ << " --> " << xmaxplus1__ << ", " << ymaxplus1__ << " [dlen: " << dataMsg->m_DataLength << "]" << std::endl;
+	//std::cout << "Render: " << xmin__ << ", " << ymin__ << " --> " << xmaxplus1__ << ", " << ymaxplus1__ << " [dlen: " << dataMsg->m_DataLength << "]" << std::endl;
 	
 	char* pdatarow = (char*)(dataMsg->m_Data);
 	// Calculate where in the bucket we are starting from if the window is cropped.

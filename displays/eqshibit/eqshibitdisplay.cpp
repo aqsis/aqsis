@@ -199,7 +199,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 				if (pid)
 				{
 					Aqsis::log() << info << "Starting the framebuffer" << std::endl;
-					sleep(1); //Give it time to startup
+					sleep(2); //Give it time to startup
 				}
 				else
 				{

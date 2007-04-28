@@ -28,7 +28,7 @@
 #define BOOK_H_INCLUDED 1
 
 #include 	<boost/shared_ptr.hpp>
-#include	<list>
+#include	<map>
 
 #include	"aqsis.h"
 #include	"sstring.h"
@@ -70,16 +70,14 @@ public:
 		m_framebuffer = fb;
 	}
 
-	void addImage(boost::shared_ptr<CqImage>& image);
-	std::list<boost::shared_ptr<CqImage> >::iterator	images()
-	{
-		return(m_images.begin());
-	}
+	TqUlong addImage(boost::shared_ptr<CqImage>& image);
+	boost::shared_ptr<CqImage> image(TqUlong id);
 
 private:
     CqString	m_name;			///< Book name.
-	std::list<boost::shared_ptr<CqImage> > m_images;
+	std::map<TqUlong, boost::shared_ptr<CqImage> > m_images;
 	boost::shared_ptr<CqFramebuffer> m_framebuffer;
+	static TqUlong	m_nextID;
 };
 
 END_NAMESPACE( Aqsis )

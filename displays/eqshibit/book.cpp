@@ -28,9 +28,23 @@
 
 START_NAMESPACE( Aqsis )
 
-void CqBook::addImage(boost::shared_ptr<CqImage>& image)
+TqUlong CqBook::m_nextID = 0;
+
+TqUlong CqBook::addImage(boost::shared_ptr<CqImage>& image)
 {
-	m_images.push_back(image);
+	m_images[m_nextID] = image;
+	return(m_nextID++);
+}
+
+boost::shared_ptr<CqImage> CqBook::image(TqUlong id)
+{
+	if(m_images.find(id) != m_images.end())
+		return(m_images[id]);
+	else
+	{
+		boost::shared_ptr<CqImage> t;
+		return(t);
+	}
 }
 
 END_NAMESPACE( Aqsis )

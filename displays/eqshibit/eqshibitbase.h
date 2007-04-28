@@ -34,6 +34,8 @@
 #include <list>
 
 #include "boost/shared_ptr.hpp"
+#include "image.h"
+#include "framebuffer.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -47,7 +49,7 @@ public:
 	void	setCurrentBook(std::string name);
 	boost::shared_ptr<CqBook>& currentBook();
 	std::string currentBookName();
-	virtual void	addImageToCurrentBook(std::string name);
+	virtual TqUlong	addImageToCurrentBook(boost::shared_ptr<CqImage>& image);
 
 private:
 	std::map<std::string, boost::shared_ptr<CqBook> >	m_books;

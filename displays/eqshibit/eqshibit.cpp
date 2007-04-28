@@ -90,7 +90,7 @@ void HandleData(int sock, void *data)
 	}
 	if(numRead == sizeof(msg))
 	{
-		std::cout << "Message ID: " << msg.m_MessageID << "(" << std::hex << msg.m_MessageID << ")" << std::dec << " length: " << msg.m_MessageLength << std::endl;
+		Aqsis::log() << Aqsis::debug << "Message ID: " << msg.m_MessageID << "(" << std::hex << msg.m_MessageID << ")" << std::dec << " length: " << msg.m_MessageLength << std::endl;
 		unsigned int msgToRead = msg.m_MessageLength - numRead;
 		char *buff = new char[msgToRead + sizeof(msg)];
 		memset(buff, '\0', msgToRead + sizeof(msg));
@@ -105,10 +105,10 @@ void HandleData(int sock, void *data)
 			bptr += i;
 			numRead += i;
 		}
-		std::cout << "Read: " << numRead << " : " << msg.m_MessageID << std::endl;
+		Aqsis::log() << Aqsis::debug << "Read: " << numRead << " : " << msg.m_MessageID << std::endl;
 		if(msg.m_MessageID == MessageID_Open)
 		{
-			std::cout << "Now processing the Open message" << std::endl;
+			Aqsis::log() << Aqsis::debug << "Now processing the Open message" << std::endl;
 			SqDDMessageOpen* openMsg = reinterpret_cast<SqDDMessageOpen*>(buff);
 			thisClient->setImageSize(openMsg->m_XRes, openMsg->m_YRes);
 			thisClient->setChannels(openMsg->m_Channels);
@@ -116,12 +116,17 @@ void HandleData(int sock, void *data)
 			thisClient->setFrameSize(openMsg->m_originalSizeX, openMsg->m_originalSizeY);
 			thisClient->PrepareImageBuffer();
 
-			std::cout << "Creating a new FB window" << std::endl;
-			boost::shared_ptr<CqFramebuffer> fb(new CqFramebuffer(thisClient->imageWidth(), thisClient->imageHeight(), thisClient->channels()));
-			window->currentBook()->setFramebuffer(fb);
-			fb->show();
 			boost::shared_ptr<CqImage> baseImage = boost::static_pointer_cast<CqImage>(thisClient);
-			fb->connect(baseImage);
+			if(window->currentBook()->framebuffer())
+				window->currentBook()->framebuffer()->connect(baseImage);
+			else
+			{
+				Aqsis::log() << Aqsis::debug << "Creating a new FB window" << std::endl;
+				boost::shared_ptr<CqFramebuffer> fb(new CqFramebuffer(thisClient->imageWidth(), thisClient->imageHeight(), thisClient->channels()));
+				window->currentBook()->setFramebuffer(fb);
+				fb->show();
+				fb->connect(baseImage);
+			}
 		}
 		else if(msg.m_MessageID == MessageID_Data)
 		{
@@ -130,7 +135,7 @@ void HandleData(int sock, void *data)
 		}
 		else if(msg.m_MessageID == MessageID_Close)
 		{
-			std::cout << "Closing socket" << std::endl;
+			Aqsis::log() << Aqsis::debug << "Closing socket" << std::endl;
 			Fl::remove_fd(sock);
 			close(sock);
 			thisClient->close();
@@ -141,16 +146,20 @@ void HandleData(int sock, void *data)
 
 void HandleConnection(int sock, void *data)
 {
-	Aqsis::log() << Aqsis::info << "Connection established with display server" << std::endl;
+	Aqsis::log() << Aqsis::debug << "Connection established with display server" << std::endl;
 
 	boost::shared_ptr<CqDisplayServerImage> newImage(new CqDisplayServerImage());
+	newImage->setName("Unnamed");
 	
 	if(g_theServer.Accept(newImage))
 	{
 		g_theClients[newImage->socket()] = newImage;
 		Fl::add_fd(newImage->socket(), FL_READ, &HandleData);
 		if(window)
-			window->addImageToCurrentBook("Unnamed");
+		{
+			boost::shared_ptr<CqImage> baseImage = boost::static_pointer_cast<CqImage>(newImage);
+			window->addImageToCurrentBook(baseImage);
+		}
 	}
 }
 

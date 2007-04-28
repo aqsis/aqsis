@@ -31,8 +31,8 @@
 
 void Fl_FrameBuffer_Widget::draw(void)
 {
-	if(image)
-		fl_draw_image(image,x(),y(),w,h,d,w*d); // draw image
+	if(m_image)
+		fl_draw_image(m_image,x(),y(),m_width,m_height,m_depth,m_width*m_depth); // draw image
 }
 
 
@@ -65,6 +65,7 @@ void CqFramebuffer::connect(boost::shared_ptr<CqImage>& image)
 {
 	m_associatedImage = image;	
 	m_uiImageWidget->setImageData(image->data());
+	m_uiImageWidget->setImageProportions(image->frameWidth(), image->frameHeight(), image->channels());
 	boost::function<void(int,int,int,int)> f;
 	f = boost::bind(&CqFramebuffer::update, this, _1, _2, _3, _4);
 	image->setUpdateCallback(f);
@@ -72,13 +73,21 @@ void CqFramebuffer::connect(boost::shared_ptr<CqImage>& image)
 
 void CqFramebuffer::disconnect()
 {
+	if(m_associatedImage)
+	{
+		boost::function<void(int,int,int,int)> f;
+		m_associatedImage->setUpdateCallback(f);
+	}
 	m_associatedImage.reset();
 	m_uiImageWidget->setImageData(0);
 }
 
 void CqFramebuffer::update(int X, int Y, int W, int H)
 {
-	m_uiImageWidget->damage(1, X, Y, W, H);
+	if(W < 0 || H < 0 || X < 0 || Y < 0)
+		m_uiImageWidget->damage(1);
+	else
+		m_uiImageWidget->damage(1, X, Y, W, H);
 	Fl::check();
 }
 

@@ -55,7 +55,7 @@ std::string CqEqshibitBase::currentBookName()
 	return( m_currentBookName );
 }
 
-void CqEqshibitBase::addImageToCurrentBook(std::string name)
+TqUlong CqEqshibitBase::addImageToCurrentBook(boost::shared_ptr<CqImage>& image)
 {
 	if(m_currentBookName.empty())
 	{
@@ -65,7 +65,7 @@ void CqEqshibitBase::addImageToCurrentBook(std::string name)
 		strBkName << "Book" << numBooks+1;
 		addNewBook(strBkName.str());
 	}
-	//currentBook().push_back(name);	
+	return( currentBook()->addImage(image));	
 }
 
 //---------------------------------------------------------------------

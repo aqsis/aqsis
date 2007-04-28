@@ -7,7 +7,7 @@ class CqEqshibitMainWindow {open : {public Aqsis::CqEqshibitBase}
   Function {CqEqshibitMainWindow()} {open
   } {
     Fl_Window m_window {open
-      private xywh {320 140 685 485} type Double resizable
+      private xywh {388 207 685 485} type Double resizable
       code0 {\#include "eqshibit.h"}
       code1 {\#include "eqshibitbase.h"}
       code2 {\#include <stdio.h>}
@@ -44,23 +44,41 @@ class CqEqshibitMainWindow {open : {public Aqsis::CqEqshibitBase}
   } {
     code {CqEqshibitBase::addNewBook(name);
 Fl_Multi_Browser *o = new Fl_Multi_Browser(0, 50, 685, 435, name.c_str());
+o->callback(&CqEqshibitMainWindow::select_cb, this);
 m_tabBooks->add(o);
 m_tabBooks->resizable(o);
 m_tabBooks->init_sizes();
-m_tabBooks->redraw();} {selected
-    }
+m_tabBooks->redraw();} {}
   }
   Function {show(int argc, char **argv)} {open
   } {
     code {m_window->show(argc, argv);} {}
   }
-  Function {addImageToCurrentBook(std::string name)} {open return_type {virtual void}
+  Function {addImageToCurrentBook(boost::shared_ptr<Aqsis::CqImage>& image)} {open return_type {virtual TqUlong}
   } {
-    code {CqEqshibitBase::addImageToCurrentBook(name);
+    code {TqUlong id = CqEqshibitBase::addImageToCurrentBook(image);
 // Should update book list here to match the base, but for
 // now we'll just add the name to the browser.
 Fl_Widget* current = m_tabBooks->value();
 Fl_Multi_Browser* bcurr = static_cast<Fl_Multi_Browser*>(current);
-bcurr->add(name.c_str());} {}
+bcurr->add(image->name().c_str(), (void*)id);
+return( id );} {}
+  }
+  Function {select_cb(Fl_Widget* w, void* d)} {open return_type {static void}
+  } {
+    code {Fl_Multi_Browser* browser = static_cast<Fl_Multi_Browser*>(w);
+CqEqshibitMainWindow* win = reinterpret_cast<CqEqshibitMainWindow*>(d);
+if(win && w)
+{
+	int selected = browser->value();
+	TqUlong imageID = (TqUlong)browser->data(selected);
+	boost::shared_ptr<Aqsis::CqImage> image = win->currentBook()->image(imageID);
+	if(image)
+	{
+		win->currentBook()->framebuffer()->connect(image);
+		win->currentBook()->framebuffer()->update(-1,-1,-1,-1);
+	}
+}} {selected
+    }
   }
 } 

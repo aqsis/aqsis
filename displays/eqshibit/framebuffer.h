@@ -44,22 +44,29 @@ class Fl_FrameBuffer_Widget : public Fl_Widget
 	public:
 		Fl_FrameBuffer_Widget(int x, int y, int imageW, int imageH, int depth, unsigned char* imageD) : Fl_Widget(x,y,imageW,imageH)
 		{
-			w = imageW;
-			h = imageH;
-			d = depth;
-			image = imageD;
+			m_width = imageW;
+			m_height = imageH;
+			m_depth = depth;
+			m_image = imageD;
 		}
 
 		void setImageData(unsigned char* data)
 		{
-			image = data;
+			m_image = data;
+		}
+
+		void setImageProportions(int w, int h, int d)
+		{
+			m_width = w;
+			m_height = h;
+			m_depth = d;
 		}
 
 		void draw(void);
 
 	private:
-		int w,h,d;
-		unsigned char* image;
+		int m_width,m_height,m_depth;
+		unsigned char* m_image;
 };
 
 START_NAMESPACE( Aqsis )
