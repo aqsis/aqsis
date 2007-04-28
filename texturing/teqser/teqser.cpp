@@ -95,7 +95,7 @@ int main( int argc, const char** argv )
 	ap.argFloat( "width", "=float\awidth [>0.0f] set both swidth and twidth (default: %default)", &g_width );
 	ap.argFloat( "quality", "=float\a[>=1.0f && <= 100.0f] (default: %default)", &g_quality );
 	ap.argFloat( "bake", "=float\a[>=2.0f && <= 2048.0f] (default: %default)", &g_bake );
-	ap.argString( "resize", "=string\a[up|down|round|up-|down-|round-] (default: " + g_resize + ")\n\aNot used, for BMRT compatibility only!", &g_resize );
+	ap.argString( "resize", "=string\a[up|down|round|up-|down-|round-] (default: %default)\n\aNot used, for BMRT compatibility only!", &g_resize );
 
 
 	if ( argc > 1 && !ap.parse( argc - 1, argv + 1 ) )
