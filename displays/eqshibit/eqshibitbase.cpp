@@ -49,6 +49,10 @@ boost::shared_ptr<CqBook>& CqEqshibitBase::currentBook()
 	return(m_books.find(m_currentBookName)->second);
 }
 
+boost::shared_ptr<CqBook>& CqEqshibitBase::book(const std::string& name)
+{
+	return(m_books.find(name)->second);
+}
 
 std::string CqEqshibitBase::currentBookName()
 {

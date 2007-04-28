@@ -239,8 +239,12 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			pImage->m_socket = sock;
 
 			// Send an OPEN message.
-			SqDDMessageOpen msg(width, height, iFormatCount, pImage->m_origin[0], pImage->m_origin[1], pImage->m_OriginalSize[0], pImage->m_OriginalSize[1], widestFormat);
-			msg.Send(pImage->m_socket);
+			SqDDMessageOpen openMsg(width, height, iFormatCount, pImage->m_origin[0], pImage->m_origin[1], pImage->m_OriginalSize[0], pImage->m_OriginalSize[1], widestFormat);
+			openMsg.Send(pImage->m_socket);
+			// And send a filename message
+			SqDDMessageFilename* fnameMsg = SqDDMessageFilename::Construct(filename);
+			fnameMsg->Send(pImage->m_socket);
+			fnameMsg->Destroy();
 			
 			TiXmlDocument displaydoc("display.xml");
 			TiXmlDeclaration* displaydecl = new TiXmlDeclaration("1.0","","yes");

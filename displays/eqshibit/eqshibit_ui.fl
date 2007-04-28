@@ -78,6 +78,30 @@ if(win && w)
 		win->currentBook()->framebuffer()->connect(image);
 		win->currentBook()->framebuffer()->update(-1,-1,-1,-1);
 	}
+}} {}
+  }
+  Function {updateImageList(const std::string& bookName)} {open return_type {virtual void}
+  } {
+    code {Fl_Widget* const* tabs = m_tabBooks->array();
+Fl_Multi_Browser* bookBrowser = 0;
+
+int tabIndex = 0;
+for(tabIndex = 0; tabIndex < m_tabBooks->children(); tabIndex++)
+{
+	if(std::string(tabs[tabIndex]->label()) == bookName)
+		bookBrowser = static_cast<Fl_Multi_Browser*>(tabs[tabIndex]);
+}
+
+if(0 != bookBrowser)
+{	
+	int line;
+	for(line = 1; line <= bookBrowser->size(); line++)
+	{
+		TqUlong imageID = reinterpret_cast<TqUlong>(bookBrowser->data(line));
+		boost::shared_ptr<Aqsis::CqImage> image = book(bookName)->image(imageID);
+		bookBrowser->text(line, image->name().c_str());
+	}
+	bookBrowser->redraw();
 }} {selected
     }
   }

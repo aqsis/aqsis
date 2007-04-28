@@ -133,6 +133,12 @@ void HandleData(int sock, void *data)
 			SqDDMessageData* dataMsg = reinterpret_cast<SqDDMessageData*>(buff);
 			thisClient->acceptData(dataMsg);
 		}
+		else if(msg.m_MessageID == MessageID_Filename)
+		{
+			SqDDMessageFilename* fnameMsg = reinterpret_cast<SqDDMessageFilename*>(buff);
+			thisClient->setName(std::string(fnameMsg->m_String, fnameMsg->m_StringLength));
+			window->updateImageList(window->currentBookName());
+		}
 		else if(msg.m_MessageID == MessageID_Close)
 		{
 			Aqsis::log() << Aqsis::debug << "Closing socket" << std::endl;

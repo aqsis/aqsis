@@ -49,7 +49,10 @@ public:
 	void	setCurrentBook(std::string name);
 	boost::shared_ptr<CqBook>& currentBook();
 	std::string currentBookName();
+	boost::shared_ptr<CqBook>& book(const std::string& name);
 	virtual TqUlong	addImageToCurrentBook(boost::shared_ptr<CqImage>& image);
+	virtual void updateImageList(const std::string& book)
+	{}
 
 private:
 	std::map<std::string, boost::shared_ptr<CqBook> >	m_books;
