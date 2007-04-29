@@ -2451,7 +2451,16 @@ RtVoid	RiGeometricApproximation( RtToken type, RtFloat value )
 
 	DEBUG_RIGEOMETRICAPPROXIMATION
 
-	Aqsis::log() << warning << "RiGeometricApproximation not supported" << std::endl;
+	if ( type != 0 && strstr( type, RI_FLATNESS ) )
+	{
+		TqFloat* flatnessAttr = QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite( "System", "GeometricFlatness" );
+		flatnessAttr[0] = value;
+		Aqsis::log() << warning << "RiGeometricApproximation flatness test not yet implemented" << std::endl;
+	}
+	else
+	{
+		Aqsis::log() << warning << "RiGeometricApproximation type not known" << std::endl;
+	}
 	return ;
 }
 
