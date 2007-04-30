@@ -952,26 +952,6 @@ class CqShadowMap : public CqTextureMap
 ;
 
 
-//=======================================================================
-// Implementation details for inline functions
-//-----------------------------------------------------------------------
-TqInt CqImageDownsampler::edgeWrap(TqInt pos, TqInt posMax, EqWrapMode mode)
-{
-	switch(mode)
-	{
-		case WrapMode_Clamp:
-		return clamp(pos, 0, posMax-1);
-		break;
-		case WrapMode_Periodic:
-		return pos = (pos + posMax) % posMax;
-		break;
-		case WrapMode_Black:
-		default:
-		return pos;
-	}
-}
-
-
 //-----------------------------------------------------------------------
 
 END_NAMESPACE( Aqsis )

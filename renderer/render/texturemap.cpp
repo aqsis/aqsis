@@ -1802,6 +1802,25 @@ void CqTextureMap::WriteTileImage( TIFF* ptex, TqPuchar raster, TqUlong width, T
 //----------------------------------------------------------------------
 // Implementation of CqImageDownsampler
 //----------------------------------------------------------------------
+// inline functions
+inline TqInt CqImageDownsampler::edgeWrap(TqInt pos, TqInt posMax, EqWrapMode mode)
+{
+	switch(mode)
+	{
+		case WrapMode_Clamp:
+		return clamp(pos, 0, posMax-1);
+		break;
+		case WrapMode_Periodic:
+		return pos = (pos + posMax) % posMax;
+		break;
+		case WrapMode_Black:
+		default:
+		return pos;
+	}
+}
+
+
+//----------------------------------------------------------------------
 CqImageDownsampler::CqImageDownsampler(TqFloat sWidth, TqFloat tWidth, RtFilterFunc filterFunc, EqWrapMode sWrapMode, EqWrapMode tWrapMode)
 	: m_sNumPts(0),
 	m_tNumPts(0),
