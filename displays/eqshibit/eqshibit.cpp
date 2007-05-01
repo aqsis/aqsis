@@ -118,7 +118,10 @@ void HandleData(int sock, void *data)
 
 			boost::shared_ptr<CqImage> baseImage = boost::static_pointer_cast<CqImage>(thisClient);
 			if(window->currentBook()->framebuffer())
+			{
 				window->currentBook()->framebuffer()->connect(baseImage);
+				window->currentBook()->framebuffer()->show();
+			}
 			else
 			{
 				Aqsis::log() << Aqsis::debug << "Creating a new FB window" << std::endl;

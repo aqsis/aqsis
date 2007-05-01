@@ -7,11 +7,11 @@ class CqEqshibitMainWindow {open : {public Aqsis::CqEqshibitBase}
   Function {CqEqshibitMainWindow()} {open
   } {
     Fl_Window m_window {open
-      private xywh {388 207 685 485} type Double resizable
+      private xywh {320 140 540 310} type Double resizable
       code0 {\#include "eqshibit.h"}
       code1 {\#include "eqshibitbase.h"}
       code2 {\#include <stdio.h>}
-      code3 {\#include <FL/Fl_Multi_Browser.H>} visible
+      code3 {\#include <FL/Fl_Browser.H>} visible
     } {
       Fl_Menu_Bar {} {open
         xywh {0 0 685 25}
@@ -36,15 +36,21 @@ class CqEqshibitMainWindow {open : {public Aqsis::CqEqshibitBase}
         }
       }
       Fl_Tabs m_tabBooks {open
-        private xywh {0 25 685 460} resizable
+        private xywh {0 25 540 285} resizable
       } {}
     }
   }
   Function {addNewBook(std::string name)} {open return_type {virtual void}
   } {
     code {CqEqshibitBase::addNewBook(name);
-Fl_Multi_Browser *o = new Fl_Multi_Browser(0, 50, 685, 435, name.c_str());
+Fl_Browser *o = new Fl_Browser(0, 50, m_tabBooks->w(), m_tabBooks->h(), name.c_str());
+m_columnWidths[0] = 200;
+m_columnWidths[1] = 0;
+o->column_widths(m_columnWidths);
+o->column_char('\\t');
+o->type(FL_MULTI_BROWSER);
 o->callback(&CqEqshibitMainWindow::select_cb, this);
+o->add("@b@B12@C7Name\\t@b@B12@C7Resolution");
 m_tabBooks->add(o);
 m_tabBooks->resizable(o);
 m_tabBooks->init_sizes();
@@ -60,20 +66,25 @@ m_tabBooks->redraw();} {}
 // Should update book list here to match the base, but for
 // now we'll just add the name to the browser.
 Fl_Widget* current = m_tabBooks->value();
-Fl_Multi_Browser* bcurr = static_cast<Fl_Multi_Browser*>(current);
-bcurr->add(image->name().c_str(), (void*)id);
-return( id );} {}
+Fl_Browser* bcurr = static_cast<Fl_Browser*>(current);
+std::stringstream item;
+item << image->name() << "\\t" << image->frameWidth() << "x" << image->frameHeight();
+bcurr->add(item.str().c_str(), (void*)id);
+bcurr->redraw();
+Fl::check();
+return( id );} {selected
+    }
   }
   Function {select_cb(Fl_Widget* w, void* d)} {open return_type {static void}
   } {
-    code {Fl_Multi_Browser* browser = static_cast<Fl_Multi_Browser*>(w);
+    code {Fl_Browser* browser = static_cast<Fl_Browser*>(w);
 CqEqshibitMainWindow* win = reinterpret_cast<CqEqshibitMainWindow*>(d);
-if(win && w)
+if(win && w && win->currentBook())
 {
 	int selected = browser->value();
 	TqUlong imageID = (TqUlong)browser->data(selected);
 	boost::shared_ptr<Aqsis::CqImage> image = win->currentBook()->image(imageID);
-	if(image)
+	if(image && win->currentBook()->framebuffer())
 	{
 		win->currentBook()->framebuffer()->connect(image);
 		win->currentBook()->framebuffer()->update(-1,-1,-1,-1);
@@ -83,26 +94,28 @@ if(win && w)
   Function {updateImageList(const std::string& bookName)} {open return_type {virtual void}
   } {
     code {Fl_Widget* const* tabs = m_tabBooks->array();
-Fl_Multi_Browser* bookBrowser = 0;
+Fl_Browser* bookBrowser = 0;
 
 int tabIndex = 0;
 for(tabIndex = 0; tabIndex < m_tabBooks->children(); tabIndex++)
 {
 	if(std::string(tabs[tabIndex]->label()) == bookName)
-		bookBrowser = static_cast<Fl_Multi_Browser*>(tabs[tabIndex]);
+		bookBrowser = static_cast<Fl_Browser*>(tabs[tabIndex]);
 }
 
 if(0 != bookBrowser)
 {	
 	int line;
-	for(line = 1; line <= bookBrowser->size(); line++)
+	for(line = 2 /* Skip the title */; line <= bookBrowser->size(); line++)
 	{
 		TqUlong imageID = reinterpret_cast<TqUlong>(bookBrowser->data(line));
 		boost::shared_ptr<Aqsis::CqImage> image = book(bookName)->image(imageID);
-		bookBrowser->text(line, image->name().c_str());
+		std::stringstream item;
+		item << image->name() << "\\t" << image->frameWidth() << "x" << image->frameHeight();
+		bookBrowser->text(line, item.str().c_str());
 	}
 	bookBrowser->redraw();
-}} {selected
-    }
+}} {}
   }
+  decl {int m_columnWidths[2];} {}
 } 
