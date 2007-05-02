@@ -666,8 +666,8 @@ class SHADERVM_SHARE CqShaderVM : public CqShaderStack, public IqShader, public 
 			for ( std::vector<IqShaderData*>::iterator i = m_LocalVars.begin(); i != m_LocalVars.end(); i++ )
 				if ( ( *i ) != NULL )
 					delete( *i );
-			for ( std::list<CqString*>::iterator i = m_ProgramStrings.begin(); i != m_ProgramStrings.end(); i++ )
-				delete *i;
+			for ( std::list<CqString*>::iterator j = m_ProgramStrings.begin(); j != m_ProgramStrings.end(); j++ )
+				delete *j;
 		}
 
 
