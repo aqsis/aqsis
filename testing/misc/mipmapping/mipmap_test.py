@@ -17,76 +17,43 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-# This script investigates some of the factors important when downsampling an
-# image:
-#
-# * Filter types
-# * Filter windows
-# * Correctly filtering odd and even-sized images
-
 from __future__ import division
 
 import matplotlib.pylab as pylab
 
 import numpy
-from numpy import r_, size, zeros, ones, ceil, floor, array, linspace, meshgrid
+from numpy import pi, r_, size, zeros, ones, ceil, floor, array, linspace, meshgrid
 
 import scipy
+from scipy import cos
 from scipy.signal import boxcar, convolve2d as conv2
 from scipy.misc import imsave, imread
 
-#----------------------------------------------------------------------
-#----------------------------------------------------------------------
-# Windowing functions
-#----------------------------------------------------------------------
-def lanczos(N, tau=1):
-	'''
-	return N-point Lanczos window with width tau
-	'''
-	return scipy.sinc(linspace(-1,1,N)/tau)
-
-
-#----------------------------------------------------------------------
-def makeTrimmedWindow(winFunc):
-	'''
-	Return a window function constructed from the given window function, but
-	without the two edge points (see natWin).
-	'''
-	return lambda N, *args: winFunc(N+2, *args)[1:-1]
-
-
-#----------------------------------------------------------------------
-def applyWindow(ker, windowFunc):
-	'''
-	Window a filter kernel with the given windowing function.
-	'''
-	window = windowFunc(len(ker))
-	window = numpy.outer(window, window)
-	return ker * window
-
+# The purpose of this script is to investigate mipmap generation and indexing
+# in more-or-less the same way which it will be used internally by Aqsis.
 
 #----------------------------------------------------------------------
 #----------------------------------------------------------------------
-# Filter Kernels
+# Filter Kernels, including any windowing.
 #----------------------------------------------------------------------
-def sincKer(width, scale):
+def sincKer(width, even, scale = 2):
 	'''
 	Return a sinc filter kernel with specified width and scale
 	
-	width - total number of points in the filter (not radius!)
+	width - width of the filter (used by the window)
+	even - true if the generated filter should have an even number of points.
 	scale - zeros will be centered around 0 with spacing "scale"
 	'''
-	x = r_[0:width+1]-width*0.5
-	k = numpy.outer(scipy.sinc(x/scale), scipy.sinc(x/scale))
-	return k
-
-
-#----------------------------------------------------------------------
-def boxKer(width, scale):
-	'''
-	Trivial box filter kernel
-	'''
-	return ones(width+1)
+	if even:
+		numPts = max(2*int((width+1)/2), 2)
+	else:
+		numPts = max(2*int(width/2) + 1, 3)
+	x = r_[0:numPts]-(numPts-1)*0.5
+	k = scipy.sinc(x/scale)
+	k *= cos(linspace(-pi/4,pi/4,len(k)))
+	ker = numpy.outer(k,k)
+	ker /= sum(sum(ker))
+	return ker
 
 
 #----------------------------------------------------------------------
@@ -130,26 +97,21 @@ def imDownsamp(im, ker, skip):
 	res = imConv(im,ker)
 	#res = imConv(im,ker,seperableConv2)
 	res = res[(skip-1)//2::skip, (skip-1)//2::skip, :]
-	res = clamp(res)
+	res = imClamp(res)
 	return res
 
 
 #----------------------------------------------------------------------
-def trilinear():
-	'''
-	Trilinear interpolation (not implemented...)
-	'''
-	pass
-
-
-#----------------------------------------------------------------------
-def clamp(im):
+def imClamp(im):
 	'''
 	Clamp an image between zero and one.
 	'''
 	return numpy.minimum(numpy.maximum(im,0),1)
 
 
+#----------------------------------------------------------------------
+#----------------------------------------------------------------------
+# Functions for creating test images
 #----------------------------------------------------------------------
 def getGridImg(N, gridSize):
 	'''
@@ -178,63 +140,144 @@ def getGridImg(N, gridSize):
 
 #----------------------------------------------------------------------
 #----------------------------------------------------------------------
-# Functions for creating/manipulating mipmaps
+# Utils for creating/manipulating mipmaps
 #----------------------------------------------------------------------
-def genMipmapIter(im, width, selectWidth, windowFunc, kerFunc):
+
+#----------------------------------------------------------------------
+class MipLevel:
 	'''
-	Generate a mipmap by downsampling each image in turn to get the next level.
-	
-	im - input image
-	width - desired "width" of filter kernel.  the kernel will have width+1 points.
-	selectWidth - whether the function should try to adjust the filter width for
-	even/odd sized images.  To avoid loosing information, even
-	filters should go with even sized images and vice versa
-	windowFunc  - windowing function to use on the filter.
-	
+	Class to hold a level of mipmap.
 	'''
+	def __init__(self, data, sOffset, tOffset):
+		self.data = data
+		self.sOffset = sOffset
+		self.tOffset = tOffset
 
-	mipmap = []
-
-	scale = 2
-
-	ker = kerFunc(width, scale)
-	ker = applyWindow(ker, windowFunc)
-
-	while size(im,0) > 1:
-		mipmap.append(im)
-
-		if selectWidth:
-			if (size(im,0) + width + 1) % 2 == 0:
-				ker = kerFunc(width,scale)
-			else:
-				ker = kerFunc(width+1,scale)
-			ker = applyWindow(ker, windowFunc)
+	def sample(self, s, t):
+		'''
+		Sample the mipmap level at the coordinates specified by i and j (may be
+		arrays)
+		'''
 		
-		print 'side length = %d,  number of points in filter = %d' \
-			% (size(im,0), len(ker))
-		im = imDownsamp(im, ker, scale)
-
-	return mipmap
-
 
 
 #----------------------------------------------------------------------
-def genMipmapIterDownsamp4(im, width, selectWidth, windowFunc, kerFunc):
-	'''
-	Same as genMipmapIter, except tries to downsample by a factor of 4 rather
-	than two when possible.
-	
-	(Beware: ugly hack)
-	'''
-	pass
+# Musings on methods of creating and accessing mipmaps
+#
+# Consider a mipmap. Let:
+# t = texture coordinates; 0 <= t <= 1.
+# l = mipmap level
+# 
+# Consider the following variables:
+# i_l(t) = raster coordinates for level l as a function of texture coordinate t.
+# o_l = offset for level l in level 0 units
+# w_l = width of level l in level 0 units
+# s_l = size of level l in pixels.
+# 
+# Example mipmap, created with my current scheme:
+#     0   1   2   3   4  <-- i_0
+# l   |   |   |   |   |   o_l  w_l  s_l
+# 0  [x   x   x   x   x]  0    4    5
+# 1  [x       x       x]  0    2    3
+# 2  [x               x]  0    1    2
+# 3  [        x        ]  2    0    1
+# 
+# Another example (powers of two)
+#     0   1   2   3   4   5   6   7 <-- i_0
+# l   |   |   |   |   |   |   |   |   o_l   w_l  s_l
+# 0  [x   x   x   x   x   x   x   x]  0     7    8
+# 1  [  x       x       x       x  ]  0.5   6    4
+# 2  [      x               x      ]  1.5   4    2
+# 3  [              x              ]  3.5   0    1
+# 
+# Formula for texture coordinates -> raster space
+# 
+# w_l = (w_0 - 2*o_l)
+# 
+# Raster units for level 0 are:
+# i_0(t) = t * w_0
+# Raster units for level l are:
+# i_l(t) = (i_0 - o_0)/w_l
+# 
+# Or, what we really need, which is raster units for level l in terms of
+# the texture coordinate t:
+# i_l(t) = (t * w_0 - o_0)/w_l
+# 
+# 
+# Lesson: odd texture sizes make it easy to index; even sizes are hard.
+# 
+# 
+# Abandoning the constant-coefficients approach (makes it very slow to generate
+# mipmaps), we would have:
+# 
+#     0   1   2   3   4   5   6   7 <-- i_0
+# l   |   |   |   |   |   |   |   |   o_l   w_l  s_l
+# 0  [x   x   x   x   x   x   x   x]  0     7    8
+# 1  [x        x         x        x]  0     7    4
+# 2  [x                           x]  0     7    2
+# 3  [              x              ]  0     7    1
+# 
+# The the raster units for level l in terms of the texture coordinates t
+# are then very simple:
+# 
+# i_l(t) = t*(s_l - 1)
 
+#----------------------------------------------------------------------
+# New test implementation of mipmapping
+class MipMap:
+	'''
+	Class to encapsulate a (power-of-2) mipmapped texture in much the same way
+	mipmapping will be done internally in Aqsis.
+	'''
+	def __init__(self, img, filterWidth, kerFunc=sincKer):
+		self.filterWidth = filterWidth
+		self.kerFunc = kerFunc
+		self.genMipMap(img)
+
+	def genMipMap(self, img):
+		self.levels = []
+
+		scale = 2
+		self.levels.append(img)
+		while size(img,0) > 1:
+			ker = self.kerFunc(self.filterWidth, (size(img,0) % 2) == 0, scale)
+			img = imgDownsamp(img, ker, scale)
+			self.levels.append(img)
+			print 'generated level:  side length = %d,  number of points in filter = %d' \
+				% (size(img,0), len(ker))
+
+	def getLevelSizes(imgWidth):
+		'''
+		Get the desired widths of a mipmap as a list
+
+		The widths result from the process as follows (x's represent sample points)
+		Even number of points:
+			[x x x x]
+			->
+			[ x   x ]
+		Odd number of points:
+			[x x x x x]
+			->
+			[x   x   x]
+		'''
+		widths = [imgWidth]
+		while imgWidth > 1:
+			imgWidth = (imgWidth+1)/2
+			widths.append(imgWidth)
+		return widths
+
+	def sampleTrilinera(self):
+		'''
+		Implement trilinear sampling
+		'''
+		pass
 
 #----------------------------------------------------------------------
 def flattenImageList(mipmap, dim):
 	'''
 	"Flatten" mipmap levels into a single image.
 	
-	mipmap - cell array of scaled images
+	mipmap - list of scaled images
 	dim - dimension number to lay the images out along
 	'''
 
@@ -259,60 +302,6 @@ def flattenImageList(mipmap, dim):
 #----------------------------------------------------------------------
 # High level driver functions.
 #----------------------------------------------------------------------
-def compareOddEven(im):
-	'''
-	Compare the difference between sampling an image with an odd or even-sized
-	filter.
-	'''
-
-	kerFunc = sincKer
-	windowFunc = makeTrimmedWindow(lanczos)
-
-	# Use an odd-width filter
-	mipmap = genMipmapIter(im, 7, False, windowFunc, kerFunc)
-	imsave('mipmap_odd_width.png', flattenImageList(mipmap,1))
-
-	# Use an even-width filter
-	mipmap = genMipmapIter(im, 8, False, windowFunc, kerFunc)
-	imsave('mipmap_even_width.png', flattenImageList(mipmap,1))
-
-
-#----------------------------------------------------------------------
-def investigateWindowTypes(im, kerFunc):
-	'''
-	grab the level-three mipmaps arising from using a bunch of windows with
-	a fixed filter kernel.
-	'''
-
-	# generate a version using the boxcar kernel [1,1] for reference.
-	mipmap = genMipmapIter(im, 1, True, boxcar, boxker)
-	miplevel3 = [mipmap[3]]
-
-	winfuncs = [lanczos, hamming, hanning, blackman, boxcar]
-	# generate mipmaps using the other window functions
-	for func in winfuncs:
-		mipmap = genMipmapIter(im, 7, True, func, kerfunc)
-		miplevel3.append(mipmap[3])
-
-	imsave('mipmap_lvl3_all_wins.png', flattenImageList(miplevel3,1))
-
-
-#----------------------------------------------------------------------
-def plotWindowFuncs(N):
-	'''
-	Plot various window functions.
-	'''
-	# Try kaiser window - just need to choose a width...
-	winFuncs = [lanczos, hamming, hanning, blackman, boxcar]
-	winFuncNames = ['lanczos', 'hamming', 'hanning', 'blackman', 'boxcar']
-	clf()
-	hold(True)
-	for func in winFuncs:
-		plot(func(N))
-
-	legend(winFuncNames)
-	axis([1,N,0,1.05])
-
 
 #----------------------------------------------------------------------
 # Main program
@@ -320,18 +309,8 @@ def plotWindowFuncs(N):
 
 if __name__ == '__main__':
 	# Choose image
-	im = imread('lena_std.png')[:,:,:3]/256.0
-	#im = getGridImg(246, 20)
-
-	# Compare odd and even filter sizes on the same image
-	compareOddEven(im)
-
-	# Compare convolution strategies for square seperable filters.
-
-	# Get a mipmap
+	#im = imread('testbox.png')[:,:,:3]/256.0
 	#mipmap = genMipmapIter(im, 7, True, boxcar, sincKer)
-	# show/save mipmap
-	#mipAll = flattenImageList(mipmap, 1)
-	#pylab.imshow(mipAll, interpolation='nearest')
 	#pylab.imshow(mipAll)
 	#imsave('mipmap.png', mipAll)
+	pass
