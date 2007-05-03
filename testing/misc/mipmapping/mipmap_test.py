@@ -25,8 +25,9 @@ import numpy
 from numpy import pi, r_, size, zeros, ones, ceil, floor, array, linspace, meshgrid
 
 import scipy
-from scipy import cos
+from scipy import cos, ogrid, ndimage
 from scipy.signal import boxcar, convolve2d as conv2
+# Use ndimage.convolve!
 from scipy.misc import imsave, imread
 
 # The purpose of this script is to investigate mipmap generation and indexing
@@ -50,63 +51,25 @@ def sincKer(width, even, scale = 2):
 		numPts = max(2*int(width/2) + 1, 3)
 	x = r_[0:numPts]-(numPts-1)*0.5
 	k = scipy.sinc(x/scale)
-	k *= cos(linspace(-pi/4,pi/4,len(k)))
+	k *= cos(linspace(-pi/2,pi/2,len(k)))
 	ker = numpy.outer(k,k)
-	ker /= sum(sum(ker))
+	ker /= sum(ker.ravel())
 	return ker
 
 
 #----------------------------------------------------------------------
 # Image manipuation
 #----------------------------------------------------------------------
-def seperableConv2(A, k, *args):
+def applyToChannels(img, fxn, *args, **kwargs):
 	'''
-	perform a 2D convolution, assuming that the convolution kernel k is
-	square-seperable.  In this case we may just do two 1D convolutions.
+	Apply the given function to each of the channels in img in turn.
+	Additional positional and keyword arguments are passed to the called fxn.
 	'''
-	center = array(k.shape)//2
-	k0 = k[center[0]:center[0]+1,:]
-	k1 = k[:,center[1]:center[1]+1]
-	return conv2(conv2(A,k0, *args),k1, *args)
-
-
-#----------------------------------------------------------------------
-def imConv(im, ker, conv2Func=conv2):
-	'''
-	Convolve an image with the given filter kernel
-	'''
-	res = zeros(im.shape)
-	normalisation = conv2Func(ones(im.shape[0:2],'d'), ker, 'full')
-	# compute how much of the full convolution to trim from top left and bottom right
-	trimTl = numpy.int_(ceil((array(ker.shape)-1)/2))
-	trimBr = numpy.int_(floor((array(ker.shape)-1)/2))
-	for ii in range(0,size(im,2)):
-		fullconv = conv2Func(im[:,:,ii], ker, 'full') / normalisation
-		res[:,:,ii] = fullconv[trimTl[0]:-trimBr[0], trimTl[1]:-trimBr[1]]
-	return res
-
-
-#----------------------------------------------------------------------
-def imDownsamp(im, ker, skip):
-	'''
-	Downsample an image by
-	(1) Applying the filter kernel ker at each pixel
-	(2) Decimate by taking elements 0::skip from the result
-	(3) Clamp the resulting intensities between 0 and 1 
-	'''
-	res = imConv(im,ker)
-	#res = imConv(im,ker,seperableConv2)
-	res = res[(skip-1)//2::skip, (skip-1)//2::skip, :]
-	res = imClamp(res)
-	return res
-
-
-#----------------------------------------------------------------------
-def imClamp(im):
-	'''
-	Clamp an image between zero and one.
-	'''
-	return numpy.minimum(numpy.maximum(im,0),1)
+	numChannels = img.shape[-1]
+	outList = []
+	for i in range(0,numChannels):
+		outList.append(fxn(img[:,:,i], *args, **kwargs))
+	return array(outList).transpose([1,2,0])
 
 
 #----------------------------------------------------------------------
@@ -144,24 +107,6 @@ def getGridImg(N, gridSize):
 #----------------------------------------------------------------------
 
 #----------------------------------------------------------------------
-class MipLevel:
-	'''
-	Class to hold a level of mipmap.
-	'''
-	def __init__(self, data, sOffset, tOffset):
-		self.data = data
-		self.sOffset = sOffset
-		self.tOffset = tOffset
-
-	def sample(self, s, t):
-		'''
-		Sample the mipmap level at the coordinates specified by i and j (may be
-		arrays)
-		'''
-		
-
-
-#----------------------------------------------------------------------
 # Musings on methods of creating and accessing mipmaps
 #
 # Consider a mipmap. Let:
@@ -171,37 +116,38 @@ class MipLevel:
 # Consider the following variables:
 # i_l(t) = raster coordinates for level l as a function of texture coordinate t.
 # o_l = offset for level l in level 0 units
-# w_l = width of level l in level 0 units
-# s_l = size of level l in pixels.
+# s_l = span of level l in level 0 units
+# d_l = interval between pixels of level l in level 0 raster units.
+# w_l = width of level l in pixels.
 # 
 # Example mipmap, created with my current scheme:
 #     0   1   2   3   4  <-- i_0
-# l   |   |   |   |   |   o_l  w_l  s_l
-# 0  [x   x   x   x   x]  0    4    5
-# 1  [x       x       x]  0    2    3
-# 2  [x               x]  0    1    2
-# 3  [        x        ]  2    0    1
+# l   |   |   |   |   |   o_l  s_l  w_l  d_l
+# 0  [x   x   x   x   x]  0    4    5    1
+# 1  [x       x       x]  0    2    3    2
+# 2  [x               x]  0    1    2    4
+# 3  [        x        ]  2    0    1    ?
 # 
 # Another example (powers of two)
 #     0   1   2   3   4   5   6   7 <-- i_0
-# l   |   |   |   |   |   |   |   |   o_l   w_l  s_l
+# l   |   |   |   |   |   |   |   |   o_l   s_l  w_l
 # 0  [x   x   x   x   x   x   x   x]  0     7    8
 # 1  [  x       x       x       x  ]  0.5   6    4
 # 2  [      x               x      ]  1.5   4    2
 # 3  [              x              ]  3.5   0    1
 # 
-# Formula for texture coordinates -> raster space
+# Formulas for texture coordinates -> raster space
 # 
-# w_l = (w_0 - 2*o_l)
+# s_l = (s_0 - 2*o_l)
 # 
 # Raster units for level 0 are:
-# i_0(t) = t * w_0
+# i_0(t) = t * s_0
 # Raster units for level l are:
-# i_l(t) = (i_0 - o_0)/w_l
+# i_l(t) = (i_0(t) - o_0)/d_l
 # 
 # Or, what we really need, which is raster units for level l in terms of
 # the texture coordinate t:
-# i_l(t) = (t * w_0 - o_0)/w_l
+# i_l(t) = t * s_0/d_l - o_0/d_l
 # 
 # 
 # Lesson: odd texture sizes make it easy to index; even sizes are hard.
@@ -211,7 +157,7 @@ class MipLevel:
 # mipmaps), we would have:
 # 
 #     0   1   2   3   4   5   6   7 <-- i_0
-# l   |   |   |   |   |   |   |   |   o_l   w_l  s_l
+# l   |   |   |   |   |   |   |   |   o_l   s_l  w_l
 # 0  [x   x   x   x   x   x   x   x]  0     7    8
 # 1  [x        x         x        x]  0     7    4
 # 2  [x                           x]  0     7    2
@@ -220,88 +166,108 @@ class MipLevel:
 # The the raster units for level l in terms of the texture coordinates t
 # are then very simple:
 # 
-# i_l(t) = t*(s_l - 1)
+# i_l(t) = t*(w_l - 1)
+
 
 #----------------------------------------------------------------------
-# New test implementation of mipmapping
+class ImageDownsampler:
+	'''
+	Class which holds a filter kernel (function & width) and is able to
+	correctly use it to downsample odd or even-sized images.
+	'''
+	def __init__(self, kerWidth, kerFunc=sincKer):
+		self.kerFunc = kerFunc
+		self.kerWidth = kerWidth
+	def downsample(self, img):
+		'''
+		Downsample an image by
+		(1) Applying the filter kernel at each pixel
+		(2) Decimate by taking elements 0::2 from the result
+		(3) Clamp the resulting intensities between 0 and 1 
+		'''
+		ker = self.kerFunc(self.kerWidth, (size(img,0) % 2) == 0)
+		res = applyToChannels(img, ndimage.correlate, ker, mode='constant', cval=0)
+		res = res[(1-(size(img,0) % 2))::2, (1-(size(img,1) % 2))::2, :]
+		res = res.clip(min=0, max=1)
+		return res
+
+#----------------------------------------------------------------------
+class MipLevel:
+	'''
+	Class to hold a level of mipmap, which knows how to bilinear interpolation
+	on itself.
+	'''
+	def __init__(self, image, offset, mult):
+		'''
+		image - pixel data; a NxMx3 array
+		offset, mult - length two vectors which specify an affine
+			transformation from texture coordinates to this mipmap's raster
+			coordinates:
+			i = mult[0] * s + offset[0]
+			j = mult[1] * t + offset[1]
+		'''
+		self.image = image
+		self.offset = offset.copy()
+		self.mult = mult
+
+	def sample(self, s, t):
+		'''
+		Sample the mipmap level at the coordinates specified by s and t.  For
+		performance, s & t should be 1D arrays.
+		'''
+		i = self.mult[0]*s + self.offset[0]
+		j = self.mult[1]*t + self.offset[1]
+		return applyToChannels(self.image, ndimage.map_coordinates, \
+				array([i,j]), order=1, mode='constant', cval=0)
+
+	def display(self):
+		pylab.imshow(self.image, interpolation='nearest')
+
+
+#----------------------------------------------------------------------
 class MipMap:
 	'''
 	Class to encapsulate a (power-of-2) mipmapped texture in much the same way
 	mipmapping will be done internally in Aqsis.
 	'''
 	def __init__(self, img, filterWidth, kerFunc=sincKer):
-		self.filterWidth = filterWidth
-		self.kerFunc = kerFunc
+		self.downsampler = ImageDownsampler(filterWidth, kerFunc)
+		self.levels = []
 		self.genMipMap(img)
 
 	def genMipMap(self, img):
-		self.levels = []
-
 		scale = 2
-		self.levels.append(img)
-		while size(img,0) > 1:
-			ker = self.kerFunc(self.filterWidth, (size(img,0) % 2) == 0, scale)
-			img = imgDownsamp(img, ker, scale)
-			self.levels.append(img)
-			print 'generated level:  side length = %d,  number of points in filter = %d' \
-				% (size(img,0), len(ker))
+		level0Span = array(img.shape[0:2])-1
+		offset = array([0,0],'d')
+		self.levels = [MipLevel(img, offset, level0Span)]
+		# delta is distance between pixels; level 0 units
+		delta = 1
+		# offsets are between 1st pixel of 0th level to 1st pixel of current level
+		#
+		# eg, in 1D
+		#     [x   x   x   x..]
+		#          <--->          <- level 0 delta
+		#     [  x       x ...]
+		#      <->                <- level 1 offset
+		while (array(img.shape[0:2]) > 1).all():
+			# calculate start offsets for this level.
+			offset += (1-(array(img.shape[0:2]) % 2))*delta/2
+			delta *= 2
+			# downsample
+			img = self.downsampler.downsample(img)
+			# create a new MipLevel to hold the image.
+			self.levels.append(MipLevel(img, -offset/delta, level0Span/delta))
+			print 'generated level size', img.shape[0:2]
 
-	def getLevelSizes(imgWidth):
+	def sampleTrilinear(self):
 		'''
-		Get the desired widths of a mipmap as a list
-
-		The widths result from the process as follows (x's represent sample points)
-		Even number of points:
-			[x x x x]
-			->
-			[ x   x ]
-		Odd number of points:
-			[x x x x x]
-			->
-			[x   x   x]
-		'''
-		widths = [imgWidth]
-		while imgWidth > 1:
-			imgWidth = (imgWidth+1)/2
-			widths.append(imgWidth)
-		return widths
-
-	def sampleTrilinera(self):
-		'''
-		Implement trilinear sampling
+		Trilinear sampling
 		'''
 		pass
 
-#----------------------------------------------------------------------
-def flattenImageList(mipmap, dim):
-	'''
-	"Flatten" mipmap levels into a single image.
-	
-	mipmap - list of scaled images
-	dim - dimension number to lay the images out along
-	'''
+	def displayLevel(self, level):
+		self.levels[level].display()
 
-	len = 0
-	for mipLevel in mipmap:
-		len += size(mipLevel,dim)
-	mipSize = list(mipmap[0].shape)
-	mipSize[dim] = len
-
-	mipmapImg = ones(mipSize)*0.7
-	pos = 0
-	for mipLevel in mipmap:
-		if dim == 0:
-			mipmapImg[pos:pos+size(mipLevel,0), 0:size(mipLevel,1), :] = mipLevel
-		else:
-			mipmapImg[0:size(mipLevel,0), pos:pos+size(mipLevel,1), :] = mipLevel
-		pos += size(mipLevel,0)
-
-	return mipmapImg
-
-
-#----------------------------------------------------------------------
-# High level driver functions.
-#----------------------------------------------------------------------
 
 #----------------------------------------------------------------------
 # Main program
@@ -309,8 +275,5 @@ def flattenImageList(mipmap, dim):
 
 if __name__ == '__main__':
 	# Choose image
-	#im = imread('testbox.png')[:,:,:3]/256.0
-	#mipmap = genMipmapIter(im, 7, True, boxcar, sincKer)
-	#pylab.imshow(mipAll)
-	#imsave('mipmap.png', mipAll)
-	pass
+	im = imread('lena_std.png')[:,:,:3]/256.0
+	mipmap = MipMap(im, 8)
