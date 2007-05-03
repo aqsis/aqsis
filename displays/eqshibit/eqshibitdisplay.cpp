@@ -246,9 +246,101 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			fnameMsg->Send(pImage->m_socket);
 			fnameMsg->Destroy();
 			
-			TiXmlDocument displaydoc("display.xml");
+			TiXmlDocument displaydoc("open.xml");
 			TiXmlDeclaration* displaydecl = new TiXmlDeclaration("1.0","","yes");
+			TiXmlElement* openMsgXML = new TiXmlElement("Open");
+
+			TiXmlElement* nameXML = new TiXmlElement("Name");
+			TiXmlText* nameText = new TiXmlText(filename);
+			nameXML->LinkEndChild(nameText);
+			openMsgXML->LinkEndChild(nameXML);
+
+			TiXmlElement* typeXML = new TiXmlElement("Type");
+			TiXmlText* typeText = new TiXmlText(drivername);
+			typeXML->LinkEndChild(typeText);
+			openMsgXML->LinkEndChild(typeXML);
+
+			TiXmlElement* dimensionsXML = new TiXmlElement("Dimensions");
+			dimensionsXML->SetAttribute("width", width);
+			dimensionsXML->SetAttribute("height", height);
+			openMsgXML->LinkEndChild(dimensionsXML);
+
+			TiXmlElement* paramsXML = new TiXmlElement("Parameters");
+			int iparam;
+			for(iparam = 0; iparam < paramCount; iparam++)
+			{
+				switch(parameters[iparam].vtype)
+				{
+					case 'i':
+					{
+						TiXmlElement* param = new TiXmlElement("IntsParameter");
+						param->SetAttribute("name", parameters[iparam].name);
+						paramsXML->LinkEndChild(param);
+						int ivalue;
+						int* pvalues = reinterpret_cast<int*>(parameters[iparam].value);
+						TiXmlElement* values = new TiXmlElement("Values");
+						for(ivalue = 0; ivalue < parameters[iparam].vcount; ++ivalue)
+						{
+							TiXmlElement* value = new TiXmlElement("Int");
+							value->SetAttribute("value", pvalues[ivalue]);
+							values->LinkEndChild(value);
+						}
+						param->LinkEndChild(values);
+						break;
+					}
+
+					case 'f':
+					{
+						TiXmlElement* param = new TiXmlElement("FloatsParameter");
+						param->SetAttribute("name", parameters[iparam].name);
+						paramsXML->LinkEndChild(param);
+						int ivalue;
+						float* pvalues = reinterpret_cast<float*>(parameters[iparam].value);
+						TiXmlElement* values = new TiXmlElement("Values");
+						for(ivalue = 0; ivalue < parameters[iparam].vcount; ++ivalue)
+						{
+							TiXmlElement* value = new TiXmlElement("Float");
+							value->SetAttribute("value", pvalues[ivalue]);
+							values->LinkEndChild(value);
+						}
+						param->LinkEndChild(values);
+						break;
+					}
+
+					case 's':
+					{
+						TiXmlElement* param = new TiXmlElement("StringsParameter");
+						param->SetAttribute("name", parameters[iparam].name);
+						paramsXML->LinkEndChild(param);
+						int ivalue;
+						char** pvalues = reinterpret_cast<char**>(parameters[iparam].value);
+						TiXmlElement* values = new TiXmlElement("Values");
+						for(ivalue = 0; ivalue < parameters[iparam].vcount; ++ivalue)
+						{
+							TiXmlElement* value = new TiXmlElement("String");
+							TiXmlText* valueText = new TiXmlText(pvalues[ivalue]);
+							value->LinkEndChild(valueText); 
+							values->LinkEndChild(value);
+						}
+						param->LinkEndChild(values);
+						break;
+					}
+				}
+			}
+			openMsgXML->LinkEndChild(paramsXML);
+
+			TiXmlElement* formatsXML = new TiXmlElement("Formats");
+			int iformat;
+			for(iformat = 0; iformat < iFormatCount; ++iformat)
+			{
+				TiXmlElement* formatv = new TiXmlElement("Format");
+				formatv->SetAttribute("name", format[iformat].name);
+				formatsXML->LinkEndChild(formatv);
+			}
+			openMsgXML->LinkEndChild(formatsXML);
+
 			displaydoc.LinkEndChild(displaydecl);
+			displaydoc.LinkEndChild(openMsgXML);
 			displaydoc.Print();
 		}
 	} else 
