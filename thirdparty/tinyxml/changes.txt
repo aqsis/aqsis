@@ -212,3 +212,43 @@ Changes in version 2.1.5
 - Fixed CDATA output formatting
 - Fixed memory allocators in TinyString to work with overloaded new/delete
 
+2.4.2
+- solosnake pointed out that TIXML_LOG causes problems on an XBOX. The definition in the header
+  was superflous and was moved inside of DEBUG_PARSING
+
+2.4.3
+- Fixed a test bug that caused a crash in 'xmltest'. TinyXML was fine, but it isn't good
+  to ship with a broken test suite.
+- Started converting some functions to not cast between std::string and const char* 
+  quite as often.
+- Added FILE* versions of the document loads - good suggestion from Wade Brainerd
+- Empty documents might not always return the errors they should. [1398915] Thanks to igor v.
+- Added some asserts for multiply adding a node, regardng bug [1391937] suggested by Paco Arjonilla.
+
+2.4.4
+- Bug find thanks to andre-gross found a memory leak that occured when a document failed to load.
+- Bug find (and good analysis) by VirtualJim who found a case where attribute parsing 
+  should be throwing an error and wasn't.
+- Steve Hyatt suggested the QueryValueAttribute method, which is now implemented.
+- DavidA identified a chunk of dead code.
+- Andrew Baxter sent in some compiler warnings that were good clean up points.
+
+2.5
+- Added the Visit() API. Many thanks to both Andrew Ellerton and John-Philip for all their
+  work, code, suggestion, and just general pushing that it should be done.
+- Removed existing streaming code and use TiXmlPrinter instead.
+- [ tinyxml-Bugs-1527079 ] Compile error in tinystr.cpp fixed, thanks to Paul Suggs
+- [ tinyxml-Bugs-1522890 ] SaveFile has no error checks fixed, thanks to Ivan Dobrokotov
+- Ivan Dobrokotov also reported redundant memory allocation in the Attribute() method, which
+  upon investigation was a mess. The attribute should now be fixed for both const char* and 
+  std::string, and the return types match the input parameters.
+- Feature [ 1511105 ] Make TiXmlComment constructor accept a string / char*, implemented.
+  Thanks to Karl Itschen for the feedback.
+- [ 1480108 ] Stream parsing fails when CDATA contains tags was found by Tobias Grimm, who also
+  submitted a test case and patch. A significant bug in CDATA streaming (operator>>) has now
+  been fixed.
+
+2.5.2
+- Lieven, and others, pointed out a missing const-cast that upset the Open Watcom compiler.
+  Should now be fixed.
+- ErrorRow and ErrorCol should have been const, and weren't. Fixed thanks to Dmitry Polutov.
