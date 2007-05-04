@@ -7,36 +7,36 @@ class CqEqshibitMainWindow {open : {public Aqsis::CqEqshibitBase}
   Function {CqEqshibitMainWindow()} {open
   } {
     Fl_Window m_window {open
-      private xywh {320 140 540 310} type Double resizable
+      private xywh {359 262 540 310} type Double resizable
       code0 {\#include "eqshibit.h"}
       code1 {\#include "eqshibitbase.h"}
       code2 {\#include <stdio.h>}
       code3 {\#include "resizebrowser.h"} visible
     } {
       Fl_Menu_Bar {} {open
-        xywh {0 0 685 25}
+        xywh {0 0 685 25} box THIN_UP_BOX
       } {
         Submenu {} {
-          label Book open
+          label {&File} open
           xywh {0 0 100 20}
         } {
           MenuItem m_menuBookNew {
-            label New
+            label {&New}
             callback {addNewBook("Book1");}
             private xywh {0 0 100 20} shortcut 0x4006e
           }
           MenuItem m_menuBookOpen {
-            label Open
+            label {&Open}
             private xywh {0 0 100 20} shortcut 0x4006f
           }
           MenuItem m_menuBookSave {
-            label Save
+            label {&Save}
             private xywh {0 0 100 20} shortcut 0x40073
           }
         }
       }
       Fl_Tabs m_tabBooks {open
-        private xywh {0 25 540 285} resizable
+        private xywh {0 29 540 281} resizable
       } {}
     }
   }
@@ -50,12 +50,13 @@ o->column_widths(m_columnWidths);
 o->column_char('\\t');
 o->type(FL_MULTI_BROWSER);
 o->callback(&CqEqshibitMainWindow::select_cb, this);
-o->add("@b@B12@C7Name\\t@b@B12@C7Resolution");
+o->add("@b@B40@C7Name\\t@b@B40@C7Resolution");
 o->showcolsep(1);
 m_tabBooks->add(o);
 m_tabBooks->resizable(o);
 m_tabBooks->init_sizes();
-m_tabBooks->redraw();} {}
+m_tabBooks->redraw();} {selected
+    }
   }
   Function {show(int argc, char **argv)} {open
   } {
@@ -115,8 +116,7 @@ if(0 != bookBrowser)
 		bookBrowser->text(line, item.str().c_str());
 	}
 	bookBrowser->redraw();
-}} {selected
-    }
+}} {}
   }
   decl {int m_columnWidths[2];} {}
 } 
