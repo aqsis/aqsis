@@ -72,6 +72,7 @@ extern "C"
 }
 #endif
 
+static int sendXMLMessage(TiXmlDocument& msg, int sock);
 
 PtDspyError DspyImageOpen(PtDspyImageHandle * image,
                           const char *drivername,
@@ -85,7 +86,6 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
                           PtFlagStuff *flagstuff)
 {
 	SqDisplayInstance* pImage;
-	static TqInt iFramebufferPID = 0;
 
 	pImage = new SqDisplayInstance;
 	flagstuff->flags = 0;
@@ -93,10 +93,6 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 	if(pImage)
 	{
 		// Store the instance information so that on re-entry we know which display is being referenced.
-		pImage->m_height = height;
-		pImage->m_width = width;
-		pImage->m_iFormatCount = iFormatCount;
-
 		*image = pImage;
 
 		pImage->m_filename = new char[strlen(filename)+1];
@@ -128,30 +124,6 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 		if( err != PkDspyErrorNone )
 		{
 			return(err);
-		}
-
-		pImage->m_lineLength = pImage->m_entrySize * pImage->m_width;
-		pImage->m_format = widestFormat;
-
-		// Extract the transformation matrices if they are there.
-		DspyFindMatrixInParamList( "NP", reinterpret_cast<float*>(pImage->m_matWorldToScreen), paramCount, parameters );
-		DspyFindMatrixInParamList( "Nl", reinterpret_cast<float*>(pImage->m_matWorldToCamera), paramCount, parameters );
-
-		// Extract any clipping information.
-		pImage->m_origin[0] = pImage->m_origin[1] = 0;
-		pImage->m_OriginalSize[0] = pImage->m_width;
-		pImage->m_OriginalSize[1] = pImage->m_height;
-		TqInt count = 2;
-		DspyFindIntsInParamList("origin", &count, pImage->m_origin, paramCount, parameters);
-		DspyFindIntsInParamList("OriginalSize", &count, pImage->m_OriginalSize, paramCount, parameters);
-
-		char *ydesc = NULL;
-		if (DspyFindStringInParamList("description", &ydesc, paramCount, parameters )
-		        == PkDspyErrorNone )
-		{
-			// Do something about it; the user will want to add its copyright notice.
-			if (ydesc && *ydesc)
-				pImage->m_description = strdup(ydesc);
 		}
 
 		// We need to start a framebuffer if none is running yet
@@ -238,14 +210,6 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			}
 			pImage->m_socket = sock;
 
-			// Send an OPEN message.
-			SqDDMessageOpen openMsg(width, height, iFormatCount, pImage->m_origin[0], pImage->m_origin[1], pImage->m_OriginalSize[0], pImage->m_OriginalSize[1], widestFormat);
-			openMsg.Send(pImage->m_socket);
-			// And send a filename message
-			SqDDMessageFilename* fnameMsg = SqDDMessageFilename::Construct(filename);
-			fnameMsg->Send(pImage->m_socket);
-			fnameMsg->Destroy();
-			
 			TiXmlDocument displaydoc("open.xml");
 			TiXmlDeclaration* displaydecl = new TiXmlDeclaration("1.0","","yes");
 			TiXmlElement* openMsgXML = new TiXmlElement("Open");
@@ -341,7 +305,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 
 			displaydoc.LinkEndChild(displaydecl);
 			displaydoc.LinkEndChild(openMsgXML);
-			displaydoc.Print();
+			sendXMLMessage(displaydoc, pImage->m_socket);
 		}
 	} else 
 		return(PkDspyErrorNoMemory);
@@ -363,7 +327,7 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 
 	TqInt bucketlinelen = entrysize * (xmaxplus1 - xmin);
 	SqDDMessageData* msg = SqDDMessageData::Construct(xmin, xmaxplus1, ymin, ymaxplus1, entrysize, data, bucketlinelen * (ymaxplus1 - ymin));
-	msg->Send(pImage->m_socket);
+	//msg->Send(pImage->m_socket);
 	msg->Destroy();
 
 	return(PkDspyErrorNone);
@@ -382,11 +346,10 @@ PtDspyError DspyImageClose(PtDspyImageHandle image)
 		msg.Send(pImage->m_socket);
 		close(pImage->m_socket);
 		pImage->m_socket = INVALID_SOCKET;
+		Aqsis::log() << debug << "Closed" << std::endl;
 	}
 
 	// Delete the image structure.
-	if (pImage->m_data)
-		free(pImage->m_data);
  	if (pImage->m_hostname)
 		free(pImage->m_hostname);
 	delete[](pImage->m_filename);
@@ -409,9 +372,10 @@ PtDspyError DspyImageDelayClose(PtDspyImageHandle image)
 		msg.Send(pImage->m_socket);
 		close(pImage->m_socket);
 		pImage->m_socket = INVALID_SOCKET;
+		Aqsis::log() << debug << "Closed" << std::endl;
 	}
 
-	if(pImage && pImage->m_data)
+	if(pImage)
 	{
 		// Clean up
 		return(DspyImageClose(image));
@@ -434,6 +398,7 @@ PtDspyError DspyImageQuery(PtDspyImageHandle image,
 	if(size <= 0 || !data)
 		return PkDspyErrorBadParams;
 
+#if 0
 	switch (type)
 	{
 			case PkOverwriteQuery:
@@ -472,6 +437,21 @@ PtDspyError DspyImageQuery(PtDspyImageHandle image,
 			default:
 			return PkDspyErrorUnsupported;
 	}
+#endif
 
 	return(PkDspyErrorNone);
+}
+
+static int sendXMLMessage(TiXmlDocument& msg, int sock)
+{
+	std::stringstream message;
+	message << msg;
+	TqInt tot = 0, need = message.str().length();
+	while ( need > 0 )
+	{
+		TqInt n = send( sock, message.str().c_str() + tot, need, 0 );
+		need -= n;
+		tot += n;
+	}
+	return( tot );
 }

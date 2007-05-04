@@ -51,41 +51,14 @@ struct SqDisplayInstance
 {
 	SqDisplayInstance() :
 		m_filename(0),
-		m_width(0),
-		m_height(0),
-		m_iFormatCount(0),
-		m_format(PkDspyUnsigned8),
-		m_entrySize(0),
-		m_lineLength(0),
-		m_hostname(0),
-		m_RenderWholeFrame(TqFalse),
-		m_imageType(Type_File),
-		m_append(0),
-		m_data(0)
+		m_hostname(0)
 	{}
 	char*		m_filename;
-	TqInt		m_width;
-	TqInt		m_height;
-	TqInt		m_OriginalSize[2];
-	TqInt		m_origin[2];
-	TqInt		m_iFormatCount;
-	TqInt		m_format;
-	TqInt		m_entrySize;
-	TqInt		m_lineLength;
 	char*		m_hostname;
 	TqInt		m_hostport;
-	int		m_socket;
-	TqBool		m_RenderWholeFrame;
-	TqInt		m_imageType;
-	TqInt		m_append;
-	TqFloat		m_matWorldToCamera[ 4 ][ 4 ];
-	TqFloat		m_matWorldToScreen[ 4 ][ 4 ];
-	char*		m_description;
+	int			m_socket;
 	// The number of pixels that have already been rendered (used for progress reporting)
 	TqInt		m_pixelsReceived;
-
-	void*		m_data;
-	unsigned char*	m_zfbdata;
 
 	friend std::istream& operator >>(std::istream &is,struct SqDisplayInstance &obj);
 	friend std::ostream& operator <<(std::ostream &os,const struct SqDisplayInstance &obj);

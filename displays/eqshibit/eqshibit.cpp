@@ -51,6 +51,7 @@ using namespace Aqsis;
 #include "displaydriver.h"
 #include "framebuffer.h"
 #include "book.h"
+#include "tinyxml.h"
 
 
 ArgParse::apstring      g_strInterface = "127.0.0.1";
@@ -71,23 +72,32 @@ void version( std::ostream& Stream )
 
 CqDDServer g_theServer;
 std::map<int, boost::shared_ptr<CqDisplayServerImage> >	g_theClients;
+#define BUF_SIZE  4096
 
 void HandleData(int sock, void *data)
 {
 	boost::shared_ptr<CqDisplayServerImage> thisClient = g_theClients[sock];
-	SqDDMessageBase msg;
-	char	*bptr;
+	char	buffer[BUF_SIZE+1];
+	std::stringstream msg;
 	unsigned int	i, numRead=0;
 
-	bptr = reinterpret_cast<char*>(&msg);
-	while(numRead < sizeof(msg))	
+	while(1)	
 	{
-		i = read(sock,bptr,sizeof(msg) - numRead);
+		i = read(sock,buffer,BUF_SIZE);
 		if(i<=0) 
 			break;
-		bptr += i;
 		numRead += i;
+		if(i == BUF_SIZE)
+			buffer[BUF_SIZE] = '\0';
+		msg << buffer;
+		if(i<BUF_SIZE)
+			break;
 	}
+	std::cout << "Recieved: " << numRead << " bytes" << std::endl;
+	TiXmlDocument xmlMsg;
+	xmlMsg.Parse(msg.str().c_str());
+	std::cout << xmlMsg.RootElement()->Value() << std::endl;
+#if 0
 	if(numRead == sizeof(msg))
 	{
 		Aqsis::log() << Aqsis::debug << "Message ID: " << msg.m_MessageID << "(" << std::hex << msg.m_MessageID << ")" << std::dec << " length: " << msg.m_MessageLength << std::endl;
@@ -151,6 +161,15 @@ void HandleData(int sock, void *data)
 		}
 		delete[](buff);
 	}		
+#else
+	if(numRead == 0)
+	{
+		Aqsis::log() << Aqsis::debug << "Closing socket" << std::endl;
+		Fl::remove_fd(sock);
+		close(sock);
+		thisClient->close();
+	}
+#endif
 }
 
 void HandleConnection(int sock, void *data)

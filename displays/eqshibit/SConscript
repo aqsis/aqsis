@@ -4,7 +4,7 @@ eqshibitappenv = env.Copy()
 eqshibitappenv.AppendUnique(CPPPATH = ['#/aqsis/aqsistypes', '#/thirdparty/tinyxml', '#/renderer/ddmanager'])
 eqshibitappenv.AppendUnique(LIBS = ['$tiff_lib', '$fltk_lib','#/thirdparty/tinyxml'])
 eqshibitappenv.AppendUnique(LIBPATH = ['/usr/X11R6/lib'])
-eqshibitappenv.AppendUnique(CPPDEFINES=['EQSHIBIT_APP_EXPORTS'])
+eqshibitappenv.AppendUnique(CPPDEFINES=['EQSHIBIT_APP_EXPORTS', 'TIXML_USE_STL'])
 
 eqshibitapp_sources = Split("""
 	eqshibit.cpp
@@ -42,6 +42,7 @@ env.Distribute('eqshibit_ui.fl')
 # Display driver for communicating with eqshibit
 eqshibitdisplayenv = env.Copy()
 eqshibitdisplayenv.AppendUnique(CPPPATH=['#/renderer/ddmanager','#/thirdparty/tinyxml'])
+eqshibitdisplayenv.AppendUnique(CPPDEFINES=['TIXML_USE_STL'])
 
 eqshibitdisplay_sources = Split("""
 	eqshibitdisplay.cpp
@@ -50,9 +51,7 @@ eqshibitdisplay_sources = Split("""
 eqshibitdisplay_headers =  Split("""
 	eqshibitdisplay.h""")
 
-
 eqshibitdisplayenv.AppendUnique(LIBS = ['aqsistypes', 'tinyxml'])
-eqshibitdisplayenv.AppendUnique(CPPPATH = ['#/thirdparty/tinyxml'])
 
 # Set any platform specific target options.
 eqshibitdisplayenv.UseTargetOptions('eqshibitdisplay')
