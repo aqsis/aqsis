@@ -81,6 +81,7 @@ void HandleData(int sock, void *data)
 	std::stringstream msg;
 	unsigned int	i, numRead=0;
 
+	// Read a message
 	while(1)	
 	{
 		i = read(sock,buffer,BUF_SIZE);
@@ -96,30 +97,15 @@ void HandleData(int sock, void *data)
 	std::cout << "Recieved: " << numRead << " bytes" << std::endl;
 	TiXmlDocument xmlMsg;
 	xmlMsg.Parse(msg.str().c_str());
-	std::cout << xmlMsg.RootElement()->Value() << std::endl;
-#if 0
-	if(numRead == sizeof(msg))
+	TiXmlElement* root = xmlMsg.RootElement();
+	std::cout << "Message: " << root->ValueStr() << std::endl;
+
+	if(root)
 	{
-		Aqsis::log() << Aqsis::debug << "Message ID: " << msg.m_MessageID << "(" << std::hex << msg.m_MessageID << ")" << std::dec << " length: " << msg.m_MessageLength << std::endl;
-		unsigned int msgToRead = msg.m_MessageLength - numRead;
-		char *buff = new char[msgToRead + sizeof(msg)];
-		memset(buff, '\0', msgToRead + sizeof(msg));
-		memcpy(buff, &msg, sizeof(msg));
-		bptr = buff + sizeof(msg);
-		numRead = 0;
-		while(numRead < msgToRead)
-		{
-			i = read(sock,bptr,msgToRead - numRead);
-			if(i<=0) 
-				break;
-			bptr += i;
-			numRead += i;
-		}
-		Aqsis::log() << Aqsis::debug << "Read: " << numRead << " : " << msg.m_MessageID << std::endl;
-		if(msg.m_MessageID == MessageID_Open)
+		if(root->ValueStr().compare("Open") == 0)
 		{
 			Aqsis::log() << Aqsis::debug << "Now processing the Open message" << std::endl;
-			SqDDMessageOpen* openMsg = reinterpret_cast<SqDDMessageOpen*>(buff);
+#if 0
 			thisClient->setImageSize(openMsg->m_XRes, openMsg->m_YRes);
 			thisClient->setChannels(openMsg->m_Channels);
 			thisClient->setOrigin(openMsg->m_originX, openMsg->m_originY);
@@ -140,36 +126,26 @@ void HandleData(int sock, void *data)
 				fb->show();
 				fb->connect(baseImage);
 			}
+#endif
 		}
-		else if(msg.m_MessageID == MessageID_Data)
+		else if(root->ValueStr().compare("Data") == 0)
 		{
-			SqDDMessageData* dataMsg = reinterpret_cast<SqDDMessageData*>(buff);
-			thisClient->acceptData(dataMsg);
+			//thisClient->acceptData(dataMsg);
 		}
-		else if(msg.m_MessageID == MessageID_Filename)
-		{
-			SqDDMessageFilename* fnameMsg = reinterpret_cast<SqDDMessageFilename*>(buff);
-			thisClient->setName(std::string(fnameMsg->m_String, fnameMsg->m_StringLength));
-			window->updateImageList(window->currentBookName());
-		}
-		else if(msg.m_MessageID == MessageID_Close)
+		//else if(msg.m_MessageID == MessageID_Filename)
+		//{
+		//	SqDDMessageFilename* fnameMsg = reinterpret_cast<SqDDMessageFilename*>(buff);
+		//	thisClient->setName(std::string(fnameMsg->m_String, fnameMsg->m_StringLength));
+		//	window->updateImageList(window->currentBookName());
+		//}
+		else if(root->ValueStr().compare("Close") == 0)
 		{
 			Aqsis::log() << Aqsis::debug << "Closing socket" << std::endl;
 			Fl::remove_fd(sock);
 			close(sock);
 			thisClient->close();
 		}
-		delete[](buff);
 	}		
-#else
-	if(numRead == 0)
-	{
-		Aqsis::log() << Aqsis::debug << "Closing socket" << std::endl;
-		Fl::remove_fd(sock);
-		close(sock);
-		thisClient->close();
-	}
-#endif
 }
 
 void HandleConnection(int sock, void *data)

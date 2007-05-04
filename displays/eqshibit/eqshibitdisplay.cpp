@@ -342,11 +342,12 @@ PtDspyError DspyImageClose(PtDspyImageHandle image)
 	// Close the socket
 	if(pImage && pImage->m_socket != INVALID_SOCKET)
 	{
-		SqDDMessageClose msg;
-		msg.Send(pImage->m_socket);
-		close(pImage->m_socket);
-		pImage->m_socket = INVALID_SOCKET;
-		Aqsis::log() << debug << "Closed" << std::endl;
+		TiXmlDocument doc("close.xml");
+		TiXmlDeclaration* decl = new TiXmlDeclaration("1.0","","yes");
+		TiXmlElement* closeMsgXML = new TiXmlElement("Close");
+		doc.LinkEndChild(decl);
+		doc.LinkEndChild(closeMsgXML);
+		sendXMLMessage(doc, pImage->m_socket);
 	}
 
 	// Delete the image structure.
@@ -368,11 +369,12 @@ PtDspyError DspyImageDelayClose(PtDspyImageHandle image)
 	// Close the socket
 	if(pImage && pImage->m_socket != INVALID_SOCKET)
 	{
-		SqDDMessageClose msg;
-		msg.Send(pImage->m_socket);
-		close(pImage->m_socket);
-		pImage->m_socket = INVALID_SOCKET;
-		Aqsis::log() << debug << "Closed" << std::endl;
+		TiXmlDocument doc("close.xml");
+		TiXmlDeclaration* decl = new TiXmlDeclaration("1.0","","yes");
+		TiXmlElement* closeMsgXML = new TiXmlElement("Close");
+		doc.LinkEndChild(decl);
+		doc.LinkEndChild(closeMsgXML);
+		sendXMLMessage(doc, pImage->m_socket);
 	}
 
 	if(pImage)
