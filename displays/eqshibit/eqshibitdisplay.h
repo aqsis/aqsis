@@ -31,54 +31,27 @@
 
 #include "tinyxml.h"
 #include "ndspy.h"
+#include "sstring.h"
 
 static const int INVALID_SOCKET = -1;
 
 START_NAMESPACE( Aqsis )
 
 
-enum EqDisplayTypes 
-{
-	Type_File = 0,
-	Type_Framebuffer,
-	Type_ZFile,
-	Type_ZFramebuffer,
-	Type_Shadowmap,
-};
-
-
 struct SqDisplayInstance
 {
 	SqDisplayInstance() :
-		m_filename(0),
-		m_hostname(0)
+		m_filename(0)
 	{}
-	char*		m_filename;
-	char*		m_hostname;
-	TqInt		m_hostport;
-	int			m_socket;
+	CqString		m_filename;
+	CqString		m_hostname;
+	TqInt			m_hostport;
+	int				m_socket;
 	// The number of pixels that have already been rendered (used for progress reporting)
 	TqInt		m_pixelsReceived;
 
 	friend std::istream& operator >>(std::istream &is,struct SqDisplayInstance &obj);
 	friend std::ostream& operator <<(std::ostream &os,const struct SqDisplayInstance &obj);
-};
-
-std::istream& operator >>(std::istream &is,struct SqDisplayInstance &obj)
-{
-//	      is>>strVal;
-	            return is;
-}
-
-std::ostream& operator <<(std::ostream &os,const struct SqDisplayInstance &obj)
-{
-//	      os<<obj.strVal;
-	            return os;
-}
-
-struct SqNetDisplayArgs
-{
-	int x,y,w,h,d;
 };
 
 

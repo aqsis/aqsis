@@ -38,6 +38,12 @@ using namespace Aqsis;
 #include <string>
 #include <list>
 
+#include "boost/archive/iterators/binary_from_base64.hpp"
+#include "boost/archive/iterators/transform_width.hpp"
+#include "boost/archive/iterators/remove_whitespace.hpp"
+
+#include "boost/pfto.hpp"
+
 #include <version.h>
 
 #include <sys/types.h>
@@ -48,7 +54,6 @@ using namespace Aqsis;
 #include "eqshibit_ui.h"
 #include "ddserver.h"
 #include "displayserverimage.h"
-#include "displaydriver.h"
 #include "framebuffer.h"
 #include "book.h"
 #include "tinyxml.h"
@@ -69,6 +74,18 @@ void version( std::ostream& Stream )
 	Stream << "eqshibit version " << VERSION_STR_PRINT << std::endl << "compiled " << __DATE__ << " " << __TIME__ << std::endl;
 }
 
+
+typedef 
+	boost::archive::iterators::transform_width<   // retrieve 6 bit integers from a sequence of 8 bit bytes
+		boost::archive::iterators::binary_from_base64<    // convert binary values ot base64 characters
+			boost::archive::iterators::remove_whitespace<
+				std::string::const_iterator
+			>
+		>,
+		8,
+		6
+	> 
+base64_binary; // compose all the above operations in to a new iterator
 
 CqDDServer g_theServer;
 std::map<int, boost::shared_ptr<CqDisplayServerImage> >	g_theClients;
@@ -94,22 +111,83 @@ void HandleData(int sock, void *data)
 		if(i<BUF_SIZE)
 			break;
 	}
-	std::cout << "Recieved: " << numRead << " bytes" << std::endl;
+	Aqsis::log() << Aqsis::debug << "Recieved: " << numRead << " bytes" << std::endl;
+	// Parse the XML message sent.
 	TiXmlDocument xmlMsg;
 	xmlMsg.Parse(msg.str().c_str());
+	// Get the root element, which is the base type of the message.
 	TiXmlElement* root = xmlMsg.RootElement();
-	std::cout << "Message: " << root->ValueStr() << std::endl;
 
 	if(root)
 	{
+		// Process the message based on its type.
 		if(root->ValueStr().compare("Open") == 0)
 		{
-			Aqsis::log() << Aqsis::debug << "Now processing the Open message" << std::endl;
-#if 0
-			thisClient->setImageSize(openMsg->m_XRes, openMsg->m_YRes);
-			thisClient->setChannels(openMsg->m_Channels);
-			thisClient->setOrigin(openMsg->m_originX, openMsg->m_originY);
-			thisClient->setFrameSize(openMsg->m_originalSizeX, openMsg->m_originalSizeY);
+			Aqsis::log() << Aqsis::debug << "Processing Open message " << std::endl;
+			TiXmlElement* child = root->FirstChildElement("Dimensions");
+			if(child)
+			{
+				int xres = 640, yres = 480;
+				child->Attribute("width", &xres);
+				child->Attribute("height", &yres);
+				thisClient->setImageSize(xres, yres);
+			}
+			
+			child = root->FirstChildElement("Name");
+			if(child)
+			{
+				const char* fname = child->GetText();
+				thisClient->setName(fname);
+			}
+			// Process the parameters
+			child = root->FirstChildElement("Parameters");
+			if(child)
+			{
+				TiXmlElement* param = child->FirstChildElement("IntsParameter");
+				while(param)
+				{
+					const char* name = param->Attribute("name");
+					if(std::string("origin").compare(name) == 0)
+					{
+						TiXmlElement* values = param->FirstChildElement("Values");
+						if(values)
+						{
+							int origin[2];
+							TiXmlElement* value = values->FirstChildElement("Int");
+							value->Attribute("value", &origin[0]);
+							value = value->NextSiblingElement("Int");
+							value->Attribute("value", &origin[1]);
+							thisClient->setOrigin(origin[0], origin[1]);
+						}
+					}
+					else if(std::string("OriginalSize").compare(name) == 0)
+					{
+						TiXmlElement* values = param->FirstChildElement("Values");
+						if(values)
+						{
+							int OriginalSize[2];
+							TiXmlElement* value = values->FirstChildElement("Int");
+							value->Attribute("value", &OriginalSize[0]);
+							value = value->NextSiblingElement("Int");
+							value->Attribute("value", &OriginalSize[1]);
+							thisClient->setFrameSize(OriginalSize[0], OriginalSize[1]);
+						}
+					}
+					param = param->NextSiblingElement("IntsParameter");
+				}
+			}
+			child = root->FirstChildElement("Formats");
+			if(child)
+			{
+				int channels = 0;
+				TiXmlElement* format = child->FirstChildElement("Format");
+				while(format)
+				{
+					++channels;
+					format = format->NextSiblingElement("Format");
+				}
+				thisClient->setChannels(channels);
+			}
 			thisClient->PrepareImageBuffer();
 
 			boost::shared_ptr<CqImage> baseImage = boost::static_pointer_cast<CqImage>(thisClient);
@@ -126,18 +204,48 @@ void HandleData(int sock, void *data)
 				fb->show();
 				fb->connect(baseImage);
 			}
-#endif
+			window->updateImageList(window->currentBookName());
 		}
 		else if(root->ValueStr().compare("Data") == 0)
 		{
-			//thisClient->acceptData(dataMsg);
+			TiXmlElement* dimensionsXML = root->FirstChildElement("Dimensions");
+			if(dimensionsXML)
+			{
+				int xmin, ymin, xmaxplus1, ymaxplus1, elementSize;
+				dimensionsXML->Attribute("xmin", &xmin);
+				dimensionsXML->Attribute("ymin", &ymin);
+				dimensionsXML->Attribute("xmaxplus1", &xmaxplus1);
+				dimensionsXML->Attribute("ymaxplus1", &ymaxplus1);
+				dimensionsXML->Attribute("elementsize", &elementSize);
+			
+				TiXmlElement* bucketDataXML = root->FirstChildElement("BucketData");
+				if(bucketDataXML)
+				{
+					TiXmlText* dataText = static_cast<TiXmlText*>(bucketDataXML->FirstChild());
+					if(dataText)
+					{
+						TqInt bucketlinelen = elementSize * (xmaxplus1 - xmin);
+						TqInt count = bucketlinelen * (ymaxplus1 - ymin);
+						std::string data = dataText->Value();
+						std::vector<unsigned char> binaryData;
+						binaryData.reserve(count);
+						base64_binary ti_begin = base64_binary(BOOST_MAKE_PFTO_WRAPPER(data.begin())); 
+						std::size_t padding = 2 - count % 3;
+						while(--count > 0)
+						{
+							binaryData.push_back(static_cast<char>(*ti_begin));
+							++ti_begin;
+						}
+						binaryData.push_back(static_cast<char>(*ti_begin));
+						if(padding > 1)
+							++ti_begin;
+						if(padding > 2)
+							++ti_begin;
+						thisClient->acceptData(xmin, xmaxplus1, ymin, ymaxplus1, elementSize, &binaryData[0]);
+					}
+				}
+			}
 		}
-		//else if(msg.m_MessageID == MessageID_Filename)
-		//{
-		//	SqDDMessageFilename* fnameMsg = reinterpret_cast<SqDDMessageFilename*>(buff);
-		//	thisClient->setName(std::string(fnameMsg->m_String, fnameMsg->m_StringLength));
-		//	window->updateImageList(window->currentBookName());
-		//}
 		else if(root->ValueStr().compare("Close") == 0)
 		{
 			Aqsis::log() << Aqsis::debug << "Closing socket" << std::endl;

@@ -63,7 +63,7 @@ TqUlong CqEqshibitBase::addImageToCurrentBook(boost::shared_ptr<CqImage>& image)
 {
 	if(m_currentBookName.empty())
 	{
-		std::cout << "Adding image" << std::endl;
+		Aqsis::log() << Aqsis::debug << "Eqshibit adding image" << std::endl;
 		std::map<std::string, boost::shared_ptr<CqBook> >::size_type numBooks = m_books.size();
 		std::stringstream strBkName;
 		strBkName << "Book" << numBooks+1;

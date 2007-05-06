@@ -25,23 +25,17 @@
 
 #include <aqsis.h>
 
-#include <iostream>
 #include <logging.h>
 #include <logging_streambufs.h>
-#include "sstring.h"
 
 using namespace Aqsis;
 
-#include <iomanip>
-#include <ios>
-#include <iostream>
-#include <memory>
 #include <sstream>
 #include <string>
-#include <fstream>
 #include <algorithm>
-#include <float.h>
-#include <time.h>
+#include "boost/archive/iterators/base64_from_binary.hpp"
+#include "boost/archive/iterators/transform_width.hpp"
+#include "boost/archive/iterators/insert_linebreaks.hpp"
 
 #include <signal.h>
 #include <sys/types.h>
@@ -54,8 +48,8 @@ using namespace Aqsis;
 #include "version.h"
 
 #include "eqshibitdisplay.h"
-#include "displaydriver.h"
 #include "tinyxml.h"
+#include "sstring.h"
 
 // From displayhelpers.c
 #ifdef __cplusplus
@@ -73,6 +67,20 @@ extern "C"
 #endif
 
 static int sendXMLMessage(TiXmlDocument& msg, int sock);
+
+// Define a base64 encoding stream iterator using the boost archive data flow iterators.
+typedef 
+    boost::archive::iterators::insert_linebreaks<         // insert line breaks every 72 characters
+        boost::archive::iterators::base64_from_binary<    // convert binary values ot base64 characters
+            boost::archive::iterators::transform_width<   // retrieve 6 bit integers from a sequence of 8 bit bytes
+                const char *,
+                6,
+                8
+            >
+        > 
+        ,72
+    > 
+    base64_text; // compose all the above operations in to a new iterator
 
 PtDspyError DspyImageOpen(PtDspyImageHandle * image,
                           const char *drivername,
@@ -95,8 +103,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 		// Store the instance information so that on re-entry we know which display is being referenced.
 		*image = pImage;
 
-		pImage->m_filename = new char[strlen(filename)+1];
-		strcpy(pImage->m_filename, filename);
+		pImage->m_filename = filename;
 
 		// Scan the formats table to see what the widest channel format specified is.
 		TqUint widestFormat = PkDspySigned8;
@@ -135,13 +142,13 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 
 		if( DspyFindStringInParamList("hostcomputer", &hostname, paramCount, parameters ) == PkDspyErrorNone )
 		{
+			pImage->m_hostname = hostname;
 			Aqsis::log() << debug << "FB host specified: " << pImage->m_hostname << std::endl;
-			pImage->m_hostname = strdup(hostname);
 		} 
 		else 
 		{
 			Aqsis::log() << debug << "FB not host specified" << std::endl;
-			pImage->m_hostname =  NULL;
+			pImage->m_hostname =  "";
 		};
 		if( DspyFindStringInParamList("hostport", &hostport, paramCount, parameters ) == PkDspyErrorNone )
 		{
@@ -154,7 +161,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			pImage->m_hostport = 0;
 		};
 
-		if( pImage->m_hostname == NULL  )
+		if( pImage->m_hostname.empty() )
 		{
 			//No host specified
 			pImage->m_hostname = "127.0.0.1";
@@ -196,7 +203,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 
 			bzero((char *) &adServer, sizeof(adServer)); 
 			adServer.sin_family = AF_INET;
-			adServer.sin_addr.s_addr = inet_addr(pImage->m_hostname);
+			adServer.sin_addr.s_addr = inet_addr(pImage->m_hostname.c_str());
 			if (adServer.sin_addr.s_addr == (in_addr_t) -1)
 			{
 				Aqsis::log() << error << "Invalid IP address" << std::endl;;
@@ -264,7 +271,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 						for(ivalue = 0; ivalue < parameters[iparam].vcount; ++ivalue)
 						{
 							TiXmlElement* value = new TiXmlElement("Float");
-							value->SetAttribute("value", pvalues[ivalue]);
+							value->SetDoubleAttribute("value", static_cast<double>(pvalues[ivalue]));
 							values->LinkEndChild(value);
 						}
 						param->LinkEndChild(values);
@@ -326,9 +333,31 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 	pImage = reinterpret_cast<SqDisplayInstance*>(image);
 
 	TqInt bucketlinelen = entrysize * (xmaxplus1 - xmin);
-	SqDDMessageData* msg = SqDDMessageData::Construct(xmin, xmaxplus1, ymin, ymaxplus1, entrysize, data, bucketlinelen * (ymaxplus1 - ymin));
-	//msg->Send(pImage->m_socket);
-	msg->Destroy();
+	TqInt bufferlength = bucketlinelen * (ymaxplus1 - ymin);
+	TiXmlDocument msg;
+	TiXmlDeclaration* decl = new TiXmlDeclaration("1.0", "", "yes");
+	TiXmlElement* dataMsgXML = new TiXmlElement("Data");
+	TiXmlElement* dimensionsXML = new TiXmlElement("Dimensions");
+	dimensionsXML->SetAttribute("xmin", xmin);
+	dimensionsXML->SetAttribute("xmaxplus1", xmaxplus1);
+	dimensionsXML->SetAttribute("ymin", ymin);
+	dimensionsXML->SetAttribute("ymaxplus1", ymaxplus1);
+	dimensionsXML->SetAttribute("elementsize", entrysize);
+	dataMsgXML->LinkEndChild(dimensionsXML);
+
+	TiXmlElement* bucketDataXML = new TiXmlElement("BucketData");
+	std::stringstream base64Data;
+	std::copy(	base64_text(BOOST_MAKE_PFTO_WRAPPER(data)), 
+				base64_text(BOOST_MAKE_PFTO_WRAPPER(data + bufferlength)), 
+				std::ostream_iterator<char>(base64Data));
+	TiXmlText* dataTextXML = new TiXmlText(base64Data.str());
+	dataTextXML->SetCDATA(true);
+	bucketDataXML->LinkEndChild(dataTextXML);
+	dataMsgXML->LinkEndChild(bucketDataXML);
+
+	msg.LinkEndChild(decl);
+	msg.LinkEndChild(dataMsgXML);
+	sendXMLMessage(msg, pImage->m_socket);
 
 	return(PkDspyErrorNone);
 }
@@ -351,11 +380,7 @@ PtDspyError DspyImageClose(PtDspyImageHandle image)
 	}
 
 	// Delete the image structure.
- 	if (pImage->m_hostname)
-		free(pImage->m_hostname);
-	delete[](pImage->m_filename);
 	delete(pImage);
-
 
 	return(PkDspyErrorNone);
 }

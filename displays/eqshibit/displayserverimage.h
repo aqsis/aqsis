@@ -85,7 +85,7 @@ public:
         return ( m_socket );
     }
 
-	void acceptData(SqDDMessageData* dataMsg);
+	void acceptData(TqUlong xmin, TqUlong xmaxplus1, TqUlong ymin, TqUlong ymaxplus1, TqInt elementSize, const unsigned char* data);
 
 private:
     SOCKET	m_socket;			///< Socket ID of the client.

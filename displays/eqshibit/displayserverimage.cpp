@@ -155,35 +155,34 @@ void CompositeAlpha(TqInt r, TqInt g, TqInt b, unsigned char &R, unsigned char &
 }
 
 
-void CqDisplayServerImage::acceptData(SqDDMessageData* dataMsg)
+void CqDisplayServerImage::acceptData(TqUlong xmin, TqUlong xmaxplus1, TqUlong ymin, TqUlong ymaxplus1, TqInt elementSize, const unsigned char* bucketData )
 {
-	TqUlong xmin__ = MAX((dataMsg->m_XMin - originX()), 0);
-	TqUlong ymin__ = MAX((dataMsg->m_YMin - originY()), 0);
-	TqUlong xmaxplus1__ = MIN((dataMsg->m_XMaxPlus1 - originX()), imageWidth());
-	TqUlong ymaxplus1__ = MIN((dataMsg->m_YMaxPlus1 - originY()), imageWidth());
-	TqUlong bucketlinelen = dataMsg->m_ElementSize * (dataMsg->m_XMaxPlus1 - dataMsg->m_XMin); 
-	//std::cout << "Render: " << xmin__ << ", " << ymin__ << " --> " << xmaxplus1__ << ", " << ymaxplus1__ << " [dlen: " << dataMsg->m_DataLength << "]" << std::endl;
+	TqUlong xmin__ = MAX((xmin - originX()), 0);
+	TqUlong ymin__ = MAX((ymin - originY()), 0);
+	TqUlong xmaxplus1__ = MIN((xmaxplus1 - originX()), imageWidth());
+	TqUlong ymaxplus1__ = MIN((ymaxplus1 - originY()), imageWidth());
+	TqUlong bucketlinelen = elementSize * (xmaxplus1 - xmin); 
 	
-	char* pdatarow = (char*)(dataMsg->m_Data);
+	const unsigned char* pdatarow = bucketData;
 	// Calculate where in the bucket we are starting from if the window is cropped.
 	TqInt row = 0;
-	if(originY() > static_cast<TqUlong>(dataMsg->m_YMin))
-		row = originY() - dataMsg->m_YMin;
+	if(originY() > static_cast<TqUlong>(ymin))
+		row = originY() - ymin;
 	TqInt col = 0;
-	if(originX() > static_cast<TqUlong>(dataMsg->m_XMin))
-		col = originX() - dataMsg->m_XMin;
-	pdatarow += (row * bucketlinelen) + (col * dataMsg->m_ElementSize);
+	if(originX() > static_cast<TqUlong>(xmin))
+		col = originX() - xmin;
+	pdatarow += (row * bucketlinelen) + (col * elementSize);
 
 	if( data() && xmin__ >= 0 && ymin__ >= 0 && xmaxplus1__ <= imageWidth() && ymaxplus1__ <= imageHeight() )
 	{
-		TqUint comp = dataMsg->m_ElementSize/channels();
+		TqUint comp = elementSize/channels();
 		TqUlong y;
 		unsigned char *unrolled = data();
 
 		for ( y = ymin__; y < ymaxplus1__; y++ )
 		{
 			TqUlong x;
-			char* _pdatarow = pdatarow;
+			const unsigned char* _pdatarow = pdatarow;
 			for ( x = xmin__; x < xmaxplus1__; x++ )
 			{
 				TqInt so = channels() * (( y * imageWidth() ) +  x );
@@ -191,7 +190,7 @@ void CqDisplayServerImage::acceptData(SqDDMessageData* dataMsg)
 				{
 					case 2 :
 					{
-						TqUshort *svalue = reinterpret_cast<TqUshort *>(_pdatarow);
+						const TqUshort *svalue = reinterpret_cast<const TqUshort *>(_pdatarow);
 						TqUchar alpha = 255;
 						if (channels() == 4)
 						{
@@ -207,7 +206,7 @@ void CqDisplayServerImage::acceptData(SqDDMessageData* dataMsg)
 					case 4:
 					{
 
-						TqUlong *lvalue = reinterpret_cast<TqUlong *>(_pdatarow);
+						const TqUlong *lvalue = reinterpret_cast<const TqUlong *>(_pdatarow);
 						TqUchar alpha = 255;
 						if (channels() == 4)
 						{
@@ -224,7 +223,7 @@ void CqDisplayServerImage::acceptData(SqDDMessageData* dataMsg)
 					case 1:
 					default:
 					{
-						TqUchar *cvalue = reinterpret_cast<TqUchar *>(_pdatarow);
+						const TqUchar *cvalue = reinterpret_cast<const TqUchar *>(_pdatarow);
 						TqUchar alpha = 255;
 						if (channels() == 4)
 						{
@@ -238,7 +237,7 @@ void CqDisplayServerImage::acceptData(SqDDMessageData* dataMsg)
 					}
 					break;
 				}
-				_pdatarow += dataMsg->m_ElementSize;
+				_pdatarow += elementSize;
 
 			}
 			pdatarow += bucketlinelen;

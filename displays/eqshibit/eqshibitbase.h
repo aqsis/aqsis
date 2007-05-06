@@ -36,6 +36,7 @@
 #include "boost/shared_ptr.hpp"
 #include "image.h"
 #include "framebuffer.h"
+#include "logging.h"
 
 START_NAMESPACE( Aqsis )
 
