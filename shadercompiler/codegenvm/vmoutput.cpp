@@ -834,6 +834,9 @@ void CqCodeGenOutput::Visit( IqParseNodeMessagePassingFunction& MPF )
 			strCommType = "textureinfo";
 			break;
 
+			case CommTypeRayInfo:
+			strCommType = "rayinfo";
+			break;
 	}
 	// Output the comm function.
 	SqVarRef temp( MPF.VarRef() );

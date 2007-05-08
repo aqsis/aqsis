@@ -1058,5 +1058,46 @@ void CqShaderExecEnv::SO_calculatenormal( IqShaderData* p, IqShaderData* Result,
 }
 
 
+//----------------------------------------------------------------------
+// occlusion(P,N,samples)
+void CqShaderExecEnv::SO_occlusion_rt( IqShaderData* P, IqShaderData* N, IqShaderData* samples, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
+{
+	TqBool __fVarying;
+	TqUint __iGrid;
+
+	if ( !getRenderContext() )
+		return ;
+
+	__fVarying = TqTrue;
+	__iGrid = 0;
+	CqBitVector& RS = RunningState();
+	do
+	{
+		if(!__fVarying || RS.Value( __iGrid ) )
+		{
+			(Result)->SetFloat(0.0f,__iGrid);	// Default, completely lit
+		}
+	}
+	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
+}
+
+//----------------------------------------------------------------------
+// rayinfo
+//
+
+void CqShaderExecEnv::SO_rayinfo( IqShaderData* dataname, IqShaderData* pV, IqShaderData* Result, IqShader* pShader )
+{
+	TqUint __iGrid;
+
+	if ( !getRenderContext() )
+		return ;
+
+	TqFloat Ret = 0.0f;
+
+	__iGrid = 0;
+
+	(Result)->SetFloat(Ret,__iGrid);
+}
+
 END_NAMESPACE(    Aqsis )
 //---------------------------------------------------------------------

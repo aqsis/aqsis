@@ -1330,5 +1330,22 @@ void CqShaderVM::SO_occlusion()
 	TEXTURE3( type_float, m_pEnv->SO_occlusion );
 }
 
+void CqShaderVM::SO_occlusion_rt()
+{
+	VARFUNC;
+	FUNC3( type_float, m_pEnv->SO_occlusion_rt );
+}
+
+void CqShaderVM::SO_rayinfo()
+{
+	AUTOFUNC;
+	IqShaderData* pV = GetVar( ReadNext().m_iVariable );
+	POPV( DataInfo );
+	RESULT(type_float, __fVarying?class_varying:class_uniform);
+	m_pEnv->SO_rayinfo( DataInfo, pV, pResult );
+	Push( pResult );
+}
+
+
 END_NAMESPACE( Aqsis )
 //---------------------------------------------------------------------

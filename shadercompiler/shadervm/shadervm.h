@@ -1189,6 +1189,8 @@ class SHADERVM_SHARE CqShaderVM : public CqShaderStack, public IqShader, public 
 		void	SO_bake_3n();
 		void	SO_external();
 		void	SO_occlusion();
+		void	SO_occlusion_rt();
+		void	SO_rayinfo();
 
 		static	SqOpCodeTrans	m_TransTable[];		///< Static opcode translation table.
 		static	TqInt	m_cTransSize;		///< Size of translation table.

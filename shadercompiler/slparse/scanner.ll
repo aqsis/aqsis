@@ -104,6 +104,7 @@ static TqInt check_type();
 "shadow"		{ return(SHADOW);}
 "occlusion"		{ return(OCCLUSION);}
 "textureinfo"	{ return(TEXTUREINFO);}
+"rayinfo"	{ return(RAYINFO);}
 
 {hashline}.*{LF}	{
 					// Find the start of the line no.

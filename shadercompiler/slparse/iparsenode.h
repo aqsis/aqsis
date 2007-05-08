@@ -101,7 +101,8 @@ enum EqCommType
     CommTypeRendererInfo,
     CommTypeIncident,
     CommTypeOpposite,
-    CommTypeTextureInfo
+    CommTypeTextureInfo,
+    CommTypeRayInfo,
 };
 
 
