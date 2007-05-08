@@ -160,7 +160,7 @@ int main( int argc, const char** argv )
 				tempname = _mktemp( ifile );
 #else
 
-				tempname = mkstemp( ifile );
+				tempname = mktemp( ifile );
 #endif //AQSIS_SYSTEM_WIN32
 
 				if( NULL != tempname )
