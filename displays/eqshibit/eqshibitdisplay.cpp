@@ -480,5 +480,8 @@ static int sendXMLMessage(TiXmlDocument& msg, int sock)
 		need -= n;
 		tot += n;
 	}
+	// Send terminator too.
+	send(sock, "\0", 1, 0);
+	tot += 1;
 	return( tot );
 }

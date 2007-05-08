@@ -91,27 +91,60 @@ CqDDServer g_theServer;
 std::map<int, boost::shared_ptr<CqDisplayServerImage> >	g_theClients;
 #define BUF_SIZE  4096
 
+void ProcessMessage(std::stringstream& msg, boost::shared_ptr<CqDisplayServerImage> thisClient);
+
 void HandleData(int sock, void *data)
 {
 	boost::shared_ptr<CqDisplayServerImage> thisClient = g_theClients[sock];
-	char	buffer[BUF_SIZE+1];
+	char	buffer[BUF_SIZE];
 	std::stringstream msg;
-	unsigned int	i, numRead=0;
+	char *bufPtr = buffer;
+	size_t bufAvail = 0;
+	bool noneWaiting = false;
 
 	// Read a message
 	while(1)	
 	{
-		i = read(sock,buffer,BUF_SIZE);
-		if(i<=0) 
-			break;
-		numRead += i;
-		if(i == BUF_SIZE)
-			buffer[BUF_SIZE] = '\0';
-		msg << buffer;
-		if(i<BUF_SIZE)
-			break;
+		// If there is more left in the buffer, process it.
+		if(bufAvail > 0)
+		{
+			// Check if the buffer has a terminator.
+			void* term;
+			if((term = memchr(bufPtr, '\0', bufAvail)) != NULL)
+			{
+				// Copy the data up to the terminator.
+				msg << bufPtr;
+				// Point the bufPtr past the terminator, and update the avail count.
+				bufAvail -= strlen(bufPtr)+1;
+				bufPtr = reinterpret_cast<char*>(term);
+				bufPtr++;
+				ProcessMessage(msg, thisClient);
+				msg.clear();
+				if(noneWaiting)
+					break;
+			}
+			else
+			{
+				msg << std::string(bufPtr, bufAvail);
+				bufPtr = buffer;
+				bufAvail = 0;
+			}
+		}
+		if(bufAvail <= 0)
+		{
+			// Read some more into the buffer
+			bufAvail = read(sock,buffer,BUF_SIZE);
+			if(bufAvail < BUF_SIZE)
+				noneWaiting = true;
+			// If none available, exit.
+			if(bufAvail <= 0) 
+				break;
+		}
 	}
-	Aqsis::log() << Aqsis::debug << "Recieved: " << numRead << " bytes" << std::endl;
+}
+
+void ProcessMessage(std::stringstream& msg, boost::shared_ptr<CqDisplayServerImage> thisClient)
+{
 	// Parse the XML message sent.
 	TiXmlDocument xmlMsg;
 	xmlMsg.Parse(msg.str().c_str());
@@ -208,6 +241,7 @@ void HandleData(int sock, void *data)
 		}
 		else if(root->ValueStr().compare("Data") == 0)
 		{
+			Aqsis::log() << Aqsis::debug << "Processing Data message " << std::endl;
 			TiXmlElement* dimensionsXML = root->FirstChildElement("Dimensions");
 			if(dimensionsXML)
 			{
@@ -249,8 +283,7 @@ void HandleData(int sock, void *data)
 		else if(root->ValueStr().compare("Close") == 0)
 		{
 			Aqsis::log() << Aqsis::debug << "Closing socket" << std::endl;
-			Fl::remove_fd(sock);
-			close(sock);
+			Fl::remove_fd(thisClient->socket());
 			thisClient->close();
 		}
 	}		

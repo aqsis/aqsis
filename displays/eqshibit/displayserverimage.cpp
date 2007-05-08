@@ -56,7 +56,6 @@ typedef sockaddr* PSOCKADDR;
 
 #include	"renderer.h"
 #include	"render.h"
-#include	"displaydriver.h"
 #include	"displayserverimage.h"
 
 
@@ -98,35 +97,6 @@ void CqDisplayServerImage::sendData( void* buffer, TqInt len )
     while ( need > 0 )
     {
         TqInt n = send( m_socket, reinterpret_cast<char*>( buffer ) + tot, need, 0 );
-        need -= n;
-        tot += n;
-    }
-}
-
-
-//---------------------------------------------------------------------
-/** Send a preconstructed message structure to this client.
- * \param pMsg Pointer to a SqDDMessageBase derive structure.
- */
-
-void CqDisplayServerImage::sendMsg( SqDDMessageBase* pMsg )
-{
-    sendData( pMsg, pMsg->m_MessageLength );
-}
-
-
-//---------------------------------------------------------------------
-/** Receive some data from the socket.
- * \param buffer Void pointer to the storage area for the data.
- * \param len Integer length of the data required.
- */
-
-void CqDisplayServerImage::receive( void* buffer, TqInt len )
-{
-    TqInt tot = 0, need = len;
-    while ( need > 0 )
-    {
-        TqInt n = recv( m_socket, reinterpret_cast<char*>( buffer ) + tot, need, 0 );
         need -= n;
         tot += n;
     }
