@@ -57,7 +57,6 @@ typedef sockaddr* PSOCKADDR;
 
 #include	"renderer.h"
 #include	"render.h"
-#include	"displaydriver.h"
 #include	"ddserver.h"
 #include	"displayserverimage.h"
 #include	"imagebuffer.h"
@@ -161,8 +160,8 @@ TqBool CqDDServer::Open()
         return ( TqFalse );
     }
 
-    //TqInt x = 1;
-    //setsockopt( m_Socket, SOL_SOCKET, SO_REUSEADDR, reinterpret_cast<const char*>( &x ), sizeof( x ) );
+    TqInt x = 1;
+    setsockopt( m_Socket, SOL_SOCKET, SO_REUSEADDR, reinterpret_cast<const char*>( &x ), sizeof( x ) );
 
 #ifdef AQSIS_SYSTEM_WIN32
     BOOL Ret = SetHandleInformation( ( HANDLE ) m_Socket, HANDLE_FLAG_INHERIT, 0 );
