@@ -8,6 +8,7 @@
 
 #include	"aqsis.h"
 #include	"parsenode.h"
+#include	"logging.h"
 
 #include	<queue>
 
@@ -95,6 +96,7 @@ TqInt	CqParseNodeFunctionCall::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& n
 
 
 	// Build the queue
+	Aqsis::log() << debug << "Typechecking function call \"" << strName() << "\", possible matches: " << m_aFuncRef.size() << std::endl;
 	std::vector<SqFuncRef>::iterator i;
 	for ( i = m_aFuncRef.begin(); i != m_aFuncRef.end();  )
 	{
@@ -110,6 +112,7 @@ TqInt	CqParseNodeFunctionCall::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& n
 			{
 				// This function isn't suitable for the arguments list, as the
 				// argument counts don't match. Don't add it to the queue.
+				Aqsis::log() << debug << pfunc->strName() << "[" << pfunc->strVMName() << "] \"" << pfunc->strParams() << "\" fail : expected " << cArgs << " arguments, got " << cSpecifiedArgs << std::endl;
 				i = m_aFuncRef.erase(i);
 				continue;
 			}
@@ -121,6 +124,19 @@ TqInt	CqParseNodeFunctionCall::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& n
 				if( (castType = FindCast(pfunc->Type(), pTypes, Count, index)) == Type_Nil )
 				{
 					// This signature cannot return any of the required types.
+					std::stringstream errMsg;
+					errMsg << pfunc->strName() << "[" << pfunc->strVMName() << "] \"" << pfunc->strParams() << 
+							"\" fail : return type " << CqParseNode::TypeName(pfunc->Type()) << 
+							" cannot be cast to [";
+					TqInt tt;
+					for(tt = 0; tt < Count; tt++)
+					{
+						errMsg << CqParseNode::TypeName(pTypes[tt]);
+						if(tt < Count-1)
+							errMsg << ",";
+					}
+					errMsg << "]" << std::endl; 
+					Aqsis::log() << debug << errMsg.str();
 					++i;
 					continue;
 				}
@@ -165,11 +181,18 @@ TqInt	CqParseNodeFunctionCall::TypeCheck( TqInt* pTypes, TqInt Count,  TqBool& n
 					{
 						// We've found and argument that can't be cast to the suitable type
 						// so this signature is no good, don't add it.
+						std::stringstream errMsg;
+						Aqsis::log() << debug << pfunc->strName() << "[" << pfunc->strVMName() << "] \"" << pfunc->strParams() << 
+								"\" fail : argument " << iArg << " type " << CqParseNode::TypeName(pArg->ResType()) << 
+								" cannot be cast to " << CqParseNode::TypeName(paramType) << std::endl;
 						fArgsFailed = TqTrue;
 						break;
 					}
 					else
 					{
+						Aqsis::log() << debug << pfunc->strName() << "[" << pfunc->strVMName() << "] \"" << pfunc->strParams() << 
+								"\" pass : argument " << iArg << " type " << CqParseNode::TypeName(pArg->ResType()) << 
+								" ok to cast to " << CqParseNode::TypeName(paramType) << std::endl;
 						// If we have an upper case type in the function declaration, then we need an actual variable.
 						if( (paramType & Type_Variable) && !pArg->IsVariableRef() )
 							break;

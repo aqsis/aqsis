@@ -122,7 +122,7 @@ void CqBucket::PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt y
 				m_aieImage[which].Clear();
 				m_aieImage[which].AllocateSamples( m_PixelXSamples, m_PixelYSamples );
 				m_aieImage[which].InitialiseSamples( m_aSamplePositions[which] );
-				if(fJitter)
+				//if(fJitter)
 					m_aieImage[which].JitterSamples(m_aSamplePositions[which], opentime, closetime);
 
 				which++;
@@ -160,7 +160,7 @@ void CqBucket::PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt y
 				m_aieImage[which].Clear();
 
 			//if(fJitter)
-			//	m_aieImage[which].JitterSamples(m_aSamplePositions[which]);
+				m_aieImage[which].JitterSamples(m_aSamplePositions[which], opentime, closetime);
 			m_aieImage[which].OffsetSamples( bPos2, m_aSamplePositions[which] );
 
 			which++;

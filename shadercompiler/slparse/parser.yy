@@ -1661,6 +1661,16 @@ procedurecall
 
 								$$=pFunc;
 							}
+	|	OCCLUSION '(' proc_arguments ')'
+							{
+								std::vector<SqFuncRef> func;
+								CqFuncDef::FindFunction("occlusion", func);
+								CqParseNodeFunctionCall* pFunc=new CqParseNodeFunctionCall(func);
+								pFunc->SetPos(ParseLineNumber,ParseStreamName.c_str());
+								while($3->pFirstChild()!=0)	pFunc->AddLastChild($3->pFirstChild());
+
+								$$=pFunc;
+							}
 	;
 
 unresolvedcall

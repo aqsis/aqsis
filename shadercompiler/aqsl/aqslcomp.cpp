@@ -60,6 +60,7 @@ ArgParse::apstringvec g_undefines; // Filled in with strings to pass to the prep
 
 bool g_cl_no_color = false;
 bool g_cl_syslog = false;
+ArgParse::apint g_cl_verbose = 1;
 
 void version( std::ostream& Stream )
 {
@@ -95,6 +96,12 @@ int main( int argc, const char** argv )
 	ap.argStrings( "U", "Sym \aUndefine an initial symbol.", &g_undefines );
 	ap.argFlag( "help", "\aprint this help and exit", &g_help );
 	ap.argFlag( "version", "\aprint version information and exit", &g_version );
+	ap.argInt( "verbose", "=integer\aSet log output level\n"
+			   "\a0 = errors\n"
+			   "\a1 = warnings (default)\n"
+			   "\a2 = information\n"
+			   "\a3 = debug", &g_cl_verbose );
+	ap.alias( "verbose", "v" );
 
 	if ( argc > 1 && !ap.parse( argc - 1, argv + 1 ) )
 	{
@@ -128,7 +135,14 @@ int main( int argc, const char** argv )
 		color_level = temp_color_level;
 	}
 	std::auto_ptr<std::streambuf> show_level( new Aqsis::show_level_buf(Aqsis::log()) );
-	std::auto_ptr<std::streambuf> filter_level( new Aqsis::filter_by_level_buf(Aqsis::DEBUG, Aqsis::log()) );
+	Aqsis::log_level_t level = Aqsis::ERROR;
+	if( g_cl_verbose > 0 )
+		level = Aqsis::WARNING;
+	if( g_cl_verbose > 1 )
+		level = Aqsis::INFO;
+	if( g_cl_verbose > 2 )
+		level = Aqsis::DEBUG;
+	std::auto_ptr<std::streambuf> filter_level( new Aqsis::filter_by_level_buf(level, Aqsis::log()) );
 #ifdef	AQSIS_SYSTEM_POSIX
 
 	if( g_cl_syslog )
