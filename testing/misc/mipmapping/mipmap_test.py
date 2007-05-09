@@ -25,7 +25,7 @@ import numpy
 from numpy import pi, r_, size, zeros, ones, ceil, floor, array, linspace, meshgrid
 
 import scipy
-from scipy import cos, ogrid, ndimage
+from scipy import cos, log2, sqrt, ogrid, mgrid, ndimage
 from scipy.signal import boxcar, convolve2d as conv2
 # Use ndimage.convolve!
 from scipy.misc import imsave, imread
@@ -51,7 +51,7 @@ def sincKer(width, even, scale = 2):
 		numPts = max(2*int(width/2) + 1, 3)
 	x = r_[0:numPts]-(numPts-1)*0.5
 	k = scipy.sinc(x/scale)
-	k *= cos(linspace(-pi/2,pi/2,len(k)))
+	k *= cos(linspace(-pi/4,pi/4,len(k)))
 	ker = numpy.outer(k,k)
 	ker /= sum(ker.ravel())
 	return ker
@@ -97,6 +97,20 @@ def getGridImg(N, gridSize):
 
 	im[:,-1,:] = 0
 	im[-1,:,:] = 0
+
+	return im
+
+
+def getCentreTest(N=512):
+	'''
+	Get a test image consisting of a 2x2 checkered plane.
+
+	N - side length
+	'''
+	im = zeros((N, N, 3))
+
+	im[:N/2,N/2:,:] = 1
+	im[N/2:,:N/2,:] = 1
 
 	return im
 
@@ -206,7 +220,11 @@ class MipLevel:
 			i = mult[0] * s + offset[0]
 			j = mult[1] * t + offset[1]
 		'''
-		self.image = image
+		# store the image with some ghost points to work around a bug in
+		# scipy.ndimage, where incorrect interpolation happens for negative
+		# indices.
+		self.image = zeros((image.shape[0]+2,image.shape[1]+2,image.shape[2]))
+		self.image[1:-1,1:-1,:] = image
 		self.offset = offset.copy()
 		self.mult = mult
 
@@ -215,13 +233,16 @@ class MipLevel:
 		Sample the mipmap level at the coordinates specified by s and t.  For
 		performance, s & t should be 1D arrays.
 		'''
-		i = self.mult[0]*s + self.offset[0]
-		j = self.mult[1]*t + self.offset[1]
+		i = self.mult[0]*s + self.offset[0] + 1
+		j = self.mult[1]*t + self.offset[1] + 1
 		return applyToChannels(self.image, ndimage.map_coordinates, \
 				array([i,j]), order=1, mode='constant', cval=0)
 
-	def display(self):
-		pylab.imshow(self.image, interpolation='nearest')
+	def display(self, s=None, t=None):
+		if s is None or t is None:
+			pylab.imshow(self.image[1:-1,1:-1,:], interpolation='nearest')
+		else:
+			pylab.imshow(self.sample(s,t), interpolation='nearest')
 
 
 #----------------------------------------------------------------------
@@ -236,6 +257,17 @@ class MipMap:
 		self.genMipMap(img)
 
 	def genMipMap(self, img):
+		'''
+		Generate a mipmap, by downsampling by successive powers of two, using
+		the held kernel function and width.
+
+		In this function we make the requirement that the filter coefficients
+		for filtering between levels are constant for a particular level.  This
+		restriction means that even-sized images have to be filtered with even-
+		sized filter kernels, and vice versa.  Even sizes also require that an
+		offset be taken into account, since the edges of the downsampled levels
+		don't lie on the edges of the original image.
+		'''
 		scale = 2
 		level0Span = array(img.shape[0:2])-1
 		offset = array([0,0],'d')
@@ -259,14 +291,41 @@ class MipMap:
 			self.levels.append(MipLevel(img, -offset/delta, level0Span/delta))
 			print 'generated level size', img.shape[0:2]
 
-	def sampleTrilinear(self):
+	def sampleTrilinear(self, s, t, level=None):
 		'''
 		Trilinear sampling
 		'''
-		pass
+		if level is None:
+			ds = s[1,0]-s[0,0]
+			dt = t[0,1]-t[0,0]
+			diag = sqrt( ((ds*self.levels[0].image.shape[0])**2 + 
+					(dt*self.levels[0].image.shape[1])**2)/2 )
+			level = log2(diag)
+		level = max(level,0)
+		print "trilinear sample at level = %f" % level
+		level1 = int(floor(level))
+		interp = level - level1
+		level2 = int(level1 + 1)
+		samp1 = self.levels[level1].sample(s,t)
+		samp2 = self.levels[level2].sample(s,t)
+		return (1-interp)*samp1 + interp*samp2
 
-	def displayLevel(self, level):
-		self.levels[level].display()
+	def displayLevel(self, level, s=None, t=None):
+		self.levels[level].display(s,t)
+
+
+#----------------------------------------------------------------------
+# High level driver functions.
+#----------------------------------------------------------------------
+def genTrilinearSeq(mipmap, s, t):
+	'''
+	Generate and save a sequence of images by trilinear interpolation at
+	various levels, but with the same texture coordinates (s,t)
+	'''
+	for i in range(0,31):
+		level = i/31.0*8
+		image = mipmap.sampleTrilinear(s,t,level)
+		imsave('downsamp%0.2d.png' % i, image)
 
 
 #----------------------------------------------------------------------
@@ -275,5 +334,8 @@ class MipMap:
 
 if __name__ == '__main__':
 	# Choose image
-	im = imread('lena_std.png')[:,:,:3]/256.0
+	#im = imread('lena_std.png')[:,:,:3]/256.0
+	N = 512
+	im = getCentreTest(N)
 	mipmap = MipMap(im, 8)
+	s,t = mgrid[0:1:N*1j,0:1:N*1j]
