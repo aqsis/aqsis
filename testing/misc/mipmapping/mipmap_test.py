@@ -22,7 +22,7 @@ from __future__ import division
 import matplotlib.pylab as pylab
 
 import numpy
-from numpy import pi, r_, size, zeros, ones, ceil, floor, array, linspace, meshgrid
+from numpy import pi, r_, size, zeros, ones, ceil, floor, array, linspace, meshgrid, random
 
 import scipy
 from scipy import cos, log2, sqrt, ogrid, mgrid, ndimage
@@ -69,14 +69,15 @@ def applyToChannels(img, fxn, *args, **kwargs):
 	outList = []
 	for i in range(0,numChannels):
 		outList.append(fxn(img[:,:,i], *args, **kwargs))
-	return array(outList).transpose([1,2,0])
+	outArr = array(outList)
+	return outArr.transpose(range(1,len(outArr.shape)) + [0])
 
 
 #----------------------------------------------------------------------
 #----------------------------------------------------------------------
 # Functions for creating test images
 #----------------------------------------------------------------------
-def getGridImg(N, gridSize):
+def getGridImg(N, gridSize, gridWidth=1):
 	'''
 	Get a test image containig a one pixel wide grid 
 	
@@ -92,8 +93,9 @@ def getGridImg(N, gridSize):
 	im[:,:,1] = 0.5
 	im[:,:,2] = yy
 
-	im[0:-gridSize-1:gridSize,:,:] = 0
-	im[:,0:-gridSize-1:gridSize,:] = 0
+	for i in range(0,gridWidth):
+		im[i:-gridSize//2:gridSize,:,:] = 0
+		im[:,i:-gridSize//2:gridSize,:] = 0
 
 	im[:,-1,:] = 0
 	im[-1,:,:] = 0
@@ -246,7 +248,7 @@ class MipLevel:
 
 
 #----------------------------------------------------------------------
-class MipMap:
+class TextureMap:
 	'''
 	Class to encapsulate a (power-of-2) mipmapped texture in much the same way
 	mipmapping will be done internally in Aqsis.
@@ -296,11 +298,7 @@ class MipMap:
 		Trilinear sampling
 		'''
 		if level is None:
-			ds = s[1,0]-s[0,0]
-			dt = t[0,1]-t[0,0]
-			diag = sqrt( ((ds*self.levels[0].image.shape[0])**2 + 
-					(dt*self.levels[0].image.shape[1])**2)/2 )
-			level = log2(diag)
+			level = calculateLevel(s[1,0]-s[0,0], t[0,1]-t[0,0])
 		level = max(level,0)
 		print "trilinear sample at level = %f" % level
 		level1 = int(floor(level))
@@ -310,9 +308,141 @@ class MipMap:
 		samp2 = self.levels[level2].sample(s,t)
 		return (1-interp)*samp1 + interp*samp2
 
+	def calculateLevel(self, ds, dt):
+		'''
+		Calculate the appripriate mipmap level for texture filtering over a
+		square region of side lengths ds & dt in texture space.
+		'''
+		diag = sqrt( ((ds*self.levels[0].image.shape[0])**2 + 
+				(dt*self.levels[0].image.shape[1])**2)/2 )
+		level = log2(diag)
+		return max(level,0)
+
+	def calculateLevelQuad(self, s, t):
+		'''
+		Calculate the appropriate mipmap level for texture filtering over a
+		quadrilateral given by the texture-space vertices
+		[s[1], t[1]], ... , [s[4], t[4]].
+		'''
+		pass
+
+	def getRandPointsInQuad(self, s, t, numPoints):
+		'''
+		Get a random set of points inside the quadrilatiral given by the
+		texture-space vertices
+		[s[1], t[1]], ... , [s[4], t[4]].
+
+		The sample should be uniform if the quadrialteral can be made from a
+		square with a _linear_ transformation.  Otherwise it will be biased.
+		The form of biasing is probably exactly what we want if we're taking
+		pixel samples...
+		'''
+		op = numpy.outer
+		lerp1 = numpy.random.rand(numPoints)
+		lerp1m = 1-lerp1
+		lerp2 = numpy.random.rand(numPoints)
+		st = array([s,t])
+		randPts = lerp2*(op(st[:,0],lerp1) + op(st[:,1],lerp1m)) \
+				+ (1-lerp2)*(op(st[:,3],lerp1) + op(st[:,2],lerp1m))
+		return (randPts[0,:], randPts[1,:])
+
+	def filterQuadFullAF(self, s, t, numPoints=100):
+		'''
+		Filter the texture by sampling inside the given quadriateral specified
+		by the texture-space vertices
+		[s[1], t[1]], ... , [s[4], t[4]],
+		and taking an average.
+
+		This is the ultimate, fully correct anisotropic filter.
+		'''
+		sRnd, tRnd = self.getRandPointsInQuad(s,t,numPoints)
+		samples = self.levels[0].sample(sRnd, tRnd)
+		#if numpy.random.rand(1) > 0.99:
+		#	pylab.plot(s,t)
+		return samples.mean(0)
+
 	def displayLevel(self, level, s=None, t=None):
 		self.levels[level].display(s,t)
 
+
+#----------------------------------------------------------------------
+# Perspective transformations
+#
+# Simplified perspective transformation, between "texture coordinates", (s,t)
+# on an infinite plane with parametric form P(s,t) = [s,-1,t],
+# and "image coordinates", (x,y) in the x,y plane.
+#
+# We use the LH coordinate system, with x=right, y=up, z=into the screen.
+#----------------------------------------------------------------------
+class PerspectiveTrans:
+	'''
+	Simplified perspective transformation, between "texture coordinates", (s,t)
+	on an infinite plane with parametric form P(s,t) = [s,-1,t],
+	and "image coordinates", (x,y) in the x,y plane.
+
+	We use the LH coordinate system, with x=right, y=up, z=into the screen.
+	'''
+	def __init__(self, d=1):
+		'''
+		d - distance from view window to viewer
+		'''
+		self.d = d
+
+	def fwd(self, s, t):
+		'''
+		Forward perspective transformation
+
+		Params:
+			s,t - texture coordinates along x & z directions
+
+		Returns:
+			(x,y) - coordinates on the view window.
+		'''
+		x = 1/(1+t/self.d) * s
+		y = -1/(1+t/self.d)
+		return (x,y)
+
+	def inv(self, x, y):
+		'''
+		Inverse perspective transformation
+
+		Params:
+			x,y - coordinates in the view window
+
+		Returns:
+			(s,t) - texture coordinates along x & z directions
+		'''
+		s = -x/y
+		t = -self.d*(1+1/y)
+		return (s,t)
+
+#----------------------------------------------------------------------
+def plotPerspectiveTrans(u, v, direc='f'):
+	'''
+	Plot u,v on an axis, and the things they transform into under an (possibly
+	inverse) perspective transformation on another axis.
+
+	u,v - either image coords if direc='b' or texture coords if direc='f'
+	direc - transformation direction; 'f' = forward, 'b'=backward
+	'''
+	perspec = PerspectiveTrans()
+	if direc == 'f':
+		s,t = u,v
+		x,y = perspec.fwd(s,t)
+	else:
+		x,y = u,v
+		s,t = perspec.inv(x,y)
+
+	# plot texture coords
+	pylab.subplot(211)
+	pylab.plot(s,t)
+	pylab.axis('equal')
+
+	# plot image coords
+	pylab.subplot(212)
+	pylab.plot(x,y)
+	pylab.axis('equal')
+	pylab.axis([-1,1,-1,0])
 
 #----------------------------------------------------------------------
 # High level driver functions.
@@ -327,6 +457,50 @@ def genTrilinearSeq(mipmap, s, t):
 		image = mipmap.sampleTrilinear(s,t,level)
 		imsave('downsamp%0.2d.png' % i, image)
 
+#----------------------------------------------------------------------
+def plotPixelBoxes():
+	'''
+	Plot the outlines of some "pixels" in the image plane, as they transform to
+	the texture coordinates.  This allows us to see what kinds of filter shapes
+	we *should* have to do proper texture filtering...  Naive trilinear
+	mipmapping only gets square filters correct...
+	'''
+	x = array([1,1,-1,-1,1])
+	y = array([-1,1,1,-1,-1])
+	plotPerspectiveTrans(x,y+1,'f')
+	plotPerspectiveTrans(x,y+7,'f')
+	plotPerspectiveTrans(x,y+4,'f')
+	plotPerspectiveTrans(x+3,y+4,'f')
+	plotPerspectiveTrans(x*0.05,y*0.05-0.1,'b')
+	plotPerspectiveTrans(x*0.01,y*0.01-0.1,'b')
+	plotPerspectiveTrans(x*0.01-0.5,y*0.01-0.1,'b')
+	plotPerspectiveTrans(x*0.01+0.5,y*0.01-0.1,'b')
+	plotPerspectiveTrans(x*0.01+0.5,y*0.01-0.05,'b')
+
+#----------------------------------------------------------------------
+def textureMapPlane(x, y, tex, numSamples=100):
+	'''
+	Map the given texture onto a plane, according to the perspective
+	transformations given above.
+
+	x,y - image space coordinates for output.
+	'''
+	perspec = PerspectiveTrans()
+	im = zeros((x.shape[0]-1, x.shape[1]-1, 3))
+	for i in range(0,x.shape[0]-1):
+		for j in range(0,x.shape[1]-1):
+			# compute (s,t) box to filter with
+			xBox = array((x[i,j], x[i+1,j], x[i+1,j+1], x[i,j+1]))
+			yBox = array((y[i,j], y[i+1,j], y[i+1,j+1], y[i,j+1]))
+			sBox, tBox = perspec.inv(xBox, yBox)
+			# remap the texture coords so that more of the plane is covered by
+			# texture.
+			sBox = sBox/4+0.5
+			tBox = tBox/4
+			im[-1-j,i,:] = tex.filterQuadFullAF(sBox.ravel(), tBox.ravel(), numSamples)
+		if i % 20 == 0:
+			print "done col %d, " % i
+	return im
 
 #----------------------------------------------------------------------
 # Main program
@@ -336,6 +510,8 @@ if __name__ == '__main__':
 	# Choose image
 	#im = imread('lena_std.png')[:,:,:3]/256.0
 	N = 512
-	im = getCentreTest(N)
-	mipmap = MipMap(im, 8)
+	#im = getCentreTest(N)
+	im = getGridImg(1000, 30, 2)
+	texture = TextureMap(im, 8)
 	s,t = mgrid[0:1:N*1j,0:1:N*1j]
+	x,y = mgrid[-0.5:0.5:N*1j,-1:-0.1:N*1j]
