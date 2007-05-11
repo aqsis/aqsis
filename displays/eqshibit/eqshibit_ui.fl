@@ -25,15 +25,18 @@ class CqEqshibitMainWindow {open : {public Aqsis::CqEqshibitBase}
           MenuItem m_menuBookNew {
             label {&New}
             callback {addNewBook("Book1");}
-            private xywh {0 0 100 20} shortcut 0x4006e
+            private xywh {0 0 100 20}
+            code0 {o->shortcut(FL_COMMAND+'n');}
           }
           MenuItem m_menuBookOpen {
             label {&Open}
-            private xywh {0 0 100 20} shortcut 0x4006f
+            private xywh {0 0 100 20}
+            code0 {o->shortcut(FL_COMMAND+'o');}
           }
           MenuItem m_menuBookSave {
             label {&Save}
-            private xywh {0 0 100 20} shortcut 0x40073
+            private xywh {0 0 100 20}
+            code0 {o->shortcut(FL_COMMAND+'s');}
           }
         }
       }

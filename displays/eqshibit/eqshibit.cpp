@@ -322,8 +322,8 @@ int main( int argc, char** argv )
 
 	// Set up the options
 	ap.usageHeader( ArgParse::apstring( "Usage: " ) + argv[ 0 ] + " [options]" );
-	ap.argString( "i", "\aSpecify the address to listen on (default: " + g_strInterface + ")", &g_strInterface );
-	ap.argString( "p", "\aSpecify the port to listen on (default: " + g_strPort + ")", &g_strPort );
+	ap.argString( "i", "\aSpecify the IP address to listen on (default: " + g_strInterface + ")", &g_strInterface );
+	ap.argString( "p", "\aSpecify the TCP port to listen on (default: " + g_strPort + ")", &g_strPort );
 	ap.argFlag( "help", "\aprint this help and exit", &g_fHelp );
 	ap.argFlag( "version", "\aprint version information and exit", &g_fVersion );
 	ap.argFlag( "nocolor", "\aDisable colored output", &g_cl_no_color );
