@@ -95,7 +95,7 @@ static void yyerror(const CqString Message);
 %token <m_tok>	EXTERN TEXTUREINFO RAYINFO OUTPUT
 
 %token <m_tok>	IF ELSE WHILE FOR CONTINUE BREAK RETURN
-%token <m_tok>	ILLUMINATE ILLUMINANCE SOLAR
+%token <m_tok>	ILLUMINATE ILLUMINANCE SOLAR GATHER
 
 %token <m_tok>	TEXTUREMAP ENVIRONMENT BUMP SHADOW OCCLUSION
 
@@ -1239,6 +1239,104 @@ loop_control
 								$5->NoDup();
 								$7->NoDup();
 								$9->NoDup();
+							}
+	| GATHER '(' expression ',' expression ',' expression ',' expression ',' expression ')' statement
+							{
+								$$=new CqParseNodeGatherConstruct(TqTrue);
+								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
+								CqParseNode* pArg=new CqParseNode();
+								pArg->SetPos(ParseLineNumber,ParseStreamName.c_str());
+								pArg->AddLastChild($3);
+								pArg->AddLastChild($5);
+								pArg->AddLastChild($7);
+								pArg->AddLastChild($9);
+								pArg->AddLastChild($11);
+								$$->AddLastChild(pArg);
+								$$->AddLastChild($13);
+								// Make sure that any assigns in the two expressions don't dup
+								$3->NoDup();
+								$5->NoDup();
+								$7->NoDup();
+								$9->NoDup();
+								$11->NoDup();
+							}
+	| GATHER '(' expression ',' expression ',' expression ',' expression ',' expression ')' statement ELSE statement
+							{
+								$$=new CqParseNodeGatherConstruct(TqTrue);
+								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
+								CqParseNode* pArg=new CqParseNode();
+								pArg->SetPos(ParseLineNumber,ParseStreamName.c_str());
+								pArg->AddLastChild($3);
+								pArg->AddLastChild($5);
+								pArg->AddLastChild($7);
+								pArg->AddLastChild($9);
+								pArg->AddLastChild($11);
+								$$->AddLastChild(pArg);
+								$$->AddLastChild($13);
+								$$->AddLastChild($15);
+								// Make sure that any assigns in the two expressions don't dup
+								$3->NoDup();
+								$5->NoDup();
+								$7->NoDup();
+								$9->NoDup();
+								$11->NoDup();
+							}
+	| GATHER '(' expression ',' expression ',' expression ',' expression ',' expression texture_arguments ')' statement
+							{
+								$$=new CqParseNodeGatherConstruct(TqTrue);
+								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
+								CqParseNode* pArg=new CqParseNode();
+								pArg->SetPos(ParseLineNumber,ParseStreamName.c_str());
+								pArg->AddLastChild($3);
+								pArg->AddLastChild($5);
+								pArg->AddLastChild($7);
+								pArg->AddLastChild($9);
+								pArg->AddLastChild($11);
+								// Add all extra arguments as further arguments to the function.
+								CqParseNode* pParam=$12->pFirstChild();
+								while(pParam!=0)
+								{
+									CqParseNode* pTemp=pParam->pNext();
+									pArg->AddLastChild(pParam);
+									pParam=pTemp;
+								}
+								$$->AddLastChild(pArg);
+								$$->AddLastChild($14);
+								// Make sure that any assigns in the two expressions don't dup
+								$3->NoDup();
+								$5->NoDup();
+								$7->NoDup();
+								$9->NoDup();
+								$11->NoDup();
+							}
+	| GATHER '(' expression ',' expression ',' expression ',' expression ',' expression texture_arguments ')' statement ELSE statement
+							{
+								$$=new CqParseNodeGatherConstruct(TqTrue);
+								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
+								CqParseNode* pArg=new CqParseNode();
+								pArg->SetPos(ParseLineNumber,ParseStreamName.c_str());
+								pArg->AddLastChild($3);
+								pArg->AddLastChild($5);
+								pArg->AddLastChild($7);
+								pArg->AddLastChild($9);
+								pArg->AddLastChild($11);
+								// Add all extra arguments as further arguments to the function.
+								CqParseNode* pParam=$12->pFirstChild();
+								while(pParam!=0)
+								{
+									CqParseNode* pTemp=pParam->pNext();
+									pArg->AddLastChild(pParam);
+									pParam=pTemp;
+								}
+								$$->AddLastChild(pArg);
+								$$->AddLastChild($14);
+								$$->AddLastChild($16);
+								// Make sure that any assigns in the two expressions don't dup
+								$3->NoDup();
+								$5->NoDup();
+								$7->NoDup();
+								$9->NoDup();
+								$11->NoDup();
 							}
 	;
 

@@ -282,6 +282,9 @@ struct IqShaderExecEnv
 	virtual	TqBool	SO_init_illuminance() = 0;
 	virtual	TqBool	SO_advance_illuminance() = 0;
 
+	virtual	STD_SO	SO_init_gather(FLOATVAL samples, DEFVOIDPARAM ) = 0;
+	virtual	TqBool	SO_advance_gather() = 0;
+
 	// ShadeOps
 	virtual STD_SO	SO_radians( FLOATVAL degrees, DEFPARAM ) = 0;
 	virtual STD_SO	SO_degrees( FLOATVAL radians, DEFPARAM ) = 0;
@@ -400,6 +403,7 @@ struct IqShaderExecEnv
 	virtual STD_SO	SO_illuminate( POINTVAL P, DEFVOIDPARAM ) = 0;
 	virtual STD_SO	SO_solar( VECTORVAL Axis, FLOATVAL Angle, DEFVOIDPARAM ) = 0;
 	virtual STD_SO	SO_solar( DEFVOIDPARAM ) = 0;
+	virtual STD_SO	SO_gather( STRINGVAL category, POINTVAL P, VECTORVAL dir, FLOATVAL angle, FLOATVAL nsamples, DEFVOIDPARAMVAR ) = 0;
 	virtual STD_SO	SO_printf( STRINGVAL str, DEFVOIDPARAMVAR ) = 0;
 	virtual STD_SO	SO_format( STRINGVAL str, DEFPARAMVAR ) = 0;
 	virtual STD_SO	SO_concat( STRINGVAL stra, STRINGVAL strb, DEFPARAMVAR ) = 0;

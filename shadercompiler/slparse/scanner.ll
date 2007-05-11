@@ -98,6 +98,7 @@ static TqInt check_type();
 "illuminate"	{ return(ILLUMINATE);}
 "illuminance"	{ return(ILLUMINANCE);}
 "solar"			{ return(SOLAR);}
+"gather"	{ return(GATHER);}
 "texture"		{ return(TEXTUREMAP);}
 "environment"	{ return(ENVIRONMENT);}
 "bump"			{ return(BUMP);}

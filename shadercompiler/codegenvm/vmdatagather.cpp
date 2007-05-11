@@ -346,6 +346,24 @@ void CqCodeGenDataGather::Visit( IqParseNodeSolarConstruct& SC )
 	}
 }
 
+void CqCodeGenDataGather::Visit( IqParseNodeGatherConstruct& IC )
+{
+	IqParseNode * pNode;
+	pNode = static_cast<IqParseNode*>(IC.GetInterface( ParseNode_Base ));
+
+	IqParseNode* pArg = pNode->pChild();
+	assert( pArg != 0 );
+	IqParseNode* pHitStmt = pArg->pNextSibling();
+	assert( pStmt != 0 );
+	IqParseNode* pNoHitStmt = pHitStmt->pNextSibling();
+
+	pArg->Accept( *this );
+	pHitStmt->Accept( *this );							// statement
+	if(pNoHitStmt)
+		pNoHitStmt->Accept(*this);
+}
+
+
 void CqCodeGenDataGather::Visit( IqParseNodeConditional& C )
 {
 	IqParseNode * pNode;

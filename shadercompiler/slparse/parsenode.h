@@ -1465,6 +1465,54 @@ class CqParseNodeSolarConstruct : public CqParseNode, public IqParseNodeSolarCon
 
 
 ///----------------------------------------------------------------------
+/// CqParseNodeGatherConstruct
+/// Parsenode a gather construct.
+
+class CqParseNodeGatherConstruct : public CqParseNode, public IqParseNodeGatherConstruct
+{
+	public:
+		CqParseNodeGatherConstruct( const CqParseNodeGatherConstruct& from ) :
+				CqParseNode( from )
+		{}
+		CqParseNodeGatherConstruct( TqBool fAxisAngle = TqFalse ) :
+				CqParseNode()
+		{}
+		virtual	~CqParseNodeGatherConstruct()
+		{}
+
+		// Overridden from IqParseNode
+
+		virtual	void*	GetInterface( EqParseNodeType type) const
+		{
+			void* pNode;
+			if ( ( pNode = ( void* ) QueryNodeType<IqParseNodeGatherConstruct>( this, type ) ) != 0 )
+				return ( pNode );
+			return ( CqParseNode::GetInterface( type ) );
+		}
+		virtual	TqInt	NodeType() const
+		{
+			return ( IqParseNodeGatherConstruct::m_ID );
+		}
+		virtual	void	Accept( IqParseNodeVisitor &V)
+		{
+			V.Visit(static_cast<IqParseNodeGatherConstruct&>(*this));
+		}
+
+
+		virtual	CqParseNode*	Clone( CqParseNode* pParent = 0 )
+		{
+			CqParseNodeGatherConstruct * pNew = new CqParseNodeGatherConstruct( *this );
+			if ( m_pChild )
+				pNew->m_pChild = m_pChild->Clone( pNew );
+			pNew->m_pParent = pParent;
+			return ( pNew );
+		}
+
+	private:
+};
+
+
+///----------------------------------------------------------------------
 /// CqParseNodeConditional
 /// Parsenode specifying an assignment operation.
 

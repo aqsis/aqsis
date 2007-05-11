@@ -812,6 +812,25 @@ void CqShaderVM::SO_solar2()
 	VOIDFUNC2( m_pEnv->SO_solar );
 }
 
+void CqShaderVM::SO_init_gather()
+{
+	VARFUNC;
+	VOIDFUNC1( m_pEnv->SO_init_gather );
+}
+
+void CqShaderVM::SO_advance_gather()
+{
+	RESULT(type_float, class_varying);
+	pResult->SetFloat( m_pEnv->SO_advance_gather() );
+	Push( pResult );
+}
+
+void CqShaderVM::SO_gather()
+{
+	VARFUNC;
+	VOIDFUNC5PLUS( m_pEnv->SO_gather );
+}
+
 void CqShaderVM::SO_printf()
 {
 	AUTOFUNC;

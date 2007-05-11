@@ -354,6 +354,9 @@ SqOpCodeTrans CqShaderVM::m_TransTable[] =
         {"advance_illuminance", 0, &CqShaderVM::SO_advance_illuminance, 0, {0}},
         {"solar2", 0, &CqShaderVM::SO_solar2, 0, {0}},
         {"solar", 0, &CqShaderVM::SO_solar, 0, {0}},
+        {"init_gather", 0, &CqShaderVM::SO_init_gather, 0, {0}},
+        {"advance_gather", 0, &CqShaderVM::SO_advance_gather, 0, {0}},
+        {"gather", 0, &CqShaderVM::SO_gather, 0, {0}},
         {"printf", 0, &CqShaderVM::SO_printf, 0, {0}},
 
         {"fcellnoise1", 0, &CqShaderVM::SO_fcellnoise1, 0, {0}},

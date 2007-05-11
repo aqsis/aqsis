@@ -347,7 +347,38 @@ union UsProgramElement
                   				delete[](stackitems); \
 						RELEASE(count); \
 						RELEASE(a);
-
+#define VOIDFUNC5PLUS(Func)	POPV(count);	/* Count of additional values.*/ \
+						POPV(a); \
+						POPV(b); \
+						POPV(c); \
+						POPV(d); \
+						POPV(e); \
+						/* Read all the additional values. */ \
+						TqFloat fc; \
+						count->GetFloat( fc ); \
+						TqInt cParams=static_cast<TqInt>( fc ); \
+						IqShaderData** aParams=new IqShaderData*[cParams]; \
+						SqStackEntry *stackitems = new SqStackEntry[cParams];\
+						TqInt iP=0; \
+						while(iP!=cParams)	{\
+							stackitems[iP]=POP; \
+							aParams[iP]=stackitems[iP].m_Data;\
+							iP++;\
+						}\
+						Func(a,b,c,d,e, this, cParams, aParams); \
+						delete[](aParams); \
+                  				iP=0; \
+						while(iP!=cParams)	{\
+							Release( stackitems[iP]);\
+							iP++;\
+						}\
+                  				delete[](stackitems); \
+						RELEASE(count); \
+						RELEASE(a); \
+						RELEASE(b); \
+						RELEASE(c); \
+						RELEASE(d); \
+						RELEASE(e);
 #define	SPLINE(t,func)	POPV(count);	\
 						POPV(value); \
 						POPV(vala);	\
@@ -1123,6 +1154,9 @@ class SHADERVM_SHARE CqShaderVM : public CqShaderStack, public IqShader, public 
 		void	SO_illuminance2();
 		void	SO_solar();
 		void	SO_solar2();
+		void	SO_init_gather();
+		void	SO_advance_gather();
+		void	SO_gather();
 		void	SO_printf();
 		void	SO_atmosphere();
 		void	SO_displacement();

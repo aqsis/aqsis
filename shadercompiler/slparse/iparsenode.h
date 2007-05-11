@@ -128,6 +128,7 @@ enum EqParseNodeType
     ParseNode_IlluminateConstruct,
     ParseNode_IlluminanceConstruct,
     ParseNode_SolarConstruct,
+    ParseNode_GatherConstruct,
     ParseNode_Conditional,
     ParseNode_ConditionalExpression,
     ParseNode_TypeCast,
@@ -157,6 +158,7 @@ struct IqParseNodeWhileConstruct;
 struct IqParseNodeIlluminateConstruct;
 struct IqParseNodeIlluminanceConstruct;
 struct IqParseNodeSolarConstruct;
+struct IqParseNodeGatherConstruct;
 struct IqParseNodeConditional;
 struct IqParseNodeConditionalExpression;
 struct IqParseNodeTypeCast;
@@ -187,6 +189,7 @@ struct IqParseNodeVisitor
 	virtual	void Visit( IqParseNodeIlluminateConstruct& ) = 0;
 	virtual	void Visit( IqParseNodeIlluminanceConstruct& ) = 0;
 	virtual	void Visit( IqParseNodeSolarConstruct& ) = 0;
+	virtual	void Visit( IqParseNodeGatherConstruct& ) = 0;
 	virtual	void Visit( IqParseNodeConditional& ) = 0;
 	virtual	void Visit( IqParseNodeConditionalExpression& ) = 0;
 	virtual	void Visit( IqParseNodeTypeCast& ) = 0;
@@ -529,6 +532,21 @@ struct IqParseNodeSolarConstruct
 	const static EqParseNodeType m_ID;
 
 	virtual ~IqParseNodeSolarConstruct()
+	{
+	};
+};
+
+
+struct IqParseNodeGatherConstruct
+{
+	virtual	void*	GetInterface( EqParseNodeType type) const = 0;
+	virtual	TqInt	NodeType() const = 0;
+
+	virtual	void Accept( IqParseNodeVisitor& V ) = 0;
+
+	const static EqParseNodeType m_ID;
+
+	virtual ~IqParseNodeGatherConstruct()
 	{
 	};
 };

@@ -407,6 +407,7 @@ class SHADERCONTEXT_SHARE CqShaderExecEnv : public IqShaderExecEnv
 		TqUint	m_li;					///< Light index, used during illuminance loop.
 		TqInt	m_Illuminate;
 		TqBool	m_IlluminanceCacheValid;	///< Flag indicating whether the illuminance cache is valid.
+		TqUint	m_gatherSample;				///< Sample index, used during gather loop.
 		IqAttributes* m_pAttributes;	///< Pointer to the associated attributes.
 		CqTransformPtr m_pTransform;		///< Pointer to the associated transform.
 		CqBitVector	m_CurrentState;			///< SIMD execution state bit vector accumulator.
@@ -420,6 +421,9 @@ class SHADERCONTEXT_SHARE CqShaderExecEnv : public IqShaderExecEnv
 
 		virtual	TqBool	SO_init_illuminance();
 		virtual	TqBool	SO_advance_illuminance();
+
+		virtual	STD_SO	SO_init_gather( FLOATVAL samples, DEFVOIDPARAM );
+		virtual	TqBool	SO_advance_gather();
 
 		// ShadeOps
 		virtual STD_SO	SO_radians( FLOATVAL degrees, DEFPARAM );
@@ -539,6 +543,7 @@ class SHADERCONTEXT_SHARE CqShaderExecEnv : public IqShaderExecEnv
 		virtual STD_SO	SO_illuminate( POINTVAL P, DEFVOIDPARAM );
 		virtual STD_SO	SO_solar( VECTORVAL Axis, FLOATVAL Angle, DEFVOIDPARAM );
 		virtual STD_SO	SO_solar( DEFVOIDPARAM );
+		virtual STD_SO	SO_gather( STRINGVAL category, POINTVAL P, VECTORVAL dir, FLOATVAL angle, FLOATVAL samples, DEFVOIDPARAMVAR );
 		virtual STD_SO	SO_printf( STRINGVAL str, DEFVOIDPARAMVAR );
 		virtual STD_SO	SO_format( STRINGVAL str, DEFPARAMVAR );
 		virtual STD_SO	SO_concat( STRINGVAL stra, STRINGVAL strb, DEFPARAMVAR );

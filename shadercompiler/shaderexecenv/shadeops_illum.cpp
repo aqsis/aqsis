@@ -93,6 +93,46 @@ TqBool CqShaderExecEnv::SO_advance_illuminance()
 }
 
 
+//----------------------------------------------------------------------
+// init_gather()
+void CqShaderExecEnv::SO_init_gather(IqShaderData* samples, IqShader* pShader)
+{
+	TqBool __fVarying;
+	TqUint __iGrid = 0;
+
+	__fVarying=(samples)->Class()==class_varying;
+
+	TqFloat _aq_samples;
+	(samples)->GetFloat(_aq_samples,__iGrid);
+
+	// Check if lighting is turned off.
+	if(getRenderContext())
+	{
+		const TqInt* enableLightingOpt = getRenderContext()->GetIntegerOption("EnableShaders", "lighting");
+		if(NULL != enableLightingOpt && enableLightingOpt[0] == 0)
+			return;
+	}
+
+	m_gatherSample = _aq_samples;
+}
+
+
+//----------------------------------------------------------------------
+// advance_illuminance()
+TqBool CqShaderExecEnv::SO_advance_gather()
+{
+	// Check if lighting is turned off, should never need this check as SO_init_illuminance will catch first.
+	if(getRenderContext())
+	{
+		const TqInt* enableLightingOpt = getRenderContext()->GetIntegerOption("EnableShaders", "lighting");
+		if(NULL != enableLightingOpt && enableLightingOpt[0] == 0)
+			return(TqFalse);
+	}
+
+	return((--m_gatherSample) > 0);
+}
+
+
 void CqShaderExecEnv::ValidateIlluminanceCache( IqShaderData* pP, IqShaderData* pN, IqShader* pShader )
 {
 	// If this is the first call to illuminance this time round, call all lights and setup the Cl and L caches.
@@ -918,6 +958,28 @@ void CqShaderExecEnv::SO_solar( IqShaderData* Axis, IqShaderData* Angle, IqShade
 void	CqShaderExecEnv::SO_solar( IqShader* pShader )
 {
 	SO_solar( NULL, NULL, pShader );
+}
+
+//----------------------------------------------------------------------
+// gather(category,P,N,angle,nsamples)
+void CqShaderExecEnv::SO_gather( IqShaderData* category, IqShaderData* P, IqShaderData* N, IqShaderData* angle, IqShaderData* samples, IqShader* pShader, int cParams, IqShaderData** apParams)
+{
+	TqBool __fVarying;
+	TqUint __iGrid;
+
+	__iGrid = 0;
+	__fVarying = TqTrue;
+	CqBitVector& RS = RunningState();
+	do
+	{
+		if(!__fVarying || RS.Value( __iGrid ) )
+		{
+			m_CurrentState.SetValue( __iGrid, TqFalse );
+		}
+		else
+			m_CurrentState.SetValue( __iGrid, TqFalse );
+	}
+	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
 }
 
 //----------------------------------------------------------------------

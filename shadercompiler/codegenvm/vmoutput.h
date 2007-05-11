@@ -73,6 +73,7 @@ class CqCodeGenOutput : public IqParseNodeVisitor
 		virtual	void Visit( IqParseNodeIlluminateConstruct& );
 		virtual	void Visit( IqParseNodeIlluminanceConstruct& );
 		virtual	void Visit( IqParseNodeSolarConstruct& );
+		virtual	void Visit( IqParseNodeGatherConstruct& );
 		virtual	void Visit( IqParseNodeConditional& );
 		virtual	void Visit( IqParseNodeConditionalExpression& );
 		virtual	void Visit( IqParseNodeTypeCast& );
