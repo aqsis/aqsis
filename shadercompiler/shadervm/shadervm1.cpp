@@ -451,7 +451,6 @@ void CqShaderVM::SO_RS_JZ()
 	SqLabel lab = ReadNext().m_Label;
 	if ( m_pEnv->RunningState().Count() == 0 )
 	{
-		Aqsis::log() << debug << m_PO << ", " << lab.m_Offset << std::endl;
 		m_PO = lab.m_Offset;
 		m_PC = lab.m_pAddress;
 	}

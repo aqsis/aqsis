@@ -1,6 +1,6 @@
 /* -------------- declaration section -------------- */
 
-%expect 24
+%expect 26
 
 %{
 #ifdef	WIN32
@@ -1771,6 +1771,7 @@ procedurecall
 							}
 	;
 
+
 unresolvedcall
 	:	IDENTIFIER '(' proc_arguments ')'
 							{
@@ -1888,12 +1889,6 @@ texture_type
 	|	SHADOW				{
 								std::vector<SqFuncRef> func;
 								CqFuncDef::FindFunction("shadow", func);
-								$$=new CqParseNodeFunctionCall(func);
-								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
-							}
-	|	OCCLUSION			{
-								std::vector<SqFuncRef> func;
-								CqFuncDef::FindFunction("occlusion", func);
 								$$=new CqParseNodeFunctionCall(func);
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
 							}
