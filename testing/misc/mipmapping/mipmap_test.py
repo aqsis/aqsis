@@ -23,6 +23,12 @@ This script investigates texture access.  There are two main parts:
 	2) Texture filtering using anisotropic filtering.  This includes
 		* stochastic filtering with a weight function over a quadrilateral
 		* elliptical gaussian filtering (EWA)
+
+To run the script, you'll need scientific python; specifically, the packages
+	* scipy
+	* matplotlib
+On a unix machine, ipython is highly recommended for a nice interactive
+interface which meshes very well with matplotlib.
 '''
 
 from __future__ import division
