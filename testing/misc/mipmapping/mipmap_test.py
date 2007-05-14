@@ -17,17 +17,26 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
+'''
+This script investigates texture access.  There are two main parts:
+	1) Mipmap generation & access
+	2) Texture filtering using anisotropic filtering.  This includes
+		* stochastic filtering with a weight function over a quadrilateral
+		* elliptical gaussian filtering (EWA)
+'''
+
 from __future__ import division
 
 import matplotlib.pylab as pylab
+from pylab import imshow
 
 import numpy
-from numpy import pi, r_, size, zeros, ones, ceil, floor, array, linspace, meshgrid, random
+from numpy import pi, r_, size, zeros, ones, eye, ceil, floor, array, \
+		linspace, meshgrid, random, arange, dot, diag
 
 import scipy
-from scipy import cos, log2, sqrt, ogrid, mgrid, ndimage
-from scipy.signal import boxcar, convolve2d as conv2
-# Use ndimage.convolve!
+from scipy import cos, exp, log, log2, sqrt, ogrid, mgrid, ndimage
+import scipy.linalg as linalg
 from scipy.misc import imsave, imread
 
 # The purpose of this script is to investigate mipmap generation and indexing
@@ -43,7 +52,7 @@ def sincKer(width, even, scale = 2):
 	
 	width - width of the filter (used by the window)
 	even - true if the generated filter should have an even number of points.
-	scale - zeros will be centered around 0 with spacing "scale"
+	scale - zeros will be centred around 0 with spacing "scale"
 	'''
 	if even:
 		numPts = max(2*int((width+1)/2), 2)
@@ -122,70 +131,6 @@ def getCentreTest(N=512):
 # Utils for creating/manipulating mipmaps
 #----------------------------------------------------------------------
 
-#----------------------------------------------------------------------
-# Musings on methods of creating and accessing mipmaps
-#
-# Consider a mipmap. Let:
-# t = texture coordinates; 0 <= t <= 1.
-# l = mipmap level
-# 
-# Consider the following variables:
-# i_l(t) = raster coordinates for level l as a function of texture coordinate t.
-# o_l = offset for level l in level 0 units
-# s_l = span of level l in level 0 units
-# d_l = interval between pixels of level l in level 0 raster units.
-# w_l = width of level l in pixels.
-# 
-# Example mipmap, created with my current scheme:
-#     0   1   2   3   4  <-- i_0
-# l   |   |   |   |   |   o_l  s_l  w_l  d_l
-# 0  [x   x   x   x   x]  0    4    5    1
-# 1  [x       x       x]  0    2    3    2
-# 2  [x               x]  0    1    2    4
-# 3  [        x        ]  2    0    1    ?
-# 
-# Another example (powers of two)
-#     0   1   2   3   4   5   6   7 <-- i_0
-# l   |   |   |   |   |   |   |   |   o_l   s_l  w_l
-# 0  [x   x   x   x   x   x   x   x]  0     7    8
-# 1  [  x       x       x       x  ]  0.5   6    4
-# 2  [      x               x      ]  1.5   4    2
-# 3  [              x              ]  3.5   0    1
-# 
-# Formulas for texture coordinates -> raster space
-# 
-# s_l = (s_0 - 2*o_l)
-# 
-# Raster units for level 0 are:
-# i_0(t) = t * s_0
-# Raster units for level l are:
-# i_l(t) = (i_0(t) - o_0)/d_l
-# 
-# Or, what we really need, which is raster units for level l in terms of
-# the texture coordinate t:
-# i_l(t) = t * s_0/d_l - o_0/d_l
-# 
-# 
-# Lesson: odd texture sizes make it easy to index; even sizes are hard.
-# 
-# 
-# Abandoning the constant-coefficients approach (makes it very slow to generate
-# mipmaps), we would have:
-# 
-#     0   1   2   3   4   5   6   7 <-- i_0
-# l   |   |   |   |   |   |   |   |   o_l   s_l  w_l
-# 0  [x   x   x   x   x   x   x   x]  0     7    8
-# 1  [x        x         x        x]  0     7    4
-# 2  [x                           x]  0     7    2
-# 3  [              x              ]  0     7    1
-# 
-# The the raster units for level l in terms of the texture coordinates t
-# are then very simple:
-# 
-# i_l(t) = t*(w_l - 1)
-
-
-#----------------------------------------------------------------------
 class ImageDownsampler:
 	'''
 	Class which holds a filter kernel (function & width) and is able to
@@ -198,7 +143,7 @@ class ImageDownsampler:
 		'''
 		Downsample an image by
 		(1) Applying the filter kernel at each pixel
-		(2) Decimate by taking elements 0::2 from the result
+		(2) Decimate by taking every second element from the result
 		(3) Clamp the resulting intensities between 0 and 1 
 		'''
 		ker = self.kerFunc(self.kerWidth, (size(img,0) % 2) == 0)
@@ -242,9 +187,9 @@ class MipLevel:
 
 	def display(self, s=None, t=None):
 		if s is None or t is None:
-			pylab.imshow(self.image[1:-1,1:-1,:], interpolation='nearest')
+			imshow(self.image[1:-1,1:-1,:], interpolation='nearest')
 		else:
-			pylab.imshow(self.sample(s,t), interpolation='nearest')
+			imshow(self.sample(s,t), interpolation='nearest')
 
 
 #----------------------------------------------------------------------
@@ -253,9 +198,18 @@ class TextureMap:
 	Class to encapsulate a (power-of-2) mipmapped texture in much the same way
 	mipmapping will be done internally in Aqsis.
 	'''
-	def __init__(self, img, filterWidth, kerFunc=sincKer):
+	def __init__(self, img, filterWidth, kerFunc=sincKer, levelCalcMethod='minSideLen'):
+		'''
+		img - texture image
+		filterWidth - filter width for mipmap downsampling
+		kerFunc - kernel function for mipmap downsampling
+		levelCalcMethod - method used for calculating required mipmap
+			filtering.  May be one of: 'minSideLen', 'minDiag', 'lvlZero'.
+		level from a quadrialteral.
+		'''
 		self.downsampler = ImageDownsampler(filterWidth, kerFunc)
 		self.levels = []
+		self.levelCalcMethod = levelCalcMethod
 		self.genMipMap(img)
 
 	def genMipMap(self, img):
@@ -264,11 +218,73 @@ class TextureMap:
 		the held kernel function and width.
 
 		In this function we make the requirement that the filter coefficients
-		for filtering between levels are constant for a particular level.  This
-		restriction means that even-sized images have to be filtered with even-
-		sized filter kernels, and vice versa.  Even sizes also require that an
-		offset be taken into account, since the edges of the downsampled levels
-		don't lie on the edges of the original image.
+		for filtering between levels are constant across the image for a
+		particular mipmap level.  This restriction means that even-sized images
+		have to be filtered with even- sized filter kernels, and vice versa.
+		Even sizes also require that an offset be taken into account, since the
+		edges of the downsampled levels don't lie on the edges of the original
+		image.
+
+		Examples showing mipmap sample points (represented as x's) follow for
+		the 1D case.  Several variables are also shown as a function of the
+		mipmap level, l on the rhs:
+
+		i_l(t) = raster coordinates for level l as a function of texture coordinate t.
+		o_l = offset for level l in level 0 units
+		s_l = span of level l in level 0 units
+		d_l = interval between pixels of level l in level 0 raster units.
+		w_l = width of level l in pixels.
+
+
+		(mostly) odd numbers of points:
+		    0   1   2   3   4                   <-- i_0
+		l   |   |   |   |   |                    o_l  s_l  w_l  d_l
+		0  [x   x   x   x   x]                   0    4    5    1
+		1  [x       x       x]                   0    2    3    2
+		2  [x               x]                   0    1    2    4
+		3  [        x        ]                   2    0    1    ?
+		
+		Another example (powers of two)
+		    0   1   2   3   4   5   6   7       <-- i_0
+		l   |   |   |   |   |   |   |   |        o_l   s_l  w_l
+		0  [x   x   x   x   x   x   x   x]       0     7    8
+		1  [  x       x       x       x  ]       0.5   6    4
+		2  [      x               x      ]       1.5   4    2
+		3  [              x              ]       3.5   0    1
+
+		Notice that the higher level mipmaps for the power of two-sized image
+		do *not* have points which lie on the edge of the image.  This means
+		that we've got to incorporate an offset when we sample the level.
+
+		Formulas for texture coordinates -> raster space
+		
+		s_l = (s_0 - 2*o_l)
+		
+		Raster units for level 0 are:
+		i_0(t) = t * s_0
+		Raster units for level l are:
+		i_l(t) = (i_0(t) - o_0)/d_l
+		
+		Or, what we really need, which is raster units for level l in terms of
+		the texture coordinate t:
+		i_l(t) = t * s_0/d_l - o_0/d_l
+		
+		((
+			Note that we could abandon the constant-coefficients approach
+			(which would make it very slow to generate mipmaps), we would have:
+			
+				0   1   2   3   4   5   6   7 <-- i_0
+			l   |   |   |   |   |   |   |   |   o_l   s_l  w_l
+			0  [x   x   x   x   x   x   x   x]  0     7    8
+			1  [x        x         x        x]  0     7    4
+			2  [x                           x]  0     7    2
+			3  [              x              ]  0     7    1
+			
+			The the raster units for level l in terms of the texture coordinates t
+			are then very simple:
+			
+			i_l(t) = t*(w_l - 1)
+		))
 		'''
 		scale = 2
 		level0Span = array(img.shape[0:2])-1
@@ -323,8 +339,37 @@ class TextureMap:
 		Calculate the appropriate mipmap level for texture filtering over a
 		quadrilateral given by the texture-space vertices
 		[s[1], t[1]], ... , [s[4], t[4]].
+
+		There are many ways to do this; the instance variable levelCalcMethod
+		selects the desired one.  The most correct way is to choose the
+		minSideLen method, as long as the quadrilateral is vaguely
+		rectangular-shaped.  This only works if you're happy to use lots of
+		samples however, otherwise you get aliasing.
 		'''
-		pass
+		s = s.copy()*self.levels[0].image.shape[0]
+		t = t.copy()*self.levels[0].image.shape[1]
+		if self.levelCalcMethod == 'minSideLen':
+			# Get mipmap level with minimum feature size equal to the shortest
+			# quadrilateral side
+			s1 = pylab.concatenate((s, s[0:1]))
+			t1 = pylab.concatenate((t, t[0:1]))
+			minSideLen2 = (numpy.diff(s1)**2 + numpy.diff(t1)**2).min()
+			level = log2(minSideLen2)/2
+		elif self.levelCalcMethod == 'minDiag':
+			# Get mipmap level with minimum feature size equal to the minimum
+			# distance between the centre of the quad and the vertices.
+			#
+			# This is more-or-less the algorithm used in Pixie...
+			minDiag2 = ((s - s.mean())**2 + (t - t.mean())**2).min()
+			level = log2(minDiag2)/2
+		#elif self.levelCalcMethod == 'sqrtArea':
+			# Get mipmap level with minimum feature size estimated as the
+			# square root of the area of the box.
+		else:
+			# Else just use level 0.  Correct texture filtering will take care
+			# of any aliasing...
+			level = 0
+		return max(level,0)
 
 	def getRandPointsInQuad(self, s, t, numPoints):
 		'''
@@ -344,24 +389,88 @@ class TextureMap:
 		st = array([s,t])
 		randPts = lerp2*(op(st[:,0],lerp1) + op(st[:,1],lerp1m)) \
 				+ (1-lerp2)*(op(st[:,3],lerp1) + op(st[:,2],lerp1m))
-		return (randPts[0,:], randPts[1,:])
+		#weights = exp(-8*((lerp1-0.5)**2 + (lerp2-0.5)**2))
+		weights = ones(numPoints)
+		return (randPts[0,:], randPts[1,:], weights)
 
-	def filterQuadFullAF(self, s, t, numPoints=100):
+	def filterQuadAF(self, s, t, numPoints=100):
 		'''
 		Filter the texture by sampling inside the given quadriateral specified
 		by the texture-space vertices
 		[s[1], t[1]], ... , [s[4], t[4]],
-		and taking an average.
-
-		This is the ultimate, fully correct anisotropic filter.
+		and taking an average.  Sample points are chosen stochastically over
+		the quadrilateral at the mipmap level returned by calculateLevelQuad.
+		This is essentially Monte Carlo integration, with a reconstruction
+		filter equal to bilinear interpolation.
 		'''
-		sRnd, tRnd = self.getRandPointsInQuad(s,t,numPoints)
-		samples = self.levels[0].sample(sRnd, tRnd)
-		#if numpy.random.rand(1) > 0.99:
-		#	pylab.plot(s,t)
-		return samples.mean(0)
+		sRnd, tRnd, w = self.getRandPointsInQuad(s,t,numPoints)
+		level = int(self.calculateLevelQuad(s,t))
+		samples = self.levels[level].sample(sRnd, tRnd)
+		return ( samples*w.reshape(w.shape+(1,)) ).sum(0) / w.sum()
+
+	def filterEllipticGaussianAF(self, s0, t0, deltaX, deltaY, J, returnWeights=False):
+		'''
+		Filter a portion of the texture using an elliptical gaussian filter, as
+		described in Heckbert's 1989 thesis, "Fundamentals of Texture Mapping
+		and Image Warping".  This kind of filter is also called an EWA filter for
+		"Elliptical Weighted Average".
+
+		s0, t0 - texture coordinates of the centre of the filter
+		deltaX, deltaY - pixel side length in the final discrete image.
+		J - Jacobian of the coordinate transformation.
+		returnWeights - true if you just want the filter weights returned for
+						debugging rather than the filtered image.
+		'''
+		if not returnWeights and (s0 < 0 or s0 > 1 or t0 < 0 or t0 > 1):
+			return 0
+		# convert to pixel coords
+		s0 *= self.levels[0].image.shape[0]
+		t0 *= self.levels[0].image.shape[1]
+		# get the inverse of J and adjust for pixel coords
+		Ji = dot(diag(self.levels[0].image.shape[0:2]), linalg.inv(J))
+		# width parameter is log(n) where the filter falls to 1/n of it's
+		# centeral value at the edge.
+		width = 4
+		# Variances for the reconstruction & prefilters.
+		magicalFudgeFactor = 200  # TODO: WTH do I need this???
+		varianceXY = 1/(2*pi) / magicalFudgeFactor
+		varianceST = 1/(2*pi) / magicalFudgeFactor
+		# V = covariance matrix
+		V = varianceXY*dot(Ji, dot(diag([deltaX**2,deltaY**2]), Ji.transpose())) + varianceST*eye(2)
+		# Q = (+ve definite) quadratic form matrix.
+		Q = 0.5*linalg.inv(V)
+		det = Q[0,0]*Q[1,1] - Q[0,1]*Q[1,0]
+		# compute bounding radii
+		sRad = sqrt(Q[1,1]*width/det)
+		tRad = sqrt(Q[0,0]*width/det)
+		# integer filter width
+		sWidth = int(floor(s0+sRad)) - int(ceil(s0-sRad)) + 1
+		tWidth = int(floor(t0+tRad)) - int(ceil(t0-tRad)) + 1
+		# compute edge of filter region in level0 image:
+		sStart = ceil(s0-sRad)
+		tStart = ceil(t0-tRad)
+		# compute filter weights.  I'm being sloppy here, and not bothering to
+		# truncate outside the relevant ellipse
+		s,t = ogrid[0:sWidth, 0:tWidth]
+		s = s - (s0-sStart)
+		t = t - (t0-tStart)
+		#crap *= 1
+		if not returnWeights and (sStart < 0 or sStart + sWidth-1 >= self.levels[0].image.shape[0] \
+				or tStart < 0 or tStart + tWidth-1 >= self.levels[0].image.shape[1]):
+			#s = 
+			return 0.5
+		weights = exp(-(Q[0,0]*s*s + (Q[0,1]+Q[1,0])*s*t + Q[1,1]*t*t))
+		weights /= weights.sum()
+		if returnWeights:
+			return weights
+		# TODO: Use a mipmap here rather than mipmap level[0]
+		imSec = self.levels[0].image[sStart:sStart+sWidth,tStart:tStart+tWidth]
+		return applyToChannels(imSec, lambda x: (x*weights).sum())
 
 	def displayLevel(self, level, s=None, t=None):
+		'''
+		Display a mipmap level
+		'''
 		self.levels[level].display(s,t)
 
 
@@ -370,7 +479,8 @@ class TextureMap:
 #
 # Simplified perspective transformation, between "texture coordinates", (s,t)
 # on an infinite plane with parametric form P(s,t) = [s,-1,t],
-# and "image coordinates", (x,y) in the x,y plane.
+# and "image coordinates", (x,y) in the x,y plane.  This is useful as an
+# example nonaffine texture warp to test anisotropic filtering techniques.
 #
 # We use the LH coordinate system, with x=right, y=up, z=into the screen.
 #----------------------------------------------------------------------
@@ -401,6 +511,13 @@ class PerspectiveTrans:
 		x = 1/(1+t/self.d) * s
 		y = -1/(1+t/self.d)
 		return (x,y)
+
+	def jacobian(self, s, t):
+		'''
+		return the Jacobian matrix of the forward transformation
+		'''
+		D = 1/self.d*(1+t/self.d)**(-2)
+		return D*array([[self.d+t, -s], [0, 1]])
 
 	def inv(self, x, y):
 		'''
@@ -486,18 +603,34 @@ def textureMapPlane(x, y, tex, numSamples=100):
 	x,y - image space coordinates for output.
 	'''
 	perspec = PerspectiveTrans()
-	im = zeros((x.shape[0]-1, x.shape[1]-1, 3))
+	im = zeros((x.shape[1]-1, x.shape[0]-1, 3))
+	deltaX = x[1,0]-x[0,0]
+	deltaY = y[0,1]-y[0,0]
+	print "Warping the texture..."
 	for i in range(0,x.shape[0]-1):
 		for j in range(0,x.shape[1]-1):
-			# compute (s,t) box to filter with
-			xBox = array((x[i,j], x[i+1,j], x[i+1,j+1], x[i,j+1]))
-			yBox = array((y[i,j], y[i+1,j], y[i+1,j+1], y[i,j+1]))
-			sBox, tBox = perspec.inv(xBox, yBox)
-			# remap the texture coords so that more of the plane is covered by
-			# texture.
-			sBox = sBox/4+0.5
-			tBox = tBox/4
-			im[-1-j,i,:] = tex.filterQuadFullAF(sBox.ravel(), tBox.ravel(), numSamples)
+#			# Quadrilateral filter region
+#			# compute (s,t) box to filter with
+#			xBox = array((x[i,j], x[i+1,j], x[i+1,j+1], x[i,j+1]))
+#			yBox = array((y[i,j], y[i+1,j], y[i+1,j+1], y[i,j+1]))
+#			sBox, tBox = perspec.inv(xBox, yBox)
+#			# remap the texture coords so that more of the plane is covered by
+#			# texture.
+#			sBox = sBox/4+0.5
+#			tBox = tBox/4-0.3
+#			im[-1-j,i,:] = tex.filterQuadAF(sBox, tBox, numSamples)
+
+			# Use an EWA filter
+			x0 = (x[i:i+2,j:j+2]).mean()
+			y0 = (y[i:i+2,j:j+2]).mean()
+			s0,t0 = perspec.inv(x0, y0)
+			J = perspec.jacobian(s0,t0)
+			# Remap the texture coords so that more of the plane is covered by
+			# texture.  Need to also adjust the Jacobian if we do this...
+			s0 = s0/4+0.5
+			t0 = t0/4-0.3
+			J /= 4
+			im[-1-j,i,:] = tex.filterEllipticGaussianAF(s0, t0, deltaX, deltaY, J)
 		if i % 20 == 0:
 			print "done col %d, " % i
 	return im
@@ -512,6 +645,9 @@ if __name__ == '__main__':
 	N = 512
 	#im = getCentreTest(N)
 	im = getGridImg(1000, 30, 2)
-	texture = TextureMap(im, 8)
+	texture = TextureMap(im, 8, )
 	s,t = mgrid[0:1:N*1j,0:1:N*1j]
-	x,y = mgrid[-0.5:0.5:N*1j,-1:-0.1:N*1j]
+	x,y = mgrid[-0.5:0.5:N*1j,-0.5:-0.1:N*2//5*1j]
+	stride = 1
+	imWarp = textureMapPlane(x[::stride,::stride],y[::stride,::stride], texture)
+	imshow(imWarp)
