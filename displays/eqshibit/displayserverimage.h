@@ -59,7 +59,7 @@ class CqDisplayServerImage : public CqImage
 public:
     CqDisplayServerImage( const CqString name) : CqImage(name)
 	{}
-	CqDisplayServerImage() : CqImage() 
+    CqDisplayServerImage() : CqImage() 
 	{}
     virtual ~CqDisplayServerImage()
 	{}
@@ -85,10 +85,18 @@ public:
         return ( m_socket );
     }
 
-	void acceptData(TqUlong xmin, TqUlong xmaxplus1, TqUlong ymin, TqUlong ymaxplus1, TqInt elementSize, const unsigned char* data);
+    /** Get a reference to the current read buffer
+      */
+    std::stringstream& readbuf()
+    {
+        return ( m_readbuf );
+    }
+
+    void acceptData(TqUlong xmin, TqUlong xmaxplus1, TqUlong ymin, TqUlong ymaxplus1, TqInt elementSize, const unsigned char* data);
 
 private:
     SOCKET	m_socket;			///< Socket ID of the client.
+    std::stringstream m_readbuf;
 };
 
 END_NAMESPACE( Aqsis )

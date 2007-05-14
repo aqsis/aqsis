@@ -50,6 +50,8 @@ using namespace Aqsis;
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <fcntl.h>
+#include <errno.h>
 #include "eqshibit.h"
 #include "eqshibit_ui.h"
 #include "ddserver.h"
@@ -96,57 +98,54 @@ void ProcessMessage(std::stringstream& msg, boost::shared_ptr<CqDisplayServerIma
 void HandleData(int sock, void *data)
 {
 	boost::shared_ptr<CqDisplayServerImage> thisClient = g_theClients[sock];
-	char	buffer[BUF_SIZE];
-	std::stringstream msg;
-	char *bufPtr = buffer;
-	size_t bufAvail = 0;
-	bool noneWaiting = false;
+	char c;
+	int count;
+	std::stringstream& buffer = thisClient->readbuf();
 
 	// Read a message
 	while(1)	
 	{
-		// If there is more left in the buffer, process it.
-		if(bufAvail > 0)
+		// Read some more into the buffer
+		count = read(sock,&c,sizeof(char));
+		if(count == -1)
 		{
-			// Check if the buffer has a terminator.
-			void* term;
-			if((term = memchr(bufPtr, '\0', bufAvail)) != NULL)
-			{
-				// Copy the data up to the terminator.
-				msg << bufPtr;
-				// Point the bufPtr past the terminator, and update the avail count.
-				bufAvail -= strlen(bufPtr)+1;
-				bufPtr = reinterpret_cast<char*>(term);
-				bufPtr++;
-				ProcessMessage(msg, thisClient);
-				msg.clear();
-				if(noneWaiting)
+			switch (errno)
+			{	
+				case EAGAIN: 
+				case EINTR: 
+					return;
 					break;
-			}
-			else
-			{
-				msg << std::string(bufPtr, bufAvail);
-				bufPtr = buffer;
-				bufAvail = 0;
-			}
-		}
-		if(bufAvail <= 0)
+				default:
+					Aqsis::log() << Aqsis::debug << "Socket read error: " << errno << std::endl;
+					return;
+					break;
+			};
+		};
+
+		if(count == 0)
 		{
-			// Read some more into the buffer
-			bufAvail = read(sock,buffer,BUF_SIZE);
-			if(bufAvail < BUF_SIZE)
-				noneWaiting = true;
-			// If none available, exit.
-			if(bufAvail <= 0) 
-				break;
-		}
-	}
+			// This probably indicates that the socket has died.
+			// EOF doesn't actually make much sense here.
+			return;
+		};
+
+		if(c == '\0')
+		{
+			// Readbuf should now contain a complete message
+			ProcessMessage(buffer, thisClient);
+			buffer.str("");
+			buffer.clear();
+		} else {
+			buffer.put(c);
+		};	
+	};
 }
 
 void ProcessMessage(std::stringstream& msg, boost::shared_ptr<CqDisplayServerImage> thisClient)
 {
 	// Parse the XML message sent.
 	TiXmlDocument xmlMsg;
+	Aqsis::log() << Aqsis::debug << "Processing message: " << msg.str() << std::endl;
 	xmlMsg.Parse(msg.str().c_str());
 	// Get the root element, which is the base type of the message.
 	TiXmlElement* root = xmlMsg.RootElement();
@@ -299,6 +298,10 @@ void HandleConnection(int sock, void *data)
 	if(g_theServer.Accept(newImage))
 	{
 		g_theClients[newImage->socket()] = newImage;
+		// Set socket as non-blocking
+		int oldflags;
+		oldflags = fcntl(sock, F_GETFL, 0);
+		fcntl(sock, F_SETFL, oldflags | O_NONBLOCK);
 		Fl::add_fd(newImage->socket(), FL_READ, &HandleData);
 		if(window)
 		{

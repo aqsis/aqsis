@@ -402,11 +402,6 @@ PtDspyError DspyImageDelayClose(PtDspyImageHandle image)
 		sendXMLMessage(doc, pImage->m_socket);
 	}
 
-	if(pImage)
-	{
-		// Clean up
-		return(DspyImageClose(image));
-	}
 	return(PkDspyErrorNone);
 }
 
