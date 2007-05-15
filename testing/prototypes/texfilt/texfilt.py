@@ -132,6 +132,21 @@ def getCentreTest(N=512):
 	return im
 
 
+def getEdgeTest(N=512, borderwidth=20):
+	'''
+	Get a white test image with a black bordering strip
+
+	N - side length
+	'''
+	im = ones((N, N, 3))
+
+	im[borderwidth:2*borderwidth,:,:] = 0
+	im[-2*borderwidth:-borderwidth,:,:] = 0
+	im[:,borderwidth:2*borderwidth,:] = 0
+	im[:,-2*borderwidth:-borderwidth,:] = 0
+
+	return im
+
 #----------------------------------------------------------------------
 #----------------------------------------------------------------------
 # Utils for creating/manipulating mipmaps
@@ -178,8 +193,8 @@ class MipLevel:
 		# indices.
 		self.image = zeros((image.shape[0]+2,image.shape[1]+2,image.shape[2]))
 		self.image[1:-1,1:-1,:] = image
-		self.offset = offset.copy()
-		self.mult = mult
+		self.offset = array(offset,'d')
+		self.mult = array(mult,'d')
 		# Variances for the reconstruction & prefilters when using EWA.  A
 		# variance of 1/(2*pi) gives a filter with centeral weight 1, but in
 		# practise this is slightly too small (resulting in a little bit of
@@ -192,8 +207,8 @@ class MipLevel:
 		Return the raster coordinates for this mipmap from the texture
 		coordinates (s,t)
 		'''
-		i = self.mult[0]*s + self.offset[0] + 1
-		j = self.mult[1]*t + self.offset[1] + 1
+		i = scipy.atleast_1d(self.mult[0]*s + self.offset[0] + 1)
+		j = scipy.atleast_1d(self.mult[1]*t + self.offset[1] + 1)
 		return (i,j)
 
 	def sampleBilinear(self, s, t):
@@ -324,14 +339,14 @@ class TextureMap:
 	mipmapping will be done internally in Aqsis.
 	'''
 	def __init__(self, img, filterWidth, kerFunc=sincKer, \
-			levelCalcMethod='minSideLen', numSamples=100):
+			levelCalcMethod='minQuadWidth', numSamples=100):
 		'''
 		img - texture image
 		filterWidth - filter width for mipmap downsampling
 		kerFunc - kernel function for mipmap downsampling
 		levelCalcMethod - method used for calculating required mipmap level
 			from a quadrialteral.  filtering.  May be one of: 'minSideLen',
-			'minDiag', 'lvlZero'.
+			'minQuadWidth', 'trilinear', 'minDiag', 'level0'.
 		numSamples - number of samples to used when performing stochastic
 			filtering
 		'''
@@ -436,25 +451,29 @@ class TextureMap:
 			img = self.downsampler.downsample(img)
 			# create a new MipLevel to hold the image.
 			self.levels.append(MipLevel(img, -offset/delta, level0Span/delta))
+			# The below is a theoretically broken, but very usable version, -
+			# mipmap offsets are set to zero.
+			#self.levels.append(MipLevel(img, 0*offset, array(img.shape[0:2])-1))
 			print 'generated level size', img.shape[0:2]
 
-	def sampleTrilinear(self, s, t, ds, dt, level=None):
+	def filterTrilinear(self, sBox, tBox, level=None):
 		'''
-		Trilinear sampling over the mipmaps
+		Trilinear filtering over the mipmaps
 
 		s, t - texture coordinates of points to sample at
 		ds,dt - size of a "box" on the screen.
 		level - mipmap level to use.  If equal to None, calculate from ds & dt
 		'''
 		if level is None:
-			level = calculateLevel(array([0,ds,ds,0]), array([0,0,dt,dt]))
+			level = min(len(self.levels)-1, self.calculateLevel(sBox, tBox))
 		level = max(level,0)
-		print "trilinear sample at level = %f" % level
 		level1 = int(floor(level))
 		interp = level - level1
-		level2 = int(level1 + 1)
-		samp1 = self.levels[level1].sampleBilinear(s,t)
-		samp2 = self.levels[level2].sampleBilinear(s,t)
+		level2 = min(len(self.levels)-1, int(level1 + 1))
+		s0 = sBox.mean()
+		t0 = tBox.mean()
+		samp1 = self.levels[level1].sampleBilinear(s0,t0)
+		samp2 = self.levels[level2].sampleBilinear(s0,t0)
 		return (1-interp)*samp1 + interp*samp2
 
 	def calculateLevel(self, s, t):
@@ -478,9 +497,19 @@ class TextureMap:
 			t1 = pylab.concatenate((t, t[0:1]))
 			minSideLen2 = (numpy.diff(s1)**2 + numpy.diff(t1)**2).min()
 			level = log2(minSideLen2)/2
+		elif self.levelCalcMethod == 'minQuadWidth':
+			# Get mipmap level with minimum feature size equal to the width of
+			# the quadrilateral.  This one is kinda tricky.
+			# v1,v2 = vectors along edges
+			v1 = array([0.5*(s[1]-s[0] + s[2]-s[3]), 0.5*(t[1]-t[0] + t[2]-t[3]),])
+			v2 = array([0.5*(s[3]-s[0] + s[2]-s[1]), 0.5*(t[3]-t[0] + t[2]-t[1]),])
+			v1Sq = dot(v1,v1)
+			v2Sq = dot(v2,v2)
+			level = 0.5*log2(min(v1Sq,v2Sq) * (1 - dot(v1,v2)**2/(v1Sq*v2Sq)))
 		elif self.levelCalcMethod == 'minDiag':
 			# Get mipmap level with minimum feature size equal to the minimum
-			# distance between the centre of the quad and the vertices.
+			# distance between the centre of the quad and the vertices.  Sort
+			# of a "quad radius"
 			#
 			# This is more-or-less the algorithm used in Pixie...
 			minDiag2 = ((s - s.mean())**2 + (t - t.mean())**2).min()
@@ -488,10 +517,17 @@ class TextureMap:
 		#elif self.levelCalcMethod == 'sqrtArea':
 			# Get mipmap level with minimum feature size estimated as the
 			# square root of the area of the box.
-		else:
+		elif self.levelCalcMethod == 'trilinear':
+			# Get mipmap level which will result in no aliasing when plain
+			# trilinear filtering is used (no integration)
+			maxDiag2 = ((s - s.mean())**2 + (t - t.mean())**2).max()
+			level = log2(maxDiag2)/2
+		elif self.levelCalcMethod == 'level0':
 			# Else just use level 0.  Correct texture filtering will take care
 			# of any aliasing...
 			level = 0
+		else:
+			raise "Invalid mipmap level calculation type: %s" % self.levelCalcMethod
 		return max(level,0)
 
 	def filterQuadAF(self, s, t):
@@ -624,6 +660,12 @@ class AffineWarp:
 	def jacobian(self, s, t):
 		return self.A
 
+	def __mul__(self, rhs):
+		'''
+		The * operator composes affine transformations
+		'''
+		return AffineWarp(A=dot(self.A,rhs.A), b=dot(self.A,rhs.b)+self.b)
+
 #----------------------------------------------------------------------
 class CompositionWarp:
 	'''
@@ -744,32 +786,108 @@ def textureWarp(x, y, tex, trans=PerspectiveWarp(), method='EWA'):
 				# was spot-on!
 				J = trans.jacobian(sBox.mean(),tBox.mean())
 				col = tex.filterEWA(sBox, tBox, deltaX, deltaY, J)
-			else:
-				# Use stochastic integration over a box.
+			elif method == 'MC_integration':
+				# Use Monte Carlo integration over a box.
 				col = tex.filterQuadAF(sBox, tBox)
+			elif method == 'trilinear':
+				# Use plain old trilinear filtering
+				col = tex.filterTrilinear(sBox, tBox)
+			else:
+				raise "Invalid method specified."
 			im[-1-j,i,:] = col
 		if i % 20 == 0:
 			print "done col %d, " % i
 	return im
 
 #----------------------------------------------------------------------
+def showMipmapOffsetDifferences():
+	'''
+	Show the differences in warped images generated when the mipmap offsets are
+	turned off (very small).
+	'''
+	im = getEdgeTest(1000, 100)
+	texture = TextureMap(im, 8)
+
+	N = 1000
+	x,y = mgrid[-0.5:0.5:N*1j,-0.22:-0.005:N*2//5*1j]
+	rot = AffineWarp(b=(0.5,0.5)) * AffineWarp(theta=45) * AffineWarp(b=(-0.5,-0.5))
+	trans = CompositionWarp(PerspectiveWarp(0.4),AffineWarp(A=diag((10,30)), b = array((-5,4)))*rot)
+	imWarp = textureWarp(x,y, texture, trans)
+	imsave('tmp_offset_bad.png',imWarp)
+
+#----------------------------------------------------------------------
+def showLevelCalcDifferences():
+	'''
+	Compare several of the best mipmap level calculation methods for EWA filters.
+	'''
+	im = getGridImg(1000, 30, 2)
+	texture = TextureMap(im, 8, levelCalcMethod='minQuadWidth')
+
+	N = 500
+	x,y = mgrid[-0.5:0.5:N*1j,-0.22:-0.005:N*2//5*1j]
+	trans = CompositionWarp(PerspectiveWarp(),AffineWarp(A=diag((10,30)), b = array((-5,4))))
+	imWarp = textureWarp(x,y, texture, trans)
+	imshow(imWarp)
+	imsave('level_minQuadWidth.png', imWarp)
+
+	texture.levelCalcMethod='minSideLen'
+	imWarp = textureWarp(x,y, texture, trans)
+	imshow(imWarp)
+	imsave('level_minSideLen.png', imWarp)
+
+	texture.levelCalcMethod='level0'
+	imWarp = textureWarp(x,y, texture, trans)
+	imshow(imWarp)
+	imsave('level_level0.png', imWarp)
+
+#----------------------------------------------------------------------
+def showFilteringMethodDifferences():
+	'''
+	Compare several different filtering methods
+	'''
+	im = getGridImg(1000, 30, 2)
+	texture = TextureMap(im, 8, levelCalcMethod='minQuadWidth')
+
+	N = 700
+	x,y = mgrid[-0.5:0.5:N*1j,-0.22:-0.005:N*2//5*1j]
+	trans = CompositionWarp(PerspectiveWarp(),AffineWarp(A=diag((10,30)), b = array((-5,4))))
+	imWarp = textureWarp(x,y, texture, trans, method='EWA')
+	imshow(imWarp)
+	imsave('method_EWA.png', imWarp)
+	imWarp = textureWarp(x,y, texture, trans, method='EWA_analytical_J')
+	imshow(imWarp)
+	imsave('method_EWA_analytical_J.png', imWarp)
+	imWarp = textureWarp(x,y, texture, trans, method='MC_integration')
+	imshow(imWarp)
+	imsave('method_MC_integration.png', imWarp)
+	texture.levelCalcMethod='trilinear' # need a special level calculation for trilin.
+	imWarp = textureWarp(x,y, texture, trans, method='trilinear')
+	imshow(imWarp)
+	imsave('method_trilinear.png', imWarp)
+
+#----------------------------------------------------------------------
 # Main program
 #----------------------------------------------------------------------
 
 if __name__ == '__main__':
-	# Choose image & create mipmap
-	N = 512
-	#im = getCentreTest(N)
-	im = getGridImg(1000, 30, 2)
-	#im = imread('lena_std.png')[:,:,:3]/256.0
-	texture = TextureMap(im, 8)
-	#s,t = mgrid[0:1:N*1j,0:1:N*1j]
-
-	# Warp image to new coordinate system.
-	x,y = mgrid[-0.5:0.5:N*1j,-0.3:-0.02:N*2//5*1j]
-	trans = CompositionWarp(PerspectiveWarp(),AffineWarp(A=10*eye(2), b = array((-5,4))))
-	imWarp = textureWarp(x,y, texture, trans)
-	pylab.hold(False)
-	imshow(imWarp)
-	imsave('imWarp.png',imWarp)
-	pylab.draw()
+	# a usage example
+	if True:
+		# Choose image & create mipmap
+		#im = getCentreTest(1000)
+		im = getGridImg(1000, 30, 2)
+		#im = getEdgeTest(1000, 100)
+		#im = imread('lena_std.png')[:,:,:3]/256.0
+		texture = TextureMap(im, 8, levelCalcMethod='minQuadWidth')
+		# Warp image to new coordinate system.
+		N = 500
+		x,y = mgrid[-0.5:0.5:N*1j,-0.22:-0.005:N*2//5*1j]
+		trans = CompositionWarp(PerspectiveWarp(),AffineWarp(A=diag((10,30)), b = array((-5,4))))
+		imWarp = textureWarp(x,y, texture, trans)
+		pylab.hold(False)
+		imshow(imWarp)
+		imsave('imWarp.png',imWarp)
+		pylab.draw()
+	else:
+		# Area for hacking out solutions.
+		#showLevelCalcDifferences()
+		showFilteringMethodDifferences()
