@@ -38,10 +38,10 @@ from pylab import imshow
 
 import numpy
 from numpy import pi, r_, size, zeros, ones, eye, ceil, floor, array, \
-		linspace, meshgrid, random, arange, dot, diag
+		linspace, meshgrid, random, arange, dot, diag, asarray
 
 import scipy
-from scipy import cos, exp, log, log2, sqrt, ogrid, mgrid, ndimage
+from scipy import cos, sin, exp, log, log2, sqrt, ogrid, mgrid, ndimage
 import scipy.linalg as linalg
 from scipy.misc import imsave, imread
 
@@ -180,22 +180,141 @@ class MipLevel:
 		self.image[1:-1,1:-1,:] = image
 		self.offset = offset.copy()
 		self.mult = mult
+		# Variances for the reconstruction & prefilters when using EWA.  A
+		# variance of 1/(2*pi) gives a filter with centeral weight 1, but in
+		# practise this is slightly too small (resulting in a little bit of
+		# aliasing).  Therefore it's adjusted up slightly.
+		self.varianceXY = 1.3/(2*pi)
+		self.varianceST = 1.3/(2*pi)
 
-	def sample(self, s, t):
+	def rasterCoords(self,s,t):
 		'''
-		Sample the mipmap level at the coordinates specified by s and t.  For
-		performance, s & t should be 1D arrays.
+		Return the raster coordinates for this mipmap from the texture
+		coordinates (s,t)
 		'''
 		i = self.mult[0]*s + self.offset[0] + 1
 		j = self.mult[1]*t + self.offset[1] + 1
+		return (i,j)
+
+	def sampleBilinear(self, s, t):
+		'''
+		Sample the mipmap level at the coordinates specified by s and t.  For
+		performance, s & t can be 1D arrays.
+		'''
+		i,j = self.rasterCoords(s,t)
 		return applyToChannels(self.image, ndimage.map_coordinates, \
 				array([i,j]), order=1, mode='constant', cval=0)
+
+	def getRandPointsInQuad(self, s, t, numPoints):
+		'''
+		Get a random set of points inside the quadrilatiral given by the
+		texture-space vertices
+		[s[1], t[1]], ... , [s[4], t[4]].
+		
+		The sample should be uniform if the quadrialteral can be made from a
+		square with a _linear_ transformation.  Otherwise it will be biased.
+		The form of biasing is probably exactly what we want if we're taking
+		pixel samples...
+		'''
+		lerp1 = numpy.random.rand(numPoints)
+		lerp1m = 1-lerp1
+		lerp2 = numpy.random.rand(numPoints)
+		st = array([s,t])
+		op = numpy.outer
+		randPts = lerp2*(op(st[:,0],lerp1) + op(st[:,1],lerp1m)) \
+				+ (1-lerp2)*(op(st[:,3],lerp1) + op(st[:,2],lerp1m))
+		#weights = exp(-8*((lerp1-0.5)**2 + (lerp2-0.5)**2))
+		weights = ones(numPoints)
+		return (randPts[0,:], randPts[1,:], weights)
+
+	def filterQuadAF(self, s, t, numSamples):
+		'''
+		Filter the texture by sampling inside the given quadriateral specified
+		by the texture-space vertices
+		[s[1], t[1]], ... , [s[4], t[4]],
+		and taking an average.  Sample points are chosen stochastically over
+		the quadrilateral.  This is essentially Monte Carlo integration, with a
+		reconstruction filter equal to bilinear interpolation.
+		'''
+		sRnd, tRnd, w = self.getRandPointsInQuad(s, t, numSamples)
+		samples = self.sampleBilinear(sRnd, tRnd)
+		return ( samples*w.reshape(w.shape+(1,)) ).sum(0) / w.sum()
+
+	def estimateJacobianInverse(self, s, t):
+		'''
+		Estimate the inverse Jacobian from a small (s,t) box using finite
+		differences.  The assumption is that the (s,t) box has come from a 1x1
+		box in the final coordinate system.
+		'''
+		return 0.5 * array([[s[1]-s[0] + s[2]-s[3], s[3]-s[0] + s[2]-s[1]],
+							[t[1]-t[0] + t[2]-t[3], t[3]-t[0] + t[2]-t[1]]])
+
+	def filterEWA(self, sBox, tBox, deltaX=None, deltaY=None, J=None, returnWeights=False):
+		'''
+		Filter a portion of the texture using an elliptical gaussian filter, as
+		described in Heckbert's 1989 thesis, "Fundamentals of Texture Mapping
+		and Image Warping".  This kind of filter is also called an EWA filter for
+		"Elliptical Weighted Average".
+		
+		s, t - texture coordinates of a box to be filtered over
+		deltaX, deltaY - pixel side length in the final discrete image.
+		J - Jacobian of the coordinate transformation.
+		returnWeights - true if you just want the filter weights returned for
+						debugging rather than the filtered image.
+		'''
+		# convert to raster coords
+		sBox,tBox = self.rasterCoords(sBox,tBox)
+		# centre of box
+		s0,t0 = sBox.mean(), tBox.mean()
+		if not returnWeights and (s0 < 0 or s0 > self.image.shape[0] \
+								or t0 < 0 or t0 > self.image.shape[1]):
+			return 0
+		if J is None:
+			# Estimate the Jacobian from the texture box.
+			Ji = self.estimateJacobianInverse(sBox, tBox)
+		else:
+			# Else we have an analytical Jacobian specified.
+			# Adjust J for raster->texture coords
+			J = dot(dot(diag((1/deltaX, 1/deltaY)), J), diag((1/self.image.shape[0], 1/self.image.shape[1])))
+			# get the inverse of J
+			Ji = linalg.inv(J)
+		# width parameter is log(n) where the filter falls to 1/n of it's
+		# centeral value at the edge.
+		width = 4
+		# V = covariance matrix
+		V = self.varianceXY*dot(Ji, Ji.transpose()) + self.varianceST*eye(2)
+		# Q = (+ve definite) quadratic form matrix.
+		Q = 0.5*linalg.inv(V)
+		det = Q[0,0]*Q[1,1] - Q[0,1]*Q[1,0]
+		# compute bounding radii
+		sRad = sqrt(Q[1,1]*width/det)
+		tRad = sqrt(Q[0,0]*width/det)
+		# integer filter width
+		sWidth = int(floor(s0+sRad)) - int(ceil(s0-sRad)) + 1
+		tWidth = int(floor(t0+tRad)) - int(ceil(t0-tRad)) + 1
+		# compute edge of filter region in level0 image:
+		sStart = ceil(s0-sRad)
+		tStart = ceil(t0-tRad)
+		# compute filter weights.  I'm being sloppy here, and not bothering to
+		# truncate outside the relevant ellipse
+		s,t = ogrid[0:sWidth, 0:tWidth]
+		s = s - (s0-sStart)
+		t = t - (t0-tStart)
+		if not returnWeights and (sStart < 0 or sStart + sWidth-1 >= self.image.shape[0] \
+				or tStart < 0 or tStart + tWidth-1 >= self.image.shape[1]):
+			return 0.5
+		weights = exp(-(Q[0,0]*s*s + (Q[0,1]+Q[1,0])*s*t + Q[1,1]*t*t))
+		weights /= weights.sum()
+		if returnWeights:
+			return weights
+		imSec = self.image[sStart:sStart+sWidth,tStart:tStart+tWidth]
+		return applyToChannels(imSec, lambda x: (x*weights).sum())
 
 	def display(self, s=None, t=None):
 		if s is None or t is None:
 			imshow(self.image[1:-1,1:-1,:], interpolation='nearest')
 		else:
-			imshow(self.sample(s,t), interpolation='nearest')
+			imshow(self.sampleBilinear(s,t), interpolation='nearest')
 
 
 #----------------------------------------------------------------------
@@ -204,19 +323,23 @@ class TextureMap:
 	Class to encapsulate a (power-of-2) mipmapped texture in much the same way
 	mipmapping will be done internally in Aqsis.
 	'''
-	def __init__(self, img, filterWidth, kerFunc=sincKer, levelCalcMethod='minSideLen'):
+	def __init__(self, img, filterWidth, kerFunc=sincKer, \
+			levelCalcMethod='minSideLen', numSamples=100):
 		'''
 		img - texture image
 		filterWidth - filter width for mipmap downsampling
 		kerFunc - kernel function for mipmap downsampling
-		levelCalcMethod - method used for calculating required mipmap
-			filtering.  May be one of: 'minSideLen', 'minDiag', 'lvlZero'.
-		level from a quadrialteral.
+		levelCalcMethod - method used for calculating required mipmap level
+			from a quadrialteral.  filtering.  May be one of: 'minSideLen',
+			'minDiag', 'lvlZero'.
+		numSamples - number of samples to used when performing stochastic
+			filtering
 		'''
 		self.downsampler = ImageDownsampler(filterWidth, kerFunc)
 		self.levels = []
 		self.levelCalcMethod = levelCalcMethod
 		self.genMipMap(img)
+		self.numSamples = numSamples
 
 	def genMipMap(self, img):
 		'''
@@ -315,32 +438,26 @@ class TextureMap:
 			self.levels.append(MipLevel(img, -offset/delta, level0Span/delta))
 			print 'generated level size', img.shape[0:2]
 
-	def sampleTrilinear(self, s, t, level=None):
+	def sampleTrilinear(self, s, t, ds, dt, level=None):
 		'''
-		Trilinear sampling
+		Trilinear sampling over the mipmaps
+
+		s, t - texture coordinates of points to sample at
+		ds,dt - size of a "box" on the screen.
+		level - mipmap level to use.  If equal to None, calculate from ds & dt
 		'''
 		if level is None:
-			level = calculateLevel(s[1,0]-s[0,0], t[0,1]-t[0,0])
+			level = calculateLevel(array([0,ds,ds,0]), array([0,0,dt,dt]))
 		level = max(level,0)
 		print "trilinear sample at level = %f" % level
 		level1 = int(floor(level))
 		interp = level - level1
 		level2 = int(level1 + 1)
-		samp1 = self.levels[level1].sample(s,t)
-		samp2 = self.levels[level2].sample(s,t)
+		samp1 = self.levels[level1].sampleBilinear(s,t)
+		samp2 = self.levels[level2].sampleBilinear(s,t)
 		return (1-interp)*samp1 + interp*samp2
 
-	def calculateLevel(self, ds, dt):
-		'''
-		Calculate the appripriate mipmap level for texture filtering over a
-		square region of side lengths ds & dt in texture space.
-		'''
-		diag = sqrt( ((ds*self.levels[0].image.shape[0])**2 + 
-				(dt*self.levels[0].image.shape[1])**2)/2 )
-		level = log2(diag)
-		return max(level,0)
-
-	def calculateLevelQuad(self, s, t):
+	def calculateLevel(self, s, t):
 		'''
 		Calculate the appropriate mipmap level for texture filtering over a
 		quadrilateral given by the texture-space vertices
@@ -377,101 +494,33 @@ class TextureMap:
 			level = 0
 		return max(level,0)
 
-	def getRandPointsInQuad(self, s, t, numPoints):
-		'''
-		Get a random set of points inside the quadrilatiral given by the
-		texture-space vertices
-		[s[1], t[1]], ... , [s[4], t[4]].
-
-		The sample should be uniform if the quadrialteral can be made from a
-		square with a _linear_ transformation.  Otherwise it will be biased.
-		The form of biasing is probably exactly what we want if we're taking
-		pixel samples...
-		'''
-		op = numpy.outer
-		lerp1 = numpy.random.rand(numPoints)
-		lerp1m = 1-lerp1
-		lerp2 = numpy.random.rand(numPoints)
-		st = array([s,t])
-		randPts = lerp2*(op(st[:,0],lerp1) + op(st[:,1],lerp1m)) \
-				+ (1-lerp2)*(op(st[:,3],lerp1) + op(st[:,2],lerp1m))
-		#weights = exp(-8*((lerp1-0.5)**2 + (lerp2-0.5)**2))
-		weights = ones(numPoints)
-		return (randPts[0,:], randPts[1,:], weights)
-
-	def filterQuadAF(self, s, t, numPoints=100):
+	def filterQuadAF(self, s, t):
 		'''
 		Filter the texture by sampling inside the given quadriateral specified
 		by the texture-space vertices
 		[s[1], t[1]], ... , [s[4], t[4]],
 		and taking an average.  Sample points are chosen stochastically over
-		the quadrilateral at the mipmap level returned by calculateLevelQuad.
+		the quadrilateral at the mipmap level returned by calculateLevel.
 		This is essentially Monte Carlo integration, with a reconstruction
 		filter equal to bilinear interpolation.
 		'''
-		sRnd, tRnd, w = self.getRandPointsInQuad(s,t,numPoints)
-		level = int(self.calculateLevelQuad(s,t))
-		samples = self.levels[level].sample(sRnd, tRnd)
-		return ( samples*w.reshape(w.shape+(1,)) ).sum(0) / w.sum()
+		level = int(self.calculateLevel(s,t))
+		return self.levels[level].filterQuadAF(s,t, self.numSamples)
 
-	def filterEllipticGaussianAF(self, s0, t0, deltaX, deltaY, J, returnWeights=False):
+	def filterEWA(self, sBox, tBox, deltaX=None, deltaY=None, J=None):
 		'''
 		Filter a portion of the texture using an elliptical gaussian filter, as
 		described in Heckbert's 1989 thesis, "Fundamentals of Texture Mapping
 		and Image Warping".  This kind of filter is also called an EWA filter for
 		"Elliptical Weighted Average".
 
-		s0, t0 - texture coordinates of the centre of the filter
+		s, t - Texture box over which to filter
 		deltaX, deltaY - pixel side length in the final discrete image.
 		J - Jacobian of the coordinate transformation.
-		returnWeights - true if you just want the filter weights returned for
-						debugging rather than the filtered image.
 		'''
-		if not returnWeights and (s0 < 0 or s0 > 1 or t0 < 0 or t0 > 1):
-			return 0
-		# convert to pixel coords
-		s0 *= self.levels[0].image.shape[0]
-		t0 *= self.levels[0].image.shape[1]
-		# get the inverse of J and adjust for pixel coords
-		Ji = dot(diag(self.levels[0].image.shape[0:2]), linalg.inv(J))
-		# width parameter is log(n) where the filter falls to 1/n of it's
-		# centeral value at the edge.
-		width = 4
-		# Variances for the reconstruction & prefilters.
-		magicalFudgeFactor = 200  # TODO: WTH do I need this???
-		varianceXY = 1/(2*pi) / magicalFudgeFactor
-		varianceST = 1/(2*pi) / magicalFudgeFactor
-		# V = covariance matrix
-		V = varianceXY*dot(Ji, dot(diag([deltaX**2,deltaY**2]), Ji.transpose())) + varianceST*eye(2)
-		# Q = (+ve definite) quadratic form matrix.
-		Q = 0.5*linalg.inv(V)
-		det = Q[0,0]*Q[1,1] - Q[0,1]*Q[1,0]
-		# compute bounding radii
-		sRad = sqrt(Q[1,1]*width/det)
-		tRad = sqrt(Q[0,0]*width/det)
-		# integer filter width
-		sWidth = int(floor(s0+sRad)) - int(ceil(s0-sRad)) + 1
-		tWidth = int(floor(t0+tRad)) - int(ceil(t0-tRad)) + 1
-		# compute edge of filter region in level0 image:
-		sStart = ceil(s0-sRad)
-		tStart = ceil(t0-tRad)
-		# compute filter weights.  I'm being sloppy here, and not bothering to
-		# truncate outside the relevant ellipse
-		s,t = ogrid[0:sWidth, 0:tWidth]
-		s = s - (s0-sStart)
-		t = t - (t0-tStart)
-		#crap *= 1
-		if not returnWeights and (sStart < 0 or sStart + sWidth-1 >= self.levels[0].image.shape[0] \
-				or tStart < 0 or tStart + tWidth-1 >= self.levels[0].image.shape[1]):
-			#s = 
-			return 0.5
-		weights = exp(-(Q[0,0]*s*s + (Q[0,1]+Q[1,0])*s*t + Q[1,1]*t*t))
-		weights /= weights.sum()
-		if returnWeights:
-			return weights
-		# TODO: Use a mipmap here rather than mipmap level[0]
-		imSec = self.levels[0].image[sStart:sStart+sWidth,tStart:tStart+tWidth]
-		return applyToChannels(imSec, lambda x: (x*weights).sum())
+		level = int(self.calculateLevel(sBox,tBox))
+		col = self.levels[level].filterEWA(sBox, tBox, deltaX, deltaY, J)
+		return col #* 0.9**level
 
 	def displayLevel(self, level, s=None, t=None):
 		'''
@@ -481,16 +530,18 @@ class TextureMap:
 
 
 #----------------------------------------------------------------------
-# Perspective transformations
-#
-# Simplified perspective transformation, between "texture coordinates", (s,t)
-# on an infinite plane with parametric form P(s,t) = [s,-1,t],
-# and "image coordinates", (x,y) in the x,y plane.  This is useful as an
-# example nonaffine texture warp to test anisotropic filtering techniques.
-#
-# We use the LH coordinate system, with x=right, y=up, z=into the screen.
 #----------------------------------------------------------------------
-class PerspectiveTrans:
+# 2D texture transformation classes ("warps")
+#
+# These are useful as example texture warps to test anisotropic filtering
+# techniques.
+#
+# Each warp class defines three functions
+# fwd - the forward transform
+# inv - the inverse transform
+# jacobian - the jacobian of the forward transform
+#----------------------------------------------------------------------
+class PerspectiveWarp:
 	'''
 	Simplified perspective transformation, between "texture coordinates", (s,t)
 	on an infinite plane with parametric form P(s,t) = [s,-1,t],
@@ -540,7 +591,74 @@ class PerspectiveTrans:
 		return (s,t)
 
 #----------------------------------------------------------------------
-def plotPerspectiveTrans(u, v, direc='f'):
+class AffineWarp:
+	'''
+	A class representing an affine transformation
+	'''
+	def __init__(self, A=eye(2), b=array([0,0]), theta=None, scale=None):
+		'''
+		Affine transformation is x' = A*x + b
+		A - linear part of the affine trans.
+		b - translation
+		theta - if this is set to a number, make A into a rotation with angle theta.
+		scale - if this is set to a number, scale A by this factor.
+		'''
+		self.A = asarray(A)
+		self.b = asarray(b)
+		if theta is not None:
+			self.theta = theta
+			theta *= pi/180
+			self.A = array([[cos(theta), sin(theta)], [-sin(theta), cos(theta)]])
+		if scale is not None:
+			self.A *= scale
+		self.Ai = linalg.inv(self.A)
+
+	def fwd(self, s, t):
+		return (self.A[0,0]*s + self.A[0,1]*t + self.b[0], \
+				self.A[1,0]*s + self.A[1,1]*t + self.b[1])
+
+	def inv(self, x, y):
+		return (self.Ai[0,0]*(x-self.b[0]) + self.Ai[0,1]*(y - self.b[1]), \
+				self.Ai[1,0]*(x-self.b[0]) + self.Ai[1,1]*(y - self.b[1]))
+
+	def jacobian(self, s, t):
+		return self.A
+
+#----------------------------------------------------------------------
+class CompositionWarp:
+	'''
+	A class for holding the composition of several transformations
+	'''
+	def __init__(self, *args):
+		'''
+		Takes a list of transformations to be composed.
+		The transformation list is evaluated from right to left in the same
+		manner as it is usually written mathematically.
+		'''
+		self.transList = list(args)
+		self.transList.reverse()
+	
+	def fwd(self, s,t):
+		x,y = s,t
+		for trans in self.transList:
+			x,y = trans.fwd(x,y)
+		return (x,y)
+	
+	def inv(self, x,y):
+		s,t = x,y
+		for trans in reversed(self.transList):
+			s,t = trans.inv(s,t)
+		return (s,t)
+	
+	def jacobian(self, s,t):
+		J = eye(2)
+		for trans in self.transList:
+			J = dot(trans.jacobian(s,t),J)
+			s,t = trans.fwd(s,t)
+		return J
+
+#----------------------------------------------------------------------
+def plotPerspectiveWarp(u, v, direc='f'):
 	'''
 	Plot u,v on an axis, and the things they transform into under an (possibly
 	inverse) perspective transformation on another axis.
@@ -548,7 +666,7 @@ def plotPerspectiveTrans(u, v, direc='f'):
 	u,v - either image coords if direc='b' or texture coords if direc='f'
 	direc - transformation direction; 'f' = forward, 'b'=backward
 	'''
-	perspec = PerspectiveTrans()
+	perspec = PerspectiveWarp()
 	if direc == 'f':
 		s,t = u,v
 		x,y = perspec.fwd(s,t)
@@ -570,14 +688,14 @@ def plotPerspectiveTrans(u, v, direc='f'):
 #----------------------------------------------------------------------
 # High level driver functions.
 #----------------------------------------------------------------------
-def genTrilinearSeq(mipmap, s, t):
+def genTrilinearSeq(mipmap, s, t, ds, dt):
 	'''
 	Generate and save a sequence of images by trilinear interpolation at
 	various levels, but with the same texture coordinates (s,t)
 	'''
 	for i in range(0,31):
 		level = i/31.0*8
-		image = mipmap.sampleTrilinear(s,t,level)
+		image = mipmap.sampleTrilinear(s,t,ds,dt,level)
 		imsave('downsamp%0.2d.png' % i, image)
 
 #----------------------------------------------------------------------
@@ -590,53 +708,46 @@ def plotPixelBoxes():
 	'''
 	x = array([1,1,-1,-1,1])
 	y = array([-1,1,1,-1,-1])
-	plotPerspectiveTrans(x,y+1,'f')
-	plotPerspectiveTrans(x,y+7,'f')
-	plotPerspectiveTrans(x,y+4,'f')
-	plotPerspectiveTrans(x+3,y+4,'f')
-	plotPerspectiveTrans(x*0.05,y*0.05-0.1,'b')
-	plotPerspectiveTrans(x*0.01,y*0.01-0.1,'b')
-	plotPerspectiveTrans(x*0.01-0.5,y*0.01-0.1,'b')
-	plotPerspectiveTrans(x*0.01+0.5,y*0.01-0.1,'b')
-	plotPerspectiveTrans(x*0.01+0.5,y*0.01-0.05,'b')
+	plotPerspectiveWarp(x,y+1,'f')
+	plotPerspectiveWarp(x,y+7,'f')
+	plotPerspectiveWarp(x,y+4,'f')
+	plotPerspectiveWarp(x+3,y+4,'f')
+	plotPerspectiveWarp(x*0.05,y*0.05-0.1,'b')
+	plotPerspectiveWarp(x*0.01,y*0.01-0.1,'b')
+	plotPerspectiveWarp(x*0.01-0.5,y*0.01-0.1,'b')
+	plotPerspectiveWarp(x*0.01+0.5,y*0.01-0.1,'b')
+	plotPerspectiveWarp(x*0.01+0.5,y*0.01-0.05,'b')
 
 #----------------------------------------------------------------------
-def textureMapPlane(x, y, tex, numSamples=100):
+def textureWarp(x, y, tex, trans=PerspectiveWarp(), method='EWA'):
 	'''
-	Map the given texture onto a plane, according to the perspective
-	transformations given above.
+	Warp the given texture.
 
 	x,y - image space coordinates for output.
 	'''
-	perspec = PerspectiveTrans()
 	im = zeros((x.shape[1]-1, x.shape[0]-1, 3))
 	deltaX = x[1,0]-x[0,0]
 	deltaY = y[0,1]-y[0,0]
 	print "Warping the texture..."
 	for i in range(0,x.shape[0]-1):
 		for j in range(0,x.shape[1]-1):
-#			# Quadrilateral filter region
-#			# compute (s,t) box to filter with
-#			xBox = array((x[i,j], x[i+1,j], x[i+1,j+1], x[i,j+1]))
-#			yBox = array((y[i,j], y[i+1,j], y[i+1,j+1], y[i,j+1]))
-#			sBox, tBox = perspec.inv(xBox, yBox)
-#			# remap the texture coords so that more of the plane is covered by
-#			# texture.
-#			sBox = sBox/4+0.5
-#			tBox = tBox/4-0.3
-#			im[-1-j,i,:] = tex.filterQuadAF(sBox, tBox, numSamples)
-
-			# Use an EWA filter
-			x0 = (x[i:i+2,j:j+2]).mean()
-			y0 = (y[i:i+2,j:j+2]).mean()
-			s0,t0 = perspec.inv(x0, y0)
-			J = perspec.jacobian(s0,t0)
-			# Remap the texture coords so that more of the plane is covered by
-			# texture.  Need to also adjust the Jacobian if we do this...
-			s0 = s0/4+0.5
-			t0 = t0/4-0.3
-			J /= 4
-			im[-1-j,i,:] = tex.filterEllipticGaussianAF(s0, t0, deltaX, deltaY, J)
+			xBox = array((x[i,j], x[i+1,j], x[i+1,j+1], x[i,j+1]))
+			yBox = array((y[i,j], y[i+1,j], y[i+1,j+1], y[i,j+1]))
+			sBox, tBox = trans.inv(xBox, yBox)
+			if method == 'EWA':
+				# use Elliptical Weighted Average filter, with Jacobian
+				# estimation via finite differences
+				col = tex.filterEWA(sBox, tBox)
+			elif method == 'EWA_analytical_J':
+				# Use EWA with an analytical Jacobian.  This can be used as a
+				# check against the numerical estimate.  Last time I looked, it
+				# was spot-on!
+				J = trans.jacobian(sBox.mean(),tBox.mean())
+				col = tex.filterEWA(sBox, tBox, deltaX, deltaY, J)
+			else:
+				# Use stochastic integration over a box.
+				col = tex.filterQuadAF(sBox, tBox)
+			im[-1-j,i,:] = col
 		if i % 20 == 0:
 			print "done col %d, " % i
 	return im
@@ -646,14 +757,19 @@ def textureMapPlane(x, y, tex, numSamples=100):
 #----------------------------------------------------------------------
 
 if __name__ == '__main__':
-	# Choose image
-	#im = imread('lena_std.png')[:,:,:3]/256.0
+	# Choose image & create mipmap
 	N = 512
 	#im = getCentreTest(N)
 	im = getGridImg(1000, 30, 2)
-	texture = TextureMap(im, 8, )
-	s,t = mgrid[0:1:N*1j,0:1:N*1j]
-	x,y = mgrid[-0.5:0.5:N*1j,-0.5:-0.1:N*2//5*1j]
-	stride = 1
-	imWarp = textureMapPlane(x[::stride,::stride],y[::stride,::stride], texture)
+	#im = imread('lena_std.png')[:,:,:3]/256.0
+	texture = TextureMap(im, 8)
+	#s,t = mgrid[0:1:N*1j,0:1:N*1j]
+
+	# Warp image to new coordinate system.
+	x,y = mgrid[-0.5:0.5:N*1j,-0.3:-0.02:N*2//5*1j]
+	trans = CompositionWarp(PerspectiveWarp(),AffineWarp(A=10*eye(2), b = array((-5,4))))
+	imWarp = textureWarp(x,y, texture, trans)
+	pylab.hold(False)
 	imshow(imWarp)
+	imsave('imWarp.png',imWarp)
+	pylab.draw()
