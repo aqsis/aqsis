@@ -68,6 +68,78 @@ enum EqBufferType
 
 
 //----------------------------------------------------------------------
+/** \brief A class which knows how to sample and filter a mipmap level.
+ *
+ */
+class CqMipmapLevel
+{
+	public:
+		CqMipmapLevel(TIFF* tiffFile, sOffset, sMult, tOffset, tMult);
+		inline void filter(std::vector<TqFloat>& sBox, std::vector<TqFloat>& tBox, std::vector<TqFloat>& output);
+		virtual void sampleBilinear(TqFloat s, TqFloat t, std::vector<TqFloat>& output);
+	protected:
+		virtual void connectToTiff(TIFF* tiffFile) = 0;
+		virtual void filterEWA(TqFloat s, TqFloat t, std::vector<TqFloat>& output) = 0;
+		virtual void filterMCI(TqFloat s, TqFloat t, std::vector<TqFloat>& output) = 0;
+	private:
+		CqFloat m_sOffset;
+		CqFloat m_sMult;
+		CqFloat m_tOffset;
+		CqFloat m_tMult;
+};
+
+
+//----------------------------------------------------------------------
+/** \brief A minimal 2D matrix class for use in texture warping.
+ *
+ * Don't develop this further until it's found out exactly how much it's needed...
+ */
+#if 0
+class CqMatrix2D
+{
+	public:
+		/** Construct a 2D matrix
+		 */
+		CqMatrix2D(a,b,c,d);
+		/** \brief Factory function to make identity matrix.
+		 */
+		inline static CqMatrix2D identity();
+		inline TqFloat determinant();
+		inline CqMatrix2D operator*(CqMatrix2D& rhs);
+		inline CqMatrix2D operator+(CqMatrix2D& rhs);
+		inline TqFloat operator()(TqInt i, TqInt j);
+		CqMatrix2D inverse();
+	private:
+		TqFloat m_a;
+		TqFloat m_b;
+		TqFloat m_c;
+		TqFloat m_d;
+};
+#endif
+
+
+//----------------------------------------------------------------------
+template<typename T>
+class CqMipmapLevelImpl : CqMipmapLevel
+{
+	public:
+		CqMipmapLevelImpl(TIFF* tiffFile, sOffset, sMult, tOffset, tMult);
+		inline void filter(std::vector<TqFloat>& sBox, std::vector<TqFloat>& tBox, std::vector<TqFloat>& output);
+		virtual void sampleBilinear(TqFloat s, TqFloat t, std::vector<TqFloat>& output);
+	protected:
+		virtual void connectToTiff(TIFF* tiffFile);
+		inline void filterEWA(std::vector<TqFloat>& sBox, std::vector<TqFloat>& tBox, std::vector<TqFloat>& output);
+		inline void filterMCI(std::vector<TqFloat>& sBox, std::vector<TqFloat>& tBox, std::vector<TqFloat>& output);
+		inline void texToRasterCoords(TqFloat s, TqFloat t, TqFloat& sOut, TqFloat& tOut);
+		/// May be better put in the CqTextureTileArray class.
+		inline bool putWithinBounds(TqInt& iStart, TqInt& iStop, TqInt& jStart, TqInt& jStop);
+		inline CqMatrix2D estimateJacobian(std::vector<TqFloat>& sBox, std::vector<TqFloat>& tBox);
+	private:
+		CqTextureTileArray<T> m_imageData;
+};
+
+
+//----------------------------------------------------------------------
 /** \class CqTextureMapBuffer
  *  \brief A container for a segment of a texture map. 
  *  
