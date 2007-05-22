@@ -37,7 +37,7 @@
 #include <boost/weak_ptr.hpp>
 #include <boost/utility.hpp>
 
-#include "aqsistypes.h"
+#include "aqsis_types.h"
 
 
 namespace Aqsis
@@ -95,7 +95,7 @@ class CqMemorySentry : boost::noncopyable
 		void incrementTotalMemory(const TqMemorySize numBytes);
 
 	private:
-		/// Total memory used by managed objects
+		/// Total memory used by managed objects in bytes
 		TqMemorySize m_totalMemory;
 		/** Maximum amount of memory which the sentry will allow to be shared
 		 * between its registered objects.
@@ -106,6 +106,8 @@ class CqMemorySentry : boost::noncopyable
 		 * independently of this class.
 		 */
 		std::list<boost::weak_ptr<CqMemoryMonitored> > m_managedList;
+		/// Iterator holding the next object in the list which will be zapped.
+		std::list<boost::weak_ptr<CqMemoryMonitored> >::iterator m_nextToZap;
 };
 
 
@@ -120,13 +122,13 @@ class CqMemoryMonitored : boost::enable_shared_from_this<CqMemoryMonitored>
 		 *
 		 * \param memorySentry monitoring sentry for the memory used by the object.
 		 */
-		CqMemoryMonitored(const CqMemorySentry& memorySentry);
+		CqMemoryMonitored(CqMemorySentry& memorySentry);
 
 		/** \brief Ask the object to deallocate as much memory as possible.
 		 *
 		 * The object may choose to deallocate zero bytes if necessary.
 		 *
-		 * \return amount of memory which was deallocated.
+		 * \return amount of memory which was deallocated in bytes.
 		 */
 		virtual CqMemorySentry::TqMemorySize zapMemory() = 0;
 
