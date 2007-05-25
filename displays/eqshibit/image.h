@@ -32,6 +32,7 @@
 
 #include	<boost/shared_ptr.hpp>
 #include	<boost/function.hpp>
+#include	<boost/thread/mutex.hpp>
 
 #include	"aqsis.h"
 #include	"sstring.h"
@@ -121,6 +122,11 @@ public:
 	
 	virtual void setUpdateCallback(boost::function<void(int,int,int,int)> f);
 
+	boost::mutex& mutex()
+	{
+		return(m_mutex);
+	}
+
 protected:
     CqString		m_name;			///< Display name.
 	unsigned char*	m_data;
@@ -133,6 +139,7 @@ protected:
 	TqInt			m_channels;
 
 	boost::function<void(int,int,int,int)> m_updateCallback;
+	boost::mutex	m_mutex;
 };
 
 END_NAMESPACE( Aqsis )

@@ -31,7 +31,7 @@ eqshibitapp_headers =  Split("""
 # Set any platform specific options for this target
 eqshibitappenv.UseTargetOptions('eqshibitapp')
 
-eqshibitapp = eqshibitappenv.Program('eqshibit', eqshibitapp_sources, LIBS=['aqsistypes','argparse','fltk','m','Xext','X11','tinyxml'])
+eqshibitapp = eqshibitappenv.Program('eqshibit', eqshibitapp_sources, LIBS=['aqsistypes','argparse','fltk','m','Xext','X11','tinyxml', 'boost_thread', 'pthread'])
 eqshibitappenv.Install('$BINDIR', eqshibitapp)
 embedManifest(env, eqshibitappenv, eqshibitapp, 'EXE')
 

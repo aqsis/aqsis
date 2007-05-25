@@ -133,6 +133,8 @@ void CqDisplayServerImage::acceptData(TqUlong xmin, TqUlong xmaxplus1, TqUlong y
 	TqUlong ymaxplus1__ = MIN((ymaxplus1 - originY()), imageWidth());
 	TqUlong bucketlinelen = elementSize * (xmaxplus1 - xmin); 
 	
+	boost::mutex::scoped_lock lock(mutex());
+
 	const unsigned char* pdatarow = bucketData;
 	// Calculate where in the bucket we are starting from if the window is cropped.
 	TqInt row = 0;

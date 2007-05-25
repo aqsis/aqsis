@@ -31,6 +31,7 @@ START_NAMESPACE( Aqsis )
 
 void CqImage::PrepareImageBuffer()
 {
+	boost::mutex::scoped_lock lock(mutex());
 	m_data = reinterpret_cast<unsigned char*>(malloc( m_imageWidth * m_imageHeight * m_channels * sizeof(TqUchar)));
 	// Initialise the display to a checkerboard to show alpha
 	for (TqUlong i = 0; i < imageHeight(); i ++)
