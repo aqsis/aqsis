@@ -46,5 +46,10 @@ CqMemorySentry& CqMemoryMonitored::getMemorySentry() const
 }
 
 //------------------------------------------------------------------------------
+// Virtual destructor empty implementation.
+CqMemoryMonitored::~CqMemoryMonitored()
+{ }
+
+//------------------------------------------------------------------------------
 
 } // namespace Aqsis

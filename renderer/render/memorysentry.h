@@ -132,6 +132,9 @@ class CqMemoryMonitored : boost::enable_shared_from_this<CqMemoryMonitored>
 		 */
 		virtual CqMemorySentry::TqMemorySize zapMemory() = 0;
 
+		/** \brief virtual destructor
+		 */
+		virtual ~CqMemoryMonitored() = 0;
 	protected:
 		/** \brief get the memory sentry for this object.
 		 *
