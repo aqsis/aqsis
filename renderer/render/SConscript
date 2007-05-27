@@ -1,8 +1,10 @@
 import os
 
 Import('env cachegen headergen validategen', 'embedManifest')
+
 aqsisdll_sources = Split("""
 	attributes.cpp
+	blobby.cpp
 	bound.cpp
 	bucket.cpp
 	bunny.cpp
@@ -22,6 +24,8 @@ aqsisdll_sources = Split("""
 	lath.cpp
 	lights.cpp
 	linearcurves.cpp
+	marchingcubes.cpp
+	memorysentry.cpp
 	micropolygon.cpp
 	mpdump.cpp
 	nurbs.cpp
@@ -44,35 +48,81 @@ aqsisdll_sources = Split("""
 	symbols.cpp
 	teapot.cpp
 	texturemap.cpp
+	tilearray.cpp
 	transform.cpp
-	blobby.cpp
-	marchingcubes.cpp
 	trimcurve.cpp""")
 
 
 aqsisdll_headers = Split("""
-	attributes.h            ilightsource.h          micropolygon.h          ri.h
-	bilinear.h              imagebuffer.h           motion.h                ri_cache.h
+	attributes.h
+	bilinear.h
+	blobby.h
+	bound.h
+	bucket.h
+	bunny.h
+	clippingvolume.h
+	condition.h
+	converter.h
+	csgtree.h
+	curves.h
+	focus.h
+	forwarddiff.h
+	genpoly.h
+	graphicsstate.h
+	iattributes.h
+	iddmanager.h
+	idsoshadeops.h
+	ilightsource.h
+	imagebuffer.h
+	imagepixel.h
+	imagers.h
+	inlineparse.h
+	ioptions.h
+	iraytrace.h
+	irenderer.h
+	ishader.h
+	ishaderdata.h
+	ishaderexecenv.h
+	isurface.h
+	itexturemap.h
+	itransform.h
+	kdtree.h
+	lath.h
+	lights.h
+	lookuptable.h
+	marchingcubes.h
+	memorysentry.h
+	micropolygon.h
+	motion.h
+	mpdump.h
+	nurbs.h
+	objectinstance.h
+	occlusion.h
+	options.h
+	parameters.h
+	patch.h
+	plane.h
+	points.h
+	polygon.h
+	procedural.h
+	quadrics.h
+	render.h
+	renderer.h
+	ri.h
+	ri_cache.h
 	ri_debug.h
-	bound.h                 imagepixel.h            mpdump.h                rifile.h
-
-	bucket.h                bunny.h 	imagers.h               
-	nurbs.h                 shadeop.h
-	blobby.h		clippingvolume.h        inlineparse.h
-        objectinstance.h        shaders.h
-
-	condition.h             iraytrace.h             occlusion.h             stats.h
-	converter.h             irenderer.h             options.h               subdivision2.h
-	csgtree.h               ishader.h               parameters.h            surface.h
-	curves.h                ishaderdata.h           patch.h                 symbols.h
-	focus.h                 ishaderexecenv.h        plane.h                 teapot.h
-	forwarddiff.h           isurface.h              points.h                texturemap.h
-	genpoly.h               itexturemap.h           polygon.h               transform.h
-	graphicsstate.h         itransform.h            procedural.h            trimcurve.h
-	iattributes.h           kdtree.h                quadrics.h              ioptions.h
-	iddmanager.h            lath.h                  render.h
-	marchingcubes.h 	lookuptable.h
-	idsoshadeops.h          lights.h                renderer.h""")
+	rifile.h
+	shadeop.h
+	shaders.h
+	stats.h
+	subdivision2.h
+	surface.h
+	symbols.h
+	teapot.h
+	texturemap.h
+	tilearray.h
+	transform.h
+	trimcurve.h""")
 
 aqsis_install_headers = Split('''
 	ri.h

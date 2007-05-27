@@ -94,6 +94,8 @@ class CqMemorySentry : boost::noncopyable
 		 */
 		void incrementTotalMemory(const TqMemorySize numBytes);
 
+		/// Destructor
+		virtual ~CqMemorySentry();
 	private:
 		/// Total memory used by managed objects in bytes
 		TqMemorySize m_totalMemory;

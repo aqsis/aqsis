@@ -30,6 +30,9 @@ void CqMemorySentry::incrementTotalMemory(const TqMemorySize numBytes)
 	}
 }
 
+//------------------------------------------------------------------------------
+CqMemorySentry::~CqMemorySentry()
+{ }
 
 //------------------------------------------------------------------------------
 // Implementation for CqMemoryMonitored
