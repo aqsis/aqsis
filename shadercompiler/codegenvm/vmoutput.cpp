@@ -639,25 +639,31 @@ void CqCodeGenOutput::Visit( IqParseNodeGatherConstruct& IC )
 	TqInt iLabelC = m_gcLabels++;
 	TqInt iLabelD = m_gcLabels++;
 
-	IqParseNode* pArg = pNode->pChild();
-	assert( pArg != 0 );
-	IqParseNode* pHitStmt = pArg->pNextSibling();
+	IqParseNode* pArgs = pNode->pChild();
+	assert( pArgs != 0 );
+	IqParseNode* pHitStmt = pArgs->pNextSibling();
 	assert( pHitStmt != 0 );
 	IqParseNode* pNoHitStmt = pHitStmt->pNextSibling();
 
-	IqParseNode* pSamples = pArg->pChild();
+	// samples is the 5th argument to the gather function, we need that to 
+	// initialise the init_gather call.
+	IqParseNode* pSamples = pArgs->pChild();
 	TqInt iArg = 5;
 	while(--iArg > 0)	
 	{
 		pSamples = pSamples->pNextSibling();
 		assert(pSamples);
 	}
-
 	pSamples->Accept(*this);
+
 	m_slxFile << "\tinit_gather" << std::endl;
 
 	m_slxFile << ":" << iLabelA << std::endl;		// loop back label
 	m_slxFile << "\tS_CLEAR" << std::endl;			// clear current state
+
+	// Output the arguments in reverse order so that the gather() function
+	// can pop them in the expected order.
+	IqParseNode* pArg = pArgs->pChild(); 
 	while ( pArg->pNextSibling() != 0 )
 		pArg = pArg->pNextSibling();
 	iArg = 0;
@@ -668,6 +674,7 @@ void CqCodeGenOutput::Visit( IqParseNodeGatherConstruct& IC )
 		pArg->Accept( *this );
 		pArg = pArg->pPrevSibling();
 	}
+	// Now output the count of 'additional' arguments.
 	iArg -= 5;
 	CqParseNodeFloatConst C( static_cast<TqFloat>( abs( iArg ) ) );
 	C.Accept( *this );

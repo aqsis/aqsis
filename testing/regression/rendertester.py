@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 ######################################################################
-# Renderer tester v1.12
-# Copyright 2003 Matthias Baas (baas@ira.uka.de)
+# Renderer tester v1.13
+# Copyright 2003 Matthias Baas (mbaas@users.sourceforge.net)
 ######################################################################
 # For a short usage description call the script with the option -h or
 # --help. To get a description of the config files see the comments
@@ -1252,8 +1252,10 @@ Click on the RIB name or thumbnail to display details.
             res.pdiffoutput = "No output"
             res.failure = True
         elif self.pdiffcmd!=None and self.pdiffcmd!="" and refimg!=None:
-            pdiffcmd = (self.pdiffcmd, res.realoutimagename[idx], refimgname)
-            print "%s %s %s" % pdiffcmd
+            pdiffcmd = self.pdiffcmd.split(" ")
+            pdiffcmd.insert(1, res.realoutimagename[idx])
+            pdiffcmd.insert(2, refimgname)
+            print " ".join(pdiffcmd)
             retval,out,err = execute(pdiffcmd)
             out += err
             out = "".join(out).strip()
