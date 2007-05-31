@@ -1,3 +1,4 @@
+import os
 import os.path
 import glob
 import sys
@@ -106,6 +107,32 @@ zipBuilder = Builder(action=zipperFunction,
    target_factory=File,
    multi=0)
 env.Append(BUILDERS = {'Zipper':zipBuilder})
+
+# Add Fluid builder
+# emitter to add the generated .h file to the dependencies
+def fluidEmitter(target, source, env):
+  adjustixes = SCons.Util.adjustixes
+  file = SCons.Util.splitext(str(source[0].name))[0]
+  file = os.path.join(str(target[0].get_dir()), file)
+  target.append(adjustixes(file, "fluid_", ".h"))
+  return target, source
+
+fluidBuilder = Builder(action = "cd ${SOURCE.dir} && " +
+                                "fluid -o fluid_${SOURCE.filebase}.cpp " +
+                                "-h fluid_${SOURCE.filebase}.h -c ${SOURCE.name} ",
+                        emitter = fluidEmitter,
+                        src_suffix = '.fl',
+                        suffix = '.cpp',
+                        prefix = 'fluid_')
+
+# register builder
+env.Append( BUILDERS = { 'Fluid': fluidBuilder } )
+
+# add builder to the builders for shared and static objects, 
+# so we can use all sources in one list
+shared, static = SCons.Tool.createObjBuilders(env)
+shared.src_builder.append('Fluid')
+static.src_builder.append('Fluid')
 
 # Create the configure object here, as you can't do it once a call
 # to SConscript has been processed.

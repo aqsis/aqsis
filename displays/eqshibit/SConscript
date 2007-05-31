@@ -15,7 +15,7 @@ eqshibitapp_sources = Split("""
 	book.cpp
 	resizebrowser.cpp
 	displayserverimage.cpp
-	eqshibit_ui.cpp""")
+	eqshibit_ui.fl""")
 
 eqshibitapp_headers =  Split("""
 	eqshibit.h
@@ -26,7 +26,7 @@ eqshibitapp_headers =  Split("""
 	framebuffer.h
 	resizebrowser.h
 	displayserverimage.h
-	eqshibit_ui.h""")
+	""")
 
 # Set any platform specific options for this target
 eqshibitappenv.UseTargetOptions('eqshibitapp')
