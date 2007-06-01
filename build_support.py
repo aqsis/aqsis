@@ -169,3 +169,22 @@ def getSCMRevision():
 		return "(revision " + scm_revisionpp + ")"
 	else:
 		return ""
+
+def checkBoostLibraries(conf, lib, pathes):
+	''' look for boost libraries '''
+	conf.Message('Checking for boost library %s... ' % lib)
+	for path in pathes:
+		# direct form: e.g. libboost_iostreams.a
+		if os.path.isfile(os.path.join(path, 'lib%s.a' % lib)):
+			conf.Result('yes')
+			return (path, lib)
+		# check things like libboost_iostreams-gcc.a
+		files = glob.glob(os.path.join(path, 'lib%s-*.a' % lib))
+		# if there are more than one, choose the first one
+		# FIXME: choose the best one.
+		if len(files) >= 1:
+			# get xxx-gcc from /usr/local/lib/libboost_xxx-gcc.a
+			conf.Result('yes')
+			return (path, files[0].split(os.sep)[-1][3:-2])
+	conf.Result('n')
+	return ('','')

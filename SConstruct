@@ -136,7 +136,12 @@ static.src_builder.append('Fluid')
 
 # Create the configure object here, as you can't do it once a call
 # to SConscript has been processed.
-conf = Configure(env)
+from build_support import checkBoostLibraries
+conf = Configure(env,
+	custom_tests = {
+		'CheckBoostLibraries' : checkBoostLibraries,
+	}
+)
 Export('env opts conf')
 
 # Setup the distribution stuff, this should be non-platform specific, the distribution

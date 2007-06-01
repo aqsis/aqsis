@@ -1,11 +1,12 @@
 Import('conf')
 
+
 # Store the current LIBS setting, as the tests will modify it, but we don't want
 # every module to have the LiBS for all libraries.
 
 libs_store = []
 cpppath_store = []
-if conf.env.has_key('LiBS'):
+if conf.env.has_key('LIBS'):
 	libs_store = conf.env['LIBS']
 if conf.env.has_key('CPPPATH'):
 	cpppath_store = conf.env['CPPPATH']
@@ -61,5 +62,8 @@ if not conf.env['no_exr']:
 else:
 	conf.env.Replace(exr_lib = '')
 
+# Check for boost_thread
+
+conf.CheckBoostLibraries('boost_thread', ['/usr/lib', '/usr/local/lib'])
 conf.env.Replace(CPPPATH = cpppath_store)
 conf.env.Replace(LIBS = libs_store)
