@@ -1361,15 +1361,6 @@ void CqImageBuffer::RenderImage()
 		if ( !( iBucket % bucketmodulo ) )
 			SetProcessWorkingSetSize( GetCurrentProcess(), 0xffffffff, 0xffffffff );
 #endif
-#if defined(REQUIRED)
-
-		TqInt iB2, NumGrids = 0, NumPolys = 0;
-		for ( iB2 = 0; iB2 < nBuckets; iB2++ )
-		{
-			NumGrids += m_aBuckets[ iB2 ].aGrids().size();
-			NumPolys += m_aBuckets[ iB2 ].aMPGs().size();
-		}
-#endif
 		CurrentBucket().SetProcessed();
 		// Increase the bucket counter...
 		iBucket += 1;
