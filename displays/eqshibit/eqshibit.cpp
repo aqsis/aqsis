@@ -55,7 +55,7 @@ using namespace Aqsis;
 #include <fcntl.h>
 #include <errno.h>
 #include "eqshibit.h"
-#include "eqshibit_ui.h"
+#include "fluid_eqshibit_ui.h"
 #include "ddserver.h"
 #include "displayserverimage.h"
 #include "framebuffer.h"

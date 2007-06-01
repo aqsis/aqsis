@@ -1,8 +1,8 @@
 # data file for the Fltk User Interface Designer (fluid)
 version 1.0107 
-header_name {.h} 
-code_name {.cpp}
-class CqEqshibitMainWindow {open : {public Aqsis::CqEqshibitBase}
+header_name {fluid_eqshibit_ui.h} 
+code_name {fluid_eqshibit_ui.cpp}
+class CqEqshibitMainWindow {open selected : {public Aqsis::CqEqshibitBase}
 } {
   Function {CqEqshibitMainWindow()} {open
   } {
@@ -13,7 +13,7 @@ class CqEqshibitMainWindow {open : {public Aqsis::CqEqshibitBase}
       code2 {\#include <stdio.h>}
       code3 {\#include "resizebrowser.h"} visible
     } {
-      Fl_Menu_Bar {} {open selected
+      Fl_Menu_Bar {} {open
         xywh {0 0 685 25} box THIN_UP_BOX
         code0 {\#include <FL/Fl_Sys_Menu_Bar.H>}
         class Fl_Sys_Menu_Bar
