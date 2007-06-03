@@ -2,7 +2,7 @@
 version 1.0107 
 header_name {fluid_eqshibit_ui.h} 
 code_name {fluid_eqshibit_ui.cpp}
-class CqEqshibitMainWindow {open selected : {public Aqsis::CqEqshibitBase}
+class CqEqshibitMainWindow {open : {public Aqsis::CqEqshibitBase}
 } {
   Function {CqEqshibitMainWindow()} {open
   } {
@@ -48,7 +48,9 @@ class CqEqshibitMainWindow {open selected : {public Aqsis::CqEqshibitBase}
   Function {addNewBook(std::string name)} {open return_type {virtual void}
   } {
     code {CqEqshibitBase::addNewBook(name);
-Fl_Resize_Browser *o = new Fl_Resize_Browser(0, 50, m_tabBooks->w(), m_tabBooks->h(), name.c_str());
+char* _name = new char[name.length()+1];
+strcpy(_name, name.c_str());
+Fl_Resize_Browser *o = new Fl_Resize_Browser(0, 50, m_tabBooks->w(), m_tabBooks->h(), _name);
 m_columnWidths[0] = 200;
 m_columnWidths[1] = 0;
 o->column_widths(m_columnWidths);
@@ -60,7 +62,8 @@ o->showcolsep(1);
 m_tabBooks->add(o);
 m_tabBooks->resizable(o);
 m_tabBooks->init_sizes();
-m_tabBooks->redraw();} {}
+m_tabBooks->redraw();} {selected
+    }
   }
   Function {show(int argc, char **argv)} {open
   } {
