@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 ######################################################################
-# Renderer tester v1.13
+# Renderer tester v1.14
 # Copyright 2003 Matthias Baas (mbaas@users.sourceforge.net)
 ######################################################################
 # For a short usage description call the script with the option -h or
@@ -1393,6 +1393,18 @@ Click on the RIB name or thumbnail to display details.
                 if max(maxdiff)>max(res_maxdiff):
                     res_maxdiff = maxdiff
             
+            if res.failure:
+                wd = res.job.workingdir
+                cwd = os.getcwd()
+                if wd.startswith(cwd):
+                    wd = wd[len(cwd)+1:]
+                    
+                code += '<form action="http://localhost:24678/cgi-bin/acceptdiff.py" method="post">\n'
+                code += '<INPUT type="hidden" name="testcase" value="%s">\n'%(os.path.join(wd,res.job.rib).replace("\\", "/"))
+                code += '<INPUT type="hidden" name="outimagenames" value="%s">\n'%",".join(res.job.outimagename)
+                code += '<INPUT type="submit" value="Accept Output as Reference"> (click this button to copy the output images to the reference directory)\n'
+                code += '</form>\n'
+
             code += 'Output / Reference / RGB diff / RGB binary diff'
             if diffalpha!=None:
                 code += ' / Alpha diff / Binary alpha diff'
