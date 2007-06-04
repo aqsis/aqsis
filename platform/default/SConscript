@@ -26,7 +26,12 @@ if not env['debug']:
 
 # Point at the boost headers.
 # todo: need to find a way of determining this location automatically
-env.Replace(boost_include_path = ['/usr/include/boost'])
+if env['boost_include_path'] == "":
+	env.Replace(boost_include_path = ['/usr/include/boost'])
+if env['boost_lib_path'] == "":
+	env.Replace(boost_lib_path = ['/usr/lib'])
+if env['boost_thread_lib'] == "":
+	env.Replace(boost_thread_lib = ['boost_thread-mt'])
 
 # Find out where the TIFF headers are, look in common places.
 tiffiofile = env.FindFile('tiffio.h', ['$tiff_include_path', '/usr/include'])

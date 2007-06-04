@@ -402,6 +402,8 @@ void CqDDManager::LoadDisplayLibrary( SqDisplayRequest& req )
 		req.m_DelayCloseMethod = ::DebugDspyDelayImageClose ;
 	}
 
+	Aqsis::log() << debug << "Loaded \"" << strDriverFile.c_str() << "\"" << std::endl;
+
 	// Nullified the data part
 	req.m_DataRow = 0;
 	req.m_DataBucket = 0;
@@ -539,6 +541,7 @@ void CqDDManager::LoadDisplayLibrary( SqDisplayRequest& req )
 		TqInt xmax = static_cast<TqInt>( CLAMP( CEIL( xres * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 1 ] ), 0, xres ) );
 		TqInt ymin = static_cast<TqInt>( CLAMP( CEIL( yres * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 2 ] ), 0, yres ) );
 		TqInt ymax = static_cast<TqInt>( CLAMP( CEIL( yres * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 3 ] ), 0, yres ) );
+		Aqsis::log() << debug << "Calling DspyImageOpen in \"" << strDriverFile.c_str() << "\"" << std::endl;
 		PtDspyError err = (*req.m_OpenMethod)(&req.m_imageHandle,
 		                                      req.m_type.c_str(), req.m_name.c_str(),
 		                                      xmax-xmin,
@@ -547,6 +550,7 @@ void CqDDManager::LoadDisplayLibrary( SqDisplayRequest& req )
 		                                      &req.m_customParams[0],
 		                                      req.m_formats.size(), &req.m_formats[0],
 		                                      &req.m_flags);
+		Aqsis::log() << debug << "Done" << std::endl;
 
 		// Check for an error
 		if( err != PkDspyErrorNone )
@@ -580,6 +584,7 @@ void CqDDManager::LoadDisplayLibrary( SqDisplayRequest& req )
 		else
 			req.m_valid = TqTrue;
 
+		Aqsis::log() << debug << "Processing format list returned from display" << std::endl;
 		// Now scan the returned format list to make sure that we pass the data in the order the display wants it.
 		std::vector<PtDspyDevFormat>::iterator i;
 		for(i=req.m_formats.begin(); i!=req.m_formats.end(); i++)

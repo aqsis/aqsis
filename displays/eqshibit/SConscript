@@ -2,7 +2,7 @@ Import('env', 'embedManifest')
 eqshibitappenv = env.Copy()
 
 eqshibitappenv.AppendUnique(CPPPATH = ['#/aqsis/aqsistypes', '#/thirdparty/tinyxml', '#/renderer/ddmanager'])
-eqshibitappenv.AppendUnique(LIBS = ['$tiff_lib', '$fltk_lib','#/thirdparty/tinyxml'])
+eqshibitappenv.AppendUnique(LIBS = ['aqsistypes','argparse','$fltk_lib', 'tinyxml', '$boost_thread_lib', 'pthread'])
 eqshibitappenv.AppendUnique(LIBPATH = ['/usr/X11R6/lib'])
 eqshibitappenv.AppendUnique(CPPDEFINES=['EQSHIBIT_APP_EXPORTS', 'TIXML_USE_STL'])
 
@@ -31,7 +31,7 @@ eqshibitapp_headers =  Split("""
 # Set any platform specific options for this target
 eqshibitappenv.UseTargetOptions('eqshibitapp')
 
-eqshibitapp = eqshibitappenv.Program('eqshibit', eqshibitapp_sources, LIBS=['aqsistypes','argparse','fltk','m','Xext','X11','tinyxml', 'boost_thread', 'pthread'])
+eqshibitapp = eqshibitappenv.Program('eqshibit', eqshibitapp_sources)
 eqshibitappenv.Install('$BINDIR', eqshibitapp)
 embedManifest(env, eqshibitappenv, eqshibitapp, 'EXE')
 

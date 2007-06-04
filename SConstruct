@@ -11,6 +11,8 @@ from build_support import AddSysPath
 from build_support import Glob
 from build_support import embedManifest
 from build_support import getSCMRevision
+from build_support import SetupBufferedOutput
+from build_support import SetupCleanPrinting
 Export('embedManifest')
 
 import version
@@ -40,6 +42,8 @@ else:
 opts.Add('tiff_include_path', 'Point to the tiff header files', '')
 opts.Add('tiff_lib_path', 'Point to the tiff library files', '')
 opts.Add('boost_include_path', 'Point to the boost header files', '')
+opts.Add('boost_lib_path', 'Point to the boost lib files', '')
+opts.Add('boost_thread_lib', 'The undecorated name of the boost thread library', '')
 opts.Add('jpeg_include_path', 'Point to the jpeg header files', '')
 opts.Add('jpeg_lib_path', 'Point to the jpeg library files', '')
 opts.Add('zlib_include_path', 'Point to the zlib header files', '')
@@ -50,6 +54,7 @@ opts.Add('exr_include_path', 'Point to the OpenEXR header files', '')
 opts.Add('exr_lib_path', 'Point to the OpenEXR library files', '')
 opts.Add(BoolOption('no_fltk', 'Build without FLTK support', '0'))
 opts.Add(BoolOption('no_exr', 'Build without OpenEXR support', '0'))
+opts.Add(BoolOption('no_threads', 'Build without thread support', '0'))
 opts.Add(BoolOption('with_pdiff', 'Build and install the third-party pdiff utility', '0'))
 opts.Add('cachedir', 'Examine a build cache dir for previously compiled files', '')
 opts.Add(BoolOption('debug', 'Build with debug options enabled', '0'))
@@ -136,13 +141,11 @@ static.src_builder.append('Fluid')
 
 # Create the configure object here, as you can't do it once a call
 # to SConscript has been processed.
-from build_support import checkBoostLibraries
-conf = Configure(env,
-	custom_tests = {
-		'CheckBoostLibraries' : checkBoostLibraries,
-	}
-)
+conf = Configure(env)
 Export('env opts conf')
+
+SetupBufferedOutput(env)
+SetupCleanPrinting(env)
 
 # Setup the distribution stuff, this should be non-platform specific, the distribution
 # archive should apply to all supported platforms.
@@ -277,12 +280,13 @@ env.AppendUnique(LIBPATH = prependBuildDir( Split('''
 ''' ) ) )
 
 # Setup the include path to the tiff headers (should have been determined in the system specific sections above).
-env.AppendUnique(LIBPATH = ['$tiff_lib_path', '$jpeg_lib_path', '$zlib_lib_path', '$fltk_lib_path', '$exr_lib_path'])
+env.AppendUnique(LIBPATH = ['$tiff_lib_path', '$jpeg_lib_path', '$zlib_lib_path', '$fltk_lib_path', '$exr_lib_path', '$boost_lib_path'])
 
 # Create the output for the command line options defined above and in the platform specific configuration.
 Help(opts.GenerateHelpText(env))
 
 # Check for the existence of the various dependencies
+conf.env = env
 SConscript('build_check.py')
 
 # Transfer any findings from the build_check back to the environment
