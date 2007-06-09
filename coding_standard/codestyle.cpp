@@ -69,7 +69,7 @@ void CqIntWrapper::setData(TqInt data)
 		//
 		// TqUint i = 0;
 
-		for(TqUint i = 0; i < maxInsults; i++)
+		for(TqUint i = 0; i < maxInsults; ++i)
 			std::cout << "You idiot! You're overriding the answer.\n";
 
 		// "i" still defined in this scope under VC++6
