@@ -1,5 +1,5 @@
 // Aqsis
-// Copyright © 1997 - 2001, Paul C. Gregory
+// Copyright (C) 1997 - 2007, Paul C. Gregory
 //
 // Contact: pgregory@aqsis.org
 //
@@ -19,53 +19,87 @@
 
 
 /** \file
-		\brief Declares the XqException base class thrown during exceptions.
-		\author Paul C. Gregory (pgregory@aqsis.org)
+	\brief Declares generic exception types to be thrown by aqsis.
+	\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-//? Is exception.h included already?
 #ifndef EXCEPTION_H_INCLUDED
-//{
 #define EXCEPTION_H_INCLUDED 1
 
-#include	"aqsis.h"
+#include <string>
 
-#include	"sstring.h"
+#include "aqsis.h"
 
-START_NAMESPACE( Aqsis )
+namespace Aqsis
+{
 
 //-----------------------------------------------------------------------
-/** General message based exception.  specific exceptions are derived from this.
+/** \brief General message-based exception class.
+ *
+ * Specific exceptions are derived from this.
  */
-
 class XqException
 {
 	public:
 		/** Default constructor.
-		 * \param pcharReason Pointer to a string associated with the error which caused the exception.
+		 *
+		 * \param reason - a message explaining the resons for the error.
 		 */
-		XqException( const char* pcharReason = 0 ) :
-				m_strReason( pcharReason )
-		{}
-		virtual	~XqException()
-		{}
+		inline XqException(const char* reason = 0);
+		/** \brief virtual destructor
+		 */
+		inline virtual ~XqException();
 
-		/** Get a reference to the error message.
-		 * \return a constant string reference.
+		/** \brief Get the reason for the error as a string
+		 *
+		 * \return error message
 		 */
-		const CqString&	strReason()
-		{
-			return ( m_strReason );
-		}
+		inline const std::string& strReason() const;
 
 	private:
-		CqString	m_strReason;	///< The message associated with this exception.
+		std::string m_reason;	///< The message associated with this exception.
+};
+
+
+//------------------------------------------------------------------------------
+/** \brief Class for reporting input or output errors (eg, errors encountered
+ * during file IO
+ */
+class XqMemoryError : public XqException
+{
+	public:
+		inline XqMemoryError(const char* reason = 0);
+};
+
+
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+// Implementation of inline functions.
+//------------------------------------------------------------------------------
+// Inline functions for XqException
+inline XqException::XqException(const char* reason)
+	: m_reason(reason)
+{}
+
+inline XqException::~XqException()
+{}
+
+inline const std::string& XqException::strReason() const
+{
+	return m_reason;
 }
-;
+
+
+//------------------------------------------------------------------------------
+// Inline functions for XqMemoryError
+inline XqMemoryError::XqMemoryError(const char* reason)
+	: XqException(reason)
+{ }
+
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
 
 #endif // EXCEPTION_H_INCLUDED
