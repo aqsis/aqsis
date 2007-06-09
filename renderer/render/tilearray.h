@@ -1,5 +1,5 @@
 // Aqsis
-// Copyright © 1997 - 2001, Paul C. Gregory
+// Copyright (C) 1997 - 2001, Paul C. Gregory
 //
 // Contact: pgregory@aqsis.org
 //
@@ -18,7 +18,7 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 /**
- * \file tilearray.h
+ * \file
  *
  * \brief Declare array class which holds data as tiles and competes with other
  * arrays for memory via a common cache.
@@ -53,7 +53,7 @@ class CqIntrusivePtrCounted
 {
 	public:
 		/// Get the number of references count for this object
-		inline TqUint getReferenceCount();
+		inline TqUint referenceCount();
 	protected:
 		/// Construct a reference counted object
 		inline CqIntrusivePtrCounted();
@@ -143,7 +143,7 @@ class CqTileArray : public CqMemoryMonitored
 		 * \param y - index in height direction (row index)
 		 * \return a lightweight vector holding a reference to the sample data
 		 */
-		virtual CqSampleVector<T> getValue(const TqUint x, const TqUint y) const = 0;
+		virtual CqSampleVector<T> value(const TqUint x, const TqUint y) const = 0;
 
 		/** \brief Set the value of the array at a particular position
 		 *
@@ -195,6 +195,8 @@ class CqTextureTile : public CqIntrusivePtrCounted
 	public:
 		/** \brief Construct a texture tile
 		 *
+		 * \todo Investigate the use of an allocator or such for the TIFF data.
+		 *
 		 * \param data - raw tile data, CqTextureTile takes responsibility for
 		 *   freeing this memory; it's assumed to have been allocated with
 		 *   _TIFFmalloc.
@@ -204,8 +206,10 @@ class CqTextureTile : public CqIntrusivePtrCounted
 		 * \param topLeftY - top left pixel Y-position in the larger array
 		 * \param samplesPerPixel - number of samples of type T per pixel.
 		 */
-		CqTextureTile(T* data, TqUint width, TqUint height, TqUint topLeftX,
-				TqUint topLeftY, TqUint samplesPerPixel);
+		CqTextureTile(boost::shared_array<T> data,
+				const TqUint width, const TqUint height,
+				const TqUint topLeftX, const TqUint topLeftY,
+				const TqUint samplesPerPixel);
 
 		/** \brief Destructor
 		 */
@@ -220,7 +224,7 @@ class CqTextureTile : public CqIntrusivePtrCounted
 		 * \param y - pixel index in height direction (row index)
 		 * \return a lightweight vector holding a reference to the sample data
 		 */
-		inline CqSampleVector<T> getValue(const TqUint x, const TqUint y) const;
+		inline CqSampleVector<T> value(const TqUint x, const TqUint y) const;
 
 		/** \brief Set the value of the tile samples at the given position.
 		 *
@@ -239,7 +243,7 @@ class CqTextureTile : public CqIntrusivePtrCounted
 		 * \param y - pixel index in height direction (row index)
 		 * \param newValue - new value for the samples at this pixel
 		 */
-		void setValue(const TqUint x, const TqUint y, const std::vector<TqFloat>& newValue);
+		//void setValue(const TqUint x, const TqUint y, const std::vector<TqFloat>& newValue);
 
 		/** \brief Get tile width
 		 *
@@ -282,25 +286,14 @@ class CqTextureTile : public CqIntrusivePtrCounted
 		 * \param x - pixel index in width direction (column index)
 		 * \param y - pixel index in height direction (row index)
 		 */
-		inline T* getSamplePtr(TqUint x, TqUint y) const;
+		inline T* samplePtr(TqUint x, TqUint y) const;
 
-		/// Pointer to the underlying data.
-		/* This cannot be handled directly by boost::shared_array
-		 * unfortunately, since it's allocated with _TIFFmalloc.  I take the
-		 * alternative of handling this manually, though it could be wrapped
-		 * with a struct and handled via boost::shared_ptr
-		 */
-		T* m_data;
-		/// Width of the tile
-		TqUint m_width;
-		/// Height of the tile
-		TqUint m_height;
-		/// Column index of the top left of the tile in the full array
-		TqUint m_topLeftX;
-		/// Row index of the top left of the tile in the full array
-		TqUint m_topLeftY;
-		/// Number of samples per pixel
-		TqUint m_samplesPerPixel;
+		boost::shared_array<T> m_data;	///< Pointer to the underlying data.
+		TqUint m_width;				///< Width of the tile
+		TqUint m_height;			///< Height of the tile
+		TqUint m_topLeftX;			///< Column index of the top left of the tile in the full array
+		TqUint m_topLeftY;			///< Row index of the top left of the tile in the full array
+		TqUint m_samplesPerPixel;	///< Number of samples per pixel
 };
 
 
@@ -315,22 +308,22 @@ template<typename T>
 class CqTextureTileArray : public CqTileArray<T>
 {
 	public:
-		/** \brief Construct a tiled texture array.
+		/** \brief Construct a tiled texture array from a tiff file.
 		 *
-		 * \todo Decide what kinds of arguments this really needs, and how it's
-		 * going to deal with TIFF files.
+		 * The constructor throws an error if the file cannot be read.
+		 *
 		 */
-		CqTextureTileArray(std::string fileName, TqUint tiffDirectory);
+		CqTextureTileArray(std::string fileName, TIFF* openTiff, TqUint tiffDirectory = 0);
 
 		// Inherited
-		virtual CqSampleVector<T> getValue(const TqUint x, const TqUint y) const;
+		virtual CqSampleVector<T> value(const TqUint x, const TqUint y) const;
 		virtual void setValue(const TqUint x, const TqUint y, const std::vector<TqFloat>& newValue);
 
 		/** \brief Access to the underlying tiles
 		 *
 		 * Algorithms which need to act on the whole image may need access to
 		 * the underlying tiles for efficiency (for instance, mipmap
-		 * generation).  Unless efficiency is really an issue, the getValue
+		 * generation).  Unless efficiency is really an issue, the value()
 		 * function should be used instead.
 		 *
 		 * \param x - index in width direction (column index)
@@ -338,7 +331,7 @@ class CqTextureTileArray : public CqTileArray<T>
 		 *
 		 * \return The tile holding the underlying data at the given indices.
 		 */
-		boost::intrusive_ptr<CqTextureTile<T> >& getTileForIndex(const TqUint x, const TqUint y) const;
+		boost::intrusive_ptr<CqTextureTile<T> >& tileForIndex(const TqUint x, const TqUint y) const;
 
 		/** \brief Get the number of samples per pixel
 		 *
@@ -357,7 +350,7 @@ class CqTextureTileArray : public CqTileArray<T>
 
 		/** Allocate a new texture tile from the TIFF file.
 		 */
-		//void allocateTile();
+		void allocateTile();
 
 		/// Number of samples per pixel
 		TqUint m_samplesPerPixel;
@@ -378,10 +371,12 @@ class CqTextureTileArray : public CqTileArray<T>
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
 // Implementation of inline functions
+//------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// Inline functions for CqIntrusivePtrCounted
 //------------------------------------------------------------------------------
+// Inline functions for CqIntrusivePtrCounted
+//
 inline CqIntrusivePtrCounted::CqIntrusivePtrCounted()
 	: m_referenceCount(0)
 { }
@@ -409,6 +404,7 @@ inline void intrusive_ptr_release(CqIntrusivePtrCounted* ptr)
 
 
 //------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Inline functions for CqSampleVector
 //------------------------------------------------------------------------------
 template<typename T>
@@ -431,6 +427,7 @@ inline TqFloat CqSampleVector<T>::operator[](TqUint index) const
 
 
 //------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Inline functions for CqTileArray
 //------------------------------------------------------------------------------
 
@@ -452,12 +449,15 @@ CqTileArray<T>::~CqTileArray<T>()
 
 
 //------------------------------------------------------------------------------
-// Inline functions for CqTextureTile
 //------------------------------------------------------------------------------
+// Implementation of CqTextureTile
+//------------------------------------------------------------------------------
+// Inline functions for CqTextureTile
+//
 template<typename T>
-inline CqSampleVector<T> CqTextureTile<T>::getValue(const TqUint x, const TqUint y) const
+inline CqSampleVector<T> CqTextureTile<T>::value(const TqUint x, const TqUint y) const
 {
-	return CqSampleVector<T>(getSamplePtr(x,y),
+	return CqSampleVector<T>(samplePtr(x,y),
 			boost::intrusive_ptr<CqIntrusivePtrCounted>(*this));
 }
 
@@ -492,18 +492,65 @@ inline TqUint CqTextureTile<T>::samplesPerPixel() const
 }
 
 template<typename T>
-inline T* CqTextureTile<T>::getSamplePtr(TqUint x, TqUint y) const
+inline T* CqTextureTile<T>::samplePtr(TqUint x, TqUint y) const
 {
 	assert(x >= m_topLeftX);
 	assert(x < m_topLeftX+m_width);
 	assert(y >= m_topLeftY);
 	assert(y < m_topLeftY+m_height);
-	return m_data + ((y-m_topLeftY)*m_width + (x-m_topLeftX))*m_samplesPerPixel;
+	return m_data.get() + ((y-m_topLeftY)*m_width + (x-m_topLeftX))*m_samplesPerPixel;
 }
 
 //------------------------------------------------------------------------------
-// Inline functions for CqTextureTileArray
+// Template implementations for CqTextureTile
+//
+template<typename T>
+CqTextureTile<T>::CqTextureTile<T>(boost::shared_array<T> data, TqUint width, TqUint height,
+		TqUint topLeftX, TqUint topLeftY, TqUint samplesPerPixel)
+	: m_data(data),
+	m_width(width),
+	m_height(height),
+	m_topLeftX(topLeftX),
+	m_topLeftY(topLeftY),
+	m_samplesPerPixel(samplesPerPixel)
+{ }
+
 //------------------------------------------------------------------------------
+template<typename T>
+void CqTextureTile<T>::setValue(const TqUint x, const TqUint y, const std::vector<TqFloat>& newValue)
+{
+	T* samplePtr = samplePtr(x,y);
+	if(std::numeric_limits<T>::is_integer)
+	{
+		// For integer data types, renormalise the new values so that a input
+		// value of 1 becomes the maximum representable integer.
+		for(TqUint i = 0; i < m_samplesPerPixel; i++)
+			samplePtr[i] = static_cast<T>(
+					clamp<TqFloat>(newValue[i]*std::numeric_limits<T>::max(),
+					std::numeric_limits<T>::min(), std::numeric_limits<T>::max()) );
+	}
+	else
+	{
+		for(TqUint i = 0; i < m_samplesPerPixel; i++)
+			samplePtr[i] = static_cast<T>(newValue[i]);
+	}
+}
+
+//------------------------------------------------------------------------------
+template<typename T>
+CqTextureTile<T>::~CqTextureTile<T>()
+{
+	// We assume that m_data was allocated via _TIFFmalloc().
+	_TIFFfree(reinterpret_cast<tdata_t>(m_data));
+}
+
+
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+// Implementation of CqTextureTileArray
+//------------------------------------------------------------------------------
+// Inline functions for CqTextureTileArray
+//
 
 template<typename T>
 inline TqUint CqTextureTileArray<T>::samplesPerPixel() const
@@ -511,6 +558,69 @@ inline TqUint CqTextureTileArray<T>::samplesPerPixel() const
 	return m_samplesPerPixel;
 }
 
+//------------------------------------------------------------------------------
+// Template Implementations for CqTextureTileArray
+//
+
+#if 0
+template<typename T>
+CqTextureTileArray<T>::CqTextureTileArray<T>(std::string fileName, TqUint tiffDirectory)
+	: m_tiffDirectory(tiffDirectory),
+	m_fileName(fileName)
+{
+	/// \todo Implementation
+	//CqTileArray<T>()
+}
+#endif
+
+/* Stuff to go in CqTextureMap
+	// Validate the filename
+	CqRiFile textureFile(fileName.c_str(), "texture");
+	if(!textureFile.IsValid())
+	{
+		Aqsis::log() << error << "Cannot open texture file '" << fileName << "'; using default texture\n";
+		m_validFile = false;
+	}
+	else
+	{
+
+	}
+*/
+
+template<typename T>
+CqSampleVector<T> CqTextureTileArray<T>::value(const TqUint x, const TqUint y) const
+{
+	return tileForIndex(x, y)->value();
+}
+
+template<typename T>
+void CqTextureTileArray<T>::setValue(const TqUint x, const TqUint y, const std::vector<TqFloat>& newValue)
+{
+	/// \todo Implementation
+}
+
+template<typename T>
+boost::intrusive_ptr<CqTextureTile<T> >& CqTextureTileArray<T>::tileForIndex(const TqUint x, const TqUint y) const
+{
+	/// \todo Implementation
+	// if() 
+	return boost::intrusive_ptr<CqTextureTile<T> > (0); // dodgy; get the stub to compile...
+}
+
+template<typename T>
+CqMemorySentry::TqMemorySize CqTextureTileArray<T>::zapMemory()
+{
+	/// \todo Implementation
+	return 0;
+}
+
+template<typename T>
+CqTextureTileArray<T>::~CqTextureTileArray<T>()
+{
+	/// \todo Implementation
+}
+
+//------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
 } // namespace Aqsis
 

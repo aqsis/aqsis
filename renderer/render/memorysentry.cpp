@@ -18,7 +18,7 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 /**
- * \file memorysentry.cpp
+ * \file
  *
  * \brief Implementation of memory sentry class.
  *
@@ -70,7 +70,7 @@ CqMemoryMonitored::CqMemoryMonitored(CqMemorySentry& memorySentry)
 }
 
 //------------------------------------------------------------------------------
-CqMemorySentry& CqMemoryMonitored::getMemorySentry() const
+CqMemorySentry& CqMemoryMonitored::memorySentry() const
 {
 	return m_memorySentry;
 }

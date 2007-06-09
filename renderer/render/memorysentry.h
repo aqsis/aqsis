@@ -19,7 +19,7 @@
 
 
 /**
- * \file memorysentry.h
+ * \file
  *
  * \brief Declare memory "sentry" mechanism responsible for maintaining bounded
  * global memory caches for objects such as textures.
@@ -142,7 +142,7 @@ class CqMemoryMonitored : boost::enable_shared_from_this<CqMemoryMonitored>
 		 *
 		 * \return the memory sentry which monitors this object.
 		 */
-		CqMemorySentry& getMemorySentry() const;
+		CqMemorySentry& memorySentry() const;
 
 	private:
 		/// The sentry object which is monitoring the memory for this object.
