@@ -772,21 +772,9 @@ void CqImageBuffer::RenderMPG_MBOrDof( CqMicroPolygon* pMPG,
                                        TqBool IsMoving, TqBool UsingDof )
 {
 	CqHitTestCache hitTestCache;
-	TqBool cachedHitData = TqFalse;
 	pMPG->CacheHitTestValues(&hitTestCache);
-	cachedHitData = TqTrue;
 
-	TqInt iXSamples = PixelXSamples();
-	TqInt iYSamples = PixelYSamples();
-
-	TqFloat opentime = m_CurrentGridInfo.m_ShutterOpenTime;
 	TqFloat closetime = m_CurrentGridInfo.m_ShutterCloseTime;
-	TqFloat timePerSample;
-	if(IsMoving)
-	{
-		TqInt numSamples = iXSamples * iYSamples;
-		timePerSample = (float)numSamples / ( closetime - opentime );
-	}
 
 	TqInt bound_maxMB = pMPG->cSubBounds();
 	TqInt bound_maxMB_1 = bound_maxMB - 1;
@@ -798,17 +786,12 @@ void CqImageBuffer::RenderMPG_MBOrDof( CqMicroPolygon* pMPG,
 
 		// get the index of the first and last samples that can fall inside
 		// the time range of this bound
-		TqInt indexT0;
-		TqInt indexT1;
 		if(IsMoving)
 		{
 			if ( bound_numMB != bound_maxMB_1 )
 				pMPG->SubBound( bound_numMB + 1, time1 );
 			else
 				time1 = closetime;//QGetRenderContext() ->poptCurrent()->GetFloatOptionWrite( "System", "Shutter" ) [ 1 ];
-
-			indexT0 = static_cast<TqInt>(FLOOR((time0 - opentime) * timePerSample));
-			indexT1 = static_cast<TqInt>(CEIL((time1 - opentime) * timePerSample));
 		}
 
 		TqFloat maxCocX = 0.0f;
