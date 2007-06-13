@@ -67,6 +67,7 @@ enum EqBufferType
 };
 
 
+#if 0
 //----------------------------------------------------------------------
 /** \brief A class which knows how to sample and filter a mipmap level.
  *
@@ -94,7 +95,6 @@ class CqMipmapLevel
  *
  * Don't develop this further until it's found out exactly how much it's needed...
  */
-#if 0
 class CqMatrix2D
 {
 	public:
@@ -115,7 +115,6 @@ class CqMatrix2D
 		TqFloat m_c;
 		TqFloat m_d;
 };
-#endif
 
 
 //----------------------------------------------------------------------
@@ -137,6 +136,7 @@ class CqMipmapLevelImpl : CqMipmapLevel
 	private:
 		CqTextureTileArray<T> m_imageData;
 };
+#endif
 
 
 //----------------------------------------------------------------------

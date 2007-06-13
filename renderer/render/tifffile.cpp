@@ -39,14 +39,14 @@ namespace Aqsis
 std::string findFileInRiPath(const std::string& fileName, const std::string& riPath)
 {
 	std::string fullFileName;
-	CqRiFile riFile(fileName.c_str(), searchPath.c_str());
+	CqRiFile riFile(fileName.c_str(), riPath.c_str());
 	if(riFile.IsValid())
 	{
 		fullFileName = riFile.strRealName();
 		riFile.Close();
 	}
 	else
-		throw XqIoError(boost::str(boost::format("Could not fild file '%s'") % fileName));
+		throw XqIoError(boost::str(boost::format("Could not fild file '%s'") % fileName).c_str());
 	return fullFileName;
 }
 
@@ -58,12 +58,12 @@ std::string findFileInRiPath(const std::string& fileName, const std::string& riP
 CqTiffInputFile::CqTiffInputFile(const std::string& fileName, const std::string& riPath, TqUint directory)
 	: m_fileName(fileName),
 	m_fullFileName(findFileInRiPath(fileName, riPath)),
-	m_tiffPtr(0),
+	m_tiffPtr(),
 	m_currDir()
 {
 	m_tiffPtr = boost::shared_ptr<TIFF>(TIFFOpen(m_fullFileName.c_str(), "r"), TIFFClose);
 	if(!m_tiffPtr)
-		throw XqIoError( boost::str(boost::format("Could not open tiff file '%s'") % fileName) );
+		throw XqIoError( boost::str(boost::format("Could not open tiff file '%s'") % fileName).c_str() );
 	setDirectory(directory);
 }
 
@@ -72,7 +72,7 @@ CqTiffInputFile::CqTiffInputFile(const std::string& fileName, const std::string&
 CqTiffInputFile::CqTiffInputFile(CqTiffInputFile& toBeCopied)
 	: m_fileName(toBeCopied.m_fileName),
 	m_fullFileName(toBeCopied.m_fullFileName),
-	m_tiffPtr(0),
+	m_tiffPtr(),
 	m_currDir(toBeCopied.m_currDir)
 {
 	m_tiffPtr = boost::shared_ptr<TIFF>(TIFFOpen(m_fullFileName.c_str(), "r"), TIFFClose);
@@ -94,10 +94,11 @@ bool CqTiffInputFile::isMipMap()
 //------------------------------------------------------------------------------
 CqTiffInputFile& CqTiffInputFile::operator=(const CqTiffInputFile& rhs)
 {
-	m_fileName = rhs.fileName;
-	m_fullFileName = rhs.fullFileName;
+	m_fileName = rhs.m_fileName;
+	m_fullFileName = rhs.m_fullFileName;
 	m_tiffPtr = boost::shared_ptr<TIFF>(TIFFOpen(m_fullFileName.c_str(), "r"), TIFFClose);
 	m_currDir = rhs.m_currDir;
+	return *this;
 }
 
 //------------------------------------------------------------------------------
@@ -105,7 +106,7 @@ void CqTiffInputFile::setDirectory(const TqUint directory)
 {
 	// Check that the tiff directory exists, and we can open it.
 	if(!TIFFSetDirectory(m_tiffPtr.get(), directory))
-		throw XqTiffError( boost::format("Directory number %d not found in file '%s'") % directory % m_fileName);
+		throw XqTiffError( boost::str(boost::format("Directory number %d not found in file '%s'") % directory % m_fileName).c_str());
 
 	SqDirectoryData newDirectory = SqDirectoryData(*this, directory);
 
@@ -162,11 +163,11 @@ CqTiffInputFile::SqDirectoryData::SqDirectoryData()
 	samplesPerPixel(0),
 	tileWidth(0),
 	tileHeight(0),
+	photometricInterp(0),
 	numTilesX(0),
 	numTilesY(0),
-	photometricInterp(0)
-	sampleFormat(0)
-	planarConfig(0)
+	sampleFormat(0),
+	planarConfig(0),
 	orientation(0)
 { }
 
@@ -179,11 +180,11 @@ CqTiffInputFile::SqDirectoryData::SqDirectoryData(CqTiffInputFile& file, TqUint 
 	samplesPerPixel(0),
 	tileWidth(0),
 	tileHeight(0),
+	photometricInterp(0),
 	numTilesX(0),
 	numTilesY(0),
-	photometricInterp(0)
-	sampleFormat(0)
-	planarConfig(0)
+	sampleFormat(0),
+	planarConfig(0),
 	orientation(0)
 {
 	isTiled = static_cast<bool>(TIFFIsTiled(file.m_tiffPtr.get()));

@@ -48,6 +48,7 @@ aqsisdll_sources = Split("""
 	symbols.cpp
 	teapot.cpp
 	texturemap.cpp
+	tifffile.cpp
 	tilearray.cpp
 	transform.cpp
 	trimcurve.cpp""")
@@ -120,6 +121,7 @@ aqsisdll_headers = Split("""
 	symbols.h
 	teapot.h
 	texturemap.h
+	tifffile.h
 	tilearray.h
 	transform.h
 	trimcurve.h""")

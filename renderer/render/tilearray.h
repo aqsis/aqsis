@@ -34,6 +34,7 @@
 #include <vector>
 
 #include <boost/intrusive_ptr.hpp>
+#include <boost/shared_array.hpp>
 #include <tiffio.h>
 
 #include "aqsis.h"
@@ -57,7 +58,7 @@ class CqIntrusivePtrCounted
 	protected:
 		/// Construct a reference counted object
 		inline CqIntrusivePtrCounted();
-		virtual ~CqIntrusivePtrCounted();
+		inline virtual ~CqIntrusivePtrCounted();
 	private:
 		/// Increase the reference count; required for boost::intrusive_ptr
 		friend inline void intrusive_ptr_add_ref(CqIntrusivePtrCounted* ptr);
@@ -157,7 +158,7 @@ class CqTileArray : public CqMemoryMonitored
 		 * \param y - index in height direction (row index)
 		 * \param newValue - New value for the
 		 */
-		virtual void setValue(const TqUint x, const TqUint y, const std::vector<TqFloat>& newValue) = 0;
+		//virtual void setValue(const TqUint x, const TqUint y, const std::vector<TqFloat>& newValue) = 0;
 
 		/** \brief Get array width
 		 *
@@ -186,8 +187,6 @@ class CqTileArray : public CqMemoryMonitored
  *
  * This class is a container for tiles of texture data for which each pixel
  * holds the same number of samples as every other pixel.
- *
- * Currently it's minimally tied to the TIFF format
  */
 template<typename T>
 class CqTextureTile : public CqIntrusivePtrCounted
@@ -197,9 +196,7 @@ class CqTextureTile : public CqIntrusivePtrCounted
 		 *
 		 * \todo Investigate the use of an allocator or such for the TIFF data.
 		 *
-		 * \param data - raw tile data, CqTextureTile takes responsibility for
-		 *   freeing this memory; it's assumed to have been allocated with
-		 *   _TIFFmalloc.
+		 * \param data - raw tile data.
 		 * \param width - tile width
 		 * \param height - tile height
 		 * \param topLeftX - top left pixel X-position in the larger array
@@ -317,7 +314,7 @@ class CqTextureTileArray : public CqTileArray<T>
 
 		// Inherited
 		virtual CqSampleVector<T> value(const TqUint x, const TqUint y) const;
-		virtual void setValue(const TqUint x, const TqUint y, const std::vector<TqFloat>& newValue);
+		//virtual void setValue(const TqUint x, const TqUint y, const std::vector<TqFloat>& newValue);
 
 		/** \brief Access to the underlying tiles
 		 *
@@ -382,7 +379,7 @@ inline CqIntrusivePtrCounted::CqIntrusivePtrCounted()
 { }
 
 // pure virtual destructors need an implementation :-/
-CqIntrusivePtrCounted::~CqIntrusivePtrCounted()
+inline CqIntrusivePtrCounted::~CqIntrusivePtrCounted()
 { }
 
 /** \todo: Threading: the following two functions are not thread-safe.  Using
@@ -516,7 +513,7 @@ CqTextureTile<T>::CqTextureTile<T>(boost::shared_array<T> data, TqUint width, Tq
 { }
 
 //------------------------------------------------------------------------------
-template<typename T>
+/*template<typename T>
 void CqTextureTile<T>::setValue(const TqUint x, const TqUint y, const std::vector<TqFloat>& newValue)
 {
 	T* samplePtr = samplePtr(x,y);
@@ -534,15 +531,12 @@ void CqTextureTile<T>::setValue(const TqUint x, const TqUint y, const std::vecto
 		for(TqUint i = 0; i < m_samplesPerPixel; i++)
 			samplePtr[i] = static_cast<T>(newValue[i]);
 	}
-}
+}*/
 
 //------------------------------------------------------------------------------
 template<typename T>
 CqTextureTile<T>::~CqTextureTile<T>()
-{
-	// We assume that m_data was allocated via _TIFFmalloc().
-	_TIFFfree(reinterpret_cast<tdata_t>(m_data));
-}
+{ }
 
 
 //------------------------------------------------------------------------------
@@ -593,11 +587,11 @@ CqSampleVector<T> CqTextureTileArray<T>::value(const TqUint x, const TqUint y) c
 	return tileForIndex(x, y)->value();
 }
 
-template<typename T>
+/*template<typename T>
 void CqTextureTileArray<T>::setValue(const TqUint x, const TqUint y, const std::vector<TqFloat>& newValue)
 {
 	/// \todo Implementation
-}
+}*/
 
 template<typename T>
 boost::intrusive_ptr<CqTextureTile<T> >& CqTextureTileArray<T>::tileForIndex(const TqUint x, const TqUint y) const

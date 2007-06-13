@@ -57,13 +57,21 @@ class XqException
 		inline const std::string& strReason() const;
 
 	private:
-		std::string m_reason;	///< The message associated with this exception.
+		const std::string m_reason; ///< Message associated with this exception.
 };
 
 
 //------------------------------------------------------------------------------
 /** \brief Class for reporting input or output errors (eg, errors encountered
  * during file IO
+ */
+class XqIoError : public XqException
+{
+	public:
+		inline XqIoError(const char* reason = 0);
+};
+
+/** \brief Class for reporting memory allocation errors.
  */
 class XqMemoryError : public XqException
 {
@@ -91,11 +99,14 @@ inline const std::string& XqException::strReason() const
 
 
 //------------------------------------------------------------------------------
-// Inline functions for XqMemoryError
+// Inline constructors for derived exceptions.
 inline XqMemoryError::XqMemoryError(const char* reason)
 	: XqException(reason)
 { }
 
+inline XqIoError::XqIoError(const char* reason)
+	: XqException(reason)
+{ }
 
 //-----------------------------------------------------------------------
 

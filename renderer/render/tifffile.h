@@ -30,10 +30,13 @@
 #include <string>
 
 #include <boost/shared_array.hpp>
+#include <boost/intrusive_ptr.hpp>
 #include <tiffio.h>
 
 #include "aqsis.h"
 #include "exception.h"
+#include "logging.h"
+#include "tilearray.h"
 
 namespace Aqsis
 {
@@ -98,7 +101,7 @@ class CqTiffInputFile
 		 * \return a tile containing the desired data.
 		 */
 		template<typename T>
-		boost::intrusive_ptr<CqTextureTile<T> > readTile(const TqUint x, const TqUint y)
+		boost::intrusive_ptr<CqTextureTile<T> > readTile(const TqUint x, const TqUint y);
 
 		/** \brief Check that this tiff file represents a mipmap.
 		 *
@@ -224,7 +227,7 @@ class CqTiffInputFile
 		 * \param dataSize - length of array in bytes.
 		 */
 		template<typename T>
-		static void handleDataReadError(boost::shared_array<T> data, const tsize_t dataSize) const;
+		void handleDataReadError(boost::shared_array<T> data, const tsize_t dataSize) const;
 		/** \brief Allocate memory with _TIFFmalloc and encapsulate the memory
 		 * in a boost::shared_array.
 		 *
@@ -234,7 +237,7 @@ class CqTiffInputFile
 		 * \return 'size' bytes of memory allocated with _TIFFmalloc
 		 */
 		template<typename T>
-		static boost::shared_array<T> tiffMalloc(const tsize_t size) const;
+		boost::shared_array<T> tiffMalloc(const tsize_t size) const;
 
 		//----------------------------------------
 		// Member data
@@ -266,12 +269,12 @@ class XqTiffError : public XqException
 // CqTiffInputFile
 //------------------------------------------------------------------------------
 // inlines
-inline TqInt CqTiffInputFile::tileWidth() const
+inline TqUint CqTiffInputFile::tileWidth() const
 {
 	return m_currDir.tileWidth;
 }
 
-inline TqInt CqTiffInputFile::tileHeight() const
+inline TqUint CqTiffInputFile::tileHeight() const
 {
 	return m_currDir.tileHeight;
 }
@@ -311,7 +314,7 @@ boost::intrusive_ptr<CqTextureTile<T> > CqTiffInputFile::readTile(const TqUint x
 	{
 		// Tiff is stored as tiles
 		dataSize = TIFFTileSize(m_tiffPtr.get());
-		tileData = tiffMalloc(dataSize);
+		tileData = tiffMalloc<T>(dataSize);
 		if(TIFFReadTile(m_tiffPtr.get(), tileData, x*m_currDir.tileWidth,
 					y*m_currDir.tileHeight, 0, 0) == -1)
 			handleDataReadError(tileData, dataSize);
@@ -320,16 +323,15 @@ boost::intrusive_ptr<CqTextureTile<T> > CqTiffInputFile::readTile(const TqUint x
 	{
 		// Tiff is stored in strips - treat each strip as a wide tile.
 		dataSize = TIFFStripSize(m_tiffPtr.get());
-		tileData = tiffMalloc(dataSize);
+		tileData = tiffMalloc<T>(dataSize);
 		if(TIFFReadEncodedStrip(m_tiffPtr.get(), TIFFComputeStrip(m_tiffPtr.get(),
 						y*m_currDir.tileHeight, 0), tileData, -1) == -1)
 			handleDataReadError(tileData, dataSize);
 	}
 
-	return boost::intrusive_ptr<CqTextureTile<T> >  tile(
-			new CqTextureTile<T>(
-				reinterpret_cast<T*>(tileData), tileWidth,
-				x*tileWidth, y*tileHeight, m_samplesPerPixel) );
+	return boost::intrusive_ptr<CqTextureTile<T> > ( new CqTextureTile<T>(
+				reinterpret_cast<T*>(tileData), tileWidth, tileHeight,
+				x*tileWidth, y*tileHeight, m_currDir.samplesPerPixel) );
 }
 
 
@@ -362,7 +364,7 @@ T CqTiffInputFile::tiffTagValue(const uint32 tag) const
 	if(TIFFGetField(m_tiffPtr.get(), tag, &temp))
 		return temp;
 	else
-		throw XqTiffError(boost::str(boost::format("Could not get tag with value %d") % tag));
+		throw XqTiffError(boost::str(boost::format("Could not get tag with value %d") % tag).c_str());
 }
 
 //------------------------------------------------------------------------------
