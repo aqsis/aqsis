@@ -41,11 +41,11 @@ void CqStreamGzip::error()
 
 	if ( *e == Z_ERRNO )
 	{
-		throw CqError ( RIE_SYSTEM, RIE_ERROR, strerror( errno ), TqFalse );
+		throw CqError ( RIE_SYSTEM, RIE_ERROR, strerror( errno ), false );
 	}
 	else
 	{
-		throw CqError( RIE_SYSTEM, RIE_ERROR, cp, TqFalse );
+		throw CqError( RIE_SYSTEM, RIE_ERROR, cp, false );
 	}
 }
 
@@ -82,7 +82,7 @@ void CqStreamGzip::openFile( const char *name )
 	gzf = gzopen( name, "wb" );
 	if ( gzf == NULL )
 	{
-		throw CqError( RIE_NOFILE, RIE_ERROR, "Unable to open file ", name, "", TqFalse );
+		throw CqError( RIE_NOFILE, RIE_ERROR, "Unable to open file ", name, "", false );
 	}
 	gzsetparams( gzf, Z_DEFAULT_COMPRESSION, Z_DEFAULT_STRATEGY );
 }
@@ -94,7 +94,7 @@ void CqStreamGzip::openFile( int fdesc )
 	{
 		char c[ 100 ];
 		sprintf( c, "%u", fdesc );
-		throw CqError( RIE_NOFILE, RIE_ERROR, "Unable to open file with descriptor=", c, "", TqFalse );
+		throw CqError( RIE_NOFILE, RIE_ERROR, "Unable to open file with descriptor=", c, "", false );
 	}
 }
 
@@ -119,7 +119,7 @@ void CqStreamGzip::flushFile()
 
 void CqStreamFDesc::error()
 {
-	throw CqError ( RIE_SYSTEM, RIE_ERROR, strerror( errno ), TqFalse );
+	throw CqError ( RIE_SYSTEM, RIE_ERROR, strerror( errno ), false );
 }
 
 CqStream & CqStreamFDesc::operator<< ( int i )
@@ -155,7 +155,7 @@ void CqStreamFDesc::openFile( const char *name )
 	fstr = fopen( name, "wb" );
 	if ( fstr == NULL )
 	{
-		throw CqError( RIE_NOFILE, RIE_ERROR, "Unable to open file ", name, "", TqFalse );
+		throw CqError( RIE_NOFILE, RIE_ERROR, "Unable to open file ", name, "", false );
 	}
 }
 
@@ -166,7 +166,7 @@ void CqStreamFDesc::openFile ( int fdesc )
 	{
 		char c[ 100 ];
 		sprintf( c, "%u", fdesc );
-		throw CqError( RIE_NOFILE, RIE_ERROR, "Unable to open file with descriptor=", c, "", TqFalse );
+		throw CqError( RIE_NOFILE, RIE_ERROR, "Unable to open file with descriptor=", c, "", false );
 	}
 }
 

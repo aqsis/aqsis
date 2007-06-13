@@ -130,7 +130,7 @@ class CqPoints : public CqSurface
 		}
 		// Overrides from CqSurface
 		virtual	CqMicroPolyGridBase* Dice();
-		virtual TqBool	Diceable();
+		virtual bool	Diceable();
 
 		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime = 0 );
 
@@ -142,9 +142,9 @@ class CqPoints : public CqSurface
 		/** Determine whether the passed surface is valid to be used as a
 		 *  frame in motion blur for this surface.
 		 */
-		virtual TqBool	IsMotionBlurMatch( CqSurface* pSurf )
+		virtual bool	IsMotionBlurMatch( CqSurface* pSurf )
 		{
-			return( TqFalse );
+			return( false );
 		}
 
 		virtual	CqBound	Bound() const;
@@ -382,7 +382,7 @@ class CqMicroPolygonPoints : public CqMicroPolygon
 			b.vecMax() = Pmax;
 			return( b );
 		}
-		virtual	TqBool	Sample( const SqSampleData& sample, TqFloat& D, TqFloat time, TqBool UsingDof = TqFalse );
+		virtual	bool	Sample( const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof = false );
 		virtual void	CacheHitTestValues(CqHitTestCache* cache, CqVector3D* points) {}
 		virtual void	CacheHitTestValues(CqHitTestCache* cache) {}
 		virtual void	CacheHitTestValuesDof(CqHitTestCache* cache, const CqVector2D& DofOffset, CqVector2D* coc) {}
@@ -430,14 +430,14 @@ class CqMovingMicroPolygonKeyPoints
 		}
 
 	public:
-		TqBool	fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const
+		bool	fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const
 		{
 			if( (CqVector2D( m_Point0.x(), m_Point0.y() ) - vecP).Magnitude() < m_radius )
 			{
 				Depth = m_Point0.z();
-				return( TqTrue );
+				return( true );
 			}
-			return( TqFalse );
+			return( false );
 		}
 		virtual void	CacheHitTestValues(CqHitTestCache* cache, CqVector3D* points) {}
 		virtual void	CacheHitTestValues(CqHitTestCache* cache) {}
@@ -476,7 +476,7 @@ class CqMovingMicroPolygonKeyPoints
 class CqMicroPolygonMotionPoints : public CqMicroPolygon
 {
 	public:
-		CqMicroPolygonMotionPoints() : CqMicroPolygon(), m_BoundReady( TqFalse )
+		CqMicroPolygonMotionPoints() : CqMicroPolygon(), m_BoundReady( false )
 		{ }
 		virtual	~CqMicroPolygonMotionPoints()
 		{
@@ -501,13 +501,13 @@ class CqMicroPolygonMotionPoints : public CqMicroPolygon
 
 	public:
 		void	AppendKey( const CqVector3D& vA, TqFloat radius, TqFloat time );
-		void	DeleteVariables( TqBool all )
+		void	DeleteVariables( bool all )
 		{}
 
 		// Overrides from CqMicroPolygon
-		virtual TqBool	fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const;
+		virtual bool	fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const;
 		virtual void CalculateTotalBound();
-		virtual	CqBound&		GetTotalBound( /*TqBool fForce = TqFalse */);
+		virtual	CqBound&		GetTotalBound( /*bool fForce = false */);
 		virtual const CqBound&	GetTotalBound() const
 		{
 			return ( m_Bound );
@@ -528,15 +528,15 @@ class CqMicroPolygonMotionPoints : public CqMicroPolygon
 		}
 		virtual void	BuildBoundList();
 
-		virtual TqBool IsMoving()
+		virtual bool IsMoving()
 		{
-			return TqTrue;
+			return true;
 		}
-		virtual	TqBool	Sample( const SqSampleData& sample, TqFloat& D, TqFloat time, TqBool UsingDof = TqFalse );
+		virtual	bool	Sample( const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof = false );
 	private:
 		CqBound	m_Bound;					///< Stored bound.
 		CqBoundList	m_BoundList;			///< List of bounds to get a tighter fit.
-		TqBool	m_BoundReady;				///< Flag indicating the boundary has been initialised.
+		bool	m_BoundReady;				///< Flag indicating the boundary has been initialised.
 		std::vector<TqFloat> m_Times;
 		std::vector<CqMovingMicroPolygonKeyPoints*>	m_Keys;
 
@@ -597,7 +597,7 @@ class CqDeformingPointsSurface : public CqDeformingSurface
 			for ( i = 0; i < cSplits; i++ )
 			{
 				boost::shared_ptr<CqDeformingPointsSurface> pNewMotion( new CqDeformingPointsSurface( boost::shared_ptr<CqSurface>() ) );
-				pNewMotion->m_fDiceable = TqTrue;
+				pNewMotion->m_fDiceable = true;
 				pNewMotion->m_EyeSplitCount = m_EyeSplitCount;
 				TqInt j;
 				for ( j = 0; j < cTimes(); j++ )

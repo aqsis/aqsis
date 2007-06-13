@@ -812,6 +812,25 @@ void CqShaderVM::SO_solar2()
 	VOIDFUNC2( m_pEnv->SO_solar );
 }
 
+void CqShaderVM::SO_init_gather()
+{
+	VARFUNC;
+	VOIDFUNC1( m_pEnv->SO_init_gather );
+}
+
+void CqShaderVM::SO_advance_gather()
+{
+	RESULT(type_float, class_varying);
+	pResult->SetFloat( m_pEnv->SO_advance_gather() );
+	Push( pResult );
+}
+
+void CqShaderVM::SO_gather()
+{
+	VARFUNC;
+	VOIDFUNC5PLUS( m_pEnv->SO_gather );
+}
+
 void CqShaderVM::SO_printf()
 {
 	AUTOFUNC;
@@ -1329,6 +1348,23 @@ void CqShaderVM::SO_occlusion()
 	VARFUNC;
 	TEXTURE3( type_float, m_pEnv->SO_occlusion );
 }
+
+void CqShaderVM::SO_occlusion_rt()
+{
+	VARFUNC;
+	FUNC3( type_float, m_pEnv->SO_occlusion_rt );
+}
+
+void CqShaderVM::SO_rayinfo()
+{
+	AUTOFUNC;
+	IqShaderData* pV = GetVar( ReadNext().m_iVariable );
+	POPV( DataInfo );
+	RESULT(type_float, __fVarying?class_varying:class_uniform);
+	m_pEnv->SO_rayinfo( DataInfo, pV, pResult );
+	Push( pResult );
+}
+
 
 END_NAMESPACE( Aqsis )
 //---------------------------------------------------------------------

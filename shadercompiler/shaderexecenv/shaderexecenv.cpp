@@ -187,12 +187,12 @@ void CqShaderExecEnv::Initialise( const TqInt uGridRes, const TqInt vGridRes, Tq
 
 	m_li = 0;
 	m_Illuminate = 0;
-	m_IlluminanceCacheValid = TqFalse;
+	m_IlluminanceCacheValid = false;
 
 	// Initialise the state bitvectors
 	m_CurrentState.SetSize( m_shadingPointCount );
 	m_RunningState.SetSize( m_shadingPointCount );
-	m_RunningState.SetAll( TqTrue );
+	m_RunningState.SetAll( true );
 
 
 	if ( pShader )

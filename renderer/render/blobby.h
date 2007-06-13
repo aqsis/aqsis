@@ -50,9 +50,9 @@ class CqBlobby : public CqSurface
 		/** Determine whether the passed surface is valid to be used as a
 		 *  frame in motion blur for this surface (CqSurface implementation).
 		 */
-		virtual TqBool IsMotionBlurMatch( CqSurface* pSurf )
+		virtual bool IsMotionBlurMatch( CqSurface* pSurf )
 		{
-			return( TqFalse );
+			return( false );
 		}
 
 		/** \todo Find out the correct values for the 4 following functions */

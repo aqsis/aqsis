@@ -20,6 +20,7 @@
 #include <map>
 #include <list>
 #include <functional>
+#include <sstream>
 
 typedef std::list<ArgParse::apstring> StringList;
 
@@ -60,7 +61,19 @@ class OptionHandler
 		// string on success, or an error message on failure.  If
 		// takesarg() is false, then arg is either "no" or the empty string.
 		virtual ArgParse::apstring handlearg(ArgParse::apstring arg) = 0;
+		// Replace first substring named defaultReplacementStr with the value
+		// pointed to by defaultVal.  Used for automatic interpolation of
+		// default values into the usage strings.
+		template<typename T>
+		static ArgParse::apstring replaceDefault(ArgParse::apstring usage,
+												 T* defaultVal);
+		template<typename T>
+		static ArgParse::apstring replaceDefault(ArgParse::apstring usage,
+												 std::vector<T>* defaultVal);
+	private:
+		static const ArgParse::apstring defaultReplacementStr;
 };
+const ArgParse::apstring OptionHandler::defaultReplacementStr = "%default";
 
 // If first is nonnegative, then this is a usage header, and second is
 // the text of the header, and first is the indent.  If first is
@@ -536,6 +549,42 @@ ArgParse::apstring OptionHandler::handleargsplit(ArgParse::apstring arg,
 	return "";
 }
 
+template<typename T>
+ArgParse::apstring OptionHandler::replaceDefault(ArgParse::apstring usage,
+												 T* defaultVal)
+{
+	ArgParse::apstring::size_type pos = usage.find(defaultReplacementStr);
+	if(pos != ArgParse::apstring::npos)
+	{
+		std::ostringstream formatStream;
+		formatStream << *defaultVal;
+		usage.replace(pos, defaultReplacementStr.size(), formatStream.str());
+	}
+	return usage;
+}
+
+// specialised version to deal with pointers to vectors.
+template<typename T>
+ArgParse::apstring OptionHandler::replaceDefault(
+		ArgParse::apstring usage, std::vector<T>* defaultVal)
+{
+	ArgParse::apstring::size_type pos = usage.find(defaultReplacementStr);
+	if(pos != ArgParse::apstring::npos)
+	{
+		std::ostringstream formatStream;
+		for(typename std::vector<T>::iterator i = defaultVal->begin(),
+				e = defaultVal->end(); i != e; i++)
+		{
+			formatStream << *i;
+			if(i != e-1)
+				formatStream << ",";
+		}
+		usage.replace(pos, defaultReplacementStr.size(), formatStream.str());
+	}
+	return usage;
+}
+
+
 // Okay, this is the point in the file where it starts getting
 // pretty repetitive.  I'm sure there's a better way I could've
 // done this...
@@ -560,7 +609,8 @@ class FlagHandler : public OptionHandler
 FlagHandler::FlagHandler(ArgParse::apstring usage_in,
                          ArgParse::apflag* value_in,
                          bool allow_negation_in) :
-		OptionHandler(usage_in), allow_negation(allow_negation_in),
+		OptionHandler(replaceDefault(usage_in, value_in)),
+		allow_negation(allow_negation_in),
 		already_used(false), value(value_in)
 {}
 
@@ -619,7 +669,8 @@ class IntHandler : public OptionHandler
 
 IntHandler::IntHandler(ArgParse::apstring usage_in,
                        ArgParse::apint* value_in) :
-		OptionHandler(usage_in), already_used(false), value(value_in)
+		OptionHandler(replaceDefault(usage_in, value_in)),
+		already_used(false), value(value_in)
 {}
 
 void IntHandler::reset()
@@ -657,7 +708,8 @@ class FloatHandler : public OptionHandler
 
 FloatHandler::FloatHandler(ArgParse::apstring usage_in,
                            ArgParse::apfloat* value_in) :
-		OptionHandler(usage_in), already_used(false), value(value_in)
+		OptionHandler(replaceDefault(usage_in,value_in)),
+		already_used(false), value(value_in)
 {}
 
 void FloatHandler::reset()
@@ -695,7 +747,8 @@ class StringHandler : public OptionHandler
 
 StringHandler::StringHandler(ArgParse::apstring usage_in,
                              ArgParse::apstring* value_in) :
-		OptionHandler(usage_in), already_used(false), value(value_in)
+		OptionHandler(replaceDefault(usage_in, value_in)),
+		already_used(false), value(value_in)
 {}
 
 void StringHandler::reset()
@@ -733,7 +786,8 @@ class IntsHandler : public OptionHandler
 
 IntsHandler::IntsHandler(ArgParse::apstring usage_in,
                          ArgParse::apintvec* value_in, int separator_in, int count_in) :
-		OptionHandler(usage_in, separator_in, count_in), value(value_in)
+		OptionHandler(replaceDefault(usage_in, value_in),
+		separator_in, count_in), value(value_in)
 {}
 
 ArgParse::apstring IntsHandler::handlearg(ArgParse::apstring arg)
@@ -769,7 +823,8 @@ class FloatsHandler : public OptionHandler
 FloatsHandler::FloatsHandler(ArgParse::apstring usage_in,
                              ArgParse::apfloatvec* value_in,
                              int separator_in, int count_in) :
-		OptionHandler(usage_in, separator_in, count_in), value(value_in)
+		OptionHandler(replaceDefault(usage_in, value_in),
+		separator_in, count_in), value(value_in)
 {}
 
 ArgParse::apstring FloatsHandler::handlearg(ArgParse::apstring arg)
@@ -806,7 +861,8 @@ class StringsHandler : public OptionHandler
 StringsHandler::StringsHandler(ArgParse::apstring usage_in,
                                ArgParse::apstringvec* value_in,
                                int separator_in, int count_in) :
-		OptionHandler(usage_in, separator_in, count_in), value(value_in)
+		OptionHandler(replaceDefault(usage_in, value_in),
+		separator_in, count_in), value(value_in)
 {}
 
 ArgParse::apstring StringsHandler::handlearg(ArgParse::apstring arg)

@@ -43,12 +43,6 @@ typedef	unsigned short	TqUshort;
 typedef	float	TqFloat;
 typedef	double	TqDouble;
 
-typedef	bool	TqBool;
-/// Defines the 'true' value used in TqBool operations.
-#define	TqTrue			true
-/// Defines the 'true' value used in TqBool operations.
-#define	TqFalse			false
-
 /// Determine the largest integer value smaller than the given float.
 #define FLOOR(x) ((int)(x) - ((x) < 0 && (x) != (int)(x)))
 /// Determine the smallest integer value larger than the given float.
@@ -61,6 +55,7 @@ typedef	bool	TqBool;
 #define LERP(t,x0,x1)  ((1.0-t)*(x0) + (t*x1))
 
 /// Clamp the given value a, to be with the extents of the given range.
+/// \deprecated use the template aqsis::clamp in future.
 #define	CLAMP(a,min,max)	((a)<(min)?(min):((a)>(max)?(max):(a)))
 /// Determine the minimum of the two values given.
 #define	MIN(a,b)			(((a)<(b))?(a):(b))
@@ -98,7 +93,7 @@ inline TqUint LOWEST_BIT( TqUint x )
 }
 
 /// Determine if the given value is a power of two.
-inline TqBool IS_POW2( TqUint x )
+inline bool IS_POW2( TqUint x )
 {
 	return ( x != 0 && x == LOWEST_BIT( x ) );
 }
@@ -116,6 +111,20 @@ inline TqUint CEIL_POW2( TqUint x )
 {
 	return ( CEIL_POW2_MINUS1( x - 1 ) + 1 );
 }
+
+
+namespace Aqsis {
+// Eventually most of the macros above should probably be deprecated in favour
+// of templated inline functions, to go below.
+
+/// \brief clamp a value to within some min and max extents.
+template<typename T> inline T clamp(T a, T min, T max)
+{
+	return a < min ? min : (a > max ? max : a);
+}
+
+} // namespace Aqsis
+
 
 
 #endif	// AQSIS_TYPES_INCLUDED

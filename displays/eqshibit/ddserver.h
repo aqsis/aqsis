@@ -60,14 +60,14 @@ public:
     CqDDServer( TqInt port );
     ~CqDDServer();
 
-    TqBool	Prepare( TqInt port );
-    TqBool	Open();
+    bool	Prepare( TqInt port );
+    bool	Open();
     /** Close the socket this server is associated with.
      */
     void	Close();
-    TqBool	Bind( TqInt port );
-    TqBool	Listen();
-    TqBool	Accept( boost::shared_ptr<CqDisplayServerImage> dd );
+    bool	Bind( TqInt port );
+    bool	Listen();
+    bool	Accept( boost::shared_ptr<CqDisplayServerImage> dd );
     /** Get a reference to the socket ID.
      */
     SOCKET&	Socket()

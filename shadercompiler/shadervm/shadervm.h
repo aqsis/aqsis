@@ -118,8 +118,8 @@ union UsProgramElement
 						pResult->SetSize(m_shadingPointCount)
 
 #define CONSTFUNC		// Uniform function
-#define	VARFUNC			TqBool __fVarying=TqTrue;
-#define	AUTOFUNC		TqBool __fVarying=TqFalse;
+#define	VARFUNC			bool __fVarying=true;
+#define	AUTOFUNC		bool __fVarying=false;
 
 #define	FUNC(t,Func)	RESULT(t,__fVarying?class_varying:class_uniform); \
 						Func(pResult,this); \
@@ -347,7 +347,38 @@ union UsProgramElement
                   				delete[](stackitems); \
 						RELEASE(count); \
 						RELEASE(a);
-
+#define VOIDFUNC5PLUS(Func)	POPV(count);	/* Count of additional values.*/ \
+						POPV(a); \
+						POPV(b); \
+						POPV(c); \
+						POPV(d); \
+						POPV(e); \
+						/* Read all the additional values. */ \
+						TqFloat fc; \
+						count->GetFloat( fc ); \
+						TqInt cParams=static_cast<TqInt>( fc ); \
+						IqShaderData** aParams=new IqShaderData*[cParams]; \
+						SqStackEntry *stackitems = new SqStackEntry[cParams];\
+						TqInt iP=0; \
+						while(iP!=cParams)	{\
+							stackitems[iP]=POP; \
+							aParams[iP]=stackitems[iP].m_Data;\
+							iP++;\
+						}\
+						Func(a,b,c,d,e, this, cParams, aParams); \
+						delete[](aParams); \
+                  				iP=0; \
+						while(iP!=cParams)	{\
+							Release( stackitems[iP]);\
+							iP++;\
+						}\
+                  				delete[](stackitems); \
+						RELEASE(count); \
+						RELEASE(a); \
+						RELEASE(b); \
+						RELEASE(c); \
+						RELEASE(d); \
+						RELEASE(e);
 #define	SPLINE(t,func)	POPV(count);	\
 						POPV(value); \
 						POPV(vala);	\
@@ -637,7 +668,7 @@ union UsProgramElement
 class SHADERVM_SHARE CqShaderVM : public CqShaderStack, public IqShader, public CqDSORepository
 {
 	public:
-		CqShaderVM(IqRenderer* pRenderContext) : CqShaderStack(), m_Uses( 0xFFFFFFFF ), m_LocalIndex( 0 ), m_PC( 0 ), m_fAmbient( TqTrue ), m_pRenderContext(pRenderContext)
+		CqShaderVM(IqRenderer* pRenderContext) : CqShaderStack(), m_Uses( 0xFFFFFFFF ), m_LocalIndex( 0 ), m_PC( 0 ), m_fAmbient( true ), m_pRenderContext(pRenderContext)
 		{
 			// Find out if this shader is being declared outside the world construct. If so
 			// if is effectively being defined in 'camera' space, which will affect the
@@ -646,9 +677,9 @@ class SHADERVM_SHARE CqShaderVM : public CqShaderStack, public IqShader, public 
 			if (NULL != m_pRenderContext)
 				m_outsideWorld = !m_pRenderContext->IsWorldBegin();
 			else
-				m_outsideWorld = TqFalse;
+				m_outsideWorld = false;
 		}
-		CqShaderVM( const CqShaderVM& From ) : m_LocalIndex( 0 ), m_PC( 0 ), m_fAmbient( TqTrue )
+		CqShaderVM( const CqShaderVM& From ) : m_LocalIndex( 0 ), m_PC( 0 ), m_fAmbient( true )
 		{
 			*this = From;
 			// Find out if this shader is being declared outside the world construct. If so
@@ -658,7 +689,7 @@ class SHADERVM_SHARE CqShaderVM : public CqShaderStack, public IqShader, public 
 			if (NULL != m_pRenderContext)
 				m_outsideWorld = !m_pRenderContext->IsWorldBegin();
 			else
-				m_outsideWorld = TqFalse;
+				m_outsideWorld = false;
 		}
 		virtual ~CqShaderVM()
 		{
@@ -666,8 +697,8 @@ class SHADERVM_SHARE CqShaderVM : public CqShaderStack, public IqShader, public 
 			for ( std::vector<IqShaderData*>::iterator i = m_LocalVars.begin(); i != m_LocalVars.end(); i++ )
 				if ( ( *i ) != NULL )
 					delete( *i );
-			for ( std::list<CqString*>::iterator i = m_ProgramStrings.begin(); i != m_ProgramStrings.end(); i++ )
-				delete *i;
+			for ( std::list<CqString*>::iterator j = m_ProgramStrings.begin(); j != m_ProgramStrings.end(); j++ )
+				delete *j;
 		}
 
 
@@ -701,7 +732,7 @@ class SHADERVM_SHARE CqShaderVM : public CqShaderStack, public IqShader, public 
 		virtual void	SetArgument( const CqString& strName, EqVariableType type, const CqString& strSpace, void* pval);
 		virtual	void	SetArgument( CqParameter* pParam, IqSurface* pSurface );
 		virtual	IqShaderData*	FindArgument( const CqString& name );
-		virtual	TqBool	GetVariableValue( const char* name, IqShaderData* res );
+		virtual	bool	GetVariableValue( const char* name, IqShaderData* res );
 		virtual	void	Evaluate( const boost::shared_ptr<IqShaderExecEnv>& pEnv )
 		{
 			Execute( pEnv );
@@ -711,7 +742,7 @@ class SHADERVM_SHARE CqShaderVM : public CqShaderStack, public IqShader, public 
 			ExecuteInit();
 		}
 		virtual void	Initialise( const TqInt uGridRes, const TqInt vGridRes, const TqInt shadingPointCount, const boost::shared_ptr<IqShaderExecEnv>& pEnv );
-		virtual	TqBool	fAmbient() const
+		virtual	bool	fAmbient() const
 		{
 			return ( m_fAmbient );
 		}
@@ -720,7 +751,7 @@ class SHADERVM_SHARE CqShaderVM : public CqShaderStack, public IqShader, public 
 			CqShaderVM * pShader = new CqShaderVM( *this );
 			return ( pShader );
 		}
-		virtual TqBool	Uses( TqInt Var ) const
+		virtual bool	Uses( TqInt Var ) const
 		{
 			assert( Var >= 0 && Var < EnvVars_Last );
 			return ( Uses( static_cast<EqEnvVars>( Var ) ) );
@@ -729,14 +760,14 @@ class SHADERVM_SHARE CqShaderVM : public CqShaderStack, public IqShader, public 
 		{
 			return ( m_Uses );
 		}
-		virtual IqShaderData* CreateVariable( EqVariableType Type, EqVariableClass Class, const CqString& name, TqBool fArgument = TqFalse, TqBool fOutput = TqFalse  );
-		virtual IqShaderData* CreateVariableArray( EqVariableType Type, EqVariableClass Class, const CqString& name, TqInt Count, TqBool fParameter = TqFalse, TqBool fOutput = TqFalse  );
+		virtual IqShaderData* CreateVariable( EqVariableType Type, EqVariableClass Class, const CqString& name, bool fArgument = false, bool fOutput = false  );
+		virtual IqShaderData* CreateVariableArray( EqVariableType Type, EqVariableClass Class, const CqString& name, TqInt Count, bool fParameter = false, bool fOutput = false  );
 		virtual	IqShaderData* CreateTemporaryStorage( EqVariableType type, EqVariableClass _class );
 		virtual void DeleteTemporaryStorage( IqShaderData* pData );
 		virtual void DefaultSurface();
-		virtual	TqBool IsLayered()
+		virtual	bool IsLayered()
 		{
-			return(TqFalse);
+			return(false);
 		}
 		void AddLayer(const CqString& layername, const boost::shared_ptr<IqShader>& layer)
 		{}
@@ -794,13 +825,13 @@ class SHADERVM_SHARE CqShaderVM : public CqShaderStack, public IqShader, public 
 		UsProgramElement*	m_PC;							///< Current program pointer.
 		TqInt	m_PO;							///< Current program offset.
 		TqInt	m_PE;							///< Offset of the end of the program.
-		TqBool	m_fAmbient;						///< Flag indicating if this is an ambient light source ( if it is indeed a light source ).
-		TqBool	m_outsideWorld;						///< Flag indicating this shader was declared outside the world.
+		bool	m_fAmbient;						///< Flag indicating if this is an ambient light source ( if it is indeed a light source ).
+		bool	m_outsideWorld;						///< Flag indicating this shader was declared outside the world.
 		IqRenderer*	m_pRenderContext;
 
 		/** Determine whether the program execution has finished.
 		 */
-		TqBool	fDone()
+		bool	fDone()
 		{
 			return ( m_PO >= m_PE );
 		}
@@ -1123,6 +1154,9 @@ class SHADERVM_SHARE CqShaderVM : public CqShaderStack, public IqShader, public 
 		void	SO_illuminance2();
 		void	SO_solar();
 		void	SO_solar2();
+		void	SO_init_gather();
+		void	SO_advance_gather();
+		void	SO_gather();
 		void	SO_printf();
 		void	SO_atmosphere();
 		void	SO_displacement();
@@ -1189,6 +1223,8 @@ class SHADERVM_SHARE CqShaderVM : public CqShaderStack, public IqShader, public 
 		void	SO_bake_3n();
 		void	SO_external();
 		void	SO_occlusion();
+		void	SO_occlusion_rt();
+		void	SO_rayinfo();
 
 		static	SqOpCodeTrans	m_TransTable[];		///< Static opcode translation table.
 		static	TqInt	m_cTransSize;		///< Size of translation table.

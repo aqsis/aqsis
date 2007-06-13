@@ -103,7 +103,7 @@ class ArgParse
 		enum {
 		    SEP_NONE = -1,
 		    SEP_ARGV = -2
-	};
+		};
 
 		ArgParse();
 		~ArgParse();
@@ -120,6 +120,13 @@ class ArgParse
 		// calling parse(), then unrecognized options will go into
 		// the leftovers, without causing an error.
 		void allowUnrecognizedOptions();
+
+		// The following functions add an option to be parsed. Options:
+		// name - option name
+		// usage - usage string.  If usage contains the substring "%default",
+		//         then this substring will be replaced with the default value
+		//         in the corresponding value pointer
+		// value(s) - pointer at where the value(s) of the option should be stored.
 
 		// "--foo" will set *value to true.  If allow_negation is true,
 		// then "--nofoo" will set *value to false.

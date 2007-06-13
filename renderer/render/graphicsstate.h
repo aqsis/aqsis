@@ -229,9 +229,9 @@ class CqModeBlock : public boost::enable_shared_from_this<CqModeBlock>
 		/** Is this a motion block, should be overridden per derived class.
 		 * \return boolean indicating whether this is a motion block.
 		 */
-		virtual	TqBool	fMotionBlock() const
+		virtual	bool	fMotionBlock() const
 		{
-			return ( TqFalse );
+			return ( false );
 		}
 
 		/** Get a pointer to the previuos context.
@@ -267,9 +267,9 @@ class CqModeBlock : public boost::enable_shared_from_this<CqModeBlock>
 				pconParent() ->AddContextLightSource( pLS );
 		}
 
-		virtual	TqBool	isSolid()
+		virtual	bool	isSolid()
 		{
-			return ( ( pconParent() ) ? pconParent() ->isSolid() : TqFalse );
+			return ( ( pconParent() ) ? pconParent() ->isSolid() : false );
 		}
 		/** Get a pointer to the CSG tree node related to this context.
 		 * \return an options reference.
@@ -657,9 +657,9 @@ class CqSolidModeBlock : public CqModeBlock
 		}
 
 
-		virtual	TqBool	isSolid()
+		virtual	bool	isSolid()
 		{
-			return ( TqTrue );
+			return ( true );
 		}
 		virtual	boost::shared_ptr<CqCSGTreeNode>	pCSGNode()
 		{
@@ -739,7 +739,7 @@ class CqObjectModeBlock : public CqModeBlock
 		 */
 		virtual	CqAttributes*	pattrWriteCurrent()
 		{
-			assert( TqFalse );
+			assert( false );
 			return ( 0 );
 		}	// Illegal to change attributes here.
 
@@ -859,9 +859,9 @@ class CqMotionModeBlock : public CqModeBlock
 		/** Indicate that this is a motion block.
 		 * \return boolean indicating whether this is a motion block.
 		 */
-		virtual	TqBool	fMotionBlock() const
+		virtual	bool	fMotionBlock() const
 		{
-			return ( TqTrue );
+			return ( true );
 		}
 		/** Get the CqDeformingSurface, if generating a deformation motion blur sequence.
 		 */

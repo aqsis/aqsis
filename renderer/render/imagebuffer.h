@@ -56,8 +56,8 @@ struct SqMpgSampleInfo
 {
 	CqColor		m_Colour;
 	CqColor		m_Opacity;
-	TqBool		m_Occludes;		// whether the opacity is full.
-	TqBool		m_IsOpaque;		// whether the mpg can use the faster StoreOpaqueSample routine that assumes a few things.
+	bool		m_Occludes;		// whether the opacity is full.
+	bool		m_IsOpaque;		// whether the mpg can use the faster StoreOpaqueSample routine that assumes a few things.
 };
 
 // This struct holds info about a grid that can be cached and used for all its mpgs.
@@ -67,9 +67,9 @@ struct SqGridInfo
 	TqFloat			m_ShutterOpenTime;
 	TqFloat			m_ShutterCloseTime;
 	const TqFloat*	        m_LodBounds;
-	TqBool			m_IsMatte;
-	TqBool			m_IsCullable;
-	TqBool			m_UsesDataMap;
+	bool			m_IsMatte;
+	bool			m_IsCullable;
+	bool			m_UsesDataMap;
 };
 
 // Enumeration of the type of rendering order of the buckets (experimental)
@@ -108,8 +108,8 @@ class CqImageBuffer
 {
 	public:
 		CqImageBuffer() :
-				m_fQuit( TqFalse ),
-				m_fDone( TqTrue ),
+				m_fQuit( false ),
+				m_fDone( true ),
 				m_iXRes( 0 ),
 				m_iYRes( 0 ),
 				m_cXBuckets( 0 ),
@@ -271,7 +271,7 @@ class CqImageBuffer
 		}
 
 		// Move to the next bucket to process.
-    		TqBool NextBucket(EqBucketOrder order);
+    		bool NextBucket(EqBucketOrder order);
 
 		/** Get a pointer to the current bucket
 		 */
@@ -290,18 +290,18 @@ class CqImageBuffer
 		void	SaveImage( const char* strName );
 
 		void	PostSurface( const boost::shared_ptr<CqSurface>& pSurface );
-		TqBool	CullSurface( CqBound& Bound, const boost::shared_ptr<CqSurface>& pSurface );
-		TqBool	OcclusionCullSurface( const boost::shared_ptr<CqSurface>& pSurface );
+		bool	CullSurface( CqBound& Bound, const boost::shared_ptr<CqSurface>& pSurface );
+		bool	OcclusionCullSurface( const boost::shared_ptr<CqSurface>& pSurface );
 		void	AddMPG( CqMicroPolygon* pmpgNew );
-		TqBool	PushMPGForward( CqMicroPolygon* pmpg, TqInt Col, TqInt Row );
-		TqBool	PushMPGDown( CqMicroPolygon*, TqInt Col, TqInt Row );
+		bool	PushMPGForward( CqMicroPolygon* pmpg, TqInt Col, TqInt Row );
+		bool	PushMPGDown( CqMicroPolygon*, TqInt Col, TqInt Row );
 		void	RenderMPGs( long xmin, long xmax, long ymin, long ymax );
 		void	RenderMicroPoly( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax );
-		void	RenderSurfaces( long xmin, long xmax, long ymin, long ymax, TqBool fImager, enum EqFilterDepth filterdepth, CqColor zThreshold );
+		void	RenderSurfaces( long xmin, long xmax, long ymin, long ymax, bool fImager, enum EqFilterDepth filterdepth, CqColor zThreshold );
 		void	RenderImage();
 		void	StoreExtraData( CqMicroPolygon* pMPG, SqImageSample& sample);
 
-		void	RenderMPG_MBOrDof( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax, TqBool IsMoving, TqBool UsingDof );
+		void	RenderMPG_MBOrDof( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax, bool IsMoving, bool UsingDof );
 		void	RenderMPG_Static( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax );
 
 
@@ -309,7 +309,7 @@ class CqImageBuffer
 		/** Get completion status of this rendered image.
 		    * \return bool indicating finished or not.
 		    */
-		TqBool	fDone() const
+		bool	fDone() const
 		{
 			return ( m_fDone );
 		}
@@ -323,12 +323,12 @@ class CqImageBuffer
 		{}
 		virtual	void	ImageComplete()
 		{}
-		virtual	TqBool	IsCurrentBucketEmpty();
+		virtual	bool	IsCurrentBucketEmpty();
 
 
 	private:
-		TqBool	m_fQuit;			///< Set by system if a quit has been requested.
-		TqBool	m_fDone;			///< Set when the render of this image has completed.
+		bool	m_fQuit;			///< Set by system if a quit has been requested.
+		bool	m_fDone;			///< Set when the render of this image has completed.
 
 		TqInt	m_iXRes;			///< Integer horizontal image resolution.
 		TqInt	m_iYRes;			///< Integer vertical image resolution.

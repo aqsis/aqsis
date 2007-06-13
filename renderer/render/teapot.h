@@ -53,7 +53,7 @@ START_NAMESPACE( Aqsis )
 class CqTeapot : public CqSurface
 {
 	public:
-		CqTeapot( TqBool addCrowBase = TqFalse );
+		CqTeapot( bool addCrowBase = false );
 		virtual	~CqTeapot()
 		{}
 
@@ -62,9 +62,9 @@ class CqTeapot : public CqSurface
 		/** Determine whether the passed surface is valid to be used as a
 		 *  frame in motion blur for this surface.
 		 */
-		virtual TqBool	IsMotionBlurMatch( CqSurface* pSurf )
+		virtual bool	IsMotionBlurMatch( CqSurface* pSurf )
 		{
-			return( TqFalse );
+			return( false );
 		}
 
 		virtual	TqUint	cUniform() const
@@ -94,7 +94,7 @@ class CqTeapot : public CqSurface
 		virtual CqSurface* Clone() const;
 
 	private:
-		TqBool	m_CrowBase;			///< Utah teapot was missing a bottom.  F. Crow added one.
+		bool	m_CrowBase;			///< Utah teapot was missing a bottom.  F. Crow added one.
 
 	protected:
 		CqMatrix	m_matTx;		///< Transformation matrix from object to camera.

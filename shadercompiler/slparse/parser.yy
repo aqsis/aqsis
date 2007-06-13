@@ -1,6 +1,6 @@
 /* -------------- declaration section -------------- */
 
-%expect 24
+%expect 26
 
 %{
 #ifdef	WIN32
@@ -37,18 +37,18 @@ namespace Aqsis
 extern CqString ParseStreamName;
 extern std::ostream* ParseErrorStream;
 extern TqInt ParseLineNumber;
-extern TqBool ParseSucceeded;
+extern bool ParseSucceeded;
 extern TqInt	iArrayAccess;
 CqParseNode*	ParseTreePointer;
-std::vector<std::pair<TqBool,CqString> >	ParseNameSpaceStack;
+std::vector<std::pair<bool,CqString> >	ParseNameSpaceStack;
 int blockID = 0;
 std::vector<TqInt>		FunctionReturnCountStack;
 EqShaderType gShaderType;
 
-TqBool	FindVariable(const char* name, SqVarRef& ref);
-TqBool	FindFunction(const char* name, std::vector<SqFuncRef>& Ref);
+bool	FindVariable(const char* name, SqVarRef& ref);
+bool	FindFunction(const char* name, std::vector<SqFuncRef>& Ref);
 CqString strNameSpace();
-void	pushScope(CqString name, TqBool terminal=TqFalse);
+void	pushScope(CqString name, bool terminal=false);
 CqString	popScope();
 void	TypeCheck();
 void	Optimise();
@@ -92,10 +92,10 @@ static void yyerror(const CqString Message);
 %token <m_tok>	TYPE_UNIFORM TYPE_VARYING
 %token <m_tok>	SHADER_TYPE_SURFACE SHADER_TYPE_VOLUME SHADER_TYPE_IMAGER SHADER_TYPE_TRANSFORMATION SHADER_TYPE_DISPLACEMENT SHADER_TYPE_LIGHT SHADER_TYPE_ATMOSPHERE 
 %token <m_tok>	ATTRIBUTE OPTION RENDERERINFO INCIDENT OPPOSITE LIGHTSOURCE
-%token <m_tok>	EXTERN TEXTUREINFO OUTPUT
+%token <m_tok>	EXTERN TEXTUREINFO RAYINFO OUTPUT
 
 %token <m_tok>	IF ELSE WHILE FOR CONTINUE BREAK RETURN
-%token <m_tok>	ILLUMINATE ILLUMINANCE SOLAR
+%token <m_tok>	ILLUMINATE ILLUMINANCE SOLAR GATHER
 
 %token <m_tok>	TEXTUREMAP ENVIRONMENT BUMP SHADOW OCCLUSION
 
@@ -303,7 +303,7 @@ function_declaration
 								$$=new CqParseNodeDeclaration((strNameSpace()+*$2).c_str(),$1.Type);
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
 								// Store the name of the function being defined for use in variable namespacing.
-								pushScope(*$2,TqTrue);
+								pushScope(*$2,true);
 								// Push a new level onto the FunctionReturnCountStack.
 								FunctionReturnCountStack.push_back(0);
 							}
@@ -311,7 +311,7 @@ function_declaration
 								$$=new CqParseNodeDeclaration((strNameSpace()+*$1).c_str(),Type_Void);
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
 								// Store the name of the function being defined for use in variable namespacing.
-								pushScope(*$1,TqTrue);
+								pushScope(*$1,true);
 								// Push a new level onto the FunctionReturnCountStack.
 								FunctionReturnCountStack.push_back(0);
 							}
@@ -324,7 +324,7 @@ function_declaration
 								$$=new CqParseNodeDeclaration(strName.c_str(),$1.Type);
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
 								// Store the name of the function being defined for use in variable namespacing.
-								pushScope(strName,TqTrue);
+								pushScope(strName,true);
 								// Push a new level onto the FunctionReturnCountStack.
 								FunctionReturnCountStack.push_back(0);
 							}
@@ -337,7 +337,7 @@ function_declaration
 								$$=new CqParseNodeDeclaration(strName.c_str(),Type_Void);
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
 								// Store the name of the function being defined for use in variable namespacing.
-								pushScope(strName,TqTrue);
+								pushScope(strName,true);
 								// Push a new level onto the FunctionReturnCountStack.
 								FunctionReturnCountStack.push_back(0);
 							}
@@ -404,7 +404,7 @@ formal_variable_definitions
 									TqInt arrayLength = 0;
 									
 									SqVarRef var;
-									TqBool fv=CqVarDef::FindVariable((strNameSpace()+pDecl->strName()).c_str(), var);
+									bool fv=CqVarDef::FindVariable((strNameSpace()+pDecl->strName()).c_str(), var);
 									if(fv)
 									{
 										CqVarDef* pVar=CqVarDef::GetVariablePtr(var);
@@ -486,7 +486,7 @@ formal_variable_definitions
 									TqInt arrayLength = 0;
 									
 									SqVarRef var;
-									TqBool fv=CqVarDef::FindVariable((strNameSpace()+pDecl->strName()).c_str(), var);
+									bool fv=CqVarDef::FindVariable((strNameSpace()+pDecl->strName()).c_str(), var);
 									if(fv)
 									{
 										CqVarDef* pVar=CqVarDef::GetVariablePtr(var);
@@ -573,7 +573,7 @@ variable_definitions
 									TqInt arrayLength = 0;
 									
 									SqVarRef var;
-									TqBool fv=CqVarDef::FindVariable((strNameSpace()+pDecl->strName()).c_str(), var);
+									bool fv=CqVarDef::FindVariable((strNameSpace()+pDecl->strName()).c_str(), var);
 									if(fv)
 									{
 										CqVarDef* pVar=CqVarDef::GetVariablePtr(var);
@@ -656,14 +656,14 @@ variable_definitions
 								while(pDecl)
 								{
 									SqVarRef varLocal, varExtern;
-									TqBool fvl=CqVarDef::FindVariable((strNameSpace()+pDecl->strName()).c_str(), varLocal);
+									bool fvl=CqVarDef::FindVariable((strNameSpace()+pDecl->strName()).c_str(), varLocal);
 
 									// As this is an extern, we need to repeatedly check in the previous namespaces
 									// until we find the variable they are referring to.
-									TqBool fve=TqFalse;
+									bool fve=false;
 									if(!ParseNameSpaceStack.empty())
 									{
-										std::vector<std::pair<TqBool,CqString> >::reverse_iterator i=ParseNameSpaceStack.rbegin()+1;
+										std::vector<std::pair<bool,CqString> >::reverse_iterator i=ParseNameSpaceStack.rbegin()+1;
 										while(!fve && i!=ParseNameSpaceStack.rend())
 										{
 											CqString strNS=i->second;
@@ -683,7 +683,7 @@ variable_definitions
 										CqVarDef* pvarLocal=CqVarDef::GetVariablePtr(varLocal);
 										CqVarDef* pvarExtern=CqVarDef::GetVariablePtr(varExtern);
 										CqParseNode* pVarNode=new CqParseNodeVariable(varLocal);
-										pvarLocal->SetExtern(TqTrue, varExtern);
+										pvarLocal->SetExtern(true, varExtern);
 										pvarLocal->SetType(pvarExtern->Type());
 										pVarNode->SetPos(ParseLineNumber,ParseStreamName.c_str());
 										$$->AddLastChild(pVarNode);
@@ -1141,7 +1141,7 @@ loop_control
 							}
 	|	SOLAR '(' expression ',' expression ')' statement
 							{
-								$$=new CqParseNodeSolarConstruct(TqTrue);
+								$$=new CqParseNodeSolarConstruct(true);
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
 								CqParseNode* pArg=new CqParseNode();
 								pArg->SetPos(ParseLineNumber,ParseStreamName.c_str());
@@ -1164,7 +1164,7 @@ loop_control
 							}
 	|	ILLUMINATE '(' expression ',' expression ',' expression ')' statement
 							{
-								$$=new CqParseNodeIlluminateConstruct(TqTrue);
+								$$=new CqParseNodeIlluminateConstruct(true);
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
 								CqParseNode* pArg=new CqParseNode();
 								pArg->SetPos(ParseLineNumber,ParseStreamName.c_str());
@@ -1207,7 +1207,7 @@ loop_control
 							}
 	|	ILLUMINANCE '(' expression ',' expression ',' expression ')' statement
 							{
-								$$=new CqParseNodeIlluminanceConstruct(TqTrue);
+								$$=new CqParseNodeIlluminanceConstruct(true);
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
 								CqParseNode* pArg=new CqParseNode();
 								pArg->SetPos(ParseLineNumber,ParseStreamName.c_str());
@@ -1224,7 +1224,7 @@ loop_control
 							}
 	| ILLUMINANCE '(' expression ',' expression ',' expression ',' expression ')' statement
 							{
-								$$=new CqParseNodeIlluminanceConstruct(TqTrue);
+								$$=new CqParseNodeIlluminanceConstruct(true);
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
 								CqParseNode* pArg=new CqParseNode();
 								pArg->SetPos(ParseLineNumber,ParseStreamName.c_str());
@@ -1239,6 +1239,104 @@ loop_control
 								$5->NoDup();
 								$7->NoDup();
 								$9->NoDup();
+							}
+	| GATHER '(' expression ',' expression ',' expression ',' expression ',' expression ')' statement
+							{
+								$$=new CqParseNodeGatherConstruct(true);
+								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
+								CqParseNode* pArg=new CqParseNode();
+								pArg->SetPos(ParseLineNumber,ParseStreamName.c_str());
+								pArg->AddLastChild($3);
+								pArg->AddLastChild($5);
+								pArg->AddLastChild($7);
+								pArg->AddLastChild($9);
+								pArg->AddLastChild($11);
+								$$->AddLastChild(pArg);
+								$$->AddLastChild($13);
+								// Make sure that any assigns in the two expressions don't dup
+								$3->NoDup();
+								$5->NoDup();
+								$7->NoDup();
+								$9->NoDup();
+								$11->NoDup();
+							}
+	| GATHER '(' expression ',' expression ',' expression ',' expression ',' expression ')' statement ELSE statement
+							{
+								$$=new CqParseNodeGatherConstruct(true);
+								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
+								CqParseNode* pArg=new CqParseNode();
+								pArg->SetPos(ParseLineNumber,ParseStreamName.c_str());
+								pArg->AddLastChild($3);
+								pArg->AddLastChild($5);
+								pArg->AddLastChild($7);
+								pArg->AddLastChild($9);
+								pArg->AddLastChild($11);
+								$$->AddLastChild(pArg);
+								$$->AddLastChild($13);
+								$$->AddLastChild($15);
+								// Make sure that any assigns in the two expressions don't dup
+								$3->NoDup();
+								$5->NoDup();
+								$7->NoDup();
+								$9->NoDup();
+								$11->NoDup();
+							}
+	| GATHER '(' expression ',' expression ',' expression ',' expression ',' expression texture_arguments ')' statement
+							{
+								$$=new CqParseNodeGatherConstruct(true);
+								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
+								CqParseNode* pArg=new CqParseNode();
+								pArg->SetPos(ParseLineNumber,ParseStreamName.c_str());
+								pArg->AddLastChild($3);
+								pArg->AddLastChild($5);
+								pArg->AddLastChild($7);
+								pArg->AddLastChild($9);
+								pArg->AddLastChild($11);
+								// Add all extra arguments as further arguments to the function.
+								CqParseNode* pParam=$12->pFirstChild();
+								while(pParam!=0)
+								{
+									CqParseNode* pTemp=pParam->pNext();
+									pArg->AddLastChild(pParam);
+									pParam=pTemp;
+								}
+								$$->AddLastChild(pArg);
+								$$->AddLastChild($14);
+								// Make sure that any assigns in the two expressions don't dup
+								$3->NoDup();
+								$5->NoDup();
+								$7->NoDup();
+								$9->NoDup();
+								$11->NoDup();
+							}
+	| GATHER '(' expression ',' expression ',' expression ',' expression ',' expression texture_arguments ')' statement ELSE statement
+							{
+								$$=new CqParseNodeGatherConstruct(true);
+								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
+								CqParseNode* pArg=new CqParseNode();
+								pArg->SetPos(ParseLineNumber,ParseStreamName.c_str());
+								pArg->AddLastChild($3);
+								pArg->AddLastChild($5);
+								pArg->AddLastChild($7);
+								pArg->AddLastChild($9);
+								pArg->AddLastChild($11);
+								// Add all extra arguments as further arguments to the function.
+								CqParseNode* pParam=$12->pFirstChild();
+								while(pParam!=0)
+								{
+									CqParseNode* pTemp=pParam->pNext();
+									pArg->AddLastChild(pParam);
+									pParam=pTemp;
+								}
+								$$->AddLastChild(pArg);
+								$$->AddLastChild($14);
+								$$->AddLastChild($16);
+								// Make sure that any assigns in the two expressions don't dup
+								$3->NoDup();
+								$5->NoDup();
+								$7->NoDup();
+								$9->NoDup();
+								$11->NoDup();
 							}
 	;
 
@@ -1661,7 +1759,18 @@ procedurecall
 
 								$$=pFunc;
 							}
+	|	OCCLUSION '(' proc_arguments ')'
+							{
+								std::vector<SqFuncRef> func;
+								CqFuncDef::FindFunction("occlusion", func);
+								CqParseNodeFunctionCall* pFunc=new CqParseNodeFunctionCall(func);
+								pFunc->SetPos(ParseLineNumber,ParseStreamName.c_str());
+								while($3->pFirstChild()!=0)	pFunc->AddLastChild($3->pFirstChild());
+
+								$$=pFunc;
+							}
 	;
+
 
 unresolvedcall
 	:	IDENTIFIER '(' proc_arguments ')'
@@ -1783,12 +1892,6 @@ texture_type
 								$$=new CqParseNodeFunctionCall(func);
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
 							}
-	|	OCCLUSION			{
-								std::vector<SqFuncRef> func;
-								CqFuncDef::FindFunction("occlusion", func);
-								$$=new CqParseNodeFunctionCall(func);
-								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
-							}
 	;
 
 texture_filename
@@ -1833,6 +1936,7 @@ comm_type
 	|	INCIDENT		{$$=CommTypeIncident;}
 	|	OPPOSITE		{$$=CommTypeOpposite;}
     |	TEXTUREINFO	    {$$=CommTypeTextureInfo;}
+    |	RAYINFO	    {$$=CommTypeRayInfo;}
 
 	;
 
@@ -1840,9 +1944,9 @@ comm_function
 	:	comm_type '(' expression ',' SYMBOL ')'
 							{
 								CqVarDef* pVD=0;
-								TqBool fError=TqFalse;
+								bool fError=false;
 								
-								if(($3->ResType()&Type_Mask)!=Type_String)	fError=TqTrue;
+								if(($3->ResType()&Type_Mask)!=Type_String)	fError=true;
 
 								// Get the variable, error if not a variable.
 								if($5.eType&1)	pVD=CqVarDef::GetVariablePtr($5.VarRef);
@@ -1862,11 +1966,11 @@ comm_function
 
                             {
 								CqVarDef* pVD=0;
-								TqBool fError=TqFalse;
+								bool fError=false;
 								
-                                if(($3->ResType()&Type_Mask)!=Type_String)	fError=TqTrue;
+                                if(($3->ResType()&Type_Mask)!=Type_String)	fError=true;
 
-							    if(($5->ResType()&Type_Mask)!=Type_String)	fError=TqTrue;
+							    if(($5->ResType()&Type_Mask)!=Type_String)	fError=true;
 
 								// Get the variable, error if not a variable.
 								if($7.eType&1)	pVD=CqVarDef::GetVariablePtr($7.VarRef);
@@ -1886,9 +1990,9 @@ comm_function
 	|	comm_type '(' expression ',' ARRAY_SYMBOL ')'
 							{
 								CqVarDef* pVD=0;
-								TqBool fError=TqFalse;
+								bool fError=false;
 								
-								if(($3->ResType()&Type_Mask)!=Type_String)	fError=TqTrue;
+								if(($3->ResType()&Type_Mask)!=Type_String)	fError=true;
 
 								// Get the variable, error if not a variable.
 								if($5.eType&1)	pVD=CqVarDef::GetVariablePtr($5.VarRef);
@@ -1908,11 +2012,11 @@ comm_function
 
                             {
 								CqVarDef* pVD=0;
-								TqBool fError=TqFalse;
+								bool fError=false;
 								
-                                if(($3->ResType()&Type_Mask)!=Type_String)	fError=TqTrue;
+                                if(($3->ResType()&Type_Mask)!=Type_String)	fError=true;
 
-							    if(($5->ResType()&Type_Mask)!=Type_String)	fError=TqTrue;
+							    if(($5->ResType()&Type_Mask)!=Type_String)	fError=true;
 
 								// Get the variable, error if not a variable.
 								if($7.eType&1)	pVD=CqVarDef::GetVariablePtr($7.VarRef);
@@ -1937,19 +2041,19 @@ comm_function
 namespace Aqsis
 {
 
-TqBool FindVariable(const char* name, SqVarRef& Ref)
+bool FindVariable(const char* name, SqVarRef& Ref)
 {
 	// First search in the current namespace, then in the global namespace.
 	CqString strLocalVar(strNameSpace()+name);
 	
-	if(CqVarDef::FindVariable(strLocalVar.c_str(), Ref))	return(TqTrue);
+	if(CqVarDef::FindVariable(strLocalVar.c_str(), Ref))	return(true);
 	else	return(CqVarDef::FindVariable(name, Ref));
 
 	
 }
 
 
-TqBool FindFunction(const char* name, std::vector<SqFuncRef>& Ref)
+bool FindFunction(const char* name, std::vector<SqFuncRef>& Ref)
 {
 	// Search in the namespaces from local to global in order.
 	CqString strNS(strNameSpace());
@@ -1958,7 +2062,7 @@ TqBool FindFunction(const char* name, std::vector<SqFuncRef>& Ref)
 	{
 		CqString strLocalFunc(strNS+name);
 		if(CqFuncDef::FindFunction(strLocalFunc.c_str(), Ref))
-			return(TqTrue);
+			return(true);
 
 		// Extract the next namespace up.
 		if( ( strNS.size() > 2 ) && ( strNS.substr( strNS.size()-2 ) == "::" ) )
@@ -1979,9 +2083,9 @@ void TypeCheck()
 	TqUint i;
 	for(i=0; i<gLocalVars.size(); i++)
 	{
-		TqBool needsCast = TqFalse;
+		bool needsCast = false;
 		if(gLocalVars[i].pDefValue()!=0)
-			gLocalVars[i].pDefValue()->TypeCheck(CqParseNode::pAllTypes(), Type_Last-1, needsCast, TqFalse);
+			gLocalVars[i].pDefValue()->TypeCheck(CqParseNode::pAllTypes(), Type_Last-1, needsCast, false);
 	}
 
 	// Typecheck any local functions.
@@ -1989,15 +2093,15 @@ void TypeCheck()
 	{
 		if(gLocalFuncs[i].pDef()!=0)
 		{
-			TqBool needsCast = TqFalse;
+			bool needsCast = false;
 //			TqInt RetType=gLocalFuncs[i].Type();
-			gLocalFuncs[i].pDefNode()->TypeCheck(CqParseNode::pAllTypes(), Type_Last-1, needsCast, TqFalse);
+			gLocalFuncs[i].pDefNode()->TypeCheck(CqParseNode::pAllTypes(), Type_Last-1, needsCast, false);
 		}
 	}
 
-	TqBool needsCast = TqFalse;
+	bool needsCast = false;
 	if(ParseTreePointer)
-		ParseTreePointer->TypeCheck(CqParseNode::pAllTypes(), Type_Last-1, needsCast, TqFalse);
+		ParseTreePointer->TypeCheck(CqParseNode::pAllTypes(), Type_Last-1, needsCast, false);
 }
 
 
@@ -2026,9 +2130,9 @@ CqString strNameSpace()
 	return(strRes);
 }
 
-void pushScope(CqString name, TqBool terminal)
+void pushScope(CqString name, bool terminal)
 {
-	std::pair<TqBool,CqString> n;
+	std::pair<bool,CqString> n;
 	n.first = terminal;
 	n.second = strNameSpace()+name+"::";
 	ParseNameSpaceStack.push_back(n);
@@ -2043,8 +2147,8 @@ CqString popScope()
 
 void InitStandardNamespace()
 {
-	std::pair<TqBool,CqString> n;
-	n.first = TqFalse;
+	std::pair<bool,CqString> n;
+	n.first = false;
 	n.second = "";
 	ParseNameSpaceStack.push_back(n);
 }

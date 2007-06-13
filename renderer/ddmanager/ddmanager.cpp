@@ -65,7 +65,7 @@ TqInt CqDDManager::AddDisplay( const TqChar* name, const TqChar* type, const TqC
 {
 	SqDisplayRequest req;
 
-	req.m_valid = TqFalse;
+	req.m_valid = false;
 	req.m_name = name;
 	req.m_type = type;
 	req.m_mode = mode;
@@ -78,8 +78,8 @@ TqInt CqDDManager::AddDisplay( const TqChar* name, const TqChar* type, const TqC
 	req.m_QuantizeMinVal = 0.0f;
 	req.m_QuantizeMaxVal = 0.0f;
 	req.m_QuantizeDitherVal = 0.0f;
-	req.m_QuantizeSpecified = TqFalse;
-	req.m_QuantizeDitherSpecified = TqFalse;
+	req.m_QuantizeSpecified = false;
+	req.m_QuantizeDitherSpecified = false;
 
 	// Create the array of UserParameter structures for all the unrecognised extra parameters,
 	// while extracting information for the recognised ones.
@@ -280,7 +280,7 @@ TqInt CqDDManager::DisplayBucket( IqBucket* pBucket )
 	return ( 0 );
 }
 
-TqBool CqDDManager::fDisplayNeeds( const TqChar* var )
+bool CqDDManager::fDisplayNeeds( const TqChar* var )
 {
 	static TqUlong rgb = CqString::hash( "rgb" );
 	static TqUlong rgba = CqString::hash( "rgba" );
@@ -297,17 +297,17 @@ TqBool CqDDManager::fDisplayNeeds( const TqChar* var )
 	std::vector<SqDisplayRequest>::iterator i;
 	for(i = m_displayRequests.begin(); i!=m_displayRequests.end(); i++)
 	{
-		TqBool usage = ( ( i->m_modeHash == rgba ) || ( i->m_modeHash == rgb ) );
+		bool usage = ( ( i->m_modeHash == rgba ) || ( i->m_modeHash == rgb ) );
 
 		if ( (( htoken == Ci )|| ( htoken == Cs))&& usage )
-			return ( TqTrue );
+			return ( true );
 		else if ( (( htoken == Oi )|| ( htoken == Os))&& usage )
-			return ( TqTrue );
+			return ( true );
 		else if ( i->m_modeHash == htoken  )
-			return ( TqTrue );
+			return ( true );
 	}
 	//printf("fDisplayNeeds(%s) returns false ???\n", var);
-	return ( TqFalse);
+	return ( false);
 }
 
 TqInt CqDDManager::Uses()
@@ -424,13 +424,13 @@ void CqDDManager::LoadDisplayLibrary( SqDisplayRequest& req )
 				req.m_QuantizeOneVal = pQuant[0];
 				req.m_QuantizeMinVal = pQuant[1];
 				req.m_QuantizeMaxVal = pQuant[2];
-				req.m_QuantizeSpecified = TqTrue;
+				req.m_QuantizeSpecified = true;
 			}
 
 			if( pQuant && !req.m_QuantizeDitherSpecified)
 			{
 				req.m_QuantizeDitherVal = pQuant[3];
-				req.m_QuantizeDitherSpecified = TqTrue;
+				req.m_QuantizeDitherSpecified = true;
 			}
 		}
 		// Prepare the information and call the DspyImageOpen function in the display device.
@@ -582,7 +582,7 @@ void CqDDManager::LoadDisplayLibrary( SqDisplayRequest& req )
 			return;
 		}
 		else
-			req.m_valid = TqTrue;
+			req.m_valid = true;
 
 		Aqsis::log() << debug << "Processing format list returned from display" << std::endl;
 		// Now scan the returned format list to make sure that we pass the data in the order the display wants it.
@@ -909,14 +909,14 @@ void CqDDManager::PrepareCustomParameters( std::map<std::string, void*>& mapPara
 			req.m_QuantizeOneVal = floats[1];
 			req.m_QuantizeMinVal = floats[2];
 			req.m_QuantizeMaxVal = floats[3];
-			req.m_QuantizeSpecified = TqTrue;
+			req.m_QuantizeSpecified = true;
 		}
 		else if(param->first.compare("dither")==0)
 		{
 			// Extract the quantization information and store it with the display request.
 			const RtFloat* floats = static_cast<float*>( param->second );
 			req.m_QuantizeDitherVal = floats[0];
-			req.m_QuantizeDitherSpecified = TqTrue;
+			req.m_QuantizeDitherSpecified = true;
 		}
 		else
 		{
@@ -935,7 +935,7 @@ void CqDDManager::PrepareCustomParameters( std::map<std::string, void*>& mapPara
 			// Check the parameter type is uniform, not valid for non-surface requests otherwise.
 			if( Decl.m_Class != class_uniform )
 			{
-				assert( TqFalse );
+				assert( false );
 				continue;
 			}
 

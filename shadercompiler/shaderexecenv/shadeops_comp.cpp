@@ -44,7 +44,7 @@ START_NAMESPACE(    Aqsis )
 // setcomp(c,__iGrid,v)
 void	CqShaderExecEnv::SO_setcomp( IqShaderData* p, IqShaderData* index, IqShaderData* v, IqShader* pShader )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__fVarying=(p)->Class()==class_varying;
@@ -74,7 +74,7 @@ void	CqShaderExecEnv::SO_setcomp( IqShaderData* p, IqShaderData* index, IqShader
 // setxcomp(p,v)
 void	CqShaderExecEnv::SO_setxcomp( IqShaderData* p, IqShaderData* v, IqShader* pShader )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__fVarying=(p)->Class()==class_varying;
@@ -101,7 +101,7 @@ void	CqShaderExecEnv::SO_setxcomp( IqShaderData* p, IqShaderData* v, IqShader* p
 // setycomp(p,v)
 void	CqShaderExecEnv::SO_setycomp( IqShaderData* p, IqShaderData* v, IqShader* pShader )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__fVarying=(p)->Class()==class_varying;
@@ -128,7 +128,7 @@ void	CqShaderExecEnv::SO_setycomp( IqShaderData* p, IqShaderData* v, IqShader* p
 // setzcomp(p,v)
 void	CqShaderExecEnv::SO_setzcomp( IqShaderData* p, IqShaderData* v, IqShader* pShader )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__fVarying=(p)->Class()==class_varying;

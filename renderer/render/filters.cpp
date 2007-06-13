@@ -102,10 +102,10 @@ extern "C"
 	// The above version falls faster than the one used by the 3.2 spec
 	//   PRMan and RenderDotC.  Since all three match exactly, might as
 	//   well change to the code below:
-	x *= 2.0 / xwidth;
-	y *= 2.0 / ywidth;
+	x /= xwidth;
+	y /= ywidth;
 
-	return exp( -2.0 * ( x * x + y * y ) );
+	return exp( -8.0 * ( x * x + y * y ) );
 }
 
 

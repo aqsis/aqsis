@@ -96,7 +96,7 @@ class CqSurfacePatchBicubic : public CqSurface
 		}
 
 		template <class T, class SLT>
-		void	TypedNaturalSubdivide( CqParameterTyped<T, SLT>* pParam, CqParameterTyped<T, SLT>* pResult1, CqParameterTyped<T, SLT>* pResult2, TqBool u )
+		void	TypedNaturalSubdivide( CqParameterTyped<T, SLT>* pParam, CqParameterTyped<T, SLT>* pResult1, CqParameterTyped<T, SLT>* pResult2, bool u )
 		{
 			TqInt iu, iv;
 
@@ -158,14 +158,14 @@ class CqSurfacePatchBicubic : public CqSurface
 		}
 
 		virtual	CqBound	Bound() const;
-		virtual TqBool	Diceable();
+		virtual bool	Diceable();
 
 		/** Determine whether the passed surface is valid to be used as a
 		 *  frame in motion blur for this surface.
 		 */
-		virtual TqBool	IsMotionBlurMatch( CqSurface* pSurf )
+		virtual bool	IsMotionBlurMatch( CqSurface* pSurf )
 		{
-			return( TqFalse );
+			return( false );
 		}
 
 		virtual	TqUint	cUniform() const
@@ -186,8 +186,8 @@ class CqSurfacePatchBicubic : public CqSurface
 		}
 
 		virtual void NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData );
-		virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, TqBool u );
-		virtual void NaturalSubdivide( CqParameter* pParam, CqParameter* pParam1, CqParameter* pParam2, TqBool u );
+		virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, bool u );
+		virtual void NaturalSubdivide( CqParameter* pParam, CqParameter* pParam1, CqParameter* pParam2, bool u );
 
 		void	ConvertToBezierBasis( CqMatrix& matuBasis, CqMatrix& matvBasis );
 
@@ -216,26 +216,26 @@ class CqSurfacePatchBilinear : public CqSurface
 		}
 #endif
 
-		void	SetfHasPhantomFourthVertex(TqBool fHasPhantomFourthVertex)
+		void	SetfHasPhantomFourthVertex(bool fHasPhantomFourthVertex)
 		{
 			m_fHasPhantomFourthVertex = fHasPhantomFourthVertex;
 		}
 
-		TqBool	fHasPhantomFourthVertex() const
+		bool	fHasPhantomFourthVertex() const
 		{
 			return(m_fHasPhantomFourthVertex);
 		}
 
 		void	GenNormals();
 		virtual	CqBound	Bound() const;
-		virtual TqBool	Diceable();
+		virtual bool	Diceable();
 
 		/** Determine whether the passed surface is valid to be used as a
 		 *  frame in motion blur for this surface.
 		 */
-		virtual TqBool	IsMotionBlurMatch( CqSurface* pSurf )
+		virtual bool	IsMotionBlurMatch( CqSurface* pSurf )
 		{
-			return( TqFalse );
+			return( false );
 		}
 
 		virtual	TqUint	cUniform() const
@@ -257,15 +257,15 @@ class CqSurfacePatchBilinear : public CqSurface
 		virtual CqSurface* Clone() const;
 
 		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
-		virtual	TqInt	PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, TqBool u );
+		virtual	TqInt	PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, bool u );
 		virtual void	PostDice(CqMicroPolyGrid * pGrid)
 		{
 			if(m_fHasPhantomFourthVertex)
-				pGrid->SetfTriangular(TqTrue);
+				pGrid->SetfTriangular(true);
 		}
 
 	protected:
-		TqBool	m_fHasPhantomFourthVertex;
+		bool	m_fHasPhantomFourthVertex;
 		TqInt	m_iInternalu;
 		TqInt	m_iInternalv;
 };
@@ -283,10 +283,10 @@ class CqSurfacePatchMeshBicubic : public CqSurface
 				CqSurface(),
 				m_nu( 0 ),
 				m_nv( 0 ),
-				m_uPeriodic( TqFalse ),
-				m_vPeriodic( TqFalse )
+				m_uPeriodic( false ),
+				m_vPeriodic( false )
 		{}
-		CqSurfacePatchMeshBicubic( TqInt nu, TqInt nv, TqBool uPeriodic = TqFalse, TqBool vPeriodic = TqFalse ) :
+		CqSurfacePatchMeshBicubic( TqInt nu, TqInt nv, bool uPeriodic = false, bool vPeriodic = false ) :
 				CqSurface(),
 				m_nu( nu ),
 				m_nv( nv ),
@@ -308,7 +308,7 @@ class CqSurfacePatchMeshBicubic : public CqSurface
 		}
 #endif
 
-		virtual	void	SetDefaultPrimitiveVariables( TqBool bUseDef_st = TqTrue )
+		virtual	void	SetDefaultPrimitiveVariables( bool bUseDef_st = true )
 		{}
 
 		virtual	CqBound	Bound() const;
@@ -317,17 +317,17 @@ class CqSurfacePatchMeshBicubic : public CqSurface
 			return ( 0 );
 		}
 		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
-		virtual TqBool	Diceable()
+		virtual bool	Diceable()
 		{
-			return ( TqFalse );
+			return ( false );
 		}
 
 		/** Determine whether the passed surface is valid to be used as a
 		 *  frame in motion blur for this surface.
 		 */
-		virtual TqBool	IsMotionBlurMatch( CqSurface* pSurf )
+		virtual bool	IsMotionBlurMatch( CqSurface* pSurf )
 		{
-			return( TqFalse );
+			return( false );
 		}
 
 		virtual	TqUint	cUniform() const
@@ -366,7 +366,7 @@ class CqSurfacePatchMeshBicubic : public CqSurface
 		m_vPatches;			///< Number of patches in v.
 		TqInt	m_nu,   				///< Number of control points in u.
 		m_nv;				///< Number of control points in v.
-		TqBool	m_uPeriodic,   		///< Is patches mesh periodic in u?
+		bool	m_uPeriodic,   		///< Is patches mesh periodic in u?
 		m_vPeriodic;		///< Is patches mesh periodic in v?
 }
 ;
@@ -384,10 +384,10 @@ class CqSurfacePatchMeshBilinear : public CqSurface
 				CqSurface(),
 				m_nu( 0 ),
 				m_nv( 0 ),
-				m_uPeriodic( TqFalse ),
-				m_vPeriodic( TqFalse )
+				m_uPeriodic( false ),
+				m_vPeriodic( false )
 		{}
-		CqSurfacePatchMeshBilinear( TqInt nu, TqInt nv, TqBool uPeriodic = TqFalse, TqBool vPeriodic = TqFalse ) :
+		CqSurfacePatchMeshBilinear( TqInt nu, TqInt nv, bool uPeriodic = false, bool vPeriodic = false ) :
 				CqSurface(),
 				m_nu( nu ),
 				m_nv( nv ),
@@ -399,7 +399,7 @@ class CqSurfacePatchMeshBilinear : public CqSurface
 		}
 		virtual	~CqSurfacePatchMeshBilinear();
 
-		virtual	void	SetDefaultPrimitiveVariables( TqBool bUseDef_st = TqTrue )
+		virtual	void	SetDefaultPrimitiveVariables( bool bUseDef_st = true )
 		{}
 
 #ifdef _DEBUG
@@ -416,17 +416,17 @@ class CqSurfacePatchMeshBilinear : public CqSurface
 			return ( 0 );
 		}
 		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
-		virtual TqBool	Diceable()
+		virtual bool	Diceable()
 		{
-			return ( TqFalse );
+			return ( false );
 		}
 
 		/** Determine whether the passed surface is valid to be used as a
 		 *  frame in motion blur for this surface.
 		 */
-		virtual TqBool	IsMotionBlurMatch( CqSurface* pSurf )
+		virtual bool	IsMotionBlurMatch( CqSurface* pSurf )
 		{
-			return( TqFalse );
+			return( false );
 		}
 
 		virtual	TqUint	cUniform() const
@@ -465,7 +465,7 @@ class CqSurfacePatchMeshBilinear : public CqSurface
 		m_vPatches;			///< Number of patches in v.
 		TqInt	m_nu,   				///< Number of control points in u.
 		m_nv;				///< Number of control points in v.
-		TqBool	m_uPeriodic,   		///< Is patches mesh periodic in u?
+		bool	m_uPeriodic,   		///< Is patches mesh periodic in u?
 		m_vPeriodic;		///< Is patches mesh periodic in v?
 }
 ;

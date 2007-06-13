@@ -462,7 +462,7 @@ static TqFloat match(const char *string, const char *pattern)
 // shadername()
 void	CqShaderExecEnv::SO_shadername( IqShaderData* Result, IqShader* pShader )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__fVarying=(Result)->Class()==class_varying;
@@ -484,7 +484,7 @@ void	CqShaderExecEnv::SO_shadername( IqShaderData* Result, IqShader* pShader )
 // shadername(s)
 void	CqShaderExecEnv::SO_shadername2( IqShaderData* shader, IqShaderData* Result, IqShader* pShader )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	CqString strName( "" );

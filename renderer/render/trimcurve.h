@@ -129,7 +129,7 @@ class CqTrimLoop
 
 		void	Prepare( CqSurface* pSurface );
 		const	TqInt	TrimPoint( const CqVector2D& v ) const;
-		const	TqBool	LineIntersects(const CqVector2D& v1, const CqVector2D& v2) const;
+		const	bool	LineIntersects(const CqVector2D& v1, const CqVector2D& v2) const;
 
 	private:
 		std::vector<CqTrimCurve>	m_aCurves;
@@ -151,8 +151,8 @@ class CqTrimLoopArray
 		}
 
 		void	Prepare( CqSurface* pSurface );
-		const	TqBool	TrimPoint( const CqVector2D& v ) const;
-		const	TqBool	LineIntersects(const CqVector2D& v1, const CqVector2D& v2) const;
+		const	bool	TrimPoint( const CqVector2D& v ) const;
+		const	bool	LineIntersects(const CqVector2D& v1, const CqVector2D& v2) const;
 		void	Clear()
 		{
 			m_aLoops.resize( 0 );

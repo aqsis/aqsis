@@ -117,7 +117,7 @@ struct IqDDManager
 	virtual	TqInt	DisplayBucket( IqBucket* pBucket ) = 0;
 	/** Determine if any of the displays need the named shader variable.
 	 */
-	virtual TqBool	fDisplayNeeds( const TqChar* var) = 0;
+	virtual bool	fDisplayNeeds( const TqChar* var) = 0;
 	/** Determine if any of the displays need the named shader variable.
 	 */
 	virtual TqInt	Uses( ) = 0;

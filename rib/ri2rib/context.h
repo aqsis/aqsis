@@ -40,7 +40,7 @@ class CqContext
 		std::list<CqOutput *> m_lContextHandle;
 		CqOutput *m_Active;
 
-		TqBool m_PipeHandleSet;
+		bool m_PipeHandleSet;
 		int m_PipeHandle;
 
 		SqOptions::EqOutputType m_OutputType;

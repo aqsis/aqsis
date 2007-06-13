@@ -206,7 +206,7 @@ class CqRenderer : public IqRenderer
 		virtual	IqTextureMap* GetShadowMap( const CqString& strFileName );
 		virtual	IqTextureMap* GetLatLongMap( const CqString& strFileName );
 
-		virtual	TqBool	GetBasisMatrix( CqMatrix& matBasis, const CqString& name );
+		virtual	bool	GetBasisMatrix( CqMatrix& matBasis, const CqString& name );
 
 
 		/** Get a read only reference to the current transformation matrix.
@@ -217,11 +217,11 @@ class CqRenderer : public IqRenderer
 			return ( pconCurrent() ->matCurrent( time ) );
 		}
 
-		virtual	TqBool	SetCoordSystem( const char* strName, const CqMatrix& matToWorld );
+		virtual	bool	SetCoordSystem( const char* strName, const CqMatrix& matToWorld );
 
 		// Function which can be overridden by the derived class.
 		virtual	void	Initialise();
-		virtual	void	RenderWorld(TqBool clone = TqFalse);
+		virtual	void	RenderWorld(bool clone = false);
 		virtual void	RenderAutoShadows();
 
 		virtual	void	AddDisplayRequest( const TqChar* name, const TqChar* type, const TqChar* mode, TqInt modeID, TqInt dataOffset, TqInt dataSize, std::map<std::string, void*>& mapOfArguments );
@@ -340,9 +340,9 @@ class CqRenderer : public IqRenderer
 		}
 
 		/** Find out if we are using depth of field or not.
-		 * \return TqTrue if depth of field is turned on.
+		 * \return true if depth of field is turned on.
 		 */
-		TqBool	UsingDepthOfField( ) const
+		bool	UsingDepthOfField( ) const
 		{
 			return m_UsingDepthOfField;
 		}
@@ -416,7 +416,7 @@ class CqRenderer : public IqRenderer
 		virtual void InstantiateObject( CqObjectInstance* handle );
 		virtual	void CloseObjectInstance()
 		{
-			m_bObjectOpen = TqFalse;
+			m_bObjectOpen = false;
 		}
 
 		/** Get a pointer to the error handler function.
@@ -480,12 +480,12 @@ class CqRenderer : public IqRenderer
 			return( m_pRaytracer );
 		}
 
-		TqBool	IsWorldBegin() const
+		bool	IsWorldBegin() const
 		{
 			return(m_fWorldBegin);
 		}
 
-		void SetWorldBegin(TqBool begin = TqTrue)
+		void SetWorldBegin(bool begin = true)
 		{
 			m_fWorldBegin = begin;
 		}
@@ -514,15 +514,15 @@ class CqRenderer : public IqRenderer
 		std::map< CqShaderKey, boost::shared_ptr<IqShader> > m_Shaders;
 		std::vector< boost::shared_ptr<IqShader> >  m_InstancedShaders;
 
-		TqBool	m_fSaveGPrims;
+		bool	m_fSaveGPrims;
 		CqTransformPtr	m_pTransCamera;					///< The camera transform.
 		CqTransformPtr	m_pTransDefObj;				///< The initial transformation for objects.
-		TqBool			m_fWorldBegin;
+		bool			m_fWorldBegin;
 		std::vector<SqParameterDeclaration>	m_Symbols;	///< Symbol table.
 
 		TqFloat			m_DofMultiplier;
 		TqFloat			m_OneOverFocalDistance;
-		TqBool			m_UsingDepthOfField;
+		bool			m_UsingDepthOfField;
 		CqVector2D		m_DepthOfFieldScale;
 
 		void WhichMatWorldTo(CqMatrix &a, TqUlong thash);
@@ -535,7 +535,7 @@ class CqRenderer : public IqRenderer
 
 		TqInt	m_FrameNo;
 		std::vector<CqObjectInstance*>	m_ObjectInstances;
-		TqBool	m_bObjectOpen;
+		bool	m_bObjectOpen;
 
 		RtErrorFunc	m_pErrorHandler;		///< A pointer to the error hadling function.
 		RtProgressFunc	m_pProgressHandler;		///< A pointer to the progress hadling function.

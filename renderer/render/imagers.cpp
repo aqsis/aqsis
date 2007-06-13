@@ -37,7 +37,7 @@ START_NAMESPACE( Aqsis )
 /** Default constructor.
  */
 
-CqImagersource::CqImagersource( const boost::shared_ptr<IqShader>& pShader, TqBool fActive ) :
+CqImagersource::CqImagersource( const boost::shared_ptr<IqShader>& pShader, bool fActive ) :
 		m_pShader( pShader ),
 		m_pAttributes( NULL ),
 		m_pShaderExecEnv( new CqShaderExecEnv(QGetRenderContextI()) )

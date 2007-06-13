@@ -42,7 +42,7 @@ START_NAMESPACE(    Aqsis )
 
 void	CqShaderExecEnv::SO_frandom( IqShaderData* Result, IqShader* pShader )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__fVarying=(Result)->Class()==class_varying;
@@ -61,7 +61,7 @@ void	CqShaderExecEnv::SO_frandom( IqShaderData* Result, IqShader* pShader )
 
 void	CqShaderExecEnv::SO_crandom( IqShaderData* Result, IqShader* pShader )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__fVarying=(Result)->Class()==class_varying;
@@ -85,7 +85,7 @@ void	CqShaderExecEnv::SO_crandom( IqShaderData* Result, IqShader* pShader )
 
 void	CqShaderExecEnv::SO_prandom( IqShaderData* Result, IqShader* pShader )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__fVarying=(Result)->Class()==class_varying;
@@ -112,7 +112,7 @@ void	CqShaderExecEnv::SO_prandom( IqShaderData* Result, IqShader* pShader )
 // noise(v)
 void	CqShaderExecEnv::SO_fnoise1( IqShaderData* v, IqShaderData* Result, IqShader* pShader )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__fVarying=(v)->Class()==class_varying;
@@ -136,7 +136,7 @@ void	CqShaderExecEnv::SO_fnoise1( IqShaderData* v, IqShaderData* Result, IqShade
 // noise(u,v)
 void CqShaderExecEnv::SO_fnoise2( IqShaderData* u, IqShaderData* v, IqShaderData* Result, IqShader* pShader )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__fVarying=(u)->Class()==class_varying;
@@ -163,7 +163,7 @@ void CqShaderExecEnv::SO_fnoise2( IqShaderData* u, IqShaderData* v, IqShaderData
 // noise(p)
 void CqShaderExecEnv::SO_fnoise3( IqShaderData* p, IqShaderData* Result, IqShader* pShader )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__fVarying=(p)->Class()==class_varying;
@@ -188,7 +188,7 @@ void CqShaderExecEnv::SO_fnoise3( IqShaderData* p, IqShaderData* Result, IqShade
 void CqShaderExecEnv::SO_fnoise4( IqShaderData* p, IqShaderData* t, IqShaderData* Result, IqShader* pShader )
 {
 	// TODO: Do proper 4D noise.
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__fVarying=(p)->Class()==class_varying;
@@ -215,7 +215,7 @@ void CqShaderExecEnv::SO_fnoise4( IqShaderData* p, IqShaderData* t, IqShaderData
 // noise(v)
 void	CqShaderExecEnv::SO_cnoise1( IqShaderData* v, IqShaderData* Result, IqShader* pShader )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__fVarying=(v)->Class()==class_varying;
@@ -239,7 +239,7 @@ void	CqShaderExecEnv::SO_cnoise1( IqShaderData* v, IqShaderData* Result, IqShade
 // noise(u,v)
 void CqShaderExecEnv::SO_cnoise2( IqShaderData* u, IqShaderData* v, IqShaderData* Result, IqShader* pShader )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__fVarying=(u)->Class()==class_varying;
@@ -266,7 +266,7 @@ void CqShaderExecEnv::SO_cnoise2( IqShaderData* u, IqShaderData* v, IqShaderData
 // noise(p)
 void CqShaderExecEnv::SO_cnoise3( IqShaderData* p, IqShaderData* Result, IqShader* pShader )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__fVarying=(p)->Class()==class_varying;
@@ -291,7 +291,7 @@ void CqShaderExecEnv::SO_cnoise3( IqShaderData* p, IqShaderData* Result, IqShade
 void CqShaderExecEnv::SO_cnoise4( IqShaderData* p, IqShaderData* t, IqShaderData* Result, IqShader* pShader )
 {
 	// TODO: Do proper 4D noise.
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__fVarying=(p)->Class()==class_varying;
@@ -318,7 +318,7 @@ void CqShaderExecEnv::SO_cnoise4( IqShaderData* p, IqShaderData* t, IqShaderData
 // noise(v)
 void CqShaderExecEnv::SO_pnoise1( IqShaderData* v, IqShaderData* Result, IqShader* pShader )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__fVarying=(v)->Class()==class_varying;
@@ -342,7 +342,7 @@ void CqShaderExecEnv::SO_pnoise1( IqShaderData* v, IqShaderData* Result, IqShade
 // noise(u,v)
 void CqShaderExecEnv::SO_pnoise2( IqShaderData* u, IqShaderData* v, IqShaderData* Result, IqShader* pShader )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__fVarying=(u)->Class()==class_varying;
@@ -369,7 +369,7 @@ void CqShaderExecEnv::SO_pnoise2( IqShaderData* u, IqShaderData* v, IqShaderData
 // noise(p)
 void CqShaderExecEnv::SO_pnoise3( IqShaderData* p, IqShaderData* Result, IqShader* pShader )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__fVarying=(p)->Class()==class_varying;
@@ -394,7 +394,7 @@ void CqShaderExecEnv::SO_pnoise3( IqShaderData* p, IqShaderData* Result, IqShade
 void CqShaderExecEnv::SO_pnoise4( IqShaderData* p, IqShaderData* t, IqShaderData* Result, IqShader* pShader )
 {
 	// TODO: Do proper 4D noise.
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__fVarying=(p)->Class()==class_varying;
@@ -422,7 +422,7 @@ void CqShaderExecEnv::SO_pnoise4( IqShaderData* p, IqShaderData* t, IqShaderData
 // noise(v)
 void CqShaderExecEnv::SO_fcellnoise1( IqShaderData* v, IqShaderData* Result, IqShader* pShader )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__fVarying=(v)->Class()==class_varying;
@@ -444,7 +444,7 @@ void CqShaderExecEnv::SO_fcellnoise1( IqShaderData* v, IqShaderData* Result, IqS
 
 void CqShaderExecEnv::SO_ccellnoise1( IqShaderData* v, IqShaderData* Result, IqShader* pShader )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__fVarying=(v)->Class()==class_varying;
@@ -466,7 +466,7 @@ void CqShaderExecEnv::SO_ccellnoise1( IqShaderData* v, IqShaderData* Result, IqS
 
 void CqShaderExecEnv::SO_pcellnoise1( IqShaderData* v, IqShaderData* Result, IqShader* pShader )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__fVarying=(v)->Class()==class_varying;
@@ -490,7 +490,7 @@ void CqShaderExecEnv::SO_pcellnoise1( IqShaderData* v, IqShaderData* Result, IqS
 // noise(u,v)
 void CqShaderExecEnv::SO_fcellnoise2( IqShaderData* u, IqShaderData* v, IqShaderData* Result, IqShader* pShader )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__fVarying=(u)->Class()==class_varying;
@@ -514,7 +514,7 @@ void CqShaderExecEnv::SO_fcellnoise2( IqShaderData* u, IqShaderData* v, IqShader
 }
 void CqShaderExecEnv::SO_ccellnoise2( IqShaderData* u, IqShaderData* v, IqShaderData* Result, IqShader* pShader )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__fVarying=(u)->Class()==class_varying;
@@ -538,7 +538,7 @@ void CqShaderExecEnv::SO_ccellnoise2( IqShaderData* u, IqShaderData* v, IqShader
 }
 void CqShaderExecEnv::SO_pcellnoise2( IqShaderData* u, IqShaderData* v, IqShaderData* Result, IqShader* pShader )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__fVarying=(u)->Class()==class_varying;
@@ -565,7 +565,7 @@ void CqShaderExecEnv::SO_pcellnoise2( IqShaderData* u, IqShaderData* v, IqShader
 // noise(p)
 void CqShaderExecEnv::SO_fcellnoise3( IqShaderData* p, IqShaderData* Result, IqShader* pShader )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__fVarying=(p)->Class()==class_varying;
@@ -586,7 +586,7 @@ void CqShaderExecEnv::SO_fcellnoise3( IqShaderData* p, IqShaderData* Result, IqS
 }
 void CqShaderExecEnv::SO_ccellnoise3( IqShaderData* p, IqShaderData* Result, IqShader* pShader )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__fVarying=(p)->Class()==class_varying;
@@ -607,7 +607,7 @@ void CqShaderExecEnv::SO_ccellnoise3( IqShaderData* p, IqShaderData* Result, IqS
 }
 void CqShaderExecEnv::SO_pcellnoise3( IqShaderData* p, IqShaderData* Result, IqShader* pShader )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__fVarying=(p)->Class()==class_varying;
@@ -631,7 +631,7 @@ void CqShaderExecEnv::SO_pcellnoise3( IqShaderData* p, IqShaderData* Result, IqS
 // noise(p,f)
 void CqShaderExecEnv::SO_fcellnoise4( IqShaderData* p, IqShaderData* v, IqShaderData* Result, IqShader* pShader )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__fVarying=(p)->Class()==class_varying;
@@ -655,7 +655,7 @@ void CqShaderExecEnv::SO_fcellnoise4( IqShaderData* p, IqShaderData* v, IqShader
 }
 void CqShaderExecEnv::SO_ccellnoise4( IqShaderData* p, IqShaderData* v, IqShaderData* Result, IqShader* pShader )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__fVarying=(p)->Class()==class_varying;
@@ -679,7 +679,7 @@ void CqShaderExecEnv::SO_ccellnoise4( IqShaderData* p, IqShaderData* v, IqShader
 }
 void CqShaderExecEnv::SO_pcellnoise4( IqShaderData* p, IqShaderData* v, IqShaderData* Result, IqShader* pShader )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__fVarying=(p)->Class()==class_varying;
@@ -707,7 +707,7 @@ void CqShaderExecEnv::SO_pcellnoise4( IqShaderData* p, IqShaderData* v, IqShader
 // pnoise(u,period)
 void CqShaderExecEnv::SO_fpnoise1( IqShaderData* v, IqShaderData* period, IqShaderData* Result, IqShader* pShader )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__fVarying=(v)->Class()==class_varying;
@@ -734,7 +734,7 @@ void CqShaderExecEnv::SO_fpnoise1( IqShaderData* v, IqShaderData* period, IqShad
 // pnoise(u,v,uperiod,vperiod)
 void CqShaderExecEnv::SO_fpnoise2( IqShaderData* u, IqShaderData* v, IqShaderData* uperiod, IqShaderData* vperiod, IqShaderData* Result, IqShader* pShader )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__fVarying=(u)->Class()==class_varying;
@@ -768,7 +768,7 @@ void CqShaderExecEnv::SO_fpnoise2( IqShaderData* u, IqShaderData* v, IqShaderDat
 // pnoise(p,pperiod)
 void CqShaderExecEnv::SO_fpnoise3( IqShaderData* p, IqShaderData* pperiod, IqShaderData* Result, IqShader* pShader )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__fVarying=(p)->Class()==class_varying;
@@ -796,7 +796,7 @@ void CqShaderExecEnv::SO_fpnoise3( IqShaderData* p, IqShaderData* pperiod, IqSha
 // pnoise(p,t,pperiod,tperiod)
 void CqShaderExecEnv::SO_fpnoise4( IqShaderData* p, IqShaderData* t, IqShaderData* pperiod, IqShaderData* tperiod, IqShaderData* Result, IqShader* pShader )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__fVarying=(p)->Class()==class_varying;
@@ -830,7 +830,7 @@ void CqShaderExecEnv::SO_fpnoise4( IqShaderData* p, IqShaderData* t, IqShaderDat
 // pnoise(u,period)
 void CqShaderExecEnv::SO_cpnoise1( IqShaderData* v, IqShaderData* period, IqShaderData* Result, IqShader* pShader )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__fVarying=(v)->Class()==class_varying;
@@ -857,7 +857,7 @@ void CqShaderExecEnv::SO_cpnoise1( IqShaderData* v, IqShaderData* period, IqShad
 // pnoise(u,v,uperiod,vperiod)
 void CqShaderExecEnv::SO_cpnoise2( IqShaderData* u, IqShaderData* v, IqShaderData* uperiod, IqShaderData* vperiod, IqShaderData* Result, IqShader* pShader )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__fVarying=(u)->Class()==class_varying;
@@ -891,7 +891,7 @@ void CqShaderExecEnv::SO_cpnoise2( IqShaderData* u, IqShaderData* v, IqShaderDat
 // pnoise(p,pperiod)
 void CqShaderExecEnv::SO_cpnoise3( IqShaderData* p, IqShaderData* pperiod, IqShaderData* Result, IqShader* pShader )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__fVarying=(p)->Class()==class_varying;
@@ -919,7 +919,7 @@ void CqShaderExecEnv::SO_cpnoise3( IqShaderData* p, IqShaderData* pperiod, IqSha
 // pnoise(p,t,pperiod,tperiod)
 void CqShaderExecEnv::SO_cpnoise4( IqShaderData* p, IqShaderData* t, IqShaderData* pperiod, IqShaderData* tperiod, IqShaderData* Result, IqShader* pShader )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__fVarying=(p)->Class()==class_varying;
@@ -953,7 +953,7 @@ void CqShaderExecEnv::SO_cpnoise4( IqShaderData* p, IqShaderData* t, IqShaderDat
 // pnoise(u,period)
 void CqShaderExecEnv::SO_ppnoise1( IqShaderData* v, IqShaderData* period, IqShaderData* Result, IqShader* pShader )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__fVarying=(v)->Class()==class_varying;
@@ -980,7 +980,7 @@ void CqShaderExecEnv::SO_ppnoise1( IqShaderData* v, IqShaderData* period, IqShad
 // pnoise(u,v,uperiod,vperiod)
 void CqShaderExecEnv::SO_ppnoise2( IqShaderData* u, IqShaderData* v, IqShaderData* uperiod, IqShaderData* vperiod, IqShaderData* Result, IqShader* pShader )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__fVarying=(u)->Class()==class_varying;
@@ -1014,7 +1014,7 @@ void CqShaderExecEnv::SO_ppnoise2( IqShaderData* u, IqShaderData* v, IqShaderDat
 // pnoise(p,pperiod)
 void CqShaderExecEnv::SO_ppnoise3( IqShaderData* p, IqShaderData* pperiod, IqShaderData* Result, IqShader* pShader )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__fVarying=(p)->Class()==class_varying;
@@ -1042,7 +1042,7 @@ void CqShaderExecEnv::SO_ppnoise3( IqShaderData* p, IqShaderData* pperiod, IqSha
 // pnoise(p,t,pperiod,tperiod)
 void CqShaderExecEnv::SO_ppnoise4( IqShaderData* p, IqShaderData* t, IqShaderData* pperiod, IqShaderData* tperiod, IqShaderData* Result, IqShader* pShader )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__fVarying=(p)->Class()==class_varying;

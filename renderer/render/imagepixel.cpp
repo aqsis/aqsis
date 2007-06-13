@@ -208,70 +208,80 @@ void CqImagePixel::JitterSamples( std::vector<CqVector2D>& vecSamples, TqFloat o
 
 	// Initialize points to the "canonical" multi-jittered pattern.
 
-	for ( i = 0; i < n; i++ )
+	if( m == 1 && n == 1)
 	{
-		for ( j = 0; j < m; j++ )
-		{
-			TqInt which = i * m + j;
-			vecSamples[which].x( i );
-			vecSamples[which].y( j );
-		}
+		TqFloat ranx = random.RandomFloat( 1.0f );
+		TqFloat rany = random.RandomFloat( 1.0f );
+		vecSamples[0].x(ranx);
+		vecSamples[0].y(rany);
 	}
-
-	// Shuffle y coordinates within each row of cells.
-	for ( i = 0; i < n; i++ )
+	else
 	{
-		for ( j = 0; j < m; j++ )
+		for ( i = 0; i < n; i++ )
 		{
-			TqFloat t;
-			TqInt k;
-
-			k = random.RandomInt( n - 1 - i ) + i;
-			TqInt i1 = i * m + j;
-			TqInt i2 = k * m + j;
-			assert( i1 < vecSamples.size() && i2 < vecSamples.size() );
-			t = vecSamples[ i1 ].y();
-			vecSamples[ i1 ].y( vecSamples[ i2 ].y() );
-			vecSamples[ i2 ].y( t );
+			for ( j = 0; j < m; j++ )
+			{
+				TqInt which = i * m + j;
+				vecSamples[which].x( i );
+				vecSamples[which].y( j );
+			}
 		}
-	}
 
-	// Shuffle x coordinates within each column of cells.
-	for ( i = 0; i < m; i++ )
-	{
-		for ( j = 0; j < n; j++ )
+		// Shuffle y coordinates within each row of cells.
+		for ( i = 0; i < n; i++ )
 		{
-			TqFloat t;
-			TqInt k;
+			for ( j = 0; j < m; j++ )
+			{
+				TqFloat t;
+				TqInt k;
 
-			k = random.RandomInt( n - 1 - j ) + j;
-			TqInt i1 = j * m + i;
-			TqInt i2 = k * m + i;
-			assert( i1 < vecSamples.size() && i2 < vecSamples.size() );
-			t = vecSamples[ i1 ].x();
-			vecSamples[ i1 ].x( vecSamples[ i2 ].x() );
-			vecSamples[ i2 ].x( t );
-
+				k = random.RandomInt( n - 1 - i ) + i;
+				TqInt i1 = i * m + j;
+				TqInt i2 = k * m + j;
+				assert( i1 < vecSamples.size() && i2 < vecSamples.size() );
+				t = vecSamples[ i1 ].y();
+				vecSamples[ i1 ].y( vecSamples[ i2 ].y() );
+				vecSamples[ i2 ].y( t );
+			}
 		}
-	}
 
-
-	TqFloat subpixelheight = 1.0f / m_YSamples;
-	TqFloat subpixelwidth = 1.0f / m_XSamples;
-
-	TqInt which = 0;
-	for ( i = 0; i < n; i++ )
-	{
-		TqFloat sy = i * subpixelheight;
-		for ( j = 0; j < m; j++ )
+		// Shuffle x coordinates within each column of cells.
+		for ( i = 0; i < m; i++ )
 		{
-			TqFloat sx = j * subpixelwidth;
-			TqFloat xindex = vecSamples[ which ].x();
-			TqFloat yindex = vecSamples[ which ].y();
-			vecSamples[ which ].x( xindex * subcell_width + ( subcell_width * 0.5f ) + sx );
-			vecSamples[ which ].y( yindex * subcell_width + ( subcell_width * 0.5f ) + sy );
-			CqBucket::SamplePoints()[m_SampleIndices[ which ]].m_SubCellIndex = static_cast<TqInt>( ( yindex * m_YSamples ) + xindex );
-			which++;
+			for ( j = 0; j < n; j++ )
+			{
+				TqFloat t;
+				TqInt k;
+
+				k = random.RandomInt( n - 1 - j ) + j;
+				TqInt i1 = j * m + i;
+				TqInt i2 = k * m + i;
+				assert( i1 < vecSamples.size() && i2 < vecSamples.size() );
+				t = vecSamples[ i1 ].x();
+				vecSamples[ i1 ].x( vecSamples[ i2 ].x() );
+				vecSamples[ i2 ].x( t );
+
+			}
+		}
+
+
+		TqFloat subpixelheight = 1.0f / m_YSamples;
+		TqFloat subpixelwidth = 1.0f / m_XSamples;
+
+		TqInt which = 0;
+		for ( i = 0; i < n; i++ )
+		{
+			TqFloat sy = i * subpixelheight;
+			for ( j = 0; j < m; j++ )
+			{
+				TqFloat sx = j * subpixelwidth;
+				TqFloat xindex = vecSamples[ which ].x();
+				TqFloat yindex = vecSamples[ which ].y();
+				vecSamples[ which ].x( xindex * subcell_width + ( subcell_width * 0.5f ) + sx );
+				vecSamples[ which ].y( yindex * subcell_width + ( subcell_width * 0.5f ) + sy );
+				CqBucket::SamplePoints()[m_SampleIndices[ which ]].m_SubCellIndex = static_cast<TqInt>( ( yindex * m_YSamples ) + xindex );
+				which++;
+			}
 		}
 	}
 
@@ -385,12 +395,12 @@ void CqImagePixel::Combine(enum EqFilterDepth depthfilter, CqColor zThreshold)
 			}
 
 			// Find out if any of the samples are in a CSG tree.
-			TqBool bProcessed;
-			TqBool CqCSGRequired = CqCSGTreeNode::IsRequired();
+			bool bProcessed;
+			bool CqCSGRequired = CqCSGTreeNode::IsRequired();
 			if (CqCSGRequired)
 				do
 				{
-					bProcessed = TqFalse;
+					bProcessed = false;
 					//Warning ProcessTree add or remove elements in samples list
 					//We could not optimized the for loop here at all.
 					for ( std::deque<SqImageSample>::iterator isample = samples->
@@ -401,7 +411,7 @@ void CqImagePixel::Combine(enum EqFilterDepth depthfilter, CqColor zThreshold)
 						if ( isample->m_pCSGNode )
 						{
 							isample->m_pCSGNode->ProcessTree( samples->m_Data );
-							bProcessed = TqTrue;
+							bProcessed = true;
 							break;
 						}
 					}
@@ -410,7 +420,7 @@ void CqImagePixel::Combine(enum EqFilterDepth depthfilter, CqColor zThreshold)
 
 			CqColor samplecolor = gColBlack;
 			CqColor sampleopacity = gColBlack;
-			TqBool samplehit = TqFalse;
+			bool samplehit = false;
 			TqFloat opaqueDepths[2] = { FLT_MAX, FLT_MAX };
 			TqFloat maxOpaqueDepth = FLT_MAX;
 
@@ -464,7 +474,7 @@ void CqImagePixel::Combine(enum EqFilterDepth depthfilter, CqColor zThreshold)
 					if(!(maxOpaqueDepth < FLT_MAX))
 						maxOpaqueDepth = sample->Data()[Sample_Depth];
 				}
-				samplehit = TqTrue;
+				samplehit = true;
 			}
 
 			if ( samplehit )

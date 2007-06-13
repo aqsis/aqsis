@@ -157,7 +157,7 @@ CqDictionary::CqDictionary()
 
 
 // If the token already exists, addToken() return the corresponding id
-TqTokenId CqDictionary::addToken ( std::string n, EqTokenClass tc, EqTokenType tt, TqUint qnt, TqBool inln )
+TqTokenId CqDictionary::addToken ( std::string n, EqTokenClass tc, EqTokenType tt, TqUint qnt, bool inln )
 {
 	std::vector<SqTokenEntry>::iterator first = te.begin();
 	TqTokenId i;
@@ -183,9 +183,9 @@ TqTokenId CqDictionary::getTokenId ( std::string n )
 	TqTokenId i, j = 0;
 
 	ip.parse( n );
-	if ( ip.isInline() == TqTrue )
+	if ( ip.isInline() == true )
 	{
-		j = addToken ( ip.getIdentifier(), ip.getClass(), ip.getType(), ip.getQuantity(), TqTrue );
+		j = addToken ( ip.getIdentifier(), ip.getClass(), ip.getType(), ip.getQuantity(), true );
 	}
 	else
 	{
@@ -193,14 +193,14 @@ TqTokenId CqDictionary::getTokenId ( std::string n )
 
 		for ( i = 1;first != te.end();first++, i++ )
 		{
-			if ( ( n == first->name ) && ( first->in_line == TqFalse ) )
+			if ( ( n == first->name ) && ( first->in_line == false ) )
 				j = i;
 		}
 		if ( j == 0 )
 		{
 			std::string st( "Token not declared: " );
 			st += n;
-			throw CqError( RIE_ILLSTATE, RIE_ERROR, st, TqFalse );
+			throw CqError( RIE_ILLSTATE, RIE_ERROR, st, false );
 		}
 	}
 	return j;
@@ -258,7 +258,7 @@ TqUint CqDictionary::getTypeSize ( EqTokenType t )
 			return 1;
 			default :
 			throw CqError( RIE_BUG, RIE_SEVERE,
-			               "CqDictionary::getTypeSize(TokenType) --> Unknown token type", TqFalse );
+			               "CqDictionary::getTypeSize(TokenType) --> Unknown token type", false );
 	}
 }
 
@@ -266,7 +266,7 @@ void CqDictionary::isValid ( TqTokenId id )
 {
 	if ( id > te.size() || id == 0 )
 		throw CqError( RIE_BUG, RIE_SEVERE,
-		               "CqDictionary::isValid(TokenId) --> Bad ID", TqFalse );
+		               "CqDictionary::isValid(TokenId) --> Bad ID", false );
 }
 
 EqTokenType CqDictionary::getType ( TqTokenId id )
@@ -301,7 +301,7 @@ void CqDictionary::stats ()
 		cout << std::setiosflags( ios::left ) << ( first->name ).c_str() << "  ";
 		first->printClassType ();
 		cout << "[" << getQuantity( i ) << "]  ";
-		if ( ( first->in_line ) == TqTrue )
+		if ( ( first->in_line ) == true )
 		{
 			cout << " inline";
 		}

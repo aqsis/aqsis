@@ -39,8 +39,8 @@ START_NAMESPACE( Aqsis )
 
 CqSubdivision2::CqSubdivision2( )
 		: CqMotionSpec<boost::shared_ptr<CqPolygonPoints> >( boost::shared_ptr<CqPolygonPoints>() ),
-		m_bInterpolateBoundary( TqFalse ),
-		m_fFinalised(TqFalse)
+		m_bInterpolateBoundary( false ),
+		m_fFinalised(false)
 {}
 
 
@@ -49,7 +49,7 @@ CqSubdivision2::CqSubdivision2( )
  *	Constructor.
  */
 
-CqSubdivision2::CqSubdivision2( const boost::shared_ptr<CqPolygonPoints>& pPoints ) :  CqMotionSpec<boost::shared_ptr<CqPolygonPoints> >(pPoints), m_bInterpolateBoundary( TqFalse ), m_fFinalised(TqFalse)
+CqSubdivision2::CqSubdivision2( const boost::shared_ptr<CqPolygonPoints>& pPoints ) :  CqMotionSpec<boost::shared_ptr<CqPolygonPoints> >(pPoints), m_bInterpolateBoundary( false ), m_fFinalised(false)
 {
 	// Store the reference to our points.
 	AddTimeSlot( 0, pPoints );
@@ -150,7 +150,7 @@ void CqSubdivision2::Prepare(TqInt cVerts)
 	// Initialise the array of vertex indexes to the appropriate size.
 	m_aapVertices.resize(cVerts);
 
-	m_fFinalised=TqFalse;
+	m_fFinalised=false;
 }
 
 
@@ -167,7 +167,7 @@ void CqSubdivision2::AddVertex(CqLath* pVertex, TqInt& iVIndex, TqInt& iFVIndex)
 	iFVIndex=0;
 
 	// If -1 is passed in as the 'vertex' class index, we must create a new value.
-	TqBool fNewVertex = iVIndex < 0;
+	bool fNewVertex = iVIndex < 0;
 
 	std::vector<CqParameter*>::iterator iUP;
 	TqInt iTime;
@@ -278,7 +278,7 @@ void CqSubdivision2::AddEdgeVertex(CqLath* pVertex, TqInt& iVIndex, TqInt& iFVIn
 	iFVIndex=0;
 
 	// If -1 is passed in as the 'vertex' class index, we must create a new value.
-	TqBool fNewVertex = iVIndex < 0;
+	bool fNewVertex = iVIndex < 0;
 
 	std::vector<CqParameter*>::iterator iUP;
 	TqInt iTime;
@@ -624,7 +624,7 @@ CqSubdivision2* CqSubdivision2::Clone() const
  *	be joined in a complete loop, so care must be taken when traversing the
  *	topology to ensure that all facets are processed.
  */
-TqBool CqSubdivision2::Finalise()
+bool CqSubdivision2::Finalise()
 {
 	for(std::vector<std::vector<CqLath*> >::const_iterator ivert=m_aapVertices.begin(); ivert!=m_aapVertices.end(); ivert++)
 	{
@@ -635,19 +635,19 @@ TqBool CqSubdivision2::Finalise()
 			continue;
 
 		// Create an array for the laths on this vertex that have been visited.
-		std::vector<TqBool>  aVisited;
+		std::vector<bool>  aVisited;
 		aVisited.resize(cLaths);
 		TqInt cVisited = 0;
 
 		// Initialise it to all false.
-		aVisited.assign(cLaths, TqFalse);
+		aVisited.assign(cLaths, false);
 
 		CqLath* pCurrent = (*ivert)[0];
 		CqLath* pStart = pCurrent;
 		TqInt iCurrent = 0;
 		TqInt iStart = 0;
 
-		TqBool fDone = TqFalse;
+		bool fDone = false;
 		while(!fDone)
 		{
 			// Find a clockwise vertex match for the counterclockwise vertex index of this lath.
@@ -662,7 +662,7 @@ TqBool CqSubdivision2::Finalise()
 					pCurrent = (*ivert)[iLath];
 					iCurrent = iLath;
 					// Mark the linked to lath as visited.
-					aVisited[iLath] = TqTrue;
+					aVisited[iLath] = true;
 					cVisited++;
 
 					break;
@@ -676,7 +676,7 @@ TqBool CqSubdivision2::Finalise()
 		// start again from the initial lath and process backwards.
 		if(NULL == pCurrent->cv())
 		{
-			fDone = TqFalse;
+			fDone = false;
 			while(!fDone)
 			{
 				// Find a counterclockwise vertex match for the clockwise vertex index of this lath.
@@ -690,7 +690,7 @@ TqBool CqSubdivision2::Finalise()
 						// Link the current to the match.
 						(*ivert)[iLath]->SetpClockwiseVertex(pStart);
 						// Mark the linked to lath as visited.
-						aVisited[iStart] = TqTrue;
+						aVisited[iStart] = true;
 						cVisited++;
 						pStart = (*ivert)[iLath];
 						iStart = iLath;
@@ -702,17 +702,17 @@ TqBool CqSubdivision2::Finalise()
 				fDone = iLath==cLaths;
 			}
 		}
-		aVisited[iStart] = TqTrue;
+		aVisited[iStart] = true;
 		cVisited++;
 		// If we have not visited all the laths referencing this vertex, then we have a non-manifold situation.
 		if(cVisited < cLaths)
 		{
-			return( TqFalse );
+			return( false );
 		}
 	}
 
-	m_fFinalised = TqTrue;
-	return( TqTrue );
+	m_fFinalised = true;
+	return( true );
 }
 
 
@@ -1689,7 +1689,7 @@ TqInt CqSurfaceSubdivisionPatch::Split( std::vector<boost::shared_ptr<CqSurface>
 	return(aSplits.size());
 }
 
-TqBool CqSurfaceSubdivisionPatch::Diceable()
+bool CqSurfaceSubdivisionPatch::Diceable()
 {
 	assert( pTopology() );
 	assert( pTopology()->pPoints() );
@@ -1698,11 +1698,11 @@ TqBool CqSurfaceSubdivisionPatch::Diceable()
 	// If the cull check showed that the primitive cannot be diced due to crossing the e and hither planes,
 	// then we can return immediately.
 	if ( !m_fDiceable )
-		return ( TqFalse );
+		return ( false );
 
 	// If we can use a patch, don't dice, as dicing a patch is much quicker.
 	if( pTopology()->CanUsePatch( pFace() ) )
-		return(TqFalse);
+		return(false);
 
 	// Get the laths that reference the vertices of this face
 	std::vector<CqLath*> aQfv;
@@ -1710,7 +1710,7 @@ TqBool CqSurfaceSubdivisionPatch::Diceable()
 
 	// Cannot dice if not 4 points
 	if ( aQfv.size() != 4 )
-		return ( TqFalse );
+		return ( false );
 
 	// Otherwise we should continue to try to find the most advantageous split direction, OR the dice size.
 	const CqMatrix & matCtoR = QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, NULL, QGetRenderContext()->Time() );
@@ -1751,8 +1751,8 @@ TqBool CqSurfaceSubdivisionPatch::Diceable()
 
 	if ( uLen < FLT_EPSILON || vLen < FLT_EPSILON )
 	{
-		m_fDiscard = TqTrue;
-		return ( TqFalse );
+		m_fDiscard = true;
+		return ( false );
 	}
 
 	// because splitting to a bicubic patch is so much faster than dicing by
@@ -1764,11 +1764,11 @@ TqBool CqSurfaceSubdivisionPatch::Diceable()
 		gs = poptGridSize[0] / 2.0f;
 
 	if ( m_uDiceSize > gs)
-		return TqFalse;
+		return false;
 	if ( m_vDiceSize > gs)
-		return TqFalse;
+		return false;
 
-	return ( TqTrue );
+	return ( true );
 }
 
 /**
@@ -1776,12 +1776,12 @@ TqBool CqSurfaceSubdivisionPatch::Diceable()
  * conversion to a bicubic patch.
  */
 
-TqBool CqSubdivision2::CanUsePatch( CqLath* pFace )
+bool CqSubdivision2::CanUsePatch( CqLath* pFace )
 {
 	// If the patch is a quad with each corner having valence 4, and no special features,
 	// we can just create a B-Spline patch.
 	if( pFace->cQfv() != 4 )
-		return( TqFalse );
+		return( false );
 
 	std::vector<CqLath*> aQff, aQfv;
 	pFace->Qfv(aQfv);
@@ -1790,7 +1790,7 @@ TqBool CqSubdivision2::CanUsePatch( CqLath* pFace )
 	{
 		// Check if all vertices are valence 4.
 		if( (*iFV)->cQvv() != 4 )
-			return( TqFalse );
+			return( false );
 
 		// Check if all edges incident on the face vertices are smooth.
 		std::vector<CqLath*> aQve;
@@ -1800,7 +1800,7 @@ TqBool CqSubdivision2::CanUsePatch( CqLath* pFace )
 		{
 			if( EdgeSharpness((*iVE)) != 0.0f ||
 			        CornerSharpness((*iVE)) != 0.0f )
-				return( TqFalse );
+				return( false );
 		}
 
 		// Check if no internal boundaries.
@@ -1808,7 +1808,7 @@ TqBool CqSubdivision2::CanUsePatch( CqLath* pFace )
 		while( (*iFV) != pEnd )
 		{
 			if( NULL == pEnd )
-				return( TqFalse );
+				return( false );
 			pEnd = pEnd->cv();
 		}
 	}
@@ -1816,13 +1816,13 @@ TqBool CqSubdivision2::CanUsePatch( CqLath* pFace )
 	// Check local neighbourhood of patch is 9 quads.
 	pFace->Qff(aQff);
 	if( aQff.size() != 9 )
-		return( TqFalse );
+		return( false );
 
 	std::vector<CqLath*>::iterator iFF;
 	for( iFF = aQff.begin(); iFF!=aQff.end(); iFF++ )
 	{
 		if( (*iFF)->cQfv() != 4 )
-			return( TqFalse );
+			return( false );
 	}
 
 	// Finally check if the "facevarying" indexes match, as patches can't have
@@ -1833,16 +1833,16 @@ TqBool CqSubdivision2::CanUsePatch( CqLath* pFace )
 		(*iFV)->Qvv(aQvv);
 		// We already know this must have 4 entries to have passed the previous tests.
 		if( !( aQvv[0]->FaceVertexIndex() == aQvv[1]->FaceVertexIndex() == aQvv[2]->FaceVertexIndex() == aQvv[3]->FaceVertexIndex() ) )
-			return( TqFalse );
+			return( false );
 
 		// Check the edge parameter lines from this face vertex.
 		if( (*iFV)->ccv()->ccf()->FaceVertexIndex() != (*iFV)->ccv()->ccf()->ccv()->FaceVertexIndex() )
-			return( TqFalse );
+			return( false );
 		if( (*iFV)->ccv()->ccv()->ccf()->FaceVertexIndex() != (*iFV)->ccv()->ccv()->ccf()->ccv()->FaceVertexIndex() )
-			return( TqFalse );
+			return( false );
 	}
 
-	return( TqTrue );
+	return( true );
 }
 
 

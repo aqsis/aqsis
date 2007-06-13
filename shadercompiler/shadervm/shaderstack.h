@@ -153,8 +153,8 @@ static CqMatrix temp_matrix;
 			R* pdR; \
 			TqInt i, ii; \
 			\
-			TqBool fAVar = pA->Size() > 1; \
-			TqBool fBVar = pB->Size() > 1; \
+			bool fAVar = pA->Size() > 1; \
+			bool fBVar = pB->Size() > 1; \
 			\
 			if( fAVar && fBVar )\
 			{ \
@@ -218,7 +218,7 @@ static CqMatrix temp_matrix;
 
 struct	SqStackEntry
 {
-	TqBool			m_IsTemp;
+	bool			m_IsTemp;
 	IqShaderData*	m_Data;
 };
 
@@ -251,7 +251,7 @@ class SHADERVM_SHARE CqShaderStack
 			}
 
 			m_Stack[ m_iTop ].m_Data = pv;
-			m_Stack[ m_iTop ].m_IsTemp = TqTrue;
+			m_Stack[ m_iTop ].m_IsTemp = true;
 			m_iTop ++;
 			m_maxsamples = MAX(m_iTop, m_maxsamples);
 
@@ -271,7 +271,7 @@ class SHADERVM_SHARE CqShaderStack
 			}
 
 			m_Stack[ m_iTop ].m_Data = pv;
-			m_Stack[ m_iTop ].m_IsTemp = TqFalse;
+			m_Stack[ m_iTop ].m_IsTemp = false;
 			m_iTop ++;
 			m_maxsamples = MAX(m_iTop, m_maxsamples);
 
@@ -282,7 +282,7 @@ class SHADERVM_SHARE CqShaderStack
 		 * \param f Boolean value to update if this is varying. If not varying, leaves f unaltered.
 		 * \return Reference to the top stack entry.
 		 */
-		SqStackEntry Pop( TqBool& f )
+		SqStackEntry Pop( bool& f )
 		{
 			if ( m_iTop )
 				m_iTop--;
@@ -313,7 +313,7 @@ class SHADERVM_SHARE CqShaderStack
 		 */
 		void	Drop()
 		{
-			TqBool f = TqFalse;
+			bool f = false;
 			Pop( f );
 
 
@@ -409,8 +409,8 @@ inline void	OpMULV( IqShaderData* pA, IqShaderData* pB, IqShaderData* pRes, CqBi
 	CqVector3D* pdB;
 	TqInt i, ii;
 
-	TqBool fAVar = pA->Size() > 1;
-	TqBool fBVar = pB->Size() > 1;
+	bool fAVar = pA->Size() > 1;
+	bool fBVar = pB->Size() > 1;
 
 	if ( fAVar && fBVar )
 	{
@@ -487,8 +487,8 @@ inline void	OpDIVMM( IqShaderData* pA, IqShaderData* pB, IqShaderData* pRes, CqB
 	CqMatrix* pdB;
 	TqInt i, ii;
 	
-	TqBool fAVar = pA->Size() > 1;
-	TqBool fBVar = pB->Size() > 1;
+	bool fAVar = pA->Size() > 1;
+	bool fBVar = pB->Size() > 1;
 	
 	if( fAVar && fBVar )
 	{
@@ -577,7 +577,7 @@ inline void	OpNEG( A& a, IqShaderData* pA, IqShaderData* pRes, CqBitVector& Runn
 	A* pdA;
 	TqInt i, ii;
 
-	TqBool fAVar = pA->Size() > 1;
+	bool fAVar = pA->Size() > 1;
 
 	if ( fAVar )
 	{
@@ -613,7 +613,7 @@ inline void	OpCAST( A& a, B& b, IqShaderData* pA, IqShaderData* pRes, CqBitVecto
 	A* pdA;
 	TqInt i, ii;
 
-	TqBool fAVar = pA->Size() > 1;
+	bool fAVar = pA->Size() > 1;
 
 	if ( fAVar )
 	{
@@ -648,7 +648,7 @@ inline void	OpTRIPLE( A&a, IqShaderData* pRes, IqShaderData* pA, IqShaderData* p
 	TqFloat x, y, z;
 
 	TqInt i = MAX( MAX( pA->Size(), pB->Size() ), pC->Size() ) - 1;
-	TqBool __fVarying = i > 0;
+	bool __fVarying = i > 0;
 	for ( ; i >= 0; i-- )
 		if ( !__fVarying || RunningState.Value( i ) )
 		{
@@ -696,7 +696,7 @@ inline void	OpHEXTUPLE( A& z, IqShaderData* pRes,
 	TqInt ii3 = MAX( MAX( MAX( pI->Size(), pJ->Size() ), pK->Size() ), pL->Size() );
 	TqInt ii4 = MAX( MAX( MAX( pM->Size(), pN->Size() ), pO->Size() ), pP->Size() );
 	TqInt ii = MAX( MAX( MAX( ii1, ii2 ), ii3 ), ii4 );
-	TqBool __fVarying = ii > 0;
+	bool __fVarying = ii > 0;
 	for ( ; ii >= 0; ii-- )
 	{
 		if ( !__fVarying || RunningState.Value( ii ) )
@@ -721,7 +721,7 @@ inline void	OpHEXTUPLE( A& z, IqShaderData* pRes,
 			      b1, b2, b3, b4,
 			      c1, c2, c3, c4,
 			      d1, d2, d3, d4 );
-			tt.SetfIdentity( TqFalse );
+			tt.SetfIdentity( false );
 			pRes->SetValue( tt, ii );
 		}
 	}
@@ -740,7 +740,7 @@ inline void	OpCOMP( A& z, IqShaderData* pA, int index, IqShaderData* pRes, CqBit
 	A* pdA;
 	TqInt i, ii;
 
-	TqBool fAVar = pA->Size() > 1;
+	bool fAVar = pA->Size() > 1;
 
 	if ( fAVar )
 	{
@@ -777,8 +777,8 @@ inline void	OpCOMP( A& z, IqShaderData* pA, IqShaderData* pB, IqShaderData* pRes
 	TqFloat* pdB;
 	TqInt i, ii;
 
-	TqBool fAVar = pA->Size() > 1;
-	TqBool fBVar = pB->Size() > 1;
+	bool fAVar = pA->Size() > 1;
+	bool fBVar = pB->Size() > 1;
 
 	if ( fAVar && fBVar )
 	{
@@ -845,7 +845,7 @@ inline void	OpSETCOMP( A& z, IqShaderData* pRes, int index, IqShaderData* pA, Cq
 	TqFloat val;
 
 	TqInt i = MAX( pRes->Size(), pA->Size() ) - 1;
-	TqBool __fVarying = i > 0;
+	bool __fVarying = i > 0;
 	for ( ; i >= 0; i-- )
 	{
 		if ( !__fVarying || RunningState.Value( i ) )
@@ -871,7 +871,7 @@ inline void	OpSETCOMP( A& z, IqShaderData* pRes, IqShaderData* index, IqShaderDa
 	TqFloat val, fi;
 
 	TqInt i = MAX( MAX( pRes->Size(), pA->Size() ), index->Size() ) - 1;
-	TqBool __fVarying = i > 0;
+	bool __fVarying = i > 0;
 	for ( ; i >= 0; i-- )
 	{
 		if ( !__fVarying || RunningState.Value( i ) )
@@ -898,7 +898,7 @@ inline void	OpCOMPM( IqShaderData* pA, IqShaderData* pR, IqShaderData* pC, IqSha
 	TqFloat fr, fc;
 
 	TqInt i = MAX( pA->Size(), pRes->Size() ) - 1;
-	TqBool __fVarying = i > 0;
+	bool __fVarying = i > 0;
 	for ( ; i >= 0; i-- )
 		if ( !__fVarying || RunningState.Value( i ) )
 		{
@@ -922,7 +922,7 @@ inline void	OpSETCOMPM( IqShaderData* pA, IqShaderData* pR, IqShaderData* pC, Iq
 	TqFloat fr, fc, val;
 
 	TqInt i = MAX( pA->Size(), pV->Size() ) - 1;
-	TqBool __fVarying = i > 0;
+	bool __fVarying = i > 0;
 	for ( ; i >= 0; i-- )
 	{
 		if ( !__fVarying || RunningState.Value( i ) )

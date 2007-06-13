@@ -105,9 +105,9 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface* pSurface, PARAMETERLIST )
 static void ProcessCompression( TqInt *compress, TqInt *quality, TqInt count, RtToken *tokens, RtPointer *values );
 RtVoid	CreateGPrim( const boost::shared_ptr<CqSurface>& pSurface );
 void SetShaderArgument( const boost::shared_ptr<IqShader>& pShader, const char* name, TqPchar val );
-TqBool	ValidateState(...);
+bool	ValidateState(...);
 
-TqBool   IfOk = TqTrue;
+bool   IfOk = true;
 
 #define VALIDATE_CONDITIONAL \
 	{\
@@ -379,7 +379,7 @@ class	CqLogRangeCheckCallback	: public CqRangeCheckCallback
 // ValidateState
 // Check that the currect graphics state is one of those specified.
 //
-TqBool	ValidateState(int count, ... )
+bool	ValidateState(int count, ... )
 {
 	va_list	pArgs;
 	va_start( pArgs, count );
@@ -393,9 +393,9 @@ TqBool	ValidateState(int count, ... )
 	{
 		int state = va_arg( pArgs, int );
 		if( currentState == state )
-			return(TqTrue);
+			return(true);
 	}
-	return(TqFalse);
+	return(false);
 }
 
 
@@ -689,7 +689,7 @@ RtVoid	RiBegin( RtToken name )
 	QGetRenderContext() ->pattrWriteCurrent() ->SetpshadSurface( pDefaultSurfaceShader, QGetRenderContext() ->Time() );
 
 	// Setup the initial transformation.
-	//	QGetRenderContext()->ptransWriteCurrent() ->SetHandedness( TqFalse );
+	//	QGetRenderContext()->ptransWriteCurrent() ->SetHandedness( false );
 	QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "Orientation" ) [ 0 ] = 0;
 
 	return ;
@@ -747,7 +747,7 @@ RtVoid	RiFrameBegin( RtInt number )
 
 	QGetRenderContext() ->BeginFrameModeBlock();
 	QGetRenderContext() ->SetCurrentFrame( number );
-	CqCSGTreeNode::SetRequired( TqFalse );
+	CqCSGTreeNode::SetRequired( false );
 
 	QGetRenderContext() ->Stats().InitialiseFrame();
 
@@ -897,7 +897,7 @@ RtVoid	RiWorldEnd()
 
 	QGetRenderContext()->RenderAutoShadows();
 
-	TqBool fFailed = TqFalse;
+	bool fFailed = false;
 	// Call any specified pre render function.
 	if ( QGetRenderContext()->pPreRenderFunction() != NULL )
 		( *QGetRenderContext()->pPreRenderFunction() ) ();
@@ -924,7 +924,7 @@ RtVoid	RiWorldEnd()
 	catch ( CqString strError )
 	{
 		Aqsis::log() << error << strError.c_str() << std::endl;
-		fFailed = TqTrue;
+		fFailed = true;
 	}
 
 	// Delete the world context
@@ -946,7 +946,7 @@ RtVoid	RiWorldEnd()
 		QGetRenderContext() ->Stats().PrintStats( verbosity );
 	}
 
-	QGetRenderContext()->SetWorldBegin(TqFalse);
+	QGetRenderContext()->SetWorldBegin(false);
 
 	return ;
 }
@@ -2451,7 +2451,16 @@ RtVoid	RiGeometricApproximation( RtToken type, RtFloat value )
 
 	DEBUG_RIGEOMETRICAPPROXIMATION
 
-	Aqsis::log() << warning << "RiGeometricApproximation not supported" << std::endl;
+	if ( type != 0 && strstr( type, RI_FLATNESS ) )
+	{
+		TqFloat* flatnessAttr = QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite( "System", "GeometricFlatness" );
+		flatnessAttr[0] = value;
+		Aqsis::log() << warning << "RiGeometricApproximation flatness test not yet implemented" << std::endl;
+	}
+	else
+	{
+		Aqsis::log() << warning << "RiGeometricApproximation type not known" << std::endl;
+	}
 	return ;
 }
 
@@ -2883,7 +2892,7 @@ RtPoint*	RiTransformPoints( RtToken fromspace, RtToken tospace, RtInt npoints, R
 	CqMatrix matCToW = QGetRenderContext() ->matSpaceToSpace( fromspace,
 	                   tospace, NULL, NULL, QGetRenderContextI()->Time() );
 
-	if (matCToW.fIdentity() != TqTrue)
+	if (matCToW.fIdentity() != true)
 	{
 		for(TqInt i =0; i< npoints; i++)
 		{
@@ -2997,7 +3006,7 @@ RtVoid	RiAttributeV( RtToken name, PARAMETERLIST )
 
 		TqInt Type = 0;
 		TqInt Class = 0;
-		TqBool bArray = false;
+		bool bArray = false;
 		CqParameter* pParam = pAttr->pParameter( token );
 		if ( pParam == 0 )
 		{
@@ -3209,7 +3218,7 @@ RtVoid	RiGeneralPolygonV( RtInt nloops, RtInt nverts[], PARAMETERLIST )
 		MinZ = MaxZ = vecTemp.z();
 
 		// We need to take into account Orientation here.
-		TqBool O = QGetRenderContext()->pattrCurrent() ->GetIntegerAttribute( "System", "Orientation" ) [ 0 ] != 0;
+		bool O = QGetRenderContext()->pattrCurrent() ->GetIntegerAttribute( "System", "Orientation" ) [ 0 ] != 0;
 
 		TqUint iVert;
 		for ( iVert = 1; iVert < pPointsClass->P() ->Size(); ++iVert )
@@ -3379,7 +3388,7 @@ RtVoid RiBlobbyV( RtInt nleaf, RtInt ncode, RtInt code[], RtInt nflt, RtFloat fl
 	splits.resize(nleaf);
 
 	/* Parameters: RtInt count, RtToken tokens[], RtPointer values[] */
-	TqBool Cs = TqFalse;
+	bool Cs = false;
 	for (TqInt c = 0; c < count; c++)
 	{
 		if (strstr(tokens[c], RI_CS))
@@ -3424,7 +3433,7 @@ RtVoid RiBlobbyV( RtInt nleaf, RtInt ncode, RtInt code[], RtInt nflt, RtFloat fl
 				}
 
 			}
-			Cs = TqTrue;
+			Cs = true;
 			break;
 		}
 	}
@@ -3598,14 +3607,14 @@ RtVoid RiCurvesV( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, 
 	DEBUG_RICURVES
 
 	// find out whether the curve is periodic or non-periodic
-	TqBool periodic = TqFalse;
+	bool periodic = false;
 	if ( strcmp( wrap, RI_PERIODIC ) == 0 )
 	{
-		periodic = TqTrue;
+		periodic = true;
 	}
 	else if ( strcmp( wrap, RI_NONPERIODIC ) == 0 )
 	{
-		periodic = TqFalse;
+		periodic = false;
 	}
 	else
 	{
@@ -3783,7 +3792,7 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 	}
 
 	// We need to take into account Orientation here.
-	TqBool O = QGetRenderContext()->pattrCurrent() ->GetIntegerAttribute( "System", "Orientation" ) [ 0 ] != 0;
+	bool O = QGetRenderContext()->pattrCurrent() ->GetIntegerAttribute( "System", "Orientation" ) [ 0 ] != 0;
 
 	// Create a storage class for all the points.
 	boost::shared_ptr<CqPolygonPoints> pPointsClass( new CqPolygonPoints( cVerts, npolys, sumnVerts ) );
@@ -3898,13 +3907,13 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 			for( TqUint ifv = iStartTri; ifv < iEndTri; ++ifv )
 			{
 				TqInt ivaryingindex = aiTriangles[ ifv ];
-				TqBool found = TqFalse;
+				bool found = false;
 				for( TqUint iv = initial_index; iv != igvert; ++iv )
 				{
 					if( verts[ iv ] == ivaryingindex )
 					{
 						aFVList.push_back( iv );
-						found = TqTrue;
+						found = true;
 					}
 				}
 				assert( found );
@@ -4050,8 +4059,8 @@ RtVoid	RiBasis( RtBasis ubasis, RtInt ustep, RtBasis vbasis, RtInt vstep )
 			v.SetElement( i, j, vbasis[ i ][ j ] );
 		}
 	}
-	u.SetfIdentity( TqFalse );
-	v.SetfIdentity( TqFalse );
+	u.SetfIdentity( false );
+	v.SetfIdentity( false );
 
 	QGetRenderContext() ->pattrWriteCurrent() ->GetMatrixAttributeWrite( "System", "Basis" ) [ 0 ] = u;
 	QGetRenderContext() ->pattrWriteCurrent() ->GetMatrixAttributeWrite( "System", "Basis" ) [ 1 ] = v;
@@ -4172,8 +4181,8 @@ RtVoid	RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vw
 	if ( strcmp( type, RI_BICUBIC ) == 0 )
 	{
 		// Create a surface patch
-		TqBool	uPeriodic = ( strcmp( uwrap, RI_PERIODIC ) == 0 ) ? TqTrue : TqFalse;
-		TqBool	vPeriodic = ( strcmp( vwrap, RI_PERIODIC ) == 0 ) ? TqTrue : TqFalse;
+		bool	uPeriodic = ( strcmp( uwrap, RI_PERIODIC ) == 0 ) ? true : false;
+		bool	vPeriodic = ( strcmp( vwrap, RI_PERIODIC ) == 0 ) ? true : false;
 
 		boost::shared_ptr<CqSurfacePatchMeshBicubic> pSurface( new CqSurfacePatchMeshBicubic( nu, nv, uPeriodic, vPeriodic ) );
 		// Fill in primitive variables specified.
@@ -4202,8 +4211,8 @@ RtVoid	RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vw
 	else if ( strcmp( type, RI_BILINEAR ) == 0 )
 	{
 		// Create a surface patch
-		TqBool	uPeriodic = ( strcmp( uwrap, RI_PERIODIC ) == 0 ) ? TqTrue : TqFalse;
-		TqBool	vPeriodic = ( strcmp( vwrap, RI_PERIODIC ) == 0 ) ? TqTrue : TqFalse;
+		bool	uPeriodic = ( strcmp( uwrap, RI_PERIODIC ) == 0 ) ? true : false;
+		bool	vPeriodic = ( strcmp( vwrap, RI_PERIODIC ) == 0 ) ? true : false;
 
 		boost::shared_ptr<CqSurfacePatchMeshBilinear> pSurface( new CqSurfacePatchMeshBilinear( nu, nv, uPeriodic, vPeriodic ) );
 		// Fill in primitive variables specified.
@@ -5065,8 +5074,9 @@ RtVoid	RiMakeTextureV( RtString imagefile, RtString texturefile, RtToken swrap, 
 		TIFFSetField( ptex, TIFFTAG_PIXAR_TEXTUREFORMAT, MIPMAP_HEADER );
 		TIFFSetField( ptex, TIFFTAG_PIXAR_WRAPMODES, modes );
 		TIFFSetField( ptex, TIFFTAG_COMPRESSION, Source.Compression() ); /* COMPRESSION_DEFLATE */
-		int log2 = MIN( Source.XRes(), Source.YRes() );
-		log2 = ( int ) ( log( static_cast<float>(log2) ) / log( 2.0 ) );
+		/// \todo :  The number of mipmap levels used is not consistent with other renderers (at least, 3delight).  The calculation of log2 here (not elsewhere) rectifies that problem.  The calculation should probably really go into the CqTextureMap class.
+		int log2 = MIN(Source.XRes(), Source.YRes());
+		log2 = static_cast<int> ( ceil(log(static_cast<float>(log2))/log(2.0)) ) + 1;
 
 
 		for ( int i = 0; i < log2; ++i )
@@ -5424,7 +5434,7 @@ RtVoid	RiMakeOcclusionV( RtInt npics, RtString picfiles[], RtString shadowfile, 
 		ZFile.SetCompression( comp );
 		ZFile.SetQuality( qual );
 
-		ZFile.SaveShadowMap( shadowfile, TqTrue );
+		ZFile.SaveShadowMap( shadowfile, true );
 	}
 	return ;
 }
@@ -5451,7 +5461,7 @@ RtVoid	RiElse( )
 
 RtVoid	RiIfEnd( )
 {
-	IfOk = TqTrue;
+	IfOk = true;
 }
 
 //----------------------------------------------------------------------
@@ -5582,7 +5592,7 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 				for ( TqInt i = 0; i < ntags; ++i )
 				{
 					if ( strcmp( tags[ i ], "interpolateboundary" ) == 0 )
-						pSubd2->SetInterpolateBoundary( TqTrue );
+						pSubd2->SetInterpolateBoundary( true );
 					else if ( strcmp( tags [ i ], "crease" ) == 0 )
 					{
 						TqFloat creaseSharpness = floatargs[ floatargIndex ];
@@ -6220,9 +6230,9 @@ RtBoolean	BasisFromName( RtBasis * b, const char * strName )
 		for ( i = 0; i < 4; ++i )
 			for ( j = 0; j < 4; ++j )
 				( *b ) [ i ][ j ] = ( *pVals ) [ i ][ j ];
-		return ( TqTrue );
+		return ( true );
 	}
-	return ( TqFalse );
+	return ( false );
 }
 
 

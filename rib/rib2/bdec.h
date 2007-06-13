@@ -79,8 +79,8 @@ class RIB_SHARE CqRibBinaryDecoder
 		void getNext();
 		TqInt writeToBuffer( TqPchar buffer, TqUint size );
 
-		TqBool eof_flag;
-		TqBool fail_flag;
+		bool eof_flag;
+		bool fail_flag;
 
 		void initZlib( int buffersize = 0 );
 		CqRibBinaryDecoder( CqRibBinaryDecoder const &)
@@ -96,11 +96,11 @@ class RIB_SHARE CqRibBinaryDecoder
 		~CqRibBinaryDecoder();
 
 		TqInt read( TqPchar buffer, TqUint size );
-		TqBool eof()
+		bool eof()
 		{
 			return eof_flag;
 		};
-		TqBool fail()
+		bool fail()
 		{
 			return fail_flag;
 		};

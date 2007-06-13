@@ -36,7 +36,7 @@
 
 START_NAMESPACE( Aqsis )
 
-static TqBool IntersectLine( CqVector3D& P1, CqVector3D& T1, CqVector3D& P2, CqVector3D& T2, CqVector3D& P );
+static bool IntersectLine( CqVector3D& P1, CqVector3D& T1, CqVector3D& P2, CqVector3D& T2, CqVector3D& P );
 static void ProjectToLine( const CqVector3D& S, const CqVector3D& Trj, const CqVector3D& pnt, CqVector3D& p );
 
 #define TOOLARGEQUADS 10000
@@ -164,7 +164,7 @@ TqInt CqQuadric::DiceAll( CqMicroPolyGrid* pGrid )
 	    if( USES( lUses, EnvVars_Ng ) && NULL != pGrid->pVar(EnvVars_Ng) )
 	    {
 	        DONE( lDone, EnvVars_Ng );
-	        pGrid->SetbGeometricNormals( TqTrue );
+	        pGrid->SetbGeometricNormals( true );
 	    }
 	*/
 	TqFloat du = 1.0 / uDiceSize();
@@ -257,8 +257,8 @@ void CqQuadric::GenerateGeometricNormals( TqInt uDiceSize, TqInt vDiceSize, IqSh
 		{
 			TqInt igrid = ( v * ( uDiceSize + 1 ) ) + u;
 			DicePoint( u, v, N );
-			TqBool CSO = pTransform()->GetHandedness(pTransform()->Time(0));
-			TqBool O = pAttributes() ->GetIntegerAttribute( "System", "Orientation" ) [ 0 ] != 0;
+			bool CSO = pTransform()->GetHandedness(pTransform()->Time(0));
+			bool O = pAttributes() ->GetIntegerAttribute( "System", "Orientation" ) [ 0 ] != 0;
 			N = ( (O && CSO) || (!O && !CSO) ) ? N : -N;
 			pNormals->SetNormal( m_matITTx * N, igrid );
 		}
@@ -271,12 +271,12 @@ void CqQuadric::GenerateGeometricNormals( TqInt uDiceSize, TqInt vDiceSize, IqSh
  */
 
 
-TqBool	CqQuadric::Diceable()
+bool	CqQuadric::Diceable()
 {
 	// If the cull check showed that the primitive cannot be diced due to crossing the e and hither planes,
 	// then we can return immediately.
 	if ( !m_fDiceable )
-		return ( TqFalse );
+		return ( false );
 
 	TqUlong toomuch = EstimateGridSize();
 
@@ -288,15 +288,15 @@ TqBool	CqQuadric::Diceable()
 		gs = poptGridSize[0];
 
 	if (toomuch > TOOLARGEQUADS)
-		return TqFalse;
+		return false;
 
 	if ( m_uDiceSize > gs)
-		return TqFalse;
+		return false;
 	if ( m_vDiceSize > gs)
-		return TqFalse;
+		return false;
 
 
-	return ( TqTrue );
+	return ( true );
 
 }
 
@@ -423,7 +423,7 @@ CqBound	CqSphere::Bound() const
 /** Split this GPrim into a NURBS surface. Temp implementation, should split into smalled quadrics.
  */
 
-TqInt CqSphere::PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, TqBool u )
+TqInt CqSphere::PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, bool u )
 {
 	TqFloat phicent = ( m_PhiMin + m_PhiMax ) * 0.5;
 	TqFloat arccent = ( m_ThetaMin + m_ThetaMax ) * 0.5;
@@ -561,7 +561,7 @@ CqBound	CqCone::Bound() const
 /** Split this GPrim into a NURBS surface. Temp implementation, should split into smalled quadrics.
  */
 
-TqInt CqCone::PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, TqBool u )
+TqInt CqCone::PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, bool u )
 {
 	TqFloat vcent = ( m_vMin + m_vMax ) * 0.5;
 	TqFloat arccent = ( m_ThetaMin + m_ThetaMax ) * 0.5;
@@ -711,7 +711,7 @@ CqBound	CqCylinder::Bound() const
 /** Split this GPrim into a NURBS surface. Temp implementation, should split into smalled quadrics.
  */
 
-TqInt CqCylinder::PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, TqBool u )
+TqInt CqCylinder::PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, bool u )
 {
 	TqFloat zcent = ( m_ZMin + m_ZMax ) * 0.5;
 	TqFloat arccent = ( m_ThetaMin + m_ThetaMax ) * 0.5;
@@ -851,7 +851,7 @@ CqBound	CqHyperboloid::Bound() const
 /** Split this GPrim into a NURBS surface. Temp implementation, should split into smalled quadrics.
  */
 
-TqInt CqHyperboloid::PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, TqBool u )
+TqInt CqHyperboloid::PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, bool u )
 {
 	TqFloat arccent = ( m_ThetaMin + m_ThetaMax ) * 0.5;
 	CqVector3D midpoint = ( m_Point1 + m_Point2 ) / 2.0;
@@ -1024,7 +1024,7 @@ CqBound	CqParaboloid::Bound() const
 /** Split this GPrim into smaller quadrics.
  */
 
-TqInt CqParaboloid::PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, TqBool u )
+TqInt CqParaboloid::PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, bool u )
 {
 	TqFloat zcent = ( m_ZMin + m_ZMax ) * 0.5;
 	TqFloat arccent = ( m_ThetaMin + m_ThetaMax ) * 0.5;
@@ -1168,7 +1168,7 @@ CqBound	CqTorus::Bound() const
 /** Split this GPrim into a NURBS surface. Temp implementation, should split into smalled quadrics.
  */
 
-TqInt CqTorus::PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, TqBool u )
+TqInt CqTorus::PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, bool u )
 {
 	TqFloat zcent = ( m_PhiMax + m_PhiMin ) * 0.5;
 	TqFloat arccent = ( m_ThetaMin + m_ThetaMax ) * 0.5;
@@ -1307,7 +1307,7 @@ CqBound	CqDisk::Bound() const
 /** Split this GPrim into a NURBS surface. Temp implementation, should split into smalled quadrics.
  */
 
-TqInt CqDisk::PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, TqBool u )
+TqInt CqDisk::PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, bool u )
 {
 	TqFloat zcent = ( m_MajorRadius + m_MinorRadius ) * 0.5;
 	TqFloat arccent = ( m_ThetaMin + m_ThetaMax ) * 0.5;
@@ -1541,10 +1541,10 @@ CqBound CqQuadric::RevolveForBound( const std::vector<CqVector3D>& profile, cons
 /** Find the point at which two infinite lines intersect.
  * The algorithm generates a plane from one of the lines and finds the 
  * intersection point between this plane and the other line.
- * \return TqFalse if they are parallel, TqTrue if they intersect.
+ * \return false if they are parallel, true if they intersect.
  */
 
-TqBool IntersectLine( CqVector3D& P1, CqVector3D& T1, CqVector3D& P2, CqVector3D& T2, CqVector3D& P )
+bool IntersectLine( CqVector3D& P1, CqVector3D& T1, CqVector3D& P2, CqVector3D& T2, CqVector3D& P )
 {
 	CqVector3D	v, px;
 
@@ -1554,10 +1554,10 @@ TqBool IntersectLine( CqVector3D& P1, CqVector3D& T1, CqVector3D& P2, CqVector3D
 	TqFloat	t = ( P1 - P2 ) * v;
 	TqFloat vw = v * T2;
 	if ( ( vw * vw ) < 1.0e-07 )
-		return ( TqFalse );
+		return ( false );
 	t /= vw;
 	P = P2 + ( ( ( P1 - P2 ) * v ) / vw ) * T2 ;
-	return ( TqTrue );
+	return ( true );
 }
 
 

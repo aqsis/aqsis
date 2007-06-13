@@ -1,8 +1,0 @@
-These utils were written to investigate texture filtering for mipmapping in
-Aqsis.  A description of the conclusions may be found at:
-
-http://wiki.aqsis.org/dev/texture_filtering
-
-The matlab version is older but better tested as it was used to produce the
-images in the page above.  The tests were rewritten in scientific python so
-that more people can run them.

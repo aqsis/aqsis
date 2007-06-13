@@ -105,6 +105,7 @@ const EqParseNodeType IqParseNodeWhileConstruct::m_ID = ParseNode_WhileConstruct
 const EqParseNodeType IqParseNodeIlluminateConstruct::m_ID = ParseNode_IlluminateConstruct;
 const EqParseNodeType IqParseNodeIlluminanceConstruct::m_ID = ParseNode_IlluminanceConstruct;
 const EqParseNodeType IqParseNodeSolarConstruct::m_ID = ParseNode_SolarConstruct;
+const EqParseNodeType IqParseNodeGatherConstruct::m_ID = ParseNode_GatherConstruct;
 const EqParseNodeType IqParseNodeConditional::m_ID = ParseNode_Conditional;
 const EqParseNodeType IqParseNodeConditionalExpression::m_ID = ParseNode_ConditionalExpression;
 const EqParseNodeType IqParseNodeTypeCast::m_ID = ParseNode_TypeCast;

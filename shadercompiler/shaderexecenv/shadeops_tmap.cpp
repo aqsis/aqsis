@@ -46,7 +46,7 @@ START_NAMESPACE(    Aqsis )
 void CqShaderExecEnv::SO_ftexture1( IqShaderData* name, IqShaderData* channel, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
 	TqFloat Deffloat = 0.0f;
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	if ( !getRenderContext() )
@@ -74,7 +74,7 @@ void CqShaderExecEnv::SO_ftexture1( IqShaderData* name, IqShaderData* channel, I
 
 
 
-	__fVarying = TqTrue;
+	__fVarying = true;
 	if ( pTMap != 0 && pTMap->IsValid() )
 	{
 		std::valarray<TqFloat> val;
@@ -141,7 +141,7 @@ void CqShaderExecEnv::SO_ftexture1( IqShaderData* name, IqShaderData* channel, I
 void CqShaderExecEnv::SO_ftexture2( IqShaderData* name, IqShaderData* channel, IqShaderData* s, IqShaderData* t, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
 	TqFloat Deffloat = 0.0f;
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	if ( !getRenderContext() )
@@ -169,7 +169,7 @@ void CqShaderExecEnv::SO_ftexture2( IqShaderData* name, IqShaderData* channel, I
 
 
 
-	__fVarying = TqTrue;
+	__fVarying = true;
 	if ( pTMap != 0 && pTMap->IsValid() )
 	{
 		std::valarray<TqFloat> val;
@@ -236,7 +236,7 @@ void CqShaderExecEnv::SO_ftexture2( IqShaderData* name, IqShaderData* channel, I
 // texture(S,F,F,F,F,F,F,F,F)
 void CqShaderExecEnv::SO_ftexture3( IqShaderData* name, IqShaderData* channel, IqShaderData* s1, IqShaderData* t1, IqShaderData* s2, IqShaderData* t2, IqShaderData* s3, IqShaderData* t3, IqShaderData* s4, IqShaderData* t4, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	if ( !getRenderContext() )
@@ -258,7 +258,7 @@ void CqShaderExecEnv::SO_ftexture3( IqShaderData* name, IqShaderData* channel, I
 
 
 
-	__fVarying = TqTrue;
+	__fVarying = true;
 	if ( pTMap != 0 && pTMap->IsValid() )
 	{
 		std::valarray<TqFloat> val;
@@ -320,7 +320,7 @@ void CqShaderExecEnv::SO_ftexture3( IqShaderData* name, IqShaderData* channel, I
 void CqShaderExecEnv::SO_ctexture1( IqShaderData* name, IqShaderData* channel, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
 	TqFloat Deffloat = 0.0f;
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	if ( !getRenderContext() )
@@ -348,7 +348,7 @@ void CqShaderExecEnv::SO_ctexture1( IqShaderData* name, IqShaderData* channel, I
 
 
 
-	__fVarying = TqTrue;
+	__fVarying = true;
 	if ( pTMap != 0 && pTMap->IsValid() )
 	{
 		std::valarray<TqFloat> val;
@@ -417,7 +417,7 @@ void CqShaderExecEnv::SO_ctexture1( IqShaderData* name, IqShaderData* channel, I
 void CqShaderExecEnv::SO_ctexture2( IqShaderData* name, IqShaderData* channel, IqShaderData* s, IqShaderData* t, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
 	TqFloat Deffloat = 0.0f;
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	if ( !getRenderContext() )
@@ -445,7 +445,7 @@ void CqShaderExecEnv::SO_ctexture2( IqShaderData* name, IqShaderData* channel, I
 
 
 
-	__fVarying = TqTrue;
+	__fVarying = true;
 	if ( pTMap != 0 && pTMap->IsValid() )
 	{
 		std::valarray<TqFloat> val;
@@ -514,7 +514,7 @@ void CqShaderExecEnv::SO_ctexture2( IqShaderData* name, IqShaderData* channel, I
 // texture(S,F,F,F,F,F,F,F,F)
 void CqShaderExecEnv::SO_ctexture3( IqShaderData* name, IqShaderData* channel, IqShaderData* s1, IqShaderData* t1, IqShaderData* s2, IqShaderData* t2, IqShaderData* s3, IqShaderData* t3, IqShaderData* s4, IqShaderData* t4, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	if ( !getRenderContext() )
@@ -536,7 +536,7 @@ void CqShaderExecEnv::SO_ctexture3( IqShaderData* name, IqShaderData* channel, I
 
 
 
-	__fVarying = TqTrue;
+	__fVarying = true;
 	if ( pTMap != 0 && pTMap->IsValid() )
 	{
 		std::valarray<TqFloat> val;
@@ -600,7 +600,7 @@ void CqShaderExecEnv::SO_ctexture3( IqShaderData* name, IqShaderData* channel, I
 void CqShaderExecEnv::SO_fenvironment2( IqShaderData* name, IqShaderData* channel, IqShaderData* R, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
 	CqVector3D Defvec( 0.0f, 0.0f, 0.0f );
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	if ( !getRenderContext() )
@@ -633,7 +633,7 @@ void CqShaderExecEnv::SO_fenvironment2( IqShaderData* name, IqShaderData* channe
 	}
 
 
-	__fVarying = TqTrue;
+	__fVarying = true;
 	if ( pTMap != 0 && pTMap->IsValid() )
 	{
 		pTMap->PrepareSampleOptions( paramMap );
@@ -696,7 +696,7 @@ void CqShaderExecEnv::SO_fenvironment2( IqShaderData* name, IqShaderData* channe
 // environment(S,P,P,P,P)
 void CqShaderExecEnv::SO_fenvironment3( IqShaderData* name, IqShaderData* channel, IqShaderData* R1, IqShaderData* R2, IqShaderData* R3, IqShaderData* R4, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	if ( !getRenderContext() )
@@ -722,7 +722,7 @@ void CqShaderExecEnv::SO_fenvironment3( IqShaderData* name, IqShaderData* channe
 	}
 
 
-	__fVarying = TqTrue;
+	__fVarying = true;
 	if ( pTMap != 0 && pTMap->IsValid() )
 	{
 		std::valarray<TqFloat> val;
@@ -776,7 +776,7 @@ void CqShaderExecEnv::SO_fenvironment3( IqShaderData* name, IqShaderData* channe
 void CqShaderExecEnv::SO_cenvironment2( IqShaderData* name, IqShaderData* channel, IqShaderData* R, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
 	CqVector3D Defvec( 0.0f, 0.0f, 0.0f );
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	if ( !getRenderContext() )
@@ -808,7 +808,7 @@ void CqShaderExecEnv::SO_cenvironment2( IqShaderData* name, IqShaderData* channe
 	}
 
 
-	__fVarying = TqTrue;
+	__fVarying = true;
 	if ( pTMap != 0 && pTMap->IsValid() )
 	{
 		std::valarray<TqFloat> val;
@@ -872,7 +872,7 @@ void CqShaderExecEnv::SO_cenvironment2( IqShaderData* name, IqShaderData* channe
 // environment(S,P,P,P,P)
 void CqShaderExecEnv::SO_cenvironment3( IqShaderData* name, IqShaderData* channel, IqShaderData* R1, IqShaderData* R2, IqShaderData* R3, IqShaderData* R4, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	if ( !getRenderContext() )
@@ -898,7 +898,7 @@ void CqShaderExecEnv::SO_cenvironment3( IqShaderData* name, IqShaderData* channe
 	}
 	__iGrid = 0;
 
-	__fVarying = TqTrue;
+	__fVarying = true;
 	if ( pTMap != 0 && pTMap->IsValid() )
 	{
 		std::valarray<TqFloat> val;
@@ -950,10 +950,10 @@ void CqShaderExecEnv::SO_cenvironment3( IqShaderData* name, IqShaderData* channe
 // bump(S)
 void CqShaderExecEnv::SO_bump1( IqShaderData* name, IqShaderData* channel, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
-	__fVarying = TqTrue;
+	__fVarying = true;
 
 	__iGrid = 0;
 	CqBitVector& RS = RunningState();
@@ -971,10 +971,10 @@ void CqShaderExecEnv::SO_bump1( IqShaderData* name, IqShaderData* channel, IqSha
 // bump(S,F,F)
 void CqShaderExecEnv::SO_bump2( IqShaderData* name, IqShaderData* channel, IqShaderData* s, IqShaderData* t, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
-	__fVarying = TqTrue;
+	__fVarying = true;
 
 	__iGrid = 0;
 	CqBitVector& RS = RunningState();
@@ -992,10 +992,10 @@ void CqShaderExecEnv::SO_bump2( IqShaderData* name, IqShaderData* channel, IqSha
 // bump(S,F,F,F,F,F,F,F,F)
 void CqShaderExecEnv::SO_bump3( IqShaderData* name, IqShaderData* channel, IqShaderData* s1, IqShaderData* t1, IqShaderData* s2, IqShaderData* t2, IqShaderData* s3, IqShaderData* t3, IqShaderData* s4, IqShaderData* t4, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
-	__fVarying = TqTrue;
+	__fVarying = true;
 
 	__iGrid = 0;
 	CqBitVector& RS = RunningState();
@@ -1013,7 +1013,7 @@ void CqShaderExecEnv::SO_bump3( IqShaderData* name, IqShaderData* channel, IqSha
 // shadow(S,P)
 void CqShaderExecEnv::SO_shadow( IqShaderData* name, IqShaderData* channel, IqShaderData* P, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	if ( !getRenderContext() )
@@ -1030,7 +1030,7 @@ void CqShaderExecEnv::SO_shadow( IqShaderData* name, IqShaderData* channel, IqSh
 	IqTextureMap* pMap = getRenderContext() ->GetShadowMap( _aq_name );
 
 
-	__fVarying = TqTrue;
+	__fVarying = true;
 	if ( pMap != 0 && pMap->IsValid() )
 	{
 		std::valarray<TqFloat> fv;
@@ -1074,7 +1074,7 @@ void CqShaderExecEnv::SO_shadow( IqShaderData* name, IqShaderData* channel, IqSh
 
 void CqShaderExecEnv::SO_shadow1( IqShaderData* name, IqShaderData* channel, IqShaderData* P1, IqShaderData* P2, IqShaderData* P3, IqShaderData* P4, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	if ( !getRenderContext() )
@@ -1091,7 +1091,7 @@ void CqShaderExecEnv::SO_shadow1( IqShaderData* name, IqShaderData* channel, IqS
 	IqTextureMap* pMap = getRenderContext() ->GetShadowMap( _aq_name );
 
 
-	__fVarying = TqTrue;
+	__fVarying = true;
 	if ( pMap != 0 && pMap->IsValid() )
 	{
 		std::valarray<TqFloat> fv;
@@ -1259,7 +1259,7 @@ extern "C" int bake_3( BakingData *bd, char *name, float s, float t, float *bake
 
 void CqShaderExecEnv::SO_bake_f( IqShaderData* name, IqShaderData* s, IqShaderData* t, IqShaderData* f, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__fVarying=(f)->Class()==class_varying;
@@ -1296,7 +1296,7 @@ void CqShaderExecEnv::SO_bake_f( IqShaderData* name, IqShaderData* s, IqShaderDa
 
 void CqShaderExecEnv::SO_bake_3c( IqShaderData* name, IqShaderData* s, IqShaderData* t, IqShaderData* f, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__fVarying=(f)->Class()==class_varying;
@@ -1334,7 +1334,7 @@ void CqShaderExecEnv::SO_bake_3c( IqShaderData* name, IqShaderData* s, IqShaderD
 
 void CqShaderExecEnv::SO_bake_3n( IqShaderData* name, IqShaderData* s, IqShaderData* t, IqShaderData* f, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__fVarying=(f)->Class()==class_varying;
@@ -1375,7 +1375,7 @@ void CqShaderExecEnv::SO_bake_3n( IqShaderData* name, IqShaderData* s, IqShaderD
 
 void CqShaderExecEnv::SO_bake_3p( IqShaderData* name, IqShaderData* s, IqShaderData* t, IqShaderData* f, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__fVarying=(f)->Class()==class_varying;
@@ -1416,7 +1416,7 @@ void CqShaderExecEnv::SO_bake_3p( IqShaderData* name, IqShaderData* s, IqShaderD
 
 void CqShaderExecEnv::SO_bake_3v( IqShaderData* name, IqShaderData* s, IqShaderData* t, IqShaderData* f, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 	__fVarying=(f)->Class()==class_varying;
 	__fVarying=(s)->Class()==class_varying||__fVarying;
@@ -1458,7 +1458,7 @@ void CqShaderExecEnv::SO_bake_3v( IqShaderData* name, IqShaderData* s, IqShaderD
 // occlusion(occlmap,P,N,samples)
 void CqShaderExecEnv::SO_occlusion( IqShaderData* occlmap, IqShaderData* channel, IqShaderData* P, IqShaderData* N, IqShaderData* samples, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	if ( !getRenderContext() )
@@ -1478,7 +1478,7 @@ void CqShaderExecEnv::SO_occlusion( IqShaderData* occlmap, IqShaderData* channel
 
 	CqVector3D L(0,0,-1);
 
-	__fVarying = TqTrue;
+	__fVarying = true;
 	if ( pMap != 0 && pMap->IsValid() )
 	{
 		std::valarray<TqFloat> fv;

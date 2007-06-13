@@ -44,7 +44,7 @@ START_NAMESPACE( Aqsis )
 struct SqTransformation
 {
 	CqMatrix m_matTransform;
-	TqBool	m_Handedness;
+	bool	m_Handedness;
 };
 
 
@@ -93,7 +93,7 @@ class CqTransform : public CqMotionSpec<SqTransformation>, public IqTransform, p
 		// virtual	CqTransform& operator=( const CqTransform& From );
 
 		void	SetCurrentTransform( TqFloat time, const CqMatrix& matTrans );
-		void	ResetTransform(const CqMatrix& mat, TqBool hand, TqBool makeStatic=TqTrue);
+		void	ResetTransform(const CqMatrix& mat, bool hand, bool makeStatic=true);
 
 		virtual	const CqMatrix&	matObjectToWorld( TqFloat time ) const;
 
@@ -109,7 +109,7 @@ class CqTransform : public CqMotionSpec<SqTransformation>, public IqTransform, p
 				return( 1 );
 		}
 
-		virtual	TqBool GetHandedness(TqFloat time ) const;
+		virtual	bool GetHandedness(TqFloat time ) const;
 
 		virtual	void	ClearMotionObject( SqTransformation& A ) const;
 		virtual	SqTransformation	ConcatMotionObjects( const SqTransformation& A, const SqTransformation& B ) const;
@@ -127,9 +127,9 @@ class CqTransform : public CqMotionSpec<SqTransformation>, public IqTransform, p
 		}
 
 
-		TqBool	m_IsMoving;			///< Flag indicating this transformation describes a changing transform.
+		bool	m_IsMoving;			///< Flag indicating this transformation describes a changing transform.
 		CqMatrix	m_StaticMatrix;	///< Matrix storing the transformation should there be no motion involved.
-		TqBool	m_Handedness;	///< Current coordinate system orientation.
+		bool	m_Handedness;	///< Current coordinate system orientation.
 }
 ;
 

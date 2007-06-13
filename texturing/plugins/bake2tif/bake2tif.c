@@ -66,6 +66,26 @@ static char tiffname[ 1024 ];
 
 static int size = SIZE;
 
+/*
+ * reversed strstr()
+ */
+static char *strrstr(char *s1, char *sub)
+{
+	int s, t;
+	char *pt = NULL;
+	
+	s = t = 0;
+	if (s1)
+		s = strlen(s1);
+	if (sub)
+		t = strlen(sub);
+	
+  	if ((pt = strstr(&s1[s - t], sub)) != NULL)
+		return pt;
+
+  	return pt;
+}
+
 __export char *bake2tif( char *in )
 {
 	FILE * bakefile;
@@ -78,11 +98,11 @@ __export char *bake2tif( char *in )
 		size = atoi( result );
 
 	strcpy( tiffname, in );
-	if ( ( result = strstr( tiffname, ".bake" ) ) != 0 )
+	if ( ( result = strrstr( tiffname, ".bake" ) ) != 0 )
 		strcpy( result, ".tif" );
 	if ( !result )
 	{
-		if ( ( result = strstr( tiffname, ".bake" ) ) != 0 )
+		if ( ( result = strrstr( tiffname, ".bake" ) ) != 0 )
 			strcpy( result, ".tif" );
 	}
 	if ( !result )
@@ -131,15 +151,26 @@ static char *bake_open( FILE *bakefile, char *tiffname )
 	unsigned char *pixels;
 	unsigned char *xpixels;
 	char buffer[ 200 ];
-	int i, j, n, o;
+	int i, j, k, n, o;
 	int x, y;
+	float mins, mint, maxs, maxt;
+	int normalized = 1;
 	int bytesize = size * size * 3;
+	int count, number;
+	float *temporary;
+
+	count = 1024 * 1024;
+	number = 0;
 
 	h = w = size;
 	pixels = ( unsigned char * ) calloc( 3, size * size );
 
+        temporary = (float *) malloc(count *  5 * sizeof(float));
+
+	/* printf( "Parse the bake file \n"); */
 	while ( fgets( buffer, 200, bakefile ) != NULL )
 	{
+	 	k = number * 5;
 
 		if ( 5 == sscanf( buffer, "%f %f %f %f %f", &s, &t, &r1, &g1, &b1 ) )
 			;
@@ -148,9 +179,86 @@ static char *bake_open( FILE *bakefile, char *tiffname )
 			sscanf( buffer, "%f %f %f", &s, &t, &r1 );
 			g1 = b1 = r1;
 		}
+		temporary[k] = s;
+		temporary[k+1] = t;
+		temporary[k+2] = r1;
+		temporary[k+3] = g1;
+		temporary[k+4] = b1;
 
-		// When we have some collision ? What should be nice
-		// to accumulate the RGB values instead ?
+		number++;
+		if (number >= (count - 1))
+		{
+			count += 1024;
+			temporary = (float *)  realloc((void *) temporary, count * 5 * sizeof(float));
+		}
+		/* printf("%d\n", number); */
+	}
+
+	/* printf("done\nFind the max, min of s,t.\n"); */
+	mins = maxs = temporary[0]; 
+	mint = maxt = temporary[1];
+
+        /* Find the min,max of s and t */
+	for (i=0; i < number; i++)
+	{
+		k = i * 5;
+
+		if (mins > temporary[k])
+			mins = temporary[k];
+		if (mint > temporary[k+1])
+			mint = temporary[k+1];
+		if (maxs < temporary[k])
+			maxs = temporary[k];
+		if (maxt < temporary[k+1])
+			maxt = temporary[k+1];
+	}
+
+
+	if ((mins >= 0.0 && maxs <= 1.0) &&
+	    (maxt >= 0.0 && maxt <= 1.0) )
+		normalized = 0;
+
+	if (normalized == 1)
+	{
+		printf("bake2tif normalizes the keys (normally s,t)\n");
+		printf("\t(min_s, max_s): (%f, %f)\n\t(min_t, max_t): (%f, %f)\n", mins, maxs, mint, maxt );
+	}
+
+	/* Now save the s,t */
+	for (i=0; i < number; i++)
+	{
+		k = i * 5;
+
+		s = temporary[k];
+		t = temporary[k+1];
+		r1 = temporary[k+2];
+		g1 = temporary[k+3];
+		b1 = temporary[k+4];
+
+		/* Normalize the s,t between 0..1.0  only if required
+                 */
+		if (normalized)
+		{
+			if ( (maxs - mins) != 0.0)
+			{
+				s = (s - mins) / (maxs - mins);
+			}
+			else {
+				if (s < 0.0) s *= -1.0;
+				if (s > 1.0) s = 1.0;
+			}
+			if ((maxt - mint) != 0.0)
+			{
+				t = (t - mint) / (maxt - mint);
+			}
+			else {
+				if (t < 0.0) t *= -1.0;
+				if (t > 1.0) t = 1.0;
+			}
+		}
+		/* When we have some collision ? What should be nice
+		 * to accumulate the RGB values instead ?
+		 */
 		x = (int)( s * ( size - 1 ) );
 		y = (int)( t * ( size - 1 ) );
 		n = ( y * size ) + x;
@@ -161,6 +269,7 @@ static char *bake_open( FILE *bakefile, char *tiffname )
 		pixels [ n + 2 ] = (int)(b1 * 255);
 
 	}
+	/* printf("convert to rgb\n"); */
 
 	xpixels = ( unsigned char * ) calloc( 3, size * size );
 
@@ -219,6 +328,7 @@ static char *bake_open( FILE *bakefile, char *tiffname )
 
 	free( pixels );
 	free( xpixels );
+	free(temporary);
 
 	return tiffname;
 }

@@ -279,8 +279,11 @@ struct IqShaderExecEnv
 
 	virtual IqRenderer* getRenderContext() const = 0;
 
-	virtual	TqBool	SO_init_illuminance() = 0;
-	virtual	TqBool	SO_advance_illuminance() = 0;
+	virtual	bool	SO_init_illuminance() = 0;
+	virtual	bool	SO_advance_illuminance() = 0;
+
+	virtual	STD_SO	SO_init_gather(FLOATVAL samples, DEFVOIDPARAM ) = 0;
+	virtual	bool	SO_advance_gather() = 0;
 
 	// ShadeOps
 	virtual STD_SO	SO_radians( FLOATVAL degrees, DEFPARAM ) = 0;
@@ -400,6 +403,7 @@ struct IqShaderExecEnv
 	virtual STD_SO	SO_illuminate( POINTVAL P, DEFVOIDPARAM ) = 0;
 	virtual STD_SO	SO_solar( VECTORVAL Axis, FLOATVAL Angle, DEFVOIDPARAM ) = 0;
 	virtual STD_SO	SO_solar( DEFVOIDPARAM ) = 0;
+	virtual STD_SO	SO_gather( STRINGVAL category, POINTVAL P, VECTORVAL dir, FLOATVAL angle, FLOATVAL nsamples, DEFVOIDPARAMVAR ) = 0;
 	virtual STD_SO	SO_printf( STRINGVAL str, DEFVOIDPARAMVAR ) = 0;
 	virtual STD_SO	SO_format( STRINGVAL str, DEFPARAMVAR ) = 0;
 	virtual STD_SO	SO_concat( STRINGVAL stra, STRINGVAL strb, DEFPARAMVAR ) = 0;
@@ -468,6 +472,8 @@ struct IqShaderExecEnv
 	virtual STD_SO	SO_bake_3v( STRINGVAL shader, FLOATVAL s, FLOATVAL t, FLOATVAL f, DEFVOIDPARAMVAR) = 0;
 	virtual STD_SO	SO_external(DSOMethod method, void *initData, DEFPARAMVAR) = 0;
 	virtual	STD_SO	SO_occlusion( STRINGVAL occlmap, FLOATVAL channel, POINTVAL P, NORMALVAL N, FLOATVAL samples, DEFPARAMVAR ) = 0;
+	virtual	STD_SO	SO_occlusion_rt( POINTVAL P, NORMALVAL N, FLOATVAL samples, DEFPARAMVAR ) = 0;
+	virtual STD_SO	SO_rayinfo( STRINGVAL dataname, IqShaderData* pV, DEFPARAM ) = 0;
 };
 
 /** Templatised derivative function. Calculates the derivative of the provided stack entry with respect to u.

@@ -30,6 +30,7 @@
 #include	<math.h>
 #include	<iostream>
 #include	<fstream>
+#include	<algorithm>
 
 #include	"texturemap.h"
 #include	"rifile.h"
@@ -97,7 +98,7 @@ typedef enum {
 //
 // Local Variables
 //
-static TqBool m_critical = TqFalse;
+static bool m_critical = false;
 
 static TqFloat sides[6][2]    =  {
                                      {0.0f,0.0f}, {0.0f, ONEHALF}, {ONETHIRD, 0.0f}, {ONETHIRD,ONEHALF},
@@ -164,10 +165,10 @@ static void CalculateNoise(TqFloat &du, TqFloat &dv, TqInt which)
 }
 //----------------------------------------------------------------------
 /** IsVerbose() Is it adequate to printout the level of mipmap ?
- * Option "statistics" "int renderinfo" 1 by default it returns TqFalse
+ * Option "statistics" "int renderinfo" 1 by default it returns false
  *
  */
-static TqBool IsVerbose()
+static bool IsVerbose()
 {
 	static TqInt bVerbose = -1;
 
@@ -234,10 +235,14 @@ static TqFloat invLog2 =  1.0f/::log(2.0f);
 #endif
 }
 
+
 //---------------------------------------------------------------------
+// Implementation of CqTextureMapBuffer
+//---------------------------------------------------------------------
+
 /** Allocate a cache segment to hold the specified image tile.
  */
-TqPuchar CqTextureMapBuffer::AllocSegment( TqUlong width, TqUlong height, TqInt samples, TqBool fProt )
+TqPuchar CqTextureMapBuffer::AllocSegment( TqUlong width, TqUlong height, TqInt samples, bool fProt )
 {
 	static TqInt limit = -1;
 	static TqInt report = 1;
@@ -278,7 +283,7 @@ TqPuchar CqTextureMapBuffer::AllocSegment( TqUlong width, TqUlong height, TqInt 
 		}
 
 		report = 0;
-		m_critical = TqTrue;
+		m_critical = true;
 	}
 
 	QGetRenderContext() ->Stats().IncTextureMemory( demand );
@@ -288,7 +293,27 @@ TqPuchar CqTextureMapBuffer::AllocSegment( TqUlong width, TqUlong height, TqInt 
 	return ( static_cast<TqPuchar>( malloc( demand ) ) );
 }
 
-//--------------------------------------------------------------------------
+//---------------------------------------------------------------------
+/** Static array of cached texture maps.
+ */
+void	CqTextureMapBuffer::FreeSegment( TqPuchar pBufferData, TqUlong width, TqUlong height, TqInt samples )
+{
+	TqInt demand = ( width * height * samples );
+#ifdef ALLOCSEGMENTSTATUS
+
+	free_cnt ++;
+#endif
+
+	QGetRenderContext() ->Stats().IncTextureMemory( -demand );
+	free( pBufferData );
+
+}
+
+
+//----------------------------------------------------------------------
+// Implementation of CqTextureMap
+//----------------------------------------------------------------------
+
 /** Support for plugins mainly converter from any bitmap format to .tif file.
  */
 TqInt CqTextureMap::Convert( CqString &strName )
@@ -377,7 +402,7 @@ void CqTextureMap::CriticalMeasure()
 
 
 	now = QGetRenderContext() ->Stats().GetTextureMemory();
-	TqBool getout = TqTrue;
+	bool getout = true;
 
 	if ( m_critical )
 	{
@@ -409,7 +434,7 @@ void CqTextureMap::CriticalMeasure()
 			(*j)->m_apLast[0] = NULL;
 
 			// All MipMaps segments (flat tiles)  are the first to go 
-			for ( TqInt k = 0; (k <  256) && (getout == TqFalse); k++)
+			for ( TqInt k = 0; (k <  256) && (getout == false); k++)
 			{
 				i = (*j)->m_apMipMaps[k].begin(); 
 				e = (*j)->m_apMipMaps[k].end(); 
@@ -421,13 +446,13 @@ void CqTextureMap::CriticalMeasure()
 				(*j)->m_apMipMaps[k].resize(0);
 				current = QGetRenderContext() ->Stats().GetTextureMemory();
 				if ( ( now - current ) > ( limit / 4 ) ) {
-					getout = TqTrue;
+					getout = true;
 					break;
 				}
 			}
 			current = QGetRenderContext() ->Stats().GetTextureMemory();
 			if ( ( now - current ) > ( limit / 4 ) ) {
-				getout = TqTrue;
+				getout = true;
 				break;
 			}
 
@@ -435,7 +460,7 @@ void CqTextureMap::CriticalMeasure()
 	}
 	current = QGetRenderContext() ->Stats().GetTextureMemory();
 
-	m_critical = TqFalse;
+	m_critical = false;
 
 #ifdef _DEBUG
 
@@ -461,12 +486,10 @@ void CqTextureMap::Close()
 
 }
 
-
-
 //---------------------------------------------------------------------
 /** Create a mipmap usable for the texturemapping.
  */
-TqBool CqTextureMap::CreateMIPMAP( TqBool fProtectBuffers )
+bool CqTextureMap::CreateMIPMAP(bool fProtectBuffers)
 {
 	if ( m_pImage != 0 )
 	{
@@ -476,66 +499,23 @@ TqBool CqTextureMap::CreateMIPMAP( TqBool fProtectBuffers )
 		if( ret )
 		{
 			Aqsis::log() << error << "Cannot MIPMAP a tiled image \"" << m_strName.c_str() << "\"" << std::endl;
-			return( TqFalse );
+			return( false );
 		}
+
 		// Read the whole image into a buffer.
-		CqTextureMapBuffer* pBuffer = GetBuffer( 0, 0, 0, fProtectBuffers );
-		TqInt prevdistance = 0;
-		TqInt prevxres = m_XRes;
-		TqInt prevyres = m_YRes;
-		TqInt currxres = m_XRes;
-		TqInt curryres = m_YRes;
-		TqFloat swidth = 0;
-		TqFloat twidth = 0;
-
-		TqInt directory = 0;
-
-		do
+		TqUint directory = 0;
+		CqTextureMapBuffer* buffer = GetBuffer( 0, 0, directory++, fProtectBuffers );
+		CqImageDownsampler sampler(m_swidth, m_twidth, m_FilterFunc, m_smode, m_tmode);
+		while(buffer->Width() > 1 && buffer->Height() > 1)
 		{
-			CqImageFilter filter(swidth, twidth, prevxres, prevyres, m_FilterFunc);
-			CqTextureMapBuffer* pTMB = CreateBuffer( 0, 0, currxres, curryres, directory, fProtectBuffers );
-			CqTextureMapBuffer* pPrevBuffer = GetBuffer(0, 0, directory - prevdistance, fProtectBuffers );
-
-			if ( pTMB->pVoidBufferData() != NULL )
-			{
-				for ( TqInt y = 0; y < curryres; y++ )
-				{
-					//unsigned char accum[ 4 ];
-					std::vector<TqFloat> accum;
-					for ( TqInt x = 0; x < currxres; x++ )
-					{
-						filter.ImageFilterVal( pPrevBuffer, x, y, SamplesPerPixel(), currxres, curryres, accum );
-
-						for ( TqInt sample = 0; sample < m_SamplesPerPixel; sample++ )
-							pTMB->SetValue( x, y, sample, accum[ sample ] );
-					}
-				}
-				m_apMipMaps[directory%256].push_back( pTMB );
-				m_apLast[directory%256] = pTMB;
-			}
-
-			currxres /= 2;
-			curryres /= 2;
+			buffer = sampler.downsample(buffer, *this, directory, fProtectBuffers);
+			m_apMipMaps[directory%256].push_back(buffer);
+			m_apLast[directory%256] = buffer;
 			directory++;
-			swidth = m_swidth*(1<<prevdistance);
-			twidth = m_twidth*(1<<prevdistance);
-
-			if(prevdistance < 2)
-			{
-				prevdistance += 1;
-			}
-			else
-			{
-				prevxres /= 2;
-				prevyres /= 2;
-			}
 		}
-		while ( ( currxres > 1 ) && ( curryres > 1 ) ) ;
 	}
-	return( TqTrue );
+	return( true );
 }
-
-
 
 //---------------------------------------------------------------------
 /** Destructor.
@@ -612,30 +592,13 @@ CqTextureMap::~CqTextureMap()
 #endif
 }
 
-//---------------------------------------------------------------------
-/** Static array of cached texture maps.
- */
-void	CqTextureMapBuffer::FreeSegment( TqPuchar pBufferData, TqUlong width, TqUlong height, TqInt samples )
-{
-	TqInt demand = ( width * height * samples );
-#ifdef ALLOCSEGMENTSTATUS
-
-	free_cnt ++;
-#endif
-
-	QGetRenderContext() ->Stats().IncTextureMemory( -demand );
-	free( pBufferData );
-
-}
-
-//----------------------------------------------------------------------
 /** Get a pointer to the cache buffer segment which contains the specifed sample point.
  * \param s Horizontal sample position.
  * \param t Vertical sample position.
  * \param directory TIFF directory index.
  * \param fProt A boolean value, true if the buffer should be protected from removal by the cache management system.
  */
-CqTextureMapBuffer* CqTextureMap::GetBuffer( TqUlong s, TqUlong t, TqInt directory, TqBool fProt )
+CqTextureMapBuffer* CqTextureMap::GetBuffer( TqUlong s, TqUlong t, TqInt directory, bool fProt )
 {
         //TIMER_START("GetBuffer");
 	QGetRenderContext() ->Stats().IncTextureMisses( 4 );
@@ -704,7 +667,7 @@ CqTextureMapBuffer* CqTextureMap::GetBuffer( TqUlong s, TqUlong t, TqInt directo
 		else
 		{
 			// Create a storage buffer
-			pTMB = CreateBuffer( 0, 0, m_XRes, m_YRes, directory, TqTrue );
+			pTMB = CreateBuffer( 0, 0, m_XRes, m_YRes, directory, true );
 
 			TIFFSetDirectory( m_pImage, directory );
 			void* pdata = pTMB->pVoidBufferData();
@@ -804,7 +767,7 @@ void CqTextureMap::CalculateLevel(TqFloat ds, TqFloat dt)
  * \param id     the directory in the tiff 0...n
  * \param param m_color the result will be stored in m_color.
  */
-TqBool CqTextureMap::BiLinear(TqFloat u, TqFloat v, TqInt umapsize, TqInt vmapsize,
+bool CqTextureMap::BiLinear(TqFloat u, TqFloat v, TqInt umapsize, TqInt vmapsize,
                               TqInt id, std::valarray<TqFloat >	&m_color)
 {
 	TqUint umapsize1 = umapsize-1;
@@ -843,7 +806,7 @@ TqBool CqTextureMap::BiLinear(TqFloat u, TqFloat v, TqInt umapsize, TqInt vmapsi
 
 		Aqsis::log() << error << "Cannot find value for either pTMPB[a,b,c,d]" << std::endl;
 		Open();
-		return TqFalse;
+		return false;
 	}
 
 	TqUint x1, y1, x2, y2, x3, y3, x4, y4;
@@ -870,7 +833,7 @@ TqBool CqTextureMap::BiLinear(TqFloat u, TqFloat v, TqInt umapsize, TqInt vmapsi
 		m_color[c] = LERP(rv, LERP(ru, Val00, Val01), LERP(ru, Val10, Val11));
 	}
 
-	return TqTrue;
+	return true;
 }
 
 //----------------------------------------------------------------------
@@ -913,7 +876,7 @@ void CqTextureMap::GetSampleWithoutBlur( TqFloat u1, TqFloat v1, TqFloat u2, TqF
 			m_lerp = 1.0f;
 
 	}
-	TqBool bLerp = (m_lerp == 1.0);
+	bool bLerp = (m_lerp == 1.0);
 
 
 	// Assuming this will also include the pixel at u,v multiple samplings interval
@@ -1088,7 +1051,7 @@ CqTextureMap* CqTextureMap::GetTextureMap( const CqString& strName )
 	// Ensure that it is in the correct format
 	if ( pNew->Format() != TexFormat_MIPMAP )
 	{
-		if( !pNew->CreateMIPMAP( TqTrue ) )
+		if( !pNew->CreateMIPMAP( true ) )
 			pNew->SetInvalid();
 		pNew->Close();
 	}
@@ -1164,72 +1127,6 @@ void CqTextureMap::Interpreted( TqPchar mode )
 	delete[](string);
 }
 
-//----------------------------------------------------------------------
-/** this is used for downsampling the texture at lower resolution
-  *   
-  * it will use the filtervalues. breakdown rgba values in floats. 
-  * Accumulate the floating value rgba and ponderate the sum with the filter values;
-  * and convert back to uint32 the rgba floating values.
-  * The values of the current filterfunc/swrap/twrap are used ; if ever swrap or twrap is equal to
-  * 1.0 than the filterfunc will be executed (at lower resolutions) using the points 
-  *   (X1,Y1) and (X2,Y2) (-0.5, -0.5) ... (0.5, 0.5) giving 9 samples -0.5, 0.0, 0.5 in X and in Y.
-  *
-  **/
-void CqTextureMap::CqImageFilter::ImageFilterVal( CqTextureMapBuffer* pData, TqInt x, TqInt y, TqInt samplesPerPixel,  TqInt xres, TqInt yres, std::vector<TqFloat>& accum )
-{
-	// Clear the accumulator
-	accum.assign( samplesPerPixel, 0.0f );
-
-	TqInt isample;
-	TqInt sampleCol, sampleRow;
-	TqFloat div = 0.0f;
-
-	TqFloat heightTransform = static_cast<TqFloat>(m_yres)/static_cast<TqFloat>(yres);
-	TqFloat widthTransform = static_cast<TqFloat>(m_xres)/static_cast<TqFloat>(xres);
-
-	for ( isample = 0; isample < samplesPerPixel; isample++ )
-		accum[ isample ]= 0.0;
-	
-	TqInt fx = static_cast<TqInt>(CEIL((m_swidth-1)/2));
-	TqInt fy = static_cast<TqInt>(CEIL((m_twidth-1)/2));
-	TqInt weightOffset = 0;
-
-	for ( sampleRow = y-fy; sampleRow <= y+fy; sampleRow++ )
-	{
-		TqInt ypos = static_cast<TqInt>(heightTransform * sampleRow);
-		// \todo: This behaviour should be based on the wrap mode.
-		if (ypos < 0) ypos = 0;
-		if (ypos > (TqInt) m_yres - 1) ypos = m_yres - 1;
-		for ( sampleCol = x-fx; sampleCol <= x+fx; sampleCol++)
-		{
-			/* find the filter value */
-			TqFloat weight = m_weights[weightOffset++];
-
-			TqInt xpos = static_cast<TqInt>(widthTransform * sampleCol);
-			// \todo: This behaviour should be based on the wrap mode.
-			if (xpos < 0) xpos = 0;
-			if (xpos > (TqInt) m_xres - 1) xpos = m_xres - 1;
-			if( (weight != 0.0) && (sampleCol>=0) && (sampleCol<m_xres) && (sampleRow>=0) && (sampleRow<m_yres) )
-			{
-				for ( isample = 0; isample < samplesPerPixel; isample++ )
-					accum[ isample ] += (pData->GetValue( xpos, ypos, isample ) * weight);
-
-				/* accumulate the weighting factor */
-				div += weight;
-			}
-		}
-	}
-
-	/* use the accumulated weighting factor */
-	for ( isample = 0; isample < samplesPerPixel; isample++ )
-	{
-		TqFloat sampleVal = accum[isample];
-		sampleVal /= div;
-		sampleVal = CLAMP(sampleVal, 0.0f, 1.0f);
-		accum[ isample ] = sampleVal;
-	}
-}
-
 //---------------------------------------------------------------------
 /** Open a named texture map.
  */
@@ -1237,7 +1134,7 @@ void CqTextureMap::Open()
 {
 	TqInt wasconverted = 0;
 
-	m_IsValid = TqFalse;
+	m_IsValid = false;
 
 
 	// Find the file required.
@@ -1318,7 +1215,7 @@ void CqTextureMap::Open()
 		/* Second test; is it containing enough directories for us */
 		TqInt min = MIN(m_XRes, m_YRes );
 		TqInt directory = static_cast<TqInt>(fastlog2(static_cast<TqFloat> (min)));
-		if (TIFFSetDirectory(m_pImage, directory - 1) == TqFalse)
+		if (TIFFSetDirectory(m_pImage, directory - 1) == false)
 		   bMipMap &= TIFFSetDirectory(m_pImage, directory - 2);
 
 
@@ -1338,12 +1235,12 @@ void CqTextureMap::Open()
 		if ( bMipMap )
 		{
 			m_Format = TexFormat_MIPMAP;
-			m_IsValid = TqTrue;
+			m_IsValid = true;
 		}
 		else
 		{
 			m_Format = TexFormat_Plain;
-			m_IsValid = TqTrue;
+			m_IsValid = true;
 		}
 	}
 	m_Directory = 0;
@@ -1538,6 +1435,7 @@ void CqTextureMap::SampleMap( TqFloat s1, TqFloat t1, TqFloat s2, TqFloat t2, Tq
 }
 
 
+/// \todo Review: much code duplication between various overloaded versions of WriteImage and WriteTileImage.
 //----------------------------------------------------------------------
 /** Write an image to an open TIFF file in the current directory as straight storage.
  * as unsigned char values
@@ -1902,6 +1800,151 @@ void CqTextureMap::WriteTileImage( TIFF* ptex, TqPuchar raster, TqUlong width, T
 
 
 //----------------------------------------------------------------------
+// Implementation of CqImageDownsampler
+//----------------------------------------------------------------------
+// inline functions
+inline TqInt CqImageDownsampler::edgeWrap(TqInt pos, TqInt posMax, EqWrapMode mode)
+{
+	switch(mode)
+	{
+		case WrapMode_Clamp:
+		return clamp(pos, 0, posMax-1);
+		break;
+		case WrapMode_Periodic:
+		return pos = (pos + posMax) % posMax;
+		break;
+		case WrapMode_Black:
+		default:
+		return pos;
+	}
+}
+
+
+//----------------------------------------------------------------------
+CqImageDownsampler::CqImageDownsampler(TqFloat sWidth, TqFloat tWidth, RtFilterFunc filterFunc, EqWrapMode sWrapMode, EqWrapMode tWrapMode)
+	: m_sNumPts(0),
+	m_tNumPts(0),
+	m_sStartOffset(0),
+	m_tStartOffset(0),
+	m_weights(0),
+	m_sWidth(sWidth),
+	m_tWidth(tWidth),
+	m_filterFunc(filterFunc),
+	m_sWrapMode(sWrapMode),
+	m_tWrapMode(tWrapMode)
+{ }
+
+
+//----------------------------------------------------------------------
+CqTextureMapBuffer* CqImageDownsampler::downsample(CqTextureMapBuffer* inBuf, CqTextureMap& texMap, TqInt directory, bool protectBuffer)
+{
+	TqInt imWidth = inBuf->Width();
+	TqInt imHeight = inBuf->Height();
+	TqInt newWidth = (imWidth+1)/2;
+	TqInt newHeight = (imHeight+1)/2;
+	TqInt samplesPerPixel = inBuf->Samples();
+	bool imEvenS = !(imWidth % 2);
+	bool imEvenT = !(imHeight % 2);
+	if(m_weights.empty() || !((m_sNumPts % 2) ^ imEvenS) || !((m_tNumPts % 2) ^ imEvenT))
+	{
+		// recalculate filter kernel if cached one isn't the right size.
+		computeFilterKernel(m_sWidth, m_tWidth, m_filterFunc, imEvenS, imEvenT);
+	}
+	// Make a new buffer to store the downsampled image in.
+	CqTextureMapBuffer* outBuf = texMap.CreateBuffer(0, 0, newWidth, newHeight, directory, protectBuffer);
+	if(outBuf->pVoidBufferData() == NULL)
+		throw XqException("Cannot create buffer for downsampled image");
+	std::vector<TqFloat> accum(samplesPerPixel);
+	for(TqInt y = 0; y < newHeight; y++)
+	{
+		for(TqInt x = 0; x < newWidth; x++)
+		{
+			// s ~ x ~ inner loop ~ 1st var in TMB.GetValue ~ width
+			// t ~ y ~ outer loop ~ 2nd var in TMB.GetValue ~ height
+			TqInt weightOffset = 0;
+			accum.assign(samplesPerPixel, 0);
+			for(TqInt j = 0; j < m_tNumPts; j++)
+			{
+				TqInt ypos = edgeWrap(2*y + m_tStartOffset + j, imHeight, m_tWrapMode);
+				for(TqInt i = 0; i < m_sNumPts; i++)
+				{
+					TqInt xpos = edgeWrap(2*x + m_sStartOffset + i, imWidth, m_sWrapMode);
+					if(!((m_tWrapMode == WrapMode_Black && (ypos < 0 || ypos >= imHeight))
+							|| (m_sWrapMode == WrapMode_Black && (xpos < 0 || xpos >= imWidth))))
+					{
+						TqFloat weight = m_weights[weightOffset];
+						for(TqInt sample = 0; sample < samplesPerPixel; sample++)
+							accum[sample] += weight * inBuf->GetValue(xpos, ypos, sample);
+					}
+					weightOffset++;
+				}
+			}
+			for(TqInt sample = 0; sample < samplesPerPixel; sample++)
+				outBuf->SetValue(x, y, sample, CLAMP(accum[sample], 0.0, 1.0));
+		}
+	}
+	return outBuf;
+}
+
+
+//----------------------------------------------------------------------
+void CqImageDownsampler::computeFilterKernel(TqFloat sWidth, TqFloat tWidth, RtFilterFunc filterFunc, bool evenFilterS, bool evenFilterT)
+{
+	// set up filter sizes & offsets
+	if(evenFilterS) // for even-sized images in s
+		m_sNumPts = std::max(2*static_cast<TqInt>((sWidth+1)/2), 2);
+	else // for odd-sized images in s
+		m_sNumPts = std::max(2*static_cast<TqInt>(sWidth/2) + 1, 3);
+
+	if(evenFilterT) // for even-sized images in t
+		m_tNumPts = std::max(2*static_cast<TqInt>((tWidth+1)/2), 2);
+	else // for odd-sized images in t
+		m_tNumPts = std::max(2*static_cast<TqInt>(tWidth/2) + 1, 3);
+
+	m_sStartOffset = -(m_sNumPts-1)/2;
+	m_tStartOffset = -(m_tNumPts-1)/2;
+
+	// set up filter weights
+	m_weights.resize(m_tNumPts * m_sNumPts);
+	TqUint weightOffset = 0;
+	TqFloat sum = 0;
+	for(TqInt j = 0; j < m_tNumPts; j++)
+	{
+		// overall division by 2 is to downsample the image by a factor of 2.
+		TqFloat t = (-(m_tNumPts-1)/2.0 + j)/2;
+		for(TqInt i = 0; i < m_sNumPts; i++)
+		{
+			TqFloat s = (-(m_sNumPts-1)/2.0 + i)/2;
+			m_weights[weightOffset] = (*filterFunc) (s, t, sWidth/2, tWidth/2);
+			sum += m_weights[weightOffset];
+			weightOffset++;
+		}
+	}
+	// normalise the filter
+	for(std::vector<TqFloat>::iterator i = m_weights.begin(), end = m_weights.end(); i != end; i++)
+		*i /= sum;
+
+	// print the filter kernel to the log at debug priority
+	weightOffset = 0;
+	Aqsis::log() << debug << "filter Kernel =\n";
+	for(TqInt j = 0; j < m_tNumPts; j++)
+	{
+		Aqsis::log() << debug << "[";
+		for(TqInt i = 0; i < m_sNumPts; i++)
+		{
+			Aqsis::log() << debug << m_weights[weightOffset++] << ", "; 
+		}
+		Aqsis::log() << debug << "]\n";
+	}
+	Aqsis::log() << debug << "\n";
+}
+
+
+//---------------------------------------------------------------------
+// Implementation of CqEnvironmentMap
+//---------------------------------------------------------------------
+
+//----------------------------------------------------------------------
 /** Retrieve a sample from the environment map using R as the reflection vector.
  */
 
@@ -1939,7 +1982,7 @@ void CqEnvironmentMap::SampleMap( CqVector3D& R1,
 		if (pLerp && (*pLerp > 0.0f))
 			m_lerp = 1.0f;
 	}
-	TqBool bLerp = (m_lerp == 1.0);
+	bool bLerp = (m_lerp == 1.0);
 
 	if ( m_pImage != 0 )
 	{

@@ -133,13 +133,13 @@ void CqDDServer::Close()
  * \param port Integer port number to use.
  */
 
-TqBool	CqDDServer::Prepare( TqInt port )
+bool	CqDDServer::Prepare( TqInt port )
 {
     if ( Open() )
         if ( Bind( port ) )
             if ( Listen() )
-                return ( TqTrue );
-    return ( TqFalse );
+                return ( true );
+    return ( false );
 }
 
 
@@ -147,7 +147,7 @@ TqBool	CqDDServer::Prepare( TqInt port )
 /** Create the socket.
  */
 
-TqBool CqDDServer::Open()
+bool CqDDServer::Open()
 {
     m_Socket = socket( AF_INET, SOCK_STREAM, 0 );
 
@@ -157,7 +157,7 @@ TqBool CqDDServer::Open()
         TqInt err = WSAGetLastError();
 #endif // AQSIS_SYSTEM_WIN32
         Aqsis::log() << error << "Error opening DD server socket" << std::endl;
-        return ( TqFalse );
+        return ( false );
     }
 
     TqInt x = 1;
@@ -167,7 +167,7 @@ TqBool CqDDServer::Open()
     BOOL Ret = SetHandleInformation( ( HANDLE ) m_Socket, HANDLE_FLAG_INHERIT, 0 );
 #endif // AQSIS_SYSTEM_WIN32
 
-    return ( TqTrue );
+    return ( true );
 }
 
 
@@ -175,7 +175,7 @@ TqBool CqDDServer::Open()
 /** Bind the socket to a specified port.
  */
 
-TqBool CqDDServer::Bind( TqInt port )
+bool CqDDServer::Bind( TqInt port )
 {
     SOCKADDR_IN saTemp;
     memset( &saTemp, 0, sizeof( saTemp ) );
@@ -187,10 +187,10 @@ TqBool CqDDServer::Bind( TqInt port )
     {
 		Aqsis::log() << error << "Error binding to DD socket" << std::endl;
 		Close();
-		return ( TqFalse );
+		return ( false );
     }
     m_Port = port;
-    return ( TqTrue );
+    return ( true );
 }
 
 
@@ -198,15 +198,15 @@ TqBool CqDDServer::Bind( TqInt port )
 /** Prepare the socket to listen for client connections.
  */
 
-TqBool CqDDServer::Listen()
+bool CqDDServer::Listen()
 {
     if ( listen( m_Socket, 5 ) == SOCKET_ERROR )
     {
         Aqsis::log() << error << "Error listening to DD socket" << std::endl;
         Close();
-        return ( TqFalse );
+        return ( false );
     }
-    return ( TqTrue );
+    return ( true );
 }
 
 
@@ -214,16 +214,16 @@ TqBool CqDDServer::Listen()
 /** Set ip the thread to wait for client connection requests.
  */
 
-TqBool CqDDServer::Accept( boost::shared_ptr<CqDisplayServerImage> dd )
+bool CqDDServer::Accept( boost::shared_ptr<CqDisplayServerImage> dd )
 {
     SOCKET c;
 
     if ( ( c = accept( Socket(), NULL, NULL ) ) != INVALID_SOCKET )
     {
         dd->setSocket( c );
-        return( TqTrue );
+        return( true );
     }
-    return ( TqFalse );
+    return ( false );
 }
 
 END_NAMESPACE( Aqsis )

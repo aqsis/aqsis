@@ -81,7 +81,7 @@ struct IqShaderData
 
 	virtual void GetFloat( TqFloat& res, TqInt index = 0 ) const = 0;
 	///	Get the data as a boolean value..
-	virtual void GetBool( TqBool& res, TqInt index = 0 ) const = 0;
+	virtual void GetBool( bool& res, TqInt index = 0 ) const = 0;
 	///	Get the data as a string..
 	virtual void GetString( CqString& res, TqInt index = 0 ) const = 0;
 	///	Get the data as a point..
@@ -98,7 +98,7 @@ struct IqShaderData
 	///	Get a const pointer to the data as a float..
 	virtual void GetFloatPtr( const TqFloat*& res ) const = 0;
 	///	Get a const pointer to the data as a boolean value..
-	virtual void GetBoolPtr( const TqBool*& res ) const = 0;
+	virtual void GetBoolPtr( const bool*& res ) const = 0;
 	///	Get a const pointer to the data as a string..
 	virtual void GetStringPtr( const CqString*& res ) const = 0;
 	///	Get a const pointer to the data as a point..
@@ -115,7 +115,7 @@ struct IqShaderData
 	///	Get a pointer to the data as a float..
 	virtual void GetFloatPtr( TqFloat*& res ) = 0;
 	///	Get a pointer to the data as a boolean value..
-	virtual void GetBoolPtr( TqBool*& res ) = 0;
+	virtual void GetBoolPtr( bool*& res ) = 0;
 	///	Get a pointer to the data as a string..
 	virtual void GetStringPtr( CqString*& res ) = 0;
 	///	Get a pointer to the data as a point..
@@ -132,7 +132,7 @@ struct IqShaderData
 	///	Set the value to the specified float.
 	virtual void SetFloat( const TqFloat& val ) = 0;
 	///	Set the value to the specified boolean value.
-	virtual void SetBool( const TqBool& val ) = 0;
+	virtual void SetBool( const bool& val ) = 0;
 	///	Set the value to the specified string.
 	virtual void SetString( const CqString& val ) = 0;
 	///	Set the value to the specified point.
@@ -149,7 +149,7 @@ struct IqShaderData
 	///	Set the value to the specified float.
 	virtual void SetFloat( const TqFloat& val, TqInt index ) = 0;
 	///	Set the value to the specified boolean value.
-	virtual void SetBool( const TqBool& val, TqInt index ) = 0;
+	virtual void SetBool( const bool& val, TqInt index ) = 0;
 	///	Set the value to the specified string.
 	virtual void SetString( const CqString& val, TqInt index ) = 0;
 	///	Set the value to the specified point.
@@ -168,7 +168,7 @@ struct IqShaderData
 	{
 		GetFloat( f, index );
 	}
-	void GetValue( TqBool& b, TqInt index = 0 ) const
+	void GetValue( bool& b, TqInt index = 0 ) const
 	{
 		GetBool( b, index );
 	}
@@ -193,7 +193,7 @@ struct IqShaderData
 	{
 		GetFloatPtr( f );
 	}
-	void GetValuePtr( const TqBool*& b ) const
+	void GetValuePtr( const bool*& b ) const
 	{
 		GetBoolPtr( b );
 	}
@@ -218,7 +218,7 @@ struct IqShaderData
 	{
 		GetFloatPtr( f );
 	}
-	void GetValuePtr( TqBool*& b )
+	void GetValuePtr( bool*& b )
 	{
 		GetBoolPtr( b );
 	}
@@ -247,7 +247,7 @@ struct IqShaderData
 	{
 		SetFloat( static_cast<TqFloat>( i ) );
 	}
-	void SetValue( const TqBool& b )
+	void SetValue( const bool& b )
 	{
 		SetBool( b );
 	}
@@ -276,7 +276,7 @@ struct IqShaderData
 	{
 		SetFloat( static_cast<TqFloat>( i ), index );
 	}
-	void SetValue( const TqBool& b, TqInt index )
+	void SetValue( const bool& b, TqInt index )
 	{
 		SetBool( b, index );
 	}
@@ -304,7 +304,7 @@ struct IqShaderData
 	/** Determine whether this data storage represents a shader argument.
 	 * \return Read only reference to a CqString class.
 	 */
-	virtual	TqBool	fParameter() const = 0;
+	virtual	bool	fParameter() const = 0;
 
 	/** Pure virtual, prepare the variable for the SIMD size.
 	 * \param uGridRes The size of the SIMD grid in u.

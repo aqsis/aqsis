@@ -129,9 +129,9 @@ public :
   void set_resolution( const TqInt size_x, const TqInt size_y, const TqInt size_z ) { i_size_x = size_x ;  i_size_y = size_y ;  i_size_z = size_z ; }
   /**
    * selects wether the algorithm will use the enhanced topologically controlled lookup table or the original MarchingCubes
-   * \param originalMC TqTrue for the original Marching Cubes
+   * \param originalMC true for the original Marching Cubes
    */
-  void set_method    ( const TqBool originalMC = TqFalse ) { i_originalMC = originalMC ; }
+  void set_method    ( const bool originalMC = false ) { i_originalMC = originalMC ; }
 
   // Data access
   /**
@@ -167,9 +167,9 @@ public :
   /**
    * GTS exportation of the generated mesh
    * \param fn  name of the GTS file to create
-   * \param bin if TqTrue, the GTS will be written in binary mode
+   * \param bin if true, the GTS will be written in binary mode
    */
-  void write( const TqChar *fn, TqBool bin = TqFalse ) ;
+  void write( const TqChar *fn, bool bin = false ) ;
 
 
 //-----------------------------------------------------------------------------
@@ -182,9 +182,9 @@ protected :
   /** tesselates one cube */
   void process_cube ()             ;
   /** tests if the components of the tesselation of the cube should be connected by the interior of an ambiguous face */
-  TqBool test_face    ( TqChar face ) ;
+  bool test_face    ( TqChar face ) ;
   /** tests if the components of the tesselation of the cube should be connected through the interior of the cube */
-  TqBool test_interior( TqChar s )    ;
+  bool test_interior( TqChar s )    ;
 
 
 //-----------------------------------------------------------------------------

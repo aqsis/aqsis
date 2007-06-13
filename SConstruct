@@ -144,8 +144,8 @@ static.src_builder.append('Fluid')
 conf = Configure(env)
 Export('env opts conf')
 
-SetupBufferedOutput(env)
-SetupCleanPrinting(env)
+#SetupBufferedOutput(env)
+#SetupCleanPrinting(env)
 
 # Setup the distribution stuff, this should be non-platform specific, the distribution
 # archive should apply to all supported platforms.

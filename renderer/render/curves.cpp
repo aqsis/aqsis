@@ -266,7 +266,7 @@ void CqCurve::PopulateWidth()
  *
  * @param bUseDef_st
  */
-void CqCurve::SetDefaultPrimitiveVariables( TqBool bUseDef_st )
+void CqCurve::SetDefaultPrimitiveVariables( bool bUseDef_st )
 {
 	// we don't want any default primitive variables.
 
@@ -277,7 +277,7 @@ void CqCurve::SetDefaultPrimitiveVariables( TqBool bUseDef_st )
 /**
  * CqCurvesGroup constructor.
  */
-CqCurvesGroup::CqCurvesGroup() : CqCurve(), m_ncurves( 0 ), m_periodic( TqFalse ),
+CqCurvesGroup::CqCurvesGroup() : CqCurve(), m_ncurves( 0 ), m_periodic( false ),
 		m_nTotalVerts( 0 )
 { }
 

@@ -81,7 +81,7 @@ std::vector<TqFloat> CqBucket::m_aCoverages;
  *  Clear,Allocate, Init. the m_aieImage samples
  */
 
-void CqBucket::PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt ysize, TqBool fJitter, TqBool empty )
+void CqBucket::PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt ysize, bool fJitter, bool empty )
 {
 	m_XOrigin = xorigin;
 	m_YOrigin = yorigin;
@@ -122,7 +122,7 @@ void CqBucket::PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt y
 				m_aieImage[which].Clear();
 				m_aieImage[which].AllocateSamples( m_PixelXSamples, m_PixelYSamples );
 				m_aieImage[which].InitialiseSamples( m_aSamplePositions[which] );
-				if(fJitter)
+				//if(fJitter)
 					m_aieImage[which].JitterSamples(m_aSamplePositions[which], opentime, closetime);
 
 				which++;
@@ -160,7 +160,7 @@ void CqBucket::PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt y
 				m_aieImage[which].Clear();
 
 			//if(fJitter)
-			//	m_aieImage[which].JitterSamples(m_aSamplePositions[which]);
+				m_aieImage[which].JitterSamples(m_aSamplePositions[which], opentime, closetime);
 			m_aieImage[which].OffsetSamples( bPos2, m_aSamplePositions[which] );
 
 			which++;
@@ -414,7 +414,7 @@ const TqFloat* CqBucket::Data( TqInt iXPos, TqInt iYPos )
 /** Filter the samples in this bucket according to type and filter widths.
  */
 
-void CqBucket::FilterBucket(TqBool empty)
+void CqBucket::FilterBucket(bool empty)
 {
 	CqImagePixel * pie;
 
@@ -437,11 +437,11 @@ void CqBucket::FilterBucket(TqBool empty)
 	TqInt x, y;
 	TqInt i = 0;
 
-	TqBool fImager = TqFalse;
+	bool fImager = false;
 	const CqString* systemOptions;
 	if( ( systemOptions = QGetRenderContext() ->poptCurrent()->GetStringOption( "System", "Imager" ) ) != 0 )
 		if( systemOptions[ 0 ].compare("null") != 0 )
-			fImager = TqTrue;
+			fImager = true;
 
 	TqInt endy = YOrigin() + Height();
 	TqInt endx = XOrigin() + Width();

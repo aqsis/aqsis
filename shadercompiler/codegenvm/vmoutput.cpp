@@ -629,6 +629,74 @@ void CqCodeGenOutput::Visit( IqParseNodeSolarConstruct& SC )
 	}
 }
 
+void CqCodeGenOutput::Visit( IqParseNodeGatherConstruct& IC )
+{
+	IqParseNode * pNode;
+	pNode = static_cast<IqParseNode*>(IC.GetInterface( ParseNode_Base ));
+
+	TqInt iLabelA = m_gcLabels++;
+	TqInt iLabelB = m_gcLabels++;
+	TqInt iLabelC = m_gcLabels++;
+	TqInt iLabelD = m_gcLabels++;
+
+	IqParseNode* pArgs = pNode->pChild();
+	assert( pArgs != 0 );
+	IqParseNode* pHitStmt = pArgs->pNextSibling();
+	assert( pHitStmt != 0 );
+	IqParseNode* pNoHitStmt = pHitStmt->pNextSibling();
+
+	// samples is the 5th argument to the gather function, we need that to 
+	// initialise the init_gather call.
+	IqParseNode* pSamples = pArgs->pChild();
+	TqInt iArg = 5;
+	while(--iArg > 0)	
+	{
+		pSamples = pSamples->pNextSibling();
+		assert(pSamples);
+	}
+	pSamples->Accept(*this);
+
+	m_slxFile << "\tinit_gather" << std::endl;
+
+	m_slxFile << ":" << iLabelA << std::endl;		// loop back label
+	m_slxFile << "\tS_CLEAR" << std::endl;			// clear current state
+
+	// Output the arguments in reverse order so that the gather() function
+	// can pop them in the expected order.
+	IqParseNode* pArg = pArgs->pChild(); 
+	while ( pArg->pNextSibling() != 0 )
+		pArg = pArg->pNextSibling();
+	iArg = 0;
+	while ( pArg != 0 )
+	{
+		// Push the argument...
+		iArg++;
+		pArg->Accept( *this );
+		pArg = pArg->pPrevSibling();
+	}
+	// Now output the count of 'additional' arguments.
+	iArg -= 5;
+	CqParseNodeFloatConst C( static_cast<TqFloat>( abs( iArg ) ) );
+	C.Accept( *this );
+	m_slxFile << "\tgather" << std::endl;
+	m_slxFile << "\tRS_PUSH" << std::endl;			// Push running state
+	m_slxFile << "\tRS_GET" << std::endl;			// Get state
+	m_slxFile << "\tRS_JZ " << iLabelD << std::endl;	// Jump to no hit statement
+	pHitStmt->Accept( *this );						// ray hit statement
+	m_slxFile << ":" << iLabelD << std::endl;
+	if(pNoHitStmt)
+	{
+		m_slxFile << "\tRS_JNZ " << iLabelC << std::endl;	// Skip if all true
+		m_slxFile << "\tRS_INVERSE" << std::endl;		// Inverse running state
+		pNoHitStmt->Accept( *this );						// ray hit statement
+	}
+	m_slxFile << ":" << iLabelC << std::endl;		// continuation label
+	m_slxFile << "\tRS_POP" << std::endl;			// Pop the running state
+	m_slxFile << "\tadvance_gather" << std::endl;
+	m_slxFile << "\tjnz " << iLabelA << std::endl; // loop back jump
+	m_slxFile << ":" << iLabelB << std::endl;		// completion label
+}
+
 void CqCodeGenOutput::Visit( IqParseNodeConditional& C )
 {
 	IqParseNode * pNode;
@@ -834,6 +902,9 @@ void CqCodeGenOutput::Visit( IqParseNodeMessagePassingFunction& MPF )
 			strCommType = "textureinfo";
 			break;
 
+			case CommTypeRayInfo:
+			strCommType = "rayinfo";
+			break;
 	}
 	// Output the comm function.
 	SqVarRef temp( MPF.VarRef() );

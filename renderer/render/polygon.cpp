@@ -80,8 +80,8 @@ TqInt CqPolygonBase::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits 
 	// We need to take into account Orientation here, even though most other
 	// primitives leave it up to the CalcNormals function on the MPGrid, because we
 	// are forcing N to be setup here, so clockwise nature is important.
-	TqBool CSO = pTransform()->GetHandedness(pTransform()->Time(0));
-	TqBool O = pAttributes() ->GetIntegerAttribute( "System", "Orientation" ) [ 0 ] != 0;
+	bool CSO = pTransform()->GetHandedness(pTransform()->Time(0));
+	bool O = pAttributes() ->GetIntegerAttribute( "System", "Orientation" ) [ 0 ] != 0;
 
 	indexA = 0;
 	indexB = 1;
@@ -214,7 +214,7 @@ TqInt CqPolygonBase::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits 
 
 		// If this is a triangle, then mark the patch as a special case. See function header comment for more details.
 		if ( indexC == indexD )
-			pNew->SetfHasPhantomFourthVertex( TqTrue );
+			pNew->SetfHasPhantomFourthVertex( true );
 
 		// If there are no smooth normals specified, then fill in the facet normal at each vertex.
 		if ( !bHasVar(EnvVars_N) && USES( iUses, EnvVars_N ) )
@@ -409,17 +409,17 @@ CqSurfacePolygon::~CqSurfacePolygon()
 /** Check if a polygon is degenerate, i.e. all points collapse to the same or almost the same place.
  */
 
-TqBool CqSurfacePolygon::CheckDegenerate() const
+bool CqSurfacePolygon::CheckDegenerate() const
 {
 	// Check if all points are within a minute distance of each other.
-	TqBool	fDegen = TqTrue;
+	bool	fDegen = true;
 	TqInt i, n;
 	n = NumVertices();
 	for ( i = 1; i < n; i++ )
 	{
 		if ( ( PolyP( i ) - PolyP( i - 1 ) ).Magnitude() > FLT_EPSILON )
 		{
-			fDegen = TqFalse;
+			fDegen = false;
 			break;
 		}
 	}
@@ -486,7 +486,7 @@ void	CqPolygonPoints::Transform( const CqMatrix& matTx, const CqMatrix& matITTx,
 
 	CqSurface::Transform( matTx, matITTx, matRTx, iTime );
 
-//	m_Transformed = TqTrue;
+//	m_Transformed = true;
 }
 
 

@@ -81,7 +81,7 @@ class CqMPDump
 		 */
 		void close();
 
-		TqBool IsOpen()
+		bool IsOpen()
 		{
 			return(NULL != out);
 		}
