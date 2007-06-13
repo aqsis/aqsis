@@ -142,7 +142,7 @@ bool CqOutput::beginNesting(EqBlocks type)
 			throw CqError(RIE_NESTING, RIE_SEVERE,
 			              "Attempt to open another ",
 			              blockNames[type],
-			              " block when one is already open.", TqFalse);
+			              " block when one is already open.", false);
 			return false;
 		}
 	}
@@ -179,7 +179,7 @@ bool CqOutput::endNesting(EqBlocks type)
 		// invalid
 		throw CqError(blockErrors[type], RIE_SEVERE,
 		              "Cannot close block of type ", blockNames[type],
-		              " when no blocks have yet been opened.", TqFalse);
+		              " when no blocks have yet been opened.", false);
 		return false;
 	}
 
@@ -202,7 +202,7 @@ bool CqOutput::endNesting(EqBlocks type)
 		<< blockNames[curBlock]
 		<< " block." << std::ends;
 		throw CqError(blockErrors[curBlock], RIE_SEVERE,
-		              &strBuf.str()[0], TqFalse);
+		              &strBuf.str()[0], false);
 		return false;
 	}
 }
@@ -323,7 +323,7 @@ std::string CqOutput::getFilterFuncName( RtFilterFunc filterfunc, const char *na
 	{
 		throw CqError( RIE_CONSISTENCY, RIE_WARNING,
 		               "Unknown RiFilterFunc. ",
-		               name, " function skipped.", TqTrue );
+		               name, " function skipped.", true );
 		return "";
 	}
 }
@@ -343,7 +343,7 @@ RtToken CqOutput::RiDeclare( const char *name, const char *declaration )
 	b += " ";
 	b += a;
 	ip.parse( b );
-	m_Dictionary.addToken( ip.getIdentifier(), ip.getClass(), ip.getType(), ip.getQuantity(), TqFalse );
+	m_Dictionary.addToken( ip.getIdentifier(), ip.getClass(), ip.getType(), ip.getQuantity(), false );
 
 	PR( "Declare", Declare );
 	S;
@@ -1385,7 +1385,7 @@ RtVoid CqOutput::RiPatchV( RtToken type, RtInt n, RtToken tokens[], RtPointer pa
 	{
 		throw CqError( RIE_BADTOKEN, RIE_ERROR,
 		               "Unknown RiPatch type: ", type,
-		               "  RiPatch() instruction skipped", TqTrue );
+		               "  RiPatch() instruction skipped", true );
 	}
 
 	PR( "Patch", Patch );
@@ -1416,7 +1416,7 @@ RtVoid CqOutput::RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap,
 		{
 			throw CqError( RIE_BADTOKEN, RIE_ERROR,
 			               "Unknown RiPatchMesh uwrap token:", uwrap,
-			               "  RiPatchMesh instruction skipped", TqTrue );
+			               "  RiPatchMesh instruction skipped", true );
 		}
 		if ( vwrap == RI_PERIODIC || (strcmp(vwrap, RI_PERIODIC)==0) )
 		{
@@ -1431,7 +1431,7 @@ RtVoid CqOutput::RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap,
 		{
 			throw CqError( RIE_BADTOKEN, RIE_ERROR,
 			               "Unknown RiPatchMesh vwrap token:", vwrap,
-			               "  RiPatchMesh instruction skipped", TqTrue );
+			               "  RiPatchMesh instruction skipped", true );
 		}
 		ii += nuptch + nvptch;
 
@@ -1455,7 +1455,7 @@ RtVoid CqOutput::RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap,
 		{
 			throw CqError( RIE_BADTOKEN, RIE_ERROR,
 			               "Unknown RiPatchMesh uwrap token:", uwrap,
-			               "  RiPatchMesh instruction skipped", TqTrue );
+			               "  RiPatchMesh instruction skipped", true );
 		}
 		if ( vwrap == RI_PERIODIC || (strcmp(vwrap, RI_PERIODIC)==0) )
 		{
@@ -1470,7 +1470,7 @@ RtVoid CqOutput::RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap,
 		{
 			throw CqError( RIE_BADTOKEN, RIE_ERROR,
 			               "Unknown RiPatchMesh vwrap token:", vwrap,
-			               "  RiPatchMesh instruction skipped", TqTrue );
+			               "  RiPatchMesh instruction skipped", true );
 		}
 		ii += nuptch + nvptch;
 
@@ -1480,7 +1480,7 @@ RtVoid CqOutput::RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap,
 	{
 		throw CqError( RIE_BADTOKEN, RIE_ERROR,
 		               "Unknown RiPatchMesh type:", type,
-		               "  RiPatchMesh instruction skipped", TqTrue );
+		               "  RiPatchMesh instruction skipped", true );
 	}
 
 	PR( "PatchMesh", PatchMesh );
@@ -1703,7 +1703,7 @@ RtVoid CqOutput::RiCurvesV( RtToken type, RtInt ncurves,
 		{
 			throw CqError( RIE_BADTOKEN, RIE_ERROR,
 			               "Unknown RiCurves wrap token:", wrap,
-			               "  RiCurves instruction skipped", TqTrue );
+			               "  RiCurves instruction skipped", true );
 		}
 	}
 	else if ( type == RI_CUBIC || (strcmp(type, RI_CUBIC)==0) )
@@ -1726,14 +1726,14 @@ RtVoid CqOutput::RiCurvesV( RtToken type, RtInt ncurves,
 		{
 			throw CqError( RIE_BADTOKEN, RIE_ERROR,
 			               "Unknown RiCurves wrap token:", wrap,
-			               "  RiCurves instruction skipped", TqTrue );
+			               "  RiCurves instruction skipped", true );
 		}
 	}
 	else
 	{
 		throw CqError( RIE_BADTOKEN, RIE_ERROR,
 		               "Unknown RiCurves type:", type,
-		               "  RiCurves instruction skipped", TqTrue );
+		               "  RiCurves instruction skipped", true );
 	}
 
 	PR( "Curves", Curves );
@@ -1825,7 +1825,7 @@ RtVoid CqOutput::RiProcedural( RtPointer data, RtBound bound,
 	}
 	else
 	{
-		throw CqError( RIE_SYNTAX, RIE_ERROR, "Unknown procedural function.", TqTrue );
+		throw CqError( RIE_SYNTAX, RIE_ERROR, "Unknown procedural function.", true );
 	}
 
 	PR( "Procedural", Procedural );
@@ -2045,7 +2045,7 @@ RtVoid CqOutput::RiArchiveRecord( RtToken type, std::string txt )
 	else
 	{
 		throw CqError( RIE_BADTOKEN, RIE_ERROR,
-		               "Unknown ArchiveRecord type: ", type, "", TqTrue );
+		               "Unknown ArchiveRecord type: ", type, "", true );
 	}
 	// EOL must be forced for binary
 	print( ( tmp + txt + "\n" ).c_str() );
@@ -2102,7 +2102,7 @@ RtVoid CqOutput::RiErrorHandler( RtErrorFunc handler )
 		ch = "abort";
 	else
 	{
-		throw CqError( RIE_CONSISTENCY, RIE_ERROR, "Unknown Error handler", TqTrue );
+		throw CqError( RIE_CONSISTENCY, RIE_ERROR, "Unknown Error handler", true );
 	}
 	PR( "ErrorHandler", ErrorHandler );
 	S;

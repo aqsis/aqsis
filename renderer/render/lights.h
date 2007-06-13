@@ -58,7 +58,7 @@ typedef boost::shared_ptr<CqLightsource> CqLightsourcePtr;
 class CqLightsource : public IqLightsource, public boost::enable_shared_from_this<CqLightsource>
 {
 	public:
-		CqLightsource( const boost::shared_ptr<IqShader>& pShader, TqBool fActive = TqTrue );
+		CqLightsource( const boost::shared_ptr<IqShader>& pShader, bool fActive = true );
 		virtual	~CqLightsource();
 
 #ifdef _DEBUG

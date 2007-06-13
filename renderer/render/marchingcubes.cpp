@@ -63,7 +63,7 @@ void MarchingCubes::print_cube()
 // Constructor
 MarchingCubes::MarchingCubes( const TqInt x /*= -1*/, const TqInt y /*= -1*/, const TqInt z /*= -1*/ ) :
 		//-----------------------------------------------------------------------------
-		i_originalMC(TqFalse),
+		i_originalMC(false),
 		i_size_x    (x),
 		i_size_y    (y),
 		i_size_z    (z),
@@ -303,8 +303,8 @@ void MarchingCubes::compute_intersection_points( )
 
 //_____________________________________________________________________________
 // Test a face
-// if face>0 return TqTrue if the face contains a part of the surface
-TqBool MarchingCubes::test_face( TqChar face )
+// if face>0 return true if the face contains a part of the surface
+bool MarchingCubes::test_face( TqChar face )
 //-----------------------------------------------------------------------------
 {
 	TqFloat A,B,C,D ;
@@ -369,9 +369,9 @@ TqBool MarchingCubes::test_face( TqChar face )
 
 //_____________________________________________________________________________
 // Test the interior of a cube
-// if s == 7, return TqTrue  if the interior is empty
-// if s ==-7, return TqFalse if the interior is empty
-TqBool MarchingCubes::test_interior( TqChar s )
+// if s == 7, return true  if the interior is empty
+// if s ==-7, return false if the interior is empty
+bool MarchingCubes::test_interior( TqChar s )
 //-----------------------------------------------------------------------------
 {
 	TqFloat t, At=0, Bt=0, Ct=0, Dt=0, a, b ;
@@ -1416,7 +1416,7 @@ TqInt MarchingCubes::add_c_vertex( )
 
 
 
-void MarchingCubes::write(const TqChar *fn, TqBool bin )
+void MarchingCubes::write(const TqChar *fn, bool bin )
 //-----------------------------------------------------------------------------
 {
 	FILE       *fp = fopen( fn, "w" );

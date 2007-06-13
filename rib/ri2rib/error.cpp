@@ -52,7 +52,7 @@ RtVoid CqError::manage ()
 	if ( m_Severity == RIE_SEVERE )
 		exit( EXIT_FAILURE );
 
-	if ( m_ToRib == TqTrue )
+	if ( m_ToRib == true )
 	{
 		std::string tmp;
 		switch ( m_Severity )

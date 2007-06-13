@@ -62,9 +62,9 @@ class CqProcedural : public CqSurface
 		virtual void    Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime = 0 );
 		/*  We have no actual geometry to dice.
 		 */
-		virtual TqBool Diceable()
+		virtual bool Diceable()
 		{
-			return TqFalse;
+			return false;
 		}
 		virtual CqMicroPolyGridBase* Dice()
 		{
@@ -74,9 +74,9 @@ class CqProcedural : public CqSurface
 		/** Determine whether the passed surface is valid to be used as a
 		 *  frame in motion blur for this surface.
 		 */
-		virtual TqBool	IsMotionBlurMatch( CqSurface* pSurf )
+		virtual bool	IsMotionBlurMatch( CqSurface* pSurf )
 		{
-			return( TqFalse );
+			return( false );
 		}
 
 		/** Returns a string name of the class. */

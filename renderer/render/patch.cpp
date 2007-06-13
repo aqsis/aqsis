@@ -82,7 +82,7 @@ CqSurface* CqSurfacePatchBicubic::Clone() const
 
 
 
-void CqSurfacePatchBicubic::NaturalSubdivide( CqParameter* pParam, CqParameter* pParam1, CqParameter* pParam2, TqBool u )
+void CqSurfacePatchBicubic::NaturalSubdivide( CqParameter* pParam, CqParameter* pParam1, CqParameter* pParam2, bool u )
 {
 	switch ( pParam->Type() )
 	{
@@ -266,7 +266,7 @@ void CqSurfacePatchBicubic::NaturalDice( CqParameter* pParameter, TqInt uDiceSiz
 /** Split the patch into smaller patches.
  */
 
-TqInt CqSurfacePatchBicubic::PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, TqBool u )
+TqInt CqSurfacePatchBicubic::PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, bool u )
 {
 	// Create two new surface of the appropriate type
 	aSplits.push_back( boost::shared_ptr<CqSurface>( new CqSurfacePatchBicubic ) );
@@ -279,13 +279,13 @@ TqInt CqSurfacePatchBicubic::PreSubdivide( std::vector<boost::shared_ptr<CqSurfa
 /** Determine whether or not the patch is diceable
  */
 
-TqBool	CqSurfacePatchBicubic::Diceable()
+bool	CqSurfacePatchBicubic::Diceable()
 {
 	assert( NULL != P() );
 	// If the cull check showed that the primitive cannot be diced due to crossing the e and hither planes,
 	// then we can return immediately.
 	if ( !m_fDiceable )
-		return ( TqFalse );
+		return ( false );
 
 	// Otherwise we should continue to try to find the most advantageous split direction, OR the dice size.
 	const CqMatrix & matCtoR = QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, NULL, QGetRenderContext()->Time() );
@@ -325,7 +325,7 @@ TqBool	CqSurfacePatchBicubic::Diceable()
 			vec.Unit();
 			vec %= vecL;
 			if ( vec.Magnitude() > 1 )
-				return ( TqFalse );
+				return ( false );
 		}
 	}
 	m_SplitDir = SplitDir_V;
@@ -352,7 +352,7 @@ TqBool	CqSurfacePatchBicubic::Diceable()
 			vec.Unit();
 			vec %= vecL;
 			if ( vec.Magnitude() > 1 )
-				return ( TqFalse );
+				return ( false );
 		}
 	}
 
@@ -405,8 +405,8 @@ TqBool	CqSurfacePatchBicubic::Diceable()
 
 	if ( uLen < FLT_EPSILON || vLen < FLT_EPSILON )
 	{
-		m_fDiscard = TqTrue;
-		return ( TqFalse );
+		m_fDiscard = true;
+		return ( false );
 	}
 
 	TqFloat gs = 16.0f;
@@ -415,9 +415,9 @@ TqBool	CqSurfacePatchBicubic::Diceable()
 		gs = poptGridSize[0];
 
 	if( m_uDiceSize * m_vDiceSize > gs * gs )
-		return TqFalse;
+		return false;
 
-	return ( TqTrue );
+	return ( true );
 }
 
 
@@ -435,7 +435,7 @@ void CqSurfacePatchBicubic::ConvertToBezierBasis( CqMatrix& matuBasis, CqMatrix&
 		for ( i = 0; i < 4; i++ )
 			for ( j = 0; j < 4; j++ )
 				matMim1[ i ][ j ] = RiBezierBasis[ i ][ j ];
-		matMim1.SetfIdentity( TqFalse );
+		matMim1.SetfIdentity( false );
 		matMim1 = matMim1.Inverse();
 	}
 
@@ -473,10 +473,10 @@ void CqSurfacePatchBicubic::ConvertToBezierBasis( CqMatrix& matuBasis, CqMatrix&
 								matCPh[ i ][ j ] = 1.0f;
 							}
 						}
-						matCPx.SetfIdentity( TqFalse );
-						matCPy.SetfIdentity( TqFalse );
-						matCPz.SetfIdentity( TqFalse );
-						matCPh.SetfIdentity( TqFalse );
+						matCPx.SetfIdentity( false );
+						matCPy.SetfIdentity( false );
+						matCPz.SetfIdentity( false );
+						matCPh.SetfIdentity( false );
 
 						matCPx = matuConv.Transpose() * matCPx * matvConv;
 						matCPy = matuConv.Transpose() * matCPy * matvConv;
@@ -512,10 +512,10 @@ void CqSurfacePatchBicubic::ConvertToBezierBasis( CqMatrix& matuBasis, CqMatrix&
 								matCPh[ i ][ j ] = pParam->pValue( i*4 + j )[0][3];
 							}
 						}
-						matCPx.SetfIdentity( TqFalse );
-						matCPy.SetfIdentity( TqFalse );
-						matCPz.SetfIdentity( TqFalse );
-						matCPh.SetfIdentity( TqFalse );
+						matCPx.SetfIdentity( false );
+						matCPy.SetfIdentity( false );
+						matCPz.SetfIdentity( false );
+						matCPh.SetfIdentity( false );
 
 						matCPx = matuConv.Transpose() * matCPx * matvConv;
 						matCPy = matuConv.Transpose() * matCPy * matvConv;
@@ -551,9 +551,9 @@ void CqSurfacePatchBicubic::ConvertToBezierBasis( CqMatrix& matuBasis, CqMatrix&
 								matBlue[ i ][ j ] = pParam->pValue( i*4 + j )[0][2];
 							}
 						}
-						matRed.SetfIdentity( TqFalse );
-						matGreen.SetfIdentity( TqFalse );
-						matBlue.SetfIdentity( TqFalse );
+						matRed.SetfIdentity( false );
+						matGreen.SetfIdentity( false );
+						matBlue.SetfIdentity( false );
 
 						matRed = matuConv.Transpose() * matRed * matvConv;
 						matGreen = matuConv.Transpose() * matGreen * matvConv;
@@ -583,7 +583,7 @@ void CqSurfacePatchBicubic::ConvertToBezierBasis( CqMatrix& matuBasis, CqMatrix&
 							for ( j = 0; j < 4; j++ )
 								matCPx[ i ][ j ] = pParam->pValue( i*4 + j )[0];
 						}
-						matCPx.SetfIdentity( TqFalse );
+						matCPx.SetfIdentity( false );
 						matCPx = matuConv.Transpose() * matCPx * matvConv;
 
 						for ( i = 0; i < 4; i++ )
@@ -616,7 +616,7 @@ void CqSurfacePatchBicubic::ConvertToBezierBasis( CqMatrix& matuBasis, CqMatrix&
 /** Constructor.
  */
 
-CqSurfacePatchBilinear::CqSurfacePatchBilinear() : CqSurface(), m_fHasPhantomFourthVertex( TqFalse ), m_iInternalu( -1 ), m_iInternalv( -1 )
+CqSurfacePatchBilinear::CqSurfacePatchBilinear() : CqSurface(), m_fHasPhantomFourthVertex( false ), m_iInternalu( -1 ), m_iInternalv( -1 )
 {}
 
 
@@ -698,7 +698,7 @@ CqBound CqSurfacePatchBilinear::Bound() const
 /** Split the patch into smaller patches.
  */
 
-TqInt CqSurfacePatchBilinear::PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, TqBool u )
+TqInt CqSurfacePatchBilinear::PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, bool u )
 {
 	aSplits.push_back( boost::shared_ptr<CqSurface>( new CqSurfacePatchBilinear ) );
 	aSplits.push_back( boost::shared_ptr<CqSurface>( new CqSurfacePatchBilinear ) );
@@ -711,14 +711,14 @@ TqInt CqSurfacePatchBilinear::PreSubdivide( std::vector<boost::shared_ptr<CqSurf
 /** Determine whether or not the patch is diceable
  */
 
-TqBool	CqSurfacePatchBilinear::Diceable()
+bool	CqSurfacePatchBilinear::Diceable()
 {
 	assert( NULL != P() );
 
 	// If the cull check showed that the primitive cannot be diced due to crossing the e and hither planes,
 	// then we can return immediately.
 	if ( !m_fDiceable )
-		return ( TqFalse );
+		return ( false );
 
 	// Otherwise we should continue to try to find the most advantageous split direction, OR the dice size.
 	const CqMatrix & matCtoR = QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, NULL, QGetRenderContext()->Time() );
@@ -765,8 +765,8 @@ TqBool	CqSurfacePatchBilinear::Diceable()
 
 	if ( uLen < FLT_EPSILON || vLen < FLT_EPSILON )
 	{
-		m_fDiscard = TqTrue;
-		return ( TqFalse );
+		m_fDiscard = true;
+		return ( false );
 	}
 
 	TqFloat gs = 16.0f;
@@ -776,9 +776,9 @@ TqBool	CqSurfacePatchBilinear::Diceable()
 
 	TqFloat gs2 = gs*gs;
 	if( m_uDiceSize > gs2 || m_vDiceSize > gs2 || (m_uDiceSize * m_vDiceSize) > gs2 )
-		return TqFalse;
+		return false;
 
-	return ( TqTrue );
+	return ( true );
 }
 
 
@@ -804,8 +804,8 @@ TqInt CqSurfacePatchBilinear::Split( std::vector<boost::shared_ptr<CqSurface> >&
 		aSplits.push_back( boost::shared_ptr<CqSurface>( new CqSurfacePatchBilinear ) );
 		aSplits.push_back( boost::shared_ptr<CqSurface>( new CqSurfacePatchBilinear ) );
 	}
-	TqBool direction = SplitDir() == SplitDir_U;
-	TqBool opposite = !direction;
+	bool direction = SplitDir() == SplitDir_U;
+	bool opposite = !direction;
 	TqInt i;
 	// Fill in the standard data from this donor to the new patches.
 	for ( i = 0; i < ( m_fHasPhantomFourthVertex ? 4 : 2 ); i++ )
@@ -813,7 +813,7 @@ TqInt CqSurfacePatchBilinear::Split( std::vector<boost::shared_ptr<CqSurface> >&
 		aSplits[ i ] ->SetSurfaceParameters( *this );
 		aSplits[ i ] ->SetSplitDir( direction ? SplitDir_V : SplitDir_U );
 		aSplits[ i ] ->SetEyeSplitCount( EyeSplitCount() );
-		aSplits[ i ] ->m_fDiceable = TqTrue;
+		aSplits[ i ] ->m_fDiceable = true;
 	}
 
 	// Iterate through any use parameters subdividing and storing the second value in the target surface.
@@ -858,17 +858,17 @@ TqInt CqSurfacePatchBilinear::Split( std::vector<boost::shared_ptr<CqSurface> >&
 		aSplits.pop_back();
 
 		// And set the phantom status of the remaining 3 patches.
-		static_cast<CqSurfacePatchBilinear*>( aSplits[ 0 ].get() ) ->m_fHasPhantomFourthVertex = TqFalse;
-		static_cast<CqSurfacePatchBilinear*>( aSplits[ 1 ].get() ) ->m_fHasPhantomFourthVertex = TqTrue;
-		static_cast<CqSurfacePatchBilinear*>( aSplits[ 2 ].get() ) ->m_fHasPhantomFourthVertex = TqTrue;
+		static_cast<CqSurfacePatchBilinear*>( aSplits[ 0 ].get() ) ->m_fHasPhantomFourthVertex = false;
+		static_cast<CqSurfacePatchBilinear*>( aSplits[ 1 ].get() ) ->m_fHasPhantomFourthVertex = true;
+		static_cast<CqSurfacePatchBilinear*>( aSplits[ 2 ].get() ) ->m_fHasPhantomFourthVertex = true;
 
 		return ( 3 );
 	}
 	else
 	{
 		// If not phantom, just return the two new halves.
-		static_cast<CqSurfacePatchBilinear*>( aSplits[ 0 ].get() ) ->m_fHasPhantomFourthVertex = TqFalse;
-		static_cast<CqSurfacePatchBilinear*>( aSplits[ 1 ].get() ) ->m_fHasPhantomFourthVertex = TqFalse;
+		static_cast<CqSurfacePatchBilinear*>( aSplits[ 0 ].get() ) ->m_fHasPhantomFourthVertex = false;
+		static_cast<CqSurfacePatchBilinear*>( aSplits[ 1 ].get() ) ->m_fHasPhantomFourthVertex = false;
 
 		return ( 2 );
 	}

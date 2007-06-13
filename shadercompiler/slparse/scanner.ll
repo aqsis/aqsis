@@ -26,11 +26,11 @@ extern std::istream* ParseInputStream;
 extern CqString		ParseStreamName;	
 extern TqInt ParseLineNumber;
 
-extern TqBool	FindVariable(const char* name, SqVarRef& ref);
-extern TqBool	FindFunction(const char* name, std::vector<SqFuncRef>& Ref);
+extern bool	FindVariable(const char* name, SqVarRef& ref);
+extern bool	FindFunction(const char* name, std::vector<SqFuncRef>& Ref);
 extern CqString strNameSpace();
 
-extern std::vector<std::pair<TqBool,CqString> >	ParseNameSpaceStack;
+extern std::vector<std::pair<bool,CqString> >	ParseNameSpaceStack;
 }
 
 static TqInt scannerinput(char* Buffer, TqInt MaxSize);
@@ -201,8 +201,8 @@ TqInt check_type()
 	
 	yylval.m_pSymbol.eType=0;
 
-	std::vector<std::pair<TqBool,CqString> >::reverse_iterator i=ParseNameSpaceStack.rbegin()+1;
-	TqBool fv = FindVariable((strNameSpace()+(char*)yytext).c_str(), var);
+	std::vector<std::pair<bool,CqString> >::reverse_iterator i=ParseNameSpaceStack.rbegin()+1;
+	bool fv = FindVariable((strNameSpace()+(char*)yytext).c_str(), var);
 	while(!fv && i!=ParseNameSpaceStack.rend())
 	{
 		CqString strNS=i->second;

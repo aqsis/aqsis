@@ -162,7 +162,7 @@ class CqMotionSpec
 		/** Return whether this motion block is actually motion blurred or not.
 		 * \return Boolean indicating motion blurred.
 		 */
-		TqBool	fMotionBlurred() const
+		bool	fMotionBlurred() const
 		{
 			return ( cTimes() > 1 );
 		}
@@ -173,19 +173,19 @@ class CqMotionSpec
 		 * \param Fraction Reference to the float fraction to fill in.
 		 * \return Boolean indicating the index is exact.
 		 */
-		TqBool	GetTimeSlot( TqFloat time, TqInt& iIndex, TqFloat& Fraction ) const
+		bool	GetTimeSlot( TqFloat time, TqInt& iIndex, TqFloat& Fraction ) const
 		{
 			assert( cTimes() > 0 );
 
 			if ( time >= m_aTimes.back() )
 			{
 				iIndex = m_aTimes.size() - 1;
-				return ( TqTrue );
+				return ( true );
 			}
 			else if ( time <= m_aTimes.front() )
 			{
 				iIndex = 0;
-				return ( TqTrue );
+				return ( true );
 			}
 			else
 			{
@@ -202,7 +202,7 @@ class CqMotionSpec
 		 * \param iIndex Reference to the integer index to fill in.
 		 * \return Boolean indicating the index exists.
 		 */
-		TqBool	TimeSlotExists( TqFloat time, TqInt& iIndex ) const
+		bool	TimeSlotExists( TqFloat time, TqInt& iIndex ) const
 		{
 			//assert( cTimes() > 0 );
 			//assert(time>=0.0f);
@@ -239,7 +239,7 @@ class CqMotionSpec
 				return ( m_aObjects[ iIndex ] );
 			else
 			{
-				assert( TqFalse );
+				assert( false );
 				return ( m_DefObject );
 			}
 		}

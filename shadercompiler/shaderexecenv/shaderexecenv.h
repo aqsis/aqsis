@@ -84,7 +84,7 @@ SHADERCONTEXT_SHARE extern TqUlong	gVariableTokens[];	///< Vector of hash key fr
 SHADERCONTEXT_SHARE extern TqInt gDefUses;
 SHADERCONTEXT_SHARE extern TqInt gDefLightUses;
 
-#define	INIT_SO			TqBool __fVarying=TqFalse; /* A flag which will be set to indicate if the operation has any varying components. */ \
+#define	INIT_SO			bool __fVarying=false; /* A flag which will be set to indicate if the operation has any varying components. */ \
 						TqInt __iGrid; /* Integer index used to track progress through the varying data */
 #define	CHECKVARY(A)	__fVarying=(A)->Class()==class_varying||__fVarying;
 #define	FOR_EACH		__iGrid = 0; \
@@ -108,7 +108,7 @@ SHADERCONTEXT_SHARE extern TqInt gDefLightUses;
 #define	GETNORMAL(Val)		CqVector3D _aq_##Val; (Val)->GetNormal(_aq_##Val,__iGrid)
 #define	GETCOLOR(Val)		CqColor _aq_##Val; (Val)->GetColor(_aq_##Val,__iGrid)
 #define	GETSTRING(Val)		CqString _aq_##Val; (Val)->GetString(_aq_##Val,__iGrid)
-#define	GETBOOLEAN(Val)		TqBool _aq_##Val; (Val)->GetBool(_aq_##Val,__iGrid)
+#define	GETBOOLEAN(Val)		bool _aq_##Val; (Val)->GetBool(_aq_##Val,__iGrid)
 #define	GETMATRIX(Val)		CqMatrix _aq_##Val; (Val)->GetMatrix(_aq_##Val,__iGrid)
 
 #define	SETFLOAT(Val, v)	(Val)->SetFloat(v,__iGrid)
@@ -198,7 +198,7 @@ class SHADERCONTEXT_SHARE CqShaderExecEnv : public IqShaderExecEnv
 		virtual	void	ValidateIlluminanceCache( IqShaderData* pP, IqShaderData* pN, IqShader* pShader );
 		virtual	void	InvalidateIlluminanceCache()
 		{
-			m_IlluminanceCacheValid = TqFalse;
+			m_IlluminanceCacheValid = false;
 		}
 		virtual	CqBitVector& CurrentState()
 		{
@@ -214,7 +214,7 @@ class SHADERCONTEXT_SHARE CqShaderExecEnv : public IqShaderExecEnv
 		}
 		virtual	void	ClearCurrentState()
 		{
-			m_CurrentState.SetAll( TqFalse );
+			m_CurrentState.SetAll( false );
 		}
 		virtual	void	PushState()
 		{
@@ -406,7 +406,7 @@ class SHADERCONTEXT_SHARE CqShaderExecEnv : public IqShaderExecEnv
 		TqInt	m_GridI;				///< The current SIMD index.
 		TqUint	m_li;					///< Light index, used during illuminance loop.
 		TqInt	m_Illuminate;
-		TqBool	m_IlluminanceCacheValid;	///< Flag indicating whether the illuminance cache is valid.
+		bool	m_IlluminanceCacheValid;	///< Flag indicating whether the illuminance cache is valid.
 		TqUint	m_gatherSample;				///< Sample index, used during gather loop.
 		IqAttributes* m_pAttributes;	///< Pointer to the associated attributes.
 		CqTransformPtr m_pTransform;		///< Pointer to the associated transform.
@@ -419,11 +419,11 @@ class SHADERCONTEXT_SHARE CqShaderExecEnv : public IqShaderExecEnv
 
 	public:
 
-		virtual	TqBool	SO_init_illuminance();
-		virtual	TqBool	SO_advance_illuminance();
+		virtual	bool	SO_init_illuminance();
+		virtual	bool	SO_advance_illuminance();
 
 		virtual	STD_SO	SO_init_gather( FLOATVAL samples, DEFVOIDPARAM );
-		virtual	TqBool	SO_advance_gather();
+		virtual	bool	SO_advance_gather();
 
 		// ShadeOps
 		virtual STD_SO	SO_radians( FLOATVAL degrees, DEFPARAM );

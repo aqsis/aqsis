@@ -68,14 +68,14 @@ void CqBinary::floatToChar( RtFloat f, TqChar &b1, TqChar &b2, TqChar &b3, TqCha
 #endif
 }
 
-void CqBinary::addString( std::string &s, TqBool &defined, TqUint &index )
+void CqBinary::addString( std::string &s, bool &defined, TqUint &index )
 {
 	TqUint j = 0;
 	for ( std::list<std::string>::iterator it = m_aStrings.begin(); it != m_aStrings.end(); it++, j++ )
 	{
 		if ( s == *it )
 		{
-			defined = TqTrue;
+			defined = true;
 			index = j;
 			return ;
 		}
@@ -85,7 +85,7 @@ void CqBinary::addString( std::string &s, TqBool &defined, TqUint &index )
 
 	m_aStrings.push_back( s );
 
-	defined = TqFalse;
+	defined = false;
 	index = j;
 }
 
@@ -129,7 +129,7 @@ CqBinary::CqBinary( const char *name, int fdesc,
 		: CqOutput( name, fdesc, comp, i, isize )
 {
 	for ( TqInt ii = 0; ii < LAST_Function; ii++ )
-		m_aRequest[ ii ] = TqFalse;
+		m_aRequest[ ii ] = false;
 }
 
 
@@ -145,9 +145,9 @@ void CqBinary::printRequest( const char *req, EqFunctions f )
 {
 	TqChar code = f;
 
-	if ( m_aRequest[ f ] == TqFalse )
+	if ( m_aRequest[ f ] == false )
 	{
-		m_aRequest[ f ] = TqTrue;
+		m_aRequest[ f ] = true;
 		OUT << '\314' << code; // 0xCC
 		encodeString(req);
 	}
@@ -196,14 +196,14 @@ void CqBinary::printString( std::string &s )
 		return ;
 	}
 
-	TqBool defined;
+	bool defined;
 	TqUint index;
 
 	addString( s, defined, index );
 
 	if ( index < 256 )
 	{
-		if ( defined == TqFalse )
+		if ( defined == false )
 		{
 			OUT << '\315' << ( TqChar ) index; // 0xCD
 			encodeString( s.c_str() );
@@ -212,7 +212,7 @@ void CqBinary::printString( std::string &s )
 	}
 	else if ( index < 65536 )
 	{
-		if ( defined == TqFalse )
+		if ( defined == false )
 		{
 			OUT << '\316' << ( TqChar ) ( ( index >> 8 ) & 0xff ) << ( TqChar ) ( index & 0xff ); // 0xCE
 			encodeString( s.c_str() );

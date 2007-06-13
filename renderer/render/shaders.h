@@ -230,7 +230,7 @@ class CqLayeredShader : public IqShader
 			}
 			return ( NULL );
 		}
-		virtual	TqBool	GetVariableValue( const char* name, IqShaderData* res )
+		virtual	bool	GetVariableValue( const char* name, IqShaderData* res )
 		{
 			// Again, need to search backwards through the list, as the last layer to affect this value will
 			// be the one that matters.
@@ -238,10 +238,10 @@ class CqLayeredShader : public IqShader
 			while( i != m_Layers.rend() )
 			{
 				if(i->second->GetVariableValue(name, res))
-					return(TqTrue);
+					return(true);
 				++i;
 			}
-			return ( TqFalse );
+			return ( false );
 		}
 		virtual	void	Evaluate( const boost::shared_ptr<IqShaderExecEnv>& pEnv );
 		virtual	void	PrepareDefArgs()
@@ -264,16 +264,16 @@ class CqLayeredShader : public IqShader
 				++i;
 			}
 		}
-		virtual	TqBool	fAmbient() const
+		virtual	bool	fAmbient() const
 		{
 			// Not sure, probably always return false for now.
-			return ( TqFalse );
+			return ( false );
 		}
 		virtual IqShader*	Clone() const
 		{
 			return ( new CqLayeredShader(*this) );
 		}
-		virtual TqBool	Uses( TqInt Var ) const
+		virtual bool	Uses( TqInt Var ) const
 		{
 			assert( Var >= 0 && Var < EnvVars_Last );
 			return ( Uses( static_cast<EqEnvVars>( Var ) ) );
@@ -283,14 +283,14 @@ class CqLayeredShader : public IqShader
 			// Gather the uses from all layers as they are added.
 			return ( m_Uses );
 		}
-		virtual IqShaderData* CreateVariable( EqVariableType Type, EqVariableClass Class, const CqString& name, TqBool fArgument = TqFalse, TqBool fOutput = TqFalse  )
+		virtual IqShaderData* CreateVariable( EqVariableType Type, EqVariableClass Class, const CqString& name, bool fArgument = false, bool fOutput = false  )
 		{
 			// Call CreateVariable on the first shader in the list, all layers must be the same type.
 			if(!m_Layers.empty())
 				return(m_Layers.front().second->CreateVariable(Type, Class, name, fArgument, fOutput));
 			return ( NULL );
 		}
-		virtual IqShaderData* CreateVariableArray( EqVariableType Type, EqVariableClass Class, const CqString& name, TqInt Count, TqBool fArgument = TqFalse, TqBool fOutput = TqFalse  )
+		virtual IqShaderData* CreateVariableArray( EqVariableType Type, EqVariableClass Class, const CqString& name, TqInt Count, bool fArgument = false, bool fOutput = false  )
 		{
 			// Call CreateVariableArray on the first shader in the list, all layers must be the same type.
 			if(!m_Layers.empty())
@@ -312,9 +312,9 @@ class CqLayeredShader : public IqShader
 		}
 		virtual void DefaultSurface()
 	{}
-		virtual TqBool IsLayered()
+		virtual bool IsLayered()
 		{
-			return(TqTrue);
+			return(true);
 		}
 
 		virtual void AddLayer(const CqString& layername, const boost::shared_ptr<IqShader>& layer);
@@ -327,7 +327,7 @@ class CqLayeredShader : public IqShader
 	private:
 		IqTransformPtr	m_pTransform;	///< Transformation transformation to world coordinates in effect at the time this shader was instantiated.
 		CqString	m_strName;		///< The name of this shader.
-		TqBool		m_outsideWorld;
+		bool		m_outsideWorld;
 
 		std::vector<std::pair<CqString, boost::shared_ptr<IqShader> > >	m_Layers;
 		std::map<CqString, TqInt> m_LayerMap;

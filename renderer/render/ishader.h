@@ -36,8 +36,8 @@ enum EqShaderType
     Type_Imager,   			///< Image shader.
 };
 
-#define	USES(a,b)	((a)&(0x00000001<<(b))?TqTrue:TqFalse)
-#define	isDONE(a,b)	((a)&(0x00000001<<(b))?TqTrue:TqFalse)
+#define	USES(a,b)	((a)&(0x00000001<<(b))?true:false)
+#define	isDONE(a,b)	((a)&(0x00000001<<(b))?true:false)
 #define	DONE(a,b)	((a)=(a)|(0x00000001<<(b)))
 
 
@@ -79,7 +79,7 @@ struct IqShader
 	 * \param res IqShaderData pointer to store the result in, will be typechecked for suitability.
 	 * \return Boolean indicating the parameter existed and res was of an appropriate type.
 	 */
-	virtual	TqBool	GetVariableValue( const char* name, IqShaderData* res ) = 0;
+	virtual	bool	GetVariableValue( const char* name, IqShaderData* res ) = 0;
 	/** Evaluate the shader code.
 	 * \param pEnv The shader execution environment to evaluate within.
 	 */
@@ -96,7 +96,7 @@ struct IqShader
 	/** Determine whether this shader is an aambient ligthsource shader.
 	 * i.e. A lightsource shader with no Illuminate or Solar constructs.
 	 */
-	virtual	TqBool	fAmbient() const = 0;
+	virtual	bool	fAmbient() const = 0;
 	/** Duplicate this shader.
 	 * \return A pointer to a new shader.
 	 */
@@ -104,16 +104,16 @@ struct IqShader
 	/** Determine whether this shader uses the specified system variable.
 	 * \param Var ID of the variable from EqEnvVars.
 	 */
-	virtual	TqBool	Uses( TqInt Var ) const = 0;
+	virtual	bool	Uses( TqInt Var ) const = 0;
 	/** Get a bit vector representing the system variables needed by this shader.
 	 */
 	virtual	TqInt	Uses() const = 0;
 	/** Variable creation function.
 	 */
-	virtual IqShaderData* CreateVariable( EqVariableType Type, EqVariableClass Class, const CqString& name, TqBool fArgument = TqFalse, TqBool fOutput = TqFalse ) = 0;
+	virtual IqShaderData* CreateVariable( EqVariableType Type, EqVariableClass Class, const CqString& name, bool fArgument = false, bool fOutput = false ) = 0;
 	/** Variable array creation function.
 	 */
-	virtual IqShaderData* CreateVariableArray( EqVariableType Type, EqVariableClass Class, const CqString& name, TqInt Count, TqBool fArgument = TqFalse, TqBool fOutput = TqFalse  ) = 0;
+	virtual IqShaderData* CreateVariableArray( EqVariableType Type, EqVariableClass Class, const CqString& name, TqInt Count, bool fArgument = false, bool fOutput = false  ) = 0;
 	/** Function to create some temporary storage which complies to the IqShaderData interface.
 	 */
 	virtual IqShaderData* CreateTemporaryStorage( EqVariableType type, EqVariableClass _class ) = 0;
@@ -126,7 +126,7 @@ struct IqShader
 	virtual void DefaultSurface( ) = 0;
 	/** Query if the shader is a layered shader
 	 */
-	virtual TqBool IsLayered() = 0;
+	virtual bool IsLayered() = 0;
 	virtual void AddLayer(const CqString& layername, const boost::shared_ptr<IqShader>& layer) = 0;
 	virtual void AddConnection(const CqString& layer1, const CqString& variable1, const CqString& layer2, const CqString& variable2) = 0;
 	virtual void SetType(EqShaderType type) = 0;

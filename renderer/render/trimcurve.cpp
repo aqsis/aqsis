@@ -148,7 +148,7 @@ const TqInt	CqTrimLoop::TrimPoint( const CqVector2D& v ) const
 	TqFloat x = v.x();
 	TqFloat y = v.y();
 	TqInt i, j;
-	TqBool oddNodes = TqFalse;
+	bool oddNodes = false;
 	TqInt size = m_aCurvePoints.size();
 	for ( i = 0, j = size - 1; i < size; j = i++ )
 	{
@@ -170,7 +170,7 @@ const TqInt	CqTrimLoop::TrimPoint( const CqVector2D& v ) const
 }
 
 
-const TqBool CqTrimLoop::LineIntersects(const CqVector2D& v1, const CqVector2D& v2) const
+const bool CqTrimLoop::LineIntersects(const CqVector2D& v1, const CqVector2D& v2) const
 {
 	TqFloat x1 = v1.x();
 	TqFloat y1 = v1.y();
@@ -193,9 +193,9 @@ const TqBool CqTrimLoop::LineIntersects(const CqVector2D& v1, const CqVector2D& 
 		TqFloat r = ((y1-y3)*(x4-x3) - (x1-x3)*(y4-y3)) / d;
 		TqFloat s = ((y1-y3)*(x2-x1) - (x1-x3)*(y2-y1)) / d;
 		if( (r >= 0.0f) && (s >= 0.0f) && (r <= 1.0f) && (s <= 1.0f))
-			return(TqTrue);
+			return(true);
 	}
-	return(TqFalse);
+	return(false);
 }
 
 
@@ -209,11 +209,11 @@ void CqTrimLoopArray::Prepare( CqSurface* pSurface )
 }
 
 
-const TqBool	CqTrimLoopArray::TrimPoint( const CqVector2D& v ) const
+const bool	CqTrimLoopArray::TrimPoint( const CqVector2D& v ) const
 {
 	// Early out if no trim loops at all.
 	if ( m_aLoops.size() == 0 )
-		return ( TqFalse );
+		return ( false );
 
 	TqInt	cCrosses = 0;
 
@@ -226,19 +226,19 @@ const TqBool	CqTrimLoopArray::TrimPoint( const CqVector2D& v ) const
 }
 
 
-const TqBool	CqTrimLoopArray::LineIntersects( const CqVector2D& v1, const CqVector2D& v2 ) const
+const bool	CqTrimLoopArray::LineIntersects( const CqVector2D& v1, const CqVector2D& v2 ) const
 {
 	// Early out if no trim loops at all.
 	if ( m_aLoops.size() == 0 )
-		return ( TqFalse );
+		return ( false );
 
 	std::vector<CqTrimLoop>::const_iterator iLoop;
 	std::vector<CqTrimLoop>::const_iterator iEnd = m_aLoops.end();
 	for ( iLoop = m_aLoops.begin(); iLoop != iEnd; iLoop++ )
 		if(iLoop->LineIntersects( v1, v2 ))
-			return(TqTrue);
+			return(true);
 
-	return ( TqFalse );
+	return ( false );
 }
 
 

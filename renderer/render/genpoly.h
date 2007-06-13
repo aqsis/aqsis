@@ -51,7 +51,7 @@ class CqPolygonGeneral2D
 	public:
 		CqPolygonGeneral2D() :
 				m_Orientation( Orientation_Unknown ),
-				m_Reverse( TqFalse )
+				m_Reverse( false )
 		{
 			STATS_INC( GPR_poly );
 		}
@@ -87,10 +87,10 @@ class CqPolygonGeneral2D
 		void	SwapDirection();
 		TqInt	CalcOrientation();
 		TqInt	CalcDeterminant( TqInt i1, TqInt i2, TqInt i3 ) const;
-		TqBool	NoneInside( TqInt P1, TqInt P2, TqInt P3, std::vector<TqInt>& iList ) const;
+		bool	NoneInside( TqInt P1, TqInt P2, TqInt P3, std::vector<TqInt>& iList ) const;
 		void	EliminateDuplicatePoints();
 
-		TqBool	Contains( CqPolygonGeneral2D& polyCheck );
+		bool	Contains( CqPolygonGeneral2D& polyCheck );
 		void	Combine( CqPolygonGeneral2D& polyFrom );
 		void	Triangulate( std::vector<TqInt>& aiList ) const;
 
@@ -134,7 +134,7 @@ class CqPolygonGeneral2D
 		TqInt	m_Orientation;
 		TqInt	m_Axis;
 		boost::shared_ptr<CqSurface>	m_pVertices;
-		TqBool	m_Reverse;
+		bool	m_Reverse;
 };
 
 

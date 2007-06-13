@@ -45,14 +45,14 @@ START_NAMESPACE(    Aqsis )
 // NOTE: There is duplication here between SO_init_illuminance and 
 // SO_advance_illuminance. This is required to ensure that the 
 // first light is not skipped.
-TqBool CqShaderExecEnv::SO_init_illuminance()
+bool CqShaderExecEnv::SO_init_illuminance()
 {
 	// Check if lighting is turned off.
 	if(getRenderContext())
 	{
 		const TqInt* enableLightingOpt = getRenderContext()->GetIntegerOption("EnableShaders", "lighting");
 		if(NULL != enableLightingOpt && enableLightingOpt[0] == 0)
-			return(TqFalse);
+			return(false);
 	}
 
 	m_li = 0;
@@ -62,22 +62,22 @@ TqBool CqShaderExecEnv::SO_init_illuminance()
 		m_li++;
 	}
 	if ( m_li < m_pAttributes ->cLights() )
-		return ( TqTrue );
+		return ( true );
 	else
-		return ( TqFalse );
+		return ( false );
 }
 
 
 //----------------------------------------------------------------------
 // advance_illuminance()
-TqBool CqShaderExecEnv::SO_advance_illuminance()
+bool CqShaderExecEnv::SO_advance_illuminance()
 {
 	// Check if lighting is turned off, should never need this check as SO_init_illuminance will catch first.
 	if(getRenderContext())
 	{
 		const TqInt* enableLightingOpt = getRenderContext()->GetIntegerOption("EnableShaders", "lighting");
 		if(NULL != enableLightingOpt && enableLightingOpt[0] == 0)
-			return(TqFalse);
+			return(false);
 	}
 
 	m_li++;
@@ -87,9 +87,9 @@ TqBool CqShaderExecEnv::SO_advance_illuminance()
 		m_li++;
 	}
 	if ( m_li < m_pAttributes ->cLights() )
-		return ( TqTrue );
+		return ( true );
 	else
-		return ( TqFalse );
+		return ( false );
 }
 
 
@@ -97,7 +97,7 @@ TqBool CqShaderExecEnv::SO_advance_illuminance()
 // init_gather()
 void CqShaderExecEnv::SO_init_gather(IqShaderData* samples, IqShader* pShader)
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid = 0;
 
 	__fVarying=(samples)->Class()==class_varying;
@@ -119,14 +119,14 @@ void CqShaderExecEnv::SO_init_gather(IqShaderData* samples, IqShader* pShader)
 
 //----------------------------------------------------------------------
 // advance_illuminance()
-TqBool CqShaderExecEnv::SO_advance_gather()
+bool CqShaderExecEnv::SO_advance_gather()
 {
 	// Check if lighting is turned off, should never need this check as SO_init_illuminance will catch first.
 	if(getRenderContext())
 	{
 		const TqInt* enableLightingOpt = getRenderContext()->GetIntegerOption("EnableShaders", "lighting");
 		if(NULL != enableLightingOpt && enableLightingOpt[0] == 0)
-			return(TqFalse);
+			return(false);
 	}
 
 	return((--m_gatherSample) > 0);
@@ -144,7 +144,7 @@ void CqShaderExecEnv::ValidateIlluminanceCache( IqShaderData* pP, IqShaderData* 
 			const TqInt* enableLightingOpt = getRenderContext()->GetIntegerOption("EnableShaders", "lighting");
 			if(NULL != enableLightingOpt && enableLightingOpt[0] == 0)
 			{
-				m_IlluminanceCacheValid = TqTrue;
+				m_IlluminanceCacheValid = true;
 				return;
 			}
 		}
@@ -162,7 +162,7 @@ void CqShaderExecEnv::ValidateIlluminanceCache( IqShaderData* pP, IqShaderData* 
 			lp->Evaluate( Ps, Ns, m_pCurrentSurface );
 			li++;
 		}
-		m_IlluminanceCacheValid = TqTrue;
+		m_IlluminanceCacheValid = true;
 	}
 }
 
@@ -170,7 +170,7 @@ void CqShaderExecEnv::ValidateIlluminanceCache( IqShaderData* pP, IqShaderData* 
 // reflect(I,N)
 void CqShaderExecEnv::SO_reflect( IqShaderData* I, IqShaderData* N, IqShaderData* Result, IqShader* pShader )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__fVarying=(I)->Class()==class_varying;
@@ -200,7 +200,7 @@ void CqShaderExecEnv::SO_reflect( IqShaderData* I, IqShaderData* N, IqShaderData
 // reftact(I,N,eta)
 void CqShaderExecEnv::SO_refract( IqShaderData* I, IqShaderData* N, IqShaderData* eta, IqShaderData* Result, IqShader* pShader )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__fVarying=(I)->Class()==class_varying;
@@ -235,7 +235,7 @@ void CqShaderExecEnv::SO_refract( IqShaderData* I, IqShaderData* N, IqShaderData
 
 void CqShaderExecEnv::SO_fresnel( IqShaderData* I, IqShaderData* N, IqShaderData* eta, IqShaderData* Kr, IqShaderData* Kt, IqShader* pShader )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__fVarying=(I)->Class()==class_varying;
@@ -284,7 +284,7 @@ void CqShaderExecEnv::SO_fresnel( IqShaderData* I, IqShaderData* N, IqShaderData
 // fresnel(I,N,eta,Kr,Kt,R,T)
 void CqShaderExecEnv::SO_fresnel( IqShaderData* I, IqShaderData* N, IqShaderData* eta, IqShaderData* Kr, IqShaderData* Kt, IqShaderData* R, IqShaderData* T, IqShader* pShader )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__fVarying=(I)->Class()==class_varying;
@@ -342,7 +342,7 @@ void CqShaderExecEnv::SO_fresnel( IqShaderData* I, IqShaderData* N, IqShaderData
 // depth(P)
 void CqShaderExecEnv::SO_depth( IqShaderData* p, IqShaderData* Result, IqShader* pShader )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	if (!getRenderContext() )
@@ -374,7 +374,7 @@ void CqShaderExecEnv::SO_depth( IqShaderData* p, IqShaderData* Result, IqShader*
 
 void CqShaderExecEnv::SO_ambient( IqShaderData* Result, IqShader* pShader )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	// Check if lighting is turned off.
@@ -398,7 +398,7 @@ void CqShaderExecEnv::SO_ambient( IqShaderData* Result, IqShader* pShader )
 
 		for ( TqUint light_index = 0; light_index < m_pAttributes ->cLights(); light_index++ )
 		{
-			__fVarying = TqTrue;
+			__fVarying = true;
 
 			IqLightsource* lp = m_pAttributes ->pLight( light_index );
 			if ( lp->pShader() ->fAmbient() )
@@ -430,7 +430,7 @@ void CqShaderExecEnv::SO_ambient( IqShaderData* Result, IqShader* pShader )
 // diffuse(N)
 void CqShaderExecEnv::SO_diffuse( IqShaderData* N, IqShaderData* Result, IqShader* pShader )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	// If the illuminance cache is already OK, then we don't need to bother filling in the illuminance parameters.
@@ -447,7 +447,7 @@ void CqShaderExecEnv::SO_diffuse( IqShaderData* N, IqShaderData* Result, IqShade
 
 	Result->SetColor( gColBlack );
 
-	__fVarying = TqTrue;
+	__fVarying = true;
 	IqShaderData* __nondiffuse = NULL;
 	__nondiffuse = pShader->CreateTemporaryStorage( type_float, class_varying );
 
@@ -518,7 +518,7 @@ void CqShaderExecEnv::SO_diffuse( IqShaderData* N, IqShaderData* Result, IqShade
 // specular(N,V,roughness)
 void CqShaderExecEnv::SO_specular( IqShaderData* N, IqShaderData* V, IqShaderData* roughness, IqShaderData* Result, IqShader* pShader )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	// If the illuminance cache is already OK, then we don't need to bother filling in the illuminance parameters.
@@ -534,7 +534,7 @@ void CqShaderExecEnv::SO_specular( IqShaderData* N, IqShaderData* V, IqShaderDat
 	pDefAngle->SetFloat( PIO2 );
 
 	Result->SetColor( gColBlack );
-	__fVarying = TqTrue;
+	__fVarying = true;
 
 	IqShaderData* __nonspecular = NULL;
 	__nonspecular = pShader->CreateTemporaryStorage( type_float, class_varying );
@@ -612,7 +612,7 @@ void CqShaderExecEnv::SO_specular( IqShaderData* N, IqShaderData* V, IqShaderDat
 // phong(N,V,size)
 void CqShaderExecEnv::SO_phong( IqShaderData* N, IqShaderData* V, IqShaderData* size, IqShaderData* Result, IqShader* pShader )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	IqShaderData * pnV = pShader ->CreateTemporaryStorage( type_vector, class_varying );
@@ -628,7 +628,7 @@ void CqShaderExecEnv::SO_phong( IqShaderData* N, IqShaderData* V, IqShaderData* 
 	SO_normalize( V, pnV );
 	SO_normalize( N, pnN );
 
-	__fVarying = TqTrue;
+	__fVarying = true;
 	__iGrid = 0;
 	CqBitVector& RS = RunningState();
 	do
@@ -714,7 +714,7 @@ void CqShaderExecEnv::SO_phong( IqShaderData* N, IqShaderData* V, IqShaderData* 
 // trace(P,R)
 void CqShaderExecEnv::SO_trace( IqShaderData* P, IqShaderData* R, IqShaderData* Result, IqShader* pShader )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__fVarying=(P)->Class()==class_varying;
@@ -738,7 +738,7 @@ void CqShaderExecEnv::SO_trace( IqShaderData* P, IqShaderData* R, IqShaderData* 
 // illuminance(P,nsamples)
 void CqShaderExecEnv::SO_illuminance( IqShaderData* Category, IqShaderData* P, IqShaderData* Axis, IqShaderData* Angle, IqShader* pShader )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__iGrid = 0;
@@ -747,7 +747,7 @@ void CqShaderExecEnv::SO_illuminance( IqShaderData* Category, IqShaderData* P, I
 		Category->GetString( cat );
 
 
-	__fVarying = TqTrue;
+	__fVarying = true;
 
 	// Fill in the lightsource information, and transfer the results to the shader variables,
 	if ( m_pAttributes != 0 )
@@ -759,12 +759,12 @@ void CqShaderExecEnv::SO_illuminance( IqShaderData* Category, IqShaderData* P, I
 		if ( NULL != Angle )
 			__fVarying=(Angle)->Class()==class_varying||__fVarying;
 
-		TqBool exec = TqTrue;
+		bool exec = true;
 
 		if( cat.size() )
 		{
 
-			TqBool exclude = TqFalse;
+			bool exclude = false;
 			CqString lightcategories;
 			CqString catname;
 
@@ -784,7 +784,7 @@ void CqShaderExecEnv::SO_illuminance( IqShaderData* Category, IqShaderData* P, I
 			{
 				pcats->GetString( lightcategories );
 
-				exec = TqFalse;
+				exec = false;
 				// While no matching category has been found...
 				CqString::size_type tokenpos = 0, tokenend;
 				while( 1 )
@@ -795,7 +795,7 @@ void CqShaderExecEnv::SO_illuminance( IqShaderData* Category, IqShaderData* P, I
 					{
 						if( !exclude )
 						{
-							exec = TqTrue;
+							exec = true;
 							break;
 						}
 					}
@@ -838,9 +838,9 @@ void CqShaderExecEnv::SO_illuminance( IqShaderData* Category, IqShaderData* P, I
 					TqFloat cosangle = Ln * vecAxis;
 					cosangle = CLAMP( cosangle, -1, 1 );
 					if ( acos( cosangle ) > fAngle )
-						m_CurrentState.SetValue( __iGrid, TqFalse );
+						m_CurrentState.SetValue( __iGrid, false );
 					else
-						m_CurrentState.SetValue( __iGrid, TqTrue );
+						m_CurrentState.SetValue( __iGrid, true );
 				}
 			}
 			while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
@@ -859,14 +859,14 @@ void	CqShaderExecEnv::SO_illuminance( IqShaderData* Category, IqShaderData* P, I
 // illuminate(P)
 void CqShaderExecEnv::SO_illuminate( IqShaderData* P, IqShaderData* Axis, IqShaderData* Angle, IqShader* pShader )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
-	TqBool res = TqTrue;
+	bool res = true;
 	if ( m_Illuminate > 0 )
-		res = TqFalse;
+		res = false;
 
-	__fVarying = TqTrue;
+	__fVarying = true;
 	if ( res )
 	{
 		__iGrid = 0;
@@ -899,10 +899,10 @@ void CqShaderExecEnv::SO_illuminate( IqShaderData* P, IqShaderData* Axis, IqShad
 				{
 					// Make sure we set the light color to zero in the areas that won't be lit.
 					Cl() ->SetColor( CqColor( 0, 0, 0 ), __iGrid );
-					m_CurrentState.SetValue( __iGrid, TqFalse );
+					m_CurrentState.SetValue( __iGrid, false );
 				}
 				else
-					m_CurrentState.SetValue( __iGrid, TqTrue );
+					m_CurrentState.SetValue( __iGrid, true );
 			}
 		}
 		while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
@@ -923,14 +923,14 @@ void	CqShaderExecEnv::SO_illuminate( IqShaderData* P, IqShader* pShader )
 void CqShaderExecEnv::SO_solar( IqShaderData* Axis, IqShaderData* Angle, IqShader* pShader )
 {
 	// TODO: Check light cone, and exclude points outside.
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
-	TqBool res = TqTrue;
+	bool res = true;
 	if ( m_Illuminate > 0 )
-		res = TqFalse;
+		res = false;
 
-	__fVarying = TqTrue;
+	__fVarying = true;
 	__iGrid = 0;
 	CqBitVector& RS = RunningState();
 	do
@@ -945,7 +945,7 @@ void CqShaderExecEnv::SO_solar( IqShaderData* Axis, IqShaderData* Angle, IqShade
 				if ( NULL != Axis )
 					Axis->GetVector( vecAxis, __iGrid );
 				L() ->SetVector( vecAxis, __iGrid );
-				m_CurrentState.SetValue( __iGrid, TqTrue );
+				m_CurrentState.SetValue( __iGrid, true );
 			}
 		}
 	}
@@ -964,20 +964,20 @@ void	CqShaderExecEnv::SO_solar( IqShader* pShader )
 // gather(category,P,N,angle,nsamples)
 void CqShaderExecEnv::SO_gather( IqShaderData* category, IqShaderData* P, IqShaderData* N, IqShaderData* angle, IqShaderData* samples, IqShader* pShader, int cParams, IqShaderData** apParams)
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__iGrid = 0;
-	__fVarying = TqTrue;
+	__fVarying = true;
 	CqBitVector& RS = RunningState();
 	do
 	{
 		if(!__fVarying || RS.Value( __iGrid ) )
 		{
-			m_CurrentState.SetValue( __iGrid, TqFalse );
+			m_CurrentState.SetValue( __iGrid, false );
 		}
 		else
-			m_CurrentState.SetValue( __iGrid, TqFalse );
+			m_CurrentState.SetValue( __iGrid, false );
 	}
 	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
 }
@@ -1011,7 +1011,7 @@ void CqShaderExecEnv::SO_opposite( IqShaderData* name, IqShaderData* pV, IqShade
 // specularbrdf(L,N,V,rough)
 void CqShaderExecEnv::SO_specularbrdf( IqShaderData* L, IqShaderData* N, IqShaderData* V, IqShaderData* rough, IqShaderData* Result, IqShader* pShader )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__fVarying=(L)->Class()==class_varying;
@@ -1052,12 +1052,12 @@ void CqShaderExecEnv::SO_specularbrdf( IqShaderData* L, IqShaderData* N, IqShade
 void CqShaderExecEnv::SO_calculatenormal( IqShaderData* p, IqShaderData* Result, IqShader* pShader )
 {
 	CqVector3D Defvec( 0.0f, 0.0f, 0.0f );
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	// Find out if the orientation is inverted.
-	TqBool CSO = pTransform()->GetHandedness(getRenderContext()->Time());
-	TqBool O = TqFalse;
+	bool CSO = pTransform()->GetHandedness(getRenderContext()->Time());
+	bool O = false;
 	if( pAttributes() )
 		O = pAttributes() ->GetIntegerAttribute( "System", "Orientation" ) [ 0 ] != 0;
 	TqFloat neg = 1;
@@ -1124,13 +1124,13 @@ void CqShaderExecEnv::SO_calculatenormal( IqShaderData* p, IqShaderData* Result,
 // occlusion(P,N,samples)
 void CqShaderExecEnv::SO_occlusion_rt( IqShaderData* P, IqShaderData* N, IqShaderData* samples, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	if ( !getRenderContext() )
 		return ;
 
-	__fVarying = TqTrue;
+	__fVarying = true;
 	__iGrid = 0;
 	CqBitVector& RS = RunningState();
 	do

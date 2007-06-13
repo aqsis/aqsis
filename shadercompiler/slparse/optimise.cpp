@@ -14,7 +14,7 @@ START_NAMESPACE( Aqsis )
 ///---------------------------------------------------------------------
 /// CqParseNode::Optimise
 
-TqBool CqParseNode::Optimise()
+bool CqParseNode::Optimise()
 {
 	// Optimise children nodes
 	CqParseNode * pChild = m_pChild;
@@ -26,7 +26,7 @@ TqBool CqParseNode::Optimise()
 			pChild = pChild->pNext();
 	}
 
-	return ( TqFalse );
+	return ( false );
 }
 
 
@@ -34,11 +34,11 @@ TqBool CqParseNode::Optimise()
 /// CqParseNodeFunction:Call:Optimise
 /// Optimise a function definition, basically optimise the parameters.
 
-TqBool CqParseNodeFunctionCall::Optimise()
+bool CqParseNodeFunctionCall::Optimise()
 {
 	CqParseNode::Optimise();
 
-	return ( TqFalse );
+	return ( false );
 }
 
 
@@ -46,39 +46,39 @@ TqBool CqParseNodeFunctionCall::Optimise()
 /// CqParseNodeFunction:Call:Optimise
 /// Optimise a function definition, basically optimise the parameters.
 
-TqBool CqParseNodeUnresolvedCall::Optimise()
+bool CqParseNodeUnresolvedCall::Optimise()
 {
 	CqParseNode::Optimise();
 
-	return ( TqFalse );
+	return ( false );
 }
 
 
 ///---------------------------------------------------------------------
 /// CqParseNodeVariable::Optimise
 
-TqBool CqParseNodeVariable::Optimise()
+bool CqParseNodeVariable::Optimise()
 {
 	CqParseNode::Optimise();
 
-	return ( TqFalse );
+	return ( false );
 }
 
 
 ///---------------------------------------------------------------------
 /// CqParseNodeAssign::Optimise
 
-TqBool CqParseNodeAssign::Optimise()
+bool CqParseNodeAssign::Optimise()
 {
 	CqParseNode::Optimise();
-	return ( TqFalse );
+	return ( false );
 }
 
 
 ///---------------------------------------------------------------------
 /// CqParseNodeCast::Optimise
 
-TqBool CqParseNodeCast::Optimise()
+bool CqParseNodeCast::Optimise()
 {
 	CqParseNode::Optimise();
 
@@ -91,7 +91,7 @@ TqBool CqParseNodeCast::Optimise()
 		m_pChild->LinkAfter( this );
 		m_pChild = 0;
 		delete( this );
-		return ( TqTrue );
+		return ( true );
 	}
 
 	// If the child is a point and the cast is to color, ignore it.
@@ -101,7 +101,7 @@ TqBool CqParseNodeCast::Optimise()
 			m_pChild->LinkAfter(this);
 			m_pChild=0;
 			delete(this);
-			return(TqTrue);
+			return(true);
 		}
 	 
 		// If the child is a color and the cast is to point, ignore it.
@@ -111,10 +111,10 @@ TqBool CqParseNodeCast::Optimise()
 			m_pChild->LinkAfter(this);
 			m_pChild=0;
 			delete(this);
-			return(TqTrue);
+			return(true);
 		}*/
 
-	return ( TqFalse );
+	return ( false );
 }
 
 END_NAMESPACE( Aqsis )

@@ -31,7 +31,7 @@ struct IqTransform
 	virtual	TqInt	cTimes() const = 0;
 	/** Set the handedness of the current transform
 	 */
-	virtual	TqBool GetHandedness(TqFloat time) const=0;
+	virtual	bool GetHandedness(TqFloat time) const=0;
 	/** Flip the handedness of the current coordinate system.
 	 */
 	// virtual void FlipHandedness(TqFloat time)=0;

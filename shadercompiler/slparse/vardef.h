@@ -33,7 +33,7 @@ class CqVarDef : public IqVarDef
 	public:
 		CqVarDef() :
 				m_Type( Type_Nil ),
-				m_fExtern( TqFalse ),
+				m_fExtern( false ),
 				m_strName( "" ),
 				m_pDefValue( 0 ),
 				m_UseCount( 0 ),
@@ -43,7 +43,7 @@ class CqVarDef : public IqVarDef
 		CqVarDef( const CqVarDef& from );
 		CqVarDef( TqInt Type, const char* strName, TqInt Length = 0, TqInt ReadOnly = 0 ) :
 				m_Type( Type ),
-				m_fExtern( TqFalse ),
+				m_fExtern( false ),
 				m_strName( strName ),
 				m_pDefValue( 0 ),
 				m_UseCount( 0 ),
@@ -75,7 +75,7 @@ class CqVarDef : public IqVarDef
 		{
 			return ( m_ArrayLength );
 		}
-		virtual	TqBool	fExtern() const
+		virtual	bool	fExtern() const
 		{
 			return ( m_fExtern );
 		}
@@ -83,11 +83,11 @@ class CqVarDef : public IqVarDef
 		{
 			return ( m_vrExtern );
 		}
-		virtual	void	SetParam( TqBool fParam = TqTrue )
+		virtual	void	SetParam( bool fParam = true )
 		{
 			m_Type = ( m_Type & ~Type_Param ) | ( fParam ? Type_Param : 0 );
 		}
-		virtual	void	SetOutput( TqBool fOutput = TqTrue )
+		virtual	void	SetOutput( bool fOutput = true )
 		{
 			m_Type = ( m_Type & ~Type_Output ) | ( fOutput ? Type_Output : 0 );
 		}
@@ -114,24 +114,24 @@ class CqVarDef : public IqVarDef
 		{
 			m_pDefValue = pDefValue;
 		}
-		void	SetExtern( TqBool f, SqVarRef vrExtern )
+		void	SetExtern( bool f, SqVarRef vrExtern )
 		{
 			m_fExtern = f;
 			m_vrExtern = vrExtern;
 		}
-		TqBool ReadOnly( EqShaderType type )
+		bool ReadOnly( EqShaderType type )
 		{
 			return( ( m_ReadOnly & (1<<type) ) != 0 );
 		}
 
-		static	TqBool	FindVariable( const char* strName, SqVarRef& Ref );
-		static	TqBool	FindStandardVariable( const char* strName, SqVarRef& Ref );
+		static	bool	FindVariable( const char* strName, SqVarRef& Ref );
+		static	bool	FindStandardVariable( const char* strName, SqVarRef& Ref );
 		static	CqVarDef*	GetVariablePtr( const SqVarRef& Ref );
 		static	TqInt	AddVariable( CqVarDef& Def );
 
 	protected:
 		TqInt	m_Type;
-		TqBool	m_fExtern;
+		bool	m_fExtern;
 		SqVarRef	m_vrExtern;
 		CqString	m_strName;
 		CqParseNode*	m_pDefValue;

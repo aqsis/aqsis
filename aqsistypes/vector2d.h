@@ -218,13 +218,13 @@ class COMMON_SHARE CqVector2D
 		}
 		/** Equality operator.
 		 */
-		TqBool	operator==( const CqVector2D &Cmp ) const
+		bool	operator==( const CqVector2D &Cmp ) const
 		{
 			return ( ( m_x == Cmp.m_x ) && ( m_y == Cmp.m_y ) );
 		}
 		/** Inequality operator.
 		 */
-		TqBool	operator!=( const CqVector2D &Cmp ) const
+		bool	operator!=( const CqVector2D &Cmp ) const
 		{
 			return ( ( m_x != Cmp.m_x ) || ( m_y != Cmp.m_y ) );
 		}

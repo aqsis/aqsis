@@ -35,7 +35,7 @@ USING_NAMESPACE( libri2rib )
 
 
 CqContext::CqContext() :
-		m_PipeHandleSet ( TqFalse ),
+		m_PipeHandleSet ( false ),
 		m_PipeHandle ( 1 ),
 		m_OutputType( SqOptions::OutputType_Ascii ),
 		m_Compression( SqOptions::Compression_None ),
@@ -50,7 +50,7 @@ void CqContext::addContext( RtToken name )
 {
 	if ( name == NULL )
 	{
-		if ( m_PipeHandleSet == TqFalse )
+		if ( m_PipeHandleSet == false )
 			m_PipeHandle = 1;
 	}
 
@@ -80,7 +80,7 @@ CqOutput & CqContext::current()
 {
 	if ( m_Active == ( ( CqOutput * ) RI_NULL ) )
 	{
-		throw CqError( RIE_BUG, RIE_SEVERE, "No active context", TqFalse );
+		throw CqError( RIE_BUG, RIE_SEVERE, "No active context", false );
 	}
 	return *m_Active;
 }
@@ -97,7 +97,7 @@ void CqContext::switchTo( RtContextHandle ch )
 			return ;
 		}
 	}
-	throw CqError ( RIE_BUG, RIE_SEVERE, "Invalid Context Handle", TqFalse );
+	throw CqError ( RIE_BUG, RIE_SEVERE, "Invalid Context Handle", false );
 }
 
 void CqContext::removeCurrent()
@@ -153,7 +153,7 @@ void CqContext::parseOutputType( RtInt n, RtToken tokens[], RtPointer params[] )
 					throw CqError( RIE_CONSISTENCY, RIE_WARNING,
 					               "RiOption: Unrecognized Output Type parameter \"",
 					               ( ( char ** ) params[ i ] ) [ 0 ],
-					               "\"", TqFalse );
+					               "\"", false );
 				}
 
 			}
@@ -168,13 +168,13 @@ void CqContext::parseOutputType( RtInt n, RtToken tokens[], RtPointer params[] )
 					throw CqError( RIE_CONSISTENCY, RIE_WARNING,
 					               "RiOption: Unrecognized Compression parameter \"",
 					               ( ( char ** ) params[ i ] ) [ 0 ],
-					               "\"", TqFalse );
+					               "\"", false );
 				}
 
 			}
 			else if ( strcmp ( tokens[ i ], "PipeHandle" ) == 0 )
 			{
-				m_PipeHandleSet = TqTrue;
+				m_PipeHandleSet = true;
 				m_PipeHandle = ( ( int * ) params[ i ] ) [ 0 ];
 			}
 			else
@@ -182,7 +182,7 @@ void CqContext::parseOutputType( RtInt n, RtToken tokens[], RtPointer params[] )
 				throw CqError( RIE_BADTOKEN, RIE_WARNING,
 				               "RiOption: Unrecognized Output token \"",
 				               tokens[ i ],
-				               "\"", TqFalse );
+				               "\"", false );
 			}
 
 		}
@@ -214,7 +214,7 @@ void CqContext::parseIndentation( RtInt n, RtToken tokens[], RtPointer params[] 
 					throw CqError( RIE_CONSISTENCY, RIE_WARNING,
 					               "RiOption: Unrecognized Indentation Type parameter\"",
 					               ( ( char ** ) params[ i ] ) [ 0 ],
-					               "\"", TqFalse );
+					               "\"", false );
 				}
 
 			}
@@ -226,7 +226,7 @@ void CqContext::parseIndentation( RtInt n, RtToken tokens[], RtPointer params[] 
 				else
 				{
 					throw CqError( RIE_CONSISTENCY, RIE_WARNING,
-					               "RiOption: Indentation size must be positive", TqFalse );
+					               "RiOption: Indentation size must be positive", false );
 				}
 
 			}
@@ -235,7 +235,7 @@ void CqContext::parseIndentation( RtInt n, RtToken tokens[], RtPointer params[] 
 				throw CqError( RIE_BADTOKEN, RIE_WARNING,
 				               "RiOption: Unrecognized Indentation token \"",
 				               tokens[ i ],
-				               "\"", TqFalse );
+				               "\"", false );
 			}
 
 		}
@@ -261,6 +261,6 @@ void CqContext::parseOption( const char *name, RtInt n, RtToken tokens[], RtPoin
 	{
 		throw CqError( RIE_CONSISTENCY, RIE_WARNING,
 		               "RiOption: Unknown Option name \"", name, "\"",
-		               TqFalse );
+		               false );
 	}
 }

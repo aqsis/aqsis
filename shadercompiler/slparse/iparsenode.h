@@ -219,9 +219,9 @@ struct IqParseNode
 	virtual	IqParseNode* pPrevSibling() const = 0;
 	virtual	TqInt	LineNo() const = 0;
 	virtual	const char*	strFileName() const = 0;
-	virtual	TqBool	IsVariableRef() const = 0;
+	virtual	bool	IsVariableRef() const = 0;
 	virtual	TqInt	ResType() const = 0;
-	virtual	TqBool	fVarying() const = 0;
+	virtual	bool	fVarying() const = 0;
 
 	virtual	void*	GetInterface( EqParseNodeType type) const = 0;
 	virtual	TqInt	NodeType() const = 0;
@@ -295,7 +295,7 @@ struct IqParseNodeVariable
 {
 	virtual	const char*	strName() const = 0;
 	virtual	SqVarRef	VarRef() const = 0;
-	virtual	TqBool	IsLocal() const = 0;
+	virtual	bool	IsLocal() const = 0;
 	virtual	void*	GetInterface( EqParseNodeType type) const = 0;
 	virtual	TqInt	NodeType() const = 0;
 
@@ -325,7 +325,7 @@ struct IqParseNodeArrayVariable
 
 struct IqParseNodeVariableAssign
 {
-	virtual	TqBool fDiscardResult() const = 0;
+	virtual	bool fDiscardResult() const = 0;
 	virtual	void*	GetInterface( EqParseNodeType type) const = 0;
 	virtual	TqInt	NodeType() const = 0;
 
@@ -491,7 +491,7 @@ struct IqParseNodeWhileConstruct
 
 struct IqParseNodeIlluminateConstruct
 {
-	virtual	TqBool	fHasAxisAngle() const = 0;
+	virtual	bool	fHasAxisAngle() const = 0;
 	virtual	void*	GetInterface( EqParseNodeType type) const = 0;
 	virtual	TqInt	NodeType() const = 0;
 
@@ -507,7 +507,7 @@ struct IqParseNodeIlluminateConstruct
 
 struct IqParseNodeIlluminanceConstruct
 {
-	virtual	TqBool	fHasAxisAngle() const = 0;
+	virtual	bool	fHasAxisAngle() const = 0;
 	virtual	void*	GetInterface( EqParseNodeType type) const = 0;
 	virtual	TqInt	NodeType() const = 0;
 
@@ -523,7 +523,7 @@ struct IqParseNodeIlluminanceConstruct
 
 struct IqParseNodeSolarConstruct
 {
-	virtual	TqBool	fHasAxisAngle() const = 0;
+	virtual	bool	fHasAxisAngle() const = 0;
 	virtual	void*	GetInterface( EqParseNodeType type) const = 0;
 	virtual	TqInt	NodeType() const = 0;
 

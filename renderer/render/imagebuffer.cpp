@@ -172,7 +172,7 @@ void	CqImageBuffer::SetImage()
 		i->resize( m_cXBuckets );
 		std::vector<CqBucket>::iterator b;
 		for( b = i->begin(); b!=i->end(); b++)
-			b->SetProcessed( TqFalse );
+			b->SetProcessed( false );
 	}
 
 	m_CurrentBucketCol = m_CurrentBucketRow = 0;
@@ -218,16 +218,16 @@ void	CqImageBuffer::Release()
    inserts EVERY gprim into buckets (using a bound that is still in camera space).
  */
 
-TqBool CqImageBuffer::CullSurface( CqBound& Bound, const boost::shared_ptr<CqSurface>& pSurface )
+bool CqImageBuffer::CullSurface( CqBound& Bound, const boost::shared_ptr<CqSurface>& pSurface )
 {
 	// If the primitive is completely outside of the hither-yon z range, cull it.
 	if ( Bound.vecMin().z() >= QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Clipping" ) [ 1 ] ||
 	        Bound.vecMax().z() <= QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Clipping" ) [ 0 ] )
-		return ( TqTrue );
+		return ( true );
 
 	if(QGetRenderContext()->clippingVolume().whereIs(Bound) == CqBound::Side_Outside)
 	{
-		return(TqTrue);
+		return(true);
 	}
 
 	// If the primitive spans the epsilon plane and the hither plane and can be split,
@@ -243,9 +243,9 @@ TqBool CqImageBuffer::CullSurface( CqBound& Bound, const boost::shared_ptr<CqSur
 			if ( pattrName != 0 )
 				objname = pattrName[ 0 ];
 			Aqsis::log() << warning << "Max eyesplits for object \"" << objname.c_str() << "\" exceeded" << std::endl;
-			return( TqTrue );
+			return( true );
 		}
-		return ( TqFalse );
+		return ( false );
 	}
 
 	TqFloat minz = Bound.vecMin().z();
@@ -279,7 +279,7 @@ TqBool CqImageBuffer::CullSurface( CqBound& Bound, const boost::shared_ptr<CqSur
 	        Bound.vecMin().y() > CropWindowYMax() ||
 	        Bound.vecMax().x() < CropWindowXMin() ||
 	        Bound.vecMax().y() < CropWindowYMin() )
-		return ( TqTrue );
+		return ( true );
 
 	// Restore Z-Values to camera space.
 	Bound.vecMin().z( minz );
@@ -287,7 +287,7 @@ TqBool CqImageBuffer::CullSurface( CqBound& Bound, const boost::shared_ptr<CqSur
 
 	// Cache the Bound.
 	pSurface->CacheRasterBound( Bound );
-	return ( TqFalse );
+	return ( false );
 }
 
 
@@ -382,7 +382,7 @@ void CqImageBuffer::PostSurface( const boost::shared_ptr<CqSurface>& pSurface )
  * \return Boolean indicating that the GPrim has been culled.
 */
 
-TqBool CqImageBuffer::OcclusionCullSurface( const boost::shared_ptr<CqSurface>& pSurface )
+bool CqImageBuffer::OcclusionCullSurface( const boost::shared_ptr<CqSurface>& pSurface )
 {
 	CqBound RasterBound( pSurface->GetCachedRasterBound() );
 
@@ -397,7 +397,7 @@ TqBool CqImageBuffer::OcclusionCullSurface( const boost::shared_ptr<CqSurface>& 
 		        ( RasterBound.vecMax().x() >= pos.x() ) )
 		{
 			Bucket( nextBucket, CurrentBucketRow() ).AddGPrim( pSurface );
-			return TqTrue;
+			return true;
 		}
 
 		// next row
@@ -412,7 +412,7 @@ TqBool CqImageBuffer::OcclusionCullSurface( const boost::shared_ptr<CqSurface>& 
 		        ( RasterBound.vecMax().y() >= pos.y() ) )
 		{
 			Bucket( nextBucketX, nextBucket ).AddGPrim( pSurface );
-			return TqTrue;
+			return true;
 		}
 
 		// Bound covers no more buckets therefore we can delete the surface completely.
@@ -422,11 +422,11 @@ TqBool CqImageBuffer::OcclusionCullSurface( const boost::shared_ptr<CqSurface>& 
 			objname = *pattrName;
 		Aqsis::log() << info << "GPrim: \"" << objname << "\" occlusion culled" << std::endl;
 		STATS_INC( GPR_culled );
-		return TqTrue;
+		return true;
 	}
 	else
 	{
-		return TqFalse;
+		return false;
 	}
 }
 
@@ -503,7 +503,7 @@ void CqImageBuffer::AddMPG( CqMicroPolygon* pmpgNew )
  * \param pmpg Pointer to a CqMicroPolygon derived class.
  */
 
-TqBool CqImageBuffer::PushMPGForward( CqMicroPolygon* pmpg, TqInt Col, TqInt Row )
+bool CqImageBuffer::PushMPGForward( CqMicroPolygon* pmpg, TqInt Col, TqInt Row )
 {
 	// Should always mark as pushed forward even if not. As this is an idicator
 	// that the attempt has been made, used by the PushDown function. If this wasn't set
@@ -512,7 +512,7 @@ TqBool CqImageBuffer::PushMPGForward( CqMicroPolygon* pmpg, TqInt Col, TqInt Row
 
 	// Check if there is anywhere to push forward to.
 	if ( Col == ( cXBuckets() - 1 ) )
-		return ( TqFalse );
+		return ( false );
 
 	TqInt NextBucketForward = Col + 1;
 
@@ -536,15 +536,15 @@ TqBool CqImageBuffer::PushMPGForward( CqMicroPolygon* pmpg, TqInt Col, TqInt Row
 	        ( vMax.x() < BucketMin.x() ) ||
 	        ( vMax.y() < BucketMin.y() ) )
 	{
-		return ( TqFalse );
+		return ( false );
 	}
 	else
 	{
 		ADDREF( pmpg );
 		Bucket( NextBucketForward, Row ).AddMPG( pmpg );
-		return ( TqTrue );
+		return ( true );
 	}
-	return ( TqFalse );
+	return ( false );
 }
 
 
@@ -554,14 +554,14 @@ TqBool CqImageBuffer::PushMPGForward( CqMicroPolygon* pmpg, TqInt Col, TqInt Row
  * \param CurrBucketIndex Index of the bucket from which we are pushing down.
  */
 
-TqBool CqImageBuffer::PushMPGDown( CqMicroPolygon* pmpg, TqInt Col, TqInt Row )
+bool CqImageBuffer::PushMPGDown( CqMicroPolygon* pmpg, TqInt Col, TqInt Row )
 {
 	if ( pmpg->IsPushedForward() )
-		return ( TqFalse );
+		return ( false );
 
 	// Check if there is anywhere to push down to.
 	if ( Row == ( m_cYBuckets - 1 ) )
-		return ( TqFalse );
+		return ( false );
 
 	TqInt NextBucketDown = Row + 1;
 
@@ -570,7 +570,7 @@ TqBool CqImageBuffer::PushMPGDown( CqMicroPolygon* pmpg, TqInt Col, TqInt Row )
 	if( Bucket( Col, NextBucketDown ).IsProcessed() )
 	{
 		if( PushMPGForward( pmpg, Col, NextBucketDown ) )
-			return( TqTrue );
+			return( true );
 		else
 			// If that fails, push down again.
 			return( PushMPGDown( pmpg, Col, NextBucketDown ) );
@@ -592,7 +592,7 @@ TqBool CqImageBuffer::PushMPGDown( CqMicroPolygon* pmpg, TqInt Col, TqInt Row )
 	        ( vMax.x() < BucketMin.x() ) ||
 	        ( vMax.y() < BucketMin.y() ) )
 	{
-		return ( TqFalse );
+		return ( false );
 	}
 	else
 	{
@@ -601,9 +601,9 @@ TqBool CqImageBuffer::PushMPGDown( CqMicroPolygon* pmpg, TqInt Col, TqInt Row )
 		// See if it needs to be pushed further down (extreme Motion Blur)
 		if ( PushMPGDown( pmpg, Col, NextBucketDown ) )
 			STATS_INC( MPG_pushed_far_down );
-		return ( TqTrue );
+		return ( true );
 	}
-	return ( TqFalse );
+	return ( false );
 }
 
 
@@ -741,7 +741,7 @@ void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, long xmin, long xmax,
 	else
 	{
 		m_CurrentMpgSampleInfo.m_Opacity = gColWhite;
-		m_CurrentMpgSampleInfo.m_Occludes = TqTrue;
+		m_CurrentMpgSampleInfo.m_Occludes = true;
 	}
 
 	// use the single imagesample rather than the list if possible.
@@ -752,8 +752,8 @@ void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, long xmin, long xmax,
 	                                    !( DisplayMode() & ModeZ ) &&
 	                                    !m_CurrentGridInfo.m_IsMatte;
 
-	TqBool UsingDof = QGetRenderContext() ->UsingDepthOfField();
-	TqBool IsMoving = pMPG->IsMoving();
+	bool UsingDof = QGetRenderContext() ->UsingDepthOfField();
+	bool IsMoving = pMPG->IsMoving();
 
 	if(IsMoving || UsingDof)
 	{
@@ -769,7 +769,7 @@ void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, long xmin, long xmax,
 // this function assumes that either dof or mb or both are being used.
 void CqImageBuffer::RenderMPG_MBOrDof( CqMicroPolygon* pMPG,
                                        long xmin, long xmax, long ymin, long ymax,
-                                       TqBool IsMoving, TqBool UsingDof )
+                                       bool IsMoving, bool UsingDof )
 {
 	CqHitTestCache hitTestCache;
 	pMPG->CacheHitTestValues(&hitTestCache);
@@ -867,11 +867,11 @@ void CqImageBuffer::RenderMPG_MBOrDof( CqMicroPolygon* pMPG,
 			if(UsingDof)
 			{
 				CqBound DofBound(bminx, bminy, bminz, bmaxx, bmaxy, bmaxz);
-				CqOcclusionBox::KDTree()->SampleMPG(pMPG, DofBound, IsMoving, time0, time1, TqTrue, bound_numDof, m_CurrentMpgSampleInfo, m_CurrentGridInfo.m_LodBounds[0] >= 0.0f, m_CurrentGridInfo);
+				CqOcclusionBox::KDTree()->SampleMPG(pMPG, DofBound, IsMoving, time0, time1, true, bound_numDof, m_CurrentMpgSampleInfo, m_CurrentGridInfo.m_LodBounds[0] >= 0.0f, m_CurrentGridInfo);
 			}
 			else
 			{
-				CqOcclusionBox::KDTree()->SampleMPG(pMPG, Bound, IsMoving, time0, time1, TqFalse, 0, m_CurrentMpgSampleInfo, m_CurrentGridInfo.m_LodBounds[0] >= 0.0f, m_CurrentGridInfo);
+				CqOcclusionBox::KDTree()->SampleMPG(pMPG, Bound, IsMoving, time0, time1, false, 0, m_CurrentMpgSampleInfo, m_CurrentGridInfo.m_LodBounds[0] >= 0.0f, m_CurrentGridInfo);
 			}
 		}
 	}
@@ -888,7 +888,7 @@ void CqImageBuffer::RenderMPG_Static( CqMicroPolygon* pMPG, long xmin, long xmax
 
 	const CqBound& Bound = pMPG->GetTotalBound();
 
-	CqOcclusionBox::KDTree()->SampleMPG(pMPG, Bound, TqFalse, 0, 0, TqFalse, 0, m_CurrentMpgSampleInfo, m_CurrentGridInfo.m_LodBounds[0] >= 0.0f, m_CurrentGridInfo);
+	CqOcclusionBox::KDTree()->SampleMPG(pMPG, Bound, false, 0, 0, false, 0, m_CurrentMpgSampleInfo, m_CurrentGridInfo.m_LodBounds[0] >= 0.0f, m_CurrentGridInfo);
 }
 
 
@@ -996,9 +996,9 @@ void CqImageBuffer::StoreExtraData( CqMicroPolygon* pMPG, SqImageSample& sample)
  * \param ymax Integer maximum extend of the image part being rendered, takes into account buckets and clipping.
  */
 
-void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax, TqBool fImager, enum EqFilterDepth depthfilter, CqColor zThreshold)
+void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax, bool fImager, enum EqFilterDepth depthfilter, CqColor zThreshold)
 {
-	TqBool bIsEmpty = IsCurrentBucketEmpty();
+	bool bIsEmpty = IsCurrentBucketEmpty();
 
 	// Render any waiting micro polygon grids.
 	{
@@ -1020,7 +1020,7 @@ void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax, 
 		if ( !( DisplayMode() & ModeZ ) && !pSurface->pCSGNode() )
 		{
 			TIME_SCOPE("Occlusion culling")
-			TqBool fCull = TqFalse;
+			bool fCull = false;
 			if ( !bIsEmpty && pSurface->fCachedBound() )
 				fCull = OcclusionCullSurface( pSurface );
 			if ( fCull )
@@ -1032,7 +1032,7 @@ void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax, 
 		}
 
 		// If the epsilon check has deemed this surface to be undiceable, don't bother asking.
-		TqBool fDiceable = TqFalse;
+		bool fDiceable = false;
 		// Dice & shade the surface if it's small enough...
 		{
 			TIME_SCOPE("Dicable check")
@@ -1056,7 +1056,7 @@ void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax, 
 				pGrid->Shade();
 				pGrid->TransferOutputVariables();
 
-				if ( pGrid->vfCulled() == TqFalse )
+				if ( pGrid->vfCulled() == false )
 				{
 					// Only project micropolygon not culled
 					Bucket.AddGrid( pGrid );
@@ -1127,7 +1127,7 @@ void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax, 
 
 	TIMER_START("Filter")
 	if (fImager)
-		bIsEmpty = TqFalse;
+		bIsEmpty = false;
 
 	Bucket.FilterBucket(bIsEmpty);
 	if(!bIsEmpty)
@@ -1154,16 +1154,16 @@ void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax, 
      It is empty only when this bucket doesn't contain any surface, 
 	 micropolygon or grids.
  */
-TqBool CqImageBuffer::IsCurrentBucketEmpty()
+bool CqImageBuffer::IsCurrentBucketEmpty()
 {
-	TqBool retval = TqFalse;
+	bool retval = false;
 
 	CqBucket& Bucket = CurrentBucket();
 
 	if ( ( !Bucket.pTopSurface() ) &&
 	        Bucket.aGrids().empty() &&
 	        Bucket.aMPGs().empty() )
-		retval = TqTrue;
+		retval = true;
 
 	return retval;
 }
@@ -1207,11 +1207,11 @@ void CqImageBuffer::RenderImage()
 			bucketmodulo = m_cXBuckets;
 	}
 
-	TqBool fImager = TqFalse;
+	bool fImager = false;
 	const CqString* systemOptions;
 	if( ( systemOptions = QGetRenderContext() ->poptCurrent()->GetStringOption( "System", "Imager" ) ) != 0 )
 		if( systemOptions[ 0 ].compare("null") != 0 )
-			fImager = TqTrue;
+			fImager = true;
 
 	const CqString* pstrDepthFilter = QGetRenderContext() ->poptCurrent()->GetStringOption( "Hider", "depthfilter" );
 	const CqColor* pzThreshold = QGetRenderContext() ->poptCurrent()->GetColorOption( "limits", "zthreshold" );
@@ -1235,7 +1235,7 @@ void CqImageBuffer::RenderImage()
 	}
 
 	// Render the surface at the front of the list.
-	m_fDone = TqFalse;
+	m_fDone = false;
 
 	CqVector2D bHalf = CqVector2D( FLOOR(m_FilterXWidth / 2.0f), FLOOR(m_FilterYWidth / 2.0f) );
 
@@ -1269,19 +1269,19 @@ void CqImageBuffer::RenderImage()
 	// Iterate over all buckets...
 	do
 	{
-		TqBool bIsEmpty = IsCurrentBucketEmpty();
+		bool bIsEmpty = IsCurrentBucketEmpty();
 		// Prepare the bucket.
 		CqVector2D bPos = BucketPosition();
 		CqVector2D bSize = BucketSize();
 
-		TqBool fImager = TqFalse;
+		bool fImager = false;
 		const CqString* systemOptions;
 		if( ( systemOptions = QGetRenderContext() ->poptCurrent()->GetStringOption( "System", "Imager" ) ) != 0 )
 			if( systemOptions[ 0 ].compare("null") != 0 )
-				fImager = TqTrue;
+				fImager = true;
 
 		if (fImager)
-			bIsEmpty = TqFalse;
+			bIsEmpty = false;
 
 		{
 			TIME_SCOPE("Prepare bucket")
@@ -1337,7 +1337,7 @@ void CqImageBuffer::RenderImage()
 		RenderSurfaces( xmin, xmax, ymin, ymax, fImager, depthfilter, zThreshold );
 		if ( m_fQuit )
 		{
-			m_fDone = TqTrue;
+			m_fDone = true;
 			return ;
 		}
 #ifdef WIN32
@@ -1359,7 +1359,7 @@ void CqImageBuffer::RenderImage()
 	{
 		( *pProgressHandler ) ( 100.0f, QGetRenderContext() ->CurrentFrame() );
 	}
-	m_fDone = TqTrue;
+	m_fDone = true;
 }
 
 
@@ -1369,7 +1369,7 @@ void CqImageBuffer::RenderImage()
 
 void CqImageBuffer::Quit()
 {
-	m_fQuit = TqTrue;
+	m_fQuit = true;
 }
 
 //----------------------------------------------------------------------
@@ -1379,7 +1379,7 @@ void CqImageBuffer::Quit()
 
   \return True if there is still an unprocessed bucket left, otherwise False.
  */
-TqBool CqImageBuffer::NextBucket(EqBucketOrder order)
+bool CqImageBuffer::NextBucket(EqBucketOrder order)
 {
 
 	TqInt cnt = 0;
@@ -1394,7 +1394,7 @@ TqBool CqImageBuffer::NextBucket(EqBucketOrder order)
 	if ((order != Bucket_Vertical) &&
 	        (order != Bucket_Horizontal) &&
 	        (cnt == total))
-		return TqFalse;
+		return false;
 
 	switch (order)
 	{
@@ -1485,7 +1485,7 @@ TqBool CqImageBuffer::NextBucket(EqBucketOrder order)
 				m_CurrentBucketRow++;
 				bucketdirection = -1;
 				if( m_CurrentBucketRow >= m_cYBuckets )
-					return( TqFalse );
+					return( false );
 
 			}
 			else if((bucketdirection == -1) && ( m_CurrentBucketCol < 0 ))
@@ -1496,7 +1496,7 @@ TqBool CqImageBuffer::NextBucket(EqBucketOrder order)
 				bucketdirection = 1;
 
 				if( m_CurrentBucketRow >= m_cYBuckets )
-					return( TqFalse );
+					return( false );
 
 			}
 		}
@@ -1513,7 +1513,7 @@ TqBool CqImageBuffer::NextBucket(EqBucketOrder order)
 				m_CurrentBucketCol++;
 
 				if( m_CurrentBucketCol >= m_cXBuckets )
-					return( TqFalse );
+					return( false );
 
 			}
 		}
@@ -1530,13 +1530,13 @@ TqBool CqImageBuffer::NextBucket(EqBucketOrder order)
 				m_CurrentBucketCol = 0;
 				m_CurrentBucketRow++;
 				if( m_CurrentBucketRow >= m_cYBuckets )
-					return( TqFalse );
+					return( false );
 
 			}
 		}
 		break;
 	}
-	return( TqTrue );
+	return( true );
 }
 
 //---------------------------------------------------------------------

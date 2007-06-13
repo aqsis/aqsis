@@ -161,7 +161,7 @@ class blobby_vm_assembler
 				m_strings(strings),
 				m_instructions(Instructions),
 				m_bbox(BBox),
-				m_has_bounding_box(TqFalse)
+				m_has_bounding_box(false)
 		{
 
 
@@ -321,7 +321,7 @@ class blobby_vm_assembler
 			}
 
 			m_bbox = Bound;
-			m_has_bounding_box = TqTrue;
+			m_has_bounding_box = true;
 		}
 
 
@@ -554,7 +554,7 @@ class blobby_vm_assembler
 		char  ** m_strings;
 		CqBlobby::instructions_t& m_instructions;
 		CqBound& m_bbox;
-		TqBool m_has_bounding_box;
+		bool m_has_bounding_box;
 };
 
 //---------------------------------------------------------------------
@@ -1077,7 +1077,7 @@ TqInt CqBlobby::polygonize( TqInt PixelsWidth, TqInt PixelsHeight, TqInt& NPoint
 				TqFloat x,y,z;
 
 				z = z_start + (TqFloat) k1 * (TqFloat) OPTIMUM_GRID_SIZE * z_voxel_size;
-				TqBool isrequired = TqFalse;
+				bool isrequired = false;
 
 				// Initialize Marching Cubes algorithm
 				MarchingCubes mc(OPTIMUM_GRID_SIZE+1, OPTIMUM_GRID_SIZE+1, OPTIMUM_GRID_SIZE+1);

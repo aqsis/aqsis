@@ -1158,7 +1158,7 @@ RtPoint * RiTransformPoints ( RtToken fromspace, RtToken tospace,
                               RtInt n, RtPoint points[] )
 {
 	CqError r( RIE_UNIMPLEMENT, RIE_WARNING,
-	           "RiTransformPoints cannot be written to a RIB file.", TqFalse );
+	           "RiTransformPoints cannot be written to a RIB file.", false );
 	r.manage();
 	return ( RtPoint * ) RI_NULL;
 }

@@ -431,7 +431,7 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 		// program. We need to try and fork a new one
 		CqRiProceduralRunProgram *run_proc = new CqRiProceduralRunProgram;
 		// Proc is invalid until fully resolved.
-		run_proc->m_valid = TqFalse;
+		run_proc->m_valid = false;
 
 		ActiveProcRP[std::string(((char**)data)[0])] = run_proc;
 		it = ActiveProcRP.find(std::string(((char**)data)[0]));
@@ -485,7 +485,7 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 		(it->second)->hChildStdoutRdDup = hChildStdoutRd;
 
 		// Proc seems to be valid.
-		run_proc->m_valid = TqTrue;
+		run_proc->m_valid = true;
 	}
 	else
 	{

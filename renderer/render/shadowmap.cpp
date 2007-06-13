@@ -146,11 +146,11 @@ CqTextureMap* CqTextureMap::GetShadowMap( const CqString& strName )
 	        TIFFGetField( pNew->m_pImage, TIFFTAG_PIXAR_TEXTUREFORMAT, &ptexfmt ) != 1 ||
 	        strcmp( ptexfmt, SHADOWMAP_HEADER ) != 0 )
 	{
-		static TqBool done = TqFalse;
+		static bool done = false;
 		if (!done)
 		{
 			Aqsis::log() << error << "Map \"" << strName.c_str() << "\" is not a valid shadow map, use RiMakeShadow" << std::endl;
-			done = TqTrue;
+			done = true;
 		}
 		pNew->SetInvalid();
 	}
@@ -212,8 +212,8 @@ void CqShadowMap::LoadZFile()
 			file.read( reinterpret_cast<TqPchar>( m_apFlat.front() ->pVoidBufferData() ), sizeof( TqFloat ) * ( m_XRes * m_YRes ) );
 
 			// Set the matrixes to general, not Identity as default.
-			matWorldToCamera().SetfIdentity( TqFalse );
-			matWorldToScreen().SetfIdentity( TqFalse );
+			matWorldToCamera().SetfIdentity( false );
+			matWorldToScreen().SetfIdentity( false );
 			m_Directory = 0;
 		}
 		else
@@ -260,8 +260,8 @@ void CqShadowMap::ReadMatrices()
 			}
 		}
 		// Set the matrixes to general, not Identity as default.
-		matWToC.SetfIdentity( TqFalse );
-		matWToS.SetfIdentity( TqFalse );
+		matWToC.SetfIdentity( false );
+		matWToS.SetfIdentity( false );
 
 		matWToC *= matCToW;
 		matWToS *= matCToW;
@@ -536,7 +536,7 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 
 	CqTextureMapBuffer * pTMBa = GetBuffer( lu, lv, index );
 
-	TqBool valid =  pTMBa  && pTMBa->IsValid (hu, hv, index );
+	bool valid =  pTMBa  && pTMBa->IsValid (hu, hv, index );
 
 	// Don't do the area computing of the shadow if the conservative z 
 	// value is either lower than the current minz value of the tile or 
@@ -655,7 +655,7 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 /** Save the shadowmap data in system specifirc image format.
  */
 
-void CqShadowMap::SaveShadowMap( const CqString& strShadowName, TqBool append )
+void CqShadowMap::SaveShadowMap( const CqString& strShadowName, bool append )
 {
 	const char* mode = (append)? "a" : "w";
 

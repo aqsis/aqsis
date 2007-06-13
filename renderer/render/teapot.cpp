@@ -426,7 +426,7 @@ static CqVector3D Patch07[ 13*2 ] = { /*u=13 v=2 */
 /** Constructor.
  */
 
-CqTeapot::CqTeapot( TqBool addCrowBase ) : m_CrowBase( addCrowBase )
+CqTeapot::CqTeapot( bool addCrowBase ) : m_CrowBase( addCrowBase )
 {
 	int i;
 	TqInt lUses;

@@ -43,12 +43,6 @@ typedef	unsigned short	TqUshort;
 typedef	float	TqFloat;
 typedef	double	TqDouble;
 
-typedef	bool	TqBool;
-/// Defines the 'true' value used in TqBool operations.
-#define	TqTrue			true
-/// Defines the 'true' value used in TqBool operations.
-#define	TqFalse			false
-
 /// Determine the largest integer value smaller than the given float.
 #define FLOOR(x) ((int)(x) - ((x) < 0 && (x) != (int)(x)))
 /// Determine the smallest integer value larger than the given float.
@@ -99,7 +93,7 @@ inline TqUint LOWEST_BIT( TqUint x )
 }
 
 /// Determine if the given value is a power of two.
-inline TqBool IS_POW2( TqUint x )
+inline bool IS_POW2( TqUint x )
 {
 	return ( x != 0 && x == LOWEST_BIT( x ) );
 }

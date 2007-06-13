@@ -74,11 +74,11 @@ static CqMatrix oldresult[2];
 CqRenderer::CqRenderer() :
 		m_pImageBuffer( 0 ),
 		m_Mode( RenderMode_Image ),
-		m_fSaveGPrims( TqFalse ),
+		m_fSaveGPrims( false ),
 		m_OutputDataOffset(9),		// Cs, Os, z, coverage, a
 		m_OutputDataTotalSize(9),	// Cs, Os, z, coverage, a
 		m_FrameNo( 0 ),
-		m_bObjectOpen(TqFalse),
+		m_bObjectOpen(false),
 		m_pErrorHandler( &RiErrorPrint ),
 		m_pProgressHandler( NULL ),
 		m_pPreRenderFunction( NULL ),
@@ -93,7 +93,7 @@ CqRenderer::CqRenderer() :
 	m_pTransDefault = CqTransformPtr( new CqTransform );
 	m_pTransCamera  = CqTransformPtr( new CqTransform );
 	m_pTransDefObj  = CqTransformPtr( new CqTransform );
-	m_fWorldBegin = TqFalse;
+	m_fWorldBegin = false;
 
 	m_poptDefault = CqOptionsPtr(new CqOptions );
 
@@ -695,7 +695,7 @@ void	CqRenderer::ptransConcatCurrentTime( const CqMatrix& matTrans )
 /** Render all surface in the current list to the image buffer.
  */
 
-void CqRenderer::RenderWorld(TqBool clone)
+void CqRenderer::RenderWorld(bool clone)
 {
 	// While rendering, all primitives should fasttrack straight into the pipeline, the easiest way to ensure this
 	// is to switch into 'non' multipass mode.
@@ -800,7 +800,7 @@ void CqRenderer::RenderAutoShadows()
 				SetCameraTransform(lightTrans);
 				
 				// Render the world
-				RenderWorld(TqTrue);
+				RenderWorld(true);
 
 				popOptions();
 				SetCameraTransform(defaultCamera);
@@ -1107,10 +1107,10 @@ CqColor*	CqRenderer::GetColorOptionWrite( const char* strName, const char* strPa
 
 //----------------------------------------------------------------------
 /** Store the named coordinate system in the array of named coordinate systems, overwrite any existing
- * with the same name. Returns TqTrue if system already exists.
+ * with the same name. Returns true if system already exists.
  */
 
-TqBool	CqRenderer::SetCoordSystem( const char* strName, const CqMatrix& matToWorld )
+bool	CqRenderer::SetCoordSystem( const char* strName, const CqMatrix& matToWorld )
 {
 	// Search for the same named system in the current list.
 	TqUlong hash = CqString::hash( strName );
@@ -1120,13 +1120,13 @@ TqBool	CqRenderer::SetCoordSystem( const char* strName, const CqMatrix& matToWor
 		{
 			m_aCoordSystems[ i ].m_matToWorld = matToWorld;
 			m_aCoordSystems[ i ].m_matWorldTo = matToWorld.Inverse();
-			return ( TqTrue );
+			return ( true );
 		}
 	}
 
 	// If we got here, it didn't exists.
 	m_aCoordSystems.push_back( SqCoordSys( strName, matToWorld, matToWorld.Inverse() ) );
-	return ( TqFalse );
+	return ( false );
 }
 
 
@@ -1666,16 +1666,16 @@ IqTextureMap* CqRenderer::GetLatLongMap( const CqString& strFileName )
 }
 
 
-TqBool	CqRenderer::GetBasisMatrix( CqMatrix& matBasis, const CqString& name )
+bool	CqRenderer::GetBasisMatrix( CqMatrix& matBasis, const CqString& name )
 {
 	RtBasis basis;
 	if ( BasisFromName( &basis, name.c_str() ) )
 	{
 		matBasis = basis;
-		return ( TqTrue );
+		return ( true );
 	}
 	else
-		return ( TqFalse );
+		return ( false );
 }
 
 //---------------------------------------------------------------------
@@ -1872,7 +1872,7 @@ TqInt CqRenderer::OutputDataType( const char* name )
 CqObjectInstance* CqRenderer::OpenNewObjectInstance()
 {
 	assert( !m_bObjectOpen );
-	m_bObjectOpen = TqTrue;
+	m_bObjectOpen = true;
 	CqObjectInstance* pNew = new CqObjectInstance;
 	m_ObjectInstances.push_back(pNew);
 

@@ -152,7 +152,7 @@ CqBound	CqSurface::AdjustBoundForTransformationMotion( const CqBound& B ) const
 /** Default constructor
  */
 
-CqSurface::CqSurface() : m_fDiceable( TqTrue ), m_fDiscard( TqFalse ), m_EyeSplitCount( 0 ),
+CqSurface::CqSurface() : m_fDiceable( true ), m_fDiscard( false ), m_EyeSplitCount( 0 ),
 		m_pAttributes( 0 ), m_SplitDir( SplitDir_U )
 {
 	// Set a refernce with the current attributes.
@@ -161,7 +161,7 @@ CqSurface::CqSurface() : m_fDiceable( TqTrue ), m_fDiscard( TqFalse ), m_EyeSpli
 
 	m_pTransform = QGetRenderContext() ->ptransCurrent();
 
-	m_CachedBound = TqFalse;
+	m_CachedBound = false;
 
 	// If the current context is a solid node, and is a 'primitive', attatch this surface to the node.
 	if ( QGetRenderContext() ->pconCurrent() ->isSolid() )
@@ -240,7 +240,7 @@ void CqSurface::ClonePrimitiveVariables( const CqSurface& From )
  * primitive variables.
  */
 
-void CqSurface::SetDefaultPrimitiveVariables( TqBool bUseDef_st )
+void CqSurface::SetDefaultPrimitiveVariables( bool bUseDef_st )
 {
 	TqInt bUses = Uses();
 
@@ -284,7 +284,7 @@ void CqSurface::SetDefaultPrimitiveVariables( TqBool bUseDef_st )
 }
 
 
-void CqSurface::NaturalSubdivide( CqParameter* pParam, CqParameter* pParam1, CqParameter* pParam2, TqBool u )
+void CqSurface::NaturalSubdivide( CqParameter* pParam, CqParameter* pParam1, CqParameter* pParam2, bool u )
 {
 	switch ( pParam->Type() )
 	{
@@ -503,12 +503,12 @@ CqMicroPolyGridBase* CqSurface::Dice()
 
 	// If the shaders need N and they have been explicitly specified, then bilinearly interpolate them.
 	if ( isDONE( lDone, EnvVars_N ) )
-		pGrid->SetbShadingNormals( TqTrue );
+		pGrid->SetbShadingNormals( true );
 
 	if ( !isDONE( lDone, EnvVars_Ng ) && CanGenerateNormals() && USES( lUses, EnvVars_Ng ) )
 	{
 		GenerateGeometricNormals( m_uDiceSize, m_vDiceSize, pGrid->pVar(EnvVars_Ng) );
-		pGrid->SetbGeometricNormals( TqTrue );
+		pGrid->SetbGeometricNormals( true );
 	}
 
 	// Now we need to dice the user specified parameters as appropriate.
@@ -542,19 +542,19 @@ TqInt CqSurface::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits )
 	aSplits[ 0 ] ->SetSurfaceParameters( *this );
 	aSplits[ 0 ] ->SetSplitDir( ( SplitDir() == SplitDir_U ) ? SplitDir_V : SplitDir_U );
 	aSplits[ 0 ] ->SetEyeSplitCount( EyeSplitCount() );
-	aSplits[ 0 ] ->m_fDiceable = TqTrue;
+	aSplits[ 0 ] ->m_fDiceable = true;
 	//ADDREF( aSplits[ 0 ] );
 
 	aSplits[ 1 ] ->SetSurfaceParameters( *this );
 	aSplits[ 1 ] ->SetSplitDir( ( SplitDir() == SplitDir_U ) ? SplitDir_V : SplitDir_U );
 	aSplits[ 1 ] ->SetEyeSplitCount( EyeSplitCount() );
-	aSplits[ 1 ] ->m_fDiceable = TqTrue;
+	aSplits[ 1 ] ->m_fDiceable = true;
 	//ADDREF( aSplits[ 1 ] );
 
 	// Iterate through any use parameters subdividing and storing the second value in the target surface.
 	std::vector<CqParameter*>::iterator iUP;
 	std::vector<CqParameter*>::iterator end = m_aUserParams.end();
-	TqBool direction = SplitDir() == SplitDir_U;
+	bool direction = SplitDir() == SplitDir_U;
 
 	for ( iUP = m_aUserParams.begin(); iUP != end; iUP++ )
 	{
@@ -597,7 +597,7 @@ void CqSurface::uSubdivideUserParameters( CqSurface* pA, CqSurface* pB )
 	{
 		CqParameter* pNewA = ( *iUP ) ->Clone();
 		CqParameter* pNewB = ( *iUP ) ->Clone();
-		( *iUP ) ->Subdivide( pNewA, pNewB, TqTrue, this );
+		( *iUP ) ->Subdivide( pNewA, pNewB, true, this );
 		pA->AddPrimitiveVariable( pNewA );
 		pB->AddPrimitiveVariable( pNewB );
 	}
@@ -617,7 +617,7 @@ void CqSurface::vSubdivideUserParameters( CqSurface* pA, CqSurface* pB )
 	{
 		CqParameter* pNewA = ( *iUP ) ->Clone();
 		CqParameter* pNewB = ( *iUP ) ->Clone();
-		( *iUP ) ->Subdivide( pNewA, pNewB, TqFalse, this );
+		( *iUP ) ->Subdivide( pNewA, pNewB, false, this );
 		pA->AddPrimitiveVariable( pNewA );
 		pB->AddPrimitiveVariable( pNewB );
 	}

@@ -73,14 +73,14 @@ class CqQuadric : public CqSurface
 
 
 		// Overrides from CqSurface
-		virtual TqBool	Diceable();
+		virtual bool	Diceable();
 
 		/** Determine whether the passed surface is valid to be used as a
 		 *  frame in motion blur for this surface.
 		 */
-		virtual TqBool	IsMotionBlurMatch( CqSurface* pSurf )
+		virtual bool	IsMotionBlurMatch( CqSurface* pSurf )
 		{
-			return( TqFalse );
+			return( false );
 		}
 
 		TqUlong	EstimateGridSize();
@@ -142,12 +142,12 @@ class CqSphere : public CqQuadric
 
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
-		virtual TqBool	CanGenerateNormals() const
+		virtual bool	CanGenerateNormals() const
 		{
-			return ( TqTrue );
+			return ( true );
 		}
 
-		virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, TqBool u );
+		virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, bool u );
 
 
 #ifdef _DEBUG
@@ -186,7 +186,7 @@ class CqCone : public CqQuadric
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
 
-		virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, TqBool u );
+		virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, bool u );
 
 
 #ifdef _DEBUG
@@ -225,12 +225,12 @@ class CqCylinder : public CqQuadric
 
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
-		virtual TqBool	CanGenerateNormals() const
+		virtual bool	CanGenerateNormals() const
 		{
-			return ( TqTrue );
+			return ( true );
 		}
 
-		virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, TqBool u );
+		virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, bool u );
 
 
 #ifdef _DEBUG
@@ -270,7 +270,7 @@ class CqHyperboloid : public CqQuadric
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
 
-		virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, TqBool u );
+		virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, bool u );
 
 
 #ifdef _DEBUG
@@ -308,7 +308,7 @@ class CqParaboloid : public CqQuadric
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
 
-		virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, TqBool u );
+		virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, bool u );
 
 
 #ifdef _DEBUG
@@ -347,7 +347,7 @@ class CqTorus : public CqQuadric
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
 
-		virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, TqBool u );
+		virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, bool u );
 
 
 #ifdef _DEBUG
@@ -386,12 +386,12 @@ class CqDisk : public CqQuadric
 
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
-		virtual TqBool	CanGenerateNormals() const
+		virtual bool	CanGenerateNormals() const
 		{
-			return ( TqTrue );
+			return ( true );
 		}
 
-		virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, TqBool u );
+		virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, bool u );
 
 
 #ifdef _DEBUG

@@ -34,7 +34,7 @@ START_NAMESPACE( Aqsis )
 /** Constructor.
  */
 
-CqTransform::CqTransform() : CqMotionSpec<SqTransformation>(SqTransformation()), m_IsMoving(TqFalse)
+CqTransform::CqTransform() : CqMotionSpec<SqTransformation>(SqTransformation()), m_IsMoving(false)
 {}
 
 
@@ -52,7 +52,7 @@ CqTransform::CqTransform( const CqTransform& From ) : CqMotionSpec<SqTransformat
 		// Get the state of the transformation at the last stack entry, and use this as the default value for new timeslots.
 		// if the previous level has motion specification, the value will be interpolated.
 		CqMatrix matOtoWLast;
-		TqBool handLast = TqFalse;
+		bool handLast = false;
 		if ( !Transform_stack.empty() )
 		{
 			TqFloat time = QGetRenderContext()->Time();
@@ -77,7 +77,7 @@ void	CqTransform::InitialiseDefaultObject( const CqTransformPtr& From )
 	// if the previous level has motion specification, the value will be interpolated.
 	TqFloat time = QGetRenderContext()->Time();
 	CqMatrix matOtoWLast =  From->matObjectToWorld( time );
-	TqBool handLast =  From->GetHandedness( time );
+	bool handLast =  From->GetHandedness( time );
 
 	SqTransformation ct;
 	ct.m_Handedness = handLast;
@@ -92,7 +92,7 @@ void	CqTransform::InitialiseDefaultObject( const CqTransformPtr& From )
 
 CqTransform::CqTransform( const CqTransformPtr& From )
 		: CqMotionSpec<SqTransformation>( *From ),
-		m_IsMoving(TqFalse),
+		m_IsMoving(false),
 		m_StaticMatrix( From->m_StaticMatrix ),
 		m_Handedness( From->m_Handedness )
 {
@@ -167,7 +167,7 @@ CqTransform& CqTransform::operator=( const CqTransform& From )
 void CqTransform::SetCurrentTransform( TqFloat time, const CqMatrix& matTrans )
 {
 	TqFloat det = matTrans.Determinant();
-	TqBool flip = ( !matTrans.fIdentity() && det < 0 );
+	bool flip = ( !matTrans.fIdentity() && det < 0 );
 
 	SqTransformation ct;
 	ct.m_matTransform = matTrans;
@@ -175,7 +175,7 @@ void CqTransform::SetCurrentTransform( TqFloat time, const CqMatrix& matTrans )
 	if ( QGetRenderContext() ->pconCurrent() ->fMotionBlock() )
 	{
 		AddTimeSlot( time, ct );
-		m_IsMoving = TqTrue;
+		m_IsMoving = true;
 	}
 	else
 	{
@@ -198,10 +198,10 @@ void CqTransform::SetCurrentTransform( TqFloat time, const CqMatrix& matTrans )
 void CqTransform::SetTransform( TqFloat time, const CqMatrix& matTrans )
 {
 	TqFloat det = matTrans.Determinant();
-	TqBool flip = ( !matTrans.fIdentity() && det < 0 );
+	bool flip = ( !matTrans.fIdentity() && det < 0 );
 	CqMatrix matCtoW = QGetRenderContext()->matSpaceToSpace("world", "camera", NULL, NULL, QGetRenderContext()->Time());
 	TqFloat camdet = matCtoW.Determinant();
-	TqBool camhand = ( !matCtoW.fIdentity() && camdet < 0 );
+	bool camhand = ( !matCtoW.fIdentity() && camdet < 0 );
 
 	if ( QGetRenderContext() ->pconCurrent() ->fMotionBlock() )
 	{
@@ -209,7 +209,7 @@ void CqTransform::SetTransform( TqFloat time, const CqMatrix& matTrans )
 		ct.m_Handedness = (flip)? !camhand : camhand;
 		ct.m_matTransform = matTrans;
 		AddTimeSlot( time, ct );
-		m_IsMoving = TqTrue;
+		m_IsMoving = true;
 	}
 	else
 	{
@@ -220,7 +220,7 @@ void CqTransform::SetTransform( TqFloat time, const CqMatrix& matTrans )
 
 			SqTransformation ct;
 			ct.m_Handedness = (flip)? !camhand : camhand;
-			TqBool hand0 = ct.m_Handedness;
+			bool hand0 = ct.m_Handedness;
 			ct.m_matTransform = matTrans;
 
 			AddTimeSlot( Time(0), ct );
@@ -229,7 +229,7 @@ void CqTransform::SetTransform( TqFloat time, const CqMatrix& matTrans )
 			{
 				CqMatrix matOffset = mat0 * matObjectToWorld(Time(i)).Inverse();
 				ct.m_matTransform = matOffset * matTrans;
-				TqBool flip2 = ( matOffset.Determinant() < 0 );
+				bool flip2 = ( matOffset.Determinant() < 0 );
 				ct.m_Handedness = (flip2)? !hand0 : hand0;
 				AddTimeSlot( Time(i), ct);
 			}
@@ -250,7 +250,7 @@ void CqTransform::SetTransform( TqFloat time, const CqMatrix& matTrans )
 void CqTransform::ConcatCurrentTransform( TqFloat time, const CqMatrix& matTrans )
 {
 	TqFloat det = matTrans.Determinant();
-	TqBool flip = ( !matTrans.fIdentity() && det < 0 );
+	bool flip = ( !matTrans.fIdentity() && det < 0 );
 
 	SqTransformation ct;
 	ct.m_matTransform = matTrans;
@@ -263,7 +263,7 @@ void CqTransform::ConcatCurrentTransform( TqFloat time, const CqMatrix& matTrans
 	if ( QGetRenderContext() ->pconCurrent() ->fMotionBlock() )
 	{
 		ConcatTimeSlot( time, ct );
-		m_IsMoving = TqTrue;
+		m_IsMoving = true;
 	}
 	else
 		// else, if we are moving, apply this transform at all time slots, otherwise apply to static matrix.
@@ -318,7 +318,7 @@ CqTransform* CqTransform::Inverse( )
 /** Get the handedness at the specified time.
  */
 
-TqBool CqTransform::GetHandedness( TqFloat time ) const
+bool CqTransform::GetHandedness( TqFloat time ) const
 {
 	if( m_IsMoving )
 		return ( GetMotionObject( time ).m_Handedness );
@@ -332,12 +332,12 @@ TqBool CqTransform::GetHandedness( TqFloat time ) const
  *  then make the transform static and clear the motion keyframes.
  */
 
-void CqTransform::ResetTransform(const CqMatrix& mat, TqBool hand, TqBool makeStatic)
+void CqTransform::ResetTransform(const CqMatrix& mat, bool hand, bool makeStatic)
 {
 	if( makeStatic )
 	{
 		Reset();
-		m_IsMoving=TqFalse;
+		m_IsMoving=false;
 		m_StaticMatrix = mat;
 		m_Handedness = hand;
 	}
@@ -361,7 +361,7 @@ SqTransformation CqTransform::ConcatMotionObjects( const SqTransformation& A, co
 {
 	SqTransformation res;
 	res.m_matTransform = A.m_matTransform * B.m_matTransform;
-	TqBool flip = ( B.m_matTransform.Determinant() < 0 );
+	bool flip = ( B.m_matTransform.Determinant() < 0 );
 	res.m_Handedness = (flip)? !A.m_Handedness : A.m_Handedness;
 	return ( res );
 }

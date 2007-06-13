@@ -49,15 +49,15 @@ static TqUlong RIH_add = CqString::hash("+");
 static TqUlong RIH_sub = CqString::hash("-");
 
 
-inline TqBool IsMath(TqUlong comp)
+inline bool IsMath(TqUlong comp)
 {
 	if ((comp == RIH_mul) || (comp == RIH_div) || (comp == RIH_add) || (comp == RIH_sub))
-		return TqTrue;
-	return TqFalse;
+		return true;
+	return false;
 }
 
 template <class T>
-inline TqBool MathCondition(const T& A, const T& B, TqUlong comp)
+inline bool MathCondition(const T& A, const T& B, TqUlong comp)
 {
 
 	if (comp == RIH_mul)
@@ -65,20 +65,20 @@ inline TqBool MathCondition(const T& A, const T& B, TqUlong comp)
 	if (comp == RIH_div)
 	{
 		if (B == (T) 0)
-			return TqFalse; // It maybe TqTrue this is a division by zero ??
+			return false; // It maybe true this is a division by zero ??
 		if (A == (T) 0)
-			return TqFalse;
+			return false;
 		return ((A / B) != (T) 0);
 	}
 	if (comp == RIH_add)
 		return ((A + B) != (T) 0);
 	if (comp == RIH_sub)
 		return ((A - B) != (T) 0);
-	return TqTrue;
+	return true;
 }
 
 template <class T>
-inline TqBool LogicCondition(const T& A, const T& B, TqUlong comp)
+inline bool LogicCondition(const T& A, const T& B, TqUlong comp)
 {
 	if (comp == RIH_eq )
 		return (A == B);
@@ -92,11 +92,11 @@ inline TqBool LogicCondition(const T& A, const T& B, TqUlong comp)
 		return (A >= B);
 	if (comp == RIH_gt )
 		return (A > B);
-	return TqFalse;
+	return false;
 }
 
 template <class T>
-inline TqBool Condition(const T& A, const T& B, TqUlong comp)
+inline bool Condition(const T& A, const T& B, TqUlong comp)
 {
 
 	if (IsMath(comp))
@@ -116,25 +116,25 @@ inline TqBool Condition(const T& A, const T& B, TqUlong comp)
  *                IfBegin "$limits:bgcolor == [0.2 0.2 0.4]"
  * \param   where  it is from IfBegin, ElseIf for printfs debugging.
  */
-TqBool TestCondition(RtString condition, RtString where)
+bool TestCondition(RtString condition, RtString where)
 {
 
 	char StringA[80];
 	char Compare[80];
 
 
-	TqBool Ok = TqTrue;
+	bool Ok = true;
 	TqInt n;
 
-	// If the left side is not the right parameter than return TqTrue
+	// If the left side is not the right parameter than return true
 	if ((strstr(condition, "$") == 0) || (strstr(condition, ":") == 0))
-		return TqTrue;
+		return true;
 
 	n = sscanf(condition,"$%s %s", StringA, Compare);
 
-	// If the left side is ill formed return TqTrue
+	// If the left side is ill formed return true
 	if (n != 2)
-		return TqTrue;
+		return true;
 
 
 	TqUlong comp = CqString::hash(Compare);
@@ -145,15 +145,15 @@ TqBool TestCondition(RtString condition, RtString where)
 
 	EqVariableType paramType = QGetRenderContext()->poptCurrent()->getParameterType(A,B);
 
-	// If the left side is not known for now return TqTrue
+	// If the left side is not known for now return true
 	if (paramType == type_invalid)
 	{
 		Aqsis::log() << warning << "Unknown parameter: " << A << ":" << B << std::endl;
-		return TqTrue;
+		return true;
 	}
 
-	// At this point the condition must be true; otherwise the return value will be TqFalse
-	Ok = TqFalse;
+	// At this point the condition must be true; otherwise the return value will be false
+	Ok = false;
 	switch (paramType)
 	{
 			case type_integer:
@@ -223,7 +223,7 @@ TqBool TestCondition(RtString condition, RtString where)
 
 						if (strstr(StringC, pString->c_str()) != 0)
 						{
-							Ok = TqTrue;
+							Ok = true;
 						}
 					}
 					else if (comp == RIH_ne )
@@ -231,7 +231,7 @@ TqBool TestCondition(RtString condition, RtString where)
 
 						if (!strstr(StringC, pString->c_str()) != 0)
 						{
-							Ok = TqTrue;
+							Ok = true;
 						}
 					}
 				}
@@ -240,15 +240,15 @@ TqBool TestCondition(RtString condition, RtString where)
 
 			default:
 			{
-				// It is not supported than make sure we return TqTrue
+				// It is not supported than make sure we return true
 				Aqsis::log() << warning << "this type of " << A << ":" << B << " are not supported yet!" << std::endl;
-				Ok = TqTrue;
+				Ok = true;
 			}
 			break;
 	}
 
 #ifdef _DEBUG
-	if (Ok == TqFalse  )
+	if (Ok == false  )
 		Aqsis::log() << info << where << ": " << condition << " is false" << std::endl;
 	else
 		Aqsis::log() << info << where << ": " << condition << " is true" << std::endl;
