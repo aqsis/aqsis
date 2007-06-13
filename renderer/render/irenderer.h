@@ -64,7 +64,7 @@ struct IqRenderer
 	virtual	IqTextureMap* GetLatLongMap( const CqString& strName ) = 0;
 
 
-	virtual	TqBool	GetBasisMatrix( CqMatrix& matBasis, const CqString& name ) = 0;
+	virtual	bool	GetBasisMatrix( CqMatrix& matBasis, const CqString& name ) = 0;
 
 	virtual TqInt	RegisterOutputData( const char* name ) = 0;
 	virtual TqInt	OutputDataIndex( const char* name ) = 0;
@@ -80,7 +80,7 @@ struct IqRenderer
 
 	virtual	TqInt	bucketCount() = 0;
 
-	virtual	TqBool	IsWorldBegin() const = 0;
+	virtual	bool	IsWorldBegin() const = 0;
 };
 
 IqRenderer* QGetRenderContextI();

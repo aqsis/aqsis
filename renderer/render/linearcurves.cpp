@@ -96,7 +96,7 @@ CqSurface* CqLinearCurveSegment::Clone() const
 void CqLinearCurveSegment::NaturalSubdivide(
     CqParameter* pParam,
     CqParameter* pParam1, CqParameter* pParam2,
-    TqBool u
+    bool u
 )
 {
 
@@ -266,7 +266,7 @@ TqInt CqLinearCurveSegment::SplitToCurves(
 			//  handle them the same way as vertex class
 			//  variables for the simple case of a
 			//  CqSingleCurveLinear
-			NaturalSubdivide( ( *iUP ), pNewA, pNewB, TqFalse );
+			NaturalSubdivide( ( *iUP ), pNewA, pNewB, false );
 		}
 		else
 		{
@@ -438,7 +438,7 @@ TqInt CqLinearCurveSegment::SplitToPatch(
  * @param periodic      true if the curves in the group are periodic.
  */
 CqLinearCurvesGroup::CqLinearCurvesGroup(
-    TqInt ncurves, TqInt nvertices[], TqBool periodic
+    TqInt ncurves, TqInt nvertices[], bool periodic
 ) : CqCurvesGroup()
 {
 

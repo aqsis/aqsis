@@ -38,11 +38,11 @@ tiff files.
 #include	"argparse.h"
 #include	"ri.h"
 
-TqBool	g_version = TqFalse;
-TqBool	g_help = TqFalse;
-TqBool	g_envcube = TqFalse;
-TqBool	g_envlatl = TqFalse;
-TqBool	g_shadow = TqFalse;
+bool	g_version = false;
+bool	g_help = false;
+bool	g_envcube = false;
+bool	g_envlatl = false;
+bool	g_shadow = false;
 
 ArgParse::apint g_cl_verbose = 1;
 ArgParse::apstring	g_swrap = "black";

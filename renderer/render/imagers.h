@@ -51,7 +51,7 @@ START_NAMESPACE( Aqsis )
 class CqImagersource : public CqListEntry<CqImagersource>
 {
 	public:
-		CqImagersource( const boost::shared_ptr<IqShader>& pShader, TqBool fActive = TqTrue );
+		CqImagersource( const boost::shared_ptr<IqShader>& pShader, bool fActive = true );
 		virtual	~CqImagersource();
 
 		/** Get a pointer to the associated Imagersource shader.

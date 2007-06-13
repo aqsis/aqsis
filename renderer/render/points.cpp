@@ -180,7 +180,7 @@ CqMicroPolyGridBase* CqPoints::Dice()
 	if ( USES( lUses, EnvVars_N ) && ( NULL != pGrid->pVar(EnvVars_N) ) && pPoints()->bHasVar(EnvVars_N) )
 	{
 		NaturalDice( pPoints()->N(), nVertices(), 1, pGrid->pVar(EnvVars_N) );
-		pGrid->SetbShadingNormals( TqTrue );
+		pGrid->SetbShadingNormals( true );
 	}
 
 	if ( USES( lUses, EnvVars_Ng ) )
@@ -190,12 +190,12 @@ CqMicroPolyGridBase* CqPoints::Dice()
 		TqUint u;
 		for ( u = 0; u < nVertices(); u++ )
 		{
-			TqBool CSO = pTransform()->GetHandedness(pTransform()->Time(0));
-			TqBool O = pAttributes() ->GetIntegerAttribute( "System", "Orientation" ) [ 0 ] != 0;
+			bool CSO = pTransform()->GetHandedness(pTransform()->Time(0));
+			bool O = pAttributes() ->GetIntegerAttribute( "System", "Orientation" ) [ 0 ] != 0;
 			N = ( (O && CSO) || (!O && !CSO) ) ? N : -N;
 			pGrid->pVar(EnvVars_Ng)->SetNormal( N, u );
 		}
-		pGrid->SetbGeometricNormals( TqTrue );
+		pGrid->SetbGeometricNormals( true );
 	}
 
 	// Now we need to dice the user specified parameters as appropriate.
@@ -310,7 +310,7 @@ void CqPoints::NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqInt vDic
 /** Determine whether the quadric is suitable for dicing.
  */
 
-TqBool	CqPoints::Diceable()
+bool	CqPoints::Diceable()
 {
 	TqUint gridsize = 256;
 
@@ -330,9 +330,9 @@ TqBool	CqPoints::Diceable()
 		gridsize = (TqUint) poptGridSize[ 0 ];
 
 	if( nVertices() > gridsize )
-		return ( TqFalse );
+		return ( false );
 	else
-		return ( TqTrue );
+		return ( true );
 }
 
 
@@ -655,7 +655,7 @@ void CqMicroPolyGridPoints::Split( CqImageBuffer* pImage, long xmin, long xmax, 
 }
 
 
-TqBool	CqMicroPolygonPoints::Sample( const SqSampleData& sample, TqFloat& D, TqFloat time, TqBool UsingDof )
+bool	CqMicroPolygonPoints::Sample( const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof )
 {
 	const CqVector2D& vecSample = sample.m_Position;
 
@@ -664,9 +664,9 @@ TqBool	CqMicroPolygonPoints::Sample( const SqSampleData& sample, TqFloat& D, TqF
 	if( (CqVector2D( P.x(), P.y() ) - vecSample).Magnitude() < m_radius )
 	{
 		D = P.z();
-		return( TqTrue );
+		return( true );
 	}
-	return( TqFalse );
+	return( false );
 }
 
 
@@ -875,7 +875,7 @@ void CqMicroPolygonMotionPoints::BuildBoundList()
 		start = end;
 		startTime = endTime;
 	}
-	m_BoundReady = TqTrue;
+	m_BoundReady = true;
 }
 
 
@@ -887,7 +887,7 @@ void CqMicroPolygonMotionPoints::BuildBoundList()
  * \return Boolean indicating smaple hit.
  */
 
-TqBool CqMicroPolygonMotionPoints::Sample( const SqSampleData& sample, TqFloat& D, TqFloat time, TqBool UsingDof )
+bool CqMicroPolygonMotionPoints::Sample( const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof )
 {
 	const CqVector2D& vecSample = sample.m_Position;
 	return( fContains( vecSample, D, time ) );
@@ -926,11 +926,11 @@ void CqMicroPolygonMotionPoints::AppendKey( const CqVector3D& vA, TqFloat radius
  * \return Boolean indicating sample hit.
  */
 
-TqBool CqMicroPolygonMotionPoints::fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const
+bool CqMicroPolygonMotionPoints::fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const
 {
 	TqInt iIndex = 0;
 	TqFloat Fraction = 0.0f;
-	TqBool Exact = TqTrue;
+	bool Exact = true;
 
 	if ( time > m_Times.front() )
 	{
@@ -962,9 +962,9 @@ TqBool CqMicroPolygonMotionPoints::fContains( const CqVector2D& vecP, TqFloat& D
 		if( (CqVector2D( MidPoint.x(), MidPoint.y() ) - vecP).Magnitude() < MidRadius )
 		{
 			Depth = MidPoint.z();
-			return( TqTrue );
+			return( true );
 		}
-		return ( TqFalse );
+		return ( false );
 	}
 }
 

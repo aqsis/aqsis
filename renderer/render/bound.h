@@ -121,39 +121,39 @@ class CqBound
 		CqBound&	Encapsulate( const CqVector3D& v );
 		CqBound&	Encapsulate( const CqVector2D& v );
 
-		TqBool	Contains2D( const CqBound& b ) const
+		bool	Contains2D( const CqBound& b ) const
 		{
 			if ( ( b.vecMin().x() >= vecMin().x() && b.vecMax().x() <= vecMax().x() ) &&
 			        ( b.vecMin().y() >= vecMin().y() && b.vecMax().y() <= vecMax().y() ) )
-				return ( TqTrue );
+				return ( true );
 			else
-				return ( TqFalse );
+				return ( false );
 		}
-		TqBool	Contains3D( const CqVector3D& v ) const
+		bool	Contains3D( const CqVector3D& v ) const
 		{
 			if ( ( v.x() >= m_vecMin.x() && v.x() <= m_vecMax.x() ) &&
 			        ( v.y() >= m_vecMin.y() && v.y() <= m_vecMax.y() ) &&
 			        ( v.z() >= m_vecMin.z() && v.z() <= m_vecMax.z() ) )
-				return ( TqTrue );
+				return ( true );
 			else
-				return ( TqFalse );
+				return ( false );
 		}
-		TqBool	Contains2D( const CqVector2D& v ) const
+		bool	Contains2D( const CqVector2D& v ) const
 		{
 			if ( ( v.x() < m_vecMin.x() || v.x() > m_vecMax.x() ) ||
 			        ( v.y() < m_vecMin.y() || v.y() > m_vecMax.y() ) )
-				return ( TqFalse );
+				return ( false );
 			else
-				return ( TqTrue );
+				return ( true );
 		}
 
-		TqBool	Intersects( const CqVector2D& min, const CqVector2D& max ) const
+		bool	Intersects( const CqVector2D& min, const CqVector2D& max ) const
 		{
 			if( min.x() > m_vecMax.x() || min.y() > m_vecMax.y() ||
 			        max.x() < m_vecMin.x() || max.y() < m_vecMin.y() )
-				return ( TqFalse );
+				return ( false );
 			else
-				return ( TqTrue );
+				return ( true );
 		}
 
 		enum EqPlaneSide
@@ -165,26 +165,26 @@ class CqBound
 
 		TqInt whichSideOf(CqPlane plane)
 		{
-			TqBool inside = TqFalse;
-			TqBool outside = TqFalse;
+			bool inside = false;
+			bool outside = false;
 
 
 			CqVector3D p(m_vecMin.x(), m_vecMin.y(), m_vecMin.z());
 			if (plane.whichSide(p) == CqPlane::Space_Positive)
-				inside = TqTrue;
+				inside = true;
 			else
-				outside = TqTrue;
+				outside = true;
 
 			p.z(m_vecMax.z());	// xmin, ymin, zmax
 			if (plane.whichSide(p) == CqPlane::Space_Positive)
 			{
-				inside = TqTrue;
+				inside = true;
 				if (outside)
 					return(Side_Both);	// Both sides
 			}
 			else
 			{
-				outside = TqTrue;
+				outside = true;
 				if (inside)
 					return(Side_Both);	// Both sides
 			}
@@ -193,26 +193,26 @@ class CqBound
 			p.y(m_vecMax.y());	// xmin, ymax, zmin
 			if (plane.whichSide(p) == CqPlane::Space_Positive)
 			{
-				inside = TqTrue;
+				inside = true;
 				if (outside)
 					return(Side_Both);	// Both sides
 			}
 			else
 			{
-				outside = TqTrue;
+				outside = true;
 				if (inside)
 					return(Side_Both);	// Both sides
 			}
 			p.z(m_vecMax.z());	// xmin, ymax, zmax
 			if (plane.whichSide(p) == CqPlane::Space_Positive)
 			{
-				inside = TqTrue;
+				inside = true;
 				if (outside)
 					return(Side_Both);
 			}
 			else
 			{
-				outside = TqTrue;
+				outside = true;
 				if (inside)
 					return(Side_Both);
 			}
@@ -221,26 +221,26 @@ class CqBound
 			p.z(m_vecMin.z());	// xmax, ymin, zmin
 			if (plane.whichSide(p) == CqPlane::Space_Positive)
 			{
-				inside = TqTrue;
+				inside = true;
 				if (outside)
 					return(Side_Both);
 			}
 			else
 			{
-				outside = TqTrue;
+				outside = true;
 				if (inside)
 					return(Side_Both);
 			}
 			p.z(m_vecMax.z());	// xmax, ymin, zmax
 			if (plane.whichSide(p) == CqPlane::Space_Positive)
 			{
-				inside = TqTrue;
+				inside = true;
 				if (outside)
 					return(Side_Both);
 			}
 			else
 			{
-				outside = TqTrue;
+				outside = true;
 				if (inside)
 					return(Side_Both);
 			}
@@ -248,26 +248,26 @@ class CqBound
 			p.y(m_vecMax.y());	// xmax, ymax, zmin
 			if (plane.whichSide(p) == CqPlane::Space_Positive)
 			{
-				inside = TqTrue;
+				inside = true;
 				if (outside)
 					return(Side_Both);
 			}
 			else
 			{
-				outside = TqTrue;
+				outside = true;
 				if (inside)
 					return(Side_Both);
 			}
 			p.z(m_vecMax.z());	// xmax, ymax, zmax
 			if (plane.whichSide(p) == CqPlane::Space_Positive)
 			{
-				inside = TqTrue;
+				inside = true;
 				if (outside)
 					return(Side_Both);
 			}
 			else
 			{
-				outside = TqTrue;
+				outside = true;
 				if (inside)
 					return(Side_Both);
 			}

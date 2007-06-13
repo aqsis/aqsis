@@ -99,22 +99,22 @@ class CqSubdivision2 : public CqMotionSpec<boost::shared_ptr<CqPolygonPoints> >
 		void		Prepare(TqInt cVerts);
 		CqLath*		AddFacet(TqInt cVerts, TqInt* pIndices, TqInt iFVIndex);
 		CqLath*		AddFacet(TqInt cVerts, TqInt* pIndices, TqInt* pFVIndices);
-		TqBool		Finalise();
+		bool		Finalise();
 		void		SubdivideFace(CqLath* pFace, std::vector<CqLath*>& apSubFaces);
-		TqBool		CanUsePatch( CqLath* pFace );
-		void		SetInterpolateBoundary( TqBool state = TqTrue )
+		bool		CanUsePatch( CqLath* pFace );
+		void		SetInterpolateBoundary( bool state = true )
 		{
 			m_bInterpolateBoundary = state;
 		}
-		TqBool		isInterpolateBoundary( ) const
+		bool		isInterpolateBoundary( ) const
 		{
 			return( m_bInterpolateBoundary );
 		}
 		void		SetHoleFace( TqInt iFaceIndex )
 		{
-			m_mapHoles[ iFaceIndex ] = TqTrue;
+			m_mapHoles[ iFaceIndex ] = true;
 		}
-		TqBool		isHoleFace( TqInt iFaceIndex ) const
+		bool		isHoleFace( TqInt iFaceIndex ) const
 		{
 			return( m_mapHoles.find( iFaceIndex ) != m_mapHoles.end() );
 		}
@@ -473,9 +473,9 @@ class CqSubdivision2 : public CqMotionSpec<boost::shared_ptr<CqPolygonPoints> >
 		/// Array of lath pointers, one for each lath generated.
 		std::vector<CqLath*>				m_apLaths;
 		/// Map of face indices which are to be treated as holes in the surface, i.e. not rendered.
-		std::map<TqInt, TqBool>				m_mapHoles;
+		std::map<TqInt, bool>				m_mapHoles;
 		/// Flag indicating whether this surface interpolates it's boundaries or not.
-		TqBool								m_bInterpolateBoundary;
+		bool								m_bInterpolateBoundary;
 		/// Map of sharp edges.
 		std::map<CqLath*, TqFloat>			m_mapSharpEdges;
 		/// Map of sharp corners.
@@ -483,7 +483,7 @@ class CqSubdivision2 : public CqMotionSpec<boost::shared_ptr<CqPolygonPoints> >
 
 
 		/// Flag indicating whether the topology structures have been finalised.
-		TqBool							m_fFinalised;
+		bool							m_fFinalised;
 };
 
 
@@ -561,16 +561,16 @@ class CqSurfaceSubdivisionPatch : public CqSurface
 		virtual	CqBound	Bound() const;
 		virtual	CqMicroPolyGridBase* Dice();
 		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
-		virtual TqBool	Diceable();
+		virtual bool	Diceable();
 
 		virtual	CqMicroPolyGridBase* DiceExtract();
 
 		/** Determine whether the passed surface is valid to be used as a
 		 *  frame in motion blur for this surface.
 		 */
-		virtual TqBool	IsMotionBlurMatch( CqSurface* pSurf )
+		virtual bool	IsMotionBlurMatch( CqSurface* pSurf )
 		{
-			return( TqFalse );
+			return( false );
 		}
 
 		void StoreDice( CqMicroPolyGrid* pGrid, const boost::shared_ptr<CqPolygonPoints>& pPoints, TqInt iParam, TqInt iFVParam, TqInt iVData);
@@ -631,9 +631,9 @@ class CqSurfaceSubdivisionMesh : public CqSurface
 		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
 		/** Determine whether this GPrim is diceable at its current size.
 		 */
-		virtual TqBool	Diceable()
+		virtual bool	Diceable()
 		{
-			return( TqFalse );
+			return( false );
 		}
 
 		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime = 0 )
@@ -642,9 +642,9 @@ class CqSurfaceSubdivisionMesh : public CqSurface
 			m_pTopology->pPoints()->Transform( matTx, matITTx, matRTx, iTime );
 		}
 
-		virtual TqBool	IsMotionBlurMatch( CqSurface* pSurf )
+		virtual bool	IsMotionBlurMatch( CqSurface* pSurf )
 		{
-			return( TqFalse );
+			return( false );
 		}
 
 		virtual	TqUint	cUniform() const

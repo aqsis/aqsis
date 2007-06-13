@@ -41,7 +41,7 @@ template <class T>
 class /*COMMON_SHARE*/ CqListEntry
 {
 	public:
-		CqListEntry() : m_pPrevious( 0 ), m_pNext( 0 ), m_Invalid( TqFalse )
+		CqListEntry() : m_pPrevious( 0 ), m_pNext( 0 ), m_Invalid( false )
 		{}
 		virtual	~CqListEntry()
 		{
@@ -70,13 +70,13 @@ class /*COMMON_SHARE*/ CqListEntry
 		 */
 		void	Invalid()
 		{
-			m_Invalid = TqTrue;
+			m_Invalid = true;
 		}
 		/** Mark this class as not an invalid place holder.
 		 */
 		void	Valid()
 		{
-			m_Invalid = TqFalse;
+			m_Invalid = false;
 		}
 
 		/** Link this class into the list after the specified entry.
@@ -150,7 +150,7 @@ class /*COMMON_SHARE*/ CqListEntry
 	protected:
 		T*	m_pPrevious;		///< Pointer to the previous in the list.
 		T*	m_pNext;			///< Pointer to the next in the list.
-		TqBool	m_Invalid;		///< Used by list to denote a dummy place holder.
+		bool	m_Invalid;		///< Used by list to denote a dummy place holder.
 }
 ;
 

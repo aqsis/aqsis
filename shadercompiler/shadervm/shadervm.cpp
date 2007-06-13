@@ -470,7 +470,7 @@ static TqUlong ohash = CqString::hash("output");
  *  Function to create a local variable for a specific shader
  */
 
-IqShaderData* CqShaderVM::CreateVariable( EqVariableType Type, EqVariableClass Class, const CqString& name, TqBool fParameter, TqBool fOutput )
+IqShaderData* CqShaderVM::CreateVariable( EqVariableType Type, EqVariableClass Class, const CqString& name, bool fParameter, bool fOutput )
 {
 	// Create a VM specific shader variable, which implements the IqShaderData interface,
 	// based on the type and class specified.
@@ -489,7 +489,7 @@ IqShaderData* CqShaderVM::CreateVariable( EqVariableType Type, EqVariableClass C
 						default: // Clear up compiler warnings
 						break;
 				}
-				assert( TqFalse );	// If we get here, something is wrong with the request.
+				assert( false );	// If we get here, something is wrong with the request.
 				return ( NULL );
 			}
 
@@ -504,7 +504,7 @@ IqShaderData* CqShaderVM::CreateVariable( EqVariableType Type, EqVariableClass C
 						default: // Clear up compiler warnings
 						break;
 				}
-				assert( TqFalse );	// If we get here, something is wrong with the request.
+				assert( false );	// If we get here, something is wrong with the request.
 				return ( NULL );
 			}
 
@@ -519,7 +519,7 @@ IqShaderData* CqShaderVM::CreateVariable( EqVariableType Type, EqVariableClass C
 						default: // Clear up compiler warnings
 						break;
 				}
-				assert( TqFalse );	// If we get here, something is wrong with the request.
+				assert( false );	// If we get here, something is wrong with the request.
 				return ( NULL );
 			}
 
@@ -534,7 +534,7 @@ IqShaderData* CqShaderVM::CreateVariable( EqVariableType Type, EqVariableClass C
 						default: // Clear up compiler warnings
 						break;
 				}
-				assert( TqFalse );	// If we get here, something is wrong with the request.
+				assert( false );	// If we get here, something is wrong with the request.
 				return ( NULL );
 			}
 
@@ -549,7 +549,7 @@ IqShaderData* CqShaderVM::CreateVariable( EqVariableType Type, EqVariableClass C
 						default: // Clear up compiler warnings
 						break;
 				}
-				assert( TqFalse );	// If we get here, something is wrong with the request.
+				assert( false );	// If we get here, something is wrong with the request.
 				return ( NULL );
 			}
 
@@ -564,14 +564,14 @@ IqShaderData* CqShaderVM::CreateVariable( EqVariableType Type, EqVariableClass C
 						default: // Clear up compiler warnings
 						break;
 				}
-				assert( TqFalse );	// If we get here, something is wrong with the request.
+				assert( false );	// If we get here, something is wrong with the request.
 				return ( NULL );
 			}
 
 			case type_triple:
 			case type_hpoint:
 			case type_void:
-			assert( TqFalse );	// We don't support triples in the engine as variables.
+			assert( false );	// We don't support triples in the engine as variables.
 			return ( NULL );
 
 			case type_matrix:
@@ -585,13 +585,13 @@ IqShaderData* CqShaderVM::CreateVariable( EqVariableType Type, EqVariableClass C
 						default: // Clear up compiler warnings
 						break;
 				}
-				assert( TqFalse );	// If we get here, something is wrong with the request.
+				assert( false );	// If we get here, something is wrong with the request.
 				return ( NULL );
 			}
 			default: // Clear up compiler warnings
 			break;
 	}
-	assert( TqFalse );	// If we get here, something is wrong with the request.
+	assert( false );	// If we get here, something is wrong with the request.
 	return ( NULL );
 }
 
@@ -600,7 +600,7 @@ IqShaderData* CqShaderVM::CreateVariable( EqVariableType Type, EqVariableClass C
  *  Function to create a local variable array for a specific shader
  */
 
-IqShaderData* CqShaderVM::CreateVariableArray( EqVariableType VarType, EqVariableClass VarClass, const CqString& name, TqInt Count, TqBool fParameter, TqBool fOutput )
+IqShaderData* CqShaderVM::CreateVariableArray( EqVariableType VarType, EqVariableClass VarClass, const CqString& name, TqInt Count, bool fParameter, bool fOutput )
 {
 	IqShaderData * pVar = 0;
 	switch ( VarType )
@@ -745,13 +745,13 @@ void CqShaderVM::DefaultSurface()
 * Function to determine if not the character is ' '
 */
 
-static TqBool notspace(char C)
+static bool notspace(char C)
 {
-	bool retval = TqTrue;
+	bool retval = true;
 
 	if ((C == 0x20) ||
 	        (( C >= 0x09 ) && (C <= 0x0D)))
-		retval = TqFalse;
+		retval = false;
 
 	return retval;
 }
@@ -820,7 +820,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 		itypes.push_back(CqString::hash(gVariableTypeNames[i]));
 
 
-	TqBool fShaderSpec = TqFalse;
+	bool fShaderSpec = false;
 	while ( !pFile->eof() )
 	{
 		GetToken( token, 255, pFile );
@@ -842,12 +842,12 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 				if ( gShaderTypeNames[i].hash == htoken )
 				{
 					m_Type = gShaderTypeNames[i].type;
-					fShaderSpec = TqTrue;
+					fShaderSpec = true;
 					tmp = i;
 					break;
 				}
 			}
-			if (fShaderSpec == TqFalse)
+			if (fShaderSpec == false)
 			{
 				for (i=0 ; i < tmp; i++ )
 				{
@@ -858,7 +858,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 					if ( gShaderTypeNames[i].hash == htoken )
 					{
 						m_Type = gShaderTypeNames[i].type;
-						fShaderSpec = TqTrue;
+						fShaderSpec = true;
 						tmp = i;
 						break;
 					}
@@ -914,9 +914,9 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 		{
 			EqVariableType VarType = type_invalid;
 			EqVariableClass VarClass = class_varying;
-			TqBool			fVarArray = TqFalse;
-			TqBool			fParameter = TqFalse;
-			TqBool			fOutput = TqFalse;
+			bool			fVarArray = false;
+			bool			fParameter = false;
+			bool			fOutput = false;
 			switch ( Segment )
 			{
 					case Seg_Data:
@@ -925,9 +925,9 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 					while ( VarType == type_invalid )
 					{
 						if ( ohash == htoken) // == "output"
-							fOutput = TqTrue;
+							fOutput = true;
 						else if ( phash == htoken) // == "param"
-							fParameter = TqTrue;
+							fParameter = true;
 						else if ( vhash == htoken) // == "varying"
 							VarClass = class_varying;
 						else if ( uhash == htoken) // == "uniform"
@@ -960,7 +960,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 						token[ i ] = '\0';
 						i++;
 						array_count = atoi( &token[ i ] );
-						fVarArray = TqTrue;
+						fVarArray = true;
 					}
 					// Check if there is a valid variable specifier
 					if ( VarType == type_invalid ||
@@ -1143,7 +1143,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 							        &CqShaderVM::SO_illuminate2 == m_TransTable[ i ].m_pCommand ||
 							        &CqShaderVM::SO_solar == m_TransTable[ i ].m_pCommand ||
 							        &CqShaderVM::SO_solar2 == m_TransTable[ i ].m_pCommand )
-								m_fAmbient = TqFalse;
+								m_fAmbient = false;
 
 							// Add this opcode to the program segment.
 							AddCommand( m_TransTable[ i ].m_pCommand, pProgramArea );
@@ -1625,16 +1625,16 @@ IqShaderData* CqShaderVM::FindArgument( const CqString& name )
 /** Get a value from an instance variable on this shader, and fill in the passed variable reference.
 */
 
-TqBool CqShaderVM::GetVariableValue( const char* name, IqShaderData* res )
+bool CqShaderVM::GetVariableValue( const char* name, IqShaderData* res )
 {
 	// Find the relevant variable.
 	TqInt i = FindLocalVarIndex( name );
 	if ( i >= 0 )
 	{
 		res->SetValueFromVariable( m_LocalVars[ i ]);
-		return ( TqTrue );
+		return ( true );
 	}
-	return ( TqFalse );
+	return ( false );
 }
 
 //---------------------------------------------------------------------

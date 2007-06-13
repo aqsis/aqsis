@@ -395,12 +395,12 @@ void CqImagePixel::Combine(enum EqFilterDepth depthfilter, CqColor zThreshold)
 			}
 
 			// Find out if any of the samples are in a CSG tree.
-			TqBool bProcessed;
-			TqBool CqCSGRequired = CqCSGTreeNode::IsRequired();
+			bool bProcessed;
+			bool CqCSGRequired = CqCSGTreeNode::IsRequired();
 			if (CqCSGRequired)
 				do
 				{
-					bProcessed = TqFalse;
+					bProcessed = false;
 					//Warning ProcessTree add or remove elements in samples list
 					//We could not optimized the for loop here at all.
 					for ( std::deque<SqImageSample>::iterator isample = samples->
@@ -411,7 +411,7 @@ void CqImagePixel::Combine(enum EqFilterDepth depthfilter, CqColor zThreshold)
 						if ( isample->m_pCSGNode )
 						{
 							isample->m_pCSGNode->ProcessTree( samples->m_Data );
-							bProcessed = TqTrue;
+							bProcessed = true;
 							break;
 						}
 					}
@@ -420,7 +420,7 @@ void CqImagePixel::Combine(enum EqFilterDepth depthfilter, CqColor zThreshold)
 
 			CqColor samplecolor = gColBlack;
 			CqColor sampleopacity = gColBlack;
-			TqBool samplehit = TqFalse;
+			bool samplehit = false;
 			TqFloat opaqueDepths[2] = { FLT_MAX, FLT_MAX };
 			TqFloat maxOpaqueDepth = FLT_MAX;
 
@@ -474,7 +474,7 @@ void CqImagePixel::Combine(enum EqFilterDepth depthfilter, CqColor zThreshold)
 					if(!(maxOpaqueDepth < FLT_MAX))
 						maxOpaqueDepth = sample->Data()[Sample_Depth];
 				}
-				samplehit = TqTrue;
+				samplehit = true;
 			}
 
 			if ( samplehit )

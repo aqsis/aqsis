@@ -249,37 +249,37 @@ class COMMON_SHARE CqVector3D
 
 		/** Component wise equality operator.
 		 */
-		TqBool	operator==( const CqVector3D &Cmp ) const
+		bool	operator==( const CqVector3D &Cmp ) const
 		{
 			return ( ( m_x == Cmp.m_x ) && ( m_y == Cmp.m_y ) && ( m_z == Cmp.m_z ) );
 		}
 		/** Component wise inequality operator.
 		 */
-		TqBool	operator!=( const CqVector3D &Cmp ) const
+		bool	operator!=( const CqVector3D &Cmp ) const
 		{
 			return ( ( m_x != Cmp.m_x ) || ( m_y != Cmp.m_y ) || ( m_z != Cmp.m_z ) );
 		}
 		/** Component wise greater than or equal to operator.
 		 */
-		TqBool	operator>=( const CqVector3D &Cmp ) const
+		bool	operator>=( const CqVector3D &Cmp ) const
 		{
 			return ( ( m_x >= Cmp.m_x ) && ( m_y >= Cmp.m_y ) && ( m_z >= Cmp.m_z ) );
 		}
 		/** Component wise less than or equal to operator.
 		 */
-		TqBool	operator<=( const CqVector3D &Cmp ) const
+		bool	operator<=( const CqVector3D &Cmp ) const
 		{
 			return ( ( m_x <= Cmp.m_x ) && ( m_y <= Cmp.m_y ) && ( m_z <= Cmp.m_z ) );
 		}
 		/** Component wise greater than operator.
 		 */
-		TqBool	operator>( const CqVector3D &Cmp ) const
+		bool	operator>( const CqVector3D &Cmp ) const
 		{
 			return ( ( m_x > Cmp.m_x ) && ( m_y > Cmp.m_y ) && ( m_z > Cmp.m_z ) );
 		}
 		/** Component wise less than operator.
 		 */
-		TqBool	operator<( const CqVector3D &Cmp ) const
+		bool	operator<( const CqVector3D &Cmp ) const
 		{
 			return ( ( m_x < Cmp.m_x ) && ( m_y < Cmp.m_y ) && ( m_z < Cmp.m_z ) );
 		}

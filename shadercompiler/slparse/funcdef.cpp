@@ -343,10 +343,10 @@ CqFuncDef::CqFuncDef( TqInt Type, const char* strName, const char* strVMName, co
 		m_strName( strName ),
 		m_strVMName( strVMName ),
 		m_strParamTypes( strParams ),
-		m_fLocal( TqTrue ),
+		m_fLocal( true ),
 		m_pDef( pDef ),
 		m_pArgs( pArgs ),
-		m_fVarying( TqFalse )
+		m_fVarying( false )
 {
 	// Build the type array.
 	TypeArray();
@@ -360,7 +360,7 @@ CqFuncDef::CqFuncDef( TqInt Type, const char* strName, const char* strVMName, co
 /** Find a function definition by searchin the standard and user definitions lists.
  */
 
-TqBool CqFuncDef::FindFunction( const char* strName, std::vector<SqFuncRef>& Refs )
+bool CqFuncDef::FindFunction( const char* strName, std::vector<SqFuncRef>& Refs )
 {
 	SqFuncRef ref;
 	// Clear any existing indexes.
@@ -389,9 +389,9 @@ TqBool CqFuncDef::FindFunction( const char* strName, std::vector<SqFuncRef>& Ref
 		}
 	}
 	if ( !Refs.empty() )
-		return ( TqTrue );
+		return ( true );
 	else
-		return ( TqFalse );
+		return ( false );
 }
 
 
@@ -465,7 +465,7 @@ int CqFuncDef::TypeArray()
 				case ']':
 				break;
 				case '*':
-				m_fVarying = TqTrue;
+				m_fVarying = true;
 				break;
 		}
 		if ( isupper( ctype ) )

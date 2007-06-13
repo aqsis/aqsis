@@ -105,7 +105,7 @@ class COMMON_SHARE CqBitVector
 		 * \param elem the index of the bit to modify.
 		 * \param value the new value of the bit, 0-false, 1-true.
 		 */
-		void	SetValue( TqInt elem, TqBool value )
+		void	SetValue( TqInt elem, bool value )
 		{
 			assert( elem < m_cLength );
 			if ( value )
@@ -116,10 +116,10 @@ class COMMON_SHARE CqBitVector
 		/** Get the indexed bit as a boolean.
 		 * \param elem the index of the bit to retrieve.
 		 */
-		TqBool Value( TqInt elem )
+		bool Value( TqInt elem )
 		{
 			assert( elem < m_cLength );
-			return ( ( m_aBits[ elem / CHAR_BIT ] & ( 1 << ( elem % CHAR_BIT ) ) ) ? TqTrue : TqFalse );
+			return ( ( m_aBits[ elem / CHAR_BIT ] & ( 1 << ( elem % CHAR_BIT ) ) ) ? true : false );
 		}
 		/** Toggle the state of the indexed bit.
 		 * \param elem the index of the bit to modify.
@@ -132,7 +132,7 @@ class COMMON_SHARE CqBitVector
 		/** Set all bits to the specified value.
 		 * \param value the new value of the bit, 0-false, 1-true.
 		 */
-		void	SetAll( TqBool value )
+		void	SetAll( bool value )
 		{
 			bit setval = ( value ) ? ~0 : 0;
 			register TqInt i;

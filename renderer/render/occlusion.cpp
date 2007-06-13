@@ -340,13 +340,13 @@ void CqOcclusionTree::PropagateChanges()
 }
 
 
-TqBool CqOcclusionTree::CanCull( CqBound* bound )
+bool CqOcclusionTree::CanCull( CqBound* bound )
 {
 	// Recursively call each level to see if it can be culled at that point.
 	// Stop recursing at a level that doesn't contain the whole bound.
 	std::deque<CqOcclusionTree*> stack;
 	stack.push_front(this);
-	TqBool	top_level = TqTrue;
+	bool	top_level = true;
 	while(!stack.empty())
 	{
 		CqOcclusionTree* node = stack.front();
@@ -356,11 +356,11 @@ TqBool CqOcclusionTree::CanCull( CqBound* bound )
 		CqBound b1(node->MinSamplePoint(), node->MaxSamplePoint());
 		if(b1.Contains2D(*bound) || top_level)
 		{
-			top_level = TqFalse;
+			top_level = false;
 			if( bound->vecMin().z() > node->MaxOpaqueZ() )
 				// If the bound is entirely contained within this node's 2D bound, and is further
 				// away than the furthest opaque point, then cull.
-				return(TqTrue);
+				return(true);
 			// If contained, but not behind the furthest point, push the children nodes onto the stack for
 			// processing.
 			CqOcclusionTree::TqChildArray::iterator childNode;
@@ -373,7 +373,7 @@ TqBool CqOcclusionTree::CanCull( CqBound* bound )
 			}
 		}
 	}
-	return(TqFalse);
+	return(false);
 }
 
 
@@ -474,7 +474,7 @@ void CqOcclusionBox::SetupHierarchy( CqBucket* bucket, TqInt xMin, TqInt yMin, T
 }
 
 
-TqBool CqOcclusionBox::CanCull( CqBound* bound )
+bool CqOcclusionBox::CanCull( CqBound* bound )
 {
 	return(m_KDTree->CanCull(bound));
 }
@@ -554,7 +554,7 @@ void StoreExtraData( CqMicroPolygon* pMPG, SqImageSample& sample)
 
 
 
-void CqOcclusionTree::SampleMPG( CqMicroPolygon* pMPG, const CqBound& bound, TqBool usingMB, TqFloat time0, TqFloat time1, TqBool usingDof, TqInt dofboundindex, SqMpgSampleInfo& MpgSampleInfo, TqBool usingLOD, SqGridInfo& gridInfo)
+void CqOcclusionTree::SampleMPG( CqMicroPolygon* pMPG, const CqBound& bound, bool usingMB, TqFloat time0, TqFloat time1, bool usingDof, TqInt dofboundindex, SqMpgSampleInfo& MpgSampleInfo, bool usingLOD, SqGridInfo& gridInfo)
 {
 	// Check the current tree level, and if only one leaf, sample the MP, otherwise, pass it down to the left
 	// and/or right side of the tree if it crosses.
@@ -562,7 +562,7 @@ void CqOcclusionTree::SampleMPG( CqMicroPolygon* pMPG, const CqBound& bound, TqB
 	{
 		// Sample the MPG
 		SqSampleData& sample = Sample();
-		TqBool SampleHit;
+		bool SampleHit;
 		TqFloat D;
 
 		CqStats::IncI( CqStats::SPL_count );
@@ -570,8 +570,8 @@ void CqOcclusionTree::SampleMPG( CqMicroPolygon* pMPG, const CqBound& bound, TqB
 
 		if ( SampleHit )
 		{
-			TqBool Occludes = MpgSampleInfo.m_Occludes;
-			TqBool opaque =  MpgSampleInfo.m_IsOpaque;
+			bool Occludes = MpgSampleInfo.m_Occludes;
+			bool opaque =  MpgSampleInfo.m_IsOpaque;
 
 			SqImageSample& currentOpaqueSample = sample.m_OpaqueSample;
 			static SqImageSample localImageVal;

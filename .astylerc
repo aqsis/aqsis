@@ -1,6 +1,0 @@
-mode=c
-indent-classes
-indent-switches
-indent-cases
-indent=tab=4
-brackets=break

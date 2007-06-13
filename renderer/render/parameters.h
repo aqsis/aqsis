@@ -89,7 +89,7 @@ class CqParameter
 		 * \param u Boolean indicating whether to split in the u direction, false indicates split in v.
 		 * \param pSurface Pointer to the surface which this paramter belongs, used if the surface has special handling of parameter splitting.
 		 */
-		virtual void	Subdivide( CqParameter* /* pResult1 */, CqParameter* /* pResult2 */, TqBool /* u */, IqSurface* /* pSurface */ = 0 )
+		virtual void	Subdivide( CqParameter* /* pResult1 */, CqParameter* /* pResult2 */, bool /* u */, IqSurface* /* pSurface */ = 0 )
 		{}
 		/** Pure virtual, dice the value into a grid using appropriate interpolation for the class.
 		 * \param u Integer dice count for the u direction.
@@ -239,7 +239,7 @@ class CqParameterTypedVarying : public CqParameterTyped<T, SLT>
 		{
 			m_aValues.clear();
 		}
-		virtual void	Subdivide( CqParameter* pResult1, CqParameter* pResult2, TqBool u, IqSurface* pSurface = 0 )
+		virtual void	Subdivide( CqParameter* pResult1, CqParameter* pResult2, bool u, IqSurface* pSurface = 0 )
 		{
 			assert( pResult1->Type() == this->Type() && pResult1->Type() == this->Type() &&
 			        pResult1->Class() == this->Class() && pResult1->Class() == this->Class() );
@@ -272,7 +272,7 @@ class CqParameterTypedVarying : public CqParameterTyped<T, SLT>
 
 		virtual	void	DiceOne( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0, TqInt ArrayIndex = 0 )
 		{
-			assert( TqFalse );
+			assert( false );
 			return;
 		}
 
@@ -382,7 +382,7 @@ class CqParameterTypedUniform : public CqParameterTyped<T, SLT>
 			m_aValues.clear();
 		}
 
-		virtual void	Subdivide( CqParameter* pResult1, CqParameter* pResult2, TqBool u, IqSurface* pSurface = 0 )
+		virtual void	Subdivide( CqParameter* pResult1, CqParameter* pResult2, bool u, IqSurface* pSurface = 0 )
 		{
 			assert( pResult1->Type() == this->Type() && pResult1->Type() == this->Type() &&
 			        pResult1->Class() == Class() && pResult1->Class() == Class() );
@@ -421,7 +421,7 @@ class CqParameterTypedUniform : public CqParameterTyped<T, SLT>
 
 		virtual	void	DiceOne( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0, TqInt ArrayIndex = 0 )
 		{
-			assert( TqFalse );
+			assert( false );
 			return;
 		}
 
@@ -519,7 +519,7 @@ class CqParameterTypedConstant : public CqParameterTyped<T, SLT>
 		virtual	void	Clear()
 		{}
 
-		virtual void	Subdivide( CqParameter* pResult1, CqParameter* pResult2, TqBool u, IqSurface* pSurface = 0 )
+		virtual void	Subdivide( CqParameter* pResult1, CqParameter* pResult2, bool u, IqSurface* pSurface = 0 )
 		{
 			assert( pResult1->Type() == this->Type() && pResult1->Type() == this->Type() &&
 			        pResult1->Class() == this->Class() && pResult1->Class() == this->Class() );
@@ -553,7 +553,7 @@ class CqParameterTypedConstant : public CqParameterTyped<T, SLT>
 
 		virtual	void	DiceOne( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0, TqInt ArrayIndex = 0 )
 		{
-			assert( TqFalse );
+			assert( false );
 			return;
 		}
 
@@ -628,7 +628,7 @@ class CqParameterTypedVertex : public CqParameterTypedVarying<T, I, SLT>
 		{
 			return ( class_vertex );
 		}
-		virtual void	Subdivide( CqParameter* pResult1, CqParameter* pResult2, TqBool u, IqSurface* pSurface = 0 )
+		virtual void	Subdivide( CqParameter* pResult1, CqParameter* pResult2, bool u, IqSurface* pSurface = 0 )
 		{
 			assert( pResult1->Type() == this->Type() && pResult1->Type() == this->Type() &&
 			        pResult1->Class() == this->Class() && pResult1->Class() == this->Class() );
@@ -655,7 +655,7 @@ class CqParameterTypedVertex : public CqParameterTypedVarying<T, I, SLT>
 
 		virtual	void	DiceOne( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0, TqInt ArrayIndex = 0 )
 		{
-			assert( TqFalse );
+			assert( false );
 			return;
 		}
 
@@ -809,7 +809,7 @@ class CqParameterTypedVaryingArray : public CqParameterTyped<T, SLT>
 		{
 			m_aValues.clear();
 		}
-		virtual void	Subdivide( CqParameter* pResult1, CqParameter* pResult2, TqBool u, IqSurface* pSurface = 0 )
+		virtual void	Subdivide( CqParameter* pResult1, CqParameter* pResult2, bool u, IqSurface* pSurface = 0 )
 		{
 			assert( pResult1->Type() == this->Type() && pResult1->Type() == this->Type() &&
 			        pResult1->Class() == Class() && pResult1->Class() == Class() );
@@ -970,7 +970,7 @@ class CqParameterTypedUniformArray : public CqParameterTyped<T, SLT>
 		virtual	void	Clear()
 		{}
 
-		virtual void	Subdivide( CqParameter* pResult1, CqParameter* pResult2, TqBool u, IqSurface* pSurface = 0 )
+		virtual void	Subdivide( CqParameter* pResult1, CqParameter* pResult2, bool u, IqSurface* pSurface = 0 )
 		{}
 		virtual	void	Dice( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0 )
 		{
@@ -1106,7 +1106,7 @@ class CqParameterTypedConstantArray : public CqParameterTyped<T, SLT>
 		virtual	void	Clear()
 		{}
 
-		virtual void	Subdivide( CqParameter* pResult1, CqParameter* pResult2, TqBool u, IqSurface* pSurface = 0 )
+		virtual void	Subdivide( CqParameter* pResult1, CqParameter* pResult2, bool u, IqSurface* pSurface = 0 )
 		{}
 		virtual	void	Dice( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0 )
 		{

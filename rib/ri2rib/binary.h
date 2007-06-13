@@ -36,10 +36,10 @@ class CqBinary : public CqOutput
 	private:
 		void intToChar( RtInt n, TqChar &b1, TqChar &b2, TqChar &b3, TqChar &b4 );
 		void floatToChar( RtFloat f, TqChar &b1, TqChar &b2, TqChar &b3, TqChar &b4 );
-		void addString( std::string &, TqBool &, TqUint & );
+		void addString( std::string &, bool &, TqUint & );
 		void encodeString( const char * );
 
-		TqBool m_aRequest[ LAST_Function ];
+		bool m_aRequest[ LAST_Function ];
 		std::list<std::string> m_aStrings;
 
 	protected:

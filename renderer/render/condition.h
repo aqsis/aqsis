@@ -31,7 +31,7 @@
 
 START_NAMESPACE( Aqsis )
 
-TqBool TestCondition(RtString condition, RtString where);
+bool TestCondition(RtString condition, RtString where);
 
 
 //-----------------------------------------------------------------------

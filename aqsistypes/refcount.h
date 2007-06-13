@@ -102,7 +102,7 @@ class COMMON_SHARE CqRefCount
 		RecordVector m_records;
 		/// Flag that, when true, indicates that the instance had
 		///  ADDREF called at least once.
-		TqBool m_addRefCalled;
+		bool m_addRefCalled;
 
 #else ///< #ifdef _DEBUG
 

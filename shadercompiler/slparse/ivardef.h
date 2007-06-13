@@ -217,7 +217,7 @@ struct SqVarRef
 	EqVarType	m_Type;
 	TqUint	m_Index;
 
-	TqBool	operator==( const SqVarRef& From ) const
+	bool	operator==( const SqVarRef& From ) const
 	{
 		return ( From.m_Type == m_Type && From.m_Index == m_Index );
 	}
@@ -233,10 +233,10 @@ struct IqVarDef
 	virtual	void	IncUseCount() = 0;
 	virtual	TqInt	UseCount() const = 0;
 	virtual	TqInt	ArrayLength() const = 0;
-	virtual	TqBool	fExtern() const = 0;
+	virtual	bool	fExtern() const = 0;
 	virtual	SqVarRef	vrExtern() const = 0;
-	virtual	void	SetParam( TqBool fParam = TqTrue ) = 0;
-	virtual	void	SetOutput( TqBool fOutput = TqTrue ) = 0;
+	virtual	void	SetParam( bool fParam = true ) = 0;
+	virtual	void	SetOutput( bool fOutput = true ) = 0;
 	virtual	void	SetDefaultStorage( TqInt Storage ) = 0;
 
 	static	IqVarDef*	GetVariablePtr( const SqVarRef& Ref );

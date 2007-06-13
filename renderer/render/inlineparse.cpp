@@ -68,15 +68,15 @@ void CqInlineParse::check_syntax ()
 			throw XqException ( "Bad inline declaration" );
 			return ;
 			case 1:
-			inline_def = TqFalse;
+			inline_def = false;
 			break;
 			case 2:
 			lc( word[ 0 ] );
-			if ( is_type( word[ 0 ] ) == TqFalse )
+			if ( is_type( word[ 0 ] ) == false )
 			{
 				throw XqException ( "Bad inline declaration" );
 			}
-			inline_def = TqTrue;
+			inline_def = true;
 			tc = class_uniform;
 			tt = get_type( word[ 0 ] );
 			size = 1;
@@ -85,11 +85,11 @@ void CqInlineParse::check_syntax ()
 			case 3:
 			lc( word[ 0 ] );
 			lc( word[ 1 ] );
-			if ( ( is_class( word[ 0 ] ) == TqFalse ) || ( is_type( word[ 1 ] ) == TqFalse ) )
+			if ( ( is_class( word[ 0 ] ) == false ) || ( is_type( word[ 1 ] ) == false ) )
 			{
 				throw XqException ( "Bad inline declaration" );
 			}
-			inline_def = TqTrue;
+			inline_def = true;
 			tc = get_class( word[ 0 ] );
 			tt = get_type( word[ 1 ] );
 			size = 1;
@@ -97,12 +97,12 @@ void CqInlineParse::check_syntax ()
 			break;
 			case 5:
 			lc( word[ 0 ] );
-			if ( ( is_type( word[ 0 ] ) == TqFalse ) || ( word[ 1 ] != "[" ) ||
-			        ( is_int( word[ 2 ] ) == TqFalse ) || ( word[ 3 ] != "]" ) )
+			if ( ( is_type( word[ 0 ] ) == false ) || ( word[ 1 ] != "[" ) ||
+			        ( is_int( word[ 2 ] ) == false ) || ( word[ 3 ] != "]" ) )
 			{
 				throw XqException ( "Bad inline declaration" );
 			}
-			inline_def = TqTrue;
+			inline_def = true;
 			tc = class_uniform;
 			tt = get_type( word[ 0 ] );
 			size = get_size( word[ 2 ] );
@@ -111,13 +111,13 @@ void CqInlineParse::check_syntax ()
 			case 6:
 			lc( word[ 0 ] );
 			lc( word[ 1 ] );
-			if ( ( is_class( word[ 0 ] ) == TqFalse ) || ( is_type( word[ 1 ] ) == TqFalse ) ||
-			        ( word[ 2 ] != "[" ) || ( is_int( word[ 3 ] ) == TqFalse ) ||
+			if ( ( is_class( word[ 0 ] ) == false ) || ( is_type( word[ 1 ] ) == false ) ||
+			        ( word[ 2 ] != "[" ) || ( is_int( word[ 3 ] ) == false ) ||
 			        ( word[ 4 ] != "]" ) )
 			{
 				throw XqException ( "Bad inline declaration" );
 			}
-			inline_def = TqTrue;
+			inline_def = true;
 			tc = get_class( word[ 0 ] );
 			tt = get_type( word[ 1 ] );
 			size = get_size( word[ 3 ] );
@@ -131,12 +131,12 @@ void CqInlineParse::parse ( std::string &str )
 	TqUint i, j;
 	size_t sp;
 	size_t sz;
-	TqBool start_found;
+	bool start_found;
 
 	sp = 0;
 	sz = 1;
 	j = 0;
-	start_found = TqFalse;
+	start_found = false;
 
 	for ( i = 0;( i < str.length() ) && ( j < 7 );i++ )
 	{
@@ -145,13 +145,13 @@ void CqInlineParse::parse ( std::string &str )
 				case ' ':
 				case '\t':
 				case '\n':
-				if ( start_found == TqTrue )
+				if ( start_found == true )
 				{
 					word[ j ] = str.substr( sp, sz );
 					j++;
 					sz = 1;
 				}
-				start_found = TqFalse;
+				start_found = false;
 				break;
 				case '#':
 				throw XqException ( "'#' character not allowed in strings" );
@@ -159,11 +159,11 @@ void CqInlineParse::parse ( std::string &str )
 				throw XqException ( "'\"' character not allowed in strings" );
 				case '[':
 				case ']':
-				if ( start_found == TqTrue )
+				if ( start_found == true )
 				{
 					word[ j ] = str.substr( sp, sz );
 					j++;
-					start_found = TqFalse;
+					start_found = false;
 				}
 				sp = i;
 				sz = 1;
@@ -171,12 +171,12 @@ void CqInlineParse::parse ( std::string &str )
 				j++;
 				break;
 				default:
-				if ( start_found == TqTrue )
+				if ( start_found == true )
 				{
 					sz += 1;
 					break;
 				}
-				start_found = TqTrue;
+				start_found = true;
 				sp = i;
 				sz = 1;
 		}
@@ -184,7 +184,7 @@ void CqInlineParse::parse ( std::string &str )
 	// if there is no space at the end of the string,
 	// the previous loop will not notice the end of the word,
 	// and so will 'forget' to store it.
-	if ( start_found == TqTrue )
+	if ( start_found == true )
 	{
 		word[ j ] = str.substr( sp, sz );
 		j++;
@@ -203,7 +203,7 @@ void CqInlineParse::parse ( std::string &str )
 	}
 }
 
-TqBool CqInlineParse::is_class ( const std::string &str )
+bool CqInlineParse::is_class ( const std::string &str )
 {
 	TqUlong param = CqString::hash( str.c_str() );
 
@@ -213,11 +213,11 @@ TqBool CqInlineParse::is_class ( const std::string &str )
 	        ( param == hvertex ) ||
 	        ( param == hfacevarying ) ||
 	  	( param == hfacevertex ) )
-		return TqTrue;
-	return TqFalse;
+		return true;
+	return false;
 }
 
-TqBool CqInlineParse::is_type ( const std::string &str )
+bool CqInlineParse::is_type ( const std::string &str )
 {
 	TqUlong param = CqString::hash( str.c_str() );
 
@@ -231,18 +231,18 @@ TqBool CqInlineParse::is_type ( const std::string &str )
 	        ( param == hhpoint ) ||
 	        ( param == hinteger ) ||
 	        ( param == hint ) )
-		return TqTrue;
-	return TqFalse;
+		return true;
+	return false;
 }
 
 // check if this int is >0 too
-TqBool CqInlineParse::is_int ( const std::string &str )
+bool CqInlineParse::is_int ( const std::string &str )
 {
 	int i, j;
 	i = sscanf( str.c_str(), "%d", &j );
 	if ( ( i != 1 ) || ( j <= 0 ) )
-		return TqFalse;
-	return TqTrue;
+		return false;
+	return true;
 }
 
 EqVariableClass CqInlineParse::get_class ( const std::string &str )

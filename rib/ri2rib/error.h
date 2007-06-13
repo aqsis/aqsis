@@ -40,15 +40,15 @@ class CqError
 		std::string m_Message1;
 		std::string m_Message2;
 		std::string m_Message3;
-		TqBool m_ToRib;
+		bool m_ToRib;
 
 	public:
-		CqError( RtInt cd, RtInt sev, std::string msg, TqBool tr )
+		CqError( RtInt cd, RtInt sev, std::string msg, bool tr )
 				: m_Code( cd ), m_Severity( sev ),
 				m_Message1( msg ), m_Message2 ( "" ), m_Message3( "" ), m_ToRib( tr )
 		{}
 
-		CqError( RtInt cd, RtInt sev, std::string msg1, std::string msg2, std::string msg3, TqBool tr )
+		CqError( RtInt cd, RtInt sev, std::string msg1, std::string msg2, std::string msg3, bool tr )
 				: m_Code ( cd ), m_Severity( sev ),
 				m_Message1( msg1 ), m_Message2( msg2 ), m_Message3( msg3 ), m_ToRib( tr )
 		{}

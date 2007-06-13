@@ -246,7 +246,7 @@ IqShaderData* CqShaderStack::GetNextTemp( EqVariableType type, EqVariableClass _
 			default:
 				break;
 	}
-	assert( TqFalse );
+	assert( false );
 	return( NULL );
 }
 

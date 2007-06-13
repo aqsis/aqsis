@@ -247,13 +247,13 @@ class RefCountRecord
 };
 
 
-CqRefCount::CqRefCount() : m_cReferences( 0 ), m_addRefCalled( TqFalse )
+CqRefCount::CqRefCount() : m_cReferences( 0 ), m_addRefCalled( false )
 {
 	// Add the reference count object to the global list.
 	RefCountTracker::addRefCountObj( this );
 }
 
-CqRefCount::CqRefCount( const CqRefCount& From ) : m_cReferences( 0 ), m_addRefCalled( TqFalse )
+CqRefCount::CqRefCount( const CqRefCount& From ) : m_cReferences( 0 ), m_addRefCalled( false )
 {
 
 	// Add the new reference count object to the global list.
@@ -295,7 +295,7 @@ void CqRefCount::AddRef(const TqChar* file, TqInt line)
 	m_cReferences++;
 
 	// Set the flag indicating that AddRef has been called
-	m_addRefCalled = TqTrue;
+	m_addRefCalled = true;
 
 	// Record the AddRef event.
 	RefCountRecord *rcr = new RefCountRecord(

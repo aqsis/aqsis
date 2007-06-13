@@ -100,7 +100,7 @@ void CqShaderVM::SO_ipushv()
 	//If either the value or the index is varying, so must the result be.
 	RESULT(pVar->Type(), (pVar->Size()>1 || A->Size()>1)?class_varying:class_uniform);
 	TqInt ext = m_pEnv->shadingPointCount();
-	TqBool fVarying = ext > 1;
+	bool fVarying = ext > 1;
 	TqInt i;
 	CqBitVector& RS = m_pEnv->RunningState();
 	for ( i = 0; i < ext; i++ )
@@ -123,7 +123,7 @@ void CqShaderVM::SO_pop()
 	IqShaderData* pV = GetVar( iVar );
 	POPV( Val );
 	TqUint ext = MAX( m_pEnv->shadingPointCount(), pV->Size() );
-	TqBool fVarying = ext > 1;
+	bool fVarying = ext > 1;
 	TqUint i;
 	CqBitVector& RS = m_pEnv->RunningState();
 	for ( i = 0; i < ext; i++ )
@@ -150,7 +150,7 @@ void CqShaderVM::SO_ipop()
 	POPV( Val );
 	//TqInt ext=__fVarying?m_pEnv->shadingPointCount():1;
 	TqUint ext = MAX( m_pEnv->shadingPointCount(), pV->Size() );
-	TqBool fVarying = ext > 1;
+	bool fVarying = ext > 1;
 	TqUint i;
 	CqBitVector& RS = m_pEnv->RunningState();
 	for ( i = 0; i < ext; i++ )
@@ -182,7 +182,7 @@ void CqShaderVM::SO_mergef()
 	TqInt ext = m_pEnv->shadingPointCount();
 	for ( i = 0; i < ext; i++ )
 	{
-		TqBool _aq_A;
+		bool _aq_A;
 		TqFloat _aq_T, _aq_F;
 		A->GetBool( _aq_A, i );
 		T->GetFloat( _aq_T, i );
@@ -210,7 +210,7 @@ void CqShaderVM::SO_merges()
 	TqInt ext = m_pEnv->shadingPointCount();
 	for ( i = 0; i < ext; i++ )
 	{
-		TqBool _aq_A;
+		bool _aq_A;
 		CqString _aq_T, _aq_F;
 		A->GetBool( _aq_A, i );
 		T->GetString( _aq_T, i );
@@ -238,7 +238,7 @@ void CqShaderVM::SO_mergep()
 	TqInt ext = m_pEnv->shadingPointCount();
 	for ( i = 0; i < ext; i++ )
 	{
-		TqBool _aq_A;
+		bool _aq_A;
 		CqVector3D _aq_T, _aq_F;
 		A->GetBool( _aq_A, i );
 		T->GetPoint( _aq_T, i );
@@ -266,7 +266,7 @@ void CqShaderVM::SO_mergec()
 	TqInt ext = m_pEnv->shadingPointCount();
 	for ( i = 0; i < ext; i++ )
 	{
-		TqBool _aq_A;
+		bool _aq_A;
 		CqColor _aq_T, _aq_F;
 		A->GetBool( _aq_A, i );
 		T->GetColor( _aq_T, i );
@@ -438,7 +438,7 @@ void CqShaderVM::SO_S_GET()
 	{
 		if ( RS.Value( i ) )
 		{
-			TqBool _aq_A;
+			bool _aq_A;
 			A->GetBool( _aq_A, i );
 			m_pEnv->CurrentState().SetValue( i, _aq_A );
 		}
@@ -497,7 +497,7 @@ void CqShaderVM::SO_jnz()
 	{
 		if ( !__fVarying || m_pEnv->RunningState().Value( __iGrid ) )
 		{
-			TqBool _f;
+			bool _f;
 			f->GetBool( _f, __iGrid );
 			if ( !_f )
 			{
@@ -523,7 +523,7 @@ void CqShaderVM::SO_jz()
 	{
 		if ( !__fVarying || m_pEnv->RunningState().Value( __iGrid ) )
 		{
-			TqBool _f;
+			bool _f;
 			f->GetBool( _f, __iGrid );
 			if ( _f )
 			{

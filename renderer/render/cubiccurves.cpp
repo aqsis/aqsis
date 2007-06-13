@@ -95,7 +95,7 @@ CqSurface* CqCubicCurveSegment::Clone() const
 void CqCubicCurveSegment::NaturalSubdivide(
     CqParameter* pParam,
     CqParameter* pParam1, CqParameter* pParam2,
-    TqBool u
+    bool u
 )
 {
 
@@ -189,7 +189,7 @@ void CqCubicCurveSegment::NaturalSubdivide(
 void CqCubicCurveSegment::VaryingNaturalSubdivide(
     CqParameter* pParam,
     CqParameter* pParam1, CqParameter* pParam2,
-    TqBool u
+    bool u
 )
 {
 
@@ -356,7 +356,7 @@ TqInt CqCubicCurveSegment::SplitToCurves(
 			//  handle them the same way as vertex class
 			//  variables for the simple case of a
 			//  CqSingleCurveLinear
-			VaryingNaturalSubdivide( ( *iUP ), pNewA, pNewB, TqFalse );
+			VaryingNaturalSubdivide( ( *iUP ), pNewA, pNewB, false );
 		}
 		else
 		{
@@ -638,7 +638,7 @@ void CqCubicCurveSegment::ConvertToBezierBasis( CqMatrix& matBasis )
 		for ( i = 0; i < 4; i++ )
 			for ( j = 0; j < 4; j++ )
 				matMim1[ i ][ j ] = RiBezierBasis[ i ][ j ];
-		matMim1.SetfIdentity( TqFalse );
+		matMim1.SetfIdentity( false );
 		matMim1 = matMim1.Inverse();
 	}
 
@@ -653,7 +653,7 @@ void CqCubicCurveSegment::ConvertToBezierBasis( CqMatrix& matBasis )
 		matCP[ 2 ][ i ] = P()->pValue(i)[0].z();
 		matCP[ 3 ][ i ] = P()->pValue(i)[0].h();
 	}
-	matCP.SetfIdentity( TqFalse );
+	matCP.SetfIdentity( false );
 
 	matCP = matConv.Transpose() * matCP;
 
@@ -675,7 +675,7 @@ void CqCubicCurveSegment::ConvertToBezierBasis( CqMatrix& matBasis )
  * @param periodic      true if curves in the group are periodic.
  */
 CqCubicCurvesGroup::CqCubicCurvesGroup(
-    TqInt ncurves, TqInt nvertices[], TqBool periodic
+    TqInt ncurves, TqInt nvertices[], bool periodic
 ) : CqCurvesGroup()
 {
 
@@ -992,7 +992,7 @@ CqBound CqCubicCurvesGroup::Bound() const
 		for ( i = 0; i < 4; i++ )
 			for ( j = 0; j < 4; j++ )
 				matMim1[ i ][ j ] = RiBezierBasis[ i ][ j ];
-		matMim1.SetfIdentity( TqFalse );
+		matMim1.SetfIdentity( false );
 		matMim1 = matMim1.Inverse();
 	}
 
@@ -1045,7 +1045,7 @@ CqBound CqCubicCurvesGroup::Bound() const
 				matCP[ 2 ][ i ] = vecV.z();
 				matCP[ 3 ][ i ] = vecV.h();
 			}
-			matCP.SetfIdentity( TqFalse );
+			matCP.SetfIdentity( false );
 
 			matCP = matConv * matCP;
 

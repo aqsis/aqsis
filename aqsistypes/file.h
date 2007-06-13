@@ -52,14 +52,14 @@ class COMMON_SHARE CqFile
 	public:
 		/** Default constructor
 		 */
-		CqFile() : m_pStream( 0 ), m_bInternal( TqFalse )
+		CqFile() : m_pStream( 0 ), m_bInternal( false )
 		{}
 		/** Constructor taking an open stream pointer and a name.
 		 * \param Stream a pointer to an already opened input stream to attach this object to.
 		 * \param strRealName the name of the file associated with this stream.
 		 */
 		CqFile( std::istream* Stream, const char* strRealName ) :
-				m_pStream( Stream ), m_strRealName( strRealName ), m_bInternal( TqFalse )
+				m_pStream( Stream ), m_strRealName( strRealName ), m_bInternal( false )
 		{}
 		CqFile( const char* strFilename, const char* strSearchPathOption = "" );
 		/** Dectructor. Takes care of closing the stream if the constructor opened it.
@@ -82,7 +82,7 @@ class COMMON_SHARE CqFile
 		/** Find out if the stream associated with this object is valid.
 		 * \return boolean indicating validity.
 		 */
-		TqBool	IsValid() const
+		bool	IsValid() const
 		{
 			return ( m_pStream != NULL );
 		}
@@ -134,7 +134,7 @@ class COMMON_SHARE CqFile
 	private:
 		std::istream*	m_pStream;		///< a poimter to the stream associated with this file object.
 		CqString	m_strRealName;	///< the name of this file object, usually the filename.
-		TqBool	m_bInternal;	///< a flag indicating whether the stream originated internally, or was externally created and passed in.
+		bool	m_bInternal;	///< a flag indicating whether the stream originated internally, or was externally created and passed in.
 }
 ;
 

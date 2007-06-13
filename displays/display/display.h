@@ -88,7 +88,7 @@ struct SqDisplayInstance
 			m_lineLength(0),
 			m_compression(COMPRESSION_NONE), m_quality(90),
 			m_hostname(),
-			m_RenderWholeFrame(TqFalse),
+			m_RenderWholeFrame(false),
 			m_imageType(Type_File),
 			m_append(0),
 			m_pixelsReceived(0),
@@ -112,7 +112,7 @@ struct SqDisplayInstance
 	TqInt		m_lineLength;
 	uint16		m_compression, m_quality;
 	CqString	m_hostname;
-	TqBool		m_RenderWholeFrame;
+	bool		m_RenderWholeFrame;
 	TqInt		m_imageType;
 	TqInt		m_append;
 	TqFloat		m_matWorldToCamera[ 4 ][ 4 ];

@@ -185,12 +185,12 @@ class CqVector4D
 		CqVector4D& operator%=( const CqVector4D &From );
 		CqVector4D& operator*=( const TqFloat Scale );
 		CqVector4D& operator/=( const TqFloat Scale );
-		TqBool	operator==( const CqVector4D &Cmp ) const;
-		TqBool	operator!=( const CqVector4D &Cmp ) const;
-		TqBool	operator>=( const CqVector4D &Cmp ) const;
-		TqBool	operator<=( const CqVector4D &Cmp ) const;
-		TqBool	operator>( const CqVector4D &Cmp ) const;
-		TqBool	operator<( const CqVector4D &Cmp ) const;
+		bool	operator==( const CqVector4D &Cmp ) const;
+		bool	operator!=( const CqVector4D &Cmp ) const;
+		bool	operator>=( const CqVector4D &Cmp ) const;
+		bool	operator<=( const CqVector4D &Cmp ) const;
+		bool	operator>( const CqVector4D &Cmp ) const;
+		bool	operator<( const CqVector4D &Cmp ) const;
 
 		friend CqVector4D	operator*( const TqFloat f, const CqVector4D& v )
 		{
@@ -411,7 +411,7 @@ inline CqVector4D &CqVector4D::operator/=( const TqFloat Scale )
 /** Compare two vectors for equality.
  */
 
-inline TqBool CqVector4D::operator==( const CqVector4D &Cmp ) const
+inline bool CqVector4D::operator==( const CqVector4D &Cmp ) const
 {
 	/*    TqFloat Hom = m_h / Cmp.m_h;
 	 
@@ -435,7 +435,7 @@ inline TqBool CqVector4D::operator==( const CqVector4D &Cmp ) const
 /** Compare two vectors for inequality.
  */
 
-inline TqBool CqVector4D::operator!=( const CqVector4D &Cmp ) const
+inline bool CqVector4D::operator!=( const CqVector4D &Cmp ) const
 {
 	return ( !( *this == Cmp ) );
 }
@@ -445,7 +445,7 @@ inline TqBool CqVector4D::operator!=( const CqVector4D &Cmp ) const
 /** Compare two vectors for greater than or equal.
  */
 
-inline TqBool CqVector4D::operator>=( const CqVector4D &Cmp ) const
+inline bool CqVector4D::operator>=( const CqVector4D &Cmp ) const
 {
 	TqFloat Hom = m_h / Cmp.m_h;
 
@@ -459,7 +459,7 @@ inline TqBool CqVector4D::operator>=( const CqVector4D &Cmp ) const
 /** Compare two vectors for less than or equal.
  */
 
-inline TqBool CqVector4D::operator<=( const CqVector4D &Cmp ) const
+inline bool CqVector4D::operator<=( const CqVector4D &Cmp ) const
 {
 	TqFloat Hom = m_h / Cmp.m_h;
 
@@ -473,7 +473,7 @@ inline TqBool CqVector4D::operator<=( const CqVector4D &Cmp ) const
 /** Compare two vectors for greater than.
  */
 
-inline TqBool CqVector4D::operator>( const CqVector4D &Cmp ) const
+inline bool CqVector4D::operator>( const CqVector4D &Cmp ) const
 {
 	TqFloat Hom = m_h / Cmp.m_h;
 
@@ -487,7 +487,7 @@ inline TqBool CqVector4D::operator>( const CqVector4D &Cmp ) const
 /** Compare two vectors for less than.
  */
 
-inline TqBool CqVector4D::operator<( const CqVector4D &Cmp ) const
+inline bool CqVector4D::operator<( const CqVector4D &Cmp ) const
 {
 	TqFloat Hom = m_h / Cmp.m_h;
 

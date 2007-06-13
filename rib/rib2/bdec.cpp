@@ -256,13 +256,13 @@ CqRibBinaryDecoder::CqRibBinaryDecoder( std::string filename, int buffersize )
 
 	if ( file == NULL )
 	{
-		fail_flag = TqTrue;
-		eof_flag = TqTrue;
+		fail_flag = true;
+		eof_flag = true;
 	}
 	else
 	{
-		fail_flag = TqFalse;
-		eof_flag = TqFalse;
+		fail_flag = false;
+		eof_flag = false;
 		initZlib( buffersize );
 
 	}
@@ -283,13 +283,13 @@ CqRibBinaryDecoder::CqRibBinaryDecoder( FILE *filehandle, int buffersize )
 
 	if ( file == NULL )
 	{
-		fail_flag = TqTrue;
-		eof_flag = TqTrue;
+		fail_flag = true;
+		eof_flag = true;
 	}
 	else
 	{
-		fail_flag = TqFalse;
-		eof_flag = TqFalse;
+		fail_flag = false;
+		eof_flag = false;
 		initZlib( buffersize );
 	}
 }
@@ -446,13 +446,13 @@ void CqRibBinaryDecoder::gc( TqChar &c )
 
 				if( zerr == Z_STREAM_END && (int) zstrm.avail_out == zbuffersize)
 				{
-					eof_flag = TqTrue;
+					eof_flag = true;
 					throw std::string( "" );
 				};
 
 				if( zerr != Z_OK && zerr != Z_STREAM_END )
 				{
-					fail_flag = eof_flag = TqTrue;
+					fail_flag = eof_flag = true;
 					throw std::string( "" );
 				};
 			};
@@ -467,7 +467,7 @@ void CqRibBinaryDecoder::gc( TqChar &c )
 			zavailable = zstrm.avail_in = fread( zin, 1, zbuffersize, file );
 			if( zavailable == 0 )
 			{
-				eof_flag = TqTrue;
+				eof_flag = true;
 				throw std::string( "" );
 				return;
 			};

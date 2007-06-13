@@ -48,7 +48,7 @@ START_NAMESPACE( Aqsis )
 class CqDDManager : public IqDDManager
 {
 	public:
-		CqDDManager() : m_fDisplayMapInitialised(TqFalse)
+		CqDDManager() : m_fDisplayMapInitialised(false)
 		{}
 		virtual ~CqDDManager()
 		{}
@@ -68,7 +68,7 @@ class CqDDManager : public IqDDManager
 		virtual	TqInt	OpenDisplays();
 		virtual	TqInt	CloseDisplays();
 		virtual	TqInt	DisplayBucket( IqBucket* pBucket );
-		virtual	TqBool	fDisplayNeeds( const TqChar* var );
+		virtual	bool	fDisplayNeeds( const TqChar* var );
 		virtual	TqInt	Uses();
 
 	private:
@@ -77,7 +77,7 @@ class CqDDManager : public IqDDManager
 
 		struct SqDisplayRequest
 		{
-			TqBool		m_valid;
+			bool		m_valid;
 			std::string m_name;
 			std::string m_type;
 			std::string m_mode;
@@ -98,8 +98,8 @@ class CqDDManager : public IqDDManager
 			TqFloat		m_QuantizeMinVal;
 			TqFloat		m_QuantizeMaxVal;
 			TqFloat		m_QuantizeDitherVal;
-			TqBool		m_QuantizeSpecified;
-			TqBool		m_QuantizeDitherSpecified;
+			bool		m_QuantizeSpecified;
+			bool		m_QuantizeDitherSpecified;
 			DspyImageOpenMethod			m_OpenMethod;
 			DspyImageQueryMethod		m_QueryMethod;
 			DspyImageDataMethod			m_DataMethod;
@@ -115,7 +115,7 @@ class CqDDManager : public IqDDManager
 		void	PrepareSystemParameters( SqDisplayRequest& req );
 
 		std::vector<SqDisplayRequest>	m_displayRequests;		///< Array of requested display drivers.
-		TqBool	m_fDisplayMapInitialised;
+		bool	m_fDisplayMapInitialised;
 		std::map<std::string, std::string>	m_mapDisplayNames;
 
 		static CqString m_strOpenMethod;

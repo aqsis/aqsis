@@ -57,7 +57,7 @@ CqMatrix::CqMatrix( const TqFloat xs, const TqFloat ys, const TqFloat zs )
 		m_aaElement[ 2 ][ 2 ] = zs;
 		m_aaElement[ 3 ][ 3 ] = 1.0;
 
-		m_fIdentity = TqFalse;
+		m_fIdentity = false;
 	}
 }
 
@@ -73,7 +73,7 @@ CqMatrix::CqMatrix( const CqVector3D& Trans )
 
 	if ( Trans.x() != 0.0f || Trans.y() != 0.0f || Trans.z() != 0.0f )
   {
-		m_fIdentity = TqFalse;
+		m_fIdentity = false;
 
 		m_aaElement[ 3 ][ 0 ] = Trans.x();
 		m_aaElement[ 3 ][ 1 ] = Trans.y();
@@ -202,7 +202,7 @@ CqMatrix::CqMatrix( TqFloat f )
     m_aaElement[ 1 ][ 1 ] = f;
     m_aaElement[ 2 ][ 2 ] = f;
     m_aaElement[ 3 ][ 3 ] = f;
-    m_fIdentity = TqFalse;
+    m_fIdentity = false;
   }
 }
 
@@ -230,7 +230,7 @@ void CqMatrix::Identity()
 	        m_aaElement[ 2 ][ 2 ] =
 	            m_aaElement[ 3 ][ 3 ] = 1.0f;
 
-	m_fIdentity = TqTrue;
+	m_fIdentity = true;
 }
 
 
@@ -273,7 +273,7 @@ void CqMatrix::Rotate( const TqFloat Angle, const CqVector3D Axis )
 		CqMatrix	R;
 		R.Identity();
 		CqVector3D	RotAxis = Axis;
-		R.m_fIdentity = TqFalse;
+		R.m_fIdentity = false;
 
 		RotAxis.Unit();
 
@@ -344,7 +344,7 @@ void CqMatrix::Translate( const TqFloat xt, const TqFloat yt, const TqFloat zt )
 void CqMatrix::ShearX( const TqFloat yh, const TqFloat zh )
 {
 	CqMatrix Shear;
-	Shear.m_fIdentity = TqFalse;
+	Shear.m_fIdentity = false;
 
 	Shear.m_aaElement[ 0 ][ 1 ] = yh;
 	Shear.m_aaElement[ 0 ][ 2 ] = zh;
@@ -362,7 +362,7 @@ void CqMatrix::ShearX( const TqFloat yh, const TqFloat zh )
 void CqMatrix::ShearY( const TqFloat xh, const TqFloat zh )
 {
 	CqMatrix Shear;
-	Shear.m_fIdentity = TqFalse;
+	Shear.m_fIdentity = false;
 
 	Shear.m_aaElement[ 1 ][ 0 ] = xh;
 	Shear.m_aaElement[ 1 ][ 2 ] = zh;
@@ -379,7 +379,7 @@ void CqMatrix::ShearY( const TqFloat xh, const TqFloat zh )
 void CqMatrix::ShearZ( const TqFloat xh, const TqFloat yh )
 {
 	CqMatrix Shear;
-	Shear.m_fIdentity = TqFalse;
+	Shear.m_fIdentity = false;
 
 	Shear.m_aaElement[ 2 ][ 0 ] = xh;
 	Shear.m_aaElement[ 2 ][ 1 ] = yh;
@@ -519,7 +519,7 @@ CqMatrix &CqMatrix::operator*=( const CqMatrix &From )
 	                        + From.m_aaElement[ 3 ][ 2 ] * A.m_aaElement[ 2 ][ 3 ]
 	                        + From.m_aaElement[ 3 ][ 3 ] * A.m_aaElement[ 3 ][ 3 ];
 
-	m_fIdentity = TqFalse;
+	m_fIdentity = false;
 	return ( *this );
 }
 
@@ -605,7 +605,7 @@ CqMatrix& CqMatrix::PreMultiply( const CqMatrix &From )
 	                        + A.m_aaElement[ 3 ][ 2 ] * From.m_aaElement[ 2 ][ 3 ]
 	                        + A.m_aaElement[ 3 ][ 3 ] * From.m_aaElement[ 3 ][ 3 ];
 
-	m_fIdentity = TqFalse;
+	m_fIdentity = false;
 	return ( *this );
 }
 
@@ -855,7 +855,7 @@ CqMatrix &CqMatrix::operator+=( const CqMatrix &From )
 	m_aaElement[ 2 ][ 3 ] += From.m_aaElement[ 2 ][ 3 ];
 	m_aaElement[ 3 ][ 3 ] += From.m_aaElement[ 3 ][ 3 ];
 
-	m_fIdentity = TqFalse;
+	m_fIdentity = false;
 
 	return ( *this );
 }
@@ -899,7 +899,7 @@ CqMatrix &CqMatrix::operator-=( const CqMatrix &From )
 	m_aaElement[ 2 ][ 3 ] -= From.m_aaElement[ 2 ][ 3 ];
 	m_aaElement[ 3 ][ 3 ] -= From.m_aaElement[ 3 ][ 3 ];
 
-	m_fIdentity = TqFalse;
+	m_fIdentity = false;
 
 	return ( *this );
 }
@@ -958,7 +958,7 @@ CqMatrix &CqMatrix::operator=( TqFloat From[ 4 ][ 4 ] )
 	m_aaElement[ 2 ][ 3 ] = From[ 2 ][ 3 ];
 	m_aaElement[ 3 ][ 3 ] = From[ 3 ][ 3 ];
 
-	m_fIdentity = TqFalse;
+	m_fIdentity = false;
 
 	return ( *this );
 }
@@ -987,7 +987,7 @@ CqMatrix &CqMatrix::operator=( TqFloat From[ 16 ] )
 	m_aaElement[ 3 ][ 2 ] = From[ 14 ];
 	m_aaElement[ 3 ][ 3 ] = From[ 15 ];
 
-	m_fIdentity = TqFalse;
+	m_fIdentity = false;
 
 	return ( *this );
 }
@@ -1010,7 +1010,7 @@ CqMatrix CqMatrix::Inverse() const
 	else
 	{
 		b.Identity();
-		b.m_fIdentity = TqFalse;
+		b.m_fIdentity = false;
 
 		TqInt i;
 		TqInt j;
@@ -1135,7 +1135,7 @@ CqMatrix CqMatrix::Transpose() const
 		Temp.m_aaElement[ 3 ][ 2 ] = m_aaElement[ 2 ][ 3 ];
 		Temp.m_aaElement[ 3 ][ 3 ] = m_aaElement[ 3 ][ 3 ];
 
-		Temp.m_fIdentity = TqFalse;
+		Temp.m_fIdentity = false;
 	}
 
 	return ( Temp );
