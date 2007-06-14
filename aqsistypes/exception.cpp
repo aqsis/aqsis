@@ -59,6 +59,10 @@ const char* XqException::description () const
 	return "General error";
 }
 
+XqException::~XqException () throw ()
+{
+}
+
 //////////////////////////////////////////////////////////////////////////////
 XqInternal::XqInternal (const std::string& reason, const std::string& detail,
 const std::string& file, const unsigned int line)
@@ -75,6 +79,10 @@ XqInternal::XqInternal (const std::string& reason,	const std::string& file,
 const char* XqInternal::description () const
 {
 	return "Internal error";
+}
+
+XqInternal::~XqInternal () throw ()
+{
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -95,6 +103,10 @@ const char* XqEnvironment::description () const
 	return "Environment error";
 }
 
+XqEnvironment::~XqEnvironment () throw ()
+{
+}
+
 //////////////////////////////////////////////////////////////////////////////
 XqValidationFailure::XqValidationFailure (const std::string& reason, const std::string& detail,
 const std::string& file, const unsigned int line)
@@ -111,6 +123,10 @@ const unsigned int line)
 const char* XqValidationFailure::description () const
 {
 	return "Validation error";
+}
+
+XqValidationFailure::~XqValidationFailure () throw ()
+{
 }
 	
 //////////////////////////////////////////////////////////////////////////////

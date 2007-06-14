@@ -60,6 +60,13 @@ class COMMON_SHARE XqException : public std::runtime_error
 		
 		virtual const char* description () const;
 		
+		/**
+		* C++ Standard,  [except.spec] 15.4.14, Example
+		* a function that overrides a virtual function from a base class shall have an exception specification
+		* at least as restrictive as that in the base class.
+		*/
+		~XqException () throw ();
+		
 	private:
 		const std::string 	m_detail; 	//< Optional, a detailed message
 		const std::string 	m_file;		//< The file name where the exception was thrown
@@ -79,6 +86,8 @@ class COMMON_SHARE XqInternal : public XqException
 			const unsigned int line);
 		
 		virtual const char* description () const;
+		
+		~XqInternal () throw ();
 }
 ;
 
@@ -92,6 +101,8 @@ class COMMON_SHARE XqEnvironment : public XqException
 			const unsigned int line);
 		
 		virtual const char* description () const;
+		
+		~XqEnvironment () throw ();
 }
 ;
 
@@ -105,6 +116,8 @@ class COMMON_SHARE XqValidationFailure : public XqException
 		const unsigned int line);
 		
 		virtual const char* description () const;
+		
+		~XqValidationFailure () throw ();
 }
 ;
 
