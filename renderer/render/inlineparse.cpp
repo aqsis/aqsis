@@ -196,10 +196,10 @@ void CqInlineParse::parse ( std::string &str )
 	}
 	catch(XqException e )
 	{
-		std::string strError( e.strReason() );
+		std::string strError( e.what () );
 		strError += " : ";
 		strError += str;
-		throw( XqException( strError.c_str() ) );
+		throw( XqException( strError ) );
 	}
 }
 
