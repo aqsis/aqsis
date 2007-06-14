@@ -44,10 +44,6 @@ const unsigned int line)
 {
 }
 
-XqException::~XqException ()
-{
-}
-
 const std::string& XqException::detail () const
 {
 	return m_detail;

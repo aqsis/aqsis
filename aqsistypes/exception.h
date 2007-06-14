@@ -54,8 +54,6 @@ class COMMON_SHARE XqException : public std::runtime_error
 		XqException (const std::string& reason,	const std::string& file,
 			const unsigned int line);
 		
-		virtual ~XqException ();
-		
 		const std::string& detail () const;
 		
 		std::pair<std::string, unsigned int> where () const;
