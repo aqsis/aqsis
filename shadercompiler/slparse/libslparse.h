@@ -38,7 +38,7 @@ START_NAMESPACE( Aqsis )
 struct IqParseNode;
 
 /// Parses an input stream, using the supplied callback object and sending error data to the supplied output stream
-TqBool Parse( std::istream& InputStream, const CqString StreamName, std::ostream& ErrorStream );
+bool Parse( std::istream& InputStream, const CqString StreamName, std::ostream& ErrorStream );
 /// Resets the state of the parser, clearing any symbol tables, etc.
 void ResetParser();
 

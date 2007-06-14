@@ -30,7 +30,7 @@
 
 START_NAMESPACE( Aqsis )
 
-TqBool CqCSGTreeNode::m_bCSGRequired = TqFalse;
+bool CqCSGTreeNode::m_bCSGRequired = false;
 
 std::list<boost::weak_ptr<CqCSGTreeNode> >	CqCSGNodePrimitive::m_lDefPrimChildren;		///< Static empty child list, as primitives cannot have children nodes.
 
@@ -55,7 +55,7 @@ CqCSGTreeNode::~CqCSGTreeNode()
  */
 boost::shared_ptr<CqCSGTreeNode> CqCSGTreeNode::CreateNode( CqString& type )
 {
-	SetRequired(TqTrue);
+	SetRequired(true);
 	if ( type == "primitive" )
 		return boost::shared_ptr<CqCSGTreeNode>( new CqCSGNodePrimitive );
 	else if ( type == "union" )
@@ -72,7 +72,7 @@ boost::shared_ptr<CqCSGTreeNode> CqCSGTreeNode::CreateNode( CqString& type )
 /**
  * Get the state of the flag indicating if CSG processing is required at all.
  */
-TqBool CqCSGTreeNode::IsRequired()
+bool CqCSGTreeNode::IsRequired()
 {
 	return m_bCSGRequired;
 }
@@ -80,7 +80,7 @@ TqBool CqCSGTreeNode::IsRequired()
 /**
  * Set the flag indicating CSG is now required.
  */
-void CqCSGTreeNode::SetRequired(TqBool value)
+void CqCSGTreeNode::SetRequired(bool value)
 {
 	m_bCSGRequired = value;
 }
@@ -182,14 +182,14 @@ void CqCSGTreeNode::ProcessSampleList( std::deque<SqImageSample>& samples )
 			pChild->ProcessSampleList( samples );
 	}
 
-	std::vector<TqBool> abChildState( cChildren() );
+	std::vector<bool> abChildState( cChildren() );
 	std::vector<TqInt> aChildIndex( samples.size() );
 	TqInt iChild;
 	for ( iChild = 0; iChild < cChildren(); iChild++ )
-		abChildState[ iChild ] = TqFalse;
+		abChildState[ iChild ] = false;
 
 	// Now get the initial state
-	TqBool bCurrentI = TqFalse;
+	bool bCurrentI = false;
 
 	// Find out if the camera is starting inside a solid. This is the case if you
 	// see an odd number of walls for that solid when looking out.
@@ -223,7 +223,7 @@ void CqCSGTreeNode::ProcessSampleList( std::deque<SqImageSample>& samples )
 		}
 
 		// Work out the new state
-		TqBool bNewI = EvaluateState( abChildState );
+		bool bNewI = EvaluateState( abChildState );
 
 		// If it hasn't changed, remove the sample.
 		if ( bNewI == bCurrentI )
@@ -279,16 +279,16 @@ void CqCSGNodePrimitive::ProcessSampleList( std::deque<SqImageSample>& samples )
  *
  *	@return					Boolean indicating in or out for the resulting solid.
  */
-TqBool CqCSGNodeUnion::EvaluateState( std::vector<TqBool>& abChildStates )
+bool CqCSGNodeUnion::EvaluateState( std::vector<bool>& abChildStates )
 {
 	// Work out the new state
-	std::vector<TqBool>::iterator iChildState;
+	std::vector<bool>::iterator iChildState;
 	for ( iChildState = abChildStates.begin(); iChildState != abChildStates.end(); iChildState++ )
 	{
 		if ( *iChildState )
-			return ( TqTrue );
+			return ( true );
 	}
-	return ( TqFalse );
+	return ( false );
 }
 
 
@@ -304,16 +304,16 @@ TqBool CqCSGNodeUnion::EvaluateState( std::vector<TqBool>& abChildStates )
  *
  *	@return					Boolean indicating in or out for the resulting solid.
  */
-TqBool CqCSGNodeIntersection::EvaluateState( std::vector<TqBool>& abChildStates )
+bool CqCSGNodeIntersection::EvaluateState( std::vector<bool>& abChildStates )
 {
 	// Work out the new state
-	std::vector<TqBool>::iterator iChildState;
+	std::vector<bool>::iterator iChildState;
 	for ( iChildState = abChildStates.begin(); iChildState != abChildStates.end(); iChildState++ )
 	{
 		if ( !( *iChildState ) )
-			return ( TqFalse );
+			return ( false );
 	}
-	return ( TqTrue );
+	return ( true );
 }
 
 
@@ -329,22 +329,22 @@ TqBool CqCSGNodeIntersection::EvaluateState( std::vector<TqBool>& abChildStates 
  *
  *	@return					Boolean indicating in or out for the resulting solid.
  */
-TqBool CqCSGNodeDifference::EvaluateState( std::vector<TqBool>& abChildStates )
+bool CqCSGNodeDifference::EvaluateState( std::vector<bool>& abChildStates )
 {
 	// Work out the new state
 	if ( abChildStates[ 0 ] )
 	{
-		std::vector<TqBool>::iterator iChildState;
+		std::vector<bool>::iterator iChildState;
 		iChildState = abChildStates.begin();
 		iChildState++;
 		for ( ; iChildState != abChildStates.end(); iChildState++ )
 		{
 			if ( *iChildState )
-				return ( TqFalse );
+				return ( false );
 		}
-		return ( TqTrue );
+		return ( true );
 	}
-	return ( TqFalse );
+	return ( false );
 }
 
 

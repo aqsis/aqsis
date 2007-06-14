@@ -83,7 +83,7 @@ class COMMON_SHARE CqMatrix
 			m_aaElement[ 3 ][ 1 ] = r4c2;
 			m_aaElement[ 3 ][ 2 ] = r4c3;
 			m_aaElement[ 3 ][ 3 ] = r4c4;
-			m_fIdentity = TqFalse;
+			m_fIdentity = false;
 		}
 		CqMatrix( TqFloat From[ 4 ][ 4 ] );
 		CqMatrix( TqFloat From[ 16 ] );
@@ -95,11 +95,11 @@ class COMMON_SHARE CqMatrix
 		/** Mark this matrix as identity or not.
 		 * \param f Bool indicating whether or not this matrix should be considered identity irespective of its contents.
 		 */
-		void	SetfIdentity( TqBool f )
+		void	SetfIdentity( bool f )
 		{
 			m_fIdentity = f;
 		}
-		TqBool	fIdentity() const
+		bool	fIdentity() const
 		{
 			return ( m_fIdentity );
 		}
@@ -200,7 +200,7 @@ class COMMON_SHARE CqMatrix
 
 	protected:
 		TqFloat	m_aaElement[ 4 ][ 4 ];		///< The 4x4 array of float values.
-		TqBool	m_fIdentity;			///< Flag indicating that this matrix should be treated as identity irrespective of its contents.
+		bool	m_fIdentity;			///< Flag indicating that this matrix should be treated as identity irrespective of its contents.
 }
 ;
 

@@ -73,7 +73,7 @@ class Location
 				k(K)
 		{}
 
-		inline friend TqBool operator == (const Location& a, const Location& b)
+		inline friend bool operator == (const Location& a, const Location& b)
 		{
 			return (a.i == b.i) && (a.j == b.j) && (a.k == b.k);
 		}
@@ -81,11 +81,11 @@ class Location
 		{
 			return Location(a.i + b.i, a.j + b.j, a.k + b.k);
 		}
-		inline friend TqBool operator <= (const Location& a, const Location& b)
+		inline friend bool operator <= (const Location& a, const Location& b)
 		{
 			return (a.i <= b.i && a.j <= b.j && a.k <= b.k);
 		}
-		inline friend TqBool operator < (const Location& a, const Location& b)
+		inline friend bool operator < (const Location& a, const Location& b)
 		{
 			return (a.i < b.i && a.j < b.j && a.k < b.k);
 		}
@@ -143,7 +143,7 @@ class LocationMap
 			m_table[key].push_back(std::pair<Location, type_t>(loc, item));
 		}
 
-		TqBool get
+		bool get
 			(const Location& loc, type_t& out)
 		{
 			TqInt key = loc.i + loc.j + loc.k;
@@ -187,7 +187,7 @@ class bloomenthal_polygonizer
 
 		~bloomenthal_polygonizer();
 
-		TqBool polygonize_from_inside_point(const CqVector3D& startingpoint);
+		bool polygonize_from_inside_point(const CqVector3D& startingpoint);
 
 		void polygonize_whole_grid();
 
@@ -208,7 +208,7 @@ class bloomenthal_polygonizer
 						l(L)
 				{}
 
-				inline friend TqBool operator == (const Corner& c1, const Corner& c2)
+				inline friend bool operator == (const Corner& c1, const Corner& c2)
 				{
 					return (c1.l == c2.l) && (c1.p == c2.p) && (c1.value == c2.value);
 				}
@@ -247,7 +247,7 @@ class bloomenthal_polygonizer
 					}
 				}
 
-				inline friend TqBool operator == (const Edge& e1, const Edge& e2)
+				inline friend bool operator == (const Edge& e1, const Edge& e2)
 				{
 					return (e1.l1 == e2.l1) && (e1.l2 == e2.l2) && (e1.vid == e2.vid);
 				}
@@ -309,7 +309,7 @@ class bloomenthal_polygonizer
 		// Grid limit corners (left-bottom-near and right-top-far)
 		Location m_MinCorner;
 		Location m_MaxCorner;
-		TqBool m_keep_within_limits;
+		bool m_keep_within_limits;
 		// Grid center ( Location(0, 0, 0) )
 		CqVector3D m_GridOrigin;
 		// Implicit function
@@ -325,11 +325,11 @@ class bloomenthal_polygonizer
 		std::stack<Cube> m_active_cubes;
 
 		// Centers hash
-		LocationMap<TqBool> m_centers;
+		LocationMap<bool> m_centers;
 		// Return true if already set, otherwise set and return false
-		TqBool mark_center(const Location& l)
+		bool mark_center(const Location& l)
 		{
-			TqBool out;
+			bool out;
 			if(m_centers.get(l, out))
 				return true;
 
@@ -375,7 +375,7 @@ class bloomenthal_polygonizer
 
 		CqVector3D normal(const CqVector3D& Point);
 
-		TqBool SurfaceLocation(Location& startinglocation);
+		bool SurfaceLocation(Location& startinglocation);
 
 		// Tetrahedral Polygonization
 		void TriangulateTet(const Cube& cube1, TqInt c1, TqInt c2, TqInt c3, TqInt c4);

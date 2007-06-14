@@ -60,7 +60,7 @@ struct SqSampleData;
 class CqMicroPolyGridBase : public CqRefCount
 {
 	public:
-		CqMicroPolyGridBase() : m_fCulled( TqFalse ), m_fTriangular( TqFalse )
+		CqMicroPolyGridBase() : m_fCulled( false ), m_fTriangular( false )
 		{}
 		virtual	~CqMicroPolyGridBase()
 		{}
@@ -80,7 +80,7 @@ class CqMicroPolyGridBase : public CqRefCount
 		/*
 		 * Delete all the variables per grid 
 		 */
-		virtual void DeleteVariables( TqBool all ) = 0;
+		virtual void DeleteVariables( bool all ) = 0;
 		/** Pure virtual, get a pointer to the surface this grid belongs.
 		 * \return Pointer to surface, only valid during grid shading.
 		 */
@@ -88,21 +88,21 @@ class CqMicroPolyGridBase : public CqRefCount
 
 		virtual	const IqAttributes* pAttributes() const = 0;
 
-		virtual TqBool	usesCSG() const = 0;
+		virtual bool	usesCSG() const = 0;
 		virtual	boost::shared_ptr<CqCSGTreeNode> pCSGNode() const = 0;
-		TqBool vfCulled()
+		bool vfCulled()
 		{
 			return m_fCulled;
 		}
 		/** Query whether this grid is being rendered as a triangle.
 		 */
-		virtual TqBool fTriangular() const
+		virtual bool fTriangular() const
 		{
 			return ( m_fTriangular );
 		}
 		/** Set this grid as being rendered as a triangle or not.
 		 */
-		virtual void SetfTriangular( TqBool fTriangular )
+		virtual void SetfTriangular( bool fTriangular )
 		{
 			m_fTriangular = fTriangular;
 		}
@@ -150,9 +150,9 @@ class CqMicroPolyGridBase : public CqRefCount
 		virtual boost::shared_ptr<IqShaderExecEnv> pShaderExecEnv() = 0; 
 
 	public:
-		TqBool m_fCulled; ///< Boolean indicating the entire grid is culled.
+		bool m_fCulled; ///< Boolean indicating the entire grid is culled.
 		CqTriangleSplitLine	m_TriangleSplitLine;	///< Two endpoints of the line that is used to turn the quad into a triangle at sample time.
-		TqBool	m_fTriangular;			///< Flag indicating that this grid should be rendered as a triangular grid with a phantom fourth corner.
+		bool	m_fTriangular;			///< Flag indicating that this grid should be rendered as a triangular grid with a phantom fourth corner.
 };
 
 
@@ -180,26 +180,26 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase
 		/** Set the shading normals flag, indicating this grid has shading (N) normals already specified.
 		 * \param f The new state of the flag.
 		 */
-		void	SetbShadingNormals( TqBool f )
+		void	SetbShadingNormals( bool f )
 		{
 			m_bShadingNormals = f;
 		}
 		/** Set the geometric normals flag, indicating this grid has geometric (Ng) normals already specified.
 		 * \param f The new state of the flag.
 		 */
-		void	SetbGeometricNormals( TqBool f )
+		void	SetbGeometricNormals( bool f )
 		{
 			m_bGeometricNormals = f;
 		}
 		/** Query whether shading (N) normals have been filled in by the surface at dice time.
 		 */
-		TqBool bShadingNormals() const
+		bool bShadingNormals() const
 		{
 			return ( m_bShadingNormals );
 		}
 		/** Query whether geometric (Ng) normals have been filled in by the surface at dice time.
 		 */
-		TqBool bGeometricNormals() const
+		bool bGeometricNormals() const
 		{
 			return ( m_bGeometricNormals );
 		}
@@ -219,7 +219,7 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase
 
 		void	Initialise( TqInt cu, TqInt cv, const boost::shared_ptr<CqSurface>& pSurface );
 
-		void DeleteVariables( TqBool all );
+		void DeleteVariables( bool all );
 
 		// Overrides from CqMicroPolyGridBase
 		virtual	void	Split( CqImageBuffer* pImage, long xmin, long xmax, long ymin, long ymax );
@@ -238,9 +238,9 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase
 			assert( m_pShaderExecEnv );
 			return ( m_pShaderExecEnv->pAttributes() );
 		}
-		virtual TqBool	usesCSG() const
+		virtual bool	usesCSG() const
 		{
-			TqBool result = (m_pCSGNode.get() != NULL);
+			bool result = (m_pCSGNode.get() != NULL);
 			return(result);
 		}
 		virtual	boost::shared_ptr<CqCSGTreeNode> pCSGNode() const
@@ -300,8 +300,8 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase
 		}
 
 	private:
-		TqBool	m_bShadingNormals;		///< Flag indicating shading normals have been filled in and don't need to be calculated during shading.
-		TqBool	m_bGeometricNormals;	///< Flag indicating geometric normals have been filled in and don't need to be calculated during shading.
+		bool	m_bShadingNormals;		///< Flag indicating shading normals have been filled in and don't need to be calculated during shading.
+		bool	m_bGeometricNormals;	///< Flag indicating geometric normals have been filled in and don't need to be calculated during shading.
 		boost::shared_ptr<CqSurface> m_pSurface;	///< Pointer to the surface for this grid.
 		boost::shared_ptr<CqCSGTreeNode> m_pCSGNode;	///< Pointer to the CSG tree node this grid belongs to, NULL if not part of a solid.
 		CqBitVector	m_CulledPolys;		///< Bitvector indicating whether the individual micro polygons are culled.
@@ -334,7 +334,7 @@ class CqMotionMicroPolyGrid : public CqMicroPolyGridBase, public CqMotionSpec<Cq
 		/**
 		* \todo Review: Unused parameter all
 		*/		
-		void DeleteVariables( TqBool all )
+		void DeleteVariables( bool all )
 		{}
 
 		// Redirect acces via IqShaderExecEnv
@@ -389,7 +389,7 @@ class CqMotionMicroPolyGrid : public CqMicroPolyGridBase, public CqMotionSpec<Cq
 			return ( static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( 0 ) ) ) ->pAttributes() );
 		}
 
-		virtual TqBool	usesCSG() const
+		virtual bool	usesCSG() const
 		{
 			return(static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( 0 ) ) ) ->usesCSG());
 		}
@@ -595,7 +595,7 @@ class CqMicroPolygon : public CqRefCount
 
 		/** Query if the micropolygon has been successfully hit by a pixel sample.
 		 */
-		TqBool IsHit() const
+		bool IsHit() const
 		{
 			return ( ( m_Flags & MicroPolyFlags_Hit ) != 0 );
 		}
@@ -607,7 +607,7 @@ class CqMicroPolygon : public CqRefCount
 		}
 		/** Get the flag indicating if the micropoly has already beed pushed forward to the next bucket.
 		 */
-		TqBool	IsPushedForward() const
+		bool	IsPushedForward() const
 		{
 			return ( ( m_Flags & MicroPolyFlags_PushedForward ) != 0 );
 		}
@@ -621,14 +621,14 @@ class CqMicroPolygon : public CqRefCount
 		{
 			m_Flags |= MicroPolyFlags_Trimmed;
 		}
-		virtual TqBool	IsTrimmed() const
+		virtual bool	IsTrimmed() const
 		{
 			return ( ( m_Flags & MicroPolyFlags_Trimmed ) != 0 );
 		}
 
-		virtual TqBool IsMoving()
+		virtual bool IsMoving()
 		{
-			return TqFalse;
+			return false;
 		}
 
 		/** Check if the sample point is within the micropoly.
@@ -637,9 +637,9 @@ class CqMicroPolygon : public CqRefCount
 		 * \param D storage to put the depth at the sample point if success.
 		 * \return Boolean success.
 		 */
-		virtual	TqBool	Sample( const SqSampleData& sample, TqFloat& D, TqFloat time, TqBool UsingDof = TqFalse );
+		virtual	bool	Sample( const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof = false );
 
-		virtual TqBool	fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const;
+		virtual bool	fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const;
 		virtual void	CacheHitTestValues(CqHitTestCache* cache, CqVector3D* points);
 		virtual void	CacheHitTestValues(CqHitTestCache* cache);
 		virtual void	CacheHitTestValuesDof(CqHitTestCache* cache, const CqVector2D& DofOffset, CqVector2D* coc);
@@ -670,7 +670,7 @@ class CqMicroPolygon : public CqRefCount
 			m_pGrid->pVar(EnvVars_P) ->GetPointPtr( pP );
 			return ( pP[ GetCodedIndex( m_IndexCode, 3 ) ] );
 		}
-		virtual const TqBool IsDegenerate() const
+		virtual const bool IsDegenerate() const
 		{
 			return ( ( m_IndexCode & 0x8000000 ) != 0 );
 		}
@@ -751,7 +751,7 @@ class CqMovingMicroPolygonKey
 		void	Initialise( const CqVector3D& vA, const CqVector3D& vB, const CqVector3D& vC, const CqVector3D& vD );
 		CqVector2D ReverseBilinear( const CqVector2D& v );
 
-		const TqBool IsDegenerate() const
+		const bool IsDegenerate() const
 		{
 			return ( m_Point2 == m_Point3 );
 		}
@@ -764,7 +764,7 @@ class CqMovingMicroPolygonKey
 		TqFloat	m_D;				///< Distance of the plane from the origin, used for calculating sample depth.
 
 		CqBound m_Bound;
-		TqBool	m_BoundReady;
+		bool	m_BoundReady;
 
 		static	CqObjectPool<CqMovingMicroPolygonKey>	m_thePool;
 }
@@ -779,7 +779,7 @@ class CqMovingMicroPolygonKey
 class CqMicroPolygonMotion : public CqMicroPolygon
 {
 	public:
-		CqMicroPolygonMotion() : CqMicroPolygon(), m_BoundReady( TqFalse )
+		CqMicroPolygonMotion() : CqMicroPolygon(), m_BoundReady( false )
 		{ }
 		virtual	~CqMicroPolygonMotion()
 		{
@@ -805,7 +805,7 @@ class CqMicroPolygonMotion : public CqMicroPolygon
 
 	public:
 		void	AppendKey( const CqVector3D& vA, const CqVector3D& vB, const CqVector3D& vC, const CqVector3D& vD, TqFloat time );
-		void	DeleteVariables( TqBool all )
+		void	DeleteVariables( bool all )
 		{}
 
 		// Overrides from CqMicroPolygon
@@ -834,19 +834,19 @@ class CqMicroPolygonMotion : public CqMicroPolygon
 		}
 		virtual void	BuildBoundList();
 
-		virtual	TqBool	Sample( const SqSampleData& sample, TqFloat& D, TqFloat time, TqBool UsingDof = TqFalse );
+		virtual	bool	Sample( const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof = false );
 
 		virtual void	MarkTrimmed()
 		{
-			m_fTrimmed = TqTrue;
+			m_fTrimmed = true;
 		}
 
-		virtual TqBool IsMoving()
+		virtual bool IsMoving()
 		{
-			return TqTrue;
+			return true;
 		}
 
-		virtual const TqBool IsDegenerate() const
+		virtual const bool IsDegenerate() const
 		{
 			return ( m_Keys[0]->IsDegenerate() );
 		}
@@ -870,10 +870,10 @@ class CqMicroPolygonMotion : public CqMicroPolygon
 
 	private:
 		CqBoundList	m_BoundList;			///< List of bounds to get a tighter fit.
-		TqBool	m_BoundReady;				///< Flag indicating the boundary has been initialised.
+		bool	m_BoundReady;				///< Flag indicating the boundary has been initialised.
 		std::vector<TqFloat> m_Times;
 		std::vector<CqMovingMicroPolygonKey*>	m_Keys;
-		TqBool	m_fTrimmed;		///< Flag indicating that the MPG spans a trim curve.
+		bool	m_fTrimmed;		///< Flag indicating that the MPG spans a trim curve.
 
 		/**
 		* \todo Review Empty copy-ctor, but default operator=!

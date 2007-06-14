@@ -47,9 +47,9 @@ std::istream* ParseInputStream = &std::cin;
 CqString ParseStreamName = "stdin";
 std::ostream* ParseErrorStream = &Aqsis::log();
 TqInt ParseLineNumber;
-TqBool ParseSucceeded = true;
+bool ParseSucceeded = true;
 
-TqBool Parse( std::istream& InputStream, const CqString StreamName, std::ostream& ErrorStream )
+bool Parse( std::istream& InputStream, const CqString StreamName, std::ostream& ErrorStream )
 {
 	ParseInputStream = &InputStream;
 	ParseStreamName = StreamName;

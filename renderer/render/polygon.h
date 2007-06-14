@@ -99,7 +99,7 @@ class CqPolygonBase
 		/** Determine if the polygon has the given indexed primitive variable.
 		 * \param index Integer index of the variable in the range EnvVars_Cs<=index<EnvVars_Last.
 		 */
-		virtual const	TqBool bHasVar( TqInt index ) const = 0;
+		virtual const	bool bHasVar( TqInt index ) const = 0;
 		/** Get the real index into the points list translated from the polygon vertex index for facevarying variables.
 		 * \param i Integer index in of the vertex in question.
 		 */
@@ -155,7 +155,7 @@ class CqSurfacePolygon : public CqSurface, public CqPolygonBase
 		}
 #endif
 
-		TqBool	CheckDegenerate() const;
+		bool	CheckDegenerate() const;
 
 		// Overridden fro mCqSurface.
 		virtual	CqBound	Bound() const
@@ -170,9 +170,9 @@ class CqSurfacePolygon : public CqSurface, public CqPolygonBase
 		/** Determine whether the passed surface is valid to be used as a
 		 *  frame in motion blur for this surface.
 		 */
-		virtual TqBool	IsMotionBlurMatch( CqSurface* pSurf )
+		virtual bool	IsMotionBlurMatch( CqSurface* pSurf )
 		{
-			return( TqFalse );
+			return( false );
 		}
 
 		virtual	TqUint	cUniform() const
@@ -242,7 +242,7 @@ class CqSurfacePolygon : public CqSurface, public CqPolygonBase
 		{
 			return( i );
 		}
-		virtual	const	TqBool	bHasVar(TqInt index) const
+		virtual	const	bool	bHasVar(TqInt index) const
 		{
 			return ( CqSurface::bHasVar(index) );
 		}
@@ -278,13 +278,13 @@ class CqPolygonPoints : public CqSurface
 	public:
 		CqPolygonPoints( TqInt cVertices, TqInt cFaces, TqInt sumnVerts ) :
 				m_cVertices( cVertices ),
-				m_Transformed( TqFalse ),
+				m_Transformed( false ),
 				m_cFaces( cFaces ),
 				m_sumnVerts( sumnVerts )
 		{}
 		CqPolygonPoints() :
 				m_cVertices( 0 ),
-				m_Transformed( TqFalse ),
+				m_Transformed( false ),
 				m_cFaces( 0 ),
 				m_sumnVerts( 0 )
 		{}
@@ -322,17 +322,17 @@ class CqPolygonPoints : public CqSurface
 		{
 			return ( 0 );
 		}
-		virtual TqBool	Diceable()
+		virtual bool	Diceable()
 		{
-			return ( TqFalse );
+			return ( false );
 		}
 
 		/** Determine whether the passed surface is valid to be used as a
 		 *  frame in motion blur for this surface.
 		 */
-		virtual TqBool	IsMotionBlurMatch( CqSurface* pSurf )
+		virtual bool	IsMotionBlurMatch( CqSurface* pSurf )
 		{
-			return( TqFalse );
+			return( false );
 		}
 
 		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime = 0 );
@@ -364,7 +364,7 @@ class CqPolygonPoints : public CqSurface
 
 	protected:
 		TqInt	m_cVertices;		///< Count of vertices in this list.
-		TqBool	m_Transformed;		///< Flag indicatign that the list has been transformed.
+		bool	m_Transformed;		///< Flag indicatign that the list has been transformed.
 		TqInt	m_cFaces;			///< Expected count of faces referencing this list.
 		TqInt	m_sumnVerts;
 }
@@ -404,7 +404,7 @@ class CqSurfacePointsPolygon : public CqSurface, public CqPolygonBase
 		// Overridden from CqSurface
 		virtual CqMicroPolyGridBase* Dice()
 		{
-			assert(TqFalse);
+			assert(false);
 			return( 0 );
 		}
 		virtual	CqBound	Bound() const
@@ -415,7 +415,7 @@ class CqSurfacePointsPolygon : public CqSurface, public CqPolygonBase
 		{
 			return ( CqPolygonBase::Split( aSplits ) );
 		}
-		virtual TqBool	Diceable()
+		virtual bool	Diceable()
 		{
 			return(false);
 		}
@@ -423,9 +423,9 @@ class CqSurfacePointsPolygon : public CqSurface, public CqPolygonBase
 		/** Determine whether the passed surface is valid to be used as a
 		 *  frame in motion blur for this surface.
 		 */
-		virtual TqBool	IsMotionBlurMatch( CqSurface* pSurf )
+		virtual bool	IsMotionBlurMatch( CqSurface* pSurf )
 		{
-			return( TqFalse );
+			return( false );
 		}
 
 		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime = 0 )
@@ -522,7 +522,7 @@ class CqSurfacePointsPolygon : public CqSurface, public CqPolygonBase
 
 		/** Determine whether this surface has the given indexed primitive variable.
 		 */
-		const	TqBool	bHasVar(TqInt index) const
+		const	bool	bHasVar(TqInt index) const
 		{
 			return ( m_pPoints->bHasVar(index) );
 		}
@@ -597,9 +597,9 @@ class CqSurfacePointsPolygons : public CqSurface
 		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
 		/** Determine whether this GPrim is diceable at its current size.
 		 */
-		virtual TqBool	Diceable()
+		virtual bool	Diceable()
 		{
-			return( TqFalse );
+			return( false );
 		}
 
 		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime = 0 )
@@ -608,9 +608,9 @@ class CqSurfacePointsPolygons : public CqSurface
 			m_pPoints->Transform( matTx, matITTx, matRTx, iTime );
 		}
 
-		virtual TqBool	IsMotionBlurMatch( CqSurface* pSurf )
+		virtual bool	IsMotionBlurMatch( CqSurface* pSurf )
 		{
-			return( TqFalse );
+			return( false );
 		}
 
 		virtual	TqUint	cUniform() const

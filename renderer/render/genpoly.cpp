@@ -152,7 +152,7 @@ TqInt CqPolygonGeneral2D::CalcDeterminant( TqInt i1, TqInt i2, TqInt i3 ) const
  *  triangle formed by the vertices indexed by i1, i2, and i3
  */
 
-TqBool CqPolygonGeneral2D::NoneInside( TqInt i1, TqInt i2, TqInt i3, std::vector<TqInt>& iList ) const
+bool CqPolygonGeneral2D::NoneInside( TqInt i1, TqInt i2, TqInt i3, std::vector<TqInt>& iList ) const
 {
 	TqUint iVertex;
 	TqUint size = iList.size();
@@ -183,10 +183,10 @@ TqBool CqPolygonGeneral2D::NoneInside( TqInt i1, TqInt i2, TqInt i3, std::vector
 			        ( ( *this ) [ iN ] == ( *this ) [ i3 ] ) )
 				continue;
 			else
-				return ( TqFalse );
+				return ( false );
 		}
 	}
-	return ( TqTrue );
+	return ( true );
 }
 
 
@@ -203,7 +203,7 @@ void CqPolygonGeneral2D::EliminateDuplicatePoints()
  *  Uses AntiClockwise as direction.
  */
 
-TqBool CqPolygonGeneral2D::Contains( CqPolygonGeneral2D& polyCheck )
+bool CqPolygonGeneral2D::Contains( CqPolygonGeneral2D& polyCheck )
 {
 	assert( polyCheck.cVertices() > 0 && cVertices() > 0 );
 
@@ -228,9 +228,9 @@ TqBool CqPolygonGeneral2D::Contains( CqPolygonGeneral2D& polyCheck )
 		}
 		// If this point is outside, then the polygon cannot be entirely inside.
 		if ( !c )
-			return ( TqFalse );
+			return ( false );
 	}
-	return ( TqTrue );
+	return ( true );
 }
 
 
@@ -358,12 +358,12 @@ void CqPolygonGeneral2D::Triangulate( std::vector<TqInt>& aiList ) const
 	TqInt cVertex = size;
 	while ( cVertex > 3 )
 	{
-		TqBool	fDone = TqFalse;
+		bool	fDone = false;
 		TqInt	iPrev = cVertex - 1;
 		TqInt	iCurr = 0;
 		TqInt	iNext = 1;
 
-		while ( ( iCurr < cVertex ) && ( fDone == TqFalse ) )
+		while ( ( iCurr < cVertex ) && ( fDone == false ) )
 		{
 			iPrev = iCurr - 1;
 			iNext = iCurr + 1;
@@ -383,12 +383,12 @@ void CqPolygonGeneral2D::Triangulate( std::vector<TqInt>& aiList ) const
 			                            iList );
 			if ( ( CurrDeterm == Orientation() ) &&
 			        ( CurrPos != 0 ) )
-				fDone = TqTrue;
+				fDone = true;
 			else
 				iCurr++;
 		}
 
-		if ( fDone == TqFalse )
+		if ( fDone == false )
 			return ;
 		else
 		{

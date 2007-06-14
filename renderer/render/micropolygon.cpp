@@ -48,8 +48,8 @@ CqObjectPool<CqMovingMicroPolygonKey>	CqMovingMicroPolygonKey::m_thePool;
  */
 
 CqMicroPolyGrid::CqMicroPolyGrid() : CqMicroPolyGridBase(),
-		m_bShadingNormals( TqFalse ),
-		m_bGeometricNormals( TqFalse ), 
+		m_bShadingNormals( false ),
+		m_bGeometricNormals( false ), 
 		m_pShaderExecEnv(new CqShaderExecEnv(QGetRenderContextI()))
 {
 	STATS_INC( GRD_allocated );
@@ -118,7 +118,7 @@ void CqMicroPolyGrid::Initialise( TqInt cu, TqInt cv, const boost::shared_ptr<Cq
 
 	// Initialise the local/public culled variable.
 	m_CulledPolys.SetSize( numShadingPoints(cu, cv) );
-	m_CulledPolys.SetAll( TqFalse );
+	m_CulledPolys.SetAll( false );
 
 	TqInt size = numMicroPolygons(cu, cv);
 
@@ -136,8 +136,8 @@ void CqMicroPolyGrid::CalcNormals()
 
 	// Get the handedness of the coordinate system (at the time of creation) and
 	// the coordinate system specified, to check for normal flipping.
-	TqBool CSO = this->pSurface()->pTransform()->GetHandedness(this->pSurface()->pTransform()->Time(0));
-	TqBool O = pAttributes() ->GetIntegerAttribute( "System", "Orientation" ) [ 0 ] != 0;
+	bool CSO = this->pSurface()->pTransform()->GetHandedness(this->pSurface()->pTransform()->Time(0));
+	bool O = pAttributes() ->GetIntegerAttribute( "System", "Orientation" ) [ 0 ] != 0;
 	const CqVector3D* vecMP[ 4 ];
 	CqVector3D	vecN, vecTemp;
 	CqVector3D	vecFailsafeN;
@@ -236,7 +236,7 @@ void CqMicroPolyGrid::CalcNormals()
 
 void CqMicroPolyGrid::CalcSurfaceDerivatives()
 {
-	TqBool bdpu, bdpv;
+	bool bdpu, bdpv;
 	TqInt lUses = pSurface() ->Uses();
 	bdpu = ( USES( lUses, EnvVars_dPdu ) );
 	bdpv = ( USES( lUses, EnvVars_dPdv ) );
@@ -311,9 +311,9 @@ void CqMicroPolyGrid::Shade()
 		pVar(EnvVars_E) ->SetVector( vecE );
 
     TqInt proj = QGetRenderContext()->GetIntegerOption( "System", "Projection" ) [ 0 ];
-    TqBool bSpline = TqFalse;
+    bool bSpline = false;
     const TqInt *pSpline = QGetRenderContext()->GetIntegerOption( "render", "spline" );
-    if (pSpline) bSpline = TqTrue;
+    if (pSpline) bSpline = true;
     
     TqInt buRes = uRes;
     TqInt bvRes = vRes;
@@ -328,7 +328,7 @@ void CqMicroPolyGrid::Shade()
 
     for ( i = gsmin1; i >= 0; i-- )
     {
-       if (bSpline == TqTrue) 
+       if (bSpline == true) 
        { 
           if ( USES( lUses, EnvVars_du ) )
           {
@@ -423,7 +423,7 @@ void CqMicroPolyGrid::Shade()
 				if ( pOs[ i ] != gColWhite )
 				{
 					cCulled ++;
-					m_CulledPolys.SetValue( i, TqTrue );
+					m_CulledPolys.SetValue( i, true );
 				}
 				else
 					break;
@@ -433,9 +433,9 @@ void CqMicroPolyGrid::Shade()
 
 		if ( cCulled == gs )
 		{
-			m_fCulled = TqTrue;
+			m_fCulled = true;
 			STATS_INC( GRD_culled );
-			DeleteVariables( TqTrue );
+			DeleteVariables( true );
 			return ;
 		}
 
@@ -453,7 +453,7 @@ void CqMicroPolyGrid::Shade()
 			if ( pOs[ i ] == gColBlack )
 			{
 				cCulled ++;
-				m_CulledPolys.SetValue( i, TqTrue );
+				m_CulledPolys.SetValue( i, true );
 			}
 			else
 				break;
@@ -462,9 +462,9 @@ void CqMicroPolyGrid::Shade()
 
 		if ( cCulled == gs )
 		{
-			m_fCulled = TqTrue;
+			m_fCulled = true;
 			STATS_INC( GRD_culled );
-			DeleteVariables( TqTrue );
+			DeleteVariables( true );
 			return ;
 		}
 	}
@@ -496,7 +496,7 @@ void CqMicroPolyGrid::Shade()
 			if ( ( pN[ i ] * pP[ i ] ) >= 0 )
 			{
 				cCulled++;
-				m_CulledPolys.SetValue( i, TqTrue );
+				m_CulledPolys.SetValue( i, true );
 			}
 		}
 		//theStats.OcclusionCullTimer().Stop();
@@ -504,9 +504,9 @@ void CqMicroPolyGrid::Shade()
 		// If the whole grid is culled don't bother going any further.
 		if ( cCulled == gs )
 		{
-			m_fCulled = TqTrue;
+			m_fCulled = true;
 			STATS_INC( GRD_culled );
-			DeleteVariables( TqTrue );
+			DeleteVariables( true );
 			return ;
 		}
 	}
@@ -534,7 +534,7 @@ void CqMicroPolyGrid::Shade()
 			if ( pOs[ i ] == gColBlack )
 			{
 				cCulled ++;
-				m_CulledPolys.SetValue( i, TqTrue );
+				m_CulledPolys.SetValue( i, true );
 			}
 			else
 				break;
@@ -543,9 +543,9 @@ void CqMicroPolyGrid::Shade()
 
 		if ( cCulled == gs )
 		{
-			m_fCulled = TqTrue;
+			m_fCulled = true;
 			STATS_INC( GRD_culled );
-			DeleteVariables( TqTrue );
+			DeleteVariables( true );
 			return ;
 		}
 	}
@@ -558,7 +558,7 @@ void CqMicroPolyGrid::Shade()
 		//theStats.AtmosphereTimer().Stop();
 	}
 
-	DeleteVariables( TqFalse );
+	DeleteVariables( false );
 
 	TqInt	size = m_pShaderExecEnv->shadingPointCount();
 
@@ -591,7 +591,7 @@ void CqMicroPolyGrid::TransferOutputVariables()
 /**
  * Delete unneeded variables so that we don't use up unnecessary memory
  */
-void CqMicroPolyGrid::DeleteVariables( TqBool all )
+void CqMicroPolyGrid::DeleteVariables( bool all )
 {
 	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Cs" ) || all )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_Cs );
@@ -775,10 +775,10 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, long y
 	CqString strTrimSense( "inside" );
 	if ( pattrTrimSense != 0 )
 		strTrimSense = pattrTrimSense[ 0 ];
-	TqBool bOutside = strTrimSense == "outside";
+	bool bOutside = strTrimSense == "outside";
 
 	// Determine whether we need to bother with trimming or not.
-	TqBool bCanBeTrimmed = pSurface() ->bCanBeTrimmed() && NULL != pVar(EnvVars_u) && NULL != pVar(EnvVars_v);
+	bool bCanBeTrimmed = pSurface() ->bCanBeTrimmed() && NULL != pVar(EnvVars_u) && NULL != pVar(EnvVars_v);
 
 	ADDREF( this );
 
@@ -798,7 +798,7 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, long y
 			}
 
 			// If the MPG is trimmed then don't add it.
-			TqBool fTrimmed = TqFalse;
+			bool fTrimmed = false;
 			if ( bCanBeTrimmed )
 			{
 				TqFloat u1, v1, u2, v2, u3, v3, u4, v4;
@@ -817,10 +817,10 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, long y
 				CqVector2D vecC(u3, v3);
 				CqVector2D vecD(u4, v4);
 
-				TqBool fTrimA = pSurface() ->bIsPointTrimmed( vecA );
-				TqBool fTrimB = pSurface() ->bIsPointTrimmed( vecB );
-				TqBool fTrimC = pSurface() ->bIsPointTrimmed( vecC );
-				TqBool fTrimD = pSurface() ->bIsPointTrimmed( vecD );
+				bool fTrimA = pSurface() ->bIsPointTrimmed( vecA );
+				bool fTrimB = pSurface() ->bIsPointTrimmed( vecB );
+				bool fTrimC = pSurface() ->bIsPointTrimmed( vecC );
+				bool fTrimD = pSurface() ->bIsPointTrimmed( vecD );
 
 				if ( bOutside )
 				{
@@ -847,7 +847,7 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, long y
 				// If any points are trimmed mark the MPG as needing to be trim checked.
 				//fTrimmed = fTrimA || fTrimB || fTrimC || fTrimD;
 				if ( fTrimA || fTrimB || fTrimC || fTrimD )
-					fTrimmed = TqTrue;
+					fTrimmed = true;
 			}
 
 			if ( tTime > 1 )
@@ -1013,10 +1013,10 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, 
 	CqString strTrimSense( "inside" );
 	if ( pattrTrimSense != 0 )
 		strTrimSense = pattrTrimSense[ 0 ];
-	TqBool bOutside = strTrimSense == "outside";
+	bool bOutside = strTrimSense == "outside";
 
 	// Determine whether we need to bother with trimming or not.
-	TqBool bCanBeTrimmed = pSurface() ->bCanBeTrimmed() && NULL != pGridA->pVar(EnvVars_u) && NULL != pGridA->pVar(EnvVars_v);
+	bool bCanBeTrimmed = pSurface() ->bCanBeTrimmed() && NULL != pGridA->pVar(EnvVars_u) && NULL != pGridA->pVar(EnvVars_v);
 
 	TqInt iv;
 	for ( iv = 0; iv < cv; iv++ )
@@ -1034,7 +1034,7 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, 
 			}
 
 			// If the MPG is trimmed then don't add it.
-			TqBool fTrimmed = TqFalse;
+			bool fTrimmed = false;
 			if ( bCanBeTrimmed )
 			{
 				TqFloat u1, v1, u2, v2, u3, v3, u4, v4;
@@ -1053,10 +1053,10 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, 
 				CqVector2D vecC(u3, v3);
 				CqVector2D vecD(u4, v4);
 
-				TqBool fTrimA = pSurface() ->bIsPointTrimmed( vecA );
-				TqBool fTrimB = pSurface() ->bIsPointTrimmed( vecB );
-				TqBool fTrimC = pSurface() ->bIsPointTrimmed( vecC );
-				TqBool fTrimD = pSurface() ->bIsPointTrimmed( vecD );
+				bool fTrimA = pSurface() ->bIsPointTrimmed( vecA );
+				bool fTrimB = pSurface() ->bIsPointTrimmed( vecB );
+				bool fTrimC = pSurface() ->bIsPointTrimmed( vecC );
+				bool fTrimD = pSurface() ->bIsPointTrimmed( vecD );
 
 				if ( bOutside )
 				{
@@ -1083,7 +1083,7 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, 
 				// If any points are trimmed mark the MPG as needing to be trim checked.
 				//fTrimmed = fTrimA || fTrimB || fTrimC || fTrimD;
 				if ( fTrimA || fTrimB || fTrimC || fTrimD )
-					fTrimmed = TqTrue;
+					fTrimmed = true;
 			}
 
 			CqMicroPolygonMotion *pNew = new CqMicroPolygonMotion();
@@ -1229,7 +1229,7 @@ void CqMicroPolygon::Initialise()
  * \return Boolean indicating sample hit.
  */
 
-TqBool CqMicroPolygon::fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time) const
+bool CqMicroPolygon::fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time) const
 {
 	// AGG - optimised version of above.
 	TqFloat x = vecP.x(), y = vecP.y();
@@ -1253,7 +1253,7 @@ TqBool CqMicroPolygon::fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloa
 			        (( x - m_pHitTestCache->m_X[e]) * m_pHitTestCache->m_XMultiplier[e] ) < 0)
 			{
 				m_pHitTestCache->m_LastFailedEdge = e;
-				return TqFalse;
+				return false;
 			}
 		}
 		else
@@ -1262,7 +1262,7 @@ TqBool CqMicroPolygon::fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloa
 			        (( x - m_pHitTestCache->m_X[e]) * m_pHitTestCache->m_XMultiplier[e] ) <= 0)
 			{
 				m_pHitTestCache->m_LastFailedEdge = e;
-				return TqFalse;
+				return false;
 			}
 		}
 
@@ -1274,7 +1274,7 @@ TqBool CqMicroPolygon::fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloa
 	Depth = ( m_pHitTestCache->m_D - ( m_pHitTestCache->m_VecN.x() * vecP.x() ) -
 	          ( m_pHitTestCache->m_VecN.y() * vecP.y() ) ) * m_pHitTestCache->m_OneOverVecNZ;
 
-	return TqTrue;
+	return true;
 }
 
 //---------------------------------------------------------------------
@@ -1355,7 +1355,7 @@ CqVector2D CqMicroPolygon::ReverseBilinear( const CqVector2D& v )
 {
 	CqVector2D kA, kB, kC, kD;
 	CqVector2D kResult;
-	TqBool flip = TqFalse;
+	bool flip = false;
 
 	kA = CqVector2D( PointA() );
 	kB = CqVector2D( PointB() );
@@ -1367,7 +1367,7 @@ CqVector2D CqMicroPolygon::ReverseBilinear( const CqVector2D& v )
 		CqVector2D temp = kC;
 		kC = kB;
 		kB = temp;
-		//flip = TqTrue;
+		//flip = true;
 	}
 
 	kD += kA - kB - kC;
@@ -1425,7 +1425,7 @@ CqVector2D CqMicroPolygon::ReverseBilinear( const CqVector2D& v )
  * \return Boolean indicating smaple hit.
  */
 
-TqBool CqMicroPolygon::Sample( const SqSampleData& sample, TqFloat& D, TqFloat time, TqBool UsingDof )
+bool CqMicroPolygon::Sample( const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof )
 {
 	const CqVector2D& vecSample = sample.m_Position;
 
@@ -1466,7 +1466,7 @@ TqBool CqMicroPolygon::Sample( const SqSampleData& sample, TqFloat& D, TqFloat t
 			CqString strTrimSense( "inside" );
 			if ( pattrTrimSense != 0 )
 				strTrimSense = pattrTrimSense[ 0 ];
-			TqBool bOutside = strTrimSense == "outside";
+			bool bOutside = strTrimSense == "outside";
 
 			CqVector2D vecUV = ReverseBilinear( vecSample );
 
@@ -1493,7 +1493,7 @@ TqBool CqMicroPolygon::Sample( const SqSampleData& sample, TqFloat& D, TqFloat t
 			if ( pGrid() ->pSurface() ->bCanBeTrimmed() && pGrid() ->pSurface() ->bIsPointTrimmed( vR ) && !bOutside )
 			{
 				STATS_INC( MPG_trimmed );
-				return ( TqFalse );
+				return ( false );
 			}
 		}
 
@@ -1508,13 +1508,13 @@ TqBool CqMicroPolygon::Sample( const SqSampleData& sample, TqFloat& D, TqFloat t
 
 			TqFloat v = ( Ay - By ) * vecSample.x() + ( Bx - Ax ) * vecSample.y() + ( Ax * By - Bx * Ay );
 			if ( v <= 0 )
-				return ( TqFalse );
+				return ( false );
 		}
 
-		return ( TqTrue );
+		return ( true );
 	}
 	else
-		return ( TqFalse );
+		return ( false );
 }
 
 //---------------------------------------------------------------------
@@ -1692,7 +1692,7 @@ void CqMicroPolygonMotion::BuildBoundList()
 		time += dt;
 	}
 
-	m_BoundReady = TqTrue;
+	m_BoundReady = true;
 }
 
 
@@ -1704,7 +1704,7 @@ void CqMicroPolygonMotion::BuildBoundList()
  * \return Boolean indicating smaple hit.
  */
 
-TqBool CqMicroPolygonMotion::Sample( const SqSampleData& sample, TqFloat& D, TqFloat time, TqBool UsingDof )
+bool CqMicroPolygonMotion::Sample( const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof )
 {
 	const CqVector2D& vecSample = sample.m_Position;
 	CqHitTestCache hitTestCache;
@@ -1713,7 +1713,7 @@ TqBool CqMicroPolygonMotion::Sample( const SqSampleData& sample, TqFloat& D, TqF
 	// Calculate the position in time of the MP.
 	TqInt iIndex = 0;
 	TqFloat Fraction = 0.0f;
-	TqBool Exact = TqTrue;
+	bool Exact = true;
 
 	if ( time > m_Times.front() )
 	{
@@ -1791,12 +1791,12 @@ TqBool CqMicroPolygonMotion::Sample( const SqSampleData& sample, TqFloat& D, TqF
 
 			TqFloat v = ( Ay - By ) * vecSample.x() + ( Bx - Ax ) * vecSample.y() + ( Ax * By - Bx * Ay );
 			if( v <= 0 )
-				return ( TqFalse );
+				return ( false );
 		}
-		return ( TqTrue );
+		return ( true );
 	}
 	else
-		return ( TqFalse );
+		return ( false );
 }
 
 

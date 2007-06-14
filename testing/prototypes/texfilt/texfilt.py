@@ -543,7 +543,7 @@ class TextureMap:
 		level = int(self.calculateLevel(s,t))
 		return self.levels[level].filterQuadAF(s,t, self.numSamples)
 
-	def filterEWA(self, sBox, tBox, deltaX=None, deltaY=None, J=None):
+	def filterEWA(self, sBox, tBox, deltaX=None, deltaY=None, J=None, returnWeights=False):
 		'''
 		Filter a portion of the texture using an elliptical gaussian filter, as
 		described in Heckbert's 1989 thesis, "Fundamentals of Texture Mapping
@@ -555,7 +555,7 @@ class TextureMap:
 		J - Jacobian of the coordinate transformation.
 		'''
 		level = int(self.calculateLevel(sBox,tBox))
-		col = self.levels[level].filterEWA(sBox, tBox, deltaX, deltaY, J)
+		col = self.levels[level].filterEWA(sBox, tBox, deltaX, deltaY, J, returnWeights)
 		return col #* 0.9**level
 
 	def displayLevel(self, level, s=None, t=None):
@@ -890,4 +890,15 @@ if __name__ == '__main__':
 	else:
 		# Area for hacking out solutions.
 		#showLevelCalcDifferences()
-		showFilteringMethodDifferences()
+		#showFilteringMethodDifferences()
+		im = getGridImg(1000, 30, 2)
+		texture = TextureMap(im, 8, levelCalcMethod='minQuadWidth')
+		N = 500
+		x,y = mgrid[-0.5:0.5:N*1j,-0.22:-0.005:N*2//5*1j]
+		trans = CompositionWarp(PerspectiveWarp(),AffineWarp(A=diag((10,30)), b = array((-5,4))))
+		i = N//2
+		j = N//4
+		xBox = array((x[i,j], x[i+1,j], x[i+1,j+1], x[i,j+1]))
+		yBox = array((y[i,j], y[i+1,j], y[i+1,j+1], y[i,j+1]))
+		sBox, tBox = trans.inv(xBox, yBox)
+		weights = texture.filterEWA(sBox, tBox, returnWeights=True)

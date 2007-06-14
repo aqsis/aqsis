@@ -60,14 +60,14 @@ struct IqParseNode;
 struct IqFuncDef
 {
 	virtual	TqInt	Type() const = 0;
-	virtual	TqBool	fLocal() const = 0;
+	virtual	bool	fLocal() const = 0;
 	virtual	const char*	strName() const = 0;
 	virtual	const char*	strVMName() const = 0;
 	virtual	const char*	strParams() const = 0;
 	virtual	const IqParseNode* pArgs() const = 0;
 	virtual	IqParseNode* pDef() = 0;
 	virtual	const IqParseNode* pDef() const = 0;
-	virtual	TqBool	fVarying() const = 0;
+	virtual	bool	fVarying() const = 0;
 	virtual	TqInt	VariableLength() const = 0;
 	virtual	TqInt	InternalUsage() const = 0;
 

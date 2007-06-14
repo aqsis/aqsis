@@ -103,8 +103,8 @@ class CqOcclusionTree// : public boost::enable_shared_from_this<CqOcclusionTree>
 		void InitialiseBounds();
 		void UpdateBounds();
 
-		TqBool CanCull( CqBound* bound );
-		void SampleMPG( CqMicroPolygon* pMPG, const CqBound& bound, TqBool usingMB, TqFloat time0, TqFloat time1, TqBool usingDof, TqInt dofboundindex, SqMpgSampleInfo& MpgSampleInfo, TqBool usingLOD, SqGridInfo& gridInfo);
+		bool CanCull( CqBound* bound );
+		void SampleMPG( CqMicroPolygon* pMPG, const CqBound& bound, bool usingMB, TqFloat time0, TqFloat time1, bool usingDof, TqInt dofboundindex, SqMpgSampleInfo& MpgSampleInfo, bool usingLOD, SqGridInfo& gridInfo);
 
 		TqInt NumSamples() const
 		{
@@ -164,7 +164,7 @@ class CqOcclusionBox
 		static void DeleteHierarchy();
 		static void SetupHierarchy( CqBucket* bucket, TqInt xMin, TqInt yMin, TqInt xMax, TqInt yMax );
 
-		static TqBool CanCull( CqBound* bound );
+		static bool CanCull( CqBound* bound );
 
 		static CqOcclusionTreePtr& KDTree()
 		{

@@ -184,13 +184,13 @@ class CqSurfaceNURBS : public CqSurface
 		}
 		/** Determine whether this surface is a mesh, and needs to be split into segments before continuing.
 		 */
-		TqBool fPatchMesh() const
+		bool fPatchMesh() const
 		{
 			return ( m_fPatchMesh );
 		}
 		/** Mark this mesh as being part of a mesh or not.
 		 */
-		void SetfPatchMesh( TqBool fPatchMesh = TqTrue )
+		void SetfPatchMesh( bool fPatchMesh = true )
 		{
 			m_fPatchMesh = fPatchMesh;
 		}
@@ -266,7 +266,7 @@ class CqSurfaceNURBS : public CqSurface
 		}
 
 		CqVector4D	EvaluateWithNormal( TqFloat u, TqFloat v, CqVector4D& P );
-		void	SplitNURBS( CqSurfaceNURBS& nrbA, CqSurfaceNURBS& nrbB, TqBool dirflag );
+		void	SplitNURBS( CqSurfaceNURBS& nrbA, CqSurfaceNURBS& nrbB, bool dirflag );
 		void	SubdivideSegments( std::vector<boost::shared_ptr<CqSurfaceNURBS> >& Array );
 		void	RefineKnotU( const std::vector<TqFloat>& X );
 		void	RefineKnotV( const std::vector<TqFloat>& X );
@@ -299,22 +299,22 @@ class CqSurfaceNURBS : public CqSurface
 		virtual void uSubdivide( CqSurfaceNURBS*& pnrbA, CqSurfaceNURBS*& pnrbB );
 		virtual void vSubdivide( CqSurfaceNURBS*& pnrbA, CqSurfaceNURBS*& pnrbB );
 		virtual void NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData );
-		//virtual TqBool		CanGenerateNormals() const	{ return( TqTrue ); }
+		//virtual bool		CanGenerateNormals() const	{ return( true ); }
 		virtual	void	GenerateGeometricNormals( TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pNormals );
 
 		virtual	CqBound	Bound() const;
 		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
-		virtual TqBool	Diceable();
+		virtual bool	Diceable();
 
 		/** Determine whether the passed surface is valid to be used as a
 		 *  frame in motion blur for this surface.
 		 */
-		virtual TqBool	IsMotionBlurMatch( CqSurface* pSurf )
+		virtual bool	IsMotionBlurMatch( CqSurface* pSurf )
 		{
-			return( TqFalse );
+			return( false );
 		}
 
-		virtual	void	SetDefaultPrimitiveVariables( TqBool bUseDef_st = TqTrue );
+		virtual	void	SetDefaultPrimitiveVariables( bool bUseDef_st = true );
 
 		/** Get the number of uniform variables for a NURBS surface.
 		 */
@@ -345,15 +345,15 @@ class CqSurfaceNURBS : public CqSurface
 			return ( cVarying() );
 		}
 
-		virtual const TqBool bCanBeTrimmed() const
+		virtual const bool bCanBeTrimmed() const
 		{
-			return ( TqTrue );
+			return ( true );
 		}
-		virtual const TqBool bIsPointTrimmed( const CqVector2D& p ) const
+		virtual const bool bIsPointTrimmed( const CqVector2D& p ) const
 		{
 			return ( m_TrimLoops.TrimPoint( p ) );
 		}
-		virtual const TqBool bIsLineIntersecting( const CqVector2D& v1, const CqVector2D& v2 ) const
+		virtual const bool bIsLineIntersecting( const CqVector2D& v1, const CqVector2D& v2 ) const
 		{
 			return ( m_TrimLoops.LineIntersects( v1, v2 ) );
 		}
@@ -377,7 +377,7 @@ class CqSurfaceNURBS : public CqSurface
 		TqFloat	m_vmin;		///< Minimum value of v over surface.
 		TqFloat m_vmax;		///< Maximum value of v over surface.
 		CqTrimLoopArray	m_TrimLoops;	///< Local trim curves, prepared for this surface.
-		TqBool	m_fPatchMesh;	///< Flag indicating this is an unsubdivided mesh.
+		bool	m_fPatchMesh;	///< Flag indicating this is an unsubdivided mesh.
 }
 ;
 

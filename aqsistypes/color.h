@@ -305,7 +305,7 @@ class COMMON_SHARE CqColor
 		 * \param colCmp the color to compare this with.
 		 * \return boolean indicating equality.
 		 */
-		TqBool	operator==( const CqColor &colCmp ) const
+		bool	operator==( const CqColor &colCmp ) const
 		{
 			return ( ( m_fRed == colCmp.m_fRed ) && ( m_fGreen == colCmp.m_fGreen ) && ( m_fBlue == colCmp.m_fBlue ) );
 		}
@@ -313,7 +313,7 @@ class COMMON_SHARE CqColor
 		 * \param colCmp the color to compare this with.
 		 * \return boolean indicating inequality.
 		 */
-		TqBool	operator!=( const CqColor &colCmp ) const
+		bool	operator!=( const CqColor &colCmp ) const
 		{
 			return ( !( *this == colCmp ) );
 		}
@@ -321,7 +321,7 @@ class COMMON_SHARE CqColor
 		 * \param colCmp the color to compare this with.
 		 * \return boolean indicating each component is greater than or equal to its counterpart in the argument.
 		 */
-		TqBool	operator>=( const CqColor &colCmp ) const
+		bool	operator>=( const CqColor &colCmp ) const
 		{
 			return ( ( m_fRed >= colCmp.m_fRed ) && ( m_fGreen >= colCmp.m_fGreen ) && ( m_fBlue >= colCmp.m_fBlue ) );
 		}
@@ -329,7 +329,7 @@ class COMMON_SHARE CqColor
 		 * \param colCmp the color to compare this with.
 		 * \return boolean indicating each component is less than or equal to its counterpart in the argument.
 		 */
-		TqBool	operator<=( const CqColor &colCmp ) const
+		bool	operator<=( const CqColor &colCmp ) const
 		{
 			return ( ( m_fRed <= colCmp.m_fRed ) && ( m_fGreen <= colCmp.m_fGreen ) && ( m_fBlue <= colCmp.m_fBlue ) );
 		}
@@ -337,7 +337,7 @@ class COMMON_SHARE CqColor
 		 * \param colCmp the color to compare this with.
 		 * \return boolean indicating each component is greater than its counterpart in the argument.
 		 */
-		TqBool	operator>( const CqColor &colCmp ) const
+		bool	operator>( const CqColor &colCmp ) const
 		{
 			return ( ( m_fRed > colCmp.m_fRed ) && ( m_fGreen > colCmp.m_fGreen ) && ( m_fBlue > colCmp.m_fBlue ) );
 		}
@@ -345,7 +345,7 @@ class COMMON_SHARE CqColor
 		 * \param colCmp the color to compare this with.
 		 * \return boolean indicating each component is less than its counterpart in the argument.
 		 */
-		TqBool	operator<( const CqColor &colCmp ) const
+		bool	operator<( const CqColor &colCmp ) const
 		{
 			return ( ( m_fRed < colCmp.m_fRed ) && ( m_fGreen < colCmp.m_fGreen ) && ( m_fBlue < colCmp.m_fBlue ) );
 		}

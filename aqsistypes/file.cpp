@@ -55,7 +55,7 @@ void CqFile::Open( const char* strFilename, const char* strSearchPathOption, std
 {
 	// Search in the current directory first.
 	m_strRealName = strFilename;
-	m_bInternal = TqTrue;
+	m_bInternal = true;
 	std::ifstream* pFStream = new std::ifstream( strFilename, mode );
 	if ( !pFStream->is_open() )
 	{

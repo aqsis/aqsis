@@ -104,7 +104,7 @@ class CqTextureMapBuffer
 				m_Height( 0 ),
 				m_Samples( 0 ),
 				m_Directory( 0 ),
-				m_fProtected( TqFalse )
+				m_fProtected( false )
 		{}
 		/** \brief Destructor.
 		 *
@@ -124,7 +124,7 @@ class CqTextureMapBuffer
 		 * \param directory The directory within the TIFF image map, used for multi image formats, i.e. cubeface environment map.
 		 * \param fProt A flag indicating the buffer should be protected from removal by the cache management system.
 		 */
-		void	Init( TqUlong xorigin, TqUlong yorigin, TqUlong width, TqUlong height, TqInt samples, TqInt directory = 0, TqBool fProt = TqFalse )
+		void	Init( TqUlong xorigin, TqUlong yorigin, TqUlong width, TqUlong height, TqInt samples, TqInt directory = 0, bool fProt = false )
 		{
 			Release();
 			m_sOrigin = xorigin;
@@ -152,7 +152,7 @@ class CqTextureMapBuffer
 		 * \param directory TIFF directory index.
 		 * \return Boolean indicating sample is within this buffer.
 		 */
-		TqBool	IsValid( TqUlong s, TqUlong t, TqInt directory = 0 )
+		bool	IsValid( TqUlong s, TqUlong t, TqInt directory = 0 )
 		{
 
 			return (
@@ -260,23 +260,23 @@ class CqTextureMapBuffer
 			return ( m_Samples );
 		}
 		/** Get the status of the protected flag
-		 *  \return TqTrue if the data within the texture cache for this buffer is protected from being flushed.
+		 *  \return true if the data within the texture cache for this buffer is protected from being flushed.
 		 */
-		TqBool	fProtected() const
+		bool	fProtected() const
 		{
 			return( m_fProtected );
 		}
 		/** Set this buffer as protected or not.
-		 *  \param fProt Set to TqTrue to protect the data in the cache for this buffer from being flushed during
+		 *  \param fProt Set to true to protect the data in the cache for this buffer from being flushed during
 		 *               routine cache management.
 		 */
-		void	SetfProtected( TqBool fProt = TqTrue )
+		void	SetfProtected( bool fProt = true )
 		{
 			m_fProtected = fProt;
 		}
 
 
-		TqPuchar AllocSegment( TqUlong width, TqUlong height, TqInt samples, TqBool fProt = TqFalse );
+		TqPuchar AllocSegment( TqUlong width, TqUlong height, TqInt samples, bool fProt = false );
 		void	FreeSegment( TqPuchar pBufferData, TqUlong width, TqUlong height, TqInt samples );
 
 	protected:
@@ -287,7 +287,7 @@ class CqTextureMapBuffer
 		TqUlong	m_Height;		///< Height of segment.
 		TqInt	m_Samples;		///< Number of samples per pixel.
 		TqInt	m_Directory;	///< TIFF directory index. Used for multi image textures, i.e. cubeface environment.
-		TqBool	m_fProtected;	///< Flag indicating if this buffer is protected from being automatically delted by the cache.
+		bool	m_fProtected;	///< Flag indicating if this buffer is protected from being automatically delted by the cache.
 
 }
 ;
@@ -382,7 +382,7 @@ class Cq16bitTextureMapBuffer : public CqTextureMapBuffer
 class CqShadowMapBuffer : public CqTextureMapBuffer
 {
 	public:
-		CqShadowMapBuffer() : CqTextureMapBuffer(), m_computed(TqFalse)
+		CqShadowMapBuffer() : CqTextureMapBuffer(), m_computed(false)
 		{}
 		virtual	~CqShadowMapBuffer()
 		{}
@@ -436,7 +436,7 @@ class CqShadowMapBuffer : public CqTextureMapBuffer
 						minz = MIN(val, minz);
 						maxz = MAX(val, maxz);
 					}
-				m_computed = TqTrue;
+				m_computed = true;
 				m_minz = minz;
 				m_maxz = maxz;
 			}
@@ -445,7 +445,7 @@ class CqShadowMapBuffer : public CqTextureMapBuffer
 	private:
 		TqFloat m_maxz;
 		TqFloat m_minz;
-		TqBool  m_computed;
+		bool  m_computed;
 
 }
 ;
@@ -470,7 +470,7 @@ class CqTextureMap : public IqTextureMap
 				m_Format( TexFormat_Plain ),
 				m_strName( strName ),
 				m_pImage( 0 ),
-				m_IsValid( TqTrue ),
+				m_IsValid( true ),
 				m_smode( WrapMode_Black ),
 				m_tmode( WrapMode_Black ),
 				m_FilterFunc( RiBoxFilter ),
@@ -585,12 +585,12 @@ class CqTextureMap : public IqTextureMap
 		 */
 		void	SetInvalid()
 		{
-			m_IsValid = TqFalse;
+			m_IsValid = false;
 		}
 
-		virtual	CqTextureMapBuffer*	GetBuffer( TqUlong s, TqUlong t, TqInt directory = 0, TqBool fProt = TqFalse );
-		TqBool	CreateMIPMAP( TqBool fProtectBuffers = TqFalse );
-		virtual	CqTextureMapBuffer* CreateBuffer( TqUlong xorigin, TqUlong yorigin, TqUlong width, TqUlong height, TqInt directory = 0, TqBool fProt = TqFalse )
+		virtual	CqTextureMapBuffer*	GetBuffer( TqUlong s, TqUlong t, TqInt directory = 0, bool fProt = false );
+		bool	CreateMIPMAP( bool fProtectBuffers = false );
+		virtual	CqTextureMapBuffer* CreateBuffer( TqUlong xorigin, TqUlong yorigin, TqUlong width, TqUlong height, TqInt directory = 0, bool fProt = false )
 		{
 			CqTextureMapBuffer* pRes;
 			switch( m_SampleFormat )
@@ -682,7 +682,7 @@ class CqTextureMap : public IqTextureMap
 			return( m_pImage );
 		}
 
-		TqBool BiLinear (TqFloat u, TqFloat v, TqInt umapsize, TqInt vmapsize, TqInt id, std::valarray<TqFloat > &m_color);
+		bool BiLinear (TqFloat u, TqFloat v, TqInt umapsize, TqInt vmapsize, TqInt id, std::valarray<TqFloat > &m_color);
 		void   CalculateLevel(TqFloat ds, TqFloat dt);
 
 	protected:
@@ -704,7 +704,7 @@ class CqTextureMap : public IqTextureMap
 
 		CqString	m_strName;	///< Name of the image.
 		TIFF*	m_pImage;		///< Pointer to an opened TIFF image.
-		TqBool	m_IsValid;		///< Indicate whether this image has been successfully opened.
+		bool	m_IsValid;		///< Indicate whether this image has been successfully opened.
 		enum EqWrapMode m_smode;        ///< Periodic, black, clamp
 		enum EqWrapMode m_tmode;        ///< Periodic, black, clamp
 		RtFilterFunc m_FilterFunc;      ///< Catmull-Rom, sinc, disk, ... pixelfilter
@@ -761,11 +761,11 @@ class CqImageDownsampler
 
 		/** \brief Downsample an image by a factor of two.
 		 */
-		CqTextureMapBuffer* downsample(CqTextureMapBuffer* inBuf, CqTextureMap& texMap, TqInt directory, TqBool protectBuffer);
+		CqTextureMapBuffer* downsample(CqTextureMapBuffer* inBuf, CqTextureMap& texMap, TqInt directory, bool protectBuffer);
 	private:
 		/** \brief Compute and cache filter kernel values for the given filter function.
 		 */
-		void computeFilterKernel(TqFloat sWidth, TqFloat tWidth, RtFilterFunc filterFunc, TqBool evenFilterS, TqBool evenFilterT);
+		void computeFilterKernel(TqFloat sWidth, TqFloat tWidth, RtFilterFunc filterFunc, bool evenFilterS, bool evenFilterT);
 		/** \brief Wrap a position at the image edges according to current wrapmode
 		 */
 		inline TqInt edgeWrap(TqInt pos, TqInt posMax, EqWrapMode mode);
@@ -891,11 +891,11 @@ class CqShadowMap : public CqTextureMap
 		TqFloat	Sample( const CqVector3D&	vecPoint );
 		void	SaveZFile();
 		void	LoadZFile();
-		void	SaveShadowMap( const CqString& strShadowName, TqBool append = TqFalse );
+		void	SaveShadowMap( const CqString& strShadowName, bool append = false );
 		void	ReadMatrices();
 		TqInt   PseudoMipMaps( TqUlong s, TqInt index );
 
-		virtual	CqTextureMapBuffer* CreateBuffer( TqUlong xorigin, TqUlong yorigin, TqUlong width, TqUlong height, TqInt directory = 0, TqBool fProt = TqFalse )
+		virtual	CqTextureMapBuffer* CreateBuffer( TqUlong xorigin, TqUlong yorigin, TqUlong width, TqUlong height, TqInt directory = 0, bool fProt = false )
 		{
 			CqTextureMapBuffer* pRes = new CqShadowMapBuffer();
 			pRes->Init( xorigin, yorigin, width, height, m_SamplesPerPixel, directory, fProt );

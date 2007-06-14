@@ -50,7 +50,7 @@ class CqCurve : public CqSurface
 		virtual ~CqCurve();
 		virtual void AddPrimitiveVariable( CqParameter* pParam );
 		virtual	CqBound	Bound() const;
-		virtual void SetDefaultPrimitiveVariables( TqBool bUseDef_st = TqTrue );
+		virtual void SetDefaultPrimitiveVariables( bool bUseDef_st = true );
 #ifdef _DEBUG
 
 		CqString className() const
@@ -86,7 +86,7 @@ class CqCurve : public CqSurface
 		/** Returns whether the curve is diceable - at the moment, no Curves
 		 * are directly diceable since they're converted to patches just prior
 		 * to rendering. */
-		virtual TqBool Diceable()
+		virtual bool Diceable()
 		{
 			// OK, here the CqCubicCurveSegment line has two options:
 			//  1. split into two more lines
@@ -148,15 +148,15 @@ class CqCurve : public CqSurface
 				
 			}
 
-			return TqFalse;
+			return false;
 		}
 
 		/** Determine whether the passed surface is valid to be used as a
 		 *  frame in motion blur for this surface.
 		 */
-		virtual TqBool	IsMotionBlurMatch( CqSurface* pSurf )
+		virtual bool	IsMotionBlurMatch( CqSurface* pSurf )
 		{
-			return( TqFalse );
+			return( false );
 		}
 		/** Copy the information about splitting and dicing from the specified GPrim.
 		 * \param From A CqSurface reference to copy the information from.
@@ -170,17 +170,17 @@ class CqCurve : public CqSurface
 		}
 
 		/** Returns a normal to the curve. */
-		TqBool GetNormal( TqInt index, CqVector3D& normal ) const
+		bool GetNormal( TqInt index, CqVector3D& normal ) const
 		{
 			if ( N() != NULL )
 			{
 				normal = N()->pValue( index )[0];
-				return TqTrue;
+				return true;
 			}
 			else
 			{
 				normal = CqVector3D( 0, 0, -1 );  // default camera normal
-				return TqFalse;
+				return false;
 			}
 		}
 		/** Returns a string name of the class. */
@@ -265,7 +265,7 @@ class CqLinearCurveSegment : public CqCurve
 		void NaturalSubdivide(
 		    CqParameter* pParam,
 		    CqParameter* pParam1, CqParameter* pParam2,
-		    TqBool u
+		    bool u
 		);
 		virtual TqInt Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
 		TqInt SplitToCurves( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
@@ -310,7 +310,7 @@ class CqLinearCurveSegment : public CqCurve
 		    CqParameterTyped<T, SLT>* pParam,
 		    CqParameterTyped<T, SLT>* pResult1,
 		    CqParameterTyped<T, SLT>* pResult2,
-		    TqBool u
+		    bool u
 		)
 		{
 			// we can only split curves along v, so enforce this
@@ -343,12 +343,12 @@ class CqCubicCurveSegment : public CqCurve
 		void NaturalSubdivide(
 		    CqParameter* pParam,
 		    CqParameter* pParam1, CqParameter* pParam2,
-		    TqBool u
+		    bool u
 		);
 		void VaryingNaturalSubdivide(
 		    CqParameter* pParam,
 		    CqParameter* pParam1, CqParameter* pParam2,
-		    TqBool u
+		    bool u
 		);
 		virtual TqInt Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
 		TqInt SplitToCurves( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
@@ -398,7 +398,7 @@ class CqCubicCurveSegment : public CqCurve
 		    CqParameterTyped<T, SLT>* pParam,
 		    CqParameterTyped<T, SLT>* pResult1,
 		    CqParameterTyped<T, SLT>* pResult2,
-		    TqBool u
+		    bool u
 		)
 		{
 			// we can only split curves along v, so enforce this
@@ -426,7 +426,7 @@ class CqCubicCurveSegment : public CqCurve
 		    CqParameterTyped<T, SLT>* pParam,
 		    CqParameterTyped<T, SLT>* pResult1,
 		    CqParameterTyped<T, SLT>* pResult2,
-		    TqBool u
+		    bool u
 		)
 		{
 			// we can only split curves along v, so enforce this
@@ -468,7 +468,7 @@ class CqCurvesGroup : public CqCurve
 	protected:
 		TqInt m_ncurves;       ///< Number of curves in the group.
 		std::vector<TqInt> m_nvertices;  ///< Number of vertices in each curve.
-		TqBool m_periodic;      ///< true if the curves specified are periodic
+		bool m_periodic;      ///< true if the curves specified are periodic
 		TqInt m_nTotalVerts;   ///< total number of vertices
 }
 ;
@@ -488,7 +488,7 @@ class CqLinearCurvesGroup : public CqCurvesGroup
 		CqLinearCurvesGroup()
 		{}
 		CqLinearCurvesGroup(
-		    TqInt ncurves, TqInt nvertices[], TqBool periodic = TqFalse
+		    TqInt ncurves, TqInt nvertices[], bool periodic = false
 		);
 		virtual ~CqLinearCurvesGroup();
 		virtual	TqInt Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
@@ -549,7 +549,7 @@ class CqCubicCurvesGroup : public CqCurvesGroup
 	public:
 		CqCubicCurvesGroup() {}
 		CqCubicCurvesGroup(
-		    TqInt ncurves, TqInt nvertices[], TqBool periodic = TqFalse
+		    TqInt ncurves, TqInt nvertices[], bool periodic = false
 		);
 		virtual ~CqCubicCurvesGroup();
 		virtual	TqUint cVarying() const;

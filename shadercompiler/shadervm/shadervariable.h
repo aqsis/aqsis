@@ -60,28 +60,28 @@ class CqShaderVariable : public IqShaderData
 {
 	public:
 		CqShaderVariable();
-		CqShaderVariable( const char* strName, TqBool fParameter = TqFalse );
+		CqShaderVariable( const char* strName, bool fParameter = false );
 		virtual	~CqShaderVariable();
 
-		virtual void GetBool( TqBool& res, TqInt index = 0 ) const
+		virtual void GetBool( bool& res, TqInt index = 0 ) const
 		{
-			assert( TqFalse );
+			assert( false );
 		}
-		virtual void GetBoolPtr( const TqBool*& res ) const
+		virtual void GetBoolPtr( const bool*& res ) const
 		{
-			assert( TqFalse );
+			assert( false );
 		}
-		virtual void GetBoolPtr( TqBool*& res )
+		virtual void GetBoolPtr( bool*& res )
 		{
-			assert( TqFalse );
+			assert( false );
 		}
-		virtual void SetBool( const TqBool& val )
+		virtual void SetBool( const bool& val )
 		{
-			assert( TqFalse );
+			assert( false );
 		}
-		virtual void SetBool( const TqBool& val, TqInt index )
+		virtual void SetBool( const bool& val, TqInt index )
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 
 		/** Get the name of this variable.
@@ -94,14 +94,14 @@ class CqShaderVariable : public IqShaderData
 
 		/** Determine if this variable is storage for a shader argument.
 		 */
-		virtual TqBool fParameter() const
+		virtual bool fParameter() const
 		{
 			return ( m_fParameter );
 		}
 
 		/** Indicate whether or not this variable is a shader argument.
 		 */
-		void SetfParameter( TqBool fParameter = TqTrue )
+		void SetfParameter( bool fParameter = true )
 		{
 			m_fParameter = fParameter;
 		}
@@ -117,7 +117,7 @@ class CqShaderVariable : public IqShaderData
 
 	protected:
 		CqString	m_strName;		///< Name of this variable.
-		TqBool	m_fParameter;	///< Flag indicating this variable is a shader argument.
+		bool	m_fParameter;	///< Flag indicating this variable is a shader argument.
 }
 ;
 
@@ -137,7 +137,7 @@ class CqShaderVariableArray: public CqShaderVariable
 		 * \param Count the size of the array.
 		 * \param fParameter Boolean value, true indicates the shader variable is a shader parameter.
 		 */
-		CqShaderVariableArray( const char* name, TqInt Count, TqBool fParameter = TqFalse ) : CqShaderVariable( name, fParameter )
+		CqShaderVariableArray( const char* name, TqInt Count, bool fParameter = false ) : CqShaderVariable( name, fParameter )
 		{
 			assert( Count > 0 );
 			m_aVariables.resize( Count );
@@ -172,181 +172,181 @@ class CqShaderVariableArray: public CqShaderVariable
 
 		virtual	void	GetFloat( TqFloat& res, TqInt index = 0 ) const
 		{
-			assert( TqFalse );
+			assert( false );
 			m_aVariables[ 0 ] ->GetFloat( res, index );
 		}
 		virtual	void	GetString( CqString& res, TqInt index = 0 ) const
 		{
-			assert( TqFalse );
+			assert( false );
 			m_aVariables[ 0 ] ->GetString( res, index );
 		}
 		virtual	void	GetPoint( CqVector3D& res, TqInt index = 0 ) const
 		{
-			assert( TqFalse );
+			assert( false );
 			m_aVariables[ 0 ] ->GetPoint( res, index );
 		}
 		virtual	void	GetVector( CqVector3D& res, TqInt index = 0 ) const
 		{
-			assert( TqFalse );
+			assert( false );
 			m_aVariables[ 0 ] ->GetVector( res, index );
 		}
 		virtual	void	GetNormal( CqVector3D& res, TqInt index = 0 ) const
 		{
-			assert( TqFalse );
+			assert( false );
 			m_aVariables[ 0 ] ->GetNormal( res, index );
 		}
 		virtual	void	GetColor( CqColor& res, TqInt index = 0 ) const
 		{
-			assert( TqFalse );
+			assert( false );
 			m_aVariables[ 0 ] ->GetColor( res, index );
 		}
 		virtual	void	GetMatrix( CqMatrix& res, TqInt index = 0 ) const
 		{
-			assert( TqFalse );
+			assert( false );
 			m_aVariables[ 0 ] ->GetMatrix( res, index );
 		}
 
 		virtual	void	GetFloatPtr( const TqFloat*& res ) const
 		{
-			assert( TqFalse );
+			assert( false );
 			m_aVariables[ 0 ] ->GetFloatPtr( res );
 		}
 		virtual	void	GetStringPtr( const CqString*& res ) const
 		{
-			assert( TqFalse );
+			assert( false );
 			m_aVariables[ 0 ] ->GetStringPtr( res );
 		}
 		virtual	void	GetPointPtr( const CqVector3D*& res ) const
 		{
-			assert( TqFalse );
+			assert( false );
 			m_aVariables[ 0 ] ->GetPointPtr( res );
 		}
 		virtual	void	GetVectorPtr( const CqVector3D*& res ) const
 		{
-			assert( TqFalse );
+			assert( false );
 			m_aVariables[ 0 ] ->GetVectorPtr( res );
 		}
 		virtual	void	GetNormalPtr( const CqVector3D*& res ) const
 		{
-			assert( TqFalse );
+			assert( false );
 			m_aVariables[ 0 ] ->GetNormalPtr( res );
 		}
 		virtual	void	GetColorPtr( const CqColor*& res ) const
 		{
-			assert( TqFalse );
+			assert( false );
 			m_aVariables[ 0 ] ->GetColorPtr( res );
 		}
 		virtual	void	GetMatrixPtr( const CqMatrix*& res ) const
 		{
-			assert( TqFalse );
+			assert( false );
 			m_aVariables[ 0 ] ->GetMatrixPtr( res );
 		}
 
 		virtual	void	GetFloatPtr( TqFloat*& res )
 		{
-			assert( TqFalse );
+			assert( false );
 			m_aVariables[ 0 ] ->GetFloatPtr( res );
 		}
 		virtual	void	GetStringPtr( CqString*& res )
 		{
-			assert( TqFalse );
+			assert( false );
 			m_aVariables[ 0 ] ->GetStringPtr( res );
 		}
 		virtual	void	GetPointPtr( CqVector3D*& res )
 		{
-			assert( TqFalse );
+			assert( false );
 			m_aVariables[ 0 ] ->GetPointPtr( res );
 		}
 		virtual	void	GetVectorPtr( CqVector3D*& res )
 		{
-			assert( TqFalse );
+			assert( false );
 			m_aVariables[ 0 ] ->GetVectorPtr( res );
 		}
 		virtual	void	GetNormalPtr( CqVector3D*& res )
 		{
-			assert( TqFalse );
+			assert( false );
 			m_aVariables[ 0 ] ->GetNormalPtr( res );
 		}
 		virtual	void	GetColorPtr( CqColor*& res )
 		{
-			assert( TqFalse );
+			assert( false );
 			m_aVariables[ 0 ] ->GetColorPtr( res );
 		}
 		virtual	void	GetMatrixPtr( CqMatrix*& res )
 		{
-			assert( TqFalse );
+			assert( false );
 			m_aVariables[ 0 ] ->GetMatrixPtr( res );
 		}
 
 		virtual	void	SetFloat( const TqFloat& f )
 		{
-			assert( TqFalse );
+			assert( false );
 			m_aVariables[ 0 ] ->SetFloat( f );
 		}
 		virtual	void	SetString( const CqString& s )
 		{
-			assert( TqFalse );
+			assert( false );
 			m_aVariables[ 0 ] ->SetString( s );
 		}
 		virtual	void	SetPoint( const CqVector3D& p )
 		{
-			assert( TqFalse );
+			assert( false );
 			m_aVariables[ 0 ] ->SetPoint( p );
 		}
 		virtual	void	SetVector( const CqVector3D& v )
 		{
-			assert( TqFalse );
+			assert( false );
 			m_aVariables[ 0 ] ->SetVector( v );
 		}
 		virtual	void	SetNormal( const CqVector3D& n )
 		{
-			assert( TqFalse );
+			assert( false );
 			m_aVariables[ 0 ] ->SetNormal( n );
 		}
 		virtual	void	SetColor( const CqColor& c )
 		{
-			assert( TqFalse );
+			assert( false );
 			m_aVariables[ 0 ] ->SetColor( c );
 		}
 		virtual	void	SetMatrix( const CqMatrix& m )
 		{
-			assert( TqFalse );
+			assert( false );
 			m_aVariables[ 0 ] ->SetMatrix( m );
 		}
 
 		virtual	void	SetFloat( const TqFloat& f, TqInt index )
 		{
-			assert( TqFalse );
+			assert( false );
 			m_aVariables[ 0 ] ->SetFloat( f, index );
 		}
 		virtual	void	SetString( const CqString& s, TqInt index )
 		{
-			assert( TqFalse );
+			assert( false );
 			m_aVariables[ 0 ] ->SetString( s, index );
 		}
 		virtual	void	SetPoint( const CqVector3D& p, TqInt index )
 		{
-			assert( TqFalse );
+			assert( false );
 			m_aVariables[ 0 ] ->SetPoint( p, index );
 		}
 		virtual	void	SetVector( const CqVector3D& v, TqInt index )
 		{
-			assert( TqFalse );
+			assert( false );
 			m_aVariables[ 0 ] ->SetVector( v, index );
 		}
 		virtual	void	SetNormal( const CqVector3D& n, TqInt index )
 		{
-			assert( TqFalse );
+			assert( false );
 			m_aVariables[ 0 ] ->SetNormal( n, index );
 		}
 		virtual	void	SetColor( const CqColor& c, TqInt index )
 		{
-			assert( TqFalse );
+			assert( false );
 			m_aVariables[ 0 ] ->SetColor( c, index );
 		}
 		virtual	void	SetMatrix( const CqMatrix& m, TqInt index )
 		{
-			assert( TqFalse );
+			assert( false );
 			m_aVariables[ 0 ] ->SetMatrix( m, index );
 		}
 
@@ -435,7 +435,7 @@ class CqShaderVariableUniform : public CqShaderVariable
 		CqShaderVariableUniform() : CqShaderVariable()
 		{
 		}
-		CqShaderVariableUniform( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariable( strName, fParameter )
+		CqShaderVariableUniform( const char* strName, bool fParameter = false ) : CqShaderVariable( strName, fParameter )
 		{
 
 		}
@@ -462,121 +462,121 @@ class CqShaderVariableUniform : public CqShaderVariable
 
 		virtual	void	GetFloat( TqFloat& res, TqInt index = 0 ) const
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 		virtual	void	GetString( CqString& res, TqInt index = 0 ) const
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 		virtual	void	GetPoint( CqVector3D& res, TqInt index = 0 ) const
 		{
 			Aqsis::log() << error << "Accessing " << Type() << " as point" << std::endl;
-			assert( TqFalse );
+			assert( false );
 		}
 		virtual	void	GetVector( CqVector3D& res, TqInt index = 0 ) const
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 		virtual	void	GetNormal( CqVector3D& res, TqInt index = 0 ) const
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 		virtual	void	GetColor( CqColor& res, TqInt index = 0 ) const
 		{
 			Aqsis::log() << error << "Accessing \"" << Type() << " " << strName().c_str() << "\" as color" << std::endl;
-			assert( TqFalse );
+			assert( false );
 		}
 		virtual	void	GetMatrix( CqMatrix& res, TqInt index = 0 ) const
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 
 		virtual	void	GetFloatPtr( const TqFloat*& res ) const
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 		virtual	void	GetStringPtr( const CqString*& res ) const
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 		virtual	void	GetPointPtr( const CqVector3D*& res ) const
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 		virtual	void	GetVectorPtr( const CqVector3D*& res ) const
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 		virtual	void	GetNormalPtr( const CqVector3D*& res ) const
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 		virtual	void	GetColorPtr( const CqColor*& res ) const
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 		virtual	void	GetMatrixPtr( const CqMatrix*& res ) const
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 
 		virtual	void	GetFloatPtr( TqFloat*& res )
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 		virtual	void	GetStringPtr( CqString*& res )
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 		virtual	void	GetPointPtr( CqVector3D*& res )
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 		virtual	void	GetVectorPtr( CqVector3D*& res )
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 		virtual	void	GetNormalPtr( CqVector3D*& res )
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 		virtual	void	GetColorPtr( CqColor*& res )
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 		virtual	void	GetMatrixPtr( CqMatrix*& res )
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 
 
 		virtual	void	SetFloat( const TqFloat& f )
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 		virtual	void	SetString( const CqString& s )
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 		virtual	void	SetPoint( const CqVector3D& p )
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 		virtual	void	SetVector( const CqVector3D& v )
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 		virtual	void	SetNormal( const CqVector3D& n )
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 		virtual	void	SetColor( const CqColor& c )
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 		virtual	void	SetMatrix( const CqMatrix& m )
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 
 		virtual	void	SetFloat( const TqFloat& f, TqInt index )
@@ -621,7 +621,7 @@ class CqShaderVariableUniform : public CqShaderVariable
 		 */
 		virtual	void	SetValueFromVariable( const IqShaderData* pVal )
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 
 		virtual	EqVariableClass	Class() const
@@ -654,7 +654,7 @@ class CqShaderVariableUniformFloat : public CqShaderVariableUniform<type_float, 
 		CqShaderVariableUniformFloat( ) : CqShaderVariableUniform<type_float, TqFloat>()
 		{
 		}
-		CqShaderVariableUniformFloat( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableUniform<type_float, TqFloat>( strName, fParameter )
+		CqShaderVariableUniformFloat( const char* strName, bool fParameter = false ) : CqShaderVariableUniform<type_float, TqFloat>( strName, fParameter )
 		{
 		}
 		virtual	void	GetFloat( TqFloat& res, TqInt index = 0 ) const
@@ -669,15 +669,15 @@ class CqShaderVariableUniformFloat : public CqShaderVariableUniform<type_float, 
 		{
 			m_Value = f;
 		}
-		virtual void	GetBool( TqBool& res, TqInt index = 0 ) const
+		virtual void	GetBool( bool& res, TqInt index = 0 ) const
 		{
 			res = m_Value != 0.0f;
 		}
-		virtual void	SetBool( const TqBool& val )
+		virtual void	SetBool( const bool& val )
 		{
 			m_Value = val;
 		}
-		virtual void	SetBool( const TqBool& val, TqInt index )
+		virtual void	SetBool( const bool& val, TqInt index )
 		{
 			m_Value = val;
 		}
@@ -703,7 +703,7 @@ class CqShaderVariableUniformString : public CqShaderVariableUniform<type_string
 		CqShaderVariableUniformString( ) : CqShaderVariableUniform<type_string, CqString>()
 		{
 		}
-		CqShaderVariableUniformString( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableUniform<type_string, CqString>( strName, fParameter )
+		CqShaderVariableUniformString( const char* strName, bool fParameter = false ) : CqShaderVariableUniform<type_string, CqString>( strName, fParameter )
 		{
 		}
 		virtual	void	GetString( CqString& res, TqInt index = 0 ) const
@@ -718,7 +718,7 @@ class CqShaderVariableUniformString : public CqShaderVariableUniform<type_string
 		{
 			m_Value = s;
 		}
-		virtual void	GetBool( TqBool& res, TqInt index = 0 ) const
+		virtual void	GetBool( bool& res, TqInt index = 0 ) const
 		{
 			res = m_Value.compare( "" ) == 0;
 		}
@@ -744,7 +744,7 @@ class CqShaderVariableUniformPoint : public CqShaderVariableUniform<type_point, 
 		CqShaderVariableUniformPoint() : CqShaderVariableUniform<type_point, CqVector3D>()
 		{
 		}
-		CqShaderVariableUniformPoint( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableUniform<type_point, CqVector3D>( strName, fParameter )
+		CqShaderVariableUniformPoint( const char* strName, bool fParameter = false ) : CqShaderVariableUniform<type_point, CqVector3D>( strName, fParameter )
 		{
 		}
 		virtual	void	GetPoint( CqVector3D& res, TqInt index = 0 ) const
@@ -787,7 +787,7 @@ class CqShaderVariableUniformPoint : public CqShaderVariableUniform<type_point, 
 		{
 			m_Value = p;
 		}
-		virtual void	GetBool( TqBool& res, TqInt index = 0 ) const
+		virtual void	GetBool( bool& res, TqInt index = 0 ) const
 		{
 			res = ( ( m_Value.x() != 0.0f ) || ( m_Value.y() != 0.0f ) || ( m_Value.z() != 0.0f ) );
 		}
@@ -813,7 +813,7 @@ class CqShaderVariableUniformVector : public CqShaderVariableUniform<type_vector
 		CqShaderVariableUniformVector() : CqShaderVariableUniform<type_vector, CqVector3D>()
 		{
 		}
-		CqShaderVariableUniformVector( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableUniform<type_vector, CqVector3D>( strName, fParameter )
+		CqShaderVariableUniformVector( const char* strName, bool fParameter = false ) : CqShaderVariableUniform<type_vector, CqVector3D>( strName, fParameter )
 		{
 		}
 		virtual	void	GetPoint( CqVector3D& res, TqInt index = 0 ) const
@@ -856,7 +856,7 @@ class CqShaderVariableUniformVector : public CqShaderVariableUniform<type_vector
 		{
 			m_Value = p;
 		}
-		virtual void	GetBool( TqBool& res, TqInt index = 0 ) const
+		virtual void	GetBool( bool& res, TqInt index = 0 ) const
 		{
 			res = ( ( m_Value.x() != 0.0f ) || ( m_Value.y() != 0.0f ) || ( m_Value.z() != 0.0f ) );
 		}
@@ -882,7 +882,7 @@ class CqShaderVariableUniformNormal : public CqShaderVariableUniform<type_normal
 		CqShaderVariableUniformNormal() : CqShaderVariableUniform<type_normal, CqVector3D>()
 		{
 		}
-		CqShaderVariableUniformNormal( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableUniform<type_normal, CqVector3D>( strName, fParameter )
+		CqShaderVariableUniformNormal( const char* strName, bool fParameter = false ) : CqShaderVariableUniform<type_normal, CqVector3D>( strName, fParameter )
 		{}
 		virtual	void	GetPoint( CqVector3D& res, TqInt index = 0 ) const
 		{
@@ -924,7 +924,7 @@ class CqShaderVariableUniformNormal : public CqShaderVariableUniform<type_normal
 		{
 			m_Value = p;
 		}
-		virtual void	GetBool( TqBool& res, TqInt index = 0 ) const
+		virtual void	GetBool( bool& res, TqInt index = 0 ) const
 		{
 			res = ( ( m_Value.x() != 0.0f ) || ( m_Value.y() != 0.0f ) || ( m_Value.z() != 0.0f ) );
 		}
@@ -950,7 +950,7 @@ class CqShaderVariableUniformColor : public CqShaderVariableUniform<type_color, 
 		CqShaderVariableUniformColor() : CqShaderVariableUniform<type_color, CqColor>()
 		{
 		}
-		CqShaderVariableUniformColor( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableUniform<type_color, CqColor>( strName, fParameter )
+		CqShaderVariableUniformColor( const char* strName, bool fParameter = false ) : CqShaderVariableUniform<type_color, CqColor>( strName, fParameter )
 		{
 		}
 		virtual	void	GetColor( CqColor& res, TqInt index = 0 ) const
@@ -972,7 +972,7 @@ class CqShaderVariableUniformColor : public CqShaderVariableUniform<type_color, 
 		{
 			pVal->GetColor( m_Value );
 		}
-		virtual void	GetBool( TqBool& res, TqInt index = 0 ) const
+		virtual void	GetBool( bool& res, TqInt index = 0 ) const
 		{
 			res = ( ( m_Value.fRed() != 0.0f ) || ( m_Value.fGreen() != 0.0f ) || ( m_Value.fBlue() != 0.0f ) );
 		}
@@ -991,7 +991,7 @@ class CqShaderVariableUniformMatrix : public CqShaderVariableUniform<type_matrix
 		CqShaderVariableUniformMatrix() : CqShaderVariableUniform<type_matrix, CqMatrix>()
 		{
 		}
-		CqShaderVariableUniformMatrix( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableUniform<type_matrix, CqMatrix>( strName, fParameter )
+		CqShaderVariableUniformMatrix( const char* strName, bool fParameter = false ) : CqShaderVariableUniform<type_matrix, CqMatrix>( strName, fParameter )
 		{
 		}
 		virtual	void	GetMatrix( CqMatrix& res, TqInt index = 0 ) const
@@ -1039,7 +1039,7 @@ class CqShaderVariableVarying : public CqShaderVariable
 			m_aValue.resize( 1 );
 		}
 
-		CqShaderVariableVarying( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariable( strName, fParameter )
+		CqShaderVariableVarying( const char* strName, bool fParameter = false ) : CqShaderVariable( strName, fParameter )
 		{
 			m_aValue.resize( 1 );
 		}
@@ -1072,147 +1072,147 @@ class CqShaderVariableVarying : public CqShaderVariable
 
 		virtual	void	GetFloat( TqFloat &res, TqInt index = 0 ) const
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 		virtual	void	GetString( CqString& res, TqInt index = 0 ) const
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 		virtual	void	GetPoint( CqVector3D& res, TqInt index = 0 ) const
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 		virtual	void	GetVector( CqVector3D& res, TqInt index = 0 ) const
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 		virtual	void	GetNormal( CqVector3D& res, TqInt index = 0 ) const
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 		virtual	void	GetColor( CqColor& res, TqInt index = 0 ) const
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 		virtual	void	GetMatrix( CqMatrix& res, TqInt index = 0 ) const
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 
 		virtual	void	GetFloatPtr( const TqFloat*& res ) const
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 		virtual	void	GetStringPtr( const CqString*& res ) const
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 		virtual	void	GetPointPtr( const CqVector3D*& res ) const
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 		virtual	void	GetVectorPtr( const CqVector3D*& res ) const
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 		virtual	void	GetNormalPtr( const CqVector3D*& res ) const
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 		virtual	void	GetColorPtr( const CqColor*& res ) const
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 		virtual	void	GetMatrixPtr( const CqMatrix*& res ) const
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 
 		virtual	void	GetFloatPtr( TqFloat*& res )
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 		virtual	void	GetStringPtr( CqString*& res )
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 		virtual	void	GetPointPtr( CqVector3D*& res )
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 		virtual	void	GetVectorPtr( CqVector3D*& res )
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 		virtual	void	GetNormalPtr( CqVector3D*& res )
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 		virtual	void	GetColorPtr( CqColor*& res )
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 		virtual	void	GetMatrixPtr( CqMatrix*& res )
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 
 		virtual	void	SetFloat( const TqFloat& f )
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 		virtual	void	SetString( const CqString& s )
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 		virtual	void	SetPoint( const CqVector3D& p )
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 		virtual	void	SetVector( const CqVector3D& v )
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 		virtual	void	SetNormal( const CqVector3D& n )
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 		virtual	void	SetColor( const CqColor& c )
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 		virtual	void	SetMatrix( const CqMatrix& m )
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 
 		virtual	void	SetFloat( const TqFloat& f, TqInt index )
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 		virtual	void	SetString( const CqString& s, TqInt index )
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 		virtual	void	SetPoint( const CqVector3D& p, TqInt index )
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 		virtual	void	SetVector( const CqVector3D& v, TqInt index )
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 		virtual	void	SetNormal( const CqVector3D& n, TqInt index )
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 		virtual	void	SetColor( const CqColor& c, TqInt index )
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 		virtual	void	SetMatrix( const CqMatrix& m, TqInt index )
 		{
-			assert( TqFalse );
+			assert( false );
 		}
 
 		virtual	EqVariableClass	Class() const
@@ -1247,7 +1247,7 @@ class CqShaderVariableVaryingFloat : public CqShaderVariableVarying<type_float, 
 		CqShaderVariableVaryingFloat( ) : CqShaderVariableVarying<type_float, TqFloat>( )
 		{
 		}
-		CqShaderVariableVaryingFloat( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableVarying<type_float, TqFloat>( strName, fParameter )
+		CqShaderVariableVaryingFloat( const char* strName, bool fParameter = false ) : CqShaderVariableVarying<type_float, TqFloat>( strName, fParameter )
 		{
 		}
 		virtual	void	GetFloat( TqFloat& res, TqInt index = 0 ) const
@@ -1290,15 +1290,15 @@ class CqShaderVariableVaryingFloat : public CqShaderVariableVarying<type_float, 
 				m_aValue.assign( m_aValue.size(), temp );
 			}
 		}
-		virtual void	GetBool( TqBool& res, TqInt index = 0 ) const
+		virtual void	GetBool( bool& res, TqInt index = 0 ) const
 		{
 			res = m_aValue[ index ] != 0.0f;
 		}
-		virtual void	SetBool( const TqBool& val )
+		virtual void	SetBool( const bool& val )
 		{
 			m_aValue.assign( m_aValue.size(), val );
 		}
-		virtual void	SetBool( const TqBool& val, TqInt index )
+		virtual void	SetBool( const bool& val, TqInt index )
 		{
 			m_aValue[ index ] = val;
 		}
@@ -1326,7 +1326,7 @@ class CqShaderVariableVaryingString : public CqShaderVariableVarying<type_string
 		CqShaderVariableVaryingString( ) : CqShaderVariableVarying<type_string, CqString>( )
 		{
 		}
-		CqShaderVariableVaryingString( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableVarying<type_string, CqString>( strName, fParameter )
+		CqShaderVariableVaryingString( const char* strName, bool fParameter = false ) : CqShaderVariableVarying<type_string, CqString>( strName, fParameter )
 		{
 		}
 		virtual	void	GetString( CqString& res, TqInt index = 0 ) const
@@ -1358,7 +1358,7 @@ class CqShaderVariableVaryingString : public CqShaderVariableVarying<type_string
 			pVal->GetString( temp );
 			m_aValue.assign( 0, temp );
 		}
-		virtual void	GetBool( TqBool& res, TqInt index = 0 ) const
+		virtual void	GetBool( bool& res, TqInt index = 0 ) const
 		{
 			res = m_aValue[ 0 ].compare( "" ) == 0;
 		}
@@ -1385,7 +1385,7 @@ class CqShaderVariableVaryingPoint : public CqShaderVariableVarying<type_point, 
 		CqShaderVariableVaryingPoint( ) : CqShaderVariableVarying<type_point, CqVector3D>( )
 		{
 		}
-		CqShaderVariableVaryingPoint( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableVarying<type_point, CqVector3D>( strName, fParameter )
+		CqShaderVariableVaryingPoint( const char* strName, bool fParameter = false ) : CqShaderVariableVarying<type_point, CqVector3D>( strName, fParameter )
 		{
 		}
 		virtual	void	GetPoint( CqVector3D& res, TqInt index = 0 ) const
@@ -1448,7 +1448,7 @@ class CqShaderVariableVaryingPoint : public CqShaderVariableVarying<type_point, 
 		{
 			SetPoint( p );
 		}
-		virtual void	GetBool( TqBool& res, TqInt index = 0 ) const
+		virtual void	GetBool( bool& res, TqInt index = 0 ) const
 		{
 			res = ( ( m_aValue[ index ].x() != 0.0f ) || ( m_aValue[ index ].y() != 0.0f ) || ( m_aValue[ index ].z() != 0.0f ) );
 		}
@@ -1495,7 +1495,7 @@ class CqShaderVariableVaryingVector : public CqShaderVariableVarying<type_vector
 		CqShaderVariableVaryingVector( ) : CqShaderVariableVarying<type_vector, CqVector3D>( )
 		{
 		}
-		CqShaderVariableVaryingVector( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableVarying<type_vector, CqVector3D>( strName, fParameter )
+		CqShaderVariableVaryingVector( const char* strName, bool fParameter = false ) : CqShaderVariableVarying<type_vector, CqVector3D>( strName, fParameter )
 		{
 		}
 		virtual	void	GetPoint( CqVector3D& res, TqInt index = 0 ) const
@@ -1558,7 +1558,7 @@ class CqShaderVariableVaryingVector : public CqShaderVariableVarying<type_vector
 		{
 			SetPoint( p );
 		}
-		virtual void	GetBool( TqBool& res, TqInt index = 0 ) const
+		virtual void	GetBool( bool& res, TqInt index = 0 ) const
 		{
 			res = ( ( m_aValue[ index ].x() != 0.0f ) || ( m_aValue[ index ].y() != 0.0f ) || ( m_aValue[ index ].z() != 0.0f ) );
 		}
@@ -1605,7 +1605,7 @@ class CqShaderVariableVaryingNormal : public CqShaderVariableVarying<type_normal
 		CqShaderVariableVaryingNormal( ) : CqShaderVariableVarying<type_normal, CqVector3D>( )
 		{
 		}
-		CqShaderVariableVaryingNormal( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableVarying<type_normal, CqVector3D>( strName, fParameter )
+		CqShaderVariableVaryingNormal( const char* strName, bool fParameter = false ) : CqShaderVariableVarying<type_normal, CqVector3D>( strName, fParameter )
 		{
 		}
 		virtual	void	GetPoint( CqVector3D& res, TqInt index = 0 ) const
@@ -1668,7 +1668,7 @@ class CqShaderVariableVaryingNormal : public CqShaderVariableVarying<type_normal
 		{
 			SetPoint( p );
 		}
-		virtual void	GetBool( TqBool& res, TqInt index = 0 ) const
+		virtual void	GetBool( bool& res, TqInt index = 0 ) const
 		{
 			res = ( ( m_aValue[ index ].x() != 0.0f ) || ( m_aValue[ index ].y() != 0.0f ) || ( m_aValue[ index ].z() != 0.0f ) );
 		}
@@ -1715,7 +1715,7 @@ class CqShaderVariableVaryingColor : public CqShaderVariableVarying<type_color, 
 		CqShaderVariableVaryingColor( ) : CqShaderVariableVarying<type_color, CqColor>( )
 		{
 		}
-		CqShaderVariableVaryingColor( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableVarying<type_color, CqColor>( strName, fParameter )
+		CqShaderVariableVaryingColor( const char* strName, bool fParameter = false ) : CqShaderVariableVarying<type_color, CqColor>( strName, fParameter )
 		{
 		}
 		virtual	void	GetColor( CqColor& res, TqInt index = 0 ) const
@@ -1758,7 +1758,7 @@ class CqShaderVariableVaryingColor : public CqShaderVariableVarying<type_color, 
 				m_aValue.assign( m_aValue.size(), temp );
 			}
 		}
-		virtual void	GetBool( TqBool& res, TqInt index = 0 ) const
+		virtual void	GetBool( bool& res, TqInt index = 0 ) const
 		{
 			res = ( ( m_aValue[ index ].fRed() != 0.0f ) || ( m_aValue[ index ].fGreen() != 0.0f ) || ( m_aValue[ index ].fBlue() != 0.0f ) );
 		}
@@ -1785,7 +1785,7 @@ class CqShaderVariableVaryingMatrix : public CqShaderVariableVarying<type_matrix
 		CqShaderVariableVaryingMatrix( ) : CqShaderVariableVarying<type_matrix, CqMatrix>( )
 		{
 		}
-		CqShaderVariableVaryingMatrix( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableVarying<type_matrix, CqMatrix>( strName, fParameter )
+		CqShaderVariableVaryingMatrix( const char* strName, bool fParameter = false ) : CqShaderVariableVarying<type_matrix, CqMatrix>( strName, fParameter )
 		{
 		}
 		virtual	void	GetMatrix( CqMatrix& res, TqInt index = 0 ) const

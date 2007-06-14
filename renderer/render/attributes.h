@@ -167,7 +167,7 @@ class CqAttributes : public CqRefCount, public IqAttributes
 		 */
 		void	FlipeOrientation( TqFloat time )
 		{
-			TqBool co = GetIntegerAttribute( "System", "Orientation" ) [ 0 ] == 0;
+			bool co = GetIntegerAttribute( "System", "Orientation" ) [ 0 ] == 0;
 			GetIntegerAttributeWrite( "System", "Orientation" ) [ 0 ] = ( co ) ? 1 : 0;
 		}
 

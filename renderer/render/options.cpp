@@ -63,7 +63,7 @@ void CqOptions::InitialiseCamera()
 				TqFloat f = GetFloatOption( "System", "Clipping" ) [ 1 ];
 
 				matCameraToScreen.Identity();
-				matCameraToScreen.SetfIdentity( TqFalse );
+				matCameraToScreen.SetfIdentity( false );
 				matCameraToScreen.SetElement( 0, 0, 2.0f / ( r - l ) );
 				matCameraToScreen.SetElement( 3, 0, -( r + l ) / ( r - l ) );
 				matCameraToScreen.SetElement( 1, 1, 2.0f / ( t - b ) );
@@ -133,7 +133,7 @@ void CqOptions::InitialiseCamera()
 				TqFloat f = GetFloatOption( "System", "Clipping" ) [ 1 ];
 
 				matCameraToScreen.Identity();
-				matCameraToScreen.SetfIdentity( TqFalse );
+				matCameraToScreen.SetfIdentity( false );
 				matCameraToScreen.SetElement( 0, 0, ( 2.0f * n ) / ( r - l ) );
 				matCameraToScreen.SetElement( 2, 0, ( r + l ) / ( r - l ) );
 				matCameraToScreen.SetElement( 1, 1, ( 2.0f * n ) / ( t - b ) );
@@ -679,7 +679,7 @@ void CqOptions::SetpshadImager( const boost::shared_ptr<IqShader>& pshadImager )
 {
 	delete m_pshadImager;
 
-	m_pshadImager = new CqImagersource(pshadImager, TqTrue);
+	m_pshadImager = new CqImagersource(pshadImager, true);
         m_pshadImager->pShader()->PrepareDefArgs();
 }
 

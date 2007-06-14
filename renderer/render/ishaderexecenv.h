@@ -279,11 +279,11 @@ struct IqShaderExecEnv
 
 	virtual IqRenderer* getRenderContext() const = 0;
 
-	virtual	TqBool	SO_init_illuminance() = 0;
-	virtual	TqBool	SO_advance_illuminance() = 0;
+	virtual	bool	SO_init_illuminance() = 0;
+	virtual	bool	SO_advance_illuminance() = 0;
 
 	virtual	STD_SO	SO_init_gather(FLOATVAL samples, DEFVOIDPARAM ) = 0;
-	virtual	TqBool	SO_advance_gather() = 0;
+	virtual	bool	SO_advance_gather() = 0;
 
 	// ShadeOps
 	virtual STD_SO	SO_radians( FLOATVAL degrees, DEFPARAM ) = 0;

@@ -39,13 +39,13 @@ START_NAMESPACE( Aqsis )
  * FIXME: These are commented out as they introduce a dependency on libaqsis
  * via the extern pCurrRenderer in renderer.h
  */
-CqShaderVariable::CqShaderVariable() : m_fParameter( TqFalse )
+CqShaderVariable::CqShaderVariable() : m_fParameter( false )
 {
 
 
 }
 
-CqShaderVariable::CqShaderVariable( const char* strName, TqBool fParameter ) : m_strName( strName ), m_fParameter( fParameter )
+CqShaderVariable::CqShaderVariable( const char* strName, bool fParameter ) : m_strName( strName ), m_fParameter( fParameter )
 {
 
 

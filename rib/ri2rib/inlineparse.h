@@ -43,16 +43,16 @@ class CqInlineParse
 		TqUint number_of_words;
 		std::string word[ 7 ];
 
-		TqBool inline_def;
+		bool inline_def;
 		EqTokenClass tc;
 		EqTokenType tt;
 		TqUint size;
 		std::string identifier;
 
 
-		TqBool is_class ( const std::string &str );
-		TqBool is_type ( const std::string &str );
-		TqBool is_int ( const std::string &str );
+		bool is_class ( const std::string &str );
+		bool is_type ( const std::string &str );
+		bool is_int ( const std::string &str );
 
 		EqTokenClass get_class ( const std::string &str );
 		EqTokenType get_type ( const std::string &str );
@@ -68,7 +68,7 @@ class CqInlineParse
 		{}
 		void parse ( std::string &str );
 
-		TqBool isInline()
+		bool isInline()
 		{
 			return inline_def;
 		}

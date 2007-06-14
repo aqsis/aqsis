@@ -92,7 +92,7 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 		virtual	void	Reset()
 		{}
 
-		virtual TqBool	IsMotionBlurMatch( CqSurface* pSurf ) = 0;
+		virtual bool	IsMotionBlurMatch( CqSurface* pSurf ) = 0;
 
 		virtual CqString	strName() const;
 		virtual	TqInt	Uses() const;
@@ -150,12 +150,12 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 		 */
 		virtual	void	ForceUndiceable()
 		{
-			m_fDiceable = TqFalse;
+			m_fDiceable = false;
 			m_EyeSplitCount++;
 		}
 		/** Query if this primitive has been marked as undiceable by the eyesplit check.
 		 */
-		virtual TqBool	IsUndiceable() const
+		virtual bool	IsUndiceable() const
 		{
 			return ( !m_fDiceable );
 		}
@@ -163,7 +163,7 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 		 */
 		virtual	void	Discard()
 		{
-			m_fDiscard = TqTrue;
+			m_fDiscard = true;
 		}
 		/** Copy the information about splitting and dicing from the specified GPrim.
 		 * \param From A CqSurface reference to copy the information from.
@@ -177,7 +177,7 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 
 		/** Determine whether this GPrim is to be discardrd.
 		 */
-		TqBool	fDiscard() const
+		bool	fDiscard() const
 		{
 			return ( m_fDiscard );
 		}
@@ -212,7 +212,7 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 		void CacheRasterBound( CqBound& pBound )
 		{
 			m_Bound = pBound;
-			m_CachedBound = TqTrue;
+			m_CachedBound = true;
 		}
 		/** Retrieve the cached bound. If it has never been cached then we
 		 * throw an error as this is probably a bug.
@@ -220,7 +220,7 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 		 */
 		CqBound	GetCachedRasterBound()
 		{
-			if ( m_CachedBound == TqFalse && m_fDiceable )
+			if ( m_CachedBound == false && m_fDiceable )
 			{
 				Aqsis::log() << critical << "No cached bound available" << std::endl;
 			}
@@ -228,7 +228,7 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 			return m_Bound;
 		}
 
-		TqBool	fCachedBound() const
+		bool	fCachedBound() const
 		{
 			return ( m_CachedBound );
 		}
@@ -241,7 +241,7 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
  		virtual CqSurface* Clone() const = 0;
 
 
-		virtual	void	SetDefaultPrimitiveVariables( TqBool bUseDef_st = TqTrue );
+		virtual	void	SetDefaultPrimitiveVariables( bool bUseDef_st = true );
 
 		void ClonePrimitiveVariables( const CqSurface& From );
 
@@ -413,7 +413,7 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 
 		/** Determine whether this surface has a specified primitive variable based on index
 		 */
-		virtual const	TqBool bHasVar(TqInt index) const
+		virtual const	bool bHasVar(TqInt index) const
 		{
 			assert( index >= EnvVars_Cs && index < EnvVars_Last );
 			// Special case for s & t if "st" is specified.
@@ -508,23 +508,23 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 
 		/** Determine whether this surface can be trimmed
 		 */
-		virtual const	TqBool	bCanBeTrimmed() const
+		virtual const	bool	bCanBeTrimmed() const
 		{
-			return ( TqFalse );
+			return ( false );
 		}
 		/** Determine if the specified point is trimmed.
 		 * \todo Review: Unused parameter p
 		 */
-		virtual	const	TqBool	bIsPointTrimmed( const CqVector2D& p ) const
+		virtual	const	bool	bIsPointTrimmed( const CqVector2D& p ) const
 		{
-			return ( TqFalse );
+			return ( false );
 		}
 		/** Determine if the specified edge crosses the trimming curves.
 		 * \todo Review: Unused parameter v1, v2
 		 */
-		virtual	const	TqBool	bIsLineIntersecting( const CqVector2D& v1, const CqVector2D& v2 ) const
+		virtual	const	bool	bIsLineIntersecting( const CqVector2D& v1, const CqVector2D& v2 ) const
 		{
-			return ( TqFalse );
+			return ( false );
 		}
 		/** Determine the level at which to split a trim curve according
 		 * to its screen size after application to the surface paramters of this
@@ -553,20 +553,20 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 		/**
 		 * \todo Review: Unused parameter aSplits, u
 		 */
-		virtual TqInt	PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, TqBool u )
+		virtual TqInt	PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, bool u )
 		{
 			return ( 0 );
 		}
-		virtual void	NaturalSubdivide( CqParameter* pParam, CqParameter* pParam1, CqParameter* pParam2, TqBool u );
+		virtual void	NaturalSubdivide( CqParameter* pParam, CqParameter* pParam1, CqParameter* pParam2, bool u );
 		virtual void	PostSubdivide(std::vector<boost::shared_ptr<CqSurface> >& /* aSplits */)
 		{}
 
 		/** Virtual function to indicate whether a particular surface is able
 		 *  to generate geometric normals itself.
 		 */
-		virtual TqBool	CanGenerateNormals() const
+		virtual bool	CanGenerateNormals() const
 		{
-			return ( TqFalse );
+			return ( false );
 		}
 
 		/** Virtual function to genrate and fill in geomtric normals if a surface is able to do so.
@@ -581,13 +581,13 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 		/**
 		 * \todo Review: Could this be const?
 		 */
-		virtual TqBool	Diceable()
+		virtual bool	Diceable()
 		{
 			return(false);
 		}
 
-		TqBool	m_fDiceable;		///< Flag to indicate that this GPrim is diceable.
-		TqBool	m_fDiscard;			///< Flag to indicate that this GPrim is to be discarded.
+		bool	m_fDiceable;		///< Flag to indicate that this GPrim is diceable.
+		bool	m_fDiscard;			///< Flag to indicate that this GPrim is to be discarded.
 		TqInt	m_EyeSplitCount;	///< The number of times this GPrim has been split because if crossing the epsilon and eye planes.
 	protected:
 		/** Protected member function to clone the data, used by the Clone() functions
@@ -621,7 +621,7 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 		}
 
 		template <class T, class SLT>
-		void	TypedNaturalSubdivide( CqParameterTyped<T, SLT>* pParam, CqParameterTyped<T, SLT>* pResult1, CqParameterTyped<T, SLT>* pResult2, TqBool u )
+		void	TypedNaturalSubdivide( CqParameterTyped<T, SLT>* pParam, CqParameterTyped<T, SLT>* pResult1, CqParameterTyped<T, SLT>* pResult2, bool u )
 		{
 			CqParameterTyped<T, SLT>* pTParam = static_cast<CqParameterTyped<T, SLT>*>( pParam );
 			CqParameterTyped<T, SLT>* pTResult1 = static_cast<CqParameterTyped<T, SLT>*>( pResult1 );
@@ -653,7 +653,7 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 		TqInt	m_uDiceSize;		///< Calculated dice size to achieve an appropriate shading rate.
 		TqInt	m_vDiceSize;		///< Calculated dice size to achieve an appropriate shading rate.
 		EqSplitDir	m_SplitDir;			///< The direction to split this GPrim to achieve best results.
-		TqBool	m_CachedBound;		///< Whether or not the bound has been cached
+		bool	m_CachedBound;		///< Whether or not the bound has been cached
 		CqBound	m_Bound;			///< The cached object bound
 		boost::shared_ptr<CqCSGTreeNode>	m_pCSGNode;		///< Pointer to the 'primitive' CSG node this surface belongs to, NULL if not part of a solid.
 		static TqFloat     m_fGridSize;   ///< standard sqrt(gridsize);
@@ -728,7 +728,7 @@ class CqDeformingSurface : public CqSurface, public CqMotionSpec<boost::shared_p
 			for ( i = 0; i < cSplits; i++ )
 			{
 				boost::shared_ptr<CqDeformingSurface> pNewMotion( new CqDeformingSurface( boost::shared_ptr<CqSurface>() ) );
-				pNewMotion->m_fDiceable = TqTrue;
+				pNewMotion->m_fDiceable = true;
 				pNewMotion->m_EyeSplitCount = m_EyeSplitCount;
 				TqInt j;
 				for ( j = 0; j < cTimes(); j++ )
@@ -741,9 +741,9 @@ class CqDeformingSurface : public CqSurface, public CqMotionSpec<boost::shared_p
 		 * determines the dicing rate, which is then copied to the other times.
 		 * \return Boolean indicating GPrim is diceable.
 		 */
-		virtual TqBool	Diceable()
+		virtual bool	Diceable()
 		{
-			TqBool f = GetMotionObject( Time( 0 ) ) ->Diceable();
+			bool f = GetMotionObject( Time( 0 ) ) ->Diceable();
 			// Copy the split info so that at each time slot, the gprims split the same.
 			TqInt i;
 			for ( i = 1; i < cTimes(); i++ )
@@ -764,9 +764,9 @@ class CqDeformingSurface : public CqSurface, public CqMotionSpec<boost::shared_p
 		/** Determine whether the passed surface is valid to be used as a
 		 *  frame in motion blur for this surface.
 		 */
-		virtual TqBool	IsMotionBlurMatch( CqSurface* pSurf )
+		virtual bool	IsMotionBlurMatch( CqSurface* pSurf )
 		{
-			return( TqFalse );
+			return( false );
 		}
 
 		/** Transform all GPrims by the specified transformation matrices.

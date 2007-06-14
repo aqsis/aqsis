@@ -53,7 +53,7 @@ START_NAMESPACE( Aqsis )
 class CqBucket : public IqBucket
 {
 	public:
-		CqBucket() : m_bProcessed( TqFalse )
+		CqBucket() : m_bProcessed( false )
 		{}
 		CqBucket( const CqBucket& From )
 		{
@@ -132,7 +132,7 @@ class CqBucket : public IqBucket
 		virtual	TqFloat Depth( TqInt iXPos, TqInt iYPos );
 		virtual	const TqFloat* Data( TqInt iXPos, TqInt iYPos );
 
-		static	void	PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt ysize, TqBool fJitter = TqTrue, TqBool empty = TqFalse );
+		static	void	PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt ysize, bool fJitter = true, bool empty = false );
 		static	void	CalculateDofBounds();
 		static	void	InitialiseFilterValues();
 		static	void	ImageElement( TqInt iXPos, TqInt iYPos, CqImagePixel*& pie )
@@ -166,7 +166,7 @@ class CqBucket : public IqBucket
 		}
 
 		static	void	CombineElements(enum EqFilterDepth eDepthFilter, CqColor zThreshold);
-		void	FilterBucket(TqBool empty);
+		void	FilterBucket(bool empty);
 		void	ExposeBucket();
 		void	QuantizeBucket();
 		static	void	ShutdownBucket();
@@ -187,7 +187,7 @@ class CqBucket : public IqBucket
 			std::vector<CqMicroPolygon*>::iterator end = m_ampgWaiting.end();
 			for (std::vector<CqMicroPolygon*>::iterator i = m_ampgWaiting.begin(); i != end; i++)
 				if ((*i) == pmpgNew)
-					assert( TqFalse );
+					assert( false );
 #endif
 
 			m_ampgWaiting.push_back( pmpgNew );
@@ -200,7 +200,7 @@ class CqBucket : public IqBucket
 			std::vector<CqMicroPolyGridBase*>::iterator end = m_agridWaiting.end();
 			for (std::vector<CqMicroPolyGridBase*>::iterator i = m_agridWaiting.begin(); i != end; i++)
 				if ((*i) == pgridNew)
-					assert( TqFalse );
+					assert( false );
 #endif
 
 			m_agridWaiting.push_back( pgridNew );
@@ -244,14 +244,14 @@ class CqBucket : public IqBucket
 		}
 		/** Get the flag that indicates if the bucket has been processed yet.
 		 */
-		TqBool IsProcessed() const
+		bool IsProcessed() const
 		{
 			return( m_bProcessed );
 		}
 
 		/** Mark this bucket as processed
 		 */
-		void SetProcessed( TqBool bProc =  TqTrue)
+		void SetProcessed( bool bProc =  true)
 		{
 			m_bProcessed = bProc;
 		}
@@ -308,7 +308,7 @@ class CqBucket : public IqBucket
 
 		/// A sorted list of primitives for this bucket
 		std::priority_queue<boost::shared_ptr<CqSurface>, std::deque<boost::shared_ptr<CqSurface> >, closest_surface> m_aGPrims;
-		TqBool	m_bProcessed;	///< Flag indicating if this bucket has been processed yet.
+		bool	m_bProcessed;	///< Flag indicating if this bucket has been processed yet.
 }
 ;
 

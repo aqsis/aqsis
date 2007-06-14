@@ -139,7 +139,7 @@ static	CqString	SO_sprintf( const char* str, int cParams, IqShaderData** apParam
 
 void	CqShaderExecEnv::SO_printf( IqShaderData* str, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	if ( !getRenderContext() )
@@ -173,7 +173,7 @@ void	CqShaderExecEnv::SO_printf( IqShaderData* str, IqShader* pShader, int cPara
 
 void	CqShaderExecEnv::SO_format( IqShaderData* str, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__fVarying=(str)->Class()==class_varying;
@@ -205,7 +205,7 @@ void	CqShaderExecEnv::SO_format( IqShaderData* str, IqShaderData* Result, IqShad
 
 void	CqShaderExecEnv::SO_concat( IqShaderData* stra, IqShaderData* strb, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__fVarying=(stra)->Class()==class_varying;
@@ -244,7 +244,7 @@ void	CqShaderExecEnv::SO_concat( IqShaderData* stra, IqShaderData* strb, IqShade
 // We manually declare the variable
 void CqShaderExecEnv::SO_external( DSOMethod method, void *initData, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
-	TqBool __fVarying;
+	bool __fVarying;
 	TqUint __iGrid;
 
 	__fVarying=(Result)->Class()==class_varying;

@@ -34,25 +34,25 @@ class CqFuncDef : public IqFuncDef
 				m_strName( "" ),
 				m_strVMName( "" ),
 				m_strParamTypes( "" ),
-				m_fLocal( TqFalse ),
+				m_fLocal( false ),
 				m_pDef( 0 ),
 				m_InternalUses( 0 ),
-				m_fVarying( TqFalse )
+				m_fVarying( false )
 		{}
 		CqFuncDef( TqInt Type, const char* strName,
 		           const char* strVMName,
 		           const char* strParams,
 		           TqInt InternalUses = 0,
-		           TqBool fSpecial = TqFalse,
+		           bool fSpecial = false,
 		           EqShaderType SType = Type_Surface ) :
 				m_Type( Type ),
 				m_strName( strName ),
 				m_strVMName( strVMName ),
 				m_strParamTypes( strParams ),
-				m_fLocal( TqFalse ),
+				m_fLocal( false ),
 				m_pDef( 0 ),
 				m_InternalUses( InternalUses ),
-				m_fVarying( TqFalse )
+				m_fVarying( false )
 		{
 			// Build the type array.
 			TypeArray();
@@ -69,7 +69,7 @@ class CqFuncDef : public IqFuncDef
 		{
 			return ( m_Type );
 		}
-		virtual	TqBool	fLocal() const
+		virtual	bool	fLocal() const
 		{
 			return ( m_fLocal );
 		}
@@ -88,7 +88,7 @@ class CqFuncDef : public IqFuncDef
 		virtual	const IqParseNode* pArgs() const;
 		virtual	const IqParseNode* pDef() const;
 		virtual	IqParseNode* pDef();
-		virtual	TqBool	fVarying() const
+		virtual	bool	fVarying() const
 		{
 			return ( m_fVarying );
 		}
@@ -128,7 +128,7 @@ class CqFuncDef : public IqFuncDef
 			m_strParamTypes = strParams;
 		}
 
-		static	TqBool	FindFunction( const char* strName, std::vector<SqFuncRef>& Refs );
+		static	bool	FindFunction( const char* strName, std::vector<SqFuncRef>& Refs );
 		static	CqFuncDef*	GetFunctionPtr( const SqFuncRef& Ref );
 		static	TqInt	AddFunction( CqFuncDef& Def );
 
@@ -137,12 +137,12 @@ class CqFuncDef : public IqFuncDef
 		CqString	m_strName;
 		CqString	m_strVMName;
 		CqString	m_strParamTypes;
-		TqBool	m_fLocal;
+		bool	m_fLocal;
 		CqParseNode*	m_pDef;
 		CqParseNode*	m_pArgs;
 		TqInt	m_InternalUses;
 		std::vector<TqInt>	m_aTypeSpec;
-		TqBool	m_fVarying;
+		bool	m_fVarying;
 };
 
 extern std::vector<CqFuncDef>	gLocalFuncs;

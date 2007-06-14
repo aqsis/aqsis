@@ -114,7 +114,7 @@ IqParseNode* CqVarDef::pInitialiser()
 /// CqVarDef::FindFunction
 /// Find a variable definition by searching the standard definitions list.
 
-TqBool CqVarDef::FindVariable( const char* strName, SqVarRef& Ref )
+bool CqVarDef::FindVariable( const char* strName, SqVarRef& Ref )
 {
 	// Search the local definitions next.
 	TqUint i;
@@ -126,7 +126,7 @@ TqBool CqVarDef::FindVariable( const char* strName, SqVarRef& Ref )
 		{
 			Ref.m_Type = VarTypeLocal;
 			Ref.m_Index = i;
-			return ( TqTrue );
+			return ( true );
 		}
 	}
 
@@ -137,11 +137,11 @@ TqBool CqVarDef::FindVariable( const char* strName, SqVarRef& Ref )
 		{
 			Ref.m_Type = VarTypeStandard;
 			Ref.m_Index = i;
-			return ( TqTrue );
+			return ( true );
 		}
 	}
 
-	return ( TqFalse );
+	return ( false );
 }
 
 
@@ -150,7 +150,7 @@ TqBool CqVarDef::FindVariable( const char* strName, SqVarRef& Ref )
 /// CqVarDef::FindStandardVariable
 /// Find a variable definition by searching the standard definitions list.
 
-TqBool CqVarDef::FindStandardVariable( const char* strName, SqVarRef& Ref )
+bool CqVarDef::FindStandardVariable( const char* strName, SqVarRef& Ref )
 {
 	// Search the standard definitions only.
 	TqUint i;
@@ -162,11 +162,11 @@ TqBool CqVarDef::FindStandardVariable( const char* strName, SqVarRef& Ref )
 		{
 			Ref.m_Type = VarTypeStandard;
 			Ref.m_Index = i;
-			return ( TqTrue );
+			return ( true );
 		}
 	}
 
-	return ( TqFalse );
+	return ( false );
 }
 
 

@@ -98,7 +98,7 @@ typedef enum {
 //
 // Local Variables
 //
-static TqBool m_critical = TqFalse;
+static bool m_critical = false;
 
 static TqFloat sides[6][2]    =  {
                                      {0.0f,0.0f}, {0.0f, ONEHALF}, {ONETHIRD, 0.0f}, {ONETHIRD,ONEHALF},
@@ -165,10 +165,10 @@ static void CalculateNoise(TqFloat &du, TqFloat &dv, TqInt which)
 }
 //----------------------------------------------------------------------
 /** IsVerbose() Is it adequate to printout the level of mipmap ?
- * Option "statistics" "int renderinfo" 1 by default it returns TqFalse
+ * Option "statistics" "int renderinfo" 1 by default it returns false
  *
  */
-static TqBool IsVerbose()
+static bool IsVerbose()
 {
 	static TqInt bVerbose = -1;
 
@@ -242,7 +242,7 @@ static TqFloat invLog2 =  1.0f/::log(2.0f);
 
 /** Allocate a cache segment to hold the specified image tile.
  */
-TqPuchar CqTextureMapBuffer::AllocSegment( TqUlong width, TqUlong height, TqInt samples, TqBool fProt )
+TqPuchar CqTextureMapBuffer::AllocSegment( TqUlong width, TqUlong height, TqInt samples, bool fProt )
 {
 	static TqInt limit = -1;
 	static TqInt report = 1;
@@ -283,7 +283,7 @@ TqPuchar CqTextureMapBuffer::AllocSegment( TqUlong width, TqUlong height, TqInt 
 		}
 
 		report = 0;
-		m_critical = TqTrue;
+		m_critical = true;
 	}
 
 	QGetRenderContext() ->Stats().IncTextureMemory( demand );
@@ -402,7 +402,7 @@ void CqTextureMap::CriticalMeasure()
 
 
 	now = QGetRenderContext() ->Stats().GetTextureMemory();
-	TqBool getout = TqTrue;
+	bool getout = true;
 
 	if ( m_critical )
 	{
@@ -434,7 +434,7 @@ void CqTextureMap::CriticalMeasure()
 			(*j)->m_apLast[0] = NULL;
 
 			// All MipMaps segments (flat tiles)  are the first to go 
-			for ( TqInt k = 0; (k <  256) && (getout == TqFalse); k++)
+			for ( TqInt k = 0; (k <  256) && (getout == false); k++)
 			{
 				i = (*j)->m_apMipMaps[k].begin(); 
 				e = (*j)->m_apMipMaps[k].end(); 
@@ -446,13 +446,13 @@ void CqTextureMap::CriticalMeasure()
 				(*j)->m_apMipMaps[k].resize(0);
 				current = QGetRenderContext() ->Stats().GetTextureMemory();
 				if ( ( now - current ) > ( limit / 4 ) ) {
-					getout = TqTrue;
+					getout = true;
 					break;
 				}
 			}
 			current = QGetRenderContext() ->Stats().GetTextureMemory();
 			if ( ( now - current ) > ( limit / 4 ) ) {
-				getout = TqTrue;
+				getout = true;
 				break;
 			}
 
@@ -460,7 +460,7 @@ void CqTextureMap::CriticalMeasure()
 	}
 	current = QGetRenderContext() ->Stats().GetTextureMemory();
 
-	m_critical = TqFalse;
+	m_critical = false;
 
 #ifdef _DEBUG
 
@@ -489,7 +489,7 @@ void CqTextureMap::Close()
 //---------------------------------------------------------------------
 /** Create a mipmap usable for the texturemapping.
  */
-TqBool CqTextureMap::CreateMIPMAP(TqBool fProtectBuffers)
+bool CqTextureMap::CreateMIPMAP(bool fProtectBuffers)
 {
 	if ( m_pImage != 0 )
 	{
@@ -499,7 +499,7 @@ TqBool CqTextureMap::CreateMIPMAP(TqBool fProtectBuffers)
 		if( ret )
 		{
 			Aqsis::log() << error << "Cannot MIPMAP a tiled image \"" << m_strName.c_str() << "\"" << std::endl;
-			return( TqFalse );
+			return( false );
 		}
 
 		// Read the whole image into a buffer.
@@ -514,7 +514,7 @@ TqBool CqTextureMap::CreateMIPMAP(TqBool fProtectBuffers)
 			directory++;
 		}
 	}
-	return( TqTrue );
+	return( true );
 }
 
 //---------------------------------------------------------------------
@@ -598,7 +598,7 @@ CqTextureMap::~CqTextureMap()
  * \param directory TIFF directory index.
  * \param fProt A boolean value, true if the buffer should be protected from removal by the cache management system.
  */
-CqTextureMapBuffer* CqTextureMap::GetBuffer( TqUlong s, TqUlong t, TqInt directory, TqBool fProt )
+CqTextureMapBuffer* CqTextureMap::GetBuffer( TqUlong s, TqUlong t, TqInt directory, bool fProt )
 {
         //TIMER_START("GetBuffer");
 	QGetRenderContext() ->Stats().IncTextureMisses( 4 );
@@ -667,7 +667,7 @@ CqTextureMapBuffer* CqTextureMap::GetBuffer( TqUlong s, TqUlong t, TqInt directo
 		else
 		{
 			// Create a storage buffer
-			pTMB = CreateBuffer( 0, 0, m_XRes, m_YRes, directory, TqTrue );
+			pTMB = CreateBuffer( 0, 0, m_XRes, m_YRes, directory, true );
 
 			TIFFSetDirectory( m_pImage, directory );
 			void* pdata = pTMB->pVoidBufferData();
@@ -767,7 +767,7 @@ void CqTextureMap::CalculateLevel(TqFloat ds, TqFloat dt)
  * \param id     the directory in the tiff 0...n
  * \param param m_color the result will be stored in m_color.
  */
-TqBool CqTextureMap::BiLinear(TqFloat u, TqFloat v, TqInt umapsize, TqInt vmapsize,
+bool CqTextureMap::BiLinear(TqFloat u, TqFloat v, TqInt umapsize, TqInt vmapsize,
                               TqInt id, std::valarray<TqFloat >	&m_color)
 {
 	TqUint umapsize1 = umapsize-1;
@@ -806,7 +806,7 @@ TqBool CqTextureMap::BiLinear(TqFloat u, TqFloat v, TqInt umapsize, TqInt vmapsi
 
 		Aqsis::log() << error << "Cannot find value for either pTMPB[a,b,c,d]" << std::endl;
 		Open();
-		return TqFalse;
+		return false;
 	}
 
 	TqUint x1, y1, x2, y2, x3, y3, x4, y4;
@@ -833,7 +833,7 @@ TqBool CqTextureMap::BiLinear(TqFloat u, TqFloat v, TqInt umapsize, TqInt vmapsi
 		m_color[c] = LERP(rv, LERP(ru, Val00, Val01), LERP(ru, Val10, Val11));
 	}
 
-	return TqTrue;
+	return true;
 }
 
 //----------------------------------------------------------------------
@@ -876,7 +876,7 @@ void CqTextureMap::GetSampleWithoutBlur( TqFloat u1, TqFloat v1, TqFloat u2, TqF
 			m_lerp = 1.0f;
 
 	}
-	TqBool bLerp = (m_lerp == 1.0);
+	bool bLerp = (m_lerp == 1.0);
 
 
 	// Assuming this will also include the pixel at u,v multiple samplings interval
@@ -1051,7 +1051,7 @@ CqTextureMap* CqTextureMap::GetTextureMap( const CqString& strName )
 	// Ensure that it is in the correct format
 	if ( pNew->Format() != TexFormat_MIPMAP )
 	{
-		if( !pNew->CreateMIPMAP( TqTrue ) )
+		if( !pNew->CreateMIPMAP( true ) )
 			pNew->SetInvalid();
 		pNew->Close();
 	}
@@ -1134,7 +1134,7 @@ void CqTextureMap::Open()
 {
 	TqInt wasconverted = 0;
 
-	m_IsValid = TqFalse;
+	m_IsValid = false;
 
 
 	// Find the file required.
@@ -1215,7 +1215,7 @@ void CqTextureMap::Open()
 		/* Second test; is it containing enough directories for us */
 		TqInt min = MIN(m_XRes, m_YRes );
 		TqInt directory = static_cast<TqInt>(fastlog2(static_cast<TqFloat> (min)));
-		if (TIFFSetDirectory(m_pImage, directory - 1) == TqFalse)
+		if (TIFFSetDirectory(m_pImage, directory - 1) == false)
 		   bMipMap &= TIFFSetDirectory(m_pImage, directory - 2);
 
 
@@ -1235,12 +1235,12 @@ void CqTextureMap::Open()
 		if ( bMipMap )
 		{
 			m_Format = TexFormat_MIPMAP;
-			m_IsValid = TqTrue;
+			m_IsValid = true;
 		}
 		else
 		{
 			m_Format = TexFormat_Plain;
-			m_IsValid = TqTrue;
+			m_IsValid = true;
 		}
 	}
 	m_Directory = 0;
@@ -1836,15 +1836,15 @@ CqImageDownsampler::CqImageDownsampler(TqFloat sWidth, TqFloat tWidth, RtFilterF
 
 
 //----------------------------------------------------------------------
-CqTextureMapBuffer* CqImageDownsampler::downsample(CqTextureMapBuffer* inBuf, CqTextureMap& texMap, TqInt directory, TqBool protectBuffer)
+CqTextureMapBuffer* CqImageDownsampler::downsample(CqTextureMapBuffer* inBuf, CqTextureMap& texMap, TqInt directory, bool protectBuffer)
 {
 	TqInt imWidth = inBuf->Width();
 	TqInt imHeight = inBuf->Height();
 	TqInt newWidth = (imWidth+1)/2;
 	TqInt newHeight = (imHeight+1)/2;
 	TqInt samplesPerPixel = inBuf->Samples();
-	TqBool imEvenS = !(imWidth % 2);
-	TqBool imEvenT = !(imHeight % 2);
+	bool imEvenS = !(imWidth % 2);
+	bool imEvenT = !(imHeight % 2);
 	if(m_weights.empty() || !((m_sNumPts % 2) ^ imEvenS) || !((m_tNumPts % 2) ^ imEvenT))
 	{
 		// recalculate filter kernel if cached one isn't the right size.
@@ -1888,7 +1888,7 @@ CqTextureMapBuffer* CqImageDownsampler::downsample(CqTextureMapBuffer* inBuf, Cq
 
 
 //----------------------------------------------------------------------
-void CqImageDownsampler::computeFilterKernel(TqFloat sWidth, TqFloat tWidth, RtFilterFunc filterFunc, TqBool evenFilterS, TqBool evenFilterT)
+void CqImageDownsampler::computeFilterKernel(TqFloat sWidth, TqFloat tWidth, RtFilterFunc filterFunc, bool evenFilterS, bool evenFilterT)
 {
 	// set up filter sizes & offsets
 	if(evenFilterS) // for even-sized images in s
@@ -1982,7 +1982,7 @@ void CqEnvironmentMap::SampleMap( CqVector3D& R1,
 		if (pLerp && (*pLerp > 0.0f))
 			m_lerp = 1.0f;
 	}
-	TqBool bLerp = (m_lerp == 1.0);
+	bool bLerp = (m_lerp == 1.0);
 
 	if ( m_pImage != 0 )
 	{

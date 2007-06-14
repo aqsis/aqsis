@@ -143,7 +143,7 @@ void bloomenthal_polygonizer::polygonize_whole_grid()
 }
 
 // Find surface and polygonize from a known inside point
-TqBool bloomenthal_polygonizer::polygonize_from_inside_point(const CqVector3D& starting_point)
+bool bloomenthal_polygonizer::polygonize_from_inside_point(const CqVector3D& starting_point)
 {
 	Location starting_location = nearest_location(starting_point);
 
@@ -214,7 +214,7 @@ void bloomenthal_polygonizer::PolygonizeSurface(const Location& startinglocation
 }
 
 // Find a location enclosing surface
-TqBool bloomenthal_polygonizer::SurfaceLocation(Location& startinglocation)
+bool bloomenthal_polygonizer::SurfaceLocation(Location& startinglocation)
 {
 	Location loc2 = startinglocation;
 	TqDouble value2 = m_FieldFunctor.implicit_value(location_vertex(loc2)) - m_Threshold;
@@ -248,10 +248,10 @@ void bloomenthal_polygonizer::TriangulateTet(const Cube& cube1, TqInt c1, TqInt 
 	Corner *c = cube1.corners[c3];
 	Corner *d = cube1.corners[c4];
 
-	TqBool apos = (a->value >= m_Threshold);
-	TqBool bpos = (b->value >= m_Threshold);
-	TqBool cpos = (c->value >= m_Threshold);
-	TqBool dpos = (d->value >= m_Threshold);
+	bool apos = (a->value >= m_Threshold);
+	bool bpos = (b->value >= m_Threshold);
+	bool cpos = (c->value >= m_Threshold);
+	bool dpos = (d->value >= m_Threshold);
 
 	TqInt index = 0;
 	if(apos)
@@ -459,7 +459,7 @@ void bloomenthal_polygonizer::MakeCubeTable()
 		for(TqInt c = 0; c < 8; c++)
 			bits[c] = bit_value(configuration, c);
 
-		TqBool done[12];
+		bool done[12];
 		for(edge = 0; edge < 12; edge++)
 			done[edge] = false;
 		for( edge = 0; edge < 12; edge++)
@@ -509,7 +509,7 @@ void bloomenthal_polygonizer::MakeCubeTable()
 void bloomenthal_polygonizer::TestFace(const Location& facelocation, Cube& old, TqInt face, TqInt c1, TqInt c2, TqInt c3, TqInt c4)
 {
 	// No surface crossing?
-	TqBool pos = old.corners[c1]->value >= m_Threshold;
+	bool pos = old.corners[c1]->value >= m_Threshold;
 	if(((old.corners[c2]->value >= m_Threshold) == pos) &&
 	        ((old.corners[c3]->value >= m_Threshold) == pos) &&
 	        ((old.corners[c4]->value >= m_Threshold) == pos))
