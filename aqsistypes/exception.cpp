@@ -26,6 +26,98 @@
 
 START_NAMESPACE(Aqsis)
 
+//////////////////////////////////////////////////////////////////////////////
+XqException::XqException (const std::string& reason)
+: std::runtime_error (reason), m_file ("Unspecified"), m_line (0)
+{
+}
+
+XqException::XqException (const std::string& reason, const std::string& detail,
+const std::string& file, const unsigned int line)
+: std::runtime_error (reason), m_detail (detail), m_file (file), m_line (line)
+{
+}
+
+XqException::XqException (const std::string& reason,	const std::string& file,
+const unsigned int line)
+: std::runtime_error (reason), m_file (file), m_line (line)
+{
+}
+
+XqException::~XqException ()
+{
+}
+
+const std::string& XqException::detail () const
+{
+	return m_detail;
+}
+
+std::pair<std::string, unsigned int> XqException::where () const
+{
+	return std::make_pair (m_file, m_line);
+}
+
+const char* XqException::description () const
+{
+	return "General error";
+}
+
+//////////////////////////////////////////////////////////////////////////////
+XqInternal::XqInternal (const std::string& reason, const std::string& detail,
+const std::string& file, const unsigned int line)
+: XqException (reason, detail, file, line)
+{
+}
+
+XqInternal::XqInternal (const std::string& reason,	const std::string& file,
+	const unsigned int line)
+: XqException (reason, file, line)
+{
+}
+
+const char* XqInternal::description () const
+{
+	return "Internal error";
+}
+
+//////////////////////////////////////////////////////////////////////////////
+XqEnvironment::XqEnvironment (const std::string& reason, const std::string& detail,
+const std::string& file, const unsigned int line)
+: XqException (reason, detail, file, line)
+{
+}
+
+XqEnvironment::XqEnvironment (const std::string& reason,	const std::string& file,
+	const unsigned int line)
+: XqException (reason, file, line)
+{
+}
+
+const char* XqEnvironment::description () const
+{
+	return "Environment error";
+}
+
+//////////////////////////////////////////////////////////////////////////////
+XqValidationFailure::XqValidationFailure (const std::string& reason, const std::string& detail,
+const std::string& file, const unsigned int line)
+: XqException (reason, detail, file, line)
+{
+}
+
+XqValidationFailure::XqValidationFailure (const std::string& reason,	const std::string& file,
+const unsigned int line)
+: XqException (reason, file, line)
+{
+}
+
+const char* XqValidationFailure::description () const
+{
+	return "Validation error";
+}
+	
+//////////////////////////////////////////////////////////////////////////////
 std::ostream& operator<<(std::ostream& o, const XqException& e)
 {
 	o << e.description () << " (" << e.where ().first << "," << e.where ().second << ")";	
