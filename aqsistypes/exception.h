@@ -61,6 +61,10 @@ class COMMON_SHARE XqException : public std::runtime_error
 		{
 		}
 		
+		virtual ~XqException ()
+		{
+		}
+		
 		const std::string& detail () const
 		{
 			return m_detail;
