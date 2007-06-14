@@ -29,8 +29,10 @@
 #define EXCEPTION_H_INCLUDED 1
 
 #include	"aqsis.h"
-
-#include	"sstring.h"
+#include <iosfwd>
+#include <stdexcept>
+#include <utility>
+#include <string>
 
 START_NAMESPACE( Aqsis )
 
@@ -38,28 +40,71 @@ START_NAMESPACE( Aqsis )
 /** General message based exception.  specific exceptions are derived from this.
  */
 
-class XqException
+class COMMON_SHARE XqException : public std::runtime_error
 {
 	public:
-		/** Default constructor.
-		 * \param pcharReason Pointer to a string associated with the error which caused the exception.
-		 */
-		XqException( const char* pcharReason = 0 ) :
-				m_strReason( pcharReason )
-		{}
-		virtual	~XqException()
-		{}
-
-		/** Get a reference to the error message.
-		 * \return a constant string reference.
-		 */
-		const CqString&	strReason()
-		{
-			return ( m_strReason );
-		}
-
+		/**
+		* @deprecated Legacy constructor for backwards compatibility
+		*/
+		XqException (const std::string& reason);
+		
+		XqException (const std::string& reason, const std::string& detail,
+		const std::string& file, const unsigned int line);
+		
+		XqException (const std::string& reason,	const std::string& file,
+			const unsigned int line);
+		
+		const std::string& detail () const;
+		
+		std::pair<std::string, unsigned int> where () const;
+		
+		virtual const char* description () const;
+		
 	private:
-		CqString	m_strReason;	///< The message associated with this exception.
+		const std::string 	m_detail; 	//< Optional, a detailed message
+		const std::string 	m_file;		//< The file name where the exception was thrown
+		const unsigned int	m_line;		//< The line numer where the exception was thrown
+}
+;
+
+COMMON_SHARE std::ostream& operator<<(std::ostream& o, const XqException& e);
+
+class COMMON_SHARE XqInternal : public XqException
+{
+	public:
+		XqInternal (const std::string& reason, const std::string& detail,
+		const std::string& file, const unsigned int line);
+		
+		XqInternal (const std::string& reason,	const std::string& file,
+			const unsigned int line);
+		
+		virtual const char* description () const;
+}
+;
+
+class COMMON_SHARE XqEnvironment : public XqException
+{
+	public:
+		XqEnvironment (const std::string& reason, const std::string& detail,
+		const std::string& file, const unsigned int line);
+		
+		XqEnvironment (const std::string& reason,	const std::string& file,
+			const unsigned int line);
+		
+		virtual const char* description () const;
+}
+;
+
+class COMMON_SHARE XqValidationFailure : public XqException
+{
+	public:
+		XqValidationFailure (const std::string& reason, const std::string& detail,
+		const std::string& file, const unsigned int line);
+		
+		XqValidationFailure (const std::string& reason,	const std::string& file,
+		const unsigned int line);
+		
+		virtual const char* description () const;
 }
 ;
 

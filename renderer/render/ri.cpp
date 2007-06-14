@@ -1626,7 +1626,7 @@ RtVoid	RiHiderV( RtToken name, PARAMETERLIST )
 		}
 		catch( XqException e )
 		{
-			Aqsis::log() << error << e.strReason().c_str() << std::endl;
+			Aqsis::log() << error << e.what() << std::endl;
 			continue;
 		}
 		TqUlong hash = CqString::hash(Decl.m_strName.c_str());
@@ -1725,7 +1725,7 @@ RtVoid	RiOptionV( RtToken name, PARAMETERLIST )
 		}
 		catch( XqException e )
 		{
-			Aqsis::log() << error << e.strReason().c_str() << std::endl;
+			Aqsis::log() << error << e.what() << std::endl;
 			continue;
 		}
 		TqInt Type = Decl.m_Type;
@@ -3019,7 +3019,7 @@ RtVoid	RiAttributeV( RtToken name, PARAMETERLIST )
 			}
 			catch( XqException e )
 			{
-				Aqsis::log() << error << e.strReason().c_str() << std::endl;
+				Aqsis::log() << error << e.what() << std::endl;
 				continue;
 			}
 			if ( Decl.m_strName != "" && Decl.m_Class == class_uniform )
@@ -6022,7 +6022,7 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface * pSurface, PARAMETERLIST 
 			}
 			catch( XqException e )
 			{
-				Aqsis::log() << error << e.strReason().c_str() << std::endl;
+				Aqsis::log() << error << e.what() << std::endl;
 				continue;
 			}
 
@@ -6285,7 +6285,7 @@ void SetShaderArgument( const boost::shared_ptr<IqShader>& pShader, const char *
 	}
 	catch( XqException e )
 	{
-		Aqsis::log() << error << e.strReason().c_str() << std::endl;
+		Aqsis::log() << error << e.what() << std::endl;
 		return;
 	}
 

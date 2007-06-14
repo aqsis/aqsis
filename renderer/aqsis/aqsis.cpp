@@ -769,7 +769,7 @@ void RenderFile( FILE* file, std::string&  name )
 	}
 	catch(Aqsis::XqException& x)
 	{
-		Aqsis::log() << Aqsis::error << x.strReason().c_str() << std::endl;
+		Aqsis::log() << Aqsis::error << x.what() << std::endl;
 	}
 
 	librib2ri::DestroyRIBEngine( renderengine );
