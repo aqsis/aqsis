@@ -998,15 +998,14 @@ void CqImageBuffer::StoreExtraData( CqMicroPolygon* pMPG, SqImageSample& sample)
 
 void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax, bool fImager, enum EqFilterDepth depthfilter, CqColor zThreshold)
 {
-	bool bIsEmpty = IsCurrentBucketEmpty();
+	CqBucket& Bucket = CurrentBucket();
+	bool bIsEmpty = Bucket.IsEmpty();
 
 	// Render any waiting micro polygon grids.
 	{
 		TIME_SCOPE("Render MPGs")
 		RenderMPGs( xmin, xmax, ymin, ymax );
 	}
-
-	CqBucket& Bucket = CurrentBucket();
 
 	// Render any waiting subsurfaces.
 	boost::shared_ptr<CqSurface> pSurface = Bucket.pTopSurface();
@@ -1115,11 +1114,11 @@ void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax, 
 		}
 	}
 
-	// Now combine the colors at each pixel sample for any micropolygons rendered to that pixel.
 	if ( m_fQuit )
 		return ;
 
-	if(!bIsEmpty)
+	// Now combine the colors at each pixel sample for any micropolygons rendered to that pixel.
+	if (!bIsEmpty)
 	{
 		TIME_SCOPE("Combine")
 		CqBucket::CombineElements(depthfilter, zThreshold);
@@ -1146,27 +1145,6 @@ void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax, 
 	}
 }
 
-//----------------------------------------------------------------------
-/** Return if a certain bucket is completely empty.
- 
-    True or False.
- 
-     It is empty only when this bucket doesn't contain any surface, 
-	 micropolygon or grids.
- */
-bool CqImageBuffer::IsCurrentBucketEmpty()
-{
-	bool retval = false;
-
-	CqBucket& Bucket = CurrentBucket();
-
-	if ( ( !Bucket.pTopSurface() ) &&
-	        Bucket.aGrids().empty() &&
-	        Bucket.aMPGs().empty() )
-		retval = true;
-
-	return retval;
-}
 //----------------------------------------------------------------------
 /** Render any waiting Surfaces
  
@@ -1269,7 +1247,7 @@ void CqImageBuffer::RenderImage()
 	// Iterate over all buckets...
 	do
 	{
-		bool bIsEmpty = IsCurrentBucketEmpty();
+		bool bIsEmpty = CurrentBucket().IsEmpty();
 		// Prepare the bucket.
 		CqVector2D bPos = BucketPosition();
 		CqVector2D bSize = BucketSize();

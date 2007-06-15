@@ -952,6 +952,15 @@ void CqBucket::QuantizeBucket()
 }
 
 //----------------------------------------------------------------------
+bool CqBucket::IsEmpty()
+{
+	if ( !pTopSurface() && aGrids().empty() && aMPGs().empty() )
+		return true;
+	else
+		return false;
+}
+
+//----------------------------------------------------------------------
 /** Clear any data on the bucket
  */
 void CqBucket::ShutdownBucket()

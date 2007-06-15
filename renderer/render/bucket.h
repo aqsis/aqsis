@@ -165,7 +165,7 @@ class CqBucket : public IqBucket
 			return(index);
 		}
 
-		static	void	CombineElements(enum EqFilterDepth eDepthFilter, CqColor zThreshold);
+		static void	CombineElements(enum EqFilterDepth eDepthFilter, CqColor zThreshold);
 		void	FilterBucket(bool empty);
 		void	ExposeBucket();
 		void	QuantizeBucket();
@@ -242,6 +242,11 @@ class CqBucket : public IqBucket
 		{
 			return ( m_agridWaiting );
 		}
+		/** Get the flag that indicates whether the bucket is
+		 * empty.  It is empty only when this bucket doesn't
+		 * contain any surface, micropolygon or grids.
+		 */
+		bool IsEmpty();
 		/** Get the flag that indicates if the bucket has been processed yet.
 		 */
 		bool IsProcessed() const

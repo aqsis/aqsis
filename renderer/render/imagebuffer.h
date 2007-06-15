@@ -323,7 +323,6 @@ class CqImageBuffer
 		{}
 		virtual	void	ImageComplete()
 		{}
-		virtual	bool	IsCurrentBucketEmpty();
 
 
 	private:
