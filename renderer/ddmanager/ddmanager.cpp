@@ -923,7 +923,7 @@ void CqDDManager::PrepareCustomParameters( std::map<std::string, void*>& mapPara
 			}
 			catch( XqException e )
 			{
-				Aqsis::log() << error << e.strReason().c_str() << std::endl;
+				Aqsis::log() << error << e.what() << std::endl;
 				return;
 			}
 

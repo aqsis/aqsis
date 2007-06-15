@@ -4,6 +4,7 @@ aqsistypes_sources = Split("""
 	bitvector.cpp
 	cellnoise.cpp
 	color.cpp
+	exception.cpp
 	file.cpp
 	logging.cpp
 	lowdiscrep.cpp

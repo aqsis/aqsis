@@ -1,5 +1,5 @@
 // Aqsis
-// Copyright (C) 1997 - 2007, Paul C. Gregory
+// Copyright © 1997 - 2001, Paul C. Gregory
 //
 // Contact: pgregory@aqsis.org
 //
@@ -19,98 +19,111 @@
 
 
 /** \file
-	\brief Declares generic exception types to be thrown by aqsis.
-	\author Paul C. Gregory (pgregory@aqsis.org)
+		\brief Declares the XqException base class thrown during exceptions.
+		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
+//? Is exception.h included already?
 #ifndef EXCEPTION_H_INCLUDED
+//{
 #define EXCEPTION_H_INCLUDED 1
 
+#include	"aqsis.h"
+#include <iosfwd>
+#include <stdexcept>
+#include <utility>
 #include <string>
 
-#include "aqsis.h"
-
-namespace Aqsis
-{
+START_NAMESPACE( Aqsis )
 
 //-----------------------------------------------------------------------
-/** \brief General message-based exception class.
- *
- * Specific exceptions are derived from this.
+/** General message based exception.  specific exceptions are derived from this.
  */
-class XqException
+
+class COMMON_SHARE XqException : public std::runtime_error
 {
 	public:
-		/** Default constructor.
-		 *
-		 * \param reason - a message explaining the resons for the error.
-		 */
-		inline XqException(const char* reason = 0);
-		/** \brief virtual destructor
-		 */
-		inline virtual ~XqException();
-
-		/** \brief Get the reason for the error as a string
-		 *
-		 * \return error message
-		 */
-		inline const std::string& strReason() const;
-
+		/**
+		* @deprecated Legacy constructor for backwards compatibility
+		*/
+		XqException (const std::string& reason);
+		
+		XqException (const std::string& reason, const std::string& detail,
+		const std::string& file, const unsigned int line);
+		
+		XqException (const std::string& reason,	const std::string& file,
+			const unsigned int line);
+		
+		const std::string& detail () const;
+		
+		std::pair<std::string, unsigned int> where () const;
+		
+		virtual const char* description () const;
+		
+		/**
+		* C++ Standard,  [except.spec] 15.4.14, Example
+		* a function that overrides a virtual function from a base class shall have an exception specification
+		* at least as restrictive as that in the base class.
+		*/
+		~XqException () throw ();
+		
 	private:
-		const std::string m_reason; ///< Message associated with this exception.
-};
-
-
-//------------------------------------------------------------------------------
-/** \brief Class for reporting input or output errors (eg, errors encountered
- * during file IO
- */
-class XqIoError : public XqException
-{
-	public:
-		inline XqIoError(const char* reason = 0);
-};
-
-/** \brief Class for reporting memory allocation errors.
- */
-class XqMemoryError : public XqException
-{
-	public:
-		inline XqMemoryError(const char* reason = 0);
-};
-
-
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-// Implementation of inline functions.
-//------------------------------------------------------------------------------
-// Inline functions for XqException
-inline XqException::XqException(const char* reason)
-	: m_reason(reason)
-{}
-
-inline XqException::~XqException()
-{}
-
-inline const std::string& XqException::strReason() const
-{
-	return m_reason;
+		const std::string 	m_detail; 	//< Optional, a detailed message
+		const std::string 	m_file;		//< The file name where the exception was thrown
+		const unsigned int	m_line;		//< The line numer where the exception was thrown
 }
+;
 
+COMMON_SHARE std::ostream& operator<<(std::ostream& o, const XqException& e);
 
-//------------------------------------------------------------------------------
-// Inline constructors for derived exceptions.
-inline XqMemoryError::XqMemoryError(const char* reason)
-	: XqException(reason)
-{ }
+class COMMON_SHARE XqInternal : public XqException
+{
+	public:
+		XqInternal (const std::string& reason, const std::string& detail,
+		const std::string& file, const unsigned int line);
+		
+		XqInternal (const std::string& reason,	const std::string& file,
+			const unsigned int line);
+		
+		virtual const char* description () const;
+		
+		~XqInternal () throw ();
+}
+;
 
-inline XqIoError::XqIoError(const char* reason)
-	: XqException(reason)
-{ }
+class COMMON_SHARE XqEnvironment : public XqException
+{
+	public:
+		XqEnvironment (const std::string& reason, const std::string& detail,
+		const std::string& file, const unsigned int line);
+		
+		XqEnvironment (const std::string& reason,	const std::string& file,
+			const unsigned int line);
+		
+		virtual const char* description () const;
+		
+		~XqEnvironment () throw ();
+}
+;
+
+class COMMON_SHARE XqValidationFailure : public XqException
+{
+	public:
+		XqValidationFailure (const std::string& reason, const std::string& detail,
+		const std::string& file, const unsigned int line);
+		
+		XqValidationFailure (const std::string& reason,	const std::string& file,
+		const unsigned int line);
+		
+		virtual const char* description () const;
+		
+		~XqValidationFailure () throw ();
+}
+;
 
 //-----------------------------------------------------------------------
 
-} // namespace Aqsis
+END_NAMESPACE( Aqsis )
 
 
 #endif // EXCEPTION_H_INCLUDED
