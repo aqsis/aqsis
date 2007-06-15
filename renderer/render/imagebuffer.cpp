@@ -1014,15 +1014,11 @@ void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax, 
 		if ( m_fQuit )
 			return ;
 
-
-		//Cull surface if it's hidden
+		// Cull surface if it's hidden
 		if ( !( DisplayMode() & ModeZ ) && !pSurface->pCSGNode() )
 		{
 			TIME_SCOPE("Occlusion culling")
-			bool fCull = false;
-			if ( !bIsEmpty && pSurface->fCachedBound() )
-				fCull = OcclusionCullSurface( pSurface );
-			if ( fCull )
+			if ( !bIsEmpty && pSurface->fCachedBound() && OcclusionCullSurface( pSurface ) )
 			{
 				Bucket.popSurface();
 				pSurface = Bucket.pTopSurface();
@@ -1040,7 +1036,6 @@ void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax, 
 
 		if ( fDiceable )
 		{
-
 			Bucket.popSurface();
 			CqMicroPolyGridBase* pGrid;
 			{
@@ -1081,8 +1076,7 @@ void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax, 
 				TIME_SCOPE("Splits")
 				std::vector<boost::shared_ptr<CqSurface> > aSplits;
 				TqInt cSplits = pSurface->Split( aSplits );
-				TqInt i;
-				for ( i = 0; i < cSplits; i++ )
+				for ( TqInt i = 0; i < cSplits; i++ )
 					PostSurface( aSplits[ i ] );
 
 				/// \debug:
@@ -1127,8 +1121,7 @@ void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax, 
 	TIMER_START("Filter")
 	if (fImager)
 		bIsEmpty = false;
-
-	Bucket.FilterBucket(bIsEmpty);
+	Bucket.FilterBucket(bIsEmpty, fImager);
 	if(!bIsEmpty)
 	{
 		Bucket.ExposeBucket();
@@ -1248,18 +1241,12 @@ void CqImageBuffer::RenderImage()
 	do
 	{
 		bool bIsEmpty = CurrentBucket().IsEmpty();
+		if (fImager)
+			bIsEmpty = false;
+
 		// Prepare the bucket.
 		CqVector2D bPos = BucketPosition();
 		CqVector2D bSize = BucketSize();
-
-		bool fImager = false;
-		const CqString* systemOptions;
-		if( ( systemOptions = QGetRenderContext() ->poptCurrent()->GetStringOption( "System", "Imager" ) ) != 0 )
-			if( systemOptions[ 0 ].compare("null") != 0 )
-				fImager = true;
-
-		if (fImager)
-			bIsEmpty = false;
 
 		{
 			TIME_SCOPE("Prepare bucket")

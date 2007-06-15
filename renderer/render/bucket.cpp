@@ -414,7 +414,7 @@ const TqFloat* CqBucket::Data( TqInt iXPos, TqInt iYPos )
 /** Filter the samples in this bucket according to type and filter widths.
  */
 
-void CqBucket::FilterBucket(bool empty)
+void CqBucket::FilterBucket(bool empty, bool fImager)
 {
 	CqImagePixel * pie;
 
@@ -436,12 +436,6 @@ void CqBucket::FilterBucket(bool empty)
 
 	TqInt x, y;
 	TqInt i = 0;
-
-	bool fImager = false;
-	const CqString* systemOptions;
-	if( ( systemOptions = QGetRenderContext() ->poptCurrent()->GetStringOption( "System", "Imager" ) ) != 0 )
-		if( systemOptions[ 0 ].compare("null") != 0 )
-			fImager = true;
 
 	TqInt endy = YOrigin() + Height();
 	TqInt endx = XOrigin() + Width();
@@ -952,6 +946,10 @@ void CqBucket::QuantizeBucket()
 }
 
 //----------------------------------------------------------------------
+/** Get the flag that indicates whether the bucket is empty.  It is
+ * empty only when this bucket doesn't contain any surface,
+ * micropolygon or grids.
+ */
 bool CqBucket::IsEmpty()
 {
 	if ( !pTopSurface() && aGrids().empty() && aMPGs().empty() )

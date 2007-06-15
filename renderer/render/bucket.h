@@ -166,7 +166,7 @@ class CqBucket : public IqBucket
 		}
 
 		static void	CombineElements(enum EqFilterDepth eDepthFilter, CqColor zThreshold);
-		void	FilterBucket(bool empty);
+		void	FilterBucket(bool empty, bool fImager);
 		void	ExposeBucket();
 		void	QuantizeBucket();
 		static	void	ShutdownBucket();
