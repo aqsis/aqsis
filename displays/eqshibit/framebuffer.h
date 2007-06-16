@@ -35,6 +35,7 @@
 
 #include	"aqsis.h"
 #include 	<boost/shared_ptr.hpp>
+#include	<boost/thread/mutex.hpp>
 
 /** FLTK Widget used to show a constantly updating image.
  *
@@ -100,12 +101,18 @@ public:
 
 	void update(int X, int Y, int W, int H);
 
+	boost::mutex& mutex()
+	{
+		return(m_mutex);
+	}
+
 private:
 	Fl_Window*	m_theWindow;
 	Fl_FrameBuffer_Widget* m_uiImageWidget;
 	Fl_RGB_Image*	m_uiImage;
 
 	boost::shared_ptr<CqImage>	m_associatedImage;
+	boost::mutex	m_mutex;
 };
 
 END_NAMESPACE( Aqsis )

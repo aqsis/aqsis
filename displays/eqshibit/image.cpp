@@ -25,13 +25,14 @@
 
 #include "image.h"
 #include "framebuffer.h"
+#include "logging.h"
 
 
 START_NAMESPACE( Aqsis )
 
 void CqImage::PrepareImageBuffer()
 {
-	boost::mutex::scoped_lock lock(mutex());
+	//boost::mutex::scoped_lock lock(mutex());
 	m_data = reinterpret_cast<unsigned char*>(malloc( m_imageWidth * m_imageHeight * m_channels * sizeof(TqUchar)));
 	// Initialise the display to a checkerboard to show alpha
 	for (TqUlong i = 0; i < imageHeight(); i ++)
@@ -45,14 +46,10 @@ void CqImage::PrepareImageBuffer()
 				t ^= 1;
 			if ( ( j & 31 ) < 16 )
 				t ^= 1;
-
 			if ( t )
-			{
 				d      = 128;
-			}
-			data()[channels() * (i*imageWidth() + j) ] = d;
-			data()[channels() * (i*imageWidth() + j) + 1] = d;
-			data()[channels() * (i*imageWidth() + j) + 2] = d;
+			for(TqUint chan = 0; chan < channels(); chan++)
+				data()[channels() * (i*imageWidth() + j) + chan ] = d;
 		}
 	}
 }

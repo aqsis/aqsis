@@ -31,8 +31,10 @@
 
 void Fl_FrameBuffer_Widget::draw(void)
 {
+	Fl::lock();
 	if(m_image)
 		fl_draw_image(m_image,x(),y(),m_width,m_height,m_depth,m_width*m_depth); // draw image
+	Fl::unlock();
 }
 
 
@@ -40,6 +42,7 @@ START_NAMESPACE( Aqsis )
 
 CqFramebuffer::CqFramebuffer(TqUlong width, TqUlong height, TqInt depth)
 {
+	Fl::lock();
 	m_theWindow = new Fl_Window(width, height);
 	m_uiImageWidget = new Fl_FrameBuffer_Widget(0,0, width, height, depth, 0);
 	m_theWindow->resizable(m_uiImageWidget);
@@ -47,6 +50,7 @@ CqFramebuffer::CqFramebuffer(TqUlong width, TqUlong height, TqInt depth)
 	m_theWindow->end();
 	Fl::visual(FL_RGB);
 	m_theWindow->show();
+	Fl::unlock();
 }
 
 CqFramebuffer::~CqFramebuffer()
@@ -63,17 +67,21 @@ void CqFramebuffer::show()
 
 void CqFramebuffer::connect(boost::shared_ptr<CqImage>& image)
 {
+	disconnect();
 	m_associatedImage = image;	
+	Fl::lock();
 	m_uiImageWidget->setImageData(image->data());
 	m_uiImageWidget->setImageProportions(image->frameWidth(), image->frameHeight(), image->channels());
 	m_theWindow->size(image->frameWidth(), image->frameHeight());
 	boost::function<void(int,int,int,int)> f;
 	f = boost::bind(&CqFramebuffer::update, this, _1, _2, _3, _4);
 	image->setUpdateCallback(f);
+	Fl::unlock();
 }
 
 void CqFramebuffer::disconnect()
 {
+	Fl::lock();
 	if(m_associatedImage)
 	{
 		boost::function<void(int,int,int,int)> f;
@@ -81,15 +89,19 @@ void CqFramebuffer::disconnect()
 	}
 	m_associatedImage.reset();
 	m_uiImageWidget->setImageData(0);
+	Fl::unlock();
 }
 
 void CqFramebuffer::update(int X, int Y, int W, int H)
 {
+	Fl::lock();
 	if(W < 0 || H < 0 || X < 0 || Y < 0)
 		m_uiImageWidget->damage(1);
 	else
 		m_uiImageWidget->damage(1, X, Y, W, H);
-	Fl::check();
+	Fl::awake();
+	Fl::unlock();
+	//Fl::check();
 }
 
 END_NAMESPACE( Aqsis )

@@ -37,11 +37,16 @@ using namespace Aqsis;
 #include "boost/archive/iterators/transform_width.hpp"
 #include "boost/archive/iterators/insert_linebreaks.hpp"
 
+#ifdef	AQSIS_SYSTEM_WIN32
+#include <winsock2.h>
+typedef	u_long in_addr_t;
+#else
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#endif
 
 #include "ndspy.h"
 
@@ -81,6 +86,62 @@ typedef
         ,72
     > 
     base64_text; // compose all the above operations in to a new iterator
+
+
+static int initialiseSocket(const std::string hostname, TqInt hostport)
+{
+#ifdef	AQSIS_SYSTEM_WIN32
+	WORD wVersionRequested;
+	WSADATA wsaData;
+	int err;
+	 
+	wVersionRequested = MAKEWORD( 2, 2 );
+	 
+	err = WSAStartup( wVersionRequested, &wsaData );
+	if ( err != 0 ) {
+		/* Tell the user that we could not find a usable */
+		/* WinSock DLL.                                  */
+		return INVALID_SOCKET;
+	}
+	 
+	/* Confirm that the WinSock DLL supports 2.2.*/
+	/* Note that if the DLL supports versions greater    */
+	/* than 2.2 in addition to 2.2, it will still return */
+	/* 2.2 in wVersion since that is the version we      */
+	/* requested.                                        */
+	 
+	if ( LOBYTE( wsaData.wVersion ) != 2 ||
+			HIBYTE( wsaData.wVersion ) != 2 ) {
+		/* Tell the user that we could not find a usable */
+		/* WinSock DLL.                                  */
+		WSACleanup( );
+		return INVALID_SOCKET; 
+	}
+#endif
+	int sock = socket(AF_INET,SOCK_STREAM,0);
+	sockaddr_in adServer;
+
+#ifndef AQSIS_SYSTEM_WIN32
+	bzero((char *) &adServer, sizeof(adServer)); 
+#else
+	ZeroMemory((char *) &adServer, sizeof(adServer)); 
+#endif
+	adServer.sin_family = AF_INET;
+	adServer.sin_addr.s_addr = inet_addr(hostname.c_str());
+	if (adServer.sin_addr.s_addr == (in_addr_t) -1)
+	{
+		Aqsis::log() << error << "Invalid IP address" << std::endl;;
+		return(INVALID_SOCKET);
+	};
+	adServer.sin_port = htons(hostport);
+
+	if( connect(sock,(const struct sockaddr*) &adServer, sizeof(sockaddr_in)))
+	{
+		return(INVALID_SOCKET);
+	}
+	return sock; 
+}
+
 
 PtDspyError DspyImageOpen(PtDspyImageHandle * image,
                           const char *drivername,
@@ -141,37 +202,23 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 		char *hostport = NULL;
 
 		if( DspyFindStringInParamList("hostcomputer", &hostname, paramCount, parameters ) == PkDspyErrorNone )
-		{
 			pImage->m_hostname = hostname;
-			Aqsis::log() << debug << "FB host specified: " << pImage->m_hostname << std::endl;
-		} 
 		else 
-		{
-			Aqsis::log() << debug << "FB not host specified" << std::endl;
-			pImage->m_hostname =  "";
-		};
-		if( DspyFindStringInParamList("hostport", &hostport, paramCount, parameters ) == PkDspyErrorNone )
-		{
-			Aqsis::log() << debug << "FB port specified" << pImage->m_hostport << std::endl;
-			pImage->m_hostport = atoi(strdup(hostport));
-		} 
-		else 
-		{
-			Aqsis::log() << debug << "FB port not specified" << std::endl;
-			pImage->m_hostport = 0;
-		};
+			pImage->m_hostname =  "127.0.0.1";
 
-		if( pImage->m_hostname.empty() )
+		if( DspyFindStringInParamList("hostport", &hostport, paramCount, parameters ) == PkDspyErrorNone )
+			pImage->m_hostport = atoi(strdup(hostport));
+		else 
+			pImage->m_hostport = 48515;
+
+		// First, see if eqshibit is running, by trying to connect to it.
+		int sock = initialiseSocket(pImage->m_hostname, pImage->m_hostport);
+		if(sock == INVALID_SOCKET)
 		{
-			//No host specified
-			pImage->m_hostname = "127.0.0.1";
-			if( !pImage->m_hostport )  
-			{
-				pImage->m_hostport = atoi("48515");
-			};
 			Aqsis::log() << info << "Will try to start a framebuffer" << std::endl;
 			//Local FB requested, we've not run one yet
-			// XXX Need to Abstract this for windows to work
+			// \todo: Need to abstract this into a system specific applciation launch in aqsistypes (pgregory).
+#ifndef	AQSIS_SYSTEM_WIN32
 			int pid = fork();
 			if (pid != -1)
 			{
@@ -194,27 +241,44 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 				Aqsis::log() << error << "Could not fork()" << std::endl;
 				return(PkDspyErrorNoMemory);
 			}
+#else
+			
+			PROCESS_INFORMATION piProcInfo;
+			STARTUPINFO siStartInfo;
+			BOOL bFuncRetn = FALSE;
 
+			ZeroMemory( &siStartInfo, sizeof(STARTUPINFO) );
+			siStartInfo.cb = sizeof(STARTUPINFO);
+			ZeroMemory( &piProcInfo, sizeof(PROCESS_INFORMATION) );
+
+			// Create the child process.
+			Aqsis::log() << info << "Starting the framebuffer" << std::endl;
+
+			char *command = "eqshibit -i 127.0.0.1";
+			bFuncRetn = CreateProcess(NULL,
+									  command,       // command line
+									  NULL,          // process security attributes
+									  NULL,          // primary thread security attributes
+									  TRUE,          // handles are inherited
+									  0,             // creation flags
+									  NULL,          // use parent's environment
+									  NULL,          // use parent's current directory
+									  &siStartInfo,  // STARTUPINFO pointer
+									  &piProcInfo);  // receives PROCESS_INFORMATION
+
+			if (bFuncRetn == 0)
+			{
+				Aqsis::log() << error << "RiProcRunProgram: CreateProcess failed" << std::endl;
+				return(PkDspyErrorNoMemory);
+			}
+			Sleep(2000); //Give it time to startup
+#endif
 			// The FB should be running at this point.
 			// Lets try and connect
-
-			int sock = socket(AF_INET,SOCK_STREAM,0);
-			sockaddr_in adServer;
-
-			bzero((char *) &adServer, sizeof(adServer)); 
-			adServer.sin_family = AF_INET;
-			adServer.sin_addr.s_addr = inet_addr(pImage->m_hostname.c_str());
-			if (adServer.sin_addr.s_addr == (in_addr_t) -1)
-			{
-				Aqsis::log() << error << "Invalid IP address" << std::endl;;
-				return(PkDspyErrorNoMemory);
-			};
-			adServer.sin_port = htons(pImage->m_hostport);
-
-			if( connect(sock,(const struct sockaddr*) &adServer, sizeof(sockaddr_in)))
-			{
-				return(PkDspyErrorUndefined);
-			}
+			sock = initialiseSocket(pImage->m_hostname, pImage->m_hostport);
+		}
+		if(sock != INVALID_SOCKET)
+		{
 			pImage->m_socket = sock;
 
 			TiXmlDocument displaydoc("open.xml");
@@ -314,7 +378,10 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			displaydoc.LinkEndChild(openMsgXML);
 			sendXMLMessage(displaydoc, pImage->m_socket);
 		}
-	} else 
+		else 
+			return(PkDspyErrorNoMemory);
+	} 
+	else 
 		return(PkDspyErrorNoMemory);
 
 	return(PkDspyErrorNone);

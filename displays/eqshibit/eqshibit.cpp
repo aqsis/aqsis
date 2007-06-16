@@ -48,12 +48,17 @@ using namespace Aqsis;
 
 #include <version.h>
 
+#ifndef	AQSIS_SYSTEM_WIN32
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <fcntl.h>
 #include <errno.h>
+#else
+#include <winsock2.h>
+#endif
+
 #include "eqshibit.h"
 #include "fluid_eqshibit_ui.h"
 #include "ddserver.h"
@@ -72,6 +77,7 @@ bool 			g_cl_syslog = false;
 ArgParse::apint 	g_cl_verbose = 1;
 
 CqEqshibitMainWindow *window = 0;
+boost::mutex g_XMLMutex;
 
 void version( std::ostream& Stream )
 {
@@ -142,6 +148,7 @@ class CqDataHandler
 
 		void processMessage(std::stringstream& msg)
 		{
+			boost::mutex::scoped_lock lock(g_XMLMutex);
 			// Parse the XML message sent.
 			TiXmlDocument xmlMsg;
 			xmlMsg.Parse(msg.str().c_str());
@@ -221,21 +228,12 @@ class CqDataHandler
 
 					boost::shared_ptr<CqImage> baseImage = boost::static_pointer_cast<CqImage>(m_client);
 					if(window->currentBook()->framebuffer())
-					{
 						window->currentBook()->framebuffer()->connect(baseImage);
-						window->currentBook()->framebuffer()->show();
-					}
-					else
-					{
-						boost::shared_ptr<CqFramebuffer> fb(new CqFramebuffer(m_client->imageWidth(), m_client->imageHeight(), m_client->channels()));
-						window->currentBook()->setFramebuffer(fb);
-						fb->show();
-						fb->connect(baseImage);
-					}
 					window->updateImageList(window->currentBookName());
 				}
 				else if(root->ValueStr().compare("Data") == 0)
 				{
+					Aqsis::log() << Aqsis::info << "Processing data message" << std::endl;
 					TiXmlElement* dimensionsXML = root->FirstChildElement("Dimensions");
 					if(dimensionsXML)
 					{
@@ -296,17 +294,29 @@ void HandleConnection(int sock, void *data)
 	if(g_theServer.Accept(newImage))
 	{
 		g_theClients[newImage->socket()] = newImage;
+		// \todo: Need to work out how to do non-blocking on Win32
+#ifndef	AQSIS_SYSTEM_WIN32
 		// Set socket as non-blocking
 		int oldflags;
 		oldflags = fcntl(sock, F_GETFL, 0);
 		fcntl(sock, F_SETFL, oldflags | O_NONBLOCK);
+#endif
 		
 		g_theThreads.push_back(new boost::thread(CqDataHandler(newImage->socket(), newImage)));
 
 		if(window)
 		{
+			Fl::lock();
 			boost::shared_ptr<CqImage> baseImage = boost::static_pointer_cast<CqImage>(newImage);
 			window->addImageToCurrentBook(baseImage);
+			if(!window->currentBook()->framebuffer())
+			{
+				boost::shared_ptr<CqFramebuffer> fb(new CqFramebuffer(100, 100, 3));
+				window->currentBook()->setFramebuffer(fb);
+				fb->show();
+				fb->connect(baseImage);
+			}
+			Fl::unlock();
 		}
 	}
 }
@@ -316,6 +326,7 @@ void HandleConnection(int sock, void *data)
 
 int main( int argc, char** argv )
 {
+	Fl::lock();
 	// Create listening socket. 
 	// Setup fltk. 
 	// add the socket to the fltk event

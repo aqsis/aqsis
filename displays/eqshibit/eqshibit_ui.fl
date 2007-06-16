@@ -7,7 +7,7 @@ class CqEqshibitMainWindow {open : {public Aqsis::CqEqshibitBase}
   Function {CqEqshibitMainWindow()} {open
   } {
     Fl_Window m_window {open
-      private xywh {255 260 540 310} type Double resizable
+      private xywh {422 221 540 310} type Double resizable
       code0 {\#include "eqshibit.h"}
       code1 {\#include "eqshibitbase.h"}
       code2 {\#include <stdio.h>}
@@ -47,7 +47,8 @@ class CqEqshibitMainWindow {open : {public Aqsis::CqEqshibitBase}
   }
   Function {addNewBook(std::string name)} {open return_type {virtual void}
   } {
-    code {CqEqshibitBase::addNewBook(name);
+    code {Fl::lock();
+CqEqshibitBase::addNewBook(name);
 char* _name = new char[name.length()+1];
 strcpy(_name, name.c_str());
 Fl_Resize_Browser *o = new Fl_Resize_Browser(0, 50, m_tabBooks->w(), m_tabBooks->h(), _name);
@@ -62,7 +63,9 @@ o->showcolsep(1);
 m_tabBooks->add(o);
 m_tabBooks->resizable(o);
 m_tabBooks->init_sizes();
-m_tabBooks->redraw();} {selected
+m_tabBooks->redraw();
+Fl::awake();
+Fl::unlock();} {selected
     }
   }
   Function {show(int argc, char **argv)} {open
@@ -71,7 +74,8 @@ m_tabBooks->redraw();} {selected
   }
   Function {addImageToCurrentBook(boost::shared_ptr<Aqsis::CqImage>& image)} {open return_type {virtual TqUlong}
   } {
-    code {TqUlong id = CqEqshibitBase::addImageToCurrentBook(image);
+    code {Fl::lock();
+TqUlong id = CqEqshibitBase::addImageToCurrentBook(image);
 // Should update book list here to match the base, but for
 // now we'll just add the name to the browser.
 Fl_Widget* current = m_tabBooks->value();
@@ -80,12 +84,15 @@ std::stringstream item;
 item << image->name() << "\\t" << image->frameWidth() << "x" << image->frameHeight();
 bcurr->add(item.str().c_str(), (void*)id);
 bcurr->redraw();
-Fl::check();
+//Fl::check();
+Fl::awake();
+Fl::unlock();
 return( id );} {}
   }
   Function {select_cb(Fl_Widget* w, void* d)} {open return_type {static void}
   } {
-    code {Fl_Resize_Browser* browser = static_cast<Fl_Resize_Browser*>(w);
+    code {Fl::lock();
+Fl_Resize_Browser* browser = static_cast<Fl_Resize_Browser*>(w);
 CqEqshibitMainWindow* win = reinterpret_cast<CqEqshibitMainWindow*>(d);
 if(win && w && win->currentBook())
 {
@@ -97,11 +104,14 @@ if(win && w && win->currentBook())
 		win->currentBook()->framebuffer()->connect(image);
 		win->currentBook()->framebuffer()->update(-1,-1,-1,-1);
 	}
-}} {}
+}
+Fl::awake();
+Fl::unlock();} {}
   }
   Function {updateImageList(const std::string& bookName)} {open return_type {virtual void}
   } {
-    code {Fl_Widget* const* tabs = m_tabBooks->array();
+    code {Fl::lock();
+Fl_Widget* const* tabs = m_tabBooks->array();
 Fl_Resize_Browser* bookBrowser = 0;
 
 int tabIndex = 0;
@@ -123,7 +133,9 @@ if(0 != bookBrowser)
 		bookBrowser->text(line, item.str().c_str());
 	}
 	bookBrowser->redraw();
-}} {}
+}
+Fl::awake();
+Fl::unlock();} {}
   }
   decl {int m_columnWidths[2];} {}
 } 
