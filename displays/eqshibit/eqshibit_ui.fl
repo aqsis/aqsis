@@ -65,8 +65,7 @@ m_tabBooks->resizable(o);
 m_tabBooks->init_sizes();
 m_tabBooks->redraw();
 Fl::awake();
-Fl::unlock();} {selected
-    }
+Fl::unlock();} {}
   }
   Function {show(int argc, char **argv)} {open
   } {
@@ -93,20 +92,27 @@ return( id );} {}
   } {
     code {Fl::lock();
 Fl_Resize_Browser* browser = static_cast<Fl_Resize_Browser*>(w);
-CqEqshibitMainWindow* win = reinterpret_cast<CqEqshibitMainWindow*>(d);
-if(win && w && win->currentBook())
+int theEvent = Fl::event();
+if(theEvent == FL_RELEASE)
 {
-	int selected = browser->value();
-	TqUlong imageID = (TqUlong)browser->data(selected);
-	boost::shared_ptr<Aqsis::CqImage> image = win->currentBook()->image(imageID);
-	if(image && win->currentBook()->framebuffer())
+	CqEqshibitMainWindow* win = reinterpret_cast<CqEqshibitMainWindow*>(d);
+	if(win && w && win->currentBook())
 	{
-		win->currentBook()->framebuffer()->connect(image);
-		win->currentBook()->framebuffer()->update(-1,-1,-1,-1);
+		int selected = browser->value();
+		TqUlong imageID = (TqUlong)browser->data(selected);
+		boost::shared_ptr<Aqsis::CqImage> image = win->currentBook()->image(imageID);
+		if(image && win->currentBook()->framebuffer())
+		{
+			win->currentBook()->framebuffer()->connect(image);
+			win->currentBook()->framebuffer()->update(-1,-1,-1,-1);
+			if(Fl::event_clicks())
+				win->currentBook()->framebuffer()->show();
+		}
 	}
 }
 Fl::awake();
-Fl::unlock();} {}
+Fl::unlock();} {selected
+    }
   }
   Function {updateImageList(const std::string& bookName)} {open return_type {virtual void}
   } {
