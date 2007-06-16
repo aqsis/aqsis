@@ -149,12 +149,13 @@ bool	CqDDServer::Prepare( TqInt port )
 
 bool CqDDServer::Open()
 {
+#ifdef AQSIS_SYSTEM_WIN32
 	WORD wVersionRequested;
 	WSADATA wsaData;
 	int err;
- 
+
 	wVersionRequested = MAKEWORD( 2, 2 );
- 
+
 	err = WSAStartup( wVersionRequested, &wsaData );
 	if ( err != 0 ) 
 	{
@@ -177,9 +178,11 @@ bool CqDDServer::Open()
 		WSACleanup( );
 		return(false); 
 	}
- 
+
 	/* The WinSock DLL is acceptable. Proceed. */
-    m_Socket = socket( AF_INET, SOCK_STREAM, 0 );
+#endif // AQSIS_SYSTEM_WIN32
+
+	m_Socket = socket( AF_INET, SOCK_STREAM, 0 );
 
     if ( m_Socket == INVALID_SOCKET )
     {

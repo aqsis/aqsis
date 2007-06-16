@@ -46,6 +46,7 @@ typedef	u_long in_addr_t;
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#define	INVALID_SOCKET -1
 #endif
 
 #include "ndspy.h"
