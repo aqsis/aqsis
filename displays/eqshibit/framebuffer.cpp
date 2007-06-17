@@ -40,6 +40,17 @@ void Fl_FrameBuffer_Widget::draw(void)
 
 START_NAMESPACE( Aqsis )
 
+Fl_Menu_Item CqFramebuffer::m_popupMenuItems[] = {
+  {"Red",       FL_ALT+'r'},
+  {"Green",     FL_ALT+'g'},
+  {"Blue",      FL_ALT+'b'},
+  {"Strange",   FL_ALT+'s', 0, 0, FL_MENU_INACTIVE},
+  {"&Charm",    FL_ALT+'c'},
+  {"Truth",     FL_ALT+'t'},
+  {"Beauty",    FL_ALT+'b'},
+  {0}
+};
+
 CqFramebuffer::CqFramebuffer(TqUlong width, TqUlong height, TqInt depth)
 {
 	Fl::lock();
@@ -47,8 +58,13 @@ CqFramebuffer::CqFramebuffer(TqUlong width, TqUlong height, TqInt depth)
 	m_uiImageWidget = new Fl_FrameBuffer_Widget(0,0, width, height, depth, 0);
 	m_theWindow->resizable(m_uiImageWidget);
 //	m_theWindow->label(thisClient.m_image.m_filename.c_str());
-	m_theWindow->end();
 	Fl::visual(FL_RGB);
+	m_popupMenu = new Fl_Menu_Button(0,0,width, height, "");
+	m_popupMenu->type(Fl_Menu_Button::POPUP3);
+	m_popupMenu->box(FL_NO_BOX);
+	m_popupMenu->menu(m_popupMenuItems); 
+	m_theWindow->resizable(m_popupMenu);
+	m_theWindow->end();
 	m_theWindow->show();
 	Fl::unlock();
 }

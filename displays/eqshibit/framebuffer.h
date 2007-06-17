@@ -32,6 +32,7 @@
 #include <FL/Fl_Box.H>
 #include <FL/Fl_Image.H>
 #include <FL/fl_draw.H>
+#include <FL/Fl_Menu_Button.H>
 
 #include	"aqsis.h"
 #include 	<boost/shared_ptr.hpp>
@@ -110,6 +111,8 @@ private:
 	Fl_Window*	m_theWindow;
 	Fl_FrameBuffer_Widget* m_uiImageWidget;
 	Fl_RGB_Image*	m_uiImage;
+	Fl_Menu_Button* m_popupMenu;
+	static Fl_Menu_Item m_popupMenuItems[];
 
 	boost::shared_ptr<CqImage>	m_associatedImage;
 	boost::mutex	m_mutex;
