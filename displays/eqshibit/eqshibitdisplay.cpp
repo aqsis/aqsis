@@ -202,7 +202,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 		char *hostname = NULL;
 		char *port = NULL;
 
-		if( DspyFindStringInParamList("computer", &hostname, paramCount, parameters ) == PkDspyErrorNone )
+		if( DspyFindStringInParamList("host", &hostname, paramCount, parameters ) == PkDspyErrorNone )
 			pImage->m_hostname = hostname;
 		else 
 			pImage->m_hostname =  "127.0.0.1";
