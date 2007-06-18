@@ -19,42 +19,47 @@ env.AppendUnique(CPPDEFINES=[('NDEBUG', '1'), ('PLUGINS', '1'), ('USE_TIMERS', 1
 
 # Point at the boost headers.
 # todo: need to find a way of determining this location automatically
-env.Replace(boost_include_path = ['/usr/local/include/boost-1_33'])
+if env['boost_include_path'] == "":
+	env.Replace(boost_include_path = ['/usr/local/include/boost-1_33'])
+if env['boost_lib_path'] == "":
+	env.Replace(boost_lib_path = ['/usr/local/lib'])
+if env['boost_thread_lib'] == "":
+	env.Replace(boost_thread_lib = ['boost_thread'])
 
-# Find out where the TIFF headers are, look in common places for Fink and DarwinPorts.
+# Find out where the TIFF headers are, look in common places for Fink and MacPorts.
 tiffiofile = env.FindFile('tiffio.h', ['$tiff_include_path', '/usr/local/include', '/opt/local/include'])
 if tiffiofile != None:
 	env.Replace(tiff_include_path = os.path.dirname(tiffiofile.abspath))
 
-# Find out where the TIFF libraries are, look in common places for Fink and DarwinPorts.
+# Find out where the TIFF libraries are, look in common places for Fink and MacPorts.
 tifflibfile = env.FindFile('libtiff.a', ['$tiff_lib_path', '/usr/local/lib', '/opt/local/lib'])
 if tifflibfile != None:
 	env.Replace(tiff_lib_path = os.path.dirname(tifflibfile.abspath))
 env.Replace(tiff_lib = 'tiff')
 
-# Find out where the JPEG headers are, look in common places for Fink and DarwinPorts.
+# Find out where the JPEG headers are, look in common places for Fink and MacPorts.
 jpegiofile = env.FindFile('jpeglib.h', ['$jpeg_include_path', '/usr/local/include', '/opt/local/include'])
 if jpegiofile != None:
 	env.Replace(jpeg_include_path = os.path.dirname(jpegiofile.abspath))
 
-# Find out where the JPEG libraries are, look in common places for Fink and DarwinPorts.
+# Find out where the JPEG libraries are, look in common places for Fink and MacPorts.
 jpeglibfile = env.FindFile('libjpeg.a', ['$jpeg_lib_path', '/usr/local/lib', '/opt/local/lib'])
 if jpeglibfile != None:
 	env.Replace(jpeg_lib_path = os.path.dirname(jpeglibfile.abspath))
 env.Replace(jpeg_lib = 'jpeg')
 
-# Find out where the zlib headers are, look in common places for Fink and DarwinPorts.
+# Find out where the zlib headers are, look in common places for Fink and MacPorts.
 zlibiofile = env.FindFile('zlib.h', ['$zlib_include_path', '/usr/local/include', '/opt/local/include'])
 if zlibiofile != None:
 	env.Replace(zlib_include_path = os.path.dirname(zlibiofile.abspath))
 
-# Find out where the zlib libraries are, look in common places for Fink and DarwinPorts.
+# Find out where the zlib libraries are, look in common places for Fink and MacPorts.
 zliblibfile = env.FindFile('libz.a', ['$zlib_lib_path', '/usr/local/lib', '/opt/local/lib'])
 if zliblibfile != None:
 	env.Replace(zlib_lib_path = os.path.dirname(zliblibfile.abspath))
 env.Replace(z_lib = 'z')
 
-# Find out where the OpenEXR libraries are, look in common places for Fink and DarwinPorts.
+# Find out where the OpenEXR libraries are, look in common places for Fink and MacPorts.
 exriofile = env.FindFile('half.h', ['$exr_include_path', '/usr/local/include/OpenEXR', '/opt/local/include/OpenEXR'])
 if exriofile != None:
 	env.Replace(exr_include_path = os.path.dirname(exriofile.abspath))
@@ -65,12 +70,12 @@ if exrlibfile != None:
 env.Replace(exr_lib = 'IlmImf')
 env.Replace(exr2tif_libs = ['IlmImf', 'Half', 'Iex', 'Imath'])
 
-# Find out where the fltk headers are, look in common places for Fink and DarwinPorts.
+# Find out where the fltk headers are, look in common places for Fink and MacPorts.
 fltkfile = env.FindFile('FL/fl.h', ['$fltk_include_path', '/usr/local/include', '/opt/local/include'])
 if fltkfile != None:
 	env.Replace(fltk_include_path = os.path.split(os.path.dirname(fltkfile.abspath))[0])
 
-# Find out where the fltk libraries are, look in common places for Fink and DarwinPorts.
+# Find out where the fltk libraries are, look in common places for Fink and MacPorts.
 fltklibfile = env.FindFile('libfltk.a', ['$fltk_lib_path', '/usr/local/lib', '/opt/local/lib'])
 if fltklibfile != None:
 	env.Replace(fltk_lib_path = os.path.dirname(fltklibfile.abspath))
