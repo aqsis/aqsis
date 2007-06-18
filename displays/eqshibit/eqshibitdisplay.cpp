@@ -89,7 +89,7 @@ typedef
     base64_text; // compose all the above operations in to a new iterator
 
 
-static int initialiseSocket(const std::string hostname, TqInt hostport)
+static int initialiseSocket(const std::string hostname, TqInt port)
 {
 #ifdef	AQSIS_SYSTEM_WIN32
 	WORD wVersionRequested;
@@ -134,7 +134,7 @@ static int initialiseSocket(const std::string hostname, TqInt hostport)
 		Aqsis::log() << error << "Invalid IP address" << std::endl;;
 		return(INVALID_SOCKET);
 	};
-	adServer.sin_port = htons(hostport);
+	adServer.sin_port = htons(port);
 
 	if( connect(sock,(const struct sockaddr*) &adServer, sizeof(sockaddr_in)))
 	{
@@ -200,20 +200,20 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 
 		// Check if the user has specified any options
 		char *hostname = NULL;
-		char *hostport = NULL;
+		char *port = NULL;
 
-		if( DspyFindStringInParamList("hostcomputer", &hostname, paramCount, parameters ) == PkDspyErrorNone )
+		if( DspyFindStringInParamList("computer", &hostname, paramCount, parameters ) == PkDspyErrorNone )
 			pImage->m_hostname = hostname;
 		else 
 			pImage->m_hostname =  "127.0.0.1";
 
-		if( DspyFindStringInParamList("hostport", &hostport, paramCount, parameters ) == PkDspyErrorNone )
-			pImage->m_hostport = atoi(strdup(hostport));
+		if( DspyFindStringInParamList("port", &port, paramCount, parameters ) == PkDspyErrorNone )
+			pImage->m_port = atoi(strdup(port));
 		else 
-			pImage->m_hostport = 48515;
+			pImage->m_port = 48515;
 
 		// First, see if eqshibit is running, by trying to connect to it.
-		int sock = initialiseSocket(pImage->m_hostname, pImage->m_hostport);
+		int sock = initialiseSocket(pImage->m_hostname, pImage->m_port);
 		if(sock == INVALID_SOCKET)
 		{
 			Aqsis::log() << info << "Will try to start a framebuffer" << std::endl;
@@ -276,7 +276,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 #endif
 			// The FB should be running at this point.
 			// Lets try and connect
-			sock = initialiseSocket(pImage->m_hostname, pImage->m_hostport);
+			sock = initialiseSocket(pImage->m_hostname, pImage->m_port);
 		}
 		if(sock != INVALID_SOCKET)
 		{

@@ -39,6 +39,15 @@ class CqEqshibitMainWindow {open : {public Aqsis::CqEqshibitBase}
             code0 {o->shortcut(FL_COMMAND+'s');}
           }
         }
+        Submenu {} {
+          label {&Help} open
+          xywh {0 0 63 20}
+        } {
+          MenuItem {} {
+            label About selected
+            xywh {0 0 31 20}
+          }
+        }
       }
       Fl_Tabs m_tabBooks {open
         private xywh {0 29 540 281} resizable
@@ -111,8 +120,7 @@ if(theEvent == FL_RELEASE)
 	}
 }
 Fl::awake();
-Fl::unlock();} {selected
-    }
+Fl::unlock();} {}
   }
   Function {updateImageList(const std::string& bookName)} {open return_type {virtual void}
   } {

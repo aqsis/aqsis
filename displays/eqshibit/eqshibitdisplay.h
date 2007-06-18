@@ -43,7 +43,7 @@ struct SqDisplayInstance
 	{}
 	CqString		m_filename;
 	CqString		m_hostname;
-	TqInt			m_hostport;
+	TqInt			m_port;
 	int				m_socket;
 	// The number of pixels that have already been rendered (used for progress reporting)
 	TqInt		m_pixelsReceived;
