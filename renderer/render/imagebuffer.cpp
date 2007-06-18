@@ -1115,7 +1115,7 @@ void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax, 
 	if (!bIsEmpty)
 	{
 		TIME_SCOPE("Combine")
-		CqBucket::CombineElements(depthfilter, zThreshold);
+		Bucket.CombineElements(depthfilter, zThreshold);
 	}
 
 	TIMER_START("Filter")

@@ -165,7 +165,7 @@ class CqBucket : public IqBucket
 			return(index);
 		}
 
-		static void	CombineElements(enum EqFilterDepth eDepthFilter, CqColor zThreshold);
+		void	CombineElements(enum EqFilterDepth eDepthFilter, CqColor zThreshold);
 		void	FilterBucket(bool empty, bool fImager);
 		void	ExposeBucket();
 		void	QuantizeBucket();
