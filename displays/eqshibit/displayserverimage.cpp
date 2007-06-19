@@ -58,6 +58,10 @@ typedef sockaddr* PSOCKADDR;
 #include	"render.h"
 #include	"displayserverimage.h"
 
+#include "boost/archive/iterators/base64_from_binary.hpp"
+#include "boost/archive/iterators/transform_width.hpp"
+#include "boost/archive/iterators/insert_linebreaks.hpp"
+
 START_NAMESPACE( Aqsis )
 
 
@@ -251,6 +255,48 @@ void CqDisplayServerImage::serialise(const std::string& folder)
 	file1 << "Test" << std::endl;
 	file1.close();
 #endif
+}
+
+// Define a base64 encoding stream iterator using the boost archive data flow iterators.
+typedef 
+    boost::archive::iterators::insert_linebreaks<         // insert line breaks every 72 characters
+        boost::archive::iterators::base64_from_binary<    // convert binary values ot base64 characters
+            boost::archive::iterators::transform_width<   // retrieve 6 bit integers from a sequence of 8 bit bytes
+                const char *,
+                6,
+                8
+            >
+        > 
+        ,72
+    > 
+    base64_text; // compose all the above operations in to a new iterator
+
+TiXmlElement* CqDisplayServerImage::serialiseToXML()
+{
+	TiXmlElement* imageXML = new TiXmlElement("Image");
+
+	TiXmlElement* typeXML = new TiXmlElement("Type");
+	TiXmlText* typeText = new TiXmlText("managed");
+	typeXML->LinkEndChild(typeText);
+	imageXML->LinkEndChild(typeXML);
+
+	TiXmlElement* nameXML = new TiXmlElement("Name");
+	TiXmlText* nameText = new TiXmlText(name());
+	nameXML->LinkEndChild(nameText);
+	imageXML->LinkEndChild(nameXML);
+
+	TiXmlElement* dataXML = new TiXmlElement("Bitmap");
+	std::stringstream base64Data;
+	size_t dataLen = m_imageWidth * m_imageHeight * m_channels * sizeof(TqUchar);
+	std::copy(	base64_text(BOOST_MAKE_PFTO_WRAPPER(m_data)), 
+				base64_text(BOOST_MAKE_PFTO_WRAPPER(m_data + dataLen)), 
+				std::ostream_iterator<char>(base64Data));
+	TiXmlText* dataTextXML = new TiXmlText(base64Data.str());
+	dataTextXML->SetCDATA(true);
+	dataXML->LinkEndChild(dataTextXML);
+	imageXML->LinkEndChild(dataXML);
+
+	return(imageXML);
 }
 
 END_NAMESPACE( Aqsis )

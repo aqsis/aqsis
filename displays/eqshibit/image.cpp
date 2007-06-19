@@ -59,4 +59,21 @@ void CqImage::setUpdateCallback(boost::function<void(int,int,int,int)> f)
 	m_updateCallback = f;
 }
 
+TiXmlElement* CqImage::serialiseToXML()
+{
+	TiXmlElement* imageXML = new TiXmlElement("Image");
+
+	TiXmlElement* typeXML = new TiXmlElement("Type");
+	TiXmlText* typeText = new TiXmlText("external");
+	typeXML->LinkEndChild(typeText);
+	imageXML->LinkEndChild(typeXML);
+
+	TiXmlElement* nameXML = new TiXmlElement("Name");
+	TiXmlText* nameText = new TiXmlText(name());
+	nameXML->LinkEndChild(nameText);
+	imageXML->LinkEndChild(nameXML);
+
+	return(imageXML);
+}
+
 END_NAMESPACE( Aqsis )

@@ -104,6 +104,7 @@ public:
     void acceptData(TqUlong xmin, TqUlong xmaxplus1, TqUlong ymin, TqUlong ymaxplus1, TqInt elementSize, const unsigned char* data);
 	
 	virtual void serialise(const std::string& folder);
+	virtual TiXmlElement* serialiseToXML();
 
 private:
     SOCKET	m_socket;			///< Socket ID of the client.

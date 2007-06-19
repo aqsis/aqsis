@@ -36,6 +36,7 @@
 
 #include	"aqsis.h"
 #include	"sstring.h"
+#include 	"tinyxml.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -132,6 +133,7 @@ public:
 
 	virtual void serialise(const std::string& folder)
 	{}
+	virtual TiXmlElement* serialiseToXML();
 
 	boost::mutex& mutex()
 	{

@@ -74,11 +74,12 @@ TqUlong CqEqshibitBase::addImageToCurrentBook(boost::shared_ptr<CqImage>& image)
 	return( currentBook()->addImage(image));	
 }
 
+
 void CqEqshibitBase::saveConfigurationAs()
 {
 	Fl::lock();
-#ifdef	AQSIS_SYSTEM_WIN32
 	char* name = fl_file_chooser("Save Configuration As", "*.xml", m_currentConfigName.c_str());
+#ifdef	AQSIS_SYSTEM_WIN32
 	if(name != NULL)
 	{
 		char drive[_MAX_DRIVE];
@@ -124,6 +125,35 @@ void CqEqshibitBase::saveConfigurationAs()
 				TiXmlText* filenameText = new TiXmlText(image->second->filename());
 				filenameXML->LinkEndChild(filenameText);
 				imageXML->LinkEndChild(filenameXML);
+			}
+			bookXML->LinkEndChild(imagesXML);
+		}
+		doc.LinkEndChild(decl);
+		doc.LinkEndChild(booksXML);
+		doc.SaveFile(name);
+	}
+#else
+	if(name != NULL)
+	{
+		m_currentConfigName = name;
+		TiXmlDocument doc(name);
+		TiXmlDeclaration* decl = new TiXmlDeclaration("1.0","","yes");
+		TiXmlElement* booksXML = new TiXmlElement("Books");
+
+		std::map<std::string, boost::shared_ptr<CqBook> >::iterator book;
+		for(book = m_books.begin(); book != m_books.end(); ++book) 
+		{
+			TiXmlElement* bookXML = new TiXmlElement("Book");
+			bookXML->SetAttribute("name", book->first);
+			booksXML->LinkEndChild(bookXML);
+			TiXmlElement* imagesXML = new TiXmlElement("Images");
+
+			std::map<TqUlong, boost::shared_ptr<CqImage> >::iterator image;
+			for(image = book->second->images().begin(); image != book->second->images().end(); ++image)
+			{
+				// Serialise the image first.
+				TiXmlElement* imageXML = image->second->serialiseToXML();
+				imagesXML->LinkEndChild(imageXML);
 			}
 			bookXML->LinkEndChild(imagesXML);
 		}
