@@ -625,16 +625,9 @@ void CqImageBuffer::RenderMPGs( long xmin, long xmax, long ymin, long ymax )
 {
 	// Render any waiting MPGs
 	std::vector<CqMicroPolygon*>::iterator lastmpg = CurrentBucket().aMPGs().end();
-	CqMicroPolyGridBase* pPrevGrid = NULL;
 	for ( std::vector<CqMicroPolygon*>::iterator impg = CurrentBucket().aMPGs().begin(); impg != lastmpg; impg++ )
 	{
 		CqMicroPolygon* pMpg = *impg;
-
-		if(pMpg->pGrid() != pPrevGrid)
-		{
-			pPrevGrid = pMpg->pGrid();
-		}
-
 		CurrentBucket().RenderMicroPoly( pMpg, xmin, xmax, ymin, ymax );
 		if ( PushMPGDown( ( pMpg ), CurrentBucketCol(), CurrentBucketRow() ) )
 			STATS_INC( MPG_pushed_down );
