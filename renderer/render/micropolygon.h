@@ -80,12 +80,8 @@ class CqMicroPolyGridBase : public CqRefCount
 
 		/** Pure virtual function, splits the grid into micropolys.
 		 * \param pImage Pointer to the image buffer being rendered.
-		 * \param xmin The minimum x pixel, taking into account clipping etc.
-		 * \param xmax The maximum x pixel, taking into account clipping etc.
-		 * \param ymin The minimum y pixel, taking into account clipping etc.
-		 * \param ymax The maximum y pixel, taking into account clipping etc.
 		 */
-		virtual	void	Split( CqImageBuffer* pImage, long xmin, long xmax, long ymin, long ymax ) = 0;
+		virtual	void	Split( CqImageBuffer* pImage ) = 0;
 		/** Pure virtual, shade the grid.
 		 */
 		virtual	void	Shade() = 0;
@@ -249,7 +245,7 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase
 		void DeleteVariables( bool all );
 
 		// Overrides from CqMicroPolyGridBase
-		virtual	void	Split( CqImageBuffer* pImage, long xmin, long xmax, long ymin, long ymax );
+		virtual	void	Split( CqImageBuffer* pImage );
 		virtual	void	Shade();
 		virtual	void	TransferOutputVariables();
 
@@ -354,7 +350,7 @@ class CqMotionMicroPolyGrid : public CqMicroPolyGridBase, public CqMotionSpec<Cq
 		// Overrides from CqMicroPolyGridBase
 
 
-		virtual	void	Split( CqImageBuffer* pImage, long xmin, long xmax, long ymin, long ymax );
+		virtual	void	Split( CqImageBuffer* pImage );
 		virtual	void	Shade();
 		virtual	void	TransferOutputVariables();
 		

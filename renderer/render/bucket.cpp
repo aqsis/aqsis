@@ -974,9 +974,6 @@ void CqBucket::ShutdownBucket()
 	m_SamplePoints.clear();
 }
 
-
-
-
 //----------------------------------------------------------------------
 /** Render a particular micropolygon.
  

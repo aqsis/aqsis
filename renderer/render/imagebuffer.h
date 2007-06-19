@@ -274,6 +274,7 @@ class CqImageBuffer
 		bool	PushMPGForward( CqMicroPolygon* pmpg, TqInt Col, TqInt Row );
 		bool	PushMPGDown( CqMicroPolygon*, TqInt Col, TqInt Row );
 		void	RenderMPGs( long xmin, long xmax, long ymin, long ymax );
+		void	RenderWaitingMPs( long xmin, long xmax, long ymin, long ymax );
 		void	RenderSurfaces( long xmin, long xmax, long ymin, long ymax, bool fImager, enum EqFilterDepth filterdepth, CqColor zThreshold );
 		void	RenderImage();
 		void	StoreExtraData( CqMicroPolygon* pMPG, SqImageSample& sample);

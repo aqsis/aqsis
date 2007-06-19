@@ -488,13 +488,11 @@ void CqImageBuffer::AddMPG( CqMicroPolygon* pmpgNew )
 		PushMPGDown( pmpgNew, iXBa, iYBa );
 		PushMPGForward( pmpgNew, iXBa, iYBa );
 		RELEASEREF( pmpgNew );
-		return ;
 	}
-	assert( !Bucket(iXBa, iYBa).IsProcessed() );
-	Bucket(iXBa, iYBa).AddMPG( pmpgNew );
-	ADDREF( pmpgNew );
-
-	RELEASEREF( pmpgNew );
+	else
+	{
+		Bucket(iXBa, iYBa).AddMPG( pmpgNew );
+	}
 }
 
 
@@ -612,8 +610,8 @@ bool CqImageBuffer::PushMPGDown( CqMicroPolygon* pmpg, TqInt Col, TqInt Row )
  
     All micro polygon grids in the specified bucket are bust into
     individual micro polygons which are assigned to their appropriate
-    bucket. Then RenderMicroPoly() is called for each micro polygon in
-    the current bucket.
+    bucket.  We call RenderWaitingMPs() several times to render them
+    as soon as possible.
  
  * \param xmin Integer minimum extend of the image part being rendered, takes into account buckets and clipping.
  * \param xmax Integer maximum extend of the image part being rendered, takes into account buckets and clipping.
@@ -623,7 +621,36 @@ bool CqImageBuffer::PushMPGDown( CqMicroPolygon* pmpg, TqInt Col, TqInt Row )
 
 void CqImageBuffer::RenderMPGs( long xmin, long xmax, long ymin, long ymax )
 {
-	// Render any waiting MPGs
+	RenderWaitingMPs( xmin, xmax, ymin, ymax );
+
+	// Split any grids in this bucket waiting to be processed.
+	std::vector<CqMicroPolyGridBase*>::iterator lastgrid = CurrentBucket().aGrids().end();
+	for ( std::vector<CqMicroPolyGridBase*>::iterator igrid = CurrentBucket().aGrids().begin(); igrid != lastgrid; igrid++ )
+	{
+		CqMicroPolyGridBase* pGrid = *igrid;
+		pGrid->Split( this );
+
+		RenderWaitingMPs( xmin, xmax, ymin, ymax );
+	}
+	CurrentBucket().aGrids().clear();
+}
+
+
+//----------------------------------------------------------------------
+/** Render any waiting MPs.
+ 
+    Render ready micro polygons waiting to be processed, so that we
+    have as few as possible MPs waiting and using memory at any given
+    moment
+ 
+ * \param xmin Integer minimum extend of the image part being rendered, takes into account buckets and clipping.
+ * \param xmax Integer maximum extend of the image part being rendered, takes into account buckets and clipping.
+ * \param ymin Integer minimum extend of the image part being rendered, takes into account buckets and clipping.
+ * \param ymax Integer maximum extend of the image part being rendered, takes into account buckets and clipping.
+ */
+
+void CqImageBuffer::RenderWaitingMPs( long xmin, long xmax, long ymin, long ymax )
+{
 	std::vector<CqMicroPolygon*>::iterator lastmpg = CurrentBucket().aMPGs().end();
 	for ( std::vector<CqMicroPolygon*>::iterator impg = CurrentBucket().aMPGs().begin(); impg != lastmpg; impg++ )
 	{
@@ -636,33 +663,6 @@ void CqImageBuffer::RenderMPGs( long xmin, long xmax, long ymin, long ymax )
 		RELEASEREF( ( pMpg ) );
 	}
 	CurrentBucket().aMPGs().clear();
-
-	// Split any grids in this bucket waiting to be processed.
-	if ( !CurrentBucket().aGrids().empty() )
-	{
-		std::vector<CqMicroPolyGridBase*>::iterator lastgrid = CurrentBucket().aGrids().end();
-
-		for ( std::vector<CqMicroPolyGridBase*>::iterator igrid = CurrentBucket().aGrids().begin(); igrid != lastgrid; igrid++ )
-		{
-			CqMicroPolyGridBase* pGrid = *igrid;
-			pGrid->Split( this, xmin, xmax, ymin, ymax );
-
-			// Render any waiting MPGs
-			std::vector<CqMicroPolygon*>::iterator lastmpg = CurrentBucket().aMPGs().end();
-			for ( std::vector<CqMicroPolygon*>::iterator impg = CurrentBucket().aMPGs().begin(); impg != lastmpg; impg++ )
-			{
-				CqMicroPolygon* pMpg = *impg;
-				CurrentBucket().RenderMicroPoly( pMpg, xmin, xmax, ymin, ymax );
-				if ( PushMPGDown( ( pMpg ), CurrentBucketCol(), CurrentBucketRow() ) )
-					STATS_INC( MPG_pushed_down );
-				if ( PushMPGForward( ( pMpg ), CurrentBucketCol(), CurrentBucketRow() ) )
-					STATS_INC( MPG_pushed_forward );
-				RELEASEREF( ( pMpg ) );
-			}
-			CurrentBucket().aMPGs().clear();
-		}
-		CurrentBucket().aGrids().clear();
-	}
 }
 
 
