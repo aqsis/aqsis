@@ -17,12 +17,16 @@ else:
 env.AppendUnique(CPPPATH = [env.Dir('#/aqsistypes/posix')])
 env.AppendUnique(CPPDEFINES=[('NDEBUG', '1'), ('PLUGINS', '1'), ('USE_TIMERS', 1), ('_CLOCKTICKS', '1')])
 
-# Point at the boost headers.
-# todo: need to find a way of determining this location automatically
-if env['boost_include_path'] == "":
-	env.Replace(boost_include_path = ['/usr/local/include/boost-1_33'])
-if env['boost_lib_path'] == "":
-	env.Replace(boost_lib_path = ['/usr/local/lib'])
+# Find out where the Boost headers are, look in common places for Fink and MacPorts.
+boostiofile = env.FindFile('io_fwd.hpp', ['$boost_include_path', '/usr/local/include/boost', '/opt/local/include/boost'])
+if boostiofile != None:
+	env.Replace(boost_include_path = os.path.split(os.path.dirname(boostiofile.abspath))[0])
+
+# Find out where the Boost libraries are, look in common places for Fink and MacPorts.
+boostlibfile = env.FindFile('libboost_iostreams.a', ['$boost_lib_path', '/usr/local/lib', '/opt/local/lib'])
+if boostlibfile != None:
+	env.Replace(boost_lib_path = os.path.dirname(boostlibfile.abspath))
+env.Replace(boost_lib = 'boost')
 if env['boost_thread_lib'] == "":
 	env.Replace(boost_thread_lib = ['boost_thread'])
 
@@ -70,12 +74,12 @@ if exrlibfile != None:
 env.Replace(exr_lib = 'IlmImf')
 env.Replace(exr2tif_libs = ['IlmImf', 'Half', 'Iex', 'Imath'])
 
-# Find out where the fltk headers are, look in common places for Fink and MacPorts.
-fltkfile = env.FindFile('FL/fl.h', ['$fltk_include_path', '/usr/local/include', '/opt/local/include'])
+# Find out where the FLTK headers are, look in common places for Fink and MacPorts.
+fltkfile = env.FindFile('fl.h', ['$fltk_include_path', '/usr/local/include/FL', '/opt/local/include/FL'])
 if fltkfile != None:
 	env.Replace(fltk_include_path = os.path.split(os.path.dirname(fltkfile.abspath))[0])
 
-# Find out where the fltk libraries are, look in common places for Fink and MacPorts.
+# Find out where the FLTK libraries are, look in common places for Fink and MacPorts.
 fltklibfile = env.FindFile('libfltk.a', ['$fltk_lib_path', '/usr/local/lib', '/opt/local/lib'])
 if fltklibfile != None:
 	env.Replace(fltk_lib_path = os.path.dirname(fltklibfile.abspath))
@@ -99,4 +103,5 @@ env.Replace(aqsis_linkflags = ['-framework', 'Carbon'])
 env.Replace(slparse_ccflags = ['-O0'])
 env.Replace(libaqsis_linkflags = ['-framework', 'Carbon'])
 env.Replace(eqshibitapp_linkflags = ['-framework', 'Carbon'])
+
 
