@@ -50,28 +50,6 @@
 START_NAMESPACE( Aqsis )
 
 
-// This struct is used to hold info about a mpg that is used when rendering the mpg.
-// It caches the info for use by multiple samples.
-struct SqMpgSampleInfo
-{
-	CqColor		m_Colour;
-	CqColor		m_Opacity;
-	bool		m_Occludes;		// whether the opacity is full.
-	bool		m_IsOpaque;		// whether the mpg can use the faster StoreOpaqueSample routine that assumes a few things.
-};
-
-// This struct holds info about a grid that can be cached and used for all its mpgs.
-struct SqGridInfo
-{
-	TqFloat			m_ShadingRate;
-	TqFloat			m_ShutterOpenTime;
-	TqFloat			m_ShutterCloseTime;
-	const TqFloat*	        m_LodBounds;
-	bool			m_IsMatte;
-	bool			m_IsCullable;
-	bool			m_UsesDataMap;
-};
-
 // Enumeration of the type of rendering order of the buckets (experimental)
 enum EqBucketOrder {
         Bucket_Horizontal = 0,
@@ -296,14 +274,9 @@ class CqImageBuffer
 		bool	PushMPGForward( CqMicroPolygon* pmpg, TqInt Col, TqInt Row );
 		bool	PushMPGDown( CqMicroPolygon*, TqInt Col, TqInt Row );
 		void	RenderMPGs( long xmin, long xmax, long ymin, long ymax );
-		void	RenderMicroPoly( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax );
 		void	RenderSurfaces( long xmin, long xmax, long ymin, long ymax, bool fImager, enum EqFilterDepth filterdepth, CqColor zThreshold );
 		void	RenderImage();
 		void	StoreExtraData( CqMicroPolygon* pMPG, SqImageSample& sample);
-
-		void	RenderMPG_MBOrDof( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax, bool IsMoving, bool UsingDof );
-		void	RenderMPG_Static( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax );
-
 
 
 		/** Get completion status of this rendered image.
@@ -352,15 +325,10 @@ class CqImageBuffer
 		TqInt	m_CurrentBucketRow;	///< Row index of the bucket currently being processed.
 		TqInt	m_MaxEyeSplits;	        ///< Max Eye Splits by default 10
 
-		SqMpgSampleInfo m_CurrentMpgSampleInfo;
-
-		SqGridInfo m_CurrentGridInfo;
-
 #if ENABLE_MPDUMP
 		CqMPDump	m_mpdump;
 #endif
 
-		void CacheGridInfo( CqMicroPolyGridBase* pGrid );
 };
 
 

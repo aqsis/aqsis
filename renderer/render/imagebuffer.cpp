@@ -607,26 +607,6 @@ bool CqImageBuffer::PushMPGDown( CqMicroPolygon* pmpg, TqInt Col, TqInt Row )
 }
 
 
-/** Cache some info about the given grid so it can be referenced by multiple mpgs.
- 
- * \param pGrid grid to cache info of.
- */
-void CqImageBuffer::CacheGridInfo(CqMicroPolyGridBase* pGrid)
-{
-	m_CurrentGridInfo.m_IsMatte = pGrid->pAttributes() ->GetIntegerAttribute( "System", "Matte" ) [ 0 ] == 1;
-
-	// this is true if the mpgs can safely be occlusion culled.
-	m_CurrentGridInfo.m_IsCullable = !( DisplayMode() & ModeZ ) && !(pGrid->pCSGNode());
-
-	m_CurrentGridInfo.m_UsesDataMap = !(QGetRenderContext() ->GetMapOfOutputDataEntries().empty());
-
-	m_CurrentGridInfo.m_ShadingRate = pGrid->pAttributes() ->GetFloatAttribute( "System", "ShadingRate" ) [ 0 ];
-	m_CurrentGridInfo.m_ShutterOpenTime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 0 ];
-	m_CurrentGridInfo.m_ShutterCloseTime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 1 ];
-
-	m_CurrentGridInfo.m_LodBounds = pGrid->pAttributes() ->GetFloatAttribute( "System", "LevelOfDetailBounds" );
-}
-
 //----------------------------------------------------------------------
 /** Render any waiting MPGs.
  
@@ -653,10 +633,9 @@ void CqImageBuffer::RenderMPGs( long xmin, long xmax, long ymin, long ymax )
 		if(pMpg->pGrid() != pPrevGrid)
 		{
 			pPrevGrid = pMpg->pGrid();
-			CacheGridInfo(pPrevGrid);
 		}
 
-		RenderMicroPoly( pMpg, xmin, xmax, ymin, ymax );
+		CurrentBucket().RenderMicroPoly( pMpg, xmin, xmax, ymin, ymax );
 		if ( PushMPGDown( ( pMpg ), CurrentBucketCol(), CurrentBucketRow() ) )
 			STATS_INC( MPG_pushed_down );
 		if ( PushMPGForward( ( pMpg ), CurrentBucketCol(), CurrentBucketRow() ) )
@@ -675,14 +654,12 @@ void CqImageBuffer::RenderMPGs( long xmin, long xmax, long ymin, long ymax )
 			CqMicroPolyGridBase* pGrid = *igrid;
 			pGrid->Split( this, xmin, xmax, ymin, ymax );
 
-			CacheGridInfo(pGrid);
-
 			// Render any waiting MPGs
 			std::vector<CqMicroPolygon*>::iterator lastmpg = CurrentBucket().aMPGs().end();
 			for ( std::vector<CqMicroPolygon*>::iterator impg = CurrentBucket().aMPGs().begin(); impg != lastmpg; impg++ )
 			{
 				CqMicroPolygon* pMpg = *impg;
-				RenderMicroPoly( pMpg, xmin, xmax, ymin, ymax );
+				CurrentBucket().RenderMicroPoly( pMpg, xmin, xmax, ymin, ymax );
 				if ( PushMPGDown( ( pMpg ), CurrentBucketCol(), CurrentBucketRow() ) )
 					STATS_INC( MPG_pushed_down );
 				if ( PushMPGForward( ( pMpg ), CurrentBucketCol(), CurrentBucketRow() ) )
@@ -694,203 +671,6 @@ void CqImageBuffer::RenderMPGs( long xmin, long xmax, long ymin, long ymax )
 		CurrentBucket().aGrids().clear();
 	}
 }
-
-
-//----------------------------------------------------------------------
-/** Render a particular micropolygon.
- 
- * \param pMPG Pointer to the micropolygon to process.
- * \param xmin Integer minimum extend of the image part being rendered, takes into account buckets and clipping.
- * \param xmax Integer maximum extend of the image part being rendered, takes into account buckets and clipping.
- * \param ymin Integer minimum extend of the image part being rendered, takes into account buckets and clipping.
- * \param ymax Integer maximum extend of the image part being rendered, takes into account buckets and clipping.
- 
-   \see CqBucket, CqImagePixel
- */
-
-void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax )
-{
-	const CqBound& Bound = pMPG->GetTotalBound();
-
-	// if bounding box is outside our viewing range, then cull it.
-	if ( Bound.vecMax().x() < xmin || Bound.vecMax().y() < ymin ||
-	        Bound.vecMin().x() > xmax || Bound.vecMin().y() > ymax ||
-	        Bound.vecMin().z() > ClippingFar() || Bound.vecMax().z() < ClippingNear())
-	{
-		STATS_INC( MPG_culled );
-		return;
-	}
-
-	// fill in sample info for this mpg so we don't have to keep fetching it for each sample.
-	// Must check if colour is needed, as if not, the variable will have been deleted from the grid.
-	if ( QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Ci" ) )
-	{
-		m_CurrentMpgSampleInfo.m_Colour = pMPG->colColor()[0];
-	}
-	else
-	{
-		m_CurrentMpgSampleInfo.m_Colour = gColWhite;
-	}
-
-	// Must check if opacity is needed, as if not, the variable will have been deleted from the grid.
-	if ( QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Oi" ) )
-	{
-		m_CurrentMpgSampleInfo.m_Opacity = pMPG->colOpacity()[0];
-		m_CurrentMpgSampleInfo.m_Occludes = m_CurrentMpgSampleInfo.m_Opacity >= gColWhite;
-	}
-	else
-	{
-		m_CurrentMpgSampleInfo.m_Opacity = gColWhite;
-		m_CurrentMpgSampleInfo.m_Occludes = true;
-	}
-
-	// use the single imagesample rather than the list if possible.
-	// transparent, matte or csg samples, or if we need more than the first depth
-	// value have to use the (slower) list.
-	m_CurrentMpgSampleInfo.m_IsOpaque = m_CurrentMpgSampleInfo.m_Occludes &&
-	                                    !pMPG->pGrid()->pCSGNode() &&
-	                                    !( DisplayMode() & ModeZ ) &&
-	                                    !m_CurrentGridInfo.m_IsMatte;
-
-	bool UsingDof = QGetRenderContext() ->UsingDepthOfField();
-	bool IsMoving = pMPG->IsMoving();
-
-	if(IsMoving || UsingDof)
-	{
-		RenderMPG_MBOrDof( pMPG, xmin, xmax, ymin, ymax, IsMoving, UsingDof );
-	}
-	else
-	{
-		RenderMPG_Static( pMPG, xmin, xmax, ymin, ymax );
-	}
-}
-
-
-// this function assumes that either dof or mb or both are being used.
-void CqImageBuffer::RenderMPG_MBOrDof( CqMicroPolygon* pMPG,
-                                       long xmin, long xmax, long ymin, long ymax,
-                                       bool IsMoving, bool UsingDof )
-{
-	CqHitTestCache hitTestCache;
-	pMPG->CacheHitTestValues(&hitTestCache);
-
-	TqFloat closetime = m_CurrentGridInfo.m_ShutterCloseTime;
-
-	TqInt bound_maxMB = pMPG->cSubBounds();
-	TqInt bound_maxMB_1 = bound_maxMB - 1;
-	for ( TqInt bound_numMB = 0; bound_numMB < bound_maxMB; bound_numMB++ )
-	{
-		TqFloat time0 = m_CurrentGridInfo.m_ShutterOpenTime;
-		TqFloat time1 = m_CurrentGridInfo.m_ShutterCloseTime;
-		const CqBound& Bound = pMPG->SubBound( bound_numMB, time0 );
-
-		// get the index of the first and last samples that can fall inside
-		// the time range of this bound
-		if(IsMoving)
-		{
-			if ( bound_numMB != bound_maxMB_1 )
-				pMPG->SubBound( bound_numMB + 1, time1 );
-			else
-				time1 = closetime;//QGetRenderContext() ->poptCurrent()->GetFloatOptionWrite( "System", "Shutter" ) [ 1 ];
-		}
-
-		TqFloat maxCocX = 0.0f;
-		TqFloat maxCocY = 0.0f;
-
-		TqFloat bminx = 0.0f;
-		TqFloat bmaxx = 0.0f;
-		TqFloat bminy = 0.0f;
-		TqFloat bmaxy = 0.0f;
-		TqFloat bminz = 0.0f;
-		TqFloat bmaxz = 0.0f;
-		// these values are the bound of the mpg not including dof extension.
-		// reduce the mpg bound so it doesn't include the coc.
-		TqFloat mpgbminx = 0.0f;
-		TqFloat mpgbmaxx = 0.0f;
-		TqFloat mpgbminy = 0.0f;
-		TqFloat mpgbmaxy = 0.0f;
-		TqInt bound_maxDof = 0;
-		if(UsingDof)
-		{
-			const CqVector2D& minZCoc = QGetRenderContext()->GetCircleOfConfusion( Bound.vecMin().z() );
-			const CqVector2D& maxZCoc = QGetRenderContext()->GetCircleOfConfusion( Bound.vecMax().z() );
-			maxCocX = MAX( minZCoc.x(), maxZCoc.x() );
-			maxCocY = MAX( minZCoc.y(), maxZCoc.y() );
-
-			mpgbminx = Bound.vecMin().x() + maxCocX;
-			mpgbmaxx = Bound.vecMax().x() - maxCocX;
-			mpgbminy = Bound.vecMin().y() + maxCocY;
-			mpgbmaxy = Bound.vecMax().y() - maxCocY;
-			bminz = Bound.vecMin().z();
-			bmaxz = Bound.vecMax().z();
-
-			bound_maxDof = CqBucket::NumDofBounds();
-		}
-		else
-		{
-			bminx = Bound.vecMin().x();
-			bmaxx = Bound.vecMax().x();
-			bminy = Bound.vecMin().y();
-			bmaxy = Bound.vecMax().y();
-			bminz = Bound.vecMin().z();
-			bmaxz = Bound.vecMax().z();
-
-			bound_maxDof = 1;
-		}
-
-		for ( TqInt bound_numDof = 0; bound_numDof < bound_maxDof; bound_numDof++ )
-		{
-			if(UsingDof)
-			{
-				// now shift the bounding box to cover only a given range of
-				// lens positions.
-				const CqBound DofBound = CqBucket::DofSubBound( bound_numDof );
-				TqFloat leftOffset = DofBound.vecMax().x() * maxCocX;
-				TqFloat rightOffset = DofBound.vecMin().x() * maxCocX;
-				TqFloat topOffset = DofBound.vecMax().y() * maxCocY;
-				TqFloat bottomOffset = DofBound.vecMin().y() * maxCocY;
-
-				bminx = mpgbminx - leftOffset;
-				bmaxx = mpgbmaxx - rightOffset;
-				bminy = mpgbminy - topOffset;
-				bmaxy = mpgbmaxy - bottomOffset;
-			}
-
-			// if bounding box is outside our viewing range, then cull it.
-			if ( bmaxx < (float)xmin || bmaxy < (float)ymin ||
-			        bminx > (float)xmax || bminy > (float)ymax ||
-			        bminz > ClippingFar() || bmaxz < ClippingNear())
-			{
-				continue;
-			}
-
-			if(UsingDof)
-			{
-				CqBound DofBound(bminx, bminy, bminz, bmaxx, bmaxy, bmaxz);
-				CqOcclusionBox::KDTree()->SampleMPG(pMPG, DofBound, IsMoving, time0, time1, true, bound_numDof, m_CurrentMpgSampleInfo, m_CurrentGridInfo.m_LodBounds[0] >= 0.0f, m_CurrentGridInfo);
-			}
-			else
-			{
-				CqOcclusionBox::KDTree()->SampleMPG(pMPG, Bound, IsMoving, time0, time1, false, 0, m_CurrentMpgSampleInfo, m_CurrentGridInfo.m_LodBounds[0] >= 0.0f, m_CurrentGridInfo);
-			}
-		}
-	}
-}
-
-
-
-// this function assumes that neither dof or mb are being used. it is much
-// simpler than the general case dealt with above.
-void CqImageBuffer::RenderMPG_Static( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax )
-{
-	CqHitTestCache hitTestCache;
-	pMPG->CacheHitTestValues(&hitTestCache);
-
-	const CqBound& Bound = pMPG->GetTotalBound();
-
-	CqOcclusionBox::KDTree()->SampleMPG(pMPG, Bound, false, 0, 0, false, 0, m_CurrentMpgSampleInfo, m_CurrentGridInfo.m_LodBounds[0] >= 0.0f, m_CurrentGridInfo);
-}
-
 
 
 void CqImageBuffer::StoreExtraData( CqMicroPolygon* pMPG, SqImageSample& sample)

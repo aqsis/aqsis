@@ -104,7 +104,7 @@ class CqOcclusionTree// : public boost::enable_shared_from_this<CqOcclusionTree>
 		void UpdateBounds();
 
 		bool CanCull( CqBound* bound );
-		void SampleMPG( CqMicroPolygon* pMPG, const CqBound& bound, bool usingMB, TqFloat time0, TqFloat time1, bool usingDof, TqInt dofboundindex, SqMpgSampleInfo& MpgSampleInfo, bool usingLOD, SqGridInfo& gridInfo);
+		void SampleMPG( CqMicroPolygon* pMPG, const CqBound& bound, bool usingMB, TqFloat time0, TqFloat time1, bool usingDof, TqInt dofboundindex, const SqMpgSampleInfo& MpgSampleInfo, bool usingLOD, const SqGridInfo& gridInfo);
 
 		TqInt NumSamples() const
 		{

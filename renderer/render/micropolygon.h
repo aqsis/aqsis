@@ -52,6 +52,19 @@ class CqImageBuffer;
 class CqSurface;
 struct SqSampleData;
 
+// This struct holds info about a grid that can be cached and used for all its mpgs.
+struct SqGridInfo
+{
+	TqFloat			m_ShadingRate;
+	TqFloat			m_ShutterOpenTime;
+	TqFloat			m_ShutterCloseTime;
+	const TqFloat*	        m_LodBounds;
+	bool			m_IsMatte;
+	bool			m_IsCullable;
+	bool			m_UsesDataMap;
+};
+
+
 //----------------------------------------------------------------------
 /** \class CqMicroPolyGridBase
  * Base class from which all MicroPolyGrids are derived.
@@ -149,10 +162,24 @@ class CqMicroPolyGridBase : public CqRefCount
 		virtual	IqShaderData* FindStandardVar( const char* pname ) = 0;
 		virtual boost::shared_ptr<IqShaderExecEnv> pShaderExecEnv() = 0; 
 
+		const SqGridInfo& GetCachedGridInfo() const
+		{
+			return m_CurrentGridInfo;
+		}
+
 	public:
 		bool m_fCulled; ///< Boolean indicating the entire grid is culled.
 		CqTriangleSplitLine	m_TriangleSplitLine;	///< Two endpoints of the line that is used to turn the quad into a triangle at sample time.
 		bool	m_fTriangular;			///< Flag indicating that this grid should be rendered as a triangular grid with a phantom fourth corner.
+
+	protected:
+		/** Cached info about the given grid so it can be
+		 * referenced by multiple mpgs. */
+		SqGridInfo m_CurrentGridInfo;
+
+		/** Cache some info about the given grid so it can be
+		 * referenced by multiple mpgs. */
+		void CacheGridInfo();
 };
 
 

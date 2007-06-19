@@ -44,6 +44,27 @@ CqObjectPool<CqMicroPolygon> CqMicroPolygon::m_thePool;
 CqObjectPool<CqMovingMicroPolygonKey>	CqMovingMicroPolygonKey::m_thePool;
 
 //---------------------------------------------------------------------
+/** Cache some info about the given grid so it can be referenced by multiple mpgs.
+ */
+void CqMicroPolyGridBase::CacheGridInfo()
+{
+	m_CurrentGridInfo.m_IsMatte = this->pAttributes() ->GetIntegerAttribute( "System", "Matte" ) [ 0 ] == 1;
+
+	// this is true if the mpgs can safely be occlusion culled.
+	m_CurrentGridInfo.m_IsCullable = !( QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "DisplayMode" ) [ 0 ] & ModeZ ) && !(this->pCSGNode());
+
+	m_CurrentGridInfo.m_UsesDataMap = !(QGetRenderContext() ->GetMapOfOutputDataEntries().empty());
+
+	m_CurrentGridInfo.m_ShadingRate = this->pAttributes() ->GetFloatAttribute( "System", "ShadingRate" ) [ 0 ];
+	m_CurrentGridInfo.m_ShutterOpenTime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 0 ];
+	m_CurrentGridInfo.m_ShutterCloseTime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 1 ];
+
+	m_CurrentGridInfo.m_LodBounds = this->pAttributes() ->GetFloatAttribute( "System", "LevelOfDetailBounds" );
+}
+
+
+
+//---------------------------------------------------------------------
 /** Default constructor
  */
 
@@ -123,6 +144,9 @@ void CqMicroPolyGrid::Initialise( TqInt cu, TqInt cv, const boost::shared_ptr<Cq
 	TqInt size = numMicroPolygons(cu, cv);
 
 	STATS_INC( GRD_size_4 + CLAMP( CqStats::stats_log2( size ) - 2, 0, 7 ) );
+
+	// Initialise the local grid info
+	CacheGridInfo();
 }
 
 //---------------------------------------------------------------------

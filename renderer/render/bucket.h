@@ -46,6 +46,17 @@
 
 START_NAMESPACE( Aqsis )
 
+// This struct is used to hold info about a mpg that is used when rendering the mpg.
+// It caches the info for use by multiple samples.
+struct SqMpgSampleInfo
+{
+	CqColor		m_Colour;
+	CqColor		m_Opacity;
+	bool		m_Occludes;		// whether the opacity is full.
+	bool		m_IsOpaque;		// whether the mpg can use the faster StoreOpaqueSample routine that assumes a few things.
+};
+
+
 //-----------------------------------------------------------------------
 /** Class holding data about a particular bucket.
  */
@@ -267,6 +278,37 @@ class CqBucket : public IqBucket
 			m_ImageBuffer = pBuffer;
 		}
 
+		/** Render a particular micropolygon.
+		 *    
+		 * \param pMPG Pointer to the micropolygon to process.
+		 *
+		 * \param xmin Integer minimum extend of the image
+		 * part being rendered, takes into account buckets and
+		 * clipping.
+		 *
+		 * \param xmax Integer maximum extend of the image
+		 * part being rendered, takes into account buckets and
+		 * clipping.
+		 *
+		 * \param ymin Integer minimum extend of the image
+		 * part being rendered, takes into account buckets and
+		 * clipping.
+		 *
+		 * \param ymax Integer maximum extend of the image
+		 * part being rendered, takes into account buckets and
+		 * clipping.
+		 *
+		 * \see CqBucket, CqImagePixel
+		 */
+		void	RenderMicroPoly( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax );
+		/** This function assumes that either dof or mb or
+		 * both are being used. */
+		void	RenderMPG_MBOrDof( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax, bool IsMoving, bool UsingDof );
+		/** This function assumes that neither dof or mb are
+		 * being used. It is much simpler than the general
+		 * case dealt with above. */
+		void	RenderMPG_Static( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax );
+
 
 	private:
 		static	TqInt	m_XOrigin;		///< Origin in discrete coordinates of this bucket.
@@ -292,6 +334,8 @@ class CqBucket : public IqBucket
 		static	std::vector<TqFloat>	m_aDatas;
 		static	std::vector<TqFloat>	m_aCoverages;
 		static	CqImageBuffer*	m_ImageBuffer;	///< Pointer to the image buffer this bucket belongs to.
+
+		SqMpgSampleInfo m_CurrentMpgSampleInfo;
 
 		// this is a compare functor for sorting surfaces in order of depth.
 		struct closest_surface
