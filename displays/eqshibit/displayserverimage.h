@@ -92,11 +92,23 @@ public:
         return ( m_readbuf );
     }
 
+    virtual CqString&	filename()
+    {
+        return ( m_serialisedName );
+    }
+    virtual void	setFilename( const CqString& name )
+    {
+        m_serialisedName = name;
+    }
+
     void acceptData(TqUlong xmin, TqUlong xmaxplus1, TqUlong ymin, TqUlong ymaxplus1, TqInt elementSize, const unsigned char* data);
+	
+	virtual void serialise(const std::string& folder);
 
 private:
     SOCKET	m_socket;			///< Socket ID of the client.
     std::stringstream m_readbuf;
+	CqString	m_serialisedName;
 };
 
 END_NAMESPACE( Aqsis )

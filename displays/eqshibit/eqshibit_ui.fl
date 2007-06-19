@@ -7,7 +7,7 @@ class CqEqshibitMainWindow {open : {public Aqsis::CqEqshibitBase}
   Function {CqEqshibitMainWindow()} {open
   } {
     Fl_Window m_window {open
-      private xywh {422 221 540 310} type Double resizable
+      private xywh {312 589 540 310} type Double resizable
       code0 {\#include "eqshibit.h"}
       code1 {\#include "eqshibitbase.h"}
       code2 {\#include <stdio.h>}
@@ -22,36 +22,79 @@ class CqEqshibitMainWindow {open : {public Aqsis::CqEqshibitBase}
           label {&File} open
           xywh {0 0 100 20}
         } {
+          MenuItem m_menuFileOpen {
+            label {&Open}
+            private xywh {0 0 100 20} shortcut 0x4006f
+            code0 {o->shortcut(FL_COMMAND+'o');}
+          }
+          MenuItem m_menuFileSave {
+            label {&Save} selected
+            private xywh {0 0 100 20} shortcut 0x40073
+            code0 {o->shortcut(FL_COMMAND+'s');}
+          }
+          MenuItem m_menuFileSaveAs {
+            label {Save &As}
+            callback {saveConfigurationAs();}
+            private xywh {0 0 100 20} shortcut 0x50073 divider
+          }
+          MenuItem m_menuFileQuit {
+            label {&Quit}
+            private xywh {0 0 100 20} shortcut 0x40071
+          }
+        }
+        Submenu {} {
+          label {&Book} open
+          xywh {5 5 100 20}
+        } {
           MenuItem m_menuBookNew {
             label {&New}
             callback {addNewBook("Book1");}
-            private xywh {0 0 100 20}
+            private xywh {5 5 100 20} shortcut 0x4006e
             code0 {o->shortcut(FL_COMMAND+'n');}
           }
-          MenuItem m_menuBookOpen {
-            label {&Open}
-            private xywh {0 0 100 20}
-            code0 {o->shortcut(FL_COMMAND+'o');}
+          MenuItem m_menuBookExport {
+            label {&Export}
+            private xywh {5 5 100 20} shortcut 0x40065
           }
-          MenuItem m_menuBookSave {
-            label {&Save}
-            private xywh {0 0 100 20}
-            code0 {o->shortcut(FL_COMMAND+'s');}
+          MenuItem m_menuBookImport {
+            label {&Import}
+            private xywh {5 5 100 20} shortcut 0x40069 divider
+          }
+          MenuItem {} {
+            label {&Rename}
+            xywh {0 0 100 20} shortcut 0x40072
           }
         }
         Submenu {} {
           label {&Help} open
-          xywh {0 0 63 20}
+          xywh {5 5 63 20}
         } {
           MenuItem {} {
-            label About selected
-            xywh {0 0 31 20}
+            label About
+            private xywh {5 5 31 20}
           }
         }
       }
-      Fl_Tabs m_tabBooks {open
-        private xywh {0 29 540 281} resizable
+      Fl_Tabs m_tabBooks {
+        private xywh {0 29 540 281}
       } {}
+      Fl_Menu_Button {} {open
+        xywh {0 30 540 280} labeltype NO_LABEL resizable
+        code0 {o->type(Fl_Menu_Button::POPUP3);}
+      } {
+        MenuItem {} {
+          label Cut
+          xywh {0 0 100 20}
+        }
+        MenuItem {} {
+          label Copy
+          xywh {0 0 100 20}
+        }
+        MenuItem {} {
+          label Paste
+          xywh {0 0 100 20}
+        }
+      }
     }
   }
   Function {addNewBook(std::string name)} {open return_type {virtual void}

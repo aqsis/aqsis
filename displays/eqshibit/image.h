@@ -66,6 +66,14 @@ public:
     {
         m_name = name;
     }
+    virtual CqString&	filename()
+    {
+        return ( name() );
+    }
+    virtual void	setFilename( const CqString& name )
+    {
+        setName(name);
+    }
 	virtual TqUlong	frameWidth()
 	{
 		return( m_frameWidth );
@@ -121,6 +129,9 @@ public:
 	virtual void PrepareImageBuffer();
 	
 	virtual void setUpdateCallback(boost::function<void(int,int,int,int)> f);
+
+	virtual void serialise(const std::string& folder)
+	{}
 
 	boost::mutex& mutex()
 	{

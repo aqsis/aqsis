@@ -58,7 +58,6 @@ typedef sockaddr* PSOCKADDR;
 #include	"render.h"
 #include	"displayserverimage.h"
 
-
 START_NAMESPACE( Aqsis )
 
 
@@ -217,6 +216,41 @@ void CqDisplayServerImage::acceptData(TqUlong xmin, TqUlong xmaxplus1, TqUlong y
 		if(m_updateCallback)
 			m_updateCallback(xmin__, ymin__, xmaxplus1__-xmin__, ymaxplus1__-ymin__);
 	}
+}
+
+void CqDisplayServerImage::serialise(const std::string& folder)
+{
+#ifdef	AQSIS_SYSTEM_WIN32
+	// Generate a unique name for the managed image in the specified folder.
+	char drive[_MAX_DRIVE];
+	char dir[_MAX_DIR];
+	char fname[_MAX_FNAME];
+	char ext[_MAX_EXT];
+	char path[_MAX_PATH];
+	char nameonly[_MAX_PATH];
+	_splitpath(folder.c_str(), drive, dir, NULL, NULL);
+	_splitpath(name().c_str(), NULL, NULL, fname, ext);
+	_makepath(path, drive, dir, fname, ext);
+	std::stringstream strIndex;
+	FILE* tfile;
+	int index = 1;
+	while((tfile = fopen(path, "r")) != NULL)
+	{
+		strIndex.clear();
+		strIndex.str("");
+		strIndex << fname << "_" << index;
+		_makepath(path, drive, dir, strIndex.str().c_str(), ext);
+		index++;
+	}
+		
+	std::cout << path << std::endl;
+	_splitpath(path, drive, dir, fname, ext);
+	_makepath(nameonly, NULL, NULL, fname, ext);	
+	setFilename(nameonly);
+	std::ofstream file1( path );
+	file1 << "Test" << std::endl;
+	file1.close();
+#endif
 }
 
 END_NAMESPACE( Aqsis )

@@ -25,7 +25,9 @@
 
 #include "eqshibitbase.h"
 #include "book.h"
+#include "tinyxml.h"
 
+#include <FL/Fl_File_Chooser.H>
 
 START_NAMESPACE( Aqsis )
 
@@ -70,6 +72,67 @@ TqUlong CqEqshibitBase::addImageToCurrentBook(boost::shared_ptr<CqImage>& image)
 		addNewBook(strBkName.str());
 	}
 	return( currentBook()->addImage(image));	
+}
+
+void CqEqshibitBase::saveConfigurationAs()
+{
+	Fl::lock();
+#ifdef	AQSIS_SYSTEM_WIN32
+	char* name = fl_file_chooser("Save Configuration As", "*.xml", m_currentConfigName.c_str());
+	if(name != NULL)
+	{
+		char drive[_MAX_DRIVE];
+		char dir[_MAX_DIR];
+		char fname[_MAX_FNAME];
+		char ext[_MAX_EXT];
+		char path[_MAX_PATH];
+		_splitpath(name, drive, dir, fname, ext);
+		_makepath(path, drive, dir, NULL, NULL);
+		m_currentConfigName = name;
+		TiXmlDocument doc(name);
+		TiXmlDeclaration* decl = new TiXmlDeclaration("1.0","","yes");
+		TiXmlElement* booksXML = new TiXmlElement("Books");
+
+		std::map<std::string, boost::shared_ptr<CqBook> >::iterator book;
+		for(book = m_books.begin(); book != m_books.end(); ++book) 
+		{
+			TiXmlElement* bookXML = new TiXmlElement("Book");
+			bookXML->SetAttribute("name", book->first);
+			booksXML->LinkEndChild(bookXML);
+			TiXmlElement* imagesXML = new TiXmlElement("Images");
+
+			std::map<TqUlong, boost::shared_ptr<CqImage> >::iterator image;
+			for(image = book->second->images().begin(); image != book->second->images().end(); ++image)
+			{
+				// Serialise the image first.
+				image->second->serialise(path);
+
+				TiXmlElement* imageXML = new TiXmlElement("Image");
+				imagesXML->LinkEndChild(imageXML);
+
+				TiXmlElement* typeXML = new TiXmlElement("Type");
+				TiXmlText* typeText = new TiXmlText("managed");
+				typeXML->LinkEndChild(typeText);
+				imageXML->LinkEndChild(typeXML);
+
+				TiXmlElement* nameXML = new TiXmlElement("Name");
+				TiXmlText* nameText = new TiXmlText(image->second->name());
+				nameXML->LinkEndChild(nameText);
+				imageXML->LinkEndChild(nameXML);
+
+				TiXmlElement* filenameXML = new TiXmlElement("Filename");
+				TiXmlText* filenameText = new TiXmlText(image->second->filename());
+				filenameXML->LinkEndChild(filenameText);
+				imageXML->LinkEndChild(filenameXML);
+			}
+			bookXML->LinkEndChild(imagesXML);
+		}
+		doc.LinkEndChild(decl);
+		doc.LinkEndChild(booksXML);
+		doc.SaveFile(name);
+	}
+#endif
+	Fl::unlock();
 }
 
 //---------------------------------------------------------------------

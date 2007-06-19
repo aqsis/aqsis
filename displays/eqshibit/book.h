@@ -70,6 +70,15 @@ public:
 		m_framebuffer = fb;
 	}
 
+	std::map<TqUlong, boost::shared_ptr<CqImage> >& images()
+	{
+		return(m_images);
+	}
+	const std::map<TqUlong, boost::shared_ptr<CqImage> >& images() const
+	{
+		return(m_images);
+	}
+
 	TqUlong addImage(boost::shared_ptr<CqImage>& image);
 	boost::shared_ptr<CqImage> image(TqUlong id);
 
