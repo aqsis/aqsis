@@ -124,9 +124,21 @@ TqUlong	gVariableTokens[ EnvVars_Last ] =
     };
 
 
-// TODO: See if we can reduce these default requires further!
-TqInt	gDefUses = ( 1 << EnvVars_P ) | ( 1 << EnvVars_I ) | ( 1 << EnvVars_N ) | ( 1 << EnvVars_Ng ) | ( 1 << EnvVars_L ) | ( 1 << EnvVars_Cl ) | ( 1 << EnvVars_Ci ) | ( 1 << EnvVars_Oi ) | ( 1 << EnvVars_u ) | ( 1 << EnvVars_v );
-TqInt	gDefLightUses = ( 1 << EnvVars_P ) | ( 1 << EnvVars_L ) | ( 1 << EnvVars_Ps ) | ( 1 << EnvVars_Ns );
+/** \brief Set default shader variables which the renderer needs internally.
+ *
+ * TODO: Document which parts of the code require these variables.
+ *
+ * Ng: Assumed to be present if Sides == 1 for back face culling.
+ *
+ * TODO: See if we can reduce these default requires further.
+ */
+TqInt gDefUses = ( 1 << EnvVars_P ) | ( 1 << EnvVars_I ) | ( 1 << EnvVars_N ) | ( 1 << EnvVars_Ng ) | ( 1 << EnvVars_L ) | ( 1 << EnvVars_Cl ) | ( 1 << EnvVars_Ci ) | ( 1 << EnvVars_Oi ) | ( 1 << EnvVars_u ) | ( 1 << EnvVars_v );
+
+/** \brief Set default light shader variables which the renderer needs internally.
+ *
+ * TODO: Document which parts of the code require these variables.
+ */
+TqInt gDefLightUses = ( 1 << EnvVars_P ) | ( 1 << EnvVars_L ) | ( 1 << EnvVars_Ps ) | ( 1 << EnvVars_Ns );
 
 //----------------------------------------------------------------------
 /** Constructor.
