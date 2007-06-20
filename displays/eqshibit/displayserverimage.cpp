@@ -61,7 +61,8 @@ typedef sockaddr* PSOCKADDR;
 #include "boost/archive/iterators/base64_from_binary.hpp"
 #include "boost/archive/iterators/transform_width.hpp"
 #include "boost/archive/iterators/insert_linebreaks.hpp"
-#include <boost/filesystem.hpp>
+#include <boost/filesystem/path.hpp>
+#include <boost/filesystem/convenience.hpp>
 
 START_NAMESPACE( Aqsis )
 

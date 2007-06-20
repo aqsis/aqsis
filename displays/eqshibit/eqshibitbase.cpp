@@ -28,7 +28,8 @@
 #include "tinyxml.h"
 
 #include <FL/Fl_File_Chooser.H>
-#include <boost/filesystem.hpp>
+#include <boost/filesystem/path.hpp>
+#include <boost/filesystem/convenience.hpp>
 
 START_NAMESPACE( Aqsis )
 
