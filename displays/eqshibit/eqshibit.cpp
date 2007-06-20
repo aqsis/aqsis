@@ -43,6 +43,7 @@ using namespace Aqsis;
 #include <boost/archive/iterators/binary_from_base64.hpp>
 #include <boost/archive/iterators/transform_width.hpp>
 #include <boost/archive/iterators/remove_whitespace.hpp>
+#include <boost/filesystem.hpp>
 
 #include "boost/pfto.hpp"
 
@@ -66,6 +67,7 @@ using namespace Aqsis;
 #include "framebuffer.h"
 #include "book.h"
 #include "tinyxml.h"
+#include <FL/Fl.H>
 
 
 ArgParse::apstring      g_strInterface = "127.0.0.1";

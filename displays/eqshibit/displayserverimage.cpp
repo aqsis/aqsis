@@ -61,6 +61,7 @@ typedef sockaddr* PSOCKADDR;
 #include "boost/archive/iterators/base64_from_binary.hpp"
 #include "boost/archive/iterators/transform_width.hpp"
 #include "boost/archive/iterators/insert_linebreaks.hpp"
+#include <boost/filesystem.hpp>
 
 START_NAMESPACE( Aqsis )
 
@@ -224,34 +225,30 @@ void CqDisplayServerImage::acceptData(TqUlong xmin, TqUlong xmaxplus1, TqUlong y
 
 void CqDisplayServerImage::serialise(const std::string& folder)
 {
-#ifdef	AQSIS_SYSTEM_WIN32
+#if	1
 	// Generate a unique name for the managed image in the specified folder.
-	char drive[_MAX_DRIVE];
-	char dir[_MAX_DIR];
-	char fname[_MAX_FNAME];
-	char ext[_MAX_EXT];
-	char path[_MAX_PATH];
-	char nameonly[_MAX_PATH];
-	_splitpath(folder.c_str(), drive, dir, NULL, NULL);
-	_splitpath(name().c_str(), NULL, NULL, fname, ext);
-	_makepath(path, drive, dir, fname, ext);
+	std::cout << folder << std::endl;
+	boost::filesystem::path xmlPath(folder);
+	boost::filesystem::path fileName(xmlPath / name().c_str());
+	std::string ext(boost::filesystem::extension(name()));
+	std::string base(boost::filesystem::basename(name()));
+	std::cout << base << " - " << ext << std::endl;
 	std::stringstream strIndex;
 	FILE* tfile;
 	int index = 1;
-	while((tfile = fopen(path, "r")) != NULL)
+	while(boost::filesystem::exists(fileName))
 	{
 		strIndex.clear();
 		strIndex.str("");
-		strIndex << fname << "_" << index;
-		_makepath(path, drive, dir, strIndex.str().c_str(), ext);
+		strIndex << base << "." << index << ext;
+		std::cout << strIndex.str() << std::endl;
+		fileName = boost::filesystem::path(xmlPath / strIndex.str()); 
 		index++;
 	}
 		
-	std::cout << path << std::endl;
-	_splitpath(path, drive, dir, fname, ext);
-	_makepath(nameonly, NULL, NULL, fname, ext);	
-	setFilename(nameonly);
-	std::ofstream file1( path );
+	std::cout << fileName.string() << std::endl;
+	setFilename(strIndex.str());
+	std::ofstream file1( fileName.string().c_str() );
 	file1 << "Test" << std::endl;
 	file1.close();
 #endif

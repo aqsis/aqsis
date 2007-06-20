@@ -28,6 +28,7 @@
 #include "tinyxml.h"
 
 #include <FL/Fl_File_Chooser.H>
+#include <boost/filesystem.hpp>
 
 START_NAMESPACE( Aqsis )
 
@@ -79,16 +80,11 @@ void CqEqshibitBase::saveConfigurationAs()
 {
 	Fl::lock();
 	char* name = fl_file_chooser("Save Configuration As", "*.xml", m_currentConfigName.c_str());
-#ifdef	AQSIS_SYSTEM_WIN32
+#if	1
 	if(name != NULL)
 	{
-		char drive[_MAX_DRIVE];
-		char dir[_MAX_DIR];
-		char fname[_MAX_FNAME];
-		char ext[_MAX_EXT];
-		char path[_MAX_PATH];
-		_splitpath(name, drive, dir, fname, ext);
-		_makepath(path, drive, dir, NULL, NULL);
+		boost::filesystem::path xmlFile(name);
+		boost::filesystem::path xmlPath(xmlFile.branch_path());
 		m_currentConfigName = name;
 		TiXmlDocument doc(name);
 		TiXmlDeclaration* decl = new TiXmlDeclaration("1.0","","yes");
@@ -106,7 +102,7 @@ void CqEqshibitBase::saveConfigurationAs()
 			for(image = book->second->images().begin(); image != book->second->images().end(); ++image)
 			{
 				// Serialise the image first.
-				image->second->serialise(path);
+				image->second->serialise(xmlPath.string());
 
 				TiXmlElement* imageXML = new TiXmlElement("Image");
 				imagesXML->LinkEndChild(imageXML);
