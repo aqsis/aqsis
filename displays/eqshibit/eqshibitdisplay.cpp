@@ -210,7 +210,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 		if( DspyFindStringInParamList("port", &port, paramCount, parameters ) == PkDspyErrorNone )
 			pImage->m_port = atoi(strdup(port));
 		else 
-			pImage->m_port = 48515;
+			pImage->m_port = 49515;
 
 		// First, see if eqshibit is running, by trying to connect to it.
 		int sock = initialiseSocket(pImage->m_hostname, pImage->m_port);

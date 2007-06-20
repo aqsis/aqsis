@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0107 
+version 1.0108 
 header_name {fluid_eqshibit_ui.h} 
 code_name {fluid_eqshibit_ui.cpp}
 class CqEqshibitMainWindow {open : {public Aqsis::CqEqshibitBase}
@@ -28,7 +28,7 @@ class CqEqshibitMainWindow {open : {public Aqsis::CqEqshibitBase}
             code0 {o->shortcut(FL_COMMAND+'o');}
           }
           MenuItem m_menuFileSave {
-            label {&Save} selected
+            label {&Save}
             private xywh {0 0 100 20} shortcut 0x40073
             code0 {o->shortcut(FL_COMMAND+'s');}
           }
@@ -36,10 +36,12 @@ class CqEqshibitMainWindow {open : {public Aqsis::CqEqshibitBase}
             label {Save &As}
             callback {saveConfigurationAs();}
             private xywh {0 0 100 20} shortcut 0x50073 divider
+            code0 {o->shortcut(FL_COMMAND+'S');}
           }
           MenuItem m_menuFileQuit {
             label {&Quit}
             private xywh {0 0 100 20} shortcut 0x40071
+            code0 {o->shortcut(FL_COMMAND+'q');}
           }
         }
         Submenu {} {
@@ -55,14 +57,17 @@ class CqEqshibitMainWindow {open : {public Aqsis::CqEqshibitBase}
           MenuItem m_menuBookExport {
             label {&Export}
             private xywh {5 5 100 20} shortcut 0x40065
+            code0 {o->shortcut(FL_COMMAND+'e');}
           }
           MenuItem m_menuBookImport {
             label {&Import}
             private xywh {5 5 100 20} shortcut 0x40069 divider
+            code0 {o->shortcut(FL_COMMAND+'i');}
           }
           MenuItem {} {
             label {&Rename}
             xywh {0 0 100 20} shortcut 0x40072
+            code0 {o->shortcut(FL_COMMAND+'r');}
           }
         }
         Submenu {} {
@@ -84,15 +89,18 @@ class CqEqshibitMainWindow {open : {public Aqsis::CqEqshibitBase}
       } {
         MenuItem {} {
           label Cut
-          xywh {0 0 100 20}
+          xywh {0 0 100 20} shortcut 0x40078
+          code0 {o->shortcut(FL_COMMAND+'x');}
         }
         MenuItem {} {
           label Copy
-          xywh {0 0 100 20}
+          xywh {0 0 100 20} shortcut 0x40063
+          code0 {o->shortcut(FL_COMMAND+'c');}
         }
         MenuItem {} {
-          label Paste
-          xywh {0 0 100 20}
+          label Paste selected
+          xywh {0 0 100 20} shortcut 0x40076
+          code0 {o->shortcut(FL_COMMAND+'v');}
         }
       }
     }

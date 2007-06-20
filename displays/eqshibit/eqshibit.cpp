@@ -70,7 +70,7 @@ using namespace Aqsis;
 
 
 ArgParse::apstring      g_strInterface = "127.0.0.1";
-ArgParse::apstring      g_strPort = "48515";
+ArgParse::apstring      g_strPort = "49515";
 bool    		g_fHelp = 0;
 bool    		g_fVersion = 0;
 bool 			g_cl_no_color = false;
