@@ -50,6 +50,7 @@ START_NAMESPACE( Aqsis )
 class CqVector3D;
 class CqImageBuffer;
 class CqSurface;
+class CqMicroPolygon;
 struct SqSampleData;
 
 // This struct holds info about a grid that can be cached and used for all its mpgs.
@@ -81,7 +82,7 @@ class CqMicroPolyGridBase : public CqRefCount
 		/** Pure virtual function, splits the grid into micropolys.
 		 * \param pImage Pointer to the image buffer being rendered.
 		 */
-		virtual	void	Split( CqImageBuffer* pImage ) = 0;
+		virtual	void	Split( std::vector<CqMicroPolygon*>& newMPs ) = 0;
 		/** Pure virtual, shade the grid.
 		 */
 		virtual	void	Shade() = 0;
@@ -245,7 +246,7 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase
 		void DeleteVariables( bool all );
 
 		// Overrides from CqMicroPolyGridBase
-		virtual	void	Split( CqImageBuffer* pImage );
+		virtual	void	Split( std::vector<CqMicroPolygon*>& newMPs );
 		virtual	void	Shade();
 		virtual	void	TransferOutputVariables();
 
@@ -350,7 +351,7 @@ class CqMotionMicroPolyGrid : public CqMicroPolyGridBase, public CqMotionSpec<Cq
 		// Overrides from CqMicroPolyGridBase
 
 
-		virtual	void	Split( CqImageBuffer* pImage );
+		virtual	void	Split( std::vector<CqMicroPolygon*>& newMPs );
 		virtual	void	Shade();
 		virtual	void	TransferOutputVariables();
 		

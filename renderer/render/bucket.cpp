@@ -1073,7 +1073,7 @@ void CqBucket::RenderMPG_MBOrDof( CqMicroPolygon* pMPG,
 			if ( bound_numMB != bound_maxMB_1 )
 				pMPG->SubBound( bound_numMB + 1, time1 );
 			else
-				time1 = closetime;//QGetRenderContext() ->poptCurrent()->GetFloatOptionWrite( "System", "Shutter" ) [ 1 ];
+				time1 = closetime;
 		}
 
 		TqFloat maxCocX = 0.0f;

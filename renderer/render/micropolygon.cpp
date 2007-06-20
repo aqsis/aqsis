@@ -677,10 +677,10 @@ void CqMicroPolyGrid::DeleteVariables( bool all )
 
 //---------------------------------------------------------------------
 /** Split the shaded grid into microploygons, and insert them into the relevant buckets in the image buffer.
- * \param pImage Pointer to image being rendered into.
+ * \param newMPs List to store the splitted MPs
  */
 
-void CqMicroPolyGrid::Split( CqImageBuffer* pImage )
+void CqMicroPolyGrid::Split( std::vector<CqMicroPolygon*>& newMPs )
 {
 	if ( NULL == pVar(EnvVars_P) )
 		return ;
@@ -880,7 +880,7 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage )
 				std::map<TqFloat, TqInt>::iterator keyFrame;
 				for ( keyFrame = keyframeTimes.begin(); keyFrame!=keyframeTimes.end(); keyFrame++ )
 					pNew->AppendKey( aaPtimes[ keyFrame->second ][ iIndex ], aaPtimes[ keyFrame->second ][ iIndex + 1 ], aaPtimes[ keyFrame->second ][ iIndex + cu + 2 ], aaPtimes[ keyFrame->second ][ iIndex + cu + 1 ],  keyFrame->first);
-				pImage->AddMPG( pNew );
+				newMPs.push_back( pNew );
 			}
 			else
 			{
@@ -891,7 +891,7 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage )
 					pNew->MarkTrimmed();
 				pNew->Initialise();
 				pNew->CalculateTotalBound();
-				pImage->AddMPG( pNew );
+				newMPs.push_back( pNew );
 			}
 
 			// Calculate MPG area
@@ -960,10 +960,10 @@ void CqMotionMicroPolyGrid::TransferOutputVariables()
 
 //---------------------------------------------------------------------
 /** Split the micropolygrid into individual MPGs,
- * \param pImage Pointer to image being rendered into.
+ * \param newMPs List to store the splitted MPs
  */
 
-void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage )
+void CqMotionMicroPolyGrid::Split( std::vector<CqMicroPolygon*>& newMPs )
 {
 	// Get the main object, the one that was shaded.
 	CqMicroPolyGrid * pGridA = static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( 0 ) ) );
@@ -1107,7 +1107,7 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage )
 			pNew->SetIndex( iIndex );
 			for ( iTime = 0; iTime < cTimes(); iTime++ )
 				pNew->AppendKey( aaPtimes[ iTime ][ iIndex ], aaPtimes[ iTime ][ iIndex + 1 ], aaPtimes[ iTime ][ iIndex + cu + 2 ], aaPtimes[ iTime ][ iIndex + cu + 1 ], Time( iTime ) );
-			pImage->AddMPG( pNew );
+			newMPs.push_back( pNew );
 		}
 	}
 

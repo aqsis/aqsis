@@ -623,12 +623,17 @@ void CqImageBuffer::RenderMPGs( long xmin, long xmax, long ymin, long ymax )
 {
 	RenderWaitingMPs( xmin, xmax, ymin, ymax );
 
-	// Split any grids in this bucket waiting to be processed.
 	std::vector<CqMicroPolyGridBase*>::iterator lastgrid = CurrentBucket().aGrids().end();
 	for ( std::vector<CqMicroPolyGridBase*>::iterator igrid = CurrentBucket().aGrids().begin(); igrid != lastgrid; igrid++ )
 	{
+		// Split any grids in this bucket waiting to be processed.
+		std::vector<CqMicroPolygon*> newMPs;
 		CqMicroPolyGridBase* pGrid = *igrid;
-		pGrid->Split( this );
+		pGrid->Split( newMPs );
+		for ( std::vector<CqMicroPolygon*>::iterator it = newMPs.begin(); it != newMPs.end(); it++ )
+		{
+			AddMPG( *it );
+		}
 
 		RenderWaitingMPs( xmin, xmax, ymin, ymax );
 	}
@@ -656,11 +661,11 @@ void CqImageBuffer::RenderWaitingMPs( long xmin, long xmax, long ymin, long ymax
 	{
 		CqMicroPolygon* pMpg = *impg;
 		CurrentBucket().RenderMicroPoly( pMpg, xmin, xmax, ymin, ymax );
-		if ( PushMPGDown( ( pMpg ), CurrentBucketCol(), CurrentBucketRow() ) )
+		if ( PushMPGDown( pMpg, CurrentBucketCol(), CurrentBucketRow() ) )
 			STATS_INC( MPG_pushed_down );
-		if ( PushMPGForward( ( pMpg ), CurrentBucketCol(), CurrentBucketRow() ) )
+		if ( PushMPGForward( pMpg, CurrentBucketCol(), CurrentBucketRow() ) )
 			STATS_INC( MPG_pushed_forward );
-		RELEASEREF( ( pMpg ) );
+		RELEASEREF( pMpg );
 	}
 	CurrentBucket().aMPGs().clear();
 }
