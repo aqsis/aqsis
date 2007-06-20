@@ -64,6 +64,55 @@ CqString CqFile::FixupPath(CqString& strPath)
 	return( strPath );
 }
 
+std::string CqFile::basePath( const CqString& strFilespec )
+{
+	std::string::size_type end;
+	if((end = strFilespec.find_last_of( "/" )) != std::string::npos)
+	{
+		return(strFilespec.substr(0, end));
+	}
+	else
+		return("");
+}
+
+std::string CqFile::fileName( const CqString& strFilespec )
+{
+	std::string::size_type end;
+	if((end = strFilespec.find_last_of( "/" )) != std::string::npos)
+	{
+		return(strFilespec.substr(end + 1));
+	}
+	else
+		return(strFilespec);
+}
+
+std::string CqFile::baseName( const CqString& strFilespec )
+{
+	std::string _fname = fileName(strFilespec);
+	std::string::size_type end;
+	if((end = _fname.find_last_of( "." )) != std::string::npos)
+	{
+		return(_fname.substr(0, end));
+	}
+	else
+		return(_fname);
+}
+
+std::string CqFile::extension( const CqString& strFilespec )
+{
+	std::string::size_type end;
+	if((end = strFilespec.find_last_of( "." )) != std::string::npos)
+	{
+		return(strFilespec.substr(end));
+	}
+	else
+		return("");
+}
+
+std::string CqFile::pathSep()
+{
+	return("/");
+}
 
 END_NAMESPACE( Aqsis )
 //---------------------------------------------------------------------

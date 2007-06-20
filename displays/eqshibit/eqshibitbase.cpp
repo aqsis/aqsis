@@ -26,10 +26,9 @@
 #include "eqshibitbase.h"
 #include "book.h"
 #include "tinyxml.h"
+#include "file.h"
 
 #include <FL/Fl_File_Chooser.H>
-#include <boost/filesystem/path.hpp>
-#include <boost/filesystem/convenience.hpp>
 
 START_NAMESPACE( Aqsis )
 
@@ -84,8 +83,7 @@ void CqEqshibitBase::saveConfigurationAs()
 #if	1
 	if(name != NULL)
 	{
-		boost::filesystem::path xmlFile(name);
-		boost::filesystem::path xmlPath(xmlFile.branch_path());
+		std::string _base = CqFile::basePath(name);
 		m_currentConfigName = name;
 		TiXmlDocument doc(name);
 		TiXmlDeclaration* decl = new TiXmlDeclaration("1.0","","yes");
@@ -103,7 +101,7 @@ void CqEqshibitBase::saveConfigurationAs()
 			for(image = book->second->images().begin(); image != book->second->images().end(); ++image)
 			{
 				// Serialise the image first.
-				image->second->serialise(xmlPath.string());
+				image->second->serialise(_base);
 
 				TiXmlElement* imageXML = new TiXmlElement("Image");
 				imagesXML->LinkEndChild(imageXML);

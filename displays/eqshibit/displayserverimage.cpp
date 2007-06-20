@@ -25,6 +25,7 @@
 
 
 #include	"aqsis.h"
+#include	"file.h"
 
 #include	<fstream>
 #include	<map>
@@ -228,30 +229,26 @@ void CqDisplayServerImage::serialise(const std::string& folder)
 {
 #if	1
 	// Generate a unique name for the managed image in the specified folder.
-	std::cout << folder << std::endl;
-	boost::filesystem::path xmlPath(folder);
-	boost::filesystem::path fileName(xmlPath / name().c_str());
-	std::string ext(boost::filesystem::extension(name()));
-	std::string base(boost::filesystem::basename(name()));
-	std::cout << base << " - " << ext << std::endl;
-	std::stringstream strIndex;
+	std::string _ext = CqFile::extension(name());
+	std::string _basename = CqFile::baseName(name());
+	std::stringstream strFilename;
+	strFilename << folder << CqFile::pathSep() << name();
 	FILE* tfile;
 	int index = 1;
-	while(boost::filesystem::exists(fileName))
+	while((tfile = fopen(strFilename.str().c_str(), "r")) != NULL)
 	{
-		strIndex.clear();
-		strIndex.str("");
-		strIndex << base << "." << index << ext;
-		std::cout << strIndex.str() << std::endl;
-		fileName = boost::filesystem::path(xmlPath / strIndex.str()); 
+		fclose(tfile);
+		strFilename.clear();
+		strFilename.str("");
+		strFilename << folder << CqFile::pathSep() << _basename<< "." << index << _ext;
 		index++;
 	}
 		
-	std::cout << fileName.string() << std::endl;
-	setFilename(strIndex.str());
-	std::ofstream file1( fileName.string().c_str() );
-	file1 << "Test" << std::endl;
-	file1.close();
+	setFilename(strFilename.str());
+	std::cout << strFilename.str() << std::endl;
+//	std::ofstream file1( fileName.string().c_str() );
+//	file1 << "Test" << std::endl;
+//	file1.close();
 #endif
 }
 
