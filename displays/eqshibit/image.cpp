@@ -73,6 +73,11 @@ TiXmlElement* CqImage::serialiseToXML()
 	nameXML->LinkEndChild(nameText);
 	imageXML->LinkEndChild(nameXML);
 
+	TiXmlElement* filenameXML = new TiXmlElement("Filename");
+	TiXmlText* filenameText = new TiXmlText(filename());
+	nameXML->LinkEndChild(filenameText);
+	imageXML->LinkEndChild(filenameXML);
+
 	return(imageXML);
 }
 

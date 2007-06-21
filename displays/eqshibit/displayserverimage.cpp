@@ -59,6 +59,8 @@ typedef sockaddr* PSOCKADDR;
 #include	"render.h"
 #include	"displayserverimage.h"
 
+#include <tiffio.h>
+
 #include "boost/archive/iterators/base64_from_binary.hpp"
 #include "boost/archive/iterators/transform_width.hpp"
 #include "boost/archive/iterators/insert_linebreaks.hpp"
@@ -227,7 +229,6 @@ void CqDisplayServerImage::acceptData(TqUlong xmin, TqUlong xmaxplus1, TqUlong y
 
 void CqDisplayServerImage::serialise(const std::string& folder)
 {
-#if	1
 	// Generate a unique name for the managed image in the specified folder.
 	std::string _ext = CqFile::extension(name());
 	std::string _basename = CqFile::baseName(name());
@@ -245,11 +246,204 @@ void CqDisplayServerImage::serialise(const std::string& folder)
 	}
 		
 	setFilename(strFilename.str());
-	std::cout << strFilename.str() << std::endl;
-//	std::ofstream file1( fileName.string().c_str() );
-//	file1 << "Test" << std::endl;
-//	file1.close();
+	saveToTiff(strFilename.str());
+}
+
+
+void CqDisplayServerImage::saveToTiff(const std::string& filename)
+{
+	uint16 photometric = PHOTOMETRIC_RGB;
+	uint16 config = PLANARCONFIG_CONTIG;
+	struct tm *ct;
+	char mydescription[80];
+	int year;
+
+	time_t long_time;
+
+	time( &long_time );           /* Get time as long integer. */
+	ct = localtime( &long_time ); /* Convert to local time. */
+
+	year=1900 + ct->tm_year;
+	char datetime[21];
+	sprintf(datetime, "%04d:%02d:%02d %02d:%02d:%02d", year, ct->tm_mon + 1,
+	        ct->tm_mday, ct->tm_hour, ct->tm_min, ct->tm_sec);
+
+#if 0
+	if(description.empty())
+	{
+		double nSecs = difftime(long_time, start);
+		sprintf(mydescription,"%d secs", static_cast<TqInt>(nSecs));
+		start = long_time;
+	}
+	else
+	{
+		strcpy(mydescription, description.c_str());
+	}
 #endif
+
+
+	// Set common tags
+	// If in "shadowmap" mode, write as a shadowmap.
+#if 0
+	if( image->m_imageType == Type_Shadowmap )
+	{
+		SaveAsShadowMap(filename, image, mydescription);
+		return;
+	}
+	else if( image->m_imageType == Type_ZFile )
+	{
+		std::ofstream ofile( filename.c_str(), std::ios::out | std::ios::binary );
+		if ( ofile.is_open() )
+		{
+			// Save a file type and version marker
+			ofile << ZFILE_HEADER;
+
+			// Save the xres and yres.
+			ofile.write( reinterpret_cast<char* >( &image->m_width ), sizeof( image->m_width ) );
+			ofile.write( reinterpret_cast<char* >( &image->m_height ), sizeof( image->m_height ) );
+
+			// Save the transformation matrices.
+			ofile.write( reinterpret_cast<char*>( image->m_matWorldToCamera[ 0 ] ), sizeof( image->m_matWorldToCamera[ 0 ][ 0 ] ) * 4 );
+			ofile.write( reinterpret_cast<char*>( image->m_matWorldToCamera[ 1 ] ), sizeof( image->m_matWorldToCamera[ 0 ][ 0 ] ) * 4 );
+			ofile.write( reinterpret_cast<char*>( image->m_matWorldToCamera[ 2 ] ), sizeof( image->m_matWorldToCamera[ 0 ][ 0 ] ) * 4 );
+			ofile.write( reinterpret_cast<char*>( image->m_matWorldToCamera[ 3 ] ), sizeof( image->m_matWorldToCamera[ 0 ][ 0 ] ) * 4 );
+
+			ofile.write( reinterpret_cast<char*>( image->m_matWorldToScreen[ 0 ] ), sizeof( image->m_matWorldToScreen[ 0 ][ 0 ] ) * 4 );
+			ofile.write( reinterpret_cast<char*>( image->m_matWorldToScreen[ 1 ] ), sizeof( image->m_matWorldToScreen[ 0 ][ 0 ] ) * 4 );
+			ofile.write( reinterpret_cast<char*>( image->m_matWorldToScreen[ 2 ] ), sizeof( image->m_matWorldToScreen[ 0 ][ 0 ] ) * 4 );
+			ofile.write( reinterpret_cast<char*>( image->m_matWorldToScreen[ 3 ] ), sizeof( image->m_matWorldToScreen[ 0 ][ 0 ] ) * 4 );
+
+			// Now output the depth values
+			ofile.write( reinterpret_cast<char*>( image->m_data ), sizeof( TqFloat ) * ( image->m_width * image->m_height ) );
+			ofile.close();
+		}
+		return;
+	}
+#endif
+
+	TIFF* pOut = TIFFOpen( filename.c_str(), "w" );
+
+	if ( pOut )
+	{
+		// Write the image to a tiff file.
+		char version[ 80 ];
+
+		short ExtraSamplesTypes[ 1 ] = {EXTRASAMPLE_ASSOCALPHA};
+
+		sprintf( version, "%s %s (%s %s)", STRNAME, VERSION_STR, __DATE__, __TIME__);
+		bool use_logluv = false;
+
+		TIFFSetField( pOut, TIFFTAG_SOFTWARE, ( char* ) version );
+		TIFFSetField( pOut, TIFFTAG_IMAGEWIDTH, ( uint32 ) imageWidth() );
+		TIFFSetField( pOut, TIFFTAG_IMAGELENGTH, ( uint32 ) imageHeight() );
+		TIFFSetField( pOut, TIFFTAG_XRESOLUTION, (float) 1.0 );
+		TIFFSetField( pOut, TIFFTAG_YRESOLUTION, (float) 1.0 );
+		TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, (short) 8 );
+		//TIFFSetField( pOut, TIFFTAG_PIXAR_MATRIX_WORLDTOCAMERA, image->m_matWorldToCamera );
+		//TIFFSetField( pOut, TIFFTAG_PIXAR_MATRIX_WORLDTOSCREEN, image->m_matWorldToScreen );
+		TIFFSetField( pOut, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT );
+		TIFFSetField( pOut, TIFFTAG_SAMPLESPERPIXEL, channels() );
+		TIFFSetField( pOut, TIFFTAG_DATETIME, datetime);
+//		if (!image->m_hostname.empty())
+//			TIFFSetField( pOut, TIFFTAG_HOSTCOMPUTER, image->m_hostname.c_str() );
+		TIFFSetField( pOut, TIFFTAG_IMAGEDESCRIPTION, mydescription);
+
+
+		// Write out an 8 bits per pixel integer image.
+//		if ( image->m_format == PkDspyUnsigned8 )
+		{
+			TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, 8 );
+			TIFFSetField( pOut, TIFFTAG_PLANARCONFIG, config );
+//			TIFFSetField( pOut, TIFFTAG_COMPRESSION, image->m_compression );
+//			if ( image->m_compression == COMPRESSION_JPEG )
+//				TIFFSetField( pOut, TIFFTAG_JPEGQUALITY, image->m_quality );
+			TIFFSetField( pOut, TIFFTAG_PHOTOMETRIC, photometric );
+			TIFFSetField( pOut, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize( pOut, 0 ) );
+
+			if ( channels() == 4 )
+				TIFFSetField( pOut, TIFFTAG_EXTRASAMPLES, 1, ExtraSamplesTypes );
+
+			// Set the position tages in case we aer dealing with a cropped image.
+			TIFFSetField( pOut, TIFFTAG_XPOSITION, ( float ) originX() );
+			TIFFSetField( pOut, TIFFTAG_YPOSITION, ( float ) originY() );
+
+			TqInt lineLength = ( sizeof(char) * channels() ) * imageWidth();
+			TqInt row;
+			for ( row = 0; row < imageHeight(); row++ )
+			{
+				if ( TIFFWriteScanline( pOut, reinterpret_cast<void*>(reinterpret_cast<char*>(data()) + ( row * lineLength ))
+				                        , row, 0 ) < 0 )
+					break;
+			}
+			TIFFClose( pOut );
+		}
+#if 0
+		else
+		{
+			// Write out a floating point image.
+			TIFFSetField( pOut, TIFFTAG_STONITS, ( double ) 1.0 );
+
+			//			if(/* user wants logluv compression*/)
+			//			{
+			//				if(/* user wants to save the alpha channel */)
+			//				{
+			//					warn("SGI LogLuv encoding does not allow an alpha channel"
+			//							" - using uncompressed IEEEFP instead");
+			//				}
+			//				else
+			//				{
+			//					use_logluv = true;
+			//				}
+			//
+			//				if(/* user wants LZW compression*/)
+			//				{
+			//					warn("LZW compression is not available with SGI LogLuv encoding\n");
+			//				}
+			//			}
+
+			if ( use_logluv )
+			{
+				/* use SGI LogLuv compression */
+				TIFFSetField( pOut, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_INT );
+				TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, 16 );
+				TIFFSetField( pOut, TIFFTAG_COMPRESSION, COMPRESSION_SGILOG );
+				TIFFSetField( pOut, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_LOGLUV );
+				TIFFSetField( pOut, TIFFTAG_SGILOGDATAFMT, SGILOGDATAFMT_FLOAT );
+			}
+			else
+			{
+				/* use uncompressed IEEEFP pixels */
+				TIFFSetField( pOut, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP );
+				TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, 32 );
+				TIFFSetField( pOut, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB );
+				TIFFSetField( pOut, TIFFTAG_COMPRESSION, image->m_compression );
+			}
+			if (image->m_format == PkDspyUnsigned16)
+			{
+				TIFFSetField( pOut, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_INT );
+				TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, 16 );
+			}
+
+			TIFFSetField( pOut, TIFFTAG_SAMPLESPERPIXEL, image->m_iFormatCount );
+
+			if ( image->m_iFormatCount == 4 )
+				TIFFSetField( pOut, TIFFTAG_EXTRASAMPLES, 1, ExtraSamplesTypes );
+			// Set the position tages in case we aer dealing with a cropped image.
+			TIFFSetField( pOut, TIFFTAG_XPOSITION, ( float ) image->m_origin[0] );
+			TIFFSetField( pOut, TIFFTAG_YPOSITION, ( float ) image->m_origin[1] );
+			TIFFSetField( pOut, TIFFTAG_PLANARCONFIG, config );
+
+			TqInt row = 0;
+			for ( row = 0; row < image->m_height; row++ )
+			{
+				if ( TIFFWriteScanline( pOut, reinterpret_cast<void*>(reinterpret_cast<TqUchar*>(image->m_data) + ( row * image->m_lineLength )), row, 0 )
+				        < 0 )
+					break;
+			}
+			TIFFClose( pOut );
+		}
+#endif
+	}
 }
 
 // Define a base64 encoding stream iterator using the boost archive data flow iterators.
@@ -280,16 +474,26 @@ TiXmlElement* CqDisplayServerImage::serialiseToXML()
 	nameXML->LinkEndChild(nameText);
 	imageXML->LinkEndChild(nameXML);
 
-	TiXmlElement* dataXML = new TiXmlElement("Bitmap");
-	std::stringstream base64Data;
-	size_t dataLen = m_imageWidth * m_imageHeight * m_channels * sizeof(TqUchar);
-	std::copy(	base64_text(BOOST_MAKE_PFTO_WRAPPER(m_data)), 
-				base64_text(BOOST_MAKE_PFTO_WRAPPER(m_data + dataLen)), 
-				std::ostream_iterator<char>(base64Data));
-	TiXmlText* dataTextXML = new TiXmlText(base64Data.str());
-	dataTextXML->SetCDATA(true);
-	dataXML->LinkEndChild(dataTextXML);
-	imageXML->LinkEndChild(dataXML);
+	if(filename().empty())
+	{
+		TiXmlElement* dataXML = new TiXmlElement("Bitmap");
+		std::stringstream base64Data;
+		size_t dataLen = m_imageWidth * m_imageHeight * m_channels * sizeof(TqUchar);
+		std::copy(	base64_text(BOOST_MAKE_PFTO_WRAPPER(m_data)), 
+					base64_text(BOOST_MAKE_PFTO_WRAPPER(m_data + dataLen)), 
+					std::ostream_iterator<char>(base64Data));
+		TiXmlText* dataTextXML = new TiXmlText(base64Data.str());
+		dataTextXML->SetCDATA(true);
+		dataXML->LinkEndChild(dataTextXML);
+		imageXML->LinkEndChild(dataXML);
+	}
+	else
+	{
+		TiXmlElement* filenameXML = new TiXmlElement("Filename");
+		TiXmlText* filenameText = new TiXmlText(filename());
+		nameXML->LinkEndChild(filenameText);
+		imageXML->LinkEndChild(filenameXML);
+	}
 
 	return(imageXML);
 }

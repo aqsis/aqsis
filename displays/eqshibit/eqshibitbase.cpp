@@ -102,24 +102,8 @@ void CqEqshibitBase::saveConfigurationAs()
 			{
 				// Serialise the image first.
 				image->second->serialise(_base);
-
-				TiXmlElement* imageXML = new TiXmlElement("Image");
+				TiXmlElement* imageXML = image->second->serialiseToXML();
 				imagesXML->LinkEndChild(imageXML);
-
-				TiXmlElement* typeXML = new TiXmlElement("Type");
-				TiXmlText* typeText = new TiXmlText("managed");
-				typeXML->LinkEndChild(typeText);
-				imageXML->LinkEndChild(typeXML);
-
-				TiXmlElement* nameXML = new TiXmlElement("Name");
-				TiXmlText* nameText = new TiXmlText(image->second->name());
-				nameXML->LinkEndChild(nameText);
-				imageXML->LinkEndChild(nameXML);
-
-				TiXmlElement* filenameXML = new TiXmlElement("Filename");
-				TiXmlText* filenameText = new TiXmlText(image->second->filename());
-				filenameXML->LinkEndChild(filenameText);
-				imageXML->LinkEndChild(filenameXML);
 			}
 			bookXML->LinkEndChild(imagesXML);
 		}
