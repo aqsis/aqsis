@@ -106,18 +106,18 @@ class COMMON_SHARE XqEnvironment : public XqException
 }
 ;
 
-class COMMON_SHARE XqValidationFailure : public XqException
+class COMMON_SHARE XqValidation : public XqException
 {
 	public:
-		XqValidationFailure (const std::string& reason, const std::string& detail,
+		XqValidation (const std::string& reason, const std::string& detail,
 		const std::string& file, const unsigned int line);
 		
-		XqValidationFailure (const std::string& reason,	const std::string& file,
+		XqValidation (const std::string& reason,	const std::string& file,
 		const unsigned int line);
 		
 		virtual const char* description () const;
 		
-		virtual ~XqValidationFailure () throw ();
+		virtual ~XqValidation () throw ();
 }
 ;
 
