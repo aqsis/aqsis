@@ -48,15 +48,11 @@ USING_NAMESPACE( libri2rib );
 
 
 CqOutput::CqOutput( const char *name, int fdesc,
-                    SqOptions::EqCompression comp,
-                    SqOptions::EqIndentation i, TqInt isize )
+                    SqOptions::EqCompression comp)
 		:
 		m_ColorNComps( 3 ),
 		m_ObjectHandle( 1 ),
-		m_LightHandle( 1 ),
-		m_Indentation( i ),
-		m_IndentSize( isize ),
-		m_IndentLevel( 0 )
+		m_LightHandle( 1 )
 {
 	switch ( comp )
 	{
@@ -115,23 +111,29 @@ void CqOutput::pop()
 // **************************************************************************
 // ******* ******* ******** CONTEXT NESTING FUNCTIONS ******* ******* *******
 // **************************************************************************
-const char* blockNames[] =
+const char* const CqOutput::m_blockNames[] =
     {
         "RiBegin/RiEnd", "Frame", "World", "Attribute", "Transform",
-        "Solid", "Object", "Motion"
+        "Solid", "Object", "Motion", "Resource"
     };
-const RtInt blockErrors[] =
+const RtInt CqOutput::m_blockErrors[] =
     {
         RIE_NESTING, RIE_NESTING, RIE_NESTING, RIE_NESTING, RIE_NESTING,
-        RIE_BADSOLID, RIE_NESTING, RIE_BADMOTION
+        RIE_BADSOLID, RIE_NESTING, RIE_BADMOTION, RIE_NESTING
     };
-
+const CqOutput::EqFunctions CqOutput::m_blockFunctions[] =
+    {
+		LAST_Function, LAST_Function,  // < There's no function type for RiBegin/End
+		FrameBegin, FrameEnd, WorldBegin, WorldEnd, AttributeBegin, AttributeEnd,
+		TransformBegin, TransformEnd, SolidBegin, SolidEnd, ObjectBegin, ObjectEnd,
+		MotionBegin, MotionEnd, ResourceBegin, ResourceEnd
+    };
 
 
 /**
  * Begins a block nesting.
  */
-bool CqOutput::beginNesting(EqBlocks type)
+void CqOutput::beginNesting(EqBlocks type)
 {
 	// we cannot have more than one Ri, Frame or World block, so check that
 	//  these are not present already
@@ -141,15 +143,19 @@ bool CqOutput::beginNesting(EqBlocks type)
 		{
 			throw CqError(RIE_NESTING, RIE_SEVERE,
 			              "Attempt to open another ",
-			              blockNames[type],
+			              m_blockNames[type],
 			              " block when one is already open.", false);
-			return false;
 		}
+	}
+
+	if(type != B_Ri)
+	{
+		std::string requestName = std::string(m_blockNames[type]) + "Begin";
+		printRequest(requestName.c_str(), m_blockFunctions[type*2]);
 	}
 
 	// everything else is fine, so open the block
 	m_nesting.push_back(type);
-	return true;
 }
 
 
@@ -170,43 +176,42 @@ bool CqOutput::beginNesting(EqBlocks type)
  *      RiTransformEnd();               // Note: block is *not* Transform
  *              RiAttributeEnd();
  */
-bool CqOutput::endNesting(EqBlocks type)
+void CqOutput::endNesting(EqBlocks type)
 {
 	// check for an empty block stack.  this is not valid, since we
 	//  can't close a block that hasn't been opened.
 	if (m_nesting.empty())
 	{
 		// invalid
-		throw CqError(blockErrors[type], RIE_SEVERE,
-		              "Cannot close block of type ", blockNames[type],
+		throw CqError(m_blockErrors[type], RIE_SEVERE,
+		              "Cannot close block of type ", m_blockNames[type],
 		              " when no blocks have yet been opened.", false);
-		return false;
 	}
 
 	// check that the block we're closing is of the correct type
 	EqBlocks curBlock = m_nesting.back();
-	if (curBlock == type)
-	{
-		// valid
-		m_nesting.pop_back();
-		return true;
-	}
-	else
+	if (curBlock != type)
 	{
 		// invalid - we raise the error based upon the last entry on
 		//  the stack
 		std::stringstream strBuf;
 		strBuf << "Bad nesting: Attempting to close block of type "
-		<< blockNames[type]
+		<< m_blockNames[type]
 		<< " within a "
-		<< blockNames[curBlock]
+		<< m_blockNames[curBlock]
 		<< " block." << std::ends;
-		throw CqError(blockErrors[curBlock], RIE_SEVERE,
+		throw CqError(m_blockErrors[curBlock], RIE_SEVERE,
 		              &strBuf.str()[0], false);
-		return false;
+	}
+
+	m_nesting.pop_back();
+
+	if(type != B_Ri)
+	{
+		std::string requestName = std::string(m_blockNames[type]) + "End";
+		printRequest(requestName.c_str(), m_blockFunctions[type*2+1]);
 	}
 }
-
 
 
 /**
@@ -355,10 +360,14 @@ RtToken CqOutput::RiDeclare( const char *name, const char *declaration )
 	return const_cast<RtToken> ( name );
 }
 
+// *****************************************************************
+// ******* ******* *******   NESTED BLOCKS   ******* ******* *******
+// *****************************************************************
+
 RtVoid CqOutput::RiBegin( RtToken name )
 {
-	if (beginNesting(B_Ri))
-		printHeader();
+	beginNesting(B_Ri);
+	printHeader();
 }
 
 RtVoid CqOutput::RiEnd( )
@@ -369,89 +378,50 @@ RtVoid CqOutput::RiEnd( )
 
 RtVoid CqOutput::RiFrameBegin( RtInt frame )
 {
-	if (beginNesting(B_Frame))
-	{
-		PR( "FrameBegin", FrameBegin );
-		S;
-		PI( frame );
-		EOL;
-
-		m_IndentLevel++;
-		push();
-	}
+	beginNesting(B_Frame);
+	S;
+	PI( frame );
+	EOL;
+	push();
 }
 
 RtVoid CqOutput::RiFrameEnd( )
 {
-	if (endNesting(B_Frame))
-	{
-		m_IndentLevel--;
-		if ( m_IndentLevel < 0 )
-			m_IndentLevel = 0;
-		pop();
-
-		PR( "FrameEnd", FrameEnd );
-		EOL;
-	}
+	endNesting(B_Frame);
+	EOL;
+	pop();
 }
 
 RtVoid CqOutput::RiWorldBegin( )
 {
-	if (beginNesting(B_World))
-	{
-		PR( "WorldBegin", WorldBegin );
-		EOL;
-
-		m_IndentLevel++;
-		push();
-	}
+	beginNesting(B_World);
+	EOL;
+	push();
 }
 
 RtVoid CqOutput::RiWorldEnd( )
 {
-	if (endNesting(B_World))
-	{
-		m_IndentLevel--;
-		if ( m_IndentLevel < 0 )
-			m_IndentLevel = 0;
-		pop();
-
-		PR( "WorldEnd", WorldEnd );
-		EOL;
-	}
+	endNesting(B_World);
+	EOL;
+	pop();
 }
 
 RtObjectHandle CqOutput::RiObjectBegin( )
 {
-	if (beginNesting(B_Object))
-	{
-		PR( "ObjectBegin", ObjectBegin );
-		S;
-		PI( ( RtInt ) m_ObjectHandle );
-		EOL;
+	beginNesting(B_Object);
+	S;
+	PI( ( RtInt ) m_ObjectHandle );
+	EOL;
 
-		m_IndentLevel++;
-		push();
-		return reinterpret_cast<RtObjectHandle>(static_cast<ptrdiff_t>(m_ObjectHandle++));
-	}
-	else
-	{
-		return ( RtObjectHandle )NULL;
-	}
+	push();
+	return reinterpret_cast<RtObjectHandle>(static_cast<ptrdiff_t>(m_ObjectHandle++));
 }
 
 RtVoid CqOutput::RiObjectEnd( )
 {
-	if (endNesting(B_Object))
-	{
-		m_IndentLevel--;
-		if ( m_IndentLevel < 0 )
-			m_IndentLevel = 0;
-		pop();
-
-		PR( "ObjectEnd", ObjectEnd );
-		EOL;
-	}
+	endNesting(B_Object);
+	EOL;
+	pop();
 }
 
 RtVoid CqOutput::RiObjectInstance( RtObjectHandle handle )
@@ -464,108 +434,74 @@ RtVoid CqOutput::RiObjectInstance( RtObjectHandle handle )
 
 RtVoid CqOutput::RiAttributeBegin( )
 {
-	if (beginNesting(B_Attribute))
-	{
-		PR( "AttributeBegin", AttributeBegin );
-		EOL;
-
-		m_IndentLevel++;
-		push();
-	}
+	beginNesting(B_Attribute);
+	EOL;
+	push();
 }
 
 RtVoid CqOutput::RiAttributeEnd( )
 {
-	if (endNesting(B_Attribute))
-	{
-		m_IndentLevel--;
-		if ( m_IndentLevel < 0 )
-			m_IndentLevel = 0;
-		pop();
-
-		PR( "AttributeEnd", AttributeEnd );
-		EOL;
-	}
+	endNesting(B_Attribute);
+	EOL;
+	pop();
 }
 
 RtVoid CqOutput::RiTransformBegin( )
 {
-	if (beginNesting(B_Transform))
-	{
-		PR( "TransformBegin", TransformBegin );
-		EOL;
-
-		m_IndentLevel++;
-	}
+	beginNesting(B_Transform);
+	EOL;
 }
 
 RtVoid CqOutput::RiTransformEnd( )
 {
-	if (endNesting(B_Transform))
-	{
-		m_IndentLevel--;
-		if ( m_IndentLevel < 0 )
-			m_IndentLevel = 0;
-
-		PR( "TransformEnd", TransformEnd );
-		EOL;
-	}
+	endNesting(B_Transform);
+	EOL;
 }
 
 RtVoid CqOutput::RiSolidBegin( RtToken operation )
 {
-	if (beginNesting(B_Solid))
-	{
-		PR( "SolidBegin", SolidBegin );
-		S;
-		printToken( operation );
-		EOL;
+	beginNesting(B_Solid);
+	S;
+	printToken( operation );
+	EOL;
 
-		m_IndentLevel++;
-		push();
-	}
+	push();
 }
 
 RtVoid CqOutput::RiSolidEnd( )
 {
-	if (endNesting(B_Solid))
-	{
-		m_IndentLevel--;
-		if ( m_IndentLevel < 0 )
-			m_IndentLevel = 0;
-		pop();
-
-		PR( "SolidEnd", SolidEnd );
-		EOL;
-	}
+	endNesting(B_Solid);
+	EOL;
+	pop();
 }
 
 RtVoid CqOutput::RiMotionBeginV( RtInt n, RtFloat times[] )
 {
-	if (beginNesting(B_Motion))
-	{
-		PR( "MotionBegin", MotionBegin );
-		S;
-		printArray( n, times );
-		EOL;
-
-		m_IndentLevel++;
-	}
+	beginNesting(B_Motion);
+	S;
+	printArray( n, times );
+	EOL;
 }
 
 RtVoid CqOutput::RiMotionEnd( )
 {
-	if (endNesting(B_Motion))
-	{
-		m_IndentLevel--;
-		if ( m_IndentLevel < 0 )
-			m_IndentLevel = 0;
-
-		PR( "MotionEnd", MotionEnd );
-		EOL;
-	}
+	endNesting(B_Motion);
+	EOL;
 }
 
+RtVoid CqOutput::RiResourceBegin( )
+{
+	beginNesting(B_Resource);
+	EOL;
+	push();
+}
+
+RtVoid CqOutput::RiResourceEnd( )
+{
+	endNesting(B_Resource);
+	EOL;
+	pop();
+}
 
 
 
@@ -1188,32 +1124,6 @@ RtVoid CqOutput::RiResourceV ( RtToken handle, RtToken type, RtInt n, RtToken to
 	printToken( type );
 	S;
 	printPL( n, tokens, parms );
-}
-
-RtVoid CqOutput::RiResourceBegin( )
-{
-	if (beginNesting(B_Resource))
-	{
-		PR( "ResourceBegin", ResourceBegin );
-		EOL;
-
-		m_IndentLevel++;
-		push();
-	}
-}
-
-RtVoid CqOutput::RiResourceEnd( )
-{
-	if (endNesting(B_Resource))
-	{
-		m_IndentLevel--;
-		if ( m_IndentLevel < 0 )
-			m_IndentLevel = 0;
-		pop();
-
-		PR( "ResourceEnd", ResourceEnd );
-		EOL;
-	}
 }
 
 RtVoid CqOutput::RiScale( RtFloat sx, RtFloat sy, RtFloat sz )
