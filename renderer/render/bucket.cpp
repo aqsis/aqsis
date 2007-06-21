@@ -143,8 +143,8 @@ void CqBucket::PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt y
 			if (other >= size) other = size - 1;
 			(*itPix).m_SampleIndices.swap(m_aieImage[other].m_SampleIndices);  
 			(*itPix).m_DofOffsetIndices.swap(m_aieImage[other].m_DofOffsetIndices); 
-		};
-	};
+		}
+	}
 
 	// Jitter the samplepoints and adjust them for the new bucket position.
 	TqInt which = 0;

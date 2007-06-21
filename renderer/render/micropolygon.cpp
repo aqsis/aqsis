@@ -512,12 +512,15 @@ void CqMicroPolyGrid::Shade()
 	cCulled = 0;
 	if ( ( pAttributes() ->GetIntegerAttribute( "System", "Sides" ) [ 0 ] == 1 ) && !m_pCSGNode )
 	{
+		const CqVector3D* pNg = NULL;
+		pVar(EnvVars_Ng) ->GetNormalPtr( pNg );
+
 		//theStats.OcclusionCullTimer().Start();
 		TIME_SCOPE("Occlusion culling")
 		for ( i = gsmin1; i >= 0; i-- )
 		{
 			// Calulate the direction the MPG is facing.
-			if ( ( pN[ i ] * pP[ i ] ) >= 0 )
+			if ( ( pNg[ i ] * pP[ i ] ) >= 0 )
 			{
 				cCulled++;
 				m_CulledPolys.SetValue( i, true );
