@@ -1400,17 +1400,20 @@ RtVoid CqOutput::RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap,
                                RtPointer parms[] )
 {
 	RtInt nuptch, nvptch;
-	RtInt ii = 0;
+	RtInt varyingDataLen = 1;
+	/// \todo Review: Consider removing redundent direct pointer comparisons to RI_BILINEAR.  Surely this isn't a worthwhile optimisation?
 	if ( type == RI_BILINEAR || (strcmp(type, RI_BILINEAR)==0) )
 	{
+		/// \todo Review: Factor out checks for RI_PERIODIC into a small helper function.
 		if ( uwrap == RI_PERIODIC || (strcmp(uwrap, RI_PERIODIC) ==0) )
 		{
 			nuptch = nu;
+			varyingDataLen *= nuptch;
 		}
 		else if ( uwrap == RI_NONPERIODIC || (strcmp(uwrap, RI_NONPERIODIC)==0) )
 		{
 			nuptch = nu - 1;
-			ii += 1;
+			varyingDataLen *= nuptch + 1;
 		}
 		else
 		{
@@ -1421,11 +1424,12 @@ RtVoid CqOutput::RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap,
 		if ( vwrap == RI_PERIODIC || (strcmp(vwrap, RI_PERIODIC)==0) )
 		{
 			nvptch = nv;
+			varyingDataLen *= nvptch;
 		}
 		else if ( vwrap == RI_NONPERIODIC || (strcmp(vwrap, RI_NONPERIODIC)==0) )
 		{
 			nvptch = nv - 1;
-			ii += 1;
+			varyingDataLen *= nvptch + 1;
 		}
 		else
 		{
@@ -1433,9 +1437,6 @@ RtVoid CqOutput::RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap,
 			               "Unknown RiPatchMesh vwrap token:", vwrap,
 			               "  RiPatchMesh instruction skipped", true );
 		}
-		ii += nuptch + nvptch;
-
-
 	}
 	else if ( type == RI_BICUBIC || (strcmp(type, RI_BICUBIC)==0) )
 	{
@@ -1445,11 +1446,12 @@ RtVoid CqOutput::RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap,
 		if ( uwrap == RI_PERIODIC || (strcmp(uwrap, RI_PERIODIC) ==0) )
 		{
 			nuptch = nu / nustep;
+			varyingDataLen *= nuptch;
 		}
 		else if ( uwrap == RI_NONPERIODIC || (strcmp(uwrap, RI_NONPERIODIC)==0) )
 		{
 			nuptch = ( nu - 4 ) / nustep + 1;
-			ii += 1;
+			varyingDataLen *= nuptch + 1;
 		}
 		else
 		{
@@ -1460,11 +1462,12 @@ RtVoid CqOutput::RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap,
 		if ( vwrap == RI_PERIODIC || (strcmp(vwrap, RI_PERIODIC)==0) )
 		{
 			nvptch = nv / nvstep;
+			varyingDataLen *= nvptch;
 		}
 		else if ( vwrap == RI_NONPERIODIC || (strcmp(vwrap, RI_NONPERIODIC)==0) )
 		{
 			nvptch = ( nv - 4 ) / nvstep + 1;
-			ii += 1;
+			varyingDataLen *= nvptch + 1;
 		}
 		else
 		{
@@ -1472,9 +1475,6 @@ RtVoid CqOutput::RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap,
 			               "Unknown RiPatchMesh vwrap token:", vwrap,
 			               "  RiPatchMesh instruction skipped", true );
 		}
-		ii += nuptch + nvptch;
-
-
 	}
 	else
 	{
@@ -1495,7 +1495,7 @@ RtVoid CqOutput::RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap,
 	S;
 	printToken( vwrap );
 	S;
-	printPL( n, tokens, parms, nu * nv, ii, nuptch * nvptch );
+	printPL( n, tokens, parms, nu * nv, varyingDataLen, nuptch * nvptch );
 }
 
 RtVoid CqOutput::RiNuPatchV( RtInt nu, RtInt uorder, RtFloat uknot[],

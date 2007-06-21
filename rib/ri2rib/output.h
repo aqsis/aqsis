@@ -98,6 +98,20 @@ class CqOutput
 		void push();
 		void pop();
 
+		/** \brief Print a Ri parameter list
+		 *
+		 * The number primitive variables which should be attached to this
+		 * geomtric primative for each different primitive variable class must
+		 * be provided (vertex, varying, uniform, facevarying).
+		 *
+		 * \param n - number of items in the list
+		 * \param tokens - descriptor tokens for the list
+		 * \param parms - pointers to the parameter values
+		 * \param vertex - number of primitive vars in class "vertex"
+		 * \param varying - number of primitive vars in class "varying"
+		 * \param uniform - number of primitive vars in class "uniform"
+		 * \param facevarying - number of primitive vars in class "facevarying"
+		 */
 		void printPL ( RtInt n, RtToken tokens[], RtPointer parms[],
 		               RtInt vertex = 1, RtInt varying = 1, RtInt uniform = 1, RtInt facevarying = 1 );
 		std::string getFilterFuncName ( RtFilterFunc, const char * ) const;
