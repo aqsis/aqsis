@@ -57,14 +57,11 @@ void CqContext::addContext( RtToken name )
 	switch ( m_OutputType )
 	{
 			case SqOptions::OutputType_Ascii:
-			m_Active = new CqASCII ( name, m_PipeHandle,
-			                         m_Compression,
+			m_Active = new CqASCII ( name, m_PipeHandle, m_Compression,
 			                         m_Indentation, m_IndentSize );
 			break;
 			case SqOptions::OutputType_Binary:
-			m_Active = new CqBinary ( name, m_PipeHandle,
-			                          m_Compression,
-			                          m_Indentation, m_IndentSize );
+			m_Active = new CqBinary ( name, m_PipeHandle, m_Compression);
 			break;
 	}
 
