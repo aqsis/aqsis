@@ -29,6 +29,7 @@
 
 #include	<vector>
 #include	<string>
+#include	<map>
 
 #include	<boost/shared_ptr.hpp>
 #include	<boost/function.hpp>
@@ -50,9 +51,9 @@ class CqFramebuffer;
 class CqImage
 {
 public:
-	CqImage( const CqString& name ) : m_name(name), m_data(0), m_frameWidth(0), m_frameHeight(0), m_imageWidth(0), m_imageHeight(0), m_originX(0), m_originY(0), m_channels(0)
+	CqImage( const CqString& name ) : m_name(name), m_data(0), m_frameWidth(0), m_frameHeight(0), m_imageWidth(0), m_imageHeight(0), m_originX(0), m_originY(0)
 	{} 
-	CqImage() : m_data(0), m_frameWidth(0), m_frameHeight(0), m_imageWidth(0), m_imageHeight(0), m_originX(0), m_originY(0), m_channels(0)
+	CqImage() : m_data(0), m_frameWidth(0), m_frameHeight(0), m_imageWidth(0), m_imageHeight(0), m_originX(0), m_originY(0)
 	{}
     virtual ~CqImage()
 	{
@@ -88,13 +89,13 @@ public:
 		m_frameWidth = width;
 		m_frameHeight = height;
 	}
-	virtual TqInt channels()
+	virtual TqInt numChannels()
 	{
-		return( m_channels );
+		return( m_channels.size() );
 	}
-	virtual void setChannels(TqInt channels)
+	virtual void addChannel(const std::string& name, TqInt type)
 	{
-		m_channels = channels;
+		m_channels.push_back(std::pair<std::string, TqInt>(name,type));
 	}
 	virtual unsigned char* data()
 	{
@@ -149,7 +150,7 @@ protected:
 	TqUlong			m_imageHeight;
 	TqUlong			m_originX;
 	TqUlong			m_originY;
-	TqInt			m_channels;
+	std::vector<std::pair<std::string, TqInt> >			m_channels;
 
 	boost::function<void(int,int,int,int)> m_updateCallback;
 	boost::mutex	m_mutex;

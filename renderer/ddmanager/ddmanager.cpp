@@ -918,7 +918,7 @@ void CqDDManager::PrepareCustomParameters( std::map<std::string, void*>& mapPara
 			req.m_QuantizeDitherVal = floats[0];
 			req.m_QuantizeDitherSpecified = true;
 		}
-		else
+		//else
 		{
 			// Otherwise, construct a UserParameter structure and fill in the details.
 			SqParameterDeclaration Decl;

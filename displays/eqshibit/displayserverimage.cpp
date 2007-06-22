@@ -155,7 +155,7 @@ void CqDisplayServerImage::acceptData(TqUlong xmin, TqUlong xmaxplus1, TqUlong y
 
 	if( data() && xmin__ >= 0 && ymin__ >= 0 && xmaxplus1__ <= imageWidth() && ymaxplus1__ <= imageHeight() )
 	{
-		TqUint comp = elementSize/channels();
+		TqUint comp = elementSize/numChannels();
 		TqUlong y;
 		unsigned char *unrolled = data();
 
@@ -165,21 +165,21 @@ void CqDisplayServerImage::acceptData(TqUlong xmin, TqUlong xmaxplus1, TqUlong y
 			const unsigned char* _pdatarow = pdatarow;
 			for ( x = xmin__; x < xmaxplus1__; x++ )
 			{
-				TqInt so = channels() * (( y * imageWidth() ) +  x );
+				TqInt so = numChannels() * (( y * imageWidth() ) +  x );
 				switch (comp)
 				{
 					case 2 :
 					{
 						const TqUshort *svalue = reinterpret_cast<const TqUshort *>(_pdatarow);
 						TqUchar alpha = 255;
-						if (channels() == 4)
+						if (numChannels() == 4)
 						{
 							alpha = (svalue[3]/256);
 						}
 						CompositeAlpha((TqInt) svalue[0]/256, (TqInt) svalue[1]/256, (TqInt) svalue[2]/256, 
 										unrolled[so + 0], unrolled[so + 1], unrolled[so + 2], 
 										alpha);
-						if (channels() == 4)
+						if (numChannels() == 4)
 							unrolled[ so + 3 ] = alpha;
 					}
 					break;
@@ -188,14 +188,14 @@ void CqDisplayServerImage::acceptData(TqUlong xmin, TqUlong xmaxplus1, TqUlong y
 
 						const TqUlong *lvalue = reinterpret_cast<const TqUlong *>(_pdatarow);
 						TqUchar alpha = 255;
-						if (channels() == 4)
+						if (numChannels() == 4)
 						{
 							alpha = (TqUchar) (lvalue[3]/256);
 						}
 						CompositeAlpha((TqInt) lvalue[0]/256, (TqInt) lvalue[1]/256, (TqInt) lvalue[2]/256, 
 										unrolled[so + 0], unrolled[so + 1], unrolled[so + 2], 
 										alpha);
-						if (channels() == 4)
+						if (numChannels() == 4)
 							unrolled[ so + 3 ] = alpha;
 					}
 					break;
@@ -205,14 +205,14 @@ void CqDisplayServerImage::acceptData(TqUlong xmin, TqUlong xmaxplus1, TqUlong y
 					{
 						const TqUchar *cvalue = reinterpret_cast<const TqUchar *>(_pdatarow);
 						TqUchar alpha = 255;
-						if (channels() == 4)
+						if (numChannels() == 4)
 						{
 							alpha = (TqUchar) (cvalue[3]);
 						}
 						CompositeAlpha((TqInt) cvalue[0], (TqInt) cvalue[1], (TqInt) cvalue[2], 
 										unrolled[so + 0], unrolled[so + 1], unrolled[so + 2], 
 										alpha);
-						if (channels() == 4)
+						if (numChannels() == 4)
 							unrolled[ so + 3 ] = alpha;
 					}
 					break;
@@ -342,7 +342,7 @@ void CqDisplayServerImage::saveToTiff(const std::string& filename)
 		//TIFFSetField( pOut, TIFFTAG_PIXAR_MATRIX_WORLDTOCAMERA, image->m_matWorldToCamera );
 		//TIFFSetField( pOut, TIFFTAG_PIXAR_MATRIX_WORLDTOSCREEN, image->m_matWorldToScreen );
 		TIFFSetField( pOut, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT );
-		TIFFSetField( pOut, TIFFTAG_SAMPLESPERPIXEL, channels() );
+		TIFFSetField( pOut, TIFFTAG_SAMPLESPERPIXEL, numChannels() );
 		TIFFSetField( pOut, TIFFTAG_DATETIME, datetime);
 //		if (!image->m_hostname.empty())
 //			TIFFSetField( pOut, TIFFTAG_HOSTCOMPUTER, image->m_hostname.c_str() );
@@ -360,14 +360,14 @@ void CqDisplayServerImage::saveToTiff(const std::string& filename)
 			TIFFSetField( pOut, TIFFTAG_PHOTOMETRIC, photometric );
 			TIFFSetField( pOut, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize( pOut, 0 ) );
 
-			if ( channels() == 4 )
+			if ( numChannels() == 4 )
 				TIFFSetField( pOut, TIFFTAG_EXTRASAMPLES, 1, ExtraSamplesTypes );
 
 			// Set the position tages in case we aer dealing with a cropped image.
 			TIFFSetField( pOut, TIFFTAG_XPOSITION, ( float ) originX() );
 			TIFFSetField( pOut, TIFFTAG_YPOSITION, ( float ) originY() );
 
-			TqInt lineLength = ( sizeof(char) * channels() ) * imageWidth();
+			TqInt lineLength = ( sizeof(char) * numChannels() ) * imageWidth();
 			TqInt row;
 			for ( row = 0; row < imageHeight(); row++ )
 			{
@@ -478,7 +478,7 @@ TiXmlElement* CqDisplayServerImage::serialiseToXML()
 	{
 		TiXmlElement* dataXML = new TiXmlElement("Bitmap");
 		std::stringstream base64Data;
-		size_t dataLen = m_imageWidth * m_imageHeight * m_channels * sizeof(TqUchar);
+		size_t dataLen = m_imageWidth * m_imageHeight * numChannels() * sizeof(TqUchar);
 		std::copy(	base64_text(BOOST_MAKE_PFTO_WRAPPER(m_data)), 
 					base64_text(BOOST_MAKE_PFTO_WRAPPER(m_data + dataLen)), 
 					std::ostream_iterator<char>(base64Data));
@@ -491,7 +491,7 @@ TiXmlElement* CqDisplayServerImage::serialiseToXML()
 	{
 		TiXmlElement* filenameXML = new TiXmlElement("Filename");
 		TiXmlText* filenameText = new TiXmlText(filename());
-		nameXML->LinkEndChild(filenameText);
+		filenameXML->LinkEndChild(filenameText);
 		imageXML->LinkEndChild(filenameXML);
 	}
 

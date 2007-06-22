@@ -88,6 +88,20 @@ typedef
     > 
     base64_text; // compose all the above operations in to a new iterator
 
+static char* g_formatNames[] = {
+	"PkDspyNone",
+	"PkDspyFloat32",
+	"PkDspyUnsigned32",
+	"PkDspySigned32",
+	"PkDspyUnsigned16",
+	"PkDspySigned16",
+	"PkDspyUnsigned8",
+	"PkDspySigned8",
+	"PkDspyString",
+	"PkDspyMatrix",
+	"PkDspyArrayBegin",
+	"PkDspyArrayEnd",
+};
 
 static int initialiseSocket(const std::string hostname, TqInt port)
 {
@@ -371,12 +385,15 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			{
 				TiXmlElement* formatv = new TiXmlElement("Format");
 				formatv->SetAttribute("name", format[iformat].name);
+				TiXmlText* formatText = new TiXmlText(g_formatNames[format[iformat].type]);
+				formatv->LinkEndChild(formatText); 
 				formatsXML->LinkEndChild(formatv);
 			}
 			openMsgXML->LinkEndChild(formatsXML);
 
 			displaydoc.LinkEndChild(displaydecl);
 			displaydoc.LinkEndChild(openMsgXML);
+			displaydoc.Print();
 			sendXMLMessage(displaydoc, pImage->m_socket);
 		}
 		else 

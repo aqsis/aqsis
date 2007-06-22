@@ -216,14 +216,19 @@ class CqDataHandler
 					child = root->FirstChildElement("Formats");
 					if(child)
 					{
-						int channels = 0;
+						//int channels = 0;
 						TiXmlElement* format = child->FirstChildElement("Format");
 						while(format)
 						{
-							++channels;
+							//++channels;
+							// Read the format type from the node.
+							const char* typeName = format->GetText();
+							const char* formatName = format->Attribute("name");
+							m_client->addChannel(typeName, 0);
+
 							format = format->NextSiblingElement("Format");
 						}
-						m_client->setChannels(channels);
+						//m_client->setChannels(channels);
 					}
 					m_client->PrepareImageBuffer();
 

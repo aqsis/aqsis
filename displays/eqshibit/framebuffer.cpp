@@ -87,7 +87,7 @@ void CqFramebuffer::connect(boost::shared_ptr<CqImage>& image)
 	m_associatedImage = image;	
 	Fl::lock();
 	m_uiImageWidget->setImageData(image->data());
-	m_uiImageWidget->setImageProportions(image->frameWidth(), image->frameHeight(), image->channels());
+	m_uiImageWidget->setImageProportions(image->frameWidth(), image->frameHeight(), image->numChannels());
 	m_theWindow->size(image->frameWidth(), image->frameHeight());
 	boost::function<void(int,int,int,int)> f;
 	f = boost::bind(&CqFramebuffer::update, this, _1, _2, _3, _4);
