@@ -74,7 +74,7 @@ TqInt CqDDManager::AddDisplay( const TqChar* name, const TqChar* type, const TqC
 	req.m_modeHash = CqString::hash( mode );
 	req.m_modeID = modeID;
 	req.m_QuantizeZeroVal = 0.0f;
-	req.m_QuantizeOneVal = 255.0f;
+	req.m_QuantizeOneVal = 0.0f;
 	req.m_QuantizeMinVal = 0.0f;
 	req.m_QuantizeMaxVal = 0.0f;
 	req.m_QuantizeDitherVal = 0.0f;
@@ -413,18 +413,21 @@ void CqDDManager::LoadDisplayLibrary( SqDisplayRequest& req )
 		// If the quantization options haven't been set in the RiDisplay call, get the appropriate values out
 		// of the RiQuantize option.
 		const TqFloat* pQuant = 0;
-		if(!req.m_QuantizeSpecified || !req.m_QuantizeDitherSpecified)
+		if(req.m_modeID * ( ModeRGB | ModeA | ModeZ ) && ( !req.m_QuantizeSpecified || !req.m_QuantizeDitherSpecified ))
 		{
-			if(req.m_modeID & ModeZ)
-				pQuant = QGetRenderContext() ->poptCurrent()->GetFloatOption( "Quantize", "Depth" );
-			else
-				pQuant = QGetRenderContext() ->poptCurrent()->GetFloatOption( "Quantize", "Color" );
-			if( pQuant && !req.m_QuantizeSpecified)
+			if(!req.m_QuantizeSpecified)
 			{
-				req.m_QuantizeOneVal = pQuant[0];
-				req.m_QuantizeMinVal = pQuant[1];
-				req.m_QuantizeMaxVal = pQuant[2];
-				req.m_QuantizeSpecified = true;
+				if(req.m_modeID & ModeZ)
+					pQuant = QGetRenderContext() ->poptCurrent()->GetFloatOption( "Quantize", "Depth" );
+				else
+					pQuant = QGetRenderContext() ->poptCurrent()->GetFloatOption( "Quantize", "Color" );
+				if( pQuant && !req.m_QuantizeSpecified)
+				{
+					req.m_QuantizeOneVal = pQuant[0];
+					req.m_QuantizeMinVal = pQuant[1];
+					req.m_QuantizeMaxVal = pQuant[2];
+					req.m_QuantizeSpecified = true;
+				}
 			}
 
 			if( pQuant && !req.m_QuantizeDitherSpecified)

@@ -393,7 +393,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 
 			displaydoc.LinkEndChild(displaydecl);
 			displaydoc.LinkEndChild(openMsgXML);
-			displaydoc.Print();
+			//displaydoc.Print();
 			sendXMLMessage(displaydoc, pImage->m_socket);
 		}
 		else 
