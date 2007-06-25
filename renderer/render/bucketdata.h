@@ -67,13 +67,11 @@ class CqBucketData
 public:
 	/** Default constructor */
 	CqBucketData();
+
 	/** Reset the values to the initial state */
 	void reset();
 
 private:
-	/// Flag indicating if this bucket has been processed yet.
-	bool	m_bProcessed;
-
 	/// Origin in discrete coordinates of this bucket.
 	TqInt	m_XOrigin;
 	/// Origin in discrete coordinates of this bucket.

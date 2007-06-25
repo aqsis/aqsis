@@ -55,10 +55,8 @@ START_NAMESPACE( Aqsis )
 class CqBucket : public IqBucket
 {
 	public:
-		CqBucket()
-		{
-			m_bucketData.m_bProcessed = false;
-		}
+		CqBucket() : m_bProcessed(false)
+		{}
 
 		virtual ~CqBucket();
 
@@ -243,14 +241,14 @@ class CqBucket : public IqBucket
 		 */
 		bool IsProcessed() const
 		{
-			return( m_bucketData.m_bProcessed );
+			return( m_bProcessed );
 		}
 
 		/** Mark this bucket as processed
 		 */
 		void SetProcessed( bool bProc =  true)
 		{
-			m_bucketData.m_bProcessed = bProc;
+			m_bProcessed = bProc;
 		}
 		/** Set the pointer to the image buffer
 		 */
@@ -292,6 +290,9 @@ class CqBucket : public IqBucket
 
 
 	private:
+		/// Flag indicating if this bucket has been processed yet.
+		bool	m_bProcessed;
+
 		/// Pointer to the image buffer this bucket belongs to.
 		static	CqImageBuffer*	m_ImageBuffer;
 

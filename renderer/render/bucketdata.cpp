@@ -25,13 +25,10 @@ START_NAMESPACE( Aqsis );
 
 CqBucketData::CqBucketData()
 {
-	reset();
 }
 
 void CqBucketData::reset()
 {
-	m_bProcessed = false;
-
 	m_XOrigin = 0;
 	m_YOrigin = 0;
 	m_XSize = 0;
@@ -53,9 +50,9 @@ void CqBucketData::reset()
 	m_SamplePoints.clear();
 	m_NextSamplePoint = 0;
 
-	for(std::vector<std::vector<CqVector2D> >::iterator i=m_aSamplePositions.begin();
-	    i!=m_aSamplePositions.end();
-	    i++ )
+	for( std::vector<std::vector<CqVector2D> >::iterator i=m_aSamplePositions.begin();
+	     i!=m_aSamplePositions.end();
+	     i++ )
 		(*i).clear();
 	m_aSamplePositions.clear();
 	m_aFilterValues.clear();
