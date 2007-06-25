@@ -1063,7 +1063,7 @@ void CqImageBuffer::RenderImage()
 		if ( !bIsEmpty )
 		{
 			TIME_SCOPE("Occlusion culling")
-			CqOcclusionBox::SetupHierarchy( &CurrentBucket(), xmin, ymin, xmax, ymax );
+			CqOcclusionBox::SetupHierarchy( &CurrentBucket() );
 		}
 
 
