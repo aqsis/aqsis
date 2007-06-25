@@ -162,7 +162,7 @@ class CqOcclusionBox
 {
 	public:
 		static void DeleteHierarchy();
-		static void SetupHierarchy( CqBucket* bucket, TqInt xMin, TqInt yMin, TqInt xMax, TqInt yMax );
+		static void SetupHierarchy( const CqBucket* bucket, TqInt xMin, TqInt yMin, TqInt xMax, TqInt yMax );
 
 		static bool CanCull( CqBound* bound );
 
@@ -175,7 +175,6 @@ class CqOcclusionBox
 		CqOcclusionBox();
 		~CqOcclusionBox();
 
-		static CqBucket* m_Bucket;
 		static CqOcclusionTreePtr	m_KDTree;			///< Tree representing the samples in the bucket.
 };
 

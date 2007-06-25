@@ -380,8 +380,6 @@ bool CqOcclusionTree::CanCull( CqBound* bound )
 //----------------------------------------------------------------------
 // Static Variables
 
-CqBucket* CqOcclusionBox::m_Bucket = NULL;
-
 bool CqOcclusionTree::CqOcclusionTreeComparator::operator()(const std::pair<TqInt, TqInt>& a, const std::pair<TqInt, TqInt>& b)
 {
 	const SqSampleData& A = CqBucket::ImageElement(a.first).SampleData(a.second);
@@ -430,10 +428,9 @@ void CqOcclusionBox::DeleteHierarchy()
  *\param yMax: Bottom edge of this bucket
 */
 
-void CqOcclusionBox::SetupHierarchy( CqBucket* bucket, TqInt xMin, TqInt yMin, TqInt xMax, TqInt yMax )
+void CqOcclusionBox::SetupHierarchy( const CqBucket* bucket, TqInt xMin, TqInt yMin, TqInt xMax, TqInt yMax )
 {
 	assert( bucket );
-	m_Bucket = bucket;
 
 	if(!m_KDTree)
 	{
