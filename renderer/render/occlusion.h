@@ -83,13 +83,7 @@ class CqOcclusionTree// : public boost::enable_shared_from_this<CqOcclusionTree>
 			return(2);
 		}
 
-		/**
-		* \todo Review: Unused parameter index; Could this be const?
-		*/
-		SqSampleData& Sample(TqInt index = 0)
-		{
-			return(CqBucket::ImageElement(m_SampleIndices[0].first).SampleData(m_SampleIndices[0].second));
-		}
+		SqSampleData& Sample() const;
 
 		void AddSample(const std::pair<TqInt, TqInt>& sample)
 		{
@@ -162,7 +156,7 @@ class CqOcclusionBox
 {
 	public:
 		static void DeleteHierarchy();
-		static void SetupHierarchy( const CqBucket* bucket, TqInt xMin, TqInt yMin, TqInt xMax, TqInt yMax );
+		static void SetupHierarchy( const CqBucket* bucket );
 
 		static bool CanCull( CqBound* bound );
 

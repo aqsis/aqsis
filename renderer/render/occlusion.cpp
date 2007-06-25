@@ -377,6 +377,12 @@ bool CqOcclusionTree::CanCull( CqBound* bound )
 }
 
 
+SqSampleData& CqOcclusionTree::Sample() const
+{
+	return CqBucket::ImageElement(m_SampleIndices[0].first).SampleData(m_SampleIndices[0].second);
+}
+
+
 //----------------------------------------------------------------------
 // Static Variables
 
@@ -428,7 +434,7 @@ void CqOcclusionBox::DeleteHierarchy()
  *\param yMax: Bottom edge of this bucket
 */
 
-void CqOcclusionBox::SetupHierarchy( const CqBucket* bucket, TqInt xMin, TqInt yMin, TqInt xMax, TqInt yMax )
+void CqOcclusionBox::SetupHierarchy( const CqBucket* bucket )
 {
 	assert( bucket );
 
