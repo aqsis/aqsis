@@ -30,7 +30,6 @@
 #include        "aqsis.h"
 #include        "matrix.h"
 #include        "surface.h"
-#include        "vector4d.h"
 #include        "patch.h"
 
 START_NAMESPACE( Aqsis )

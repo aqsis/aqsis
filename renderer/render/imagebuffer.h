@@ -36,7 +36,6 @@
 #include	"micropolygon.h"
 #include	"renderer.h"
 #include	"ri.h"
-#include	"sstring.h"
 #include	"surface.h"
 #include	"color.h"
 #include	"vector2d.h"
