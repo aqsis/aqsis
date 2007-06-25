@@ -68,6 +68,9 @@ public:
 	/** Default constructor */
 	CqBucketData();
 
+	/** Default destructor */
+	~CqBucketData();
+
 	/** Reset the values to the initial state */
 	void reset();
 

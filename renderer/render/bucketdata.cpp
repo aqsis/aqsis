@@ -27,6 +27,11 @@ CqBucketData::CqBucketData()
 {
 }
 
+CqBucketData::~CqBucketData()
+{
+	reset();
+}
+
 void CqBucketData::reset()
 {
 	m_XOrigin = 0;
