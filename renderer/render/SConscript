@@ -5,6 +5,7 @@ aqsisdll_sources = Split("""
 	attributes.cpp
 	bound.cpp
 	bucket.cpp
+	bucketdata.cpp
 	bunny.cpp
 	condition.cpp
 	converter.cpp
@@ -56,7 +57,7 @@ aqsisdll_headers = Split("""
 	ri_debug.h
 	bound.h                 imagepixel.h            mpdump.h                rifile.h
 
-	bucket.h                bunny.h 	imagers.h               
+	bucket.h		bucketdata.h                bunny.h 	imagers.h               
 	nurbs.h                 shadeop.h
 	blobby.h		clippingvolume.h        inlineparse.h
         objectinstance.h        shaders.h
