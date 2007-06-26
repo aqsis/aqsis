@@ -46,6 +46,7 @@
 #include	"imagepixel.h"
 #include	"bucketdata.h"
 
+
 START_NAMESPACE( Aqsis )
 
 //-----------------------------------------------------------------------
@@ -125,23 +126,8 @@ class CqBucket : public IqBucket
 		static	void	PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt ysize, bool fJitter = true, bool empty = false );
 		static	void	CalculateDofBounds();
 		static	void	InitialiseFilterValues();
-		static	void	ImageElement( TqInt iXPos, TqInt iYPos, CqImagePixel*& pie )
-		{
-			iXPos -= m_bucketData.m_XOrigin;
-			iYPos -= m_bucketData.m_YOrigin;
-
-			// Check within renderable range
-			//assert( iXPos < -m_XMax && iXPos < m_XSize + m_XMax &&
-			//		iYPos < -m_YMax && iYPos < m_YSize + m_YMax );
-
-			TqInt i = ( ( iYPos + m_bucketData.m_DiscreteShiftY ) * ( m_bucketData.m_RealWidth ) ) + ( iXPos + m_bucketData.m_DiscreteShiftX );
-			pie = &m_bucketData.m_aieImage[ i ];
-		}
-		static CqImagePixel& ImageElement(TqInt index)
-		{
-			assert(index < m_bucketData.m_aieImage.size());
-			return(m_bucketData.m_aieImage[index]);
-		}
+		static	void	ImageElement( TqInt iXPos, TqInt iYPos, CqImagePixel*& pie );
+		static CqImagePixel& ImageElement(TqInt index);
 
 		static	std::vector<SqSampleData>& SamplePoints()
 		{
@@ -246,10 +232,7 @@ class CqBucket : public IqBucket
 
 		/** Mark this bucket as processed
 		 */
-		void SetProcessed( bool bProc =  true)
-		{
-			m_bProcessed = bProc;
-		}
+		void SetProcessed( bool bProc =  true);
 		/** Set the pointer to the image buffer
 		 */
 		static void SetImageBuffer( CqImageBuffer* pBuffer )
@@ -293,11 +276,11 @@ class CqBucket : public IqBucket
 		/// Flag indicating if this bucket has been processed yet.
 		bool	m_bProcessed;
 
-		/// Pointer to the image buffer this bucket belongs to.
-		static	CqImageBuffer*	m_ImageBuffer;
-
 		/// Dynamic bucket data
 		static CqBucketData m_bucketData;
+
+		/// Pointer to the image buffer this bucket belongs to.
+		static	CqImageBuffer*	m_ImageBuffer;
 
 		// this is a compare functor for sorting surfaces in order of depth.
 		struct closest_surface

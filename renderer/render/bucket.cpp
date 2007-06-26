@@ -51,8 +51,25 @@ START_NAMESPACE( Aqsis )
 /** Static data on CqBucket
  */
 
-CqImageBuffer* CqBucket::m_ImageBuffer;
+CqImageBuffer* CqBucket::m_ImageBuffer = 0;
 CqBucketData CqBucket::m_bucketData;
+
+
+
+//----------------------------------------------------------------------
+/** Mark this bucket as processed
+ */
+void CqBucket::SetProcessed( bool bProc )
+{
+	m_bProcessed = bProc;
+/*
+	if (m_bucketData)
+	{
+		delete m_bucketData;
+		m_bucketData = 0;
+	}
+*/
+}
 
 
 //----------------------------------------------------------------------
@@ -286,6 +303,28 @@ void CqBucket::InitialiseFilterValues()
 
 }
 
+
+//----------------------------------------------------------------------
+void CqBucket::ImageElement( TqInt iXPos, TqInt iYPos, CqImagePixel*& pie )
+{
+	iXPos -= m_bucketData.m_XOrigin;
+	iYPos -= m_bucketData.m_YOrigin;
+	
+	// Check within renderable range
+	//assert( iXPos < -m_XMax && iXPos < m_XSize + m_XMax &&
+	//	iYPos < -m_YMax && iYPos < m_YSize + m_YMax );
+
+	TqInt i = ( ( iYPos + m_bucketData.m_DiscreteShiftY ) * ( m_bucketData.m_RealWidth ) ) + ( iXPos + m_bucketData.m_DiscreteShiftX );
+	pie = &m_bucketData.m_aieImage[ i ];
+}
+
+
+//----------------------------------------------------------------------
+CqImagePixel& CqBucket::ImageElement(TqInt index)
+{
+	assert(index < m_bucketData.m_aieImage.size());
+	return m_bucketData.m_aieImage[index];
+}
 
 //----------------------------------------------------------------------
 /** Combine the subsamples into single pixel samples and coverage information.
@@ -941,7 +980,13 @@ bool CqBucket::IsEmpty()
  */
 void CqBucket::ShutdownBucket()
 {
-	m_bucketData.reset();
+/*
+	if (m_bucketData)
+	{
+		delete m_bucketData;
+		m_bucketData = 0;
+	}
+*/
 }
 
 //----------------------------------------------------------------------
