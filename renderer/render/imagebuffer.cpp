@@ -39,7 +39,7 @@
 #include	"micropolygon.h"
 #include	"imagebuffer.h"
 #include	"occlusion.h"
-#include	"bucketdata.h"
+#include	"bucketprocessor.h"
 
 
 START_NAMESPACE( Aqsis )
@@ -607,7 +607,7 @@ bool CqImageBuffer::PushMPGDown( CqMicroPolygon* pmpg, TqInt Col, TqInt Row )
 
 
 //----------------------------------------------------------------------
-/** Render any waiting MPGs.
+/** Render any waiting Grids.
  
     All micro polygon grids in the specified bucket are bust into
     individual micro polygons which are assigned to their appropriate
@@ -620,7 +620,7 @@ bool CqImageBuffer::PushMPGDown( CqMicroPolygon* pmpg, TqInt Col, TqInt Row )
  * \param ymax Integer maximum extend of the image part being rendered, takes into account buckets and clipping.
  */
 
-void CqImageBuffer::RenderMPGs( long xmin, long xmax, long ymin, long ymax )
+void CqImageBuffer::RenderGrids( long xmin, long xmax, long ymin, long ymax )
 {
 	RenderWaitingMPs( xmin, xmax, ymin, ymax );
 
@@ -755,7 +755,7 @@ void CqImageBuffer::StoreExtraData( CqMicroPolygon* pMPG, SqImageSample& sample)
     The dicing is done by the gprim in CqSurface::Dice(). After that
     the entire grid is shaded by calling CqMicroPolyGridBase::Shade().
     The shaded grid is then stored in the current bucket and will eventually
-    be further processed by RenderMPGs().
+    be further processed by RenderGrids().
  
     If the gprim could not yet be diced, it is split into a number of
     smaller gprims (CqSurface::Split()) which are again assigned to
@@ -783,7 +783,7 @@ void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax, 
 	// Render any waiting micro polygon grids.
 	{
 		TIME_SCOPE("Render MPGs")
-		RenderMPGs( xmin, xmax, ymin, ymax );
+		RenderWaitingMPs( xmin, xmax, ymin, ymax );
 	}
 
 	// Render any waiting subsurfaces.
@@ -836,7 +836,7 @@ void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax, 
 					// Render any waiting micro polygon grids.
 					{
 						TIME_SCOPE("Render MPGs")
-						RenderMPGs( xmin, xmax, ymin, ymax );
+						RenderGrids( xmin, xmax, ymin, ymax );
 					}
 				}
 				RELEASEREF( pGrid );
@@ -883,7 +883,7 @@ void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax, 
 		// Render any waiting micro polygon grids.
 		{
 			TIME_SCOPE("Render MPGs")
-			RenderMPGs( xmin, xmax, ymin, ymax );
+			RenderGrids( xmin, xmax, ymin, ymax );
 		}
 	}
 
@@ -1016,12 +1016,12 @@ void CqImageBuffer::RenderImage()
 	// A counter for the number of processed buckets (used for progress reporting)
 	TqInt iBucket = 0;
 
-	CqBucketData bucketData;
+	CqBucketProcessor bucketProcessor;
 
 	// Iterate over all buckets...
 	do
 	{
-		CurrentBucket().SetBucketData(&bucketData);
+		bucketProcessor.setBucket(&CurrentBucket());
 
 		bool bIsEmpty = CurrentBucket().IsEmpty();
 		if (fImager)
@@ -1093,7 +1093,8 @@ void CqImageBuffer::RenderImage()
 			SetProcessWorkingSetSize( GetCurrentProcess(), 0xffffffff, 0xffffffff );
 #endif
 		CurrentBucket().SetProcessed();
-		// CurrentBucket().SetBucketData((CqBucketData*)0);
+		bucketProcessor.reset();
+
 		// Increase the bucket counter...
 		iBucket += 1;
 	} while( NextBucket(order) );

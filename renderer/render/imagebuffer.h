@@ -272,7 +272,7 @@ class CqImageBuffer
 		void	AddMPG( CqMicroPolygon* pmpgNew );
 		bool	PushMPGForward( CqMicroPolygon* pmpg, TqInt Col, TqInt Row );
 		bool	PushMPGDown( CqMicroPolygon*, TqInt Col, TqInt Row );
-		void	RenderMPGs( long xmin, long xmax, long ymin, long ymax );
+		void	RenderGrids( long xmin, long xmax, long ymin, long ymax );
 		void	RenderWaitingMPs( long xmin, long xmax, long ymin, long ymax );
 		void	RenderSurfaces( long xmin, long xmax, long ymin, long ymax, bool fImager, enum EqFilterDepth filterdepth, CqColor zThreshold );
 		void	RenderImage();

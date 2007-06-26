@@ -967,7 +967,8 @@ bool CqBucket::IsEmpty()
  */
 void CqBucket::ShutdownBucket()
 {
-	m_bucketData->reset();
+	if (m_bucketData)
+		m_bucketData->reset();
 }
 
 //----------------------------------------------------------------------
