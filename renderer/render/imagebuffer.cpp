@@ -1033,8 +1033,8 @@ void CqImageBuffer::RenderImage()
 
 		{
 			TIME_SCOPE("Prepare bucket")
-			CqBucket::PrepareBucket( static_cast<TqInt>( bPos.x() ), static_cast<TqInt>( bPos.y() ), static_cast<TqInt>( bSize.x() ), static_cast<TqInt>( bSize.y() ), true, bIsEmpty );
-			CqBucket::InitialiseFilterValues();
+			CurrentBucket().PrepareBucket( static_cast<TqInt>( bPos.x() ), static_cast<TqInt>( bPos.y() ), static_cast<TqInt>( bSize.x() ), static_cast<TqInt>( bSize.y() ), true, bIsEmpty );
+			CurrentBucket().InitialiseFilterValues();
 		}
 
 		////////// Dump the pixel sample positions into a dump file //////////
