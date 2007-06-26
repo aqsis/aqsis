@@ -42,8 +42,6 @@
 #include	<valarray>
 
 
-
-
 START_NAMESPACE( Aqsis )
 
 
@@ -55,20 +53,12 @@ CqImageBuffer* CqBucket::m_ImageBuffer = 0;
 CqBucketData CqBucket::m_bucketData;
 
 
-
 //----------------------------------------------------------------------
 /** Mark this bucket as processed
  */
 void CqBucket::SetProcessed( bool bProc )
 {
 	m_bProcessed = bProc;
-/*
-	if (m_bucketData)
-	{
-		delete m_bucketData;
-		m_bucketData = 0;
-	}
-*/
 }
 
 
@@ -969,10 +959,7 @@ void CqBucket::QuantizeBucket()
  */
 bool CqBucket::IsEmpty()
 {
-	if ( !pTopSurface() && aGrids().empty() && aMPGs().empty() )
-		return true;
-	else
-		return false;
+	return !pTopSurface() && aGrids().empty() && aMPGs().empty();
 }
 
 //----------------------------------------------------------------------
@@ -980,13 +967,7 @@ bool CqBucket::IsEmpty()
  */
 void CqBucket::ShutdownBucket()
 {
-/*
-	if (m_bucketData)
-	{
-		delete m_bucketData;
-		m_bucketData = 0;
-	}
-*/
+	m_bucketData.reset();
 }
 
 //----------------------------------------------------------------------
