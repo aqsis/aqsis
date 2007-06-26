@@ -32,19 +32,14 @@
 
 #include	<vector>
 
-#include	"bitvector.h"
-#include	"micropolygon.h"
-#include	"renderer.h"
-#include	"ri.h"
 #include	"surface.h"
 #include	"color.h"
 #include	"vector2d.h"
-#include    	"imagepixel.h"
 #include    	"bucket.h"
-#include	"kdtree.h"
-#include	"occlusion.h"
-#include	"clippingvolume.h"
 #include	"mpdump.h"
+
+
+class CqMicroPolygon;
 
 START_NAMESPACE( Aqsis )
 

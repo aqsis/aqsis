@@ -34,15 +34,8 @@
 #include	<queue>
 #include	<deque>
 
-#include	"iddmanager.h"
-#include	"bitvector.h"
-#include	"micropolygon.h"
-#include	"renderer.h"
-#include	"ri.h"
 #include	"surface.h"
 #include	"color.h"
-#include	"vector2d.h"
-#include	"vector2d.h"
 #include	"imagepixel.h"
 #include	"bucketdata.h"
 

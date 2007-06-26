@@ -35,6 +35,7 @@
 #include	"surface.h"
 #include	"imagepixel.h"
 #include	"bucket.h"
+#include	"occlusion.h"
 
 #include	"imagers.h"
 
