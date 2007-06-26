@@ -9,7 +9,6 @@ eqshibitappenv.AppendUnique(CPPDEFINES=['EQSHIBIT_APP_EXPORTS', 'TIXML_USE_STL']
 eqshibitapp_sources = Split("""
 	eqshibit.cpp
 	eqshibitbase.cpp
-	ddserver.cpp
 	image.cpp
 	framebuffer.cpp
 	book.cpp
@@ -20,7 +19,6 @@ eqshibitapp_sources = Split("""
 eqshibitapp_headers =  Split("""
 	eqshibit.h
 	eqshibitbase.h
-	ddserver.h
 	image.h
 	book.h
 	framebuffer.h

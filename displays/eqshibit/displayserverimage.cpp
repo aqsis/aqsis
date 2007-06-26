@@ -75,39 +75,7 @@ START_NAMESPACE( Aqsis )
  */
 void CqDisplayServerImage::close()
 {
-#ifdef AQSIS_SYSTEM_WIN32
-    int x = 1;
-    setsockopt( m_socket, SOL_SOCKET, SO_DONTLINGER, reinterpret_cast<const char*>( &x ), sizeof( x ) );
-    shutdown( m_socket, SD_BOTH );
-    closesocket( m_socket );
-#else // AQSIS_SYSTEM_WIN32
-    shutdown( m_socket, SD_BOTH );
-    ::close( m_socket );
-#endif // !AQSIS_SYSTEM_WIN32
-
-    m_socket = INVALID_SOCKET;
-}
-
-
-
-//---------------------------------------------------------------------
-/** Send some data to the socket.
- * \param buffer Void pointer to the data to send.
- * \param len Integer length of the data in buffer.
- */
-
-void CqDisplayServerImage::sendData( void* buffer, TqInt len )
-{
-    if ( m_socket == INVALID_SOCKET )
-        return ;
-
-    TqInt tot = 0, need = len;
-    while ( need > 0 )
-    {
-        TqInt n = send( m_socket, reinterpret_cast<char*>( buffer ) + tot, need, 0 );
-        need -= n;
-        tot += n;
-    }
+	m_socket.close();
 }
 
 
@@ -119,22 +87,19 @@ void CqDisplayServerImage::sendData( void* buffer, TqInt len )
 #define INT_MULT(a,b,t) ( (t) = (a) * (b) + 0x80, ( ( ( (t)>>8 ) + (t) )>>8 ) )
 #define INT_PRELERP(p, q, a, t) ( (p) + (q) - INT_MULT( a, p, t) )
 
-void CompositeAlpha(TqInt r, TqInt g, TqInt b, unsigned char &R, unsigned char &G, unsigned char &B, 
-		    unsigned char alpha )
+void CompositeAlpha(TqInt r, unsigned char &R, unsigned char alpha )
 { 
 	TqInt t;
 	// C’ = INT_PRELERP( A’, B’, b, t )
 	TqInt R1 = static_cast<TqInt>(INT_PRELERP( R, r, alpha, t ));
-	TqInt G1 = static_cast<TqInt>(INT_PRELERP( G, g, alpha, t ));
-	TqInt B1 = static_cast<TqInt>(INT_PRELERP( B, b, alpha, t ));
 	R = CLAMP( R1, 0, 255 );
-	G = CLAMP( G1, 0, 255 );
-	B = CLAMP( B1, 0, 255 );
 }
 
 
 void CqDisplayServerImage::acceptData(TqUlong xmin, TqUlong xmaxplus1, TqUlong ymin, TqUlong ymaxplus1, TqInt elementSize, const unsigned char* bucketData )
 {
+	assert(elementSize == m_elementSize);
+
 	TqUlong xmin__ = MAX((xmin - originX()), 0);
 	TqUlong ymin__ = MAX((ymin - originY()), 0);
 	TqUlong xmaxplus1__ = MIN((xmaxplus1 - originX()), imageWidth());
@@ -166,59 +131,43 @@ void CqDisplayServerImage::acceptData(TqUlong xmin, TqUlong xmaxplus1, TqUlong y
 			for ( x = xmin__; x < xmaxplus1__; x++ )
 			{
 				TqInt so = numChannels() * (( y * imageWidth() ) +  x );
-				switch (comp)
+				TqUchar alpha = 255;
+				/// \todo: Work out how to read alpha from the bucket data, taking into account sizes.
+				std::vector<std::pair<std::string, TqInt> >::iterator channel;
+				for(channel = m_channels.begin(); channel != m_channels.end(); ++channel)
 				{
-					case 2 :
+					switch(channel->second)
 					{
-						const TqUshort *svalue = reinterpret_cast<const TqUshort *>(_pdatarow);
-						TqUchar alpha = 255;
-						if (numChannels() == 4)
+						case PkDspyUnsigned16:
+						case PkDspySigned16:
 						{
-							alpha = (svalue[3]/256);
+							const TqUshort *svalue = reinterpret_cast<const TqUshort *>(_pdatarow);
+							CompositeAlpha((TqInt) svalue[0]/256, unrolled[so], alpha);
+							_pdatarow += 2;
 						}
-						CompositeAlpha((TqInt) svalue[0]/256, (TqInt) svalue[1]/256, (TqInt) svalue[2]/256, 
-										unrolled[so + 0], unrolled[so + 1], unrolled[so + 2], 
-										alpha);
-						if (numChannels() == 4)
-							unrolled[ so + 3 ] = alpha;
-					}
-					break;
-					case 4:
-					{
+						break;
+						case PkDspyUnsigned32:
+						case PkDspySigned32:
+						{
 
-						const TqUlong *lvalue = reinterpret_cast<const TqUlong *>(_pdatarow);
-						TqUchar alpha = 255;
-						if (numChannels() == 4)
-						{
-							alpha = (TqUchar) (lvalue[3]/256);
+							const TqUlong *lvalue = reinterpret_cast<const TqUlong *>(_pdatarow);
+							CompositeAlpha((TqInt) lvalue[0]/256, unrolled[so], alpha);
+							_pdatarow += 4;
 						}
-						CompositeAlpha((TqInt) lvalue[0]/256, (TqInt) lvalue[1]/256, (TqInt) lvalue[2]/256, 
-										unrolled[so + 0], unrolled[so + 1], unrolled[so + 2], 
-										alpha);
-						if (numChannels() == 4)
-							unrolled[ so + 3 ] = alpha;
-					}
-					break;
+						break;
 
-					case 1:
-					default:
-					{
-						const TqUchar *cvalue = reinterpret_cast<const TqUchar *>(_pdatarow);
-						TqUchar alpha = 255;
-						if (numChannels() == 4)
+						case PkDspySigned8:
+						case PkDspyUnsigned8:
+						default:
 						{
-							alpha = (TqUchar) (cvalue[3]);
+							const TqUchar *cvalue = reinterpret_cast<const TqUchar *>(_pdatarow);
+							CompositeAlpha((TqInt) cvalue[0], unrolled[so], alpha);
+							_pdatarow += 1;
 						}
-						CompositeAlpha((TqInt) cvalue[0], (TqInt) cvalue[1], (TqInt) cvalue[2], 
-										unrolled[so + 0], unrolled[so + 1], unrolled[so + 2], 
-										alpha);
-						if (numChannels() == 4)
-							unrolled[ so + 3 ] = alpha;
+						break;
 					}
-					break;
+					++so;
 				}
-				_pdatarow += elementSize;
-
 			}
 			pdatarow += bucketlinelen;
 		}

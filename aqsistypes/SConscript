@@ -40,6 +40,7 @@ aqsistypes_headers = Split("""
 	pool.h
 	random.h
 	refcount.h
+	socket.h
 	spline.h
 	sstring.h
 	validate.h
@@ -64,6 +65,7 @@ aqsistypes_install_headers = Split('''
 	matrix.h
 	random.h
 	refcount.h
+	socket.h
 	sstring.h
 	vector2d.h
 	vector3d.h

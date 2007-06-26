@@ -56,6 +56,7 @@ typedef	u_long in_addr_t;
 #include "eqshibitdisplay.h"
 #include "tinyxml.h"
 #include "sstring.h"
+#include "socket.h"
 
 // From displayhelpers.c
 #ifdef __cplusplus
@@ -72,7 +73,8 @@ extern "C"
 }
 #endif
 
-static int sendXMLMessage(TiXmlDocument& msg, int sock);
+static int sendXMLMessage(TiXmlDocument& msg, CqSocket& sock);
+static TiXmlDocument* recvXMLMessage(CqSocket& sock);
 
 // Define a base64 encoding stream iterator using the boost archive data flow iterators.
 typedef 
@@ -102,60 +104,6 @@ static char* g_formatNames[] = {
 	"PkDspyArrayBegin",
 	"PkDspyArrayEnd",
 };
-
-static int initialiseSocket(const std::string hostname, TqInt port)
-{
-#ifdef	AQSIS_SYSTEM_WIN32
-	WORD wVersionRequested;
-	WSADATA wsaData;
-	int err;
-	 
-	wVersionRequested = MAKEWORD( 2, 2 );
-	 
-	err = WSAStartup( wVersionRequested, &wsaData );
-	if ( err != 0 ) {
-		/* Tell the user that we could not find a usable */
-		/* WinSock DLL.                                  */
-		return INVALID_SOCKET;
-	}
-	 
-	/* Confirm that the WinSock DLL supports 2.2.*/
-	/* Note that if the DLL supports versions greater    */
-	/* than 2.2 in addition to 2.2, it will still return */
-	/* 2.2 in wVersion since that is the version we      */
-	/* requested.                                        */
-	 
-	if ( LOBYTE( wsaData.wVersion ) != 2 ||
-			HIBYTE( wsaData.wVersion ) != 2 ) {
-		/* Tell the user that we could not find a usable */
-		/* WinSock DLL.                                  */
-		WSACleanup( );
-		return INVALID_SOCKET; 
-	}
-#endif
-	int sock = socket(AF_INET,SOCK_STREAM,0);
-	sockaddr_in adServer;
-
-#ifndef AQSIS_SYSTEM_WIN32
-	bzero((char *) &adServer, sizeof(adServer)); 
-#else
-	ZeroMemory((char *) &adServer, sizeof(adServer)); 
-#endif
-	adServer.sin_family = AF_INET;
-	adServer.sin_addr.s_addr = inet_addr(hostname.c_str());
-	if (adServer.sin_addr.s_addr == (in_addr_t) -1)
-	{
-		Aqsis::log() << error << "Invalid IP address" << std::endl;;
-		return(INVALID_SOCKET);
-	};
-	adServer.sin_port = htons(port);
-
-	if( connect(sock,(const struct sockaddr*) &adServer, sizeof(sockaddr_in)))
-	{
-		return(INVALID_SOCKET);
-	}
-	return sock; 
-}
 
 
 PtDspyError DspyImageOpen(PtDspyImageHandle * image,
@@ -227,8 +175,9 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			pImage->m_port = 49515;
 
 		// First, see if eqshibit is running, by trying to connect to it.
-		int sock = initialiseSocket(pImage->m_hostname, pImage->m_port);
-		if(sock == INVALID_SOCKET)
+		CqSocket::initialiseSockets();
+		pImage->m_socket.connect(pImage->m_hostname, pImage->m_port);
+		if(!pImage->m_socket)
 		{
 			Aqsis::log() << info << "Will try to start a framebuffer" << std::endl;
 			//Local FB requested, we've not run one yet
@@ -290,12 +239,10 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 #endif
 			// The FB should be running at this point.
 			// Lets try and connect
-			sock = initialiseSocket(pImage->m_hostname, pImage->m_port);
+			pImage->m_socket.connect(pImage->m_hostname, pImage->m_port);
 		}
-		if(sock != INVALID_SOCKET)
+		if(pImage->m_socket)
 		{
-			pImage->m_socket = sock;
-
 			TiXmlDocument displaydoc("open.xml");
 			TiXmlDeclaration* displaydecl = new TiXmlDeclaration("1.0","","yes");
 			TiXmlElement* openMsgXML = new TiXmlElement("Open");
@@ -395,6 +342,10 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			displaydoc.LinkEndChild(openMsgXML);
 			//displaydoc.Print();
 			sendXMLMessage(displaydoc, pImage->m_socket);
+			TiXmlDocument* formats = recvXMLMessage(pImage->m_socket);
+			std::cout << "Reveived formats message from display" << std::endl;
+			formats->Print();
+			delete(formats);
 		}
 		else 
 			return(PkDspyErrorNoMemory);
@@ -454,7 +405,7 @@ PtDspyError DspyImageClose(PtDspyImageHandle image)
 	pImage = reinterpret_cast<SqDisplayInstance*>(image);
 
 	// Close the socket
-	if(pImage && pImage->m_socket != INVALID_SOCKET)
+	if(pImage && !pImage->m_socket)
 	{
 		TiXmlDocument doc("close.xml");
 		TiXmlDeclaration* decl = new TiXmlDeclaration("1.0","","yes");
@@ -477,7 +428,7 @@ PtDspyError DspyImageDelayClose(PtDspyImageHandle image)
 	pImage = reinterpret_cast<SqDisplayInstance*>(image);
 	
 	// Close the socket
-	if(pImage && pImage->m_socket != INVALID_SOCKET)
+	if(pImage && !pImage->m_socket)
 	{
 		TiXmlDocument doc("close.xml");
 		TiXmlDeclaration* decl = new TiXmlDeclaration("1.0","","yes");
@@ -499,8 +450,8 @@ PtDspyError DspyImageQuery(PtDspyImageHandle image,
 	SqDisplayInstance* pImage;
 	pImage = reinterpret_cast<SqDisplayInstance*>(image);
 
-	PtDspyOverwriteInfo overwriteInfo;
-	PtDspySizeInfo sizeInfo;
+	//PtDspyOverwriteInfo overwriteInfo;
+	//PtDspySizeInfo sizeInfo;
 
 	if(size <= 0 || !data)
 		return PkDspyErrorBadParams;
@@ -549,19 +500,25 @@ PtDspyError DspyImageQuery(PtDspyImageHandle image,
 	return(PkDspyErrorNone);
 }
 
-static int sendXMLMessage(TiXmlDocument& msg, int sock)
+static int sendXMLMessage(TiXmlDocument& msg, CqSocket& sock)
 {
 	std::stringstream message;
 	message << msg;
-	TqInt tot = 0, need = message.str().length();
-	while ( need > 0 )
-	{
-		TqInt n = send( sock, message.str().c_str() + tot, need, 0 );
-		need -= n;
-		tot += n;
-	}
-	// Send terminator too.
-	send(sock, "\0", 1, 0);
-	tot += 1;
-	return( tot );
+
+	return( sock.sendData( message.str() ) );
 }
+
+static TiXmlDocument* recvXMLMessage(CqSocket& sock)
+{
+	TiXmlDocument* xmlMsg = new TiXmlDocument();
+	std::stringstream buffer;
+	int len = sock.recvData(buffer);
+	if(len > 0)
+	{
+		// Parse the XML message sent.
+		xmlMsg->Parse(buffer.str().c_str());
+	}
+	return(xmlMsg);
+}
+
+

@@ -32,6 +32,7 @@
 #include "tinyxml.h"
 #include "ndspy.h"
 #include "sstring.h"
+#include "socket.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -44,7 +45,7 @@ struct SqDisplayInstance
 	CqString		m_filename;
 	CqString		m_hostname;
 	TqInt			m_port;
-	int				m_socket;
+	CqSocket		m_socket;
 	// The number of pixels that have already been rendered (used for progress reporting)
 	TqInt		m_pixelsReceived;
 

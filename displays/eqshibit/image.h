@@ -51,14 +51,11 @@ class CqFramebuffer;
 class CqImage
 {
 public:
-	CqImage( const CqString& name ) : m_name(name), m_data(0), m_frameWidth(0), m_frameHeight(0), m_imageWidth(0), m_imageHeight(0), m_originX(0), m_originY(0)
+	CqImage( const CqString& name ) : m_name(name), m_data(0), m_realData(0), m_frameWidth(0), m_frameHeight(0), m_imageWidth(0), m_imageHeight(0), m_originX(0), m_originY(0), m_elementSize(0)
 	{} 
-	CqImage() : m_data(0), m_frameWidth(0), m_frameHeight(0), m_imageWidth(0), m_imageHeight(0), m_originX(0), m_originY(0)
+	CqImage() : m_data(0), m_realData(0), m_frameWidth(0), m_frameHeight(0), m_imageWidth(0), m_imageHeight(0), m_originX(0), m_originY(0), m_elementSize(0)
 	{}
-    virtual ~CqImage()
-	{
-		free(m_data);
-	}
+    virtual ~CqImage();
 
     virtual CqString&	name()
     {
@@ -143,13 +140,15 @@ public:
 
 protected:
     CqString		m_name;			///< Display name.
-	unsigned char*	m_data;
+	unsigned char*	m_data;			///< Buffer to store the 8bit data for display. 
+	unsigned char*	m_realData;		///< Buffer to store the natural format image data.
 	TqUlong			m_frameWidth;
 	TqUlong			m_frameHeight;
 	TqUlong			m_imageWidth;
 	TqUlong			m_imageHeight;
 	TqUlong			m_originX;
 	TqUlong			m_originY;
+	TqInt			m_elementSize;
 	std::vector<std::pair<std::string, TqInt> >			m_channels;
 
 	boost::function<void(int,int,int,int)> m_updateCallback;

@@ -2,10 +2,12 @@ Import('env')
 
 env.Distribute('aqsis_compiler.h')
 env.Distribute('file_system.cpp')
+env.Distribute('socket_system.cpp')
 env.Distribute('SConscript')
 env.Distribute('unistd.h')
 
 platform_sources = Split ("""
 		win32/file_system.cpp
+		win32/socket_system.cpp
 		""")
 Export('platform_sources')

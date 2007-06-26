@@ -26,9 +26,15 @@
 #include "image.h"
 #include "framebuffer.h"
 #include "logging.h"
-
+#include "ndspy.h"
 
 START_NAMESPACE( Aqsis )
+
+CqImage::~CqImage()
+{
+	free(m_data);
+	free(m_realData);
+}
 
 void CqImage::PrepareImageBuffer()
 {
@@ -52,6 +58,30 @@ void CqImage::PrepareImageBuffer()
 				data()[numChannels() * (i*imageWidth() + j) + chan ] = d;
 		}
 	}
+	// Now prepare the buffer for the natural data.
+	// First work out how big each element is by scanning the channels specification.
+	m_elementSize = 0;
+	for(std::vector<std::pair<std::string, TqInt> >::iterator channel = m_channels.begin(); channel != m_channels.end(); ++channel)
+	{
+		switch(channel->second)
+		{
+			case PkDspyFloat32:
+			case PkDspyUnsigned32:
+			case PkDspySigned32:
+				m_elementSize += 4;
+				break;
+			case PkDspyUnsigned16:
+			case PkDspySigned16:
+				m_elementSize += 2;
+				break;
+			case PkDspyUnsigned8:
+			case PkDspySigned8:
+			default:
+				m_elementSize += 1;
+				break;
+		}
+	}
+	m_realData = reinterpret_cast<unsigned char*>(malloc( m_imageWidth * m_imageHeight * m_elementSize));
 }
 
 void CqImage::setUpdateCallback(boost::function<void(int,int,int,int)> f)

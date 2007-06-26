@@ -27,9 +27,10 @@
 
 #include "argparse.h"
 
-#include <logging.h>
-#include <logging_streambufs.h>
+#include "logging.h"
+#include "logging_streambufs.h"
 #include "sstring.h"
+#include "socket.h"
 
 #include <tiffio.h>
 
@@ -61,7 +62,6 @@ using namespace Aqsis;
 
 #include "eqshibit.h"
 #include "fluid_eqshibit_ui.h"
-#include "ddserver.h"
 #include "displayserverimage.h"
 #include "framebuffer.h"
 #include "book.h"
@@ -98,15 +98,14 @@ typedef
 	> 
 base64_binary; // compose all the above operations in to a new iterator
 
-CqDDServer g_theServer;
-std::map<int, boost::shared_ptr<CqDisplayServerImage> >	g_theClients;
+CqSocket g_theSocket;
 std::vector<boost::thread*> g_theThreads;
 #define BUF_SIZE  4096
 
 class CqDataHandler
 {
 	public:
-		CqDataHandler(int sock, boost::shared_ptr<CqDisplayServerImage> thisClient) : m_sock(sock), m_client(thisClient)
+		CqDataHandler(const CqSocket& sock, boost::shared_ptr<CqDisplayServerImage> thisClient) : m_sock(sock), m_client(thisClient)
 		{}
 
 		void operator()()
@@ -116,35 +115,28 @@ class CqDataHandler
 
 		void handleData()
 		{
-			char c;
-			int count;
 			std::stringstream buffer;
+			int count;
 
 			// Read a message
 			while(1)	
 			{
-				// Read some more into the buffer
-				count = recv(m_sock,&c,sizeof(char),0);
+				count = m_sock.recvData(buffer);
 				if(count <= 0)
-				{
-					if(errno == EAGAIN)
-						continue;
-					else
-						break;
-				}
-
-				if(c == '\0')
-				{
-					// Readbuf should now contain a complete message
-					processMessage(buffer);
-					buffer.str("");
-					buffer.clear();
-				} 
-				else 
-				{
-					buffer.put(c);
-				}	
+					break;
+				// Readbuf should now contain a complete message
+				processMessage(buffer);
+				buffer.str("");
+				buffer.clear();
 			}
+		}
+
+		int sendXMLMessage(TiXmlDocument& msg)
+		{
+			std::stringstream message;
+			message << msg;
+
+			return( m_sock.sendData( message.str() ) );
 		}
 
 		void processMessage(std::stringstream& msg)
@@ -223,12 +215,18 @@ class CqDataHandler
 							//++channels;
 							// Read the format type from the node.
 							const char* typeName = format->GetText();
-							const char* formatName = format->Attribute("name");
+							//const char* formatName = format->Attribute("name");
 							m_client->addChannel(typeName, 0);
 
 							format = format->NextSiblingElement("Format");
 						}
-						//m_client->setChannels(channels);
+						// Send the reorganised formats back.
+						TiXmlDocument doc("close.xml");
+						TiXmlDeclaration* decl = new TiXmlDeclaration("1.0","","yes");
+						TiXmlElement* closeMsgXML = new TiXmlElement("Acknowledge");
+						doc.LinkEndChild(decl);
+						doc.LinkEndChild(closeMsgXML);
+						sendXMLMessage(doc);
 					}
 					m_client->PrepareImageBuffer();
 
@@ -285,7 +283,7 @@ class CqDataHandler
 
 
 	private:
-		int m_sock;
+		CqSocket m_sock;
 		boost::shared_ptr<CqDisplayServerImage> m_client;
 };
 
@@ -297,9 +295,10 @@ void HandleConnection(int sock, void *data)
 	boost::shared_ptr<CqDisplayServerImage> newImage(new CqDisplayServerImage());
 	newImage->setName("Unnamed");
 	
-	if(g_theServer.Accept(newImage))
+	CqSocket c;
+	if((c = g_theSocket.accept()))
 	{
-		g_theClients[newImage->socket()] = newImage;
+		newImage->setSocket(c);
 		// \todo: Need to work out how to do non-blocking on Win32
 #ifndef	AQSIS_SYSTEM_WIN32
 		// Set socket as non-blocking
@@ -401,10 +400,11 @@ int main( int argc, char** argv )
 #endif  // AQSIS_SYSTEM_POSIX
 
 	int portno = atoi(g_strPort.c_str());
-	if(!g_theServer.Prepare(portno))
+	CqSocket::initialiseSockets();
+	if(!g_theSocket.prepare(portno))
 		Aqsis::log() << Aqsis::error << "Cannot open server on the specified port" << std::endl;
 
-	Fl::add_fd(g_theServer.Socket(),&HandleConnection);
+	Fl::add_fd(g_theSocket,&HandleConnection);
 
 	window = new CqEqshibitMainWindow();
 	char *internalArgs[] = {

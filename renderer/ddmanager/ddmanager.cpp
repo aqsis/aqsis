@@ -921,7 +921,7 @@ void CqDDManager::PrepareCustomParameters( std::map<std::string, void*>& mapPara
 			req.m_QuantizeDitherVal = floats[0];
 			req.m_QuantizeDitherSpecified = true;
 		}
-		//else
+		else
 		{
 			// Otherwise, construct a UserParameter structure and fill in the details.
 			SqParameterDeclaration Decl;
@@ -1035,6 +1035,16 @@ void CqDDManager::PrepareSystemParameters( SqDisplayRequest& req )
 	const char* Software = SoftwareName;
 	sprintf( SoftwareName, "%s %s (%s %s)", STRNAME, VERSION_STR, __DATE__, __TIME__ );
 	ConstructStringsParameter("Software", &Software, 1, parameter);
+	req.m_customParams.push_back(parameter);
+
+	// "quantize"
+	TqFloat quantvals[4] = {
+		req.m_QuantizeZeroVal,
+		req.m_QuantizeOneVal,
+		req.m_QuantizeMinVal,
+		req.m_QuantizeMaxVal
+	};
+	ConstructFloatsParameter("quantize", quantvals, 4, parameter);
 	req.m_customParams.push_back(parameter);
 
 //	// "HostComputer"

@@ -30,19 +30,10 @@
 #include	<vector>
 #include	<string>
 
-#ifdef AQSIS_SYSTEM_WIN32
-
-#include	<winsock2.h>
-
-#else // AQSIS_SYSTEM_WIN32
-
-typedef int SOCKET;
-
-#endif // !AQSIS_SYSTEM_WIN32
-
 #include	"aqsis.h"
 #include	"ndspy.h"
 #include	"image.h"
+#include	"socket.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -64,33 +55,18 @@ public:
     virtual ~CqDisplayServerImage()
 	{}
 
-    void	close();
-    void	sendData( void* buffer, TqInt len );
-    void	sendMsg( SqDDMessageBase* pMsg );
-    void	receive( void* buffer, TqInt len );
     /** Get a reference to the socket ID.
      */
-    void	setSocket( SOCKET s )
+    void	setSocket( const CqSocket& s )
     {
         m_socket = s;
     }
-    SOCKET& socket()
-    {
-        return ( m_socket );
-    }
-    /** Get a reference to the socket ID.
-     */
-    const SOCKET& socket() const
+    const CqSocket& socket()
     {
         return ( m_socket );
     }
 
-    /** Get a reference to the current read buffer
-      */
-    std::stringstream& readbuf()
-    {
-        return ( m_readbuf );
-    }
+	void close();
 
     virtual CqString&	filename()
     {
@@ -108,7 +84,7 @@ public:
 	virtual TiXmlElement* serialiseToXML();
 
 private:
-    SOCKET	m_socket;			///< Socket ID of the client.
+    CqSocket	m_socket;			///< Socket of the client.
     std::stringstream m_readbuf;
 	CqString	m_serialisedName;
 };
