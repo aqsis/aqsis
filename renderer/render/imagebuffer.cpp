@@ -39,6 +39,7 @@
 #include	"micropolygon.h"
 #include	"imagebuffer.h"
 #include	"occlusion.h"
+#include	"bucketdata.h"
 
 
 START_NAMESPACE( Aqsis )
@@ -1015,9 +1016,13 @@ void CqImageBuffer::RenderImage()
 	// A counter for the number of processed buckets (used for progress reporting)
 	TqInt iBucket = 0;
 
+	CqBucketData bucketData;
+
 	// Iterate over all buckets...
 	do
 	{
+		CurrentBucket().SetBucketData(&bucketData);
+
 		bool bIsEmpty = CurrentBucket().IsEmpty();
 		if (fImager)
 			bIsEmpty = false;
@@ -1088,6 +1093,7 @@ void CqImageBuffer::RenderImage()
 			SetProcessWorkingSetSize( GetCurrentProcess(), 0xffffffff, 0xffffffff );
 #endif
 		CurrentBucket().SetProcessed();
+		// CurrentBucket().SetBucketData((CqBucketData*)0);
 		// Increase the bucket counter...
 		iBucket += 1;
 	} while( NextBucket(order) );

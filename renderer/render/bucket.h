@@ -64,57 +64,57 @@ class CqBucket : public IqBucket
 		// Overridden from IqBucket
 		virtual	TqInt	Width() const
 		{
-			return ( m_bucketData.m_XSize );
+			return ( m_bucketData->m_XSize );
 		}
 		virtual	TqInt	Height() const
 		{
-			return ( m_bucketData.m_YSize );
+			return ( m_bucketData->m_YSize );
 		}
 		virtual	TqInt	RealWidth() const
 		{
-			return ( m_bucketData.m_RealWidth );
+			return ( m_bucketData->m_RealWidth );
 		}
 		virtual	TqInt	RealHeight() const
 		{
-			return ( m_bucketData.m_RealHeight );
+			return ( m_bucketData->m_RealHeight );
 		}
 		virtual	TqInt	XOrigin() const
 		{
-			return ( m_bucketData.m_XOrigin );
+			return ( m_bucketData->m_XOrigin );
 		}
 		virtual	TqInt	YOrigin() const
 		{
-			return ( m_bucketData.m_YOrigin );
+			return ( m_bucketData->m_YOrigin );
 		}
 		static	TqInt	PixelXSamples()
 		{
-			return m_bucketData.m_PixelXSamples;
+			return m_bucketData->m_PixelXSamples;
 		}
 		static	TqInt	PixelYSamples()
 		{
-			return m_bucketData.m_PixelYSamples;
+			return m_bucketData->m_PixelYSamples;
 		}
 		static	TqFloat	FilterXWidth()
 		{
-			return m_bucketData.m_FilterXWidth;
+			return m_bucketData->m_FilterXWidth;
 		}
 		static	TqFloat	FilterYWidth()
 		{
-			return m_bucketData.m_FilterYWidth;
+			return m_bucketData->m_FilterYWidth;
 		}
 		static	TqInt	NumTimeRanges()
 		{
-			return m_bucketData.m_NumTimeRanges;
+			return m_bucketData->m_NumTimeRanges;
 		}
 		static	TqInt	NumDofBounds()
 		{
-			return m_bucketData.m_NumDofBounds;
+			return m_bucketData->m_NumDofBounds;
 		}
 
 		static const CqBound& DofSubBound(TqInt index)
 		{
-			assert(index < m_bucketData.m_NumDofBounds);
-			return m_bucketData.m_DofBounds[index];
+			assert(index < m_bucketData->m_NumDofBounds);
+			return m_bucketData->m_DofBounds[index];
 		}
 
 		virtual	CqColor Color( TqInt iXPos, TqInt iYPos );
@@ -131,13 +131,13 @@ class CqBucket : public IqBucket
 
 		static	std::vector<SqSampleData>& SamplePoints()
 		{
-			return(m_bucketData.m_SamplePoints);
+			return(m_bucketData->m_SamplePoints);
 		}
 
 		static TqInt GetNextSamplePointIndex()
 		{
-			TqInt index = m_bucketData.m_NextSamplePoint;
-			m_bucketData.m_NextSamplePoint++;
+			TqInt index = m_bucketData->m_NextSamplePoint;
+			m_bucketData->m_NextSamplePoint++;
 			return(index);
 		}
 
@@ -239,6 +239,12 @@ class CqBucket : public IqBucket
 		{
 			m_ImageBuffer = pBuffer;
 		}
+		/** Set the pointer to the bucket data
+		 */
+		static void SetBucketData( CqBucketData* bucketData )
+		{
+			m_bucketData = bucketData;
+		}
 
 		/** Render a particular micropolygon.
 		 *    
@@ -277,7 +283,7 @@ class CqBucket : public IqBucket
 		bool	m_bProcessed;
 
 		/// Dynamic bucket data
-		static CqBucketData m_bucketData;
+		static CqBucketData* m_bucketData;
 
 		/// Pointer to the image buffer this bucket belongs to.
 		static	CqImageBuffer*	m_ImageBuffer;
