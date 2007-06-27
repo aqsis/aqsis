@@ -24,7 +24,7 @@
 /* and aspect ratio.                                                          */
 /******************************************************************************/
 
-extern "C" PtDspyError DspyImageQuery(PtDspyImageHandle image,
+extern PtDspyError DspyImageQuery(PtDspyImageHandle image,
                                       PtDspyQueryType   type,
                                       size_t            size,
                                       void              *data)
