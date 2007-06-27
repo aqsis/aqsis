@@ -15,7 +15,7 @@
 
 static aspXpm *xpmImg;
 
-PtDspyError DspyImageQuery ( PtDspyImageHandle image, PtDspyQueryType type, size_t size, void *data )
+extern "C" PtDspyError DspyImageQuery ( PtDspyImageHandle image, PtDspyQueryType type, size_t size, void *data )
 {
   if( size<=0 || !data ) {
     return PkDspyErrorBadParams;
@@ -63,17 +63,16 @@ PtDspyError DspyImageQuery ( PtDspyImageHandle image, PtDspyQueryType type, size
   return PkDspyErrorNone;
 }
 
-PtDspyError DspyImageOpen ( PtDspyImageHandle *image,
-                            const char *drivername,
-                            const char *filename,
-                            int width,
-                            int height,
-                            int paramcount,
-                            const UserParameter *parameters,
-                            int formatcount,
-                            PtDspyDevFormat *format,
-                            PtFlagStuff *flagsstuff
-                          )
+extern "C" PtDspyError DspyImageOpen(PtDspyImageHandle *image,
+                                     const char *drivername,
+                                     const char *filename,
+                                     int width,
+                                     int height,
+                                     int paramcount,
+                                     const UserParameter *parameters,
+                                     int formatcount,
+                                     PtDspyDevFormat *format,
+                                     PtFlagStuff *flagsstuff )
 {
   //std::cout << "Entering DspyImageOpen" << std::endl;
   
@@ -123,7 +122,7 @@ PtDspyError DspyImageOpen ( PtDspyImageHandle *image,
 }
 
                           
-PtDspyError DspyImageData ( PtDspyImageHandle image,
+extern "C" PtDspyError DspyImageData ( PtDspyImageHandle image,
                             int xmin,
                             int xmax_plus_one,
                             int ymin,
@@ -153,7 +152,7 @@ PtDspyError DspyImageData ( PtDspyImageHandle image,
 }
                           
 
-PtDspyError DspyImageClose ( PtDspyImageHandle image )
+extern "C" PtDspyError DspyImageClose ( PtDspyImageHandle image )
 {
   //std::cout << "Entering DspyImageClose" << std::endl;
   
@@ -170,6 +169,4 @@ PtDspyError DspyImageClose ( PtDspyImageHandle image )
   //std::cout << "Exiting DspyImageClose" << std::endl;
   return PkDspyErrorNone;
 }
-
-
 
