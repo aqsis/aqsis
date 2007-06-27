@@ -24,10 +24,10 @@
 /* and aspect ratio.                                                          */
 /******************************************************************************/
 
-extern PtDspyError DspyImageQuery(PtDspyImageHandle image,
-                                      PtDspyQueryType   type,
-                                      size_t            size,
-                                      void              *data)
+PtDspyError DspyImageQuery(PtDspyImageHandle image,
+                           PtDspyQueryType   type,
+                           size_t	         size,
+                           void              *data)
 {
 #if SHOW_CALLSTACK
 	fprintf(stderr, "sdcWin32_DspyImageQuery called, type: %d.\n", type);
