@@ -26,7 +26,6 @@
 #include	"aqsis.h"
 #include	"transform.h"
 #include	"renderer.h"
-#include	"imagebuffer.h"
 
 START_NAMESPACE( Aqsis )
 

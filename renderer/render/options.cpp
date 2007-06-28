@@ -25,10 +25,8 @@
 
 #include	<math.h>
 
-#include	"aqsis.h"
 #include	"options.h"
 #include	"renderer.h"
-#include	"imagebuffer.h"
 #include	"imagers.h"
 #include	"ri.h"
 

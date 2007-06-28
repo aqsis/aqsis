@@ -34,9 +34,6 @@
 
 START_NAMESPACE( Aqsis )
 
-struct SqImageSample;
-struct IqRenderer;
-class CqParameter;
 
 struct IqBucket
 {

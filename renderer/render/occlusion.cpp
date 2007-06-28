@@ -23,15 +23,12 @@
 		\author Andy Gill (billybobjimboy@users.sf.net)
 */
 
-#include "aqsis.h"
-
 #ifdef	AQSIS_SYSTEM_WIN32
 #pragma warning(disable : 4786)
 #endif
 
 #include "occlusion.h"
 #include "bound.h"
-#include "imagebuffer.h"
 #include <deque>
 #include <fstream>
 #undef	min

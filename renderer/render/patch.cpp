@@ -27,8 +27,6 @@
 #include	<math.h>
 
 #include	"aqsis.h"
-#include	"imagebuffer.h"
-#include	"micropolygon.h"
 #include	"renderer.h"
 #include	"patch.h"
 #include	"vector2d.h"

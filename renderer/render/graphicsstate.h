@@ -27,18 +27,17 @@
 #ifndef CONTEXT_H_INCLUDED
 #define CONTEXT_H_INCLUDED 1
 
-#include	<vector>
-#include	<boost/shared_ptr.hpp>
-#include	<boost/enable_shared_from_this.hpp>
-
 #include	"aqsis.h"
 
 #include	"options.h"
 #include	"attributes.h"
 #include	"transform.h"
-//#include	"messages.h"
 #include	"lights.h"
 #include	"csgtree.h"
+
+#include	<vector>
+#include	<boost/shared_ptr.hpp>
+#include	<boost/enable_shared_from_this.hpp>
 
 START_NAMESPACE( Aqsis )
 

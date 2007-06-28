@@ -25,8 +25,10 @@
 
 #include	"MultiTimer.h"
 
-#include	"aqsis.h"
 #include	"imagers.h"
+#include	"iddmanager.h"
+#include	"attributes.h"
+#include	"renderer.h"
 #include	"file.h"
 
 

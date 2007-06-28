@@ -54,20 +54,16 @@
 #undef __old_max__
 #endif
 
-#include	"bitvector.h"
-
-#include	"renderer.h"
 #include        "csgtree.h"
 #include	"color.h"
 #include	"vector2d.h"
 
 START_NAMESPACE( Aqsis )
 
+
 //-----------------------------------------------------------------------
 /** Structure representing the information at a sample point in the image.
  */
-
-class CqCSGTreeNode;
 
 enum EqSampleIndices
 {

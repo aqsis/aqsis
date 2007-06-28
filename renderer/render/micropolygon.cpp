@@ -23,10 +23,9 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include	"aqsis.h"
 #include	"stats.h"
-#include	"imagebuffer.h"
-#include	"micropolygon.h"
+#include	"bucket.h"
+#include	"imagepixel.h"
 #include	"renderer.h"
 #include	"surface.h"
 #include	"lights.h"
@@ -36,6 +35,8 @@
 #include	"mpdump.h"
 
 #include	"MultiTimer.h"
+
+#include	"micropolygon.h"
 
 START_NAMESPACE( Aqsis )
 

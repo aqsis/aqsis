@@ -30,7 +30,6 @@
 #include	"winsock2.h"
 #endif
 
-#include	"sstring.h"
 #include	"ddmanager.h"
 #include	"rifile.h"
 #include	"imagebuffer.h"

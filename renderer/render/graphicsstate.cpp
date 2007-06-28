@@ -23,12 +23,11 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include	"aqsis.h"
-
 #include "lights.h"
 #include "csgtree.h"
 #include "renderer.h"
-#include "imagebuffer.h"
+#include "surface.h"
+#include "graphicsstate.h"
 
 START_NAMESPACE( Aqsis )
 

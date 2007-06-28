@@ -34,7 +34,6 @@
 
 #include "aqsis.h"
 #include "kdtree.h"
-#include "imagepixel.h"
 #include "bucket.h"
 
 START_NAMESPACE( Aqsis )

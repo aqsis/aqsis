@@ -38,10 +38,11 @@
 #include "matrix.h"
 #include "shaderexecenv.h"
 #include "vector4d.h"
-#include "imagebuffer.h"
 #include "version.h"
 
 START_NAMESPACE( Aqsis )
+
+class CqAttributes;
 
 //----------------------------------------------------------------------
 /** \class CqImagersource

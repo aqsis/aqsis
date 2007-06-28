@@ -26,11 +26,8 @@
 
 #include	<math.h>
 
-#include	"aqsis.h"
 #include	"quadrics.h"
 #include	"micropolygon.h"
-#include	"imagebuffer.h"
-#include	"nurbs.h"
 
 #include	"ri.h"
 

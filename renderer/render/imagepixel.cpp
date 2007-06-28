@@ -23,20 +23,20 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include	"aqsis.h"
+#include	"imagepixel.h"
+
+#include	"options.h"
+#include	"random.h"
+#include	"logging.h"
+#include	"bucket.h"
+
+#include	<algorithm>
 
 #ifdef WIN32
 #include	<windows.h>
 #endif
 #include	<math.h>
 
-#include	<algorithm>
-#include	"options.h"
-#include	"renderer.h"
-#include	"random.h"
-#include	"imagepixel.h"
-#include	"logging.h"
-#include	"bucket.h"
 
 
 START_NAMESPACE( Aqsis )

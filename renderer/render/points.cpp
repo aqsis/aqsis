@@ -31,10 +31,10 @@
 
 #include	<math.h>
 
-#include	"aqsis.h"
 #include	"points.h"
 #include	"micropolygon.h"
 #include	"imagebuffer.h"
+#include	"renderer.h"
 #include	"polygon.h"
 
 #include	"ri.h"

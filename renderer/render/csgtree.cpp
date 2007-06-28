@@ -23,10 +23,8 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include	"aqsis.h"
-
 #include	"csgtree.h"
-#include	"imagebuffer.h"
+#include	"imagepixel.h"
 
 START_NAMESPACE( Aqsis )
 

@@ -28,7 +28,6 @@
 #include	"micropolygon.h"
 #include	"surface.h"
 #include	"vector2d.h"
-#include	"imagebuffer.h"
 
 START_NAMESPACE( Aqsis )
 

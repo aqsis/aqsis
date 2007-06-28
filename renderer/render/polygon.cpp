@@ -23,10 +23,8 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include	"aqsis.h"
 #include	"polygon.h"
 #include	"patch.h"
-#include	"imagebuffer.h"
 
 START_NAMESPACE( Aqsis )
 

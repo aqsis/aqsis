@@ -23,13 +23,10 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include	"aqsis.h"
-
 #include	"attributes.h"
 #include	"renderer.h"
 #include	"shaders.h"
 #include	"trimcurve.h"
-#include	"imagebuffer.h"
 #include	"lights.h"
 
 START_NAMESPACE( Aqsis )

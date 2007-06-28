@@ -33,10 +33,7 @@
 #include <list>
 #include <map>
 
-#include "aqsis.h"
 #include "rifile.h"
-#include "imagebuffer.h"
-#include "micropolygon.h"
 #include "renderer.h"
 #include "procedural.h"
 #include "plugins.h"

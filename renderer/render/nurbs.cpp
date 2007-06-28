@@ -29,10 +29,8 @@
 #include	<stdio.h>
 
 #include	"nurbs.h"
-#include	"micropolygon.h"
 #include	"renderer.h"
 #include	"vector3d.h"
-#include	"imagebuffer.h"
 #include	"bilinear.h"
 #include	"attributes.h"
 

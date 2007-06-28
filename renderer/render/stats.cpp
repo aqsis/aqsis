@@ -22,9 +22,7 @@
 */
 #include "MultiTimer.h"
 
-#include "aqsis.h"
 #include "attributes.h"
-#include "imagebuffer.h"
 #include "renderer.h"
 #include "stats.h"
 #include "transform.h"
