@@ -143,19 +143,6 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 		else if(widestFormat == PkDspySigned32)
 			widestFormat = PkDspyUnsigned32;
 
-		// If we are recieving "rgba" data, ensure that it is in the correct order.
-		PtDspyDevFormat outFormat[] =
-		    {
-			{"r", widestFormat},
-			{"g", widestFormat},
-			{"b", widestFormat},
-			{"a", widestFormat},
-		    };
-		PtDspyError err = DspyReorderFormatting(iFormatCount, format, MIN(iFormatCount,4), outFormat);
-		if( err != PkDspyErrorNone )
-		{
-			return(err);
-		}
 
 		// We need to start a framebuffer if none is running yet
 		// Need to create our actual socket
@@ -340,11 +327,35 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 
 			displaydoc.LinkEndChild(displaydecl);
 			displaydoc.LinkEndChild(openMsgXML);
-			//displaydoc.Print();
 			sendXMLMessage(displaydoc, pImage->m_socket);
 			TiXmlDocument* formats = recvXMLMessage(pImage->m_socket);
-			std::cout << "Reveived formats message from display" << std::endl;
 			formats->Print();
+			TiXmlElement* child = formats->FirstChildElement("Formats");
+			if(child)
+			{
+				TiXmlElement* formatNode = child->FirstChildElement("Format");
+				// If we are recieving "rgba" data, ensure that it is in the correct order.
+				PtDspyDevFormat outFormat[iFormatCount];
+				TqInt iformat = 0;
+				while(formatNode)
+				{
+					// Read the format type from the node.
+					const char* typeName = formatNode->GetText();
+					const char* formatName = formatNode->Attribute("name");
+					TqInt typeID = PkDspyUnsigned8;
+					char* name = new char[strlen(formatName)+1];
+					strcpy(name, formatName);
+					outFormat[iformat].name = name;
+					outFormat[iformat].type = typeID;
+					formatNode = formatNode->NextSiblingElement("Format");
+					iformat++;
+				}
+				PtDspyError err = DspyReorderFormatting(iFormatCount, format, MIN(iFormatCount,4), outFormat);
+				if( err != PkDspyErrorNone )
+				{
+					return(err);
+				}
+			}
 			delete(formats);
 		}
 		else 

@@ -83,6 +83,8 @@ public:
 	void saveToTiff(const std::string& filename);
 	virtual TiXmlElement* serialiseToXML();
 
+	void reorderChannels();
+
 private:
     CqSocket	m_socket;			///< Socket of the client.
     std::stringstream m_readbuf;

@@ -80,6 +80,22 @@ ArgParse::apint 	g_cl_verbose = 1;
 CqEqshibitMainWindow *window = 0;
 boost::mutex g_XMLMutex;
 
+std::map<std::string, TqInt>	g_typeNames;
+static char* g_formatNames[] = {
+	"PkDspyNone",
+	"PkDspyFloat32",
+	"PkDspyUnsigned32",
+	"PkDspySigned32",
+	"PkDspyUnsigned16",
+	"PkDspySigned16",
+	"PkDspyUnsigned8",
+	"PkDspySigned8",
+	"PkDspyString",
+	"PkDspyMatrix",
+	"PkDspyArrayBegin",
+	"PkDspyArrayEnd",
+};
+
 void version( std::ostream& Stream )
 {
 	Stream << "eqshibit version " << VERSION_STR_PRINT << std::endl << "compiled " << __DATE__ << " " << __TIME__ << std::endl;
@@ -215,17 +231,32 @@ class CqDataHandler
 							//++channels;
 							// Read the format type from the node.
 							const char* typeName = format->GetText();
-							//const char* formatName = format->Attribute("name");
-							m_client->addChannel(typeName, 0);
+							const char* formatName = format->Attribute("name");
+							TqInt typeID = PkDspyUnsigned8;
+							std::map<std::string, TqInt>::iterator type;
+							if((type = g_typeNames.find(typeName)) != g_typeNames.end())
+								typeID = type->second;
+							m_client->addChannel(formatName, typeID);
 
 							format = format->NextSiblingElement("Format");
 						}
+						// Ensure that the formats are in the right order.
+						m_client->reorderChannels();
 						// Send the reorganised formats back.
-						TiXmlDocument doc("close.xml");
+						TiXmlDocument doc("formats.xml");
 						TiXmlDeclaration* decl = new TiXmlDeclaration("1.0","","yes");
-						TiXmlElement* closeMsgXML = new TiXmlElement("Acknowledge");
+						TiXmlElement* formatsXML = new TiXmlElement("Formats");
+						TqInt ichannel;
+						for( ichannel = 0; ichannel < m_client->numChannels(); ++ichannel)
+						{
+							TiXmlElement* formatv = new TiXmlElement("Format");
+							formatv->SetAttribute("name", m_client->channelName(ichannel));
+							TiXmlText* formatText = new TiXmlText(g_formatNames[m_client->channelType(ichannel)]);
+							formatv->LinkEndChild(formatText); 
+							formatsXML->LinkEndChild(formatv);
+						}
 						doc.LinkEndChild(decl);
-						doc.LinkEndChild(closeMsgXML);
+						doc.LinkEndChild(formatsXML);
 						sendXMLMessage(doc);
 					}
 					m_client->PrepareImageBuffer();
@@ -398,6 +429,17 @@ int main( int argc, char** argv )
 	if( g_cl_syslog )
 		std::auto_ptr<std::streambuf> use_syslog( new Aqsis::syslog_buf(std::cerr) );
 #endif  // AQSIS_SYSTEM_POSIX
+
+	// Fill in the typenames map
+	g_typeNames["PkDspyFloat32"] = PkDspyFloat32;
+	g_typeNames["PkDspyUnsigned32"] = PkDspyUnsigned32;
+	g_typeNames["PkDspySigned32"] = PkDspySigned32;
+	g_typeNames["PkDspyUnsigned16"] = PkDspyUnsigned16;
+	g_typeNames["PkDspySigned16"] = PkDspySigned16;
+	g_typeNames["PkDspyUnsigned8"] = PkDspyUnsigned8;
+	g_typeNames["PkDspySigned8"] = PkDspySigned8;
+	g_typeNames["PkDspyString"] = PkDspyString;
+	g_typeNames["PkDspyMatrix"] = PkDspyMatrix;
 
 	int portno = atoi(g_strPort.c_str());
 	CqSocket::initialiseSockets();

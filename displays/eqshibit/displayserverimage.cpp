@@ -447,4 +447,27 @@ TiXmlElement* CqDisplayServerImage::serialiseToXML()
 	return(imageXML);
 }
 
+void CqDisplayServerImage::reorderChannels()
+{
+	// If there are "r", "g", "b" and "a" channels, ensure they
+	// are in the expected order.
+	const char* elements[] = { "r", "g", "b", "a" };
+	TqInt numElements = sizeof(elements) / sizeof(elements[0]);
+	for(int elementIndex = 0; elementIndex < numElements; ++elementIndex)
+	{
+		for(std::vector<std::pair<std::string, TqInt> >::iterator channel = m_channels.begin(); channel != m_channels.end(); ++channel)
+		{
+			// If this entry in the channel list matches one in the expected list, 
+			// move it to the right point in the channel list.
+			if(channel->first.compare(elements[elementIndex]) == 0)
+			{
+				std::pair<std::string, TqInt> temp = m_channels[elementIndex];
+				m_channels[elementIndex] = *channel;
+				*channel = temp;
+				break;
+			}
+		}
+	}
+}
+
 END_NAMESPACE( Aqsis )

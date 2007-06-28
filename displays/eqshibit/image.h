@@ -86,6 +86,26 @@ public:
 		m_frameWidth = width;
 		m_frameHeight = height;
 	}
+	virtual const std::string& channelName(TqInt index)
+	{
+		assert(index < numChannels());
+		return(m_channels[index].first);
+	}
+	virtual void setChannelName(TqInt index, const std::string& name)
+	{
+		assert(index < numChannels());
+		m_channels[index].first = name;
+	}
+	virtual TqInt channelType(TqInt index)
+	{
+		assert(index < numChannels());
+		return(m_channels[index].second);
+	}
+	virtual void setChannelType(TqInt index, TqInt type)
+	{
+		assert(index < numChannels());
+		m_channels[index].second = type;
+	}
 	virtual TqInt numChannels()
 	{
 		return( m_channels.size() );

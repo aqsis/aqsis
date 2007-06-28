@@ -68,7 +68,7 @@ CqSocket& CqSocket::operator=(const CqSocket& from)
  */
 CqSocket::~CqSocket()
 {
-    close();
+    //close();
 }
 
 bool CqSocket::initialiseSockets()
