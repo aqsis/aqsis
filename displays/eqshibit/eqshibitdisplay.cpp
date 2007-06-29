@@ -324,7 +324,6 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 				formatsXML->LinkEndChild(formatv);
 			}
 			openMsgXML->LinkEndChild(formatsXML);
-
 			displaydoc.LinkEndChild(displaydecl);
 			displaydoc.LinkEndChild(openMsgXML);
 			sendXMLMessage(displaydoc, pImage->m_socket);

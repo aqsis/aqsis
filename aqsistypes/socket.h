@@ -74,7 +74,7 @@ class COMMON_SHARE CqSocket
 		CqSocket& operator=(const CqSocket& from);
 
 	private:
-		unsigned int	m_socket;			///< Socket ID of the server.
+		int				m_socket;			///< Socket ID of the server.
 		int 			m_port;				///< Port number used by this server.
 };
 
