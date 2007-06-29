@@ -56,5 +56,10 @@ void CqBucketProcessor::reset()
 	m_bucket = 0;
 }
 
+void CqBucketProcessor::process( long xmin, long xmax, long ymin, long ymax )
+{
+	m_bucket->RenderWaitingMPs( xmin, xmax, ymin, ymax );
+}
+
 
 END_NAMESPACE( Aqsis );

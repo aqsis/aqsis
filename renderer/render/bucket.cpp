@@ -25,19 +25,18 @@
 
 #include	"MultiTimer.h"
 
-#include	"aqsis.h"
-
 #ifdef WIN32
 #include    <windows.h>
 #endif
 #include	<math.h>
 
 #include	"surface.h"
+#include	"imagebuffer.h"
 #include	"imagepixel.h"
-#include	"bucket.h"
 #include	"occlusion.h"
+#include	"renderer.h"
 
-#include	"imagers.h"
+#include	"bucket.h"
 
 #include	<algorithm>
 #include	<valarray>
@@ -960,7 +959,7 @@ void CqBucket::QuantizeBucket()
  */
 bool CqBucket::IsEmpty()
 {
-	return !pTopSurface() && aGrids().empty() && aMPGs().empty();
+	return !pTopSurface() && m_micropolygons.empty();
 }
 
 //----------------------------------------------------------------------
@@ -971,6 +970,38 @@ void CqBucket::ShutdownBucket()
 	if (m_bucketData)
 		m_bucketData->reset();
 }
+
+//----------------------------------------------------------------------
+/** Render any waiting MPs.
+ 
+    Render ready micro polygons waiting to be processed, so that we
+    have as few as possible MPs waiting and using memory at any given
+    moment
+ 
+ * \param xmin Integer minimum extend of the image part being rendered, takes into account buckets and clipping.
+ * \param xmax Integer maximum extend of the image part being rendered, takes into account buckets and clipping.
+ * \param ymin Integer minimum extend of the image part being rendered, takes into account buckets and clipping.
+ * \param ymax Integer maximum extend of the image part being rendered, takes into account buckets and clipping.
+ */
+
+void CqBucket::RenderWaitingMPs( long xmin, long xmax, long ymin, long ymax )
+{
+	for ( std::vector<CqMicroPolygon*>::iterator impg = m_micropolygons.begin();
+	      impg != m_micropolygons.end();
+	      impg++ )
+	{
+		CqMicroPolygon* pMpg = *impg;
+		RenderMicroPoly( pMpg, xmin, xmax, ymin, ymax );
+		if ( m_ImageBuffer->PushMPGDown( pMpg, m_ImageBuffer->CurrentBucketCol(), m_ImageBuffer->CurrentBucketRow() ) )
+			STATS_INC( MPG_pushed_down );
+		if ( m_ImageBuffer->PushMPGForward( pMpg, m_ImageBuffer->CurrentBucketCol(), m_ImageBuffer->CurrentBucketRow() ) )
+			STATS_INC( MPG_pushed_forward );
+		RELEASEREF( pMpg );
+	}
+
+	m_micropolygons.clear();
+}
+
 
 //----------------------------------------------------------------------
 /** Render a particular micropolygon.
@@ -1001,6 +1032,7 @@ void CqBucket::RenderMicroPoly( CqMicroPolygon* pMPG, long xmin, long xmax, long
 	// Must check if colour is needed, as if not, the variable will have been deleted from the grid.
 	if ( QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Ci" ) )
 	{
+		// mafm: segfault here
 		m_bucketData->m_CurrentMpgSampleInfo.m_Colour = pMPG->colColor()[0];
 	}
 	else

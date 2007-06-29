@@ -59,6 +59,22 @@ public:
 	/** Reset the status of the object */
 	void reset();
 
+	/** Process the bucket, basically rendering the waiting MPs
+	 *
+	 * \param xmin Integer minimum extend of the image part being
+	 * rendered, takes into account buckets and clipping.
+	 *
+	 * \param xmax Integer maximum extend of the image part being
+	 * rendered, takes into account buckets and clipping.
+	 *
+	 * \param ymin Integer minimum extend of the image part being
+	 * rendered, takes into account buckets and clipping.
+	 *
+	 * \param ymax Integer maximum extend of the image part being
+	 * rendered, takes into account buckets and clipping.
+	 */
+	void process( long xmin, long xmax, long ymin, long ymax );
+
 private:
 	/// Pointer to the current bucket
 	CqBucket* m_bucket;

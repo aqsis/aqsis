@@ -606,72 +606,6 @@ bool CqImageBuffer::PushMPGDown( CqMicroPolygon* pmpg, TqInt Col, TqInt Row )
 }
 
 
-//----------------------------------------------------------------------
-/** Render any waiting Grids.
- 
-    All micro polygon grids in the specified bucket are bust into
-    individual micro polygons which are assigned to their appropriate
-    bucket.  We call RenderWaitingMPs() several times to render them
-    as soon as possible.
- 
- * \param xmin Integer minimum extend of the image part being rendered, takes into account buckets and clipping.
- * \param xmax Integer maximum extend of the image part being rendered, takes into account buckets and clipping.
- * \param ymin Integer minimum extend of the image part being rendered, takes into account buckets and clipping.
- * \param ymax Integer maximum extend of the image part being rendered, takes into account buckets and clipping.
- */
-
-void CqImageBuffer::RenderGrids( long xmin, long xmax, long ymin, long ymax )
-{
-	RenderWaitingMPs( xmin, xmax, ymin, ymax );
-
-	std::vector<CqMicroPolyGridBase*>::iterator lastgrid = CurrentBucket().aGrids().end();
-	for ( std::vector<CqMicroPolyGridBase*>::iterator igrid = CurrentBucket().aGrids().begin(); igrid != lastgrid; igrid++ )
-	{
-		// Split any grids in this bucket waiting to be processed.
-		std::vector<CqMicroPolygon*> newMPs;
-		CqMicroPolyGridBase* pGrid = *igrid;
-		pGrid->Split( newMPs );
-		for ( std::vector<CqMicroPolygon*>::iterator it = newMPs.begin(); it != newMPs.end(); it++ )
-		{
-			AddMPG( *it );
-		}
-
-		RenderWaitingMPs( xmin, xmax, ymin, ymax );
-	}
-	CurrentBucket().aGrids().clear();
-}
-
-
-//----------------------------------------------------------------------
-/** Render any waiting MPs.
- 
-    Render ready micro polygons waiting to be processed, so that we
-    have as few as possible MPs waiting and using memory at any given
-    moment
- 
- * \param xmin Integer minimum extend of the image part being rendered, takes into account buckets and clipping.
- * \param xmax Integer maximum extend of the image part being rendered, takes into account buckets and clipping.
- * \param ymin Integer minimum extend of the image part being rendered, takes into account buckets and clipping.
- * \param ymax Integer maximum extend of the image part being rendered, takes into account buckets and clipping.
- */
-
-void CqImageBuffer::RenderWaitingMPs( long xmin, long xmax, long ymin, long ymax )
-{
-	std::vector<CqMicroPolygon*>::iterator lastmpg = CurrentBucket().aMPGs().end();
-	for ( std::vector<CqMicroPolygon*>::iterator impg = CurrentBucket().aMPGs().begin(); impg != lastmpg; impg++ )
-	{
-		CqMicroPolygon* pMpg = *impg;
-		CurrentBucket().RenderMicroPoly( pMpg, xmin, xmax, ymin, ymax );
-		if ( PushMPGDown( pMpg, CurrentBucketCol(), CurrentBucketRow() ) )
-			STATS_INC( MPG_pushed_down );
-		if ( PushMPGForward( pMpg, CurrentBucketCol(), CurrentBucketRow() ) )
-			STATS_INC( MPG_pushed_forward );
-		RELEASEREF( pMpg );
-	}
-	CurrentBucket().aMPGs().clear();
-}
-
-
 void CqImageBuffer::StoreExtraData( CqMicroPolygon* pMPG, SqImageSample& sample)
 {
 	std::map<std::string, CqRenderer::SqOutputDataEntry>& DataMap = QGetRenderContext() ->GetMapOfOutputDataEntries();
@@ -745,7 +679,7 @@ void CqImageBuffer::StoreExtraData( CqMicroPolygon* pMPG, SqImageSample& sample)
 }
 
 //----------------------------------------------------------------------
-/** Render any waiting Surfaces
+/** Render the given Surface
  
     This method loops through all the gprims stored in the specified bucket
     and checks if the gprim can be diced and turned into a grid of micro
@@ -775,145 +709,74 @@ void CqImageBuffer::StoreExtraData( CqMicroPolygon* pMPG, SqImageSample& sample)
  * \param ymax Integer maximum extend of the image part being rendered, takes into account buckets and clipping.
  */
 
-void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax, bool fImager, enum EqFilterDepth depthfilter, CqColor zThreshold)
+void CqImageBuffer::RenderSurface( CqSurface* pSurface, long xmin, long xmax, long ymin, long ymax )
 {
-	CqBucket& Bucket = CurrentBucket();
-	bool bIsEmpty = Bucket.IsEmpty();
-
-	// Render any waiting micro polygon grids.
+	// If the epsilon check has deemed this surface to be undiceable, don't bother asking.
+	bool fDiceable = false;
 	{
-		TIME_SCOPE("Render MPGs")
-		RenderWaitingMPs( xmin, xmax, ymin, ymax );
+		TIME_SCOPE("Diceable check");
+		fDiceable = pSurface->Diceable();
 	}
 
-	// Render any waiting subsurfaces.
-	boost::shared_ptr<CqSurface> pSurface = Bucket.pTopSurface();
-	while ( pSurface )
+	// Dice & shade the surface if it's small enough...
+	if ( fDiceable )
 	{
-		if ( m_fQuit )
-			return ;
-
-		// Cull surface if it's hidden
-		if ( !( DisplayMode() & ModeZ ) && !pSurface->pCSGNode() )
+		CqMicroPolyGridBase* pGrid = 0;
 		{
-			TIME_SCOPE("Occlusion culling")
-			if ( !bIsEmpty && pSurface->fCachedBound() && OcclusionCullSurface( pSurface ) )
-			{
-				Bucket.popSurface();
-				pSurface = Bucket.pTopSurface();
-				continue;
-			}
+			TIME_SCOPE("Dicing");
+			pGrid = pSurface->Dice();
 		}
 
-		// If the epsilon check has deemed this surface to be undiceable, don't bother asking.
-		bool fDiceable = false;
-		// Dice & shade the surface if it's small enough...
+		if ( NULL != pGrid )
 		{
-			TIME_SCOPE("Dicable check")
-			fDiceable = pSurface->Diceable();
-		}
+			ADDREF( pGrid );
+			// Only shade in all cases since the Displacement could be called in the shadow map creation too.
+			pGrid->Shade();
+			pGrid->TransferOutputVariables();
 
-		if ( fDiceable )
-		{
-			Bucket.popSurface();
-			CqMicroPolyGridBase* pGrid;
+			if ( pGrid->vfCulled() == false )
 			{
-				TIME_SCOPE("Dicing")
-				pGrid = pSurface->Dice();
-			}
-
-			if ( NULL != pGrid )
-			{
-				ADDREF( pGrid );
-				// Only shade in all cases since the Displacement could be called in the shadow map creation too.
-				pGrid->Shade();
-				pGrid->TransferOutputVariables();
-
-				if ( pGrid->vfCulled() == false )
+				// Split any grids in this bucket waiting to be processed.
+				std::vector<CqMicroPolygon*> newMPs;
+				pGrid->Split( newMPs );
+				for ( std::vector<CqMicroPolygon*>::iterator it = newMPs.begin();
+				      it != newMPs.end();
+				      it++ )
 				{
-					// Only project micropolygon not culled
-					Bucket.AddGrid( pGrid );
-					// Render any waiting micro polygon grids.
-					{
-						TIME_SCOPE("Render MPGs")
-						RenderGrids( xmin, xmax, ymin, ymax );
-					}
+					AddMPG( *it );
 				}
-				RELEASEREF( pGrid );
 			}
-		}
-		// The surface is not small enough, so split it...
-		else if ( !pSurface->fDiscard() )
-		{
-			Bucket.popSurface();
-
-			// Decrease the total gprim count since this gprim is replaced by other gprims
-			STATS_DEC( GPR_created_total );
-
-			// Split it
-			{
-				TIME_SCOPE("Splits")
-				std::vector<boost::shared_ptr<CqSurface> > aSplits;
-				TqInt cSplits = pSurface->Split( aSplits );
-				for ( TqInt i = 0; i < cSplits; i++ )
-					PostSurface( aSplits[ i ] );
-
-				/// \debug:
-				/*				if(pSurface->IsUndiceable())
-								{
-								    CqBound Bound( pSurface->Bound() );
-									std::cout << pSurface << " - " << Bound.vecMin().z() << " --> " << Bound.vecMax().z() << std::endl;
-									for ( i = 0; i < cSplits; i++ )
-									{
-									    CqBound SBound( aSplits[i]->Bound() );
-										std::cout << "\t" << aSplits[i] << " - " << SBound.vecMin().z() << " --> " << SBound.vecMax().z() << std::endl;
-									}
-								}
-				*/			
-			}
-		}
-		else if ( pSurface == Bucket.pTopSurface() )
-		{
-			// Make sure we will break the while()
-			//   e.g.  !fDiceable  &&  pSurface->fDiscard()
-			Bucket.popSurface();
-		}
-
-		pSurface = Bucket.pTopSurface();
-		// Render any waiting micro polygon grids.
-		{
-			TIME_SCOPE("Render MPGs")
-			RenderGrids( xmin, xmax, ymin, ymax );
+			RELEASEREF( pGrid );
 		}
 	}
-
-	if ( m_fQuit )
-		return ;
-
-	// Now combine the colors at each pixel sample for any micropolygons rendered to that pixel.
-	if (!bIsEmpty)
+	// The surface is not small enough, so split it...
+	else if ( !pSurface->fDiscard() )
 	{
-		TIME_SCOPE("Combine")
-		Bucket.CombineElements(depthfilter, zThreshold);
-	}
+		// Decrease the total gprim count since this gprim is replaced by other gprims
+		STATS_DEC( GPR_created_total );
 
-	TIMER_START("Filter")
-	if (fImager)
-		bIsEmpty = false;
-	Bucket.FilterBucket(bIsEmpty, fImager);
-	if(!bIsEmpty)
-	{
-		Bucket.ExposeBucket();
-		// \note: Used to quantize here too, but not any more, as it is handled by
-		//	  ddmanager in a specific way for each display.
-	}
+		// Split it
+		{
+			TIME_SCOPE("Splits");
+			std::vector<boost::shared_ptr<CqSurface> > aSplits;
+			TqInt cSplits = pSurface->Split( aSplits );
+			for ( TqInt i = 0; i < cSplits; i++ )
+				PostSurface( aSplits[ i ] );
 
-	TIMER_STOP("Filter")
-
-	BucketComplete();
-	{
-		TIME_SCOPE("Display bucket")
-		QGetRenderContext() ->pDDmanager() ->DisplayBucket( &CurrentBucket() );
+			/// \debug:
+			/*
+			  if(pSurface->IsUndiceable())
+			  {
+			  CqBound Bound( pSurface->Bound() );
+			  std::cout << pSurface << " - " << Bound.vecMin().z() << " --> " << Bound.vecMax().z() << std::endl;
+			  for ( i = 0; i < cSplits; i++ )
+			  {
+			  CqBound SBound( aSplits[i]->Bound() );
+			  std::cout << "\t" << aSplits[i] << " - " << SBound.vecMin().z() << " --> " << SBound.vecMax().z() << std::endl;
+			  }
+			  }
+			*/			
+		}
 	}
 }
 
@@ -1082,12 +945,65 @@ void CqImageBuffer::RenderImage()
 		}
 
 
-		RenderSurfaces( xmin, xmax, ymin, ymax, fImager, depthfilter, zThreshold );
+		// Render any waiting subsurfaces.
+		boost::shared_ptr<CqSurface> pSurface = CurrentBucket().pTopSurface();
+		while ( pSurface && !m_fQuit )
+		{
+			// Cull surface if it's hidden
+			if ( !( DisplayMode() & ModeZ ) && !pSurface->pCSGNode() )
+			{
+				TIME_SCOPE("Occlusion culling");
+				if ( !bIsEmpty && pSurface->fCachedBound() && OcclusionCullSurface( pSurface ) )
+				{
+					// Advance to next surface
+					CurrentBucket().popSurface();
+					pSurface = CurrentBucket().pTopSurface();
+					continue;
+				}
+			}
+
+			RenderSurface( &(*CurrentBucket().pTopSurface()), xmin, xmax, ymin, ymax );
+
+			// Render any waiting micro polygons.
+			{
+				TIME_SCOPE("Render MPs");
+				bucketProcessor.process( xmin, xmax, ymin, ymax );
+			}
+
+			// Advance to next surface
+			CurrentBucket().popSurface();
+			pSurface = CurrentBucket().pTopSurface();
+		}
+
 		if ( m_fQuit )
 		{
 			m_fDone = true;
 			return ;
 		}
+
+		// Now combine the colors at each pixel sample for any micropolygons rendered to that pixel.
+		if (!bIsEmpty)
+		{
+			TIME_SCOPE("Combine");
+			CurrentBucket().CombineElements(depthfilter, zThreshold);
+		}
+
+		TIMER_START("Filter");
+		CurrentBucket().FilterBucket(bIsEmpty, fImager);
+		if (!bIsEmpty)
+		{
+			CurrentBucket().ExposeBucket();
+			// \note: Used to quantize here too, but not any more, as it is handled by
+			//	  ddmanager in a specific way for each display.
+		}
+		TIMER_STOP("Filter");
+
+		BucketComplete();
+		{
+			TIME_SCOPE("Display bucket");
+			QGetRenderContext() ->pDDmanager() ->DisplayBucket( &CurrentBucket() );
+		}
+
 #ifdef WIN32
 		if ( !( iBucket % bucketmodulo ) )
 			SetProcessWorkingSetSize( GetCurrentProcess(), 0xffffffff, 0xffffffff );

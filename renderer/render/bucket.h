@@ -37,6 +37,7 @@
 #include	"surface.h"
 #include	"color.h"
 #include	"imagepixel.h"
+#include	"iddmanager.h"
 #include	"bucketdata.h"
 
 
@@ -160,19 +161,6 @@ class CqBucket : public IqBucket
 
 			m_micropolygons.push_back( pmpgNew );
 		}
-		/** Add a Micropoly grid to the list of deferred grids.
-		 */
-		void	AddGrid( CqMicroPolyGridBase* pgridNew )
-		{
-#ifdef _DEBUG
-			std::vector<CqMicroPolyGridBase*>::iterator end = m_grids.end();
-			for (std::vector<CqMicroPolyGridBase*>::iterator i = m_grids.begin(); i != end; i++)
-				if ((*i) == pgridNew)
-					assert( false );
-#endif
-
-			m_grids.push_back( pgridNew );
-		}
 		/** Get a pointer to the top GPrim in the stack of deferred GPrims.
 		 */
 		boost::shared_ptr<CqSurface> pTopSurface()
@@ -197,18 +185,6 @@ class CqBucket : public IqBucket
 		TqInt cGPrims()
 		{
 			return ( m_gPrims.size() );
-		}
-		/** Get a reference to the vector of deferred MPGs.
-		 */
-		std::vector<CqMicroPolygon*>& aMPGs()
-		{
-			return ( m_micropolygons );
-		}
-		/** Get a reference to the vector of deferred grids.
-		 */
-		std::vector<CqMicroPolyGridBase*>& aGrids()
-		{
-			return ( m_grids );
 		}
 		/** Get the flag that indicates whether the bucket is
 		 * empty.  It is empty only when this bucket doesn't
@@ -238,6 +214,31 @@ class CqBucket : public IqBucket
 			m_bucketData = bucketData;
 		}
 
+		/** Render any waiting MPs.
+		 *
+		 * Render ready micro polygons waiting to be
+		 * processed, so that we have as few as possible MPs
+		 * waiting and using memory at any given moment
+ 		 *
+		 * \param xmin Integer minimum extend of the image
+		 * part being rendered, takes into account buckets and
+		 * clipping.
+		 *
+		 * \param xmax Integer maximum extend of the image
+		 * part being rendered, takes into account buckets and
+		 * clipping.
+		 *
+		 * \param ymin Integer minimum extend of the image
+		 * part being rendered, takes into account buckets and
+		 * clipping.
+		 *
+		 * \param ymax Integer maximum extend of the image
+		 * part being rendered, takes into account buckets and
+		 * clipping.
+		 *
+		 */
+		void RenderWaitingMPs( long xmin, long xmax, long ymin, long ymax );
+
 		/** Render a particular micropolygon.
 		 *    
 		 * \param pMPG Pointer to the micropolygon to process.
@@ -261,6 +262,7 @@ class CqBucket : public IqBucket
 		 * \see CqBucket, CqImagePixel
 		 */
 		void	RenderMicroPoly( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax );
+
 		/** This function assumes that either dof or mb or
 		 * both are being used. */
 		void	RenderMPG_MBOrDof( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax, bool IsMoving, bool UsingDof );
@@ -298,7 +300,6 @@ class CqBucket : public IqBucket
 		};
 
 		std::vector<CqMicroPolygon*> m_micropolygons;			///< Vector of vectors of waiting micropolygons in this bucket
-		std::vector<CqMicroPolyGridBase*> m_grids;		///< Vector of vectors of waiting micropolygrids in this bucket
 
 		/// A sorted list of primitives for this bucket
 		std::priority_queue<boost::shared_ptr<CqSurface>, std::deque<boost::shared_ptr<CqSurface> >, closest_surface> m_gPrims;

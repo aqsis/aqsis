@@ -33,7 +33,6 @@
 #include	<vector>
 
 #include	"surface.h"
-#include	"color.h"
 #include	"vector2d.h"
 #include    	"bucket.h"
 #include	"mpdump.h"
@@ -267,9 +266,7 @@ class CqImageBuffer
 		void	AddMPG( CqMicroPolygon* pmpgNew );
 		bool	PushMPGForward( CqMicroPolygon* pmpg, TqInt Col, TqInt Row );
 		bool	PushMPGDown( CqMicroPolygon*, TqInt Col, TqInt Row );
-		void	RenderGrids( long xmin, long xmax, long ymin, long ymax );
-		void	RenderWaitingMPs( long xmin, long xmax, long ymin, long ymax );
-		void	RenderSurfaces( long xmin, long xmax, long ymin, long ymax, bool fImager, enum EqFilterDepth filterdepth, CqColor zThreshold );
+		void	RenderSurface( CqSurface* pSurface, long xmin, long xmax, long ymin, long ymax );
 		void	RenderImage();
 		void	StoreExtraData( CqMicroPolygon* pMPG, SqImageSample& sample);
 
