@@ -55,13 +55,11 @@ public:
     virtual ~CqDisplayServerImage()
 	{}
 
-    /** Get a reference to the socket ID.
-     */
-    void	setSocket( const CqSocket& s )
+    CqSocket& socket()
     {
-        m_socket = s;
+        return ( m_socket );
     }
-    const CqSocket& socket()
+    const CqSocket& socket() const
     {
         return ( m_socket );
     }

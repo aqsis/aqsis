@@ -33,17 +33,18 @@
 
 #include	"sstring.h"
 
+#include	<boost/utility.hpp>
+
 START_NAMESPACE( Aqsis )
 
 //----------------------------------------------------------------------
 /** \class CqSocket
  *  \brief Wrapper class around sockets based communications.
  */
-class COMMON_SHARE CqSocket
+class COMMON_SHARE CqSocket : boost::noncopyable
 {
 	public:
 		CqSocket();
-		CqSocket( const CqSocket& sock );
 		CqSocket( int port );
 		~CqSocket();
 
@@ -56,7 +57,7 @@ class COMMON_SHARE CqSocket
 		void	close();
 		bool	bind( int port );
 		bool	listen();
-		CqSocket accept();
+		bool	accept(CqSocket& socket);
 		bool	connect(const std::string hostname, int port);
 		int		sendData(const std::string& data) const;
 		int		recvData(std::stringstream& buffer) const;
@@ -71,7 +72,6 @@ class COMMON_SHARE CqSocket
 			return(m_socket);
 		}
 		operator bool();
-		CqSocket& operator=(const CqSocket& from);
 
 	private:
 		int				m_socket;			///< Socket ID of the server.

@@ -121,7 +121,7 @@ std::vector<boost::thread*> g_theThreads;
 class CqDataHandler
 {
 	public:
-		CqDataHandler(const CqSocket& sock, boost::shared_ptr<CqDisplayServerImage> thisClient) : m_sock(sock), m_client(thisClient)
+		CqDataHandler(boost::shared_ptr<CqDisplayServerImage> thisClient) : m_client(thisClient)
 		{}
 
 		void operator()()
@@ -137,7 +137,7 @@ class CqDataHandler
 			// Read a message
 			while(1)	
 			{
-				count = m_sock.recvData(buffer);
+				count = m_client->socket().recvData(buffer);
 				if(count <= 0)
 					break;
 				// Readbuf should now contain a complete message
@@ -152,7 +152,7 @@ class CqDataHandler
 			std::stringstream message;
 			message << msg;
 
-			return( m_sock.sendData( message.str() ) );
+			return( m_client->socket().sendData( message.str() ) );
 		}
 
 		void processMessage(std::stringstream& msg)
@@ -314,7 +314,6 @@ class CqDataHandler
 
 
 	private:
-		CqSocket m_sock;
 		boost::shared_ptr<CqDisplayServerImage> m_client;
 };
 
@@ -326,10 +325,8 @@ void HandleConnection(int sock, void *data)
 	boost::shared_ptr<CqDisplayServerImage> newImage(new CqDisplayServerImage());
 	newImage->setName("Unnamed");
 	
-	CqSocket c;
-	if((c = g_theSocket.accept()))
+	if(g_theSocket.accept(newImage->socket()))
 	{
-		newImage->setSocket(c);
 		// \todo: Need to work out how to do non-blocking on Win32
 #ifndef	AQSIS_SYSTEM_WIN32
 		// Set socket as non-blocking
@@ -338,7 +335,7 @@ void HandleConnection(int sock, void *data)
 		fcntl(sock, F_SETFL, oldflags | O_NONBLOCK);
 #endif
 		
-		g_theThreads.push_back(new boost::thread(CqDataHandler(newImage->socket(), newImage)));
+		g_theThreads.push_back(new boost::thread(CqDataHandler(newImage)));
 
 		if(window)
 		{
