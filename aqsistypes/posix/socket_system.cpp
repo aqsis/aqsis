@@ -56,25 +56,12 @@ CqSocket::CqSocket( int port )
     prepare( port );
 }
 
-
-CqSocket::CqSocket( const CqSocket& sock )
-{
-	*this = sock;
-}
-
-CqSocket& CqSocket::operator=(const CqSocket& from)
-{
-	m_socket = from.m_socket;
-	m_port = from.m_port;
-	return(*this);
-}
-
 //---------------------------------------------------------------------
 /** Destructor, close all connected client sockets.
  */
 CqSocket::~CqSocket()
 {
-    //close();
+    close();
 }
 
 bool CqSocket::initialiseSockets()
@@ -175,14 +162,18 @@ bool CqSocket::listen()
 /** Set ip the thread to wait for client connection requests.
  */
 
-CqSocket CqSocket::accept()
+bool CqSocket::accept(CqSocket& sock)
 {
-	CqSocket result;
-    int c;
+	sock.close();
+	int c;
 
-    if ( ( c = ::accept( m_socket, NULL, NULL ) ) != INVALID_SOCKET )
-		result.m_socket = c;
-    return ( result );
+	if ( ( c = ::accept( m_socket, NULL, NULL ) ) != INVALID_SOCKET )
+	{
+		sock.m_socket = c;
+		return( true );
+	}
+	else
+		return( false );
 }
 
 bool CqSocket::connect(const std::string hostname, int port)
