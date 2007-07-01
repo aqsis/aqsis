@@ -106,13 +106,17 @@ public:
 		assert(index < numChannels());
 		m_channels[index].second = type;
 	}
-	virtual TqInt numChannels()
+	virtual TqInt numChannels() const
 	{
 		return( m_channels.size() );
 	}
 	virtual void addChannel(const std::string& name, TqInt type)
 	{
 		m_channels.push_back(std::pair<std::string, TqInt>(name,type));
+	}
+	virtual TqInt elementSize() const
+	{
+		return(m_elementSize);
 	}
 	virtual unsigned char* data()
 	{

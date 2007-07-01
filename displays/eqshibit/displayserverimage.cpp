@@ -29,6 +29,7 @@
 
 #include	<fstream>
 #include	<map>
+#include	<algorithm>
 #include	"signal.h"
 
 #ifdef AQSIS_SYSTEM_WIN32
@@ -231,7 +232,6 @@ void CqDisplayServerImage::serialise(const std::string& folder)
 
 void CqDisplayServerImage::saveToTiff(const std::string& filename)
 {
-	uint16 photometric = PHOTOMETRIC_RGB;
 	uint16 config = PLANARCONFIG_CONTIG;
 	struct tm *ct;
 	char mydescription[80];
@@ -310,7 +310,6 @@ void CqDisplayServerImage::saveToTiff(const std::string& filename)
 		short ExtraSamplesTypes[ 1 ] = {EXTRASAMPLE_ASSOCALPHA};
 
 		sprintf( version, "%s %s (%s %s)", STRNAME, VERSION_STR, __DATE__, __TIME__);
-		bool use_logluv = false;
 
 		TIFFSetField( pOut, TIFFTAG_SOFTWARE, ( char* ) version );
 		TIFFSetField( pOut, TIFFTAG_IMAGEWIDTH, ( uint32 ) imageWidth() );
@@ -327,101 +326,58 @@ void CqDisplayServerImage::saveToTiff(const std::string& filename)
 //			TIFFSetField( pOut, TIFFTAG_HOSTCOMPUTER, image->m_hostname.c_str() );
 		TIFFSetField( pOut, TIFFTAG_IMAGEDESCRIPTION, mydescription);
 
+		// Set the position tages in case we aer dealing with a cropped image.
+		TIFFSetField( pOut, TIFFTAG_XPOSITION, ( float ) originX() );
+		TIFFSetField( pOut, TIFFTAG_YPOSITION, ( float ) originY() );
+		TIFFSetField( pOut, TIFFTAG_PLANARCONFIG, config );
+//		TIFFSetField( pOut, TIFFTAG_COMPRESSION, image->m_compression );
+//		if ( image->m_compression == COMPRESSION_JPEG )
+//			TIFFSetField( pOut, TIFFTAG_JPEGQUALITY, image->m_quality );
+		TIFFSetField( pOut, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB );
+
+		if ( numChannels() == 4 )
+			TIFFSetField( pOut, TIFFTAG_EXTRASAMPLES, 1, ExtraSamplesTypes );
+
+		TIFFSetField( pOut, TIFFTAG_SAMPLESPERPIXEL, numChannels() );
+		TIFFSetField( pOut, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize( pOut, 0 ) );
+
+		TqInt lineLength = elementSize() * imageWidth();
+
+		// Work out the format of the image to write.
+		TqInt maxType = PkDspyUnsigned8;
+		for(TqInt ichan = 0; ichan < numChannels(); ++ichan)
+			maxType = std::max(maxType, channelType(ichan));
 
 		// Write out an 8 bits per pixel integer image.
-//		if ( image->m_format == PkDspyUnsigned8 )
+		if ( maxType == PkDspyUnsigned8 || maxType == PkDspySigned8 )
 		{
+			TIFFSetField( pOut, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_INT );
 			TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, 8 );
-			TIFFSetField( pOut, TIFFTAG_PLANARCONFIG, config );
-//			TIFFSetField( pOut, TIFFTAG_COMPRESSION, image->m_compression );
-//			if ( image->m_compression == COMPRESSION_JPEG )
-//				TIFFSetField( pOut, TIFFTAG_JPEGQUALITY, image->m_quality );
-			TIFFSetField( pOut, TIFFTAG_PHOTOMETRIC, photometric );
-			TIFFSetField( pOut, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize( pOut, 0 ) );
-
-			if ( numChannels() == 4 )
-				TIFFSetField( pOut, TIFFTAG_EXTRASAMPLES, 1, ExtraSamplesTypes );
-
-			// Set the position tages in case we aer dealing with a cropped image.
-			TIFFSetField( pOut, TIFFTAG_XPOSITION, ( float ) originX() );
-			TIFFSetField( pOut, TIFFTAG_YPOSITION, ( float ) originY() );
-
-			TqInt lineLength = ( sizeof(char) * numChannels() ) * imageWidth();
-			TqInt row;
-			for ( row = 0; row < imageHeight(); row++ )
-			{
-				if ( TIFFWriteScanline( pOut, reinterpret_cast<void*>(reinterpret_cast<char*>(data()) + ( row * lineLength ))
-				                        , row, 0 ) < 0 )
-					break;
-			}
-			TIFFClose( pOut );
 		}
-#if 0
-		else
+		else if(maxType == PkDspyFloat32)
 		{
-			// Write out a floating point image.
-			TIFFSetField( pOut, TIFFTAG_STONITS, ( double ) 1.0 );
-
-			//			if(/* user wants logluv compression*/)
-			//			{
-			//				if(/* user wants to save the alpha channel */)
-			//				{
-			//					warn("SGI LogLuv encoding does not allow an alpha channel"
-			//							" - using uncompressed IEEEFP instead");
-			//				}
-			//				else
-			//				{
-			//					use_logluv = true;
-			//				}
-			//
-			//				if(/* user wants LZW compression*/)
-			//				{
-			//					warn("LZW compression is not available with SGI LogLuv encoding\n");
-			//				}
-			//			}
-
-			if ( use_logluv )
-			{
-				/* use SGI LogLuv compression */
-				TIFFSetField( pOut, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_INT );
-				TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, 16 );
-				TIFFSetField( pOut, TIFFTAG_COMPRESSION, COMPRESSION_SGILOG );
-				TIFFSetField( pOut, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_LOGLUV );
-				TIFFSetField( pOut, TIFFTAG_SGILOGDATAFMT, SGILOGDATAFMT_FLOAT );
-			}
-			else
-			{
-				/* use uncompressed IEEEFP pixels */
-				TIFFSetField( pOut, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP );
-				TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, 32 );
-				TIFFSetField( pOut, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB );
-				TIFFSetField( pOut, TIFFTAG_COMPRESSION, image->m_compression );
-			}
-			if (image->m_format == PkDspyUnsigned16)
-			{
-				TIFFSetField( pOut, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_INT );
-				TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, 16 );
-			}
-
-			TIFFSetField( pOut, TIFFTAG_SAMPLESPERPIXEL, image->m_iFormatCount );
-
-			if ( image->m_iFormatCount == 4 )
-				TIFFSetField( pOut, TIFFTAG_EXTRASAMPLES, 1, ExtraSamplesTypes );
-			// Set the position tages in case we aer dealing with a cropped image.
-			TIFFSetField( pOut, TIFFTAG_XPOSITION, ( float ) image->m_origin[0] );
-			TIFFSetField( pOut, TIFFTAG_YPOSITION, ( float ) image->m_origin[1] );
-			TIFFSetField( pOut, TIFFTAG_PLANARCONFIG, config );
-
-			TqInt row = 0;
-			for ( row = 0; row < image->m_height; row++ )
-			{
-				if ( TIFFWriteScanline( pOut, reinterpret_cast<void*>(reinterpret_cast<TqUchar*>(image->m_data) + ( row * image->m_lineLength )), row, 0 )
-				        < 0 )
-					break;
-			}
-			TIFFClose( pOut );
+			/* use uncompressed IEEEFP pixels */
+			TIFFSetField( pOut, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP );
+			TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, 32 );
 		}
-#endif
+		else if(maxType == PkDspySigned16 || maxType == PkDspyUnsigned16)
+		{
+			TIFFSetField( pOut, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_INT );
+			TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, 16 );
+		}
+		else if(maxType == PkDspySigned32 || maxType == PkDspyUnsigned32)
+		{
+			TIFFSetField( pOut, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_INT );
+			TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, 32 );
+		}
+		TqInt row;
+		for ( row = 0; row < imageHeight(); row++ )
+		{
+			if ( TIFFWriteScanline( pOut, reinterpret_cast<void*>(reinterpret_cast<char*>(m_realData) + ( row * lineLength ))
+									, row, 0 ) < 0 )
+				break;
+		}
+		TIFFClose( pOut );
 	}
 }
 
