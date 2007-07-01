@@ -80,21 +80,8 @@ ArgParse::apint 	g_cl_verbose = 1;
 CqEqshibitMainWindow *window = 0;
 boost::mutex g_XMLMutex;
 
-std::map<std::string, TqInt>	g_typeNames;
-static char* g_formatNames[] = {
-	"PkDspyNone",
-	"PkDspyFloat32",
-	"PkDspyUnsigned32",
-	"PkDspySigned32",
-	"PkDspyUnsigned16",
-	"PkDspySigned16",
-	"PkDspyUnsigned8",
-	"PkDspySigned8",
-	"PkDspyString",
-	"PkDspyMatrix",
-	"PkDspyArrayBegin",
-	"PkDspyArrayEnd",
-};
+std::map<std::string, TqInt>	g_mapNameToType;
+std::map<TqInt, std::string>	g_mapTypeToName;
 
 void version( std::ostream& Stream )
 {
@@ -220,6 +207,34 @@ class CqDataHandler
 							}
 							param = param->NextSiblingElement("IntsParameter");
 						}
+						param = child->FirstChildElement("FloatsParameter");
+						while(param)
+						{
+							const char* name = param->Attribute("name");
+							if(std::string("quantize").compare(name) == 0)
+							{
+								TqFloat quantize[4];
+								TiXmlElement* values = param->FirstChildElement("Values");
+								if(values)
+								{
+									double val;
+									TiXmlElement* value = values->FirstChildElement("Float");
+									value->Attribute("value", &val);
+									quantize[0] = val;
+									value = value->NextSiblingElement("Float");
+									value->Attribute("value", &val);
+									quantize[0] = val;
+									value = value->NextSiblingElement("Float");
+									value->Attribute("value", &val);
+									quantize[0] = val;
+									value = value->NextSiblingElement("Float");
+									value->Attribute("value", &val);
+									quantize[0] = val;
+									m_client->setQuantize(quantize);
+								}
+							}
+							param = param->NextSiblingElement("FloatsParameter");
+						}
 					}
 					child = root->FirstChildElement("Formats");
 					if(child)
@@ -234,7 +249,7 @@ class CqDataHandler
 							const char* formatName = format->Attribute("name");
 							TqInt typeID = PkDspyUnsigned8;
 							std::map<std::string, TqInt>::iterator type;
-							if((type = g_typeNames.find(typeName)) != g_typeNames.end())
+							if((type = g_mapNameToType.find(typeName)) != g_mapNameToType.end())
 								typeID = type->second;
 							m_client->addChannel(formatName, typeID);
 
@@ -251,7 +266,7 @@ class CqDataHandler
 						{
 							TiXmlElement* formatv = new TiXmlElement("Format");
 							formatv->SetAttribute("name", m_client->channelName(ichannel));
-							TiXmlText* formatText = new TiXmlText(g_formatNames[m_client->channelType(ichannel)]);
+							TiXmlText* formatText = new TiXmlText(g_mapTypeToName[m_client->channelType(ichannel)]);
 							formatv->LinkEndChild(formatText); 
 							formatsXML->LinkEndChild(formatv);
 						}
@@ -427,16 +442,26 @@ int main( int argc, char** argv )
 		std::auto_ptr<std::streambuf> use_syslog( new Aqsis::syslog_buf(std::cerr) );
 #endif  // AQSIS_SYSTEM_POSIX
 
-	// Fill in the typenames map
-	g_typeNames["PkDspyFloat32"] = PkDspyFloat32;
-	g_typeNames["PkDspyUnsigned32"] = PkDspyUnsigned32;
-	g_typeNames["PkDspySigned32"] = PkDspySigned32;
-	g_typeNames["PkDspyUnsigned16"] = PkDspyUnsigned16;
-	g_typeNames["PkDspySigned16"] = PkDspySigned16;
-	g_typeNames["PkDspyUnsigned8"] = PkDspyUnsigned8;
-	g_typeNames["PkDspySigned8"] = PkDspySigned8;
-	g_typeNames["PkDspyString"] = PkDspyString;
-	g_typeNames["PkDspyMatrix"] = PkDspyMatrix;
+	// Fill in the typenames maps
+	g_mapNameToType["PkDspyFloat32"] = PkDspyFloat32;
+	g_mapNameToType["PkDspyUnsigned32"] = PkDspyUnsigned32;
+	g_mapNameToType["PkDspySigned32"] = PkDspySigned32;
+	g_mapNameToType["PkDspyUnsigned16"] = PkDspyUnsigned16;
+	g_mapNameToType["PkDspySigned16"] = PkDspySigned16;
+	g_mapNameToType["PkDspyUnsigned8"] = PkDspyUnsigned8;
+	g_mapNameToType["PkDspySigned8"] = PkDspySigned8;
+	g_mapNameToType["PkDspyString"] = PkDspyString;
+	g_mapNameToType["PkDspyMatrix"] = PkDspyMatrix;
+
+	g_mapTypeToName[PkDspyFloat32] = "PkDspyFloat32";
+	g_mapTypeToName[PkDspyUnsigned32] = "PkDspyUnsigned32";
+	g_mapTypeToName[PkDspySigned32] = "PkDspySigned32";
+	g_mapTypeToName[PkDspyUnsigned16] = "PkDspyUnsigned16";
+	g_mapTypeToName[PkDspySigned16] = "PkDspySigned16";
+	g_mapTypeToName[PkDspyUnsigned8] = "PkDspyUnsigned8";
+	g_mapTypeToName[PkDspySigned8] = "PkDspySigned8";
+	g_mapTypeToName[PkDspyString] = "PkDspyString";
+	g_mapTypeToName[PkDspyMatrix] = "PkDspyMatrix";
 
 	int portno = atoi(g_strPort.c_str());
 	CqSocket::initialiseSockets();

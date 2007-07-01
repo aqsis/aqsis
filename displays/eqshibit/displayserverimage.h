@@ -49,9 +49,13 @@ class CqDisplayServerImage : public CqImage
 {
 public:
     CqDisplayServerImage( const CqString name) : CqImage(name)
-	{}
+	{
+		m_quantize[0] = m_quantize[1] = m_quantize[2] = m_quantize[3] = 0.0f;
+	}
     CqDisplayServerImage() : CqImage() 
-	{}
+	{
+		m_quantize[0] = m_quantize[1] = m_quantize[2] = m_quantize[3] = 0.0f;
+	}
     virtual ~CqDisplayServerImage()
 	{}
 
@@ -74,6 +78,45 @@ public:
     {
         m_serialisedName = name;
     }
+	TqFloat quantizeZero() const
+	{
+		return(m_quantize[0]);
+	}
+	void setQuantizeZero(TqFloat zero)
+	{
+		m_quantize[0] = zero;
+	}
+	TqFloat quantizeOne() const
+	{
+		return(m_quantize[1]);
+	}
+	void setQuantizeOne(TqFloat one)
+	{
+		m_quantize[1] = one;
+	}
+	TqFloat quantizeMin() const
+	{
+		return(m_quantize[2]);
+	}
+	void setQuantizeMin(TqFloat min)
+	{
+		m_quantize[2] = min;
+	}
+	TqFloat quantizeMax() const
+	{
+		return(m_quantize[3]);
+	}
+	void setQuantizeMax(TqFloat max)
+	{
+		m_quantize[3] = max;
+	}
+	void setQuantize(const TqFloat (&quant)[4])
+	{
+		m_quantize[0] = quant[0];
+		m_quantize[1] = quant[1];
+		m_quantize[2] = quant[2];
+		m_quantize[3] = quant[3];
+	}
 
     void acceptData(TqUlong xmin, TqUlong xmaxplus1, TqUlong ymin, TqUlong ymaxplus1, TqInt elementSize, const unsigned char* data);
 	
@@ -87,6 +130,7 @@ private:
     CqSocket	m_socket;			///< Socket of the client.
     std::stringstream m_readbuf;
 	CqString	m_serialisedName;
+	TqFloat		m_quantize[4];
 };
 
 END_NAMESPACE( Aqsis )

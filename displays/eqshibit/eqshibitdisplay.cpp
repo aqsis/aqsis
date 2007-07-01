@@ -33,6 +33,7 @@ using namespace Aqsis;
 #include <sstream>
 #include <string>
 #include <algorithm>
+#include <map>
 #include "boost/archive/iterators/base64_from_binary.hpp"
 #include "boost/archive/iterators/transform_width.hpp"
 #include "boost/archive/iterators/insert_linebreaks.hpp"
@@ -90,21 +91,8 @@ typedef
     > 
     base64_text; // compose all the above operations in to a new iterator
 
-static char* g_formatNames[] = {
-	"PkDspyNone",
-	"PkDspyFloat32",
-	"PkDspyUnsigned32",
-	"PkDspySigned32",
-	"PkDspyUnsigned16",
-	"PkDspySigned16",
-	"PkDspyUnsigned8",
-	"PkDspySigned8",
-	"PkDspyString",
-	"PkDspyMatrix",
-	"PkDspyArrayBegin",
-	"PkDspyArrayEnd",
-};
-
+std::map<std::string, TqInt>	g_mapNameToType;
+std::map<TqInt, std::string>	g_mapTypeToName;
 
 PtDspyError DspyImageOpen(PtDspyImageHandle * image,
                           const char *drivername,
@@ -118,6 +106,26 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
                           PtFlagStuff *flagstuff)
 {
 	SqDisplayInstance* pImage;
+
+	g_mapNameToType["PkDspyFloat32"] = PkDspyFloat32;
+	g_mapNameToType["PkDspyUnsigned32"] = PkDspyUnsigned32;
+	g_mapNameToType["PkDspySigned32"] = PkDspySigned32;
+	g_mapNameToType["PkDspyUnsigned16"] = PkDspyUnsigned16;
+	g_mapNameToType["PkDspySigned16"] = PkDspySigned16;
+	g_mapNameToType["PkDspyUnsigned8"] = PkDspyUnsigned8;
+	g_mapNameToType["PkDspySigned8"] = PkDspySigned8;
+	g_mapNameToType["PkDspyString"] = PkDspyString;
+	g_mapNameToType["PkDspyMatrix"] = PkDspyMatrix;
+
+	g_mapTypeToName[PkDspyFloat32] = "PkDspyFloat32";
+	g_mapTypeToName[PkDspyUnsigned32] = "PkDspyUnsigned32";
+	g_mapTypeToName[PkDspySigned32] = "PkDspySigned32";
+	g_mapTypeToName[PkDspyUnsigned16] = "PkDspyUnsigned16";
+	g_mapTypeToName[PkDspySigned16] = "PkDspySigned16";
+	g_mapTypeToName[PkDspyUnsigned8] = "PkDspyUnsigned8";
+	g_mapTypeToName[PkDspySigned8] = "PkDspySigned8";
+	g_mapTypeToName[PkDspyString] = "PkDspyString";
+	g_mapTypeToName[PkDspyMatrix] = "PkDspyMatrix";
 
 	pImage = new SqDisplayInstance;
 	flagstuff->flags = 0;
@@ -319,7 +327,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			{
 				TiXmlElement* formatv = new TiXmlElement("Format");
 				formatv->SetAttribute("name", format[iformat].name);
-				TiXmlText* formatText = new TiXmlText(g_formatNames[format[iformat].type]);
+				TiXmlText* formatText = new TiXmlText(g_mapTypeToName[format[iformat].type]);
 				formatv->LinkEndChild(formatText); 
 				formatsXML->LinkEndChild(formatv);
 			}
@@ -328,7 +336,6 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			displaydoc.LinkEndChild(openMsgXML);
 			sendXMLMessage(displaydoc, pImage->m_socket);
 			TiXmlDocument* formats = recvXMLMessage(pImage->m_socket);
-			formats->Print();
 			TiXmlElement* child = formats->FirstChildElement("Formats");
 			if(child)
 			{
@@ -341,7 +348,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 					// Read the format type from the node.
 					const char* typeName = formatNode->GetText();
 					const char* formatName = formatNode->Attribute("name");
-					TqInt typeID = PkDspyUnsigned8;
+					TqInt typeID = g_mapNameToType[typeName];
 					char* name = new char[strlen(formatName)+1];
 					strcpy(name, formatName);
 					outFormat[iformat].name = name;
