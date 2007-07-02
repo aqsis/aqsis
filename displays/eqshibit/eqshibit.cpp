@@ -345,9 +345,9 @@ void HandleConnection(int sock, void *data)
 		// \todo: Need to work out how to do non-blocking on Win32
 #ifndef	AQSIS_SYSTEM_WIN32
 		// Set socket as non-blocking
-		int oldflags;
-		oldflags = fcntl(sock, F_GETFL, 0);
-		fcntl(sock, F_SETFL, oldflags | O_NONBLOCK);
+//		int oldflags;
+//		oldflags = fcntl(sock, F_GETFL, 0);
+//		fcntl(sock, F_SETFL, oldflags | O_NONBLOCK);
 #endif
 		
 		g_theThreads.push_back(new boost::thread(CqDataHandler(newImage)));

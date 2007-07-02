@@ -344,28 +344,28 @@ void CqDisplayServerImage::saveToTiff(const std::string& filename)
 		TqInt lineLength = elementSize() * imageWidth();
 
 		// Work out the format of the image to write.
-		TqInt maxType = PkDspyUnsigned8;
+		TqInt widestType = PkDspyUnsigned8;
 		for(TqInt ichan = 0; ichan < numChannels(); ++ichan)
-			maxType = std::max(maxType, channelType(ichan));
+			widestType = std::min(widestType, channelType(ichan));
 
 		// Write out an 8 bits per pixel integer image.
-		if ( maxType == PkDspyUnsigned8 || maxType == PkDspySigned8 )
+		if ( widestType == PkDspyUnsigned8 || widestType == PkDspySigned8 )
 		{
 			TIFFSetField( pOut, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_INT );
 			TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, 8 );
 		}
-		else if(maxType == PkDspyFloat32)
+		else if(widestType == PkDspyFloat32)
 		{
 			/* use uncompressed IEEEFP pixels */
 			TIFFSetField( pOut, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP );
 			TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, 32 );
 		}
-		else if(maxType == PkDspySigned16 || maxType == PkDspyUnsigned16)
+		else if(widestType == PkDspySigned16 || widestType == PkDspyUnsigned16)
 		{
 			TIFFSetField( pOut, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_INT );
 			TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, 16 );
 		}
-		else if(maxType == PkDspySigned32 || maxType == PkDspyUnsigned32)
+		else if(widestType == PkDspySigned32 || widestType == PkDspyUnsigned32)
 		{
 			TIFFSetField( pOut, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_INT );
 			TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, 32 );
