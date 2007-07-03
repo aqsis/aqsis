@@ -266,7 +266,7 @@ class CqImageBuffer
 		void	AddMPG( CqMicroPolygon* pmpgNew );
 		bool	PushMPGForward( CqMicroPolygon* pmpg, TqInt Col, TqInt Row );
 		bool	PushMPGDown( CqMicroPolygon*, TqInt Col, TqInt Row );
-		void	RenderSurface( CqSurface* pSurface, long xmin, long xmax, long ymin, long ymax );
+		void	RenderSurface( boost::shared_ptr<CqSurface>& pSurface, long xmin, long xmax, long ymin, long ymax );
 		void	RenderImage();
 		void	StoreExtraData( CqMicroPolygon* pMPG, SqImageSample& sample);
 

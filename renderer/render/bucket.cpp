@@ -58,6 +58,7 @@ CqBucketData* CqBucket::m_bucketData = 0;
  */
 void CqBucket::SetProcessed( bool bProc )
 {
+	assert(IsEmpty());
 	m_bProcessed = bProc;
 }
 

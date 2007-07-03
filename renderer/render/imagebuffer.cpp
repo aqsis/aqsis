@@ -709,7 +709,7 @@ void CqImageBuffer::StoreExtraData( CqMicroPolygon* pMPG, SqImageSample& sample)
  * \param ymax Integer maximum extend of the image part being rendered, takes into account buckets and clipping.
  */
 
-void CqImageBuffer::RenderSurface( CqSurface* pSurface, long xmin, long xmax, long ymin, long ymax )
+void CqImageBuffer::RenderSurface( boost::shared_ptr<CqSurface>& pSurface, long xmin, long xmax, long ymin, long ymax )
 {
 	// If the epsilon check has deemed this surface to be undiceable, don't bother asking.
 	bool fDiceable = false;
@@ -944,35 +944,37 @@ void CqImageBuffer::RenderImage()
 			( *pProgressHandler ) ( Complete, QGetRenderContext() ->CurrentFrame() );
 		}
 
-
 		// Render any waiting subsurfaces.
-		boost::shared_ptr<CqSurface> pSurface = CurrentBucket().pTopSurface();
-		while ( pSurface && !m_fQuit )
+		while( !CurrentBucket().IsEmpty() && !m_fQuit )
 		{
-			// Cull surface if it's hidden
-			if ( !( DisplayMode() & ModeZ ) && !pSurface->pCSGNode() )
+			boost::shared_ptr<CqSurface> pSurface = CurrentBucket().pTopSurface();
+			if(pSurface)
 			{
-				TIME_SCOPE("Occlusion culling");
-				if ( !bIsEmpty && pSurface->fCachedBound() && OcclusionCullSurface( pSurface ) )
+				// Cull surface if it's hidden
+				if ( !( DisplayMode() & ModeZ ) && !pSurface->pCSGNode() )
 				{
-					// Advance to next surface
-					CurrentBucket().popSurface();
-					pSurface = CurrentBucket().pTopSurface();
-					continue;
+					TIME_SCOPE("Occlusion culling");
+					if ( !bIsEmpty && pSurface->fCachedBound() && OcclusionCullSurface( pSurface ) )
+					{
+						// Advance to next surface
+						CurrentBucket().popSurface();
+						pSurface = CurrentBucket().pTopSurface();
+						continue;
+					}
 				}
-			}
 
-			RenderSurface( &(*CurrentBucket().pTopSurface()), xmin, xmax, ymin, ymax );
+				RenderSurface( pSurface, xmin, xmax, ymin, ymax );
+				
+				// Advance to next surface
+				CurrentBucket().popSurface();
+				pSurface = CurrentBucket().pTopSurface();
+			}
 
 			// Render any waiting micro polygons.
 			{
 				TIME_SCOPE("Render MPs");
 				bucketProcessor.process( xmin, xmax, ymin, ymax );
 			}
-
-			// Advance to next surface
-			CurrentBucket().popSurface();
-			pSurface = CurrentBucket().pTopSurface();
 		}
 
 		if ( m_fQuit )
