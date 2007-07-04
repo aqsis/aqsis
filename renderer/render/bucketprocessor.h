@@ -73,7 +73,7 @@ public:
 	 * \param ymax Integer maximum extend of the image part being
 	 * rendered, takes into account buckets and clipping.
 	 */
-	void process( long xmin, long xmax, long ymin, long ymax );
+	void process( long xmin, long xmax, long ymin, long ymax, TqFloat clippingFar, TqFloat clippingNear );
 
 private:
 	/// Pointer to the current bucket

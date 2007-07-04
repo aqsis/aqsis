@@ -973,7 +973,7 @@ void CqImageBuffer::RenderImage()
 			// Render any waiting micro polygons.
 			{
 				TIME_SCOPE("Render MPs");
-				bucketProcessor.process( xmin, xmax, ymin, ymax );
+				bucketProcessor.process( xmin, xmax, ymin, ymax, ClippingFar(), ClippingNear() );
 			}
 		}
 

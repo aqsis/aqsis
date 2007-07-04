@@ -56,9 +56,9 @@ void CqBucketProcessor::reset()
 	m_bucket = 0;
 }
 
-void CqBucketProcessor::process( long xmin, long xmax, long ymin, long ymax )
+void CqBucketProcessor::process( long xmin, long xmax, long ymin, long ymax, TqFloat clippingFar, TqFloat clippingNear )
 {
-	m_bucket->RenderWaitingMPs( xmin, xmax, ymin, ymax );
+	m_bucket->RenderWaitingMPs( xmin, xmax, ymin, ymax, clippingFar, clippingNear );
 }
 
 

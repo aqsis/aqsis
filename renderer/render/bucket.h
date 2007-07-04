@@ -237,7 +237,7 @@ class CqBucket : public IqBucket
 		 * clipping.
 		 *
 		 */
-		void RenderWaitingMPs( long xmin, long xmax, long ymin, long ymax );
+		void RenderWaitingMPs( long xmin, long xmax, long ymin, long ymax, TqFloat clippingFar, TqFloat clippingNear );
 
 		/** Render a particular micropolygon.
 		 *    
@@ -261,15 +261,15 @@ class CqBucket : public IqBucket
 		 *
 		 * \see CqBucket, CqImagePixel
 		 */
-		void	RenderMicroPoly( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax );
+		void	RenderMicroPoly( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax, TqFloat clippingFar, TqFloat clippingNear );
 
 		/** This function assumes that either dof or mb or
 		 * both are being used. */
-		void	RenderMPG_MBOrDof( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax, bool IsMoving, bool UsingDof );
+		void	RenderMPG_MBOrDof( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax, TqFloat clippingFar, TqFloat clippingNear, bool IsMoving, bool UsingDof );
 		/** This function assumes that neither dof or mb are
 		 * being used. It is much simpler than the general
 		 * case dealt with above. */
-		void	RenderMPG_Static( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax );
+		void	RenderMPG_Static( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax, TqFloat clippingFar, TqFloat clippingNear );
 
 
 	private:

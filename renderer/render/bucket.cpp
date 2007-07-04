@@ -985,14 +985,14 @@ void CqBucket::ShutdownBucket()
  * \param ymax Integer maximum extend of the image part being rendered, takes into account buckets and clipping.
  */
 
-void CqBucket::RenderWaitingMPs( long xmin, long xmax, long ymin, long ymax )
+void CqBucket::RenderWaitingMPs( long xmin, long xmax, long ymin, long ymax, TqFloat clippingFar, TqFloat clippingNear )
 {
 	for ( std::vector<CqMicroPolygon*>::iterator imp = m_micropolygons.begin();
 	      imp != m_micropolygons.end();
 	      imp++ )
 	{
 		CqMicroPolygon* pMP = *imp;
-		RenderMicroPoly( pMP, xmin, xmax, ymin, ymax );
+		RenderMicroPoly( pMP, xmin, xmax, ymin, ymax, clippingFar, clippingNear );
 
 		TqInt col = m_ImageBuffer->CurrentBucketCol();
 		TqInt row = m_ImageBuffer->CurrentBucketRow();
@@ -1018,14 +1018,14 @@ void CqBucket::RenderWaitingMPs( long xmin, long xmax, long ymin, long ymax )
    \see CqBucket, CqImagePixel
  */
 
-void CqBucket::RenderMicroPoly( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax )
+void CqBucket::RenderMicroPoly( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax, TqFloat clippingFar, TqFloat clippingNear )
 {
 	const CqBound& Bound = pMPG->GetTotalBound();
 
 	// if bounding box is outside our viewing range, then cull it.
 	if ( Bound.vecMax().x() < xmin || Bound.vecMax().y() < ymin ||
 	        Bound.vecMin().x() > xmax || Bound.vecMin().y() > ymax ||
-	        Bound.vecMin().z() > m_ImageBuffer->ClippingFar() || Bound.vecMax().z() < m_ImageBuffer->ClippingNear())
+	        Bound.vecMin().z() > clippingFar || Bound.vecMax().z() < clippingNear )
 	{
 		STATS_INC( MPG_culled );
 		return;
@@ -1067,11 +1067,11 @@ void CqBucket::RenderMicroPoly( CqMicroPolygon* pMPG, long xmin, long xmax, long
 
 	if(IsMoving || UsingDof)
 	{
-		RenderMPG_MBOrDof( pMPG, xmin, xmax, ymin, ymax, IsMoving, UsingDof );
+		RenderMPG_MBOrDof( pMPG, xmin, xmax, ymin, ymax, clippingFar, clippingNear, IsMoving, UsingDof );
 	}
 	else
 	{
-		RenderMPG_Static( pMPG, xmin, xmax, ymin, ymax );
+		RenderMPG_Static( pMPG, xmin, xmax, ymin, ymax, clippingFar, clippingNear );
 	}
 }
 
@@ -1082,6 +1082,7 @@ void CqBucket::RenderMicroPoly( CqMicroPolygon* pMPG, long xmin, long xmax, long
  */
 void CqBucket::RenderMPG_MBOrDof( CqMicroPolygon* pMPG,
                                        long xmin, long xmax, long ymin, long ymax,
+				       TqFloat clippingFar, TqFloat clippingNear,
                                        bool IsMoving, bool UsingDof )
 {
 	CqHitTestCache hitTestCache;
@@ -1173,7 +1174,7 @@ void CqBucket::RenderMPG_MBOrDof( CqMicroPolygon* pMPG,
 			// if bounding box is outside our viewing range, then cull it.
 			if ( bmaxx < (float)xmin || bmaxy < (float)ymin ||
 			        bminx > (float)xmax || bminy > (float)ymax ||
-			        bminz > m_ImageBuffer->ClippingFar() || bmaxz < m_ImageBuffer->ClippingNear())
+			        bminz > clippingFar || bmaxz < clippingNear )
 			{
 				continue;
 			}
@@ -1195,7 +1196,8 @@ void CqBucket::RenderMPG_MBOrDof( CqMicroPolygon* pMPG,
 //---------------------------------------------------------------------
 /** This function assumes that neither dof or mb are being used. It is
  * much simpler than the general case dealt with above. */
-void CqBucket::RenderMPG_Static( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax )
+void CqBucket::RenderMPG_Static( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax,
+				 TqFloat clippingFar, TqFloat clippingNear )
 {
 	CqHitTestCache hitTestCache;
 	pMPG->CacheHitTestValues(&hitTestCache);
