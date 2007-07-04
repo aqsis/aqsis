@@ -409,16 +409,16 @@ void CompositeAlpha(TqInt r, TqInt g, TqInt b, TqUchar &R, TqUchar &G, TqUchar &
 END_NAMESPACE( Aqsis )
 
 
-PtDspyError DspyImageOpen(PtDspyImageHandle * image,
-                          const char *drivername,
-                          const char *filename,
-                          int width,
-                          int height,
-                          int paramCount,
-                          const UserParameter *parameters,
-                          int iFormatCount,
-                          PtDspyDevFormat *format,
-                          PtFlagStuff *flagstuff)
+extern "C" PtDspyError DspyImageOpen(PtDspyImageHandle * image,
+                                     const char *drivername,
+                                     const char *filename,
+                                     int width,
+                                     int height,
+                                     int paramCount,
+                                     const UserParameter *parameters,
+                                     int iFormatCount,
+                                     PtDspyDevFormat *format,
+                                     PtFlagStuff *flagstuff)
 {
 	SqDisplayInstance* pImage;
 
@@ -643,13 +643,13 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 }
 
 
-PtDspyError DspyImageData(PtDspyImageHandle image,
-                          int xmin,
-                          int xmaxplus1,
-                          int ymin,
-                          int ymaxplus1,
-                          int entrysize,
-                          const TqUchar *data)
+extern "C" PtDspyError DspyImageData(PtDspyImageHandle image,
+                                     int xmin,
+                                     int xmaxplus1,
+                                     int ymin,
+                                     int ymaxplus1,
+                                     int entrysize,
+                                     const TqUchar *data)
 {
 	SqDisplayInstance* pImage;
 	pImage = reinterpret_cast<SqDisplayInstance*>(image);
@@ -833,7 +833,7 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 }
 
 
-PtDspyError DspyImageClose(PtDspyImageHandle image)
+extern "C" PtDspyError DspyImageClose(PtDspyImageHandle image)
 {
 	SqDisplayInstance* pImage;
 	pImage = reinterpret_cast<SqDisplayInstance*>(image);
@@ -857,7 +857,7 @@ PtDspyError DspyImageClose(PtDspyImageHandle image)
 }
 
 
-PtDspyError DspyImageDelayClose(PtDspyImageHandle image)
+extern "C" PtDspyError DspyImageDelayClose(PtDspyImageHandle image)
 {
 	SqDisplayInstance* pImage;
 	pImage = reinterpret_cast<SqDisplayInstance*>(image);
@@ -941,10 +941,10 @@ PtDspyError DspyImageDelayClose(PtDspyImageHandle image)
 }
 
 
-PtDspyError DspyImageQuery(PtDspyImageHandle image,
-                           PtDspyQueryType type,
-                           int size,
-                           void *data)
+extern "C" PtDspyError DspyImageQuery(PtDspyImageHandle image,
+                                      PtDspyQueryType type,
+                                      size_t size,
+                                      void *data)
 {
 	SqDisplayInstance* pImage;
 	pImage = reinterpret_cast<SqDisplayInstance*>(image);

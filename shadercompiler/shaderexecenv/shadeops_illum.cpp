@@ -113,7 +113,7 @@ void CqShaderExecEnv::SO_init_gather(IqShaderData* samples, IqShader* pShader)
 			return;
 	}
 
-	m_gatherSample = _aq_samples;
+	m_gatherSample = static_cast<TqUint> (_aq_samples);
 }
 
 

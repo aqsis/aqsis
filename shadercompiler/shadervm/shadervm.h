@@ -1120,10 +1120,14 @@ class SHADERVM_SHARE CqShaderVM : public CqShaderStack, public IqShader, public 
 		void	SO_comp();
 		void	SO_setcomp();
 		void	SO_cmix();
+		void	SO_cmixc();
 		void	SO_fmix();
 		void	SO_pmix();
 		void	SO_vmix();
 		void	SO_nmix();
+		void	SO_pmixc();
+		void	SO_vmixc();
+		void	SO_nmixc();
 		void	SO_ambient();
 		void	SO_diffuse();
 		void	SO_specular();

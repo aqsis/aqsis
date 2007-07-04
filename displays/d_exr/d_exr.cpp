@@ -657,7 +657,7 @@ extern "C"
 	PtDspyError
 	DspyImageQuery (PtDspyImageHandle pvImage,
 	                PtDspyQueryType querytype,
-	                int datalen,
+	                size_t datalen,
 	                void *data)
 	{
 		unsigned int _datalen = static_cast<unsigned int>(datalen);

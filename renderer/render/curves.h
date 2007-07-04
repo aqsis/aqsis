@@ -178,7 +178,7 @@ class CqCurve : public CqSurface
 			}
 			else
 			{
-				normal = CqVector3D( 0, 0, -1 );  // default camera normal
+				normal = CqVector3D( 0, 0, 1 );  // default camera normal
 				return false;
 			}
 		}
