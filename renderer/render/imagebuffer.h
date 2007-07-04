@@ -260,16 +260,11 @@ class CqImageBuffer
 		void	DeleteImage();
 		void	SaveImage( const char* strName );
 
-		void	PostSurface( const boost::shared_ptr<CqSurface>& pSurface );
-		bool	CullSurface( CqBound& Bound, const boost::shared_ptr<CqSurface>& pSurface );
-		bool	OcclusionCullSurface( const boost::shared_ptr<CqSurface>& pSurface );
 		void	AddMPG( CqMicroPolygon* pmpgNew );
-		bool	PushMPGForward( CqMicroPolygon* pmpg, TqInt Col, TqInt Row );
-		bool	PushMPGDown( CqMicroPolygon*, TqInt Col, TqInt Row );
-		void	RenderSurface( boost::shared_ptr<CqSurface>& pSurface, long xmin, long xmax, long ymin, long ymax );
+		bool	PushMPForward( CqMicroPolygon* pMP, TqInt Col, TqInt Row );
+		bool	PushMPDown( CqMicroPolygon* pMP, TqInt Col, TqInt Row );
+		void	PostSurface( const boost::shared_ptr<CqSurface>& pSurface );
 		void	RenderImage();
-		void	StoreExtraData( CqMicroPolygon* pMPG, SqImageSample& sample);
-
 
 		/** Get completion status of this rendered image.
 		    * \return bool indicating finished or not.
@@ -321,6 +316,11 @@ class CqImageBuffer
 		CqMPDump	m_mpdump;
 #endif
 
+
+		void	RenderSurface( boost::shared_ptr<CqSurface>& pSurface, long xmin, long xmax, long ymin, long ymax );
+		bool	CullSurface( CqBound& Bound, const boost::shared_ptr<CqSurface>& pSurface );
+		bool	OcclusionCullSurface( const boost::shared_ptr<CqSurface>& pSurface );
+		void	StoreExtraData( CqMicroPolygon* pMPG, SqImageSample& sample);
 };
 
 

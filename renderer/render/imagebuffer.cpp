@@ -36,7 +36,6 @@
 #include	"options.h"
 #include	"renderer.h"
 #include	"surface.h"
-#include	"micropolygon.h"
 #include	"imagebuffer.h"
 #include	"occlusion.h"
 #include	"bucketprocessor.h"
@@ -486,8 +485,8 @@ void CqImageBuffer::AddMPG( CqMicroPolygon* pmpgNew )
 	// situation.
 	if ( Bucket(iXBa,iYBa).IsProcessed() )
 	{
-		PushMPGDown( pmpgNew, iXBa, iYBa );
-		PushMPGForward( pmpgNew, iXBa, iYBa );
+		PushMPDown( pmpgNew, iXBa, iYBa );
+		PushMPForward( pmpgNew, iXBa, iYBa );
 		RELEASEREF( pmpgNew );
 	}
 	else
@@ -499,34 +498,34 @@ void CqImageBuffer::AddMPG( CqMicroPolygon* pmpgNew )
 
 //----------------------------------------------------------------------
 /** Add a new micro polygon to the list of waiting ones.
- * \param pmpg Pointer to a CqMicroPolygon derived class.
+ * \param pMP Pointer to a CqMicroPolygon derived class.
  */
 
-bool CqImageBuffer::PushMPGForward( CqMicroPolygon* pmpg, TqInt Col, TqInt Row )
+bool CqImageBuffer::PushMPForward( CqMicroPolygon* pMP, TqInt Col, TqInt Row )
 {
 	// Should always mark as pushed forward even if not. As this is an idicator
 	// that the attempt has been made, used by the PushDown function. If this wasn't set
-	// then the mpg would be pushed down again when the next row is hit.
-	pmpg->MarkPushedForward();
+	// then the MP would be pushed down again when the next row is hit.
+	pMP->MarkPushedForward();
 
 	// Check if there is anywhere to push forward to.
-	if ( Col == ( cXBuckets() - 1 ) )
+	if ( Col == ( m_cXBuckets - 1 ) )
 		return ( false );
 
-	TqInt NextBucketForward = Col + 1;
+	TqInt NextColForward = Col + 1;
 
 	// If the next bucket forward has already been processed, try the one following that.
-	if( Bucket( NextBucketForward, Row ).IsProcessed() )
-		return( PushMPGForward( pmpg, NextBucketForward, Row ) );
+	if( Bucket( NextColForward, Row ).IsProcessed() )
+		return( PushMPForward( pMP, NextColForward, Row ) );
 
 	// Find out if any of the subbounds touch this bucket.
-	CqVector2D BucketMin = BucketPosition( NextBucketForward, Row );
-	CqVector2D BucketMax = BucketMin + BucketSize( NextBucketForward, Row );
+	CqVector2D BucketMin = BucketPosition( NextColForward, Row );
+	CqVector2D BucketMax = BucketMin + BucketSize( NextColForward, Row );
 	CqVector2D FilterWidth( m_FilterXWidth * 0.5f, m_FilterYWidth * 0.5f );
 	BucketMin -= FilterWidth;
 	BucketMax += FilterWidth;
 
-	const CqBound&	B = pmpg->GetTotalBound();
+	const CqBound&	B = pMP->GetTotalBound();
 
 	const CqVector3D& vMin = B.vecMin();
 	const CqVector3D& vMax = B.vecMax();
@@ -539,50 +538,50 @@ bool CqImageBuffer::PushMPGForward( CqMicroPolygon* pmpg, TqInt Col, TqInt Row )
 	}
 	else
 	{
-		ADDREF( pmpg );
-		Bucket( NextBucketForward, Row ).AddMPG( pmpg );
+		ADDREF( pMP );
+		Bucket( NextColForward, Row ).AddMPG( pMP );
+		STATS_INC( MPG_pushed_forward );
+
 		return ( true );
 	}
-	return ( false );
 }
 
 
 //----------------------------------------------------------------------
 /** Add a new micro polygon to the list of waiting ones.
- * \param pmpg Pointer to a CqMicroPolygon derived class.
- * \param CurrBucketIndex Index of the bucket from which we are pushing down.
+ * \param pMP Pointer to a CqMicroPolygon derived class.
  */
 
-bool CqImageBuffer::PushMPGDown( CqMicroPolygon* pmpg, TqInt Col, TqInt Row )
+bool CqImageBuffer::PushMPDown( CqMicroPolygon* pMP, TqInt Col, TqInt Row )
 {
-	if ( pmpg->IsPushedForward() )
+	if ( pMP->IsPushedForward() )
 		return ( false );
 
 	// Check if there is anywhere to push down to.
 	if ( Row == ( m_cYBuckets - 1 ) )
 		return ( false );
 
-	TqInt NextBucketDown = Row + 1;
+	TqInt NextRowDown = Row + 1;
 
 	// If the next bucket down has already been processed,
 	// try pushing forward from there.
-	if( Bucket( Col, NextBucketDown ).IsProcessed() )
+	if( Bucket( Col, NextRowDown ).IsProcessed() )
 	{
-		if( PushMPGForward( pmpg, Col, NextBucketDown ) )
+		if( PushMPForward( pMP, Col, NextRowDown ) )
 			return( true );
 		else
 			// If that fails, push down again.
-			return( PushMPGDown( pmpg, Col, NextBucketDown ) );
+			return( PushMPDown( pMP, Col, NextRowDown ) );
 	}
 
 	// Find out if any of the subbounds touch this bucket.
-	CqVector2D BucketMin = BucketPosition( Col, NextBucketDown );
-	CqVector2D BucketMax = BucketMin + BucketSize( Col, NextBucketDown );
+	CqVector2D BucketMin = BucketPosition( Col, NextRowDown );
+	CqVector2D BucketMax = BucketMin + BucketSize( Col, NextRowDown );
 	CqVector2D FilterWidth( m_FilterXWidth * 0.5f, m_FilterYWidth * 0.5f );
 	BucketMin -= FilterWidth;
 	BucketMax += FilterWidth;
 
-	const CqBound&	B = pmpg->GetTotalBound( );
+	const CqBound&	B = pMP->GetTotalBound( );
 
 	const CqVector3D& vMin = B.vecMin();
 	const CqVector3D& vMax = B.vecMax();
@@ -595,14 +594,15 @@ bool CqImageBuffer::PushMPGDown( CqMicroPolygon* pmpg, TqInt Col, TqInt Row )
 	}
 	else
 	{
-		ADDREF( pmpg );
-		Bucket(Col, NextBucketDown ).AddMPG( pmpg );
-		// See if it needs to be pushed further down (extreme Motion Blur)
-		if ( PushMPGDown( pmpg, Col, NextBucketDown ) )
-			STATS_INC( MPG_pushed_far_down );
+		ADDREF( pMP );
+		Bucket(Col, NextRowDown ).AddMPG( pMP );
+		STATS_INC( MPG_pushed_down );
+
+		// See if it needs to be pushed further down
+		PushMPDown( pMP, Col, NextRowDown );
+
 		return ( true );
 	}
-	return ( false );
 }
 
 

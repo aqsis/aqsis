@@ -29,11 +29,11 @@
 #ifndef MPDUMP_H
 #define MPDUMP_H
 
-#include	"micropolygon.h"
 #include	"renderer.h"
-//#include	"imagebuffer.h"
 
 START_NAMESPACE( Aqsis )
+
+class CqMicroPolygon;
 
 /**
    Dump micro polygons into a file for debugging.

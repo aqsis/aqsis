@@ -32,8 +32,6 @@
 #include	"shaders.h"
 #include	"trimcurve.h"
 
-#include	"mpdump.h"
-
 #include	"MultiTimer.h"
 
 #include	"micropolygon.h"

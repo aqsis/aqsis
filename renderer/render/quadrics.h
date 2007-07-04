@@ -30,7 +30,6 @@
 #include	"aqsis.h"
 
 #include	"surface.h"
-#include	"micropolygon.h"
 
 START_NAMESPACE( Aqsis )
 

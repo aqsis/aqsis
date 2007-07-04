@@ -987,17 +987,19 @@ void CqBucket::ShutdownBucket()
 
 void CqBucket::RenderWaitingMPs( long xmin, long xmax, long ymin, long ymax )
 {
-	for ( std::vector<CqMicroPolygon*>::iterator impg = m_micropolygons.begin();
-	      impg != m_micropolygons.end();
-	      impg++ )
+	for ( std::vector<CqMicroPolygon*>::iterator imp = m_micropolygons.begin();
+	      imp != m_micropolygons.end();
+	      imp++ )
 	{
-		CqMicroPolygon* pMpg = *impg;
-		RenderMicroPoly( pMpg, xmin, xmax, ymin, ymax );
-		if ( m_ImageBuffer->PushMPGDown( pMpg, m_ImageBuffer->CurrentBucketCol(), m_ImageBuffer->CurrentBucketRow() ) )
-			STATS_INC( MPG_pushed_down );
-		if ( m_ImageBuffer->PushMPGForward( pMpg, m_ImageBuffer->CurrentBucketCol(), m_ImageBuffer->CurrentBucketRow() ) )
-			STATS_INC( MPG_pushed_forward );
-		RELEASEREF( pMpg );
+		CqMicroPolygon* pMP = *imp;
+		RenderMicroPoly( pMP, xmin, xmax, ymin, ymax );
+
+		TqInt col = m_ImageBuffer->CurrentBucketCol();
+		TqInt row = m_ImageBuffer->CurrentBucketRow();
+		m_ImageBuffer->PushMPDown( pMP, col, row);
+		m_ImageBuffer->PushMPForward( pMP, col, row);
+
+		RELEASEREF( pMP );
 	}
 
 	m_micropolygons.clear();
@@ -1033,7 +1035,6 @@ void CqBucket::RenderMicroPoly( CqMicroPolygon* pMPG, long xmin, long xmax, long
 	// Must check if colour is needed, as if not, the variable will have been deleted from the grid.
 	if ( QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Ci" ) )
 	{
-		// mafm: segfault here
 		m_bucketData->m_CurrentMpgSampleInfo.m_Colour = pMPG->colColor()[0];
 	}
 	else
