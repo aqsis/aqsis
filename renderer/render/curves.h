@@ -172,16 +172,21 @@ class CqCurve : public CqSurface
 		/** Returns a normal to the curve. */
 		bool GetNormal( TqInt index, CqVector3D& normal ) const
 		{
+		bool ret = true;
+		bool CSO = pTransform()->GetHandedness(pTransform()->Time(0));
+		bool O = pAttributes() ->GetIntegerAttribute( "System", "Orientation" ) [ 0 ] != 0;
+		bool revert = ( (O && CSO) || (!O && !CSO) );
 			if ( N() != NULL )
 			{
 				normal = N()->pValue( index )[0];
-				return true;
 			}
 			else
 			{
-				normal = CqVector3D( 0, 0, 1 );  // default camera normal
-				return false;
+				normal = CqVector3D( 0, 0, -1 );  // default camera normal
+				ret = false;
 			}
+			normal = ( revert ) ? normal : -normal;
+			return ret;
 		}
 		/** Returns a string name of the class. */
 		virtual CqString strName() const
