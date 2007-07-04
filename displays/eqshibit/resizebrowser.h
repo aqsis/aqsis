@@ -28,10 +28,14 @@
 #ifndef RESIZE_BROWSER_H_INCLUDED
 #define RESIZE_BROWSER_H_INCLUDED 1
 
+#include "book.h"
+
 #include <FL/Fl.H>
 #include <FL/Fl_Double_Window.H>
 #include <FL/Fl_Browser.H>
 #include <FL/fl_draw.H>
+
+#include <boost/shared_ptr.hpp>
 //
 // Demonstrate how to derive a class extending Fl_Browser with interactively resizable columns
 // erco 1.10 12/09/2005
@@ -81,6 +85,17 @@ public:
         Fl_Browser::column_widths(val);
     }
 
+	// Locally overridden Fl_Browser_ functions to manage the 
+	// item list.
+	void* item_first() const;
+	void* item_next(void*) const;
+	void* item_prev(void*) const;
+	void item_draw(void* v, int X, int Y, int W, int H) const;
+  int item_selected(void*) const ;
+  void item_select(void*, int);
+  int item_height(void*) const ;
+  int item_width(void*) const ;
+
 protected:
     // MANAGE EVENTS TO HANDLE COLUMN RESIZING
     int handle(int e);
@@ -94,6 +109,7 @@ private:
     int       m_dragcol;	// col# user is currently dragging
     int      *m_widths;		// pointer to user's width[] array
     int       m_nowidths[1];	// default width array (non-const)
+	boost::shared_ptr<Aqsis::CqBook>	m_theBook;
     // CHANGE CURSOR
     //     Does nothing if cursor already set to value specified.
     //

@@ -81,6 +81,10 @@ public:
 
 	TqUlong addImage(boost::shared_ptr<CqImage>& image);
 	boost::shared_ptr<CqImage> image(TqUlong id);
+	TqUlong numImages() const
+	{
+		return(m_images.size());
+	}
 
 private:
     CqString	m_name;			///< Book name.
