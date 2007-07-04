@@ -24,9 +24,12 @@ FrameBegin 0
 			ShadingInterpolation "smooth"
 			Orientation "lh"
 			Curves "linear" [ 2 ] "nonperiodic" "P" [ 33.2703 -50.4114 0.0  -39.1857 31.7896 0.0 ] "constantwidth" 2.0
+			Points "P" [ 33.2703 -50.4114 0.0  -39.1857 31.7896 0.0 ] "width" [ 4 4 ]
+
 			Orientation "rh"
 			Color [0.882353 0.341177 0.341177]
 			Curves "linear" [ 2 ] "nonperiodic" "P" [ 43.2703 -50.4114 0.0  -29.1857 31.7896 0.0 ] "constantwidth" 2.0
+			Points "P" [ 43.2703 -50.4114 0.0  -29.1857 31.7896 0.0 ] "width" [ 4 4 ]
 		AttributeEnd
 	WorldEnd
 FrameEnd
