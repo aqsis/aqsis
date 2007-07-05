@@ -12,7 +12,7 @@ eqshibitapp_sources = Split("""
 	image.cpp
 	framebuffer.cpp
 	book.cpp
-	resizebrowser.cpp
+	bookbrowser.cpp
 	displayserverimage.cpp
 	eqshibit_ui.fl""")
 
@@ -22,7 +22,7 @@ eqshibitapp_headers =  Split("""
 	image.h
 	book.h
 	framebuffer.h
-	resizebrowser.h
+	bookbrowser.h
 	displayserverimage.h
 	""")
 

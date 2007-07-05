@@ -19,17 +19,19 @@
 
 
 /** \file
-		\brief Declare a class extending Fl_Browser with resizable columns.
-		Based on original code from Greg Ercolano (http://seriss.com/people/erco/)
+		\brief Declare a FLTK browser for displaying book contents.
+		Based on original code from Greg Ercolano (http://seriss.com/people/erco/) to 
+		provide sizeable columns. The class extends Fl_Browser_ and implements the item_*
+		functions to read list data directly from the CqBook class that
+		is associated with it.
 		\author Paul C. Gregory (pgregory@aqsis.com)
 */
 
-//? Is ddclient.h included already?
-#ifndef RESIZE_BROWSER_H_INCLUDED
-#define RESIZE_BROWSER_H_INCLUDED 1
+//? Is bookbrowser.h included already?
+#ifndef BOOK_BROWSER_H_INCLUDED
+#define BOOK_BROWSER_H_INCLUDED 1
 
 #include "book.h"
-using namespace Aqsis;
 
 #include <FL/Fl.H>
 #include <FL/Fl_Double_Window.H>
@@ -37,14 +39,14 @@ using namespace Aqsis;
 #include <FL/fl_draw.H>
 
 #include <boost/shared_ptr.hpp>
-//
-// Demonstrate how to derive a class extending Fl_Browser with interactively resizable columns
-// erco 1.10 12/09/2005
-//
-class Fl_Resize_Browser : public Fl_Browser_
+
+START_NAMESPACE( Aqsis )
+
+
+class CqBookBrowser : public Fl_Browser_
 {
 public:
-    Fl_Resize_Browser(int X,int Y,int W,int H,const char*L=0) : Fl_Browser_(X,Y,W,H,L) {
+    CqBookBrowser(int X,int Y,int W,int H,const char*L=0) : Fl_Browser_(X,Y,W,H,L) {
         m_colsepcolor = Fl_Color(FL_GRAY);
         m_last_cursor = FL_CURSOR_DEFAULT;
         m_showcolsep  = 0;
@@ -172,4 +174,6 @@ private:
 
 };
 
-#endif //RESIZE_BROWSER_H_INCLUDED 1
+END_NAMESPACE( Aqsis )
+
+#endif //BOOK_BROWSER_H_INCLUDED 1

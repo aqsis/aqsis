@@ -11,7 +11,7 @@ class CqEqshibitMainWindow {open : {public Aqsis::CqEqshibitBase}
       code0 {\#include "eqshibit.h"}
       code1 {\#include "eqshibitbase.h"}
       code2 {\#include <stdio.h>}
-      code3 {\#include "resizebrowser.h"} visible
+      code3 {\#include "bookbrowser.h"} visible
     } {
       Fl_Menu_Bar {} {open
         xywh {0 0 685 25} box THIN_UP_BOX
@@ -81,7 +81,7 @@ class CqEqshibitMainWindow {open : {public Aqsis::CqEqshibitBase}
         }
       }
       Fl_Tabs m_tabBooks {
-        callback {Fl_Resize_Browser* browser = static_cast<Fl_Resize_Browser*>(o->value());
+        callback {Aqsis::CqBookBrowser* browser = static_cast<Aqsis::CqBookBrowser*>(o->value());
 setCurrentBook(browser->book());} open
         private xywh {0 29 540 281}
       } {}
@@ -107,13 +107,13 @@ setCurrentBook(browser->book());} open
       }
     }
   }
-  Function {addNewBook(std::string name)} {open return_type {virtual boost::shared_ptr<CqBook>}
+  Function {addNewBook(std::string name)} {open return_type {virtual boost::shared_ptr<Aqsis::CqBook>}
   } {
     code {Fl::lock();
-boost::shared_ptr<CqBook> newBook(CqEqshibitBase::addNewBook(name));
+boost::shared_ptr<Aqsis::CqBook> newBook(CqEqshibitBase::addNewBook(name));
 char* _name = new char[name.length()+1];
 strcpy(_name, name.c_str());
-Fl_Resize_Browser *o = new Fl_Resize_Browser(0, 50, m_tabBooks->w(), m_tabBooks->h(), _name);
+Aqsis::CqBookBrowser *o = new Aqsis::CqBookBrowser(0, 50, m_tabBooks->w(), m_tabBooks->h(), _name);
 o->setBook(newBook);
 m_columnWidths[0] = 200;
 m_columnWidths[1] = 0;
@@ -128,8 +128,7 @@ m_tabBooks->init_sizes();
 m_tabBooks->redraw();
 Fl::awake();
 Fl::unlock();
-return(newBook);} {selected
-    }
+return(newBook);} {}
   }
   Function {show(int argc, char **argv)} {open
   } {
@@ -140,7 +139,7 @@ return(newBook);} {selected
     code {Fl::lock();
 TqUlong id = CqEqshibitBase::addImageToCurrentBook(image);
 Fl_Widget* current = m_tabBooks->value();
-Fl_Resize_Browser* bcurr = static_cast<Fl_Resize_Browser*>(current);
+Aqsis::CqBookBrowser* bcurr = static_cast<Aqsis::CqBookBrowser*>(current);
 // Note: in the FLTK gui, the image indices are 1 based, but inside the CqBook
 // they are zero based, this is because the (void*) stuff passed around in 
 // FLTK for the Fl_Browser_ class uses 0 to indicate false.
@@ -153,14 +152,14 @@ return( id );} {}
   Function {select_cb(Fl_Widget* w, void* d)} {open return_type {static void}
   } {
     code {Fl::lock();
-Fl_Resize_Browser* browser = static_cast<Fl_Resize_Browser*>(w);
+Aqsis::CqBookBrowser* browser = static_cast<Aqsis::CqBookBrowser*>(w);
 int theEvent = Fl::event();
 if(theEvent == FL_RELEASE)
 {
 	CqEqshibitMainWindow* win = reinterpret_cast<CqEqshibitMainWindow*>(d);
 	if(win && w && win->currentBook())
 	{
-		std::vector<boost::shared_ptr<CqImage> >::size_type selected = 
+		std::vector<boost::shared_ptr<Aqsis::CqImage> >::size_type selected = 
 			browser->currentSelected();
 		boost::shared_ptr<Aqsis::CqImage> image = win->currentBook()->image(selected-1);
 		if(image && win->currentBook()->framebuffer())
@@ -173,12 +172,13 @@ if(theEvent == FL_RELEASE)
 	}
 }
 Fl::awake();
-Fl::unlock();} {}
+Fl::unlock();} {selected
+    }
   }
   Function {updateImageList()} {open return_type {virtual void}
   } {
     code {Fl::lock();
-Fl_Resize_Browser* bookBrowser = static_cast<Fl_Resize_Browser*>(m_tabBooks->value());
+Aqsis::CqBookBrowser* bookBrowser = static_cast<Aqsis::CqBookBrowser*>(m_tabBooks->value());
 
 if(0 != bookBrowser)
 {	
@@ -197,8 +197,4 @@ Fl::awake();
 Fl::unlock();} {}
   }
   decl {int m_columnWidths[2];} {}
-  Function {select_tab(Fl_Widget* w)} {open return_type {static void}
-  } {
-    code {printf("Hello, World!\\n");} {}
-  }
 } 

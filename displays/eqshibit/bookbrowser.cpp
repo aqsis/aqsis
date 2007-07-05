@@ -24,11 +24,13 @@
 		\author Paul C. Gregory (pgregory@aqsis.com)
 */
 
-#include "resizebrowser.h"
+#include "bookbrowser.h"
 #include "image.h"
 #include <string.h>
 
-int Fl_Resize_Browser::handle(int e) 
+START_NAMESPACE( Aqsis )
+
+int CqBookBrowser::handle(int e) 
 {
 	// Not showing column separators? Use default Fl_Browser::handle() logic
 	if ( ! showcolsep() ) return(Fl_Browser_::handle(e));
@@ -105,7 +107,7 @@ int Fl_Resize_Browser::handle(int e)
 		return(Fl_Browser_::handle(e) ? 1 : ret);
 }
 
-void Fl_Resize_Browser::draw() 
+void CqBookBrowser::draw() 
 {
 	// DRAW BROWSER
 	Fl_Browser_::draw();
@@ -127,7 +129,7 @@ void Fl_Resize_Browser::draw()
 	}
 }
 
-void* Fl_Resize_Browser::item_first() const
+void* CqBookBrowser::item_first() const
 {
 	if(m_theBook && m_theBook->numImages() > 0)
 		return((void*)1);
@@ -135,7 +137,7 @@ void* Fl_Resize_Browser::item_first() const
 		return((void*)0);
 }
 
-void* Fl_Resize_Browser::item_next(void* p) const
+void* CqBookBrowser::item_next(void* p) const
 {
 	if(!p)
 		return(p);
@@ -150,7 +152,7 @@ void* Fl_Resize_Browser::item_next(void* p) const
 	}
 }
 
-void* Fl_Resize_Browser::item_prev(void* p) const
+void* CqBookBrowser::item_prev(void* p) const
 {
 	if(!p)
 		return(p);
@@ -165,7 +167,7 @@ void* Fl_Resize_Browser::item_prev(void* p) const
 	}
 }
 
-int Fl_Resize_Browser::item_selected(void* l) const 
+int CqBookBrowser::item_selected(void* l) const 
 {
 	std::vector<boost::shared_ptr<CqImage> >::size_type index = 
 		reinterpret_cast<std::vector<boost::shared_ptr<CqImage> >::size_type>(l);
@@ -173,7 +175,7 @@ int Fl_Resize_Browser::item_selected(void* l) const
 	return(index == currentSelected());
 }
 
-void Fl_Resize_Browser::item_select(void* l, int v) 
+void CqBookBrowser::item_select(void* l, int v) 
 {
 	std::vector<boost::shared_ptr<CqImage> >::size_type index = 
 		reinterpret_cast<std::vector<boost::shared_ptr<CqImage> >::size_type>(l);
@@ -183,7 +185,7 @@ void Fl_Resize_Browser::item_select(void* l, int v)
 		setCurrentSelected(0);
 }
 
-int Fl_Resize_Browser::item_height(void* lv) const 
+int CqBookBrowser::item_height(void* lv) const 
 {
 	int hmax = 2; // use 2 to insure we don't return a zero!
 
@@ -196,7 +198,7 @@ int Fl_Resize_Browser::item_height(void* lv) const
 }
 
 
-int Fl_Resize_Browser::item_width(void* v) const 
+int CqBookBrowser::item_width(void* v) const 
 {
 	const int* i = column_widths();
 	int ww = i[0] + i[1];
@@ -210,7 +212,7 @@ int Fl_Resize_Browser::item_width(void* v) const
 	return ww + 6;
 }
 
-void Fl_Resize_Browser::item_draw(void* v, int X, int Y, int W, int H) const 
+void CqBookBrowser::item_draw(void* v, int X, int Y, int W, int H) const 
 {
 	std::vector<boost::shared_ptr<CqImage> >::size_type index = 
 		reinterpret_cast<std::vector<boost::shared_ptr<CqImage> >::size_type>(v);
@@ -237,3 +239,4 @@ void Fl_Resize_Browser::item_draw(void* v, int X, int Y, int W, int H) const
 	fl_draw("widthXheight", X+3, Y, i[1]-6, H, talign, 0, 0);
 }
 
+END_NAMESPACE( Aqsis )
