@@ -343,7 +343,7 @@ sub_sconsdirs_withret = prependBuildDir(Split('''
 		displays/d_sdcBMP
 		displays/d_sdcWin32
 		displays/d_xpm
-		displays/eqshibit
+		displays/piqsl
 '''))
 (	aqsis,
 	display,
