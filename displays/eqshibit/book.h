@@ -28,7 +28,7 @@
 #define BOOK_H_INCLUDED 1
 
 #include 	<boost/shared_ptr.hpp>
-#include	<map>
+#include	<vector>
 
 #include	"aqsis.h"
 #include	"sstring.h"
@@ -70,17 +70,19 @@ public:
 		m_framebuffer = fb;
 	}
 
-	std::map<TqUlong, boost::shared_ptr<CqImage> >& images()
+	typedef std::vector<boost::shared_ptr<CqImage> >			TqImageList;
+	typedef std::vector<boost::shared_ptr<CqImage> >::iterator	TqImageListIterator;
+	TqImageListIterator imagesBegin()
 	{
-		return(m_images);
+		return(m_images.begin());
 	}
-	const std::map<TqUlong, boost::shared_ptr<CqImage> >& images() const
+	TqImageListIterator imagesEnd()
 	{
-		return(m_images);
+		return(m_images.end());
 	}
 
-	TqUlong addImage(boost::shared_ptr<CqImage>& image);
-	boost::shared_ptr<CqImage> image(TqUlong id);
+	TqImageList::size_type addImage(boost::shared_ptr<CqImage>& image);
+	boost::shared_ptr<CqImage> image(TqImageList::size_type index);
 	TqUlong numImages() const
 	{
 		return(m_images.size());
@@ -88,7 +90,7 @@ public:
 
 private:
     CqString	m_name;			///< Book name.
-	std::map<TqUlong, boost::shared_ptr<CqImage> > m_images;
+	TqImageList m_images;
 	boost::shared_ptr<CqFramebuffer> m_framebuffer;
 	static TqUlong	m_nextID;
 };

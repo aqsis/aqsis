@@ -29,10 +29,11 @@
 #define RESIZE_BROWSER_H_INCLUDED 1
 
 #include "book.h"
+using namespace Aqsis;
 
 #include <FL/Fl.H>
 #include <FL/Fl_Double_Window.H>
-#include <FL/Fl_Browser.H>
+#include <FL/Fl_Browser_.H>
 #include <FL/fl_draw.H>
 
 #include <boost/shared_ptr.hpp>
@@ -40,10 +41,10 @@
 // Demonstrate how to derive a class extending Fl_Browser with interactively resizable columns
 // erco 1.10 12/09/2005
 //
-class Fl_Resize_Browser : public Fl_Browser 
+class Fl_Resize_Browser : public Fl_Browser_
 {
 public:
-    Fl_Resize_Browser(int X,int Y,int W,int H,const char*L=0) : Fl_Browser(X,Y,W,H,L) {
+    Fl_Resize_Browser(int X,int Y,int W,int H,const char*L=0) : Fl_Browser_(X,Y,W,H,L) {
         m_colsepcolor = Fl_Color(FL_GRAY);
         m_last_cursor = FL_CURSOR_DEFAULT;
         m_showcolsep  = 0;
@@ -82,8 +83,26 @@ public:
     void column_widths(int *val) 
 	{
         m_widths = val;
-        Fl_Browser::column_widths(val);
     }
+
+	boost::shared_ptr<CqBook>& book()
+	{
+		return(m_theBook);
+	}
+	void setBook(boost::shared_ptr<CqBook>& book)
+	{
+		m_theBook = book;
+	}
+
+	std::vector<boost::shared_ptr<CqImage> >::size_type currentSelected() const
+	{
+		return(m_currentSelected);
+	}
+
+	void setCurrentSelected(std::vector<boost::shared_ptr<CqImage> >::size_type index)
+	{
+		m_currentSelected = index;
+	}
 
 	// Locally overridden Fl_Browser_ functions to manage the 
 	// item list.
@@ -91,10 +110,10 @@ public:
 	void* item_next(void*) const;
 	void* item_prev(void*) const;
 	void item_draw(void* v, int X, int Y, int W, int H) const;
-  int item_selected(void*) const ;
-  void item_select(void*, int);
-  int item_height(void*) const ;
-  int item_width(void*) const ;
+	int item_selected(void*) const ;
+	void item_select(void*, int);
+	int item_height(void*) const ;
+	int item_width(void*) const ;
 
 protected:
     // MANAGE EVENTS TO HANDLE COLUMN RESIZING
@@ -110,6 +129,7 @@ private:
     int      *m_widths;		// pointer to user's width[] array
     int       m_nowidths[1];	// default width array (non-const)
 	boost::shared_ptr<Aqsis::CqBook>	m_theBook;
+	std::vector<boost::shared_ptr<CqImage> >::size_type m_currentSelected;
     // CHANGE CURSOR
     //     Does nothing if cursor already set to value specified.
     //
@@ -127,7 +147,7 @@ private:
     int which_col_near_mouse() 
 	{
         int X,Y,W,H;
-        Fl_Browser::bbox(X,Y,W,H);		// area inside browser's box()
+        Fl_Browser_::bbox(X,Y,W,H);		// area inside browser's box()
         // EVENT NOT INSIDE BROWSER AREA? (eg. on a scrollbar)
         if ( ! Fl::event_inside(X,Y,W,H) ) 
 		{

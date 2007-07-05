@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0108 
+version 1.0107 
 header_name {fluid_eqshibit_ui.h} 
 code_name {fluid_eqshibit_ui.cpp}
 class CqEqshibitMainWindow {open : {public Aqsis::CqEqshibitBase}
@@ -7,7 +7,7 @@ class CqEqshibitMainWindow {open : {public Aqsis::CqEqshibitBase}
   Function {CqEqshibitMainWindow()} {open
   } {
     Fl_Window m_window {open
-      private xywh {312 589 540 310} type Double resizable
+      private xywh {513 174 540 310} type Double resizable
       code0 {\#include "eqshibit.h"}
       code1 {\#include "eqshibitbase.h"}
       code2 {\#include <stdio.h>}
@@ -81,6 +81,8 @@ class CqEqshibitMainWindow {open : {public Aqsis::CqEqshibitBase}
         }
       }
       Fl_Tabs m_tabBooks {
+        callback {Fl_Resize_Browser* browser = static_cast<Fl_Resize_Browser*>(o->value());
+setCurrentBook(browser->book());} open
         private xywh {0 29 540 281}
       } {}
       Fl_Menu_Button {} {open
@@ -98,34 +100,36 @@ class CqEqshibitMainWindow {open : {public Aqsis::CqEqshibitBase}
           code0 {o->shortcut(FL_COMMAND+'c');}
         }
         MenuItem {} {
-          label Paste selected
+          label Paste
           xywh {0 0 100 20} shortcut 0x40076
           code0 {o->shortcut(FL_COMMAND+'v');}
         }
       }
     }
   }
-  Function {addNewBook(std::string name)} {open return_type {virtual void}
+  Function {addNewBook(std::string name)} {open return_type {virtual boost::shared_ptr<CqBook>}
   } {
     code {Fl::lock();
-CqEqshibitBase::addNewBook(name);
+boost::shared_ptr<CqBook> newBook(CqEqshibitBase::addNewBook(name));
 char* _name = new char[name.length()+1];
 strcpy(_name, name.c_str());
 Fl_Resize_Browser *o = new Fl_Resize_Browser(0, 50, m_tabBooks->w(), m_tabBooks->h(), _name);
+o->setBook(newBook);
 m_columnWidths[0] = 200;
 m_columnWidths[1] = 0;
 o->column_widths(m_columnWidths);
-o->column_char('\\t');
 o->type(FL_MULTI_BROWSER);
 o->callback(&CqEqshibitMainWindow::select_cb, this);
-o->add("@b@B28@C7Name\\t@b@B28@C7Resolution");
 o->showcolsep(1);
 m_tabBooks->add(o);
+m_tabBooks->value(o);
 m_tabBooks->resizable(o);
 m_tabBooks->init_sizes();
 m_tabBooks->redraw();
 Fl::awake();
-Fl::unlock();} {}
+Fl::unlock();
+return(newBook);} {selected
+    }
   }
   Function {show(int argc, char **argv)} {open
   } {
@@ -135,15 +139,13 @@ Fl::unlock();} {}
   } {
     code {Fl::lock();
 TqUlong id = CqEqshibitBase::addImageToCurrentBook(image);
-// Should update book list here to match the base, but for
-// now we'll just add the name to the browser.
 Fl_Widget* current = m_tabBooks->value();
 Fl_Resize_Browser* bcurr = static_cast<Fl_Resize_Browser*>(current);
-std::stringstream item;
-item << image->name() << "\\t" << image->frameWidth() << "x" << image->frameHeight();
-bcurr->add(item.str().c_str(), (void*)id);
+// Note: in the FLTK gui, the image indices are 1 based, but inside the CqBook
+// they are zero based, this is because the (void*) stuff passed around in 
+// FLTK for the Fl_Browser_ class uses 0 to indicate false.
+bcurr->setCurrentSelected(id + 1);
 bcurr->redraw();
-//Fl::check();
 Fl::awake();
 Fl::unlock();
 return( id );} {}
@@ -158,9 +160,9 @@ if(theEvent == FL_RELEASE)
 	CqEqshibitMainWindow* win = reinterpret_cast<CqEqshibitMainWindow*>(d);
 	if(win && w && win->currentBook())
 	{
-		int selected = browser->value();
-		TqUlong imageID = (TqUlong)browser->data(selected);
-		boost::shared_ptr<Aqsis::CqImage> image = win->currentBook()->image(imageID);
+		std::vector<boost::shared_ptr<CqImage> >::size_type selected = 
+			browser->currentSelected();
+		boost::shared_ptr<Aqsis::CqImage> image = win->currentBook()->image(selected-1);
 		if(image && win->currentBook()->framebuffer())
 		{
 			win->currentBook()->framebuffer()->connect(image);
@@ -173,34 +175,30 @@ if(theEvent == FL_RELEASE)
 Fl::awake();
 Fl::unlock();} {}
   }
-  Function {updateImageList(const std::string& bookName)} {open return_type {virtual void}
+  Function {updateImageList()} {open return_type {virtual void}
   } {
     code {Fl::lock();
-Fl_Widget* const* tabs = m_tabBooks->array();
-Fl_Resize_Browser* bookBrowser = 0;
-
-int tabIndex = 0;
-for(tabIndex = 0; tabIndex < m_tabBooks->children(); tabIndex++)
-{
-	if(std::string(tabs[tabIndex]->label()) == bookName)
-		bookBrowser = static_cast<Fl_Resize_Browser*>(tabs[tabIndex]);
-}
+Fl_Resize_Browser* bookBrowser = static_cast<Fl_Resize_Browser*>(m_tabBooks->value());
 
 if(0 != bookBrowser)
 {	
-	int line;
-	for(line = 2 /* Skip the title */; line <= bookBrowser->size(); line++)
-	{
-		TqUlong imageID = reinterpret_cast<TqUlong>(bookBrowser->data(line));
-		boost::shared_ptr<Aqsis::CqImage> image = book(bookName)->image(imageID);
-		std::stringstream item;
-		item << image->name() << "\\t" << image->frameWidth() << "x" << image->frameHeight();
-		bookBrowser->text(line, item.str().c_str());
-	}
+//	int line;
+//	for(line = 2 /* Skip the title */; line <= bookBrowser->size(); line++)
+//	{
+//		TqUlong imageID = reinterpret_cast<TqUlong>(bookBrowser->data(line));
+//		boost::shared_ptr<Aqsis::CqImage> image = bookBrowser->book()->image(imageID);
+//		std::stringstream item;
+//		item << image->name() << "\\t" << image->frameWidth() << "x" << image->frameHeight();
+//		bookBrowser->text(line, item.str().c_str());
+//	}
 	bookBrowser->redraw();
 }
 Fl::awake();
 Fl::unlock();} {}
   }
   decl {int m_columnWidths[2];} {}
+  Function {select_tab(Fl_Widget* w)} {open return_type {static void}
+  } {
+    code {printf("Hello, World!\\n");} {}
+  }
 } 

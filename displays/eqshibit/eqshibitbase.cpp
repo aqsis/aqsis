@@ -28,43 +28,37 @@
 #include "tinyxml.h"
 #include "file.h"
 
+#include <algorithm>
+
 #include <FL/Fl_File_Chooser.H>
 
 START_NAMESPACE( Aqsis )
 
 
-void CqEqshibitBase::addNewBook(std::string name)
+boost::shared_ptr<CqBook> CqEqshibitBase::addNewBook(std::string name)
 {
 	boost::shared_ptr<CqBook> newBook(new CqBook(name));
-	m_books[name] = newBook;
-	m_currentBookName = name;
+	m_books.push_back(newBook);
+	m_currentBook = newBook;
+
+	return(newBook);
 }
 
-void CqEqshibitBase::setCurrentBook(std::string name)
+void CqEqshibitBase::setCurrentBook(boost::shared_ptr<CqBook>& book)
 {
-	if(m_books.find(name) != m_books.end())
-		m_currentBookName = name;
+	if(std::find(m_books.begin(), m_books.end(), book) != m_books.end())
+		m_currentBook = book;
 }
 
 
 boost::shared_ptr<CqBook>& CqEqshibitBase::currentBook()
 {
-	return(m_books.find(m_currentBookName)->second);
-}
-
-boost::shared_ptr<CqBook>& CqEqshibitBase::book(const std::string& name)
-{
-	return(m_books.find(name)->second);
-}
-
-std::string CqEqshibitBase::currentBookName()
-{
-	return( m_currentBookName );
+	return(m_currentBook);
 }
 
 TqUlong CqEqshibitBase::addImageToCurrentBook(boost::shared_ptr<CqImage>& image)
 {
-	if(m_currentBookName.empty())
+	if(!m_currentBook)
 	{
 		Aqsis::log() << Aqsis::debug << "Eqshibit adding image" << std::endl;
 		std::map<std::string, boost::shared_ptr<CqBook> >::size_type numBooks = m_books.size();
@@ -89,20 +83,20 @@ void CqEqshibitBase::saveConfigurationAs()
 		TiXmlDeclaration* decl = new TiXmlDeclaration("1.0","","yes");
 		TiXmlElement* booksXML = new TiXmlElement("Books");
 
-		std::map<std::string, boost::shared_ptr<CqBook> >::iterator book;
+		std::vector<boost::shared_ptr<CqBook> >::iterator book;
 		for(book = m_books.begin(); book != m_books.end(); ++book) 
 		{
 			TiXmlElement* bookXML = new TiXmlElement("Book");
-			bookXML->SetAttribute("name", book->first);
+			bookXML->SetAttribute("name", (*book)->name());
 			booksXML->LinkEndChild(bookXML);
 			TiXmlElement* imagesXML = new TiXmlElement("Images");
 
-			std::map<TqUlong, boost::shared_ptr<CqImage> >::iterator image;
-			for(image = book->second->images().begin(); image != book->second->images().end(); ++image)
+			CqBook::TqImageListIterator image;
+			for(image = (*book)->imagesBegin(); image != (*book)->imagesEnd(); ++image)
 			{
 				// Serialise the image first.
-				image->second->serialise(_base);
-				TiXmlElement* imageXML = image->second->serialiseToXML();
+				(*image)->serialise(_base);
+				TiXmlElement* imageXML = (*image)->serialiseToXML();
 				imagesXML->LinkEndChild(imageXML);
 			}
 			bookXML->LinkEndChild(imagesXML);

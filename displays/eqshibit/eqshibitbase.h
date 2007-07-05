@@ -29,7 +29,7 @@
 #include "aqsis.h"
 #include "book.h"
 
-#include <map>
+#include <vector>
 #include <string>
 #include <list>
 
@@ -46,19 +46,17 @@ public:
 	CqEqshibitBase()		{}
 	virtual ~CqEqshibitBase()	{}
 
-	virtual void	addNewBook(std::string name);
-	void	setCurrentBook(std::string name);
+	virtual boost::shared_ptr<CqBook>	addNewBook(std::string name);
+	void	setCurrentBook(boost::shared_ptr<CqBook>& book);
 	boost::shared_ptr<CqBook>& currentBook();
-	std::string currentBookName();
-	boost::shared_ptr<CqBook>& book(const std::string& name);
 	virtual TqUlong	addImageToCurrentBook(boost::shared_ptr<CqImage>& image);
-	virtual void updateImageList(const std::string& book)
+	virtual void updateImageList()
 	{}
 	virtual void saveConfigurationAs();
 
 private:
-	std::map<std::string, boost::shared_ptr<CqBook> >	m_books;
-	std::string	m_currentBookName;
+	std::vector<boost::shared_ptr<CqBook> >	m_books;
+	boost::shared_ptr<CqBook>	m_currentBook;
 	std::string m_currentConfigName;
 };
 

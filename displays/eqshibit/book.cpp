@@ -24,22 +24,21 @@
 */
 
 #include "book.h"
+#include "image.h"
 
 
 START_NAMESPACE( Aqsis )
 
-TqUlong CqBook::m_nextID = 0;
-
-TqUlong CqBook::addImage(boost::shared_ptr<CqImage>& image)
+std::vector<boost::shared_ptr<CqImage> >::size_type CqBook::addImage(boost::shared_ptr<CqImage>& image)
 {
-	m_images[m_nextID] = image;
-	return(m_nextID++);
+	m_images.push_back(image);
+	return(m_images.size()-1);
 }
 
-boost::shared_ptr<CqImage> CqBook::image(TqUlong id)
+boost::shared_ptr<CqImage> CqBook::image(std::vector<boost::shared_ptr<CqImage> >::size_type index)
 {
-	if(m_images.find(id) != m_images.end())
-		return(m_images[id]);
+	if(m_images.size() > index)
+		return(m_images[index]);
 	else
 	{
 		boost::shared_ptr<CqImage> t;
