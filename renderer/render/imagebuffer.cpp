@@ -603,7 +603,7 @@ void CqImageBuffer::StoreExtraData( CqMicroPolygon* pMPG, SqImageSample& sample)
  * \param ymax Integer maximum extend of the image part being rendered, takes into account buckets and clipping.
  */
 
-void CqImageBuffer::RenderSurface( boost::shared_ptr<CqSurface>& pSurface, long xmin, long xmax, long ymin, long ymax )
+void CqImageBuffer::RenderSurface( boost::shared_ptr<CqSurface>& pSurface )
 {
 	// If the epsilon check has deemed this surface to be undiceable, don't bother asking.
 	bool fDiceable = false;
@@ -857,7 +857,7 @@ void CqImageBuffer::RenderImage()
 					}
 				}
 
-				RenderSurface( pSurface, xmin, xmax, ymin, ymax );
+				RenderSurface( pSurface );
 				
 				// Advance to next surface
 				CurrentBucket().popSurface();

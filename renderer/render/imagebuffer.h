@@ -315,7 +315,7 @@ class CqImageBuffer
 #endif
 
 
-		void	RenderSurface( boost::shared_ptr<CqSurface>& pSurface, long xmin, long xmax, long ymin, long ymax );
+		void	RenderSurface( boost::shared_ptr<CqSurface>& pSurface );
 		bool	CullSurface( CqBound& Bound, const boost::shared_ptr<CqSurface>& pSurface );
 		bool	OcclusionCullSurface( const boost::shared_ptr<CqSurface>& pSurface );
 		void	StoreExtraData( CqMicroPolygon* pMPG, SqImageSample& sample);
