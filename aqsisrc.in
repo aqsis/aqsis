@@ -8,7 +8,7 @@ Option "display" "string xpm" ["%(xpmlib)s"]
 Option "display" "string exr" ["%(exrlib)s"]
 Option "display" "string bmp" ["%(bmplib)s"]
 Option "display" "string debugdd" ["debugdd"]
-Option "display" "string eqshibit" ["%(eqshibitdisplaylib)s"]
+Option "display" "string piqsl" ["%(piqsldisplaylib)s"]
 
 Option "searchpath" "string shader" ["%(shaderpath)s"]
 Option "searchpath" "string display" ["%(displaypath)s"]

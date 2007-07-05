@@ -1,15 +1,15 @@
 # data file for the Fltk User Interface Designer (fluid)
 version 1.0107 
-header_name {fluid_eqshibit_ui.h} 
-code_name {fluid_eqshibit_ui.cpp}
+header_name {fluid_piqsl_ui.h} 
+code_name {fluid_piqsl_ui.cpp}
 class CqEqshibitMainWindow {open : {public Aqsis::CqEqshibitBase}
 } {
   Function {CqEqshibitMainWindow()} {open
   } {
     Fl_Window m_window {open
       private xywh {513 174 540 310} type Double resizable
-      code0 {\#include "eqshibit.h"}
-      code1 {\#include "eqshibitbase.h"}
+      code0 {\#include "piqsl.h"}
+      code1 {\#include "piqslbase.h"}
       code2 {\#include <stdio.h>}
       code3 {\#include "bookbrowser.h"} visible
     } {

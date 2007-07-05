@@ -54,7 +54,7 @@ typedef	u_long in_addr_t;
 
 #include "version.h"
 
-#include "eqshibitdisplay.h"
+#include "piqsldisplay.h"
 #include "tinyxml.h"
 #include "sstring.h"
 #include "socket.h"
@@ -169,7 +169,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 		else 
 			pImage->m_port = 49515;
 
-		// First, see if eqshibit is running, by trying to connect to it.
+		// First, see if piqsl is running, by trying to connect to it.
 		CqSocket::initialiseSockets();
 		pImage->m_socket.connect(pImage->m_hostname, pImage->m_port);
 		if(!pImage->m_socket)
@@ -189,9 +189,9 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 				else
 				{
 					// TODO: need to pass verbosity level for logginng
-					char *argv[4] = {"eqshibit","-i","127.0.0.1",NULL};
+					char *argv[4] = {"piqsl","-i","127.0.0.1",NULL};
 					signal(SIGHUP, SIG_IGN);
-					execvp("eqshibit",argv);
+					execvp("piqsl",argv);
 				}
 			} 
 			else
@@ -213,7 +213,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			// Create the child process.
 			Aqsis::log() << info << "Starting the framebuffer" << std::endl;
 
-			char *command = "eqshibit -i 127.0.0.1";
+			char *command = "piqsl -i 127.0.0.1";
 			bFuncRetn = CreateProcess(NULL,
 									  command,       // command line
 									  NULL,          // process security attributes

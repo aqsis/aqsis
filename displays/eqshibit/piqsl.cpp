@@ -60,8 +60,8 @@ using namespace Aqsis;
 #include <winsock2.h>
 #endif
 
-#include "eqshibit.h"
-#include "fluid_eqshibit_ui.h"
+#include "piqsl.h"
+#include "fluid_piqsl_ui.h"
 #include "displayserverimage.h"
 #include "framebuffer.h"
 #include "book.h"
@@ -85,7 +85,7 @@ std::map<TqInt, std::string>	g_mapTypeToName;
 
 void version( std::ostream& Stream )
 {
-	Stream << "eqshibit version " << VERSION_STR_PRINT << std::endl << "compiled " << __DATE__ << " " << __TIME__ << std::endl;
+	Stream << "piqsl version " << VERSION_STR_PRINT << std::endl << "compiled " << __DATE__ << " " << __TIME__ << std::endl;
 }
 
 
@@ -472,7 +472,7 @@ int main( int argc, char** argv )
 
 	window = new CqEqshibitMainWindow();
 	char *internalArgs[] = {
-		"eqshibit"
+		"piqsl"
 	};
 	window->show(1, internalArgs);
 

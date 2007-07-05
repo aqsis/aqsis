@@ -19,11 +19,11 @@
 
 
 /** \file
-		\brief Implements the common eqshibit functionality.
+		\brief Implements the common piqsl functionality.
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include "eqshibitbase.h"
+#include "piqslbase.h"
 #include "book.h"
 #include "tinyxml.h"
 #include "file.h"

@@ -23,8 +23,8 @@
 		\author Paul C. Gregory (pgregory@aqsis.com)
 */
 
-#ifndef	___eqshibitbase_Loaded___
-#define	___eqshibitbase_Loaded___
+#ifndef	___piqslbase_Loaded___
+#define	___piqslbase_Loaded___
 
 #include "aqsis.h"
 #include "book.h"

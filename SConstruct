@@ -351,7 +351,7 @@ sub_sconsdirs_withret = prependBuildDir(Split('''
 	bmp,
 	win32,
 	xpm,
-	eqshibitdisplay,
+	piqsldisplay,
 ) = env.SConscript( dirs = prependBuildDir(sub_sconsdirs_withret) )
 
 # needed (?) by macosx distribution (there should be a better way to achieve
@@ -366,7 +366,7 @@ env.SConscript( dirs = prependBuildDir(['distribution']) )
 def aqsis_rc_build(target, source, env):
 	# Code to build "target" from "source"
 	displaylib = os.path.basename(display[0].path)
-	eqshibitdisplaylib = os.path.basename(eqshibitdisplay[0].path)
+	piqsldisplaylib = os.path.basename(piqsldisplay[0].path)
 	xpmlib = os.path.basename(xpm[0].path)
 	bmplib = os.path.basename(bmp[0].path)
 	win32lib = ""
@@ -374,7 +374,7 @@ def aqsis_rc_build(target, source, env):
 		win32lib = os.path.basename(win32[0].path)
 	defines = {
 		"displaylib": displaylib,
-		"eqshibitdisplaylib": eqshibitdisplaylib,
+		"piqsldisplaylib": piqsldisplaylib,
 		"xpmlib": xpmlib,
 		"bmplib": bmplib,
 		"win32lib": win32lib,

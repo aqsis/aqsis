@@ -102,6 +102,6 @@ env.Replace(aqsis_linkflags = ['-framework', 'Carbon'])
 
 env.Replace(slparse_ccflags = ['-O0'])
 env.Replace(libaqsis_linkflags = ['-framework', 'Carbon'])
-env.Replace(eqshibitapp_linkflags = ['-framework', 'Carbon'])
+env.Replace(piqslapp_linkflags = ['-framework', 'Carbon'])
 
 

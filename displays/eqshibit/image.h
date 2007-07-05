@@ -19,7 +19,7 @@
 
 
 /** \file
-		\brief The base class from which all eqshibit images derive.
+		\brief The base class from which all piqsl images derive.
 		\author Paul C. Gregory (pgregory@aqsis.com)
 */
 
@@ -45,7 +45,7 @@ class CqFramebuffer;
 
 //---------------------------------------------------------------------
 /** \class CqImage
- * Abstract base class for eqshibit images.
+ * Abstract base class for piqsl images.
  */
 
 class CqImage

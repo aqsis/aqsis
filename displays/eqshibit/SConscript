@@ -1,24 +1,24 @@
 Import('env', 'embedManifest')
-eqshibitappenv = env.Copy()
+piqslappenv = env.Copy()
 
-eqshibitappenv.AppendUnique(CPPPATH = ['#/aqsis/aqsistypes', '#/thirdparty/tinyxml', '#/renderer/ddmanager','$tiff_include_path', '$zlib_include_path', '$fltk_include_path'])
-eqshibitappenv.AppendUnique(LIBS = ['aqsistypes','argparse','$fltk_lib', 'tinyxml', '$boost_thread_lib', 'pthread', '$tiff_lib', '$z_lib'])
-eqshibitappenv.AppendUnique(LIBPATH = ['/usr/X11R6/lib'])
-eqshibitappenv.AppendUnique(CPPDEFINES=['EQSHIBIT_APP_EXPORTS', 'TIXML_USE_STL'])
+piqslappenv.AppendUnique(CPPPATH = ['#/aqsis/aqsistypes', '#/thirdparty/tinyxml', '#/renderer/ddmanager','$tiff_include_path', '$zlib_include_path', '$fltk_include_path'])
+piqslappenv.AppendUnique(LIBS = ['aqsistypes','argparse','$fltk_lib', 'tinyxml', '$boost_thread_lib', 'pthread', '$tiff_lib', '$z_lib'])
+piqslappenv.AppendUnique(LIBPATH = ['/usr/X11R6/lib'])
+piqslappenv.AppendUnique(CPPDEFINES=['PIQSL_APP_EXPORTS', 'TIXML_USE_STL'])
 
-eqshibitapp_sources = Split("""
-	eqshibit.cpp
-	eqshibitbase.cpp
+piqslapp_sources = Split("""
+	piqsl.cpp
+	piqslbase.cpp
 	image.cpp
 	framebuffer.cpp
 	book.cpp
 	bookbrowser.cpp
 	displayserverimage.cpp
-	eqshibit_ui.fl""")
+	piqsl_ui.fl""")
 
-eqshibitapp_headers =  Split("""
-	eqshibit.h
-	eqshibitbase.h
+piqslapp_headers =  Split("""
+	piqsl.h
+	piqslbase.h
 	image.h
 	book.h
 	framebuffer.h
@@ -27,43 +27,43 @@ eqshibitapp_headers =  Split("""
 	""")
 
 # Set any platform specific options for this target
-eqshibitappenv.UseTargetOptions('eqshibitapp')
+piqslappenv.UseTargetOptions('piqslapp')
 
-eqshibitapp = eqshibitappenv.Program('eqshibit', eqshibitapp_sources)
-eqshibitappenv.Install('$BINDIR', eqshibitapp)
-embedManifest(env, eqshibitappenv, eqshibitapp, 'EXE')
+piqslapp = piqslappenv.Program('piqsl', piqslapp_sources)
+piqslappenv.Install('$BINDIR', piqslapp)
+embedManifest(env, piqslappenv, piqslapp, 'EXE')
 
-env.Distribute(eqshibitapp_sources)
-env.Distribute(eqshibitapp_headers)
-env.Distribute('eqshibit_ui.fl')
+env.Distribute(piqslapp_sources)
+env.Distribute(piqslapp_headers)
+env.Distribute('piqsl_ui.fl')
 
-# Display driver for communicating with eqshibit
-eqshibitdisplayenv = env.Copy()
-eqshibitdisplayenv.AppendUnique(CPPPATH=['#/renderer/ddmanager','#/thirdparty/tinyxml'])
-eqshibitdisplayenv.AppendUnique(CPPDEFINES=['TIXML_USE_STL'])
+# Display driver for communicating with piqsl
+piqsldisplayenv = env.Copy()
+piqsldisplayenv.AppendUnique(CPPPATH=['#/renderer/ddmanager','#/thirdparty/tinyxml'])
+piqsldisplayenv.AppendUnique(CPPDEFINES=['TIXML_USE_STL'])
 
-eqshibitdisplay_sources = Split("""
-	eqshibitdisplay.cpp
+piqsldisplay_sources = Split("""
+	piqsldisplay.cpp
 	displayhelpers.c""")
 
-eqshibitdisplay_headers =  Split("""
-	eqshibitdisplay.h""")
+piqsldisplay_headers =  Split("""
+	piqsldisplay.h""")
 
-eqshibitdisplayenv.AppendUnique(LIBS = ['aqsistypes', 'tinyxml'])
+piqsldisplayenv.AppendUnique(LIBS = ['aqsistypes', 'tinyxml'])
 
 # Set any platform specific target options.
-eqshibitdisplayenv.UseTargetOptions('eqshibitdisplay')
+piqsldisplayenv.UseTargetOptions('piqsldisplay')
 
-eqshibitdisplay = eqshibitdisplayenv.SharedLibrary('eqshibit', eqshibitdisplay_sources)
+piqsldisplay = piqsldisplayenv.SharedLibrary('piqsl', piqsldisplay_sources)
 
-embedManifest(env, eqshibitdisplayenv, eqshibitdisplay, 'DLL')
+embedManifest(env, piqsldisplayenv, piqsldisplay, 'DLL')
 
 	
-eqshibitdisplayenv.Install('$DISPLAYSDIR', eqshibitdisplay)
+piqsldisplayenv.Install('$DISPLAYSDIR', piqsldisplay)
 
-Return('eqshibitdisplay')
+Return('piqsldisplay')
 
-env.Distribute(eqshibitdisplay_sources)
-env.Distribute(eqshibitdisplay_headers)
+env.Distribute(piqsldisplay_sources)
+env.Distribute(piqsldisplay_headers)
 
 env.Distribute('SConscript')
