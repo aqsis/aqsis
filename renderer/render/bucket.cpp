@@ -993,12 +993,6 @@ void CqBucket::RenderWaitingMPs( long xmin, long xmax, long ymin, long ymax, TqF
 	{
 		CqMicroPolygon* pMP = *imp;
 		RenderMicroPoly( pMP, xmin, xmax, ymin, ymax, clippingFar, clippingNear );
-
-		TqInt col = m_ImageBuffer->CurrentBucketCol();
-		TqInt row = m_ImageBuffer->CurrentBucketRow();
-		m_ImageBuffer->PushMPDown( pMP, col, row);
-		m_ImageBuffer->PushMPForward( pMP, col, row);
-
 		RELEASEREF( pMP );
 	}
 

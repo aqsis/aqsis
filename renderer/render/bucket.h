@@ -150,17 +150,18 @@ class CqBucket : public IqBucket
 
 		/** Add an MPG to the list of deferred MPGs.
 		 */
-		void	AddMPG( CqMicroPolygon* pmpgNew )
+		void	AddMPG( CqMicroPolygon* pMP )
 		{
 #ifdef _DEBUG
 			std::vector<CqMicroPolygon*>::iterator end = m_micropolygons.end();
 			for (std::vector<CqMicroPolygon*>::iterator i = m_micropolygons.begin(); i != end; i++)
-				if ((*i) == pmpgNew)
+				if ((*i) == pMP)
 					assert( false );
 #endif
 
-			m_micropolygons.push_back( pmpgNew );
+			m_micropolygons.push_back( pMP );
 		}
+
 		/** Get a pointer to the top GPrim in the stack of deferred GPrims.
 		 */
 		boost::shared_ptr<CqSurface> pTopSurface()

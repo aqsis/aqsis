@@ -440,12 +440,10 @@ void CqImageBuffer::AddMPG( CqMicroPolygon* pmpgNew )
 {
 	// Quick check for outside crop window.
 	CqBound	B( pmpgNew->GetTotalBound() );
-	ADDREF( pmpgNew );
 
 	if ( B.vecMax().x() < m_CropWindowXMin - m_FilterXWidth / 2.0f || B.vecMax().y() < m_CropWindowYMin - m_FilterYWidth / 2.0f ||
 	        B.vecMin().x() > m_CropWindowXMax + m_FilterXWidth / 2.0f || B.vecMin().y() > m_CropWindowYMax + m_FilterYWidth / 2.0f )
 	{
-		RELEASEREF( pmpgNew );
 		return ;
 	}
 
@@ -464,144 +462,40 @@ void CqImageBuffer::AddMPG( CqMicroPolygon* pmpgNew )
 	B.vecMax().x( B.vecMax().x() + m_FilterXWidth / 2.0f );
 	B.vecMax().y( B.vecMax().y() + m_FilterYWidth / 2.0f );
 
-	TqInt iXBa = static_cast<TqInt>( B.vecMin().x() / ( m_XBucketSize ) );
-	TqInt iYBa = static_cast<TqInt>( B.vecMin().y() / ( m_YBucketSize ) );
-	TqInt iXBb = static_cast<TqInt>( B.vecMax().x() / ( m_XBucketSize ) );
-	TqInt iYBb = static_cast<TqInt>( B.vecMax().y() / ( m_YBucketSize ) );
+	TqInt iXBa = static_cast<TqInt>( B.vecMin().x() / m_XBucketSize );
+	TqInt iYBa = static_cast<TqInt>( B.vecMin().y() / m_YBucketSize );
+	TqInt iXBb = static_cast<TqInt>( B.vecMax().x() / m_XBucketSize );
+	TqInt iYBb = static_cast<TqInt>( B.vecMax().y() / m_YBucketSize );
 
 	if ( ( iXBb < 0 ) || ( iYBb < 0 ) ||
 	        ( iXBa >= m_cXBuckets ) || ( iYBa >= m_cYBuckets ) )
 	{
-		RELEASEREF( pmpgNew );
 		return ;
 	}
 
-	if ( iXBa < 0 )
-		iXBa = 0;
-	if ( iYBa < 0 )
-		iYBa = 0;
+	// Use sane values -- otherwise sometimes crashes, probably
+	// due to precision problems
+	if ( iXBa < 0 )	iXBa = 0;
+	if ( iYBa < 0 )	iYBa = 0;
+	if ( iXBb >= m_cXBuckets ) iXBb = m_cXBuckets - 1;
+	if ( iYBb >= m_cYBuckets ) iYBb = m_cYBuckets - 1;
 
-	// If the ideal bucket has already been processed we need to work out why we have got into this
-	// situation.
-	if ( Bucket(iXBa,iYBa).IsProcessed() )
+	// Add the MP to all the Buckets that it touches
+	for ( TqInt i = iXBa; i <= iXBb; i++ )
 	{
-		PushMPDown( pmpgNew, iXBa, iYBa );
-		PushMPForward( pmpgNew, iXBa, iYBa );
-		RELEASEREF( pmpgNew );
-	}
-	else
-	{
-		Bucket(iXBa, iYBa).AddMPG( pmpgNew );
-	}
-}
-
-
-//----------------------------------------------------------------------
-/** Add a new micro polygon to the list of waiting ones.
- * \param pMP Pointer to a CqMicroPolygon derived class.
- */
-
-bool CqImageBuffer::PushMPForward( CqMicroPolygon* pMP, TqInt Col, TqInt Row )
-{
-	// Should always mark as pushed forward even if not. As this is an idicator
-	// that the attempt has been made, used by the PushDown function. If this wasn't set
-	// then the MP would be pushed down again when the next row is hit.
-	pMP->MarkPushedForward();
-
-	// Check if there is anywhere to push forward to.
-	if ( Col == ( m_cXBuckets - 1 ) )
-		return ( false );
-
-	TqInt NextColForward = Col + 1;
-
-	// If the next bucket forward has already been processed, try the one following that.
-	if( Bucket( NextColForward, Row ).IsProcessed() )
-		return( PushMPForward( pMP, NextColForward, Row ) );
-
-	// Find out if any of the subbounds touch this bucket.
-	CqVector2D BucketMin = BucketPosition( NextColForward, Row );
-	CqVector2D BucketMax = BucketMin + BucketSize( NextColForward, Row );
-	CqVector2D FilterWidth( m_FilterXWidth * 0.5f, m_FilterYWidth * 0.5f );
-	BucketMin -= FilterWidth;
-	BucketMax += FilterWidth;
-
-	const CqBound&	B = pMP->GetTotalBound();
-
-	const CqVector3D& vMin = B.vecMin();
-	const CqVector3D& vMax = B.vecMax();
-	if ( ( vMin.x() > BucketMax.x() ) ||
-	        ( vMin.y() > BucketMax.y() ) ||
-	        ( vMax.x() < BucketMin.x() ) ||
-	        ( vMax.y() < BucketMin.y() ) )
-	{
-		return ( false );
-	}
-	else
-	{
-		ADDREF( pMP );
-		Bucket( NextColForward, Row ).AddMPG( pMP );
-		STATS_INC( MPG_pushed_forward );
-
-		return ( true );
-	}
-}
-
-
-//----------------------------------------------------------------------
-/** Add a new micro polygon to the list of waiting ones.
- * \param pMP Pointer to a CqMicroPolygon derived class.
- */
-
-bool CqImageBuffer::PushMPDown( CqMicroPolygon* pMP, TqInt Col, TqInt Row )
-{
-	if ( pMP->IsPushedForward() )
-		return ( false );
-
-	// Check if there is anywhere to push down to.
-	if ( Row == ( m_cYBuckets - 1 ) )
-		return ( false );
-
-	TqInt NextRowDown = Row + 1;
-
-	// If the next bucket down has already been processed,
-	// try pushing forward from there.
-	if( Bucket( Col, NextRowDown ).IsProcessed() )
-	{
-		if( PushMPForward( pMP, Col, NextRowDown ) )
-			return( true );
-		else
-			// If that fails, push down again.
-			return( PushMPDown( pMP, Col, NextRowDown ) );
-	}
-
-	// Find out if any of the subbounds touch this bucket.
-	CqVector2D BucketMin = BucketPosition( Col, NextRowDown );
-	CqVector2D BucketMax = BucketMin + BucketSize( Col, NextRowDown );
-	CqVector2D FilterWidth( m_FilterXWidth * 0.5f, m_FilterYWidth * 0.5f );
-	BucketMin -= FilterWidth;
-	BucketMax += FilterWidth;
-
-	const CqBound&	B = pMP->GetTotalBound( );
-
-	const CqVector3D& vMin = B.vecMin();
-	const CqVector3D& vMax = B.vecMax();
-	if ( ( vMin.x() > BucketMax.x() ) ||
-	        ( vMin.y() > BucketMax.y() ) ||
-	        ( vMax.x() < BucketMin.x() ) ||
-	        ( vMax.y() < BucketMin.y() ) )
-	{
-		return ( false );
-	}
-	else
-	{
-		ADDREF( pMP );
-		Bucket(Col, NextRowDown ).AddMPG( pMP );
-		STATS_INC( MPG_pushed_down );
-
-		// See if it needs to be pushed further down
-		PushMPDown( pMP, Col, NextRowDown );
-
-		return ( true );
+		for ( TqInt j = iYBa; j <= iYBb; j++ )
+		{
+			CqBucket* bucket = &Bucket( i, j );
+			if ( bucket->IsProcessed() )
+			{
+				Aqsis::log() << warning << "Bucket already processed but a new MP touches it" << std::endl;
+			}
+			else
+			{
+				ADDREF( pmpgNew );
+				bucket->AddMPG( pmpgNew );
+			}
+		}
 	}
 }
 
