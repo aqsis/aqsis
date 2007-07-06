@@ -17,9 +17,10 @@ else:
 env.AppendUnique(CPPPATH = [env.Dir('#/aqsistypes/posix')])
 env.AppendUnique(CPPDEFINES=[('NDEBUG', '1'), ('PLUGINS', '1'), ('USE_TIMERS', 1), ('_CLOCKTICKS', '1')])
 
-# Point at the boost headers.
-# todo: need to find a way of determining this location automatically
-env.Replace(boost_include_path = ['/usr/local/include/boost-1_33'])
+# Find out where the Boost headers are, look in common places for Fink and MacPorts.
+boostiofile = env.FindFile('io_fwd.hpp', ['$boost_include_path', '/usr/local/include/boost', '/opt/local/include/boost', '/sw/local/include/boost'])
+if boostiofile != None:
+	env.Replace(boost_include_path = os.path.split(os.path.dirname(boostiofile.abspath))[0])
 
 # Find out where the TIFF headers are, look in common places for Fink and DarwinPorts.
 tiffiofile = env.FindFile('tiffio.h', ['$tiff_include_path', '/usr/local/include', '/opt/local/include'])
