@@ -465,7 +465,7 @@ int main( int argc, char** argv )
 
 	int portno = atoi(g_strPort.c_str());
 	CqSocket::initialiseSockets();
-	if(!g_theSocket.prepare(portno))
+	if(!g_theSocket.prepare(g_strInterface, portno))
 		Aqsis::log() << Aqsis::error << "Cannot open server on the specified port" << std::endl;
 
 	Fl::add_fd(g_theSocket,&HandleConnection);

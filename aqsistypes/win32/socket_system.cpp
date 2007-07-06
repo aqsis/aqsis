@@ -115,8 +115,13 @@ void CqSocket::close()
 
 bool	CqSocket::prepare( int port )
 {
+    return prepare(std::string("0.0.0.0"), port);
+}
+
+bool	CqSocket::prepare( const std::string addr, int port )
+{
     if ( open() )
-        if ( bind( port ) )
+        if ( bind( addr, port ) )
             if ( listen() )
                 return ( true );
     return ( false );
@@ -150,7 +155,13 @@ bool CqSocket::open()
 /** Bind the socket to a specified port.
  */
 
-bool CqSocket::bind( TqInt port )
+{
+bool CqSocket::bind( TqInt port  )
+{
+    return bind(std::string("0.0.0.0"), port);
+}
+
+bool CqSocket::bind( const std::string hostname, TqInt port )
 {
     SOCKADDR_IN saTemp;
     memset( &saTemp, 0, sizeof( saTemp ) );

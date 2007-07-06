@@ -49,13 +49,14 @@ class COMMON_SHARE CqSocket : boost::noncopyable
 		~CqSocket();
 
 		static bool initialiseSockets();
-
 		bool	prepare( int port );
+		bool    prepare( const std::string hostname, int port);
 		bool	open();
 		/** Close the socket this server is associated with.
 		 */
 		void	close();
 		bool	bind( int port );
+		bool	bind(const std::string hostname, int port);
 		bool	listen();
 		bool	accept(CqSocket& socket);
 		bool	connect(const std::string hostname, int port);

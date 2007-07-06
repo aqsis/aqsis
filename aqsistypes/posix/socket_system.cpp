@@ -91,8 +91,13 @@ void CqSocket::close()
 
 bool	CqSocket::prepare( int port )
 {
+	return prepare( std::string("0.0.0.0"), port );
+}
+
+bool	CqSocket::prepare( const std::string addr, int port )
+{
     if ( open() )
-        if ( bind( port ) )
+        if ( bind( addr, port ) )
             if ( listen() )
                 return ( true );
     return ( false );
@@ -124,13 +129,27 @@ bool CqSocket::open()
 /** Bind the socket to a specified port.
  */
 
-bool CqSocket::bind( TqInt port )
+bool CqSocket::bind( TqInt port  )
 {
+    return bind(std::string("0.0.0.0"), port);
+}
+
+bool CqSocket::bind( const std::string hostname, TqInt port )
+{
+    struct hostent *pHost;
     sockaddr_in saTemp;
+
+    pHost = gethostbyname(hostname.c_str());
+    if(pHost == NULL || pHost->h_addr_list[0] == NULL)
+    {
+    	Aqsis::log() << error << "Invalid Name or IP address" << std::endl;;
+    	return(false);
+    };
+
     memset( &saTemp, 0, sizeof( saTemp ) );
     saTemp.sin_family = AF_INET;
     saTemp.sin_port = htons( port );
-    saTemp.sin_addr.s_addr = inet_addr("127.0.0.1");
+    saTemp.sin_addr.s_addr = *(in_addr_t *) pHost->h_addr_list[0];
 
     if ( ::bind( m_socket,  (sockaddr*)&saTemp, sizeof( saTemp ) ) == -1 )
     {
@@ -141,7 +160,6 @@ bool CqSocket::bind( TqInt port )
     m_port = port;
     return ( true );
 }
-
 
 //---------------------------------------------------------------------
 /** Prepare the socket to listen for client connections.
