@@ -474,7 +474,15 @@ struct CqHitTestCache
 class CqMicroPolygon : public CqRefCount
 {
 	public:
-		CqMicroPolygon();
+		/** Constructor, setting up the pointer to the grid
+		 * this micropoly came from; and the index of the
+		 * shading point associated with this micropolygon
+		 * within the donor grid.
+		 * 
+		 * \param pGrid CqMicroPolyGrid pointer.
+		 * \param Index Integer grid index.
+		 */
+		CqMicroPolygon( CqMicroPolyGridBase* pGrid, TqInt Index );
 		virtual	~CqMicroPolygon();
 
 		/** Overridden operator new to allocate micropolys from a pool.
@@ -524,16 +532,6 @@ class CqMicroPolygon : public CqRefCount
 	};
 
 	public:
-		/** Set up the pointer to the grid this micropoly came from.
-		 * \param pGrid CqMicroPolyGrid pointer.
-		 */
-		void	SetGrid( CqMicroPolyGridBase* pGrid )
-		{
-			if ( m_pGrid )
-				RELEASEREF( m_pGrid );
-			m_pGrid = pGrid;
-			ADDREF( m_pGrid );
-		}
 		/** Get the pointer to the grid this micropoly came from.
 		 * \return Pointer to the CqMicroPolyGrid.
 		 */
@@ -546,25 +544,6 @@ class CqMicroPolygon : public CqRefCount
 		TqInt GetIndex() const
 		{
 			return( m_Index );
-		}
-		/** Set the index of the shading point associated with this
-		 *  micropolygon within the donor grid.
-		 * \param Index Integer grid index.
-		 */
-		void	SetIndex( TqInt Index )
-		{
-			assert( m_pGrid != 0 && m_pGrid->pShaderExecEnv()->shadingPointCount() > Index );
-			m_Index = Index;
-		}
-		/** Release this micropolys reference to the donor grid.
-		 */
-		void	Detach()
-		{
-			if ( m_pGrid != 0 )
-			{
-				RELEASEREF( m_pGrid );
-				m_pGrid = 0;
-			}
 		}
 		/** Get the color of this micropoly.
 		 * \return CqColor reference.
@@ -802,7 +781,8 @@ class CqMovingMicroPolygonKey
 class CqMicroPolygonMotion : public CqMicroPolygon
 {
 	public:
-		CqMicroPolygonMotion() : CqMicroPolygon(), m_BoundReady( false )
+		CqMicroPolygonMotion( CqMicroPolyGridBase* pGrid, TqInt Index ) :
+			CqMicroPolygon( pGrid, Index ), m_BoundReady( false )
 		{ }
 		virtual	~CqMicroPolygonMotion()
 		{
@@ -897,12 +877,6 @@ class CqMicroPolygonMotion : public CqMicroPolygon
 		std::vector<TqFloat> m_Times;
 		std::vector<CqMovingMicroPolygonKey*>	m_Keys;
 		bool	m_fTrimmed;		///< Flag indicating that the MPG spans a trim curve.
-
-		/**
-		* \todo Review Empty copy-ctor, but default operator=!
-		*/
-		CqMicroPolygonMotion( const CqMicroPolygonMotion& From )
-		{}
 }
 ;
 

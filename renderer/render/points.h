@@ -344,7 +344,8 @@ class CqMotionMicroPolyGridPoints : public CqMotionMicroPolyGrid
 class CqMicroPolygonPoints : public CqMicroPolygon
 {
 	public:
-		CqMicroPolygonPoints() : CqMicroPolygon()
+		CqMicroPolygonPoints( CqMicroPolyGridBase* pGrid, TqInt Index ) :
+			CqMicroPolygon( pGrid, Index )
 		{}
 		virtual	~CqMicroPolygonPoints()
 		{}
@@ -389,9 +390,6 @@ class CqMicroPolygonPoints : public CqMicroPolygon
 
 
 	private:
-		CqMicroPolygonPoints( const CqMicroPolygonPoints& From )
-		{}
-
 		TqFloat	m_radius;
 
 		static	CqObjectPool<CqMicroPolygonPoints>	m_thePool;
@@ -476,7 +474,8 @@ class CqMovingMicroPolygonKeyPoints
 class CqMicroPolygonMotionPoints : public CqMicroPolygon
 {
 	public:
-		CqMicroPolygonMotionPoints() : CqMicroPolygon(), m_BoundReady( false )
+		CqMicroPolygonMotionPoints( CqMicroPolyGridBase* pGrid, TqInt Index ) :
+			CqMicroPolygon( pGrid, Index ), m_BoundReady( false )
 		{ }
 		virtual	~CqMicroPolygonMotionPoints()
 		{
@@ -539,9 +538,6 @@ class CqMicroPolygonMotionPoints : public CqMicroPolygon
 		bool	m_BoundReady;				///< Flag indicating the boundary has been initialised.
 		std::vector<TqFloat> m_Times;
 		std::vector<CqMovingMicroPolygonKeyPoints*>	m_Keys;
-
-		CqMicroPolygonMotionPoints( const CqMicroPolygonMotionPoints& From )
-		{}
 
 		static	CqObjectPool<CqMicroPolygonMotionPoints>	m_thePool;
 

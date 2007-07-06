@@ -874,9 +874,7 @@ void CqMicroPolyGrid::Split( std::vector<CqMicroPolygon*>& newMPs )
 
 			if ( tTime > 1 )
 			{
-				CqMicroPolygonMotion * pNew = new CqMicroPolygonMotion();
-				pNew->SetGrid( this );
-				pNew->SetIndex( iIndex );
+				CqMicroPolygonMotion * pNew = new CqMicroPolygonMotion( this, iIndex );
 				if ( fTrimmed )
 					pNew->MarkTrimmed();
 				std::map<TqFloat, TqInt>::iterator keyFrame;
@@ -886,9 +884,7 @@ void CqMicroPolyGrid::Split( std::vector<CqMicroPolygon*>& newMPs )
 			}
 			else
 			{
-				CqMicroPolygon *pNew = new CqMicroPolygon();
-				pNew->SetGrid( this );
-				pNew->SetIndex( iIndex );
+				CqMicroPolygon *pNew = new CqMicroPolygon( this, iIndex );
 				if ( fTrimmed )
 					pNew->MarkTrimmed();
 				pNew->Initialise();
@@ -1104,9 +1100,7 @@ void CqMotionMicroPolyGrid::Split( std::vector<CqMicroPolygon*>& newMPs )
 					fTrimmed = true;
 			}
 
-			CqMicroPolygonMotion *pNew = new CqMicroPolygonMotion();
-			pNew->SetGrid( this );
-			pNew->SetIndex( iIndex );
+			CqMicroPolygonMotion *pNew = new CqMicroPolygonMotion( this, iIndex );
 			for ( iTime = 0; iTime < cTimes(); iTime++ )
 				pNew->AppendKey( aaPtimes[ iTime ][ iIndex ], aaPtimes[ iTime ][ iIndex + 1 ], aaPtimes[ iTime ][ iIndex + cu + 2 ], aaPtimes[ iTime ][ iIndex + cu + 1 ], Time( iTime ) );
 			newMPs.push_back( pNew );
@@ -1131,8 +1125,12 @@ void CqMotionMicroPolyGrid::Split( std::vector<CqMicroPolygon*>& newMPs )
 /** Default constructor
  */
 
-CqMicroPolygon::CqMicroPolygon() : m_pGrid( 0 ), m_Flags( 0 ), m_pHitTestCache( 0 )
+CqMicroPolygon::CqMicroPolygon( CqMicroPolyGridBase* pGrid, TqInt Index ) :
+	m_pGrid( pGrid ), m_Index ( Index), m_Flags( 0 ), m_pHitTestCache( 0 )
 {
+	assert( m_pGrid != 0 && m_pGrid->pShaderExecEnv()->shadingPointCount() > Index );
+	ADDREF( m_pGrid );
+
 	STATS_INC( MPG_allocated );
 	STATS_INC( MPG_current );
 	TqInt cMPG = STATS_GETI( MPG_current );
@@ -1147,8 +1145,8 @@ CqMicroPolygon::CqMicroPolygon() : m_pGrid( 0 ), m_Flags( 0 ), m_pHitTestCache( 
 
 CqMicroPolygon::~CqMicroPolygon()
 {
-	if ( m_pGrid )
-		RELEASEREF( m_pGrid );
+	RELEASEREF( m_pGrid );
+
 	STATS_INC( MPG_deallocated );
 	STATS_DEC( MPG_current );
 	if ( !IsHit() )
