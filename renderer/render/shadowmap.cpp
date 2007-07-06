@@ -186,6 +186,7 @@ void CqShadowMap::LoadZFile()
 				Aqsis::log() << error << "Invalid shadow map format \"" << m_strName.c_str() << "\"" << " : \"" << strHeader << "\"[" << origHeader << "]"<< std::endl;
 				return ;
 			}
+			delete [] strHeader;
 
 			// Save the xres and yres.
 			file.read( reinterpret_cast<TqPchar >( &m_XRes ), sizeof( m_XRes ) );
