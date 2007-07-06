@@ -18,61 +18,61 @@ env.AppendUnique(CPPPATH = [env.Dir('#/aqsistypes/posix')])
 env.AppendUnique(CPPDEFINES=[('NDEBUG', '1'), ('PLUGINS', '1'), ('USE_TIMERS', 1), ('_CLOCKTICKS', '1')])
 
 # Find out where the Boost headers are, look in common places for Fink and MacPorts.
-boostiofile = env.FindFile('io_fwd.hpp', ['$boost_include_path', '/usr/local/include/boost', '/opt/local/include/boost', '/sw/local/include/boost'])
+boostiofile = env.FindFile('io_fwd.hpp', ['$boost_include_path', '/usr/local/include/boost', '/opt/local/include/boost', '/sw/include/boost'])
 if boostiofile != None:
 	env.Replace(boost_include_path = os.path.split(os.path.dirname(boostiofile.abspath))[0])
 
 # Find out where the TIFF headers are, look in common places for Fink and DarwinPorts.
-tiffiofile = env.FindFile('tiffio.h', ['$tiff_include_path', '/usr/local/include', '/opt/local/include'])
+tiffiofile = env.FindFile('tiffio.h', ['$tiff_include_path', '/usr/local/include', '/opt/local/include', '/sw/include/'])
 if tiffiofile != None:
 	env.Replace(tiff_include_path = os.path.dirname(tiffiofile.abspath))
 
 # Find out where the TIFF libraries are, look in common places for Fink and DarwinPorts.
-tifflibfile = env.FindFile('libtiff.a', ['$tiff_lib_path', '/usr/local/lib', '/opt/local/lib'])
+tifflibfile = env.FindFile('libtiff.a', ['$tiff_lib_path', '/usr/local/lib', '/opt/local/lib', '/sw/lib'])
 if tifflibfile != None:
 	env.Replace(tiff_lib_path = os.path.dirname(tifflibfile.abspath))
 env.Replace(tiff_lib = 'tiff')
 
 # Find out where the JPEG headers are, look in common places for Fink and DarwinPorts.
-jpegiofile = env.FindFile('jpeglib.h', ['$jpeg_include_path', '/usr/local/include', '/opt/local/include'])
+jpegiofile = env.FindFile('jpeglib.h', ['$jpeg_include_path', '/usr/local/include', '/opt/local/include', '/sw/include/'])
 if jpegiofile != None:
 	env.Replace(jpeg_include_path = os.path.dirname(jpegiofile.abspath))
 
 # Find out where the JPEG libraries are, look in common places for Fink and DarwinPorts.
-jpeglibfile = env.FindFile('libjpeg.a', ['$jpeg_lib_path', '/usr/local/lib', '/opt/local/lib'])
+jpeglibfile = env.FindFile('libjpeg.a', ['$jpeg_lib_path', '/usr/local/lib', '/opt/local/lib', '/sw/lib'])
 if jpeglibfile != None:
 	env.Replace(jpeg_lib_path = os.path.dirname(jpeglibfile.abspath))
 env.Replace(jpeg_lib = 'jpeg')
 
 # Find out where the zlib headers are, look in common places for Fink and DarwinPorts.
-zlibiofile = env.FindFile('zlib.h', ['$zlib_include_path', '/usr/local/include', '/opt/local/include'])
+zlibiofile = env.FindFile('zlib.h', ['$zlib_include_path', '/usr/local/include', '/opt/local/include', '/sw/include/'])
 if zlibiofile != None:
 	env.Replace(zlib_include_path = os.path.dirname(zlibiofile.abspath))
 
 # Find out where the zlib libraries are, look in common places for Fink and DarwinPorts.
-zliblibfile = env.FindFile('libz.a', ['$zlib_lib_path', '/usr/local/lib', '/opt/local/lib'])
+zliblibfile = env.FindFile('libz.a', ['$zlib_lib_path', '/usr/local/lib', '/opt/local/lib', '/sw/lib'])
 if zliblibfile != None:
 	env.Replace(zlib_lib_path = os.path.dirname(zliblibfile.abspath))
 env.Replace(z_lib = 'z')
 
 # Find out where the OpenEXR libraries are, look in common places for Fink and DarwinPorts.
-exriofile = env.FindFile('half.h', ['$exr_include_path', '/usr/local/include/OpenEXR', '/opt/local/include/OpenEXR'])
+exriofile = env.FindFile('half.h', ['$exr_include_path', '/usr/local/include/OpenEXR', '/opt/local/include/OpenEXR', '/sw/include/OpenEXR'])
 if exriofile != None:
 	env.Replace(exr_include_path = os.path.dirname(exriofile.abspath))
 
-exrlibfile = env.FindFile('libIlmImf.a', ['$exr_lib_path', '/usr/local/lib', '/opt/local/lib'])
+exrlibfile = env.FindFile('libIlmImf.a', ['$exr_lib_path', '/usr/local/lib', '/opt/local/lib', '/sw/lib'])
 if exrlibfile != None:
 	env.Replace(exr_lib_path = os.path.dirname(exrlibfile.abspath))
 env.Replace(exr_lib = 'IlmImf')
 env.Replace(exr2tif_libs = ['IlmImf', 'Half', 'Iex', 'Imath'])
 
 # Find out where the fltk headers are, look in common places for Fink and DarwinPorts.
-fltkfile = env.FindFile('FL/fl.h', ['$fltk_include_path', '/usr/local/include', '/opt/local/include'])
+fltkfile = env.FindFile('FL/fl.h', ['$fltk_include_path', '/usr/local/include', '/opt/local/include', '/sw/include/'])
 if fltkfile != None:
 	env.Replace(fltk_include_path = os.path.split(os.path.dirname(fltkfile.abspath))[0])
 
 # Find out where the fltk libraries are, look in common places for Fink and DarwinPorts.
-fltklibfile = env.FindFile('libfltk.a', ['$fltk_lib_path', '/usr/local/lib', '/opt/local/lib'])
+fltklibfile = env.FindFile('libfltk.a', ['$fltk_lib_path', '/usr/local/lib', '/opt/local/lib', '/sw/lib'])
 if fltklibfile != None:
 	env.Replace(fltk_lib_path = os.path.dirname(fltklibfile.abspath))
 env.Replace(fltk_lib = 'fltk')
