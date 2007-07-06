@@ -27,6 +27,7 @@
 #include	"logging.h"
 
 #include	"socket.h"
+#include 	"netdb.h"
 
 #include	<sys/types.h>
 #include	<sys/socket.h>
@@ -178,15 +179,22 @@ bool CqSocket::accept(CqSocket& sock)
 
 bool CqSocket::connect(const std::string hostname, int port)
 {
+	struct hostent *pHost;
 	// Assert that this socket hasn't already been configured as a server.
 	assert(m_socket == -1 && m_port == 0);
 
 	m_socket = socket(AF_INET,SOCK_STREAM,0);
 	sockaddr_in adServer;
 
+	pHost = gethostbyname(hostname.c_str());
+	if(pHost == NULL || pHost->h_addr_list[0] == NULL)
+	{
+		Aqsis::log() << error << "Invalid Name or IP address" << std::endl;;
+		return(false);
+	};
 	memset((char *) &adServer, 0, sizeof(adServer)); 
 	adServer.sin_family = AF_INET;
-	adServer.sin_addr.s_addr = inet_addr(hostname.c_str());
+	adServer.sin_addr.s_addr = *(in_addr_t *) pHost->h_addr_list[0];
 	if(adServer.sin_addr.s_addr == INVALID_SOCKET)
 	{
 		Aqsis::log() << error << "Invalid IP address" << std::endl;;
