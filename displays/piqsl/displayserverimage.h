@@ -121,7 +121,6 @@ public:
     void acceptData(TqUlong xmin, TqUlong xmaxplus1, TqUlong ymin, TqUlong ymaxplus1, TqInt elementSize, const unsigned char* data);
 	
 	virtual void serialise(const std::string& folder);
-	void saveToTiff(const std::string& filename);
 	virtual TiXmlElement* serialiseToXML();
 
 	void reorderChannels();

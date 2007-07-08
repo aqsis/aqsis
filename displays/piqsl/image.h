@@ -156,6 +156,8 @@ public:
 	virtual void serialise(const std::string& folder)
 	{}
 	virtual TiXmlElement* serialiseToXML();
+	void saveToTiff(const std::string& filename);
+	void loadFromTiff(const std::string& filename);
 
 	boost::mutex& mutex()
 	{

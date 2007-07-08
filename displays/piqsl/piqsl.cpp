@@ -277,8 +277,8 @@ class CqDataHandler
 					m_client->PrepareImageBuffer();
 
 					boost::shared_ptr<CqImage> baseImage = boost::static_pointer_cast<CqImage>(m_client);
-					if(window->currentBook()->framebuffer())
-						window->currentBook()->framebuffer()->connect(baseImage);
+					//if(window->currentBook()->framebuffer())
+					//	window->currentBook()->framebuffer()->update();
 					window->updateImageList();
 				}
 				else if(root->ValueStr().compare("Data") == 0)
@@ -357,13 +357,6 @@ void HandleConnection(int sock, void *data)
 			Fl::lock();
 			boost::shared_ptr<CqImage> baseImage = boost::static_pointer_cast<CqImage>(newImage);
 			window->addImageToCurrentBook(baseImage);
-			if(!window->currentBook()->framebuffer())
-			{
-				boost::shared_ptr<CqFramebuffer> fb(new CqFramebuffer(100, 100, 3));
-				window->currentBook()->setFramebuffer(fb);
-				fb->show();
-				fb->connect(baseImage);
-			}
 			Fl::unlock();
 		}
 	}

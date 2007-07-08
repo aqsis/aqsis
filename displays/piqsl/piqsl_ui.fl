@@ -2,9 +2,9 @@
 version 1.0107 
 header_name {fluid_piqsl_ui.h} 
 code_name {fluid_piqsl_ui.cpp}
-class CqEqshibitMainWindow {open : {public Aqsis::CqEqshibitBase}
+class CqPiqslMainWindow {open : {public Aqsis::CqPiqslBase}
 } {
-  Function {CqEqshibitMainWindow()} {open
+  Function {CqPiqslMainWindow()} {open
   } {
     Fl_Window m_window {open
       private xywh {513 174 540 310} type Double resizable
@@ -71,6 +71,21 @@ class CqEqshibitMainWindow {open : {public Aqsis::CqEqshibitBase}
           }
         }
         Submenu {} {
+          label {&Images} open selected
+          xywh {0 0 100 20}
+        } {
+          MenuItem {} {
+            label {&Add Image}
+            callback {Fl::lock();
+char* name = fl_file_chooser("Load Image", "*.tiff", "");
+if(name)
+	loadImageToCurrentBook(name);
+Fl::unlock();}
+            xywh {0 0 100 20}
+            code0 {\#include <FL/Fl_File_Chooser.H>}
+          }
+        }
+        Submenu {} {
           label {&Help} open
           xywh {5 5 63 20}
         } {
@@ -80,12 +95,7 @@ class CqEqshibitMainWindow {open : {public Aqsis::CqEqshibitBase}
           }
         }
       }
-      Fl_Tabs m_tabBooks {
-        callback {Aqsis::CqBookBrowser* browser = static_cast<Aqsis::CqBookBrowser*>(o->value());
-setCurrentBook(browser->book());} open
-        private xywh {0 29 540 281}
-      } {}
-      Fl_Menu_Button {} {open
+      Fl_Menu_Button {} {
         xywh {0 30 540 280} labeltype NO_LABEL resizable
         code0 {o->type(Fl_Menu_Button::POPUP3);}
       } {
@@ -105,12 +115,17 @@ setCurrentBook(browser->book());} open
           code0 {o->shortcut(FL_COMMAND+'v');}
         }
       }
+      Fl_Tabs m_tabBooks {
+        callback {Aqsis::CqBookBrowser* browser = static_cast<Aqsis::CqBookBrowser*>(o->value());
+setCurrentBook(browser->book());}
+        private xywh {0 29 540 281}
+      } {}
     }
   }
   Function {addNewBook(std::string name)} {open return_type {virtual boost::shared_ptr<Aqsis::CqBook>}
   } {
     code {Fl::lock();
-boost::shared_ptr<Aqsis::CqBook> newBook(CqEqshibitBase::addNewBook(name));
+boost::shared_ptr<Aqsis::CqBook> newBook(CqPiqslBase::addNewBook(name));
 char* _name = new char[name.length()+1];
 strcpy(_name, name.c_str());
 Aqsis::CqBookBrowser *o = new Aqsis::CqBookBrowser(0, 50, m_tabBooks->w(), m_tabBooks->h(), _name);
@@ -119,7 +134,7 @@ m_columnWidths[0] = 200;
 m_columnWidths[1] = 0;
 o->column_widths(m_columnWidths);
 o->type(FL_MULTI_BROWSER);
-o->callback(&CqEqshibitMainWindow::select_cb, this);
+o->callback(&CqPiqslMainWindow::select_cb, this);
 o->showcolsep(1);
 m_tabBooks->add(o);
 m_tabBooks->value(o);
@@ -137,7 +152,7 @@ return(newBook);} {}
   Function {addImageToCurrentBook(boost::shared_ptr<Aqsis::CqImage>& image)} {open return_type {virtual TqUlong}
   } {
     code {Fl::lock();
-TqUlong id = CqEqshibitBase::addImageToCurrentBook(image);
+TqUlong id = CqPiqslBase::addImageToCurrentBook(image);
 Fl_Widget* current = m_tabBooks->value();
 Aqsis::CqBookBrowser* bcurr = static_cast<Aqsis::CqBookBrowser*>(current);
 // Note: in the FLTK gui, the image indices are 1 based, but inside the CqBook
@@ -156,7 +171,7 @@ Aqsis::CqBookBrowser* browser = static_cast<Aqsis::CqBookBrowser*>(w);
 int theEvent = Fl::event();
 if(theEvent == FL_RELEASE)
 {
-	CqEqshibitMainWindow* win = reinterpret_cast<CqEqshibitMainWindow*>(d);
+	CqPiqslMainWindow* win = reinterpret_cast<CqPiqslMainWindow*>(d);
 	if(win && w && win->currentBook())
 	{
 		std::vector<boost::shared_ptr<Aqsis::CqImage> >::size_type selected = 
@@ -172,8 +187,7 @@ if(theEvent == FL_RELEASE)
 	}
 }
 Fl::awake();
-Fl::unlock();} {selected
-    }
+Fl::unlock();} {}
   }
   Function {updateImageList()} {open return_type {virtual void}
   } {
@@ -193,6 +207,23 @@ if(0 != bookBrowser)
 //	}
 	bookBrowser->redraw();
 }
+Fl::awake();
+Fl::unlock();} {}
+  }
+  Function {show()} {open return_type void
+  } {
+    code {m_window->show();} {}
+  }
+  Function {setCurrentImage(std::vector<boost::shared_ptr<Aqsis::CqImage> >::size_type index)} {open return_type {virtual void}
+  } {
+    code {Fl::lock();
+Fl_Widget* current = m_tabBooks->value();
+Aqsis::CqBookBrowser* bcurr = static_cast<Aqsis::CqBookBrowser*>(current);
+// Note: in the FLTK gui, the image indices are 1 based, but inside the CqBook
+// they are zero based, this is because the (void*) stuff passed around in 
+// FLTK for the Fl_Browser_ class uses 0 to indicate false.
+bcurr->setCurrentSelected(index + 1);
+bcurr->redraw();
 Fl::awake();
 Fl::unlock();} {}
   }

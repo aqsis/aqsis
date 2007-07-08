@@ -25,6 +25,7 @@
 
 #include "framebuffer.h"
 #include "image.h"
+#include "fluid_piqsl_ui.h"
 
 #include "boost/bind.hpp"
 
@@ -32,24 +33,30 @@
 void Fl_FrameBuffer_Widget::draw(void)
 {
 	Fl::lock();
-	if(m_image)
+	if(m_image && m_width > 0 && m_height > 0)
 		fl_draw_image(m_image,x(),y(),m_width,m_height,m_depth,m_width*m_depth); // draw image
 	Fl::unlock();
 }
 
+extern CqPiqslMainWindow* window;
 
 START_NAMESPACE( Aqsis )
 
+void piqsl_cb(Fl_Widget* w, void* v);
+
 Fl_Menu_Item CqFramebuffer::m_popupMenuItems[] = {
-  {"Red",       FL_ALT+'r'},
-  {"Green",     FL_ALT+'g'},
-  {"Blue",      FL_ALT+'b'},
-  {"Strange",   FL_ALT+'s', 0, 0, FL_MENU_INACTIVE},
-  {"&Charm",    FL_ALT+'c'},
-  {"Truth",     FL_ALT+'t'},
-  {"Beauty",    FL_ALT+'b'},
+  {"Open &Piqsl",       FL_ALT+'p', (Fl_Callback*)piqsl_cb },
   {0}
 };
+
+
+void piqsl_cb(Fl_Widget* w, void* v)
+{
+	Fl::lock();
+	if(window)
+		window->show();
+	Fl::unlock();
+}
 
 CqFramebuffer::CqFramebuffer(TqUlong width, TqUlong height, TqInt depth)
 {
@@ -71,18 +78,23 @@ CqFramebuffer::CqFramebuffer(TqUlong width, TqUlong height, TqInt depth)
 
 CqFramebuffer::~CqFramebuffer()
 {
+	Fl::lock();
 	disconnect();
 	m_theWindow->hide();
 	delete m_theWindow;
+	Fl::unlock();
 }
 
 void CqFramebuffer::show()
 {
+	Fl::lock();
 	m_theWindow->show();
+	Fl::unlock();
 }
 
 void CqFramebuffer::connect(boost::shared_ptr<CqImage>& image)
 {
+	boost::mutex::scoped_lock lock(mutex());
 	disconnect();
 	m_associatedImage = image;	
 	Fl::lock();
@@ -97,6 +109,7 @@ void CqFramebuffer::connect(boost::shared_ptr<CqImage>& image)
 
 void CqFramebuffer::disconnect()
 {
+	boost::mutex::scoped_lock lock(mutex());
 	Fl::lock();
 	if(m_associatedImage)
 	{
@@ -105,12 +118,16 @@ void CqFramebuffer::disconnect()
 	}
 	m_associatedImage.reset();
 	m_uiImageWidget->setImageData(0);
+	m_uiImageWidget->setImageProportions(0,0,0);
 	Fl::unlock();
 }
 
 void CqFramebuffer::update(int X, int Y, int W, int H)
 {
+	boost::mutex::scoped_lock lock(mutex());
 	Fl::lock();
+	//m_uiImageWidget->setImageData(m_associatedImage->data());
+	//m_uiImageWidget->setImageProportions(m_associatedImage->frameWidth(), m_associatedImage->frameHeight(), m_associatedImage->numChannels());
 	if(W < 0 || H < 0 || X < 0 || Y < 0)
 		m_uiImageWidget->damage(1);
 	else

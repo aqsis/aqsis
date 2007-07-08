@@ -66,7 +66,10 @@ TqUlong CqPiqslBase::addImageToCurrentBook(boost::shared_ptr<CqImage>& image)
 		strBkName << "Book" << numBooks+1;
 		addNewBook(strBkName.str());
 	}
-	return( currentBook()->addImage(image));	
+	TqUlong id = currentBook()->addImage(image);
+	if(currentBook()->framebuffer())
+		currentBook()->framebuffer()->connect(image);
+	return( id );	
 }
 
 
@@ -136,6 +139,15 @@ void CqPiqslBase::saveConfigurationAs()
 	}
 #endif
 	Fl::unlock();
+}
+
+void CqPiqslBase::loadImageToCurrentBook(const std::string& filename)
+{
+	boost::shared_ptr<CqImage> newImage(new CqImage(CqFile::fileName(filename)));
+	newImage->loadFromTiff(filename);
+	TqUlong id = addImageToCurrentBook(newImage);
+
+	setCurrentImage(id);
 }
 
 //---------------------------------------------------------------------

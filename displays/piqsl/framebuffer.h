@@ -100,7 +100,7 @@ public:
 		return( m_associatedImage );
 	}
 
-	void update(int X, int Y, int W, int H);
+	void update(int X = -1, int Y = -1, int W = -1, int H = -1);
 
 	boost::mutex& mutex()
 	{

@@ -47,8 +47,7 @@ class CqImage;
 class CqBook
 {
 public:
-    CqBook( const CqString& name ) : m_name(name)
-	{}
+    CqBook( const CqString& name );
     ~CqBook()
 	{}
 
@@ -64,10 +63,6 @@ public:
 	boost::shared_ptr<CqFramebuffer> framebuffer()
 	{
 		return(m_framebuffer);
-	}
-	void setFramebuffer(boost::shared_ptr<CqFramebuffer>& fb)
-	{
-		m_framebuffer = fb;
 	}
 
 	typedef std::vector<boost::shared_ptr<CqImage> >			TqImageList;

@@ -25,9 +25,17 @@
 
 #include "book.h"
 #include "image.h"
+#include "framebuffer.h"
 
 
 START_NAMESPACE( Aqsis )
+
+CqBook::CqBook( const CqString& name ) : m_name(name)
+{
+	m_framebuffer = boost::shared_ptr<CqFramebuffer>(new CqFramebuffer(100, 100, 3));
+	m_framebuffer->show();
+}
+
 
 std::vector<boost::shared_ptr<CqImage> >::size_type CqBook::addImage(boost::shared_ptr<CqImage>& image)
 {

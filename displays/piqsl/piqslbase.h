@@ -47,12 +47,15 @@ public:
 	virtual ~CqPiqslBase()	{}
 
 	virtual boost::shared_ptr<CqBook>	addNewBook(std::string name);
-	void	setCurrentBook(boost::shared_ptr<CqBook>& book);
+	virtual void	setCurrentBook(boost::shared_ptr<CqBook>& book);
 	boost::shared_ptr<CqBook>& currentBook();
 	virtual TqUlong	addImageToCurrentBook(boost::shared_ptr<CqImage>& image);
+	virtual void setCurrentImage(std::vector<boost::shared_ptr<CqImage> >::size_type index)
+	{}
 	virtual void updateImageList()
 	{}
 	virtual void saveConfigurationAs();
+	virtual void loadImageToCurrentBook(const std::string& filename);
 
 private:
 	std::vector<boost::shared_ptr<CqBook> >	m_books;
