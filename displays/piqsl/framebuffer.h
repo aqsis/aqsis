@@ -35,6 +35,7 @@
 #include <FL/Fl_Menu_Button.H>
 
 #include	"aqsis.h"
+#include	"image.h"
 #include 	<boost/shared_ptr.hpp>
 #include	<boost/thread/mutex.hpp>
 
@@ -44,36 +45,23 @@
 class Fl_FrameBuffer_Widget : public Fl_Widget
 {
 	public:
-		Fl_FrameBuffer_Widget(int x, int y, int imageW, int imageH, int depth, unsigned char* imageD) : Fl_Widget(x,y,imageW,imageH)
+		Fl_FrameBuffer_Widget(int x, int y, int imageW, int imageH, int depth, boost::shared_ptr<Aqsis::CqImage>& image) : Fl_Widget(x,y,imageW,imageH)
 		{
-			m_width = imageW;
-			m_height = imageH;
-			m_depth = depth;
-			m_image = imageD;
+			m_image = image;
 		}
 
-		void setImageData(unsigned char* data)
+		void setImage(boost::shared_ptr<Aqsis::CqImage>& image)
 		{
-			m_image = data;
-		}
-
-		void setImageProportions(int w, int h, int d)
-		{
-			m_width = w;
-			m_height = h;
-			m_depth = d;
+			m_image = image;
 		}
 
 		void draw(void);
 
 	private:
-		int m_width,m_height,m_depth;
-		unsigned char* m_image;
+		boost::shared_ptr<Aqsis::CqImage> m_image;
 };
 
 START_NAMESPACE( Aqsis )
-
-class CqImage;
 
 //---------------------------------------------------------------------
 /** \class CqFramebuffer

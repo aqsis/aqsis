@@ -33,8 +33,11 @@
 void Fl_FrameBuffer_Widget::draw(void)
 {
 	Fl::lock();
-	if(m_image && m_width > 0 && m_height > 0)
-		fl_draw_image(m_image,x(),y(),m_width,m_height,m_depth,m_width*m_depth); // draw image
+	if(m_image)
+		fl_draw_image(m_image->data(),x(),y(),
+			m_image->imageWidth(),m_image->imageHeight(),
+			m_image->numChannels(),
+			m_image->imageWidth()*m_image->numChannels()); // draw image
 	Fl::unlock();
 }
 
@@ -62,7 +65,8 @@ CqFramebuffer::CqFramebuffer(TqUlong width, TqUlong height, TqInt depth)
 {
 	Fl::lock();
 	m_theWindow = new Fl_Window(width, height);
-	m_uiImageWidget = new Fl_FrameBuffer_Widget(0,0, width, height, depth, 0);
+	boost::shared_ptr<CqImage> t;
+	m_uiImageWidget = new Fl_FrameBuffer_Widget(0,0, width, height, depth, t);
 	m_theWindow->resizable(m_uiImageWidget);
 //	m_theWindow->label(thisClient.m_image.m_filename.c_str());
 	Fl::visual(FL_RGB);
@@ -94,12 +98,11 @@ void CqFramebuffer::show()
 
 void CqFramebuffer::connect(boost::shared_ptr<CqImage>& image)
 {
-	boost::mutex::scoped_lock lock(mutex());
+	//boost::mutex::scoped_lock lock(mutex());
 	disconnect();
 	m_associatedImage = image;	
 	Fl::lock();
-	m_uiImageWidget->setImageData(image->data());
-	m_uiImageWidget->setImageProportions(image->frameWidth(), image->frameHeight(), image->numChannels());
+	m_uiImageWidget->setImage(image);
 	m_theWindow->size(image->frameWidth(), image->frameHeight());
 	boost::function<void(int,int,int,int)> f;
 	f = boost::bind(&CqFramebuffer::update, this, _1, _2, _3, _4);
@@ -109,32 +112,29 @@ void CqFramebuffer::connect(boost::shared_ptr<CqImage>& image)
 
 void CqFramebuffer::disconnect()
 {
-	boost::mutex::scoped_lock lock(mutex());
+	//boost::mutex::scoped_lock lock(mutex());
 	Fl::lock();
 	if(m_associatedImage)
 	{
 		boost::function<void(int,int,int,int)> f;
 		m_associatedImage->setUpdateCallback(f);
 	}
-	m_associatedImage.reset();
-	m_uiImageWidget->setImageData(0);
-	m_uiImageWidget->setImageProportions(0,0,0);
+	boost::shared_ptr<CqImage> t;
+	m_associatedImage = t;
+	m_uiImageWidget->setImage(t);
 	Fl::unlock();
 }
 
 void CqFramebuffer::update(int X, int Y, int W, int H)
 {
-	boost::mutex::scoped_lock lock(mutex());
+	//boost::mutex::scoped_lock lock(mutex());
 	Fl::lock();
-	//m_uiImageWidget->setImageData(m_associatedImage->data());
-	//m_uiImageWidget->setImageProportions(m_associatedImage->frameWidth(), m_associatedImage->frameHeight(), m_associatedImage->numChannels());
 	if(W < 0 || H < 0 || X < 0 || Y < 0)
 		m_uiImageWidget->damage(1);
 	else
 		m_uiImageWidget->damage(1, X, Y, W, H);
 	Fl::awake();
 	Fl::unlock();
-	//Fl::check();
 }
 
 END_NAMESPACE( Aqsis )

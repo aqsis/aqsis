@@ -58,15 +58,16 @@ boost::shared_ptr<CqBook>& CqPiqslBase::currentBook()
 
 TqUlong CqPiqslBase::addImageToCurrentBook(boost::shared_ptr<CqImage>& image)
 {
+	Aqsis::log() << Aqsis::debug << "Piqsl adding image" << std::endl;
 	if(!m_currentBook)
 	{
-		Aqsis::log() << Aqsis::debug << "Piqsl adding image" << std::endl;
 		std::map<std::string, boost::shared_ptr<CqBook> >::size_type numBooks = m_books.size();
 		std::stringstream strBkName;
 		strBkName << "Book" << numBooks+1;
 		addNewBook(strBkName.str());
 	}
 	TqUlong id = currentBook()->addImage(image);
+	Aqsis::log() << Aqsis::debug << "Piqsl connecting image to framebuffer" << std::endl;
 	if(currentBook()->framebuffer())
 		currentBook()->framebuffer()->connect(image);
 	return( id );	
