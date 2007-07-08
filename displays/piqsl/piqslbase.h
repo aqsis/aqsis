@@ -40,11 +40,11 @@
 
 START_NAMESPACE( Aqsis )
 
-class CqEqshibitBase
+class CqPiqslBase
 {
 public:
-	CqEqshibitBase()		{}
-	virtual ~CqEqshibitBase()	{}
+	CqPiqslBase()		{}
+	virtual ~CqPiqslBase()	{}
 
 	virtual boost::shared_ptr<CqBook>	addNewBook(std::string name);
 	void	setCurrentBook(boost::shared_ptr<CqBook>& book);

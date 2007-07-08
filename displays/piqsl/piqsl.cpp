@@ -77,7 +77,7 @@ bool 			g_cl_no_color = false;
 bool 			g_cl_syslog = false;
 ArgParse::apint 	g_cl_verbose = 1;
 
-CqEqshibitMainWindow *window = 0;
+CqPiqslMainWindow *window = 0;
 boost::mutex g_XMLMutex;
 
 std::map<std::string, TqInt>	g_mapNameToType;
@@ -470,7 +470,7 @@ int main( int argc, char** argv )
 
 	Fl::add_fd(g_theSocket,&HandleConnection);
 
-	window = new CqEqshibitMainWindow();
+	window = new CqPiqslMainWindow();
 	char *internalArgs[] = {
 		"piqsl"
 	};

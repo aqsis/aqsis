@@ -35,7 +35,7 @@
 START_NAMESPACE( Aqsis )
 
 
-boost::shared_ptr<CqBook> CqEqshibitBase::addNewBook(std::string name)
+boost::shared_ptr<CqBook> CqPiqslBase::addNewBook(std::string name)
 {
 	boost::shared_ptr<CqBook> newBook(new CqBook(name));
 	m_books.push_back(newBook);
@@ -44,23 +44,23 @@ boost::shared_ptr<CqBook> CqEqshibitBase::addNewBook(std::string name)
 	return(newBook);
 }
 
-void CqEqshibitBase::setCurrentBook(boost::shared_ptr<CqBook>& book)
+void CqPiqslBase::setCurrentBook(boost::shared_ptr<CqBook>& book)
 {
 	if(std::find(m_books.begin(), m_books.end(), book) != m_books.end())
 		m_currentBook = book;
 }
 
 
-boost::shared_ptr<CqBook>& CqEqshibitBase::currentBook()
+boost::shared_ptr<CqBook>& CqPiqslBase::currentBook()
 {
 	return(m_currentBook);
 }
 
-TqUlong CqEqshibitBase::addImageToCurrentBook(boost::shared_ptr<CqImage>& image)
+TqUlong CqPiqslBase::addImageToCurrentBook(boost::shared_ptr<CqImage>& image)
 {
 	if(!m_currentBook)
 	{
-		Aqsis::log() << Aqsis::debug << "Eqshibit adding image" << std::endl;
+		Aqsis::log() << Aqsis::debug << "Piqsl adding image" << std::endl;
 		std::map<std::string, boost::shared_ptr<CqBook> >::size_type numBooks = m_books.size();
 		std::stringstream strBkName;
 		strBkName << "Book" << numBooks+1;
@@ -70,7 +70,7 @@ TqUlong CqEqshibitBase::addImageToCurrentBook(boost::shared_ptr<CqImage>& image)
 }
 
 
-void CqEqshibitBase::saveConfigurationAs()
+void CqPiqslBase::saveConfigurationAs()
 {
 	Fl::lock();
 	char* name = fl_file_chooser("Save Configuration As", "*.xml", m_currentConfigName.c_str());
