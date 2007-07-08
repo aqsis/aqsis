@@ -155,7 +155,6 @@ bool CqSocket::open()
 /** Bind the socket to a specified port.
  */
 
-{
 bool CqSocket::bind( TqInt port  )
 {
     return bind(std::string("0.0.0.0"), port);
