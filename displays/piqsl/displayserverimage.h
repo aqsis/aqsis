@@ -70,14 +70,6 @@ public:
 
 	void close();
 
-    virtual CqString&	filename()
-    {
-        return ( m_serialisedName );
-    }
-    virtual void	setFilename( const CqString& name )
-    {
-        m_serialisedName = name;
-    }
 	TqFloat quantizeZero() const
 	{
 		return(m_quantize[0]);
@@ -128,7 +120,6 @@ public:
 private:
     CqSocket	m_socket;			///< Socket of the client.
     std::stringstream m_readbuf;
-	CqString	m_serialisedName;
 	TqFloat		m_quantize[4];
 };
 

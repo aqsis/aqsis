@@ -74,12 +74,11 @@ TqUlong CqPiqslBase::addImageToCurrentBook(boost::shared_ptr<CqImage>& image)
 }
 
 
-void CqPiqslBase::saveConfigurationAs()
+void CqPiqslBase::saveConfigurationAs(const std::string& name)
 {
 	Fl::lock();
-	char* name = fl_file_chooser("Save Configuration As", "*.xml", m_currentConfigName.c_str());
 #if	1
-	if(name != NULL)
+	if(!name.empty())
 	{
 		std::string _base = CqFile::basePath(name);
 		m_currentConfigName = name;
@@ -142,9 +141,61 @@ void CqPiqslBase::saveConfigurationAs()
 	Fl::unlock();
 }
 
-void CqPiqslBase::loadImageToCurrentBook(const std::string& filename)
+void CqPiqslBase::loadConfiguration(const std::string& name)
 {
-	boost::shared_ptr<CqImage> newImage(new CqImage(CqFile::fileName(filename)));
+	Fl::lock();
+
+	if(!name.empty())
+	{
+		std::string _base = CqFile::basePath(name);
+		m_currentConfigName = name;
+		TiXmlDocument doc(name);
+		bool loadOkay = doc.LoadFile();
+		if(loadOkay)
+		{
+			TiXmlElement* booksXML = doc.RootElement();
+			if(booksXML)
+			{
+				TiXmlElement* bookXML = booksXML->FirstChildElement("Book");
+				while(bookXML)
+				{
+					std::string bookName = bookXML->Attribute("name");
+					std::cout << "Book: " << bookName << std::endl;
+					addNewBook(bookName);
+
+					TiXmlElement* imagesXML = bookXML->FirstChildElement("Images");
+					if(imagesXML)
+					{
+						TiXmlElement* imageXML = imagesXML->FirstChildElement("Image");
+						while(imageXML)
+						{
+							std::string imageName("");
+							std::string imageFilename("");
+							TiXmlElement* nameXML = imageXML->FirstChildElement("Name");
+							if(nameXML)
+								imageName = nameXML->GetText();
+							TiXmlElement* fileNameXML = imageXML->FirstChildElement("Filename");
+								imageFilename = fileNameXML->GetText();
+							std::cout << "\tImage: \"" << imageName <<  "\", \"" << imageFilename << "\"" << std::endl;
+							loadImageToCurrentBook(imageName, imageFilename);
+							imageXML = imageXML->NextSiblingElement("Image");
+						}
+					}
+					bookXML = bookXML->NextSiblingElement("Book");
+				}
+			}
+		}
+		else
+		{
+			Aqsis::log() << Aqsis::error << "Failed to load configuration file" << std::endl;
+		}
+	}
+	Fl::unlock();
+}
+
+void CqPiqslBase::loadImageToCurrentBook(const std::string& name, const std::string& filename)
+{
+	boost::shared_ptr<CqImage> newImage(new CqImage(name));
 	newImage->loadFromTiff(filename);
 	TqUlong id = addImageToCurrentBook(newImage);
 

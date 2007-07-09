@@ -67,11 +67,11 @@ public:
     }
     virtual CqString&	filename()
     {
-        return ( name() );
+        return ( m_fileName );
     }
     virtual void	setFilename( const CqString& name )
     {
-        setName(name);
+        m_fileName = name;
     }
 	virtual TqUlong	frameWidth()
 	{
@@ -166,6 +166,7 @@ public:
 
 protected:
     CqString		m_name;			///< Display name.
+    CqString		m_fileName;		///< File name.
 	unsigned char*	m_data;			///< Buffer to store the 8bit data for display. 
 	unsigned char*	m_realData;		///< Buffer to store the natural format image data.
 	TqUlong			m_frameWidth;

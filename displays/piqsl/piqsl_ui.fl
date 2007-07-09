@@ -24,6 +24,8 @@ class CqPiqslMainWindow {open : {public Aqsis::CqPiqslBase}
         } {
           MenuItem m_menuFileOpen {
             label {&Open}
+            callback {char* name = fl_file_chooser("Load Configuration", "*.xml", currentConfigName().c_str());
+loadConfiguration(name);}
             private xywh {0 0 100 20} shortcut 0x4006f
             code0 {o->shortcut(FL_COMMAND+'o');}
           }
@@ -34,7 +36,8 @@ class CqPiqslMainWindow {open : {public Aqsis::CqPiqslBase}
           }
           MenuItem m_menuFileSaveAs {
             label {Save &As}
-            callback {saveConfigurationAs();}
+            callback {char* name = fl_file_chooser("Save Configuration As", "*.xml", currentConfigName().c_str());
+saveConfigurationAs(name);}
             private xywh {0 0 100 20} shortcut 0x50073 divider
             code0 {o->shortcut(FL_COMMAND+'S');}
           }
@@ -71,18 +74,22 @@ class CqPiqslMainWindow {open : {public Aqsis::CqPiqslBase}
           }
         }
         Submenu {} {
-          label {&Images} open selected
+          label {&Images} open
           xywh {0 0 100 20}
         } {
           MenuItem {} {
             label {&Add Image}
             callback {Fl::lock();
-char* name = fl_file_chooser("Load Image", "*.tiff", "");
-if(name)
-	loadImageToCurrentBook(name);
-Fl::unlock();}
+char* filename = fl_file_chooser("Load Image", "TIFF Files (*.tif)", "");
+if(filename)
+{
+	std::string name = Aqsis::CqFile::fileName(filename);
+	loadImageToCurrentBook(name, filename);
+}
+Fl::unlock();} selected
             xywh {0 0 100 20}
             code0 {\#include <FL/Fl_File_Chooser.H>}
+            code1 {\#include "file.h"}
           }
         }
         Submenu {} {

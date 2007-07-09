@@ -54,8 +54,18 @@ public:
 	{}
 	virtual void updateImageList()
 	{}
-	virtual void saveConfigurationAs();
-	virtual void loadImageToCurrentBook(const std::string& filename);
+	virtual void saveConfigurationAs(const std::string& name);
+	virtual void loadConfiguration(const std::string& name);
+	virtual void loadImageToCurrentBook(const std::string& name, const std::string& filename);
+
+	const std::string& currentConfigName() const
+	{
+		return(m_currentConfigName);
+	}
+	std::string& currentConfigName()
+	{
+		return(m_currentConfigName);
+	}
 
 private:
 	std::vector<boost::shared_ptr<CqBook> >	m_books;
