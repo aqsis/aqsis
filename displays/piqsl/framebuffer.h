@@ -45,7 +45,7 @@
 class Fl_FrameBuffer_Widget : public Fl_Widget
 {
 	public:
-		Fl_FrameBuffer_Widget(int x, int y, int imageW, int imageH, int depth, boost::shared_ptr<Aqsis::CqImage>& image) : Fl_Widget(x,y,imageW,imageH)
+		Fl_FrameBuffer_Widget(int x, int y, int imageW, int imageH, boost::shared_ptr<Aqsis::CqImage>& image) : Fl_Widget(x,y,imageW,imageH)
 		{
 			m_image = image;
 		}
@@ -88,6 +88,7 @@ public:
 		return( m_associatedImage );
 	}
 
+	void resize();
 	void update(int X = -1, int Y = -1, int W = -1, int H = -1);
 
 	boost::mutex& mutex()

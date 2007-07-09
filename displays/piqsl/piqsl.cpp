@@ -278,8 +278,8 @@ class CqDataHandler
 					m_client->PrepareImageBuffer();
 
 					boost::shared_ptr<CqImage> baseImage = boost::static_pointer_cast<CqImage>(m_client);
-//					if(window->currentBook()->framebuffer())
-//						window->currentBook()->framebuffer()->update();
+					window->currentBook()->framebuffer()->resize();
+					window->currentBook()->framebuffer()->update();
 					window->updateImageList();
 				}
 				else if(root->ValueStr().compare("Data") == 0)

@@ -66,7 +66,7 @@ CqFramebuffer::CqFramebuffer(TqUlong width, TqUlong height, TqInt depth)
 	Fl::lock();
 	m_theWindow = new Fl_Window(width, height);
 	boost::shared_ptr<CqImage> t;
-	m_uiImageWidget = new Fl_FrameBuffer_Widget(0,0, width, height, depth, t);
+	m_uiImageWidget = new Fl_FrameBuffer_Widget(0,0, width, height, t);
 	m_theWindow->resizable(m_uiImageWidget);
 //	m_theWindow->label(thisClient.m_image.m_filename.c_str());
 	Fl::visual(FL_RGB);
@@ -98,7 +98,6 @@ void CqFramebuffer::show()
 
 void CqFramebuffer::connect(boost::shared_ptr<CqImage>& image)
 {
-	//boost::mutex::scoped_lock lock(mutex());
 	disconnect();
 	m_associatedImage = image;	
 	Fl::lock();
@@ -112,7 +111,6 @@ void CqFramebuffer::connect(boost::shared_ptr<CqImage>& image)
 
 void CqFramebuffer::disconnect()
 {
-	//boost::mutex::scoped_lock lock(mutex());
 	Fl::lock();
 	if(m_associatedImage)
 	{
@@ -125,9 +123,16 @@ void CqFramebuffer::disconnect()
 	Fl::unlock();
 }
 
+void CqFramebuffer::resize()
+{
+	Fl::lock();
+	m_uiImageWidget->size(m_associatedImage->frameWidth(), m_associatedImage->frameHeight());
+	m_theWindow->size(m_associatedImage->frameWidth(), m_associatedImage->frameHeight());
+	Fl::unlock();
+}
+
 void CqFramebuffer::update(int X, int Y, int W, int H)
 {
-	//boost::mutex::scoped_lock lock(mutex());
 	Fl::lock();
 	if(W < 0 || H < 0 || X < 0 || Y < 0)
 		m_uiImageWidget->damage(1);
