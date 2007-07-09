@@ -34,14 +34,18 @@
 
 #include "aqsis.h"
 #include "kdtree.h"
-#include "bucket.h"
+#include "vector2d.h"
 
 START_NAMESPACE( Aqsis )
 
 class CqBound;
 class CqBucket;
+class CqMicroPolygon;
 
 struct SqMpgSampleInfo;
+struct SqImageSample;
+struct SqImageSample;
+struct SqSampleData;
 struct SqGridInfo;
 
 class CqOcclusionTree;
@@ -57,6 +61,22 @@ typedef CqOcclusionTree* CqOcclusionTreeWeakPtr;
 */
 class CqOcclusionTree// : public boost::enable_shared_from_this<CqOcclusionTree>
 {
+	public:
+		CqOcclusionTree(TqInt dimension = 0);
+		~CqOcclusionTree();
+
+		void AddSample(const std::pair<TqInt, TqInt>& sample)
+		{
+			m_SampleIndices.push_back(sample);
+		}
+		void ConstructTree();
+		void InitialiseBounds();
+		void UpdateBounds();
+
+		bool CanCull( const CqBound* bound );
+		void SampleMPG( CqMicroPolygon* pMPG, const CqBound& bound, bool usingMB, TqFloat time0, TqFloat time1, bool usingDof, TqInt dofboundindex, const SqMpgSampleInfo& MpgSampleInfo, bool usingLOD, const SqGridInfo& gridInfo);
+
+	private:
 		class CqOcclusionTreeComparator
 		{
 			public:
@@ -69,35 +89,25 @@ class CqOcclusionTree// : public boost::enable_shared_from_this<CqOcclusionTree>
 				TqInt		m_Dim;
 		};
 
-	public:
-		CqOcclusionTree(TqInt dimension = 0);
-		~CqOcclusionTree();
+		enum { s_ChildrenPerNode = 4 };
+		typedef boost::array<CqOcclusionTreePtr,s_ChildrenPerNode> TqChildArray;
 
-		void SortElements(TqInt dimension)
-		{
-			std::sort(m_SampleIndices.begin(), m_SampleIndices.end(), CqOcclusionTreeComparator(dimension) );
-		}
+		typedef std::vector<std::pair<TqInt, TqInt> > TqSampleIndices;
+
+		void SplitNode(CqOcclusionTreePtr& a, CqOcclusionTreePtr& b);
+
+		void StoreExtraData( const CqMicroPolygon* pMPG, SqImageSample& sample);
+
+		SqSampleData& Sample() const;
+
+		void PropagateChanges();
+
+		void OutputTree(const char* name);
+
 		TqInt Dimensions() const
 		{
 			return(2);
 		}
-
-		SqSampleData& Sample() const;
-
-		void AddSample(const std::pair<TqInt, TqInt>& sample)
-		{
-			m_SampleIndices.push_back(sample);
-		}
-		void ConstructTree();
-		void OutputTree(const char* name);
-
-		void PropagateChanges();
-
-		void InitialiseBounds();
-		void UpdateBounds();
-
-		bool CanCull( CqBound* bound );
-		void SampleMPG( CqMicroPolygon* pMPG, const CqBound& bound, bool usingMB, TqFloat time0, TqFloat time1, bool usingDof, TqInt dofboundindex, const SqMpgSampleInfo& MpgSampleInfo, bool usingLOD, const SqGridInfo& gridInfo);
 
 		TqInt NumSamples() const
 		{
@@ -124,15 +134,10 @@ class CqOcclusionTree// : public boost::enable_shared_from_this<CqOcclusionTree>
 			return(m_MaxSamplePoint);
 		}
 
-	private:
-		enum { s_ChildrenPerNode = 4 };
-		typedef boost::array<CqOcclusionTreePtr,s_ChildrenPerNode> TqChildArray;
-
-		typedef std::vector<std::pair<TqInt, TqInt> > TqSampleIndices;
-
-		void SplitNode(CqOcclusionTreePtr& a, CqOcclusionTreePtr& b);
-
-		void StoreExtraData( CqMicroPolygon* pMPG, SqImageSample& sample);
+		void SortElements(TqInt dimension)
+		{
+			std::sort(m_SampleIndices.begin(), m_SampleIndices.end(), CqOcclusionTreeComparator(dimension) );
+		}
 
 		CqOcclusionTreeWeakPtr	m_Parent;
 		TqInt		m_Dimension;
@@ -159,7 +164,7 @@ class CqOcclusionBox
 		static void DeleteHierarchy();
 		static void SetupHierarchy( const CqBucket* bucket );
 
-		static bool CanCull( CqBound* bound );
+		static bool CanCull( const CqBound* bound );
 
 		static CqOcclusionTreePtr& KDTree()
 		{

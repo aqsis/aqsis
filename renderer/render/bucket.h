@@ -270,7 +270,7 @@ class CqBucket : public IqBucket
 		/** This function assumes that neither dof or mb are
 		 * being used. It is much simpler than the general
 		 * case dealt with above. */
-		void	RenderMPG_Static( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax, TqFloat clippingFar, TqFloat clippingNear );
+		void	RenderMPG_Static( CqMicroPolygon* pMPG );
 
 
 	private:

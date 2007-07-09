@@ -102,11 +102,6 @@ class CqImageBuffer
 		{}
 		virtual	~CqImageBuffer();
 
-		CqVector2D	BucketPosition() const;
-		CqVector2D	BucketPosition(TqInt x, TqInt y) const;
-		CqVector2D	BucketSize() const;
-		CqVector2D	BucketSize( TqInt x, TqInt y) const;
-
 		/** Get the horizontal resolution of this image.
 		 * \return Integer horizontal resolution.
 		 */
@@ -226,44 +221,6 @@ class CqImageBuffer
 		{
 			return ( m_DisplayMode );
 		}
-		/** Get the column index of the bucket currently being processed.
-		 * \return Integer bucket index.
-		 */
-		TqInt	CurrentBucketCol() const
-		{
-			return ( m_CurrentBucketCol );
-		}
-		/** Get the row index of the bucket currently being processed.
-		 * \return Integer bucket index.
-		 */
-		TqInt	CurrentBucketRow() const
-		{
-			return ( m_CurrentBucketRow );
-		}
-
-		// Move to the next bucket to process.
-    		bool NextBucket(EqBucketOrder order);
-
-		/** Get a pointer to the current bucket
-		 */
-		CqBucket& CurrentBucket()
-		{
-			return( m_Buckets[CurrentBucketRow()][CurrentBucketCol()] );
-		}
-		/** Get a pointer to the bucket at position x,y in the grid.
-		 */
-		CqBucket& Bucket( TqInt x, TqInt y)
-		{
-			return( m_Buckets[y][x] );
-		}
-
-		void	DeleteImage();
-		void	SaveImage( const char* strName );
-
-		void	AddMPG( CqMicroPolygon* pmpgNew );
-		void	PostSurface( const boost::shared_ptr<CqSurface>& pSurface );
-		void	RenderImage();
-
 		/** Get completion status of this rendered image.
 		    * \return bool indicating finished or not.
 		    */
@@ -271,6 +228,10 @@ class CqImageBuffer
 		{
 			return ( m_fDone );
 		}
+
+		void	AddMPG( CqMicroPolygon* pmpgNew );
+		void	PostSurface( const boost::shared_ptr<CqSurface>& pSurface );
+		void	RenderImage();
 
 		virtual	void	SetImage();
 		virtual	void	Quit();
@@ -318,7 +279,43 @@ class CqImageBuffer
 		void	RenderSurface( boost::shared_ptr<CqSurface>& pSurface );
 		bool	CullSurface( CqBound& Bound, const boost::shared_ptr<CqSurface>& pSurface );
 		bool	OcclusionCullSurface( const boost::shared_ptr<CqSurface>& pSurface );
-		void	StoreExtraData( CqMicroPolygon* pMPG, SqImageSample& sample);
+
+		void	DeleteImage();
+
+		// Move to the next bucket to process.
+    		bool NextBucket(EqBucketOrder order);
+
+		/** Get a pointer to the current bucket
+		 */
+		CqBucket& CurrentBucket()
+		{
+			return( m_Buckets[CurrentBucketRow()][CurrentBucketCol()] );
+		}
+		/** Get a pointer to the bucket at position x,y in the grid.
+		 */
+		CqBucket& Bucket( TqInt x, TqInt y)
+		{
+			return( m_Buckets[y][x] );
+		}
+		/** Get the column index of the bucket currently being processed.
+		 * \return Integer bucket index.
+		 */
+		TqInt	CurrentBucketCol() const
+		{
+			return ( m_CurrentBucketCol );
+		}
+		/** Get the row index of the bucket currently being processed.
+		 * \return Integer bucket index.
+		 */
+		TqInt	CurrentBucketRow() const
+		{
+			return ( m_CurrentBucketRow );
+		}
+
+		CqVector2D	BucketPosition() const;
+		CqVector2D	BucketPosition(TqInt x, TqInt y) const;
+		CqVector2D	BucketSize() const;
+		CqVector2D	BucketSize( TqInt x, TqInt y) const;
 };
 
 

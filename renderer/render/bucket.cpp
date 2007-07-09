@@ -1065,7 +1065,7 @@ void CqBucket::RenderMicroPoly( CqMicroPolygon* pMPG, long xmin, long xmax, long
 	}
 	else
 	{
-		RenderMPG_Static( pMPG, xmin, xmax, ymin, ymax, clippingFar, clippingNear );
+		RenderMPG_Static( pMPG );
 	}
 }
 
@@ -1190,8 +1190,7 @@ void CqBucket::RenderMPG_MBOrDof( CqMicroPolygon* pMPG,
 //---------------------------------------------------------------------
 /** This function assumes that neither dof or mb are being used. It is
  * much simpler than the general case dealt with above. */
-void CqBucket::RenderMPG_Static( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax,
-				 TqFloat clippingFar, TqFloat clippingNear )
+void CqBucket::RenderMPG_Static( CqMicroPolygon* pMPG )
 {
 	CqHitTestCache hitTestCache;
 	pMPG->CacheHitTestValues(&hitTestCache);

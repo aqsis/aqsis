@@ -29,6 +29,7 @@
 
 #include "occlusion.h"
 #include "bound.h"
+#include "bucket.h"
 #include <deque>
 #include <fstream>
 #undef	min
@@ -36,7 +37,21 @@
 
 START_NAMESPACE( Aqsis )
 
+//----------------------------------------------------------------------
+// Static Variables
+
+bool CqOcclusionTree::CqOcclusionTreeComparator::operator()(const std::pair<TqInt, TqInt>& a, const std::pair<TqInt, TqInt>& b)
+{
+	const SqSampleData& A = CqBucket::ImageElement(a.first).SampleData(a.second);
+	const SqSampleData& B = CqBucket::ImageElement(b.first).SampleData(b.second);
+	return( A.m_Position[m_Dim] < B.m_Position[m_Dim] );
+}
+
+
+CqOcclusionTreePtr	CqOcclusionBox::m_KDTree = 0;	///< KD Tree representing the samples in the bucket.
+
 TqInt CqOcclusionTree::m_Tab = 0;
+
 
 CqOcclusionTree::CqOcclusionTree(TqInt dimension)
 		: m_Parent(0), m_Dimension(dimension)
@@ -56,11 +71,10 @@ CqOcclusionTree::~CqOcclusionTree()
 			delete (*child);
 			(*child) = NULL;
 		}
-	};
+	}
 }
 
-void
-CqOcclusionTree::SplitNode(CqOcclusionTreePtr& a, CqOcclusionTreePtr& b)
+void CqOcclusionTree::SplitNode(CqOcclusionTreePtr& a, CqOcclusionTreePtr& b)
 {
 	SortElements(m_Dimension);
 
@@ -164,7 +178,7 @@ void CqOcclusionTree::ConstructTree()
 			{
 				++NonLeafCount;
 			}
-		};
+		}
 
 		if(split_counter >1 )
 			delete old;
@@ -337,7 +351,7 @@ void CqOcclusionTree::PropagateChanges()
 }
 
 
-bool CqOcclusionTree::CanCull( CqBound* bound )
+bool CqOcclusionTree::CanCull( const CqBound* bound )
 {
 	// Recursively call each level to see if it can be culled at that point.
 	// Stop recursing at a level that doesn't contain the whole bound.
@@ -378,20 +392,6 @@ SqSampleData& CqOcclusionTree::Sample() const
 {
 	return CqBucket::ImageElement(m_SampleIndices[0].first).SampleData(m_SampleIndices[0].second);
 }
-
-
-//----------------------------------------------------------------------
-// Static Variables
-
-bool CqOcclusionTree::CqOcclusionTreeComparator::operator()(const std::pair<TqInt, TqInt>& a, const std::pair<TqInt, TqInt>& b)
-{
-	const SqSampleData& A = CqBucket::ImageElement(a.first).SampleData(a.second);
-	const SqSampleData& B = CqBucket::ImageElement(b.first).SampleData(b.second);
-	return( A.m_Position[m_Dim] < B.m_Position[m_Dim] );
-}
-
-
-CqOcclusionTreePtr	CqOcclusionBox::m_KDTree;	///< KD Tree representing the samples in the bucket.
 
 
 //----------------------------------------------------------------------
@@ -474,20 +474,20 @@ void CqOcclusionBox::SetupHierarchy( const CqBucket* bucket )
 }
 
 
-bool CqOcclusionBox::CanCull( CqBound* bound )
+bool CqOcclusionBox::CanCull( const CqBound* bound )
 {
 	return(m_KDTree->CanCull(bound));
 }
 
 
-void CqOcclusionTree::StoreExtraData( CqMicroPolygon* pMPG, SqImageSample& sample)
+void CqOcclusionTree::StoreExtraData( const CqMicroPolygon* pMPG, SqImageSample& sample)
 {
 	std::map<std::string, CqRenderer::SqOutputDataEntry>& DataMap = QGetRenderContext() ->GetMapOfOutputDataEntries();
 	std::map<std::string, CqRenderer::SqOutputDataEntry>::iterator entry;
 	for ( entry = DataMap.begin(); entry != DataMap.end(); ++entry )
 	{
-		IqShaderData* pData;
-		if ( ( pData = pMPG->pGrid() ->FindStandardVar( entry->first.c_str() ) ) != NULL )
+		IqShaderData* pData = pMPG->pGrid()->FindStandardVar( entry->first.c_str() );
+		if ( pData != NULL )
 		{
 			switch ( pData->Type() )
 			{
@@ -562,11 +562,10 @@ void CqOcclusionTree::SampleMPG( CqMicroPolygon* pMPG, const CqBound& bound, boo
 	{
 		// Sample the MPG
 		SqSampleData& sample = Sample();
-		bool SampleHit;
-		TqFloat D;
 
 		CqStats::IncI( CqStats::SPL_count );
-		SampleHit = pMPG->Sample(sample, D, sample.m_Time, usingDof );
+		TqFloat D;
+		bool SampleHit = pMPG->Sample(sample, D, sample.m_Time, usingDof );
 
 		if ( SampleHit )
 		{

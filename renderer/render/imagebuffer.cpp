@@ -369,9 +369,6 @@ void CqImageBuffer::PostSurface( const boost::shared_ptr<CqSurface>& pSurface )
 	// Sanity check we are not putting into a bucket that has already been processed.
 	assert( !Bucket(XMinb, YMinb).IsProcessed() );
 	Bucket(XMinb, YMinb).AddGPrim( pSurface );
-
-	return ;
-
 }
 
 //----------------------------------------------------------------------
@@ -384,7 +381,7 @@ void CqImageBuffer::PostSurface( const boost::shared_ptr<CqSurface>& pSurface )
 
 bool CqImageBuffer::OcclusionCullSurface( const boost::shared_ptr<CqSurface>& pSurface )
 {
-	CqBound RasterBound( pSurface->GetCachedRasterBound() );
+	const CqBound RasterBound( pSurface->GetCachedRasterBound() );
 
 	if ( CqOcclusionBox::CanCull( &RasterBound ) )
 	{
@@ -721,6 +718,12 @@ void CqImageBuffer::RenderImage()
 			CurrentBucket().InitialiseFilterValues();
 		}
 
+		if ( !bIsEmpty )
+		{
+			TIME_SCOPE("Occlusion culling")
+			CqOcclusionBox::SetupHierarchy( &CurrentBucket() );
+		}
+
 		////////// Dump the pixel sample positions into a dump file //////////
 #if ENABLE_MPDUMP
 		if(m_mpdump.IsOpen())
@@ -747,13 +750,6 @@ void CqImageBuffer::RenderImage()
 			xmax = static_cast<long>(CropWindowXMax() + m_FilterXWidth / 2.0f);
 		if ( ymax > CropWindowYMax() + m_FilterYWidth / 2 )
 			ymax = static_cast<long>(CropWindowYMax() + m_FilterYWidth / 2.0f);
-
-
-		if ( !bIsEmpty )
-		{
-			TIME_SCOPE("Occlusion culling")
-			CqOcclusionBox::SetupHierarchy( &CurrentBucket() );
-		}
 
 
 		if ( pProgressHandler )
