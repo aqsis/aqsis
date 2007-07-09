@@ -291,7 +291,7 @@ class UI:
 		return hsv
 		
 	def hsvToRgb(self, hsv):
-		if hsv[1] == 0: # HSV values = 0 / 1 # saturation is 0, it's a grayscale value,
+		if hsv[1] == 0: 
 		   rgb = [hsv[2] * 255, hsv[2] * 255, hsv[2] * 255]		
 		else:
 			h = float(hsv[0] * 6) # determine the hue
@@ -322,7 +322,7 @@ class UI:
 
 	
 	def hslToRgb(self, hsl):
-		if hsl[1] == 0:                  #HSL values = 0 / 1		
+		if hsl[1] == 0:                  
 			rgb = [hsl[2] * 255, hsl[2] * 255, hsl[2] * 255]
 		else:
 			if hsl[2] < 0.5:
@@ -348,7 +348,7 @@ class UI:
 		return v1 		
 
 	def rgbToHsl(self, value):
-		var_R = ( value[0] / 255 )                     # Where RGB values = 0 ÷ 255
+		var_R = ( value[0] / 255 )                     
 		var_G = ( value[1] / 255 )
 		var_B = ( value[2] / 255 )
 		
@@ -359,7 +359,7 @@ class UI:
 		L = (var_Max + var_Min ) / 2
 		
 		if del_Max == 0:                    # This is a gray, no chroma...		
-		   H = 0                            # HSL results = 0 ÷ 1
+		   H = 0                            
 		   S = 0
 		else:                               #Chromatic data...
 			if ( L < 0.5 ):
