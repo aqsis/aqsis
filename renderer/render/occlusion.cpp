@@ -480,7 +480,7 @@ bool CqOcclusionBox::CanCull( CqBound* bound )
 }
 
 
-void StoreExtraData( CqMicroPolygon* pMPG, SqImageSample& sample)
+void CqOcclusionTree::StoreExtraData( CqMicroPolygon* pMPG, SqImageSample& sample)
 {
 	std::map<std::string, CqRenderer::SqOutputDataEntry>& DataMap = QGetRenderContext() ->GetMapOfOutputDataEntries();
 	std::map<std::string, CqRenderer::SqOutputDataEntry>::iterator entry;

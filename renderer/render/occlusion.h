@@ -132,6 +132,8 @@ class CqOcclusionTree// : public boost::enable_shared_from_this<CqOcclusionTree>
 
 		void SplitNode(CqOcclusionTreePtr& a, CqOcclusionTreePtr& b);
 
+		void StoreExtraData( CqMicroPolygon* pMPG, SqImageSample& sample);
+
 		CqOcclusionTreeWeakPtr	m_Parent;
 		TqInt		m_Dimension;
 		CqVector2D	m_MinSamplePoint;
