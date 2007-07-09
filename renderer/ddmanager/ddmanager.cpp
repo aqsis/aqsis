@@ -1049,10 +1049,7 @@ void CqDeepDisplayRequest::FormatBucketForDisplay( IqBucket* pBucket )
 //-----------------------------------------------------------------------------
 bool CqShallowDisplayRequest::CollapseBucketsToScanlines( IqBucket* pBucket )
 {
-	TqUint	xmin = pBucket->XOrigin();
 	TqUint	ymin = pBucket->YOrigin();
-	TqUint	xmaxplus1 = xmin + pBucket->Width();
-	TqUint	ymaxplus1 = ymin + pBucket->Height();
 	TqUint width = QGetRenderContext()->pImage()->CropWindowXMax() - QGetRenderContext()->pImage()->CropWindowXMin();	
 	TqUint bucketDataSize = pBucket->Width() * pBucket->Height() * m_elementSize; 
 	
@@ -1073,7 +1070,7 @@ bool CqShallowDisplayRequest::CollapseBucketsToScanlines( IqBucket* pBucket )
 
 bool CqDeepDisplayRequest::CollapseBucketsToScanlines( IqBucket* pBucket )
 {
-	
+	return false;	
 }
 
 void CqShallowDisplayRequest::SendToDisplay(TqUint ymin, TqUint ymaxplus1)
@@ -1107,9 +1104,10 @@ bool CqDisplayRequest::ThisDisplayNeeds( const TqUlong& htoken, const TqUlong& r
 		return ( true );
 	else if ( m_modeHash == htoken  )
 		return ( true );	
+	return false;
 }
 
-TqInt CqDisplayRequest::ThisDisplayUses( TqInt& Uses )
+void CqDisplayRequest::ThisDisplayUses( TqInt& Uses )
 {
 	TqInt ivar;
 	for( ivar = 0; ivar < EnvVars_Last; ++ivar )

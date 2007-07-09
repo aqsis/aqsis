@@ -108,7 +108,7 @@ class CqDisplayRequest
 		/* Determine all of the environment variables this display uses
 		 * by querying this display's mode hash.
 		 */
-		virtual	TqInt ThisDisplayUses( TqInt& Uses );
+		virtual	void ThisDisplayUses( TqInt& Uses );
 		
 		virtual void ClearDisplayParams();
 		void LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimplePlugin& dspyPlugin );
