@@ -135,8 +135,9 @@ class CqDisplayRequest
 		/* Collapses a row of buckets into a scanline by copying the
 		 * quantized data into a format readable by the display.  
 		 * Used when the display wants scanline order.
+		 * Return true if a full row is ready, false otherwise.
 		 */
-		virtual void CollapseBucketsToScanlines(IqBucket* pBucket) = 0;
+		virtual bool CollapseBucketsToScanlines(IqBucket* pBucket) = 0;
 		 /* Sends the data to the display.
 		 */
 		virtual void SendToDisplay(TqUint ymin, TqUint ymaxplus1) = 0;
@@ -175,7 +176,7 @@ class CqDisplayRequest
 		//  Specifically, the stuff which deals with holding the data
 		//  which has been copied out of the bucket and quantized: 
 		unsigned char  *m_DataRow;    // A row of bucket's data
-		unsigned char  *m_DataBucket; // A bucket's data		
+		unsigned char  *m_DataBucket; // A bucket's data
 };
 
 //---------------------------------------------------------------------
@@ -206,8 +207,9 @@ class CqShallowDisplayRequest : virtual public CqDisplayRequest
 		/* Collapses a row of buckets into a scanline by copying the
 		 * quantized data into a format readable by the display.  
 		 * Used when the display wants scanline order.
+		 * Return true if a full row is ready, false otherwise.
 		 */
-		void CollapseBucketsToScanlines(IqBucket* pBucket);
+		bool CollapseBucketsToScanlines(IqBucket* pBucket);
 		/*
 		 * Sends the data to the display.
 		 * Invoked only when the bucket row data is full.
@@ -215,7 +217,14 @@ class CqShallowDisplayRequest : virtual public CqDisplayRequest
 		void SendToDisplay(TqUint ymin, TqUint ymaxplus1);
 	
 	private:
-
+		
+		// Map for accumulating buckets to full rows:
+		// The outer map has keys corresponding to the bucket row.
+		// The inner vector stores an unsorted list of the buckets for a row.
+		// The fact that it is unsorted may be an issue because the display needs to
+		// receive data in sorted order. We may need to store identifying info to re-determine order.
+		// Note: I want to use a boost:shared_array here, but my boost library does not have it.
+		std::map<TqInt, std::vector<boost::shared_ptr<unsigned char> > > m_BucketDataMap;
 };
 
 //---------------------------------------------------------------------
@@ -243,13 +252,16 @@ class CqDeepDisplayRequest : virtual public CqDisplayRequest
 		/* Collapses a row of buckets into a scanline by copying the
 		 * quantized data into a format readable by the display.  
 		 * Used when the display wants scanline order.
+		 * Return true if a full row is ready, false otherwise.
 		 */
-		virtual void CollapseBucketsToScanlines(IqBucket* pBucket);
+		virtual bool CollapseBucketsToScanlines(IqBucket* pBucket);
 		/*
 		 * Sends the data to the display.
 		 */
-		virtual void SendToDisplay(TqUint ymin, TqUint ymaxplus1);		
+		virtual void SendToDisplay(TqUint ymin, TqUint ymaxplus1);
 	
+	private:
+		
 };
 
 //---------------------------------------------------------------------

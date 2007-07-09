@@ -537,12 +537,12 @@ void CqDisplayRequest::CloseDisplayLibrary()
 
 	if (m_DataBucket != 0)
 	{
-		free(m_DataBucket);
+		delete m_DataBucket;
 		m_DataBucket = 0;
 	}
 	if (m_DataRow != 0)
 	{
-		free(m_DataRow);
+		delete m_DataRow;
 		m_DataRow = 0;
 	}
 
@@ -912,14 +912,38 @@ void CqDisplayRequest::PrepareSystemParameters()
 void CqDisplayRequest::DisplayBucket( IqBucket* pBucket )
 {
 	// If the display is not validated, don't send it data.
-	if( !m_valid )
+	// Or if a DspyImageData function was not found for
+	// this display request, then we cannot continue
+	if( !m_valid || !m_DataMethod )
 		return;
 	
+	TqUint	xmin = pBucket->XOrigin();
+	TqUint	ymin = pBucket->YOrigin();
+	TqUint	xmaxplus1 = xmin + pBucket->Width();
+	TqUint	ymaxplus1 = ymin + pBucket->Height();	
+	PtDspyError err;
+	
 	// Dispatch to display sub-type methods
+	// Copy relevant data from the bucket and store locally,
+	// while quantizing and/or compressing
 	FormatBucketForDisplay( pBucket );
+	// Now that the bucket data has been constructed, send it to the display
+	// either lines by lines or bucket by bucket.
 	// Check if the display needs scanlines, and if so, accumulate bucket data
-	// and send when a scanline is complete
-	CollapseBucketsToScanlines( pBucket );	
+	// until a scanline is complete. Send to display when complete.
+	if (m_flags.flags & PkDspyFlagsWantsScanLineOrder)
+	{
+		if (CollapseBucketsToScanlines( pBucket ))
+		{
+			// Filled a scan line: time to send complete rows to display
+			SendToDisplay(ymin, ymaxplus1);
+		}
+	}
+	else
+	{
+		// Send the bucket information as they come in
+		err = (m_DataMethod)(m_imageHandle, xmin, xmaxplus1, ymin, ymaxplus1, m_elementSize, m_DataBucket);
+	}	
 }
 
 void CqShallowDisplayRequest::FormatBucketForDisplay( IqBucket* pBucket )
@@ -931,13 +955,21 @@ void CqShallowDisplayRequest::FormatBucketForDisplay( IqBucket* pBucket )
 	TqUint	ymaxplus1 = ymin + pBucket->Height();
 	
 	// Allocate enough space to put the whole bucket data into
+	if (m_BucketDataMap.find(ymin) == m_BucketDataMap.end())
+	{
+		// No entries on this row yet
+		//m_BucketDataMap[ymin].push_back(m_DataBucket);
+		
+	}	
+	
 	if (m_DataBucket == 0)
-		m_DataBucket = reinterpret_cast<unsigned char*>(malloc(m_elementSize * pBucket->Width() * pBucket->Height()));
+		m_DataBucket = new unsigned char[m_elementSize * pBucket->Width() * pBucket->Height()];
 	if ((m_flags.flags & PkDspyFlagsWantsScanLineOrder) && m_DataRow == 0)
 	{
 		TqUint width = QGetRenderContext()->pImage()->CropWindowXMax() - QGetRenderContext()->pImage()->CropWindowXMin();
 		TqUint height = pBucket->Height();
-		m_DataRow = reinterpret_cast<unsigned char*>(malloc(m_elementSize * width * height));
+		m_DataRow = new unsigned char[m_elementSize * width * height];
+		//m_DataRow = reinterpret_cast<unsigned char*>(malloc(m_elementSize * width * height));
 	}
 	
 	SqImageSample val;
@@ -1012,53 +1044,34 @@ void CqDeepDisplayRequest::FormatBucketForDisplay( IqBucket* pBucket )
 	
 }
 
-void CqShallowDisplayRequest::CollapseBucketsToScanlines( IqBucket* pBucket )
+//-----------------------------------------------------------------------------
+// Return true if a scanline of buckets has been accumulated, false otherwise.
+//-----------------------------------------------------------------------------
+bool CqShallowDisplayRequest::CollapseBucketsToScanlines( IqBucket* pBucket )
 {
 	TqUint	xmin = pBucket->XOrigin();
 	TqUint	ymin = pBucket->YOrigin();
 	TqUint	xmaxplus1 = xmin + pBucket->Width();
 	TqUint	ymaxplus1 = ymin + pBucket->Height();
-	// Now that the bucket data has been constructed, send it to the display
-	// either lines by lines or bucket by bucket
+	TqUint width = QGetRenderContext()->pImage()->CropWindowXMax() - QGetRenderContext()->pImage()->CropWindowXMin();	
+	TqUint bucketDataSize = pBucket->Width() * pBucket->Height() * m_elementSize; 
 	
-	// If a DspyImageData function was not found for
-	// this display request, then we cannot continue
-	if( !m_DataMethod )
-		return;
+	// Accumulate the bucket information to the full row of buckets
+	boost::shared_ptr<unsigned char> pdata(new unsigned char[bucketDataSize]);
+	memcpy(&(*pdata), m_DataBucket, bucketDataSize);
+	// A problem with arbitrary bucket orders is that the row vectors of buckets are not sorted, but we need to
+	// send data to the display in sorted order. How can we reconstruct the sorted order?
+	m_BucketDataMap[ymin].push_back(pdata);
 
-	PtDspyError err;
-
-	if (m_flags.flags & PkDspyFlagsWantsScanLineOrder)
+	if (m_BucketDataMap[ymin].size() == width)
 	{
-		TqUint x, y;
-
-		// Accumulate the bucket information to the full row of buckets
-		unsigned char* pdata = m_DataBucket;
-		TqUint width = QGetRenderContext()->pImage()->CropWindowXMax() - QGetRenderContext()->pImage()->CropWindowXMin();
-		for (y = ymin; y < ymaxplus1; y++)
-		{
-			for (x = xmin; x < xmaxplus1; x++)
-			{
-				memcpy(&(m_DataRow[width * m_elementSize * (y - ymin) + m_elementSize * x]), pdata, m_elementSize);
-				pdata += m_elementSize;
-			}
-		}
-		pdata = m_DataRow;
-
-		// Is it the time sent complete rows
-		if (xmaxplus1 >= width)
-		{
-			SendToDisplay(ymin, ymaxplus1);
-		}
+		// Filled a scan line
+		return true;
 	}
-	else
-	{
-		// Send the bucket information as they come in
-		err = (m_DataMethod)(m_imageHandle, xmin, xmaxplus1, ymin, ymaxplus1, m_elementSize, m_DataBucket);
-	}	
+	return false;
 }
 
-void CqDeepDisplayRequest::CollapseBucketsToScanlines( IqBucket* pBucket )
+bool CqDeepDisplayRequest::CollapseBucketsToScanlines( IqBucket* pBucket )
 {
 	
 }
@@ -1067,10 +1080,10 @@ void CqShallowDisplayRequest::SendToDisplay(TqUint ymin, TqUint ymaxplus1)
 {
 	TqUint y;
 	PtDspyError err;
-	unsigned char* pdata = m_DataBucket;
+	unsigned char* pdata = m_DataRow;
 	TqUint width = QGetRenderContext()->pImage()->CropWindowXMax() - QGetRenderContext()->pImage()->CropWindowXMin();
 	
-	// send to the display one line at the time
+	// send to the display one line at a time
 	for (y = ymin; y < ymaxplus1; y++)
 	{
 		err = (m_DataMethod)(m_imageHandle, 0, width, y, y+1, m_elementSize, pdata);
