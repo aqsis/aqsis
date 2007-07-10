@@ -42,8 +42,8 @@ START_NAMESPACE( Aqsis )
 
 bool CqOcclusionTree::CqOcclusionTreeComparator::operator()(const std::pair<TqInt, TqInt>& a, const std::pair<TqInt, TqInt>& b)
 {
-	const SqSampleData& A = CqBucket::ImageElement(a.first).SampleData(a.second);
-	const SqSampleData& B = CqBucket::ImageElement(b.first).SampleData(b.second);
+	const SqSampleData& A = m_bucket->ImageElement(a.first).SampleData(a.second);
+	const SqSampleData& B = m_bucket->ImageElement(b.first).SampleData(b.second);
 	return( A.m_Position[m_Dim] < B.m_Position[m_Dim] );
 }
 
@@ -72,9 +72,9 @@ CqOcclusionTree::~CqOcclusionTree()
 	}
 }
 
-void CqOcclusionTree::SplitNode(CqOcclusionTreePtr& a, CqOcclusionTreePtr& b)
+void CqOcclusionTree::SplitNode(const CqBucket* bucket, CqOcclusionTreePtr& a, CqOcclusionTreePtr& b)
 {
-	SortElements(m_Dimension);
+	SortElements(bucket, m_Dimension);
 
 	TqInt samplecount = m_SampleIndices.size();
 	TqInt median = samplecount / 2;
@@ -90,7 +90,7 @@ void CqOcclusionTree::SplitNode(CqOcclusionTreePtr& a, CqOcclusionTreePtr& b)
 	TqInt newdim = ( m_Dimension + 1 ) % Dimensions();
 	a->m_Dimension = b->m_Dimension = newdim;
 
-	TqFloat dividingplane = CqBucket::ImageElement(m_SampleIndices[median].first).SampleData(m_SampleIndices[median].second).m_Position[m_Dimension];
+	TqFloat dividingplane = Sample(bucket, median).m_Position[m_Dimension];
 
 	a->m_MaxSamplePoint[m_Dimension] = dividingplane;
 	b->m_MinSamplePoint[m_Dimension] = dividingplane;
@@ -103,7 +103,7 @@ void CqOcclusionTree::SplitNode(CqOcclusionTreePtr& a, CqOcclusionTreePtr& b)
 	for(i = 0; i<median; ++i)
 	{
 		a->m_SampleIndices.push_back(m_SampleIndices[i]);
-		const SqSampleData& sample = CqBucket::ImageElement(m_SampleIndices[i].first).SampleData(m_SampleIndices[i].second);
+		const SqSampleData& sample = Sample(bucket, i);
 		minTime = MIN(minTime, sample.m_Time);
 		maxTime = MAX(maxTime, sample.m_Time);
 		minDofIndex = MIN(minDofIndex, sample.m_DofOffsetIndex);
@@ -124,7 +124,7 @@ void CqOcclusionTree::SplitNode(CqOcclusionTreePtr& a, CqOcclusionTreePtr& b)
 	for(; i<samplecount; ++i)
 	{
 		b->m_SampleIndices.push_back(m_SampleIndices[i]);
-		const SqSampleData& sample = CqBucket::ImageElement(m_SampleIndices[i].first).SampleData(m_SampleIndices[i].second);
+		const SqSampleData& sample = Sample(bucket, i);
 		minTime = MIN(minTime, sample.m_Time);
 		maxTime = MAX(maxTime, sample.m_Time);
 		minDofIndex = MIN(minDofIndex, sample.m_DofOffsetIndex);
@@ -140,7 +140,7 @@ void CqOcclusionTree::SplitNode(CqOcclusionTreePtr& a, CqOcclusionTreePtr& b)
 	b->m_MaxDetailLevel = maxDetailLevel;
 }
 
-void CqOcclusionTree::ConstructTree()
+void CqOcclusionTree::ConstructTree(const CqBucket* bucket)
 {
 	std::deque<CqOcclusionTreePtr> ChildQueue;
 	ChildQueue.push_back(this/*shared_from_this()*/);
@@ -159,7 +159,7 @@ void CqOcclusionTree::ConstructTree()
 
 		CqOcclusionTreePtr a;
 		CqOcclusionTreePtr b;
-		old->SplitNode(a, b);
+		old->SplitNode(bucket, a, b);
 		split_counter++;
 		if (a)
 		{
@@ -193,7 +193,7 @@ void CqOcclusionTree::ConstructTree()
 			(*ii)->m_Parent = this/*shared_from_this()*/;
 			if ((*ii)->NumSamples() > 1)
 			{
-				(*ii)->ConstructTree();
+				(*ii)->ConstructTree(bucket);
 			}
 			++ii;
 		}
@@ -211,12 +211,12 @@ void CqOcclusionTree::ConstructTree()
 }
 
 
-void CqOcclusionTree::InitialiseBounds()
+void CqOcclusionTree::InitialiseBounds(const CqBucket* bucket)
 {
 	if (m_SampleIndices.size() < 1)
 		return;
 
-	const SqSampleData& sample = CqBucket::ImageElement(m_SampleIndices[0].first).SampleData(m_SampleIndices[0].second);
+	const SqSampleData& sample = Sample(bucket, 0);
 	TqFloat minXVal = sample.m_Position.x();
 	TqFloat maxXVal = minXVal;
 	TqFloat minYVal = sample.m_Position.y();
@@ -227,10 +227,9 @@ void CqOcclusionTree::InitialiseBounds()
 	TqInt	maxDofIndex = minDofIndex;
 	TqFloat	minDetailLevel = sample.m_DetailLevel;
 	TqFloat	maxDetailLevel = minDetailLevel;
-	std::vector<std::pair<TqInt, TqInt> >::iterator i;
-	for(i = m_SampleIndices.begin()+1; i!=m_SampleIndices.end(); ++i)
+	for(size_t i = 1; i < m_SampleIndices.size(); i++)
 	{
-		const SqSampleData& sample = CqBucket::ImageElement(i->first).SampleData(i->second);
+		const SqSampleData& sample = Sample(bucket, i);
 		minXVal = MIN(minXVal, sample.m_Position.x());
 		maxXVal = MAX(maxXVal, sample.m_Position.x());
 		minYVal = MIN(minYVal, sample.m_Position.y());
@@ -258,14 +257,14 @@ void CqOcclusionTree::InitialiseBounds()
 }
 
 
-void CqOcclusionTree::UpdateBounds()
+void CqOcclusionTree::UpdateBounds(const CqBucket* bucket)
 {
 	if (m_Children[0])
 	{
 		assert(m_SampleIndices.size() > 1);
 
 		TqChildArray::iterator child = m_Children.begin();
-		(*child)->UpdateBounds();
+		(*child)->UpdateBounds(bucket);
 
 		m_MinSamplePoint[0] = (*child)->m_MinSamplePoint[0];
 		m_MaxSamplePoint[0] = (*child)->m_MaxSamplePoint[0];
@@ -282,7 +281,7 @@ void CqOcclusionTree::UpdateBounds()
 		{
 			if (*child)
 			{
-				(*child)->UpdateBounds();
+				(*child)->UpdateBounds(bucket);
 
 				m_MinSamplePoint[0] = std::min(m_MinSamplePoint[0], (*child)->m_MinSamplePoint[0]);
 				m_MaxSamplePoint[0] = std::max(m_MaxSamplePoint[0], (*child)->m_MaxSamplePoint[0]);
@@ -301,7 +300,7 @@ void CqOcclusionTree::UpdateBounds()
 	{
 		assert(m_SampleIndices.size() == 1);
 
-		const SqSampleData& sample = Sample();
+		const SqSampleData& sample = Sample(bucket, 0);
 		m_MinSamplePoint[0] = m_MaxSamplePoint[0] = sample.m_Position[0];
 		m_MinSamplePoint[1] = m_MaxSamplePoint[1] = sample.m_Position[1];
 		m_MinTime = m_MaxTime = sample.m_Time;
@@ -386,13 +385,13 @@ bool CqOcclusionTree::CanCull( const CqBound* bound )
 }
 
 
-SqSampleData& CqOcclusionTree::Sample() const
+SqSampleData& CqOcclusionTree::Sample(const CqBucket* bucket, size_t index) const
 {
-	return CqBucket::ImageElement(m_SampleIndices[0].first).SampleData(m_SampleIndices[0].second);
+	return bucket->ImageElement(m_SampleIndices[index].first).SampleData(m_SampleIndices[index].second);
 }
 
 
-void CqOcclusionTree::StoreExtraData( const CqMicroPolygon* pMPG, SqImageSample& sample)
+void CqOcclusionTree::StoreExtraData(const CqMicroPolygon* pMPG, SqImageSample& sample)
 {
 	std::map<std::string, CqRenderer::SqOutputDataEntry>& DataMap = QGetRenderContext() ->GetMapOfOutputDataEntries();
 	std::map<std::string, CqRenderer::SqOutputDataEntry>::iterator entry;
@@ -466,14 +465,14 @@ void CqOcclusionTree::StoreExtraData( const CqMicroPolygon* pMPG, SqImageSample&
 
 
 
-void CqOcclusionTree::SampleMPG( CqMicroPolygon* pMPG, const CqBound& bound, bool usingMB, TqFloat time0, TqFloat time1, bool usingDof, TqInt dofboundindex, const SqMpgSampleInfo& MpgSampleInfo, bool usingLOD, const SqGridInfo& gridInfo)
+void CqOcclusionTree::SampleMPG( const CqBucket* bucket, CqMicroPolygon* pMPG, const CqBound& bound, bool usingMB, TqFloat time0, TqFloat time1, bool usingDof, TqInt dofboundindex, const SqMpgSampleInfo& MpgSampleInfo, bool usingLOD, const SqGridInfo& gridInfo)
 {
 	// Check the current tree level, and if only one leaf, sample the MP, otherwise, pass it down to the left
 	// and/or right side of the tree if it crosses.
 	if(NumSamples() == 1)
 	{
 		// Sample the MPG
-		SqSampleData& sample = Sample();
+		SqSampleData& sample = Sample(bucket, 0);
 
 		CqStats::IncI( CqStats::SPL_count );
 		TqFloat D;
@@ -482,14 +481,12 @@ void CqOcclusionTree::SampleMPG( CqMicroPolygon* pMPG, const CqBound& bound, boo
 		if ( SampleHit )
 		{
 			bool Occludes = MpgSampleInfo.m_Occludes;
-			bool opaque =  MpgSampleInfo.m_IsOpaque;
+			bool opaque = MpgSampleInfo.m_IsOpaque;
 
 			SqImageSample& currentOpaqueSample = sample.m_OpaqueSample;
 			static SqImageSample localImageVal;
 
 			SqImageSample& ImageVal = opaque ? currentOpaqueSample : localImageVal;
-
-			std::deque<SqImageSample>& aValues = sample.m_Data;
 
 			// return if the sample is occluded and can be culled.
 			if(opaque)
@@ -552,7 +549,7 @@ void CqOcclusionTree::SampleMPG( CqMicroPolygon* pMPG, const CqBound& bound, boo
 
 			if(!opaque)
 			{
-				aValues.push_back( ImageVal );
+				sample.m_Data.push_back( ImageVal );
 			}
 			else
 			{
@@ -577,7 +574,7 @@ void CqOcclusionTree::SampleMPG( CqMicroPolygon* pMPG, const CqBound& bound, boo
 			{
 				if(bound.vecMin().z() <= (*child)->m_MaxOpaqueZ || !gridInfo.m_IsCullable)
 				{
-					(*child)->SampleMPG(pMPG, bound, usingMB, time0, time1, usingDof, dofboundindex, MpgSampleInfo, usingLOD, gridInfo);
+					(*child)->SampleMPG(bucket, pMPG, bound, usingMB, time0, time1, usingDof, dofboundindex, MpgSampleInfo, usingLOD, gridInfo);
 				}
 			}
 		}
@@ -669,11 +666,11 @@ void CqOcclusionBox::SetupHierarchy( const CqBucket* bucket )
 			}
 		}
 		// Now split the tree down until each leaf has only one sample.
-		m_KDTree->InitialiseBounds();
-		m_KDTree->ConstructTree();
+		m_KDTree->InitialiseBounds(bucket);
+		m_KDTree->ConstructTree(bucket);
 	}
 
-	m_KDTree->UpdateBounds();
+	m_KDTree->UpdateBounds(bucket);
 
 	/*
 		static TqInt i__ = 0;

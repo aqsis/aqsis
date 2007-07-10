@@ -68,23 +68,25 @@ class CqOcclusionTree// : public boost::enable_shared_from_this<CqOcclusionTree>
 		{
 			m_SampleIndices.push_back(sample);
 		}
-		void ConstructTree();
-		void InitialiseBounds();
-		void UpdateBounds();
-
 		bool CanCull( const CqBound* bound );
-		void SampleMPG( CqMicroPolygon* pMPG, const CqBound& bound, bool usingMB, TqFloat time0, TqFloat time1, bool usingDof, TqInt dofboundindex, const SqMpgSampleInfo& MpgSampleInfo, bool usingLOD, const SqGridInfo& gridInfo);
+		void SampleMPG( const CqBucket* bucket, CqMicroPolygon* pMPG, const CqBound& bound, bool usingMB, TqFloat time0, TqFloat time1, bool usingDof, TqInt dofboundindex, const SqMpgSampleInfo& MpgSampleInfo, bool usingLOD, const SqGridInfo& gridInfo);
+
+		void ConstructTree(const CqBucket* bucket);
+		void InitialiseBounds(const CqBucket* bucket);
+		void UpdateBounds(const CqBucket* bucket);
 
 	private:
 		class CqOcclusionTreeComparator
 		{
 			public:
-				CqOcclusionTreeComparator(TqInt dimension) : m_Dim( dimension )
+				CqOcclusionTreeComparator(const CqBucket* bucket, TqInt dimension) :
+					m_bucket(bucket), m_Dim( dimension )
 				{}
 
 				bool operator()(const std::pair<TqInt, TqInt>& a, const std::pair<TqInt, TqInt>& b);
 
 			private:
+				const CqBucket* m_bucket;
 				TqInt		m_Dim;
 		};
 
@@ -93,11 +95,11 @@ class CqOcclusionTree// : public boost::enable_shared_from_this<CqOcclusionTree>
 
 		typedef std::vector<std::pair<TqInt, TqInt> > TqSampleIndices;
 
-		void SplitNode(CqOcclusionTreePtr& a, CqOcclusionTreePtr& b);
+		void SplitNode(const CqBucket* bucket, CqOcclusionTreePtr& a, CqOcclusionTreePtr& b);
 
-		void StoreExtraData( const CqMicroPolygon* pMPG, SqImageSample& sample);
+		void StoreExtraData(const CqMicroPolygon* pMPG, SqImageSample& sample);
 
-		SqSampleData& Sample() const;
+		SqSampleData& Sample(const CqBucket* bucket, size_t index) const;
 
 		void PropagateChanges();
 
@@ -133,9 +135,11 @@ class CqOcclusionTree// : public boost::enable_shared_from_this<CqOcclusionTree>
 			return(m_MaxSamplePoint);
 		}
 
-		void SortElements(TqInt dimension)
+		void SortElements(const CqBucket* bucket, TqInt dimension)
 		{
-			std::sort(m_SampleIndices.begin(), m_SampleIndices.end(), CqOcclusionTreeComparator(dimension) );
+			std::sort(m_SampleIndices.begin(),
+				  m_SampleIndices.end(),
+				  CqOcclusionTreeComparator(bucket, dimension) );
 		}
 
 		CqOcclusionTreeWeakPtr	m_Parent;

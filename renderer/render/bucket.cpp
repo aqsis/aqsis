@@ -1176,11 +1176,11 @@ void CqBucket::RenderMPG_MBOrDof( CqMicroPolygon* pMPG,
 			if(UsingDof)
 			{
 				CqBound DofBound(bminx, bminy, bminz, bmaxx, bmaxy, bmaxz);
-				m_bucketData->m_OcclusionBox.KDTree()->SampleMPG(pMPG, DofBound, IsMoving, time0, time1, true, bound_numDof, m_bucketData->m_CurrentMpgSampleInfo, currentGridInfo.m_LodBounds[0] >= 0.0f, currentGridInfo);
+				m_bucketData->m_OcclusionBox.KDTree()->SampleMPG(this, pMPG, DofBound, IsMoving, time0, time1, true, bound_numDof, m_bucketData->m_CurrentMpgSampleInfo, currentGridInfo.m_LodBounds[0] >= 0.0f, currentGridInfo);
 			}
 			else
 			{
-				m_bucketData->m_OcclusionBox.KDTree()->SampleMPG(pMPG, Bound, IsMoving, time0, time1, false, 0, m_bucketData->m_CurrentMpgSampleInfo, currentGridInfo.m_LodBounds[0] >= 0.0f, currentGridInfo);
+				m_bucketData->m_OcclusionBox.KDTree()->SampleMPG(this, pMPG, Bound, IsMoving, time0, time1, false, 0, m_bucketData->m_CurrentMpgSampleInfo, currentGridInfo.m_LodBounds[0] >= 0.0f, currentGridInfo);
 			}
 		}
 	}
@@ -1198,7 +1198,7 @@ void CqBucket::RenderMPG_Static( CqMicroPolygon* pMPG )
 	const SqGridInfo& currentGridInfo = pMPG->pGrid()->GetCachedGridInfo();
 	const CqBound& Bound = pMPG->GetTotalBound();
 
-	m_bucketData->m_OcclusionBox.KDTree()->SampleMPG(pMPG, Bound, false, 0, 0, false, 0, m_bucketData->m_CurrentMpgSampleInfo, currentGridInfo.m_LodBounds[0] >= 0.0f, currentGridInfo);
+	m_bucketData->m_OcclusionBox.KDTree()->SampleMPG(this, pMPG, Bound, false, 0, 0, false, 0, m_bucketData->m_CurrentMpgSampleInfo, currentGridInfo.m_LodBounds[0] >= 0.0f, currentGridInfo);
 }
 
 
