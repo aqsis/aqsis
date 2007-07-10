@@ -57,6 +57,18 @@ void CqBucketProcessor::reset()
 	m_bucket = 0;
 }
 
+void CqBucketProcessor::occlusionCulling()
+{
+	assert(m_bucket == 0);
+
+	m_bucketData.setupOcclusionHierarchy(m_bucket);
+}
+
+bool CqBucketProcessor::canCull(const CqBound* bound) const
+{
+	return m_bucketData.canCull(bound);
+}
+
 void CqBucketProcessor::process( long xmin, long xmax, long ymin, long ymax, TqFloat clippingFar, TqFloat clippingNear )
 {
 	m_bucket->RenderWaitingMPs( xmin, xmax, ymin, ymax, clippingFar, clippingNear );

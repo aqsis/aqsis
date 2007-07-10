@@ -75,6 +75,12 @@ public:
 	/** Reset the values to the initial state */
 	void reset();
 
+	/** Setup occlusion hierarchy */
+	void setupOcclusionHierarchy(const CqBucket* bucket);
+
+	/** Whether we can cull what's represented by the given bound */
+	bool canCull(const CqBound* bound) const;
+
 private:
 	/// Origin in discrete coordinates of this bucket.
 	TqInt	m_XOrigin;

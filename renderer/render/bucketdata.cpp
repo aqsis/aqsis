@@ -65,5 +65,17 @@ void CqBucketData::reset()
 	m_aCoverages.clear();
 }
 
+void CqBucketData::setupOcclusionHierarchy(const CqBucket* bucket)
+{
+	assert(bucket);
+	m_OcclusionBox.SetupHierarchy(bucket);
+}
+
+bool CqBucketData::canCull(const CqBound* bound) const
+{
+	return m_OcclusionBox.KDTree()->CanCull(bound);
+}
+
+
 
 END_NAMESPACE( Aqsis );

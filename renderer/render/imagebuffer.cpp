@@ -37,7 +37,6 @@
 #include	"renderer.h"
 #include	"surface.h"
 #include	"imagebuffer.h"
-#include	"occlusion.h"
 #include	"bucketprocessor.h"
 
 
@@ -379,11 +378,11 @@ void CqImageBuffer::PostSurface( const boost::shared_ptr<CqSurface>& pSurface )
  * \return Boolean indicating that the GPrim has been culled.
 */
 
-bool CqImageBuffer::OcclusionCullSurface( const CqOcclusionBox& occlusionBox, const boost::shared_ptr<CqSurface>& pSurface )
+bool CqImageBuffer::OcclusionCullSurface( const CqBucketProcessor& bucketProcessor, const boost::shared_ptr<CqSurface>& pSurface )
 {
 	const CqBound RasterBound( pSurface->GetCachedRasterBound() );
 
-	if ( occlusionBox.CanCull( &RasterBound ) )
+	if ( bucketProcessor.canCull( &RasterBound ) )
 	{
 		// pSurface is behind everying in this bucket but it may be
 		// visible in other buckets it overlaps.
@@ -697,7 +696,6 @@ void CqImageBuffer::RenderImage()
 	// A counter for the number of processed buckets (used for progress reporting)
 	TqInt iBucket = 0;
 
-	CqOcclusionBox occlusionBox;
 	CqBucketProcessor bucketProcessor;
 
 	// Iterate over all buckets...
@@ -721,8 +719,8 @@ void CqImageBuffer::RenderImage()
 
 		if ( !bIsEmpty )
 		{
-			TIME_SCOPE("Occlusion culling")
-			occlusionBox.SetupHierarchy( &CurrentBucket() );
+			TIME_SCOPE("Occlusion culling");
+			bucketProcessor.occlusionCulling();
 		}
 
 		////////// Dump the pixel sample positions into a dump file //////////
@@ -772,8 +770,9 @@ void CqImageBuffer::RenderImage()
 				if ( !( DisplayMode() & ModeZ ) && !pSurface->pCSGNode() )
 				{
 					TIME_SCOPE("Occlusion culling");
-					if ( !bIsEmpty && pSurface->fCachedBound() && OcclusionCullSurface( occlusionBox,
-													    pSurface ) )
+					if ( !bIsEmpty &&
+					     pSurface->fCachedBound() &&
+					     OcclusionCullSurface( bucketProcessor, pSurface ) )
 					{
 						// Advance to next surface
 						CurrentBucket().popSurface();

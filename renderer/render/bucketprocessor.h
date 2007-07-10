@@ -59,6 +59,12 @@ public:
 	/** Reset the status of the object */
 	void reset();
 
+	/** Update occlusion tree */
+	void occlusionCulling();
+
+	/** Whether we can cull what's represented by the given bound */
+	bool canCull(const CqBound* bound) const;
+
 	/** Process the bucket, basically rendering the waiting MPs
 	 *
 	 * \param xmin Integer minimum extend of the image part being
