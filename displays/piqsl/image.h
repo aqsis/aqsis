@@ -118,6 +118,10 @@ public:
 	{
 		return(m_elementSize);
 	}
+	virtual TqInt rowLength() const
+	{
+		return(m_elementSize * m_imageWidth);
+	}
 	virtual unsigned char* data()
 	{
 		return( m_data );
@@ -158,6 +162,8 @@ public:
 	virtual TiXmlElement* serialiseToXML();
 	void saveToTiff(const std::string& filename);
 	void loadFromTiff(const std::string& filename);
+
+	void transferData();
 
 	boost::mutex& mutex()
 	{

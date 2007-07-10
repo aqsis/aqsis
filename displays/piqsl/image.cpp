@@ -302,10 +302,52 @@ void CqImage::loadFromTiff(const std::string& filename)
 			addChannel(defChannelNames[channel], PkDspyUnsigned8);
 		PrepareImageBuffer();
 
-		TIFFReadRGBAImage(tif, w, h, (uint32*)m_data, 0);
+		if(!TIFFIsTiled(tif))
+		{
+			tdata_t buf;
+			uint32 row;
+			uint16 config;
+
+			TIFFGetField(tif, TIFFTAG_PLANARCONFIG, &config);
+			buf = _TIFFmalloc(TIFFScanlineSize(tif));
+			TqUlong localOffset = 0;
+			if (config == PLANARCONFIG_CONTIG) 
+			{
+				for (row = 0; row < h; row++)
+				{
+					TIFFReadScanline(tif, buf, row);
+					memcpy(m_realData+localOffset, buf, rowLength());
+					localOffset+=rowLength();
+				}
+			} 
+			else if (config == PLANARCONFIG_SEPARATE) 
+			{
+				#if 0
+				uint16 s, nsamples;
+
+				TIFFGetField(tif, TIFFTAG_SAMPLESPERPIXEL, &nsamples);
+				for (s = 0; s < nsamples; s++)
+				{
+					for (row = 0; row < imagelength; row++)
+					{
+						TIFFReadScanline(tif, buf, row, s);
+						memcpy(m_realData+localOffset, buf, rowLength());
+						localOffset+=rowLength();
+					}
+				}
+				#else
+				Aqsis:log() << Aqsis::error << "Images with separate planar config nto supported" << std::endl;
+				#endif
+			}
+			_TIFFfree(buf);
+		}
+		else
+			Aqsis::log() << Aqsis::error << "Cannot currently load images in tiled format." << std::endl;
+//		TIFFReadRGBAImage(tif, w, h, (uint32*)m_data, 0);
 		TIFFClose(tif);
 
 		setFilename(filename);
+		transferData();
 
 		// As the standard TIFF images are inverted compared with our internal representation,
 		// we need to do a flip.
@@ -323,6 +365,60 @@ void CqImage::loadFromTiff(const std::string& filename)
 		}
 		delete[](temp);
     }
+}
+
+void CqImage::transferData()
+{
+	assert(elementSize == m_elementSize);
+
+	boost::mutex::scoped_lock lock(mutex());
+
+	TqUlong y;
+	unsigned char *unrolled = m_data;
+	unsigned char *realData = m_realData;
+
+	for ( y = 0; y < imageHeight(); y++ )
+	{
+		TqUlong x;
+		for ( x = 0; x < imageWidth(); x++ )
+		{
+			TqInt displayOffset = numChannels() * (( y * imageWidth() ) +  x );
+			TqInt storageOffset = (( y * rowLength() ) + ( x * m_elementSize ) );
+			std::vector<std::pair<std::string, TqInt> >::iterator channel;
+			for(channel = m_channels.begin(); channel != m_channels.end(); ++channel)
+			{
+				switch(channel->second)
+				{
+					case PkDspyUnsigned16:
+						unrolled[displayOffset] = reinterpret_cast<TqUshort*>(&realData[storageOffset])[0]>>8;
+						break;
+					case PkDspySigned16:
+						unrolled[displayOffset] = reinterpret_cast<TqShort*>(&realData[storageOffset])[0]>>7;
+						break;
+					case PkDspyUnsigned32:
+						unrolled[displayOffset] = reinterpret_cast<TqUlong*>(&realData[storageOffset])[0]>>24;
+						break;
+					case PkDspySigned32:
+						unrolled[displayOffset] = reinterpret_cast<TqLong*>(&realData[storageOffset])[0]>>23;
+						break;
+
+					case PkDspyFloat32:
+						unrolled[displayOffset] = reinterpret_cast<TqFloat*>(&realData[storageOffset])[0]*255.0;
+						break;
+
+					case PkDspySigned8:
+					case PkDspyUnsigned8:
+					default:
+						unrolled[displayOffset] = reinterpret_cast<TqUchar*>(&realData[storageOffset])[0];
+						break;
+				}
+				++displayOffset;
+				++storageOffset;
+			}
+		}
+	}
+	if(m_updateCallback)
+		m_updateCallback(-1, -1, -1, -1);
 }
 
 END_NAMESPACE( Aqsis )
