@@ -160,7 +160,6 @@ void CqPiqslBase::loadConfiguration(const std::string& name)
 				while(bookXML)
 				{
 					std::string bookName = bookXML->Attribute("name");
-					std::cout << "Book: " << bookName << std::endl;
 					addNewBook(bookName);
 
 					TiXmlElement* imagesXML = bookXML->FirstChildElement("Images");
@@ -172,11 +171,11 @@ void CqPiqslBase::loadConfiguration(const std::string& name)
 							std::string imageName("");
 							std::string imageFilename("");
 							TiXmlElement* nameXML = imageXML->FirstChildElement("Name");
-							if(nameXML)
+							if(nameXML && nameXML->GetText())
 								imageName = nameXML->GetText();
 							TiXmlElement* fileNameXML = imageXML->FirstChildElement("Filename");
+							if(fileNameXML && fileNameXML->GetText())
 								imageFilename = fileNameXML->GetText();
-							std::cout << "\tImage: \"" << imageName <<  "\", \"" << imageFilename << "\"" << std::endl;
 							loadImageToCurrentBook(imageName, imageFilename);
 							imageXML = imageXML->NextSiblingElement("Image");
 						}

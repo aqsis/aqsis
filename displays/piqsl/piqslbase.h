@@ -67,6 +67,17 @@ public:
 		return(m_currentConfigName);
 	}
 
+	typedef std::vector<boost::shared_ptr<CqBook> >			TqBookList;
+	typedef std::vector<boost::shared_ptr<CqBook> >::iterator	TqBookListIterator;
+	TqBookListIterator booksBegin()
+	{
+		return(m_books.begin());
+	}
+	TqBookListIterator booksEnd()
+	{
+		return(m_books.end());
+	}
+
 private:
 	std::vector<boost::shared_ptr<CqBook> >	m_books;
 	boost::shared_ptr<CqBook>	m_currentBook;

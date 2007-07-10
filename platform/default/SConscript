@@ -149,6 +149,7 @@ env.PrependENVPath('LD_LIBRARY_PATH', env.Dir('$build_prefix/aqsistypes').abspat
 
 env.Replace(slparse_ccflags = ['-O0'])
 env.Replace(aqsistypes_libs = ['dl'])
+env.Replace(piqslapp_libs = ['pthread'])
 
 # Small TinyXML hack to allow successful building under x86_64 architecture.
 if platform.machine() == 'x86_64':

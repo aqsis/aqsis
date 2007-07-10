@@ -109,7 +109,7 @@ std::vector<boost::thread*> g_theThreads;
 class CqDataHandler
 {
 	public:
-		CqDataHandler(boost::shared_ptr<CqDisplayServerImage> thisClient) : m_client(thisClient)
+		CqDataHandler(boost::shared_ptr<CqDisplayServerImage> thisClient) : m_client(thisClient), m_done(false)
 		{}
 
 		void operator()()
@@ -123,7 +123,7 @@ class CqDataHandler
 			int count;
 
 			// Read a message
-			while(1)	
+			while(!m_done)	
 			{
 				count = m_client->socket().recvData(buffer);
 				if(count <= 0)
@@ -278,19 +278,12 @@ class CqDataHandler
 					m_client->PrepareImageBuffer();
 
 					boost::shared_ptr<CqImage> baseImage = boost::static_pointer_cast<CqImage>(m_client);
-					if (window && window->currentBook())
-					{
-						window->currentBook()->framebuffer()->resize();
-						window->currentBook()->framebuffer()->update();
-					}
-					if (window)
-					{
-						window->updateImageList();
-					}
+					window->currentBook()->framebuffer()->queueResize();
+					window->currentBook()->framebuffer()->update();
+					window->updateImageList();
 				}
 				else if(root->ValueStr().compare("Data") == 0)
 				{
-					Aqsis::log() << Aqsis::info << "Processing data message" << std::endl;
 					TiXmlElement* dimensionsXML = root->FirstChildElement("Dimensions");
 					if(dimensionsXML)
 					{
@@ -330,35 +323,29 @@ class CqDataHandler
 					}
 				}
 				else if(root->ValueStr().compare("Close") == 0)
+				{
 					m_client->close();
+					m_done = true;
+				}
 			}		
 		}
 
 
 	private:
 		boost::shared_ptr<CqDisplayServerImage> m_client;
+		bool	m_done;
 };
 
 
 void HandleConnection(int sock, void *data)
 {
-	Aqsis::log() << Aqsis::debug << "Connection established with display server" << std::endl;
+	Aqsis::log() << Aqsis::info << "Connection established with display server" << std::endl;
 
 	boost::shared_ptr<CqDisplayServerImage> newImage(new CqDisplayServerImage());
 	newImage->setName("Unnamed");
 	
 	if(g_theSocket.accept(newImage->socket()))
 	{
-		// \todo: Need to work out how to do non-blocking on Win32
-#ifndef	AQSIS_SYSTEM_WIN32
-		// Set socket as non-blocking
-//		int oldflags;
-//		oldflags = fcntl(sock, F_GETFL, 0);
-//		fcntl(sock, F_SETFL, oldflags | O_NONBLOCK);
-#endif
-		
-		g_theThreads.push_back(new boost::thread(CqDataHandler(newImage)));
-
 		if(window)
 		{
 			Fl::lock();
@@ -366,11 +353,22 @@ void HandleConnection(int sock, void *data)
 			window->addImageToCurrentBook(baseImage);
 			Fl::unlock();
 		}
+		
+		g_theThreads.push_back(new boost::thread(CqDataHandler(newImage)));
 	}
 }
 
 
-
+void idle_cb(void*)
+{
+	// Act upon an resize/update requests on the framebuffers.
+	CqPiqslBase::TqBookListIterator book;
+	for(book = window->booksBegin(); book != window->booksEnd(); ++book)
+	{
+		if((*book)->framebuffer())
+			(*book)->framebuffer()->onIdle();
+	}
+}
 
 int main( int argc, char** argv )
 {
@@ -476,12 +474,19 @@ int main( int argc, char** argv )
 
 	Fl::add_fd(g_theSocket,&HandleConnection);
 
+	Fl::add_idle(idle_cb);
+
 	window = new CqPiqslMainWindow();
 	char *internalArgs[] = {
 		"piqsl"
 	};
 	window->show(1, internalArgs);
 
-	return Fl::run();
+
+	int result = Fl::run();
+
+	Fl::remove_idle(idle_cb);
+
+	return(result);
 }
 

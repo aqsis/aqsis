@@ -61,7 +61,7 @@ void piqsl_cb(Fl_Widget* w, void* v)
 	Fl::unlock();
 }
 
-CqFramebuffer::CqFramebuffer(TqUlong width, TqUlong height, TqInt depth)
+CqFramebuffer::CqFramebuffer(TqUlong width, TqUlong height, TqInt depth) : m_doResize(false)
 {
 	Fl::lock();
 	m_theWindow = new Fl_Window(width, height);
@@ -123,11 +123,19 @@ void CqFramebuffer::disconnect()
 	Fl::unlock();
 }
 
+void CqFramebuffer::queueResize()
+{
+	Fl::lock();
+	m_doResize = true;
+	Fl::unlock();
+}
+
 void CqFramebuffer::resize()
 {
 	Fl::lock();
 	m_uiImageWidget->size(m_associatedImage->frameWidth(), m_associatedImage->frameHeight());
 	m_theWindow->size(m_associatedImage->frameWidth(), m_associatedImage->frameHeight());
+	m_doResize = false;
 	Fl::unlock();
 }
 
@@ -140,6 +148,13 @@ void CqFramebuffer::update(int X, int Y, int W, int H)
 		m_uiImageWidget->damage(1, X, Y, W, H);
 	Fl::awake();
 	Fl::unlock();
+}
+
+/// \note: This should only ever be called from the main thread.
+void CqFramebuffer::onIdle()
+{
+	if(m_doResize)
+		resize();
 }
 
 END_NAMESPACE( Aqsis )

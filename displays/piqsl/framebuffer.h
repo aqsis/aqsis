@@ -88,8 +88,10 @@ public:
 		return( m_associatedImage );
 	}
 
+	void queueResize();
 	void resize();
 	void update(int X = -1, int Y = -1, int W = -1, int H = -1);
+	void onIdle();
 
 	boost::mutex& mutex()
 	{
@@ -102,6 +104,7 @@ private:
 	Fl_RGB_Image*	m_uiImage;
 	Fl_Menu_Button* m_popupMenu;
 	static Fl_Menu_Item m_popupMenuItems[];
+	bool	m_doResize;
 
 	boost::shared_ptr<CqImage>	m_associatedImage;
 	boost::mutex	m_mutex;
