@@ -403,6 +403,12 @@ int main( int argc, char** argv )
  		exit( 1 );
 	}
 
+	if ( g_fHelp)
+	{
+		std::cerr << ap.usagemsg();
+ 		exit( 0 );
+	}
+
 	if ( g_fVersion )
 	{
 		version( std::cout );

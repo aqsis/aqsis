@@ -2,7 +2,14 @@ Import('env', 'embedManifest')
 piqslappenv = env.Copy()
 
 piqslappenv.AppendUnique(CPPPATH = ['#/aqsis/aqsistypes', '#/thirdparty/tinyxml', '#/renderer/ddmanager','$tiff_include_path', '$zlib_include_path', '$fltk_include_path'])
-piqslappenv.AppendUnique(LIBS = ['aqsistypes','argparse','$fltk_lib', 'tinyxml', '$boost_thread_lib', 'pthread', '$tiff_lib', '$z_lib'])
+piqslappenv.AppendUnique(LIBS = ['aqsistypes','argparse','$fltk_lib', 'tinyxml', '$boost_thread_lib', '$tiff_lib', '$z_lib'])
+
+if piqslappenv.has_key('default'): 
+	piqslappenv.AppendUnique(LIBS = ['pthread'])
+
+if piqslappenv.has_key('darwin'): 
+	piqslappenv.AppendUnique(LIBS = ['pthread'])
+
 piqslappenv.AppendUnique(LIBPATH = ['/usr/X11R6/lib'])
 piqslappenv.AppendUnique(CPPDEFINES=['PIQSL_APP_EXPORTS', 'TIXML_USE_STL'])
 
