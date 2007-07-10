@@ -10,10 +10,9 @@ ScreenWindow -1 1 -0.75 0.75
 Projection "perspective" "fov" 45.0
 Clipping 0.1 100000.0
 Shutter 0.0 1.0
-Orientation "lh"
 
 FrameBegin 0
-	Display "Bug1740063.tif" "file" "rgb"  "string compression" "packbit"
+	Display "Bug1740063.tif" "file" "rgb"  "string compression" "lzw"
 	Scale -1 1 1
 	ConcatTransform [-0.707107 0.353553 0.612373 0 0.707107 0.353553 0.612372 0 0.0 0.866025 -0.5 0 2.18557e-005 0.0 250.0 1]
 
@@ -23,7 +22,14 @@ FrameBegin 0
 			Color [0.341177 0.882353 0.341177]
 			Opacity [1.0 1.0 1.0]
 			ShadingInterpolation "smooth"
-			Curves "linear" [ 2 ] "nonperiodic" "P" [ 33.2703 -50.4114 0.0  -39.1857 31.7896 0.0 ] "constantwidth" 1.0
+			Orientation "lh"
+			Curves "linear" [ 2 ] "nonperiodic" "P" [ 33.2703 -50.4114 0.0  -39.1857 31.7896 0.0 ] "constantwidth" 2.0
+			Points "P" [ 33.2703 -50.4114 0.0  -39.1857 31.7896 0.0 ] "width" [ 4 4 ]
+
+			Orientation "rh"
+			Color [0.882353 0.341177 0.341177]
+			Curves "linear" [ 2 ] "nonperiodic" "P" [ 43.2703 -50.4114 0.0  -29.1857 31.7896 0.0 ] "constantwidth" 2.0
+			Points "P" [ 43.2703 -50.4114 0.0  -29.1857 31.7896 0.0 ] "width" [ 4 4 ]
 		AttributeEnd
 	WorldEnd
 FrameEnd

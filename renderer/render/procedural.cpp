@@ -24,7 +24,7 @@
         \author Jonathan Merritt (j.merritt@pgrad.unimelb.edu.au)
 */
 
-#ifdef	WIN32
+#if _MSC_VER
 #pragma warning(disable : 4786)
 #endif
 

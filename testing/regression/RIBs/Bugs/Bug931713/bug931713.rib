@@ -5,7 +5,7 @@ Option "limits" "gridsize" [ 256 ]
 Option "limits" "texturememory" [ 256 ] 
 Option "limits" "eyesplits" [ 10 ] 
 #Shader Path
-Option "searchpath" "shader" ["&:.:~:../../../shaders"]
+Option "searchpath" "shader" ["../../../shaders:&:.:~:"]
 
 Orientation "rh"
 PixelSamples 1.000000 1.000000

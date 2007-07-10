@@ -185,14 +185,11 @@ CqMicroPolyGridBase* CqPoints::Dice()
 
 	if ( USES( lUses, EnvVars_Ng ) )
 	{
-		CqVector3D	N(0,0,1);
+		CqVector3D	N(0,0,-1);
 		//N = QGetRenderContext() ->matSpaceToSpace( "camera", "object", NULL, pGrid->pTransform() ) * N;
 		TqUint u;
 		for ( u = 0; u < nVertices(); u++ )
 		{
-			bool CSO = pTransform()->GetHandedness(pTransform()->Time(0));
-			bool O = pAttributes() ->GetIntegerAttribute( "System", "Orientation" ) [ 0 ] != 0;
-			N = ( (O && CSO) || (!O && !CSO) ) ? N : -N;
 			pGrid->pVar(EnvVars_Ng)->SetNormal( N, u );
 		}
 		pGrid->SetbGeometricNormals( true );

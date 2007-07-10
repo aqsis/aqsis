@@ -44,7 +44,6 @@ class CqMicroPolygon;
 
 struct SqMpgSampleInfo;
 struct SqImageSample;
-struct SqImageSample;
 struct SqSampleData;
 struct SqGridInfo;
 
