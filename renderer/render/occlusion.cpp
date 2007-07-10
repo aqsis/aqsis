@@ -48,8 +48,6 @@ bool CqOcclusionTree::CqOcclusionTreeComparator::operator()(const std::pair<TqIn
 }
 
 
-CqOcclusionTreePtr	CqOcclusionBox::m_KDTree = 0;	///< KD Tree representing the samples in the bucket.
-
 TqInt CqOcclusionTree::m_Tab = 0;
 
 
@@ -394,92 +392,6 @@ SqSampleData& CqOcclusionTree::Sample() const
 }
 
 
-//----------------------------------------------------------------------
-/** Constructor
-*/
-
-CqOcclusionBox::CqOcclusionBox()
-{}
-
-
-//----------------------------------------------------------------------
-/** Destructor
-*/
-
-CqOcclusionBox::~CqOcclusionBox()
-{}
-
-
-
-//----------------------------------------------------------------------
-/** Delete the static hierarchy created in CreateHierachy(). static.
-*/
-void CqOcclusionBox::DeleteHierarchy()
-{
-	delete m_KDTree;
-	m_KDTree = NULL;
-}
-
-
-//----------------------------------------------------------------------
-/** Setup the hierarchy for one bucket. Static.
-	This should be called before rendering each bucket
- *\param bucket: the bucket we are about to render
- *\param xMin: left edge of this bucket (taking into account crop windows etc)
- *\param yMin: Top edge of this bucket
- *\param xMax: Right edge of this bucket
- *\param yMax: Bottom edge of this bucket
-*/
-
-void CqOcclusionBox::SetupHierarchy( const CqBucket* bucket )
-{
-	assert( bucket );
-
-	if(!m_KDTree)
-	{
-		m_KDTree = CqOcclusionTreePtr(new CqOcclusionTree());
-		// Setup the KDTree of samples
-		TqInt numpixels = bucket->RealHeight() * bucket->RealWidth();
-		TqInt numsamples = bucket->PixelXSamples() * bucket->PixelYSamples();
-		for ( TqInt j = 0; j < numpixels; j++ )
-		{
-			// Gather all samples within the pixel
-			for ( TqInt i = 0; i < numsamples; i++ )
-			{
-				m_KDTree->AddSample(std::pair<TqInt, TqInt>(j,i));
-			}
-		}
-		// Now split the tree down until each leaf has only one sample.
-		m_KDTree->InitialiseBounds();
-		m_KDTree->ConstructTree();
-	}
-
-	m_KDTree->UpdateBounds();
-
-	/*
-		static TqInt i__ = 0;
-		if(i__ == 800)
-		{
-			std::ofstream strFile("test.out");
-			strFile << "xmin = " << xMin << std::endl << "ymin = " << yMin << std::endl << "xmax = " <<  xMax << std::endl << "ymax = " << yMax << std::endl << std::endl;
-			strFile << "points = [" << std::endl;
-			strFile.close();
-			CqOcclusionTree::m_Tab = 0;
-			m_KDTree->OutputTree("test.out");
-			std::ofstream strFile2("test.out", std::ios_base::out|std::ios_base::app);
-			strFile2 << "]" << std::endl;
-		}
-		i__++;
-	*/
-}
-
-
-bool CqOcclusionBox::CanCull( const CqBound* bound )
-{
-	return(m_KDTree->CanCull(bound));
-}
-
-
 void CqOcclusionTree::StoreExtraData( const CqMicroPolygon* pMPG, SqImageSample& sample)
 {
 	std::map<std::string, CqRenderer::SqOutputDataEntry>& DataMap = QGetRenderContext() ->GetMapOfOutputDataEntries();
@@ -702,6 +614,90 @@ void CqOcclusionTree::SampleMPG( CqMicroPolygon* pMPG, const CqBound& bound, boo
 	}
 }
 */
+
+
+//----------------------------------------------------------------------
+// Static Variables
+
+CqOcclusionTreePtr	CqOcclusionBox::m_KDTree = 0;	///< KD Tree representing the samples in the bucket.
+
+//----------------------------------------------------------------------
+/** Constructor
+*/
+
+CqOcclusionBox::CqOcclusionBox()
+{}
+
+
+//----------------------------------------------------------------------
+/** Destructor
+*/
+
+CqOcclusionBox::~CqOcclusionBox()
+{
+	delete m_KDTree;
+	m_KDTree = NULL;
+}
+
+
+//----------------------------------------------------------------------
+/** Setup the hierarchy for one bucket. Static.
+	This should be called before rendering each bucket
+ *\param bucket: the bucket we are about to render
+ *\param xMin: left edge of this bucket (taking into account crop windows etc)
+ *\param yMin: Top edge of this bucket
+ *\param xMax: Right edge of this bucket
+ *\param yMax: Bottom edge of this bucket
+*/
+
+void CqOcclusionBox::SetupHierarchy( const CqBucket* bucket )
+{
+	assert( bucket );
+
+	if(!m_KDTree)
+	{
+		m_KDTree = CqOcclusionTreePtr(new CqOcclusionTree());
+		// Setup the KDTree of samples
+		TqInt numpixels = bucket->RealHeight() * bucket->RealWidth();
+		TqInt numsamples = bucket->PixelXSamples() * bucket->PixelYSamples();
+		for ( TqInt j = 0; j < numpixels; j++ )
+		{
+			// Gather all samples within the pixel
+			for ( TqInt i = 0; i < numsamples; i++ )
+			{
+				m_KDTree->AddSample(std::pair<TqInt, TqInt>(j,i));
+			}
+		}
+		// Now split the tree down until each leaf has only one sample.
+		m_KDTree->InitialiseBounds();
+		m_KDTree->ConstructTree();
+	}
+
+	m_KDTree->UpdateBounds();
+
+	/*
+		static TqInt i__ = 0;
+		if(i__ == 800)
+		{
+			std::ofstream strFile("test.out");
+			strFile << "xmin = " << xMin << std::endl << "ymin = " << yMin << std::endl << "xmax = " <<  xMax << std::endl << "ymax = " << yMax << std::endl << std::endl;
+			strFile << "points = [" << std::endl;
+			strFile.close();
+			CqOcclusionTree::m_Tab = 0;
+			m_KDTree->OutputTree("test.out");
+			std::ofstream strFile2("test.out", std::ios_base::out|std::ios_base::app);
+			strFile2 << "]" << std::endl;
+		}
+		i__++;
+	*/
+}
+
+
+bool CqOcclusionBox::CanCull( const CqBound* bound ) const
+{
+	return(m_KDTree->CanCull(bound));
+}
+
 
 END_NAMESPACE( Aqsis )
 

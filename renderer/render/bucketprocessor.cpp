@@ -39,12 +39,12 @@ CqBucketProcessor::CqBucketProcessor(CqBucket* bucket) :
 
 CqBucketProcessor::~CqBucketProcessor()
 {
-	reset();
 }
 
 void CqBucketProcessor::setBucket(CqBucket* bucket)
 {
 	assert(m_bucket == 0);
+
 	m_bucket = bucket;
 	m_bucket->SetBucketData(&m_bucketData);
 }
@@ -52,6 +52,7 @@ void CqBucketProcessor::setBucket(CqBucket* bucket)
 void CqBucketProcessor::reset()
 {
 	assert(m_bucket && m_bucket->IsProcessed());
+
 	m_bucket->SetBucketData(static_cast<CqBucketData*>(0));
 	m_bucket = 0;
 }
@@ -59,6 +60,13 @@ void CqBucketProcessor::reset()
 void CqBucketProcessor::process( long xmin, long xmax, long ymin, long ymax, TqFloat clippingFar, TqFloat clippingNear )
 {
 	m_bucket->RenderWaitingMPs( xmin, xmax, ymin, ymax, clippingFar, clippingNear );
+}
+
+void CqBucketProcessor::finishProcessing()
+{
+	assert(m_bucket && !m_bucket->IsProcessed());
+
+	m_bucket->SetProcessed();
 }
 
 

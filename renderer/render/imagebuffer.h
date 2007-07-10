@@ -38,9 +38,10 @@
 #include	"mpdump.h"
 
 
-class CqMicroPolygon;
-
 START_NAMESPACE( Aqsis )
+
+class CqMicroPolygon;
+class CqOcclusionBox;
 
 
 // Enumeration of the type of rendering order of the buckets (experimental)
@@ -278,7 +279,7 @@ class CqImageBuffer
 
 		void	RenderSurface( boost::shared_ptr<CqSurface>& pSurface );
 		bool	CullSurface( CqBound& Bound, const boost::shared_ptr<CqSurface>& pSurface );
-		bool	OcclusionCullSurface( const boost::shared_ptr<CqSurface>& pSurface );
+		bool	OcclusionCullSurface( const CqOcclusionBox& occlusionBox, const boost::shared_ptr<CqSurface>& pSurface );
 
 		void	DeleteImage();
 

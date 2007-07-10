@@ -32,6 +32,7 @@
 #include	"bound.h"
 #include	"color.h"
 #include	"imagepixel.h"
+#include	"occlusion.h"
 
 #include	<vector>
 
@@ -109,6 +110,8 @@ private:
 	std::vector<TqFloat>	m_aCoverages;
 
 	SqMpgSampleInfo m_CurrentMpgSampleInfo;
+
+	CqOcclusionBox m_OcclusionBox;
 };
 
 

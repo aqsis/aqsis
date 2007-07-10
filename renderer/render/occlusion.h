@@ -160,10 +160,12 @@ class CqOcclusionTree// : public boost::enable_shared_from_this<CqOcclusionTree>
 class CqOcclusionBox
 {
 	public:
-		static void DeleteHierarchy();
-		static void SetupHierarchy( const CqBucket* bucket );
+		CqOcclusionBox();
+		~CqOcclusionBox();
 
-		static bool CanCull( const CqBound* bound );
+		void SetupHierarchy( const CqBucket* bucket );
+
+		bool CanCull( const CqBound* bound ) const;
 
 		static CqOcclusionTreePtr& KDTree()
 		{
@@ -171,9 +173,6 @@ class CqOcclusionBox
 		}
 
 	protected:
-		CqOcclusionBox();
-		~CqOcclusionBox();
-
 		static CqOcclusionTreePtr	m_KDTree;			///< Tree representing the samples in the bucket.
 };
 

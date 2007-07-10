@@ -379,11 +379,11 @@ void CqImageBuffer::PostSurface( const boost::shared_ptr<CqSurface>& pSurface )
  * \return Boolean indicating that the GPrim has been culled.
 */
 
-bool CqImageBuffer::OcclusionCullSurface( const boost::shared_ptr<CqSurface>& pSurface )
+bool CqImageBuffer::OcclusionCullSurface( const CqOcclusionBox& occlusionBox, const boost::shared_ptr<CqSurface>& pSurface )
 {
 	const CqBound RasterBound( pSurface->GetCachedRasterBound() );
 
-	if ( CqOcclusionBox::CanCull( &RasterBound ) )
+	if ( occlusionBox.CanCull( &RasterBound ) )
 	{
 		// pSurface is behind everying in this bucket but it may be
 		// visible in other buckets it overlaps.
@@ -697,6 +697,7 @@ void CqImageBuffer::RenderImage()
 	// A counter for the number of processed buckets (used for progress reporting)
 	TqInt iBucket = 0;
 
+	CqOcclusionBox occlusionBox;
 	CqBucketProcessor bucketProcessor;
 
 	// Iterate over all buckets...
@@ -721,7 +722,7 @@ void CqImageBuffer::RenderImage()
 		if ( !bIsEmpty )
 		{
 			TIME_SCOPE("Occlusion culling")
-			CqOcclusionBox::SetupHierarchy( &CurrentBucket() );
+			occlusionBox.SetupHierarchy( &CurrentBucket() );
 		}
 
 		////////// Dump the pixel sample positions into a dump file //////////
@@ -771,7 +772,8 @@ void CqImageBuffer::RenderImage()
 				if ( !( DisplayMode() & ModeZ ) && !pSurface->pCSGNode() )
 				{
 					TIME_SCOPE("Occlusion culling");
-					if ( !bIsEmpty && pSurface->fCachedBound() && OcclusionCullSurface( pSurface ) )
+					if ( !bIsEmpty && pSurface->fCachedBound() && OcclusionCullSurface( occlusionBox,
+													    pSurface ) )
 					{
 						// Advance to next surface
 						CurrentBucket().popSurface();
@@ -827,7 +829,8 @@ void CqImageBuffer::RenderImage()
 		if ( !( iBucket % bucketmodulo ) )
 			SetProcessWorkingSetSize( GetCurrentProcess(), 0xffffffff, 0xffffffff );
 #endif
-		CurrentBucket().SetProcessed();
+
+		bucketProcessor.finishProcessing();
 		bucketProcessor.reset();
 
 		// Increase the bucket counter...
@@ -836,7 +839,6 @@ void CqImageBuffer::RenderImage()
 
 	ImageComplete();
 	CqBucket::ShutdownBucket();
-	CqOcclusionBox::DeleteHierarchy();
 
 	// Pass >100 through to progress to allow it to indicate completion.
 

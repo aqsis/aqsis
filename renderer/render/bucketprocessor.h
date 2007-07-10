@@ -75,6 +75,9 @@ public:
 	 */
 	void process( long xmin, long xmax, long ymin, long ymax, TqFloat clippingFar, TqFloat clippingNear );
 
+	/** Finish the processing of the bucket */
+	void finishProcessing();
+
 private:
 	/// Pointer to the current bucket
 	CqBucket* m_bucket;
