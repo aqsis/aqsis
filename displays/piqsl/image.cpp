@@ -336,7 +336,7 @@ void CqImage::loadFromTiff(const std::string& filename)
 					}
 				}
 				#else
-				Aqsis:log() << Aqsis::error << "Images with separate planar config nto supported" << std::endl;
+				Aqsis:log() << Aqsis::error << "Images with separate planar config not supported." << std::endl;
 				#endif
 			}
 			_TIFFfree(buf);
