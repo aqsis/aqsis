@@ -73,6 +73,7 @@ class CqOcclusionTree// : public boost::enable_shared_from_this<CqOcclusionTree>
 		}
 		bool CanCull( const CqBound* bound );
 		void SampleMPG( std::vector<CqImagePixel>& aieImage,
+				std::vector<SqSampleData>& samplePoints,
 				CqMicroPolygon* pMPG,
 				const CqBound& bound,
 				bool usingMB,
@@ -113,7 +114,7 @@ class CqOcclusionTree// : public boost::enable_shared_from_this<CqOcclusionTree>
 		void StoreExtraData(const CqMicroPolygon* pMPG, SqImageSample& sample);
 
 		SqSampleData& Sample(const CqBucket* bucket, size_t index) const;
-		SqSampleData& Sample(std::vector<CqImagePixel>& aieImage, size_t index) const;
+		SqSampleData& Sample(std::vector<CqImagePixel>& aieImage, std::vector<SqSampleData>& samplePoints, size_t index) const;
 
 		void PropagateChanges();
 

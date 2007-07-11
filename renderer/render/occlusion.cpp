@@ -42,8 +42,8 @@ START_NAMESPACE( Aqsis )
 
 bool CqOcclusionTree::CqOcclusionTreeComparator::operator()(const std::pair<TqInt, TqInt>& a, const std::pair<TqInt, TqInt>& b)
 {
-	const SqSampleData& A = m_bucket->ImageElement(a.first).SampleData(a.second);
-	const SqSampleData& B = m_bucket->ImageElement(b.first).SampleData(b.second);
+	const SqSampleData& A = m_bucket->ImageElement(a.first).SampleData(m_bucket->SamplePoints(), a.second);
+	const SqSampleData& B = m_bucket->ImageElement(b.first).SampleData(m_bucket->SamplePoints(), b.second);
 	return( A.m_Position[m_Dim] < B.m_Position[m_Dim] );
 }
 
@@ -387,12 +387,13 @@ bool CqOcclusionTree::CanCull( const CqBound* bound )
 
 SqSampleData& CqOcclusionTree::Sample(const CqBucket* bucket, size_t index) const
 {
-	return bucket->ImageElement(m_SampleIndices[index].first).SampleData(m_SampleIndices[index].second);
+	return bucket->ImageElement(m_SampleIndices[index].first).SampleData(bucket->SamplePoints(),
+									     m_SampleIndices[index].second);
 }
 
-SqSampleData& CqOcclusionTree::Sample(std::vector<CqImagePixel>& aieImage, size_t index) const
+SqSampleData& CqOcclusionTree::Sample(std::vector<CqImagePixel>& aieImage, std::vector<SqSampleData>& samplePoints, size_t index) const
 {
-	return aieImage[m_SampleIndices[index].first].SampleData(m_SampleIndices[index].second);
+	return aieImage[m_SampleIndices[index].first].SampleData(samplePoints, m_SampleIndices[index].second);
 }
 
 
@@ -470,14 +471,14 @@ void CqOcclusionTree::StoreExtraData(const CqMicroPolygon* pMPG, SqImageSample& 
 
 
 
-void CqOcclusionTree::SampleMPG( std::vector<CqImagePixel>& aieImage, CqMicroPolygon* pMPG, const CqBound& bound, bool usingMB, TqFloat time0, TqFloat time1, bool usingDof, TqInt dofboundindex, const SqMpgSampleInfo& MpgSampleInfo, bool usingLOD, const SqGridInfo& gridInfo)
+void CqOcclusionTree::SampleMPG( std::vector<CqImagePixel>& aieImage, std::vector<SqSampleData>& samplePoints, CqMicroPolygon* pMPG, const CqBound& bound, bool usingMB, TqFloat time0, TqFloat time1, bool usingDof, TqInt dofboundindex, const SqMpgSampleInfo& MpgSampleInfo, bool usingLOD, const SqGridInfo& gridInfo)
 {
 	// Check the current tree level, and if only one leaf, sample the MP, otherwise, pass it down to the left
 	// and/or right side of the tree if it crosses.
 	if(NumSamples() == 1)
 	{
 		// Sample the MPG
-		SqSampleData& sample = Sample(aieImage, 0);
+		SqSampleData& sample = Sample(aieImage, samplePoints, 0);
 
 		CqStats::IncI( CqStats::SPL_count );
 		TqFloat D;
@@ -579,7 +580,7 @@ void CqOcclusionTree::SampleMPG( std::vector<CqImagePixel>& aieImage, CqMicroPol
 			{
 				if(bound.vecMin().z() <= (*child)->m_MaxOpaqueZ || !gridInfo.m_IsCullable)
 				{
-					(*child)->SampleMPG(aieImage, pMPG, bound, usingMB, time0, time1, usingDof, dofboundindex, MpgSampleInfo, usingLOD, gridInfo);
+					(*child)->SampleMPG(aieImage, samplePoints, pMPG, bound, usingMB, time0, time1, usingDof, dofboundindex, MpgSampleInfo, usingLOD, gridInfo);
 				}
 			}
 		}

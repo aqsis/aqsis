@@ -106,14 +106,14 @@ void CqBucket::PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt y
 		{
 			for ( TqInt j = 0; j < m_bucketData->m_RealWidth; j++ )
 			{
-				m_bucketData->m_aieImage[which].Clear( this );
+				m_bucketData->m_aieImage[which].Clear( m_bucketData->m_SamplePoints );
 				m_bucketData->m_aieImage[which].AllocateSamples( this,
 										 m_bucketData->m_PixelXSamples,
 										 m_bucketData->m_PixelYSamples );
-				m_bucketData->m_aieImage[which].InitialiseSamples( this,
+				m_bucketData->m_aieImage[which].InitialiseSamples( m_bucketData->m_SamplePoints,
 										   m_bucketData->m_aSamplePositions[which] );
 				//if(fJitter)
-				m_bucketData->m_aieImage[which].JitterSamples( this,
+				m_bucketData->m_aieImage[which].JitterSamples( m_bucketData->m_SamplePoints,
 									       m_bucketData->m_aSamplePositions[which],
 									       opentime, closetime);
 
@@ -149,13 +149,13 @@ void CqBucket::PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt y
 			bPos2 += CqVector2D( ( j - m_bucketData->m_DiscreteShiftX ), ( ii - m_bucketData->m_DiscreteShiftY ) );
 
 			if(!empty)
-				m_bucketData->m_aieImage[which].Clear( this );
+				m_bucketData->m_aieImage[which].Clear( m_bucketData->m_SamplePoints );
 
 			//if(fJitter)
-			m_bucketData->m_aieImage[which].JitterSamples( this,
+			m_bucketData->m_aieImage[which].JitterSamples( m_bucketData->m_SamplePoints,
 								       m_bucketData->m_aSamplePositions[which],
 								       opentime, closetime);
-			m_bucketData->m_aieImage[which].OffsetSamples( this,
+			m_bucketData->m_aieImage[which].OffsetSamples( m_bucketData->m_SamplePoints,
 								       bPos2,
 								       m_bucketData->m_aSamplePositions[which] );
 
@@ -504,7 +504,8 @@ void CqBucket::FilterBucket(bool empty, bool fImager)
 
 							for ( TqInt sx = 0; sx < PixelXSamples(); sx++ )
 							{
-								const SqSampleData& sampleData = pie2->SampleData( sampleIndex );
+								const SqSampleData& sampleData = pie2->SampleData( m_bucketData->m_SamplePoints,
+														   sampleIndex );
 								CqVector2D vecS = sampleData.m_Position;
 								vecS -= CqVector2D( xcent, ycent );
 								if ( vecS.x() >= -xfwo2 && vecS.y() >= -yfwo2 && vecS.x() <= xfwo2 && vecS.y() <= yfwo2 )
@@ -512,9 +513,11 @@ void CqBucket::FilterBucket(bool empty, bool fImager)
 									TqInt cindex = sindex + sampleData.m_SubCellIndex;
 									TqFloat g = m_bucketData->m_aFilterValues[ cindex ];
 									gTot += g;
-									if ( pie2->OpaqueValues( sampleIndex ).m_flags & SqImageSample::Flag_Valid )
+									if ( pie2->OpaqueValues( m_bucketData->m_SamplePoints,
+												 sampleIndex ).m_flags & SqImageSample::Flag_Valid )
 									{
-										SqImageSample& pSample = pie2->OpaqueValues( sampleIndex );
+										SqImageSample& pSample = pie2->OpaqueValues( m_bucketData->m_SamplePoints,
+															     sampleIndex );
 										for ( TqInt k = 0; k < datasize; ++k )
 											samples[k] += pSample.Data()[k] * g;
 										sampleCounts[pixelIndex]++;
@@ -564,7 +567,8 @@ void CqBucket::FilterBucket(bool empty, bool fImager)
 						for ( sy = 0; sy < PixelYSamples(); sy++ )
 						{
 							TqInt sindex = index + ( ( ( sy * PixelXSamples() ) + sx ) * numsubpixels );
-							const SqSampleData& sampleData = pie2->SampleData( sampleIndex );
+							const SqSampleData& sampleData = pie2->SampleData( m_bucketData->m_SamplePoints,
+													   sampleIndex );
 							CqVector2D vecS = sampleData.m_Position;
 							vecS -= CqVector2D( xcent, ycent );
 							if ( vecS.x() >= -xfwo2 && vecS.y() >= -yfwo2 && vecS.x() <= xfwo2 && vecS.y() <= yfwo2 )
@@ -639,7 +643,8 @@ void CqBucket::FilterBucket(bool empty, bool fImager)
 								for ( sx = 0; sx < PixelXSamples(); sx++ )
 								{
 									TqInt sindex = index + ( ( ( sy * PixelXSamples() ) + sx ) * numsubpixels );
-									const SqSampleData& sampleData = pie2->SampleData( sampleIndex );
+									const SqSampleData& sampleData = pie2->SampleData( m_bucketData->m_SamplePoints,
+															   sampleIndex );
 									CqVector2D vecS = sampleData.m_Position;
 									vecS -= CqVector2D( xcent, ycent );
 									if ( vecS.x() >= -xfwo2 && vecS.y() >= -yfwo2 && vecS.x() <= xfwo2 && vecS.y() <= yfwo2 )
@@ -647,9 +652,11 @@ void CqBucket::FilterBucket(bool empty, bool fImager)
 										TqInt cindex = sindex + sampleData.m_SubCellIndex;
 										TqFloat g = m_bucketData->m_aFilterValues[ cindex ];
 										gTot += g;
-										if ( pie2->OpaqueValues( sampleIndex ).m_flags & SqImageSample::Flag_Valid )
+										if ( pie2->OpaqueValues( m_bucketData->m_SamplePoints,
+													 sampleIndex ).m_flags & SqImageSample::Flag_Valid )
 										{
-											SqImageSample& pSample = pie2->OpaqueValues( sampleIndex );
+											SqImageSample& pSample = pie2->OpaqueValues( m_bucketData->m_SamplePoints,
+																     sampleIndex );
 											for ( TqInt k = 0; k < datasize; ++k )
 												samples[k] += pSample.Data()[k] * g;
 											SampleCount++;
@@ -1185,11 +1192,11 @@ void CqBucket::RenderMPG_MBOrDof( CqMicroPolygon* pMPG,
 			if(UsingDof)
 			{
 				CqBound DofBound(bminx, bminy, bminz, bmaxx, bmaxy, bmaxz);
-				m_bucketData->m_OcclusionBox.KDTree()->SampleMPG(m_bucketData->m_aieImage, pMPG, DofBound, IsMoving, time0, time1, true, bound_numDof, m_bucketData->m_CurrentMpgSampleInfo, currentGridInfo.m_LodBounds[0] >= 0.0f, currentGridInfo);
+				m_bucketData->m_OcclusionBox.KDTree()->SampleMPG(m_bucketData->m_aieImage, m_bucketData->m_SamplePoints, pMPG, DofBound, IsMoving, time0, time1, true, bound_numDof, m_bucketData->m_CurrentMpgSampleInfo, currentGridInfo.m_LodBounds[0] >= 0.0f, currentGridInfo);
 			}
 			else
 			{
-				m_bucketData->m_OcclusionBox.KDTree()->SampleMPG(m_bucketData->m_aieImage, pMPG, Bound, IsMoving, time0, time1, false, 0, m_bucketData->m_CurrentMpgSampleInfo, currentGridInfo.m_LodBounds[0] >= 0.0f, currentGridInfo);
+				m_bucketData->m_OcclusionBox.KDTree()->SampleMPG(m_bucketData->m_aieImage, m_bucketData->m_SamplePoints, pMPG, Bound, IsMoving, time0, time1, false, 0, m_bucketData->m_CurrentMpgSampleInfo, currentGridInfo.m_LodBounds[0] >= 0.0f, currentGridInfo);
 			}
 		}
 	}
@@ -1207,7 +1214,7 @@ void CqBucket::RenderMPG_Static( CqMicroPolygon* pMPG )
 	const SqGridInfo& currentGridInfo = pMPG->pGrid()->GetCachedGridInfo();
 	const CqBound& Bound = pMPG->GetTotalBound();
 
-	m_bucketData->m_OcclusionBox.KDTree()->SampleMPG(m_bucketData->m_aieImage, pMPG, Bound, false, 0, 0, false, 0, m_bucketData->m_CurrentMpgSampleInfo, currentGridInfo.m_LodBounds[0] >= 0.0f, currentGridInfo);
+	m_bucketData->m_OcclusionBox.KDTree()->SampleMPG(m_bucketData->m_aieImage, m_bucketData->m_SamplePoints, pMPG, Bound, false, 0, 0, false, 0, m_bucketData->m_CurrentMpgSampleInfo, currentGridInfo.m_LodBounds[0] >= 0.0f, currentGridInfo);
 }
 
 

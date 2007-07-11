@@ -264,9 +264,9 @@ class CqImagePixel
 			return ( m_YSamples );
 		}
 		void	AllocateSamples( CqBucket* bucket, TqInt XSamples, TqInt YSamples );
-		void	InitialiseSamples( CqBucket* bucket, std::vector<CqVector2D>& vecSamples );
-		void	JitterSamples( CqBucket* bucket, std::vector<CqVector2D>& vecSamples, TqFloat opentime, TqFloat closetime );
-		void	OffsetSamples( CqBucket* bucket, CqVector2D& vecPixel, std::vector<CqVector2D>& vecSamples );
+		void	InitialiseSamples( std::vector<SqSampleData>& samplePoints, std::vector<CqVector2D>& vecSamples );
+		void	JitterSamples( std::vector<SqSampleData>& samplePoints, std::vector<CqVector2D>& vecSamples, TqFloat opentime, TqFloat closetime );
+		void	OffsetSamples( std::vector<SqSampleData>& samplePoints, CqVector2D& vecPixel, std::vector<CqVector2D>& vecSamples );
 
 		/** Get the approximate coverage of this pixel.
 		 * \return Float fraction of the pixel covered.
@@ -356,7 +356,7 @@ class CqImagePixel
 
 		/** Clear all sample information from this pixel.
 		 */
-		void	Clear( CqBucket* bucket );
+		void	Clear( std::vector<SqSampleData>& samplePoints );
 		/** Get a reference to the array of values for the specified sample.
 		 * \param m The horizontal index of the required sample point.
 		 * \param n The vertical index of the required sample point.
@@ -364,7 +364,7 @@ class CqImagePixel
 		 */
 		//std::list<SqImageSample>&	Values( TqInt index );
 
-		SqImageSample& OpaqueValues( TqInt index );
+		SqImageSample& OpaqueValues( std::vector<SqSampleData>& samplePoints, TqInt index );
 
 		void	Combine(EqFilterDepth eDepthFilter, CqColor zThreshold);
 
@@ -372,13 +372,13 @@ class CqImagePixel
 		 * \param The index of the required sample point.
 		 * \return A reference to the sample data.
 		 */
-		const SqSampleData& SampleData( TqInt index ) const;
+		const SqSampleData& SampleData( std::vector<SqSampleData>& samplePoints, TqInt index ) const;
 
 		/** Get the sample data for the specified sample index.
 		 * \param The index of the required sample point.
 		 * \return A reference to the sample data.
 		 */
-		SqSampleData& SampleData( TqInt index );
+		SqSampleData& SampleData( std::vector<SqSampleData>& samplePoints, TqInt index );
 
 		/** Get the index of the sample that contains a dof offset that lies
 		 *  in bounding-box number i.
