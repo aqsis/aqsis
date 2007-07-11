@@ -31,7 +31,6 @@
 #include	<math.h>
 
 #include	"surface.h"
-#include	"imagebuffer.h"
 #include	"imagepixel.h"
 #include	"occlusion.h"
 #include	"renderer.h"
@@ -49,7 +48,6 @@ START_NAMESPACE( Aqsis )
 /** Static data on CqBucket
  */
 
-CqImageBuffer* CqBucket::m_ImageBuffer = 0;
 CqBucketData* CqBucket::m_bucketData = 0;
 
 
@@ -68,16 +66,18 @@ void CqBucket::SetProcessed( bool bProc )
  *  Clear,Allocate, Init. the m_bucketData->m_aieImage samples
  */
 
-void CqBucket::PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt ysize, bool fJitter, bool empty )
+void CqBucket::PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt ysize,
+			      TqInt pixelXSamples, TqInt pixelYSamples, TqFloat filterXWidth, TqFloat filterYWidth,
+			      bool fJitter, bool empty )
 {
 	m_bucketData->m_XOrigin = xorigin;
 	m_bucketData->m_YOrigin = yorigin;
 	m_bucketData->m_XSize = xsize;
 	m_bucketData->m_YSize = ysize;
-	m_bucketData->m_PixelXSamples = m_ImageBuffer->PixelXSamples();
-	m_bucketData->m_PixelYSamples = m_ImageBuffer->PixelYSamples();
-	m_bucketData->m_FilterXWidth = m_ImageBuffer->FilterXWidth();
-	m_bucketData->m_FilterYWidth = m_ImageBuffer->FilterYWidth();
+	m_bucketData->m_PixelXSamples = pixelXSamples;
+	m_bucketData->m_PixelYSamples = pixelYSamples;
+	m_bucketData->m_FilterXWidth = filterXWidth;
+	m_bucketData->m_FilterYWidth = filterYWidth;
 	m_bucketData->m_DiscreteShiftX = FLOOR(m_bucketData->m_FilterXWidth/2.0f);
 	m_bucketData->m_DiscreteShiftY = FLOOR(m_bucketData->m_FilterYWidth/2.0f);
 	m_bucketData->m_RealWidth = m_bucketData->m_XSize + (m_bucketData->m_DiscreteShiftX*2);

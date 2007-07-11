@@ -163,7 +163,6 @@ void	CqImageBuffer::SetImage()
 	if ( poptEyeSplits != 0 )
 		m_MaxEyeSplits = poptEyeSplits[ 0 ];
 
-	CqBucket::SetImageBuffer(this);
 	m_Buckets.resize( m_cYBuckets );
 	std::vector<std::vector<CqBucket> >::iterator i;
 	for( i = m_Buckets.begin(); i!=m_Buckets.end(); i++)
@@ -713,7 +712,16 @@ void CqImageBuffer::RenderImage()
 
 		{
 			TIME_SCOPE("Prepare bucket")
-			CurrentBucket().PrepareBucket( static_cast<TqInt>( bPos.x() ), static_cast<TqInt>( bPos.y() ), static_cast<TqInt>( bSize.x() ), static_cast<TqInt>( bSize.y() ), true, bIsEmpty );
+			CurrentBucket().PrepareBucket( static_cast<TqInt>( bPos.x() ),
+						       static_cast<TqInt>( bPos.y() ),
+						       static_cast<TqInt>( bSize.x() ),
+						       static_cast<TqInt>( bSize.y() ),
+						       m_PixelXSamples,
+						       m_PixelYSamples,
+						       m_FilterXWidth,
+						       m_FilterYWidth,
+						       true,
+						       bIsEmpty );
 			CurrentBucket().InitialiseFilterValues();
 		}
 
@@ -791,7 +799,7 @@ void CqImageBuffer::RenderImage()
 			// Render any waiting micro polygons.
 			{
 				TIME_SCOPE("Render MPs");
-				bucketProcessor.process( xmin, xmax, ymin, ymax, ClippingFar(), ClippingNear() );
+				bucketProcessor.process( xmin, xmax, ymin, ymax, m_ClippingFar, m_ClippingNear );
 			}
 		}
 

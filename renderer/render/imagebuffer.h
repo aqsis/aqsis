@@ -173,48 +173,6 @@ class CqImageBuffer
 		{
 			return ( m_YBucketSize );
 		}
-		/** Get the number of horizontal samples per pixel.
-		 * \return Integer sample count.
-		 */
-		TqInt	PixelXSamples() const
-		{
-			return ( m_PixelXSamples );
-		}
-		/** Get the number of vertical samples per pixel.
-		 * \return Integer sample count.
-		 */
-		TqInt	PixelYSamples() const
-		{
-			return ( m_PixelYSamples );
-		}
-		/** Get the width of the pixel filter in the horizontal direction.
-		 * \return Integer filter width, in pixels.
-		 */
-		TqFloat	FilterXWidth() const
-		{
-			return ( m_FilterXWidth );
-		}
-		/** Get the width of the pixel filter in the vertical direction.
-		 * \return Integer filter width, in pixels.
-		 */
-		TqFloat	FilterYWidth() const
-		{
-			return ( m_FilterYWidth );
-		}
-		/** Get the near clipping distance.
-		 * \return Float distance from the camera that objects must be to be visible.
-		 */
-		TqFloat	ClippingNear() const
-		{
-			return ( m_ClippingNear );
-		}
-		/** Get the far clipping distance.
-		 * \return Float distance from the camera that objects will be clipped from view.
-		 */
-		TqFloat	ClippingFar() const
-		{
-			return ( m_ClippingFar );
-		}
 		/** Get the display.
 		 * \return Integer display mode as a member of enum Mode.
 		 */

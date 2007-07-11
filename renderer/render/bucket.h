@@ -109,7 +109,9 @@ class CqBucket : public IqBucket
 		virtual	TqFloat Depth( TqInt iXPos, TqInt iYPos );
 		virtual	const TqFloat* Data( TqInt iXPos, TqInt iYPos );
 
-		void	PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt ysize, bool fJitter = true, bool empty = false );
+		void	PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt ysize,
+				       TqInt pixelXSamples, TqInt pixelYSamples, TqFloat filterXWidth, TqFloat filterYWidth,
+				       bool fJitter = true, bool empty = false );
 		void	InitialiseFilterValues();
 
 		static CqImagePixel& ImageElement(TqInt index);
@@ -194,12 +196,6 @@ class CqBucket : public IqBucket
 		/** Mark this bucket as processed
 		 */
 		void SetProcessed( bool bProc =  true);
-		/** Set the pointer to the image buffer
-		 */
-		static void SetImageBuffer( CqImageBuffer* pBuffer )
-		{
-			m_ImageBuffer = pBuffer;
-		}
 		/** Set the pointer to the bucket data
 		 */
 		static void SetBucketData( CqBucketData* bucketData )
@@ -238,9 +234,6 @@ class CqBucket : public IqBucket
 
 		/// Dynamic bucket data
 		static CqBucketData* m_bucketData;
-
-		/// Pointer to the image buffer this bucket belongs to.
-		static	CqImageBuffer*	m_ImageBuffer;
 
 		// this is a compare functor for sorting surfaces in order of depth.
 		struct closest_surface
