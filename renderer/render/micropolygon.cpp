@@ -24,7 +24,6 @@
 */
 
 #include	"stats.h"
-#include	"bucket.h"
 #include	"imagepixel.h"
 #include	"renderer.h"
 #include	"surface.h"
@@ -1643,7 +1642,7 @@ void CqMicroPolygonMotion::CalculateTotalBound()
 //---------------------------------------------------------------------
 /** Calculate a list of 2D bounds for this micropolygon,
  */
-void CqMicroPolygonMotion::BuildBoundList()
+void CqMicroPolygonMotion::BuildBoundList( TqUint timeRanges )
 {
 	TqFloat opentime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 0 ];
 	TqFloat closetime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 1 ];
@@ -1660,7 +1659,6 @@ void CqMicroPolygonMotion::BuildBoundList()
 	TqFloat dy = fabs(m_Keys.front()->m_Point0.y() - m_Keys.back()->m_Point0.y());
 	TqUint d = static_cast<int>((dx + dy) / shadingrate) + 1; // d is always >= 1
 
-	TqUint timeRanges = CqBucket::NumTimeRanges();
 	TqUint divisions = MIN(d, timeRanges);
 	TqFloat dt = (closetime - opentime) / divisions;
 	TqFloat time = opentime + dt;

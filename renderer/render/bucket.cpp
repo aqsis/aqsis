@@ -1085,20 +1085,20 @@ void CqBucket::RenderMPG_MBOrDof( CqMicroPolygon* pMPG,
 	const SqGridInfo& currentGridInfo = pMPG->pGrid()->GetCachedGridInfo();
 	TqFloat closetime = currentGridInfo.m_ShutterCloseTime;
 
-	TqInt bound_maxMB = pMPG->cSubBounds();
+	TqInt bound_maxMB = pMPG->cSubBounds( m_bucketData->m_NumTimeRanges );
 	TqInt bound_maxMB_1 = bound_maxMB - 1;
 	for ( TqInt bound_numMB = 0; bound_numMB < bound_maxMB; bound_numMB++ )
 	{
 		TqFloat time0 = currentGridInfo.m_ShutterOpenTime;
 		TqFloat time1 = currentGridInfo.m_ShutterCloseTime;
-		const CqBound& Bound = pMPG->SubBound( bound_numMB, time0 );
+		const CqBound& Bound = pMPG->SubBound( m_bucketData->m_NumTimeRanges, bound_numMB, time0 );
 
 		// get the index of the first and last samples that can fall inside
 		// the time range of this bound
 		if(IsMoving)
 		{
 			if ( bound_numMB != bound_maxMB_1 )
-				pMPG->SubBound( bound_numMB + 1, time1 );
+				pMPG->SubBound( m_bucketData->m_NumTimeRanges, bound_numMB + 1, time1 );
 			else
 				time1 = closetime;
 		}
@@ -1133,7 +1133,7 @@ void CqBucket::RenderMPG_MBOrDof( CqMicroPolygon* pMPG,
 			bminz = Bound.vecMin().z();
 			bmaxz = Bound.vecMax().z();
 
-			bound_maxDof = CqBucket::NumDofBounds();
+			bound_maxDof = m_bucketData->m_NumDofBounds;
 		}
 		else
 		{

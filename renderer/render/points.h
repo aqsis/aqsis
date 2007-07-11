@@ -511,21 +511,21 @@ class CqMicroPolygonMotionPoints : public CqMicroPolygon
 		{
 			return ( m_Bound );
 		}
-		virtual	TqInt			cSubBounds()
+		virtual	TqInt	cSubBounds( TqUint timeRanges )
 		{
 			if ( !m_BoundReady )
-				BuildBoundList();
+				BuildBoundList( timeRanges );
 			return ( m_BoundList.Size() );
 		}
-		virtual	CqBound			SubBound( TqInt iIndex, TqFloat& time )
+		virtual	CqBound	SubBound( TqUint timeRanges, TqInt iIndex, TqFloat& time )
 		{
 			if ( !m_BoundReady )
-				BuildBoundList();
+				BuildBoundList( timeRanges );
 			assert( iIndex < m_BoundList.Size() );
 			time = m_BoundList.GetTime( iIndex );
 			return ( m_BoundList.GetBound( iIndex ) );
 		}
-		virtual void	BuildBoundList();
+		virtual void	BuildBoundList( TqUint timeRanges );
 
 		virtual bool IsMoving()
 		{

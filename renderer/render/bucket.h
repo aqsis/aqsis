@@ -80,29 +80,21 @@ class CqBucket : public IqBucket
 		{
 			return ( m_bucketData->m_YOrigin );
 		}
-		static	TqInt	PixelXSamples()
+		TqInt	PixelXSamples() const
 		{
 			return m_bucketData->m_PixelXSamples;
 		}
-		static	TqInt	PixelYSamples()
+		TqInt	PixelYSamples() const
 		{
 			return m_bucketData->m_PixelYSamples;
 		}
-		static	TqFloat	FilterXWidth()
+		TqFloat	FilterXWidth() const
 		{
 			return m_bucketData->m_FilterXWidth;
 		}
-		static	TqFloat	FilterYWidth()
+		TqFloat	FilterYWidth() const
 		{
 			return m_bucketData->m_FilterYWidth;
-		}
-		static	TqInt	NumTimeRanges()
-		{
-			return m_bucketData->m_NumTimeRanges;
-		}
-		static	TqInt	NumDofBounds()
-		{
-			return m_bucketData->m_NumDofBounds;
 		}
 
 		static const CqBound& DofSubBound(TqInt index)
@@ -119,6 +111,7 @@ class CqBucket : public IqBucket
 
 		void	PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt ysize, bool fJitter = true, bool empty = false );
 		void	InitialiseFilterValues();
+
 		static CqImagePixel& ImageElement(TqInt index);
 
 		static	std::vector<SqSampleData>& SamplePoints()
@@ -182,7 +175,7 @@ class CqBucket : public IqBucket
 		}
 		/** Get a count of deferred GPrims.
 		 */
-		TqInt cGPrims()
+		TqInt cGPrims() const
 		{
 			return ( m_gPrims.size() );
 		}
@@ -239,39 +232,6 @@ class CqBucket : public IqBucket
 		 */
 		void RenderWaitingMPs( long xmin, long xmax, long ymin, long ymax, TqFloat clippingFar, TqFloat clippingNear );
 
-		/** Render a particular micropolygon.
-		 *    
-		 * \param pMPG Pointer to the micropolygon to process.
-		 *
-		 * \param xmin Integer minimum extend of the image
-		 * part being rendered, takes into account buckets and
-		 * clipping.
-		 *
-		 * \param xmax Integer maximum extend of the image
-		 * part being rendered, takes into account buckets and
-		 * clipping.
-		 *
-		 * \param ymin Integer minimum extend of the image
-		 * part being rendered, takes into account buckets and
-		 * clipping.
-		 *
-		 * \param ymax Integer maximum extend of the image
-		 * part being rendered, takes into account buckets and
-		 * clipping.
-		 *
-		 * \see CqBucket, CqImagePixel
-		 */
-		void	RenderMicroPoly( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax, TqFloat clippingFar, TqFloat clippingNear );
-
-		/** This function assumes that either dof or mb or
-		 * both are being used. */
-		void	RenderMPG_MBOrDof( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax, TqFloat clippingFar, TqFloat clippingNear, bool IsMoving, bool UsingDof );
-		/** This function assumes that neither dof or mb are
-		 * being used. It is much simpler than the general
-		 * case dealt with above. */
-		void	RenderMPG_Static( CqMicroPolygon* pMPG );
-
-
 	private:
 		/// Flag indicating if this bucket has been processed yet.
 		bool	m_bProcessed;
@@ -305,6 +265,38 @@ class CqBucket : public IqBucket
 		void	ImageElement( TqInt iXPos, TqInt iYPos, CqImagePixel*& pie );
 
 		void	CalculateDofBounds();
+
+		/** Render a particular micropolygon.
+		 *    
+		 * \param pMPG Pointer to the micropolygon to process.
+		 *
+		 * \param xmin Integer minimum extend of the image
+		 * part being rendered, takes into account buckets and
+		 * clipping.
+		 *
+		 * \param xmax Integer maximum extend of the image
+		 * part being rendered, takes into account buckets and
+		 * clipping.
+		 *
+		 * \param ymin Integer minimum extend of the image
+		 * part being rendered, takes into account buckets and
+		 * clipping.
+		 *
+		 * \param ymax Integer maximum extend of the image
+		 * part being rendered, takes into account buckets and
+		 * clipping.
+		 *
+		 * \see CqBucket, CqImagePixel
+		 */
+		void	RenderMicroPoly( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax, TqFloat clippingFar, TqFloat clippingNear );
+
+		/** This function assumes that either dof or mb or
+		 * both are being used. */
+		void	RenderMPG_MBOrDof( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax, TqFloat clippingFar, TqFloat clippingNear, bool IsMoving, bool UsingDof );
+		/** This function assumes that neither dof or mb are
+		 * being used. It is much simpler than the general
+		 * case dealt with above. */
+		void	RenderMPG_Static( CqMicroPolygon* pMPG );
 };
 
 END_NAMESPACE( Aqsis )

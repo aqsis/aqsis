@@ -581,7 +581,7 @@ class CqMicroPolygon : public CqRefCount
 			return m_Bound;
 		}
 
-		virtual	TqInt	cSubBounds()
+		virtual	TqInt	cSubBounds( TqUint timeRanges )
 		{
 			return ( 1 );
 		}
@@ -589,7 +589,7 @@ class CqMicroPolygon : public CqRefCount
 		/**
 		* \todo Review: Unused parameter iIndex
 		*/				
-		virtual	CqBound SubBound( TqInt iIndex, TqFloat& time )
+		virtual	CqBound SubBound( TqUint timeRanges, TqInt iIndex, TqFloat& time )
 		{
 			time = 0.0f;
 			return ( GetTotalBound() );
@@ -821,21 +821,21 @@ class CqMicroPolygonMotion : public CqMicroPolygon
 		{
 			return ( m_Bound );
 		}
-		virtual	TqInt	cSubBounds()
+		virtual	TqInt	cSubBounds( TqUint timeRanges )
 		{
 			if ( !m_BoundReady )
-				BuildBoundList();
+				BuildBoundList( timeRanges );
 			return ( m_BoundList.Size() );
 		}
-		virtual	CqBound	SubBound( TqInt iIndex, TqFloat& time )
+		virtual	CqBound	SubBound( TqUint timeRanges, TqInt iIndex, TqFloat& time )
 		{
 			if ( !m_BoundReady )
-				BuildBoundList();
+				BuildBoundList( timeRanges );
 			assert( iIndex < m_BoundList.Size() );
 			time = m_BoundList.GetTime( iIndex );
 			return ( m_BoundList.GetBound( iIndex ) );
 		}
-		virtual void	BuildBoundList();
+		virtual void	BuildBoundList( TqUint timeRanges );
 
 		virtual	bool	Sample( const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof = false );
 

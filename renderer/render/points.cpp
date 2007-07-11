@@ -832,7 +832,7 @@ CqBound& CqMicroPolygonMotionPoints::GetTotalBound( )
 //---------------------------------------------------------------------
 /** Calculate a list of 2D bounds for this micropolygon,
  */
-void CqMicroPolygonMotionPoints::BuildBoundList()
+void CqMicroPolygonMotionPoints::BuildBoundList( TqUint timeRanges )
 {
 	m_BoundList.Clear();
 
