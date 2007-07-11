@@ -121,7 +121,7 @@ class CqBucket : public IqBucket
 			return(m_bucketData->m_SamplePoints);
 		}
 
-		static TqInt GetNextSamplePointIndex()
+		TqInt GetNextSamplePointIndex()
 		{
 			TqInt index = m_bucketData->m_NextSamplePoint;
 			m_bucketData->m_NextSamplePoint++;

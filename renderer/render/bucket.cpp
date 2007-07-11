@@ -106,11 +106,16 @@ void CqBucket::PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt y
 		{
 			for ( TqInt j = 0; j < m_bucketData->m_RealWidth; j++ )
 			{
-				m_bucketData->m_aieImage[which].Clear();
-				m_bucketData->m_aieImage[which].AllocateSamples( m_bucketData->m_PixelXSamples, m_bucketData->m_PixelYSamples );
-				m_bucketData->m_aieImage[which].InitialiseSamples( m_bucketData->m_aSamplePositions[which] );
+				m_bucketData->m_aieImage[which].Clear( this );
+				m_bucketData->m_aieImage[which].AllocateSamples( this,
+										 m_bucketData->m_PixelXSamples,
+										 m_bucketData->m_PixelYSamples );
+				m_bucketData->m_aieImage[which].InitialiseSamples( this,
+										   m_bucketData->m_aSamplePositions[which] );
 				//if(fJitter)
-					m_bucketData->m_aieImage[which].JitterSamples(m_bucketData->m_aSamplePositions[which], opentime, closetime);
+				m_bucketData->m_aieImage[which].JitterSamples( this,
+									       m_bucketData->m_aSamplePositions[which],
+									       opentime, closetime);
 
 				which++;
 			}
@@ -144,11 +149,15 @@ void CqBucket::PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt y
 			bPos2 += CqVector2D( ( j - m_bucketData->m_DiscreteShiftX ), ( ii - m_bucketData->m_DiscreteShiftY ) );
 
 			if(!empty)
-				m_bucketData->m_aieImage[which].Clear();
+				m_bucketData->m_aieImage[which].Clear( this );
 
 			//if(fJitter)
-				m_bucketData->m_aieImage[which].JitterSamples(m_bucketData->m_aSamplePositions[which], opentime, closetime);
-			m_bucketData->m_aieImage[which].OffsetSamples( bPos2, m_bucketData->m_aSamplePositions[which] );
+			m_bucketData->m_aieImage[which].JitterSamples( this,
+								       m_bucketData->m_aSamplePositions[which],
+								       opentime, closetime);
+			m_bucketData->m_aieImage[which].OffsetSamples( this,
+								       bPos2,
+								       m_bucketData->m_aSamplePositions[which] );
 
 			which++;
 		}

@@ -60,6 +60,7 @@
 
 START_NAMESPACE( Aqsis )
 
+class CqBucket;
 
 //-----------------------------------------------------------------------
 /** Structure representing the information at a sample point in the image.
@@ -262,10 +263,10 @@ class CqImagePixel
 		{
 			return ( m_YSamples );
 		}
-		void	AllocateSamples( TqInt XSamples, TqInt YSamples );
-		void	InitialiseSamples( std::vector<CqVector2D>& vecSamples );
-		void	JitterSamples( std::vector<CqVector2D>& vecSamples, TqFloat opentime, TqFloat closetime );
-		void	OffsetSamples(CqVector2D& vecPixel, std::vector<CqVector2D>& vecSamples);
+		void	AllocateSamples( CqBucket* bucket, TqInt XSamples, TqInt YSamples );
+		void	InitialiseSamples( CqBucket* bucket, std::vector<CqVector2D>& vecSamples );
+		void	JitterSamples( CqBucket* bucket, std::vector<CqVector2D>& vecSamples, TqFloat opentime, TqFloat closetime );
+		void	OffsetSamples( CqBucket* bucket, CqVector2D& vecPixel, std::vector<CqVector2D>& vecSamples );
 
 		/** Get the approximate coverage of this pixel.
 		 * \return Float fraction of the pixel covered.
@@ -355,7 +356,7 @@ class CqImagePixel
 
 		/** Clear all sample information from this pixel.
 		 */
-		void	Clear();
+		void	Clear( CqBucket* bucket );
 		/** Get a reference to the array of values for the specified sample.
 		 * \param m The horizontal index of the required sample point.
 		 * \param n The vertical index of the required sample point.

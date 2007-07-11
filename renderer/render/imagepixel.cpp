@@ -77,7 +77,7 @@ CqImagePixel::CqImagePixel( const CqImagePixel& ieFrom )
  * \param YSamples Integer samples count in Y.
  */
 
-void CqImagePixel::AllocateSamples( TqInt XSamples, TqInt YSamples )
+void CqImagePixel::AllocateSamples( CqBucket* bucket, TqInt XSamples, TqInt YSamples )
 {
 	if( m_XSamples != XSamples || m_YSamples != YSamples )
 	{
@@ -91,7 +91,7 @@ void CqImagePixel::AllocateSamples( TqInt XSamples, TqInt YSamples )
 			// rendering, including any AOV data.
 			m_SampleIndices.resize( numSamples );
 			for(TqInt i=0; i<numSamples; i++)
-				m_SampleIndices[i] = CqBucket::GetNextSamplePointIndex();
+				m_SampleIndices[i] = bucket->GetNextSamplePointIndex();
 			m_DofOffsetIndices.resize( numSamples );
 		}
 	}
@@ -103,7 +103,7 @@ void CqImagePixel::AllocateSamples( TqInt XSamples, TqInt YSamples )
  * \param fJitter Flag indicating whether to apply jittering to the sample points or not.
  */
 
-void CqImagePixel::InitialiseSamples( std::vector<CqVector2D>& vecSamples )
+void CqImagePixel::InitialiseSamples( CqBucket* bucket, std::vector<CqVector2D>& vecSamples )
 {
 	TqInt numSamples = m_XSamples * m_YSamples;
 	TqInt i, j;
@@ -131,8 +131,8 @@ void CqImagePixel::InitialiseSamples( std::vector<CqVector2D>& vecSamples )
 
 	for ( i = 0; i < nSamples; i++ )
 	{
-		CqBucket::SamplePoints()[m_SampleIndices[ i ]].m_SubCellIndex = 0;
-		CqBucket::SamplePoints()[m_SampleIndices[ i ]].m_DetailLevel = CqBucket::SamplePoints()[m_SampleIndices[ i ]].m_Time = time;
+		bucket->SamplePoints()[m_SampleIndices[ i ]].m_SubCellIndex = 0;
+		bucket->SamplePoints()[m_SampleIndices[ i ]].m_DetailLevel = bucket->SamplePoints()[m_SampleIndices[ i ]].m_Time = time;
 		time += dtime;
 	}
 
@@ -186,8 +186,8 @@ void CqImagePixel::InitialiseSamples( std::vector<CqVector2D>& vecSamples )
 
 	for( i = 0; i < numSamples; ++i)
 	{
-		CqBucket::SamplePoints()[m_SampleIndices[m_DofOffsetIndices[i]]].m_DofOffset = tmpDofOffsets[i];
-		CqBucket::SamplePoints()[m_SampleIndices[m_DofOffsetIndices[i]]].m_DofOffsetIndex = i;
+		bucket->SamplePoints()[m_SampleIndices[m_DofOffsetIndices[i]]].m_DofOffset = tmpDofOffsets[i];
+		bucket->SamplePoints()[m_SampleIndices[m_DofOffsetIndices[i]]].m_DofOffsetIndex = i;
 	}
 }
 
@@ -196,7 +196,7 @@ void CqImagePixel::InitialiseSamples( std::vector<CqVector2D>& vecSamples )
 /** Shuffle the sample data to avoid repeating patterns in the sampling.
  */
 
-void CqImagePixel::JitterSamples( std::vector<CqVector2D>& vecSamples, TqFloat opentime, TqFloat closetime )
+void CqImagePixel::JitterSamples( CqBucket* bucket, std::vector<CqVector2D>& vecSamples, TqFloat opentime, TqFloat closetime )
 {
 	TqInt numSamples = m_XSamples * m_YSamples;
 	TqFloat subcell_width = 1.0f / numSamples;
@@ -279,7 +279,7 @@ void CqImagePixel::JitterSamples( std::vector<CqVector2D>& vecSamples, TqFloat o
 				TqFloat yindex = vecSamples[ which ].y();
 				vecSamples[ which ].x( xindex * subcell_width + ( subcell_width * 0.5f ) + sx );
 				vecSamples[ which ].y( yindex * subcell_width + ( subcell_width * 0.5f ) + sy );
-				CqBucket::SamplePoints()[m_SampleIndices[ which ]].m_SubCellIndex = static_cast<TqInt>( ( yindex * m_YSamples ) + xindex );
+				bucket->SamplePoints()[m_SampleIndices[ which ]].m_SubCellIndex = static_cast<TqInt>( ( yindex * m_YSamples ) + xindex );
 				which++;
 			}
 		}
@@ -302,10 +302,10 @@ void CqImagePixel::JitterSamples( std::vector<CqVector2D>& vecSamples, TqFloat o
 		// Scale the value of time to the shutter time.
 		TqFloat t = time + randomTime;
 		t = ( closetime - opentime ) * t + opentime;
-		CqBucket::SamplePoints()[m_SampleIndices[ i ]].m_Time = t;
+		bucket->SamplePoints()[m_SampleIndices[ i ]].m_Time = t;
 		time += dtime;
 
-		CqBucket::SamplePoints()[m_SampleIndices[ i ]].m_DetailLevel = lod + random.RandomFloat( dlod );
+		bucket->SamplePoints()[m_SampleIndices[ i ]].m_DetailLevel = lod + random.RandomFloat( dlod );
 		lod += dlod;
 	}
 
@@ -314,7 +314,7 @@ void CqImagePixel::JitterSamples( std::vector<CqVector2D>& vecSamples, TqFloat o
 	// assumptions made about ordering during sampling still hold.
 	for( i = 0; i < numSamples; ++i)
 	{
-		tmpDofOffsets[i] = CqBucket::SamplePoints()[m_SampleIndices[m_DofOffsetIndices[i]]].m_DofOffset;
+		tmpDofOffsets[i] = bucket->SamplePoints()[m_SampleIndices[m_DofOffsetIndices[i]]].m_DofOffset;
 		m_DofOffsetIndices[i] = i;
 	}
 
@@ -330,8 +330,8 @@ void CqImagePixel::JitterSamples( std::vector<CqVector2D>& vecSamples, TqFloat o
 
 	for( i = 0; i < numSamples; ++i)
 	{
-		CqBucket::SamplePoints()[m_SampleIndices[m_DofOffsetIndices[i]]].m_DofOffset = tmpDofOffsets[i];
-		CqBucket::SamplePoints()[m_SampleIndices[m_DofOffsetIndices[i]]].m_DofOffsetIndex = i;
+		bucket->SamplePoints()[m_SampleIndices[m_DofOffsetIndices[i]]].m_DofOffset = tmpDofOffsets[i];
+		bucket->SamplePoints()[m_SampleIndices[m_DofOffsetIndices[i]]].m_DofOffsetIndex = i;
 	}
 }
 
@@ -339,14 +339,13 @@ void CqImagePixel::JitterSamples( std::vector<CqVector2D>& vecSamples, TqFloat o
 /** Clear the relevant data from the image element preparing it for the next usage.
  */
 
-void CqImagePixel::Clear()
+void CqImagePixel::Clear( CqBucket* bucket )
 {
-	TqInt i;
-	for ( i = ( m_XSamples * m_YSamples ) - 1; i >= 0; i-- )
+	for ( TqInt i = ( m_XSamples * m_YSamples ) - 1; i >= 0; i-- )
 	{
-		if(!CqBucket::SamplePoints()[m_SampleIndices[i]].m_Data.empty())
-			CqBucket::SamplePoints()[m_SampleIndices[ i ]].m_Data.clear( );
-		CqBucket::SamplePoints()[m_SampleIndices[ i ]].m_OpaqueSample.m_flags=0;
+		if(!bucket->SamplePoints()[m_SampleIndices[i]].m_Data.empty())
+			bucket->SamplePoints()[m_SampleIndices[ i ]].m_Data.clear( );
+		bucket->SamplePoints()[m_SampleIndices[ i ]].m_OpaqueSample.m_flags=0;
 	}
 }
 
@@ -546,14 +545,14 @@ void CqImagePixel::Combine(enum EqFilterDepth depthfilter, CqColor zThreshold)
 	}
 }
 
-void CqImagePixel::OffsetSamples(CqVector2D& vecPixel, std::vector<CqVector2D>& vecSamples)
+void CqImagePixel::OffsetSamples( CqBucket* bucket, CqVector2D& vecPixel, std::vector<CqVector2D>& vecSamples )
 {
 	// add in the pixel offset
 	const TqInt numSamples = m_XSamples * m_YSamples;
 	for ( TqInt i = 0; i < numSamples; i++ )
 	{
-		CqBucket::SamplePoints()[ m_SampleIndices[i] ].m_Position = vecSamples[ i ];
-		CqBucket::SamplePoints()[ m_SampleIndices[i] ].m_Position += vecPixel;
+		bucket->SamplePoints()[ m_SampleIndices[i] ].m_Position = vecSamples[ i ];
+		bucket->SamplePoints()[ m_SampleIndices[i] ].m_Position += vecPixel;
 	}
 }
 
