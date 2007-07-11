@@ -25,6 +25,7 @@
 
 #include	"stats.h"
 #include	"imagepixel.h"
+#include	"imagebuffer.h"
 #include	"renderer.h"
 #include	"surface.h"
 #include	"lights.h"
@@ -678,10 +679,9 @@ void CqMicroPolyGrid::DeleteVariables( bool all )
 
 //---------------------------------------------------------------------
 /** Split the shaded grid into microploygons, and insert them into the relevant buckets in the image buffer.
- * \param newMPs List to store the splitted MPs
  */
 
-void CqMicroPolyGrid::Split( std::vector<CqMicroPolygon*>& newMPs )
+void CqMicroPolyGrid::Split( CqImageBuffer* pImage )
 {
 	if ( NULL == pVar(EnvVars_P) )
 		return ;
@@ -879,7 +879,8 @@ void CqMicroPolyGrid::Split( std::vector<CqMicroPolygon*>& newMPs )
 				std::map<TqFloat, TqInt>::iterator keyFrame;
 				for ( keyFrame = keyframeTimes.begin(); keyFrame!=keyframeTimes.end(); keyFrame++ )
 					pNew->AppendKey( aaPtimes[ keyFrame->second ][ iIndex ], aaPtimes[ keyFrame->second ][ iIndex + 1 ], aaPtimes[ keyFrame->second ][ iIndex + cu + 2 ], aaPtimes[ keyFrame->second ][ iIndex + cu + 1 ],  keyFrame->first);
-				newMPs.push_back( pNew );
+				
+				pImage->AddMPG( pNew );
 			}
 			else
 			{
@@ -888,7 +889,7 @@ void CqMicroPolyGrid::Split( std::vector<CqMicroPolygon*>& newMPs )
 					pNew->MarkTrimmed();
 				pNew->Initialise();
 				pNew->CalculateTotalBound();
-				newMPs.push_back( pNew );
+				pImage->AddMPG( pNew );
 			}
 
 			// Calculate MPG area
@@ -957,10 +958,9 @@ void CqMotionMicroPolyGrid::TransferOutputVariables()
 
 //---------------------------------------------------------------------
 /** Split the micropolygrid into individual MPGs,
- * \param newMPs List to store the splitted MPs
  */
 
-void CqMotionMicroPolyGrid::Split( std::vector<CqMicroPolygon*>& newMPs )
+void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage )
 {
 	// Get the main object, the one that was shaded.
 	CqMicroPolyGrid * pGridA = static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( 0 ) ) );
@@ -1102,7 +1102,8 @@ void CqMotionMicroPolyGrid::Split( std::vector<CqMicroPolygon*>& newMPs )
 			CqMicroPolygonMotion *pNew = new CqMicroPolygonMotion( this, iIndex );
 			for ( iTime = 0; iTime < cTimes(); iTime++ )
 				pNew->AppendKey( aaPtimes[ iTime ][ iIndex ], aaPtimes[ iTime ][ iIndex + 1 ], aaPtimes[ iTime ][ iIndex + cu + 2 ], aaPtimes[ iTime ][ iIndex + cu + 1 ], Time( iTime ) );
-			newMPs.push_back( pNew );
+
+			pImage->AddMPG( pNew );
 		}
 	}
 

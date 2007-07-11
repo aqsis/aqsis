@@ -81,7 +81,7 @@ class CqMicroPolyGridBase : public CqRefCount
 		/** Pure virtual function, splits the grid into micropolys.
 		 * \param pImage Pointer to the image buffer being rendered.
 		 */
-		virtual	void	Split( std::vector<CqMicroPolygon*>& newMPs ) = 0;
+		virtual	void	Split( CqImageBuffer* pImage ) = 0;
 		/** Pure virtual, shade the grid.
 		 */
 		virtual	void	Shade() = 0;
@@ -245,7 +245,7 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase
 		void DeleteVariables( bool all );
 
 		// Overrides from CqMicroPolyGridBase
-		virtual	void	Split( std::vector<CqMicroPolygon*>& newMPs );
+		virtual	void	Split( CqImageBuffer* pImage );
 		virtual	void	Shade();
 		virtual	void	TransferOutputVariables();
 
@@ -350,7 +350,7 @@ class CqMotionMicroPolyGrid : public CqMicroPolyGridBase, public CqMotionSpec<Cq
 		// Overrides from CqMicroPolyGridBase
 
 
-		virtual	void	Split( std::vector<CqMicroPolygon*>& newMPs );
+		virtual	void	Split( CqImageBuffer* pImage );
 		virtual	void	Shade();
 		virtual	void	TransferOutputVariables();
 		

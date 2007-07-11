@@ -553,14 +553,7 @@ void CqImageBuffer::RenderSurface( boost::shared_ptr<CqSurface>& pSurface )
 			if ( pGrid->vfCulled() == false )
 			{
 				// Split any grids in this bucket waiting to be processed.
-				std::vector<CqMicroPolygon*> newMPs;
-				pGrid->Split( newMPs );
-				for ( std::vector<CqMicroPolygon*>::iterator it = newMPs.begin();
-				      it != newMPs.end();
-				      it++ )
-				{
-					AddMPG( *it );
-				}
+				pGrid->Split( this );
 			}
 			RELEASEREF( pGrid );
 		}
