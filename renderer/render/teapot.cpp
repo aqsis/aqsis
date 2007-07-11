@@ -34,11 +34,8 @@
 
 #include	<math.h>
 
-#include	"aqsis.h"
 #include	"teapot.h"
 #include	"patch.h"
-
-#include	"ri.h"
 
 START_NAMESPACE( Aqsis )
 

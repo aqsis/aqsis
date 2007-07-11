@@ -38,10 +38,6 @@
 #include	"aqsis.h"
 #include	"matrix.h"
 #include	"surface.h"
-#include	"vector4d.h"
-
-#include	"ri.h"
-#include	"vector3d.h"
 
 START_NAMESPACE( Aqsis )
 
