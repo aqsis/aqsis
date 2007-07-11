@@ -720,7 +720,7 @@ void CqImageBuffer::RenderImage()
 		if ( !bIsEmpty )
 		{
 			TIME_SCOPE("Occlusion culling");
-			bucketProcessor.occlusionCulling();
+			bucketProcessor.prepareOcclusionData();
 		}
 
 		////////// Dump the pixel sample positions into a dump file //////////

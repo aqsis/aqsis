@@ -57,7 +57,7 @@ void CqBucketProcessor::reset()
 	m_bucket = 0;
 }
 
-void CqBucketProcessor::occlusionCulling()
+void CqBucketProcessor::prepareOcclusionData()
 {
 	assert(m_bucket == 0);
 

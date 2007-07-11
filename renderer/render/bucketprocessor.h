@@ -60,7 +60,7 @@ public:
 	void reset();
 
 	/** Update occlusion tree */
-	void occlusionCulling();
+	void prepareOcclusionData();
 
 	/** Whether we can cull what's represented by the given bound */
 	bool canCull(const CqBound* bound) const;
