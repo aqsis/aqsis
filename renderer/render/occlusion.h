@@ -32,9 +32,12 @@
 #include <boost/weak_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
 
+#include <vector>
+
 #include "aqsis.h"
 #include "kdtree.h"
 #include "vector2d.h"
+#include "imagepixel.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -69,7 +72,17 @@ class CqOcclusionTree// : public boost::enable_shared_from_this<CqOcclusionTree>
 			m_SampleIndices.push_back(sample);
 		}
 		bool CanCull( const CqBound* bound );
-		void SampleMPG( const CqBucket* bucket, CqMicroPolygon* pMPG, const CqBound& bound, bool usingMB, TqFloat time0, TqFloat time1, bool usingDof, TqInt dofboundindex, const SqMpgSampleInfo& MpgSampleInfo, bool usingLOD, const SqGridInfo& gridInfo);
+		void SampleMPG( std::vector<CqImagePixel>& aieImage,
+				CqMicroPolygon* pMPG,
+				const CqBound& bound,
+				bool usingMB,
+				TqFloat time0,
+				TqFloat time1,
+				bool usingDof,
+				TqInt dofboundindex,
+				const SqMpgSampleInfo& MpgSampleInfo,
+				bool usingLOD,
+				const SqGridInfo& gridInfo );
 
 		void ConstructTree(const CqBucket* bucket);
 		void InitialiseBounds(const CqBucket* bucket);
@@ -80,13 +93,13 @@ class CqOcclusionTree// : public boost::enable_shared_from_this<CqOcclusionTree>
 		{
 			public:
 				CqOcclusionTreeComparator(const CqBucket* bucket, TqInt dimension) :
-					m_bucket(bucket), m_Dim( dimension )
+					m_bucket( bucket ), m_Dim( dimension )
 				{}
 
 				bool operator()(const std::pair<TqInt, TqInt>& a, const std::pair<TqInt, TqInt>& b);
 
 			private:
-				const CqBucket* m_bucket;
+				const CqBucket*	m_bucket;
 				TqInt		m_Dim;
 		};
 
@@ -100,6 +113,7 @@ class CqOcclusionTree// : public boost::enable_shared_from_this<CqOcclusionTree>
 		void StoreExtraData(const CqMicroPolygon* pMPG, SqImageSample& sample);
 
 		SqSampleData& Sample(const CqBucket* bucket, size_t index) const;
+		SqSampleData& Sample(std::vector<CqImagePixel>& aieImage, size_t index) const;
 
 		void PropagateChanges();
 

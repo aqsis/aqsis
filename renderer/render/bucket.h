@@ -119,7 +119,6 @@ class CqBucket : public IqBucket
 
 		void	PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt ysize, bool fJitter = true, bool empty = false );
 		void	InitialiseFilterValues();
-		static	void	ImageElement( TqInt iXPos, TqInt iYPos, CqImagePixel*& pie );
 		static CqImagePixel& ImageElement(TqInt index);
 
 		static	std::vector<SqSampleData>& SamplePoints()
@@ -283,8 +282,6 @@ class CqBucket : public IqBucket
 		/// Pointer to the image buffer this bucket belongs to.
 		static	CqImageBuffer*	m_ImageBuffer;
 
-		void	CalculateDofBounds();
-
 		// this is a compare functor for sorting surfaces in order of depth.
 		struct closest_surface
 		{
@@ -304,8 +301,11 @@ class CqBucket : public IqBucket
 
 		/// A sorted list of primitives for this bucket
 		std::priority_queue<boost::shared_ptr<CqSurface>, std::deque<boost::shared_ptr<CqSurface> >, closest_surface> m_gPrims;
-}
-;
+
+		void	ImageElement( TqInt iXPos, TqInt iYPos, CqImagePixel*& pie );
+
+		void	CalculateDofBounds();
+};
 
 END_NAMESPACE( Aqsis )
 

@@ -390,6 +390,11 @@ SqSampleData& CqOcclusionTree::Sample(const CqBucket* bucket, size_t index) cons
 	return bucket->ImageElement(m_SampleIndices[index].first).SampleData(m_SampleIndices[index].second);
 }
 
+SqSampleData& CqOcclusionTree::Sample(std::vector<CqImagePixel>& aieImage, size_t index) const
+{
+	return aieImage[m_SampleIndices[index].first].SampleData(m_SampleIndices[index].second);
+}
+
 
 void CqOcclusionTree::StoreExtraData(const CqMicroPolygon* pMPG, SqImageSample& sample)
 {
@@ -465,14 +470,14 @@ void CqOcclusionTree::StoreExtraData(const CqMicroPolygon* pMPG, SqImageSample& 
 
 
 
-void CqOcclusionTree::SampleMPG( const CqBucket* bucket, CqMicroPolygon* pMPG, const CqBound& bound, bool usingMB, TqFloat time0, TqFloat time1, bool usingDof, TqInt dofboundindex, const SqMpgSampleInfo& MpgSampleInfo, bool usingLOD, const SqGridInfo& gridInfo)
+void CqOcclusionTree::SampleMPG( std::vector<CqImagePixel>& aieImage, CqMicroPolygon* pMPG, const CqBound& bound, bool usingMB, TqFloat time0, TqFloat time1, bool usingDof, TqInt dofboundindex, const SqMpgSampleInfo& MpgSampleInfo, bool usingLOD, const SqGridInfo& gridInfo)
 {
 	// Check the current tree level, and if only one leaf, sample the MP, otherwise, pass it down to the left
 	// and/or right side of the tree if it crosses.
 	if(NumSamples() == 1)
 	{
 		// Sample the MPG
-		SqSampleData& sample = Sample(bucket, 0);
+		SqSampleData& sample = Sample(aieImage, 0);
 
 		CqStats::IncI( CqStats::SPL_count );
 		TqFloat D;
@@ -574,7 +579,7 @@ void CqOcclusionTree::SampleMPG( const CqBucket* bucket, CqMicroPolygon* pMPG, c
 			{
 				if(bound.vecMin().z() <= (*child)->m_MaxOpaqueZ || !gridInfo.m_IsCullable)
 				{
-					(*child)->SampleMPG(bucket, pMPG, bound, usingMB, time0, time1, usingDof, dofboundindex, MpgSampleInfo, usingLOD, gridInfo);
+					(*child)->SampleMPG(aieImage, pMPG, bound, usingMB, time0, time1, usingDof, dofboundindex, MpgSampleInfo, usingLOD, gridInfo);
 				}
 			}
 		}
