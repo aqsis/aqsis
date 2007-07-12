@@ -44,9 +44,9 @@ typedef	float	TqFloat;
 typedef	double	TqDouble;
 
 /// Determine the largest integer value smaller than the given float.
-#define FLOOR(x) ((int)(x) - ((x) < 0 && (x) != (int)(x)))
+#define FLOOR(x) ((long)(x) - ((x) < 0 && (x) != (long)(x)))
 /// Determine the smallest integer value larger than the given float.
-#define CEIL(x) ((int)(x) + ((x) > 0 && (x) != (int)(x)))
+#define CEIL(x) ((long)(x) + ((x) > 0 && (x) != (long)(x)))
 /// Determine the nearest integer value to the given float.
 #define	ROUND(x) (((x) - FLOOR((x))) < 0.5f)?FLOOR((x)):CEIL((x))
 

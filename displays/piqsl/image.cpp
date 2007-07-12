@@ -202,7 +202,6 @@ void CqImage::saveToTiff(const std::string& filename)
 		TIFFSetField( pOut, TIFFTAG_IMAGELENGTH, ( uint32 ) imageHeight() );
 		TIFFSetField( pOut, TIFFTAG_XRESOLUTION, (float) 1.0 );
 		TIFFSetField( pOut, TIFFTAG_YRESOLUTION, (float) 1.0 );
-		TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, (short) 8 );
 		//TIFFSetField( pOut, TIFFTAG_PIXAR_MATRIX_WORLDTOCAMERA, image->m_matWorldToCamera );
 		//TIFFSetField( pOut, TIFFTAG_PIXAR_MATRIX_WORLDTOSCREEN, image->m_matWorldToScreen );
 		TIFFSetField( pOut, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT );
@@ -246,20 +245,30 @@ void CqImage::saveToTiff(const std::string& filename)
 			TIFFSetField( pOut, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP );
 			TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, 32 );
 		}
-		else if(widestType == PkDspySigned16 || widestType == PkDspyUnsigned16)
+		else if(widestType == PkDspySigned16)
 		{
 			TIFFSetField( pOut, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_INT );
 			TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, 16 );
 		}
-		else if(widestType == PkDspySigned32 || widestType == PkDspyUnsigned32)
+		else if(widestType == PkDspyUnsigned16)
+		{
+			TIFFSetField( pOut, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT );
+			TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, 16 );
+		}
+		else if(widestType == PkDspySigned32)
 		{
 			TIFFSetField( pOut, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_INT );
+			TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, 32 );
+		}
+		else if(widestType == PkDspyUnsigned32)
+		{
+			TIFFSetField( pOut, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT );
 			TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, 32 );
 		}
 		TqInt row;
 		for ( row = 0; row < imageHeight(); row++ )
 		{
-			if ( TIFFWriteScanline( pOut, reinterpret_cast<void*>(reinterpret_cast<char*>(m_realData) + ( row * lineLength ))
+			if ( TIFFWriteScanline( pOut, reinterpret_cast<void*>(m_realData + ( row * lineLength ))
 									, row, 0 ) < 0 )
 				break;
 		}
@@ -283,23 +292,82 @@ void CqImage::loadFromTiff(const std::string& filename)
 	if (tif) 
 	{
 		uint32 w, h;
-		uint16 nChannels;
-		uint16 bitsPerSample;
-		uint16 sampleFormat;
+		uint16 nChannels = 1;
+		uint16 bitsPerSample = 1;
+		uint16 sampleFormat = SAMPLEFORMAT_UINT;
+		TqInt internalFormat = PkDspyUnsigned8;
 
 		TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &w);
 		TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &h);
 		TIFFGetField(tif, TIFFTAG_SAMPLESPERPIXEL, &nChannels);
 		TIFFGetField(tif, TIFFTAG_BITSPERSAMPLE, &bitsPerSample);
 		TIFFGetField(tif, TIFFTAG_SAMPLEFORMAT, &sampleFormat);
+		switch(sampleFormat)
+		{
+			case SAMPLEFORMAT_UINT:
+			{
+				switch(bitsPerSample)
+				{
+					case 8:
+						internalFormat = PkDspyUnsigned8;
+						break;
+					case 16:
+						internalFormat = PkDspyUnsigned16;
+						break;
+					case 32:
+						internalFormat = PkDspyUnsigned32;
+						break;
+					default:
+						Aqsis::log() << Aqsis::error << "Unrecognised bit depth for unsigned int format " << bitsPerSample << std::endl;
+						return;
+				}
+			}
+			break;
+
+			case SAMPLEFORMAT_INT:
+			{
+				switch(bitsPerSample)
+				{
+					case 8:
+						internalFormat = PkDspySigned8;
+						break;
+					case 16:
+						internalFormat = PkDspySigned16;
+						break;
+					case 32:
+						internalFormat = PkDspySigned32;
+						break;
+					default:
+						Aqsis::log() << Aqsis::error << "Unrecognised bit depth for signed int format " << bitsPerSample << std::endl;
+						return;
+				}
+			}
+			break;
+
+			case SAMPLEFORMAT_IEEEFP:
+			{
+				if(bitsPerSample != 32)
+				{
+					Aqsis::log() << Aqsis::error << "Unrecognised bit depth for ieeefp format " << bitsPerSample << std::endl;
+					return;
+				}
+				internalFormat = PkDspyFloat32;
+			}
+			break;
+
+			default:
+				Aqsis::log() << Aqsis::error << "Unrecognised format " << sampleFormat << std::endl;
+				return;
+		}
+
 		// \todo: Should read the origin and frame size out of the image.
 		setOrigin(0,0);
 		setImageSize(w, h);
 		setFrameSize(w, h);
-		Aqsis::log() << Aqsis::info << "Loading image " << filename << std::endl;
+		Aqsis::log() << Aqsis::info << "Loading image " << filename << " [" << h << "x" << w << "x" << nChannels << "] (" << internalFormat << ")" << std::endl;
 		m_channels.clear();
-		for(TqUint channel = 0; channel < 4; ++channel)
-			addChannel(defChannelNames[channel], PkDspyUnsigned8);
+		for(TqUint channel = 0; channel < nChannels; ++channel)
+			addChannel(defChannelNames[channel], internalFormat);
 		PrepareImageBuffer();
 
 		if(!TIFFIsTiled(tif))
@@ -310,7 +378,7 @@ void CqImage::loadFromTiff(const std::string& filename)
 
 			TIFFGetField(tif, TIFFTAG_PLANARCONFIG, &config);
 			buf = _TIFFmalloc(TIFFScanlineSize(tif));
-			TqUlong localOffset = 0;
+			TqUlong localOffset = 0; 
 			if (config == PLANARCONFIG_CONTIG) 
 			{
 				for (row = 0; row < h; row++)
@@ -348,22 +416,6 @@ void CqImage::loadFromTiff(const std::string& filename)
 
 		setFilename(filename);
 		transferData();
-
-		// As the standard TIFF images are inverted compared with our internal representation,
-		// we need to do a flip.
-		TqUlong linelength = w * sizeof(uint32);
-		unsigned char* temp = new unsigned char[linelength];
-		TqUlong topline = 0;
-		TqUlong bottomline = h-1;
-		while(topline < bottomline)
-		{
-			memcpy(temp, m_data+(linelength*topline), linelength);
-			memcpy(m_data+(linelength*topline), m_data+(linelength*bottomline), linelength);
-			memcpy(m_data+(linelength*bottomline), temp, linelength);
-			topline++;
-			bottomline--;
-		}
-		delete[](temp);
     }
 }
 
@@ -377,13 +429,13 @@ void CqImage::transferData()
 	unsigned char *unrolled = m_data;
 	unsigned char *realData = m_realData;
 
+	TqInt displayOffset = 0;
+	TqInt storageOffset = 0;
 	for ( y = 0; y < imageHeight(); y++ )
 	{
 		TqUlong x;
 		for ( x = 0; x < imageWidth(); x++ )
 		{
-			TqInt displayOffset = numChannels() * (( y * imageWidth() ) +  x );
-			TqInt storageOffset = (( y * rowLength() ) + ( x * m_elementSize ) );
 			std::vector<std::pair<std::string, TqInt> >::iterator channel;
 			for(channel = m_channels.begin(); channel != m_channels.end(); ++channel)
 			{
@@ -391,29 +443,34 @@ void CqImage::transferData()
 				{
 					case PkDspyUnsigned16:
 						unrolled[displayOffset] = reinterpret_cast<TqUshort*>(&realData[storageOffset])[0]>>8;
+						storageOffset += sizeof(TqUshort);
 						break;
 					case PkDspySigned16:
 						unrolled[displayOffset] = reinterpret_cast<TqShort*>(&realData[storageOffset])[0]>>7;
+						storageOffset += sizeof(TqShort);
 						break;
 					case PkDspyUnsigned32:
 						unrolled[displayOffset] = reinterpret_cast<TqUlong*>(&realData[storageOffset])[0]>>24;
+						storageOffset += sizeof(TqUlong);
 						break;
 					case PkDspySigned32:
 						unrolled[displayOffset] = reinterpret_cast<TqLong*>(&realData[storageOffset])[0]>>23;
+						storageOffset += sizeof(TqLong);
 						break;
 
 					case PkDspyFloat32:
-						unrolled[displayOffset] = reinterpret_cast<TqFloat*>(&realData[storageOffset])[0]*255.0;
+						unrolled[displayOffset] = CLAMP(reinterpret_cast<TqFloat*>(&realData[storageOffset])[0], 0.0, 1.0)*255.0;
+						storageOffset += sizeof(TqFloat);
 						break;
 
 					case PkDspySigned8:
 					case PkDspyUnsigned8:
 					default:
 						unrolled[displayOffset] = reinterpret_cast<TqUchar*>(&realData[storageOffset])[0];
+						storageOffset += sizeof(TqUchar);
 						break;
 				}
 				++displayOffset;
-				++storageOffset;
 			}
 		}
 	}

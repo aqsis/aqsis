@@ -143,7 +143,8 @@ void CqDisplayServerImage::acceptData(TqUlong xmin, TqUlong xmaxplus1, TqUlong y
 							const TqUshort *svalue = reinterpret_cast<const TqUshort *>(_pdatarow);
 							reinterpret_cast<TqUshort*>(&realData[storageOffset])[0] = svalue[0];
 							CompositeAlpha((TqInt) (svalue[0]>>8), unrolled[displayOffset], alpha);
-							_pdatarow += 2;
+							_pdatarow += sizeof(TqUshort);
+							storageOffset += sizeof(TqUshort);
 						}
 						break;
 						case PkDspySigned16:
@@ -151,7 +152,8 @@ void CqDisplayServerImage::acceptData(TqUlong xmin, TqUlong xmaxplus1, TqUlong y
 							const TqShort *svalue = reinterpret_cast<const TqShort *>(_pdatarow);
 							reinterpret_cast<TqShort*>(&realData[storageOffset])[0] = svalue[0];
 							CompositeAlpha((TqInt) (svalue[0]>>7), unrolled[displayOffset], alpha);
-							_pdatarow += 2;
+							_pdatarow += sizeof(TqShort);
+							storageOffset += sizeof(TqShort);
 						}
 						break;
 						case PkDspyUnsigned32:
@@ -160,7 +162,8 @@ void CqDisplayServerImage::acceptData(TqUlong xmin, TqUlong xmaxplus1, TqUlong y
 							const TqUlong *lvalue = reinterpret_cast<const TqUlong *>(_pdatarow);
 							reinterpret_cast<TqUlong*>(&realData[storageOffset])[0] = lvalue[0];
 							CompositeAlpha((TqInt) (lvalue[0]>>24), unrolled[displayOffset], alpha);
-							_pdatarow += 4;
+							_pdatarow += sizeof(TqUlong);
+							storageOffset += sizeof(TqUlong);
 						}
 						break;
 						case PkDspySigned32:
@@ -169,7 +172,8 @@ void CqDisplayServerImage::acceptData(TqUlong xmin, TqUlong xmaxplus1, TqUlong y
 							const TqLong *lvalue = reinterpret_cast<const TqLong *>(_pdatarow);
 							reinterpret_cast<TqLong*>(&realData[storageOffset])[0] = lvalue[0];
 							CompositeAlpha((TqInt) (lvalue[0]>>23), unrolled[displayOffset], alpha);
-							_pdatarow += 4;
+							_pdatarow += sizeof(TqLong);
+							storageOffset += sizeof(TqLong);
 						}
 						break;
 
@@ -178,7 +182,8 @@ void CqDisplayServerImage::acceptData(TqUlong xmin, TqUlong xmaxplus1, TqUlong y
 							const TqFloat *fvalue = reinterpret_cast<const TqFloat *>(_pdatarow);
 							reinterpret_cast<TqFloat*>(&realData[storageOffset])[0] = fvalue[0];
 							CompositeAlpha((TqInt) (fvalue[0]*255.0), unrolled[displayOffset], alpha);
-							_pdatarow += 4;
+							_pdatarow += sizeof(TqFloat);
+							storageOffset += sizeof(TqFloat);
 						}
 						break;
 
@@ -189,16 +194,17 @@ void CqDisplayServerImage::acceptData(TqUlong xmin, TqUlong xmaxplus1, TqUlong y
 							const TqUchar *cvalue = reinterpret_cast<const TqUchar *>(_pdatarow);
 							reinterpret_cast<TqUchar*>(&realData[storageOffset])[0] = cvalue[0];
 							CompositeAlpha((TqInt) cvalue[0], unrolled[displayOffset], alpha);
-							_pdatarow += 1;
+							_pdatarow += sizeof(TqUchar);
+							storageOffset += sizeof(TqUchar);
 						}
 						break;
 					}
 					++displayOffset;
-					++storageOffset;
 				}
 			}
 			pdatarow += bucketlinelen;
 		}
+		//transferData();
 		if(m_updateCallback)
 			m_updateCallback(xmin__, ymin__, xmaxplus1__-xmin__, ymaxplus1__-ymin__);
 	}
