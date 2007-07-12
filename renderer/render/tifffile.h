@@ -32,6 +32,7 @@
 #include <boost/utility.hpp>
 #include <boost/shared_array.hpp>
 #include <boost/intrusive_ptr.hpp>
+#include <boost/format.hpp>
 #include <tiffio.h>
 
 #include "aqsis.h"
@@ -104,7 +105,9 @@ class CqTiffDirHandle : public boost::noncopyable
 		/** \brief Obtain the underlying tiff file pointer
 		 */
 		TIFF* tiffPtr() const;
-		/** \brief Obtain the directory index to this 
+		/** \brief Obtain the index to this directory
+		 *
+		 * \return current directory index.
 		 */
 		tdir_t dirIndex() const;
 		/** \brief Get the value of a tiff tag for the directory
@@ -221,11 +224,10 @@ class CqTiffInputFile
 		 * \throw XqEnvironment
 		 * \throw XqTiffError
 		 *
-		 * \param fileName
-		 * \param searchPath
-		 * \param directory
+		 * \param fileName - file name to open
+		 * \param directory - tiff directory to attach to
 		 */
-		CqTiffInputFile(const std::string& fileName, const std::string& riPath, const TqUint directory = 0);
+		CqTiffInputFile(const std::string& fileName, const TqUint directory = 0);
 		/** \brief Virtual destructor
 		 */
 		virtual ~CqTiffInputFile();
@@ -374,6 +376,17 @@ T CqTiffDirHandle::tiffTagValue(const uint32 tag, const T defaultVal) const
 		return defaultVal;
 }
 
+//------------------------------------------------------------------------------
+template<typename T>
+bool CqTiffDirHandle::checkTagValue(const uint32 tag, const T desiredValue,
+		const bool tagNotFoundVal) const
+{
+	T temp = 0;
+	if(TIFFGetField(tiffPtr(), tag, &temp))
+		return temp == desiredValue;
+	else
+		return tagNotFoundVal;
+}
 
 //------------------------------------------------------------------------------
 // libtiff wrapper functions

@@ -24,8 +24,6 @@
  * \author Chris Foster
  */
 
-#include <boost/format.hpp>
-
 #include "tifffile.h"
 #include "rifile.h"
 
@@ -92,8 +90,14 @@ tdir_t CqTiffDirHandle::dirIndex() const
 //------------------------------------------------------------------------------
 // CqTiffFileHandle
 //------------------------------------------------------------------------------
+void safeTiffClose(TIFF* tif)
+{
+	if(tif)
+		TIFFClose(tif);
+}
+
 CqTiffFileHandle::CqTiffFileHandle(const std::string& fileName, const char* openMode)
-	: m_tiffPtr(TIFFOpen(fileName.c_str(), openMode), TIFFClose),
+	: m_tiffPtr(TIFFOpen(fileName.c_str(), openMode), safeTiffClose),
 	m_currDirec(0)
 {
 	if(!m_tiffPtr)
@@ -119,7 +123,7 @@ void CqTiffFileHandle::setDirectory(tdir_t dirIdx)
 // CqTiffInputFile
 //------------------------------------------------------------------------------
 // constructor
-CqTiffInputFile::CqTiffInputFile(const std::string& fileName, const std::string& riPath, TqUint directory)
+CqTiffInputFile::CqTiffInputFile(const std::string& fileName, TqUint directory)
 	: m_fileName(fileName),
 	m_fileHandlePtr(new CqTiffFileHandle(fileName, "r")),
 	m_currDir()
