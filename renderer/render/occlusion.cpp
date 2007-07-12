@@ -620,15 +620,10 @@ void CqOcclusionTree::SampleMPG( std::vector<CqImagePixel>& aieImage, std::vecto
 
 
 //----------------------------------------------------------------------
-// Static Variables
-
-CqOcclusionTreePtr	CqOcclusionBox::m_KDTree = 0;	///< KD Tree representing the samples in the bucket.
-
-//----------------------------------------------------------------------
 /** Constructor
 */
 
-CqOcclusionBox::CqOcclusionBox()
+CqOcclusionBox::CqOcclusionBox() : m_KDTree(0)
 {}
 
 

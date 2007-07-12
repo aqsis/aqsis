@@ -186,13 +186,13 @@ class CqOcclusionBox
 
 		bool CanCull( const CqBound* bound ) const;
 
-		static CqOcclusionTreePtr& KDTree()
+		const CqOcclusionTreePtr& KDTree() const
 		{
 			return(m_KDTree);
 		}
 
 	protected:
-		static CqOcclusionTreePtr	m_KDTree;			///< Tree representing the samples in the bucket.
+		CqOcclusionTreePtr	m_KDTree;			///< Tree representing the samples in the bucket.
 };
 
 
