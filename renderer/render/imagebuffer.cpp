@@ -838,7 +838,6 @@ void CqImageBuffer::RenderImage()
 	} while( NextBucket(order) );
 
 	ImageComplete();
-	CqBucket::ShutdownBucket();
 
 	// Pass >100 through to progress to allow it to indicate completion.
 

@@ -45,13 +45,6 @@ START_NAMESPACE( Aqsis )
 
 
 //----------------------------------------------------------------------
-/** Static data on CqBucket
- */
-
-CqBucketData* CqBucket::m_bucketData = 0;
-
-
-//----------------------------------------------------------------------
 /** Mark this bucket as processed
  */
 void CqBucket::SetProcessed( bool bProc )
@@ -977,15 +970,6 @@ void CqBucket::QuantizeBucket()
 bool CqBucket::IsEmpty()
 {
 	return !pTopSurface() && m_micropolygons.empty();
-}
-
-//----------------------------------------------------------------------
-/** Clear any data on the bucket
- */
-void CqBucket::ShutdownBucket()
-{
-	if (m_bucketData)
-		m_bucketData->reset();
 }
 
 //----------------------------------------------------------------------

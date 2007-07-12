@@ -55,10 +55,12 @@ void CqBucketData::reset()
 	m_SamplePoints.clear();
 	m_NextSamplePoint = 0;
 
-	for( std::vector<std::vector<CqVector2D> >::iterator i=m_aSamplePositions.begin();
-	     i!=m_aSamplePositions.end();
+	for( std::vector<std::vector<CqVector2D> >::iterator i = m_aSamplePositions.begin();
+	     i != m_aSamplePositions.end();
 	     i++ )
-		(*i).clear();
+	{
+		i->clear();
+	}
 	m_aSamplePositions.clear();
 	m_aFilterValues.clear();
 	m_aDatas.clear();

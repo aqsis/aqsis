@@ -126,7 +126,6 @@ class CqBucket : public IqBucket
 		void	FilterBucket(bool empty, bool fImager);
 		void	ExposeBucket();
 		void	QuantizeBucket();
-		static	void	ShutdownBucket();
 
 		/** Add a GPRim to the stack of deferred GPrims.
 		* \param The Gprim to be added.
@@ -192,7 +191,7 @@ class CqBucket : public IqBucket
 		void SetProcessed( bool bProc =  true);
 		/** Set the pointer to the bucket data
 		 */
-		static void SetBucketData( CqBucketData* bucketData )
+		void SetBucketData( CqBucketData* bucketData )
 		{
 			m_bucketData = bucketData;
 		}
@@ -227,7 +226,7 @@ class CqBucket : public IqBucket
 		bool	m_bProcessed;
 
 		/// Dynamic bucket data
-		static CqBucketData* m_bucketData;
+		CqBucketData* m_bucketData;
 
 		// this is a compare functor for sorting surfaces in order of depth.
 		struct closest_surface
