@@ -490,7 +490,7 @@ void CqOcclusionTree::SampleMPG( std::vector<CqImagePixel>& aieImage, std::vecto
 			bool opaque = MpgSampleInfo.m_IsOpaque;
 
 			SqImageSample& currentOpaqueSample = sample.m_OpaqueSample;
-			static SqImageSample localImageVal;
+			SqImageSample localImageVal;
 
 			SqImageSample& ImageVal = opaque ? currentOpaqueSample : localImageVal;
 
