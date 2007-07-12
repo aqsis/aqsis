@@ -48,6 +48,7 @@ class RIB_SHARE CqRibBinaryDecoder
 		int zavailable; // Available output bytes
 		Bytef *zcurrent; // Location in available output
 
+		/// \todo <b>Code Review</b>: consider using a stream here instead of a vector.
 		std::vector<TqChar> cv;
 
 		std::string ritab[ 256 ];
