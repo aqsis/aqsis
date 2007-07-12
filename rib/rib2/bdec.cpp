@@ -674,6 +674,7 @@ void CqRibBinaryDecoder::getNext ()
 	TqChar b1, b2, b3, b4;
 	TqUint ui;
 	TqFloat f;
+	/// \todo <b>Code Review</b>: use a stream for cv directly rather than using the temporary string ostr.
 	std::string ostr;
 	std::string str;
 	std::string tmpstr;

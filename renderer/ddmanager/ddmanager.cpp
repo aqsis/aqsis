@@ -536,12 +536,12 @@ void CqDisplayRequest::CloseDisplayLibrary()
 
 	if (m_DataBucket != 0)
 	{
-		delete m_DataBucket;
+		delete [] m_DataBucket;
 		m_DataBucket = 0;
 	}
 	if (m_DataRow != 0)
 	{
-		delete m_DataRow;
+		delete [] m_DataRow;
 		m_DataRow = 0;
 	}
 
