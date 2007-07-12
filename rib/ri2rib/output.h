@@ -71,12 +71,20 @@ class CqOutput
 		                  ShaderLayer, ConnectShaderLayers,
 		                  LAST_Function,
 		};
-		// block types (used to check context nesting)
+		/** \brief Block types (used to check context nesting)
+		 */
+		// Before modifiying this enum, CHECK the associated m_blockNames,
+		// m_blockErros and m_blockFunctions arrays in the implementation file!
+		// They need to be kept in sync.
 		enum EqBlocks{
-		    B_Ri, B_Frame, B_World, B_Attribute, B_Transform, B_Solid, B_Object,
-		    B_Motion, B_Resource
-	};
+			B_Ri, B_Frame, B_World, B_Attribute, B_Transform, B_Solid, B_Object,
+			B_Motion, B_Resource
+		};
 	private:
+		static const char* const m_blockNames[];
+		static const RtInt m_blockErrors[];
+		static const EqFunctions m_blockFunctions[];
+
 		CqDictionary m_Dictionary;
 
 		RtInt m_ColorNComps;
@@ -91,13 +99,25 @@ class CqOutput
 		std::stack<SqSteps> m_Steps;
 
 		std::vector<EqBlocks> m_nesting;
-		bool beginNesting(EqBlocks type);
-		bool endNesting(EqBlocks type);
 		bool nestingContains(EqBlocks type) const;
 
 		void push();
 		void pop();
 
+		/** \brief Print a Ri parameter list
+		 *
+		 * The number primitive variables which should be attached to this
+		 * geomtric primative for each different primitive variable class must
+		 * be provided (vertex, varying, uniform, facevarying).
+		 *
+		 * \param n - number of items in the list
+		 * \param tokens - descriptor tokens for the list
+		 * \param parms - pointers to the parameter values
+		 * \param vertex - number of primitive vars in class "vertex"
+		 * \param varying - number of primitive vars in class "varying"
+		 * \param uniform - number of primitive vars in class "uniform"
+		 * \param facevarying - number of primitive vars in class "facevarying"
+		 */
 		void printPL ( RtInt n, RtToken tokens[], RtPointer parms[],
 		               RtInt vertex = 1, RtInt varying = 1, RtInt uniform = 1, RtInt facevarying = 1 );
 		std::string getFilterFuncName ( RtFilterFunc, const char * ) const;
@@ -110,11 +130,10 @@ class CqOutput
 		}
 
 	protected:
-		SqOptions::EqIndentation m_Indentation;
-		TqInt m_IndentSize;
-		TqInt m_IndentLevel;
-
 		CqStream *out;
+
+		virtual void beginNesting(EqBlocks type);
+		virtual void endNesting(EqBlocks type);
 
 		virtual void printHeader()
 		{}
@@ -146,8 +165,7 @@ class CqOutput
 
 	public:
 		CqOutput( const char *, int fdesc,
-		          SqOptions::EqCompression,
-		          SqOptions::EqIndentation, TqInt isize );
+		          SqOptions::EqCompression);
 		virtual ~CqOutput();
 
 		RtToken RiDeclare( const char *name, const char *declaration );

@@ -29,6 +29,7 @@
 #include	<math.h>
 #include	<iostream>
 #include	<fstream>
+#include	<boost/shared_array.hpp>
 
 #include	"texturemap.h"
 #include	"random.h"
@@ -178,12 +179,12 @@ void CqShadowMap::LoadZFile()
 			// Save a file type and version marker
 			TqPchar origHeader = ZFILE_HEADER;
 			TqInt headerLength = strlen( ZFILE_HEADER );
-			TqPchar strHeader = new TqChar[ headerLength ];
-			file.read( strHeader, headerLength );
+			boost::shared_array<TqChar> strHeader( new TqChar[ headerLength ] );
+			file.read( strHeader.get(), headerLength );
 			// Check validity of shadow map.
-			if ( strncmp( strHeader, origHeader, headerLength ) != 0 )
+			if ( strncmp( strHeader.get(), origHeader, headerLength ) != 0 )
 			{
-				Aqsis::log() << error << "Invalid shadow map format \"" << m_strName.c_str() << "\"" << " : \"" << strHeader << "\"[" << origHeader << "]"<< std::endl;
+				Aqsis::log() << error << "Invalid shadow map format \"" << m_strName.c_str() << "\"" << " : \"" << strHeader.get() << "\"[" << origHeader << "]"<< std::endl;
 				return ;
 			}
 

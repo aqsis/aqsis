@@ -674,6 +674,7 @@ void CqRibBinaryDecoder::getNext ()
 	TqChar b1, b2, b3, b4;
 	TqUint ui;
 	TqFloat f;
+	/// \todo <b>Code Review</b>: use a stream for cv directly rather than using the temporary string ostr.
 	std::string ostr;
 	std::string str;
 	std::string tmpstr;
@@ -1200,4 +1201,18 @@ TqInt CqRibBinaryDecoder::read( TqPchar buffer, TqUint size )
 		n  = t;
 	}
 	return n;
+}
+
+
+/*--------------------------------------------------------------------*/
+void CqRibBinaryDecoder::dumpToStream(std::ostream& out)
+{
+	const TqInt bufSize = 1024;
+	TqPchar buf = new TqChar[bufSize];
+	while(!eof())
+	{
+		TqInt readSize = read(buf, bufSize-1);
+		buf[readSize] = 0; // add null termination char.
+		out << buf;
+	}
 }

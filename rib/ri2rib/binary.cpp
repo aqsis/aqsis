@@ -123,14 +123,18 @@ void CqBinary::encodeString( const char *s )
 		OUT << str[ i ];
 }
 
+
 CqBinary::CqBinary( const char *name, int fdesc,
-                    SqOptions::EqCompression comp,
-                    SqOptions::EqIndentation i, TqInt isize )
-		: CqOutput( name, fdesc, comp, i, isize )
+                    const SqOptions::EqCompression comp)
+		: CqOutput( name, fdesc, comp)
 {
 	for ( TqInt ii = 0; ii < LAST_Function; ii++ )
 		m_aRequest[ ii ] = false;
 }
+
+
+CqBinary::~CqBinary()
+{ }
 
 
 void CqBinary::printHeader()

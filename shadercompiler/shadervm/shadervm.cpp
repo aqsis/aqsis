@@ -323,6 +323,10 @@ SqOpCodeTrans CqShaderVM::m_TransTable[] =
         {"vmix", 0, &CqShaderVM::SO_vmix, 0, {0}},
         {"nmix", 0, &CqShaderVM::SO_nmix, 0, {0}},
         {"comp", 0, &CqShaderVM::SO_comp, 0, {0}},
+        {"cmixc", 0, &CqShaderVM::SO_cmixc, 0, {0}},
+        {"pmixc", 0, &CqShaderVM::SO_pmixc, 0, {0}},
+        {"vmixc", 0, &CqShaderVM::SO_vmixc, 0, {0}},
+        {"nmixc", 0, &CqShaderVM::SO_nmixc, 0, {0}},
         {"setcomp", 0, &CqShaderVM::SO_setcomp, 0, {0}},
         {"ambient", 0, &CqShaderVM::SO_ambient, 0, {0}},
         {"diffuse", 0, &CqShaderVM::SO_diffuse, 0, {0}},
@@ -1507,7 +1511,7 @@ void CqShaderVM::PrepareShaderForUse( )
 			Aqsis::log() << debug << "imager shader " << strName().c_str() << std::endl;
 			break;
 		default:
-			Aqsis::log() << debug << "unknown shader type " << strName().c_str() << std::endl;
+			Aqsis::log() << error << "unknown shader type " << strName().c_str() << std::endl;
 			break;
 	}	
 

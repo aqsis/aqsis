@@ -32,30 +32,34 @@ START_NAMESPACE( libri2rib )
 
 class CqASCII : public CqOutput
 {
-	protected:
-		void printHeader();
-		void printRequest( const char *, EqFunctions );
-		void printInteger( const RtInt );
-		void printFloat( const RtFloat );
-		void printString( std::string & );
-		void printSpace();
-		void printEOL();
-
-		void printArray ( RtInt n, RtInt *p );
-		void printArray ( RtInt n, RtFloat *p );
-		void printArray ( RtInt n, RtToken *p );
-		void printToken ( RtToken t );
-		void printCharP ( const char *c );
-		void print ( const char *c );
-
 	public:
-		CqASCII( const char *name, int fdesc,
-		         SqOptions::EqCompression comp,
-		         SqOptions::EqIndentation i, TqInt isize )
-				: CqOutput( name, fdesc, comp, i, isize )
-		{}
-		~CqASCII()
-		{}
+		CqASCII( const char *name, const int fdesc,
+		         const SqOptions::EqCompression comp,
+		         const SqOptions::EqIndentation i, const TqInt isize );
+		virtual ~CqASCII();
+	protected:
+		virtual void beginNesting(EqBlocks type);
+		virtual void endNesting(EqBlocks type);
+
+		virtual void printHeader();
+		virtual void printRequest( const char *, EqFunctions );
+		virtual void printInteger( const RtInt );
+		virtual void printFloat( const RtFloat );
+		virtual void printString( std::string & );
+		virtual void printSpace();
+		virtual void printEOL();
+
+		virtual void printArray ( RtInt n, RtInt *p );
+		virtual void printArray ( RtInt n, RtFloat *p );
+		virtual void printArray ( RtInt n, RtToken *p );
+		virtual void printToken ( RtToken t );
+		virtual void printCharP ( const char *c );
+		virtual void print ( const char *c );
+
+	private:
+		SqOptions::EqIndentation m_Indentation;
+		TqInt m_IndentSize;
+		TqUint m_IndentLevel;
 }
 ;
 

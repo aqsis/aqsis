@@ -143,16 +143,16 @@ static bool lowendian();
 // size, specifies format in which incoming data will arrive.
 //******************************************************************************
 
-PtDspyError DspyImageOpen(PtDspyImageHandle    *image,
-                          const char           *drivername,
-                          const char           *filename,
-                          int                  width,
-                          int                  height,
-                          int                  paramCount,
-                          const UserParameter  *parameters,
-                          int                  formatCount,
-                          PtDspyDevFormat      *format,
-                          PtFlagStuff          *flagstuff)
+extern "C" PtDspyError DspyImageOpen(PtDspyImageHandle    *image,
+                                     const char           *drivername,
+                                     const char           *filename,
+                                     int                  width,
+                                     int                  height,
+                                     int                  paramCount,
+                                     const UserParameter  *parameters,
+                                     int                  formatCount,
+                                     PtDspyDevFormat      *format,
+                                     PtFlagStuff          *flagstuff)
 {
 	PtDspyError rval = PkDspyErrorNone;
 
@@ -315,10 +315,10 @@ Exit:
 // and aspect ratio.
 //******************************************************************************
 
-PtDspyError DspyImageQuery(PtDspyImageHandle image,
-                           PtDspyQueryType   type,
-                           size_t            size,
-                           void              *data)
+extern "C" PtDspyError DspyImageQuery(PtDspyImageHandle image,
+                                      PtDspyQueryType   type,
+                                      size_t            size,
+                                      void              *data)
 {
 #if SHOW_CALLSTACK
 	fprintf(stderr, "sdcBMP_DspyImageQuery called, type: %d.\n", type);
@@ -384,7 +384,7 @@ PtDspyError DspyImageQuery(PtDspyImageHandle image,
 //
 // Send data to the display driver.
 //******************************************************************************
-PtDspyError DspyImageData(PtDspyImageHandle image,
+extern "C" PtDspyError DspyImageData(PtDspyImageHandle image,
                           int xmin,
                           int xmax_plusone,
                           int ymin,
@@ -468,7 +468,7 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 // DspyImageClose
 //******************************************************************************
 
-PtDspyError DspyImageClose(PtDspyImageHandle image)
+extern "C" PtDspyError DspyImageClose(PtDspyImageHandle image)
 {
 #if SHOW_CALLSTACK
 	fprintf(stderr, "sdcBMP_DspyImageClose called.\n");

@@ -61,11 +61,8 @@ class CqBinary : public CqOutput
 		void print ( const char *c );
 
 	public:
-		CqBinary( const char *, int fdesc,
-		          SqOptions::EqCompression,
-		          SqOptions::EqIndentation, TqInt isize );
-		~CqBinary()
-		{}
+		CqBinary( const char *, const int fdesc, const SqOptions::EqCompression);
+		virtual ~CqBinary();
 }
 ;
 

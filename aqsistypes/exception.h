@@ -65,7 +65,7 @@ class COMMON_SHARE XqException : public std::runtime_error
 		* a function that overrides a virtual function from a base class shall have an exception specification
 		* at least as restrictive as that in the base class.
 		*/
-		~XqException () throw ();
+		virtual ~XqException () throw ();
 		
 	private:
 		const std::string 	m_detail; 	//< Optional, a detailed message
@@ -87,7 +87,7 @@ class COMMON_SHARE XqInternal : public XqException
 		
 		virtual const char* description () const;
 		
-		~XqInternal () throw ();
+		virtual ~XqInternal () throw ();
 }
 ;
 
@@ -102,22 +102,22 @@ class COMMON_SHARE XqEnvironment : public XqException
 		
 		virtual const char* description () const;
 		
-		~XqEnvironment () throw ();
+		virtual ~XqEnvironment () throw ();
 }
 ;
 
-class COMMON_SHARE XqValidationFailure : public XqException
+class COMMON_SHARE XqValidation : public XqException
 {
 	public:
-		XqValidationFailure (const std::string& reason, const std::string& detail,
+		XqValidation (const std::string& reason, const std::string& detail,
 		const std::string& file, const unsigned int line);
 		
-		XqValidationFailure (const std::string& reason,	const std::string& file,
+		XqValidation (const std::string& reason,	const std::string& file,
 		const unsigned int line);
 		
 		virtual const char* description () const;
 		
-		~XqValidationFailure () throw ();
+		virtual ~XqValidation () throw ();
 }
 ;
 

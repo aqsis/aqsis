@@ -32,6 +32,8 @@
 
 START_NAMESPACE( libri2rib )
 
+/// \todo Review: Replace this exception class with one rooted in the XqException heirarchy - it should be a subclass of XqValidationFailure.
+
 class CqError
 {
 	private:

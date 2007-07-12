@@ -108,24 +108,24 @@ XqEnvironment::~XqEnvironment () throw ()
 }
 
 //////////////////////////////////////////////////////////////////////////////
-XqValidationFailure::XqValidationFailure (const std::string& reason, const std::string& detail,
+XqValidation::XqValidation (const std::string& reason, const std::string& detail,
 const std::string& file, const unsigned int line)
 : XqException (reason, detail, file, line)
 {
 }
 
-XqValidationFailure::XqValidationFailure (const std::string& reason,	const std::string& file,
+XqValidation::XqValidation (const std::string& reason,	const std::string& file,
 const unsigned int line)
 : XqException (reason, file, line)
 {
 }
 
-const char* XqValidationFailure::description () const
+const char* XqValidation::description () const
 {
 	return "Validation error";
 }
 
-XqValidationFailure::~XqValidationFailure () throw ()
+XqValidation::~XqValidation () throw ()
 {
 }
 	

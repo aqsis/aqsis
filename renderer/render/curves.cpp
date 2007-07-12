@@ -260,6 +260,24 @@ void CqCurve::PopulateWidth()
 }
 
 
+bool CqCurve::GetNormal( TqInt index, CqVector3D& normal ) const
+{
+	if ( N() != NULL )
+	{
+		normal = N()->pValue( index )[0];
+		return true;
+	}
+	else
+	{
+		bool CSO = pTransform()->GetHandedness(pTransform()->Time(0));
+		bool O = pAttributes() ->GetIntegerAttribute( "System", "Orientation" ) [ 0 ] != 0;
+		if ( (O && CSO) || (!O && !CSO) )
+			normal = CqVector3D(0, 0, -1);
+		else
+			normal = CqVector3D(0, 0, 1);
+		return false;
+	}
+}
 
 /**
  * Sets the default primitive variables.
