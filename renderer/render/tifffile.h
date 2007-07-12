@@ -29,6 +29,7 @@
 
 #include <string>
 
+#include <boost/utility.hpp>
 #include <boost/shared_array.hpp>
 #include <boost/intrusive_ptr.hpp>
 #include <tiffio.h>
@@ -40,6 +41,7 @@
 
 namespace Aqsis
 {
+//------------------------------------------------------------------------------
 
 /** \brief Find a file in the current Ri Path.
  *
@@ -51,16 +53,164 @@ namespace Aqsis
 std::string findFileInRiPath(const std::string& fileName, const std::string& riPath);
 
 //------------------------------------------------------------------------------
-/** \brief Class wrapper around the libtiff library functions for reading and
- * writing multi-directory tiled tiff files.
+/** \brief Class for reporting errors encountered on reading TIFF files.
+ */
+class XqTiffError : public XqEnvironment
+{
+	public:
+		XqTiffError (const std::string& reason, const std::string& detail,
+		const std::string& file, const unsigned int line);
+		
+		XqTiffError (const std::string& reason,	const std::string& file,
+			const unsigned int line);
+		
+		virtual const char* description () const;
+		
+		/// \todo should this really be virtual?
+		virtual ~XqTiffError () throw ();
+};
+
+
+//------------------------------------------------------------------------------
+// forward declaration
+class CqTiffFileHandle;
+
+//------------------------------------------------------------------------------
+/** \brief A locked handle to a tiff directory.
  *
- * In principle this class would extend from CqFile.  However, CqFile isn't a
- * very good base class because it's targeted toward file IO based on the
- * standard iostreams.  Here we wrap the C-like file IO functions from libtiff
- * instead.
+ * The handle wraps some libtiff functions in a C++-like manner, but in general
+ * is desgined to be simply a thin wrapper with access to the underlying TIFF
+ * structure.  This means that users should be prepared to call libtiff
+ * functions directly on the TIFF* which is accessible with the tiffPtr()
+ * function.
+ *
+ * Warning! at the moment this isn't thread-safe (but it's easy to make it so).
+ *
+ * Use this to obtain a handle to a specific directory inside a tiff file.  For
+ * threading, the underlying tiff file handle will be locked so that only one
+ * directory handle can be obtained at any one time.  This means that an
+ * instance of this class blocks access to the underlying tiff file until its
+ * destructor is called.
+ */
+class CqTiffDirHandle : public boost::noncopyable
+{
+	public:
+		/** \brief Construct a tiff directory handle from a tiff file handle
+		 *
+		 * \param fileHandle - handle to the underlying tiff file
+		 * \param dirIdx - directory index
+		 */
+		CqTiffDirHandle(boost::shared_ptr<CqTiffFileHandle> fileHandle, const tdir_t dirIdx = 0);
+		/** \brief Obtain the underlying tiff file pointer
+		 */
+		TIFF* tiffPtr() const;
+		/** \brief Obtain the directory index to this 
+		 */
+		tdir_t dirIndex() const;
+		/** \brief Get the value of a tiff tag for the directory
+		 *
+		 * Note that unfortunately this isn't type-safe: you *must* specify the
+		 * correct type, T for the TIFF tag desired, otherwise you'll get
+		 * strange results, or a crash!  This is unfortunately due to the
+		 * nature of the underlying library and isn't easy to avoid.
+		 *
+		 * \throw XqTiffError if the tag is not defined.
+		 *
+		 * \param tag - the tiff tag to obtain.
+		 *
+		 * \return the tag value
+		 */
+		template<typename T>
+		T tiffTagValue(const uint32 tag) const;
+		/** \brief Get the value of a tiff tag for the directory with a default
+		 * if not found.
+		 *
+		 * Note that unfortunately this isn't type-safe: you *must* specify the
+		 * correct type, T for the TIFF tag desired, otherwise you'll get
+		 * strange results, or a crash!
+		 *
+		 * Unlike the one-parameter version of tiffTagValue, this version does
+		 * not throw an exception when the tag is not found.  Instead it
+		 * quietly returns the supplied default value.
+		 *
+		 * \param tag - the tiff tag to obtain.
+		 * \param defaultVal - value to return if the tag is not present in the file.
+		 *
+		 * \return the tag value
+		 */
+		template<typename T>
+		T tiffTagValue(const uint32 tag, const T defaultVal) const;
+		/** \brief Ensure that a given tiff tag has a particular value.
+		 *
+		 * \param tag - the tiff tag to query
+		 * \param desiredValue - desired value for the tag.
+		 * \param tagNotFoundVal - return this when the tag is not found
+		 *
+		 * \return true if the tag has the desired value, false if not.
+		 */
+		template<typename T>
+		bool checkTagValue(const uint32 tag, const T desiredValue,
+				const bool tagNotFoundVal = true) const;
+	private:
+		boost::shared_ptr<CqTiffFileHandle> m_fileHandle; ///< underlying file handle
+		/// \todo: multithreading - add a lock here!
+		/// \todo: add a pointer to a TIFFRGBAimage
+};
+
+
+//------------------------------------------------------------------------------
+/** \brief A handle for tiff directories
+ *
+ * The handle takes care of file allocation, deallocation, and keeps
+ * track of the current directory.  Do *not* use TIFFOpen, TIFFClose,
+ * or TIFFSetDirectory outside this class.
+ */
+class CqTiffFileHandle : public boost::noncopyable
+{
+	public:
+		/** \brief Construct a tiff file handle
+		 *
+		 * \param fileName - name of the tiff to open
+		 * \param openMode - libtiff file open mode ("r" or "w" for read or write)
+		 */
+		CqTiffFileHandle(const std::string& fileName, const char* openMode);
+
+	private:
+		friend class CqTiffDirHandle;
+		/** \brief Set the current directory for this tiff file.
+		 */
+		void setDirectory(tdir_t dirIdx);
+
+		std::string m_fileName;             ///< name of the tiff file
+		boost::shared_ptr<TIFF> m_tiffPtr;  ///< underlying TIFF structure
+		tdir_t m_currDirec;                 ///< current directory index
+		/// \todo: multithreading - add a mutex!
+};
+
+//------------------------------------------------------------------------------
+// libtiff wrapper functions
+
+/** \brief Allocate memory with _TIFFmalloc and encapsulate the memory
+ * in a boost::shared_array.
+ *
+ * \throw XqEnvironment if the allocation fails
+ *
+ * \param size - number of bytes to allocate.
+ * \return 'size' bytes of memory allocated with _TIFFmalloc
+ */
+template<typename T>
+boost::shared_array<T> tiffMalloc(const tsize_t size);
+
+
+//------------------------------------------------------------------------------
+/** \brief Class wrapper around the libtiff library functions for reading
+ * multi-directory tiff files.
  *
  * CqTiffInputFile provides a uniform interface for dealing with both tiled and
- * strip-oriented TIFF files - here we just call both types tiles.
+ * strip-oriented TIFF files - here we just call both types "tiles".
+ *
+ * CqTiffInputFile attempts to provide a more C++-like interface, and as such
+ * doesn't always do things in "the libtiff way".
  */
 class CqTiffInputFile
 {
@@ -68,7 +218,7 @@ class CqTiffInputFile
 		/** \brief Construct a tiff input file.  The resulting file object is
 		 * guaranteed to be an valid and accessable TIFF file.
 		 *
-		 * \throw XqIoError
+		 * \throw XqEnvironment
 		 * \throw XqTiffError
 		 *
 		 * \param fileName
@@ -76,9 +226,6 @@ class CqTiffInputFile
 		 * \param directory
 		 */
 		CqTiffInputFile(const std::string& fileName, const std::string& riPath, const TqUint directory = 0);
-		/** \brief Copy constructor
-		 */
-		CqTiffInputFile(CqTiffInputFile& toBeCopied);
 		/** \brief Virtual destructor
 		 */
 		virtual ~CqTiffInputFile();
@@ -128,65 +275,15 @@ class CqTiffInputFile
 		 */
 		CqTiffInputFile& cloneWithNewDirectory(const TqUint newDir);
 
-		/** \brief assignment operator
-		 *
-		 * \param rhs - tiff file to assign to this one
-		 * \return reference to this.
-		 */
-		CqTiffInputFile& operator=(const CqTiffInputFile& rhs);
+		// Use compiler-generated copy constructor and assignment operator
 
-	protected:
-		//----------------------------------------
-		// Protected member functions
-		/** \brief Get the value of a tiff tag for the current image.
-		 *
-		 * Note that unfortunately this isn't type-safe: you *must* specify the
-		 * correct type, T for the TIFF tag desired, otherwise you'll get
-		 * strange results, or a crash!  This is unfortunately due to the
-		 * nature of the underlying library and isn't easy to avoid.
-		 *
-		 * \throw XqTiffError if the tag is not defined.
-		 *
-		 * \param tag - the tiff tag to obtain.
-		 *
-		 * \return the tag value
-		 */
-		template<typename T>
-		T tiffTagValue(const uint32 tag) const;
-		/** \brief Get the value of a tiff tag for the current image.
-		 *
-		 * Note that unfortunately this isn't type-safe: you *must* specify the
-		 * correct type, T for the TIFF tag desired, otherwise you'll get
-		 * strange results, or a crash!
-		 *
-		 * Unlike the one-parameter version of tiffTagValue, this version does
-		 * not throw an exception when the tag is not found.  Instead it
-		 * quitely returns the supplied default value.
-		 *
-		 * \param tag - the tiff tag to obtain.
-		 * \param defaultVal - value to return if the tag is not present in the file.
-		 *
-		 * \return the tag value
-		 */
-		template<typename T>
-		T tiffTagValue(const uint32 tag, const T defaultVal) const;
-		/** \brief Ensure that a given tiff tag has a particular value.
-		 *
-		 * \param tag - the tiff tag to query
-		 * \param desiredValue - desired value for the tag.
-		 * \param tagNotFoundVal - return this when the tag is not found
-		 * \return true if the tag has the desired value, false if not.
-		 */
-		template<typename T>
-		bool checkTagValue(const uint32 tag, const T desiredValue,
-				const bool tagNotFoundVal = true) const;
 	private:
 		//----------------------------------------
 		/** \brief Hold data describing the current directory
 		 */
 		struct SqDirectoryData
 		{
-			uint32 index;			///< directory index
+			tdir_t index;			///< directory index
 			bool isTiled;			///< true if tile-based, false if strip-based
 			// The following are required tiff fields
 			uint32 imageWidth;		///< full image width
@@ -205,10 +302,13 @@ class CqTiffInputFile
 			uint16 planarConfig;	///< are different channels stored packed together?
 			uint16 orientation;		///< position of the (0,0) index to the tiles
 
+			// Non format-related data.
+			boost::shared_ptr<TIFFRGBAImage> m_rgbaImage; ///< libtiff RGBA image for decoding unusual formats
+
 			/// Default constructor
 			SqDirectoryData();
-			/// Constructor taking a CqTiffInputFile to grab the directory data from
-			SqDirectoryData(CqTiffInputFile& file, TqUint index);
+			/// Constructor taking a directory handle to grab the directory data from
+			SqDirectoryData(const CqTiffDirHandle& dirHandle);
 			/// Use compiler generated assignment operator and copy constructor.
 		};
 
@@ -224,39 +324,17 @@ class CqTiffInputFile
 		/** \brief Set data to all ones, and a data read error to the log.
 		 *
 		 * \param data - array which wasn't written because of a tiff read error.
-		 * \param dataSize - length of array in bytes.
+		 * \param dataSize - length of array.
 		 */
 		template<typename T>
-		void handleDataReadError(boost::shared_array<T> data, const tsize_t dataSize) const;
-		/** \brief Allocate memory with _TIFFmalloc and encapsulate the memory
-		 * in a boost::shared_array.
-		 *
-		 * \throw XqMemoryError if the allocation fails
-		 *
-		 * \param size - number of bytes to allocate.
-		 * \return 'size' bytes of memory allocated with _TIFFmalloc
-		 */
-		template<typename T>
-		boost::shared_array<T> tiffMalloc(const tsize_t size) const;
-
+		void handleTiffReadError(boost::shared_array<T> data, const TqUint size) const;
 		//----------------------------------------
 		// Member data
 		std::string m_fileName;			///< file name
-		std::string m_fullFileName;		///< file name including full path
-		boost::shared_ptr<TIFF> m_tiffPtr;	///< pointer to the underlying tiff
+		boost::shared_ptr<CqTiffFileHandle> m_fileHandlePtr; ///< Thread and directory-safe file handle.
 		//boost::shared_ptr<TIFFRGBAImage> m_rgbaImage; ///< libtiff RGBA image for decoding unusual formats
 
 		SqDirectoryData m_currDir;		///< data describing current directory.
-};
-
-
-//------------------------------------------------------------------------------
-/** \brief Class for reporting errors encountered on reading TIFF files.
- */
-class XqTiffError : public XqException
-{
-	public:
-		inline XqTiffError(const char* reason = 0);
 };
 
 
@@ -265,6 +343,52 @@ class XqTiffError : public XqException
 //==============================================================================
 // Implementation of inline functions and templates
 //==============================================================================
+
+//------------------------------------------------------------------------------
+// CqTiffDirHandle
+//------------------------------------------------------------------------------
+TIFF* CqTiffDirHandle::tiffPtr() const
+{
+	return m_fileHandle->m_tiffPtr.get();
+}
+
+//------------------------------------------------------------------------------
+template<typename T>
+T CqTiffDirHandle::tiffTagValue(const uint32 tag) const
+{
+	T temp = 0;
+	if(TIFFGetField(tiffPtr(), tag, &temp))
+		return temp;
+	else
+		throw XqTiffError(boost::str(boost::format("Could not get tag with value %d") % tag).c_str(), __FILE__, __LINE__);
+}
+
+//------------------------------------------------------------------------------
+template<typename T>
+T CqTiffDirHandle::tiffTagValue(const uint32 tag, const T defaultVal) const
+{
+	T temp = 0;
+	if(TIFFGetField(tiffPtr(), tag, &temp))
+		return temp;
+	else
+		return defaultVal;
+}
+
+
+//------------------------------------------------------------------------------
+// libtiff wrapper functions
+//------------------------------------------------------------------------------
+template<typename T>
+boost::shared_array<T> tiffMalloc(const tsize_t size)
+{
+	boost::shared_array<T> buf(reinterpret_cast<T>(_TIFFmalloc(size)), _TIFFfree);
+	if(!buf)
+		throw XqEnvironment("Could not allocate memory with _TIFFmalloc",
+				__FILE__, __LINE__);
+	return buf;
+}
+
+
 //------------------------------------------------------------------------------
 // CqTiffInputFile
 //------------------------------------------------------------------------------
@@ -281,25 +405,24 @@ inline TqUint CqTiffInputFile::tileHeight() const
 
 //------------------------------------------------------------------------------
 // templates
-//------------------------------------------------------------------------------
 template<typename T>
 boost::intrusive_ptr<CqTextureTile<T> > CqTiffInputFile::readTile(const TqUint x, const TqUint y)
 {
 	if(x >= m_currDir.numTilesX)
-		throw XqTiffError("Column index out of bounds");
+		throw XqTiffError("Column index out of bounds", __FILE__, __LINE__);
 	if(y >= m_currDir.numTilesY)
-		throw XqTiffError("Row index out of bounds");
+		throw XqTiffError("Row index out of bounds", __FILE__, __LINE__);
 
 	// Check if the data size, T, matches up with the size of the internal
-	// representation.  Ideally we'd check if the types are equal, but I don't
-	// know how to do that.
+	// representation.  Ideally we'd check if the types are equal, but I'm not
+	// sure the extra machinery would be worth it.
 	//
 	// We could do data format conversion here instead of throwing an error I suppose...
 	if(sizeof(T)*8 != m_currDir.bitsPerSample)
-		throw XqTiffError("miss-match between requested vs actual bits per sample");
+		throw XqTiffError("miss-match between requested vs actual bits per sample", __FILE__, __LINE__);
 
-	// The tile size is smaller if it falls off the edge of the image - take
-	// account of this.
+	// The tile size is smaller if it lies partly off the edge of the image -
+	// take account of this.
 	TqUint tileWidth = m_currDir.tileWidth;
 	TqUint tileHeight = m_currDir.tileHeight;
 	if((x+1)*tileWidth > m_currDir.imageWidth)
@@ -309,24 +432,24 @@ boost::intrusive_ptr<CqTextureTile<T> > CqTiffInputFile::readTile(const TqUint x
 
 	// Read in the tile data.
 	boost::shared_array<T> tileData(0);
-	tsize_t dataSize = 0;
+	CqTiffDirHandle dirHandle(m_fileHandlePtr, m_currDir.index);
 	if(m_currDir.isTiled)
 	{
 		// Tiff is stored as tiles
-		dataSize = TIFFTileSize(m_tiffPtr.get());
+		tsize_t dataSize = TIFFTileSize(dirHandle.tiffPtr());
 		tileData = tiffMalloc<T>(dataSize);
-		if(TIFFReadTile(m_tiffPtr.get(), tileData, x*m_currDir.tileWidth,
+		if(TIFFReadTile(dirHandle.tiffPtr(), tileData, x*m_currDir.tileWidth,
 					y*m_currDir.tileHeight, 0, 0) == -1)
-			handleDataReadError(tileData, dataSize);
+			handleTiffReadError(tileData, dataSize/sizeof(T));
 	}
 	else
 	{
 		// Tiff is stored in strips - treat each strip as a wide tile.
-		dataSize = TIFFStripSize(m_tiffPtr.get());
+		tsize_t dataSize = TIFFStripSize(dirHandle.tiffPtr());
 		tileData = tiffMalloc<T>(dataSize);
-		if(TIFFReadEncodedStrip(m_tiffPtr.get(), TIFFComputeStrip(m_tiffPtr.get(),
-						y*m_currDir.tileHeight, 0), tileData, -1) == -1)
-			handleDataReadError(tileData, dataSize);
+		if(TIFFReadEncodedStrip(dirHandle.tiffPtr(), TIFFComputeStrip(dirHandle.tiffPtr(),
+					y*m_currDir.tileHeight, 0), tileData, -1) == -1)
+			handleTiffReadError(tileData, dataSize/sizeof(T));
 	}
 
 	return boost::intrusive_ptr<CqTextureTile<T> > ( new CqTextureTile<T>(
@@ -337,56 +460,14 @@ boost::intrusive_ptr<CqTextureTile<T> > CqTiffInputFile::readTile(const TqUint x
 
 //------------------------------------------------------------------------------
 template<typename T>
-void CqTiffInputFile::handleDataReadError(boost::shared_array<T> data, const tsize_t dataSize) const
+void CqTiffInputFile::handleTiffReadError(boost::shared_array<T> data, const TqUint size) const
 {
 	// gracefully degrade when there's an error reading data from a tiff file.
 	Aqsis::log() << error << "Error reading data from tiff file \""
 		<< m_fileName << "\".  Using blank (white) tile\n";
-	_TIFFmemset(data.get(), 0xFF, dataSize);
+	for(TqUint i = 0; i < size; i++)
+		data[i] = 1;
 }
-
-
-//------------------------------------------------------------------------------
-template<typename T>
-boost::shared_array<T> CqTiffInputFile::tiffMalloc(const tsize_t size) const
-{
-	boost::shared_array<T> buf(reinterpret_cast<T>(_TIFFmalloc(size)));
-	if(!buf)
-		throw XqMemoryError("Could not allocate memory for tiff tile");
-	return buf;
-}
-
-//------------------------------------------------------------------------------
-template<typename T>
-T CqTiffInputFile::tiffTagValue(const uint32 tag) const
-{
-	T temp = 0;
-	if(TIFFGetField(m_tiffPtr.get(), tag, &temp))
-		return temp;
-	else
-		throw XqTiffError(boost::str(boost::format("Could not get tag with value %d") % tag).c_str());
-}
-
-//------------------------------------------------------------------------------
-template<typename T>
-T CqTiffInputFile::tiffTagValue(const uint32 tag, const T defaultVal) const
-{
-	T temp = 0;
-	if(TIFFGetField(m_tiffPtr.get(), tag, &temp))
-		return temp;
-	else
-		return defaultVal;
-}
-
-
-//------------------------------------------------------------------------------
-// XqTiffError
-//------------------------------------------------------------------------------
-// inlines
-inline XqTiffError::XqTiffError(const char* reason)
-	: XqException(reason)
-{ }
-
 
 
 //------------------------------------------------------------------------------

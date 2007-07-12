@@ -46,8 +46,72 @@ std::string findFileInRiPath(const std::string& fileName, const std::string& riP
 		riFile.Close();
 	}
 	else
-		throw XqIoError(boost::str(boost::format("Could not fild file '%s'") % fileName).c_str());
+		throw XqEnvironment(boost::str(boost::format("Could not fild file '%s'") % fileName).c_str(), __FILE__, __LINE__);
 	return fullFileName;
+}
+
+
+//------------------------------------------------------------------------------
+// XqTiffError
+//------------------------------------------------------------------------------
+
+XqTiffError::XqTiffError (const std::string& reason, const std::string& detail,
+		const std::string& file, const unsigned int line)
+	: XqEnvironment(reason, detail, file, line)
+{ }
+
+XqTiffError::XqTiffError (const std::string& reason,	const std::string& file,
+	const unsigned int line)
+	: XqEnvironment(reason, file, line)
+{ }
+
+const char* XqTiffError::description() const
+{
+	return "Tiff Error";
+}
+
+XqTiffError::~XqTiffError() throw ()
+{ }
+
+
+//------------------------------------------------------------------------------
+// CqTiffDirHandle
+//------------------------------------------------------------------------------
+CqTiffDirHandle::CqTiffDirHandle(boost::shared_ptr<CqTiffFileHandle> fileHandle, const tdir_t dirIdx)
+	: m_fileHandle(fileHandle)
+{
+	fileHandle->setDirectory(dirIdx);
+}
+
+tdir_t CqTiffDirHandle::dirIndex() const
+{
+	return m_fileHandle->m_currDirec;
+}
+
+
+//------------------------------------------------------------------------------
+// CqTiffFileHandle
+//------------------------------------------------------------------------------
+CqTiffFileHandle::CqTiffFileHandle(const std::string& fileName, const char* openMode)
+	: m_tiffPtr(TIFFOpen(fileName.c_str(), openMode), TIFFClose),
+	m_currDirec(0)
+{
+	if(!m_tiffPtr)
+	{
+		throw XqEnvironment( boost::str(boost::format("Could not open tiff file '%s'")
+					% fileName).c_str(), __FILE__, __LINE__);
+	}
+}
+
+
+void CqTiffFileHandle::setDirectory(tdir_t dirIdx)
+{
+	if(dirIdx != m_currDirec)
+	{
+		if(!TIFFSetDirectory(m_tiffPtr.get(), dirIdx))
+			throw XqTiffError("Invalid Tiff directory", __FILE__, __LINE__);
+		m_currDirec = dirIdx;
+	}
 }
 
 
@@ -57,26 +121,12 @@ std::string findFileInRiPath(const std::string& fileName, const std::string& riP
 // constructor
 CqTiffInputFile::CqTiffInputFile(const std::string& fileName, const std::string& riPath, TqUint directory)
 	: m_fileName(fileName),
-	m_fullFileName(findFileInRiPath(fileName, riPath)),
-	m_tiffPtr(),
+	m_fileHandlePtr(new CqTiffFileHandle(fileName, "r")),
 	m_currDir()
 {
-	m_tiffPtr = boost::shared_ptr<TIFF>(TIFFOpen(m_fullFileName.c_str(), "r"), TIFFClose);
-	if(!m_tiffPtr)
-		throw XqIoError( boost::str(boost::format("Could not open tiff file '%s'") % fileName).c_str() );
 	setDirectory(directory);
 }
 
-//------------------------------------------------------------------------------
-// copy constructor
-CqTiffInputFile::CqTiffInputFile(CqTiffInputFile& toBeCopied)
-	: m_fileName(toBeCopied.m_fileName),
-	m_fullFileName(toBeCopied.m_fullFileName),
-	m_tiffPtr(),
-	m_currDir(toBeCopied.m_currDir)
-{
-	m_tiffPtr = boost::shared_ptr<TIFF>(TIFFOpen(m_fullFileName.c_str(), "r"), TIFFClose);
-}
 
 //------------------------------------------------------------------------------
 // destructor
@@ -92,23 +142,12 @@ bool CqTiffInputFile::isMipMap()
 }
 
 //------------------------------------------------------------------------------
-CqTiffInputFile& CqTiffInputFile::operator=(const CqTiffInputFile& rhs)
-{
-	m_fileName = rhs.m_fileName;
-	m_fullFileName = rhs.m_fullFileName;
-	m_tiffPtr = boost::shared_ptr<TIFF>(TIFFOpen(m_fullFileName.c_str(), "r"), TIFFClose);
-	m_currDir = rhs.m_currDir;
-	return *this;
-}
-
-//------------------------------------------------------------------------------
 void CqTiffInputFile::setDirectory(const TqUint directory)
 {
 	// Check that the tiff directory exists, and we can open it.
-	if(!TIFFSetDirectory(m_tiffPtr.get(), directory))
-		throw XqTiffError( boost::str(boost::format("Directory number %d not found in file '%s'") % directory % m_fileName).c_str());
+	CqTiffDirHandle dirHandle(m_fileHandlePtr, directory);
 
-	SqDirectoryData newDirectory = SqDirectoryData(*this, directory);
+	SqDirectoryData newDirectory = SqDirectoryData(dirHandle);
 
 	// Check that the tiff file is of a type which we know how to handle
 	// easily.  If it's not, then we should use the generic RGBA handling of
@@ -130,7 +169,7 @@ void CqTiffInputFile::setDirectory(const TqUint directory)
 		) )
 	{
 		// for the moment, just throw an error...
-		throw XqTiffError("Unrecognised tiff format");
+		throw XqTiffError("Unrecognised tiff format", __FILE__, __LINE__);
 	}
 	m_currDir = newDirectory;
 }
@@ -171,8 +210,8 @@ CqTiffInputFile::SqDirectoryData::SqDirectoryData()
 	orientation(0)
 { }
 
-CqTiffInputFile::SqDirectoryData::SqDirectoryData(CqTiffInputFile& file, TqUint index)
-	: index(index),
+CqTiffInputFile::SqDirectoryData::SqDirectoryData(const CqTiffDirHandle& dirHandle)
+	: index(dirHandle.dirIndex()),
 	isTiled(0),
 	imageWidth(0),
 	imageHeight(0),
@@ -187,32 +226,33 @@ CqTiffInputFile::SqDirectoryData::SqDirectoryData(CqTiffInputFile& file, TqUint 
 	planarConfig(0),
 	orientation(0)
 {
-	isTiled = static_cast<bool>(TIFFIsTiled(file.m_tiffPtr.get()));
+	isTiled = static_cast<bool>(TIFFIsTiled(dirHandle.tiffPtr()));
 	// get required tags
-	imageWidth = file.tiffTagValue<uint32>(TIFFTAG_IMAGEWIDTH);
-	imageHeight = file.tiffTagValue<uint32>(TIFFTAG_IMAGELENGTH);
-	bitsPerSample = file.tiffTagValue<uint16>(TIFFTAG_BITSPERSAMPLE);
-	samplesPerPixel = file.tiffTagValue<uint16>(TIFFTAG_SAMPLESPERPIXEL);
+	imageWidth = dirHandle.tiffTagValue<uint32>(TIFFTAG_IMAGEWIDTH);
+	imageHeight = dirHandle.tiffTagValue<uint32>(TIFFTAG_IMAGELENGTH);
+	bitsPerSample = dirHandle.tiffTagValue<uint16>(TIFFTAG_BITSPERSAMPLE);
+	samplesPerPixel = dirHandle.tiffTagValue<uint16>(TIFFTAG_SAMPLESPERPIXEL);
 	if(isTiled)
 	{
-		tileWidth = file.tiffTagValue<uint32>(TIFFTAG_TILEWIDTH);
-		tileHeight = file.tiffTagValue<uint32>(TIFFTAG_TILELENGTH);
+		tileWidth = dirHandle.tiffTagValue<uint32>(TIFFTAG_TILEWIDTH);
+		tileHeight = dirHandle.tiffTagValue<uint32>(TIFFTAG_TILELENGTH);
 	}
 	else
 	{
 		// Treat strips as a variety of tile.
 		tileWidth = imageWidth;
-		tileHeight = file.tiffTagValue<uint32>(TIFFTAG_ROWSPERSTRIP);
+		tileHeight = dirHandle.tiffTagValue<uint32>(TIFFTAG_ROWSPERSTRIP);
 	}
-	photometricInterp = file.tiffTagValue<uint16>(TIFFTAG_PHOTOMETRIC);
+	photometricInterp = dirHandle.tiffTagValue<uint16>(TIFFTAG_PHOTOMETRIC);
 	// compute number of tiles in x and y directions
 	numTilesX = static_cast<TqUint>(ceil(static_cast<TqFloat>(imageWidth)/tileWidth));
 	numTilesY = static_cast<TqUint>(ceil(static_cast<TqFloat>(imageHeight)/tileHeight));
 	// get tags with sensible default values
-	sampleFormat = file.tiffTagValue<uint16>(TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
-	planarConfig = file.tiffTagValue<uint16>(TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
-	orientation = file.tiffTagValue<uint16>(TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
+	sampleFormat = dirHandle.tiffTagValue<uint16>(TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
+	planarConfig = dirHandle.tiffTagValue<uint16>(TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
+	orientation = dirHandle.tiffTagValue<uint16>(TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
 }
+
 
 //------------------------------------------------------------------------------
 } // namespace Aqsis
