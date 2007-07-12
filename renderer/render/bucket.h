@@ -97,12 +97,6 @@ class CqBucket : public IqBucket
 			return m_bucketData->m_FilterYWidth;
 		}
 
-		static const CqBound& DofSubBound(TqInt index)
-		{
-			assert(index < m_bucketData->m_NumDofBounds);
-			return m_bucketData->m_DofBounds[index];
-		}
-
 		virtual	CqColor Color( TqInt iXPos, TqInt iYPos );
 		virtual	CqColor Opacity( TqInt iXPos, TqInt iYPos );
 		virtual	TqFloat Coverage( TqInt iXPos, TqInt iYPos );
@@ -114,9 +108,9 @@ class CqBucket : public IqBucket
 				       bool fJitter = true, bool empty = false );
 		void	InitialiseFilterValues();
 
-		static CqImagePixel& ImageElement(TqInt index);
+		CqImagePixel& ImageElement(TqInt index) const;
 
-		static	std::vector<SqSampleData>& SamplePoints()
+		std::vector<SqSampleData>& SamplePoints() const
 		{
 			return(m_bucketData->m_SamplePoints);
 		}
@@ -258,6 +252,12 @@ class CqBucket : public IqBucket
 		void	ImageElement( TqInt iXPos, TqInt iYPos, CqImagePixel*& pie );
 
 		void	CalculateDofBounds();
+
+		const CqBound& DofSubBound(TqInt index) const
+		{
+			assert(index < m_bucketData->m_NumDofBounds);
+			return m_bucketData->m_DofBounds[index];
+		}
 
 		/** Render a particular micropolygon.
 		 *    

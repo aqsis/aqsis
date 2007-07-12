@@ -362,14 +362,14 @@ struct SqAscendingDepthSort
      }
 };
 
-void CqImagePixel::Combine(enum EqFilterDepth depthfilter, CqColor zThreshold)
+void CqImagePixel::Combine( std::vector<SqSampleData>& samplePoints, enum EqFilterDepth depthfilter, CqColor zThreshold )
 {
 	TqUint samplecount = 0;
 	TqInt sampleIndex = 0;
 	std::vector<TqInt>::iterator end = m_SampleIndices.end();
 	for ( std::vector<TqInt>::iterator sample_index = m_SampleIndices.begin(); sample_index != end; ++sample_index )
 	{
-		SqSampleData* samples = &CqBucket::SamplePoints()[*sample_index];
+		SqSampleData* samples = &samplePoints[*sample_index];
 
 		SqImageSample& opaqueValue = samples->m_OpaqueSample;
 		sampleIndex++;

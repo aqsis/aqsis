@@ -366,7 +366,7 @@ class CqImagePixel
 
 		SqImageSample& OpaqueValues( std::vector<SqSampleData>& samplePoints, TqInt index );
 
-		void	Combine(EqFilterDepth eDepthFilter, CqColor zThreshold);
+		void	Combine( std::vector<SqSampleData>& samplePoints, EqFilterDepth eDepthFilter, CqColor zThreshold );
 
 		/** Get the sample data for the specified sample index.
 		 * \param The index of the required sample point.

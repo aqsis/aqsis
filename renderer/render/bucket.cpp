@@ -320,7 +320,7 @@ void CqBucket::ImageElement( TqInt iXPos, TqInt iYPos, CqImagePixel*& pie )
 
 
 //----------------------------------------------------------------------
-CqImagePixel& CqBucket::ImageElement(TqInt index)
+CqImagePixel& CqBucket::ImageElement(TqInt index) const
 {
 	assert(index < m_bucketData->m_aieImage.size());
 	return m_bucketData->m_aieImage[index];
@@ -334,7 +334,7 @@ void CqBucket::CombineElements(enum EqFilterDepth filterdepth, CqColor zThreshol
 {
 	std::vector<CqImagePixel>::iterator end = m_bucketData->m_aieImage.end();
 	for ( std::vector<CqImagePixel>::iterator i = m_bucketData->m_aieImage.begin(); i != end ; i++ )
-		i->Combine(filterdepth, zThreshold);
+		i->Combine(m_bucketData->m_SamplePoints, filterdepth, zThreshold);
 }
 
 
