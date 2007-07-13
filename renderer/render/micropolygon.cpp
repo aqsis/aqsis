@@ -264,7 +264,7 @@ void CqMicroPolyGrid::CalcSurfaceDerivatives()
 	bdpu = ( USES( lUses, EnvVars_dPdu ) );
 	bdpv = ( USES( lUses, EnvVars_dPdv ) );
 	IqShaderData * pSDP = pVar(EnvVars_P);
-	static CqVector3D	Defvec( 0, 0, 0 );
+	static const CqVector3D	Defvec( 0, 0, 0 );
 
 	TqInt i;
 
@@ -294,7 +294,7 @@ void CqMicroPolyGrid::Shade()
 	if ( NULL == pVar(EnvVars_P) || NULL == pVar(EnvVars_I) )
 		return ;
 
-	static CqVector3D	vecE( 0, 0, 0 );
+	static const CqVector3D	vecE( 0, 0, 0 );
 
 	boost::shared_ptr<IqShader> pshadSurface = pSurface() ->pAttributes() ->pshadSurface(QGetRenderContext()->Time());
 	boost::shared_ptr<IqShader> pshadDisplacement = pSurface() ->pAttributes() ->pshadDisplacement(QGetRenderContext()->Time());

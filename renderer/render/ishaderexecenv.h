@@ -483,7 +483,7 @@ struct IqShaderExecEnv
 /** Templatised derivative function. Calculates the derivative of the provided stack entry with respect to u.
  */
 template <class R>
-R SO_DuType( IqShaderData* Var, TqInt i, IqShaderExecEnv* ps, R& Def )
+R SO_DuType( IqShaderData* Var, TqInt i, IqShaderExecEnv* ps, const R& Def )
 {
 	R Ret;
 	TqInt uRes = ps->uGridRes();
@@ -515,7 +515,7 @@ R SO_DuType( IqShaderData* Var, TqInt i, IqShaderExecEnv* ps, R& Def )
 /** Templatised derivative function. Calculates the derivative of the provided stack entry with respect to v.
  */
 template <class R>
-R SO_DvType( IqShaderData* Var, TqInt i, IqShaderExecEnv* ps, R& Def )
+R SO_DvType( IqShaderData* Var, TqInt i, IqShaderExecEnv* ps, const R& Def )
 {
 	R Ret;
 	TqInt uRes = ps->uGridRes();
