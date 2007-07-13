@@ -155,6 +155,8 @@ void CqBucket::PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt y
 			which++;
 		}
 	}
+
+	InitialiseFilterValues();
 }
 
 

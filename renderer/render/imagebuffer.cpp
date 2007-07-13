@@ -661,8 +661,7 @@ void CqImageBuffer::RenderImage()
 
 	CqVector2D bHalf = CqVector2D( FLOOR(m_FilterXWidth / 2.0f), FLOOR(m_FilterYWidth / 2.0f) );
 
-	RtProgressFunc pProgressHandler = NULL;
-	pProgressHandler = QGetRenderContext()->pProgressHandler();
+	RtProgressFunc pProgressHandler = QGetRenderContext()->pProgressHandler();
 
 	const CqString* pstrBucketOrder = QGetRenderContext() ->poptCurrent()->GetStringOption( "render", "bucketorder" );
 	enum EqBucketOrder order = Bucket_Horizontal;
@@ -693,37 +692,6 @@ void CqImageBuffer::RenderImage()
 	// Iterate over all buckets...
 	do
 	{
-		bucketProcessor.setBucket(&CurrentBucket());
-
-		bool bIsEmpty = CurrentBucket().IsEmpty();
-		if (fImager)
-			bIsEmpty = false;
-
-		// Prepare the bucket.
-		CqVector2D bPos = BucketPosition();
-		CqVector2D bSize = BucketSize();
-
-		{
-			TIME_SCOPE("Prepare bucket")
-			CurrentBucket().PrepareBucket( static_cast<TqInt>( bPos.x() ),
-						       static_cast<TqInt>( bPos.y() ),
-						       static_cast<TqInt>( bSize.x() ),
-						       static_cast<TqInt>( bSize.y() ),
-						       m_PixelXSamples,
-						       m_PixelYSamples,
-						       m_FilterXWidth,
-						       m_FilterYWidth,
-						       true,
-						       bIsEmpty );
-			CurrentBucket().InitialiseFilterValues();
-		}
-
-		if ( !bIsEmpty )
-		{
-			TIME_SCOPE("Occlusion culling");
-			bucketProcessor.prepareOcclusionData();
-		}
-
 		////////// Dump the pixel sample positions into a dump file //////////
 #if ENABLE_MPDUMP
 		if(m_mpdump.IsOpen())
@@ -731,17 +699,23 @@ void CqImageBuffer::RenderImage()
 #endif
 		/////////////////////////////////////////////////////////////////////////
 
+
+		bucketProcessor.setBucket(&CurrentBucket());
+
+		bool bIsEmpty = CurrentBucket().IsEmpty();
+		if (fImager)
+			bIsEmpty = false;
+
 		// Set up some bounds for the bucket.
-		CqVector2D vecMin = bPos;
-		CqVector2D vecMax = bPos + bSize;
-		vecMin -= bHalf;
-		vecMax += bHalf;
+		const CqVector2D bPos = BucketPosition();
+		const CqVector2D bSize = BucketSize();
+		const CqVector2D vecMin = bPos - bHalf;
+		const CqVector2D vecMax = bPos + bSize + bHalf;
 
 		long xmin = static_cast<long>( vecMin.x() );
 		long ymin = static_cast<long>( vecMin.y() );
 		long xmax = static_cast<long>( vecMax.x() );
 		long ymax = static_cast<long>( vecMax.y() );
-
 		if ( xmin < CropWindowXMin() - m_FilterXWidth / 2 )
 			xmin = static_cast<long>(CropWindowXMin() - m_FilterXWidth / 2.0f);
 		if ( ymin < CropWindowYMin() - m_FilterYWidth / 2 )
@@ -751,15 +725,16 @@ void CqImageBuffer::RenderImage()
 		if ( ymax > CropWindowYMax() + m_FilterYWidth / 2 )
 			ymax = static_cast<long>(CropWindowYMax() + m_FilterYWidth / 2.0f);
 
-
-		if ( pProgressHandler )
-		{
-			// Inform the status class how far we have got, and update UI.
-			float Complete = ( float ) ( cXBuckets() * cYBuckets() );
-			Complete = 100.0f * iBucket / Complete;
-			QGetRenderContext() ->Stats().SetComplete( Complete );
-			( *pProgressHandler ) ( Complete, QGetRenderContext() ->CurrentFrame() );
-		}
+		// Pre-process
+		bucketProcessor.preProcess( static_cast<TqInt>( bPos.x() ),
+					    static_cast<TqInt>( bPos.y() ),
+					    static_cast<TqInt>( bSize.x() ),
+					    static_cast<TqInt>( bSize.y() ),
+					    m_PixelXSamples,
+					    m_PixelYSamples,
+					    m_FilterXWidth,
+					    m_FilterYWidth,
+					    bIsEmpty );
 
 		// Render any waiting subsurfaces.
 		while( !CurrentBucket().IsEmpty() && !m_fQuit )
@@ -789,11 +764,8 @@ void CqImageBuffer::RenderImage()
 				pSurface = CurrentBucket().pTopSurface();
 			}
 
-			// Render any waiting micro polygons.
-			{
-				TIME_SCOPE("Render MPs");
-				bucketProcessor.process( xmin, xmax, ymin, ymax, m_ClippingFar, m_ClippingNear );
-			}
+			// Process: Render any waiting micro polygons.
+			bucketProcessor.process( xmin, xmax, ymin, ymax, m_ClippingFar, m_ClippingNear );
 		}
 
 		if ( m_fQuit )
@@ -802,36 +774,30 @@ void CqImageBuffer::RenderImage()
 			return ;
 		}
 
-		// Now combine the colors at each pixel sample for any micropolygons rendered to that pixel.
-		if (!bIsEmpty)
-		{
-			TIME_SCOPE("Combine");
-			CurrentBucket().CombineElements(depthfilter, zThreshold);
-		}
+		// Post-processing
+		bucketProcessor.postProcess( bIsEmpty, fImager, depthfilter, zThreshold );
 
-		TIMER_START("Filter");
-		CurrentBucket().FilterBucket(bIsEmpty, fImager);
-		if (!bIsEmpty)
-		{
-			CurrentBucket().ExposeBucket();
-			// \note: Used to quantize here too, but not any more, as it is handled by
-			//	  ddmanager in a specific way for each display.
-		}
-		TIMER_STOP("Filter");
-
+		// Bucket complete
 		BucketComplete();
 		{
 			TIME_SCOPE("Display bucket");
 			QGetRenderContext() ->pDDmanager() ->DisplayBucket( &CurrentBucket() );
 		}
+		if ( pProgressHandler )
+		{
+			// Inform the status class how far we have got, and update UI.
+			float Complete = ( float ) ( cXBuckets() * cYBuckets() );
+			Complete = 100.0f * iBucket / Complete;
+			QGetRenderContext() ->Stats().SetComplete( Complete );
+			( *pProgressHandler ) ( Complete, QGetRenderContext() ->CurrentFrame() );
+		}
+
+		bucketProcessor.reset();
 
 #ifdef WIN32
 		if ( !( iBucket % bucketmodulo ) )
 			SetProcessWorkingSetSize( GetCurrentProcess(), 0xffffffff, 0xffffffff );
 #endif
-
-		bucketProcessor.finishProcessing();
-		bucketProcessor.reset();
 
 		// Increase the bucket counter...
 		iBucket += 1;

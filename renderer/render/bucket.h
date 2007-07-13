@@ -50,7 +50,7 @@ START_NAMESPACE( Aqsis )
 class CqBucket : public IqBucket
 {
 	public:
-		CqBucket() : m_bProcessed(false)
+		CqBucket() : m_bProcessed(false), m_bucketData(0)
 		{}
 
 		virtual ~CqBucket();
@@ -106,7 +106,6 @@ class CqBucket : public IqBucket
 		void	PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt ysize,
 				       TqInt pixelXSamples, TqInt pixelYSamples, TqFloat filterXWidth, TqFloat filterYWidth,
 				       bool fJitter = true, bool empty = false );
-		void	InitialiseFilterValues();
 
 		CqImagePixel& ImageElement(TqInt index) const;
 
@@ -222,13 +221,7 @@ class CqBucket : public IqBucket
 		void RenderWaitingMPs( long xmin, long xmax, long ymin, long ymax, TqFloat clippingFar, TqFloat clippingNear );
 
 	private:
-		/// Flag indicating if this bucket has been processed yet.
-		bool	m_bProcessed;
-
-		/// Dynamic bucket data
-		CqBucketData* m_bucketData;
-
-		// this is a compare functor for sorting surfaces in order of depth.
+		/// This is a compare functor for sorting surfaces in order of depth.
 		struct closest_surface
 		{
 			bool operator()(const boost::shared_ptr<CqSurface>& s1, const boost::shared_ptr<CqSurface>& s2) const
@@ -243,12 +236,21 @@ class CqBucket : public IqBucket
 			}
 		};
 
-		std::vector<CqMicroPolygon*> m_micropolygons;			///< Vector of vectors of waiting micropolygons in this bucket
+		/// Flag indicating if this bucket has been processed yet.
+		bool	m_bProcessed;
+
+		/// Dynamic bucket data
+		CqBucketData* m_bucketData;
+
+		/// Vector of vectors of waiting micropolygons in this bucket
+		std::vector<CqMicroPolygon*> m_micropolygons;
 
 		/// A sorted list of primitives for this bucket
 		std::priority_queue<boost::shared_ptr<CqSurface>, std::deque<boost::shared_ptr<CqSurface> >, closest_surface> m_gPrims;
 
 		void	ImageElement( TqInt iXPos, TqInt iYPos, CqImagePixel*& pie );
+
+		void	InitialiseFilterValues();
 
 		void	CalculateDofBounds();
 

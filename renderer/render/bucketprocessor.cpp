@@ -19,6 +19,7 @@
  */
 
 #include	"bucket.h"
+#include	"MultiTimer.h"
 
 #include	"bucketprocessor.h"
 
@@ -29,12 +30,6 @@ START_NAMESPACE( Aqsis );
 CqBucketProcessor::CqBucketProcessor() :
 	m_bucket(0)
 {
-}
-
-CqBucketProcessor::CqBucketProcessor(CqBucket* bucket) :
-	m_bucket(bucket)
-{
-	setBucket(m_bucket);
 }
 
 CqBucketProcessor::~CqBucketProcessor()
@@ -57,29 +52,63 @@ void CqBucketProcessor::reset()
 	m_bucket = 0;
 }
 
-void CqBucketProcessor::prepareOcclusionData()
-{
-	assert(m_bucket == 0);
-
-	m_bucketData.setupOcclusionHierarchy(m_bucket);
-}
-
 bool CqBucketProcessor::canCull(const CqBound* bound) const
 {
 	return m_bucketData.canCull(bound);
 }
 
+void CqBucketProcessor::preProcess(TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt ysize,
+				   TqInt pixelXSamples, TqInt pixelYSamples, TqFloat filterXWidth, TqFloat filterYWidth,
+				   bool empty)
+{
+	assert(m_bucket);
+
+	{
+		TIME_SCOPE("Prepare bucket");
+		m_bucket->PrepareBucket( xorigin, yorigin, xsize, ysize,
+					 pixelXSamples, pixelYSamples, filterXWidth, filterYWidth,
+					 true, empty );
+	}
+
+	if ( !empty )
+	{
+		TIME_SCOPE("Occlusion culling");
+		m_bucketData.setupOcclusionHierarchy(m_bucket);
+	}
+}
+
 void CqBucketProcessor::process( long xmin, long xmax, long ymin, long ymax, TqFloat clippingFar, TqFloat clippingNear )
 {
+	assert(m_bucket);
+
+	TIME_SCOPE("Render MPs");
 	m_bucket->RenderWaitingMPs( xmin, xmax, ymin, ymax, clippingFar, clippingNear );
 }
 
-void CqBucketProcessor::finishProcessing()
+void CqBucketProcessor::postProcess( bool empty, bool imager, EqFilterDepth depthfilter, const CqColor& zThreshold )
 {
-	assert(m_bucket && !m_bucket->IsProcessed());
+	assert(m_bucket);
 
+	// Combine the colors at each pixel sample for any
+	// micropolygons rendered to that pixel.
+	if (!empty)
+	{
+		TIME_SCOPE("Combine");
+		m_bucket->CombineElements(depthfilter, zThreshold);
+	}
+
+	TIMER_START("Filter");
+	m_bucket->FilterBucket(empty, imager);
+	if (!empty)
+	{
+		m_bucket->ExposeBucket();
+		// \note: Used to quantize here too, but not any more, as it is handled by
+		//	  ddmanager in a specific way for each display.
+	}
+	TIMER_STOP("Filter");
+
+	assert(!m_bucket->IsProcessed());
 	m_bucket->SetProcessed();
 }
-
 
 END_NAMESPACE( Aqsis );

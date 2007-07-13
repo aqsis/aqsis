@@ -45,11 +45,6 @@ class CqBucketProcessor
 public:
 	/** Default constructor */
 	CqBucketProcessor();
-	/** Default constructor
-	 *
-	 * \param bucket Bucket to be used
-	 */
-	CqBucketProcessor(CqBucket* bucket);
 	/** Destructor */
 	~CqBucketProcessor();
 
@@ -59,11 +54,13 @@ public:
 	/** Reset the status of the object */
 	void reset();
 
-	/** Update occlusion tree */
-	void prepareOcclusionData();
-
 	/** Whether we can cull what's represented by the given bound */
 	bool canCull(const CqBound* bound) const;
+
+	/** Prepare the data for the bucket to be processed */
+	void preProcess(TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt ysize,
+			TqInt pixelXSamples, TqInt pixelYSamples, TqFloat filterXWidth, TqFloat filterYWidth,
+			bool empty);
 
 	/** Process the bucket, basically rendering the waiting MPs
 	 *
@@ -81,8 +78,9 @@ public:
 	 */
 	void process( long xmin, long xmax, long ymin, long ymax, TqFloat clippingFar, TqFloat clippingNear );
 
-	/** Finish the processing of the bucket */
-	void finishProcessing();
+	/** Post-process the bucket, which involves the operations Combine and Filter
+	 */
+	void postProcess( bool empty, bool imager, EqFilterDepth depthfilter, const CqColor& zThreshold );
 
 private:
 	/// Pointer to the current bucket
