@@ -31,8 +31,6 @@
 
 START_NAMESPACE( Aqsis )
 
-TqFloat CqSurface::m_fGridSize = sqrt(256.0);
-
 
 //---------------------------------------------------------------------
 /** Copy the local surface parameters from the donor surface.

@@ -656,7 +656,6 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 		bool	m_CachedBound;		///< Whether or not the bound has been cached
 		CqBound	m_Bound;			///< The cached object bound
 		boost::shared_ptr<CqCSGTreeNode>	m_pCSGNode;		///< Pointer to the 'primitive' CSG node this surface belongs to, NULL if not part of a solid.
-		static TqFloat     m_fGridSize;   ///< standard sqrt(gridsize);
 }
 ;
 
