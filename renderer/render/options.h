@@ -85,7 +85,7 @@ class CqOptions : public IqOptions
 		 */
 		boost::shared_ptr<const CqNamedParameterList> pOption( const char* strName ) const
 		{
-			TqUlong hash = CqString::hash( strName );
+			const TqUlong hash = CqString::hash( strName );
 			std::vector<boost::shared_ptr<CqNamedParameterList> >::const_iterator
 			i = m_aOptions.begin(), end = m_aOptions.end();
 			for ( i = m_aOptions.begin(); i != end; ++i )
@@ -105,7 +105,7 @@ class CqOptions : public IqOptions
 		 */
 		boost::shared_ptr<CqNamedParameterList> pOptionWrite( const char* strName )
 		{
-			TqUlong hash = CqString::hash( strName );
+			const TqUlong hash = CqString::hash( strName );
 			std::vector<boost::shared_ptr<CqNamedParameterList> >::iterator
 			i = m_aOptions.begin(), end = m_aOptions.end();
 			for ( ; i != end; ++i )

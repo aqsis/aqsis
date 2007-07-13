@@ -1570,7 +1570,7 @@ class CqNamedParameterList
 		 */
 		const	CqParameter* pParameter( const char* strName ) const
 		{
-			TqUlong hash = CqString::hash( strName );
+			const TqUlong hash = CqString::hash( strName );
 			for ( std::vector<CqParameter*>::const_iterator i = m_aParameters.begin(); i != m_aParameters.end(); i++ )
 				if ( ( *i ) ->hash() == hash )
 					return ( *i );
@@ -1582,7 +1582,7 @@ class CqNamedParameterList
 		 */
 		CqParameter* pParameter( const char* strName )
 		{
-			TqUlong hash = CqString::hash( strName );
+			const TqUlong hash = CqString::hash( strName );
 			for ( std::vector<CqParameter*>::iterator i = m_aParameters.begin(); i != m_aParameters.end(); i++ )
 				if ( ( *i ) ->hash() == hash )
 					return ( *i );

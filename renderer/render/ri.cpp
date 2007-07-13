@@ -277,22 +277,22 @@ enum RIL_POINTS
     RIL_t = RIL_s,
     RIL_st,
 };
-static TqUlong RIH_S = CqString::hash( RI_S );
-static TqUlong RIH_T = CqString::hash( RI_T );
-static TqUlong RIH_ST = CqString::hash( RI_ST );
-static TqUlong RIH_CS = CqString::hash( RI_CS );
-static TqUlong RIH_OS = CqString::hash( RI_OS );
-static TqUlong RIH_P = CqString::hash( RI_P );
-static TqUlong RIH_PZ = CqString::hash( RI_PZ );
-static TqUlong RIH_PW = CqString::hash( RI_PW );
-static TqUlong RIH_N = CqString::hash( RI_N );
-static TqUlong RIH_NP = CqString::hash( RI_NP );
-static TqUlong RIH_DEPTHFILTER = CqString::hash( "depthfilter" );
-static TqUlong RIH_JITTER = CqString::hash( "jitter" );
-static TqUlong RIH_RENDER = CqString::hash( "render" );
-static TqUlong RIH_INDIRECT = CqString::hash( "indirect" );
-static TqUlong RIH_LIGHT = CqString::hash( "light" );
-static TqUlong RIH_VISIBILITY = CqString::hash( "visibility" );
+static const TqUlong RIH_S = CqString::hash( RI_S );
+static const TqUlong RIH_T = CqString::hash( RI_T );
+static const TqUlong RIH_ST = CqString::hash( RI_ST );
+static const TqUlong RIH_CS = CqString::hash( RI_CS );
+static const TqUlong RIH_OS = CqString::hash( RI_OS );
+static const TqUlong RIH_P = CqString::hash( RI_P );
+static const TqUlong RIH_PZ = CqString::hash( RI_PZ );
+static const TqUlong RIH_PW = CqString::hash( RI_PW );
+static const TqUlong RIH_N = CqString::hash( RI_N );
+static const TqUlong RIH_NP = CqString::hash( RI_NP );
+static const TqUlong RIH_DEPTHFILTER = CqString::hash( "depthfilter" );
+static const TqUlong RIH_JITTER = CqString::hash( "jitter" );
+static const TqUlong RIH_RENDER = CqString::hash( "render" );
+static const TqUlong RIH_INDIRECT = CqString::hash( "indirect" );
+static const TqUlong RIH_LIGHT = CqString::hash( "light" );
+static const TqUlong RIH_VISIBILITY = CqString::hash( "visibility" );
 
 RtInt	RiLastError = 0;
 
@@ -1629,7 +1629,7 @@ RtVoid	RiHiderV( RtToken name, PARAMETERLIST )
 			Aqsis::log() << error << e.what() << std::endl;
 			continue;
 		}
-		TqUlong hash = CqString::hash(Decl.m_strName.c_str());
+		const TqUlong hash = CqString::hash(Decl.m_strName.c_str());
 		if ( hash == RIH_DEPTHFILTER )
 			RiOption( "Hider", "depthfilter", ( RtToken ) values[ i ], NULL );
 		else if ( hash == RIH_JITTER )
@@ -2956,7 +2956,7 @@ RtVoid	RiAttribute( RtToken name, ... )
 {
 	EXTRACT_PARAMETERS( name )
 
-	TqUlong hash = CqString::hash(name);
+	const TqUlong hash = CqString::hash(name);
 
 	if (hash == RIH_RENDER)
 		return;
@@ -2985,7 +2985,7 @@ RtVoid	RiAttributeV( RtToken name, PARAMETERLIST )
 
 	DEBUG_RIATTRIBUTE
 
-	TqUlong hash = CqString::hash(name);
+	const TqUlong hash = CqString::hash(name);
 
 	if (hash == RIH_RENDER)
 		return;
@@ -5957,7 +5957,7 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface * pSurface, PARAMETERLIST 
 		RtPointer	value = values[ i ];
 
 		SqParameterDeclaration Decl = QGetRenderContext()->FindParameterDecl( token );
-		TqUlong hash = CqString::hash(Decl.m_strName.c_str());
+		const TqUlong hash = CqString::hash(Decl.m_strName.c_str());
 
 		if ( (hash == RIH_P) && (Decl.m_Class == class_vertex ))
 		{

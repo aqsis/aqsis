@@ -313,7 +313,7 @@ class CqAttributes : public CqRefCount, public IqAttributes
 
 				const boost::shared_ptr<CqNamedParameterList>	Find( const TqChar* pname ) const
 				{
-					TqUlong hash = CqString::hash(pname);
+					const TqUlong hash = CqString::hash(pname);
 					TqInt i = _hash( pname);
 
 					if ( m_aLists[ i ].empty() )
@@ -342,7 +342,7 @@ class CqAttributes : public CqRefCount, public IqAttributes
 
 				boost::shared_ptr<CqNamedParameterList>	Find( const TqChar* pname )
 				{
-					TqUlong hash = CqString::hash(pname);
+					const TqUlong hash = CqString::hash(pname);
 					TqUlong i = _hash( pname);
 
 					if ( m_aLists[ i ].empty() )

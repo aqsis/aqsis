@@ -27,26 +27,26 @@
 
 USING_NAMESPACE( Aqsis );
 
-static TqUlong huniform = CqString::hash( "uniform" );
-static TqUlong hconstant = CqString::hash( "constant" );
-static TqUlong hvarying = CqString::hash( "varying" );
-static TqUlong hvertex = CqString::hash( "vertex" );
-static TqUlong hfacevarying = CqString::hash( "facevarying" );
-static TqUlong hfacevertex = CqString::hash( "facevertex" );
+static const TqUlong huniform = CqString::hash( "uniform" );
+static const TqUlong hconstant = CqString::hash( "constant" );
+static const TqUlong hvarying = CqString::hash( "varying" );
+static const TqUlong hvertex = CqString::hash( "vertex" );
+static const TqUlong hfacevarying = CqString::hash( "facevarying" );
+static const TqUlong hfacevertex = CqString::hash( "facevertex" );
 
-static TqUlong hfloat = CqString::hash( "float" );
-static TqUlong hpoint = CqString::hash( "point" );
-static TqUlong hhpoint = CqString::hash( "hpoint" );
-static TqUlong hvector = CqString::hash( "vector" );
-static TqUlong hnormal = CqString::hash( "normal" );
-static TqUlong hcolor = CqString::hash( "color" );
-static TqUlong hstring = CqString::hash( "string" );
-static TqUlong hmatrix = CqString::hash( "matrix" );
-static TqUlong hinteger = CqString::hash( "integer" );
-static TqUlong hint = CqString::hash( "int" );
+static const TqUlong hfloat = CqString::hash( "float" );
+static const TqUlong hpoint = CqString::hash( "point" );
+static const TqUlong hhpoint = CqString::hash( "hpoint" );
+static const TqUlong hvector = CqString::hash( "vector" );
+static const TqUlong hnormal = CqString::hash( "normal" );
+static const TqUlong hcolor = CqString::hash( "color" );
+static const TqUlong hstring = CqString::hash( "string" );
+static const TqUlong hmatrix = CqString::hash( "matrix" );
+static const TqUlong hinteger = CqString::hash( "integer" );
+static const TqUlong hint = CqString::hash( "int" );
 
-static TqUlong hleft = CqString::hash( "[" );
-static TqUlong hright = CqString::hash( "]" );
+static const TqUlong hleft = CqString::hash( "[" );
+static const TqUlong hright = CqString::hash( "]" );
 
 void CqInlineParse::check_syntax ()
 {
@@ -205,7 +205,7 @@ void CqInlineParse::parse ( std::string &str )
 
 bool CqInlineParse::is_class ( const std::string &str )
 {
-	TqUlong param = CqString::hash( str.c_str() );
+	const TqUlong param = CqString::hash( str.c_str() );
 
 	if ( ( param == hconstant ) ||
 	        ( param == huniform ) ||
@@ -219,7 +219,7 @@ bool CqInlineParse::is_class ( const std::string &str )
 
 bool CqInlineParse::is_type ( const std::string &str )
 {
-	TqUlong param = CqString::hash( str.c_str() );
+	const TqUlong param = CqString::hash( str.c_str() );
 
 	if ( ( param == hfloat ) ||
 	        ( param == hpoint ) ||
@@ -247,7 +247,7 @@ bool CqInlineParse::is_int ( const std::string &str )
 
 EqVariableClass CqInlineParse::get_class ( const std::string &str )
 {
-	TqUlong param = CqString::hash( str.c_str() );
+	const TqUlong param = CqString::hash( str.c_str() );
 
 	if ( param == hconstant )
 		return class_constant;
@@ -266,7 +266,7 @@ EqVariableClass CqInlineParse::get_class ( const std::string &str )
 
 EqVariableType CqInlineParse::get_type ( const std::string &str )
 {
-	TqUlong param = CqString::hash( str.c_str() );
+	const TqUlong param = CqString::hash( str.c_str() );
 
 	if ( param == hfloat )
 		return type_float;

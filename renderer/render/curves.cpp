@@ -30,8 +30,8 @@
 START_NAMESPACE( Aqsis )
 
 
-static TqUlong hwidth = CqString::hash("width");
-static TqUlong hcwidth = CqString::hash("constantwidth");
+static const TqUlong hwidth = CqString::hash("width");
+static const TqUlong hcwidth = CqString::hash("constantwidth");
 
 /**
  * CqCurve constructor.

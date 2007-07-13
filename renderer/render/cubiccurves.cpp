@@ -31,10 +31,10 @@
 START_NAMESPACE( Aqsis )
 
 
-static TqUlong hp = CqString::hash("P");
-static TqUlong hu = CqString::hash("u");
-static TqUlong hn = CqString::hash("N");
-static TqUlong hv = CqString::hash("v");
+static const TqUlong hp = CqString::hash("P");
+static const TqUlong hu = CqString::hash("u");
+static const TqUlong hn = CqString::hash("N");
+static const TqUlong hv = CqString::hash("v");
 
 /**
  * CqCubicCurveSegment constructor.

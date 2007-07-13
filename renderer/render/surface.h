@@ -451,14 +451,14 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 		 */
 		virtual void AddPrimitiveVariable( CqParameter* pParam )
 		{
-			static TqUlong RIH_P = CqString::hash("P");
-			static TqUlong RIH_N = CqString::hash("N");
-			static TqUlong RIH_CS = CqString::hash("Cs");
-			static TqUlong RIH_OS = CqString::hash("Os");
-			static TqUlong RIH_S = CqString::hash("s");
-			static TqUlong RIH_T = CqString::hash("t") ;
-			static TqUlong RIH_U = CqString::hash("u");
-			static TqUlong RIH_V = CqString::hash("v");
+			static const TqUlong RIH_P = CqString::hash("P");
+			static const TqUlong RIH_N = CqString::hash("N");
+			static const TqUlong RIH_CS = CqString::hash("Cs");
+			static const TqUlong RIH_OS = CqString::hash("Os");
+			static const TqUlong RIH_S = CqString::hash("s");
+			static const TqUlong RIH_T = CqString::hash("t") ;
+			static const TqUlong RIH_U = CqString::hash("u");
+			static const TqUlong RIH_V = CqString::hash("v");
 
 			m_aUserParams.push_back( pParam );
 

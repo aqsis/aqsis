@@ -161,12 +161,12 @@ TqInt CqDDManager::DisplayBucket( IqBucket* pBucket )
 
 bool CqDDManager::fDisplayNeeds( const TqChar* var )
 {
-	static TqUlong rgb = CqString::hash( "rgb" );
-	static TqUlong rgba = CqString::hash( "rgba" );
-	static TqUlong Ci = CqString::hash( "Ci" );
-	static TqUlong Oi = CqString::hash( "Oi" );
-	static TqUlong Cs = CqString::hash( "Cs" );
-	static TqUlong Os = CqString::hash( "Os" );
+	static const TqUlong rgb = CqString::hash( "rgb" );
+	static const TqUlong rgba = CqString::hash( "rgba" );
+	static const TqUlong Ci = CqString::hash( "Ci" );
+	static const TqUlong Oi = CqString::hash( "Oi" );
+	static const TqUlong Cs = CqString::hash( "Cs" );
+	static const TqUlong Os = CqString::hash( "Os" );
 
 	TqUlong htoken = CqString::hash( var );
 

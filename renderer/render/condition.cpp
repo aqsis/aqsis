@@ -35,18 +35,18 @@
 START_NAMESPACE( Aqsis )
 
 // Logic relation
-static TqUlong RIH_eq = CqString::hash("==");
-static TqUlong RIH_ne = CqString::hash("!=");
-static TqUlong RIH_le = CqString::hash("<=");
-static TqUlong RIH_lt = CqString::hash("<");
-static TqUlong RIH_ge = CqString::hash(">=");
-static TqUlong RIH_gt = CqString::hash(">");
+static const TqUlong RIH_eq = CqString::hash("==");
+static const TqUlong RIH_ne = CqString::hash("!=");
+static const TqUlong RIH_le = CqString::hash("<=");
+static const TqUlong RIH_lt = CqString::hash("<");
+static const TqUlong RIH_ge = CqString::hash(">=");
+static const TqUlong RIH_gt = CqString::hash(">");
 
 // Math relation
-static TqUlong RIH_mul = CqString::hash("*");
-static TqUlong RIH_div = CqString::hash("/");
-static TqUlong RIH_add = CqString::hash("+");
-static TqUlong RIH_sub = CqString::hash("-");
+static const TqUlong RIH_mul = CqString::hash("*");
+static const TqUlong RIH_div = CqString::hash("/");
+static const TqUlong RIH_add = CqString::hash("+");
+static const TqUlong RIH_sub = CqString::hash("-");
 
 
 inline bool IsMath(TqUlong comp)
@@ -137,7 +137,7 @@ bool TestCondition(RtString condition, RtString where)
 		return true;
 
 
-	TqUlong comp = CqString::hash(Compare);
+	const TqUlong comp = CqString::hash(Compare);
 
 	char *A, *B;
 	A = strtok(StringA, ":");
