@@ -389,7 +389,7 @@ static PtDspyError CreateAppWindow(const char *title, int cx, int cy)
 // size, specifies format in which incoming data will arrive.
 //******************************************************************************
 
-PtDspyError DspyImageOpen(PtDspyImageHandle    *image,
+extern "C" PtDspyError DspyImageOpen(PtDspyImageHandle    *image,
                           const char           *drivername,
                           const char           *filename,
                           int                  width,
@@ -466,7 +466,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle    *image,
 //
 // Send data to the display driver.
 //******************************************************************************
-PtDspyError DspyImageData(PtDspyImageHandle image,
+extern "C" PtDspyError DspyImageData(PtDspyImageHandle image,
                           int xmin,
                           int xmax_plusone,
                           int ymin,
@@ -560,7 +560,7 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 // DspyImageClose
 //******************************************************************************
 
-PtDspyError DspyImageClose(PtDspyImageHandle image)
+extern "C" PtDspyError DspyImageClose(PtDspyImageHandle image)
 {
 #if SHOW_CALLSTACK
 	fprintf(stderr, "sdcWin32_DspyImageClose called.\n");

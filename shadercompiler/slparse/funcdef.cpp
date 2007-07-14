@@ -207,6 +207,7 @@ CqFuncDef	gStandardFuncs[] = {
                                  CqFuncDef( Type_Float, "comp", "comp", "cf" ),
                                  CqFuncDef( Type_Void, "setcomp", "setcomp", "cff" ),
                                  CqFuncDef( Type_Color, "mix", "cmix", "ccf" ),
+                                 CqFuncDef( Type_Color, "mix", "cmixc", "ccc" ),
                                  CqFuncDef( Type_Color, "ambient", "ambient", "" ),
                                  CqFuncDef( Type_Color, "diffuse", "diffuse", "p" ),
                                  CqFuncDef( Type_Color, "specular", "specular", "ppf" ),
@@ -258,6 +259,9 @@ CqFuncDef	gStandardFuncs[] = {
                                  CqFuncDef( Type_Point, "mix", "pmix", "ppf" ),
                                  CqFuncDef( Type_Vector, "mix", "vmix", "vvf" ),
                                  CqFuncDef( Type_Normal, "mix", "nmix", "nnf" ),
+                                 CqFuncDef( Type_Point, "mix", "pmixc", "ppc" ),
+                                 CqFuncDef( Type_Vector, "mix", "vmixc", "vvc" ),
+                                 CqFuncDef( Type_Normal, "mix", "nmixc", "nnc" ),
 
                                  CqFuncDef( Type_Void, "setcomp", "setcomp", "Cff" ),
                                  CqFuncDef( Type_Void, "setxcomp", "setxcomp", "Pf" ),

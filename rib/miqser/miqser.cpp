@@ -62,7 +62,12 @@ extern "C" __declspec(dllimport) void report_refcounts();
 #endif
 
 // Forward declarations
-void ProcessFile( FILE* file, std::string& name );
+void setupOutputFormat();
+void processFile( FILE* inFile, const std::string& name );
+void processFiles(const ArgParse::apstringvec& fileNames);
+void parseAndFormat( FILE* inFile, const std::string&  name );
+void decodeBinaryOnly(FILE* inFile);
+
 
 // Command-line arguments
 ArgParse::apflag g_cl_pause;
@@ -80,6 +85,7 @@ ArgParse::apint g_cl_indentlevel = 0;
 ArgParse::apflag g_cl_binary = 0;
 ArgParse::apint g_cl_compression = 0;	// Default None
 ArgParse::apstring g_cl_output = "";
+ArgParse::apflag g_cl_decodeOnly = 0;
 
 RtToken g_indentNone = "None";
 RtToken g_indentSpace = "Space";
@@ -92,6 +98,8 @@ RtToken g_compressionGzip = "Gzip";
 ArgParse::apflag g_cl_syslog = 0;
 #endif	// AQSIS_SYSTEM_POSIX
 
+
+//------------------------------------------------------------------------------
 int main( int argc, const char** argv )
 {
 	ArgParse ap;
@@ -132,6 +140,7 @@ int main( int argc, const char** argv )
 #endif	// AQSIS_SYSTEM_POSIX
 
 	ap.argString( "archives", "=string\aOverride the default archive searchpath(s)", &g_cl_archive_path );
+	ap.argFlag( "decodeonly", "\aDecode a binary rib into text, *without* validating or formatting the result.  (Debug use only)", &g_cl_decodeOnly );
 	ap.allowUnrecognizedOptions();
 
 	//_crtBreakAlloc = 1305;
@@ -187,6 +196,39 @@ int main( int argc, const char** argv )
 		std::auto_ptr<std::streambuf> use_syslog( new Aqsis::syslog_buf(Aqsis::log()) );
 #endif	// AQSIS_SYSTEM_POSIX
 
+	if(!g_cl_decodeOnly)
+		setupOutputFormat();
+	else
+	{
+		// special case for binary decoding only - truncate output file to zero length.
+		if(g_cl_output != "")
+		{
+			std::ofstream outFile(g_cl_output.c_str(), std::ios_base::out | std::ios_base::trunc);
+			if(!outFile)
+			{
+				Aqsis::log() << Aqsis::error << "Could not open output file '" << g_cl_output << "'\n";
+				exit(1);
+			}
+		}
+	}
+
+	processFiles(ap.leftovers());
+
+	if(g_cl_pause)
+	{
+		std::cout << "Press any key..." << std::ends;
+		std::cin.ignore(std::cin.rdbuf()->in_avail() + 1);
+	}
+
+	return ( 0 );
+}
+
+
+//------------------------------------------------------------------------------
+/** \brief Set up the output formatting, compression etc for libri2rib.
+ */
+void setupOutputFormat()
+{
 	// Setup the indentation if specified
 	if(g_cl_indentation > 0)
 	{
@@ -225,21 +267,28 @@ int main( int argc, const char** argv )
 			itype[0] = g_compressionNone;
 		RiOption("RI2RIB_Output", "Compression", &itype, RI_NULL);
 	}
+}
 
-	if ( ap.leftovers().size() == 0 )     // If no files specified, take input from stdin.
+
+//------------------------------------------------------------------------------
+/** \brief Process all RIB files.
+ */
+void processFiles(const ArgParse::apstringvec& fileNames)
+{
+	if ( fileNames.empty() )     // If no files specified, take input from stdin.
 	{
 		std::string name("stdin");
-		ProcessFile( stdin, name );
+		processFile( stdin, name );
 	}
 	else
 	{
-		for ( ArgParse::apstringvec::const_iterator e = ap.leftovers().begin(); e != ap.leftovers().end(); e++ )
+		for ( ArgParse::apstringvec::const_iterator e = fileNames.begin(); e != fileNames.end(); e++ )
 		{
 			FILE *file = fopen( e->c_str(), "rb" );
 			if ( file != NULL )
 			{
 				std::string name(*e);
-				ProcessFile( file, name );
+				processFile( file, name );
 				fclose( file );
 			}
 			else
@@ -248,17 +297,25 @@ int main( int argc, const char** argv )
 			}
 		}
 	}
-
-	if(g_cl_pause)
-	{
-		std::cout << "Press any key..." << std::ends;
-		std::cin.ignore(std::cin.rdbuf()->in_avail() + 1);
-	}
-
-	return ( 0 );
 }
 
-void ProcessFile( FILE* file, std::string&  name )
+
+//------------------------------------------------------------------------------
+/** \brief process a single RIB file
+ */
+void processFile( FILE* file, const std::string&  name )
+{
+	if(!g_cl_decodeOnly)
+		parseAndFormat(file, name);
+	else
+		decodeBinaryOnly(file);
+}
+
+
+//------------------------------------------------------------------------------
+/** \brief Parse the RIB file and format the result with librib2ri.
+ */
+void parseAndFormat( FILE* file, const std::string&  name )
 {
 	librib::RendermanInterface * engine = librib2ri::CreateRIBEngine();
 
@@ -310,8 +367,37 @@ void ProcessFile( FILE* file, std::string&  name )
 	}
 	catch(Aqsis::XqException& x)
 	{
-		Aqsis::log() << Aqsis::error << x.strReason().c_str() << std::endl;
+		Aqsis::log() << Aqsis::error << x.what() << std::endl;
 	}
 
 	librib2ri::DestroyRIBEngine( engine );
+}
+
+
+//------------------------------------------------------------------------------
+/** \brief decode a binary file, without parsing the result
+ *
+ * This function performs a simple binary decode, without invoking the RIB
+ * parser.  As such it's helpful for debugging, but doesn't necessarily produce
+ * valid RIBs.
+ *
+ * \param inFile - take input from this file.
+ */
+void decodeBinaryOnly(FILE* inFile)
+{
+	try
+	{
+		librib::CqRibBinaryDecoder decoder(inFile);
+		if(g_cl_output.compare("")!=0)
+		{
+			std::ofstream outFile(g_cl_output.c_str(), std::ios_base::out | std::ios_base::app);
+			decoder.dumpToStream(outFile);
+		}
+		else
+			decoder.dumpToStream(std::cout);
+	}
+	catch(Aqsis::XqException& x)
+	{
+		Aqsis::log() << Aqsis::error << x;
+	}
 }

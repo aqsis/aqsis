@@ -207,7 +207,7 @@ extern "C"
 
 	_qExport PtDspyError DspyImageQuery(PtDspyImageHandle image,
 	                                    PtDspyQueryType type,
-	                                    int size,
+	                                    size_t size,
 	                                    void *data);
 
 #ifdef __cplusplus

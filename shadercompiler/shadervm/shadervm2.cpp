@@ -600,6 +600,12 @@ void CqShaderVM::SO_cmix()
 	FUNC3( type_color, m_pEnv->SO_cmix );
 }
 
+void CqShaderVM::SO_cmixc()
+{
+	AUTOFUNC;
+	FUNC3( type_color, m_pEnv->SO_cmixc );
+}
+
 void CqShaderVM::SO_fmix()
 {
 	AUTOFUNC;
@@ -622,6 +628,24 @@ void CqShaderVM::SO_nmix()
 {
 	AUTOFUNC;
 	FUNC3( type_normal, m_pEnv->SO_nmix );
+}
+
+void CqShaderVM::SO_pmixc()
+{
+	AUTOFUNC;
+	FUNC3( type_point, m_pEnv->SO_pmixc );
+}
+
+void CqShaderVM::SO_vmixc()
+{
+	AUTOFUNC;
+	FUNC3( type_vector, m_pEnv->SO_vmixc );
+}
+
+void CqShaderVM::SO_nmixc()
+{
+	AUTOFUNC;
+	FUNC3( type_normal, m_pEnv->SO_nmixc );
 }
 
 void CqShaderVM::SO_ambient()

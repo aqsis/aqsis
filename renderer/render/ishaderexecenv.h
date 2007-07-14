@@ -373,10 +373,14 @@ struct IqShaderExecEnv
 	virtual STD_SO	SO_depth( POINTVAL p, DEFPARAM ) = 0;
 	virtual STD_SO	SO_calculatenormal( POINTVAL p, DEFPARAM ) = 0;
 	virtual STD_SO	SO_cmix( COLORVAL color0, COLORVAL color1, FLOATVAL value, DEFPARAM ) = 0;
+	virtual STD_SO	SO_cmixc( COLORVAL color0, COLORVAL color1, COLORVAL value, DEFPARAM ) = 0;
 	virtual STD_SO	SO_fmix( FLOATVAL f0, FLOATVAL f1, FLOATVAL value, DEFPARAM ) = 0;
 	virtual STD_SO	SO_pmix( POINTVAL p0, POINTVAL p1, FLOATVAL value, DEFPARAM ) = 0;
 	virtual STD_SO	SO_vmix( VECTORVAL v0, VECTORVAL v1, FLOATVAL value, DEFPARAM ) = 0;
 	virtual STD_SO	SO_nmix( NORMALVAL n0, NORMALVAL n1, FLOATVAL value, DEFPARAM ) = 0;
+	virtual STD_SO	SO_pmixc( POINTVAL p0, POINTVAL p1, COLORVAL value, DEFPARAM ) = 0;
+	virtual STD_SO	SO_vmixc( VECTORVAL v0, VECTORVAL v1, COLORVAL value, DEFPARAM ) = 0;
+	virtual STD_SO	SO_nmixc( NORMALVAL n0, NORMALVAL n1, COLORVAL value, DEFPARAM ) = 0;
 	virtual STD_SO	SO_ambient( DEFPARAM ) = 0;
 	virtual STD_SO	SO_diffuse( NORMALVAL N, DEFPARAM ) = 0;
 	virtual STD_SO	SO_specular( NORMALVAL N, VECTORVAL V, FLOATVAL roughness, DEFPARAM ) = 0;

@@ -1252,7 +1252,7 @@ void CqRenderer::AddParameterDecl( const char* strName, const char* strType )
 	}
 	catch( XqException e )
 	{
-		Aqsis::log() << error << e.strReason().c_str() << std::endl;
+		Aqsis::log() << error << e.what () << std::endl;
 		return;
 	}
 
@@ -1751,7 +1751,7 @@ TqInt CqRenderer::RegisterOutputData( const char* name )
 	}
 	catch( XqException e )
 	{
-		Aqsis::log() << error << e.strReason().c_str() << std::endl;
+			Aqsis::log() << error << e.what() << std::endl;
 		return(-1);
 	}
 	if( Decl.m_Type != type_invalid )
@@ -1813,7 +1813,7 @@ TqInt CqRenderer::OutputDataIndex( const char* name )
 	}
 	catch( XqException e )
 	{
-		Aqsis::log() << error << e.strReason().c_str() << std::endl;
+		Aqsis::log() << error << e.what() << std::endl;
 		return(-1);
 	}
 	if( Decl.m_Type != type_invalid )
@@ -1834,7 +1834,7 @@ TqInt CqRenderer::OutputDataSamples( const char* name )
 	}
 	catch( XqException e )
 	{
-		Aqsis::log() << error << e.strReason().c_str() << std::endl;
+		Aqsis::log() << error << e.what() << std::endl;
 		return(-1);
 	}
 	if( Decl.m_Type != type_invalid )
@@ -1856,7 +1856,7 @@ TqInt CqRenderer::OutputDataType( const char* name )
 	}
 	catch( XqException e )
 	{
-		Aqsis::log() << error << e.strReason().c_str() << std::endl;
+		Aqsis::log() << error << e.what() << std::endl;
 		return(-1);
 	}
 	if( Decl.m_Type != type_invalid )

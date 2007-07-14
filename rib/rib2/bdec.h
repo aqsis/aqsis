@@ -27,6 +27,7 @@
 #define RIB_BINARY_DECODER_H
 #include <string>
 #include <vector>
+#include <iosfwd>
 #include <stdio.h>
 #include <zlib.h>
 #include "aqsis.h"
@@ -47,6 +48,7 @@ class RIB_SHARE CqRibBinaryDecoder
 		int zavailable; // Available output bytes
 		Bytef *zcurrent; // Location in available output
 
+		/// \todo <b>Code Review</b>: consider using a stream here instead of a vector.
 		std::vector<TqChar> cv;
 
 		std::string ritab[ 256 ];
@@ -105,6 +107,11 @@ class RIB_SHARE CqRibBinaryDecoder
 			return fail_flag;
 		};
 
+		/** \brief Dump decoded data directly to a stream for debugging.
+		 *
+		 * \param out - stream to dump data into
+		 */
+		void dumpToStream(std::ostream& out);
 };
 
 } // namespace librib

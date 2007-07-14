@@ -30,6 +30,7 @@
 #include	"aqsis.h"
 #include	"color.h"
 #include	<map>
+#include	<boost/shared_ptr.hpp>
 
 
 START_NAMESPACE( Aqsis )

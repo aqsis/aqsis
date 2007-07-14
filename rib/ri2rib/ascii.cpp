@@ -32,7 +32,38 @@
 
 USING_NAMESPACE( libri2rib )
 
+CqASCII::CqASCII(const char *name, const int fdesc,
+			const SqOptions::EqCompression comp,
+			const SqOptions::EqIndentation i, const TqInt isize )
+		: CqOutput( name, fdesc, comp ),
+		m_Indentation( i ),
+		m_IndentSize( isize ),
+		m_IndentLevel( 0 )
+{}
 
+CqASCII::~CqASCII()
+{}
+
+
+// **************************************************************
+// ******* ******* ******* BLOCK NESTING ******** ******* *******
+// **************************************************************
+
+void CqASCII::beginNesting(EqBlocks type)
+{
+	CqOutput::beginNesting(type);
+	if(type != B_Ri)
+		++m_IndentLevel;
+}
+
+void CqASCII::endNesting(EqBlocks type)
+{
+	if(type != B_Ri && m_IndentLevel > 0)
+		--m_IndentLevel;
+	CqOutput::endNesting(type);
+	// The above may throw, and our indenting will be screwed up.  We could
+	// catch this and try to recover, but such a RIB is broken anyway.
+}
 
 // **************************************************************
 // ******* ******* ******* PRINTING TOOLS ******* ******* *******
@@ -45,7 +76,7 @@ void CqASCII::printHeader()
 
 void CqASCII::printRequest( const char *cp, EqFunctions )
 {
-	TqInt i;
+	TqUint i;
 	switch ( m_Indentation )
 	{
 			case SqOptions::Indentation_None:
@@ -87,45 +118,43 @@ void CqASCII::printEOL()
 	OUT << "\n";
 }
 
+const RtInt maxLineLength = 10;
 void CqASCII::printArray ( RtInt n, RtInt *p )
 {
-	//    if( n > 0 )
+	OUT << "[ ";
+	for ( RtInt i = 0; i < n; i++ )
 	{
-		OUT << "[ ";
-		for ( RtInt i = 0; i < n; i++ )
-		{
-			OUT << p[ i ] << ' ';
-		}
-		OUT << ']';
+		OUT << p[ i ] << ' ';
+		//if ( (i+1) % maxLineLength == 0 )
+			//printEOL();
 	}
+	OUT << ']';
 }
 
 void CqASCII::printArray ( RtInt n, RtFloat *p )
 {
-	//    if( n > 0 )
+	OUT << "[ ";
+	for ( RtInt i = 0; i < n; i++ )
 	{
-		OUT << "[ ";
-		for ( RtInt i = 0; i < n; i++ )
-		{
-			OUT << p[ i ] << ' ';
-		}
-		OUT << ']';
+		OUT << p[ i ] << ' ';
+		//if ( (i+1) % maxLineLength == 0 )
+			//printEOL();
 	}
+	OUT << ']';
 }
 
 
 void CqASCII::printArray ( RtInt n, RtToken *p )
 {
-	//    if( n > 0 )
+	OUT << "[ ";
+	for ( RtInt i = 0; i < n; i++ )
 	{
-		OUT << "[ ";
-		for ( RtInt i = 0; i < n; i++ )
-		{
-			printToken(p[ i ]);
-			OUT << ' ';
-		}
-		OUT << ']';
+		printToken(p[ i ]);
+		OUT << ' ';
+		//if ( (i+1) % maxLineLength == 0 )
+			//printEOL();
 	}
+	OUT << ']';
 }
 
 

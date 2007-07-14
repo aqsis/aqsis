@@ -517,6 +517,10 @@ class SHADERCONTEXT_SHARE CqShaderExecEnv : public IqShaderExecEnv
 		virtual STD_SO	SO_pmix( POINTVAL p0, POINTVAL p1, FLOATVAL value, DEFPARAM );
 		virtual STD_SO	SO_vmix( VECTORVAL v0, VECTORVAL v1, FLOATVAL value, DEFPARAM );
 		virtual STD_SO	SO_nmix( NORMALVAL n0, NORMALVAL n1, FLOATVAL value, DEFPARAM );
+		virtual STD_SO	SO_cmixc( COLORVAL color0, COLORVAL color1, COLORVAL value, DEFPARAM );
+		virtual STD_SO	SO_pmixc( POINTVAL p0, POINTVAL p1, COLORVAL value, DEFPARAM );
+		virtual STD_SO	SO_vmixc( VECTORVAL v0, VECTORVAL v1, COLORVAL value, DEFPARAM );
+		virtual STD_SO	SO_nmixc( NORMALVAL n0, NORMALVAL n1, COLORVAL value, DEFPARAM );
 		virtual STD_SO	SO_ambient( DEFPARAM );
 		virtual STD_SO	SO_diffuse( NORMALVAL N, DEFPARAM );
 		virtual STD_SO	SO_specular( NORMALVAL N, VECTORVAL V, FLOATVAL roughness, DEFPARAM );

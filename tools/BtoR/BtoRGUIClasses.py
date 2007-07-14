@@ -16,7 +16,7 @@ import math
 draw = Blender.Draw
 gl = Blender.BGL
  
-
+ 
 class UI:
 	def __init__(self):	
 		self.theme = Blender.Window.Theme.Get()[0] # the current theme
@@ -291,7 +291,7 @@ class UI:
 		return hsv
 		
 	def hsvToRgb(self, hsv):
-		if hsv[1] == 0: # HSV values = 0 ÷ 1 # saturation is 0, it's a grayscale value,
+		if hsv[1] == 0: 
 		   rgb = [hsv[2] * 255, hsv[2] * 255, hsv[2] * 255]		
 		else:
 			h = float(hsv[0] * 6) # determine the hue
@@ -322,7 +322,7 @@ class UI:
 
 	
 	def hslToRgb(self, hsl):
-		if hsl[1] == 0:                  #HSL values = 0 ÷ 1		
+		if hsl[1] == 0:                  
 			rgb = [hsl[2] * 255, hsl[2] * 255, hsl[2] * 255]
 		else:
 			if hsl[2] < 0.5:
@@ -348,7 +348,7 @@ class UI:
 		return v1 		
 
 	def rgbToHsl(self, value):
-		var_R = ( value[0] / 255 )                     # Where RGB values = 0 ÷ 255
+		var_R = ( value[0] / 255 )                     
 		var_G = ( value[1] / 255 )
 		var_B = ( value[2] / 255 )
 		
@@ -359,7 +359,7 @@ class UI:
 		L = (var_Max + var_Min ) / 2
 		
 		if del_Max == 0:                    # This is a gray, no chroma...		
-		   H = 0                            # HSL results = 0 ÷ 1
+		   H = 0                            
 		   S = 0
 		else:                               #Chromatic data...
 			if ( L < 0.5 ):
@@ -388,9 +388,9 @@ class UI:
 	def xyzToRgb(self, value):
 			
 		# Observer = 2°, Illuminant = D65
-		var_X = value[0] / 100        # Where X = 0 ÷  95.047
-		var_Y = value[1] / 100        # Where Y = 0 ÷ 100.000
-		var_Z = value[2] / 100        # Where Z = 0 ÷ 108.883
+		var_X = value[0] / 100        # Where X = 0 /  95.047
+		var_Y = value[1] / 100        # Where Y = 0 / 100.000
+		var_Z = value[2] / 100        # Where Z = 0 / 108.883
 		
 		var_R = var_X *  3.2406 + var_Y * -1.5372 + var_Z * -0.4986
 		var_G = var_X * -0.9689 + var_Y *  1.8758 + var_Z *  0.0415
@@ -438,9 +438,9 @@ class UI:
 		return rgb
 	
 	def rgbToXyz(self, value):
-		var_R = ( value[0] / 255 )        # Where R = 0 ÷ 255
-		var_G = ( value[1] / 255 )        # Where G = 0 ÷ 255
-		var_B = ( value[2] / 255 )        # Where B = 0 ÷ 255
+		var_R = ( value[0] / 255 )        # Where R = 0 / 255
+		var_G = ( value[1] / 255 )        # Where G = 0 / 255
+		var_B = ( value[2] / 255 )        # Where B = 0 / 255
 		
 		if var_R > 0.04045:
 			var_R = ( ( var_R + 0.055 ) / 1.055 ) ^ 2.4
@@ -4309,4 +4309,17 @@ class VisibilityGroup: # maintains a list of objects and turns them on or off
 		for obj in self.objList:
 			obj.show()
 			
+			
+			
 
+class CurveEditor(Panel):
+	# ok this is a curve editor. I should be able to specify a starting frame, an ending frame, and 
+	# have a curve that I can add quite a few nodes to. This thing should probably be fairly large, and be activated by a 
+	# launch icon that I click.
+	def __init__(self, x, y, width, height, name, title, parent, auto_register = True, fontsize = 'normal'):
+		Panel.__init__(self, x, y, width, height, name, title, parent)
+		# a curve editor should have a back panel display
+		# the curve itself
+		# and maybe I use the curve as a boundary or something and use a floodfill?
+		
+			

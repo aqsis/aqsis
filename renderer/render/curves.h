@@ -170,19 +170,8 @@ class CqCurve : public CqSurface
 		}
 
 		/** Returns a normal to the curve. */
-		bool GetNormal( TqInt index, CqVector3D& normal ) const
-		{
-			if ( N() != NULL )
-			{
-				normal = N()->pValue( index )[0];
-				return true;
-			}
-			else
-			{
-				normal = CqVector3D( 0, 0, -1 );  // default camera normal
-				return false;
-			}
-		}
+		bool GetNormal( TqInt index, CqVector3D& normal ) const;
+
 		/** Returns a string name of the class. */
 		virtual CqString strName() const
 		{
