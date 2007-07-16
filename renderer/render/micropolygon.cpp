@@ -803,11 +803,11 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage )
 
 	ADDREF( this );
 
-	TqInt iv;
-	for ( iv = 0; iv < cv; iv++ )
+	const TqUint numTimeRanges = MAX(4, pImage->PixelXSamples() * pImage->PixelYSamples());
+
+	for (TqInt iv = 0; iv < cv; iv++ )
 	{
-		TqInt iu;
-		for ( iu = 0; iu < cu; iu++ )
+		for (TqInt iu = 0; iu < cu; iu++ )
 		{
 			TqInt iIndex = ( iv * ( cu + 1 ) ) + iu;
 
@@ -880,6 +880,7 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage )
 				for ( keyFrame = keyframeTimes.begin(); keyFrame!=keyframeTimes.end(); keyFrame++ )
 					pNew->AppendKey( aaPtimes[ keyFrame->second ][ iIndex ], aaPtimes[ keyFrame->second ][ iIndex + 1 ], aaPtimes[ keyFrame->second ][ iIndex + cu + 2 ], aaPtimes[ keyFrame->second ][ iIndex + cu + 1 ],  keyFrame->first);
 				
+				pNew->BuildBoundList( numTimeRanges );
 				pImage->AddMPG( pNew );
 			}
 			else
@@ -1031,11 +1032,11 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage )
 	// Determine whether we need to bother with trimming or not.
 	bool bCanBeTrimmed = pSurface() ->bCanBeTrimmed() && NULL != pGridA->pVar(EnvVars_u) && NULL != pGridA->pVar(EnvVars_v);
 
-	TqInt iv;
-	for ( iv = 0; iv < cv; iv++ )
+	const TqUint numTimeRanges = MAX(4, pImage->PixelXSamples() * pImage->PixelYSamples());
+
+	for (TqInt iv = 0; iv < cv; iv++ )
 	{
-		TqInt iu;
-		for ( iu = 0; iu < cu; iu++ )
+		for (TqInt iu = 0; iu < cu; iu++ )
 		{
 			TqInt iIndex = ( iv * ( cu + 1 ) ) + iu;
 
@@ -1102,6 +1103,8 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage )
 			CqMicroPolygonMotion *pNew = new CqMicroPolygonMotion( this, iIndex );
 			for ( iTime = 0; iTime < cTimes(); iTime++ )
 				pNew->AppendKey( aaPtimes[ iTime ][ iIndex ], aaPtimes[ iTime ][ iIndex + 1 ], aaPtimes[ iTime ][ iIndex + cu + 2 ], aaPtimes[ iTime ][ iIndex + cu + 1 ], Time( iTime ) );
+
+			pNew->BuildBoundList( numTimeRanges );
 
 			pImage->AddMPG( pNew );
 		}

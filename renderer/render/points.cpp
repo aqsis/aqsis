@@ -531,6 +531,8 @@ void CqMicroPolyGridPoints::Split( CqImageBuffer* pImage, long xmin, long xmax, 
 			}
 		}
 
+		const TqUint numTimeRanges = MAX(4, pImage->PixelXSamples() * pImage->PixelYSamples());
+
 		for ( iu = 0; iu < cu; iu++ )
 		{
 			CqMicroPolygonMotionPoints *pNew = new CqMicroPolygonMotionPoints( this, iu );
@@ -583,6 +585,7 @@ void CqMicroPolyGridPoints::Split( CqImageBuffer* pImage, long xmin, long xmax, 
 				pNew->AppendKey( Point, radius, pSurface()->pTransform()->Time( iTime ) );
 			}
 			pNew->CalculateTotalBound( );
+			pNew->BuildBoundList( numTimeRanges );
 			pImage->AddMPG( pNew );
 		}
 	}
@@ -731,6 +734,8 @@ void CqMotionMicroPolyGridPoints::Split( CqImageBuffer* pImage, long xmin, long 
 		}
 	}
 
+	const TqUint numTimeRanges = MAX(4, pImage->PixelXSamples() * pImage->PixelYSamples());
+
 	TqInt iu;
 	for ( iu = 0; iu < cu; iu++ )
 	{
@@ -793,6 +798,7 @@ void CqMotionMicroPolyGridPoints::Split( CqImageBuffer* pImage, long xmin, long 
 			pNew->AppendKey( Point, radius, Time( iTime ) );
 		}
 		pNew->CalculateTotalBound( );
+		pNew->BuildBoundList( numTimeRanges );
 		pImage->AddMPG( pNew );
 	}
 

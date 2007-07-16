@@ -101,7 +101,6 @@ private:
 	TqInt	m_PixelYSamples;
 	TqFloat	m_FilterXWidth;
 	TqFloat	m_FilterYWidth;
-	TqUint	m_NumTimeRanges;
 	TqInt	m_NumDofBounds;
 
 	std::vector<CqBound>		m_DofBounds;

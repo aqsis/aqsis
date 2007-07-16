@@ -47,7 +47,6 @@ void CqBucketData::reset()
 	m_PixelYSamples = 0;
 	m_FilterXWidth = 0.0f;
 	m_FilterYWidth = 0.0f;
-	m_NumTimeRanges = 0;
 	m_NumDofBounds = 0;
 
 	m_DofBounds.clear();

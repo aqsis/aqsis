@@ -76,8 +76,6 @@ void CqBucket::PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt y
 	m_bucketData->m_RealWidth = m_bucketData->m_XSize + (m_bucketData->m_DiscreteShiftX*2);
 	m_bucketData->m_RealHeight = m_bucketData->m_YSize + (m_bucketData->m_DiscreteShiftY*2);
 
-	m_bucketData->m_NumTimeRanges = MAX(4, m_bucketData->m_PixelXSamples * m_bucketData->m_PixelYSamples);
-
         TqFloat opentime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 0 ];
         TqFloat closetime = QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "Shutter" ) [ 1 ];
 
@@ -1087,20 +1085,20 @@ void CqBucket::RenderMPG_MBOrDof( CqMicroPolygon* pMPG,
 	const SqGridInfo& currentGridInfo = pMPG->pGrid()->GetCachedGridInfo();
 	TqFloat closetime = currentGridInfo.m_ShutterCloseTime;
 
-	TqInt bound_maxMB = pMPG->cSubBounds( m_bucketData->m_NumTimeRanges );
+	TqInt bound_maxMB = pMPG->cSubBounds();
 	TqInt bound_maxMB_1 = bound_maxMB - 1;
 	for ( TqInt bound_numMB = 0; bound_numMB < bound_maxMB; bound_numMB++ )
 	{
 		TqFloat time0 = currentGridInfo.m_ShutterOpenTime;
 		TqFloat time1 = currentGridInfo.m_ShutterCloseTime;
-		const CqBound& Bound = pMPG->SubBound( m_bucketData->m_NumTimeRanges, bound_numMB, time0 );
+		const CqBound& Bound = pMPG->SubBound( bound_numMB, time0 );
 
 		// get the index of the first and last samples that can fall inside
 		// the time range of this bound
 		if(IsMoving)
 		{
 			if ( bound_numMB != bound_maxMB_1 )
-				pMPG->SubBound( m_bucketData->m_NumTimeRanges, bound_numMB + 1, time1 );
+				pMPG->SubBound( bound_numMB + 1, time1 );
 			else
 				time1 = closetime;
 		}
@@ -1155,7 +1153,7 @@ void CqBucket::RenderMPG_MBOrDof( CqMicroPolygon* pMPG,
 			{
 				// now shift the bounding box to cover only a given range of
 				// lens positions.
-				const CqBound DofBound = CqBucket::DofSubBound( bound_numDof );
+				const CqBound DofBound = DofSubBound( bound_numDof );
 				TqFloat leftOffset = DofBound.vecMax().x() * maxCocX;
 				TqFloat rightOffset = DofBound.vecMin().x() * maxCocX;
 				TqFloat topOffset = DofBound.vecMax().y() * maxCocY;

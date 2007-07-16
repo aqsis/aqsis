@@ -263,8 +263,7 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase
 		}
 		virtual bool	usesCSG() const
 		{
-			bool result = (m_pCSGNode.get() != NULL);
-			return(result);
+			return (m_pCSGNode.get() != NULL);
 		}
 		virtual	boost::shared_ptr<CqCSGTreeNode> pCSGNode() const
 		{
@@ -581,7 +580,7 @@ class CqMicroPolygon : public CqRefCount
 			return m_Bound;
 		}
 
-		virtual	TqInt	cSubBounds( TqUint timeRanges )
+		virtual	TqInt	cSubBounds()
 		{
 			return ( 1 );
 		}
@@ -589,7 +588,7 @@ class CqMicroPolygon : public CqRefCount
 		/**
 		* \todo Review: Unused parameter iIndex
 		*/				
-		virtual	CqBound SubBound( TqUint timeRanges, TqInt iIndex, TqFloat& time )
+		virtual	CqBound SubBound( TqInt iIndex, TqFloat& time )
 		{
 			time = 0.0f;
 			return ( GetTotalBound() );
@@ -821,16 +820,16 @@ class CqMicroPolygonMotion : public CqMicroPolygon
 		{
 			return ( m_Bound );
 		}
-		virtual	TqInt	cSubBounds( TqUint timeRanges )
+		virtual	TqInt	cSubBounds()
 		{
 			if ( !m_BoundReady )
-				BuildBoundList( timeRanges );
+				Aqsis::log() << error << "MP bound list not ready" << std::endl;
 			return ( m_BoundList.Size() );
 		}
-		virtual	CqBound	SubBound( TqUint timeRanges, TqInt iIndex, TqFloat& time )
+		virtual	CqBound	SubBound( TqInt iIndex, TqFloat& time )
 		{
 			if ( !m_BoundReady )
-				BuildBoundList( timeRanges );
+				Aqsis::log() << error << "MP bound list not ready" << std::endl;
 			assert( iIndex < m_BoundList.Size() );
 			time = m_BoundList.GetTime( iIndex );
 			return ( m_BoundList.GetBound( iIndex ) );
