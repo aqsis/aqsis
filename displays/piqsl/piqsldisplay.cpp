@@ -181,12 +181,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			int pid = fork();
 			if (pid != -1)
 			{
-				if (pid)
-				{
-					Aqsis::log() << info << "Starting the framebuffer" << std::endl;
-					sleep(2); //Give it time to startup
-				}
-				else
+				if (!pid)
 				{
 					// TODO: need to pass verbosity level for logginng
 					char *argv[4] = {"piqsl","-i","127.0.0.1",NULL};
@@ -234,7 +229,11 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 #endif
 			// The FB should be running at this point.
 			// Lets try and connect
-			pImage->m_socket.connect(pImage->m_hostname, pImage->m_port);
+			if(!pImage->m_socket.connect(pImage->m_hostname, pImage->m_port))
+			{
+				sleep(2); //Give it time to startup
+				pImage->m_socket.connect(pImage->m_hostname, pImage->m_port);
+			}
 		}
 		if(pImage->m_socket)
 		{
@@ -365,10 +364,10 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			delete(formats);
 		}
 		else 
-			return(PkDspyErrorNoMemory);
+			return(PkDspyErrorUndefined);
 	} 
 	else 
-		return(PkDspyErrorNoMemory);
+		return(PkDspyErrorUndefined);
 
 	return(PkDspyErrorNone);
 }

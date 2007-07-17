@@ -204,7 +204,6 @@ void CqDisplayServerImage::acceptData(TqUlong xmin, TqUlong xmaxplus1, TqUlong y
 			}
 			pdatarow += bucketlinelen;
 		}
-		//transferData();
 		if(m_updateCallback)
 			m_updateCallback(xmin__, ymin__, xmaxplus1__-xmin__, ymaxplus1__-ymin__);
 	}
