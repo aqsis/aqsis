@@ -32,6 +32,7 @@
 #include	"renderer.h"
 #include	"patch.h"
 #include	"vector2d.h"
+#include	"aqsismath.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -399,8 +400,8 @@ bool	CqSurfacePatchBicubic::Diceable()
 	const TqInt *binary = pAttributes() ->GetIntegerAttribute( "dice", "binary" );
 	if ( binary && *binary)
 	{
-		m_uDiceSize = CEIL_POW2( m_uDiceSize );
-		m_vDiceSize = CEIL_POW2( m_vDiceSize );
+		m_uDiceSize = ceilPow2( m_uDiceSize );
+		m_vDiceSize = ceilPow2( m_vDiceSize );
 	}
 
 	if ( uLen < FLT_EPSILON || vLen < FLT_EPSILON )
@@ -759,8 +760,8 @@ bool	CqSurfacePatchBilinear::Diceable()
 	const TqInt *binary = pAttributes() ->GetIntegerAttribute( "dice", "binary" );
 	if ( binary && *binary)
 	{
-		m_uDiceSize = CEIL_POW2( m_uDiceSize );
-		m_vDiceSize = CEIL_POW2( m_vDiceSize );
+		m_uDiceSize = ceilPow2( m_uDiceSize );
+		m_vDiceSize = ceilPow2( m_vDiceSize );
 	}
 
 	if ( uLen < FLT_EPSILON || vLen < FLT_EPSILON )

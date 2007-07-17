@@ -28,9 +28,10 @@
 //{
 #define COLOR_H_INCLUDED 1
 
-#include	"aqsis.h"
+#include "aqsis.h"
 
-#include	"vector3d.h"
+#include "vector3d.h"
+#include "aqsismath.h"
 
 #include <iostream>
 
@@ -350,6 +351,27 @@ class COMMON_SHARE CqColor
 			return ( ( m_fRed < colCmp.m_fRed ) && ( m_fGreen < colCmp.m_fGreen ) && ( m_fBlue < colCmp.m_fBlue ) );
 		}
 
+		/** \brief Determine a componentwise minimum for two colors
+		 */
+		friend CqColor min(const CqColor a, const CqColor b);
+
+		/** \brief Determine a componentwise maximum for two colors
+		 */
+		friend CqColor max(const CqColor a, const CqColor b);
+
+		/** \brief Clamp the components of a color to between two given colors.
+		 */
+		friend CqColor clamp(const CqColor c, const CqColor min, const CqColor max);
+
+		/** \brief Linearly interpolate between two colors
+		 *
+		 * \param t - interpolation parameter; a floating point between 0 and 1.
+		 * \param c0 - color corresponding to t = 0
+		 * \param c1 - color corresponding to t = 1
+		 */
+		template<typename T>
+		friend CqColor lerp(const T t, const CqColor c0, const CqColor c1);
+
 		/** Component wise friend addition operator.
 		 * \param f float to add to each component.
 		 * \param c color to add to.
@@ -503,7 +525,6 @@ class COMMON_SHARE CqColor
 }
 ;
 
-
 /// Static white color
 COMMON_SHARE extern CqColor	gColWhite;
 /// Static black color
@@ -514,6 +535,40 @@ COMMON_SHARE extern CqColor	gColRed;
 COMMON_SHARE extern CqColor	gColGreen;
 /// Static blue color
 COMMON_SHARE extern CqColor	gColBlue;
+
+
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+// Inline function implementations.
+//-----------------------------------------------------------------------
+inline CqColor min(const CqColor a, const CqColor b)
+{
+	return CqColor(min(a.m_fRed, b.m_fRed),
+			min(a.m_fGreen, b.m_fGreen),
+			min(a.m_fBlue, b.m_fBlue));
+}
+
+inline CqColor max(const CqColor a, const CqColor b)
+{
+	return CqColor(max(a.m_fRed, b.m_fRed),
+			max(a.m_fGreen, b.m_fGreen),
+			max(a.m_fBlue, b.m_fBlue));
+}
+
+inline CqColor clamp(const CqColor c, const CqColor min, const CqColor max)
+{
+	return CqColor(clamp(c.m_fRed, min.m_fRed, max.m_fRed),
+			clamp(c.m_fGreen, min.m_fGreen, max.m_fGreen),
+			clamp(c.m_fBlue, min.m_fBlue, max.m_fBlue));
+}
+
+template<typename T>
+inline CqColor lerp(const T t, const CqColor c0, const CqColor c1)
+{
+	return CqColor((1-t)*c0.m_fRed + t*c1.m_fRed,
+			       (1-t)*c0.m_fGreen + t*c1.m_fGreen,
+			       (1-t)*c0.m_fBlue + t*c1.m_fBlue);
+}
 
 //-----------------------------------------------------------------------
 
