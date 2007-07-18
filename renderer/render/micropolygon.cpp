@@ -1129,7 +1129,7 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage )
  */
 
 CqMicroPolygon::CqMicroPolygon( CqMicroPolyGridBase* pGrid, TqInt Index ) :
-	m_pGrid( pGrid ), m_Index ( Index), m_Flags( 0 ), m_pHitTestCache( 0 )
+	m_pGrid( pGrid ), m_Index ( Index), m_Flags( 0 )
 {
 	assert( m_pGrid != 0 && m_pGrid->pShaderExecEnv()->shadingPointCount() > Index );
 	ADDREF( m_pGrid );
@@ -1248,14 +1248,14 @@ void CqMicroPolygon::Initialise()
  * \return Boolean indicating sample hit.
  */
 
-bool CqMicroPolygon::fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time) const
+bool CqMicroPolygon::fContains( CqHitTestCache& hitTestCache, const CqVector2D& vecP, TqFloat& Depth, TqFloat time) const
 {
 	// AGG - optimised version of above.
 	TqFloat x = vecP.x(), y = vecP.y();
 
 	// start with the edge that failed last time to get the most benefit
 	// from an early exit.
-	int e = m_pHitTestCache->m_LastFailedEdge;
+	int e = hitTestCache.m_LastFailedEdge;
 	int prev = e - 1;
 	if(prev < 0)
 		prev = 3;
@@ -1268,19 +1268,19 @@ bool CqMicroPolygon::fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat 
 		// or neither sides.
 		if(e & 2)
 		{
-			if( (( y - m_pHitTestCache->m_Y[e]) * m_pHitTestCache->m_YMultiplier[e] ) -
-			        (( x - m_pHitTestCache->m_X[e]) * m_pHitTestCache->m_XMultiplier[e] ) < 0)
+			if( (( y - hitTestCache.m_Y[e]) * hitTestCache.m_YMultiplier[e] ) -
+			        (( x - hitTestCache.m_X[e]) * hitTestCache.m_XMultiplier[e] ) < 0)
 			{
-				m_pHitTestCache->m_LastFailedEdge = e;
+				hitTestCache.m_LastFailedEdge = e;
 				return false;
 			}
 		}
 		else
 		{
-			if( (( y - m_pHitTestCache->m_Y[e]) * m_pHitTestCache->m_YMultiplier[e] ) -
-			        (( x - m_pHitTestCache->m_X[e]) * m_pHitTestCache->m_XMultiplier[e] ) <= 0)
+			if( (( y - hitTestCache.m_Y[e]) * hitTestCache.m_YMultiplier[e] ) -
+			        (( x - hitTestCache.m_X[e]) * hitTestCache.m_XMultiplier[e] ) <= 0)
 			{
-				m_pHitTestCache->m_LastFailedEdge = e;
+				hitTestCache.m_LastFailedEdge = e;
 				return false;
 			}
 		}
@@ -1290,8 +1290,8 @@ bool CqMicroPolygon::fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat 
 		e = (e+1) & 3;
 	}
 
-	Depth = ( m_pHitTestCache->m_D - ( m_pHitTestCache->m_VecN.x() * vecP.x() ) -
-	          ( m_pHitTestCache->m_VecN.y() * vecP.y() ) ) * m_pHitTestCache->m_OneOverVecNZ;
+	Depth = ( hitTestCache.m_D - ( hitTestCache.m_VecN.x() * vecP.x() ) -
+	          ( hitTestCache.m_VecN.y() * vecP.y() ) ) * hitTestCache.m_OneOverVecNZ;
 
 	return true;
 }
@@ -1303,8 +1303,6 @@ bool CqMicroPolygon::fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat 
 
 inline void CqMicroPolygon::CacheHitTestValues(CqHitTestCache* cache, CqVector3D* points)
 {
-	m_pHitTestCache = cache;
-
 	int j = 3;
 	for(int i=0; i<4; ++i)
 	{
@@ -1444,14 +1442,14 @@ CqVector2D CqMicroPolygon::ReverseBilinear( const CqVector2D& v )
  * \return Boolean indicating smaple hit.
  */
 
-bool CqMicroPolygon::Sample( const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof )
+bool CqMicroPolygon::Sample( CqHitTestCache& hitTestCache, const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof )
 {
 	const CqVector2D& vecSample = sample.m_Position;
 
 	// If using DoF, we need to adjust the point positions, and the hit test cache,
 	// \note: this invalidates the hit test cache, but we are using DoF, so all bets are off anyway.
 	// still, would be good to find out if there is a better way of doing this.
-	CqHitTestCache hitTestCache;
+	CqHitTestCache hitTestCacheDof;
 
 	if(UsingDof)
 	{
@@ -1472,10 +1470,11 @@ bool CqMicroPolygon::Sample( const SqSampleData& sample, TqFloat& D, TqFloat tim
 		points[3].x(points[3].x() - ( coc.x() * sample.m_DofOffset.x() ));
 		points[3].y(points[3].y() - ( coc.y() * sample.m_DofOffset.y() ));
 
-		CacheHitTestValues(&hitTestCache, points);
+		CacheHitTestValues(&hitTestCacheDof, points);
+		hitTestCache = hitTestCacheDof;
 	}
 
-	if ( fContains( vecSample, D, time ) )
+	if ( fContains( hitTestCache, vecSample, D, time ) )
 	{
 		// Now check if it is trimmed.
 		if ( IsTrimmed() )
@@ -1722,10 +1721,9 @@ void CqMicroPolygonMotion::BuildBoundList( TqUint timeRanges )
  * \return Boolean indicating smaple hit.
  */
 
-bool CqMicroPolygonMotion::Sample( const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof )
+bool CqMicroPolygonMotion::Sample( CqHitTestCache& hitTestCache, const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof )
 {
 	const CqVector2D& vecSample = sample.m_Position;
-	CqHitTestCache hitTestCache;
 	CqVector3D points[4];
 
 	// Calculate the position in time of the MP.
@@ -1788,7 +1786,7 @@ bool CqMicroPolygonMotion::Sample( const SqSampleData& sample, TqFloat& D, TqFlo
 	}
 	CacheHitTestValues(&hitTestCache, points);
 
-	if ( CqMicroPolygon::fContains(vecSample, D, time) )
+	if ( CqMicroPolygon::fContains(hitTestCache, vecSample, D, time) )
 	{
 		// Now check if it is trimmed.
 		if ( IsTrimmed() )

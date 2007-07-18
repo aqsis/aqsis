@@ -471,7 +471,7 @@ void CqOcclusionTree::StoreExtraData(const CqMicroPolygon* pMPG, SqImageSample& 
 
 
 
-void CqOcclusionTree::SampleMPG( std::vector<CqImagePixel>& aieImage, std::vector<SqSampleData>& samplePoints, CqMicroPolygon* pMPG, const CqBound& bound, bool usingMB, TqFloat time0, TqFloat time1, bool usingDof, TqInt dofboundindex, const SqMpgSampleInfo& MpgSampleInfo, bool usingLOD, const SqGridInfo& gridInfo)
+void CqOcclusionTree::SampleMPG( std::vector<CqImagePixel>& aieImage, std::vector<SqSampleData>& samplePoints, CqMicroPolygon* pMPG, const CqBound& bound, bool usingMB, TqFloat time0, TqFloat time1, bool usingDof, TqInt dofboundindex, const SqMpgSampleInfo& MpgSampleInfo, bool usingLOD, const SqGridInfo& gridInfo, CqHitTestCache& hitTestCache)
 {
 	// Check the current tree level, and if only one leaf, sample the MP, otherwise, pass it down to the left
 	// and/or right side of the tree if it crosses.
@@ -482,7 +482,7 @@ void CqOcclusionTree::SampleMPG( std::vector<CqImagePixel>& aieImage, std::vecto
 
 		CqStats::IncI( CqStats::SPL_count );
 		TqFloat D;
-		bool SampleHit = pMPG->Sample(sample, D, sample.m_Time, usingDof );
+		bool SampleHit = pMPG->Sample( hitTestCache, sample, D, sample.m_Time, usingDof );
 
 		if ( SampleHit )
 		{
@@ -580,7 +580,7 @@ void CqOcclusionTree::SampleMPG( std::vector<CqImagePixel>& aieImage, std::vecto
 			{
 				if(bound.vecMin().z() <= (*child)->m_MaxOpaqueZ || !gridInfo.m_IsCullable)
 				{
-					(*child)->SampleMPG(aieImage, samplePoints, pMPG, bound, usingMB, time0, time1, usingDof, dofboundindex, MpgSampleInfo, usingLOD, gridInfo);
+					(*child)->SampleMPG(aieImage, samplePoints, pMPG, bound, usingMB, time0, time1, usingDof, dofboundindex, MpgSampleInfo, usingLOD, gridInfo, hitTestCache);
 				}
 			}
 		}

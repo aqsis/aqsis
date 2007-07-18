@@ -51,6 +51,7 @@ struct SqSampleData;
 struct SqGridInfo;
 
 class CqOcclusionTree;
+class CqHitTestCache;
 //typedef boost::shared_ptr<CqOcclusionTree> CqOcclusionTreePtr;
 //typedef boost::weak_ptr<CqOcclusionTree> CqOcclusionTreeWeakPtr;
 typedef CqOcclusionTree* CqOcclusionTreePtr;
@@ -83,7 +84,8 @@ class CqOcclusionTree// : public boost::enable_shared_from_this<CqOcclusionTree>
 				TqInt dofboundindex,
 				const SqMpgSampleInfo& MpgSampleInfo,
 				bool usingLOD,
-				const SqGridInfo& gridInfo );
+				const SqGridInfo& gridInfo,
+				CqHitTestCache& hitTestCache );
 
 		void ConstructTree(const CqBucket* bucket);
 		void InitialiseBounds(const CqBucket* bucket);

@@ -627,7 +627,7 @@ class CqMicroPolygon : public CqRefCount
 			return ( ( m_Flags & MicroPolyFlags_Trimmed ) != 0 );
 		}
 
-		virtual bool IsMoving()
+		virtual bool IsMoving() const
 		{
 			return false;
 		}
@@ -638,12 +638,10 @@ class CqMicroPolygon : public CqRefCount
 		 * \param D storage to put the depth at the sample point if success.
 		 * \return Boolean success.
 		 */
-		virtual	bool	Sample( const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof = false );
+		virtual	bool	Sample( CqHitTestCache& hitTestCache, const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof = false );
 
-		virtual bool	fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const;
-		virtual void	CacheHitTestValues(CqHitTestCache* cache, CqVector3D* points);
+		virtual bool	fContains( CqHitTestCache& hitTestCache, const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const;
 		virtual void	CacheHitTestValues(CqHitTestCache* cache);
-		virtual void	CacheHitTestValuesDof(CqHitTestCache* cache, const CqVector2D& DofOffset, CqVector2D* coc);
 		void	Initialise();
 		CqVector2D ReverseBilinear( const CqVector2D& v );
 
@@ -700,7 +698,9 @@ class CqMicroPolygon : public CqRefCount
 
 		TqShort	m_Flags;		///< Bitvector of general flags, using EqMicroPolyFlags as bitmasks.
 
-		CqHitTestCache* m_pHitTestCache; // struct to hold cached values used in the point-in-poly test
+		virtual void	CacheHitTestValues(CqHitTestCache* cache, CqVector3D* points);
+		virtual void	CacheHitTestValuesDof(CqHitTestCache* cache, const CqVector2D& DofOffset, CqVector2D* coc);
+
 	private:
 		/**
 		* \todo Review: operator= defined, but empty copy-ctor.
@@ -836,14 +836,14 @@ class CqMicroPolygonMotion : public CqMicroPolygon
 		}
 		virtual void	BuildBoundList( TqUint timeRanges );
 
-		virtual	bool	Sample( const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof = false );
+		virtual	bool	Sample( CqHitTestCache& hitTestCache, const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof = false );
 
 		virtual void	MarkTrimmed()
 		{
 			m_fTrimmed = true;
 		}
 
-		virtual bool IsMoving()
+		virtual bool IsMoving() const
 		{
 			return true;
 		}
