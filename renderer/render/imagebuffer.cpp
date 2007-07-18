@@ -364,9 +364,17 @@ void CqImageBuffer::PostSurface( const boost::shared_ptr<CqSurface>& pSurface )
 			YMinb = CurrentBucketRow();
 		}
 	}
+
 	// Sanity check we are not putting into a bucket that has already been processed.
-	assert( !Bucket(XMinb, YMinb).IsProcessed() );
-	Bucket(XMinb, YMinb).AddGPrim( pSurface );
+	CqBucket* bucket = &Bucket( XMinb, YMinb );
+	if ( bucket->IsProcessed() )
+	{
+		Aqsis::log() << warning << "Bucket already processed but a new Surface touches it" << std::endl;
+	}
+	else
+	{
+		bucket->AddGPrim( pSurface );
+	}
 }
 
 //----------------------------------------------------------------------
@@ -433,6 +441,8 @@ bool CqImageBuffer::OcclusionCullSurface( const CqBucketProcessor& bucketProcess
 
 void CqImageBuffer::AddMPG( CqMicroPolygon* pmpgNew )
 {
+	ADDREF(pmpgNew);
+
 	// Quick check for outside crop window.
 	CqBound	B( pmpgNew->GetTotalBound() );
 
@@ -487,11 +497,12 @@ void CqImageBuffer::AddMPG( CqMicroPolygon* pmpgNew )
 			}
 			else
 			{
-				ADDREF( pmpgNew );
 				bucket->AddMPG( pmpgNew );
 			}
 		}
 	}
+
+	RELEASEREF(pmpgNew);
 }
 
 //----------------------------------------------------------------------

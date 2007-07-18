@@ -145,6 +145,7 @@ class CqBucket : public IqBucket
 					assert( false );
 #endif
 
+			ADDREF( pMP );
 			m_micropolygons.push_back( pMP );
 		}
 
