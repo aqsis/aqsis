@@ -54,6 +54,7 @@ public:
 	{}
 	virtual void updateImageList()
 	{}
+	virtual void saveConfiguration();
 	virtual void saveConfigurationAs(const std::string& name);
 	virtual void loadConfiguration(const std::string& name);
 	virtual void loadImageToCurrentBook(const std::string& name, const std::string& filename);

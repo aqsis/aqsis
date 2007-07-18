@@ -215,7 +215,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 									  NULL,          // process security attributes
 									  NULL,          // primary thread security attributes
 									  TRUE,          // handles are inherited
-									  0,             // creation flags
+									  IDLE_PRIORITY_CLASS,             // creation flags
 									  NULL,          // use parent's environment
 									  NULL,          // use parent's current directory
 									  &siStartInfo,  // STARTUPINFO pointer
@@ -224,15 +224,18 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			if (bFuncRetn == 0)
 			{
 				Aqsis::log() << error << "RiProcRunProgram: CreateProcess failed" << std::endl;
-				return(PkDspyErrorNoMemory);
+				return(PkDspyErrorUndefined);
 			}
-			Sleep(2000); //Give it time to startup
 #endif
 			// The FB should be running at this point.
 			// Lets try and connect
 			if(!pImage->m_socket.connect(pImage->m_hostname, pImage->m_port))
 			{
+#ifndef	AQSIS_SYSTEM_WIN32
 				sleep(2); //Give it time to startup
+#else
+				Sleep(2000); //Give it time to startup
+#endif
 				pImage->m_socket.connect(pImage->m_hostname, pImage->m_port);
 			}
 		}

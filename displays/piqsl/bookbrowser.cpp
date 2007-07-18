@@ -236,9 +236,9 @@ void CqBookBrowser::item_draw(void* v, int X, int Y, int W, int H) const
 	X += i[0];
 	W -= i[0];
 	CqString Size;
-        Size.Format("%dX%dX%d", m_theBook->image(index)->imageWidth(), 
-		m_theBook->image(index)->imageHeight(),  
-		m_theBook->image(index)->numChannels() );
+	Size.Format("%dx%dx%d", m_theBook->image(index)->imageWidth(), 
+	m_theBook->image(index)->imageHeight(),  
+	m_theBook->image(index)->numChannels() );
 	fl_draw(Size.c_str(), X+3, Y, i[1]-6, H, talign, 0, 0);
 }
 

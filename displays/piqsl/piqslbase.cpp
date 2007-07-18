@@ -73,6 +73,10 @@ TqUlong CqPiqslBase::addImageToCurrentBook(boost::shared_ptr<CqImage>& image)
 	return( id );	
 }
 
+void CqPiqslBase::saveConfiguration()
+{
+	saveConfigurationAs(m_currentConfigName);
+}
 
 void CqPiqslBase::saveConfigurationAs(const std::string& name)
 {
@@ -109,6 +113,8 @@ void CqPiqslBase::saveConfigurationAs(const std::string& name)
 		doc.SaveFile(name);
 	}
 #else
+	// A possible alternative saving mechanism, that embeds internal images in the XML file.
+	// Not properly tested, and as yet not supported.
 	if(name != NULL)
 	{
 		m_currentConfigName = name;
