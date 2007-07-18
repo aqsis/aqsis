@@ -151,7 +151,7 @@ void CqFramebuffer::update(int X, int Y, int W, int H)
 }
 
 /// \note: This should only ever be called from the main thread.
-void CqFramebuffer::onIdle()
+void CqFramebuffer::checkResize()
 {
 	if(m_doResize)
 		resize();

@@ -187,6 +187,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 					char *argv[4] = {"piqsl","-i","127.0.0.1",NULL};
 					signal(SIGHUP, SIG_IGN);
 					execvp("piqsl",argv);
+					nice(2);
 				}
 			} 
 			else

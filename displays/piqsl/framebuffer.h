@@ -91,7 +91,7 @@ public:
 	void queueResize();
 	void resize();
 	void update(int X = -1, int Y = -1, int W = -1, int H = -1);
-	void onIdle();
+	void checkResize();
 
 	boost::mutex& mutex()
 	{

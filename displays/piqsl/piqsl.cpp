@@ -153,7 +153,7 @@ class CqDataHandler
 			TiXmlElement* root = xmlMsg.RootElement();
 
 			if(root)
-			{
+			{	
 				// Process the message based on its type.
 				if(root->ValueStr().compare("Open") == 0)
 				{
@@ -279,6 +279,7 @@ class CqDataHandler
 
 					boost::shared_ptr<CqImage> baseImage = boost::static_pointer_cast<CqImage>(m_client);
 					window->currentBook()->framebuffer()->queueResize();
+					Fl::awake();
 					window->currentBook()->framebuffer()->update();
 					window->updateImageList();
 				}
@@ -358,17 +359,6 @@ void HandleConnection(int sock, void *data)
 	}
 }
 
-
-void idle_cb(void*)
-{
-	// Act upon an resize/update requests on the framebuffers.
-	CqPiqslBase::TqBookListIterator book;
-	for(book = window->booksBegin(); book != window->booksEnd(); ++book)
-	{
-		if((*book)->framebuffer())
-			(*book)->framebuffer()->onIdle();
-	}
-}
 
 int main( int argc, char** argv )
 {
@@ -474,8 +464,6 @@ int main( int argc, char** argv )
 
 	Fl::add_fd(g_theSocket,&HandleConnection);
 
-	Fl::add_idle(idle_cb);
-
 	window = new CqPiqslMainWindow();
 	char *internalArgs[] = {
 		"piqsl"
@@ -483,9 +471,20 @@ int main( int argc, char** argv )
 	window->show(1, internalArgs);
 
 
-	int result = Fl::run();
-
-	Fl::remove_idle(idle_cb);
+	int result = 0;
+	for(;;)
+	{
+		Fl::wait();
+		// Act upon an resize/update requests on the framebuffers.
+		CqPiqslBase::TqBookListIterator book;
+		for(book = window->booksBegin(); book != window->booksEnd(); ++book)
+		{
+			if((*book)->framebuffer())
+				(*book)->framebuffer()->checkResize();
+		}
+		if(Fl::first_window() == NULL)
+			break;
+	}
 
 	return(result);
 }
