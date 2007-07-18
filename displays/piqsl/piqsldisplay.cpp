@@ -422,7 +422,7 @@ PtDspyError DspyImageClose(PtDspyImageHandle image)
 	pImage = reinterpret_cast<SqDisplayInstance*>(image);
 
 	// Close the socket
-	if(pImage && !pImage->m_socket)
+	if(pImage && pImage->m_socket)
 	{
 		TiXmlDocument doc("close.xml");
 		TiXmlDeclaration* decl = new TiXmlDeclaration("1.0","","yes");
@@ -445,7 +445,7 @@ PtDspyError DspyImageDelayClose(PtDspyImageHandle image)
 	pImage = reinterpret_cast<SqDisplayInstance*>(image);
 	
 	// Close the socket
-	if(pImage && !pImage->m_socket)
+	if(pImage && pImage->m_socket)
 	{
 		TiXmlDocument doc("close.xml");
 		TiXmlDeclaration* decl = new TiXmlDeclaration("1.0","","yes");
