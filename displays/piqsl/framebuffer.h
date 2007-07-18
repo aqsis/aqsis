@@ -71,7 +71,7 @@ START_NAMESPACE( Aqsis )
 class CqFramebuffer
 {
 public:
-    CqFramebuffer( TqUlong width, TqUlong height, TqInt depth );
+    CqFramebuffer( TqUlong width, TqUlong height, TqInt depth, const std::string& bookName );
     ~CqFramebuffer();
 
 	void show();
@@ -108,6 +108,8 @@ private:
 
 	boost::shared_ptr<CqImage>	m_associatedImage;
 	boost::mutex	m_mutex;
+	std::string		m_title;
+	std::string		m_bookName;
 };
 
 END_NAMESPACE( Aqsis )

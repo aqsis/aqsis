@@ -61,7 +61,7 @@ void piqsl_cb(Fl_Widget* w, void* v)
 	Fl::unlock();
 }
 
-CqFramebuffer::CqFramebuffer(TqUlong width, TqUlong height, TqInt depth) : m_doResize(false)
+CqFramebuffer::CqFramebuffer(TqUlong width, TqUlong height, TqInt depth, const std::string& bookName) : m_doResize(false), m_bookName(bookName)
 {
 	Fl::lock();
 	m_theWindow = new Fl_Window(width, height);
@@ -75,6 +75,8 @@ CqFramebuffer::CqFramebuffer(TqUlong width, TqUlong height, TqInt depth) : m_doR
 	m_popupMenu->box(FL_NO_BOX);
 	m_popupMenu->menu(m_popupMenuItems); 
 	m_theWindow->resizable(m_popupMenu);
+	m_title = bookName;
+	m_theWindow->label(m_title.c_str());
 	m_theWindow->end();
 	m_theWindow->show();
 	Fl::unlock();
@@ -103,7 +105,10 @@ void CqFramebuffer::connect(boost::shared_ptr<CqImage>& image)
 	Fl::lock();
 	m_uiImageWidget->setImage(image);
 	m_theWindow->size(image->frameWidth(), image->frameHeight());
-	m_theWindow->label(image->name().c_str());
+	std::stringstream title;
+	title << m_bookName << ":" << image->name() << std::ends;
+	m_title = title.str();
+	m_theWindow->label(m_title.c_str());
 	boost::function<void(int,int,int,int)> f;
 	f = boost::bind(&CqFramebuffer::update, this, _1, _2, _3, _4);
 	image->setUpdateCallback(f);
@@ -137,7 +142,10 @@ void CqFramebuffer::resize()
 	Fl::lock();
 	m_uiImageWidget->size(m_associatedImage->frameWidth(), m_associatedImage->frameHeight());
 	m_theWindow->size(m_associatedImage->frameWidth(), m_associatedImage->frameHeight());
-	m_theWindow->label(m_associatedImage->name().c_str());
+	std::stringstream title;
+	title << m_bookName << ":" << m_associatedImage->name() << std::ends;
+	m_title = title.str();
+	m_theWindow->label(m_title.c_str());
 	m_doResize = false;
 	Fl::unlock();
 }
