@@ -103,6 +103,7 @@ void CqFramebuffer::connect(boost::shared_ptr<CqImage>& image)
 	Fl::lock();
 	m_uiImageWidget->setImage(image);
 	m_theWindow->size(image->frameWidth(), image->frameHeight());
+	m_theWindow->label(image->name().c_str());
 	boost::function<void(int,int,int,int)> f;
 	f = boost::bind(&CqFramebuffer::update, this, _1, _2, _3, _4);
 	image->setUpdateCallback(f);
@@ -117,6 +118,7 @@ void CqFramebuffer::disconnect()
 		boost::function<void(int,int,int,int)> f;
 		m_associatedImage->setUpdateCallback(f);
 	}
+	m_theWindow->label("");
 	boost::shared_ptr<CqImage> t;
 	m_associatedImage = t;
 	m_uiImageWidget->setImage(t);
@@ -135,6 +137,7 @@ void CqFramebuffer::resize()
 	Fl::lock();
 	m_uiImageWidget->size(m_associatedImage->frameWidth(), m_associatedImage->frameHeight());
 	m_theWindow->size(m_associatedImage->frameWidth(), m_associatedImage->frameHeight());
+	m_theWindow->label(m_associatedImage->name().c_str());
 	m_doResize = false;
 	Fl::unlock();
 }
