@@ -748,10 +748,10 @@ void CqImageBuffer::RenderImage()
 					    bIsEmpty );
 
 		// Render any waiting subsurfaces.
-		while( !CurrentBucket().IsEmpty() && !m_fQuit )
+		while ( !CurrentBucket().IsEmpty() && !m_fQuit )
 		{
 			boost::shared_ptr<CqSurface> pSurface = CurrentBucket().pTopSurface();
-			if(pSurface)
+			if (pSurface)
 			{
 				// Cull surface if it's hidden
 				if ( !( DisplayMode() & ModeZ ) && !pSurface->pCSGNode() )
@@ -763,16 +763,14 @@ void CqImageBuffer::RenderImage()
 					{
 						// Advance to next surface
 						CurrentBucket().popSurface();
-						pSurface = CurrentBucket().pTopSurface();
 						continue;
 					}
 				}
 
 				RenderSurface( pSurface );
-				
+
 				// Advance to next surface
 				CurrentBucket().popSurface();
-				pSurface = CurrentBucket().pTopSurface();
 			}
 
 			// Process: Render any waiting micro polygons.
