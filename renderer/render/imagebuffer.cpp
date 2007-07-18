@@ -713,7 +713,7 @@ void CqImageBuffer::RenderImage()
 
 		bucketProcessor.setBucket(&CurrentBucket());
 
-		bool bIsEmpty = CurrentBucket().IsEmpty();
+		bool bIsEmpty = bucketProcessor.currentBucketIsEmpty();
 		if (fImager)
 			bIsEmpty = false;
 
@@ -748,9 +748,9 @@ void CqImageBuffer::RenderImage()
 					    bIsEmpty );
 
 		// Render any waiting subsurfaces.
-		while ( !CurrentBucket().IsEmpty() && !m_fQuit )
+		while ( !bucketProcessor.currentBucketIsEmpty() && !m_fQuit )
 		{
-			boost::shared_ptr<CqSurface> pSurface = CurrentBucket().pTopSurface();
+			boost::shared_ptr<CqSurface> pSurface = bucketProcessor.getTopSurface();
 			if (pSurface)
 			{
 				// Cull surface if it's hidden
@@ -762,7 +762,7 @@ void CqImageBuffer::RenderImage()
 					     OcclusionCullSurface( bucketProcessor, pSurface ) )
 					{
 						// Advance to next surface
-						CurrentBucket().popSurface();
+						bucketProcessor.popSurface();
 						continue;
 					}
 				}
@@ -770,7 +770,7 @@ void CqImageBuffer::RenderImage()
 				RenderSurface( pSurface );
 
 				// Advance to next surface
-				CurrentBucket().popSurface();
+				bucketProcessor.popSurface();
 			}
 
 			// Process: Render any waiting micro polygons.

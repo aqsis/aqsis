@@ -111,4 +111,26 @@ void CqBucketProcessor::postProcess( bool empty, bool imager, EqFilterDepth dept
 	m_bucket->SetProcessed();
 }
 
+bool CqBucketProcessor::currentBucketIsEmpty() const
+{
+	assert(m_bucket);
+
+	return m_bucket->IsEmpty();
+}
+
+boost::shared_ptr<CqSurface> CqBucketProcessor::getTopSurface()
+{
+	assert(m_bucket);
+
+	return m_bucket->pTopSurface();
+}
+
+void CqBucketProcessor::popSurface()
+{
+	assert(m_bucket);
+
+	return m_bucket->popSurface();
+}
+
+
 END_NAMESPACE( Aqsis );

@@ -82,6 +82,17 @@ public:
 	 */
 	void postProcess( bool empty, bool imager, EqFilterDepth depthfilter, const CqColor& zThreshold );
 
+	/** Whether the bucket is empty
+	 */
+	bool currentBucketIsEmpty() const;
+
+	/** Get the top surface of the current bucket
+	 */
+	boost::shared_ptr<CqSurface> getTopSurface();
+	/** Get the top surface of the current bucket
+	 */
+	void popSurface();
+
 private:
 	/// Pointer to the current bucket
 	CqBucket* m_bucket;
