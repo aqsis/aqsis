@@ -264,13 +264,9 @@ int	CqSocket::recvData(std::stringstream& buffer) const
 	{
 		// Read some more into the buffer
 		count = recv(m_socket,&c,sizeof(char),0);
+		//\todo We need some proper error handling in here
 		if(count <= 0)
-		{
-//			if(errno == EAGAIN)
-				continue;
-//			else
-//				break;
-		}
+				break;
 
 		if(c == '\0')
 		{
