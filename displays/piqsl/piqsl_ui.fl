@@ -89,6 +89,26 @@ Fl::unlock();}
             private xywh {0 0 100 20} shortcut 0x40072
             code0 {o->shortcut(FL_COMMAND+'r');}
           }
+          MenuItem m_menuBookRemove {
+            label {&Remove}
+            callback {Fl::lock();
+Aqsis::CqBookBrowser* tab = static_cast<Aqsis::CqBookBrowser*>(m_tabBooks->value());
+if(tab != NULL)
+{
+	deleteBook(tab->book());
+	m_tabBooks->remove(tab);
+	delete(tab);
+	m_tabBooks->redraw();
+	if(m_tabBooks->value() != 0)
+	{
+		tab = static_cast<Aqsis::CqBookBrowser*>(m_tabBooks->value());
+		setCurrentBook(tab->book());
+	}
+	Fl::awake();
+}
+Fl::unlock();} selected
+            private xywh {0 0 100 20}
+          }
         }
         Submenu {} {
           label {&Images} open
@@ -122,7 +142,7 @@ if(tab != NULL)
 	tab->redraw();
 	Fl::awake();
 }
-Fl::unlock();} selected
+Fl::unlock();}
             xywh {0 0 100 20}
           }
         }

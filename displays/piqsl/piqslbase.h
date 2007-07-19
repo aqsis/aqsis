@@ -49,6 +49,7 @@ public:
 	virtual boost::shared_ptr<CqBook>	addNewBook(std::string name);
 	virtual void	setCurrentBook(boost::shared_ptr<CqBook>& book);
 	boost::shared_ptr<CqBook>& currentBook();
+	virtual void deleteBook(boost::shared_ptr<CqBook>& book);
 	virtual TqUlong	addImageToCurrentBook(boost::shared_ptr<CqImage>& image);
 	virtual void setCurrentImage(std::vector<boost::shared_ptr<CqImage> >::size_type index)
 	{}

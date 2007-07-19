@@ -50,6 +50,19 @@ void CqPiqslBase::setCurrentBook(boost::shared_ptr<CqBook>& book)
 		m_currentBook = book;
 }
 
+void CqPiqslBase::deleteBook(boost::shared_ptr<CqBook>& book)
+{
+	std::vector<boost::shared_ptr<CqBook> >::iterator entry;
+	if((entry = std::find(m_books.begin(), m_books.end(), book)) != m_books.end())
+	{
+		m_books.erase(entry);
+		if(m_currentBook == book)
+		{
+			boost::shared_ptr<CqBook> t;
+			m_currentBook = t;
+		}
+	}
+}
 
 boost::shared_ptr<CqBook>& CqPiqslBase::currentBook()
 {
