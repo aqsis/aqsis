@@ -55,9 +55,10 @@ public:
 	virtual void updateImageList()
 	{}
 	virtual void saveConfiguration();
-	virtual void saveConfigurationAs(const std::string& name);
+	virtual void saveConfigurationAs() = 0;
 	virtual void loadConfiguration(const std::string& name);
 	virtual void loadImageToCurrentBook(const std::string& name, const std::string& filename);
+	virtual void exportBook(boost::shared_ptr<CqBook>& book, const std::string& name) const;
 
 	const std::string& currentConfigName() const
 	{
@@ -66,6 +67,10 @@ public:
 	std::string& currentConfigName()
 	{
 		return(m_currentConfigName);
+	}
+	void setCurrentConfigName(const std::string& name)
+	{
+		m_currentConfigName = name;
 	}
 
 	typedef std::vector<boost::shared_ptr<CqBook> >			TqBookList;

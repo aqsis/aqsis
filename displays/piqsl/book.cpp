@@ -54,5 +54,18 @@ boost::shared_ptr<CqImage> CqBook::image(std::vector<boost::shared_ptr<CqImage> 
 	}
 }
 
+void CqBook::setName( const CqString& name )
+{
+	m_name = name;
+	if(m_framebuffer)
+		m_framebuffer->setBookName(name);
+}
+
+void CqBook::removeImage(TqImageListIterator item)
+{
+	if(item != m_images.end())
+		m_images.erase(item);
+}
+
 END_NAMESPACE( Aqsis )
 

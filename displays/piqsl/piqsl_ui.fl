@@ -18,9 +18,9 @@ class CqPiqslMainWindow {open : {public Aqsis::CqPiqslBase}
         code0 {\#include <FL/Fl_Sys_Menu_Bar.H>}
         class Fl_Sys_Menu_Bar
       } {
-        Submenu {} {
+        Submenu m_menuFile {
           label {&File} open
-          xywh {0 0 100 20}
+          private xywh {0 0 100 20}
         } {
           MenuItem m_menuFileOpen {
             label {&Open Library}
@@ -37,8 +37,7 @@ loadConfiguration(name);}
           }
           MenuItem m_menuFileSaveAs {
             label {Save Library &As}
-            callback {char* filename = fl_file_chooser("Save Books As", "*.xml", currentConfigName().c_str());
-saveConfigurationAs(filename);}
+            callback {saveConfigurationAs();}
             private xywh {0 0 100 20} shortcut 0x50073 divider
             code0 {o->shortcut(FL_COMMAND+'S');}
           }
@@ -60,17 +59,34 @@ saveConfigurationAs(filename);}
           }
           MenuItem m_menuBookExport {
             label {&Export}
+            callback {Aqsis::CqBookBrowser* tab = static_cast<Aqsis::CqBookBrowser*>(m_tabBooks->value());
+if(tab != NULL)
+{
+	char* filename = fl_file_chooser("Export Book As", "*.xml", currentConfigName().c_str());
+	if(filename != NULL)
+		exportBook(tab->book(), filename);
+}}
             private xywh {5 5 100 20} shortcut 0x40065
             code0 {o->shortcut(FL_COMMAND+'e');}
           }
-          MenuItem m_menuBookImport {
-            label {&Import}
-            private xywh {5 5 100 20} shortcut 0x40069 deactivate divider
-            code0 {o->shortcut(FL_COMMAND+'i');}
-          }
-          MenuItem {} {
+          MenuItem m_menuBookRename {
             label {&Rename}
-            xywh {0 0 100 20} shortcut 0x40072 deactivate
+            callback {Fl::lock();
+Aqsis::CqBookBrowser* tab = static_cast<Aqsis::CqBookBrowser*>(m_tabBooks->value());
+if(tab)
+{
+    const char* result = fl_input("Rename book", tab->book()->name().c_str());
+    if(result != NULL)
+    {
+    	tab->book()->setName(result);
+    	tab->book()->framebuffer()->queueResize();
+    	tab->label(tab->book()->name().c_str());
+    	tab->redraw();
+    	Fl::awake();
+    }
+}
+Fl::unlock();}
+            private xywh {0 0 100 20} shortcut 0x40072
             code0 {o->shortcut(FL_COMMAND+'r');}
           }
         }
@@ -78,7 +94,7 @@ saveConfigurationAs(filename);}
           label {&Images} open
           xywh {0 0 100 20}
         } {
-          MenuItem {} {
+          MenuItem m_menuImagesAdd {
             label {&Add Image}
             callback {Fl::lock();
 char* filename = fl_file_chooser("Load Image", "TIFF Files (*.tif)", "");
@@ -88,9 +104,25 @@ if(filename)
 	loadImageToCurrentBook(name, filename);
 }
 Fl::unlock();}
-            xywh {0 0 100 20}
+            private xywh {0 0 100 20}
             code0 {\#include <FL/Fl_File_Chooser.H>}
             code1 {\#include "file.h"}
+          }
+          MenuItem m_menuImagesRemove {
+            label {&Remove}
+            callback {Fl::lock();
+Aqsis::CqBookBrowser* tab = static_cast<Aqsis::CqBookBrowser*>(m_tabBooks->value());
+if(tab != NULL)
+{
+	Aqsis::CqBook::TqImageList::size_type index = tab->currentSelected();
+	Aqsis::CqBook::TqImageListIterator item = tab->book()->imagesBegin();
+	item += (index-1);
+	tab->book()->removeImage(item);
+	tab->redraw();
+	Fl::awake();
+}
+Fl::unlock();} selected
+            xywh {0 0 100 20}
           }
         }
         Submenu {} {
@@ -125,7 +157,7 @@ Fl::unlock();}
       }
       Fl_Tabs m_tabBooks {
         callback {Aqsis::CqBookBrowser* browser = static_cast<Aqsis::CqBookBrowser*>(o->value());
-setCurrentBook(browser->book());} selected
+setCurrentBook(browser->book());}
         private xywh {0 29 540 281}
       } {}
     }
@@ -134,9 +166,7 @@ setCurrentBook(browser->book());} selected
   } {
     code {Fl::lock();
 boost::shared_ptr<Aqsis::CqBook> newBook(CqPiqslBase::addNewBook(name));
-char* _name = new char[name.length()+1];
-strcpy(_name, name.c_str());
-Aqsis::CqBookBrowser *o = new Aqsis::CqBookBrowser(0, 50, m_tabBooks->w(), m_tabBooks->h(), _name);
+Aqsis::CqBookBrowser *o = new Aqsis::CqBookBrowser(0, 50, m_tabBooks->w(), m_tabBooks->h(), newBook->name().c_str());
 o->setBook(newBook);
 m_columnWidths[0] = 200;
 m_columnWidths[1] = 0;
@@ -236,4 +266,13 @@ Fl::awake();
 Fl::unlock();} {}
   }
   decl {int m_columnWidths[2];} {}
+  Function {saveConfigurationAs()} {open return_type {virtual void}
+  } {
+    code {char* filename = fl_file_chooser("Save Books As", "*.xml", currentConfigName().c_str());
+if(filename != NULL)
+{
+	setCurrentConfigName(filename);
+	saveConfiguration();
+}} {}
+  }
 } 

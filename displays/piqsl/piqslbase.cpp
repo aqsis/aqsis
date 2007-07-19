@@ -75,18 +75,11 @@ TqUlong CqPiqslBase::addImageToCurrentBook(boost::shared_ptr<CqImage>& image)
 
 void CqPiqslBase::saveConfiguration()
 {
-	saveConfigurationAs(m_currentConfigName);
-}
-
-void CqPiqslBase::saveConfigurationAs(const std::string& name)
-{
 	Fl::lock();
-#if	1
-	if(!name.empty())
+	if(!m_currentConfigName.empty())
 	{
-		std::string _base = CqFile::basePath(name);
-		m_currentConfigName = name;
-		TiXmlDocument doc(name);
+		std::string _base = CqFile::basePath(m_currentConfigName);
+		TiXmlDocument doc(m_currentConfigName);
 		TiXmlDeclaration* decl = new TiXmlDeclaration("1.0","","yes");
 		TiXmlElement* booksXML = new TiXmlElement("Books");
 
@@ -110,42 +103,46 @@ void CqPiqslBase::saveConfigurationAs(const std::string& name)
 		}
 		doc.LinkEndChild(decl);
 		doc.LinkEndChild(booksXML);
-		doc.SaveFile(name);
+		doc.SaveFile(m_currentConfigName);
 	}
-#else
-	// A possible alternative saving mechanism, that embeds internal images in the XML file.
-	// Not properly tested, and as yet not supported.
-	if(name != NULL)
+	else
+		saveConfigurationAs();
+	Fl::unlock();
+}
+
+
+void CqPiqslBase::exportBook(boost::shared_ptr<CqBook>& book, const std::string& name) const
+{
+	Fl::lock();
+	if(!name.empty() && book)
 	{
-		m_currentConfigName = name;
+		std::string _base = CqFile::basePath(name);
 		TiXmlDocument doc(name);
 		TiXmlDeclaration* decl = new TiXmlDeclaration("1.0","","yes");
 		TiXmlElement* booksXML = new TiXmlElement("Books");
 
-		std::map<std::string, boost::shared_ptr<CqBook> >::iterator book;
-		for(book = m_books.begin(); book != m_books.end(); ++book) 
-		{
-			TiXmlElement* bookXML = new TiXmlElement("Book");
-			bookXML->SetAttribute("name", book->first);
-			booksXML->LinkEndChild(bookXML);
-			TiXmlElement* imagesXML = new TiXmlElement("Images");
+		TiXmlElement* bookXML = new TiXmlElement("Book");
+		bookXML->SetAttribute("name", book->name());
+		booksXML->LinkEndChild(bookXML);
+		TiXmlElement* imagesXML = new TiXmlElement("Images");
 
-			std::map<TqUlong, boost::shared_ptr<CqImage> >::iterator image;
-			for(image = book->second->images().begin(); image != book->second->images().end(); ++image)
-			{
-				// Serialise the image first.
-				TiXmlElement* imageXML = image->second->serialiseToXML();
-				imagesXML->LinkEndChild(imageXML);
-			}
-			bookXML->LinkEndChild(imagesXML);
+		CqBook::TqImageListIterator image;
+		for(image = book->imagesBegin(); image != book->imagesEnd(); ++image)
+		{
+			// Serialise the image first.
+			(*image)->serialise(_base);
+			TiXmlElement* imageXML = (*image)->serialiseToXML();
+			imagesXML->LinkEndChild(imageXML);
 		}
+		bookXML->LinkEndChild(imagesXML);
+		
 		doc.LinkEndChild(decl);
 		doc.LinkEndChild(booksXML);
 		doc.SaveFile(name);
 	}
-#endif
 	Fl::unlock();
 }
+
 
 void CqPiqslBase::loadConfiguration(const std::string& name)
 {

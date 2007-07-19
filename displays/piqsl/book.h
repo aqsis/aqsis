@@ -55,10 +55,7 @@ public:
     {
         return ( m_name );
     }
-    void	setName( const CqString& name )
-    {
-        m_name = name;
-    }
+    void	setName( const CqString& name );
 
 	boost::shared_ptr<CqFramebuffer> framebuffer()
 	{
@@ -82,6 +79,8 @@ public:
 	{
 		return(m_images.size());
 	}
+
+	void removeImage(TqImageListIterator item);
 
 private:
     CqString	m_name;			///< Book name.

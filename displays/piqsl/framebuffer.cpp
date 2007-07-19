@@ -140,10 +140,17 @@ void CqFramebuffer::queueResize()
 void CqFramebuffer::resize()
 {
 	Fl::lock();
-	m_uiImageWidget->size(m_associatedImage->frameWidth(), m_associatedImage->frameHeight());
-	m_theWindow->size(m_associatedImage->frameWidth(), m_associatedImage->frameHeight());
 	std::stringstream title;
-	title << m_bookName << ":" << m_associatedImage->name() << std::ends;
+	title << m_bookName;
+	if(m_associatedImage)
+	{
+		if(m_associatedImage->frameWidth() > 0 && m_associatedImage->frameHeight() > 0)
+		{
+			m_uiImageWidget->size(m_associatedImage->frameWidth(), m_associatedImage->frameHeight());
+			m_theWindow->size(m_associatedImage->frameWidth(), m_associatedImage->frameHeight());
+		}
+		title << ":" << m_associatedImage->name();
+	}
 	m_title = title.str();
 	m_theWindow->label(m_title.c_str());
 	m_doResize = false;

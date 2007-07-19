@@ -87,6 +87,14 @@ public:
 	{
 		return( m_associatedImage );
 	}
+	const std::string& bookName() const
+	{
+		return(m_bookName);
+	}
+	void setBookName(const std::string& name)
+	{
+		m_bookName = name;
+	}
 
 	void queueResize();
 	void resize();
