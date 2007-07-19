@@ -64,7 +64,13 @@ void CqBook::setName( const CqString& name )
 void CqBook::removeImage(TqImageListIterator item)
 {
 	if(item != m_images.end())
+	{
+		if(framebuffer()->image() == (*item))
+		{
+			framebuffer()->disconnect();
+		}
 		m_images.erase(item);
+	}
 }
 
 END_NAMESPACE( Aqsis )

@@ -118,6 +118,7 @@ if(tab != NULL)
 	Aqsis::CqBook::TqImageListIterator item = tab->book()->imagesBegin();
 	item += (index-1);
 	tab->book()->removeImage(item);
+	tab->setCurrentSelected(0);
 	tab->redraw();
 	Fl::awake();
 }

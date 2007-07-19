@@ -38,6 +38,12 @@ void Fl_FrameBuffer_Widget::draw(void)
 			m_image->imageWidth(),m_image->imageHeight(),
 			m_image->numChannels(),
 			m_image->imageWidth()*m_image->numChannels()); // draw image
+	else
+	{
+		fl_draw_box(FL_FLAT_BOX, x(), y(), w(), h(), FL_BACKGROUND_COLOR);
+		fl_color(FL_FOREGROUND_COLOR);
+		fl_draw("No Image", x(), y(), w(), h(), FL_ALIGN_CENTER, 0, 0);
+	}
 	Fl::unlock();
 }
 
@@ -68,7 +74,6 @@ CqFramebuffer::CqFramebuffer(TqUlong width, TqUlong height, TqInt depth, const s
 	boost::shared_ptr<CqImage> t;
 	m_uiImageWidget = new Fl_FrameBuffer_Widget(0,0, width, height, t);
 	m_theWindow->resizable(m_uiImageWidget);
-//	m_theWindow->label(thisClient.m_image.m_filename.c_str());
 	Fl::visual(FL_RGB);
 	m_popupMenu = new Fl_Menu_Button(0,0,width, height, "");
 	m_popupMenu->type(Fl_Menu_Button::POPUP3);
@@ -104,11 +109,7 @@ void CqFramebuffer::connect(boost::shared_ptr<CqImage>& image)
 	m_associatedImage = image;	
 	Fl::lock();
 	m_uiImageWidget->setImage(image);
-	m_theWindow->size(image->frameWidth(), image->frameHeight());
-	std::stringstream title;
-	title << m_bookName << ":" << image->name() << std::ends;
-	m_title = title.str();
-	m_theWindow->label(m_title.c_str());
+	queueResize();
 	boost::function<void(int,int,int,int)> f;
 	f = boost::bind(&CqFramebuffer::update, this, _1, _2, _3, _4);
 	image->setUpdateCallback(f);
@@ -127,6 +128,7 @@ void CqFramebuffer::disconnect()
 	boost::shared_ptr<CqImage> t;
 	m_associatedImage = t;
 	m_uiImageWidget->setImage(t);
+	queueResize();
 	Fl::unlock();
 }
 
@@ -142,15 +144,19 @@ void CqFramebuffer::resize()
 	Fl::lock();
 	std::stringstream title;
 	title << m_bookName;
+	int fw = 100;
+	int fh = 100;
 	if(m_associatedImage)
 	{
 		if(m_associatedImage->frameWidth() > 0 && m_associatedImage->frameHeight() > 0)
 		{
-			m_uiImageWidget->size(m_associatedImage->frameWidth(), m_associatedImage->frameHeight());
-			m_theWindow->size(m_associatedImage->frameWidth(), m_associatedImage->frameHeight());
+			fw = m_associatedImage->frameWidth();
+			fh = m_associatedImage->frameHeight();
 		}
 		title << ":" << m_associatedImage->name();
 	}
+	m_theWindow->size(fw, fh);
+
 	m_title = title.str();
 	m_theWindow->label(m_title.c_str());
 	m_doResize = false;
