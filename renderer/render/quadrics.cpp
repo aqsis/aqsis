@@ -28,6 +28,7 @@
 
 #include	"quadrics.h"
 #include	"micropolygon.h"
+#include	"aqsismath.h"
 
 #include	"ri.h"
 
@@ -349,8 +350,8 @@ TqUlong CqQuadric::EstimateGridSize()
 	const TqInt *binary = pAttributes() ->GetIntegerAttribute( "dice", "binary" );
 	if ( binary && *binary)
 	{
-		m_uDiceSize = CEIL_POW2( m_uDiceSize );
-		m_vDiceSize = CEIL_POW2( m_vDiceSize );
+		m_uDiceSize = ceilPow2( m_uDiceSize );
+		m_vDiceSize = ceilPow2( m_vDiceSize );
 	}
 
 	return  (TqUlong) m_uDiceSize * m_vDiceSize;

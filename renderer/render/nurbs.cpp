@@ -33,6 +33,7 @@
 #include	"vector3d.h"
 #include	"bilinear.h"
 #include	"attributes.h"
+#include	"aqsismath.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -1702,8 +1703,8 @@ bool	CqSurfaceNURBS::Diceable()
 	const TqInt *binary = pAttributes() ->GetIntegerAttribute( "dice", "binary" );
 	if ( binary && *binary)
 	{
-		m_uDiceSize = CEIL_POW2( m_uDiceSize );
-		m_vDiceSize = CEIL_POW2( m_vDiceSize );
+		m_uDiceSize = ceilPow2( m_uDiceSize );
+		m_vDiceSize = ceilPow2( m_vDiceSize );
 	}
 
 	if ( MaxuLen < FLT_EPSILON || MaxvLen < FLT_EPSILON )

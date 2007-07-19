@@ -562,12 +562,12 @@ void	CqShaderExecEnv::SO_pmin( IqShaderData* a, IqShaderData* b, IqShaderData* R
 			(a)->GetPoint(_aq_a,__iGrid);
 			CqVector3D _aq_b;
 			(b)->GetPoint(_aq_b,__iGrid);
-			CqVector3D res = VMIN( _aq_a, _aq_b );
+			CqVector3D res = min( _aq_a, _aq_b );
 			while ( cParams-- > 0 )
 			{
 				CqVector3D pn;
 				apParams[ cParams ] ->GetPoint( pn, __iGrid );
-				res = VMIN( res, pn );
+				res = min( res, pn );
 			}
 			(Result)->SetPoint(res,__iGrid);
 		}
@@ -594,12 +594,12 @@ void	CqShaderExecEnv::SO_pmax( IqShaderData* a, IqShaderData* b, IqShaderData* R
 			(a)->GetPoint(_aq_a,__iGrid);
 			CqVector3D _aq_b;
 			(b)->GetPoint(_aq_b,__iGrid);
-			CqVector3D res = VMAX( _aq_a, _aq_b );
+			CqVector3D res = max( _aq_a, _aq_b );
 			while ( cParams-- > 0 )
 			{
 				CqVector3D pn;
 				apParams[ cParams ] ->GetPoint( pn, __iGrid );
-				res = VMAX( res, pn );
+				res = max( res, pn );
 			}
 			(Result)->SetPoint(res,__iGrid);
 		}
@@ -626,12 +626,12 @@ void	CqShaderExecEnv::SO_cmin( IqShaderData* a, IqShaderData* b, IqShaderData* R
 			(a)->GetColor(_aq_a,__iGrid);
 			CqColor _aq_b;
 			(b)->GetColor(_aq_b,__iGrid);
-			CqColor res = CMIN( _aq_a, _aq_b );
+			CqColor res = min( _aq_a, _aq_b );
 			while ( cParams-- > 0 )
 			{
 				CqColor cn;
 				apParams[ cParams ] ->GetColor( cn, __iGrid );
-				res = CMIN( res, cn );
+				res = min( res, cn );
 			}
 			(Result)->SetColor(res,__iGrid);
 		}
@@ -658,12 +658,12 @@ void	CqShaderExecEnv::SO_cmax( IqShaderData* a, IqShaderData* b, IqShaderData* R
 			(a)->GetColor(_aq_a,__iGrid);
 			CqColor _aq_b;
 			(b)->GetColor(_aq_b,__iGrid);
-			CqColor res = CMAX( _aq_a, _aq_b );
+			CqColor res = max( _aq_a, _aq_b );
 			while ( cParams-- > 0 )
 			{
 				CqColor cn;
 				apParams[ cParams ] ->GetColor( cn, __iGrid );
-				res = CMAX( res, cn );
+				res = max( res, cn );
 			}
 			(Result)->SetColor(res,__iGrid);
 		}
@@ -721,7 +721,7 @@ void	CqShaderExecEnv::SO_pclamp( IqShaderData* a, IqShaderData* _min, IqShaderDa
 			(_min)->GetPoint(_aq__min,__iGrid);
 			CqVector3D _aq__max;
 			(_max)->GetPoint(_aq__max,__iGrid);
-			(Result)->SetPoint(VCLAMP( _aq_a, _aq__min, _aq__max ),__iGrid);
+			(Result)->SetPoint(clamp( _aq_a, _aq__min, _aq__max ),__iGrid);
 		}
 	}
 	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
@@ -749,7 +749,7 @@ void	CqShaderExecEnv::SO_cclamp( IqShaderData* a, IqShaderData* _min, IqShaderDa
 			(_min)->GetColor(_aq__min,__iGrid);
 			CqColor _aq__max;
 			(_max)->GetColor(_aq__max,__iGrid);
-			(Result)->SetColor(CCLAMP( _aq_a, _aq__min, _aq__max ),__iGrid);
+			(Result)->SetColor(clamp( _aq_a, _aq__min, _aq__max ),__iGrid);
 		}
 	}
 	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
