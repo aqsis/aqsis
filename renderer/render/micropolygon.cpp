@@ -1301,7 +1301,7 @@ bool CqMicroPolygon::fContains( CqHitTestCache& hitTestCache, const CqVector2D& 
  * This must be called prior to calling fContains() on a mpg.
  */
 
-inline void CqMicroPolygon::CacheHitTestValues(CqHitTestCache* cache, CqVector3D* points)
+inline void CqMicroPolygon::CacheHitTestValues(CqHitTestCache* cache, CqVector3D* points) const
 {
 	int j = 3;
 	for(int i=0; i<4; ++i)
@@ -1334,7 +1334,7 @@ inline void CqMicroPolygon::CacheHitTestValues(CqHitTestCache* cache, CqVector3D
 	cache->m_LastFailedEdge = 0;
 }
 
-void CqMicroPolygon::CacheHitTestValues(CqHitTestCache* cache)
+void CqMicroPolygon::CacheHitTestValues(CqHitTestCache* cache) const
 {
 	CqVector3D points[4] = { PointB(), PointC(), PointD(), PointA() };
 	CacheHitTestValues(cache, points);
@@ -1368,7 +1368,7 @@ void CqMicroPolygon::CacheHitTestValuesDof(CqHitTestCache* cache, const CqVector
 }
 
 
-CqVector2D CqMicroPolygon::ReverseBilinear( const CqVector2D& v )
+CqVector2D CqMicroPolygon::ReverseBilinear( const CqVector2D& v ) const
 {
 	CqVector2D kA, kB, kC, kD;
 	CqVector2D kResult;
@@ -1442,7 +1442,7 @@ CqVector2D CqMicroPolygon::ReverseBilinear( const CqVector2D& v )
  * \return Boolean indicating smaple hit.
  */
 
-bool CqMicroPolygon::Sample( CqHitTestCache& hitTestCache, const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof )
+bool CqMicroPolygon::Sample( CqHitTestCache& hitTestCache, const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof ) const
 {
 	const CqVector2D& vecSample = sample.m_Position;
 
@@ -1721,7 +1721,7 @@ void CqMicroPolygonMotion::BuildBoundList( TqUint timeRanges )
  * \return Boolean indicating smaple hit.
  */
 
-bool CqMicroPolygonMotion::Sample( CqHitTestCache& hitTestCache, const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof )
+bool CqMicroPolygonMotion::Sample( CqHitTestCache& hitTestCache, const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof ) const
 {
 	const CqVector2D& vecSample = sample.m_Position;
 	CqVector3D points[4];

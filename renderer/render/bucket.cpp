@@ -1003,7 +1003,7 @@ void CqBucket::RenderWaitingMPs( long xmin, long xmax, long ymin, long ymax, TqF
 //----------------------------------------------------------------------
 /** Render a particular micropolygon.
  
- * \param pMPG Pointer to the micropolygon to process.
+ * \param pMP Pointer to the micropolygon to process.
  * \param xmin Integer minimum extend of the image part being rendered, takes into account buckets and clipping.
  * \param xmax Integer maximum extend of the image part being rendered, takes into account buckets and clipping.
  * \param ymin Integer minimum extend of the image part being rendered, takes into account buckets and clipping.
@@ -1012,9 +1012,9 @@ void CqBucket::RenderWaitingMPs( long xmin, long xmax, long ymin, long ymax, TqF
    \see CqBucket, CqImagePixel
  */
 
-void CqBucket::RenderMicroPoly( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax, TqFloat clippingFar, TqFloat clippingNear )
+void CqBucket::RenderMicroPoly( CqMicroPolygon* pMP, long xmin, long xmax, long ymin, long ymax, TqFloat clippingFar, TqFloat clippingNear )
 {
-	const CqBound& Bound = pMPG->GetTotalBound();
+	const CqBound& Bound = pMP->GetTotalBound();
 
 	// if bounding box is outside our viewing range, then cull it.
 	if ( Bound.vecMax().x() < xmin || Bound.vecMax().y() < ymin ||
@@ -1029,7 +1029,7 @@ void CqBucket::RenderMicroPoly( CqMicroPolygon* pMPG, long xmin, long xmax, long
 	// Must check if colour is needed, as if not, the variable will have been deleted from the grid.
 	if ( QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Ci" ) )
 	{
-		m_bucketData->m_CurrentMpgSampleInfo.m_Colour = pMPG->colColor()[0];
+		m_bucketData->m_CurrentMpgSampleInfo.m_Colour = pMP->colColor()[0];
 	}
 	else
 	{
@@ -1039,7 +1039,7 @@ void CqBucket::RenderMicroPoly( CqMicroPolygon* pMPG, long xmin, long xmax, long
 	// Must check if opacity is needed, as if not, the variable will have been deleted from the grid.
 	if ( QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Oi" ) )
 	{
-		m_bucketData->m_CurrentMpgSampleInfo.m_Opacity = pMPG->colOpacity()[0];
+		m_bucketData->m_CurrentMpgSampleInfo.m_Opacity = pMP->colOpacity()[0];
 		m_bucketData->m_CurrentMpgSampleInfo.m_Occludes = m_bucketData->m_CurrentMpgSampleInfo.m_Opacity >= gColWhite;
 	}
 	else
@@ -1052,20 +1052,20 @@ void CqBucket::RenderMicroPoly( CqMicroPolygon* pMPG, long xmin, long xmax, long
 	// transparent, matte or csg samples, or if we need more than the first depth
 	// value have to use the (slower) list.
 	m_bucketData->m_CurrentMpgSampleInfo.m_IsOpaque = m_bucketData->m_CurrentMpgSampleInfo.m_Occludes &&
-	                                    !pMPG->pGrid()->pCSGNode() &&
+	                                    !pMP->pGrid()->pCSGNode() &&
 	                                    !( QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "DisplayMode" ) [ 0 ] & ModeZ ) &&
-	                                    !pMPG->pGrid()->GetCachedGridInfo().m_IsMatte;
+	                                    !pMP->pGrid()->GetCachedGridInfo().m_IsMatte;
 
 	bool UsingDof = QGetRenderContext() ->UsingDepthOfField();
-	bool IsMoving = pMPG->IsMoving();
+	bool IsMoving = pMP->IsMoving();
 
 	if(IsMoving || UsingDof)
 	{
-		RenderMPG_MBOrDof( pMPG, xmin, xmax, ymin, ymax, clippingFar, clippingNear, IsMoving, UsingDof );
+		RenderMP_MBOrDof( pMP, xmin, xmax, ymin, ymax, clippingFar, clippingNear, IsMoving, UsingDof );
 	}
 	else
 	{
-		RenderMPG_Static( pMPG );
+		RenderMP_Static( pMP );
 	}
 }
 
@@ -1074,31 +1074,31 @@ void CqBucket::RenderMicroPoly( CqMicroPolygon* pMPG, long xmin, long xmax, long
 /** This function assumes that either dof or mb or both are being
  * used.
  */
-void CqBucket::RenderMPG_MBOrDof( CqMicroPolygon* pMPG,
-                                       long xmin, long xmax, long ymin, long ymax,
-				       TqFloat clippingFar, TqFloat clippingNear,
-                                       bool IsMoving, bool UsingDof )
+void CqBucket::RenderMP_MBOrDof( CqMicroPolygon* pMP,
+				 long xmin, long xmax, long ymin, long ymax,
+				 TqFloat clippingFar, TqFloat clippingNear,
+				 bool IsMoving, bool UsingDof )
 {
 	CqHitTestCache hitTestCache;
-	pMPG->CacheHitTestValues(&hitTestCache);
+	pMP->CacheHitTestValues(&hitTestCache);
 
-	const SqGridInfo& currentGridInfo = pMPG->pGrid()->GetCachedGridInfo();
+	const SqGridInfo& currentGridInfo = pMP->pGrid()->GetCachedGridInfo();
 	TqFloat closetime = currentGridInfo.m_ShutterCloseTime;
+	TqFloat time0 = currentGridInfo.m_ShutterOpenTime;
+	TqFloat time1 = currentGridInfo.m_ShutterCloseTime;
 
-	TqInt bound_maxMB = pMPG->cSubBounds();
+	TqInt bound_maxMB = pMP->cSubBounds();
 	TqInt bound_maxMB_1 = bound_maxMB - 1;
 	for ( TqInt bound_numMB = 0; bound_numMB < bound_maxMB; bound_numMB++ )
 	{
-		TqFloat time0 = currentGridInfo.m_ShutterOpenTime;
-		TqFloat time1 = currentGridInfo.m_ShutterCloseTime;
-		const CqBound& Bound = pMPG->SubBound( bound_numMB, time0 );
+		const CqBound& Bound = pMP->SubBound( bound_numMB, time0 );
 
 		// get the index of the first and last samples that can fall inside
 		// the time range of this bound
 		if(IsMoving)
 		{
 			if ( bound_numMB != bound_maxMB_1 )
-				pMPG->SubBound( bound_numMB + 1, time1 );
+				pMP->SubBound( bound_numMB + 1, time1 );
 			else
 				time1 = closetime;
 		}
@@ -1176,11 +1176,35 @@ void CqBucket::RenderMPG_MBOrDof( CqMicroPolygon* pMPG,
 			if(UsingDof)
 			{
 				CqBound DofBound(bminx, bminy, bminz, bmaxx, bmaxy, bmaxz);
-				m_bucketData->m_OcclusionBox.KDTree()->SampleMPG(m_bucketData->m_aieImage, m_bucketData->m_SamplePoints, pMPG, DofBound, IsMoving, time0, time1, true, bound_numDof, m_bucketData->m_CurrentMpgSampleInfo, currentGridInfo.m_LodBounds[0] >= 0.0f, currentGridInfo, hitTestCache);
+				m_bucketData->m_OcclusionBox.KDTree()->SampleMP(m_bucketData->m_aieImage,
+										m_bucketData->m_SamplePoints,
+										pMP,
+										DofBound,
+										IsMoving,
+										time0,
+										time1,
+										true,
+										bound_numDof,
+										m_bucketData->m_CurrentMpgSampleInfo,
+										currentGridInfo.m_LodBounds[0] >= 0.0f,
+										currentGridInfo,
+										hitTestCache);
 			}
 			else
 			{
-				m_bucketData->m_OcclusionBox.KDTree()->SampleMPG(m_bucketData->m_aieImage, m_bucketData->m_SamplePoints, pMPG, Bound, IsMoving, time0, time1, false, 0, m_bucketData->m_CurrentMpgSampleInfo, currentGridInfo.m_LodBounds[0] >= 0.0f, currentGridInfo, hitTestCache);
+				m_bucketData->m_OcclusionBox.KDTree()->SampleMP(m_bucketData->m_aieImage,
+										m_bucketData->m_SamplePoints,
+										pMP,
+										Bound,
+										IsMoving,
+										time0,
+										time1,
+										false,
+										0,
+										m_bucketData->m_CurrentMpgSampleInfo,
+										currentGridInfo.m_LodBounds[0] >= 0.0f,
+										currentGridInfo,
+										hitTestCache);
 			}
 		}
 	}
@@ -1190,15 +1214,27 @@ void CqBucket::RenderMPG_MBOrDof( CqMicroPolygon* pMPG,
 //---------------------------------------------------------------------
 /** This function assumes that neither dof or mb are being used. It is
  * much simpler than the general case dealt with above. */
-void CqBucket::RenderMPG_Static( CqMicroPolygon* pMPG )
+void CqBucket::RenderMP_Static( CqMicroPolygon* pMP )
 {
 	CqHitTestCache hitTestCache;
-	pMPG->CacheHitTestValues(&hitTestCache);
+	pMP->CacheHitTestValues(&hitTestCache);
 
-	const SqGridInfo& currentGridInfo = pMPG->pGrid()->GetCachedGridInfo();
-	const CqBound& Bound = pMPG->GetTotalBound();
+	const SqGridInfo& currentGridInfo = pMP->pGrid()->GetCachedGridInfo();
+	const CqBound& Bound = pMP->GetTotalBound();
 
-	m_bucketData->m_OcclusionBox.KDTree()->SampleMPG(m_bucketData->m_aieImage, m_bucketData->m_SamplePoints, pMPG, Bound, false, 0, 0, false, 0, m_bucketData->m_CurrentMpgSampleInfo, currentGridInfo.m_LodBounds[0] >= 0.0f, currentGridInfo, hitTestCache);
+	m_bucketData->m_OcclusionBox.KDTree()->SampleMP(m_bucketData->m_aieImage,
+							m_bucketData->m_SamplePoints,
+							pMP,
+							Bound,
+							false,
+							0,
+							0,
+							false,
+							0,
+							m_bucketData->m_CurrentMpgSampleInfo,
+							currentGridInfo.m_LodBounds[0] >= 0.0f,
+							currentGridInfo,
+							hitTestCache);
 }
 
 

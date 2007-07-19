@@ -73,19 +73,19 @@ class CqOcclusionTree// : public boost::enable_shared_from_this<CqOcclusionTree>
 			m_SampleIndices.push_back(sample);
 		}
 		bool CanCull( const CqBound* bound );
-		void SampleMPG( std::vector<CqImagePixel>& aieImage,
-				std::vector<SqSampleData>& samplePoints,
-				CqMicroPolygon* pMPG,
-				const CqBound& bound,
-				bool usingMB,
-				TqFloat time0,
-				TqFloat time1,
-				bool usingDof,
-				TqInt dofboundindex,
-				const SqMpgSampleInfo& MpgSampleInfo,
-				bool usingLOD,
-				const SqGridInfo& gridInfo,
-				CqHitTestCache& hitTestCache );
+		void SampleMP( std::vector<CqImagePixel>& aieImage,
+			       std::vector<SqSampleData>& samplePoints,
+			       CqMicroPolygon* pMP,
+			       const CqBound& bound,
+			       bool usingMB,
+			       TqFloat time0,
+			       TqFloat time1,
+			       bool usingDof,
+			       TqInt dofboundindex,
+			       const SqMpgSampleInfo& MpgSampleInfo,
+			       bool usingLOD,
+			       const SqGridInfo& gridInfo,
+			       CqHitTestCache& hitTestCache );
 
 		void ConstructTree(const CqBucket* bucket);
 		void InitialiseBounds(const CqBucket* bucket);

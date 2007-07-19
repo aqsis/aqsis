@@ -826,16 +826,6 @@ void CqMicroPolygonMotionPoints::CalculateTotalBound()
 }
 
 //---------------------------------------------------------------------
-/** Calculate the 2D boundary of this micropolygon,
- * \param fForce Boolean flag to force the recalculation of the cached bound.
- */
-
-CqBound& CqMicroPolygonMotionPoints::GetTotalBound( )
-{
-	return ( m_Bound );
-}
-
-//---------------------------------------------------------------------
 /** Calculate a list of 2D bounds for this micropolygon,
  */
 void CqMicroPolygonMotionPoints::BuildBoundList( TqUint timeRanges )

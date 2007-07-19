@@ -571,10 +571,6 @@ class CqMicroPolygon : public CqRefCount
 		/** Get the bound of the micropoly.
 		 * \return CqBound representing the conservative bound.
 		 */
-		virtual	CqBound& GetTotalBound()
-		{
-			return m_Bound;
-		}
 		virtual	const CqBound& GetTotalBound() const
 		{
 			return m_Bound;
@@ -638,12 +634,12 @@ class CqMicroPolygon : public CqRefCount
 		 * \param D storage to put the depth at the sample point if success.
 		 * \return Boolean success.
 		 */
-		virtual	bool	Sample( CqHitTestCache& hitTestCache, const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof = false );
+		virtual	bool	Sample( CqHitTestCache& hitTestCache, const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof = false ) const;
 
 		virtual bool	fContains( CqHitTestCache& hitTestCache, const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const;
-		virtual void	CacheHitTestValues(CqHitTestCache* cache);
+		virtual void	CacheHitTestValues(CqHitTestCache* cache) const;
 		void	Initialise();
-		CqVector2D ReverseBilinear( const CqVector2D& v );
+		CqVector2D ReverseBilinear( const CqVector2D& v ) const;
 
 		virtual const CqVector3D& PointA() const
 		{
@@ -698,7 +694,7 @@ class CqMicroPolygon : public CqRefCount
 
 		TqShort	m_Flags;		///< Bitvector of general flags, using EqMicroPolyFlags as bitmasks.
 
-		virtual void	CacheHitTestValues(CqHitTestCache* cache, CqVector3D* points);
+		virtual void	CacheHitTestValues(CqHitTestCache* cache, CqVector3D* points) const;
 		virtual void	CacheHitTestValuesDof(CqHitTestCache* cache, const CqVector2D& DofOffset, CqVector2D* coc);
 
 	private:
@@ -750,7 +746,7 @@ class CqMovingMicroPolygonKey
 	public:
 		const CqBound&	GetTotalBound();
 		void	Initialise( const CqVector3D& vA, const CqVector3D& vB, const CqVector3D& vC, const CqVector3D& vD );
-		CqVector2D ReverseBilinear( const CqVector2D& v );
+		CqVector2D ReverseBilinear( const CqVector2D& v ) const;
 
 		const bool IsDegenerate() const
 		{
@@ -812,10 +808,6 @@ class CqMicroPolygonMotion : public CqMicroPolygon
 
 		// Overrides from CqMicroPolygon
 		virtual void CalculateTotalBound();
-		virtual	CqBound&	GetTotalBound()
-		{
-			return m_Bound;
-		}
 		virtual const CqBound&	GetTotalBound() const
 		{
 			return ( m_Bound );
@@ -836,7 +828,7 @@ class CqMicroPolygonMotion : public CqMicroPolygon
 		}
 		virtual void	BuildBoundList( TqUint timeRanges );
 
-		virtual	bool	Sample( CqHitTestCache& hitTestCache, const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof = false );
+		virtual	bool	Sample( CqHitTestCache& hitTestCache, const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof = false ) const;
 
 		virtual void	MarkTrimmed()
 		{

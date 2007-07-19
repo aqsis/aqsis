@@ -361,7 +361,7 @@ class CqRenderer : public IqRenderer
 		 * \param depth The depth in camera space
 		 * \return A 2d vector with the radius of the coc in raster space along x and y.
 		 */
-		const CqVector2D GetCircleOfConfusion( TqFloat depth )
+		const CqVector2D GetCircleOfConfusion( TqFloat depth ) const
 		{
 			assert(m_UsingDepthOfField);
 			TqFloat c = m_DofMultiplier * fabs(1.0f / depth - m_OneOverFocalDistance);

@@ -506,7 +506,6 @@ class CqMicroPolygonMotionPoints : public CqMicroPolygon
 		// Overrides from CqMicroPolygon
 		virtual bool	fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const;
 		virtual void CalculateTotalBound();
-		virtual	CqBound&		GetTotalBound( /*bool fForce = false */);
 		virtual const CqBound&	GetTotalBound() const
 		{
 			return ( m_Bound );
