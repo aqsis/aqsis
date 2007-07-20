@@ -42,7 +42,8 @@ struct SqDDMessageData;
 
 //---------------------------------------------------------------------
 /** \class CqDDClient
- * Class encapsulating the display driver server thread.
+ * Class implementing a specific image type that gets it's data from the 
+ * piqsl display and aqsis.
  */
 
 class CqDisplayServerImage : public CqImage
@@ -59,49 +60,84 @@ public:
     virtual ~CqDisplayServerImage()
 	{}
 
+	/** Get a reference to the socket that is used to communicate with the piqsl display device.
+ 	 * \return				A reference to the socket.
+ 	 */
     CqSocket& socket()
     {
         return ( m_socket );
     }
+	/** Get a const reference to the socket that is used to communicate with the piqsl display device.
+ 	 * \return				A reference to the socket.
+ 	 */
     const CqSocket& socket() const
     {
         return ( m_socket );
     }
 
+	/** Close the connection to the piqsl display server.
+	 */
 	void close();
 
+	/** Get the defined zero value used during quantisation.
+ 	 * \return			The zero value that will be used during quantisation.
+ 	 */
 	TqFloat quantizeZero() const
 	{
 		return(m_quantize[0]);
 	}
+	/** Set the zero value to be used during quantisation.
+ 	 * \param zero		The zero value to use during quantisation.
+ 	 */
 	void setQuantizeZero(TqFloat zero)
 	{
 		m_quantize[0] = zero;
 	}
+	/** Get the defined one value used during quantisation.
+ 	 * \return			The one value that will be used during quantisation.
+ 	 */
 	TqFloat quantizeOne() const
 	{
 		return(m_quantize[1]);
 	}
+	/** Set the one value to be used during quantisation.
+ 	 * \param one		The one value to use during quantisation.
+ 	 */
 	void setQuantizeOne(TqFloat one)
 	{
 		m_quantize[1] = one;
 	}
+	/** Get the defined min value used during quantisation.
+ 	 * \return			The min value that will be used during quantisation.
+ 	 */
 	TqFloat quantizeMin() const
 	{
 		return(m_quantize[2]);
 	}
+	/** Set the min value to be used during quantisation.
+ 	 * \param min		The min value to use during quantisation.
+ 	 */
 	void setQuantizeMin(TqFloat min)
 	{
 		m_quantize[2] = min;
 	}
+	/** Get the defined max value used during quantisation.
+ 	 * \return			The max value that will be used during quantisation.
+ 	 */
 	TqFloat quantizeMax() const
 	{
 		return(m_quantize[3]);
 	}
+	/** Set the max value to be used during quantisation.
+ 	 * \param max		The max value to use during quantisation.
+ 	 */
 	void setQuantizeMax(TqFloat max)
 	{
 		m_quantize[3] = max;
 	}
+	/** Set all quantisation values in one go.
+ 	 * \param quant		A 4 element array containin the zero, one, min and max values for quantisation.
+ 	 */
 	void setQuantize(const TqFloat (&quant)[4])
 	{
 		m_quantize[0] = quant[0];
@@ -110,17 +146,37 @@ public:
 		m_quantize[3] = quant[3];
 	}
 
+	/** Accept a bucket of data from the piqsl display server.
+ 	 * The data will have been delived to piqsl as an XML packet, this function expects the data to
+ 	 * have been parsed and converted to plain binary data in machine format.
+ 	 * \param xmin		The minimum x value in image coordinates of the bucket.
+ 	 * \param xmaxplus1	One past the maximum x value in image coordinates of the bucket.
+ 	 * \param ymin		The minimum y value in image coordinates of the bucket.
+ 	 * \param ymaxplus1	One past the maximum y value in image coordinates of the bucket.
+ 	 */
     void acceptData(TqUlong xmin, TqUlong xmaxplus1, TqUlong ymin, TqUlong ymaxplus1, TqInt elementSize, const unsigned char* data);
 	
+	/** Save the image as a TIFF file to the given folder.
+ 	 * Used during saving a book, this ensures that the image, which otherwise is completely transient, existing
+ 	 * only in memory, gets saved to disk so that it can be later reloaded into Piqsl with the book.
+ 	 * \param folder	The folder on disk to store the TIFF file to.
+ 	 */
 	virtual void serialise(const std::string& folder);
+	/** Create an XML element that represents this image in a library XML file.
+ 	 * \return			A pointer to a generated TinyXML element containing all the data to be
+ 	 * 					added to the XML file.
+ 	 */
 	virtual TiXmlElement* serialiseToXML();
 
+	/** A helper function to reorder the channels from Aqsis.
+	 * A helper function to reorder the channels that Aqsis sends to ensure that they are in the expected format
+ 	 * for display by piqsl, and subsequent saving to TIFF.
+ 	 */
 	void reorderChannels();
 
 private:
     CqSocket	m_socket;			///< Socket of the client.
-    std::stringstream m_readbuf;
-	TqFloat		m_quantize[4];
+	TqFloat		m_quantize[4];		///< Stored quantisation values, used during conversion for display.
 };
 
 END_NAMESPACE( Aqsis )

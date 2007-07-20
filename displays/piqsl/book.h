@@ -47,46 +47,79 @@ class CqImage;
 class CqBook
 {
 public:
-    CqBook( const CqString& name );
-    ~CqBook()
+	CqBook( const CqString& name );
+	~CqBook()
 	{}
 
-    CqString&	name()
-    {
-        return ( m_name );
-    }
-    void	setName( const CqString& name );
+	/** Get the books name.
+	 */
+	CqString&	name()
+	{
+		return ( m_name );
+	}
+	/** Set the name of the book.
+     * \param name		The new name to the apply to the book.
+     */
+	void	setName( const CqString& name );
 
+	/** Get a shared pointer to the framebuffer associated with this book.
+	 */
 	boost::shared_ptr<CqFramebuffer> framebuffer()
 	{
 		return(m_framebuffer);
 	}
 
+	/** \typedef TqImageList
+	 * Typedef for the locally stored image list.
+	 */
 	typedef std::vector<boost::shared_ptr<CqImage> >			TqImageList;
+	/** \typedef TqImageListIterator
+	 * Typedef for a basic iterator over the images contained in the book.
+	 */
 	typedef std::vector<boost::shared_ptr<CqImage> >::iterator	TqImageListIterator;
+	/** Get an iterator to the start of the images this book contains.
+	 */
 	TqImageListIterator imagesBegin()
 	{
 		return(m_images.begin());
 	}
+	/** Get an iterator to just past the last image this book contains.
+ 	 * Follows the standard STL iterator conventions, so can be used in a != comparison
+ 	 * for iterating the images in the book.
+ 	 */
 	TqImageListIterator imagesEnd()
 	{
 		return(m_images.end());
 	}
 
+	/** Add an image to the book.
+ 	 * \param image		Shared pointer to the new image.
+ 	 * \return			The index of the new image in the image list.
+ 	 */
 	TqImageList::size_type addImage(boost::shared_ptr<CqImage>& image);
+	/** Get a shared pointer to the image at the specified index, if one exists.
+ 	 * Will return a null shared pointer if the index is invalid.
+ 	 * \param index		The index of the requested image in the list, should be less than numImages().
+ 	 * \return			A shared pointer to the image, or a null shared pointer if the index is not valid.
+ 	 */
 	boost::shared_ptr<CqImage> image(TqImageList::size_type index);
+	/** Get the number of images in this book.
+ 	 * \return			The number of images contained in this book.
+ 	 */
 	TqUlong numImages() const
 	{
 		return(m_images.size());
 	}
 
+	/** Remove an image from the book.
+ 	 * \param item		Iterator referencing the image to be removed, see imagesBegin and imagesEnd.
+ 	 */
 	void removeImage(TqImageListIterator item);
 
 private:
     CqString	m_name;			///< Book name.
-	TqImageList m_images;
-	boost::shared_ptr<CqFramebuffer> m_framebuffer;
-	static TqUlong	m_nextID;
+	TqImageList m_images;		///< List of images in the book.
+	boost::shared_ptr<CqFramebuffer> m_framebuffer;	///< Shared pointer to the main framebuffer associated with this book.
 };
 
 END_NAMESPACE( Aqsis )
