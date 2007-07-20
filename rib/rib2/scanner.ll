@@ -4,8 +4,10 @@
 
 #ifdef	WIN32
 extern "C" int isatty(int);
+#if _MSC_VER
 #pragma warning(disable : 4786)
 #pragma warning(disable : 4102)
+#endif
 #endif
 
 #include "aqsis.h"
