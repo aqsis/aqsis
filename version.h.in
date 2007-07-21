@@ -27,8 +27,6 @@
 #ifndef VERSION_H_INCLUDED
 #define VERSION_H_INCLUDED 1
 
-#include "sstring.h"
-
 #define	STRNAME		"Aqsis"
 
 #define	VERMAJOR %(major)i
