@@ -26,6 +26,8 @@ tempenv = Environment()
 
 # Read in the platform specific options.
 AddSysPath(tempenv.Dir(target_config_dir).abspath)
+# import platform_utils from the platform specific directory
+import platform_utils
 
 # Read in options from custom.py if it exists, or options.cache otherwise
 if os.path.exists('custom.py'):
@@ -216,6 +218,7 @@ def prependBuildDir(subDirs):
 		return os.path.join(target_dir.abspath, subDirs)
 	else:
 		return [ os.path.join(target_dir.abspath, subDir) for subDir in subDirs ]
+
 env.AppendUnique(LIBPATH = prependBuildDir( Split('''
 	rib/rib2
 	rib/rib2ri
@@ -256,11 +259,36 @@ SConscript('build_check.py')
 env = conf.Finish()
 
 # Prepare the NSIS installer tool
-env.Tool('NSIS', toolpath=['./'])
-env.Distribute('NSIS.py')
+env.Tool('NSIS', toolpath=['build_tools'])
 
 # Set the build directory for all sub-project build operations.
 env.BuildDir(target_dir, '.')
+
+# Add dynamic linker path so that aqsl can be run at compile-time
+platform_utils.addDynamicLinkerPath(env, prependBuildDir('aqsistypes') )
+
+# Set up the unit test environment.  We copy the environment so that we can add
+# the extra libraries needed without messing up the environment for production
+# builds.
+#
+# Here we use boost.test as the unit testing framework.
+testEnv = env.Copy()
+testEnv.Tool('unittest',
+		toolpath=['build_tools'],
+		UTEST_MAIN_SRC=File('build_tools/boostautotestmain.cpp'),
+		LIBS=['boost_unit_test_framework']
+	)
+# Linker paths for finding shared libraries at compile-time.  This lets us run
+# the unit tests at compile-time.
+platform_utils.addDynamicLinkerPath(testEnv,
+		prependBuildDir(Split('''
+			aqsistypes
+			renderer/render
+		''')
+		)
+	)
+Export('testEnv')
+
 
 # Load the sub-project SConscript files.
 sub_sconsdirs_noret = prependBuildDir(Split('''
@@ -405,11 +433,13 @@ main_distfiles = Split("""
 env.Distribute(main_distfiles)
 
 # Distribute the platform build configurations.
-platforms = glob.glob('platform/*/SConscript')
-for platform in platforms:
-	path, name = os.path.split(platform)
-	env.Distribute(platform, path)
-options = glob.glob('platform/*/*.py')
-for option in options:
-	path, name = os.path.split(option)
-	env.Distribute(option, path)
+extraDistfiles = Flatten( [ glob.glob(path) for path in
+		Split('''
+			platform/*/SConscript
+			platform/*/*.py
+			build_tools/*.py
+			build_tools/*.cpp
+		''') ] )
+for distfile in extraDistfiles:
+	path, name = os.path.split(distfile)
+	env.Distribute(distfile, path)
