@@ -213,8 +213,6 @@ else:
 
 # Add the GnuWin32 bin folder to the PATH, so that bison 2.1 can find m4.exe
 env.AppendENVPath('PATH', env.Dir('#/../win32libs/GnuWin32/bin').abspath)
-# Prepend the aqsistypes build path to the PATH so that aqsl.exe can find the .dll during building shaders.
-env.PrependENVPath('PATH', env.Dir('$build_prefix/aqsistypes').abspath)
 env.AppendUnique(CPPPATH = ['#/aqsistypes/win32'])
 
 env.Replace(YACC = '${bison}')

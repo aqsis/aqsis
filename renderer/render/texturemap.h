@@ -44,9 +44,6 @@
 #include	"ishaderexecenv.h"
 #include	"lowdiscrep.h"
 
-#undef		min
-#undef		max
-
 START_NAMESPACE( Aqsis )
 
 struct IqShader;

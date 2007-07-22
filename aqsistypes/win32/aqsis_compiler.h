@@ -32,6 +32,11 @@
  */
 #define	AQSIS_SYSTEM_WIN32	1
 
+/** Make sure that including windows.h doesn't define the min and max macros,
+ * which conflict with other uses of min and max (Aqsis::min, std::min etc.)
+ */
+#define NOMINMAX
+
 /** Define the compiler.
  */
 #ifdef __GNUC__

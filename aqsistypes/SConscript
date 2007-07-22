@@ -19,10 +19,12 @@ aqsistypes_sources = Split("""
 	sstring.cpp
 	vector2d.cpp
 	vector3d.cpp
-	vector4d.cpp""")
+	vector4d.cpp
+	""")
 
 aqsistypes_headers = Split("""
 	aqsis.h
+	aqsismath.h
 	aqsis_types.h
 	bitvector.h
 	cellnoise.h
@@ -46,7 +48,8 @@ aqsistypes_headers = Split("""
 	validate.h
 	vector2d.h
 	vector3d.h
-	vector4d.h""")
+	vector4d.h
+	""")
 
 
 if 'win32' == env['PLATFORM']:
@@ -56,6 +59,7 @@ else:
 
 aqsistypes_install_headers = Split('''
 	aqsis.h
+	aqsismath.h
 	aqsis_types.h
 	bitvector.h
 	color.h
@@ -94,6 +98,22 @@ aqsistypesenv.InstallAs([os.path.join('${RENDERENGINEDIR}', '%s${SHLIB_VERSION_S
 
 aqsistypesenv.PostInstallSharedLibrary(aqsistypesenv, '${RENDERENGINEDIR}', aqsistypes)
 
+
+#-------------------------------------------------------------------------------
+# Unit Tests
+Import('testEnv')
+testEnv = testEnv.Copy()
+testEnv.AppendUnique(LIBS=['aqsistypes'])
+aqsistypes_test_sources = Split('''
+	aqsismath_test.cpp
+	color_test.cpp
+	vector3d_test.cpp
+	''')
+testEnv.addUnitTest('aqsistypes_test', aqsistypes_test_sources)
+
+
+#-------------------------------------------------------------------------------
 env.Distribute(aqsistypes_sources)
+env.Distribute(aqsistypes_test_sources)
 env.Distribute(aqsistypes_headers)
 env.Distribute('SConscript')
