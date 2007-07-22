@@ -143,8 +143,8 @@ void* CqBookBrowser::item_next(void* p) const
 		return(p);
 	else
 	{
-		std::vector<boost::shared_ptr<CqImage> >::size_type index = 
-			reinterpret_cast<std::vector<boost::shared_ptr<CqImage> >::size_type>(p);
+		CqBook::TqImageList::size_type index = 
+			reinterpret_cast<CqBook::TqImageList::size_type>(p);
 		if(m_theBook && index < m_theBook->numImages())
 			return((void*)(index + 1));
 		else
@@ -158,8 +158,8 @@ void* CqBookBrowser::item_prev(void* p) const
 		return(p);
 	else
 	{
-		std::vector<boost::shared_ptr<CqImage> >::size_type index = 
-			reinterpret_cast<std::vector<boost::shared_ptr<CqImage> >::size_type>(p);
+		CqBook::TqImageList::size_type index = 
+			reinterpret_cast<CqBook::TqImageList::size_type>(p);
 		if(m_theBook && index > 1)
 			return((void*)(index - 1));
 		else
@@ -169,16 +169,16 @@ void* CqBookBrowser::item_prev(void* p) const
 
 int CqBookBrowser::item_selected(void* l) const 
 {
-	std::vector<boost::shared_ptr<CqImage> >::size_type index = 
-		reinterpret_cast<std::vector<boost::shared_ptr<CqImage> >::size_type>(l);
+	CqBook::TqImageList::size_type index = 
+		reinterpret_cast<CqBook::TqImageList::size_type>(l);
 	
 	return(index == currentSelected());
 }
 
 void CqBookBrowser::item_select(void* l, int v) 
 {
-	std::vector<boost::shared_ptr<CqImage> >::size_type index = 
-		reinterpret_cast<std::vector<boost::shared_ptr<CqImage> >::size_type>(l);
+	CqBook::TqImageList::size_type index = 
+		reinterpret_cast<CqBook::TqImageList::size_type>(l);
 	if(v)
 		setCurrentSelected(index);
 	else
@@ -213,8 +213,8 @@ int CqBookBrowser::item_width(void* v) const
 
 void CqBookBrowser::item_draw(void* v, int X, int Y, int W, int H) const 
 {
-	std::vector<boost::shared_ptr<CqImage> >::size_type index = 
-		reinterpret_cast<std::vector<boost::shared_ptr<CqImage> >::size_type>(v);
+	CqBook::TqImageList::size_type index = 
+		reinterpret_cast<CqBook::TqImageList::size_type>(v);
 	index--;
 	if(!m_theBook || index < 0 || index > m_theBook->numImages())
 		return;
@@ -240,6 +240,40 @@ void CqBookBrowser::item_draw(void* v, int X, int Y, int W, int H) const
 	m_theBook->image(index)->imageHeight(),  
 	m_theBook->image(index)->numChannels() );
 	fl_draw(Size.c_str(), X+3, Y, i[1]-6, H, talign, 0, 0);
+}
+
+void CqBookBrowser::change_cursor(Fl_Cursor newcursor) 
+{
+	if ( newcursor != m_last_cursor ) 
+	{
+		fl_cursor(newcursor, FL_BLACK, FL_WHITE);
+		m_last_cursor = newcursor;
+	}
+}
+
+int CqBookBrowser::which_col_near_mouse() 
+{
+	int X,Y,W,H;
+	Fl_Browser_::bbox(X,Y,W,H);		// area inside browser's box()
+	// EVENT NOT INSIDE BROWSER AREA? (eg. on a scrollbar)
+	if ( ! Fl::event_inside(X,Y,W,H) ) 
+	{
+		return(-1);
+	}
+	int mousex = Fl::event_x() + hposition();
+	int colx = this->x();
+	for ( int t=0; m_widths[t]; t++ ) 
+	{
+		colx += m_widths[t];
+		int diff = mousex - colx;
+		// MOUSE 'NEAR' A COLUMN?
+		//     Return column #
+		//
+		if ( diff >= -4 && diff <= 4 ) {
+			return(t);
+		}
+	}
+	return(-1);
 }
 
 END_NAMESPACE( Aqsis )

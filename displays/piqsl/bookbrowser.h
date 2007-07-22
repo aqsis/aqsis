@@ -46,11 +46,12 @@ START_NAMESPACE( Aqsis )
 class CqBookBrowser : public Fl_Browser_
 {
 public:
-    CqBookBrowser(int X,int Y,int W,int H,const char*L=0) : Fl_Browser_(X,Y,W,H,L) {
-        m_colsepcolor = Fl_Color(FL_GRAY);
-        m_last_cursor = FL_CURSOR_DEFAULT;
-        m_showcolsep  = 0;
-        m_dragging    = 0;
+    CqBookBrowser(int X,int Y,int W,int H,const char*L=0) : Fl_Browser_(X,Y,W,H,L), 
+		m_colsepcolor(Fl_Color(FL_GRAY)),
+        m_showcolsep(0),
+        m_last_cursor(FL_CURSOR_DEFAULT),
+        m_dragging(0)
+	{
         m_nowidths[0] = 0;
         m_widths      = m_nowidths;
     }
@@ -60,7 +61,7 @@ public:
         return(m_colsepcolor);
     }
 
-    void colsepcolor(Fl_Color val) 
+    void colsepcolor(const Fl_Color val) 
 	{
         m_colsepcolor = val;
     }
@@ -96,12 +97,12 @@ public:
 		m_theBook = book;
 	}
 
-	std::vector<boost::shared_ptr<CqImage> >::size_type currentSelected() const
+	CqBook::TqImageList::size_type currentSelected() const
 	{
 		return(m_currentSelected);
 	}
 
-	void setCurrentSelected(std::vector<boost::shared_ptr<CqImage> >::size_type index)
+	void setCurrentSelected(CqBook::TqImageList::size_type index)
 	{
 		m_currentSelected = index;
 	}
@@ -131,47 +132,15 @@ private:
     int      *m_widths;		// pointer to user's width[] array
     int       m_nowidths[1];	// default width array (non-const)
 	boost::shared_ptr<Aqsis::CqBook>	m_theBook;
-	std::vector<boost::shared_ptr<CqImage> >::size_type m_currentSelected;
+	CqBook::TqImageList::size_type m_currentSelected;
     // CHANGE CURSOR
     //     Does nothing if cursor already set to value specified.
     //
-    void change_cursor(Fl_Cursor newcursor) 
-	{
-        if ( newcursor != m_last_cursor ) 
-		{
-            fl_cursor(newcursor, FL_BLACK, FL_WHITE);
-            m_last_cursor = newcursor;
-        }
-    }
+    void change_cursor(Fl_Cursor newcursor);
     // RETURN THE COLUMN MOUSE IS 'NEAR'
     //     Returns -1 if none.
     //
-    int which_col_near_mouse() 
-	{
-        int X,Y,W,H;
-        Fl_Browser_::bbox(X,Y,W,H);		// area inside browser's box()
-        // EVENT NOT INSIDE BROWSER AREA? (eg. on a scrollbar)
-        if ( ! Fl::event_inside(X,Y,W,H) ) 
-		{
-            return(-1);
-        }
-        int mousex = Fl::event_x() + hposition();
-        int colx = this->x();
-        for ( int t=0; m_widths[t]; t++ ) 
-		{
-            colx += m_widths[t];
-            int diff = mousex - colx;
-            // MOUSE 'NEAR' A COLUMN?
-			//     Return column #
-			//
-            if ( diff >= -4 && diff <= 4 ) {
-                return(t);
-            }
-        }
-        return(-1);
-    }
-
-
+    int which_col_near_mouse();
 };
 
 END_NAMESPACE( Aqsis )

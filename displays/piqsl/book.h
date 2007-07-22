@@ -27,11 +27,12 @@
 #ifndef BOOK_H_INCLUDED
 #define BOOK_H_INCLUDED 1
 
-#include 	<boost/shared_ptr.hpp>
 #include	<vector>
+#include	<string>
+
+#include 	<boost/shared_ptr.hpp>
 
 #include	"aqsis.h"
-#include	"sstring.h"
 #include	"ndspy.h"
 
 START_NAMESPACE( Aqsis )
@@ -47,20 +48,20 @@ class CqImage;
 class CqBook
 {
 public:
-	CqBook( const CqString& name );
+	CqBook( const std::string& name );
 	~CqBook()
 	{}
 
 	/** Get the books name.
 	 */
-	CqString&	name()
+	const std::string&	name() const
 	{
 		return ( m_name );
 	}
 	/** Set the name of the book.
      * \param name		The new name to the apply to the book.
      */
-	void	setName( const CqString& name );
+	void	setName( const std::string& name );
 
 	/** Get a shared pointer to the framebuffer associated with this book.
 	 */
@@ -102,7 +103,7 @@ public:
  	 * \param index		The index of the requested image in the list, should be less than numImages().
  	 * \return			A shared pointer to the image, or a null shared pointer if the index is not valid.
  	 */
-	boost::shared_ptr<CqImage> image(TqImageList::size_type index);
+	boost::shared_ptr<CqImage> image(CqBook::TqImageList::size_type index);
 	/** Get the number of images in this book.
  	 * \return			The number of images contained in this book.
  	 */
@@ -117,7 +118,7 @@ public:
 	void removeImage(TqImageListIterator item);
 
 private:
-    CqString	m_name;			///< Book name.
+	std::string	m_name;			///< Book name.
 	TqImageList m_images;		///< List of images in the book.
 	boost::shared_ptr<CqFramebuffer> m_framebuffer;	///< Shared pointer to the main framebuffer associated with this book.
 };

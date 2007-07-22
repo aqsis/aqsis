@@ -30,7 +30,7 @@
 
 START_NAMESPACE( Aqsis )
 
-CqBook::CqBook( const CqString& name ) : m_name(name)
+CqBook::CqBook( const std::string& name ) : m_name(name)
 {
 	m_framebuffer = boost::shared_ptr<CqFramebuffer>(new CqFramebuffer(100, 100, 3, name));
 	m_framebuffer->show();
@@ -43,7 +43,7 @@ std::vector<boost::shared_ptr<CqImage> >::size_type CqBook::addImage(boost::shar
 	return(m_images.size()-1);
 }
 
-boost::shared_ptr<CqImage> CqBook::image(std::vector<boost::shared_ptr<CqImage> >::size_type index)
+boost::shared_ptr<CqImage> CqBook::image(CqBook::TqImageList::size_type index)
 {
 	if(m_images.size() > index)
 		return(m_images[index]);
@@ -54,7 +54,7 @@ boost::shared_ptr<CqImage> CqBook::image(std::vector<boost::shared_ptr<CqImage> 
 	}
 }
 
-void CqBook::setName( const CqString& name )
+void CqBook::setName( const std::string& name )
 {
 	m_name = name;
 	if(m_framebuffer)
