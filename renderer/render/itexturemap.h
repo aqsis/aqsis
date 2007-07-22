@@ -15,15 +15,6 @@
 
 #include	"aqsis.h"
 
-#ifdef	AQSIS_COMPILER_MSVC6
-#ifdef	min
-#undef min
-#endif
-#ifdef max
-#undef max
-#endif
-#endif
-
 #include	<valarray>
 #include	<map>
 

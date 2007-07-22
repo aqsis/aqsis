@@ -34,8 +34,6 @@
 #include "imagebuffer.h"
 #include <deque>
 #include <fstream>
-#undef	min
-#undef	max
 
 START_NAMESPACE( Aqsis )
 
