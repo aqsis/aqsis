@@ -28,10 +28,6 @@
 
 #include "aqsis.h"
 
-// necessary workaround for VC++ stupidity?
-#undef min
-#undef max
-
 namespace Aqsis {
 // These inline functions are intended to eventually replace all the old macros
 // which reside in aqsis_types.h

@@ -98,6 +98,22 @@ aqsistypesenv.InstallAs([os.path.join('${RENDERENGINEDIR}', '%s${SHLIB_VERSION_S
 
 aqsistypesenv.PostInstallSharedLibrary(aqsistypesenv, '${RENDERENGINEDIR}', aqsistypes)
 
+
+#-------------------------------------------------------------------------------
+# Unit Tests
+Import('testEnv')
+testEnv = testEnv.Copy()
+testEnv.AppendUnique(LIBS=['aqsistypes'])
+aqsistypes_test_sources = Split('''
+	aqsismath_test.cpp
+	color_test.cpp
+	vector3d_test.cpp
+	''')
+testEnv.addUnitTest('aqsistypes_test', aqsistypes_test_sources)
+
+
+#-------------------------------------------------------------------------------
 env.Distribute(aqsistypes_sources)
+env.Distribute(aqsistypes_test_sources)
 env.Distribute(aqsistypes_headers)
 env.Distribute('SConscript')

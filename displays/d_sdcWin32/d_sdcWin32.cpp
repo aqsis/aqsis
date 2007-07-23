@@ -41,6 +41,7 @@
 // set as environment variable where we could see in action the line 
 // by line rendering
 
+#define NOMINMAX
 #include <windows.h>
 #include <malloc.h>
 #include <string.h>
