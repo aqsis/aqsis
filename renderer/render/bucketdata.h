@@ -59,6 +59,12 @@ struct SqMpgSampleInfo
 
 /**
  * \brief Class to hold dynamic data of Buckets being processed.
+ *
+ * \todo This class is a container for bucket data (as if it were a
+ * struct), but having it being a class with private data and friendly
+ * access to the bucket class is more restricting.  However it's
+ * probably a good idea to add public methods to access the private
+ * data or something like that.
  */
 class CqBucketData
 {
