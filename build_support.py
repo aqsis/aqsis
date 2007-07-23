@@ -1,10 +1,12 @@
 import os, re
 import sys
 import fnmatch
+import subprocess
+import xml.dom.minidom
 from string import lower, split
+
 import SCons
 from SCons.Script.SConscript import SConsEnvironment
-import xml.dom.minidom
 import glob
 import StringIO
 
@@ -108,8 +110,6 @@ def print_config(msg, two_dee_iterable):
     print
 
 def AddSysPath(new_path):
-	import sys, os
-
 	# standardise
 	new_path = os.path.abspath(new_path)
 
@@ -161,14 +161,11 @@ def embedManifest(env, targetenv, source, type):
 		targetenv.AddPostAction(source, 'mt.exe -nologo -manifest ${TARGET}.manifest -outputresource:$TARGET;' + suffix)
 
 def getSCMRevision():
-	scm_command = 'svn info --xml ' + os.getcwd()
-
-	if os.system(scm_command) <= 0:
-		scm_resource = os.popen(scm_command).read()
-		scm_resourcepp = xml.dom.minidom.parseString(scm_resource)
-		scm_revision = scm_resourcepp.getElementsByTagName('entry')[0].attributes['revision']
-		scm_revisionpp = scm_revision.value
-		return "(revision " + scm_revisionpp + ")"
+	svnInfo = subprocess.Popen('svn info --xml ' + os.getcwd(), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+	if svnInfo.wait() == 0:
+		svnInfoXml = xml.dom.minidom.parse(svnInfo.stdout)
+		svnRev = svnInfoXml.getElementsByTagName('entry')[0].attributes['revision'].value
+		return "(revision " + svnRev + ")"
 	else:
 		return ""
 
@@ -380,4 +377,3 @@ def SetupCleanPrinting( env ):
 	env['PRINT_CMD_LINE_FUNC'] = print_cmd_line
 	if not env.has_key('CMD_LOGFILE') or ['CMD_LOGFILE'] == '':
 		env['CMD_LOGFILE'] = 'build-log.txt'
-

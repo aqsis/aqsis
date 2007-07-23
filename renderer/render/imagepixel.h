@@ -33,31 +33,11 @@
 #include	<vector>
 #include	<stack>
 #include	<deque>
-
-#ifdef	min
-#define	__old_min__ min
-#undef min
-#endif
-#ifdef	max
-#define	__old_max__ max
-#undef max
-#endif
-
 #include	<valarray>
 
-#ifdef	__old_min__
-#define	min __old_min__
-#undef __old_min__
-#endif
-#ifdef	__old_max__
-#define	max __old_max__
-#undef __old_max__
-#endif
-
 #include	"bitvector.h"
-
 #include	"renderer.h"
-#include        "csgtree.h"
+#include	"csgtree.h"
 #include	"color.h"
 #include	"vector2d.h"
 

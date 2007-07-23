@@ -79,6 +79,7 @@ void my_func()
 
 #ifdef WIN32
 #pragma warning(disable:4786)	// hide stl warnings (VS6)
+#define NOMINMAX
 #include <windows.h>
 #else
 typedef struct {
