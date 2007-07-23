@@ -19,24 +19,20 @@
 
 
 /** \file
-		\brief Implements the default display devices for Aqsis.
+		\brief A display device that communicates with a separate process
+			using sockets and XML based data packets.
 		\author Paul C. Gregory (pgregory@aqsis.com)
 */
 
-#include <aqsis.h>
-
-#include <logging.h>
-#include <logging_streambufs.h>
-
-using namespace Aqsis;
+#include "aqsis.h"
 
 #include <sstream>
 #include <string>
 #include <algorithm>
 #include <map>
-#include "boost/archive/iterators/base64_from_binary.hpp"
-#include "boost/archive/iterators/transform_width.hpp"
-#include "boost/archive/iterators/insert_linebreaks.hpp"
+#include <boost/archive/iterators/base64_from_binary.hpp>
+#include <boost/archive/iterators/transform_width.hpp>
+#include <boost/archive/iterators/insert_linebreaks.hpp>
 
 #ifdef	AQSIS_SYSTEM_WIN32
 #include <winsock2.h>
@@ -49,30 +45,27 @@ typedef	u_long in_addr_t;
 #include <arpa/inet.h>
 #define	INVALID_SOCKET -1
 #endif
+#include <tinyxml.h>
 
 #include "ndspy.h"
-
 #include "version.h"
-
 #include "piqsldisplay.h"
-#include "tinyxml.h"
-#include "sstring.h"
 #include "socket.h"
+#include "logging.h"
+#include "logging_streambufs.h"
+
+using namespace Aqsis;
 
 // From displayhelpers.c
-#ifdef __cplusplus
 extern "C"
 {
-#endif
 	PtDspyError DspyReorderFormatting(int formatCount, PtDspyDevFormat *format, int outFormatCount, const PtDspyDevFormat *outFormat);
 	PtDspyError DspyFindStringInParamList(const char *string, char **result, int n, const UserParameter *p);
 	PtDspyError DspyFindIntInParamList(const char *string, int *result, int n, const UserParameter *p);
 	PtDspyError DspyFindFloatInParamList(const char *string, float *result, int n, const UserParameter *p);
 	PtDspyError DspyFindMatrixInParamList(const char *string, float *result, int n, const UserParameter *p);
 	PtDspyError DspyFindIntsInParamList(const char *string, int *resultCount, int *result, int n, const UserParameter *p);
-#ifdef __cplusplus
 }
-#endif
 
 static int sendXMLMessage(TiXmlDocument& msg, CqSocket& sock);
 static TiXmlDocument* recvXMLMessage(CqSocket& sock);
@@ -91,6 +84,11 @@ typedef
     > 
     base64_text; // compose all the above operations in to a new iterator
 
+// Macros to initialise the type/name name/type maps.
+#define	INIT_TYPE_NAME_MAPS(name) \
+g_mapNameToType[#name] = name; \
+g_mapTypeToName[name] = #name;
+
 std::map<std::string, TqInt>	g_mapNameToType;
 std::map<TqInt, std::string>	g_mapTypeToName;
 
@@ -107,25 +105,16 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 {
 	SqDisplayInstance* pImage;
 
-	g_mapNameToType["PkDspyFloat32"] = PkDspyFloat32;
-	g_mapNameToType["PkDspyUnsigned32"] = PkDspyUnsigned32;
-	g_mapNameToType["PkDspySigned32"] = PkDspySigned32;
-	g_mapNameToType["PkDspyUnsigned16"] = PkDspyUnsigned16;
-	g_mapNameToType["PkDspySigned16"] = PkDspySigned16;
-	g_mapNameToType["PkDspyUnsigned8"] = PkDspyUnsigned8;
-	g_mapNameToType["PkDspySigned8"] = PkDspySigned8;
-	g_mapNameToType["PkDspyString"] = PkDspyString;
-	g_mapNameToType["PkDspyMatrix"] = PkDspyMatrix;
-
-	g_mapTypeToName[PkDspyFloat32] = "PkDspyFloat32";
-	g_mapTypeToName[PkDspyUnsigned32] = "PkDspyUnsigned32";
-	g_mapTypeToName[PkDspySigned32] = "PkDspySigned32";
-	g_mapTypeToName[PkDspyUnsigned16] = "PkDspyUnsigned16";
-	g_mapTypeToName[PkDspySigned16] = "PkDspySigned16";
-	g_mapTypeToName[PkDspyUnsigned8] = "PkDspyUnsigned8";
-	g_mapTypeToName[PkDspySigned8] = "PkDspySigned8";
-	g_mapTypeToName[PkDspyString] = "PkDspyString";
-	g_mapTypeToName[PkDspyMatrix] = "PkDspyMatrix";
+	// Fill in the typenames maps
+	INIT_TYPE_NAME_MAPS(PkDspyFloat32);
+	INIT_TYPE_NAME_MAPS(PkDspyUnsigned32);
+	INIT_TYPE_NAME_MAPS(PkDspySigned32);
+	INIT_TYPE_NAME_MAPS(PkDspyUnsigned16);
+	INIT_TYPE_NAME_MAPS(PkDspySigned16);
+	INIT_TYPE_NAME_MAPS(PkDspyUnsigned8);
+	INIT_TYPE_NAME_MAPS(PkDspySigned8);
+	INIT_TYPE_NAME_MAPS(PkDspyString);
+	INIT_TYPE_NAME_MAPS(PkDspyMatrix);
 
 	pImage = new SqDisplayInstance;
 	flagstuff->flags = 0;

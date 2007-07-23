@@ -19,7 +19,7 @@
 
 
 /** \file
-		\brief Implements the default display devices for Aqsis.
+		\brief Various helper functions for handling daya in the Dspy interface.
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 

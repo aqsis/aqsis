@@ -24,9 +24,13 @@
 		\author Paul C. Gregory (pgregory@aqsis.com)
 */
 
+#include "aqsis.h"
+
+#include <string.h>
+
 #include "bookbrowser.h"
 #include "image.h"
-#include <string.h>
+#include "sstring.h"
 
 START_NAMESPACE( Aqsis )
 

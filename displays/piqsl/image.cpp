@@ -23,28 +23,27 @@
 		\author Paul C. Gregory (pgregory@aqsis.com)
 */
 
-#include	"aqsis.h"
-#include "version.h"
+#include "aqsis.h"
 
+#include <tiffio.h>
+
+#include "version.h"
 #include "image.h"
 #include "framebuffer.h"
 #include "logging.h"
 #include "ndspy.h"
 
-#include <tiffio.h>
 
 START_NAMESPACE( Aqsis )
 
 CqImage::~CqImage()
 {
-	free(m_data);
-	free(m_realData);
 }
 
 void CqImage::PrepareImageBuffer()
 {
 	//boost::mutex::scoped_lock lock(mutex());
-	m_data = reinterpret_cast<unsigned char*>(malloc( m_imageWidth * m_imageHeight * numChannels() * sizeof(TqUchar)));
+	m_data = boost::shared_array<unsigned char>(new unsigned char[( m_imageWidth * m_imageHeight * numChannels() )]);
 	// Initialise the display to a checkerboard to show alpha
 	for (TqUlong i = 0; i < imageHeight(); i ++)
 	{
@@ -66,7 +65,7 @@ void CqImage::PrepareImageBuffer()
 	// Now prepare the buffer for the natural data.
 	// First work out how big each element is by scanning the channels specification.
 	m_elementSize = 0;
-	for(std::vector<std::pair<std::string, TqInt> >::iterator channel = m_channels.begin(); channel != m_channels.end(); ++channel)
+	for(TqChannelListIterator channel = m_channels.begin(); channel != m_channels.end(); ++channel)
 	{
 		switch(channel->second)
 		{
@@ -86,7 +85,7 @@ void CqImage::PrepareImageBuffer()
 				break;
 		}
 	}
-	m_realData = reinterpret_cast<unsigned char*>(malloc( m_imageWidth * m_imageHeight * m_elementSize));
+	m_realData = boost::shared_array<unsigned char>(new unsigned char[( m_imageWidth * m_imageHeight * m_elementSize)]);
 }
 
 void CqImage::setUpdateCallback(boost::function<void(int,int,int,int)> f)
@@ -229,8 +228,8 @@ void CqImage::saveToTiff(const std::string& filename)
 		TqInt lineLength = elementSize() * imageWidth();
 
 		// Work out the format of the image to write.
-		TqInt widestType = PkDspyUnsigned8;
-		for(TqInt ichan = 0; ichan < numChannels(); ++ichan)
+		TqUint widestType = PkDspyUnsigned8;
+		for(TqUint ichan = 0; ichan < numChannels(); ++ichan)
 			widestType = std::min(widestType, channelType(ichan));
 
 		// Write out an 8 bits per pixel integer image.
@@ -265,10 +264,10 @@ void CqImage::saveToTiff(const std::string& filename)
 			TIFFSetField( pOut, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT );
 			TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, 32 );
 		}
-		TqInt row;
+		TqUint row;
 		for ( row = 0; row < imageHeight(); row++ )
 		{
-			if ( TIFFWriteScanline( pOut, reinterpret_cast<void*>(m_realData + ( row * lineLength ))
+			if ( TIFFWriteScanline( pOut, reinterpret_cast<void*>(m_realData.get() + ( row * lineLength ))
 									, row, 0 ) < 0 )
 				break;
 		}
@@ -384,7 +383,7 @@ void CqImage::loadFromTiff(const std::string& filename)
 				for (row = 0; row < h; row++)
 				{
 					TIFFReadScanline(tif, buf, row);
-					memcpy(m_realData+localOffset, buf, rowLength());
+					memcpy(m_realData.get()+localOffset, buf, rowLength());
 					localOffset+=rowLength();
 				}
 			} 
@@ -404,7 +403,7 @@ void CqImage::loadFromTiff(const std::string& filename)
 					}
 				}
 				#else
-				Aqsis:log() << Aqsis::error << "Images with separate planar config not supported." << std::endl;
+				Aqsis::log() << Aqsis::error << "Images with separate planar config not supported." << std::endl;
 				#endif
 			}
 			_TIFFfree(buf);
@@ -421,13 +420,11 @@ void CqImage::loadFromTiff(const std::string& filename)
 
 void CqImage::transferData()
 {
-	assert(elementSize == m_elementSize);
-
 	boost::mutex::scoped_lock lock(mutex());
 
 	TqUlong y;
-	unsigned char *unrolled = m_data;
-	unsigned char *realData = m_realData;
+	boost::shared_array<unsigned char> unrolled = m_data;
+	boost::shared_array<unsigned char> realData = m_realData;
 
 	TqInt displayOffset = 0;
 	TqInt storageOffset = 0;
@@ -436,7 +433,7 @@ void CqImage::transferData()
 		TqUlong x;
 		for ( x = 0; x < imageWidth(); x++ )
 		{
-			std::vector<std::pair<std::string, TqInt> >::iterator channel;
+			TqChannelListIterator channel;
 			for(channel = m_channels.begin(); channel != m_channels.end(); ++channel)
 			{
 				switch(channel->second)

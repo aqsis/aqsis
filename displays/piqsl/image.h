@@ -27,16 +27,17 @@
 #ifndef IMAGE_H_INCLUDED
 #define IMAGE_H_INCLUDED 1
 
+#include	"aqsis.h"
+
 #include	<vector>
 #include	<string>
 #include	<map>
 
 #include	<boost/shared_ptr.hpp>
+#include	<boost/shared_array.hpp>
 #include	<boost/function.hpp>
 #include	<boost/thread/mutex.hpp>
 
-#include	"aqsis.h"
-#include	"sstring.h"
 #include 	"tinyxml.h"
 
 START_NAMESPACE( Aqsis )
@@ -51,37 +52,40 @@ class CqFramebuffer;
 class CqImage
 {
 public:
-	CqImage( const CqString& name ) : m_name(name), m_data(0), m_realData(0), m_frameWidth(0), m_frameHeight(0), m_imageWidth(0), m_imageHeight(0), m_originX(0), m_originY(0), m_elementSize(0)
+	CqImage( const std::string& name ) : m_name(name), m_data(0), m_realData(0), m_frameWidth(0), m_frameHeight(0), m_imageWidth(0), m_imageHeight(0), m_originX(0), m_originY(0), m_elementSize(0)
 	{} 
 	CqImage() : m_data(0), m_realData(0), m_frameWidth(0), m_frameHeight(0), m_imageWidth(0), m_imageHeight(0), m_originX(0), m_originY(0), m_elementSize(0)
 	{}
     virtual ~CqImage();
 
+	typedef	std::pair<std::string, TqUint>	TqChannel;
+	typedef	std::vector<TqChannel>			TqChannelList;
+	typedef	TqChannelList::iterator			TqChannelListIterator;
 	/** Get the name of the image.
 	 * \return			The name of the image.
 	 */
-    virtual CqString&	name()
+    virtual const std::string&	name() const
     {
         return ( m_name );
     }
 	/** Set the display name of the image.
 	 * \param name		The new display name of the image.
 	 */
-    virtual void	setName( const CqString& name )
+    virtual void	setName( const std::string& name )
     {
         m_name = name;
     }
 	/** Get the filename of the image.
 	 * \return			The filename of the image.
 	 */
-    virtual CqString&	filename()
+    virtual const std::string&	filename() const
     {
         return ( m_fileName );
     }
 	/** Set the filename of the image.
 	 * \param name		The new filename of the image.
 	 */
-    virtual void	setFilename( const CqString& name )
+    virtual void	setFilename( const std::string& name )
     {
         m_fileName = name;
     }
@@ -89,7 +93,7 @@ public:
 	 * The frame width if the cropped rendered region, within the image.
 	 * \return			The frame width of the image.
 	 */
-	virtual TqUlong	frameWidth()
+	virtual TqUlong	frameWidth() const
 	{
 		return( m_frameWidth );
 	}
@@ -97,7 +101,7 @@ public:
 	 * The frame height if the cropped rendered region, within the image.
 	 * \return			The frame height of the image.
 	 */
-	virtual TqUlong frameHeight()
+	virtual TqUlong frameHeight() const
 	{
 		return( m_frameHeight );
 	}
@@ -114,7 +118,7 @@ public:
 	 * \param index			The index of the channel to query.
 	 * \return				A string representation of the channel name.
 	 */
-	virtual const std::string& channelName(TqInt index)
+	virtual const std::string& channelName(TqInt index) const
 	{
 		assert(index < numChannels());
 		return(m_channels[index].first);
@@ -133,7 +137,7 @@ public:
 	 * \param index			The index of the channel to query.
 	 * \return				The type of the channel, as a PkDspy type.
 	 */
-	virtual TqInt channelType(TqInt index)
+	virtual TqUint channelType(TqInt index) const
 	{
 		assert(index < numChannels());
 		return(m_channels[index].second);
@@ -143,7 +147,7 @@ public:
 	 * \param index			The index of the channel to change.
 	 * \param type			The type to set the indexed channel to.
 	 */
-	virtual void setChannelType(TqInt index, TqInt type)
+	virtual void setChannelType(TqInt index, TqUint type)
 	{
 		assert(index < numChannels());
 		m_channels[index].second = type;
@@ -151,7 +155,7 @@ public:
 	/** Get the number of channels in this image.
 	 * \return				The number of channels.
 	 */
-	virtual TqInt numChannels() const
+	virtual TqUint numChannels() const
 	{
 		return( m_channels.size() );
 	}
@@ -159,9 +163,9 @@ public:
 	 * \param name			The name to use for the new channel.
 	 * \param type			The PkDspy type to use, see ndspy.h for supported types.
 	 */
-	virtual void addChannel(const std::string& name, TqInt type)
+	virtual void addChannel(const std::string& name, TqUint type)
 	{
-		m_channels.push_back(std::pair<std::string, TqInt>(name,type));
+		m_channels.push_back(TqChannel(name,type));
 	}
 	/** Get the calculated size of a single pixel in the image.
 	 * Calculated from the number of channels and their types.
@@ -182,7 +186,7 @@ public:
 	 * The display buffer is simple 8 bits per channel data as displayable by an RGB image.
 	 * \return				A pointer to the start of the display buffer.
 	 */
-	virtual unsigned char* data()
+	virtual const boost::shared_array<unsigned char>& data() const
 	{
 		return( m_data );
 	}
@@ -261,11 +265,6 @@ public:
 	 */
 	void loadFromTiff(const std::string& filename);
 
-	/** Transfer the data from the real buffer to thd display buffer.
-	 * This takes into accound the format of the channels in the real data and will attempt to make a 
-	 * good guess at the intended quantisation for 8bit display.
-	 */
-	void transferData();
 
 	/** Get a reference to the unique mutex for this image.
 	 * Used when locking the image during multithreaded operation.
@@ -277,10 +276,10 @@ public:
 	}
 
 protected:
-    CqString		m_name;			///< Display name.
-    CqString		m_fileName;		///< File name.
-	unsigned char*	m_data;			///< Buffer to store the 8bit data for display. 
-	unsigned char*	m_realData;		///< Buffer to store the natural format image data.
+    std::string		m_name;			///< Display name.
+    std::string		m_fileName;		///< File name.
+	boost::shared_array<unsigned char>	m_data;			///< Buffer to store the 8bit data for display. 
+	boost::shared_array<unsigned char>	m_realData;		///< Buffer to store the natural format image data.
 	TqUlong			m_frameWidth;	///< The width of the frame within the whole image.
 	TqUlong			m_frameHeight;	///< The height of the frame within the whole image.
 	TqUlong			m_imageWidth;	///< The total image width.
@@ -288,10 +287,17 @@ protected:
 	TqUlong			m_originX;		///< The origin of the frame within the whole image.
 	TqUlong			m_originY;		///< The origin of the frame within the whole image.
 	TqInt			m_elementSize;	///< The calcualated total size of a single pixel.
-	std::vector<std::pair<std::string, TqInt> >			m_channels;	///< An array of channels, name and type.
+	TqChannelList	m_channels;		///< An array of channels, name and type.
 
 	boost::function<void(int,int,int,int)> m_updateCallback;	///< A callback, called when an image changes.
 	boost::mutex	m_mutex;		///< The unique mutex for this image.
+
+private:
+	/** Transfer the data from the real buffer to thd display buffer.
+	 * This takes into accound the format of the channels in the real data and will attempt to make a 
+	 * good guess at the intended quantisation for 8bit display.
+	 */
+	void transferData();
 };
 
 END_NAMESPACE( Aqsis )

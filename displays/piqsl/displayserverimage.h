@@ -146,7 +146,7 @@ public:
 		m_quantize[3] = quant[3];
 	}
 
-	/** Accept a bucket of data from the piqsl display server.
+	/** \brief Accept a bucket of data from the piqsl display server.
  	 * The data will have been delived to piqsl as an XML packet, this function expects the data to
  	 * have been parsed and converted to plain binary data in machine format.
  	 * \param xmin		The minimum x value in image coordinates of the bucket.
@@ -156,7 +156,7 @@ public:
  	 */
     void acceptData(TqUlong xmin, TqUlong xmaxplus1, TqUlong ymin, TqUlong ymaxplus1, TqInt elementSize, const unsigned char* data);
 	
-	/** Save the image as a TIFF file to the given folder.
+	/** \brief Save the image as a TIFF file to the given folder.
  	 * Used during saving a book, this ensures that the image, which otherwise is completely transient, existing
  	 * only in memory, gets saved to disk so that it can be later reloaded into Piqsl with the book.
  	 * \param folder	The folder on disk to store the TIFF file to.
@@ -168,7 +168,7 @@ public:
  	 */
 	virtual TiXmlElement* serialiseToXML();
 
-	/** A helper function to reorder the channels from Aqsis.
+	/** \brief A helper function to reorder the channels from Aqsis.
 	 * A helper function to reorder the channels that Aqsis sends to ensure that they are in the expected format
  	 * for display by piqsl, and subsequent saving to TIFF.
  	 */

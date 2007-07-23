@@ -23,52 +23,46 @@
 		\author Paul C. Gregory (pgregory@aqsis.com)
 */
 
-#include <aqsis.h>
+#include	"aqsis.h"
 
-#include "argparse.h"
+#include	<tiffio.h>
+#include	<string>
+#include	<list>
 
-#include "logging.h"
-#include "logging_streambufs.h"
-#include "sstring.h"
-#include "socket.h"
-#include "image.h"
+#include	<boost/thread/thread.hpp>
+#include	<boost/thread/mutex.hpp>
+#include	<boost/archive/iterators/binary_from_base64.hpp>
+#include	<boost/archive/iterators/transform_width.hpp>
+#include	<boost/archive/iterators/remove_whitespace.hpp>
 
-#include <tiffio.h>
+#include	<boost/pfto.hpp>
+#ifndef	AQSIS_SYSTEM_WIN32
+#include	<sys/types.h>
+#include	<sys/socket.h>
+#include	<netinet/in.h>
+#include	<arpa/inet.h>
+#include	<fcntl.h>
+#include	<errno.h>
+#else
+#include	<winsock2.h>
+#endif
+#include	<FL/Fl.H>
+#include	<tinyxml.h>
+
+#include	"argparse.h"
+#include	"logging.h"
+#include	"logging_streambufs.h"
+#include	"sstring.h"
+#include	"socket.h"
+#include	"image.h"
+#include	"version.h"
+#include	"piqsl.h"
+#include	"fluid_piqsl_ui.h"
+#include	"displayserverimage.h"
+#include	"framebuffer.h"
+#include	"book.h"
 
 using namespace Aqsis;
-
-#include <string>
-#include <list>
-
-#include <boost/thread/thread.hpp>
-#include <boost/thread/mutex.hpp>
-#include <boost/archive/iterators/binary_from_base64.hpp>
-#include <boost/archive/iterators/transform_width.hpp>
-#include <boost/archive/iterators/remove_whitespace.hpp>
-
-#include "boost/pfto.hpp"
-
-#include <version.h>
-
-#ifndef	AQSIS_SYSTEM_WIN32
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <fcntl.h>
-#include <errno.h>
-#else
-#include <winsock2.h>
-#endif
-
-#include "piqsl.h"
-#include "fluid_piqsl_ui.h"
-#include "displayserverimage.h"
-#include "framebuffer.h"
-#include "book.h"
-#include "tinyxml.h"
-#include <FL/Fl.H>
-
 
 ArgParse::apstring      g_strInterface = "127.0.0.1";
 ArgParse::apstring      g_strPort = "49515";
@@ -104,7 +98,6 @@ base64_binary; // compose all the above operations in to a new iterator
 
 CqSocket g_theSocket;
 std::vector<boost::thread*> g_theThreads;
-#define BUF_SIZE  4096
 
 class CqDataHandler
 {
@@ -359,15 +352,15 @@ void HandleConnection(int sock, void *data)
 	}
 }
 
+// Macros to initialise the type/name name/type maps.
+#define	INIT_TYPE_NAME_MAPS(name) \
+g_mapNameToType[#name] = name; \
+g_mapTypeToName[name] = #name;
 
 int main( int argc, char** argv )
 {
 	Fl::lock();
-	// Create listening socket. 
-	// Setup fltk. 
-	// add the socket to the fltk event
-	// run fltk
-	// blah
+
 	ArgParse ap;
 
 	// Set up the options
@@ -437,25 +430,15 @@ int main( int argc, char** argv )
 #endif  // AQSIS_SYSTEM_POSIX
 
 	// Fill in the typenames maps
-	g_mapNameToType["PkDspyFloat32"] = PkDspyFloat32;
-	g_mapNameToType["PkDspyUnsigned32"] = PkDspyUnsigned32;
-	g_mapNameToType["PkDspySigned32"] = PkDspySigned32;
-	g_mapNameToType["PkDspyUnsigned16"] = PkDspyUnsigned16;
-	g_mapNameToType["PkDspySigned16"] = PkDspySigned16;
-	g_mapNameToType["PkDspyUnsigned8"] = PkDspyUnsigned8;
-	g_mapNameToType["PkDspySigned8"] = PkDspySigned8;
-	g_mapNameToType["PkDspyString"] = PkDspyString;
-	g_mapNameToType["PkDspyMatrix"] = PkDspyMatrix;
-
-	g_mapTypeToName[PkDspyFloat32] = "PkDspyFloat32";
-	g_mapTypeToName[PkDspyUnsigned32] = "PkDspyUnsigned32";
-	g_mapTypeToName[PkDspySigned32] = "PkDspySigned32";
-	g_mapTypeToName[PkDspyUnsigned16] = "PkDspyUnsigned16";
-	g_mapTypeToName[PkDspySigned16] = "PkDspySigned16";
-	g_mapTypeToName[PkDspyUnsigned8] = "PkDspyUnsigned8";
-	g_mapTypeToName[PkDspySigned8] = "PkDspySigned8";
-	g_mapTypeToName[PkDspyString] = "PkDspyString";
-	g_mapTypeToName[PkDspyMatrix] = "PkDspyMatrix";
+	INIT_TYPE_NAME_MAPS(PkDspyFloat32);
+	INIT_TYPE_NAME_MAPS(PkDspyUnsigned32);
+	INIT_TYPE_NAME_MAPS(PkDspySigned32);
+	INIT_TYPE_NAME_MAPS(PkDspyUnsigned16);
+	INIT_TYPE_NAME_MAPS(PkDspySigned16);
+	INIT_TYPE_NAME_MAPS(PkDspyUnsigned8);
+	INIT_TYPE_NAME_MAPS(PkDspySigned8);
+	INIT_TYPE_NAME_MAPS(PkDspyString);
+	INIT_TYPE_NAME_MAPS(PkDspyMatrix);
 
 	int portno = atoi(g_strPort.c_str());
 	CqSocket::initialiseSockets();

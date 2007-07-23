@@ -25,27 +25,30 @@
 
 
 #include	"aqsis.h"
-#include	"file.h"
+
 
 #include	<fstream>
 #include	<map>
 #include	<algorithm>
-#include	"signal.h"
+
+#include	<boost/archive/iterators/base64_from_binary.hpp>
+#include	<boost/archive/iterators/transform_width.hpp>
+#include	<boost/archive/iterators/insert_linebreaks.hpp>
+#include	<boost/filesystem/path.hpp>
+#include	<boost/filesystem/convenience.hpp>
 
 #ifdef AQSIS_SYSTEM_WIN32
-
 #include	<process.h>
-
-#else // AQSIS_SYSTEM_WIN32
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <netinet/in.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/wait.h>
-#include <errno.h>
+#include	<signal.h>
+#else // !AQSIS_SYSTEM_WIN32
+#include	<stdio.h>
+#include	<stdlib.h>
+#include	<unistd.h>
+#include	<netinet/in.h>
+#include	<sys/types.h>
+#include	<sys/socket.h>
+#include	<sys/wait.h>
+#include	<errno.h>
 
 static const int INVALID_SOCKET = -1;
 static const int SD_BOTH = 2;
@@ -53,20 +56,13 @@ static const int SOCKET_ERROR = -1;
 
 typedef sockaddr_in SOCKADDR_IN;
 typedef sockaddr* PSOCKADDR;
+#endif // AQSIS_SYSTEM_WIN32
 
-#endif // !AQSIS_SYSTEM_WIN32
-
+#include	"file.h"
 #include	"displayserverimage.h"
-
-
-#include "boost/archive/iterators/base64_from_binary.hpp"
-#include "boost/archive/iterators/transform_width.hpp"
-#include "boost/archive/iterators/insert_linebreaks.hpp"
-#include <boost/filesystem/path.hpp>
-#include <boost/filesystem/convenience.hpp>
+#include	"aqsismath.h"
 
 START_NAMESPACE( Aqsis )
-
 
 //---------------------------------------------------------------------
 /** Close the socket this client is associated with.
@@ -90,7 +86,7 @@ void CompositeAlpha(TqInt r, unsigned char &R, unsigned char alpha )
 	TqInt t;
 	// C’ = INT_PRELERP( A’, B’, b, t )
 	TqInt R1 = static_cast<TqInt>(INT_PRELERP( R, r, alpha, t ));
-	R = CLAMP( R1, 0, 255 );
+	R = Aqsis::clamp( R1, 0, 255 );
 }
 
 
@@ -98,10 +94,10 @@ void CqDisplayServerImage::acceptData(TqUlong xmin, TqUlong xmaxplus1, TqUlong y
 {
 	assert(elementSize == m_elementSize);
 
-	TqUlong xmin__ = MAX((xmin - originX()), 0);
-	TqUlong ymin__ = MAX((ymin - originY()), 0);
-	TqUlong xmaxplus1__ = MIN((xmaxplus1 - originX()), imageWidth());
-	TqUlong ymaxplus1__ = MIN((ymaxplus1 - originY()), imageWidth());
+	TqUlong xmin__ = Aqsis::max((xmin - originX()), 0UL);
+	TqUlong ymin__ = Aqsis::max((ymin - originY()), 0UL);
+	TqUlong xmaxplus1__ = Aqsis::min((xmaxplus1 - originX()), imageWidth());
+	TqUlong ymaxplus1__ = Aqsis::min((ymaxplus1 - originY()), imageWidth());
 	TqUlong bucketlinelen = elementSize * (xmaxplus1 - xmin); 
 	TqUlong realLineLen = m_elementSize * imageWidth();
 	
@@ -120,8 +116,8 @@ void CqDisplayServerImage::acceptData(TqUlong xmin, TqUlong xmaxplus1, TqUlong y
 	if( data() && xmin__ >= 0 && ymin__ >= 0 && xmaxplus1__ <= imageWidth() && ymaxplus1__ <= imageHeight() )
 	{
 		TqUlong y;
-		unsigned char *unrolled = m_data;
-		unsigned char *realData = m_realData;
+		boost::shared_array<unsigned char> unrolled = m_data;
+		boost::shared_array<unsigned char> realData = m_realData;
 
 		for ( y = ymin__; y < ymaxplus1__; y++ )
 		{
@@ -133,7 +129,7 @@ void CqDisplayServerImage::acceptData(TqUlong xmin, TqUlong xmaxplus1, TqUlong y
 				TqInt storageOffset = (( y * realLineLen ) + ( x * m_elementSize ) );
 				TqUchar alpha = 255;
 				/// \todo: Work out how to read alpha from the bucket data, taking into account sizes.
-				std::vector<std::pair<std::string, TqInt> >::iterator channel;
+				CqImage::TqChannelListIterator channel;
 				for(channel = m_channels.begin(); channel != m_channels.end(); ++channel)
 				{
 					switch(channel->second)
@@ -266,8 +262,8 @@ TiXmlElement* CqDisplayServerImage::serialiseToXML()
 		TiXmlElement* dataXML = new TiXmlElement("Bitmap");
 		std::stringstream base64Data;
 		size_t dataLen = m_imageWidth * m_imageHeight * numChannels() * sizeof(TqUchar);
-		std::copy(	base64_text(BOOST_MAKE_PFTO_WRAPPER(m_data)), 
-					base64_text(BOOST_MAKE_PFTO_WRAPPER(m_data + dataLen)), 
+		std::copy(	base64_text(BOOST_MAKE_PFTO_WRAPPER(m_data.get())), 
+					base64_text(BOOST_MAKE_PFTO_WRAPPER(m_data.get() + dataLen)), 
 					std::ostream_iterator<char>(base64Data));
 		TiXmlText* dataTextXML = new TiXmlText(base64Data.str());
 		dataTextXML->SetCDATA(true);
@@ -293,13 +289,13 @@ void CqDisplayServerImage::reorderChannels()
 	TqInt numElements = sizeof(elements) / sizeof(elements[0]);
 	for(int elementIndex = 0; elementIndex < numElements; ++elementIndex)
 	{
-		for(std::vector<std::pair<std::string, TqInt> >::iterator channel = m_channels.begin(); channel != m_channels.end(); ++channel)
+		for(CqImage::TqChannelListIterator channel = m_channels.begin(); channel != m_channels.end(); ++channel)
 		{
 			// If this entry in the channel list matches one in the expected list, 
 			// move it to the right point in the channel list.
 			if(channel->first.compare(elements[elementIndex]) == 0)
 			{
-				std::pair<std::string, TqInt> temp = m_channels[elementIndex];
+				CqImage::TqChannel temp = m_channels[elementIndex];
 				m_channels[elementIndex] = *channel;
 				*channel = temp;
 				break;

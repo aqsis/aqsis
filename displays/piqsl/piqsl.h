@@ -23,8 +23,8 @@
 		\author Paul C. Gregory (pgregory@aqsis.com)
 */
 
-#ifndef	___display_Loaded___
-#define	___display_Loaded___
+#ifndef	PIQSL_H_INCLUDED
+#define	PIQSL_H_INCLUDED
 
 #include <aqsis.h>
 //#include <../display.h>
@@ -44,4 +44,4 @@ START_NAMESPACE( Aqsis )
 
 END_NAMESPACE( Aqsis )
 
-#endif	//	___display_Loaded___
+#endif	//	PIQSL_H_INCLUDED

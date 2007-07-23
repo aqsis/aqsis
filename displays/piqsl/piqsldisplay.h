@@ -23,27 +23,23 @@
 		\author Paul C. Gregory (pgregory@aqsis.com)
 */
 
-#ifndef	___display_Loaded___
-#define	___display_Loaded___
+#ifndef	PIQSLDISPLAY_H_INCLUDED
+#define	PIQSLDISPLAY_H_INCLUDED
 
-#include <aqsis.h>
-#include <iostream>
+#include	"aqsis.h"
+#include	<iostream>
+#include	<string>
+#include	<tinyxml.h>
 
-#include "tinyxml.h"
-#include "ndspy.h"
-#include "sstring.h"
-#include "socket.h"
+#include	"ndspy.h"
+#include	"socket.h"
 
 START_NAMESPACE( Aqsis )
 
-
 struct SqDisplayInstance
 {
-	SqDisplayInstance() :
-		m_filename(0)
-	{}
-	CqString		m_filename;
-	CqString		m_hostname;
+	std::string		m_filename;
+	std::string		m_hostname;
 	TqInt			m_port;
 	CqSocket		m_socket;
 	// The number of pixels that have already been rendered (used for progress reporting)
@@ -58,4 +54,4 @@ struct SqDisplayInstance
 
 END_NAMESPACE( Aqsis )
 
-#endif	//	___display_Loaded___
+#endif	//	PIQSLDISPLAY_H_INCLUDED

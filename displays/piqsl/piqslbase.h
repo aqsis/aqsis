@@ -23,23 +23,29 @@
 		\author Paul C. Gregory (pgregory@aqsis.com)
 */
 
-#ifndef	___piqslbase_Loaded___
-#define	___piqslbase_Loaded___
+#ifndef	PIQSLBASE_H_INCLUDED
+#define	PIQSLBASE_H_INCLUDED
 
 #include "aqsis.h"
-#include "book.h"
+
 
 #include <vector>
 #include <string>
 #include <list>
+#include <boost/shared_ptr.hpp>
 
-#include "boost/shared_ptr.hpp"
 #include "image.h"
 #include "framebuffer.h"
 #include "logging.h"
+#include "book.h"
 
 START_NAMESPACE( Aqsis )
 
+/** \class CqPiqslBase
+ * \brief Base class from which the main UI window derives.
+ * Offers common functionality not necessarily related directly to the UI
+ * which allows the fluid based UI to be kept as light as possible.
+ */
 class CqPiqslBase
 {
 public:
@@ -71,7 +77,7 @@ public:
 	/** Set the current image index on the current book.
 	 * \param index		The index of the current image in the current book.
 	 */
-	virtual void setCurrentImage(std::vector<boost::shared_ptr<CqImage> >::size_type index)
+	virtual void setCurrentImage(CqBook::TqImageList::size_type index)
 	{}
 	/** Update the image list of the current book in the UI.
 	 */

@@ -23,14 +23,15 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include "piqslbase.h"
-#include "book.h"
-#include "tinyxml.h"
-#include "file.h"
+#include	"aqsis.h"
 
-#include <algorithm>
+#include	<FL/Fl_File_Chooser.H>
+#include	<algorithm>
+#include	<tinyxml.h>
 
-#include <FL/Fl_File_Chooser.H>
+#include	"piqslbase.h"
+#include	"book.h"
+#include	"file.h"
 
 START_NAMESPACE( Aqsis )
 

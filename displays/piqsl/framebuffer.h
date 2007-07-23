@@ -27,17 +27,18 @@
 #ifndef FRAMEBUFFER_H_INCLUDED
 #define FRAMEBUFFER_H_INCLUDED 1
 
-#include <FL/Fl.H>
-#include <FL/Fl_Window.H>
-#include <FL/Fl_Box.H>
-#include <FL/Fl_Image.H>
-#include <FL/fl_draw.H>
-#include <FL/Fl_Menu_Button.H>
-
 #include	"aqsis.h"
-#include	"image.h"
+
+#include	<FL/Fl.H>
+#include	<FL/Fl_Window.H>
+#include	<FL/Fl_Box.H>
+#include	<FL/Fl_Image.H>
+#include	<FL/fl_draw.H>
+#include	<FL/Fl_Menu_Button.H>
 #include 	<boost/shared_ptr.hpp>
 #include	<boost/thread/mutex.hpp>
+
+#include	"image.h"
 
 /** FLTK Widget used to show a constantly updating image.
  *
@@ -55,7 +56,7 @@ class Fl_FrameBuffer_Widget : public Fl_Widget
 			m_image = image;
 		}
 
-		void draw(void);
+		virtual void draw();
 
 	private:
 		boost::shared_ptr<Aqsis::CqImage> m_image;
@@ -77,7 +78,7 @@ public:
 	/** Ensure that the FLTK window for this framebuffer is displayed.
  	 * Brings the window to the front if already displayed.
  	 */
-	void show();
+	virtual void show();
 
 	/** Connect a CqImage to this framebuffer for display.
 	 * \param image		Shared pointer to the image to display in the framebuffer. A shared pointer will be kept.

@@ -23,18 +23,17 @@
 		\author Paul C. Gregory (pgregory@aqsis.com)
 */
 
-#include "framebuffer.h"
-#include "image.h"
-#include "fluid_piqsl_ui.h"
+#include	<boost/bind.hpp>
 
-#include "boost/bind.hpp"
+#include	"framebuffer.h"
+#include	"image.h"
+#include	"fluid_piqsl_ui.h"
 
-
-void Fl_FrameBuffer_Widget::draw(void)
+void Fl_FrameBuffer_Widget::draw()
 {
 	Fl::lock();
 	if(m_image)
-		fl_draw_image(m_image->data(),x(),y(),
+		fl_draw_image(m_image->data().get(),x(),y(),
 			m_image->imageWidth(),m_image->imageHeight(),
 			m_image->numChannels(),
 			m_image->imageWidth()*m_image->numChannels()); // draw image
@@ -93,6 +92,8 @@ CqFramebuffer::~CqFramebuffer()
 	disconnect();
 	m_theWindow->hide();
 	delete m_theWindow;
+	delete m_uiImageWidget;
+	delete m_popupMenu;
 	Fl::unlock();
 }
 
