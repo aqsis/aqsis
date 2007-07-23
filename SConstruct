@@ -273,9 +273,10 @@ platform_utils.addDynamicLinkerPath(env, prependBuildDir('aqsistypes') )
 #
 # Here we use boost.test as the unit testing framework.
 testEnv = env.Copy()
+autotestmain_objs = SConscript(dirs=prependBuildDir(['build_tools']))
 testEnv.Tool('unittest',
 		toolpath=['build_tools'],
-		UTEST_MAIN_SRC=testEnv.Object('build_tools/boostautotestmain.cpp'),
+		UTEST_MAIN_SRC=autotestmain_objs
 	)
 testEnv.AppendUnique( LIBS=['boost_unit_test_framework'] )
 # Linker paths for finding shared libraries at compile-time.  This lets us run
@@ -437,8 +438,6 @@ extraDistfiles = Flatten( [ glob.glob(path) for path in
 		Split('''
 			platform/*/SConscript
 			platform/*/*.py
-			build_tools/*.py
-			build_tools/*.cpp
 		''') ] )
 for distfile in extraDistfiles:
 	path, name = os.path.split(distfile)

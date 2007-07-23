@@ -1,0 +1,16 @@
+Import('env')
+
+build_tools_sources = ['boostautotestmain.cpp']
+
+unittest_objs = env.Object(build_tools_sources)
+
+env.Distribute(
+		build_tools_sources
+		+ Split('''
+		SConscript
+		NSIS.py
+		unittest.py
+		''')
+	)
+
+Return('unittest_objs')
