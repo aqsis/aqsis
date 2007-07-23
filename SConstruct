@@ -275,9 +275,9 @@ platform_utils.addDynamicLinkerPath(env, prependBuildDir('aqsistypes') )
 testEnv = env.Copy()
 testEnv.Tool('unittest',
 		toolpath=['build_tools'],
-		UTEST_MAIN_SRC=File('build_tools/boostautotestmain.cpp'),
-		LIBS=['boost_unit_test_framework']
+		UTEST_MAIN_SRC=testEnv.Object('build_tools/boostautotestmain.cpp'),
 	)
+testEnv.AppendUnique( LIBS=['boost_unit_test_framework'] )
 # Linker paths for finding shared libraries at compile-time.  This lets us run
 # the unit tests at compile-time.
 platform_utils.addDynamicLinkerPath(testEnv,

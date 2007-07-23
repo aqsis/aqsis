@@ -63,12 +63,11 @@ def addUnitTest(env, target=None, source=None, *args, **kwargs):
 #-------------------------------------------------------------------------------
 # Functions used to initialize the unit test tool.
 
-def generate(env, UTEST_MAIN_SRC=[], LIBS=[]):
+def generate(env, UTEST_MAIN_SRC=[]):
 	env['BUILDERS']['UnitTest'] = env.Builder(
 			action = env.Action(unitTestAction, unitTestActionString),
 			suffix='.passed')
 	env['UTEST_MAIN_SRC'] = UTEST_MAIN_SRC
-	env.AppendUnique(LIBS=LIBS)
 	# The following is a bit of a nasty hack to add a wrapper function for the
 	# UnitTest builder, see http://www.scons.org/wiki/WrapperFunctions
 	from SCons.Script.SConscript import SConsEnvironment
