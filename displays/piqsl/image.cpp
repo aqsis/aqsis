@@ -32,6 +32,7 @@
 #include "framebuffer.h"
 #include "logging.h"
 #include "ndspy.h"
+#include "aqsismath.h"
 
 
 START_NAMESPACE( Aqsis )
@@ -371,19 +372,18 @@ void CqImage::loadFromTiff(const std::string& filename)
 
 		if(!TIFFIsTiled(tif))
 		{
-			tdata_t buf;
 			uint32 row;
 			uint16 config;
 
 			TIFFGetField(tif, TIFFTAG_PLANARCONFIG, &config);
-			buf = _TIFFmalloc(TIFFScanlineSize(tif));
+			boost::shared_ptr<void> buf(_TIFFmalloc(TIFFScanlineSize(tif)), _TIFFfree);
 			TqUlong localOffset = 0; 
 			if (config == PLANARCONFIG_CONTIG) 
 			{
 				for (row = 0; row < h; row++)
 				{
-					TIFFReadScanline(tif, buf, row);
-					memcpy(m_realData.get()+localOffset, buf, rowLength());
+					TIFFReadScanline(tif, buf.get(), row);
+					_TIFFmemcpy(m_realData.get()+localOffset, buf.get(), rowLength());
 					localOffset+=rowLength();
 				}
 			} 
@@ -406,7 +406,6 @@ void CqImage::loadFromTiff(const std::string& filename)
 				Aqsis::log() << Aqsis::error << "Images with separate planar config not supported." << std::endl;
 				#endif
 			}
-			_TIFFfree(buf);
 		}
 		else
 			Aqsis::log() << Aqsis::error << "Cannot currently load images in tiled format." << std::endl;
@@ -456,7 +455,7 @@ void CqImage::transferData()
 						break;
 
 					case PkDspyFloat32:
-						unrolled[displayOffset] = CLAMP(reinterpret_cast<TqFloat*>(&realData[storageOffset])[0], 0.0, 1.0)*255.0;
+						unrolled[displayOffset] = Aqsis::clamp(reinterpret_cast<TqFloat*>(&realData[storageOffset])[0], 0.0f, 1.0f)*255.0f;
 						storageOffset += sizeof(TqFloat);
 						break;
 

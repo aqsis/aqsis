@@ -46,66 +46,27 @@ START_NAMESPACE( Aqsis )
 class CqBookBrowser : public Fl_Browser_
 {
 public:
-    CqBookBrowser(int X,int Y,int W,int H,const char*L=0) : Fl_Browser_(X,Y,W,H,L), 
-		m_colsepcolor(Fl_Color(FL_GRAY)),
-        m_showcolsep(0),
-        m_last_cursor(FL_CURSOR_DEFAULT),
-        m_dragging(0)
-	{
-        m_nowidths[0] = 0;
-        m_widths      = m_nowidths;
-    }
+    CqBookBrowser(int X,int Y,int W,int H,const char*L=0);
 
-    Fl_Color colsepcolor() const 
-	{
-        return(m_colsepcolor);
-    }
+    Fl_Color colsepcolor() const;
 
-    void colsepcolor(const Fl_Color val) 
-	{
-        m_colsepcolor = val;
-    }
+    void colsepcolor(const Fl_Color val);
     // GET/SET DISPLAY OF COLUMN SEPARATOR LINES
     //     1: show lines, 0: don't show lines
     //
-    int showcolsep() const 
-	{
-        return(m_showcolsep);
-    }
-    void showcolsep(int val) 
-	{
-        m_showcolsep = val;
-    }
+    int showcolsep() const;
+    void showcolsep(int val);
     // GET/SET COLUMN WIDTHS ARRAY
     //    Just like fltk method, but array is non-const.
     //
-    int *column_widths() const 
-	{
-        return(m_widths);
-    }
-    void column_widths(int *val) 
-	{
-        m_widths = val;
-    }
+    int *column_widths() const;
+    void column_widths(int *val);
 
-	boost::shared_ptr<CqBook>& book()
-	{
-		return(m_theBook);
-	}
-	void setBook(boost::shared_ptr<CqBook>& book)
-	{
-		m_theBook = book;
-	}
+	boost::shared_ptr<CqBook>& book();
+	void setBook(boost::shared_ptr<CqBook>& book);
 
-	CqBook::TqImageList::size_type currentSelected() const
-	{
-		return(m_currentSelected);
-	}
-
-	void setCurrentSelected(CqBook::TqImageList::size_type index)
-	{
-		m_currentSelected = index;
-	}
+	CqBook::TqImageList::size_type currentSelected() const;
+	void setCurrentSelected(CqBook::TqImageList::size_type index);
 
 	// Locally overridden Fl_Browser_ functions to manage the 
 	// item list.
@@ -142,6 +103,71 @@ private:
     //
     int which_col_near_mouse();
 };
+
+
+// Implementation of inline functions.
+inline CqBookBrowser::CqBookBrowser(int X,int Y,int W,int H,const char*L) : 
+	Fl_Browser_(X,Y,W,H,L), 
+	m_colsepcolor(Fl_Color(FL_GRAY)),
+	m_showcolsep(0),
+	m_last_cursor(FL_CURSOR_DEFAULT),
+	m_dragging(0)
+{
+	m_nowidths[0] = 0;
+	m_widths      = m_nowidths;
+}
+
+
+inline Fl_Color CqBookBrowser::colsepcolor() const 
+{
+	return(m_colsepcolor);
+}
+
+inline void CqBookBrowser::colsepcolor(const Fl_Color val) 
+{
+	m_colsepcolor = val;
+}
+
+inline int CqBookBrowser::showcolsep() const 
+{
+	return(m_showcolsep);
+}
+
+inline void CqBookBrowser::showcolsep(int val) 
+{
+	m_showcolsep = val;
+}
+
+inline int *CqBookBrowser::column_widths() const 
+{
+	return(m_widths);
+}
+
+inline void CqBookBrowser::column_widths(int *val) 
+{
+	m_widths = val;
+}
+
+
+inline boost::shared_ptr<CqBook>& CqBookBrowser::book()
+{
+	return(m_theBook);
+}
+
+inline void CqBookBrowser::setBook(boost::shared_ptr<CqBook>& book)
+{
+	m_theBook = book;
+}
+
+inline CqBook::TqImageList::size_type CqBookBrowser::currentSelected() const
+{
+	return(m_currentSelected);
+}
+
+inline void CqBookBrowser::setCurrentSelected(CqBook::TqImageList::size_type index)
+{
+	m_currentSelected = index;
+}
 
 END_NAMESPACE( Aqsis )
 

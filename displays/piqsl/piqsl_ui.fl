@@ -24,7 +24,7 @@ class CqPiqslMainWindow {open : {public Aqsis::CqPiqslBase}
         } {
           MenuItem m_menuFileOpen {
             label {&Open Library}
-            callback {char* name = fl_file_chooser("Load Configuration", "*.xml", currentConfigName().c_str());
+            callback {char* name = fl_file_chooser("Load Books", "*.bks", currentConfigName().c_str());
 loadConfiguration(name);}
             private xywh {0 0 100 20} shortcut 0x4006f
             code0 {o->shortcut(FL_COMMAND+'o');}
@@ -43,6 +43,7 @@ loadConfiguration(name);}
           }
           MenuItem m_menuFileQuit {
             label {&Quit}
+            callback {exit(0);} selected
             private xywh {0 0 100 20} shortcut 0x40071
             code0 {o->shortcut(FL_COMMAND+'q');}
           }
@@ -106,7 +107,7 @@ if(tab != NULL)
 	}
 	Fl::awake();
 }
-Fl::unlock();} selected
+Fl::unlock();}
             private xywh {0 0 100 20}
           }
         }
@@ -289,7 +290,7 @@ Fl::unlock();} {}
   decl {int m_columnWidths[2];} {}
   Function {saveConfigurationAs()} {open return_type {virtual void}
   } {
-    code {char* filename = fl_file_chooser("Save Books As", "*.xml", currentConfigName().c_str());
+    code {char* filename = fl_file_chooser("Save Books As", "*.bks", currentConfigName().c_str());
 if(filename != NULL)
 {
 	setCurrentConfigName(filename);

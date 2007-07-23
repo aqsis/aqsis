@@ -108,24 +108,15 @@ public:
 	/** Get the current name that the library would be saved to.
 	 * \return			The name of the library on disk.
 	 */
-	const std::string& currentConfigName() const
-	{
-		return(m_currentConfigName);
-	}
+	const std::string& currentConfigName() const;
 	/** Get the current name that the library would be saved to.
 	 * \return			The name of the library on disk.
 	 */
-	std::string& currentConfigName()
-	{
-		return(m_currentConfigName);
-	}
+	std::string& currentConfigName();
 	/** Set the current name that the library would be saved to.
 	 * \param name		The name of the library on disk.
 	 */
-	void setCurrentConfigName(const std::string& name)
-	{
-		m_currentConfigName = name;
-	}
+	void setCurrentConfigName(const std::string& name);
 
 	/** \typedef TqBookList
 	 * Typedef for the list of books in the libary.
@@ -137,18 +128,12 @@ public:
 	typedef std::vector<boost::shared_ptr<CqBook> >::iterator	TqBookListIterator;
 	/** Get an iterator to the start of the books in the library.
 	 */
-	TqBookListIterator booksBegin()
-	{
-		return(m_books.begin());
-	}
+	TqBookListIterator booksBegin();
 	/** Get an iterator to just past the last book in the library.
  	 * Follows the standard STL iterator conventions, so can be used in a != comparison
  	 * for iterating the books.
  	 */
-	TqBookListIterator booksEnd()
-	{
-		return(m_books.end());
-	}
+	TqBookListIterator booksEnd();
 
 private:
 	std::vector<boost::shared_ptr<CqBook> >	m_books;	///< List of books in the library.
@@ -156,6 +141,32 @@ private:
 	std::string m_currentConfigName;					///< Stored name of the library on disk.
 };
 
+
+// Implementation of inline functions.
+inline const std::string& CqPiqslBase::currentConfigName() const
+{
+	return(m_currentConfigName);
+}
+
+inline std::string& CqPiqslBase::currentConfigName()
+{
+	return(m_currentConfigName);
+}
+
+inline void CqPiqslBase::setCurrentConfigName(const std::string& name)
+{
+	m_currentConfigName = name;
+}
+
+inline CqPiqslBase::TqBookListIterator CqPiqslBase::booksBegin()
+{
+	return(m_books.begin());
+}
+
+inline CqPiqslBase::TqBookListIterator CqPiqslBase::booksEnd()
+{
+	return(m_books.end());
+}
 
 //-----------------------------------------------------------------------
 

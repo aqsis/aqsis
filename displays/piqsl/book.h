@@ -54,10 +54,7 @@ public:
 
 	/** Get the books name.
 	 */
-	const std::string&	name() const
-	{
-		return ( m_name );
-	}
+	const std::string&	name() const;
 	/** Set the name of the book.
      * \param name		The new name to the apply to the book.
      */
@@ -65,10 +62,7 @@ public:
 
 	/** Get a shared pointer to the framebuffer associated with this book.
 	 */
-	boost::shared_ptr<CqFramebuffer> framebuffer()
-	{
-		return(m_framebuffer);
-	}
+	boost::shared_ptr<CqFramebuffer> framebuffer();
 
 	/** \typedef TqImageList
 	 * Typedef for the locally stored image list.
@@ -80,18 +74,12 @@ public:
 	typedef std::vector<boost::shared_ptr<CqImage> >::iterator	TqImageListIterator;
 	/** Get an iterator to the start of the images this book contains.
 	 */
-	TqImageListIterator imagesBegin()
-	{
-		return(m_images.begin());
-	}
+	TqImageListIterator imagesBegin();
 	/** Get an iterator to just past the last image this book contains.
  	 * Follows the standard STL iterator conventions, so can be used in a != comparison
  	 * for iterating the images in the book.
  	 */
-	TqImageListIterator imagesEnd()
-	{
-		return(m_images.end());
-	}
+	TqImageListIterator imagesEnd();
 
 	/** Add an image to the book.
  	 * \param image		Shared pointer to the new image.
@@ -107,10 +95,7 @@ public:
 	/** Get the number of images in this book.
  	 * \return			The number of images contained in this book.
  	 */
-	TqUlong numImages() const
-	{
-		return(m_images.size());
-	}
+	TqUlong numImages() const;
 
 	/** Remove an image from the book.
  	 * \param item		Iterator referencing the image to be removed, see imagesBegin and imagesEnd.
@@ -122,6 +107,33 @@ private:
 	TqImageList m_images;		///< List of images in the book.
 	boost::shared_ptr<CqFramebuffer> m_framebuffer;	///< Shared pointer to the main framebuffer associated with this book.
 };
+
+// Implementations of inline functions.
+inline const std::string&	CqBook::name() const
+{
+	return ( m_name );
+}
+
+inline boost::shared_ptr<CqFramebuffer> CqBook::framebuffer()
+{
+	return(m_framebuffer);
+}
+
+inline CqBook::TqImageListIterator CqBook::imagesBegin()
+{
+	return(m_images.begin());
+}
+
+inline CqBook::TqImageListIterator CqBook::imagesEnd()
+{
+	return(m_images.end());
+}
+
+inline TqUlong CqBook::numImages() const
+{
+	return(m_images.size());
+}
+
 
 END_NAMESPACE( Aqsis )
 

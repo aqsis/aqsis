@@ -50,101 +50,24 @@ class CqDisplayServerImage : public CqImage
 {
 public:
     CqDisplayServerImage( const CqString name) : CqImage(name)
-	{
-		m_quantize[0] = m_quantize[1] = m_quantize[2] = m_quantize[3] = 0.0f;
-	}
+	{}
     CqDisplayServerImage() : CqImage() 
-	{
-		m_quantize[0] = m_quantize[1] = m_quantize[2] = m_quantize[3] = 0.0f;
-	}
+	{}
     virtual ~CqDisplayServerImage()
 	{}
 
 	/** Get a reference to the socket that is used to communicate with the piqsl display device.
  	 * \return				A reference to the socket.
  	 */
-    CqSocket& socket()
-    {
-        return ( m_socket );
-    }
+	CqSocket& socket();
 	/** Get a const reference to the socket that is used to communicate with the piqsl display device.
  	 * \return				A reference to the socket.
  	 */
-    const CqSocket& socket() const
-    {
-        return ( m_socket );
-    }
+    const CqSocket& socket() const;
 
 	/** Close the connection to the piqsl display server.
 	 */
 	void close();
-
-	/** Get the defined zero value used during quantisation.
- 	 * \return			The zero value that will be used during quantisation.
- 	 */
-	TqFloat quantizeZero() const
-	{
-		return(m_quantize[0]);
-	}
-	/** Set the zero value to be used during quantisation.
- 	 * \param zero		The zero value to use during quantisation.
- 	 */
-	void setQuantizeZero(TqFloat zero)
-	{
-		m_quantize[0] = zero;
-	}
-	/** Get the defined one value used during quantisation.
- 	 * \return			The one value that will be used during quantisation.
- 	 */
-	TqFloat quantizeOne() const
-	{
-		return(m_quantize[1]);
-	}
-	/** Set the one value to be used during quantisation.
- 	 * \param one		The one value to use during quantisation.
- 	 */
-	void setQuantizeOne(TqFloat one)
-	{
-		m_quantize[1] = one;
-	}
-	/** Get the defined min value used during quantisation.
- 	 * \return			The min value that will be used during quantisation.
- 	 */
-	TqFloat quantizeMin() const
-	{
-		return(m_quantize[2]);
-	}
-	/** Set the min value to be used during quantisation.
- 	 * \param min		The min value to use during quantisation.
- 	 */
-	void setQuantizeMin(TqFloat min)
-	{
-		m_quantize[2] = min;
-	}
-	/** Get the defined max value used during quantisation.
- 	 * \return			The max value that will be used during quantisation.
- 	 */
-	TqFloat quantizeMax() const
-	{
-		return(m_quantize[3]);
-	}
-	/** Set the max value to be used during quantisation.
- 	 * \param max		The max value to use during quantisation.
- 	 */
-	void setQuantizeMax(TqFloat max)
-	{
-		m_quantize[3] = max;
-	}
-	/** Set all quantisation values in one go.
- 	 * \param quant		A 4 element array containin the zero, one, min and max values for quantisation.
- 	 */
-	void setQuantize(const TqFloat (&quant)[4])
-	{
-		m_quantize[0] = quant[0];
-		m_quantize[1] = quant[1];
-		m_quantize[2] = quant[2];
-		m_quantize[3] = quant[3];
-	}
 
 	/** \brief Accept a bucket of data from the piqsl display server.
  	 * The data will have been delived to piqsl as an XML packet, this function expects the data to
@@ -176,8 +99,19 @@ public:
 
 private:
     CqSocket	m_socket;			///< Socket of the client.
-	TqFloat		m_quantize[4];		///< Stored quantisation values, used during conversion for display.
 };
+
+// Implementations of inline functions.
+inline CqSocket& CqDisplayServerImage::socket()
+{
+	return ( m_socket );
+}
+
+inline const CqSocket& CqDisplayServerImage::socket() const
+{
+	return ( m_socket );
+}
+
 
 END_NAMESPACE( Aqsis )
 

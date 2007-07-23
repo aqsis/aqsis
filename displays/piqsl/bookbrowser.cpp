@@ -24,13 +24,14 @@
 		\author Paul C. Gregory (pgregory@aqsis.com)
 */
 
-#include "aqsis.h"
+#include	"aqsis.h"
 
-#include <string.h>
+#include	<string.h>
+#include	<boost/format.hpp>
 
-#include "bookbrowser.h"
-#include "image.h"
-#include "sstring.h"
+#include	"bookbrowser.h"
+#include	"image.h"
+#include	"sstring.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -239,11 +240,11 @@ void CqBookBrowser::item_draw(void* v, int X, int Y, int W, int H) const
 	fl_draw(m_theBook->image(index)->name().c_str(), X+3, Y, i[0]-6, H, Fl_Align(talign|FL_ALIGN_CLIP), 0, 0);
 	X += i[0];
 	W -= i[0];
-	CqString Size;
-	Size.Format("%dx%dx%d", m_theBook->image(index)->imageWidth(), 
-	m_theBook->image(index)->imageHeight(),  
-	m_theBook->image(index)->numChannels() );
-	fl_draw(Size.c_str(), X+3, Y, i[1]-6, H, talign, 0, 0);
+	boost::format size("%1%x%2%x%3%");
+	size % m_theBook->image(index)->imageWidth();
+	size % m_theBook->image(index)->imageHeight();
+	size % m_theBook->image(index)->numChannels();
+	fl_draw(size.str().c_str(), X+3, Y, i[1]-6, H, talign, 0, 0);
 }
 
 void CqBookBrowser::change_cursor(Fl_Cursor newcursor) 

@@ -201,34 +201,6 @@ class CqDataHandler
 							}
 							param = param->NextSiblingElement("IntsParameter");
 						}
-						param = child->FirstChildElement("FloatsParameter");
-						while(param)
-						{
-							const char* name = param->Attribute("name");
-							if(std::string("quantize").compare(name) == 0)
-							{
-								TqFloat quantize[4];
-								TiXmlElement* values = param->FirstChildElement("Values");
-								if(values)
-								{
-									double val;
-									TiXmlElement* value = values->FirstChildElement("Float");
-									value->Attribute("value", &val);
-									quantize[0] = val;
-									value = value->NextSiblingElement("Float");
-									value->Attribute("value", &val);
-									quantize[0] = val;
-									value = value->NextSiblingElement("Float");
-									value->Attribute("value", &val);
-									quantize[0] = val;
-									value = value->NextSiblingElement("Float");
-									value->Attribute("value", &val);
-									quantize[0] = val;
-									m_client->setQuantize(quantize);
-								}
-							}
-							param = param->NextSiblingElement("FloatsParameter");
-						}
 					}
 					child = root->FirstChildElement("Formats");
 					if(child)
@@ -255,7 +227,7 @@ class CqDataHandler
 						TiXmlDocument doc("formats.xml");
 						TiXmlDeclaration* decl = new TiXmlDeclaration("1.0","","yes");
 						TiXmlElement* formatsXML = new TiXmlElement("Formats");
-						TqInt ichannel;
+						TqUint ichannel;
 						for( ichannel = 0; ichannel < m_client->numChannels(); ++ichannel)
 						{
 							TiXmlElement* formatv = new TiXmlElement("Format");

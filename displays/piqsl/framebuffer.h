@@ -46,21 +46,17 @@
 class Fl_FrameBuffer_Widget : public Fl_Widget
 {
 	public:
-		Fl_FrameBuffer_Widget(int x, int y, int imageW, int imageH, boost::shared_ptr<Aqsis::CqImage>& image) : Fl_Widget(x,y,imageW,imageH)
-		{
-			m_image = image;
-		}
+		Fl_FrameBuffer_Widget(int x, int y, int imageW, int imageH, boost::shared_ptr<Aqsis::CqImage>& image);
+		virtual ~Fl_FrameBuffer_Widget() {}
 
-		void setImage(boost::shared_ptr<Aqsis::CqImage>& image)
-		{
-			m_image = image;
-		}
+		void setImage(boost::shared_ptr<Aqsis::CqImage>& image);
 
 		virtual void draw();
 
 	private:
 		boost::shared_ptr<Aqsis::CqImage> m_image;
 };
+
 
 START_NAMESPACE( Aqsis )
 
@@ -73,7 +69,7 @@ class CqFramebuffer
 {
 public:
     CqFramebuffer( TqUlong width, TqUlong height, TqInt depth, const std::string& bookName );
-    ~CqFramebuffer();
+    virtual ~CqFramebuffer();
 
 	/** Ensure that the FLTK window for this framebuffer is displayed.
  	 * Brings the window to the front if already displayed.
@@ -91,32 +87,20 @@ public:
 	/** Get a shared pointer to the image that is being displayed in this framebuffer.
 	 * \return			A shared pointer to the associated image.
 	 */
-	boost::shared_ptr<CqImage>& image()
-	{
-		return( m_associatedImage );
-	}
+	boost::shared_ptr<CqImage>& image();
 	/** Get a const shared pointer to the image that is being displayed in this framebuffer.
 	 * \return			A shared pointer to the associated image.
 	 */
-	const boost::shared_ptr<CqImage>& image() const
-	{
-		return( m_associatedImage );
-	}
+	const boost::shared_ptr<CqImage>& image() const;
 	/** Get the name of the book that this framebuffer is associated with, if any.
 	 * \return			A reference to the book name.
 	 */
-	const std::string& bookName() const
-	{
-		return(m_bookName);
-	}
+	const std::string& bookName() const;
 	/** Set the name of the book that this framebuffer is linked to.
 	 * This is used to set the title of the window, for information purposes only.
 	 * \param name		The name of the book that the framebuffer is linked to.
 	 */
-	void setBookName(const std::string& name)
-	{
-		m_bookName = name;
-	}
+	void setBookName(const std::string& name);
 
 	/** Queue a request to recalculate the size of this window.
 	 * The resize operation can only be performed on the main thread, this allows other threads to force a recalc.
@@ -144,10 +128,7 @@ public:
 	 * Used when locking the framebuffer during multithreaded operation.
 	 * \return			A reference to the unique mutex for this framebuffer.
 	 */
-	boost::mutex& mutex()
-	{
-		return(m_mutex);
-	}
+	boost::mutex& mutex();
 
 private:
 	Fl_Window*	m_theWindow;						///< The FLTK window.
@@ -162,6 +143,46 @@ private:
 	std::string		m_bookName;						///< The name of the book, if any, this framebuffer is linked to.
 };
 
+
+// Implementation of inline functions.
+inline boost::shared_ptr<CqImage>& CqFramebuffer::image()
+{
+	return( m_associatedImage );
+}
+
+inline const boost::shared_ptr<CqImage>& CqFramebuffer::image() const
+{
+	return( m_associatedImage );
+}
+
+inline const std::string& CqFramebuffer::bookName() const
+{
+	return(m_bookName);
+}
+
+
+inline void CqFramebuffer::setBookName(const std::string& name)
+{
+	m_bookName = name;
+}
+
+
+inline boost::mutex& CqFramebuffer::mutex()
+{
+	return(m_mutex);
+}
+
 END_NAMESPACE( Aqsis )
+
+inline Fl_FrameBuffer_Widget::Fl_FrameBuffer_Widget(int x, int y, int imageW, int imageH, boost::shared_ptr<Aqsis::CqImage>& image) : 
+	Fl_Widget(x,y,imageW,imageH)
+{
+	m_image = image;
+}
+
+inline void Fl_FrameBuffer_Widget::setImage(boost::shared_ptr<Aqsis::CqImage>& image)
+{
+	m_image = image;
+}
 
 #endif	// FRAMEBUFFER_H_INCLUDED
