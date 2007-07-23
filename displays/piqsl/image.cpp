@@ -66,7 +66,7 @@ void CqImage::PrepareImageBuffer()
 	// Now prepare the buffer for the natural data.
 	// First work out how big each element is by scanning the channels specification.
 	m_elementSize = 0;
-	for(TqChannelListIterator channel = m_channels.begin(); channel != m_channels.end(); ++channel)
+	for(TqChannelListConstIterator channel = m_channels.begin(); channel != m_channels.end(); ++channel)
 	{
 		switch(channel->second)
 		{

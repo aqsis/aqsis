@@ -61,6 +61,7 @@ public:
 	typedef	std::pair<std::string, TqUint>	TqChannel;
 	typedef	std::vector<TqChannel>			TqChannelList;
 	typedef	TqChannelList::iterator			TqChannelListIterator;
+	typedef	TqChannelList::const_iterator	TqChannelListConstIterator;
 	/** Get the name of the image.
 	 * \return			The name of the image.
 	 */
