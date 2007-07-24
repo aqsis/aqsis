@@ -45,6 +45,51 @@ START_NAMESPACE( Aqsis )
 
 
 //----------------------------------------------------------------------
+CqBucket::CqBucket() : m_bProcessed(false), m_bucketData(0)
+{
+}
+
+//----------------------------------------------------------------------
+/** Add an MP to the list of deferred MPs.
+ *
+ * \note Same considerations as for ClearMPs().
+ */
+void CqBucket::AddMP( CqMicroPolygon* pMP )
+{
+#ifdef _DEBUG
+	std::vector<CqMicroPolygon*>::iterator end = m_micropolygons.end();
+	for (std::vector<CqMicroPolygon*>::iterator i = m_micropolygons.begin(); i != end; i++)
+		if ((*i) == pMP)
+			assert( false );
+#endif
+
+	ADDREF( pMP );
+	m_micropolygons.push_back( pMP );
+}
+
+//----------------------------------------------------------------------
+/** Clear the list of MPs.
+ *
+ * \note It's modifying the internal reference count of the MP, which
+ * could cause problems when a different bucket is operating on the
+ * same MP concurrently; so we have to separate this step of cleaning
+ * up the list of pending MPs from the concurrent rendering process.
+ * In other words, this shouldn't be called from a thread.
+ */
+void CqBucket::ClearMPs()
+{
+	for ( std::vector<CqMicroPolygon*>::iterator itMP = m_micropolygons.begin();
+	      itMP != m_micropolygons.end();
+	      itMP++ )
+	{
+		RELEASEREF( *itMP );
+	}
+
+	m_micropolygons.clear();
+}
+
+
+//----------------------------------------------------------------------
 /** Mark this bucket as processed
  */
 void CqBucket::SetProcessed( bool bProc )
@@ -987,16 +1032,14 @@ bool CqBucket::IsEmpty()
 
 void CqBucket::RenderWaitingMPs( long xmin, long xmax, long ymin, long ymax, TqFloat clippingFar, TqFloat clippingNear )
 {
-	for ( std::vector<CqMicroPolygon*>::iterator imp = m_micropolygons.begin();
-	      imp != m_micropolygons.end();
-	      imp++ )
+	for ( std::vector<CqMicroPolygon*>::iterator itMP = m_micropolygons.begin();
+	      itMP != m_micropolygons.end();
+	      itMP++ )
 	{
-		CqMicroPolygon* pMP = *imp;
-		RenderMicroPoly( pMP, xmin, xmax, ymin, ymax, clippingFar, clippingNear );
-		RELEASEREF( pMP );
+		RenderMicroPoly( *itMP, xmin, xmax, ymin, ymax, clippingFar, clippingNear );
 	}
 
-	m_micropolygons.clear();
+	ClearMPs();
 }
 
 

@@ -78,7 +78,8 @@ public:
 	 */
 	void process( long xmin, long xmax, long ymin, long ymax, TqFloat clippingFar, TqFloat clippingNear );
 
-	/** Post-process the bucket, which involves the operations Combine and Filter
+	/** Post-process the bucket, which involves the operations
+	 * Combine and Filter
 	 */
 	void postProcess( bool empty, bool imager, EqFilterDepth depthfilter, const CqColor& zThreshold );
 

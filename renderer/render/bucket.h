@@ -50,8 +50,7 @@ START_NAMESPACE( Aqsis )
 class CqBucket : public IqBucket
 {
 	public:
-		CqBucket() : m_bProcessed(false), m_bucketData(0)
-		{}
+		CqBucket();
 
 		virtual ~CqBucket();
 
@@ -134,20 +133,23 @@ class CqBucket : public IqBucket
 			m_gPrims.push(pGPrim);
 		}
 
-		/** Add an MPG to the list of deferred MPGs.
+		/** Add an MP to the list of deferred MPs.
+		 *
+		 * \note Same considerations as for ClearMPs().
 		 */
-		void	AddMPG( CqMicroPolygon* pMP )
-		{
-#ifdef _DEBUG
-			std::vector<CqMicroPolygon*>::iterator end = m_micropolygons.end();
-			for (std::vector<CqMicroPolygon*>::iterator i = m_micropolygons.begin(); i != end; i++)
-				if ((*i) == pMP)
-					assert( false );
-#endif
+		void	AddMP( CqMicroPolygon* pMP );
 
-			ADDREF( pMP );
-			m_micropolygons.push_back( pMP );
-		}
+		/** Clear the list of MPs.
+		 *
+		 * \note It's modifying the internal reference count
+		 * of the MP, which could cause problems when a
+		 * different bucket is operating on the same MP
+		 * concurrently; so we have to separate this step of
+		 * cleaning up the list of pending MPs from the
+		 * concurrent rendering process.  In other words, this
+		 * shouldn't be called from a thread.
+		 */
+		void	ClearMPs();
 
 		/** Get a pointer to the top GPrim in the stack of deferred GPrims.
 		 */
@@ -185,7 +187,6 @@ class CqBucket : public IqBucket
 		{
 			return( m_bProcessed );
 		}
-
 		/** Mark this bucket as processed
 		 */
 		void SetProcessed( bool bProc =  true);

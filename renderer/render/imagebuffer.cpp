@@ -497,7 +497,7 @@ void CqImageBuffer::AddMPG( CqMicroPolygon* pmpgNew )
 			}
 			else
 			{
-				bucket->AddMPG( pmpgNew );
+				bucket->AddMP( pmpgNew );
 			}
 		}
 	}
