@@ -73,14 +73,20 @@
 #ifndef CODESTYLE_H_INCLUDED
 #define CODESTYLE_H_INCLUDED
 
-// Includes go here.  First the standard headers, followed by external
-// libraries; finally any required project headers.
+// Includes go here.  Note the order.
+
+// First include aqsis.h - it has all the compiler-dependent #defines etc
+#include "aqsis.h"
+
+// Next include any C++ standard libraries
 #include <string>
 #include <sstream>
 
+// Followed by external library headers
 #include <boost/shared_ptr.hpp>
 
-#include "aqsis.h"
+// Followed by the remaining aqsis headers
+// #include "blah.h"
 
 
 // All aqsis components (apart from C-library interfaces) live inside some
@@ -133,8 +139,13 @@ class CqIntWrapper
 		 */
 		CqIntWrapper();
 
-		/** \brief The destructor.  Note: virtual so we can extend from
-		 * CqIntWrapper.  (Only undesirable for lightweight classes.)
+		/** \brief The destructor.
+		 *
+		 * Note: virtual so we can extend from CqIntWrapper.  (Only undesirable
+		 * for lightweight classes.)
+		 *
+		 * Note also that virtual methods which are overridden from base
+		 * classes should explicitly be declared virtual for clarity.
 		 */
 		virtual ~CqIntWrapper();
 
