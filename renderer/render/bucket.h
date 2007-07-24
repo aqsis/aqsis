@@ -134,22 +134,8 @@ class CqBucket : public IqBucket
 		}
 
 		/** Add an MP to the list of deferred MPs.
-		 *
-		 * \note Same considerations as for ClearMPs().
 		 */
-		void	AddMP( CqMicroPolygon* pMP );
-
-		/** Clear the list of MPs.
-		 *
-		 * \note It's modifying the internal reference count
-		 * of the MP, which could cause problems when a
-		 * different bucket is operating on the same MP
-		 * concurrently; so we have to separate this step of
-		 * cleaning up the list of pending MPs from the
-		 * concurrent rendering process.  In other words, this
-		 * shouldn't be called from a thread.
-		 */
-		void	ClearMPs();
+		void	AddMP( boost::shared_ptr<CqMicroPolygon>& pMP );
 
 		/** Get a pointer to the top GPrim in the stack of deferred GPrims.
 		 */
@@ -245,7 +231,7 @@ class CqBucket : public IqBucket
 		CqBucketData* m_bucketData;
 
 		/// Vector of vectors of waiting micropolygons in this bucket
-		std::vector<CqMicroPolygon*> m_micropolygons;
+		std::vector<boost::shared_ptr<CqMicroPolygon> > m_micropolygons;
 
 		/// A sorted list of primitives for this bucket
 		std::priority_queue<boost::shared_ptr<CqSurface>, std::deque<boost::shared_ptr<CqSurface> >, closest_surface> m_gPrims;

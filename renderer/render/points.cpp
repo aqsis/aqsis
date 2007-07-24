@@ -586,7 +586,8 @@ void CqMicroPolyGridPoints::Split( CqImageBuffer* pImage, long xmin, long xmax, 
 			}
 			pNew->CalculateTotalBound( );
 			pNew->BuildBoundList( numTimeRanges );
-			pImage->AddMPG( pNew );
+			boost::shared_ptr<CqMicroPolygon> pMP( pNew );
+			pImage->AddMPG( pMP );
 		}
 	}
 	else
@@ -643,7 +644,8 @@ void CqMicroPolyGridPoints::Split( CqImageBuffer* pImage, long xmin, long xmax, 
 			pNew->Initialise( radius );
 			//pNew->GetTotalBound();
 
-			pImage->AddMPG( pNew );
+			boost::shared_ptr<CqMicroPolygon> pMP( pNew );
+			pImage->AddMPG( pMP );
 		}
 	}
 
@@ -799,7 +801,8 @@ void CqMotionMicroPolyGridPoints::Split( CqImageBuffer* pImage, long xmin, long 
 		}
 		pNew->CalculateTotalBound( );
 		pNew->BuildBoundList( numTimeRanges );
-		pImage->AddMPG( pNew );
+		boost::shared_ptr<CqMicroPolygon> pMP( pNew );
+		pImage->AddMPG( pMP );
 	}
 
 	RELEASEREF( pGridA );

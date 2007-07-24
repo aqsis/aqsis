@@ -439,10 +439,8 @@ bool CqImageBuffer::OcclusionCullSurface( const CqBucketProcessor& bucketProcess
  * \param pmpgNew Pointer to a CqMicroPolygon derived class.
  */
 
-void CqImageBuffer::AddMPG( CqMicroPolygon* pmpgNew )
+void CqImageBuffer::AddMPG( boost::shared_ptr<CqMicroPolygon>& pmpgNew )
 {
-	ADDREF(pmpgNew);
-
 	// Quick check for outside crop window.
 	CqBound	B( pmpgNew->GetTotalBound() );
 
@@ -501,8 +499,6 @@ void CqImageBuffer::AddMPG( CqMicroPolygon* pmpgNew )
 			}
 		}
 	}
-
-	RELEASEREF(pmpgNew);
 }
 
 //----------------------------------------------------------------------

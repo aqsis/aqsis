@@ -216,7 +216,7 @@ class CqImageBuffer
 			return ( m_fDone );
 		}
 
-		void	AddMPG( CqMicroPolygon* pmpgNew );
+		void	AddMPG( boost::shared_ptr<CqMicroPolygon>& pmpgNew );
 		void	PostSurface( const boost::shared_ptr<CqSurface>& pSurface );
 		void	RenderImage();
 

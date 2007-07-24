@@ -470,7 +470,7 @@ struct CqHitTestCache
  * Abstract base class from which static and motion micropolygons are derived.
  */
 
-class CqMicroPolygon : public CqRefCount
+class CqMicroPolygon
 {
 	public:
 		/** Constructor, setting up the pointer to the grid

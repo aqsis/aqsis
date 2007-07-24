@@ -881,7 +881,8 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage )
 					pNew->AppendKey( aaPtimes[ keyFrame->second ][ iIndex ], aaPtimes[ keyFrame->second ][ iIndex + 1 ], aaPtimes[ keyFrame->second ][ iIndex + cu + 2 ], aaPtimes[ keyFrame->second ][ iIndex + cu + 1 ],  keyFrame->first);
 				
 				pNew->BuildBoundList( numTimeRanges );
-				pImage->AddMPG( pNew );
+				boost::shared_ptr<CqMicroPolygon> pMP( pNew );
+				pImage->AddMPG( pMP );
 			}
 			else
 			{
@@ -890,7 +891,8 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage )
 					pNew->MarkTrimmed();
 				pNew->Initialise();
 				pNew->CalculateTotalBound();
-				pImage->AddMPG( pNew );
+				boost::shared_ptr<CqMicroPolygon> pMP( pNew );
+				pImage->AddMPG( pMP );
 			}
 
 			// Calculate MPG area
@@ -1106,7 +1108,8 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage )
 
 			pNew->BuildBoundList( numTimeRanges );
 
-			pImage->AddMPG( pNew );
+			boost::shared_ptr<CqMicroPolygon> pMP( pNew );
+			pImage->AddMPG( pMP );
 		}
 	}
 
