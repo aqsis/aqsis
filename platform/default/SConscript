@@ -1,4 +1,5 @@
 import os.path
+import platform
 import SCons.Util
 
 Import('env', 'version')
@@ -26,7 +27,12 @@ if not env['debug']:
 
 # Point at the boost headers.
 # todo: need to find a way of determining this location automatically
-env.Replace(boost_include_path = ['/usr/include/boost'])
+if env['boost_include_path'] == "":
+	env.Replace(boost_include_path = ['/usr/include/boost'])
+if env['boost_lib_path'] == "":
+	env.Replace(boost_lib_path = ['/usr/lib'])
+if env['boost_thread_lib'] == "":
+	env.Replace(boost_thread_lib = ['boost_thread'])
 
 # Find out where the TIFF headers are, look in common places.
 tiffiofile = env.FindFile('tiffio.h', ['$tiff_include_path', '/usr/include'])
@@ -140,6 +146,11 @@ if not env['no_rpath']:
 
 env.Replace(slparse_ccflags = ['-O0'])
 env.Replace(aqsistypes_libs = ['dl'])
+env.Replace(piqslapp_libs = ['pthread'])
+
+# Small TinyXML hack to allow successful building under x86_64 architecture.
+if platform.machine() == 'x86_64':
+	env.Replace(tinyxml_ccflags = ['-fPIC'])
 
 def Symlink(dest, src):
 	def _symlink_func(target, source, env, dest=dest, src=src):
