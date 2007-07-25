@@ -7,9 +7,8 @@
 **___________________________________________________________________________
 */
 
-//? Is ri.h included already?
+/* Is ri.h included already? */
 #ifndef	RI_H_INCLUDED
-//{
 #define	RI_H_INCLUDED 1
 
 #include	"float.h"
@@ -19,7 +18,7 @@
 
 #    define  RI_SHARE
 
-#  else // !AQSIS_STATIC_LINK
+#  else /* !AQSIS_STATIC_LINK */
 
 #      ifdef RI_EXPORTS
 #        define RI_SHARE __declspec(dllexport)
@@ -27,13 +26,13 @@
 #        define RI_SHARE __declspec(dllimport)
 #      endif
 
-#  endif	// AQSIS_STATIC_LINK
+#  endif	/* AQSIS_STATIC_LINK */
 
-#else	// !WIN32
+#else	/* !WIN32 */
 
 #  define  RI_SHARE
 
-#endif // WIN32
+#endif /* WIN32 */
 
 #ifdef	__cplusplus
 extern	"C"
@@ -116,7 +115,7 @@ extern	"C"
 	RI_SHARE	extern	RtToken	RI_RASTER, RI_SCREEN, RI_CAMERA, RI_WORLD,
 	RI_OBJECT;
 	RI_SHARE	extern	RtToken	RI_INSIDE, RI_OUTSIDE, RI_LH, RI_RH;
-	//__declspec(dllimport) RtToken RI_P;
+	/*__declspec(dllimport) RtToken RI_P; */
 	RI_SHARE	extern	RtToken	RI_P, RI_PZ, RI_PW, RI_N, RI_NP, RI_CS, RI_OS,
 	RI_S, RI_T, RI_ST;
 	RI_SHARE	extern	RtToken	RI_BILINEAR, RI_BICUBIC;
@@ -147,12 +146,12 @@ extern	"C"
 
 #define	PARAMETERLIST	RtInt count, RtToken tokens[], RtPointer values[]
 
-	// Include the automatically generated procedure declarations.
-	// Generated from api.xml, using apiheader.xsl
+	/* Include the automatically generated procedure declarations. 
+	   Generated from api.xml, using apiheader.xsl */
 
 #include	"ri.inl"
 
-	// Specific to Aqsis
+	/* Specific to Aqsis */
 
 	typedef	RtVoid	( *RtProgressFunc ) ( RtFloat PercentComplete, RtInt FrameNo );
 
@@ -214,7 +213,6 @@ extern	"C"
 #define RIE_SEVERE      ((RtInt)3)      /* So bad you should probably abort */
 
 
-//}  // End of #ifdef RI_H_INCLUDED
 #endif
 
 

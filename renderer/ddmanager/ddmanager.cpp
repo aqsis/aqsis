@@ -987,15 +987,15 @@ void CqShallowDisplayRequest::FormatBucketForDisplay( IqBucket* pBucket )
 			double s = random.RandomFloat();
 			for(iformat = m_formats.begin(); iformat != m_formats.end(); iformat++)
 			{
-				TqFloat value = pSamples[m_dataOffsets[index]];
+				double value = pSamples[m_dataOffsets[index]];
 				// If special quantization instructions have been given for this display, do it now.
 				if( !( m_QuantizeZeroVal == 0.0f &&
 				        m_QuantizeOneVal  == 0.0f &&
 				        m_QuantizeMinVal  == 0.0f &&
 				        m_QuantizeMaxVal  == 0.0f ) )
 				{
-					value = ROUND(m_QuantizeZeroVal + value * (m_QuantizeOneVal - m_QuantizeZeroVal) + ( m_QuantizeDitherVal * s ) );
-					value = CLAMP(value, m_QuantizeMinVal, m_QuantizeMaxVal) ;
+					value = round(m_QuantizeZeroVal + value * (m_QuantizeOneVal - m_QuantizeZeroVal) + ( m_QuantizeDitherVal * s ) );
+					value = clamp<double>(value, m_QuantizeMinVal, m_QuantizeMaxVal) ;
 				}
 				TqInt type = iformat->type & PkDspyMaskType;
 				/// \todo Eventually, the switch statement below should go away in favour of making
@@ -1008,6 +1008,14 @@ void CqShallowDisplayRequest::FormatBucketForDisplay( IqBucket* pBucket )
 						pdata += sizeof(float);
 						break;
 						case PkDspyUnsigned32:
+						/** \note: We need to do this extra clamp as the quantisation values are stored
+						    single precision floats, as mandated by the spec., 
+						    but single precision floats cannot accurately represent the maximum 
+						    unsinged long value of 4294967295. Doing this ensures that the 
+						    unsigned long value is clamped before being cast, and the clamp is
+						    performed in double precision math to retain accuracy.
+						*/
+						value = clamp<double>(value, 0, 4294967295.0);
 						reinterpret_cast<unsigned long*>(pdata)[0] = static_cast<unsigned long>( value );
 						pdata += sizeof(unsigned long);
 						break;

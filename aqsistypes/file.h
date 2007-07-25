@@ -130,6 +130,11 @@ class COMMON_SHARE CqFile
 		CqString FixupPath(CqString& strPath);
 
 		static std::list<CqString*> Glob( const CqString& strFileGlob );
+		static std::string basePath( const CqString& strFilespec );
+		static std::string fileName( const CqString& strFilespec );
+		static std::string extension( const CqString& strFilespec );
+		static std::string baseName( const CqString& strFilespec );
+		static std::string pathSep();
 
 	private:
 		std::istream*	m_pStream;		///< a poimter to the stream associated with this file object.

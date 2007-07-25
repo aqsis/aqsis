@@ -1,0 +1,70 @@
+Import('env', 'embedManifest')
+piqslappenv = env.Copy()
+
+piqslappenv.AppendUnique(CPPPATH = ['#/aqsis/aqsistypes', '#/thirdparty/tinyxml', '#/renderer/ddmanager','$tiff_include_path', '$zlib_include_path', '$fltk_include_path'])
+piqslappenv.AppendUnique(LIBS = ['aqsistypes','argparse','$fltk_lib', 'tinyxml', '$boost_thread_lib', '$tiff_lib', '$z_lib'])
+
+piqslappenv.AppendUnique(LIBPATH = ['/usr/X11R6/lib'])
+piqslappenv.AppendUnique(CPPDEFINES=['PIQSL_APP_EXPORTS', 'TIXML_USE_STL'])
+
+piqslapp_sources = Split("""
+	piqsl.cpp
+	piqslbase.cpp
+	image.cpp
+	framebuffer.cpp
+	book.cpp
+	bookbrowser.cpp
+	displayserverimage.cpp
+	piqsl_ui.fl""")
+
+piqslapp_headers =  Split("""
+	piqsl.h
+	piqslbase.h
+	image.h
+	book.h
+	framebuffer.h
+	bookbrowser.h
+	displayserverimage.h
+	""")
+
+# Set any platform specific options for this target
+piqslappenv.UseTargetOptions('piqslapp')
+
+piqslapp = piqslappenv.Program('piqsl', piqslapp_sources)
+piqslappenv.Install('$BINDIR', piqslapp)
+embedManifest(env, piqslappenv, piqslapp, 'EXE')
+
+env.Distribute(piqslapp_sources)
+env.Distribute(piqslapp_headers)
+env.Distribute('piqsl_ui.fl')
+
+# Display driver for communicating with piqsl
+piqsldisplayenv = env.Copy()
+piqsldisplayenv.AppendUnique(CPPPATH=['#/renderer/ddmanager','#/thirdparty/tinyxml'])
+piqsldisplayenv.AppendUnique(CPPDEFINES=['TIXML_USE_STL'])
+
+piqsldisplay_sources = Split("""
+	piqsldisplay.cpp
+	displayhelpers.c""")
+
+piqsldisplay_headers =  Split("""
+	piqsldisplay.h""")
+
+piqsldisplayenv.AppendUnique(LIBS = ['aqsistypes', 'tinyxml'])
+
+# Set any platform specific target options.
+piqsldisplayenv.UseTargetOptions('piqsldisplay')
+
+piqsldisplay = piqsldisplayenv.SharedLibrary('piqsl', piqsldisplay_sources)
+
+embedManifest(env, piqsldisplayenv, piqsldisplay, 'DLL')
+
+	
+piqsldisplayenv.Install('$DISPLAYSDIR', piqsldisplay)
+
+Return('piqsldisplay')
+
+env.Distribute(piqsldisplay_sources)
+env.Distribute(piqsldisplay_headers)
+
+env.Distribute('SConscript')

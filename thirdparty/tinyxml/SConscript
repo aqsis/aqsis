@@ -12,6 +12,7 @@ tinyxml_headers = Split("""
 
 
 tinyxmlenv = env.Copy()
+tinyxmlenv.AppendUnique(CPPDEFINES=['TIXML_USE_STL'])
 
 # Set any platform specific options for this target
 tinyxmlenv.UseTargetOptions('tinyxml')

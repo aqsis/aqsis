@@ -1,6 +1,6 @@
 Import('env', 'embedManifest')
 displayenv = env.Copy()
-displayenv.AppendUnique(CPPPATH=['#/renderer/ddmanager'])
+displayenv.AppendUnique(CPPPATH=['#/renderer/ddmanager','#/thirdparty/tinyxml'])
 displayenv.AppendUnique(CPPDEFINES=['DISPLAY_EXPORTS'])
 
 display_sources = Split("""

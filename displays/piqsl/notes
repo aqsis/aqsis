@@ -1,0 +1,8 @@
+# Text File
+# AUTHOR:   tristan
+# FILE:     /home/tristan/src/aqsis/displays/display/framebuffer/notes
+# CREATED:  12:51:45 23/11/2005
+# MODIFIED: 12:51:45 23/11/2005
+
+For getting fltk to monitor the listening socket.
+ void add_fd(int fd, void (*cb)(int, void*), void* = 0);
