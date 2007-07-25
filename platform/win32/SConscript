@@ -141,6 +141,9 @@ if not env['mingw']:
 	env.AppendUnique(CPPDEFINES=['NO_SYSLOG', 'WIN32', 'PLUGINS', 'USE_WIN32_FILEIO'])
 	
 	env.Replace(display_libs = ['ws2_32', 'user32', 'gdi32', 'ole32', 'shell32', 'comctl32', '$fltk_lib'])
+	env.Replace(aqsistypes_libs = ['ws2_32'])
+	env.Replace(piqslapp_libs = ['ws2_32', 'user32', 'gdi32', 'ole32', 'shell32', 'comctl32', 
+		'advapi32', '$fltk_lib'])
 	
 	# This is needed for the Express Editions
 	env.AppendUnique(LIBPATH = ['$psdk_lib_path'])

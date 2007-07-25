@@ -26,6 +26,7 @@
 #include "aqsis.h"
 
 #include <tiffio.h>
+#include <ctime>
 
 #include "version.h"
 #include "image.h"
