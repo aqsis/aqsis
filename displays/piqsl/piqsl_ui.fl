@@ -26,7 +26,7 @@ class CqPiqslMainWindow {open : {public Aqsis::CqPiqslBase}
             label {&Open Library}
             callback {char* name = fl_file_chooser("Load Books", "*.bks", currentConfigName().c_str());
 if(name)
-  loadConfiguration(name);} selected
+  loadConfiguration(name);}
             private xywh {0 0 100 20} shortcut 0x4006f
             code0 {o->shortcut(FL_COMMAND+'o');}
           }
@@ -47,17 +47,20 @@ if(name)
             callback {exit(0);} selected
             private xywh {0 0 100 20} shortcut 0x40071
             code0 {o->shortcut(FL_COMMAND+'q');}
+            code1 {\#include <FL/fl_ask.H>}
           }
         }
         Submenu {} {
-          label {&Book} open
+          label {&Book} open selected
           xywh {5 5 100 20}
+          code1 {\#include <FL/fl_ask.H>}
         } {
           MenuItem m_menuBookNew {
             label {&New}
-            callback {addNewBook("Book1");}
+            callback {addNewBook("Book1");} selected
             private xywh {5 5 100 20} shortcut 0x4006e
             code0 {o->shortcut(FL_COMMAND+'n');}
+            code1 {\#include <FL/fl_ask.H>}
           }
           MenuItem m_menuBookExport {
             label {&Export}
@@ -67,9 +70,10 @@ if(tab != NULL)
 	char* filename = fl_file_chooser("Export Book As", "*.xml", currentConfigName().c_str());
 	if(filename != NULL)
 		exportBook(tab->book(), filename);
-}}
+}} selected
             private xywh {5 5 100 20} shortcut 0x40065
             code0 {o->shortcut(FL_COMMAND+'e');}
+            code1 {\#include <FL/fl_ask.H>}
           }
           MenuItem m_menuBookRename {
             label {&Rename}
@@ -87,9 +91,10 @@ if(tab)
     	Fl::awake();
     }
 }
-Fl::unlock();}
+Fl::unlock();} selected
             private xywh {0 0 100 20} shortcut 0x40072
             code0 {o->shortcut(FL_COMMAND+'r');}
+            code1 {\#include <FL/fl_ask.H>}
           }
           MenuItem m_menuBookRemove {
             label {&Remove}
@@ -108,13 +113,15 @@ if(tab != NULL)
 	}
 	Fl::awake();
 }
-Fl::unlock();}
+Fl::unlock();} selected
             private xywh {0 0 100 20}
+            code1 {\#include <FL/fl_ask.H>}
           }
         }
         Submenu {} {
-          label {&Images} open
+          label {&Images} open selected
           xywh {0 0 100 20}
+          code1 {\#include <FL/fl_ask.H>}
         } {
           MenuItem m_menuImagesAdd {
             label {&Add Image}
@@ -125,10 +132,10 @@ if(filename)
 	std::string name = Aqsis::CqFile::fileName(filename);
 	loadImageToCurrentBook(name, filename);
 }
-Fl::unlock();}
+Fl::unlock();} selected
             private xywh {0 0 100 20}
             code0 {\#include <FL/Fl_File_Chooser.H>}
-            code1 {\#include <FL/Fl_ask.H>}
+            code1 {\#include <FL/fl_ask.H>}
             code2 {\#include "version.h"}
             code3 {\#include "file.h"}
           }
@@ -156,10 +163,8 @@ Fl::unlock();}
         } {
           MenuItem {} {
             label About
-            callback {
-		std::string str = "piqsl version %s\\ncompiled %s %s";
-		fl_message(str.c_str(), VERSION_STR_PRINT, __DATE__, __TIME__);
-            } selected
+            callback {std::string str = "piqsl version %s\\ncompiled %s %s";
+		fl_message(str.c_str(), VERSION_STR_PRINT, __DATE__, __TIME__);}
             private xywh {5 5 31 20}
           }
         }
