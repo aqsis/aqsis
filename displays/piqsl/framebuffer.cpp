@@ -92,8 +92,6 @@ CqFramebuffer::~CqFramebuffer()
 	disconnect();
 	m_theWindow->hide();
 	delete m_theWindow;
-	delete m_uiImageWidget;
-	delete m_popupMenu;
 	Fl::unlock();
 }
 
