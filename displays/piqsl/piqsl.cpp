@@ -340,7 +340,7 @@ int main( int argc, char** argv )
 	ArgParse ap;
 
 	// Set up the options
-	ap.usageHeader( ArgParse::apstring( "Usage: " ) + argv[ 0 ] + " [options]" );
+	ap.usageHeader( ArgParse::apstring( "Usage: " ) + argv[ 0 ] + " [options] [XML file...] [Tiff file...]" );
 	ap.argString( "i", "\aSpecify the IP address to listen on (default: %default)", &g_strInterface );
 	ap.argString( "p", "\aSpecify the TCP port to listen on (default: %default)", &g_strPort );
 	ap.argFlag( "help", "\aprint this help and exit", &g_fHelp );
@@ -438,7 +438,9 @@ int main( int argc, char** argv )
 		{
 			fclose( file );
 			std::string name(*e);
-			if (name.find("xml") != std::string::npos)
+			if ((name.find(".xml") != std::string::npos) ||
+			    (name.find(".XML") != std::string::npos))
+			
 			{
 				// Load a booklet
 				window->loadConfiguration(name);
