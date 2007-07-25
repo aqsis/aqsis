@@ -33,6 +33,7 @@
 #include <boost/archive/iterators/base64_from_binary.hpp>
 #include <boost/archive/iterators/transform_width.hpp>
 #include <boost/archive/iterators/insert_linebreaks.hpp>
+#include <boost/shared_array.hpp>
 
 #ifdef	AQSIS_SYSTEM_WIN32
 #include <winsock2.h>
@@ -53,6 +54,7 @@ typedef	u_long in_addr_t;
 #include "socket.h"
 #include "logging.h"
 #include "logging_streambufs.h"
+#include "aqsismath.h"
 
 using namespace Aqsis;
 
@@ -333,7 +335,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			{
 				TiXmlElement* formatNode = child->FirstChildElement("Format");
 				// If we are recieving "rgba" data, ensure that it is in the correct order.
-				PtDspyDevFormat outFormat[iFormatCount];
+				boost::shared_array<PtDspyDevFormat> outFormat(new PtDspyDevFormat[iFormatCount]);
 				TqInt iformat = 0;
 				while(formatNode)
 				{
@@ -348,7 +350,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 					formatNode = formatNode->NextSiblingElement("Format");
 					iformat++;
 				}
-				PtDspyError err = DspyReorderFormatting(iFormatCount, format, MIN(iFormatCount,4), outFormat);
+				PtDspyError err = DspyReorderFormatting(iFormatCount, format, Aqsis::min(iFormatCount,4), outFormat.get());
 				if( err != PkDspyErrorNone )
 				{
 					return(err);
