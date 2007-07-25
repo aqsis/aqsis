@@ -430,6 +430,32 @@ int main( int argc, char** argv )
 	window->show(1, internalArgs);
 
 
+	// Take the leftovers and open either a book or a tiff
+	for ( ArgParse::apstringvec::const_iterator e = ap.leftovers().begin(); 		e != ap.leftovers().end(); e++ )
+	{
+		FILE *file = fopen( e->c_str(), "rb" );
+		if ( file != NULL )
+		{
+			fclose( file );
+			std::string name(*e);
+			if (name.find("xml") != std::string::npos)
+			{
+				// Load a booklet
+				window->loadConfiguration(name);
+			} else 
+			{
+				// load one image
+				boost::shared_ptr<CqImage> newImage(new CqImage(name));
+				newImage->loadFromTiff(name);
+				window->addImageToCurrentBook(newImage);
+			}
+		}
+		else
+		{
+			std::cout << "Warning: Cannot open file \"" << *e << "\"" << std::endl;
+		}
+	}
+
 	int result = 0;
 	for(;;)
 	{
