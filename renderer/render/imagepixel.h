@@ -140,7 +140,6 @@ struct SqImageSample
 	}
 
 	/// Copy constructor
-	///
 	SqImageSample(const SqImageSample& from)
 	{
 		m_sampleSlot = m_theSamplePool.Allocate();
@@ -151,14 +150,6 @@ struct SqImageSample
 	{
 		m_theSamplePool.DeAllocate(m_sampleSlot);
 	}
-
-
-	enum {
-	    Flag_Occludes = 0x0001,
-	    Flag_Matte = 0x0002,
-	    Flag_Valid = 0x0004
-	};
-
 
 	SqImageSample& operator=(const SqImageSample& from)
 	{
@@ -173,7 +164,6 @@ struct SqImageSample
 		return(*this);
 	}
 
-
 	static void SetSampleSize(TqInt size)
 	{
 		m_theSamplePool.Initialise(size);
@@ -183,7 +173,6 @@ struct SqImageSample
 	{
 		return(m_theSamplePool.SampleDataSlot(m_sampleSlot));
 	}
-
 	const TqFloat* Data() const
 	{
 		return(m_theSamplePool.SampleDataSlot(m_sampleSlot));
@@ -194,10 +183,45 @@ struct SqImageSample
 		return(m_sampleSlot);
 	}
 
-	TqInt m_flags;
+	void resetFlags()
+	{
+		m_flags = 0;
+	}
+	bool isValid() const
+	{
+		return (m_flags & Flag_Valid) != 0;
+	}
+	void setValid()
+	{
+		m_flags |= Flag_Valid;
+	}
+	bool isMatte() const
+	{
+		return (m_flags & Flag_Matte) != 0;
+	}
+	void setMatte()
+	{
+		m_flags |= Flag_Matte;
+	}
+	bool isOccludes() const
+	{
+		return (m_flags & Flag_Occludes) != 0;
+	}
+	void setOccludes()
+	{
+		m_flags |= Flag_Occludes;
+	}
+
 	boost::shared_ptr<CqCSGTreeNode>	m_pCSGNode;	///< Pointer to the CSG node this sample is part of, NULL if not part of a solid.
 
 private:
+	enum {
+	    Flag_Occludes = 0x0001,
+	    Flag_Matte = 0x0002,
+	    Flag_Valid = 0x0004
+	};
+
+	TqInt	m_flags;
 	TqInt	m_sampleSlot;
 
 	static	CqSampleDataPool m_theSamplePool;

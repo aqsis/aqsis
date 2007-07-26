@@ -485,7 +485,7 @@ void CqOcclusionTree::SampleMP( std::vector<CqImagePixel>& aieImage,
 {
 	// Check the current tree level, and if only one leaf, sample the MP, otherwise, pass it down to the left
 	// and/or right side of the tree if it crosses.
-	if(NumSamples() == 1)
+	if ( NumSamples() == 1 )
 	{
 		// Sample the MP
 		SqSampleData& sample = Sample(aieImage, samplePoints, 0);
@@ -505,10 +505,10 @@ void CqOcclusionTree::SampleMP( std::vector<CqImagePixel>& aieImage,
 			SqImageSample& ImageVal = opaque ? currentOpaqueSample : localImageVal;
 
 			// return if the sample is occluded and can be culled.
-			if(opaque)
+			if ( opaque )
 			{
-				if((currentOpaqueSample.m_flags & SqImageSample::Flag_Valid) &&
-				        currentOpaqueSample.Data()[Sample_Depth] <= D)
+				if (currentOpaqueSample.isValid() &&
+				    currentOpaqueSample.Data()[Sample_Depth] <= D)
 				{
 					return;
 				}
@@ -529,7 +529,7 @@ void CqOcclusionTree::SampleMP( std::vector<CqImagePixel>& aieImage,
 			val[ 6 ] = D;
 
 			// Now store any other data types that have been registered.
-			if(gridInfo.m_UsesDataMap)
+			if ( gridInfo.m_UsesDataMap )
 			{
 				StoreExtraData(pMP, ImageVal);
 			}
@@ -543,34 +543,34 @@ void CqOcclusionTree::SampleMP( std::vector<CqImagePixel>& aieImage,
 			// we can just replace, as we know we are in a treenode that is a leaf.
 			if ( opaque )
 			{
-				if(D < MaxOpaqueZ())
+				if ( D < MaxOpaqueZ() )
 				{
 					SetMaxOpaqueZ(D);
 					PropagateChanges();
 				}
 			}
 
-			if (pMP->pGrid()->usesCSG())
+			if ( pMP->pGrid()->usesCSG() )
 				ImageVal.m_pCSGNode = pMP->pGrid() ->pCSGNode();
 
-			ImageVal.m_flags = 0;
+			ImageVal.resetFlags();
 			if ( Occludes )
 			{
-				ImageVal.m_flags |= SqImageSample::Flag_Occludes;
+				ImageVal.setOccludes();
 			}
-			if( gridInfo.m_IsMatte )
+			if ( gridInfo.m_IsMatte )
 			{
-				ImageVal.m_flags |= SqImageSample::Flag_Matte;
+				ImageVal.setMatte();
 			}
 
-			if(!opaque)
+			if ( !opaque )
 			{
 				sample.m_Data.push_back( ImageVal );
 			}
 			else
 			{
 				// mark this sample as having been written into.
-				ImageVal.m_flags |= SqImageSample::Flag_Valid;
+				ImageVal.setValid();
 			}
 		}
 	}

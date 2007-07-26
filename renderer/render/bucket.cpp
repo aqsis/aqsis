@@ -535,8 +535,7 @@ void CqBucket::FilterBucket(bool empty, bool fImager)
 									TqInt cindex = sindex + sampleData.m_SubCellIndex;
 									TqFloat g = m_bucketData->m_aFilterValues[ cindex ];
 									gTot += g;
-									if ( pie2->OpaqueValues( m_bucketData->m_SamplePoints,
-												 sampleIndex ).m_flags & SqImageSample::Flag_Valid )
+									if ( pie2->OpaqueValues( m_bucketData->m_SamplePoints, sampleIndex ).isValid() )
 									{
 										SqImageSample& pSample = pie2->OpaqueValues( m_bucketData->m_SamplePoints,
 															     sampleIndex );
@@ -674,8 +673,7 @@ void CqBucket::FilterBucket(bool empty, bool fImager)
 										TqInt cindex = sindex + sampleData.m_SubCellIndex;
 										TqFloat g = m_bucketData->m_aFilterValues[ cindex ];
 										gTot += g;
-										if ( pie2->OpaqueValues( m_bucketData->m_SamplePoints,
-													 sampleIndex ).m_flags & SqImageSample::Flag_Valid )
+										if ( pie2->OpaqueValues( m_bucketData->m_SamplePoints, sampleIndex ).isValid() )
 										{
 											SqImageSample& pSample = pie2->OpaqueValues( m_bucketData->m_SamplePoints,
 																     sampleIndex );
@@ -1124,7 +1122,7 @@ void CqBucket::RenderMP_MBOrDof( CqMicroPolygon* pMP,
 
 		// get the index of the first and last samples that can fall inside
 		// the time range of this bound
-		if(IsMoving)
+		if (IsMoving)
 		{
 			if ( bound_numMB != bound_maxMB_1 )
 				pMP->SubBound( bound_numMB + 1, time1 );
@@ -1148,7 +1146,7 @@ void CqBucket::RenderMP_MBOrDof( CqMicroPolygon* pMP,
 		TqFloat mpgbminy = 0.0f;
 		TqFloat mpgbmaxy = 0.0f;
 		TqInt bound_maxDof = 0;
-		if(UsingDof)
+		if (UsingDof)
 		{
 			const CqVector2D& minZCoc = QGetRenderContext()->GetCircleOfConfusion( Bound.vecMin().z() );
 			const CqVector2D& maxZCoc = QGetRenderContext()->GetCircleOfConfusion( Bound.vecMax().z() );
@@ -1178,7 +1176,7 @@ void CqBucket::RenderMP_MBOrDof( CqMicroPolygon* pMP,
 
 		for ( TqInt bound_numDof = 0; bound_numDof < bound_maxDof; bound_numDof++ )
 		{
-			if(UsingDof)
+			if (UsingDof)
 			{
 				// now shift the bounding box to cover only a given range of
 				// lens positions.
@@ -1205,9 +1203,9 @@ void CqBucket::RenderMP_MBOrDof( CqMicroPolygon* pMP,
 				continue;
 			}
 
-			if(UsingDof)
+			if (UsingDof)
 			{
-				CqBound DofBound(bminx, bminy, bminz, bmaxx, bmaxy, bmaxz);
+				const CqBound DofBound(bminx, bminy, bminz, bmaxx, bmaxy, bmaxz);
 				m_bucketData->m_OcclusionBox.KDTree()->SampleMP(m_bucketData->m_aieImage,
 										m_bucketData->m_SamplePoints,
 										pMP,

@@ -345,7 +345,7 @@ void CqImagePixel::Clear( std::vector<SqSampleData>& samplePoints )
 	{
 		if(!samplePoints[m_SampleIndices[i]].m_Data.empty())
 			samplePoints[m_SampleIndices[ i ]].m_Data.clear( );
-		samplePoints[m_SampleIndices[ i ]].m_OpaqueSample.m_flags=0;
+		samplePoints[m_SampleIndices[ i ]].m_OpaqueSample.resetFlags();
 	}
 }
 
@@ -378,7 +378,7 @@ void CqImagePixel::Combine( std::vector<SqSampleData>& samplePoints, enum EqFilt
 		{
 			// Sort the samples by depth.
 			std::sort(samples->m_Data.begin(), samples->m_Data.end(), SqAscendingDepthSort());
-			if(opaqueValue.m_flags & SqImageSample::Flag_Valid)
+			if (opaqueValue.isValid())
 			{
 				//	insert opaqueValue into samples in the right place.
 				std::deque<SqImageSample>::iterator isi = samples->m_Data.begin();
@@ -429,9 +429,9 @@ void CqImagePixel::Combine( std::vector<SqSampleData>& samplePoints, enum EqFilt
 			        sample++ )
 			{
 				TqFloat* sample_data = sample->Data();
-				if ( sample->m_flags & SqImageSample::Flag_Matte )
+				if ( sample->isMatte() )
 				{
-					if ( sample->m_flags & SqImageSample::Flag_Occludes )
+					if ( sample->isOccludes() )
 					{
 						// Optimise common case
 						samplecolor = gColBlack;
@@ -482,7 +482,7 @@ void CqImagePixel::Combine( std::vector<SqSampleData>& samplePoints, enum EqFilt
 			}
 
 			// Write the collapsed color values back into the opaque entry.
-			if ( !samples->m_Data.empty())
+			if ( !samples->m_Data.empty() )
 			{
 				// Make sure the extra sample data from the top entry is copied
 				// to the opaque sample, which is then sent to the display.
@@ -494,9 +494,9 @@ void CqImagePixel::Combine( std::vector<SqSampleData>& samplePoints, enum EqFilt
 				opaqueValue.Data()[Sample_ORed] = sampleopacity.fRed();
 				opaqueValue.Data()[Sample_OGreen] = sampleopacity.fGreen();
 				opaqueValue.Data()[Sample_OBlue] = sampleopacity.fBlue();
-				opaqueValue.m_flags |= SqImageSample::Flag_Valid;
+				opaqueValue.setValid();
 
-				if ( depthfilter != Filter_Min)
+				if ( depthfilter != Filter_Min )
 				{
 					if ( depthfilter == Filter_MidPoint )
 					{
@@ -537,7 +537,7 @@ void CqImagePixel::Combine( std::vector<SqSampleData>& samplePoints, enum EqFilt
 		}
 		else
 		{
-			if(opaqueValue.m_flags & SqImageSample::Flag_Valid)
+			if (opaqueValue.isValid())
 			{
 				samplecount++;
 			}
