@@ -57,16 +57,20 @@ bool CqBucketProcessor::canCull(const CqBound* bound) const
 	return m_bucketData.canCull(bound);
 }
 
-void CqBucketProcessor::preProcess(TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt ysize,
+void CqBucketProcessor::preProcess(const CqVector2D& pos, const CqVector2D& size,
 				   TqInt pixelXSamples, TqInt pixelYSamples, TqFloat filterXWidth, TqFloat filterYWidth,
+				   TqInt viewRangeXMin, TqInt viewRangeXMax, TqInt viewRangeYMin, TqInt viewRangeYMax,
+				   TqFloat clippingNear, TqFloat clippingFar,
 				   bool empty)
 {
 	assert(m_bucket);
 
 	{
 		TIME_SCOPE("Prepare bucket");
-		m_bucket->PrepareBucket( xorigin, yorigin, xsize, ysize,
+		m_bucket->PrepareBucket( pos, size,
 					 pixelXSamples, pixelYSamples, filterXWidth, filterYWidth,
+					 viewRangeXMin, viewRangeXMax, viewRangeYMin, viewRangeYMax,
+					 clippingNear, clippingFar,
 					 true, empty );
 	}
 
@@ -77,12 +81,12 @@ void CqBucketProcessor::preProcess(TqInt xorigin, TqInt yorigin, TqInt xsize, Tq
 	}
 }
 
-void CqBucketProcessor::process( long xmin, long xmax, long ymin, long ymax, TqFloat clippingFar, TqFloat clippingNear )
+void CqBucketProcessor::process()
 {
 	assert(m_bucket);
 
 	TIME_SCOPE("Render MPs");
-	m_bucket->RenderWaitingMPs( xmin, xmax, ymin, ymax, clippingFar, clippingNear );
+	m_bucket->RenderWaitingMPs();
 }
 
 void CqBucketProcessor::postProcess( bool empty, bool imager, EqFilterDepth depthfilter, const CqColor& zThreshold )

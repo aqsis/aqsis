@@ -713,35 +713,33 @@ void CqImageBuffer::RenderImage()
 		if (fImager)
 			bIsEmpty = false;
 
-		// Set up some bounds for the bucket.
-		const CqVector2D bPos = BucketPosition();
-		const CqVector2D bSize = BucketSize();
-		const CqVector2D vecMin = bPos - bHalf;
-		const CqVector2D vecMax = bPos + bSize + bHalf;
+		// Pre-process bucket 
+		{
+			// Set up some bounds for the bucket.
+			const CqVector2D bPos = BucketPosition();
+			const CqVector2D bSize = BucketSize();
+			const CqVector2D vecMin = bPos - bHalf;
+			const CqVector2D vecMax = bPos + bSize + bHalf;
 
-		long xmin = static_cast<long>( vecMin.x() );
-		long ymin = static_cast<long>( vecMin.y() );
-		long xmax = static_cast<long>( vecMax.x() );
-		long ymax = static_cast<long>( vecMax.y() );
-		if ( xmin < CropWindowXMin() - m_FilterXWidth / 2 )
-			xmin = static_cast<long>(CropWindowXMin() - m_FilterXWidth / 2.0f);
-		if ( ymin < CropWindowYMin() - m_FilterYWidth / 2 )
-			ymin = static_cast<long>(CropWindowYMin() - m_FilterYWidth / 2.0f);
-		if ( xmax > CropWindowXMax() + m_FilterXWidth / 2 )
-			xmax = static_cast<long>(CropWindowXMax() + m_FilterXWidth / 2.0f);
-		if ( ymax > CropWindowYMax() + m_FilterYWidth / 2 )
-			ymax = static_cast<long>(CropWindowYMax() + m_FilterYWidth / 2.0f);
+			long xmin = static_cast<long>( vecMin.x() );
+			long ymin = static_cast<long>( vecMin.y() );
+			long xmax = static_cast<long>( vecMax.x() );
+			long ymax = static_cast<long>( vecMax.y() );
+			if ( xmin < CropWindowXMin() - m_FilterXWidth / 2 )
+				xmin = static_cast<long>(CropWindowXMin() - m_FilterXWidth / 2.0f);
+			if ( ymin < CropWindowYMin() - m_FilterYWidth / 2 )
+				ymin = static_cast<long>(CropWindowYMin() - m_FilterYWidth / 2.0f);
+			if ( xmax > CropWindowXMax() + m_FilterXWidth / 2 )
+				xmax = static_cast<long>(CropWindowXMax() + m_FilterXWidth / 2.0f);
+			if ( ymax > CropWindowYMax() + m_FilterYWidth / 2 )
+				ymax = static_cast<long>(CropWindowYMax() + m_FilterYWidth / 2.0f);
 
-		// Pre-process
-		bucketProcessor.preProcess( static_cast<TqInt>( bPos.x() ),
-					    static_cast<TqInt>( bPos.y() ),
-					    static_cast<TqInt>( bSize.x() ),
-					    static_cast<TqInt>( bSize.y() ),
-					    m_PixelXSamples,
-					    m_PixelYSamples,
-					    m_FilterXWidth,
-					    m_FilterYWidth,
-					    bIsEmpty );
+			bucketProcessor.preProcess( bPos, bSize,
+						    m_PixelXSamples, m_PixelYSamples, m_FilterXWidth, m_FilterYWidth,
+						    xmin, xmax, ymin, ymax,
+						    m_ClippingNear, m_ClippingFar,
+						    bIsEmpty );
+		}
 
 		// Render any waiting subsurfaces.
 		while ( !bucketProcessor.currentBucketIsEmpty() && !m_fQuit )
@@ -770,7 +768,7 @@ void CqImageBuffer::RenderImage()
 			}
 
 			// Process: Render any waiting micro polygons.
-			bucketProcessor.process( xmin, xmax, ymin, ymax, m_ClippingFar, m_ClippingNear );
+			bucketProcessor.process();
 		}
 
 		if ( m_fQuit )

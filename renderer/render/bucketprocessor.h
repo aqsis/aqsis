@@ -58,25 +58,15 @@ public:
 	bool canCull(const CqBound* bound) const;
 
 	/** Prepare the data for the bucket to be processed */
-	void preProcess(TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt ysize,
+	void preProcess(const CqVector2D& pos, const CqVector2D& size,
 			TqInt pixelXSamples, TqInt pixelYSamples, TqFloat filterXWidth, TqFloat filterYWidth,
+			TqInt viewRangeXMin, TqInt viewRangeXMax, TqInt viewRangeYMin, TqInt viewRangeYMax,
+			TqFloat clippingNear, TqFloat clippingFar,
 			bool empty);
 
 	/** Process the bucket, basically rendering the waiting MPs
-	 *
-	 * \param xmin Integer minimum extend of the image part being
-	 * rendered, takes into account buckets and clipping.
-	 *
-	 * \param xmax Integer maximum extend of the image part being
-	 * rendered, takes into account buckets and clipping.
-	 *
-	 * \param ymin Integer minimum extend of the image part being
-	 * rendered, takes into account buckets and clipping.
-	 *
-	 * \param ymax Integer maximum extend of the image part being
-	 * rendered, takes into account buckets and clipping.
 	 */
-	void process( long xmin, long xmax, long ymin, long ymax, TqFloat clippingFar, TqFloat clippingNear );
+	void process();
 
 	/** Post-process the bucket, which involves the operations
 	 * Combine and Filter

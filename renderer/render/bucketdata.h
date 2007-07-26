@@ -109,6 +109,14 @@ private:
 	TqFloat	m_FilterYWidth;
 	TqInt	m_NumDofBounds;
 
+	// View range and clipping info (to know when to skip rendering)
+	TqInt	m_viewRangeXMin;
+	TqInt	m_viewRangeXMax;
+	TqInt	m_viewRangeYMin;
+	TqInt	m_viewRangeYMax;
+	TqFloat	m_clippingNear;
+	TqFloat	m_clippingFar;
+
 	std::vector<CqBound>		m_DofBounds;
 	std::vector<CqImagePixel>	m_aieImage;
 	std::vector<SqSampleData>	m_SamplePoints;

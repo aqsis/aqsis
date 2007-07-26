@@ -49,6 +49,13 @@ void CqBucketData::reset()
 	m_FilterYWidth = 0.0f;
 	m_NumDofBounds = 0;
 
+	m_viewRangeXMin = 0;
+	m_viewRangeXMax = 0;
+	m_viewRangeYMin = 0;
+	m_viewRangeYMax = 0;
+	m_clippingNear = 0.0f;
+	m_clippingFar = 0.0f;
+
 	m_DofBounds.clear();
 	m_aieImage.clear();
 	m_SamplePoints.clear();
@@ -56,7 +63,7 @@ void CqBucketData::reset()
 
 	for( std::vector<std::vector<CqVector2D> >::iterator i = m_aSamplePositions.begin();
 	     i != m_aSamplePositions.end();
-	     i++ )
+	     ++i )
 	{
 		i->clear();
 	}
@@ -76,7 +83,6 @@ bool CqBucketData::canCull(const CqBound* bound) const
 {
 	return m_OcclusionBox.KDTree()->CanCull(bound);
 }
-
 
 
 END_NAMESPACE( Aqsis );

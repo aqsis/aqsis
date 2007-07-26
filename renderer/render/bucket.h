@@ -102,8 +102,28 @@ class CqBucket : public IqBucket
 		virtual	TqFloat Depth( TqInt iXPos, TqInt iYPos );
 		virtual	const TqFloat* Data( TqInt iXPos, TqInt iYPos );
 
-		void	PrepareBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt ysize,
+		/** Set up the necessary data for the bucket to render
+		 *
+		 * \param viewRangeXMin Integer minimum extend of the
+		 * image part being rendered, takes into account
+		 * buckets and clipping.
+		 *
+		 * \param viewRangeXMax Integer maximum extend of the
+		 * image part being rendered, takes into account
+		 * buckets and clipping.
+		 *
+		 * \param viewRangeYMin Integer minimum extend of the
+		 * image part being rendered, takes into account
+		 * buckets and clipping.
+		 *
+		 * \param viewRangeYMax Integer maximum extend of the
+		 * image part being rendered, takes into account
+		 * buckets and clipping.
+		 */
+		void	PrepareBucket( const CqVector2D& pos, const CqVector2D& size,
 				       TqInt pixelXSamples, TqInt pixelYSamples, TqFloat filterXWidth, TqFloat filterYWidth,
+				       TqInt viewRangeXMin, TqInt viewRangeXMax, TqInt viewRangeYMin, TqInt viewRangeYMax,
+				       TqFloat clippingNear, TqFloat clippingFar,
 				       bool fJitter = true, bool empty = false );
 
 		CqImagePixel& ImageElement(TqInt index) const;
@@ -184,29 +204,8 @@ class CqBucket : public IqBucket
 		}
 
 		/** Render any waiting MPs.
-		 *
-		 * Render ready micro polygons waiting to be
-		 * processed, so that we have as few as possible MPs
-		 * waiting and using memory at any given moment
- 		 *
-		 * \param xmin Integer minimum extend of the image
-		 * part being rendered, takes into account buckets and
-		 * clipping.
-		 *
-		 * \param xmax Integer maximum extend of the image
-		 * part being rendered, takes into account buckets and
-		 * clipping.
-		 *
-		 * \param ymin Integer minimum extend of the image
-		 * part being rendered, takes into account buckets and
-		 * clipping.
-		 *
-		 * \param ymax Integer maximum extend of the image
-		 * part being rendered, takes into account buckets and
-		 * clipping.
-		 *
 		 */
-		void RenderWaitingMPs( long xmin, long xmax, long ymin, long ymax, TqFloat clippingFar, TqFloat clippingNear );
+		void RenderWaitingMPs();
 
 	private:
 		/// This is a compare functor for sorting surfaces in order of depth.
@@ -249,32 +248,15 @@ class CqBucket : public IqBucket
 		}
 
 		/** Render a particular micropolygon.
-		 *    
+		 *
 		 * \param pMPG Pointer to the micropolygon to process.
-		 *
-		 * \param xmin Integer minimum extend of the image
-		 * part being rendered, takes into account buckets and
-		 * clipping.
-		 *
-		 * \param xmax Integer maximum extend of the image
-		 * part being rendered, takes into account buckets and
-		 * clipping.
-		 *
-		 * \param ymin Integer minimum extend of the image
-		 * part being rendered, takes into account buckets and
-		 * clipping.
-		 *
-		 * \param ymax Integer maximum extend of the image
-		 * part being rendered, takes into account buckets and
-		 * clipping.
-		 *
 		 * \see CqBucket, CqImagePixel
 		 */
-		void	RenderMicroPoly( CqMicroPolygon* pMP, long xmin, long xmax, long ymin, long ymax, TqFloat clippingFar, TqFloat clippingNear );
+		void	RenderMicroPoly( CqMicroPolygon* pMP );
 
 		/** This function assumes that either dof or mb or
 		 * both are being used. */
-		void	RenderMP_MBOrDof( CqMicroPolygon* pMP, long xmin, long xmax, long ymin, long ymax, TqFloat clippingFar, TqFloat clippingNear, bool IsMoving, bool UsingDof );
+		void	RenderMP_MBOrDof( CqMicroPolygon* pMP, bool IsMoving, bool UsingDof );
 		/** This function assumes that neither dof or mb are
 		 * being used. It is much simpler than the general
 		 * case dealt with above. */
