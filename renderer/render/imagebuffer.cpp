@@ -721,18 +721,18 @@ void CqImageBuffer::RenderImage()
 			const CqVector2D vecMin = bPos - bHalf;
 			const CqVector2D vecMax = bPos + bSize + bHalf;
 
-			long xmin = static_cast<long>( vecMin.x() );
-			long ymin = static_cast<long>( vecMin.y() );
-			long xmax = static_cast<long>( vecMax.x() );
-			long ymax = static_cast<long>( vecMax.y() );
+			TqInt xmin = static_cast<TqInt>( vecMin.x() );
+			TqInt ymin = static_cast<TqInt>( vecMin.y() );
+			TqInt xmax = static_cast<TqInt>( vecMax.x() );
+			TqInt ymax = static_cast<TqInt>( vecMax.y() );
 			if ( xmin < CropWindowXMin() - m_FilterXWidth / 2 )
-				xmin = static_cast<long>(CropWindowXMin() - m_FilterXWidth / 2.0f);
+				xmin = static_cast<TqInt>(CropWindowXMin() - m_FilterXWidth / 2.0f);
 			if ( ymin < CropWindowYMin() - m_FilterYWidth / 2 )
-				ymin = static_cast<long>(CropWindowYMin() - m_FilterYWidth / 2.0f);
+				ymin = static_cast<TqInt>(CropWindowYMin() - m_FilterYWidth / 2.0f);
 			if ( xmax > CropWindowXMax() + m_FilterXWidth / 2 )
-				xmax = static_cast<long>(CropWindowXMax() + m_FilterXWidth / 2.0f);
+				xmax = static_cast<TqInt>(CropWindowXMax() + m_FilterXWidth / 2.0f);
 			if ( ymax > CropWindowYMax() + m_FilterYWidth / 2 )
-				ymax = static_cast<long>(CropWindowYMax() + m_FilterYWidth / 2.0f);
+				ymax = static_cast<TqInt>(CropWindowYMax() + m_FilterYWidth / 2.0f);
 
 			bucketProcessor.preProcess( bPos, bSize,
 						    m_PixelXSamples, m_PixelYSamples, m_FilterXWidth, m_FilterYWidth,
