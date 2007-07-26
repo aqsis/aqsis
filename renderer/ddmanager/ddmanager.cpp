@@ -994,7 +994,7 @@ void CqShallowDisplayRequest::FormatBucketForDisplay( IqBucket* pBucket )
 				        m_QuantizeMinVal  == 0.0f &&
 				        m_QuantizeMaxVal  == 0.0f ) )
 				{
-					value = round(m_QuantizeZeroVal + value * (m_QuantizeOneVal - m_QuantizeZeroVal) + ( m_QuantizeDitherVal * s ) );
+					value = lround(m_QuantizeZeroVal + value * (m_QuantizeOneVal - m_QuantizeZeroVal) + ( m_QuantizeDitherVal * s ) );
 					value = clamp<double>(value, m_QuantizeMinVal, m_QuantizeMaxVal) ;
 				}
 				TqInt type = iformat->type & PkDspyMaskType;

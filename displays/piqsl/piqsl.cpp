@@ -25,6 +25,10 @@
 
 #include	"aqsis.h"
 
+#ifdef	AQSIS_SYSTEM_WIN32
+#define WIN32_LEAN_AND_MEAN
+#endif
+
 #include	<tiffio.h>
 #include	<string>
 #include	<list>
@@ -336,7 +340,7 @@ int main( int argc, char** argv )
 	ArgParse ap;
 
 	// Set up the options
-	ap.usageHeader( ArgParse::apstring( "Usage: " ) + argv[ 0 ] + " [options]" );
+	ap.usageHeader( ArgParse::apstring( "Usage: " ) + argv[ 0 ] + " [options] [BKS file...] [Tiff file...]" );
 	ap.argString( "i", "\aSpecify the IP address to listen on (default: %default)", &g_strInterface );
 	ap.argString( "p", "\aSpecify the TCP port to listen on (default: %default)", &g_strPort );
 	ap.argFlag( "help", "\aprint this help and exit", &g_fHelp );
@@ -425,6 +429,34 @@ int main( int argc, char** argv )
 	};
 	window->show(1, internalArgs);
 
+
+	// Take the leftovers and open either a book or a tiff
+	for ( ArgParse::apstringvec::const_iterator e = ap.leftovers().begin(); 		e != ap.leftovers().end(); e++ )
+	{
+		FILE *file = fopen( e->c_str(), "rb" );
+		if ( file != NULL )
+		{
+			fclose( file );
+			std::string name(*e);
+			TiXmlDocument doc(name);
+			bool loadOkay = doc.LoadFile();
+			if(loadOkay)
+			{
+				// Load a booklet
+				window->loadConfiguration(name);
+			} else 
+			{
+				// load one image
+				boost::shared_ptr<CqImage> newImage(new CqImage(name));
+				newImage->loadFromTiff(name);
+				window->addImageToCurrentBook(newImage);
+			}
+		}
+		else
+		{
+			std::cout << "Warning: Cannot open file \"" << *e << "\"" << std::endl;
+		}
+	}
 
 	int result = 0;
 	for(;;)
