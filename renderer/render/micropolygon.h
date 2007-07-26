@@ -576,7 +576,7 @@ class CqMicroPolygon
 			return m_Bound;
 		}
 
-		virtual	TqInt	cSubBounds()
+		virtual	TqInt	cSubBounds() const
 		{
 			return ( 1 );
 		}
@@ -584,7 +584,7 @@ class CqMicroPolygon
 		/**
 		* \todo Review: Unused parameter iIndex
 		*/				
-		virtual	CqBound SubBound( TqInt iIndex, TqFloat& time )
+		virtual	CqBound SubBound( TqInt iIndex, TqFloat& time ) const
 		{
 			time = 0.0f;
 			return ( GetTotalBound() );
@@ -812,13 +812,13 @@ class CqMicroPolygonMotion : public CqMicroPolygon
 		{
 			return ( m_Bound );
 		}
-		virtual	TqInt	cSubBounds()
+		virtual	TqInt	cSubBounds() const
 		{
 			if ( !m_BoundReady )
 				Aqsis::log() << error << "MP bound list not ready" << std::endl;
 			return ( m_BoundList.Size() );
 		}
-		virtual	CqBound	SubBound( TqInt iIndex, TqFloat& time )
+		virtual	CqBound	SubBound( TqInt iIndex, TqFloat& time ) const
 		{
 			if ( !m_BoundReady )
 				Aqsis::log() << error << "MP bound list not ready" << std::endl;

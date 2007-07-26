@@ -323,7 +323,7 @@ class CqBoundList
 			m_Bounds[ index ] = bound;
 			m_Times[ index ] = time;
 		}
-		TqInt Size()
+		TqInt Size() const
 		{
 			return m_Bounds.size();
 		}
@@ -332,7 +332,11 @@ class CqBoundList
 		{
 			return m_Bounds[ i ];
 		}
-		TqFloat GetTime( TqInt i )
+		const CqBound& GetBound( TqInt i ) const
+		{
+			return m_Bounds[ i ];
+		}
+		TqFloat GetTime( TqInt i ) const
 		{
 			return m_Times[ i ];
 		}

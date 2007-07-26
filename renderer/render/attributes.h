@@ -40,7 +40,6 @@
 #include	"ri.h"
 #include	"matrix.h"
 #include	"options.h"
-#include	"bound.h"
 #include	"spline.h"
 #include	"trimcurve.h"
 #include	"iattributes.h"
