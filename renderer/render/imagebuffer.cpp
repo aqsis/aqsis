@@ -363,7 +363,7 @@ void CqImageBuffer::PostSurface( const boost::shared_ptr<CqSurface>& pSurface )
 	CqBucket* bucket = &Bucket( XMinb, YMinb );
 	if ( bucket->IsProcessed() )
 	{
-		throw (CqString("Bucket already processed but a new Surface touches it"));
+		throw XqInternal("Bucket already processed but a new Surface touches it", __FILE__, __LINE__);
 	}
 	else
 	{
