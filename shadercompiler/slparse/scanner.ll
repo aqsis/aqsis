@@ -198,9 +198,11 @@ TqInt check_type()
 	SqVarRef var;
 	CqString strName(strNameSpace());
 	strName+=(char*)yytext;
+	CqVarDef* pVar = 0;
 	
 	yylval.m_pSymbol.eType=0;
 
+	// First check for local variables in the nested namespaces.
 	std::vector<std::pair<bool,CqString> >::reverse_iterator i=ParseNameSpaceStack.rbegin()+1;
 	bool fv = FindVariable((strNameSpace()+(char*)yytext).c_str(), var);
 	while(!fv && i!=ParseNameSpaceStack.rend())
@@ -212,43 +214,45 @@ TqInt check_type()
 			break;
 		i++;
 	}
+	// If a local variable was found, it must hide any global variables 
+	// of the same name.
 	if(fv)
 	{
 		yylval.m_pSymbol.VarRef=var;
 		yylval.m_pSymbol.eType=1;
-		CqVarDef* pVar=CqVarDef::GetVariablePtr(var);
-		// Check if the declaration marked it as an arry
-		if(pVar->Type()&Type_Array)
-			Ret=ARRAY_SYMBOL;
-		else
-			Ret=SYMBOL;
-		return(Ret);
+		pVar=CqVarDef::GetVariablePtr(var);
 	}
-
-	// Check the type against global variables.
-	strName=(char*)yytext;
-	if(FindVariable(strName.c_str(), var))
+	// Otherwise, check for global variables.
+	else
 	{
-		yylval.m_pSymbol.VarRef=var;
-		yylval.m_pSymbol.eType=1;
-		CqVarDef* pVar=CqVarDef::GetVariablePtr(var);
-		// Check if the declaration marked it as an arry
-		if(pVar->Type()&Type_Array)
-			Ret=ARRAY_SYMBOL;
-		else
-			Ret=SYMBOL;
-		return(Ret);
+		// Check the type against global variables.
+		strName=(char*)yytext;
+		if(FindVariable(strName.c_str(), var))
+		{
+			yylval.m_pSymbol.VarRef=var;
+			yylval.m_pSymbol.eType=1;
+			pVar=CqVarDef::GetVariablePtr(var);
+		}
 	}
 
 	// Check the type against known functions.
+	bool isAFunction = false;
 	std::vector<SqFuncRef> func;
 	if(FindFunction((char*)yytext, func))
 	{
 		yylval.m_pSymbol.FuncRef=func[0];
 		yylval.m_pSymbol.eType|=2;
-		Ret=SYMBOL;
-		return(Ret);
+		isAFunction = true;
 	}
+
+	// Check the resulting type, and return the appropriate
+	// identifier.
+	if(pVar && pVar->Type()&Type_Array)
+		Ret=ARRAY_SYMBOL;
+	else if(pVar)
+		Ret=SYMBOL;
+	else if(isAFunction)
+		Ret=SYMBOL;
 
 	return(Ret);
 }
