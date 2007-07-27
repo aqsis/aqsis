@@ -270,7 +270,6 @@ void CqParseNodeFunctionCall::validTypes( std::list<std::pair<TqInt, TqInt> >& t
 	// Create a map of types against suitability weights.
 	std::map<TqInt, TqInt> suitableTypes;
 	// For each candidate function, add it's real return type.
-	types.clear();
 	std::vector<SqFuncRef>::iterator i;
 	for ( i = m_aFuncRef.begin(); i != m_aFuncRef.end(); ++i )
 	{
@@ -288,9 +287,8 @@ void CqParseNodeFunctionCall::validTypes( std::list<std::pair<TqInt, TqInt> >& t
 				suitableTypes[castType] = m_aaTypePriorities[mainType][castType];
 	}
 	// Now copy the findings to the types list
-	std::map<TqInt, TqInt>::iterator suitableType;
-	for(suitableType = suitableTypes.begin(); suitableType != suitableTypes.end(); ++suitableType)
-		types.push_back(std::pair<TqInt, TqInt>(suitableType->first, suitableType->second));
+	types.clear();
+	std::copy(suitableTypes.begin(), suitableTypes.end(), std::back_inserter(types));
 }
 
 ///---------------------------------------------------------------------
