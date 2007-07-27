@@ -340,7 +340,7 @@ void CqImageBuffer::PostSurface( const boost::shared_ptr<CqSurface>& pSurface )
 	// If the primitive has been marked as undiceable by the eyeplane check, then we cannot get a valid
 	// bucket index from it as the projection of the bound would cross the camera plane and therefore give a false
 	// result, so just put it back in the current bucket for further splitting.
-	TqInt XMinb = CurrentBucketCol(), YMinb = CurrentBucketRow();
+	TqInt XMinb = 0, YMinb = 0;
 	if ( !pSurface->IsUndiceable() )
 	{
 		// Find out which bucket(s) the surface belongs to.
@@ -357,19 +357,13 @@ void CqImageBuffer::PostSurface( const boost::shared_ptr<CqSurface>& pSurface )
 
 		XMinb = CLAMP( XMinb, 0, cXBuckets() );
 		YMinb = CLAMP( YMinb, 0, cYBuckets() );
-
-		if( Bucket(XMinb, YMinb).IsProcessed() )
-		{
-			XMinb = CurrentBucketCol();
-			YMinb = CurrentBucketRow();
-		}
 	}
 
 	// Sanity check we are not putting into a bucket that has already been processed.
 	CqBucket* bucket = &Bucket( XMinb, YMinb );
 	if ( bucket->IsProcessed() )
 	{
-		Aqsis::log() << warning << "Bucket already processed but a new Surface touches it" << std::endl;
+		throw (CqString("Bucket already processed but a new Surface touches it"));
 	}
 	else
 	{
