@@ -52,7 +52,7 @@ class CqFramebuffer;
 class CqImage
 {
 public:
-	CqImage( const std::string& name ) : m_name(name), m_data(0), m_realData(0), m_frameWidth(0), m_frameHeight(0), m_imageWidth(0), m_imageHeight(0), m_originX(0), m_originY(0), m_elementSize(0)
+	CqImage( const std::string& name ) : m_name(name), m_description(""), m_data(0), m_realData(0), m_frameWidth(0), m_frameHeight(0), m_imageWidth(0), m_imageHeight(0), m_originX(0), m_originY(0), m_elementSize(0)
 	{} 
 	CqImage() : m_data(0), m_realData(0), m_frameWidth(0), m_frameHeight(0), m_imageWidth(0), m_imageHeight(0), m_originX(0), m_originY(0), m_elementSize(0)
 	{}
@@ -78,6 +78,13 @@ public:
 	 * \param name		The new filename of the image.
 	 */
     virtual void	setFilename( const std::string& name );
+	/** Set the Description
+	 */
+    virtual void	setDescription( const std::string& software );
+	/** Get the Description
+	 */
+    virtual const std::string&	description() const;
+
 	/** Get the frame width of the image.
 	 * The frame width if the cropped rendered region, within the image.
 	 * \return			The frame width of the image.
@@ -194,15 +201,18 @@ public:
 	void loadFromTiff(const std::string& filename);
 
 
+
 	/** Get a reference to the unique mutex for this image.
 	 * Used when locking the image during multithreaded operation.
 	 * \return			A reference to the unique mutex for this image.
 	 */
 	boost::mutex& mutex();
 
+
 protected:
     std::string		m_name;			///< Display name.
     std::string		m_fileName;		///< File name.
+    std::string		m_description;		///< Description or Software' renderer name.
 	boost::shared_array<unsigned char>	m_data;			///< Buffer to store the 8bit data for display. 
 	boost::shared_array<unsigned char>	m_realData;		///< Buffer to store the natural format image data.
 	TqUlong			m_frameWidth;	///< The width of the frame within the whole image.
@@ -225,6 +235,15 @@ private:
 	void transferData();
 };
 
+inline void	CqImage::setDescription( const std::string& description )
+{
+	m_description = description;
+}
+
+inline const std::string&	CqImage::description( ) const
+{
+	return (m_description);
+}
 
 inline const std::string& CqImage::name() const
 {

@@ -212,6 +212,8 @@ void CqImage::saveToTiff(const std::string& filename)
 //			TIFFSetField( pOut, TIFFTAG_HOSTCOMPUTER, image->m_hostname.c_str() );
 		TIFFSetField( pOut, TIFFTAG_IMAGEDESCRIPTION, mydescription);
 
+		setDescription(std::string(mydescription));
+
 		// Set the position tages in case we aer dealing with a cropped image.
 		TIFFSetField( pOut, TIFFTAG_XPOSITION, ( float ) originX() );
 		TIFFSetField( pOut, TIFFTAG_YPOSITION, ( float ) originY() );
@@ -303,6 +305,11 @@ void CqImage::loadFromTiff(const std::string& filename)
 		TIFFGetField(tif, TIFFTAG_SAMPLESPERPIXEL, &nChannels);
 		TIFFGetField(tif, TIFFTAG_BITSPERSAMPLE, &bitsPerSample);
 		TIFFGetField(tif, TIFFTAG_SAMPLEFORMAT, &sampleFormat);
+		TqChar *description = "";
+		if (TIFFGetField(tif, TIFFTAG_IMAGEDESCRIPTION, &description) != 1)
+		{
+			TIFFGetField(tif, TIFFTAG_SOFTWARE, &description);
+		}
 		switch(sampleFormat)
 		{
 			case SAMPLEFORMAT_UINT:
@@ -365,6 +372,7 @@ void CqImage::loadFromTiff(const std::string& filename)
 		setOrigin(0,0);
 		setImageSize(w, h);
 		setFrameSize(w, h);
+		setDescription(std::string(description));
 		Aqsis::log() << Aqsis::info << "Loading image " << filename << " [" << h << "x" << w << "x" << nChannels << "] (" << internalFormat << ")" << std::endl;
 		m_channels.clear();
 		for(TqUint channel = 0; channel < nChannels; ++channel)
