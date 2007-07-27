@@ -77,6 +77,13 @@ public:
 	 */
 	bool currentBucketIsEmpty() const;
 
+	/** Whether the bucket has pending surfaces to render
+	 */
+	bool hasPendingSurfaces() const;
+	/** Whether the bucket has pending MPs to render
+	 */
+	bool hasPendingMPs() const;
+
 	/** Get the top surface of the current bucket
 	 */
 	boost::shared_ptr<CqSurface> getTopSurface();

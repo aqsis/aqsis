@@ -122,6 +122,20 @@ bool CqBucketProcessor::currentBucketIsEmpty() const
 	return m_bucket->IsEmpty();
 }
 
+bool CqBucketProcessor::hasPendingSurfaces() const
+{
+	assert(m_bucket);
+
+	return m_bucket->hasPendingSurfaces();
+}
+
+bool CqBucketProcessor::hasPendingMPs() const
+{
+	assert(m_bucket);
+
+	return m_bucket->hasPendingMPs();
+}
+
 boost::shared_ptr<CqSurface> CqBucketProcessor::getTopSurface()
 {
 	assert(m_bucket);

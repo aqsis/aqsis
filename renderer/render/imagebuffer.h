@@ -269,7 +269,8 @@ class CqImageBuffer
 
 		void	DeleteImage();
 
-		// Move to the next bucket to process.
+		/** Move to the next bucket to process.
+		 */
     		bool NextBucket(EqBucketOrder order);
 
 		/** Get a pointer to the current bucket

@@ -187,6 +187,14 @@ class CqBucket : public IqBucket
 		 * contain any surface, micropolygon or grids.
 		 */
 		bool IsEmpty();
+		/** Get the flag that indicates whether the bucket has
+		 * pending surfaces.
+		 */
+		bool hasPendingSurfaces() const;
+		/** Get the flag that indicates whether the bucket has
+		 * pending MPs to render.
+		 */
+		bool hasPendingMPs() const;
 		/** Get the flag that indicates if the bucket has been processed yet.
 		 */
 		bool IsProcessed() const

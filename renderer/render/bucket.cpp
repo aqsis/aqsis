@@ -999,6 +999,20 @@ bool CqBucket::IsEmpty()
 	return !pTopSurface() && m_micropolygons.empty();
 }
 
+
+//----------------------------------------------------------------------
+bool CqBucket::hasPendingSurfaces() const
+{
+	return ! m_gPrims.empty();
+}
+
+
+//----------------------------------------------------------------------
+bool CqBucket::hasPendingMPs() const
+{
+	return ! m_micropolygons.empty();
+}
+
 //----------------------------------------------------------------------
 /** Render any waiting MPs.
  
