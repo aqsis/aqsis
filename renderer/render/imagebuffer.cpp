@@ -388,17 +388,17 @@ bool CqImageBuffer::OcclusionCullSurface( const CqBucketProcessor& bucketProcess
 		// pSurface is behind everying in this bucket but it may be
 		// visible in other buckets it overlaps.
 		// bucket to the right
-		TqInt nextBucket = CurrentBucketCol() + 1;
-		CqVector2D pos = BucketPosition( nextBucket, CurrentBucketRow() );
+		TqInt nextBucket = bucketProcessor.getBucketCol() + 1;
+		CqVector2D pos = BucketPosition( nextBucket, bucketProcessor.getBucketRow() );
 		if ( ( nextBucket < cXBuckets() ) &&
 		        ( RasterBound.vecMax().x() >= pos.x() ) )
 		{
-			Bucket( nextBucket, CurrentBucketRow() ).AddGPrim( pSurface );
+			Bucket( nextBucket, bucketProcessor.getBucketRow() ).AddGPrim( pSurface );
 			return true;
 		}
 
 		// next row
-		nextBucket = CurrentBucketRow() + 1;
+		nextBucket = bucketProcessor.getBucketRow() + 1;
 		// find bucket containing left side of bound
 		TqInt nextBucketX = static_cast<TqInt>( RasterBound.vecMin().x() ) / XBucketSize();
 		nextBucketX = MAX( nextBucketX, 0 );
@@ -701,7 +701,7 @@ void CqImageBuffer::RenderImage()
 		/////////////////////////////////////////////////////////////////////////
 
 
-		bucketProcessor.setBucket(&CurrentBucket());
+		bucketProcessor.setBucket(&CurrentBucket(), CurrentBucketCol(), CurrentBucketRow());
 
 		bool bIsEmpty = bucketProcessor.currentBucketIsEmpty();
 		if (fImager)
@@ -781,7 +781,9 @@ void CqImageBuffer::RenderImage()
 		BucketComplete();
 		{
 			TIME_SCOPE("Display bucket");
-			QGetRenderContext() ->pDDmanager() ->DisplayBucket( &CurrentBucket() );
+			CqBucket& bucket = Bucket(bucketProcessor.getBucketCol(),
+						  bucketProcessor.getBucketRow());
+			QGetRenderContext() ->pDDmanager() ->DisplayBucket( &bucket );
 		}
 		if ( pProgressHandler )
 		{

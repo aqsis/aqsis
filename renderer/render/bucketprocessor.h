@@ -49,7 +49,7 @@ public:
 	~CqBucketProcessor();
 
 	/** Set the bucket to be processed */
-	void setBucket(CqBucket* bucket);
+	void setBucket(CqBucket* bucket, TqInt bucketCol, TqInt bucketRow);
 
 	/** Reset the status of the object */
 	void reset();
@@ -91,9 +91,19 @@ public:
 	 */
 	void popSurface();
 
+	/** Get the column in the image of the current bucket */
+	TqInt getBucketCol() const;
+	/** Get the row in the image of the current bucket */
+	TqInt getBucketRow() const;
+
 private:
 	/// Pointer to the current bucket
 	CqBucket* m_bucket;
+
+	/// Current bucket column in the image
+	TqInt m_bucketCol;
+	/// Current bucket row in the image
+	TqInt m_bucketRow;
 
 	/// Bucket data for the current bucket
 	CqBucketData m_bucketData;
