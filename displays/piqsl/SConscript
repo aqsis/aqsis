@@ -30,13 +30,31 @@ piqslapp_headers =  Split("""
 # Set any platform specific options for this target
 piqslappenv.UseTargetOptions('piqslapp')
 
-piqslapp = piqslappenv.Program('piqsl', piqslapp_sources)
+piqslapp_objects = piqslappenv.Object(piqslapp_sources)
+
+piqslapp = piqslappenv.Program('piqsl', piqslapp_objects)
 piqslappenv.Install('$BINDIR', piqslapp)
 embedManifest(env, piqslappenv, piqslapp, 'EXE')
 
+#-------------------------------------------------------------------------------
+# Unit Tests
+Import('testEnv')
+testEnv = testEnv.Copy()
+#testEnv.AppendUnique(LIBS=['aqsistypes'])
+testEnv.AppendUnique(LIBS = ['aqsistypes','argparse','$fltk_lib', 'tinyxml', '$boost_thread_lib', '$tiff_lib', '$z_lib'])
+testEnv.AppendUnique(CPPPATH=['#/thirdparty/tinyxml'])
+piqslapp_test_sources = Split('''
+	image_test.cpp
+	''') + [piqslapp_objects[2]]
+testEnv.addUnitTest('piqslapp_test', piqslapp_test_sources)
+
+
+#-------------------------------------------------------------------------------
+env.Distribute(piqslapp_test_sources)
 env.Distribute(piqslapp_sources)
 env.Distribute(piqslapp_headers)
 env.Distribute('piqsl_ui.fl')
+#-------------------------------------------------------------------------------
 
 # Display driver for communicating with piqsl
 piqsldisplayenv = env.Copy()

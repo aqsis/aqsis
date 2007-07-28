@@ -39,6 +39,7 @@
 #include	<boost/thread/mutex.hpp>
 
 #include 	"tinyxml.h"
+#include	"aqsismath.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -52,10 +53,7 @@ class CqFramebuffer;
 class CqImage
 {
 public:
-	CqImage( const std::string& name ) : m_name(name), m_description(""), m_data(0), m_realData(0), m_frameWidth(0), m_frameHeight(0), m_imageWidth(0), m_imageHeight(0), m_originX(0), m_originY(0), m_elementSize(0)
-	{} 
-	CqImage() : m_data(0), m_realData(0), m_frameWidth(0), m_frameHeight(0), m_imageWidth(0), m_imageHeight(0), m_originX(0), m_originY(0), m_elementSize(0)
-	{}
+	inline CqImage(const std::string& name = "");
     virtual ~CqImage();
 
 	typedef	std::pair<std::string, TqUint>	TqChannel;
@@ -221,19 +219,90 @@ protected:
 	TqUlong			m_imageHeight;	///< The total image height.
 	TqUlong			m_originX;		///< The origin of the frame within the whole image.
 	TqUlong			m_originY;		///< The origin of the frame within the whole image.
-	TqInt			m_elementSize;	///< The calcualated total size of a single pixel.
+	TqUint			m_elementSize;	///< The calcualated total size of a single pixel.
+	std::vector<TqUint> m_channelOffsets; ///< A vector of channel byte offsets into the image data.
 	TqChannelList	m_channels;		///< An array of channels, name and type.
 
 	boost::function<void(int,int,int,int)> m_updateCallback;	///< A callback, called when an image changes.
 	boost::mutex	m_mutex;		///< The unique mutex for this image.
 
-private:
-	/** Transfer the data from the real buffer to thd display buffer.
-	 * This takes into accound the format of the channels in the real data and will attempt to make a 
-	 * good guess at the intended quantisation for 8bit display.
+protected:
+	/** \brief Transfer the data from the real buffer to thd display buffer.
+	 *
+	 * This takes into accound the format of the channels in the real data and
+	 * will attempt to make a good guess at the intended quantisation for 8bit
+	 * display.
+	 *
+	 * \param src - source buffer
+	 * \param dest - destination buffer
 	 */
-	void transferData();
+	void quantizeForDisplay(const TqUchar* src, TqUchar* dest);
+
+	/** \brief Get offsets into a data buffer of type TqUchar for the channel list.
+	 *
+	 * \param channels - list describing the image channels
+	 * \param offsets - output vector of offsets for channels in bytes.
+	 * \param bytesPerPixel - output number of bytes taken up by all channels.
+	 */
+	static void channelOffsets(const TqChannelList& channels,
+			std::vector<TqUint>& offsets, TqUint& bytesPerPixel);
+
+	/** \brief Re-quantize a single channel from a buffer into 
+	 *
+	 * T is the type of the parameters in the source buffer.
+	 *
+	 * \param src - source buffer
+	 * \param dest - destination buffer
+	 * \param size - number of pixels in the buffers
+	 * \param srcStride - stride for the source buffer in bytes.
+	 * \param destStride - stride for the destination buffer in bytes.
+	 */
+	template<typename T>
+	static void quantize8bitChannelStrided(const TqUchar* src, TqUchar* dest,
+			TqUint size, TqUint srcStride, TqUint destStride);
+
+	/** \brief Requantieze an integer type for 8bit displays
+	 *
+	 * \param val - a variable of either signed or unsigned integral type
+	 *
+	 * \return A TqUchar representing the input.
+	 */
+	template<typename T>
+	static inline TqUchar quantize8bit(T val);
+
+	/** \brief Quantize a TqFloat for 8bit displays
+	 *
+	 * \param float to remap
+	 *
+	 * \return A TqUchar representing the input.
+	 */
+	static inline TqUchar quantize8bit(TqFloat val);
 };
+
+
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+// Implementation of CqImage inlines and templates
+
+inline CqImage::CqImage( const std::string& name)
+    : m_name(name),
+    m_fileName(),
+    m_description(),
+	m_data(0),
+	m_realData(0),
+	m_frameWidth(0),
+	m_frameHeight(0),
+	m_imageWidth(0),
+	m_imageHeight(0),
+	m_originX(0),
+	m_originY(0),
+	m_elementSize(0),
+	m_channelOffsets(),
+	m_channels(),
+	m_updateCallback(),
+	m_mutex()
+{ } 
+
 
 inline void	CqImage::setDescription( const std::string& description )
 {
@@ -366,6 +435,33 @@ inline boost::mutex& CqImage::mutex()
 {
 	return(m_mutex);
 }
+
+template<typename T>
+void CqImage::quantize8bitChannelStrided(const TqUchar* src, TqUchar* dest,
+		TqUint size, TqUint srcStride, TqUint destStride)
+{
+	for(TqUint i = 0; i < size; ++i)
+	{
+		*dest = quantize8bit(*reinterpret_cast<const T*>(src));
+		src += srcStride;
+		dest += destStride;
+	}
+}
+
+template<typename T>
+inline TqUchar CqImage::quantize8bit(T val)
+{
+	return static_cast<TqUchar>(
+			static_cast<TqUlong>(val - std::numeric_limits<T>::min()) >>
+			( std::numeric_limits<TqUchar>::digits*(sizeof(T) - sizeof(TqUchar)) )
+		);
+}
+
+inline TqUchar CqImage::quantize8bit(TqFloat val)
+{
+	return static_cast<TqUchar>(clamp(val, 0.0f, 1.0f)*255);
+}
+
 
 END_NAMESPACE( Aqsis )
 
