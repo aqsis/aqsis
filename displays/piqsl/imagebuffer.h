@@ -32,6 +32,7 @@
 
 #include <vector>
 #include <string>
+#include <limits>
 
 #include <boost/shared_array.hpp>
 
