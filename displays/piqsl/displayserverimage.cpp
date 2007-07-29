@@ -144,10 +144,9 @@ void CqDisplayServerImage::acceptData(TqUlong xmin, TqUlong xmaxplus1, TqUlong y
 				TqInt storageOffset = (( y * realLineLen ) + ( x * m_elementSize ) );
 				TqUchar alpha = 255;
 				/// \todo: Work out how to read alpha from the bucket data, taking into account sizes.
-				CqImage::TqChannelListIterator channel;
-				for(channel = m_channels.begin(); channel != m_channels.end(); ++channel)
+				for(TqChannelList::const_iterator channel = m_channels.begin(); channel != m_channels.end(); ++channel)
 				{
-					switch(channel->second)
+					switch(channel->type())
 					{
 						case PkDspyUnsigned16:
 						{
@@ -304,13 +303,13 @@ void CqDisplayServerImage::reorderChannels()
 	TqInt numElements = sizeof(elements) / sizeof(elements[0]);
 	for(int elementIndex = 0; elementIndex < numElements; ++elementIndex)
 	{
-		for(CqImage::TqChannelListIterator channel = m_channels.begin(); channel != m_channels.end(); ++channel)
+		for(TqChannelList::iterator channel = m_channels.begin(); channel != m_channels.end(); ++channel)
 		{
 			// If this entry in the channel list matches one in the expected list, 
 			// move it to the right point in the channel list.
-			if(channel->first.compare(elements[elementIndex]) == 0)
+			if(channel->name() == elements[elementIndex])
 			{
-				CqImage::TqChannel temp = m_channels[elementIndex];
+				CqImageChannel temp = m_channels[elementIndex];
 				m_channels[elementIndex] = *channel;
 				*channel = temp;
 				break;

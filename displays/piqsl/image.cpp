@@ -64,7 +64,7 @@ void CqImage::PrepareImageBuffer()
 		}
 	}
 	// Work out how big each element is by scanning the channel specification.
-	m_elementSize = bytesPerPixel(m_channels);
+	m_elementSize = CqImageBuffer::bytesPerPixel(m_channels);
 	// Now prepare a buffer for the natural data.
 	m_realData = boost::shared_array<unsigned char>(new unsigned char[( m_imageWidth * m_imageHeight * m_elementSize)]);
 }
@@ -403,88 +403,11 @@ void CqImage::loadFromTiff(const std::string& filename)
 		setFilename(filename);
 
 		boost::mutex::scoped_lock lock(mutex());
-		quantizeForDisplay(m_realData.get(), m_data.get(), m_channels, m_imageWidth, m_imageHeight);
+		CqImageBuffer::quantizeForDisplay(m_realData.get(), m_data.get(), m_channels, m_imageWidth, m_imageHeight);
 		if(m_updateCallback)
 			m_updateCallback(-1, -1, -1, -1);
     }
 }
 
-TqUint CqImage::channelSize(TqInt type)
-{
-	switch(type)
-	{
-		case PkDspyUnsigned32:
-		case PkDspySigned32:
-		case PkDspyFloat32:
-			return 4;
-			break;
-		case PkDspyUnsigned16:
-		case PkDspySigned16:
-			return 2;
-		case PkDspySigned8:
-		case PkDspyUnsigned8:
-		default:
-			return 1;
-	}
-}
-
-TqUint CqImage::bytesPerPixel(const TqChannelList& channels)
-{
-	TqUint size = 0;
-	for(TqChannelList::const_iterator channel = channels.begin();
-			channel != channels.end(); ++channel)
-		size += channelSize(channel->second);
-	return size;
-}
-
-void CqImage::quantizeForDisplay(const TqUchar* src, TqUchar* dest,
-		const TqChannelList& srcChannels, TqUint width, TqUint height)
-{
-	const TqUint destStride = srcChannels.size();
-	const TqUint numPixels = width*height;
-
-	TqUint srcStride = bytesPerPixel(srcChannels);
-	TqUint srcOffset = 0;
-
-	TqUint channelNum = 0;
-	for(TqChannelList::const_iterator channel = srcChannels.begin();
-			channel != srcChannels.end(); ++channel)
-	{
-		switch(channel->second)
-		{
-			case PkDspyUnsigned16:
-				quantize8bitChannelStrided<TqUshort>(src + srcOffset, 
-						dest + channelNum, srcStride, destStride, numPixels);
-				break;
-			case PkDspySigned16:
-				quantize8bitChannelStrided<TqShort>(src + srcOffset, 
-						dest + channelNum, srcStride, destStride, numPixels);
-				break;
-			case PkDspyUnsigned32:
-				quantize8bitChannelStrided<TqUint>(src + srcOffset, 
-						dest + channelNum, srcStride, destStride, numPixels);
-				break;
-			case PkDspySigned32:
-				quantize8bitChannelStrided<TqInt>(src + srcOffset, 
-						dest + channelNum, srcStride, destStride, numPixels);
-				break;
-			case PkDspyFloat32:
-				quantize8bitChannelStrided<TqFloat>(src + srcOffset, 
-						dest + channelNum, srcStride, destStride, numPixels);
-				break;
-			case PkDspySigned8:
-				quantize8bitChannelStrided<TqChar>(src + srcOffset, 
-						dest + channelNum, srcStride, destStride, numPixels);
-				break;
-			case PkDspyUnsigned8:
-			default:
-				quantize8bitChannelStrided<TqUchar>(src + srcOffset, 
-						dest + channelNum, srcStride, destStride, numPixels);
-				break;
-		}
-		srcOffset += channelSize(channel->second);
-		++channelNum;
-	}
-}
 
 END_NAMESPACE( Aqsis )

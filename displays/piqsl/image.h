@@ -23,23 +23,22 @@
 		\author Paul C. Gregory (pgregory@aqsis.com)
 */
 
-//? Is ddclient.h included already?
 #ifndef IMAGE_H_INCLUDED
 #define IMAGE_H_INCLUDED 1
 
-#include	"aqsis.h"
+#include "aqsis.h"
 
-#include	<vector>
-#include	<string>
-#include	<map>
+#include <vector>
+#include <string>
+#include <map>
 
-#include	<boost/shared_ptr.hpp>
-#include	<boost/shared_array.hpp>
-#include	<boost/function.hpp>
-#include	<boost/thread/mutex.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/shared_array.hpp>
+#include <boost/function.hpp>
+#include <boost/thread/mutex.hpp>
 
-#include 	"tinyxml.h"
-#include	"aqsismath.h"
+#include "imagebuffer.h"
+#include "tinyxml.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -56,10 +55,6 @@ public:
 	inline CqImage(const std::string& name = "");
     virtual ~CqImage();
 
-	typedef	std::pair<std::string, TqUint>	TqChannel;
-	typedef	std::vector<TqChannel>			TqChannelList;
-	typedef	TqChannelList::iterator			TqChannelListIterator;
-	typedef	TqChannelList::const_iterator	TqChannelListConstIterator;
 	/** Get the name of the image.
 	 * \return			The name of the image.
 	 */
@@ -198,14 +193,11 @@ public:
 	 */
 	void loadFromTiff(const std::string& filename);
 
-
-
 	/** Get a reference to the unique mutex for this image.
 	 * Used when locking the image during multithreaded operation.
 	 * \return			A reference to the unique mutex for this image.
 	 */
 	boost::mutex& mutex();
-
 
 protected:
     std::string		m_name;			///< Display name.
@@ -224,75 +216,6 @@ protected:
 
 	boost::function<void(int,int,int,int)> m_updateCallback;	///< A callback, called when an image changes.
 	boost::mutex	m_mutex;		///< The unique mutex for this image.
-
-protected:
-	/** \brief Return the total number of bytes needed for a pixel containing
-	 * the given channels.
-	 */
-	static TqUint bytesPerPixel(const TqChannelList& channels);
-
-	/** \brief Get the size for a given channel type.
-	 *
-	 * \param channel type  (eg, PkDspyUnsigned16)
-	 * \return channel size in bytes
-	 */
-	static TqUint channelSize(TqInt type);
-
-	/** \brief Transfer the data from the real buffer to thd display buffer.
-	 *
-	 * This takes into accound the format of the channels in the real data and
-	 * will attempt to make a good guess at the intended quantisation for 8bit
-	 * display.
-	 *
-	 * \param src - source buffer
-	 * \param dest - destination buffer
-	 */
-	static void CqImage::quantizeForDisplay(const TqUchar* src, TqUchar* dest,
-			const TqChannelList& srcChannels, TqUint width, TqUint height);
-
-	/** \brief Re-quantize a single channel from a buffer into an 8bit
-	 * destination buffer.
-	 *
-	 * It's possible to quantize an arbitrary rectangle using this function; if
-	 * the rectangle is smaller than the width of the image the numRows,
-	 * srcRowSkip destRowSkip variables must be used.
-	 *
-	 * If you want to convert a rectangle of image data which is equal to the
-	 * width of the image, the last three parameters can be ignored, and
-	 * pixelsPerRow should be the total number of pixels in the rectangle.
-	 *
-	 * T is the numeric type of the source data.
-	 *
-	 * \param src - source buffer
-	 * \param dest - destination buffer
-	 * \param srcStride - stride for the source buffer in bytes.
-	 * \param destStride - stride for the destination buffer in bytes.
-	 * \param pixelsPerRow - number of pixels to be converted per row.
-	 * \param numRows - number of pixel rows (same for src & dest)
-	 * \param srcRowSkip - number of bytes to skip at the end of a source row.
-	 * \param destRowSkip - number of bytes to skip at the end of a destination row.
-	 */
-	template<typename T>
-	static void quantize8bitChannelStrided(const TqUchar* src, TqUchar* dest,
-			TqUint srcStride, TqUint destStride, TqUint pixelsPerRow,
-			TqUint numRows = 1, TqUint srcRowSkip = 0, TqUint destRowSkip = 0);
-
-	/** \brief Requantieze an integer type for 8bit displays
-	 *
-	 * \param val - a variable of either signed or unsigned integral type
-	 *
-	 * \return A TqUchar representing the input.
-	 */
-	template<typename T>
-	static inline TqUchar quantize8bit(T val);
-
-	/** \brief Quantize a TqFloat for 8bit displays
-	 *
-	 * \param float to remap
-	 *
-	 * \return A TqUchar representing the input.
-	 */
-	static inline TqUchar quantize8bit(TqFloat val);
 };
 
 
@@ -368,25 +291,25 @@ inline void CqImage::setFrameSize(TqUlong width, TqUlong height)
 inline const std::string& CqImage::channelName(TqInt index) const
 {
 	assert(index < numChannels());
-	return(m_channels[index].first);
+	return(m_channels[index].name());
 }
 
 inline void CqImage::setChannelName(TqInt index, const std::string& name)
 {
 	assert(index < numChannels());
-	m_channels[index].first = name;
+	m_channels[index].setName(name);
 }
 
 inline TqUint CqImage::channelType(TqInt index) const
 {
 	assert(index < numChannels());
-	return(m_channels[index].second);
+	return(m_channels[index].type());
 }
 
 inline void CqImage::setChannelType(TqInt index, TqUint type)
 {
 	assert(index < numChannels());
-	m_channels[index].second = type;
+	m_channels[index].setType(type);
 }
 
 inline TqUint CqImage::numChannels() const
@@ -396,7 +319,7 @@ inline TqUint CqImage::numChannels() const
 
 inline void CqImage::addChannel(const std::string& name, TqUint type)
 {
-	m_channels.push_back(TqChannel(name,type));
+	m_channels.push_back(CqImageChannel(name,type));
 }
 
 inline TqInt CqImage::elementSize() const
@@ -449,38 +372,6 @@ inline void CqImage::setImageSize(TqUlong imageWidth, TqUlong imageHeight)
 inline boost::mutex& CqImage::mutex()
 {
 	return(m_mutex);
-}
-
-template<typename T>
-void CqImage::quantize8bitChannelStrided( const TqUchar* src, TqUchar* dest,
-		TqUint srcStride, TqUint destStride, TqUint pixelsPerRow, TqUint numRows,
-		TqUint srcRowSkip, TqUint destRowSkip)
-{
-	for(TqUint row = 0; row < numRows; ++row)
-	{
-		for(TqUint i = 0; i < pixelsPerRow; ++i)
-		{
-			*dest = quantize8bit(*reinterpret_cast<const T*>(src));
-			src += srcStride;
-			dest += destStride;
-		}
-		src += srcRowSkip;
-		dest += destRowSkip;
-	}
-}
-
-template<typename T>
-inline TqUchar CqImage::quantize8bit(T val)
-{
-	return static_cast<TqUchar>(
-			static_cast<TqUlong>(val - std::numeric_limits<T>::min()) >>
-			( std::numeric_limits<TqUchar>::digits*(sizeof(T) - sizeof(TqUchar)) )
-		);
-}
-
-inline TqUchar CqImage::quantize8bit(TqFloat val)
-{
-	return static_cast<TqUchar>(clamp(val, 0.0f, 1.0f)*255);
 }
 
 

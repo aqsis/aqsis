@@ -11,6 +11,7 @@ piqslapp_sources = Split("""
 	piqsl.cpp
 	piqslbase.cpp
 	image.cpp
+	imagebuffer.cpp
 	framebuffer.cpp
 	book.cpp
 	bookbrowser.cpp
@@ -21,6 +22,7 @@ piqslapp_headers =  Split("""
 	piqsl.h
 	piqslbase.h
 	image.h
+	imagebuffer.h
 	book.h
 	framebuffer.h
 	bookbrowser.h
@@ -42,10 +44,11 @@ Import('testEnv')
 testEnv = testEnv.Copy()
 #testEnv.AppendUnique(LIBS=['aqsistypes'])
 testEnv.AppendUnique(LIBS = ['aqsistypes','argparse','$fltk_lib', 'tinyxml', '$boost_thread_lib', '$tiff_lib', '$z_lib'])
-testEnv.AppendUnique(CPPPATH=['#/thirdparty/tinyxml'])
+testEnv.AppendUnique(CPPPATH=['#/renderer/ddmanager'])
+# Yes, taking [piqslapp_objects[3]] is a real mess.  I wonder about a better way...
 piqslapp_test_sources = Split('''
-	image_test.cpp
-	''') + [piqslapp_objects[2]]
+	imagebuffer_test.cpp
+	''') + [piqslapp_objects[3]]
 testEnv.addUnitTest('piqslapp_test', piqslapp_test_sources)
 
 
