@@ -71,6 +71,10 @@ BOOST_AUTO_TEST_CASE(CqImage_test_quantize8bitChannelStrided)
 		BOOST_CHECK_EQUAL(dest[i], expected[i]);
 }
 
+BOOST_AUTO_TEST_CASE(CqImage_test_quantizeForDisplay)
+{
+}
+
 //BOOST_AUTO_TEST_CASE(CqImage_test_quantizeForDisplay)
 //{
 //

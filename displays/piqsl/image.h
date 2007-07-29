@@ -220,13 +220,24 @@ protected:
 	TqUlong			m_originX;		///< The origin of the frame within the whole image.
 	TqUlong			m_originY;		///< The origin of the frame within the whole image.
 	TqUint			m_elementSize;	///< The calcualated total size of a single pixel.
-	std::vector<TqUint> m_channelOffsets; ///< A vector of channel byte offsets into the image data.
 	TqChannelList	m_channels;		///< An array of channels, name and type.
 
 	boost::function<void(int,int,int,int)> m_updateCallback;	///< A callback, called when an image changes.
 	boost::mutex	m_mutex;		///< The unique mutex for this image.
 
 protected:
+	/** \brief Return the total number of bytes needed for a pixel containing
+	 * the given channels.
+	 */
+	static TqUint bytesPerPixel(const TqChannelList& channels);
+
+	/** \brief Get the size for a given channel type.
+	 *
+	 * \param channel type  (eg, PkDspyUnsigned16)
+	 * \return channel size in bytes
+	 */
+	static TqUint channelSize(TqInt type);
+
 	/** \brief Transfer the data from the real buffer to thd display buffer.
 	 *
 	 * This takes into accound the format of the channels in the real data and
@@ -236,30 +247,35 @@ protected:
 	 * \param src - source buffer
 	 * \param dest - destination buffer
 	 */
-	void quantizeForDisplay(const TqUchar* src, TqUchar* dest);
+	static void CqImage::quantizeForDisplay(const TqUchar* src, TqUchar* dest,
+			const TqChannelList& srcChannels, TqUint width, TqUint height);
 
-	/** \brief Get offsets into a data buffer of type TqUchar for the channel list.
+	/** \brief Re-quantize a single channel from a buffer into an 8bit
+	 * destination buffer.
 	 *
-	 * \param channels - list describing the image channels
-	 * \param offsets - output vector of offsets for channels in bytes.
-	 * \param bytesPerPixel - output number of bytes taken up by all channels.
-	 */
-	static void channelOffsets(const TqChannelList& channels,
-			std::vector<TqUint>& offsets, TqUint& bytesPerPixel);
-
-	/** \brief Re-quantize a single channel from a buffer into 
+	 * It's possible to quantize an arbitrary rectangle using this function; if
+	 * the rectangle is smaller than the width of the image the numRows,
+	 * srcRowSkip destRowSkip variables must be used.
 	 *
-	 * T is the type of the parameters in the source buffer.
+	 * If you want to convert a rectangle of image data which is equal to the
+	 * width of the image, the last three parameters can be ignored, and
+	 * pixelsPerRow should be the total number of pixels in the rectangle.
+	 *
+	 * T is the numeric type of the source data.
 	 *
 	 * \param src - source buffer
 	 * \param dest - destination buffer
-	 * \param size - number of pixels in the buffers
 	 * \param srcStride - stride for the source buffer in bytes.
 	 * \param destStride - stride for the destination buffer in bytes.
+	 * \param pixelsPerRow - number of pixels to be converted per row.
+	 * \param numRows - number of pixel rows (same for src & dest)
+	 * \param srcRowSkip - number of bytes to skip at the end of a source row.
+	 * \param destRowSkip - number of bytes to skip at the end of a destination row.
 	 */
 	template<typename T>
 	static void quantize8bitChannelStrided(const TqUchar* src, TqUchar* dest,
-			TqUint size, TqUint srcStride, TqUint destStride);
+			TqUint srcStride, TqUint destStride, TqUint pixelsPerRow,
+			TqUint numRows = 1, TqUint srcRowSkip = 0, TqUint destRowSkip = 0);
 
 	/** \brief Requantieze an integer type for 8bit displays
 	 *
@@ -297,7 +313,6 @@ inline CqImage::CqImage( const std::string& name)
 	m_originX(0),
 	m_originY(0),
 	m_elementSize(0),
-	m_channelOffsets(),
 	m_channels(),
 	m_updateCallback(),
 	m_mutex()
@@ -437,14 +452,20 @@ inline boost::mutex& CqImage::mutex()
 }
 
 template<typename T>
-void CqImage::quantize8bitChannelStrided(const TqUchar* src, TqUchar* dest,
-		TqUint size, TqUint srcStride, TqUint destStride)
+void CqImage::quantize8bitChannelStrided( const TqUchar* src, TqUchar* dest,
+		TqUint srcStride, TqUint destStride, TqUint pixelsPerRow, TqUint numRows,
+		TqUint srcRowSkip, TqUint destRowSkip)
 {
-	for(TqUint i = 0; i < size; ++i)
+	for(TqUint row = 0; row < numRows; ++row)
 	{
-		*dest = quantize8bit(*reinterpret_cast<const T*>(src));
-		src += srcStride;
-		dest += destStride;
+		for(TqUint i = 0; i < pixelsPerRow; ++i)
+		{
+			*dest = quantize8bit(*reinterpret_cast<const T*>(src));
+			src += srcStride;
+			dest += destStride;
+		}
+		src += srcRowSkip;
+		dest += destRowSkip;
 	}
 }
 
