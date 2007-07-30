@@ -97,7 +97,7 @@ class CqImageBuffer
 		 * \param src - source buffer
 		 * \param dest - destination buffer
 		 */
-		static void CqImageBuffer::quantizeForDisplay(const TqUchar* src, TqUchar* dest,
+		static void quantizeForDisplay(const TqUchar* src, TqUchar* dest,
 				const TqChannelList& srcChannels, TqUint width, TqUint height);
 
 		/** \brief Re-quantize a single channel from a buffer into an 8bit
