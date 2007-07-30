@@ -7,6 +7,10 @@
 ////---------------------------------------------------------------------
 
 #include	"aqsis.h"
+
+#include	<algorithm>
+#include	<map>
+
 #include	"parsenode.h"
 #include	"funcdef.h"
 #include	"vardef.h"
@@ -53,7 +57,7 @@ TqInt gcShaderTypeNames = sizeof( gShaderTypeNames ) / sizeof( gShaderTypeNames[
 TqInt	CqParseNode::m_cLabels = 0;
 TqInt	CqParseNode::m_aaTypePriorities[ Type_Last ][ Type_Last ] =
     {
-        //				   @  f	 i	p  s  c	 t	h  n  v	 x	m
+        //				   @     f     i     p     s     c     t     h     n     v     x     m     x
         /*Type_Nil*/	 { 99,   00,   00,   00,   00,   00,   00,   00,   00,   00,   00,   00,   00 },
         /*Type_Float*/	 { 00,   99,   98,   02,   00,   01,   02,   02,   02,   02,   00,   01,   00 },
         /*Type_Integer*/ { 00,   98,   99,   00,   00,   00,   00,   00,   00,   00,   00,   00,   00 },
@@ -112,6 +116,29 @@ const EqParseNodeType IqParseNodeTypeCast::m_ID = ParseNode_TypeCast;
 const EqParseNodeType IqParseNodeTriple::m_ID = ParseNode_Triple;
 const EqParseNodeType IqParseNodeSixteenTuple::m_ID = ParseNode_SixteenTuple;
 const EqParseNodeType IqParseNodeMessagePassingFunction::m_ID = ParseNode_MessagePassingFunction;
+
+
+///---------------------------------------------------------------------
+/** Default implementation of validTypes, just gets the return type, and then
+ *  fills the array with that and the possible cast types in order of preference.
+ */
+bool cmpCasts(const std::pair<TqInt, TqInt>& a, const std::pair<TqInt, TqInt>& b)
+{
+	return(a.second > b.second);
+}
+void CqParseNode::validTypes( std::list<std::pair<TqInt, TqInt> >& types)
+{
+	TqInt mainType = ResType();
+	types.clear();
+	types.push_front(std::pair<TqInt, TqInt>(mainType, 99));
+	std::vector<std::pair<TqInt, TqInt> > casts;
+	for(TqInt castType = Type_Nil; castType < Type_Last; ++castType)
+		if(m_aaTypePriorities[mainType][castType] != 0)
+			casts.push_back(std::pair<TqInt, TqInt>(castType, m_aaTypePriorities[mainType][castType]));
+	std::sort(casts.begin(), casts.end(), cmpCasts);
+	for(std::vector<std::pair<TqInt, TqInt> >::const_iterator c = casts.begin(); c != casts.end(); ++c)
+		types.push_back(*c);
+}
 
 
 ///---------------------------------------------------------------------
@@ -234,6 +261,35 @@ IqFuncDef* CqParseNodeFunctionCall::pFuncDef()
 		return ( 0 );
 }
 
+void CqParseNodeFunctionCall::validTypes( std::list<std::pair<TqInt, TqInt> >& types)
+{
+	// First do a typecheck, which will eliminate all candidates that don't 
+	// match the argument list.
+	bool needsCast;
+	TqInt bestType = TypeCheck( pAllTypes(), Type_Last - 1, needsCast, true );
+	// Create a map of types against suitability weights.
+	std::map<TqInt, TqInt> suitableTypes;
+	// For each candidate function, add it's real return type.
+	std::vector<SqFuncRef>::iterator i;
+	for ( i = m_aFuncRef.begin(); i != m_aFuncRef.end(); ++i )
+	{
+		CqFuncDef* pfunc = CqFuncDef::GetFunctionPtr( (*i) );
+		TqInt mainType = bestType; //pfunc->Type();
+		// Set a directly available type as a high priority no matter what.
+		suitableTypes[mainType] = 99;
+		// Now check the possible castable types, storing only if they have a weight greater than 
+		// an existing mapping.
+		for(TqInt castType = Type_Nil; castType < Type_Last; ++castType)
+			if(m_aaTypePriorities[mainType][castType] != 0 && 
+					castType != mainType && 
+					( suitableTypes.find(castType) == suitableTypes.end() ||  
+					  suitableTypes[castType] < m_aaTypePriorities[mainType][castType]) )
+				suitableTypes[castType] = m_aaTypePriorities[mainType][castType];
+	}
+	// Now copy the findings to the types list
+	types.clear();
+	std::copy(suitableTypes.begin(), suitableTypes.end(), std::back_inserter(types));
+}
 
 ///---------------------------------------------------------------------
 /// CqParseNodeUnresolvedCall::ResType

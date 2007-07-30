@@ -11,6 +11,7 @@
 #define PARSENODE_H_INCLUDED 1
 
 #include	<vector>
+#include	<list>
 
 #include	"aqsis.h"
 
@@ -205,6 +206,7 @@ class CqParseNode : public CqListEntry<CqParseNode>, public IqParseNode
 			}
 			return ( NewType );
 		}
+		virtual void	validTypes( std::list<std::pair<TqInt,TqInt> >& types );
 		virtual	void	NoDup()
 		{}
 		virtual	CqParseNode* Clone( CqParseNode* pParent = 0 )
@@ -375,6 +377,7 @@ class CqParseNodeFunctionCall : public CqParseNode, public IqParseNodeFunctionCa
 		virtual	TqInt	TypeCheck( TqInt* pTypes, TqInt Count, bool& needsCast, bool CheckOnly );
 		virtual	bool	Optimise();
 		virtual	TqInt	ResType() const;
+		virtual void	validTypes( std::list<std::pair<TqInt,TqInt> >& types );
 		virtual	CqParseNode*	Clone( CqParseNode* pParent = 0 )
 		{
 			CqParseNodeFunctionCall * pNew = new CqParseNodeFunctionCall( *this );

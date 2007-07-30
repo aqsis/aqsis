@@ -316,6 +316,7 @@ testEnv.Tool('unittest',
 		UTEST_MAIN_SRC=autotestmain_objs
 	)
 testEnv.AppendUnique( LIBS=['boost_unit_test_framework'] )
+testEnv.PrependENVPath('BOOST_TEST_LOG_LEVEL', 'message')
 # Linker paths for finding shared libraries at compile-time.  This lets us run
 # the unit tests at compile-time.
 platform_utils.addDynamicLinkerPath(testEnv,

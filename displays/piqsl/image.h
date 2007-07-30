@@ -23,22 +23,22 @@
 		\author Paul C. Gregory (pgregory@aqsis.com)
 */
 
-//? Is ddclient.h included already?
 #ifndef IMAGE_H_INCLUDED
 #define IMAGE_H_INCLUDED 1
 
-#include	"aqsis.h"
+#include "aqsis.h"
 
-#include	<vector>
-#include	<string>
-#include	<map>
+#include <vector>
+#include <string>
+#include <map>
 
-#include	<boost/shared_ptr.hpp>
-#include	<boost/shared_array.hpp>
-#include	<boost/function.hpp>
-#include	<boost/thread/mutex.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/shared_array.hpp>
+#include <boost/function.hpp>
+#include <boost/thread/mutex.hpp>
 
-#include 	"tinyxml.h"
+#include "imagebuffer.h"
+#include "tinyxml.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -52,16 +52,9 @@ class CqFramebuffer;
 class CqImage
 {
 public:
-	CqImage( const std::string& name ) : m_name(name), m_data(0), m_realData(0), m_frameWidth(0), m_frameHeight(0), m_imageWidth(0), m_imageHeight(0), m_originX(0), m_originY(0), m_elementSize(0)
-	{} 
-	CqImage() : m_data(0), m_realData(0), m_frameWidth(0), m_frameHeight(0), m_imageWidth(0), m_imageHeight(0), m_originX(0), m_originY(0), m_elementSize(0)
-	{}
+	inline CqImage(const std::string& name = "");
     virtual ~CqImage();
 
-	typedef	std::pair<std::string, TqUint>	TqChannel;
-	typedef	std::vector<TqChannel>			TqChannelList;
-	typedef	TqChannelList::iterator			TqChannelListIterator;
-	typedef	TqChannelList::const_iterator	TqChannelListConstIterator;
 	/** Get the name of the image.
 	 * \return			The name of the image.
 	 */
@@ -78,6 +71,13 @@ public:
 	 * \param name		The new filename of the image.
 	 */
     virtual void	setFilename( const std::string& name );
+	/** Set the Description
+	 */
+    virtual void	setDescription( const std::string& software );
+	/** Get the Description
+	 */
+    virtual const std::string&	description() const;
+
 	/** Get the frame width of the image.
 	 * The frame width if the cropped rendered region, within the image.
 	 * \return			The frame width of the image.
@@ -193,7 +193,6 @@ public:
 	 */
 	void loadFromTiff(const std::string& filename);
 
-
 	/** Get a reference to the unique mutex for this image.
 	 * Used when locking the image during multithreaded operation.
 	 * \return			A reference to the unique mutex for this image.
@@ -203,6 +202,7 @@ public:
 protected:
     std::string		m_name;			///< Display name.
     std::string		m_fileName;		///< File name.
+    std::string		m_description;		///< Description or Software' renderer name.
 	boost::shared_array<unsigned char>	m_data;			///< Buffer to store the 8bit data for display. 
 	boost::shared_array<unsigned char>	m_realData;		///< Buffer to store the natural format image data.
 	TqUlong			m_frameWidth;	///< The width of the frame within the whole image.
@@ -211,20 +211,46 @@ protected:
 	TqUlong			m_imageHeight;	///< The total image height.
 	TqUlong			m_originX;		///< The origin of the frame within the whole image.
 	TqUlong			m_originY;		///< The origin of the frame within the whole image.
-	TqInt			m_elementSize;	///< The calcualated total size of a single pixel.
+	TqUint			m_elementSize;	///< The calcualated total size of a single pixel.
 	TqChannelList	m_channels;		///< An array of channels, name and type.
 
 	boost::function<void(int,int,int,int)> m_updateCallback;	///< A callback, called when an image changes.
 	boost::mutex	m_mutex;		///< The unique mutex for this image.
-
-private:
-	/** Transfer the data from the real buffer to thd display buffer.
-	 * This takes into accound the format of the channels in the real data and will attempt to make a 
-	 * good guess at the intended quantisation for 8bit display.
-	 */
-	void transferData();
 };
 
+
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+// Implementation of CqImage inlines and templates
+
+inline CqImage::CqImage( const std::string& name)
+    : m_name(name),
+    m_fileName(),
+    m_description(),
+	m_data(0),
+	m_realData(0),
+	m_frameWidth(0),
+	m_frameHeight(0),
+	m_imageWidth(0),
+	m_imageHeight(0),
+	m_originX(0),
+	m_originY(0),
+	m_elementSize(0),
+	m_channels(),
+	m_updateCallback(),
+	m_mutex()
+{ } 
+
+
+inline void	CqImage::setDescription( const std::string& description )
+{
+	m_description = description;
+}
+
+inline const std::string&	CqImage::description( ) const
+{
+	return (m_description);
+}
 
 inline const std::string& CqImage::name() const
 {
@@ -265,25 +291,25 @@ inline void CqImage::setFrameSize(TqUlong width, TqUlong height)
 inline const std::string& CqImage::channelName(TqInt index) const
 {
 	assert(index < numChannels());
-	return(m_channels[index].first);
+	return(m_channels[index].name());
 }
 
 inline void CqImage::setChannelName(TqInt index, const std::string& name)
 {
 	assert(index < numChannels());
-	m_channels[index].first = name;
+	m_channels[index].setName(name);
 }
 
 inline TqUint CqImage::channelType(TqInt index) const
 {
 	assert(index < numChannels());
-	return(m_channels[index].second);
+	return(m_channels[index].type());
 }
 
 inline void CqImage::setChannelType(TqInt index, TqUint type)
 {
 	assert(index < numChannels());
-	m_channels[index].second = type;
+	m_channels[index].setType(type);
 }
 
 inline TqUint CqImage::numChannels() const
@@ -293,7 +319,7 @@ inline TqUint CqImage::numChannels() const
 
 inline void CqImage::addChannel(const std::string& name, TqUint type)
 {
-	m_channels.push_back(TqChannel(name,type));
+	m_channels.push_back(CqImageChannel(name,type));
 }
 
 inline TqInt CqImage::elementSize() const
@@ -347,6 +373,7 @@ inline boost::mutex& CqImage::mutex()
 {
 	return(m_mutex);
 }
+
 
 END_NAMESPACE( Aqsis )
 

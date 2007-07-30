@@ -72,17 +72,34 @@ void CqDisplayServerImage::close()
 
 
 //----------------------------------------------------------------------
-/** CompositeAlpha() Composite with the alpha the end result RGB
-*
-*/
 
+// Tricky macros from [Smith 1995] (see ref below)
+
+/** Compute int((a/255.0)*b) with only integer arithmetic.  Assumes a, b are
+ * between 0 and 255.
+ */
 #define INT_MULT(a,b,t) ( (t) = (a) * (b) + 0x80, ( ( ( (t)>>8 ) + (t) )>>8 ) )
+/** Compute a composite of alpha-premultiplied values using integer arithmetic.
+ *
+ * Assumes p, q are between 0 and 255.
+ *
+ * \return int(q + (1-a/255.0)*p)
+ */
 #define INT_PRELERP(p, q, a, t) ( (p) + (q) - INT_MULT( a, p, t) )
 
+/** \brief Composite two integers with a given alpha
+ *
+ * See for eg:
+ * [Smith 1995]  Alvy Ray Smith, "Image Compositing Fundamentals", Technical
+ * Memo 4, 1995.  ftp://ftp.alvyray.com/Acrobat/4_Comp.pdf
+ *
+ * \param r - top surface; alpha-premultiplied.  Assumed to be between 0 and 255.
+ * \param R - bottom surface; alpha-premultiplied
+ * \param alpha - alpha for top surface
+ */
 void CompositeAlpha(TqInt r, unsigned char &R, unsigned char alpha )
 { 
 	TqInt t;
-	// C’ = INT_PRELERP( A’, B’, b, t )
 	TqInt R1 = static_cast<TqInt>(INT_PRELERP( R, r, alpha, t ));
 	R = Aqsis::clamp( R1, 0, 255 );
 }
@@ -127,10 +144,9 @@ void CqDisplayServerImage::acceptData(TqUlong xmin, TqUlong xmaxplus1, TqUlong y
 				TqInt storageOffset = (( y * realLineLen ) + ( x * m_elementSize ) );
 				TqUchar alpha = 255;
 				/// \todo: Work out how to read alpha from the bucket data, taking into account sizes.
-				CqImage::TqChannelListIterator channel;
-				for(channel = m_channels.begin(); channel != m_channels.end(); ++channel)
+				for(TqChannelList::const_iterator channel = m_channels.begin(); channel != m_channels.end(); ++channel)
 				{
-					switch(channel->second)
+					switch(channel->type())
 					{
 						case PkDspyUnsigned16:
 						{
@@ -287,13 +303,13 @@ void CqDisplayServerImage::reorderChannels()
 	TqInt numElements = sizeof(elements) / sizeof(elements[0]);
 	for(int elementIndex = 0; elementIndex < numElements; ++elementIndex)
 	{
-		for(CqImage::TqChannelListIterator channel = m_channels.begin(); channel != m_channels.end(); ++channel)
+		for(TqChannelList::iterator channel = m_channels.begin(); channel != m_channels.end(); ++channel)
 		{
 			// If this entry in the channel list matches one in the expected list, 
 			// move it to the right point in the channel list.
-			if(channel->first.compare(elements[elementIndex]) == 0)
+			if(channel->name() == elements[elementIndex])
 			{
-				CqImage::TqChannel temp = m_channels[elementIndex];
+				CqImageChannel temp = m_channels[elementIndex];
 				m_channels[elementIndex] = *channel;
 				*channel = temp;
 				break;

@@ -11,6 +11,7 @@ piqslapp_sources = Split("""
 	piqsl.cpp
 	piqslbase.cpp
 	image.cpp
+	imagebuffer.cpp
 	framebuffer.cpp
 	book.cpp
 	bookbrowser.cpp
@@ -21,6 +22,7 @@ piqslapp_headers =  Split("""
 	piqsl.h
 	piqslbase.h
 	image.h
+	imagebuffer.h
 	book.h
 	framebuffer.h
 	bookbrowser.h
@@ -30,13 +32,32 @@ piqslapp_headers =  Split("""
 # Set any platform specific options for this target
 piqslappenv.UseTargetOptions('piqslapp')
 
-piqslapp = piqslappenv.Program('piqsl', piqslapp_sources)
+piqslapp_objects = piqslappenv.Object(piqslapp_sources)
+
+piqslapp = piqslappenv.Program('piqsl', piqslapp_objects)
 piqslappenv.Install('$BINDIR', piqslapp)
 embedManifest(env, piqslappenv, piqslapp, 'EXE')
 
+#-------------------------------------------------------------------------------
+# Unit Tests
+Import('testEnv')
+testEnv = testEnv.Copy()
+#testEnv.AppendUnique(LIBS=['aqsistypes'])
+testEnv.AppendUnique(LIBS = ['aqsistypes','argparse','$fltk_lib', 'tinyxml', '$boost_thread_lib', '$tiff_lib', '$z_lib'])
+testEnv.AppendUnique(CPPPATH=['#/renderer/ddmanager'])
+# Yes, taking [piqslapp_objects[3]] is a real mess.  I wonder about a better way...
+piqslapp_test_sources = Split('''
+	imagebuffer_test.cpp
+	''') + [piqslapp_objects[3]]
+testEnv.addUnitTest('piqslapp_test', piqslapp_test_sources)
+
+
+#-------------------------------------------------------------------------------
+env.Distribute(piqslapp_test_sources)
 env.Distribute(piqslapp_sources)
 env.Distribute(piqslapp_headers)
 env.Distribute('piqsl_ui.fl')
+#-------------------------------------------------------------------------------
 
 # Display driver for communicating with piqsl
 piqsldisplayenv = env.Copy()
