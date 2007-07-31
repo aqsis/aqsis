@@ -313,6 +313,7 @@ testEnv = env.Copy()
 autotestmain_objs = SConscript(dirs=prependBuildDir(['build_tools']))
 testEnv.Tool('unittest', toolpath=['build_tools'],)
 testEnv.Replace(UTEST_MAIN_SRC=autotestmain_objs)
+testEnv.Replace(UTEST_RESULTS_DIR='#unit_test_results/')
 testEnv.AppendUnique( LIBS=['boost_unit_test_framework'] )
 testEnv.PrependENVPath('BOOST_TEST_LOG_LEVEL', 'message')
 # Linker paths for finding shared libraries at compile-time.  This lets us run

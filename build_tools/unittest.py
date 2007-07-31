@@ -41,6 +41,11 @@ def addUnitTest(env, target=None, source=None, *args, **kwargs):
 	Any additional files listed in the env['UTEST_MAIN_SRC'] build variable are
 	also included in the source list.
 
+	When each unit test passes, it creates a target file ending with .passed.
+	This is created in the same directory as the test executable, unless the
+	environment variable UTEST_RESULTS_DIR has been set, in which case the
+	results are put in the directory indicated in that environment variable.
+
 	All tests added with addUnitTest can be run with the test alias:
 		"scons test"
 	Any test can be run in isolation from other tests, using the name of the
@@ -53,7 +58,10 @@ def addUnitTest(env, target=None, source=None, *args, **kwargs):
 	if env.has_key('UTEST_MAIN_SRC'):
 		source = [source, env['UTEST_MAIN_SRC']]
 	program = env.Program(target, source, *args, **kwargs)
-	utest = env.UnitTest(program)
+	testTarget = str(program[0])
+	if env.has_key('UTEST_RESULTS_DIR'):
+		testTarget = env['UTEST_RESULTS_DIR'] + testTarget
+	utest = env.UnitTest(testTarget, program)
 	# add alias to run all unit tests.
 	env.Alias('test', utest)
 	# make an alias to run the test in isolation from the rest of the tests.
