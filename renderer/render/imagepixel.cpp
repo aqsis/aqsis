@@ -356,7 +356,7 @@ void CqImagePixel::Clear( std::vector<SqSampleData>& samplePoints )
 // Ascending depth sorting function
 struct SqAscendingDepthSort
 {
-     bool operator()(const SqImageSample& splStart, const SqImageSample& splEnd)
+     bool operator()(const SqImageSample& splStart, const SqImageSample& splEnd) const
      {
           return splStart.Data()[Sample_Depth] < splEnd.Data()[Sample_Depth];
      }

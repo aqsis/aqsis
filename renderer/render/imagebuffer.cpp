@@ -56,17 +56,6 @@ CqImageBuffer::~CqImageBuffer()
 
 
 //----------------------------------------------------------------------
-/** Get the screen position for the current bucket.
- * \return Bucket position as 2d vector (xpos, ypos).
- */
-
-CqVector2D	CqImageBuffer::BucketPosition( ) const
-{
-	return( BucketPosition( CurrentBucketCol(), CurrentBucketRow() ) );
-}
-
-
-//----------------------------------------------------------------------
 /** Get the screen position for the bucket at x,y.
  * \return Bucket position as 2d vector (xpos, ypos).
  */
@@ -81,22 +70,6 @@ CqVector2D	CqImageBuffer::BucketPosition( TqInt x, TqInt y ) const
 
 	return ( vecA );
 }
-
-//----------------------------------------------------------------------
-/** Get the bucket size for the current bucket.
- 
-    Usually the return value is just (XBucketSize, YBucketSize) except
-    for the buckets on the right and bottom side of the image where the
-    size can be smaller. The crop window is not taken into account.
- 
- * \return Bucket size as 2d vector (xsize, ysize).
- */
-
-CqVector2D CqImageBuffer::BucketSize( ) const
-{
-	return( BucketSize( CurrentBucketCol(), CurrentBucketRow() ) );
-}
-
 
 //----------------------------------------------------------------------
 /** Get the bucket size for the bucket at x,y.
@@ -169,8 +142,10 @@ void	CqImageBuffer::SetImage()
 	{
 		i->resize( m_cXBuckets );
 		std::vector<CqBucket>::iterator b;
-		for( b = i->begin(); b!=i->end(); b++)
+		for ( b = i->begin(); b!=i->end(); b++ )
+		{
 			b->SetProcessed( false );
+		}
 	}
 
 	m_CurrentBucketCol = m_CurrentBucketRow = 0;
@@ -688,10 +663,11 @@ void CqImageBuffer::RenderImage()
 	// A counter for the number of processed buckets (used for progress reporting)
 	TqInt iBucket = 0;
 
-	CqBucketProcessor bucketProcessor;
+	CqBucketProcessor bucketProcessor1;
 
 	// Iterate over all buckets...
-	while (true)
+	bool pendingBuckets = true;
+	while (pendingBuckets)
 	{
 		////////// Dump the pixel sample positions into a dump file //////////
 #if ENABLE_MPDUMP
@@ -701,17 +677,16 @@ void CqImageBuffer::RenderImage()
 		/////////////////////////////////////////////////////////////////////////
 
 
-		bucketProcessor.setBucket(&CurrentBucket(), CurrentBucketCol(), CurrentBucketRow());
-
-		bool bIsEmpty = bucketProcessor.currentBucketIsEmpty();
+		bucketProcessor1.setBucket(&CurrentBucket(), CurrentBucketCol(), CurrentBucketRow());
+		bool b1IsEmpty = bucketProcessor1.currentBucketIsEmpty();
 		if (fImager)
-			bIsEmpty = false;
-
-		// Pre-process bucket 
+			b1IsEmpty = false;
 		{
 			// Set up some bounds for the bucket.
-			const CqVector2D bPos = BucketPosition();
-			const CqVector2D bSize = BucketSize();
+			const CqVector2D bPos = BucketPosition( bucketProcessor1.getBucketCol(),
+								bucketProcessor1.getBucketRow() );
+			const CqVector2D bSize = BucketSize( bucketProcessor1.getBucketCol(),
+							     bucketProcessor1.getBucketRow() );
 			const CqVector2D vecMin = bPos - bHalf;
 			const CqVector2D vecMax = bPos + bSize + bHalf;
 
@@ -728,63 +703,57 @@ void CqImageBuffer::RenderImage()
 			if ( ymax > CropWindowYMax() + m_FilterYWidth / 2 )
 				ymax = static_cast<TqInt>(CropWindowYMax() + m_FilterYWidth / 2.0f);
 
-			bucketProcessor.preProcess( bPos, bSize,
-						    m_PixelXSamples, m_PixelYSamples, m_FilterXWidth, m_FilterYWidth,
-						    xmin, xmax, ymin, ymax,
-						    m_ClippingNear, m_ClippingFar,
-						    bIsEmpty );
-		}
+			bucketProcessor1.preProcess( bPos, bSize,
+						     m_PixelXSamples, m_PixelYSamples, m_FilterXWidth, m_FilterYWidth,
+						     xmin, xmax, ymin, ymax,
+						     m_ClippingNear, m_ClippingFar,
+						     b1IsEmpty );
 
-		// Render any waiting subsurfaces.
-		while ( bucketProcessor.hasPendingSurfaces() && !m_fQuit )
-		{
-			boost::shared_ptr<CqSurface> pSurface = bucketProcessor.getTopSurface();
-			if (pSurface)
+			// Render any waiting subsurfaces.
+			while ( bucketProcessor1.hasPendingSurfaces() && !m_fQuit )
 			{
-				// Cull surface if it's hidden
-				if ( !( DisplayMode() & ModeZ ) && !pSurface->pCSGNode() )
+				boost::shared_ptr<CqSurface> pSurface = bucketProcessor1.getTopSurface();
+				if (pSurface)
 				{
-					TIME_SCOPE("Occlusion culling");
-					if ( !bIsEmpty &&
-					     pSurface->fCachedBound() &&
-					     OcclusionCullSurface( bucketProcessor, pSurface ) )
+					// Cull surface if it's hidden
+					if ( !( DisplayMode() & ModeZ ) && !pSurface->pCSGNode() )
 					{
-						// Advance to next surface
-						bucketProcessor.popSurface();
-						continue;
+						TIME_SCOPE("Occlusion culling");
+						if ( !b1IsEmpty &&
+						     pSurface->fCachedBound() &&
+						     OcclusionCullSurface( bucketProcessor1, pSurface ) )
+						{
+							// Advance to next surface
+							bucketProcessor1.popSurface();
+							continue;
+						}
 					}
+
+					RenderSurface( pSurface );
+
+					// Advance to next surface
+					bucketProcessor1.popSurface();
 				}
+			}
 
-				RenderSurface( pSurface );
-
-				// Advance to next surface
-				bucketProcessor.popSurface();
+			if ( m_fQuit )
+			{
+				m_fDone = true;
+				return ;
 			}
 		}
 
-		// Render any waiting MPs.
-		while ( bucketProcessor.hasPendingMPs() && !m_fQuit )
-		{
-			bucketProcessor.process();
-		}
-
-		if ( m_fQuit )
-		{
-			m_fDone = true;
-			return ;
-		}
-
-		// Post-processing
-		bucketProcessor.postProcess( bIsEmpty, fImager, depthfilter, zThreshold );
-
-		// Bucket complete
+		bucketProcessor1.process();	
+		bucketProcessor1.postProcess( b1IsEmpty, fImager, depthfilter, zThreshold );
 		BucketComplete();
 		{
 			TIME_SCOPE("Display bucket");
-			CqBucket& bucket = Bucket(bucketProcessor.getBucketCol(),
-						  bucketProcessor.getBucketRow());
-			QGetRenderContext() ->pDDmanager() ->DisplayBucket( &bucket );
+			CqBucket& bucket1 = Bucket( bucketProcessor1.getBucketCol(),
+						    bucketProcessor1.getBucketRow() );
+			QGetRenderContext() ->pDDmanager() ->DisplayBucket( &bucket1 );
 		}
+		bucketProcessor1.reset();
+
 		if ( pProgressHandler )
 		{
 			// Inform the status class how far we have got, and update UI.
@@ -792,8 +761,6 @@ void CqImageBuffer::RenderImage()
 			QGetRenderContext() ->Stats().SetComplete( Complete );
 			( *pProgressHandler ) ( Complete, QGetRenderContext() ->CurrentFrame() );
 		}
-
-		bucketProcessor.reset();
 
 #ifdef WIN32
 		if ( !( iBucket % bucketmodulo ) )
@@ -804,8 +771,7 @@ void CqImageBuffer::RenderImage()
 		iBucket += 1;
 
 		// Advance to next bucket, quit if nothing left
-		if ( !NextBucket(order) )
-			break;
+		pendingBuckets = NextBucket(order);
 	}
 
 	ImageComplete();

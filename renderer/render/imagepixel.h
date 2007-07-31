@@ -126,9 +126,9 @@ class CqSampleDataPool
 
 	private:
 		std::vector<TqFloat>	m_theDataPool;
-		TqUint					m_nextSlot;
-		TqUint					m_slotSize;
-		std::stack<TqInt>		m_freeSlots;
+		TqUint			m_nextSlot;
+		TqUint			m_slotSize;
+		std::stack<TqInt>	m_freeSlots;
 };
 
 
@@ -176,11 +176,6 @@ struct SqImageSample
 	const TqFloat* Data() const
 	{
 		return(m_theSamplePool.SampleDataSlot(m_sampleSlot));
-	}
-
-	TqInt sampleSlot() const
-	{
-		return(m_sampleSlot);
 	}
 
 	void resetFlags()
@@ -276,7 +271,7 @@ class CqImagePixel
 		/** Get the approximate coverage of this pixel.
 		 * \return Float fraction of the pixel covered.
 		 */
-		TqFloat	Coverage()
+		TqFloat	Coverage() const
 		{
 			return ( m_Data.Data()[Sample_Coverage] );
 		}
@@ -288,9 +283,9 @@ class CqImagePixel
 		 * \return A color representing the averaged color at this pixel.
 		 * \attention Only call this after already calling FilterBucket().
 		 */
-		CqColor	Color()
+		CqColor	Color() const
 		{
-			TqFloat* data = m_Data.Data();
+			const TqFloat* data = m_Data.Data();
 			return ( CqColor(data[Sample_Red], data[Sample_Green], data[Sample_Blue]) );
 		}
 		void	SetColor(const CqColor& col)
@@ -304,9 +299,9 @@ class CqImagePixel
 		 * \return A color representing the averaged opacity at this pixel.
 		 * \attention Only call this after already calling FilterBucket().
 		 */
-		CqColor	Opacity()
+		CqColor	Opacity() const
 		{
-			TqFloat* data = m_Data.Data();
+			const TqFloat* data = m_Data.Data();
 			return ( CqColor(data[Sample_ORed], data[Sample_OGreen], data[Sample_OBlue]) );
 		}
 		void	SetOpacity(const CqColor& col)
@@ -320,7 +315,7 @@ class CqImagePixel
 		 * \return A float representing the averaged depth at this pixel.
 		 * \attention Only call this after already calling FilterBucket().
 		 */
-		TqFloat	Depth()
+		TqFloat	Depth() const
 		{
 			return ( m_Data.Data()[Sample_Depth] );
 		}
@@ -332,7 +327,7 @@ class CqImagePixel
 		 * \return A float representing the premultiplied alpha value of this pixel.
 		 * \attention Only call this after already calling FilterBucket().
 		 */
-		TqFloat	Alpha()
+		TqFloat	Alpha() const
 		{
 			return ( m_Data.Data()[Sample_Alpha] );
 		}
@@ -390,7 +385,7 @@ class CqImagePixel
 		 * \param The index of the bounding box in question.
 		 * \return The index of the sample that contains a dof offset in said bb.
 		 */
-		TqInt GetDofOffsetIndex(TqInt i)
+		TqInt GetDofOffsetIndex(TqInt i) const
 		{
 			return m_DofOffsetIndices[i];
 		}

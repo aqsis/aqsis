@@ -300,9 +300,7 @@ class CqImageBuffer
 			return ( m_CurrentBucketRow );
 		}
 
-		CqVector2D	BucketPosition() const;
 		CqVector2D	BucketPosition(TqInt x, TqInt y) const;
-		CqVector2D	BucketSize() const;
 		CqVector2D	BucketSize( TqInt x, TqInt y) const;
 };
 
