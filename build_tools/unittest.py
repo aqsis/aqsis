@@ -52,6 +52,8 @@ def addUnitTest(env, target=None, source=None, *args, **kwargs):
 	test executable provided in the target parameter:
 		"scons target"
 	'''
+	if env.has_key('UTEST_DISABLE') and env['UTEST_DISABLE']:
+		return None
 	if source is None:
 		source = target
 		target = None
