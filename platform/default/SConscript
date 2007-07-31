@@ -148,6 +148,10 @@ env.Replace(slparse_ccflags = ['-O0'])
 env.Replace(aqsistypes_libs = ['dl'])
 env.Replace(piqslapp_libs = ['pthread'])
 
+# Solaris needs a socket library linking in to aqsistypes
+if platform.system() == 'SunOS':
+	env.AppendUnique(aqsistypes_libs = ['socket', 'nsl'])
+
 # Small TinyXML hack to allow successful building under x86_64 architecture.
 if platform.machine() == 'x86_64':
 	env.Replace(tinyxml_ccflags = ['-fPIC'])
