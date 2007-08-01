@@ -85,7 +85,7 @@ TqInt	CqParseNodeFunctionCall::TypeCheck( TqInt* pTypes, TqInt Count,  bool& nee
 		pArg = pArg->pNext();
 	}
 
-	Aqsis::log() << debug << "Typechecking function call \"" << strName() << "\", possible matches: " << m_aFuncRef.size() <<  "[Line: " << LineNo() << "]" << std::endl;
+	Aqsis::log() << info << "Typechecking function call \"" << strName() << "\", possible matches: " << m_aFuncRef.size() <<  "[Line: " << LineNo() << "]" << std::endl;
 
 	// First build a list of valid types, ordered by preference, for each specified argument.
 	pArg = m_pChild;
@@ -108,6 +108,7 @@ TqInt	CqParseNodeFunctionCall::TypeCheck( TqInt* pTypes, TqInt Count,  bool& nee
 		CqFuncDef* pfunc = CqFuncDef::GetFunctionPtr( (*i) );
 		if( pfunc != 0 )
 		{
+			Aqsis::log() << info << "Considering candidate (" << TypeName(pfunc->Type()) << ")" << pfunc->strName() << "[" << pfunc->strParams() << "]" << std::endl;
 			TqInt weight = 0;
 			bool mustCast = false;
 			TqInt cArgs = pfunc->cTypeSpecLength();
@@ -160,14 +161,19 @@ TqInt	CqParseNodeFunctionCall::TypeCheck( TqInt* pTypes, TqInt Count,  bool& nee
 					std::list<std::pair<TqInt, TqInt> >::const_iterator match;
 					for(match = arg->begin(); match != arg->end(); ++match)
 					{
-						if(match->first == pfunc->aTypeSpec()[iArg])
+						/// \todo: Need to check the 'usage' of the required argument, specifically
+						/// check if Type_Variable matches.
+						if((match->first & Type_Mask) == (pfunc->aTypeSpec()[iArg] & Type_Mask))
 						{
 							weight += match->second;
 							break;
 						}
 					}
 					if(match == arg->end())
+					{
+						Aqsis::log() << info << "Argument " << iArg << " doesn't match, got " << TypeName(arg->front().first) << " expected " << TypeName(pfunc->aTypeSpec()[iArg]) << std::endl;
 						fArgsFailed = true;
+					}
 				}
 
 				// If we got this far, the function signature matches, and we have a weight
@@ -206,6 +212,7 @@ TqInt	CqParseNodeFunctionCall::TypeCheck( TqInt* pTypes, TqInt Count,  bool& nee
 	}
 
 	const CqFunctionSignature& best = functions.top();
+	Aqsis::log() << info << "Selected (" << TypeName(best.getFunc()->Type()) << ")" << best.getFunc()->strName() << "[" << best.getFunc()->strParams() << "]" << std::endl;
 	needsCast = best.needsCast();
 
 	// If we are not just checking, at this point, we have the best function candidate,
