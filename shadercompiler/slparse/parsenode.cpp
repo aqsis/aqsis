@@ -133,8 +133,8 @@ void CqParseNode::validTypes( std::list<std::pair<TqInt, TqInt> >& types)
 	types.push_front(std::pair<TqInt, TqInt>(mainType, 99));
 	std::vector<std::pair<TqInt, TqInt> > casts;
 	for(TqInt castType = Type_Nil; castType < Type_Last; ++castType)
-		if(m_aaTypePriorities[mainType][castType] != 0)
-			casts.push_back(std::pair<TqInt, TqInt>(castType, m_aaTypePriorities[mainType][castType]));
+		if(m_aaTypePriorities[mainType & Type_Mask][castType & Type_Mask] != 0)
+			casts.push_back(std::pair<TqInt, TqInt>(castType, m_aaTypePriorities[mainType & Type_Mask][castType & Type_Mask]));
 	std::sort(casts.begin(), casts.end(), cmpCasts);
 	for(std::vector<std::pair<TqInt, TqInt> >::const_iterator c = casts.begin(); c != casts.end(); ++c)
 		types.push_back(*c);
@@ -280,11 +280,11 @@ void CqParseNodeFunctionCall::validTypes( std::list<std::pair<TqInt, TqInt> >& t
 		// Now check the possible castable types, storing only if they have a weight greater than 
 		// an existing mapping.
 		for(TqInt castType = Type_Nil; castType < Type_Last; ++castType)
-			if(m_aaTypePriorities[mainType][castType] != 0 && 
+			if(m_aaTypePriorities[mainType & Type_Mask][castType & Type_Mask] != 0 && 
 					castType != mainType && 
 					( suitableTypes.find(castType) == suitableTypes.end() ||  
-					  suitableTypes[castType] < m_aaTypePriorities[mainType][castType]) )
-				suitableTypes[castType] = m_aaTypePriorities[mainType][castType];
+					  suitableTypes[castType] < m_aaTypePriorities[mainType & Type_Mask][castType & Type_Mask]) )
+				suitableTypes[castType] = m_aaTypePriorities[mainType & Type_Mask][castType & Type_Mask];
 	}
 	// Now copy the findings to the types list
 	types.clear();

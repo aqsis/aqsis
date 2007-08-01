@@ -311,10 +311,12 @@ platform_utils.addDynamicLinkerPath(env, prependBuildDir('aqsistypes') )
 # Here we use boost.test as the unit testing framework.
 testEnv = env.Copy()
 autotestmain_objs = SConscript(dirs=prependBuildDir(['build_tools']))
-testEnv.Tool('unittest',
-		toolpath=['build_tools'],
-		UTEST_MAIN_SRC=autotestmain_objs
-	)
+testEnv.Tool('unittest', toolpath=['build_tools'],)
+# NOTE: Unit tests disabled for the time being due to too many portability
+# problems.  Comment out this line or set the variable to False to enable them.
+testEnv.Replace(UTEST_DISABLE=True)
+testEnv.Replace(UTEST_MAIN_SRC=autotestmain_objs)
+testEnv.Replace(UTEST_RESULTS_DIR='#unit_test_results/')
 testEnv.AppendUnique( LIBS=['boost_unit_test_framework'] )
 testEnv.PrependENVPath('BOOST_TEST_LOG_LEVEL', 'message')
 # Linker paths for finding shared libraries at compile-time.  This lets us run
