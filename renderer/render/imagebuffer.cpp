@@ -672,7 +672,7 @@ void CqImageBuffer::RenderImage()
 		////////// Dump the pixel sample positions into a dump file //////////
 #if ENABLE_MPDUMP
 		if(m_mpdump.IsOpen())
-			m_mpdump.dumpPixelSamples(CurrentBucketCol(), CurrentBucketRow());
+			m_mpdump.dumpPixelSamples(CurrentBucketCol(), CurrentBucketRow(), CurrentBucket());
 #endif
 		/////////////////////////////////////////////////////////////////////////
 
@@ -767,10 +767,8 @@ void CqImageBuffer::RenderImage()
 			SetProcessWorkingSetSize( GetCurrentProcess(), 0xffffffff, 0xffffffff );
 #endif
 
-		// Increase the bucket counter...
-		iBucket += 1;
-
 		// Advance to next bucket, quit if nothing left
+		iBucket += 1;
 		pendingBuckets = NextBucket(order);
 	}
 

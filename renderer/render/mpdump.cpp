@@ -92,7 +92,7 @@ void CqMPDump::dumpImageInfo()
 }
 
 // Dump all pixel samples of the current bucket
-void CqMPDump::dumpPixelSamples(TqInt bucketCol, TqInt bucketRow)
+void CqMPDump::dumpPixelSamples(TqInt bucketCol, TqInt bucketRow, const CqBucket* currentBucket)
 {
 	CqImageBuffer* img =  QGetRenderContext()->pImage();
 
@@ -103,7 +103,7 @@ void CqMPDump::dumpPixelSamples(TqInt bucketCol, TqInt bucketRow)
 			CqImagePixel* pie;
 			int ix = static_cast<int>(j+img->BucketPosition(bucketCol, bucketRow).x());
 			int iy = static_cast<int>(i+img->BucketPosition(bucketCol, bucketRow).y());
-			CqBucket::ImageElement(ix, iy, pie);
+			currentBucket->ImageElement(ix, iy, pie);
 			for(int k=0; k<pie->XSamples()*pie->YSamples(); k++)
 			{
 				SqSampleData sd = pie->SampleData(k);

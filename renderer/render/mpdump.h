@@ -103,7 +103,7 @@ class CqMPDump
 		    This method has to be called after the sample initialization in
 			CqImageBuffer::RenderImage().
 		 */
-		void dumpPixelSamples(TqInt bucketCol, TqInt bucketRow);
+		void dumpPixelSamples(TqInt bucketCol, TqInt bucketRow, const CqBucket* currentBucket);
 
 		/**
 		   Dump a pixel sample.

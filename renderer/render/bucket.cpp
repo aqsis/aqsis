@@ -69,7 +69,7 @@ void CqBucket::AddMP( boost::shared_ptr<CqMicroPolygon>& pMP )
  */
 void CqBucket::SetProcessed( bool bProc )
 {
-	assert(IsEmpty());
+	assert( !bProc || (bProc && IsEmpty()) );
 	m_bProcessed = bProc;
 }
 
@@ -327,7 +327,7 @@ void CqBucket::InitialiseFilterValues()
 
 
 //----------------------------------------------------------------------
-void CqBucket::ImageElement( TqInt iXPos, TqInt iYPos, CqImagePixel*& pie )
+void CqBucket::ImageElement( TqInt iXPos, TqInt iYPos, CqImagePixel*& pie ) const
 {
 	iXPos -= m_bucketData->m_XOrigin;
 	iYPos -= m_bucketData->m_YOrigin;

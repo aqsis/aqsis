@@ -215,6 +215,8 @@ class CqBucket : public IqBucket
 		 */
 		void RenderWaitingMPs();
 
+		void	ImageElement( TqInt iXPos, TqInt iYPos, CqImagePixel*& pie ) const;
+
 	private:
 		/// This is a compare functor for sorting surfaces in order of depth.
 		struct closest_surface
@@ -242,8 +244,6 @@ class CqBucket : public IqBucket
 
 		/// A sorted list of primitives for this bucket
 		std::priority_queue<boost::shared_ptr<CqSurface>, std::deque<boost::shared_ptr<CqSurface> >, closest_surface> m_gPrims;
-
-		void	ImageElement( TqInt iXPos, TqInt iYPos, CqImagePixel*& pie );
 
 		void	InitialiseFilterValues();
 
