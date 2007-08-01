@@ -672,7 +672,7 @@ void CqImageBuffer::RenderImage()
 		////////// Dump the pixel sample positions into a dump file //////////
 #if ENABLE_MPDUMP
 		if(m_mpdump.IsOpen())
-			m_mpdump.dumpPixelSamples();
+			m_mpdump.dumpPixelSamples(CurrentBucketCol(), CurrentBucketRow());
 #endif
 		/////////////////////////////////////////////////////////////////////////
 

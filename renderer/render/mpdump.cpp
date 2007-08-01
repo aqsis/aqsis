@@ -17,11 +17,12 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+
+#if ENABLE_MPDUMP
+
 #include "mpdump.h"
 #include "micropolygon.h"
 #include "imagebuffer.h"
-
-#if ENABLE_MPDUMP
 
 START_NAMESPACE( Aqsis )
 
@@ -30,14 +31,14 @@ START_NAMESPACE( Aqsis )
 CqMPDump::CqMPDump()
 		: out(NULL), mpcount(0)
 {}
-;
+
 
 
 // Destructor
 CqMPDump::~CqMPDump()
 {
 	close();
-};
+}
 
 // Open the dump file
 void CqMPDump::open()
@@ -91,17 +92,17 @@ void CqMPDump::dumpImageInfo()
 }
 
 // Dump all pixel samples of the current bucket
-void CqMPDump::dumpPixelSamples()
+void CqMPDump::dumpPixelSamples(TqInt bucketCol, TqInt bucketRow)
 {
 	CqImageBuffer* img =  QGetRenderContext()->pImage();
 
-	for(int i=0; i<img->BucketSize().y(); i++)
+	for(int i=0; i<img->BucketSize(bucketCol, bucketRow).y(); i++)
 	{
-		for(int j=0; j<img->BucketSize().x(); j++)
+		for(int j=0; j<img->BucketSize(bucketCol, bucketRow).x(); j++)
 		{
 			CqImagePixel* pie;
-			int ix = static_cast<int>(j+img->BucketPosition().x());
-			int iy = static_cast<int>(i+img->BucketPosition().y());
+			int ix = static_cast<int>(j+img->BucketPosition(bucketCol, bucketRow).x());
+			int iy = static_cast<int>(i+img->BucketPosition(bucketCol, bucketRow).y());
 			CqBucket::ImageElement(ix, iy, pie);
 			for(int k=0; k<pie->XSamples()*pie->YSamples(); k++)
 			{

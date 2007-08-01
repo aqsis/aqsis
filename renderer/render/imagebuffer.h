@@ -216,6 +216,9 @@ class CqImageBuffer
 			return ( m_fDone );
 		}
 
+		CqVector2D	BucketPosition( TqInt x, TqInt y ) const;
+		CqVector2D	BucketSize( TqInt x, TqInt y ) const;
+
 		void	AddMPG( boost::shared_ptr<CqMicroPolygon>& pmpgNew );
 		void	PostSurface( const boost::shared_ptr<CqSurface>& pSurface );
 		void	RenderImage();
@@ -299,9 +302,6 @@ class CqImageBuffer
 		{
 			return ( m_CurrentBucketRow );
 		}
-
-		CqVector2D	BucketPosition(TqInt x, TqInt y) const;
-		CqVector2D	BucketSize( TqInt x, TqInt y) const;
 };
 
 

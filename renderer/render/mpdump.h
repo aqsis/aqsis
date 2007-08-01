@@ -34,6 +34,7 @@
 START_NAMESPACE( Aqsis )
 
 class CqMicroPolygon;
+struct SqSampleData;
 
 /**
    Dump micro polygons into a file for debugging.
@@ -102,7 +103,7 @@ class CqMPDump
 		    This method has to be called after the sample initialization in
 			CqImageBuffer::RenderImage().
 		 */
-		void dumpPixelSamples();
+		void dumpPixelSamples(TqInt bucketCol, TqInt bucketRow);
 
 		/**
 		   Dump a pixel sample.
