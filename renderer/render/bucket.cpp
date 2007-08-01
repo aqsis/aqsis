@@ -342,7 +342,7 @@ void CqBucket::ImageElement( TqInt iXPos, TqInt iYPos, CqImagePixel*& pie )
 
 
 //----------------------------------------------------------------------
-CqImagePixel& CqBucket::ImageElement(TqInt index) const
+CqImagePixel& CqBucket::ImageElement(TqUint index) const
 {
 	assert(index < m_bucketData->m_aieImage.size());
 	return m_bucketData->m_aieImage[index];

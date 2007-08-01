@@ -126,7 +126,7 @@ class CqBucket : public IqBucket
 				       TqFloat clippingNear, TqFloat clippingFar,
 				       bool fJitter = true, bool empty = false );
 
-		CqImagePixel& ImageElement(TqInt index) const;
+		CqImagePixel& ImageElement(TqUint index) const;
 
 		std::vector<SqSampleData>& SamplePoints() const
 		{

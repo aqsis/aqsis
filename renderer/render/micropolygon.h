@@ -850,13 +850,13 @@ class CqMicroPolygonMotion : public CqMicroPolygon
 			return(m_Keys.size());
 		}
 
-		virtual TqFloat Time(TqInt index) const
+		virtual TqFloat Time(TqUint index) const
 		{
 			assert(index < m_Times.size());
 			return(m_Times[index]);
 		}
 
-		virtual CqMovingMicroPolygonKey* Key(TqInt index) const
+		virtual CqMovingMicroPolygonKey* Key(TqUint index) const
 		{
 			assert(index < m_Keys.size());
 			return(m_Keys[index]);
