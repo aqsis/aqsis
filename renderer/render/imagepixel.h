@@ -136,19 +136,25 @@ struct SqImageSample
 {
 	SqImageSample() : m_flags(0)
 	{
-		m_sampleSlot = m_theSamplePool.Allocate();
+		/// \todo Previous code for the sample pool
+		/// m_sampleSlot = m_theSamplePool.Allocate();
+		m_data = new TqFloat[m_sampleSize];
 	}
 
 	/// Copy constructor
 	SqImageSample(const SqImageSample& from)
 	{
-		m_sampleSlot = m_theSamplePool.Allocate();
+		/// \todo Previous code for the sample pool
+		/// m_sampleSlot = m_theSamplePool.Allocate();
+		m_data = new TqFloat[m_sampleSize];
 		*this = from;
 	}
 
 	~SqImageSample()
 	{
-		m_theSamplePool.DeAllocate(m_sampleSlot);
+		/// \todo Previous code for the sample pool
+		/// m_theSamplePool.DeAllocate(m_sampleSlot);
+		delete [] m_data;
 	}
 
 	SqImageSample& operator=(const SqImageSample& from)
@@ -158,24 +164,32 @@ struct SqImageSample
 
 		const TqFloat* fromData = from.Data();
 		TqFloat* toData = Data();
-		for(TqInt i=0; i<m_theSamplePool.slotSize(); ++i)
+		/// \todo Previous code for the sample pool
+		/// for(TqInt i=0; i<m_theSamplePool.slotSize(); ++i)
+		for(TqUint i=0; i<m_sampleSize; ++i)
 			toData[i] = fromData[i];
 
 		return(*this);
 	}
 
-	static void SetSampleSize(TqInt size)
+	static void SetSampleSize(TqUint size)
 	{
-		m_theSamplePool.Initialise(size);
+		/// \todo Previous code for the sample pool
+		/// m_theSamplePool.Initialise(size);
+		m_sampleSize = size;
 	}
 
 	TqFloat* Data()
 	{
-		return(m_theSamplePool.SampleDataSlot(m_sampleSlot));
+		/// \todo Previous code for the sample pool
+		/// return(m_theSamplePool.SampleDataSlot(m_sampleSlot));
+		return m_data;
 	}
 	const TqFloat* Data() const
 	{
-		return(m_theSamplePool.SampleDataSlot(m_sampleSlot));
+		/// \todo Previous code for the sample pool
+		/// return(m_theSamplePool.SampleDataSlot(m_sampleSlot));
+		return m_data;
 	}
 
 	void resetFlags()
@@ -219,7 +233,11 @@ private:
 	TqInt	m_flags;
 	TqInt	m_sampleSlot;
 
-	static	CqSampleDataPool m_theSamplePool;
+	/// \todo Previous code for the sample pool
+	/// static  CqSampleDataPool m_theSamplePool;
+	static TqUint	m_sampleSize;
+	TqFloat*	m_data;
+
 }
 ;
 

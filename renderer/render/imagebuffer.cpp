@@ -494,13 +494,7 @@ void CqImageBuffer::AddMPG( boost::shared_ptr<CqMicroPolygon>& pmpgNew )
     After that the method BucketComplete() and IqDDManager::DisplayBucket()
     is called which can be used to display the bucket inside a window or
     save it to disk.
- 
- * \param xmin Integer minimum extend of the image part being rendered, takes into account buckets and clipping.
- * \param xmax Integer maximum extend of the image part being rendered, takes into account buckets and clipping.
- * \param ymin Integer minimum extend of the image part being rendered, takes into account buckets and clipping.
- * \param ymax Integer maximum extend of the image part being rendered, takes into account buckets and clipping.
  */
-
 void CqImageBuffer::RenderSurface( boost::shared_ptr<CqSurface>& pSurface )
 {
 	// If the epsilon check has deemed this surface to be undiceable, don't bother asking.
@@ -664,6 +658,7 @@ void CqImageBuffer::RenderImage()
 	TqInt iBucket = 0;
 
 	CqBucketProcessor bucketProcessor1;
+	CqBucketProcessor bucketProcessor2;
 
 	// Iterate over all buckets...
 	bool pendingBuckets = true;
@@ -742,17 +737,101 @@ void CqImageBuffer::RenderImage()
 				return ;
 			}
 		}
-
 		bucketProcessor1.process();	
 		bucketProcessor1.postProcess( b1IsEmpty, fImager, depthfilter, zThreshold );
 		BucketComplete();
 		{
 			TIME_SCOPE("Display bucket");
-			CqBucket& bucket1 = Bucket( bucketProcessor1.getBucketCol(),
-						    bucketProcessor1.getBucketRow() );
-			QGetRenderContext() ->pDDmanager() ->DisplayBucket( &bucket1 );
+			CqBucket& bucket = Bucket( bucketProcessor1.getBucketCol(),
+						   bucketProcessor1.getBucketRow() );
+			QGetRenderContext() ->pDDmanager() ->DisplayBucket( &bucket );
 		}
 		bucketProcessor1.reset();
+
+/** \note Disabled at the moment so it doesn't change the order of
+ * execution of the previous code
+
+		// Advance to next bucket, quit if nothing left
+		iBucket += 1;
+		pendingBuckets = NextBucket(order);
+		if ( ! pendingBuckets )
+			break;
+
+		bucketProcessor2.setBucket(&CurrentBucket(), CurrentBucketCol(), CurrentBucketRow());
+		bool b2IsEmpty = bucketProcessor2.currentBucketIsEmpty();
+		if (fImager)
+			b2IsEmpty = false;
+		{
+			// Set up some bounds for the bucket.
+			const CqVector2D bPos = BucketPosition( bucketProcessor2.getBucketCol(),
+								bucketProcessor2.getBucketRow() );
+			const CqVector2D bSize = BucketSize( bucketProcessor2.getBucketCol(),
+							     bucketProcessor2.getBucketRow() );
+			const CqVector2D vecMin = bPos - bHalf;
+			const CqVector2D vecMax = bPos + bSize + bHalf;
+
+			TqInt xmin = static_cast<TqInt>( vecMin.x() );
+			TqInt ymin = static_cast<TqInt>( vecMin.y() );
+			TqInt xmax = static_cast<TqInt>( vecMax.x() );
+			TqInt ymax = static_cast<TqInt>( vecMax.y() );
+			if ( xmin < CropWindowXMin() - m_FilterXWidth / 2 )
+				xmin = static_cast<TqInt>(CropWindowXMin() - m_FilterXWidth / 2.0f);
+			if ( ymin < CropWindowYMin() - m_FilterYWidth / 2 )
+				ymin = static_cast<TqInt>(CropWindowYMin() - m_FilterYWidth / 2.0f);
+			if ( xmax > CropWindowXMax() + m_FilterXWidth / 2 )
+				xmax = static_cast<TqInt>(CropWindowXMax() + m_FilterXWidth / 2.0f);
+			if ( ymax > CropWindowYMax() + m_FilterYWidth / 2 )
+				ymax = static_cast<TqInt>(CropWindowYMax() + m_FilterYWidth / 2.0f);
+
+			bucketProcessor2.preProcess( bPos, bSize,
+						     m_PixelXSamples, m_PixelYSamples, m_FilterXWidth, m_FilterYWidth,
+						     xmin, xmax, ymin, ymax,
+						     m_ClippingNear, m_ClippingFar,
+						     b2IsEmpty );
+
+			// Render any waiting subsurfaces.
+			while ( bucketProcessor2.hasPendingSurfaces() && !m_fQuit )
+			{
+				boost::shared_ptr<CqSurface> pSurface = bucketProcessor2.getTopSurface();
+				if (pSurface)
+				{
+					// Cull surface if it's hidden
+					if ( !( DisplayMode() & ModeZ ) && !pSurface->pCSGNode() )
+					{
+						TIME_SCOPE("Occlusion culling");
+						if ( !b2IsEmpty &&
+						     pSurface->fCachedBound() &&
+						     OcclusionCullSurface( bucketProcessor2, pSurface ) )
+						{
+							// Advance to next surface
+							bucketProcessor2.popSurface();
+							continue;
+						}
+					}
+
+					RenderSurface( pSurface );
+
+					// Advance to next surface
+					bucketProcessor2.popSurface();
+				}
+			}
+
+			if ( m_fQuit )
+			{
+				m_fDone = true;
+				return ;
+			}
+		}
+		bucketProcessor2.process();	
+		bucketProcessor2.postProcess( b2IsEmpty, fImager, depthfilter, zThreshold );
+		BucketComplete();
+		{
+			TIME_SCOPE("Display bucket");
+			CqBucket& bucket = Bucket( bucketProcessor2.getBucketCol(),
+						   bucketProcessor2.getBucketRow() );
+			QGetRenderContext() ->pDDmanager() ->DisplayBucket( &bucket );
+		}
+		bucketProcessor2.reset();
 
 		if ( pProgressHandler )
 		{
@@ -761,6 +840,8 @@ void CqImageBuffer::RenderImage()
 			QGetRenderContext() ->Stats().SetComplete( Complete );
 			( *pProgressHandler ) ( Complete, QGetRenderContext() ->CurrentFrame() );
 		}
+*/
+
 
 #ifdef WIN32
 		if ( !( iBucket % bucketmodulo ) )

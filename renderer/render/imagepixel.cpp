@@ -41,7 +41,9 @@
 
 START_NAMESPACE( Aqsis )
 
-CqSampleDataPool	SqImageSample::m_theSamplePool;
+/// \todo Previous code for the sample pool
+/// CqSampleDataPool	SqImageSample::m_theSamplePool;
+TqUint SqImageSample::m_sampleSize(9);
 
 //----------------------------------------------------------------------
 /** Constructor
