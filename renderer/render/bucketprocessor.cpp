@@ -46,6 +46,7 @@ void CqBucketProcessor::setBucket(CqBucket* bucket, TqInt bucketCol, TqInt bucke
 
 	m_bucketCol = bucketCol;
 	m_bucketRow = bucketRow;
+	m_initiallyEmpty = m_bucket->IsEmpty();
 }
 
 void CqBucketProcessor::reset()
@@ -67,8 +68,7 @@ bool CqBucketProcessor::canCull(const CqBound* bound) const
 void CqBucketProcessor::preProcess(const CqVector2D& pos, const CqVector2D& size,
 				   TqInt pixelXSamples, TqInt pixelYSamples, TqFloat filterXWidth, TqFloat filterYWidth,
 				   TqInt viewRangeXMin, TqInt viewRangeXMax, TqInt viewRangeYMin, TqInt viewRangeYMax,
-				   TqFloat clippingNear, TqFloat clippingFar,
-				   bool empty)
+				   TqFloat clippingNear, TqFloat clippingFar)
 {
 	assert(m_bucket);
 
@@ -78,10 +78,10 @@ void CqBucketProcessor::preProcess(const CqVector2D& pos, const CqVector2D& size
 					 pixelXSamples, pixelYSamples, filterXWidth, filterYWidth,
 					 viewRangeXMin, viewRangeXMax, viewRangeYMin, viewRangeYMax,
 					 clippingNear, clippingFar,
-					 true, empty );
+					 true, m_initiallyEmpty );
 	}
 
-	if ( !empty )
+	if ( !m_initiallyEmpty )
 	{
 		TIME_SCOPE("Occlusion culling");
 		m_bucketData.setupOcclusionHierarchy(m_bucket);
@@ -96,21 +96,21 @@ void CqBucketProcessor::process()
 	m_bucket->RenderWaitingMPs();
 }
 
-void CqBucketProcessor::postProcess( bool empty, bool imager, EqFilterDepth depthfilter, const CqColor& zThreshold )
+void CqBucketProcessor::postProcess( bool imager, EqFilterDepth depthfilter, const CqColor& zThreshold )
 {
 	assert(m_bucket);
 
 	// Combine the colors at each pixel sample for any
 	// micropolygons rendered to that pixel.
-	if (!empty)
+	if (!m_initiallyEmpty)
 	{
 		TIME_SCOPE("Combine");
 		m_bucket->CombineElements(depthfilter, zThreshold);
 	}
 
 	TIMER_START("Filter");
-	m_bucket->FilterBucket(empty, imager);
-	if (!empty)
+	m_bucket->FilterBucket(m_initiallyEmpty, imager);
+	if (!m_initiallyEmpty)
 	{
 		m_bucket->ExposeBucket();
 		// \note: Used to quantize here too, but not any more, as it is handled by
@@ -122,11 +122,14 @@ void CqBucketProcessor::postProcess( bool empty, bool imager, EqFilterDepth dept
 	m_bucket->SetProcessed();
 }
 
-bool CqBucketProcessor::currentBucketIsEmpty() const
+bool CqBucketProcessor::isInitiallyEmpty() const
 {
-	assert(m_bucket);
+	return m_initiallyEmpty;
+}
 
-	return m_bucket->IsEmpty();
+void CqBucketProcessor::setInitiallyEmpty(bool value)
+{
+	m_initiallyEmpty = value;
 }
 
 bool CqBucketProcessor::hasPendingSurfaces() const

@@ -61,8 +61,7 @@ public:
 	void preProcess(const CqVector2D& pos, const CqVector2D& size,
 			TqInt pixelXSamples, TqInt pixelYSamples, TqFloat filterXWidth, TqFloat filterYWidth,
 			TqInt viewRangeXMin, TqInt viewRangeXMax, TqInt viewRangeYMin, TqInt viewRangeYMax,
-			TqFloat clippingNear, TqFloat clippingFar,
-			bool empty);
+			TqFloat clippingNear, TqFloat clippingFar);
 
 	/** Process the bucket, basically rendering the waiting MPs
 	 */
@@ -71,11 +70,14 @@ public:
 	/** Post-process the bucket, which involves the operations
 	 * Combine and Filter
 	 */
-	void postProcess( bool empty, bool imager, EqFilterDepth depthfilter, const CqColor& zThreshold );
+	void postProcess( bool imager, EqFilterDepth depthfilter, const CqColor& zThreshold );
 
-	/** Whether the bucket is empty
+	/** Is the bucket empty initially?
 	 */
-	bool currentBucketIsEmpty() const;
+	bool isInitiallyEmpty() const;
+	/** Set if the bucket is empty initially
+	 */
+	void setInitiallyEmpty(bool value);
 
 	/** Whether the bucket has pending surfaces to render
 	 */
@@ -104,6 +106,10 @@ private:
 	TqInt m_bucketCol;
 	/// Current bucket row in the image
 	TqInt m_bucketRow;
+
+	/// Whether the buckets is empty before starting to manipulate
+	/// it
+	bool m_initiallyEmpty;
 
 	/// Bucket data for the current bucket
 	CqBucketData m_bucketData;
