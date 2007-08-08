@@ -116,18 +116,6 @@ private:
 };
 
 
-/**
- * \brief Class to schedule the processing of Buckets.
- */
-class CqBucketProcessorScheduler
-{
-public:
-	
-private:
-	
-};
-
-
 END_NAMESPACE( Aqsis );
 
 #endif
