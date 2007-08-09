@@ -339,28 +339,31 @@ boost::shared_ptr<CqHiFreqTimerBase> CqTimerFactory::getTimer(const std::string&
 }
 
 #else	// Don't use timing code - just dummy defines
-	#define TIMER_SETUP
+
+#define TIMER_SETUP
 
 #define TIME_SCOPE(name)
-	#define TIME_FUN(fun) fun;
-	#define TIME_LINE(line) TIME_FUN(line)
+#define TIME_FUN(fun) fun;
+#define TIME_LINE(line) TIME_FUN(line)
 
 #define TIMER_START(identifier)
-	#define TIMER_STOP(identifier)
+#define TIMER_STOP(identifier)
 
 #define TIMER_DUMP(dest, sort)
-	#define TIMER_DUMP_FILE(dest, sort, mode)
-	#define TIMER_DUMP_CSV(dest, sort, mode)
+#define TIMER_DUMP_FILE(dest, sort, mode)
+#define TIMER_DUMP_CSV(dest, sort, mode)
 
 #define TIMER_DUMP_SAMPLES(timer, dest)
-	#define TIMER_DUMP_SAMPLES_FILE(timer, dest, mode)
-	#define TIMER_DUMP_SAMPLES_CSV(timer, file, mode)
+#define TIMER_DUMP_SAMPLES_FILE(timer, dest, mode)
+#define TIMER_DUMP_SAMPLES_CSV(timer, file, mode)
 
 #define CLEAR_TIMERS
-	#define GET_TIMER(name) (*new CqHiFreqTimer)
-	#define T2S(time) "Timing Disabled"
+#define GET_TIMER(name) (*new CqHiFreqTimer)
+#define T2S(time) "Timing Disabled"
 
 #include <vector>
+
+namespace Aqsis {
 
 class CqHiFreqTimer
 {

@@ -19,27 +19,23 @@
 
 
 /** \file
-		\brief Declares classes required for the flexible performance timers.
-		\author	Paul C. Gregory - originally based on code published on the CodeProject site
-				http://www.codeproject.com/debug/multitimer.asp
+		\brief Version information and functions
+		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#ifdef	USE_TIMERS
+//? Is .h included already?
+#ifndef VERSION_H_INCLUDED
+#define VERSION_H_INCLUDED 1
 
-#include "aqsis.h"
+#include "sstring.h"
 
+#define	STRNAME		"Aqsis"
 
-#include "multitimer_system.h"
-#include "exception.h"
+#define	VERMAJOR ${MAJOR}
+#define	VERMINOR ${MINOR}
+#define	BUILD ${BUILD}
+#define TYPE ${TYPE}
+#define	VERSION_STR	"${MAJOR}.${MINOR}.${BUILD}${TYPE}"
+#define VERSION_STR_PRINT  "${MAJOR}.${MINOR}.${BUILD}${TYPE} ${REVISION}"
 
-namespace Aqsis {
-
-void CqHiFreqTimer::SqTimingDetails::Setup()
-{
-	perFreq = (double)CLOCKS_PER_SEC/1000.0;
-	nextTimer = curBase = curManualBase = 0;
-}
-
-} // namespace Aqsis
-
-#endif // USE_TIMERS
+#endif	// !VERSION_H_INCLUDED

@@ -1,0 +1,7 @@
+PROJECT(ARGPARSE)
+
+INCLUDE(${PROJECT_SOURCE_DIR}/export.cmake)
+
+SET(ARGPARSE_SRCS argparse.cpp)
+SET(ARGPARSE_HDRS argparse.h)
+ADD_LIBRARY(argparse ${ARGPARSE_SRCS})
