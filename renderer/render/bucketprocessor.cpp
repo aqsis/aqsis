@@ -49,8 +49,16 @@ void CqBucketProcessor::setBucket(CqBucket* bucket, TqInt bucketCol, TqInt bucke
 	m_initiallyEmpty = m_bucket->IsEmpty();
 }
 
+const CqBucket* CqBucketProcessor::getBucket() const
+{
+	return m_bucket;
+}
+
 void CqBucketProcessor::reset()
 {
+	if (!m_bucket)
+		return;
+
 	assert(m_bucket && m_bucket->IsProcessed());
 
 	m_bucket->SetBucketData(static_cast<CqBucketData*>(0));
@@ -58,6 +66,7 @@ void CqBucketProcessor::reset()
 
 	m_bucketCol = -1;
 	m_bucketRow = -1;
+	m_initiallyEmpty = false;
 }
 
 bool CqBucketProcessor::canCull(const CqBound* bound) const
@@ -90,7 +99,8 @@ void CqBucketProcessor::preProcess(const CqVector2D& pos, const CqVector2D& size
 
 void CqBucketProcessor::process()
 {
-	assert(m_bucket);
+	if (!m_bucket)
+		return;
 
 	TIME_SCOPE("Render MPs");
 	m_bucket->RenderWaitingMPs();
@@ -98,7 +108,8 @@ void CqBucketProcessor::process()
 
 void CqBucketProcessor::postProcess( bool imager, EqFilterDepth depthfilter, const CqColor& zThreshold )
 {
-	assert(m_bucket);
+	if (!m_bucket)
+		return;
 
 	// Combine the colors at each pixel sample for any
 	// micropolygons rendered to that pixel.

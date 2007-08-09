@@ -133,7 +133,7 @@ TqInt CqDDManager::CloseDisplays()
 	return ( 0 );
 }
 
-TqInt CqDDManager::DisplayBucket( IqBucket* pBucket )
+TqInt CqDDManager::DisplayBucket( const IqBucket* pBucket )
 {
 	static CqRandom random( 61 );
 
@@ -908,7 +908,7 @@ void CqDisplayRequest::PrepareSystemParameters()
 	m_customParams.push_back(parameter);
 }
 
-void CqDisplayRequest::DisplayBucket( IqBucket* pBucket )
+void CqDisplayRequest::DisplayBucket( const IqBucket* pBucket )
 {
 	// If the display is not validated, don't send it data.
 	// Or if a DspyImageData function was not found for
@@ -945,7 +945,7 @@ void CqDisplayRequest::DisplayBucket( IqBucket* pBucket )
 	}	
 }
 
-void CqShallowDisplayRequest::FormatBucketForDisplay( IqBucket* pBucket )
+void CqShallowDisplayRequest::FormatBucketForDisplay( const IqBucket* pBucket )
 {
 	static CqRandom random( 61 );
 	TqUint	xmin = pBucket->XOrigin();
@@ -1046,7 +1046,7 @@ void CqShallowDisplayRequest::FormatBucketForDisplay( IqBucket* pBucket )
 	}
 }
 
-void CqDeepDisplayRequest::FormatBucketForDisplay( IqBucket* pBucket )
+void CqDeepDisplayRequest::FormatBucketForDisplay( const IqBucket* pBucket )
 {
 	
 }
@@ -1054,7 +1054,7 @@ void CqDeepDisplayRequest::FormatBucketForDisplay( IqBucket* pBucket )
 //-----------------------------------------------------------------------------
 // Return true if a scanline of buckets has been accumulated, false otherwise.
 //-----------------------------------------------------------------------------
-bool CqShallowDisplayRequest::CollapseBucketsToScanlines( IqBucket* pBucket )
+bool CqShallowDisplayRequest::CollapseBucketsToScanlines( const IqBucket* pBucket )
 {
 	TqUint	ymin = pBucket->YOrigin();
 	TqUint width = QGetRenderContext()->pImage()->CropWindowXMax() - QGetRenderContext()->pImage()->CropWindowXMin();	
@@ -1075,7 +1075,7 @@ bool CqShallowDisplayRequest::CollapseBucketsToScanlines( IqBucket* pBucket )
 	return false;
 }
 
-bool CqDeepDisplayRequest::CollapseBucketsToScanlines( IqBucket* pBucket )
+bool CqDeepDisplayRequest::CollapseBucketsToScanlines( const IqBucket* pBucket )
 {
 	return false;	
 }

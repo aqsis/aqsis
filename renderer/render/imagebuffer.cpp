@@ -657,7 +657,7 @@ void CqImageBuffer::RenderImage()
 	// A counter for the number of processed buckets (used for progress reporting)
 	TqInt iBucket = 0;
 
-#define MULTIPROCESSING_NBUCKETS 1
+#define MULTIPROCESSING_NBUCKETS 7
 
 	std::vector<CqBucketProcessor> bucketProcessors;
 	bucketProcessors.resize(MULTIPROCESSING_NBUCKETS);
@@ -666,7 +666,7 @@ void CqImageBuffer::RenderImage()
 	bool pendingBuckets = true;
 	while ( pendingBuckets && !m_fQuit )
 	{
-		for (int i = 0; !m_fQuit && i < MULTIPROCESSING_NBUCKETS; ++i)
+		for (int i = 0; pendingBuckets && i < MULTIPROCESSING_NBUCKETS; ++i)
 		{
 		////////// Dump the pixel sample positions into a dump file //////////
 #if ENABLE_MPDUMP
@@ -735,14 +735,26 @@ void CqImageBuffer::RenderImage()
 					}
 				}
 			}
+
+			// Advance to next bucket, quit if nothing left
+			iBucket += 1;
+			pendingBuckets = NextBucket(order);
+		}
+
+		for (int i = 0; !m_fQuit && i < MULTIPROCESSING_NBUCKETS; ++i)
+		{
 			bucketProcessors[i].process();	
+		}
+
+		for (int i = 0; !m_fQuit && i < MULTIPROCESSING_NBUCKETS; ++i)
+		{
 			bucketProcessors[i].postProcess( fImager, depthfilter, zThreshold );
 			BucketComplete();
 			{
 				TIME_SCOPE("Display bucket");
-				CqBucket& bucket = Bucket( bucketProcessors[i].getBucketCol(),
-							   bucketProcessors[i].getBucketRow() );
-				QGetRenderContext() ->pDDmanager() ->DisplayBucket( &bucket );
+				const CqBucket* bucket = bucketProcessors[i].getBucket();
+				if (bucket)
+					QGetRenderContext() ->pDDmanager() ->DisplayBucket( bucket );
 			}
 			bucketProcessors[i].reset();
 
@@ -758,10 +770,6 @@ void CqImageBuffer::RenderImage()
 			if ( !( iBucket % bucketmodulo ) )
 				SetProcessWorkingSetSize( GetCurrentProcess(), 0xffffffff, 0xffffffff );
 #endif
-
-			// Advance to next bucket, quit if nothing left
-			iBucket += 1;
-			pendingBuckets = NextBucket(order);
 		}
 	}
 

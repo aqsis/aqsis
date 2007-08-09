@@ -96,11 +96,11 @@ class CqBucket : public IqBucket
 			return m_bucketData->m_FilterYWidth;
 		}
 
-		virtual	CqColor Color( TqInt iXPos, TqInt iYPos );
-		virtual	CqColor Opacity( TqInt iXPos, TqInt iYPos );
-		virtual	TqFloat Coverage( TqInt iXPos, TqInt iYPos );
-		virtual	TqFloat Depth( TqInt iXPos, TqInt iYPos );
-		virtual	const TqFloat* Data( TqInt iXPos, TqInt iYPos );
+		virtual	CqColor Color( TqInt iXPos, TqInt iYPos ) const;
+		virtual	CqColor Opacity( TqInt iXPos, TqInt iYPos ) const;
+		virtual	TqFloat Coverage( TqInt iXPos, TqInt iYPos ) const;
+		virtual	TqFloat Depth( TqInt iXPos, TqInt iYPos ) const;
+		virtual	const TqFloat* Data( TqInt iXPos, TqInt iYPos ) const;
 
 		/** Set up the necessary data for the bucket to render
 		 *

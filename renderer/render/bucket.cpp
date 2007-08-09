@@ -367,7 +367,7 @@ void CqBucket::CombineElements(enum EqFilterDepth filterdepth, CqColor zThreshol
  * \param iYPos Screen position of sample.
  */
 
-CqColor CqBucket::Color( TqInt iXPos, TqInt iYPos )
+CqColor CqBucket::Color( TqInt iXPos, TqInt iYPos ) const
 {
 	CqImagePixel * pie;
 	ImageElement( iXPos, iYPos, pie );
@@ -384,7 +384,7 @@ CqColor CqBucket::Color( TqInt iXPos, TqInt iYPos )
  * \param iYPos Screen position of sample.
  */
 
-CqColor CqBucket::Opacity( TqInt iXPos, TqInt iYPos )
+CqColor CqBucket::Opacity( TqInt iXPos, TqInt iYPos ) const
 {
 	CqImagePixel * pie;
 	ImageElement( iXPos, iYPos, pie );
@@ -402,7 +402,7 @@ CqColor CqBucket::Opacity( TqInt iXPos, TqInt iYPos )
  * \param iYPos Screen position of sample.
  */
 
-TqFloat CqBucket::Coverage( TqInt iXPos, TqInt iYPos )
+TqFloat CqBucket::Coverage( TqInt iXPos, TqInt iYPos ) const
 {
 	CqImagePixel * pie;
 	ImageElement( iXPos, iYPos, pie );
@@ -420,7 +420,7 @@ TqFloat CqBucket::Coverage( TqInt iXPos, TqInt iYPos )
  * \param iYPos Screen position of sample.
  */
 
-TqFloat CqBucket::Depth( TqInt iXPos, TqInt iYPos )
+TqFloat CqBucket::Depth( TqInt iXPos, TqInt iYPos ) const
 {
 	CqImagePixel * pie;
 	ImageElement( iXPos, iYPos, pie );
@@ -438,7 +438,7 @@ TqFloat CqBucket::Depth( TqInt iXPos, TqInt iYPos )
  * \param iYPos Screen position of sample.
  */
 
-const TqFloat* CqBucket::Data( TqInt iXPos, TqInt iYPos )
+const TqFloat* CqBucket::Data( TqInt iXPos, TqInt iYPos ) const
 {
 	CqImagePixel * pie;
 	ImageElement( iXPos, iYPos, pie );

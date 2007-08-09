@@ -64,27 +64,27 @@ struct IqBucket
 	 * \param iXPos Screen position of the requested element.
 	 * \param iYPos Screen position of the requested element.
 	 */
-	virtual	CqColor Color( TqInt iXPos, TqInt iYPos ) = 0;
+	virtual	CqColor Color( TqInt iXPos, TqInt iYPos ) const = 0;
 	/** Get an element opacity from this bucket. If the requested address is not within this bucket, returns transparent.
 	 * \param iXPos Screen position of the requested element.
 	 * \param iYPos Screen position of the requested element.
 	 */
-	virtual	CqColor Opacity( TqInt iXPos, TqInt iYPos ) = 0;
+	virtual	CqColor Opacity( TqInt iXPos, TqInt iYPos ) const = 0;
 	/** Get an element coverage from this bucket. If the requested address is not within this bucket, returns 0.
 	 * \param iXPos Screen position of the requested element.
 	 * \param iYPos Screen position of the requested element.
 	 */
-	virtual	TqFloat Coverage( TqInt iXPos, TqInt iYPos ) = 0;
+	virtual	TqFloat Coverage( TqInt iXPos, TqInt iYPos ) const = 0;
 	/** Get an element depth from this bucket. If the requested address is not within this bucket, returns FLT_MAX.
 	 * \param iXPos Screen position of the requested element.
 	 * \param iYPos Screen position of the requested element.
 	 */
-	virtual	TqFloat Depth( TqInt iXPos, TqInt iYPos ) = 0;
+	virtual	TqFloat Depth( TqInt iXPos, TqInt iYPos ) const = 0;
 	/** Get a pointer to the sample array
 	 * \param iXPos Screen position of the requested element.
 	 * \param iYPos Screen position of the requested element.
 	 */
-	virtual const TqFloat* Data( TqInt iXPos, TqInt iYPos ) = 0;
+	virtual const TqFloat* Data( TqInt iXPos, TqInt iYPos ) const = 0;
 };
 
 struct IqDDManager
@@ -112,7 +112,7 @@ struct IqDDManager
 	virtual	TqInt	CloseDisplays() = 0;
 	/** Display a bucket.
 	 */
-	virtual	TqInt	DisplayBucket( IqBucket* pBucket ) = 0;
+	virtual	TqInt	DisplayBucket( const IqBucket* pBucket ) = 0;
 	/** Determine if any of the displays need the named shader variable.
 	 */
 	virtual bool	fDisplayNeeds( const TqChar* var) = 0;

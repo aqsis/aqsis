@@ -50,6 +50,8 @@ public:
 
 	/** Set the bucket to be processed */
 	void setBucket(CqBucket* bucket, TqInt bucketCol, TqInt bucketRow);
+	/** Get the bucket to be processed */
+	const CqBucket* getBucket() const;
 
 	/** Reset the status of the object */
 	void reset();
