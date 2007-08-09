@@ -1,0 +1,36 @@
+FrameBegin 1
+Display "repel.tif" "tiff" "rgba" 
+Format 200 100 1
+Projection "perspective" "fov" [8]
+Translate 0 -.35 8
+Rotate 88 1 0 0
+WorldBegin
+Imager "background" "color" [1 1 1]
+LightSource "ambientlight" 1 "intensity" [0.05]
+LightSource "distantlight" 2 "from" [-1 1 -1] "to" [0 0 0]
+Color [.1 .9 .3]
+Opacity [1 1 1]
+Sides 2
+ShadingInterpolation "smooth"
+ShadingRate 1.0
+Surface "plastic"
+#Surface "myplastic"
+#Surface "shownorm"
+Blobby 2 [
+		1001 0
+		1003 0 16
+		0 2 0 1
+	]
+	[
+		1.5 0 0 0 0 1.5 0 0 0 0 1.5 0 0 0 -.1 1
+		.4 .01 .3 .08
+	]
+	[
+		"flat.zfile"
+	]
+Color [1 0.2 0]
+Attribute "displacementbound" "sphere" .2 "coordinatesystem" "surface"
+Surface "lumpy"
+Patch "bilinear" "P" [-1 -1 0	1 -1 0	-1 1 0	1 1 0]
+WorldEnd 
+FrameEnd 

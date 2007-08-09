@@ -1,0 +1,21 @@
+Import('env', 'embedManifest')
+dbo_planeenv = env.Copy()
+dbo_plane_headers=Split("""
+	implicit.h""")
+dbo_plane_sources=Split("""
+	dbo_plane.c""")
+
+# Set any platform specific options for this target
+dbo_planeenv.UseTargetOptions('plugin')
+dbo_planeenv.UseTargetOptions('texture_plugin')
+dbo_planeenv.UseTargetOptions('dbo_plane')
+
+dbo_plane = dbo_planeenv.SharedLibrary('dbo_plane', dbo_plane_sources, LIBS=[''])
+
+embedManifest(env, dbo_planeenv, dbo_plane, 'DLL')
+	
+dbo_planeenv.Install('$PLUGINDIR', dbo_plane)
+
+env.Distribute(dbo_plane_headers)
+env.Distribute(dbo_plane_sources)
+env.Distribute('SConscript')

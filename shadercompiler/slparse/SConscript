@@ -1,0 +1,43 @@
+Import('env')
+
+slparse_sources = Split("""
+	funcdef.cpp
+	libslparse.cpp
+	optimise.cpp
+	parsenode.cpp
+	parser.cpp
+	scanner.cpp
+	typecheck.cpp
+	vardef.cpp""")
+
+slparse_headers = Split("""
+	funcdef.h
+	icodegen.h
+	ifuncdef.h
+	iparsenode.h
+	ivardef.h
+	libslparse.h
+	parsenode.h
+	vardef.h""")
+
+slparseenv = env.Copy()
+
+# Set any platform specific options for this target
+slparseenv.UseTargetOptions('slparse')
+
+if slparseenv['debug']:
+	slparseenv.AppendUnique(CPPDEFINES = ['YYDEBUG'])
+
+slparseenv.CXXFile(target='parser.cpp', source='parser.yy')
+slparseenv.CXXFile(target='scanner.cpp', source='scanner.ll')
+
+slparse_objs = [slparseenv.Object(file) for file in slparse_sources]
+
+Export('slparse_objs')
+
+env.Distribute(slparse_sources)
+env.Distribute(slparse_headers)
+env.Distribute('SConscript')
+env.Distribute('parser.yy')
+env.Distribute('scanner.ll')
+

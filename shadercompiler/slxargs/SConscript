@@ -1,0 +1,40 @@
+import os
+Import('env', 'embedManifest')
+
+slxargs_sources = Split("""
+	rcdummy.cpp
+	slx.cpp""")
+
+slxargs_headers = Split("""
+	slx.h""")
+
+slxargs_install_headers = Split("""
+	slx.h""")
+
+slxargsenv = env.Copy()
+
+slxargsenv.AppendUnique(CPPDEFINES=['SLXARGS_EXPORTS'])
+
+# Set any platform specific options for this target
+slxargsenv.UseTargetOptions('slxargs')
+
+if env.has_key('slxargs_add_sources'):
+	slxargs_sources = slxargs_sources + ['$slxargs_add_sources']
+
+slxargsenv.Replace(LIBS = ['aqsistypes', 'shadervm'])
+slxargs = slxargsenv.SharedLibrary('slxargs', slxargs_sources)
+
+embedManifest(env, slxargsenv, slxargs, 'DLL')
+	
+slxargsenv.PostBuildSharedLibrary(slxargsenv, slxargs)
+slxargsenv.InstallAs([os.path.join('${RENDERENGINEDIR}', '%s${SHLIB_VERSION_SUFFIX}') %(slxargs[0])], [slxargs[0]])
+
+slxargsenv.PostInstallSharedLibrary(slxargsenv, '${RENDERENGINEDIR}', slxargs)
+
+
+slxargsenv.Install('$INCLUDEDIR', slxargs_install_headers)
+
+env.Distribute(slxargs_sources)
+env.Distribute(slxargs_headers)
+env.Distribute('SConscript')
+

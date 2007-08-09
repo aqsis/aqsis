@@ -1,0 +1,32 @@
+Import('env')
+shaderexecenv_sources = Split("""
+	shaderexecenv.cpp
+	shadeops_comp.cpp
+	shadeops_deriv.cpp
+	shadeops_illum.cpp
+	shadeops_inter.cpp
+	shadeops_math.cpp
+	shadeops_matrx.cpp
+	shadeops_rand.cpp
+	shadeops_text.cpp
+	shadeops_tmap.cpp
+""")
+
+shaderexecenv_headers = Split("""
+	shaderexecenv.h""")
+
+shaderexecenvenv = env.Copy()
+shaderexecenvenv.AppendUnique(CPPDEFINES=['SHADERCONTEXT_EXPORTS'])
+
+# Set any platform specific options for this target
+shaderexecenvenv.UseTargetOptions('shaderexecenv')
+
+shaderexecenv_objs = [shaderexecenvenv.SharedObject(file) for file in shaderexecenv_sources]
+
+Export('shaderexecenv_objs')
+
+env.Distribute(shaderexecenv_sources)
+env.Distribute(shaderexecenv_headers)
+env.Distribute('SConscript')
+
+

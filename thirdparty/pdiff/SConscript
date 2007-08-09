@@ -1,0 +1,31 @@
+Import('env')
+
+pdiff_sources = Split("""
+	CompareArgs.cpp
+	LPyramid.cpp
+	Metric.cpp
+	PerceptualDiff.cpp
+	RGBAImage.cpp
+	""")
+pdiff_headers = Split("""
+	CompareArgs.h
+	LPyramid.h
+	Metric.h
+	RGBAImage.h
+	""")
+
+if env['with_pdiff']:
+	pdiffenv = env.Copy()
+
+	pdiffenv.AppendUnique(LIBS = ['$tiff_lib', '$z_lib'])
+	pdiffenv.AppendUnique(CPPPATH=['$tiff_include_path', '$zlib_include_path'])
+
+	pdiffenv.UseTargetOptions('pdiff')
+
+	pdiff = pdiffenv.Program('pdiff', pdiff_sources)
+	pdiffenv.Install('$BINDIR', pdiff)
+
+env.Distribute(pdiff_sources)
+env.Distribute(pdiff_headers)
+env.Distribute('SConscript')
+

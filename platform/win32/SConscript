@@ -1,0 +1,239 @@
+import os.path
+
+Import('env', 'version')
+
+def getCompilerShortcut (msvs_version):
+	'''Return the shortcut ending for a given MS Visual Studio version.
+	This ending is used while looking for precompiled binaries.'''
+	if msvs_version == '8.0':
+		return 'vc8'
+	elif msvs_version == '7.1':
+		return 'vc7'
+	else:
+		return 'vc6'
+	# note that 2002 is not supported.
+	
+def setupVCLibraries(env):
+	'''Checks if the paths for each library and sets up default paths
+	that point into win32libs'''
+	compiler_shortcut = getCompilerShortcut (env ['MSVS_VERSION'])
+	
+	# If the tiff include path isn't specified as an option, choose the default, of the 
+	# win32libs project from SVN checked out to the same folder as 'aqsis'
+	if env['tiff_include_path'] == "":
+		env.Replace(tiff_include_path = env.Dir('#/../win32libs/libtiff/include'))
+	if env['tiff_lib_path'] == "":
+		env.Replace(tiff_lib_path = env.Dir('#/../win32libs/libtiff/lib/' + compiler_shortcut))
+
+	if env['debug']:
+		env.Replace(tiff_lib = 'libtiff_d')
+	else:
+		env.Replace(tiff_lib = 'libtiff')
+
+	# If the zlib include path isn't specified as an option, choose the default, of the 
+	# win32libs project from SVN checked out to the same folder as 'aqsis'
+	if env['zlib_include_path'] == "":
+		env.Replace(zlib_include_path = env.Dir('#/../win32libs/zlib/include'))
+	if env['zlib_lib_path'] == "":
+		env.Replace(zlib_lib_path = env.Dir('#/../win32libs/zlib/lib/' + compiler_shortcut))
+
+	if env['debug']:
+		env.Replace(z_lib = 'zlibstat_d')
+	else:
+		env.Replace(z_lib = 'zlibstat')
+
+	# If the jpeg include path isn't specified as an option, choose the default, of the 
+	# win32libs project from SVN checked out to the same folder as 'aqsis'
+	if env['jpeg_include_path'] == "":
+		env.Replace(jpeg_include_path = env.Dir('#/../win32libs/jpeg/include'))
+	if env['jpeg_lib_path'] == "":
+		env.Replace(jpeg_lib_path = env.Dir('#/../win32libs/jpeg/lib/' + compiler_shortcut))
+
+	if env['debug']:
+		env.Replace(jpeg_lib = 'libjpeg_d')
+	else:
+		env.Replace(jpeg_lib = 'libjpeg')
+	
+	# Set the right name for FLTK
+	if env['debug']:
+		env.Replace(fltk_lib = 'fltkd')	# FLTK uses d by default as the suffix for debug builds
+	else:
+		env.Replace(fltk_lib = 'fltk')
+	
+	# Set up OpenEXR
+	if env['debug']:
+		env.Replace(exr_lib = 'Iex_d')
+		env.Replace(exr2tif_libs = ['IlmImf_d', 'Half_d', 'Iex_d', 'Imath_d', 'IlmThread_d'])
+		env.Replace(exr_libs = ['IlmImf_d', 'Half_d', 'Iex_d', 'Imath_d', 'IlmThread_d', '$z_lib'])
+	else:
+		env.Replace(exr_lib = 'Iex')
+		env.Replace(exr2tif_libs = ['IlmImf', 'Half', 'Iex', 'Imath', 'IlmThread'])
+		env.Replace(exr_libs = ['IlmImf', 'Half', 'Iex', 'Imath', 'IlmThread', '$z_lib'])
+	
+	env.AppendUnique(CPPPATH = ['$exr_include_path/Iex', '$exr_include_path/IlmImf', '$exr_include_path/Imath',
+		'$psdk_include_path', '$psdk_include_path'])
+
+		
+# Compiler specific settings
+if not env['mingw']:
+	# MS Visual C++ build
+	setupVCLibraries(env)
+
+	# Set up build options
+	if env['MSVS_VERSION'] == '8.0':
+		# MSVC 2005
+		if env['debug']:
+			env.AppendUnique(CCFLAGS=[
+				'/RTC1',	# run-time checks
+				'/Od',		# no optimization
+				'/W4'		# warning level 4
+				])
+		else:	# Release
+			env.AppendUnique(CCFLAGS=[
+				'/Ox',		# Full optimization
+				'/GL'		# Whole-program optimization, needed for LTCG
+				])
+			
+			if (env['SSE'] != 'off'):
+				if env['SSE'] == 'SSE1':
+					env.AppendUnique(CCFLAGS=['/arch:SSE'])
+				else:	#SSE2
+					env.AppendUnique(CCFLAGS=['/arch:SSE2'])
+					
+			if (env['FP_Fast']):
+				env.AppendUnique(CCFLAGS=['/fp:fast']) # /fp:strict is the default
+				
+			env.AppendUnique(LINKFLAGS=[
+				'/LTCG' 	# Link-time code generation
+				])
+		
+		# Common VC8 options
+		env.AppendUnique(CCFLAGS=[
+				'/EHsc',	# exception handling
+				'/GR',		# RTTI
+				'/GS', 		# buffer overflow checks
+				'/Wp64'		# 64-bit portability warnings
+				])
+		env.AppendUnique(CPPDEFINES=[
+				'_CRT_SECURE_NO_DEPRECATE'
+				])
+	else:
+		#MSVC6, 2003
+		if env['debug']:
+			env.AppendUnique(CCFLAGS=['/GX', '/GR', '/Zm200', '/Od'])
+		else:
+			env.AppendUnique(CCFLAGS=['/GX', '/GR', '/Zm200', '/O2'])
+	
+	# Common options to all MSVC versions
+	if env['debug']:
+		env.AppendUnique(CCFLAGS=[
+				'/Z7',		# debug informations
+				'/MDd'		# multi-threaded debug dll
+							])
+		env.AppendUnique(CPPDEFINES=[('_DEBUG', 1)])
+		env.AppendUnique(LINKFLAGS=['/DEBUG'])	
+	else: # Release
+		env.AppendUnique(CCFLAGS=[
+				'/MD'		# multi-threaded dll
+							])
+		env.AppendUnique(CPPDEFINES=[('NDEBUG', '1')])		
+		
+	env.AppendUnique(CPPDEFINES=['NO_SYSLOG', 'WIN32', 'PLUGINS', 'USE_WIN32_FILEIO'])
+	
+	env.Replace(display_libs = ['ws2_32', 'user32', 'gdi32', 'ole32', 'shell32', 'comctl32', '$fltk_lib'])
+	env.Replace(aqsistypes_libs = ['ws2_32'])
+	env.Replace(piqslapp_libs = ['ws2_32', 'user32', 'gdi32', 'ole32', 'shell32', 'comctl32', 
+		'advapi32', '$fltk_lib'])
+	
+	# This is needed for the Express Editions
+	env.AppendUnique(LIBPATH = ['$psdk_lib_path'])
+else:
+	# MinGW (gcc) build
+	
+	#env.AppendUnique(SHLINKFLAGS=['-Wl,-enable-auto-import', '-Wl,-enable-runtime-pseudo-reloc'])
+	env.AppendUnique(SHLINKFLAGS=['-Wl,-disable-auto-import'])
+	env.AppendUnique(LINKFLAGS=['-Wl,-disable-auto-import'])
+	if env['debug']:
+		env.AppendUnique(CCFLAGS=['-g', '-O0', '-fno-common', '-Wall'])
+	else:
+		env.AppendUnique(CCFLAGS=['-O1', '-fno-common', '-Wall'])
+
+	env.AppendUnique(CPPPATH = [env.Dir('#/aqsistypes/win32')])
+	env.AppendUnique(CPPDEFINES=[('NDEBUG', '1'), ('PLUGINS', '1'), 'WIN32', 'NO_SYSLOG'])
+
+	# If the tiff include path isn't specified as an option, choose the default, of the 
+	# win32libs project from SVN checked out to the same folder as 'aqsis'
+	if env['tiff_include_path'] == "":
+		env.Replace(tiff_include_path = env.Dir('#/../win32libs/libtiff/include'))
+	if env['tiff_lib_path'] == "":
+		env.Replace(tiff_lib_path = env.Dir('#/../win32libs/libtiff/lib/mingw'))
+
+	env.Replace(tiff_lib = 'tiff')
+
+	# If the zlib include path isn't specified as an option, choose the default, of the 
+	# win32libs project from SVN checked out to the same folder as 'aqsis'
+	if env['zlib_include_path'] == "":
+		env.Replace(zlib_include_path = env.Dir('#/../win32libs/zlib/include'))
+	if env['zlib_lib_path'] == "":
+		env.Replace(zlib_lib_path = env.Dir('#/../win32libs/zlib/lib/mingw'))
+
+	env.Replace(z_lib = 'z')
+
+	# If the jpeg include path isn't specified as an option, choose the default, of the 
+	# win32libs project from SVN checked out to the same folder as 'aqsis'
+	if env['jpeg_include_path'] == "":
+		env.Replace(jpeg_include_path = env.Dir('#/../win32libs/jpeg/include'))
+	if env['jpeg_lib_path'] == "":
+		env.Replace(jpeg_lib_path = env.Dir('#/../win32libs/jpeg/lib/mingw'))
+
+	env.Replace(jpeg_lib = 'jpeg')
+
+	# If the openexr include path isn't specified as an option, choose the default, of the 
+	# win32libs project from SVN checked out to the same folder as 'aqsis'
+	if env['exr_include_path'] == "":
+		env.Replace(exr_include_path = env.Dir('#/../win32libs/OpenEXR/include'))
+	if env['exr_lib_path'] == "":
+		env.Replace(exr_lib_path = env.Dir('#/../win32libs/OpenEXR/lib/mingw'))
+
+	env.Replace(exr_lib = 'Iex')
+
+	# If the fltk include path isn't specified as an option, choose the default, of the 
+	# win32libs project from SVN checked out to the same folder as 'aqsis'
+	if env['fltk_include_path'] == "":
+		env.Replace(fltk_include_path = env.Dir('#/../win32libs/FLTK/include'))
+	if env['fltk_lib_path'] == "":
+		env.Replace(fltk_lib_path = env.Dir('#/../win32libs/FLTK/lib/mingw'))
+
+	env.Replace(fltk_lib = 'fltk')
+
+	env.Replace(aqsistypes_libs = ['ws2_32'])
+	env.Replace(exr2tif_libs = ['$tiff_lib', 'IlmImf', 'Half', 'Iex', 'Imath', 'IlmThread', '$z_lib'])
+	env.Replace(exr_libs = ['IlmImf', 'Half', 'Iex', 'Imath', 'IlmThread', '$z_lib'])
+	env.Replace(display_libs = ['ws2_32', 'user32', 'gdi32', 'ole32', 'shell32', 'comctl32', 'uuid', '$fltk_lib'])
+	env.Replace(piqsldisplay_libs = ['ws2_32', 'user32', 'gdi32', 'ole32', 'shell32', 'comctl32', 'uuid'])
+	env.Replace(piqslapp_libs = ['ws2_32', 'user32', 'gdi32', 'ole32', 'shell32', 'comctl32', 'uuid', '$fltk_lib'])
+
+	env.Replace(slparse_ccflags = ['-O0'])
+	env.AppendUnique(CPPDEFINES=['NO_SYSLOG', 'WIN32', 'PLUGINS'])
+
+
+# Add the GnuWin32 bin folder to the PATH, so that bison 2.1 can find m4.exe
+env.AppendENVPath('PATH', env.Dir('#/../win32libs/GnuWin32/bin').abspath)
+env.AppendUnique(CPPPATH = ['#/aqsistypes/win32'])
+
+env.Replace(YACC = '${bison}')
+env.Replace(LEX = '${flex}')
+env.Replace(YACCFLAGS = '--no-lines -d')
+env.Replace(XSLTPROC = env.File('#/../win32libs/GnuWin32/bin/xsltproc'))
+
+env.Replace(aqsis_libs = ['ws2_32', 'user32'])
+env.Replace(libaqsis_libs = ['ws2_32', 'user32'])
+
+def PostInstallSharedLibrary(env, dir, source):
+	'''Copy the .exp/.lib file to the target folder'''
+	basename = os.path.join('%s', '%s') %(dir, source[1])
+	env.Command('%s' %(basename), source[1], Copy('$TARGET', '$SOURCE'))
+	basename = os.path.join('%s', '%s') %(dir, source[2])
+	env.Command('%s' %(basename), source[2], Copy('$TARGET', '$SOURCE'))
+	
+env.PostInstallSharedLibrary = PostInstallSharedLibrary

@@ -1,0 +1,90 @@
+Aqsis Renderer README
+---------------------
+
+Aqsis is a high quality, photorealistic, 3D rendering solution. It complies
+with the RenderMan(R) interface standard defined by Pixar.
+
+The RenderMan(R) standard has been used in film and television visual effects
+since it's introduction in 1989. Pixar has used their own implementation for
+all of their award winning CG features, and provided their implementation for
+use in the visual effects of most major blockbuster films over the last 2
+decades. The Aqsis project offers a way for individuals and organisations alike
+to gain experience with the RenderMan(R) interface without the cost of
+commercial software licenses.
+
+Aqsis comprises a command line rendering tool, a tool for compiling shaders in
+the RSL language, a tool for preparing textures for optimal use, and various
+developer libraries to enable integration with third party tools.
+
+For more information, visit to the aqsis website:
+
+www.aqsis.org
+
+
+Documentation
+-------------
+
+The documentation may be accessed online at the aqsis wiki; see
+
+http://wiki.aqsis.org/index
+
+
+Brief list of tools
+-------------------
+
+* Binary command line tools:
+   aqsis    - the renderer
+   aqsl     - the shader compiler
+   aqsltell - the shader inspection tool
+   teqser   - the texture pre-processor
+   miqser   - the RIB processor
+
+* Scripts:
+   mpanalyse.py - Analysis tool for micropolygon dump format (see scripts
+				  directory).  Note that mpanalyse requires cgkit and pyOpenGL
+				  as extra dependencies.
+
+
+License
+-------
+
+Aqsis is licensed under the GNU GPL.  See the COPYING file for details.
+libri2rib is licensed under the GNU LGPL. See the libri2rib/COPYING_LGPL file
+for details.
+
+
+Authors
+-------
+
+Aqsis was originally written by Paul Gregory for use under Win32.  See the
+AUTHORS file for subsequent contributors.
+
+
+Installation
+------------
+
+See the INSTALL file for installation instructions.
+
+Credits
+-------
+
+The following libraries form part of the Aqsis product, the copyright for
+these libraries lies with the respective owners.
+
+Boost   - http://www.boost.org
+FLTK    - http://www.fltk.org
+JPEG    - http://www.ijg.org
+libpng  - http://www.libpng.org
+LibTIFF - http://www.libtiff.org
+OpenEXR - http://www.openexr.org
+zlib    - http://www.zlib.net
+
+
+
+Happy Rendering!
+The Aqsis Team
+
+
+----------------------------------------------------------------------
+This software is OSI Certified Open Source Software.
+OSI Certified is a certification mark of the Open Source Initiative.

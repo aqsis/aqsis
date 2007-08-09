@@ -1,0 +1,20 @@
+Import('env', 'embedManifest')
+aqsltellenv = env.Copy()
+aqsltellenv.AppendUnique(CPPPATH=['#/shadercompiler/slxargs'])
+aqsltell_sources = Split("""
+	aqsltell.cpp""")
+
+aqsltellenv.AppendUnique(LIBS = ['argparse', 'slxargs', 'shadervm', 'aqsistypes'])
+
+# Set any platform specific options for this target
+aqsltellenv.UseTargetOptions('aqsltell')
+
+aqsltell = aqsltellenv.Program('aqsltell', aqsltell_sources)
+
+embedManifest(env, aqsltellenv, aqsltell, 'EXE')
+	
+aqsltellenv.Install('$BINDIR', aqsltell)
+
+env.Distribute(aqsltell_sources)
+env.Distribute("SConscript")
+

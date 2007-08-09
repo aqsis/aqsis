@@ -1,0 +1,19 @@
+Import('env', 'embedManifest')
+bake2tifenv = env.Copy()
+bake2tif_sources=Split("""
+	bake2tif.c""")
+
+# Set any platform specific options for this target
+bake2tifenv.UseTargetOptions('plugin')
+bake2tifenv.UseTargetOptions('texture_plugin')
+bake2tifenv.UseTargetOptions('bake2tif')
+
+Import('common_objs')
+bake2tif = bake2tifenv.SharedLibrary('bake2tif', [bake2tif_sources, common_objs], LIBS=['$tiff_lib', '$z_lib'])
+
+embedManifest(env, bake2tifenv, bake2tif, 'DLL')
+
+bake2tifenv.Install('$PLUGINDIR', bake2tif)
+
+env.Distribute(bake2tif_sources)
+env.Distribute('SConscript')

@@ -1,0 +1,23 @@
+
+                                  Aqsis 1.2 Release Notes
+                                  ------------------------
+ 
+  These are the Release notes for the Aqsis 1.2 branch.
+
+    Installation
+    -------------
+
+  The build system now relies on SCons on all platforms. Please refer to the INSTALL file
+for detailed instructions.
+
+    Caveats and Deprecations relative to 1.0
+    -------------------------------------------
+
+  DSO Search Behaviour - The DSO search behaviour has been changed to be more in-line with
+other implementations. AQSIS_DSO_PATH, -dsolibs, and the related RiOption searchpaths have
+been removed. DSOs are now searched for in the same directory as normal shaders.
+
+  Shadow Sampling - Shadow sampling has been significantly improved, users should be aware 
+that the results are significantly different from shadows produced by Aqsis 1.0 and other
+stable releases.
+

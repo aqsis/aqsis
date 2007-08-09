@@ -1,0 +1,24 @@
+Import('env')
+aqiv_sources = Split("""
+	iv.c
+	sgigt.c
+	""")
+aqiv_headers = Split("""
+	sgigt.h
+	""")
+
+aqivenv = env.Copy()
+
+###g++ -o build/thirdparty/iv/aqiv -framework Carbon build/thirdparty/iv/iv.o build/thirdparty/iv/sgigt.o -L/opt/local/lib -ltiff -L/System/Library/Frameworks/OpenGL.framework/Libraries/ -framework GLUT -lGLU -lGL -lobjc
+
+# Set any platform specific options for this target
+aqivenv.UseTargetOptions('aqiv')
+
+aqiv = aqivenv.Program('aqiv', aqiv_sources)
+aqivenv.Install('$BINDIR', aqiv)
+
+env.Distribute(aqiv_sources)
+env.Distribute(aqiv_headers)
+env.Distribute('SConscript')
+
+Return('aqiv')

@@ -1,0 +1,46 @@
+import os
+Import('env', 'embedManifest')
+
+shadervm_sources = Split("""
+	dsoshadeops.cpp
+	shaderstack.cpp
+	shadervariable.cpp
+	shadervm.cpp
+	shadervm1.cpp
+	shadervm2.cpp""")
+
+shadervm_headers = Split("""
+	dsoshadeops.h
+	shaderstack.h
+	shadervariable.h
+	shadervm.h
+	shadervm_common.h""")
+
+shadervmenv = env.Copy()
+
+# Set any platform specific options for this target
+shadervmenv.UseTargetOptions('shadervm')
+shadervmenv.AppendUnique(CPPDEFINES=['SHADERVM_EXPORTS', 'SHADERCONTEXT_EXPORTS'])
+
+shadervmenv.Replace(LIBS = ['aqsistypes'])
+
+if env.has_key('shadervm_add_sources'):
+	shadervm_sources = shadervm_sources + ['$shadervm_add_sources']
+
+Import('shaderexecenv_objs')
+
+shadervm = shadervmenv.SharedLibrary('shadervm', [shadervm_sources, shaderexecenv_objs])
+
+embedManifest(env, shadervmenv, shadervm, 'DLL')
+
+shadervmenv.PostBuildSharedLibrary(shadervmenv, shadervm)
+
+shadervmenv.InstallAs([os.path.join('${RENDERENGINEDIR}', '%s${SHLIB_VERSION_SUFFIX}') %(shadervm[0])], [shadervm[0]])
+
+shadervmenv.PostInstallSharedLibrary(shadervmenv, '${RENDERENGINEDIR}', shadervm)
+
+env.Distribute(shadervm_sources)
+env.Distribute(shadervm_headers)
+env.Distribute('SConscript')
+
+

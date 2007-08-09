@@ -1,0 +1,20 @@
+Import('env')
+raytrace_sources = Split("""
+	raytrace.cpp""")
+
+raytrace_headers = Split("""
+	raytrace.h""")
+
+raytraceenv = env.Copy()
+
+# Set any platform specific options for this target
+raytraceenv.UseTargetOptions('raytrace')
+
+raytrace_objs = [raytraceenv.SharedObject(file) for file in raytrace_sources]
+
+Export('raytrace_objs')
+
+env.Distribute(raytrace_sources)
+env.Distribute(raytrace_headers)
+env.Distribute('SConscript')
+

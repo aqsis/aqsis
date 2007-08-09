@@ -1,0 +1,53 @@
+Aqsis Renderer - An open source RenderMan-compliant 3D rendering solution.
+
+The following people have contributed to the development of Aqsis Renderer:
+
+    1998 Paul C. Gregory		pgregory@aqsis.org
+								Originator and primary developer.
+	2001 Timothy M. Shead		tshead@k-3d.com
+								Linux port.
+								librib2.
+	2001 Lionel Joseph Lacour	Linux port.
+								libri2rib.
+								Binary RIB support.
+								gzipped RIB support.
+	2001 Patrick Mauritz		Linux port.
+	2001 Patrick Pelletier		Supplied libargparse and general development.
+	2001 Kelly Brock			General development and optimisation.
+	2001 Matthias Baas			General development and optimisation.
+	2001 Michel Joron			Image shaders support.
+								aqsltell.
+								Texture mapping, cache mechanism.
+								Texture file conversion plugins.
+								Latlong envionment mapping.
+								Teapot primitive.
+								Blobby support.
+								Bunny primitive.
+	2001 Kirk Bailey			Supplied PP C preprocessor.
+	2001 Andy Gill				buzz@ucky.com
+								Occlusion culling.
+	2001 Thomas Burge			RiSkew support.
+								RiPerspective support.
+								Cell noise.
+								Pixel filters.
+								Teapot primitive (initial work).
+	2002 Doug Ward				Mac OS X port.
+								libslxargs.
+	2002 Jonathan Merritt		RiCurves.
+	2002 Will Newton			Posix port.
+	2002 Andrew J. Bromage		RiDetail support.
+								RiMatte support.
+	2002 Matthäus G. Chajdas	Documentation.
+								Web site.
+								Various changes to information output.	
+	2003 Tristan Colgate		DSO shadeop support.
+								RiProcedural.
+								RiDelayedReadArchive.
+	2004 Tobias Sauerwein		Fedora RPM package.
+	2005 Stephan Gustavvson		Re-implemented 2D/3D/4D noise.
+	2006 Romain Behar			Blobby support.
+	2006 Marcus Rückert		Linux package management via openSUSE Build Service.
+	2006 Chris Foster			Unix build support for SCons
+
+	If anyone is missing from this list, please contact me at pgregory@aqsis.org.
+

@@ -1,0 +1,120 @@
+import os
+Import('env', 'embedManifest')
+aqsistypes_sources = Split("""
+	bitvector.cpp
+	cellnoise.cpp
+	color.cpp
+	exception.cpp
+	file.cpp
+	logging.cpp
+	lowdiscrep.cpp
+	matrix.cpp
+	multitimer.cpp
+	noise.cpp
+	noise1234.cpp
+	plugins.cpp
+	random.cpp
+	refcount.cpp
+	spline.cpp
+	sstring.cpp
+	vector2d.cpp
+	vector3d.cpp
+	vector4d.cpp
+	""")
+
+aqsistypes_headers = Split("""
+	aqsis.h
+	aqsismath.h
+	aqsis_types.h
+	bitvector.h
+	cellnoise.h
+	color.h
+	exception.h
+	file.h
+	list.h
+	logging.h
+	logging_streambufs.h
+	lowdiscrep.h
+	matrix.h
+	multitimer.h
+	noise1234.h
+	plugins.h
+	pool.h
+	random.h
+	refcount.h
+	socket.h
+	spline.h
+	sstring.h
+	validate.h
+	vector2d.h
+	vector3d.h
+	vector4d.h
+	""")
+
+
+if 'win32' == env['PLATFORM']:
+	SConscript('win32/SConscript')
+else:
+	SConscript('posix/SConscript')
+
+aqsistypes_install_headers = Split('''
+	aqsis.h
+	aqsismath.h
+	aqsis_types.h
+	bitvector.h
+	color.h
+	exception.h
+	file.h
+	list.h
+	matrix.h
+	random.h
+	refcount.h
+	socket.h
+	sstring.h
+	vector2d.h
+	vector3d.h
+	vector4d.h
+	''')
+
+Import('platform_sources')
+aqsistypes_sources = aqsistypes_sources + platform_sources
+
+aqsistypesenv = env.Copy()
+aqsistypesenv.AppendUnique(CPPDEFINES=['COMMON_EXPORTS'])
+
+# Set any platform specific options for this target
+aqsistypesenv.UseTargetOptions('aqsistypes')
+
+if env.has_key('aqsistypes_add_sources'):
+	aqsistypes_sources = aqsistypes_sources + ['$aqsistypes_add_sources']
+
+aqsistypes = aqsistypesenv.SharedLibrary('aqsistypes', aqsistypes_sources)
+
+embedManifest(env, aqsistypesenv, aqsistypes, 'DLL')
+
+aqsistypesenv.PostBuildSharedLibrary(aqsistypesenv, aqsistypes)
+#aqsistypesenv.Install('$RENDERENGINEDIR', aqsistypes)
+aqsistypesenv.Install('$INCLUDEDIR',aqsistypes_install_headers)
+aqsistypesenv.InstallAs([os.path.join('${RENDERENGINEDIR}', '%s${SHLIB_VERSION_SUFFIX}') %(aqsistypes[0])], [aqsistypes[0]])
+
+aqsistypesenv.PostInstallSharedLibrary(aqsistypesenv, '${RENDERENGINEDIR}', aqsistypes)
+
+
+#-------------------------------------------------------------------------------
+# Unit Tests
+Import('testEnv')
+testEnv = testEnv.Copy()
+testEnv.AppendUnique(LIBS=['aqsistypes'])
+aqsistypes_test_sources = Split('''
+	aqsismath_test.cpp
+	color_test.cpp
+	vector3d_test.cpp
+	''')
+testEnv.addUnitTest('aqsistypes_test', aqsistypes_test_sources)
+
+
+#-------------------------------------------------------------------------------
+env.Distribute(aqsistypes_sources)
+env.Distribute(aqsistypes_test_sources)
+env.Distribute(aqsistypes_headers)
+env.Distribute('SConscript')

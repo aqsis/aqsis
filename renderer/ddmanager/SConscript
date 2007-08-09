@@ -1,0 +1,24 @@
+Import('env')
+ddmanager_sources = Split("""
+	ddmanager.cpp
+	debugdd.cpp""")
+
+ddmanager_headers = Split("""
+	ddmanager.h
+	debugdd.h
+	ndspy.h""")
+
+ddmanagerenv = env.Copy()
+
+# Set any platform specific options for this target
+ddmanagerenv.UseTargetOptions('ddmanager')
+
+ddmanager_objs = [ddmanagerenv.SharedObject(file) for file in ddmanager_sources]
+
+Export('ddmanager_objs')
+
+ddmanagerenv.Install('$INCLUDEDIR', "ndspy.h")
+
+env.Distribute(ddmanager_sources)
+env.Distribute(ddmanager_headers)
+env.Distribute('SConscript')

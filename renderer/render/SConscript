@@ -1,0 +1,125 @@
+import os
+
+Import('env cachegen headergen validategen', 'embedManifest')
+aqsisdll_sources = Split("""
+	attributes.cpp
+	bound.cpp
+	bucket.cpp
+	bunny.cpp
+	condition.cpp
+	converter.cpp
+	csgtree.cpp
+	cubiccurves.cpp
+	curves.cpp
+	environment.cpp
+	filters.cpp
+	genpoly.cpp
+	graphicsstate.cpp
+	imagebuffer.cpp
+	imagepixel.cpp
+	imagers.cpp
+	inlineparse.cpp
+	lath.cpp
+	lights.cpp
+	linearcurves.cpp
+	micropolygon.cpp
+	mpdump.cpp
+	nurbs.cpp
+	occlusion.cpp
+	options.cpp
+	parameters.cpp
+	patch.cpp
+	points.cpp
+	polygon.cpp
+	procedural.cpp
+	quadrics.cpp
+	render.cpp
+	renderer.cpp
+	ri.cpp
+	shaders.cpp
+	shadowmap.cpp
+	stats.cpp
+	subdivision2.cpp
+	surface.cpp
+	symbols.cpp
+	teapot.cpp
+	texturemap.cpp
+	transform.cpp
+	blobby.cpp
+	marchingcubes.cpp
+	trimcurve.cpp""")
+
+
+aqsisdll_headers = Split("""
+	attributes.h            ilightsource.h          micropolygon.h          ri.h
+	bilinear.h              imagebuffer.h           motion.h                ri_cache.h
+	ri_debug.h
+	bound.h                 imagepixel.h            mpdump.h                rifile.h
+
+	bucket.h                bunny.h 	imagers.h               
+	nurbs.h                 shadeop.h
+	blobby.h		clippingvolume.h        inlineparse.h
+        objectinstance.h        shaders.h
+
+	condition.h             iraytrace.h             occlusion.h             stats.h
+	converter.h             irenderer.h             options.h               subdivision2.h
+	csgtree.h               ishader.h               parameters.h            surface.h
+	curves.h                ishaderdata.h           patch.h                 symbols.h
+	focus.h                 ishaderexecenv.h        plane.h                 teapot.h
+	forwarddiff.h           isurface.h              points.h                texturemap.h
+	genpoly.h               itexturemap.h           polygon.h               transform.h
+	graphicsstate.h         itransform.h            procedural.h            trimcurve.h
+	iattributes.h           kdtree.h                quadrics.h              ioptions.h
+	iddmanager.h            lath.h                  render.h
+	marchingcubes.h 	lookuptable.h
+	idsoshadeops.h          lights.h                renderer.h""")
+
+aqsis_install_headers = Split('''
+	ri.h
+	shadeop.h
+	''')
+
+aqsisenv = env.Copy()
+aqsisenv.AppendUnique(CPPDEFINES=['RI_EXPORTS', 'RIB_EXPORTS'])
+aqsisenv.AppendUnique(CPPPATH=['$tiff_include_path', '$zlib_include_path'])
+
+
+if env.has_key('libaqsis_add_sources'):
+	aqsisdll_sources = aqsisdll_sources + ['$libaqsis_add_sources']
+
+
+aqsisenv.Replace(LIBS = ['shadervm', 'aqsistypes', '$tiff_lib', '$z_lib'])
+
+aqsisenv.UseTargetOptions('libaqsis')
+
+Import('ddmanager_objs raytrace_objs rib2_objs rib2ri_sources')
+
+# compile rib2ri here to catch aqsisenv #defines
+rib2ri_objs = aqsisenv.SharedObject('rib2ri', rib2ri_sources)
+
+aqsisdll = aqsisenv.SharedLibrary('aqsis', [aqsisdll_sources, ddmanager_objs, raytrace_objs, rib2ri_objs, rib2_objs])
+
+embedManifest(env, aqsisenv, aqsisdll, 'DLL')
+
+aqsisenv.PostBuildSharedLibrary(aqsisenv, aqsisdll)
+
+Depends(aqsisdll, cachegen)
+Depends(aqsisdll, validategen)
+Depends(aqsisdll, headergen)
+
+aqsisInstall = aqsisenv.InstallAs([os.path.join('${RENDERENGINEDIR}', '%s${SHLIB_VERSION_SUFFIX}') %(aqsisdll[0])], [aqsisdll[0]])
+aqsisenv.Install('$INCLUDEDIR', aqsis_install_headers)
+
+aqsisenv.PostInstallSharedLibrary(aqsisenv, '${RENDERENGINEDIR}', aqsisdll)
+
+#aqsisproject = aqsisenv.MSVSProject(target = 'render' + env['MSVSPROJECTSUFFIX'],
+#	srcs = aqsisdll_sources,
+#	buildtarget = aqsisdll,
+#	variant = 'Release')
+
+#aqsisenv.Depends(aqsisdll, aqsisproject)
+
+
+env.Distribute(aqsisdll_sources)
+env.Distribute(aqsisdll_headers)
+env.Distribute('SConscript')

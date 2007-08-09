@@ -1,0 +1,28 @@
+Import('env', 'embedManifest')
+miqser_sources = Split("""
+	miqser.cpp""")
+
+miqserenv = env.Copy();
+miqserenv.AppendUnique(CPPDEFINES = ['RIB_EXPORTS'])
+miqserenv.AppendUnique(CPPPATH=['$zlib_include_path'])
+
+miqserenv.AppendUnique(LIBS = ['argparse', 'ri2rib', 'aqsistypes', '$z_lib'])
+
+# Set any platform specific options for this target
+miqserenv.UseTargetOptions('miqser')
+
+Import('rib2_objs rib2ri_sources')
+
+# compile rib2ri here to catch miqserenv #defines
+rib2ri_objs = miqserenv.StaticObject('rib2ri', rib2ri_sources)
+
+miqser = miqserenv.Program('miqser', [miqser_sources, rib2ri_objs, rib2_objs])
+
+embedManifest(env, miqserenv, miqser, 'EXE')
+		
+miqserenv.Install('$BINDIR', miqser)
+
+env.Distribute(miqser_sources)
+env.Distribute('SConscript')
+
+Return('miqser')

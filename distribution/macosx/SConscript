@@ -1,0 +1,5 @@
+Import('env')
+
+SConscript('bundle/SConscript')
+
+env.Distribute('SConscript')

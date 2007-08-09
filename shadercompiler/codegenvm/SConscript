@@ -1,0 +1,24 @@
+Import('env')
+codegenvm_sources = Split("""
+	vmdatagather.cpp
+	vmoutput.cpp
+	codegenvm.cpp""")
+
+codegenvm_headers = Split("""
+	codegenvm.h
+	vmdatagather.h
+	vmoutput.h""")
+
+codegenvmenv = env.Copy()
+
+# Set any platform specific options for this target
+codegenvmenv.UseTargetOptions('codegenvm')
+
+codegenvm_objs = [codegenvmenv.Object(file) for file in codegenvm_sources]
+
+Export('codegenvm_objs')
+
+env.Distribute(codegenvm_sources)
+env.Distribute(codegenvm_headers)
+env.Distribute('SConscript')
+

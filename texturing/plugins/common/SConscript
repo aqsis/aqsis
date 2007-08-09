@@ -1,0 +1,24 @@
+Import('env')
+commonenv = env.Copy()
+
+common_sources = Split("""
+	pixelsave.c""")
+
+common_headers = Split("""
+	pixelsave.h""")
+
+commonenv.AppendUnique(CPPPATH=['$tiff_include_path', '$zlib_include_path'])
+
+# Set any platform specific options for this target
+commonenv.UseTargetOptions('common')
+
+#common = commonenv.Library('common', common_sources)
+
+common_objs = [commonenv.SharedObject(file) for file in common_sources]
+
+Export('common_objs')
+
+env.Distribute(common_sources)
+env.Distribute(common_headers)
+env.Distribute('SConscript')
+

@@ -1,0 +1,40 @@
+FrameBegin 0
+Display "blobplane.tif" "file" "rgb" 
+Display "+blobplane.tif" "framebuffer" "rgb" 
+
+Projection "perspective" "fov" 35
+Format 160 120 1
+Format 640 480 1
+
+ShadingRate 1
+
+Translate 0 -1 12
+Rotate -110 1 0 0
+
+Imager "gradient" 
+
+WorldBegin
+
+  Color [1 .5 .1]
+
+  Blobby 6 [
+    1001 0            
+    1001 16
+    1001 32
+    1001 48
+    1001 64
+    9000 4 0 80 1 96     
+    0 6 0 1 2 3 4 5  
+  ] [
+    1 0 0 0  0 1 0 0  0 0 1 0  -4 0 .1  1  
+    1 0 0 0  0 1 0 0  0 0 1 0  -2 0 .25 1  
+    1 0 0 0  0 1 0 0  0 0 1 0   0 0 .5  1  
+    1 0 0 0  0 1 0 0  0 0 1 0   2 0 .75 1  
+    1 0 0 0  0 1 0 0  0 0 1 0   4 0 .84 1 
+    10 0 0 0  0 3 0 0  0 0 1 0   0 0 0 1
+    2
+  ] [ "dbo_plane" ]
+
+WorldEnd
+
+FrameEnd

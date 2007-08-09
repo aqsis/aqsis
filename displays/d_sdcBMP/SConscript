@@ -1,0 +1,30 @@
+Import('env', 'embedManifest')
+d_bmpenv = env.Copy()
+d_bmpenv.AppendUnique(CPPPATH=['#/renderer/ddmanager'])
+d_bmpenv.AppendUnique(CPPDEFINES=['d_bmp_EXPORTS'])
+
+d_bmp_sources = Split("""
+	d_sdcBMP.cpp
+	""")
+
+d_bmp_headers =  Split("""
+	""")
+
+
+d_bmpenv.AppendUnique(LIBS = ['$tiff_lib', '$z_lib'])
+
+# Set any platform specific target options.
+d_bmpenv.UseTargetOptions('d_bmp')
+
+d_bmp = d_bmpenv.SharedLibrary('d_bmp', d_bmp_sources)
+
+embedManifest(env, d_bmpenv, d_bmp, 'DLL')
+		
+d_bmpenv.Install('$DISPLAYSDIR', d_bmp)
+
+Return('d_bmp')
+
+env.Distribute(d_bmp_sources)
+env.Distribute(d_bmp_headers)
+env.Distribute('SConscript')
+

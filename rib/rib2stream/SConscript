@@ -1,0 +1,22 @@
+Import('env')
+
+rib2stream_sources = Split("""
+	librib2stream.cpp""")
+
+rib2stream_headers = Split("""
+	librib2stream.h""")
+
+rib2stream_install_headers = Split("""
+	librib2stream.h""")
+
+rib2streamenv = env.Copy()
+
+# Set any platform specific options for this target
+rib2streamenv.UseTargetOptions('rib2stream')
+
+rib2stream = rib2streamenv.Library('rib2stream', rib2stream_sources)
+
+env.Distribute(rib2stream_sources)
+env.Distribute(rib2stream_headers)
+env.Distribute('SConscript')
+

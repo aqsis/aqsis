@@ -1,0 +1,191 @@
+import os.path
+import platform
+import SCons.Util
+
+Import('env', 'version')
+
+# Import some build-related variables from the unix environment.
+if os.environ.has_key('CC'):
+	env.Replace(CC = os.environ['CC'])
+if os.environ.has_key('CFLAGS'):
+	env.AppendUnique(CCFLAGS = SCons.Util.CLVar(os.environ['CFLAGS']))
+if os.environ.has_key('CXX'):
+	env.Replace(CXX = os.environ['CXX'])
+if os.environ.has_key('CXXFLAGS'):
+	env.AppendUnique(CXXFLAGS = SCons.Util.CLVar(os.environ['CXXFLAGS']))
+if os.environ.has_key('LDFLAGS'):
+	env.AppendUnique(LINKFLAGS = SCons.Util.CLVar(os.environ['LDFLAGS']))
+if os.environ.has_key('TAR'):
+	env.Replace(TAR = os.environ['TAR'])
+
+env.AppendUnique(CCFLAGS=['-Wall','-g'])
+
+env.AppendUnique(CPPPATH = [env.Dir('#/aqsistypes/posix')])
+env.AppendUnique(CPPDEFINES=[('PLUGINS', '1')])
+
+if not env['debug']:
+	env.AppendUnique(CPPDEFINES=[('NDEBUG', '1')])
+	env.AppendUnique(CCFLAGS=['-O2'])
+
+# Point at the boost headers.
+# todo: need to find a way of determining this location automatically
+if env['boost_include_path'] == "":
+	env.Replace(boost_include_path = ['/usr/include/boost'])
+if env['boost_lib_path'] == "":
+	env.Replace(boost_lib_path = ['/usr/lib'])
+if env['boost_thread_lib'] == "":
+	env.Replace(boost_thread_lib = ['boost_thread'])
+
+# Find out where the TIFF headers are, look in common places.
+tiffiofile = env.FindFile('tiffio.h', ['$tiff_include_path', '/usr/include'])
+if tiffiofile != None:
+	env.Replace(tiff_include_path = os.path.dirname(tiffiofile.abspath))
+
+# Find out where the TIFF libraries are, look in common places for Fink and DarwinPorts.
+tifflibfile = env.FindFile('libtiff.a', ['$tiff_lib_path', '/usr/lib'])
+if tifflibfile != None:
+	env.Replace(tiff_lib_path = os.path.dirname(tifflibfile.abspath))
+env.Replace(tiff_lib = 'tiff')
+
+# Find out where the JPEG headers are, look in common places for Fink and DarwinPorts.
+jpegiofile = env.FindFile('jpeglib.h', ['$jpeg_include_path', '/usr/include', '/usr/include'])
+if jpegiofile != None:
+	env.Replace(jpeg_include_path = os.path.dirname(jpegiofile.abspath))
+
+# Find out where the JPEG libraries are, look in common places for Fink and DarwinPorts.
+jpeglibfile = env.FindFile('libjpeg.a', ['$jpeg_lib_path', '/usr/lib', '/usr/lib'])
+if jpeglibfile != None:
+	env.Replace(jpeg_lib_path = os.path.dirname(jpeglibfile.abspath))
+env.Replace(jpeg_lib = 'jpeg')
+
+# Find out where the zlib headers are, look in common places for Fink and DarwinPorts.
+zlibiofile = env.FindFile('zlib.h', ['$zlib_include_path', '/usr/include', '/usr/include'])
+if zlibiofile != None:
+	env.Replace(zlib_include_path = os.path.dirname(zlibiofile.abspath))
+
+# Find out where the zlib libraries are, look in common places for Fink and DarwinPorts.
+zliblibfile = env.FindFile('libz.a', ['$zlib_lib_path', '/usr/lib', '/usr/lib'])
+if zliblibfile != None:
+	env.Replace(zlib_lib_path = os.path.dirname(zliblibfile.abspath))
+env.Replace(z_lib = 'z')
+
+# Find out where the OpenEXR libraries are, look in common places 
+exriofile = env.FindFile('half.h', ['$exr_include_path', '/usr/local/include/OpenEXR', '/opt/local/include/OpenEXR', '/usr/include/OpenEXR'])
+if exriofile != None:
+	env.Replace(exr_include_path = os.path.dirname(exriofile.abspath))
+
+exrlibfile = env.FindFile('libIlmImf.a', ['$exr_lib_path', '/usr/local/lib', '/opt/local/lib', '/usr/lib'])
+if exrlibfile != None:
+	env.Replace(exr_lib_path = os.path.dirname(exrlibfile.abspath))
+env.Replace(exr_lib = 'Iex')
+env.Replace(exr2tif_libs = ['IlmImf', 'Half', 'Iex', 'Imath'])
+env.Replace(exr_libs = ['IlmImf', 'Half', 'Iex', 'Imath'])
+
+# Find out where the fltk headers are, look in common places for Fink and DarwinPorts.
+fltkfile = env.FindFile('FL/fl.h', ['$fltk_include_path', '/usr/include'])
+if fltkfile != None:
+	env.Replace(fltk_include_path = os.path.split(os.path.dirname(fltkfile.abspath))[0])
+
+# Find out where the fltk libraries are, look in common places for Fink and DarwinPorts.
+fltklibfile = env.FindFile('libfltk.a', ['$fltk_lib_path', '/usr/lib'])
+if fltklibfile != None:
+	env.Replace(fltk_lib_path = os.path.dirname(fltklibfile.abspath))
+env.Replace(fltk_lib = 'fltk')
+
+
+# Setup the xsltproc program location
+env.Replace(XSLTPROC = 'xsltproc')
+
+env.Replace(YACC = '${bison}')
+env.Replace(LEX = '${flex}')
+env.Replace(YACCFLAGS = '--no-lines -d')
+
+# Make sure any relative paths are relative to the _top_ of the scons directory structure
+for path in ('$destdir', '$libdir', '$libexecdir', '$sysconfdir'):
+	if env.subst(path) != '' and not (env.subst(path)[0] in ['/','#']):
+		env.Replace( **{path[1:]: '#' + env.subst(path)} )
+# Update the install paths; use env.Dir, since otherwise scons (v-0.96.1) crashes with an obscure bug.
+env.Replace(LIBDIR = env.Dir('$libdir'))
+env.Replace(RENDERENGINEDIR = env.Dir('$LIBDIR'))
+env.Replace(DISPLAYSDIR = env.Dir('$libexecdir'))
+env.Replace(PLUGINDIR = env.Dir('$LIBDIR/aqsis/plugins'))
+env.Replace(STATICLIBDIR = env.Dir('$LIBDIR/aqsis'))
+env.Replace(SHADERDIR = env.Dir('$install_prefix/share/aqsis/shaders'))
+env.Replace(SYSCONFDIR = env.Dir('$sysconfdir'))
+env.Replace(CONTENTDIR = env.Dir('$install_prefix/share/aqsis/content'))
+env.Replace(SCRIPTSDIR = env.Dir('$install_prefix/share/aqsis/scripts'))
+
+if env.subst('$destdir') != '':
+	if 'dist' in BUILD_TARGETS or 'dist_zip' in BUILD_TARGETS or 'dist_tar' in BUILD_TARGETS:
+		import sys
+		sys.stderr.write('***\n')
+		sys.stderr.write('*** WARNING: $destdir!="" and the "dist*" targets are incompatible.  Ignoring $destdir.\n')
+		sys.stderr.write('***\n')
+	else:
+		env.Replace(DESTDIR = env.Dir('$destdir'))
+		# Replace the scons Install() function with a wrapper which modifies the
+		# install path to be prefixed by $DESTDIR
+		env.SconsInternalInstallFunc = env.Install
+		env.SconsInternalInstallAsFunc = env.InstallAs
+		def InstallWithDestDir(dir, source):
+			return env.SconsInternalInstallFunc('$DESTDIR'+env.Dir(dir).abspath, source)
+		def InstallAsWithDestDir(target, source):
+			return env.SconsInternalInstallAsFunc(['$DESTDIR'+env.File(t).abspath for t in target], source)
+		env.Install = InstallWithDestDir
+		env.InstallAs = InstallAsWithDestDir
+		# Update the install directories to reflect the changes.
+		env.Replace(INSTALL_DIRS = [ '$DESTDIR' + env.Dir(dir).abspath for dir in env['INSTALL_DIRS'] ] )
+
+# These absolute paths are necessary because there's no good general way of
+# getting a running program's install path on unix-like systems.
+env.AppendUnique(CPPDEFINES=[('DEFAULT_RC_PATH', '\\"' + env.Dir('$SYSCONFDIR').abspath + '\\"')])
+env.AppendUnique(CPPDEFINES=[('DEFAULT_SHADER_PATH', '\\"' + env.Dir('$SHADERDIR').abspath + '\\"')])
+env.Replace(SHLIB_VERSION_SUFFIX = '.%d.%d' %(version.major, version.minor))
+env.AppendUnique(SHLINKFLAGS=['-Wl,-soname=${TARGET.file}.%d' %version.major])
+
+if not env['no_rpath']:
+	env.AppendUnique(RPATH=[env.Dir('$RENDERENGINEDIR').abspath])
+
+env.Replace(slparse_ccflags = ['-O0'])
+env.Replace(aqsistypes_libs = ['dl'])
+env.Replace(piqslapp_libs = ['pthread'])
+
+# Solaris needs a socket library linking in to aqsistypes
+if platform.system() == 'SunOS':
+	env.AppendUnique(aqsistypes_libs = ['socket', 'nsl'])
+
+# Small TinyXML hack to allow successful building under x86_64 architecture.
+if platform.machine() == 'x86_64':
+	env.Replace(tinyxml_ccflags = ['-fPIC'])
+
+def Symlink(dest, src):
+	def _symlink_func(target, source, env, dest=dest, src=src):
+		dest = str(env.arg2nodes(dest, env.fs.Entry)[0])
+		src = str(env.arg2nodes(src, env.fs.Entry)[0])
+		if os.path.islink(dest) or os.path.exists(dest):
+			os.remove(dest)
+		os.symlink(os.path.basename(src), dest)
+	def _symlink_str(target, source, env, dest=dest, src=src):
+		dest = str(env.arg2nodes(dest, env.fs.Entry)[0])
+		src = str(env.arg2nodes(src, env.fs.Entry)[0])
+		print "Symlink from %s ==> %s" %(dest, src)
+	return Action(_symlink_func, strfunction=_symlink_str)
+
+def PostInstallSharedLibrary(env, dir, source):
+	basename = os.path.join('%s', '%s') %(dir, source[0])
+	sourcename = os.path.join('%s', '%s${SHLIB_VERSION_SUFFIX}') %(dir, source[0])
+	if env.subst('$destdir') != '':
+		env.Command(os.path.join('$DESTDIR', '%s.%d' %(basename, version.major)), os.path.join('$DESTDIR', '%s' %(sourcename)), Symlink(os.path.join('$DESTDIR', '%s.%d' %(basename, version.major)), sourcename))
+		env.Command(os.path.join('$DESTDIR', '%s' %(basename)), os.path.join('$DESTDIR', '%s' %(sourcename)), Symlink(os.path.join('$DESTDIR', '%s' %(basename)), sourcename))
+	else:
+		env.Command('%s.%d' %(basename, version.major), sourcename, Symlink('%s.%d' %(basename, version.major), sourcename))
+		env.Command('%s' %(basename), sourcename, Symlink('%s' %(basename), sourcename))
+
+env.PostInstallSharedLibrary = PostInstallSharedLibrary
+
+def PostBuildSharedLibrary(env, source):
+	basename = source[0].abspath
+	env.Command('%s.%d' %(basename, version.major), basename, Symlink('%s.%d' %(basename, version.major), basename))
+	env.Command('%s.%d.%d' %(basename, version.major, version.minor), basename, Symlink('%s.%d.%d' %(basename, version.major, version.minor), basename))
+
+env.PostBuildSharedLibrary = PostBuildSharedLibrary

@@ -1,0 +1,22 @@
+Import('env')
+
+argparse_sources = Split("""
+	argparse.cpp""")
+
+argparse_headers = Split("""
+	argparse.h""")
+
+argparse_install_headers = Split("""
+	argparse.h""")
+
+argparseenv = env.Copy()
+
+# Set any platform specific options for this target
+argparseenv.UseTargetOptions('argparse')
+
+argparse = argparseenv.Library('argparse', argparse_sources)
+
+env.Distribute(argparse_sources)
+env.Distribute(argparse_headers)
+env.Distribute('SConscript')
+

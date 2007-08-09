@@ -1,0 +1,75 @@
+FrameBegin 0
+Display "vert.tif" "tiff" "rgba"
+Format 200 100 1
+Clipping 1e-3 1e2
+Projection "perspective" "fov" 20
+LightSource "distantlight" 1 "from" [-7 12 -14] "intensity" [0.7]
+LightSource "distantlight" 2 "from" [7 10 -14] "intensity" [0.7]
+LightSource "ambientlight" 3 "intensity" [0.1]
+Translate 0 0 7
+WorldBegin
+Imager "background" "color" [1 1 1]
+Surface "plastic"
+ShadingInterpolation "smooth"
+ShadingRate 1.0
+Sides 2
+TransformBegin
+Translate 1.1 0 0
+Rotate 10 0 1 0
+Rotate 60 1 1 1
+Blobby 6 [
+		1001 0
+		1001 16
+		1001 32
+		1001 48
+		1001 64
+		1001 80
+		0 6 0 1 2 3 4 5
+	] [
+		1 0 0 0  0 1 0 0  0 0 1 0   0.6 0   0   1
+		1 0 0 0  0 1 0 0  0 0 1 0   0   0.6 0   1
+		1 0 0 0  0 1 0 0  0 0 1 0   0   0   0.6 1
+		1 0 0 0  0 1 0 0  0 0 1 0  -0.6 0   0   1
+		1 0 0 0  0 1 0 0  0 0 1 0   0  -0.6 0   1
+		1 0 0 0  0 1 0 0  0 0 1 0   0   0  -0.6 1
+	] [ "" ]
+	"vertex color Cs" [
+		1 .5 .5
+		.5 1 .5
+		.5 .5 1
+		0 .5 .5
+		.5 0 .5
+		.5 .5 0
+	]
+TransformEnd
+TransformBegin
+Translate -1.1 0 0
+Rotate 10 0 1 0
+Rotate 60 1 1 1
+Blobby 6 [
+		1001 0
+		1001 16
+		1001 32
+		1001 48
+		1001 64
+		1001 80
+		2 6 0 1 2 3 4 5
+	] [
+		1 0 0 0  0 1 0 0  0 0 1 0   0.6 0   0   1
+		1 0 0 0  0 1 0 0  0 0 1 0   0   0.6 0   1
+		1 0 0 0  0 1 0 0  0 0 1 0   0   0   0.6 1
+		1 0 0 0  0 1 0 0  0 0 1 0  -0.6 0   0   1
+		1 0 0 0  0 1 0 0  0 0 1 0   0  -0.6 0   1
+		1 0 0 0  0 1 0 0  0 0 1 0   0   0  -0.6 1
+	] [ "" ]
+	"vertex color Cs" [
+		1 .5 .5
+		.5 1 .5
+		.5 .5 1
+		0 .5 .5
+		.5 0 .5
+		.5 .5 0
+	]
+TransformEnd
+WorldEnd
+FrameEnd

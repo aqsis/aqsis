@@ -1,0 +1,32 @@
+Import('env', 'embedManifest')
+displayenv = env.Copy()
+displayenv.AppendUnique(CPPPATH=['#/renderer/ddmanager','#/thirdparty/tinyxml'])
+displayenv.AppendUnique(CPPDEFINES=['DISPLAY_EXPORTS'])
+
+display_sources = Split("""
+	display.cpp
+	displayhelpers.c""")
+
+display_headers =  Split("""
+	display.h""")
+
+
+displayenv.AppendUnique(LIBS = ['aqsistypes', '$tiff_lib', '$z_lib', '$fltk_lib'])
+displayenv.AppendUnique(CPPPATH=['$tiff_include_path', '$zlib_include_path', '$fltk_include_path'])
+
+# Set any platform specific target options.
+displayenv.UseTargetOptions('display')
+
+display = displayenv.SharedLibrary('display', display_sources)
+
+embedManifest(env, displayenv, display, 'DLL')
+
+	
+displayenv.Install('$DISPLAYSDIR', display)
+
+Return('display')
+
+env.Distribute(display_sources)
+env.Distribute(display_headers)
+env.Distribute('SConscript')
+
