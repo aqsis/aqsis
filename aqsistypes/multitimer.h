@@ -29,7 +29,7 @@
 //{
 #define MULTITIMER_H_INCLUDED 1
 
-#ifdef USE_TIMERS
+#if USE_TIMERS
 
 #define TIME_SCOPE(name) CqTimerProxy _tim(timerFactory.getTimer(name));
 #define TIME_FUN(fun) {TIME_SCOPE(#fun);fun;}
@@ -94,7 +94,7 @@ void my_func()
  }
 */
 
-#ifdef USE_TIMERS
+#if USE_TIMERS
 
 #include "aqsis.h"
 
@@ -338,6 +338,8 @@ boost::shared_ptr<CqHiFreqTimerBase> CqTimerFactory::getTimer(const std::string&
 	}
 }
 
+} // namespace Aqsis
+
 #else	// Don't use timing code - just dummy defines
 	#define TIMER_SETUP
 
@@ -392,9 +394,9 @@ class CqHiFreqTimer
 		}
 };
 
+
 #endif
 
-} // namespace Aqsis
 
 //}  // End of #ifdef _H_INCLUDED
 #endif

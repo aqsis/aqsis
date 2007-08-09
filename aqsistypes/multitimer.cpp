@@ -29,7 +29,7 @@
 #include "multitimer.h"
 #include "multitimer_system.h"
 
-#ifdef USE_TIMERS
+#if USE_TIMERS
 
 namespace Aqsis {
 
