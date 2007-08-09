@@ -28,7 +28,7 @@
 #ifndef	SYSTEM_MULTITIMER_H_INCLUDED
 #define SYSTEM_MULTITIMER_H_INCLUDED
 
-#ifdef USE_TIMERS
+#if USE_TIMERS
 
 #include "aqsis.h"
 

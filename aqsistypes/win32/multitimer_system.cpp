@@ -26,7 +26,7 @@
 
 #include "aqsis.h"
 
-
+#if USE_TIMERS
 #include "multitimer_system.h"
 #include "exception.h"
 
@@ -92,3 +92,5 @@ void CqHiFreqTimer::SqTimingDetails::Setup()
 }
 
 } // namespace Aqsis
+
+#endif
