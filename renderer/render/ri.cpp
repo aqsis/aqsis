@@ -3345,7 +3345,8 @@ RtVoid RiBlobbyV( RtInt nleaf, RtInt ncode, RtInt code[], RtInt nflt, RtFloat fl
 	CqBlobby blobby(nleaf, ncode, code, nflt, flt, nstr, str);
 
 	// Get back the bounding box in world coordinates
-	CqBound Bound(blobby.Bound());
+	CqBound Bound;
+	blobby.Bound(&Bound);
 
 	// Transform the bounding box into camera coordinates
 	Bound.Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", NULL, QGetRenderContext() ->ptransCurrent().get(), QGetRenderContext()->Time() ));

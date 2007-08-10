@@ -297,7 +297,7 @@ class blobby_vm_assembler
 			CqBound end_box( End.x() - r, End.y() - r, End.z() - r, End.x() + r, End.y() + r, End.z() + r );
 			end_box.Transform( transformation );
 
-			start_box.Encapsulate( end_box );
+			start_box.Encapsulate( &end_box );
 
 			encapsulate( start_box );
 		}
@@ -316,7 +316,7 @@ class blobby_vm_assembler
 		{
 			if(m_has_bounding_box)
 			{
-				m_bbox.Encapsulate(Bound);
+				m_bbox.Encapsulate(&Bound);
 				return;
 			}
 

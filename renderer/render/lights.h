@@ -44,6 +44,7 @@
 #include "version.h"
 #include "ilightsource.h"
 #include "attributes.h"
+#include "transform.h"
 
 START_NAMESPACE( Aqsis )
 

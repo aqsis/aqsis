@@ -302,7 +302,7 @@ class CqSurfaceNURBS : public CqSurface
 		//virtual bool		CanGenerateNormals() const	{ return( true ); }
 		virtual	void	GenerateGeometricNormals( TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pNormals );
 
-		virtual	CqBound	Bound() const;
+		virtual	void	Bound(IqBound* bound) const;
 		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
 		virtual bool	Diceable();
 

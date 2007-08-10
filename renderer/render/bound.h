@@ -32,6 +32,7 @@
 #include	"ri.h"
 #include	"matrix.h"
 #include	"plane.h"
+#include	"ibound.h"
 
 #include <vector>
 
@@ -42,7 +43,7 @@ START_NAMESPACE( Aqsis )
  * Class specifying a 3D geometric bound.
  */
 
-class CqBound
+class CqBound : public IqBound
 {
 	public:
 		CqBound( const TqFloat* pBounds )
@@ -116,15 +117,14 @@ class CqBound
 		CqBound&	operator=( const CqBound& From );
 
 		void		Transform( const CqMatrix&	matTransform );
-		CqBound		Combine( const CqBound& bound );
-		CqBound&	Encapsulate( const CqBound& bound );
-		CqBound&	Encapsulate( const CqVector3D& v );
-		CqBound&	Encapsulate( const CqVector2D& v );
+		void		Encapsulate( const IqBound* const bound );
+		void		Encapsulate( const CqVector3D& v );
+		void		Encapsulate( const CqVector2D& v );
 
-		bool	Contains2D( const CqBound& b ) const
+		bool	Contains2D( const IqBound* const b ) const
 		{
-			if ( ( b.vecMin().x() >= vecMin().x() && b.vecMax().x() <= vecMax().x() ) &&
-			        ( b.vecMin().y() >= vecMin().y() && b.vecMax().y() <= vecMax().y() ) )
+			if ( ( b->vecMin().x() >= vecMin().x() && b->vecMax().x() <= vecMax().x() ) &&
+			        ( b->vecMin().y() >= vecMin().y() && b->vecMax().y() <= vecMax().y() ) )
 				return ( true );
 			else
 				return ( false );
@@ -163,20 +163,20 @@ class CqBound
 		    Side_Inside = 1,
 	};
 
-		TqInt whichSideOf(CqPlane plane)
+		TqInt whichSideOf(const CqPlane* const plane) const
 		{
 			bool inside = false;
 			bool outside = false;
 
 
 			CqVector3D p(m_vecMin.x(), m_vecMin.y(), m_vecMin.z());
-			if (plane.whichSide(p) == CqPlane::Space_Positive)
+			if (plane->whichSide(p) == CqPlane::Space_Positive)
 				inside = true;
 			else
 				outside = true;
 
 			p.z(m_vecMax.z());	// xmin, ymin, zmax
-			if (plane.whichSide(p) == CqPlane::Space_Positive)
+			if (plane->whichSide(p) == CqPlane::Space_Positive)
 			{
 				inside = true;
 				if (outside)
@@ -191,7 +191,7 @@ class CqBound
 
 			p.z(m_vecMin.z());
 			p.y(m_vecMax.y());	// xmin, ymax, zmin
-			if (plane.whichSide(p) == CqPlane::Space_Positive)
+			if (plane->whichSide(p) == CqPlane::Space_Positive)
 			{
 				inside = true;
 				if (outside)
@@ -204,7 +204,7 @@ class CqBound
 					return(Side_Both);	// Both sides
 			}
 			p.z(m_vecMax.z());	// xmin, ymax, zmax
-			if (plane.whichSide(p) == CqPlane::Space_Positive)
+			if (plane->whichSide(p) == CqPlane::Space_Positive)
 			{
 				inside = true;
 				if (outside)
@@ -219,7 +219,7 @@ class CqBound
 			p.x(m_vecMax.x());
 			p.y(m_vecMin.y());
 			p.z(m_vecMin.z());	// xmax, ymin, zmin
-			if (plane.whichSide(p) == CqPlane::Space_Positive)
+			if (plane->whichSide(p) == CqPlane::Space_Positive)
 			{
 				inside = true;
 				if (outside)
@@ -232,7 +232,7 @@ class CqBound
 					return(Side_Both);
 			}
 			p.z(m_vecMax.z());	// xmax, ymin, zmax
-			if (plane.whichSide(p) == CqPlane::Space_Positive)
+			if (plane->whichSide(p) == CqPlane::Space_Positive)
 			{
 				inside = true;
 				if (outside)
@@ -246,7 +246,7 @@ class CqBound
 			}
 			p.z(m_vecMin.z());
 			p.y(m_vecMax.y());	// xmax, ymax, zmin
-			if (plane.whichSide(p) == CqPlane::Space_Positive)
+			if (plane->whichSide(p) == CqPlane::Space_Positive)
 			{
 				inside = true;
 				if (outside)
@@ -259,7 +259,7 @@ class CqBound
 					return(Side_Both);
 			}
 			p.z(m_vecMax.z());	// xmax, ymax, zmax
-			if (plane.whichSide(p) == CqPlane::Space_Positive)
+			if (plane->whichSide(p) == CqPlane::Space_Positive)
 			{
 				inside = true;
 				if (outside)

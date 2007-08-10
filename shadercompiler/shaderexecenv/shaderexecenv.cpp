@@ -25,7 +25,8 @@
 
 #include	"aqsis.h"
 #include	"ishaderexecenv.h"
-#include	"surface.h"
+//#include	"surface.h"
+#include	"refcount.h"
 
 #include	"shadervm.h"
 
@@ -194,7 +195,7 @@ void CqShaderExecEnv::Initialise( const TqInt uGridRes, const TqInt vGridRes, Tq
 	// Store a pointer to the transform.
 	if (pTrans)
 	{
-		m_pTransform = boost::static_pointer_cast<CqTransform>(pTrans);
+		m_pTransform = pTrans;
 	}
 
 	m_li = 0;

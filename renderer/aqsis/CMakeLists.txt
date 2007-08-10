@@ -10,4 +10,4 @@ INCLUDE(${RIB2RI_SOURCE_DIR}/export.cmake)
 INCLUDE(${ARGPARSE_SOURCE_DIR}/export.cmake)
 
 ADD_EXECUTABLE(aqsis ${AQSIS_SRCS})
-TARGET_LINK_LIBRARIES(aqsis argparse aqsistypes aqsislib shadervm rib2 rib2ri ${TIFF_LIBRARIES})
+TARGET_LINK_LIBRARIES(aqsis argparse aqsistypes aqsislib shadervm ${TIFF_LIBRARIES})

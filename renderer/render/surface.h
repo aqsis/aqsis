@@ -232,7 +232,7 @@ class CqSurface : public IqSurface, private boost::noncopyable, public boost::en
 		{
 			return ( m_CachedBound );
 		}
-		CqBound	AdjustBoundForTransformationMotion( const CqBound& B ) const;
+		void	AdjustBoundForTransformationMotion( IqBound* B ) const;
 
 		boost::shared_ptr<CqCSGTreeNode>& pCSGNode()
 		{
@@ -678,14 +678,17 @@ class CqDeformingSurface : public CqSurface, public CqMotionSpec<boost::shared_p
 		/** Get combnied bound for all times
 		 * \return CqBound representing the geometric boundary of this GPrim over all time slots.
 		 */
-		virtual	CqBound	Bound() const
+		virtual	void	Bound(IqBound* bound) const
 		{
-			CqBound B( FLT_MAX, FLT_MAX, FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX );
+			bound->vecMin() = CqVector3D(FLT_MAX, FLT_MAX, FLT_MAX);
+			bound->vecMax() = CqVector3D(-FLT_MAX, -FLT_MAX, -FLT_MAX);
+			CqBound B;
 			TqInt i;
 			for ( i = 0; i < cTimes(); i++ )
-				B.Encapsulate( GetMotionObject( Time( i ) ) ->Bound() );
-
-			return ( B );
+			{
+				GetMotionObject( Time( i ) )->Bound(&B);
+				bound->Encapsulate( &B );
+			}
 		}
 		/** Dice this GPrim, creating a CqMotionMicroPolyGrid with all times in.
 		 */

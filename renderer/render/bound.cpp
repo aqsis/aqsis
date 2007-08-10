@@ -96,43 +96,19 @@ void CqBound::Transform( const CqMatrix& matTransform )
 
 
 //---------------------------------------------------------------------
-/** Combine the specified boundary with the current one, returning a new bound
- * that encapsulates the area of both.
- * \param bound CqBound to add to this.
- */
-
-CqBound CqBound::Combine( const CqBound& bound )
-{
-	CqBound Result;
-
-	Result.m_vecMax.x( MAX( m_vecMax.x(), bound.m_vecMax.x() ) );
-	Result.m_vecMax.y( MAX( m_vecMax.y(), bound.m_vecMax.y() ) );
-	Result.m_vecMax.z( MAX( m_vecMax.z(), bound.m_vecMax.z() ) );
-
-	Result.m_vecMin.x( MIN( m_vecMin.x(), bound.m_vecMin.x() ) );
-	Result.m_vecMin.y( MIN( m_vecMin.y(), bound.m_vecMin.y() ) );
-	Result.m_vecMin.z( MIN( m_vecMin.z(), bound.m_vecMin.z() ) );
-
-	return ( Result );
-}
-
-
-//---------------------------------------------------------------------
 /** Expand this bound to encapsulate the specified bound.
  * \param bound CqBound to add to this.
  */
 
-CqBound& CqBound::Encapsulate( const CqBound& bound )
+void CqBound::Encapsulate( const IqBound* const bound )
 {
-	m_vecMax.x( MAX( m_vecMax.x(), bound.m_vecMax.x() ) );
-	m_vecMax.y( MAX( m_vecMax.y(), bound.m_vecMax.y() ) );
-	m_vecMax.z( MAX( m_vecMax.z(), bound.m_vecMax.z() ) );
+	m_vecMax.x( MAX( m_vecMax.x(), bound->vecMax().x() ) );
+	m_vecMax.y( MAX( m_vecMax.y(), bound->vecMax().y() ) );
+	m_vecMax.z( MAX( m_vecMax.z(), bound->vecMax().z() ) );
 
-	m_vecMin.x( MIN( m_vecMin.x(), bound.m_vecMin.x() ) );
-	m_vecMin.y( MIN( m_vecMin.y(), bound.m_vecMin.y() ) );
-	m_vecMin.z( MIN( m_vecMin.z(), bound.m_vecMin.z() ) );
-
-	return( *this );
+	m_vecMin.x( MIN( m_vecMin.x(), bound->vecMin().x() ) );
+	m_vecMin.y( MIN( m_vecMin.y(), bound->vecMin().y() ) );
+	m_vecMin.z( MIN( m_vecMin.z(), bound->vecMin().z() ) );
 }
 
 
@@ -141,7 +117,7 @@ CqBound& CqBound::Encapsulate( const CqBound& bound )
  * \param v CqVector3D to expand bound to include.
  */
 
-CqBound& CqBound::Encapsulate( const CqVector3D& v )
+void CqBound::Encapsulate( const CqVector3D& v )
 {
 	m_vecMax.x( MAX( m_vecMax.x(), v.x() ) );
 	m_vecMax.y( MAX( m_vecMax.y(), v.y() ) );
@@ -150,8 +126,6 @@ CqBound& CqBound::Encapsulate( const CqVector3D& v )
 	m_vecMin.x( MIN( m_vecMin.x(), v.x() ) );
 	m_vecMin.y( MIN( m_vecMin.y(), v.y() ) );
 	m_vecMin.z( MIN( m_vecMin.z(), v.z() ) );
-
-	return( *this );
 }
 
 
@@ -160,15 +134,13 @@ CqBound& CqBound::Encapsulate( const CqVector3D& v )
  * \param v CqVector2D to expand bound to include.
  */
 
-CqBound& CqBound::Encapsulate( const CqVector2D& v )
+void CqBound::Encapsulate( const CqVector2D& v )
 {
 	m_vecMax.x( MAX( m_vecMax.x(), v.x() ) );
 	m_vecMax.y( MAX( m_vecMax.y(), v.y() ) );
 
 	m_vecMin.x( MIN( m_vecMin.x(), v.x() ) );
 	m_vecMin.y( MIN( m_vecMin.y(), v.y() ) );
-
-	return( *this );
 }
 
 //----------------------------------------------------------------------

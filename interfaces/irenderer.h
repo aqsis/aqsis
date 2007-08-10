@@ -12,7 +12,8 @@
 #define	___irenderer_Loaded___
 
 #include	"matrix.h"
-#include	"symbols.h"
+//#include	"symbols.h"
+#include 	"itransform.h"
 
 START_NAMESPACE( Aqsis )
 

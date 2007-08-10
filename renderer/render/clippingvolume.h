@@ -59,7 +59,7 @@ class CqClippingVolume
 			std::vector<CqPlane>::iterator i;
 			for(i = m_Planes.begin(); i != m_Planes.end(); ++i)
 			{
-				TqInt side = bound.whichSideOf(*i);
+				TqInt side = bound.whichSideOf(&(*i));
 				if (side == CqBound::Side_Outside)
 					return(CqBound::Side_Outside);
 				if (side == CqBound::Side_Both)

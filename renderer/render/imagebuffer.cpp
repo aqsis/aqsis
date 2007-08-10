@@ -303,7 +303,8 @@ void CqImageBuffer::PostSurface( const boost::shared_ptr<CqSurface>& pSurface )
 	STATS_INC( GPR_created_total );
 
 	// Bound the primitive in its current space (camera) space taking into account any motion specification.
-	CqBound Bound( pSurface->Bound() );
+	CqBound Bound;
+	pSurface->Bound(&Bound);
 
 	// Take into account the displacement bound extension.
 	TqFloat db = 0.0f;
