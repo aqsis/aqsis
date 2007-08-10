@@ -90,7 +90,7 @@ if env.has_key('libaqsis_add_sources'):
 	aqsisdll_sources = aqsisdll_sources + ['$libaqsis_add_sources']
 
 
-aqsisenv.Replace(LIBS = ['shadervm', 'aqsistypes', '$tiff_lib', '$z_lib'])
+aqsisenv.Replace(LIBS = ['shadervm', 'aqsistypes', '$boost_thread_lib', '$tiff_lib', '$z_lib'])
 
 aqsisenv.UseTargetOptions('libaqsis')
 

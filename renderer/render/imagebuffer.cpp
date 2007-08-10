@@ -31,6 +31,7 @@
 #include    <windows.h>
 #endif
 #include	<math.h>
+#include	<boost/thread/thread.hpp>
 
 #include	"stats.h"
 #include	"options.h"
@@ -39,11 +40,26 @@
 #include	"imagebuffer.h"
 #include	"bucketprocessor.h"
 
-
 START_NAMESPACE( Aqsis )
 
 static TqInt bucketmodulo = -1;
 static TqInt bucketdirection = -1;
+
+
+struct thread_processor
+{
+	thread_processor(CqBucketProcessor* bucketProcessor) :
+		m_bucketProcessor(bucketProcessor) { }
+	void operator()()
+	{
+//		printf("%p > start\n", m_bucketProcessor);
+		m_bucketProcessor->process();
+//		printf("%p < stop\n", m_bucketProcessor);
+	}
+
+	CqBucketProcessor* m_bucketProcessor;
+};
+
 
 //----------------------------------------------------------------------
 /** Destructor
@@ -657,7 +673,7 @@ void CqImageBuffer::RenderImage()
 	// A counter for the number of processed buckets (used for progress reporting)
 	TqInt iBucket = 0;
 
-#define MULTIPROCESSING_NBUCKETS 7
+#define MULTIPROCESSING_NBUCKETS 1
 
 	std::vector<CqBucketProcessor> bucketProcessors;
 	bucketProcessors.resize(MULTIPROCESSING_NBUCKETS);
@@ -666,6 +682,9 @@ void CqImageBuffer::RenderImage()
 	bool pendingBuckets = true;
 	while ( pendingBuckets && !m_fQuit )
 	{
+		boost::thread_group threads;
+		std::vector<thread_processor> threadProcessors;
+
 		for (int i = 0; pendingBuckets && i < MULTIPROCESSING_NBUCKETS; ++i)
 		{
 		////////// Dump the pixel sample positions into a dump file //////////
@@ -736,15 +755,16 @@ void CqImageBuffer::RenderImage()
 				}
 			}
 
+			threadProcessors.push_back( thread_processor( &bucketProcessors[i] ) );
+			threads.create_thread( threadProcessors.back() );
+
 			// Advance to next bucket, quit if nothing left
 			iBucket += 1;
 			pendingBuckets = NextBucket(order);
 		}
 
-		for (int i = 0; !m_fQuit && i < MULTIPROCESSING_NBUCKETS; ++i)
-		{
-			bucketProcessors[i].process();	
-		}
+		threads.join_all();
+		threadProcessors.clear();
 
 		for (int i = 0; !m_fQuit && i < MULTIPROCESSING_NBUCKETS; ++i)
 		{
