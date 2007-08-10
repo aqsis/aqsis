@@ -134,7 +134,7 @@ class CqChannelInfoList
 //------------------------------------------------------------------------------
 /** \brief A thin wrapper around channel data held in a CqImageBuffer
  *
- * CqImageChannel wraps around a single channel of a subregion of a hetrogenous
+ * CqImageChannel wraps around a single channel of a subregion of a heterogenous
  * array:
  *
  * A subregion looks like:
@@ -252,6 +252,29 @@ class CqImageChannelTyped : public CqImageChannel
 		 * \see CqImageChannel::CqImageChannel
 		 */
 		inline CqImageChannelTyped(const SqChannelInfo& chanInfo, TqUchar* data,
+				TqUint width, TqUint height, TqUint stride, TqUint rowSkip = 0);
+	private:
+		/// Inherited from CqImageChannel
+		virtual void copyFromSameType(const CqImageChannel& source);
+		/// Inherited from CqImageChannel
+		virtual void fillRowBuffer(TqUint row, TqFloatConv* buf) const;
+		/// Inherited from CqImageChannel
+		virtual void replaceRow(TqUint row, TqFloatConv* buf);
+
+		/// Convert the type held by this channel into a float.
+		static inline TqFloatConv convertToFloat(T t);
+		/// Convert from a float to the type held by this channel.
+		static inline T convertFromFloat(TqFloatConv f);
+};
+
+//------------------------------------------------------------------------------
+/** \brief Creates a constant valued channel
+ */
+template<typename T>
+class CqConstantImageChannel : public CqImageChannelTyped<T>
+{
+	public:
+		inline CqConstantImageChannel(const SqChannelInfo& chanInfo, TqUchar* data,
 				TqUint width, TqUint height, TqUint stride, TqUint rowSkip = 0);
 	private:
 		/// Inherited from CqImageChannel

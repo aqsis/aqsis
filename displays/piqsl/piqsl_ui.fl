@@ -44,20 +44,20 @@ if(name)
           }
           MenuItem m_menuFileQuit {
             label {&Quit}
-            callback {exit(0);} selected
+            callback {exit(0);}
             private xywh {0 0 100 20} shortcut 0x40071
             code0 {o->shortcut(FL_COMMAND+'q');}
             code1 {\#include <FL/fl_ask.H>}
           }
         }
         Submenu {} {
-          label {&Book} open selected
+          label {&Book} open
           xywh {5 5 100 20}
           code1 {\#include <FL/fl_ask.H>}
         } {
           MenuItem m_menuBookNew {
             label {&New}
-            callback {addNewBook("Book1");} selected
+            callback {addNewBook("Book1");}
             private xywh {5 5 100 20} shortcut 0x4006e
             code0 {o->shortcut(FL_COMMAND+'n');}
             code1 {\#include <FL/fl_ask.H>}
@@ -70,7 +70,7 @@ if(tab != NULL)
 	char* filename = fl_file_chooser("Export Book As", "*.xml", currentConfigName().c_str());
 	if(filename != NULL)
 		exportBook(tab->book(), filename);
-}} selected
+}}
             private xywh {5 5 100 20} shortcut 0x40065
             code0 {o->shortcut(FL_COMMAND+'e');}
             code1 {\#include <FL/fl_ask.H>}
@@ -91,7 +91,7 @@ if(tab)
     	Fl::awake();
     }
 }
-Fl::unlock();} selected
+Fl::unlock();}
             private xywh {0 0 100 20} shortcut 0x40072
             code0 {o->shortcut(FL_COMMAND+'r');}
             code1 {\#include <FL/fl_ask.H>}
@@ -113,13 +113,13 @@ if(tab != NULL)
 	}
 	Fl::awake();
 }
-Fl::unlock();} selected
+Fl::unlock();}
             private xywh {0 0 100 20}
             code1 {\#include <FL/fl_ask.H>}
           }
         }
         Submenu {} {
-          label {&Images} open selected
+          label {&Images} open
           xywh {0 0 100 20}
           code1 {\#include <FL/fl_ask.H>}
         } {
@@ -132,7 +132,7 @@ if(filename)
 	std::string name = Aqsis::CqFile::fileName(filename);
 	loadImageToCurrentBook(name, filename);
 }
-Fl::unlock();} selected
+Fl::unlock();}
             private xywh {0 0 100 20}
             code0 {\#include <FL/Fl_File_Chooser.H>}
             code1 {\#include <FL/fl_ask.H>}
@@ -191,7 +191,7 @@ Fl::unlock();}
       }
       Fl_Tabs m_tabBooks {
         callback {Aqsis::CqBookBrowser* browser = static_cast<Aqsis::CqBookBrowser*>(o->value());
-setCurrentBook(browser->book());}
+setCurrentBook(browser->book());} selected
         private xywh {0 29 540 281}
       } {}
     }
