@@ -71,7 +71,7 @@ SUBDIRS(renderer/ddmanager)
 SUBDIRS(renderer/raytrace)
 SUBDIRS(shadercompiler/shaderexecenv)
 SUBDIRS(aqsistypes)
-SUBDIRS(renderer/render)
 SUBDIRS(shadercompiler/shadervm)
+SUBDIRS(renderer/render)
 SUBDIRS(renderer/aqsis)
 
