@@ -1,3 +1,1 @@
 PROJECT(RIB)
-
-INCLUDE(${PROJECT_SOURCE_DIR}/local.cmake)

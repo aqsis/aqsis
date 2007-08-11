@@ -29,6 +29,8 @@ SET(RIB_SRCS ${RIB_SRCS} ${CMAKE_CURRENT_BINARY_DIR}/parser.cpp)
 SET(RIB_SRCS ${RIB_SRCS} ${CMAKE_CURRENT_BINARY_DIR}/scanner.cpp)
 SET(RIB_HDRS ${RIB_HDRS} ${CMAKE_CURRENT_BINARY_DIR}/parser.hpp)
 
+INCLUDE_DIRECTORIES(${ZLIB_INCLUDE_DIR})
+
 # Since parser.cpp and scanner.cpp do not exists yet when cmake is run, mark
 # them as generated
 SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_BINARY_DIR}/parser.cpp ${CMAKE_CURRENT_BINARY_DIR}/parser.hpp ${CMAKE_CURRENT_BINARY_DIR}/scanner.cpp GENERATED)
