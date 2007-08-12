@@ -34,6 +34,7 @@ piqsldisplay_headers =  Split("""
 
 piqslapp_test_sources = Split('''
 	imagebuffer_test.cpp
+	imagechannel_test.cpp
 	''')
 
 #-------------------------------------------------------------------------------
