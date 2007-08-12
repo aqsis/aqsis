@@ -74,4 +74,8 @@ SUBDIRS(aqsistypes)
 SUBDIRS(shadercompiler/shadervm)
 SUBDIRS(renderer/render)
 SUBDIRS(renderer/aqsis)
+SUBDIRS(shadercompiler/slpp)
+SUBDIRS(shadercompiler/slparse)
+SUBDIRS(shadercompiler/codegenvm)
+SUBDIRS(shadercompiler/aqsl)
 

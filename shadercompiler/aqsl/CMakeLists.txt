@@ -1,0 +1,23 @@
+PROJECT(AQSL)
+
+SET(AQSL_SRCS aqslcomp.cpp)
+
+# TODO: Need to use the link.cmake system.
+LINK_DIRECTORIES(${LIBRARY_OUTPUT_PATH})
+
+INCLUDE(${AQSISTYPES_SOURCE_DIR}/export.cmake)
+INCLUDE(${ARGPARSE_SOURCE_DIR}/export.cmake)
+INCLUDE(${SLPARSE_SOURCE_DIR}/export.cmake)
+INCLUDE(${CODEGENVM_SOURCE_DIR}/export.cmake)
+INCLUDE(${SLPP_SOURCE_DIR}/export.cmake)
+
+INCLUDE(${SLPARSE_SOURCE_DIR}/local.cmake)
+INCLUDE(${CODEGENVM_SOURCE_DIR}/local.cmake)
+INCLUDE(${SLPP_SOURCE_DIR}/local.cmake)
+
+ADD_EXECUTABLE(aqsl ${AQSL_SRCS} ${SLPARSE_SRCS} ${CODEGENVM_SRCS} ${SLPP_SRCS})
+IF(WIN32)
+	TARGET_LINK_LIBRARIES(aqsl argparse aqsistypes)
+ELSE(WIN32)
+	TARGET_LINK_LIBRARIES(aqsl argparse aqsistypes)
+ENDIF(WIN32)

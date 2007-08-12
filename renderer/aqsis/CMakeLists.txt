@@ -1,3 +1,5 @@
+PROJECT(AQSIS)
+
 SET(AQSIS_SRCS aqsis.cpp)
 
 # TODO: Need to use the link.cmake system.
