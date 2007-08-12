@@ -220,7 +220,7 @@ class CqDataHandler
 							std::map<std::string, TqInt>::iterator type;
 							if((type = g_mapNameToType.find(typeName)) != g_mapNameToType.end())
 								typeID = type->second;
-							channelList.addChannel(SqChannelInfo(formatName, typeID));
+							channelList.addChannel(SqChannelInfo(formatName, chanFormatFromPkDspy(typeID)));
 
 							format = format->NextSiblingElement("Format");
 						}
@@ -235,7 +235,7 @@ class CqDataHandler
 						{
 							TiXmlElement* formatv = new TiXmlElement("Format");
 							formatv->SetAttribute("name", ichan->name);
-							TiXmlText* formatText = new TiXmlText(g_mapTypeToName[ichan->type]);
+							TiXmlText* formatText = new TiXmlText(g_mapTypeToName[pkDspyFromChanFormat(ichan->type)]);
 							formatv->LinkEndChild(formatText); 
 							formatsXML->LinkEndChild(formatv);
 						}
@@ -326,11 +326,6 @@ void HandleConnection(int sock, void *data)
 	}
 }
 
-// Macros to initialise the type/name name/type maps.
-#define	INIT_TYPE_NAME_MAPS(name) \
-g_mapNameToType[#name] = name; \
-g_mapTypeToName[name] = #name;
-
 int main( int argc, char** argv )
 {
 	Fl::lock();
@@ -403,6 +398,11 @@ int main( int argc, char** argv )
 		std::auto_ptr<std::streambuf> use_syslog( new Aqsis::syslog_buf(std::cerr) );
 #endif  // AQSIS_SYSTEM_POSIX
 
+// Macros to initialise the type/name name/type maps.
+#	define	INIT_TYPE_NAME_MAPS(name) \
+	g_mapNameToType[#name] = name; \
+	g_mapTypeToName[name] = #name;
+
 	// Fill in the typenames maps
 	INIT_TYPE_NAME_MAPS(PkDspyFloat32);
 	INIT_TYPE_NAME_MAPS(PkDspyUnsigned32);
@@ -413,6 +413,8 @@ int main( int argc, char** argv )
 	INIT_TYPE_NAME_MAPS(PkDspySigned8);
 	INIT_TYPE_NAME_MAPS(PkDspyString);
 	INIT_TYPE_NAME_MAPS(PkDspyMatrix);
+
+#	undef INIT_TYPE_NAME_MAPS
 
 	int portno = atoi(g_strPort.c_str());
 	CqSocket::initialiseSockets();

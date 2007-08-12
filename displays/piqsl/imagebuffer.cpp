@@ -38,28 +38,6 @@ namespace Aqsis {
 
 
 //------------------------------------------------------------------------------
-// SqChannelInfo implementation
-TqUint SqChannelInfo::bytesPerPixel() const
-{
-	switch(type)
-	{
-		case PkDspyUnsigned32:
-		case PkDspySigned32:
-		case PkDspyFloat32:
-			return 4;
-			break;
-		case PkDspyUnsigned16:
-		case PkDspySigned16:
-			return 2;
-		case PkDspySigned8:
-		case PkDspyUnsigned8:
-		default:
-			return 1;
-	}
-}
-
-
-//------------------------------------------------------------------------------
 // CqChannelInfoList implementation
 
 void CqChannelInfoList::addChannel(const SqChannelInfo& newChan)
@@ -98,7 +76,7 @@ CqChannelInfoList CqChannelInfoList::cloneAs8Bit() const
 	CqChannelInfoList newChannels;
 	for(const_iterator chInfo = m_channels.begin();
 			chInfo != m_channels.end(); ++chInfo)
-		newChannels.addChannel(SqChannelInfo(chInfo->name, PkDspyUnsigned8));
+		newChannels.addChannel(SqChannelInfo(chInfo->name, Format_Unsigned8));
 	return newChannels;
 }
 
@@ -131,42 +109,6 @@ void CqChannelInfoList::recomputeByteOffsets()
 
 
 //------------------------------------------------------------------------------
-// CqImageChannel implementation
-CqImageChannel::CqImageChannel(const SqChannelInfo& chanInfo, TqUchar* data,
-		TqUint width, TqUint height, TqUint stride, TqUint rowSkip)
-	: m_chanInfo(chanInfo),
-	m_data(data),
-	m_width(width),
-	m_height(height),
-	m_stride(stride),
-	m_rowSkip(rowSkip)
-{ }
-
-void CqImageChannel::copyFrom(const CqImageChannel& source)
-{
-	if(source.m_width != m_width || source.m_height != m_height)
-		throw XqInternal("Source and destination buffer widths do not match", 
-			(boost::format("source region = %dx%d, dest region = %dx%d")
-			 % source.m_width % source.m_height % m_width % m_height).str(),
-			 __FILE__, __LINE__);
-
-	if(m_chanInfo.type == source.m_chanInfo.type)
-	{
-		copyFromSameType(source);
-	}
-	else
-	{
-		boost::shared_array<TqFloat> srcRowBuffer(new TqFloat[m_width]);
-		for(TqUint row = 0; row < m_height; ++row)
-		{
-			source.fillRowBuffer(row, srcRowBuffer.get());
-			replaceRow(row, srcRowBuffer.get());
-		}
-	}
-}
-
-
-//------------------------------------------------------------------------------
 // CqImageBuffer implementation
 CqImageBuffer::CqImageBuffer(const CqChannelInfoList& channels, TqUint width, TqUint height)
 	: m_channelsInfo(channels),
@@ -195,7 +137,7 @@ boost::shared_ptr<CqImageBuffer> CqImageBuffer::loadFromTiff(TIFF* tif)
 	uint16 nChannels = 1;
 	uint16 bitsPerSample = 1;
 	uint16 sampleFormat = SAMPLEFORMAT_UINT;
-	TqInt internalFormat = PkDspyUnsigned8;
+	EqChannelFormat internalFormat = Format_Unsigned8;
 
 	TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &width);
 	TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &height);
@@ -210,13 +152,13 @@ boost::shared_ptr<CqImageBuffer> CqImageBuffer::loadFromTiff(TIFF* tif)
 			switch(bitsPerSample)
 			{
 				case 8:
-					internalFormat = PkDspyUnsigned8;
+					internalFormat = Format_Unsigned8;
 					break;
 				case 16:
-					internalFormat = PkDspyUnsigned16;
+					internalFormat = Format_Unsigned16;
 					break;
 				case 32:
-					internalFormat = PkDspyUnsigned32;
+					internalFormat = Format_Unsigned32;
 					break;
 				default:
 					Aqsis::log() << Aqsis::error << "Unrecognised bit depth for unsigned int format " << bitsPerSample << std::endl;
@@ -230,13 +172,13 @@ boost::shared_ptr<CqImageBuffer> CqImageBuffer::loadFromTiff(TIFF* tif)
 			switch(bitsPerSample)
 			{
 				case 8:
-					internalFormat = PkDspySigned8;
+					internalFormat = Format_Signed8;
 					break;
 				case 16:
-					internalFormat = PkDspySigned16;
+					internalFormat = Format_Signed16;
 					break;
 				case 32:
-					internalFormat = PkDspySigned32;
+					internalFormat = Format_Signed32;
 					break;
 				default:
 					Aqsis::log() << Aqsis::error << "Unrecognised bit depth for signed int format " << bitsPerSample << std::endl;
@@ -252,7 +194,7 @@ boost::shared_ptr<CqImageBuffer> CqImageBuffer::loadFromTiff(TIFF* tif)
 				Aqsis::log() << Aqsis::error << "Unrecognised bit depth for ieeefp format " << bitsPerSample << std::endl;
 				sampleFormatValid = false;
 			}
-			internalFormat = PkDspyFloat32;
+			internalFormat = Format_Float32;
 		}
 		break;
 
@@ -326,39 +268,39 @@ void CqImageBuffer::saveToTiff(TIFF* pOut) const
 	TIFFSetField( pOut, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize( pOut, 0 ) );
 
 	// Work out the format of the image to write.
-	TqUint widestType = PkDspyUnsigned8;
+	EqChannelFormat widestType = Format_Unsigned8;
 	for(CqChannelInfoList::const_iterator ichan = m_channelsInfo.begin();
 			ichan != m_channelsInfo.end() ; ++ichan)
 		widestType = Aqsis::min(widestType, ichan->type);
 
 	// Write out an 8 bits per pixel integer image.
-	if ( widestType == PkDspyUnsigned8 || widestType == PkDspySigned8 )
+	if ( widestType == Format_Unsigned8 || widestType == Format_Signed8 )
 	{
 		TIFFSetField( pOut, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_INT );
 		TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, 8 );
 	}
-	else if(widestType == PkDspyFloat32)
+	else if(widestType == Format_Float32)
 	{
 		/* use uncompressed IEEEFP pixels */
 		TIFFSetField( pOut, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP );
 		TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, 32 );
 	}
-	else if(widestType == PkDspySigned16)
+	else if(widestType == Format_Signed16)
 	{
 		TIFFSetField( pOut, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_INT );
 		TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, 16 );
 	}
-	else if(widestType == PkDspyUnsigned16)
+	else if(widestType == Format_Unsigned16)
 	{
 		TIFFSetField( pOut, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT );
 		TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, 16 );
 	}
-	else if(widestType == PkDspySigned32)
+	else if(widestType == Format_Signed32)
 	{
 		TIFFSetField( pOut, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_INT );
 		TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, 32 );
 	}
-	else if(widestType == PkDspyUnsigned32)
+	else if(widestType == Format_Unsigned32)
 	{
 		TIFFSetField( pOut, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT );
 		TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, 32 );
@@ -390,43 +332,18 @@ boost::shared_ptr<CqImageBuffer> CqImageBuffer::quantizeForDisplay() const
 
 void CqImageBuffer::clearBuffer(TqFloat f)
 {
-	// Make a buffer holding the constant floating point.
-	std::vector<CqImageChannel::TqFloatConv> rowBuf(m_width, f);
-
-	// Fill all channels with the constant.
+	// Fill all channels with the given constant.
+	CqImageChannelConstant constChan(f);
 	for(TqUint chanNum = 0; chanNum < m_channelsInfo.numChannels(); ++chanNum)
-	{
-		boost::shared_ptr<CqImageChannel> chan = channel(chanNum);
-		for(TqUint row = 0; row < m_height; ++row)
-			chan->replaceRow(row, &rowBuf[0]);
-	}
+		channel(chanNum)->copyFrom(constChan);
 }
 
 void CqImageBuffer::initToCheckerboard(TqUint tileSize)
 {
-	// Make two buffers, one holding the first row of checker pattern and one
-	// for the second.
-	std::vector<CqImageChannel::TqFloatConv> checkerRow1(m_width, 0);
-	std::vector<CqImageChannel::TqFloatConv> checkerRow2(m_width, 0);
-	for(TqUint col = 0; col < m_width; ++col)
-	{
-		TqInt whichTile = (col % (tileSize*2)) / tileSize;
-		checkerRow1[col] = (whichTile+1)*0.5f;
-		checkerRow2[col] = (2-whichTile)*0.5f;
-	}
-
 	// Fill all channels with checker pattern
+	CqImageChannelCheckered checkerChan(tileSize);
 	for(TqUint chanNum = 0; chanNum < m_channelsInfo.numChannels(); ++chanNum)
-	{
-		boost::shared_ptr<CqImageChannel> chan = channel(chanNum);
-		for(TqUint row = 0; row < m_height; ++row)
-		{
-			if( ((row % (tileSize*2)) / tileSize) == 0 )
-				chan->replaceRow(row, &checkerRow1[0]);
-			else
-				chan->replaceRow(row, &checkerRow2[0]);
-		}
-	}
+		channel(chanNum)->copyFrom(checkerChan);
 }
 
 void CqImageBuffer::copyFrom(const CqImageBuffer& source, TqUint topLeftX, TqUint topLeftY)
@@ -486,31 +403,31 @@ boost::shared_ptr<CqImageChannel> CqImageBuffer::channelImpl(TqUint index,
 	TqUint rowSkip = m_width - width;
 	switch(m_channelsInfo[index].type)
 	{
-		case PkDspyFloat32:
+		case Format_Float32:
 			return boost::shared_ptr<CqImageChannel>(
 					new CqImageChannelTyped<PtDspyFloat32>(m_channelsInfo[index],
 						startPtr, width, height, stride, rowSkip));
-		case PkDspyUnsigned32:
+		case Format_Unsigned32:
 			return boost::shared_ptr<CqImageChannel>(
 					new CqImageChannelTyped<PtDspyUnsigned32>(m_channelsInfo[index],
 						startPtr, width, height, stride, rowSkip));
-		case PkDspySigned32:
+		case Format_Signed32:
 			return boost::shared_ptr<CqImageChannel>(
 					new CqImageChannelTyped<PtDspySigned32>(m_channelsInfo[index],
 						startPtr, width, height, stride, rowSkip));
-		case PkDspyUnsigned16:
+		case Format_Unsigned16:
 			return boost::shared_ptr<CqImageChannel>(
 					new CqImageChannelTyped<PtDspyUnsigned16>(m_channelsInfo[index],
 						startPtr, width, height, stride, rowSkip));
-		case PkDspySigned16:
+		case Format_Signed16:
 			return boost::shared_ptr<CqImageChannel>(
 					new CqImageChannelTyped<PtDspySigned16>(m_channelsInfo[index],
 						startPtr, width, height, stride, rowSkip));
-		case PkDspySigned8:
+		case Format_Signed8:
 			return boost::shared_ptr<CqImageChannel>(
 					new CqImageChannelTyped<PtDspySigned8>(m_channelsInfo[index],
 						startPtr, width, height, stride, rowSkip));
-		case PkDspyUnsigned8:
+		case Format_Unsigned8:
 		default:
 			return boost::shared_ptr<CqImageChannel>(
 					new CqImageChannelTyped<PtDspyUnsigned8>(m_channelsInfo[index],

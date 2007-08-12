@@ -6,6 +6,7 @@ piqslapp_sources = Split("""
 	piqslbase.cpp
 	image.cpp
 	imagebuffer.cpp
+	imagechannel.cpp
 	framebuffer.cpp
 	book.cpp
 	bookbrowser.cpp
@@ -17,6 +18,7 @@ piqslapp_headers =  Split("""
 	piqslbase.h
 	image.h
 	imagebuffer.h
+	imagechannel.h
 	book.h
 	framebuffer.h
 	bookbrowser.h
@@ -57,7 +59,7 @@ if not env['no_piqsl']:
 
 	piqslapp_objects = piqslappenv.Object(piqslapp_sources)
 	# Yes, taking [piqslapp_objects[3]] is a real mess.  I wonder about a better way...
-	piqslapp_test_sources += [piqslapp_objects[3]]
+	piqslapp_test_sources += [piqslapp_objects[3], piqslapp_objects[4]]
 
 	piqslapp = piqslappenv.Program('piqsl', piqslapp_objects)
 	piqslappenv.Install('$BINDIR', piqslapp)
