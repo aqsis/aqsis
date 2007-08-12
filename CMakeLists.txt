@@ -78,4 +78,6 @@ SUBDIRS(shadercompiler/slpp)
 SUBDIRS(shadercompiler/slparse)
 SUBDIRS(shadercompiler/codegenvm)
 SUBDIRS(shadercompiler/aqsl)
+SUBDIRS(shadercompiler/slxargs)
+SUBDIRS(shadercompiler/aqsltell)
 
