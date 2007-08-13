@@ -254,15 +254,12 @@ void CqFramebuffer::queueResize()
 
 void CqFramebuffer::resize(int X, int Y, int W, int H)
 {
-	// if the window is actually getting resized (might just be moved)
-	if (W != w() || H != h())
-	{
-		// center our image
-		centerImageWidget();
-	}
-
+	// is the window actually getting resized? (might just be moved)
+	bool isResizing = W != w() || H != h();
 	// call parent's resize()
 	Fl_Double_Window::resize(X, Y, W, H);
+	if(isResizing)
+		centerImageWidget();
 }
 
 void CqFramebuffer::centerImageWidget()
@@ -289,6 +286,7 @@ void CqFramebuffer::resize()
 		title << ": " << m_associatedImage->name();
 	}
 	m_uiImageWidget->size(fw, fh);
+	centerImageWidget();
 	redraw();
 
 	m_title = title.str();
