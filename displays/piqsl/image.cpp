@@ -45,14 +45,27 @@ void CqImage::prepareImageBuffers(const CqChannelInfoList& channelsInfo)
 {
 	boost::mutex::scoped_lock lock(mutex());
 
-	// Set up 8-bit display image buffer
-	m_displayData = boost::shared_ptr<CqImageBuffer>(
-			new CqImageBuffer(channelsInfo.cloneAs8Bit(), m_imageWidth, m_imageHeight));
-	m_displayData->initToCheckerboard();
+	if(channelsInfo.numChannels() == 0)
+		throw XqInternal("Not enough image channels to display", __FILE__, __LINE__);
 
 	// Set up buffer for holding the full-precision data
 	m_realData = boost::shared_ptr<CqImageBuffer>(
 			new CqImageBuffer(channelsInfo, m_imageWidth, m_imageHeight));
+
+	// Set up 8-bit per pixel display image buffer
+	m_displayData = boost::shared_ptr<CqImageBuffer>(
+			new CqImageBuffer(CqChannelInfoList::displayChannels(),
+				m_imageWidth, m_imageHeight));
+	m_displayData->initToCheckerboard();
+
+	// Set up the mapping between the display channels and the underlying image
+	// channels.
+	if(!channelsInfo.hasChannel("r"))
+		m_displayMap["r"] = channelsInfo[0].name;
+	if(!channelsInfo.hasChannel("g"))
+		m_displayMap["g"] = channelsInfo[0].name;
+	if(!channelsInfo.hasChannel("b"))
+		m_displayMap["b"] = channelsInfo[0].name;
 }
 
 void CqImage::setUpdateCallback(boost::function<void(int,int,int,int)> f)

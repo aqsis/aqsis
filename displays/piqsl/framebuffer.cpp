@@ -32,11 +32,14 @@
 void Fl_FrameBuffer_Widget::draw()
 {
 	Fl::lock();
-	if(m_image)
-		fl_draw_image(m_image->displayData().get(),x(),y(),
-			m_image->imageWidth(),m_image->imageHeight(),
-			m_image->numChannels(),
-			m_image->imageWidth()*m_image->numChannels()); // draw image
+	boost::shared_ptr<const Aqsis::CqImageBuffer> buf;
+	if(m_image && (buf = m_image->displayBuffer()))
+	{
+		fl_draw_image(buf->rawData().get(), x(), y(),
+			buf->width(), buf->height(),
+			buf->numChannels(),
+			buf->width()*buf->numChannels()); // draw image
+	}
 	else
 	{
 		fl_draw_box(FL_FLAT_BOX, x(), y(), w(), h(), FL_BACKGROUND_COLOR);

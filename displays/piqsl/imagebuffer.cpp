@@ -39,6 +39,14 @@ namespace Aqsis {
 
 //------------------------------------------------------------------------------
 // CqChannelInfoList implementation
+CqChannelInfoList CqChannelInfoList::displayChannels()
+{
+    CqChannelInfoList displayChannels;
+    displayChannels.addChannel(SqChannelInfo("r", Format_Unsigned8));
+    displayChannels.addChannel(SqChannelInfo("g", Format_Unsigned8));
+    displayChannels.addChannel(SqChannelInfo("b", Format_Unsigned8));
+	return displayChannels;
+}
 
 void CqChannelInfoList::addChannel(const SqChannelInfo& newChan)
 {
@@ -360,10 +368,39 @@ void CqImageBuffer::copyFrom(const CqImageBuffer& source, TqUint topLeftX, TqUin
 	}
 }
 
+void CqImageBuffer::copyFrom(const CqImageBuffer& source, const TqChannelNameMap& nameMap,
+		TqUint topLeftX, TqUint topLeftY)
+{
+	if(source.m_width + topLeftX > m_width || source.m_height + topLeftY > m_height)
+		throw XqInternal("Source region too big for destination", __FILE__, __LINE__);
+
+	for(TqChannelNameMap::const_iterator i = nameMap.begin(), e = nameMap.end();
+			i != e; ++i)
+	{
+		channel(i->first, topLeftX, topLeftY, source.m_width, source.m_height)
+			->copyFrom(*source.channel(i->second));
+	}
+}
+
+void CqImageBuffer::compositeOver(const CqImageBuffer& source,
+		const TqChannelNameMap& nameMap, TqUint topLeftX, TqUint topLeftY,
+		const std::string alphaName)
+{
+	if(source.m_width + topLeftX > m_width || source.m_height + topLeftY > m_height)
+		throw XqInternal("Source region too big for destination", __FILE__, __LINE__);
+
+	for(TqChannelNameMap::const_iterator i = nameMap.begin(), e = nameMap.end();
+			i != e; ++i)
+	{
+		channel(i->first, topLeftX, topLeftY, source.m_width, source.m_height)
+			->compositeOver(*source.channel(i->second), *source.channel(alphaName));
+	}
+}
+
 inline boost::shared_ptr<CqImageChannel> CqImageBuffer::channel(const std::string& name,
 		TqUint topLeftX, TqUint topLeftY, TqUint width, TqUint height)
 {
-	return channelImpl(findChannelIndex(name, m_channelsInfo),
+	return channelImpl(m_channelsInfo.findChannelIndex(name),
 			topLeftX, topLeftY, width, height);
 }
 
@@ -376,7 +413,7 @@ inline boost::shared_ptr<CqImageChannel> CqImageBuffer::channel(TqUint index, Tq
 inline boost::shared_ptr<const CqImageChannel> CqImageBuffer::channel(const std::string& name,
 		TqUint topLeftX, TqUint topLeftY, TqUint width, TqUint height) const
 {
-	return channelImpl(findChannelIndex(name, m_channelsInfo),
+	return channelImpl(m_channelsInfo.findChannelIndex(name),
 			topLeftX, topLeftY, width, height);
 }
 

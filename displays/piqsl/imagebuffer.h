@@ -32,6 +32,7 @@
 
 #include <vector>
 #include <string>
+#include <map>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
@@ -60,6 +61,8 @@ class CqChannelInfoList
 
 		/// Constructor
 		inline CqChannelInfoList();
+		/// Factory function for standard 8bpp RGB display channel list
+		static CqChannelInfoList displayChannels();
 		/// \note We use the default copy constructor,destructor and assignment operator.
 
 		/// Get an iterator to the start of the channel list.
@@ -114,6 +117,7 @@ class CqChannelInfoList
 		TqUint m_bytesPerPixel;			///< bytes per pixel needed to store the channels.
 };
 
+typedef std::map<std::string, std::string> TqChannelNameMap;
 
 //------------------------------------------------------------------------------
 /** \brief A wrapper for an array of hetrogenous image data
@@ -198,16 +202,36 @@ class CqImageBuffer : boost::noncopyable
 		 *                   buffer will map onto.
 		 */
 		void copyFrom(const CqImageBuffer& source, TqUint topLeftX = 0, TqUint topLeftY = 0);
+		/** \brief Copy a source buffer onto this one.
+		 *
+		 * This allows arbitrary source channels be mapped onto arbitrary
+		 * destination channels by name.
+		 *
+		 * \param source - source buffer
+		 * \param nameMap - a map between the names of the destination (this)
+		 *                  and source buffers.
+		 * \param topLeftX - x coordinate where the top left of the source
+		 *                   buffer will map onto.
+		 * \param topLeftY - y coordinate where the top left of the source
+		 *                   buffer will map onto.
+		 */
+		void copyFrom(const CqImageBuffer& source, const TqChannelNameMap& nameMap,
+				TqUint topLeftX = 0, TqUint topLeftY = 0);
 
 		/** \brief Composite the given image buffer on top of this one.
+		 *
+		 * \param source - source buffer
+		 * \param nameMap - a map between the names of the destination (this)
+		 *                  and source buffers.
+		 * \param alphaName - name of the alpha channel
+		 * \param topLeftX - x coordinate where the top left of the source
+		 *                   buffer will map onto.
+		 * \param topLeftY - y coordinate where the top left of the source
+		 *                   buffer will map onto.
 		 */
-//		static void CqImageBuffer::compositeFrom(boost::shared_ptr<CqImageBuffer> source,
-//				TqUint topLeftX, TqUint topLeftY);
-
-		/** \brief Check for the existance of a particular channel name.
-		 */
-//		bool hasChannel(const std::string& name);
-
+		void compositeOver(const CqImageBuffer& source,
+				const TqChannelNameMap& nameMap, TqUint topLeftX = 0,
+				TqUint topLeftY = 0, const std::string alphaName = "a");
 		
 		/** \brief Get the vector of channel information describing pixels in
 		 * the buffer.
@@ -282,9 +306,6 @@ class CqImageBuffer : boost::noncopyable
 		 * the 
 		 */
 		static std::vector<TqUint> channelOffsets(const CqChannelInfoList& channels);
-
-		/// Return the index of the first channel with the given name.
-		static TqUint findChannelIndex(const std::string& name, const CqChannelInfoList& channelInfo);
 
 	private:
 		CqChannelInfoList m_channelsInfo; ///< vector of channel information

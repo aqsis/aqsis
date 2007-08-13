@@ -142,7 +142,8 @@ class IqImageChannelSink
 		 * \param source - source intensity data
 		 * \param alpha - alpha channel for the source.
 		 */
-		//void compositeOver(const IqImageChannelSource& source, const IqImageChannelSource& alpha);
+		virtual void compositeOver(const IqImageChannelSource& source,
+				const IqImageChannelSource& sourceAlpha) = 0;
 		inline virtual ~IqImageChannelSink() = 0;
 };
 
@@ -269,6 +270,8 @@ class CqImageChannel : public IqImageChannel
 		// Inherited
 		virtual void requireSize(TqUint width, TqUint height) const;
 		virtual void copyFrom(const IqImageChannelSource& source);
+		virtual void compositeOver(const IqImageChannelSource& source,
+				const IqImageChannelSource& sourceAlpha);
 
 		/// \note Use default copy constructor and assignment ops.
 	protected:
@@ -277,10 +280,21 @@ class CqImageChannel : public IqImageChannel
 		 * Performs the necessary type conversion from TqFloatConv to
 		 * the type of this channel.
 		 *
-		 * \param row - image row to replace, counting from the top.
+		 * \param row - image row to replace, counting from the top (row 0).
 		 * \param buf - buffer holding the data to replace the row with.
 		 */
 		virtual void replaceRow(TqUint row, const TqFloatConv* buf) = 0;
+		/** \brief Composite a row onto the current channel
+		 *
+		 * Performs the necessary type conversion from TqFloatConv to
+		 * the type of this channel.  The source is assumed to be
+		 * alpha-premultipled.
+		 *
+		 * \param row - image row to replace, counting from the top (row 0).
+		 * \param buf - buffer holding the data to replace the row with.
+		 */
+		virtual void compositeRow(TqUint row, const TqFloatConv* src,
+				const TqFloatConv* srcAlpha) = 0;
 
 		SqChannelInfo m_chanInfo; ///< channel format information
 		TqUchar* m_data;	///< raw data
@@ -309,6 +323,8 @@ class CqImageChannelTyped : public CqImageChannel
 		// Inherited
 		virtual const TqFloatConv* getRow(TqUint row) const;
 		virtual void replaceRow(TqUint row, const TqFloatConv* buf);
+		virtual void compositeRow(TqUint row, const TqFloatConv* src,
+				const TqFloatConv* srcAlpha);
 
 		/// Convert the type held by this channel into a float.
 		static inline TqFloatConv convertToFloat(T t);
@@ -378,6 +394,21 @@ void CqImageChannelTyped<T>::replaceRow(TqUint row, const TqFloatConv* buf)
 		*reinterpret_cast<T*>(destBuf) = convertFromFloat(*buf);
 		destBuf += m_stride;
 		buf++;
+	}
+}
+
+template<typename T>
+void CqImageChannelTyped<T>::compositeRow(TqUint row, const TqFloatConv* src,
+		const TqFloatConv* srcAlpha)
+{
+	TqUchar* destBuf = m_data + row*m_stride*(m_width + m_rowSkip);
+	for(TqUint i = 0; i < m_width; ++i)
+	{
+		TqFloatConv oldCol = convertToFloat(*reinterpret_cast<T*>(destBuf));
+		*reinterpret_cast<T*>(destBuf) = convertFromFloat(*src + (1 - *srcAlpha)*oldCol);
+		destBuf += m_stride;
+		src++;
+		srcAlpha++;
 	}
 }
 

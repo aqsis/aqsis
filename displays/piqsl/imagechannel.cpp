@@ -193,6 +193,15 @@ void CqImageChannel::copyFrom(const IqImageChannelSource& source)
 		replaceRow(row, source.getRow(row));
 }
 
+void CqImageChannel::compositeOver(const IqImageChannelSource& source,
+		const IqImageChannelSource& sourceAlpha)
+{
+	source.requireSize(m_width, m_height);
+	sourceAlpha.requireSize(m_width, m_height);
+
+	for(TqUint row = 0; row < m_height; ++row)
+		compositeRow(row, source.getRow(row), sourceAlpha.getRow(row));
+}
 
 //------------------------------------------------------------------------------
 } // namespace Aqsis

@@ -124,14 +124,18 @@ void CqDisplayServerImage::acceptData(TqUlong xmin, TqUlong xmaxplus1, TqUlong y
 	if(m_realData && m_displayData && xmin__ >= 0 && ymin__ >= 0
 			&& xmaxplus1__ <= imageWidth() && ymaxplus1__ <= imageHeight())
 	{
-		/// \todo: There should be a way to avoid the ugly const_cast below.
+		// The const_cast below is ugly, but I don't see how to avoid it
+		// without some notion of "const constructor" which isn't present in
+		// C++
 		const CqImageBuffer bucketBuf(m_realData->channelsInfo(),
 				boost::shared_array<TqUchar>(const_cast<TqUchar*>(bucketData), nullDeleter),
 				xmaxplus1__ - xmin__, ymaxplus1__ - ymin__);
 
 		m_realData->copyFrom(bucketBuf, xmin__, ymin__);
-		/// \todo: Do proper alpha compositing onto the display data.
-		m_displayData->copyFrom(bucketBuf, xmin__, ymin__);
+		if(m_realData->channelsInfo().hasChannel("a"))
+			m_displayData->compositeOver(bucketBuf, m_displayMap, xmin__, ymin__);
+		else
+			m_displayData->copyFrom(bucketBuf, m_displayMap, xmin__, ymin__);
 
 		if(m_updateCallback)
 			m_updateCallback(xmin__, ymin__, xmaxplus1__-xmin__, ymaxplus1__-ymin__);
