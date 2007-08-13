@@ -56,12 +56,9 @@ class Fl_FrameBuffer_Widget : public Fl_Widget
 		void setImage(boost::shared_ptr<Aqsis::CqImage>& image);
 
 		virtual void draw();
-		//virtual int handle(int event);
 
 	private:
 		boost::shared_ptr<Aqsis::CqImage> m_image;
-		std::vector<bool> m_channelsEnabled;
-		//bool m_keyHeld;
 };
 
 
@@ -118,6 +115,9 @@ public:
 	 * only be performed in the main thread.
 	 */
 	void resize();
+	/** Overriden Fl_Widget::resize()
+	 */
+	virtual void resize(int X, int Y, int W, int H);
 	/** Perform an update on a region of the framebuffer.
 	 * Pass -1 for all values to update the whole framebuffer.
 	 * \param X			The X origin of the region (bucket) to update.
@@ -137,13 +137,18 @@ public:
 	 */
 	boost::mutex& mutex();
 
+	/** Event handler for the framebuffer
+	 */
 	int handle(int event);
+
+	/** Centers the image widget in the scrolled area
+	 */
+	void centerImageWidget();
 
 	static const int defaultWidth; ///< Default framebuffer width.
 	static const int defaultHeight; ///< Default framebuffer height.
 
 private:
-	//Fl_Window*	m_theWindow;						///< The FLTK window.
 	Fl_FrameBuffer_Widget* m_uiImageWidget;			///< The custom image widget.
 	Fl_Menu_Button* m_popupMenu;					///< The right click menu widget.
 	Fl_Scroll *m_scroll;

@@ -64,7 +64,7 @@ Fl_Menu_Item CqFramebuffer::m_popupMenuItems[] = {
 };
 
 
-void piqsl_cb(Fl_Widget* w, void* v)
+void piqsl_cb(Fl_Widget* /*w*/, void* /*v*/)
 {
 	Fl::lock();
 	if(window)
@@ -78,8 +78,10 @@ const int CqFramebuffer::defaultHeight = 300;
 CqFramebuffer::CqFramebuffer(TqUlong width, TqUlong height, TqInt depth,
 		const std::string& bookName) : 
 	Fl_Double_Window(width+20, height, bookName.c_str()),
-	m_doResize(false), m_bookName(bookName), m_keyHeld(false),
-	m_title(bookName)
+	m_doResize(false),
+	m_title(bookName),
+	m_bookName(bookName),
+	m_keyHeld(false)
 {
 	Fl::lock();
 	size_range(400, 300); // restrict min size
@@ -145,6 +147,11 @@ int CqFramebuffer::handle(int event)
 					case 'r':
 						//std::cout << "Red channel toggle" << std::endl;
 						return 1;
+					case 'h':
+						// 'Home' widget back to center
+						centerImageWidget();
+						m_scroll->redraw();
+						return 1;
 				}
 			}
 			break;
@@ -174,6 +181,8 @@ int CqFramebuffer::handle(int event)
 			switch (Fl::event_button())
 			{
 				case FL_MIDDLE_MOUSE:
+					fl_cursor(FL_CURSOR_DEFAULT, FL_FOREGROUND_COLOR,
+							FL_BACKGROUND_COLOR);
 					return 1;
 			}
 			break;
@@ -181,10 +190,10 @@ int CqFramebuffer::handle(int event)
 			switch (Fl::event_button())
 			{
 				case FL_MIDDLE_MOUSE:
+					fl_cursor(FL_CURSOR_MOVE, FL_FOREGROUND_COLOR,
+							FL_BACKGROUND_COLOR);
 					int dx = Fl::event_x() - m_lastPos[0];
 					int dy = Fl::event_y() - m_lastPos[1];
-					//m_scroll->position(m_scroll->xposition() + dx,
-					//		m_scroll->yposition() + dy);
 					m_uiImageWidget->position(m_uiImageWidget->x() + dx,
 							m_uiImageWidget->y()+dy);
 					m_scroll->redraw();
@@ -241,6 +250,26 @@ void CqFramebuffer::queueResize()
 	Fl::lock();
 	m_doResize = true;
 	Fl::unlock();
+}
+
+void CqFramebuffer::resize(int X, int Y, int W, int H)
+{
+	// if the window is actually getting resized (might just be moved)
+	if (W != w() || H != h())
+	{
+		// center our image
+		centerImageWidget();
+	}
+
+	// call parent's resize()
+	Fl_Double_Window::resize(X, Y, W, H);
+}
+
+void CqFramebuffer::centerImageWidget()
+{
+	m_uiImageWidget->position(
+			(m_scroll->w() - m_uiImageWidget->w())/2,
+			(m_scroll->h() - m_uiImageWidget->h())/2);
 }
 
 void CqFramebuffer::resize()

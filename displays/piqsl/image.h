@@ -160,8 +160,7 @@ public:
 	/** Save the image to the given folder.
 	 * \note Overridden by derivations that manage their image data differently.
 	 */
-	virtual void serialise(const std::string& folder)
-	{}
+	virtual void serialise(const std::string& folder) {}
 	/** Create an XML element representing this image for serialising to library files.
 	 * \return			A pointer to a new TinyXML element structure.
 	 */
