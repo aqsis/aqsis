@@ -220,6 +220,9 @@ class CqImageBuffer : boost::noncopyable
 
 		/** \brief Composite the given image buffer on top of this one.
 		 *
+		 * If the alpha channel name is not present in the source channel,
+		 * attempt a simple copy using the equivilant copyFrom() method.
+		 *
 		 * \param source - source buffer
 		 * \param nameMap - a map between the names of the destination (this)
 		 *                  and source buffers.

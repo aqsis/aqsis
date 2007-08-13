@@ -299,9 +299,10 @@ void CqFramebuffer::update(int X, int Y, int W, int H)
 {
 	Fl::lock();
 	if(W < 0 || H < 0 || X < 0 || Y < 0)
-		m_uiImageWidget->damage(1);
+		m_uiImageWidget->damage(FL_DAMAGE_SCROLL);
 	else
-		m_uiImageWidget->damage(1, X, Y, W, H);
+		m_uiImageWidget->damage(FL_DAMAGE_SCROLL, m_uiImageWidget->x() + X,
+				m_uiImageWidget->y() + Y, W, H);
 	Fl::awake();
 	Fl::unlock();
 }

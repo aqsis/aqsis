@@ -389,11 +389,18 @@ void CqImageBuffer::compositeOver(const CqImageBuffer& source,
 	if(source.m_width + topLeftX > m_width || source.m_height + topLeftY > m_height)
 		throw XqInternal("Source region too big for destination", __FILE__, __LINE__);
 
-	for(TqChannelNameMap::const_iterator i = nameMap.begin(), e = nameMap.end();
-			i != e; ++i)
+	if(!source.channelsInfo().hasChannel(alphaName))
 	{
-		channel(i->first, topLeftX, topLeftY, source.m_width, source.m_height)
-			->compositeOver(*source.channel(i->second), *source.channel(alphaName));
+		copyFrom(source, nameMap, topLeftX, topLeftY);
+	}
+	else
+	{
+		for(TqChannelNameMap::const_iterator i = nameMap.begin(), e = nameMap.end();
+				i != e; ++i)
+		{
+			channel(i->first, topLeftX, topLeftY, source.m_width, source.m_height)
+				->compositeOver(*source.channel(i->second), *source.channel(alphaName));
+		}
 	}
 }
 

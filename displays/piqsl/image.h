@@ -175,6 +175,14 @@ public:
 	void loadFromTiff(const std::string& filename);
 
 protected:
+	/** Check m_displayMap is pointing to valid channel names from channelsInfo.
+	 *
+	 * If the map isn't pointing to valid channels, then set the offending
+	 * channels names to the first one in channelsInfo
+	 *
+	 * \param channelsInfo - channels which the map must point to.
+	 */
+	void fixupDisplayMap(const CqChannelInfoList& channelsInfo);
 	/** Get a reference to the unique mutex for this image.
 	 * Used when locking the image during multithreaded operation.
 	 * \return			A reference to the unique mutex for this image.

@@ -132,10 +132,7 @@ void CqDisplayServerImage::acceptData(TqUlong xmin, TqUlong xmaxplus1, TqUlong y
 				xmaxplus1__ - xmin__, ymaxplus1__ - ymin__);
 
 		m_realData->copyFrom(bucketBuf, xmin__, ymin__);
-		if(m_realData->channelsInfo().hasChannel("a"))
-			m_displayData->compositeOver(bucketBuf, m_displayMap, xmin__, ymin__);
-		else
-			m_displayData->copyFrom(bucketBuf, m_displayMap, xmin__, ymin__);
+		m_displayData->compositeOver(bucketBuf, m_displayMap, xmin__, ymin__);
 
 		if(m_updateCallback)
 			m_updateCallback(xmin__, ymin__, xmaxplus1__-xmin__, ymaxplus1__-ymin__);
