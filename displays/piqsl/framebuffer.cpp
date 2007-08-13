@@ -32,13 +32,16 @@
 void Fl_FrameBuffer_Widget::draw()
 {
 	Fl::lock();
-	boost::shared_ptr<const Aqsis::CqImageBuffer> buf;
-	if(m_image && (buf = m_image->displayBuffer()))
+	if(m_image)
 	{
-		fl_draw_image(buf->rawData().get(), x(), y(),
-			buf->width(), buf->height(),
-			buf->numChannels(),
-			buf->width()*buf->numChannels()); // draw image
+		boost::shared_ptr<const Aqsis::CqImageBuffer> buf = m_image->displayBuffer();
+		if(buf)
+		{
+			fl_draw_image(buf->rawData().get(), x(), y(),
+				buf->width(), buf->height(),
+				buf->numChannels(),
+				buf->width()*buf->numChannels()); // draw image
+		}
 	}
 	else
 	{
