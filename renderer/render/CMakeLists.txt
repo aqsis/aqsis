@@ -32,3 +32,8 @@ ADD_DEPENDENCIES(aqsislib apiheader apicache apivalidate apidebug)
 IF(WIN32)
 	TARGET_LINK_LIBRARIES(aqsislib aqsistypes shadervm ${TIFF_LIBRARIES} ${ZLIB_LIBRARIES})
 ENDIF(WIN32)
+
+INSTALL(TARGETS aqsislib
+	RUNTIME DESTINATION bin
+	LIBRARY DESTINATION lib)
+

@@ -19,3 +19,6 @@ IF(WIN32)
 ELSE(WIN32)
 	TARGET_LINK_LIBRARIES(aqsis argparse aqsistypes aqsislib shadervm ${TIFF_LIBRARIES})
 ENDIF(WIN32)
+
+INSTALL(TARGETS aqsis
+	RUNTIME DESTINATION bin)
