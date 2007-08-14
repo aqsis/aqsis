@@ -146,15 +146,19 @@ Aqsis::CqBookBrowser* tab = static_cast<Aqsis::CqBookBrowser*>(m_tabBooks->value
 if(tab != NULL)
 {
 	Aqsis::CqBook::TqImageList::size_type index = tab->currentSelected();
-	Aqsis::CqBook::TqImageListIterator item = tab->book()->imagesBegin();
-	item += (index-1);
-	tab->book()->removeImage(item);
-	tab->setCurrentSelected(0);
-	tab->redraw();
-	Fl::awake();
+	if (index > 0) // something must be selected
+	{
+		Aqsis::CqBook::TqImageListIterator item = tab->book()->imagesBegin();
+		item += (index-1);
+		tab->book()->removeImage(item);
+		tab->setCurrentSelected(0);
+		m_menuImagesRemove->deactivate();
+		tab->redraw();
+		Fl::awake();
+	}
 }
-Fl::unlock();}
-            xywh {0 0 100 20}
+Fl::unlock();} selected
+            xywh {0 0 100 20} deactivate
           }
         }
         Submenu {} {
@@ -191,7 +195,7 @@ Fl::unlock();}
       }
       Fl_Tabs m_tabBooks {
         callback {Aqsis::CqBookBrowser* browser = static_cast<Aqsis::CqBookBrowser*>(o->value());
-setCurrentBook(browser->book());} selected
+setCurrentBook(browser->book());}
         private xywh {0 29 540 281}
       } {}
     }
@@ -231,6 +235,7 @@ Aqsis::CqBookBrowser* bcurr = static_cast<Aqsis::CqBookBrowser*>(current);
 // they are zero based, this is because the (void*) stuff passed around in 
 // FLTK for the Fl_Browser_ class uses 0 to indicate false.
 bcurr->setCurrentSelected(id + 1);
+m_menuImagesRemove->activate();
 bcurr->redraw();
 Fl::awake();
 Fl::unlock();
@@ -251,10 +256,15 @@ if(theEvent == FL_RELEASE)
 		boost::shared_ptr<Aqsis::CqImage> image = win->currentBook()->image(selected-1);
 		if(image && win->currentBook()->framebuffer())
 		{
+			m_menuImagesRemove->activate();
 			win->currentBook()->framebuffer()->connect(image);
 			win->currentBook()->framebuffer()->update(-1,-1,-1,-1);
 			if(Fl::event_clicks())
 				win->currentBook()->framebuffer()->show();
+		}
+		else
+		{
+			m_menuImagesRemove->deactivate();
 		}
 	}
 }
