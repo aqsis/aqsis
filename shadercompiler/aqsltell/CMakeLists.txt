@@ -18,3 +18,6 @@ IF(WIN32)
 ELSE(WIN32)
 	TARGET_LINK_LIBRARIES(aqsltell argparse aqsistypes slxargs shadervm)
 ENDIF(WIN32)
+
+INSTALL(TARGETS aqsltell
+	RUNTIME DESTINATION ${BINDIR})
