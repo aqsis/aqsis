@@ -121,10 +121,11 @@ __export char *bake2tif( char *in )
  * linear interpretation between an sample at the left side and ride side of black pixel.
  */
 
-static int lerp(int maxy, int miny, int maxx, int minx, int x)
+static float lerp(float maxy, float miny, float maxx, float minx, int x)
 {
-	int result = minx;
+	float result = minx;
 	float ratio = 1.0;
+
 
 	if (x == maxx)
 		return maxy;
@@ -134,7 +135,7 @@ static int lerp(int maxy, int miny, int maxx, int minx, int x)
 		return miny;
 	else
 		ratio = 1.0f - (float) (maxx - x) / (float) (maxx - minx);
-	result = miny + (int) (ratio * (maxy - miny));
+	result = miny + (float) (ratio * (maxy - miny));
 
 
 	return result;
@@ -148,8 +149,8 @@ static char *bake_open( FILE *bakefile, char *tiffname )
 {
 	unsigned short h, w;
 	float s, t, r1, g1, b1;
-	unsigned char *pixels;
-	unsigned char *xpixels;
+	float *pixels;
+	float *xpixels;
 	char buffer[ 200 ];
 	int i, j, k, n, o;
 	int x, y;
@@ -158,26 +159,42 @@ static char *bake_open( FILE *bakefile, char *tiffname )
 	int bytesize = size * size * 3;
 	int count, number;
 	float *temporary;
+	int elmsize = 3;
 
 	count = 1024 * 1024;
 	number = 0;
 
 	h = w = size;
-	pixels = ( unsigned char * ) calloc( 3, size * size );
+	pixels = ( float * ) calloc( 3, size * size * sizeof(float));
 
         temporary = (float *) malloc(count *  5 * sizeof(float));
 
 	/* printf( "Parse the bake file \n"); */
+	fgets( buffer, 200, bakefile ) ;
+	fgets( buffer, 200, bakefile ) ;
+	sscanf(buffer, "%d", &elmsize);
+       
 	while ( fgets( buffer, 200, bakefile ) != NULL )
 	{
 	 	k = number * 5;
 
-		if ( 5 == sscanf( buffer, "%f %f %f %f %f", &s, &t, &r1, &g1, &b1 ) )
-			;
-		else
+		switch (elmsize)
 		{
-			sscanf( buffer, "%f %f %f", &s, &t, &r1 );
-			g1 = b1 = r1;
+			case 3:
+			{
+				sscanf( buffer, "%f %f %f %f %f", &s, &t, &r1, &g1, &b1 );
+			}	break;
+			case 2:
+			{
+				sscanf( buffer, "%f %f %f %f", &s, &t, &r1, &g1);
+				b1 = (r1 + g1) / 2.0;
+			}	break;
+			default:
+			case 1:
+			{
+				sscanf( buffer, "%f %f %f", &s, &t, &r1);
+				g1 = b1 = r1;
+			}	break;
 		}
 		temporary[k] = s;
 		temporary[k+1] = t;
@@ -264,16 +281,16 @@ static char *bake_open( FILE *bakefile, char *tiffname )
 		n = ( y * size ) + x;
 		n *= 3;
 
-		pixels [ n ] = (int)(r1 * 255);
-		pixels [ n + 1 ] = (int)(g1 * 255);
-		pixels [ n + 2 ] = (int)(b1 * 255);
+		pixels [ n ] = r1;
+		pixels [ n + 1 ] = g1;
+		pixels [ n + 2 ] = b1;
 
 	}
 	/* printf("convert to rgb\n"); */
 
-	xpixels = ( unsigned char * ) calloc( 3, size * size );
+	xpixels = ( float * ) calloc( 3, size * size * sizeof(float));
 
-	memcpy(xpixels, pixels, bytesize);
+	memcpy(xpixels, pixels, bytesize * sizeof(float));
 
 
 #ifdef REMOVEDARK
@@ -317,14 +334,16 @@ static char *bake_open( FILE *bakefile, char *tiffname )
 		}
 	}
 
-	memcpy(pixels, xpixels, 3 * size * size);
+	memcpy(pixels, xpixels, 3 * size * size * sizeof(float));
 
 #endif
-	// Should we do some filterings prior to save to tif file ?
-	// I will used the general scheme of mipmap from texturemap.cpp for now
+	/* Should we do some filterings prior to save to tif file ? */
+	/* Used the general scheme of mipmap from texturemap.cpp for now */
+	/* but for tex but when "bake2tif" is used floating value will be */
+	/* saved instead of RGB/bytes encoding */
 
 	/* convert each scan line */
-	save_tiff( tiffname, pixels, w, h, 3, "bake2tif" );
+	save_tiff( tiffname, (char *) pixels, w, h, 3, "bake2tif" );
 
 	free( pixels );
 	free( xpixels );

@@ -74,6 +74,17 @@ void CqCodeGenDataGather::Visit( IqParseNodeShader& S )
 		m_VariableUsage = 0;
 		pNode->pChild() ->Accept( *this );
 	}
+
+	// We must visit all the initialization code incase it uses any
+        // standard vars
+	TqUint i ;
+        for ( i = 0; i < gLocalVars.size(); ++i )
+        {
+                IqVarDef* pVar = &gLocalVars[ i ];
+                if ( pVar->Type() & Type_Param && pVar->pInitialiser() != 0 )
+                        pVar->pInitialiser() ->Accept( *this );
+        }
+
 }
 
 void CqCodeGenDataGather::Visit( IqParseNodeFunctionCall& FC )

@@ -22,7 +22,7 @@
  *  \author Lionel J. Lacour (intuition01@online.fr)
  */
 
-#ifdef	WIN32
+#if _MSC_VER
 #pragma warning(disable : 4786)
 #endif
 

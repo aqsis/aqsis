@@ -46,6 +46,7 @@ START_NAMESPACE( Aqsis )
 /// Required function that implements Class Factory design pattern for DDManager libraries
 IqDDManager* CreateDisplayDriverManager()
 {
+	Aqsis::log() << debug << "CreateDisplayDriverManager()" << std::endl;
 	return new CqDDManager;
 }
 
@@ -54,8 +55,8 @@ IqDDManager* CreateDisplayDriverManager()
 // Maybe this should be done in a DDManager constructor,
 // or in the CreateDisplayDriverManager function, above.
 SqDDMemberData CqDDManager::m_MemberData("DspyImageOpen", "DspyImageQuery",
-		"DspyImageData", "DspyImageClose", "DspyImageDelayClose",
-		"r", "g", "b", "a", "z");
+        "DspyImageData", "DspyImageClose", "DspyImageDelayClose",
+        "r", "g", "b", "a", "z");
 
 TqInt CqDDManager::AddDisplay( const TqChar* name, const TqChar* type, const TqChar* mode, TqInt modeID, TqInt dataOffset, TqInt dataSize, std::map<std::string, void*> mapOfArguments )
 {
@@ -63,9 +64,9 @@ TqInt CqDDManager::AddDisplay( const TqChar* name, const TqChar* type, const TqC
 	// then the last 2 lines in the if-else blocks should follow afterward. I couldn't figure out
 	// how to declare the boost pointer separately from its initialization.
 	if (type == "dsm")
-	{	
+	{
 		boost::shared_ptr<CqDisplayRequest> req(new CqDeepDisplayRequest(false, name, type, mode, CqString::hash( mode ), modeID,
-				dataOffset,	dataSize, 0.0f, 255.0f, 0.0f, 0.0f, 0.0f, false, false));
+		                                        dataOffset,	dataSize, 0.0f, 255.0f, 0.0f, 0.0f, 0.0f, false, false));
 		// Create the array of UserParameter structures for all the unrecognised extra parameters,
 		// while extracting information for the recognised ones.
 		req->PrepareCustomParameters(mapOfArguments);
@@ -73,8 +74,8 @@ TqInt CqDDManager::AddDisplay( const TqChar* name, const TqChar* type, const TqC
 	}
 	else
 	{
-		boost::shared_ptr<CqDisplayRequest> req(new CqShallowDisplayRequest(false, name, type, mode, CqString::hash( mode ), modeID,
-				dataOffset,	dataSize, 0.0f, 255.0f, 0.0f, 0.0f, 0.0f, false, false));
+		boost::shared_ptr<CqDisplayRequest> req(new CqDisplayRequest(false, name, type, mode, CqString::hash( mode ), modeID,
+		                                        dataOffset,	dataSize, 0.0f, 255.0f, 0.0f, 0.0f, 0.0f, false, false));
 		// Create the array of UserParameter structures for all the unrecognised extra parameters,
 		// while extracting information for the recognised ones.
 		req->PrepareCustomParameters(mapOfArguments);
@@ -93,21 +94,21 @@ TqInt CqDDManager::AddDisplay( const TqChar* name, const TqChar* type, const TqC
 void CqDisplayRequest::ClearDisplayParams()
 {
 	std::vector<UserParameter>::iterator iup;
-	for(iup = m_customParams.begin(); iup != m_customParams.end(); ++iup )
+	for (iup = m_customParams.begin(); iup != m_customParams.end(); ++iup )
 	{
-		if( iup->nbytes )
+		if ( iup->nbytes )
 		{
 			free(iup->name);
 			free(iup->value);
 		}
-	}	
+	}
 }
 
 TqInt CqDDManager::ClearDisplays()
 {
 	// Free any user parameter data specified on the display requests.
 	std::vector< boost::shared_ptr<CqDisplayRequest> >::iterator i;
-	for(i = m_displayRequests.begin(); i != m_displayRequests.end(); ++i)
+	for (i = m_displayRequests.begin(); i != m_displayRequests.end(); ++i)
 	{
 		(*i)->ClearDisplayParams();
 	}
@@ -120,8 +121,15 @@ TqInt CqDDManager::OpenDisplays()
 {
 	// Now go over any requested displays launching the clients.
 	std::vector< boost::shared_ptr<CqDisplayRequest> >::iterator i;
-	for(i = m_displayRequests.begin(); i!= m_displayRequests.end(); ++i)
+	for (i = m_displayRequests.begin(); i!= m_displayRequests.end(); ++i)
+	{
 		(*i)->LoadDisplayLibrary(m_MemberData, m_DspyPlugin);
+		m_MemberData.m_strOpenMethod = "DspyImageOpen";
+		m_MemberData.m_strQueryMethod = "DspyImageQuery";
+		m_MemberData.m_strDataMethod = "DspyImageData";
+		m_MemberData.m_strCloseMethod = "DspyImageClose";
+		m_MemberData.m_strDelayCloseMethod = "DspyImageDelayClose";
+	}
 	return ( 0 );
 }
 
@@ -129,7 +137,7 @@ TqInt CqDDManager::CloseDisplays()
 {
 	// Now go over any requested displays launching the clients.
 	std::vector< boost::shared_ptr<CqDisplayRequest> >::iterator i;
-	for(i = m_displayRequests.begin(); i!= m_displayRequests.end(); ++i)
+	for (i = m_displayRequests.begin(); i!= m_displayRequests.end(); ++i)
 		(*i)->CloseDisplayLibrary();
 	return ( 0 );
 }
@@ -138,7 +146,7 @@ TqInt CqDDManager::DisplayBucket( IqBucket* pBucket )
 {
 	static CqRandom random( 61 );
 
-	if( (pBucket->Width() == 0) || (pBucket->Height() == 0) )
+	if ( (pBucket->Width() == 0) || (pBucket->Height() == 0) )
 		return(0);
 	TqUint	xmin = pBucket->XOrigin();
 	TqUint	ymin = pBucket->YOrigin();
@@ -146,12 +154,12 @@ TqInt CqDDManager::DisplayBucket( IqBucket* pBucket )
 	TqUint	ymaxplus1 = ymin + pBucket->Height();
 
 	// If completely outside the crop rectangle, don't bother sending.
-	if( xmaxplus1 <= (TqUint) QGetRenderContext()->pImage()->CropWindowXMin() ||
+	if ( xmaxplus1 <= (TqUint) QGetRenderContext()->pImage()->CropWindowXMin() ||
 	        ymaxplus1 <= (TqUint) QGetRenderContext()->pImage()->CropWindowYMin() ||
 	        xmin > (TqUint) QGetRenderContext()->pImage()->CropWindowXMax() ||
 	        ymin > (TqUint) QGetRenderContext()->pImage()->CropWindowYMax() )
 		return(0);
-	
+
 	std::vector< boost::shared_ptr<CqDisplayRequest> >::iterator i;
 	for ( i = m_displayRequests.begin(); i != m_displayRequests.end(); ++i )
 	{
@@ -173,7 +181,7 @@ bool CqDDManager::fDisplayNeeds( const TqChar* var )
 
 	// Scan all registered displays to see if any of them need the variable specified.
 	std::vector< boost::shared_ptr<CqDisplayRequest> >::iterator i;
-	for(i = m_displayRequests.begin(); i!= m_displayRequests.end(); ++i)
+	for (i = m_displayRequests.begin(); i!= m_displayRequests.end(); ++i)
 	{
 		if ( (*i)->ThisDisplayNeeds(htoken, rgb, rgba, Ci, Oi, Cs, Os) )
 		{
@@ -186,14 +194,15 @@ bool CqDDManager::fDisplayNeeds( const TqChar* var )
 
 TqInt CqDDManager::Uses()
 {
-	TqInt Uses = 0;
+	if (m_Uses) return m_Uses;
+
 	// Scan all registered displays to combine the required variables.
 	std::vector< boost::shared_ptr<CqDisplayRequest> >::iterator i;
-	for(i = m_displayRequests.begin(); i!= m_displayRequests.end(); ++i)
+	for (i = m_displayRequests.begin(); i!= m_displayRequests.end(); ++i)
 	{
-		(*i)->ThisDisplayUses(Uses);
+		(*i)->ThisDisplayUses(m_Uses);
 	}
-	return ( Uses );
+	return ( m_Uses );
 }
 
 void CqDisplayRequest::LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimplePlugin& dspyPlugin )
@@ -202,12 +211,12 @@ void CqDisplayRequest::LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimpl
 	CqString strDriverFile = "";
 	CqString displayType = m_type;
 	const CqString* poptDisplay = QGetRenderContext()->poptCurrent()->GetStringOption("display", displayType.c_str());
-	if(0 != poptDisplay)
+	if (0 != poptDisplay)
 		strDriverFile = poptDisplay[0];
 	else
 	{
 		const CqString* poptDisplayMapping = QGetRenderContext()->poptCurrent()->GetStringOption("display", "mapping");
-		if(0 != poptDisplayMapping)
+		if (0 != poptDisplayMapping)
 		{
 			CqString strMapping = poptDisplayMapping[0];
 			strDriverFile.Format(strMapping.c_str(), displayType.c_str());
@@ -217,16 +226,17 @@ void CqDisplayRequest::LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimpl
 	// Display type not found.
 	if ( strDriverFile.empty() )
 		throw( CqString( "Invalid display type \"" ) + CqString( m_type ) + CqString( "\"" ) + CqString(" (") + strDriverFile + CqString(")") );
-	if( strDriverFile != "debugdd")
+	if ( strDriverFile != "debugdd")
 	{
 		// Try to open the file to see if it's really there
 		CqRiFile fileDriver( strDriverFile.c_str(), "display" );
 		if ( !fileDriver.IsValid() )
 			throw( CqString( "Error loading display driver [ " ) + strDriverFile + CqString( " ]" ) );
 		CqString strDriverPathAndFile = fileDriver.strRealName();
-		// Load the dynamic obejct and locate the relevant symbols.
+
+		// Load the dynamic object and locate the relevant symbols.
 		m_DriverHandle = dspyPlugin.SimpleDLOpen( &strDriverPathAndFile );
-		if( m_DriverHandle != NULL )
+		if ( m_DriverHandle != NULL )
 		{
 			m_OpenMethod = (DspyImageOpenMethod)dspyPlugin.SimpleDLSym( m_DriverHandle, &ddMemberData.m_strOpenMethod );
 			if (!m_OpenMethod)
@@ -234,24 +244,28 @@ void CqDisplayRequest::LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimpl
 				ddMemberData.m_strOpenMethod = "_" + ddMemberData.m_strOpenMethod;
 				m_OpenMethod = (DspyImageOpenMethod)dspyPlugin.SimpleDLSym( m_DriverHandle, &ddMemberData.m_strOpenMethod );
 			}
+
 			m_QueryMethod = (DspyImageQueryMethod)dspyPlugin.SimpleDLSym( m_DriverHandle, &ddMemberData.m_strQueryMethod );
 			if (!m_QueryMethod)
 			{
 				ddMemberData.m_strQueryMethod = "_" + ddMemberData.m_strQueryMethod;
 				m_QueryMethod = (DspyImageQueryMethod)dspyPlugin.SimpleDLSym( m_DriverHandle, &ddMemberData.m_strQueryMethod );
 			}
+
 			m_DataMethod = (DspyImageDataMethod)dspyPlugin.SimpleDLSym( m_DriverHandle, &ddMemberData.m_strDataMethod );
 			if (!m_DataMethod)
 			{
 				ddMemberData.m_strDataMethod = "_" + ddMemberData.m_strDataMethod;
 				m_DataMethod = (DspyImageDataMethod)dspyPlugin.SimpleDLSym( m_DriverHandle, &ddMemberData.m_strDataMethod );
 			}
+
 			m_CloseMethod = (DspyImageCloseMethod)dspyPlugin.SimpleDLSym( m_DriverHandle, &ddMemberData.m_strCloseMethod );
-			if (!m_OpenMethod)
+			if (!m_CloseMethod)
 			{
 				ddMemberData.m_strCloseMethod = "_" + ddMemberData.m_strCloseMethod;
 				m_CloseMethod = (DspyImageCloseMethod)dspyPlugin.SimpleDLSym( m_DriverHandle, &ddMemberData.m_strCloseMethod );
 			}
+
 			m_DelayCloseMethod = (DspyImageDelayCloseMethod)dspyPlugin.SimpleDLSym( m_DriverHandle, &ddMemberData.m_strDelayCloseMethod );
 			if (!m_DelayCloseMethod)
 			{
@@ -274,18 +288,18 @@ void CqDisplayRequest::LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimpl
 	m_DataRow = 0;
 	m_DataBucket = 0;
 
-	if( NULL != m_OpenMethod )
+	if ( NULL != m_OpenMethod )
 	{
 		// If the quantization options haven't been set in the RiDisplay call, get the appropriate values out
 		// of the RiQuantize option.
 		const TqFloat* pQuant = 0;
-		if(!m_QuantizeSpecified || !m_QuantizeDitherSpecified)
+		if (!m_QuantizeSpecified || !m_QuantizeDitherSpecified)
 		{
-			if(m_modeID & ModeZ)
+			if (m_modeID & ModeZ)
 				pQuant = QGetRenderContext() ->poptCurrent()->GetFloatOption( "Quantize", "Depth" );
 			else
 				pQuant = QGetRenderContext() ->poptCurrent()->GetFloatOption( "Quantize", "Color" );
-			if( pQuant && !m_QuantizeSpecified)
+			if ( pQuant && !m_QuantizeSpecified)
 			{
 				m_QuantizeOneVal = pQuant[0];
 				m_QuantizeMinVal = pQuant[1];
@@ -293,30 +307,30 @@ void CqDisplayRequest::LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimpl
 				m_QuantizeSpecified = true;
 			}
 
-			if( pQuant && !m_QuantizeDitherSpecified)
+			if ( pQuant && !m_QuantizeDitherSpecified)
 			{
 				m_QuantizeDitherVal = pQuant[3];
 				m_QuantizeDitherSpecified = true;
 			}
 		}
 		// Prepare the information and call the DspyImageOpen function in the display device.
-		if(m_modeID & ( ModeRGB | ModeA | ModeZ) )
+		if (m_modeID & ( ModeRGB | ModeA | ModeZ) )
 		{
 			PtDspyDevFormat fmt;
-			if( m_QuantizeOneVal == 255 )
+			if ( m_QuantizeOneVal == 255 )
 				fmt.type = PkDspyUnsigned8;
-			else if( m_QuantizeOneVal == 65535 )
+			else if ( m_QuantizeOneVal == 65535 )
 				fmt.type = PkDspyUnsigned16;
-			else if( m_QuantizeOneVal == 4294967295u )
+			else if ( m_QuantizeOneVal == 4294967295u )
 				fmt.type = PkDspyUnsigned32;
 			else
 				fmt.type = PkDspyFloat32;
-			if(m_modeID & ModeA)
+			if (m_modeID & ModeA)
 			{
 				fmt.name = ddMemberData.m_AlphaName;
 				m_formats.push_back(fmt);
 			}
-			if(m_modeID & ModeRGB)
+			if (m_modeID & ModeRGB)
 			{
 				fmt.name = ddMemberData.m_RedName;
 				m_formats.push_back(fmt);
@@ -325,7 +339,7 @@ void CqDisplayRequest::LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimpl
 				fmt.name = ddMemberData.m_BlueName;
 				m_formats.push_back(fmt);
 			}
-			if(m_modeID & ModeZ)
+			if (m_modeID & ModeZ)
 			{
 				fmt.name = ddMemberData.m_ZName;
 				fmt.type = PkDspyFloat32;
@@ -339,24 +353,24 @@ void CqDisplayRequest::LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimpl
 			TqInt type;
 			type = QGetRenderContext()->OutputDataType(m_mode.c_str());
 			std::string componentNames = "";
-			switch(type)
+			switch (type)
 			{
-					case type_point:
-					case type_normal:
-					case type_vector:
-					case type_hpoint:
+				case type_point:
+				case type_normal:
+				case type_vector:
+				case type_hpoint:
 					componentNames = "XYZ";
 					break;
-					case type_color:
+				case type_color:
 					componentNames = "rgb";
 					break;
 			}
 			// Now create the channels formats.
 			PtDspyDevFormat fmt;
 			TqUint i;
-			for( i = 0; i < (TqUint) m_AOVSize; i++ )
+			for ( i = 0; i < (TqUint) m_AOVSize; i++ )
 			{
-				if(componentNames.size()>i)
+				if (componentNames.size()>i)
 				{
 
 					if (componentNames.substr(i, 1) == "r")
@@ -383,11 +397,11 @@ void CqDisplayRequest::LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimpl
 					// by default we will stored into red channel eg. "s" will be saved into 'r' channel
 					fmt.name = ddMemberData.m_RedName;
 				}
-				if( m_QuantizeOneVal == 255 )
+				if ( m_QuantizeOneVal == 255 )
 					fmt.type = PkDspyUnsigned8;
-				else if( m_QuantizeOneVal == 65535 )
+				else if ( m_QuantizeOneVal == 65535 )
 					fmt.type = PkDspyUnsigned16;
-				else if( m_QuantizeOneVal == 4294967295u )
+				else if ( m_QuantizeOneVal == 4294967295u )
 					fmt.type = PkDspyUnsigned32;
 				else
 					fmt.type = PkDspyFloat32;
@@ -408,36 +422,36 @@ void CqDisplayRequest::LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimpl
 		TqInt ymin = static_cast<TqInt>( CLAMP( CEIL( yres * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 2 ] ), 0, yres ) );
 		TqInt ymax = static_cast<TqInt>( CLAMP( CEIL( yres * QGetRenderContext() ->poptCurrent()->GetFloatOption( "System", "CropWindow" ) [ 3 ] ), 0, yres ) );
 		PtDspyError err = (*m_OpenMethod)(&m_imageHandle,
-		                                      m_type.c_str(), m_name.c_str(),
-		                                      xmax-xmin,
-		                                      ymax-ymin,
-		                                      m_customParams.size(),
-		                                      &m_customParams[0],
-		                                      m_formats.size(), &m_formats[0],
-		                                      &m_flags);
+		                                  m_type.c_str(), m_name.c_str(),
+		                                  xmax-xmin,
+		                                  ymax-ymin,
+		                                  m_customParams.size(),
+		                                  &m_customParams[0],
+		                                  m_formats.size(), &m_formats[0],
+		                                  &m_flags);
 
 		// Check for an error
-		if( err != PkDspyErrorNone )
+		if ( err != PkDspyErrorNone )
 		{
 			// The display did not successfully open, so clean up after it and leave the
 			// request as invalid.
 			Aqsis::log() << error << "Cannot open display \"" << m_name << "\" : ";
-			switch(err)
+			switch (err)
 			{
-					case PkDspyErrorNoMemory:
+				case PkDspyErrorNoMemory:
 					Aqsis::log() << error << "Out of memory" << std::endl;
 					break;
-					case PkDspyErrorUnsupported:
+				case PkDspyErrorUnsupported:
 					Aqsis::log() << error << "Unsupported" << std::endl;
 					break;
-					case PkDspyErrorBadParams:
+				case PkDspyErrorBadParams:
 					Aqsis::log() << error << "Bad params" << std::endl;
 					break;
-					case PkDspyErrorNoResource:
+				case PkDspyErrorNoResource:
 					Aqsis::log() << error << "No resource" << std::endl;
 					break;
-					case PkDspyErrorUndefined:
-					default:
+				case PkDspyErrorUndefined:
+				default:
 					Aqsis::log() << error << "Undefined" << std::endl;
 					break;
 			}
@@ -450,19 +464,19 @@ void CqDisplayRequest::LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimpl
 
 		// Now scan the returned format list to make sure that we pass the data in the order the display wants it.
 		std::vector<PtDspyDevFormat>::iterator i;
-		for(i=m_formats.begin(); i!=m_formats.end(); i++)
+		for (i=m_formats.begin(); i!=m_formats.end(); i++)
 		{
-			if(m_modeID & ( ModeRGB | ModeA | ModeZ) )
+			if (m_modeID & ( ModeRGB | ModeA | ModeZ) )
 			{
-				if( i->name == ddMemberData.m_RedName )
+				if ( i->name == ddMemberData.m_RedName )
 					m_dataOffsets.push_back(Sample_Red);
-				else if( i->name == ddMemberData.m_GreenName )
+				else if ( i->name == ddMemberData.m_GreenName )
 					m_dataOffsets.push_back(Sample_Green);
-				else if( i->name == ddMemberData.m_BlueName )
+				else if ( i->name == ddMemberData.m_BlueName )
 					m_dataOffsets.push_back(Sample_Blue);
-				else if( i->name == ddMemberData.m_AlphaName )
+				else if ( i->name == ddMemberData.m_AlphaName )
 					m_dataOffsets.push_back(Sample_Alpha);
-				else if( i->name == ddMemberData.m_ZName )
+				else if ( i->name == ddMemberData.m_ZName )
 					m_dataOffsets.push_back(Sample_Depth);
 			}
 			else
@@ -470,16 +484,16 @@ void CqDisplayRequest::LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimpl
 				// Scan through the generated names to find the ones specified, and use the index
 				// of the found name as an offset into the data from the dataOffset passed in originally.
 				TqUint iname;
-				for(iname = 0; iname < m_AOVnames.size(); iname++)
+				for (iname = 0; iname < m_AOVnames.size(); iname++)
 				{
-					if(i->name == m_AOVnames[iname])
+					if (i->name == m_AOVnames[iname])
 					{
 						m_dataOffsets.push_back(m_AOVOffset + iname );
 						break;
 					}
 				}
 				// If we got here, and didn't find it, add 0 as the offset, and issue an error.
-				if( iname == m_AOVnames.size() )
+				if ( iname == m_AOVnames.size() )
 				{
 					Aqsis::log() << error << "Couldn't find format entry returned from display : " << i->name << std::endl;
 					m_dataOffsets.push_back(m_AOVOffset);
@@ -490,31 +504,31 @@ void CqDisplayRequest::LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimpl
 		// Determine how big each pixel is by summing the format type sizes.
 		m_elementSize = 0;
 		std::vector<PtDspyDevFormat>::iterator iformat;
-		for(iformat = m_formats.begin(); iformat != m_formats.end(); iformat++)
+		for (iformat = m_formats.begin(); iformat != m_formats.end(); iformat++)
 		{
 			TqInt type = iformat->type & PkDspyMaskType;
-			switch( type )
+			switch ( type )
 			{
-					case PkDspyFloat32:
+				case PkDspyFloat32:
 					m_elementSize+=sizeof(float);
 					break;
-					case PkDspyUnsigned32:
-					case PkDspySigned32:
+				case PkDspyUnsigned32:
+				case PkDspySigned32:
 					m_elementSize+=sizeof(long);
 					break;
-					case PkDspyUnsigned16:
-					case PkDspySigned16:
+				case PkDspyUnsigned16:
+				case PkDspySigned16:
 					m_elementSize+=sizeof(short);
 					break;
-					case PkDspyUnsigned8:
-					case PkDspySigned8:
+				case PkDspyUnsigned8:
+				case PkDspySigned8:
 					m_elementSize+=sizeof(char);
 					break;
 			}
 		}
 
 		//Aqsis::log() << warning << "Elementsize will be " << m_elementSize << std::endl;
-		if( NULL != m_QueryMethod )
+		if ( NULL != m_QueryMethod )
 		{
 			PtDspySizeInfo size;
 			err = (*m_QueryMethod)(m_imageHandle, PkSizeQuery, sizeof(size), &size);
@@ -530,9 +544,9 @@ void CqDisplayRequest::CloseDisplayLibrary()
 {
 	// Call the DspyImageClose method on the display to shut things down.
 	// If there is a delayed close method, call it in preference.
-	if( m_DelayCloseMethod)
+	if ( m_DelayCloseMethod)
 		(*m_DelayCloseMethod)(m_imageHandle);
-	else if( NULL != m_CloseMethod )
+	else if ( NULL != m_CloseMethod )
 		(*m_CloseMethod)(m_imageHandle);
 
 	if (m_DataBucket != 0)
@@ -561,12 +575,12 @@ void CqDisplayRequest::CloseDisplayLibrary()
 	/// The cleanup of the drivers is left to when the CqDDManager instance closes down, and the
 	/// CqSimplePlugin class gets destroyed, which will be at the end of the render, which is fine.
 }
-	
+
 void CqDDManager::InitialiseDisplayNameMap()
 {
 	CqString strConfigFile("displays.ini");
 	const CqString* displays = QGetRenderContext()->poptCurrent()->GetStringOption( "searchpath", "display" );
-	if( displays )
+	if ( displays )
 		strConfigFile = displays[ 0 ] + "/" + strConfigFile;
 
 	Aqsis::log() << info << "Loading display configuration from file \"" << strConfigFile << "\"" << std::endl;
@@ -603,12 +617,12 @@ void CqDDManager::InitialiseDisplayNameMap()
 
 /**
   Return the substring with the given index.
- 
+
   The string \a s is conceptually broken into substrings that are separated by blanks
   or tabs. A continuous sequence of blanks/tabs counts as one individual separator.
   The substring with number \a idx is returned (0-based). If \a idx is higher than the
   number of substrings then an empty string is returned.
- 
+
   \param s Input string.
   \param idx Index (0-based)
   \return Sub string with given index
@@ -631,7 +645,7 @@ std::string CqDDManager::GetStringField( const std::string& s, int idx )
 
 		switch ( z )
 		{
-				case 0:
+			case 0:
 				if ( c != ' ' && c != '\t' )
 				{
 					idx--;
@@ -641,14 +655,14 @@ std::string CqDDManager::GetStringField( const std::string& s, int idx )
 				if ( idx > 0 )
 					start++;
 				break;
-				case 1:
+			case 1:
 				if ( c == ' ' || c == '\t' )
 				{
 					z = 0;
 				}
 				start++;
 				break;
-				case 2:
+			case 2:
 				if ( c == ' ' || c == '\t' )
 				{
 					z = 3;
@@ -678,11 +692,11 @@ void CqDisplayRequest::ConstructMatrixParameter(const char* name, const CqMatrix
 	TqInt totallen = 16 * count * sizeof(RtFloat);
 	RtFloat* pfloats = reinterpret_cast<RtFloat*>(malloc(totallen));
 	TqInt i;
-	for( i=0; i<count; i++)
+	for ( i=0; i<count; i++)
 	{
 		const TqFloat* floats = mats[i].pElements();
 		TqInt m;
-		for(m=0; m<16; m++)
+		for (m=0; m<16; m++)
 			pfloats[(i*16)+m]=floats[m];
 	}
 	parameter.value = reinterpret_cast<RtPointer>(pfloats);
@@ -735,11 +749,11 @@ void CqDisplayRequest::ConstructStringsParameter(const char* name, const char** 
 	// makes it easy to deallocate later.
 	TqInt totallen = count * sizeof(char*);
 	TqInt i;
-	for( i = 0; i < count; i++ )
+	for ( i = 0; i < count; i++ )
 		totallen += (strlen(strings[i])+1) * sizeof(char);
 	char** pstringptrs = reinterpret_cast<char**>(malloc(totallen));
 	char* pstrings = reinterpret_cast<char*>(&pstringptrs[count]);
-	for( i = 0; i < count; i++ )
+	for ( i = 0; i < count; i++ )
 	{
 		// Copy each string to the end of the block.
 		strcpy(pstrings, strings[i]);
@@ -759,7 +773,7 @@ void CqDisplayRequest::PrepareCustomParameters( std::map<std::string, void*>& ma
 	for ( param = mapParams.begin(); param != mapParams.end(); param++ )
 	{
 		// First check if it is one of the recognised parameters that the renderer should handle.
-		if(param->first.compare("quantize")==0)
+		if (param->first.compare("quantize")==0)
 		{
 			// Extract the quantization information and store it with the display request.
 			const RtFloat* floats = static_cast<float*>( param->second );
@@ -769,7 +783,7 @@ void CqDisplayRequest::PrepareCustomParameters( std::map<std::string, void*>& ma
 			m_QuantizeMaxVal = floats[3];
 			m_QuantizeSpecified = true;
 		}
-		else if(param->first.compare("dither")==0)
+		else if (param->first.compare("dither")==0)
 		{
 			// Extract the quantization information and store it with the display request.
 			const RtFloat* floats = static_cast<float*>( param->second );
@@ -784,14 +798,14 @@ void CqDisplayRequest::PrepareCustomParameters( std::map<std::string, void*>& ma
 			{
 				Decl = QGetRenderContext() ->FindParameterDecl( param->first.c_str() );
 			}
-			catch( XqException e )
+			catch ( XqException e )
 			{
 				Aqsis::log() << error << e.what() << std::endl;
 				return;
 			}
 
 			// Check the parameter type is uniform, not valid for non-surface requests otherwise.
-			if( Decl.m_Class != class_uniform )
+			if ( Decl.m_Class != class_uniform )
 			{
 				assert( false );
 				continue;
@@ -811,26 +825,26 @@ void CqDisplayRequest::PrepareCustomParameters( std::map<std::string, void*>& ma
 
 			switch ( Decl.m_Type )
 			{
-					case type_string:
-					{
-						const char** strings = static_cast<const char**>( param->second );
-						ConstructStringsParameter(Decl.m_strName.c_str(), strings, Decl.m_Count, parameter);
-					}
-					break;
+				case type_string:
+				{
+					const char** strings = static_cast<const char**>( param->second );
+					ConstructStringsParameter(Decl.m_strName.c_str(), strings, Decl.m_Count, parameter);
+				}
+				break;
 
-					case type_float:
-					{
-						const RtFloat* floats = static_cast<RtFloat*>( param->second );
-						ConstructFloatsParameter(Decl.m_strName.c_str(), floats, Decl.m_Count, parameter);
-					}
-					break;
+				case type_float:
+				{
+					const RtFloat* floats = static_cast<RtFloat*>( param->second );
+					ConstructFloatsParameter(Decl.m_strName.c_str(), floats, Decl.m_Count, parameter);
+				}
+				break;
 
-					case type_integer:
-					{
-						const RtInt* ints = static_cast<RtInt*>( param->second );
-						ConstructIntsParameter(Decl.m_strName.c_str(), ints, Decl.m_Count, parameter);
-					}
-					break;
+				case type_integer:
+				{
+					const RtInt* ints = static_cast<RtInt*>( param->second );
+					ConstructIntsParameter(Decl.m_strName.c_str(), ints, Decl.m_Count, parameter);
+				}
+				break;
 				default:
 					break;
 			}
@@ -914,15 +928,15 @@ void CqDisplayRequest::DisplayBucket( IqBucket* pBucket )
 	// If the display is not validated, don't send it data.
 	// Or if a DspyImageData function was not found for
 	// this display request, then we cannot continue
-	if( !m_valid || !m_DataMethod )
+	if ( !m_valid || !m_DataMethod )
 		return;
-	
+
 	TqUint	xmin = pBucket->XOrigin();
 	TqUint	ymin = pBucket->YOrigin();
 	TqUint	xmaxplus1 = xmin + pBucket->Width();
-	TqUint	ymaxplus1 = ymin + pBucket->Height();	
+	TqUint	ymaxplus1 = ymin + pBucket->Height();
 	PtDspyError err;
-	
+
 	// Dispatch to display sub-type methods
 	// Copy relevant data from the bucket and store locally,
 	// while quantizing and/or compressing
@@ -943,25 +957,17 @@ void CqDisplayRequest::DisplayBucket( IqBucket* pBucket )
 	{
 		// Send the bucket information as they come in
 		err = (m_DataMethod)(m_imageHandle, xmin, xmaxplus1, ymin, ymaxplus1, m_elementSize, m_DataBucket);
-	}	
+	}
 }
 
-void CqShallowDisplayRequest::FormatBucketForDisplay( IqBucket* pBucket )
+void CqDisplayRequest::FormatBucketForDisplay( IqBucket* pBucket )
 {
 	static CqRandom random( 61 );
 	TqUint	xmin = pBucket->XOrigin();
 	TqUint	ymin = pBucket->YOrigin();
 	TqUint	xmaxplus1 = xmin + pBucket->Width();
 	TqUint	ymaxplus1 = ymin + pBucket->Height();
-	
-	// Allocate enough space to put the whole bucket data into
-	if (m_BucketDataMap.find(ymin) == m_BucketDataMap.end())
-	{
-		// No entries on this row yet
-		//m_BucketDataMap[ymin].push_back(m_DataBucket);
-		
-	}	
-	
+
 	if (m_DataBucket == 0)
 		m_DataBucket = new unsigned char[m_elementSize * pBucket->Width() * pBucket->Height()];
 	if ((m_flags.flags & PkDspyFlagsWantsScanLineOrder) && m_DataRow == 0)
@@ -969,14 +975,13 @@ void CqShallowDisplayRequest::FormatBucketForDisplay( IqBucket* pBucket )
 		TqUint width = QGetRenderContext()->pImage()->CropWindowXMax() - QGetRenderContext()->pImage()->CropWindowXMin();
 		TqUint height = pBucket->Height();
 		m_DataRow = new unsigned char[m_elementSize * width * height];
-		//m_DataRow = reinterpret_cast<unsigned char*>(malloc(m_elementSize * width * height));
 	}
-	
+
 	SqImageSample val;
 	// Fill in the bucket data for each channel in each element, honoring the requested order and formats.
 	unsigned char* pdata = m_DataBucket;
 	TqUint y;
-	
+
 	for ( y = ymin; y < ymaxplus1; ++y )
 	{
 		TqUint x;
@@ -986,49 +991,57 @@ void CqShallowDisplayRequest::FormatBucketForDisplay( IqBucket* pBucket )
 			const TqFloat* pSamples = pBucket->Data( x, y );
 			std::vector<PtDspyDevFormat>::iterator iformat;
 			double s = random.RandomFloat();
-			for(iformat = m_formats.begin(); iformat != m_formats.end(); iformat++)
+			for (iformat = m_formats.begin(); iformat != m_formats.end(); iformat++)
 			{
-				TqFloat value = pSamples[m_dataOffsets[index]];
+				double value = pSamples[m_dataOffsets[index]];
 				// If special quantization instructions have been given for this display, do it now.
-				if( !( m_QuantizeZeroVal == 0.0f &&
+				if ( !( m_QuantizeZeroVal == 0.0f &&
 				        m_QuantizeOneVal  == 0.0f &&
 				        m_QuantizeMinVal  == 0.0f &&
 				        m_QuantizeMaxVal  == 0.0f ) )
 				{
-					value = ROUND(m_QuantizeZeroVal + value * (m_QuantizeOneVal - m_QuantizeZeroVal) + ( m_QuantizeDitherVal * s ) );
-					value = CLAMP(value, m_QuantizeMinVal, m_QuantizeMaxVal) ;
+					value = lround(m_QuantizeZeroVal + value * (m_QuantizeOneVal - m_QuantizeZeroVal) + ( m_QuantizeDitherVal * s ) );
+					value = clamp<double>(value, m_QuantizeMinVal, m_QuantizeMaxVal) ;
 				}
 				TqInt type = iformat->type & PkDspyMaskType;
 				/// \todo Eventually, the switch statement below should go away in favour of making
-				// CqShallowDisplayRequest a template which extends CqDisplayRequest for
+				// CqDisplayRequest a template which extends CqDisplayRequest for
 				// the appropriate type which it will handle.
-				switch(type)
+				switch (type)
 				{
-						case PkDspyFloat32:
+					case PkDspyFloat32:
 						reinterpret_cast<float*>(pdata)[0] = value;
 						pdata += sizeof(float);
 						break;
-						case PkDspyUnsigned32:
+					case PkDspyUnsigned32:
+						/** \note: We need to do this extra clamp as the quantisation values are stored
+						    single precision floats, as mandated by the spec.,
+						    but single precision floats cannot accurately represent the maximum
+						    unsinged long value of 4294967295. Doing this ensures that the
+						    unsigned long value is clamped before being cast, and the clamp is
+						    performed in double precision math to retain accuracy.
+						*/
+						value = clamp<double>(value, 0, 4294967295.0);
 						reinterpret_cast<unsigned long*>(pdata)[0] = static_cast<unsigned long>( value );
 						pdata += sizeof(unsigned long);
 						break;
-						case PkDspySigned32:
+					case PkDspySigned32:
 						reinterpret_cast<long*>(pdata)[0] = static_cast<long>( value );
 						pdata += sizeof(long);
 						break;
-						case PkDspyUnsigned16:
+					case PkDspyUnsigned16:
 						reinterpret_cast<unsigned short*>(pdata)[0] = static_cast<unsigned short>( value );
 						pdata += sizeof(unsigned short);
 						break;
-						case PkDspySigned16:
+					case PkDspySigned16:
 						reinterpret_cast<short*>(pdata)[0] = static_cast<short>( value );
 						pdata += sizeof(short);
 						break;
-						case PkDspyUnsigned8:
+					case PkDspyUnsigned8:
 						reinterpret_cast<unsigned char*>(pdata)[0] = static_cast<unsigned char>( value );
 						pdata += sizeof(unsigned char);
 						break;
-						case PkDspySigned8:
+					case PkDspySigned8:
 						reinterpret_cast<char*>(pdata)[0] = static_cast<char>( value );
 						pdata += sizeof(char);
 						break;
@@ -1041,28 +1054,40 @@ void CqShallowDisplayRequest::FormatBucketForDisplay( IqBucket* pBucket )
 
 void CqDeepDisplayRequest::FormatBucketForDisplay( IqBucket* pBucket )
 {
-	
+
 }
 
 //-----------------------------------------------------------------------------
 // Return true if a scanline of buckets has been accumulated, false otherwise.
 //-----------------------------------------------------------------------------
-bool CqShallowDisplayRequest::CollapseBucketsToScanlines( IqBucket* pBucket )
+bool CqDisplayRequest::CollapseBucketsToScanlines( IqBucket* pBucket )
 {
-	TqUint	ymin = pBucket->YOrigin();
-	TqUint width = QGetRenderContext()->pImage()->CropWindowXMax() - QGetRenderContext()->pImage()->CropWindowXMin();	
-	TqUint bucketDataSize = pBucket->Width() * pBucket->Height() * m_elementSize; 
-	
-	// Accumulate the bucket information to the full row of buckets
-	boost::shared_ptr<unsigned char> pdata(new unsigned char[bucketDataSize]);
-	memcpy(&(*pdata), m_DataBucket, bucketDataSize);
-	// A problem with arbitrary bucket orders is that the row vectors of buckets are not sorted, but we need to
-	// send data to the display in sorted order. How can we reconstruct the sorted order?
-	m_BucketDataMap[ymin].push_back(pdata);
 
-	if (m_BucketDataMap[ymin].size() == width)
+	//Aqsis::log() << debug << "CqDisplayRequest::CollapseBuckets...()" << std::endl;
+
+	unsigned char* pdata = m_DataBucket;
+	TqUint	xmin = pBucket->XOrigin();
+	TqUint	ymin = pBucket->YOrigin();
+	TqUint	xmaxplus1 = xmin + pBucket->Width();
+	TqUint	ymaxplus1 = ymin + pBucket->Height();
+	TqUint width = QGetRenderContext()->pImage()->CropWindowXMax() - QGetRenderContext()->pImage()->CropWindowXMin();
+	TqUint x, y;
+
+	//Aqsis::log() << debug << "xmin: " << xmin << " ymin: " << ymin << " xmaxplus1: " << xmaxplus1 << " ymaxplus1: " << ymaxplus1 << " width: " << width <<//std::endl;
+
+	for (y = ymin; y < ymaxplus1; y++)
+	{
+		for (x = xmin; x < xmaxplus1; x++)
+		{
+			memcpy(&(m_DataRow[width * m_elementSize * (y - ymin) + m_elementSize * x]), pdata, m_elementSize);
+			pdata += m_elementSize;
+		}
+	}
+
+	if (xmaxplus1 >= width)
 	{
 		// Filled a scan line
+		Aqsis::log() << debug << "filled a scanline" << std::endl;
 		return true;
 	}
 	return false;
@@ -1070,51 +1095,54 @@ bool CqShallowDisplayRequest::CollapseBucketsToScanlines( IqBucket* pBucket )
 
 bool CqDeepDisplayRequest::CollapseBucketsToScanlines( IqBucket* pBucket )
 {
-	return false;	
+	return false;
 }
 
-void CqShallowDisplayRequest::SendToDisplay(TqUint ymin, TqUint ymaxplus1)
+void CqDisplayRequest::SendToDisplay(TqUint ymin, TqUint ymaxplus1)
 {
+	//Aqsis::log() << debug << "CqDisplayRequest::SendToDisplay()" << std::endl;
 	TqUint y;
 	PtDspyError err;
 	unsigned char* pdata = m_DataRow;
 	TqUint width = QGetRenderContext()->pImage()->CropWindowXMax() - QGetRenderContext()->pImage()->CropWindowXMin();
-	
+
 	// send to the display one line at a time
 	for (y = ymin; y < ymaxplus1; y++)
 	{
 		err = (m_DataMethod)(m_imageHandle, 0, width, y, y+1, m_elementSize, pdata);
 		pdata += m_elementSize * width;
-	}	
+	}
 }
 
 void CqDeepDisplayRequest::SendToDisplay(TqUint ymin, TqUint ymaxplus1)
 {
-	
+
 }
 
 bool CqDisplayRequest::ThisDisplayNeeds( const TqUlong& htoken, const TqUlong& rgb, const TqUlong& rgba,
-		const TqUlong& Ci, const TqUlong& Oi, const TqUlong& Cs, const TqUlong& Os )
+        const TqUlong& Ci, const TqUlong& Oi, const TqUlong& Cs, const TqUlong& Os )
 {
 	bool usage = ( ( m_modeHash == rgba ) || ( m_modeHash == rgb ) );
-	
+
 	if ( (( htoken == Ci )|| ( htoken == Cs))&& usage )
 		return ( true );
 	else if ( (( htoken == Oi )|| ( htoken == Os))&& usage )
 		return ( true );
 	else if ( m_modeHash == htoken  )
-		return ( true );	
+		return ( true );
 	return false;
 }
 
 void CqDisplayRequest::ThisDisplayUses( TqInt& Uses )
 {
 	TqInt ivar;
-	for( ivar = 0; ivar < EnvVars_Last; ++ivar )
+
+	for ( ivar = 0; ivar < EnvVars_Last; ++ivar )
 	{
-		if( m_modeHash == gVariableTokens[ ivar ] )
+		if ( m_modeHash == gVariableTokens[ ivar ] )
 			Uses |= 1 << ivar;
-	}	
+	}
+
 }
 
 END_NAMESPACE( Aqsis )

@@ -19,9 +19,13 @@
 
 
 /** \file
-		\brief Declares a class for handling general polygons with loops.
-		\author Paul C. Gregory (pgregory@aqsis.org)
-*/
+ * \brief Renderman display driver interface.
+ *
+ * This file defines prototypes, typedefs, macros etc for the "standard"
+ * renderman display driver interface.
+ *
+ * \author Paul C. Gregory (pgregory@aqsis.org)
+ */
 
 #ifndef	___ndspy_Loaded___
 #define	___ndspy_Loaded___
@@ -57,7 +61,7 @@ typedef float PtDspyFloat32;
 #define PkDspyByteOrderNative	PkDspyByteOrderLoHi
 #endif
 
-#if defined(__mips64) || defined(__alpha)
+#if defined(__mips64) || defined(__alpha) || defined(__x86_64) || defined(_M_X64)
 typedef unsigned int PtDspyUnsigned32;
 typedef int PtDspySigned32;
 #else

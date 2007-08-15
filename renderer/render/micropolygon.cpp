@@ -35,7 +35,7 @@
 
 #include	"mpdump.h"
 
-#include	"MultiTimer.h"
+#include	"multitimer.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -415,7 +415,6 @@ void CqMicroPolyGrid::Shade()
 	cCulled = 0;
 	if ( USES( lUses, EnvVars_Os ) && QGetRenderContext() ->poptCurrent()->GetIntegerOption( "System", "DisplayMode" ) [ 0 ] & ModeZ )
 	{
-		//theStats.OcclusionCullTimer().Start();
 		TIME_SCOPE("Occlusion Culling")
 		{
 			for ( i = gsmin1; i >= 0; i-- )
@@ -428,7 +427,6 @@ void CqMicroPolyGrid::Shade()
 				else
 					break;
 			}
-			//theStats.OcclusionCullTimer().Stop();
 		}
 
 		if ( cCulled == gs )
@@ -491,18 +489,17 @@ void CqMicroPolyGrid::Shade()
 		const CqVector3D* pNg = NULL;
 		pVar(EnvVars_Ng) ->GetNormalPtr( pNg );
 
-		//theStats.OcclusionCullTimer().Start();
-		TIME_SCOPE("Occlusion culling")
+		TIME_SCOPE("Backface culling")
 		for ( i = gsmin1; i >= 0; i-- )
 		{
 			// Calulate the direction the MPG is facing.
 			if ( ( pNg[ i ] * pP[ i ] ) >= 0 )
 			{
 				cCulled++;
+				STATS_INC( MPG_culled );
 				m_CulledPolys.SetValue( i, true );
 			}
 		}
-		//theStats.OcclusionCullTimer().Stop();
 
 		// If the whole grid is culled don't bother going any further.
 		if ( cCulled == gs )
@@ -773,6 +770,7 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, long y
 
 	TIMER_STOP("Project points")
 
+	TIMER_START("Bust grids")
 	// Get the required trim curve sense, if specified, defaults to "inside".
 	const CqString* pattrTrimSense = pAttributes() ->GetStringAttribute( "trimcurve", "sense" );
 	CqString strTrimSense( "inside" );
@@ -786,6 +784,9 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, long y
 	ADDREF( this );
 
 	TqInt iv;
+//	bool tooSmall_ = false;
+//	TqFloat smallArea = 1.0;
+//	TqFloat bigArea = 0.0;
 	for ( iv = 0; iv < cv; iv++ )
 	{
 		TqInt iu;
@@ -891,8 +892,24 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, long y
 				STATS_SETF( MPG_min_area, area );
 			if( area > STATS_GETF( MPG_max_area ) )
 				STATS_SETF( MPG_max_area, area );
+
+		//	smallArea = std::min(smallArea, area);
+		//	bigArea = std::max(bigArea, area);
+		//	if(area < 0.005)
+		//	{
+		//		tooSmall_ = true;
+		//	}
 		}
 	}
+	TIMER_STOP("Bust grids")
+//	if(tooSmall_)
+//	{
+//		CqString objname( "unnamed" );
+//		const CqString* pattrName = pAttributes()->GetStringAttribute( "identifier", "name" );
+//		if ( pattrName != 0 )
+//			objname = pattrName[ 0 ];
+//		Aqsis::log() << error << "Primitive \"" << objname.c_str() << "\" resulted in very small MPS (" << smallArea << ", " << bigArea << ")" << cu << ", " << cv << std::endl;
+//	}
 
 	RELEASEREF( this );
 }
@@ -958,6 +975,7 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, 
 	TqInt cv = pGridA->vGridRes();
 	TqInt iTime;
 
+	TIMER_START("Project points")
 	CqMatrix matCameraToRaster = QGetRenderContext() ->matSpaceToSpace( "camera", "raster", NULL, NULL, QGetRenderContext()->Time() );
 
 	ADDREF( pGridA );
@@ -1010,7 +1028,9 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, 
 		}
 		m_TriangleSplitLine.AddTimeSlot(Time( iTime ), sl );
 	}
+	TIMER_STOP("Project points")
 
+	TIMER_START("Bust grids")
 	// Get the required trim curve sense, if specified, defaults to "inside".
 	const CqString* pattrTrimSense = pAttributes() ->GetStringAttribute( "trimcurve", "sense" );
 	CqString strTrimSense( "inside" );
@@ -1097,6 +1117,7 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, 
 			pImage->AddMPG( pNew );
 		}
 	}
+	TIMER_STOP("Bust grids")
 
 	RELEASEREF( pGridA );
 

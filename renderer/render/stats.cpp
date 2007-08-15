@@ -20,7 +20,7 @@
 		\brief Declares CqStats class for holding global renderer statistics information.
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
-#include "MultiTimer.h"
+#include "multitimer.h"
 
 #include "aqsis.h"
 #include "attributes.h"

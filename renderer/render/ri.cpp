@@ -24,7 +24,7 @@
 		\todo: <b>Code Review</b>
 */
 
-#include	"MultiTimer.h"
+#include	"multitimer.h"
 
 #include	"aqsis.h"
 
@@ -103,6 +103,7 @@ using namespace Aqsis;
 
 static RtBoolean ProcessPrimitiveVariables( CqSurface* pSurface, PARAMETERLIST );
 static void ProcessCompression( TqInt *compress, TqInt *quality, TqInt count, RtToken *tokens, RtPointer *values );
+static bool ProcessBake( TqInt * bake, TqInt count, RtToken * tokens, RtPointer * values );
 RtVoid	CreateGPrim( const boost::shared_ptr<CqSurface>& pSurface );
 void SetShaderArgument( const boost::shared_ptr<IqShader>& pShader, const char* name, TqPchar val );
 bool	ValidateState(...);
@@ -5053,6 +5054,15 @@ RtVoid	RiMakeTextureV( RtString imagefile, RtString texturefile, RtToken swrap, 
 
 
 	// Now load the original image.
+	TqInt bake = 128;
+	if (ProcessBake( &bake, count, tokens, values ) == true)
+	{
+		static char tmpenv[80];
+        	sprintf(tmpenv, "BAKE=%d", bake);
+		putenv (tmpenv);
+		Aqsis::log() << debug << tmpenv << std::endl;
+	}
+
 	CqTextureMap Source( imagefile );
 	Source.Open();
 	TqInt comp, qual;
@@ -6345,4 +6355,24 @@ static void ProcessCompression( TqInt * compression, TqInt * quality, TqInt coun
 				* quality = 100;
 		}
 	}
+}
+
+static bool ProcessBake( TqInt * bake, TqInt count, RtToken * tokens, RtPointer * values )
+{
+bool found = false;
+
+	for ( int i = 0; i < count; ++i )
+	{
+		RtToken	token = tokens[ i ];
+		RtString *value = ( RtString * ) values[ i ];
+
+		if ( strstr( token, "bake" ) != 0 )
+		{
+
+			*bake =  (int) * ( float * ) value;
+			found = true;
+			break;
+		}
+	}
+	return found;
 }

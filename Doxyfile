@@ -87,6 +87,7 @@ INPUT                  = ./aqsistypes \
                          ./aqsistypes/win32 \
                          ./argparse \
                          ./displays/display \
+                         ./displays/piqsl \
                          ./displays/d_exr \
                          ./displays/d_xpm \
                          ./renderer/aqsis \

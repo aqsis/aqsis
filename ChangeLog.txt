@@ -4635,7 +4635,7 @@
 	  aqsis/texturing/plugins/tga2tif/tga2tif.c,
 	  aqsis/thirdparty/aqiv/iv.c, aqsis/thirdparty/aqiv/sgigt.h,
 	  aqsis/version.h.in: Updated all (old) references of
-	  'pgregory@aqsis.com' to 'pgregory@aqsis.org' within the source
+	  'pgregory@aqsis.org' to 'pgregory@aqsis.org' within the source
 	  code.
 
 2006-06-14 08:42  pgregory

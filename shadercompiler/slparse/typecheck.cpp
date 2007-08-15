@@ -76,15 +76,6 @@ TqInt	CqParseNodeFunctionCall::TypeCheck( TqInt* pTypes, TqInt Count,  bool& nee
 
 	CqString strMyName = strName();
 
-	// Prepare the error string.
-	CqString strErr( strFileName() );
-	strErr += " : ";
-	strErr += CqString( LineNo() );
-	strErr += " : ";
-	strErr += strMyName;
-	strErr += " : ";
-	CqString strErrDesc = "Valid function declaration not found : ";
-
 	// First discard any function possibilities which don't have the correct number of arguments.
 	// Find out how many arguments have been specified.
 	CqParseNode* pArg = m_pChild;
@@ -94,15 +85,30 @@ TqInt	CqParseNodeFunctionCall::TypeCheck( TqInt* pTypes, TqInt Count,  bool& nee
 		pArg = pArg->pNext();
 	}
 
+	Aqsis::log() << info << "Typechecking function call \"" << strName() << "\", possible matches: " << m_aFuncRef.size() <<  "[Line: " << LineNo() << "]" << std::endl;
 
-	// Build the queue
-	Aqsis::log() << debug << "Typechecking function call \"" << strName() << "\", possible matches: " << m_aFuncRef.size() << std::endl;
+	// First build a list of valid types, ordered by preference, for each specified argument.
+	pArg = m_pChild;
+	TqUint iArg = 0;
+	std::vector<std::list<std::pair<TqInt, TqInt> > >	argTypes;
+	while(pArg != 0)
+	{
+		CqParseNode* pNext = pArg->pNext();
+		std::list<std::pair<TqInt, TqInt> > types;
+		pArg->validTypes(types);
+		argTypes.push_back(types);
+		++iArg;
+		pArg = pNext;
+	}
+
+	// Now for each candidate, check if the valid types can match, storing a weight depending on the suitability.
 	std::vector<SqFuncRef>::iterator i;
 	for ( i = m_aFuncRef.begin(); i != m_aFuncRef.end();  )
 	{
 		CqFuncDef* pfunc = CqFuncDef::GetFunctionPtr( (*i) );
 		if( pfunc != 0 )
 		{
+			Aqsis::log() << info << "Considering candidate (" << TypeName(pfunc->Type()) << ")" << pfunc->strName() << "[" << pfunc->strParams() << "]" << std::endl;
 			TqInt weight = 0;
 			bool mustCast = false;
 			TqInt cArgs = pfunc->cTypeSpecLength();
@@ -112,7 +118,6 @@ TqInt	CqParseNodeFunctionCall::TypeCheck( TqInt* pTypes, TqInt Count,  bool& nee
 			{
 				// This function isn't suitable for the arguments list, as the
 				// argument counts don't match. Don't add it to the queue.
-				Aqsis::log() << debug << pfunc->strName() << "[" << pfunc->strVMName() << "] \"" << pfunc->strParams() << "\" fail : expected " << cArgs << " arguments, got " << cSpecifiedArgs << std::endl;
 				i = m_aFuncRef.erase(i);
 				continue;
 			}
@@ -123,20 +128,9 @@ TqInt	CqParseNodeFunctionCall::TypeCheck( TqInt* pTypes, TqInt Count,  bool& nee
 				TqInt castType, index;
 				if( (castType = FindCast(pfunc->Type(), pTypes, Count, index)) == Type_Nil )
 				{
-					// This signature cannot return any of the required types.
-					std::stringstream errMsg;
-					errMsg << pfunc->strName() << "[" << pfunc->strVMName() << "] \"" << pfunc->strParams() << 
-							"\" fail : return type " << CqParseNode::TypeName(pfunc->Type()) << 
-							" cannot be cast to [";
-					TqInt tt;
-					for(tt = 0; tt < Count; tt++)
-					{
-						errMsg << CqParseNode::TypeName(pTypes[tt]);
-						if(tt < Count-1)
-							errMsg << ",";
-					}
-					errMsg << "]" << std::endl; 
-					Aqsis::log() << debug << errMsg.str();
+					// This signature cannot return any of the requested types,
+					// Can't delete it, as it is possible that TypeCheck may be later called
+					// with a different set of requested types.
 					++i;
 					continue;
 				}
@@ -156,54 +150,30 @@ TqInt	CqParseNodeFunctionCall::TypeCheck( TqInt* pTypes, TqInt Count,  bool& nee
 						}
 					}
 				}
-				// Check if the args list matches the arguments passed, the weight
-				// is adjusted according to the number of casts required.
-				pArg = m_pChild;
+				// Check the arguments in turn to see if they can be used for this candidate.
 				TqUint iArg = 0;
 				bool fArgsFailed = false;
-				while(pArg != 0)
+				for(std::vector<std::list<std::pair<TqInt, TqInt> > >::iterator arg = argTypes.begin(); arg != argTypes.end(); ++arg, ++iArg)
 				{
-					CqParseNode * pNext = pArg->pNext();
-
-					// Check if this is a varying length argument function.
-					if ( (TqUint) pfunc->cTypeSpecLength() <= iArg || ( pfunc->fVarying() && (TqUint) pfunc->cTypeSpecLength() == iArg ) )
-					{
-						// Not entirely happy about this, if the function takes a varying number
-						// of arguments, and this argument is amongst the varying list, then
-						// just accept it, no casting necessary.
+					// If the candidate signature is varying, and we've hit the '*' exit at this point.
+					if(pfunc->fVarying() && iArg >= cArgs)
 						break;
-					}
-
-					TqInt paramType = pfunc->aTypeSpec()[iArg];
-					TqInt castType;
-					bool castReturn = false;
-					if((castType = pArg->TypeCheck(&paramType, 1, castReturn, true)) == Type_Nil)
+					std::list<std::pair<TqInt, TqInt> >::const_iterator match;
+					for(match = arg->begin(); match != arg->end(); ++match)
 					{
-						// We've found and argument that can't be cast to the suitable type
-						// so this signature is no good, don't add it.
-						std::stringstream errMsg;
-						Aqsis::log() << debug << pfunc->strName() << "[" << pfunc->strVMName() << "] \"" << pfunc->strParams() << 
-								"\" fail : argument " << iArg << " type " << CqParseNode::TypeName(pArg->ResType()) << 
-								" cannot be cast to " << CqParseNode::TypeName(paramType) << std::endl;
-						fArgsFailed = true;
-						break;
-					}
-					else
-					{
-						Aqsis::log() << debug << pfunc->strName() << "[" << pfunc->strVMName() << "] \"" << pfunc->strParams() << 
-								"\" pass : argument " << iArg << " type " << CqParseNode::TypeName(pArg->ResType()) << 
-								" ok to cast to " << CqParseNode::TypeName(paramType) << std::endl;
-						// If we have an upper case type in the function declaration, then we need an actual variable.
-						if( (paramType & Type_Variable) && !pArg->IsVariableRef() )
+						/// \todo: Need to check the 'usage' of the required argument, specifically
+						/// check if Type_Variable matches.
+						if((match->first & Type_Mask) == (pfunc->aTypeSpec()[iArg] & Type_Mask))
+						{
+							weight += match->second;
 							break;
-						else
-							// Did the argument have to cast to match? If not, then increase the weight.
-							if(!castReturn)
-								weight++;
+						}
 					}
-
-					pArg = pNext;
-					iArg++;
+					if(match == arg->end())
+					{
+						Aqsis::log() << info << "Argument " << iArg << " doesn't match, got " << TypeName(arg->front().first) << " expected " << TypeName(pfunc->aTypeSpec()[iArg]) << std::endl;
+						fArgsFailed = true;
+					}
 				}
 
 				// If we got this far, the function signature matches, and we have a weight
@@ -232,13 +202,17 @@ TqInt	CqParseNodeFunctionCall::TypeCheck( TqInt* pTypes, TqInt Count,  bool& nee
 	{
 		if(!CheckOnly)
 		{
-			strErr += "Arguments to function not valid : ";
+			CqString strErr = "Arguments to function not valid : ";
+			strErr += strName();
+			strErr += " - ";
+			strErr += LineNo();
 			throw( strErr );
 		}
 		return ( Type_Nil );
 	}
 
 	const CqFunctionSignature& best = functions.top();
+	Aqsis::log() << info << "Selected (" << TypeName(best.getFunc()->Type()) << ")" << best.getFunc()->strName() << "[" << best.getFunc()->strParams() << "]" << std::endl;
 	needsCast = best.needsCast();
 
 	// If we are not just checking, at this point, we have the best function candidate,

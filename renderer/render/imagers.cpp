@@ -23,7 +23,7 @@
 		\author Michel Joron (joron@sympatico.ca)
 */
 
-#include	"MultiTimer.h"
+#include	"multitimer.h"
 
 #include	"aqsis.h"
 #include	"imagers.h"
@@ -196,5 +196,6 @@ TqFloat CqImagersource::Alpha( TqFloat x, TqFloat y )
 //---------------------------------------------------------------------
 
 END_NAMESPACE( Aqsis )
+
 
 

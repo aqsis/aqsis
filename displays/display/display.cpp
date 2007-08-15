@@ -346,7 +346,7 @@ void WriteTIFF(const std::string& filename, SqDisplayInstance* image)
 			if ( use_logluv )
 			{
 				/* use SGI LogLuv compression */
-				TIFFSetField( pOut, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_INT );
+				TIFFSetField( pOut, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT );
 				TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, 16 );
 				TIFFSetField( pOut, TIFFTAG_COMPRESSION, COMPRESSION_SGILOG );
 				TIFFSetField( pOut, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_LOGLUV );
@@ -362,7 +362,7 @@ void WriteTIFF(const std::string& filename, SqDisplayInstance* image)
 			}
 			if (image->m_format == PkDspyUnsigned16)
 			{
-				TIFFSetField( pOut, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_INT );
+				TIFFSetField( pOut, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT );
 				TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, 16 );
 			}
 

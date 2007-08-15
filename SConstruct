@@ -1,3 +1,4 @@
+import os
 import os.path
 import glob
 import sys
@@ -10,6 +11,8 @@ from build_support import AddSysPath
 from build_support import Glob
 from build_support import embedManifest
 from build_support import getSCMRevision
+from build_support import SetupBufferedOutput
+from build_support import SetupCleanPrinting
 Export('embedManifest')
 
 import version
@@ -41,6 +44,8 @@ else:
 opts.Add('tiff_include_path', 'Point to the tiff header files', '')
 opts.Add('tiff_lib_path', 'Point to the tiff library files', '')
 opts.Add('boost_include_path', 'Point to the boost header files', '')
+opts.Add('boost_lib_path', 'Point to the boost lib files', '')
+opts.Add('boost_thread_lib', 'The undecorated name of the boost thread library', '')
 opts.Add('jpeg_include_path', 'Point to the jpeg header files', '')
 opts.Add('jpeg_lib_path', 'Point to the jpeg library files', '')
 opts.Add('zlib_include_path', 'Point to the zlib header files', '')
@@ -51,10 +56,13 @@ opts.Add('exr_include_path', 'Point to the OpenEXR header files', '')
 opts.Add('exr_lib_path', 'Point to the OpenEXR library files', '')
 opts.Add(BoolOption('no_fltk', 'Build without FLTK support', '0'))
 opts.Add(BoolOption('no_exr', 'Build without OpenEXR support', '0'))
+opts.Add(BoolOption('no_threads', 'Build without thread support', '0'))
+opts.Add(BoolOption('no_piqsl', 'Build without the piqsl display driver', '0'))
 opts.Add(BoolOption('with_pdiff', 'Build and install the third-party pdiff utility', '0'))
 opts.Add('cachedir', 'Examine a build cache dir for previously compiled files', '')
 opts.Add(BoolOption('debug', 'Build with debug options enabled', '0'))
 opts.Add(BoolOption('enable_mpdump', 'Build with micropolygon dumping mode enabled', '1'))
+opts.Add(BoolOption('enable_timing', 'Build with performance timing enabled', '1'))
 
 # This will hopefully import the target specific options
 import Options
@@ -109,10 +117,39 @@ zipBuilder = Builder(action=zipperFunction,
    multi=0)
 env.Append(BUILDERS = {'Zipper':zipBuilder})
 
+# Add Fluid builder
+# emitter to add the generated .h file to the dependencies
+def fluidEmitter(target, source, env):
+  adjustixes = SCons.Util.adjustixes
+  file = SCons.Util.splitext(str(source[0].name))[0]
+  file = os.path.join(str(target[0].get_dir()), file)
+  target.append(adjustixes(file, "fluid_", ".h"))
+  return target, source
+
+fluidBuilder = Builder(action = "cd ${SOURCE.dir} && " +
+                                "fluid -o fluid_${SOURCE.filebase}.cpp " +
+                                "-h fluid_${SOURCE.filebase}.h -c ${SOURCE.name} ",
+                        emitter = fluidEmitter,
+                        src_suffix = '.fl',
+                        suffix = '.cpp',
+                        prefix = 'fluid_')
+
+# register builder
+env.Append( BUILDERS = { 'Fluid': fluidBuilder } )
+
+# add builder to the builders for shared and static objects, 
+# so we can use all sources in one list
+shared, static = SCons.Tool.createObjBuilders(env)
+shared.src_builder.append('Fluid')
+static.src_builder.append('Fluid')
+
 # Create the configure object here, as you can't do it once a call
 # to SConscript has been processed.
 conf = Configure(env)
 Export('env opts conf')
+
+#SetupBufferedOutput(env)
+#SetupCleanPrinting(env)
 
 # Setup the distribution stuff, this should be non-platform specific, the distribution
 # archive should apply to all supported platforms.
@@ -210,6 +247,11 @@ env.AppendUnique(CPPDEFINES=[('DEFAULT_PLUGIN_PATH', '\\"' + env.Dir('${PLUGINDI
 #
 env.AppendUnique(CPPDEFINES=[('ENABLE_MPDUMP', env.subst('${enable_mpdump}'))])
 
+#
+# Enable timing code if requested
+#
+env.AppendUnique(CPPDEFINES=[('USE_TIMERS', env.subst('${enable_timing}'))])
+
 # Add paths to librarys generated in the build dir.
 def prependBuildDir(subDirs):
 	'''Prepend the build directory to each directory in a list, or to a string
@@ -244,15 +286,17 @@ env.AppendUnique(LIBPATH = prependBuildDir( Split('''
 	texturing/plugins/ppm2tif
 	texturing/plugins/tga2tif
 	texturing/plugins/png2tif
+	thirdparty/tinyxml
 ''' ) ) )
 
 # Setup the include path to the tiff headers (should have been determined in the system specific sections above).
-env.AppendUnique(LIBPATH = ['$tiff_lib_path', '$jpeg_lib_path', '$zlib_lib_path', '$fltk_lib_path', '$exr_lib_path'])
+env.AppendUnique(LIBPATH = ['$tiff_lib_path', '$jpeg_lib_path', '$zlib_lib_path', '$fltk_lib_path', '$exr_lib_path', '$boost_lib_path'])
 
 # Create the output for the command line options defined above and in the platform specific configuration.
 Help(opts.GenerateHelpText(env))
 
 # Check for the existence of the various dependencies
+conf.env = env
 SConscript('build_check.py')
 
 # Transfer any findings from the build_check back to the environment
@@ -274,10 +318,12 @@ platform_utils.addDynamicLinkerPath(env, prependBuildDir('aqsistypes') )
 # Here we use boost.test as the unit testing framework.
 testEnv = env.Copy()
 autotestmain_objs = SConscript(dirs=prependBuildDir(['build_tools']))
-testEnv.Tool('unittest',
-		toolpath=['build_tools'],
-		UTEST_MAIN_SRC=autotestmain_objs
-	)
+testEnv.Tool('unittest', toolpath=['build_tools'],)
+# NOTE: Unit tests disabled for the time being due to too many portability
+# problems.  Comment out this line or set the variable to False to enable them.
+testEnv.Replace(UTEST_DISABLE=True)
+testEnv.Replace(UTEST_MAIN_SRC=autotestmain_objs)
+testEnv.Replace(UTEST_RESULTS_DIR='#unit_test_results/')
 testEnv.AppendUnique( LIBS=['boost_unit_test_framework'] )
 testEnv.PrependENVPath('BOOST_TEST_LOG_LEVEL', 'message')
 # Don't want test executables to link against the installed libs.
@@ -321,12 +367,14 @@ sub_sconsdirs_noret = prependBuildDir(Split('''
 	shaders
 	thirdparty/pdiff
 	thirdparty/dbo_plane
+	thirdparty/tinyxml
 	tools
 	content/ribs/scenes/vase
 	content/ribs/features/layeredshaders
 	content/shaders/light
 	content/shaders/displacement
 '''))
+
 env.SConscript( dirs = sub_sconsdirs_noret )
 
 # The following subdirectories have SConscript return values.
@@ -337,6 +385,7 @@ sub_sconsdirs_withret = prependBuildDir(Split('''
 		displays/d_sdcBMP
 		displays/d_sdcWin32
 		displays/d_xpm
+		displays/piqsl
 '''))
 (	aqsis,
 	display,
@@ -344,6 +393,7 @@ sub_sconsdirs_withret = prependBuildDir(Split('''
 	bmp,
 	win32,
 	xpm,
+	piqsldisplay,
 ) = env.SConscript( dirs = prependBuildDir(sub_sconsdirs_withret) )
 
 # needed (?) by macosx distribution (there should be a better way to achieve
@@ -365,6 +415,7 @@ def aqsis_rc_build(target, source, env):
 		win32lib = os.path.basename(win32[0].path)
 	defines = {
 		"displaylib": displaylib,
+		"piqsldisplaylib": "",
 		"xpmlib": xpmlib,
 		"bmplib": bmplib,
 		"win32lib": win32lib,
@@ -375,6 +426,9 @@ def aqsis_rc_build(target, source, env):
 	if not env['no_exr']:
 		exrlib = os.path.basename(exr[0].path)
 		defines["exrlib"] = exrlib
+
+	if not env['no_piqsl']:
+		defines["piqsldisplaylib"] = os.path.basename(piqsldisplay[0].path)
 
 	print_config("Building aqsisrc with the following settings:", defines.items())
 

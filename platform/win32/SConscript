@@ -143,6 +143,9 @@ if not env['mingw']:
 	env.AppendUnique(CPPDEFINES=['NO_SYSLOG', 'WIN32', 'PLUGINS', 'USE_WIN32_FILEIO'])
 	
 	env.Replace(display_libs = ['ws2_32', 'user32', 'gdi32', 'ole32', 'shell32', 'comctl32', '$fltk_lib'])
+	env.Replace(aqsistypes_libs = ['ws2_32'])
+	env.Replace(piqslapp_libs = ['ws2_32', 'user32', 'gdi32', 'ole32', 'shell32', 'comctl32', 
+		'advapi32', '$fltk_lib'])
 	
 	# This is needed for the Express Editions
 	env.AppendUnique(LIBPATH = ['$psdk_lib_path'])
@@ -206,9 +209,12 @@ else:
 
 	env.Replace(fltk_lib = 'fltk')
 
+	env.Replace(aqsistypes_libs = ['ws2_32'])
 	env.Replace(exr2tif_libs = ['$tiff_lib', 'IlmImf', 'Half', 'Iex', 'Imath', 'IlmThread', '$z_lib'])
 	env.Replace(exr_libs = ['IlmImf', 'Half', 'Iex', 'Imath', 'IlmThread', '$z_lib'])
 	env.Replace(display_libs = ['ws2_32', 'user32', 'gdi32', 'ole32', 'shell32', 'comctl32', 'uuid', '$fltk_lib'])
+	env.Replace(piqsldisplay_libs = ['ws2_32', 'user32', 'gdi32', 'ole32', 'shell32', 'comctl32', 'uuid'])
+	env.Replace(piqslapp_libs = ['ws2_32', 'user32', 'gdi32', 'ole32', 'shell32', 'comctl32', 'uuid', '$fltk_lib'])
 
 	env.Replace(slparse_ccflags = ['-O0'])
 	env.AppendUnique(CPPDEFINES=['NO_SYSLOG', 'WIN32', 'PLUGINS'])

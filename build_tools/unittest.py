@@ -41,18 +41,29 @@ def addUnitTest(env, target=None, source=None, *args, **kwargs):
 	Any additional files listed in the env['UTEST_MAIN_SRC'] build variable are
 	also included in the source list.
 
+	When each unit test passes, it creates a target file ending with .passed.
+	This is created in the same directory as the test executable, unless the
+	environment variable UTEST_RESULTS_DIR has been set, in which case the
+	results are put in the directory indicated in that environment variable.
+
 	All tests added with addUnitTest can be run with the test alias:
 		"scons test"
 	Any test can be run in isolation from other tests, using the name of the
 	test executable provided in the target parameter:
 		"scons target"
 	'''
+	if env.has_key('UTEST_DISABLE') and env['UTEST_DISABLE']:
+		return None
 	if source is None:
 		source = target
 		target = None
-	source = [source, env['UTEST_MAIN_SRC']]
+	if env.has_key('UTEST_MAIN_SRC'):
+		source = [source, env['UTEST_MAIN_SRC']]
 	program = env.Program(target, source, *args, **kwargs)
-	utest = env.UnitTest(program)
+	testTarget = str(program[0])
+	if env.has_key('UTEST_RESULTS_DIR'):
+		testTarget = env['UTEST_RESULTS_DIR'] + testTarget
+	utest = env.UnitTest(testTarget, program)
 	# add alias to run all unit tests.
 	env.Alias('test', utest)
 	# make an alias to run the test in isolation from the rest of the tests.
@@ -63,11 +74,10 @@ def addUnitTest(env, target=None, source=None, *args, **kwargs):
 #-------------------------------------------------------------------------------
 # Functions used to initialize the unit test tool.
 
-def generate(env, UTEST_MAIN_SRC=[]):
+def generate(env):
 	env['BUILDERS']['UnitTest'] = env.Builder(
 			action = env.Action(unitTestAction, unitTestActionString),
 			suffix='.passed')
-	env['UTEST_MAIN_SRC'] = UTEST_MAIN_SRC
 	# The following is a bit of a nasty hack to add a wrapper function for the
 	# UnitTest builder, see http://www.scons.org/wiki/WrapperFunctions
 	from SCons.Script.SConscript import SConsEnvironment
