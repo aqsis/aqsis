@@ -1,4 +1,4 @@
-/* Aqsis
+/* Aqsis - bucketdata.cpp
  *
  * Copyright (C) 2007 Manuel A. Fernadez Montecelo <mafm@users.sourceforge.net>
  *

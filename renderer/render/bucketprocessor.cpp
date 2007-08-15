@@ -1,4 +1,4 @@
-/* Aqsis
+/* Aqsis - bucketprocessor.cpp
  *
  * Copyright (C) 2007 Manuel A. Fernadez Montecelo <mafm@users.sourceforge.net>
  *
@@ -29,7 +29,6 @@ START_NAMESPACE( Aqsis );
 
 CqBucketProcessor::CqBucketProcessor() :
 	m_bucket(0), m_bucketCol(-1), m_bucketRow(-1)
-
 {
 }
 
