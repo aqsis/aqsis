@@ -47,17 +47,19 @@ static TqInt bucketmodulo = -1;
 static TqInt bucketdirection = -1;
 
 
-struct thread_processor
+class CqThreadProcessor
 {
-	thread_processor(CqBucketProcessor* bucketProcessor) :
+public:
+	CqThreadProcessor(CqBucketProcessor* bucketProcessor) :
 		m_bucketProcessor(bucketProcessor) { }
 	void operator()()
 	{
-//		printf("%p > start\n", m_bucketProcessor);
+		// printf("%p > start\n", m_bucketProcessor);
 		m_bucketProcessor->process();
-//		printf("%p < stop\n", m_bucketProcessor);
+		// printf("%p < stop\n", m_bucketProcessor);
 	}
 
+private:
 	CqBucketProcessor* m_bucketProcessor;
 };
 
@@ -684,7 +686,7 @@ void CqImageBuffer::RenderImage()
 	while ( pendingBuckets && !m_fQuit )
 	{
 		CqThreadScheduler threadScheduler(MULTIPROCESSING_NBUCKETS);
-		std::vector<thread_processor> threadProcessors;
+		std::vector<CqThreadProcessor> threadProcessors;
 
 		for (int i = 0; pendingBuckets && i < MULTIPROCESSING_NBUCKETS; ++i)
 		{
@@ -756,7 +758,7 @@ void CqImageBuffer::RenderImage()
 				}
 			}
 
-			threadProcessors.push_back( thread_processor( &bucketProcessors[i] ) );
+			threadProcessors.push_back( CqThreadProcessor( &bucketProcessors[i] ) );
 			threadScheduler.addWorkUnit( threadProcessors.back() );
 
 			// Advance to next bucket, quit if nothing left

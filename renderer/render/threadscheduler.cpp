@@ -1,4 +1,4 @@
-/* Aqsis
+/* Aqsis - threadscheduler.cpp
  *
  * Copyright (C) 2007 Manuel A. Fernadez Montecelo <mafm@users.sourceforge.net>
  *
@@ -29,25 +29,25 @@ START_NAMESPACE( Aqsis );
  * It adds a notifying call to the scheduler to know when the thread
  * finished.
  */
-class UnitWrapper
+class CqUnitWrapper
 {
 public:
-	UnitWrapper(CqThreadScheduler* threadScheduler, const boost::function0<void>& unit) :
+	CqUnitWrapper(CqThreadScheduler* threadScheduler, const boost::function0<void>& unit) :
 		m_threadScheduler(threadScheduler), m_unit(unit)
 	{
 	}
 
 	void operator()()
 	{
-//		fprintf(stderr, "! executing thread\n");
+		// fprintf(stderr, "! executing thread\n");
 		m_unit();
-//		fprintf(stderr, "! finishing thread\n");
+		// fprintf(stderr, "! finishing thread\n");
 		m_threadScheduler->notifyWorkUnitFinished();
 	}
 
 private:
 	CqThreadScheduler* m_threadScheduler;
-	const boost::function0<void>& m_unit;
+	const boost::function0<void> m_unit;
 };
 
 
@@ -55,7 +55,7 @@ private:
 CqThreadScheduler::CqThreadScheduler(TqInt maxThreads) :
 	m_maxThreads(maxThreads), m_activeThreads(0)
 {
-//	fprintf(stderr, "* Thread scheduler started with max threads=%d\n", m_maxThreads);
+	// fprintf(stderr, "* Thread scheduler started with max threads=%d\n", m_maxThreads);
 }
 
 
@@ -66,48 +66,46 @@ CqThreadScheduler::~CqThreadScheduler()
 
 void CqThreadScheduler::addWorkUnit(const boost::function0<void>& unit)
 {
-//	fprintf(stderr, "> Adding work unit, will block?\n");
+	// fprintf(stderr, "> Adding work unit, will block?\n");
 
-/*
 	boost::mutex::scoped_lock lock(m_mutexCondition);
 	if (m_activeThreads >= m_maxThreads)
 	{
-		fprintf(stderr, " - blocked: max threads=%d, active threads=%d'\n", m_maxThreads, m_activeThreads);
+		// fprintf(stderr, " - blocked: max threads=%d, active threads=%d'\n", m_maxThreads, m_activeThreads);
 		m_threadsAvailable.wait(lock);
+		// fprintf(stderr, " - passed wait condition 'threads available'\n");
 	}
-	fprintf(stderr, " - passed wait condition 'threads available'\n");
-*/
 
 	{ 
-//		fprintf(stderr, " - lock in ++activeThreads\n");
-
-		boost::mutex::scoped_lock lock2(m_mutexActiveThreads);
+		// fprintf(stderr, " - lock in ++activeThreads\n");
+		boost::mutex::scoped_lock lock(m_mutexActiveThreads);
 		++m_activeThreads;
-//		fprintf(stderr, " - thread started, current active threads: %d\n", m_activeThreads);
+		// fprintf(stderr, " - thread started, current active threads: %d\n", m_activeThreads);
 	}
 
-	m_threadGroup.create_thread(UnitWrapper(this, unit));
+	m_threadGroup.create_thread( CqUnitWrapper(this, unit) );
 }
 
 
 void CqThreadScheduler::notifyWorkUnitFinished()
 {
-// 	fprintf(stderr, "< Thread finished\n");
-	m_threadsAvailable.notify_one();
 	{
-//		fprintf(stderr, " - lock in --activeThreads\n");
-
+		// fprintf(stderr, " - lock in --activeThreads\n");
 		boost::mutex::scoped_lock lock(m_mutexActiveThreads);
 		--m_activeThreads;
-//		fprintf(stderr, " - current active threads: %d\n", m_activeThreads);
+		// fprintf(stderr, " - current active threads: %d\n", m_activeThreads);
 	}
+
+	// fprintf(stderr, "< Thread finished\n");
+	m_threadsAvailable.notify_one();
 }
 
 
 void CqThreadScheduler::joinAll()
 {
-//	fprintf(stderr, "* Join all\n");
+	// fprintf(stderr, "* Join all\n");
 	m_threadGroup.join_all();
 }
+
 
 END_NAMESPACE( Aqsis );
