@@ -39,6 +39,7 @@
 #include	"surface.h"
 #include	"imagebuffer.h"
 #include	"bucketprocessor.h"
+#include	"threadscheduler.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -682,7 +683,7 @@ void CqImageBuffer::RenderImage()
 	bool pendingBuckets = true;
 	while ( pendingBuckets && !m_fQuit )
 	{
-		boost::thread_group threads;
+		CqThreadScheduler threadScheduler(MULTIPROCESSING_NBUCKETS);
 		std::vector<thread_processor> threadProcessors;
 
 		for (int i = 0; pendingBuckets && i < MULTIPROCESSING_NBUCKETS; ++i)
@@ -756,14 +757,14 @@ void CqImageBuffer::RenderImage()
 			}
 
 			threadProcessors.push_back( thread_processor( &bucketProcessors[i] ) );
-			threads.create_thread( threadProcessors.back() );
+			threadScheduler.addWorkUnit( threadProcessors.back() );
 
 			// Advance to next bucket, quit if nothing left
 			iBucket += 1;
 			pendingBuckets = NextBucket(order);
 		}
 
-		threads.join_all();
+		threadScheduler.joinAll();
 		threadProcessors.clear();
 
 		for (int i = 0; !m_fQuit && i < MULTIPROCESSING_NBUCKETS; ++i)
