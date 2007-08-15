@@ -34,6 +34,7 @@
 #include <boost/intrusive_ptr.hpp>
 #include <boost/format.hpp>
 #include <tiffio.h>
+#include <tiffio.hxx>
 
 #include "aqsis.h"
 #include "exception.h"
@@ -110,6 +111,11 @@ class CqTiffDirHandle : public boost::noncopyable
 		 * \return current directory index.
 		 */
 		tdir_t dirIndex() const;
+		/** \brief Determine if this is the last directory in the tiff file.
+		 *
+		 * \return true if this is the last directory in the tiff.
+		 */
+		bool isLastDirectory() const;
 		/** \brief Get the value of a tiff tag for the directory
 		 *
 		 * Note that unfortunately this isn't type-safe: you *must* specify the
@@ -173,10 +179,19 @@ class CqTiffFileHandle : public boost::noncopyable
 	public:
 		/** \brief Construct a tiff file handle
 		 *
+		 * \throw XqEnvironment if libtiff cannot open the file.
+		 *
 		 * \param fileName - name of the tiff to open
 		 * \param openMode - libtiff file open mode ("r" or "w" for read or write)
 		 */
 		CqTiffFileHandle(const std::string& fileName, const char* openMode);
+		/** \brief Construct a tiff file handle from a std::istream
+		 *
+		 * \throw XqTiffError if libtiff has a problem with the stream
+		 *
+		 * \param inputStream - an input stream
+		 */
+		CqTiffFileHandle(std::istream& inputStream);
 
 	private:
 		friend class CqTiffDirHandle;
@@ -186,7 +201,7 @@ class CqTiffFileHandle : public boost::noncopyable
 
 		std::string m_fileName;             ///< name of the tiff file
 		boost::shared_ptr<TIFF> m_tiffPtr;  ///< underlying TIFF structure
-		tdir_t m_currDirec;                 ///< current directory index
+		tdir_t m_currDir;                   ///< current directory index
 		/// \todo: multithreading - add a mutex!
 };
 
@@ -228,10 +243,26 @@ class CqTiffInputFile
 		 * \param directory - tiff directory to attach to
 		 */
 		CqTiffInputFile(const std::string& fileName, const TqUint directory = 0);
+		/** \brief Construct a tiff input file from an input stream.
+		 *
+		 * \throw XqTiffError if libtiff has a problem with the stream
+		 *
+		 * \param inputStream - an input stream
+		 * \param directory - tiff directory to attach to
+		 */
+		CqTiffInputFile(std::istream& inputStream, const TqUint directory = 0);
 		/** \brief Virtual destructor
 		 */
 		virtual ~CqTiffInputFile();
 
+		/** \brief Get the image width.
+		 * \return image width
+		 */
+		inline TqUint width() const;
+		/** \brief Get the image height.
+		 * \return image height
+		 */
+		inline TqUint height() const;
 		/** \brief Get the width of tiles held in this tiff
 		 * \return tile width
 		 */
@@ -252,26 +283,17 @@ class CqTiffInputFile
 		template<typename T>
 		boost::intrusive_ptr<CqTextureTile<T> > readTile(const TqUint x, const TqUint y);
 
-		/** \brief Check that this tiff file represents a mipmap.
-		 *
-		 * A mipmap consists of successive downscalings of the original file by
-		 * a factor of two.  The smallest mipmap level consists of a single
-		 * pixel (this is the convention taken in the OpenExr spec.)
+		/** \brief Check that this tiff file has directories with a given size.
 		 *
 		 * This function checks only that the tiff has the correct number of
-		 * directories (each mipmap level corresponds to a tiff directory), and
-		 * that the directories have the correct sizes.
+		 * directories, and that the directories have the correct sizes.
 		 *
-		 * \return true if the file represents a mipmap.
+		 * \return true if the file has directories of the given size.
 		 */
-		bool isMipMap();
+		bool checkDirSizes(const std::vector<TqUint>& widths,
+				const std::vector<TqUint>& heights);
 
 		/** \brief Create a copy, of this Tiff file, but with a different directory.
-		 *
-		 * \todo: Some performance testing - is it better to clone, or keep the
-		 * same underlying file handle etc, and simply use TIFFSetDirectory a
-		 * lot of times.  Also, have a think about the number of file handles
-		 * it would require if each mipmap level gets its own...
 		 *
 		 * \return a copy of this tiff file, set to the given directory.
 		 */
@@ -394,7 +416,7 @@ bool CqTiffDirHandle::checkTagValue(const uint32 tag, const T desiredValue,
 template<typename T>
 boost::shared_array<T> tiffMalloc(const tsize_t size)
 {
-	boost::shared_array<T> buf(reinterpret_cast<T>(_TIFFmalloc(size)), _TIFFfree);
+	boost::shared_array<T> buf(reinterpret_cast<T*>(_TIFFmalloc(size)), _TIFFfree);
 	if(!buf)
 		throw XqEnvironment("Could not allocate memory with _TIFFmalloc",
 				__FILE__, __LINE__);
@@ -406,6 +428,16 @@ boost::shared_array<T> tiffMalloc(const tsize_t size)
 // CqTiffInputFile
 //------------------------------------------------------------------------------
 // inlines
+inline TqUint CqTiffInputFile::width() const
+{
+	return m_currDir.imageWidth;
+}
+
+inline TqUint CqTiffInputFile::height() const
+{
+	return m_currDir.imageHeight;
+}
+
 inline TqUint CqTiffInputFile::tileWidth() const
 {
 	return m_currDir.tileWidth;
@@ -451,7 +483,7 @@ boost::intrusive_ptr<CqTextureTile<T> > CqTiffInputFile::readTile(const TqUint x
 		// Tiff is stored as tiles
 		tsize_t dataSize = TIFFTileSize(dirHandle.tiffPtr());
 		tileData = tiffMalloc<T>(dataSize);
-		if(TIFFReadTile(dirHandle.tiffPtr(), tileData, x*m_currDir.tileWidth,
+		if(TIFFReadTile(dirHandle.tiffPtr(), tileData.get(), x*m_currDir.tileWidth,
 					y*m_currDir.tileHeight, 0, 0) == -1)
 			handleTiffReadError(tileData, dataSize/sizeof(T));
 	}
@@ -461,13 +493,13 @@ boost::intrusive_ptr<CqTextureTile<T> > CqTiffInputFile::readTile(const TqUint x
 		tsize_t dataSize = TIFFStripSize(dirHandle.tiffPtr());
 		tileData = tiffMalloc<T>(dataSize);
 		if(TIFFReadEncodedStrip(dirHandle.tiffPtr(), TIFFComputeStrip(dirHandle.tiffPtr(),
-					y*m_currDir.tileHeight, 0), tileData, -1) == -1)
+					y*m_currDir.tileHeight, 0), tileData.get(), -1) == -1)
 			handleTiffReadError(tileData, dataSize/sizeof(T));
 	}
 
 	return boost::intrusive_ptr<CqTextureTile<T> > ( new CqTextureTile<T>(
-				reinterpret_cast<T*>(tileData), tileWidth, tileHeight,
-				x*tileWidth, y*tileHeight, m_currDir.samplesPerPixel) );
+				tileData, tileWidth, tileHeight, x*tileWidth, y*tileHeight,
+				m_currDir.samplesPerPixel) );
 }
 
 

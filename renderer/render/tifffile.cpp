@@ -83,9 +83,13 @@ CqTiffDirHandle::CqTiffDirHandle(boost::shared_ptr<CqTiffFileHandle> fileHandle,
 
 tdir_t CqTiffDirHandle::dirIndex() const
 {
-	return m_fileHandle->m_currDirec;
+	return m_fileHandle->m_currDir;
 }
 
+bool CqTiffDirHandle::isLastDirectory() const
+{
+	return static_cast<bool>(TIFFLastDirectory(tiffPtr()));
+}
 
 //------------------------------------------------------------------------------
 // CqTiffFileHandle
@@ -98,7 +102,7 @@ void safeTiffClose(TIFF* tif)
 
 CqTiffFileHandle::CqTiffFileHandle(const std::string& fileName, const char* openMode)
 	: m_tiffPtr(TIFFOpen(fileName.c_str(), openMode), safeTiffClose),
-	m_currDirec(0)
+	m_currDir(0)
 {
 	if(!m_tiffPtr)
 	{
@@ -108,13 +112,24 @@ CqTiffFileHandle::CqTiffFileHandle(const std::string& fileName, const char* open
 }
 
 
+CqTiffFileHandle::CqTiffFileHandle(std::istream& inputStream)
+	: m_tiffPtr(TIFFStreamOpen("stream", &inputStream), safeTiffClose),
+	m_currDir(0)
+{
+	if(!m_tiffPtr)
+	{
+		throw XqTiffError("Could not use input stream for tiff", __FILE__, __LINE__);
+	}
+}
+
+
 void CqTiffFileHandle::setDirectory(tdir_t dirIdx)
 {
-	if(dirIdx != m_currDirec)
+	if(dirIdx != m_currDir)
 	{
 		if(!TIFFSetDirectory(m_tiffPtr.get(), dirIdx))
 			throw XqTiffError("Invalid Tiff directory", __FILE__, __LINE__);
-		m_currDirec = dirIdx;
+		m_currDir = dirIdx;
 	}
 }
 
@@ -131,6 +146,15 @@ CqTiffInputFile::CqTiffInputFile(const std::string& fileName, TqUint directory)
 	setDirectory(directory);
 }
 
+//------------------------------------------------------------------------------
+// constructor from stream
+CqTiffInputFile::CqTiffInputFile(std::istream& inputStream, const TqUint directory)
+	: m_fileName(),
+	m_fileHandlePtr(new CqTiffFileHandle(inputStream)),
+	m_currDir()
+{
+	setDirectory(directory);
+}
 
 //------------------------------------------------------------------------------
 // destructor
@@ -138,11 +162,24 @@ CqTiffInputFile::~CqTiffInputFile()
 { }
 
 //------------------------------------------------------------------------------
-bool CqTiffInputFile::isMipMap()
+bool CqTiffInputFile::checkDirSizes(const std::vector<TqUint>& widths,
+		const std::vector<TqUint>& heights)
 {
 	// iterate through levels, checking that each is the correct size.
-	/// \todo implementation.
-	return false;
+	TqUint dirNum = 0;
+	TqUint vecLen = min(widths.size(), heights.size());
+	bool isLast = false;
+	while(!isLast && dirNum < vecLen)
+	{
+		CqTiffDirHandle dirHandle(m_fileHandlePtr, dirNum);
+		TqUint levelWidth = dirHandle.tiffTagValue<uint32>(TIFFTAG_IMAGEWIDTH);
+		TqUint levelHeight = dirHandle.tiffTagValue<uint32>(TIFFTAG_IMAGELENGTH);
+		if(levelWidth != widths[dirNum] || levelHeight != heights[dirNum])
+			return false;
+		isLast = dirHandle.isLastDirectory();
+		dirNum++;
+	}
+	return dirNum == vecLen;
 }
 
 //------------------------------------------------------------------------------

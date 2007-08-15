@@ -92,7 +92,7 @@ BOOST_AUTO_TEST_CASE(aqsis_deg)
 
 BOOST_AUTO_TEST_CASE(aqsis_ceilPow2)
 {
-	BOOST_CHECK_EQUAL(Aqsis::ceilPow2(0x100), 0x100);
-	BOOST_CHECK_EQUAL(Aqsis::ceilPow2(0x110), 0x200);
+	BOOST_CHECK_EQUAL(Aqsis::ceilPow2(0x100), TqUint(0x100));
+	BOOST_CHECK_EQUAL(Aqsis::ceilPow2(0x110), TqUint(0x200));
 }
 

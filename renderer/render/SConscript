@@ -27,6 +27,7 @@ aqsisdll_sources = Split("""
 	marchingcubes.cpp
 	memorysentry.cpp
 	micropolygon.cpp
+	mipmap.cpp
 	mpdump.cpp
 	nurbs.cpp
 	occlusion.cpp
@@ -94,6 +95,7 @@ aqsisdll_headers = Split("""
 	marchingcubes.h
 	memorysentry.h
 	micropolygon.h
+	mipmap.h
 	motion.h
 	mpdump.h
 	nurbs.h
@@ -140,7 +142,7 @@ if env.has_key('libaqsis_add_sources'):
 	aqsisdll_sources = aqsisdll_sources + ['$libaqsis_add_sources']
 
 
-aqsisenv.Replace(LIBS = ['shadervm', 'aqsistypes', '$tiff_lib', '$z_lib'])
+aqsisenv.Replace(LIBS = ['shadervm', 'aqsistypes', '$tiff_lib', '$tiffxx_lib', '$z_lib'])
 
 aqsisenv.UseTargetOptions('libaqsis')
 
@@ -172,6 +174,19 @@ aqsisenv.PostInstallSharedLibrary(aqsisenv, '${RENDERENGINEDIR}', aqsisdll)
 #aqsisenv.Depends(aqsisdll, aqsisproject)
 
 
+#-------------------------------------------------------------------------------
+# Unit Tests
+Import('testEnv')
+testEnv = testEnv.Copy()
+testEnv.AppendUnique(LIBS=['aqsis'])
+aqsisdll_test_sources = Split('''
+	tifffile_test.cpp
+	mipmap_test.cpp
+	''')
+testEnv.addUnitTest('aqsisdll_test', aqsisdll_test_sources)
+
+
 env.Distribute(aqsisdll_sources)
+env.Distribute(aqsisdll_test_sources)
 env.Distribute(aqsisdll_headers)
 env.Distribute('SConscript')

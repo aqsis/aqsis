@@ -32,6 +32,7 @@ tifflibfile = env.FindFile('libtiff.a', ['$tiff_lib_path', '/usr/local/lib', '/o
 if tifflibfile != None:
 	env.Replace(tiff_lib_path = os.path.dirname(tifflibfile.abspath))
 env.Replace(tiff_lib = 'tiff')
+env.Replace(tiffxx_lib = 'tiffxx')
 
 # Find out where the JPEG headers are, look in common places for Fink and DarwinPorts.
 jpegiofile = env.FindFile('jpeglib.h', ['$jpeg_include_path', '/usr/local/include', '/opt/local/include', '/sw/include/'])
