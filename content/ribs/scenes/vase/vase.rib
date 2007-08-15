@@ -282,7 +282,7 @@ MakeShadow "shad2.map" "shad2.map"
 FrameBegin 3
 
 Display "vase.tif" "file" "rgba" "string compression" "lzw"
-#Display "+vase.tif" "framebuffer" "rgb"
+Display "+vase.tif" "framebuffer" "rgb"
 
 Format 256 192 1
 PixelSamples 4 4
