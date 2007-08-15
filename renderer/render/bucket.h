@@ -217,6 +217,15 @@ class CqBucket : public IqBucket
 
 		void	ImageElement( TqInt iXPos, TqInt iYPos, CqImagePixel*& pie ) const;
 
+		/** Get the column of the bucket in the image */
+		TqInt getCol() const;
+		/** Set the column of the bucket in the image */
+		void setCol(TqInt value);
+		/** Get the row of the bucket in the image */
+		TqInt getRow() const;
+		/** Set the row of the bucket in the image */
+		void setRow(TqInt value);
+
 	private:
 		/// This is a compare functor for sorting surfaces in order of depth.
 		struct closest_surface
@@ -235,6 +244,11 @@ class CqBucket : public IqBucket
 
 		/// Flag indicating if this bucket has been processed yet.
 		bool	m_bProcessed;
+
+		/// Bucket column in the image
+		TqInt m_col;
+		/// Bucket row in the image
+		TqInt m_row;
 
 		/// Dynamic bucket data
 		CqBucketData* m_bucketData;

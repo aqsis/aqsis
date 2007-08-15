@@ -28,7 +28,7 @@ START_NAMESPACE( Aqsis );
 
 
 CqBucketProcessor::CqBucketProcessor() :
-	m_bucket(0), m_bucketCol(-1), m_bucketRow(-1)
+	m_bucket(0)
 {
 }
 
@@ -36,15 +36,12 @@ CqBucketProcessor::~CqBucketProcessor()
 {
 }
 
-void CqBucketProcessor::setBucket(CqBucket* bucket, TqInt bucketCol, TqInt bucketRow)
+void CqBucketProcessor::setBucket(CqBucket* bucket)
 {
 	assert(m_bucket == 0);
 
 	m_bucket = bucket;
 	m_bucket->SetBucketData(&m_bucketData);
-
-	m_bucketCol = bucketCol;
-	m_bucketRow = bucketRow;
 	m_initiallyEmpty = m_bucket->IsEmpty();
 }
 
@@ -63,8 +60,6 @@ void CqBucketProcessor::reset()
 	m_bucket->SetBucketData(static_cast<CqBucketData*>(0));
 	m_bucket = 0;
 
-	m_bucketCol = -1;
-	m_bucketRow = -1;
 	m_initiallyEmpty = false;
 }
 
@@ -168,16 +163,6 @@ void CqBucketProcessor::popSurface()
 	assert(m_bucket);
 
 	return m_bucket->popSurface();
-}
-
-TqInt CqBucketProcessor::getBucketCol() const
-{
-	return m_bucketCol;
-}
-
-TqInt CqBucketProcessor::getBucketRow() const
-{
-	return m_bucketRow;
 }
 
 

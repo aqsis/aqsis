@@ -64,6 +64,31 @@ void CqBucket::AddMP( boost::shared_ptr<CqMicroPolygon>& pMP )
 	m_micropolygons.push_back( pMP );
 }
 
+
+//----------------------------------------------------------------------
+TqInt CqBucket::getCol() const
+{
+	return m_col;
+}
+
+//----------------------------------------------------------------------
+void CqBucket::setCol(TqInt value)
+{
+	m_col = value;
+}
+
+//----------------------------------------------------------------------
+TqInt CqBucket::getRow() const
+{
+	return m_row;
+}
+
+//----------------------------------------------------------------------
+void CqBucket::setRow(TqInt value)
+{
+	m_row = value;
+}
+
 //----------------------------------------------------------------------
 /** Mark this bucket as processed
  */

@@ -155,16 +155,22 @@ void	CqImageBuffer::SetImage()
 	if ( poptEyeSplits != 0 )
 		m_MaxEyeSplits = poptEyeSplits[ 0 ];
 
+	TqInt row = 0;
 	m_Buckets.resize( m_cYBuckets );
 	std::vector<std::vector<CqBucket> >::iterator i;
 	for( i = m_Buckets.begin(); i!=m_Buckets.end(); i++)
 	{
+		TqInt column = 0;
 		i->resize( m_cXBuckets );
 		std::vector<CqBucket>::iterator b;
 		for ( b = i->begin(); b!=i->end(); b++ )
 		{
 			b->SetProcessed( false );
+			b->setCol( column );
+			b->setRow( row );
+			column++;
 		}
+		row++;
 	}
 
 	m_CurrentBucketCol = m_CurrentBucketRow = 0;
@@ -382,17 +388,17 @@ bool CqImageBuffer::OcclusionCullSurface( const CqBucketProcessor& bucketProcess
 		// pSurface is behind everying in this bucket but it may be
 		// visible in other buckets it overlaps.
 		// bucket to the right
-		TqInt nextBucket = bucketProcessor.getBucketCol() + 1;
-		CqVector2D pos = BucketPosition( nextBucket, bucketProcessor.getBucketRow() );
+		TqInt nextBucket = bucketProcessor.getBucket()->getCol() + 1;
+		CqVector2D pos = BucketPosition( nextBucket, bucketProcessor.getBucket()->getRow() );
 		if ( ( nextBucket < cXBuckets() ) &&
 		        ( RasterBound.vecMax().x() >= pos.x() ) )
 		{
-			Bucket( nextBucket, bucketProcessor.getBucketRow() ).AddGPrim( pSurface );
+			Bucket( nextBucket, bucketProcessor.getBucket()->getRow() ).AddGPrim( pSurface );
 			return true;
 		}
 
 		// next row
-		nextBucket = bucketProcessor.getBucketRow() + 1;
+		nextBucket = bucketProcessor.getBucket()->getRow() + 1;
 		// find bucket containing left side of bound
 		TqInt nextBucketX = static_cast<TqInt>( RasterBound.vecMin().x() ) / XBucketSize();
 		nextBucketX = MAX( nextBucketX, 0 );
@@ -699,15 +705,16 @@ void CqImageBuffer::RenderImage()
 #endif
 		/////////////////////////////////////////////////////////////////////////
 
-			bucketProcessors[i].setBucket(&CurrentBucket(), CurrentBucketCol(), CurrentBucketRow());
+			bucketProcessors[i].setBucket(&CurrentBucket());
 			if (fImager)
 				bucketProcessors[i].setInitiallyEmpty(false);
 			{
 				// Set up some bounds for the bucket.
-				const CqVector2D bPos = BucketPosition( bucketProcessors[i].getBucketCol(),
-									bucketProcessors[i].getBucketRow() );
-				const CqVector2D bSize = BucketSize( bucketProcessors[i].getBucketCol(),
-								     bucketProcessors[i].getBucketRow() );
+				const CqBucket* bucket = bucketProcessors[i].getBucket();
+				const CqVector2D bPos = BucketPosition( bucket->getCol(),
+									bucket->getRow() );
+				const CqVector2D bSize = BucketSize( bucket->getCol(),
+								     bucket->getRow() );
 				const CqVector2D vecMin = bPos - bHalf;
 				const CqVector2D vecMax = bPos + bSize + bHalf;
 
