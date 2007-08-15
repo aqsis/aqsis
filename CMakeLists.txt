@@ -98,6 +98,8 @@ SUBDIRS(shadercompiler/aqsltell)
 SUBDIRS(rib/ri2rib)
 SUBDIRS(texturing/teqser)
 SUBDIRS(displays/display)
+SUBDIRS(thirdparty/tinyxml)
+SUBDIRS(displays/piqsl)
 #
 # Packaging setup
 #

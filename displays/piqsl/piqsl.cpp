@@ -61,7 +61,7 @@
 #include	"image.h"
 #include	"version.h"
 #include	"piqsl.h"
-#include	"fluid_piqsl_ui.h"
+#include	"piqsl_ui.h"
 #include	"displayserverimage.h"
 #include	"framebuffer.h"
 #include	"book.h"

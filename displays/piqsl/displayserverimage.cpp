@@ -110,7 +110,7 @@ void nullDeleter(const void*)
 
 void CqDisplayServerImage::acceptData(TqUlong xmin, TqUlong xmaxplus1, TqUlong ymin, TqUlong ymaxplus1, TqInt elementSize, const unsigned char* bucketData )
 {
-	assert(elementSize == m_realData.bytesPerPixel());
+	assert(elementSize == m_realData->bytesPerPixel());
 
 	TqUint xmin__ = Aqsis::max((xmin - originX()), 0UL);
 	TqUint ymin__ = Aqsis::max((ymin - originY()), 0UL);
