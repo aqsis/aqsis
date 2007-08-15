@@ -8,6 +8,7 @@ INCLUDE(FindTIFF)
 INCLUDE(FindBoost)
 INCLUDE(FindZLIB)
 INCLUDE(FindFLTK)
+INCLUDE(FindOpenEXR)
 
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
@@ -100,6 +101,7 @@ SUBDIRS(texturing/teqser)
 SUBDIRS(displays/display)
 SUBDIRS(thirdparty/tinyxml)
 SUBDIRS(displays/piqsl)
+SUBDIRS(displays/d_exr)
 #
 # Packaging setup
 #
