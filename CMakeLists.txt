@@ -1,6 +1,8 @@
 PROJECT(aqsis_all)
 
-SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules")
+SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules" "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
+INCLUDE(macros)
 
 INCLUDE(OutOfSourceBuild)
 
@@ -14,52 +16,9 @@ INCLUDE(FindOpenEXR)
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 
-# TODO: This should probably be in a separate macros file.
-MACRO(FILTER_OUT FILTERS INPUTS OUTPUT)
-   # Mimicks Gnu Make's $(filter-out) which removes elements 
-   # from a list that match the pattern.
-   # Arguments:
-   #  FILTERS - list of patterns that need to be removed
-   #  INPUTS  - list of inputs that will be worked on
-   #  OUTPUT  - the filtered list to be returned
-   # 
-   # Example: 
-   #  SET(MYLIST this that and the other)
-   #  SET(FILTS this that)
-   #
-   #  FILTER_OUT("${FILTS}" "${MYLIST}" OUT)
-   #  MESSAGE("OUTPUT = ${OUT}")
-   #
-   # The output - 
-   #   OUTPUT = and;the;other
-   #
-   SET(FOUT "")
-   FOREACH(INP ${INPUTS})
-	   SET(FILTERED 0)
-	   FOREACH(FILT ${FILTERS})
-		   IF(${FILTERED} EQUAL 0)
-			   IF("${FILT}" STREQUAL "${INP}")
-				   SET(FILTERED 1)
-			   ENDIF("${FILT}" STREQUAL "${INP}")
-		   ENDIF(${FILTERED} EQUAL 0)
-	   ENDFOREACH(FILT ${FILTERS})
-	   IF(${FILTERED} EQUAL 0)
-		   SET(FOUT ${FOUT} ${INP})
-	   ENDIF(${FILTERED} EQUAL 0)
-   ENDFOREACH(INP ${INPUTS})
-   SET(${OUTPUT} ${FOUT})
-ENDMACRO(FILTER_OUT FILTERS INPUTS OUTPUT)
-
 # TODO: find these properly
 SET(FLEX_EXECUTABLE flex)
 SET(BISON_EXECUTABLE bison)
-
-IF(WIN32)
-	ADD_DEFINITIONS(-DNO_SYSLOG)
-ELSE(WIN32)
-	ADD_DEFINITIONS(-DDEFAULT_PLUGIN_PATH="\\"/usr/local/aqsis/lib/aqsis/plugins\\"")
-	ADD_DEFINITIONS(-DDEFAULT_RC_PATH="\\"/usr/local/aqsis/lib/aqsis/plugins\\"")
-ENDIF(WIN32)
 
 SET(MAJOR 1)
 SET(MINOR 3)
@@ -68,18 +27,63 @@ CONFIGURE_FILE(version.h.in.cmake ${PROJECT_BINARY_DIR}/version.h)
 
 INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR})
 
-SET(BINDIR "bin" CACHE STRING "Install location for binary files. (relative to CMAKE_INSTALL_PREFIX)")
-SET(RENDERENGINEDIR "${BINDIR}" CACHE STRING "Install location for render dependent shared libraries (relative to CMAKE_INSTALL_PREFIX)")
-SET(DISPLAYSDIR "${BINDIR}" CACHE STRING "Install location for display libraries (relative to CMAKE_INSTALL_PREFIX)")
-SET(PLUGINDIR "${BINDIR}" CACHE STRING "Install location for plugin libraries (relative to CMAKE_INSTALL_PREFIX)")
-SET(LIBDIR "lib" CACHE STRING "Install location for shared libraries (relative to CMAKE_INSTALL_PREFIX)")
-SET(STATICLIBDIR "${LIBDIR}" CACHE STRING "Install location for static libraries (relative to CMAKE_INSTALL_PREFIX)")
-SET(SHADERDIR "shaders" CACHE STRING "Install location for shaders (relative to CMAKE_INSTALL_PREFIX)")
-SET(SYSCONFDIR "${BINDIR}" CACHE STRING "Install location for system configuration files (relative to CMAKE_INSTALL_PREFIX)")
-SET(INCLUDEDIR "include/aqsis" CACHE STRING "Install location for aqsis header files (relative to CMAKE_INSTALL_PREFIX)")
-SET(CONTENTDIR "content" CACHE STRING "Install location for content (relative to CMAKE_INSTALL_PREFIX)")
-SET(SCRIPTSDIR "scripts" CACHE STRING "Install location for scripts (relative to CMAKE_INSTALL_PREFIX)")
+IF(WIN32)
+	SET(BINDIR "bin" 
+		CACHE STRING "Install location for binary files. (relative to CMAKE_INSTALL_PREFIX)")
+	SET(RENDERENGINEDIR "${BINDIR}" 
+		CACHE STRING "Install location for render dependent shared libraries (relative to CMAKE_INSTALL_PREFIX)")
+	SET(DISPLAYSDIR "${BINDIR}" 
+		CACHE STRING "Install location for display libraries (relative to CMAKE_INSTALL_PREFIX)")
+	SET(PLUGINDIR "${BINDIR}" 
+		CACHE STRING "Install location for plugin libraries (relative to CMAKE_INSTALL_PREFIX)")
+	SET(LIBDIR "lib" 
+		CACHE STRING "Install location for shared libraries (relative to CMAKE_INSTALL_PREFIX)")
+	SET(STATICLIBDIR "${LIBDIR}" 
+		CACHE STRING "Install location for static libraries (relative to CMAKE_INSTALL_PREFIX)")
+	SET(SHADERDIR "shaders" 
+		CACHE STRING "Install location for shaders (relative to CMAKE_INSTALL_PREFIX)")
+	SET(SYSCONFDIR "${BINDIR}" 
+		CACHE STRING "Install location for system configuration files (relative to CMAKE_INSTALL_PREFIX)")
+	SET(INCLUDEDIR "include/aqsis" 
+		CACHE STRING "Install location for aqsis header files (relative to CMAKE_INSTALL_PREFIX)")
+	SET(CONTENTDIR "content" 
+		CACHE STRING "Install location for content (relative to CMAKE_INSTALL_PREFIX)")
+	SET(SCRIPTSDIR "scripts" 
+		CACHE STRING "Install location for scripts (relative to CMAKE_INSTALL_PREFIX)")
+ELSE(WIN32)
+	SET(BINDIR "bin" 
+		CACHE STRING "Install location for binary files. (relative to CMAKE_INSTALL_PREFIX)")
+	SET(LIBDIR "lib" 
+		CACHE STRING "Install location for shared libraries (relative to CMAKE_INSTALL_PREFIX)")
+	SET(RENDERENGINEDIR "${LIBDIR}" 
+		CACHE STRING "Install location for render dependent shared libraries (relative to CMAKE_INSTALL_PREFIX)")
+	SET(DISPLAYSDIR "${LIBDIR}/aqsis" 
+		CACHE STRING "Install location for display libraries (relative to CMAKE_INSTALL_PREFIX)")
+	SET(PLUGINDIR "${LIBDIR}/aqsis/plugins" 
+		CACHE STRING "Install location for plugin libraries (relative to CMAKE_INSTALL_PREFIX)")
+	SET(STATICLIBDIR "${LIBDIR}/aqsis" 
+		CACHE STRING "Install location for static libraries (relative to CMAKE_INSTALL_PREFIX)")
+	SET(SHADERDIR "share/aqsis/shaders" 
+		CACHE STRING "Install location for shaders (relative to CMAKE_INSTALL_PREFIX)")
+	SET(SYSCONFDIR "etc/aqsis" 
+		CACHE STRING "Install location for system configuration files (relative to CMAKE_INSTALL_PREFIX)")
+	SET(INCLUDEDIR "include/aqsis" 
+		CACHE STRING "Install location for aqsis header files (relative to CMAKE_INSTALL_PREFIX)")
+	SET(CONTENTDIR "content" 
+		CACHE STRING "Install location for content (relative to CMAKE_INSTALL_PREFIX)")
+	SET(SCRIPTSDIR "scripts" 
+		CACHE STRING "Install location for scripts (relative to CMAKE_INSTALL_PREFIX)")
+ENDIF(WIN32)
 
+SET(DEFAULT_PLUGIN_PATH "${CMAKE_INSTALL_PREFIX}/${PLUGINDIR}")
+SET(DEFAULT_RC_PATH "${CMAKE_INSTALL_PREFIX}/${SYSCONFDIR}")
+
+IF(WIN32)
+	ADD_DEFINITIONS(-DNO_SYSLOG)
+ELSE(WIN32)
+	ADD_DEFINITIONS(-DDEFAULT_PLUGIN_PATH="\\"${DEFAULT_PLUGIN_PATH}\\"")
+	ADD_DEFINITIONS(-DDEFAULT_RC_PATH="\\"${DEFAULT_RC_PATH}\\"")
+ENDIF(WIN32)
 
 ADD_SUBDIRECTORY(argparse)
 ADD_SUBDIRECTORY(rib/api)
@@ -104,6 +108,11 @@ ADD_SUBDIRECTORY(displays/display)
 ADD_SUBDIRECTORY(thirdparty/tinyxml)
 ADD_SUBDIRECTORY(displays/piqsl)
 ADD_SUBDIRECTORY(displays/d_exr)
+ADD_SUBDIRECTORY(displays/d_sdcBMP)
+# Get the value of AQSL_EXECUTABLE from the shadercompiler/aqsl project, so that downstream projects
+# can use it.
+GET_DIRECTORY_PROPERTY(AQSL_EXECUTABLE DIRECTORY shadercompiler/aqsl DEFINITION AQSL_EXECUTABLE)
+ADD_SUBDIRECTORY(shaders)
 
 #
 # Build aqsisrc
@@ -111,6 +120,7 @@ ADD_SUBDIRECTORY(displays/d_exr)
 GET_DIRECTORY_PROPERTY(display_DISPLAYLIB DIRECTORY displays/display DEFINITION DISPLAYLIB)
 GET_DIRECTORY_PROPERTY(piqsl_DISPLAYLIB DIRECTORY displays/piqsl DEFINITION DISPLAYLIB)
 GET_DIRECTORY_PROPERTY(d_exr_DISPLAYLIB DIRECTORY displays/d_exr DEFINITION DISPLAYLIB)
+GET_DIRECTORY_PROPERTY(d_bmp_DISPLAYLIB DIRECTORY displays/d_sdcBMP DEFINITION DISPLAYLIB)
 CONFIGURE_FILE(aqsisrc.in.cmake ${PROJECT_BINARY_DIR}/aqsisrc)
 ADD_CUSTOM_TARGET(aqsisrc ALL echo
 	DEPENDS  ${PROJECT_BINARY_DIR}/aqsisrc
