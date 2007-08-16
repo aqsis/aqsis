@@ -23,7 +23,7 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include	"MultiTimer.h"
+#include	"multitimer.h"
 
 #include	"aqsis.h"
 
@@ -296,9 +296,9 @@ bool CqImageBuffer::CullSurface( CqBound& Bound, const boost::shared_ptr<CqSurfa
 
 void CqImageBuffer::PostSurface( const boost::shared_ptr<CqSurface>& pSurface )
 {
+	TIME_SCOPE("Post Surface")
 	// Count the number of total gprims
 	STATS_INC( GPR_created_total );
-
 
 	// Bound the primitive in its current space (camera) space taking into account any motion specification.
 	CqBound Bound( pSurface->Bound() );
@@ -550,6 +550,7 @@ void CqImageBuffer::RenderSurface( boost::shared_ptr<CqSurface>& pSurface )
 				// Split any grids in this bucket waiting to be processed.
 				pGrid->Split( this );
 			}
+
 			RELEASEREF( pGrid );
 		}
 	}
@@ -993,5 +994,6 @@ bool CqImageBuffer::NextBucket(EqBucketOrder order)
 //---------------------------------------------------------------------
 
 END_NAMESPACE( Aqsis )
+
 
 

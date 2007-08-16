@@ -24,7 +24,7 @@
 */
 
 #include	"aqsis.h"
-#include	"MultiTimer.h"
+#include	"multitimer.h"
 
 #include	<math.h>
 #include	<iostream>
@@ -740,5 +740,6 @@ void CqShadowMap::SaveZFile()
 
 
 END_NAMESPACE( Aqsis )
+
 
 

@@ -39,7 +39,7 @@
 
 #include	"ri.h"
 
-#include	"MultiTimer.h"
+#include	"multitimer.h"
 
 
 START_NAMESPACE( Aqsis )
@@ -962,5 +962,6 @@ bool CqMicroPolygonMotionPoints::fContains( const CqVector2D& vecP, TqFloat& Dep
 
 END_NAMESPACE( Aqsis )
 //---------------------------------------------------------------------
+
 
 

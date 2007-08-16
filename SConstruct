@@ -57,10 +57,12 @@ opts.Add('exr_lib_path', 'Point to the OpenEXR library files', '')
 opts.Add(BoolOption('no_fltk', 'Build without FLTK support', '0'))
 opts.Add(BoolOption('no_exr', 'Build without OpenEXR support', '0'))
 opts.Add(BoolOption('no_threads', 'Build without thread support', '0'))
+opts.Add(BoolOption('no_piqsl', 'Build without the piqsl display driver', '0'))
 opts.Add(BoolOption('with_pdiff', 'Build and install the third-party pdiff utility', '0'))
 opts.Add('cachedir', 'Examine a build cache dir for previously compiled files', '')
 opts.Add(BoolOption('debug', 'Build with debug options enabled', '0'))
 opts.Add(BoolOption('enable_mpdump', 'Build with micropolygon dumping mode enabled', '1'))
+opts.Add(BoolOption('enable_timing', 'Build with performance timing enabled', '1'))
 
 # This will hopefully import the target specific options
 import Options
@@ -245,6 +247,11 @@ env.AppendUnique(CPPDEFINES=[('DEFAULT_PLUGIN_PATH', '\\"' + env.Dir('${PLUGINDI
 #
 env.AppendUnique(CPPDEFINES=[('ENABLE_MPDUMP', env.subst('${enable_mpdump}'))])
 
+#
+# Enable timing code if requested
+#
+env.AppendUnique(CPPDEFINES=[('USE_TIMERS', env.subst('${enable_timing}'))])
+
 # Add paths to librarys generated in the build dir.
 def prependBuildDir(subDirs):
 	'''Prepend the build directory to each directory in a list, or to a string
@@ -398,7 +405,6 @@ env.SConscript( dirs = prependBuildDir(['distribution']) )
 def aqsis_rc_build(target, source, env):
 	# Code to build "target" from "source"
 	displaylib = os.path.basename(display[0].path)
-	piqsldisplaylib = os.path.basename(piqsldisplay[0].path)
 	xpmlib = os.path.basename(xpm[0].path)
 	bmplib = os.path.basename(bmp[0].path)
 	win32lib = ""
@@ -406,7 +412,7 @@ def aqsis_rc_build(target, source, env):
 		win32lib = os.path.basename(win32[0].path)
 	defines = {
 		"displaylib": displaylib,
-		"piqsldisplaylib": piqsldisplaylib,
+		"piqsldisplaylib": "",
 		"xpmlib": xpmlib,
 		"bmplib": bmplib,
 		"win32lib": win32lib,
@@ -417,6 +423,9 @@ def aqsis_rc_build(target, source, env):
 	if not env['no_exr']:
 		exrlib = os.path.basename(exr[0].path)
 		defines["exrlib"] = exrlib
+
+	if not env['no_piqsl']:
+		defines["piqsldisplaylib"] = os.path.basename(piqsldisplay[0].path)
 
 	print_config("Building aqsisrc with the following settings:", defines.items())
 

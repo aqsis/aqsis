@@ -61,10 +61,14 @@ else:
 if not conf.env['no_threads']:
 	if not conf.CheckLib(conf.env.subst('$boost_thread_lib'), language='c++'):
 		print 'Cannot find boost_thread - proceeding with no threads support.'
-		conf.env['no_thread'] = True
+		conf.env['no_threads'] = True
 		conf.env.Replace(boost_thread_lib = '')
 else:
 	conf.env.Replace(boost_thread_lib = '')
+
+if conf.env['no_fltk'] or conf.env['no_threads']:
+	print 'Building without piqsl display support'
+	conf.env['no_piqsl'] = True
 
 conf.env.Replace(CPPPATH = cpppath_store)
 conf.env.Replace(LIBS = libs_store)

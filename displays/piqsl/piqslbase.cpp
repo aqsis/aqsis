@@ -81,9 +81,11 @@ TqUlong CqPiqslBase::addImageToCurrentBook(boost::shared_ptr<CqImage>& image)
 		addNewBook(strBkName.str());
 	}
 	TqUlong id = currentBook()->addImage(image);
-	Aqsis::log() << Aqsis::debug << "Piqsl connecting image to framebuffer" << std::endl;
 	if(currentBook()->framebuffer())
+	{
+		Aqsis::log() << Aqsis::debug << "Piqsl connecting image to framebuffer" << std::endl;
 		currentBook()->framebuffer()->connect(image);
+	}
 	return( id );	
 }
 

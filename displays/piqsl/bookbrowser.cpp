@@ -1,7 +1,7 @@
 // Aqsis
 // Copyright © 1997 - 2001, Paul C. Gregory
 //
-// Contact: pgregory@aqsis.com
+// Contact: pgregory@aqsis.org
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public
@@ -21,7 +21,7 @@
 /** \file
 		\brief Implement a class extending Fl_Browser with resizable columns.
 		Based on original code from Greg Ercolano (http://seriss.com/people/erco/)
-		\author Paul C. Gregory (pgregory@aqsis.com)
+		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
 #include	"aqsis.h"
@@ -70,7 +70,7 @@ int CqBookBrowser::handle(int e)
 				ret = 1;
 				m_dragging = 1;
 				m_dragcol = whichcol;
-				change_cursor(FL_CURSOR_DEFAULT);
+				//change_cursor(FL_CURSOR_DEFAULT);
 			}
 			break;
 		}
@@ -235,9 +235,12 @@ void CqBookBrowser::item_draw(void* v, int X, int Y, int W, int H) const
 //	if (((FL_BLINE*)v)->flags & SELECTED)
 //		lcol = fl_contrast(lcol, selection_color());
 	if (!active_r()) 
+	{
 		lcol = fl_inactive(lcol);
+	}
 	fl_color(lcol);
-	fl_draw(m_theBook->image(index)->name().c_str(), X+3, Y, i[0]-6, H, Fl_Align(talign|FL_ALIGN_CLIP), 0, 0);
+	fl_draw(m_theBook->image(index)->name().c_str(), X+3, Y, i[0]-6, H,
+			Fl_Align(talign|FL_ALIGN_CLIP), 0, 0);
 	X += i[0];
 	W -= i[0];
 	boost::format size("%1%x%2%x%3% ");

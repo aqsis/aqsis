@@ -1,7 +1,7 @@
 // Aqsis
 // Copyright © 1997 - 2001, Paul C. Gregory
 //
-// Contact: pgregory@aqsis.com
+// Contact: pgregory@aqsis.org
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public
@@ -20,7 +20,7 @@
 
 /** \file
 		\brief Declare the class for a basic framebuffer window.
-		\author Paul C. Gregory (pgregory@aqsis.com)
+		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
 //? Is framebuffer.h included already?
@@ -30,11 +30,15 @@
 #include	"aqsis.h"
 
 #include	<FL/Fl.H>
-#include	<FL/Fl_Window.H>
+#include	<FL/Fl_Double_Window.H>
 #include	<FL/Fl_Box.H>
 #include	<FL/Fl_Image.H>
+#include	<FL/Fl_Group.H>
+#include	<FL/Fl_PNG_Image.H>
 #include	<FL/fl_draw.H>
 #include	<FL/Fl_Menu_Button.H>
+#include	<FL/Fl_Pack.H>
+#include	<FL/Fl_Scroll.H>
 #include 	<boost/shared_ptr.hpp>
 #include	<boost/thread/mutex.hpp>
 
@@ -65,7 +69,7 @@ START_NAMESPACE( Aqsis )
  * Class encapsulating the framebuffer window.
  */
 
-class CqFramebuffer
+class CqFramebuffer : public Fl_Double_Window
 {
 public:
     CqFramebuffer( TqUlong width, TqUlong height, TqInt depth, const std::string& bookName );
@@ -111,6 +115,9 @@ public:
 	 * only be performed in the main thread.
 	 */
 	void resize();
+	/** Overriden Fl_Widget::resize()
+	 */
+	virtual void resize(int X, int Y, int W, int H);
 	/** Perform an update on a region of the framebuffer.
 	 * Pass -1 for all values to update the whole framebuffer.
 	 * \param X			The X origin of the region (bucket) to update.
@@ -130,10 +137,21 @@ public:
 	 */
 	boost::mutex& mutex();
 
+	/** Event handler for the framebuffer
+	 */
+	int handle(int event);
+
+	/** Centers the image widget in the scrolled area
+	 */
+	void centerImageWidget();
+
+	static const int defaultWidth; ///< Default framebuffer width.
+	static const int defaultHeight; ///< Default framebuffer height.
+
 private:
-	Fl_Window*	m_theWindow;						///< The FLTK window.
 	Fl_FrameBuffer_Widget* m_uiImageWidget;			///< The custom image widget.
 	Fl_Menu_Button* m_popupMenu;					///< The right click menu widget.
+	Fl_Scroll *m_scroll;
 	static Fl_Menu_Item m_popupMenuItems[];			///< Static list of menuitems for the popup menu.
 	bool	m_doResize;								///< Flag indicating a resize has been requested.
 
@@ -141,6 +159,8 @@ private:
 	boost::mutex	m_mutex;						///< Unique mutex for this image.
 	std::string		m_title;						///< Local string that contains the title for the window.
 	std::string		m_bookName;						///< The name of the book, if any, this framebuffer is linked to.
+	bool m_keyHeld;
+	int m_lastPos[2];
 };
 
 
@@ -174,7 +194,8 @@ inline boost::mutex& CqFramebuffer::mutex()
 
 END_NAMESPACE( Aqsis )
 
-inline Fl_FrameBuffer_Widget::Fl_FrameBuffer_Widget(int x, int y, int imageW, int imageH, boost::shared_ptr<Aqsis::CqImage>& image) : 
+inline Fl_FrameBuffer_Widget::Fl_FrameBuffer_Widget(int x, int y, int imageW,
+		int imageH, boost::shared_ptr<Aqsis::CqImage>& image) : 
 	Fl_Widget(x,y,imageW,imageH)
 {
 	m_image = image;

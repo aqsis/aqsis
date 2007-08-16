@@ -1,7 +1,7 @@
 // Aqsis
 // Copyright © 1997 - 2001, Paul C. Gregory
 //
-// Contact: pgregory@aqsis.com
+// Contact: pgregory@aqsis.org
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public
@@ -20,7 +20,7 @@
 
 /** \file
 		\brief Declare the class controlling book's of images.
-		\author Paul C. Gregory (pgregory@aqsis.com)
+		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
 //? Is book.h included already?
@@ -131,7 +131,7 @@ inline CqBook::TqImageListIterator CqBook::imagesEnd()
 
 inline TqUlong CqBook::numImages() const
 {
-	return(m_images.size());
+	return(static_cast<TqUlong>(m_images.size()));
 }
 
 

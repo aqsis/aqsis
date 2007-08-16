@@ -3,11 +3,15 @@ Import('env')
 env.Distribute('aqsis_compiler.h')
 env.Distribute('file_system.cpp')
 env.Distribute('socket_system.cpp')
+env.Distribute('multitimer_system.cpp')
+env.Distribute('multitimer_system.h')
 env.Distribute('SConscript')
 
 platform_sources = Split ("""
                 posix/file_system.cpp
                 posix/socket_system.cpp
+                posix/multitimer_system.cpp
                 """)
 Export('platform_sources')
+
 

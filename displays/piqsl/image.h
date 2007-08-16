@@ -1,7 +1,7 @@
 // Aqsis
 // Copyright © 1997 - 2001, Paul C. Gregory
 //
-// Contact: pgregory@aqsis.com
+// Contact: pgregory@aqsis.org
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public
@@ -20,7 +20,7 @@
 
 /** \file
 		\brief The base class from which all piqsl images derive.
-		\author Paul C. Gregory (pgregory@aqsis.com)
+		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
 #ifndef IMAGE_H_INCLUDED
@@ -58,11 +58,11 @@ public:
 	/** Get the name of the image.
 	 * \return			The name of the image.
 	 */
-    virtual const std::string&	name() const;
+    virtual const std::string& name() const;
 	/** Set the display name of the image.
 	 * \param name		The new display name of the image.
 	 */
-    virtual void	setName( const std::string& name );
+    virtual void setName( const std::string& name );
 	/** Get the filename of the image.
 	 * \return			The filename of the image.
 	 */
@@ -70,13 +70,13 @@ public:
 	/** Set the filename of the image.
 	 * \param name		The new filename of the image.
 	 */
-    virtual void	setFilename( const std::string& name );
+    virtual void setFilename( const std::string& name );
 	/** Set the Description
 	 */
-    virtual void	setDescription( const std::string& software );
+    virtual void setDescription( const std::string& software );
 	/** Get the Description
 	 */
-    virtual const std::string&	description() const;
+    virtual const std::string& description() const;
 
 	/** Get the frame width of the image.
 	 * The frame width if the cropped rendered region, within the image.
@@ -93,51 +93,29 @@ public:
 	 * \param height		The new frame height.
 	 */
 	virtual void setFrameSize(TqUlong width, TqUlong height);
-	/** Get the name of the channel at the specified index.
-	 * \param index			The index of the channel to query.
-	 * \return				A string representation of the channel name.
+	/** \brief Get the channel information list for the "real" data.
+	 *
+	 * \return The channel info list of channel names and types.
 	 */
-	virtual const std::string& channelName(TqInt index) const;
-	/** Set the name of the indexed channel.
-	 * \param index			The index of the channel to rename.
-	 * \param name			The name to set the indexed channel to.
+	inline const CqChannelInfoList& channelsInfo() const;
+	/** \brief Connect a channel of the underlying data to the red display channel
 	 */
-	virtual void setChannelName(TqInt index, const std::string& name);
-	/** Get the type of the indexed channel.
-	 * See ndspy.h for details of the supported types.
-	 * \param index			The index of the channel to query.
-	 * \return				The type of the channel, as a PkDspy type.
+	inline void connectChannelR(const std::string& chanName);
+	/** \brief Connect a channel of the underlying data to the green display channel
 	 */
-	virtual TqUint channelType(TqInt index) const;
-	/** Set the type of the indexed channel.
-	 * See ndspy.h for details of the supported types.
-	 * \param index			The index of the channel to change.
-	 * \param type			The type to set the indexed channel to.
+	inline void connectChannelG(const std::string& chanName);
+	/** \brief Connect a channel of the underlying data to the blue display channel
 	 */
-	virtual void setChannelType(TqInt index, TqUint type);
+	inline void connectChannelB(const std::string& chanName);
 	/** Get the number of channels in this image.
 	 * \return				The number of channels.
 	 */
 	virtual TqUint numChannels() const;
-	/** Add a channel to the end of the current list.
-	 * \param name			The name to use for the new channel.
-	 * \param type			The PkDspy type to use, see ndspy.h for supported types.
-	 */
-	virtual void addChannel(const std::string& name, TqUint type);
-	/** Get the calculated size of a single pixel in the image.
-	 * Calculated from the number of channels and their types.
-	 * \return				The total number of bytes in a single image pixel.
-	 */
-	virtual TqInt elementSize() const;
-	/** Get the calculated length of a complete row of the image in bytes.
-	 * \return				The number of bytes in a complete row of the image.
-	 */
-	virtual TqInt rowLength() const;
 	/** Get a pointer to the display data.
 	 * The display buffer is simple 8 bits per channel data as displayable by an RGB image.
 	 * \return				A pointer to the start of the display buffer.
 	 */
-	virtual const boost::shared_array<unsigned char>& data() const;
+	virtual boost::shared_ptr<const CqImageBuffer> displayBuffer() const;
 	/** Get the origin of the cropped frame within the total image.
 	 * \return				The origin of the frame.
 	 */
@@ -165,10 +143,14 @@ public:
 	 */
 	virtual void setImageSize(TqUlong imageWidth, TqUlong imageHeight);
 
-	/** Setup the display and real buffers.
-	 * Presuming the size and channels have been setup, allocate the two buffers used by the image.
+	/** \brief Setup the display and full-precision buffers.
+	 *
+	 * Presuming the image size has been setup, allocate the two buffers used
+	 * by the image.
+	 *
+	 * \param channelsInfo - the list of channel information for the image.
 	 */
-	virtual void PrepareImageBuffer();
+	virtual void prepareImageBuffers(const CqChannelInfoList& channelsInfo);
 	
 	/** Setup a callback to be called when the image changes.
 	 * \param f			A function that will be called with the region that has changed.
@@ -178,8 +160,7 @@ public:
 	/** Save the image to the given folder.
 	 * \note Overridden by derivations that manage their image data differently.
 	 */
-	virtual void serialise(const std::string& folder)
-	{}
+	virtual void serialise(const std::string& folder) {}
 	/** Create an XML element representing this image for serialising to library files.
 	 * \return			A pointer to a new TinyXML element structure.
 	 */
@@ -187,35 +168,42 @@ public:
 	/** Save the image to a TIFF file.
 	 * \param filename	The name of the file to save the image into.
 	 */
-	void saveToTiff(const std::string& filename);
+	void saveToTiff(const std::string& filename) const;
 	/** Load the image from a TIFF file on disk.
 	 * \param filename	The name of the TIFF file to load the image data from.
 	 */
 	void loadFromTiff(const std::string& filename);
 
+protected:
+	/** Check m_displayMap is pointing to valid channel names from channelsInfo.
+	 *
+	 * If the map isn't pointing to valid channels, then set the offending
+	 * channels names to the first one in channelsInfo
+	 *
+	 * \param channelsInfo - channels which the map must point to.
+	 */
+	void fixupDisplayMap(const CqChannelInfoList& channelsInfo);
 	/** Get a reference to the unique mutex for this image.
 	 * Used when locking the image during multithreaded operation.
 	 * \return			A reference to the unique mutex for this image.
 	 */
-	boost::mutex& mutex();
+	boost::mutex& mutex() const;
 
-protected:
     std::string		m_name;			///< Display name.
     std::string		m_fileName;		///< File name.
     std::string		m_description;		///< Description or Software' renderer name.
-	boost::shared_array<unsigned char>	m_data;			///< Buffer to store the 8bit data for display. 
-	boost::shared_array<unsigned char>	m_realData;		///< Buffer to store the natural format image data.
+	boost::shared_ptr<CqImageBuffer> m_displayData;		///< Buffer to store the 8bit data for display. 
+	boost::shared_ptr<CqImageBuffer> m_realData;	///< Buffer to store the natural format image data.
 	TqUlong			m_frameWidth;	///< The width of the frame within the whole image.
 	TqUlong			m_frameHeight;	///< The height of the frame within the whole image.
 	TqUlong			m_imageWidth;	///< The total image width.
 	TqUlong			m_imageHeight;	///< The total image height.
 	TqUlong			m_originX;		///< The origin of the frame within the whole image.
 	TqUlong			m_originY;		///< The origin of the frame within the whole image.
-	TqUint			m_elementSize;	///< The calcualated total size of a single pixel.
-	TqChannelList	m_channels;		///< An array of channels, name and type.
+	TqChannelNameMap m_displayMap; ///< map from display to underlying channel names
 
 	boost::function<void(int,int,int,int)> m_updateCallback;	///< A callback, called when an image changes.
-	boost::mutex	m_mutex;		///< The unique mutex for this image.
+	mutable boost::mutex m_mutex;	///< The unique mutex for this image.
 };
 
 
@@ -227,19 +215,22 @@ inline CqImage::CqImage( const std::string& name)
     : m_name(name),
     m_fileName(),
     m_description(),
-	m_data(0),
-	m_realData(0),
+	m_displayData(),
+	m_realData(),
 	m_frameWidth(0),
 	m_frameHeight(0),
 	m_imageWidth(0),
 	m_imageHeight(0),
 	m_originX(0),
 	m_originY(0),
-	m_elementSize(0),
-	m_channels(),
+	m_displayMap(),
 	m_updateCallback(),
 	m_mutex()
-{ } 
+{
+	m_displayMap["r"] = "r";
+	m_displayMap["g"] = "g";
+	m_displayMap["b"] = "b";
+}
 
 
 inline void	CqImage::setDescription( const std::string& description )
@@ -288,53 +279,22 @@ inline void CqImage::setFrameSize(TqUlong width, TqUlong height)
 	m_frameHeight = height;
 }
 
-inline const std::string& CqImage::channelName(TqInt index) const
+inline const CqChannelInfoList& CqImage::channelsInfo() const
 {
-	assert(index < numChannels());
-	return(m_channels[index].name());
-}
-
-inline void CqImage::setChannelName(TqInt index, const std::string& name)
-{
-	assert(index < numChannels());
-	m_channels[index].setName(name);
-}
-
-inline TqUint CqImage::channelType(TqInt index) const
-{
-	assert(index < numChannels());
-	return(m_channels[index].type());
-}
-
-inline void CqImage::setChannelType(TqInt index, TqUint type)
-{
-	assert(index < numChannels());
-	m_channels[index].setType(type);
+	return m_realData->channelsInfo();
 }
 
 inline TqUint CqImage::numChannels() const
 {
-	return( m_channels.size() );
+	if(m_realData)
+		return(m_realData->channelsInfo().numChannels());
+	else
+		return 0;
 }
 
-inline void CqImage::addChannel(const std::string& name, TqUint type)
+inline boost::shared_ptr<const CqImageBuffer> CqImage::displayBuffer() const
 {
-	m_channels.push_back(CqImageChannel(name,type));
-}
-
-inline TqInt CqImage::elementSize() const
-{
-	return(m_elementSize);
-}
-
-inline TqInt CqImage::rowLength() const
-{
-	return(m_elementSize * m_imageWidth);
-}
-
-inline const boost::shared_array<unsigned char>& CqImage::data() const
-{
-	return( m_data );
+	return m_displayData;
 }
 
 inline TqUlong CqImage::originX() const
@@ -369,7 +329,7 @@ inline void CqImage::setImageSize(TqUlong imageWidth, TqUlong imageHeight)
 	m_imageHeight = imageHeight;
 }
 
-inline boost::mutex& CqImage::mutex()
+inline boost::mutex& CqImage::mutex() const
 {
 	return(m_mutex);
 }

@@ -23,7 +23,6 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include	"MultiTimer.h"
 
 #ifdef WIN32
 #include    <windows.h>
@@ -36,6 +35,7 @@
 #include	"renderer.h"
 
 #include	"bucket.h"
+#include	"multitimer.h"
 
 #include	<algorithm>
 #include	<valarray>
@@ -1315,4 +1315,5 @@ CqBucket::~CqBucket()
 }
 
 END_NAMESPACE( Aqsis )
+
 

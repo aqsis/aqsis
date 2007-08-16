@@ -55,7 +55,7 @@ __Basis	gLinearBasis	= {{  0.0f,       0.0f,       0.0f,       0.0f},
 
 
 //---------------------------------------------------------------------
-/** Default constructor for a cubic spline curve, defaults to bezier basis matrix.
+/** Default constructor for a cubic spline curve, defaults to Catmull-Rom basis matrix.
  */
 
 CqSplineCubic::CqSplineCubic( TqInt cu ) : m_matBasis( gCatmullRomBasis )

@@ -32,7 +32,9 @@ START_NAMESPACE( Aqsis )
 
 CqBook::CqBook( const std::string& name ) : m_name(name)
 {
-	m_framebuffer = boost::shared_ptr<CqFramebuffer>(new CqFramebuffer(100, 100, 3, name));
+	m_framebuffer = boost::shared_ptr<CqFramebuffer>(
+			new CqFramebuffer(CqFramebuffer::defaultWidth,
+				CqFramebuffer::defaultHeight, 3, name));
 	m_framebuffer->show();
 }
 

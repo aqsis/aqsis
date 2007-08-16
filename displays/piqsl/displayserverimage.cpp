@@ -1,7 +1,7 @@
 // Aqsis
 // Copyright © 1997 - 2001, Paul C. Gregory
 //
-// Contact: pgregory@aqsis.com
+// Contact: pgregory@aqsis.org
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public
@@ -20,7 +20,7 @@
 
 /** \file
 		\brief Implements an image class getting it's data from the Dspy server.
-		\author Paul C. Gregory (pgregory@aqsis.com)
+		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
 
@@ -104,116 +104,36 @@ void CompositeAlpha(TqInt r, unsigned char &R, unsigned char alpha )
 	R = Aqsis::clamp( R1, 0, 255 );
 }
 
+/// Do-nothing deleter for holding non-reference counted data in a boost::shared_ptr/array.
+void nullDeleter(const void*)
+{ }
 
 void CqDisplayServerImage::acceptData(TqUlong xmin, TqUlong xmaxplus1, TqUlong ymin, TqUlong ymaxplus1, TqInt elementSize, const unsigned char* bucketData )
 {
-	assert(elementSize == m_elementSize);
+	assert(elementSize == m_realData->bytesPerPixel());
 
-	TqUlong xmin__ = Aqsis::max((xmin - originX()), 0UL);
-	TqUlong ymin__ = Aqsis::max((ymin - originY()), 0UL);
-	TqUlong xmaxplus1__ = Aqsis::min((xmaxplus1 - originX()), imageWidth());
-	TqUlong ymaxplus1__ = Aqsis::min((ymaxplus1 - originY()), imageWidth());
-	TqUlong bucketlinelen = elementSize * (xmaxplus1 - xmin); 
-	TqUlong realLineLen = m_elementSize * imageWidth();
+	TqUint xmin__ = Aqsis::max((xmin - originX()), 0UL);
+	TqUint ymin__ = Aqsis::max((ymin - originY()), 0UL);
+	TqUint xmaxplus1__ = Aqsis::min((xmaxplus1 - originX()), imageWidth());
+	TqUint ymaxplus1__ = Aqsis::min((ymaxplus1 - originY()), imageWidth());
 	
 	boost::mutex::scoped_lock lock(mutex());
 
-	const unsigned char* pdatarow = bucketData;
-	// Calculate where in the bucket we are starting from if the window is cropped.
-	TqInt row = 0;
-	if(originY() > static_cast<TqUlong>(ymin))
-		row = originY() - ymin;
-	TqInt col = 0;
-	if(originX() > static_cast<TqUlong>(xmin))
-		col = originX() - xmin;
-	pdatarow += (row * bucketlinelen) + (col * elementSize);
+	/// \todo: Check that this all works with cropped images...
 
-	if( data() && xmin__ >= 0 && ymin__ >= 0 && xmaxplus1__ <= imageWidth() && ymaxplus1__ <= imageHeight() )
+	if(m_realData && m_displayData && xmin__ >= 0 && ymin__ >= 0
+			&& xmaxplus1__ <= imageWidth() && ymaxplus1__ <= imageHeight())
 	{
-		TqUlong y;
-		boost::shared_array<unsigned char> unrolled = m_data;
-		boost::shared_array<unsigned char> realData = m_realData;
+		// The const_cast below is ugly, but I don't see how to avoid it
+		// without some notion of "const constructor" which isn't present in
+		// C++
+		const CqImageBuffer bucketBuf(m_realData->channelsInfo(),
+				boost::shared_array<TqUchar>(const_cast<TqUchar*>(bucketData), nullDeleter),
+				xmaxplus1__ - xmin__, ymaxplus1__ - ymin__);
 
-		for ( y = ymin__; y < ymaxplus1__; y++ )
-		{
-			TqUlong x;
-			const unsigned char* _pdatarow = pdatarow;
-			for ( x = xmin__; x < xmaxplus1__; x++ )
-			{
-				TqInt displayOffset = numChannels() * (( y * imageWidth() ) +  x );
-				TqInt storageOffset = (( y * realLineLen ) + ( x * m_elementSize ) );
-				TqUchar alpha = 255;
-				/// \todo: Work out how to read alpha from the bucket data, taking into account sizes.
-				for(TqChannelList::const_iterator channel = m_channels.begin(); channel != m_channels.end(); ++channel)
-				{
-					switch(channel->type())
-					{
-						case PkDspyUnsigned16:
-						{
-							const TqUshort *svalue = reinterpret_cast<const TqUshort *>(_pdatarow);
-							reinterpret_cast<TqUshort*>(&realData[storageOffset])[0] = svalue[0];
-							CompositeAlpha((TqInt) (svalue[0]>>8), unrolled[displayOffset], alpha);
-							_pdatarow += sizeof(TqUshort);
-							storageOffset += sizeof(TqUshort);
-						}
-						break;
-						case PkDspySigned16:
-						{
-							const TqShort *svalue = reinterpret_cast<const TqShort *>(_pdatarow);
-							reinterpret_cast<TqShort*>(&realData[storageOffset])[0] = svalue[0];
-							CompositeAlpha((TqInt) (svalue[0]>>7), unrolled[displayOffset], alpha);
-							_pdatarow += sizeof(TqShort);
-							storageOffset += sizeof(TqShort);
-						}
-						break;
-						case PkDspyUnsigned32:
-						{
+		m_realData->copyFrom(bucketBuf, xmin__, ymin__);
+		m_displayData->compositeOver(bucketBuf, m_displayMap, xmin__, ymin__);
 
-							const TqUlong *lvalue = reinterpret_cast<const TqUlong *>(_pdatarow);
-							reinterpret_cast<TqUlong*>(&realData[storageOffset])[0] = lvalue[0];
-							CompositeAlpha((TqInt) (lvalue[0]>>24), unrolled[displayOffset], alpha);
-							_pdatarow += sizeof(TqUlong);
-							storageOffset += sizeof(TqUlong);
-						}
-						break;
-						case PkDspySigned32:
-						{
-
-							const TqLong *lvalue = reinterpret_cast<const TqLong *>(_pdatarow);
-							reinterpret_cast<TqLong*>(&realData[storageOffset])[0] = lvalue[0];
-							CompositeAlpha((TqInt) (lvalue[0]>>23), unrolled[displayOffset], alpha);
-							_pdatarow += sizeof(TqLong);
-							storageOffset += sizeof(TqLong);
-						}
-						break;
-
-						case PkDspyFloat32:
-						{
-							const TqFloat *fvalue = reinterpret_cast<const TqFloat *>(_pdatarow);
-							reinterpret_cast<TqFloat*>(&realData[storageOffset])[0] = fvalue[0];
-							CompositeAlpha((TqInt) (fvalue[0]*255.0), unrolled[displayOffset], alpha);
-							_pdatarow += sizeof(TqFloat);
-							storageOffset += sizeof(TqFloat);
-						}
-						break;
-
-						case PkDspySigned8:
-						case PkDspyUnsigned8:
-						default:
-						{
-							const TqUchar *cvalue = reinterpret_cast<const TqUchar *>(_pdatarow);
-							reinterpret_cast<TqUchar*>(&realData[storageOffset])[0] = cvalue[0];
-							CompositeAlpha((TqInt) cvalue[0], unrolled[displayOffset], alpha);
-							_pdatarow += sizeof(TqUchar);
-							storageOffset += sizeof(TqUchar);
-						}
-						break;
-					}
-					++displayOffset;
-				}
-			}
-			pdatarow += bucketlinelen;
-		}
 		if(m_updateCallback)
 			m_updateCallback(xmin__, ymin__, xmaxplus1__-xmin__, ymaxplus1__-ymin__);
 	}
@@ -275,9 +195,9 @@ TiXmlElement* CqDisplayServerImage::serialiseToXML()
 	{
 		TiXmlElement* dataXML = new TiXmlElement("Bitmap");
 		std::stringstream base64Data;
-		size_t dataLen = m_imageWidth * m_imageHeight * numChannels() * sizeof(TqUchar);
-		std::copy(	base64_text(BOOST_MAKE_PFTO_WRAPPER(m_data.get())), 
-					base64_text(BOOST_MAKE_PFTO_WRAPPER(m_data.get() + dataLen)), 
+		size_t dataLen = m_displayData->width() * m_displayData->height() * numChannels() * sizeof(TqUchar);
+		std::copy(	base64_text(BOOST_MAKE_PFTO_WRAPPER(m_displayData->rawData().get())), 
+					base64_text(BOOST_MAKE_PFTO_WRAPPER(m_displayData->rawData().get() + dataLen)), 
 					std::ostream_iterator<char>(base64Data));
 		TiXmlText* dataTextXML = new TiXmlText(base64Data.str());
 		dataTextXML->SetCDATA(true);
@@ -293,29 +213,6 @@ TiXmlElement* CqDisplayServerImage::serialiseToXML()
 	}
 
 	return(imageXML);
-}
-
-void CqDisplayServerImage::reorderChannels()
-{
-	// If there are "r", "g", "b" and "a" channels, ensure they
-	// are in the expected order.
-	const char* elements[] = { "r", "g", "b", "a" };
-	TqInt numElements = sizeof(elements) / sizeof(elements[0]);
-	for(int elementIndex = 0; elementIndex < numElements; ++elementIndex)
-	{
-		for(TqChannelList::iterator channel = m_channels.begin(); channel != m_channels.end(); ++channel)
-		{
-			// If this entry in the channel list matches one in the expected list, 
-			// move it to the right point in the channel list.
-			if(channel->name() == elements[elementIndex])
-			{
-				CqImageChannel temp = m_channels[elementIndex];
-				m_channels[elementIndex] = *channel;
-				*channel = temp;
-				break;
-			}
-		}
-	}
 }
 
 END_NAMESPACE( Aqsis )

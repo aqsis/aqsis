@@ -268,7 +268,7 @@ int	CqSocket::sendData(const std::string& data) const
 int	CqSocket::recvData(std::stringstream& buffer) const
 {
 	char c;
-	int count, total;
+	int count, total = 0;
 
 	// Read a message
 	while(1)	

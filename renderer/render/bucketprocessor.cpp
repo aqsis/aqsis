@@ -19,7 +19,7 @@
  */
 
 #include	"bucket.h"
-#include	"MultiTimer.h"
+#include	"multitimer.h"
 
 #include	"bucketprocessor.h"
 
@@ -86,7 +86,7 @@ void CqBucketProcessor::preProcess(const CqVector2D& pos, const CqVector2D& size
 
 	if ( !m_initiallyEmpty )
 	{
-		TIME_SCOPE("Occlusion culling");
+		TIME_SCOPE("Occlusion culling initialisation");
 		m_bucketData.setupOcclusionHierarchy(m_bucket);
 	}
 }

@@ -23,7 +23,7 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include	"MultiTimer.h"
+#include	"multitimer.h"
 
 #include	"aqsis.h"
 
@@ -2133,4 +2133,5 @@ void CqEnvironmentMap::SampleMap( CqVector3D& R1,
 }
 
 END_NAMESPACE( Aqsis )
+
 

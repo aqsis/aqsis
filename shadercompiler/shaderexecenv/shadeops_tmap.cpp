@@ -1192,6 +1192,12 @@ class BakingChannel
 			{
 				FILE * file = fopen ( filename, "a" );
 				float *f = data;
+				if (!fseek(file, 0, SEEK_END) && ftell(file) == 0)
+				{
+					// write once the header part
+					fprintf ( file, "Aqsis bake file\n");
+					fprintf ( file, "%d\n", elsize - 2);
+				}
 				for ( int i = 0; i < buffered; ++i, f += elsize )
 				{
 					for ( int j = 0; j < elsize; ++j )

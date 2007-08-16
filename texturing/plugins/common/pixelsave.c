@@ -23,6 +23,8 @@ void save_tiff( char *filename,
 	TIFF* ptex = TIFFOpen( filename, "w" );
 	struct tm  *ct;
 	int    year;
+	int   bake = 0;
+	int linewidth;
 
 	time_t long_time;
 
@@ -41,25 +43,37 @@ void save_tiff( char *filename,
 	/* Write the some form of version */
 	sprintf( version, "%s conversion for AQSIS", conversion );
 
+	if (conversion && strstr(conversion, "bake2tif"))
+		bake = 1;
+
 	TIFFSetField( ptex, TIFFTAG_SOFTWARE, ( char* ) version );
 	TIFFSetField( ptex, TIFFTAG_IMAGEWIDTH, width );
 	TIFFSetField( ptex, TIFFTAG_IMAGELENGTH, length );
 	TIFFSetField( ptex, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG );
-	TIFFSetField( ptex, TIFFTAG_BITSPERSAMPLE, 8 );
+	if (bake)
+		TIFFSetField( ptex, TIFFTAG_BITSPERSAMPLE, 32 );
+	else
+		TIFFSetField( ptex, TIFFTAG_BITSPERSAMPLE, 8 );
 	TIFFSetField( ptex, TIFFTAG_SAMPLESPERPIXEL, samples );
 	TIFFSetField( ptex, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT );
-	TIFFSetField( ptex, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT );
+	if (bake)
+		TIFFSetField( ptex, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP );
+	else
+		TIFFSetField( ptex, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT );
 	TIFFSetField( ptex, TIFFTAG_COMPRESSION, COMPRESSION_PACKBITS );
 	TIFFSetField( ptex, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB );
 	TIFFSetField( ptex, TIFFTAG_ROWSPERSTRIP, 1 );
 	TIFFSetField( ptex, TIFFTAG_DATETIME, datetime);
 
-
+	linewidth = width * samples;
+	if (bake)
+		linewidth *= sizeof(float);
 	for ( i = 0; i < length; i++ )
 	{
 		TIFFWriteScanline( ptex, pdata, i, 0 );
-		pdata += ( width * samples );
+		pdata += linewidth;
 	}
-	TIFFWriteDirectory( ptex );
+	if (!bake)
+		TIFFWriteDirectory( ptex );
 	TIFFClose( ptex );
 }

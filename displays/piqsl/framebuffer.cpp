@@ -1,7 +1,7 @@
 // Aqsis
 // Copyright © 1997 - 2001, Paul C. Gregory
 //
-// Contact: pgregory@aqsis.com
+// Contact: pgregory@aqsis.org
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public
@@ -20,7 +20,7 @@
 
 /** \file
 		\brief Implements the basic framebuffer functionality.
-		\author Paul C. Gregory (pgregory@aqsis.com)
+		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
 #include	<boost/bind.hpp>
@@ -33,10 +33,16 @@ void Fl_FrameBuffer_Widget::draw()
 {
 	Fl::lock();
 	if(m_image)
-		fl_draw_image(m_image->data().get(),x(),y(),
-			m_image->imageWidth(),m_image->imageHeight(),
-			m_image->numChannels(),
-			m_image->imageWidth()*m_image->numChannels()); // draw image
+	{
+		boost::shared_ptr<const Aqsis::CqImageBuffer> buf = m_image->displayBuffer();
+		if(buf)
+		{
+			fl_draw_image(buf->rawData().get(), x(), y(),
+				buf->width(), buf->height(),
+				buf->numChannels(),
+				buf->width()*buf->numChannels()); // draw image
+		}
+	}
 	else
 	{
 		fl_draw_box(FL_FLAT_BOX, x(), y(), w(), h(), FL_BACKGROUND_COLOR);
@@ -58,7 +64,7 @@ Fl_Menu_Item CqFramebuffer::m_popupMenuItems[] = {
 };
 
 
-void piqsl_cb(Fl_Widget* w, void* v)
+void piqsl_cb(Fl_Widget* /*w*/, void* /*v*/)
 {
 	Fl::lock();
 	if(window)
@@ -66,23 +72,50 @@ void piqsl_cb(Fl_Widget* w, void* v)
 	Fl::unlock();
 }
 
-CqFramebuffer::CqFramebuffer(TqUlong width, TqUlong height, TqInt depth, const std::string& bookName) : m_doResize(false), m_bookName(bookName)
+const int CqFramebuffer::defaultWidth = 400;
+const int CqFramebuffer::defaultHeight = 300;
+
+CqFramebuffer::CqFramebuffer(TqUlong width, TqUlong height, TqInt depth,
+		const std::string& bookName) : 
+	Fl_Double_Window(width+20, height, bookName.c_str()),
+	m_doResize(false),
+	m_title(bookName),
+	m_bookName(bookName),
+	m_keyHeld(false)
 {
 	Fl::lock();
-	m_theWindow = new Fl_Window(width, height);
+	size_range(400, 300); // restrict min size
+	// I was going to make a toolbar, but I decided to disable it for now
+//	m_theWindow = new Fl_Window(width, height+16);
+	
+//	Fl_Pack *vpack = new Fl_Pack(0, 0, width, height);
+//	vpack->type(Fl_Pack::VERTICAL);
+
+//	Fl_Pack *toolbar_pck = new Fl_Pack(0,0, width, 30);
+//	toolbar_pck->type(Fl_Pack::HORIZONTAL);
+//	Fl_Button *but1 = new Fl_Button(0,0, 100,30, "Red");
+//	but1->image(new Fl_PNG_Image("red_chan.png"));
+//	Fl_Button *but2 = new Fl_Button(0,0, 100,30, "Green");
+//	but2->image(new Fl_PNG_Image("green_chan.png"));
+//	Fl_Button *but3 = new Fl_Button(0,0, 100,30, "Blue");
+//	but3->image(new Fl_PNG_Image("blue_chan.png"));
+//	toolbar_pck->end();
+//	toolbar_pck->resizable(toolbar_pck);
 	boost::shared_ptr<CqImage> t;
+	m_scroll = new Fl_Scroll(0, 0, width+20, height);
 	m_uiImageWidget = new Fl_FrameBuffer_Widget(0,0, width, height, t);
-	m_theWindow->resizable(m_uiImageWidget);
+	m_scroll->end();
+
 	Fl::visual(FL_RGB);
 	m_popupMenu = new Fl_Menu_Button(0,0,width, height, "");
 	m_popupMenu->type(Fl_Menu_Button::POPUP3);
 	m_popupMenu->box(FL_NO_BOX);
 	m_popupMenu->menu(m_popupMenuItems); 
-	m_theWindow->resizable(m_popupMenu);
-	m_title = bookName;
-	m_theWindow->label(m_title.c_str());
-	m_theWindow->end();
-	m_theWindow->show();
+
+	resizable(m_scroll);
+
+	end();
+	Fl_Window::show();
 	Fl::unlock();
 }
 
@@ -90,15 +123,93 @@ CqFramebuffer::~CqFramebuffer()
 {
 	Fl::lock();
 	disconnect();
-	m_theWindow->hide();
-	delete m_theWindow;
+	//hide();
+	//delete m_theWindow;
 	Fl::unlock();
+}
+
+// Event handler for the framebuffer
+int CqFramebuffer::handle(int event)
+{
+	switch(event)
+	{
+		case FL_FOCUS:
+			return 1;
+		case FL_UNFOCUS:
+			return 1;
+		case FL_KEYDOWN:
+			if (!m_keyHeld)
+			{
+				m_keyHeld = true;
+				//std::cout << "Key: " << Fl::event_key() << " down" << std::endl;
+				switch (Fl::event_key())
+				{
+					case 'r':
+						//std::cout << "Red channel toggle" << std::endl;
+						return 1;
+					case 'h':
+						// 'Home' widget back to center
+						centerImageWidget();
+						m_scroll->redraw();
+						return 1;
+				}
+			}
+			break;
+
+		case FL_KEYUP:
+			m_keyHeld = false;
+			switch (Fl::event_key())
+			{
+				case 'r':
+					//std::cout << "R up" << std::endl;
+					return 1;
+			}
+			break;
+
+		case FL_PUSH:
+			switch (Fl::event_button())
+			{
+				case FL_MIDDLE_MOUSE:
+					// pan
+					m_lastPos[0] = Fl::event_x();
+					m_lastPos[1] = Fl::event_y();
+					return 1;
+
+			}
+			break;
+		case FL_RELEASE:
+			switch (Fl::event_button())
+			{
+				case FL_MIDDLE_MOUSE:
+					fl_cursor(FL_CURSOR_DEFAULT, FL_FOREGROUND_COLOR,
+							FL_BACKGROUND_COLOR);
+					return 1;
+			}
+			break;
+		case FL_DRAG:
+			switch (Fl::event_button())
+			{
+				case FL_MIDDLE_MOUSE:
+					fl_cursor(FL_CURSOR_MOVE, FL_FOREGROUND_COLOR,
+							FL_BACKGROUND_COLOR);
+					int dx = Fl::event_x() - m_lastPos[0];
+					int dy = Fl::event_y() - m_lastPos[1];
+					m_uiImageWidget->position(m_uiImageWidget->x() + dx,
+							m_uiImageWidget->y()+dy);
+					m_scroll->redraw();
+					m_lastPos[0] = Fl::event_x();
+					m_lastPos[1] = Fl::event_y();
+					return 1;
+			}
+			break;
+	}
+	return Fl_Window::handle(event);
 }
 
 void CqFramebuffer::show()
 {
 	Fl::lock();
-	m_theWindow->show();
+	Fl_Window::show();
 	Fl::unlock();
 }
 
@@ -109,6 +220,9 @@ void CqFramebuffer::connect(boost::shared_ptr<CqImage>& image)
 	Fl::lock();
 	m_uiImageWidget->setImage(image);
 	queueResize();
+
+	// update window title
+
 	boost::function<void(int,int,int,int)> f;
 	f = boost::bind(&CqFramebuffer::update, this, _1, _2, _3, _4);
 	image->setUpdateCallback(f);
@@ -123,7 +237,7 @@ void CqFramebuffer::disconnect()
 		boost::function<void(int,int,int,int)> f;
 		m_associatedImage->setUpdateCallback(f);
 	}
-	m_theWindow->label("");
+	//label("");
 	boost::shared_ptr<CqImage> t;
 	m_associatedImage = t;
 	m_uiImageWidget->setImage(t);
@@ -138,13 +252,30 @@ void CqFramebuffer::queueResize()
 	Fl::unlock();
 }
 
+void CqFramebuffer::resize(int X, int Y, int W, int H)
+{
+	// is the window actually getting resized? (might just be moved)
+	bool isResizing = W != w() || H != h();
+	// call parent's resize()
+	Fl_Double_Window::resize(X, Y, W, H);
+	if(isResizing)
+		centerImageWidget();
+}
+
+void CqFramebuffer::centerImageWidget()
+{
+	m_uiImageWidget->position(
+			(m_scroll->w() - m_uiImageWidget->w())/2,
+			(m_scroll->h() - m_uiImageWidget->h())/2);
+}
+
 void CqFramebuffer::resize()
 {
 	Fl::lock();
 	std::stringstream title;
 	title << m_bookName;
-	int fw = 100;
-	int fh = 100;
+	int fw = defaultWidth;
+	int fh = defaultHeight;
 	if(m_associatedImage)
 	{
 		if(m_associatedImage->frameWidth() > 0 && m_associatedImage->frameHeight() > 0)
@@ -152,12 +283,14 @@ void CqFramebuffer::resize()
 			fw = m_associatedImage->frameWidth();
 			fh = m_associatedImage->frameHeight();
 		}
-		title << ":" << m_associatedImage->name();
+		title << ": " << m_associatedImage->name();
 	}
-	m_theWindow->size(fw, fh);
+	m_uiImageWidget->size(fw, fh);
+	centerImageWidget();
+	redraw();
 
 	m_title = title.str();
-	m_theWindow->label(m_title.c_str());
+	label(m_title.c_str());
 	m_doResize = false;
 	Fl::unlock();
 }
@@ -166,9 +299,10 @@ void CqFramebuffer::update(int X, int Y, int W, int H)
 {
 	Fl::lock();
 	if(W < 0 || H < 0 || X < 0 || Y < 0)
-		m_uiImageWidget->damage(1);
+		m_uiImageWidget->damage(FL_DAMAGE_SCROLL);
 	else
-		m_uiImageWidget->damage(1, X, Y, W, H);
+		m_uiImageWidget->damage(FL_DAMAGE_SCROLL, m_uiImageWidget->x() + X,
+				m_uiImageWidget->y() + Y, W, H);
 	Fl::awake();
 	Fl::unlock();
 }

@@ -19,29 +19,26 @@
 
 
 /** \file
-		\brief Implements the default display devices for Aqsis.
-		\author Paul C. Gregory (pgregory@aqsis.org)
+		\brief Declares classes required for the flexible performance timers.
+		\author	Paul C. Gregory - originally based on code published on the CodeProject site
+				http://www.codeproject.com/debug/multitimer.asp
 */
 
-#ifndef	PIQSL_H_INCLUDED
-#define	PIQSL_H_INCLUDED
+#include "aqsis.h"
 
-#include <aqsis.h>
-//#include <../display.h>
+#if USE_TIMERS
 
-#include <FL/Fl.H>
-#include <FL/Fl_Window.H>
-#include <FL/Fl_Box.H>
-#include <FL/Fl_Image.H>
-#include <FL/fl_draw.H>
+#include "multitimer_system.h"
+#include "exception.h"
 
-#include <map>
+namespace Aqsis {
 
+void CqHiFreqTimer::SqTimingDetails::Setup()
+{
+	perFreq = (double)CLOCKS_PER_SEC/1000.0;
+	nextTimer = curBase = curManualBase = 0;
+}
 
-START_NAMESPACE( Aqsis )
+} // namespace Aqsis
 
-//-----------------------------------------------------------------------
-
-END_NAMESPACE( Aqsis )
-
-#endif	//	PIQSL_H_INCLUDED
+#endif

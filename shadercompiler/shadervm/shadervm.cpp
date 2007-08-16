@@ -25,7 +25,7 @@
 
 #include	"aqsis.h"
 
-#include	"MultiTimer.h"
+#include	"multitimer.h"
 
 #include	<iostream>
 

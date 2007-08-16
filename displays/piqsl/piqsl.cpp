@@ -1,7 +1,7 @@
 // Aqsis
 // Copyright © 1997 - 2001, Paul C. Gregory
 //
-// Contact: pgregory@aqsis.com
+// Contact: pgregory@aqsis.org
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public
@@ -20,7 +20,7 @@
 
 /** \file
 		\brief Implements the default display devices for Aqsis.
-		\author Paul C. Gregory (pgregory@aqsis.com)
+		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
 #include	"aqsis.h"
@@ -207,13 +207,12 @@ class CqDataHandler
 						}
 					}
 					child = root->FirstChildElement("Formats");
+					CqChannelInfoList channelList;
 					if(child)
 					{
-						//int channels = 0;
 						TiXmlElement* format = child->FirstChildElement("Format");
 						while(format)
 						{
-							//++channels;
 							// Read the format type from the node.
 							const char* typeName = format->GetText();
 							const char* formatName = format->Attribute("name");
@@ -221,22 +220,22 @@ class CqDataHandler
 							std::map<std::string, TqInt>::iterator type;
 							if((type = g_mapNameToType.find(typeName)) != g_mapNameToType.end())
 								typeID = type->second;
-							m_client->addChannel(formatName, typeID);
+							channelList.addChannel(SqChannelInfo(formatName, chanFormatFromPkDspy(typeID)));
 
 							format = format->NextSiblingElement("Format");
 						}
 						// Ensure that the formats are in the right order.
-						m_client->reorderChannels();
+						channelList.reorderChannels();
 						// Send the reorganised formats back.
 						TiXmlDocument doc("formats.xml");
 						TiXmlDeclaration* decl = new TiXmlDeclaration("1.0","","yes");
 						TiXmlElement* formatsXML = new TiXmlElement("Formats");
-						TqUint ichannel;
-						for( ichannel = 0; ichannel < m_client->numChannels(); ++ichannel)
+						for(CqChannelInfoList::const_iterator ichan = channelList.begin();
+								ichan != channelList.end(); ++ichan)
 						{
 							TiXmlElement* formatv = new TiXmlElement("Format");
-							formatv->SetAttribute("name", m_client->channelName(ichannel));
-							TiXmlText* formatText = new TiXmlText(g_mapTypeToName[m_client->channelType(ichannel)]);
+							formatv->SetAttribute("name", ichan->name);
+							TiXmlText* formatText = new TiXmlText(g_mapTypeToName[pkDspyFromChanFormat(ichan->type)]);
 							formatv->LinkEndChild(formatText); 
 							formatsXML->LinkEndChild(formatv);
 						}
@@ -244,9 +243,8 @@ class CqDataHandler
 						doc.LinkEndChild(formatsXML);
 						sendXMLMessage(doc);
 					}
-					m_client->PrepareImageBuffer();
+					m_client->prepareImageBuffers(channelList);
 
-					boost::shared_ptr<CqImage> baseImage = boost::static_pointer_cast<CqImage>(m_client);
 					window->currentBook()->framebuffer()->queueResize();
 					Fl::awake();
 					window->currentBook()->framebuffer()->update();
@@ -328,11 +326,6 @@ void HandleConnection(int sock, void *data)
 	}
 }
 
-// Macros to initialise the type/name name/type maps.
-#define	INIT_TYPE_NAME_MAPS(name) \
-g_mapNameToType[#name] = name; \
-g_mapTypeToName[name] = #name;
-
 int main( int argc, char** argv )
 {
 	Fl::lock();
@@ -405,6 +398,11 @@ int main( int argc, char** argv )
 		std::auto_ptr<std::streambuf> use_syslog( new Aqsis::syslog_buf(std::cerr) );
 #endif  // AQSIS_SYSTEM_POSIX
 
+// Macros to initialise the type/name name/type maps.
+#	define	INIT_TYPE_NAME_MAPS(name) \
+	g_mapNameToType[#name] = name; \
+	g_mapTypeToName[name] = #name;
+
 	// Fill in the typenames maps
 	INIT_TYPE_NAME_MAPS(PkDspyFloat32);
 	INIT_TYPE_NAME_MAPS(PkDspyUnsigned32);
@@ -415,6 +413,8 @@ int main( int argc, char** argv )
 	INIT_TYPE_NAME_MAPS(PkDspySigned8);
 	INIT_TYPE_NAME_MAPS(PkDspyString);
 	INIT_TYPE_NAME_MAPS(PkDspyMatrix);
+
+#	undef INIT_TYPE_NAME_MAPS
 
 	int portno = atoi(g_strPort.c_str());
 	CqSocket::initialiseSockets();

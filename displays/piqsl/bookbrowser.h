@@ -1,7 +1,7 @@
 // Aqsis
 // Copyright © 1997 - 2001, Paul C. Gregory
 //
-// Contact: pgregory@aqsis.com
+// Contact: pgregory@aqsis.org
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public
@@ -24,7 +24,7 @@
 		provide sizeable columns. The class extends Fl_Browser_ and implements the item_*
 		functions to read list data directly from the CqBook class that
 		is associated with it.
-		\author Paul C. Gregory (pgregory@aqsis.com)
+		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
 //? Is bookbrowser.h included already?
@@ -115,6 +115,12 @@ inline CqBookBrowser::CqBookBrowser(int X,int Y,int W,int H,const char*L) :
 {
 	m_nowidths[0] = 0;
 	m_widths      = m_nowidths;
+	// this is the text color of a deselected tab
+	labelcolor(FL_FOREGROUND_COLOR);
+	// this is the background color of a deselected tab
+	// and deselected list entry
+	selection_color(FL_BACKGROUND_COLOR);
+	
 }
 
 
