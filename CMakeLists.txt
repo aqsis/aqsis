@@ -4,6 +4,7 @@ SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules")
 
 INCLUDE(OutOfSourceBuild)
 
+INCLUDE(FindWin32Libs)
 INCLUDE(FindTIFF)
 INCLUDE(FindBoost)
 INCLUDE(FindZLIB)
@@ -79,29 +80,43 @@ SET(INCLUDEDIR "include/aqsis" CACHE STRING "Install location for aqsis header f
 SET(CONTENTDIR "content" CACHE STRING "Install location for content (relative to CMAKE_INSTALL_PREFIX)")
 SET(SCRIPTSDIR "scripts" CACHE STRING "Install location for scripts (relative to CMAKE_INSTALL_PREFIX)")
 
-SUBDIRS(argparse)
-SUBDIRS(rib/api)
-SUBDIRS(rib/rib2)
-SUBDIRS(rib/rib2ri)
-SUBDIRS(renderer/ddmanager)
-SUBDIRS(renderer/raytrace)
-SUBDIRS(shadercompiler/shaderexecenv)
-SUBDIRS(aqsistypes)
-SUBDIRS(shadercompiler/shadervm)
-SUBDIRS(renderer/render)
-SUBDIRS(renderer/aqsis)
-SUBDIRS(shadercompiler/slpp)
-SUBDIRS(shadercompiler/slparse)
-SUBDIRS(shadercompiler/codegenvm)
-SUBDIRS(shadercompiler/aqsl)
-SUBDIRS(shadercompiler/slxargs)
-SUBDIRS(shadercompiler/aqsltell)
-SUBDIRS(rib/ri2rib)
-SUBDIRS(texturing/teqser)
-SUBDIRS(displays/display)
-SUBDIRS(thirdparty/tinyxml)
-SUBDIRS(displays/piqsl)
-SUBDIRS(displays/d_exr)
+
+ADD_SUBDIRECTORY(argparse)
+ADD_SUBDIRECTORY(rib/api)
+ADD_SUBDIRECTORY(rib/rib2)
+ADD_SUBDIRECTORY(rib/rib2ri)
+ADD_SUBDIRECTORY(renderer/ddmanager)
+ADD_SUBDIRECTORY(renderer/raytrace)
+ADD_SUBDIRECTORY(shadercompiler/shaderexecenv)
+ADD_SUBDIRECTORY(aqsistypes)
+ADD_SUBDIRECTORY(shadercompiler/shadervm)
+ADD_SUBDIRECTORY(renderer/render)
+ADD_SUBDIRECTORY(renderer/aqsis)
+ADD_SUBDIRECTORY(shadercompiler/slpp)
+ADD_SUBDIRECTORY(shadercompiler/slparse)
+ADD_SUBDIRECTORY(shadercompiler/codegenvm)
+ADD_SUBDIRECTORY(shadercompiler/aqsl)
+ADD_SUBDIRECTORY(shadercompiler/slxargs)
+ADD_SUBDIRECTORY(shadercompiler/aqsltell)
+ADD_SUBDIRECTORY(rib/ri2rib)
+ADD_SUBDIRECTORY(texturing/teqser)
+ADD_SUBDIRECTORY(displays/display)
+ADD_SUBDIRECTORY(thirdparty/tinyxml)
+ADD_SUBDIRECTORY(displays/piqsl)
+ADD_SUBDIRECTORY(displays/d_exr)
+
+#
+# Build aqsisrc
+#
+GET_DIRECTORY_PROPERTY(display_DISPLAYLIB DIRECTORY displays/display DEFINITION DISPLAYLIB)
+GET_DIRECTORY_PROPERTY(piqsl_DISPLAYLIB DIRECTORY displays/piqsl DEFINITION DISPLAYLIB)
+GET_DIRECTORY_PROPERTY(d_exr_DISPLAYLIB DIRECTORY displays/d_exr DEFINITION DISPLAYLIB)
+CONFIGURE_FILE(aqsisrc.in.cmake ${PROJECT_BINARY_DIR}/aqsisrc)
+ADD_CUSTOM_TARGET(aqsisrc ALL echo
+	DEPENDS  ${PROJECT_BINARY_DIR}/aqsisrc
+	)
+INSTALL(FILES ${PROJECT_BINARY_DIR}/aqsisrc DESTINATION ${SYSCONFDIR})
+
 #
 # Packaging setup
 #
