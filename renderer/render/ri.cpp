@@ -5723,6 +5723,9 @@ RtVoid	RiReadArchiveV( RtToken name, RtArchiveCallback callback, PARAMETERLIST )
 			librib::SetParserState( currstate );
 			fclose(file);
 		}
+	} else 
+	{
+		Aqsis::log() << error << "Cannot open file \"" << fileArchive.strRealName().c_str() << "\"" << std::endl;
 	}
 }
 
