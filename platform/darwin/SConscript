@@ -15,7 +15,7 @@ else:
 #env.AppendUnique(CCFLAGS=['-O3', '-faltivec', '-finline-functions', '-ffast-math', '-fno-common'])
 
 env.AppendUnique(CPPPATH = [env.Dir('#/aqsistypes/posix')])
-env.AppendUnique(CPPDEFINES=[('NDEBUG', '1'), ('PLUGINS', '1'), ('USE_TIMERS', 1), ('_CLOCKTICKS', '1')])
+env.AppendUnique(CPPDEFINES=[('NDEBUG', '1'), ('PLUGINS', '1'), ('_CLOCKTICKS', '1')])
 
 # Find out where the Boost headers are, look in common places for Fink and MacPorts.
 boostiofile = env.FindFile('io_fwd.hpp', ['$boost_include_path', '/usr/local/include/boost', '/opt/local/include/boost'])
