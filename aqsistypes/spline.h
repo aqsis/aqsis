@@ -116,7 +116,7 @@ struct SqSplineBasis
 
 typedef SqSplineBasis TqSplineTypes[6];
 
-extern TqSplineTypes splineTypes;
+extern COMMON_SHARE TqSplineTypes splineTypes;
 
 template <class T>
 inline CqCubicSpline<T>::~CqCubicSpline()
