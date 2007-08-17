@@ -19,121 +19,236 @@
 
 
 /** \file
-		\brief Declares the CqSplineCubic class for generic spline functionality.
+		\brief Declares the CqCubicSpline class for generic spline functionality.
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-//? Is .h included already?
 #ifndef SPLINE_H_INCLUDED
 #define SPLINE_H_INCLUDED 1
 
-#include	<vector>
+#include "aqsis.h"
 
-#include	"aqsis.h"
+#include <vector>
 
-#include	"matrix.h"
-#include	"vector4d.h"
-#include	"sstring.h"
-
-#include	"logging.h"
+#include "sstring.h"
+#include "matrix.h"
 
 START_NAMESPACE( Aqsis )
 
-
-typedef	TqFloat	__Basis[ 4 ][ 4 ];
-
-extern __Basis	gBezierBasis;
-extern __Basis	gBSplineBasis;
-extern __Basis	gCatmullRomBasis;
-extern __Basis	gHermiteBasis;
-extern __Basis	gPowerBasis;
+enum EqSplineBasis
+{
+	SplineBasis_Bezier,
+	SplineBasis_BSpline,
+	SplineBasis_CatmullRom,
+	SplineBasis_Hermite,
+	SplineBasis_Power,	
+	SplineBasis_Linear,
+	SplineBasis_LAST,	//Marks the last element
+};
 
 
 //----------------------------------------------------------------------
-/** \class CqSplineCubic
+/** \class CqCubicSpline
  * Cubic spline curve
  */
-
-class COMMON_SHARE CqSplineCubic
+template <class T>
+class COMMON_SHARE CqCubicSpline
 {
 	public:
-		CqSplineCubic( TqInt cu = 4 );
-		virtual	~CqSplineCubic()
-		{}
+		CqCubicSpline( EqSplineBasis basis = SplineBasis_CatmullRom, TqUint reservePoints = 0 );
+		CqCubicSpline( const CqString& strBasis = "catmull-rom", TqUint reservePoints = 0 );
+		inline virtual ~CqCubicSpline();
 
-		virtual	CqVector4D	Evaluate( TqFloat t ) const;
-		virtual	void	InitFD( TqInt n );
-		virtual	CqVector4D	EvaluateFD();
-		virtual	TqInt	cSections() const;
+		typedef typename std::vector<T>::iterator iterator;
 
-		/** Get a reference to the array of control points.
+		/** Evaluate curve at a given time.
+		 * \param t time value.
 		 */
-		std::vector<CqVector4D>& aControlPoints()
-		{
-			return ( m_aControlPoints );
-		}
-		/** Get a reference to the cubic spline basis matrix.
-		 */
-		CqMatrix&	matBasis()
-		{
-			return ( m_matBasis );
-		}
+		virtual T evaluate( TqFloat t ) const;
+
 		/** Set the cubic spline basis matrix.
-		 * \param mat Basis matrix.
+		 * \param basis Basis name.
 		 */
-		void	SetmatBasis( CqMatrix& mat )
-		{
-			m_matBasis = mat;
-		}
-		/** Set the cubic spline basis matrix.
-		 * \param strName Basis name.
+		void setBasis( const EqSplineBasis basis );
+				
+		/** Add new a control point.
+		 * \param newPoint Control point.
 		 */
-		void	SetBasis( const CqString& strName );
+		void pushBack( const T newPoint );
+		
+		/** Removes all control points.
+		 */
+		inline void clear();
 
-		/** Get the control point step size for the evaluation window.
-		 * \return Integer step size.
-		 */
-		TqInt	Step() const
-		{
-			return ( m_Step );
-		}
-		/** Set the control point step size for the evaluation window.
-		 * \param Step Integer step size.
-		 */
-		void	SetStep( const TqInt Step )
-		{
-			m_Step = Step;
-		}
+		/** Returns the number of control points.
+		 */		
+		inline TqUint numControlPoints();
+		
+		inline iterator	begin();
+		inline iterator	end();
 
 		/** Indexed access to the control points.
 		 * \param i Integer index.
 		 */
-		CqVector4D&	operator[] ( TqInt i )
-		{
-			assert( i<m_cu );
-			return ( m_aControlPoints[ i ] );
-		}
-		/** Indexed access to the control points.
-		 * \param i Integer index.
+		inline const T& operator[] ( TqInt i ) const;
+
+	private:
+		CqMatrix m_basis;					///< Basis matrix.
+		TqInt m_step;						///< Evaluation window step size.
+		std::vector<T> m_controlPoints;		///< Array of control points.
+		
+		/** Returns the number of sections.
 		 */
-		const CqVector4D&	operator[] ( TqInt i ) const
-		{
-			assert( i<m_cu );
-			return ( m_aControlPoints[ i ] );
-		}
+		virtual TqInt numSections() const;
+};
 
-	protected:
-		CqMatrix	m_matBasis;						///< Basis matrix.
-		TqInt	m_Step;							///< Evaluation window step size.
-		TqInt	m_cu;							///< Number of control points.
-		std::vector<CqVector4D>	m_aControlPoints;		///< Array of 4D control points.
 
-		CqVector4D	m_vecFDPoint;					///< Forward difference evaluation parameters.
-		CqVector4D	m_vecFDDelta;					///< Forward difference evaluation parameters.
-		CqVector4D	m_vecFDDelta2;					///< Forward difference evaluation parameters.
-		CqVector4D	m_vecFDDelta3;					///< Forward difference evaluation parameters.
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+// Inline/Template function implementations
+
+struct SqSplineBasis
+{
+	TqChar* name;
+	TqInt step;
+	TqFloat basis[4][4];
+}; 
+
+typedef SqSplineBasis TqSplineTypes[6];
+
+extern TqSplineTypes splineTypes;
+
+template <class T>
+inline CqCubicSpline<T>::~CqCubicSpline()
+{}
+
+
+//---------------------------------------------------------------------
+/** Default constructor for a cubic spline curve, defaults to Catmull-Rom basis matrix.
+ */
+template <class T>
+CqCubicSpline<T>::CqCubicSpline( EqSplineBasis basis, TqUint reservePoints )
+{
+	m_basis = *splineTypes[ basis ].basis;
+	m_step = splineTypes[ basis ].step;
+
+	m_controlPoints.reserve( reservePoints );
 }
-;
+
+
+//---------------------------------------------------------------------
+/** Default constructor for a cubic spline curve, defaults to bezier basis matrix.
+ */
+template <class T>
+CqCubicSpline<T>::CqCubicSpline( const CqString& strBasis, TqUint reservePoints )
+{
+	TqUint basis = SplineBasis_CatmullRom; 
+	
+	for ( TqUint i=0; i<SplineBasis_LAST; ++i)
+	{
+		if ( splineTypes[ i ].name == strBasis )
+		{
+			basis = i;
+		}
+	}
+
+	m_basis = *splineTypes[ basis ].basis;
+	m_step = splineTypes[ basis ].step;
+
+	m_controlPoints.reserve( reservePoints );
+}
+
+
+//---------------------------------------------------------------------
+/** Evaluate a cubic spline curve at the specified time.
+ */
+template <class T>
+T CqCubicSpline<T>::evaluate( TqFloat t ) const
+{
+	TqFloat u = static_cast<TqFloat>( numSections() ) * t;
+	TqInt section = static_cast<TqInt>( u );
+	t = u - section;
+	TqInt iv = section * m_step;
+
+	T v0 = m_controlPoints[ 0 + iv ];
+	T v1 = m_controlPoints[ 1 + iv ];
+	T v2 = m_controlPoints[ 2 + iv ];
+	T v3 = m_controlPoints[ 3 + iv ];
+
+	T G0 = m_basis[0][0] * v0 + m_basis[0][1] * v1 + m_basis[0][2] * v2 + m_basis[0][3] * v3;
+	T G1 = m_basis[1][0] * v0 + m_basis[1][1] * v1 + m_basis[1][2] * v2 + m_basis[1][3] * v3;
+	T G2 = m_basis[2][0] * v0 + m_basis[2][1] * v1 + m_basis[2][2] * v2 + m_basis[2][3] * v3;
+	T G3 = m_basis[3][0] * v0 + m_basis[3][1] * v1 + m_basis[3][2] * v2 + m_basis[3][3] * v3;
+	
+	TqFloat t2 = t * t;
+	TqFloat t3 = t2 * t;
+
+	T result = t3 * G0 + t2 * G1 + t * G2 + G3;
+	
+	return result;
+}
+
+
+//---------------------------------------------------------------------
+/** Add new control point to the curve
+ */
+template <class T>
+void CqCubicSpline<T>::pushBack( const T newPoint )
+{
+	m_controlPoints.push_back( newPoint );
+}
+
+
+//---------------------------------------------------------------------
+/** Return the number of curve sections in the spline curve
+ */
+template <class T>
+TqInt CqCubicSpline<T>::numSections() const
+{
+	return ( ( ( m_controlPoints.size() - 4 ) / m_step ) + 1 );
+}
+
+
+//---------------------------------------------------------------------
+/* Set the cubic spline basis matrix.
+ */
+template <class T>
+void CqCubicSpline<T>::setBasis( const EqSplineBasis basis )
+{	
+	m_step = splineTypes[ basis ].step;
+	m_basis = *splineTypes[ basis ].basis;
+}
+
+template <class T>
+inline const T& CqCubicSpline<T>::operator[] ( TqInt i ) const
+{
+	assert( i < m_controlPoints.size() );
+	return ( m_controlPoints[ i ] );
+}
+
+template <class T>
+inline void CqCubicSpline<T>::clear()
+{  
+    m_controlPoints.clear();
+} 
+
+template <class T>
+inline typename CqCubicSpline<T>::iterator CqCubicSpline<T>::begin()
+{  
+    return m_controlPoints.begin();
+} 
+
+template <class T>
+inline typename CqCubicSpline<T>::iterator	CqCubicSpline<T>::end()
+{  
+    return m_controlPoints.end();
+} 
+
+template <class T>
+inline TqUint CqCubicSpline<T>::numControlPoints()
+{  
+    return (TqUint)m_controlPoints.size();
+} 
 
 
 //-----------------------------------------------------------------------
