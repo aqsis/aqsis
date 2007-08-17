@@ -75,8 +75,8 @@ class COMMON_SHARE CqSocket : boost::noncopyable
 		operator bool();
 
 	private:
-		int				m_socket;			///< Socket ID of the server.
-		int 			m_port;				///< Port number used by this server.
+		unsigned int	m_socket;	///< Socket ID of the server.
+		unsigned int 	m_port;		///< Port number used by this server.
 };
 
 //-----------------------------------------------------------------------
