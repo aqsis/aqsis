@@ -65,14 +65,6 @@ void CqDisplayServerImage::acceptData(TqUlong xmin, TqUlong xmaxplus1, TqUlong y
 	TqUint xmaxplus1__ = Aqsis::min((xmaxplus1 - originX()), imageWidth());
 	TqUint ymaxplus1__ = Aqsis::min((ymaxplus1 - originY()), imageWidth());
 	
-#	define AQLOG(x) Aqsis::log() << #x << " = " << (x) << " "
-	AQLOG(xmin);
-	AQLOG(ymin);
-	AQLOG(xmin__);
-	AQLOG(ymin__);
-	Aqsis::log() << "\n";
-#	undef AQLOG
-
 	boost::mutex::scoped_lock lock(mutex());
 
 	/// \todo: Check that this all works with cropped images...
