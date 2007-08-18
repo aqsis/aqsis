@@ -1,64 +1,33 @@
-######################################################################
-# Posix specific configuration
+SET(AQSIS_BOOST_FOUND 0)
 
-IF(UNIX AND NOT APPLE)
-	FIND_PATH(BOOST_INCLUDE_DIR boost
-		/usr/include
-		DOC "Directory where the boost header files are located"
-		)
-
-	SET(BOOST_LIB_DIR /usr/lib CACHE PATH "Directory where the boost libraries are located")
-
-	SET(BOOST_THREAD_LIB boost_thread CACHE STRING "")
-
-ENDIF(UNIX AND NOT APPLE)
-
-######################################################################
-# Apple specific configuration
-
-IF(UNIX AND APPLE)
-	FIND_PATH(BOOST_INCLUDE_DIR boost
-		/opt/local/include
-		DOC "Directory where the boost header files are located"
-		)
-
-	SET(BOOST_LIB_DIR /opt/local/lib CACHE PATH "Directory where the boost libraries are located")
-
-	SET(BOOST_THREAD_LIB boost_thread CACHE STRING "")
-
-ENDIF(UNIX AND APPLE)
-
-######################################################################
-# Win32 specific configuration
+SET(AQSIS_BOOST_INCLUDE_SEARCHPATH)
+SET(AQSIS_BOOST_LIBRARIES_SEARCHPATH)
+SET(AQSIS_BOOST_THREAD_LIBRARY_NAME boost_thread CACHE STRING "The name of the boost_thread library (undecorated, i.e. the string passed to the compiler)")
 
 IF(WIN32)
-	FIND_PATH(BOOST_INCLUDE_DIR boost
-		c:/boost/include/boost-1_33_1
-		DOC "Directory where the boost header files are located"
-		)
-
-	SET(BOOST_LIB_DIR c:/boost/lib CACHE PATH "Directory where the boost libraries are located")
-
         IF(MSVC)
-                SET(BOOST_PROGRAM_OPTIONS_LIB optimized libboost_thread-vc80-mt debug libboost_thread-vc80-mt-gd CACHE STRING "")
+                SET(AQSIS_BOOST_THREAD_NAME ${AQSIS_BOOST_THREAD_NAMES} libboost_thread-vc80-mt)
         ELSE(MSVC)
-                SET(BOOST_PROGRAM_OPTIONS_LIB libboost_thread-mgw34-1_34 CACHE STRING "")
+                SET(AQSIS_BOOST_THREAD_NAME ${AQSIS_BOOST_THREAD_NAMES} libboost_thread-mgw34-1_34)
         ENDIF(MSVC)
-
 ENDIF(WIN32)
 
-# Following are the consolidated variables that should be used for builds
-SET(BOOST_INCLUDE_DIRS
-	${BOOST_INCLUDE_DIR}
-	)
+FIND_PATH(AQSIS_BOOST_INCLUDE_DIR
+			boost
+			PATHS ${AQSIS_BOOST_INCLUDE_SEARCHPATH}
+			DOC "Location of the boost headers folder"
+			)
 
-SET(BOOST_LIB_DIRS
-	${BOOST_LIB_DIR}
-	)
+FIND_LIBRARY(AQSIS_BOOST_THREAD_LIBRARY
+			NAMES ${AQSIS_BOOST_THREAD_LIBRARY_NAME}	
+			PATHS ${AQSIS_BOOST_LIBRARIES_SEARCHPATH}
+			DOC "Location of the boost thread library"
+			)
 
-SET(BOOST_THREAD_LIBS
-	${BOOST_THREAD_LIB}
-	)
+STRING(COMPARE EQUAL "${AQSIS_BOOST_INCLUDE_DIR}" "AQSIS_BOOST_INCLUDE_DIR-NOTFOUND" AQSIS_BOOST_INCLUDE_NOTFOUND)
+STRING(COMPARE EQUAL "${AQSIS_BOOST_THREAD_LIBRARY}" "AQSIS_BOOST_THREAD_LIBRARY-NOTFOUND" AQSIS_BOOST_THREAD_LIBRARY_NOTFOUND)
 
-SET(BOOST_FOUND 1)
+IF(NOT AQSIS_BOOST_THREAD_LIBRARY_NOTFOUND AND NOT AQSIS_BOOST_INCLUDE_DIR_NOTFOUND)
+	SET(AQSIS_BOOST_FOUND 1)
+ENDIF(NOT AQSIS_BOOST_THREAD_LIBRARY_NOTFOUND AND NOT AQSIS_BOOST_INCLUDE_DIR_NOTFOUND)
 
