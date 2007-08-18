@@ -25,15 +25,16 @@
 		Implementation is platform specific, existing in the platform folders.
 */
 
-//? Is .h included already?
 #ifndef SOCKET_H_INCLUDED
 #define SOCKET_H_INCLUDED 1
 
-#include	"aqsis.h"
+#include "aqsis.h"
 
-#include	"sstring.h"
+#include <sstream>
 
-#include	<boost/utility.hpp>
+#include <boost/utility.hpp>
+
+#include "socket_system.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -75,8 +76,8 @@ class COMMON_SHARE CqSocket : boost::noncopyable
 		operator bool();
 
 	private:
-		unsigned int	m_socket;	///< Socket ID of the server.
-		unsigned int 	m_port;		///< Port number used by this server.
+		TqSocketId m_socket;  ///< Socket ID of the server.
+		int m_port;         ///< Port number used by this server.
 };
 
 //-----------------------------------------------------------------------

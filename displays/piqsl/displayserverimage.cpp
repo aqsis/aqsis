@@ -26,7 +26,6 @@
 
 #include	"aqsis.h"
 
-
 #include	<fstream>
 #include	<map>
 #include	<algorithm>
@@ -35,30 +34,10 @@
 #include	<boost/archive/iterators/transform_width.hpp>
 #include	<boost/archive/iterators/insert_linebreaks.hpp>
 
-#ifdef AQSIS_SYSTEM_WIN32
-#include	<process.h>
-#include	<signal.h>
-#else // !AQSIS_SYSTEM_WIN32
-#include	<stdio.h>
-#include	<stdlib.h>
-#include	<unistd.h>
-#include	<netinet/in.h>
-#include	<sys/types.h>
-#include	<sys/socket.h>
-#include	<sys/wait.h>
-#include	<errno.h>
-
-static const int INVALID_SOCKET = -1;
-static const int SD_BOTH = 2;
-static const int SOCKET_ERROR = -1;
-
-typedef sockaddr_in SOCKADDR_IN;
-typedef sockaddr* PSOCKADDR;
-#endif // AQSIS_SYSTEM_WIN32
-
 #include	"file.h"
 #include	"displayserverimage.h"
 #include	"aqsismath.h"
+#include 	"logging.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -73,37 +52,6 @@ void CqDisplayServerImage::close()
 
 //----------------------------------------------------------------------
 
-// Tricky macros from [Smith 1995] (see ref below)
-
-/** Compute int((a/255.0)*b) with only integer arithmetic.  Assumes a, b are
- * between 0 and 255.
- */
-#define INT_MULT(a,b,t) ( (t) = (a) * (b) + 0x80, ( ( ( (t)>>8 ) + (t) )>>8 ) )
-/** Compute a composite of alpha-premultiplied values using integer arithmetic.
- *
- * Assumes p, q are between 0 and 255.
- *
- * \return int(q + (1-a/255.0)*p)
- */
-#define INT_PRELERP(p, q, a, t) ( (p) + (q) - INT_MULT( a, p, t) )
-
-/** \brief Composite two integers with a given alpha
- *
- * See for eg:
- * [Smith 1995]  Alvy Ray Smith, "Image Compositing Fundamentals", Technical
- * Memo 4, 1995.  ftp://ftp.alvyray.com/Acrobat/4_Comp.pdf
- *
- * \param r - top surface; alpha-premultiplied.  Assumed to be between 0 and 255.
- * \param R - bottom surface; alpha-premultiplied
- * \param alpha - alpha for top surface
- */
-void CompositeAlpha(TqInt r, unsigned char &R, unsigned char alpha )
-{ 
-	TqInt t;
-	TqInt R1 = static_cast<TqInt>(INT_PRELERP( R, r, alpha, t ));
-	R = Aqsis::clamp( R1, 0, 255 );
-}
-
 /// Do-nothing deleter for holding non-reference counted data in a boost::shared_ptr/array.
 void nullDeleter(const void*)
 { }
@@ -117,6 +65,14 @@ void CqDisplayServerImage::acceptData(TqUlong xmin, TqUlong xmaxplus1, TqUlong y
 	TqUint xmaxplus1__ = Aqsis::min((xmaxplus1 - originX()), imageWidth());
 	TqUint ymaxplus1__ = Aqsis::min((ymaxplus1 - originY()), imageWidth());
 	
+#	define AQLOG(x) Aqsis::log() << #x << " = " << (x) << " "
+	AQLOG(xmin);
+	AQLOG(ymin);
+	AQLOG(xmin__);
+	AQLOG(ymin__);
+	Aqsis::log() << "\n";
+#	undef AQLOG
+
 	boost::mutex::scoped_lock lock(mutex());
 
 	/// \todo: Check that this all works with cropped images...
