@@ -7,7 +7,7 @@ ADD_CUSTOM_TARGET(slparser echo "Creating SL parser/scanner")
 # Create custom command for flex/lex (note the outputs)
 ADD_CUSTOM_COMMAND(
 	SOURCE ${SLPARSE_SOURCE_DIR}/scanner.ll
-	COMMAND ${FLEX_EXECUTABLE} 
+	COMMAND ${AQSIS_FLEX_EXECUTABLE} 
 	ARGS -o${CMAKE_CURRENT_BINARY_DIR}/scanner.cpp
 			${SLPARSE_SOURCE_DIR}/scanner.ll
 	TARGET slparser
@@ -17,7 +17,7 @@ ADD_CUSTOM_COMMAND(
 # Create custom command for bison/yacc (note the DEPENDS)
 ADD_CUSTOM_COMMAND(
 	SOURCE ${SLPARSE_SOURCE_DIR}/parser.yy
-	COMMAND ${BISON_EXECUTABLE} 
+	COMMAND ${AQSIS_BISON_EXECUTABLE} 
 	ARGS -d ${SLPARSE_SOURCE_DIR}/parser.yy
 		-o ${CMAKE_CURRENT_BINARY_DIR}/parser.cpp
 	TARGET slparser

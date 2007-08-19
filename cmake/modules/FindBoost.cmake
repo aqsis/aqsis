@@ -1,17 +1,18 @@
 SET(AQSIS_BOOST_FOUND 0)
 
-SET(AQSIS_BOOST_LIB_DIR "" CACHE PATH "The location of the boost libraries")
+SET(AQSIS_BOOST_LIB_DIR "" CACHE PATH "Location to look for boost libraries.")
 
 SET(AQSIS_BOOST_INCLUDE_SEARCHPATH)
 SET(AQSIS_BOOST_LIBRARIES_SEARCHPATH ${AQSIS_BOOST_LIB_DIR})
-SET(AQSIS_BOOST_THREAD_LIBRARY_NAME boost_thread CACHE STRING "The name of the boost_thread library (undecorated, i.e. the string passed to the compiler)")
 
 IF(WIN32)
         IF(MSVC)
-                SET(AQSIS_BOOST_THREAD_LIBRARY_NAME ${AQSIS_BOOST_THREAD_LIBRARY_NAME} boost_thread-vc80-mt)
+		SET(AQSIS_BOOST_THREAD_LIBRARY_NAME boost_thread-vc80-mt CACHE STRING "The name of the boost_thread library (undecorated, i.e. the string passed to the compiler)")
         ELSE(MSVC)
-                SET(AQSIS_BOOST_THREAD_LIBRARY_NAME ${AQSIS_BOOST_THREAD_LIBRARY_NAME} libboost_thread-mgw34-1_34)
+		SET(AQSIS_BOOST_THREAD_LIBRARY_NAME libboost_thread-mgw34-1_34 CACHE STRING "The name of the boost_thread library (undecorated, i.e. the string passed to the compiler)")
         ENDIF(MSVC)
+ELSE(WIN32)
+	SET(AQSIS_BOOST_THREAD_LIBRARY_NAME boost_thread CACHE STRING "The name of the boost_thread library (undecorated, i.e. the string passed to the compiler)")
 ENDIF(WIN32)
 
 FIND_PATH(AQSIS_BOOST_INCLUDE_DIR
