@@ -52,7 +52,7 @@ enum EqSplineBasis
  * Cubic spline curve
  */
 template <class T>
-class COMMON_SHARE CqCubicSpline
+class CqCubicSpline
 {
 	public:
 		CqCubicSpline( EqSplineBasis basis = SplineBasis_CatmullRom, TqUint reservePoints = 0 );

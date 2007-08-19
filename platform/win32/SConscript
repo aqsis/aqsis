@@ -91,7 +91,8 @@ if not env['mingw']:
 		else:	# Release
 			env.AppendUnique(CCFLAGS=[
 				'/Ox',		# Full optimization
-				'/GL'		# Whole-program optimization, needed for LTCG
+				'/GL',		# Whole-program optimization, needed for LTCG
+				'/W4'		# warning level 4
 				])
 			
 			if (env['SSE'] != 'off'):

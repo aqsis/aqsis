@@ -25,7 +25,6 @@
 
 #include	"socket.h"
 
-#include	<winsock2.h>
 #include	<signal.h>
 
 #include	"logging.h"
