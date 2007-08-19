@@ -9,13 +9,15 @@ if env['debug']:
 	env.AppendUnique(CCFLAGS=['-g', '-O0', '-fno-common'])
 else:
 	env.AppendUnique(CCFLAGS=['-O2', '-fno-common'])
+	env.AppendUnique(CPPDEFINES=[('NDEBUG', '1')])
 #	Commented this line out, as there is a bug in gcc 4.0.1 on MacOSX, -s corrupts executables.
 #	env.AppendUnique(LINKFLAGS=['-Wl,-s'])
 
 #env.AppendUnique(CCFLAGS=['-O3', '-faltivec', '-finline-functions', '-ffast-math', '-fno-common'])
+env.AppendUnique(CPPDEFINES=[('PLUGINS', '1')])
 
 env.AppendUnique(CPPPATH = [env.Dir('#/aqsistypes/posix')])
-env.AppendUnique(CPPDEFINES=[('NDEBUG', '1'), ('PLUGINS', '1'), ('_CLOCKTICKS', '1')])
+env.AppendUnique(CPPDEFINES=[('PLUGINS', '1')])
 
 # Find out where the Boost headers are, look in common places for Fink and MacPorts.
 boostiofile = env.FindFile('io_fwd.hpp', ['$boost_include_path', '/usr/local/include/boost', '/opt/local/include/boost'])
