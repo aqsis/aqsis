@@ -14,7 +14,6 @@ else:
 #	env.AppendUnique(LINKFLAGS=['-Wl,-s'])
 
 #env.AppendUnique(CCFLAGS=['-O3', '-faltivec', '-finline-functions', '-ffast-math', '-fno-common'])
-env.AppendUnique(CPPDEFINES=[('PLUGINS', '1')])
 
 env.AppendUnique(CPPPATH = [env.Dir('#/aqsistypes/posix')])
 env.AppendUnique(CPPDEFINES=[('PLUGINS', '1')])
