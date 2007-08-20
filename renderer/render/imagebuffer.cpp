@@ -47,6 +47,9 @@ static TqInt bucketmodulo = -1;
 static TqInt bucketdirection = -1;
 
 
+/** Implementing a work unit for a boost::thread (the operator()()
+ * method), that is, a piece of code that will run in parallel.
+ */
 class CqThreadProcessor
 {
 public:
@@ -62,6 +65,94 @@ public:
 private:
 	CqBucketProcessor* m_bucketProcessor;
 };
+
+
+/* mafm: implementation of a processor (work unit for a boost::thread)
+ * where it takes buckets ready to process and does so continuously.
+ * One simple addition would be to wait for new available buckets
+ * which are provided dynamically.  This is not applicable at the
+ * moment though, it would need RenderSurfaces() to process all of the
+ * surfaces of the buckets before assigning them as ready; but at the
+ * moment RenderSurfaces() can't run before assigning the bucket to
+ * the bucket processor, and it doesn't seem possible to break this
+ * interdependency.
+
+boost::mutex displayMutex;
+
+class CqThreadProcessor2
+{
+public:
+	CqThreadProcessor2(const CqImageBuffer* imageBuffer,
+			   std::vector<CqBucket*>& bucketList,
+			   bool fImager,
+			   const CqColor& zThreshold,
+			   enum EqFilterDepth depthfilter,
+			   const CqVector2D& bHalf) :
+		m_imageBuffer(imageBuffer),
+		m_bucketList(bucketList),
+		m_fImager(fImager),
+		m_zThreshold(zThreshold),
+		m_depthfilter(depthfilter),
+		m_bHalf(bHalf) { }
+
+	void operator()()
+	{
+		while ( !m_bucketList.empty() )
+		{
+			CqBucket* bucket = m_bucketList.front();
+			m_bucketList.erase( m_bucketList.begin() );
+
+			m_bucketProcessor.setBucket( bucket );
+			if ( m_fImager )
+				m_bucketProcessor.setInitiallyEmpty(false);
+			
+			// Set up some bounds for the bucket.
+			const CqVector2D bPos = m_imageBuffer->BucketPosition( bucket->getCol(),
+									       bucket->getRow() );
+			const CqVector2D bSize = m_imageBuffer->BucketSize( bucket->getCol(),
+									    bucket->getRow() );
+			const CqVector2D vecMin = bPos - m_bHalf;
+			const CqVector2D vecMax = bPos + bSize + m_bHalf;
+
+			TqInt xmin = static_cast<TqInt>( vecMin.x() );
+			TqInt ymin = static_cast<TqInt>( vecMin.y() );
+			TqInt xmax = static_cast<TqInt>( vecMax.x() );
+			TqInt ymax = static_cast<TqInt>( vecMax.y() );
+			if ( xmin < m_imageBuffer->CropWindowXMin() - m_imageBuffer->FilterXWidth() / 2 )
+				xmin = static_cast<TqInt>(m_imageBuffer->CropWindowXMin() - m_imageBuffer->FilterXWidth() / 2.0f);
+			if ( ymin < m_imageBuffer->CropWindowYMin() - m_imageBuffer->FilterYWidth() / 2 )
+				ymin = static_cast<TqInt>(m_imageBuffer->CropWindowYMin() - m_imageBuffer->FilterYWidth() / 2.0f);
+			if ( xmax > m_imageBuffer->CropWindowXMax() + m_imageBuffer->FilterXWidth() / 2 )
+				xmax = static_cast<TqInt>(m_imageBuffer->CropWindowXMax() + m_imageBuffer->FilterXWidth() / 2.0f);
+			if ( ymax > m_imageBuffer->CropWindowYMax() + m_imageBuffer->FilterYWidth() / 2 )
+				ymax = static_cast<TqInt>(m_imageBuffer->CropWindowYMax() + m_imageBuffer->FilterYWidth() / 2.0f);
+
+			m_bucketProcessor.preProcess( bPos, bSize,
+						      m_imageBuffer->PixelXSamples(), m_imageBuffer->PixelYSamples(), m_imageBuffer->FilterXWidth(), m_imageBuffer->FilterYWidth(),
+						      xmin, xmax, ymin, ymax,
+						      m_imageBuffer->ClippingNear(), m_imageBuffer->ClippingFar() );
+			m_bucketProcessor.process();
+			m_bucketProcessor.postProcess( m_fImager, m_depthfilter, m_zThreshold );
+			{
+				TIME_SCOPE("Display bucket");
+				boost::mutex::scoped_lock lock(displayMutex);
+				QGetRenderContext() ->pDDmanager() ->DisplayBucket( bucket );
+			}
+			m_bucketProcessor.reset();
+		}
+	}
+
+private:
+	CqBucketProcessor m_bucketProcessor;
+	const CqImageBuffer* m_imageBuffer;
+	std::vector<CqBucket*> m_bucketList;
+	bool m_fImager;
+	CqColor m_zThreshold;
+	enum EqFilterDepth m_depthfilter;
+	CqVector2D m_bHalf;
+};
+
+*/
 
 
 //----------------------------------------------------------------------
@@ -438,8 +529,10 @@ void CqImageBuffer::AddMPG( boost::shared_ptr<CqMicroPolygon>& pmpgNew )
 	// Quick check for outside crop window.
 	CqBound	B( pmpgNew->GetTotalBound() );
 
-	if ( B.vecMax().x() < m_CropWindowXMin - m_FilterXWidth / 2.0f || B.vecMax().y() < m_CropWindowYMin - m_FilterYWidth / 2.0f ||
-	        B.vecMin().x() > m_CropWindowXMax + m_FilterXWidth / 2.0f || B.vecMin().y() > m_CropWindowYMax + m_FilterYWidth / 2.0f )
+	if ( B.vecMax().x() < m_CropWindowXMin - m_FilterXWidth / 2.0f ||
+	     B.vecMax().y() < m_CropWindowYMin - m_FilterYWidth / 2.0f ||
+	     B.vecMin().x() > m_CropWindowXMax + m_FilterXWidth / 2.0f ||
+	     B.vecMin().y() > m_CropWindowYMax + m_FilterYWidth / 2.0f )
 	{
 		return ;
 	}
@@ -684,6 +777,26 @@ void CqImageBuffer::RenderImage()
 	TqInt iBucket = 0;
 
 #define MULTIPROCESSING_NBUCKETS 1
+
+/* mafm: Sample code to use with the CqThreadProcessor2 alternative
+ * approach.
+
+	std::vector<std::vector<CqBucket*> > bucketLists;
+	bucketLists.resize(MULTIPROCESSING_NBUCKETS);
+	int index = 0;
+	do
+	{
+		bucketLists[index % MULTIPROCESSING_NBUCKETS].push_back( &(CurrentBucket()) );
+		++index;
+	} while ( NextBucket(order) );
+	boost::thread_group threadGroup;
+	for (int i = 0; i < MULTIPROCESSING_NBUCKETS; ++i)
+	{
+		threadGroup.create_thread( CqThreadProcessor2(this, bucketLists[i], fImager, zThreshold, depthfilter, bHalf) );
+	}
+	threadGroup.join_all();
+	return;
+*/
 
 	std::vector<CqBucketProcessor> bucketProcessors;
 	bucketProcessors.resize(MULTIPROCESSING_NBUCKETS);

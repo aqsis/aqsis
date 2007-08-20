@@ -201,6 +201,20 @@ class CqImageBuffer
 		{
 			return ( m_FilterYWidth );
 		}
+		/** Get the Near Clipping distance.
+		 * \return Float distance of the Near Clipping.
+		 */
+		TqFloat	ClippingNear() const
+		{
+			return ( m_ClippingNear );
+		}
+		/** Get the Far Clipping distance.
+		 * \return Float distance of the Far Clipping.
+		 */
+		TqFloat	ClippingFar() const
+		{
+			return ( m_ClippingFar );
+		}
 		/** Get the display.
 		 * \return Integer display mode as a member of enum Mode.
 		 */
