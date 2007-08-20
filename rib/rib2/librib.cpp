@@ -23,7 +23,7 @@
     \author Tim Shead & Paul C. Gregory
 */
 
-#ifdef	WIN32
+#if _MSC_VER
 #pragma warning(disable : 4786)
 #endif
 

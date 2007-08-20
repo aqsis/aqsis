@@ -23,22 +23,21 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include	"aqsis.h"
-#include	"logging.h"
-
 #include	"socket.h"
-#include 	"netdb.h"
 
 #include	<sys/types.h>
 #include	<sys/socket.h>
 #include	<netinet/in.h>
 #include	<arpa/inet.h>
 #include	<errno.h>
-#include	"signal.h"
+#include 	<netdb.h>
+#include	<signal.h>
 
-#define	INVALID_SOCKET -1
+#include	"logging.h"
 
 START_NAMESPACE( Aqsis )
+
+const TqSocketId INVALID_SOCKET = -1;
 
 //---------------------------------------------------------------------
 /** Default constructor.
@@ -178,7 +177,7 @@ bool CqSocket::listen()
 
 
 //---------------------------------------------------------------------
-/** Set ip the thread to wait for client connection requests.
+/** Set up the thread to wait for client connection requests.
  */
 
 bool CqSocket::accept(CqSocket& sock)
@@ -202,7 +201,7 @@ bool CqSocket::connect(const std::string hostname, int port)
 	assert(m_socket == -1 && m_port == 0);
 
 	m_socket = socket(AF_INET,SOCK_STREAM,0);
-	sockaddr_in adServer;
+	sockaddr_in serverAddr;
 
 	pHost = gethostbyname(hostname.c_str());
 	if(pHost == NULL || pHost->h_addr_list[0] == NULL)
@@ -210,17 +209,12 @@ bool CqSocket::connect(const std::string hostname, int port)
 		Aqsis::log() << error << "Invalid Name or IP address" << std::endl;;
 		return(false);
 	};
-	memset((char *) &adServer, 0, sizeof(adServer)); 
-	adServer.sin_family = AF_INET;
-	adServer.sin_addr.s_addr = *(in_addr_t *) pHost->h_addr_list[0];
-	if(adServer.sin_addr.s_addr == INVALID_SOCKET)
-	{
-		Aqsis::log() << error << "Invalid IP address" << std::endl;;
-		return(false);
-	};
-	adServer.sin_port = htons(port);
+	memset((char *) &serverAddr, 0, sizeof(serverAddr)); 
+	serverAddr.sin_family = AF_INET;
+	serverAddr.sin_addr.s_addr = *(reinterpret_cast<in_addr_t *>(pHost->h_addr_list[0]));
+	serverAddr.sin_port = htons(port);
 
-	if( ::connect(m_socket,(const struct sockaddr*) &adServer, sizeof(sockaddr_in)))
+	if( ::connect(m_socket,(const struct sockaddr*) &serverAddr, sizeof(sockaddr_in)))
 	{
 		close();
 		m_socket = INVALID_SOCKET;

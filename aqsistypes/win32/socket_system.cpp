@@ -23,13 +23,11 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include	"aqsis.h"
-#include	"logging.h"
-
 #include	"socket.h"
 
-#include	<winsock2.h>
-#include	"signal.h"
+#include	<signal.h>
+
+#include	"logging.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -268,7 +266,7 @@ int	CqSocket::sendData(const std::string& data) const
 int	CqSocket::recvData(std::stringstream& buffer) const
 {
 	char c;
-	int count, total;
+	int count, total = 0;
 
 	// Read a message
 	while(1)	

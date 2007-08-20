@@ -49,30 +49,27 @@ IF(WIN32)
 		CACHE STRING "Install location for content (relative to CMAKE_INSTALL_PREFIX)")
 	SET(SCRIPTSDIR "scripts" 
 		CACHE STRING "Install location for scripts (relative to CMAKE_INSTALL_PREFIX)")
-ELSE(WIN32)
-	SET(BINDIR "bin" 
-		CACHE STRING "Install location for binary files. (relative to CMAKE_INSTALL_PREFIX)")
-	SET(LIBDIR "lib" 
-		CACHE STRING "Install location for shared libraries (relative to CMAKE_INSTALL_PREFIX)")
-	SET(RENDERENGINEDIR "${LIBDIR}" 
-		CACHE STRING "Install location for render dependent shared libraries (relative to CMAKE_INSTALL_PREFIX)")
-	SET(DISPLAYSDIR "${LIBDIR}/aqsis" 
-		CACHE STRING "Install location for display libraries (relative to CMAKE_INSTALL_PREFIX)")
-	SET(PLUGINDIR "${LIBDIR}/aqsis/plugins" 
-		CACHE STRING "Install location for plugin libraries (relative to CMAKE_INSTALL_PREFIX)")
-	SET(STATICLIBDIR "${LIBDIR}/aqsis" 
-		CACHE STRING "Install location for static libraries (relative to CMAKE_INSTALL_PREFIX)")
-	SET(SHADERDIR "share/aqsis/shaders" 
-		CACHE STRING "Install location for shaders (relative to CMAKE_INSTALL_PREFIX)")
-	SET(SYSCONFDIR "etc/aqsis" 
-		CACHE STRING "Install location for system configuration files (relative to CMAKE_INSTALL_PREFIX)")
-	SET(INCLUDEDIR "include/aqsis" 
-		CACHE STRING "Install location for aqsis header files (relative to CMAKE_INSTALL_PREFIX)")
-	SET(CONTENTDIR "content" 
-		CACHE STRING "Install location for content (relative to CMAKE_INSTALL_PREFIX)")
-	SET(SCRIPTSDIR "scripts" 
-		CACHE STRING "Install location for scripts (relative to CMAKE_INSTALL_PREFIX)")
 ENDIF(WIN32)
+
+OPTION(AQSIS_USE_TIMERS "Enable performance timers ON/OFF" ON)
+IF(AQSIS_USE_TIMERS)
+	ADD_DEFINITIONS(-DUSE_TIMERS)
+ENDIF(AQSIS_USE_TIMERS)
+
+OPTION(AQSIS_USE_PLUGINS "Enable plugins (required for plugin display drivers) ON/OFF" ON)
+IF(AQSIS_USE_PLUGINS)
+	ADD_DEFINITIONS(-DPLUGINS)
+ENDIF(AQSIS_USE_PLUGINS)
+
+IF(UNIX AND NOT APPLE)
+	INCLUDE(${CMAKE_SOURCE_DIR}/cmake/platform/linux.cmake) 
+ELSE(UNIX AND NOT APPLE)
+	IF(WIN32)
+	ELSE(WIN32)
+		IF(APPLE)
+		ENDIF(APPLE)
+	ENDIF(WIN32)
+ENDIF(UNIX AND NOT APPLE)
 
 SET(DEFAULT_PLUGIN_PATH "${CMAKE_INSTALL_PREFIX}/${PLUGINDIR}")
 SET(DEFAULT_RC_PATH "${CMAKE_INSTALL_PREFIX}/${SYSCONFDIR}")
@@ -130,6 +127,8 @@ GET_DIRECTORY_PROPERTY(display_DISPLAYLIB DIRECTORY displays/display DEFINITION 
 GET_DIRECTORY_PROPERTY(piqsl_DISPLAYLIB DIRECTORY displays/piqsl DEFINITION DISPLAYLIB)
 GET_DIRECTORY_PROPERTY(d_exr_DISPLAYLIB DIRECTORY displays/d_exr DEFINITION DISPLAYLIB)
 GET_DIRECTORY_PROPERTY(d_bmp_DISPLAYLIB DIRECTORY displays/d_sdcBMP DEFINITION DISPLAYLIB)
+SET(SHADERPATH ${CMAKE_INSTALL_PREFIX}/${SHADERDIR})
+SET(DISPLAYPATH ${CMAKE_INSTALL_PREFIX}/${DISPLAYSDIR})
 CONFIGURE_FILE(aqsisrc.in.cmake ${PROJECT_BINARY_DIR}/aqsisrc)
 ADD_CUSTOM_TARGET(aqsisrc ALL echo
 	DEPENDS  ${PROJECT_BINARY_DIR}/aqsisrc

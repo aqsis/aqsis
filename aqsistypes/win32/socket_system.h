@@ -1,5 +1,5 @@
 // Aqsis
-// Copyright © 1997 - 2001, Paul C. Gregory
+// Copyright (C) 1997 - 2001, Paul C. Gregory
 //
 // Contact: pgregory@aqsis.org
 //
@@ -19,25 +19,21 @@
 
 
 /** \file
-		\brief Declares classes required for the flexible performance timers.
-		\author	Paul C. Gregory - originally based on code published on the CodeProject site
-				http://www.codeproject.com/debug/multitimer.asp
+	\brief System-dependent typedefs for sockets
+	\author Chris Foster
 */
 
-#include "aqsis.h"
+#ifndef SOCKET_SYSTEM_H_INCLUDED
+#define SOCKET_SYSTEM_H_INCLUDED
 
-#if USE_TIMERS
-
-#include "multitimer_system.h"
-#include "exception.h"
+#include <winsock2.h>
 
 namespace Aqsis {
 
-void CqHiFreqTimer::SqTimingDetails::Setup()
-{
-	perFreq = (double)CLOCKS_PER_SEC/1000.0;
-	nextTimer = curBase = curManualBase = 0;
+typedef SOCKET TqSocketId;
+
 }
 
-} // namespace Aqsis
-#endif // USE_TIMERS
+#endif // SOCKET_SYSTEM_H_INCLUDED
+
+//---------------------------------------------------------------------

@@ -142,6 +142,11 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 		else if(widestFormat == PkDspySigned32)
 			widestFormat = PkDspyUnsigned32;
 
+		int scanorder;
+		if( DspyFindIntInParamList("scanlineorder", &scanorder, paramCount, parameters ) == PkDspyErrorNone )
+		{
+			flagstuff->flags = PkDspyFlagsWantsScanLineOrder;
+		}
 
 		// We need to start a framebuffer if none is running yet
 		// Need to create our actual socket

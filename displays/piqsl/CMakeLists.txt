@@ -5,6 +5,7 @@ SET(PIQSLAPP_SRCS
 	piqslbase.cpp
 	image.cpp
 	imagebuffer.cpp
+	imagechannel.cpp
 	framebuffer.cpp
 	book.cpp
 	bookbrowser.cpp
@@ -16,6 +17,7 @@ SET(PIQSLAPP_HDRS
 	piqslbase.h
 	image.h
 	imagebuffer.h
+	imagechannel.h
 	book.h
 	framebuffer.h
 	bookbrowser.h

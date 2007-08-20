@@ -26,7 +26,6 @@
 
 #include	"aqsis.h"
 
-
 #include	<fstream>
 #include	<map>
 #include	<algorithm>
@@ -35,30 +34,10 @@
 #include	<boost/archive/iterators/transform_width.hpp>
 #include	<boost/archive/iterators/insert_linebreaks.hpp>
 
-#ifdef AQSIS_SYSTEM_WIN32
-#include	<process.h>
-#include	<signal.h>
-#else // !AQSIS_SYSTEM_WIN32
-#include	<stdio.h>
-#include	<stdlib.h>
-#include	<unistd.h>
-#include	<netinet/in.h>
-#include	<sys/types.h>
-#include	<sys/socket.h>
-#include	<sys/wait.h>
-#include	<errno.h>
-
-static const int INVALID_SOCKET = -1;
-static const int SD_BOTH = 2;
-static const int SOCKET_ERROR = -1;
-
-typedef sockaddr_in SOCKADDR_IN;
-typedef sockaddr* PSOCKADDR;
-#endif // AQSIS_SYSTEM_WIN32
-
 #include	"file.h"
 #include	"displayserverimage.h"
 #include	"aqsismath.h"
+#include 	"logging.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -72,37 +51,6 @@ void CqDisplayServerImage::close()
 
 
 //----------------------------------------------------------------------
-
-// Tricky macros from [Smith 1995] (see ref below)
-
-/** Compute int((a/255.0)*b) with only integer arithmetic.  Assumes a, b are
- * between 0 and 255.
- */
-#define INT_MULT(a,b,t) ( (t) = (a) * (b) + 0x80, ( ( ( (t)>>8 ) + (t) )>>8 ) )
-/** Compute a composite of alpha-premultiplied values using integer arithmetic.
- *
- * Assumes p, q are between 0 and 255.
- *
- * \return int(q + (1-a/255.0)*p)
- */
-#define INT_PRELERP(p, q, a, t) ( (p) + (q) - INT_MULT( a, p, t) )
-
-/** \brief Composite two integers with a given alpha
- *
- * See for eg:
- * [Smith 1995]  Alvy Ray Smith, "Image Compositing Fundamentals", Technical
- * Memo 4, 1995.  ftp://ftp.alvyray.com/Acrobat/4_Comp.pdf
- *
- * \param r - top surface; alpha-premultiplied.  Assumed to be between 0 and 255.
- * \param R - bottom surface; alpha-premultiplied
- * \param alpha - alpha for top surface
- */
-void CompositeAlpha(TqInt r, unsigned char &R, unsigned char alpha )
-{ 
-	TqInt t;
-	TqInt R1 = static_cast<TqInt>(INT_PRELERP( R, r, alpha, t ));
-	R = Aqsis::clamp( R1, 0, 255 );
-}
 
 /// Do-nothing deleter for holding non-reference counted data in a boost::shared_ptr/array.
 void nullDeleter(const void*)
@@ -124,14 +72,15 @@ void CqDisplayServerImage::acceptData(TqUlong xmin, TqUlong xmaxplus1, TqUlong y
 	if(m_realData && m_displayData && xmin__ >= 0 && ymin__ >= 0
 			&& xmaxplus1__ <= imageWidth() && ymaxplus1__ <= imageHeight())
 	{
-		/// \todo: There should be a way to avoid the ugly const_cast below.
+		// The const_cast below is ugly, but I don't see how to avoid it
+		// without some notion of "const constructor" which isn't present in
+		// C++
 		const CqImageBuffer bucketBuf(m_realData->channelsInfo(),
 				boost::shared_array<TqUchar>(const_cast<TqUchar*>(bucketData), nullDeleter),
 				xmaxplus1__ - xmin__, ymaxplus1__ - ymin__);
 
 		m_realData->copyFrom(bucketBuf, xmin__, ymin__);
-		/// \todo: Do proper alpha compositing onto the display data.
-		m_displayData->copyFrom(bucketBuf, xmin__, ymin__);
+		m_displayData->compositeOver(bucketBuf, m_displayMap, xmin__, ymin__);
 
 		if(m_updateCallback)
 			m_updateCallback(xmin__, ymin__, xmaxplus1__-xmin__, ymaxplus1__-ymin__);

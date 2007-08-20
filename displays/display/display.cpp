@@ -472,6 +472,12 @@ extern "C" PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 		else if(widestFormat == PkDspySigned32)
 			widestFormat = PkDspyUnsigned32;
 
+		int scanorder;
+		if( DspyFindIntInParamList("scanlineorder", &scanorder, paramCount, parameters ) == PkDspyErrorNone )
+		{
+			flagstuff->flags = PkDspyFlagsWantsScanLineOrder;
+		}
+
 		// If we are recieving "rgba" data, ensure that it is in the correct order.
 		if(pImage->m_imageType == Type_File || pImage->m_imageType == Type_Framebuffer )
 		{

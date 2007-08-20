@@ -131,7 +131,7 @@ inline CqBook::TqImageListIterator CqBook::imagesEnd()
 
 inline TqUlong CqBook::numImages() const
 {
-	return(m_images.size());
+	return(static_cast<TqUlong>(m_images.size()));
 }
 
 

@@ -45,14 +45,19 @@ void CqImage::prepareImageBuffers(const CqChannelInfoList& channelsInfo)
 {
 	boost::mutex::scoped_lock lock(mutex());
 
-	// Set up 8-bit display image buffer
-	m_displayData = boost::shared_ptr<CqImageBuffer>(
-			new CqImageBuffer(channelsInfo.cloneAs8Bit(), m_imageWidth, m_imageHeight));
-	m_displayData->initToCheckerboard();
+	if(channelsInfo.numChannels() == 0)
+		throw XqInternal("Not enough image channels to display", __FILE__, __LINE__);
 
 	// Set up buffer for holding the full-precision data
 	m_realData = boost::shared_ptr<CqImageBuffer>(
 			new CqImageBuffer(channelsInfo, m_imageWidth, m_imageHeight));
+
+	fixupDisplayMap(channelsInfo);
+	// Set up 8-bit per pixel display image buffer
+	m_displayData = boost::shared_ptr<CqImageBuffer>(
+			new CqImageBuffer(CqChannelInfoList::displayChannels(),
+				m_imageWidth, m_imageHeight));
+	m_displayData->initToCheckerboard();
 }
 
 void CqImage::setUpdateCallback(boost::function<void(int,int,int,int)> f)
@@ -120,8 +125,12 @@ void CqImage::loadFromTiff(const std::string& filename)
 		TIFFGetField(tif.get(), TIFFTAG_SOFTWARE, &description);
 	setDescription(description);
 
+	fixupDisplayMap(m_realData->channelsInfo());
 	// Quantize and display the data
-	m_displayData = m_realData->quantizeForDisplay();
+	m_displayData = boost::shared_ptr<CqImageBuffer>(
+			new CqImageBuffer(CqChannelInfoList::displayChannels(), width, height));
+	m_displayData->initToCheckerboard();
+	m_displayData->compositeOver(*m_realData, m_displayMap);
 
 	if(m_updateCallback)
 		m_updateCallback(-1, -1, -1, -1);
@@ -176,5 +185,26 @@ void CqImage::saveToTiff(const std::string& filename) const
 //	TIFFSetField( pOut.get(), TIFFTAG_PIXAR_MATRIX_WORLDTOCAMERA, image->m_matWorldToCamera );
 //	TIFFSetField( pOut.get(), TIFFTAG_PIXAR_MATRIX_WORLDTOSCREEN, image->m_matWorldToScreen );
 }
+
+void CqImage::fixupDisplayMap(const CqChannelInfoList& channelsInfo)
+{
+	// Validate the mapping between the display channels and the underlying
+	// image channels.
+	if(!channelsInfo.hasChannel("r"))
+		m_displayMap["r"] = channelsInfo[0].name;
+	else
+		m_displayMap["r"] = "r";
+
+	if(!channelsInfo.hasChannel("g"))
+		m_displayMap["g"] = channelsInfo[0].name;
+	else
+		m_displayMap["g"] = "g";
+
+	if(!channelsInfo.hasChannel("b"))
+		m_displayMap["b"] = channelsInfo[0].name;
+	else
+		m_displayMap["b"] = "b";
+}
+
 
 END_NAMESPACE( Aqsis )

@@ -115,6 +115,12 @@ inline CqBookBrowser::CqBookBrowser(int X,int Y,int W,int H,const char*L) :
 {
 	m_nowidths[0] = 0;
 	m_widths      = m_nowidths;
+	// this is the text color of a deselected tab
+	labelcolor(FL_FOREGROUND_COLOR);
+	// this is the background color of a deselected tab
+	// and deselected list entry
+	selection_color(FL_BACKGROUND_COLOR);
+	
 }
 
 

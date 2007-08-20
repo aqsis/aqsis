@@ -32,6 +32,7 @@
 #include	"lights.h"
 #include	"shaders.h"
 #include	"trimcurve.h"
+#include	"spline.h"
 
 #include	"mpdump.h"
 
@@ -322,9 +323,8 @@ void CqMicroPolyGrid::Shade()
     // Otherwise spline interpolation will be off
     if (uRes < 4) buRes = 4;
     if (vRes < 4) bvRes = 4;
-    CqSplineCubic sp_u(buRes), sp_v(bvRes);
-    sp_u.SetBasis("catmull-rom");
-    sp_v.SetBasis("catmull-rom" );
+    CqCubicSpline<CqVector4D> sp_u(SplineBasis_CatmullRom, buRes);
+    CqCubicSpline<CqVector4D> sp_v(SplineBasis_CatmullRom, bvRes);
 
     for ( i = gsmin1; i >= 0; i-- )
     {
@@ -341,16 +341,16 @@ void CqMicroPolyGrid::Shade()
                 pVar(EnvVars_u) ->GetValue( v2, i );
                 TqFloat dv =  v1 - v2;
                 pVar(EnvVars_du) ->SetFloat(dv, i );
-                sp_u[GridX] = CqVector4D(dv, 0, 0, 0);
-                } else {
+                sp_u.pushBack(CqVector4D(dv, 0, 0, 0));
+                 } else {
                    // Make sure uRes at least equal to 4
                    if (uRes < 4) {
                       for (TqInt k= uRes; k < 4; k++) {
-                         sp_u[k] = sp_u[uRes-1];
+                         sp_u.pushBack(sp_u[uRes-1]);
                       }
                    }
              
-                   CqVector4D res = sp_u.Evaluate(1.0f - 1.0f/(float) uRes);
+                   CqVector4D res = sp_u.evaluate(1.0f - 1.0f/(float) uRes);
              
                    pVar(EnvVars_du) ->SetFloat( res.x(), i );
                 }
@@ -364,15 +364,15 @@ void CqMicroPolyGrid::Shade()
                 pVar(EnvVars_v) ->GetValue( v2, i );
                 TqFloat dv =  v1 - v2;
                 pVar(EnvVars_dv) ->SetFloat( dv, i );
-                sp_v[GridY] = CqVector4D(dv, 0, 0, 0);
+                sp_v.pushBack(CqVector4D(dv, 0, 0, 0));
              } else {
                 // Make sure vRes at least equal to 4
                 if (vRes < 4) {
                    for (TqInt k= vRes; k < 4; k++) {
-                      sp_v[k] = sp_v[vRes-1];
+                      sp_v.pushBack(sp_v[vRes-1]);
                    }
                 }
-                CqVector4D res = sp_v.Evaluate(1.0f - 1.0f/(float) vRes);
+                CqVector4D res = sp_v.evaluate(1.0f - 1.0f/(float) vRes);
                 pVar(EnvVars_dv) ->SetFloat( res.x(), i );
              }
           }

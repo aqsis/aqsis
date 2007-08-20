@@ -98,6 +98,15 @@ public:
 	 * \return The channel info list of channel names and types.
 	 */
 	inline const CqChannelInfoList& channelsInfo() const;
+	/** \brief Connect a channel of the underlying data to the red display channel
+	 */
+	inline void connectChannelR(const std::string& chanName);
+	/** \brief Connect a channel of the underlying data to the green display channel
+	 */
+	inline void connectChannelG(const std::string& chanName);
+	/** \brief Connect a channel of the underlying data to the blue display channel
+	 */
+	inline void connectChannelB(const std::string& chanName);
 	/** Get the number of channels in this image.
 	 * \return				The number of channels.
 	 */
@@ -106,7 +115,7 @@ public:
 	 * The display buffer is simple 8 bits per channel data as displayable by an RGB image.
 	 * \return				A pointer to the start of the display buffer.
 	 */
-	virtual const boost::shared_array<TqUchar> displayData() const;
+	virtual boost::shared_ptr<const CqImageBuffer> displayBuffer() const;
 	/** Get the origin of the cropped frame within the total image.
 	 * \return				The origin of the frame.
 	 */
@@ -151,8 +160,7 @@ public:
 	/** Save the image to the given folder.
 	 * \note Overridden by derivations that manage their image data differently.
 	 */
-	virtual void serialise(const std::string& folder)
-	{}
+	virtual void serialise(const std::string& folder) {}
 	/** Create an XML element representing this image for serialising to library files.
 	 * \return			A pointer to a new TinyXML element structure.
 	 */
@@ -167,6 +175,14 @@ public:
 	void loadFromTiff(const std::string& filename);
 
 protected:
+	/** Check m_displayMap is pointing to valid channel names from channelsInfo.
+	 *
+	 * If the map isn't pointing to valid channels, then set the offending
+	 * channels names to the first one in channelsInfo
+	 *
+	 * \param channelsInfo - channels which the map must point to.
+	 */
+	void fixupDisplayMap(const CqChannelInfoList& channelsInfo);
 	/** Get a reference to the unique mutex for this image.
 	 * Used when locking the image during multithreaded operation.
 	 * \return			A reference to the unique mutex for this image.
@@ -184,6 +200,7 @@ protected:
 	TqUlong			m_imageHeight;	///< The total image height.
 	TqUlong			m_originX;		///< The origin of the frame within the whole image.
 	TqUlong			m_originY;		///< The origin of the frame within the whole image.
+	TqChannelNameMap m_displayMap; ///< map from display to underlying channel names
 
 	boost::function<void(int,int,int,int)> m_updateCallback;	///< A callback, called when an image changes.
 	mutable boost::mutex m_mutex;	///< The unique mutex for this image.
@@ -206,9 +223,14 @@ inline CqImage::CqImage( const std::string& name)
 	m_imageHeight(0),
 	m_originX(0),
 	m_originY(0),
+	m_displayMap(),
 	m_updateCallback(),
 	m_mutex()
-{ } 
+{
+	m_displayMap["r"] = "r";
+	m_displayMap["g"] = "g";
+	m_displayMap["b"] = "b";
+}
 
 
 inline void	CqImage::setDescription( const std::string& description )
@@ -270,12 +292,9 @@ inline TqUint CqImage::numChannels() const
 		return 0;
 }
 
-inline const boost::shared_array<TqUchar> CqImage::displayData() const
+inline boost::shared_ptr<const CqImageBuffer> CqImage::displayBuffer() const
 {
-	if(m_displayData)
-		return( m_displayData->rawData() );
-	else
-		return boost::shared_array<TqUchar>();
+	return m_displayData;
 }
 
 inline TqUlong CqImage::originX() const
