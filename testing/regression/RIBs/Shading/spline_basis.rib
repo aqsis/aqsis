@@ -1,9 +1,0 @@
-Format 320 240 1
-Display "spline_basis.tif" "file" "rgb" "string compression" "lzw"
-PixelSamples 1 1
-Translate 0 0 5
-Scale 1.27 0.95 1
-WorldBegin
-Surface "spline_basis"
-Patch "bilinear" "P" [-1 1 0  1 1 0  -1 -1 0  1 -1 0]
-WorldEnd

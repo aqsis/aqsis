@@ -1,8 +1,0 @@
-Format 320 240 1
-PixelSamples 2 2
-Display "bug1497559.tif" "file" "rgb" "string compression" "lzw"
-Translate 0 0 5
-WorldBegin
-Surface "array" "uniform float[2] a" [0.5 1.0]
-Sphere 1 -1 1 360
-WorldEnd
