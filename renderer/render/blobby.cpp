@@ -43,8 +43,10 @@
 #include "marchingcubes.h"
 #include "plugins.h"
 
-#ifdef WIN32
+#if _MSC_VER
 #pragma warning(disable:4786)	// hide stl warnings (VS6)
+#endif
+#if _WIN32
 #include <windows.h>
 #endif
 

@@ -203,5 +203,42 @@ void CqImageChannel::compositeOver(const IqImageChannelSource& source,
 		compositeRow(row, source.getRow(row), sourceAlpha.getRow(row));
 }
 
+// Old stuff used for compositing 8-bit channels.  May possibly be useful for
+// future optimizations.
+#if 0
+
+// Tricky macros from [Smith 1995] (see ref below)
+
+/** Compute int((a/255.0)*b) with only integer arithmetic.  Assumes a, b are
+ * between 0 and 255.
+ */
+#define INT_MULT(a,b,t) ( (t) = (a) * (b) + 0x80, ( ( ( (t)>>8 ) + (t) )>>8 ) )
+/** Compute a composite of alpha-premultiplied values using integer arithmetic.
+ *
+ * Assumes p, q are between 0 and 255.
+ *
+ * \return int(q + (1-a/255.0)*p)
+ */
+#define INT_PRELERP(p, q, a, t) ( (p) + (q) - INT_MULT( a, p, t) )
+
+/** \brief Composite two integers with a given alpha
+ *
+ * See for eg:
+ * [Smith 1995]  Alvy Ray Smith, "Image Compositing Fundamentals", Technical
+ * Memo 4, 1995.  ftp://ftp.alvyray.com/Acrobat/4_Comp.pdf
+ *
+ * \param r - top surface; alpha-premultiplied.  Assumed to be between 0 and 255.
+ * \param R - bottom surface; alpha-premultiplied
+ * \param alpha - alpha for top surface
+ */
+void CompositeAlpha(TqInt r, unsigned char &R, unsigned char alpha )
+{ 
+	TqInt t;
+	TqInt R1 = static_cast<TqInt>(INT_PRELERP( R, r, alpha, t ));
+	R = Aqsis::clamp( R1, 0, 255 );
+}
+
+#endif
+
 //------------------------------------------------------------------------------
 } // namespace Aqsis

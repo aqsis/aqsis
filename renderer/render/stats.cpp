@@ -22,6 +22,7 @@
 */
 #include "multitimer.h"
 
+#include "logging.h"
 #include "attributes.h"
 #include "renderer.h"
 #include "stats.h"

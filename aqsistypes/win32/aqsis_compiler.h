@@ -51,6 +51,10 @@
 #endif
 #endif
 
+/** Faster windows compilation, and less bloat
+ */
+#define WIN32_LEAN_AND_MEAN
+
 ///----------------------------------------------------------------------
 ///
 /// Namespace macros for those cases where they aren't supported
