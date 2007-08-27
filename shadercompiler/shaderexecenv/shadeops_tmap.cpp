@@ -1029,6 +1029,14 @@ void CqShaderExecEnv::SO_shadow( IqShaderData* name, IqShaderData* channel, IqSh
 	(channel)->GetFloat(_aq_channel,__iGrid);
 	IqTextureMap* pMap = getRenderContext() ->GetShadowMap( _aq_name );
 
+	// Get values for deltas along surface directions
+	TqFloat fdu = 0.0f;
+	TqFloat fdv = 0.0f;
+	if ( m_pAttributes )
+	{
+		du()->GetFloat(fdu);
+		dv()->GetFloat(fdv);
+	}
 
 	__fVarying = true;
 	if ( pMap != 0 && pMap->IsValid() )
@@ -1037,18 +1045,23 @@ void CqShaderExecEnv::SO_shadow( IqShaderData* name, IqShaderData* channel, IqSh
 		pMap->PrepareSampleOptions( paramMap );
 
 		__iGrid = 0;
+		CqVector3D defaultDeriv(0,0,0);
 		CqBitVector& RS = RunningState();
 		do
 		{
 
 			if(!__fVarying || RS.Value( __iGrid ) )
 			{
-				CqVector3D swidth = 0.0f, twidth = 0.0f;
+				CqVector3D p;
+				(P)->GetPoint(p,__iGrid);
 
-				CqVector3D _aq_P;
-				(P)->GetPoint(_aq_P,__iGrid);
-
-				pMap->SampleMap( _aq_P, swidth, twidth, fv, 0 );
+				CqVector3D dpuOn2 = fdu*0.5*SO_DuType<CqVector3D>(P, __iGrid, this, defaultDeriv);
+				CqVector3D dpvOn2 = fdv*0.5*SO_DvType<CqVector3D>(P, __iGrid, this, defaultDeriv);
+				CqVector3D p1 = p - dpuOn2 - dpvOn2;
+				CqVector3D p2 = p + dpuOn2 - dpvOn2;
+				CqVector3D p3 = p + dpuOn2 + dpvOn2;
+				CqVector3D p4 = p - dpuOn2 + dpvOn2;
+				pMap->SampleMap(p1, p2, p3, p4, fv, 0 );
 				(Result)->SetFloat(fv[ 0 ],__iGrid);
 			}
 		}
