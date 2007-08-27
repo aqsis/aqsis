@@ -91,6 +91,9 @@ ADD_SUBDIRECTORY(renderer/ddmanager)
 ADD_SUBDIRECTORY(renderer/raytrace)
 ADD_SUBDIRECTORY(shadercompiler/shaderexecenv)
 ADD_SUBDIRECTORY(aqsistypes)
+# Get the value of AQSISTYPES_LIBRARY from the aqsistypes project, so that downstream projects
+# can use it.
+GET_DIRECTORY_PROPERTY(AQSISTYPES_LIBRARY DIRECTORY aqsistypes DEFINITION AQSISTYPES_LIBRARY)
 ADD_SUBDIRECTORY(shadercompiler/shadervm)
 ADD_SUBDIRECTORY(renderer/render)
 ADD_SUBDIRECTORY(renderer/aqsis)
@@ -98,6 +101,9 @@ ADD_SUBDIRECTORY(shadercompiler/slpp)
 ADD_SUBDIRECTORY(shadercompiler/slparse)
 ADD_SUBDIRECTORY(shadercompiler/codegenvm)
 ADD_SUBDIRECTORY(shadercompiler/aqsl)
+# Get the value of AQSL_EXECUTABLE from the shadercompiler/aqsl project, so that downstream projects
+# can use it.
+GET_DIRECTORY_PROPERTY(AQSL_EXECUTABLE DIRECTORY shadercompiler/aqsl DEFINITION AQSL_EXECUTABLE)
 ADD_SUBDIRECTORY(shadercompiler/slxargs)
 ADD_SUBDIRECTORY(shadercompiler/aqsltell)
 ADD_SUBDIRECTORY(rib/ri2rib)
@@ -117,9 +123,6 @@ ADD_SUBDIRECTORY(texturing/plugins/bmp2tif)
 ADD_SUBDIRECTORY(texturing/plugins/exr2tif)
 ADD_SUBDIRECTORY(texturing/plugins/png2tif)
 ADD_SUBDIRECTORY(texturing/plugins/tga2tif)
-# Get the value of AQSL_EXECUTABLE from the shadercompiler/aqsl project, so that downstream projects
-# can use it.
-GET_DIRECTORY_PROPERTY(AQSL_EXECUTABLE DIRECTORY shadercompiler/aqsl DEFINITION AQSL_EXECUTABLE)
 ADD_SUBDIRECTORY(shaders)
 
 #
