@@ -70,11 +70,11 @@ class CqChannelInfoList
 		/// Get an iterator to the end of the channel list.
 		inline const_iterator end() const;
 		/// Get the number of channels in the list
-		inline TqUint numChannels() const;
+		inline TqInt numChannels() const;
 		/** \brief Get the channel at a given index.
 		 * \note Range-checked!
 		 */
-		inline const SqChannelInfo& operator[](TqUint index) const;
+		inline const SqChannelInfo& operator[](TqInt index) const;
 		/** \brief Add a channel to the end of the list.
 		 */
 		void addChannel(const SqChannelInfo& newChan);
@@ -82,16 +82,16 @@ class CqChannelInfoList
 		 * \throw XqInternal if the channel name isn't in the list.
 		 * \return the index for the channel, if it exists.
 		 */
-		inline TqUint findChannelIndex(const std::string& name) const;
+		inline TqInt findChannelIndex(const std::string& name) const;
 		/// \brief Check whether the list of channels contains the given channel name
 		inline bool hasChannel(const std::string& name) const;
 		/** \brief Get the byte offset of the indexed channel inside a pixel
 		 */
-		inline TqUint channelByteOffset(TqUint index) const;
+		inline TqInt channelByteOffset(TqInt index) const;
 		/** Return the number of bytes required to store a pixel of the
 		 * contained channel list.
 		 */
-		inline TqUint bytesPerPixel() const;
+		inline TqInt bytesPerPixel() const;
 		/** \brief Reorder channels to the "expected" order (rgba)
 		 *
 		 * A helper function to reorder the channels that Aqsis sends to ensure
@@ -113,8 +113,8 @@ class CqChannelInfoList
 		void recomputeByteOffsets();
 
 		TqListType m_channels;  		///< underlying vector of SqChannelInfo
-		std::vector<TqUint> m_offsets;  ///< vector of byte offsets into the channels.
-		TqUint m_bytesPerPixel;			///< bytes per pixel needed to store the channels.
+		std::vector<TqInt> m_offsets;  ///< vector of byte offsets into the channels.
+		TqInt m_bytesPerPixel;			///< bytes per pixel needed to store the channels.
 };
 
 typedef std::map<std::string, std::string> TqChannelNameMap;
@@ -151,11 +151,11 @@ class CqImageBuffer : boost::noncopyable
 	public:
 		/** \brief Construct an image buffer with the given channels per pixel.
 		 */
-		CqImageBuffer(const CqChannelInfoList& channels, TqUint width, TqUint height);
+		CqImageBuffer(const CqChannelInfoList& channels, TqInt width, TqInt height);
 		/** \brief Construct an image buffer with the given channels per pixel.
 		 */
 		CqImageBuffer(const CqChannelInfoList& channels, boost::shared_array<TqUchar> data,
-				TqUint width, TqUint height);
+				TqInt width, TqInt height);
 
 		/** \brief Factory function loading a buffer from a tiff file.
 		 *
@@ -191,7 +191,7 @@ class CqImageBuffer : boost::noncopyable
 		 *
 		 * \param tileSize - size of the square checker "tiles" in pixels
 		 */
-		void initToCheckerboard(TqUint tileSize = 16);
+		void initToCheckerboard(TqInt tileSize = 16);
 
 		/** \brief Copy a source buffer onto this one.
 		 *
@@ -201,7 +201,7 @@ class CqImageBuffer : boost::noncopyable
 		 * \param topLeftY - y coordinate where the top left of the source
 		 *                   buffer will map onto.
 		 */
-		void copyFrom(const CqImageBuffer& source, TqUint topLeftX = 0, TqUint topLeftY = 0);
+		void copyFrom(const CqImageBuffer& source, TqInt topLeftX = 0, TqInt topLeftY = 0);
 		/** \brief Copy a source buffer onto this one.
 		 *
 		 * This allows arbitrary source channels be mapped onto arbitrary
@@ -216,7 +216,7 @@ class CqImageBuffer : boost::noncopyable
 		 *                   buffer will map onto.
 		 */
 		void copyFrom(const CqImageBuffer& source, const TqChannelNameMap& nameMap,
-				TqUint topLeftX = 0, TqUint topLeftY = 0);
+				TqInt topLeftX = 0, TqInt topLeftY = 0);
 
 		/** \brief Composite the given image buffer on top of this one.
 		 *
@@ -233,8 +233,8 @@ class CqImageBuffer : boost::noncopyable
 		 *                   buffer will map onto.
 		 */
 		void compositeOver(const CqImageBuffer& source,
-				const TqChannelNameMap& nameMap, TqUint topLeftX = 0,
-				TqUint topLeftY = 0, const std::string alphaName = "a");
+				const TqChannelNameMap& nameMap, TqInt topLeftX = 0,
+				TqInt topLeftY = 0, const std::string alphaName = "a");
 		
 		/** \brief Get the vector of channel information describing pixels in
 		 * the buffer.
@@ -242,13 +242,13 @@ class CqImageBuffer : boost::noncopyable
 		inline const CqChannelInfoList& channelsInfo() const;
 		/** \brief get the number of channels per pixel in the buffer.
 		 */
-		inline TqUint numChannels() const;
+		inline TqInt numChannels() const;
 		/** \brief Get the width of the image buffer in pixels
 		 */
-		inline TqUint width() const;
+		inline TqInt width() const;
 		/** \brief Get the height of the image buffer in pixels
 		 */
-		inline TqUint height() const;
+		inline TqInt height() const;
 		/** \brief Get a const pointer to the underlying raw data.
 		 *
 		 * The proper thing here would be to return a shared array of type
@@ -261,7 +261,7 @@ class CqImageBuffer : boost::noncopyable
 		inline boost::shared_array<TqUchar>& rawData();
 		/** \brief Get the number of bytes required per pixel.
 		 */
-		inline TqUint bytesPerPixel() const;
+		inline TqInt bytesPerPixel() const;
 
 		/** \brief Retreive the image channel subregion with the given name
 		 *
@@ -274,24 +274,24 @@ class CqImageBuffer : boost::noncopyable
 		 * \return The named channel subregion.
 		 */
 		inline boost::shared_ptr<CqImageChannel> channel(const std::string& name,
-				TqUint topLeftX = 0, TqUint topLeftY = 0, TqUint width = 0,
-				TqUint height = 0);
+				TqInt topLeftX = 0, TqInt topLeftY = 0, TqInt width = 0,
+				TqInt height = 0);
 		/** \brief Retreive the image channel subregion with the given index in
 		 * the list of channels.
 		 *
 		 * \see channel(const std::string& name, ...)
 		 */
-		inline boost::shared_ptr<CqImageChannel> channel(TqUint index,
-				TqUint topLeftX = 0, TqUint topLeftY = 0, TqUint width = 0,
-				TqUint height = 0);
+		inline boost::shared_ptr<CqImageChannel> channel(TqInt index,
+				TqInt topLeftX = 0, TqInt topLeftY = 0, TqInt width = 0,
+				TqInt height = 0);
 		/// \see channel(const std::string& name, ...)
 		inline boost::shared_ptr<const CqImageChannel> channel(const std::string& name,
-				TqUint topLeftX = 0, TqUint topLeftY = 0, TqUint width = 0,
-				TqUint height = 0) const;
-		/// \see channel(TqUint index, ...)
-		inline boost::shared_ptr<const CqImageChannel> channel(TqUint index,
-				TqUint topLeftX = 0, TqUint topLeftY = 0, TqUint width = 0,
-				TqUint height = 0) const;
+				TqInt topLeftX = 0, TqInt topLeftY = 0, TqInt width = 0,
+				TqInt height = 0) const;
+		/// \see channel(TqInt index, ...)
+		inline boost::shared_ptr<const CqImageChannel> channel(TqInt index,
+				TqInt topLeftX = 0, TqInt topLeftY = 0, TqInt width = 0,
+				TqInt height = 0) const;
 
 	private:
 		/** \brief Implmentation for the various possible channel() calls in
@@ -299,8 +299,8 @@ class CqImageBuffer : boost::noncopyable
 		 *
 		 * \see channel
 		 */
-		boost::shared_ptr<CqImageChannel> channelImpl(TqUint index, TqUint topLeftX,
-				TqUint topLeftY, TqUint width, TqUint height) const;
+		boost::shared_ptr<CqImageChannel> channelImpl(TqInt index, TqInt topLeftX,
+				TqInt topLeftY, TqInt width, TqInt height) const;
 		/** \brief Compute the byte offsets into each image channel.
 		 *
 		 * \param channels - list of channel information
@@ -308,12 +308,12 @@ class CqImageBuffer : boost::noncopyable
 		 * This is one element longer than channels; the last element contains
 		 * the 
 		 */
-		static std::vector<TqUint> channelOffsets(const CqChannelInfoList& channels);
+		static std::vector<TqInt> channelOffsets(const CqChannelInfoList& channels);
 
 	private:
 		CqChannelInfoList m_channelsInfo; ///< vector of channel information
-		TqUint m_width; ///< buffer width in pixels
-		TqUint m_height; ///< buffer height in pixels
+		TqInt m_width; ///< buffer width in pixels
+		TqInt m_height; ///< buffer height in pixels
 		boost::shared_array<TqUchar> m_data; ///< raw image data
 };
 
@@ -340,22 +340,22 @@ inline CqChannelInfoList::const_iterator CqChannelInfoList::end() const
 	return m_channels.end();
 }
 
-inline TqUint CqChannelInfoList::numChannels() const
+inline TqInt CqChannelInfoList::numChannels() const
 {
 	return m_channels.size();
 }
 
-inline const SqChannelInfo& CqChannelInfoList::operator[](TqUint index) const
+inline const SqChannelInfo& CqChannelInfoList::operator[](TqInt index) const
 {
 	return m_channels.at(index);
 }
 
-inline TqUint CqChannelInfoList::findChannelIndex(const std::string& name) const
+inline TqInt CqChannelInfoList::findChannelIndex(const std::string& name) const
 {
 	TqInt index = findChannelIndexImpl(name);
 	if(index < 0)
 		throw XqInternal("Cannot find channel with name \"" + name + "\"", __FILE__, __LINE__);
-	return static_cast<TqUint>(index);
+	return static_cast<TqInt>(index);
 }
 
 inline bool CqChannelInfoList::hasChannel(const std::string& name) const
@@ -363,12 +363,12 @@ inline bool CqChannelInfoList::hasChannel(const std::string& name) const
 	return findChannelIndexImpl(name) >= 0;
 }
 
-inline TqUint CqChannelInfoList::channelByteOffset(TqUint index) const
+inline TqInt CqChannelInfoList::channelByteOffset(TqInt index) const
 {
 	return m_offsets.at(index);
 }
 
-inline TqUint CqChannelInfoList::bytesPerPixel() const
+inline TqInt CqChannelInfoList::bytesPerPixel() const
 {
 	return m_bytesPerPixel;
 }
@@ -381,17 +381,17 @@ inline const CqChannelInfoList& CqImageBuffer::channelsInfo() const
 	return m_channelsInfo;
 }
 
-inline TqUint CqImageBuffer::numChannels() const
+inline TqInt CqImageBuffer::numChannels() const
 {
 	return m_channelsInfo.numChannels();
 }
 
-inline TqUint CqImageBuffer::width() const
+inline TqInt CqImageBuffer::width() const
 {
 	return m_width;
 }
 
-inline TqUint CqImageBuffer::height() const
+inline TqInt CqImageBuffer::height() const
 {
 	return m_height;
 }
@@ -406,7 +406,7 @@ inline boost::shared_array<TqUchar>& CqImageBuffer::rawData()
 	return m_data;
 }
 
-inline TqUint CqImageBuffer::bytesPerPixel() const
+inline TqInt CqImageBuffer::bytesPerPixel() const
 {
 	return m_channelsInfo.bytesPerPixel();
 }
