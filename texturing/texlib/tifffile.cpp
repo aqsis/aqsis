@@ -25,29 +25,10 @@
  */
 
 #include "tifffile.h"
-#include "rifile.h"
+#include "aqsismath.h"
 
 namespace Aqsis
 {
-
-//------------------------------------------------------------------------------
-// stand-alone functions
-//------------------------------------------------------------------------------
-
-std::string findFileInRiPath(const std::string& fileName, const std::string& riPath)
-{
-	std::string fullFileName;
-	CqRiFile riFile(fileName.c_str(), riPath.c_str());
-	if(riFile.IsValid())
-	{
-		fullFileName = riFile.strRealName();
-		riFile.Close();
-	}
-	else
-		throw XqEnvironment(boost::str(boost::format("Could not fild file '%s'") % fileName).c_str(), __FILE__, __LINE__);
-	return fullFileName;
-}
-
 
 //------------------------------------------------------------------------------
 // XqTiffError
@@ -286,8 +267,8 @@ CqTiffInputFile::SqDirectoryData::SqDirectoryData(const CqTiffDirHandle& dirHand
 	}
 	photometricInterp = dirHandle.tiffTagValue<uint16>(TIFFTAG_PHOTOMETRIC);
 	// compute number of tiles in x and y directions
-	numTilesX = static_cast<TqUint>(ceil(static_cast<TqFloat>(imageWidth)/tileWidth));
-	numTilesY = static_cast<TqUint>(ceil(static_cast<TqFloat>(imageHeight)/tileHeight));
+	numTilesX = static_cast<TqUint>(lceil(static_cast<TqFloat>(imageWidth)/tileWidth));
+	numTilesY = static_cast<TqUint>(lceil(static_cast<TqFloat>(imageHeight)/tileHeight));
 	// get tags with sensible default values
 	sampleFormat = dirHandle.tiffTagValue<uint16>(TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
 	planarConfig = dirHandle.tiffTagValue<uint16>(TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);

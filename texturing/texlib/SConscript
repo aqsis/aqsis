@@ -37,7 +37,7 @@ texlib_test_sources = Split('''
 
 Import('testEnv')
 testEnv = testEnv.Copy()
-testEnv.AppendUnique(LIBS=['aqsis'])
+testEnv.AppendUnique(LIBS=['aqsistex', 'aqsistypes'])
 testEnv.addUnitTest('texlib_test', texlib_test_sources)
 
 
