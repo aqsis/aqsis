@@ -354,31 +354,66 @@ void CqImageBuffer::initToCheckerboard(TqInt tileSize)
 		channel(chanNum)->copyFrom(checkerChan);
 }
 
+void CqImageBuffer::getCopyRegionSize(TqInt offset, TqInt srcWidth, TqInt destWidth,
+		TqInt& srcOffset, TqInt& destOffset, TqInt& copyWidth)
+{
+	destOffset = max(offset, 0);
+	srcOffset = max(-offset, 0);
+	copyWidth = min(destWidth, offset+srcWidth) - destOffset;
+}
+
 void CqImageBuffer::copyFrom(const CqImageBuffer& source, TqInt topLeftX, TqInt topLeftY)
 {
-	if(source.m_width + topLeftX > m_width || source.m_height + topLeftY > m_height)
-		throw XqInternal("Source region too big for destination", __FILE__, __LINE__);
 	if(source.m_channelsInfo.numChannels() != m_channelsInfo.numChannels())
 		throw XqInternal("Number of source and destination channels do not match", __FILE__, __LINE__);
 
+	// compute size and top left coords of region to copy.
+	TqInt copyWidth = 0;
+	TqInt destTopLeftX = 0;
+	TqInt srcTopLeftX = 0;
+	getCopyRegionSize(topLeftX, source.m_width, m_width,
+			srcTopLeftX, destTopLeftX, copyWidth);
+	TqInt copyHeight = 0;
+	TqInt destTopLeftY = 0;
+	TqInt srcTopLeftY = 0;
+	getCopyRegionSize(topLeftY, source.m_height, m_height,
+			srcTopLeftY, destTopLeftY, copyHeight);
+	// return if no overlap
+	if(copyWidth <= 0 || copyHeight <= 0)
+		return;
+
 	for(TqInt i = 0; i < m_channelsInfo.numChannels(); ++i)
 	{
-		channel(i, topLeftX, topLeftY, source.m_width, source.m_height)
-			->copyFrom(*source.channel(i));
+		channel(i, destTopLeftX, destTopLeftY, copyWidth, copyHeight)
+			->copyFrom(*source.channel(i, srcTopLeftX, srcTopLeftY,
+						copyWidth, copyHeight));
 	}
 }
 
 void CqImageBuffer::copyFrom(const CqImageBuffer& source, const TqChannelNameMap& nameMap,
 		TqInt topLeftX, TqInt topLeftY)
 {
-	if(source.m_width + topLeftX > m_width || source.m_height + topLeftY > m_height)
-		throw XqInternal("Source region too big for destination", __FILE__, __LINE__);
+	// compute size and top left coords of region to copy.
+	TqInt copyWidth = 0;
+	TqInt destTopLeftX = 0;
+	TqInt srcTopLeftX = 0;
+	getCopyRegionSize(topLeftX, source.m_width, m_width,
+			srcTopLeftX, destTopLeftX, copyWidth);
+	TqInt copyHeight = 0;
+	TqInt destTopLeftY = 0;
+	TqInt srcTopLeftY = 0;
+	getCopyRegionSize(topLeftY, source.m_height, m_height,
+			srcTopLeftY, destTopLeftY, copyHeight);
+	// return if no overlap
+	if(copyWidth <= 0 || copyHeight <= 0)
+		return;
 
 	for(TqChannelNameMap::const_iterator i = nameMap.begin(), e = nameMap.end();
 			i != e; ++i)
 	{
-		channel(i->first, topLeftX, topLeftY, source.m_width, source.m_height)
-			->copyFrom(*source.channel(i->second));
+		channel(i->first, destTopLeftX, destTopLeftY, copyWidth, copyHeight)
+			->copyFrom(*source.channel(i->second, srcTopLeftX, srcTopLeftY,
+						copyWidth, copyHeight));
 	}
 }
 
@@ -386,20 +421,33 @@ void CqImageBuffer::compositeOver(const CqImageBuffer& source,
 		const TqChannelNameMap& nameMap, TqInt topLeftX, TqInt topLeftY,
 		const std::string alphaName)
 {
-	if(source.m_width + topLeftX > m_width || source.m_height + topLeftY > m_height)
-		throw XqInternal("Source region too big for destination", __FILE__, __LINE__);
-
 	if(!source.channelsInfo().hasChannel(alphaName))
 	{
 		copyFrom(source, nameMap, topLeftX, topLeftY);
 	}
 	else
 	{
+		// compute size and top left coords of region to copy.
+		TqInt copyWidth = 0;
+		TqInt destTopLeftX = 0;
+		TqInt srcTopLeftX = 0;
+		getCopyRegionSize(topLeftX, source.m_width, m_width,
+				srcTopLeftX, destTopLeftX, copyWidth);
+		TqInt copyHeight = 0;
+		TqInt destTopLeftY = 0;
+		TqInt srcTopLeftY = 0;
+		getCopyRegionSize(topLeftY, source.m_height, m_height,
+				srcTopLeftY, destTopLeftY, copyHeight);
+		// return if no overlap
+		if(copyWidth <= 0 || copyHeight <= 0)
+			return;
+
 		for(TqChannelNameMap::const_iterator i = nameMap.begin(), e = nameMap.end();
 				i != e; ++i)
 		{
-			channel(i->first, topLeftX, topLeftY, source.m_width, source.m_height)
-				->compositeOver(*source.channel(i->second), *source.channel(alphaName));
+			channel(i->first, destTopLeftX, destTopLeftY, copyWidth, copyHeight)
+				->compositeOver(*source.channel(i->second, srcTopLeftX, srcTopLeftY, copyWidth, copyHeight),
+						*source.channel(alphaName, srcTopLeftX, srcTopLeftY, copyWidth, copyHeight));
 		}
 	}
 }

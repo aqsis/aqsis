@@ -150,9 +150,18 @@ class CqImageBuffer : boost::noncopyable
 {
 	public:
 		/** \brief Construct an image buffer with the given channels per pixel.
+ 		 *
+ 		 * \param channels - description of image channels
+ 		 * \param width - buffer width in pixels
+ 		 * \param height - buffer height in pixels
 		 */
 		CqImageBuffer(const CqChannelInfoList& channels, TqInt width, TqInt height);
 		/** \brief Construct an image buffer with the given channels per pixel.
+ 		 *
+ 		 * \param channels - description of image channels
+ 		 * \param data - preexisting raw data to wrap the channel around
+ 		 * \param width - buffer width in pixels
+ 		 * \param height - buffer height in pixels
 		 */
 		CqImageBuffer(const CqChannelInfoList& channels, boost::shared_array<TqUchar> data,
 				TqInt width, TqInt height);
@@ -166,6 +175,9 @@ class CqImageBuffer : boost::noncopyable
 		static boost::shared_ptr<CqImageBuffer> loadFromTiff(TIFF* tif);
 
 		/** \brief Save the buffer to a TIFF file.
+		 *
+		 * \param pOut - Pointer to an open TIFF file where the buffer will be
+		 *               saved int into.
 		 */
 		void saveToTiff(TIFF* pOut) const;
 
@@ -195,6 +207,10 @@ class CqImageBuffer : boost::noncopyable
 
 		/** \brief Copy a source buffer onto this one.
 		 *
+ 		 * Parts of the source buffer may fall outside the destination buffer
+ 		 * (for instance, if topLeftX or topLeftY are negative).  In this case,
+ 		 * the regions lying outside the destination buffer are quietly ignored.
+ 		 *
 		 * \param source - source buffer
 		 * \param topLeftX - x coordinate where the top left of the source
 		 *                   buffer will map onto.
@@ -207,6 +223,10 @@ class CqImageBuffer : boost::noncopyable
 		 * This allows arbitrary source channels be mapped onto arbitrary
 		 * destination channels by name.
 		 *
+ 		 * Parts of the source buffer may fall outside the destination buffer
+ 		 * (for instance, if topLeftX or topLeftY are negative).  In this case,
+ 		 * the regions lying outside the destination buffer are quietly ignored.
+ 		 *
 		 * \param source - source buffer
 		 * \param nameMap - a map between the names of the destination (this)
 		 *                  and source buffers.
@@ -309,6 +329,19 @@ class CqImageBuffer : boost::noncopyable
 		 * the 
 		 */
 		static std::vector<TqInt> channelOffsets(const CqChannelInfoList& channels);
+		/** \brief Compute region offsets/sizes when copying one buffer onto another.
+		 *
+		 * \param offset - desired start index in destination region (may be < 0)
+		 * \param srcWidth - natural width of source region
+		 * \param destWidth - natural width of destination region
+		 * \param srcOffset - start index in source region (output)
+		 * \param destOffset - start index in destination region (output)
+		 * \param copyWidth - width of the actual region to copy (output).
+		 *                    Will be negative the source and destinations don't
+		 *                    overlap
+		 */
+		static void getCopyRegionSize(TqInt offset, TqInt srcWidth, TqInt destWidth,
+				TqInt& srcOffset, TqInt& destOffset, TqInt& copyWidth);
 
 	private:
 		CqChannelInfoList m_channelsInfo; ///< vector of channel information
