@@ -557,6 +557,7 @@ class CqTextureMap : public IqTextureMap
 			m_pixel_variance.resize( m_SamplesPerPixel );
 			m_pixel_sublevel.resize( m_SamplesPerPixel );
 			m_accum_color.resize( m_SamplesPerPixel );
+			m_hash = CqString::hash(strName.c_str());
 		}
 		virtual	~CqTextureMap();
 
@@ -807,6 +808,7 @@ class CqTextureMap : public IqTextureMap
 		// of the last (non-zero) directory (typically level) so later we could
 		// re-use the same level of mipmap in GetSampleArea(), GetSampleSgle().
 		TqInt   m_Directory;
+		TqUlong m_hash;
 }
 ;
 

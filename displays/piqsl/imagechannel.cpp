@@ -87,13 +87,13 @@ CqImageChannelConstant::CqImageChannelConstant(TqFloat value)
 	m_rowBuf()
 { }
 
-void CqImageChannelConstant::requireSize(TqUint width, TqUint height) const
+void CqImageChannelConstant::requireSize(TqInt width, TqInt height) const
 {
-	if(m_rowBuf.size() != width)
+	if(static_cast<TqInt>(m_rowBuf.size()) != width)
 		m_rowBuf.assign(width, m_value);
 }
 
-const TqFloatConv* CqImageChannelConstant::getRow(TqUint row) const
+const TqFloatConv* CqImageChannelConstant::getRow(TqInt row) const
 {
 	return &m_rowBuf[0];
 }
@@ -101,21 +101,21 @@ const TqFloatConv* CqImageChannelConstant::getRow(TqUint row) const
 //------------------------------------------------------------------------------
 // CqImageChannelCheckered implementation
 
-CqImageChannelCheckered::CqImageChannelCheckered(TqUint tileSize)
+CqImageChannelCheckered::CqImageChannelCheckered(TqInt tileSize)
 	: m_tileSize(tileSize),
 	m_checkerRow0(),
 	m_checkerRow1()
 { }
 
-void CqImageChannelCheckered::requireSize(TqUint width, TqUint height) const
+void CqImageChannelCheckered::requireSize(TqInt width, TqInt height) const
 {
-	if(m_checkerRow0.size() != width)
+	if(static_cast<TqInt>(m_checkerRow0.size()) != width)
 	{
 		m_checkerRow0.resize(width);
 		m_checkerRow1.resize(width);
 		// Make two buffers, one holding the first row of the checker pattern
 		// and one holding the second.
-		for(TqUint col = 0; col < width; ++col)
+		for(TqInt col = 0; col < width; ++col)
 		{
 			TqInt whichTile = (col % (m_tileSize*2)) / m_tileSize;
 			m_checkerRow0[col] = (whichTile+1)*0.5f;
@@ -124,7 +124,7 @@ void CqImageChannelCheckered::requireSize(TqUint width, TqUint height) const
 	}
 }
 
-const TqFloatConv* CqImageChannelCheckered::getRow(TqUint row) const
+const TqFloatConv* CqImageChannelCheckered::getRow(TqInt row) const
 {
 	if( ((row % (m_tileSize*2)) / m_tileSize) == 0 )
 		return &m_checkerRow0[0];
@@ -135,7 +135,7 @@ const TqFloatConv* CqImageChannelCheckered::getRow(TqUint row) const
 
 //------------------------------------------------------------------------------
 // SqChannelInfo implementation
-TqUint SqChannelInfo::bytesPerPixel() const
+TqInt SqChannelInfo::bytesPerPixel() const
 {
 	switch(type)
 	{
@@ -158,7 +158,7 @@ TqUint SqChannelInfo::bytesPerPixel() const
 //------------------------------------------------------------------------------
 // CqImageChannel implementation
 CqImageChannel::CqImageChannel(const SqChannelInfo& chanInfo, TqUchar* data,
-		TqUint width, TqUint height, TqUint stride, TqUint rowSkip)
+		TqInt width, TqInt height, TqInt stride, TqInt rowSkip)
 	: m_chanInfo(chanInfo),
 	m_data(data),
 	m_width(width),
@@ -168,7 +168,7 @@ CqImageChannel::CqImageChannel(const SqChannelInfo& chanInfo, TqUchar* data,
 	m_copyBuf(width)
 { }
 
-void CqImageChannel::requireSize(TqUint width, TqUint height) const
+void CqImageChannel::requireSize(TqInt width, TqInt height) const
 {
 	// Normal image channels cannot change size; just check that the sizes match.
 	if(m_width != width || m_height != height)
@@ -189,7 +189,7 @@ void CqImageChannel::copyFrom(const IqImageChannelSource& source)
 	 * implemented.
 	 */
 
-	for(TqUint row = 0; row < m_height; ++row)
+	for(TqInt row = 0; row < m_height; ++row)
 		replaceRow(row, source.getRow(row));
 }
 
@@ -199,9 +199,46 @@ void CqImageChannel::compositeOver(const IqImageChannelSource& source,
 	source.requireSize(m_width, m_height);
 	sourceAlpha.requireSize(m_width, m_height);
 
-	for(TqUint row = 0; row < m_height; ++row)
+	for(TqInt row = 0; row < m_height; ++row)
 		compositeRow(row, source.getRow(row), sourceAlpha.getRow(row));
 }
+
+// Old stuff used for compositing 8-bit channels.  May possibly be useful for
+// future optimizations.
+#if 0
+
+// Tricky macros from [Smith 1995] (see ref below)
+
+/** Compute int((a/255.0)*b) with only integer arithmetic.  Assumes a, b are
+ * between 0 and 255.
+ */
+#define INT_MULT(a,b,t) ( (t) = (a) * (b) + 0x80, ( ( ( (t)>>8 ) + (t) )>>8 ) )
+/** Compute a composite of alpha-premultiplied values using integer arithmetic.
+ *
+ * Assumes p, q are between 0 and 255.
+ *
+ * \return int(q + (1-a/255.0)*p)
+ */
+#define INT_PRELERP(p, q, a, t) ( (p) + (q) - INT_MULT( a, p, t) )
+
+/** \brief Composite two integers with a given alpha
+ *
+ * See for eg:
+ * [Smith 1995]  Alvy Ray Smith, "Image Compositing Fundamentals", Technical
+ * Memo 4, 1995.  ftp://ftp.alvyray.com/Acrobat/4_Comp.pdf
+ *
+ * \param r - top surface; alpha-premultiplied.  Assumed to be between 0 and 255.
+ * \param R - bottom surface; alpha-premultiplied
+ * \param alpha - alpha for top surface
+ */
+void CompositeAlpha(TqInt r, unsigned char &R, unsigned char alpha )
+{ 
+	TqInt t;
+	TqInt R1 = static_cast<TqInt>(INT_PRELERP( R, r, alpha, t ));
+	R = Aqsis::clamp( R1, 0, 255 );
+}
+
+#endif
 
 //------------------------------------------------------------------------------
 } // namespace Aqsis

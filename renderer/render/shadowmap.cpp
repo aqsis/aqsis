@@ -119,10 +119,12 @@ CqTextureMap* CqTextureMap::GetShadowMap( const CqString& strName )
 {
 	QGetRenderContext() ->Stats().IncTextureMisses( 3 );
 
+	TqUlong hash = CqString::hash(strName.c_str());
+
 	// First search the texture map cache
 	for ( std::vector<CqTextureMap*>::iterator i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
 	{
-		if ( ( *i ) ->m_strName == strName )
+		if ( ( *i ) ->m_hash == hash )
 		{
 			if ( ( *i ) ->Type() == MapType_Shadow )
 			{

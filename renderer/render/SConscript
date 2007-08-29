@@ -4,7 +4,6 @@ Import('env cachegen headergen validategen', 'embedManifest')
 
 aqsisdll_sources = Split("""
 	attributes.cpp
-	blobby.cpp
 	bound.cpp
 	bucket.cpp
 	bunny.cpp
@@ -24,7 +23,6 @@ aqsisdll_sources = Split("""
 	lath.cpp
 	lights.cpp
 	linearcurves.cpp
-	marchingcubes.cpp
 	memorysentry.cpp
 	micropolygon.cpp
 	mipmap.cpp
@@ -44,7 +42,6 @@ aqsisdll_sources = Split("""
 	shaders.cpp
 	shadowmap.cpp
 	stats.cpp
-	subdivision2.cpp
 	surface.cpp
 	symbols.cpp
 	teapot.cpp
@@ -54,6 +51,11 @@ aqsisdll_sources = Split("""
 	transform.cpp
 	trimcurve.cpp""")
 
+aqsisdll_no_optimization = Split("""
+	blobby.cpp
+	marchingcubes.cpp
+	subdivision2.cpp
+	""")
 
 aqsisdll_headers = Split("""
 	attributes.h
@@ -151,7 +153,13 @@ Import('ddmanager_objs raytrace_objs rib2_objs rib2ri_sources')
 # compile rib2ri here to catch aqsisenv #defines
 rib2ri_objs = aqsisenv.SharedObject('rib2ri', rib2ri_sources)
 
-aqsisdll = aqsisenv.SharedLibrary('aqsis', [aqsisdll_sources, ddmanager_objs, raytrace_objs, rib2ri_objs, rib2_objs])
+aqsisno_optimization = aqsisenv.Copy()
+aqsisno_optimization.AppendUnique(CCFLAGS=['-O0'])
+
+aqsisextra = [aqsisno_optimization.SharedObject(file) for file in aqsisdll_no_optimization]
+
+
+aqsisdll = aqsisenv.SharedLibrary('aqsis', [aqsisdll_sources, aqsisextra, ddmanager_objs, raytrace_objs, rib2ri_objs, rib2_objs])
 
 embedManifest(env, aqsisenv, aqsisdll, 'DLL')
 
