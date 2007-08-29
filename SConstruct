@@ -363,6 +363,7 @@ sub_sconsdirs_noret = prependBuildDir(Split('''
 	rib/rib2stream
 	rib/miqser
 	texturing/teqser
+	texturing/texlib
 	texturing/plugins
 	shaders
 	thirdparty/pdiff

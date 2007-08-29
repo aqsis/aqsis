@@ -9,6 +9,7 @@ aqsistypes_sources = Split("""
 	logging.cpp
 	lowdiscrep.cpp
 	matrix.cpp
+	memorysentry.cpp
 	multitimer.cpp
 	noise.cpp
 	noise1234.cpp
@@ -36,6 +37,7 @@ aqsistypes_headers = Split("""
 	logging_streambufs.h
 	lowdiscrep.h
 	matrix.h
+	memorysentry.h
 	multitimer.h
 	noise1234.h
 	plugins.h
