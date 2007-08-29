@@ -88,6 +88,13 @@ template<typename T>
 class CqTextureTile : public CqIntrusivePtrCounted
 {
 	public:
+		/** \brief The pointer type for use with texture tiles.
+		 *
+		 * We use intrusive_ptr here rather than shared_ptr since it's lightweight for
+		 * the construction of CqSampleVector objects.
+		 */
+		typedef boost::intrusive_ptr<CqTextureTile<T> > TqPtr;
+
 		/** \brief Construct a texture tile
 		 *
 		 * \todo Investigate the use of an allocator or such for the TIFF data.
