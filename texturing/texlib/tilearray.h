@@ -212,7 +212,7 @@ inline TqUint CqTileArray<T>::height() const
 }
 
 template<typename T>
-CqTileArray<T>::~CqTileArray<T>()
+CqTileArray<T>::~CqTileArray()
 { }
 
 
@@ -234,7 +234,7 @@ inline TqUint CqTextureTileArray<T>::samplesPerPixel() const
 
 #if 0
 template<typename T>
-CqTextureTileArray<T>::CqTextureTileArray<T>(std::string fileName, TqUint tiffDirectory)
+CqTextureTileArray<T>::CqTextureTileArray(std::string fileName, TqUint tiffDirectory)
 	: m_tiffDirectory(tiffDirectory),
 	m_fileName(fileName)
 {
@@ -285,7 +285,7 @@ CqMemorySentry::TqMemorySize CqTextureTileArray<T>::zapMemory()
 }
 
 template<typename T>
-CqTextureTileArray<T>::~CqTextureTileArray<T>()
+CqTextureTileArray<T>::~CqTextureTileArray()
 {
 	/// \todo Implementation
 }
