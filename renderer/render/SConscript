@@ -47,7 +47,6 @@ aqsisdll_sources = Split("""
 	teapot.cpp
 	texturemap.cpp
 	tifffile.cpp
-	tilearray.cpp
 	transform.cpp
 	trimcurve.cpp""")
 
