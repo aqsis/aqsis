@@ -932,9 +932,8 @@ class CqShadowMap : public CqTextureMap
 	private:
 		static	CqLowDiscrepancy	m_LowDiscrep;			///< Low discrepancy point generator.
 
-		TqFloat	m_bias;
-		TqFloat m_bias0;
-		TqFloat m_bias1;
+		TqFloat m_minBias;
+		TqFloat m_biasRange;
 
 		std::vector<CqMatrix>	m_WorldToCameraMatrices;		///< Matrix to convert points from world space to light space.
 		std::vector<CqMatrix>	m_WorldToScreenMatrices;		///< Matrix to convert points from world space to screen space.
@@ -945,8 +944,6 @@ class CqShadowMap : public CqTextureMap
 		TqFloat			m_Val;		///< Its value at the last iu,iv
 		TqFloat			m_Depth; 	///< Its depth at the last iu,iv
 		TqFloat			m_Average; 	///< Its average z at the last iu,iv
-	
-
 }
 ;
 
