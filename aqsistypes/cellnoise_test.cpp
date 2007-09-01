@@ -27,7 +27,6 @@
 #include "vector3d.h"
 
 
-#define BOOST_AUTO_TEST_MAIN
 #include <boost/test/auto_unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 
@@ -35,7 +34,7 @@
 const TqFloat epsilon = 0.1f; 
 
 
-bool equals(const Aqsis::CqVector3D& a, const Aqsis::CqVector3D& b)
+static bool equals(const Aqsis::CqVector3D& a, const Aqsis::CqVector3D& b)
 {
 	if ((a.x() > (b.x() + 0.000001f)
 			|| a.x() < (b.x() - 0.000001f)) ||

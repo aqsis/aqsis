@@ -27,13 +27,12 @@
 #include "vector3d.h"
 
 
-#define BOOST_AUTO_TEST_MAIN
 #include <boost/test/auto_unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 
 
 
-bool equals(const Aqsis::CqMatrix& a, const Aqsis::CqMatrix& b)
+static bool equals(const Aqsis::CqMatrix& a, const Aqsis::CqMatrix& b)
 {
 	for (int i=0; i<4; ++i)
 	{
