@@ -59,20 +59,18 @@ void CqIntWrapper::setData(TqInt data)
 
 	if(*m_data == theAnswer && data != theAnswer)
 	{
-		// Unfortunately, due to the crapness of VC++6 which we still support,
-		// loop variable declarations (in the initialisation part of a for
-		// loop) must often go outside of looping constructs.  Otherwise name
-		// collisions happen.
-
-		// ie, if you want to portably use the name "i" in two *different* loops,
-		// you'll have to declare it here:
-		//
-		// TqUint i = 0;
-
 		for(TqUint i = 0; i < maxInsults; ++i)
 			std::cout << "You idiot! You're overriding the answer.\n";
 
-		// "i" still defined in this scope under VC++6
+		// Portability warning: "i" still defined in this scope under VC++6; see
+		// http://www.boost.org/more/microsoft_vcpp.html
+
+		// Recommended workaround to declare i in another loop: explicitly wrap
+		// in a block using an extra { } pair:
+		{
+			for(TqUint i = 0; i < maxInsults; ++i)
+				std::cout << "You idiot! You're overriding the answer.\n";
+		}
 	}
 	*m_data = data;
 }

@@ -59,11 +59,11 @@ BOOST_AUTO_TEST_CASE(CqChannelInfoList_channelByteOffset_test)
 {
 	ChannelInfoListFixture f;
 
-	BOOST_CHECK_EQUAL(f.chanList.channelByteOffset(0), TqUint(0));
-	BOOST_CHECK_EQUAL(f.chanList.channelByteOffset(1), TqUint(2));
-	BOOST_CHECK_EQUAL(f.chanList.channelByteOffset(3), TqUint(7));
+	BOOST_CHECK_EQUAL(f.chanList.channelByteOffset(0), 0);
+	BOOST_CHECK_EQUAL(f.chanList.channelByteOffset(1), 2);
+	BOOST_CHECK_EQUAL(f.chanList.channelByteOffset(3), 7);
 
-	BOOST_CHECK_EQUAL(f.chanList.bytesPerPixel(), TqUint(11));
+	BOOST_CHECK_EQUAL(f.chanList.bytesPerPixel(), 11);
 }
 
 BOOST_AUTO_TEST_CASE(CqChannelInfoList_reorderChannels_test)
@@ -78,14 +78,14 @@ BOOST_AUTO_TEST_CASE(CqChannelInfoList_reorderChannels_test)
 	BOOST_CHECK_EQUAL(f.chanList[2].name, "b");
 	BOOST_CHECK_EQUAL(f.chanList[3].name, "a");
 
-	BOOST_CHECK_EQUAL(f.chanList.bytesPerPixel(), TqUint(15));
+	BOOST_CHECK_EQUAL(f.chanList.bytesPerPixel(), 15);
 }
 
 BOOST_AUTO_TEST_CASE(CqChannelInfoList_findChannelIndex_test)
 {
 	ChannelInfoListFixture f;
 
-	BOOST_CHECK_EQUAL(f.chanList.findChannelIndex("g"), TqUint(2));
+	BOOST_CHECK_EQUAL(f.chanList.findChannelIndex("g"), 2);
 	BOOST_CHECK_THROW(f.chanList.findChannelIndex("z"), Aqsis::XqInternal);
 }
 
@@ -99,14 +99,14 @@ BOOST_AUTO_TEST_CASE(CqImageBuffer_test_clear)
 	ch.addChannel(Aqsis::SqChannelInfo("r", Aqsis::Format_Unsigned16));
 	ch.addChannel(Aqsis::SqChannelInfo("b", Aqsis::Format_Unsigned16));
 	TqUshort data[] = {0x100, 0x0200, 0xFA00, 0xFF00};
-	TqUint width = 2;
-	TqUint height = 1;
-	TqUint chansPerPixel = ch.numChannels();
+	TqInt width = 2;
+	TqInt height = 1;
+	TqInt chansPerPixel = ch.numChannels();
 	Aqsis::CqImageBuffer imBuf(ch, boost::shared_array<TqUchar>(
 				reinterpret_cast<TqUchar*>(data), nullDeleter), width, height);
 	imBuf.clearBuffer(1.0f);
 
-	for(TqUint i = 0; i < width*height*chansPerPixel; ++i)
+	for(TqInt i = 0; i < width*height*chansPerPixel; ++i)
 		BOOST_CHECK_EQUAL(data[i], TqUshort(0xFFFF));
 }
 
@@ -116,22 +116,22 @@ BOOST_AUTO_TEST_CASE(CqImageBuffer_test_quantizeForDisplay)
 	ch.addChannel(Aqsis::SqChannelInfo("r", Aqsis::Format_Unsigned16));
 	ch.addChannel(Aqsis::SqChannelInfo("b", Aqsis::Format_Unsigned16));
 	TqUshort data[] = {0x100, 0x0200, 0xFFFF/2, 0xFFFF};
-	TqUint width = 2;
-	TqUint height = 1;
-	TqUint chansPerPixel = ch.numChannels();
+	TqInt width = 2;
+	TqInt height = 1;
+	TqInt chansPerPixel = ch.numChannels();
 	Aqsis::CqImageBuffer imBuf(ch, boost::shared_array<TqUchar>(
 				reinterpret_cast<TqUchar*>(data), nullDeleter), width, height);
 	
 	boost::shared_ptr<Aqsis::CqImageBuffer> quantizedBuf = imBuf.quantizeForDisplay();
 
-	BOOST_CHECK_EQUAL(quantizedBuf->bytesPerPixel(), TqUint(2));
+	BOOST_CHECK_EQUAL(quantizedBuf->bytesPerPixel(), 2);
 	BOOST_CHECK_EQUAL(quantizedBuf->channelsInfo()[0].type, Aqsis::Format_Unsigned8);
 	BOOST_CHECK_EQUAL(quantizedBuf->channelsInfo()[1].type, Aqsis::Format_Unsigned8);
 
 	TqUchar* quantizedData = quantizedBuf->rawData().get();
 	TqUchar expectedData[] = {0x1, 0x02, 0xFF/2, 0xFF};
 
-	for(TqUint i = 0; i < width*height*chansPerPixel; ++i)
+	for(TqInt i = 0; i < width*height*chansPerPixel; ++i)
 		BOOST_CHECK_EQUAL(quantizedData[i], expectedData[i]);
 }
 
@@ -141,16 +141,16 @@ BOOST_AUTO_TEST_CASE(CqImageBuffer_test_copyFromSubregion)
 	ch.addChannel(Aqsis::SqChannelInfo("r", Aqsis::Format_Unsigned16));
 	TqUshort srcData[] = {1, 2,
 	                      3, 4};
-	TqUint width = 2;
-	TqUint height = 2;
-	TqUint chansPerPixel = ch.numChannels();
+	TqInt width = 2;
+	TqInt height = 2;
+	TqInt chansPerPixel = ch.numChannels();
 	Aqsis::CqImageBuffer srcBuf(ch, boost::shared_array<TqUchar>(
 				reinterpret_cast<TqUchar*>(srcData), nullDeleter), width, height);
 	
 	TqUshort destData[] = {0,0,0,
 	                       0,0,0};
-	TqUint destWidth = 3;
-	TqUint destHeight = 2;
+	TqInt destWidth = 3;
+	TqInt destHeight = 2;
 	Aqsis::CqImageBuffer destBuf(ch, boost::shared_array<TqUchar>(
 				reinterpret_cast<TqUchar*>(destData), nullDeleter), destWidth, destHeight);
 
@@ -159,7 +159,7 @@ BOOST_AUTO_TEST_CASE(CqImageBuffer_test_copyFromSubregion)
 	TqUshort expectedData[] = {1, 2, 0,
 							   3, 4, 0};
 
-	for(TqUint i = 0; i < destWidth*destHeight*chansPerPixel; ++i)
+	for(TqInt i = 0; i < destWidth*destHeight*chansPerPixel; ++i)
 		BOOST_CHECK_EQUAL(destData[i], expectedData[i]);
 }
 
@@ -169,9 +169,9 @@ BOOST_AUTO_TEST_CASE(CqImageBuffer_test_read_write_tiff)
 	ch.addChannel(Aqsis::SqChannelInfo("r", Aqsis::Format_Unsigned16));
 	TqUshort srcData[] = {1, 2,
 	                      3, 4};
-	TqUint width = 2;
-	TqUint height = 2;
-	TqUint chansPerPixel = ch.numChannels();
+	TqInt width = 2;
+	TqInt height = 2;
+	TqInt chansPerPixel = ch.numChannels();
 	Aqsis::CqImageBuffer srcBuf(ch, boost::shared_array<TqUchar>(
 				reinterpret_cast<TqUchar*>(srcData), nullDeleter), width, height);
 
@@ -191,7 +191,7 @@ BOOST_AUTO_TEST_CASE(CqImageBuffer_test_read_write_tiff)
 	TIFFClose(inTif);
 
 	TqUshort* destData = reinterpret_cast<TqUshort*>(srcBuf.rawData().get());
-	for(TqUint i = 0; i < width*height*chansPerPixel; ++i)
+	for(TqInt i = 0; i < width*height*chansPerPixel; ++i)
 		BOOST_CHECK_EQUAL(destData[i], srcData[i]);
 }
 
