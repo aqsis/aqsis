@@ -27,7 +27,13 @@
 #include "vector3d.h"
 
 
-#include <boost/test/auto_unit_test.hpp>
+#ifdef AQSIS_SYSTEM_MACOSX
+    #define BOOST_AUTO_TEST_MAIN
+	#include <boost/test/included/unit_test.hpp>
+#else
+	#include <boost/test/auto_unit_test.hpp>
+#endif
+
 #include <boost/test/floating_point_comparison.hpp>
 
 

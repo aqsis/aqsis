@@ -112,7 +112,9 @@ aqsistypes_test_sources = Split('''
 	matrix_test.cpp
 	noise_test.cpp
 	spline_test.cpp
+	vector2d_test.cpp
 	vector3d_test.cpp
+	vector4d_test.cpp
 	''')
 testEnv.addUnitTest('aqsistypes_test', aqsistypes_test_sources)
 
