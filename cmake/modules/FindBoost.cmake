@@ -7,13 +7,17 @@ SET(AQSIS_BOOST_INCLUDE_SEARCHPATH)
 IF(WIN32)
         IF(MSVC)
 		SET(AQSIS_BOOST_THREAD_LIBRARY_NAME boost_thread-vc80-mt CACHE STRING "The name of the boost_thread library (undecorated, i.e. the string passed to the compiler)")
+		SET(AQSIS_BOOST_UNIT_TEST_FRAMEWORK_LIBRARY_NAME boost_unit_test_framework-vc80-mt CACHE STRING "The name of the boost_unit_test_framework library (undecorated, i.e. the string passed to the compiler)")
         ELSE(MSVC)
 		SET(AQSIS_BOOST_THREAD_LIBRARY_NAME libboost_thread-mgw34-1_34 CACHE STRING "The name of the boost_thread library (undecorated, i.e. the string passed to the compiler)")
+		SET(AQSIS_BOOST_UNIT_TEST_FRAMEWORK_LIBRARY_NAME libboost_unit_test_framework-mgw34-1_34 CACHE STRING "The name of the boost_unit_test_framework library (undecorated, i.e. the string passed to the compiler)")
         ENDIF(MSVC)
 ELSE(WIN32)
 	SET(AQSIS_BOOST_THREAD_LIBRARY_NAME boost_thread CACHE STRING "The name of the boost_thread library (undecorated, i.e. the string passed to the compiler)")
+	SET(AQSIS_BOOST_UNIT_TEST_FRAMEWORK_LIBRARY_NAME boost_unit_test_framework CACHE STRING "The name of the boost_unit_test_framework library (undecorated, i.e. the string passed to the compiler)")
 ENDIF(WIN32)
 MARK_AS_ADVANCED(AQSIS_BOOST_THREAD_LIBRARY_NAME)
+MARK_AS_ADVANCED(AQSIS_BOOST_UNIT_TEST_FRAMEWORK_LIBRARY_NAME)
 
 FIND_PATH(AQSIS_BOOST_INCLUDE_DIR
 			boost
@@ -27,6 +31,12 @@ FIND_LIBRARY(AQSIS_BOOST_THREAD_LIBRARY
 			DOC "Location of the boost thread library"
 			)
 MARK_AS_ADVANCED(AQSIS_BOOST_THREAD_LIBRARY)
+FIND_LIBRARY(AQSIS_BOOST_UNIT_TEST_FRAMEWORK_LIBRARY
+			NAMES ${AQSIS_BOOST_UNIT_TEST_FRAMEWORK_LIBRARY_NAME}	
+			PATHS ${AQSIS_BOOST_LIBRARIES_DIR}
+			DOC "Location of the boost unit test framework library"
+			)
+MARK_AS_ADVANCED(AQSIS_BOOST_UNIT_TEST_FRAMEWORK_LIBRARY)
 
 STRING(COMPARE EQUAL "${AQSIS_BOOST_INCLUDE_DIR}" "AQSIS_BOOST_INCLUDE_DIR-NOTFOUND" AQSIS_BOOST_INCLUDE_NOTFOUND)
 STRING(COMPARE EQUAL "${AQSIS_BOOST_THREAD_LIBRARY}" "AQSIS_BOOST_THREAD_LIBRARY-NOTFOUND" AQSIS_BOOST_THREAD_LIBRARY_NOTFOUND)
