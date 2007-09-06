@@ -110,7 +110,6 @@ ADD_SUBDIRECTORY(rib/ri2rib)
 ADD_SUBDIRECTORY(texturing/teqser)
 ADD_SUBDIRECTORY(displays/display)
 ADD_SUBDIRECTORY(thirdparty/tinyxml)
-ADD_SUBDIRECTORY(displays/piqsl)
 ADD_SUBDIRECTORY(displays/d_exr)
 ADD_SUBDIRECTORY(displays/d_sdcBMP)
 ADD_SUBDIRECTORY(texturing/plugins/common)
@@ -125,6 +124,9 @@ ADD_SUBDIRECTORY(texturing/plugins/png2tif)
 ADD_SUBDIRECTORY(texturing/plugins/tga2tif)
 ADD_SUBDIRECTORY(shaders)
 
+IF(AQSIS_FLTK_FOUND AND AQSIS_BOOST_FOUND)
+	ADD_SUBDIRECTORY(displays/piqsl)
+ENDIF(AQSIS_FLTK_FOUND AND AQSIS_BOOST_FOUND)
 #
 # Build aqsisrc
 #
