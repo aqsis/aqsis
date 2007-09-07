@@ -111,6 +111,7 @@ aqsistypes_test_sources = Split('''
 	color_test.cpp
 	matrix_test.cpp
 	noise_test.cpp
+	noise1234_test.cpp
 	spline_test.cpp
 	vector2d_test.cpp
 	vector3d_test.cpp

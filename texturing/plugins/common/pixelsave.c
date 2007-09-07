@@ -1,10 +1,15 @@
 #include <time.h>
+#include <string.h>  // for strstr()
+
 #include "tiffio.h"
 
 static char datetime[20];
 /*
  * save to filename a tiff file
  */
+#ifndef WIN32
+inline
+#endif
 void save_tiff( char *filename,
                 unsigned char *raster,
                 int width,
