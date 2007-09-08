@@ -5,9 +5,12 @@ api_xml = Split("""
 
 api_xsl = Split("""
 	apiheader.xsl		apicache.xsl		apivalidate.xsl		apidebug.xsl""")	
+api_headers = Split("""
+	ri.h""")
 
 api_install_headers = Split('''
 	ri.inl
+	ri.h
 		''')
 
 apienv = env.Copy()
@@ -31,4 +34,5 @@ Export('cachegen validategen headergen debuggen')
 
 env.Distribute(api_xml)
 env.Distribute(api_xsl)
+env.Distribute(api_headers)
 env.Distribute('SConscript')

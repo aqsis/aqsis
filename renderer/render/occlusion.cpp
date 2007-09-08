@@ -352,7 +352,7 @@ bool CqOcclusionTree::CanCull( CqBound* bound )
 		// Check the bound against the 2D limits of this level, if not entirely contained, then we
 		// cannot cull at this level, nor at any of the children.
 		CqBound b1(node->MinSamplePoint(), node->MaxSamplePoint());
-		if(b1.Contains2D(*bound) || top_level)
+		if(b1.Contains2D(bound) || top_level)
 		{
 			top_level = false;
 			if( bound->vecMin().z() > node->MaxOpaqueZ() )

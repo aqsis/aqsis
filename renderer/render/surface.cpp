@@ -111,10 +111,8 @@ TqInt CqSurface::Uses() const
 /** Adjust the bound of the quadric taking into account transformation motion blur.
  */
 
-CqBound	CqSurface::AdjustBoundForTransformationMotion( const CqBound& B ) const
+void CqSurface::AdjustBoundForTransformationMotion( IqBound* B ) const
 {
-	CqBound Bm( B );
-
 	// Create a map of transformation keyframes, taking into account both object and camera motion.
 	TqInt iTime;
 	IqTransformPtr objectTransform = pTransform();
@@ -131,7 +129,9 @@ CqBound	CqSurface::AdjustBoundForTransformationMotion( const CqBound& B ) const
 	if( keyframeTimes.size() > 1 )
 	{
 		CqMatrix matCameraToObject0 = QGetRenderContext() ->matSpaceToSpace( "camera", "object", NULL, pTransform().get(), keyframeTimes.begin()->second );
-		CqBound B0( B );
+		CqBound B0;
+		B0.vecMin() = B->vecMin();
+		B0.vecMax() = B->vecMax();
 		B0.Transform( matCameraToObject0 );
 
 		std::map<TqFloat, TqFloat>::iterator keyFrame;
@@ -140,11 +140,9 @@ CqBound	CqSurface::AdjustBoundForTransformationMotion( const CqBound& B ) const
 			CqBound Btx( B0 );
 			CqMatrix matObjectToCameraT = QGetRenderContext() ->matSpaceToSpace( "object", "camera", NULL, pTransform().get(), keyFrame->second );
 			Btx.Transform( matObjectToCameraT );
-			Bm.Encapsulate( Btx );
+			B->Encapsulate( &Btx );
 		}
 	}
-
-	return ( Bm );
 }
 
 

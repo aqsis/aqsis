@@ -72,9 +72,4 @@ STRING_DESC;
 // alternative name for the above seen in bbox.c in the RMR
 #define SHADEOP_CLEANUP(shutdownfunc) EXTERN_C EXPORT void shutdownfunc (void *initdata)
 
-// We declare these here for access from shaderexecenv
-typedef void (*DSOMethod)(void*,int,void**);
-typedef void* (*DSOInit)(int,void*);
-typedef void (*DSOShutdown)(void*);
-
 #endif // SHADEOP_H

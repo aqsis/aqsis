@@ -975,7 +975,7 @@ TqInt CqCubicCurvesGroup::Split(
  *
  * @return CqBound object containing the bounds.
  */
-CqBound CqCubicCurvesGroup::Bound() const
+void CqCubicCurvesGroup::Bound(IqBound* bound) const
 {
 	// Get the boundary in camera space.
 	CqVector3D vecA( FLT_MAX, FLT_MAX, FLT_MAX );
@@ -1098,11 +1098,9 @@ CqBound CqCubicCurvesGroup::Bound() const
 	vecA -= ( maxCameraSpaceWidth / 2.0 );
 	vecB += ( maxCameraSpaceWidth / 2.0 );
 
-	// return the boundary
-	CqBound	B;
-	B.vecMin() = vecA;
-	B.vecMax() = vecB;
-	return ( AdjustBoundForTransformationMotion( B ) );
+	bound->vecMin() = vecA;
+	bound->vecMax() = vecB;
+	AdjustBoundForTransformationMotion( bound );
 }
 
 /**

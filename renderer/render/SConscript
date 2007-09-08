@@ -53,33 +53,29 @@ aqsisdll_no_optimization = Split("""
 	""")
 
 aqsisdll_headers = Split("""
-	attributes.h            ilightsource.h          micropolygon.h          ri.h
+	attributes.h            micropolygon.h
 	bilinear.h              imagebuffer.h           motion.h                ri_cache.h
 	ri_debug.h
 	bound.h                 imagepixel.h            mpdump.h                rifile.h
 
 	bucket.h                bunny.h 	imagers.h               
-	nurbs.h                 shadeop.h
+	nurbs.h                 
 	blobby.h		clippingvolume.h        inlineparse.h
         objectinstance.h        shaders.h
 
-	condition.h             iraytrace.h             occlusion.h             stats.h
-	converter.h             irenderer.h             options.h               subdivision2.h
-	csgtree.h               ishader.h               parameters.h            surface.h
-	curves.h                ishaderdata.h           patch.h                 symbols.h
-	focus.h                 ishaderexecenv.h        plane.h                 teapot.h
-	forwarddiff.h           isurface.h              points.h                texturemap.h 
-	genpoly.h               itexturemap.h           polygon.h               transform.h
-	graphicsstate.h         itransform.h            procedural.h            trimcurve.h
-	iattributes.h           kdtree.h                quadrics.h              ioptions.h
-	iddmanager.h            lath.h                  render.h
+	condition.h             occlusion.h             stats.h
+	converter.h             options.h               subdivision2.h
+	csgtree.h               parameters.h            surface.h
+	curves.h                patch.h                 symbols.h
+	focus.h                 plane.h                 teapot.h
+	forwarddiff.h           points.h                texturemap.h 
+	genpoly.h               polygon.h               transform.h
+	graphicsstate.h         procedural.h            trimcurve.h
+	kdtree.h                quadrics.h
+	lath.h                  render.h
 	marchingcubes.h 	lookuptable.h
-	idsoshadeops.h          lights.h                renderer.h""")
+	lights.h                renderer.h""")
 
-aqsis_install_headers = Split('''
-	ri.h
-	shadeop.h
-	''')
 
 aqsisenv = env.Copy()
 aqsisenv.AppendUnique(CPPDEFINES=['RI_EXPORTS', 'RIB_EXPORTS'])
@@ -115,7 +111,6 @@ Depends(aqsisdll, validategen)
 Depends(aqsisdll, headergen)
 
 aqsisInstall = aqsisenv.InstallAs([os.path.join('${RENDERENGINEDIR}', '%s${SHLIB_VERSION_SUFFIX}') %(aqsisdll[0])], [aqsisdll[0]])
-aqsisenv.Install('$INCLUDEDIR', aqsis_install_headers)
 
 aqsisenv.PostInstallSharedLibrary(aqsisenv, '${RENDERENGINEDIR}', aqsisdll)
 

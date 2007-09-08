@@ -123,16 +123,16 @@ def fluidEmitter(target, source, env):
   adjustixes = SCons.Util.adjustixes
   file = SCons.Util.splitext(str(source[0].name))[0]
   file = os.path.join(str(target[0].get_dir()), file)
-  target.append(adjustixes(file, "fluid_", ".h"))
+  target.append(adjustixes(file, "", ".h"))
   return target, source
 
 fluidBuilder = Builder(action = "cd ${SOURCE.dir} && " +
-                                "fluid -o fluid_${SOURCE.filebase}.cpp " +
-                                "-h fluid_${SOURCE.filebase}.h -c ${SOURCE.name} ",
+                                "fluid -o ${SOURCE.filebase}.cpp " +
+                                "-h ${SOURCE.filebase}.h -c ${SOURCE.name} ",
                         emitter = fluidEmitter,
                         src_suffix = '.fl',
                         suffix = '.cpp',
-                        prefix = 'fluid_')
+                        prefix = '')
 
 # register builder
 env.Append( BUILDERS = { 'Fluid': fluidBuilder } )
@@ -216,6 +216,7 @@ env.AppendUnique(
 	CPPPATH = [ os.path.join(target_dir.abspath, dir) for dir in
 		[''] + Split('''
 		aqsistypes
+		interfaces
 		renderer/render
 		shadercompiler/shaderexecenv
 		rib/rib2
@@ -342,6 +343,7 @@ Export('testEnv')
 sub_sconsdirs_noret = prependBuildDir(Split('''
 	rib/api
 	aqsistypes
+	interfaces
 	argparse
 	renderer/ddmanager
 	renderer/raytrace

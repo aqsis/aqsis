@@ -88,7 +88,7 @@ class CqTeapot : public CqSurface
 		TqInt cNbrPatchMeshBicubic;
 
 		// Overrides from CqSurface
-		virtual	CqBound	Bound() const;
+		virtual	void	Bound(IqBound* bound) const;
 		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
 
 		virtual CqSurface* Clone() const;

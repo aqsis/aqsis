@@ -35,7 +35,7 @@ START_NAMESPACE( Aqsis )
 /** Return the boundary extents in camera space of the polygon
  */
 
-CqBound CqPolygonBase::Bound() const
+void CqPolygonBase::Bound(IqBound* bound) const
 {
 	CqVector3D	vecA( FLT_MAX, FLT_MAX, FLT_MAX );
 	CqVector3D	vecB( -FLT_MAX, -FLT_MAX, -FLT_MAX );
@@ -57,10 +57,8 @@ CqBound CqPolygonBase::Bound() const
 		if ( vecV.z() > vecB.z() )
 			vecB.z( vecV.z() );
 	}
-	CqBound	B;
-	B.vecMin() = vecA;
-	B.vecMax() = vecB;
-	return ( B );
+	bound->vecMin() = vecA;
+	bound->vecMax() = vecB;
 }
 
 
@@ -502,16 +500,15 @@ CqSurface* CqPolygonPoints::Clone() const
 }
 
 
-CqBound	CqSurfacePointsPolygons::Bound() const
+void	CqSurfacePointsPolygons::Bound(IqBound* bound) const
 {
-	CqBound B;
 	if( m_pPoints && m_pPoints->P() )
 	{
 		TqInt PointIndex;
 		for( PointIndex = m_pPoints->P()->Size()-1; PointIndex >= 0; PointIndex-- )
-			B.Encapsulate( (CqVector3D)m_pPoints->P()->pValue()[PointIndex] );
+			bound->Encapsulate( (CqVector3D)m_pPoints->P()->pValue()[PointIndex] );
 	}
-	return(AdjustBoundForTransformationMotion( B ));
+	AdjustBoundForTransformationMotion( bound );
 }
 
 TqInt CqSurfacePointsPolygons::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits )

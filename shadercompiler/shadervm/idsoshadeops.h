@@ -34,6 +34,7 @@
 #include	"plugins.h"
 
 #include	"shadeop.h"
+#include	"ishaderexecenv.h"
 
 START_NAMESPACE( Aqsis )
 

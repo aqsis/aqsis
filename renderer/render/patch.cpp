@@ -166,7 +166,7 @@ void CqSurfacePatchBicubic::NaturalSubdivide( CqParameter* pParam, CqParameter* 
 /** Get the boundary extents in camera space of the surface patch
  */
 
-CqBound CqSurfacePatchBicubic::Bound() const
+void CqSurfacePatchBicubic::Bound(IqBound* bound) const
 {
 	// Get the boundary in camera space.
 	CqVector3D	vecA( FLT_MAX, FLT_MAX, FLT_MAX );
@@ -188,10 +188,9 @@ CqBound CqSurfacePatchBicubic::Bound() const
 		if ( vecV.z() > vecB.z() )
 			vecB.z( vecV.z() );
 	}
-	CqBound	B;
-	B.vecMin() = vecA;
-	B.vecMax() = vecB;
-	return ( AdjustBoundForTransformationMotion( B ) );
+	bound->vecMin() = vecA;
+	bound->vecMax() = vecB;
+	AdjustBoundForTransformationMotion( bound );
 }
 
 
@@ -663,7 +662,7 @@ CqSurface* CqSurfacePatchBilinear::Clone() const
 /** Return the boundary extents in camera space of the surface patch
  */
 
-CqBound CqSurfacePatchBilinear::Bound() const
+void CqSurfacePatchBilinear::Bound(IqBound* bound) const
 {
 	assert( NULL != P() );
 
@@ -687,10 +686,9 @@ CqBound CqSurfacePatchBilinear::Bound() const
 		if ( vecV.z() > vecB.z() )
 			vecB.z( vecV.z() );
 	}
-	CqBound	B;
-	B.vecMin() = vecA;
-	B.vecMax() = vecB;
-	return ( AdjustBoundForTransformationMotion( B ) );
+	bound->vecMin() = vecA;
+	bound->vecMax() = vecB;
+	AdjustBoundForTransformationMotion( bound );
 }
 
 
@@ -909,7 +907,7 @@ CqSurface* CqSurfacePatchMeshBicubic::Clone() const
 /** Get the boundary extents in camera space of the surface patch mesh
  */
 
-CqBound CqSurfacePatchMeshBicubic::Bound() const
+void CqSurfacePatchMeshBicubic::Bound(IqBound* bound) const
 {
 	assert( NULL != P() );
 
@@ -933,10 +931,9 @@ CqBound CqSurfacePatchMeshBicubic::Bound() const
 		if ( vecV.z() > vecB.z() )
 			vecB.z( vecV.z() );
 	}
-	CqBound	B;
-	B.vecMin() = vecA;
-	B.vecMax() = vecB;
-	return ( AdjustBoundForTransformationMotion( B ) );
+	bound->vecMin() = vecA;
+	bound->vecMax() = vecB;
+	AdjustBoundForTransformationMotion( bound );
 }
 
 
@@ -1141,7 +1138,7 @@ CqSurface* CqSurfacePatchMeshBilinear::Clone() const
 /** Get the boundary extents in camera space of the surface patch mesh
  */
 
-CqBound CqSurfacePatchMeshBilinear::Bound() const
+void CqSurfacePatchMeshBilinear::Bound(IqBound* bound) const
 {
 	assert( NULL != P() );
 
@@ -1165,10 +1162,9 @@ CqBound CqSurfacePatchMeshBilinear::Bound() const
 		if ( vecV.z() > vecB.z() )
 			vecB.z( vecV.z() );
 	}
-	CqBound	B;
-	B.vecMin() = vecA;
-	B.vecMax() = vecB;
-	return ( AdjustBoundForTransformationMotion( B ) );
+	bound->vecMin() = vecA;
+	bound->vecMax() = vecB;
+	AdjustBoundForTransformationMotion( bound );
 }
 
 

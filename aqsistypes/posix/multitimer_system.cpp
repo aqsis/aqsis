@@ -40,5 +40,4 @@ void CqHiFreqTimer::SqTimingDetails::Setup()
 }
 
 } // namespace Aqsis
-
-#endif
+#endif // USE_TIMERS

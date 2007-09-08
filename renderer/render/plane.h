@@ -61,7 +61,7 @@ class CqPlane
 	};
 
 
-		EqHalfSpace whichSide(const CqVector3D& p)
+		EqHalfSpace whichSide(const CqVector3D& p) const
 		{
 			TqFloat d = m_a*p.x() + m_b*p.y() + m_c*p.z() + m_d;
 			if(d < 0)

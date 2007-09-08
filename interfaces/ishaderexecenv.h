@@ -34,7 +34,7 @@
 #include	"matrix.h"
 #include	"sstring.h"
 #include	"bitvector.h"
-#include 	"shadeop.h"
+//#include 	"shadeop.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -43,6 +43,11 @@ struct IqAttributes;
 struct IqTransform;
 struct IqShader;
 struct IqRenderer;
+
+// We declare these here for access from shaderexecenv
+typedef void (*DSOMethod)(void*,int,void**);
+typedef void* (*DSOInit)(int,void*);
+typedef void (*DSOShutdown)(void*);
 
 /** \enum EqEnvVars
  * Identifiers for the standard environment variables.
