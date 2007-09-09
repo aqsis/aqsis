@@ -68,8 +68,13 @@ struct IqBound
 	};
 
 	virtual TqInt whichSideOf(const CqPlane* const plane) const = 0;
+
+	inline virtual ~IqBound() = 0;
 };
 //-----------------------------------------------------------------------
+
+inline IqBound::~IqBound()
+{}
 
 END_NAMESPACE( Aqsis )
 
