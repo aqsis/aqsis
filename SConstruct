@@ -245,7 +245,11 @@ env.AppendUnique(CPPDEFINES=[('DEFAULT_PLUGIN_PATH', '\\"' + env.Dir('${PLUGINDI
 #
 # Enable MP dumping mode if specified
 #
-env.AppendUnique(CPPDEFINES=[('ENABLE_MPDUMP', env.subst('${enable_mpdump}'))])
+#env.AppendUnique(CPPDEFINES=[('ENABLE_MPDUMP', env.subst('${enable_mpdump}'))])
+if env['enable_mpdump']:
+	env.AppendUnique(CPPDEFINES=[('ENABLE_MPDUMP', '1')])
+else:
+	env.AppendUnique(CPPDEFINES=[('ENABLE_MPDUMP', '0')])
 
 #
 # Enable timing code if requested

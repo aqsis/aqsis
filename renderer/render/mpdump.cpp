@@ -106,7 +106,7 @@ void CqMPDump::dumpPixelSamples(TqInt bucketCol, TqInt bucketRow, const CqBucket
 			currentBucket->ImageElement(ix, iy, pie);
 			for(int k=0; k<pie->XSamples()*pie->YSamples(); k++)
 			{
-				SqSampleData sd = pie->SampleData(k);
+				const SqSampleData sd = pie->SampleData(currentBucket->SamplePoints(), k);
 				dump(ix, iy, k, sd);
 			}
 		}

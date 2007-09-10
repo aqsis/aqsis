@@ -815,7 +815,7 @@ void CqImageBuffer::RenderImage()
 			if(m_mpdump.IsOpen())
 				m_mpdump.dumpPixelSamples(CurrentBucketCol(),
 							  CurrentBucketRow(),
-							  CurrentBucket());
+							  &CurrentBucket());
 #endif
 		/////////////////////////////////////////////////////////////////////////
 

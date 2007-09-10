@@ -33,6 +33,7 @@
 
 START_NAMESPACE( Aqsis )
 
+class CqBucket;
 class CqMicroPolygon;
 struct SqSampleData;
 
