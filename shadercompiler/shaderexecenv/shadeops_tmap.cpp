@@ -1212,7 +1212,9 @@ class BakingChannel
 };
 
 typedef std::map<std::string, BakingChannel> BakingData;
+typedef std::map<std::string, bool> BakingAccess;
 
+static BakingAccess *Existing = new BakingAccess;
 
 extern "C" BakingData *bake_init()
 {
@@ -1230,7 +1232,16 @@ extern "C" void bake ( BakingData *bd, const std::string &name,
 	                       float s, float t, int elsize, float *data )
 {
 	BakingData::iterator found = bd->find ( name );
+	BakingAccess::iterator exist = Existing->find ( name );
 
+        if (exist == Existing->end())
+	{
+		// Erase the bake file if they were not managed yet.
+		// The bake file must be already processed earlier and 
+		// it is time to start from stratch.
+		unlink ( name.c_str() );
+		(*Existing)[ name ] = true;
+	}
 	if ( found == bd->end() )
 	{
 		// This named map doesn't yet exist
