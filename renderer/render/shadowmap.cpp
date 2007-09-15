@@ -299,39 +299,33 @@ void CqShadowMap::PrepareSampleOptions( std::map<std::string, IqShaderData*>& pa
 
 	// Extend the shadow() call to accept bias, if set, override global bias
 	m_minBias = 0.0f;
+	TqFloat maxBias = 0.0f;
 	m_biasRange = 0.0f;
 
 	if ( ( !paramMap.empty() ) && ( paramMap.find( "bias" ) != paramMap.end() ) )
 	{
 		paramMap[ "bias" ] ->GetFloat( m_minBias );
+		maxBias = m_minBias;
 	}
-	else
+	if ( ( !paramMap.empty() ) && ( paramMap.find( "bias0" ) != paramMap.end() ) )
 	{
-		// Add in the bias at this point in camera coordinates.
-		const TqFloat* poptBias = QGetRenderContextI()->GetFloatOption( "shadow", "bias" );
-		if ( poptBias != 0 )
-			m_minBias = poptBias[0];
-		TqFloat maxBias = m_minBias;
-
-		// Allow bias0 and bias1 to override bias.
-		poptBias = QGetRenderContextI()->GetFloatOption( "shadow", "bias0" );
-		if ( poptBias != 0 )
-			m_minBias = poptBias[ 0 ];
-
-		poptBias = QGetRenderContextI()->GetFloatOption( "shadow", "bias1" );
-		if ( poptBias != 0 )
-			maxBias = poptBias[ 0 ];
-
-		// Sanity check: make sure min biases is less than max bias.
-		if(m_minBias > maxBias)
-		{
-			TqFloat tmp = m_minBias;
-			m_minBias = maxBias;
-			maxBias = tmp;
-		}
-
-		m_biasRange = maxBias - m_minBias;
+		paramMap[ "bias0" ] ->GetFloat( m_minBias );
+		maxBias = m_minBias;
 	}
+	if ( ( !paramMap.empty() ) && ( paramMap.find( "bias1" ) != paramMap.end() ) )
+	{
+		paramMap[ "bias1" ] ->GetFloat( maxBias );
+	}
+	
+	// Sanity check: make sure min biases is less than max bias.
+	if(m_minBias > maxBias)
+	{
+		TqFloat tmp = m_minBias;
+		m_minBias = maxBias;
+		maxBias = tmp;
+	}
+
+	m_biasRange = maxBias - m_minBias;
 }
 
 //---------------------------------------------------------------------

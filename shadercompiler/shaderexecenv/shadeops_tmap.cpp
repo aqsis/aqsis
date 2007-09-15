@@ -1013,6 +1013,10 @@ void CqShaderExecEnv::SO_bump3( IqShaderData* name, IqShaderData* channel, IqSha
 // shadow(S,P)
 void CqShaderExecEnv::SO_shadow( IqShaderData* name, IqShaderData* channel, IqShaderData* P, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
+	IqShaderData* pDefBias = NULL;
+	IqShaderData* pDefBias0 = NULL;
+	IqShaderData* pDefBias1 = NULL;
+
 	bool __fVarying;
 	TqUint __iGrid;
 
@@ -1021,6 +1025,41 @@ void CqShaderExecEnv::SO_shadow( IqShaderData* name, IqShaderData* channel, IqSh
 
 	std::map<std::string, IqShaderData*> paramMap;
 	GetTexParams(cParams, apParams, paramMap);
+
+	// If the bias values haven't been specified in the arguments to the function, use those from the 
+	// Option stack.
+	if ( paramMap.find( "bias" ) == paramMap.end() )
+	{
+		TqFloat bias = 0.0f;
+		const TqFloat* poptBias = QGetRenderContextI()->GetFloatOption( "shadow", "bias" );
+		if ( poptBias != 0 )
+			bias = poptBias[0];
+		pDefBias = pShader->CreateTemporaryStorage( type_float, class_uniform );
+		pDefBias->SetFloat( bias );
+		paramMap["bias"] = pDefBias;
+	}
+	if ( paramMap.find( "bias0" ) == paramMap.end() )
+	{
+		const TqFloat* poptBias = QGetRenderContextI()->GetFloatOption( "shadow", "bias0" );
+		if ( poptBias != 0 )
+		{
+			TqFloat bias0 = poptBias[0];
+			pDefBias0 = pShader->CreateTemporaryStorage( type_float, class_uniform );
+			pDefBias0->SetFloat( bias0 );
+			paramMap["bias0"] = pDefBias0;
+		}
+	}
+	if ( paramMap.find( "bias1" ) == paramMap.end() )
+	{
+		const TqFloat* poptBias = QGetRenderContextI()->GetFloatOption( "shadow", "bias1" );
+		if ( poptBias != 0 )
+		{
+			TqFloat bias1 = poptBias[0];
+			pDefBias1 = pShader->CreateTemporaryStorage( type_float, class_uniform );
+			pDefBias1->SetFloat( bias1 );
+			paramMap["bias1"] = pDefBias1;
+		}
+	}
 
 	__iGrid = 0;
 	CqString _aq_name;
@@ -1067,6 +1106,13 @@ void CqShaderExecEnv::SO_shadow( IqShaderData* name, IqShaderData* channel, IqSh
 		}
 		while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
 	}
+	if(NULL != pDefBias)
+		pShader->DeleteTemporaryStorage( pDefBias );
+	if(NULL != pDefBias0)
+		pShader->DeleteTemporaryStorage( pDefBias0 );
+	if(NULL != pDefBias1)
+		pShader->DeleteTemporaryStorage( pDefBias1 );
+		
 }
 
 //----------------------------------------------------------------------
@@ -1074,6 +1120,10 @@ void CqShaderExecEnv::SO_shadow( IqShaderData* name, IqShaderData* channel, IqSh
 
 void CqShaderExecEnv::SO_shadow1( IqShaderData* name, IqShaderData* channel, IqShaderData* P1, IqShaderData* P2, IqShaderData* P3, IqShaderData* P4, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
+	IqShaderData* pDefBias = NULL;
+	IqShaderData* pDefBias0 = NULL;
+	IqShaderData* pDefBias1 = NULL;
+
 	bool __fVarying;
 	TqUint __iGrid;
 
@@ -1082,6 +1132,41 @@ void CqShaderExecEnv::SO_shadow1( IqShaderData* name, IqShaderData* channel, IqS
 
 	std::map<std::string, IqShaderData*> paramMap;
 	GetTexParams(cParams, apParams, paramMap);
+
+	// If the bias values haven't been specified in the arguments to the function, use those from the 
+	// Option stack.
+	if ( paramMap.find( "bias" ) == paramMap.end() )
+	{
+		TqFloat bias = 0.0f;
+		const TqFloat* poptBias = QGetRenderContextI()->GetFloatOption( "shadow", "bias" );
+		if ( poptBias != 0 )
+			bias = poptBias[0];
+		pDefBias = pShader->CreateTemporaryStorage( type_float, class_uniform );
+		pDefBias->SetFloat( bias );
+		paramMap["bias"] = pDefBias;
+	}
+	if ( paramMap.find( "bias0" ) == paramMap.end() )
+	{
+		const TqFloat* poptBias = QGetRenderContextI()->GetFloatOption( "shadow", "bias0" );
+		if ( poptBias != 0 )
+		{
+			TqFloat bias0 = poptBias[0];
+			pDefBias0 = pShader->CreateTemporaryStorage( type_float, class_uniform );
+			pDefBias0->SetFloat( bias0 );
+			paramMap["bias0"] = pDefBias0;
+		}
+	}
+	if ( paramMap.find( "bias1" ) == paramMap.end() )
+	{
+		const TqFloat* poptBias = QGetRenderContextI()->GetFloatOption( "shadow", "bias1" );
+		if ( poptBias != 0 )
+		{
+			TqFloat bias1 = poptBias[0];
+			pDefBias1 = pShader->CreateTemporaryStorage( type_float, class_uniform );
+			pDefBias1->SetFloat( bias1 );
+			paramMap["bias1"] = pDefBias1;
+		}
+	}
 
 	__iGrid = 0;
 	CqString _aq_name;
@@ -1130,6 +1215,12 @@ void CqShaderExecEnv::SO_shadow1( IqShaderData* name, IqShaderData* channel, IqS
 		}
 		while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
 	}
+	if(NULL != pDefBias)
+		pShader->DeleteTemporaryStorage( pDefBias );
+	if(NULL != pDefBias0)
+		pShader->DeleteTemporaryStorage( pDefBias0 );
+	if(NULL != pDefBias1)
+		pShader->DeleteTemporaryStorage( pDefBias1 );
 }
 
 // SIGGRAPH 2002; Larry G. Bake functions
