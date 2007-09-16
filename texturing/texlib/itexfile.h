@@ -30,58 +30,88 @@
 
 #include "aqsis.h"
 
+#include <string>
+#include <map>
+
 #include "texturetile.h"
 
 namespace Aqsis {
 
+class IqTexAttribute
+{
+	public:
+}
+
+template<typename T>
+class CqTexAttributeTyped
+{
+	public:
+	private:
+};
+
+class CqTexFileHeader
+{
+	public:
+		typedef std::map<std::string, boost::shared_ptr<IqTexAttribute> > TqAttrMap;
+		CqTexFileHeader();
+		virtual ~CqTexFileHeader();
+	protected:
+		virtual const boost::shared_ptr<IqTexAttriubute> loadUnderlyingAttribute(const std::string &, );
+	private:
+		TqAttrMap m_attributes;
+		TqInt m_width;
+		TqInt m_height;
+		TqInt m_tileWidth;
+		TqInt m_tileHeight;
+};
+
+class IqTextureHeader
+{
+	public:
+		// Access to commonly defined attributes here:
+
+		// Access to data about the names and types of channels
+		CqChannelList channels();
+		void setChannels(const CqChannelList& channels);
+
+		// General access to attributes
+		/** \brief Get an attribute by name
+		 */
+		template<typename T>
+		const T& findAttribute(const std::string& name);
+};
+
+
 //------------------------------------------------------------------------------
-class IqTextureInputFile
+class IqTexInputFile
 {
 	public:
 		virtual ~IqTextureInputFile() = 0;
 
-		/** \brief Read a tile or strip from the tiff file.
-		 *
-		 * \throw XqTiffError if the requested tile is outside the bounds of the image
+		/** \brief Read a tile from the file.
 		 *
 		 * \param x - tile column index (counting from top left, starting with 0)
 		 * \param y - tile row index (counting from top left, starting with 0)
 		 * \return a tile containing the desired data.
 		 */
 		template<typename T>
-		virtual CqTextureTile<T>::TqPtr readTile(const TqUint x, const TqUint y) = 0;
+		virtual CqTextureTile<T>::TqPtr readTile(const TqInt x, const TqInt y) = 0;
 		/** \brief Read the entire image into a single buffer.
 		 */
 		template<typename T>
-		virtual CqTextureTile<T>::TqPtr readImage() = 0;
+		virtual CqTextureTile<T>::TqPtr readPixels() = 0;
 
 		/** \brief Get the image index for multi-image files like TIFF.
 		 *
 		 * \return The image index, or 0 if the format doesn't support mutiple images.
 		 */
-		virtual TqUint index();
+		virtual TqInt index();
 		/** \brief Set the image index for multi-image files like TIFF.
 		 *
 		 * Has no effect for images which aren't multi-index.
 		 */
-		virtual void setIndex(TqUint newIndex);
+		virtual void setIndex(TqInt newIndex);
 
-		/** \brief Get the image width
-		 */
-		virtual TqUint width() = 0;
-		/** \brief Get the image height
-		 */
-		virtual TqUint height() = 0;
-		/** \brief Get the tile width
-		 *
-		 * \return The tile width, or total image width if the image is not tiled.
-		 */
-		virtual TqUint tileWidth() = 0;
-		/** \brief Get the tile height
-		 *
-		 * \return The tile height, or total image height if the image is not tiled.
-		 */
-		virtual TqUint tileHeight() = 0;
 };
 
 

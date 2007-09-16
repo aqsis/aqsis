@@ -286,6 +286,7 @@ env.AppendUnique(LIBPATH = prependBuildDir( Split('''
 	texturing/plugins/ppm2tif
 	texturing/plugins/tga2tif
 	texturing/plugins/png2tif
+	texturing/texlib
 	thirdparty/tinyxml
 ''' ) ) )
 

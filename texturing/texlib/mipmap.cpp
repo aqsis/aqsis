@@ -42,6 +42,7 @@ void mipmapLevelSizes(TqUint width, TqUint height,
 		return;
 	while(width > 1 || height > 1)
 	{
+		// new width = ceil(width/2.0f);
 		width = (width+1)/2;
 		height = (height+1)/2;
 		levelWidths.push_back(width);
