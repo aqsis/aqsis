@@ -1,7 +1,6 @@
 import os
 
 Import('env cachegen headergen validategen', 'embedManifest')
-
 aqsisdll_sources = Split("""
 	attributes.cpp
 	bound.cpp
@@ -54,83 +53,33 @@ aqsisdll_no_optimization = Split("""
 	""")
 
 aqsisdll_headers = Split("""
-	attributes.h
-	bilinear.h
-	blobby.h
-	bound.h
-	bucket.h
-	bunny.h
-	clippingvolume.h
-	condition.h
-	converter.h
-	csgtree.h
-	curves.h
-	focus.h
-	forwarddiff.h
-	genpoly.h
-	graphicsstate.h
-	iattributes.h
-	iddmanager.h
-	idsoshadeops.h
-	ilightsource.h
-	imagebuffer.h
-	imagepixel.h
-	imagers.h
-	inlineparse.h
-	ioptions.h
-	iraytrace.h
-	irenderer.h
-	ishader.h
-	ishaderdata.h
-	ishaderexecenv.h
-	isurface.h
-	itexturemap.h
-	itransform.h
-	kdtree.h
-	lath.h
-	lights.h
-	lookuptable.h
-	marchingcubes.h
-	micropolygon.h
-	motion.h
-	mpdump.h
-	nurbs.h
-	objectinstance.h
-	occlusion.h
-	options.h
-	parameters.h
-	patch.h
-	plane.h
-	points.h
-	polygon.h
-	procedural.h
-	quadrics.h
-	render.h
-	renderer.h
-	ri.h
-	ri_cache.h
+	attributes.h            micropolygon.h
+	bilinear.h              imagebuffer.h           motion.h                ri_cache.h
 	ri_debug.h
-	rifile.h
-	shadeop.h
-	shaders.h
-	stats.h
-	subdivision2.h
-	surface.h
-	symbols.h
-	teapot.h
-	texturemap.h
-	transform.h
-	trimcurve.h""")
+	bound.h                 imagepixel.h            mpdump.h                rifile.h
 
-aqsis_install_headers = Split('''
-	ri.h
-	shadeop.h
-	''')
+	bucket.h                bunny.h 	imagers.h               
+	nurbs.h                 
+	blobby.h		clippingvolume.h        inlineparse.h
+        objectinstance.h        shaders.h
+
+	condition.h             occlusion.h             stats.h
+	converter.h             options.h               subdivision2.h
+	csgtree.h               parameters.h            surface.h
+	curves.h                patch.h                 symbols.h
+	focus.h                 plane.h                 teapot.h
+	forwarddiff.h           points.h                texturemap.h 
+	genpoly.h               polygon.h               transform.h
+	graphicsstate.h         procedural.h            trimcurve.h
+	kdtree.h                quadrics.h
+	lath.h                  render.h
+	marchingcubes.h 	lookuptable.h
+	lights.h                renderer.h""")
+
 
 aqsisenv = env.Copy()
 aqsisenv.AppendUnique(CPPDEFINES=['RI_EXPORTS', 'RIB_EXPORTS'])
 aqsisenv.AppendUnique(CPPPATH=['$tiff_include_path', '$zlib_include_path'])
-
 
 if env.has_key('libaqsis_add_sources'):
 	aqsisdll_sources = aqsisdll_sources + ['$libaqsis_add_sources']
@@ -162,7 +111,6 @@ Depends(aqsisdll, validategen)
 Depends(aqsisdll, headergen)
 
 aqsisInstall = aqsisenv.InstallAs([os.path.join('${RENDERENGINEDIR}', '%s${SHLIB_VERSION_SUFFIX}') %(aqsisdll[0])], [aqsisdll[0]])
-aqsisenv.Install('$INCLUDEDIR', aqsis_install_headers)
 
 aqsisenv.PostInstallSharedLibrary(aqsisenv, '${RENDERENGINEDIR}', aqsisdll)
 
@@ -172,8 +120,6 @@ aqsisenv.PostInstallSharedLibrary(aqsisenv, '${RENDERENGINEDIR}', aqsisdll)
 #	variant = 'Release')
 
 #aqsisenv.Depends(aqsisdll, aqsisproject)
-
-
 
 
 env.Distribute(aqsisdll_sources)

@@ -115,7 +115,7 @@ void CqCurve::AddPrimitiveVariable( CqParameter* pParam )
  *
  * @return CqBound object containing the bounds.
  */
-CqBound CqCurve::Bound() const
+void CqCurve::Bound(IqBound* bound) const
 {
 
 	// Get the boundary in camera space.
@@ -159,11 +159,9 @@ CqBound CqCurve::Bound() const
 	vecA -= ( maxCameraSpaceWidth / 2.0 );
 	vecB += ( maxCameraSpaceWidth / 2.0 );
 
-	// return the boundary
-	CqBound	B;
-	B.vecMin() = vecA;
-	B.vecMax() = vecB;
-	return ( AdjustBoundForTransformationMotion( B ) );
+	bound->vecMin() = vecA;
+	bound->vecMax() = vecB;
+	AdjustBoundForTransformationMotion( bound );
 }
 
 

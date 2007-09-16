@@ -23,7 +23,6 @@
 		\author	Paul C. Gregory - originally based on code published on the CodeProject site
 				http://www.codeproject.com/debug/multitimer.asp
 */
-
 #include "aqsis.h"
 
 #if USE_TIMERS
@@ -92,5 +91,4 @@ void CqHiFreqTimer::SqTimingDetails::Setup()
 }
 
 } // namespace Aqsis
-
 #endif

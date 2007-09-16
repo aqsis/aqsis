@@ -169,6 +169,12 @@ class COMMON_SHARE reset_level_buf :
 // filter_by_level_buf
 
 /// Enumerates available log levels
+#ifdef AQSIS_SYSTEM_WIN32
+#ifdef DEBUG
+#define __TEMP_DEBUG__ DEBUG
+#undef DEBUG
+#endif // DEBUG
+#endif // AQSIS_SYSTEM_WIN32
 typedef enum
 {
     CRITICAL = 1,
@@ -177,6 +183,11 @@ typedef enum
     INFO = 4,
     DEBUG = 5
 } log_level_t;
+#ifdef AQSIS_SYSTEM_WIN32
+#ifdef __TEMP_DEBUG__
+#define DEBUG __TEMP_DEBUG__
+#endif // __TEMP_DEBUG__
+#endif // AQSIS_SYSTEM_WIN32
 
 /// When attached to an output stream, filters-out messages below the given level
 class COMMON_SHARE filter_by_level_buf :

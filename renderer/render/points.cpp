@@ -337,24 +337,22 @@ bool	CqPoints::Diceable()
 /** Get the geometric bound of this GPrim in 'current' space.
  */
 
-CqBound	CqPoints::Bound() const
+void	CqPoints::Bound(IqBound* bound) const
 {
-	CqBound	B;
-
 	TqUint i;
 
 /*	for ( t = 0; t < cTimes(); t++ )
 	{
 		CqPolygonPoints* pTimePoints = pPoints( t ).get();*/
 		for( i = 0; i < nVertices(); i++ )
-			B.Encapsulate( (CqVector3D)m_pPoints->P()->pValue( m_KDTree.aLeaves()[ i ] )[0] );
+			bound->Encapsulate( (CqVector3D)m_pPoints->P()->pValue( m_KDTree.aLeaves()[ i ] )[0] );
 /*	}*/
 
 	// Expand the bound to take into account the width of the particles.
-	B.vecMax() += CqVector3D( m_MaxWidth, m_MaxWidth, m_MaxWidth );
-	B.vecMin() -= CqVector3D( m_MaxWidth, m_MaxWidth, m_MaxWidth );
+	bound->vecMax() += CqVector3D( m_MaxWidth, m_MaxWidth, m_MaxWidth );
+	bound->vecMin() -= CqVector3D( m_MaxWidth, m_MaxWidth, m_MaxWidth );
 
-	return ( AdjustBoundForTransformationMotion( B ) );
+	AdjustBoundForTransformationMotion( bound );
 }
 
 //---------------------------------------------------------------------
@@ -822,7 +820,10 @@ void CqMicroPolygonMotionPoints::CalculateTotalBound()
 	m_Bound = m_Keys[0]->GetTotalBound();
 	std::vector<CqMovingMicroPolygonKeyPoints*>::iterator i;
 	for ( i = m_Keys.begin(); i != m_Keys.end(); i++ )
-		m_Bound.Encapsulate( (*i)->GetTotalBound() );
+	{
+		CqBound B = (*i)->GetTotalBound();
+		m_Bound.Encapsulate( &B );
+	}
 }
 
 //---------------------------------------------------------------------
@@ -864,7 +865,8 @@ void CqMicroPolygonMotionPoints::BuildBoundList()
 		{
 			mid1.vecMin() = delta * ( end.vecMin() - start.vecMin() ) + start.vecMin();
 			mid1.vecMax() = delta * ( end.vecMax() - start.vecMax() ) + start.vecMax();
-			m_BoundList.Set( d-1, mid0.Combine( mid1 ), time );
+			mid0.Encapsulate(&mid1);
+			m_BoundList.Set( d-1, mid0, time );
 			time = delta * ( endTime - startTime ) + startTime;
 			mid0 = mid1;
 			delta += delta;
@@ -911,7 +913,10 @@ void CqMicroPolygonMotionPoints::AppendKey( const CqVector3D& vA, TqFloat radius
 	if ( m_Times.size() == 1 )
 		m_Bound = pMP->GetTotalBound();
 	else
-		m_Bound.Encapsulate( pMP->GetTotalBound() );
+	{
+		CqBound B(pMP->GetTotalBound());
+		m_Bound.Encapsulate( &B );
+	}
 }
 
 

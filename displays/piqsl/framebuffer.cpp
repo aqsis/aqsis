@@ -27,7 +27,7 @@
 
 #include	"framebuffer.h"
 #include	"image.h"
-#include	"fluid_piqsl_ui.h"
+#include	"piqsl_ui.h"
 
 void Fl_FrameBuffer_Widget::draw()
 {

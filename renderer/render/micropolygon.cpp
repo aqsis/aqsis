@@ -1645,7 +1645,10 @@ void CqMicroPolygonMotion::CalculateTotalBound()
 	m_Bound = m_Keys[ 0 ] ->GetTotalBound();
 	std::vector<CqMovingMicroPolygonKey*>::iterator i;
 	for ( i = m_Keys.begin(); i != m_Keys.end(); i++ )
-		m_Bound.Encapsulate( ( *i ) ->GetTotalBound() );
+	{
+		CqBound B((*i)->GetTotalBound());
+		m_Bound.Encapsulate( &B );
+	}
 }
 
 //---------------------------------------------------------------------
@@ -1699,14 +1702,15 @@ void CqMicroPolygonMotion::BuildBoundList()
 		mid.vecMax() += mix * (end1.vecMax() - end0.vecMax());
 
 		// combine with our starting bound.
-		bound.Encapsulate(mid);
+		bound.Encapsulate(&mid);
 
 		// now combine the bound with any keys that fall between our start
 		// and end times.
 		while(startKey < endKey_1)
 		{
 			startKey++;
-			bound.Encapsulate(m_Keys[startKey]->GetTotalBound());
+			CqBound B(m_Keys[startKey]->GetTotalBound());
+			bound.Encapsulate(&B);
 		}
 
 		m_BoundList.Set( i, bound, time - dt );
@@ -1844,7 +1848,10 @@ void CqMicroPolygonMotion::AppendKey( const CqVector3D& vA, const CqVector3D& vB
 	if ( m_Times.size() == 1 )
 		m_Bound = pMP->GetTotalBound();
 	else
-		m_Bound.Encapsulate( pMP->GetTotalBound() );
+	{
+		CqBound B(pMP->GetTotalBound());
+		m_Bound.Encapsulate( &B );
+	}
 }
 
 

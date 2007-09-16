@@ -3,7 +3,7 @@
 #---------------------------------------------------------------------------
 # Project related configuration options
 #---------------------------------------------------------------------------
-PROJECT_NAME           = Aqsis.Render
+PROJECT_NAME           = Aqsis.Renderer
 PROJECT_NUMBER         = 
 OUTPUT_DIRECTORY       = doxygen_docs
 CREATE_SUBDIRS         = NO

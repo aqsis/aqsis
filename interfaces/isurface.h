@@ -17,7 +17,7 @@
 #include	"aqsis.h"
 #include	"matrix.h"
 #include	"sstring.h"
-#include	"bound.h"
+#include	"ibound.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -110,7 +110,7 @@ struct IqSurface
 	virtual void	RenderComplete() = 0;
 	/** Get the gemoetric bound of this GPrim.
 	 */
-	virtual	CqBound	Bound() const = 0;
+	virtual void	Bound(IqBound* bound) const = 0;
 };
 
 

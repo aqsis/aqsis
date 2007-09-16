@@ -1,11 +1,12 @@
 #include <time.h>
+#include <string.h>  // for strstr()
+
 #include "tiffio.h"
 
 static char datetime[20];
 /*
  * save to filename a tiff file
  */
-extern 
 #ifndef WIN32
 inline
 #endif

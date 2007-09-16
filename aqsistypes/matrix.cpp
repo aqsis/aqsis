@@ -86,6 +86,8 @@ CqMatrix::CqMatrix( const CqVector3D& Trans )
 /** Rotate matrix constructor
  * \param Angle	The angle to rotate by.
  * \param Axis The axis about which to rotate.
+ *
+ * \todo code review: is m_fIdentity needed here  
  */
 
 CqMatrix::CqMatrix( const TqFloat Angle, const CqVector3D Axis )
@@ -409,10 +411,12 @@ void CqMatrix::Skew( const TqFloat angle,
 
 //---------------------------------------------------------------------
 /** Normalise the matrix, returning the homogenous part of the matrix to 1.
+ * \todo code review might be removed since not used in codebase
  */
 
 void CqMatrix::Normalise()
 {
+	assert(m_aaElement[ 3 ][ 3 ] != 0);
 	for ( TqInt i = 0; i < 4; i++ )
 	{
 		for ( TqInt j = 0; j < 4; j++ )
@@ -1325,6 +1329,14 @@ CqVector4D operator*( const CqVector4D &Vector, const CqMatrix& Matrix )
 	return ( Matrix.PreMultiply( Vector ) );
 }
 
+//---------------------------------------------------------------------
+/** Compare two matrices.
+ * \param A One Matrix to be compared.
+ * \param B Second Matrix to be compared with.
+ * \return Result if matrices are equal or not.
+ *
+ * \todo code review float comparison might need some kind of tollerance.
+ */
 
 bool  operator==(const CqMatrix& A, const CqMatrix& B)
 {

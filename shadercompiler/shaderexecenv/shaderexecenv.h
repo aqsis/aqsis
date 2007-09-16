@@ -47,7 +47,7 @@
 #include	"matrix.h"
 
 #include	"iattributes.h"
-#include	"transform.h"
+#include	"itransform.h"
 
 #ifdef	WIN32
 #  ifdef	AQSIS_STATIC_LINK
@@ -409,7 +409,7 @@ class SHADERCONTEXT_SHARE CqShaderExecEnv : public IqShaderExecEnv
 		bool	m_IlluminanceCacheValid;	///< Flag indicating whether the illuminance cache is valid.
 		TqUint	m_gatherSample;				///< Sample index, used during gather loop.
 		IqAttributes* m_pAttributes;	///< Pointer to the associated attributes.
-		CqTransformPtr m_pTransform;		///< Pointer to the associated transform.
+		IqTransformPtr m_pTransform;		///< Pointer to the associated transform.
 		CqBitVector	m_CurrentState;			///< SIMD execution state bit vector accumulator.
 		CqBitVector	m_RunningState;			///< SIMD running execution state bit vector.
 		std::stack<CqBitVector>	m_stkState;				///< Stack of execution state bit vectors.

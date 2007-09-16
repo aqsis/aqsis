@@ -14,7 +14,13 @@ shadervm_headers = Split("""
 	shaderstack.h
 	shadervariable.h
 	shadervm.h
-	shadervm_common.h""")
+	shadervm_common.h
+	idsoshadeops.h
+	shadeop.h""")
+
+shadervm_install_headers = Split('''
+	shadeop.h
+	''')
 
 shadervmenv = env.Copy()
 
@@ -43,4 +49,5 @@ env.Distribute(shadervm_sources)
 env.Distribute(shadervm_headers)
 env.Distribute('SConscript')
 
+env.Install('$INCLUDEDIR', shadervm_install_headers)
 

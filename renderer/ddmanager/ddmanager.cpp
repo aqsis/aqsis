@@ -273,6 +273,8 @@ void CqDisplayRequest::LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimpl
 				m_DelayCloseMethod = (DspyImageDelayCloseMethod)dspyPlugin.SimpleDLSym( m_DriverHandle, &ddMemberData.m_strDelayCloseMethod );
 			}
 		}
+		else
+			Aqsis::log() << error << "Could not successfully load the display driver" << std::endl;
 	}
 	else
 	{

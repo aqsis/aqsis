@@ -644,14 +644,15 @@ void	CqTeapot::Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const 
 /** Get the geometric bound of this GPrim.
  */
 
-CqBound	CqTeapot::Bound() const
+void	CqTeapot::Bound(IqBound* bound) const
 {
 	CqVector3D vecMin( -3.000, -2.0, 0.0 );
 	CqVector3D vecMax( 3.525, 2.0, ( m_CrowBase ? 3.15 : 3.15 - 0.15 /* remove bottom */ ) );
 
-	CqBound	B( vecMin, vecMax );
-	B.Transform( m_matTx );
-	return ( AdjustBoundForTransformationMotion( B ) );
+	bound->vecMin() = vecMin;
+	bound->vecMax() = vecMax;
+	bound->Transform( m_matTx );
+	AdjustBoundForTransformationMotion( bound );
 }
 
 //---------------------------------------------------------------------

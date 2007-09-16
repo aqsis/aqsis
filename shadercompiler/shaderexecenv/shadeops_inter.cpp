@@ -38,6 +38,7 @@
 #include	"shaderexecenv.h"
 #include	"shadervm.h"
 #include	"irenderer.h"
+#include	"isurface.h"
 #include	"ilightsource.h"
 #include	"version.h"
 #include	"logging.h"

@@ -79,9 +79,10 @@ class CqBlobby : public CqSurface
 
 		// Overrides from CqSurface
 		virtual TqInt Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
-		CqBound	Bound() const
+		virtual void	Bound(IqBound* bound) const
 		{
-			return bbox;
+			bound->vecMin() = bbox.vecMin();
+			bound->vecMax() = bbox.vecMax();
 		}
 
 		/** Return CqBlobby's implicit value.

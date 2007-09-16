@@ -55,9 +55,10 @@ class CqProcedural : public CqSurface
 
 		//---------------------------------------------- Inlined Public Methods
 	public:
-		CqBound	Bound() const
+		void	Bound(IqBound* bound) const
 		{
-			return m_Bound;
+			bound->vecMin() = m_Bound.vecMin();
+			bound->vecMax() = m_Bound.vecMax();
 		};
 		virtual void    Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime = 0 );
 		/*  We have no actual geometry to dice.
