@@ -1031,7 +1031,7 @@ void CqShaderExecEnv::SO_shadow( IqShaderData* name, IqShaderData* channel, IqSh
 	if ( paramMap.find( "bias" ) == paramMap.end() )
 	{
 		TqFloat bias = 0.0f;
-		const TqFloat* poptBias = QGetRenderContextI()->GetFloatOption( "shadow", "bias" );
+		const TqFloat* poptBias = getRenderContext()->GetFloatOption( "shadow", "bias" );
 		if ( poptBias != 0 )
 			bias = poptBias[0];
 		pDefBias = pShader->CreateTemporaryStorage( type_float, class_uniform );
@@ -1040,7 +1040,7 @@ void CqShaderExecEnv::SO_shadow( IqShaderData* name, IqShaderData* channel, IqSh
 	}
 	if ( paramMap.find( "bias0" ) == paramMap.end() )
 	{
-		const TqFloat* poptBias = QGetRenderContextI()->GetFloatOption( "shadow", "bias0" );
+		const TqFloat* poptBias = getRenderContext()->GetFloatOption( "shadow", "bias0" );
 		if ( poptBias != 0 )
 		{
 			TqFloat bias0 = poptBias[0];
@@ -1051,7 +1051,7 @@ void CqShaderExecEnv::SO_shadow( IqShaderData* name, IqShaderData* channel, IqSh
 	}
 	if ( paramMap.find( "bias1" ) == paramMap.end() )
 	{
-		const TqFloat* poptBias = QGetRenderContextI()->GetFloatOption( "shadow", "bias1" );
+		const TqFloat* poptBias = getRenderContext()->GetFloatOption( "shadow", "bias1" );
 		if ( poptBias != 0 )
 		{
 			TqFloat bias1 = poptBias[0];
@@ -1138,7 +1138,7 @@ void CqShaderExecEnv::SO_shadow1( IqShaderData* name, IqShaderData* channel, IqS
 	if ( paramMap.find( "bias" ) == paramMap.end() )
 	{
 		TqFloat bias = 0.0f;
-		const TqFloat* poptBias = QGetRenderContextI()->GetFloatOption( "shadow", "bias" );
+		const TqFloat* poptBias = getRenderContext()->GetFloatOption( "shadow", "bias" );
 		if ( poptBias != 0 )
 			bias = poptBias[0];
 		pDefBias = pShader->CreateTemporaryStorage( type_float, class_uniform );
@@ -1147,7 +1147,7 @@ void CqShaderExecEnv::SO_shadow1( IqShaderData* name, IqShaderData* channel, IqS
 	}
 	if ( paramMap.find( "bias0" ) == paramMap.end() )
 	{
-		const TqFloat* poptBias = QGetRenderContextI()->GetFloatOption( "shadow", "bias0" );
+		const TqFloat* poptBias = getRenderContext()->GetFloatOption( "shadow", "bias0" );
 		if ( poptBias != 0 )
 		{
 			TqFloat bias0 = poptBias[0];
@@ -1158,7 +1158,7 @@ void CqShaderExecEnv::SO_shadow1( IqShaderData* name, IqShaderData* channel, IqS
 	}
 	if ( paramMap.find( "bias1" ) == paramMap.end() )
 	{
-		const TqFloat* poptBias = QGetRenderContextI()->GetFloatOption( "shadow", "bias1" );
+		const TqFloat* poptBias = getRenderContext()->GetFloatOption( "shadow", "bias1" );
 		if ( poptBias != 0 )
 		{
 			TqFloat bias1 = poptBias[0];
