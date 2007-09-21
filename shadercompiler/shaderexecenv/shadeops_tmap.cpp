@@ -25,6 +25,8 @@
 
 #include	"aqsis.h"
 
+#include	<io.h>
+
 #include	<math.h>
 #include	<map>
 #include	<vector>
