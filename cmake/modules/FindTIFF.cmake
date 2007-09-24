@@ -18,7 +18,8 @@ IF(WIN32)
 		ENDIF(MSVC AND MSVC80)
 	ENDIF(AQSIS_WIN32LIBS)
 ELSE(WIN32)
-	SET(AQSIS_TIFF_LIBRARIES_DIR "" CACHE PATH "Semi-colon separated list of paths to search for the tiff libraries")
+	SET(AQSIS_TIFF_LIBRARY_NAMES tiff)
+	SET(AQSIS_TIFF_LIBRARIES_DIR CACHE PATH "Semi-colon separated list of paths to search for the tiff libraries")
 ENDIF(WIN32)
 
 FIND_PATH(AQSIS_TIFF_INCLUDE_DIR
