@@ -34,31 +34,6 @@ CONFIGURE_FILE(version.h.in.cmake ${PROJECT_BINARY_DIR}/version.h)
 
 INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR})
 
-IF(WIN32)
-	SET(BINDIR "bin" 
-		CACHE STRING "Install location for binary files. (relative to CMAKE_INSTALL_PREFIX)")
-	SET(RENDERENGINEDIR "${BINDIR}" 
-		CACHE STRING "Install location for render dependent shared libraries (relative to CMAKE_INSTALL_PREFIX)")
-	SET(DISPLAYSDIR "${BINDIR}" 
-		CACHE STRING "Install location for display libraries (relative to CMAKE_INSTALL_PREFIX)")
-	SET(PLUGINDIR "${BINDIR}" 
-		CACHE STRING "Install location for plugin libraries (relative to CMAKE_INSTALL_PREFIX)")
-	SET(LIBDIR "lib" 
-		CACHE STRING "Install location for shared libraries (relative to CMAKE_INSTALL_PREFIX)")
-	SET(STATICLIBDIR "${LIBDIR}" 
-		CACHE STRING "Install location for static libraries (relative to CMAKE_INSTALL_PREFIX)")
-	SET(SHADERDIR "shaders" 
-		CACHE STRING "Install location for shaders (relative to CMAKE_INSTALL_PREFIX)")
-	SET(SYSCONFDIR "${BINDIR}" 
-		CACHE STRING "Install location for system configuration files (relative to CMAKE_INSTALL_PREFIX)")
-	SET(INCLUDEDIR "include/aqsis" 
-		CACHE STRING "Install location for aqsis header files (relative to CMAKE_INSTALL_PREFIX)")
-	SET(CONTENTDIR "content" 
-		CACHE STRING "Install location for content (relative to CMAKE_INSTALL_PREFIX)")
-	SET(SCRIPTSDIR "scripts" 
-		CACHE STRING "Install location for scripts (relative to CMAKE_INSTALL_PREFIX)")
-ENDIF(WIN32)
-
 OPTION(AQSIS_USE_TIMERS "Enable performance timers ON/OFF" ON)
 IF(AQSIS_USE_TIMERS)
 	ADD_DEFINITIONS(-DUSE_TIMERS)
