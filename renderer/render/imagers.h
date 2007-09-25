@@ -43,6 +43,7 @@
 START_NAMESPACE( Aqsis )
 
 class CqAttributes;
+class IqBucket;
 
 //----------------------------------------------------------------------
 /** \class CqImagersource

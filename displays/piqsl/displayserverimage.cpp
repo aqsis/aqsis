@@ -60,30 +60,26 @@ void CqDisplayServerImage::acceptData(TqUlong xmin, TqUlong xmaxplus1, TqUlong y
 {
 	assert(elementSize == m_realData->bytesPerPixel());
 
-	TqUint xmin__ = Aqsis::max((xmin - originX()), 0UL);
-	TqUint ymin__ = Aqsis::max((ymin - originY()), 0UL);
-	TqUint xmaxplus1__ = Aqsis::min((xmaxplus1 - originX()), imageWidth());
-	TqUint ymaxplus1__ = Aqsis::min((ymaxplus1 - originY()), imageWidth());
-	
+	// yuck.  To fix the casts, refactor Image to use signed ints.
+	TqInt cropXmin = static_cast<TqInt>(xmin) - static_cast<TqInt>(m_originX);
+	TqInt cropYmin = static_cast<TqInt>(ymin) - static_cast<TqInt>(m_originY);
+
 	boost::mutex::scoped_lock lock(mutex());
 
-	/// \todo: Check that this all works with cropped images...
-
-	if(m_realData && m_displayData && xmin__ >= 0 && ymin__ >= 0
-			&& xmaxplus1__ <= imageWidth() && ymaxplus1__ <= imageHeight())
+	if(m_realData && m_displayData)
 	{
 		// The const_cast below is ugly, but I don't see how to avoid it
 		// without some notion of "const constructor" which isn't present in
 		// C++
 		const CqImageBuffer bucketBuf(m_realData->channelsInfo(),
-				boost::shared_array<TqUchar>(const_cast<TqUchar*>(bucketData), nullDeleter),
-				xmaxplus1__ - xmin__, ymaxplus1__ - ymin__);
+				boost::shared_array<TqUchar>(const_cast<TqUchar*>(bucketData),
+					nullDeleter), xmaxplus1 - xmin, ymaxplus1 - ymin);
 
-		m_realData->copyFrom(bucketBuf, xmin__, ymin__);
-		m_displayData->compositeOver(bucketBuf, m_displayMap, xmin__, ymin__);
+		m_realData->copyFrom(bucketBuf, cropXmin, cropYmin);
+		m_displayData->compositeOver(bucketBuf, m_displayMap, cropXmin, cropYmin);
 
 		if(m_updateCallback)
-			m_updateCallback(xmin__, ymin__, xmaxplus1__-xmin__, ymaxplus1__-ymin__);
+			m_updateCallback(xmin, ymin, xmaxplus1-xmin, ymaxplus1-ymin);
 	}
 }
 

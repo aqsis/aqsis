@@ -1053,13 +1053,11 @@ void CqSubdivision2::OutputInfo(const char* fname, std::vector<CqLath*>* paFaces
 }
 
 
-CqBound	CqSurfaceSubdivisionPatch::Bound() const
+void	CqSurfaceSubdivisionPatch::Bound(IqBound* bound) const
 {
 	assert( pTopology() );
 	assert( pTopology()->pPoints() );
 	assert( pFace() );
-
-	CqBound B;
 
 	// First make sure that the appropriate neighbour facets have been subdivided if this is >0 level face.
 	if( pFace()->pParentFacet() )
@@ -1093,11 +1091,11 @@ CqBound	CqSurfaceSubdivisionPatch::Bound() const
 		{
 			TqInt iTime;
 			for( iTime = 0; iTime < pTopology()->cTimes(); iTime++ )
-				B.Encapsulate((CqVector3D)pTopology()->pPoints( iTime )->P()->pValue((*iQfv)->VertexIndex())[0]);
+				bound->Encapsulate((CqVector3D)pTopology()->pPoints( iTime )->P()->pValue((*iQfv)->VertexIndex())[0]);
 		}
 	}
 
-	return( AdjustBoundForTransformationMotion( B ) );
+	AdjustBoundForTransformationMotion( bound );
 }
 
 
@@ -1846,16 +1844,15 @@ bool CqSubdivision2::CanUsePatch( CqLath* pFace )
 }
 
 
-CqBound	CqSurfaceSubdivisionMesh::Bound() const
+void	CqSurfaceSubdivisionMesh::Bound(IqBound* bound) const
 {
-	CqBound B;
 	if( m_pTopology && m_pTopology->pPoints() && m_pTopology->pPoints()->P() )
 	{
 		TqInt PointIndex;
 		for( PointIndex = m_pTopology->pPoints()->P()->Size()-1; PointIndex >= 0; PointIndex-- )
-			B.Encapsulate( (CqVector3D)m_pTopology->pPoints()->P()->pValue()[PointIndex] );
+			bound->Encapsulate( (CqVector3D)m_pTopology->pPoints()->P()->pValue()[PointIndex] );
 	}
-	return( AdjustBoundForTransformationMotion( B ) );
+	AdjustBoundForTransformationMotion( bound );
 }
 
 TqInt CqSurfaceSubdivisionMesh::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits )

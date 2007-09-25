@@ -147,7 +147,7 @@ class CqPoints : public CqSurface
 			return( false );
 		}
 
-		virtual	CqBound	Bound() const;
+		virtual	void	Bound(IqBound* bound) const;
 		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
 
 		virtual CqSurface* Clone() const;
@@ -508,7 +508,7 @@ class CqMicroPolygonMotionPoints : public CqMicroPolygon
 		virtual void CalculateTotalBound();
 		virtual const CqBound&	GetTotalBound() const
 		{
-			return ( m_Bound );
+			return( m_Bound );
 		}
 		virtual	TqInt	cSubBounds() const
 		{

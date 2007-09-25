@@ -41,51 +41,48 @@ aqsisdll_sources = Split("""
 	shaders.cpp
 	shadowmap.cpp
 	stats.cpp
-	subdivision2.cpp
 	surface.cpp
 	symbols.cpp
 	teapot.cpp
 	texturemap.cpp
 	threadscheduler.cpp
 	transform.cpp
-	blobby.cpp
-	marchingcubes.cpp
 	trimcurve.cpp""")
 
+aqsisdll_no_optimization = Split("""
+	blobby.cpp
+	marchingcubes.cpp
+	subdivision2.cpp
+	""")
 
 aqsisdll_headers = Split("""
-	attributes.h            ilightsource.h          micropolygon.h          ri.h
+	attributes.h            micropolygon.h
 	bilinear.h              imagebuffer.h           motion.h                ri_cache.h
 	ri_debug.h
 	bound.h                 imagepixel.h            mpdump.h                rifile.h
 
 	bucket.h		bucketdata.h            bucketprocessor.h	bunny.h 	imagers.h               
-	nurbs.h                 shadeop.h
+	nurbs.h                 
 	blobby.h		clippingvolume.h        inlineparse.h
         objectinstance.h        shaders.h
 
-	condition.h             iraytrace.h             occlusion.h             stats.h
-	converter.h             irenderer.h             options.h               subdivision2.h
-	csgtree.h               ishader.h               parameters.h            surface.h
-	curves.h                ishaderdata.h           patch.h                 symbols.h
-	focus.h                 ishaderexecenv.h        plane.h                 teapot.h
-	forwarddiff.h           isurface.h              points.h                texturemap.h
-	genpoly.h               itexturemap.h           polygon.h               transform.h
-	graphicsstate.h         itransform.h            procedural.h            trimcurve.h
-	iattributes.h           kdtree.h                quadrics.h              ioptions.h
-	iddmanager.h            lath.h                  render.h		threadscheduler.h
+	condition.h             occlusion.h             stats.h
+	converter.h             options.h               subdivision2.h
+	csgtree.h               parameters.h            surface.h
+	curves.h                patch.h                 symbols.h
+	focus.h                 plane.h                 teapot.h
+	forwarddiff.h           points.h                texturemap.h
+	genpoly.h               polygon.h               threadscheduler.h
+	graphicsstate.h         procedural.h            transform.h
+	kdtree.h                quadrics.h		trimcurve.h
+	lath.h                  render.h
 	marchingcubes.h 	lookuptable.h
-	idsoshadeops.h          lights.h                renderer.h""")
+	lights.h                renderer.h""")
 
-aqsis_install_headers = Split('''
-	ri.h
-	shadeop.h
-	''')
 
 aqsisenv = env.Copy()
 aqsisenv.AppendUnique(CPPDEFINES=['RI_EXPORTS', 'RIB_EXPORTS'])
 aqsisenv.AppendUnique(CPPPATH=['$tiff_include_path', '$zlib_include_path'])
-
 
 if env.has_key('libaqsis_add_sources'):
 	aqsisdll_sources = aqsisdll_sources + ['$libaqsis_add_sources']
@@ -100,7 +97,13 @@ Import('ddmanager_objs raytrace_objs rib2_objs rib2ri_sources')
 # compile rib2ri here to catch aqsisenv #defines
 rib2ri_objs = aqsisenv.SharedObject('rib2ri', rib2ri_sources)
 
-aqsisdll = aqsisenv.SharedLibrary('aqsis', [aqsisdll_sources, ddmanager_objs, raytrace_objs, rib2ri_objs, rib2_objs])
+aqsisno_optimization = aqsisenv.Copy()
+aqsisno_optimization.AppendUnique(CCFLAGS=['-O0'])
+
+aqsisextra = [aqsisno_optimization.SharedObject(file) for file in aqsisdll_no_optimization]
+
+
+aqsisdll = aqsisenv.SharedLibrary('aqsis', [aqsisdll_sources, aqsisextra, ddmanager_objs, raytrace_objs, rib2ri_objs, rib2_objs])
 
 embedManifest(env, aqsisenv, aqsisdll, 'DLL')
 
@@ -111,7 +114,6 @@ Depends(aqsisdll, validategen)
 Depends(aqsisdll, headergen)
 
 aqsisInstall = aqsisenv.InstallAs([os.path.join('${RENDERENGINEDIR}', '%s${SHLIB_VERSION_SUFFIX}') %(aqsisdll[0])], [aqsisdll[0]])
-aqsisenv.Install('$INCLUDEDIR', aqsis_install_headers)
 
 aqsisenv.PostInstallSharedLibrary(aqsisenv, '${RENDERENGINEDIR}', aqsisdll)
 

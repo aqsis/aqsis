@@ -119,10 +119,12 @@ CqTextureMap* CqTextureMap::GetShadowMap( const CqString& strName )
 {
 	QGetRenderContext() ->Stats().IncTextureMisses( 3 );
 
+	TqUlong hash = CqString::hash(strName.c_str());
+
 	// First search the texture map cache
 	for ( std::vector<CqTextureMap*>::iterator i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
 	{
-		if ( ( *i ) ->m_strName == strName )
+		if ( ( *i ) ->m_hash == hash )
 		{
 			if ( ( *i ) ->Type() == MapType_Shadow )
 			{
@@ -296,27 +298,34 @@ void CqShadowMap::PrepareSampleOptions( std::map<std::string, IqShaderData*>& pa
 	CqTextureMap::PrepareSampleOptions( paramMap );
 
 	// Extend the shadow() call to accept bias, if set, override global bias
-	m_bias = 0.0f;
-	m_bias0 = 0.0f;
-	m_bias1 = 0.0f;
+	m_minBias = 0.0f;
+	TqFloat maxBias = 0.0f;
+	m_biasRange = 0.0f;
 
 	if ( ( !paramMap.empty() ) && ( paramMap.find( "bias" ) != paramMap.end() ) )
 	{
-		paramMap[ "bias" ] ->GetFloat( m_bias );
-		m_bias0 = m_bias1 = 0.0f;
+		paramMap[ "bias" ] ->GetFloat( m_minBias );
+		maxBias = m_minBias;
 	}
-	else
+	if ( ( !paramMap.empty() ) && ( paramMap.find( "bias0" ) != paramMap.end() ) )
 	{
-		// Add in the bias at this point in camera coordinates.
-		const TqFloat* poptBias = QGetRenderContextI() ->GetFloatOption( "shadow", "bias0" );
-		if ( poptBias != 0 )
-			m_bias0 = poptBias[ 0 ];
-
-		poptBias = QGetRenderContextI() ->GetFloatOption( "shadow", "bias1" );
-		if ( poptBias != 0 )
-			m_bias1 = poptBias[ 0 ];
-
+		paramMap[ "bias0" ] ->GetFloat( m_minBias );
+		maxBias = m_minBias;
 	}
+	if ( ( !paramMap.empty() ) && ( paramMap.find( "bias1" ) != paramMap.end() ) )
+	{
+		paramMap[ "bias1" ] ->GetFloat( maxBias );
+	}
+	
+	// Sanity check: make sure min biases is less than max bias.
+	if(m_minBias > maxBias)
+	{
+		TqFloat tmp = m_minBias;
+		m_minBias = maxBias;
+		maxBias = tmp;
+	}
+
+	m_biasRange = maxBias - m_minBias;
 }
 
 //---------------------------------------------------------------------
@@ -355,20 +364,6 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 
 	CqVector3D	vecR1l;
 	CqVector3D	vecR1m, vecR2m, vecR3m, vecR4m;
-
-
-	TqFloat minbias;
-	TqFloat maxbias;
-	TqFloat    bias;
-
-	minbias = m_bias0;
-	maxbias = m_bias1;
-
-	if (minbias > maxbias)
-	{
-		minbias = m_bias1;
-		maxbias = m_bias0;
-	}
 
 
 	// Generate a matrix to transform points from camera space into the space of the light source used in the
@@ -519,12 +514,12 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 	TqUint i;
 	TqFloat avz = 0.0f;
 	TqFloat sample_z = 0.0f; // How deep we're in the shadow
-	TqFloat rbias;
-	if ((minbias == 0.0f) && (maxbias == 0.0f))
-		rbias  = 0.5 * m_bias;
-	else
-		rbias  = (0.5 * (maxbias - minbias)) + minbias;
 
+	// I've really no idea what rbias does, but in the process of fixing the
+	// bias behaviour quickly (prior to the texture refactor which will replace
+	// much of this), I'm leaving it with the same value which it previously
+	// contained - CJF.
+	TqFloat rbias = m_minBias + 0.5*m_biasRange;
 
   	// A conservative z value is the worst case scenario
 	// for the high bias value will be between 0..2.0 * rbias
@@ -615,7 +610,7 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 				TqFloat mapz = pTMBa->GetValue( iu, iv, 0 );
 
 				m_rand_index = ( m_rand_index + 1 ) & 1023;
-				bias  = m_aRand_no[m_rand_index] * rbias;
+				TqFloat bias = m_biasRange*m_aRand_no[m_rand_index] + m_minBias;
 
 				if ( z > mapz + bias)
 				{

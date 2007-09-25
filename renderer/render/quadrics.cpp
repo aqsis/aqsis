@@ -400,7 +400,7 @@ CqSurface*	CqSphere::Clone( ) const
 /** Get the geometric bound of this GPrim.
  */
 
-CqBound	CqSphere::Bound() const
+void	CqSphere::Bound(IqBound* bound) const
 {
 	std::vector<CqVector3D> curve;
 	CqVector3D vA( 0, 0, 0 ), vB( 1, 0, 0 ), vC( 0, 0, 1 );
@@ -412,8 +412,10 @@ CqBound	CqSphere::Bound() const
 
 	CqBound	B( RevolveForBound( curve, vA, vC, RAD( m_ThetaMax - m_ThetaMin ) ) );
 	B.Transform( m_matTx );
+	bound->vecMin() = B.vecMin();
+	bound->vecMax() = B.vecMax();
 
-	return ( AdjustBoundForTransformationMotion( B ) );
+	AdjustBoundForTransformationMotion( bound );
 }
 
 
@@ -537,7 +539,7 @@ CqSurface*	CqCone::Clone( ) const
 /** Get the geometric bound of this GPrim.
  */
 
-CqBound	CqCone::Bound() const
+void	CqCone::Bound(IqBound* bound) const
 {
 	std::vector<CqVector3D> curve;
 	TqFloat zmin = m_vMin * m_Height;
@@ -550,8 +552,10 @@ CqBound	CqCone::Bound() const
 		*i = matRot * ( *i );
 	CqBound	B( RevolveForBound( curve, vC, vD, RAD( m_ThetaMax - m_ThetaMin ) ) );
 	B.Transform( m_matTx );
+	bound->vecMin() = B.vecMin();
+	bound->vecMax() = B.vecMax();
 
-	return ( AdjustBoundForTransformationMotion( B ) );
+	AdjustBoundForTransformationMotion( bound );
 }
 
 
@@ -689,7 +693,7 @@ CqSurface*	CqCylinder::Clone() const
 /** Get the geometric bound of this GPrim.
  */
 
-CqBound	CqCylinder::Bound() const
+void	CqCylinder::Bound(IqBound* bound) const
 {
 	std::vector<CqVector3D> curve;
 	CqVector3D vA( m_Radius, 0, m_ZMin ), vB( m_Radius, 0, m_ZMax ), vC( 0, 0, 0 ), vD( 0, 0, 1 );
@@ -700,8 +704,10 @@ CqBound	CqCylinder::Bound() const
 		*i = matRot * ( *i );
 	CqBound	B( RevolveForBound( curve, vC, vD, RAD( m_ThetaMax - m_ThetaMin ) ) );
 	B.Transform( m_matTx );
+	bound->vecMin() = B.vecMin();
+	bound->vecMax() = B.vecMax();
 
-	return ( AdjustBoundForTransformationMotion( B ) );
+	AdjustBoundForTransformationMotion( bound );
 }
 
 
@@ -829,7 +835,7 @@ CqSurface*	CqHyperboloid::Clone() const
 /** Get the geometric bound of this GPrim.
  */
 
-CqBound	CqHyperboloid::Bound() const
+void	CqHyperboloid::Bound(IqBound* bound) const
 {
 	std::vector<CqVector3D> curve;
 	curve.push_back( m_Point1 );
@@ -840,8 +846,10 @@ CqBound	CqHyperboloid::Bound() const
 		*i = matRot * ( *i );
 	CqBound	B( RevolveForBound( curve, vA, vB, RAD( m_ThetaMax - m_ThetaMin ) ) );
 	B.Transform( m_matTx );
+	bound->vecMin() = B.vecMin();
+	bound->vecMax() = B.vecMax();
 
-	return ( AdjustBoundForTransformationMotion( B ) );
+	AdjustBoundForTransformationMotion( bound );
 }
 
 
@@ -988,7 +996,7 @@ CqSurface*	CqParaboloid::Clone() const
 /** Get the geometric bound of this GPrim.
  */
 
-CqBound	CqParaboloid::Bound() const
+void	CqParaboloid::Bound(IqBound* bound) const
 {
 	/*	TqFloat xminang,yminang,xmaxang,ymaxang;
 		xminang=yminang=MIN(m_ThetaMin,m_ThetaMax);
@@ -1011,10 +1019,11 @@ CqBound	CqParaboloid::Bound() const
 	CqVector3D vecMin( MIN( x1, x2 ), MIN( y1, y2 ), MIN( m_ZMin, m_ZMax ) );
 	CqVector3D vecMax( MAX( x1, x2 ), MAX( y1, y2 ), MAX( m_ZMin, m_ZMax ) );
 
-	CqBound	B( vecMin, vecMax );
-	B.Transform( m_matTx );
+	bound->vecMin() = vecMin;
+	bound->vecMax() = vecMax;
+	bound->Transform( m_matTx );
 
-	return ( AdjustBoundForTransformationMotion( B ) );
+	AdjustBoundForTransformationMotion( bound );
 }
 
 
@@ -1147,7 +1156,7 @@ CqSurface*	CqTorus::Clone() const
 /** Get the geometric bound of this GPrim.
  */
 
-CqBound	CqTorus::Bound() const
+void	CqTorus::Bound(IqBound* bound) const
 {
 	std::vector<CqVector3D> curve;
 	CqVector3D vA( m_MajorRadius, 0, 0 ), vB( 1, 0, 0 ), vC( 0, 0, 1 ), vD( 0, 0, 0 );
@@ -1157,8 +1166,10 @@ CqBound	CqTorus::Bound() const
 		*i = matRot * ( *i );
 	CqBound	B( RevolveForBound( curve, vD, vC, RAD( m_ThetaMax - m_ThetaMin ) ) );
 	B.Transform( m_matTx );
+	bound->vecMin() = B.vecMin();
+	bound->vecMax() = B.vecMax();
 
-	return ( AdjustBoundForTransformationMotion( B ) );
+	AdjustBoundForTransformationMotion( bound );
 }
 
 
@@ -1285,7 +1296,7 @@ CqSurface*	CqDisk::Clone() const
 /** Get the geometric bound of this GPrim.
  */
 
-CqBound	CqDisk::Bound() const
+void	CqDisk::Bound(IqBound* bound) const
 {
 	std::vector<CqVector3D> curve;
 	CqVector3D vA( m_MajorRadius, 0, m_Height ), vB( m_MinorRadius, 0, m_Height ), vC( 0, 0, 0 ), vD( 0, 0, 1 );
@@ -1296,8 +1307,10 @@ CqBound	CqDisk::Bound() const
 		*i = matRot * ( *i );
 	CqBound	B( RevolveForBound( curve, vC, vD, RAD( m_ThetaMax - m_ThetaMin ) ) );
 	B.Transform( m_matTx );
+	bound->vecMin() = B.vecMin();
+	bound->vecMax() = B.vecMax();
 
-	return ( AdjustBoundForTransformationMotion( B ) );
+	AdjustBoundForTransformationMotion( bound );
 }
 
 

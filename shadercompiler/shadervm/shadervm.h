@@ -46,7 +46,7 @@
 #include	"shaderexecenv.h"
 #include	"shaderstack.h"
 #include	"shadervariable.h"
-#include 	"parameters.h"
+//#include 	"parameters.h"
 #include 	"dsoshadeops.h"
 #include	"itransform.h"
 #include	"shadervm_common.h"
@@ -56,6 +56,7 @@ START_NAMESPACE( Aqsis )
 
 
 class CqShaderVM;
+class CqParameter;
 
 //----------------------------------------------------------------------
 /** \struct SqOpCodeTrans

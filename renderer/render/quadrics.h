@@ -137,7 +137,7 @@ class CqSphere : public CqQuadric
 		virtual	~CqSphere()
 		{}
 
-		virtual	CqBound	Bound() const;
+		virtual	void	Bound(IqBound* bound) const;
 
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
@@ -180,7 +180,7 @@ class CqCone : public CqQuadric
 		virtual	~CqCone()
 		{}
 
-		virtual	CqBound	Bound() const;
+		virtual	void	Bound(IqBound* bound) const;
 
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
@@ -220,7 +220,7 @@ class CqCylinder : public CqQuadric
 		virtual	~CqCylinder()
 		{}
 
-		virtual	CqBound	Bound() const;
+		virtual	void	Bound(IqBound* bound) const;
 
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
@@ -264,7 +264,7 @@ class CqHyperboloid : public CqQuadric
 		virtual	~CqHyperboloid()
 		{}
 
-		virtual	CqBound	Bound() const;
+		virtual	void	Bound(IqBound* bound) const;
 
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
@@ -302,7 +302,7 @@ class CqParaboloid : public CqQuadric
 		virtual	~CqParaboloid()
 		{}
 
-		virtual	CqBound	Bound() const;
+		virtual	void	Bound(IqBound* bound) const;
 
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
@@ -341,7 +341,7 @@ class CqTorus : public CqQuadric
 		virtual	~CqTorus()
 		{}
 
-		virtual	CqBound	Bound() const;
+		virtual	void	Bound(IqBound* bound) const;
 
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
@@ -381,7 +381,7 @@ class CqDisk : public CqQuadric
 		virtual	~CqDisk()
 		{}
 
-		virtual	CqBound	Bound() const;
+		virtual	void	Bound(IqBound* bound) const;
 
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );

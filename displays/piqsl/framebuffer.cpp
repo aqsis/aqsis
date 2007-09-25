@@ -27,17 +27,20 @@
 
 #include	"framebuffer.h"
 #include	"image.h"
-#include	"fluid_piqsl_ui.h"
+#include	"piqsl_ui.h"
 
 void Fl_FrameBuffer_Widget::draw()
 {
 	Fl::lock();
+	fl_color(FL_BACKGROUND_COLOR);
+	fl_rectf(x(), y(), w(), h());
 	if(m_image)
 	{
 		boost::shared_ptr<const Aqsis::CqImageBuffer> buf = m_image->displayBuffer();
 		if(buf)
 		{
-			fl_draw_image(buf->rawData().get(), x(), y(),
+			fl_draw_image(buf->rawData().get(),
+				x()+m_image->originX(), y()+m_image->originY(),
 				buf->width(), buf->height(),
 				buf->numChannels(),
 				buf->width()*buf->numChannels()); // draw image
@@ -45,7 +48,6 @@ void Fl_FrameBuffer_Widget::draw()
 	}
 	else
 	{
-		fl_draw_box(FL_FLAT_BOX, x(), y(), w(), h(), FL_BACKGROUND_COLOR);
 		fl_color(FL_FOREGROUND_COLOR);
 		fl_draw("No Image", x(), y(), w(), h(), FL_ALIGN_CENTER, 0, 0);
 	}
@@ -103,6 +105,7 @@ CqFramebuffer::CqFramebuffer(TqUlong width, TqUlong height, TqInt depth,
 //	toolbar_pck->resizable(toolbar_pck);
 	boost::shared_ptr<CqImage> t;
 	m_scroll = new Fl_Scroll(0, 0, width+20, height);
+	m_scroll->color(FL_LIGHT1);
 	m_uiImageWidget = new Fl_FrameBuffer_Widget(0,0, width, height, t);
 	m_scroll->end();
 
