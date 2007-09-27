@@ -327,8 +327,8 @@ CqFuncDef	gStandardFuncs[] = {
                                  CqFuncDef( Type_Void, "bake", "bake_3v", "sffv" ),
                                  CqFuncDef( Type_Void, "bake", "bake_3n", "sffn" ),
 
-                                 CqFuncDef( Type_Float, "occlusion", "occlusion", "s*" ),
-                                 CqFuncDef( Type_Float, "occlusion", "occlusion_rt", "p*" ),
+                                 CqFuncDef( Type_Float, "occlusion", "occlusion", "sfpnf*" ),
+                                 CqFuncDef( Type_Float, "occlusion", "occlusion_rt", "pnf*" ),
                              };
 
 TqUint	gcStandardFuncs = sizeof( gStandardFuncs ) / sizeof( gStandardFuncs[ 0 ] );
