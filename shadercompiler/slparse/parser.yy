@@ -5,7 +5,9 @@
 %{
 #ifdef	WIN32
 #include <malloc.h>
+#ifdef _MSC_VER
 #pragma warning(disable : 4786)
+#endif
 #include <cstdio>
 #include <memory>
 namespace std
@@ -1759,16 +1761,6 @@ procedurecall
 
 								$$=pFunc;
 							}
-	|	OCCLUSION '(' proc_arguments ')'
-							{
-								std::vector<SqFuncRef> func;
-								CqFuncDef::FindFunction("occlusion", func);
-								CqParseNodeFunctionCall* pFunc=new CqParseNodeFunctionCall(func);
-								pFunc->SetPos(ParseLineNumber,ParseStreamName.c_str());
-								while($3->pFirstChild()!=0)	pFunc->AddLastChild($3->pFirstChild());
-
-								$$=pFunc;
-							}
 	;
 
 
@@ -1889,6 +1881,12 @@ texture_type
 	|	SHADOW				{
 								std::vector<SqFuncRef> func;
 								CqFuncDef::FindFunction("shadow", func);
+								$$=new CqParseNodeFunctionCall(func);
+								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
+							}
+	|	OCCLUSION			{
+								std::vector<SqFuncRef> func;
+								CqFuncDef::FindFunction("occlusion", func);
 								$$=new CqParseNodeFunctionCall(func);
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
 							}
