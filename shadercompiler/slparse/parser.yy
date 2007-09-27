@@ -154,11 +154,9 @@ static void yyerror(const CqString Message);
 %type  <m_pParseNode>	assignexpression
 %type  <m_pParseNode>	procedurecall
 %type  <m_pParseNode>	unresolvedcall
+%type  <m_pParseNode>	proc_argument
 %type  <m_pParseNode>	proc_arguments
-%type  <m_pParseNode>	texture
 %type  <m_pParseNode>	texture_type
-%type  <m_pParseNode>	texture_filename
-%type  <m_pParseNode>	channel
 %type  <m_pParseNode>	texture_arguments
 %type  <m_FloatConst>	number
 %type  <m_CommType>		comm_type
@@ -1499,7 +1497,6 @@ primary
 								$$=new CqParseNodeFloatConst($1);
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
 							}
-	|	texture
 	|	SYMBOL				{
 								$$=new CqParseNodeVariable($1.VarRef);	
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
@@ -1759,15 +1756,17 @@ procedurecall
 
 								$$=pFunc;
 							}
-	|	OCCLUSION '(' proc_arguments ')'
+	|	texture_type '(' proc_arguments ')'
 							{
-								std::vector<SqFuncRef> func;
-								CqFuncDef::FindFunction("occlusion", func);
-								CqParseNodeFunctionCall* pFunc=new CqParseNodeFunctionCall(func);
-								pFunc->SetPos(ParseLineNumber,ParseStreamName.c_str());
-								while($3->pFirstChild()!=0)	pFunc->AddLastChild($3->pFirstChild());
-
-								$$=pFunc;
+								$$ = $1;
+								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
+								CqParseNode* pArg = $3->pFirstChild();
+								$$->AddLastChild($3->pFirstChild());
+								if(pArg->pFirstChild())
+									$$->AddLastChild(pArg->pFirstChild());
+								else
+									$$->AddLastChild(new CqParseNodeFloatConst(0));
+								while($3->pFirstChild()!=0)	$$->AddLastChild($3->pFirstChild());
 							}
 	;
 
@@ -1810,60 +1809,27 @@ unresolvedcall
 							}
 	;
 
+proc_argument
+	:	expression		
+	|	expression '[' expression ']'
+							{
+								$$ = $1;
+								$$->AddLastChild($3);
+								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
+							}
+	;
+		
 proc_arguments
-	:	expression			{
+	:	proc_argument		{
 								// Create a list header, and add the first entry.
-									$$=new CqParseNode();
+								$$=new CqParseNode();
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
 								$$->AddLastChild($1);
 							}
-	|	proc_arguments ',' expression
+	|	proc_arguments ',' proc_argument
 							{
 								// Add this entry to the list.
 								$$->AddLastChild($3);
-							}
-	;
-
-texture
-	:	texture_type '(' texture_filename channel texture_arguments ')'
-							{	
-								// Add the texture_filename as the first argument
-								$$->AddFirstChild($3);
-								$$->AddLastChild($4);
-								// Add all texture_arguments as further arguments to the function.
-								CqParseNode* pParam=$5->pFirstChild();
-								while(pParam!=0)
-								{
-									CqParseNode* pTemp=pParam->pNext();
-									$$->AddLastChild(pParam);
-									pParam=pTemp;
-								}
-							}
-	|	texture_type '(' texture_filename texture_arguments ')'
-							{	
-								// Add the texture_filename as the first argument
-								$$->AddFirstChild($3);
-								$$->AddLastChild(new CqParseNodeFloatConst(0));
-								// Add all texture_arguments as further arguments to the function.
-								CqParseNode* pParam=$4->pFirstChild();
-								while(pParam!=0)
-								{
-									CqParseNode* pTemp=pParam->pNext();
-									$$->AddLastChild(pParam);
-									pParam=pTemp;
-								}
-							}
-	|	texture_type '(' texture_filename channel ')'
-							{	
-								// Add the texture_filename as the first argument
-								$$->AddFirstChild($3);
-								$$->AddLastChild($4);
-							}
-	|	texture_type '(' texture_filename ')'
-							{	
-								// Add the texture_filename as the first argument
-								$$->AddFirstChild($3);
-								$$->AddLastChild(new CqParseNodeFloatConst(0));
 							}
 	;
 
@@ -1892,17 +1858,12 @@ texture_type
 								$$=new CqParseNodeFunctionCall(func);
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
 							}
-	;
-
-texture_filename
-	:	expression				{	
-								$$=$1;	
+	|	OCCLUSION			{
+								std::vector<SqFuncRef> func;
+								CqFuncDef::FindFunction("occlusion", func);
+								$$=new CqParseNodeFunctionCall(func);
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
 							}
-	;
-
-channel
-	:	'[' expression ']'	{	$$=$2; }
 	;
 
 texture_arguments
