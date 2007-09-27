@@ -43,6 +43,7 @@
 #include	"ishaderdata.h"
 #include	"ishader.h"
 #include	"irenderer.h"
+#include	"iparameter.h"
 #include	"shaderexecenv.h"
 #include	"shaderstack.h"
 #include	"shadervariable.h"
@@ -56,7 +57,6 @@ START_NAMESPACE( Aqsis )
 
 
 class CqShaderVM;
-class CqParameter;
 
 //----------------------------------------------------------------------
 /** \struct SqOpCodeTrans
@@ -731,7 +731,7 @@ class SHADERVM_SHARE CqShaderVM : public CqShaderStack, public IqShader, public 
 		virtual	void	PrepareShaderForUse( );
 		virtual	void	InitialiseParameters( );
 		virtual void	SetArgument( const CqString& strName, EqVariableType type, const CqString& strSpace, void* pval);
-		virtual	void	SetArgument( CqParameter* pParam, IqSurface* pSurface );
+		virtual	void	SetArgument( IqParameter* pParam, IqSurface* pSurface );
 		virtual	IqShaderData*	FindArgument( const CqString& name );
 		virtual	bool	GetVariableValue( const char* name, IqShaderData* res );
 		virtual	void	Evaluate( const boost::shared_ptr<IqShaderExecEnv>& pEnv )
