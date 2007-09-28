@@ -1,4 +1,0 @@
-Import('env')
-SConscript('mpdump/SConscript')
-
-env.Distribute('SConscript')
