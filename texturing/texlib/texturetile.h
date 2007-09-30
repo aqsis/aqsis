@@ -194,13 +194,12 @@ class CqTextureTile : public CqIntrusivePtrCounted
 };
 
 
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-// Implementation of inline functions
-//------------------------------------------------------------------------------
+//==============================================================================
+// Implementation of inline functions and templates
+//==============================================================================
 
 //------------------------------------------------------------------------------
-// Inline functions for CqSampleVector
+// CqSampleVector
 //------------------------------------------------------------------------------
 template<typename T>
 inline CqSampleVector<T>::CqSampleVector(const T* data,
@@ -222,10 +221,8 @@ inline TqFloat CqSampleVector<T>::operator[](TqUint index) const
 
 
 //------------------------------------------------------------------------------
-// Implementation of CqTextureTile
+// CqTextureTile
 //------------------------------------------------------------------------------
-// Inline functions for CqTextureTile
-//
 template<typename T>
 inline CqSampleVector<T> CqTextureTile<T>::value(const TqUint x, const TqUint y) const
 {
@@ -274,8 +271,8 @@ inline T* CqTextureTile<T>::samplePtr(TqUint x, TqUint y) const
 }
 
 //------------------------------------------------------------------------------
-// Template implementations for CqTextureTile
-//
+// CqTextureTile
+//------------------------------------------------------------------------------
 template<typename T>
 CqTextureTile<T>::CqTextureTile(boost::shared_array<T> data, TqUint width, TqUint height,
 		TqUint topLeftX, TqUint topLeftY, TqUint samplesPerPixel)

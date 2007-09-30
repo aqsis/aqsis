@@ -19,49 +19,40 @@
 
 /** \file
  *
- * \brief Declare input and output interface specifications which should be
- * implemented by all classes wrapping texture files.
+ * \brief Define data structures to hold info about image channels.
  *
- * \author Chris Foster
+ * \author Chris Foster  chris42f _at_ gmail.com
+ *
  */
 
-#ifndef ITEXFILE_H_INCLUDED
-#define ITEXFILE_H_INCLUDED
+#ifndef TIFFINPUTFILE_H_INCLUDED
+#define TIFFINPUTFILE_H_INCLUDED
 
 #include "aqsis.h"
 
 #include <string>
 
-#include "texfileheader.h"
-#include "texturetile.h"
+#include <shared_ptr.h>
+
+#include "itexfile.h"
 
 namespace Aqsis {
 
 //------------------------------------------------------------------------------
-class IqTexInputFile
+class CqTiffInputFile : public IqTexInputFile
 {
 	public:
-		inline virtual ~IqTextureInputFile() = 0;
-
-		virtual const std::string& fileName() const = 0;
-
-		virtual const CqTexFileHeader& header() const = 0;
-		/** \brief Read in a region of scanlines
-		 *
-		 * \param buffer - buffer to read scanlines into
-		 * \param startLine - scanline to start reading the data from (top == 0)
-		 * \param numScanlines - number of scanlines to read.  If <= 0, read
-		 *                       to the end of the image.
-		 */
-		virtual void readPixels(CqTextureBufferBase& buffer,
-				TqInt startLine = 0, TqInt numScanlines = 0) const;
-
-		/** \brief Open an image file in any understood format
-		 */
-		static boost::shared_ptr<IqTexInputFile> open(const std::string& fileName);
-	protected:
+		CqTiffInputFile(const std::string& fileName);
+		virtual const std::string& fileName() const;
+		inline virtual const CqTexFileHeader& header() const;
+	private:
 		virtual void readPixelsImpl(CqTextureBufferBase& buffer, TqInt startLine,
-				TqInt numScanlines) const = 0;
+				TqInt numScanlines) const;
+
+		void fillHeader(CqTexFileHeader& header, const CqTiffDirHandle& dirHandle);
+
+		CqTexFileHeader m_header;
+		boost::shared_ptr<CqTiffFileHandle> m_fileHandle;
 };
 
 
@@ -69,9 +60,12 @@ class IqTexInputFile
 // Implementation of inline functions and templates
 //==============================================================================
 
-inline IqTextureInputFile::~IqTextureInputFile()
-{ }
+inline const CqTexFileHeader& CqTiffInputFile::header() const
+{
+	return m_header;
+}
+
 
 } // namespace Aqsis
 
-#endif // ITEXFILE_H_INCLUDED
+#endif // TIFFINPUTFILE_H_INCLUDED
