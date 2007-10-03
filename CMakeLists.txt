@@ -100,6 +100,7 @@ GET_DIRECTORY_PROPERTY(AQSL_EXECUTABLE DIRECTORY shadercompiler/aqsl DEFINITION 
 ADD_SUBDIRECTORY(shadercompiler/slxargs)
 ADD_SUBDIRECTORY(shadercompiler/aqsltell)
 ADD_SUBDIRECTORY(rib/ri2rib)
+ADD_SUBDIRECTORY(rib/miqser)
 ADD_SUBDIRECTORY(texturing/teqser)
 IF(AQSIS_FLTK_FOUND)
 	ADD_SUBDIRECTORY(displays/display)
