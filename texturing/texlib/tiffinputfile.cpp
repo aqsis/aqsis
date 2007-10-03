@@ -50,11 +50,11 @@ virtual void CqTiffInputFile::readPixelsImpl(CqTextureBufferBase& buffer,
 void CqTiffInputFile::fillHeader(CqTexFileHeader& header,
 		const CqTiffDirHandle& dirHandle)
 {
-	header.addAttribute<TqInt>("width", dirHandle.tiffTagValue<uint32>(TIFFTAG_IMAGEWIDTH));
-	header.addAttribute<TqInt>("height", dirHandle.tiffTagValue<uint32>(TIFFTAG_IMAGELENGTH));
-	header.addAttribute<TqInt>("rows_per_strip", dirHandle.tiffTagValue<uint32>(TIFFTAG_ROWSPERSTRIP));
+	header.setAttribute<TqInt>("width", dirHandle.tiffTagValue<uint32>(TIFFTAG_IMAGEWIDTH));
+	header.setAttribute<TqInt>("height", dirHandle.tiffTagValue<uint32>(TIFFTAG_IMAGELENGTH));
+	header.setAttribute<TqInt>("rows_per_strip", dirHandle.tiffTagValue<uint32>(TIFFTAG_ROWSPERSTRIP));
 	// Deduce image channel information.
-	header.addAttribute("channels", CqChannelList);
+	header.setAttribute("channels", CqChannelList);
 	TqInt photometricInterp = dirHandle.tiffTagValue<uint16>(TIFFTAG_PHOTOMETRIC);
 	TqInt bitsPerSample = dirHandle.tiffTagValue<uint16>(TIFFTAG_BITSPERSAMPLE);
 	TqInt samplesPerPixel = dirHandle.tiffTagValue<uint16>(TIFFTAG_SAMPLESPERPIXEL);

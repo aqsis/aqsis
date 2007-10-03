@@ -2,8 +2,7 @@
 
 CqTexFileHeader::addStandardAttributes()
 {
-	addAttribute<TqInt>("width", 0);
-	addAttribute<TqInt>("height", 0);
-	addAttribute<boost::shared_ptr<CqChannelList> >("channels",
-			boost::shared_ptr<CqChannelList>(new CqChannelList()));
+	setAttribute<TqInt>("width", 100);
+	setAttribute<TqInt>("height", 100);
+	setAttribute<CqChannelList>("channels", CqChannelList());
 }
