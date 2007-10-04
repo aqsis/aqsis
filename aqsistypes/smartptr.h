@@ -30,6 +30,8 @@
 
 #include "aqsis.h"
 
+#include <boost/intrusive_ptr.hpp>
+
 namespace Aqsis {
 
 //------------------------------------------------------------------------------
