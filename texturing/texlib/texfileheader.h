@@ -25,8 +25,8 @@
  */
 
 
-#ifndef IMAGEHEADER_H_INCLUDED
-#define IMAGEHEADER_H_INCLUDED
+#ifndef TEXFILEHEADER_H_INCLUDED
+#define TEXFILEHEADER_H_INCLUDED
 
 #include "aqsis.h"
 
@@ -38,8 +38,7 @@
 
 #include "exception.h"
 
-class CqChannelList;
-struct SqTileInfo;
+namespace Aqsis {
 
 //------------------------------------------------------------------------------
 /** \brief Wrapper for image file metadata
@@ -48,29 +47,41 @@ struct SqTileInfo;
  */
 class CqTexFileHeader
 {
-	public:
+	private:
+		/// Underlying map type.
 		typedef std::map<std::string, boost::any> TqAttributeMap;
+	public:
+		/** \brief Const iterator type
+		 *
+		 * Dereferencing this iterator yields objects of type
+		 * std::pair<std::string, boost::any>, where the first represents the
+		 * attribute name, and second element represents the value.
+		 */
 		typedef TqAttributeMap::const_iterator const_iterator;
 
+		/** Construct a header, empty except for required fields.
+		 */
 		CqTexFileHeader();
 
+		//---------------------------------------------------------
 		/** \brief Set the value of an attribute with the given name
 		 *
-		 * If the attribute already exists, then the type of the new and
-		 * current values must be the same.  If the types are incompatible,
+		 * If an attribute with "name" already exists, then the type of the new
+		 * and current values must be the same.  If the types are incompatible,
 		 * throw an XqInternal.
 		 */
 		template<typename T>
 		inline void setAttribute(const std::string& name, const T& value);
 
-		inline TqInt width() const;
-		inline TqInt height() const;
-
-		// Access to data about the names and types of channels
-		inline const CqChannelList& channels() const;
-
 		//---------------------------------------------------------
-		/** \brief Get an attribute by name
+		/** \name Attribute access
+		 *
+		 * The findAttribute functions provide typesafe access to the
+		 * underlying image attributes.
+		 */
+		//@{
+
+		/** \brief Get a reference to an attribute by name
 		 *
 		 * \throw XqInternal if the named attribute is not present, or of the
 		 * wrong type.
@@ -79,20 +90,29 @@ class CqTexFileHeader
 		 */
 		template<typename T>
 		inline T& findAttribute(const std::string& name);
+		/// Get a reference to an attribute by name (const version)
 		template<typename T>
 		inline const T& findAttribute(const std::string& name) const;
-		/** \brief Get an attribute by name
+
+		/** \brief Get a pointer to an attribute by name
 		 *
 		 * \return a pointer to the desired attribute, or NULL if not present.
 		 */
 		template<typename T>
 		inline T* findAttributePtr(const std::string& name);
+		/// Get a pointer to an attribute by name (const version)
 		template<typename T>
 		inline const T* findAttributePtr(const std::string& name) const;
 
-		/// Iterator interface to all attributes
+		//@}
+
+
+		//---------------------------------------------------------
+		/// \name Standard iterator interface to all contained attributes
+		//@{
 		inline const_iterator begin() const;
 		inline const_iterator end() const;
+		//@}
 
 	private:
 		void addStandardAttributes();
@@ -115,7 +135,7 @@ template<typename T>
 inline void CqTexFileHeader::setAttribute(const std::string& name, const T& value)
 {
 	TqAttributeMap::iterator iter = m_attributeMap.find(name);
-	if(iter != m_attributeMap.end() && iter->second->type() != typeid(T))
+	if(iter != m_attributeMap.end() && iter->second.type() != typeid(T))
 	{
 		throw XqInternal("Cannot assign a different type to a pre-existing attribute",
 				__FILE__, __LINE__);
@@ -124,19 +144,11 @@ inline void CqTexFileHeader::setAttribute(const std::string& name, const T& valu
 		m_attributeMap[name] = value;
 }
 
-inline TqInt CqTexFileHeader::width() const
+template<typename T>
+inline T& CqTexFileHeader::findAttribute(const std::string& name)
 {
-	return boost::any_cast<TqInt>((*this)["width"]);
-}
-
-inline TqInt CqTexFileHeader::height() const
-{
-	return boost::any_cast<TqInt>((*this)["height"]);
-}
-
-inline const CqChannelList& CqTexFileHeader::channels() const
-{
-	return *boost::any_cast<const boost::shared_ptr<CqChannelList>& >((*this)["channels"]);
+	return const_cast<T&>(
+			const_cast<const CqTexFileHeader*>(this)->findAttribute<T>(name) );
 }
 
 template<typename T>
@@ -144,27 +156,40 @@ inline const T& CqTexFileHeader::findAttribute(const std::string& name) const
 {
 	const_iterator iter = m_attributeMap.find(name);
 	if(iter == m_attributeMap.end())
-		throw XqInternal("Cannot cast attribute to incompatible type.");
+		throw XqInternal("Cannot find attribute with requested name",
+				__FILE__, __LINE__);
+	if(iter->second.type() != typeid(T))
+		throw XqInternal("Cannot cast attribute to the requested type",
+				__FILE__, __LINE__);
 	return boost::any_cast<const T&>(iter->second);
+}
+
+template<typename T>
+inline T* CqTexFileHeader::findAttributePtr(const std::string& name)
+{
+	return const_cast<T*>(
+			const_cast<const CqTexFileHeader*>(this)->findAttributePtr<T>(name) );
 }
 
 template<typename T>
 inline const T* CqTexFileHeader::findAttributePtr(const std::string& name) const
 {
 	const_iterator iter = m_attributeMap.find(name);
-	if(iter == m_attributeMap.end())
+	if(iter == m_attributeMap.end() || iter->second.type() != typeid(T))
 		return 0;
 	return & boost::any_cast<const T&>(iter->second);
 }
 
-inline const_iterator CqTexFileHeader::begin() const
+inline CqTexFileHeader::const_iterator CqTexFileHeader::begin() const
 {
 	return m_attributeMap.begin();
 }
 
-inline const_iterator CqTexFileHeader::end() const
+inline CqTexFileHeader::const_iterator CqTexFileHeader::end() const
 {
 	return m_attributeMap.end();
 }
 
-#endif // IMAGEHEADER_H_INCLUDED
+} // namespace Aqsis
+
+#endif // TEXFILEHEADER_H_INCLUDED

@@ -2,12 +2,13 @@
 
 #include "tiffinputfile.h"
 
+namespace Aqsis {
+
 //------------------------------------------------------------------------------
 // IqTexInputFile
 //------------------------------------------------------------------------------
 
-
-void IqTextureInputFile::readPixels(CqTextureBufferBase& buffer,
+void IqTexInputFile::readPixels(CqTextureBufferBase& buffer,
 		TqInt startLine, TqInt numScanlines) const
 {
 	if(numScanlines <= 0)
@@ -18,7 +19,7 @@ void IqTextureInputFile::readPixels(CqTextureBufferBase& buffer,
 	readPixelsImpl(buffer, startLine, numScanlines);
 }
 
-boost::shared_ptr<IqTexInputFile> IqTextureInputFile::open(const std::string& fileName)
+boost::shared_ptr<IqTexInputFile> IqTexInputFile::open(const std::string& fileName)
 {
 	boost::shared_ptr<IqTexInputFile> newFile;
 
@@ -27,3 +28,5 @@ boost::shared_ptr<IqTexInputFile> IqTextureInputFile::open(const std::string& fi
 
 	return newFile;
 }
+
+} // namespace Aqsis

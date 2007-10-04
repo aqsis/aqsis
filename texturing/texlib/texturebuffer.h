@@ -34,10 +34,11 @@
 #include <boost/shared_array.hpp>
 
 #include "smartptr.h"
+#include "channelinfo.h"
 
 namespace Aqsis {
 
-class CqSampleVector;
+template<typename T> class CqSampleVector;
 
 //------------------------------------------------------------------------------
 class CqTextureBufferBase : public CqIntrusivePtrCounted
@@ -168,7 +169,7 @@ class CqSampleVector
 //------------------------------------------------------------------------------
 // Inline functions for CqTextureBufferBase
 //------------------------------------------------------------------------------
-CqTextureBufferBase(EqChannelType pixelType)
+CqTextureBufferBase::CqTextureBufferBase(EqChannelType pixelType)
 	: m_pixelType(pixelType)
 { }
 

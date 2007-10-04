@@ -33,7 +33,7 @@
 #include <string>
 
 #include "texfileheader.h"
-#include "texturetile.h"
+#include "texturebuffer.h"
 
 namespace Aqsis {
 
@@ -41,7 +41,7 @@ namespace Aqsis {
 class IqTexInputFile
 {
 	public:
-		inline virtual ~IqTextureInputFile() = 0;
+		virtual ~IqTexInputFile() {};
 
 		virtual const std::string& fileName() const = 0;
 
@@ -64,13 +64,6 @@ class IqTexInputFile
 				TqInt numScanlines) const = 0;
 };
 
-
-//==============================================================================
-// Implementation of inline functions and templates
-//==============================================================================
-
-inline IqTextureInputFile::~IqTextureInputFile()
-{ }
 
 } // namespace Aqsis
 

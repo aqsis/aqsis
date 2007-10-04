@@ -30,6 +30,8 @@
 
 #include "aqsis.h"
 
+#include <string>
+
 namespace Aqsis {
 
 //------------------------------------------------------------------------------
@@ -48,8 +50,13 @@ enum EqChannelType
 	Channel_TypeUnknown
 };
 
+/** \brief Get the EqChannelType for the given template type
+ *
+ * This function is specialized for each type represented in EqChannelType.
+ * For all other types it will return Channel_TypeUnknown.
+ */
 template<typename T>
-EqChannelType getChannelTypeEnum();
+inline EqChannelType getChannelTypeEnum();
 
 //------------------------------------------------------------------------------
 /** \brief Hold name and type information about image channels.
@@ -64,7 +71,7 @@ struct SqChannelInfo
 	 *
 	 * \return channel size in bytes
 	 */
-	TqInt bytesPerPixel() const;
+	inline TqInt bytesPerPixel() const;
 };
 
 
@@ -78,20 +85,41 @@ inline SqChannelInfo::SqChannelInfo(const std::string& name, EqChannelType type)
 	type(type)
 { }
 
+inline TqInt SqChannelInfo::bytesPerPixel() const
+{
+	switch(type)
+	{
+		case Channel_Unsigned32:
+		case Channel_Signed32:
+		case Channel_Float32:
+			return 4;
+			break;
+		case Channel_Unsigned16:
+		case Channel_Signed16:
+		case Channel_Float16:
+			return 2;
+		case Channel_Signed8:
+		case Channel_Unsigned8:
+		default:
+			return 1;
+	}
+}
 
-template<typename T> EqChannelType getChannelTypeEnum() { return Channel_TypeUnknown; }
+// getChannelTypeEnum - generic implementation
+template<typename T> inline EqChannelType getChannelTypeEnum() { return Channel_TypeUnknown; }
 
-template<> EqChannelType getChannelTypeEnum<TqFloat>() { return Channel_Float32; }
-template<> EqChannelType getChannelTypeEnum<TqUint>() { return Channel_Unsigned32; }
-template<> EqChannelType getChannelTypeEnum<TqInt>() { return Channel_Signed32; }
+// specializations for getChannelTypeEnum
+template<> inline EqChannelType getChannelTypeEnum<TqFloat>() { return Channel_Float32; }
+template<> inline EqChannelType getChannelTypeEnum<TqUint>() { return Channel_Unsigned32; }
+template<> inline EqChannelType getChannelTypeEnum<TqInt>() { return Channel_Signed32; }
 #if 0
 // Need access to the half data type from OpenEXR here.
-template<> EqChannelType getChannelTypeEnum<>() { return Channel_Float16; }
+template<> inline EqChannelType getChannelTypeEnum<>() { return Channel_Float16; }
 #endif
-template<> EqChannelType getChannelTypeEnum<TqUshort>() { return Channel_Unsigned16; }
-template<> EqChannelType getChannelTypeEnum<TqShort>() { return Channel_Signed16; }
-template<> EqChannelType getChannelTypeEnum<TqUchar>() { return Channel_Unigned8; }
-template<> EqChannelType getChannelTypeEnum<TqChar>() { return Channel_Signed8; }
+template<> inline EqChannelType getChannelTypeEnum<TqUshort>() { return Channel_Unsigned16; }
+template<> inline EqChannelType getChannelTypeEnum<TqShort>() { return Channel_Signed16; }
+template<> inline EqChannelType getChannelTypeEnum<TqUchar>() { return Channel_Unsigned8; }
+template<> inline EqChannelType getChannelTypeEnum<TqChar>() { return Channel_Signed8; }
 
 } // namespace Aqsis
 
