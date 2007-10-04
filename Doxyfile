@@ -108,6 +108,7 @@ INPUT                  = ./aqsistypes \
                          ./shadercompiler/slpp \
                          ./shadercompiler/slxargs \
                          ./texturing/teqser \
+                         ./texturing/texlib \
                          ./texturing/plugins/bake2tif \
                          ./texturing/plugins/bmp2tif \
                          ./texturing/plugins/common \
