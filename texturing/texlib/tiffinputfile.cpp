@@ -47,23 +47,4 @@ virtual void CqTiffInputFile::readPixelsImpl(CqTextureBufferBase& buffer,
 	
 }
 
-void CqTiffInputFile::fillHeader(CqTexFileHeader& header,
-		const CqTiffDirHandle& dirHandle)
-{
-	header.setAttribute<TqInt>("width", dirHandle.tiffTagValue<uint32>(TIFFTAG_IMAGEWIDTH));
-	header.setAttribute<TqInt>("height", dirHandle.tiffTagValue<uint32>(TIFFTAG_IMAGELENGTH));
-	header.setAttribute<TqInt>("rows_per_strip", dirHandle.tiffTagValue<uint32>(TIFFTAG_ROWSPERSTRIP));
-	// Deduce image channel information.
-	header.setAttribute("channels", CqChannelList);
-	TqInt photometricInterp = dirHandle.tiffTagValue<uint16>(TIFFTAG_PHOTOMETRIC);
-	TqInt bitsPerSample = dirHandle.tiffTagValue<uint16>(TIFFTAG_BITSPERSAMPLE);
-	TqInt samplesPerPixel = dirHandle.tiffTagValue<uint16>(TIFFTAG_SAMPLESPERPIXEL);
-	PHOTOMETRIC_RGB PHOTOMETRIC_MINISBLACK
-	// 
-	TqInt sampleFormat = dirHandle.tiffTagValue<uint16>(TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
-	SAMPLEFORMAT_UINT
-	SAMPLEFORMAT_INT
-	SAMPLEFORMAT_IEEEFP;
-	TqInt planarConfig = dirHandle.tiffTagValue<uint16>(TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
-	TqInt orientation = dirHandle.tiffTagValue<uint16>(TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
-}
+

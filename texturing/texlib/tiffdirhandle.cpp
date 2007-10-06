@@ -29,9 +29,38 @@
 #include <tiffio.hxx>
 
 #include "aqsismath.h"
+#include "logging.h"
 
 namespace Aqsis
 {
+
+//------------------------------------------------------------------------------
+// XqUnknownTiffFormat
+//------------------------------------------------------------------------------
+/** \brief An exception 
+ */
+class COMMON_SHARE XqUnknownTiffFormat : public XqEnvironment
+{
+	public:
+		XqUnknownTiffFormat (const std::string& reason, const std::string& detail,
+			const std::string& file, const unsigned int line)
+			: XqEnvironment(reason, detail, file, line)
+		{ }
+
+		XqUnknownTiffFormat (const std::string& reason,	const std::string& file,
+			const unsigned int line)
+			: XqEnvironment(reason, file, line)
+		{ }
+
+		virtual const char* description () const
+		{
+			return "XqUnknownTiffFormat";
+		}
+
+		virtual ~XqUnknownTiffFormat () throw ()
+		{ }
+};
+
 
 //------------------------------------------------------------------------------
 // CqTiffDirHandle
@@ -48,9 +77,208 @@ tdir_t CqTiffDirHandle::dirIndex() const
 	return m_fileHandle->m_currDir;
 }
 
-bool CqTiffDirHandle::isLastDirectory() const
+void addStringToHeaderIfDefined(const CqTiffDirHandle& dirHandle, 
+		CqTexFileHeader& header, ttag_t tag, const char* headerName)
 {
-	return static_cast<bool>(TIFFLastDirectory(tiffPtr()));
+	char* buf = dirHandle.tiffTagValue(tag, (char*)0);
+	if(buf)
+		header.setAttribute<std::string>(headerName, buf);
+}
+
+const char* getCompressionName(uint16 compressionType)
+{
+	switch(compressionType)
+	{
+		case COMPRESSION_NONE:
+			return "none";
+		case COMPRESSION_LZW:
+			return "lzw";
+		case COMPRESSION_JPEG:
+			return "jpeg";
+		case COMPRESSION_PACKBITS:
+			return "packbits";
+		case COMPRESSION_PIXARLOG:
+			return "pixar_log";
+		case COMPRESSION_DEFLATE:
+			return "deflate";
+		default:
+			return "unknown";
+	}
+}
+
+void CqTiffDirHandle::fillHeader(CqTexFileHeader& header) const
+{
+	header.setAttribute<TqInt>("width", tiffTagValue<uint32>(TIFFTAG_IMAGEWIDTH));
+	header.setAttribute<TqInt>("height", tiffTagValue<uint32>(TIFFTAG_IMAGELENGTH));
+	//header.setAttribute<TqInt>("rows_per_strip", tiffTagValue<uint32>(TIFFTAG_ROWSPERSTRIP));
+	header.setAttribute<bool>("is_tiled", TIFFIsTiled(tiffPtr()));
+
+	// Add various descriptive strings to the header if they exist
+	addStringToHeaderIfDefined(*this, header, TIFFTAG_ARTIST, "artist");
+	addStringToHeaderIfDefined(*this, header, TIFFTAG_SOFTWARE, "software");
+	addStringToHeaderIfDefined(*this, header, TIFFTAG_HOSTCOMPUTER, "hostname");
+	addStringToHeaderIfDefined(*this, header, TIFFTAG_IMAGEDESCRIPTION, "description");
+	addStringToHeaderIfDefined(*this, header, TIFFTAG_DATETIME, "date_time");
+
+	try
+	{
+		// Deduce image channel information.
+		guessChannels(header.findAttribute<CqChannelList>("channels"));
+		TqInt planarConfig = tiffTagValue<uint16>(TIFFTAG_PLANARCONFIG,
+				PLANARCONFIG_CONTIG);
+		if(planarConfig != PLANARCONFIG_CONTIG)
+			throw XqUnknownTiffFormat("non-interlaced channels detected",
+					__FILE__, __LINE__);
+		TqInt orientation = tiffTagValue<uint16>(TIFFTAG_ORIENTATION,
+				ORIENTATION_TOPLEFT);
+		if(orientation != ORIENTATION_TOPLEFT)
+			throw XqUnknownTiffFormat("orientation isn't top-left",
+					__FILE__, __LINE__);
+		header.setAttribute<std::string>("compression",
+				getCompressionName(tiffTagValue<uint16>(TIFFTAG_COMPRESSION)) );
+	}
+	catch(XqUnknownTiffFormat& e)
+	{
+		Aqsis::log() << warning
+			<< "Cannot handle desired tiff format efficiently: \"" << e.what() << "\".\n"
+			"Switching to generic RGBA handling - this may result in some loss of precision\n";
+		// The format is something strange that we don't know how to handle
+		// directly... Use the generic RGBA handling built into libtiff...
+		EqChannelType chanType = Channel_Unsigned8;
+		CqChannelList channels;
+		channels.addChannel( SqChannelInfo("r", chanType) );
+		channels.addChannel( SqChannelInfo("g", chanType) );
+		channels.addChannel( SqChannelInfo("b", chanType) );
+		channels.addChannel( SqChannelInfo("a", chanType) );
+		header.setAttribute<CqChannelList>("channels", channels);
+		// For the moment, throw another error here.
+		/// \todo Make the generic RGBA handling work properly.
+		throw XqInternal("Cannot handle desired tiff format", __FILE__, __LINE__);
+	}
+}
+
+EqChannelType CqTiffDirHandle::guessChannelType() const
+{
+	TqInt bitsPerSample = tiffTagValue<uint16>(TIFFTAG_BITSPERSAMPLE);
+	TqInt sampleFormat = tiffTagValue<uint16>(TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
+	switch(bitsPerSample)
+	{
+		case 32:
+			switch(sampleFormat)
+			{
+				case SAMPLEFORMAT_IEEEFP:
+					return Channel_Float32;
+				case SAMPLEFORMAT_INT:
+					return Channel_Signed32;
+				case SAMPLEFORMAT_UINT:
+					return Channel_Unsigned32;
+				default:
+					Aqsis::log() << warning
+						<< "Unknown tiff format for 32 bits per sample: "
+						"TIFFTAG_SAMPLEFORMAT = " << sampleFormat
+						<< ".  Assuming unsigned int.\n";
+					return Channel_Unsigned32;
+			}
+			break;
+		case 16:
+			switch(sampleFormat)
+			{
+				case SAMPLEFORMAT_INT:
+					return Channel_Signed16;
+				case SAMPLEFORMAT_UINT:
+					return Channel_Unsigned16;
+				default:
+					Aqsis::log() << warning
+						<< "Unknown tiff format for 16 bits per sample: "
+						"TIFFTAG_SAMPLEFORMAT = " << sampleFormat
+						<< ".  Assuming unsigned int.\n";
+					return Channel_Unsigned16;
+			}
+			break;
+		case 8:
+			switch(sampleFormat)
+			{
+				case SAMPLEFORMAT_INT:
+					return Channel_Signed8;
+				case SAMPLEFORMAT_UINT:
+					return Channel_Unsigned8;
+				default:
+					Aqsis::log() << warning
+						<< "Unknown tiff format for 8 bits per sample: "
+						"TIFFTAG_SAMPLEFORMAT = " << sampleFormat
+						<< ".  Assuming unsigned int.\n";
+					return Channel_Unsigned8;
+			}
+			break;
+		default:
+			// We give up and use the generic 8bpp tiff loading.
+			return Channel_TypeUnknown;
+	}
+}
+
+void CqTiffDirHandle::guessChannels(CqChannelList& channels) const
+{
+	channels.clear();
+	EqChannelType chanType = guessChannelType();
+	if(chanType == Channel_TypeUnknown)
+		throw XqUnknownTiffFormat("Cannot determine channel type", __FILE__, __LINE__);
+	else
+	{
+		// Determine the channel type held in the tiff
+		TqInt samplesPerPixel = tiffTagValue<uint16>(TIFFTAG_SAMPLESPERPIXEL);
+		TqInt photometricInterp = tiffTagValue<uint16>(TIFFTAG_PHOTOMETRIC);
+		switch(photometricInterp)
+		{
+			case PHOTOMETRIC_MINISBLACK:
+				if(samplesPerPixel == 1)
+				{
+					// We have an intensity (y) channel only.
+					channels.addChannel(SqChannelInfo("y", chanType));
+				}
+				else
+				{
+					// Try to bumble through anyway...
+					channels.addUnnamedChannels(chanType, samplesPerPixel);
+				}
+				break;
+			case PHOTOMETRIC_RGB:
+				if(samplesPerPixel < 3)
+					channels.addUnnamedChannels(chanType, samplesPerPixel);
+				else
+				{
+					// add RGB channels
+					channels.addChannel(SqChannelInfo("r", chanType));
+					channels.addChannel(SqChannelInfo("g", chanType));
+					channels.addChannel(SqChannelInfo("b", chanType));
+					/// \todo Investigate what to do about TIFFTAG_EXTRASAMPLES
+					if(samplesPerPixel == 4)
+					{
+						// add alpha channel
+						channels.addChannel(SqChannelInfo("a", chanType));
+					}
+					else if(samplesPerPixel == 6)
+					{
+						// add RGB alpha channels
+						channels.addChannel(SqChannelInfo("ra", chanType));
+						channels.addChannel(SqChannelInfo("ga", chanType));
+						channels.addChannel(SqChannelInfo("ba", chanType));
+					}
+					else
+					{
+						// Or not sure what to do here... add some unnamed
+						// channels?
+						channels.addUnnamedChannels(chanType, samplesPerPixel-3);
+					}
+				}
+				break;
+			/// \todo Should also handle the following?
+			//case PHOTOMETRIC_LOGL:
+			//case PHOTOMETRIC_LOGLUV:
+			default:
+				throw XqUnknownTiffFormat("Unknown photometric type",
+						__FILE__, __LINE__);
+		}
+	}
 }
 
 

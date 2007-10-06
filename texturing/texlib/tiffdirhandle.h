@@ -27,6 +27,8 @@
 #ifndef TIFFDIRHANDLE_H_INCLUDED
 #define TIFFDIRHANDLE_H_INCLUDED
 
+#include "aqsis.h"
+
 #include <string>
 
 #include <boost/utility.hpp>
@@ -34,10 +36,9 @@
 #include <boost/format.hpp>
 #include <tiffio.h>
 
-#include "aqsis.h"
 #include "exception.h"
-#include "logging.h"
-#include "tilearray.h"
+#include "channellist.h"
+#include "texfileheader.h"
 
 namespace Aqsis
 {
@@ -76,12 +77,24 @@ class CqTiffDirHandle : public boost::noncopyable
 		/// Obtain the index to this directory
 		tdir_t dirIndex() const;
 
-		/// Return true if the tiff is tiled
-		bool isTiled() const;
-		/// Return true if this is the last directory in the tiff.
-		bool isLastDirectory() const;
+		/** \brief Fill the given tex file header with relevant data about this
+		 * tiff directory.
+		 *
+		 * "Relevant data" includes the following:
+		 *   - width, height
+		 *   - tile width, height (if tiled)
+		 *   - descriptive strings - artist, software, hostname, description, date_time
+		 *   - tile mode
+		 *   - channel information
+		 *
+		 * \param header - header to fill.
+		 */
+		void fillHeader(CqTexFileHeader& header) const;
 
-		/** \brief Get the value of a tiff tag for the directory
+		//----------------------------------------------------------------------
+		/// \name Access to tags of the underlying tiff file
+		//@{
+		/** \brief Get the value of a tiff tag
 		 *
 		 * Note that unfortunately this isn't type-safe: you *must* specify the
 		 * correct type, T for the TIFF tag desired, otherwise you'll get
@@ -96,8 +109,7 @@ class CqTiffDirHandle : public boost::noncopyable
 		 */
 		template<typename T>
 		T tiffTagValue(const uint32 tag) const;
-		/** \brief Get the value of a tiff tag for the directory with a default
-		 * if not found.
+		/** \brief Get the value of a tiff tag with a default value
 		 *
 		 * Note that unfortunately this isn't type-safe: you *must* specify the
 		 * correct type, T for the TIFF tag desired, otherwise you'll get
@@ -125,7 +137,34 @@ class CqTiffDirHandle : public boost::noncopyable
 		template<typename T>
 		bool checkTagValue(const uint32 tag, const T desiredValue,
 				const bool tagNotFoundVal = true) const;
+		//@}
+
 	private:
+		//----------------------------------------------------------------------
+		/// \name Helper functions for deducing channel names/types
+		//@{
+		/** \brief Guess the image channels for the given tiff directory.
+		 *
+		 * Tiff doesn't have a way to explicitly name the channels contained,
+		 * but we can deduce most of what we'd like via various tags.
+		 *
+		 * \param channels - channel object to place the guessed channels in.
+		 *                   The object is cleared before being modified.
+		 */
+		void guessChannels(CqChannelList& channels) const;
+		/** Guess the channel data type
+		 *
+		 * The channel data type is deduced from reading the tags
+		 * TIFFTAG_BITSPERSAMPLE and TIFFTAG_SAMPLEFORMAT.
+		 *
+		 * \return The data type, or Channel_TypeUnknown if the data type isn't
+		 *         understood.
+		 */
+		EqChannelType guessChannelType() const;
+		//@}
+
+
+		//----------------------------------------------------------------------
 		boost::shared_ptr<CqTiffFileHandle> m_fileHandle; ///< underlying file handle
 		/// \todo: multithreading - add a lock here!
 		/// \todo: add a pointer to a TIFFRGBAimage

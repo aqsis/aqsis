@@ -106,12 +106,27 @@ class CqChannelList
 		inline TqInt bytesPerPixel() const;
 		//@}
 
+		//----------------------------------------------------------------------
+		/// \name Methods to modify all channels
+		//@{
 		/** \brief Reorder channels to the "expected" order (rgba)
 		 *
 		 * Reorder the list of channels to be in the standard order - "r", "g",
 		 * "b", "a".  Other channel names are ignored.
 		 */
 		void reorderChannels();
+		/// Remove all channels
+		inline void clear();
+		/** Add the specified number of "unnamed" channels
+		 *
+		 * The channels will be named from "?01" up until "?nn" where nn is
+		 * numToAdd.
+		 *
+		 * \param chanType - type of the channels to add
+		 * \param numToAdd - number of channels to add
+		 */
+		void addUnnamedChannels(EqChannelType chanType, TqInt numToAdd);
+		//@}
 
 	private:
 		/** \brief Get an index for the given channel name
@@ -179,6 +194,13 @@ inline TqInt CqChannelList::bytesPerPixel() const
 {
 	return m_bytesPerPixel;
 }
+
+inline void CqChannelList::clear()
+{
+	m_channels.clear();
+	recomputeByteOffsets();
+}
+
 } // namespace Aqsis
 
 #endif // CHANNELLIST_H_INCLUDED

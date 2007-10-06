@@ -26,6 +26,8 @@
 
 #include "channellist.h"
 
+#include <boost/format.hpp>
+
 namespace Aqsis {
 
 //------------------------------------------------------------------------------
@@ -68,6 +70,12 @@ void CqChannelList::reorderChannels()
 		}
 	}
 	recomputeByteOffsets();
+}
+
+void CqChannelList::addUnnamedChannels(EqChannelType chanType, TqInt numToAdd)
+{
+	for(TqInt i = 1; i <= numToAdd; ++i)
+		addChannel( SqChannelInfo((boost::format("?%02d") % i).str(), chanType) );
 }
 
 TqInt CqChannelList::findChannelIndexImpl(const std::string& name) const

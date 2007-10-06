@@ -61,7 +61,7 @@ class CqTexFileHeader
 
 		/** Construct a header, empty except for required fields.
 		 */
-		CqTexFileHeader();
+		inline CqTexFileHeader();
 
 		//---------------------------------------------------------
 		/** \brief Set the value of an attribute with the given name
@@ -125,7 +125,7 @@ class CqTexFileHeader
 // Implementation of inline functions and templates
 //==============================================================================
 
-CqTexFileHeader::CqTexFileHeader()
+inline CqTexFileHeader::CqTexFileHeader()
 	: m_attributeMap()
 {
 	addStandardAttributes();
