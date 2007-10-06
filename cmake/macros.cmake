@@ -56,25 +56,28 @@ IF(AQSIS_ENABLE_TESTING)
 	# The custom target all_tests allows all tests to be built at once.
 
 	MACRO(AQSIS_ADD_TESTS SOURCE_LIST LINK_LIBS)
-		# It seems strange to add all_tests it each time the macro is called...
-		# perhaps there's a better way?
+		# Adding a custom target "all_tests" each time the macro is called
+		# seems like the wrong thing to do, but it works for now.
 		ADD_CUSTOM_TARGET(all_tests)
 		FOREACH(TEST_SRC ${SOURCE_LIST})
-			STRING(REGEX REPLACE ".cpp$" "" TEST_NAME ${TEST_SRC})
-			# Remove any prefixed-path from the test source
-			STRING(REGEX REPLACE "^.*/" "" TEST_NAME ${TEST_NAME})
-			ADD_EXECUTABLE(${TEST_NAME}
+			# Remove any prefixed-path from the test source and remove the
+			# extension to get the test name.
+			GET_FILENAME_COMPONENT(TEST_EXE_NAME ${TEST_SRC} NAME_WE)
+			GET_FILENAME_COMPONENT(CURR_DIR_NAME ${PROJECT_SOURCE_DIR} NAME)
+			# Test name is "source_directory/file_name"
+			SET(TEST_NAME "${CURR_DIR_NAME}/${TEST_EXE_NAME}")
+			ADD_EXECUTABLE(${TEST_EXE_NAME}
 				${TEST_SRC}
 				${CMAKE_SOURCE_DIR}/build_tools/boostautotestmain.cpp
 				)
 			# Perhaps we should remove boostautotestmain.cpp in favor of simply
 			# defining BOOST_AUTO_TEST_MAIN in each test file.
-			TARGET_LINK_LIBRARIES(${TEST_NAME}
+			TARGET_LINK_LIBRARIES(${TEST_EXE_NAME}
 				${LINK_LIBS}
 				${AQSIS_BOOST_UNIT_TEST_FRAMEWORK_LIBRARY}
 				)
-			ADD_TEST("${TEST_NAME}" ${EXECUTABLE_OUTPUT_PATH}/${TEST_NAME})
-			ADD_DEPENDENCIES(all_tests ${TEST_NAME})
+			ADD_TEST(${TEST_NAME} ${EXECUTABLE_OUTPUT_PATH}/${TEST_EXE_NAME})
+			ADD_DEPENDENCIES(all_tests ${TEST_EXE_NAME})
 		ENDFOREACH(TEST_SRC)
 	ENDMACRO(AQSIS_ADD_TESTS)
 
