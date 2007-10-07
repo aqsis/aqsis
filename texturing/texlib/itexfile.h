@@ -43,7 +43,11 @@ class IqTexInputFile
 	public:
 		virtual ~IqTexInputFile() {};
 
+		/// get the file name
 		virtual const std::string& fileName() const = 0;
+
+		/// get the file type
+		virtual const char* fileType() const = 0;
 
 		virtual const CqTexFileHeader& header() const = 0;
 		/** \brief Read in a region of scanlines
@@ -56,10 +60,24 @@ class IqTexInputFile
 		virtual void readPixels(CqTextureBufferBase& buffer,
 				TqInt startLine = 0, TqInt numScanlines = 0) const;
 
-		/** \brief Open an image file in any understood format
+		/** \brief Open an input image file in any format
+		 *
+		 * Uses magic numbers to determine the file format of the file given by
+		 * fileName.  If the format is unknown or the file cannot be opened for
+		 * some other reason, throw an exception.
+		 *
+		 * \param
+		 * \return The newly opened input file
 		 */
 		static boost::shared_ptr<IqTexInputFile> open(const std::string& fileName);
 	protected:
+		/** \brief readPixels() implementation to be overridden by child classes
+		 *
+		 * The default implementation of readPixels simply validates the input
+		 * parameters against the image dimensions as reported by header(), and
+		 * calls readPixelsImpl directly.  Implementations of readPixelsImpl()
+		 * can assume that startLine and numScanlines specify a valid range.
+		 */
 		virtual void readPixelsImpl(CqTextureBufferBase& buffer, TqInt startLine,
 				TqInt numScanlines) const = 0;
 };

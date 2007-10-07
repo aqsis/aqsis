@@ -19,7 +19,7 @@
 
 /** \file
  *
- * \brief Define data structures to hold info about image channels.
+ * \brief Scanline-oriented pixel access for TIFF input.
  *
  * \author Chris Foster  chris42f _at_ gmail.com
  *
@@ -32,9 +32,10 @@
 
 #include <string>
 
-#include <shared_ptr.h>
+#include <boost/shared_ptr.hpp>
 
 #include "itexfile.h"
+#include "tiffdirhandle.h"
 
 namespace Aqsis {
 
@@ -44,12 +45,11 @@ class CqTiffInputFile : public IqTexInputFile
 	public:
 		CqTiffInputFile(const std::string& fileName);
 		virtual const std::string& fileName() const;
+		inline virtual const char* fileType() const;
 		inline virtual const CqTexFileHeader& header() const;
 	private:
 		virtual void readPixelsImpl(CqTextureBufferBase& buffer, TqInt startLine,
 				TqInt numScanlines) const;
-
-		void fillHeader(CqTexFileHeader& header, const CqTiffDirHandle& dirHandle);
 
 		CqTexFileHeader m_header;
 		boost::shared_ptr<CqTiffFileHandle> m_fileHandle;
@@ -60,11 +60,15 @@ class CqTiffInputFile : public IqTexInputFile
 // Implementation of inline functions and templates
 //==============================================================================
 
+inline const char* CqTiffInputFile::fileType() const
+{
+	return "tiff";
+}
+
 inline const CqTexFileHeader& CqTiffInputFile::header() const
 {
 	return m_header;
 }
-
 
 } // namespace Aqsis
 

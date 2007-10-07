@@ -14,12 +14,13 @@ INCLUDE(${AQSISTYPES_SOURCE_DIR}/export.cmake)
 #FILTER_OUT("${TEXLIB_TEST_SRCS}" "${TEXLIB_SRCS}" TEXLIB_SRCS)
 #FILE(GLOB TEXLIB_HEADERS ${PROJECT_SOURCE_DIR}/*.h)
 SET(TEXLIB_SRCS
+	channellist.cpp
+	itexfile.cpp
+	magicnumber.cpp
 	texfileheader.cpp
 	tiffdirhandle.cpp
-	channellist.cpp
+	tiffinputfile.cpp
 	)
-#	itexfile.cpp
-#	tiffinputfile.cpp
 
 ADD_DEFINITIONS(-DTEXLIB_EXPORTS)
 ADD_LIBRARY(aqsistex SHARED ${TEXLIB_SRCS})
@@ -40,6 +41,7 @@ INSTALL(TARGETS aqsistex
 # Testing
 SET(TEXLIB_TEST_SRCS
 	channellist_test.cpp
+	magicnumber_test.cpp
 	texfileheader_test.cpp
 	tiffdirhandle_test.cpp
 	)

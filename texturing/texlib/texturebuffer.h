@@ -44,7 +44,7 @@ template<typename T> class CqSampleVector;
 class CqTextureBufferBase : public CqIntrusivePtrCounted
 {
 	public:
-		CqTextureBufferBase(EqChannelType pixelType);
+		inline CqTextureBufferBase(EqChannelType pixelType);
 
 		virtual void resize(TqInt width, TqInt height, TqInt channelsPerPixel) = 0;
 	protected:
@@ -169,7 +169,7 @@ class CqSampleVector
 //------------------------------------------------------------------------------
 // Inline functions for CqTextureBufferBase
 //------------------------------------------------------------------------------
-CqTextureBufferBase::CqTextureBufferBase(EqChannelType pixelType)
+inline CqTextureBufferBase::CqTextureBufferBase(EqChannelType pixelType)
 	: m_pixelType(pixelType)
 { }
 

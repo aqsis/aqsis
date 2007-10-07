@@ -1,39 +1,49 @@
+// Aqsis
+// Copyright (C) 1997 - 2007, Paul C. Gregory
+//
+// Contact: pgregory@aqsis.org
+//
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public
+// License as published by the Free Software Foundation; either
+// version 2 of the License, or (at your option) any later version.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public
+// License along with this library; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+/** \file
+ *
+ * \brief Scanline-oriented pixel access for TIFF input - implementation.
+ *
+ * \author Chris Foster  chris42f _at_ gmail.com
+ *
+ */
+
 #include "tiffinputfile.h"
 
 #include "tiffdirhandle.h"
 
+namespace Aqsis {
+
+//------------------------------------------------------------------------------
+// CqTiffInputFile - implementation
+
 CqTiffInputFile::CqTiffInputFile(const std::string& fileName)
-	: m_fileHandle(new CqTiffFileHandle(fileName, "r")),
-	m_header()
+	: m_header(),
+	m_fileHandle(new CqTiffFileHandle(fileName, "r"))
 {
 	CqTiffDirHandle dirHandle(m_fileHandle);
-	if(!dirHandle.isTiled())
-		fillHeader(m_header, dirHandle);
-	else
+	dirHandle.fillHeader(m_header);
+	if(m_header.findAttribute<bool>("isTiled"))
 		throw XqInternal("Can't read tiled tiff files", __FILE__, __LINE__);
-
-	// Check that the tiff file is of a type which we know how to handle
-	// easily.  If it's not, then we should use the generic RGBA handling of
-	// libtiff to read the data (probably slower; doesn't preserve precision (?))
-	if( !(
-		// require either RGB, or grayscale photometric interpretation.
-		( newDirectory.photometricInterp == PHOTOMETRIC_RGB
-			|| newDirectory.photometricInterp == PHOTOMETRIC_MINISBLACK )
-		// require directly addressable data samples
-		&& (newDirectory.bitsPerSample % 8) == 0
-		// require (0,0) coord to be in the top left
-		&& newDirectory.orientation == ORIENTATION_TOPLEFT
-		// require that colour values are stored packed together, not seperately.
-		&& newDirectory.planarConfig == PLANARCONFIG_CONTIG
-		// require that the sample type is either uint, int, or floating point.
-		&& (newDirectory.sampleFormat == SAMPLEFORMAT_UINT
-			|| newDirectory.sampleFormat == SAMPLEFORMAT_INT
-			|| newDirectory.sampleFormat == SAMPLEFORMAT_IEEEFP)
-		) )
-	{
-		// for the moment, just throw an error...
-		throw XqTiffError("Unrecognised tiff format", __FILE__, __LINE__);
-	}
+	/// \todo We'll need to add something to deal with generic RGBA tiff
+	/// reading at some stage.
 }
 
 const std::string& CqTiffInputFile::fileName() const
@@ -41,10 +51,10 @@ const std::string& CqTiffInputFile::fileName() const
 	return m_fileHandle->fileName();
 }
 
-virtual void CqTiffInputFile::readPixelsImpl(CqTextureBufferBase& buffer,
+void CqTiffInputFile::readPixelsImpl(CqTextureBufferBase& buffer,
 		TqInt startLine, TqInt numScanlines) const
 {
 	
 }
 
-
+} // namespace Aqsis

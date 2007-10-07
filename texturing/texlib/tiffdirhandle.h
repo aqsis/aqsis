@@ -73,7 +73,7 @@ class CqTiffDirHandle : public boost::noncopyable
 		CqTiffDirHandle(boost::shared_ptr<CqTiffFileHandle> fileHandle, const tdir_t dirIdx = 0);
 
 		/// Obtain the underlying tiff file pointer
-		TIFF* tiffPtr() const;
+		inline TIFF* tiffPtr() const;
 		/// Obtain the index to this directory
 		tdir_t dirIndex() const;
 
@@ -238,7 +238,7 @@ boost::shared_array<T> tiffMalloc(const tsize_t size);
 // CqTiffDirHandle
 //------------------------------------------------------------------------------
 
-TIFF* CqTiffDirHandle::tiffPtr() const
+inline TIFF* CqTiffDirHandle::tiffPtr() const
 {
 	return m_fileHandle->m_tiffPtr.get();
 }
@@ -274,6 +274,13 @@ bool CqTiffDirHandle::checkTagValue(const uint32 tag, const T desiredValue,
 		return tagNotFoundVal;
 }
 
+//------------------------------------------------------------------------------
+// CqTIffFileHandle
+//------------------------------------------------------------------------------
+inline const std::string& CqTiffFileHandle::fileName() const
+{
+	return m_fileName;
+}
 
 //------------------------------------------------------------------------------
 // libtiff wrapper functions

@@ -320,11 +320,6 @@ CqTiffFileHandle::CqTiffFileHandle(std::istream& inputStream)
 	}
 }
 
-const std::string& CqTiffFileHandle::fileName() const
-{
-	return m_fileName;
-}
-
 void CqTiffFileHandle::setDirectory(tdir_t dirIdx)
 {
 	if(dirIdx != m_currDir)
