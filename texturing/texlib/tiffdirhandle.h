@@ -80,12 +80,14 @@ class CqTiffDirHandle : public boost::noncopyable
 		/** \brief Fill the given tex file header with relevant data about this
 		 * tiff directory.
 		 *
-		 * "Relevant data" includes the following:
-		 *   - width, height
-		 *   - tile width, height (if tiled)
-		 *   - descriptive strings - artist, software, hostname, description, date_time
-		 *   - tile mode
-		 *   - channel information
+		 * "Relevant data" includes the following fields:
+		 *   - width, height: TqInt; image dimensions
+		 *   - isTiled: bool
+		 *     - tileWidth, tileHeight: TqInt; tile size (present only if the
+		 *       image is tiled)
+		 *   - artist, software, hostname, description, dateTime: std::string;
+		 *     descriptive strings
+		 *   - channels: TqChannelList; channel information
 		 *
 		 * \param header - header to fill.
 		 */

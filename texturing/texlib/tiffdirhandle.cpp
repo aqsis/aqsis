@@ -111,14 +111,21 @@ void CqTiffDirHandle::fillHeader(CqTexFileHeader& header) const
 	header.setAttribute<TqInt>("width", tiffTagValue<uint32>(TIFFTAG_IMAGEWIDTH));
 	header.setAttribute<TqInt>("height", tiffTagValue<uint32>(TIFFTAG_IMAGELENGTH));
 	//header.setAttribute<TqInt>("rows_per_strip", tiffTagValue<uint32>(TIFFTAG_ROWSPERSTRIP));
-	header.setAttribute<bool>("is_tiled", TIFFIsTiled(tiffPtr()));
+	header.setAttribute<bool>("isTiled", TIFFIsTiled(tiffPtr()));
+	if(header.findAttribute<bool>("isTiled"))
+	{
+		header.setAttribute<TqInt>("tileWidth",
+				tiffTagValue<uint32>(TIFFTAG_TILEWIDTH));
+		header.setAttribute<TqInt>("tileHeight",
+				tiffTagValue<uint32>(TIFFTAG_TILELENGTH));
+	}
 
 	// Add various descriptive strings to the header if they exist
 	addStringToHeaderIfDefined(*this, header, TIFFTAG_ARTIST, "artist");
 	addStringToHeaderIfDefined(*this, header, TIFFTAG_SOFTWARE, "software");
 	addStringToHeaderIfDefined(*this, header, TIFFTAG_HOSTCOMPUTER, "hostname");
 	addStringToHeaderIfDefined(*this, header, TIFFTAG_IMAGEDESCRIPTION, "description");
-	addStringToHeaderIfDefined(*this, header, TIFFTAG_DATETIME, "date_time");
+	addStringToHeaderIfDefined(*this, header, TIFFTAG_DATETIME, "dateTime");
 
 	try
 	{

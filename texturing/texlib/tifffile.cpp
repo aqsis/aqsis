@@ -54,68 +54,6 @@ XqTiffError::~XqTiffError() throw ()
 
 
 //------------------------------------------------------------------------------
-// CqTiffDirHandle
-//------------------------------------------------------------------------------
-CqTiffDirHandle::CqTiffDirHandle(boost::shared_ptr<CqTiffFileHandle> fileHandle, const tdir_t dirIdx)
-	: m_fileHandle(fileHandle)
-{
-	fileHandle->setDirectory(dirIdx);
-}
-
-tdir_t CqTiffDirHandle::dirIndex() const
-{
-	return m_fileHandle->m_currDir;
-}
-
-bool CqTiffDirHandle::isLastDirectory() const
-{
-	return static_cast<bool>(TIFFLastDirectory(tiffPtr()));
-}
-
-//------------------------------------------------------------------------------
-// CqTiffFileHandle
-//------------------------------------------------------------------------------
-void safeTiffClose(TIFF* tif)
-{
-	if(tif)
-		TIFFClose(tif);
-}
-
-CqTiffFileHandle::CqTiffFileHandle(const std::string& fileName, const char* openMode)
-	: m_tiffPtr(TIFFOpen(fileName.c_str(), openMode), safeTiffClose),
-	m_currDir(0)
-{
-	if(!m_tiffPtr)
-	{
-		throw XqEnvironment( boost::str(boost::format("Could not open tiff file '%s'")
-					% fileName).c_str(), __FILE__, __LINE__);
-	}
-}
-
-
-CqTiffFileHandle::CqTiffFileHandle(std::istream& inputStream)
-	: m_tiffPtr(TIFFStreamOpen("stream", &inputStream), safeTiffClose),
-	m_currDir(0)
-{
-	if(!m_tiffPtr)
-	{
-		throw XqTiffError("Could not use input stream for tiff", __FILE__, __LINE__);
-	}
-}
-
-
-void CqTiffFileHandle::setDirectory(tdir_t dirIdx)
-{
-	if(dirIdx != m_currDir)
-	{
-		if(!TIFFSetDirectory(m_tiffPtr.get(), dirIdx))
-			throw XqTiffError("Invalid Tiff directory", __FILE__, __LINE__);
-		m_currDir = dirIdx;
-	}
-}
-
-
-//------------------------------------------------------------------------------
 // CqTiffInputFile
 //------------------------------------------------------------------------------
 // constructor

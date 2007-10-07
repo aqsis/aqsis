@@ -39,8 +39,9 @@ INSTALL(TARGETS aqsistex
 #----------------------------------------------------------------------
 # Testing
 SET(TEXLIB_TEST_SRCS
-	texfileheader_test.cpp
 	channellist_test.cpp
+	texfileheader_test.cpp
+	tiffdirhandle_test.cpp
 	)
 
 SET(TEST_LINKLIBS  aqsistex dl tiffxx ${LINKLIBS})
