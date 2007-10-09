@@ -39,6 +39,11 @@ namespace Aqsis {
  * boost::intrusive_ptr.
  *
  * Classes to be counted with an boost::intrusive_ptr should inherit from this class. 
+ *
+ * WARNING: Think very carefully before allocating this class on the stack,
+ * especially without calling intrusive_ptr_add_ref() on it immediately
+ * afterward.  Doing so can cause multiple deallocations of the object if it is
+ * subsequently handled via an intrusive_ptr.
  */
 class CqIntrusivePtrCounted
 {

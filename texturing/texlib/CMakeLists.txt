@@ -44,6 +44,7 @@ SET(TEXLIB_TEST_SRCS
 	magicnumber_test.cpp
 	texfileheader_test.cpp
 	tiffdirhandle_test.cpp
+	tiffinputfile_test.cpp
 	)
 
 SET(TEST_LINKLIBS  aqsistex dl tiffxx ${LINKLIBS})

@@ -71,7 +71,7 @@ class IqTexInputFile
 		 */
 		template<typename Array2DType>
 		void readPixels(Array2DType& buffer, TqInt startLine = 0,
-				TqInt numScanlines = 0) const;
+				TqInt numScanlines = -1) const;
 
 		/** \brief Open an input image file in any format
 		 *

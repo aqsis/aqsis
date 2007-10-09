@@ -38,12 +38,14 @@ CqTiffInputFile::CqTiffInputFile(const std::string& fileName)
 	: m_header(),
 	m_fileHandle(new CqTiffFileHandle(fileName, "r"))
 {
-	CqTiffDirHandle dirHandle(m_fileHandle);
-	dirHandle.fillHeader(m_header);
-	if(m_header.findAttribute<bool>("isTiled"))
-		throw XqInternal("Can't read tiled tiff files", __FILE__, __LINE__);
-	/// \todo We'll need to add something to deal with generic RGBA tiff
-	/// reading at some stage.
+	initialize();
+}
+
+CqTiffInputFile::CqTiffInputFile(std::istream& inStream)
+	: m_header(),
+	m_fileHandle(new CqTiffFileHandle(inStream))
+{
+	initialize();
 }
 
 const std::string& CqTiffInputFile::fileName() const
@@ -68,6 +70,16 @@ void CqTiffInputFile::readPixelsImpl(TqUchar* buffer,
 				static_cast<uint32>(line));
 		buffer += bytesPerRow;
 	}
+}
+
+void CqTiffInputFile::initialize()
+{
+	CqTiffDirHandle dirHandle(m_fileHandle);
+	dirHandle.fillHeader(m_header);
+	if(m_header.findAttribute<bool>("isTiled"))
+		throw XqInternal("Can't read tiled tiff files", __FILE__, __LINE__);
+	/// \todo We'll need to add something to deal with generic RGBA tiff
+	/// reading at some stage.
 }
 
 } // namespace Aqsis

@@ -43,6 +43,11 @@ namespace Aqsis {
  *
  * This class is a container for tiles of texture data for which each pixel
  * holds the same number of channels as every other pixel.
+ *
+ * WARNING: Never allocate this class on the stack, especially without calling
+ * intrusive_ptr_add_ref() on it immediately afterward.  Doing so and using the
+ * indexing operator() which returns a CqSampleVector will result in multiple
+ * deallocations.
  */
 template<typename T>
 class CqTextureBuffer : public CqIntrusivePtrCounted
@@ -54,6 +59,9 @@ class CqTextureBuffer : public CqIntrusivePtrCounted
 		 * the construction of CqSampleVector objects.
 		 */
 		typedef boost::intrusive_ptr<CqTextureBuffer<T> > TqPtr;
+
+		/// Construct a texture tile with width = height = 0
+		CqTextureBuffer();
 
 		/** \brief Construct a texture tile
 		 *
@@ -120,6 +128,14 @@ class CqTextureBuffer : public CqIntrusivePtrCounted
 //==============================================================================
 
 // Inline functions/templates for CqTextureBuffer
+
+template<typename T>
+CqTextureBuffer<T>::CqTextureBuffer()
+	: m_pixelData(),
+	m_width(0),
+	m_height(0),
+	m_channelsPerPixel(0)
+{ }
 
 template<typename T>
 CqTextureBuffer<T>::CqTextureBuffer(TqInt width, TqInt height, TqInt channelsPerPixel)

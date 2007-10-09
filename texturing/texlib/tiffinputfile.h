@@ -44,12 +44,17 @@ class CqTiffInputFile : public IqTexInputFile
 {
 	public:
 		CqTiffInputFile(const std::string& fileName);
+		/// Constructor which takes an input stream rather than a file name
+		CqTiffInputFile(std::istream& inStream);
 		virtual const std::string& fileName() const;
 		inline virtual const char* fileType() const;
 		inline virtual const CqTexFileHeader& header() const;
 	private:
 		virtual void readPixelsImpl(TqUchar* buffer, TqInt startLine,
 				TqInt numScanlines) const;
+
+		/// Perform shared initializations needed in construction.
+		void initialize();
 
 		CqTexFileHeader m_header;
 		boost::shared_ptr<CqTiffFileHandle> m_fileHandle;
