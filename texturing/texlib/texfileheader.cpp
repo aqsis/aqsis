@@ -25,7 +25,6 @@
  */
 
 #include "texfileheader.h"
-#include "channellist.h"
 
 namespace Aqsis {
 

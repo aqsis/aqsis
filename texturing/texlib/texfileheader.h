@@ -37,6 +37,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include "exception.h"
+#include "channellist.h"
 
 namespace Aqsis {
 
@@ -76,10 +77,20 @@ class CqTexFileHeader
 		//---------------------------------------------------------
 		/** \name Attribute access
 		 *
-		 * The findAttribute functions provide typesafe access to the
-		 * underlying image attributes.
+		 * Convenience functions are provided for attributes which are
+		 * guarenteed to be present.  All other attributes are accessed via the
+		 * findAttribute() or findAttributePtr() functions.
 		 */
 		//@{
+
+		/// Get the image width
+		inline TqInt width() const;
+		/// Get the image height
+		inline TqInt height() const;
+		/// Get the image channel data
+		inline CqChannelList& channels();
+		/// Get the image channel data
+		inline const CqChannelList& channels() const;
 
 		/** \brief Get a reference to an attribute by name
 		 *
@@ -142,6 +153,26 @@ inline void CqTexFileHeader::setAttribute(const std::string& name, const T& valu
 	}
 	else
 		m_attributeMap[name] = value;
+}
+
+TqInt CqTexFileHeader::width() const
+{
+	return findAttribute<TqInt>("width");
+}
+
+TqInt CqTexFileHeader::height() const
+{
+	return findAttribute<TqInt>("height");
+}
+
+CqChannelList& CqTexFileHeader::channels()
+{
+	return findAttribute<CqChannelList>("channels");
+}
+
+const CqChannelList& CqTexFileHeader::channels() const
+{
+	return findAttribute<CqChannelList>("channels");
 }
 
 template<typename T>

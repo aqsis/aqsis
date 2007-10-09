@@ -20,7 +20,7 @@
 /**
  * \file
  *
- * \brief Declare a texture tile class and associated machinery.
+ * \brief Declare a texture buffer class and associated machinery.
  *
  * \author Chris Foster  chris42f _at_ gmail.com
  */
@@ -34,22 +34,9 @@
 #include <boost/shared_array.hpp>
 
 #include "smartptr.h"
-#include "channelinfo.h"
+#include "samplevector.h"
 
 namespace Aqsis {
-
-template<typename T> class CqSampleVector;
-
-//------------------------------------------------------------------------------
-class CqTextureBufferBase : public CqIntrusivePtrCounted
-{
-	public:
-		inline CqTextureBufferBase(EqChannelType pixelType);
-
-		virtual void resize(TqInt width, TqInt height, TqInt channelsPerPixel) = 0;
-	protected:
-		EqChannelType m_pixelType;
-};
 
 //------------------------------------------------------------------------------
 /** \brief A class to hold the data from a single texture tile.
@@ -58,7 +45,7 @@ class CqTextureBufferBase : public CqIntrusivePtrCounted
  * holds the same number of channels as every other pixel.
  */
 template<typename T>
-class CqTextureBuffer : public CqTextureBufferBase
+class CqTextureBuffer : public CqIntrusivePtrCounted
 {
 	public:
 		/** \brief The pointer type for use with texture tiles.
@@ -80,8 +67,15 @@ class CqTextureBuffer : public CqTextureBufferBase
 				const TqInt channelsPerPixel);
 
 		/** \brief Resize the buffer
+		 *
+		 * \param width  - new width
+		 * \param height - new height
+		 * \param bytesPerPixel - number of bytes per pixel
 		 */
-		virtual void resize(TqInt width, TqInt height, TqInt channelsPerPixel);
+		virtual void resize(TqInt width, TqInt height, TqInt bytesPerPixel);
+
+		/// Get a pointer to the underlying raw data
+		inline TqUchar* rawDataPtr();
 
 		/** \brief Get a reference to the tile channels at the given position.
 		 *
@@ -120,66 +114,16 @@ class CqTextureBuffer : public CqTextureBufferBase
 };
 
 
-//------------------------------------------------------------------------------
-/** \brief A minimal vector interface to the colour channels held by another object.
- *
- * The object which holds 
- *
- * The idea of this class is to provide the absolute minimal interface to array
- * data managed by another object, but in a way which ensures that the data
- * which this class points to (but does not own) is not deallocated by another
- * thread.
- */
-template<typename T>
-class CqSampleVector
-{
-	public:
-		/** \brief Construct a sample vector.
-		 *
-		 * \param data - the raw vector sample data.
-		 * \param parentTile - the array tile which the sample data belongs to.
-		 */
-		inline CqSampleVector(const T* sampleData,
-				const boost::intrusive_ptr<const CqIntrusivePtrCounted>& parentTile);
-		/** \brief Indexing operator for this vector of data.
-		 *
-		 * If the vector holds integer data, this function normalises the data
-		 * by the maximum integer value.  Therefore, for (unsigned) integers the
-		 * range returned by operator[] is between 0 and 1.  For floating point
-		 * data, no extra normalisation is used.
-		 *
-		 * \param index - the index at which to obtain a sample.
-		 */
-		inline TqFloat operator[](TqInt index) const;
-	private:
-		/// Raw pointer to the data held by this vector
-		const T* m_sampleData;
-		/** A pointer to the parent tile; this is simply to protect the tile
-		 *  data from deallocation in the multithreaded case.
-		 */
-		const boost::intrusive_ptr<const CqIntrusivePtrCounted> m_parentTile;
-};
-
-
 
 //==============================================================================
 // Implementation of inline functions and templates
 //==============================================================================
 
-//------------------------------------------------------------------------------
-// Inline functions for CqTextureBufferBase
-//------------------------------------------------------------------------------
-inline CqTextureBufferBase::CqTextureBufferBase(EqChannelType pixelType)
-	: m_pixelType(pixelType)
-{ }
-
-//------------------------------------------------------------------------------
 // Inline functions/templates for CqTextureBuffer
-//------------------------------------------------------------------------------
+
 template<typename T>
 CqTextureBuffer<T>::CqTextureBuffer(TqInt width, TqInt height, TqInt channelsPerPixel)
-	: CqTextureBufferBase(getChannelTypeEnum<T>()),
-	m_pixelData(new T[width * height * channelsPerPixel]),
+	: m_pixelData(new T[width * height * channelsPerPixel]),
 	m_width(width),
 	m_height(height),
 	m_channelsPerPixel(channelsPerPixel)
@@ -193,9 +137,25 @@ inline const CqSampleVector<T> CqTextureBuffer<T>::operator()(const TqInt x, con
 }
 
 template<typename T>
-void CqTextureBuffer<T>::resize(TqInt width, TqInt height, TqInt channelsPerPixel)
+void CqTextureBuffer<T>::resize(TqInt width, TqInt height, TqInt bytesPerPixel)
 {
-	m_pixelData.reset(new T[width * height * channelsPerPixel]);
+	if(bytesPerPixel % sizeof(T) != 0)
+		throw XqInternal("Cannot resize buffer to required number of bytes per pixel",
+				__FILE__, __LINE__);
+	TqInt channelsPerPixel = bytesPerPixel/sizeof(T);
+	TqInt newSize = width * height * channelsPerPixel;
+	if(newSize != m_width * m_height * m_channelsPerPixel);
+		m_pixelData.reset(new T[newSize]);
+	// Set new buffer sizes
+	m_width = width;
+	m_height = height;
+	m_channelsPerPixel = channelsPerPixel;
+}
+
+template<typename T>
+inline TqUchar* CqTextureBuffer<T>::rawDataPtr()
+{
+	return reinterpret_cast<TqUchar*>(m_pixelData.get());
 }
 
 template<typename T>
@@ -224,28 +184,6 @@ inline T* CqTextureBuffer<T>::samplePtr(TqInt x, TqInt y) const
 	assert(y >= 0);
 	assert(y < m_height);
 	return m_pixelData.get() + (y*m_width + x)*m_channelsPerPixel;
-}
-
-
-//------------------------------------------------------------------------------
-// Inline functions for CqSampleVector
-//------------------------------------------------------------------------------
-template<typename T>
-inline CqSampleVector<T>::CqSampleVector(const T* sampleData,
-		const boost::intrusive_ptr<const CqIntrusivePtrCounted>& parentTile)
-	: m_sampleData(sampleData),
-	m_parentTile(parentTile)
-{ }
-
-template<typename T>
-inline TqFloat CqSampleVector<T>::operator[](TqInt index) const
-{
-	// The following if statement should be optimised away at compile time.
-	if(std::numeric_limits<T>::is_integer)
-		return static_cast<TqFloat>(m_sampleData[index])
-			/ std::numeric_limits<T>::max();
-	else
-		return m_sampleData[index];
 }
 
 

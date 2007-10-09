@@ -48,7 +48,7 @@ class CqTiffInputFile : public IqTexInputFile
 		inline virtual const char* fileType() const;
 		inline virtual const CqTexFileHeader& header() const;
 	private:
-		virtual void readPixelsImpl(CqTextureBufferBase& buffer, TqInt startLine,
+		virtual void readPixelsImpl(TqUchar* buffer, TqInt startLine,
 				TqInt numScanlines) const;
 
 		CqTexFileHeader m_header;

@@ -33,7 +33,6 @@
 #include <string>
 
 #include "texfileheader.h"
-#include "texturebuffer.h"
 
 namespace Aqsis {
 
@@ -46,19 +45,33 @@ class IqTexInputFile
 		/// get the file name
 		virtual const std::string& fileName() const = 0;
 
-		/// get the file type
+		/// get a string representing the file type
 		virtual const char* fileType() const = 0;
 
+		/// Get the file header data
 		virtual const CqTexFileHeader& header() const = 0;
+
 		/** \brief Read in a region of scanlines
+		 *
+		 * Array2DType is a type modelling a simple resizeable 2D array
+		 * interface.  It should provide the following methods:
+		 *   - void resize(TqInt width, TqInt height, TqInt bytesPerPixel)
+		 *     Resizes the buffer.  (width, height) is the new dimensions for
+		 *     the buffer, while bytesPerPixel is the number of bytes which
+		 *     should be allocated for each pixel.  This call should throw an
+		 *     exception if it fails otherwise nasty behaviour is bound to
+		 *     ensue, probably involving segfaulting.
+		 *   - TqUchar* rawDataPtr()
+		 *     Gets a raw pointer to the data.
 		 *
 		 * \param buffer - buffer to read scanlines into
 		 * \param startLine - scanline to start reading the data from (top == 0)
 		 * \param numScanlines - number of scanlines to read.  If <= 0, read
 		 *                       to the end of the image.
 		 */
-		virtual void readPixels(CqTextureBufferBase& buffer,
-				TqInt startLine = 0, TqInt numScanlines = 0) const;
+		template<typename Array2DType>
+		void readPixels(Array2DType& buffer, TqInt startLine = 0,
+				TqInt numScanlines = 0) const;
 
 		/** \brief Open an input image file in any format
 		 *
@@ -66,21 +79,48 @@ class IqTexInputFile
 		 * fileName.  If the format is unknown or the file cannot be opened for
 		 * some other reason, throw an exception.
 		 *
-		 * \param
+		 * \param fileName - file to open.  Can be in any of the formats
+		 * understood by aqsistex.
 		 * \return The newly opened input file
 		 */
 		static boost::shared_ptr<IqTexInputFile> open(const std::string& fileName);
 	protected:
-		/** \brief readPixels() implementation to be overridden by child classes
+		/** \brief Low-level readPixels() function to be overridden by child classes
 		 *
-		 * The default implementation of readPixels simply validates the input
-		 * parameters against the image dimensions as reported by header(), and
-		 * calls readPixelsImpl directly.  Implementations of readPixelsImpl()
-		 * can assume that startLine and numScanlines specify a valid range.
+		 * The implementation of readPixels simply validates the input
+		 * parameters against the image dimensions as reported by header(),
+		 * sets up the buffer, and calls readPixelsImpl().
+		 *
+		 * Implementations of readPixelsImpl() can assume that startLine and
+		 * numScanlines specify a valid range.
 		 */
-		virtual void readPixelsImpl(CqTextureBufferBase& buffer, TqInt startLine,
+		virtual void readPixelsImpl(TqUchar* buffer, TqInt startLine,
 				TqInt numScanlines) const = 0;
 };
+
+
+//==============================================================================
+// Implementation of inline functions and templates
+//==============================================================================
+
+template<typename Array2DType>
+void IqTexInputFile::readPixels(Array2DType& buffer, TqInt startLine,
+		TqInt numScanlines) const
+{
+	TqInt imageHeight = header().height();
+	// if numScanlines is negative, read until the last line
+	if(numScanlines <= 0)
+		numScanlines = imageHeight - startLine;
+	// check that startLine is in the image range & that the ending line is
+	// reasonable.
+	if(startLine < 0 || startLine >= imageHeight
+			|| startLine + numScanlines > imageHeight)
+		throw XqInternal("Attempt to read scanlines outside image boundaries",
+				__FILE__, __LINE__);
+	// Resize the buffer to deal with the new data
+	buffer.resize(header().width(), numScanlines, header().channels().bytesPerPixel());
+	readPixelsImpl(buffer.rawDataPtr(), startLine, numScanlines);
+}
 
 
 } // namespace Aqsis

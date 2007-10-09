@@ -36,18 +36,6 @@ namespace Aqsis {
 // IqTexInputFile
 //------------------------------------------------------------------------------
 
-void IqTexInputFile::readPixels(CqTextureBufferBase& buffer,
-		TqInt startLine, TqInt numScanlines) const
-{
-	TqInt imageHeight = header().findAttribute<TqInt>("height");
-	if(numScanlines <= 0)
-		numScanlines = imageHeight - startLine;
-	if(startLine < 0 || startLine + numScanlines > imageHeight)
-		throw XqInternal("Attempt to read scanlines outside image boundaries",
-				__FILE__, __LINE__);
-	readPixelsImpl(buffer, startLine, numScanlines);
-}
-
 boost::shared_ptr<IqTexInputFile> IqTexInputFile::open(const std::string& fileName)
 {
 	boost::shared_ptr<IqTexInputFile> newFile;

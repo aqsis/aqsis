@@ -110,7 +110,7 @@ class CqTiffDirHandle : public boost::noncopyable
 		 * \return the tag value
 		 */
 		template<typename T>
-		T tiffTagValue(const uint32 tag) const;
+		T tiffTagValue(const ttag_t tag) const;
 		/** \brief Get the value of a tiff tag with a default value
 		 *
 		 * Note that unfortunately this isn't type-safe: you *must* specify the
@@ -127,7 +127,7 @@ class CqTiffDirHandle : public boost::noncopyable
 		 * \return the tag value
 		 */
 		template<typename T>
-		T tiffTagValue(const uint32 tag, const T defaultVal) const;
+		T tiffTagValue(const ttag_t tag, const T defaultVal) const;
 		/** \brief Ensure that a given tiff tag has a particular value.
 		 *
 		 * \param tag - the tiff tag to query
@@ -137,7 +137,7 @@ class CqTiffDirHandle : public boost::noncopyable
 		 * \return true if the tag has the desired value, false if not.
 		 */
 		template<typename T>
-		bool checkTagValue(const uint32 tag, const T desiredValue,
+		bool checkTagValue(const ttag_t tag, const T desiredValue,
 				const bool tagNotFoundVal = true) const;
 		//@}
 
@@ -244,7 +244,7 @@ inline TIFF* CqTiffDirHandle::tiffPtr() const
 }
 
 template<typename T>
-T CqTiffDirHandle::tiffTagValue(const uint32 tag) const
+T CqTiffDirHandle::tiffTagValue(const ttag_t tag) const
 {
 	T temp = 0;
 	if(TIFFGetField(tiffPtr(), tag, &temp))
@@ -254,7 +254,7 @@ T CqTiffDirHandle::tiffTagValue(const uint32 tag) const
 }
 
 template<typename T>
-T CqTiffDirHandle::tiffTagValue(const uint32 tag, const T defaultVal) const
+T CqTiffDirHandle::tiffTagValue(const ttag_t tag, const T defaultVal) const
 {
 	T temp = 0;
 	if(TIFFGetField(tiffPtr(), tag, &temp))

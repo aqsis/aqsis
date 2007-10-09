@@ -51,10 +51,23 @@ const std::string& CqTiffInputFile::fileName() const
 	return m_fileHandle->fileName();
 }
 
-void CqTiffInputFile::readPixelsImpl(CqTextureBufferBase& buffer,
+void CqTiffInputFile::readPixelsImpl(TqUchar* buffer,
 		TqInt startLine, TqInt numScanlines) const
 {
-	
+	CqTiffDirHandle dirHandle(m_fileHandle);
+	tsize_t bytesPerRow = TIFFScanlineSize(dirHandle.tiffPtr());
+	// Implement simplest possible version for now - read in scanlines
+	// sequentially...  Looking at the source code for libtiff, this should be
+	// reasonably efficient.
+	//
+	// In the unlikely event that it turns out to be a problem, we should look
+	// at using the strip-based interface via TIFFReadEncodedStrip & friends.
+	for(TqInt line = startLine; line < startLine + numScanlines; ++line)
+	{
+		TIFFReadScanline(dirHandle.tiffPtr(), reinterpret_cast<tdata_t>(buffer),
+				static_cast<uint32>(line));
+		buffer += bytesPerRow;
+	}
 }
 
 } // namespace Aqsis
