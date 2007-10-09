@@ -60,14 +60,21 @@ BOOST_AUTO_TEST_CASE(CqTexFileHeader_defaults)
 {
 	Aqsis::CqTexFileHeader header;
 
-	// Set the width
+	// Set/check the width
 	header.setAttribute<TqInt>("width", 42);
 	BOOST_CHECK_EQUAL(header.findAttribute<TqInt>("width"), 42);
-
+	BOOST_CHECK_EQUAL(header.width(), 42);
 	// should throw, since we shouldn't be able to change the type of "width"
 	// from int to float, & "width" is a default attribute.
 	BOOST_CHECK_THROW(header.setAttribute<TqFloat>("width", 1.0f), Aqsis::XqInternal);
 
-	// Check that the appropriate default channels are present.
+	// Set/check the height
+	header.setAttribute<TqInt>("height", 142);
+	BOOST_CHECK_EQUAL(header.findAttribute<TqInt>("height"), 142);
+	BOOST_CHECK_EQUAL(header.height(), 142);
+
+	// Check the channels
+	Aqsis::CqChannelList& channels = header.channels();
+	BOOST_CHECK_EQUAL(channels.numChannels(), 0);
 }
 
