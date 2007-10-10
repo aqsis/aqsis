@@ -39,7 +39,7 @@ TqMagicNumberPtr getMagicNumber(const std::string& fileName)
 {
 	std::ifstream inFile(fileName.c_str());
 	if(!inFile)
-		throw XqEnvironment("Cannot open file for reading", __FILE__, __LINE__);
+		throw XqInternal("Cannot open file for reading", __FILE__, __LINE__);
 	return getMagicNumber(inFile);
 }
 
