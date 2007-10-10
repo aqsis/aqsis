@@ -26,7 +26,7 @@
  *
  */
 
-#include "imagebuffer.h"
+#include "mixedimagebuffer.h"
 
 #include <boost/format.hpp>
 

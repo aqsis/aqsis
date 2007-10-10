@@ -37,7 +37,7 @@
 #include <boost/function.hpp>
 #include <boost/thread/mutex.hpp>
 
-#include "imagebuffer.h"
+#include "mixedimagebuffer.h"
 #include "tinyxml.h"
 
 START_NAMESPACE( Aqsis )

@@ -23,7 +23,7 @@
  * \author Chris Foster
  */
 
-#include "imagebuffer.h"
+#include "mixedimagebuffer.h"
 
 #include <sstream>
 

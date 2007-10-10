@@ -18,7 +18,7 @@ SET(AQSISTEX_SRCS
 	tiffdirhandle.cpp
 	tiffinputfile.cpp
 	imagechannel.cpp
-	imagebuffer.cpp
+	mixedimagebuffer.cpp
 	)
 
 ADD_DEFINITIONS(-DAQSISTEX_EXPORTS)
@@ -41,7 +41,7 @@ INSTALL(TARGETS aqsistex
 SET(AQSISTEX_TEST_SRCS
 	channellist_test.cpp
 	imagechannel_test.cpp
-	imagebuffer_test.cpp
+	mixedimagebuffer_test.cpp
 	magicnumber_test.cpp
 	texfileheader_test.cpp
 	tiffdirhandle_test.cpp
