@@ -97,7 +97,7 @@ public:
 	 *
 	 * \return The channel info list of channel names and types.
 	 */
-	inline const CqChannelInfoList& channelsInfo() const;
+	inline const CqChannelList& channelInfo() const;
 	/** \brief Connect a channel of the underlying data to the red display channel
 	 */
 	inline void connectChannelR(const std::string& chanName);
@@ -115,7 +115,7 @@ public:
 	 * The display buffer is simple 8 bits per channel data as displayable by an RGB image.
 	 * \return				A pointer to the start of the display buffer.
 	 */
-	virtual boost::shared_ptr<const CqImageBuffer> displayBuffer() const;
+	virtual boost::shared_ptr<const CqMixedImageBuffer> displayBuffer() const;
 	/** Get the origin of the cropped frame within the total image.
 	 * \return				The origin of the frame.
 	 */
@@ -148,9 +148,9 @@ public:
 	 * Presuming the image size has been setup, allocate the two buffers used
 	 * by the image.
 	 *
-	 * \param channelsInfo - the list of channel information for the image.
+	 * \param channelInfo - the list of channel information for the image.
 	 */
-	virtual void prepareImageBuffers(const CqChannelInfoList& channelsInfo);
+	virtual void prepareImageBuffers(const CqChannelList& channelInfo);
 	
 	/** Setup a callback to be called when the image changes.
 	 * \param f			A function that will be called with the region that has changed.
@@ -175,14 +175,14 @@ public:
 	void loadFromTiff(const std::string& filename);
 
 protected:
-	/** Check m_displayMap is pointing to valid channel names from channelsInfo.
+	/** Check m_displayMap is pointing to valid channel names from channelInfo.
 	 *
 	 * If the map isn't pointing to valid channels, then set the offending
-	 * channels names to the first one in channelsInfo
+	 * channels names to the first one in channelInfo
 	 *
-	 * \param channelsInfo - channels which the map must point to.
+	 * \param channelInfo - channels which the map must point to.
 	 */
-	void fixupDisplayMap(const CqChannelInfoList& channelsInfo);
+	void fixupDisplayMap(const CqChannelList& channelInfo);
 	/** Get a reference to the unique mutex for this image.
 	 * Used when locking the image during multithreaded operation.
 	 * \return			A reference to the unique mutex for this image.
@@ -192,8 +192,8 @@ protected:
     std::string		m_name;			///< Display name.
     std::string		m_fileName;		///< File name.
     std::string		m_description;		///< Description or Software' renderer name.
-	boost::shared_ptr<CqImageBuffer> m_displayData;		///< Buffer to store the 8bit data for display. 
-	boost::shared_ptr<CqImageBuffer> m_realData;	///< Buffer to store the natural format image data.
+	boost::shared_ptr<CqMixedImageBuffer> m_displayData;		///< Buffer to store the 8bit data for display. 
+	boost::shared_ptr<CqMixedImageBuffer> m_realData;	///< Buffer to store the natural format image data.
 	TqUlong			m_frameWidth;	///< The width of the frame within the whole image.
 	TqUlong			m_frameHeight;	///< The height of the frame within the whole image.
 	TqUlong			m_imageWidth;	///< The total image width.
@@ -279,20 +279,20 @@ inline void CqImage::setFrameSize(TqUlong width, TqUlong height)
 	m_frameHeight = height;
 }
 
-inline const CqChannelInfoList& CqImage::channelsInfo() const
+inline const CqChannelList& CqImage::channelInfo() const
 {
-	return m_realData->channelsInfo();
+	return m_realData->channelInfo();
 }
 
 inline TqUint CqImage::numChannels() const
 {
 	if(m_realData)
-		return(m_realData->channelsInfo().numChannels());
+		return(m_realData->channelInfo().numChannels());
 	else
 		return 0;
 }
 
-inline boost::shared_ptr<const CqImageBuffer> CqImage::displayBuffer() const
+inline boost::shared_ptr<const CqMixedImageBuffer> CqImage::displayBuffer() const
 {
 	return m_displayData;
 }

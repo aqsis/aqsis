@@ -38,24 +38,24 @@ void nullDeleter(const void*)
 { }
 
 //------------------------------------------------------------------------------
-// CqChannelInfoList test cases
+// CqChannelList test cases
 
 // Fixture for channel list test cases.
 struct ChannelInfoListFixture
 {
-	Aqsis::CqChannelInfoList chanList;
+	Aqsis::CqChannelList chanList;
 
 	ChannelInfoListFixture()
 		: chanList()
 	{
-		chanList.addChannel(Aqsis::SqChannelInfo("a", Aqsis::Format_Unsigned16));
-		chanList.addChannel(Aqsis::SqChannelInfo("b", Aqsis::Format_Unsigned8));
-		chanList.addChannel(Aqsis::SqChannelInfo("g", Aqsis::Format_Signed32));
-		chanList.addChannel(Aqsis::SqChannelInfo("r", Aqsis::Format_Float32));
+		chanList.addChannel(Aqsis::SqChannelInfo("a", Aqsis::Channel_Unsigned16));
+		chanList.addChannel(Aqsis::SqChannelInfo("b", Aqsis::Channel_Unsigned8));
+		chanList.addChannel(Aqsis::SqChannelInfo("g", Aqsis::Channel_Signed32));
+		chanList.addChannel(Aqsis::SqChannelInfo("r", Aqsis::Channel_Float32));
 	}
 };
 
-BOOST_AUTO_TEST_CASE(CqChannelInfoList_channelByteOffset_test)
+BOOST_AUTO_TEST_CASE(CqChannelList_channelByteOffset_test)
 {
 	ChannelInfoListFixture f;
 
@@ -66,12 +66,12 @@ BOOST_AUTO_TEST_CASE(CqChannelInfoList_channelByteOffset_test)
 	BOOST_CHECK_EQUAL(f.chanList.bytesPerPixel(), 11);
 }
 
-BOOST_AUTO_TEST_CASE(CqChannelInfoList_reorderChannels_test)
+BOOST_AUTO_TEST_CASE(CqChannelList_reorderChannels_test)
 {
 	ChannelInfoListFixture f;
 
 	f.chanList.reorderChannels();
-	f.chanList.addChannel(Aqsis::SqChannelInfo("N", Aqsis::Format_Float32));
+	f.chanList.addChannel(Aqsis::SqChannelInfo("N", Aqsis::Channel_Float32));
 
 	BOOST_CHECK_EQUAL(f.chanList[0].name, "r");
 	BOOST_CHECK_EQUAL(f.chanList[1].name, "g");
@@ -81,7 +81,7 @@ BOOST_AUTO_TEST_CASE(CqChannelInfoList_reorderChannels_test)
 	BOOST_CHECK_EQUAL(f.chanList.bytesPerPixel(), 15);
 }
 
-BOOST_AUTO_TEST_CASE(CqChannelInfoList_findChannelIndex_test)
+BOOST_AUTO_TEST_CASE(CqChannelList_findChannelIndex_test)
 {
 	ChannelInfoListFixture f;
 
@@ -91,18 +91,18 @@ BOOST_AUTO_TEST_CASE(CqChannelInfoList_findChannelIndex_test)
 
 
 //------------------------------------------------------------------------------
-// CqImageBuffer test cases
+// CqMixedImageBuffer test cases
 
-BOOST_AUTO_TEST_CASE(CqImageBuffer_test_clear)
+BOOST_AUTO_TEST_CASE(CqMixedImageBuffer_test_clear)
 {
-	Aqsis::CqChannelInfoList ch;
-	ch.addChannel(Aqsis::SqChannelInfo("r", Aqsis::Format_Unsigned16));
-	ch.addChannel(Aqsis::SqChannelInfo("b", Aqsis::Format_Unsigned16));
+	Aqsis::CqChannelList ch;
+	ch.addChannel(Aqsis::SqChannelInfo("r", Aqsis::Channel_Unsigned16));
+	ch.addChannel(Aqsis::SqChannelInfo("b", Aqsis::Channel_Unsigned16));
 	TqUshort data[] = {0x100, 0x0200, 0xFA00, 0xFF00};
 	TqInt width = 2;
 	TqInt height = 1;
 	TqInt chansPerPixel = ch.numChannels();
-	Aqsis::CqImageBuffer imBuf(ch, boost::shared_array<TqUchar>(
+	Aqsis::CqMixedImageBuffer imBuf(ch, boost::shared_array<TqUchar>(
 				reinterpret_cast<TqUchar*>(data), nullDeleter), width, height);
 	imBuf.clearBuffer(1.0f);
 
@@ -110,48 +110,23 @@ BOOST_AUTO_TEST_CASE(CqImageBuffer_test_clear)
 		BOOST_CHECK_EQUAL(data[i], TqUshort(0xFFFF));
 }
 
-BOOST_AUTO_TEST_CASE(CqImageBuffer_test_quantizeForDisplay)
+BOOST_AUTO_TEST_CASE(CqMixedImageBuffer_test_copyFromSubregion)
 {
-	Aqsis::CqChannelInfoList ch;
-	ch.addChannel(Aqsis::SqChannelInfo("r", Aqsis::Format_Unsigned16));
-	ch.addChannel(Aqsis::SqChannelInfo("b", Aqsis::Format_Unsigned16));
-	TqUshort data[] = {0x100, 0x0200, 0xFFFF/2, 0xFFFF};
-	TqInt width = 2;
-	TqInt height = 1;
-	TqInt chansPerPixel = ch.numChannels();
-	Aqsis::CqImageBuffer imBuf(ch, boost::shared_array<TqUchar>(
-				reinterpret_cast<TqUchar*>(data), nullDeleter), width, height);
-	
-	boost::shared_ptr<Aqsis::CqImageBuffer> quantizedBuf = imBuf.quantizeForDisplay();
-
-	BOOST_CHECK_EQUAL(quantizedBuf->bytesPerPixel(), 2);
-	BOOST_CHECK_EQUAL(quantizedBuf->channelsInfo()[0].type, Aqsis::Format_Unsigned8);
-	BOOST_CHECK_EQUAL(quantizedBuf->channelsInfo()[1].type, Aqsis::Format_Unsigned8);
-
-	TqUchar* quantizedData = quantizedBuf->rawData().get();
-	TqUchar expectedData[] = {0x1, 0x02, 0xFF/2, 0xFF};
-
-	for(TqInt i = 0; i < width*height*chansPerPixel; ++i)
-		BOOST_CHECK_EQUAL(quantizedData[i], expectedData[i]);
-}
-
-BOOST_AUTO_TEST_CASE(CqImageBuffer_test_copyFromSubregion)
-{
-	Aqsis::CqChannelInfoList ch;
-	ch.addChannel(Aqsis::SqChannelInfo("r", Aqsis::Format_Unsigned16));
+	Aqsis::CqChannelList ch;
+	ch.addChannel(Aqsis::SqChannelInfo("r", Aqsis::Channel_Unsigned16));
 	TqUshort srcData[] = {1, 2,
 	                      3, 4};
 	TqInt width = 2;
 	TqInt height = 2;
 	TqInt chansPerPixel = ch.numChannels();
-	Aqsis::CqImageBuffer srcBuf(ch, boost::shared_array<TqUchar>(
+	Aqsis::CqMixedImageBuffer srcBuf(ch, boost::shared_array<TqUchar>(
 				reinterpret_cast<TqUchar*>(srcData), nullDeleter), width, height);
 	
 	TqUshort destData[] = {0,0,0,
 	                       0,0,0};
 	TqInt destWidth = 3;
 	TqInt destHeight = 2;
-	Aqsis::CqImageBuffer destBuf(ch, boost::shared_array<TqUchar>(
+	Aqsis::CqMixedImageBuffer destBuf(ch, boost::shared_array<TqUchar>(
 				reinterpret_cast<TqUchar*>(destData), nullDeleter), destWidth, destHeight);
 
 	destBuf.copyFrom(srcBuf, 0, 0);
@@ -163,16 +138,16 @@ BOOST_AUTO_TEST_CASE(CqImageBuffer_test_copyFromSubregion)
 		BOOST_CHECK_EQUAL(destData[i], expectedData[i]);
 }
 
-BOOST_AUTO_TEST_CASE(CqImageBuffer_test_read_write_tiff)
+BOOST_AUTO_TEST_CASE(CqMixedImageBuffer_test_read_write_tiff)
 {
-	Aqsis::CqChannelInfoList ch;
-	ch.addChannel(Aqsis::SqChannelInfo("r", Aqsis::Format_Unsigned16));
+	Aqsis::CqChannelList ch;
+	ch.addChannel(Aqsis::SqChannelInfo("r", Aqsis::Channel_Unsigned16));
 	TqUshort srcData[] = {1, 2,
 	                      3, 4};
 	TqInt width = 2;
 	TqInt height = 2;
 	TqInt chansPerPixel = ch.numChannels();
-	Aqsis::CqImageBuffer srcBuf(ch, boost::shared_array<TqUchar>(
+	Aqsis::CqMixedImageBuffer srcBuf(ch, boost::shared_array<TqUchar>(
 				reinterpret_cast<TqUchar*>(srcData), nullDeleter), width, height);
 
 	// Write the image buffer to a tiff stream.
@@ -183,7 +158,7 @@ BOOST_AUTO_TEST_CASE(CqImageBuffer_test_read_write_tiff)
 
 	std::istringstream inStream(outStream.str());
 	TIFF* inTif = TIFFStreamOpen("test_read", &inStream);
-	boost::shared_ptr<Aqsis::CqImageBuffer> destBuf = Aqsis::CqImageBuffer::loadFromTiff(inTif);
+	boost::shared_ptr<Aqsis::CqMixedImageBuffer> destBuf = Aqsis::CqMixedImageBuffer::loadFromTiff(inTif);
 
 	BOOST_CHECK_EQUAL(width, destBuf->width());
 	BOOST_CHECK_EQUAL(height, destBuf->height());

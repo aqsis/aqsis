@@ -1,4 +1,4 @@
-PROJECT(TEXLIB)
+PROJECT(AQSISTEX)
 
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR})
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/interfaces)
@@ -8,24 +8,23 @@ INCLUDE_DIRECTORIES(${AQSIS_TIFF_INCLUDE_DIR})
 
 # Internal dependencies
 INCLUDE(${AQSISTYPES_SOURCE_DIR}/export.cmake)
+INCLUDE(${DDMANAGER_SOURCE_DIR}/export.cmake)
 
-#FILE(GLOB TEXLIB_SRCS ${PROJECT_SOURCE_DIR}/*.cpp)
-#FILE(GLOB TEXLIB_TEST_SRCS ${PROJECT_SOURCE_DIR}/*_test.cpp)
-#FILTER_OUT("${TEXLIB_TEST_SRCS}" "${TEXLIB_SRCS}" TEXLIB_SRCS)
-#FILE(GLOB TEXLIB_HEADERS ${PROJECT_SOURCE_DIR}/*.h)
-SET(TEXLIB_SRCS
+SET(AQSISTEX_SRCS
 	channellist.cpp
 	itexfile.cpp
 	magicnumber.cpp
 	texfileheader.cpp
 	tiffdirhandle.cpp
 	tiffinputfile.cpp
+	imagechannel.cpp
+	imagebuffer.cpp
 	)
 
-ADD_DEFINITIONS(-DTEXLIB_EXPORTS)
-ADD_LIBRARY(aqsistex SHARED ${TEXLIB_SRCS})
+ADD_DEFINITIONS(-DAQSISTEX_EXPORTS)
+ADD_LIBRARY(aqsistex SHARED ${AQSISTEX_SRCS})
 
-SET(LINKLIBS ${AQSIS_TIFF_LIBRARIES})
+SET(LINKLIBS ${AQSIS_TIFF_LIBRARIES} ${AQSIS_TIFFXX_LIBRARIES})
 INCLUDE(${AQSISTYPES_SOURCE_DIR}/link.cmake)
 TARGET_LINK_LIBRARIES(aqsistex ${LINKLIBS})
 
@@ -39,15 +38,17 @@ INSTALL(TARGETS aqsistex
 
 #----------------------------------------------------------------------
 # Testing
-SET(TEXLIB_TEST_SRCS
+SET(AQSISTEX_TEST_SRCS
 	channellist_test.cpp
+	imagechannel_test.cpp
+	imagebuffer_test.cpp
 	magicnumber_test.cpp
 	texfileheader_test.cpp
 	tiffdirhandle_test.cpp
 	tiffinputfile_test.cpp
 	)
 
-SET(TEST_LINKLIBS  aqsistex dl tiffxx ${LINKLIBS})
+SET(TEST_LINKLIBS  aqsistex dl ${LINKLIBS})
 
-AQSIS_ADD_TESTS("${TEXLIB_TEST_SRCS}" "${TEST_LINKLIBS}")
+AQSIS_ADD_TESTS("${AQSISTEX_TEST_SRCS}" "${TEST_LINKLIBS}")
 

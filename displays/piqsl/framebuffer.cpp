@@ -36,7 +36,7 @@ void Fl_FrameBuffer_Widget::draw()
 	fl_rectf(x(), y(), w(), h());
 	if(m_image)
 	{
-		boost::shared_ptr<const Aqsis::CqImageBuffer> buf = m_image->displayBuffer();
+		boost::shared_ptr<const Aqsis::CqMixedImageBuffer> buf = m_image->displayBuffer();
 		if(buf)
 		{
 			fl_draw_image(buf->rawData().get(),

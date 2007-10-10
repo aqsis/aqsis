@@ -19,7 +19,7 @@
 
 /** \file
  *
- * \brief Implementation of CqImageBuffer and related stuff.
+ * \brief Implementation of CqMixedImageBuffer and related stuff.
  *
  * \author Chris Foster  chris42f _at_ gmail.com
  * \author Paul C. Gregory (pgregory@aqsis.org)
@@ -36,98 +36,18 @@
 
 namespace Aqsis {
 
-
 //------------------------------------------------------------------------------
-// CqChannelInfoList implementation
-CqChannelInfoList CqChannelInfoList::displayChannels()
-{
-    CqChannelInfoList displayChannels;
-    displayChannels.addChannel(SqChannelInfo("r", Format_Unsigned8));
-    displayChannels.addChannel(SqChannelInfo("g", Format_Unsigned8));
-    displayChannels.addChannel(SqChannelInfo("b", Format_Unsigned8));
-	return displayChannels;
-}
-
-void CqChannelInfoList::addChannel(const SqChannelInfo& newChan)
-{
-	m_channels.push_back(newChan);
-	m_offsets.push_back(m_bytesPerPixel);
-	m_bytesPerPixel += newChan.bytesPerPixel();
-}
-
-void CqChannelInfoList::reorderChannels()
-{
-	// If there are "r", "g", "b" and "a" channels, ensure they
-	// are in the expected order.
-	const char* elements[] = { "r", "g", "b", "a" };
-	TqInt numElements = sizeof(elements) / sizeof(elements[0]);
-	for(int elementIndex = 0; elementIndex < numElements; ++elementIndex)
-	{
-		for(TqListType::iterator channel = m_channels.begin(); channel != m_channels.end(); ++channel)
-		{
-			// If this entry in the channel list matches one in the expected list, 
-			// move it to the right point in the channel list.
-			if(channel->name == elements[elementIndex])
-			{
-				const SqChannelInfo temp = m_channels[elementIndex];
-				m_channels[elementIndex] = *channel;
-				*channel = temp;
-				break;
-			}
-		}
-	}
-	recomputeByteOffsets();
-}
-
-CqChannelInfoList CqChannelInfoList::cloneAs8Bit() const
-{
-	CqChannelInfoList newChannels;
-	for(const_iterator chInfo = m_channels.begin();
-			chInfo != m_channels.end(); ++chInfo)
-		newChannels.addChannel(SqChannelInfo(chInfo->name, Format_Unsigned8));
-	return newChannels;
-}
-
-TqInt CqChannelInfoList::findChannelIndexImpl(const std::string& name) const
-{
-	TqInt index = 0;
-	TqListType::const_iterator ichan = m_channels.begin();
-	while(ichan != m_channels.end() && ichan->name != name)
-	{
-		++ichan;
-		++index;
-	}
-	if(ichan == m_channels.end())
-		return -1;
-	return index;
-}
-
-void CqChannelInfoList::recomputeByteOffsets()
-{
-	m_offsets.clear();
-	TqInt offset = 0;
-	for(TqListType::const_iterator chInfo = m_channels.begin();
-			chInfo != m_channels.end(); ++chInfo)
-	{
-		m_offsets.push_back(offset);
-		offset += chInfo->bytesPerPixel();
-	}
-	m_bytesPerPixel = offset;
-}
-
-
-//------------------------------------------------------------------------------
-// CqImageBuffer implementation
-CqImageBuffer::CqImageBuffer(const CqChannelInfoList& channels, TqInt width, TqInt height)
-	: m_channelsInfo(channels),
+// CqMixedImageBuffer implementation
+CqMixedImageBuffer::CqMixedImageBuffer(const CqChannelList& channels, TqInt width, TqInt height)
+	: m_channelInfo(channels),
 	m_width(width),
 	m_height(height),
 	m_data(new TqUchar[width*height*channels.bytesPerPixel()])
 { }
 
-CqImageBuffer::CqImageBuffer(const CqChannelInfoList& channels,
+CqMixedImageBuffer::CqMixedImageBuffer(const CqChannelList& channels,
 		boost::shared_array<TqUchar> data, TqInt width, TqInt height)
-	: m_channelsInfo(channels),
+	: m_channelInfo(channels),
 	m_width(width),
 	m_height(height),
 	m_data(data)
@@ -136,16 +56,16 @@ CqImageBuffer::CqImageBuffer(const CqChannelInfoList& channels,
 
 // Simple image loading, uses TIFFReadRGBAImage to hide format details. Use the
 // lower level reading facilities in the future.
-boost::shared_ptr<CqImageBuffer> CqImageBuffer::loadFromTiff(TIFF* tif)
+boost::shared_ptr<CqMixedImageBuffer> CqMixedImageBuffer::loadFromTiff(TIFF* tif)
 {
 	if(!tif)
-		return boost::shared_ptr<CqImageBuffer>();
+		return boost::shared_ptr<CqMixedImageBuffer>();
 
 	uint32 width, height;
 	uint16 nChannels = 1;
 	uint16 bitsPerSample = 1;
 	uint16 sampleFormat = SAMPLEFORMAT_UINT;
-	EqChannelFormat internalFormat = Format_Unsigned8;
+	EqChannelType internalFormat = Channel_Unsigned8;
 
 	TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &width);
 	TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &height);
@@ -160,13 +80,13 @@ boost::shared_ptr<CqImageBuffer> CqImageBuffer::loadFromTiff(TIFF* tif)
 			switch(bitsPerSample)
 			{
 				case 8:
-					internalFormat = Format_Unsigned8;
+					internalFormat = Channel_Unsigned8;
 					break;
 				case 16:
-					internalFormat = Format_Unsigned16;
+					internalFormat = Channel_Unsigned16;
 					break;
 				case 32:
-					internalFormat = Format_Unsigned32;
+					internalFormat = Channel_Unsigned32;
 					break;
 				default:
 					Aqsis::log() << Aqsis::error << "Unrecognised bit depth for unsigned int format " << bitsPerSample << std::endl;
@@ -180,13 +100,13 @@ boost::shared_ptr<CqImageBuffer> CqImageBuffer::loadFromTiff(TIFF* tif)
 			switch(bitsPerSample)
 			{
 				case 8:
-					internalFormat = Format_Signed8;
+					internalFormat = Channel_Signed8;
 					break;
 				case 16:
-					internalFormat = Format_Signed16;
+					internalFormat = Channel_Signed16;
 					break;
 				case 32:
-					internalFormat = Format_Signed32;
+					internalFormat = Channel_Signed32;
 					break;
 				default:
 					Aqsis::log() << Aqsis::error << "Unrecognised bit depth for signed int format " << bitsPerSample << std::endl;
@@ -202,7 +122,7 @@ boost::shared_ptr<CqImageBuffer> CqImageBuffer::loadFromTiff(TIFF* tif)
 				Aqsis::log() << Aqsis::error << "Unrecognised bit depth for ieeefp format " << bitsPerSample << std::endl;
 				sampleFormatValid = false;
 			}
-			internalFormat = Format_Float32;
+			internalFormat = Channel_Float32;
 		}
 		break;
 
@@ -211,11 +131,11 @@ boost::shared_ptr<CqImageBuffer> CqImageBuffer::loadFromTiff(TIFF* tif)
 			sampleFormatValid = false;
 	}
 	if(!sampleFormatValid)
-		return boost::shared_ptr<CqImageBuffer>();
+		return boost::shared_ptr<CqMixedImageBuffer>();
 
 	// Construct a vector of channel information for the new image buffer.
 	const char* defaultChannelNames[] = { "r", "g", "b", "a" };
-	CqChannelInfoList newChans;
+	CqChannelList newChans;
 	for(TqInt chanNum = 0; chanNum < nChannels; ++chanNum)
 	{
 		newChans.addChannel(SqChannelInfo(
@@ -223,7 +143,7 @@ boost::shared_ptr<CqImageBuffer> CqImageBuffer::loadFromTiff(TIFF* tif)
 				internalFormat));
 	}
 
-	boost::shared_ptr<CqImageBuffer> newImBuf;
+	boost::shared_ptr<CqMixedImageBuffer> newImBuf;
 
 	if(!TIFFIsTiled(tif))
 	{
@@ -233,8 +153,8 @@ boost::shared_ptr<CqImageBuffer> CqImageBuffer::loadFromTiff(TIFF* tif)
 		TIFFGetField(tif, TIFFTAG_PLANARCONFIG, &config);
 		if (config == PLANARCONFIG_CONTIG) 
 		{
-			newImBuf = boost::shared_ptr<CqImageBuffer>(
-					new CqImageBuffer(newChans, width, height));
+			newImBuf = boost::shared_ptr<CqMixedImageBuffer>(
+					new CqMixedImageBuffer(newChans, width, height));
 			TqUchar* data = newImBuf->rawData().get();
 			TqInt rowLength = newImBuf->bytesPerPixel() * newImBuf->m_width;
 			for (row = 0; row < height; row++)
@@ -256,7 +176,7 @@ boost::shared_ptr<CqImageBuffer> CqImageBuffer::loadFromTiff(TIFF* tif)
 	return newImBuf;
 }
 
-void CqImageBuffer::saveToTiff(TIFF* pOut) const
+void CqMixedImageBuffer::saveToTiff(TIFF* pOut) const
 {
 	if ( !pOut )
 		return;
@@ -276,45 +196,45 @@ void CqImageBuffer::saveToTiff(TIFF* pOut) const
 	TIFFSetField( pOut, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize( pOut, 0 ) );
 
 	// Work out the format of the image to write.
-	EqChannelFormat widestType = Format_Unsigned8;
-	for(CqChannelInfoList::const_iterator ichan = m_channelsInfo.begin();
-			ichan != m_channelsInfo.end() ; ++ichan)
+	EqChannelType widestType = Channel_Unsigned8;
+	for(CqChannelList::const_iterator ichan = m_channelInfo.begin();
+			ichan != m_channelInfo.end() ; ++ichan)
 		widestType = Aqsis::min(widestType, ichan->type);
 
 	// Write out an 8 bits per pixel integer image.
-	if ( widestType == Format_Unsigned8 || widestType == Format_Signed8 )
+	if ( widestType == Channel_Unsigned8 || widestType == Channel_Signed8 )
 	{
 		TIFFSetField( pOut, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_INT );
 		TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, 8 );
 	}
-	else if(widestType == Format_Float32)
+	else if(widestType == Channel_Float32)
 	{
 		/* use uncompressed IEEEFP pixels */
 		TIFFSetField( pOut, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP );
 		TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, 32 );
 	}
-	else if(widestType == Format_Signed16)
+	else if(widestType == Channel_Signed16)
 	{
 		TIFFSetField( pOut, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_INT );
 		TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, 16 );
 	}
-	else if(widestType == Format_Unsigned16)
+	else if(widestType == Channel_Unsigned16)
 	{
 		TIFFSetField( pOut, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT );
 		TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, 16 );
 	}
-	else if(widestType == Format_Signed32)
+	else if(widestType == Channel_Signed32)
 	{
 		TIFFSetField( pOut, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_INT );
 		TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, 32 );
 	}
-	else if(widestType == Format_Unsigned32)
+	else if(widestType == Channel_Unsigned32)
 	{
 		TIFFSetField( pOut, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT );
 		TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, 32 );
 	}
 	// Write out the actual pixel data.
-	TqInt lineLength = m_channelsInfo.bytesPerPixel() * m_width;
+	TqInt lineLength = m_channelInfo.bytesPerPixel() * m_width;
 	TqUchar* dataPtr = m_data.get();
 	for (TqInt row = 0; row < m_height; row++ )
 	{
@@ -324,37 +244,23 @@ void CqImageBuffer::saveToTiff(TIFF* pOut) const
 	}
 }
 
-
-boost::shared_ptr<CqImageBuffer> CqImageBuffer::quantizeForDisplay() const
-{
-	// Make a new image buffer with the same channel names, but with all
-	// channel types set to unsigned 8 bit.
-	boost::shared_ptr<CqImageBuffer> newBuf(
-			new CqImageBuffer(m_channelsInfo.cloneAs8Bit(), m_width, m_height));
-
-	// Copy across the data.
-	for(TqInt chanNum = 0; chanNum < m_channelsInfo.numChannels(); ++chanNum)
-		newBuf->channel(chanNum)->copyFrom(*channel(chanNum));
-	return newBuf;
-}
-
-void CqImageBuffer::clearBuffer(TqFloat f)
+void CqMixedImageBuffer::clearBuffer(TqFloat f)
 {
 	// Fill all channels with the given constant.
 	CqImageChannelConstant constChan(f);
-	for(TqInt chanNum = 0; chanNum < m_channelsInfo.numChannels(); ++chanNum)
+	for(TqInt chanNum = 0; chanNum < m_channelInfo.numChannels(); ++chanNum)
 		channel(chanNum)->copyFrom(constChan);
 }
 
-void CqImageBuffer::initToCheckerboard(TqInt tileSize)
+void CqMixedImageBuffer::initToCheckerboard(TqInt tileSize)
 {
 	// Fill all channels with checker pattern
 	CqImageChannelCheckered checkerChan(tileSize);
-	for(TqInt chanNum = 0; chanNum < m_channelsInfo.numChannels(); ++chanNum)
+	for(TqInt chanNum = 0; chanNum < m_channelInfo.numChannels(); ++chanNum)
 		channel(chanNum)->copyFrom(checkerChan);
 }
 
-void CqImageBuffer::getCopyRegionSize(TqInt offset, TqInt srcWidth, TqInt destWidth,
+void CqMixedImageBuffer::getCopyRegionSize(TqInt offset, TqInt srcWidth, TqInt destWidth,
 		TqInt& srcOffset, TqInt& destOffset, TqInt& copyWidth)
 {
 	destOffset = max(offset, 0);
@@ -362,9 +268,9 @@ void CqImageBuffer::getCopyRegionSize(TqInt offset, TqInt srcWidth, TqInt destWi
 	copyWidth = min(destWidth, offset+srcWidth) - destOffset;
 }
 
-void CqImageBuffer::copyFrom(const CqImageBuffer& source, TqInt topLeftX, TqInt topLeftY)
+void CqMixedImageBuffer::copyFrom(const CqMixedImageBuffer& source, TqInt topLeftX, TqInt topLeftY)
 {
-	if(source.m_channelsInfo.numChannels() != m_channelsInfo.numChannels())
+	if(source.m_channelInfo.numChannels() != m_channelInfo.numChannels())
 		throw XqInternal("Number of source and destination channels do not match", __FILE__, __LINE__);
 
 	// compute size and top left coords of region to copy.
@@ -382,7 +288,7 @@ void CqImageBuffer::copyFrom(const CqImageBuffer& source, TqInt topLeftX, TqInt 
 	if(copyWidth <= 0 || copyHeight <= 0)
 		return;
 
-	for(TqInt i = 0; i < m_channelsInfo.numChannels(); ++i)
+	for(TqInt i = 0; i < m_channelInfo.numChannels(); ++i)
 	{
 		channel(i, destTopLeftX, destTopLeftY, copyWidth, copyHeight)
 			->copyFrom(*source.channel(i, srcTopLeftX, srcTopLeftY,
@@ -390,7 +296,7 @@ void CqImageBuffer::copyFrom(const CqImageBuffer& source, TqInt topLeftX, TqInt 
 	}
 }
 
-void CqImageBuffer::copyFrom(const CqImageBuffer& source, const TqChannelNameMap& nameMap,
+void CqMixedImageBuffer::copyFrom(const CqMixedImageBuffer& source, const TqChannelNameMap& nameMap,
 		TqInt topLeftX, TqInt topLeftY)
 {
 	// compute size and top left coords of region to copy.
@@ -417,11 +323,11 @@ void CqImageBuffer::copyFrom(const CqImageBuffer& source, const TqChannelNameMap
 	}
 }
 
-void CqImageBuffer::compositeOver(const CqImageBuffer& source,
+void CqMixedImageBuffer::compositeOver(const CqMixedImageBuffer& source,
 		const TqChannelNameMap& nameMap, TqInt topLeftX, TqInt topLeftY,
 		const std::string alphaName)
 {
-	if(!source.channelsInfo().hasChannel(alphaName))
+	if(!source.channelInfo().hasChannel(alphaName))
 	{
 		copyFrom(source, nameMap, topLeftX, topLeftY);
 	}
@@ -452,33 +358,33 @@ void CqImageBuffer::compositeOver(const CqImageBuffer& source,
 	}
 }
 
-inline boost::shared_ptr<CqImageChannel> CqImageBuffer::channel(const std::string& name,
+inline boost::shared_ptr<CqImageChannel> CqMixedImageBuffer::channel(const std::string& name,
 		TqInt topLeftX, TqInt topLeftY, TqInt width, TqInt height)
 {
-	return channelImpl(m_channelsInfo.findChannelIndex(name),
+	return channelImpl(m_channelInfo.findChannelIndex(name),
 			topLeftX, topLeftY, width, height);
 }
 
-inline boost::shared_ptr<CqImageChannel> CqImageBuffer::channel(TqInt index, TqInt topLeftX,
+inline boost::shared_ptr<CqImageChannel> CqMixedImageBuffer::channel(TqInt index, TqInt topLeftX,
 		TqInt topLeftY, TqInt width, TqInt height)
 {
 	return channelImpl(index, topLeftX, topLeftY, width, height);
 }
 
-inline boost::shared_ptr<const CqImageChannel> CqImageBuffer::channel(const std::string& name,
+inline boost::shared_ptr<const CqImageChannel> CqMixedImageBuffer::channel(const std::string& name,
 		TqInt topLeftX, TqInt topLeftY, TqInt width, TqInt height) const
 {
-	return channelImpl(m_channelsInfo.findChannelIndex(name),
+	return channelImpl(m_channelInfo.findChannelIndex(name),
 			topLeftX, topLeftY, width, height);
 }
 
-inline boost::shared_ptr<const CqImageChannel> CqImageBuffer::channel(TqInt index,
+inline boost::shared_ptr<const CqImageChannel> CqMixedImageBuffer::channel(TqInt index,
 		TqInt topLeftX, TqInt topLeftY, TqInt width, TqInt height) const
 {
 	return channelImpl(index, topLeftX, topLeftY, width, height);
 }
 
-boost::shared_ptr<CqImageChannel> CqImageBuffer::channelImpl(TqInt index,
+boost::shared_ptr<CqImageChannel> CqMixedImageBuffer::channelImpl(TqInt index,
 		TqInt topLeftX, TqInt topLeftY, TqInt width, TqInt height) const
 {
 	if(width == 0)
@@ -487,42 +393,42 @@ boost::shared_ptr<CqImageChannel> CqImageBuffer::channelImpl(TqInt index,
 		height = m_height;
 	assert(topLeftX + width <= m_width);
 	assert(topLeftY + height <= m_height);
-	TqInt stride = m_channelsInfo.bytesPerPixel();
+	TqInt stride = m_channelInfo.bytesPerPixel();
 	// Start offset for the channel
 	TqUchar* startPtr = m_data.get()
 			+ (topLeftY*m_width + topLeftX)*stride
-			+ m_channelsInfo.channelByteOffset(index);
+			+ m_channelInfo.channelByteOffset(index);
 	TqInt rowSkip = m_width - width;
-	switch(m_channelsInfo[index].type)
+	switch(m_channelInfo[index].type)
 	{
-		case Format_Float32:
+		case Channel_Float32:
 			return boost::shared_ptr<CqImageChannel>(
-					new CqImageChannelTyped<PtDspyFloat32>(m_channelsInfo[index],
+					new CqImageChannelTyped<PtDspyFloat32>(m_channelInfo[index],
 						startPtr, width, height, stride, rowSkip));
-		case Format_Unsigned32:
+		case Channel_Unsigned32:
 			return boost::shared_ptr<CqImageChannel>(
-					new CqImageChannelTyped<PtDspyUnsigned32>(m_channelsInfo[index],
+					new CqImageChannelTyped<PtDspyUnsigned32>(m_channelInfo[index],
 						startPtr, width, height, stride, rowSkip));
-		case Format_Signed32:
+		case Channel_Signed32:
 			return boost::shared_ptr<CqImageChannel>(
-					new CqImageChannelTyped<PtDspySigned32>(m_channelsInfo[index],
+					new CqImageChannelTyped<PtDspySigned32>(m_channelInfo[index],
 						startPtr, width, height, stride, rowSkip));
-		case Format_Unsigned16:
+		case Channel_Unsigned16:
 			return boost::shared_ptr<CqImageChannel>(
-					new CqImageChannelTyped<PtDspyUnsigned16>(m_channelsInfo[index],
+					new CqImageChannelTyped<PtDspyUnsigned16>(m_channelInfo[index],
 						startPtr, width, height, stride, rowSkip));
-		case Format_Signed16:
+		case Channel_Signed16:
 			return boost::shared_ptr<CqImageChannel>(
-					new CqImageChannelTyped<PtDspySigned16>(m_channelsInfo[index],
+					new CqImageChannelTyped<PtDspySigned16>(m_channelInfo[index],
 						startPtr, width, height, stride, rowSkip));
-		case Format_Signed8:
+		case Channel_Signed8:
 			return boost::shared_ptr<CqImageChannel>(
-					new CqImageChannelTyped<PtDspySigned8>(m_channelsInfo[index],
+					new CqImageChannelTyped<PtDspySigned8>(m_channelInfo[index],
 						startPtr, width, height, stride, rowSkip));
-		case Format_Unsigned8:
+		case Channel_Unsigned8:
 		default:
 			return boost::shared_ptr<CqImageChannel>(
-					new CqImageChannelTyped<PtDspyUnsigned8>(m_channelsInfo[index],
+					new CqImageChannelTyped<PtDspyUnsigned8>(m_channelInfo[index],
 						startPtr, width, height, stride, rowSkip));
 	}
 }

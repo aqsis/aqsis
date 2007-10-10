@@ -35,47 +35,47 @@
 namespace Aqsis {
 //------------------------------------------------------------------------------
 
-EqChannelFormat chanFormatFromPkDspy(TqInt dspyFormat)
+EqChannelType chanFormatFromPkDspy(TqInt dspyFormat)
 {
 	switch(dspyFormat)
 	{
 		case PkDspyFloat32:
-			return Format_Float32;
+			return Channel_Float32;
 		case PkDspyUnsigned32:
-			return Format_Unsigned32;
+			return Channel_Unsigned32;
 		case PkDspySigned32:
-			return Format_Signed32;
+			return Channel_Signed32;
 		case PkDspyUnsigned16:
-			return Format_Unsigned16;
+			return Channel_Unsigned16;
 		case PkDspySigned16:
-			return Format_Signed16;
+			return Channel_Signed16;
 		case PkDspyUnsigned8:
-			return Format_Unsigned8;
+			return Channel_Unsigned8;
 		case PkDspySigned8:
-			return Format_Signed8;
+			return Channel_Signed8;
 		default:
 			throw XqInternal("Unknown PkDspy data format", __FILE__, __LINE__);
 	}
 }
 
-TqInt pkDspyFromChanFormat(EqChannelFormat format)
+TqInt pkDspyFromChanFormat(EqChannelType format)
 {
 	switch(format)
 	{
-		case Format_Float32:
+		case Channel_Float32:
 			return PkDspyFloat32;
-		case Format_Unsigned32:
+		case Channel_Unsigned32:
 			return PkDspyUnsigned32;
-		case Format_Signed32:
+		case Channel_Signed32:
 			return PkDspySigned32;
-		case Format_Unsigned16:
+		case Channel_Unsigned16:
 			return PkDspyUnsigned16;
-		case Format_Signed16:
+		case Channel_Signed16:
 			return PkDspySigned16;
-		case Format_Unsigned8:
+		case Channel_Unsigned8:
 			return PkDspyUnsigned8;
 		default:
-		case Format_Signed8:
+		case Channel_Signed8:
 			return PkDspySigned8;
 	}
 }
@@ -130,28 +130,6 @@ const TqFloatConv* CqImageChannelCheckered::getRow(TqInt row) const
 		return &m_checkerRow0[0];
 	else
 		return &m_checkerRow1[0];
-}
-
-
-//------------------------------------------------------------------------------
-// SqChannelInfo implementation
-TqInt SqChannelInfo::bytesPerPixel() const
-{
-	switch(type)
-	{
-		case Format_Unsigned32:
-		case Format_Signed32:
-		case Format_Float32:
-			return 4;
-			break;
-		case Format_Unsigned16:
-		case Format_Signed16:
-			return 2;
-		case Format_Signed8:
-		case Format_Unsigned8:
-		default:
-			return 1;
-	}
 }
 
 

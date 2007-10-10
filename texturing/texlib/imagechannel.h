@@ -38,35 +38,20 @@
 #include <string>
 
 #include "aqsismath.h"
+#include "channelinfo.h"
 
 
 namespace Aqsis {
+
 //------------------------------------------------------------------------------
-
-/** \brief A more C++ - like version of the PkDspy* macros from ndspy.h
- *
- * Using this enum allows us to explicitly state that functions take a
- * "EqChannelFormat" as an input, rather than just some unnamed integer.
+/** \brief Convert a dspy format type into the enum EqChannelType equivilant.
+ * \return the equivilant EqChannelType type for the given PkDspy* constant
  */
-enum EqChannelFormat
-{
-	Format_Float32,
-	Format_Unsigned32,
-	Format_Signed32,
-	Format_Unsigned16,
-	Format_Signed16,
-	Format_Unsigned8,
-	Format_Signed8
-};
+EqChannelType chanFormatFromPkDspy(TqInt dspyFormat);
 
-/** \brief Convert a dspy format type into the enum EqChannelFormat equivilant.
- * \return the equivilant EqChannelFormat type for the given PkDspy* constant
+/** \brief Convert a EqChannelType to the PkDspy equivilant
  */
-EqChannelFormat chanFormatFromPkDspy(TqInt dspyFormat);
-
-/** \brief Convert a EqChannelFormat to the PkDspy equivilant
- */
-TqInt pkDspyFromChanFormat(EqChannelFormat format);
+TqInt pkDspyFromChanFormat(EqChannelType format);
 
 //------------------------------------------------------------------------------
 /** \brief Floating point type used to do conversions between different image
@@ -114,7 +99,7 @@ class IqImageChannelSource
 		 * \param stride - stride for buf in bytes
 		 * \param format - desired format for the row
 		 */
-		//virtual void getRawRow(TqInt row, const TqUchar* &buf, TqInt& stride, EqChannelFormat format) = 0 const;
+		//virtual void getRawRow(TqInt row, const TqUchar* &buf, TqInt& stride, EqChannelType format) = 0 const;
 		inline virtual ~IqImageChannelSource() = 0;
 };
 
@@ -200,24 +185,7 @@ class CqImageChannelCheckered : public IqImageChannelSource
 
 
 //------------------------------------------------------------------------------
-/** \brief Hold channel information; similar in purpose to PtDspyDevFormat from ndspy.h.
- */
-struct SqChannelInfo
-{
-	std::string name;  ///< name of the channel (eg, "r", "g"...)
-	EqChannelFormat type;	///< channel format type
-	/// Trivial constructor
-	inline SqChannelInfo(const std::string& name, EqChannelFormat type);
-	/** \brief Get the number of bytes per pixel for this channel data.
-	 *
-	 * \return channel size in bytes
-	 */
-	TqInt bytesPerPixel() const;
-};
-
-
-//------------------------------------------------------------------------------
-/** \brief A thin wrapper around channel data held in a CqImageBuffer
+/** \brief A thin wrapper around channel data held in a CqMixedImageBuffer
  *
  * CqImageChannel wraps around a single channel of a subregion of a heterogenous
  * array:
@@ -343,13 +311,6 @@ inline IqImageChannelSink::~IqImageChannelSink()
 { }
 
 inline IqImageChannel::~IqImageChannel()
-{ }
-
-//------------------------------------------------------------------------------
-// SqChannelInfo
-inline SqChannelInfo::SqChannelInfo(const std::string& name, EqChannelFormat type)
-	: name(name),
-	type(type)
 { }
 
 //------------------------------------------------------------------------------

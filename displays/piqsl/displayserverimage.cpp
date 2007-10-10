@@ -71,7 +71,7 @@ void CqDisplayServerImage::acceptData(TqUlong xmin, TqUlong xmaxplus1, TqUlong y
 		// The const_cast below is ugly, but I don't see how to avoid it
 		// without some notion of "const constructor" which isn't present in
 		// C++
-		const CqImageBuffer bucketBuf(m_realData->channelsInfo(),
+		const CqMixedImageBuffer bucketBuf(m_realData->channelInfo(),
 				boost::shared_array<TqUchar>(const_cast<TqUchar*>(bucketData),
 					nullDeleter), xmaxplus1 - xmin, ymaxplus1 - ymin);
 
