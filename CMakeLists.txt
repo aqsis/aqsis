@@ -15,6 +15,14 @@ INCLUDE(FindFLTK)
 INCLUDE(FindOpenEXR)
 INCLUDE(FindXsltproc)
 INCLUDE(FindFlexBison)
+INCLUDE(FindSVNVersion)
+
+IF(NOT AQSIS_FLTK_FOUND)
+	MESSAGE(STATUS "Cannot find FLTK, display and piqsl will not be built")
+ENDIF(NOT AQSIS_FLTK_FOUND)
+IF(NOT AQSIS_FLUID_FOUND)
+	MESSAGE(STATUS "Cannot find Fluid, piqsl will not be built")
+ENDIF(NOT AQSIS_FLUID_FOUND)
 
 ENABLE_TESTING()
 
@@ -28,34 +36,10 @@ SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 SET(MAJOR 1)
 SET(MINOR 3)
 SET(BUILD 0)
+SVN_REPOSITORY_VERSION( REVISION ${PROJECT_SOURCE_DIR} )
 CONFIGURE_FILE(version.h.in.cmake ${PROJECT_BINARY_DIR}/version.h)
 
 INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR})
-
-IF(WIN32)
-	SET(BINDIR "bin" 
-		CACHE STRING "Install location for binary files. (relative to CMAKE_INSTALL_PREFIX)")
-	SET(RENDERENGINEDIR "${BINDIR}" 
-		CACHE STRING "Install location for render dependent shared libraries (relative to CMAKE_INSTALL_PREFIX)")
-	SET(DISPLAYSDIR "${BINDIR}" 
-		CACHE STRING "Install location for display libraries (relative to CMAKE_INSTALL_PREFIX)")
-	SET(PLUGINDIR "${BINDIR}" 
-		CACHE STRING "Install location for plugin libraries (relative to CMAKE_INSTALL_PREFIX)")
-	SET(LIBDIR "lib" 
-		CACHE STRING "Install location for shared libraries (relative to CMAKE_INSTALL_PREFIX)")
-	SET(STATICLIBDIR "${LIBDIR}" 
-		CACHE STRING "Install location for static libraries (relative to CMAKE_INSTALL_PREFIX)")
-	SET(SHADERDIR "shaders" 
-		CACHE STRING "Install location for shaders (relative to CMAKE_INSTALL_PREFIX)")
-	SET(SYSCONFDIR "${BINDIR}" 
-		CACHE STRING "Install location for system configuration files (relative to CMAKE_INSTALL_PREFIX)")
-	SET(INCLUDEDIR "include/aqsis" 
-		CACHE STRING "Install location for aqsis header files (relative to CMAKE_INSTALL_PREFIX)")
-	SET(CONTENTDIR "content" 
-		CACHE STRING "Install location for content (relative to CMAKE_INSTALL_PREFIX)")
-	SET(SCRIPTSDIR "scripts" 
-		CACHE STRING "Install location for scripts (relative to CMAKE_INSTALL_PREFIX)")
-ENDIF(WIN32)
 
 OPTION(AQSIS_USE_TIMERS "Enable performance timers ON/OFF" ON)
 IF(AQSIS_USE_TIMERS)
@@ -73,6 +57,7 @@ IF(UNIX AND NOT APPLE)
 	INCLUDE(${CMAKE_SOURCE_DIR}/cmake/platform/linux.cmake) 
 ELSE(UNIX AND NOT APPLE)
 	IF(WIN32)
+		INCLUDE(${CMAKE_SOURCE_DIR}/cmake/platform/windows.cmake)
 	ELSE(WIN32)
 		IF(APPLE)
 			INCLUDE(${CMAKE_SOURCE_DIR}/cmake/platform/macosx.cmake)
@@ -115,9 +100,12 @@ GET_DIRECTORY_PROPERTY(AQSL_EXECUTABLE DIRECTORY shadercompiler/aqsl DEFINITION 
 ADD_SUBDIRECTORY(shadercompiler/slxargs)
 ADD_SUBDIRECTORY(shadercompiler/aqsltell)
 ADD_SUBDIRECTORY(rib/ri2rib)
+ADD_SUBDIRECTORY(rib/miqser)
 ADD_SUBDIRECTORY(texturing/teqser)
 ADD_SUBDIRECTORY(texturing/texlib)
-ADD_SUBDIRECTORY(displays/display)
+IF(AQSIS_FLTK_FOUND)
+	ADD_SUBDIRECTORY(displays/display)
+ENDIF(AQSIS_FLTK_FOUND)
 ADD_SUBDIRECTORY(thirdparty/tinyxml)
 ADD_SUBDIRECTORY(displays/d_exr)
 ADD_SUBDIRECTORY(displays/d_sdcBMP)
@@ -132,11 +120,10 @@ ADD_SUBDIRECTORY(texturing/plugins/exr2tif)
 ADD_SUBDIRECTORY(texturing/plugins/png2tif)
 ADD_SUBDIRECTORY(texturing/plugins/tga2tif)
 ADD_SUBDIRECTORY(shaders)
-
-IF(AQSIS_FLTK_FOUND AND AQSIS_BOOST_FOUND)
+IF(AQSIS_FLTK_FOUND AND AQSIS_FLUID_FOUND AND AQSIS_BOOST_FOUND)
 	ADD_SUBDIRECTORY(displays/piqsl)
 	GET_DIRECTORY_PROPERTY(piqsl_DISPLAYLIB DIRECTORY displays/piqsl DEFINITION DISPLAYLIB)
-ENDIF(AQSIS_FLTK_FOUND AND AQSIS_BOOST_FOUND)
+ENDIF(AQSIS_FLTK_FOUND AND AQSIS_FLUID_FOUND AND AQSIS_BOOST_FOUND)
 #
 # Build aqsisrc
 #
@@ -164,17 +151,4 @@ SET(CPACK_PACKAGE_VERSION_MAJOR "${MAJOR}")
 SET(CPACK_PACKAGE_VERSION_MINOR "${MINOR}")
 SET(CPACK_PACKAGE_VERSION_PATCH "${BUILD}")
 SET(CPACK_PACKAGE_INSTALL_DIRECTORY "Aqsis-${MAJOR}.${MINOR}")
-IF(WIN32 AND NOT UNIX)
-  # There is a bug in NSI that does not handle full unix paths properly. Make
-  # sure there is at least one set of four (4) backlasshes.
-  #SET(CPACK_PACKAGE_ICON "${CMake_SOURCE_DIR}/Utilities/Release\\\\InstallIcon.bmp")
-  SET(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\aqsis_install.exe")
-  SET(CPACK_NSIS_DISPLAY_NAME "${CPACK_PACKAGE_INSTALL_DIRECTORY} Aqsis")
-  SET(CPACK_NSIS_HELP_LINK "http:\\\\\\\\www.aqsis.org")
-  SET(CPACK_NSIS_URL_INFO_ABOUT "http:\\\\\\\\www.aqsis.org")
-  SET(CPACK_NSIS_CONTACT "packages@aqsis.org")
-  SET(CPACK_NSIS_MODIFY_PATH ON)
-#ELSE(WIN32 AND NOT UNIX)
-  SET(CPACK_STRIP_FILES ON)
-ENDIF(WIN32 AND NOT UNIX)
 INCLUDE(CPack)

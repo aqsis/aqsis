@@ -15,6 +15,7 @@
 
 #include	"aqsis.h"
 #include	"itransform.h"
+#include	"iparameter.h"
 #include	<boost/shared_ptr.hpp>
 
 
@@ -43,7 +44,6 @@ enum EqShaderType
 
 struct IqShaderExecEnv;
 struct IqSurface;
-class CqParameter;
 
 //----------------------------------------------------------------------
 /** \struct IqShader
@@ -68,7 +68,7 @@ struct IqShader
 	virtual	void	PrepareShaderForUse( ) = 0;
 	virtual	void	InitialiseParameters( ) = 0;
 	virtual	void	SetArgument( const CqString& name, EqVariableType type, const CqString& space, void* val ) = 0;
-	virtual	void	SetArgument( CqParameter* pParam, IqSurface* pSurface ) = 0;
+	virtual	void	SetArgument( IqParameter* pParam, IqSurface* pSurface ) = 0;
 	/** Find a named argument.
 	 * \param name Character pointer to argument name.
 	 * \return A pointer to the argument data if it exists, NULL otherwise.

@@ -6,7 +6,7 @@ Requirements
 
 Building Aqsis requires a C++ compiler and the following tools and libraries:
 
-    * SCons (v0.96.1+, SCons in turn requires Python)
+    * CMake (v2.4+)
     * boost (v1.32.0+)
     * libtiff.lib (v3.7.1+)
     * flex (v2.5.4) (2.5.31 causes problems, see FAQ 2.2)
@@ -22,7 +22,7 @@ Obtaining the sources
 
 You can either obtain the source archive or get the latest source code via SVN.
 
-With SVN, it's recommended to check out the /trunk only, as it contains all you need to compile aqsis. If you're on Linux, you can save even more time by skipping the Win32 Libraries and checking out /trunk/aqsis only.
+With SVN, it's recommended to check out the /trunk only, as it contains all you need to compile aqsis. If you're on Linux, you can save even more time by skipping the Win32 Libraries and testing folders, checking out /trunk/aqsis only.
 
 To obtain a clean checkout from SVN, first install SVN and make sure that you either provide the full path to the svn binary (svn.exe on Windows) or that you add svn to your PATH. Then go into an empty folder and call:
 
@@ -46,99 +46,76 @@ For more instructions on obtaining the source code via SVN see the SourceForge S
 Building
 ========
 
-If you already believe you meet all of the above requirements and the compiler/linker will be able to find everything then go ahead and call
+The CMake system requires that the project is built in a different folder to the source, this ensures that nothing affects the source folder. So first create a new directory, for example 'build' in the same location as the source...
 
-scons
+mkdir build
+cd build
 
-inside the aqsis directory (Windows users have to do this inside a DOS box). If all goes well you will find a shiny new version of Aqsis in the newly created output directory.
+Then from within that folder run the CMake interactive configuration tool, see system specifics, and check that all the necessary configuration variables are properly specified. If CMake cannot find any of the required libraries, it will report an error or warning about the effect of the missing libraries or tools.
 
-If there was an error after calling scons this indicates that some of the above components are either entirely missing or located in a non-standard path. In the latter case, you can tell scons about the location of your libraries in a file called custom.py (you have to create that file yourself inside the aqsis directory). This file simply contains variable assignments such as
-
-fltk_include_path = r"C:\Libs\fltk-1.1.5rc1"
-fltk_lib_path = r"C:\Libs\fltk-1.1.5rc1\lib"
-
-The syntax is plain Python code (in this example we're using raw strings (indicated by the 'r' prefix) so that we don't have to use double backslashes). You can get a list of variables to manipulate by calling
-
-scons --help
-
-This will output a list of available variables together with their default values and their current values. Note that you can also call scons --help-options to get a list of available options that are passed directly to the scons tool.
+Once the variables are all properly set, select the option to generate the project files and exit. This will result in a set of system specific build configuration files in the build folder. See the system specific sections for what to do next.
 
 System Specific Details
 =======================
 
-Win32 - MSVC6.0/MSVC7.x
+Win32
+=====
+
+The CMake interactive configuration tool can be started from the 'Start' menu. Point the source location at your checked out source, and the build location to your newly made build folder. Then check the variables. Most important on Win32 is to point AQSIS_WIN32LIBS to point to the location of your checked out 'win32libs' SVN folder, this will resolve most of the required libraries and executables that are provided as part of the 'win32libs' folder.
+
+Other important things to locate are the Boost include and libraries folder, and to setup the proper name for the Boost thread library, you'll have to check your Boost installation for that information. For example, if you have "libboost_thread_vc80-mt-1_34_1.lib" the name would be "libboost_thread_vc80-mt-1_34_1". You can confirm if this has worked by enabling the 'advanced' options and checking if the AQSIS_BOOST_THREAD_LIBRARY points to the file you expect. 
+
+When you select to configure for the first time in a clean build folder CMake will ask you which target platform you wish to make for, we have tested with MicroSoft Visual Studio 8 and MinGW.
+
+Win32 - MSVC8
 =======================
 
-The native build environment for Aqsis on Windows is MSVC6.
-
-The package also compiles with VC7.1 (.NET 2003) and maybe even newer versions, but the resulting executable is not equivalent to the MSVC6 version. The VC7.1 version of Aqsis crashes on some scenes and may produce incorrect results if certain features are used.
+CMake will generate vcproj and solution files for the project, load the solution into the VC8 IDE and build the ALL_BUILD target.
 
 Win32 - MingW
 =============
 
-Prerequisites
+You can build from the build folder by typing...
 
-    * MinGW (v3.1.0-1)
+mingw32-make
 
-Install MinGW.
+there are some different build targets, type...
 
-The MinGW build relies on the availability of a zlib and libTIFF library. This can be achieved by either getting the source and building it yourself, or alternatively, just getting the win32libs folder from SVN at https://svn.sourceforge.net/svnroot/aqsis/trunk/win32libs, which contains the necessary libs and headers.
+mingw32-make help 
 
-  Note: Getting the win32libs SVN folder will also ensure you have a working copy of bison, flex and xsltproc from the requirements list above. 
-
-Building Aqsis
---------------
-
-The process of getting the source and building Aqsis is mainly the same as the default procedure detailed above. You may need to force SCons to use the appropriate build system, and tell it where libTIFF and zlib are. You will need to convert the MSYS locations to Windows location, the '/usr' folder is located at 'C:\msys\1.0\' in installed to the default location.
-
- scons mingw=true boost_include_path=<wherever you installed boost to>
-
-  Note: You will need to ensure that the MinGW bin directory is on your path, i.e. C:\MinGW\bin.
+for a list.
 
 Linux
 =====
 
-Because the build system originated on windows, everything is installed by default into the 'output/' subdirectory of the source directory.  This isn't what you normally want on linux, but the install_prefix variable can be used to fix the problem.  For example, suppose we specify install_prefix='/usr/local'.
+The interactive CMake configuration tool on Linux is ccmake, which is curses based. 
 
-If you're careful and don't build things as root, you should make use of the usual two-stage build and install.  To build the project, you can therefore run the command:
+ccmake ../aqsis
 
-scons install_prefix='/usr/local' build
+will setup GNU make files in the build folder. From there typing...
 
-as a normal user, followed by
+make
 
-scons install_prefix='/usr/local' install
+will build the project in the build folder. There are various other build targets that you can list by typing...
 
-as root, which will copy the appropriate files into the /usr/local directory hierarchy.
-
+make help
 
 MacOSX
 ======
 
-Installing
+The interactive CMake configuration tool on MacOSX is ccmake, which is curses based. 
+
+ccmake ../aqsis
+
+will setup GNU make files in the build folder. From there typing...
+
+make
+
+will build the project in the build folder. There are various other build targets that you can list by typing...
+
+make help
 
 ...
 Troubleshooting
 ===============
 
-Q (Windows): scons complains with
-
-Checking for main() in C++ library libtiff... no
-Cannot find libtiff
-
-but I have checked out win32libs at the correct location (or: have provided the correct paths in tiff_include_path/tiff_lib_path). What's wrong?
-
-A: Check that you have set the environment variables for calling the Visual C++ compiler from inside a DOS box (i.e. check if you can invoke cl without getting an error). Depending on how you've installed MSVC this was already set up for you (and then you won't get the above error), otherwise you have to manually call the batch file vcvars32.bat that comes with MSVC. For further information about the failure, check the config.log file in the project root, this will detail the results of the tests.
-
-Q: Aqsis compiles for a while and then linker errors like the following appear (each line mentions STL somewhere):
-
-...
-renderer.obj : error LNK2001: unresolved external symbol "protected: virtual class _STL::list<struct Aqsis::SqDSOExternalCall *,class _STL::allocator<struct Aqsis::SqDSOExternalCall *> > * __thiscall Aqsis::CqDSORepository::getShadeOpMethods(class Aqsis::CqString *)" (?getShadeOpMethods@CqDSORepository@Aqsis@@MAEPAV?$list@PAUSqDSOExternalCall@Aqsis@@V?$allocator@PAUSqDSOExternalCall@Aqsis@@@_STL@@@_STL@@PAVCqString@2@@Z)
-renderer.obj : error LNK2001: unresolved external symbol "public: void __thiscall Aqsis::CqShaderVM::LoadProgram(class _STL::basic_istream<char,class _STL::char_traits<char> > *)" (?LoadProgram@CqShaderVM@Aqsis@@QAEXPAV?$basic_istream@DV?$char_traits@D@_STL@@@_STL@@@Z)
-
-What is wrong?
-
-A: You were probably using STLport instead of the native STL version of your compiler and Aqsis just does not link with the STLport runtime library.
-
-Q: scons uses options settings (such as install_prefix, debug, etc.) that I didn't specify on the command line and that are not the default values. Where do they come from?
-
-A: When you invoke scons it saves its current options in a file called options.cache which is read the next time you invoke scons again. This means, options are sort of "sticky", once specified they are in effect until they are specified again with a new value. If you want to go back to default values, simply delete this file. Call scons -help to inspect the current values of all variables.

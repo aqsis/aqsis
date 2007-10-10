@@ -206,7 +206,7 @@ class CqLayeredShader : public IqShader
 				++i;
 			}
 		}
-		virtual	void	SetArgument( CqParameter* pParam, IqSurface* pSurface )
+		virtual	void	SetArgument( IqParameter* pParam, IqSurface* pSurface )
 		{
 			// Pass the argument on to the shader for each layer in the list.
 			std::vector<std::pair<CqString, boost::shared_ptr<IqShader> > >::iterator i = m_Layers.begin();

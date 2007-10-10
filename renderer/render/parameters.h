@@ -33,6 +33,7 @@
 
 #include	"isurface.h"
 #include	"ishaderdata.h"
+#include	"iparameter.h"
 #include	"bilinear.h"
 #include	<boost/shared_ptr.hpp>
 
@@ -44,7 +45,7 @@ START_NAMESPACE( Aqsis )
  * Class storing a parameter with a name and value.
  */
 
-class CqParameter
+class CqParameter : public IqParameter
 {
 	public:
 		CqParameter( const char* strName, TqInt Count = 1 );
