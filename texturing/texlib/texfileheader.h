@@ -105,6 +105,19 @@ class CqTexFileHeader
 		template<typename T>
 		inline const T& findAttribute(const std::string& name) const;
 
+		/** \brief Get a reference to an attribute by name
+		 *
+		 * If the named attribute is not present, or has the wrong type, return
+		 * the default value given.
+		 *
+		 * \param name - attribute name
+		 * \param defaultVal - default attribute value
+		 *
+		 * \return a reference to the desired attribute.
+		 */
+		template<typename T>
+		inline const T& findAttribute(const std::string& name, const T& defaultVal) const;
+
 		/** \brief Get a pointer to an attribute by name
 		 *
 		 * \return a pointer to the desired attribute, or NULL if not present.
@@ -193,6 +206,17 @@ inline const T& CqTexFileHeader::findAttribute(const std::string& name) const
 		throw XqInternal("Cannot cast attribute to the requested type",
 				__FILE__, __LINE__);
 	return boost::any_cast<const T&>(iter->second);
+}
+
+template<typename T>
+inline const T& CqTexFileHeader::findAttribute(const std::string& name,
+		const T& defaultVal) const
+{
+	const T* attr = findAttributePtr<T>(name);
+	if(attr)
+		return *attr;
+	else
+		return defaultVal;
 }
 
 template<typename T>

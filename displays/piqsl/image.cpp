@@ -33,6 +33,7 @@
 #include "framebuffer.h"
 #include "logging.h"
 #include "ndspy.h"
+#include "itexinputfile.h"
 
 
 START_NAMESPACE( Aqsis )
@@ -94,36 +95,40 @@ void safeTiffClose(TIFF* tif)
 		TIFFClose(tif);
 }
 
-void CqImage::loadFromTiff(const std::string& filename)
+void CqImage::loadFromFile(const std::string& fileName)
 {
-	boost::shared_ptr<TIFF> tif(TIFFOpen(filename.c_str(), "r"), safeTiffClose);
 	boost::mutex::scoped_lock lock(mutex());
-	// Read image into a buffer, and check for success.
-	m_realData = CqMixedImageBuffer::loadFromTiff(tif.get());
-	if(!m_realData)
+
+	boost::shared_ptr<IqTexInputFile> texFile;
+	try
 	{
-		// \todo: Should we do something else here as well?
-		Aqsis::log() << Aqsis::error << "Could not load image \"" << filename << "\"\n";
+		texFile = IqTexInputFile::open(fileName);
+	}
+	catch(XqInternal& e)
+	{
+		Aqsis::log() << error << "Could not load image \"" << fileName << "\": "
+			<< e.what() << "\n";
 		return;
 	}
-	// Reading succeeded.  Read in additional data from the tiff file & set
-	// some variables accordingly.
-	setFilename(filename);
+	setFilename(fileName);
 	// \todo: Should read the origin and frame size out of the image.
 	setOrigin(0,0);
-	TqUint width = m_realData->width();
-	TqUint height = m_realData->height();
+
+	m_realData = boost::shared_ptr<CqMixedImageBuffer>(new CqMixedImageBuffer());
+	texFile->readPixels(*m_realData);
+
+	const CqTexFileHeader& header = texFile->header();
+	TqUint width = header.width();
+	TqUint height = header.height();
 	setImageSize(width, height);
 	setFrameSize(width, height);
-	Aqsis::log() << Aqsis::info << "Loaded image " << filename
-		<< " [" << width << "x" << height << "x"
-		<< m_realData->numChannels()
-		<< "] (PkDspyType = " << m_realData->channelInfo()[0].type << ")"
-		<< std::endl;
-	TqChar *description = "";
-	if(TIFFGetField(tif.get(), TIFFTAG_IMAGEDESCRIPTION, &description) != 1)
-		TIFFGetField(tif.get(), TIFFTAG_SOFTWARE, &description);
-	setDescription(description);
+	setDescription(header.findAttribute<std::string>("description",
+				header.findAttribute<std::string>("software", "No description")
+				).c_str());
+
+	Aqsis::log() << Aqsis::info << "Loaded image " << fileName
+		<< " [" << width << "x" << height << " : "
+		<< texFile->header().channels() << "]" << std::endl;
 
 	fixupDisplayMap(m_realData->channelInfo());
 	// Quantize and display the data

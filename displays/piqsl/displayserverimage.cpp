@@ -58,7 +58,7 @@ void nullDeleter(const void*)
 
 void CqDisplayServerImage::acceptData(TqUlong xmin, TqUlong xmaxplus1, TqUlong ymin, TqUlong ymaxplus1, TqInt elementSize, const unsigned char* bucketData )
 {
-	assert(elementSize == m_realData->bytesPerPixel());
+	assert(elementSize == m_realData->channelInfo().bytesPerPixel());
 
 	// yuck.  To fix the casts, refactor Image to use signed ints.
 	TqInt cropXmin = static_cast<TqInt>(xmin) - static_cast<TqInt>(m_originX);
@@ -140,8 +140,8 @@ TiXmlElement* CqDisplayServerImage::serialiseToXML()
 		TiXmlElement* dataXML = new TiXmlElement("Bitmap");
 		std::stringstream base64Data;
 		size_t dataLen = m_displayData->width() * m_displayData->height() * numChannels() * sizeof(TqUchar);
-		std::copy(	base64_text(BOOST_MAKE_PFTO_WRAPPER(m_displayData->rawData().get())), 
-					base64_text(BOOST_MAKE_PFTO_WRAPPER(m_displayData->rawData().get() + dataLen)), 
+		std::copy(	base64_text(BOOST_MAKE_PFTO_WRAPPER(m_displayData->rawData())), 
+					base64_text(BOOST_MAKE_PFTO_WRAPPER(m_displayData->rawData() + dataLen)), 
 					std::ostream_iterator<char>(base64Data));
 		TiXmlText* dataTextXML = new TiXmlText(base64Data.str());
 		dataTextXML->SetCDATA(true);

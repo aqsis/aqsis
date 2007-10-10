@@ -26,6 +26,8 @@
 
 #include "channellist.h"
 
+#include <iostream>
+
 #include <boost/format.hpp>
 
 namespace Aqsis {
@@ -46,6 +48,19 @@ void CqChannelList::addChannel(const SqChannelInfo& newChan)
 	m_channels.push_back(newChan);
 	m_offsets.push_back(m_bytesPerPixel);
 	m_bytesPerPixel += newChan.bytesPerPixel();
+}
+
+EqChannelType CqChannelList::sharedChannelType() const
+{
+	if(m_channels.empty())
+		return Channel_TypeUnknown;
+	EqChannelType sharedType = m_channels[0].type;
+	for(TqListType::const_iterator channel = m_channels.begin(); channel != m_channels.end(); ++channel)
+	{
+		if(channel->type != sharedType)
+			return Channel_TypeUnknown;
+	}
+	return sharedType;
 }
 
 void CqChannelList::reorderChannels()
@@ -105,5 +120,34 @@ void CqChannelList::recomputeByteOffsets()
 	m_bytesPerPixel = offset;
 }
 
+//------------------------------------------------------------------------------
+// Free functions
+std::ostream& operator<<(std::ostream& out, const CqChannelList& channels)
+{
+	EqChannelType sharedChanType = channels.sharedChannelType();
+	if(sharedChanType != Channel_TypeUnknown)
+	{
+		out << "(";
+		for(CqChannelList::const_iterator chan = channels.begin(), end = channels.end();
+							chan != end; ++chan)
+		{
+			out << chan->name;
+			if(chan+1 != end)
+				out << ",";
+		}
+		out << ")-" << sharedChanType;
+	}
+	else
+	{
+		for(CqChannelList::const_iterator chan = channels.begin(), end = channels.end();
+							chan != end; ++chan)
+		{
+			out << *chan;
+			if(chan+1 != end)
+				out << ",";
+		}
+	}
+	return out;
+}
 
 } // namespace Aqsis

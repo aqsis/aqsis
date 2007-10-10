@@ -25,7 +25,7 @@
  * \author Chris Foster
  */
 
-#include "itexfile.h"
+#include "itexinputfile.h"
 
 #include "tiffinputfile.h"
 #include "magicnumber.h"

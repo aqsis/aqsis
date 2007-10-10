@@ -35,6 +35,7 @@
 
 #include "smartptr.h"
 #include "samplevector.h"
+#include "channellist.h"
 
 namespace Aqsis {
 
@@ -78,12 +79,15 @@ class CqTextureBuffer : public CqIntrusivePtrCounted
 		 *
 		 * \param width  - new width
 		 * \param height - new height
-		 * \param bytesPerPixel - number of bytes per pixel
+		 * \param channels - new channel list for the buffer.
+		 *
+		 * \throw XqInternal if the new required channel list "channels" has
+		 * channel types which are incompatible with this texture buffer.
 		 */
-		virtual void resize(TqInt width, TqInt height, TqInt bytesPerPixel);
+		void resize(TqInt width, TqInt height, const CqChannelList& channels);
 
 		/// Get a pointer to the underlying raw data
-		inline TqUchar* rawDataPtr();
+		inline TqUchar* rawData();
 
 		/** \brief Get a reference to the tile channels at the given position.
 		 *
@@ -153,12 +157,12 @@ inline const CqSampleVector<T> CqTextureBuffer<T>::operator()(const TqInt x, con
 }
 
 template<typename T>
-void CqTextureBuffer<T>::resize(TqInt width, TqInt height, TqInt bytesPerPixel)
+void CqTextureBuffer<T>::resize(TqInt width, TqInt height, const CqChannelList& channels)
 {
-	if(bytesPerPixel % sizeof(T) != 0)
-		throw XqInternal("Cannot resize buffer to required number of bytes per pixel",
+	if(channels.sharedChannelType() != getChannelTypeEnum<T>())
+		throw XqInternal("Channel type is incompatible with new channel info list",
 				__FILE__, __LINE__);
-	TqInt channelsPerPixel = bytesPerPixel/sizeof(T);
+	TqInt channelsPerPixel = channels.bytesPerPixel()/sizeof(T);
 	TqInt newSize = width * height * channelsPerPixel;
 	if(newSize != m_width * m_height * m_channelsPerPixel);
 		m_pixelData.reset(new T[newSize]);
@@ -169,7 +173,7 @@ void CqTextureBuffer<T>::resize(TqInt width, TqInt height, TqInt bytesPerPixel)
 }
 
 template<typename T>
-inline TqUchar* CqTextureBuffer<T>::rawDataPtr()
+inline TqUchar* CqTextureBuffer<T>::rawData()
 {
 	return reinterpret_cast<TqUchar*>(m_pixelData.get());
 }

@@ -448,7 +448,7 @@ int main( int argc, char** argv )
 			{
 				// load one image
 				boost::shared_ptr<CqImage> newImage(new CqImage(name));
-				newImage->loadFromTiff(name);
+				newImage->loadFromFile(name);
 				window->addImageToCurrentBook(newImage);
 			}
 		}

@@ -39,11 +39,11 @@ void Fl_FrameBuffer_Widget::draw()
 		boost::shared_ptr<const Aqsis::CqMixedImageBuffer> buf = m_image->displayBuffer();
 		if(buf)
 		{
-			fl_draw_image(buf->rawData().get(),
+			fl_draw_image(buf->rawData(),
 				x()+m_image->originX(), y()+m_image->originY(),
 				buf->width(), buf->height(),
-				buf->numChannels(),
-				buf->width()*buf->numChannels()); // draw image
+				buf->channelInfo().numChannels(),
+				0); // draw image
 		}
 	}
 	else

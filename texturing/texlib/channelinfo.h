@@ -31,6 +31,7 @@
 #include "aqsis.h"
 
 #include <string>
+#include <iosfwd>
 
 namespace Aqsis {
 
@@ -58,6 +59,16 @@ enum EqChannelType
 template<typename T>
 inline EqChannelType getChannelTypeEnum();
 
+
+/** \brief Stream insertion operator for EqChannelType
+ *
+ * Inserts a human-readable representation of the type to the stream.
+ *
+ * \param out - stream to write to
+ * \param chanType - type to output.
+ */
+std::ostream& operator<<(std::ostream& out, EqChannelType chanType);
+
 //------------------------------------------------------------------------------
 /** \brief Hold name and type information about image channels.
  */
@@ -74,11 +85,21 @@ struct SqChannelInfo
 	inline TqInt bytesPerPixel() const;
 };
 
+/** \brief Stream insertion operator for SqChannelInfo.
+ *
+ * Inserts a human-readable representation of the channel info to the ostream.
+ *
+ * \param out - stream to write to
+ * \param info - output this.
+ */
+std::ostream& operator<<(std::ostream& out, const SqChannelInfo& info);
+
 
 //==============================================================================
 // Implementation of inline functions and templates
 //==============================================================================
 
+//------------------------------------------------------------------------------
 // SqChannelInfo
 inline SqChannelInfo::SqChannelInfo(const std::string& name, EqChannelType type)
 	: name(name),
@@ -104,6 +125,9 @@ inline TqInt SqChannelInfo::bytesPerPixel() const
 			return 1;
 	}
 }
+
+//------------------------------------------------------------------------------
+// Free functions
 
 // getChannelTypeEnum - generic implementation
 template<typename T> inline EqChannelType getChannelTypeEnum() { return Channel_TypeUnknown; }

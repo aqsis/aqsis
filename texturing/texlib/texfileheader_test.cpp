@@ -56,6 +56,20 @@ BOOST_AUTO_TEST_CASE(CqTexFileHeader_findAttribute)
 	BOOST_CHECK_THROW(header.findAttribute<TqInt>("not_present"), Aqsis::XqInternal);
 }
 
+BOOST_AUTO_TEST_CASE(CqTexFileHeader_findAttributeDefault)
+{
+	Aqsis::CqTexFileHeader header;
+
+	// add and read back an attribute via the findAttribute() interface with
+	// default value.
+	header.setAttribute<TqInt>("asdf", 42);
+	BOOST_CHECK_EQUAL(header.findAttribute<TqInt>("asdf", 1), 42);
+	BOOST_CHECK_EQUAL(header.findAttribute<TqFloat>("asdf", 0.0f), 0.0f);
+
+	// throw when accessing an attribute which isn't present.
+	BOOST_CHECK_EQUAL(header.findAttribute<TqInt>("not_present", 42), 42);
+}
+
 BOOST_AUTO_TEST_CASE(CqTexFileHeader_defaults)
 {
 	Aqsis::CqTexFileHeader header;

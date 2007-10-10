@@ -34,7 +34,7 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include "itexfile.h"
+#include "itexinputfile.h"
 #include "tiffdirhandle.h"
 
 namespace Aqsis {

@@ -38,6 +38,13 @@ namespace Aqsis {
 
 //------------------------------------------------------------------------------
 // CqMixedImageBuffer implementation
+CqMixedImageBuffer::CqMixedImageBuffer()
+	: m_channelInfo(),
+	m_width(0),
+	m_height(0),
+	m_data()
+{ }
+
 CqMixedImageBuffer::CqMixedImageBuffer(const CqChannelList& channels, TqInt width, TqInt height)
 	: m_channelInfo(channels),
 	m_width(width),
@@ -54,128 +61,6 @@ CqMixedImageBuffer::CqMixedImageBuffer(const CqChannelList& channels,
 { }
 
 
-// Simple image loading, uses TIFFReadRGBAImage to hide format details. Use the
-// lower level reading facilities in the future.
-boost::shared_ptr<CqMixedImageBuffer> CqMixedImageBuffer::loadFromTiff(TIFF* tif)
-{
-	if(!tif)
-		return boost::shared_ptr<CqMixedImageBuffer>();
-
-	uint32 width, height;
-	uint16 nChannels = 1;
-	uint16 bitsPerSample = 1;
-	uint16 sampleFormat = SAMPLEFORMAT_UINT;
-	EqChannelType internalFormat = Channel_Unsigned8;
-
-	TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &width);
-	TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &height);
-	TIFFGetField(tif, TIFFTAG_SAMPLESPERPIXEL, &nChannels);
-	TIFFGetField(tif, TIFFTAG_BITSPERSAMPLE, &bitsPerSample);
-	TIFFGetField(tif, TIFFTAG_SAMPLEFORMAT, &sampleFormat);
-	bool sampleFormatValid = true;
-	switch(sampleFormat)
-	{
-		case SAMPLEFORMAT_UINT:
-		{
-			switch(bitsPerSample)
-			{
-				case 8:
-					internalFormat = Channel_Unsigned8;
-					break;
-				case 16:
-					internalFormat = Channel_Unsigned16;
-					break;
-				case 32:
-					internalFormat = Channel_Unsigned32;
-					break;
-				default:
-					Aqsis::log() << Aqsis::error << "Unrecognised bit depth for unsigned int format " << bitsPerSample << std::endl;
-					sampleFormatValid = false;
-			}
-		}
-		break;
-
-		case SAMPLEFORMAT_INT:
-		{
-			switch(bitsPerSample)
-			{
-				case 8:
-					internalFormat = Channel_Signed8;
-					break;
-				case 16:
-					internalFormat = Channel_Signed16;
-					break;
-				case 32:
-					internalFormat = Channel_Signed32;
-					break;
-				default:
-					Aqsis::log() << Aqsis::error << "Unrecognised bit depth for signed int format " << bitsPerSample << std::endl;
-					sampleFormatValid = false;
-			}
-		}
-		break;
-
-		case SAMPLEFORMAT_IEEEFP:
-		{
-			if(bitsPerSample != 32)
-			{
-				Aqsis::log() << Aqsis::error << "Unrecognised bit depth for ieeefp format " << bitsPerSample << std::endl;
-				sampleFormatValid = false;
-			}
-			internalFormat = Channel_Float32;
-		}
-		break;
-
-		default:
-			Aqsis::log() << Aqsis::error << "Unrecognised format " << sampleFormat << std::endl;
-			sampleFormatValid = false;
-	}
-	if(!sampleFormatValid)
-		return boost::shared_ptr<CqMixedImageBuffer>();
-
-	// Construct a vector of channel information for the new image buffer.
-	const char* defaultChannelNames[] = { "r", "g", "b", "a" };
-	CqChannelList newChans;
-	for(TqInt chanNum = 0; chanNum < nChannels; ++chanNum)
-	{
-		newChans.addChannel(SqChannelInfo(
-				defaultChannelNames[Aqsis::min(chanNum,3)],
-				internalFormat));
-	}
-
-	boost::shared_ptr<CqMixedImageBuffer> newImBuf;
-
-	if(!TIFFIsTiled(tif))
-	{
-		uint32 row;
-		uint16 config;
-
-		TIFFGetField(tif, TIFFTAG_PLANARCONFIG, &config);
-		if (config == PLANARCONFIG_CONTIG) 
-		{
-			newImBuf = boost::shared_ptr<CqMixedImageBuffer>(
-					new CqMixedImageBuffer(newChans, width, height));
-			TqUchar* data = newImBuf->rawData().get();
-			TqInt rowLength = newImBuf->bytesPerPixel() * newImBuf->m_width;
-			for (row = 0; row < height; row++)
-			{
-				TIFFReadScanline(tif, data, row);
-				data += rowLength;
-			}
-		}
-		else if (config == PLANARCONFIG_SEPARATE) 
-		{
-			Aqsis::log() << Aqsis::error << "Images with separate planar config not supported." << std::endl;
-		}
-	}
-	else
-	{
-		Aqsis::log() << Aqsis::error << "Cannot currently load images in tiled format." << std::endl;
-//		TIFFReadRGBAImage(tif, width, height, (uint32*)m_data, 0);
-	}
-	return newImBuf;
-}
-
 void CqMixedImageBuffer::saveToTiff(TIFF* pOut) const
 {
 	if ( !pOut )
@@ -183,7 +68,7 @@ void CqMixedImageBuffer::saveToTiff(TIFF* pOut) const
 
 	TIFFSetField( pOut, TIFFTAG_PLANARCONFIG, uint16(PLANARCONFIG_CONTIG) );
 	TIFFSetField( pOut, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB );
-	if ( numChannels() == 4 )
+	if ( m_channelInfo.numChannels() == 4 )
 	{
 		short ExtraSamplesTypes[ 1 ] = {EXTRASAMPLE_ASSOCALPHA};
 		TIFFSetField( pOut, TIFFTAG_EXTRASAMPLES, 1, ExtraSamplesTypes );
@@ -192,7 +77,7 @@ void CqMixedImageBuffer::saveToTiff(TIFF* pOut) const
 	TIFFSetField( pOut, TIFFTAG_IMAGEWIDTH, uint32(m_width) );
 	TIFFSetField( pOut, TIFFTAG_IMAGELENGTH, uint32(m_height) );
 	TIFFSetField( pOut, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT );
-	TIFFSetField( pOut, TIFFTAG_SAMPLESPERPIXEL, numChannels() );
+	TIFFSetField( pOut, TIFFTAG_SAMPLESPERPIXEL, m_channelInfo.numChannels() );
 	TIFFSetField( pOut, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize( pOut, 0 ) );
 
 	// Work out the format of the image to write.
@@ -258,6 +143,20 @@ void CqMixedImageBuffer::initToCheckerboard(TqInt tileSize)
 	CqImageChannelCheckered checkerChan(tileSize);
 	for(TqInt chanNum = 0; chanNum < m_channelInfo.numChannels(); ++chanNum)
 		channel(chanNum)->copyFrom(checkerChan);
+}
+
+void CqMixedImageBuffer::resize(TqInt width, TqInt height,
+		const CqChannelList& channels)
+{
+	if(width*height*channels.bytesPerPixel()
+			!= m_width*m_height*m_channelInfo.bytesPerPixel())
+	{
+		// resize the buffer if the new buffer 
+		m_data.reset(new TqUchar[width*height*channels.bytesPerPixel()]);
+	}
+	m_channelInfo = channels;
+	m_width = width;
+	m_height = height;
 }
 
 void CqMixedImageBuffer::getCopyRegionSize(TqInt offset, TqInt srcWidth, TqInt destWidth,

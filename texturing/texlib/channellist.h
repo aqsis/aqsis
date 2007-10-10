@@ -30,6 +30,7 @@
 #include "aqsis.h"
 
 #include <vector>
+#include <iosfwd>
 
 #include "channelinfo.h"
 #include "exception.h"
@@ -93,7 +94,7 @@ class CqChannelList
 		//@}
 
 		//----------------------------------------------------------------------
-		/// \name Access to pixel byte-layout
+		/// \name Access to low-level pixel layout
 		//@{
 		/** \brief Get the byte offset for the given channel number
 		 *
@@ -104,6 +105,13 @@ class CqChannelList
 		inline TqInt channelByteOffset(TqInt index) const;
 		/// Number of bytes required to store all channels in a pixel
 		inline TqInt bytesPerPixel() const;
+		/** Get the shared channel type code if it exists.
+		 *
+		 * \return the channel type which is shared by all channels, or
+		 * Channel_TypeUnknown if the channels aren't all identical or there
+		 * are no channels present.
+		 */
+		EqChannelType sharedChannelType() const;
 		//@}
 
 		//----------------------------------------------------------------------
@@ -142,6 +150,14 @@ class CqChannelList
 		TqInt m_bytesPerPixel;			///< bytes per pixel needed to store the channels.
 };
 
+/** \brief Stream insertion operator for CqChannelList
+ *
+ * Inserts a human-readable representation of the channels to the stream.
+ *
+ * \param out - stream to write to
+ * \param channels - channels to output.
+ */
+std::ostream& operator<<(std::ostream& out, const CqChannelList& channels);
 
 //==============================================================================
 // Implementation of inline functions and templates

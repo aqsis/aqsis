@@ -55,13 +55,14 @@ class IqTexInputFile
 		 *
 		 * Array2DType is a type modelling a simple resizeable 2D array
 		 * interface.  It should provide the following methods:
-		 *   - void resize(TqInt width, TqInt height, TqInt bytesPerPixel)
+		 *   - void resize(TqInt width, TqInt height, const CqChannelList& channels)
 		 *     Resizes the buffer.  (width, height) is the new dimensions for
-		 *     the buffer, while bytesPerPixel is the number of bytes which
-		 *     should be allocated for each pixel.  This call should throw an
-		 *     exception if it fails otherwise nasty behaviour is bound to
-		 *     ensue, probably involving segfaulting.
-		 *   - TqUchar* rawDataPtr()
+		 *     the buffer.  channels describes the new desired channel
+		 *     structure for the buffer.  If the buffer cannot handle the
+		 *     channel structure it should throw This call should throw an
+		 *     exception otherwise nasty behaviour is bound to ensue, probably
+		 *     involving segfaulting.
+		 *   - TqUchar* rawData()
 		 *     Gets a raw pointer to the data.
 		 *
 		 * \param buffer - buffer to read scanlines into
@@ -118,8 +119,8 @@ void IqTexInputFile::readPixels(Array2DType& buffer, TqInt startLine,
 		throw XqInternal("Attempt to read scanlines outside image boundaries",
 				__FILE__, __LINE__);
 	// Resize the buffer to deal with the new data
-	buffer.resize(header().width(), numScanlines, header().channels().bytesPerPixel());
-	readPixelsImpl(buffer.rawDataPtr(), startLine, numScanlines);
+	buffer.resize(header().width(), numScanlines, header().channels());
+	readPixelsImpl(buffer.rawData(), startLine, numScanlines);
 }
 
 

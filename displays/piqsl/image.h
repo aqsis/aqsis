@@ -37,8 +37,10 @@
 #include <boost/function.hpp>
 #include <boost/thread/mutex.hpp>
 
-#include "mixedimagebuffer.h"
 #include "tinyxml.h"
+
+#include "channellist.h"
+#include "mixedimagebuffer.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -170,9 +172,9 @@ public:
 	 */
 	void saveToTiff(const std::string& filename) const;
 	/** Load the image from a TIFF file on disk.
-	 * \param filename	The name of the TIFF file to load the image data from.
+	 * \param fileName	The name of the TIFF file to load the image data from.
 	 */
-	void loadFromTiff(const std::string& filename);
+	void loadFromFile(const std::string& fileName);
 
 protected:
 	/** Check m_displayMap is pointing to valid channel names from channelInfo.

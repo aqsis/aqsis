@@ -11,8 +11,9 @@ INCLUDE(${AQSISTYPES_SOURCE_DIR}/export.cmake)
 INCLUDE(${DDMANAGER_SOURCE_DIR}/export.cmake)
 
 SET(AQSISTEX_SRCS
+	channelinfo.cpp
 	channellist.cpp
-	itexfile.cpp
+	itexinputfile.cpp
 	magicnumber.cpp
 	texfileheader.cpp
 	tiffdirhandle.cpp

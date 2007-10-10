@@ -57,6 +57,20 @@ BOOST_AUTO_TEST_CASE(CqChannelList_channelByteOffset_test)
 	BOOST_CHECK_EQUAL(f.chanList.bytesPerPixel(), 11);
 }
 
+BOOST_AUTO_TEST_CASE(CqChannelList_sharedChannelType_test)
+{
+	Aqsis::CqChannelList chanList;
+	// Check that the shared type comes out correctly
+	chanList.addChannel(Aqsis::SqChannelInfo("r", Aqsis::Channel_Unsigned8));
+	BOOST_CHECK_EQUAL(chanList.sharedChannelType(), Aqsis::Channel_Unsigned8);
+	chanList.addChannel(Aqsis::SqChannelInfo("g", Aqsis::Channel_Unsigned8));
+	BOOST_CHECK_EQUAL(chanList.sharedChannelType(), Aqsis::Channel_Unsigned8);
+	// There's no shared channel type anymore since the "b" channel has an
+	// incompatible type.
+	chanList.addChannel(Aqsis::SqChannelInfo("b", Aqsis::Channel_Unsigned16));
+	BOOST_CHECK_EQUAL(chanList.sharedChannelType(), Aqsis::Channel_TypeUnknown);
+}
+
 BOOST_AUTO_TEST_CASE(CqChannelList_reorderChannels_test)
 {
 	ChannelInfoListFixture f;
