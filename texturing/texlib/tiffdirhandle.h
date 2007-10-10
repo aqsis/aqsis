@@ -143,8 +143,14 @@ class CqTiffDirHandle : public boost::noncopyable
 
 	private:
 		//----------------------------------------------------------------------
-		/// \name Helper functions for deducing channel names/types
+		/// \name Helper functions for filling CqTexFileHeader
 		//@{
+		/// Fill the header with required attributes 
+		void fillHeaderRequiredAttrs(CqTexFileHeader& header) const;
+		/// Search the TIFF for optional header attributes and add them.
+		void fillHeaderOptionalAttrs(CqTexFileHeader& header) const;
+		/// Fill the header fields dealing with pixel layout
+		void fillHeaderPixelLayout(CqTexFileHeader& header) const;
 		/** \brief Guess the image channels for the given tiff directory.
 		 *
 		 * Tiff doesn't have a way to explicitly name the channels contained,

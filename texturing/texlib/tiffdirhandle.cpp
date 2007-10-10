@@ -29,6 +29,7 @@
 #include <tiffio.hxx>
 
 #include "aqsismath.h"
+#include "matrix.h"
 #include "logging.h"
 
 namespace Aqsis
@@ -77,12 +78,11 @@ tdir_t CqTiffDirHandle::dirIndex() const
 	return m_fileHandle->m_currDir;
 }
 
-void addStringToHeaderIfDefined(const CqTiffDirHandle& dirHandle, 
-		CqTexFileHeader& header, ttag_t tag, const char* headerName)
+void CqTiffDirHandle::fillHeader(CqTexFileHeader& header) const
 {
-	char* buf = dirHandle.tiffTagValue(tag, (char*)0);
-	if(buf)
-		header.setAttribute<std::string>(headerName, buf);
+	fillHeaderRequiredAttrs(header);
+	fillHeaderOptionalAttrs(header);
+	fillHeaderPixelLayout(header);
 }
 
 const char* getCompressionName(uint16 compressionType)
@@ -106,11 +106,12 @@ const char* getCompressionName(uint16 compressionType)
 	}
 }
 
-void CqTiffDirHandle::fillHeader(CqTexFileHeader& header) const
+void CqTiffDirHandle::fillHeaderRequiredAttrs(CqTexFileHeader& header) const
 {
+	// Fill header with general metadata which won't affect the details of the
+	// pixel memory layout.
 	header.setAttribute<TqInt>("width", tiffTagValue<uint32>(TIFFTAG_IMAGEWIDTH));
 	header.setAttribute<TqInt>("height", tiffTagValue<uint32>(TIFFTAG_IMAGELENGTH));
-	//header.setAttribute<TqInt>("rows_per_strip", tiffTagValue<uint32>(TIFFTAG_ROWSPERSTRIP));
 	header.setAttribute<bool>("isTiled", TIFFIsTiled(tiffPtr()));
 	if(header.findAttribute<bool>("isTiled"))
 	{
@@ -119,30 +120,84 @@ void CqTiffDirHandle::fillHeader(CqTexFileHeader& header) const
 		header.setAttribute<TqInt>("tileHeight",
 				tiffTagValue<uint32>(TIFFTAG_TILELENGTH));
 	}
+	// Get the compression type.
+	header.setAttribute<std::string>("compression",
+			getCompressionName(tiffTagValue<uint16>(TIFFTAG_COMPRESSION)) );
+	// Compute pixel aspect ratio
+	TqFloat xRes = 0;
+	TqFloat yRes = 0;
+	if(TIFFGetField(tiffPtr(), TIFFTAG_XRESOLUTION, &xRes)
+			&& TIFFGetField(tiffPtr(), TIFFTAG_YRESOLUTION, &yRes))
+	{
+		// yRes/xRes should be the correct quantity corresponding to the
+		// pixelAspectRatio used in OpenEXR.
+		header.setAttribute<TqFloat>("pixelAspectRatio", yRes/xRes);
+	}
+	else
+	{
+		header.setAttribute<TqFloat>("pixelAspectRatio", 1.0f);
+	}
+	/// \todo Compute and save the data window
+	/** Something like the "data window" in OpenEXR terminology can be
+	 * obtained using
+	 * TIFFTAG_XPOSITION TIFFTAG_PIXAR_IMAGEFULLWIDTH
+	 * TIFFTAG_YPOSITION TIFFTAG_PIXAR_IMAGEFULLLENGTH
+	 *
+	 * This should allow sensible saving/loading of cropwindows...
+	 */
+}
 
+// Extract an attribute from dirHandle and add it to header, if present.
+template<typename Tattr, typename Ttiff>
+void addAttributeToHeader(const char* attributName, ttag_t tag,
+		CqTexFileHeader& header, const CqTiffDirHandle& dirHandle)
+{
+	Ttiff temp;
+	if(TIFFGetField(dirHandle.tiffPtr(), tag, &temp))
+		header.setAttribute<Tattr>(attributName, Tattr(temp));
+}
+
+void CqTiffDirHandle::fillHeaderOptionalAttrs(CqTexFileHeader& header) const
+{
 	// Add various descriptive strings to the header if they exist
-	addStringToHeaderIfDefined(*this, header, TIFFTAG_ARTIST, "artist");
-	addStringToHeaderIfDefined(*this, header, TIFFTAG_SOFTWARE, "software");
-	addStringToHeaderIfDefined(*this, header, TIFFTAG_HOSTCOMPUTER, "hostname");
-	addStringToHeaderIfDefined(*this, header, TIFFTAG_IMAGEDESCRIPTION, "description");
-	addStringToHeaderIfDefined(*this, header, TIFFTAG_DATETIME, "dateTime");
+	addAttributeToHeader<std::string,char*>("artist",
+			TIFFTAG_ARTIST, header, *this);
+	addAttributeToHeader<std::string,char*>("software",
+			TIFFTAG_SOFTWARE, header, *this);
+	addAttributeToHeader<std::string,char*>("hostname",
+			TIFFTAG_HOSTCOMPUTER, header, *this);
+	addAttributeToHeader<std::string,char*>("description",
+			TIFFTAG_IMAGEDESCRIPTION, header, *this);
+	addAttributeToHeader<std::string,char*>("dateTime",
+			TIFFTAG_DATETIME, header, *this);
 
+	// Add some matrix attributes
+	/// \todo: Check that these are constructed correctly!
+	addAttributeToHeader<CqMatrix,float*>("matrixWorldToScreen",
+			TIFFTAG_PIXAR_MATRIX_WORLDTOSCREEN, header, *this);
+	addAttributeToHeader<CqMatrix,float*>("matrixWorldToCamera",
+			TIFFTAG_PIXAR_MATRIX_WORLDTOCAMERA, header, *this);
+}
+
+void CqTiffDirHandle::fillHeaderPixelLayout(CqTexFileHeader& header) const
+{
+	// Deal with fields which determine the pixel layout.
 	try
 	{
 		// Deduce image channel information.
 		guessChannels(header.findAttribute<CqChannelList>("channels"));
+		// Check that channels are interlaced, otherwise we'll be confused.
 		TqInt planarConfig = tiffTagValue<uint16>(TIFFTAG_PLANARCONFIG,
 				PLANARCONFIG_CONTIG);
 		if(planarConfig != PLANARCONFIG_CONTIG)
 			throw XqUnknownTiffFormat("non-interlaced channels detected",
 					__FILE__, __LINE__);
+		// Check that the origin is at the topleft of the image.
 		TqInt orientation = tiffTagValue<uint16>(TIFFTAG_ORIENTATION,
 				ORIENTATION_TOPLEFT);
 		if(orientation != ORIENTATION_TOPLEFT)
 			throw XqUnknownTiffFormat("orientation isn't top-left",
 					__FILE__, __LINE__);
-		header.setAttribute<std::string>("compression",
-				getCompressionName(tiffTagValue<uint16>(TIFFTAG_COMPRESSION)) );
 	}
 	catch(XqUnknownTiffFormat& e)
 	{
@@ -232,49 +287,42 @@ void CqTiffDirHandle::guessChannels(CqChannelList& channels) const
 	else
 	{
 		// Determine the channel type held in the tiff
-		TqInt samplesPerPixel = tiffTagValue<uint16>(TIFFTAG_SAMPLESPERPIXEL);
-		TqInt photometricInterp = tiffTagValue<uint16>(TIFFTAG_PHOTOMETRIC);
-		switch(photometricInterp)
+		switch(tiffTagValue<uint16>(TIFFTAG_PHOTOMETRIC))
 		{
 			case PHOTOMETRIC_MINISBLACK:
-				if(samplesPerPixel == 1)
-				{
-					// We have an intensity (y) channel only.
-					channels.addChannel(SqChannelInfo("y", chanType));
-				}
-				else
-				{
-					// Try to bumble through anyway...
-					channels.addUnnamedChannels(chanType, samplesPerPixel);
-				}
+				// We have an intensity (y) channel only.
+				channels.addChannel(SqChannelInfo("y", chanType));
 				break;
 			case PHOTOMETRIC_RGB:
-				if(samplesPerPixel < 3)
-					channels.addUnnamedChannels(chanType, samplesPerPixel);
-				else
 				{
-					// add RGB channels
-					channels.addChannel(SqChannelInfo("r", chanType));
-					channels.addChannel(SqChannelInfo("g", chanType));
-					channels.addChannel(SqChannelInfo("b", chanType));
-					/// \todo Investigate what to do about TIFFTAG_EXTRASAMPLES
-					if(samplesPerPixel == 4)
-					{
-						// add alpha channel
-						channels.addChannel(SqChannelInfo("a", chanType));
-					}
-					else if(samplesPerPixel == 6)
-					{
-						// add RGB alpha channels
-						channels.addChannel(SqChannelInfo("ra", chanType));
-						channels.addChannel(SqChannelInfo("ga", chanType));
-						channels.addChannel(SqChannelInfo("ba", chanType));
-					}
+					TqInt samplesPerPixel = tiffTagValue<uint16>(TIFFTAG_SAMPLESPERPIXEL);
+					if(samplesPerPixel < 3)
+						channels.addUnnamedChannels(chanType, samplesPerPixel);
 					else
 					{
-						// Or not sure what to do here... add some unnamed
-						// channels?
-						channels.addUnnamedChannels(chanType, samplesPerPixel-3);
+						// add RGB channels
+						channels.addChannel(SqChannelInfo("r", chanType));
+						channels.addChannel(SqChannelInfo("g", chanType));
+						channels.addChannel(SqChannelInfo("b", chanType));
+						/// \todo Investigate what to do about TIFFTAG_EXTRASAMPLES
+						if(samplesPerPixel == 4)
+						{
+							// add alpha channel
+							channels.addChannel(SqChannelInfo("a", chanType));
+						}
+						else if(samplesPerPixel == 6)
+						{
+							// add RGB alpha channels
+							channels.addChannel(SqChannelInfo("ra", chanType));
+							channels.addChannel(SqChannelInfo("ga", chanType));
+							channels.addChannel(SqChannelInfo("ba", chanType));
+						}
+						else
+						{
+							// Or not sure what to do here... add some unnamed
+							// channels?
+							channels.addUnnamedChannels(chanType, samplesPerPixel-3);
+						}
 					}
 				}
 				break;

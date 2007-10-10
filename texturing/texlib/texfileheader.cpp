@@ -35,7 +35,10 @@ void CqTexFileHeader::addStandardAttributes()
 {
 	setAttribute<TqInt>("width", 100);
 	setAttribute<TqInt>("height", 100);
+	setAttribute<bool>("isTiled", false);
+	setAttribute<std::string>("compression", "none");
 	setAttribute<CqChannelList>("channels", CqChannelList());
+	setAttribute<TqFloat>("pixelAspectRatio", 1.0f);
 }
 
 } // namespace Aqsis
