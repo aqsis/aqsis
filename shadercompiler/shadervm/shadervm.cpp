@@ -34,7 +34,7 @@
 #include	<stddef.h>
 
 #include	"shadervm.h"
-//#include	"symbols.h"
+#include	"iparameter.h"
 #include	"version.h"
 #include	"sstring.h"
 
@@ -1596,10 +1596,9 @@ void CqShaderVM::InitialiseParameters( )
 /** Set the instance variables on this shader, used for varying variables which will be set from a parameter in the surface.
 */
 
-void CqShaderVM::SetArgument( CqParameter* pParam, IqSurface* pSurface )
+void CqShaderVM::SetArgument( IqParameter* pParam, IqSurface* pSurface )
 {
 	// Find the relevant variable.
-#if 0
 	TqInt i = FindLocalVarIndex( pParam->strName().c_str() );
 	if ( i >= 0 )
 	{
@@ -1608,7 +1607,6 @@ void CqShaderVM::SetArgument( CqParameter* pParam, IqSurface* pSurface )
 		if(pVar->Type() == pParam->Type())
 			pParam->Dice(m_uGridRes,m_vGridRes,pVar,pSurface);
 	}
-#endif
 }
 
 

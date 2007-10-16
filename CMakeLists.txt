@@ -17,6 +17,13 @@ INCLUDE(FindXsltproc)
 INCLUDE(FindFlexBison)
 INCLUDE(FindSVNVersion)
 
+IF(NOT AQSIS_FLTK_FOUND)
+	MESSAGE(STATUS "Cannot find FLTK, display and piqsl will not be built")
+ENDIF(NOT AQSIS_FLTK_FOUND)
+IF(NOT AQSIS_FLUID_FOUND)
+	MESSAGE(STATUS "Cannot find Fluid, piqsl will not be built")
+ENDIF(NOT AQSIS_FLUID_FOUND)
+
 ENABLE_TESTING()
 
 IF(WIN32)
@@ -33,31 +40,6 @@ SVN_REPOSITORY_VERSION( REVISION ${PROJECT_SOURCE_DIR} )
 CONFIGURE_FILE(version.h.in.cmake ${PROJECT_BINARY_DIR}/version.h)
 
 INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR})
-
-IF(WIN32)
-	SET(BINDIR "bin" 
-		CACHE STRING "Install location for binary files. (relative to CMAKE_INSTALL_PREFIX)")
-	SET(RENDERENGINEDIR "${BINDIR}" 
-		CACHE STRING "Install location for render dependent shared libraries (relative to CMAKE_INSTALL_PREFIX)")
-	SET(DISPLAYSDIR "${BINDIR}" 
-		CACHE STRING "Install location for display libraries (relative to CMAKE_INSTALL_PREFIX)")
-	SET(PLUGINDIR "${BINDIR}" 
-		CACHE STRING "Install location for plugin libraries (relative to CMAKE_INSTALL_PREFIX)")
-	SET(LIBDIR "lib" 
-		CACHE STRING "Install location for shared libraries (relative to CMAKE_INSTALL_PREFIX)")
-	SET(STATICLIBDIR "${LIBDIR}" 
-		CACHE STRING "Install location for static libraries (relative to CMAKE_INSTALL_PREFIX)")
-	SET(SHADERDIR "shaders" 
-		CACHE STRING "Install location for shaders (relative to CMAKE_INSTALL_PREFIX)")
-	SET(SYSCONFDIR "${BINDIR}" 
-		CACHE STRING "Install location for system configuration files (relative to CMAKE_INSTALL_PREFIX)")
-	SET(INCLUDEDIR "include/aqsis" 
-		CACHE STRING "Install location for aqsis header files (relative to CMAKE_INSTALL_PREFIX)")
-	SET(CONTENTDIR "content" 
-		CACHE STRING "Install location for content (relative to CMAKE_INSTALL_PREFIX)")
-	SET(SCRIPTSDIR "scripts" 
-		CACHE STRING "Install location for scripts (relative to CMAKE_INSTALL_PREFIX)")
-ENDIF(WIN32)
 
 OPTION(AQSIS_USE_TIMERS "Enable performance timers ON/OFF" ON)
 IF(AQSIS_USE_TIMERS)
@@ -118,8 +100,11 @@ GET_DIRECTORY_PROPERTY(AQSL_EXECUTABLE DIRECTORY shadercompiler/aqsl DEFINITION 
 ADD_SUBDIRECTORY(shadercompiler/slxargs)
 ADD_SUBDIRECTORY(shadercompiler/aqsltell)
 ADD_SUBDIRECTORY(rib/ri2rib)
+ADD_SUBDIRECTORY(rib/miqser)
 ADD_SUBDIRECTORY(texturing/teqser)
-ADD_SUBDIRECTORY(displays/display)
+IF(AQSIS_FLTK_FOUND)
+	ADD_SUBDIRECTORY(displays/display)
+ENDIF(AQSIS_FLTK_FOUND)
 ADD_SUBDIRECTORY(thirdparty/tinyxml)
 ADD_SUBDIRECTORY(displays/d_exr)
 ADD_SUBDIRECTORY(displays/d_sdcBMP)
@@ -134,11 +119,10 @@ ADD_SUBDIRECTORY(texturing/plugins/exr2tif)
 ADD_SUBDIRECTORY(texturing/plugins/png2tif)
 ADD_SUBDIRECTORY(texturing/plugins/tga2tif)
 ADD_SUBDIRECTORY(shaders)
-
-IF(AQSIS_FLTK_FOUND AND AQSIS_BOOST_FOUND)
+IF(AQSIS_FLTK_FOUND AND AQSIS_FLUID_FOUND AND AQSIS_BOOST_FOUND)
 	ADD_SUBDIRECTORY(displays/piqsl)
 	GET_DIRECTORY_PROPERTY(piqsl_DISPLAYLIB DIRECTORY displays/piqsl DEFINITION DISPLAYLIB)
-ENDIF(AQSIS_FLTK_FOUND AND AQSIS_BOOST_FOUND)
+ENDIF(AQSIS_FLTK_FOUND AND AQSIS_FLUID_FOUND AND AQSIS_BOOST_FOUND)
 #
 # Build aqsisrc
 #
