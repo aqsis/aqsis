@@ -1776,19 +1776,32 @@ RtVoid	RiOptionV( RtToken name, PARAMETERLIST )
 					{
 						// Get the old value for use in escape replacement
 						CqString str_old = pOpt[ 0 ];
+						CqString* pOptStd = QGetRenderContext()->poptWriteCurrent()->GetStringOptionWrite("defaultsearchpath", undecoratedName.c_str(), Count);
+						CqString str_std = pOptStd[ 0 ];
 						Aqsis::log() << debug << "Old searchpath = " << str_old.c_str() << std::endl;
-						// Build the string, checking for & character and replace with old string.
+						// Build the string, checking for & and @ characters  and replace with old and default string, respectively.
 						unsigned int strt = 0;
 						unsigned int len = 0;
 						while ( 1 )
 						{
-							if ( ( len = strcspn( &ps[ j ][ strt ], "&" ) ) < strlen( &ps[ j ][ strt ] ) )
+							if ( ( len = strcspn( &ps[ j ][ strt ], "&@" ) ) < strlen( &ps[ j ][ strt ] ) )
 							{
-								str += CqString( ps[ j ] ).substr( strt, len );
-								str += str_old;
-								strt += len + 1;
+								if( *(&ps[ j ][ strt + len ]) == '&' )
+								{
+									str += CqString( ps[ j ] ).substr( strt, len );
+									str += str_old;
+									strt += len + 1;
+									continue;
+								}
+								if( *(&ps[ j ][ strt + len ]) == '@' )
+								{
+									str += CqString( ps[ j ] ).substr( strt, len );
+									str += str_std;
+									strt += len + 1;
+									continue;
+								}
 							}
-							else
+							else 
 							{
 								str += CqString( ps[ j ] ).substr( strt );
 								break;
