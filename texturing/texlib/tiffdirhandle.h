@@ -39,11 +39,16 @@
 #include "exception.h"
 #include "channellist.h"
 #include "texfileheader.h"
+#include "logging.h"
 
 namespace Aqsis
 {
 
 class CqTiffFileHandle;
+
+/// Type string for tiff files.
+
+extern const char* tiffFileTypeString;
 
 //------------------------------------------------------------------------------
 /** \brief A locked handle to a tiff directory.
@@ -77,6 +82,9 @@ class CqTiffDirHandle : public boost::noncopyable
 		/// Obtain the index to this directory
 		tdir_t dirIndex() const;
 
+		//----------------------------------------------------------------------
+		/// \name Functions to read and write header data
+		//@{
 		/** \brief Fill the given tex file header with relevant data about this
 		 * tiff directory.
 		 *
@@ -92,6 +100,10 @@ class CqTiffDirHandle : public boost::noncopyable
 		 * \param header - header to fill.
 		 */
 		void fillHeader(CqTexFileHeader& header) const;
+		/** \brief Write relevant header data to the directory.
+		 */
+		void writeHeader(const CqTexFileHeader& header);
+		//@}
 
 		//----------------------------------------------------------------------
 		/// \name Access to tags of the underlying tiff file
@@ -128,17 +140,24 @@ class CqTiffDirHandle : public boost::noncopyable
 		 */
 		template<typename T>
 		T tiffTagValue(const ttag_t tag, const T defaultVal) const;
-		/** \brief Ensure that a given tiff tag has a particular value.
+		/** \brief Write a tag to the underlying tiff dierctory.
 		 *
-		 * \param tag - the tiff tag to query
-		 * \param desiredValue - desired value for the tag.
-		 * \param tagNotFoundVal - return this when the tag is not found
+		 * Note that this isn't particularly typesafe - the type T needs to
+		 * correspond to the correcty type for the given tag, otherwise weird
+		 * stuff might happen.
 		 *
-		 * \return true if the tag has the desired value, false if not.
+		 * If the underlying tiff library reports an error trying to set the
+		 * tag, throw an error, but only if throwOnError is true.  Otherwise
+		 * the error is reported to the standard aqsis logging facility at
+		 * "warning" level.
+		 *
+		 * \param tag - tiff tag to write
+		 * \param value - value for the tag.
+		 * \param throwOnError - if true, throw when an error occurrs.
 		 */
 		template<typename T>
-		bool checkTagValue(const ttag_t tag, const T desiredValue,
-				const bool tagNotFoundVal = true) const;
+		void setTiffTagValue(const ttag_t tag, const T value,
+				bool throwOnError = true);
 		//@}
 
 	private:
@@ -171,6 +190,17 @@ class CqTiffDirHandle : public boost::noncopyable
 		EqChannelType guessChannelType() const;
 		//@}
 
+		/// \name Helper functions for filling a tiff with header data
+		//@{
+		/// Write required tiff header attributes
+		void writeRequiredAttrs(const CqTexFileHeader& header);
+		/// Write channel-related stuff (required attrs.)
+		void writeChannelAttrs(const CqTexFileHeader& header);
+		/// Write compression-related stuff
+		void writeCompressionAttrs(const CqTexFileHeader& header);
+		/// Write optional tiff header attributes
+		void writeOptionalAttrs(const CqTexFileHeader& header);
+		//@}
 
 		//----------------------------------------------------------------------
 		boost::shared_ptr<CqTiffFileHandle> m_fileHandle; ///< underlying file handle
@@ -191,7 +221,7 @@ class CqTiffFileHandle : public boost::noncopyable
 	public:
 		/** \brief Construct a tiff file handle
 		 *
-		 * \throw XqEnvironment if libtiff cannot open the file.
+		 * \throw XqInternal if libtiff cannot open the file.
 		 *
 		 * \param fileName - name of the tiff to open
 		 * \param openMode - libtiff file open mode ("r" or "w" for read or write)
@@ -204,6 +234,13 @@ class CqTiffFileHandle : public boost::noncopyable
 		 * \param inputStream - an input stream
 		 */
 		CqTiffFileHandle(std::istream& inputStream);
+		/** \brief Construct a tiff file handle writing to a std::ostream
+		 *
+		 * \throw XqInternal if libtiff has a problem with the stream
+		 *
+		 * \param outputStream - the output stream
+		 */
+		CqTiffFileHandle(std::ostream& outputStream);
 
 		/// Return the file name
 		inline const std::string& fileName() const;
@@ -226,7 +263,7 @@ class CqTiffFileHandle : public boost::noncopyable
 /** \brief Allocate memory with _TIFFmalloc and encapsulate the memory
  * in a boost::shared_array.
  *
- * \throw XqEnvironment if the allocation fails
+ * \throw XqInternal if the allocation fails
  *
  * \param size - number of bytes to allocate.
  * \return 'size' bytes of memory allocated with _TIFFmalloc
@@ -270,14 +307,19 @@ T CqTiffDirHandle::tiffTagValue(const ttag_t tag, const T defaultVal) const
 }
 
 template<typename T>
-bool CqTiffDirHandle::checkTagValue(const uint32 tag, const T desiredValue,
-		const bool tagNotFoundVal) const
+void CqTiffDirHandle::setTiffTagValue(const ttag_t tag, const T value,
+		bool throwOnError)
 {
-	T temp = 0;
-	if(TIFFGetField(tiffPtr(), tag, &temp))
-		return temp == desiredValue;
-	else
-		return tagNotFoundVal;
+	
+	if(!TIFFSetField(tiffPtr(), tag, value))
+	{
+		const std::string errorStr = (boost::format("Could not set tiff tag = %d")
+				% tag).str();
+		if(throwOnError)
+			throw XqInternal(errorStr, __FILE__, __LINE__);
+		else
+			Aqsis::log() << warning << errorStr;
+	}
 }
 
 //------------------------------------------------------------------------------
@@ -297,7 +339,7 @@ boost::shared_array<T> tiffMalloc(const tsize_t size)
 {
 	boost::shared_array<T> buf(reinterpret_cast<T*>(_TIFFmalloc(size)), _TIFFfree);
 	if(!buf)
-		throw XqEnvironment("Could not allocate memory with _TIFFmalloc",
+		throw XqInternal("Could not allocate memory with _TIFFmalloc",
 				__FILE__, __LINE__);
 	return buf;
 }

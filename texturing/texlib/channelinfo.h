@@ -51,6 +51,11 @@ enum EqChannelType
 	Channel_TypeUnknown
 };
 
+/** \brief Get the number of bytes per pixel required to store the given
+ * channel type.
+ */
+TqInt bytesPerPixel(EqChannelType type);
+
 /** \brief Get the EqChannelType for the given template type
  *
  * This function is specialized for each type represented in EqChannelType.
@@ -108,22 +113,7 @@ inline SqChannelInfo::SqChannelInfo(const std::string& name, EqChannelType type)
 
 inline TqInt SqChannelInfo::bytesPerPixel() const
 {
-	switch(type)
-	{
-		case Channel_Unsigned32:
-		case Channel_Signed32:
-		case Channel_Float32:
-			return 4;
-			break;
-		case Channel_Unsigned16:
-		case Channel_Signed16:
-		case Channel_Float16:
-			return 2;
-		case Channel_Signed8:
-		case Channel_Unsigned8:
-		default:
-			return 1;
-	}
+	return Aqsis::bytesPerPixel(type);
 }
 
 //------------------------------------------------------------------------------

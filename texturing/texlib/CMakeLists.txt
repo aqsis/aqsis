@@ -14,10 +14,12 @@ SET(AQSISTEX_SRCS
 	channelinfo.cpp
 	channellist.cpp
 	itexinputfile.cpp
+	itexoutputfile.cpp
 	magicnumber.cpp
 	texfileheader.cpp
 	tiffdirhandle.cpp
 	tiffinputfile.cpp
+	tiffoutputfile.cpp
 	imagechannel.cpp
 	mixedimagebuffer.cpp
 	)

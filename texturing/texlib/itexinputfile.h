@@ -25,8 +25,8 @@
  * \author Chris Foster
  */
 
-#ifndef ITEXFILE_H_INCLUDED
-#define ITEXFILE_H_INCLUDED
+#ifndef ITEXINPUTFILE_H_INCLUDED
+#define ITEXINPUTFILE_H_INCLUDED
 
 #include "aqsis.h"
 
@@ -126,4 +126,4 @@ void IqTexInputFile::readPixels(Array2DType& buffer, TqInt startLine,
 
 } // namespace Aqsis
 
-#endif // ITEXFILE_H_INCLUDED
+#endif // ITEXINPUTFILE_H_INCLUDED

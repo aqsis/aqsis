@@ -42,9 +42,23 @@
 namespace Aqsis {
 
 //------------------------------------------------------------------------------
+/** \brief Standard image attributes.
+ *
+ * This enum should be expanded as extra image attributes are required.
+ */
+enum EqImageAttribute
+{
+};
+
+//------------------------------------------------------------------------------
 /** \brief Wrapper for image file metadata
  *
+ * General support for image metadata presents a bit of a problem, since
+ * various file types choose to support various types and fields for metadata.
  *
+ * The approach chosen here is to index metadata via strings, but also provide
+ * some accessor functions for standard attributes which might be expected to
+ * be used by many (if not all) file formats.
  */
 class CqTexFileHeader
 {
@@ -91,6 +105,33 @@ class CqTexFileHeader
 		inline CqChannelList& channels();
 		/// Get the image channel data
 		inline const CqChannelList& channels() const;
+
+		inline bool isTiled() const;
+
+		/*
+		// Standard Attributes:
+		/// Image dimensions
+		width,                 ///< TqInt - image width
+		height,                ///< TqInt - image height
+		pixelAspectRatio,      ///< TqFloat - aspect ratio = pix_width/pix_height
+		// Channel information
+		channels,              ///< CqChannelList - list of image channels
+		/// Tile information
+		isTiled,               ///< bool - is the image tiled?
+		tileWidth,             ///< TqInt - width for tiled image
+		tileHeight,            ///< TqInt - height for tiled image
+		/// Information strings
+		software,              ///< std::string - image creation software
+		hostName,              ///< std::string - computer host name
+		description,           ///< std::string - description
+		dateTime,              ///< std::string - date and time of creation
+		/// Transformation matrices
+		worldToScreenMatrix,   ///< CqMatrix - world -> screen transformation
+		cameraToScreenMatrix,  ///< CqMatrix - camer -> screen transformation
+		/// Compression
+		compression,           ///< std::string - compression type
+		compressionQuality,    ///< TqInt - compression quality (for lossy compression)
+		*/
 
 		/** \brief Get a reference to an attribute by name
 		 *

@@ -19,33 +19,43 @@
 
 /** \file
  *
- * \brief Interface wrapper functions and factory functions for texture file
- * interface.
+ * \brief Implementation of a scanline-based output interface for texture files.
  *
  * \author Chris Foster
  */
 
-#include "itexinputfile.h"
+#include "itexoutputfile.h"
 
-#include "tiffinputfile.h"
-#include "magicnumber.h"
+#include "tiffoutputfile.h"
+#include "exception.h"
 
 namespace Aqsis {
 
 //------------------------------------------------------------------------------
-// IqTexInputFile
-//------------------------------------------------------------------------------
-
-boost::shared_ptr<IqTexInputFile> IqTexInputFile::open(const std::string& fileName)
+boost::shared_ptr<IqTexOutputFile> IqTexOutputFile::open(
+		const std::string& fileName, const std::string& fileType,
+		const CqTexFileHeader& header)
 {
-	boost::shared_ptr<IqTexInputFile> newFile;
+	// Check some of the header data to make sure it's minimally sane...
+	if(header.width() <= 0 || header.height() <= 0)
+		throw XqInternal("Image width and height cannot be negative or zero.",
+				__FILE__, __LINE__);
+	if(header.channels().numChannels() == 0)
+		throw XqInternal("No data channels present.", __FILE__, __LINE__);
 
-	TqMagicNumberPtr magicNum = getMagicNumber(fileName);
-	if(isTiffMagicNumber(*magicNum))
-		newFile.reset(new CqTiffInputFile(fileName));
-	// else if(Add new formats here!)
+	// Create the new file object
+	boost::shared_ptr<IqTexOutputFile> newFile;
+
+	if(fileType == tiffFileTypeString)
+	{
+		newFile.reset(new CqTiffOutputFile(fileName, header));
+	}
+	// else if(Add new output formats here!)
 	else
-		throw XqInternal("Unknown file type", __FILE__, __LINE__);
+	{
+		throw XqInternal("Unknown file type: \"" + fileType + "\"",
+				__FILE__, __LINE__);
+	}
 
 	return newFile;
 }

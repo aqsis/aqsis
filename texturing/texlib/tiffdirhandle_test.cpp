@@ -35,7 +35,7 @@
 BOOST_AUTO_TEST_CASE(CqTiffFileHandle_test_constructor)
 {
 	BOOST_CHECK_THROW(Aqsis::CqTiffFileHandle("nonexistant_file.tif", "r"),
-			Aqsis::XqEnvironment);
+			Aqsis::XqInternal);
 	BOOST_MESSAGE("Unit test note: Expect a libtiff error about nonexistant_file.tif above ^^");
 
 	// just create.  Should not throw.
@@ -81,10 +81,6 @@ BOOST_AUTO_TEST_CASE(CqTiffDirHandle_tiffTagValue_test)
 
 	char* artistDefault = "blah";
 	BOOST_CHECK_EQUAL(dirHandle.tiffTagValue<char*>(TIFFTAG_ARTIST, artistDefault), artistDefault);
-
-	BOOST_CHECK(dirHandle.checkTagValue<uint32>(TIFFTAG_IMAGEWIDTH, 6));
-	BOOST_CHECK(dirHandle.checkTagValue<char*>(TIFFTAG_ARTIST, artistDefault));
-	BOOST_CHECK(!dirHandle.checkTagValue<char*>(TIFFTAG_ARTIST, artistDefault, false));
 }
 
 BOOST_AUTO_TEST_CASE(CqTiffDirHandle_fillHeader_test)

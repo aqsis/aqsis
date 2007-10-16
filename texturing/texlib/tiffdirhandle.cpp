@@ -35,22 +35,24 @@
 namespace Aqsis
 {
 
+const char* tiffFileTypeString = "tiff";
+
 //------------------------------------------------------------------------------
 // XqUnknownTiffFormat
 //------------------------------------------------------------------------------
 /** \brief An exception 
  */
-class COMMON_SHARE XqUnknownTiffFormat : public XqEnvironment
+class COMMON_SHARE XqUnknownTiffFormat : public XqInternal
 {
 	public:
 		XqUnknownTiffFormat (const std::string& reason, const std::string& detail,
 			const std::string& file, const unsigned int line)
-			: XqEnvironment(reason, detail, file, line)
+			: XqInternal(reason, detail, file, line)
 		{ }
 
 		XqUnknownTiffFormat (const std::string& reason,	const std::string& file,
 			const unsigned int line)
-			: XqEnvironment(reason, file, line)
+			: XqInternal(reason, file, line)
 		{ }
 
 		virtual const char* description () const
@@ -62,6 +64,46 @@ class COMMON_SHARE XqUnknownTiffFormat : public XqEnvironment
 		{ }
 };
 
+
+//------------------------------------------------------------------------------
+// Helper functions and data for dealing with tiff compression
+//------------------------------------------------------------------------------
+typedef std::pair<uint16, const char*> TqComprPair;
+static TqComprPair comprTypesInit[] = {
+	TqComprPair(COMPRESSION_NONE, "none"),
+	TqComprPair(COMPRESSION_LZW, "lzw"),
+	TqComprPair(COMPRESSION_JPEG, "jpeg"),
+	TqComprPair(COMPRESSION_PACKBITS, "packbits"),
+	TqComprPair(COMPRESSION_SGILOG, "log"),
+	TqComprPair(COMPRESSION_DEFLATE, "deflate"),
+};
+/// vector holding the TIFF compression alternatives that we want to deal with.
+static const std::vector<TqComprPair> compressionTypes( comprTypesInit,
+		comprTypesInit + sizeof(comprTypesInit)/sizeof(TqComprPair));
+
+/// Get the tiff compression type from a string description.
+uint16 tiffCompressionTagFromName(const std::string& compressionName)
+{
+	for(std::vector<TqComprPair>::const_iterator i = compressionTypes.begin();
+			i != compressionTypes.end(); ++i)
+	{
+		if(i->second == compressionName)
+			return i->first;
+	}
+	return COMPRESSION_NONE;
+}
+
+/// Get the tiff compression type from a string description.
+const char* tiffCompressionNameFromTag(uint16 compressionType)
+{
+	for(std::vector<TqComprPair>::const_iterator i = compressionTypes.begin();
+			i != compressionTypes.end(); ++i)
+	{
+		if(i->first == compressionType)
+			return i->second;
+	}
+	return "unknown";
+}
 
 //------------------------------------------------------------------------------
 // CqTiffDirHandle
@@ -85,25 +127,174 @@ void CqTiffDirHandle::fillHeader(CqTexFileHeader& header) const
 	fillHeaderPixelLayout(header);
 }
 
-const char* getCompressionName(uint16 compressionType)
+void CqTiffDirHandle::writeHeader(const CqTexFileHeader& header)
 {
-	switch(compressionType)
+	writeRequiredAttrs(header);
+	writeOptionalAttrs(header);
+}
+
+void CqTiffDirHandle::writeRequiredAttrs(const CqTexFileHeader& header)
+{
+	// Width, height...
+	setTiffTagValue<uint32>(TIFFTAG_IMAGEWIDTH, header.width());
+	setTiffTagValue<uint32>(TIFFTAG_IMAGELENGTH, header.height());
+
+	// Orientation & planar config should always be fixed.
+	setTiffTagValue<uint16>(TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
+	setTiffTagValue<uint16>(TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
+
+	// Pixel aspect ratio
+	// We have no meaningful resolution unit - we're only interested in pixel
+	// aspect ratio, so set the resolution unit to none.
+	setTiffTagValue<uint16>(TIFFTAG_RESOLUTIONUNIT, RESUNIT_NONE);
+	setTiffTagValue<float>(TIFFTAG_XRESOLUTION, 1.0f);
+	setTiffTagValue<float>(TIFFTAG_YRESOLUTION,
+			header.findAttribute<TqFloat>("pixelAspectRatio"));
+
+	// Compression-related stuff
+	writeCompressionAttrs(header);
+	// Channel-related stuff
+	writeChannelAttrs(header);
+
+	// Write strip size - AFAICT libtiff uses the values of some other fields
+	// (compression) to choose a default, so do this last.
+	setTiffTagValue<uint32>(TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize(tiffPtr(), 0));
+}
+
+void CqTiffDirHandle::writeCompressionAttrs(const CqTexFileHeader& header)
+{
+	uint16 compression = tiffCompressionTagFromName(
+			header.findAttribute<std::string>("compression"));
+	setTiffTagValue<uint16>(TIFFTAG_COMPRESSION, compression);
+	if(compression != COMPRESSION_NONE
+			&& header.channels().sharedChannelType() != Channel_Float32)
 	{
-		case COMPRESSION_NONE:
-			return "none";
-		case COMPRESSION_LZW:
-			return "lzw";
-		case COMPRESSION_JPEG:
-			return "jpeg";
-		case COMPRESSION_PACKBITS:
-			return "packbits";
-		case COMPRESSION_PIXARLOG:
-			return "pixar_log";
-		case COMPRESSION_DEFLATE:
-			return "deflate";
-		default:
-			return "unknown";
+		// Adding a predictor drastically increases the compression ratios for
+		// some types of compression.  Apparently it doesn't work well on
+		// floating point data (I didn't test this).
+		setTiffTagValue<uint16>(TIFFTAG_PREDICTOR, PREDICTOR_HORIZONTAL);
 	}
+	if(compression == COMPRESSION_JPEG)
+	{
+		setTiffTagValue<int>(TIFFTAG_JPEGQUALITY,
+				header.findAttribute<TqInt>("compressionQuality", 85));
+	}
+}
+
+void CqTiffDirHandle::writeChannelAttrs(const CqTexFileHeader& header)
+{
+	const CqChannelList& channels = header.channels();
+	EqChannelType channelType = channels.sharedChannelType();
+	// Assume that the channel type is uniform across the various channels.
+	assert(channelType != Channel_TypeUnknown && channelType != Channel_Float16);
+	TqInt numChannels = channels.numChannels();
+
+	setTiffTagValue<uint16>(TIFFTAG_SAMPLESPERPIXEL, numChannels); 
+	setTiffTagValue<uint16>(TIFFTAG_BITSPERSAMPLE, 8*bytesPerPixel(channelType));
+	if(numChannels == 1)
+	{
+		// greyscale image
+		setTiffTagValue<uint16>(TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
+		// \todo PHOTOMETRIC_LOGL alternative for floats
+	}
+	else
+	{
+		// Multi-channel images.
+		//
+		// Use PHOTOMETRIC_RGB as the default photometric type.
+		setTiffTagValue<uint16>(TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
+		/// \todo PHOTOMETRIC_LOGLUV alternative for floats
+		if(numChannels > 3)
+		{
+			/// \todo Set TIFFTAG_EXTRASAMPLES appropriately for the a ra, rg, rb channels
+		}
+	}
+	/// \todo: deal with TIFFTAG_SGILOGDATAFMT
+	uint16 sampleFormat = 0;
+	switch(channelType)
+	{
+        case Channel_Float32:
+			sampleFormat = SAMPLEFORMAT_IEEEFP;
+			break;
+        case Channel_Signed32:
+        case Channel_Signed16:
+        case Channel_Signed8:
+			sampleFormat = SAMPLEFORMAT_INT;
+			break;
+        case Channel_Unsigned32:
+        case Channel_Unsigned16:
+        case Channel_Unsigned8:
+			sampleFormat = SAMPLEFORMAT_UINT;
+		default:
+			break;
+    }
+	setTiffTagValue<uint16>(TIFFTAG_SAMPLEFORMAT, sampleFormat);
+}
+
+/** Convert a type held in the header to the appropriate type understood by
+ * libtiff.
+ */
+template<typename Tattr, typename Ttiff>
+static Ttiff attrTypeToTiff(const Tattr& attr)
+{
+	return Ttiff(attr);
+}
+// Specialize for std::string -> const char*
+template<>
+static const char* attrTypeToTiff(const std::string& attr)
+{
+	return attr.c_str();
+}
+// Specialize for CqMatrix -> TqFloat*
+template<>
+static const float* attrTypeToTiff(const CqMatrix& attr)
+{
+	return attr.pElements();
+}
+
+/**
+ * Add an attribute with the given tag and name from the header to the given
+ * tiff directory.  If the attribute isn't present in the header, silently do
+ * nothing.
+ */
+template<typename Tattr, typename Ttiff>
+static void addAttributeToTiff(const char* attributeName, ttag_t tag,
+		const CqTexFileHeader& header, CqTiffDirHandle& dirHandle)
+{
+	const Tattr* headerVal = header.findAttributePtr<Tattr>(attributeName);
+	if(headerVal)
+	{
+		dirHandle.setTiffTagValue<Ttiff>(tag, 
+				attrTypeToTiff<Tattr,Ttiff>(*headerVal), false);
+	}
+}
+
+void CqTiffDirHandle::writeOptionalAttrs(const CqTexFileHeader& header)
+{
+	// Add various descriptive strings to the header if they exist
+	addAttributeToTiff<std::string,const char*>("software",
+			TIFFTAG_SOFTWARE, header, *this);
+	addAttributeToTiff<std::string,const char*>("hostName",
+			TIFFTAG_HOSTCOMPUTER, header, *this);
+	addAttributeToTiff<std::string,const char*>("description",
+			TIFFTAG_IMAGEDESCRIPTION, header, *this);
+	addAttributeToTiff<std::string,const char*>("dateTime",
+			TIFFTAG_DATETIME, header, *this);
+
+	// Add some matrix attributes
+	/// \todo: Check that these are converted correctly!
+	addAttributeToTiff<CqMatrix,const float*>("worldToScreenMatrix",
+			TIFFTAG_PIXAR_MATRIX_WORLDTOSCREEN, header, *this);
+	addAttributeToTiff<CqMatrix,const float*>("worldToCameraMatrix",
+			TIFFTAG_PIXAR_MATRIX_WORLDTOCAMERA, header, *this);
+
+	/** \todo Add the following optional attributes:
+	 *  - "textureFormat" TIFFTAG_PIXAR_TEXTUREFORMAT,
+	 *  - "textureWrapMode" TIFFTAG_PIXAR_WRAPMODES,
+	 *  - "fieldOfViewCotan" TIFFTAG_PIXAR_FOVCOT,
+	 *  - "??" TIFFTAG_PIXAR_IMAGEFULLWIDTH, TIFFTAG_PIXAR_IMAGEFULLLENGTH,
+	 *       TIFFTAG_XPOSITION, TIFFTAG_YPOSITION
+	 */
 }
 
 void CqTiffDirHandle::fillHeaderRequiredAttrs(CqTexFileHeader& header) const
@@ -122,7 +313,7 @@ void CqTiffDirHandle::fillHeaderRequiredAttrs(CqTexFileHeader& header) const
 	}
 	// Get the compression type.
 	header.setAttribute<std::string>("compression",
-			getCompressionName(tiffTagValue<uint16>(TIFFTAG_COMPRESSION)) );
+			tiffCompressionNameFromTag(tiffTagValue<uint16>(TIFFTAG_COMPRESSION)) );
 	// Compute pixel aspect ratio
 	TqFloat xRes = 0;
 	TqFloat yRes = 0;
@@ -149,19 +340,17 @@ void CqTiffDirHandle::fillHeaderRequiredAttrs(CqTexFileHeader& header) const
 
 // Extract an attribute from dirHandle and add it to header, if present.
 template<typename Tattr, typename Ttiff>
-void addAttributeToHeader(const char* attributName, ttag_t tag,
+static void addAttributeToHeader(const char* attributeName, ttag_t tag,
 		CqTexFileHeader& header, const CqTiffDirHandle& dirHandle)
 {
 	Ttiff temp;
 	if(TIFFGetField(dirHandle.tiffPtr(), tag, &temp))
-		header.setAttribute<Tattr>(attributName, Tattr(temp));
+		header.setAttribute<Tattr>(attributeName, Tattr(temp));
 }
 
 void CqTiffDirHandle::fillHeaderOptionalAttrs(CqTexFileHeader& header) const
 {
 	// Add various descriptive strings to the header if they exist
-	addAttributeToHeader<std::string,char*>("artist",
-			TIFFTAG_ARTIST, header, *this);
 	addAttributeToHeader<std::string,char*>("software",
 			TIFFTAG_SOFTWARE, header, *this);
 	addAttributeToHeader<std::string,char*>("hostname",
@@ -173,9 +362,9 @@ void CqTiffDirHandle::fillHeaderOptionalAttrs(CqTexFileHeader& header) const
 
 	// Add some matrix attributes
 	/// \todo: Check that these are constructed correctly!
-	addAttributeToHeader<CqMatrix,float*>("matrixWorldToScreen",
+	addAttributeToHeader<CqMatrix,float*>("worldToScreenMatrix",
 			TIFFTAG_PIXAR_MATRIX_WORLDTOSCREEN, header, *this);
-	addAttributeToHeader<CqMatrix,float*>("matrixWorldToCamera",
+	addAttributeToHeader<CqMatrix,float*>("worldToCameraMatrix",
 			TIFFTAG_PIXAR_MATRIX_WORLDTOCAMERA, header, *this);
 }
 
@@ -185,7 +374,7 @@ void CqTiffDirHandle::fillHeaderPixelLayout(CqTexFileHeader& header) const
 	try
 	{
 		// Deduce image channel information.
-		guessChannels(header.findAttribute<CqChannelList>("channels"));
+		guessChannels(header.channels());
 		// Check that channels are interlaced, otherwise we'll be confused.
 		TqInt planarConfig = tiffTagValue<uint16>(TIFFTAG_PLANARCONFIG,
 				PLANARCONFIG_CONTIG);
@@ -353,7 +542,7 @@ CqTiffFileHandle::CqTiffFileHandle(const std::string& fileName, const char* open
 {
 	if(!m_tiffPtr)
 	{
-		throw XqEnvironment( boost::str(boost::format("Could not open tiff file '%s'")
+		throw XqInternal( boost::str(boost::format("Could not open tiff file '%s'")
 					% fileName).c_str(), __FILE__, __LINE__);
 	}
 }
@@ -365,6 +554,16 @@ CqTiffFileHandle::CqTiffFileHandle(std::istream& inputStream)
 	if(!m_tiffPtr)
 	{
 		throw XqInternal("Could not use input stream for tiff", __FILE__, __LINE__);
+	}
+}
+
+CqTiffFileHandle::CqTiffFileHandle(std::ostream& outputStream)
+	: m_tiffPtr(TIFFStreamOpen("stream", &outputStream), safeTiffClose),
+	m_currDir(0)
+{
+	if(!m_tiffPtr)
+	{
+		throw XqInternal("Could not use output stream for tiff", __FILE__, __LINE__);
 	}
 }
 
