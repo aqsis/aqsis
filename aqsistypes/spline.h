@@ -56,7 +56,7 @@ class CqCubicSpline
 {
 	public:
 		CqCubicSpline( EqSplineBasis basis = SplineBasis_CatmullRom, TqUint reservePoints = 0 );
-		CqCubicSpline( const CqString& strBasis = "catmull-rom", TqUint reservePoints = 0 );
+		CqCubicSpline( const CqString& strBasis, TqUint reservePoints = 0 );
 		inline virtual ~CqCubicSpline();
 
 		typedef typename std::vector<T>::iterator iterator;
