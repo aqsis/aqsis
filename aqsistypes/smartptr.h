@@ -30,9 +30,18 @@
 
 #include "aqsis.h"
 
-#include <boost/intrusive_ptr.hpp>
-
 namespace Aqsis {
+
+//------------------------------------------------------------------------------
+/** \brief Null deleter for holding stack-allocated stuff in a boost::shared_ptr
+ *
+ * Example:
+ * // allocate i on the stack:
+ * int i;
+ * // suppose for some reason we need to access it through a shared_ptr.  We need:
+ * boost::shared_ptr<int>(&i, nullDeleter);
+ */
+inline void nullDeleter(const void*) { }
 
 //------------------------------------------------------------------------------
 /** \brief Very simple class providing reference counting machinery via
