@@ -38,33 +38,97 @@
 
 #include "exception.h"
 #include "channellist.h"
+#include "matrix.h"
 
 namespace Aqsis {
 
-//------------------------------------------------------------------------------
-/** \brief Standard image attributes.
+/** \brief Standard image header attributes.
  *
- * This enum should be expanded as extra image attributes are required.
+ * This namespace contains all the "tag" structs which represent possible image
+ * attributes to be stored in a CqTexFileHeader
  */
-enum EqImageAttribute
+namespace Attr
 {
-};
+	/** \brief Macro to aid in defining the standard image attributes
+	 *
+	 * It's not certain that the name() function is necessary at this stage,
+	 * but it might prove useful for diagnostics
+	 */
+#	define AQSIS_IMAGE_ATTR_TAG(attrName, attrType)          \
+	struct attrName                                          \
+	{                                                        \
+		typedef attrType type;                               \
+		static const char* name() { return #attrName; }      \
+	}
+
+	//--------------------------------------------------
+	/// Image dimensions
+	AQSIS_IMAGE_ATTR_TAG(Width, TqInt);
+	AQSIS_IMAGE_ATTR_TAG(Height, TqInt);
+	/// aspect ratio = pix_width/pix_height
+	AQSIS_IMAGE_ATTR_TAG(PixelAspectRatio, TqFloat);
+
+	//--------------------------------------------------
+	/// Channel information
+	AQSIS_IMAGE_ATTR_TAG(ChannelList, CqChannelList);
+
+	//--------------------------------------------------
+	/// Tile information
+	AQSIS_IMAGE_ATTR_TAG(IsTiled, bool);
+	AQSIS_IMAGE_ATTR_TAG(TileWidth, TqInt);
+	AQSIS_IMAGE_ATTR_TAG(TileHeight, TqInt);
+
+	//--------------------------------------------------
+	/// Information strings
+	// image creation software
+	AQSIS_IMAGE_ATTR_TAG(Software, std::string);
+	// computer host name
+	AQSIS_IMAGE_ATTR_TAG(HostName, std::string);
+	// description of image
+	AQSIS_IMAGE_ATTR_TAG(Description, std::string);
+	// date and time of creation
+	AQSIS_IMAGE_ATTR_TAG(DateTime, std::string);
+
+	//--------------------------------------------------
+	/// Transformation matrices
+	AQSIS_IMAGE_ATTR_TAG(WorldToScreenMatrix, CqMatrix);
+	AQSIS_IMAGE_ATTR_TAG(WorldToCameraMatrix, CqMatrix);
+
+	//--------------------------------------------------
+	/// Compression
+	/// Compression type
+	AQSIS_IMAGE_ATTR_TAG(Compression, std::string);
+	/// compression quality (for lossy compression)
+	AQSIS_IMAGE_ATTR_TAG(CompressionQuality, TqInt);
+
+#undef AQSIS_IMAGE_ATTR_TAG
+}
+
 
 //------------------------------------------------------------------------------
 /** \brief Wrapper for image file metadata
  *
  * General support for image metadata presents a bit of a problem, since
- * various file types choose to support various types and fields for metadata.
+ * various file types choose to support various types and field names for
+ * metadata.
  *
- * The approach chosen here is to index metadata via strings, but also provide
- * some accessor functions for standard attributes which might be expected to
- * be used by many (if not all) file formats.
+ * For the best possible compile-time checking, we choose to identify the
+ * various image attributes with "tag" structs.  These tags live in the
+ * Aqsis::Attr namespace defined above.  They collect together the name of the
+ * attribute with the type, so handily allow all the type-checking to be done
+ * at compile time.
+ *
+ * For example, to retrieve the width of the image, use
+ *   header.find<Attr::Width>()
+ * which will automatically know it should return a TqInt as the appropriate
+ * type.
  */
 class CqTexFileHeader
 {
 	private:
+		class CqTypeInfoHolder;
 		/// Underlying map type.
-		typedef std::map<std::string, boost::any> TqAttributeMap;
+		typedef std::map<CqTypeInfoHolder, boost::any> TqAttributeMap;
 	public:
 		/** \brief Const iterator type
 		 *
@@ -79,24 +143,21 @@ class CqTexFileHeader
 		inline CqTexFileHeader();
 
 		//---------------------------------------------------------
-		/** \brief Set the value of an attribute with the given name
+		/** \brief Set the value of an attribute with the given tag type
 		 *
-		 * If an attribute with "name" already exists, then the type of the new
-		 * and current values must be the same.  If the types are incompatible,
-		 * throw an XqInternal.
+		 * AttrTagType provides a typedef AttrTagType::type which is the
+		 * desired type for the corresponding attribute.
 		 */
-		template<typename T>
-		inline void setAttribute(const std::string& name, const T& value);
+		template<typename AttrTagType>
+		inline void set(const typename AttrTagType::type& value);
 
 		//---------------------------------------------------------
-		/** \name Attribute access
+		/** \name Image attribute access
 		 *
-		 * Convenience functions are provided for attributes which are
-		 * guarenteed to be present.  All other attributes are accessed via the
-		 * findAttribute() or findAttributePtr() functions.
+		 * Convenience functions are provided for a few often-used attributes.
+		 * All other attributes are accessed via the find() functions.
 		 */
 		//@{
-
 		/// Get the image width
 		inline TqInt width() const;
 		/// Get the image height
@@ -106,69 +167,43 @@ class CqTexFileHeader
 		/// Get the image channel data
 		inline const CqChannelList& channelList() const;
 
-		inline bool isTiled() const;
-
-		/*
-		// Standard Attributes:
-		/// Image dimensions
-		width,                 ///< TqInt - image width
-		height,                ///< TqInt - image height
-		pixelAspectRatio,      ///< TqFloat - aspect ratio = pix_width/pix_height
-		// Channel information
-		channelList,           ///< CqChannelList - list of image channels
-		/// Tile information
-		isTiled,               ///< bool - is the image tiled?
-		tileWidth,             ///< TqInt - width for tiled image
-		tileHeight,            ///< TqInt - height for tiled image
-		/// Information strings
-		software,              ///< std::string - image creation software
-		hostName,              ///< std::string - computer host name
-		description,           ///< std::string - description
-		dateTime,              ///< std::string - date and time of creation
-		/// Transformation matrices
-		worldToScreenMatrix,   ///< CqMatrix - world -> screen transformation
-		cameraToScreenMatrix,  ///< CqMatrix - camer -> screen transformation
-		/// Compression
-		compression,           ///< std::string - compression type
-		compressionQuality,    ///< TqInt - compression quality (for lossy compression)
-		*/
-
-		/** \brief Get a reference to an attribute by name
+		/** \brief Get a reference to an attribute
 		 *
-		 * \throw XqInternal if the named attribute is not present, or of the
-		 * wrong type.
+		 * AttrTagType provides a typedef AttrTagType::type which is the
+		 * desired type for the corresponding attribute.
+		 *
+		 * \throw XqInternal if the named attribute is not present.
 		 *
 		 * \return a reference to the desired attribute.
 		 */
-		template<typename T>
-		inline T& findAttribute(const std::string& name);
-		/// Get a reference to an attribute by name (const version)
-		template<typename T>
-		inline const T& findAttribute(const std::string& name) const;
+		template<typename AttrTagType>
+		inline typename AttrTagType::type& find();
+		/// Get a reference to an attribute (const version)
+		template<typename AttrTagType>
+		inline const typename AttrTagType::type& find() const;
 
-		/** \brief Get a reference to an attribute by name
+		/** \brief Get a reference to an attribute
 		 *
-		 * If the named attribute is not present, or has the wrong type, return
-		 * the default value given.
+		 * If the named attribute is not present, return the default value
+		 * given.
 		 *
-		 * \param name - attribute name
 		 * \param defaultVal - default attribute value
 		 *
 		 * \return a reference to the desired attribute.
 		 */
-		template<typename T>
-		inline const T& findAttribute(const std::string& name, const T& defaultVal) const;
+		template<typename AttrTagType>
+		inline const typename AttrTagType::type& find(const typename
+				AttrTagType::type& defaultVal) const;
 
-		/** \brief Get a pointer to an attribute by name
+		/** \brief Get a pointer to an attribute
 		 *
 		 * \return a pointer to the desired attribute, or NULL if not present.
 		 */
-		template<typename T>
-		inline T* findAttributePtr(const std::string& name);
+		template<typename AttrTagType>
+		inline typename AttrTagType::type* findPtr();
 		/// Get a pointer to an attribute by name (const version)
-		template<typename T>
-		inline const T* findAttributePtr(const std::string& name) const;
-
+		template<typename AttrTagType>
+		inline const typename AttrTagType::type* findPtr() const;
 		//@}
 
 
@@ -187,93 +222,103 @@ class CqTexFileHeader
 
 
 //==============================================================================
-// Implementation of inline functions and templates
+// Implementation details
 //==============================================================================
 
+//------------------------------------------------------------------------------
+/** \brief Wrapper around std::type_info to allow usage as a key type in std::map.
+ *
+ * Hold onto a reference to std::type_info, and provide operator<
+ */
+class CqTexFileHeader::CqTypeInfoHolder
+{
+	private:
+		const std::type_info& m_typeInfo;
+	public:
+		CqTypeInfoHolder(const std::type_info& typeInfo)
+			: m_typeInfo(typeInfo)
+		{ }
+		bool operator<(const CqTypeInfoHolder& rhs) const
+		{
+			return m_typeInfo.before(rhs.m_typeInfo);
+		}
+};
+
+//------------------------------------------------------------------------------
+// CqTexFileHeader
 inline CqTexFileHeader::CqTexFileHeader()
 	: m_attributeMap()
 {
 	addStandardAttributes();
 }
 
-template<typename T>
-inline void CqTexFileHeader::setAttribute(const std::string& name, const T& value)
+template<typename AttrTagType>
+inline void CqTexFileHeader::set(const typename AttrTagType::type& value)
 {
-	TqAttributeMap::iterator iter = m_attributeMap.find(name);
-	if(iter != m_attributeMap.end() && iter->second.type() != typeid(T))
-	{
-		throw XqInternal("Cannot assign a different type to a pre-existing attribute",
-				__FILE__, __LINE__);
-	}
-	else
-		m_attributeMap[name] = value;
+	m_attributeMap[CqTypeInfoHolder(typeid(AttrTagType))] = value;
 }
 
-TqInt CqTexFileHeader::width() const
+inline TqInt CqTexFileHeader::width() const
 {
-	return findAttribute<TqInt>("width");
+	return find<Attr::Width>();
 }
 
-TqInt CqTexFileHeader::height() const
+inline TqInt CqTexFileHeader::height() const
 {
-	return findAttribute<TqInt>("height");
+	return find<Attr::Height>();
 }
 
-CqChannelList& CqTexFileHeader::channelList()
+inline CqChannelList& CqTexFileHeader::channelList()
 {
-	return findAttribute<CqChannelList>("channelList");
+	return find<Attr::ChannelList>();
 }
 
-const CqChannelList& CqTexFileHeader::channelList() const
+inline const CqChannelList& CqTexFileHeader::channelList() const
 {
-	return findAttribute<CqChannelList>("channelList");
+	return find<Attr::ChannelList>();
 }
 
-template<typename T>
-inline T& CqTexFileHeader::findAttribute(const std::string& name)
+template<typename AttrTagType>
+inline typename AttrTagType::type& CqTexFileHeader::find()
 {
-	return const_cast<T&>(
-			const_cast<const CqTexFileHeader*>(this)->findAttribute<T>(name) );
+	return const_cast<typename AttrTagType::type&>(
+			const_cast<const CqTexFileHeader*>(this)->find<AttrTagType>() );
 }
 
-template<typename T>
-inline const T& CqTexFileHeader::findAttribute(const std::string& name) const
+template<typename AttrTagType>
+inline const typename AttrTagType::type& CqTexFileHeader::find() const
 {
-	const_iterator iter = m_attributeMap.find(name);
+	const_iterator iter = m_attributeMap.find(CqTypeInfoHolder(typeid(AttrTagType)));
 	if(iter == m_attributeMap.end())
-		throw XqInternal("Cannot find attribute with requested name",
-				__FILE__, __LINE__);
-	if(iter->second.type() != typeid(T))
-		throw XqInternal("Cannot cast attribute to the requested type",
-				__FILE__, __LINE__);
-	return boost::any_cast<const T&>(iter->second);
+		throw XqInternal("Cannot find requested attribute", __FILE__, __LINE__);
+	return boost::any_cast<const typename AttrTagType::type&>(iter->second);
 }
 
-template<typename T>
-inline const T& CqTexFileHeader::findAttribute(const std::string& name,
-		const T& defaultVal) const
+template<typename AttrTagType>
+inline const typename AttrTagType::type& CqTexFileHeader::find(
+		const typename AttrTagType::type& defaultVal) const
 {
-	const T* attr = findAttributePtr<T>(name);
+	const typename AttrTagType::type* attr = findPtr<AttrTagType>();
 	if(attr)
 		return *attr;
 	else
 		return defaultVal;
 }
 
-template<typename T>
-inline T* CqTexFileHeader::findAttributePtr(const std::string& name)
+template<typename AttrTagType>
+inline typename AttrTagType::type* CqTexFileHeader::findPtr()
 {
-	return const_cast<T*>(
-			const_cast<const CqTexFileHeader*>(this)->findAttributePtr<T>(name) );
+	return const_cast<typename AttrTagType::type*>(
+			const_cast<const CqTexFileHeader*>(this)->findPtr<AttrTagType>() );
 }
 
-template<typename T>
-inline const T* CqTexFileHeader::findAttributePtr(const std::string& name) const
+template<typename AttrTagType>
+inline const typename AttrTagType::type* CqTexFileHeader::findPtr() const
 {
-	const_iterator iter = m_attributeMap.find(name);
-	if(iter == m_attributeMap.end() || iter->second.type() != typeid(T))
+	const_iterator iter = m_attributeMap.find(CqTypeInfoHolder(typeid(AttrTagType)));
+	if(iter == m_attributeMap.end())
 		return 0;
-	return & boost::any_cast<const T&>(iter->second);
+	return & boost::any_cast<const typename AttrTagType::type&>(iter->second);
 }
 
 inline CqTexFileHeader::const_iterator CqTexFileHeader::begin() const

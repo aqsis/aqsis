@@ -76,7 +76,7 @@ void CqTiffInputFile::initialize()
 {
 	CqTiffDirHandle dirHandle(m_fileHandle);
 	dirHandle.fillHeader(m_header);
-	if(m_header.findAttribute<bool>("isTiled"))
+	if(m_header.find<Attr::IsTiled>())
 		throw XqInternal("Can't read tiled tiff files", __FILE__, __LINE__);
 	/// \todo We'll need to add something to deal with generic RGBA tiff
 	/// reading at some stage.

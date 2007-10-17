@@ -114,9 +114,8 @@ void CqImage::loadFromFile(const std::string& fileName)
 	TqUint height = header.height();
 	setImageSize(width, height);
 	setFrameSize(width, height);
-	setDescription(header.findAttribute<std::string>("description",
-				header.findAttribute<std::string>("software", "No description")
-				).c_str());
+	setDescription(header.find<Attr::Description>(
+				header.find<Attr::Software>("No description") ).c_str());
 
 	Aqsis::log() << Aqsis::info << "Loaded image " << fileName
 		<< " [" << width << "x" << height << " : "
@@ -140,20 +139,19 @@ void CqImage::saveToFile(const std::string& fileName) const
 	CqTexFileHeader header;
 
 	// Required attributes
-	header.setAttribute<TqInt>("width", m_realData->width());
-	header.setAttribute<TqInt>("height", m_realData->height());
-	header.setAttribute<CqChannelList>("channelList", m_realData->channelList());
+	header.set<Attr::Width>(m_realData->width());
+	header.set<Attr::Height>(m_realData->height());
+	header.set<Attr::ChannelList>(m_realData->channelList());
 	// Informational strings
-	header.setAttribute<std::string>("software",
-			(boost::format("%s %s (%s %s)") % STRNAME % VERSION_STR
-			 % __DATE__ % __TIME__).str());
+	header.set<Attr::Software>( (boost::format("%s %s (%s %s)")
+			 % STRNAME % VERSION_STR % __DATE__ % __TIME__).str());
 
 	/// \todo Set attributes for dealing with cropped images.
-	header.setAttribute<TqFloat>("pixelAspectRatio", 1.0);
+	header.set<Attr::PixelAspectRatio>(1.0);
 
 	// Set some default compression scheme for now - later we can accept user
 	// input for this.
-	header.setAttribute<std::string>("compression", "lzw");
+	header.set<Attr::Compression>("lzw");
 
 	// \todo: Attributes which might be good to add:
 	//   Host computer

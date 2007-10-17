@@ -94,11 +94,11 @@ BOOST_AUTO_TEST_CASE(CqTiffDirHandle_fillHeader_test)
 	dirHandle.fillHeader(header);
 
 	// Check that the header has been initialized properly...
-	BOOST_CHECK_EQUAL(header.findAttribute<TqInt>("width"), 6);
-	BOOST_CHECK_EQUAL(header.findAttribute<TqInt>("height"), 4);
+	BOOST_CHECK_EQUAL(header.find<Aqsis::Attr::Width>(), 6);
+	BOOST_CHECK_EQUAL(header.find<Aqsis::Attr::Height>(), 4);
 
 	// Check the channels
-	Aqsis::CqChannelList& channelList = header.findAttribute<Aqsis::CqChannelList>("channelList");
+	Aqsis::CqChannelList& channelList = header.find<Aqsis::Attr::ChannelList>();
 	BOOST_REQUIRE_EQUAL(channelList.numChannels(), 3);
 	BOOST_CHECK_EQUAL(channelList[0].name, "r");
 	BOOST_CHECK_EQUAL(channelList[0].type, Aqsis::Channel_Unsigned8);
@@ -106,9 +106,9 @@ BOOST_AUTO_TEST_CASE(CqTiffDirHandle_fillHeader_test)
 	BOOST_CHECK_EQUAL(channelList[2].name, "b");
 
 	// Check informational strings
-	BOOST_CHECK_EQUAL(header.findAttribute<std::string>("description"),
+	BOOST_CHECK_EQUAL(header.find<Aqsis::Attr::Description>(),
 			"Strip-allocated tiff for unit tests");
 
-	BOOST_CHECK(!header.findAttribute<bool>("isTiled"));
+	BOOST_CHECK(!header.find<Aqsis::Attr::IsTiled>());
 }
 

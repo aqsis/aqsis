@@ -27,68 +27,55 @@
 
 #include <boost/test/auto_unit_test.hpp>
 
-BOOST_AUTO_TEST_CASE(CqTexFileHeader_findAttributePtr)
+// tag types for header testing
+struct TestAttr { typedef TqInt type; };
+struct NotPresent { typedef TqInt type; };
+
+
+BOOST_AUTO_TEST_CASE(CqTexFileHeader_findPtr)
 {
 	Aqsis::CqTexFileHeader header;
 
-	// add and read back an attribute via the findAttributePtr() interface
-	header.setAttribute<TqInt>("asdf", 42);
-	const TqInt* value = header.findAttributePtr<TqInt>("asdf");
+	// add and read back an attribute via the findPtr() interface
+	header.set<TestAttr>(42);
+	const TqInt* value = header.findPtr<TestAttr>();
 	BOOST_REQUIRE(value != 0);
 	BOOST_CHECK_EQUAL(*value, 42);
 
-	BOOST_CHECK_EQUAL(header.findAttributePtr<TqFloat>("asdf"), (TqFloat*)0);
-
-	BOOST_CHECK_EQUAL(header.findAttributePtr<TqInt>("not_present"), (TqInt*)0);
+	BOOST_CHECK_EQUAL(header.findPtr<NotPresent>(), (TqInt*)0);
 }
 
-BOOST_AUTO_TEST_CASE(CqTexFileHeader_findAttribute)
+BOOST_AUTO_TEST_CASE(CqTexFileHeader_find)
 {
 	Aqsis::CqTexFileHeader header;
 
-	// add and read back an attribute via the findAttribute() interface
-	header.setAttribute<TqInt>("asdf", 42);
-	BOOST_CHECK_EQUAL(header.findAttribute<TqInt>("asdf"), 42);
-	// throw when accessing an attribute by the wrong type.
-	BOOST_CHECK_THROW(header.findAttribute<TqFloat>("asdf"), Aqsis::XqInternal);
+	// add and read back an attribute via the find() interface
+	header.set<TestAttr>(42);
+	BOOST_CHECK_EQUAL(header.find<TestAttr>(), 42);
 
 	// throw when accessing an attribute which isn't present.
-	BOOST_CHECK_THROW(header.findAttribute<TqInt>("not_present"), Aqsis::XqInternal);
+	BOOST_CHECK_THROW(header.find<NotPresent>(), Aqsis::XqInternal);
 }
 
-BOOST_AUTO_TEST_CASE(CqTexFileHeader_findAttributeDefault)
+BOOST_AUTO_TEST_CASE(CqTexFileHeader_findDefault)
 {
 	Aqsis::CqTexFileHeader header;
 
-	// add and read back an attribute via the findAttribute() interface with
+	// add and read back an attribute via the find() interface with
 	// default value.
-	header.setAttribute<TqInt>("asdf", 42);
-	BOOST_CHECK_EQUAL(header.findAttribute<TqInt>("asdf", 1), 42);
-	BOOST_CHECK_EQUAL(header.findAttribute<TqFloat>("asdf", 0.0f), 0.0f);
+	header.set<TestAttr>(42);
+	BOOST_CHECK_EQUAL(header.find<TestAttr>(1), 42);
 
-	// throw when accessing an attribute which isn't present.
-	BOOST_CHECK_EQUAL(header.findAttribute<TqInt>("not_present", 42), 42);
+	// Return default when attribute isn't present.
+	BOOST_CHECK_EQUAL(header.find<NotPresent>(42), 42);
 }
 
 BOOST_AUTO_TEST_CASE(CqTexFileHeader_defaults)
 {
 	Aqsis::CqTexFileHeader header;
 
-	// Set/check the width
-	header.setAttribute<TqInt>("width", 42);
-	BOOST_CHECK_EQUAL(header.findAttribute<TqInt>("width"), 42);
-	BOOST_CHECK_EQUAL(header.width(), 42);
-	// should throw, since we shouldn't be able to change the type of "width"
-	// from int to float, & "width" is a default attribute.
-	BOOST_CHECK_THROW(header.setAttribute<TqFloat>("width", 1.0f), Aqsis::XqInternal);
-
-	// Set/check the height
-	header.setAttribute<TqInt>("height", 142);
-	BOOST_CHECK_EQUAL(header.findAttribute<TqInt>("height"), 142);
-	BOOST_CHECK_EQUAL(header.height(), 142);
-
 	// Check the channels
-	Aqsis::CqChannelList& channelList = header.channelList();
+	Aqsis::CqChannelList& channelList = header.find<Aqsis::Attr::ChannelList>();
 	BOOST_CHECK_EQUAL(channelList.numChannels(), 0);
 }
 

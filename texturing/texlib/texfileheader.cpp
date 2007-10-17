@@ -53,13 +53,13 @@ std::string tiffDateTimeString()
 
 void CqTexFileHeader::addStandardAttributes()
 {
-	setAttribute<TqInt>("width", 100);
-	setAttribute<TqInt>("height", 100);
-	setAttribute<bool>("isTiled", false);
-	setAttribute<std::string>("compression", "none");
-	setAttribute<CqChannelList>("channelList", CqChannelList());
-	setAttribute<TqFloat>("pixelAspectRatio", 1.0f);
-	setAttribute<std::string>("dateTime", tiffDateTimeString());
+	set<Attr::Width>(100);
+	set<Attr::Height>(100);
+	set<Attr::IsTiled>(false);
+	set<Attr::Compression>("none");
+	set<Attr::ChannelList>(CqChannelList());
+	set<Attr::PixelAspectRatio>(1.0f);
+	set<Attr::DateTime>(tiffDateTimeString());
 }
 
 } // namespace Aqsis

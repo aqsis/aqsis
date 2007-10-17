@@ -57,7 +57,7 @@ void CqTiffOutputFile::initialize()
 	channelList.reorderChannels();
 
 	// Use lzw compression if the compression hasn't been specified.
-	std::string& compressionStr = m_header.findAttribute<std::string>("compression");
+	std::string& compressionStr = m_header.find<Attr::Compression>();
 	if(compressionStr == "unknown")
 		compressionStr = "lzw";
 

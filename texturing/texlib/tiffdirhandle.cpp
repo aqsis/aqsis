@@ -148,8 +148,7 @@ void CqTiffDirHandle::writeRequiredAttrs(const CqTexFileHeader& header)
 	// aspect ratio, so set the resolution unit to none.
 	setTiffTagValue<uint16>(TIFFTAG_RESOLUTIONUNIT, RESUNIT_NONE);
 	setTiffTagValue<float>(TIFFTAG_XRESOLUTION, 1.0f);
-	setTiffTagValue<float>(TIFFTAG_YRESOLUTION,
-			header.findAttribute<TqFloat>("pixelAspectRatio"));
+	setTiffTagValue<float>(TIFFTAG_YRESOLUTION, header.find<Attr::PixelAspectRatio>());
 
 	// Compression-related stuff
 	writeCompressionAttrs(header);
@@ -163,8 +162,7 @@ void CqTiffDirHandle::writeRequiredAttrs(const CqTexFileHeader& header)
 
 void CqTiffDirHandle::writeCompressionAttrs(const CqTexFileHeader& header)
 {
-	uint16 compression = tiffCompressionTagFromName(
-			header.findAttribute<std::string>("compression"));
+	uint16 compression = tiffCompressionTagFromName( header.find<Attr::Compression>());
 	setTiffTagValue<uint16>(TIFFTAG_COMPRESSION, compression);
 	if(compression != COMPRESSION_NONE
 			&& header.channelList().sharedChannelType() != Channel_Float32)
@@ -177,7 +175,7 @@ void CqTiffDirHandle::writeCompressionAttrs(const CqTexFileHeader& header)
 	if(compression == COMPRESSION_JPEG)
 	{
 		setTiffTagValue<int>(TIFFTAG_JPEGQUALITY,
-				header.findAttribute<TqInt>("compressionQuality", 85));
+				header.find<Attr::CompressionQuality>(85));
 	}
 }
 
@@ -258,34 +256,30 @@ static const float* attrTypeToTiff(const CqMatrix& attr)
  * nothing.
  */
 template<typename Tattr, typename Ttiff>
-static void addAttributeToTiff(const char* attributeName, ttag_t tag,
+static void addAttributeToTiff(ttag_t tag,
 		const CqTexFileHeader& header, CqTiffDirHandle& dirHandle)
 {
-	const Tattr* headerVal = header.findAttributePtr<Tattr>(attributeName);
+	const typename Tattr::type* headerVal = header.findPtr<Tattr>();
 	if(headerVal)
 	{
 		dirHandle.setTiffTagValue<Ttiff>(tag, 
-				attrTypeToTiff<Tattr,Ttiff>(*headerVal), false);
+				attrTypeToTiff<typename Tattr::type,Ttiff>(*headerVal), false);
 	}
 }
 
 void CqTiffDirHandle::writeOptionalAttrs(const CqTexFileHeader& header)
 {
 	// Add various descriptive strings to the header if they exist
-	addAttributeToTiff<std::string,const char*>("software",
-			TIFFTAG_SOFTWARE, header, *this);
-	addAttributeToTiff<std::string,const char*>("hostName",
-			TIFFTAG_HOSTCOMPUTER, header, *this);
-	addAttributeToTiff<std::string,const char*>("description",
-			TIFFTAG_IMAGEDESCRIPTION, header, *this);
-	addAttributeToTiff<std::string,const char*>("dateTime",
-			TIFFTAG_DATETIME, header, *this);
+	addAttributeToTiff<Attr::Software,const char*>(TIFFTAG_SOFTWARE, header, *this);
+	addAttributeToTiff<Attr::HostName,const char*>(TIFFTAG_HOSTCOMPUTER, header, *this);
+	addAttributeToTiff<Attr::Description,const char*>(TIFFTAG_IMAGEDESCRIPTION, header, *this);
+	addAttributeToTiff<Attr::DateTime,const char*>(TIFFTAG_DATETIME, header, *this);
 
 	// Add some matrix attributes
 	/// \todo: Check that these are converted correctly!
-	addAttributeToTiff<CqMatrix,const float*>("worldToScreenMatrix",
+	addAttributeToTiff<Attr::WorldToScreenMatrix,const float*>(
 			TIFFTAG_PIXAR_MATRIX_WORLDTOSCREEN, header, *this);
-	addAttributeToTiff<CqMatrix,const float*>("worldToCameraMatrix",
+	addAttributeToTiff<Attr::WorldToCameraMatrix,const float*>(
 			TIFFTAG_PIXAR_MATRIX_WORLDTOCAMERA, header, *this);
 
 	/** \todo Add the following optional attributes:
@@ -301,18 +295,16 @@ void CqTiffDirHandle::fillHeaderRequiredAttrs(CqTexFileHeader& header) const
 {
 	// Fill header with general metadata which won't affect the details of the
 	// pixel memory layout.
-	header.setAttribute<TqInt>("width", tiffTagValue<uint32>(TIFFTAG_IMAGEWIDTH));
-	header.setAttribute<TqInt>("height", tiffTagValue<uint32>(TIFFTAG_IMAGELENGTH));
-	header.setAttribute<bool>("isTiled", TIFFIsTiled(tiffPtr()));
-	if(header.findAttribute<bool>("isTiled"))
+	header.set<Attr::Width>(tiffTagValue<uint32>(TIFFTAG_IMAGEWIDTH));
+	header.set<Attr::Height>(tiffTagValue<uint32>(TIFFTAG_IMAGELENGTH));
+	header.set<Attr::IsTiled>(TIFFIsTiled(tiffPtr()));
+	if(header.find<Attr::IsTiled>())
 	{
-		header.setAttribute<TqInt>("tileWidth",
-				tiffTagValue<uint32>(TIFFTAG_TILEWIDTH));
-		header.setAttribute<TqInt>("tileHeight",
-				tiffTagValue<uint32>(TIFFTAG_TILELENGTH));
+		header.set<Attr::TileWidth>(tiffTagValue<uint32>(TIFFTAG_TILEWIDTH));
+		header.set<Attr::TileHeight>(tiffTagValue<uint32>(TIFFTAG_TILELENGTH));
 	}
 	// Get the compression type.
-	header.setAttribute<std::string>("compression",
+	header.set<Attr::Compression>(
 			tiffCompressionNameFromTag(tiffTagValue<uint16>(TIFFTAG_COMPRESSION)) );
 	// Compute pixel aspect ratio
 	TqFloat xRes = 0;
@@ -322,11 +314,11 @@ void CqTiffDirHandle::fillHeaderRequiredAttrs(CqTexFileHeader& header) const
 	{
 		// yRes/xRes should be the correct quantity corresponding to the
 		// pixelAspectRatio used in OpenEXR.
-		header.setAttribute<TqFloat>("pixelAspectRatio", yRes/xRes);
+		header.set<Attr::PixelAspectRatio>(yRes/xRes);
 	}
 	else
 	{
-		header.setAttribute<TqFloat>("pixelAspectRatio", 1.0f);
+		header.set<Attr::PixelAspectRatio>(1.0f);
 	}
 	/// \todo Compute and save the data window
 	/** Something like the "data window" in OpenEXR terminology can be
@@ -340,31 +332,27 @@ void CqTiffDirHandle::fillHeaderRequiredAttrs(CqTexFileHeader& header) const
 
 // Extract an attribute from dirHandle and add it to header, if present.
 template<typename Tattr, typename Ttiff>
-static void addAttributeToHeader(const char* attributeName, ttag_t tag,
+static void addAttributeToHeader(ttag_t tag,
 		CqTexFileHeader& header, const CqTiffDirHandle& dirHandle)
 {
 	Ttiff temp;
 	if(TIFFGetField(dirHandle.tiffPtr(), tag, &temp))
-		header.setAttribute<Tattr>(attributeName, Tattr(temp));
+		header.set<Tattr>(typename Tattr::type(temp));
 }
 
 void CqTiffDirHandle::fillHeaderOptionalAttrs(CqTexFileHeader& header) const
 {
 	// Add various descriptive strings to the header if they exist
-	addAttributeToHeader<std::string,char*>("software",
-			TIFFTAG_SOFTWARE, header, *this);
-	addAttributeToHeader<std::string,char*>("hostname",
-			TIFFTAG_HOSTCOMPUTER, header, *this);
-	addAttributeToHeader<std::string,char*>("description",
-			TIFFTAG_IMAGEDESCRIPTION, header, *this);
-	addAttributeToHeader<std::string,char*>("dateTime",
-			TIFFTAG_DATETIME, header, *this);
+	addAttributeToHeader<Attr::Software,char*>(TIFFTAG_SOFTWARE, header, *this);
+	addAttributeToHeader<Attr::HostName,char*>(TIFFTAG_HOSTCOMPUTER, header, *this);
+	addAttributeToHeader<Attr::Description,char*>(TIFFTAG_IMAGEDESCRIPTION, header, *this);
+	addAttributeToHeader<Attr::DateTime,char*>(TIFFTAG_DATETIME, header, *this);
 
 	// Add some matrix attributes
 	/// \todo: Check that these are constructed correctly!
-	addAttributeToHeader<CqMatrix,float*>("worldToScreenMatrix",
+	addAttributeToHeader<Attr::WorldToScreenMatrix,float*>(
 			TIFFTAG_PIXAR_MATRIX_WORLDTOSCREEN, header, *this);
-	addAttributeToHeader<CqMatrix,float*>("worldToCameraMatrix",
+	addAttributeToHeader<Attr::WorldToCameraMatrix,float*>(
 			TIFFTAG_PIXAR_MATRIX_WORLDTOCAMERA, header, *this);
 }
 
@@ -401,7 +389,7 @@ void CqTiffDirHandle::fillHeaderPixelLayout(CqTexFileHeader& header) const
 		channelList.addChannel( SqChannelInfo("g", chanType) );
 		channelList.addChannel( SqChannelInfo("b", chanType) );
 		channelList.addChannel( SqChannelInfo("a", chanType) );
-		header.setAttribute<CqChannelList>("channelList", channelList);
+		header.set<Attr::ChannelList>(channelList);
 		// For the moment, throw another error here.
 		/// \todo Make the generic RGBA handling work properly.
 		throw XqInternal("Cannot handle desired tiff format", __FILE__, __LINE__);
