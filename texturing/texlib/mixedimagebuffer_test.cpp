@@ -32,10 +32,7 @@
 #include <tiffio.hxx>
 
 #include "aqsismath.h"
-
-// Null deleter for holding stack-allocated stuff in a boost::shared_ptr
-void nullDeleter(const void*)
-{ }
+#include "smartptr.h"
 
 //------------------------------------------------------------------------------
 // CqChannelList test cases
@@ -103,7 +100,7 @@ BOOST_AUTO_TEST_CASE(CqMixedImageBuffer_test_clear)
 	TqInt height = 1;
 	TqInt chansPerPixel = ch.numChannels();
 	Aqsis::CqMixedImageBuffer imBuf(ch, boost::shared_array<TqUchar>(
-				reinterpret_cast<TqUchar*>(data), nullDeleter), width, height);
+				reinterpret_cast<TqUchar*>(data), Aqsis::nullDeleter), width, height);
 	imBuf.clearBuffer(1.0f);
 
 	for(TqInt i = 0; i < width*height*chansPerPixel; ++i)
@@ -120,14 +117,14 @@ BOOST_AUTO_TEST_CASE(CqMixedImageBuffer_test_copyFromSubregion)
 	TqInt height = 2;
 	TqInt chansPerPixel = ch.numChannels();
 	Aqsis::CqMixedImageBuffer srcBuf(ch, boost::shared_array<TqUchar>(
-				reinterpret_cast<TqUchar*>(srcData), nullDeleter), width, height);
+				reinterpret_cast<TqUchar*>(srcData), Aqsis::nullDeleter), width, height);
 	
 	TqUshort destData[] = {0,0,0,
 	                       0,0,0};
 	TqInt destWidth = 3;
 	TqInt destHeight = 2;
 	Aqsis::CqMixedImageBuffer destBuf(ch, boost::shared_array<TqUchar>(
-				reinterpret_cast<TqUchar*>(destData), nullDeleter), destWidth, destHeight);
+				reinterpret_cast<TqUchar*>(destData), Aqsis::nullDeleter), destWidth, destHeight);
 
 	destBuf.copyFrom(srcBuf, 0, 0);
 
@@ -142,7 +139,7 @@ BOOST_AUTO_TEST_CASE(CqMixedImageBuffer_resize_test)
 {
 	Aqsis::CqMixedImageBuffer buf;
 
-	BOOST_CHECK_EQUAL(buf.channelInfo().numChannels(), 0);
+	BOOST_CHECK_EQUAL(buf.channels().numChannels(), 0);
 	BOOST_CHECK_EQUAL(buf.width(), 0);
 	BOOST_CHECK_EQUAL(buf.height(), 0);
 
@@ -151,7 +148,7 @@ BOOST_AUTO_TEST_CASE(CqMixedImageBuffer_resize_test)
 	ch.addChannel(Aqsis::SqChannelInfo("r", Aqsis::Channel_Unsigned16));
 	buf.resize(10, 20, ch);
 	
-	BOOST_CHECK_EQUAL(buf.channelInfo().numChannels(), 1);
+	BOOST_CHECK_EQUAL(buf.channels().numChannels(), 1);
 	BOOST_CHECK_EQUAL(buf.width(), 10);
 	BOOST_CHECK_EQUAL(buf.height(), 20);
 	BOOST_CHECK(buf.rawData() != 0);
@@ -169,7 +166,7 @@ BOOST_AUTO_TEST_CASE(CqMixedImageBuffer_resize_test)
 //	TqInt height = 2;
 //	TqInt chansPerPixel = ch.numChannels();
 //	Aqsis::CqMixedImageBuffer srcBuf(ch, boost::shared_array<TqUchar>(
-//				reinterpret_cast<TqUchar*>(srcData), nullDeleter), width, height);
+//				reinterpret_cast<TqUchar*>(srcData), Aqsis::nullDeleter), width, height);
 //
 //	// Write the image buffer to a tiff stream.
 //	std::ostringstream outStream;

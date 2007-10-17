@@ -32,6 +32,7 @@
 #include "aqsis.h"
 
 #include <boost/shared_array.hpp>
+#include <boost/intrusive_ptr.hpp>
 
 #include "smartptr.h"
 #include "samplevector.h"

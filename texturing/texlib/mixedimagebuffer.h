@@ -70,7 +70,7 @@ typedef std::map<std::string, std::string> TqChannelNameMap;
  * operation may not make sense.  It would be extremly easy to implement some
  * sensible copying behaviour.
  */
-class CqMixedImageBuffer : boost::noncopyable
+class CqMixedImageBuffer : public boost::noncopyable
 {
 	public:
 		/** \brief Construct an empty image buffer
@@ -183,7 +183,7 @@ class CqMixedImageBuffer : boost::noncopyable
 		/// \name Accessors for buffer metadata and raw pixel data
 		//@{
 		/// \brief Get the channel information for this buffer
-		inline const CqChannelList& channelInfo() const;
+		inline const CqChannelList& channels() const;
 		/// Get the width of the image buffer in pixels
 		inline TqInt width() const;
 		/// Get the height of the image buffer in pixels
@@ -273,7 +273,7 @@ class CqMixedImageBuffer : boost::noncopyable
 //------------------------------------------------------------------------------
 // CqMixedImageBuffer
 
-inline const CqChannelList& CqMixedImageBuffer::channelInfo() const
+inline const CqChannelList& CqMixedImageBuffer::channels() const
 {
 	return m_channelInfo;
 }

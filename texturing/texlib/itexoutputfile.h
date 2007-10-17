@@ -33,6 +33,8 @@
 
 #include "texfileheader.h"
 #include "exception.h"
+#include "smartptr.h"
+#include "mixedimagebuffer.h"
 
 namespace Aqsis {
 
@@ -83,7 +85,7 @@ class IqTexOutputFile
 		 * \param buffer - buffer to read scanline data from.
 		 */
 		template<typename Array2DType>
-		void writePixels(Array2DType& buffer);
+		void writePixels(const Array2DType& buffer);
 
 		/** \brief Open an input image file in any format
 		 *
@@ -102,10 +104,13 @@ class IqTexOutputFile
 	protected:
 		/** \brief Low-level virtual implementation for writePixels().
 		 *
-		 * Implementations of readPixelsImpl() can assume that numScanlines
-		 * is a valid 
+		 * The parameter is a CqMixedImageBuffer - this allows image formats
+		 * the maximum flexibility in deciding what to do, since they have full
+		 * access to the channel structure.
+		 *
+		 * \param buffer - pixel data will be read from here.
 		 */
-		virtual void writePixelsImpl(TqUchar* buffer, TqInt numScanlines) = 0;
+		virtual void writePixelsImpl(const CqMixedImageBuffer& buffer) = 0;
 };
 
 
@@ -114,12 +119,16 @@ class IqTexOutputFile
 //==============================================================================
 
 template<typename Array2DType>
-void IqTexOutputFile::writePixels(Array2DType& buffer)
+void IqTexOutputFile::writePixels(const Array2DType& buffer)
 {
-	TqInt numScanlines = min(buffer().height(), header().height() - currentLine());
+	TqInt numScanlines = min(buffer.height(), header().height() - currentLine());
 	if(buffer.width() != header().width())
-		throw XqInternal("Buffer has wrong width", __FILE__, __LINE__);
-	writePixelsImpl(buffer.rawData(header().channels()), numScanlines);
+		throw XqInternal("Provieded buffer has wrong width for output file",
+				__FILE__, __LINE__);
+	CqMixedImageBuffer newBuf(buffer.channels(),
+			boost::shared_array<TqUchar>(const_cast<TqUchar*>(buffer.rawData()),
+				nullDeleter), buffer.width(), numScanlines);
+	writePixelsImpl(newBuf);
 }
 
 } // namespace Aqsis

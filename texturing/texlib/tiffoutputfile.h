@@ -57,9 +57,11 @@ class CqTiffOutputFile : public IqTexOutputFile
 		virtual inline const CqTexFileHeader& header() const;
 		virtual inline TqInt currentLine() const;
 	private:
-		virtual void writePixelsImpl(TqUchar* buffer, TqInt numScanlines);
+		virtual void writePixelsImpl(const CqMixedImageBuffer& buffer);
 
-		std::string m_fileName;
+		/// Perform shared initializations needed in construction.
+		void initialize();
+
 		CqTexFileHeader m_header;
 		TqInt m_currentLine;
 		boost::shared_ptr<CqTiffFileHandle> m_fileHandle;
@@ -72,7 +74,7 @@ class CqTiffOutputFile : public IqTexOutputFile
 
 inline const std::string& CqTiffOutputFile::fileName() const
 {
-	return m_fileName;
+	return m_fileHandle->fileName();
 }
 
 inline const char* CqTiffOutputFile::fileType()

@@ -29,10 +29,22 @@
 namespace Aqsis {
 
 CqTiffOutputFile::CqTiffOutputFile(const std::string& fileName, const CqTexFileHeader& header)
-	: m_fileName(fileName),
-	m_header(header),
+	: m_header(header),
 	m_currentLine(0),
 	m_fileHandle(new CqTiffFileHandle(fileName.c_str(), "w"))
+{
+	initialize();
+}
+
+CqTiffOutputFile::CqTiffOutputFile(std::ostream& outStream, const CqTexFileHeader& header)
+	: m_header(header),
+	m_currentLine(0),
+	m_fileHandle(new CqTiffFileHandle(outStream))
+{
+	initialize();
+}
+
+void CqTiffOutputFile::initialize()
 {
 	CqChannelList& channels = m_header.channels();
 	// make all channels are the same type.
@@ -49,16 +61,31 @@ CqTiffOutputFile::CqTiffOutputFile(const std::string& fileName, const CqTexFileH
 	if(compressionStr == "unknown")
 		compressionStr = "lzw";
 
+	/// \todo more checking & validation of the header.
+
 	// Now load the initial settings into the TIFF.
 	CqTiffDirHandle dirHandle(m_fileHandle);
-	dirHandle.writeHeader(header);
-
-	/// \todo more checking & validation of the header.
+	dirHandle.writeHeader(m_header);
 }
 
-void CqTiffOutputFile::writePixelsImpl(TqUchar* buffer, TqInt numScanlines)
+void CqTiffOutputFile::writePixelsImpl(const CqMixedImageBuffer& buffer)
 {
-	/// \todo implementaton
+	if(buffer.channels() != header().channels())
+		throw XqInternal("Buffer and file channels don't match",
+				__FILE__, __LINE__);
+	CqTiffDirHandle dirHandle(m_fileHandle);
+	// Simplest possible implementation using scanline TIFF I/O.  Could use
+	// Strip-based IO if performance is ever a problem here.
+	const TqUchar* rawBuf = buffer.rawData();
+	const TqInt rowStride = buffer.channels().bytesPerPixel()*buffer.width();
+	const TqInt endLine = m_currentLine + buffer.height();
+	for(TqInt line = m_currentLine; line < endLine; ++line)
+	{
+		TIFFWriteScanline(dirHandle.tiffPtr(), reinterpret_cast<tdata_t>(const_cast<TqUchar*>(rawBuf)),
+				static_cast<uint32>(line));
+		rawBuf += rowStride;
+	}
+	m_currentLine = endLine;
 }
 
 } // namespace Aqsis

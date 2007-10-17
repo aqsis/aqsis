@@ -99,6 +99,11 @@ struct SqChannelInfo
  */
 std::ostream& operator<<(std::ostream& out, const SqChannelInfo& info);
 
+/** Comparison operator for SqChannelInfo
+ *
+ * \return true if the name and type of the channels are the same
+ */
+inline bool operator==(const SqChannelInfo& info1, const SqChannelInfo& info2);
 
 //==============================================================================
 // Implementation of inline functions and templates
@@ -134,6 +139,12 @@ template<> inline EqChannelType getChannelTypeEnum<TqUshort>() { return Channel_
 template<> inline EqChannelType getChannelTypeEnum<TqShort>() { return Channel_Signed16; }
 template<> inline EqChannelType getChannelTypeEnum<TqUchar>() { return Channel_Unsigned8; }
 template<> inline EqChannelType getChannelTypeEnum<TqChar>() { return Channel_Signed8; }
+
+
+inline bool operator==(const SqChannelInfo& info1, const SqChannelInfo& info2)
+{
+	return info1.name == info2.name && info1.type == info2.type;
+}
 
 } // namespace Aqsis
 

@@ -58,7 +58,7 @@ void nullDeleter(const void*)
 
 void CqDisplayServerImage::acceptData(TqUlong xmin, TqUlong xmaxplus1, TqUlong ymin, TqUlong ymaxplus1, TqInt elementSize, const unsigned char* bucketData )
 {
-	assert(elementSize == m_realData->channelInfo().bytesPerPixel());
+	assert(elementSize == m_realData->channels().bytesPerPixel());
 
 	// yuck.  To fix the casts, refactor Image to use signed ints.
 	TqInt cropXmin = static_cast<TqInt>(xmin) - static_cast<TqInt>(m_originX);
@@ -71,7 +71,7 @@ void CqDisplayServerImage::acceptData(TqUlong xmin, TqUlong xmaxplus1, TqUlong y
 		// The const_cast below is ugly, but I don't see how to avoid it
 		// without some notion of "const constructor" which isn't present in
 		// C++
-		const CqMixedImageBuffer bucketBuf(m_realData->channelInfo(),
+		const CqMixedImageBuffer bucketBuf(m_realData->channels(),
 				boost::shared_array<TqUchar>(const_cast<TqUchar*>(bucketData),
 					nullDeleter), xmaxplus1 - xmin, ymaxplus1 - ymin);
 
@@ -102,7 +102,7 @@ void CqDisplayServerImage::serialise(const std::string& folder)
 	}
 		
 	setFilename(strFilename.str());
-	saveToTiff(strFilename.str());
+	saveToFile(strFilename.str());
 }
 
 

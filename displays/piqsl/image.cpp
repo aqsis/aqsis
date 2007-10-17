@@ -25,8 +25,7 @@
 
 #include "aqsis.h"
 
-#include <tiffio.h>
-#include <ctime>
+#include <boost/format.hpp>
 
 #include "version.h"
 #include "image.h"
@@ -34,26 +33,26 @@
 #include "logging.h"
 #include "ndspy.h"
 #include "itexinputfile.h"
+#include "itexoutputfile.h"
 
-
-START_NAMESPACE( Aqsis )
+namespace Aqsis {
 
 CqImage::~CqImage()
 {
 }
 
-void CqImage::prepareImageBuffers(const CqChannelList& channelInfo)
+void CqImage::prepareImageBuffers(const CqChannelList& channels)
 {
 	boost::mutex::scoped_lock lock(mutex());
 
-	if(channelInfo.numChannels() == 0)
+	if(channels.numChannels() == 0)
 		throw XqInternal("Not enough image channels to display", __FILE__, __LINE__);
 
 	// Set up buffer for holding the full-precision data
 	m_realData = boost::shared_ptr<CqMixedImageBuffer>(
-			new CqMixedImageBuffer(channelInfo, m_imageWidth, m_imageHeight));
+			new CqMixedImageBuffer(channels, m_imageWidth, m_imageHeight));
 
-	fixupDisplayMap(channelInfo);
+	fixupDisplayMap(channels);
 	// Set up 8-bit per pixel display image buffer
 	m_displayData = boost::shared_ptr<CqMixedImageBuffer>(
 			new CqMixedImageBuffer(CqChannelList::displayChannels(),
@@ -86,13 +85,6 @@ TiXmlElement* CqImage::serialiseToXML()
 	imageXML->LinkEndChild(filenameXML);
 
 	return(imageXML);
-}
-
-// custom deallocation function for use with boost::shared_ptr<TIFF>.
-void safeTiffClose(TIFF* tif)
-{
-	if(tif)
-		TIFFClose(tif);
 }
 
 void CqImage::loadFromFile(const std::string& fileName)
@@ -130,7 +122,7 @@ void CqImage::loadFromFile(const std::string& fileName)
 		<< " [" << width << "x" << height << " : "
 		<< texFile->header().channels() << "]" << std::endl;
 
-	fixupDisplayMap(m_realData->channelInfo());
+	fixupDisplayMap(m_realData->channels());
 	// Quantize and display the data
 	m_displayData = boost::shared_ptr<CqMixedImageBuffer>(
 			new CqMixedImageBuffer(CqChannelList::displayChannels(), width, height));
@@ -141,75 +133,60 @@ void CqImage::loadFromFile(const std::string& fileName)
 		m_updateCallback(-1, -1, -1, -1);
 }
 
-void CqImage::saveToTiff(const std::string& filename) const
+void CqImage::saveToFile(const std::string& fileName) const
 {
 	boost::mutex::scoped_lock lock(mutex());
-	boost::shared_ptr<TIFF> pOut(TIFFOpen(filename.c_str(), "r"), safeTiffClose);
 
-	if(!pOut)
-	{
-		// \todo: Should we do something else here as well?
-		Aqsis::log() << Aqsis::error << "Could not save image to file \"" << filename << "\"\n";
-		return;
-	}
+	CqTexFileHeader header;
 
-	// Write software version information
-	char version[ 80 ];
-	sprintf( version, "%s %s (%s %s)", STRNAME, VERSION_STR, __DATE__, __TIME__);
-	TIFFSetField( pOut.get(), TIFFTAG_SOFTWARE, ( char* ) version );
-	// Compute the date & time and write to the tiff.
-	time_t long_time;
-	time( &long_time );           /* Get time as long integer. */
-	struct tm* ct = localtime( &long_time ); /* Convert to local time. */
-	int year=1900 + ct->tm_year;
-	char datetime[21];
-	sprintf(datetime, "%04d:%02d:%02d %02d:%02d:%02d", year, ct->tm_mon + 1,
-			ct->tm_mday, ct->tm_hour, ct->tm_min, ct->tm_sec);
-	TIFFSetField( pOut.get(), TIFFTAG_DATETIME, datetime);
-	// Set position tags for dealing with cropped images.
-	TIFFSetField( pOut.get(), TIFFTAG_XPOSITION, ( float ) originX() );
-	TIFFSetField( pOut.get(), TIFFTAG_YPOSITION, ( float ) originY() );
-	// Set x and y resolutions to some default values.
-	TIFFSetField( pOut.get(), TIFFTAG_XRESOLUTION, (float) 1.0 );
-	TIFFSetField( pOut.get(), TIFFTAG_YRESOLUTION, (float) 1.0 );
-	// Now write the actual image data.
-	m_realData->saveToTiff(pOut.get());
+	// Required attributes
+	header.setAttribute<TqInt>("width", m_realData->width());
+	header.setAttribute<TqInt>("height", m_realData->height());
+	header.setAttribute<CqChannelList>("channels", m_realData->channels());
+	// Informational strings
+	header.setAttribute<std::string>("software",
+			(boost::format("%s %s (%s %s)") % STRNAME % VERSION_STR
+			 % __DATE__ % __TIME__).str());
 
-	// Old (obsolete??) stuff inherited from before factoring out much of the
-	// tiff saving code into CqMixedImageBuffer:
+	/// \todo Set attributes for dealing with cropped images.
+	header.setAttribute<TqFloat>("pixelAspectRatio", 1.0);
 
-//		if (!image->m_hostname.empty())
-//			TIFFSetField( pOut.get(), TIFFTAG_HOSTCOMPUTER, image->m_hostname.c_str() );
-//	char mydescription[80];
-//	TIFFSetField( pOut.get(), TIFFTAG_IMAGEDESCRIPTION, mydescription);
-//	setDescription(std::string(mydescription));
-	// Set compression type
-//	TIFFSetField( pOut.get(), TIFFTAG_COMPRESSION, image->m_compression );
-//	if ( image->m_compression == COMPRESSION_JPEG )
-//		TIFFSetField( pOut.get(), TIFFTAG_JPEGQUALITY, image->m_quality );
-//	TIFFSetField( pOut.get(), TIFFTAG_PIXAR_MATRIX_WORLDTOCAMERA, image->m_matWorldToCamera );
-//	TIFFSetField( pOut.get(), TIFFTAG_PIXAR_MATRIX_WORLDTOSCREEN, image->m_matWorldToScreen );
+	// Set some default compression scheme for now - later we can accept user
+	// input for this.
+	header.setAttribute<std::string>("compression", "lzw");
+
+	// \todo: Attributes which might be good to add:
+	//   Host computer
+	//   Image description
+	//   Transformation matrices
+
+	// Now create the image, and output the pixel data.
+	boost::shared_ptr<IqTexOutputFile> outFile
+		= IqTexOutputFile::open(fileName, "tiff", header);
+
+	// Write all pixels out at once.
+	outFile->writePixels(*m_realData);
 }
 
-void CqImage::fixupDisplayMap(const CqChannelList& channelInfo)
+void CqImage::fixupDisplayMap(const CqChannelList& channels)
 {
 	// Validate the mapping between the display channels and the underlying
 	// image channels.
-	if(!channelInfo.hasChannel("r"))
-		m_displayMap["r"] = channelInfo[0].name;
+	if(!channels.hasChannel("r"))
+		m_displayMap["r"] = channels[0].name;
 	else
 		m_displayMap["r"] = "r";
 
-	if(!channelInfo.hasChannel("g"))
-		m_displayMap["g"] = channelInfo[0].name;
+	if(!channels.hasChannel("g"))
+		m_displayMap["g"] = channels[0].name;
 	else
 		m_displayMap["g"] = "g";
 
-	if(!channelInfo.hasChannel("b"))
-		m_displayMap["b"] = channelInfo[0].name;
+	if(!channels.hasChannel("b"))
+		m_displayMap["b"] = channels[0].name;
 	else
 		m_displayMap["b"] = "b";
 }
 
 
-END_NAMESPACE( Aqsis )
+} // namespace Aqsis

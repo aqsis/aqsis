@@ -226,7 +226,7 @@ void CqMixedImageBuffer::compositeOver(const CqMixedImageBuffer& source,
 		const TqChannelNameMap& nameMap, TqInt topLeftX, TqInt topLeftY,
 		const std::string alphaName)
 {
-	if(!source.channelInfo().hasChannel(alphaName))
+	if(!source.channels().hasChannel(alphaName))
 	{
 		copyFrom(source, nameMap, topLeftX, topLeftY);
 	}

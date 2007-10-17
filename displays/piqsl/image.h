@@ -99,7 +99,7 @@ public:
 	 *
 	 * \return The channel info list of channel names and types.
 	 */
-	inline const CqChannelList& channelInfo() const;
+	inline const CqChannelList& channels() const;
 	/** \brief Connect a channel of the underlying data to the red display channel
 	 */
 	inline void connectChannelR(const std::string& chanName);
@@ -150,9 +150,9 @@ public:
 	 * Presuming the image size has been setup, allocate the two buffers used
 	 * by the image.
 	 *
-	 * \param channelInfo - the list of channel information for the image.
+	 * \param channels - the list of channel information for the image.
 	 */
-	virtual void prepareImageBuffers(const CqChannelList& channelInfo);
+	virtual void prepareImageBuffers(const CqChannelList& channels);
 	
 	/** Setup a callback to be called when the image changes.
 	 * \param f			A function that will be called with the region that has changed.
@@ -170,21 +170,21 @@ public:
 	/** Save the image to a TIFF file.
 	 * \param filename	The name of the file to save the image into.
 	 */
-	void saveToTiff(const std::string& filename) const;
+	void saveToFile(const std::string& fileName) const;
 	/** Load the image from a TIFF file on disk.
 	 * \param fileName	The name of the TIFF file to load the image data from.
 	 */
 	void loadFromFile(const std::string& fileName);
 
 protected:
-	/** Check m_displayMap is pointing to valid channel names from channelInfo.
+	/** Check m_displayMap is pointing to valid channel names from channels.
 	 *
 	 * If the map isn't pointing to valid channels, then set the offending
-	 * channels names to the first one in channelInfo
+	 * channels names to the first one in channels
 	 *
-	 * \param channelInfo - channels which the map must point to.
+	 * \param channels - channels which the map must point to.
 	 */
-	void fixupDisplayMap(const CqChannelList& channelInfo);
+	void fixupDisplayMap(const CqChannelList& channels);
 	/** Get a reference to the unique mutex for this image.
 	 * Used when locking the image during multithreaded operation.
 	 * \return			A reference to the unique mutex for this image.
@@ -281,15 +281,15 @@ inline void CqImage::setFrameSize(TqUlong width, TqUlong height)
 	m_frameHeight = height;
 }
 
-inline const CqChannelList& CqImage::channelInfo() const
+inline const CqChannelList& CqImage::channels() const
 {
-	return m_realData->channelInfo();
+	return m_realData->channels();
 }
 
 inline TqUint CqImage::numChannels() const
 {
 	if(m_realData)
-		return(m_realData->channelInfo().numChannels());
+		return(m_realData->channels().numChannels());
 	else
 		return 0;
 }

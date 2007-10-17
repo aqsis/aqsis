@@ -59,6 +59,24 @@ class CqChannelList
 		/// We use the default copy constructor,destructor and assignment operator.
 
 		//----------------------------------------------------------------------
+		/// \name Functions for comparing channel lists.
+		//@{
+		/** \brief Equality operator
+		 *
+		 * Two channel lists are equal when their channels match in both name
+		 * and type.
+		 *
+		 * \return true if channels are equal
+		 */
+		inline bool operator==(const CqChannelList& other) const;
+		/** \brief Inequality operator
+		 *
+		 * \return !(*this == other)
+		 */
+		inline bool operator!=(const CqChannelList& other) const;
+		//@}
+
+		//----------------------------------------------------------------------
 		/// \name Standard iterator interface
 		//@{
 		/// Get an iterator to the start of the channel list.
@@ -167,6 +185,16 @@ inline CqChannelList::CqChannelList()
 	m_offsets(),
 	m_bytesPerPixel(0)
 { }
+
+inline bool CqChannelList::operator==(const CqChannelList& other) const
+{
+	return m_channels == other.m_channels;
+}
+
+inline bool CqChannelList::operator!=(const CqChannelList& other) const
+{
+	return !(*this == other);
+}
 
 inline CqChannelList::const_iterator CqChannelList::begin() const
 {
