@@ -99,7 +99,7 @@ public:
 	 *
 	 * \return The channel info list of channel names and types.
 	 */
-	inline const CqChannelList& channels() const;
+	inline const CqChannelList& channelList() const;
 	/** \brief Connect a channel of the underlying data to the red display channel
 	 */
 	inline void connectChannelR(const std::string& chanName);
@@ -150,9 +150,9 @@ public:
 	 * Presuming the image size has been setup, allocate the two buffers used
 	 * by the image.
 	 *
-	 * \param channels - the list of channel information for the image.
+	 * \param channelList - the list of channel information for the image.
 	 */
-	virtual void prepareImageBuffers(const CqChannelList& channels);
+	virtual void prepareImageBuffers(const CqChannelList& channelList);
 	
 	/** Setup a callback to be called when the image changes.
 	 * \param f			A function that will be called with the region that has changed.
@@ -182,9 +182,9 @@ protected:
 	 * If the map isn't pointing to valid channels, then set the offending
 	 * channels names to the first one in channels
 	 *
-	 * \param channels - channels which the map must point to.
+	 * \param channelList - channels which the map must point to.
 	 */
-	void fixupDisplayMap(const CqChannelList& channels);
+	void fixupDisplayMap(const CqChannelList& channelList);
 	/** Get a reference to the unique mutex for this image.
 	 * Used when locking the image during multithreaded operation.
 	 * \return			A reference to the unique mutex for this image.
@@ -281,15 +281,15 @@ inline void CqImage::setFrameSize(TqUlong width, TqUlong height)
 	m_frameHeight = height;
 }
 
-inline const CqChannelList& CqImage::channels() const
+inline const CqChannelList& CqImage::channelList() const
 {
-	return m_realData->channels();
+	return m_realData->channelList();
 }
 
 inline TqUint CqImage::numChannels() const
 {
 	if(m_realData)
-		return(m_realData->channels().numChannels());
+		return (m_realData->channelList().numChannels());
 	else
 		return 0;
 }

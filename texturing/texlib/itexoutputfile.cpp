@@ -40,7 +40,7 @@ boost::shared_ptr<IqTexOutputFile> IqTexOutputFile::open(
 	if(header.width() <= 0 || header.height() <= 0)
 		throw XqInternal("Image width and height cannot be negative or zero.",
 				__FILE__, __LINE__);
-	if(header.channels().numChannels() == 0)
+	if(header.channelList().numChannels() == 0)
 		throw XqInternal("No data channels present.", __FILE__, __LINE__);
 
 	// Create the new file object

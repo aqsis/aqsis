@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_CASE(CqTexFileHeader_defaults)
 	BOOST_CHECK_EQUAL(header.height(), 142);
 
 	// Check the channels
-	Aqsis::CqChannelList& channels = header.channels();
-	BOOST_CHECK_EQUAL(channels.numChannels(), 0);
+	Aqsis::CqChannelList& channelList = header.channelList();
+	BOOST_CHECK_EQUAL(channelList.numChannels(), 0);
 }
 

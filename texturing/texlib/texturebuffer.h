@@ -80,12 +80,12 @@ class CqTextureBuffer : public CqIntrusivePtrCounted
 		 *
 		 * \param width  - new width
 		 * \param height - new height
-		 * \param channels - new channel list for the buffer.
+		 * \param channelList - new channel list for the buffer.
 		 *
-		 * \throw XqInternal if the new required channel list "channels" has
-		 * channel types which are incompatible with this texture buffer.
+		 * \throw XqInternal If the new required channel list has channel types
+		 * which are incompatible with this texture buffer.
 		 */
-		void resize(TqInt width, TqInt height, const CqChannelList& channels);
+		void resize(TqInt width, TqInt height, const CqChannelList& channelList);
 
 		/// Get a pointer to the underlying raw data
 		inline TqUchar* rawData();
@@ -158,12 +158,12 @@ inline const CqSampleVector<T> CqTextureBuffer<T>::operator()(const TqInt x, con
 }
 
 template<typename T>
-void CqTextureBuffer<T>::resize(TqInt width, TqInt height, const CqChannelList& channels)
+void CqTextureBuffer<T>::resize(TqInt width, TqInt height, const CqChannelList& channelList)
 {
-	if(channels.sharedChannelType() != getChannelTypeEnum<T>())
+	if(channelList.sharedChannelType() != getChannelTypeEnum<T>())
 		throw XqInternal("Channel type is incompatible with new channel info list",
 				__FILE__, __LINE__);
-	TqInt channelsPerPixel = channels.bytesPerPixel()/sizeof(T);
+	TqInt channelsPerPixel = channelList.bytesPerPixel()/sizeof(T);
 	TqInt newSize = width * height * channelsPerPixel;
 	if(newSize != m_width * m_height * m_channelsPerPixel);
 		m_pixelData.reset(new T[newSize]);

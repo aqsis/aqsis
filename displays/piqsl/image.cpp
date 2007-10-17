@@ -41,18 +41,18 @@ CqImage::~CqImage()
 {
 }
 
-void CqImage::prepareImageBuffers(const CqChannelList& channels)
+void CqImage::prepareImageBuffers(const CqChannelList& channelList)
 {
 	boost::mutex::scoped_lock lock(mutex());
 
-	if(channels.numChannels() == 0)
+	if(channelList.numChannels() == 0)
 		throw XqInternal("Not enough image channels to display", __FILE__, __LINE__);
 
 	// Set up buffer for holding the full-precision data
 	m_realData = boost::shared_ptr<CqMixedImageBuffer>(
-			new CqMixedImageBuffer(channels, m_imageWidth, m_imageHeight));
+			new CqMixedImageBuffer(channelList, m_imageWidth, m_imageHeight));
 
-	fixupDisplayMap(channels);
+	fixupDisplayMap(channelList);
 	// Set up 8-bit per pixel display image buffer
 	m_displayData = boost::shared_ptr<CqMixedImageBuffer>(
 			new CqMixedImageBuffer(CqChannelList::displayChannels(),
@@ -120,9 +120,9 @@ void CqImage::loadFromFile(const std::string& fileName)
 
 	Aqsis::log() << Aqsis::info << "Loaded image " << fileName
 		<< " [" << width << "x" << height << " : "
-		<< texFile->header().channels() << "]" << std::endl;
+		<< texFile->header().channelList() << "]" << std::endl;
 
-	fixupDisplayMap(m_realData->channels());
+	fixupDisplayMap(m_realData->channelList());
 	// Quantize and display the data
 	m_displayData = boost::shared_ptr<CqMixedImageBuffer>(
 			new CqMixedImageBuffer(CqChannelList::displayChannels(), width, height));
@@ -142,7 +142,7 @@ void CqImage::saveToFile(const std::string& fileName) const
 	// Required attributes
 	header.setAttribute<TqInt>("width", m_realData->width());
 	header.setAttribute<TqInt>("height", m_realData->height());
-	header.setAttribute<CqChannelList>("channels", m_realData->channels());
+	header.setAttribute<CqChannelList>("channelList", m_realData->channelList());
 	// Informational strings
 	header.setAttribute<std::string>("software",
 			(boost::format("%s %s (%s %s)") % STRNAME % VERSION_STR
@@ -168,22 +168,22 @@ void CqImage::saveToFile(const std::string& fileName) const
 	outFile->writePixels(*m_realData);
 }
 
-void CqImage::fixupDisplayMap(const CqChannelList& channels)
+void CqImage::fixupDisplayMap(const CqChannelList& channelList)
 {
 	// Validate the mapping between the display channels and the underlying
 	// image channels.
-	if(!channels.hasChannel("r"))
-		m_displayMap["r"] = channels[0].name;
+	if(!channelList.hasChannel("r"))
+		m_displayMap["r"] = channelList[0].name;
 	else
 		m_displayMap["r"] = "r";
 
-	if(!channels.hasChannel("g"))
-		m_displayMap["g"] = channels[0].name;
+	if(!channelList.hasChannel("g"))
+		m_displayMap["g"] = channelList[0].name;
 	else
 		m_displayMap["g"] = "g";
 
-	if(!channels.hasChannel("b"))
-		m_displayMap["b"] = channels[0].name;
+	if(!channelList.hasChannel("b"))
+		m_displayMap["b"] = channelList[0].name;
 	else
 		m_displayMap["b"] = "b";
 }

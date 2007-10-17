@@ -96,10 +96,10 @@ BOOST_AUTO_TEST_CASE(CqChannelList_findChannelIndex_test)
 
 BOOST_AUTO_TEST_CASE(CqChannelList_addUnnamedChannels)
 {
-	Aqsis::CqChannelList channels;
+	Aqsis::CqChannelList channelList;
 
-	channels.addUnnamedChannels(Aqsis::Channel_Unsigned8, 5);
-	BOOST_CHECK_EQUAL(channels[0].name, "?01");
-	BOOST_CHECK_EQUAL(channels[0].type, Aqsis::Channel_Unsigned8);
-	BOOST_CHECK_EQUAL(channels[4].name, "?05");
+	channelList.addUnnamedChannels(Aqsis::Channel_Unsigned8, 5);
+	BOOST_CHECK_EQUAL(channelList[0].name, "?01");
+	BOOST_CHECK_EQUAL(channelList[0].type, Aqsis::Channel_Unsigned8);
+	BOOST_CHECK_EQUAL(channelList[4].name, "?05");
 }

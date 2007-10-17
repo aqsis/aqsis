@@ -42,7 +42,7 @@ void Fl_FrameBuffer_Widget::draw()
 			fl_draw_image(buf->rawData(),
 				x()+m_image->originX(), y()+m_image->originY(),
 				buf->width(), buf->height(),
-				buf->channels().numChannels(),
+				buf->channelList().numChannels(),
 				0); // draw image
 		}
 	}

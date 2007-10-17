@@ -167,7 +167,7 @@ void CqTiffDirHandle::writeCompressionAttrs(const CqTexFileHeader& header)
 			header.findAttribute<std::string>("compression"));
 	setTiffTagValue<uint16>(TIFFTAG_COMPRESSION, compression);
 	if(compression != COMPRESSION_NONE
-			&& header.channels().sharedChannelType() != Channel_Float32)
+			&& header.channelList().sharedChannelType() != Channel_Float32)
 	{
 		// Adding a predictor drastically increases the compression ratios for
 		// some types of compression.  Apparently it doesn't work well on
@@ -183,11 +183,11 @@ void CqTiffDirHandle::writeCompressionAttrs(const CqTexFileHeader& header)
 
 void CqTiffDirHandle::writeChannelAttrs(const CqTexFileHeader& header)
 {
-	const CqChannelList& channels = header.channels();
-	EqChannelType channelType = channels.sharedChannelType();
+	const CqChannelList& channelList = header.channelList();
+	EqChannelType channelType = channelList.sharedChannelType();
 	// Assume that the channel type is uniform across the various channels.
 	assert(channelType != Channel_TypeUnknown && channelType != Channel_Float16);
-	TqInt numChannels = channels.numChannels();
+	TqInt numChannels = channelList.numChannels();
 
 	setTiffTagValue<uint16>(TIFFTAG_SAMPLESPERPIXEL, numChannels); 
 	setTiffTagValue<uint16>(TIFFTAG_BITSPERSAMPLE, 8*bytesPerPixel(channelType));
@@ -374,7 +374,7 @@ void CqTiffDirHandle::fillHeaderPixelLayout(CqTexFileHeader& header) const
 	try
 	{
 		// Deduce image channel information.
-		guessChannels(header.channels());
+		guessChannels(header.channelList());
 		// Check that channels are interlaced, otherwise we'll be confused.
 		TqInt planarConfig = tiffTagValue<uint16>(TIFFTAG_PLANARCONFIG,
 				PLANARCONFIG_CONTIG);
@@ -396,12 +396,12 @@ void CqTiffDirHandle::fillHeaderPixelLayout(CqTexFileHeader& header) const
 		// The format is something strange that we don't know how to handle
 		// directly... Use the generic RGBA handling built into libtiff...
 		EqChannelType chanType = Channel_Unsigned8;
-		CqChannelList channels;
-		channels.addChannel( SqChannelInfo("r", chanType) );
-		channels.addChannel( SqChannelInfo("g", chanType) );
-		channels.addChannel( SqChannelInfo("b", chanType) );
-		channels.addChannel( SqChannelInfo("a", chanType) );
-		header.setAttribute<CqChannelList>("channels", channels);
+		CqChannelList channelList;
+		channelList.addChannel( SqChannelInfo("r", chanType) );
+		channelList.addChannel( SqChannelInfo("g", chanType) );
+		channelList.addChannel( SqChannelInfo("b", chanType) );
+		channelList.addChannel( SqChannelInfo("a", chanType) );
+		header.setAttribute<CqChannelList>("channelList", channelList);
 		// For the moment, throw another error here.
 		/// \todo Make the generic RGBA handling work properly.
 		throw XqInternal("Cannot handle desired tiff format", __FILE__, __LINE__);
@@ -467,9 +467,9 @@ EqChannelType CqTiffDirHandle::guessChannelType() const
 	}
 }
 
-void CqTiffDirHandle::guessChannels(CqChannelList& channels) const
+void CqTiffDirHandle::guessChannels(CqChannelList& channelList) const
 {
-	channels.clear();
+	channelList.clear();
 	EqChannelType chanType = guessChannelType();
 	if(chanType == Channel_TypeUnknown)
 		throw XqUnknownTiffFormat("Cannot determine channel type", __FILE__, __LINE__);
@@ -480,37 +480,37 @@ void CqTiffDirHandle::guessChannels(CqChannelList& channels) const
 		{
 			case PHOTOMETRIC_MINISBLACK:
 				// We have an intensity (y) channel only.
-				channels.addChannel(SqChannelInfo("y", chanType));
+				channelList.addChannel(SqChannelInfo("y", chanType));
 				break;
 			case PHOTOMETRIC_RGB:
 				{
 					TqInt samplesPerPixel = tiffTagValue<uint16>(TIFFTAG_SAMPLESPERPIXEL);
 					if(samplesPerPixel < 3)
-						channels.addUnnamedChannels(chanType, samplesPerPixel);
+						channelList.addUnnamedChannels(chanType, samplesPerPixel);
 					else
 					{
 						// add RGB channels
-						channels.addChannel(SqChannelInfo("r", chanType));
-						channels.addChannel(SqChannelInfo("g", chanType));
-						channels.addChannel(SqChannelInfo("b", chanType));
+						channelList.addChannel(SqChannelInfo("r", chanType));
+						channelList.addChannel(SqChannelInfo("g", chanType));
+						channelList.addChannel(SqChannelInfo("b", chanType));
 						/// \todo Investigate what to do about TIFFTAG_EXTRASAMPLES
 						if(samplesPerPixel == 4)
 						{
 							// add alpha channel
-							channels.addChannel(SqChannelInfo("a", chanType));
+							channelList.addChannel(SqChannelInfo("a", chanType));
 						}
 						else if(samplesPerPixel == 6)
 						{
 							// add RGB alpha channels
-							channels.addChannel(SqChannelInfo("ra", chanType));
-							channels.addChannel(SqChannelInfo("ga", chanType));
-							channels.addChannel(SqChannelInfo("ba", chanType));
+							channelList.addChannel(SqChannelInfo("ra", chanType));
+							channelList.addChannel(SqChannelInfo("ga", chanType));
+							channelList.addChannel(SqChannelInfo("ba", chanType));
 						}
 						else
 						{
 							// Or not sure what to do here... add some unnamed
 							// channels?
-							channels.addUnnamedChannels(chanType, samplesPerPixel-3);
+							channelList.addUnnamedChannels(chanType, samplesPerPixel-3);
 						}
 					}
 				}

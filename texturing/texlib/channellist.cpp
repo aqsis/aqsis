@@ -122,13 +122,13 @@ void CqChannelList::recomputeByteOffsets()
 
 //------------------------------------------------------------------------------
 // Free functions
-std::ostream& operator<<(std::ostream& out, const CqChannelList& channels)
+std::ostream& operator<<(std::ostream& out, const CqChannelList& channelList)
 {
-	EqChannelType sharedChanType = channels.sharedChannelType();
+	EqChannelType sharedChanType = channelList.sharedChannelType();
 	if(sharedChanType != Channel_TypeUnknown)
 	{
 		out << "(";
-		for(CqChannelList::const_iterator chan = channels.begin(), end = channels.end();
+		for(CqChannelList::const_iterator chan = channelList.begin(), end = channelList.end();
 							chan != end; ++chan)
 		{
 			out << chan->name;
@@ -139,7 +139,7 @@ std::ostream& operator<<(std::ostream& out, const CqChannelList& channels)
 	}
 	else
 	{
-		for(CqChannelList::const_iterator chan = channels.begin(), end = channels.end();
+		for(CqChannelList::const_iterator chan = channelList.begin(), end = channelList.end();
 							chan != end; ++chan)
 		{
 			out << *chan;

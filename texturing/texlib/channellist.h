@@ -173,9 +173,9 @@ class CqChannelList
  * Inserts a human-readable representation of the channels to the stream.
  *
  * \param out - stream to write to
- * \param channels - channels to output.
+ * \param channelList - channels to output.
  */
-std::ostream& operator<<(std::ostream& out, const CqChannelList& channels);
+std::ostream& operator<<(std::ostream& out, const CqChannelList& channelList);
 
 //==============================================================================
 // Implementation of inline functions and templates

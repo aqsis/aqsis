@@ -37,7 +37,6 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
 #include <boost/utility.hpp>
-#include <tiffio.h>
 
 #include "aqsismath.h"
 #include "exception.h"
@@ -81,29 +80,20 @@ class CqMixedImageBuffer : public boost::noncopyable
 		CqMixedImageBuffer();
 		/** \brief Construct an image buffer with the given channels per pixel.
  		 *
- 		 * \param channels - description of image channels
+ 		 * \param channelList - description of image channels
  		 * \param width - buffer width in pixels
  		 * \param height - buffer height in pixels
 		 */
-		CqMixedImageBuffer(const CqChannelList& channels, TqInt width, TqInt height);
+		CqMixedImageBuffer(const CqChannelList& channelList, TqInt width, TqInt height);
 		/** \brief Construct an image buffer with the given channels per pixel.
  		 *
- 		 * \param channels - description of image channels
+ 		 * \param channelList - description of image channels
  		 * \param data - preexisting raw data to wrap the channel around
  		 * \param width - buffer width in pixels
  		 * \param height - buffer height in pixels
 		 */
-		CqMixedImageBuffer(const CqChannelList& channels, boost::shared_array<TqUchar> data,
+		CqMixedImageBuffer(const CqChannelList& channelList, boost::shared_array<TqUchar> data,
 				TqInt width, TqInt height);
-
-		/** \brief Save the buffer to a TIFF file.
-		 *
-		 * \param pOut - Pointer to an open TIFF file where the buffer will be
-		 *               saved int into.
-		 *
-		 * \todo Get rid of this in favour of CqOutputFile
-		 */
-		void saveToTiff(TIFF* pOut) const;
 
 		//------------------------------------------------------------
 		/// \name Functions to (re)initialize the buffer
@@ -120,9 +110,9 @@ class CqMixedImageBuffer : public boost::noncopyable
 		 *
 		 * \param width  - new width
 		 * \param height - new height
-		 * \param channels - new channel list for the buffer.
+		 * \param channelList - new channel list for the buffer.
 		 */
-		void resize(TqInt width, TqInt height, const CqChannelList& channels);
+		void resize(TqInt width, TqInt height, const CqChannelList& channelList);
 		//@}
 
 		//------------------------------------------------------------
@@ -183,7 +173,7 @@ class CqMixedImageBuffer : public boost::noncopyable
 		/// \name Accessors for buffer metadata and raw pixel data
 		//@{
 		/// \brief Get the channel information for this buffer
-		inline const CqChannelList& channels() const;
+		inline const CqChannelList& channelList() const;
 		/// Get the width of the image buffer in pixels
 		inline TqInt width() const;
 		/// Get the height of the image buffer in pixels
@@ -238,12 +228,12 @@ class CqMixedImageBuffer : public boost::noncopyable
 				TqInt topLeftY, TqInt width, TqInt height) const;
 		/** \brief Compute the byte offsets into each image channel.
 		 *
-		 * \param channels - list of channel information
+		 * \param channelList - list of channel information
 		 * \return The byte-offsets for the start of each channel in the image.
 		 * This is one element longer than channels; the last element contains
 		 * the 
 		 */
-		static std::vector<TqInt> channelOffsets(const CqChannelList& channels);
+		static std::vector<TqInt> channelOffsets(const CqChannelList& channelList);
 		/** \brief Compute region offsets/sizes when copying one buffer onto another.
 		 *
 		 * \param offset - desired start index in destination region (may be < 0)
@@ -259,7 +249,7 @@ class CqMixedImageBuffer : public boost::noncopyable
 				TqInt& srcOffset, TqInt& destOffset, TqInt& copyWidth);
 
 	private:
-		CqChannelList m_channelInfo; ///< vector of channel information
+		CqChannelList m_channelList; ///< vector of channel information
 		TqInt m_width; ///< buffer width in pixels
 		TqInt m_height; ///< buffer height in pixels
 		boost::shared_array<TqUchar> m_data; ///< raw image data
@@ -273,9 +263,9 @@ class CqMixedImageBuffer : public boost::noncopyable
 //------------------------------------------------------------------------------
 // CqMixedImageBuffer
 
-inline const CqChannelList& CqMixedImageBuffer::channels() const
+inline const CqChannelList& CqMixedImageBuffer::channelList() const
 {
-	return m_channelInfo;
+	return m_channelList;
 }
 
 inline TqInt CqMixedImageBuffer::width() const

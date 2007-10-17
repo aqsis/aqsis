@@ -29,7 +29,6 @@
 
 #include <boost/test/auto_unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
-#include <tiffio.hxx>
 
 #include "aqsismath.h"
 #include "smartptr.h"
@@ -139,7 +138,7 @@ BOOST_AUTO_TEST_CASE(CqMixedImageBuffer_resize_test)
 {
 	Aqsis::CqMixedImageBuffer buf;
 
-	BOOST_CHECK_EQUAL(buf.channels().numChannels(), 0);
+	BOOST_CHECK_EQUAL(buf.channelList().numChannels(), 0);
 	BOOST_CHECK_EQUAL(buf.width(), 0);
 	BOOST_CHECK_EQUAL(buf.height(), 0);
 
@@ -148,43 +147,9 @@ BOOST_AUTO_TEST_CASE(CqMixedImageBuffer_resize_test)
 	ch.addChannel(Aqsis::SqChannelInfo("r", Aqsis::Channel_Unsigned16));
 	buf.resize(10, 20, ch);
 	
-	BOOST_CHECK_EQUAL(buf.channels().numChannels(), 1);
+	BOOST_CHECK_EQUAL(buf.channelList().numChannels(), 1);
 	BOOST_CHECK_EQUAL(buf.width(), 10);
 	BOOST_CHECK_EQUAL(buf.height(), 20);
 	BOOST_CHECK(buf.rawData() != 0);
 }
-
-// Probably want to remove this after saveToTiff is replaced...
-//
-//BOOST_AUTO_TEST_CASE(CqMixedImageBuffer_test_read_write_tiff)
-//{
-//	Aqsis::CqChannelList ch;
-//	ch.addChannel(Aqsis::SqChannelInfo("r", Aqsis::Channel_Unsigned16));
-//	TqUshort srcData[] = {1, 2,
-//	                      3, 4};
-//	TqInt width = 2;
-//	TqInt height = 2;
-//	TqInt chansPerPixel = ch.numChannels();
-//	Aqsis::CqMixedImageBuffer srcBuf(ch, boost::shared_array<TqUchar>(
-//				reinterpret_cast<TqUchar*>(srcData), Aqsis::nullDeleter), width, height);
-//
-//	// Write the image buffer to a tiff stream.
-//	std::ostringstream outStream;
-//	TIFF* outTif = TIFFStreamOpen("test_write", &outStream);
-//	srcBuf.saveToTiff(outTif);
-//	TIFFClose(outTif);
-//
-//	std::istringstream inStream(outStream.str());
-//	TIFF* inTif = TIFFStreamOpen("test_read", &inStream);
-//	boost::shared_ptr<Aqsis::CqMixedImageBuffer> destBuf = Aqsis::CqMixedImageBuffer::loadFromTiff(inTif);
-//
-//	BOOST_CHECK_EQUAL(width, destBuf->width());
-//	BOOST_CHECK_EQUAL(height, destBuf->height());
-//
-//	TIFFClose(inTif);
-//
-//	TqUshort* destData = reinterpret_cast<TqUshort*>(srcBuf.rawData().get());
-//	for(TqInt i = 0; i < width*height*chansPerPixel; ++i)
-//		BOOST_CHECK_EQUAL(destData[i], srcData[i]);
-//}
 

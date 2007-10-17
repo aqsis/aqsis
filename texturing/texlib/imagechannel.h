@@ -233,7 +233,7 @@ class CqImageChannel : public IqImageChannel
 		virtual inline ~CqImageChannel();
 		/** \brief Get descriptive information about the channel
 		 */
-		inline const SqChannelInfo& channels() const;
+		inline const SqChannelInfo& channelInfo() const;
 
 		// Inherited
 		virtual void requireSize(TqInt width, TqInt height) const;
@@ -318,7 +318,7 @@ inline IqImageChannel::~IqImageChannel()
 inline CqImageChannel::~CqImageChannel()
 { }
 
-inline const SqChannelInfo& CqImageChannel::channels() const
+inline const SqChannelInfo& CqImageChannel::channelInfo() const
 {
 	return m_chanInfo;
 }

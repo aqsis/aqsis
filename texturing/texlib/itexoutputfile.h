@@ -68,14 +68,14 @@ class IqTexOutputFile
 		 * Array2DType is a type modelling a 2D array interface.  It should
 		 * provide the following methods:
 		 *
-		 *   - TqUchar* Array2dType::rawData(const CqChannelList& channels)
-		 *   The channels parameter describes the required channel structure
-		 *   for the returned buffer.  If the array cannot return a buffer with
-		 *   the required the channel structure, rawData() is required to throw
-		 *   an exception.
+		 *   - TqUchar* Array2dType::rawData() returns a pointer to the raw
+		 *     data.  The raw data is assumed at this stage to be contiguous -
+		 *     (ie, not a nontrivial slice).
 		 *
-		 *   - Array2dType::width() and
-		 *   - Array2dType::height() return the dimensions of the array.
+		 *   - Array2DType::channelList() returns a channel list for the array
+		 *
+		 *   - Array2DType::width() and
+		 *   - Array2DType::height() return the dimensions of the array.
 		 *
 		 * All the scanlines in buffer are read and written to the output file,
 		 * starting from the current write line as reported by currentLine().
@@ -125,7 +125,7 @@ void IqTexOutputFile::writePixels(const Array2DType& buffer)
 	if(buffer.width() != header().width())
 		throw XqInternal("Provieded buffer has wrong width for output file",
 				__FILE__, __LINE__);
-	CqMixedImageBuffer newBuf(buffer.channels(),
+	CqMixedImageBuffer newBuf(buffer.channelList(),
 			boost::shared_array<TqUchar>(const_cast<TqUchar*>(buffer.rawData()),
 				nullDeleter), buffer.width(), numScanlines);
 	writePixelsImpl(newBuf);

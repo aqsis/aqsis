@@ -57,7 +57,7 @@ void CqTexFileHeader::addStandardAttributes()
 	setAttribute<TqInt>("height", 100);
 	setAttribute<bool>("isTiled", false);
 	setAttribute<std::string>("compression", "none");
-	setAttribute<CqChannelList>("channels", CqChannelList());
+	setAttribute<CqChannelList>("channelList", CqChannelList());
 	setAttribute<TqFloat>("pixelAspectRatio", 1.0f);
 	setAttribute<std::string>("dateTime", tiffDateTimeString());
 }

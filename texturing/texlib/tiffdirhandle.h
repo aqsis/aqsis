@@ -95,7 +95,7 @@ class CqTiffDirHandle : public boost::noncopyable
 		 *       image is tiled)
 		 *   - artist, software, hostname, description, dateTime: std::string;
 		 *     descriptive strings
-		 *   - channels: TqChannelList; channel information
+		 *   - channelList: TqChannelList; channel information
 		 *
 		 * \param header - header to fill.
 		 */
@@ -175,10 +175,10 @@ class CqTiffDirHandle : public boost::noncopyable
 		 * Tiff doesn't have a way to explicitly name the channels contained,
 		 * but we can deduce most of what we'd like via various tags.
 		 *
-		 * \param channels - channel object to place the guessed channels in.
+		 * \param channelList - channel object to place the guessed channels in.
 		 *                   The object is cleared before being modified.
 		 */
-		void guessChannels(CqChannelList& channels) const;
+		void guessChannels(CqChannelList& channelList) const;
 		/** Guess the channel data type
 		 *
 		 * The channel data type is deduced from reading the tags

@@ -46,15 +46,15 @@ CqTiffOutputFile::CqTiffOutputFile(std::ostream& outStream, const CqTexFileHeade
 
 void CqTiffOutputFile::initialize()
 {
-	CqChannelList& channels = m_header.channels();
+	CqChannelList& channelList = m_header.channelList();
 	// make all channels are the same type.
-	if(channels.sharedChannelType() == Channel_TypeUnknown)
+	if(channelList.sharedChannelType() == Channel_TypeUnknown)
 	{
 		throw XqInternal("TIFF format can only deal with channels of the same type",
 				__FILE__, __LINE__);
 	}
 	// reorder the channels for TIFF output...
-	channels.reorderChannels();
+	channelList.reorderChannels();
 
 	// Use lzw compression if the compression hasn't been specified.
 	std::string& compressionStr = m_header.findAttribute<std::string>("compression");
@@ -70,14 +70,14 @@ void CqTiffOutputFile::initialize()
 
 void CqTiffOutputFile::writePixelsImpl(const CqMixedImageBuffer& buffer)
 {
-	if(buffer.channels() != header().channels())
+	if(buffer.channelList() != header().channelList())
 		throw XqInternal("Buffer and file channels don't match",
 				__FILE__, __LINE__);
 	CqTiffDirHandle dirHandle(m_fileHandle);
 	// Simplest possible implementation using scanline TIFF I/O.  Could use
 	// Strip-based IO if performance is ever a problem here.
 	const TqUchar* rawBuf = buffer.rawData();
-	const TqInt rowStride = buffer.channels().bytesPerPixel()*buffer.width();
+	const TqInt rowStride = buffer.channelList().bytesPerPixel()*buffer.width();
 	const TqInt endLine = m_currentLine + buffer.height();
 	for(TqInt line = m_currentLine; line < endLine; ++line)
 	{

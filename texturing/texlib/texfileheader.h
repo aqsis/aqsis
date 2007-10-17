@@ -102,9 +102,9 @@ class CqTexFileHeader
 		/// Get the image height
 		inline TqInt height() const;
 		/// Get the image channel data
-		inline CqChannelList& channels();
+		inline CqChannelList& channelList();
 		/// Get the image channel data
-		inline const CqChannelList& channels() const;
+		inline const CqChannelList& channelList() const;
 
 		inline bool isTiled() const;
 
@@ -115,7 +115,7 @@ class CqTexFileHeader
 		height,                ///< TqInt - image height
 		pixelAspectRatio,      ///< TqFloat - aspect ratio = pix_width/pix_height
 		// Channel information
-		channels,              ///< CqChannelList - list of image channels
+		channelList,           ///< CqChannelList - list of image channels
 		/// Tile information
 		isTiled,               ///< bool - is the image tiled?
 		tileWidth,             ///< TqInt - width for tiled image
@@ -219,14 +219,14 @@ TqInt CqTexFileHeader::height() const
 	return findAttribute<TqInt>("height");
 }
 
-CqChannelList& CqTexFileHeader::channels()
+CqChannelList& CqTexFileHeader::channelList()
 {
-	return findAttribute<CqChannelList>("channels");
+	return findAttribute<CqChannelList>("channelList");
 }
 
-const CqChannelList& CqTexFileHeader::channels() const
+const CqChannelList& CqTexFileHeader::channelList() const
 {
-	return findAttribute<CqChannelList>("channels");
+	return findAttribute<CqChannelList>("channelList");
 }
 
 template<typename T>

@@ -98,12 +98,12 @@ BOOST_AUTO_TEST_CASE(CqTiffDirHandle_fillHeader_test)
 	BOOST_CHECK_EQUAL(header.findAttribute<TqInt>("height"), 4);
 
 	// Check the channels
-	Aqsis::CqChannelList& channels = header.findAttribute<Aqsis::CqChannelList>("channels");
-	BOOST_REQUIRE_EQUAL(channels.numChannels(), 3);
-	BOOST_CHECK_EQUAL(channels[0].name, "r");
-	BOOST_CHECK_EQUAL(channels[0].type, Aqsis::Channel_Unsigned8);
-	BOOST_CHECK_EQUAL(channels[1].name, "g");
-	BOOST_CHECK_EQUAL(channels[2].name, "b");
+	Aqsis::CqChannelList& channelList = header.findAttribute<Aqsis::CqChannelList>("channelList");
+	BOOST_REQUIRE_EQUAL(channelList.numChannels(), 3);
+	BOOST_CHECK_EQUAL(channelList[0].name, "r");
+	BOOST_CHECK_EQUAL(channelList[0].type, Aqsis::Channel_Unsigned8);
+	BOOST_CHECK_EQUAL(channelList[1].name, "g");
+	BOOST_CHECK_EQUAL(channelList[2].name, "b");
 
 	// Check informational strings
 	BOOST_CHECK_EQUAL(header.findAttribute<std::string>("description"),
