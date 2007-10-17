@@ -162,8 +162,8 @@ SectionIn 1 2
   SetOutPath "$INSTDIR\shaders"
   File "${PROJECT_ROOT}\output\shaders\*.slx"
 
-  ${ConfigWrite} "$INSTDIR\bin\aqsisrc" 'Option "searchpath" "string shader" ' '["$INSTDIR\shaders"]' $R0
-  ${ConfigWrite} "$INSTDIR\bin\aqsisrc" 'Option "searchpath" "string display" ' '["$INSTDIR\bin"]' $R1
+  ${ConfigWrite} "$INSTDIR\bin\aqsisrc" 'Option "defaultsearchpath" "string display" ' '["$INSTDIR\bin"]' $R0
+  ${ConfigWrite} "$INSTDIR\bin\aqsisrc" 'Option "defaultsearchpath" "string shader" ' '["$INSTDIR\shaders"]' $R1
 
 ; Shortcuts
   !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
