@@ -206,14 +206,6 @@ class CqTexFileHeader
 		inline const typename AttrTagType::type* findPtr() const;
 		//@}
 
-
-		//---------------------------------------------------------
-		/// \name Standard iterator interface to all contained attributes
-		//@{
-		inline const_iterator begin() const;
-		inline const_iterator end() const;
-		//@}
-
 	private:
 		void addStandardAttributes();
 
@@ -321,15 +313,6 @@ inline const typename AttrTagType::type* CqTexFileHeader::findPtr() const
 	return & boost::any_cast<const typename AttrTagType::type&>(iter->second);
 }
 
-inline CqTexFileHeader::const_iterator CqTexFileHeader::begin() const
-{
-	return m_attributeMap.begin();
-}
-
-inline CqTexFileHeader::const_iterator CqTexFileHeader::end() const
-{
-	return m_attributeMap.end();
-}
 
 } // namespace Aqsis
 
