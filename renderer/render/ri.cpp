@@ -3952,7 +3952,7 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 		// Rebuild any facevarying or uniform variables.
 		TqInt iUserParam;
 		TqInt fvcount = ctris * 3;
-		assert( aFVList.size() == fvcount );
+		assert( static_cast<TqInt>(aFVList.size()) == fvcount );
 		std::vector<void*> aNewParams;
 		for( iUserParam = 0; iUserParam < count; ++iUserParam )
 		{

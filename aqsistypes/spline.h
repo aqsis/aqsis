@@ -222,7 +222,7 @@ void CqCubicSpline<T>::setBasis( const EqSplineBasis basis )
 template <class T>
 inline const T& CqCubicSpline<T>::operator[] ( TqInt i ) const
 {
-	assert( i < m_controlPoints.size() );
+	assert( i < static_cast<TqInt>(m_controlPoints.size()) );
 	return ( m_controlPoints[ i ] );
 }
 

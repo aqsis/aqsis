@@ -530,7 +530,7 @@ class CqMicroPolygon : public CqRefCount
 		 */
 		void	SetIndex( TqInt Index )
 		{
-			assert( m_pGrid != 0 && m_pGrid->pShaderExecEnv()->shadingPointCount() > Index );
+			assert( m_pGrid != 0 && static_cast<TqInt>(m_pGrid->pShaderExecEnv()->shadingPointCount()) > Index );
 			m_Index = Index;
 		}
 		/** Release this micropolys reference to the donor grid.
@@ -828,7 +828,7 @@ class CqMicroPolygonMotion : public CqMicroPolygon
 		{
 			if ( !m_BoundReady )
 				BuildBoundList();
-			assert( iIndex < m_BoundList.Size() );
+			assert( iIndex < static_cast<TqInt>(m_BoundList.Size()) );
 			time = m_BoundList.GetTime( iIndex );
 			return ( m_BoundList.GetBound( iIndex ) );
 		}
@@ -858,13 +858,13 @@ class CqMicroPolygonMotion : public CqMicroPolygon
 
 		virtual TqFloat Time(TqInt index) const
 		{
-			assert(index < m_Times.size());
+			assert( index < static_cast<TqInt>(m_Times.size()) );
 			return(m_Times[index]);
 		}
 
 		virtual CqMovingMicroPolygonKey* Key(TqInt index) const
 		{
-			assert(index < m_Keys.size());
+			assert( index < static_cast<TqInt>(m_Keys.size()) );
 			return(m_Keys[index]);
 		}
 
