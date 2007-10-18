@@ -59,13 +59,8 @@ IF(AQSIS_ENABLE_TESTING)
 	#
 	# The boost test library is automatically linked with the generated
 	# executables, so there's no need to include it in the LINK_LIBS list.
-	# 
-	# The custom target all_tests allows all tests to be built at once.
-
+	#
 	MACRO(AQSIS_ADD_TESTS SOURCE_LIST LINK_LIBS)
-		# Adding a custom target "all_tests" each time the macro is called
-		# seems like the wrong thing to do, but it works for now.
-		ADD_CUSTOM_TARGET(all_tests)
 		FOREACH(TEST_SRC ${SOURCE_LIST})
 			# Remove any prefixed-path from the test source and remove the
 			# extension to get the test name.
@@ -84,7 +79,6 @@ IF(AQSIS_ENABLE_TESTING)
 				${AQSIS_BOOST_UNIT_TEST_FRAMEWORK_LIBRARY}
 				)
 			ADD_TEST(${TEST_NAME} ${EXECUTABLE_OUTPUT_PATH}/${TEST_EXE_NAME})
-			ADD_DEPENDENCIES(all_tests ${TEST_EXE_NAME})
 		ENDFOREACH(TEST_SRC)
 	ENDMACRO(AQSIS_ADD_TESTS)
 
