@@ -33,6 +33,10 @@
 #include <string>
 #include <iosfwd>
 
+#ifdef USE_OPENEXR
+#include <half.h>
+#endif
+
 namespace Aqsis {
 
 //------------------------------------------------------------------------------
@@ -131,9 +135,9 @@ template<typename T> inline EqChannelType getChannelTypeEnum() { return Channel_
 template<> inline EqChannelType getChannelTypeEnum<TqFloat>() { return Channel_Float32; }
 template<> inline EqChannelType getChannelTypeEnum<TqUint>() { return Channel_Unsigned32; }
 template<> inline EqChannelType getChannelTypeEnum<TqInt>() { return Channel_Signed32; }
-#if 0
+#ifdef USE_OPENEXR
 // Need access to the half data type from OpenEXR here.
-template<> inline EqChannelType getChannelTypeEnum<>() { return Channel_Float16; }
+template<> inline EqChannelType getChannelTypeEnum<half>() { return Channel_Float16; }
 #endif
 template<> inline EqChannelType getChannelTypeEnum<TqUshort>() { return Channel_Unsigned16; }
 template<> inline EqChannelType getChannelTypeEnum<TqShort>() { return Channel_Signed16; }

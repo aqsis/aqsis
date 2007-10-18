@@ -28,6 +28,7 @@
 #include "itexinputfile.h"
 
 #include "tiffinputfile.h"
+#include "exrinputfile.h"
 #include "magicnumber.h"
 
 namespace Aqsis {
@@ -43,6 +44,14 @@ boost::shared_ptr<IqTexInputFile> IqTexInputFile::open(const std::string& fileNa
 	TqMagicNumberPtr magicNum = getMagicNumber(fileName);
 	if(isTiffMagicNumber(*magicNum))
 		newFile.reset(new CqTiffInputFile(fileName));
+	else if(isOpenExrMagicNumber(*magicNum))
+	{
+#		ifdef USE_OPENEXR
+		newFile.reset(new CqExrInputFile(fileName));
+#		else
+		throw XqInternal("Aqsis was compiled without OpenEXR support", __FILE__, __LINE__);
+#		endif
+	}
 	// else if(Add new formats here!)
 	else
 		throw XqInternal("Unknown file type", __FILE__, __LINE__);

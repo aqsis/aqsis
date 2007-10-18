@@ -30,6 +30,10 @@
 
 #include <boost/format.hpp>
 
+#ifdef USE_OPENEXR
+#include <half.h>
+#endif
+
 #include "exception.h"
 #include "logging.h"
 #include "ndspy.h"
@@ -243,6 +247,12 @@ boost::shared_ptr<CqImageChannel> CqMixedImageBuffer::channelImpl(TqInt index,
 			return boost::shared_ptr<CqImageChannel>(
 					new CqImageChannelTyped<PtDspySigned32>(m_channelList[index],
 						startPtr, width, height, stride, rowSkip));
+#		ifdef USE_OPENEXR
+		case Channel_Float16:
+			return boost::shared_ptr<CqImageChannel>(
+					new CqImageChannelTyped<half>(m_channelList[index],
+						startPtr, width, height, stride, rowSkip));
+#		endif
 		case Channel_Unsigned16:
 			return boost::shared_ptr<CqImageChannel>(
 					new CqImageChannelTyped<PtDspyUnsigned16>(m_channelList[index],
@@ -256,10 +266,11 @@ boost::shared_ptr<CqImageChannel> CqMixedImageBuffer::channelImpl(TqInt index,
 					new CqImageChannelTyped<PtDspySigned8>(m_channelList[index],
 						startPtr, width, height, stride, rowSkip));
 		case Channel_Unsigned8:
-		default:
 			return boost::shared_ptr<CqImageChannel>(
 					new CqImageChannelTyped<PtDspyUnsigned8>(m_channelList[index],
 						startPtr, width, height, stride, rowSkip));
+		default:
+			throw XqInternal("Unknown channel type", __FILE__, __LINE__);
 	}
 }
 

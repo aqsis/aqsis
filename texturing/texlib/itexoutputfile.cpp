@@ -46,7 +46,7 @@ boost::shared_ptr<IqTexOutputFile> IqTexOutputFile::open(
 	// Create the new file object
 	boost::shared_ptr<IqTexOutputFile> newFile;
 
-	if(fileType == tiffFileTypeString)
+	if(fileType == "tiff")
 	{
 		newFile.reset(new CqTiffOutputFile(fileName, header));
 	}

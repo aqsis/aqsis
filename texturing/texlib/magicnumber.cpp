@@ -68,4 +68,11 @@ bool isTiffMagicNumber(const TqMagicNumber& magicNum)
 			&& magicNum[2] == 0 && magicNum[3] == 42);
 }
 
+bool isOpenExrMagicNumber(const TqMagicNumber& magicNum)
+{
+	return magicNum.size() >= 4
+		&& magicNum[0] == 0x76 && magicNum[1] == 0x2F
+		&& magicNum[2] == 0x31 && magicNum[3] == 0x01;
+}
+
 } // namespace Aqsis

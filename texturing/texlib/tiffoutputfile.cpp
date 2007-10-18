@@ -24,6 +24,7 @@
  * \author Chris Foster
  */
 
+#include "tiffdirhandle.h"
 #include "tiffoutputfile.h"
 
 namespace Aqsis {
@@ -42,6 +43,11 @@ CqTiffOutputFile::CqTiffOutputFile(std::ostream& outStream, const CqTexFileHeade
 	m_fileHandle(new CqTiffFileHandle(outStream))
 {
 	initialize();
+}
+
+inline const char* CqTiffOutputFile::fileName() const
+{
+	return m_fileHandle->fileName().c_str();
 }
 
 void CqTiffOutputFile::initialize()

@@ -42,6 +42,20 @@
 
 namespace Aqsis {
 
+/// A box type specifying an image region.
+struct SqImageRegion
+{
+	TqInt width;     ///< width of the box
+	TqInt height;    ///< height of the box
+	TqInt topLeftX;  ///< x-position of the top left of the box.
+	TqInt topLeftY;  ///< y-position of the top left of the box.
+
+	/// Trivial constructor
+	inline SqImageRegion(TqInt width = 0, TqInt height = 0,
+			TqInt topLeftX = 0, TqInt topLeftY = 0);
+};
+
+//------------------------------------------------------------------------------
 /** \brief Standard image header attributes.
  *
  * This namespace contains all the "tag" structs which represent possible image
@@ -62,9 +76,41 @@ namespace Attr
 	}
 
 	//--------------------------------------------------
-	/// Image dimensions
+	/** \name Image dimensions
+	 *
+	 * Image data has dimensions  Width x Height.
+	 *
+	 * In addition to the image dimensions, the header may specify a
+	 * DisplayWindow attribute (mainly for use with cropped images).  The
+	 * display window specifies the extent of the non-cropped image.  The
+	 * coordinates used are such that the image data of size Width x Height
+	 * has top left coordinates of (0,0).  (So negative values of
+	 * topLeftX,topLeftY are valid).
+	 *
+	 * (topLeftX, topLeftY)
+	 *  x---Display window-------------------+
+	 *  |                                    |
+	 *  |                                    |
+	 *  |      (0,0)                         |
+	 *  |       x----Data window------+      |
+	 *  |       |                     | |    |
+	 *  |       |                     | |    |
+	 *  |       |                     |      |
+	 *  |       |                   Height   |
+	 *  |       |                     |      |
+	 *  |       |                     | |    |
+	 *  |       |                     | |    |
+	 *  |       |                     | |    |
+	 *  |       |                     | v    |
+	 *  |       +---------------------+      |
+	 *  |        ------ Width ------->       |
+	 *  |                                    |
+	 *  +------------------------------------+
+	 *
+	 */
 	AQSIS_IMAGE_ATTR_TAG(Width, TqInt);
 	AQSIS_IMAGE_ATTR_TAG(Height, TqInt);
+	AQSIS_IMAGE_ATTR_TAG(DisplayWindow, SqImageRegion);
 	/// aspect ratio = pix_width/pix_height
 	AQSIS_IMAGE_ATTR_TAG(PixelAspectRatio, TqFloat);
 
@@ -216,6 +262,13 @@ class CqTexFileHeader
 //==============================================================================
 // Implementation details
 //==============================================================================
+inline SqImageRegion::SqImageRegion(TqInt width, TqInt height,
+		TqInt topLeftX, TqInt topLeftY)
+	: width(width),
+	height(height),
+	topLeftX(topLeftX),
+	topLeftY(topLeftY)
+{ }
 
 //------------------------------------------------------------------------------
 /** \brief Wrapper around std::type_info to allow usage as a key type in std::map.

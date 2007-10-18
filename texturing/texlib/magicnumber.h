@@ -84,6 +84,12 @@ TqMagicNumberPtr getMagicNumber(std::istream& inStream);
  */
 bool isTiffMagicNumber(const TqMagicNumber& magicNum);
 
+/** Determine if the magic number indicates an OpenEXR file.
+ *
+ * \return true if magicNum is an OpenEXR magic number.
+ */
+bool isOpenExrMagicNumber(const TqMagicNumber& magicNum);
+
 // --> Add further file type detection functions here <--
 
 //@}

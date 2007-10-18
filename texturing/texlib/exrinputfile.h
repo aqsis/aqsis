@@ -19,53 +19,49 @@
 
 /** \file
  *
- * \brief A scanline-based output interface for tiff files.
+ * \brief Scanline-oriented pixel access for OpenEXR input.
  *
- * \author Chris Foster
+ * \author Chris Foster  chris42f _at_ gmail.com
+ *
  */
 
-#ifndef TIFFOUTPUTFILE_H_INCLUDED
-#define TIFFOUTPUTFILE_H_INCLUDED
+#ifndef EXRINPUTFILE_H_INCLUDED
+#define EXRINPUTFILE_H_INCLUDED
 
 #include "aqsis.h"
 
-#include "itexoutputfile.h"
+#include <string>
+
+#include <boost/shared_ptr.hpp>
+
+#include "itexinputfile.h"
+
+//------------------------------------------------------------------------------
+namespace Imf {
+	class InputFile;
+}
 
 namespace Aqsis {
 
-class CqTiffFileHandle;
-
 //------------------------------------------------------------------------------
-class CqTiffOutputFile : public IqTexOutputFile
+class CqExrInputFile : public IqTexInputFile
 {
 	public:
-		/** \brief Construct a tiff output file with the given file name.
-		 *
-		 * \throw XqInternal if the file cannot be opened for writing.
-		 *
-		 * \param fileName - name for the new file.
-		 * \param header - header data.
-		 */
-		CqTiffOutputFile(const std::string& fileName, const CqTexFileHeader& header);
-		/** \brief Construct a tiff output file writing to the given stream.
-		 */
-		CqTiffOutputFile(std::ostream& outStream, const CqTexFileHeader& header);
-
-		virtual ~CqTiffOutputFile() {};
-
-		virtual inline const char* fileName() const;
-		virtual inline const char* fileType();
-		virtual inline const CqTexFileHeader& header() const;
-		virtual inline TqInt currentLine() const;
+		CqExrInputFile(const std::string& fileName);
+		/// Constructor which takes an input stream rather than a file name
+		//CqExrInputFile(std::istream& inStream);
+		virtual const char* fileName() const;
+		inline virtual const char* fileType() const;
+		inline virtual const CqTexFileHeader& header() const;
 	private:
-		virtual void writePixelsImpl(const CqMixedImageBuffer& buffer);
+		virtual void readPixelsImpl(TqUchar* buffer, TqInt startLine,
+				TqInt numScanlines) const;
 
 		/// Perform shared initializations needed in construction.
 		void initialize();
 
 		CqTexFileHeader m_header;
-		TqInt m_currentLine;
-		boost::shared_ptr<CqTiffFileHandle> m_fileHandle;
+		boost::shared_ptr<Imf::InputFile> m_exrFile;
 };
 
 
@@ -73,21 +69,16 @@ class CqTiffOutputFile : public IqTexOutputFile
 // Implementation of inline functions and templates
 //==============================================================================
 
-inline const char* CqTiffOutputFile::fileType()
+inline const char* CqExrInputFile::fileType() const
 {
-	return "tiff";
+	return "OpenEXR";
 }
 
-inline const CqTexFileHeader& CqTiffOutputFile::header() const
+inline const CqTexFileHeader& CqExrInputFile::header() const
 {
 	return m_header;
 }
 
-TqInt CqTiffOutputFile::currentLine() const
-{
-	return m_currentLine;
-}
-
 } // namespace Aqsis
 
-#endif // TIFFOUTPUTFILE_H_INCLUDED
+#endif // EXRINPUTFILE_H_INCLUDED

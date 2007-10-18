@@ -48,9 +48,9 @@ CqTiffInputFile::CqTiffInputFile(std::istream& inStream)
 	initialize();
 }
 
-const std::string& CqTiffInputFile::fileName() const
+const char* CqTiffInputFile::fileName() const
 {
-	return m_fileHandle->fileName();
+	return m_fileHandle->fileName().c_str();
 }
 
 void CqTiffInputFile::readPixelsImpl(TqUchar* buffer,

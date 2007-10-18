@@ -67,7 +67,7 @@ extern const char* tiffFileTypeString;
  * instance of this class blocks access to the underlying tiff file until its
  * destructor is called.
  */
-class CqTiffDirHandle : public boost::noncopyable
+class CqTiffDirHandle : boost::noncopyable
 {
 	public:
 		/** \brief Construct a tiff directory handle from a tiff file handle
@@ -216,7 +216,7 @@ class CqTiffDirHandle : public boost::noncopyable
  * track of the current directory.  Do *not* use TIFFOpen, TIFFClose,
  * or TIFFSetDirectory outside this class.
  */
-class CqTiffFileHandle : public boost::noncopyable
+class CqTiffFileHandle : boost::noncopyable
 {
 	public:
 		/** \brief Construct a tiff file handle

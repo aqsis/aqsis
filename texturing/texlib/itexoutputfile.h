@@ -45,7 +45,7 @@ class IqTexOutputFile
 		virtual ~IqTexOutputFile() {};
 
 		/// get the file name
-		virtual const std::string& fileName() const = 0;
+		virtual const char* fileName() const = 0;
 
 		/// get a string representing the file type
 		virtual const char* fileType() = 0;

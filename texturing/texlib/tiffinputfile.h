@@ -46,7 +46,7 @@ class CqTiffInputFile : public IqTexInputFile
 		CqTiffInputFile(const std::string& fileName);
 		/// Constructor which takes an input stream rather than a file name
 		CqTiffInputFile(std::istream& inStream);
-		virtual const std::string& fileName() const;
+		virtual const char* fileName() const;
 		inline virtual const char* fileType() const;
 		inline virtual const CqTexFileHeader& header() const;
 	private:
