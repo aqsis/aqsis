@@ -27,6 +27,9 @@
 
 #include "exrinputfile.h"
 
+#include <algorithm>
+#include <cctype>
+
 #include <ImfInputFile.h>
 #include <ImfChannelList.h>
 #include <ImfFrameBuffer.h>
@@ -126,24 +129,22 @@ void convertHeader(const Imf::Header& exrHeader, CqTexFileHeader& header)
 	// Aspect ratio
 	header.set<Attr::PixelAspectRatio>(exrHeader.pixelAspectRatio());
 
+	TqChannelNameMap channelNameMap;
 	// Convert channel representation
 	const Imf::ChannelList& exrChannels = exrHeader.channels();
 	CqChannelList& channels = header.channelList();
 	for(Imf::ChannelList::ConstIterator i = exrChannels.begin();
 			i != exrChannels.end(); ++i)
 	{
-		if(i.channel().xSampling == 1 && i.channel().ySampling == 1)
-		{
-			channels.addChannel( SqChannelInfo(i.name(),
-					channelTypeFromExr(i.channel().type)) );
-		}
-		else
-		{
-			Aqsis::log() << warning
-				<< "Subresolution channels in EXR images not yet supported - "
-				<< "Omitting channel \"" << i.name() << "\"\n";
-		}
+		// use lower case names for channels; OpenEXR uses upper case.
+		std::string chanName = i.name();
+		std::transform(chanName.begin(), chanName.end(), chanName.begin(),
+				::tolower);
+		channelNameMap[chanName] = i.name();
+		channels.addChannel( SqChannelInfo(chanName,
+				channelTypeFromExr(i.channel().type)) );
 	}
+	header.set<Attr::ExrChannelNameMap>(channelNameMap);
 	channels.reorderChannels();
 
 	// Set compresssion type
@@ -190,9 +191,10 @@ void CqExrInputFile::readPixelsImpl(TqUchar* buffer,
 	// Set up an OpenEXR framebuffer
 	Imf::FrameBuffer frameBuffer;
 	const CqChannelList& channels = m_header.channelList();
+	const TqChannelNameMap& nameMap = m_header.find<Attr::ExrChannelNameMap>();
 	for(TqInt i = 0; i < channels.numChannels(); ++i)
 	{
-		frameBuffer.insert( channels[i].name.c_str(),
+		frameBuffer.insert(nameMap.find(channels[i].name)->second.c_str(),
 				Imf::Slice(
 					exrChannelType(channels[i].type),
 					reinterpret_cast<char*>(buffer + channels.channelByteOffset(i)),

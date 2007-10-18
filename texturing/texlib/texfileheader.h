@@ -146,8 +146,6 @@ namespace Attr
 	AQSIS_IMAGE_ATTR_TAG(Compression, std::string);
 	/// compression quality (for lossy compression)
 	AQSIS_IMAGE_ATTR_TAG(CompressionQuality, TqInt);
-
-#undef AQSIS_IMAGE_ATTR_TAG
 }
 
 

@@ -31,6 +31,7 @@
 #include "aqsis.h"
 
 #include <string>
+#include <map>
 
 #include <boost/shared_ptr.hpp>
 
@@ -42,6 +43,16 @@ namespace Imf {
 }
 
 namespace Aqsis {
+
+typedef std::map<std::string,std::string> TqChannelNameMap;
+
+namespace Attr {
+	/**
+	 * Extra image attribute to record the mapping from CqChannelList to EXR
+	 * channel names.
+	 */
+	AQSIS_IMAGE_ATTR_TAG(ExrChannelNameMap, TqChannelNameMap);
+}
 
 //------------------------------------------------------------------------------
 class CqExrInputFile : public IqTexInputFile
