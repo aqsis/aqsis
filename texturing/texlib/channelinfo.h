@@ -58,7 +58,7 @@ enum EqChannelType
 /** \brief Get the number of bytes per pixel required to store the given
  * channel type.
  */
-TqInt bytesPerPixel(EqChannelType type);
+COMMON_SHARE TqInt bytesPerPixel(EqChannelType type);
 
 /** \brief Get the EqChannelType for the given template type
  *
@@ -76,7 +76,7 @@ inline EqChannelType getChannelTypeEnum();
  * \param out - stream to write to
  * \param chanType - type to output.
  */
-std::ostream& operator<<(std::ostream& out, EqChannelType chanType);
+COMMON_SHARE std::ostream& operator<<(std::ostream& out, EqChannelType chanType);
 
 //------------------------------------------------------------------------------
 /** \brief Hold name and type information about image channels.
@@ -101,7 +101,7 @@ struct SqChannelInfo
  * \param out - stream to write to
  * \param info - output this.
  */
-std::ostream& operator<<(std::ostream& out, const SqChannelInfo& info);
+COMMON_SHARE std::ostream& operator<<(std::ostream& out, const SqChannelInfo& info);
 
 /** Comparison operator for SqChannelInfo
  *
@@ -109,8 +109,10 @@ std::ostream& operator<<(std::ostream& out, const SqChannelInfo& info);
  */
 inline bool operator==(const SqChannelInfo& info1, const SqChannelInfo& info2);
 
+
+
 //==============================================================================
-// Implementation of inline functions and templates
+// Implementation details
 //==============================================================================
 
 //------------------------------------------------------------------------------

@@ -69,7 +69,7 @@ typedef std::map<std::string, std::string> TqChannelNameMap;
  * operation may not make sense.  It would be extremly easy to implement some
  * sensible copying behaviour.
  */
-class CqMixedImageBuffer : boost::noncopyable
+COMMON_SHARE class CqMixedImageBuffer : boost::noncopyable
 {
 	public:
 		/** \brief Construct an empty image buffer
@@ -257,8 +257,8 @@ class CqMixedImageBuffer : boost::noncopyable
 
 
 //------------------------------------------------------------------------------
+// Implementation details
 //------------------------------------------------------------------------------
-// Inline function and template implementations
 
 //------------------------------------------------------------------------------
 // CqMixedImageBuffer

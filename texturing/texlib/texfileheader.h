@@ -167,7 +167,7 @@ namespace Attr
  * which will automatically know it should return a TqInt as the appropriate
  * type.
  */
-class CqTexFileHeader
+COMMON_SHARE class CqTexFileHeader
 {
 	private:
 		class CqTypeInfoHolder;

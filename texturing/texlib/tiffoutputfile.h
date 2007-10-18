@@ -36,7 +36,7 @@ namespace Aqsis {
 class CqTiffFileHandle;
 
 //------------------------------------------------------------------------------
-class CqTiffOutputFile : public IqTexOutputFile
+COMMON_SHARE class CqTiffOutputFile : public IqTexOutputFile
 {
 	public:
 		/** \brief Construct a tiff output file with the given file name.
@@ -70,7 +70,7 @@ class CqTiffOutputFile : public IqTexOutputFile
 
 
 //==============================================================================
-// Implementation of inline functions and templates
+// Implementation details
 //==============================================================================
 
 inline const char* CqTiffOutputFile::fileType()

@@ -40,7 +40,7 @@
 namespace Aqsis {
 
 //------------------------------------------------------------------------------
-class CqTiffInputFile : public IqTexInputFile
+COMMON_SHARE class CqTiffInputFile : public IqTexInputFile
 {
 	public:
 		CqTiffInputFile(const std::string& fileName);
@@ -62,7 +62,7 @@ class CqTiffInputFile : public IqTexInputFile
 
 
 //==============================================================================
-// Implementation of inline functions and templates
+// Implementation details
 //==============================================================================
 
 inline const char* CqTiffInputFile::fileType() const
