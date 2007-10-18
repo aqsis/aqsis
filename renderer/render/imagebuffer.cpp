@@ -660,7 +660,9 @@ void CqImageBuffer::RenderSurface( boost::shared_ptr<CqSurface>& pSurface )
 			std::vector<boost::shared_ptr<CqSurface> > aSplits;
 			TqInt cSplits = pSurface->Split( aSplits );
 			for ( TqInt i = 0; i < cSplits; i++ )
+			{
 				PostSurface( aSplits[ i ] );
+			}
 
 			/// \debug:
 			/*
@@ -858,6 +860,9 @@ void CqImageBuffer::RenderImage()
 					boost::shared_ptr<CqSurface> pSurface = bucketProcessors[i].getTopSurface();
 					if (pSurface)
 					{
+						// Advance to next surface
+						bucketProcessors[i].popSurface();
+
 						// Cull surface if it's hidden
 						if ( !( DisplayMode() & ModeZ ) && !pSurface->pCSGNode() )
 						{
@@ -866,16 +871,11 @@ void CqImageBuffer::RenderImage()
 							     pSurface->fCachedBound() &&
 							     OcclusionCullSurface( bucketProcessors[i], pSurface ) )
 							{
-								// Advance to next surface
-								bucketProcessors[i].popSurface();
 								continue;
 							}
 						}
 
 						RenderSurface( pSurface );
-
-						// Advance to next surface
-						bucketProcessors[i].popSurface();
 					}
 				}
 			}
