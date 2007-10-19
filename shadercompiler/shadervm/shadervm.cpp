@@ -50,7 +50,7 @@ START_NAMESPACE( Aqsis )
  */
 static struct shader_types
 {
-	char *name;
+	const TqChar* name;
 	EqShaderType type;
 	TqUlong hash;
 }
@@ -456,17 +456,17 @@ TqInt CqShaderVM::m_cTransSize = sizeof( m_TransTable ) / sizeof( m_TransTable[ 
  * Private hash keys for "Data", "Init", "Code", "segment", "param", 
  *          "varying", "uniform", "USES"
  */
-static TqUlong dhash = CqString::hash("Data");
+static const TqUlong dhash = CqString::hash("Data");
 ;
-static TqUlong ihash = CqString::hash("Init");
-static TqUlong chash = CqString::hash("Code");
-static TqUlong shash = CqString::hash("segment");
-static TqUlong phash = CqString::hash("param");
-static TqUlong vhash = CqString::hash("varying");
-static TqUlong uhash = CqString::hash("uniform");
-static TqUlong ushash = CqString::hash("USES");
-static TqUlong ehash = CqString::hash("external");
-static TqUlong ohash = CqString::hash("output");
+static const TqUlong ihash = CqString::hash("Init");
+static const TqUlong chash = CqString::hash("Code");
+static const TqUlong shash = CqString::hash("segment");
+static const TqUlong phash = CqString::hash("param");
+static const TqUlong vhash = CqString::hash("varying");
+static const TqUlong uhash = CqString::hash("uniform");
+static const TqUlong ushash = CqString::hash("USES");
+static const TqUlong ehash = CqString::hash("external");
+static const TqUlong ohash = CqString::hash("output");
 
 
 //---------------------------------------------------------------------

@@ -44,7 +44,7 @@ class CqConverter : public CqPluginBase
 {
 	public:
 
-		CqConverter( char *searchpath, char *library, char *function );
+		CqConverter( const char* searchpath, const char* library, const char* function );
 
 		void Close();
 		void *Function();

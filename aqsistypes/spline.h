@@ -109,7 +109,7 @@ class CqCubicSpline
 
 struct SqSplineBasis
 {
-	TqChar* name;
+	const TqChar* name;
 	TqInt step;
 	TqFloat basis[4][4];
 }; 

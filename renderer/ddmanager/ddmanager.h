@@ -51,8 +51,9 @@ struct SqDDMemberData
 	/** Constructor: initialize an SqDDMemberData structure
 	 */
 	SqDDMemberData(CqString strOpenMethod, CqString strQueryMethod, CqString strDataMethod,
-	               CqString strCloseMethod, CqString strDelayCloseMethod, char* redName, char* greenName,
-	               char* blueName, char* alphaName, char* zName) :
+	               CqString strCloseMethod, CqString strDelayCloseMethod,
+		       const char* redName, const char* greenName, const char* blueName,
+		       const char* alphaName, const char* zName) :
 			m_strOpenMethod(strOpenMethod),
 			m_strQueryMethod(strQueryMethod),
 			m_strDataMethod(strDataMethod),
@@ -73,11 +74,11 @@ struct SqDDMemberData
 	CqString m_strCloseMethod;
 	CqString m_strDelayCloseMethod;
 
-	char* m_RedName;
-	char* m_GreenName;
-	char* m_BlueName;
-	char* m_AlphaName;
-	char* m_ZName;
+	const char* m_RedName;
+	const char* m_GreenName;
+	const char* m_BlueName;
+	const char* m_AlphaName;
+	const char* m_ZName;
 };
 
 //---------------------------------------------------------------------

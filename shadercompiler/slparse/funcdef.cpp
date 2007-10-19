@@ -15,7 +15,7 @@ START_NAMESPACE( Aqsis )
 ///---------------------------------------------------------------------
 /// Global array of standard function definitions
 
-char* gVariableTypeIdentifiers[] =
+const char* gVariableTypeIdentifiers[] =
     {
         "@",
         "f",

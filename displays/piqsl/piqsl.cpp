@@ -76,7 +76,7 @@ bool 			g_cl_no_color = false;
 bool 			g_cl_syslog = false;
 ArgParse::apint 	g_cl_verbose = 1;
 
-CqPiqslMainWindow *window = 0;
+CqPiqslMainWindow* window = 0;
 boost::mutex g_XMLMutex;
 
 std::map<std::string, TqInt>	g_mapNameToType;
@@ -424,14 +424,15 @@ int main( int argc, char** argv )
 	Fl::add_fd(g_theSocket,&HandleConnection);
 
 	window = new CqPiqslMainWindow();
-	char *internalArgs[] = {
+	char* internalArgs[] = {
 		"piqsl"
 	};
 	window->show(1, internalArgs);
 
 
 	// Take the leftovers and open either a book or a tiff
-	for ( ArgParse::apstringvec::const_iterator e = ap.leftovers().begin(); 		e != ap.leftovers().end(); e++ )
+	for ( ArgParse::apstringvec::const_iterator e = ap.leftovers().begin();
+	      e != ap.leftovers().end(); e++ )
 	{
 		FILE *file = fopen( e->c_str(), "rb" );
 		if ( file != NULL )

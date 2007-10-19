@@ -402,10 +402,10 @@ void CqCodeGenOutput::Visit( IqParseNodeOperator& OP )
 	IqParseNode* pOperandA = pNode->pChild();
 	IqParseNode* pOperandB = pOperandA->pNextSibling();
 
-	char* pstrAType = "";
+	const char* pstrAType = "";
 	if ( pOperandA )
 		pstrAType = gVariableTypeIdentifiers[ pOperandA->ResType() & Type_Mask ];
-	char* pstrBType = "";
+	const char* pstrBType = "";
 	if ( pOperandB )
 		pstrBType = gVariableTypeIdentifiers[ pOperandB->ResType() & Type_Mask ];
 
@@ -747,7 +747,7 @@ void CqCodeGenOutput::Visit( IqParseNodeConditionalExpression& CE )
 	IqParseNode* pFalseStmt = pTrueStmt->pNextSibling();
 
 	TqInt typeT = static_cast<TqInt>( pTrueStmt->ResType() & Type_Mask );
-	char* pstrTType = gVariableTypeIdentifiers[ typeT ];
+	const char* pstrTType = gVariableTypeIdentifiers[ typeT ];
 
 	pTrueStmt->Accept( *this );					// true statement
 	pFalseStmt->Accept( *this );				// false statement
@@ -770,8 +770,8 @@ void CqCodeGenOutput::Visit( IqParseNodeTypeCast& TC )
 	if ( !( ( typeA == Type_Point || typeA == Type_Normal || typeA == Type_Vector ) &&
 	        ( typeB == Type_Point || typeB == Type_Normal || typeB == Type_Vector ) ) )
 	{
-		char * pstrToType = gVariableTypeIdentifiers[ TC.CastTo() & Type_Mask ];
-		char* pstrFromType = gVariableTypeIdentifiers[ pOperand->ResType() & Type_Mask ];
+		const char* pstrToType = gVariableTypeIdentifiers[ TC.CastTo() & Type_Mask ];
+		const char* pstrFromType = gVariableTypeIdentifiers[ pOperand->ResType() & Type_Mask ];
 		m_slxFile << "\tset" << pstrFromType << pstrToType << std::endl;
 	}
 }

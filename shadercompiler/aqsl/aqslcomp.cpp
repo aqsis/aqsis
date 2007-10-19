@@ -68,7 +68,7 @@ void version( std::ostream& Stream )
 }
 
 
-char* g_slppDefArgs[] =
+const char* g_slppDefArgs[] =
     {
         "slpp",
         "-d",

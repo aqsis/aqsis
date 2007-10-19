@@ -42,8 +42,8 @@
 #include <sstream>
 #include <string>
 #include <vector>
-#include <stdio.h>
-#include <time.h>
+#include <cstdio>
+#include <ctime>
 
 #ifdef AQSIS_SYSTEM_WIN32
   #include <windows.h>

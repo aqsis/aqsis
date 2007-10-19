@@ -23,7 +23,7 @@
 
 START_NAMESPACE( Aqsis )
 
-extern char* gShaderTypeNames[];
+extern const char* gShaderTypeNames[];
 extern TqInt gcShaderTypeNames;
 
 ///----------------------------------------------------------------------
@@ -232,9 +232,9 @@ class CqParseNode : public CqListEntry<CqParseNode>, public IqParseNode
 
 		CqParseNodeShader* pShaderNode();
 
-		static	char*	TypeIdentifier( int Type );
+		static	const char*	TypeIdentifier( int Type );
 		static	TqInt	TypeFromIdentifier( char Id );
-		static	char*	TypeName( int Type );
+		static	const char*	TypeName( int Type );
 		static	TqInt	FindCast( TqInt CurrType, TqInt* pTypes, TqInt Count, TqInt& index );
 		static	TqInt*	pAllTypes()
 		{
