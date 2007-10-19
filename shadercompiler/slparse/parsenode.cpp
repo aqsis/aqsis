@@ -21,7 +21,7 @@
 
 START_NAMESPACE( Aqsis )
 
-static char* gVariableTypeNames[] =
+static const char* gVariableTypeNames[] =
     {
         "invalid",
         "float",
@@ -39,7 +39,7 @@ static char* gVariableTypeNames[] =
     };
 //static TqInt gcVariableTypeNames = sizeof( gVariableTypeNames ) / sizeof( gVariableTypeNames[ 0 ] );
 
-char* gShaderTypeNames[] =
+const char* gShaderTypeNames[] =
     {
         "surface",
         "lightsource",
@@ -159,7 +159,7 @@ CqParseNodeShader* CqParseNode::pShaderNode()
 /** Return a string type identifier for the specified type.
  */
 
-char* CqParseNode::TypeIdentifier( int Type )
+const char* CqParseNode::TypeIdentifier( int Type )
 {
 	return ( gVariableTypeIdentifiers[ Type & Type_Mask ] );
 }
@@ -185,7 +185,7 @@ TqInt CqParseNode::TypeFromIdentifier( char Id )
 /** Return a string type name for the specified type.
  */
 
-char* CqParseNode::TypeName( int Type )
+const char* CqParseNode::TypeName( int Type )
 {
 	return ( gVariableTypeNames[ Type & Type_Mask ] );
 }

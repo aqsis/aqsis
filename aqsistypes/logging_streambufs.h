@@ -1,4 +1,4 @@
-// Copyright © 2003, Timothy M. Shead
+// Copyright (C) 2003, Timothy M. Shead
 //
 // Contact: tshead@k-3d.com
 //

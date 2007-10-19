@@ -1,5 +1,5 @@
 // Aqsis
-// Copyright © 2001, Paul C. Gregory
+// Copyright (C) 2001, Paul C. Gregory
 //
 // Contact: pgregory@aqsis.org //
 // This library is free software; you can redistribute it and/or
@@ -44,7 +44,7 @@ class CqConverter : public CqPluginBase
 {
 	public:
 
-		CqConverter( char *searchpath, char *library, char *function );
+		CqConverter( const char* searchpath, const char* library, const char* function );
 
 		void Close();
 		void *Function();

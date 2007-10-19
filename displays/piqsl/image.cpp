@@ -1,5 +1,5 @@
 // Aqsis
-// Copyright © 1997 - 2001, Paul C. Gregory
+// Copyright (C) 1997 - 2001, Paul C. Gregory
 //
 // Contact: pgregory@aqsis.org
 //
@@ -120,7 +120,7 @@ void CqImage::loadFromTiff(const std::string& filename)
 		<< m_realData->numChannels()
 		<< "] (PkDspyType = " << m_realData->channelsInfo()[0].type << ")"
 		<< std::endl;
-	TqChar *description = "";
+	const TqChar* description = "";
 	if(TIFFGetField(tif.get(), TIFFTAG_IMAGEDESCRIPTION, &description) != 1)
 		TIFFGetField(tif.get(), TIFFTAG_SOFTWARE, &description);
 	setDescription(description);

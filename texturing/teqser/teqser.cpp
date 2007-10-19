@@ -91,8 +91,11 @@ int main( int argc, const char** argv )
 	ap.argString( "filter", "=string\a[box|bessel|catmull-rom|disk|gaussian|sinc|triangle|mitchell] (default: %default)", &g_filter );
 	ap.argFloat( "fov(envcube)", "=float\a[>=0.0f] (default: %default)", &g_fov );
 	ap.argFloat( "swidth", "=float\as width [>0.0f] (default: %default)", &g_swidth );
+	ap.alias( "swidth", "sfilterwidth" );
 	ap.argFloat( "twidth", "=float\at width [>0.0f] (default: %default)", &g_twidth );
+	ap.alias( "twidth", "tfilterwidth" );
 	ap.argFloat( "width", "=float\awidth [>0.0f] set both swidth and twidth (default: %default)", &g_width );
+	ap.alias( "width", "filterwidth" );
 	ap.argFloat( "quality", "=float\a[>=1.0f && <= 100.0f] (default: %default)", &g_quality );
 	ap.argFloat( "bake", "=float\a[>=2.0f && <= 2048.0f] (default: %default)", &g_bake );
 	ap.argString( "resize", "=string\a[up|down|round|up-|down-|round-] (default: %default)\n\aNot used, for BMRT compatibility only!", &g_resize );

@@ -1,5 +1,5 @@
 // Aqsis
-// Copyright © 1997 - 2001, Paul C. Gregory
+// Copyright (C) 1997 - 2001, Paul C. Gregory
 //
 // Contact: pgregory@aqsis.org
 //
@@ -240,7 +240,7 @@ void CqImagePixel::JitterSamples( std::vector<SqSampleData>& samplePoints, std::
 				k = random.RandomInt( n - 1 - i ) + i;
 				TqInt i1 = i * m + j;
 				TqInt i2 = k * m + j;
-				assert( i1 < vecSamples.size() && i2 < vecSamples.size() );
+				assert( i1 < static_cast<TqInt>(vecSamples.size()) && i2 < static_cast<TqInt>(vecSamples.size()) );
 				t = vecSamples[ i1 ].y();
 				vecSamples[ i1 ].y( vecSamples[ i2 ].y() );
 				vecSamples[ i2 ].y( t );
@@ -258,7 +258,7 @@ void CqImagePixel::JitterSamples( std::vector<SqSampleData>& samplePoints, std::
 				k = random.RandomInt( n - 1 - j ) + j;
 				TqInt i1 = j * m + i;
 				TqInt i2 = k * m + i;
-				assert( i1 < vecSamples.size() && i2 < vecSamples.size() );
+				assert( i1 < static_cast<TqInt>(vecSamples.size()) && i2 < static_cast<TqInt>(vecSamples.size()) );
 				t = vecSamples[ i1 ].x();
 				vecSamples[ i1 ].x( vecSamples[ i2 ].x() );
 				vecSamples[ i2 ].x( t );

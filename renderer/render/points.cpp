@@ -29,7 +29,7 @@
  *
  */
 
-#include	<math.h>
+#include	<cmath>
 
 #include	"points.h"
 #include	"micropolygon.h"
@@ -48,8 +48,6 @@ CqObjectPool<CqMovingMicroPolygonKeyPoints>	CqMovingMicroPolygonKeyPoints::m_the
 CqObjectPool<CqMicroPolygonPoints>	CqMicroPolygonPoints::m_thePool;
 CqObjectPool<CqMicroPolygonMotionPoints>	CqMicroPolygonMotionPoints::m_thePool;
 
-
-#define NBR_SEGMENTS 6
 
 void CqPointsKDTreeData::SetpPoints( const CqPoints* pPoints )
 {
@@ -131,8 +129,6 @@ CqSurface* CqPoints::Clone() const
 CqMicroPolyGridBase* CqPoints::Dice()
 {
 	assert( pPoints() );
-
-	std::vector<CqMicroPolyGrid*> apGrids;
 
 	CqMicroPolyGridPoints* pGrid = new CqMicroPolyGridPoints();
 	pGrid->Initialise(nVertices(), 1, shared_from_this());
@@ -312,17 +308,6 @@ bool	CqPoints::Diceable()
 	TqUint gridsize = 256;
 
 	const TqInt* poptGridSize = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "limits", "gridsize" );
-
-	TqInt m_XBucketSize = 16;
-	TqInt m_YBucketSize = 16;
-
-	const TqInt* poptBucketSize = QGetRenderContext() ->poptCurrent()->GetIntegerOption( "limits", "bucketsize" );
-	if ( poptBucketSize != 0 )
-	{
-		m_XBucketSize = poptBucketSize[ 0 ];
-		m_YBucketSize = poptBucketSize[ 1 ];
-	}
-
 	if ( poptGridSize )
 		gridsize = (TqUint) poptGridSize[ 0 ];
 
@@ -339,12 +324,10 @@ bool	CqPoints::Diceable()
 
 void	CqPoints::Bound(IqBound* bound) const
 {
-	TqUint i;
-
 /*	for ( t = 0; t < cTimes(); t++ )
 	{
 		CqPolygonPoints* pTimePoints = pPoints( t ).get();*/
-		for( i = 0; i < nVertices(); i++ )
+		for( TqUint i = 0; i < nVertices(); i++ )
 			bound->Encapsulate( (CqVector3D)m_pPoints->P()->pValue( m_KDTree.aLeaves()[ i ] )[0] );
 /*	}*/
 
@@ -415,8 +398,7 @@ TqInt CqPoints::CopySplit( std::vector<boost::shared_ptr<CqSurface> >& aSplits, 
 void CqPoints::InitialiseKDTree()
 {
 	m_KDTree.aLeaves().reserve( nVertices() );
-	TqUint i;
-	for( i = 0; i < nVertices(); i++ )
+	for( TqUint i = 0; i < nVertices(); i++ )
 		m_KDTree.aLeaves().push_back( i );
 }
 
@@ -428,16 +410,12 @@ void CqPoints::InitialiseMaxWidth()
 	CqMatrix matObjectToCamera = QGetRenderContext() ->matSpaceToSpace( "object", "camera", NULL, pTransform().get(), QGetRenderContext()->Time() );
 	const CqParameterTypedConstant<TqFloat, type_float, TqFloat>* pConstantWidthParam = constantwidth( );
 
-	TqInt iu;
-	TqInt gsmin1;
-	gsmin1 = cu - 1;
-
 	CqVector3D Point0 = matObjectToCamera * CqVector3D(0,0,0);
 
 	TqFloat i_radius = 1.0f;
 	if( NULL != pConstantWidthParam )
 		i_radius = pConstantWidthParam->pValue( 0 )[ 0 ];
-	for ( iu = 0; iu < cu; iu++ )
+	for ( TqInt iu = 0; iu < cu; iu++ )
 	{
 		TqFloat radius;
 		// Find out if the "width" parameter was specified.
@@ -510,8 +488,7 @@ void CqMicroPolyGridPoints::Split( CqImageBuffer* pImage, long xmin, long xmax, 
 
 		CqMatrix matObjectToCameraT;
 		register TqInt i;
-		TqInt gsmin1;
-		gsmin1 = GridSize() - 1;
+		TqInt gsmin1 = GridSize() - 1;
 
 
 		for( iTime = 0; iTime < tTime; iTime++ )
@@ -711,8 +688,7 @@ void CqMotionMicroPolyGridPoints::Split( CqImageBuffer* pImage, long xmin, long 
 
 	CqMatrix matObjectToCameraT;
 	register TqInt i;
-	TqInt gsmin1;
-	gsmin1 = pGridA->pShaderExecEnv()->shadingPointCount() - 1;
+	TqInt gsmin1 = pGridA->pShaderExecEnv()->shadingPointCount() - 1;
 
 	for( iTime = 0; iTime < NumTimes; iTime++ )
 	{

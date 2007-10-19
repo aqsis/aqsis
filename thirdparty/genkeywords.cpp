@@ -1,4 +1,4 @@
-// Copyright © 2004 Andrew J. Bromage
+// Copyright (C) 2004 Andrew J. Bromage
 //
 // Contact: ajb@spamcop.net
 //

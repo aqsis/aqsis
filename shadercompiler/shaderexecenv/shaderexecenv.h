@@ -1,5 +1,5 @@
 // Aqsis
-// Copyright © 1997 - 2001, Paul C. Gregory
+// Copyright (C) 1997 - 2001, Paul C. Gregory
 //
 // Contact: pgregory@aqsis.org
 //
@@ -73,11 +73,11 @@
 START_NAMESPACE( Aqsis )
 
 
-SHADERCONTEXT_SHARE extern char*	gVariableClassNames[];
+SHADERCONTEXT_SHARE extern const char*	gVariableClassNames[];
 SHADERCONTEXT_SHARE extern TqInt	gcVariableClassNames;
-SHADERCONTEXT_SHARE extern char*	gVariableTypeNames[];
+SHADERCONTEXT_SHARE extern const char*	gVariableTypeNames[];
 SHADERCONTEXT_SHARE extern TqInt	gcVariableTypeNames;
-SHADERCONTEXT_SHARE extern char*	gVariableNames[];	///< Vector of variable names.
+SHADERCONTEXT_SHARE extern const char*	gVariableNames[];	///< Vector of variable names.
 SHADERCONTEXT_SHARE extern TqUlong	gVariableTokens[];	///< Vector of hash key from above names.
 
 

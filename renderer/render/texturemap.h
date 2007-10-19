@@ -1,5 +1,5 @@
 // Aqsis
-// Copyright © 1997 - 2001, Paul C. Gregory
+// Copyright (C) 1997 - 2001, Paul C. Gregory
 //
 // Contact: pgregory@aqsis.org
 //
@@ -873,14 +873,14 @@ class CqShadowMap : public CqTextureMap
 		 */
 		virtual CqMatrix&	matWorldToCamera(TqInt index = 0)
 		{
-			assert( index < m_WorldToCameraMatrices.size() );
+			assert( index < static_cast<TqInt>(m_WorldToCameraMatrices.size()) );
 			return ( m_WorldToCameraMatrices[index] );
 		}
 		/** Get the matrix used to convert points from work into screen space.
 		 */
 		virtual CqMatrix&	matWorldToScreen(TqInt index = 0)
 		{
-			assert( index < m_WorldToScreenMatrices.size() );
+			assert( index < static_cast<TqInt>(m_WorldToScreenMatrices.size()) );
 			return ( m_WorldToScreenMatrices[index] );
 		}
 

@@ -1,5 +1,5 @@
 // Aqsis
-// Copyright © 1997 - 2001, Paul C. Gregory
+// Copyright (C) 1997 - 2001, Paul C. Gregory
 //
 // Contact: pgregory@aqsis.org
 //
@@ -26,8 +26,6 @@
 //? Is .h included already?
 #ifndef MICROPOLYGON_H_INCLUDED
 #define MICROPOLYGON_H_INCLUDED 1
-
-#include	"ri.h"
 
 #include	"aqsis.h"
 
@@ -822,7 +820,7 @@ class CqMicroPolygonMotion : public CqMicroPolygon
 		{
 			if ( !m_BoundReady )
 				Aqsis::log() << error << "MP bound list not ready" << std::endl;
-			assert( iIndex < m_BoundList.Size() );
+			assert( iIndex < static_cast<TqInt>(m_BoundList.Size()) );
 			time = m_BoundList.GetTime( iIndex );
 			return ( m_BoundList.GetBound( iIndex ) );
 		}
@@ -852,13 +850,13 @@ class CqMicroPolygonMotion : public CqMicroPolygon
 
 		virtual TqFloat Time(TqUint index) const
 		{
-			assert(index < m_Times.size());
+			assert( index < static_cast<TqInt>(m_Times.size()) );
 			return(m_Times[index]);
 		}
 
 		virtual CqMovingMicroPolygonKey* Key(TqUint index) const
 		{
-			assert(index < m_Keys.size());
+			assert( index < static_cast<TqInt>(m_Keys.size()) );
 			return(m_Keys[index]);
 		}
 

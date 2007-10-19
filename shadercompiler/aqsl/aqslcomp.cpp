@@ -1,5 +1,5 @@
 // Aqsis
-// Copyright © 1997 - 2001, Paul C. Gregory
+// Copyright (C) 1997 - 2001, Paul C. Gregory
 //
 // Contact: pgregory@aqsis.org
 //
@@ -68,7 +68,7 @@ void version( std::ostream& Stream )
 }
 
 
-char* g_slppDefArgs[] =
+const char* g_slppDefArgs[] =
     {
         "slpp",
         "-d",
