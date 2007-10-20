@@ -32,7 +32,7 @@ ADD_LIBRARY(aqsislib SHARED ${AQSISLIB_SRCS} ${AQSISLIB_HDRS}
 							${RIB2RI_SRCS} ${RIB2RI_HDRS} 
 							${DDMANAGER_SRCS} ${DDMANAGER_HDRS} 
 							${RAYTRACE_SRCS} ${RAYTRACE_HDRS})
-ADD_DEPENDENCIES(aqsislib apiheader apicache apivalidate apidebug)
+ADD_DEPENDENCIES(aqsislib apiheader apicache apivalidate apidebug ribparser)
 
 SET(LINKLIBS ${AQSIS_TIFF_LIBRARIES} ${AQSIS_ZLIB_LIBRARIES} ${AQSISLIB_SYSTEM_LINKLIBS})
 INCLUDE(${AQSISTYPES_SOURCE_DIR}/link.cmake)

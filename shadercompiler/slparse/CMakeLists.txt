@@ -1,7 +1,5 @@
 PROJECT(SLPARSE)
 
-# Create target for the parser
-ADD_CUSTOM_TARGET(slparser echo "Creating SL parser/scanner")
 
 # Create custom command for flex/lex (note the outputs)
 ADD_CUSTOM_COMMAND(
@@ -23,3 +21,8 @@ ADD_CUSTOM_COMMAND(
 	OUTPUTS ${SLPARSE_BINARY_DIR}/parser.cpp
 	OUTPUTS ${SLPARSE_BINARY_DIR}/parser.hpp)
 
+# Create target for the parser
+ADD_CUSTOM_TARGET(slparser echo "Creating SL parser/scanner"
+		DEPENDS ${SLPARSE_BINARY_DIR}/parser.cpp
+				${SLPARSE_BINARY_DIR}/parser.hpp
+				${SLPARSE_BINARY_DIR}/scanner.cpp)
