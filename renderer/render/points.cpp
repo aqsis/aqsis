@@ -508,7 +508,7 @@ void CqMicroPolyGridPoints::Split( CqImageBuffer* pImage, long xmin, long xmax, 
 
 		for ( iu = 0; iu < cu; iu++ )
 		{
-			CqMicroPolygonMotionPoints *pNew = new CqMicroPolygonMotionPoints( this, iu );
+			CqMicroPolygonMotionPoints* pNew = new CqMicroPolygonMotionPoints( this, iu );
 
 			TqFloat radius;
 			TqFloat i_radius = 1.0f;
@@ -612,8 +612,7 @@ void CqMicroPolyGridPoints::Split( CqImageBuffer* pImage, long xmin, long xmax, 
 			TqFloat ras_radius = ( vecRasP2 - Point ).Magnitude();
 			radius = ras_radius * 0.5f;
 
-			CqMicroPolygonPoints *pNew = new CqMicroPolygonPoints( this, iu );
-			pNew->Initialise( radius );
+			CqMicroPolygonPoints* pNew = new CqMicroPolygonPoints( this, iu, radius );
 			//pNew->GetTotalBound();
 
 			boost::shared_ptr<CqMicroPolygon> pMP( pNew );
@@ -710,7 +709,7 @@ void CqMotionMicroPolyGridPoints::Split( CqImageBuffer* pImage, long xmin, long 
 	TqInt iu;
 	for ( iu = 0; iu < cu; iu++ )
 	{
-		CqMicroPolygonMotionPoints *pNew = new CqMicroPolygonMotionPoints( pGridA, iu );
+		CqMicroPolygonMotionPoints* pNew = new CqMicroPolygonMotionPoints( pGridA, iu );
 
 		TqFloat radius;
 		TqInt iTime;

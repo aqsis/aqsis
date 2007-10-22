@@ -872,7 +872,7 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage )
 
 			if ( tTime > 1 )
 			{
-				CqMicroPolygonMotion * pNew = new CqMicroPolygonMotion( this, iIndex );
+				CqMicroPolygonMotion* pNew = new CqMicroPolygonMotion( this, iIndex );
 				if ( fTrimmed )
 					pNew->MarkTrimmed();
 				std::map<TqFloat, TqInt>::iterator keyFrame;
@@ -884,7 +884,7 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage )
 			}
 			else
 			{
-				CqMicroPolygon *pNew = new CqMicroPolygon( this, iIndex );
+				CqMicroPolygon* pNew = new CqMicroPolygon( this, iIndex );
 				if ( fTrimmed )
 					pNew->MarkTrimmed();
 				pNew->Initialise();
@@ -1117,7 +1117,7 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage )
 					fTrimmed = true;
 			}
 
-			CqMicroPolygonMotion *pNew = new CqMicroPolygonMotion( this, iIndex );
+			CqMicroPolygonMotion* pNew = new CqMicroPolygonMotion( this, iIndex );
 			for ( iTime = 0; iTime < cTimes(); iTime++ )
 				pNew->AppendKey( aaPtimes[ iTime ][ iIndex ], aaPtimes[ iTime ][ iIndex + 1 ], aaPtimes[ iTime ][ iIndex + cu + 2 ], aaPtimes[ iTime ][ iIndex + cu + 1 ], Time( iTime ) );
 

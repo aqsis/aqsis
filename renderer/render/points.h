@@ -344,8 +344,8 @@ class CqMotionMicroPolyGridPoints : public CqMotionMicroPolyGrid
 class CqMicroPolygonPoints : public CqMicroPolygon
 {
 	public:
-		CqMicroPolygonPoints( CqMicroPolyGridBase* pGrid, TqInt Index ) :
-			CqMicroPolygon( pGrid, Index )
+		CqMicroPolygonPoints( CqMicroPolyGridBase* pGrid, TqInt Index , TqFloat radius ) :
+			CqMicroPolygon( pGrid, Index ), m_radius( radius )
 		{}
 		virtual	~CqMicroPolygonPoints()
 		{}
@@ -365,10 +365,6 @@ class CqMicroPolygonPoints : public CqMicroPolygon
 		}
 
 	public:
-		void Initialise( TqFloat radius )
-		{
-			m_radius = radius;
-		}
 		virtual	CqBound&			GetTotalBound( )
 		{
 			static CqBound b;

@@ -41,6 +41,7 @@
 #include	"csgtree.h"
 #include	"refcount.h"
 #include	"logging.h"
+#include       <boost/utility.hpp>
 
 START_NAMESPACE( Aqsis )
 
@@ -468,7 +469,7 @@ struct CqHitTestCache
  * Abstract base class from which static and motion micropolygons are derived.
  */
 
-class CqMicroPolygon
+class CqMicroPolygon : boost::noncopyable
 {
 	public:
 		/** Constructor, setting up the pointer to the grid
@@ -503,22 +504,6 @@ class CqMicroPolygon
 			return CqString("CqMicroPolygon");
 		}
 #endif
-		/** Assigment operator, copies contents of donor micropoly while safely deleting old contents.
-		 * \param From Donor micropoly.
-		 */
-		CqMicroPolygon& operator=( const CqMicroPolygon& From )
-		{
-			if ( m_pGrid != NULL )
-				RELEASEREF( m_pGrid );
-			m_pGrid = From.m_pGrid;
-			ADDREF( m_pGrid );
-			m_Index = From.m_Index;
-			m_IndexCode = From.m_IndexCode;
-			m_BoundCode = From.m_BoundCode;
-			m_Flags = From.m_Flags;
-
-			return ( *this );
-		}
 
 	private:
 		enum EqMicroPolyFlags
@@ -696,12 +681,6 @@ class CqMicroPolygon
 		virtual void	CacheHitTestValuesDof(CqHitTestCache* cache, const CqVector2D& DofOffset, CqVector2D* coc);
 
 	private:
-		/**
-		* \todo Review: operator= defined, but empty copy-ctor.
-		*/
-		CqMicroPolygon( const CqMicroPolygon& From)
-		{}
-
 		static	CqObjectPool<CqMicroPolygon> m_thePool;
 }
 ;
