@@ -1,13 +1,16 @@
 Building Aqsis
 --------------
 
-As of version 1.1.0 Aqsis is using SCons as its build system on all platforms (yes, even on Windows), so the following instructions apply to all systems.
+As of version 1.3.0 Aqsis is using CMake as its build system on all platforms, so the following instructions apply to all systems.
+
+
 Requirements
+============
 
 Building Aqsis requires a C++ compiler and the following tools and libraries:
 
     * CMake (v2.4+)
-    * boost (v1.32.0+)
+    * Boost (v1.32.0+)
     * libtiff.lib (v3.7.1+)
     * flex (v2.5.4) (2.5.31 causes problems, see FAQ 2.2)
     * bison (v1.35+)
@@ -17,36 +20,40 @@ Building Aqsis requires a C++ compiler and the following tools and libraries:
     * xsltproc
     * OpenEXR - if you want to read and write OpenEXR HDR image files
 
-Win32: For the convenience of Windows users, most of the above stuff is readily available in the win32libs directory in the Aqsis SVN repository. However, you still have to get SCons, boost and FLTK.
+Win32: For convenience most of the above dependencies are available via the '/win32libs' directory within our source repository. However, you still have to obtain both Boost and FLTK.
+
+
 Obtaining the sources
+=====================
 
 You can either obtain the source archive or get the latest source code via SVN.
 
-With SVN, it's recommended to check out the /trunk only, as it contains all you need to compile aqsis. If you're on Linux, you can save even more time by skipping the Win32 Libraries and testing folders, checking out /trunk/aqsis only.
+With SVN, it's recommended to checkout the '/trunk' only, as it contains all you need to compile aqsis, though you can save further time by excluding the '/win32libs' and '/testing' directories (using '/trunk/aqsis').
 
-To obtain a clean checkout from SVN, first install SVN and make sure that you either provide the full path to the svn binary (svn.exe on Windows) or that you add svn to your PATH. Then go into an empty folder and call:
+To perform a clean checkout from SVN, first install SVN and make sure that you either provide the full path to the svn binary (svn.exe on Windows) or that you add svn to your PATH. Then go into an empty folder and call:
 
 $ svn checkout https://svn.sourceforge.net/svnroot/aqsis/trunk
 
-This will check out by default into a folder called /trunk - just as in the repository. If you don't want this, you can specify the target folder by passing it after the URL, like this (this will put the content of /trunk into ~/aqsis/current):
+By default this will checkout to a folder called '/trunk', as per the repository. If this is not desired you can instead specify the target folder by passing it after the URL:
 
 $ svn checkout https://svn.sourceforge.net/svnroot/aqsis/trunk ~/aqsis/current
 
-If everything works fine, you should see some output like ...
+All being well, you should see some output like:
 
 A    trunk\aqsis
 A    trunk\aqsis\distribution
 A    trunk\aqsis\distribution\SConscript
 ...
 
-Eventually you end up with a new directory, /trunk. /trunk/aqsis contains the complete source code, while /trunk/win32libs contains libraries only interesting for Windows users.
+Eventually you have a new directory, '/trunk'. '/trunk/aqsis' contains the complete source code, while '/trunk/win32libs' contains libraries only interesting for Windows users.
 
 For more instructions on obtaining the source code via SVN see the SourceForge SVN page.
+
 
 Building
 ========
 
-The CMake system requires that the project is built in a different folder to the source, this ensures that nothing affects the source folder. So first create a new directory, for example 'build' in the same location as the source...
+The CMake system requires that the project is built within a different folder to the source, to ensure nothing affects the source folder. So first create a new directory, for example 'build' in the same location as the source:
 
 mkdir build
 cd build
@@ -55,67 +62,70 @@ Then from within that folder run the CMake interactive configuration tool, see s
 
 Once the variables are all properly set, select the option to generate the project files and exit. This will result in a set of system specific build configuration files in the build folder. See the system specific sections for what to do next.
 
+
 System Specific Details
 =======================
 
 Win32
 =====
 
-The CMake interactive configuration tool can be started from the 'Start' menu. Point the source location at your checked out source, and the build location to your newly made build folder. Then check the variables. Most important on Win32 is to point AQSIS_WIN32LIBS to point to the location of your checked out 'win32libs' SVN folder, this will resolve most of the required libraries and executables that are provided as part of the 'win32libs' folder.
+The CMake interactive configuration tool can be started via the 'Start' menu. Point the source location at your checked out source, and the build location to your newly made build folder. Then check the variables. Most important on Win32 is to point AQSIS_WIN32LIBS to point to the location of your checked out 'win32libs' SVN folder, this will resolve most of the required libraries and executables that are provided as part of the 'win32libs' folder.
 
 Other important things to locate are the Boost include and libraries folder, and to setup the proper name for the Boost thread library, you'll have to check your Boost installation for that information. For example, if you have "libboost_thread_vc80-mt-1_34_1.lib" the name would be "libboost_thread_vc80-mt-1_34_1". You can confirm if this has worked by enabling the 'advanced' options and checking if the AQSIS_BOOST_THREAD_LIBRARY points to the file you expect. 
 
 When you select to configure for the first time in a clean build folder CMake will ask you which target platform you wish to make for, we have tested with MicroSoft Visual Studio 8 and MinGW.
 
 Win32 - MSVC8
-=======================
+=============
 
 CMake will generate vcproj and solution files for the project, load the solution into the VC8 IDE and build the ALL_BUILD target.
 
 Win32 - MingW
 =============
 
-You can build from the build folder by typing...
+To build within the current directory enter:
 
 mingw32-make
 
-there are some different build targets, type...
+To list the different build targets enter:
 
-mingw32-make help 
-
-for a list.
+mingw32-make help
 
 Linux
 =====
 
-The interactive CMake configuration tool on Linux is ccmake, which is curses based. 
+The interactive CMake configuration tool on Linux is 'ccmake', which is curses based.
+
+To create GNU 'make' files within the current folder enter:
 
 ccmake ../aqsis
 
-will setup GNU make files in the build folder. From there typing...
+To build within the current directory enter:
 
 make
 
-will build the project in the build folder. There are various other build targets that you can list by typing...
+To list the different build targets enter
 
 make help
 
 MacOSX
 ======
 
-The interactive CMake configuration tool on MacOSX is ccmake, which is curses based. 
+The interactive CMake configuration tool on MacOSX is 'ccmake', which is curses based. 
+
+To create GNU 'make' files within the current folder enter:
 
 ccmake ../aqsis
 
-will setup GNU make files in the build folder. From there typing...
+To build within the current directory enter:
 
 make
 
-will build the project in the build folder. There are various other build targets that you can list by typing...
+To list the different build targets enter
 
 make help
 
-...
+
 Troubleshooting
 ===============
 
