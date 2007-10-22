@@ -34,59 +34,6 @@
 #include "smartptr.h"
 
 //------------------------------------------------------------------------------
-// CqChannelList test cases
-
-// Fixture for channel list test cases.
-struct ChannelInfoListFixture
-{
-	Aqsis::CqChannelList chanList;
-
-	ChannelInfoListFixture()
-		: chanList()
-	{
-		chanList.addChannel(Aqsis::SqChannelInfo("a", Aqsis::Channel_Unsigned16));
-		chanList.addChannel(Aqsis::SqChannelInfo("b", Aqsis::Channel_Unsigned8));
-		chanList.addChannel(Aqsis::SqChannelInfo("g", Aqsis::Channel_Signed32));
-		chanList.addChannel(Aqsis::SqChannelInfo("r", Aqsis::Channel_Float32));
-	}
-};
-
-BOOST_AUTO_TEST_CASE(CqChannelList_channelByteOffset_test)
-{
-	ChannelInfoListFixture f;
-
-	BOOST_CHECK_EQUAL(f.chanList.channelByteOffset(0), 0);
-	BOOST_CHECK_EQUAL(f.chanList.channelByteOffset(1), 2);
-	BOOST_CHECK_EQUAL(f.chanList.channelByteOffset(3), 7);
-
-	BOOST_CHECK_EQUAL(f.chanList.bytesPerPixel(), 11);
-}
-
-BOOST_AUTO_TEST_CASE(CqChannelList_reorderChannels_test)
-{
-	ChannelInfoListFixture f;
-
-	f.chanList.reorderChannels();
-	f.chanList.addChannel(Aqsis::SqChannelInfo("N", Aqsis::Channel_Float32));
-
-	BOOST_CHECK_EQUAL(f.chanList[0].name, "r");
-	BOOST_CHECK_EQUAL(f.chanList[1].name, "g");
-	BOOST_CHECK_EQUAL(f.chanList[2].name, "b");
-	BOOST_CHECK_EQUAL(f.chanList[3].name, "a");
-
-	BOOST_CHECK_EQUAL(f.chanList.bytesPerPixel(), 15);
-}
-
-BOOST_AUTO_TEST_CASE(CqChannelList_findChannelIndex_test)
-{
-	ChannelInfoListFixture f;
-
-	BOOST_CHECK_EQUAL(f.chanList.findChannelIndex("g"), 2);
-	BOOST_CHECK_THROW(f.chanList.findChannelIndex("z"), Aqsis::XqInternal);
-}
-
-
-//------------------------------------------------------------------------------
 // CqMixedImageBuffer test cases
 
 BOOST_AUTO_TEST_CASE(CqMixedImageBuffer_test_clear)
@@ -151,5 +98,37 @@ BOOST_AUTO_TEST_CASE(CqMixedImageBuffer_resize_test)
 	BOOST_CHECK_EQUAL(buf.width(), 10);
 	BOOST_CHECK_EQUAL(buf.height(), 20);
 	BOOST_CHECK(buf.rawData() != 0);
+}
+
+
+BOOST_AUTO_TEST_CASE(CqMixedImageBuffer_mixed_channels_test)
+{
+	// Test that we can actually mix different channel types properly
+	Aqsis::CqChannelList chanList;
+	chanList.addChannel(Aqsis::SqChannelInfo("r", Aqsis::Channel_Unsigned8));
+	chanList.addChannel(Aqsis::SqChannelInfo("g", Aqsis::Channel_Float32));
+	chanList.addChannel(Aqsis::SqChannelInfo("z", Aqsis::Channel_Signed16));
+
+	TqInt width = 10;
+	TqInt height = 10;
+	Aqsis::CqMixedImageBuffer buf(chanList, width, height);
+
+	// Fill the whole buffer with the maximum value possible for each channel.
+	buf.clearBuffer(1.0);
+
+	const TqUchar* rawData = buf.rawData();
+
+	// check pixel 0,0...
+	BOOST_CHECK_EQUAL(rawData[0], 255);
+	BOOST_CHECK_CLOSE(*reinterpret_cast<const TqFloat*>(rawData+chanList.channelByteOffset(1)), 1.0f, 1e-5);
+	BOOST_CHECK_EQUAL(*reinterpret_cast<const TqShort*>(rawData+chanList.channelByteOffset(2)),
+			std::numeric_limits<TqShort>::max());
+
+	// check last pixel
+	rawData += chanList.bytesPerPixel()*(width*height-1);
+	BOOST_CHECK_EQUAL(rawData[0], 255);
+	BOOST_CHECK_CLOSE(*reinterpret_cast<const TqFloat*>(rawData+chanList.channelByteOffset(1)), 1.0f, 1e-5);
+	BOOST_CHECK_EQUAL(*reinterpret_cast<const TqShort*>(rawData+chanList.channelByteOffset(2)),
+			std::numeric_limits<TqShort>::max());
 }
 

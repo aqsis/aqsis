@@ -114,8 +114,9 @@ void convertHeader(const Imf::Header& exrHeader, CqTexFileHeader& header)
 {
 	// Set width, height
 	const Imath::Box2i& dataBox = exrHeader.dataWindow();
-	header.set<Attr::Width>(dataBox.max.x - dataBox.min.x);
-	header.set<Attr::Height>(dataBox.max.y - dataBox.min.y);
+	header.set<Attr::Width>(dataBox.max.x - dataBox.min.x+1);
+	header.set<Attr::Height>(dataBox.max.y - dataBox.min.y+1);
+	Aqsis::log() << header.find<Attr::Width>() << "  " << header.find<Attr::Height>() << "\n";
 	// display window
 	const Imath::Box2i& displayBox = exrHeader.displayWindow();
 	header.set<Attr::DisplayWindow>( SqImageRegion(
@@ -187,19 +188,26 @@ void CqExrInputFile::readPixelsImpl(TqUchar* buffer,
 		TqInt startLine, TqInt numScanlines) const
 {
 	// correct the start line for OpenEXR conventions
-	startLine += m_exrFile->header().dataWindow().min.y;
+	const Imath::Box2i& dataWindow = m_exrFile->header().dataWindow();
+	startLine += dataWindow.min.y;
 	// Set up an OpenEXR framebuffer
 	Imf::FrameBuffer frameBuffer;
 	const CqChannelList& channels = m_header.channelList();
 	const TqChannelNameMap& nameMap = m_header.find<Attr::ExrChannelNameMap>();
+	const TqInt xStride = channels.bytesPerPixel();
+	const TqInt yStride = m_header.width()*xStride;
+	// In OpenEXR, the buffer base pointer is assumed to point at the
+	// coordinates of the (0,0) pixel.  We need to correct our buffer pointer
+	// by subtracting the offset to (0,0) from the start of the data.
+	buffer -= dataWindow.min.x*xStride + dataWindow.min.y*yStride;
 	for(TqInt i = 0; i < channels.numChannels(); ++i)
 	{
 		frameBuffer.insert(nameMap.find(channels[i].name)->second.c_str(),
 				Imf::Slice(
 					exrChannelType(channels[i].type),
 					reinterpret_cast<char*>(buffer + channels.channelByteOffset(i)),
-					channels.bytesPerPixel(),
-					m_header.width()*channels.bytesPerPixel()
+					xStride,
+					yStride
 					)
 				);
 	}
