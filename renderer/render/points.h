@@ -508,12 +508,12 @@ class CqMicroPolygonMotionPoints : public CqMicroPolygon
 		virtual void CalculateTotalBound();
 		virtual const CqBound&	GetTotalBound() const
 		{
-			return( m_Bound );
+			return ( m_Bound );
 		}
-		virtual	TqInt	cSubBounds() const
+		virtual	TqInt	cSubBounds( TqUint timeRanges )
 		{
 			if ( !m_BoundReady )
-				Aqsis::log() << error << "MP bound list not ready" << std::endl;
+				BuildBoundList( timeRanges );
 			return ( m_BoundList.Size() );
 		}
 		virtual	CqBound	SubBound( TqInt iIndex, TqFloat& time ) const

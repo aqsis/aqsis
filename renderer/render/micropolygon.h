@@ -523,10 +523,10 @@ class CqMicroPolygon
 	private:
 		enum EqMicroPolyFlags
 		{
-		    MicroPolyFlags_Trimmed	= 0x0001,
-		    MicroPolyFlags_Hit	= 0x0002,
-		    MicroPolyFlags_PushedForward	= 0x0004,
-	};
+			MicroPolyFlags_Trimmed		= 0x0001,
+			MicroPolyFlags_Hit		= 0x0002,
+			MicroPolyFlags_PushedForward	= 0x0004,
+		};
 
 	public:
 		/** Get the pointer to the grid this micropoly came from.
@@ -574,7 +574,7 @@ class CqMicroPolygon
 			return m_Bound;
 		}
 
-		virtual	TqInt	cSubBounds() const
+		virtual	TqInt	cSubBounds( TqUint timeRanges )
 		{
 			return ( 1 );
 		}
@@ -810,10 +810,10 @@ class CqMicroPolygonMotion : public CqMicroPolygon
 		{
 			return ( m_Bound );
 		}
-		virtual	TqInt	cSubBounds() const
+		virtual	TqInt	cSubBounds( TqUint timeRanges )
 		{
 			if ( !m_BoundReady )
-				Aqsis::log() << error << "MP bound list not ready" << std::endl;
+				BuildBoundList( timeRanges );
 			return ( m_BoundList.Size() );
 		}
 		virtual	CqBound	SubBound( TqInt iIndex, TqFloat& time ) const

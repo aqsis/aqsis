@@ -1153,7 +1153,8 @@ void CqBucket::RenderMP_MBOrDof( CqMicroPolygon* pMP,
 	TqFloat time0 = currentGridInfo.m_ShutterOpenTime;
 	TqFloat time1 = currentGridInfo.m_ShutterCloseTime;
 
-	TqInt bound_maxMB = pMP->cSubBounds();
+	const TqUint timeRanges = MAX(4, m_bucketData->m_PixelXSamples * m_bucketData->m_PixelYSamples);
+	TqInt bound_maxMB = pMP->cSubBounds( timeRanges );
 	TqInt bound_maxMB_1 = bound_maxMB - 1;
 	for ( TqInt bound_numMB = 0; bound_numMB < bound_maxMB; bound_numMB++ )
 	{
