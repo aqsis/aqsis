@@ -37,6 +37,8 @@
 
 START_NAMESPACE( Aqsis )
 
+class CqMicroPolyGrid;
+class CqMicroPolyGridBase;
 
 //----------------------------------------------------------------------
 /** \class CqSurfacePatchBicubic
@@ -258,11 +260,7 @@ class CqSurfacePatchBilinear : public CqSurface
 
 		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits );
 		virtual	TqInt	PreSubdivide( std::vector<boost::shared_ptr<CqSurface> >& aSplits, bool u );
-		virtual void	PostDice(CqMicroPolyGrid * pGrid)
-		{
-			if(m_fHasPhantomFourthVertex)
-				pGrid->SetfTriangular(true);
-		}
+		virtual void	PostDice(CqMicroPolyGrid * pGrid);
 
 	protected:
 		bool	m_fHasPhantomFourthVertex;

@@ -27,18 +27,19 @@
 #ifdef WIN32
 #include    <windows.h>
 #endif
-#include	<math.h>
 
 #include	"surface.h"
 #include	"imagepixel.h"
 #include	"occlusion.h"
 #include	"renderer.h"
+#include	"micropolygon.h"
 
 #include	"bucket.h"
 #include	"multitimer.h"
 
 #include	<algorithm>
 #include	<valarray>
+#include	<cmath>
 
 
 START_NAMESPACE( Aqsis )

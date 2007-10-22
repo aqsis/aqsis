@@ -30,6 +30,8 @@
 #include "occlusion.h"
 #include "bound.h"
 #include "bucket.h"
+#include "micropolygon.h"
+
 #include <deque>
 #include <fstream>
 

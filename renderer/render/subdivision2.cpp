@@ -25,6 +25,7 @@
 
 #include	"subdivision2.h"
 #include	"patch.h"
+#include	"micropolygon.h"
 
 #include	<fstream>
 #include	<vector>

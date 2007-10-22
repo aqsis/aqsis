@@ -38,6 +38,7 @@
 #include	"renderer.h"
 #include	"surface.h"
 #include	"imagebuffer.h"
+#include	"micropolygon.h"
 #include	"bucketprocessor.h"
 #include	"threadscheduler.h"
 

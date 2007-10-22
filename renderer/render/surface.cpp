@@ -23,7 +23,6 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include	"aqsis.h"
 #include	"renderer.h"
 #include	"micropolygon.h"
 #include	"surface.h"
@@ -682,6 +681,21 @@ CqParameter* CqSurface::FindUserParam( const char* name ) const
 
 
 //---------------------------------------------------------------------
+
+/** Dice this GPrim, creating a CqMotionMicroPolyGrid with all times in.
+ */
+CqMicroPolyGridBase* CqDeformingSurface::Dice()
+{
+	CqMotionMicroPolyGrid* pGrid = new CqMotionMicroPolyGrid();
+	for ( TqInt i = 0; i < cTimes(); i++ )
+	{
+		CqMicroPolyGridBase* pGrid2 = GetMotionObject( Time( i ) ) ->Dice();
+		pGrid->AddTimeSlot( Time( i ), pGrid2 );
+		ADDREF(pGrid2);
+		pGrid->SetfTriangular( pGrid2->fTriangular() );
+	}
+	return ( pGrid );
+}
 
 END_NAMESPACE( Aqsis )
 

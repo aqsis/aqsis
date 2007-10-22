@@ -32,12 +32,8 @@
 #include	<cmath>
 
 #include	"points.h"
-#include	"micropolygon.h"
 #include	"imagebuffer.h"
 #include	"renderer.h"
-#include	"polygon.h"
-
-#include	"ri.h"
 
 #include	"multitimer.h"
 

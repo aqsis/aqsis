@@ -24,9 +24,9 @@
 		\author Paul C. Gregory (pgregory@aqsis.org)
 */
 
-#include	<math.h>
+#include	<cmath>
 
-#include	"aqsis.h"
+#include	"micropolygon.h"
 #include	"renderer.h"
 #include	"patch.h"
 #include	"vector2d.h"
@@ -776,6 +776,12 @@ bool	CqSurfacePatchBilinear::Diceable()
 		return false;
 
 	return ( true );
+}
+
+void CqSurfacePatchBilinear::PostDice(CqMicroPolyGrid * pGrid)
+{
+	if (m_fHasPhantomFourthVertex)
+		pGrid->SetfTriangular(true);
 }
 
 

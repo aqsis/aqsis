@@ -37,6 +37,7 @@
 #include	"ri.h"
 
 #include        "polygon.h"
+#include        "micropolygon.h"
 
 #include	<algorithm>
 #include	<functional>
@@ -44,12 +45,14 @@
 START_NAMESPACE( Aqsis )
 
 
+class CqPoints;
+
+
 //----------------------------------------------------------------------
 /** \class CqPointsKDTreeData
  * Class for handling KDTree data representing the points primitive.
  */
 
-class CqPoints;
 class CqPointsKDTreeData : public IqKDTreeData<TqInt>
 {
 		class CqPointsKDTreeDataComparator

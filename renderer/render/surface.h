@@ -41,7 +41,6 @@
 #include	"matrix.h"
 #include	"parameters.h"
 #include	"bound.h"
-#include	"micropolygon.h"
 #include	"csgtree.h"
 #include	"isurface.h"
 #include	"logging.h"
@@ -50,6 +49,8 @@
 START_NAMESPACE( Aqsis )
 
 
+class CqMicroPolyGrid;
+class CqMicroPolyGridBase;
 
 //----------------------------------------------------------------------
 /** \class CqSurface
@@ -674,7 +675,7 @@ class CqDeformingSurface : public CqSurface, public CqMotionSpec<boost::shared_p
 		virtual	~CqDeformingSurface()
 		{}
 
-		/** Get combnied bound for all times
+		/** Get combined bound for all times
 		 * \return CqBound representing the geometric boundary of this GPrim over all time slots.
 		 */
 		virtual	void	Bound(IqBound* bound) const
@@ -691,19 +692,7 @@ class CqDeformingSurface : public CqSurface, public CqMotionSpec<boost::shared_p
 		}
 		/** Dice this GPrim, creating a CqMotionMicroPolyGrid with all times in.
 		 */
-		virtual	CqMicroPolyGridBase* Dice()
-		{
-			CqMotionMicroPolyGrid * pGrid = new CqMotionMicroPolyGrid;
-			TqInt i;
-			for ( i = 0; i < cTimes(); i++ )
-			{
-				CqMicroPolyGridBase* pGrid2 = GetMotionObject( Time( i ) ) ->Dice();
-				pGrid->AddTimeSlot( Time( i ), pGrid2 );
-				ADDREF(pGrid2);
-				pGrid->SetfTriangular( pGrid2->fTriangular() );
-			}
-			return ( pGrid );
-		}
+		virtual	CqMicroPolyGridBase* Dice();
 		/** Split this GPrim, creating a series of CqDeformingSurface with all times in.
 		 */
 		virtual	TqInt	Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits )
