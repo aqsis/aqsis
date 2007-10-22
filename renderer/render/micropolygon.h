@@ -162,12 +162,11 @@ class CqMicroPolyGridBase : public CqRefCount
 			return m_CurrentGridInfo;
 		}
 
-	public:
+	protected:
 		bool m_fCulled; ///< Boolean indicating the entire grid is culled.
 		CqTriangleSplitLine	m_TriangleSplitLine;	///< Two endpoints of the line that is used to turn the quad into a triangle at sample time.
 		bool	m_fTriangular;			///< Flag indicating that this grid should be rendered as a triangular grid with a phantom fourth corner.
 
-	protected:
 		/** Cached info about the given grid so it can be
 		 * referenced by multiple mpgs. */
 		SqGridInfo m_CurrentGridInfo;
@@ -735,6 +734,8 @@ class CqMovingMicroPolygonKey
 		CqVector3D	m_Point2;
 		CqVector3D	m_Point3;
 		CqVector3D	m_N;			///< The normal to the micropoly.
+
+	protected:
 		TqFloat	m_D;				///< Distance of the plane from the origin, used for calculating sample depth.
 
 		CqBound m_Bound;
@@ -839,7 +840,7 @@ class CqMicroPolygonMotion : public CqMicroPolygon
 			return(m_Keys[index]);
 		}
 
-	private:
+	protected:
 		CqBoundList	m_BoundList;			///< List of bounds to get a tighter fit.
 		bool	m_BoundReady;				///< Flag indicating the boundary has been initialised.
 		std::vector<TqFloat> m_Times;
