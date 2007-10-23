@@ -716,8 +716,7 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage )
 
 	CqMatrix matObjectToCameraT;
 	register TqInt i;
-	TqInt gsmin1;
-	gsmin1 = m_pShaderExecEnv->shadingPointCount() - 1;
+	TqInt gsmin1 = m_pShaderExecEnv->shadingPointCount() - 1;
 
 	std::map<TqFloat, TqInt>::iterator keyFrame;
 	for ( keyFrame = keyframeTimes.begin(); keyFrame!=keyframeTimes.end(); keyFrame++ )

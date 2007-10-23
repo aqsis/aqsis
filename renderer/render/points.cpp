@@ -439,7 +439,7 @@ void	CqPoints::Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const 
 	pTimePoints->Transform(matTx, matITTx, matRTx, 0);
 }
 
-void CqMicroPolyGridPoints::Split( CqImageBuffer* pImage, long xmin, long xmax, long ymin, long ymax )
+void CqMicroPolyGridPoints::Split( CqImageBuffer* pImage )
 {
 	if ( NULL == pVar(EnvVars_P) )
 		return ;
@@ -609,7 +609,7 @@ void CqMicroPolyGridPoints::Split( CqImageBuffer* pImage, long xmin, long xmax, 
 			radius = ras_radius * 0.5f;
 
 			CqMicroPolygonPoints* pNew = new CqMicroPolygonPoints( this, iu, radius );
-			//pNew->GetTotalBound();
+			pNew->CalculateTotalBound();
 
 			boost::shared_ptr<CqMicroPolygon> pMP( pNew );
 			pImage->AddMPG( pMP );
@@ -620,7 +620,7 @@ void CqMicroPolyGridPoints::Split( CqImageBuffer* pImage, long xmin, long xmax, 
 }
 
 
-bool	CqMicroPolygonPoints::Sample( const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof )
+bool CqMicroPolygonPoints::Sample( CqHitTestCache& hitTestCache, const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof ) const
 {
 	const CqVector2D& vecSample = sample.m_Position;
 
@@ -645,7 +645,7 @@ bool	CqMicroPolygonPoints::Sample( const SqSampleData& sample, TqFloat& D, TqFlo
  * \param ymax Integer maximum extend of the image part being rendered, takes into account buckets and clipping.
  */
 
-void CqMotionMicroPolyGridPoints::Split( CqImageBuffer* pImage, long xmin, long xmax, long ymin, long ymax )
+void CqMotionMicroPolyGridPoints::Split( CqImageBuffer* pImage )
 {
 	// Get the main object, the one that was shaded.
 	CqMicroPolyGrid * pGridA = static_cast<CqMicroPolyGridPoints*>( GetMotionObject( Time( 0 ) ) );
@@ -844,10 +844,10 @@ void CqMicroPolygonMotionPoints::BuildBoundList( TqUint timeRanges )
  * \return Boolean indicating smaple hit.
  */
 
-bool CqMicroPolygonMotionPoints::Sample( const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof )
+bool CqMicroPolygonMotionPoints::Sample( CqHitTestCache& hitTestCache, const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof ) const
 {
 	const CqVector2D& vecSample = sample.m_Position;
-	return( fContains( vecSample, D, time ) );
+	return( fContains( hitTestCache, vecSample, D, time ) );
 }
 
 
@@ -886,7 +886,7 @@ void CqMicroPolygonMotionPoints::AppendKey( const CqVector3D& vA, TqFloat radius
  * \return Boolean indicating sample hit.
  */
 
-bool CqMicroPolygonMotionPoints::fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const
+bool CqMicroPolygonMotionPoints::fContains( CqHitTestCache& hitTestCache, const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const
 {
 	TqInt iIndex = 0;
 	TqFloat Fraction = 0.0f;
@@ -910,7 +910,7 @@ bool CqMicroPolygonMotionPoints::fContains( const CqVector2D& vecP, TqFloat& Dep
 	if( Exact )
 	{
 		CqMovingMicroPolygonKeyPoints* pMP1 = m_Keys[ iIndex ];
-		return( pMP1->fContains( vecP, Depth, time ) );
+		return( pMP1->fContains( hitTestCache, vecP, Depth, time ) );
 	}
 	else
 	{

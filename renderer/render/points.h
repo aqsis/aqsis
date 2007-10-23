@@ -73,7 +73,7 @@ class CqPointsKDTreeData : public IqKDTreeData<TqInt>
 		{}
 		virtual ~CqPointsKDTreeData()
 		{
-		};
+		}
 
 		virtual void SortElements(std::vector<TqInt>& aLeaves, TqInt dimension)
 		{
@@ -315,7 +315,7 @@ class CqMicroPolyGridPoints : public CqMicroPolyGrid
 		virtual	~CqMicroPolyGridPoints()
 		{}
 
-		virtual	void	Split( CqImageBuffer* pImage, long xmin, long xmax, long ymin, long ymax );
+		virtual	void	Split( CqImageBuffer* pImage );
 
 		virtual	TqUint	GridSize() const
 		{
@@ -336,7 +336,7 @@ class CqMotionMicroPolyGridPoints : public CqMotionMicroPolyGrid
 		virtual	~CqMotionMicroPolyGridPoints()
 		{}
 
-		virtual	void	Split( CqImageBuffer* pImage, long xmin, long xmax, long ymin, long ymax );
+		virtual	void	Split( CqImageBuffer* pImage );
 };
 
 //----------------------------------------------------------------------
@@ -368,9 +368,8 @@ class CqMicroPolygonPoints : public CqMicroPolygon
 		}
 
 	public:
-		virtual	CqBound&			GetTotalBound( )
+		virtual	void CalculateTotalBound()
 		{
-			static CqBound b;
 			CqVector3D Pmin, Pmax;
 			pGrid()->pVar(EnvVars_P)->GetPoint(Pmin, m_Index);
 			Pmax = Pmin;
@@ -378,15 +377,12 @@ class CqMicroPolygonPoints : public CqMicroPolygon
 			Pmin.y( Pmin.y() - m_radius );
 			Pmax.x( Pmax.x() + m_radius );
 			Pmax.y( Pmax.y() + m_radius );
-			b.vecMin() = Pmin;
-			b.vecMax() = Pmax;
-			return( b );
+			m_Bound.vecMin() = Pmin;
+			m_Bound.vecMax() = Pmax;
 		}
-		virtual	bool	Sample( const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof = false );
-		virtual void	CacheHitTestValues(CqHitTestCache* cache, CqVector3D* points) {}
-		virtual void	CacheHitTestValues(CqHitTestCache* cache) {}
-		virtual void	CacheHitTestValuesDof(CqHitTestCache* cache, const CqVector2D& DofOffset, CqVector2D* coc) {}
 
+		virtual	bool	Sample( CqHitTestCache& hitTestCache, const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof = false ) const;
+		virtual void	CacheHitTestValues(CqHitTestCache* cache) const { }
 
 	private:
 		TqFloat	m_radius;
@@ -403,12 +399,9 @@ class CqMicroPolygonPoints : public CqMicroPolygon
 class CqMovingMicroPolygonKeyPoints
 {
 	public:
-		CqMovingMicroPolygonKeyPoints()
+		CqMovingMicroPolygonKeyPoints( const CqVector3D& vA, TqFloat radius) :
+			m_Point0( vA ), m_radius( radius )
 		{}
-		CqMovingMicroPolygonKeyPoints( const CqVector3D& vA, TqFloat radius)
-		{
-			Initialise( vA, radius );
-		}
 		virtual ~CqMovingMicroPolygonKeyPoints()
 		{}
 
@@ -427,7 +420,7 @@ class CqMovingMicroPolygonKeyPoints
 		}
 
 	public:
-		bool	fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const
+		bool	fContains( CqHitTestCache& hitTestCache, const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const
 		{
 			if( (CqVector2D( m_Point0.x(), m_Point0.y() ) - vecP).Magnitude() < m_radius )
 			{
@@ -436,9 +429,6 @@ class CqMovingMicroPolygonKeyPoints
 			}
 			return( false );
 		}
-		virtual void	CacheHitTestValues(CqHitTestCache* cache, CqVector3D* points) {}
-		virtual void	CacheHitTestValues(CqHitTestCache* cache) {}
-		virtual void	CacheHitTestValuesDof(CqHitTestCache* cache, const CqVector2D& DofOffset, CqVector2D* coc) {}
 
 		CqBound	GetTotalBound() const
 		{
@@ -451,15 +441,10 @@ class CqMovingMicroPolygonKeyPoints
 			return( CqBound( Pmin, Pmax ) );
 		}
 
-		void	Initialise( const CqVector3D& vA, TqFloat radius )
-		{
-			m_Point0 = vA;
-			m_radius = radius;
-		}
-
 		CqVector3D	m_Point0;
 		TqFloat		m_radius;
 
+	private:
 		static	CqObjectPool<CqMovingMicroPolygonKeyPoints>	m_thePool;
 }
 ;
@@ -503,7 +488,7 @@ class CqMicroPolygonMotionPoints : public CqMicroPolygon
 		{}
 
 		// Overrides from CqMicroPolygon
-		virtual bool	fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const;
+		virtual bool	fContains( CqHitTestCache& hitTestCache, const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const;
 		virtual void CalculateTotalBound();
 		virtual const CqBound&	GetTotalBound() const
 		{
@@ -529,7 +514,9 @@ class CqMicroPolygonMotionPoints : public CqMicroPolygon
 		{
 			return true;
 		}
-		virtual	bool	Sample( const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof = false );
+
+		virtual	bool	Sample( CqHitTestCache& hitTestCache, const SqSampleData& sample, TqFloat& D, TqFloat time, bool UsingDof = false ) const;
+
 	private:
 		CqBound	m_Bound;					///< Stored bound.
 		CqBoundList	m_BoundList;			///< List of bounds to get a tighter fit.
@@ -610,7 +597,6 @@ class CqDeformingPointsSurface : public CqDeformingSurface
 			}
 			CqSurface::RenderComplete();
 		}
-	protected:
 };
 
 
