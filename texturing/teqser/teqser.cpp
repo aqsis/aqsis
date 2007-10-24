@@ -216,10 +216,10 @@ int main( int argc, const char** argv )
 		g_bake = 2048.0;
 
 	/* protect the gamma mode */
-	if ( g_bake < -200.0f )
-		g_bake = -200.0;
-	if ( g_bake > 200.0f )
-		g_bake = 200.0;
+	if ( g_gamma < -200.0f )
+		g_gamma = -200.0;
+	if ( g_gamma > 200.0f )
+		g_gamma = 200.0;
 
 	char *compression = ( char * ) g_compress.c_str();
 	float quality = ( float ) g_quality;
@@ -291,7 +291,7 @@ int main( int argc, const char** argv )
 	}
 	else if ( g_envlatl )
 	{
-		printf( "LatLong Environment %s ----> %s \n\t\"compression\" = %s -gamma = %f\n",
+		printf( "LatLong Environment %s ----> %s \n\t\"compression\" = %s \n\t-gamma = %f\n",
 		        ( char* ) ap.leftovers() [ 0 ].c_str(),
 		        ( char* ) ap.leftovers() [ 1 ].c_str(),
 		        ( char* ) g_compress.c_str() , g_gamma);
