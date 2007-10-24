@@ -104,6 +104,7 @@ using namespace Aqsis;
 static RtBoolean ProcessPrimitiveVariables( CqSurface* pSurface, PARAMETERLIST );
 static void ProcessCompression( TqInt *compress, TqInt *quality, TqInt count, RtToken *tokens, RtPointer *values );
 static bool ProcessBake( TqInt * bake, TqInt count, RtToken * tokens, RtPointer * values );
+static bool ProcessGamma( TqFloat * gamma, TqInt count, RtToken * tokens, RtPointer * values );
 RtVoid	CreateGPrim( const boost::shared_ptr<CqSurface>& pSurface );
 void SetShaderArgument( const boost::shared_ptr<IqShader>& pShader, const char* name, TqPchar val );
 bool	ValidateState(...);
@@ -5080,6 +5081,15 @@ RtVoid	RiMakeTextureV( RtString imagefile, RtString texturefile, RtToken swrap, 
 		Aqsis::log() << debug << tmpenv << std::endl;
 	}
 
+	TqFloat gamma = 2.2f;
+	if (ProcessGamma( &gamma, count, tokens, values ) == true)
+	{
+		static char tmpenv[80];
+        	sprintf(tmpenv, "GAMMA=%f", gamma);
+		putenv (tmpenv);
+		Aqsis::log() << debug << tmpenv << std::endl;
+	}
+
 	CqTextureMap Source( imagefile );
 	Source.Open();
 	TqInt comp, qual;
@@ -5204,6 +5214,15 @@ RtVoid	RiMakeLatLongEnvironmentV( RtString imagefile, RtString reflfile, RtFilte
 	if ( filterfunc == RiBesselFilter )
 		sprintf( modes, "%s %s %s %f %f", swrap, twrap, "bessel", swidth, twidth );
 
+
+	TqFloat gamma = 2.2f;
+	if (ProcessGamma( &gamma, count, tokens, values ) == true)
+	{
+		static char tmpenv[80];
+        	sprintf(tmpenv, "GAMMA=%f", gamma);
+		putenv (tmpenv);
+		Aqsis::log() << debug << tmpenv << std::endl;
+	}
 
 	// Now load the original image.
 	CqTextureMap Source( imagefile );
@@ -6390,6 +6409,26 @@ bool found = false;
 		{
 
 			*bake =  (int) * ( float * ) value;
+			found = true;
+			break;
+		}
+	}
+	return found;
+}
+
+static bool ProcessGamma( TqFloat * gamma, TqInt count, RtToken * tokens, RtPointer * values )
+{
+bool found = false;
+
+	for ( int i = 0; i < count; ++i )
+	{
+		RtToken	token = tokens[ i ];
+		RtString *value = ( RtString * ) values[ i ];
+
+		if ( strstr( token, "gamma" ) != 0 )
+		{
+
+			*gamma =  *( float * ) value;
 			found = true;
 			break;
 		}
