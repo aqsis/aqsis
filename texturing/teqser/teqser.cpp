@@ -57,6 +57,7 @@ ArgParse::apfloat g_width = -1.0;
 ArgParse::apstring g_compress = "none";
 ArgParse::apfloat g_quality = 70.0;
 ArgParse::apfloat g_bake = 64.0;
+ArgParse::apfloat g_gamma = 0.0;
 
 
 void version( std::ostream& Stream )
@@ -98,6 +99,7 @@ int main( int argc, const char** argv )
 	ap.alias( "width", "filterwidth" );
 	ap.argFloat( "quality", "=float\a[>=1.0f && <= 100.0f] (default: %default)", &g_quality );
 	ap.argFloat( "bake", "=float\a[>=2.0f && <= 2048.0f] (default: %default)", &g_bake );
+	ap.argFloat( "gamma", "=float\a[>=-200.0f && <= 200.0f] (default: %default)", &g_gamma );
 	ap.argString( "resize", "=string\a[up|down|round|up-|down-|round-] (default: %default)\n\aNot used, for BMRT compatibility only!", &g_resize );
 
 
@@ -213,6 +215,12 @@ int main( int argc, const char** argv )
 	if ( g_bake > 2048.0f )
 		g_bake = 2048.0;
 
+	/* protect the gamma mode */
+	if ( g_bake < -200.0f )
+		g_bake = -200.0;
+	if ( g_bake > 200.0f )
+		g_bake = 200.0;
+
 	char *compression = ( char * ) g_compress.c_str();
 	float quality = ( float ) g_quality;
 
@@ -283,13 +291,21 @@ int main( int argc, const char** argv )
 	}
 	else if ( g_envlatl )
 	{
-		printf( "LatLong Environment %s ----> %s \n\t\"compression\" = %s \n",
+		printf( "LatLong Environment %s ----> %s \n\t\"compression\" = %s -gamma = %f\n",
 		        ( char* ) ap.leftovers() [ 0 ].c_str(),
 		        ( char* ) ap.leftovers() [ 1 ].c_str(),
-		        ( char* ) g_compress.c_str() );
+		        ( char* ) g_compress.c_str() , g_gamma);
 
 
 
+		// Only OpenEXR plugin supports gamma correction
+		if (strstr(ap.leftovers() [ 0 ].c_str(), ".exr"))
+		{
+			static char envgamma[80];
+
+			sprintf(envgamma, "GAMMA=%f", g_gamma);
+			putenv(envgamma);
+		}
 		RiMakeLatLongEnvironment( ( char* ) ap.leftovers() [ 0 ].c_str(), ( char* ) ap.leftovers() [ 1 ].c_str(), filterfunc,
 		                          ( float ) g_swidth, ( float ) g_twidth, "compression", &compression, "quality", &quality, RI_NULL );
 	}
@@ -316,6 +332,16 @@ int main( int argc, const char** argv )
 			sprintf(envbake, "BAKE=%d", bake);
 			putenv(envbake);
 		}
+
+		// Only OpenEXR plugin supports gamma correction
+		if (strstr(ap.leftovers() [ 0 ].c_str(), ".exr"))
+		{
+			static char envgamma[80];
+
+			sprintf(envgamma, "GAMMA=%f", g_gamma);
+			putenv(envgamma);
+		}
+
 		RiMakeTexture( ( char* ) ap.leftovers() [ 0 ].c_str(), ( char* ) ap.leftovers() [ 1 ].c_str(),
 		               ( char* ) g_swrap.c_str(), ( char* ) g_twrap.c_str(), filterfunc,
 		               ( float ) g_swidth, ( float ) g_twidth, "compression", &compression, "quality", &quality, RI_NULL );
