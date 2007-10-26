@@ -3495,10 +3495,10 @@ RtVoid RiBlobbyV( RtInt nleaf, RtInt ncode, RtInt code[], RtInt nflt, RtFloat fl
 
 	Aqsis::log() << info << "Created RiPointsPolygons for Blobby" << std::endl;
 
-	delete nvertices;
-	delete vertices;
-	delete points;
-	delete colors;
+	delete[] nvertices;
+	delete[] vertices;
+	delete[] points;
+	delete[] colors;
 
 	return ;
 }
