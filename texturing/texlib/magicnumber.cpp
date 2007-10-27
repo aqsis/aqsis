@@ -28,6 +28,7 @@
 #include "magicnumber.h"
 
 #include <fstream>
+#include <algorithm>
 
 #include "exception.h"
 
@@ -59,20 +60,16 @@ TqMagicNumberPtr getMagicNumber(std::istream& inStream)
 // Functions to match magic numbers
 bool isTiffMagicNumber(const TqMagicNumber& magicNum)
 {
-	if(magicNum.size() < 4)
-		return false;
 	// TIFF can have one of two possible magic numbers, depending on endianness.
-	return (magicNum[0] == 'I' && magicNum[1] == 'I'
-			&& magicNum[2] == 42 && magicNum[3] == 0)
-		|| (magicNum[0] == 'M' && magicNum[1] == 'M'
-			&& magicNum[2] == 0 && magicNum[3] == 42);
+	return magicNum.size() >= 4
+		&& (std::equal(magicNum.begin(), magicNum.begin()+4, "II\x2A\x00")
+			|| std::equal(magicNum.begin(), magicNum.begin()+4, "MM\x00\x2A"));
 }
 
 bool isOpenExrMagicNumber(const TqMagicNumber& magicNum)
 {
 	return magicNum.size() >= 4
-		&& magicNum[0] == 0x76 && magicNum[1] == 0x2F
-		&& magicNum[2] == 0x31 && magicNum[3] == 0x01;
+		&& std::equal(magicNum.begin(), magicNum.begin()+4, "v/1\x01");
 }
 
 } // namespace Aqsis

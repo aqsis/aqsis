@@ -52,8 +52,9 @@ EqChannelType channelTypeFromExr(Imf::PixelType exrType)
 		case Imf::FLOAT:
 			return Channel_Float32;
 		case Imf::HALF:
-		default:
 			return Channel_Float16;
+		default:
+			throw XqInternal("Unknown OpenEXR type!", __FILE__, __LINE__);
 	}
 }
 
@@ -116,7 +117,6 @@ void convertHeader(const Imf::Header& exrHeader, CqTexFileHeader& header)
 	const Imath::Box2i& dataBox = exrHeader.dataWindow();
 	header.set<Attr::Width>(dataBox.max.x - dataBox.min.x+1);
 	header.set<Attr::Height>(dataBox.max.y - dataBox.min.y+1);
-	Aqsis::log() << header.find<Attr::Width>() << "  " << header.find<Attr::Height>() << "\n";
 	// display window
 	const Imath::Box2i& displayBox = exrHeader.displayWindow();
 	header.set<Attr::DisplayWindow>( SqImageRegion(

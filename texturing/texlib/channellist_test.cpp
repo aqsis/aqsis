@@ -84,6 +84,14 @@ BOOST_AUTO_TEST_CASE(CqChannelList_reorderChannels_test)
 	BOOST_CHECK_EQUAL(f.chanList[3].name, "a");
 
 	BOOST_CHECK_EQUAL(f.chanList.bytesPerPixel(), 15);
+
+	// Check that the reorder also works for less than 4 elements
+	Aqsis::CqChannelList chanList2;
+	chanList2.addChannel(Aqsis::SqChannelInfo("N", Aqsis::Channel_Float32));
+	chanList2.addChannel(Aqsis::SqChannelInfo("r", Aqsis::Channel_Unsigned8));
+	chanList2.reorderChannels();
+	BOOST_CHECK_EQUAL(chanList2[0].name, "r");
+	BOOST_CHECK_EQUAL(chanList2[1].name, "N");
 }
 
 BOOST_AUTO_TEST_CASE(CqChannelList_findChannelIndex_test)

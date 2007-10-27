@@ -27,6 +27,7 @@
 #include "channellist.h"
 
 #include <iostream>
+#include <algorithm>
 
 #include <boost/format.hpp>
 
@@ -63,27 +64,41 @@ EqChannelType CqChannelList::sharedChannelType() const
 	return sharedType;
 }
 
+/// Predicate: true if chInfo has the given name.
+bool chanHasName(const SqChannelInfo& chInfo, const TqChar* name)
+{
+	return chInfo.name == name;
+}
+
 void CqChannelList::reorderChannels()
 {
-	// If there are "r", "g", "b" and "a" channels, ensure they
-	// are in the expected order.
-	const char* elements[] = { "r", "g", "b", "a" };
-	TqInt numElements = sizeof(elements) / sizeof(elements[0]);
-	for(int elementIndex = 0; elementIndex < numElements; ++elementIndex)
+	const TqChar* desiredNames[] = { "r", "g", "b", "a" };
+	TqInt numNames = sizeof(desiredNames) / sizeof(desiredNames[0]);
+	TqInt numChans = m_channels.size();
+	// Return if channels are already in the correct order.
+	if(numChans <= 1 || std::equal(m_channels.begin(), m_channels.begin()
+			+ std::min(numNames, numChans), desiredNames, chanHasName) )
+		return;
+
+	// Reorder the channels
+	TqListType oldChannels;
+	m_channels.swap(oldChannels);
+	// Put any of the standard channels from "desiredNames" in the correct
+	// order at the beginning of the channel list.
+	for(TqInt j = 0; j < numNames; ++j)
 	{
-		for(TqListType::iterator channel = m_channels.begin(); channel != m_channels.end(); ++channel)
+		for(TqListType::iterator i = oldChannels.begin(); i != oldChannels.end(); ++i)
 		{
-			// If this entry in the channel list matches one in the expected list, 
-			// move it to the right point in the channel list.
-			if(channel->name == elements[elementIndex])
+			if(i->name == desiredNames[j])
 			{
-				const SqChannelInfo temp = m_channels[elementIndex];
-				m_channels[elementIndex] = *channel;
-				*channel = temp;
+				m_channels.push_back(*i);
+				oldChannels.erase(i);
 				break;
 			}
 		}
 	}
+	// Add the remaining channels back into the 
+	std::copy(oldChannels.begin(), oldChannels.end(), std::back_inserter(m_channels));
 	recomputeByteOffsets();
 }
 
