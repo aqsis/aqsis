@@ -273,8 +273,7 @@ void CqParseNodeFunctionCall::validTypes( std::list<std::pair<TqInt, TqInt> >& t
 	std::vector<SqFuncRef>::iterator i;
 	for ( i = m_aFuncRef.begin(); i != m_aFuncRef.end(); ++i )
 	{
-		CqFuncDef* pfunc = CqFuncDef::GetFunctionPtr( (*i) );
-		TqInt mainType = bestType; //pfunc->Type();
+		TqInt mainType = bestType;
 		// Set a directly available type as a high priority no matter what.
 		suitableTypes[mainType] = 99;
 		// Now check the possible castable types, storing only if they have a weight greater than 

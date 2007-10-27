@@ -191,7 +191,6 @@ class COMMON_SHARE CqMatrix
 		CqMatrix&	operator*=( const TqFloat S );
 
 		COMMON_SHARE friend std::ostream &operator<<( std::ostream &Stream, const CqMatrix &Matrix );
-		COMMON_SHARE friend std::ostream &operator<<( std::ostream &Stream, CqMatrix &Matrix );
 		COMMON_SHARE friend CqMatrix	operator*( TqFloat S, const CqMatrix& a );
 		COMMON_SHARE friend bool  operator==(const CqMatrix& A, const CqMatrix& B);
 		COMMON_SHARE friend bool  operator!=(const CqMatrix& A, const CqMatrix& B);
@@ -203,8 +202,6 @@ class COMMON_SHARE CqMatrix
 		bool	m_fIdentity;			///< Flag indicating that this matrix should be treated as identity irrespective of its contents.
 }
 ;
-
-COMMON_SHARE std::ostream &operator<<( std::ostream &Stream, CqMatrix &Matrix );
 
 //-----------------------------------------------------------------------
 

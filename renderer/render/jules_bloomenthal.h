@@ -284,7 +284,7 @@ class bloomenthal_polygonizer
 				TqInt GetValue(const Edge& Value)
 				{
 					TqInt index = HashFunc(Value.l1) + HashFunc(Value.l2);
-					for(TqInt n = 0; n < edges[index].size(); n++)
+					for(TqInt n = 0; n < static_cast<TqInt>(edges[index].size()); n++)
 					{
 						if(edges[index][n].l1 == Value.l1 && edges[index][n].l2 == Value.l2)
 							return edges[index][n].vid;

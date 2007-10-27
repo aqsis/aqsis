@@ -151,7 +151,7 @@ TqInt	CqParseNodeFunctionCall::TypeCheck( TqInt* pTypes, TqInt Count,  bool& nee
 					}
 				}
 				// Check the arguments in turn to see if they can be used for this candidate.
-				TqUint iArg = 0;
+				TqInt iArg = 0;
 				bool fArgsFailed = false;
 				for(std::vector<std::list<std::pair<TqInt, TqInt> > >::iterator arg = argTypes.begin(); arg != argTypes.end(); ++arg, ++iArg)
 				{
