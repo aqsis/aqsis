@@ -149,7 +149,7 @@ class CqBucket : public IqBucket
 		}
 		static CqImagePixel& ImageElement(TqInt index)
 		{
-			assert(index < m_aieImage.size());
+			assert( index < static_cast<TqInt>(m_aieImage.size()) );
 			return(m_aieImage[index]);
 		}
 

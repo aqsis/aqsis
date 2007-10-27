@@ -1,5 +1,5 @@
 // Aqsis
-// Copyright © 1997 - 2001, Paul C. Gregory
+// Copyright (C) 1997 - 2001, Paul C. Gregory
 //
 // Contact: pgregory@aqsis.org
 //
@@ -439,7 +439,7 @@ class CqSubdivision2 : public CqMotionSpec<boost::shared_ptr<CqPolygonPoints> >
 				for( iV = aQfv.begin(); iV != aQfv.end(); iV++ )
 				{
 					assert( ((*iV)->*IndexFunction)() >= 0 &&
-					        ((*iV)->*IndexFunction)() < pParam->Size() );
+					        ((*iV)->*IndexFunction)() < static_cast<TqInt>(pParam->Size()) );
 					Val += pParam->pValue( ((*iV)->*IndexFunction)() )[arrayindex];
 				}
 				Val = static_cast<TypeA>( Val / static_cast<TqFloat>( aQfv.size() ) );

@@ -146,7 +146,7 @@ class CqFuncDef : public IqFuncDef
 };
 
 extern std::vector<CqFuncDef>	gLocalFuncs;
-extern char*	gVariableTypeIdentifiers[];
+extern const char*	gVariableTypeIdentifiers[];
 extern TqInt	gcVariableTypeIdentifiers;
 
 //-----------------------------------------------------------------------

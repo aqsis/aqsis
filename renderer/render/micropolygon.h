@@ -1,5 +1,5 @@
 // Aqsis
-// Copyright © 1997 - 2001, Paul C. Gregory
+// Copyright (C) 1997 - 2001, Paul C. Gregory
 //
 // Contact: pgregory@aqsis.org
 //
@@ -149,7 +149,7 @@ class CqMicroPolyGridBase : public CqRefCount
 		virtual	IqShaderData* FindStandardVar( const char* pname ) = 0;
 		virtual boost::shared_ptr<IqShaderExecEnv> pShaderExecEnv() = 0; 
 
-	public:
+	protected:
 		bool m_fCulled; ///< Boolean indicating the entire grid is culled.
 		CqTriangleSplitLine	m_TriangleSplitLine;	///< Two endpoints of the line that is used to turn the quad into a triangle at sample time.
 		bool	m_fTriangular;			///< Flag indicating that this grid should be rendered as a triangular grid with a phantom fourth corner.
@@ -495,10 +495,10 @@ class CqMicroPolygon : public CqRefCount
 	private:
 		enum EqMicroPolyFlags
 		{
-		    MicroPolyFlags_Trimmed	= 0x0001,
-		    MicroPolyFlags_Hit	= 0x0002,
-		    MicroPolyFlags_PushedForward	= 0x0004,
-	};
+			MicroPolyFlags_Trimmed		= 0x0001,
+			MicroPolyFlags_Hit		= 0x0002,
+			MicroPolyFlags_PushedForward	= 0x0004,
+		};
 
 	public:
 		/** Set up the pointer to the grid this micropoly came from.
@@ -530,7 +530,7 @@ class CqMicroPolygon : public CqRefCount
 		 */
 		void	SetIndex( TqInt Index )
 		{
-			assert( m_pGrid != 0 && m_pGrid->pShaderExecEnv()->shadingPointCount() > Index );
+			assert( m_pGrid != 0 && static_cast<TqInt>(m_pGrid->pShaderExecEnv()->shadingPointCount()) > Index );
 			m_Index = Index;
 		}
 		/** Release this micropolys reference to the donor grid.
@@ -761,6 +761,8 @@ class CqMovingMicroPolygonKey
 		CqVector3D	m_Point2;
 		CqVector3D	m_Point3;
 		CqVector3D	m_N;			///< The normal to the micropoly.
+
+	protected:
 		TqFloat	m_D;				///< Distance of the plane from the origin, used for calculating sample depth.
 
 		CqBound m_Bound;
@@ -828,7 +830,7 @@ class CqMicroPolygonMotion : public CqMicroPolygon
 		{
 			if ( !m_BoundReady )
 				BuildBoundList();
-			assert( iIndex < m_BoundList.Size() );
+			assert( iIndex < static_cast<TqInt>(m_BoundList.Size()) );
 			time = m_BoundList.GetTime( iIndex );
 			return ( m_BoundList.GetBound( iIndex ) );
 		}
@@ -858,17 +860,17 @@ class CqMicroPolygonMotion : public CqMicroPolygon
 
 		virtual TqFloat Time(TqInt index) const
 		{
-			assert(index < m_Times.size());
+			assert( index < static_cast<TqInt>(m_Times.size()) );
 			return(m_Times[index]);
 		}
 
 		virtual CqMovingMicroPolygonKey* Key(TqInt index) const
 		{
-			assert(index < m_Keys.size());
+			assert( index < static_cast<TqInt>(m_Keys.size()) );
 			return(m_Keys[index]);
 		}
 
-	private:
+	protected:
 		CqBoundList	m_BoundList;			///< List of bounds to get a tighter fit.
 		bool	m_BoundReady;				///< Flag indicating the boundary has been initialised.
 		std::vector<TqFloat> m_Times;

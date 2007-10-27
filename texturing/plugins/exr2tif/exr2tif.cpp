@@ -1,5 +1,5 @@
 // Aqsis
-// Copyright © 1997 - 2001, Paul C. Gregory
+// Copyright (C) 1997 - 2001, Paul C. Gregory
 //
 // Contact: pgregory@aqsis.org
 //
@@ -100,7 +100,7 @@ knee (float x, float f)
 }
 
 
-static unsigned char
+static float
 gamma (half h, float m)
 {
 	//
@@ -116,9 +116,9 @@ gamma (half h, float m)
 	if (x > 1)
 		x = 1 + knee (x - 1, 0.184874f);
 
-	return (unsigned char) (clamp (Math<float>::pow (x, 0.4545f) * 84.66f,
+	return (float ) (clamp (Math<float>::pow (x, 0.4545f) * 84.66f,
 	                               0.f,
-	                               255.f));
+	                               255.f)) / 255.0f;
 }
 
 // Shameless copied from an example rgbaInterfaceExamples.cpp
@@ -164,7 +164,7 @@ extern "C" __export char *exr2tif(char *in)
 	char *result =NULL;
 	int width,height;
 	Array2D<Rgba> rgba;
-	unsigned char *pixels;
+	float *pixels;
 
 	strcpy(tiffname, in);
 	if ((result = strstr(tiffname, ".exr")) != 0)
@@ -211,7 +211,7 @@ extern "C" __export char *exr2tif(char *in)
 	}
 
 	// width * height * 4 floats
-	pixels = (unsigned char *) malloc(n * sizeof(unsigned char) *  height);
+	pixels = (float *) malloc(n * sizeof(float) *  height);
 	float m  = Math<float>::pow (2.f, clamp (exposure + 2.47393f, -20.f, 20.f));
 
 	for (int i=0; i< height; i++)
@@ -221,12 +221,12 @@ extern "C" __export char *exr2tif(char *in)
 			pixels[i*n + 4*j]     = gamma(rgba[i][j].r, m); // red
 			pixels[i*n + 4*j + 1] = gamma(rgba[i][j].g, m); // green
 			pixels[i*n + 4*j + 2] = gamma(rgba[i][j].b, m); // blue
-			pixels[i*n + 4*j + 3] = static_cast<unsigned char>(rgba[i][j].a * 255); // alpha
+			pixels[i*n + 4*j + 3] = (rgba[i][j].a * 1.0f); // alpha
 		}
 	}
 
 	// a function to save as Float tiff files
-	save_tiff( tiffname, pixels, width, height, 4, "exr2tif" );
+	save_tiff( tiffname, (unsigned char *) pixels, width, height, 4, "exr2tif" );
 
 	free(pixels);
 

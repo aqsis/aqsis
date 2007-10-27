@@ -1,5 +1,5 @@
 // Aqsis
-// Copyright © 1997 - 2001, Paul C. Gregory
+// Copyright (C) 1997 - 2001, Paul C. Gregory
 //
 // Contact: pgregory@aqsis.org
 //
@@ -56,7 +56,7 @@ class CqCubicSpline
 {
 	public:
 		CqCubicSpline( EqSplineBasis basis = SplineBasis_CatmullRom, TqUint reservePoints = 0 );
-		CqCubicSpline( const CqString& strBasis = "catmull-rom", TqUint reservePoints = 0 );
+		CqCubicSpline( const CqString& strBasis, TqUint reservePoints = 0 );
 		inline virtual ~CqCubicSpline();
 
 		typedef typename std::vector<T>::iterator iterator;
@@ -109,7 +109,7 @@ class CqCubicSpline
 
 struct SqSplineBasis
 {
-	TqChar* name;
+	const TqChar* name;
 	TqInt step;
 	TqFloat basis[4][4];
 }; 
@@ -222,7 +222,7 @@ void CqCubicSpline<T>::setBasis( const EqSplineBasis basis )
 template <class T>
 inline const T& CqCubicSpline<T>::operator[] ( TqInt i ) const
 {
-	assert( i < m_controlPoints.size() );
+	assert( i < static_cast<TqInt>(m_controlPoints.size()) );
 	return ( m_controlPoints[ i ] );
 }
 

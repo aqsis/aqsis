@@ -1,5 +1,5 @@
 // Aqsis
-// Copyright © 1997 - 2001, Paul C. Gregory
+// Copyright (C) 1997 - 2001, Paul C. Gregory
 //
 // Contact: pgregory@aqsis.org
 //
@@ -186,7 +186,8 @@ void CqTransform::SetCurrentTransform( TqFloat time, const CqMatrix& matTrans )
 		else
 		{
 			m_StaticMatrix = matTrans;
-			m_Handedness = flip;
+			m_Handedness = (flip)? !m_Handedness : m_Handedness;
+			//m_Handedness = flip;
 			ct.m_Handedness = flip;
 			SetDefaultObject( ct );
 		}

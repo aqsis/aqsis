@@ -1,5 +1,5 @@
 // Aqsis
-// Copyright © 1997 - 2001, Paul C. Gregory
+// Copyright (C) 1997 - 2001, Paul C. Gregory
 //
 // Contact: pgregory@aqsis.org
 //
@@ -65,7 +65,7 @@ class CqShaderVM;
 
 struct SqOpCodeTrans
 {
-	char*	m_strName;			///< Name of the opcode.
+	const TqChar*	m_strName;		///< Name of the opcode.
 	TqUlong	m_hash;				///< Hash key of the opcode.
 	void (CqShaderVM::*m_pCommand ) ();	//< Member pointer to the function.
 	TqInt	m_cParams;			///< Number of expected parameters.

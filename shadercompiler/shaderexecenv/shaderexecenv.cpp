@@ -1,5 +1,5 @@
 // Aqsis
-// Copyright © 1997 - 2001, Paul C. Gregory
+// Copyright (C) 1997 - 2001, Paul C. Gregory
 //
 // Contact: pgregory@aqsis.org
 //
@@ -32,7 +32,7 @@
 
 START_NAMESPACE( Aqsis )
 
-char* gVariableTypeNames[] =
+const char* gVariableTypeNames[] =
     {
         "invalid",
         "float",
@@ -50,7 +50,7 @@ char* gVariableTypeNames[] =
     };
 TqInt gcVariableTypeNames = sizeof( gVariableTypeNames ) / sizeof( gVariableTypeNames[ 0 ] );
 
-char* gVariableClassNames[] =
+const char* gVariableClassNames[] =
     {
         "invalid",
         "constant",
@@ -67,7 +67,7 @@ CqCellNoise	CqShaderExecEnv::m_cellnoise;
 CqRandom	CqShaderExecEnv::m_random;
 CqMatrix	CqShaderExecEnv::m_matIdentity;
 
-char*	gVariableNames[ EnvVars_Last ] =
+const char*	gVariableNames[ EnvVars_Last ] =
     {
         "Cs",
         "Os",

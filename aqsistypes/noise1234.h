@@ -1,5 +1,5 @@
 // CqNoise1234
-// Copyright © 2003-2005, Stefan Gustavson
+// Copyright (C) 2003-2005, Stefan Gustavson
 //
 // Contact: stegu@itn.liu.se
 //

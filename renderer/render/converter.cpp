@@ -1,5 +1,5 @@
 // Aqsis
-// Copyright © 1997 - 2001, Paul C. Gregory
+// Copyright (C) 1997 - 2001, Paul C. Gregory
 //
 // Contact: pgregory@aqsis.org
 //
@@ -24,8 +24,8 @@
 */
 
 
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <cstring>
 
 #include "aqsis.h"
 #include "converter.h"
@@ -38,7 +38,7 @@ START_NAMESPACE( Aqsis )
 /** Constructor.
  * Set up the search path, library (.dll, .dso, .so) name, and function name
  */
-CqConverter::CqConverter( char *searchpath, char *library, char *function )
+CqConverter::CqConverter( const char* searchpath, const char* library, const char* function )
 {
 	m_errorlog = "" ;
 	m_dynamicsearch = searchpath ;

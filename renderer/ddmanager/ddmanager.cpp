@@ -1,5 +1,5 @@
 // Aqsis
-// Copyright © 1997 - 2001, Paul C. Gregory
+// Copyright (C) 1997 - 2001, Paul C. Gregory
 //
 // Contact: pgregory@aqsis.org
 //
@@ -329,21 +329,21 @@ void CqDisplayRequest::LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimpl
 				fmt.type = PkDspyFloat32;
 			if (m_modeID & ModeA)
 			{
-				fmt.name = ddMemberData.m_AlphaName;
+				fmt.name = const_cast<char*>( ddMemberData.m_AlphaName );
 				m_formats.push_back(fmt);
 			}
 			if (m_modeID & ModeRGB)
 			{
-				fmt.name = ddMemberData.m_RedName;
+				fmt.name = const_cast<char*>( ddMemberData.m_RedName );
 				m_formats.push_back(fmt);
-				fmt.name = ddMemberData.m_GreenName;
+				fmt.name = const_cast<char*>( ddMemberData.m_GreenName );
 				m_formats.push_back(fmt);
-				fmt.name = ddMemberData.m_BlueName;
+				fmt.name = const_cast<char*>( ddMemberData.m_BlueName );
 				m_formats.push_back(fmt);
 			}
 			if (m_modeID & ModeZ)
 			{
-				fmt.name = ddMemberData.m_ZName;
+				fmt.name = const_cast<char*>( ddMemberData.m_ZName );
 				fmt.type = PkDspyFloat32;
 				m_formats.push_back(fmt);
 			}
@@ -352,8 +352,7 @@ void CqDisplayRequest::LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimpl
 		else
 		{
 			// Determine the type of the AOV data being displayed.
-			TqInt type;
-			type = QGetRenderContext()->OutputDataType(m_mode.c_str());
+			TqInt type = QGetRenderContext()->OutputDataType(m_mode.c_str());
 			std::string componentNames = "";
 			switch (type)
 			{
@@ -376,28 +375,28 @@ void CqDisplayRequest::LoadDisplayLibrary( SqDDMemberData& ddMemberData, CqSimpl
 				{
 
 					if (componentNames.substr(i, 1) == "r")
-						fmt.name = ddMemberData.m_RedName;
+						fmt.name = const_cast<char*>( ddMemberData.m_RedName );
 					else if (componentNames.substr(i, 1) == "g")
-						fmt.name = ddMemberData.m_GreenName;
+						fmt.name = const_cast<char*>( ddMemberData.m_GreenName );
 					else if (componentNames.substr(i, 1) == "b")
-						fmt.name = ddMemberData.m_BlueName;
+						fmt.name = const_cast<char*>( ddMemberData.m_BlueName );
 					else if (componentNames.substr(i, 1) == "a")
-						fmt.name = ddMemberData.m_AlphaName;
+						fmt.name = const_cast<char*>( ddMemberData.m_AlphaName );
 					else if (componentNames.substr(i, 1) == "z")
-						fmt.name = ddMemberData.m_ZName;
+						fmt.name = const_cast<char*>( ddMemberData.m_ZName );
 					else if (componentNames.substr(i, 1) == "X")
-						fmt.name = ddMemberData.m_RedName;
+						fmt.name = const_cast<char*>( ddMemberData.m_RedName );
 					else if (componentNames.substr(i, 1) == "Y")
-						fmt.name = ddMemberData.m_GreenName;
+						fmt.name = const_cast<char*>( ddMemberData.m_GreenName );
 					else if (componentNames.substr(i, 1) == "Z")
-						fmt.name = ddMemberData.m_BlueName;
+						fmt.name = const_cast<char*>( ddMemberData.m_BlueName );
 					else
-						fmt.name = ddMemberData.m_RedName;
+						fmt.name = const_cast<char*>( ddMemberData.m_RedName );
 				}
 				else
 				{
 					// by default we will stored into red channel eg. "s" will be saved into 'r' channel
-					fmt.name = ddMemberData.m_RedName;
+					fmt.name = const_cast<char*>( ddMemberData.m_RedName );
 				}
 				if ( m_QuantizeOneVal == 255 )
 					fmt.type = PkDspyUnsigned8;

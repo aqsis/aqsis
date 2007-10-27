@@ -162,8 +162,13 @@ SectionIn 1 2
   SetOutPath "$INSTDIR\shaders"
   File "${PROJECT_ROOT}\output\shaders\*.slx"
 
-  ${ConfigWrite} "$INSTDIR\bin\aqsisrc" 'Option "searchpath" "string shader" ' '["$INSTDIR\shaders"]' $R0
-  ${ConfigWrite} "$INSTDIR\bin\aqsisrc" 'Option "searchpath" "string display" ' '["$INSTDIR\bin"]' $R1
+  ${ConfigWrite} "$INSTDIR\bin\aqsisrc" 'Option "defaultsearchpath" "string shader" ' '["$INSTDIR\shaders"]' $R0
+  ${ConfigWrite} "$INSTDIR\bin\aqsisrc" 'Option "defaultsearchpath" "string archive" ' '["$INSTDIR"]' $R1
+  ${ConfigWrite} "$INSTDIR\bin\aqsisrc" 'Option "defaultsearchpath" "string texture" ' '["$INSTDIR"]' $R2
+  ${ConfigWrite} "$INSTDIR\bin\aqsisrc" 'Option "defaultsearchpath" "string display" ' '["$INSTDIR\bin"]' $R3
+  ${ConfigWrite} "$INSTDIR\bin\aqsisrc" 'Option "defaultsearchpath" "string procedural" ' '["$INSTDIR"]' $R4
+  ${ConfigWrite} "$INSTDIR\bin\aqsisrc" 'Option "defaultsearchpath" "string plugin" ' '["$INSTDIR"]' $R5
+  ${ConfigWrite} "$INSTDIR\bin\aqsisrc" 'Option "defaultsearchpath" "string resource" ' '["$INSTDIR"]' $R6
 
 ; Shortcuts
   !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
