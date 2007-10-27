@@ -106,9 +106,6 @@ void CqImage::loadFromFile(const std::string& fileName)
 	// \todo: Should read the origin and frame size out of the image.
 	setOrigin(0,0);
 
-	m_realData = boost::shared_ptr<CqMixedImageBuffer>(new CqMixedImageBuffer());
-	texFile->readPixels(*m_realData);
-
 	const CqTexFileHeader& header = texFile->header();
 	TqUint width = header.width();
 	TqUint height = header.height();
@@ -116,6 +113,9 @@ void CqImage::loadFromFile(const std::string& fileName)
 	setFrameSize(width, height);
 	setDescription(header.find<Attr::Description>(
 				header.find<Attr::Software>("No description") ).c_str());
+
+	m_realData = boost::shared_ptr<CqMixedImageBuffer>(new CqMixedImageBuffer());
+	texFile->readPixels(*m_realData);
 
 	Aqsis::log() << Aqsis::info << "Loaded image " << fileName
 		<< " [" << width << "x" << height << " : "
