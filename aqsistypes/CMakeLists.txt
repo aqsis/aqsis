@@ -53,10 +53,12 @@ INSTALL(TARGETS aqsistypes
 
 INSTALL(FILES ${AQSISTYPES_HDRS} DESTINATION ${INCLUDEDIR})
 
+#----------------------------------------------------------------------
 # Testing
-IF(AQSIS_ENABLE_TESTING)
-	SET(AQSISTYPES_TEST_SRCS ${AQSISTYPES_TEST_SRCS} ${CMAKE_SOURCE_DIR}/build_tools/boostautotestmain.cpp)
-	ADD_EXECUTABLE(aqsistypes_test ${AQSISTYPES_TEST_SRCS})
-	TARGET_LINK_LIBRARIES(aqsistypes_test ${AQSIS_BOOST_UNIT_TEST_FRAMEWORK_LIBRARY} aqsistypes dl)
-	ADD_TEST(aqsistypes_test ${EXECUTABLE_OUTPUT_PATH}/aqsistypes_test)
-ENDIF(AQSIS_ENABLE_TESTING)
+SET(TEST_LINKLIBS
+	aqsistypes
+	${LINKLIBS}
+	dl
+	)
+AQSIS_ADD_TESTS("${AQSISTYPES_TEST_SRCS}" "${TEST_LINKLIBS}")
+
