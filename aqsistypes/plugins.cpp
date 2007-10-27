@@ -80,6 +80,12 @@ CqPluginBase::DLOpen( CqString *library )
 
 	if ( handle )
 		m_activeHandles.push_back( handle );
+	else
+		/** \todo <b>Code Review</b>: Re-evaluate how the error handling works
+		 * here.  For now we report the error, but perhaps it would be better
+		 * to throw an exception and let the calling code handle the problem.
+		 */
+		Aqsis::log() << error << "Error loading plugin: \"" << DLError() << "\"\n";
 	return handle;
 }
 
