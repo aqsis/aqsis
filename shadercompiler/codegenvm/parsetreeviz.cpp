@@ -229,7 +229,7 @@ void CqParseTreeViz::Visit(IqParseNodeUnresolvedCall& node)
 void CqParseTreeViz::Visit(IqParseNodeVariable& node)
 {
 	setNodeProperty(node, "label", splitVarNameToLines(node.strName()));
-	setNodeProperty(node, "fillcolor", "#C0C0F0");
+	setNodeProperty(node, "color", "#C0C0F0");
 	visitChildren(node);
 }
 
@@ -238,7 +238,7 @@ void CqParseTreeViz::Visit(IqParseNodeArrayVariable& node)
 	const char* varName = static_cast<IqParseNodeVariable*>(
 			node.GetInterface(ParseNode_Variable))->strName();
 	setNodeProperty(node, "label", splitVarNameToLines(varName) + " []");
-	setNodeProperty(node, "fillcolor", "#C0C0F0");
+	setNodeProperty(node, "color", "#C0C0F0");
 	visitChildren(node);
 }
 
@@ -268,7 +268,7 @@ void CqParseTreeViz::Visit(IqParseNodeOperator& node)
 {
 	setNodeProperty(node, "label", opToString(node.Operator()));
 	setNodeProperty(node, "shape", "box");
-	setNodeProperty(node, "color", "#E0C080");
+	setNodeProperty(node, "fillcolor", "#E0C080");
 	visitChildren(node);
 }
 
@@ -305,12 +305,14 @@ void CqParseTreeViz::Visit(IqParseNodeDiscardResult& node)
 void CqParseTreeViz::Visit(IqParseNodeConstantFloat& node)
 {
 	setNodeProperty(node, "label", boost::format("%0.2f") % node.Value());
+	setNodeProperty(node, "color", "#CCCCCC");
 	visitChildren(node);
 }
 
 void CqParseTreeViz::Visit(IqParseNodeConstantString& node)
 {
 	setNodeProperty(node, "label", boost::format("\\\"%s\\\"") % node.strValue());
+	setNodeProperty(node, "color", "#CCCCCC");
 	visitChildren(node);
 }
 
