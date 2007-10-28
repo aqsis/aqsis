@@ -1339,17 +1339,19 @@ loop_control
 	;
 
 loop_modstmt
-	:	loop_mod number
+	:	loop_mod number		{
+								yyerror("Breaking out of a loop by level not yet supported");
+							}
 	|	loop_mod
 	;
 
 loop_mod
-	:	BREAK				{	
-								$$=new CqParseNode();	
+	:	BREAK				{
+								$$=new CqParseNodeLoopMod(LoopMod_Break);
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
 							}
 	|	CONTINUE			{
-								$$=new CqParseNode();	
+								$$=new CqParseNodeLoopMod(LoopMod_Continue);
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
 							}
 

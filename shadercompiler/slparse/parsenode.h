@@ -1294,6 +1294,59 @@ class CqParseNodeWhileConstruct : public CqParseNode, public IqParseNodeWhileCon
 
 
 ///----------------------------------------------------------------------
+/// CqParseNodeLoopMod
+/// Parsenode specifying a loop modification (break or continue)
+
+class CqParseNodeLoopMod : public CqParseNode, public IqParseNodeLoopMod
+{
+	public:
+		CqParseNodeLoopMod( const CqParseNodeLoopMod& from )
+			: CqParseNode( from ),
+			m_modType(from.m_modType)
+		{}
+		CqParseNodeLoopMod(EqLoopModType modType)
+			: CqParseNode(),
+			m_modType(modType)
+		{}
+		virtual	~CqParseNodeLoopMod() {}
+
+		virtual EqLoopModType modType()
+		{
+			return m_modType;
+		}
+
+		// Overridden fromIqParseNode
+
+		virtual	void*	GetInterface( EqParseNodeType type) const
+		{
+			void* pNode;
+			if ( ( pNode = ( void* ) QueryNodeType<IqParseNodeLoopMod>( this, type ) ) != 0 )
+				return ( pNode );
+			return ( CqParseNode::GetInterface( type ) );
+		}
+		virtual	TqInt	NodeType() const
+		{
+			return ( IqParseNodeLoopMod::m_ID );
+		}
+		virtual	void	Accept( IqParseNodeVisitor &V)
+		{
+			V.Visit(static_cast<IqParseNodeLoopMod&>(*this));
+		}
+
+		virtual	CqParseNode*	Clone( CqParseNode* pParent = 0 )
+		{
+			CqParseNodeLoopMod * pNew = new CqParseNodeLoopMod( *this );
+			if ( m_pChild )
+				pNew->m_pChild = m_pChild->Clone( pNew );
+			pNew->m_pParent = pParent;
+			return ( pNew );
+		}
+	private:
+		EqLoopModType m_modType;
+};
+
+
+///----------------------------------------------------------------------
 /// CqParseNodeIlluminateConstruct
 /// Parsenode an illuminate construct.
 

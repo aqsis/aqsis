@@ -505,6 +505,11 @@ void CqCodeGenOutput::Visit( IqParseNodeWhileConstruct& WC )
 	m_slxFile << ":" << iLabelB << std::endl;		// completion label
 }
 
+void CqCodeGenOutput::Visit( IqParseNodeLoopMod& LM )
+{
+	std::cout << "WARNING: No code generated for break or continue\n";
+}
+
 void CqCodeGenOutput::Visit( IqParseNodeIlluminateConstruct& IC )
 {
 	IqParseNode * pNode;

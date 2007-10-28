@@ -106,6 +106,7 @@ const EqParseNodeType IqParseNodeDiscardResult::m_ID = ParseNode_DiscardResult;
 const EqParseNodeType IqParseNodeConstantFloat::m_ID = ParseNode_ConstantFloat;
 const EqParseNodeType IqParseNodeConstantString::m_ID = ParseNode_ConstantString;
 const EqParseNodeType IqParseNodeWhileConstruct::m_ID = ParseNode_WhileConstruct;
+const EqParseNodeType IqParseNodeLoopMod::m_ID = ParseNode_LoopMod;
 const EqParseNodeType IqParseNodeIlluminateConstruct::m_ID = ParseNode_IlluminateConstruct;
 const EqParseNodeType IqParseNodeIlluminanceConstruct::m_ID = ParseNode_IlluminanceConstruct;
 const EqParseNodeType IqParseNodeSolarConstruct::m_ID = ParseNode_SolarConstruct;

@@ -62,6 +62,7 @@ class CqCodeGenDataGather : public IqParseNodeVisitor
 		virtual	void Visit( IqParseNodeConstantFloat& );
 		virtual	void Visit( IqParseNodeConstantString& );
 		virtual	void Visit( IqParseNodeWhileConstruct& );
+		virtual	void Visit( IqParseNodeLoopMod& );
 		virtual	void Visit( IqParseNodeIlluminateConstruct& );
 		virtual	void Visit( IqParseNodeIlluminanceConstruct& );
 		virtual	void Visit( IqParseNodeSolarConstruct& );

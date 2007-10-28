@@ -36,47 +36,6 @@ namespace Aqsis {
 //-----------------------------------------------------------------------
 // Helper functions
 
-/// Conveniance function to output a parse node type to a stream
-std::ostream& operator<<(std::ostream& out, EqParseNodeType type)
-{
-	switch(type)
-	{
-#		define PARSE_NODE_TYPE_CASE(n) \
-		case n:            \
-			out << (#n + 10);     \
-			break;
-		PARSE_NODE_TYPE_CASE(ParseNode_Base)
-		PARSE_NODE_TYPE_CASE(ParseNode_Shader)
-		PARSE_NODE_TYPE_CASE(ParseNode_FunctionCall)
-		PARSE_NODE_TYPE_CASE(ParseNode_UnresolvedCall)
-		PARSE_NODE_TYPE_CASE(ParseNode_Variable)
-		PARSE_NODE_TYPE_CASE(ParseNode_ArrayVariable)
-		PARSE_NODE_TYPE_CASE(ParseNode_VariableAssign)
-		PARSE_NODE_TYPE_CASE(ParseNode_ArrayVariableAssign)
-		PARSE_NODE_TYPE_CASE(ParseNode_Operator)
-		PARSE_NODE_TYPE_CASE(ParseNode_MathOp)
-		PARSE_NODE_TYPE_CASE(ParseNode_RelationalOp)
-		PARSE_NODE_TYPE_CASE(ParseNode_UnaryOp)
-		PARSE_NODE_TYPE_CASE(ParseNode_LogicalOp)
-		PARSE_NODE_TYPE_CASE(ParseNode_DiscardResult)
-		PARSE_NODE_TYPE_CASE(ParseNode_ConstantFloat)
-		PARSE_NODE_TYPE_CASE(ParseNode_ConstantString)
-		PARSE_NODE_TYPE_CASE(ParseNode_WhileConstruct)
-		PARSE_NODE_TYPE_CASE(ParseNode_IlluminateConstruct)
-		PARSE_NODE_TYPE_CASE(ParseNode_IlluminanceConstruct)
-		PARSE_NODE_TYPE_CASE(ParseNode_SolarConstruct)
-		PARSE_NODE_TYPE_CASE(ParseNode_GatherConstruct)
-		PARSE_NODE_TYPE_CASE(ParseNode_Conditional)
-		PARSE_NODE_TYPE_CASE(ParseNode_ConditionalExpression)
-		PARSE_NODE_TYPE_CASE(ParseNode_TypeCast)
-		PARSE_NODE_TYPE_CASE(ParseNode_Triple)
-		PARSE_NODE_TYPE_CASE(ParseNode_SixteenTuple)
-		PARSE_NODE_TYPE_CASE(ParseNode_MessagePassingFunction)
-#		undef PARSE_NODE_TYPE_CASE
-	}
-	return out;
-}
-
 /** \brief Return a string corresponding to the given operator code
  *
  * The codes in question are described at the top of iparsenode.h.
@@ -140,6 +99,18 @@ std::string splitVarNameToLines(const char* varName)
 	return s;
 }
 
+// Color strings for nodes.
+static const char* functionColor = "#FF7070";
+static const char* functionCallColor = "#F0A0A0";
+static const char* unresolvedCallColor = "#F0C0C0";
+static const char* variableColor = "#C0C0F0";
+static const char* variableAssignColor = "#7070FF";
+static const char* operatorColor = "#E0C080";
+static const char* constantColor = "#CCCCCC";
+static const char* blockConstructColor = "#80E080";
+static const char* typeCastColor = "#E080A0";
+
+
 //-----------------------------------------------------------------------
 // CqParseTreeViz constructors/destructors
 
@@ -168,7 +139,7 @@ CqParseTreeViz::~CqParseTreeViz()
 // Node visitor functions
 void CqParseTreeViz::Visit(IqParseNode& node)
 {
-	setNodeProperty(node, "label", node.m_ID);
+	setNodeProperty(node, "label", "Base");
 	setNodeProperty(node, "shape", "point");
 	visitChildren(node);
 }
@@ -178,7 +149,7 @@ void CqParseTreeViz::Visit(IqParseNodeShader& node)
 	setNodeProperty(node, "label", boost::format(
 			"{%s shader \\\"%s\\\" | {<args> args | <code> code } }")
 			% node.strShaderType() % node.strName());
-	setNodeProperty(node, "fillcolor", "#FF7070");
+	setNodeProperty(node, "fillcolor", functionColor);
 	setNodeProperty(node, "shape", "record");
 	IqParseNode* code = static_cast<IqParseNode*>(
 			node.GetInterface(ParseNode_Base))->pChild();
@@ -213,7 +184,7 @@ void CqParseTreeViz::Visit(IqParseNodeFunctionCall& node)
 		setNodeProperty(node, "label", fxnName);
 		setNodeProperty(node, "shape", "box");
 	}
-	setNodeProperty(node, "fillcolor", "#F0A0A0");
+	setNodeProperty(node, "fillcolor", functionCallColor);
 	m_calledFunctions.insert(funcDef);
 	visitChildren(node);
 }
@@ -221,7 +192,7 @@ void CqParseTreeViz::Visit(IqParseNodeFunctionCall& node)
 void CqParseTreeViz::Visit(IqParseNodeUnresolvedCall& node)
 {
 	setNodeProperty(node, "label", std::string("UnresolvedCall\\n") + node.strName());
-	setNodeProperty(node, "fillcolor", "#F0C0C0");
+	setNodeProperty(node, "fillcolor", unresolvedCallColor);
 	setNodeProperty(node, "shape", "box");
 	visitChildren(node);
 }
@@ -229,7 +200,7 @@ void CqParseTreeViz::Visit(IqParseNodeUnresolvedCall& node)
 void CqParseTreeViz::Visit(IqParseNodeVariable& node)
 {
 	setNodeProperty(node, "label", splitVarNameToLines(node.strName()));
-	setNodeProperty(node, "color", "#C0C0F0");
+	setNodeProperty(node, "color", variableColor);
 	visitChildren(node);
 }
 
@@ -238,7 +209,7 @@ void CqParseTreeViz::Visit(IqParseNodeArrayVariable& node)
 	const char* varName = static_cast<IqParseNodeVariable*>(
 			node.GetInterface(ParseNode_Variable))->strName();
 	setNodeProperty(node, "label", splitVarNameToLines(varName) + " []");
-	setNodeProperty(node, "color", "#C0C0F0");
+	setNodeProperty(node, "color", variableColor);
 	visitChildren(node);
 }
 
@@ -249,7 +220,7 @@ void CqParseTreeViz::Visit(IqParseNodeVariableAssign& node)
 
 	setNodeProperty(node, "label", boost::format("%s := ")
 			% splitVarNameToLines(varNode->strName()));
-	setNodeProperty(node, "fillcolor", "#7070FF");
+	setNodeProperty(node, "fillcolor", variableAssignColor);
 	visitChildren(node);
 }
 
@@ -260,7 +231,7 @@ void CqParseTreeViz::Visit(IqParseNodeArrayVariableAssign& node)
 
 	setNodeProperty(node, "label", boost::format("%s [] := ")
 			% splitVarNameToLines(varNode->strName()));
-	setNodeProperty(node, "fillcolor", "#7070FF");
+	setNodeProperty(node, "fillcolor", variableAssignColor);
 	visitChildren(node);
 }
 
@@ -268,7 +239,7 @@ void CqParseTreeViz::Visit(IqParseNodeOperator& node)
 {
 	setNodeProperty(node, "label", opToString(node.Operator()));
 	setNodeProperty(node, "shape", "box");
-	setNodeProperty(node, "fillcolor", "#E0C080");
+	setNodeProperty(node, "fillcolor", operatorColor);
 	visitChildren(node);
 }
 
@@ -298,36 +269,52 @@ void CqParseTreeViz::Visit(IqParseNodeLogicalOp& node)
 
 void CqParseTreeViz::Visit(IqParseNodeDiscardResult& node)
 {
-	setNodeProperty(node, "label", node.m_ID);
+	setNodeProperty(node, "label", "DiscardResult");
 	visitChildren(node);
 }
 
 void CqParseTreeViz::Visit(IqParseNodeConstantFloat& node)
 {
 	setNodeProperty(node, "label", boost::format("%0.2f") % node.Value());
-	setNodeProperty(node, "color", "#CCCCCC");
+	setNodeProperty(node, "color", constantColor);
 	visitChildren(node);
 }
 
 void CqParseTreeViz::Visit(IqParseNodeConstantString& node)
 {
 	setNodeProperty(node, "label", boost::format("\\\"%s\\\"") % node.strValue());
-	setNodeProperty(node, "color", "#CCCCCC");
+	setNodeProperty(node, "color", constantColor);
 	visitChildren(node);
 }
 
 void CqParseTreeViz::Visit(IqParseNodeWhileConstruct& node)
 {
 	setNodeProperty(node, "label", "WHILE");
-	setNodeProperty(node, "fillcolor", "#80E080");
+	setNodeProperty(node, "fillcolor", blockConstructColor);
 	setNodeProperty(node, "shape", "Msquare");
+	visitChildren(node);
+}
+
+void CqParseTreeViz::Visit(IqParseNodeLoopMod& node)
+{
+	switch(node.modType())
+	{
+		case LoopMod_Break:
+			setNodeProperty(node, "label", "break");
+			break;
+		case LoopMod_Continue:
+			setNodeProperty(node, "label", "continue");
+			break;
+	}
+	setNodeProperty(node, "fillcolor", blockConstructColor);
+	setNodeProperty(node, "shape", "box");
 	visitChildren(node);
 }
 
 void CqParseTreeViz::Visit(IqParseNodeIlluminateConstruct& node)
 {
 	setNodeProperty(node, "label", "ILLUMINATE");
-	setNodeProperty(node, "fillcolor", "#80E080");
+	setNodeProperty(node, "fillcolor", blockConstructColor);
 	setNodeProperty(node, "shape", "Msquare");
 	visitChildren(node);
 }
@@ -335,7 +322,7 @@ void CqParseTreeViz::Visit(IqParseNodeIlluminateConstruct& node)
 void CqParseTreeViz::Visit(IqParseNodeIlluminanceConstruct& node)
 {
 	setNodeProperty(node, "label", "ILLUMINANCE");
-	setNodeProperty(node, "fillcolor", "#80E080");
+	setNodeProperty(node, "fillcolor", blockConstructColor);
 	setNodeProperty(node, "shape", "Msquare");
 	visitChildren(node);
 }
@@ -343,7 +330,7 @@ void CqParseTreeViz::Visit(IqParseNodeIlluminanceConstruct& node)
 void CqParseTreeViz::Visit(IqParseNodeSolarConstruct& node)
 {
 	setNodeProperty(node, "label", "SOLAR");
-	setNodeProperty(node, "fillcolor", "#80E080");
+	setNodeProperty(node, "fillcolor", blockConstructColor);
 	setNodeProperty(node, "shape", "Msquare");
 	visitChildren(node);
 }
@@ -351,7 +338,7 @@ void CqParseTreeViz::Visit(IqParseNodeSolarConstruct& node)
 void CqParseTreeViz::Visit(IqParseNodeGatherConstruct& node)
 {
 	setNodeProperty(node, "label", "GATHER");
-	setNodeProperty(node, "fillcolor", "#80E080");
+	setNodeProperty(node, "fillcolor", blockConstructColor);
 	setNodeProperty(node, "shape", "Msquare");
 	visitChildren(node);
 }
@@ -359,7 +346,7 @@ void CqParseTreeViz::Visit(IqParseNodeGatherConstruct& node)
 void CqParseTreeViz::Visit(IqParseNodeConditional& node)
 {
 	setNodeProperty(node, "label", "IF");
-	setNodeProperty(node, "fillcolor", "#80E080");
+	setNodeProperty(node, "fillcolor", blockConstructColor);
 	setNodeProperty(node, "shape", "Msquare");
 	visitChildren(node);
 }
@@ -372,7 +359,7 @@ void CqParseTreeViz::Visit(IqParseNodeConditionalExpression& node)
 
 void CqParseTreeViz::Visit(IqParseNodeTypeCast& node)
 {
-	setNodeProperty(node, "fillcolor", "#E080A0");
+	setNodeProperty(node, "fillcolor", typeCastColor);
 	setNodeProperty(node, "shape", "box");
 
 	IqParseNode* operand = static_cast<IqParseNode*>(
@@ -387,19 +374,19 @@ void CqParseTreeViz::Visit(IqParseNodeTypeCast& node)
 
 void CqParseTreeViz::Visit(IqParseNodeTriple& node)
 {
-	setNodeProperty(node, "label", node.m_ID);
+	setNodeProperty(node, "label", "Triple");
 	visitChildren(node);
 }
 
 void CqParseTreeViz::Visit(IqParseNodeSixteenTuple& node)
 {
-	setNodeProperty(node, "label", node.m_ID);
+	setNodeProperty(node, "label", "SixteenTuple");
 	visitChildren(node);
 }
 
 void CqParseTreeViz::Visit(IqParseNodeMessagePassingFunction& node)
 {
-	setNodeProperty(node, "label", node.m_ID);
+	setNodeProperty(node, "label", "MessagePassingFunction");
 	visitChildren(node);
 }
 
@@ -470,7 +457,7 @@ void CqParseTreeViz::makeFunctionGraph(const IqFuncDef& funcDef)
 		setNodeProperty(funcDef, "label",
 				boost::format("{%s | {<args> args|<code> code}}")
 				% funcDef.strName());
-		setNodeProperty(funcDef, "fillcolor", "#FF7070");
+		setNodeProperty(funcDef, "fillcolor", functionColor);
 		setNodeProperty(funcDef, "shape", "record");
 		const IqParseNode* args = funcDef.pArgs();
 		if(args)

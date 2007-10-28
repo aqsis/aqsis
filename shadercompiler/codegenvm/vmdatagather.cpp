@@ -308,6 +308,9 @@ void CqCodeGenDataGather::Visit( IqParseNodeWhileConstruct& WC )
 		pStmtInc->Accept( *this );					// incrementor
 }
 
+void CqCodeGenDataGather::Visit( IqParseNodeLoopMod& LM )
+{}
+
 void CqCodeGenDataGather::Visit( IqParseNodeIlluminateConstruct& IC )
 {
 	IqParseNode * pNode;
