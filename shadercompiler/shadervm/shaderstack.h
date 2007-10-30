@@ -302,11 +302,11 @@ class SHADERVM_SHARE CqShaderStack
 		{
 			TqInt iTop = m_iTop-1;
 
-			IqShaderData* s = GetNextTemp( m_Stack[ iTop ].m_Data ->Type(), m_Stack[ iTop ].m_Data ->Class() );
-			s->SetValueFromVariable( m_Stack[ iTop ].m_Data );
+			IqShaderData* top = m_Stack[ iTop ].m_Data;
+			IqShaderData* s = GetNextTemp( top->Type(), top->Class() );
+			s->SetSize(top->Size());
+			s->SetValueFromVariable( top );
 			Push( s );
-
-
 		}
 
 		/** Drop the top stack entry.
