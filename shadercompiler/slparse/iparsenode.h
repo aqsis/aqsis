@@ -105,6 +105,11 @@ enum EqCommType
     CommTypeRayInfo,
 };
 
+enum EqLoopModType
+{
+	LoopMod_Break,
+	LoopMod_Continue,
+};
 
 enum EqParseNodeType
 {
@@ -125,6 +130,7 @@ enum EqParseNodeType
     ParseNode_ConstantFloat,
     ParseNode_ConstantString,
     ParseNode_WhileConstruct,
+    ParseNode_LoopMod,
     ParseNode_IlluminateConstruct,
     ParseNode_IlluminanceConstruct,
     ParseNode_SolarConstruct,
@@ -155,6 +161,7 @@ struct IqParseNodeDiscardResult;
 struct IqParseNodeConstantFloat;
 struct IqParseNodeConstantString;
 struct IqParseNodeWhileConstruct;
+struct IqParseNodeLoopMod;
 struct IqParseNodeIlluminateConstruct;
 struct IqParseNodeIlluminanceConstruct;
 struct IqParseNodeSolarConstruct;
@@ -186,6 +193,7 @@ struct IqParseNodeVisitor
 	virtual	void Visit( IqParseNodeConstantFloat& ) = 0;
 	virtual	void Visit( IqParseNodeConstantString& ) = 0;
 	virtual	void Visit( IqParseNodeWhileConstruct& ) = 0;
+	virtual	void Visit( IqParseNodeLoopMod& ) = 0;
 	virtual	void Visit( IqParseNodeIlluminateConstruct& ) = 0;
 	virtual	void Visit( IqParseNodeIlluminanceConstruct& ) = 0;
 	virtual	void Visit( IqParseNodeSolarConstruct& ) = 0;
@@ -484,6 +492,22 @@ struct IqParseNodeWhileConstruct
 	const static EqParseNodeType m_ID;
 
 	virtual ~IqParseNodeWhileConstruct()
+	{
+	};
+};
+
+
+struct IqParseNodeLoopMod
+{
+	virtual EqLoopModType modType() = 0;
+	virtual	void*	GetInterface( EqParseNodeType type) const = 0;
+	virtual	TqInt	NodeType() const = 0;
+
+	virtual	void Accept( IqParseNodeVisitor& V ) = 0;
+
+	const static EqParseNodeType m_ID;
+
+	virtual ~IqParseNodeLoopMod()
 	{
 	};
 };

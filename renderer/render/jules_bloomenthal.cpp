@@ -425,13 +425,13 @@ void bloomenthal_polygonizer::MarchingCube(const Cube& cube1)
 			index += 1 << i;
 
 	std::vector< std::vector<TqInt> > currentindex = m_CubeTable[index];
-	for( i = 0; i < currentindex.size(); i++)
+	for( i = 0; i < static_cast<TqInt>(currentindex.size()); i++)
 	{
 		TqInt a = 0;
 		TqInt b = 0;
 		TqInt count = 0;
 
-		for(TqInt j = 0; j < currentindex[i].size(); j++)
+		for(TqInt j = 0; j < static_cast<TqInt>(currentindex[i].size()); j++)
 		{
 			Corner* c1 = cube1.corners[mc::corner1[currentindex[i][j]]];
 			Corner* c2 = cube1.corners[mc::corner2[currentindex[i][j]]];
@@ -495,8 +495,8 @@ void bloomenthal_polygonizer::MakeCubeTable()
 		m_CubeTable.push_back(triangles);
 	}
 
-	for(TqInt i = 0; i < m_CubeTable.size(); i++)
-		for(TqInt j = 0; j < m_CubeTable[i].size(); j++)
+	for(TqInt i = 0, numI = m_CubeTable.size(); i < numI; i++)
+		for(TqInt j = 0, numJ = m_CubeTable[i].size(); j < numJ; j++)
 			std::reverse(m_CubeTable[i][j].begin(), m_CubeTable[i][j].end());
 }
 

@@ -278,8 +278,13 @@ CqRibBinaryDecoder::CqRibBinaryDecoder( FILE *filehandle, int buffersize )
 {
 	//We dup here because we don't want to close the original
 	//filehandle.
+	// \todo Should find a way of abstacting this out so we don't have
+	//       system specific code in here if we can.
+#ifdef	AQSIS_SYSTEM_WIN32
+	file = fdopen( _dup( _fileno( filehandle ) ), "rb");
+#else
 	file = fdopen( dup( fileno( filehandle ) ), "rb");
-
+#endif // AQSIS_SYSTEM_WIN32
 
 	if ( file == NULL )
 	{

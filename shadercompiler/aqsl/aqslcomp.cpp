@@ -32,6 +32,7 @@
 #include	<fstream>
 #include	<sstream>
 #include	<stdio.h>
+#include	<boost/scoped_ptr.hpp>
 
 #ifdef	AQSIS_SYSTEM_WIN32
 #include	"io.h"
@@ -42,7 +43,7 @@
 #include	"libslparse.h"
 #include	"icodegen.h"
 #include	"codegenvm.h"
-#include	"vmoutput.h"
+#include 	"codegengraphviz.h"
 #include	"argparse.h"
 
 #include	"version.h"
@@ -57,6 +58,7 @@ bool	g_version = 0;
 ArgParse::apstringvec g_defines; // Filled in with strings to pass to the preprocessor
 ArgParse::apstringvec g_includes; // Filled in with strings to pass to the preprocessor
 ArgParse::apstringvec g_undefines; // Filled in with strings to pass to the preprocessor
+ArgParse::apstring g_backendName = "slx"; /// Name for the comipler backend.
 
 bool g_cl_no_color = false;
 bool g_cl_syslog = false;
@@ -85,7 +87,7 @@ int g_cslppDefArgs = sizeof( g_slppDefArgs ) / sizeof( g_slppDefArgs[0] );
 int main( int argc, const char** argv )
 {
 	ArgParse ap;
-	CqCodeGenVM codegen; // Should be a pointer determined by what we want to generate
+	boost::scoped_ptr<IqCodeGen> codeGenerator;
 	bool error = false; ///! Couldn't compile shader
 
 	ap.usageHeader( ArgParse::apstring( "Usage: " ) + argv[ 0 ] + " [options] <filename>" );
@@ -94,6 +96,9 @@ int main( int argc, const char** argv )
 	ap.argStrings( "I", "%s \aSet path for #include files.", &g_includes );
 	ap.argStrings( "D", "Sym[=value] \adefine symbol <string> to have value <value> (default: 1).", &g_defines );
 	ap.argStrings( "U", "Sym \aUndefine an initial symbol.", &g_undefines );
+	ap.argString( "backend", " %s \aCompiler backend (default %default).  Possibilities include \"slx\" or \"dot\":\a"
+			      "slx - produce a compiled shader (in the aqsis shader VM stack language)\a"
+				  "dot - make a graphviz visualization of the parse tree (useful for debugging only).", &g_backendName );
 	ap.argFlag( "help", "\aprint this help and exit", &g_help );
 	ap.argFlag( "version", "\aprint version information and exit", &g_version );
 	ap.argInt( "verbose", "=integer\aSet log output level\n"
@@ -149,11 +154,22 @@ int main( int argc, const char** argv )
 		std::auto_ptr<std::streambuf> use_syslog( new Aqsis::syslog_buf(Aqsis::log()) );
 #endif	// AQSIS_SYSTEM_POSIX
 
+	// Create a code generator for the requested backend.
+	if(g_backendName == "slx")
+		codeGenerator.reset(new CqCodeGenVM());
+	else if(g_backendName == "dot")
+		codeGenerator.reset(new CqCodeGenGraphviz());
+	else
+	{
+		std::cout << "Unknown backend type: \"" << g_backendName << "\", assuming slx.";
+		codeGenerator.reset(new CqCodeGenVM());
+	}
+
 	// Pass the shader file through the slpp preprocessor first to generate a temporary file.
 	if ( ap.leftovers().size() == 0 )     // If no files specified, take input from stdin.
 	{
 		//if ( Parse( std::cin, "stdin", Aqsis::log() ) )
-		//	codegen.OutputTree( GetParseTree(), g_stroutname );
+		//	codeGenerator->OutputTree( GetParseTree(), g_stroutname );
 		std::cout << ap.usagemsg();
 		exit( 0 );
 	}
@@ -238,7 +254,7 @@ int main( int argc, const char** argv )
 
 					std::ifstream ppfile( tempname );
 					if ( Parse( ppfile, e->c_str(), Aqsis::log() ) )
-						codegen.OutputTree( GetParseTree(), g_stroutname );
+						codeGenerator->OutputTree( GetParseTree(), g_stroutname );
 					else
 						error = true;
 

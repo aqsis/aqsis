@@ -185,7 +185,8 @@ void CqTransform::SetCurrentTransform( TqFloat time, const CqMatrix& matTrans )
 		else
 		{
 			m_StaticMatrix = matTrans;
-			m_Handedness = flip;
+			m_Handedness = (flip)? !m_Handedness : m_Handedness;
+			//m_Handedness = flip;
 			ct.m_Handedness = flip;
 			SetDefaultObject( ct );
 		}

@@ -573,8 +573,6 @@ bool MarchingCubes::test_interior( TqChar s )
 void MarchingCubes::process_cube( )
 //-----------------------------------------------------------------------------
 {
-	i_N[i_case]++ ;
-
 	if( i_originalMC )
 	{
 		TqChar nt = 0 ;
@@ -588,6 +586,8 @@ void MarchingCubes::process_cube( )
 	i_case   = cases[i_lut_entry][0] ;
 	i_config = cases[i_lut_entry][1] ;
 	i_subconfig = 0 ;
+
+	i_N[i_case]++ ;
 
 	switch( i_case )
 	{
