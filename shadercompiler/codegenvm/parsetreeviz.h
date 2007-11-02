@@ -113,7 +113,7 @@ class CqParseTreeViz : public IqParseNodeVisitor
 		const std::string& getNodeName(const T& node);
 		/** \brief Get a unique graphviz node name for the given pointer
 		 */
-		const std::string& CqParseTreeViz::getNodeName(const void* ptr);
+		const std::string& getNodeName(const void* ptr);
 
 		/// \name Graph output functions.
 		//@{
@@ -141,13 +141,13 @@ class CqParseTreeViz : public IqParseNodeVisitor
 		 * stream insertion operator.
 		 */
 		template<typename T, typename U>
-		void CqParseTreeViz::setNodeProperty(const T& node, const char* key,
+		void setNodeProperty(const T& node, const char* key,
 				const U& value);
 		//@}
 
 		/// Visit all the children of the given node starting from the first.
 		template<typename T>
-		void CqParseTreeViz::visitChildren(T& node);
+		void visitChildren(T& node);
 
 		/// Output a graph of the given function definition
 		void makeFunctionGraph(const IqFuncDef& funcDef);
