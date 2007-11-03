@@ -19,8 +19,8 @@
 
 /** \file
  *
- * \brief Declare input and output interface specifications which should be
- * implemented by all classes wrapping texture files.
+ * \brief Declare input interface specification which should be implemented by
+ * all classes wrapping scanline-oriented texture files.
  *
  * \author Chris Foster
  */
@@ -42,6 +42,9 @@ COMMON_SHARE class IqTexInputFile
 	public:
 		virtual ~IqTexInputFile() {};
 
+		//------------------------------------------------------------
+		/// \name Metadata access
+		//@{
 		/// get the file name
 		virtual const char* fileName() const = 0;
 
@@ -50,6 +53,40 @@ COMMON_SHARE class IqTexInputFile
 
 		/// Get the file header data
 		virtual const CqTexFileHeader& header() const = 0;
+		//@}
+
+		//------------------------------------------------------------
+		/// \name Support functions for multi-image files.
+		//@{
+		/** Set the image index in a multi-image file.
+		 *
+		 * Some formats (TIFF) allow completely unrelated content in the
+		 * various images of a multi-image file.  This function may therefore
+		 * be expected to modify the image header to reflect the metadata for
+		 * the new image level.
+		 *
+		 * For formats which don't support multiple images, this function
+		 * logs a warning, and exits unless newIndex = 0, in which case it is
+		 * silently ignored.
+		 *
+		 * \param newIndex - new index in the multi-image file.
+		 */
+		virtual void setImageIndex(TqInt newIndex);
+
+		/** Get the image index for a multi-image file.
+		 *
+		 * \return the current image index or 0 if the file is not a
+		 * multi-image file.
+		 */
+		inline virtual TqInt imageIndex() const;
+
+		/** Get the number of images in the multi-image file.
+		 *
+		 * \return The number of images, or 1 if the file format doesn't have
+		 * support for multiple images.
+		 */
+		inline virtual TqInt numImages() const;
+		//@}
 
 		/** \brief Read in a region of scanlines
 		 *
@@ -59,9 +96,7 @@ COMMON_SHARE class IqTexInputFile
 		 *     Resizes the buffer.  (width, height) is the new dimensions for
 		 *     the buffer.  channels describes the new desired channel
 		 *     structure for the buffer.  If the buffer cannot handle the
-		 *     channel structure it should throw This call should throw an
-		 *     exception otherwise nasty behaviour is bound to ensue, probably
-		 *     involving segfaulting.
+		 *     given channel structure it should throw.
 		 *   - TqUchar* rawData()
 		 *     Gets a raw pointer to the data.
 		 *
@@ -103,6 +138,16 @@ COMMON_SHARE class IqTexInputFile
 //==============================================================================
 // Implementation of inline functions and templates
 //==============================================================================
+
+// Default implementation for file formats which don't support multiple images.
+inline TqInt IqTexInputFile::imageIndex() const
+{
+	return 0;
+}
+inline TqInt IqTexInputFile::numImages() const
+{
+	return 1;
+}
 
 template<typename Array2DType>
 void IqTexInputFile::readPixels(Array2DType& buffer, TqInt startLine,

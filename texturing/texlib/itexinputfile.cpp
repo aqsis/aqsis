@@ -30,12 +30,22 @@
 #include "tiffinputfile.h"
 #include "exrinputfile.h"
 #include "magicnumber.h"
+#include "logging.h"
 
 namespace Aqsis {
 
 //------------------------------------------------------------------------------
 // IqTexInputFile
 //------------------------------------------------------------------------------
+
+void IqTexInputFile::setImageIndex(TqInt newIndex)
+{
+	// default implementation for image files which don't support multiple
+	// levels.
+	if(newIndex != 0)
+		Aqsis::log() << warning << "File: \"" << fileName()
+			<< "\" is not a multi-image file format.\n";
+}
 
 boost::shared_ptr<IqTexInputFile> IqTexInputFile::open(const std::string& fileName)
 {

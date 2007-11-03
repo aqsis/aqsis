@@ -40,6 +40,7 @@
 #include "boost/shared_ptr.hpp"
 
 #include "tiffdirhandle.h"
+#include "smartptr.h"
 
 //------------------------------------------------------------------------------
 // Fixtures which wrap up some binary tiff data.
@@ -96,10 +97,6 @@ const unsigned char tileTiffData[] =
 };
 const std::string tileTiffString(tileTiffData, tileTiffData+sizeof(tileTiffData));
 
-// Null deleter for holding stack-allocated stuff in a boost::shared_ptr
-void nullDeleter(const void*)
-{ }
-
 // Fixture which includes a CqTiffFileHandle allocated using a std::string as
 // the "file" buffer
 struct TiffFileHandleFixture
@@ -111,7 +108,7 @@ struct TiffFileHandleFixture
 	TiffFileHandleFixture(const std::string& data)
 		: tiffStream(data),
 		fileHandle(tiffStream),
-		fileHandlePtr(&fileHandle, nullDeleter)
+		fileHandlePtr(&fileHandle, Aqsis::nullDeleter)
 	{ }
 };
 

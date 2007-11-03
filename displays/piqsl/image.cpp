@@ -104,13 +104,17 @@ void CqImage::loadFromFile(const std::string& fileName)
 	}
 	setFilename(fileName);
 	// \todo: Should read the origin and frame size out of the image.
-	setOrigin(0,0);
 
 	const CqTexFileHeader& header = texFile->header();
 	TqUint width = header.width();
 	TqUint height = header.height();
 	setImageSize(width, height);
-	setFrameSize(width, height);
+	// set size within larger cropped window
+	const SqImageRegion displayWindow = header.find<Attr::DisplayWindow>(
+			SqImageRegion(width, height, 0, 0) );
+	setFrameSize(displayWindow.width, displayWindow.height);
+	setOrigin(displayWindow.topLeftX, displayWindow.topLeftY);
+	// descriptive strings
 	setDescription(header.find<Attr::Description>(
 				header.find<Attr::Software>("No description") ).c_str());
 
@@ -146,7 +150,7 @@ void CqImage::saveToFile(const std::string& fileName) const
 	header.set<Attr::Software>( (boost::format("%s %s (%s %s)")
 			 % STRNAME % VERSION_STR % __DATE__ % __TIME__).str());
 
-	/// \todo Set attributes for dealing with cropped images.
+	header.set<Attr::DisplayWindow>(SqImageRegion(m_frameWidth, m_frameHeight, m_originX, m_originY));
 	header.set<Attr::PixelAspectRatio>(1.0);
 
 	// Set some default compression scheme for now - later we can accept user

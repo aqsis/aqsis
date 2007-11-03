@@ -27,6 +27,8 @@
 #include "tiffdirhandle.h"
 #include "tifffile_test.h"
 
+#include <sstream>
+
 #include <boost/test/auto_unit_test.hpp>
 
 //------------------------------------------------------------------------------
@@ -110,5 +112,56 @@ BOOST_AUTO_TEST_CASE(CqTiffDirHandle_fillHeader_test)
 			"Strip-allocated tiff for unit tests");
 
 	BOOST_CHECK(!header.find<Aqsis::Attr::IsTiled>());
+}
+
+BOOST_AUTO_TEST_CASE(CqTiffDirHandle_write_read_header_test)
+{
+	std::ostringstream out;
+	{
+		// Create a tiff with some given header data.
+		Aqsis::CqTiffFileHandle tiffHandle(out);
+		boost::shared_ptr<Aqsis::CqTiffFileHandle>
+			tiffHandlePtr(&tiffHandle, Aqsis::nullDeleter);
+		Aqsis::CqTiffDirHandle dirHandle(tiffHandlePtr);
+
+		Aqsis::CqTexFileHeader header;
+		header.set<Aqsis::Attr::Width>(11);
+		header.set<Aqsis::Attr::Height>(1);
+		Aqsis::CqChannelList& channels = header.channelList();
+		channels.addChannel(Aqsis::SqChannelInfo("r", Aqsis::Channel_Signed8));
+		header.set<Aqsis::Attr::DisplayWindow>( Aqsis::SqImageRegion(1,2,3,4) );
+
+		dirHandle.writeHeader(header);
+		TqUchar rubbishPixels[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+		TIFFWriteScanline(dirHandle.tiffPtr(), rubbishPixels, 0);
+	}
+
+	{
+		// Read the tiff back in again.
+		std::istringstream in(out.str());
+		Aqsis::CqTiffFileHandle tiffHandle(in);
+		boost::shared_ptr<Aqsis::CqTiffFileHandle>
+			tiffHandlePtr(&tiffHandle, Aqsis::nullDeleter);
+		Aqsis::CqTiffDirHandle dirHandle(tiffHandlePtr);
+
+		Aqsis::CqTexFileHeader header;
+		dirHandle.fillHeader(header);
+
+		// check dimensions
+		BOOST_CHECK_EQUAL(header.find<Aqsis::Attr::Width>(), 11);
+		BOOST_CHECK_EQUAL(header.find<Aqsis::Attr::Height>(), 1);
+		// check channels
+		Aqsis::CqChannelList& channels = header.channelList();
+		// Note that we can't store actual channel names in tiff, so the "r"
+		// above is lost and deduced to be a luminance channel...
+		BOOST_CHECK_EQUAL(channels[0].name, "y");
+		BOOST_CHECK_EQUAL(channels[0].type, Aqsis::Channel_Signed8);
+		// check display window
+		Aqsis::SqImageRegion& displayWindow = header.find<Aqsis::Attr::DisplayWindow>();
+		BOOST_CHECK_EQUAL(displayWindow.width, 1);
+		BOOST_CHECK_EQUAL(displayWindow.height, 2);
+		BOOST_CHECK_EQUAL(displayWindow.topLeftX, 3);
+		BOOST_CHECK_EQUAL(displayWindow.topLeftY, 4);
+	}
 }
 

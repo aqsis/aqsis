@@ -109,7 +109,7 @@ const char* tiffCompressionNameFromTag(uint16 compressionType)
 // CqTiffDirHandle
 //------------------------------------------------------------------------------
 
-CqTiffDirHandle::CqTiffDirHandle(boost::shared_ptr<CqTiffFileHandle> fileHandle, const tdir_t dirIdx)
+CqTiffDirHandle::CqTiffDirHandle(const boost::shared_ptr<CqTiffFileHandle>& fileHandle, const tdir_t dirIdx)
 	: m_fileHandle(fileHandle)
 {
 	fileHandle->setDirectory(dirIdx);
@@ -286,9 +286,15 @@ void CqTiffDirHandle::writeOptionalAttrs(const CqTexFileHeader& header)
 	 *  - "textureFormat" TIFFTAG_PIXAR_TEXTUREFORMAT,
 	 *  - "textureWrapMode" TIFFTAG_PIXAR_WRAPMODES,
 	 *  - "fieldOfViewCotan" TIFFTAG_PIXAR_FOVCOT,
-	 *  - "??" TIFFTAG_PIXAR_IMAGEFULLWIDTH, TIFFTAG_PIXAR_IMAGEFULLLENGTH,
-	 *       TIFFTAG_XPOSITION, TIFFTAG_YPOSITION
 	 */
+	const SqImageRegion* displayWindow = header.findPtr<Attr::DisplayWindow>();
+	if(displayWindow)
+	{
+		setTiffTagValue<uint32>(TIFFTAG_PIXAR_IMAGEFULLWIDTH, displayWindow->width);
+		setTiffTagValue<uint32>(TIFFTAG_PIXAR_IMAGEFULLLENGTH, displayWindow->height);
+		setTiffTagValue<float>(TIFFTAG_XPOSITION, displayWindow->topLeftX);
+		setTiffTagValue<float>(TIFFTAG_YPOSITION, displayWindow->topLeftY);
+	}
 }
 
 void CqTiffDirHandle::fillHeaderRequiredAttrs(CqTexFileHeader& header) const
@@ -320,14 +326,6 @@ void CqTiffDirHandle::fillHeaderRequiredAttrs(CqTexFileHeader& header) const
 	{
 		header.set<Attr::PixelAspectRatio>(1.0f);
 	}
-	/// \todo Compute and save the data window
-	/** Something like the "data window" in OpenEXR terminology can be
-	 * obtained using
-	 * TIFFTAG_XPOSITION TIFFTAG_PIXAR_IMAGEFULLWIDTH
-	 * TIFFTAG_YPOSITION TIFFTAG_PIXAR_IMAGEFULLLENGTH
-	 *
-	 * This should allow sensible saving/loading of cropwindows...
-	 */
 }
 
 // Extract an attribute from dirHandle and add it to header, if present.
@@ -354,6 +352,25 @@ void CqTiffDirHandle::fillHeaderOptionalAttrs(CqTexFileHeader& header) const
 			TIFFTAG_PIXAR_MATRIX_WORLDTOSCREEN, header, *this);
 	addAttributeToHeader<Attr::WorldToCameraMatrix,float*>(
 			TIFFTAG_PIXAR_MATRIX_WORLDTOCAMERA, header, *this);
+
+	// Retrieve tags relevant to the display window
+	// The origin of the image is apparently given in resolution units, but
+	// here we want to interpret it as the number of pixels from the top left
+	// of the image, hence the lfloor.
+	uint32 fullWidth = header.width();
+	uint32 fullHeight = header.height();
+	float xPos = 0;
+	float yPos = 0;
+	if( TIFFGetField(tiffPtr(), TIFFTAG_PIXAR_IMAGEFULLWIDTH, &fullWidth)
+		| TIFFGetField(tiffPtr(), TIFFTAG_PIXAR_IMAGEFULLLENGTH, &fullHeight)
+		| TIFFGetField(tiffPtr(), TIFFTAG_XPOSITION, &xPos)
+		| TIFFGetField(tiffPtr(), TIFFTAG_YPOSITION, &yPos)
+		// bitwise OR used since we don't want shortcut evaluation
+		)
+	{
+		header.set<Attr::DisplayWindow>( SqImageRegion(fullWidth, fullHeight,
+					lfloor(xPos), lfloor(yPos)) );
+	}
 }
 
 void CqTiffDirHandle::fillHeaderPixelLayout(CqTexFileHeader& header) const
@@ -526,6 +543,7 @@ void safeTiffClose(TIFF* tif)
 
 CqTiffFileHandle::CqTiffFileHandle(const std::string& fileName, const char* openMode)
 	: m_tiffPtr(TIFFOpen(fileName.c_str(), openMode), safeTiffClose),
+	m_isInputFile(openMode[0] == 'r'),
 	m_currDir(0)
 {
 	if(!m_tiffPtr)
@@ -537,6 +555,7 @@ CqTiffFileHandle::CqTiffFileHandle(const std::string& fileName, const char* open
 
 CqTiffFileHandle::CqTiffFileHandle(std::istream& inputStream)
 	: m_tiffPtr(TIFFStreamOpen("stream", &inputStream), safeTiffClose),
+	m_isInputFile(true),
 	m_currDir(0)
 {
 	if(!m_tiffPtr)
@@ -547,6 +566,7 @@ CqTiffFileHandle::CqTiffFileHandle(std::istream& inputStream)
 
 CqTiffFileHandle::CqTiffFileHandle(std::ostream& outputStream)
 	: m_tiffPtr(TIFFStreamOpen("stream", &outputStream), safeTiffClose),
+	m_isInputFile(false),
 	m_currDir(0)
 {
 	if(!m_tiffPtr)
@@ -557,7 +577,7 @@ CqTiffFileHandle::CqTiffFileHandle(std::ostream& outputStream)
 
 void CqTiffFileHandle::setDirectory(tdir_t dirIdx)
 {
-	if(dirIdx != m_currDir)
+	if(m_isInputFile && dirIdx != m_currDir)
 	{
 		if(!TIFFSetDirectory(m_tiffPtr.get(), dirIdx))
 			throw XqInternal("Invalid Tiff directory", __FILE__, __LINE__);

@@ -36,16 +36,18 @@ namespace Aqsis {
 
 CqTiffInputFile::CqTiffInputFile(const std::string& fileName)
 	: m_header(),
-	m_fileHandle(new CqTiffFileHandle(fileName, "r"))
+	m_fileHandle(new CqTiffFileHandle(fileName, "r")),
+	m_imageIndex(0)
 {
-	initialize();
+	setDirectory(m_imageIndex);
 }
 
 CqTiffInputFile::CqTiffInputFile(std::istream& inStream)
 	: m_header(),
-	m_fileHandle(new CqTiffFileHandle(inStream))
+	m_fileHandle(new CqTiffFileHandle(inStream)),
+	m_imageIndex(0)
 {
-	initialize();
+	setDirectory(m_imageIndex);
 }
 
 const char* CqTiffInputFile::fileName() const
@@ -53,10 +55,26 @@ const char* CqTiffInputFile::fileName() const
 	return m_fileHandle->fileName().c_str();
 }
 
+void CqTiffInputFile::setImageIndex(TqInt newIndex)
+{
+	if(newIndex < 0)
+		throw XqInternal((boost::format("Recieved invalid image index %d")
+				% newIndex).str(), __FILE__, __LINE__);
+	setDirectory(newIndex);
+}
+
+// Warning: don't use this function from another member which already has a
+// lock on the underlying file handle.
+TqInt CqTiffInputFile::numImages() const
+{
+	return TIFFNumberOfDirectories(
+			CqTiffDirHandle(m_fileHandle,m_imageIndex).tiffPtr());
+}
+
 void CqTiffInputFile::readPixelsImpl(TqUchar* buffer,
 		TqInt startLine, TqInt numScanlines) const
 {
-	CqTiffDirHandle dirHandle(m_fileHandle);
+	CqTiffDirHandle dirHandle(m_fileHandle, m_imageIndex);
 	tsize_t bytesPerRow = TIFFScanlineSize(dirHandle.tiffPtr());
 	// Implement simplest possible version for now - read in scanlines
 	// sequentially...  Looking at the source code for libtiff, this should be
@@ -72,9 +90,15 @@ void CqTiffInputFile::readPixelsImpl(TqUchar* buffer,
 	}
 }
 
-void CqTiffInputFile::initialize()
+void CqTiffInputFile::setDirectory(tdir_t newDir)
 {
-	CqTiffDirHandle dirHandle(m_fileHandle);
+	tdir_t numDirs = numImages();
+	if(newDir >= numDirs)
+		throw XqInternal((boost::format("TIFF directory %d out of range [0,%d]")
+				% newDir % (numDirs-1)).str(), __FILE__, __LINE__);
+	m_imageIndex = newDir;
+
+	CqTiffDirHandle dirHandle(m_fileHandle, m_imageIndex);
 	dirHandle.fillHeader(m_header);
 	if(m_header.find<Attr::IsTiled>())
 		throw XqInternal("Can't read tiled tiff files", __FILE__, __LINE__);

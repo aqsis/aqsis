@@ -75,7 +75,8 @@ class CqTiffDirHandle : boost::noncopyable
 		 * \param fileHandle - handle to the underlying tiff file
 		 * \param dirIdx - directory index
 		 */
-		CqTiffDirHandle(boost::shared_ptr<CqTiffFileHandle> fileHandle, const tdir_t dirIdx = 0);
+		CqTiffDirHandle(const boost::shared_ptr<CqTiffFileHandle>& fileHandle,
+				const tdir_t dirIdx = 0);
 
 		/// Obtain the underlying tiff file pointer
 		inline TIFF* tiffPtr() const;
@@ -253,6 +254,7 @@ class CqTiffFileHandle : boost::noncopyable
 
 		const std::string m_fileName;       ///< name of the tiff file
 		boost::shared_ptr<TIFF> m_tiffPtr;  ///< underlying TIFF structure
+		bool m_isInputFile;                 ///< true if the file is open for input
 		tdir_t m_currDir;                   ///< current directory index
 		/// \todo: multithreading - add a mutex!
 };

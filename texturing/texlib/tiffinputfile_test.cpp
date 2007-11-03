@@ -36,7 +36,7 @@
 
 // note: header stuff is tested elsewhere, in tiffdirhandle_test.
 
-BOOST_AUTO_UNIT_TEST(CqTiffInputFile_readPixels)
+BOOST_AUTO_UNIT_TEST(CqTiffInputFile_readPixels_test)
 {
 	std::istringstream inStream(stripTiffString);
 	Aqsis::CqTiffInputFile inFile(inStream);
@@ -62,5 +62,47 @@ BOOST_AUTO_UNIT_TEST(CqTiffInputFile_readPixels)
 	BOOST_CHECK_CLOSE(buffer(0,2)[0], 0.0f, 1e-5);
 	BOOST_CHECK_CLOSE(buffer(0,2)[1], 0.0f, 1e-5);
 	BOOST_CHECK_CLOSE(buffer(0,2)[2], 1.0f, 1e-5);
+}
+
+// Check that the second sub-image of the tiff data from stripTiffString
+// contains the expected data.
+BOOST_AUTO_UNIT_TEST(CqTiffInputFile_readPixels_secondSubImage_test)
+{
+	std::istringstream inStream(stripTiffString);
+	Aqsis::CqTiffInputFile inFile(inStream);
+	inFile.setImageIndex(1);
+
+	// Read the whole tiff into a buffer
+	Aqsis::CqTextureBuffer<TqUchar> buffer;
+	// Ugly and unfortunately necessary hack to prevent multiple deallocations
+	// when CqTextureBuffer is allocated on the stack.
+	Aqsis::intrusive_ptr_add_ref(&buffer);
+	inFile.readPixels(buffer);
+
+	// Check that the buffer is the right size.
+	BOOST_CHECK_EQUAL(buffer.width(), 6);
+	BOOST_CHECK_EQUAL(buffer.height(), 4);
+	BOOST_CHECK_EQUAL(buffer.channelsPerPixel(), 3);
+
+	// part of the fist strip (should be white)
+	BOOST_CHECK_CLOSE(buffer(0,0)[0], 1.0f, 1e-5);
+	BOOST_CHECK_CLOSE(buffer(0,0)[1], 1.0f, 1e-5);
+	BOOST_CHECK_CLOSE(buffer(0,0)[2], 1.0f, 1e-5);
+	// part of the second strip (should be black)
+	BOOST_CHECK_CLOSE(buffer(0,2)[0], 0.0f, 1e-5);
+	BOOST_CHECK_CLOSE(buffer(0,2)[1], 0.0f, 1e-5);
+	BOOST_CHECK_CLOSE(buffer(0,2)[2], 0.0f, 1e-5);
+}
+
+BOOST_AUTO_UNIT_TEST(CqTiffInputFile_imageIndex_test)
+{
+	std::istringstream inStream(stripTiffString);
+	Aqsis::CqTiffInputFile inFile(inStream);
+
+	BOOST_CHECK_EQUAL(inFile.imageIndex(), 0);
+	inFile.setImageIndex(1);
+	BOOST_CHECK_EQUAL(inFile.imageIndex(), 1);
+
+	BOOST_CHECK_EQUAL(inFile.numImages(), 2);
 }
 

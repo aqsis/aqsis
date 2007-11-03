@@ -53,8 +53,8 @@ std::string tiffDateTimeString()
 
 void CqTexFileHeader::addStandardAttributes()
 {
-	set<Attr::Width>(100);
-	set<Attr::Height>(100);
+	set<Attr::Width>(0);
+	set<Attr::Height>(0);
 	set<Attr::IsTiled>(false);
 	set<Attr::Compression>("none");
 	set<Attr::ChannelList>(CqChannelList());
