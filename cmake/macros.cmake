@@ -1,3 +1,4 @@
+#----------------------------------------------------------------------
 # Filter out entries from a list.
 MACRO(FILTER_OUT FILTERS INPUTS OUTPUT)
    # Mimicks Gnu Make's $(filter-out) which removes elements 
@@ -33,6 +34,23 @@ MACRO(FILTER_OUT FILTERS INPUTS OUTPUT)
    ENDFOREACH(INP ${INPUTS})
    SET(${OUTPUT} ${FOUT})
 ENDMACRO(FILTER_OUT FILTERS INPUTS OUTPUT)
+
+#----------------------------------------------------------------------
+#
+# Macro which calls the SET command if the variable to be set is currently
+# empty.  In this case, "empty" means containing zero or more space characters.
+#
+# The arguments are identicle to the SET macro.
+#
+MACRO(SET_IF_EMPTY var)
+	# The "x" prefix is needed so that cmake never has to match an empty
+	# string, which it seems to get upset about.
+	STRING(REGEX REPLACE "x *" "" var_strip_space "x${${var}}")
+	STRING(COMPARE EQUAL "${var_strip_space}" "" var_EMPTY)
+	IF(var_EMPTY)
+		SET(${var} ${ARGN})
+	ENDIF(var_EMPTY)
+ENDMACRO(SET_IF_EMPTY)
 
 #----------------------------------------------------------------------
 # Macro to get the svn revision number
