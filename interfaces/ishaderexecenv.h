@@ -187,6 +187,16 @@ struct IqShaderExecEnv
 	/** Invert the bits in the running state, to perform the opposite to the condition, i.e. else.
 	 */
 	virtual	void	InvertRunningState() = 0;
+	/** \brief Nonlocal "break" and "continue" operations for the running state
+	 * stack.
+	 *
+	 * This function causes all numLevels states on the top of the stack to be
+	 * set to non-running for all bits of the running state which on.
+	 *
+	 * The running state is set to non-running to let the VM fall out of the
+	 * current loop scope.
+	 */
+	virtual void RunningStatesBreak(TqInt numLevels) = 0;
 	/** Find a named standard variable in the list.
 	 * \param pname Character pointer to the name.
 	 * \return IqShaderData pointer or 0.
