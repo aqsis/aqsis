@@ -3820,6 +3820,12 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 	{
 		pPointsClass->SetDefaultPrimitiveVariables( RI_FALSE );
 
+		// A list of modified values.  We can't modify values in-place, since
+		// then the function calling this one will loose track of the
+		// associated memory.  Instead we take a copy here, which will let us
+		// modify it as necessary.
+		std::vector<RtPointer> modifiedValues(values, values+count);
+
 		// Reset loop counter.
 		igloop = 0;
 		TqUint ctris = 0;
@@ -3991,11 +3997,11 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 				TqInt iElem;
 				for( iElem = 0; iElem < fvcount; ++iElem )
 				{
-					const unsigned char* pval = static_cast<const unsigned char*>( values[ iUserParam ] ) + ( aFVList[ iElem ] * elem_size );
+					const unsigned char* pval = static_cast<const unsigned char*>( modifiedValues[ iUserParam ] ) + ( aFVList[ iElem ] * elem_size );
 					memcpy( pNew, pval, ( elem_size ));
 					pNew += elem_size;
 				}
-				values[ iUserParam ] = aNewParams.back();
+				modifiedValues[ iUserParam ] = aNewParams.back();
 			}
 			else if( Decl.m_Class == class_uniform )
 			{
@@ -4004,7 +4010,7 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 				char* pNew = static_cast<char*>( malloc( elem_size * ctris ) );
 				aNewParams.push_back( pNew );
 				TqInt iElem;
-				const unsigned char* pval = static_cast<const unsigned char*>( values[ iUserParam ] );
+				const unsigned char* pval = static_cast<const unsigned char*>( modifiedValues[ iUserParam ] );
 				for( iElem = 0; iElem < npolys; ++iElem )
 				{
 					TqInt dup_count = aUVList[ iElem ];
@@ -4016,11 +4022,11 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 					}
 					pval += elem_size;
 				}
-				values[ iUserParam ] = aNewParams.back();
+				modifiedValues[ iUserParam ] = aNewParams.back();
 			}
 		}
 
-		RiPointsPolygonsV( ctris, &_nverts[ 0 ], &aiTriangles[ 0 ], count, tokens, values );
+		RiPointsPolygonsV( ctris, &_nverts[ 0 ], &aiTriangles[ 0 ], count, tokens, &(modifiedValues[0]) );
 
 		std::vector<void*>::iterator iNewParam;
 		for( iNewParam = aNewParams.begin(); iNewParam != aNewParams.end(); ++iNewParam )
