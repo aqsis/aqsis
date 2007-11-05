@@ -3820,6 +3820,12 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 	{
 		pPointsClass->SetDefaultPrimitiveVariables( RI_FALSE );
 
+		// A list of modified values.  We can't modify values in-place, since
+		// then the function calling this one will loose track of the
+		// associated memory.  Instead we take a copy here, which will let us
+		// modify it as necessary.
+		std::vector<RtPointer> modifiedValues(values, values+count);
+
 		// Reset loop counter.
 		igloop = 0;
 		TqUint ctris = 0;
@@ -3840,13 +3846,6 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 			{
 				iminindex = MIN( iminindex, (TqUint) verts[ igvert ] );
 				imaxindex = MAX( imaxindex, (TqUint) verts[ igvert ] );
-				TqFloat	MinX, MaxX;
-				TqFloat	MinY, MaxY;
-				TqFloat	MinZ, MaxZ;
-				CqVector3D	vecTemp = pPointsClass->P()->pValue( verts[ igvert ] )[0];
-				MinX = MaxX = vecTemp.x();
-				MinY = MaxY = vecTemp.y();
-				MinZ = MaxZ = vecTemp.z();
 
 				CqPolygonGeneral2D polya;
 				polya.SetpVertices( pPointsClass );
@@ -3856,29 +3855,9 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 					ipoint = verts[ igvert ];
 					assert( ipoint < pPointsClass->P() ->Size() );
 					polya.aiVertices().push_back( ipoint );
-
-					vecTemp = pPointsClass->P()->pValue( verts[ igvert ] )[0];
-					MinX = ( MinX < vecTemp.x() ) ? MinX : vecTemp.x();
-					MinY = ( MinY < vecTemp.y() ) ? MinY : vecTemp.y();
-					MinZ = ( MinZ < vecTemp.z() ) ? MinZ : vecTemp.z();
-					MaxX = ( MaxX > vecTemp.x() ) ? MaxX : vecTemp.x();
-					MaxY = ( MaxY > vecTemp.y() ) ? MaxY : vecTemp.y();
-					MaxZ = ( MaxZ > vecTemp.z() ) ? MaxZ : vecTemp.z();
 				}
-
-				// Work out which plane to project to.
-				TqFloat	DiffX = MaxX - MinX;
-				TqFloat	DiffY = MaxY - MinY;
-				TqFloat	DiffZ = MaxZ - MinZ;
-
-				TqInt Axis;
-				if ( DiffX < DiffY && DiffX < DiffZ )
-					Axis = CqPolygonGeneral2D::Axis_YZ;
-				else if ( DiffY < DiffX && DiffY < DiffZ )
-					Axis = CqPolygonGeneral2D::Axis_XZ;
-				else
-					Axis = CqPolygonGeneral2D::Axis_XY;
-				polya.SetAxis( Axis );
+				// Work out which plane to project onto.
+				polya.CalcAxis();
 
 				if ( iloop == 0 )
 				{
@@ -3991,11 +3970,11 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 				TqInt iElem;
 				for( iElem = 0; iElem < fvcount; ++iElem )
 				{
-					const unsigned char* pval = static_cast<const unsigned char*>( values[ iUserParam ] ) + ( aFVList[ iElem ] * elem_size );
+					const unsigned char* pval = static_cast<const unsigned char*>( modifiedValues[ iUserParam ] ) + ( aFVList[ iElem ] * elem_size );
 					memcpy( pNew, pval, ( elem_size ));
 					pNew += elem_size;
 				}
-				values[ iUserParam ] = aNewParams.back();
+				modifiedValues[ iUserParam ] = aNewParams.back();
 			}
 			else if( Decl.m_Class == class_uniform )
 			{
@@ -4004,7 +3983,7 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 				char* pNew = static_cast<char*>( malloc( elem_size * ctris ) );
 				aNewParams.push_back( pNew );
 				TqInt iElem;
-				const unsigned char* pval = static_cast<const unsigned char*>( values[ iUserParam ] );
+				const unsigned char* pval = static_cast<const unsigned char*>( modifiedValues[ iUserParam ] );
 				for( iElem = 0; iElem < npolys; ++iElem )
 				{
 					TqInt dup_count = aUVList[ iElem ];
@@ -4016,11 +3995,11 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 					}
 					pval += elem_size;
 				}
-				values[ iUserParam ] = aNewParams.back();
+				modifiedValues[ iUserParam ] = aNewParams.back();
 			}
 		}
 
-		RiPointsPolygonsV( ctris, &_nverts[ 0 ], &aiTriangles[ 0 ], count, tokens, values );
+		RiPointsPolygonsV( ctris, &_nverts[ 0 ], &aiTriangles[ 0 ], count, tokens, &(modifiedValues[0]) );
 
 		std::vector<void*>::iterator iNewParam;
 		for( iNewParam = aNewParams.begin(); iNewParam != aNewParams.end(); ++iNewParam )

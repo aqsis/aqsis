@@ -287,15 +287,15 @@ class COMMON_SHARE CqVector3D
 
 		/** Determine a componentwise minimum for two vectors
 		 */
-		friend CqVector3D min(const CqVector3D a, const CqVector3D b);
+		friend CqVector3D min(const CqVector3D& a, const CqVector3D& b);
 
 		/** Determine a componentwise maximum for two vectors
 		 */
-		friend CqVector3D max(const CqVector3D a, const CqVector3D b);
+		friend CqVector3D max(const CqVector3D& a, const CqVector3D& b);
 
 		/** Clamp the components of a vector to between two given vectors.
 		 */
-		friend CqVector3D clamp(const CqVector3D v, const CqVector3D min, const CqVector3D max);
+		friend CqVector3D clamp(const CqVector3D& v, const CqVector3D& min, const CqVector3D& max);
 
 		/** \brief Linearly interpolate between two colors
 		 *
@@ -304,7 +304,7 @@ class COMMON_SHARE CqVector3D
 		 * \param c1 - color corresponding to t = 1
 		 */
 		template<typename T>
-		friend CqVector3D lerp(const T t, const CqVector3D v0, const CqVector3D v1);
+		friend CqVector3D lerp(const T t, const CqVector3D& v0, const CqVector3D& v1);
 
 		friend CqVector3D	operator+( const TqFloat f, const CqVector3D& v )
 		{
@@ -382,17 +382,17 @@ class COMMON_SHARE CqVector3D
 //-----------------------------------------------------------------------
 // Inline function implementations.
 //-----------------------------------------------------------------------
-inline CqVector3D min(const CqVector3D a, const CqVector3D b)
+inline CqVector3D min(const CqVector3D& a, const CqVector3D& b)
 {
 	return CqVector3D(min(a.m_x, b.m_x), min(a.m_y, b.m_y), min(a.m_z, b.m_z));
 }
 
-inline CqVector3D max(const CqVector3D a, const CqVector3D b)
+inline CqVector3D max(const CqVector3D& a, const CqVector3D& b)
 {
 	return CqVector3D(max(a.m_x, b.m_x), max(a.m_y, b.m_y), max(a.m_z, b.m_z));
 }
 
-inline CqVector3D clamp(const CqVector3D v, const CqVector3D min, const CqVector3D max)
+inline CqVector3D clamp(const CqVector3D& v, const CqVector3D& min, const CqVector3D& max)
 {
 	return CqVector3D(clamp(v.m_x, min.m_x, max.m_x),
 			clamp(v.m_y, min.m_y, max.m_y),
@@ -400,7 +400,7 @@ inline CqVector3D clamp(const CqVector3D v, const CqVector3D min, const CqVector
 }
 
 template<typename T>
-inline CqVector3D lerp(const T t, const CqVector3D v0, const CqVector3D v1)
+inline CqVector3D lerp(const T t, const CqVector3D& v0, const CqVector3D& v1)
 {
 	return CqVector3D((1-t)*v0.m_x + t*v1.m_x,
 			       (1-t)*v0.m_y + t*v1.m_y,

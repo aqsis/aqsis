@@ -21,6 +21,12 @@ SET(CONTENTDIR "content"
 SET(SCRIPTSDIR "scripts" 
 	CACHE STRING "Install location for scripts (relative to CMAKE_INSTALL_PREFIX)")
 
+IF(FIRST_CMAKE_RUN)
+	# Override default compile flags the first time cmake is run.
+	SET_IF_EMPTY(CMAKE_CXX_FLAGS "-Wall" CACHE STRING "Flags used by the compiler during all build types." FORCE)
+	SET_IF_EMPTY(CMAKE_C_FLAGS "-Wall" CACHE STRING "Flags for C compiler." FORCE)
+ENDIF(FIRST_CMAKE_RUN)
+
 IF(AQSIS_USE_PLUGINS)
 	SET(AQSISEXE_SYSTEM_LINKLIBS ${AQSIS_EXECUTABLE_LINKLIBS} dl)
 	SET(TEQSER_SYSTEM_LINKLIBS ${AQSIS_EXECUTABLE_LINKLIBS} dl)

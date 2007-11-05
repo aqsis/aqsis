@@ -4,6 +4,7 @@ SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules" "${CMAKE_CURRE
 
 INCLUDE(macros)
 
+INCLUDE(FirstCMakeRun)
 INCLUDE(OutOfSourceBuild)
 
 INCLUDE(FindWin32Libs)
@@ -75,6 +76,16 @@ ELSE(WIN32)
 	ADD_DEFINITIONS(-DDEFAULT_PLUGIN_PATH="\\"${DEFAULT_PLUGIN_PATH}\\"")
 	ADD_DEFINITIONS(-DDEFAULT_RC_PATH="\\"${DEFAULT_RC_PATH}\\"")
 ENDIF(WIN32)
+
+IF(FIRST_CMAKE_RUN)
+	# Set default build type the first time cmake is run, but only if it's
+	# empty (an alternative value might have been specified on the command
+	# line, and we want this to override the default below.).
+	SET_IF_EMPTY(CMAKE_BUILD_TYPE "Release" CACHE STRING
+		"Choose the type of build, options are: None(CMAKE_CXX_FLAGS or CMAKE_C_FLAGS used) Debug Release RelWithDebInfo MinSizeRel."
+		FORCE
+		)
+ENDIF(FIRST_CMAKE_RUN)
 
 ADD_SUBDIRECTORY(argparse)
 ADD_SUBDIRECTORY(rib/api)

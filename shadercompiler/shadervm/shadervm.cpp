@@ -79,6 +79,7 @@ SqOpCodeTrans CqShaderVM::m_TransTable[] =
         {"RS_INVERSE", 0, &CqShaderVM::SO_RS_INVERSE, 0, {0}},
         {"RS_JZ", 0, &CqShaderVM::SO_RS_JZ, 1, {type_float}},
         {"RS_JNZ", 0, &CqShaderVM::SO_RS_JNZ, 1, {type_float}},
+        {"RS_BREAK", 0, &CqShaderVM::SO_RS_BREAK, 1, {type_integer}},
         {"S_JZ", 0, &CqShaderVM::SO_S_JZ, 1, {type_float}},
         {"S_JNZ", 0, &CqShaderVM::SO_S_JNZ, 1, {type_float}},
         {"S_GET", 0, &CqShaderVM::SO_S_GET, 0, {0}},
@@ -1172,24 +1173,38 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 								{
 									switch ( m_TransTable[ i ].m_aParamTypes[ p ] )
 									{
-											case type_float:
-											( *pFile ) >> std::ws;
-											TqFloat f;
-											( *pFile ) >> f;
-											AddFloat( f, pProgramArea );
+										case type_float:
+											{
+												( *pFile ) >> std::ws;
+												TqFloat f;
+												( *pFile ) >> f;
+												AddFloat( f, pProgramArea );
+											}
 											break;
-
-											case type_string:
-											( *pFile ) >> std::ws;
-											char c;
-											CqString s( "" );
-											pFile->get
-											();
-											while ( ( c = pFile->get
-											              () ) != '"' )
-												s += c;
-											AddString( s.c_str(), pProgramArea );
+										case type_integer:
+											{
+												( *pFile ) >> std::ws;
+												TqInt i;
+												( *pFile ) >> i;
+												AddInteger( i, pProgramArea );
+											}
 											break;
+										case type_string:
+											{
+												( *pFile ) >> std::ws;
+												char c;
+												CqString s( "" );
+												pFile->get
+												();
+												while ( ( c = pFile->get
+															() ) != '"' )
+													s += c;
+												AddString( s.c_str(), pProgramArea );
+											}
+											break;
+										default:
+											Aqsis::log() << critical << "Unknown literal type\n";
+											return;
 									}
 								}
 							}

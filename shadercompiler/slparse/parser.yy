@@ -24,6 +24,7 @@ namespace std
 
 #include	"parsenode.h"
 #include	"logging.h"
+#include	"aqsismath.h"
 
 # define YYMAXDEPTH 100000
 # define YYINITDEPTH  2000
@@ -1340,7 +1341,19 @@ loop_control
 
 loop_modstmt
 	:	loop_mod number		{
-								yyerror("Breaking out of a loop by level not yet supported");
+								$$=$1;
+								// \todo: "number" should really be an integer
+								// - it would better to encode this into the
+								// grammer.
+								TqFloat breakDepth = $2;
+								TqInt breakDepthRounded = lround(breakDepth);
+								if(breakDepthRounded <= 0)
+									yyerror("Invalid break or continue - depth argument must be greater than 0");
+								else if(breakDepthRounded != breakDepth)
+									yyerror("Invalid break or continue - depth argument must be an integer");
+								CqParseNode* pArg = new CqParseNodeFloatConst($2);
+								pArg->SetPos(ParseLineNumber,ParseStreamName.c_str());
+								$$->AddLastChild(pArg);
 							}
 	|	loop_mod
 	;
