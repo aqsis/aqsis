@@ -79,6 +79,12 @@ class CqPolygonGeneral2D
 		{
 			m_Axis = axis;
 		}
+		/** \brief Compute and set the projection axis for the polygon.
+		 *
+		 * The projection axis is chosen such that projecting that axis out
+		 * leaves the polyogon nondegenerate.
+		 */
+		void CalcAxis();
 		void	SetpVertices( const boost::shared_ptr<CqSurface>& pVertices )
 		{
 			m_pVertices = pVertices;

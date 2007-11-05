@@ -3846,13 +3846,6 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 			{
 				iminindex = MIN( iminindex, (TqUint) verts[ igvert ] );
 				imaxindex = MAX( imaxindex, (TqUint) verts[ igvert ] );
-				TqFloat	MinX, MaxX;
-				TqFloat	MinY, MaxY;
-				TqFloat	MinZ, MaxZ;
-				CqVector3D	vecTemp = pPointsClass->P()->pValue( verts[ igvert ] )[0];
-				MinX = MaxX = vecTemp.x();
-				MinY = MaxY = vecTemp.y();
-				MinZ = MaxZ = vecTemp.z();
 
 				CqPolygonGeneral2D polya;
 				polya.SetpVertices( pPointsClass );
@@ -3862,29 +3855,9 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 					ipoint = verts[ igvert ];
 					assert( ipoint < pPointsClass->P() ->Size() );
 					polya.aiVertices().push_back( ipoint );
-
-					vecTemp = pPointsClass->P()->pValue( verts[ igvert ] )[0];
-					MinX = ( MinX < vecTemp.x() ) ? MinX : vecTemp.x();
-					MinY = ( MinY < vecTemp.y() ) ? MinY : vecTemp.y();
-					MinZ = ( MinZ < vecTemp.z() ) ? MinZ : vecTemp.z();
-					MaxX = ( MaxX > vecTemp.x() ) ? MaxX : vecTemp.x();
-					MaxY = ( MaxY > vecTemp.y() ) ? MaxY : vecTemp.y();
-					MaxZ = ( MaxZ > vecTemp.z() ) ? MaxZ : vecTemp.z();
 				}
-
-				// Work out which plane to project to.
-				TqFloat	DiffX = MaxX - MinX;
-				TqFloat	DiffY = MaxY - MinY;
-				TqFloat	DiffZ = MaxZ - MinZ;
-
-				TqInt Axis;
-				if ( DiffX < DiffY && DiffX < DiffZ )
-					Axis = CqPolygonGeneral2D::Axis_YZ;
-				else if ( DiffY < DiffX && DiffY < DiffZ )
-					Axis = CqPolygonGeneral2D::Axis_XZ;
-				else
-					Axis = CqPolygonGeneral2D::Axis_XY;
-				polya.SetAxis( Axis );
+				// Work out which plane to project onto.
+				polya.CalcAxis();
 
 				if ( iloop == 0 )
 				{

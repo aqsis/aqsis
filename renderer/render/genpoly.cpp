@@ -25,6 +25,7 @@
 
 #include	"aqsis.h"
 #include	"genpoly.h"
+#include	"aqsismath.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -59,6 +60,32 @@ CqPolygonGeneral2D& CqPolygonGeneral2D::operator=( const CqPolygonGeneral2D& Fro
 	return ( *this );
 }
 
+//---------------------------------------------------------------------
+void CqPolygonGeneral2D::CalcAxis()
+{
+	CqParameterTyped<CqVector4D, CqVector3D>* P = m_pVertices->P();
+	// Obtain a nondegenerate normal vector for the polygon.
+	CqVector3D normal(1,0,0);
+	TqInt i = 0;
+	TqFloat maxNormalComp = 0;
+	while(i+2 < cVertices() && maxNormalComp < 1e-6)
+	{
+		CqVector3D diff1 = P->pValue(m_aiVertices[i+1])[0] - P->pValue(m_aiVertices[i])[0];
+		CqVector3D diff2 = P->pValue(m_aiVertices[i+2])[0] - P->pValue(m_aiVertices[i+1])[0];
+		normal = diff1 % diff2;
+		// get absolute value of normal componenets.
+		normal = Aqsis::max(normal, -normal);
+		// maximum component of the normal.
+		maxNormalComp = Aqsis::max(Aqsis::max(normal.x(), normal.y()), normal.z());
+	}
+	// We want to project out the axis which has the maximum normal component.
+	if(normal.x() > normal.y() && normal.x() > normal.z())
+		SetAxis(Axis_YZ);
+	else if(normal.y() > normal.x() && normal.y() > normal.z())
+		SetAxis(Axis_XZ);
+	else
+		SetAxis(Axis_XY);
+}
 
 //---------------------------------------------------------------------
 /** Swap the direction of a polygon.
