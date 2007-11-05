@@ -75,7 +75,7 @@ void CqTiffInputFile::readPixelsImpl(TqUchar* buffer,
 		TqInt startLine, TqInt numScanlines) const
 {
 	CqTiffDirHandle dirHandle(m_fileHandle, m_imageIndex);
-	tsize_t bytesPerRow = TIFFScanlineSize(dirHandle.tiffPtr());
+	const tsize_t bytesPerRow = TIFFScanlineSize(dirHandle.tiffPtr());
 	// Implement simplest possible version for now - read in scanlines
 	// sequentially...  Looking at the source code for libtiff, this should be
 	// reasonably efficient.
@@ -92,7 +92,7 @@ void CqTiffInputFile::readPixelsImpl(TqUchar* buffer,
 
 void CqTiffInputFile::setDirectory(tdir_t newDir)
 {
-	tdir_t numDirs = numImages();
+	const tdir_t numDirs = numImages();
 	if(newDir >= numDirs)
 		throw XqInternal((boost::format("TIFF directory %d out of range [0,%d]")
 				% newDir % (numDirs-1)).str(), __FILE__, __LINE__);

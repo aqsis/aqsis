@@ -19,14 +19,14 @@
 
 /** \file
  *
- * \brief Scanline-oriented pixel access for TIFF input.
+ * \brief Tiled TIFF input.
  *
  * \author Chris Foster  chris42f _at_ gmail.com
  *
  */
 
-#ifndef TIFFINPUTFILE_H_INCLUDED
-#define TIFFINPUTFILE_H_INCLUDED
+#ifndef TILEDTIFFINPUTFILE_H_INCLUDED
+#define TILEDTIFFINPUTFILE_H_INCLUDED
 
 #include "aqsis.h"
 
@@ -40,52 +40,24 @@
 namespace Aqsis {
 
 //------------------------------------------------------------------------------
-/** \brief Scanline-oriented input class for TIFF files.
- *
- * This class puts a scanline interface onto strip-based or tiled TIFF files,
- * and attempts to hide a lot of the complexity of the TIFF format behind a
- * uniform interface.
- *
- * For cases of unusual internal formats, the class falls back on the generic
- * RGBA image handling built into libTIFF.
- */
-COMMON_SHARE class CqTiffInputFile : public IqTexInputFile
+COMMON_SHARE class CqTiledTiffInputFile
 {
 	public:
-		CqTiffInputFile(const std::string& fileName);
-		/** \param Read the tiff from an input stream rather than a file.
-		 *
-		 * \param inStream - Stream to read from.  This is passed to the
-		 * underlying tiff (tiffxx) library.
-		 */
+		CqTiledTiffInputFile(const std::string& fileName);
+		/// Constructor which takes an input stream rather than a file name
 		CqTiffInputFile(std::istream& inStream);
-
 		virtual const char* fileName() const;
 		inline virtual const char* fileType() const;
 		inline virtual const CqTexFileHeader& header() const;
-
-		virtual void setImageIndex(TqInt newIndex);
-		inline virtual TqInt imageIndex() const;
-		virtual TqInt numImages() const;
-
 	private:
 		virtual void readPixelsImpl(TqUchar* buffer, TqInt startLine,
 				TqInt numScanlines) const;
 
-		/** \brief Initializations for directory-specific data
-		 *
-		 * \throw XqInternal if newDir is outside the valid range of
-		 * directories = 0...numImages()-1
-		 * \param newDir - new image directory to set.
-		 */
-		void setDirectory(tdir_t newDir);
+		/// Perform shared initializations needed in construction.
+		void initialize();
 
-		/// Header information
 		CqTexFileHeader m_header;
-		/// Handle to the underlying TIFF structure.
 		boost::shared_ptr<CqTiffFileHandle> m_fileHandle;
-		/// Index to the tiff directory
-		tdir_t m_imageIndex;
 };
 
 
@@ -103,11 +75,6 @@ inline const CqTexFileHeader& CqTiffInputFile::header() const
 	return m_header;
 }
 
-inline TqInt CqTiffInputFile::imageIndex() const
-{
-	return m_imageIndex;
-}
-
 } // namespace Aqsis
 
-#endif // TIFFINPUTFILE_H_INCLUDED
+#endif // TILEDTIFFINPUTFILE_H_INCLUDED
