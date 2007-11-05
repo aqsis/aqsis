@@ -74,7 +74,7 @@ CqPluginBase::DLOpen( CqString *library )
 	CqString::size_type pos = tstring.find ("/");
 	if (pos == CqString::npos)
 		tstring = CqString("./") + *library;
-	handle = ( void * ) dlopen( tstring.c_str(), RTLD_NOW | RTLD_GLOBAL );
+	handle = ( void * ) dlopen( tstring.c_str(), RTLD_NOW);
 #endif
 #endif
 
