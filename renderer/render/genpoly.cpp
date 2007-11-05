@@ -77,6 +77,7 @@ void CqPolygonGeneral2D::CalcAxis()
 		normal = Aqsis::max(normal, -normal);
 		// maximum component of the normal.
 		maxNormalComp = Aqsis::max(Aqsis::max(normal.x(), normal.y()), normal.z());
+		++i;
 	}
 	// We want to project out the axis which has the maximum normal component.
 	if(normal.x() > normal.y() && normal.x() > normal.z())
