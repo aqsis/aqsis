@@ -5,7 +5,9 @@
 %{
 #ifdef	WIN32
 #include <malloc.h>
+#if _MSC_VER
 #pragma warning(disable : 4786)
+#endif
 #include <cstdio>
 #include <memory>
 namespace std
