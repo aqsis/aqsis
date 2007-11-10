@@ -419,9 +419,9 @@ void CqCodeGenOutput::Visit( IqParseNodeOperator& OP )
 	if ( pNode->NodeType() != ParseNode_LogicalOp )
 	{
 		if ( pOperandA )
-			m_slxFile << pstrBType;
-		if ( pOperandB )
 			m_slxFile << pstrAType;
+		if ( pOperandB )
+			m_slxFile << pstrBType;
 	}
 	m_slxFile << std::endl;
 }
