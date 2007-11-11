@@ -82,7 +82,7 @@ class CqCubicSpline
 
 		/** Returns the number of control points.
 		 */		
-		inline TqUint numControlPoints();
+		inline TqInt numControlPoints();
 		
 		inline iterator	begin();
 		inline iterator	end();
@@ -144,7 +144,7 @@ CqCubicSpline<T>::CqCubicSpline( const CqString& strBasis, TqUint reservePoints 
 {
 	TqUint basis = SplineBasis_CatmullRom; 
 	
-	for ( TqUint i=0; i<SplineBasis_LAST; ++i)
+	for ( TqInt i=0; i<SplineBasis_LAST; ++i)
 	{
 		if ( splineTypes[ i ].name == strBasis )
 		{
@@ -245,9 +245,9 @@ inline typename CqCubicSpline<T>::iterator	CqCubicSpline<T>::end()
 } 
 
 template <class T>
-inline TqUint CqCubicSpline<T>::numControlPoints()
+inline TqInt CqCubicSpline<T>::numControlPoints()
 {  
-    return (TqUint)m_controlPoints.size();
+    return m_controlPoints.size();
 } 
 
 
