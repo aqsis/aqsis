@@ -92,9 +92,6 @@ extern "C" __declspec(dllimport) void report_refcounts();
 
 #include	"sstring.h"
 
-//#include	"share.h"
-#include	"validate.h"
-
 #include	"ri_validate.inl"
 
 using namespace Aqsis;
@@ -133,6 +130,34 @@ bool   IfOk = true;
 
 #define PASS_PARAMETERS \
 	count, aTokens.size()>0?&aTokens[0]:0, aValues.size()>0?&aValues[0]:0
+
+//---------------------------------------------------------------------
+/// Exception try guard to be inserted at the top of all Ri calls which intend
+//to catch exceptions.
+#define EXCEPTION_TRY_GUARD try {
+
+/// Exception catch guard to prevent exceptions propagating outside of Ri calls
+#define EXCEPTION_CATCH_GUARD(procName) 							\
+}																	\
+catch(const XqValidation& e)										\
+{																	\
+	Aqsis::log() << error << "ignoring invalid " << procName << ":\n" \
+		<< error << e.what() << "\n";								\
+}																	\
+catch(const XqException& e)											\
+{																	\
+	Aqsis::log() << error << e << "\n";								\
+}																	\
+catch(const std::exception& e)										\
+{																	\
+	Aqsis::log() << error << "std::exception encountered in "		\
+		<< procName << ": " << e.what() << "\n";					\
+}																	\
+catch(...)															\
+{																	\
+	Aqsis::log() << error << "unknown exception encountered in "	\
+		<< procName << "\n";										\
+}
 
 //---------------------------------------------------------------------
 // This file contains the interface functions which are published as the
@@ -331,51 +356,40 @@ RtInt BuildParameterList( va_list pArgs, std::vector<RtToken>& aTokens, std::vec
 	return ( count );
 }
 
+//--------------------------------------------------------------------------------
+// Procedure parameter constraints checking
 
-//----------------------------------------------------------------------
-//	CqRangeCheckCallback implentation
-//	Use this with CheckMinMax
-//
-class	CqLogRangeCheckCallback	: public CqRangeCheckCallback
+/** \param Check that a constraint on a variable is true.
+ *
+ * Checks that (val1 cmp val2), and if not throws an XqValidation.  The what()
+ * string of the XqValidation contains relevant error information
+ */
+#define PARAM_CONSTRAINT_CHECK(val1, cmp, val2) \
+	parameterConstraintCheck((val1) cmp (val2), val1, val2, #val1, #val2, #cmp)
+
+/** \brief check that a constraint is true
+ *
+ * Don't use this directly - it's designed to be used indirectly via the
+ * PARAM_CONSTRAINT_CHECK macro.
+ *
+ * \throw XqValidation if the condition isn't true.
+ *
+ * The thrown error contains the relevant validation failure information in its
+ * what() string.
+ */
+template<typename T1, typename T2>
+void parameterConstraintCheck(bool condition, const T1& val1, const T2& val2,
+		const char* val1Str, const char* val2Str, const char* cmpStr)
 {
-	public:
-		CqLogRangeCheckCallback()
-		{ }
-
-		virtual ~CqLogRangeCheckCallback()
-		{
-		}
-
-		void set
-			( const char* name )
-		{
-			m_name = name;
-		}
-
-		virtual void operator()( int res )
-		{
-			switch( res )
-			{
-					case CqRangeCheckCallback::UPPER_BOUND_HIT:
-					{
-						Aqsis::log() << error << "Invalid Value for " << m_name << ". Value exceeded upper limit" << std::endl;
-					}
-
-					case CqRangeCheckCallback::LOWER_BOUND_HIT:
-					{
-						Aqsis::log() << error << "Invalid Value for " << m_name << ". Value exceeded lower limit" << std::endl;
-					}
-
-					default:
-					;
-			}
-		}
-
-
-	private:
-		const char*	m_name;
-};
-
+	if(!condition)
+	{
+		std::ostringstream out;
+		out << "parameter check "
+			<< "\"" << val1Str << " " << cmpStr << " " << val2Str << "\""
+			<< " failed: [" << val1 << " not " << cmpStr << " " << val2 << "]";
+		throw XqValidation(out.str(), __FILE__, __LINE__);
+	}
+}
 
 //----------------------------------------------------------------------
 // ValidateState
@@ -459,6 +473,7 @@ const char*	GetStateAsString()
 RtToken	RiDeclare( RtString name, RtString declaration )
 {
 	VALIDATE_CONDITIONAL0
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIDECLARE
 
@@ -468,6 +483,7 @@ RtToken	RiDeclare( RtString name, RtString declaration )
 
 	CqString strName( name ), strDecl( declaration );
 	QGetRenderContext() ->AddParameterDecl( strName.c_str(), strDecl.c_str() );
+	EXCEPTION_CATCH_GUARD("RiDeclare")
 	return ( 0 );
 }
 
@@ -658,6 +674,7 @@ void SetDefaultRiOptions( void )
 extern "C" char *StandardParameters[][2];
 RtVoid	RiBegin( RtToken name )
 {
+	EXCEPTION_TRY_GUARD
 	VALIDATE_RIBEGIN
 
 	DEBUG_RIBEGIN
@@ -694,6 +711,7 @@ RtVoid	RiBegin( RtToken name )
 	//	QGetRenderContext()->ptransWriteCurrent() ->SetHandedness( false );
 	QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "Orientation" ) [ 0 ] = 0;
 
+	EXCEPTION_CATCH_GUARD("RiBegin")
 	return ;
 }
 
@@ -703,6 +721,7 @@ RtVoid	RiBegin( RtToken name )
 //
 RtVoid	RiEnd()
 {
+	EXCEPTION_TRY_GUARD
 	VALIDATE_RIEND
 
 	DEBUG_RIEND
@@ -719,6 +738,7 @@ RtVoid	RiEnd()
 	delete( QGetRenderContext() );
 	QSetRenderContext( 0 );
 
+	EXCEPTION_CATCH_GUARD("RiEnd")
 	return ;
 }
 
@@ -730,6 +750,7 @@ RtVoid	RiEnd()
 RtVoid	RiFrameBegin( RtInt number )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIFRAMEBEGIN
 
@@ -758,6 +779,7 @@ RtVoid	RiFrameBegin( RtInt number )
 
 	worldrand.Reseed('a'+'q'+'s'+'i'+'s');
 
+	EXCEPTION_CATCH_GUARD("RiFrameBegin")
 	return ;
 }
 
@@ -769,6 +791,7 @@ RtVoid	RiFrameBegin( RtInt number )
 RtVoid	RiFrameEnd()
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIFRAMEEND
 
@@ -779,6 +802,7 @@ RtVoid	RiFrameEnd()
 	QGetRenderContext() ->EndFrameModeBlock();
 	QGetRenderContext() ->ClearDisplayRequests();
 
+	EXCEPTION_CATCH_GUARD("RiFrameEnd")
 	return ;
 }
 
@@ -790,6 +814,7 @@ RtVoid	RiFrameEnd()
 RtVoid	RiWorldBegin()
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIWORLDBEGIN
 
@@ -878,6 +903,7 @@ RtVoid	RiWorldBegin()
 
 	worldrand.Reseed('a'+'q'+'s'+'i'+'s');
 
+	EXCEPTION_CATCH_GUARD("RiWorldBegin")
 	return ;
 }
 
@@ -890,6 +916,7 @@ RtVoid	RiWorldBegin()
 RtVoid	RiWorldEnd()
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIWORLDEND
 
@@ -950,6 +977,7 @@ RtVoid	RiWorldEnd()
 
 	QGetRenderContext()->SetWorldBegin(false);
 
+	EXCEPTION_CATCH_GUARD("RiWorldEnd")
 	return ;
 }
 
@@ -961,6 +989,7 @@ RtVoid	RiWorldEnd()
 RtVoid	RiFormat( RtInt xresolution, RtInt yresolution, RtFloat pixelaspectratio )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIFORMAT
 
@@ -972,6 +1001,7 @@ RtVoid	RiFormat( RtInt xresolution, RtInt yresolution, RtFloat pixelaspectratio 
 	QGetRenderContext() ->poptWriteCurrent()->GetIntegerOptionWrite( "System", "Resolution" ) [ 1 ] = yresolution ;
 	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "PixelAspectRatio" ) [ 0 ] = ( pixelaspectratio < 0.0 ) ? 1.0 : pixelaspectratio ;
 
+	EXCEPTION_CATCH_GUARD("RiFormat")
 	return ;
 }
 
@@ -983,6 +1013,7 @@ RtVoid	RiFormat( RtInt xresolution, RtInt yresolution, RtFloat pixelaspectratio 
 RtVoid	RiFrameAspectRatio( RtFloat frameratio )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIFRAMEASPECTRATIO
 
@@ -990,27 +1021,14 @@ RtVoid	RiFrameAspectRatio( RtFloat frameratio )
 
 	DEBUG_RIFRAMEASPECTRATIO
 
-	CqLogRangeCheckCallback rc;
-
-	bool valid = true;
-
-	rc.set( "frameratio");
-	if( !CheckMinMax( frameratio, 0.0f, RI_INFINITY, &rc ) )
-	{
-		valid = false;
-	}
-
-	if( !valid )
-	{
-		Aqsis::log() << error << "RiFrameAspectRatio: Invalid RiFrameAspectRatio, aborting" << std::endl;
-		return;
-	}
+	PARAM_CONSTRAINT_CHECK(frameratio, >, 0);
 
 	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "FrameAspectRatio" ) [ 0 ] = frameratio ;
 
 	// Inform the system that RiFrameAspectRatio has been called, as this takes priority.
 	QGetRenderContext()->poptWriteCurrent()->GetIntegerOptionWrite("System", "CameraFlags")[0] |= CameraFARSet;
 
+	EXCEPTION_CATCH_GUARD("RiFrameAspectRatio")
 	return ;
 }
 
@@ -1023,6 +1041,7 @@ RtVoid	RiFrameAspectRatio( RtFloat frameratio )
 RtVoid	RiScreenWindow( RtFloat left, RtFloat right, RtFloat bottom, RtFloat top )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RISCREENWINDOW
 
@@ -1038,6 +1057,7 @@ RtVoid	RiScreenWindow( RtFloat left, RtFloat right, RtFloat bottom, RtFloat top 
 	// Inform the system that RiScreenWindow has been called, as this takes priority.
 	QGetRenderContext()->poptWriteCurrent()->GetIntegerOptionWrite("System", "CameraFlags")[0] |= CameraScreenWindowSet;
 
+	EXCEPTION_CATCH_GUARD("RiScreenWindow")
 	return ;
 }
 
@@ -1047,9 +1067,10 @@ RtVoid	RiScreenWindow( RtFloat left, RtFloat right, RtFloat bottom, RtFloat top 
 // Set the position and size of the crop window specified in fractions of the raster
 // window.
 //
-RtVoid	RiCropWindow( RtFloat left, RtFloat right, RtFloat top, RtFloat bottom )
+RtVoid	RiCropWindow( RtFloat xmin, RtFloat xmax, RtFloat ymin, RtFloat ymax )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RICROPWINDOW
 
@@ -1057,55 +1078,23 @@ RtVoid	RiCropWindow( RtFloat left, RtFloat right, RtFloat top, RtFloat bottom )
 
 	DEBUG_RICROPWINDOW
 
-	CqLogRangeCheckCallback rc;
+	PARAM_CONSTRAINT_CHECK(xmin, >=, 0.0f);
+	PARAM_CONSTRAINT_CHECK(xmin, <=, 1.0f);
+	PARAM_CONSTRAINT_CHECK(xmax, >=, 0.0f);
+	PARAM_CONSTRAINT_CHECK(xmax, <=, 1.0f);
+	PARAM_CONSTRAINT_CHECK(ymin, >=, 0.0f);
+	PARAM_CONSTRAINT_CHECK(ymin, <=, 1.0f);
+	PARAM_CONSTRAINT_CHECK(ymax, >=, 0.0f);
+	PARAM_CONSTRAINT_CHECK(ymax, <=, 1.0f);
+	PARAM_CONSTRAINT_CHECK(xmin, <, xmax);
+	PARAM_CONSTRAINT_CHECK(ymin, <, ymax);
 
-	bool valid = true;
+	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "CropWindow" ) [ 0 ] = xmin ;
+	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "CropWindow" ) [ 1 ] = xmax ;
+	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "CropWindow" ) [ 2 ] = ymin ;
+	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "CropWindow" ) [ 3 ] = ymax ;
 
-	rc.set( "left");
-	if( !CheckMinMax( left, 0.0f, 1.0f, &rc ) )
-	{
-		valid = false;
-	}
-
-	rc.set( "right" );
-	if( !CheckMinMax( right, 0.0f, 1.0f, &rc ) )
-	{
-		valid = false;
-	}
-
-	rc.set( "top" );
-	if( !CheckMinMax( top, 0.0f, 1.0f, &rc ) )
-	{
-		valid = false;
-	}
-
-	rc.set( "bottom" );
-	if( !CheckMinMax( bottom, 0.0f, 1.0f, &rc ) )
-	{
-		valid = false;
-	}
-
-	if (bottom == top)
-	{
-		valid = false;
-	}
-
-	if (left == right)
-	{
-		valid = false;
-	}
-
-	if( !valid )
-	{
-		Aqsis::log() << error << "Invalid RiCropWindow, ignoring" << std::endl;
-		return;
-	}
-
-	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "CropWindow" ) [ 0 ] = left ;
-	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "CropWindow" ) [ 1 ] = right ;
-	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "CropWindow" ) [ 2 ] = top ;
-	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "CropWindow" ) [ 3 ] = bottom ;
-
+	EXCEPTION_CATCH_GUARD("RiCropWindow")
 	return ;
 }
 
@@ -1129,6 +1118,7 @@ RtVoid	RiProjection( RtToken name, ... )
 RtVoid	RiProjectionV( RtToken name, PARAMETERLIST )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIPROJECTION
 
@@ -1158,6 +1148,7 @@ RtVoid	RiProjectionV( RtToken name, PARAMETERLIST )
 	// TODO: need to get the current transformation so that it can be added to the screen transformation.
 	QGetRenderContext() ->ptransSetTime( CqMatrix() );
 
+	EXCEPTION_CATCH_GUARD("RiProjectionV")
 	return ;
 }
 
@@ -1166,9 +1157,10 @@ RtVoid	RiProjectionV( RtToken name, PARAMETERLIST )
 // RiClipping
 // Set the near and far clipping planes specified as distances from the camera.
 //
-RtVoid	RiClipping( RtFloat cnear, RtFloat cfar )
+RtVoid	RiClipping( RtFloat near, RtFloat far )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RICLIPPING
 
@@ -1176,32 +1168,13 @@ RtVoid	RiClipping( RtFloat cnear, RtFloat cfar )
 
 	DEBUG_RICLIPPING
 
-	CqLogRangeCheckCallback rc;
+	PARAM_CONSTRAINT_CHECK(near, <, far);
+	PARAM_CONSTRAINT_CHECK(near, >=, RI_EPSILON);
 
-	bool valid = true;
+	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "Clipping" ) [ 0 ] = near ;
+	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "Clipping" ) [ 1 ] = far ;
 
-	rc.set( "near");
-	if( !CheckMinMax( cnear, RI_EPSILON, cfar, &rc ) )
-	{
-		valid = false;
-	}
-
-	rc.set( "far" );
-	if( !CheckMinMax( cfar, cnear, RI_INFINITY, &rc ) )
-	{
-		valid = false;
-	}
-
-	if( !valid )
-	{
-		Aqsis::log() << error << "RiClipping: Invalid RiClipping, clipping planes set to RI_EPSILON, RI_INFINITY" << std::endl;
-		cnear	= RI_EPSILON;
-		cfar	= RI_INFINITY;
-	}
-
-	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "Clipping" ) [ 0 ] = cnear ;
-	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "Clipping" ) [ 1 ] = cfar ;
-
+	EXCEPTION_CATCH_GUARD("RiClipping")
 	return ;
 }
 
@@ -1213,6 +1186,7 @@ RtVoid	RiClipping( RtFloat cnear, RtFloat cfar )
 RtVoid	RiDepthOfField( RtFloat fstop, RtFloat focallength, RtFloat focaldistance )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIDEPTHOFFIELD
 
@@ -1220,39 +1194,16 @@ RtVoid	RiDepthOfField( RtFloat fstop, RtFloat focallength, RtFloat focaldistance
 
 	DEBUG_RIDEPTHOFFIELD
 
-	CqLogRangeCheckCallback rc;
-
-	bool valid = true;
-
-	rc.set( "fstop" );
-	if( !CheckMinMax( fstop, 0.0f, RI_INFINITY, &rc ) )
-	{
-		valid = false;
-	}
-
-	rc.set( "focallength" );
-	if( !CheckMinMax( focallength, 0.0f, RI_INFINITY, &rc ) )
-	{
-		valid = false;
-	}
-
-	rc.set( "focaldistance" );
-	if( !CheckMinMax( focaldistance, 0.0f, RI_INFINITY, &rc ) )
-	{
-		valid = false;
-	}
-
-	if( !valid )
-	{
-		Aqsis::log() << warning << "RiDepthOfField: Invalid DepthOfField, DepthOfField ignored" << std::endl;
-		return;
-	}
+	PARAM_CONSTRAINT_CHECK(fstop, >, 0.0f);
+	PARAM_CONSTRAINT_CHECK(focallength, >, 0.0f);
+	PARAM_CONSTRAINT_CHECK(focaldistance, >, 0.0f);
 
 	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "DepthOfField" ) [ 0 ] = fstop ;
 	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "DepthOfField" ) [ 1 ] = focallength ;
 	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "DepthOfField" ) [ 2 ] = focaldistance ;
 
 	QGetRenderContext() ->SetDepthOfFieldData( fstop, focallength, focaldistance );
+	EXCEPTION_CATCH_GUARD("RiDepthOfField")
 }
 
 
@@ -1263,6 +1214,7 @@ RtVoid	RiDepthOfField( RtFloat fstop, RtFloat focallength, RtFloat focaldistance
 RtVoid	RiShutter( RtFloat opentime, RtFloat closetime )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RISHUTTER
 
@@ -1273,6 +1225,7 @@ RtVoid	RiShutter( RtFloat opentime, RtFloat closetime )
 	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "Shutter" ) [ 0 ] = opentime;
 	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "Shutter" ) [ 1 ] = closetime;
 
+	EXCEPTION_CATCH_GUARD("RiShutter")
 	return ;
 }
 
@@ -1285,6 +1238,7 @@ RtVoid	RiShutter( RtFloat opentime, RtFloat closetime )
 RtVoid	RiPixelVariance( RtFloat variance )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIPIXELVARIANCE
 
@@ -1292,24 +1246,11 @@ RtVoid	RiPixelVariance( RtFloat variance )
 
 	DEBUG_RIPIXELVARIANCE
 
-	CqLogRangeCheckCallback rc;
-
-	bool valid = true;
-
-	rc.set( "variance" );
-	if( !CheckMinMax( variance, 0.0f, RI_INFINITY, &rc ) )
-	{
-		valid = false;
-	}
-
-	if( !valid )
-	{
-		Aqsis::log() << warning << "RiPixelVariance: Invalid PixelVariance, PixelVariance set to 0" << std::endl;
-		variance = 0;
-	}
+	PARAM_CONSTRAINT_CHECK(variance, >=, 0.0f);
 
 	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "PixelVariance" ) [ 0 ] = variance ;
 
+	EXCEPTION_CATCH_GUARD("RiPixelVariance")
 	return ;
 }
 
@@ -1321,6 +1262,7 @@ RtVoid	RiPixelVariance( RtFloat variance )
 RtVoid	RiPixelSamples( RtFloat xsamples, RtFloat ysamples )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIPIXELSAMPLES
 
@@ -1328,32 +1270,13 @@ RtVoid	RiPixelSamples( RtFloat xsamples, RtFloat ysamples )
 
 	DEBUG_RIPIXELSAMPLES
 
-	CqLogRangeCheckCallback rc;
-
-	bool valid = true;
-
-	rc.set( "xsamples" );
-	if( !CheckMinMax( xsamples, 1.0f, RI_INFINITY, &rc ) )
-	{
-		valid = false;
-	}
-
-	rc.set( "ysamples" );
-	if( !CheckMinMax( ysamples, 1.0f, RI_INFINITY, &rc ) )
-	{
-		valid = false;
-	}
-
-	if( !valid )
-	{
-		Aqsis::log() << warning << "RiPixelSamples: Invalid PixelSamples, PixelSamples set to 1, 1" << std::endl;
-		xsamples = 1;
-		ysamples = 1;
-	}
+	PARAM_CONSTRAINT_CHECK(xsamples, >=, 1.0f);
+	PARAM_CONSTRAINT_CHECK(ysamples, >=, 1.0f);
 
 	QGetRenderContext() ->poptWriteCurrent()->GetIntegerOptionWrite( "System", "PixelSamples" ) [ 0 ] = static_cast<TqInt>( xsamples ) ;
 	QGetRenderContext() ->poptWriteCurrent()->GetIntegerOptionWrite( "System", "PixelSamples" ) [ 1 ] = static_cast<TqInt>( ysamples ) ;
 
+	EXCEPTION_CATCH_GUARD("RiPixelSamples")
 	return ;
 }
 
@@ -1365,6 +1288,7 @@ RtVoid	RiPixelSamples( RtFloat xsamples, RtFloat ysamples )
 RtVoid	RiPixelFilter( RtFilterFunc function, RtFloat xwidth, RtFloat ywidth )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIPIXELFILTER
 
@@ -1376,6 +1300,7 @@ RtVoid	RiPixelFilter( RtFilterFunc function, RtFloat xwidth, RtFloat ywidth )
 	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "FilterWidth" ) [ 0 ] = xwidth ;
 	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "FilterWidth" ) [ 1 ] = ywidth ;
 
+	EXCEPTION_CATCH_GUARD("RiPixelFilter")
 	return ;
 }
 
@@ -1387,6 +1312,7 @@ RtVoid	RiPixelFilter( RtFilterFunc function, RtFloat xwidth, RtFloat ywidth )
 RtVoid	RiExposure( RtFloat gain, RtFloat gamma )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIEXPOSURE
 
@@ -1397,6 +1323,7 @@ RtVoid	RiExposure( RtFloat gain, RtFloat gamma )
 	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "Exposure" ) [ 0 ] = gain ;
 	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "Exposure" ) [ 1 ] = gamma ;
 
+	EXCEPTION_CATCH_GUARD("RiExposure")
 	return ;
 }
 
@@ -1420,6 +1347,7 @@ RtVoid	RiImager( RtToken name, ... )
 RtVoid	RiImagerV( RtToken name, PARAMETERLIST )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIIMAGER
 
@@ -1443,6 +1371,7 @@ RtVoid	RiImagerV( RtToken name, PARAMETERLIST )
 			SetShaderArgument( pshadImager, token, static_cast<TqPchar>( value ) );
 		}
 	}
+	EXCEPTION_CATCH_GUARD("RiImagerV")
 	return ;
 }
 
@@ -1454,6 +1383,7 @@ RtVoid	RiImagerV( RtToken name, PARAMETERLIST )
 RtVoid	RiQuantize( RtToken type, RtInt one, RtInt min, RtInt max, RtFloat ditheramplitude )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIQUANTIZE
 
@@ -1486,6 +1416,7 @@ RtVoid	RiQuantize( RtToken type, RtInt one, RtInt min, RtInt max, RtFloat dither
 		quantOpt[3] = static_cast<TqFloat>( ditheramplitude );
 	}
 
+	EXCEPTION_CATCH_GUARD("RiQuantize")
 	return ;
 }
 
@@ -1509,6 +1440,7 @@ RtVoid	RiDisplay( RtToken name, RtToken type, RtToken mode, ... )
 RtVoid	RiDisplayV( RtToken name, RtToken type, RtToken mode, PARAMETERLIST )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIDISPLAY
 
@@ -1584,6 +1516,7 @@ RtVoid	RiDisplayV( RtToken name, RtToken type, RtToken mode, PARAMETERLIST )
 		// Add a display driver to the list of requested drivers.
 		QGetRenderContext() ->AddDisplayRequest( strName.c_str(), strType.c_str(), mode, eValue, dataOffset, dataSize, mapOfArguments );
 	}
+	EXCEPTION_CATCH_GUARD("RiDisplayV")
 	return ;
 }
 
@@ -1606,6 +1539,7 @@ RtVoid	RiHider( RtToken name, ... )
 RtVoid	RiHiderV( RtToken name, PARAMETERLIST )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIHIDER
 
@@ -1638,6 +1572,7 @@ RtVoid	RiHiderV( RtToken name, PARAMETERLIST )
 			RiOption( "Hider", "jitter", ( RtFloat* ) values[ i ], NULL );
 	}
 
+	EXCEPTION_CATCH_GUARD("RiHiderV")
 	return ;
 }
 
@@ -1649,6 +1584,7 @@ RtVoid	RiHiderV( RtToken name, PARAMETERLIST )
 RtVoid	RiColorSamples( RtInt N, RtFloat *nRGB, RtFloat *RGBn )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RICOLORSAMPLES
 
@@ -1657,6 +1593,7 @@ RtVoid	RiColorSamples( RtInt N, RtFloat *nRGB, RtFloat *RGBn )
 	DEBUG_RICOLORSAMPLES
 
 	Aqsis::log() << warning << "RiColorSamples not supported" << std::endl;
+	EXCEPTION_CATCH_GUARD("RiColorSamples")
 	return ;
 }
 
@@ -1668,6 +1605,7 @@ RtVoid	RiColorSamples( RtInt N, RtFloat *nRGB, RtFloat *RGBn )
 RtVoid	RiRelativeDetail( RtFloat relativedetail )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIRELATIVEDETAIL
 
@@ -1683,6 +1621,7 @@ RtVoid	RiRelativeDetail( RtFloat relativedetail )
 	{
 		QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "RelativeDetail" ) [ 0 ] = relativedetail;
 	}
+	EXCEPTION_CATCH_GUARD("RiRelativeDetail")
 	return ;
 }
 
@@ -1706,6 +1645,7 @@ RtVoid	RiOption( RtToken name, ... )
 RtVoid	RiOptionV( RtToken name, PARAMETERLIST )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIOPTION
 
@@ -1881,6 +1821,7 @@ RtVoid	RiOptionV( RtToken name, PARAMETERLIST )
 			break;
 		}
 	}
+	EXCEPTION_CATCH_GUARD("RiOptionV")
 	return ;
 }
 
@@ -1892,6 +1833,7 @@ RtVoid	RiOptionV( RtToken name, PARAMETERLIST )
 RtVoid	RiAttributeBegin()
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIATTRIBUTEBEGIN
 
@@ -1901,6 +1843,7 @@ RtVoid	RiAttributeBegin()
 
 	QGetRenderContext() ->BeginAttributeModeBlock();
 
+	EXCEPTION_CATCH_GUARD("RiAttributeBegin")
 	return ;
 }
 
@@ -1912,6 +1855,7 @@ RtVoid	RiAttributeBegin()
 RtVoid	RiAttributeEnd()
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIATTRIBUTEEND
 
@@ -1921,6 +1865,7 @@ RtVoid	RiAttributeEnd()
 
 	QGetRenderContext() ->EndAttributeModeBlock();
 
+	EXCEPTION_CATCH_GUARD("RiAttributeEnd")
 	return ;
 }
 
@@ -1932,6 +1877,7 @@ RtVoid	RiAttributeEnd()
 RtVoid	RiColor( RtColor Cq )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RICOLOR
 
@@ -1941,6 +1887,7 @@ RtVoid	RiColor( RtColor Cq )
 
 	QGetRenderContext() ->pattrWriteCurrent() ->GetColorAttributeWrite( "System", "Color" ) [ 0 ] = CqColor( Cq );
 	QGetRenderContext() ->AdvanceTime();
+	EXCEPTION_CATCH_GUARD("RiColor")
 	return ;
 }
 
@@ -1952,6 +1899,7 @@ RtVoid	RiColor( RtColor Cq )
 RtVoid	RiOpacity( RtColor Os )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIOPACITY
 
@@ -1961,6 +1909,7 @@ RtVoid	RiOpacity( RtColor Os )
 
 	QGetRenderContext() ->pattrWriteCurrent() ->GetColorAttributeWrite( "System", "Opacity" ) [ 0 ] = CqColor( Os );
 	QGetRenderContext() ->AdvanceTime();
+	EXCEPTION_CATCH_GUARD("RiOpacity")
 	return ;
 }
 
@@ -1975,6 +1924,7 @@ RtVoid	RiTextureCoordinates( RtFloat s1, RtFloat t1,
                              RtFloat s4, RtFloat t4 )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RITEXTURECOORDINATES
 
@@ -1996,6 +1946,7 @@ RtVoid	RiTextureCoordinates( RtFloat s1, RtFloat t1,
 	pTC[ 7 ] = t4;
 	QGetRenderContext() ->AdvanceTime();
 
+	EXCEPTION_CATCH_GUARD("RiTextureCoordinates")
 	return ;
 }
 
@@ -2019,6 +1970,7 @@ RtLightHandle	RiLightSource( RtToken name, ... )
 RtLightHandle	RiLightSourceV( RtToken name, PARAMETERLIST )
 {
 	VALIDATE_CONDITIONAL0
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RILIGHTSOURCE
 
@@ -2063,6 +2015,7 @@ RtLightHandle	RiLightSourceV( RtToken name, PARAMETERLIST )
 		QGetRenderContext() ->pconCurrent() ->AddContextLightSource( pNew );
 		return ( reinterpret_cast<RtLightHandle>( pNew.get() ) );
 	}
+	EXCEPTION_CATCH_GUARD("RiLightSourceV")
 	return ( 0 );
 }
 
@@ -2089,6 +2042,7 @@ RtLightHandle	RiAreaLightSource( RtToken name, ... )
 RtLightHandle	RiAreaLightSourceV( RtToken name, PARAMETERLIST )
 {
 	VALIDATE_CONDITIONAL0
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIAREALIGHTSOURCE
 
@@ -2098,6 +2052,7 @@ RtLightHandle	RiAreaLightSourceV( RtToken name, PARAMETERLIST )
 
 	Aqsis::log() << warning << "RiAreaLightSource not supported, will produce a point light" << std::endl;
 
+	EXCEPTION_CATCH_GUARD("RiAreaLightSourceV")
 	return ( RiLightSourceV( name, count, tokens, values ) );
 }
 
@@ -2109,6 +2064,7 @@ RtLightHandle	RiAreaLightSourceV( RtToken name, PARAMETERLIST )
 RtVoid	RiIlluminate( RtLightHandle light, RtBoolean onoff )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIILLUMINATE
 
@@ -2124,6 +2080,7 @@ RtVoid	RiIlluminate( RtLightHandle light, RtBoolean onoff )
 		QGetRenderContext() ->pattrWriteCurrent() ->AddLightsource( pL );
 	else
 		QGetRenderContext() ->pattrWriteCurrent() ->RemoveLightsource( pL );
+	EXCEPTION_CATCH_GUARD("RiIlluminate")
 	return ;
 }
 
@@ -2148,6 +2105,7 @@ RtVoid	RiSurfaceV( RtToken name, PARAMETERLIST )
 {
 
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RISURFACE
 
@@ -2175,6 +2133,7 @@ RtVoid	RiSurfaceV( RtToken name, PARAMETERLIST )
 		QGetRenderContext() ->pattrWriteCurrent() ->SetpshadSurface( pshadSurface, QGetRenderContext() ->Time() );
 	}
 	QGetRenderContext() ->AdvanceTime();
+	EXCEPTION_CATCH_GUARD("RiSurfaceV")
 	return ;
 }
 
@@ -2198,6 +2157,7 @@ RtVoid	RiAtmosphere( RtToken name, ... )
 RtVoid	RiAtmosphereV( RtToken name, PARAMETERLIST )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIATMOSPHERE
 
@@ -2225,6 +2185,7 @@ RtVoid	RiAtmosphereV( RtToken name, PARAMETERLIST )
 
 	QGetRenderContext() ->pattrWriteCurrent() ->SetpshadAtmosphere( pshadAtmosphere, QGetRenderContext() ->Time() );
 	QGetRenderContext() ->AdvanceTime();
+	EXCEPTION_CATCH_GUARD("RiAtmosphereV")
 	return ;
 }
 
@@ -2247,6 +2208,7 @@ RtVoid	RiInterior( RtToken name, ... )
 RtVoid	RiInteriorV( RtToken name, PARAMETERLIST )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIINTERIOR
 
@@ -2255,6 +2217,7 @@ RtVoid	RiInteriorV( RtToken name, PARAMETERLIST )
 	DEBUG_RIINTERIOR
 
 	Aqsis::log() << warning << "RiInterior not supported" << std::endl;
+	EXCEPTION_CATCH_GUARD("RiInteriorV")
 	return ;
 }
 
@@ -2277,6 +2240,7 @@ RtVoid	RiExterior( RtToken name, ... )
 RtVoid	RiExteriorV( RtToken name, PARAMETERLIST )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIEXTERIOR
 
@@ -2285,6 +2249,7 @@ RtVoid	RiExteriorV( RtToken name, PARAMETERLIST )
 	DEBUG_RIEXTERIOR
 
 	Aqsis::log() << warning << "ExInterior not supported" << std::endl;
+	EXCEPTION_CATCH_GUARD("RiExteriorV")
 	return ;
 }
 
@@ -2296,6 +2261,7 @@ RtVoid	RiExteriorV( RtToken name, PARAMETERLIST )
 RtVoid	RiShadingRate( RtFloat size )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RISHADINGRATE
 
@@ -2303,26 +2269,13 @@ RtVoid	RiShadingRate( RtFloat size )
 
 	DEBUG_RISHADINGRATE
 
-	CqLogRangeCheckCallback rc;
-
-	bool valid = true;
-
-	rc.set( "size" );
-	if( !CheckMinMax( size, 0.0f, RI_INFINITY, &rc ) )
-	{
-		valid = false;
-	}
-
-	if( !valid )
-	{
-		Aqsis::log() << warning << "Invalid ShadingRate, ShadingRate set to 1" << std::endl;
-		size = 1;
-	}
+	PARAM_CONSTRAINT_CHECK(size, >, 0.0f);
 
 	QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite( "System", "ShadingRate" ) [ 0 ] = size;
 	QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite( "System", "ShadingRateSqrt" ) [ 0 ] = sqrt( size );
 	QGetRenderContext() ->AdvanceTime();
 
+	EXCEPTION_CATCH_GUARD("RiShadingRate")
 	return ;
 }
 
@@ -2334,6 +2287,7 @@ RtVoid	RiShadingRate( RtFloat size )
 RtVoid	RiShadingInterpolation( RtToken type )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RISHADINGINTERPOLATION
 
@@ -2350,6 +2304,7 @@ RtVoid	RiShadingInterpolation( RtToken type )
 			Aqsis::log() << error << "RiShadingInterpolation unrecognised value \"" << type << "\"" << std::endl;
 
 	QGetRenderContext() ->AdvanceTime();
+	EXCEPTION_CATCH_GUARD("RiShadingInterpolation")
 	return ;
 }
 
@@ -2361,6 +2316,7 @@ RtVoid	RiShadingInterpolation( RtToken type )
 RtVoid	RiMatte( RtBoolean onoff )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIMATTE
 
@@ -2370,6 +2326,7 @@ RtVoid	RiMatte( RtBoolean onoff )
 
 	QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "Matte" ) [ 0 ] = onoff != 0;
 	QGetRenderContext() ->AdvanceTime();
+	EXCEPTION_CATCH_GUARD("RiMatte")
 	return ;
 }
 
@@ -2381,6 +2338,7 @@ RtVoid	RiMatte( RtBoolean onoff )
 RtVoid	RiBound( RtBound bound )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIBOUND
 
@@ -2391,6 +2349,7 @@ RtVoid	RiBound( RtBound bound )
 	// TODO: Need to add a "Bound" attribute here, and fill it in.
 	QGetRenderContext() ->AdvanceTime();
 
+	EXCEPTION_CATCH_GUARD("RiBound")
 	return ;
 }
 
@@ -2402,6 +2361,7 @@ RtVoid	RiBound( RtBound bound )
 RtVoid	RiDetail( RtBound bound )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIDETAIL
 
@@ -2419,6 +2379,7 @@ RtVoid	RiDetail( RtBound bound )
 	boundAttr[4] = bound[4];
 	boundAttr[5] = bound[5];
 
+	EXCEPTION_CATCH_GUARD("RiDetail")
 	return ;
 }
 
@@ -2430,6 +2391,7 @@ RtVoid	RiDetail( RtBound bound )
 RtVoid	RiDetailRange( RtFloat offlow, RtFloat onlow, RtFloat onhigh, RtFloat offhigh )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIDETAILRANGE
 
@@ -2448,6 +2410,7 @@ RtVoid	RiDetailRange( RtFloat offlow, RtFloat onlow, RtFloat onhigh, RtFloat off
 	rangeAttr[1] = onlow;
 	rangeAttr[2] = onhigh;
 	rangeAttr[3] = offhigh;
+	EXCEPTION_CATCH_GUARD("RiDetailRange")
 	return ;
 }
 
@@ -2459,6 +2422,7 @@ RtVoid	RiDetailRange( RtFloat offlow, RtFloat onlow, RtFloat onhigh, RtFloat off
 RtVoid	RiGeometricApproximation( RtToken type, RtFloat value )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIGEOMETRICAPPROXIMATION
 
@@ -2476,6 +2440,7 @@ RtVoid	RiGeometricApproximation( RtToken type, RtFloat value )
 	{
 		Aqsis::log() << warning << "RiGeometricApproximation type not known" << std::endl;
 	}
+	EXCEPTION_CATCH_GUARD("RiGeometricApproximation")
 	return ;
 }
 
@@ -2487,6 +2452,7 @@ RtVoid	RiGeometricApproximation( RtToken type, RtFloat value )
 RtVoid	RiOrientation( RtToken orientation )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIORIENTATION
 
@@ -2506,6 +2472,7 @@ RtVoid	RiOrientation( RtToken orientation )
 			QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "Orientation" ) [ 0 ] = 0;
 	}
 	QGetRenderContext() ->AdvanceTime();
+	EXCEPTION_CATCH_GUARD("RiOrientation")
 	return ;
 }
 
@@ -2517,6 +2484,7 @@ RtVoid	RiOrientation( RtToken orientation )
 RtVoid	RiReverseOrientation()
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIREVERSEORIENTATION
 
@@ -2526,6 +2494,7 @@ RtVoid	RiReverseOrientation()
 
 	QGetRenderContext() ->pattrWriteCurrent() ->FlipeOrientation( QGetRenderContext() ->Time() );
 	QGetRenderContext() ->AdvanceTime();
+	EXCEPTION_CATCH_GUARD("RiReverseOrientation")
 	return ;
 }
 
@@ -2537,6 +2506,7 @@ RtVoid	RiReverseOrientation()
 RtVoid	RiSides( RtInt nsides )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RISIDES
 
@@ -2547,6 +2517,7 @@ RtVoid	RiSides( RtInt nsides )
 	QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "Sides" ) [ 0 ] = nsides;
 	QGetRenderContext() ->AdvanceTime();
 
+	EXCEPTION_CATCH_GUARD("RiSides")
 	return ;
 }
 
@@ -2558,6 +2529,7 @@ RtVoid	RiSides( RtInt nsides )
 RtVoid	RiIdentity()
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIIDENTITY
 
@@ -2567,6 +2539,7 @@ RtVoid	RiIdentity()
 
 	QGetRenderContext() ->ptransSetTime( CqMatrix() );
 	QGetRenderContext() ->AdvanceTime();
+	EXCEPTION_CATCH_GUARD("RiIdentity")
 	return ;
 }
 
@@ -2577,6 +2550,7 @@ RtVoid	RiIdentity()
 RtVoid	RiTransform( RtMatrix transform )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RITRANSFORM
 
@@ -2601,6 +2575,7 @@ RtVoid	RiTransform( RtMatrix transform )
 		QGetRenderContext() ->ptransSetCurrentTime( CqMatrix( transform ) );
 	QGetRenderContext() ->AdvanceTime();
 
+	EXCEPTION_CATCH_GUARD("RiTransform")
 	return ;
 }
 
@@ -2612,6 +2587,7 @@ RtVoid	RiTransform( RtMatrix transform )
 RtVoid	RiConcatTransform( RtMatrix transform )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RICONCATTRANSFORM
 
@@ -2626,6 +2602,7 @@ RtVoid	RiConcatTransform( RtMatrix transform )
 
 	QGetRenderContext() ->ptransConcatCurrentTime( CqMatrix( transform ) );
 	QGetRenderContext() ->AdvanceTime();
+	EXCEPTION_CATCH_GUARD("RiConcatTransform")
 	return ;
 }
 
@@ -2637,6 +2614,7 @@ RtVoid	RiConcatTransform( RtMatrix transform )
 RtVoid	RiPerspective( RtFloat fov )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIPERSPECTIVE
 
@@ -2662,6 +2640,7 @@ RtVoid	RiPerspective( RtFloat fov )
 	QGetRenderContext() ->ptransConcatCurrentTime( matP );
 	QGetRenderContext() ->AdvanceTime();
 
+	EXCEPTION_CATCH_GUARD("RiPerspective")
 	return ;
 }
 
@@ -2673,6 +2652,7 @@ RtVoid	RiPerspective( RtFloat fov )
 RtVoid	RiTranslate( RtFloat dx, RtFloat dy, RtFloat dz )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RITRANSLATE
 
@@ -2688,6 +2668,7 @@ RtVoid	RiTranslate( RtFloat dx, RtFloat dy, RtFloat dz )
 	QGetRenderContext() ->ptransConcatCurrentTime( matTrans );
 	QGetRenderContext() ->AdvanceTime();
 
+	EXCEPTION_CATCH_GUARD("RiTranslate")
 	return ;
 }
 
@@ -2699,6 +2680,7 @@ RtVoid	RiTranslate( RtFloat dx, RtFloat dy, RtFloat dz )
 RtVoid	RiRotate( RtFloat angle, RtFloat dx, RtFloat dy, RtFloat dz )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIROTATE
 
@@ -2713,6 +2695,7 @@ RtVoid	RiRotate( RtFloat angle, RtFloat dx, RtFloat dy, RtFloat dz )
 
 	QGetRenderContext() ->ptransConcatCurrentTime( matRot );
 	QGetRenderContext() ->AdvanceTime();
+	EXCEPTION_CATCH_GUARD("RiRotate")
 	return ;
 }
 
@@ -2724,6 +2707,7 @@ RtVoid	RiRotate( RtFloat angle, RtFloat dx, RtFloat dy, RtFloat dz )
 RtVoid	RiScale( RtFloat sx, RtFloat sy, RtFloat sz )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RISCALE
 
@@ -2738,6 +2722,7 @@ RtVoid	RiScale( RtFloat sx, RtFloat sy, RtFloat sz )
 
 	QGetRenderContext() ->ptransConcatCurrentTime( matScale );
 	QGetRenderContext() ->AdvanceTime();
+	EXCEPTION_CATCH_GUARD("RiScale")
 	return ;
 }
 
@@ -2750,6 +2735,7 @@ RtVoid	RiSkew( RtFloat angle, RtFloat dx1, RtFloat dy1, RtFloat dz1,
                RtFloat dx2, RtFloat dy2, RtFloat dz2 )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RISKEW
 
@@ -2763,6 +2749,7 @@ RtVoid	RiSkew( RtFloat angle, RtFloat dx1, RtFloat dy1, RtFloat dz1,
 
 	QGetRenderContext() ->ptransConcatCurrentTime( matSkew );
 	QGetRenderContext() ->AdvanceTime();
+	EXCEPTION_CATCH_GUARD("RiSkew")
 	return ;
 }
 
@@ -2785,6 +2772,7 @@ RtVoid	RiDeformation( RtToken name, ... )
 RtVoid	RiDeformationV( RtToken name, PARAMETERLIST )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIDEFORMATION
 
@@ -2793,6 +2781,7 @@ RtVoid	RiDeformationV( RtToken name, PARAMETERLIST )
 	DEBUG_RIDEFORMATION
 
 	Aqsis::log() << warning << "RiDeformation not supported" << std::endl;
+	EXCEPTION_CATCH_GUARD("RiDeformationV")
 	return ;
 }
 
@@ -2816,6 +2805,7 @@ RtVoid	RiDisplacement( RtToken name, ... )
 RtVoid	RiDisplacementV( RtToken name, PARAMETERLIST )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIDISPLACEMENT
 
@@ -2843,6 +2833,7 @@ RtVoid	RiDisplacementV( RtToken name, PARAMETERLIST )
 
 	QGetRenderContext() ->pattrWriteCurrent() ->SetpshadDisplacement( pshadDisplacement, QGetRenderContext() ->Time() );
 	QGetRenderContext() ->AdvanceTime();
+	EXCEPTION_CATCH_GUARD("RiDisplacementV")
 	return ;
 }
 
@@ -2854,6 +2845,7 @@ RtVoid	RiDisplacementV( RtToken name, PARAMETERLIST )
 RtVoid	RiCoordinateSystem( RtToken space )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RICOORDINATESYSTEM
 
@@ -2865,6 +2857,7 @@ RtVoid	RiCoordinateSystem( RtToken space )
 	QGetRenderContext() ->SetCoordSystem( space, QGetRenderContext() ->matCurrent( QGetRenderContext() ->Time() ) );
 	QGetRenderContext() ->AdvanceTime();
 
+	EXCEPTION_CATCH_GUARD("RiCoordinateSystem")
 	return ;
 }
 
@@ -2877,6 +2870,7 @@ RtVoid	RiCoordinateSystem( RtToken space )
 RtVoid	RiCoordSysTransform( RtToken space )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RICOORDSYSTRANSFORM
 
@@ -2888,6 +2882,7 @@ RtVoid	RiCoordSysTransform( RtToken space )
 	QGetRenderContext() ->ptransSetTime( QGetRenderContext() ->matSpaceToSpace( space, "world", NULL, NULL, QGetRenderContext()->Time() ) );
 	QGetRenderContext() ->AdvanceTime();
 
+	EXCEPTION_CATCH_GUARD("RiCoordSysTransform")
 	return ;
 }
 
@@ -2933,6 +2928,7 @@ RtPoint*	RiTransformPoints( RtToken fromspace, RtToken tospace, RtInt npoints, R
 RtVoid	RiTransformBegin()
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RITRANSFORMBEGIN
 
@@ -2942,6 +2938,7 @@ RtVoid	RiTransformBegin()
 
 	QGetRenderContext() ->BeginTransformModeBlock();
 
+	EXCEPTION_CATCH_GUARD("RiTransformBegin")
 	return ;
 }
 
@@ -2953,6 +2950,7 @@ RtVoid	RiTransformBegin()
 RtVoid	RiTransformEnd()
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RITRANSFORMEND
 
@@ -2962,6 +2960,7 @@ RtVoid	RiTransformEnd()
 
 	QGetRenderContext() ->EndTransformModeBlock();
 
+	EXCEPTION_CATCH_GUARD("RiTransformEnd")
 	return ;
 }
 
@@ -2996,6 +2995,7 @@ RtVoid	RiAttribute( RtToken name, ... )
 RtVoid	RiAttributeV( RtToken name, PARAMETERLIST )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIATTRIBUTE
 
@@ -3120,6 +3120,7 @@ RtVoid	RiAttributeV( RtToken name, PARAMETERLIST )
 				// TODO: Rest of parameter types.
 		}
 	}
+	EXCEPTION_CATCH_GUARD("RiAttributeV")
 	return ;
 }
 
@@ -3143,6 +3144,7 @@ RtVoid	RiPolygon( RtInt nvertices, ... )
 RtVoid	RiPolygonV( RtInt nvertices, PARAMETERLIST )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIPOLYGON
 
@@ -3171,6 +3173,7 @@ RtVoid	RiPolygonV( RtInt nvertices, PARAMETERLIST )
 		}
 	}
 
+	EXCEPTION_CATCH_GUARD("RiPolygonV")
 	return ;
 }
 
@@ -3194,6 +3197,7 @@ RtVoid	RiGeneralPolygon( RtInt nloops, RtInt nverts[], ... )
 RtVoid	RiGeneralPolygonV( RtInt nloops, RtInt nverts[], PARAMETERLIST )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIGENERALPOLYGON
 
@@ -3328,6 +3332,7 @@ RtVoid	RiGeneralPolygonV( RtInt nloops, RtInt nverts[], PARAMETERLIST )
 
 		RiPointsPolygonsV( ctris, &_nverts[ 0 ], &aiTriangles[ 0 ], count, tokens, values );
 	}
+	EXCEPTION_CATCH_GUARD("RiGeneralPolygonV")
 	return ;
 }
 
@@ -3351,6 +3356,7 @@ RtVoid RiBlobbyV( RtInt nleaf, RtInt ncode, RtInt code[], RtInt nflt, RtFloat fl
                   RtInt nstr, RtString str[], PARAMETERLIST )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIBLOBBY
 
@@ -3500,6 +3506,7 @@ RtVoid RiBlobbyV( RtInt nleaf, RtInt ncode, RtInt code[], RtInt nflt, RtFloat fl
 	delete[] points;
 	delete[] colors;
 
+	EXCEPTION_CATCH_GUARD("RiBlobbyV")
 	return ;
 }
 
@@ -3525,6 +3532,7 @@ RtVoid	RiPoints( RtInt nvertices, ... )
 RtVoid	RiPointsV( RtInt npoints, PARAMETERLIST )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIPOINTS
 
@@ -3588,6 +3596,7 @@ RtVoid	RiPointsV( RtInt npoints, PARAMETERLIST )
 		}
 	}
 
+	EXCEPTION_CATCH_GUARD("RiPointsV")
 	return ;
 }
 
@@ -3618,6 +3627,7 @@ RtVoid RiCurves( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, .
 RtVoid RiCurvesV( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, PARAMETERLIST )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RICURVES
 
@@ -3684,6 +3694,7 @@ RtVoid RiCurvesV( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, 
 		// the type of curve was neither "linear" nor "cubic"
 		Aqsis::log() << error << "RiCurves invalid type \"" << type << "\"" << std::endl;
 	}
+	EXCEPTION_CATCH_GUARD("RiCurvesV")
 }
 
 
@@ -3708,6 +3719,7 @@ RtVoid	RiPointsPolygons( RtInt npolys, RtInt nverts[], RtInt verts[], ... )
 RtVoid	RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETERLIST )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIPOINTSPOLYGONS
 
@@ -3745,6 +3757,7 @@ RtVoid	RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETER
 		CreateGPrim(pPsPs);
 	}
 
+	EXCEPTION_CATCH_GUARD("RiPointsPolygonsV")
 	return ;
 }
 
@@ -3770,6 +3783,7 @@ RtVoid	RiPointsGeneralPolygons( RtInt npolys, RtInt nloops[], RtInt nverts[], Rt
 RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], RtInt verts[], PARAMETERLIST )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIPOINTSGENERALPOLYGONS
 
@@ -4006,6 +4020,7 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 			free( *iNewParam );
 	}
 
+	EXCEPTION_CATCH_GUARD("RiPointsGeneralPolygonsV")
 	return ;
 }
 
@@ -4017,6 +4032,7 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 RtVoid	RiBasis( RtBasis ubasis, RtInt ustep, RtBasis vbasis, RtInt vstep )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIBASIS
 
@@ -4065,6 +4081,7 @@ RtVoid	RiBasis( RtBasis ubasis, RtInt ustep, RtBasis vbasis, RtInt vstep )
 	QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "BasisStep" ) [ 0 ] = ustep;
 	QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "BasisStep" ) [ 1 ] = vstep;
 	QGetRenderContext() ->AdvanceTime();
+	EXCEPTION_CATCH_GUARD("RiBasis")
 	return ;
 }
 
@@ -4088,6 +4105,7 @@ RtVoid	RiPatch( RtToken type, ... )
 RtVoid	RiPatchV( RtToken type, PARAMETERLIST )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIPATCH
 
@@ -4139,6 +4157,7 @@ RtVoid	RiPatchV( RtToken type, PARAMETERLIST )
 		Aqsis::log() << error << "RiPatch invalid patch type \"" << type << "\"" << std::endl;
 	}
 
+	EXCEPTION_CATCH_GUARD("RiPatchV")
 	return ;
 }
 
@@ -4163,6 +4182,7 @@ RtVoid	RiPatchMesh( RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vwr
 RtVoid	RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vwrap, PARAMETERLIST )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIPATCHMESH
 
@@ -4231,6 +4251,7 @@ RtVoid	RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vw
 		Aqsis::log() << error << "RiPatchMesh invalid type \"" << type << "\"" << std::endl;
 	}
 
+	EXCEPTION_CATCH_GUARD("RiPatchMeshV")
 	return ;
 }
 
@@ -4256,6 +4277,7 @@ RtVoid	RiNuPatchV( RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin, RtFloa
                    RtInt nv, RtInt vorder, RtFloat vknot[], RtFloat vmin, RtFloat vmax, PARAMETERLIST )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RINUPATCH
 
@@ -4295,6 +4317,7 @@ RtVoid	RiNuPatchV( RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin, RtFloa
 		CreateGPrim( pSurface );
 	}
 
+	EXCEPTION_CATCH_GUARD("RiNuPatchV")
 	return ;
 }
 
@@ -4305,6 +4328,7 @@ RtVoid	RiNuPatchV( RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin, RtFloa
 RtVoid	RiTrimCurve( RtInt nloops, RtInt ncurves[], RtInt order[], RtFloat knot[], RtFloat min[], RtFloat max[], RtInt n[], RtFloat u[], RtFloat v[], RtFloat w[] )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RITRIMCURVE
 
@@ -4352,6 +4376,7 @@ RtVoid	RiTrimCurve( RtInt nloops, RtInt ncurves[], RtInt order[], RtFloat knot[]
 		}
 		QGetRenderContext() ->pattrWriteCurrent() ->TrimLoops().aLoops().push_back( Loop );
 	}
+	EXCEPTION_CATCH_GUARD("RiTrimCurve")
 	return ;
 }
 
@@ -4376,6 +4401,7 @@ RtVoid	RiSphere( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, .
 RtVoid	RiSphereV( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, PARAMETERLIST )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RISPHERE
 
@@ -4383,12 +4409,14 @@ RtVoid	RiSphereV( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, 
 
 	DEBUG_RISPHERE
 
-	CqLogRangeCheckCallback rc;
-
-	rc.set( "sphere zmin" );
-	CheckMinMax( zmin, MIN(-radius, radius), MAX(-radius,radius), &rc );
-	rc.set( "sphere zmax" );
-	CheckMinMax( zmax, MIN(-radius, radius), MAX(-radius,radius), &rc );
+	PARAM_CONSTRAINT_CHECK(radius, !=, 0);
+	TqFloat absRadius = fabs(radius);
+	PARAM_CONSTRAINT_CHECK(zmin, <=, absRadius);
+	PARAM_CONSTRAINT_CHECK(zmin, >=, -absRadius);
+	PARAM_CONSTRAINT_CHECK(zmax, <=, absRadius);
+	PARAM_CONSTRAINT_CHECK(zmax, >=, -absRadius);
+	/// \todo thetamax == 0 should probably log a warning rather than an error.
+	PARAM_CONSTRAINT_CHECK(thetamax, !=, 0);
 
 	// Create a sphere
 	boost::shared_ptr<CqSphere> pSurface( new CqSphere( radius, zmin, zmax, 0, thetamax ) );
@@ -4402,6 +4430,7 @@ RtVoid	RiSphereV( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, 
 	                     QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ) );
 	CreateGPrim( pSurface );
 
+	EXCEPTION_CATCH_GUARD("RiSphereV")
 	return ;
 }
 
@@ -4425,6 +4454,7 @@ RtVoid	RiCone( RtFloat height, RtFloat radius, RtFloat thetamax, ... )
 RtVoid	RiConeV( RtFloat height, RtFloat radius, RtFloat thetamax, PARAMETERLIST )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RICONE
 
@@ -4448,6 +4478,7 @@ RtVoid	RiConeV( RtFloat height, RtFloat radius, RtFloat thetamax, PARAMETERLIST 
 	                     QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ) );
 	CreateGPrim( pSurface );
 
+	EXCEPTION_CATCH_GUARD("RiConeV")
 	return ;
 }
 
@@ -4471,6 +4502,7 @@ RtVoid	RiCylinder( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax,
 RtVoid	RiCylinderV( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, PARAMETERLIST )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RICYLINDER
 
@@ -4490,6 +4522,7 @@ RtVoid	RiCylinderV( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax
 	                     QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ) );
 	CreateGPrim( pSurface );
 
+	EXCEPTION_CATCH_GUARD("RiCylinderV")
 	return ;
 }
 
@@ -4513,6 +4546,7 @@ RtVoid	RiHyperboloid( RtPoint point1, RtPoint point2, RtFloat thetamax, ... )
 RtVoid	RiHyperboloidV( RtPoint point1, RtPoint point2, RtFloat thetamax, PARAMETERLIST )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIHYPERBOLOID
 
@@ -4534,6 +4568,7 @@ RtVoid	RiHyperboloidV( RtPoint point1, RtPoint point2, RtFloat thetamax, PARAMET
 	                     QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ) );
 	CreateGPrim( pSurface );
 
+	EXCEPTION_CATCH_GUARD("RiHyperboloidV")
 	return ;
 }
 
@@ -4557,6 +4592,7 @@ RtVoid	RiParaboloid( RtFloat rmax, RtFloat zmin, RtFloat zmax, RtFloat thetamax,
 RtVoid	RiParaboloidV( RtFloat rmax, RtFloat zmin, RtFloat zmax, RtFloat thetamax, PARAMETERLIST )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIPARABOLOID
 
@@ -4576,6 +4612,7 @@ RtVoid	RiParaboloidV( RtFloat rmax, RtFloat zmin, RtFloat zmax, RtFloat thetamax
 	                     QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pSurface->pTransform().get(), time ) );
 	CreateGPrim( pSurface );
 
+	EXCEPTION_CATCH_GUARD("RiParaboloidV")
 	return ;
 }
 
@@ -4599,6 +4636,7 @@ RtVoid	RiDisk( RtFloat height, RtFloat radius, RtFloat thetamax, ... )
 RtVoid	RiDiskV( RtFloat height, RtFloat radius, RtFloat thetamax, PARAMETERLIST )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIDISK
 
@@ -4619,6 +4657,7 @@ RtVoid	RiDiskV( RtFloat height, RtFloat radius, RtFloat thetamax, PARAMETERLIST 
 
 	CreateGPrim( pSurface );
 
+	EXCEPTION_CATCH_GUARD("RiDiskV")
 	return ;
 }
 
@@ -4641,6 +4680,7 @@ RtVoid	RiTorus( RtFloat majorrad, RtFloat minorrad, RtFloat phimin, RtFloat phim
 RtVoid	RiTorusV( RtFloat majorrad, RtFloat minorrad, RtFloat phimin, RtFloat phimax, RtFloat thetamax, PARAMETERLIST )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RITORUS
 
@@ -4661,6 +4701,7 @@ RtVoid	RiTorusV( RtFloat majorrad, RtFloat minorrad, RtFloat phimin, RtFloat phi
 
 	CreateGPrim( pSurface );
 
+	EXCEPTION_CATCH_GUARD("RiTorusV")
 	return ;
 }
 
@@ -4672,6 +4713,7 @@ RtVoid	RiTorusV( RtFloat majorrad, RtFloat minorrad, RtFloat phimin, RtFloat phi
 RtVoid	RiProcedural( RtPointer data, RtBound bound, RtProcSubdivFunc refineproc, RtProcFreeFunc freeproc )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIPROCEDURAL
 
@@ -4693,6 +4735,7 @@ RtVoid	RiProcedural( RtPointer data, RtBound bound, RtProcSubdivFunc refineproc,
 	                  QGetRenderContext() ->matVSpaceToSpace( "object", "world", NULL, pProc->pTransform().get(), time ) );
 	CreateGPrim( pProc );
 
+	EXCEPTION_CATCH_GUARD("RiProcedural")
 	return ;
 }
 
@@ -4717,6 +4760,7 @@ RtVoid	RiGeometry( RtToken type, ... )
 RtVoid	RiGeometryV( RtToken type, PARAMETERLIST )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIGEOMETRY
 
@@ -4816,6 +4860,7 @@ RtVoid	RiGeometryV( RtToken type, PARAMETERLIST )
 		Aqsis::log() << warning << "RiGeometry unrecognised type \"" << type << "\"" << std::endl;
 	}
 
+	EXCEPTION_CATCH_GUARD("RiGeometryV")
 	return ;
 }
 
@@ -4826,6 +4871,7 @@ RtVoid	RiGeometryV( RtToken type, PARAMETERLIST )
 RtVoid	RiSolidBegin( RtToken type )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RISOLIDBEGIN
 
@@ -4836,6 +4882,7 @@ RtVoid	RiSolidBegin( RtToken type )
 	CqString strType( type );
 	QGetRenderContext() ->BeginSolidModeBlock( strType );
 
+	EXCEPTION_CATCH_GUARD("RiSolidBegin")
 	return ;
 }
 
@@ -4847,6 +4894,7 @@ RtVoid	RiSolidBegin( RtToken type )
 RtVoid	RiSolidEnd()
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RISOLIDEND
 
@@ -4856,6 +4904,7 @@ RtVoid	RiSolidEnd()
 
 	QGetRenderContext() ->EndSolidModeBlock();
 
+	EXCEPTION_CATCH_GUARD("RiSolidEnd")
 	return ;
 }
 
@@ -4867,6 +4916,7 @@ RtVoid	RiSolidEnd()
 RtObjectHandle	RiObjectBegin()
 {
 	VALIDATE_CONDITIONAL0
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIOBJECTBEGIN
 
@@ -4875,9 +4925,11 @@ RtObjectHandle	RiObjectBegin()
 	DEBUG_RIOBJECTBEGIN
 
 	QGetRenderContext() ->BeginObjectModeBlock();
-	RtObjectHandle ObjectHandle = static_cast<RtObjectHandle>(QGetRenderContext() ->OpenNewObjectInstance());
+	RtObjectHandle objectHandle = static_cast<RtObjectHandle>(QGetRenderContext() ->OpenNewObjectInstance());
 
-	return ( ObjectHandle );
+	return objectHandle;
+	EXCEPTION_CATCH_GUARD("RiObjectBegin")
+	return 0;
 }
 
 
@@ -4888,6 +4940,7 @@ RtObjectHandle	RiObjectBegin()
 RtVoid	RiObjectEnd()
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	VALIDATE_RIOBJECTEND
 
@@ -4898,6 +4951,7 @@ RtVoid	RiObjectEnd()
 
 	CACHE_RIOBJECTEND
 
+	EXCEPTION_CATCH_GUARD("RiObjectEnd")
 	return ;
 }
 
@@ -4909,6 +4963,7 @@ RtVoid	RiObjectEnd()
 RtVoid	RiObjectInstance( RtObjectHandle handle )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIOBJECTINSTANCE
 
@@ -4917,6 +4972,7 @@ RtVoid	RiObjectInstance( RtObjectHandle handle )
 	DEBUG_RIOBJECTINSTANCE
 
 	QGetRenderContext() ->InstantiateObject( reinterpret_cast<CqObjectInstance*>( handle ) );
+	EXCEPTION_CATCH_GUARD("RiObjectInstance")
 	return ;
 }
 
@@ -4949,6 +5005,7 @@ RtVoid	RiMotionBegin( RtInt N, ... )
 RtVoid	RiMotionBeginV( RtInt N, RtFloat times[] )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIMOTIONBEGINV
 
@@ -4958,6 +5015,7 @@ RtVoid	RiMotionBeginV( RtInt N, RtFloat times[] )
 
 	QGetRenderContext() ->BeginMotionModeBlock( N, times );
 
+	EXCEPTION_CATCH_GUARD("RiMotionBeginV")
 	return ;
 }
 
@@ -4969,6 +5027,7 @@ RtVoid	RiMotionBeginV( RtInt N, RtFloat times[] )
 RtVoid	RiMotionEnd()
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIMOTIONEND
 
@@ -4978,6 +5037,7 @@ RtVoid	RiMotionEnd()
 
 	QGetRenderContext() ->EndMotionModeBlock();
 
+	EXCEPTION_CATCH_GUARD("RiMotionEnd")
 	return ;
 }
 
@@ -5002,6 +5062,7 @@ RtVoid RiMakeTexture ( RtString pic, RtString tex, RtToken swrap, RtToken twrap,
 RtVoid	RiMakeTextureV( RtString imagefile, RtString texturefile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, PARAMETERLIST )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIMAKETEXTURE
 
@@ -5107,6 +5168,7 @@ RtVoid	RiMakeTextureV( RtString imagefile, RtString texturefile, RtToken swrap, 
 	}
 
 	Source.Close();
+	EXCEPTION_CATCH_GUARD("RiMakeTextureV")
 }
 
 
@@ -5128,6 +5190,7 @@ RtVoid	RiMakeBump( RtString imagefile, RtString bumpfile, RtToken swrap, RtToken
 RtVoid	RiMakeBumpV( RtString imagefile, RtString bumpfile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, PARAMETERLIST )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIMAKEBUMP
 
@@ -5136,6 +5199,7 @@ RtVoid	RiMakeBumpV( RtString imagefile, RtString bumpfile, RtToken swrap, RtToke
 	DEBUG_RIMAKEBUMP
 
 	Aqsis::log() << warning << "RiMakeBump not supported" << std::endl;
+	EXCEPTION_CATCH_GUARD("RiMakeBumpV")
 	return ;
 }
 
@@ -5160,6 +5224,7 @@ RtVoid	RiMakeLatLongEnvironment( RtString imagefile, RtString reflfile, RtFilter
 RtVoid	RiMakeLatLongEnvironmentV( RtString imagefile, RtString reflfile, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, PARAMETERLIST )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIMAKELATLONGENVIRONMENT
 
@@ -5243,6 +5308,7 @@ RtVoid	RiMakeLatLongEnvironmentV( RtString imagefile, RtString reflfile, RtFilte
 	}
 
 	Source.Close();
+	EXCEPTION_CATCH_GUARD("RiMakeLatLongEnvironmentV")
 	return ;
 }
 
@@ -5266,6 +5332,7 @@ RtVoid	RiMakeCubeFaceEnvironment( RtString px, RtString nx, RtString py, RtStrin
 RtVoid	RiMakeCubeFaceEnvironmentV( RtString px, RtString nx, RtString py, RtString ny, RtString pz, RtString nz, RtString reflfile, RtFloat fov, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, PARAMETERLIST )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIMAKECUBEFACEENVIRONMENT
 
@@ -5375,6 +5442,7 @@ RtVoid	RiMakeCubeFaceEnvironmentV( RtString px, RtString nx, RtString py, RtStri
 		}
 		TIFFClose( ptex );
 	}
+	EXCEPTION_CATCH_GUARD("RiMakeCubeFaceEnvironmentV")
 	return ;
 }
 
@@ -5398,6 +5466,7 @@ RtVoid	RiMakeShadow( RtString picfile, RtString shadowfile, ... )
 RtVoid	RiMakeShadowV( RtString picfile, RtString shadowfile, PARAMETERLIST )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIMAKESHADOW
 
@@ -5415,6 +5484,7 @@ RtVoid	RiMakeShadowV( RtString picfile, RtString shadowfile, PARAMETERLIST )
 	ZFile.SetQuality( qual );
 
 	ZFile.SaveShadowMap( shadowfile );
+	EXCEPTION_CATCH_GUARD("RiMakeShadowV")
 	return ;
 }
 
@@ -5438,6 +5508,7 @@ RtVoid	RiMakeOcclusion( RtInt npics, RtString picfiles[], RtString shadowfile, .
 RtVoid	RiMakeOcclusionV( RtInt npics, RtString picfiles[], RtString shadowfile, RtInt count, RtToken tokens[], RtPointer values[] )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIMAKEOCCLUSION
 
@@ -5461,6 +5532,7 @@ RtVoid	RiMakeOcclusionV( RtInt npics, RtString picfiles[], RtString shadowfile, 
 
 		ZFile.SaveShadowMap( shadowfile, true );
 	}
+	EXCEPTION_CATCH_GUARD("RiMakeOcclusionV")
 	return ;
 }
 
@@ -5496,6 +5568,7 @@ RtVoid	RiIfEnd( )
 RtVoid	RiErrorHandler( RtErrorFunc handler )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIERRORHANDLER
 
@@ -5504,6 +5577,7 @@ RtVoid	RiErrorHandler( RtErrorFunc handler )
 	DEBUG_RIERRORHANDLER
 
 	QGetRenderContext()->SetpErrorHandler( handler );
+	EXCEPTION_CATCH_GUARD("RiErrorHandler")
 	return ;
 }
 
@@ -5558,6 +5632,7 @@ RtVoid	RiSubdivisionMesh( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtInt
 RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtInt vertices[], RtInt ntags, RtToken tags[], RtInt nargs[], RtInt intargs[], RtFloat floatargs[], PARAMETERLIST )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RISUBDIVISIONMESH
 
@@ -5696,6 +5771,7 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 		}
 	}
 
+	EXCEPTION_CATCH_GUARD("RiSubdivisionMeshV")
 	return ;
 }
 
@@ -5711,6 +5787,7 @@ RtVoid RiReadArchive( RtToken name, RtArchiveCallback callback, ... )
 RtVoid	RiReadArchiveV( RtToken name, RtArchiveCallback callback, PARAMETERLIST )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIREADARCHIVE
 
@@ -5742,6 +5819,7 @@ RtVoid	RiReadArchiveV( RtToken name, RtArchiveCallback callback, PARAMETERLIST )
 	{
 		Aqsis::log() << error << "Cannot open file \"" << fileArchive.strRealName().c_str() << "\"" << std::endl;
 	}
+	EXCEPTION_CATCH_GUARD("RiReadArchiveV")
 }
 
 
@@ -5794,6 +5872,7 @@ RtVoid	RiResourceV( RtToken handle, RtToken type, PARAMETERLIST )
 {
 
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIRESOURCE
 
@@ -5801,6 +5880,7 @@ RtVoid	RiResourceV( RtToken handle, RtToken type, PARAMETERLIST )
 
 	DEBUG_RIRESOURCE
 
+	EXCEPTION_CATCH_GUARD("RiResourceV")
 	return;
 }
 
@@ -5811,6 +5891,7 @@ RtVoid	RiResourceV( RtToken handle, RtToken type, PARAMETERLIST )
 RtVoid	RiResourceBegin()
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIRESOURCEBEGIN
 
@@ -5818,6 +5899,7 @@ RtVoid	RiResourceBegin()
 
 	DEBUG_RIRESOURCEBEGIN
 
+	EXCEPTION_CATCH_GUARD("RiResourceBegin")
 	return ;
 }
 
@@ -5828,6 +5910,7 @@ RtVoid	RiResourceBegin()
 RtVoid	RiResourceEnd()
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RIRESOURCEEND
 
@@ -5835,6 +5918,7 @@ RtVoid	RiResourceEnd()
 
 	DEBUG_RIRESOURCEEND
 
+	EXCEPTION_CATCH_GUARD("RiResourceEnd")
 	return ;
 }
 
@@ -5849,6 +5933,7 @@ RtVoid RiShaderLayer( RtToken type, RtToken name, RtToken layername, ... )
 RtVoid RiShaderLayerV( RtToken type, RtToken name, RtToken layername, RtInt count, RtToken tokens[], RtPointer values[] )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RISHADERLAYER
 
@@ -5928,11 +6013,13 @@ RtVoid RiShaderLayerV( RtToken type, RtToken name, RtToken layername, RtInt coun
 			SetShaderArgument( newlayer, token, static_cast<TqPchar>( value ) );
 		}
 	}
+	EXCEPTION_CATCH_GUARD("RiShaderLayerV")
 }
 
 RtVoid RiConnectShaderLayers( RtToken type, RtToken layer1, RtToken variable1, RtToken layer2, RtToken variable2 )
 {
 	VALIDATE_CONDITIONAL
+	EXCEPTION_TRY_GUARD
 
 	CACHE_RICONNECTSHADERLAYERS
 
@@ -5957,6 +6044,7 @@ RtVoid RiConnectShaderLayers( RtToken type, RtToken layer1, RtToken variable1, R
 		// Just add this layer in
 		pcurr->AddConnection(layer1, variable1, layer2, variable2);
 	}
+	EXCEPTION_CATCH_GUARD("RiConnectShaderLayers")
 }
 
 

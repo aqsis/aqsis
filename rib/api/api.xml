@@ -164,19 +164,19 @@
 			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
 				<Argument>
-					<Name>left</Name>
+					<Name>xmin</Name>
 					<Type>RtFloat</Type>
 				</Argument>
 				<Argument>
-					<Name>right</Name>
+					<Name>xmax</Name>
 					<Type>RtFloat</Type>
 				</Argument>
 				<Argument>
-					<Name>top</Name>
+					<Name>ymin</Name>
 					<Type>RtFloat</Type>
 				</Argument>
 				<Argument>
-					<Name>bottom</Name>
+					<Name>ymax</Name>
 					<Type>RtFloat</Type>
 				</Argument>
 			</Arguments>
@@ -210,11 +210,11 @@
 			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
 				<Argument>
-					<Name>cnear</Name>
+					<Name>near</Name>
 					<Type>RtFloat</Type>
 				</Argument>
 				<Argument>
-					<Name>cfar</Name>
+					<Name>far</Name>
 					<Type>RtFloat</Type>
 				</Argument>
 			</Arguments>
