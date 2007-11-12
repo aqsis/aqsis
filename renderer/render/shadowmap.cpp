@@ -372,7 +372,13 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 	// Generate a matrix to transform points from camera space into the space of the shadow map.
 	CqMatrix& matCameraToMap = matWorldToScreen( index );
 
-	vecR1l = matCameraToLight * ( ( R1 + R2 + R3 + R4 ) * 0.25f );
+	bool fouridenticals = ((R1 == R2 ) && (R2 == R3) && (R3 == R4));
+
+	if (fouridenticals)
+		vecR1l = matCameraToLight * R1;
+	else
+		vecR1l = matCameraToLight * ( ( R1 + R2 + R3 + R4 ) * 0.25f );
+
 	TqFloat z = vecR1l.z();
 
 	// If point is behind light, call it not in shadow.
@@ -380,7 +386,7 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 		return;
 
 	vecR1m = matCameraToMap * R1;
-	if ((R1 == R2) && (R2 == R3) && (R3 == R4))
+	if (fouridenticals)
 	{
 		vecR2m = vecR3m = vecR4m = vecR1m;
 	}
