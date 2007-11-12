@@ -4688,6 +4688,11 @@ RtVoid	RiTorusV( RtFloat majorrad, RtFloat minorrad, RtFloat phimin, RtFloat phi
 
 	DEBUG_RITORUS
 
+	PARAM_CONSTRAINT_CHECK(majorrad, !=, 0);
+	PARAM_CONSTRAINT_CHECK(minorrad, !=, 0);
+	PARAM_CONSTRAINT_CHECK(phimax, !=, phimin);
+	PARAM_CONSTRAINT_CHECK(thetamax, !=, 0);
+
 	// Create a torus
 	boost::shared_ptr<CqTorus> pSurface( new CqTorus( majorrad, minorrad, phimin, phimax, 0, thetamax ) );
 	ProcessPrimitiveVariables( pSurface.get(), count, tokens, values );
