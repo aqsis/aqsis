@@ -1157,7 +1157,7 @@ RtVoid	RiProjectionV( RtToken name, PARAMETERLIST )
 // RiClipping
 // Set the near and far clipping planes specified as distances from the camera.
 //
-RtVoid	RiClipping( RtFloat near, RtFloat far )
+RtVoid	RiClipping( RtFloat cnear, RtFloat cfar )
 {
 	VALIDATE_CONDITIONAL
 	EXCEPTION_TRY_GUARD
@@ -1168,11 +1168,11 @@ RtVoid	RiClipping( RtFloat near, RtFloat far )
 
 	DEBUG_RICLIPPING
 
-	PARAM_CONSTRAINT_CHECK(near, <, far);
-	PARAM_CONSTRAINT_CHECK(near, >=, RI_EPSILON);
+	PARAM_CONSTRAINT_CHECK(cnear, <, cfar);
+	PARAM_CONSTRAINT_CHECK(cnear, >=, RI_EPSILON);
 
-	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "Clipping" ) [ 0 ] = near ;
-	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "Clipping" ) [ 1 ] = far ;
+	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "Clipping" ) [ 0 ] = cnear;
+	QGetRenderContext() ->poptWriteCurrent()->GetFloatOptionWrite( "System", "Clipping" ) [ 1 ] = cfar;
 
 	EXCEPTION_CATCH_GUARD("RiClipping")
 	return ;

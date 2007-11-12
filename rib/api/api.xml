@@ -210,11 +210,11 @@
 			<ReturnType>RtVoid</ReturnType>
 			<Arguments>
 				<Argument>
-					<Name>near</Name>
+					<Name>cnear</Name>
 					<Type>RtFloat</Type>
 				</Argument>
 				<Argument>
-					<Name>far</Name>
+					<Name>cfar</Name>
 					<Type>RtFloat</Type>
 				</Argument>
 			</Arguments>
