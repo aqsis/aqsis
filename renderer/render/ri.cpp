@@ -5158,13 +5158,7 @@ RtVoid	RiMakeTextureV( RtString imagefile, RtString texturefile, RtToken swrap, 
 
 	// Now load the original image.
 	TqInt bake = 128;
-	if (ProcessBake( &bake, count, tokens, values ) == true)
-	{
-		static char tmpenv[80];
-        	sprintf(tmpenv, "BAKE=%d", bake);
-		putenv (tmpenv);
-		Aqsis::log() << debug << tmpenv << std::endl;
-	}
+	ProcessBake( &bake, count, tokens, values ); 
 
 	TqFloat gamma = 2.2f;
 	if (ProcessGamma( &gamma, count, tokens, values ) == true)
@@ -5179,7 +5173,7 @@ RtVoid	RiMakeTextureV( RtString imagefile, RtString texturefile, RtToken swrap, 
 	result = strict_strrstr(imagefile, ".bake");
 	if (result != NULL)
 	{
-		Aqsis::log() << debug << "bake2tif " << imagefile << std::endl;
+		Aqsis::log() << debug << "bake2tif " << imagefile << " bake: " << bake << std::endl;
 
 		// Convert the bake to tiff
 		TqChar tiffname[1024];
