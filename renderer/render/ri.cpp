@@ -330,7 +330,6 @@ static TqUlong RIH_VISIBILITY = CqString::hash( "visibility" );
 
 RtInt	RiLastError = 0;
 
-#define SIZE 64
 #define FILTER_TBL_SIZE 16
 #define FILTER_WIDTH 8.0f
 static float filter_width = FILTER_WIDTH;
@@ -6593,7 +6592,7 @@ static void bake2tif( TqChar *in , TqChar *tiffname, int bake)
 	TqInt i, k, n;
 	TqInt x, y;
 	TqFloat mins, mint, maxs, maxt;
-	TqInt normalized = 1;
+	bool normalized = true;
 	TqInt count, number;
 	TqFloat *temporary;
 	TqInt elmsize = 3;
@@ -6680,13 +6679,13 @@ static void bake2tif( TqChar *in , TqChar *tiffname, int bake)
 	if ((mins >= 0.0 && maxs <= 1.0) &&
 	        (maxt >= 0.0 && maxt <= 1.0) )
 	{
-		normalized = 0;
+		normalized = false;
 	}
 
-	if (normalized == 1)
+	if (normalized == true)
 	{
-		printf("bake2tif normalizes the keys (normally s,t)\n");
-		printf("\t(min_s, max_s): (%f, %f)\n\t(min_t, max_t): (%f, %f)\n", mins, maxs, mint, maxt );
+		Aqsis::log() << "bake2tif normalizes the keys (normally s,t)" << std::endl;
+		Aqsis::log() << "\t(min_s, max_s): (" << mins << ", " << maxs << "), (min_t, max_t): (" << mint << ", " << maxt << ")" << std::endl;
 	}
 
 	/* Try to adjust with the final resolution of mipmap */
@@ -6706,8 +6705,8 @@ static void bake2tif( TqChar *in , TqChar *tiffname, int bake)
 		{
 			TqFloat fx = ((TqFloat) x+ 0.5f) * filter_width * invSize;
 			/* we will use a disk filter the point will dispose in
-			             * a circle around each point; more pleasant visually
-			             */
+			 * a circle around each point; more pleasant visually
+			 */
 			*pf++ = RiDiskFilter(fx,fy,filter_width, filter_width);
 		}
 	}
@@ -6765,9 +6764,9 @@ static void bake2tif( TqChar *in , TqChar *tiffname, int bake)
 
 		/* each each pixels accumulated it in xpixels but
 		* make sure we use
-		  	 * a filtering of 16x16 to garantee spreading of the
+		* a filtering of 16x16 to garantee spreading of the
 		* values across x,y pixels.
-		 */
+		*/
 
 		dImageX = x - 0.5f;
 		dImageY = y - 0.5f;
