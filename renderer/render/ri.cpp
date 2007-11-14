@@ -31,6 +31,7 @@
 #include	<stdarg.h>
 #include	<math.h>
 #include	<list>
+#include	<stdio.h>
 
 #include	"imagebuffer.h"
 #include	"lights.h"
@@ -102,6 +103,12 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface* pSurface, PARAMETERLIST )
 static void ProcessCompression( TqInt *compress, TqInt *quality, TqInt count, RtToken *tokens, RtPointer *values );
 static bool ProcessBake( TqInt * bake, TqInt count, RtToken * tokens, RtPointer * values );
 static bool ProcessGamma( TqFloat * gamma, TqInt count, RtToken * tokens, RtPointer * values );
+static void bake2tif(TqChar *bakefile, TqChar *tifffile, TqInt bake);
+static void save_tiff( TqChar *filename, TqFloat *raster, TqInt width,
+                       TqInt length,
+                       TqInt samples,
+		       TqChar *description);
+
 RtVoid	CreateGPrim( const boost::shared_ptr<CqSurface>& pSurface );
 void SetShaderArgument( const boost::shared_ptr<IqShader>& pShader, const char* name, TqPchar val );
 bool	ValidateState(...);
@@ -322,6 +329,40 @@ static TqUlong RIH_LIGHT = CqString::hash( "light" );
 static TqUlong RIH_VISIBILITY = CqString::hash( "visibility" );
 
 RtInt	RiLastError = 0;
+
+#define SIZE 64
+#define FILTER_TBL_SIZE 16
+#define FILTER_WIDTH 8.0f
+static float filter_width = FILTER_WIDTH;
+static int filter_size = FILTER_TBL_SIZE;
+
+#ifndef MAX
+#define MAX(a,b) (((a) > (b)) ? (a) : (b))
+#endif
+
+#ifndef MIN
+#define MIN(a,b) (((a) < (b)) ? (a) : (b))
+#endif
+
+/*
+ * similar to reversed strstr() but more strict
+ */
+static char *strict_strrstr(char *s1, char *sub)
+{
+	int s, t;
+	char *pt = NULL;
+
+	s = t = 0;
+	if (s1)
+		s = strlen(s1);
+	if (sub)
+		t = strlen(sub);
+
+	if ((pt = strstr(&s1[s - t], sub)) != NULL)
+		return pt;
+
+	return NULL;
+}
 
 //----------------------------------------------------------------------
 // CreateGPrim
@@ -5135,6 +5176,25 @@ RtVoid	RiMakeTextureV( RtString imagefile, RtString texturefile, RtToken swrap, 
 		Aqsis::log() << debug << tmpenv << std::endl;
 	}
 
+	TqChar *result = NULL;
+	result = strict_strrstr(imagefile, ".bake");
+	if (result != NULL)
+	{
+		Aqsis::log() << debug << "bake2tif " << imagefile << std::endl;
+
+		// Convert the bake to tiff
+		TqChar tiffname[1024];
+		strcpy(tiffname, imagefile);
+		result = strict_strrstr(tiffname, ".bake");
+		// Edit the extension and replace .bake by .tif
+		strcpy(result, ".tif");
+
+		bake2tif(imagefile, tiffname, bake);
+
+		strcpy(imagefile, tiffname);
+		Aqsis::log() << debug << "Convert " << imagefile << std::endl;
+	}
+
 	CqTextureMap Source( imagefile );
 	Source.Open();
 	TqInt comp, qual;
@@ -6506,4 +6566,365 @@ bool found = false;
 		}
 	}
 	return found;
+}
+
+
+
+/* Main function to convert any bake to tif format
+ * It used the standard standard definition of bake file defined in bake() from
+ * Siggraph 2001.
+ *
+ * It created texture file of only 64x64 pixels not a lot
+ * but which some changes in teqser we should be able to
+ * defined as much as the user needs via environment variable BAKE
+ * Surprising 64x64 is good enough for small tests; I won't be surprised we
+ * need more and agressive filtering (between subsamples s/t)
+ */
+static void bake2tif( TqChar *in , TqChar *tiffname, int bake)
+{
+	FILE * bakefile;
+
+	TqUshort h, w;
+	TqFloat s, t, r1, g1, b1;
+	TqFloat *pixels;
+	TqFloat *xpixels;
+	TqFloat *filter, *pf;
+	TqChar buffer[ 200 ];
+	TqInt i, k, n;
+	TqInt x, y;
+	TqFloat mins, mint, maxs, maxt;
+	TqInt normalized = 1;
+	TqInt count, number;
+	TqFloat *temporary;
+	TqInt elmsize = 3;
+	TqFloat invWidth, invSize;
+	TqChar description[80];
+
+	count = 1024 * 1024;
+	number = 0;
+
+
+	h = w = bake;
+	pixels = ( TqFloat * ) calloc( 4, bake * bake * sizeof(TqFloat));
+	temporary = (TqFloat *) malloc(count *  5 * sizeof(TqFloat));
+
+	bakefile = fopen( in, "rb" );
+
+	/* Ignore the first line of text eg. Aqsis bake file */
+	fgets( buffer, 200, bakefile ) ;
+	/* Read the second line of text to configure how many floats
+	     * we expect to read
+	     */
+	fgets( buffer, 200, bakefile ) ;
+	sscanf(buffer, "%d", &elmsize);
+
+	while ( fgets( buffer, 200, bakefile ) != NULL )
+	{
+		k = number * 5;
+
+		switch (elmsize)
+		{
+			case 3:
+			{
+				sscanf( buffer, "%f %f %f %f %f", &s, &t, &r1, &g1, &b1 );
+			}
+			break;
+			case 2:
+			{
+				sscanf( buffer, "%f %f %f %f", &s, &t, &r1, &g1);
+				b1 = (r1 + g1) / 2.0;
+			}
+			break;
+			default:
+			case 1:
+			{
+				sscanf( buffer, "%f %f %f", &s, &t, &r1);
+				g1 = b1 = r1;
+			}
+			break;
+		}
+		temporary[k] = s;
+		temporary[k+1] = t;
+		temporary[k+2] = r1;
+		temporary[k+3] = g1;
+		temporary[k+4] = b1;
+
+		number++;
+		if (number >= (count - 1))
+		{
+			count += 1024;
+			temporary = (float *)  realloc((void *) temporary, count * 5 * sizeof(float));
+		}
+	}
+
+	/* printf("done\nFind the max, min of s,t.\n"); */
+	mins = maxs = temporary[0];
+	mint = maxt = temporary[1];
+
+	/* Find the min,max of s and t */
+	for (i=0; i < number; i++)
+	{
+		k = i * 5;
+
+		if (mins > temporary[k])
+			mins = temporary[k];
+		if (mint > temporary[k+1])
+			mint = temporary[k+1];
+		if (maxs < temporary[k])
+			maxs = temporary[k];
+		if (maxt < temporary[k+1])
+			maxt = temporary[k+1];
+	}
+
+
+	if ((mins >= 0.0 && maxs <= 1.0) &&
+	        (maxt >= 0.0 && maxt <= 1.0) )
+	{
+		normalized = 0;
+	}
+
+	if (normalized == 1)
+	{
+		printf("bake2tif normalizes the keys (normally s,t)\n");
+		printf("\t(min_s, max_s): (%f, %f)\n\t(min_t, max_t): (%f, %f)\n", mins, maxs, mint, maxt );
+	}
+
+	/* Try to adjust with the final resolution of mipmap */
+	/* filter_size = MAX((int) log((double)bake)/log(2.0) + 2, (int) FILTER_TBL_SIZE);
+	 * filter_size = (int) ceil(log((double)MIN((int) ( (maxs - mins) * bake), (int) ((maxt -mint ) * bake)))/log(2.0));
+	     */
+	invWidth = 1.0f/filter_width;
+	invSize = 1.0f/filter_size;
+
+	/* init the filter' table */
+	filter = (TqFloat *) calloc(filter_size*filter_size,sizeof(TqFloat));
+	pf = filter;
+	for (y=0; y < filter_size; ++y)
+	{
+		TqFloat fy = (TqFloat)( y+ 0.5f) * filter_width * invSize;
+		for (x=0; x < filter_size; ++x)
+		{
+			TqFloat fx = ((TqFloat) x+ 0.5f) * filter_width * invSize;
+			/* we will use a disk filter the point will dispose in
+			             * a circle around each point; more pleasant visually
+			             */
+			*pf++ = RiDiskFilter(fx,fy,filter_width, filter_width);
+		}
+	}
+
+
+	/* Now it is time to save s,t, r1, g1, b1 into pixels array (along with the sum/area filtering accumalor  */
+	for (i=0; i < number; i++)
+	{
+		TqInt x0, x1, y0, y1;
+		TqInt *ifx, *ify;
+		TqFloat dImageX;
+		TqFloat dImageY;
+
+		k = i * 5;
+
+
+		s = temporary[k];
+		t = temporary[k+1];
+		r1 = temporary[k+2];
+		g1 = temporary[k+3];
+		b1 = temporary[k+4];
+
+		/* printf("%d\n", number);  */
+
+		/* Normalize the s,t between 0..1.0  only if required
+		               */
+		if (normalized)
+		{
+			if ( (maxs - mins) != 0.0)
+			{
+				s = (s - mins) / (maxs - mins);
+			}
+			else
+			{
+				if (s < 0.0) s *= -1.0;
+				if (s > 1.0) s = 1.0;
+			}
+			if ((maxt - mint) != 0.0)
+			{
+				t = (t - mint) / (maxt - mint);
+			}
+			else
+			{
+				if (t < 0.0) t *= -1.0;
+				if (t > 1.0) t = 1.0;
+			}
+		}
+		/* When we have some collision ? What should be nice
+		 * to accumulate the RGB values instead ?
+		 */
+		x = (int)( s * ( bake - 1 ) );
+		y = (int)( t * ( bake - 1 ) );
+
+		/* printf("x %d y %d rgb %f %f %f\n", x, y, r1, g1, b1); */
+
+		/* each each pixels accumulated it in xpixels but
+		* make sure we use
+		  	 * a filtering of 16x16 to garantee spreading of the
+		* values across x,y pixels.
+		 */
+
+		dImageX = x - 0.5f;
+		dImageY = y - 0.5f;
+
+		x0 = (TqInt) ceil(dImageX - filter_width);
+		x1 = (TqInt) floor(dImageX + filter_width);
+		y0 = (TqInt) ceil(dImageY - filter_width);
+		y1 = (TqInt) floor(dImageY + filter_width);
+
+		x0 = MAX(x0, 0);
+		x1 = MIN(x1, bake -1);
+		y0 = MAX(y0, 0);
+		y1 = MIN(y1, bake -1);
+
+		if ( ( (x1-x0)<0) || ((y1-y0)<0 )) continue;
+
+		/* filter delta indexes*/
+		ifx = (TqInt*)calloc(x1-x0+1, sizeof(TqInt));
+		for (x = x0; x <= x1; ++x)
+		{
+			TqFloat fx = fabsf(x -dImageX) * invWidth * filter_size;
+			ifx[x-x0] = MIN((int) floor(fx), filter_size - 1);
+		}
+		ify = (TqInt*)calloc(y1-y0+1, sizeof(TqInt));
+		for (y = y0; y <= y1; ++y)
+		{
+			TqFloat fy = fabsf(y -dImageY) * invWidth * filter_size;
+			ify[y-y0] = MIN((int) floor(fy), filter_size - 1);
+		}
+
+		/* Fill all the right pixels now */
+		for (y = y0; y < y1; ++y)
+		{
+			for (x = x0; x <= x1; ++x)
+			{
+				TqInt offset;
+				TqFloat filterWt;
+				offset = ify[y-y0]*filter_size + ifx[x-x0];
+				/* printf("offset %d ", offset); */
+				filterWt = filter[offset];
+
+				/* Remove the negative lob maybe ?
+				 * if (filterWt < 0.0) continue;
+				 */
+
+				/* printf("wt %f\n", filterWt); */
+				n = (y * bake + x);
+				n *= 4;
+				pixels[n] += (filterWt * r1);
+				pixels[n+1] += (filterWt * g1);
+				pixels[n+2] += (filterWt * b1);
+				pixels[n+3] += filterWt;
+				/* printf("x %d y %d rgb wt %f %f %f %f\n", x, y, pixels[n], pixels[n+1], pixels[n+2], pixels[n+3]); */
+			}
+		}
+
+
+		free(ifx);
+		free(ify);
+	}
+
+
+	/* Now it is time to unroll the filterWt and save into xpixels */
+
+	xpixels = ( TqFloat * ) calloc( 3, bake * bake * sizeof(TqFloat));
+
+	for (y=0; y < bake -1 ; ++y)
+	{
+		for (x=0; x < bake -1 ; ++x)
+		{
+			TqInt m;
+			n = (y * bake + x);
+			m = n;
+			m *= 3;
+			n *= 4;
+			if (pixels[n+3] > 0.0)
+			{
+				/* printf("unroll weightSum factor \n"); */
+				float area = 1.0/pixels[n+3];
+				xpixels[m] =  pixels[n] * area;
+				xpixels[m+1] =  pixels[n+1] * area;
+				xpixels[m+2] =  pixels[n+2] * area;
+			}
+		}
+	}
+
+
+	/* Should we do some filterings prior to save to tif file ? */
+	/* convert each scan line */
+	/* Write the some form of version */
+	strcpy( description, "bake2tif conversion for AQSIS");
+
+	save_tiff( tiffname, xpixels, w, h, 3, description );
+
+	free( pixels );
+	free( xpixels );
+	free( filter );
+	free(temporary);
+
+	fclose( bakefile );
+
+}
+
+
+/*
+ * save to filename a tiff file
+ */
+static void save_tiff( TqChar *filename,
+                       TqFloat *raster,
+                       TqInt width,
+                       TqInt length,
+                       TqInt samples,
+		       TqChar *description)
+{
+	/* save to a tiff file */
+	TqInt i;
+	TqUchar *pdata = (TqUchar *) raster;
+	TIFF* ptex = TIFFOpen( filename, "w" );
+	static TqChar datetime[20];
+	struct tm  *ct;
+	TqInt    year;
+	TqInt linewidth;
+
+	time_t long_time;
+
+	time( &long_time );           /* Get time as long integer. */
+	ct = localtime( &long_time ); /* Convert to local time. */
+
+
+	year=1900 + ct->tm_year;
+	sprintf(datetime, "%04d:%02d:%02d %02d:%02d:%02d",
+	        year, ct->tm_mon + 1, ct->tm_mday,
+	        ct->tm_hour, ct->tm_min, ct->tm_sec);
+
+
+	TIFFCreateDirectory( ptex );
+
+
+	TIFFSetField( ptex, TIFFTAG_SOFTWARE, description );
+	TIFFSetField( ptex, TIFFTAG_IMAGEWIDTH, width );
+	TIFFSetField( ptex, TIFFTAG_IMAGELENGTH, length );
+	TIFFSetField( ptex, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG );
+	TIFFSetField( ptex, TIFFTAG_BITSPERSAMPLE, 32 );
+	TIFFSetField( ptex, TIFFTAG_SAMPLESPERPIXEL, samples );
+	TIFFSetField( ptex, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT );
+	TIFFSetField( ptex, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP );
+	TIFFSetField( ptex, TIFFTAG_COMPRESSION, COMPRESSION_PACKBITS );
+	TIFFSetField( ptex, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB );
+	TIFFSetField( ptex, TIFFTAG_ROWSPERSTRIP, 1 );
+	TIFFSetField( ptex, TIFFTAG_DATETIME, datetime);
+
+	linewidth = width * samples;
+	linewidth *= sizeof(TqFloat);
+	for ( i = 0; i < length; i++ )
+	{
+		TIFFWriteScanline( ptex, pdata, i, 0 );
+		pdata += linewidth;
+	}
+	TIFFClose( ptex );
 }
