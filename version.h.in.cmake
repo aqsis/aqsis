@@ -36,6 +36,6 @@
 #define	BUILD ${BUILD}
 #define TYPE ${TYPE}
 #define	VERSION_STR	"${MAJOR}.${MINOR}.${BUILD}${TYPE}"
-#define VERSION_STR_PRINT  "${MAJOR}.${MINOR}.${BUILD}${TYPE} ${REVISION}"
+#define VERSION_STR_PRINT "${MAJOR}.${MINOR}.${BUILD}${TYPE} (revision ${REVISION})"
 
 #endif	// !VERSION_H_INCLUDED
