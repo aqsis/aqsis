@@ -65,6 +65,18 @@ enum EqTexFormat
 //----------------------------------------------------------------------
 /** \struct IqTextureMap
  * Interface for access to texture map objects.
+ *
+ * \todo <b>Code Review</b>: This interface is distasteful in a number of ways:
+ *   * It's a "fat" interface, providing many methods which are not meaningful
+ *     for most of the concrete classes which implement it.  For instance, the
+ *     varients of the SampleMap() functions taking CqVector3D are only
+ *     applicable to environment maps.
+ *   * It doesn't support RAII, though this might be fair enough.  Does it make
+ *     sense to acquire the underlying file resource at construction, rather
+ *     than having Open() and Close() methods?
+ *   * Use of CqString is deprecated.
+ *   * The SampleMap methods are conceptually const, but aren't declared as such.
+ *   * (minor complaint) It uses TqUint when TqInt would be sufficient and safer.
  */
 
 struct IqTextureMap
