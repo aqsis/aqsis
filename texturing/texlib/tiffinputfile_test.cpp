@@ -103,6 +103,6 @@ BOOST_AUTO_UNIT_TEST(CqTiffInputFile_imageIndex_test)
 	inFile.setImageIndex(1);
 	BOOST_CHECK_EQUAL(inFile.imageIndex(), 1);
 
-	BOOST_CHECK_EQUAL(inFile.numImages(), 2);
+	BOOST_CHECK_EQUAL(inFile.numSubImages(), 2);
 }
 

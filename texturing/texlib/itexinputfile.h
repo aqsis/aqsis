@@ -37,6 +37,18 @@
 namespace Aqsis {
 
 //------------------------------------------------------------------------------
+/** \brief An input interface for texture files.
+ *
+ * This class provides simple scanline-based texture I/O into buffers modeling
+ * a 2D image buffer concept.  Pixel data may be read as blocks of scanlines
+ * into the 2D buffer class.
+ *
+ * Image metadata is accessed through an extensible image attributes mechanism.
+ * All attributes are contained in a CqTexFileHeader object.
+ *
+ * A file-type-aware open() function is provided for type-agnostic loading of
+ * image files.
+ */
 COMMON_SHARE class IqTexInputFile
 {
 	public:
@@ -53,39 +65,6 @@ COMMON_SHARE class IqTexInputFile
 
 		/// Get the file header data
 		virtual const CqTexFileHeader& header() const = 0;
-		//@}
-
-		//------------------------------------------------------------
-		/// \name Support functions for multi-image files.
-		//@{
-		/** Set the image index in a multi-image file.
-		 *
-		 * Some formats (TIFF) allow completely unrelated content in the
-		 * various images of a multi-image file.  This function may therefore
-		 * be expected to modify the image header to reflect the metadata for
-		 * the new image level.
-		 *
-		 * For formats which don't support multiple images, this function
-		 * logs a warning, and exits unless newIndex = 0, in which case it is
-		 * silently ignored.
-		 *
-		 * \param newIndex - new index in the multi-image file.
-		 */
-		virtual void setImageIndex(TqInt newIndex);
-
-		/** Get the image index for a multi-image file.
-		 *
-		 * \return the current image index or 0 if the file is not a
-		 * multi-image file.
-		 */
-		inline virtual TqInt imageIndex() const;
-
-		/** Get the number of images in the multi-image file.
-		 *
-		 * \return The number of images, or 1 if the file format doesn't have
-		 * support for multiple images.
-		 */
-		inline virtual TqInt numImages() const;
 		//@}
 
 		/** \brief Read in a region of scanlines
@@ -135,19 +114,42 @@ COMMON_SHARE class IqTexInputFile
 };
 
 
+//------------------------------------------------------------------------------
+/** \brief Interface for image files supporting multiple sub-images.
+ *
+ * Some formats (eg, TIFF) allow unrelated content in the various images of a
+ * multi-image file.  This class provides support for such files, in addition
+ * to the operations supported by the IqTexInputFile interface.
+ */
+COMMON_SHARE class IqMultiTexInputFile : public IqTexInputFile
+{
+	public:
+		/** Set the image index in a multi-image file.
+		 *
+		 * In general, this function may be expected to modify the image header
+		 * to reflect the metadata for the new image level.
+		 *
+		 * \param newIndex - new index in the multi-image file.
+		 */
+		virtual void setImageIndex(TqInt newIndex) = 0;
+
+		/** Get the image index for a multi-image file.
+		 *
+		 * \return the current image index
+		 */
+		inline virtual TqInt imageIndex() const = 0;
+
+		/** Get the number of images in the multi-image file.
+		 *
+		 * \return The number of images
+		 */
+		inline virtual TqInt numSubImages() const = 0;
+};
+
+
 //==============================================================================
 // Implementation of inline functions and templates
 //==============================================================================
-
-// Default implementation for file formats which don't support multiple images.
-inline TqInt IqTexInputFile::imageIndex() const
-{
-	return 0;
-}
-inline TqInt IqTexInputFile::numImages() const
-{
-	return 1;
-}
 
 template<typename Array2DType>
 void IqTexInputFile::readPixels(Array2DType& buffer, TqInt startLine,

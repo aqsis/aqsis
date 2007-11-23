@@ -65,7 +65,7 @@ void CqTiffInputFile::setImageIndex(TqInt newIndex)
 
 // Warning: don't use this function from another member which already has a
 // lock on the underlying file handle.
-TqInt CqTiffInputFile::numImages() const
+TqInt CqTiffInputFile::numSubImages() const
 {
 	return TIFFNumberOfDirectories(
 			CqTiffDirHandle(m_fileHandle,m_imageIndex).tiffPtr());
@@ -92,7 +92,7 @@ void CqTiffInputFile::readPixelsImpl(TqUchar* buffer,
 
 void CqTiffInputFile::setDirectory(tdir_t newDir)
 {
-	const tdir_t numDirs = numImages();
+	const tdir_t numDirs = numSubImages();
 	if(newDir >= numDirs)
 		throw XqInternal((boost::format("TIFF directory %d out of range [0,%d]")
 				% newDir % (numDirs-1)).str(), __FILE__, __LINE__);

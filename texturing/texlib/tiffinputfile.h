@@ -49,7 +49,7 @@ namespace Aqsis {
  * For cases of unusual internal formats, the class falls back on the generic
  * RGBA image handling built into libTIFF.
  */
-COMMON_SHARE class CqTiffInputFile : public IqTexInputFile
+COMMON_SHARE class CqTiffInputFile : public IqMultiTexInputFile
 {
 	public:
 		CqTiffInputFile(const std::string& fileName);
@@ -66,7 +66,7 @@ COMMON_SHARE class CqTiffInputFile : public IqTexInputFile
 
 		virtual void setImageIndex(TqInt newIndex);
 		inline virtual TqInt imageIndex() const;
-		virtual TqInt numImages() const;
+		virtual TqInt numSubImages() const;
 
 	private:
 		virtual void readPixelsImpl(TqUchar* buffer, TqInt startLine,
@@ -75,7 +75,7 @@ COMMON_SHARE class CqTiffInputFile : public IqTexInputFile
 		/** \brief Initializations for directory-specific data
 		 *
 		 * \throw XqInternal if newDir is outside the valid range of
-		 * directories = 0...numImages()-1
+		 * directories = 0...numSubImages()-1
 		 * \param newDir - new image directory to set.
 		 */
 		void setDirectory(tdir_t newDir);
