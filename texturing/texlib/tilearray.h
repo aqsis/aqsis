@@ -45,30 +45,33 @@
 
 namespace Aqsis {
 
-
 //------------------------------------------------------------------------------
 /** \brief 2D array interface for tiled data - aimed at tiled textures.
  *
  * This class specifies an array interface to 2D tiled data.  The design is
- * based on the premise that each position in the array contains a vector of
- * samples.  Getting a reference to this samples vector requires hunting
- * through sets of tiles, and as such may be slow.
+ * based on the premise that each position in the array contains a short fixed
+ * length vector of samples.  Getting a reference to this sample vector
+ * requires hunting through sets of tiles, and as such may be slow.
  *
- * A primary design requirement is that once the vector of samples is obtained
- * it should be very fast to access.  This is particularly important for large
- * numbers of samples.
- *
+ * A primary design requirement is that samples should be as fast as possible
+ * to obtain.  If the current implementation doesn't suffice, a possible
+ * optimization when accessing blocks of texture (such as during filtering) is
+ * to return a list of tiles which cover the block in question.  The filtering
+ * code could then perform an explicit loop over the pixels in each tile, which
+ * would save the overhead incurred by tile search.  Something like this might
+ * be very necessary for reasonable performance in a multithreaded environment
+ * where two threads could contend for the same texture.
  */
 template<typename T>
 class CqTileArray : public CqMemoryMonitored
 {
 	public:
-		/** \brief constructor
+		/** \brief Construct a tiled texture array connected to a file
 		 *
-		 * \param width - array width
-		 * \param height - array height
+		 * The constructor throws an error if the file cannot be read.
+		 *
 		 */
-		CqTileArray(const TqUint width, const TqUint height);
+		CqTileArray(const boost::shared_ptr<IqTiledTexInputFile>& texFile);
 
 		/** \brief Get the value of the array at the given position
 		 *
@@ -81,7 +84,7 @@ class CqTileArray : public CqMemoryMonitored
 		 * \param y - index in height direction (row index)
 		 * \return a lightweight vector holding a reference to the sample data
 		 */
-		virtual CqSampleVector<T> value(const TqUint x, const TqUint y) const = 0;
+		CqSampleVector<T> value(const TqInt x, const TqInt y) const;
 
 		/** \brief Set the value of the array at a particular position
 		 *
@@ -95,51 +98,7 @@ class CqTileArray : public CqMemoryMonitored
 		 * \param y - index in height direction (row index)
 		 * \param newValue - New value for the
 		 */
-		//virtual void setValue(const TqUint x, const TqUint y, const std::vector<TqFloat>& newValue) = 0;
-
-		/** \brief Get array width
-		 *
-		 * \return array width
-		 */
-		inline TqUint width() const;
-
-		/** \brief Get array height
-		 *
-		 * \return array height
-		 */
-		inline TqUint height() const;
-	protected:
-		/// Destructor
-		virtual ~CqTileArray() = 0;
-
-		/// Width of the array
-		TqUint m_width;
-		/// Height of the array
-		TqUint m_height;
-};
-
-
-//------------------------------------------------------------------------------
-/** \brief Array class for which the underlying tiles are held in tiles.
- *
- * This class is currently designed to be a wrapper around TIFF files.  It
- * wraps both tiled and strip-based TIFF storage in a uniform manner, as a set
- * of tiles which may be individually allocated and deallocated.
- */
-template<typename T>
-class CqTextureTileArray : public CqTileArray<T>
-{
-	public:
-		/** \brief Construct a tiled texture array from a tiff file.
-		 *
-		 * The constructor throws an error if the file cannot be read.
-		 *
-		 */
-		CqTextureTileArray(std::string fileName, TIFF* openTiff, TqUint tiffDirectory = 0);
-
-		// Inherited
-		virtual CqSampleVector<T> value(const TqUint x, const TqUint y) const;
-		//virtual void setValue(const TqUint x, const TqUint y, const std::vector<TqFloat>& newValue);
+		//void setValue(const TqInt x, const TqInt y, const std::vector<TqFloat>& newValue) = 0;
 
 		/** \brief Access to the underlying tiles
 		 *
@@ -153,29 +112,49 @@ class CqTextureTileArray : public CqTileArray<T>
 		 *
 		 * \return The tile holding the underlying data at the given indices.
 		 */
-		boost::intrusive_ptr<CqTextureTile<T> >& tileForIndex(const TqUint x, const TqUint y) const;
+		boost::intrusive_ptr<CqTextureTile<T> >& tileForIndex(const TqInt x, const TqInt y) const;
 
 		/** \brief Get the number of samples per pixel
 		 *
 		 * \return number of samples per pixel
 		 */
-		inline TqUint samplesPerPixel() const;
+		inline TqInt samplesPerPixel() const;
+
+		/** \brief Get array width
+		 *
+		 * \return array width
+		 */
+		inline TqInt width() const;
+
+		/** \brief Get array height
+		 *
+		 * \return array height
+		 */
+		inline TqInt height() const;
 
 		// Inherited from CqMemoryMonitored
 		virtual CqMemorySentry::TqMemorySize zapMemory();
 
 		/// Destructor
-		virtual ~CqTextureTileArray();
+		virtual ~CqTileArray();
 	private:
-		/// Key to use when finding tiles in std::maps.
-		typedef std::pair<TqUint, TqUint> TileKey;
-
-		/** Allocate a new texture tile from the TIFF file.
+		/** Allocate a new texture tile from the file.
 		 */
 		void allocateTile();
 
+		/// Key to use when finding tiles in std::maps.
+		struct TileKey
+		{
+			int x;
+			int y;
+		};
+
+		/// Width of the array
+		TqInt m_width;
+		/// Height of the array
+		TqInt m_height;
 		/// Number of samples per pixel
-		TqUint m_samplesPerPixel;
+		TqInt m_samplesPerPixel;
 		/** A list holding recently used or "hot" tiles in the order of
 		 * hotness.  The same tiles are also held in hotMap.
 		 */
@@ -190,58 +169,57 @@ class CqTextureTileArray : public CqTileArray<T>
 
 
 
-//------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
-// Implementation of inline functions
-//------------------------------------------------------------------------------
+//==============================================================================
+// Implementation details
+//==============================================================================
 
-//------------------------------------------------------------------------------
-// Inline functions for CqTileArray
-//------------------------------------------------------------------------------
+// Implementation for CqTileArray
 
 template<typename T>
-inline TqUint CqTileArray<T>::width() const
+inline TqInt CqTileArray<T>::width() const
 {
 	return m_width;
 }
 
 template<typename T>
-inline TqUint CqTileArray<T>::height() const
+inline TqInt CqTileArray<T>::height() const
 {
 	return m_height;
 }
 
 template<typename T>
-CqTileArray<T>::~CqTileArray()
-{ }
-
-
-//------------------------------------------------------------------------------
-// Implementation of CqTextureTileArray
-//------------------------------------------------------------------------------
-// Inline functions for CqTextureTileArray
-//
-
-template<typename T>
-inline TqUint CqTextureTileArray<T>::samplesPerPixel() const
+inline TqInt CqTileArray<T>::samplesPerPixel() const
 {
 	return m_samplesPerPixel;
 }
 
-//------------------------------------------------------------------------------
-// Template Implementations for CqTextureTileArray
-//
-
-#if 0
 template<typename T>
-CqTextureTileArray<T>::CqTextureTileArray(std::string fileName, TqUint tiffDirectory)
-	: m_tiffDirectory(tiffDirectory),
-	m_fileName(fileName)
+CqSampleVector<T> CqTileArray<T>::value(const TqInt x, const TqInt y) const
+{
+	return tileForIndex(x, y)->value();
+}
+
+
+template<typename T>
+boost::intrusive_ptr<CqTextureTile<T> >& CqTileArray<T>::tileForIndex(const TqInt x, const TqInt y) const
 {
 	/// \todo Implementation
-	//CqTileArray<T>()
+	// if() 
+	return boost::intrusive_ptr<CqTextureTile<T> > (0); // dodgy; get the stub to compile...
 }
-#endif
+
+template<typename T>
+CqMemorySentry::TqMemorySize CqTileArray<T>::zapMemory()
+{
+	/// \todo Implementation
+	return 0;
+}
+
+template<typename T>
+CqTileArray<T>::~CqTileArray()
+{
+	/// \todo Implementation
+}
 
 /* Stuff to go in CqTextureMap
 	// Validate the filename
@@ -256,39 +234,6 @@ CqTextureTileArray<T>::CqTextureTileArray(std::string fileName, TqUint tiffDirec
 
 	}
 */
-
-template<typename T>
-CqSampleVector<T> CqTextureTileArray<T>::value(const TqUint x, const TqUint y) const
-{
-	return tileForIndex(x, y)->value();
-}
-
-/*template<typename T>
-void CqTextureTileArray<T>::setValue(const TqUint x, const TqUint y, const std::vector<TqFloat>& newValue)
-{
-	/// \todo Implementation
-}*/
-
-template<typename T>
-boost::intrusive_ptr<CqTextureTile<T> >& CqTextureTileArray<T>::tileForIndex(const TqUint x, const TqUint y) const
-{
-	/// \todo Implementation
-	// if() 
-	return boost::intrusive_ptr<CqTextureTile<T> > (0); // dodgy; get the stub to compile...
-}
-
-template<typename T>
-CqMemorySentry::TqMemorySize CqTextureTileArray<T>::zapMemory()
-{
-	/// \todo Implementation
-	return 0;
-}
-
-template<typename T>
-CqTextureTileArray<T>::~CqTextureTileArray()
-{
-	/// \todo Implementation
-}
 
 //------------------------------------------------------------------------------
 } // namespace Aqsis
