@@ -141,10 +141,25 @@ int CqFramebuffer::handle(int event)
 		case FL_UNFOCUS:
 			return 1;
 		case FL_KEYDOWN:
-			if (!m_keyHeld)
+			if(Fl::event_alt())
 			{
-				m_keyHeld = true;
-				//std::cout << "Key: " << Fl::event_key() << " down" << std::endl;
+				int key = Fl::event_key();
+				if(key == 'n' || key == 'p')
+				{
+					boost::shared_ptr<Aqsis::CqImage>& image
+						= m_uiImageWidget->image();
+					if(image)
+					{
+						if(key == 'n')
+							image->loadNextSubImage();
+						else
+							image->loadPrevSubImage();
+					}
+					return 1;
+				}
+			}
+			else
+			{
 				switch (Fl::event_key())
 				{
 					case 'r':
@@ -158,15 +173,8 @@ int CqFramebuffer::handle(int event)
 				}
 			}
 			break;
-
 		case FL_KEYUP:
-			m_keyHeld = false;
-			switch (Fl::event_key())
-			{
-				case 'r':
-					//std::cout << "R up" << std::endl;
-					return 1;
-			}
+			return 1;
 			break;
 
 		case FL_PUSH:
@@ -177,7 +185,6 @@ int CqFramebuffer::handle(int event)
 					m_lastPos[0] = Fl::event_x();
 					m_lastPos[1] = Fl::event_y();
 					return 1;
-
 			}
 			break;
 		case FL_RELEASE:

@@ -87,7 +87,7 @@ TiXmlElement* CqImage::serialiseToXML()
 	return(imageXML);
 }
 
-void CqImage::loadFromFile(const std::string& fileName)
+void CqImage::loadFromFile(const std::string& fileName, TqInt imageIndex)
 {
 	boost::mutex::scoped_lock lock(mutex());
 
@@ -95,6 +95,19 @@ void CqImage::loadFromFile(const std::string& fileName)
 	try
 	{
 		texFile = IqTexInputFile::open(fileName);
+		if(imageIndex > 0)
+		{
+			IqMultiTexInputFile* multiFile = dynamic_cast<IqMultiTexInputFile*>(texFile.get());
+			if(multiFile && imageIndex < multiFile->numSubImages())
+			{
+				multiFile->setImageIndex(imageIndex);
+				m_imageIndex = imageIndex;
+			}
+			else
+				return;
+		}
+		else
+			m_imageIndex = 0;
 	}
 	catch(XqInternal& e)
 	{
@@ -134,6 +147,17 @@ void CqImage::loadFromFile(const std::string& fileName)
 
 	if(m_updateCallback)
 		m_updateCallback(-1, -1, -1, -1);
+}
+
+void CqImage::loadNextSubImage()
+{
+	loadFromFile(filename(), m_imageIndex+1);
+}
+
+void CqImage::loadPrevSubImage()
+{
+	if(m_imageIndex-1 >= 0)
+		loadFromFile(filename(), m_imageIndex-1);
 }
 
 void CqImage::saveToFile(const std::string& fileName) const

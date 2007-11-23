@@ -171,10 +171,20 @@ public:
 	 * \param filename	The name of the file to save the image into.
 	 */
 	void saveToFile(const std::string& fileName) const;
-	/** Load the image from a TIFF file on disk.
+	/** Load the image from a file on disk.
 	 * \param fileName	The name of the TIFF file to load the image data from.
 	 */
-	void loadFromFile(const std::string& fileName);
+	void loadFromFile(const std::string& fileName, TqInt imageIndex = 0);
+	/** \breif Load the next subimage from the current image file.
+	 *
+	 * Do nothing if there is no next subimage.
+	 */
+	void loadNextSubImage();
+	/** \breif Load the previous subimage from the current image file.
+	 *
+	 * Do nothing if there is no previous subimage.
+	 */
+	void loadPrevSubImage();
 
 protected:
 	/** Check m_displayMap is pointing to valid channel names from channels.
@@ -202,6 +212,7 @@ protected:
 	TqUlong			m_imageHeight;	///< The total image height.
 	TqUlong			m_originX;		///< The origin of the frame within the whole image.
 	TqUlong			m_originY;		///< The origin of the frame within the whole image.
+	TqInt 			m_imageIndex;	///< Current image index in a multi-image file.
 	TqChannelNameMap m_displayMap; ///< map from display to underlying channel names
 
 	boost::function<void(int,int,int,int)> m_updateCallback;	///< A callback, called when an image changes.
@@ -225,6 +236,7 @@ inline CqImage::CqImage( const std::string& name)
 	m_imageHeight(0),
 	m_originX(0),
 	m_originY(0),
+	m_imageIndex(0),
 	m_displayMap(),
 	m_updateCallback(),
 	m_mutex()
