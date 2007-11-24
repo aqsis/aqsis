@@ -40,35 +40,47 @@ CqIntWrapper::CqIntWrapper()
 { }
 
 //------------------------------------------------------------------------------
-// Ok, this method would probably be inline in reality.  Just pretend that it
-// does something less trivial ;-)
 void CqIntWrapper::setData(TqInt data)
 {
 	// As documented in the interface, this class only holds values >= minValue
 	// Use exceptions to indicate failure conditions.
 	if (data < minValue)
-		throw XqException("data too small.");
+		throw XqException("data too small.", __FILE__, __LINE__);
 	// If runtime performance is critical (for example, in an inline function),
 	// consider using assert().  Assert signifies not only that an error
 	// condition shouldn't happen, but that we don't want to even attempt to
 	// recover.
 	// assert(data >= minValue);
 
+	// Use constants when you know a quantity cannot change.  Anything to help
+	// the compiler catch errors at compile-time is a "good thing".
 	const TqInt theAnswer = 42;
-	const TqUint maxInsults = 10;
 
 	if(*m_data == theAnswer && data != theAnswer)
 	{
-		for(TqUint i = 0; i < maxInsults; ++i)
+		// It's often tempting to use unsigned integers for things which
+		// logically cannot be negative.  Many experts (though perhaps not all)
+		// agree that this is a bad thing in C or C++ because of the subtle
+		// bugs it can cause.  For example, the following is false on most archs:
+		//
+		// (int)(-1) < (unsigned int)(1)
+		//
+		// For more information, see the aqsis mailing list:
+		//   'Unsigned integers "considered harmful"?'
+		// http://sourceforge.net/mailarchive/forum.php?thread_name=20070829120534.GA17365%40physics.uq.edu.au&forum_name=aqsis-development
+		const TqInt maxInsults = 10;
+
+		for(TqInt i = 0; i < maxInsults; ++i)
 			std::cout << "You idiot! You're overriding the answer.\n";
 
 		// Portability warning: "i" still defined in this scope under VC++6; see
 		// http://www.boost.org/more/microsoft_vcpp.html
 
-		// Recommended workaround to declare i in another loop: explicitly wrap
-		// in a block using an extra { } pair:
+		// The recommended workaround if you want to declare i in another loop
+		// is to explicitly introduce an extra scope by wrapping the for loop
+		// in a { } block.
 		{
-			for(TqUint i = 0; i < maxInsults; ++i)
+			for(TqInt i = 0; i < maxInsults; ++i)
 				std::cout << "You idiot! You're overriding the answer.\n";
 		}
 	}
