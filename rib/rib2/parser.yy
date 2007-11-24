@@ -855,7 +855,7 @@ complete_request
             {
                 ParseCallbackInterface->RiBlobbyV($2, $3->Count(), &(*$3)[0], 
                         $4->Count(), &(*$4)[0],
-                        $5->Count(), &(*$5)[0],
+                        $5->Count(), ($5->Count() > 0)?&(*$5)[0] : NULL,
                         $6->Count(), $6->Tokens(), $6->Values());
                 DiscardArrayValue($3);
                 DiscardArrayValue($4);
@@ -1229,9 +1229,9 @@ complete_request
 				ParseCallbackInterface->RiSubdivisionMeshV(const_cast<char*>($2),
 								$3->Count(),&(*$3)[0], &(*$4)[0],
 								$5->Count(), ptags,
-								&(*$6)[0],
-								&(*$7)[0],
-								&(*$8)[0],
+								($6->Count() > 0)?&(*$6)[0] : NULL,
+								($7->Count() > 0)?&(*$7)[0] : NULL,
+								($8->Count() > 0)?&(*$8)[0] : NULL,
 								$9->Count(), $9->Tokens(), $9->Values());
 
 				for(i=0; i<$5->Count(); i++)

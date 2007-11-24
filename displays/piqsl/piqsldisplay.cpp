@@ -35,28 +35,40 @@
 #include <boost/archive/iterators/insert_linebreaks.hpp>
 #include <boost/shared_array.hpp>
 
-#ifdef	AQSIS_SYSTEM_WIN32
-#include <winsock2.h>
-typedef	u_long in_addr_t;
+#ifdef AQSIS_SYSTEM_WIN32
+	#include <winsock2.h>
+	typedef	u_long in_addr_t;
 #else
-#include <signal.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#define	INVALID_SOCKET -1
+	#include <signal.h>
+	#include <sys/types.h>
+	#include <sys/socket.h>
+	#include <netinet/in.h>
+	#include <arpa/inet.h>
+	#define	INVALID_SOCKET -1
 #endif
 #include <tinyxml.h>
 
 #include "ndspy.h"
 #include "version.h"
-#include "piqsldisplay.h"
 #include "socket.h"
 #include "logging.h"
 #include "logging_streambufs.h"
 #include "aqsismath.h"
 
 using namespace Aqsis;
+
+struct SqPiqslDisplayInstance
+{
+	std::string		m_filename;
+	std::string		m_hostname;
+	TqInt			m_port;
+	CqSocket		m_socket;
+	// The number of pixels that have already been rendered (used for progress reporting)
+	TqInt		m_pixelsReceived;
+
+	friend std::istream& operator >>(std::istream &is,struct SqPiqslDisplayInstance &obj);
+	friend std::ostream& operator <<(std::ostream &os,const struct SqPiqslDisplayInstance &obj);
+};
 
 // From displayhelpers.c
 extern "C"
@@ -105,7 +117,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
                           PtDspyDevFormat *format,
                           PtFlagStuff *flagstuff)
 {
-	SqDisplayInstance* pImage;
+	SqPiqslDisplayInstance* pImage;
 
 	// Fill in the typenames maps
 	INIT_TYPE_NAME_MAPS(PkDspyFloat32);
@@ -118,7 +130,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 	INIT_TYPE_NAME_MAPS(PkDspyString);
 	INIT_TYPE_NAME_MAPS(PkDspyMatrix);
 
-	pImage = new SqDisplayInstance;
+	pImage = new SqPiqslDisplayInstance;
 	flagstuff->flags = 0;
 
 	if(pImage)
@@ -381,8 +393,8 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
                           int entrysize,
                           const unsigned char *data)
 {
-	SqDisplayInstance* pImage;
-	pImage = reinterpret_cast<SqDisplayInstance*>(image);
+	SqPiqslDisplayInstance* pImage;
+	pImage = reinterpret_cast<SqPiqslDisplayInstance*>(image);
 
 	TqInt bucketlinelen = entrysize * (xmaxplus1 - xmin);
 	TqInt bufferlength = bucketlinelen * (ymaxplus1 - ymin);
@@ -417,8 +429,8 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 
 PtDspyError DspyImageClose(PtDspyImageHandle image)
 {
-	SqDisplayInstance* pImage;
-	pImage = reinterpret_cast<SqDisplayInstance*>(image);
+	SqPiqslDisplayInstance* pImage;
+	pImage = reinterpret_cast<SqPiqslDisplayInstance*>(image);
 
 	// Close the socket
 	if(pImage && pImage->m_socket)
@@ -440,8 +452,8 @@ PtDspyError DspyImageClose(PtDspyImageHandle image)
 
 PtDspyError DspyImageDelayClose(PtDspyImageHandle image)
 {
-	SqDisplayInstance* pImage;
-	pImage = reinterpret_cast<SqDisplayInstance*>(image);
+	SqPiqslDisplayInstance* pImage;
+	pImage = reinterpret_cast<SqPiqslDisplayInstance*>(image);
 	
 	// Close the socket
 	if(pImage && pImage->m_socket)
@@ -463,8 +475,8 @@ PtDspyError DspyImageQuery(PtDspyImageHandle image,
                            int size,
                            void *data)
 {
-	SqDisplayInstance* pImage;
-	pImage = reinterpret_cast<SqDisplayInstance*>(image);
+	SqPiqslDisplayInstance* pImage;
+	pImage = reinterpret_cast<SqPiqslDisplayInstance*>(image);
 
 	//PtDspyOverwriteInfo overwriteInfo;
 	//PtDspySizeInfo sizeInfo;

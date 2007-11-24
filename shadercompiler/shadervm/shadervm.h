@@ -99,6 +99,7 @@ union UsProgramElement
 {
 	void( CqShaderVM::*m_Command ) ();		///< Pointer to a function.
 	TqFloat	m_FloatVal;				///< Absolute float value.
+	TqInt	m_intVal;				///< Absolute int value.
 	CqString*	m_pString;			///< Absolute string value.
 	TqInt	m_iVariable;				///< Shader variable index.
 	SqLabel	m_Label;				///< Program label.
@@ -902,6 +903,16 @@ class SHADERVM_SHARE CqShaderVM : public CqShaderStack, public IqShader, public 
 			E.m_FloatVal = f;
 			pProgramArea->push_back( E );
 		}
+		/** Add an absolute integer value to the program data area.
+		 * \param i Integer value to add.
+		 * \param pProgramArea Pointer to the program area, either init, or main code areas.
+		 */
+		void AddInteger(TqInt i, std::vector<UsProgramElement>* pProgramArea)
+		{
+			UsProgramElement E;
+			E.m_intVal = i;
+			pProgramArea->push_back( E );
+		}
 		/** Add an absolute string value to the program data area.
 		 * \param s Character pointer value to add.
 		 * \param pProgramArea Pointer to the program area, either init, or main code areas.
@@ -966,6 +977,7 @@ class SHADERVM_SHARE CqShaderVM : public CqShaderStack, public IqShader, public 
 		void	SO_S_GET();
 		void	SO_RS_JZ();
 		void	SO_RS_JNZ();
+		void	SO_RS_BREAK();
 		void	SO_S_JZ();
 		void	SO_S_JNZ();
 		void	SO_jnz();

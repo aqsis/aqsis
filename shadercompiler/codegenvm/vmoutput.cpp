@@ -32,12 +32,14 @@
 #include	<deque>
 #include	<string>
 #include	<map>
-
+#include	<numeric>
 
 #include	"version.h"
 #include	"vmoutput.h"
 
 #include	"parsenode.h"
+#include	"aqsismath.h"
+#include	"logging.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -417,9 +419,9 @@ void CqCodeGenOutput::Visit( IqParseNodeOperator& OP )
 	if ( pNode->NodeType() != ParseNode_LogicalOp )
 	{
 		if ( pOperandA )
-			m_slxFile << pstrBType;
-		if ( pOperandB )
 			m_slxFile << pstrAType;
+		if ( pOperandB )
+			m_slxFile << pstrBType;
 	}
 	m_slxFile << std::endl;
 }
@@ -490,19 +492,58 @@ void CqCodeGenOutput::Visit( IqParseNodeWhileConstruct& WC )
 	assert( pStmt != 0 );
 	IqParseNode* pStmtInc = pStmt->pNextSibling();
 
+	rsPush();										// push running state
+	// Mark current RS stack depth so that break/continue will know where to
+	// jump to.
+	m_breakDepthStack.push_back(0);
 	m_slxFile << ":" << iLabelA << std::endl;		// loop back label
 	m_slxFile << "\tS_CLEAR" << std::endl;			// clear current state
 	pArg->Accept( *this );							// relation
 	m_slxFile << "\tS_GET" << std::endl;			// Get the current state by popping the t[ value off the stack
 	m_slxFile << "\tS_JZ " << iLabelB << std::endl;	// exit if false
-	m_slxFile << "\tRS_PUSH" << std::endl;			// push running state
 	m_slxFile << "\tRS_GET" << std::endl;			// get current state to running state
+	// The following push and associated pop are needed to implement continue statements correctly.
+	rsPush();										// push running state
 	pStmt->Accept( *this );							// statement
-	if ( pStmtInc )
+	rsPop();										// pop the running state
+	if( pStmtInc )
 		pStmtInc->Accept( *this );					// incrementor
-	m_slxFile << "\tRS_POP" << std::endl;			// Pop the running state
 	m_slxFile << "\tjmp " << iLabelA << std::endl;	// loop back jump
 	m_slxFile << ":" << iLabelB << std::endl;		// completion label
+	m_breakDepthStack.pop_back();
+	rsPop();										// pop the running state
+}
+
+void CqCodeGenOutput::Visit( IqParseNodeLoopMod& LM )
+{
+	IqParseNode* pChild = static_cast<IqParseNode*>(LM.GetInterface( ParseNode_Base ))->pChild();
+	TqInt breakDepth = 1;
+	if(pChild)
+	{
+		breakDepth = lround( static_cast<IqParseNodeConstantFloat*>(
+					pChild->GetInterface(ParseNode_ConstantFloat))->Value() );
+	}
+	if(breakDepth > static_cast<TqInt>(m_breakDepthStack.size()))
+	{
+		/// \todo This should have been done by the semantic analysis
+		/// stage, but here is better than doing nothing (for now).
+		Aqsis::log() << critical << "Break depth too deep\n";
+		// kludge: break output so it can't be accidentally used...
+		m_slxFile << "\tCANNOT_BREAK - COMPILE ERROR";
+		return;
+	}
+	TqInt rsPopNum = std::accumulate(m_breakDepthStack.rbegin(),
+				m_breakDepthStack.rbegin() + breakDepth, 0);
+	switch(LM.modType())
+	{
+		case LoopMod_Break:
+			// Need one extra pop for the break.
+			m_slxFile << "\tRS_BREAK " << rsPopNum << "\n";
+			break;
+		case LoopMod_Continue:
+			m_slxFile << "\tRS_BREAK " << (rsPopNum-1) << "\n";
+			break;
+	}
 }
 
 void CqCodeGenOutput::Visit( IqParseNodeIlluminateConstruct& IC )
@@ -525,11 +566,11 @@ void CqCodeGenOutput::Visit( IqParseNodeIlluminateConstruct& IC )
 	else
 		m_slxFile << "\tilluminate" << std::endl;
 	m_slxFile << "\tS_JZ " << iLabelB << std::endl;	// exit loop if false
-	m_slxFile << "\tRS_PUSH" << std::endl;			// Push running state
+	rsPush();										// push running state
 	m_slxFile << "\tRS_GET" << std::endl;			// Get state
 	pStmt->Accept( *this );							// statement
-	m_slxFile << "\tRS_POP" << std::endl;			// Pop the running state
-	m_slxFile << "\tjmp " << iLabelA << std::endl; // loop back jump
+	rsPop();										// pop the running state
+	m_slxFile << "\tjmp " << iLabelA << std::endl;	// loop back jump
 	m_slxFile << ":" << iLabelB << std::endl;		// completion label
 }
 
@@ -575,10 +616,10 @@ void CqCodeGenOutput::Visit( IqParseNodeIlluminanceConstruct& IC )
 	else
 		m_slxFile << "\tilluminance" << std::endl;
 	m_slxFile << "\tS_JZ " << iLabelC << std::endl;	// skip processing of statement if light has no influence
-	m_slxFile << "\tRS_PUSH" << std::endl;			// Push running state
+	rsPush();										// push running state
 	m_slxFile << "\tRS_GET" << std::endl;			// Get state
 	pStmt->Accept( *this );							// statement
-	m_slxFile << "\tRS_POP" << std::endl;			// Pop the running state
+	rsPop();										// pop the running state
 	m_slxFile << ":" << iLabelC << std::endl;		// continuation label
 	m_slxFile << "\tadvance_illuminance" << std::endl;
 	m_slxFile << "\tjnz " << iLabelA << std::endl; // loop back jump
@@ -604,11 +645,11 @@ void CqCodeGenOutput::Visit( IqParseNodeSolarConstruct& SC )
 		pArg->Accept( *this );
 		m_slxFile << "\tsolar2" << std::endl;
 		m_slxFile << "\tS_JZ " << iLabelB << std::endl;	// exit loop if false
-		m_slxFile << "\tRS_PUSH" << std::endl;			// Push running state
+		rsPush();										// push running state
 		m_slxFile << "\tRS_GET" << std::endl;			// set running state
 		if ( pStmt )
 			pStmt->Accept( *this );			// statement
-		m_slxFile << "\tRS_POP" << std::endl;			// Pop the running state
+		rsPop();										// pop the running state
 		m_slxFile << "\tjmp " << iLabelA << std::endl;	// loop back jump
 		m_slxFile << ":" << iLabelB << std::endl;		// completion label
 	}
@@ -619,11 +660,11 @@ void CqCodeGenOutput::Visit( IqParseNodeSolarConstruct& SC )
 		m_slxFile << "\tS_CLEAR" << std::endl;			// clear current state
 		m_slxFile << "\tsolar" << std::endl;
 		m_slxFile << "\tS_JZ " << iLabelB << std::endl;	// exit loop if false
-		m_slxFile << "\tRS_PUSH" << std::endl;			// Push running state
+		rsPush();										// push running state
 		m_slxFile << "\tRS_GET" << std::endl;			// set running state
 		if ( pStmt )
 			pStmt->Accept( *this );			// statement
-		m_slxFile << "\tRS_POP" << std::endl;			// Pop the running state
+		rsPop();										// pop the running state
 		m_slxFile << "\tjmp " << iLabelA << std::endl;	// loop back jump
 		m_slxFile << ":" << iLabelB << std::endl;		// completion label
 	}
@@ -679,7 +720,7 @@ void CqCodeGenOutput::Visit( IqParseNodeGatherConstruct& IC )
 	CqParseNodeFloatConst C( static_cast<TqFloat>( abs( iArg ) ) );
 	C.Accept( *this );
 	m_slxFile << "\tgather" << std::endl;
-	m_slxFile << "\tRS_PUSH" << std::endl;			// Push running state
+	rsPush();										// push running state
 	m_slxFile << "\tRS_GET" << std::endl;			// Get state
 	m_slxFile << "\tRS_JZ " << iLabelD << std::endl;	// Jump to no hit statement
 	pHitStmt->Accept( *this );						// ray hit statement
@@ -691,7 +732,7 @@ void CqCodeGenOutput::Visit( IqParseNodeGatherConstruct& IC )
 		pNoHitStmt->Accept( *this );						// ray hit statement
 	}
 	m_slxFile << ":" << iLabelC << std::endl;		// continuation label
-	m_slxFile << "\tRS_POP" << std::endl;			// Pop the running state
+	rsPop();										// pop the running state
 	m_slxFile << "\tadvance_gather" << std::endl;
 	m_slxFile << "\tjnz " << iLabelA << std::endl; // loop back jump
 	m_slxFile << ":" << iLabelB << std::endl;		// completion label
@@ -714,7 +755,7 @@ void CqCodeGenOutput::Visit( IqParseNodeConditional& C )
 	m_slxFile << "\tS_CLEAR" << std::endl;			// clear current state
 	pArg->Accept( *this );							// relation
 	m_slxFile << "\tS_GET" << std::endl;			// Get the current state by popping the top value off the stack
-	m_slxFile << "\tRS_PUSH" << std::endl;			// push the running state
+	rsPush();										// push running state
 	m_slxFile << "\tRS_GET" << std::endl;			// get current state to running state
 	if ( pFalseStmt )
 	{
@@ -732,7 +773,7 @@ void CqCodeGenOutput::Visit( IqParseNodeConditional& C )
 		pFalseStmt->Accept( *this );				// false statement
 	}
 	m_slxFile << ":" << iLabelA << std::endl;		// conditional exit point
-	m_slxFile << "\tRS_POP" << std::endl;			// pop running state
+	rsPop();										// pop the running state
 }
 
 void CqCodeGenOutput::Visit( IqParseNodeConditionalExpression& CE )
@@ -966,102 +1007,49 @@ const char* CqCodeGenOutput::MathOpName( TqInt op )
 	// Output this nodes operand name.
 	switch ( op )
 	{
-			case Op_Add:
-			return ( "add" );
-			break;
-
-			case Op_Sub:
-			return ( "sub" );
-			break;
-
-			case Op_Mul:
-			return ( "mul" );
-			break;
-
-			case Op_Div:
-			return ( "div" );
-			break;
-
-			case Op_Dot:
-			return ( "dot" );
-			break;
-
-			case Op_Crs:
-			return ( "crs" );
-			break;
-
-			case Op_Mod:
-			return ( "mod" );
-			break;
-
-			case Op_Lft:
-			return ( "left" );
-			break;
-
-			case Op_Rgt:
-			return ( "right" );
-			break;
-
-			case Op_And:
-			return ( "and" );
-			break;
-
-			case Op_Xor:
-			return ( "xor" );
-			break;
-
-			case Op_Or:
-			return ( "or" );
-			break;
-
-			case Op_L:
-			return ( "ls" );
-			break;
-
-			case Op_G:
-			return ( "gt" );
-			break;
-
-			case Op_GE:
-			return ( "ge" );
-			break;
-
-			case Op_LE:
-			return ( "le" );
-			break;
-
-			case Op_EQ:
-			return ( "eq" );
-			break;
-
-			case Op_NE:
-			return ( "ne" );
-			break;
-
-			case Op_Plus:
-			break;
-
-			case Op_Neg:
-			return ( "neg" );
-			break;
-
-			case Op_BitwiseComplement:
-			return ( "cmpl" );
-			break;
-
-			case Op_LogicalNot:
-			return ( "not" );
-			break;
-
-			case Op_LogAnd:
-			return ( "land" );
-			break;
-
-			case Op_LogOr:
-			return ( "lor" );
-			break;
+		case Op_Add: return "add";
+		case Op_Sub: return "sub";
+		case Op_Mul: return "mul";
+		case Op_Div: return "div";
+		case Op_Dot: return "dot";
+		case Op_Crs: return "crs";
+		case Op_Mod: return "mod";
+		case Op_Lft: return "left";
+		case Op_Rgt: return "right";
+		case Op_And: return "and";
+		case Op_Xor: return "xor";
+		case Op_Or: return "or";
+		case Op_L: return "ls";
+		case Op_G: return "gt";
+		case Op_GE: return "ge";
+		case Op_LE: return "le";
+		case Op_EQ: return "eq";
+		case Op_NE: return "ne";
+		case Op_Neg: return "neg";
+		case Op_BitwiseComplement: return "cmpl";
+		case Op_LogicalNot: return "not";
+		case Op_LogAnd: return "land";
+		case Op_LogOr: return "lor";
+		case Op_Plus: 
+		default:
+			return "error";
 	}
-	return ( "error" );
+}
+
+void CqCodeGenOutput::rsPush()
+{
+	// push the running state
+	if(!m_breakDepthStack.empty())
+		m_breakDepthStack.back()++;
+	m_slxFile << "\tRS_PUSH" << std::endl;
+}
+
+void CqCodeGenOutput::rsPop()
+{
+	// pop the running state
+	m_slxFile << "\tRS_POP" << std::endl;
+	if(!m_breakDepthStack.empty())
+		m_breakDepthStack.back()--;
 }
 
 //-----------------------------------------------------------------------

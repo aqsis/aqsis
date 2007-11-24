@@ -70,6 +70,7 @@ class CqCodeGenOutput : public IqParseNodeVisitor
 		virtual	void Visit( IqParseNodeConstantFloat& );
 		virtual	void Visit( IqParseNodeConstantString& );
 		virtual	void Visit( IqParseNodeWhileConstruct& );
+		virtual	void Visit( IqParseNodeLoopMod& );
 		virtual	void Visit( IqParseNodeIlluminateConstruct& );
 		virtual	void Visit( IqParseNodeIlluminanceConstruct& );
 		virtual	void Visit( IqParseNodeSolarConstruct& );
@@ -100,6 +101,9 @@ class CqCodeGenOutput : public IqParseNodeVisitor
 		const char* MathOpName( TqInt );
 
 	private:
+		void rsPush();
+		void rsPop();
+
 		CqString	m_strOutName;
 		TqInt	m_gcLabels;
 		CqCodeGenDataGather*	m_pDataGather;
@@ -107,6 +111,7 @@ class CqCodeGenOutput : public IqParseNodeVisitor
 
 		std::vector<std::vector<SqVarRefTranslator> > m_saTransTable;
 		std::deque<std::map<std::string, std::string> >	m_StackVarMap;
+		std::vector<TqInt> m_breakDepthStack;
 };
 
 

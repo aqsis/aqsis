@@ -218,18 +218,34 @@ class SHADERCONTEXT_SHARE CqShaderExecEnv : public IqShaderExecEnv
 		}
 		virtual	void	PushState()
 		{
-			m_stkState.push( m_RunningState );
+			m_stkState.push_back( m_RunningState );
 		}
 		virtual	void	PopState()
 		{
-			m_RunningState = m_stkState.top();
-			m_stkState.pop();
+			m_RunningState = m_stkState.back();
+			m_stkState.pop_back();
 		}
 		virtual	void	InvertRunningState()
 		{
 			m_RunningState.Complement();
 			if ( !m_stkState.empty() )
-				m_RunningState.Intersect( m_stkState.top() );
+				m_RunningState.Intersect( m_stkState.back() );
+		}
+		virtual void RunningStatesBreak(TqInt numLevels)
+		{
+			assert(numLevels >= 0);
+			assert(numLevels <= static_cast<TqInt>(1+m_stkState.size()));
+			m_RunningState.Complement();
+			for(std::vector<CqBitVector>::reverse_iterator i = m_stkState.rbegin(),
+					end = m_stkState.rbegin()+numLevels; i != end; ++i)
+			{
+				// Cause all running states down the stack for numLevels
+				// positions to stop running for those elements of the current
+				// state which are running.
+				i->Intersect(m_RunningState);
+			}
+			// Current state needs to stop executing.
+			m_RunningState.SetAll(false);
 		}
 		virtual IqShaderData* FindStandardVar( const char* pname );
 
@@ -412,7 +428,7 @@ class SHADERCONTEXT_SHARE CqShaderExecEnv : public IqShaderExecEnv
 		IqTransformPtr m_pTransform;		///< Pointer to the associated transform.
 		CqBitVector	m_CurrentState;			///< SIMD execution state bit vector accumulator.
 		CqBitVector	m_RunningState;			///< SIMD running execution state bit vector.
-		std::stack<CqBitVector>	m_stkState;				///< Stack of execution state bit vectors.
+		std::vector<CqBitVector>	m_stkState;				///< Stack of execution state bit vectors.
 		IqRenderer*	m_pRenderContext;
 		TqInt	m_LocalIndex;			///< Local cached variable index to speed repeated access to the same local variable.
 		IqSurface*	m_pCurrentSurface;	///< Pointer to the surface being shaded.

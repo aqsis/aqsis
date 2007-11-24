@@ -17,6 +17,8 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+#include <signal.h>
+
 #include "aqsis.h"
 #include "exception.h"
 #include "argparse.h"
@@ -290,6 +292,20 @@ RtVoid PrintProgress( RtFloat percent, RtInt FrameNo )
 	std:: cout << std::flush;
 }
 
+/**
+ * Signal event handler mostly to restore the color for the console 
+ * while doint a Ctrl-C interruption.
+ */
+
+void int_signal( int sig)
+{
+	if (sig == SIGINT)
+		Aqsis::log() << "Catch ^C" << std::endl; 
+	else if (sig == SIGABRT)
+		Aqsis::log() << "Aborting..." << std::endl; 
+
+	exit(sig);
+}
 
 /** Function to setup specific options needed after options are complete but before the world is created.
 	Used as the callback function to a RiPreWorldFunction call.
@@ -512,6 +528,9 @@ static void SetPriority(int priority)
 
 int main( int argc, const char** argv )
 {
+	signal(SIGINT, int_signal);
+	signal(SIGABRT, int_signal);
+	
 	StartMemoryDebugging();
 	{
 		ArgParse ap;

@@ -37,7 +37,7 @@ class CqTextureSampler
 {
 	public:
 		inline void filter(std::vector<TqFloat>& sBox, std::vector<TqFloat>& tBox, std::vector<TqFloat>& output);
-		static boost::shared_ptr<CqTextureSampler> construct(const boost::shared_ptr<IqTiledTexInputFile>& file);
+		static boost::shared_ptr<CqTextureSampler> create(const boost::shared_ptr<IqTiledTexInputFile>& file);
 		virtual ~CqTextureSampler();
 	protected:
 		/**

@@ -466,6 +466,12 @@ void CqShaderVM::SO_RS_JNZ()
 	}
 }
 
+void CqShaderVM::SO_RS_BREAK()
+{
+	TqInt breakDepth = ReadNext().m_intVal;
+	m_pEnv->RunningStatesBreak(breakDepth);
+}
+
 void CqShaderVM::SO_S_JZ()
 {
 	SqLabel lab = ReadNext().m_Label;

@@ -244,7 +244,7 @@ void CqShaderExecEnv::SO_option( IqShaderData* name, IqShaderData* pV, IqShaderD
 			{
 				pV->ArrayEntry( 0 ) ->SetFloat( static_cast<TqFloat>( getRenderContext() ->GetIntegerOption( "System", "Resolution" ) [ 0 ] ) );
 				pV->ArrayEntry( 1 ) ->SetFloat( static_cast<TqFloat>( getRenderContext() ->GetIntegerOption( "System", "Resolution" ) [ 1 ] ) );
-				pV->ArrayEntry( 2 ) ->SetFloat( static_cast<TqFloat>( getRenderContext() ->GetFloatOption( "System", "PixelAspectRatio" ) [ 2 ] ) );
+				pV->ArrayEntry( 2 ) ->SetFloat( static_cast<TqFloat>( getRenderContext() ->GetFloatOption( "System", "PixelAspectRatio" ) [ 0 ] ) );
 				Ret = 1.0f;
 			}
 		}

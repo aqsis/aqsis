@@ -56,7 +56,7 @@ ArgParse::apfloat g_fov = 90.0;
 ArgParse::apfloat g_width = -1.0;
 ArgParse::apstring g_compress = "none";
 ArgParse::apfloat g_quality = 70.0;
-ArgParse::apfloat g_bake = 64.0;
+ArgParse::apfloat g_bake = 128.0;
 ArgParse::apfloat g_gamma = 0.0;
 
 
@@ -70,6 +70,7 @@ int main( int argc, const char** argv )
 {
 	ArgParse ap;
 	RtFilterFunc filterfunc;
+	float bake;
 
 	ap.usageHeader( ArgParse::apstring( "Usage: " ) + argv[ 0 ] + " [options] infile outfile" );
 	ap.argFlag( "help", "\aprint this help and exit", &g_help );
@@ -324,15 +325,6 @@ int main( int argc, const char** argv )
 		      );
 
 
-		if (strstr(ap.leftovers() [ 0 ].c_str(), ".bake"))
-		{
-			static char envbake[80];
-			int bake = (int) g_bake;
-
-			sprintf(envbake, "BAKE=%d", bake);
-			putenv(envbake);
-		}
-
 		// Only OpenEXR plugin supports gamma correction
 		if (strstr(ap.leftovers() [ 0 ].c_str(), ".exr"))
 		{
@@ -342,9 +334,12 @@ int main( int argc, const char** argv )
 			putenv(envgamma);
 		}
 
+
+ 		bake = g_bake;
+
 		RiMakeTexture( ( char* ) ap.leftovers() [ 0 ].c_str(), ( char* ) ap.leftovers() [ 1 ].c_str(),
 		               ( char* ) g_swrap.c_str(), ( char* ) g_twrap.c_str(), filterfunc,
-		               ( float ) g_swidth, ( float ) g_twidth, "compression", &compression, "quality", &quality, RI_NULL );
+		               ( float ) g_swidth, ( float ) g_twidth, "compression", &compression, "quality", &quality, "bake", &bake, RI_NULL );
 
 	}
 

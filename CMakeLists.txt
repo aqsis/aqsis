@@ -4,6 +4,7 @@ SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules" "${CMAKE_CURRE
 
 INCLUDE(macros)
 
+INCLUDE(FirstCMakeRun)
 INCLUDE(OutOfSourceBuild)
 
 INCLUDE(FindWin32Libs)
@@ -76,6 +77,16 @@ ELSE(WIN32)
 	ADD_DEFINITIONS(-DDEFAULT_RC_PATH="\\"${DEFAULT_RC_PATH}\\"")
 ENDIF(WIN32)
 
+IF(FIRST_CMAKE_RUN)
+	# Set default build type the first time cmake is run, but only if it's
+	# empty (an alternative value might have been specified on the command
+	# line, and we want this to override the default below.).
+	SET_IF_EMPTY(CMAKE_BUILD_TYPE "Release" CACHE STRING
+		"Choose the type of build, options are: None(CMAKE_CXX_FLAGS or CMAKE_C_FLAGS used) Debug Release RelWithDebInfo MinSizeRel."
+		FORCE
+		)
+ENDIF(FIRST_CMAKE_RUN)
+
 ADD_SUBDIRECTORY(argparse)
 ADD_SUBDIRECTORY(rib/api)
 ADD_SUBDIRECTORY(rib/rib2)
@@ -109,16 +120,6 @@ ENDIF(AQSIS_FLTK_FOUND)
 ADD_SUBDIRECTORY(thirdparty/tinyxml)
 ADD_SUBDIRECTORY(displays/d_exr)
 ADD_SUBDIRECTORY(displays/d_sdcBMP)
-ADD_SUBDIRECTORY(texturing/plugins/common)
-ADD_SUBDIRECTORY(texturing/plugins/ppm2tif)
-ADD_SUBDIRECTORY(texturing/plugins/bake2tif)
-ADD_SUBDIRECTORY(texturing/plugins/gif2tif)
-ADD_SUBDIRECTORY(texturing/plugins/pcx2tif)
-ADD_SUBDIRECTORY(texturing/plugins/jpg2tif)
-ADD_SUBDIRECTORY(texturing/plugins/bmp2tif)
-ADD_SUBDIRECTORY(texturing/plugins/exr2tif)
-ADD_SUBDIRECTORY(texturing/plugins/png2tif)
-ADD_SUBDIRECTORY(texturing/plugins/tga2tif)
 ADD_SUBDIRECTORY(shaders)
 IF(AQSIS_FLTK_FOUND AND AQSIS_FLUID_FOUND AND AQSIS_BOOST_FOUND)
 	ADD_SUBDIRECTORY(displays/piqsl)

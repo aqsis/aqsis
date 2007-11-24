@@ -189,6 +189,7 @@ class RiCacheBase
 						break;
 
 					default:
+						m_values[i] = 0;
 						break;
 				}
 			}

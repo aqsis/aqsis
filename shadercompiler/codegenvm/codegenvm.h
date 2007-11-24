@@ -41,17 +41,10 @@
 START_NAMESPACE( Aqsis )
 
 
-class CqCodeGenVM : private IqCodeGen
+class CqCodeGenVM : public IqCodeGen
 {
-	protected:
 	public:
-		CqCodeGenVM()
-		{
-		};
 		virtual void OutputTree( IqParseNode* pNode, std::string strOutName );
-		virtual ~CqCodeGenVM()
-		{
-		};
 };
 
 //-----------------------------------------------------------------------

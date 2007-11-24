@@ -834,16 +834,17 @@ void    CqShaderExecEnv::SO_fsplinea( IqShaderData* value, IqShaderData* a, IqSh
 			}
 			else
 			{
-				spline.clear();
-				TqInt j;
-				for ( j = 0; __fVaryingA && j < cParams; j++ )
+				if(__fVaryingA)
 				{
-					a->ArrayEntry( j ) ->GetFloat( fTemp, __iGrid );
-					spline.pushBack( fTemp);
+					spline.clear();
+					for(TqInt j = 0; j < cParams; j++)
+					{
+						a->ArrayEntry( j ) ->GetFloat( fTemp, __iGrid );
+						spline.pushBack( fTemp);
+					}
 				}
 
 				(Result)->SetFloat( spline.evaluate( _aq_value ), __iGrid );
-				spline.clear();
 			}
 		}
 	}
@@ -905,21 +906,23 @@ void    CqShaderExecEnv::SO_csplinea( IqShaderData* value, IqShaderData* a, IqSh
 			}
 			else
 			{
-				spline.clear();
-				TqInt j;
-				for ( j = 0; __fVaryingA && j < cParams; j++ )
+				if(__fVaryingA)
 				{
-					a->ArrayEntry( j ) ->GetColor( colTemp, __iGrid );
-					spline.pushBack( colTemp );
+					spline.clear();
+					for(TqInt j = 0; j < cParams; j++)
+					{
+						a->ArrayEntry( j ) ->GetColor( colTemp, __iGrid );
+						spline.pushBack( colTemp );
+					}
 				}
 
 				(Result)->SetColor( spline.evaluate( _aq_value ), __iGrid );
-				spline.clear();
 			}
 		}
 	}
 	while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
 }
+
 
 //----------------------------------------------------------------------
 // spline(value, f1,f2,...,fn)
@@ -975,16 +978,17 @@ void    CqShaderExecEnv::SO_psplinea( IqShaderData* value, IqShaderData* a, IqSh
 			}
 			else
 			{
-				spline.clear();
-				TqInt j;
-				for ( j = 0; __fVaryingA && j < cParams; j++ )
+				if(__fVaryingA)
 				{
-					a->ArrayEntry( j ) ->GetPoint( vecTemp, __iGrid );
-					spline.pushBack( vecTemp );
+					spline.clear();
+					for(TqInt j = 0; j < cParams; j++)
+					{
+						a->ArrayEntry( j ) ->GetPoint( vecTemp, __iGrid );
+						spline.pushBack( vecTemp );
+					}
 				}
 
 				(Result)->SetPoint( spline.evaluate( _aq_value ), __iGrid );
-				spline.clear();
 			}
 		}
 	}
@@ -1051,16 +1055,17 @@ void    CqShaderExecEnv::SO_sfsplinea( IqShaderData* basis, IqShaderData* value,
 			}
 			else
 			{
-				spline.clear();
-				TqInt j;
-				for ( j = 0; __fVaryingA && j < cParams; j++ )
+				if(__fVaryingA)
 				{
-					a->ArrayEntry( j ) ->GetFloat( fTemp, __iGrid );
-					spline.pushBack( fTemp );
+					spline.clear();
+					for(TqInt j = 0; j < cParams; j++)
+					{
+						a->ArrayEntry( j ) ->GetFloat( fTemp, __iGrid );
+						spline.pushBack( fTemp );
+					}
 				}
 
 				(Result)->SetFloat( spline.evaluate( _aq_value ), __iGrid );
-				spline.clear();
 			}
 		}
 	}
@@ -1126,16 +1131,17 @@ void    CqShaderExecEnv::SO_scsplinea( IqShaderData* basis, IqShaderData* value,
 			}
 			else
 			{
-				spline.clear();
-				TqInt j;
-				for ( j = 0; __fVaryingA && j < cParams; j++ )
+				if(__fVaryingA)
 				{
-					a->ArrayEntry( j ) ->GetColor( colTemp, __iGrid );
-					spline.pushBack( colTemp );
+					spline.clear();
+					for (TqInt j = 0; j < cParams; j++ )
+					{
+						a->ArrayEntry( j ) ->GetColor( colTemp, __iGrid );
+						spline.pushBack( colTemp );
+					}
 				}
 
 				(Result)->SetColor( spline.evaluate( _aq_value ), __iGrid );
-				spline.clear();
 			}
 		}
 	}
@@ -1200,16 +1206,17 @@ void    CqShaderExecEnv::SO_spsplinea( IqShaderData* basis, IqShaderData* value,
 			}
 			else
 			{
-				spline.clear();
-				TqInt j;
-				for ( j = 0; __fVaryingA && j < cParams; j++ )
+				if(__fVaryingA)
 				{
-					a->ArrayEntry( j ) ->GetPoint( vecTemp, __iGrid );
-					spline.pushBack( vecTemp );
+					spline.clear();
+					for(TqInt j = 0; j < cParams; j++)
+					{
+						a->ArrayEntry( j ) ->GetPoint( vecTemp, __iGrid );
+						spline.pushBack( vecTemp );
+					}
 				}
 
 				(Result)->SetPoint( spline.evaluate( _aq_value ), __iGrid );
-				spline.clear();
 			}
 		}
 	}
