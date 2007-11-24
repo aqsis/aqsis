@@ -695,7 +695,7 @@ inline void	OpHEXTUPLE( A& z, IqShaderData* pRes,
 	TqInt ii2 = MAX( MAX( MAX( pE->Size(), pF->Size() ), pG->Size() ), pH->Size() );
 	TqInt ii3 = MAX( MAX( MAX( pI->Size(), pJ->Size() ), pK->Size() ), pL->Size() );
 	TqInt ii4 = MAX( MAX( MAX( pM->Size(), pN->Size() ), pO->Size() ), pP->Size() );
-	TqInt ii = MAX( MAX( MAX( ii1, ii2 ), ii3 ), ii4 );
+	TqInt ii = MAX( MAX( MAX( ii1, ii2 ), ii3 ), ii4 ) - 1;
 	bool __fVarying = ii > 0;
 	for ( ; ii >= 0; ii-- )
 	{

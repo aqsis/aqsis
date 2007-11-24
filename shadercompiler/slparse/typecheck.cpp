@@ -892,8 +892,10 @@ TqInt	CqParseNodeHexTuple::TypeCheck( TqInt* pTypes, TqInt Count,  bool& needsCa
 	CqParseNode* pExpr = m_pChild;
 	while ( pExpr != 0 )
 	{
+		// Have to get this here, in case the type check inserts a cast above the current expression.
+		CqParseNode* pnextChild = pExpr->pNext();
 		pExpr->TypeCheck( &ExprType, 1, needsCast, CheckOnly );
-		pExpr = pExpr->pNext();
+		pExpr = pnextChild;
 	}
 	// Check if expecting a sixteentuple, if not add a cast
 	TqInt i;
