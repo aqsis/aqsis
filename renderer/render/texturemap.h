@@ -639,10 +639,10 @@ class CqTextureMap : public IqTextureMap
 			return(1);
 		}
 
-		static	CqTextureMap* GetTextureMap( const CqString& strName );
-		static	CqTextureMap* GetEnvironmentMap( const CqString& strName );
-		static	CqTextureMap* GetShadowMap( const CqString& strName );
-		static	CqTextureMap* GetLatLongMap( const CqString& strName );
+		static	IqTextureMap* GetTextureMap( const CqString& strName );
+		static	IqTextureMap* GetEnvironmentMap( const CqString& strName );
+		static	IqTextureMap* GetShadowMap( const CqString& strName );
+		static	IqTextureMap* GetLatLongMap( const CqString& strName );
 
 		//void	ImageFilterVal( CqTextureMapBuffer* pData, TqInt x, TqInt y, TqInt directory, TqInt m_xres, TqInt m_yres, std::vector<TqFloat>& accum );
 
@@ -652,9 +652,9 @@ class CqTextureMap : public IqTextureMap
 		 */
 		static	void	FlushCache()
 		{
-			std::vector<CqTextureMap*>::iterator i;
-			while ( ( i = m_TextureMap_Cache.begin() ) != m_TextureMap_Cache.end() )
-				delete( *i );
+			for(std::vector<IqTextureMap*>::iterator i = m_TextureMap_Cache.begin();
+					i != m_TextureMap_Cache.end(); ++i)
+				delete(*i);
 
 			m_TextureMap_Cache.clear();
 
@@ -684,7 +684,7 @@ class CqTextureMap : public IqTextureMap
 		void   CalculateLevel(TqFloat ds, TqFloat dt);
 
 	protected:
-		static std::vector<CqTextureMap*>	m_TextureMap_Cache;	///< Static array of loaded textures.
+		static std::vector<IqTextureMap*> m_TextureMap_Cache;	///< Static array of loaded textures.
 		static std::vector<CqString*>	m_ConvertString_Cache; ///< Static array of filename (after conversion)
 
 		TqInt m_Compression;            ///< TIFF Compression model

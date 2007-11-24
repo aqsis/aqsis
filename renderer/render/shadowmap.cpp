@@ -115,16 +115,16 @@ void CqShadowMap::AllocateMap( TqInt XRes, TqInt YRes )
  * load it if possible..
  */
 
-CqTextureMap* CqTextureMap::GetShadowMap( const CqString& strName )
+IqTextureMap* CqTextureMap::GetShadowMap( const CqString& strName )
 {
 	QGetRenderContext() ->Stats().IncTextureMisses( 3 );
 
 	TqUlong hash = CqString::hash(strName.c_str());
 
 	// First search the texture map cache
-	for ( std::vector<CqTextureMap*>::iterator i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
+	for ( std::vector<IqTextureMap*>::iterator i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
 	{
-		if ( ( *i ) ->m_hash == hash )
+		if ( (*i)->getName() == strName )
 		{
 			if ( ( *i ) ->Type() == MapType_Shadow )
 			{

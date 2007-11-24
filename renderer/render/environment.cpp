@@ -47,16 +47,16 @@ START_NAMESPACE( Aqsis )
  * load it if possible..
  */
 
-CqTextureMap* CqTextureMap::GetLatLongMap( const CqString& strName )
+IqTextureMap* CqTextureMap::GetLatLongMap( const CqString& strName )
 {
 	QGetRenderContext() ->Stats().IncTextureMisses( 2 );
 
 	TqUlong hash = CqString::hash(strName.c_str());
 
 	// First search the texture map cache
-	for ( std::vector<CqTextureMap*>::iterator i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
+	for ( std::vector<IqTextureMap*>::iterator i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
 	{
-		if ( ( *i ) ->m_hash == hash )
+		if ( (*i) ->getName() == strName )
 		{
 			if ( ( *i ) ->Type() == MapType_LatLong )
 			{
@@ -100,16 +100,16 @@ CqTextureMap* CqTextureMap::GetLatLongMap( const CqString& strName )
  * load it if possible..
  */
 
-CqTextureMap* CqTextureMap::GetEnvironmentMap( const CqString& strName )
+IqTextureMap* CqTextureMap::GetEnvironmentMap( const CqString& strName )
 {
 	QGetRenderContext() ->Stats().IncTextureMisses( 1 );
 
 	TqUlong hash = CqString::hash(strName.c_str());
 
 	// First search the texture map cache
-	for ( std::vector<CqTextureMap*>::iterator i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
+	for ( std::vector<IqTextureMap*>::iterator i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
 	{
-		if ( ( *i ) ->m_hash == hash )
+		if ( ( *i ) ->getName() == strName )
 		{
 			if ( ( *i ) ->Type() == MapType_Environment )
 			{

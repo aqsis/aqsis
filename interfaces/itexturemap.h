@@ -21,6 +21,9 @@
 START_NAMESPACE( Aqsis )
 
 struct IqShaderData;
+class CqVector3D;
+class CqString;
+class CqMatrix;
 
 //----------------------------------------------------------------------
 /** \enum EqMapType

@@ -40,6 +40,7 @@
 #include	"renderer.h"
 #include	"converter.h"
 #include	"logging.h"
+#include	"texturemap2.h"
 
 #ifndef		AQSIS_SYSTEM_WIN32
 #include	"unistd.h"
@@ -108,7 +109,7 @@ static TqFloat sides[6][2]    =  {
 //---------------------------------------------------------------------
 /** Static array of cached texture maps.
  */
-std::vector<CqTextureMap*>	CqTextureMap::m_TextureMap_Cache;
+std::vector<IqTextureMap*> CqTextureMap::m_TextureMap_Cache;
 std::vector<CqString*> CqTextureMap::m_ConvertString_Cache;
 
 #ifdef ALLOCSEGMENTSTATUS
@@ -386,7 +387,7 @@ void CqTextureMap::CriticalMeasure()
 {
 	TqInt current, now; 
 	static TqInt limit = -1;
-	std::vector<CqTextureMap*>::iterator j;
+	std::vector<CqTextureMap2*>::iterator j;
 	std::list<CqTextureMapBuffer*>::iterator i;
 	std::list<CqTextureMapBuffer*>::iterator e;
 
@@ -402,6 +403,9 @@ void CqTextureMap::CriticalMeasure()
 
 
 	now = QGetRenderContext() ->Stats().GetTextureMemory();
+// The following is commented out, as the old cache mechanism will be obsolete
+// with CqTextureMap2.
+#if 0
 	bool getout = true;
 
 	if ( m_critical )
@@ -459,6 +463,7 @@ void CqTextureMap::CriticalMeasure()
 		}
 	}
 	current = QGetRenderContext() ->Stats().GetTextureMemory();
+#endif
 
 	m_critical = false;
 
@@ -525,8 +530,11 @@ CqTextureMap::~CqTextureMap()
 	// Close the file.
 	Close();
 	// Search for it in the cache and remove the reference.
-	std::vector<CqTextureMap*>::iterator i;
+	std::vector<CqTextureMap2*>::iterator i;
 
+// Commented out: old cache mechanism is obsolete for CqTextureMap2 (but needs
+// to be replaced)
+#if 0
 	for ( i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
 	{
 		if ( ( *i ) == this )
@@ -535,6 +543,7 @@ CqTextureMap::~CqTextureMap()
 			break;
 		}
 	}
+#endif
 
 	std::vector<CqString*>::iterator j;
 	for ( j = m_ConvertString_Cache.begin(); j != m_ConvertString_Cache.end(); j++ )
@@ -1022,16 +1031,16 @@ void CqTextureMap::GetSample( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, st
 /** Check if a texture map exists in the cache, return a pointer to it if so, else
  * load it if possible..
  */
-CqTextureMap* CqTextureMap::GetTextureMap( const CqString& strName )
+IqTextureMap* CqTextureMap::GetTextureMap( const CqString& strName )
 {
 	QGetRenderContext() ->Stats().IncTextureMisses( 0 );
 
 	TqUlong hash = CqString::hash(strName.c_str());
 
 	// First search the texture map cache
-	for ( std::vector<CqTextureMap*>::iterator i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
+	for ( std::vector<IqTextureMap*>::iterator i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
 	{
-		if ( ( *i ) ->m_hash == hash )
+		if( (*i)->getName() == strName )
 		{
 			if ( ( *i ) ->Type() == MapType_Texture )
 			{
@@ -1047,16 +1056,19 @@ CqTextureMap* CqTextureMap::GetTextureMap( const CqString& strName )
 	QGetRenderContext() ->Stats().IncTextureHits( 0, 0 );
 
 	// If we got here, it doesn't exist yet, so we must create and load it.
-	CqTextureMap* pNew = new CqTextureMap( strName );
+	CqTextureMap2* pNew = new CqTextureMap2( strName );
 	pNew->Open();
 
 	// Ensure that it is in the correct format
+// Commented out for transition to CqTextureMap2
+#if 0
 	if ( pNew->Format() != TexFormat_MIPMAP )
 	{
 		if( !pNew->CreateMIPMAP( true ) )
 			pNew->SetInvalid();
 		pNew->Close();
 	}
+#endif
 
 	m_TextureMap_Cache.push_back( pNew );
 	return ( pNew );
