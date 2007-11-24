@@ -23,6 +23,7 @@ SET(AQSISTEX_SRCS
 	tiffdirhandle.cpp
 	tiffinputfile.cpp
 	tiffoutputfile.cpp
+	texturemap2.cpp
 	imagechannel.cpp
 	mixedimagebuffer.cpp
 	)

@@ -137,13 +137,13 @@ COMMON_SHARE class IqMultiTexInputFile : public IqTexInputFile
 		 *
 		 * \return the current image index
 		 */
-		inline virtual TqInt imageIndex() const = 0;
+		virtual TqInt imageIndex() const = 0;
 
 		/** Get the number of images in the multi-image file.
 		 *
 		 * \return The number of images
 		 */
-		inline virtual TqInt numSubImages() const = 0;
+		virtual TqInt numSubImages() const = 0;
 };
 
 
