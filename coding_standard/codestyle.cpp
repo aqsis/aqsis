@@ -58,14 +58,15 @@ void CqIntWrapper::setData(TqInt data)
 
 	if(*m_data == theAnswer && data != theAnswer)
 	{
-		// It's often tempting to use unsigned integers for things which
-		// logically cannot be negative.  Many experts (though perhaps not all)
-		// agree that this is a bad thing in C or C++ because of the subtle
-		// bugs it can cause.  For example, the following is false on most archs:
+		// Avoid using unsigned integers, even for things which logically
+		// cannot be negative.  Many experts (though perhaps not all) agree
+		// that this is a bad thing in C and C++ because of the subtle bugs it
+		// can cause.  For example, the following is false on most
+		// architectures:
 		//
-		// (int)(-1) < (unsigned int)(1)
+		//   (int)(-1) < (unsigned int)(1)
 		//
-		// For more information, see the aqsis mailing list:
+		// For more information, see the aqsis mailing list post:
 		//   'Unsigned integers "considered harmful"?'
 		// http://sourceforge.net/mailarchive/forum.php?thread_name=20070829120534.GA17365%40physics.uq.edu.au&forum_name=aqsis-development
 		const TqInt maxInsults = 10;
