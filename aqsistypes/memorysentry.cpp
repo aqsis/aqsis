@@ -64,15 +64,14 @@ CqMemorySentry::~CqMemorySentry()
 //------------------------------------------------------------------------------
 // Implementation for CqMemoryMonitored
 //------------------------------------------------------------------------------
-CqMemoryMonitored::CqMemoryMonitored(CqMemorySentry& memorySentry)
+CqMemoryMonitored::CqMemoryMonitored(const boost::shared_ptr<CqMemorySentry>& memorySentry)
 	: m_memorySentry(memorySentry)
-{
-}
+{ }
 
-//------------------------------------------------------------------------------
-CqMemorySentry& CqMemoryMonitored::memorySentry() const
+void CqMemoryMonitored::incrementMemoryUsage(CqMemorySentry::TqMemorySize numBytes)
 {
-	return m_memorySentry;
+	if(m_memorySentry)
+		m_memorySentry->incrementTotalMemory(numBytes);
 }
 
 //------------------------------------------------------------------------------

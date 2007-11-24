@@ -34,6 +34,7 @@
 #include <stddef.h>
 
 #include <boost/enable_shared_from_this.hpp>
+#include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
 #include <boost/utility.hpp>
 
@@ -73,7 +74,7 @@ class CqMemorySentry : boost::noncopyable
 		 */
 		CqMemorySentry(const TqMemorySize maxMemory);
 
-		/** \brief Register an obejct to be have its memory usage overseen by
+		/** \brief Register an object to be have its memory usage overseen by
 		 * this memory sentry.
 		 *
 		 * If the sentry runs out of memory, this object may have its
@@ -122,9 +123,12 @@ class CqMemoryMonitored : boost::enable_shared_from_this<CqMemoryMonitored>
 	public:
 		/** \brief Create an object to be monitored by a CqMemorySentry
 		 *
-		 * \param memorySentry monitoring sentry for the memory used by the object.
+		 * \param memorySentry monitoring sentry for the memory used by the
+		 *   object.  The default is a null sentry indicating that no
+		 *   monitoring should be performed.
 		 */
-		CqMemoryMonitored(CqMemorySentry& memorySentry);
+		CqMemoryMonitored(const boost::shared_ptr<CqMemorySentry>& memorySentry
+				= boost::shared_ptr<CqMemorySentry>());
 
 		/** \brief Ask the object to deallocate as much memory as possible.
 		 *
@@ -138,15 +142,17 @@ class CqMemoryMonitored : boost::enable_shared_from_this<CqMemoryMonitored>
 		 */
 		virtual ~CqMemoryMonitored() = 0;
 	protected:
-		/** \brief get the memory sentry for this object.
+		/** \brief Should be called by child classes to increment the total
+		 * memory use.
 		 *
-		 * \return the memory sentry which monitors this object.
+		 * May cause a callback by the memory sentry to the zapMemory()
+		 * function if necessary.
 		 */
-		CqMemorySentry& memorySentry() const;
+		void incrementMemoryUsage(CqMemorySentry::TqMemorySize numBytes);
 
 	private:
-		/// The sentry object which is monitoring the memory for this object.
-		CqMemorySentry& m_memorySentry;
+		/// The sentry object which monitors the memory for this object.
+		boost::shared_ptr<CqMemorySentry> m_memorySentry;
 };
 
 
