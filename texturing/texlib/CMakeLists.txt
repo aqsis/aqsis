@@ -20,6 +20,7 @@ SET(AQSISTEX_SRCS
 	itexoutputfile.cpp
 	magicnumber.cpp
 	texfileheader.cpp
+	texturesampler.cpp
 	tiffdirhandle.cpp
 	tiffinputfile.cpp
 	tiffoutputfile.cpp

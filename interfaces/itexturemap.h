@@ -63,6 +63,47 @@ enum EqTexFormat
 };
 
 
+/** \brief Texture filter types
+ *
+ * The texture filters define the weighting functions for texture filtering.
+ *
+ * EWA (Elliptical Weighted Average or gaussian) filtering is very high
+ * quality, so it's expected that most people will want this.
+ *
+ * Other filter types are evaluated by Monte Carlo integration of a bilinearly
+ * reconstructed texture over the filter support, while EWA is analytical, (so
+ * has no sampling noise).
+ */
+enum EqTextureFilter
+{
+	TextureFilter_Box,
+	TextureFilter_Gaussian ///< implies EWA filtering
+};
+
+//----------------------------------------------------------------------
+/** \brief Contain the standard renderman texture/environment sampling options
+ *
+ * This struct holds the set of all sampling parameters which may be passed as
+ * strings to the texture() and environment() RSL calls.
+ */
+struct SqTextureSampleOptions
+{
+	TqFloat blur;
+	TqFloat sblur;
+	TqFloat tblur;
+	TqFloat width;
+	TqFloat swidth;
+	TqFloat twidth;
+	EqTextureFilter filterType;
+	TqFloat fill;
+
+	/// Trivial constructor.
+	inline SqTextureSampleOptions( TqFloat blur, TqFloat sblur, TqFloat tblur,
+			TqFloat width, TqFloat swidth, TqFloat twidth,
+			EqTextureFilter filterType, TqFloat fill);
+	/// Set all fields to zero, and the filter to Gaussian.
+	inline SqTextureSampleOptions();
+};
 
 
 //----------------------------------------------------------------------
@@ -130,6 +171,23 @@ struct IqTextureMap
 };
 
 
+//==============================================================================
+// Implementation details.
+//==============================================================================
+
+// SqTextureSampleOptions implementation
+
+inline SqTextureSampleOptions::SqTextureSampleOptions(
+		TqFloat blur, TqFloat sblur, TqFloat tblur, TqFloat width,
+		TqFloat swidth, TqFloat twidth, EqTextureFilter filterType, TqFloat fill)
+	: blur(blur), sblur(sblur), tblur(tblur), width(width),
+	swidth(swidth), twidth(twidth), filterType(filterType), fill(fill)
+{ }
+
+inline SqTextureSampleOptions::SqTextureSampleOptions()
+	: blur(0), sblur(0), tblur(0), width(0),
+	swidth(0), twidth(0), filterType(TextureFilter_Gaussian), fill(0)
+{ }
 
 //-----------------------------------------------------------------------
 

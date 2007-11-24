@@ -28,6 +28,7 @@
 
 #include "vector3d.h"
 #include "matrix.h"
+#include "texturesampler.h"
 
 namespace Aqsis
 {
@@ -36,39 +37,80 @@ namespace Aqsis
 // Implementation of CqTextureMap2
 
 CqTextureMap2::CqTextureMap2(const std::string& fileName)
-	: m_fileName(fileName)
+	: m_fileName(fileName),
+	m_mipLevels()
 {
+	// \todo decide how many mipmap levels are needed.
+	m_mipLevels.resize(1);
+	m_mipLevels[0] = IqTextureSampler::create(
+			boost::shared_ptr<IqTiledTexInputFile>());
 }
 
-void CqTextureMap2::Open()
+TqInt CqTextureMap2::numSamples() const
+{
+	/// \todo implementation
+	return 1;
+}
+
+const std::string& CqTextureMap2::name() const
+{
+	return m_fileName;
+}
+
+void CqTextureMap2::sampleMap(const SqSampleQuad& sampleQuad,
+		TqFloat* outSamples) const
+{
+	m_mipLevels[0]->filter(sampleQuad, outSamples);
+}
+
+
+//------------------------------------------------------------------------------
+// Implementation of CqTextureMap2Wrapper
+
+CqTextureMap2Wrapper::CqTextureMap2Wrapper(const std::string& fileName)
+	: m_fileName(),
+	m_realMap(fileName)
+{ }
+
+void CqTextureMap2Wrapper::Open()
 {
 	// \todo implementation
 }
 
-void CqTextureMap2::Close()
+void CqTextureMap2Wrapper::Close()
 {
 	// \todo implementation
 }
 
-void CqTextureMap2::PrepareSampleOptions(std::map<std::string, IqShaderData*>& paramMap )
+void CqTextureMap2Wrapper::PrepareSampleOptions(std::map<std::string, IqShaderData*>& paramMap )
 {
 	// \todo implementation
 }
 
-void CqTextureMap2::SampleMap(TqFloat s1, TqFloat t1, TqFloat swidth, TqFloat twidth,
+void CqTextureMap2Wrapper::SampleMap(TqFloat s1, TqFloat t1, TqFloat swidth, TqFloat twidth,
 		std::valarray<TqFloat>& val)
 {
 	// \todo implementation
+	//
+	// In fact, we really don't want to implement this - it's a generally
+	// broken way of accessing a texture.
+	//assert(0);
+	val.resize(SamplesPerPixel());
+	const SqSampleQuad sQuad(s1,t1, s1,t1, s1,t1, s1,t1);
+	m_realMap.sampleMap(sQuad, &val[0]);
 }
 
-void CqTextureMap2::SampleMap(TqFloat s1, TqFloat t1, TqFloat s2, TqFloat t2,
+void CqTextureMap2Wrapper::SampleMap(TqFloat s1, TqFloat t1, TqFloat s2, TqFloat t2,
 		TqFloat s3, TqFloat t3, TqFloat s4, TqFloat t4,
 		std::valarray<TqFloat>& val )
 {
 	// \todo implementation
+	val.resize(SamplesPerPixel());
+	const SqSampleQuad sQuad(s1,t1, s2,t2, s3,t3, s4,t4);
+	m_realMap.sampleMap(sQuad, &val[0]);
 }
 
-inline CqMatrix& CqTextureMap2::GetMatrix(TqInt which, TqInt index)
+inline CqMatrix& CqTextureMap2Wrapper::GetMatrix(TqInt which, TqInt index)
 {
 	// This matrix isn't incredibly meaningful for normal texture maps.
 	// However some of the "stupid RAT tricks" have used it IIRC.

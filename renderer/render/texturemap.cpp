@@ -387,7 +387,7 @@ void CqTextureMap::CriticalMeasure()
 {
 	TqInt current, now; 
 	static TqInt limit = -1;
-	std::vector<CqTextureMap2*>::iterator j;
+	std::vector<CqTextureMap2Wrapper*>::iterator j;
 	std::list<CqTextureMapBuffer*>::iterator i;
 	std::list<CqTextureMapBuffer*>::iterator e;
 
@@ -529,12 +529,13 @@ CqTextureMap::~CqTextureMap()
 {
 	// Close the file.
 	Close();
-	// Search for it in the cache and remove the reference.
-	std::vector<CqTextureMap2*>::iterator i;
 
 // Commented out: old cache mechanism is obsolete for CqTextureMap2 (but needs
 // to be replaced)
 #if 0
+	// Search for it in the cache and remove the reference.
+	std::vector<CqTextureMap2Wrapper*>::iterator i;
+
 	for ( i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
 	{
 		if ( ( *i ) == this )
@@ -1035,7 +1036,7 @@ IqTextureMap* CqTextureMap::GetTextureMap( const CqString& strName )
 {
 	QGetRenderContext() ->Stats().IncTextureMisses( 0 );
 
-	TqUlong hash = CqString::hash(strName.c_str());
+	// TqUlong hash = CqString::hash(strName.c_str());
 
 	// First search the texture map cache
 	for ( std::vector<IqTextureMap*>::iterator i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
@@ -1056,7 +1057,7 @@ IqTextureMap* CqTextureMap::GetTextureMap( const CqString& strName )
 	QGetRenderContext() ->Stats().IncTextureHits( 0, 0 );
 
 	// If we got here, it doesn't exist yet, so we must create and load it.
-	CqTextureMap2* pNew = new CqTextureMap2( strName );
+	CqTextureMap2Wrapper* pNew = new CqTextureMap2Wrapper( strName );
 	pNew->Open();
 
 	// Ensure that it is in the correct format

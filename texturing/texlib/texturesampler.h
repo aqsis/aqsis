@@ -27,60 +27,122 @@
 #ifndef TEXTURESAMPLER_H_INCLUDED
 #define TEXTURESAMPLER_H_INCLUDED
 
+#include "aqsis.h"
+
+#include <valarray>
+
+#include "tilearray.h"
+#include "aqsismath.h"
+#include "samplequad.h"
+
 namespace Aqsis {
 
 //------------------------------------------------------------------------------
 /** \brief A class which knows how to sample texture buffers.
  *
  */
-class CqTextureSampler
+class IqTextureSampler
 {
 	public:
-		inline void filter(std::vector<TqFloat>& sBox, std::vector<TqFloat>& tBox, std::vector<TqFloat>& output);
-		static boost::shared_ptr<CqTextureSampler> create(const boost::shared_ptr<IqTiledTexInputFile>& file);
-		virtual ~CqTextureSampler();
-	protected:
-		/**
+		/** \brief Sample the texture with the current filter
 		 */
-		virtual void filterClosest(TqFloat s, TqFloat t, std::vector<TqFloat>& output) = 0;
-		/** \breif Elliptical Weighted Average (EWA) filter
+		virtual void filter(const SqSampleQuad& sampleQuad, TqFloat* output) const = 0;
+		/** \brief Create and return a IqTextureSampler derived class
+		 *
+		 * The returned class is a CqTextureSamplerImpl<T> where T is a type
+		 * appropriate to the pixel type held in the file.
 		 */
-		virtual void filterEWA(TqFloat s, TqFloat t, std::vector<TqFloat>& output) = 0;
-		/**
-		 */
-		virtual void filterMCI(TqFloat s, TqFloat t, std::vector<TqFloat>& output) = 0;
-	private:
+		static boost::shared_ptr<IqTextureSampler> create(
+				const boost::shared_ptr<IqTiledTexInputFile>& file);
+		virtual ~IqTextureSampler() {}
 };
 
 //------------------------------------------------------------------------------
 /** \brief Implementation of texture buffer samplers
  */
 template<typename T>
-class CqTextureSamplerImpl : public CqTextureSampler
+class CqTextureSamplerImpl : public IqTextureSampler
 {
 	public:
-		CqTextureSamplerImpl(const boost::shared_ptr<CqTextureSampler>& tiffFile, sOffset, sMult, tOffset, tMult);
-		inline void filter(std::vector<TqFloat>& sBox, std::vector<TqFloat>& tBox, std::vector<TqFloat>& output);
-	protected:
-		inline void sampleBilinear(TqFloat s, TqFloat t, std::vector<TqFloat>& output);
-		inline void filterEWA(std::vector<TqFloat>& sBox, std::vector<TqFloat>& tBox, std::vector<TqFloat>& output);
-		inline void filterMCI(std::vector<TqFloat>& sBox, std::vector<TqFloat>& tBox, std::vector<TqFloat>& output);
-		inline void texToRasterCoords(TqFloat s, TqFloat t, TqFloat& sOut, TqFloat& tOut);
-		/// May be better put in the CqTextureTileArray class.
-		inline bool putWithinBounds(TqInt& iStart, TqInt& iStop, TqInt& jStart, TqInt& jStop);
-		inline CqMatrix2D estimateJacobian(std::vector<TqFloat>& sBox, std::vector<TqFloat>& tBox);
+		CqTextureSamplerImpl(const boost::shared_ptr<CqTileArray<T> >& texData);
+		virtual void filter(const SqSampleQuad& sampleQuad, TqFloat* output) const;
 	private:
-		CqTileArray<T> m_imageData;
-		TqFloat m_sOffset;
+		/*
+		inline void sampleBilinear(TqFloat s, TqFloat t, std::valarray<TqFloat>& output);
+		void filterEWA(
+		void filterMCI(
+		*/
+		inline void texToRasterCoords(TqFloat s, TqFloat t, TqInt& sOut, TqInt& tOut) const;
+		void filterNearestNeighbour(const SqSampleQuad& sampleQuad, TqFloat* output) const;
+		/// May be better put in the CqTextureTileArray class.
+		//inline bool putWithinBounds(TqInt& iStart, TqInt& iStop, TqInt& jStart, TqInt& jStop);
+		//inline CqMatrix2D estimateJacobian(const SqSampleQuad& sampleQuad);
+		TqFloat dummyGridTex(TqInt s, TqInt t) const;
+
+	private:
+		// instance data
+		boost::shared_ptr<CqTileArray<T> > m_texData;
 		TqFloat m_sMult;
-		TqFloat m_tOffset;
 		TqFloat m_tMult;
+		/// (Analyse performance+complexity/quality tradeoff before including offsets):
+		//TqFloat m_tOffset;
+		//TqFloat m_sOffset;
 };
 
 
 //==============================================================================
 // Implementation details
 //==============================================================================
+
+template<typename T>
+inline CqTextureSamplerImpl<T>::CqTextureSamplerImpl(
+		const boost::shared_ptr<CqTileArray<T> >& texData)
+	: m_texData(texData),
+	m_sMult(511),
+	m_tMult(511)
+{ }
+
+template<typename T>
+void CqTextureSamplerImpl<T>::filter(const SqSampleQuad& sampleQuad, TqFloat* output) const
+{
+	// \todo add switch based on filter algorithm
+	filterNearestNeighbour(sampleQuad, output);
+}
+
+template<typename T>
+inline void CqTextureSamplerImpl<T>::texToRasterCoords(TqFloat s, TqFloat t, TqInt& sOut, TqInt& tOut) const
+{
+	// \todo handle edge clip mode.  For now just clamp.
+	sOut = lfloor(m_sMult*clamp<TqFloat>(s, 0.0f, 1.0f)+0.5);
+	tOut = lfloor(m_tMult*clamp<TqFloat>(t, 0.0f, 1.0f)+0.5);
+}
+
+template<typename T>
+void CqTextureSamplerImpl<T>::filterNearestNeighbour(
+		const SqSampleQuad& sQuad, TqFloat* output) const
+{
+	// \todo implementation
+	TqInt s = 0;
+	TqInt t = 0;
+	texToRasterCoords((sQuad.v1.x() + sQuad.v2.x() + sQuad.v3.x() + sQuad.v4.x())/4,
+			(sQuad.v1.y() + sQuad.v2.y() + sQuad.v3.y() + sQuad.v4.y())/4,
+			s, t);
+	TqFloat texVal = dummyGridTex(s, t);
+	for(TqInt i = 1; i > 0; --i, ++output)
+		*output = texVal;
+}
+
+template<typename T>
+TqFloat CqTextureSamplerImpl<T>::dummyGridTex(TqInt s, TqInt t) const
+{
+	const TqInt gridSize = 8;
+	const TqInt lineWidth = 1;
+	TqFloat outVal = 1;
+	//if((s / gridSize) % 2 == 0 | (t / gridSize) % 2 == 0) // checkered
+	if((s % gridSize) < lineWidth || (t % gridSize) < lineWidth) // grid
+		outVal = 0;
+	return outVal;
+}
 
 //------------------------------------------------------------------------------
 /** \brief A minimal 2D matrix class for use in texture warping.

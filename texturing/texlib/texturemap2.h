@@ -30,22 +30,47 @@
 #include "aqsis.h"
 
 #include <string>
+#include <vector>
+
+#include <boost/shared_ptr.hpp>
 
 #include "itexturemap.h"
 #include "sstring.h"
+#include "samplequad.h" // \todo remove include when itexturemap.h is moved
 
 namespace Aqsis
 {
 
+class IqTextureSampler;
+
+//------------------------------------------------------------------------------
+
 /* \brief A multi-resolution filtering texture sampler
  *
  * \todo Rename this to CqTextureMap after the old CqTextureMap is removed.
- * \todo Refactor when a new IqTextureMap interface is decided on.
  */
-class CqTextureMap2 : public IqTextureMap
+class CqTextureMap2
 {
 	public:
 		CqTextureMap2(const std::string& fileName);
+		virtual TqInt numSamples() const;
+		//virtual const CqTexFileHeader& attributes() const;
+		virtual const std::string& name() const;
+		virtual void sampleMap(const SqSampleQuad& sampleQuad,
+				TqFloat* outSamples) const;
+
+		virtual ~CqTextureMap2() {}
+	private:
+		std::string m_fileName;
+		mutable std::vector<boost::shared_ptr<IqTextureSampler> > m_mipLevels;
+};
+
+/// Temporary wrapper class for 
+/// \todo Refactor when a new IqTextureMap interface is decided on.
+class CqTextureMap2Wrapper : public IqTextureMap
+{
+	public:
+		CqTextureMap2Wrapper(const std::string& fileName);
 
 		// The following are overridden from IqTextureMap.  It's rather a fat
 		// interface and badly needs to be slimmed down.
@@ -76,70 +101,73 @@ class CqTextureMap2 : public IqTextureMap
 		virtual TqInt NumPages() const;
 	private:
 		/// \todo replace this with std::string when the interface is revamped.
-		CqString m_fileName;
+		mutable CqString m_fileName;
+		CqTextureMap2 m_realMap;
 };
-
 
 //==============================================================================
 // Implementation details
 //==============================================================================
 
-inline TqUint CqTextureMap2::XRes() const
+// CqTextureMap2Wrapper implementation
+
+inline TqUint CqTextureMap2Wrapper::XRes() const
 {
 	// \todo implementation
 	return 512;
 }
 
-inline TqUint CqTextureMap2::YRes() const
+inline TqUint CqTextureMap2Wrapper::YRes() const
 {
 	// \todo implementation
 	return 512;
 }
 
-inline TqInt CqTextureMap2::SamplesPerPixel() const
+inline TqInt CqTextureMap2Wrapper::SamplesPerPixel() const
 {
 	// \todo implementation
-	return 1;
+	return m_realMap.numSamples();
 }
 
-inline EqTexFormat CqTextureMap2::Format() const
+inline EqTexFormat CqTextureMap2Wrapper::Format() const
 {
 	// \todo implementation
 	return TexFormat_MIPMAP;
 }
 
-inline EqMapType CqTextureMap2::Type() const
+inline EqMapType CqTextureMap2Wrapper::Type() const
 {
 	return MapType_Texture;
 }
 
-inline const CqString& CqTextureMap2::getName() const
+inline const CqString& CqTextureMap2Wrapper::getName() const
 {
 	// \todo implementation
+	m_fileName = m_realMap.name();
 	return m_fileName;
 }
 
-inline bool CqTextureMap2::IsValid() const
+inline bool CqTextureMap2Wrapper::IsValid() const
 {
 	// \todo implementation
 	return true;
 }
 
-inline void CqTextureMap2::SampleMap(CqVector3D& R, CqVector3D& swidth, CqVector3D& twidth,
+inline void CqTextureMap2Wrapper::SampleMap(CqVector3D& R, CqVector3D& swidth, CqVector3D& twidth,
 		std::valarray<TqFloat>& val, TqInt index,
 		TqFloat* average_depth, TqFloat* shadow_depth)
 {
 	assert(false);
 }
 
-inline void CqTextureMap2::SampleMap(CqVector3D& R1, CqVector3D& R2, CqVector3D& R3,
+inline void CqTextureMap2Wrapper::SampleMap(CqVector3D& R1, CqVector3D& R2, CqVector3D& R3,
 		CqVector3D& R4, std::valarray<TqFloat>& val, TqInt index,
 		TqFloat* average_depth, TqFloat* shadow_depth)
 {
 	assert(false);
 }
 
-inline TqInt CqTextureMap2::NumPages() const
+inline TqInt CqTextureMap2Wrapper::NumPages() const
 {
 	return 1;
 }

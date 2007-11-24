@@ -45,6 +45,8 @@
 
 namespace Aqsis {
 
+class IqTiledTexInputFile;
+
 //------------------------------------------------------------------------------
 /** \brief 2D array interface for tiled data - aimed at tiled textures.
  *
@@ -71,7 +73,9 @@ class CqTileArray : public CqMemoryMonitored
 		 * The constructor throws an error if the file cannot be read.
 		 *
 		 */
-		CqTileArray(const boost::shared_ptr<IqTiledTexInputFile>& texFile);
+		CqTileArray( const boost::shared_ptr<IqTiledTexInputFile>& texFile,
+				const boost::shared_ptr<CqMemorySentry>& memSentry
+					= boost::shared_ptr<CqMemorySentry>() );
 
 		/** \brief Get the value of the array at the given position
 		 *
@@ -174,6 +178,12 @@ class CqTileArray : public CqMemoryMonitored
 //==============================================================================
 
 // Implementation for CqTileArray
+
+template<typename T>
+CqTileArray<T>::CqTileArray( const boost::shared_ptr<IqTiledTexInputFile>& texFile,
+		const boost::shared_ptr<CqMemorySentry>& memSentry)
+	: CqMemoryMonitored(memSentry)
+{ }
 
 template<typename T>
 inline TqInt CqTileArray<T>::width() const
