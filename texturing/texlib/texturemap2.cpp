@@ -58,9 +58,9 @@ const std::string& CqTextureMap2::name() const
 }
 
 void CqTextureMap2::sampleMap(const SqSampleQuad& sampleQuad,
-		TqFloat* outSamples) const
+		const SqTextureSampleOptions& sampleOpts, TqFloat* outSamples) const
 {
-	m_mipLevels[0]->filter(sampleQuad, outSamples);
+	m_mipLevels[0]->filter(sampleQuad, sampleOpts, outSamples);
 }
 
 
@@ -95,9 +95,9 @@ void CqTextureMap2Wrapper::SampleMap(TqFloat s1, TqFloat t1, TqFloat swidth, TqF
 	// In fact, we really don't want to implement this - it's a generally
 	// broken way of accessing a texture.
 	//assert(0);
-	val.resize(SamplesPerPixel());
-	const SqSampleQuad sQuad(s1,t1, s1,t1, s1,t1, s1,t1);
-	m_realMap.sampleMap(sQuad, &val[0]);
+	SampleMap(s1-swidth/2, t1-twidth/2,  s1+swidth/2, t1-twidth/2,
+			s1-swidth/2, t1+twidth/2,  s1+swidth/2, t1+twidth/2,
+			val);
 }
 
 void CqTextureMap2Wrapper::SampleMap(TqFloat s1, TqFloat t1, TqFloat s2, TqFloat t2,
@@ -107,7 +107,9 @@ void CqTextureMap2Wrapper::SampleMap(TqFloat s1, TqFloat t1, TqFloat s2, TqFloat
 	// \todo implementation
 	val.resize(SamplesPerPixel());
 	const SqSampleQuad sQuad(s1,t1, s2,t2, s3,t3, s4,t4);
-	m_realMap.sampleMap(sQuad, &val[0]);
+	const SqTextureSampleOptions sampleOpts(0,0, 1,1, TextureFilter_Gaussian,
+			0, 0, 1);
+	m_realMap.sampleMap(sQuad, sampleOpts, &val[0]);
 }
 
 inline CqMatrix& CqTextureMap2Wrapper::GetMatrix(TqInt which, TqInt index)

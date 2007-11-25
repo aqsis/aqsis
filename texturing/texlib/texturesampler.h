@@ -34,6 +34,7 @@
 #include "tilearray.h"
 #include "aqsismath.h"
 #include "samplequad.h"
+#include "texturesampleoptions.h"
 
 namespace Aqsis {
 
@@ -44,13 +45,20 @@ namespace Aqsis {
 class IqTextureSampler
 {
 	public:
-		/** \brief Sample the texture with the current filter
+		/** \brief Sample the texture with the provided sample options.
+		 *
+		 * \param sampleQuad - quadrilateral region to sample over
+		 * \param sampleOpts - options to the sampler, including filter widths etc.
+		 * \param output - the output samples will be placed here.  
 		 */
-		virtual void filter(const SqSampleQuad& sampleQuad, TqFloat* output) const = 0;
+		virtual void filter(const SqSampleQuad& sampleQuad,
+				const SqTextureSampleOptions& sampleOpts, TqFloat* output) const = 0;
 		/** \brief Create and return a IqTextureSampler derived class
 		 *
 		 * The returned class is a CqTextureSamplerImpl<T> where T is a type
 		 * appropriate to the pixel type held in the file.
+		 *
+		 * \param file - tiled texture file which the sampler should be connected to.
 		 */
 		static boost::shared_ptr<IqTextureSampler> create(
 				const boost::shared_ptr<IqTiledTexInputFile>& file);
@@ -65,15 +73,17 @@ class CqTextureSamplerImpl : public IqTextureSampler
 {
 	public:
 		CqTextureSamplerImpl(const boost::shared_ptr<CqTileArray<T> >& texData);
-		virtual void filter(const SqSampleQuad& sampleQuad, TqFloat* output) const;
+		virtual void filter(const SqSampleQuad& sampleQuad,
+				const SqTextureSampleOptions& sampleOpts, TqFloat* output) const;
 	private:
 		/*
 		inline void sampleBilinear(TqFloat s, TqFloat t, std::valarray<TqFloat>& output);
 		void filterEWA(
-		void filterMCI(
+		void filterMC(
 		*/
 		inline void texToRasterCoords(TqFloat s, TqFloat t, TqInt& sOut, TqInt& tOut) const;
-		void filterNearestNeighbour(const SqSampleQuad& sampleQuad, TqFloat* output) const;
+		void filterNearestNeighbour(const SqSampleQuad& sampleQuad,
+				const SqTextureSampleOptions& sampleOpts, TqFloat* output) const;
 		/// May be better put in the CqTextureTileArray class.
 		//inline bool putWithinBounds(TqInt& iStart, TqInt& iStop, TqInt& jStart, TqInt& jStop);
 		//inline CqMatrix2D estimateJacobian(const SqSampleQuad& sampleQuad);
@@ -103,10 +113,10 @@ inline CqTextureSamplerImpl<T>::CqTextureSamplerImpl(
 { }
 
 template<typename T>
-void CqTextureSamplerImpl<T>::filter(const SqSampleQuad& sampleQuad, TqFloat* output) const
+void CqTextureSamplerImpl<T>::filter(const SqSampleQuad& sampleQuad, const SqTextureSampleOptions& sampleOpts, TqFloat* output) const
 {
 	// \todo add switch based on filter algorithm
-	filterNearestNeighbour(sampleQuad, output);
+	filterNearestNeighbour(sampleQuad, sampleOpts, output);
 }
 
 template<typename T>
@@ -118,8 +128,8 @@ inline void CqTextureSamplerImpl<T>::texToRasterCoords(TqFloat s, TqFloat t, TqI
 }
 
 template<typename T>
-void CqTextureSamplerImpl<T>::filterNearestNeighbour(
-		const SqSampleQuad& sQuad, TqFloat* output) const
+void CqTextureSamplerImpl<T>::filterNearestNeighbour( const SqSampleQuad& sQuad,
+		const SqTextureSampleOptions& sampleOpts, TqFloat* output) const
 {
 	// \todo implementation
 	TqInt s = 0;

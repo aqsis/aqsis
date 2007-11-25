@@ -36,7 +36,6 @@
 
 #include "itexturemap.h"
 #include "sstring.h"
-#include "samplequad.h" // \todo remove include when itexturemap.h is moved
 
 namespace Aqsis
 {
@@ -57,7 +56,7 @@ class CqTextureMap2
 		//virtual const CqTexFileHeader& attributes() const;
 		virtual const std::string& name() const;
 		virtual void sampleMap(const SqSampleQuad& sampleQuad,
-				TqFloat* outSamples) const;
+				const SqTextureSampleOptions& sampleOpts, TqFloat* outSamples) const;
 
 		virtual ~CqTextureMap2() {}
 	private:

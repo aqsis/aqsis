@@ -385,7 +385,8 @@ TqInt CqTextureMap::Convert( CqString &strName )
   **/
 void CqTextureMap::CriticalMeasure()
 {
-	TqInt current, now; 
+	TqInt now; 
+	//TqInt current;
 	static TqInt limit = -1;
 	std::vector<CqTextureMap2Wrapper*>::iterator j;
 	std::list<CqTextureMapBuffer*>::iterator i;
