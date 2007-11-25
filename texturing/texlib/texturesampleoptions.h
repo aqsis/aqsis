@@ -19,7 +19,7 @@
 
 /** \file
  *
- * \brief Define texture sampling options structure and associated enums
+ * \brief Define texture sampling options structures and associated enums
  *
  * \author Chris Foster [chris42f (at) gmail (d0t) com]
  */
@@ -32,6 +32,7 @@
 namespace Aqsis
 {
 
+//----------------------------------------------------------------------
 /** \brief Defines the various modes of handling texture access outside of the
  * normal range.
  */
@@ -42,6 +43,8 @@ enum	EqWrapMode
     WrapMode_Clamp,		///< Clamp to the edge of the range.
 };
 
+
+//----------------------------------------------------------------------
 /** \brief Texture filter types
  *
  * The texture filters define the weighting functions for texture filtering.
@@ -55,10 +58,23 @@ enum	EqWrapMode
  */
 enum EqTextureFilter
 {
-	TextureFilter_Box,
+	TextureFilter_Box,		///< box filtering (Monte Carlo)
 	TextureFilter_Gaussian, ///< implies EWA filtering
-	TextureFilter_None		///< No filtering, only do bilinear interpolation.
+	TextureFilter_None,		///< No filtering, only do bilinear interpolation.
+	TextureFilter_Unknown	///< Unknown filter type.
 };
+
+
+/** \brief Return a filter type given a descriptive string.
+ *
+ * \param filterName - The name string is the lowercase suffix (the bit after
+ * the underscore) of the associated enum name.
+ *
+ * \return The EqTextureFilter associated with a name string.  If the string
+ * doesn't describe a known filter, return TextureFilter_Unknown.
+ */
+EqTextureFilter texFilterTypeFromString(const char* filterName);
+
 
 //----------------------------------------------------------------------
 /** \brief Contain the standard renderman texture/environment sampling options

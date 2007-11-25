@@ -28,7 +28,7 @@
 
 #include "vector3d.h"
 #include "matrix.h"
-#include "texturesampler.h"
+#include "itexturesampler.h"
 
 #include "ishaderdata.h"  /// \todo remove when removing the wrapper.
 #include "logging.h"
@@ -147,12 +147,15 @@ void CqTextureMap2Wrapper::PrepareSampleOptions(std::map<std::string, IqShaderDa
 		{
 			CqString filterName;
 			i->second->GetString(filterName);
-			if(filterName == "box")
-				m_sampleOptions.filterType = TextureFilter_Box;
-			else if(filterName == "none")
-				m_sampleOptions.filterType = TextureFilter_None;
-			else
-				m_sampleOptions.filterType = TextureFilter_Gaussian;
+			EqTextureFilter filterType = texFilterTypeFromString(filterName.c_str());
+			if(filterType == TextureFilter_Unknown)
+			{
+				/// \todo Do this check at shader compilation time if possible.
+				Aqsis::log() << warning << "Unknown texture filter \""
+					<< filterName << "\".  Using gaussian\n";
+				filterType = TextureFilter_Gaussian;
+			}
+			m_sampleOptions.filterType = filterType;
 		}
 	}
 }

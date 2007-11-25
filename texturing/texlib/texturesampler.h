@@ -19,7 +19,7 @@
 
 /** \file
  *
- * \brief Texture buffer sampling machinery.
+ * \brief Texture buffer sampling machinery - implementation
  *
  * \author Chris Foster [ chris42f (at) gmail (dot) com ]
  */
@@ -35,36 +35,11 @@
 #include "aqsismath.h"
 #include "samplequad.h"
 #include "texturesampleoptions.h"
+#include "itexturesampler.h"
 #include "random.h"
 
 namespace Aqsis {
 
-//------------------------------------------------------------------------------
-/** \brief A class which knows how to sample texture buffers.
- *
- */
-class IqTextureSampler
-{
-	public:
-		/** \brief Sample the texture with the provided sample options.
-		 *
-		 * \param sampleQuad - quadrilateral region to sample over
-		 * \param sampleOpts - options to the sampler, including filter widths etc.
-		 * \param outSamps - the outSamps samples will be placed here.  
-		 */
-		virtual void filter(const SqSampleQuad& sampleQuad,
-				const SqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const = 0;
-		/** \brief Create and return a IqTextureSampler derived class
-		 *
-		 * The returned class is a CqTextureSamplerImpl<T> where T is a type
-		 * appropriate to the pixel type held in the file.
-		 *
-		 * \param file - tiled texture file which the sampler should be connected to.
-		 */
-		static boost::shared_ptr<IqTextureSampler> create(
-				const boost::shared_ptr<IqTiledTexInputFile>& file);
-		virtual ~IqTextureSampler() {}
-};
 
 //------------------------------------------------------------------------------
 /** \brief Implementation of texture buffer samplers
@@ -190,7 +165,8 @@ void CqTextureSamplerImpl<T>::filter(const SqSampleQuad& sampleQuad, const SqTex
 			filterSimple(sampleQuad, sampleOpts, outSamps);
 			break;
 		case TextureFilter_Gaussian:
-			filterSimple(sampleQuad, sampleOpts, outSamps);
+		default:
+			filterEWA(sampleQuad, sampleOpts, outSamps);
 			break;
 	}
 }

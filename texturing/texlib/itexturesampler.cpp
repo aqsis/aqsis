@@ -24,6 +24,7 @@
  * \author Chris Foster [ chris42f (at) gmail (dot) com ]
  */
 
+#include "itexturesampler.h"
 #include "texturesampler.h"
 
 namespace Aqsis {

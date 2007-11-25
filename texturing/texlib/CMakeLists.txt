@@ -18,13 +18,14 @@ SET(AQSISTEX_SRCS
 	channellist.cpp
 	itexinputfile.cpp
 	itexoutputfile.cpp
+	itexturesampler.cpp
 	magicnumber.cpp
 	texfileheader.cpp
-	texturesampler.cpp
 	tiffdirhandle.cpp
 	tiffinputfile.cpp
 	tiffoutputfile.cpp
 	texturemap2.cpp
+	texturesampleoptions.cpp
 	imagechannel.cpp
 	mixedimagebuffer.cpp
 	)
