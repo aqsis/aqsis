@@ -49,10 +49,10 @@ class IqTextureSampler
 		 *
 		 * \param sampleQuad - quadrilateral region to sample over
 		 * \param sampleOpts - options to the sampler, including filter widths etc.
-		 * \param output - the output samples will be placed here.  
+		 * \param outSamps - the outSamps samples will be placed here.  
 		 */
 		virtual void filter(const SqSampleQuad& sampleQuad,
-				const SqTextureSampleOptions& sampleOpts, TqFloat* output) const = 0;
+				const SqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const = 0;
 		/** \brief Create and return a IqTextureSampler derived class
 		 *
 		 * The returned class is a CqTextureSamplerImpl<T> where T is a type
@@ -74,19 +74,82 @@ class CqTextureSamplerImpl : public IqTextureSampler
 	public:
 		CqTextureSamplerImpl(const boost::shared_ptr<CqTileArray<T> >& texData);
 		virtual void filter(const SqSampleQuad& sampleQuad,
-				const SqTextureSampleOptions& sampleOpts, TqFloat* output) const;
+				const SqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const;
 	private:
-		/*
-		inline void sampleBilinear(TqFloat s, TqFloat t, std::valarray<TqFloat>& output);
-		void filterEWA(
-		void filterMC(
-		*/
-		inline void texToRasterCoords(TqFloat s, TqFloat t, TqInt& sOut, TqInt& tOut) const;
-		void filterNearestNeighbour(const SqSampleQuad& sampleQuad,
-				const SqTextureSampleOptions& sampleOpts, TqFloat* output) const;
+		inline TqFloat wrapCoord(TqFloat pos, EqWrapMode mode) const;
+		inline CqVector2D texToRasterCoords(const CqVector2D& pos,
+				EqWrapMode sMode, EqWrapMode tMode) const;
+		/** \brief An extra simple, extra dumb sampler with no filtering.
+		 *
+		 * Useful for debugging only.
+		 *
+		 * \param sampleQuad - quadrilateral region to sample over
+		 * \param sampleOpts - options to the sampler, including filter widths etc.
+		 * \param outSamps - the outSamps samples will be placed here.  
+		 */
+		void filterSimple(const SqSampleQuad& sampleQuad,
+				const SqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const;
+
+		//--------------------------------------------------
+		/// Methods for EWA filtering
+		//@{
+		//inline CqMatrix2D estimateJacobian(const SqSampleQuad& sampleQuad);
+		/** \brief Filter using an Elliptical Weighted Average
+		 *
+		 * EWA filtering is based on the convolution of several gaussian
+		 * filters and composition with the linear approximation to the image
+		 * warp at the sampling point.  The original theory was developed in
+		 * Paul Heckbert's masters thesis, "Fundamentals of Texture Mapping and
+		 * Image Warping", which may be found at http://www.cs.cmu.edu/~ph/.
+		 * "Physically Based Rendering" also has a small section mentioning
+		 * EWA.
+		 *
+		 * In EWA the total anisotropic filter acting on the original image
+		 * turns out to be simply another gaussian filter with a given angle
+		 * and ellipticity.  This means that the result may be computed
+		 * deterministically and hence suffers from no sampling error.  The
+		 * inclusion of the linear transformation implies good anisotropic
+		 * filtering characteristics.
+		 *
+		 * \param sampleQuad - quadrilateral region to sample over
+		 * \param sampleOpts - options to the sampler, including filter widths etc.
+		 * \param outSamps - the outSamps samples will be placed here.  
+		 */
+		void filterEWA(const SqSampleQuad& sampleQuad,
+				const SqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const;
+		//@}
+
+		//--------------------------------------------------
+		/// Methods for Monte Carlo filtering
+		//@{
+		/** \brief Perform Bilinear sampling on the underlying image data.
+		 *
+		 * \param st - texture coordinates
+		 * \param sampleOpts - options to the sampler, including filter widths etc.
+		 * \param samples - outSamps array for the samples.
+		 */
+		inline void sampleBilinear(const CqVector2D& st,
+				const SqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const;
+		/** \brief Filter using Monte Carlo integration with a box filter.
+		 *
+		 * Given an arbitrary filter weighting function, determining the
+		 * necessary filter coefficients for points in the original image is a
+		 * difficult task.  Therefore, when faced with this task, we resort to
+		 * Monte Carlo integration over the domain given by the sampling
+		 * quadrilateral.  The image values at the Monte Carlo sampling points
+		 * are reconstructed via bilinear filtering of the underlying discrete
+		 * data.
+		 *
+		 * \param sampleQuad - quadrilateral region to sample over
+		 * \param sampleOpts - options to the sampler, including filter widths etc.
+		 * \param outSamps - the outSamps samples will be placed here.  
+		 */
+		void filterMC(const SqSampleQuad& sampleQuad,
+				const SqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const;
+		//@}
+
 		/// May be better put in the CqTextureTileArray class.
 		//inline bool putWithinBounds(TqInt& iStart, TqInt& iStop, TqInt& jStart, TqInt& jStop);
-		//inline CqMatrix2D estimateJacobian(const SqSampleQuad& sampleQuad);
 		TqFloat dummyGridTex(TqInt s, TqInt t) const;
 
 	private:
@@ -94,9 +157,9 @@ class CqTextureSamplerImpl : public IqTextureSampler
 		boost::shared_ptr<CqTileArray<T> > m_texData;
 		TqFloat m_sMult;
 		TqFloat m_tMult;
-		/// (Analyse performance+complexity/quality tradeoff before including offsets):
-		//TqFloat m_tOffset;
-		//TqFloat m_sOffset;
+		/// (Analyse performance+complexity/quality tradeoff for offsets?):
+		TqFloat m_sOffset;
+		TqFloat m_tOffset;
 };
 
 
@@ -109,37 +172,114 @@ inline CqTextureSamplerImpl<T>::CqTextureSamplerImpl(
 		const boost::shared_ptr<CqTileArray<T> >& texData)
 	: m_texData(texData),
 	m_sMult(511),
-	m_tMult(511)
+	m_tMult(511),
+	m_sOffset(0),
+	m_tOffset(0)
 { }
 
 template<typename T>
-void CqTextureSamplerImpl<T>::filter(const SqSampleQuad& sampleQuad, const SqTextureSampleOptions& sampleOpts, TqFloat* output) const
+void CqTextureSamplerImpl<T>::filter(const SqSampleQuad& sampleQuad, const SqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
 {
-	// \todo add switch based on filter algorithm
-	filterNearestNeighbour(sampleQuad, sampleOpts, output);
+	switch(sampleOpts.filterType)
+	{
+		case TextureFilter_Box:
+		case TextureFilter_Gaussian:
+		default:
+			filterSimple(sampleQuad, sampleOpts, outSamps);
+	}
 }
 
 template<typename T>
-inline void CqTextureSamplerImpl<T>::texToRasterCoords(TqFloat s, TqFloat t, TqInt& sOut, TqInt& tOut) const
+inline TqFloat CqTextureSamplerImpl<T>::wrapCoord(TqFloat pos, EqWrapMode mode) const
 {
-	// \todo handle edge clip mode.  For now just clamp.
-	sOut = lfloor(m_sMult*clamp<TqFloat>(s, 0.0f, 1.0f)+0.5);
-	tOut = lfloor(m_tMult*clamp<TqFloat>(t, 0.0f, 1.0f)+0.5);
+	switch(mode)
+	{
+		case WrapMode_Periodic:
+			return pos - lfloor(pos);
+			break;
+		case WrapMode_Clamp:
+			return clamp(pos, 0.0f, 1.0f);
+		case WrapMode_Black:
+			// Can't handle this case here!
+			return pos;
+		default:
+			// Keep the compiler happy with a default.
+			assert(0);
+			return 0;
+	}
 }
 
 template<typename T>
-void CqTextureSamplerImpl<T>::filterNearestNeighbour( const SqSampleQuad& sQuad,
-		const SqTextureSampleOptions& sampleOpts, TqFloat* output) const
+inline CqVector2D CqTextureSamplerImpl<T>::texToRasterCoords(
+		const CqVector2D& pos, EqWrapMode sMode, EqWrapMode tMode) const
 {
-	// \todo implementation
-	TqInt s = 0;
-	TqInt t = 0;
-	texToRasterCoords((sQuad.v1.x() + sQuad.v2.x() + sQuad.v3.x() + sQuad.v4.x())/4,
-			(sQuad.v1.y() + sQuad.v2.y() + sQuad.v3.y() + sQuad.v4.y())/4,
-			s, t);
-	TqFloat texVal = dummyGridTex(s, t);
-	for(TqInt i = 1; i > 0; --i, ++output)
-		*output = texVal;
+	return CqVector2D(m_sOffset + m_sMult*wrapCoord(pos.x(), sMode),
+			m_tOffset + m_tMult*wrapCoord(pos.y(), tMode));
+}
+
+template<typename T>
+void CqTextureSamplerImpl<T>::filterSimple( const SqSampleQuad& sQuad,
+		const SqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
+{
+	/*
+	CqVector2D st = texToRasterCoords((sQuad.v1 + sQuad.v2 + sQuad.v3 + sQuad.v4)/4,
+			sampleOpts.sWrapMode, sampleOpts.tWrapMode);
+	TqFloat texVal = dummyGridTex(lfloor(st.x()+0.5), lfloor(st.y()+0.5));
+	for(TqInt i = 1; i > 0; --i, ++outSamps)
+		*outSamps = texVal;
+	*/
+	sampleBilinear((sQuad.v1 + sQuad.v2 + sQuad.v3 + sQuad.v4)/4,
+			sampleOpts, outSamps);
+}
+
+template<typename T>
+void CqTextureSamplerImpl<T>::filterEWA( const SqSampleQuad& sQuad,
+		const SqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
+{
+	/// \todo implementation
+}
+
+template<typename T>
+inline void CqTextureSamplerImpl<T>::sampleBilinear(const CqVector2D& st,
+		const SqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
+{
+	CqVector2D stRaster = texToRasterCoords(st,
+			sampleOpts.sWrapMode, sampleOpts.tWrapMode);
+	TqInt s = lfloor(stRaster.x());
+	TqInt t = lfloor(stRaster.y());
+	TqFloat sInterp = stRaster.x() - s;
+	TqFloat tInterp = stRaster.y() - t;
+
+	for(TqInt i = 0; i < sampleOpts.numChannels; ++i)
+	{
+		TqFloat texVal1 = dummyGridTex(s, t);
+		TqFloat texVal2 = dummyGridTex(s+1, t);
+		TqFloat texVal3 = dummyGridTex(s, t+1);
+		TqFloat texVal4 = dummyGridTex(s+1, t+1);
+
+		outSamps[i] = lerp(tInterp,
+				lerp(sInterp, texVal1, texVal2),
+				lerp(sInterp, texVal3, texVal4)
+				);
+	}
+}
+
+template<typename T>
+void CqTextureSamplerImpl<T>::filterMC(const SqSampleQuad& sampleQuad,
+		const SqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
+{
+	std::vector<TqFloat> tempSamps(sampleOpts.numChannels, 0);
+	// zero all samples
+	for(int i = 0; i < sampleOpts.numChannels; ++i)
+		outSamps[i] = 0;
+	// MC integration loop
+	for(int i = 0; i < sampleOpts.numSamples; ++i)
+	{
+	}
+	// normalize result by the number of samples
+	TqFloat renormalizer = 1.0f/sampleOpts.numSamples;
+	for(int i = 0; i < sampleOpts.numChannels; ++i)
+		outSamps[i] = outSamps[i]*renormalizer;
 }
 
 template<typename T>

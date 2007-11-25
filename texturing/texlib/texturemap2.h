@@ -36,6 +36,7 @@
 
 #include "itexturemap.h"
 #include "sstring.h"
+#include "texfileheader.h"
 
 namespace Aqsis
 {
@@ -46,26 +47,78 @@ class IqTextureSampler;
 
 /* \brief A multi-resolution filtering texture sampler
  *
+ * There are two alternatives for specifying options for how the underlying
+ * image should be sampled:
+ *   * The sample options can be passed into the sampleMap function as a
+ *     SqTextureSampleOptions structure.  This is good when the sample options
+ *     change regularly (eg, in the shader VM), and in multithreaded
+ *     environments when more than one set of sample options may being used.
+ *   * For general use in other circumstances when the sample options don't
+ *     change often it makes more sense to set some default sample options once
+ *     with a member function.  This is possible with setDefaultSampleOptions.
+ *
+ * The initial values for the default sampling options are obtained from any
+ * stored attributes present in the underlying texture file, otherwise sensible
+ * defaults are chosen.
+ *
  * \todo Rename this to CqTextureMap after the old CqTextureMap is removed.
  */
 class CqTextureMap2
 {
 	public:
 		CqTextureMap2(const std::string& fileName);
+		/** \brief Get the texture attributes of the underlying file.
+		 *
+		 * This function allows access to the texture file attributes such as
+		 * transformation matrices, image resolution etc.
+		 *
+		 * \return Underlying file attributes, or 0 if there isn't an
+		 * underlying file.
+		 */
+		virtual inline const CqTexFileHeader* attributes() const;
+		/// \todo Decide if these two methods are actually needed.
 		virtual TqInt numSamples() const;
-		//virtual const CqTexFileHeader& attributes() const;
 		virtual const std::string& name() const;
+
+		/** \brief Sample the texture map.
+		 *
+		 * \param sampleQuad - quadrilateral region to sample over
+		 * \param sampleOpts - options to the sampler, including filter widths etc.
+		 * \param outSamples - the output samples will be placed here.
+		 */
 		virtual void sampleMap(const SqSampleQuad& sampleQuad,
 				const SqTextureSampleOptions& sampleOpts, TqFloat* outSamples) const;
+		/** \brief Sample the map with the default sampling options
+		 *
+		 * \param sampleQuad - quadrilateral region to sample over
+		 * \param outSamples - the output samples will be placed here.
+		 */
+		virtual inline void sampleMap(const SqSampleQuad& sampleQuad,
+				TqFloat* outSamples) const;
+
+		/** \brief Get the current default sample options
+		 */
+		virtual inline const SqTextureSampleOptions& defaultSampleOptions() const;
+		/** \brief Set the default sample options
+		 */
+		virtual inline void setDefaultSampleOptions(
+				const SqTextureSampleOptions& sampleOpts);
 
 		virtual ~CqTextureMap2() {}
 	private:
 		std::string m_fileName;
+		/** \brief List of samplers for mipmap levels.  The pointers to these
+		 * may be NULL since they are created only on demand.
+		 */
 		mutable std::vector<boost::shared_ptr<IqTextureSampler> > m_mipLevels;
+		SqTextureSampleOptions m_defaultSampleOptions;
 };
 
-/// Temporary wrapper class for 
-/// \todo Refactor when a new IqTextureMap interface is decided on.
+/** Temporary wrapper class for CqTextureMap2 to squash it into the shape of
+ * the old IqTextureMap interface.
+ *
+ * \todo Remove when the new IqTextureMap interface is in place.
+ */
 class CqTextureMap2Wrapper : public IqTextureMap
 {
 	public:
@@ -104,10 +157,36 @@ class CqTextureMap2Wrapper : public IqTextureMap
 		CqTextureMap2 m_realMap;
 };
 
+
 //==============================================================================
 // Implementation details
 //==============================================================================
 
+// CqTextureMap2 implementation
+inline void CqTextureMap2::sampleMap(const SqSampleQuad& sampleQuad,
+		TqFloat* outSamples) const
+{
+	sampleMap(sampleQuad, m_defaultSampleOptions, outSamples);
+}
+
+inline const CqTexFileHeader* CqTextureMap2::attributes() const
+{
+	/// \todo implementation
+	return 0;
+}
+
+inline const SqTextureSampleOptions& CqTextureMap2::defaultSampleOptions() const
+{
+	return m_defaultSampleOptions;
+}
+
+inline void CqTextureMap2::setDefaultSampleOptions(
+		const SqTextureSampleOptions& sampleOpts)
+{
+	m_defaultSampleOptions = sampleOpts;
+}
+
+//------------------------------------------------------------------------------
 // CqTextureMap2Wrapper implementation
 
 inline TqUint CqTextureMap2Wrapper::XRes() const

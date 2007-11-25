@@ -82,16 +82,33 @@ struct SqTextureSampleOptions
 	TqInt startChannel;
 	/// Number of channels to sample from the texture.
 	TqInt numChannels;
+	/// Number of samples to take when using a stochastic sampler
+	TqInt numSamples;
+	/// Wrap modes specifying what the sampler should do with (s,t) coordinates lying off the image edge.
+	EqWrapMode sWrapMode;
+	EqWrapMode tWrapMode;
 
 	/// Trivial constructor.
 	inline SqTextureSampleOptions(TqFloat sblur, TqFloat tblur, TqFloat swidth,
 			TqFloat twidth, EqTextureFilter filterType, TqFloat fill,
-			TqInt startChannel, TqInt numChannels);
+			TqInt startChannel, TqInt numChannels, TqInt numSamples,
+			EqWrapMode sWrapMode, EqWrapMode tWrapMode);
 	/** Default constructor
 	 *
-	 * Set all numerical quantities to 0, and set the filter to gaussian.
+	 * Set all numerical quantities to 0 except for numSamples and numChannels
+	 * which are set to 1.  The filter is set to gaussian, and wrap modes to
+	 * black.
 	 */
 	inline SqTextureSampleOptions();
+};
+
+
+struct SqShadowSampleOptions : private SqTextureSampleOptions
+{
+	/// \todo: Flesh this out when we eventually get around to redoing the shadow maps.
+	// (The inherited members need to be pulled in with "using")
+	TqFloat biasLow;
+	TqFloat biasHigh;
 };
 
 
@@ -103,7 +120,8 @@ struct SqTextureSampleOptions
 
 inline SqTextureSampleOptions::SqTextureSampleOptions( TqFloat sblur, TqFloat tblur,
 		TqFloat swidth, TqFloat twidth, EqTextureFilter filterType, TqFloat fill,
-		TqInt startChannel, TqInt numChannels)
+		TqInt startChannel, TqInt numChannels, TqInt numSamples,
+		EqWrapMode sWrapMode, EqWrapMode tWrapMode)
 	: sblur(sblur),
 	tblur(tblur),
 	swidth(swidth),
@@ -111,7 +129,10 @@ inline SqTextureSampleOptions::SqTextureSampleOptions( TqFloat sblur, TqFloat tb
 	filterType(filterType),
 	fill(fill),
 	startChannel(startChannel),
-	numChannels(numChannels)
+	numChannels(numChannels),
+	numSamples(numSamples),
+	sWrapMode(sWrapMode),
+	tWrapMode(tWrapMode)
 { }
 
 inline SqTextureSampleOptions::SqTextureSampleOptions()
@@ -122,7 +143,10 @@ inline SqTextureSampleOptions::SqTextureSampleOptions()
 	filterType(TextureFilter_Gaussian),
 	fill(0),
 	startChannel(0),
-	numChannels(0)
+	numChannels(1),
+	numSamples(1),
+	sWrapMode(WrapMode_Black),
+	tWrapMode(WrapMode_Black)
 { }
 
 } // namespace Aqsis

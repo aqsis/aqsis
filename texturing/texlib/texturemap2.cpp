@@ -38,12 +38,14 @@ namespace Aqsis
 
 CqTextureMap2::CqTextureMap2(const std::string& fileName)
 	: m_fileName(fileName),
-	m_mipLevels()
+	m_mipLevels(),
+	m_defaultSampleOptions()
 {
 	// \todo decide how many mipmap levels are needed.
 	m_mipLevels.resize(1);
 	m_mipLevels[0] = IqTextureSampler::create(
 			boost::shared_ptr<IqTiledTexInputFile>());
+	// \todo: Init default sampling opts from texture file
 }
 
 TqInt CqTextureMap2::numSamples() const
@@ -108,7 +110,7 @@ void CqTextureMap2Wrapper::SampleMap(TqFloat s1, TqFloat t1, TqFloat s2, TqFloat
 	val.resize(SamplesPerPixel());
 	const SqSampleQuad sQuad(s1,t1, s2,t2, s3,t3, s4,t4);
 	const SqTextureSampleOptions sampleOpts(0,0, 1,1, TextureFilter_Gaussian,
-			0, 0, 1);
+			0, 0, SamplesPerPixel(), 4, WrapMode_Black, WrapMode_Black);
 	m_realMap.sampleMap(sQuad, sampleOpts, &val[0]);
 }
 
