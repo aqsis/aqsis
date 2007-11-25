@@ -56,7 +56,8 @@ enum	EqWrapMode
 enum EqTextureFilter
 {
 	TextureFilter_Box,
-	TextureFilter_Gaussian ///< implies EWA filtering
+	TextureFilter_Gaussian, ///< implies EWA filtering
+	TextureFilter_None		///< No filtering, only do bilinear interpolation.
 };
 
 //----------------------------------------------------------------------

@@ -98,11 +98,10 @@ class CqTextureMap2
 
 		/** \brief Get the current default sample options
 		 */
-		virtual inline const SqTextureSampleOptions& defaultSampleOptions() const;
-		/** \brief Set the default sample options
+		virtual inline SqTextureSampleOptions& defaultSampleOptions();
+		/** \brief Get the current default sample options (const version)
 		 */
-		virtual inline void setDefaultSampleOptions(
-				const SqTextureSampleOptions& sampleOpts);
+		virtual inline const SqTextureSampleOptions& defaultSampleOptions() const;
 
 		virtual ~CqTextureMap2() {}
 	private:
@@ -155,6 +154,7 @@ class CqTextureMap2Wrapper : public IqTextureMap
 		/// \todo replace this with std::string when the interface is revamped.
 		mutable CqString m_fileName;
 		CqTextureMap2 m_realMap;
+		SqTextureSampleOptions m_sampleOptions;
 };
 
 
@@ -175,16 +175,16 @@ inline const CqTexFileHeader* CqTextureMap2::attributes() const
 	return 0;
 }
 
+inline SqTextureSampleOptions& CqTextureMap2::defaultSampleOptions()
+{
+	return m_defaultSampleOptions;
+}
+
 inline const SqTextureSampleOptions& CqTextureMap2::defaultSampleOptions() const
 {
 	return m_defaultSampleOptions;
 }
 
-inline void CqTextureMap2::setDefaultSampleOptions(
-		const SqTextureSampleOptions& sampleOpts)
-{
-	m_defaultSampleOptions = sampleOpts;
-}
 
 //------------------------------------------------------------------------------
 // CqTextureMap2Wrapper implementation

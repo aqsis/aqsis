@@ -30,6 +30,9 @@
 #include "matrix.h"
 #include "texturesampler.h"
 
+#include "ishaderdata.h"  /// \todo remove when removing the wrapper.
+#include "logging.h"
+
 namespace Aqsis
 {
 
@@ -71,7 +74,8 @@ void CqTextureMap2::sampleMap(const SqSampleQuad& sampleQuad,
 
 CqTextureMap2Wrapper::CqTextureMap2Wrapper(const std::string& fileName)
 	: m_fileName(),
-	m_realMap(fileName)
+	m_realMap(fileName),
+	m_sampleOptions()
 { }
 
 void CqTextureMap2Wrapper::Open()
@@ -86,7 +90,71 @@ void CqTextureMap2Wrapper::Close()
 
 void CqTextureMap2Wrapper::PrepareSampleOptions(std::map<std::string, IqShaderData*>& paramMap )
 {
-	// \todo implementation
+	m_sampleOptions = SqTextureSampleOptions(0,0, 1,1, TextureFilter_Gaussian,
+			0, 0, SamplesPerPixel(), 4, WrapMode_Black, WrapMode_Black);
+	if(paramMap.size() != 0)
+	{
+		std::map<std::string, IqShaderData*>::const_iterator i;
+		std::map<std::string, IqShaderData*>::const_iterator end = paramMap.end();
+		// Load filter widths
+		i = paramMap.find("width");
+		if(i != end)
+		{
+			TqFloat width = 1;
+			i->second->GetFloat(width);
+			m_sampleOptions.swidth = width;
+			m_sampleOptions.twidth = width;
+		}
+		else
+		{
+			i = paramMap.find("swidth");
+			if(i != end)
+				i->second->GetFloat(m_sampleOptions.swidth);
+			i = paramMap.find("twidth");
+			if(i != end)
+				i->second->GetFloat(m_sampleOptions.twidth);
+		}
+		// Load filter blurs
+		i = paramMap.find("blur");
+		if(i != end)
+		{
+			TqFloat blur = 0;
+			i->second->GetFloat(blur);
+			m_sampleOptions.sblur = blur;
+			m_sampleOptions.tblur = blur;
+		}
+		else
+		{
+			i = paramMap.find("sblur");
+			if(i != end)
+				i->second->GetFloat(m_sampleOptions.sblur);
+			i = paramMap.find("tblur");
+			if(i != end)
+				i->second->GetFloat(m_sampleOptions.tblur);
+		}
+		// number of samples for stochastic filters
+		i = paramMap.find("samples");
+		if(i != end)
+		{
+			TqFloat samples = 0;
+			i->second->GetFloat(samples);
+			m_sampleOptions.numSamples = lfloor(samples);
+		}
+		/// \todo pixelvariance ?
+		// Filter type
+		i = paramMap.find("filter");
+		if(i != end)
+		{
+			CqString filterName;
+			i->second->GetString(filterName);
+			if(filterName == "box")
+				m_sampleOptions.filterType = TextureFilter_Box;
+			else if(filterName == "none")
+				m_sampleOptions.filterType = TextureFilter_None;
+			else
+				m_sampleOptions.filterType = TextureFilter_Gaussian;
+		}
+	}
 }
 
 void CqTextureMap2Wrapper::SampleMap(TqFloat s1, TqFloat t1, TqFloat swidth, TqFloat twidth,
@@ -109,9 +177,7 @@ void CqTextureMap2Wrapper::SampleMap(TqFloat s1, TqFloat t1, TqFloat s2, TqFloat
 	// \todo implementation
 	val.resize(SamplesPerPixel());
 	const SqSampleQuad sQuad(s1,t1, s2,t2, s3,t3, s4,t4);
-	const SqTextureSampleOptions sampleOpts(0,0, 1,1, TextureFilter_Gaussian,
-			0, 0, SamplesPerPixel(), 4, WrapMode_Black, WrapMode_Black);
-	m_realMap.sampleMap(sQuad, sampleOpts, &val[0]);
+	m_realMap.sampleMap(sQuad, m_sampleOptions, &val[0]);
 }
 
 inline CqMatrix& CqTextureMap2Wrapper::GetMatrix(TqInt which, TqInt index)

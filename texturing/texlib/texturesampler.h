@@ -35,6 +35,7 @@
 #include "aqsismath.h"
 #include "samplequad.h"
 #include "texturesampleoptions.h"
+#include "random.h"
 
 namespace Aqsis {
 
@@ -183,9 +184,14 @@ void CqTextureSamplerImpl<T>::filter(const SqSampleQuad& sampleQuad, const SqTex
 	switch(sampleOpts.filterType)
 	{
 		case TextureFilter_Box:
-		case TextureFilter_Gaussian:
-		default:
+			filterMC(sampleQuad, sampleOpts, outSamps);
+			break;
+		case TextureFilter_None:
 			filterSimple(sampleQuad, sampleOpts, outSamps);
+			break;
+		case TextureFilter_Gaussian:
+			filterSimple(sampleQuad, sampleOpts, outSamps);
+			break;
 	}
 }
 
@@ -273,13 +279,25 @@ void CqTextureSamplerImpl<T>::filterMC(const SqSampleQuad& sampleQuad,
 	for(int i = 0; i < sampleOpts.numChannels; ++i)
 		outSamps[i] = 0;
 	// MC integration loop
+	/// \todo adjust quad for swidth, sblur etc.
+	SqSampleQuad adjustedQuad(sampleQuad);
+	CqRandom randGen;
 	for(int i = 0; i < sampleOpts.numSamples; ++i)
 	{
+		TqFloat interp1 = randGen.RandomFloat();
+		TqFloat interp2 = randGen.RandomFloat();
+		CqVector2D samplePos = lerp(interp1,
+				lerp(interp2, adjustedQuad.v1, adjustedQuad.v2),
+				lerp(interp2, adjustedQuad.v3, adjustedQuad.v4)
+				);
+		sampleBilinear(samplePos, sampleOpts, &tempSamps[0]);
+		for(int i = 0; i < sampleOpts.numChannels; ++i)
+			outSamps[i] += tempSamps[i];
 	}
 	// normalize result by the number of samples
 	TqFloat renormalizer = 1.0f/sampleOpts.numSamples;
 	for(int i = 0; i < sampleOpts.numChannels; ++i)
-		outSamps[i] = outSamps[i]*renormalizer;
+		outSamps[i] *= renormalizer;
 }
 
 template<typename T>
