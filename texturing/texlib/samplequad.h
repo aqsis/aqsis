@@ -57,6 +57,7 @@ struct SqSampleQuad
 	/// Construct from explicit texture coordinates
 	inline SqSampleQuad(TqFloat s1, TqFloat t1, TqFloat s2, TqFloat t2,
 			TqFloat s3, TqFloat t3, TqFloat s4, TqFloat t4);
+	inline SqSampleQuad(CqVector2D v1, CqVector2D v2, CqVector2D v3, CqVector2D v4);
 };
 
 
@@ -72,6 +73,13 @@ inline SqSampleQuad::SqSampleQuad(TqFloat s1, TqFloat t1, TqFloat s2, TqFloat t2
 	v4(s4, t4)
 { }
 
+inline SqSampleQuad::SqSampleQuad(CqVector2D v1, CqVector2D v2,
+		CqVector2D v3, CqVector2D v4)
+	: v1(v1),
+	v2(v2),
+	v3(v3),
+	v4(v4)
+{ }
 
 } // namespace Aqsis
 

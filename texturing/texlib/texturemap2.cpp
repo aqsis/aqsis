@@ -167,7 +167,7 @@ void CqTextureMap2Wrapper::SampleMap(TqFloat s1, TqFloat t1, TqFloat swidth, TqF
 	//
 	// In fact, we really don't want to implement this - it's a generally
 	// broken way of accessing a texture.
-	//assert(0);
+	assert(0);
 	SampleMap(s1-swidth/2, t1-twidth/2,  s1+swidth/2, t1-twidth/2,
 			s1-swidth/2, t1+twidth/2,  s1+swidth/2, t1+twidth/2,
 			val);
