@@ -107,17 +107,7 @@ INPUT                  = ./aqsistypes \
                          ./shadercompiler/slparse \
                          ./shadercompiler/slpp \
                          ./shadercompiler/slxargs \
-                         ./texturing/teqser \
-                         ./texturing/plugins/bake2tif \
-                         ./texturing/plugins/bmp2tif \
-                         ./texturing/plugins/common \
-                         ./texturing/plugins/exr2tif \
-                         ./texturing/plugins/gif2tif \
-                         ./texturing/plugins/jpg2tif \
-                         ./texturing/plugins/pcx2tif \
-                         ./texturing/plugins/png2tif \
-                         ./texturing/plugins/ppm2tif \
-                         ./texturing/plugins/tga2tif
+                         ./texturing/teqser
 FILE_PATTERNS          = *.h \
                          *.cpp \
                          *.c

@@ -33,17 +33,17 @@ Brief list of tools
 -------------------
 
 * Binary command line tools:
-   aqsis    - the renderer
-   aqsl     - the shader compiler
-   aqsltell - the shader inspection tool
-   teqser   - the texture pre-processor
-   miqser   - the RIB processor
-   piqsl	- the advanced framebuffer
+	aqsis		-	the renderer
+	aqsl		-	the shader compiler
+	aqsltell	-	the shader inspection tool
+	teqser		-	the texture pre-processor
+	miqser		-	the RIB processor
+	piqsl		-	the advanced framebuffer
 
 * Scripts:
-   mpanalyse.py - Analysis tool for micropolygon dump format (see scripts
-				  directory).  Note that mpanalyse requires CGKit and pyOpenGL
-				  as extra dependencies.
+	mpanalyse.py	-	Analysis tool for micropolygon dump format (see scripts
+						directory).  Note that mpanalyse requires CGKit and pyOpenGL
+						as extra dependencies.
 
 
 License
