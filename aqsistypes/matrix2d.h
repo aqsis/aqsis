@@ -27,6 +27,10 @@
 #ifndef MATRIX2D_H_INCLUDED
 #define MATRIX2D_H_INCLUDED
 
+#include "aqsis.h"
+
+#include <cmath>
+
 namespace Aqsis
 {
 
@@ -83,6 +87,34 @@ struct SqMatrix2D
 	inline TqFloat det() const;
 	/// Return the matrix transpose
 	inline SqMatrix2D transpose() const;
+	/** \brief Get the eigenvalues of the matrix
+	 *
+	 * The behaviour is undefined if the eigenvalues are complex rather than
+	 * real.
+	 *
+	 * \param l1 - first eigenvalue (output variable)
+	 * \param l2 - second eigenvalue (output variable)
+	 */
+	inline void eigenvalues(TqFloat& l1, TqFloat& l2) const;
+	/** \brief Attempt to get a matrix which orthogonally diagonalizes this matrix.
+	 *
+	 * That is, find a matrix R such that (calling this matrix A),
+	 *
+	 *   A = R^T * D * R
+	 *
+	 * where R is an orthogonal matrix, and D is the diagonal matrix, diag(l1,l2).
+	 *
+	 * \param l1 - first eigenvalue
+	 * \param l2 - the second eigenvalue.
+	 *
+	 * The somewhat nasty behaviour of feeding eigenvalues are back into this
+	 * function is used for efficiency, since we may want to compute the
+	 * eigenvalues seperately, but at the same time avoid computing them again
+	 * when computing the diagonalizing matrix.
+	 *
+	 * The behaviour of this function is undefined if the matrix is not symmetric.
+	 */
+	inline SqMatrix2D orthogDiagonalize(TqFloat l1, TqFloat l2) const;
 	//@}
 };
 
@@ -147,6 +179,7 @@ inline SqMatrix2D SqMatrix2D::inv() const
 {
 	// There's a simple formula for the inverse of a 2D matrix.  We use this here.
 	TqFloat D = det();
+	assert(D != 0);
 	return SqMatrix2D(d/D, -b/D, -c/D, a/D);
 }
 inline TqFloat SqMatrix2D::det() const
@@ -156,6 +189,59 @@ inline TqFloat SqMatrix2D::det() const
 inline SqMatrix2D SqMatrix2D::transpose() const
 {
 	return SqMatrix2D(a, c, b, d);
+}
+
+inline void SqMatrix2D::eigenvalues(TqFloat& l1, TqFloat& l2) const
+{
+	// Special-case formula for eigenvalues of a 2D matrix.  It simply boils
+	// down to solving the quadratic equation
+	//
+	// l^2 - Tr(A)*l + det(A) = 0
+	//
+	// for l.
+	TqFloat trace = a+d;
+	TqFloat determ = det();
+	TqFloat firstTerm = trace/2;
+	TqFloat secondTerm = trace*trace - 4*determ;
+	assert(secondTerm >= 0);
+	secondTerm = std::sqrt(secondTerm)/2;
+	l1 = firstTerm + secondTerm;
+	l2 = firstTerm - secondTerm;
+}
+
+inline SqMatrix2D SqMatrix2D::orthogDiagonalize(TqFloat l1, TqFloat l2) const
+{
+	// As usual, we construct the matrix from the two orthonormal eigenvectors.
+	// These eigenvectors only exist if the matrix is symmetric, so assert
+	// symmetry:
+	assert( std::fabs((b - c)) <= 1e-5*std::fabs(c) ||
+			std::fabs((b - c)) <= 1e-5*std::fabs(b) );
+	if(l1 == l2)
+	{
+		// Special (easy) case for degenerate eigenvalues
+		return SqMatrix2D(1, 0,
+						  0, 1);
+	}
+	// First eigenvector
+	TqFloat u1 = b;
+	TqFloat u2 = l1-a;
+	if(u1 == 0 && u2 == 0)
+	{
+		u1 = l1-d;
+		u2 = c;
+	}
+	TqFloat invLenU = 1/std::sqrt(u1*u1 + u2*u2);
+	// Second eigenvector
+	TqFloat v1 = b;
+	TqFloat v2 = l2-a;
+	if(v1 == 0 && v2 == 0)
+	{
+		v1 = l2-d;
+		v2 = c;
+	}
+	TqFloat invLenV = 1/std::sqrt(v1*v1 + v2*v2);
+	return SqMatrix2D(u1*invLenU, v1*invLenV,
+					  u2*invLenU, v2*invLenV);
 }
 
 
