@@ -53,7 +53,7 @@ class IqTextureSampler
 		 * \param outSamps - the outSamps samples will be placed here.  
 		 */
 		virtual void filter(const SqSampleQuad& sampleQuad,
-				const SqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const = 0;
+				const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const = 0;
 
 		/** \brief Create and return a IqTextureSampler derived class
 		 *

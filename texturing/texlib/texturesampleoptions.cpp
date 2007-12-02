@@ -44,4 +44,37 @@ EqTextureFilter texFilterTypeFromString(const char* filterName)
 }
 
 
+//------------------------------------------------------------------------------
+// CqTextureSampleOptions implementation
+
+void CqTextureSampleOptions::adjustSampleQuad(SqSampleQuad& quad)
+{
+	bool widthAdjust = m_sWidth != 1 || m_tWidth != 1;
+	bool blurAdjust = m_sBlur > 0 || m_tBlur > 0;
+	if(widthAdjust || blurAdjust)
+	{
+		CqVector2D center = 0.25*(quad.v1 + quad.v2 + quad.v3 + quad.v4);
+		if(widthAdjust)
+		{
+			TqFloat csWeighted = (1-m_sWidth)*center.x();
+			TqFloat ctWeighted = (1-m_tWidth)*center.y();
+			// Expand v1...v4 away from the quad center by multiplying the x
+			// and y components of the vectors which point from the quad center to
+			// the vertices by the s and t widths respectively.
+			quad.v1.x(m_sWidth*quad.v1.x() + csWeighted);
+			quad.v1.y(m_tWidth*quad.v1.y() + ctWeighted);
+			quad.v2.x(m_sWidth*quad.v2.x() + csWeighted);
+			quad.v2.y(m_tWidth*quad.v2.y() + ctWeighted);
+			quad.v3.x(m_sWidth*quad.v3.x() + csWeighted);
+			quad.v3.y(m_tWidth*quad.v3.y() + ctWeighted);
+			quad.v4.x(m_sWidth*quad.v4.x() + csWeighted);
+			quad.v4.y(m_tWidth*quad.v4.y() + ctWeighted);
+		}
+		if(blurAdjust)
+		{
+			/// \todo implementation
+		}
+	}
+}
+
 } // namespace Aqsis

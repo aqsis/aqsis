@@ -51,7 +51,7 @@ class CqTextureSamplerImpl : public IqTextureSampler
 	public:
 		CqTextureSamplerImpl(const boost::shared_ptr<CqTileArray<T> >& texData);
 		virtual void filter(const SqSampleQuad& sampleQuad,
-				const SqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const;
+				const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const;
 	private:
 		inline TqFloat wrapCoord(TqFloat pos, EqWrapMode mode) const;
 		inline CqVector2D texToRasterCoords(const CqVector2D& pos,
@@ -65,7 +65,7 @@ class CqTextureSamplerImpl : public IqTextureSampler
 		 * \param outSamps - the outSamps samples will be placed here.  
 		 */
 		void filterSimple(const SqSampleQuad& sampleQuad,
-				const SqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const;
+				const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const;
 
 		//--------------------------------------------------
 		/// Methods for EWA filtering
@@ -93,7 +93,7 @@ class CqTextureSamplerImpl : public IqTextureSampler
 		 * \param outSamps - the outSamps samples will be placed here.  
 		 */
 		void filterEWA(const SqSampleQuad& sampleQuad,
-				const SqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const;
+				const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const;
 		//@}
 
 		//--------------------------------------------------
@@ -106,7 +106,7 @@ class CqTextureSamplerImpl : public IqTextureSampler
 		 * \param samples - outSamps array for the samples.
 		 */
 		inline void sampleBilinear(const CqVector2D& st,
-				const SqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const;
+				const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const;
 		/** \brief Filter using Monte Carlo integration with a box filter.
 		 *
 		 * Given an arbitrary filter weighting function, determining the
@@ -122,7 +122,7 @@ class CqTextureSamplerImpl : public IqTextureSampler
 		 * \param outSamps - the outSamps samples will be placed here.  
 		 */
 		void filterMC(const SqSampleQuad& sampleQuad,
-				const SqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const;
+				const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const;
 		//@}
 
 		/// May be better put in the CqTextureTileArray class.
@@ -155,9 +155,9 @@ inline CqTextureSamplerImpl<T>::CqTextureSamplerImpl(
 { }
 
 template<typename T>
-void CqTextureSamplerImpl<T>::filter(const SqSampleQuad& sampleQuad, const SqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
+void CqTextureSamplerImpl<T>::filter(const SqSampleQuad& sampleQuad, const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
 {
-	switch(sampleOpts.filterType)
+	switch(sampleOpts.filterType())
 	{
 		case TextureFilter_Box:
 			filterMC(sampleQuad, sampleOpts, outSamps);
@@ -202,7 +202,7 @@ inline CqVector2D CqTextureSamplerImpl<T>::texToRasterCoords(
 
 template<typename T>
 void CqTextureSamplerImpl<T>::filterSimple( const SqSampleQuad& sQuad,
-		const SqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
+		const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
 {
 	sampleBilinear((sQuad.v1 + sQuad.v2 + sQuad.v3 + sQuad.v4)/4,
 			sampleOpts, outSamps);
@@ -321,11 +321,11 @@ inline SqMatrix2D getEWAQuadForm(const SqSampleQuad& sQuad)
 
 template<typename T>
 void CqTextureSamplerImpl<T>::filterEWA( const SqSampleQuad& sQuad,
-		const SqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
+		const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
 {
 	/// \todo Write a function for this.
 	// Zero the samples
-	for(TqInt i = 0; i < sampleOpts.numChannels; ++i)
+	for(TqInt i = 0; i < sampleOpts.numChannels(); ++i)
 		outSamps[i] = 0;
 	// Translate the sample quad to into raster coords.
 	/// \todo Deal with edge effects...  This may be tricky.
@@ -365,7 +365,7 @@ void CqTextureSamplerImpl<T>::filterEWA( const SqSampleQuad& sQuad,
 			if(q < logEdgeWeight)
 			{
 				TqFloat weight = exp(-q);
-				for(TqInt i = 0; i < sampleOpts.numChannels; ++i)
+				for(TqInt i = 0; i < sampleOpts.numChannels(); ++i)
 					outSamps[i] += weight*dummyGridTex(s,t);
 				totWeight += weight;
 			}
@@ -373,22 +373,22 @@ void CqTextureSamplerImpl<T>::filterEWA( const SqSampleQuad& sQuad,
 	}
 	// Renormalize the samples
 	TqFloat renormalizer = 1/totWeight;
-	for(TqInt i = 0; i < sampleOpts.numChannels; ++i)
+	for(TqInt i = 0; i < sampleOpts.numChannels(); ++i)
 		outSamps[i] *= renormalizer;
 }
 
 template<typename T>
 inline void CqTextureSamplerImpl<T>::sampleBilinear(const CqVector2D& st,
-		const SqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
+		const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
 {
 	CqVector2D stRaster = texToRasterCoords(st,
-			sampleOpts.sWrapMode, sampleOpts.tWrapMode);
+			sampleOpts.sWrapMode(), sampleOpts.tWrapMode());
 	TqInt s = lfloor(stRaster.x());
 	TqInt t = lfloor(stRaster.y());
 	TqFloat sInterp = stRaster.x() - s;
 	TqFloat tInterp = stRaster.y() - t;
 
-	for(TqInt i = 0; i < sampleOpts.numChannels; ++i)
+	for(TqInt i = 0; i < sampleOpts.numChannels(); ++i)
 	{
 		TqFloat texVal1 = dummyGridTex(s, t);
 		TqFloat texVal2 = dummyGridTex(s+1, t);
@@ -404,11 +404,11 @@ inline void CqTextureSamplerImpl<T>::sampleBilinear(const CqVector2D& st,
 
 template<typename T>
 void CqTextureSamplerImpl<T>::filterMC(const SqSampleQuad& sampleQuad,
-		const SqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
+		const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
 {
-	std::vector<TqFloat> tempSamps(sampleOpts.numChannels, 0);
+	std::vector<TqFloat> tempSamps(sampleOpts.numChannels(), 0);
 	// zero all samples
-	for(int i = 0; i < sampleOpts.numChannels; ++i)
+	for(int i = 0; i < sampleOpts.numChannels(); ++i)
 		outSamps[i] = 0;
 	// MC integration loop
 	/// \todo adjust quad for swidth, sblur etc.
@@ -417,7 +417,7 @@ void CqTextureSamplerImpl<T>::filterMC(const SqSampleQuad& sampleQuad,
 	/// \todo Possible optimizaton: tabulate the random numbers?
 //	CqRandom randGen;
 	CqLowDiscrepancy randGen(2);
-	for(int i = 0; i < sampleOpts.numSamples; ++i)
+	for(int i = 0; i < sampleOpts.numSamples(); ++i)
 	{
 //		TqFloat interp1 = randGen.RandomFloat();
 //		TqFloat interp2 = randGen.RandomFloat();
@@ -428,12 +428,12 @@ void CqTextureSamplerImpl<T>::filterMC(const SqSampleQuad& sampleQuad,
 				lerp(interp2, adjustedQuad.v3, adjustedQuad.v4)
 				);
 		sampleBilinear(samplePos, sampleOpts, &tempSamps[0]);
-		for(int i = 0; i < sampleOpts.numChannels; ++i)
+		for(int i = 0; i < sampleOpts.numChannels(); ++i)
 			outSamps[i] += tempSamps[i];
 	}
 	// normalize result by the number of samples
-	TqFloat renormalizer = 1.0f/sampleOpts.numSamples;
-	for(int i = 0; i < sampleOpts.numChannels; ++i)
+	TqFloat renormalizer = 1.0f/sampleOpts.numSamples();
+	for(int i = 0; i < sampleOpts.numChannels(); ++i)
 		outSamps[i] *= renormalizer;
 }
 

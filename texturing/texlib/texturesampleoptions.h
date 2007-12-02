@@ -29,6 +29,8 @@
 
 #include "aqsis.h"
 
+#include "samplequad.h"
+
 namespace Aqsis
 {
 
@@ -79,53 +81,138 @@ EqTextureFilter texFilterTypeFromString(const char* filterName);
 //----------------------------------------------------------------------
 /** \brief Contain the standard renderman texture/environment sampling options
  *
- * This struct holds many of the sampling parameters which may be passed to the
+ * This class holds many of the sampling parameters which may be passed to the
  * texture() and environment() RSL calls.  Note that blur and width are left
- * out; the more specific sblur,tblur, are used instead.
+ * out; the more specific sBlur,tBlur, etc are used instead.
  */
-struct SqTextureSampleOptions
+class CqTextureSampleOptions
 {
-	/// Additional texture blurs in the s and t directions.  
-	TqFloat sblur;
-	TqFloat tblur;
-	/// Filter widths as a multiple of the given filter box.
-	TqFloat swidth;
-	TqFloat twidth;
-	/// Type of filter - represents both the filter weight function and filtering algorithm.
-	EqTextureFilter filterType;
-	/// Value to fill a channel with if the associated texture doesn't contain sufficiently many channels.
-	TqFloat fill;
-	/// Index of the starting channel (the first channel has index 0)
-	TqInt startChannel;
-	/// Number of channels to sample from the texture.
-	TqInt numChannels;
-	/// Number of samples to take when using a stochastic sampler
-	TqInt numSamples;
-	/// Wrap modes specifying what the sampler should do with (s,t) coordinates lying off the image edge.
-	EqWrapMode sWrapMode;
-	EqWrapMode tWrapMode;
+	public:
+		/// Trivial constructor.
+		inline CqTextureSampleOptions(TqFloat sBlur, TqFloat tBlur, TqFloat sWidth,
+				TqFloat tWidth, EqTextureFilter filterType, TqFloat fill,
+				TqInt startChannel, TqInt numChannels,
+				TqInt numSamples, EqWrapMode sWrapMode, EqWrapMode tWrapMode);
+		/** Default constructor
+		*
+		* Set all numerical quantities to 0 except for numSamples and numChannels
+		* which are set to 1.  The filter is set to gaussian, and wrap modes to
+		* black.
+		*/
+		inline CqTextureSampleOptions();
 
-	/// Trivial constructor.
-	inline SqTextureSampleOptions(TqFloat sblur, TqFloat tblur, TqFloat swidth,
-			TqFloat twidth, EqTextureFilter filterType, TqFloat fill,
-			TqInt startChannel, TqInt numChannels, TqInt numSamples,
-			EqWrapMode sWrapMode, EqWrapMode tWrapMode);
-	/** Default constructor
-	 *
-	 * Set all numerical quantities to 0 except for numSamples and numChannels
-	 * which are set to 1.  The filter is set to gaussian, and wrap modes to
-	 * black.
-	 */
-	inline SqTextureSampleOptions();
+		//--------------------------------------------------
+		/// \name Accessors for all relevant texture sample options.
+		//@{
+		/// Get the blur in the s-direction
+		inline TqFloat sBlur() const;
+		/// Get the blur in the t-direction
+		inline TqFloat tBlur() const;
+		/// Get the width multiplier in the s-direction
+		inline TqFloat sWidth() const;
+		/// Get the width multiplier in the t-direction
+		inline TqFloat tWidth() const;
+		/// Get the filter type
+		inline EqTextureFilter filterType() const;
+		/// Get the fill value for texture channels indices outside the available range
+		inline TqFloat fill() const;
+		/// Get the start channel index where channels will be read from.
+		inline TqInt startChannel() const;
+		/// Get the number of channels to sample
+		inline TqInt numChannels() const;
+		/// Get the number of samples used by stochastic sampling methods.
+		inline TqInt numSamples() const;
+		/// Get the wrap mode in the s-direction
+		inline EqWrapMode sWrapMode() const;
+		/// Get the wrap mode in the t-direction
+		inline EqWrapMode tWrapMode() const;
+		//@}
+
+		//--------------------------------------------------
+		/// \name Modifiers for all relevant texture sample options.
+		//@{
+		/// Set the blur in both directions
+		inline void setBlur(TqFloat blur);
+		/// Set the blur in the s-direction
+		inline void setSBlur(TqFloat sBlur);
+		/// Set the blur in the t-direction
+		inline void setTBlur(TqFloat tBlur);
+		/// Set the width multiplier in all directions.
+		inline void setWidth(TqFloat width);
+		/// Set the width multiplier in the s-direction
+		inline void setSWidth(TqFloat sWidth);
+		/// Set the width multiplier in the t-direction
+		inline void setTWidth(TqFloat tWidth);
+		/// Set the filter type
+		inline void setFilterType(EqTextureFilter type);
+		/// Set the fill value for texture channels indices outside the available range
+		inline void setFill(TqFloat fill);
+		/// Set the start channel index where channels will be read from.
+		inline void setStartChannel(TqInt startChannel);
+		/// Set the number of channels to sample
+		inline void setNumChannels(TqInt numChannels);
+		/// Set the number of samples used by stochastic sampling methods.
+		inline void setNumSamples(TqInt numSamples);
+		/// Set the wrap mode in both directions
+		inline void setWrapMode(EqWrapMode wrapMode);
+		/// Set the wrap mode in the s-direction
+		inline void setSWrapMode(EqWrapMode sWrapMode);
+		/// Set the wrap mode in the t-direction
+		inline void setTWrapMode(EqWrapMode tWrapMode);
+		//@}
+
+		//--------------------------------------------------
+		/** \brief Adjust a sample quad to take into account the current blur
+		 * and width parameters.
+		 *
+		 * The width parameter effects the quad in a simple way:  All the
+		 * vertices are contracted toward or exapanded away from the quad
+		 * center point by multiplying by the width in the appropriate
+		 * direction.  
+		 *
+		 * The effect which blur *should* have on the quad is less certian,
+		 * and perhaps it shouldn't effect it at all for ultimate quality.
+		 * Here we take the approch that the quad is expanded by an additional
+		 * amount equal to the blur parameters.  This effectively causes blur
+		 * by sampling with a coarser mipmap level.  Experiments are required
+		 * to determine whether the resulting quality will be sufficient.
+		 *
+		 * \param quad - sample quadrilateral to adjust.
+		 */
+		void adjustSampleQuad(SqSampleQuad& quad);
+
+	protected:
+		/// Texture blur amount in the s and t directions.  
+		TqFloat m_sBlur;
+		TqFloat m_tBlur;
+		/// Filter widths as a multiple of the given filter box.
+		TqFloat m_sWidth;
+		TqFloat m_tWidth;
+		/// Type of filter - represents both the filter weight function and filtering algorithm.
+		EqTextureFilter m_filterType;
+		/// Value to fill a channel with if the associated texture doesn't contain sufficiently many channels.
+		TqFloat m_fill;
+		/// Index of the starting channel (the first channel has index 0)
+		TqInt m_startChannel;
+		/// Number of channels to sample from the texture.
+		TqInt m_numChannels;
+		/// Limit on the number of channels in the associated texture file.
+		//TqInt m_numChannelsLimit;
+		/// Number of samples to take when using a stochastic sampler
+		TqInt m_numSamples;
+		/// Wrap modes specifying what the sampler should do with (s,t) coordinates
+		/// lying off the image edge.
+		EqWrapMode m_sWrapMode;
+		EqWrapMode m_tWrapMode;
 };
 
 
-struct SqShadowSampleOptions : private SqTextureSampleOptions
+struct SqShadowSampleOptions : private CqTextureSampleOptions
 {
 	/// \todo: Flesh this out when we eventually get around to redoing the shadow maps.
-	// (The inherited members need to be pulled in with "using")
-	TqFloat biasLow;
-	TqFloat biasHigh;
+	// (The inherited functions need to be pulled in with "using")
+	TqFloat m_biasLow;
+	TqFloat m_biasHigh;
 };
 
 
@@ -133,38 +220,176 @@ struct SqShadowSampleOptions : private SqTextureSampleOptions
 // Implementation details.
 //==============================================================================
 
-// SqTextureSampleOptions implementation
+// CqTextureSampleOptions implementation
 
-inline SqTextureSampleOptions::SqTextureSampleOptions( TqFloat sblur, TqFloat tblur,
-		TqFloat swidth, TqFloat twidth, EqTextureFilter filterType, TqFloat fill,
+inline CqTextureSampleOptions::CqTextureSampleOptions( TqFloat sBlur, TqFloat tBlur,
+		TqFloat sWidth, TqFloat tWidth, EqTextureFilter filterType, TqFloat fill,
 		TqInt startChannel, TqInt numChannels, TqInt numSamples,
 		EqWrapMode sWrapMode, EqWrapMode tWrapMode)
-	: sblur(sblur),
-	tblur(tblur),
-	swidth(swidth),
-	twidth(twidth),
-	filterType(filterType),
-	fill(fill),
-	startChannel(startChannel),
-	numChannels(numChannels),
-	numSamples(numSamples),
-	sWrapMode(sWrapMode),
-	tWrapMode(tWrapMode)
+	: m_sBlur(sBlur),
+	m_tBlur(tBlur),
+	m_sWidth(sWidth),
+	m_tWidth(tWidth),
+	m_filterType(filterType),
+	m_fill(fill),
+	m_startChannel(startChannel),
+	m_numChannels(numChannels),
+	m_numSamples(numSamples),
+	m_sWrapMode(sWrapMode),
+	m_tWrapMode(tWrapMode)
 { }
 
-inline SqTextureSampleOptions::SqTextureSampleOptions()
-	: sblur(0),
-	tblur(0),
-	swidth(0),
-	twidth(0),
-	filterType(TextureFilter_Gaussian),
-	fill(0),
-	startChannel(0),
-	numChannels(1),
-	numSamples(1),
-	sWrapMode(WrapMode_Black),
-	tWrapMode(WrapMode_Black)
+inline CqTextureSampleOptions::CqTextureSampleOptions()
+	: m_sBlur(0),
+	m_tBlur(0),
+	m_sWidth(0),
+	m_tWidth(0),
+	m_filterType(TextureFilter_Gaussian),
+	m_fill(0),
+	m_startChannel(0),
+	m_numChannels(1),
+	m_numSamples(1),
+	m_sWrapMode(WrapMode_Black),
+	m_tWrapMode(WrapMode_Black)
 { }
+
+
+inline TqFloat CqTextureSampleOptions::sBlur() const
+{
+	return m_sBlur;
+}
+
+inline TqFloat CqTextureSampleOptions::tBlur() const
+{
+	return m_tBlur;
+}
+
+inline TqFloat CqTextureSampleOptions::sWidth() const
+{
+	return m_sWidth;
+}
+
+inline TqFloat CqTextureSampleOptions::tWidth() const
+{
+	return m_tWidth;
+}
+
+inline EqTextureFilter CqTextureSampleOptions::filterType() const
+{
+	return m_filterType;
+}
+
+inline TqFloat CqTextureSampleOptions::fill() const
+{
+	return m_fill;
+}
+
+inline TqInt CqTextureSampleOptions::startChannel() const
+{
+	return m_startChannel;
+}
+
+inline TqInt CqTextureSampleOptions::numChannels() const
+{
+	return m_numChannels;
+}
+
+inline TqInt CqTextureSampleOptions::numSamples() const
+{
+	return m_numSamples;
+}
+
+inline EqWrapMode CqTextureSampleOptions::sWrapMode() const
+{
+	return m_sWrapMode;
+}
+
+inline EqWrapMode CqTextureSampleOptions::tWrapMode() const
+{
+	return m_tWrapMode;
+}
+
+
+inline void CqTextureSampleOptions::setBlur(TqFloat blur)
+{
+	setSBlur(blur);
+	setTBlur(blur);
+}
+
+inline void CqTextureSampleOptions::setSBlur(TqFloat sBlur)
+{
+	assert(sBlur >= 0);
+	m_sBlur = sBlur;
+}
+
+inline void CqTextureSampleOptions::setTBlur(TqFloat tBlur)
+{
+	assert(tBlur >= 0);
+	m_tBlur = tBlur;
+}
+
+inline void CqTextureSampleOptions::setWidth(TqFloat width)
+{
+	setSWidth(width);
+	setTWidth(width);
+}
+
+inline void CqTextureSampleOptions::setSWidth(TqFloat sWidth)
+{
+	assert(sWidth >= 0);
+	m_sWidth = sWidth;
+}
+
+inline void CqTextureSampleOptions::setTWidth(TqFloat tWidth)
+{
+	assert(tWidth >= 0);
+	m_tWidth = tWidth;
+}
+
+inline void CqTextureSampleOptions::setFilterType(EqTextureFilter type)
+{
+	assert(type != TextureFilter_Unknown);
+	m_filterType = type;
+}
+
+inline void CqTextureSampleOptions::setFill(TqFloat fill)
+{
+	m_fill = fill;
+}
+
+inline void CqTextureSampleOptions::setStartChannel(TqInt startChannel)
+{
+	assert(startChannel >= 0);
+	m_startChannel = startChannel;
+}
+
+inline void CqTextureSampleOptions::setNumChannels(TqInt numChannels)
+{
+	assert(numChannels >= 0);
+	m_numChannels = numChannels;
+}
+
+inline void CqTextureSampleOptions::setNumSamples(TqInt numSamples)
+{
+	assert(numSamples >= 0);
+	m_numSamples = numSamples;
+}
+
+inline void CqTextureSampleOptions::setWrapMode(EqWrapMode wrapMode)
+{
+	setSWrapMode(wrapMode);
+	setTWrapMode(wrapMode);
+}
+
+inline void CqTextureSampleOptions::setSWrapMode(EqWrapMode sWrapMode)
+{
+	m_sWrapMode = sWrapMode;
+}
+
+inline void CqTextureSampleOptions::setTWrapMode(EqWrapMode tWrapMode)
+{
+	m_tWrapMode = tWrapMode;
+}
 
 } // namespace Aqsis
 
