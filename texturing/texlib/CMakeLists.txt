@@ -68,6 +68,7 @@ SET(AQSISTEX_TEST_SRCS
 	mixedimagebuffer_test.cpp
 	magicnumber_test.cpp
 	texfileheader_test.cpp
+	texturesampleoptions_test.cpp
 	tiffdirhandle_test.cpp
 	tiffinputfile_test.cpp
 	)

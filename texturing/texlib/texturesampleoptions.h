@@ -102,7 +102,7 @@ class CqTextureSampleOptions
 		inline CqTextureSampleOptions();
 
 		//--------------------------------------------------
-		/// \name Accessors for all relevant texture sample options.
+		/// \name Accessors for relevant texture sample options.
 		//@{
 		/// Get the blur in the s-direction
 		inline TqFloat sBlur() const;
@@ -129,7 +129,7 @@ class CqTextureSampleOptions
 		//@}
 
 		//--------------------------------------------------
-		/// \name Modifiers for all relevant texture sample options.
+		/// \name Modifiers for texture sampling options.
 		//@{
 		/// Set the blur in both directions
 		inline void setBlur(TqFloat blur);
@@ -179,9 +179,17 @@ class CqTextureSampleOptions
 		 *
 		 * \param quad - sample quadrilateral to adjust.
 		 */
-		void adjustSampleQuad(SqSampleQuad& quad);
+		void adjustSampleQuad(SqSampleQuad& quad) const;
 
 	protected:
+		/** \brief Check that the blur and filter settings are compatible.
+		 *
+		 * This function checks that the filter is gaussian if we're attempting
+		 * to apply a nonzero blur to the texture.  If it's not gaussian, then
+		 * a warning is generated.
+		 */
+		void checkBlurAndFilter();
+
 		/// Texture blur amount in the s and t directions.  
 		TqFloat m_sBlur;
 		TqFloat m_tBlur;
@@ -320,12 +328,14 @@ inline void CqTextureSampleOptions::setSBlur(TqFloat sBlur)
 {
 	assert(sBlur >= 0);
 	m_sBlur = sBlur;
+	checkBlurAndFilter();
 }
 
 inline void CqTextureSampleOptions::setTBlur(TqFloat tBlur)
 {
 	assert(tBlur >= 0);
 	m_tBlur = tBlur;
+	checkBlurAndFilter();
 }
 
 inline void CqTextureSampleOptions::setWidth(TqFloat width)
@@ -350,6 +360,7 @@ inline void CqTextureSampleOptions::setFilterType(EqTextureFilter type)
 {
 	assert(type != TextureFilter_Unknown);
 	m_filterType = type;
+	checkBlurAndFilter();
 }
 
 inline void CqTextureSampleOptions::setFill(TqFloat fill)

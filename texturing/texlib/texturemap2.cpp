@@ -43,7 +43,7 @@ namespace Aqsis
 
 CqTextureMap2::CqTextureMap2(const boost::shared_ptr<CqMipmapLevels>& mipmapLevels)
 	: m_mipLevels(mipmapLevels),
-	m_sampleOptions()
+	m_sampleOptions(m_mipLevels->defaultSampleOptions())
 {
 	assert(m_mipLevels);
 }
@@ -61,7 +61,10 @@ const std::string& CqTextureMap2::name() const
 
 void CqTextureMap2::sampleMap(const SqSampleQuad& sampleQuad, TqFloat* outSamples) const
 {
-	m_mipLevels->level(0).filter(sampleQuad, m_sampleOptions, outSamples);
+	/// \todo Add timing statistics?
+	SqSampleQuad quad = sampleQuad;
+	m_sampleOptions.adjustSampleQuad(quad);
+	m_mipLevels->level(0).filter(quad, m_sampleOptions, outSamples);
 }
 
 
@@ -71,8 +74,7 @@ void CqTextureMap2::sampleMap(const SqSampleQuad& sampleQuad, TqFloat* outSample
 CqTextureMap2Wrapper::CqTextureMap2Wrapper(const std::string& texName)
 	: m_texName(),
 	m_levels(texName),
-	m_realMap(boost::shared_ptr<CqMipmapLevels>(&m_levels, nullDeleter)),
-	m_sampleOptions()
+	m_realMap(boost::shared_ptr<CqMipmapLevels>(&m_levels, nullDeleter))
 { }
 
 void CqTextureMap2Wrapper::Open()
@@ -87,14 +89,15 @@ void CqTextureMap2Wrapper::Close()
 
 void CqTextureMap2Wrapper::PrepareSampleOptions(std::map<std::string, IqShaderData*>& paramMap )
 {
-	m_sampleOptions.setBlur(0);
-	m_sampleOptions.setWidth(1);
-	m_sampleOptions.setFilterType(TextureFilter_Gaussian);
-	m_sampleOptions.setFill(0);
-	m_sampleOptions.setStartChannel(0);
-	m_sampleOptions.setNumChannels(SamplesPerPixel());
-	m_sampleOptions.setNumSamples(4);
-	m_sampleOptions.setWrapMode(WrapMode_Black);
+	CqTextureSampleOptions& opts = m_realMap.sampleOptions();
+	opts.setBlur(0);
+	opts.setWidth(1);
+	opts.setFilterType(TextureFilter_Gaussian);
+	opts.setFill(0);
+	opts.setStartChannel(0);
+	opts.setNumChannels(SamplesPerPixel());
+	opts.setNumSamples(4);
+	opts.setWrapMode(WrapMode_Black);
 	if(paramMap.size() != 0)
 	{
 		std::map<std::string, IqShaderData*>::const_iterator i;
@@ -105,23 +108,23 @@ void CqTextureMap2Wrapper::PrepareSampleOptions(std::map<std::string, IqShaderDa
 		{
 			TqFloat width = 1;
 			i->second->GetFloat(width);
-			m_sampleOptions.setWidth(width);
+			opts.setWidth(width);
 		}
 		else
 		{
 			i = paramMap.find("swidth");
 			if(i != end)
 			{
-				TqFloat tmp = 0;
+				TqFloat tmp = 1;
 				i->second->GetFloat(tmp);
-				m_sampleOptions.setSWidth(tmp);
+				opts.setSWidth(tmp);
 			}
 			i = paramMap.find("twidth");
 			if(i != end)
 			{
-				TqFloat tmp = 0;
+				TqFloat tmp = 1;
 				i->second->GetFloat(tmp);
-				m_sampleOptions.setTWidth(tmp);
+				opts.setTWidth(tmp);
 			}
 		}
 		// Load filter blurs
@@ -130,7 +133,7 @@ void CqTextureMap2Wrapper::PrepareSampleOptions(std::map<std::string, IqShaderDa
 		{
 			TqFloat blur = 0;
 			i->second->GetFloat(blur);
-			m_sampleOptions.setBlur(blur);
+			opts.setBlur(blur);
 		}
 		else
 		{
@@ -139,14 +142,14 @@ void CqTextureMap2Wrapper::PrepareSampleOptions(std::map<std::string, IqShaderDa
 			{
 				TqFloat tmp = 0;
 				i->second->GetFloat(tmp);
-				m_sampleOptions.setSBlur(tmp);
+				opts.setSBlur(tmp);
 			}
 			i = paramMap.find("tblur");
 			if(i != end)
 			{
 				TqFloat tmp = 0;
 				i->second->GetFloat(tmp);
-				m_sampleOptions.setTBlur(tmp);
+				opts.setTBlur(tmp);
 			}
 		}
 		// number of samples for stochastic filters
@@ -155,7 +158,7 @@ void CqTextureMap2Wrapper::PrepareSampleOptions(std::map<std::string, IqShaderDa
 		{
 			TqFloat samples = 0;
 			i->second->GetFloat(samples);
-			m_sampleOptions.setNumSamples(lfloor(samples));
+			opts.setNumSamples(lfloor(samples));
 		}
 		/// \todo pixelvariance ?
 		// Filter type
@@ -172,7 +175,7 @@ void CqTextureMap2Wrapper::PrepareSampleOptions(std::map<std::string, IqShaderDa
 					<< filterName << "\".  Using gaussian\n";
 				filterType = TextureFilter_Gaussian;
 			}
-			m_sampleOptions.setFilterType(filterType);
+			opts.setFilterType(filterType);
 		}
 	}
 }

@@ -38,6 +38,8 @@
 #include "itexturesampler.h"
 #include "random.h"
 #include "lowdiscrep.h"
+#include "matrix2d.h"
+#include "logging.h"
 
 namespace Aqsis {
 
@@ -94,6 +96,25 @@ class CqTextureSamplerImpl : public IqTextureSampler
 		 */
 		void filterEWA(const SqSampleQuad& sampleQuad,
 				const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const;
+		/** Get the quadratic form defining the gaussian filter for EWA.
+		 *
+		 * A 2D gaussian filter may be defined by a quadratic form,
+		 *   Q(x,y) = a*x^2 + b*x*y + c*y*x + d*y^2,
+		 * such that the filter weights are given by
+		 *   W(x,y) = exp(-Q(x,y)).
+		 *
+		 * This function returns the appropriate matrix for the quadratic form,
+		 *   Q = [a b]
+		 *       [c d]
+		 * which represents the EWA filter over the quadrilateral given by sampleQuad.
+		 *
+		 * \param sampleQuad - quadrilateral to sample over in texture coordinates.
+		 * \param sampleOpts - sample options (needed to include blur).
+		 *
+		 * \return quadratic form matrix defining the EWA filter.
+		 */
+		inline SqMatrix2D getEWAQuadForm(const SqSampleQuad& sQuad,
+				const CqTextureSampleOptions& sampleOpts) const;
 		//@}
 
 		//--------------------------------------------------
@@ -134,7 +155,7 @@ class CqTextureSamplerImpl : public IqTextureSampler
 		boost::shared_ptr<CqTileArray<T> > m_texData;
 		TqFloat m_sMult;
 		TqFloat m_tMult;
-		/// (Analyse performance+complexity/quality tradeoff for offsets?):
+		// (Analyse performance+complexity/quality tradeoff for offsets?):
 		TqFloat m_sOffset;
 		TqFloat m_tOffset;
 };
@@ -208,75 +229,6 @@ void CqTextureSamplerImpl<T>::filterSimple( const SqSampleQuad& sQuad,
 			sampleOpts, outSamps);
 }
 
-/// \todo Factor this out into aqsistypes
-struct SqMatrix2D
-{
-	// matrix components.  This class considers vectors to be column vectors,
-	// and to multipy matrices on the RHS.  This is the usual form used in
-	// linear algebra courses.
-	//
-	// The matrix is
-	//
-	// [a b]
-	// [c d]
-	//
-	/// \todo Consider whether the components should be public or not.
-	TqFloat a;
-	TqFloat b;
-	TqFloat c;
-	TqFloat d;
-	// Construct a multiple of the identity.
-	inline SqMatrix2D(TqFloat diag)
-		: a(diag), b(0), c(0), d(diag)
-	{ }
-	inline SqMatrix2D(TqFloat a, TqFloat b, TqFloat c, TqFloat d)
-		: a(a), b(b), c(c), d(d)
-	{ }
-	/// Matrix addition
-	inline SqMatrix2D operator+(const SqMatrix2D& rhs) const
-	{
-		return SqMatrix2D(a+rhs.a, b+rhs.b, c+rhs.c, d+rhs.d);
-	}
-	/// Matrix multiplication
-	//@{
-	inline SqMatrix2D operator*(const SqMatrix2D& rhs) const
-	{
-		return SqMatrix2D(
-				a*rhs.a + b*rhs.c, a*rhs.b + b*rhs.d,
-				c*rhs.a + d*rhs.c, c*rhs.b + d*rhs.d
-				);
-	}
-	inline SqMatrix2D operator*(TqFloat mult) const
-	{
-		return SqMatrix2D(a*mult, b*mult, c*mult, d*mult);
-	}
-	friend inline SqMatrix2D operator*(TqFloat mult, const SqMatrix2D& mat);
-	//@}
-
-	/// Return the inverse
-	inline SqMatrix2D inv() const
-	{
-		// There's a simple formula for the inverse of a 2D matrix.
-		TqFloat D = det();
-		return SqMatrix2D(d/D, -b/D, -c/D, a/D);
-	}
-	/// Return the determinant.
-	inline TqFloat det() const
-	{
-		return a*d - b*c;
-	}
-	/// Return the matrix transpose
-	inline SqMatrix2D transpose() const
-	{
-		return SqMatrix2D(a, c, b, d);
-	}
-};
-
-inline SqMatrix2D operator*(TqFloat mult, const SqMatrix2D& mat)
-{
-	return mat*mult;
-}
-
 /** Estimate the inverse Jacobian of the mapping defined by a sampling quad
  *
  * The four corners of the sampling quad are assumed to point to four corners
@@ -287,12 +239,14 @@ inline SqMatrix2D operator*(TqFloat mult, const SqMatrix2D& mat)
  */
 inline SqMatrix2D estimateJacobianInverse(const SqSampleQuad& sQuad)
 {
-	// computes what is essentially a scaled version of
+	// Computes what is essentially a scaled version of the jacobian of the
+	// mapping
+	//
 	//
 	// [ds/du ds/dv]
 	// [dt/du dt/dv]
 	//
-	// by averaging (hence the factor of 0.5)
+	// We use some averaging for numerical stability (giving the factor of 0.5).
 	return SqMatrix2D(
 			0.5*(sQuad.v2.x() - sQuad.v1.x() + sQuad.v4.x() - sQuad.v3.x()),
 			0.5*(sQuad.v3.x() - sQuad.v1.x() + sQuad.v4.x() - sQuad.v2.x()),
@@ -303,18 +257,47 @@ inline SqMatrix2D estimateJacobianInverse(const SqSampleQuad& sQuad)
 
 /** Get the quadratic form matrix for an EWA filter.
  */
-inline SqMatrix2D getEWAQuadForm(const SqSampleQuad& sQuad)
+template<typename T>
+inline SqMatrix2D CqTextureSamplerImpl<T>::getEWAQuadForm(const SqSampleQuad& sQuad,
+		const CqTextureSampleOptions& sampleOpts) const
 {
-	// Get Jacobian
+	// Get Jacobian of the texture warp
 	SqMatrix2D invJ = estimateJacobianInverse(sQuad);
+	// Compute covariance matrix for the gaussian filter
+	//
 	// Variances for the reconstruction & prefilters.  A variance of 1/(2*pi)
 	// gives a filter with centeral weight 1, but in practise this is slightly
 	// too small (resulting in a little bit of aliasing).  Therefore it's
 	// adjusted up slightly.
+	//
+	// Default reconstruction filter variance - this is the variance of the
+	// filter (conceptually) used to reconstruct a continuous image from the
+	// underlying discrete samples.
 	const TqFloat reconsVar = 1.3/(2*M_PI);
+	// "Prefilter" variance - this is the variance of the antialiasing filter
+	// which is (conceptually) used immediately before resampling onto a
+	// discrete grid.
 	const TqFloat prefilterVar = 1.3/(2*M_PI);
-	// Get covariance matrix
-	SqMatrix2D coVar = reconsVar*(invJ*invJ.transpose()) + prefilterVar*SqMatrix2D(1);
+	// the covariance matrix
+	SqMatrix2D coVar(prefilterVar);
+	if(sampleOpts.sBlur() != 0 || sampleOpts.tBlur() != 0)
+	{
+		// The reconstruction variance matrix provides a very nice way of
+		// incorporating extra filter blurring if necessary.  Here we do this
+		// by adding the extra blur to the variance matrix.
+		TqFloat sVariance = sampleOpts.sBlur()*m_sMult;
+		sVariance = sVariance*sVariance + reconsVar;
+		TqFloat tVariance = sampleOpts.tBlur()*m_tMult;
+		tVariance = tVariance*tVariance + reconsVar;
+		coVar += invJ * SqMatrix2D(sVariance, tVariance) * invJ.transpose();
+	}
+	else
+	{
+		// Note: This looks slightly different from Heckbert's thesis, since
+		// We're using a column-vector convention rather than a row-vector one.
+		// That is, the transpose is in the opposite position.
+		coVar += reconsVar*(invJ*invJ.transpose());
+	}
 	// Get the quadratic form
 	return 0.5*coVar.inv();
 }
@@ -323,7 +306,6 @@ template<typename T>
 void CqTextureSamplerImpl<T>::filterEWA( const SqSampleQuad& sQuad,
 		const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
 {
-	/// \todo Write a function for this.
 	// Zero the samples
 	for(TqInt i = 0; i < sampleOpts.numChannels(); ++i)
 		outSamps[i] = 0;
@@ -340,7 +322,7 @@ void CqTextureSamplerImpl<T>::filterEWA( const SqSampleQuad& sQuad,
 	// should be more than good enough.
 	const TqFloat logEdgeWeight = 4;
 	// Get the quadratic form matrix
-	SqMatrix2D Q = getEWAQuadForm(rasterSampleQuad);
+	SqMatrix2D Q = getEWAQuadForm(rasterSampleQuad, sampleOpts);
 	TqFloat detQ = Q.det();
 	// Radius of filter.
 	TqFloat sRad = std::sqrt(Q.d*logEdgeWeight/detQ);
@@ -348,7 +330,7 @@ void CqTextureSamplerImpl<T>::filterEWA( const SqSampleQuad& sQuad,
 	// Center point of filter
 	CqVector2D center = 0.25*(rasterSampleQuad.v1 + rasterSampleQuad.v2
 			+ rasterSampleQuad.v3 + rasterSampleQuad.v4);
-	// Starting texture coordinates for the averaging
+	// Starting and finishing texture coordinates for the filter support
 	TqInt sStart = lceil(center.x()-sRad);
 	TqInt tStart = lceil(center.y()-tRad);
 	TqInt sEnd = lfloor(center.x()+sRad);
@@ -410,22 +392,24 @@ void CqTextureSamplerImpl<T>::filterMC(const SqSampleQuad& sampleQuad,
 	// zero all samples
 	for(int i = 0; i < sampleOpts.numChannels(); ++i)
 		outSamps[i] = 0;
-	// MC integration loop
-	/// \todo adjust quad for swidth, sblur etc.
-	SqSampleQuad adjustedQuad(sampleQuad);
-	/// \todo Decide whether to use MC or QMC samples here.
+	// Monte Carlo integration loop
+	//
+	// We use low discrepency random numbers here, since they produce much
+	// lower noise sampling than uniform uncorrelated samples as used in
+	// traditional Monte Carlo integration.
+	//
+	// Note that currently this filter method doesn't support blurring, as
+	// reflected by the checks in CqTextureSampleOptions.
+	//
 	/// \todo Possible optimizaton: tabulate the random numbers?
-//	CqRandom randGen;
 	CqLowDiscrepancy randGen(2);
 	for(int i = 0; i < sampleOpts.numSamples(); ++i)
 	{
-//		TqFloat interp1 = randGen.RandomFloat();
-//		TqFloat interp2 = randGen.RandomFloat();
 		TqFloat interp1 = randGen.Generate(0, i);
 		TqFloat interp2 = randGen.Generate(1, i);
 		CqVector2D samplePos = lerp(interp1,
-				lerp(interp2, adjustedQuad.v1, adjustedQuad.v2),
-				lerp(interp2, adjustedQuad.v3, adjustedQuad.v4)
+				lerp(interp2, sampleQuad.v1, sampleQuad.v2),
+				lerp(interp2, sampleQuad.v3, sampleQuad.v4)
 				);
 		sampleBilinear(samplePos, sampleOpts, &tempSamps[0]);
 		for(int i = 0; i < sampleOpts.numChannels(); ++i)
@@ -443,39 +427,15 @@ TqFloat CqTextureSamplerImpl<T>::dummyGridTex(TqInt s, TqInt t) const
 	const TqInt gridSize = 8;
 	const TqInt lineWidth = 1;
 	TqFloat outVal = 1;
-	//if((s / gridSize) % 2 == 0 | (t / gridSize) % 2 == 0) // checkered
-	if((s % gridSize) < lineWidth || (t % gridSize) < lineWidth) // grid
+	if(s < 0)
+		s += gridSize*(1-s/gridSize);
+	if(t < 0)
+		t += gridSize*(1-t/gridSize);
+	// Hardcoded grid pattern
+	if((s % gridSize) < lineWidth || (t % gridSize) < lineWidth)
 		outVal = 0;
 	return outVal;
 }
-
-//------------------------------------------------------------------------------
-/** \brief A minimal 2D matrix class for use in texture warping.
- *
- * Don't develop this further until it's found out exactly how much it's needed...
- */
-#if 0
-class CqMatrix2D
-{
-	public:
-		/** Construct a 2D matrix
-		 */
-		CqMatrix2D(a,b,c,d);
-		/** \brief Factory function to make identity matrix.
-		 */
-		inline static CqMatrix2D identity();
-		inline TqFloat determinant();
-		inline CqMatrix2D operator*(CqMatrix2D& rhs);
-		inline CqMatrix2D operator+(CqMatrix2D& rhs);
-		inline TqFloat operator()(TqInt i, TqInt j);
-		CqMatrix2D inverse();
-	private:
-		TqFloat m_a;
-		TqFloat m_b;
-		TqFloat m_c;
-		TqFloat m_d;
-};
-#endif
 
 } // namespace Aqsis
 

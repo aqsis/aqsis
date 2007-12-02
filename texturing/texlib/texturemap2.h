@@ -130,7 +130,6 @@ class CqTextureMap2Wrapper : public IqTextureMap
 		mutable CqString m_texName;
 		CqMipmapLevels m_levels;
 		CqTextureMap2 m_realMap;
-		CqTextureSampleOptions m_sampleOptions;
 };
 
 
