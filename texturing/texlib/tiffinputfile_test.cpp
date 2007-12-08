@@ -43,9 +43,6 @@ BOOST_AUTO_UNIT_TEST(CqTiffInputFile_readPixels_test)
 
 	// Read the whole tiff into a buffer
 	Aqsis::CqTextureBuffer<TqUchar> buffer;
-	// Ugly and unfortunately necessary hack to prevent multiple deallocations
-	// when CqTextureBuffer is allocated on the stack.
-	Aqsis::intrusive_ptr_add_ref(&buffer);
 	inFile.readPixels(buffer);
 
 	// Check that the buffer is the right size.
@@ -74,9 +71,6 @@ BOOST_AUTO_UNIT_TEST(CqTiffInputFile_readPixels_secondSubImage_test)
 
 	// Read the whole tiff into a buffer
 	Aqsis::CqTextureBuffer<TqUchar> buffer;
-	// Ugly and unfortunately necessary hack to prevent multiple deallocations
-	// when CqTextureBuffer is allocated on the stack.
-	Aqsis::intrusive_ptr_add_ref(&buffer);
 	inFile.readPixels(buffer);
 
 	// Check that the buffer is the right size.

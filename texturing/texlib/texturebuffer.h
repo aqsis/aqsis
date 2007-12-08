@@ -52,7 +52,7 @@ namespace Aqsis {
  * deallocations.
  */
 template<typename T>
-class CqTextureBuffer : public CqIntrusivePtrCounted
+class CqTextureBuffer // : public CqIntrusivePtrCounted
 {
 	public:
 		/** \brief The pointer type for use with texture tiles.
@@ -153,8 +153,10 @@ CqTextureBuffer<T>::CqTextureBuffer(TqInt width, TqInt height, TqInt channelsPer
 template<typename T>
 inline const CqSampleVector<T> CqTextureBuffer<T>::operator()(const TqInt x, const TqInt y) const
 {
-	return CqSampleVector<T>(samplePtr(x,y),
-			boost::intrusive_ptr<const CqIntrusivePtrCounted>(this));
+	return CqSampleVector<T>(samplePtr(x,y));
+	/// \todo Have to think about how to do the below for the multi-threaded case...
+//	return CqSampleVector<T>(samplePtr(x,y),
+//			boost::intrusive_ptr<const CqIntrusivePtrCounted>(this));
 }
 
 template<typename T>

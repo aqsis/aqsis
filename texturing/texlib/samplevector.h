@@ -55,8 +55,13 @@ class CqSampleVector
 		 * \param data - the raw vector sample data.
 		 * \param parentTile - the array tile which the sample data belongs to.
 		 */
-		inline CqSampleVector(const T* sampleData,
-				const boost::intrusive_ptr<const CqIntrusivePtrCounted>& parentTile);
+//		inline CqSampleVector(const T* sampleData,
+//				const boost::intrusive_ptr<const CqIntrusivePtrCounted>& parentTile);
+		/** \brief Construct a sample vector.
+		 *
+		 * \param data - the raw vector sample data.
+		 */
+		inline CqSampleVector(const T* sampleData);
 		/** \brief Indexing operator for this vector of data.
 		 *
 		 * If the vector holds integer data, this function normalises the data
@@ -70,24 +75,28 @@ class CqSampleVector
 	private:
 		/// Raw pointer to the data held by this vector
 		const T* m_sampleData;
-		/** A pointer to the parent tile; this is simply to protect the tile
-		 *  data from deallocation in the multithreaded case.
+		/** A pointer to the parent tile; this is simply to protect the parent
+		 * data from deallocation in the multithreaded case.
 		 */
-		const boost::intrusive_ptr<const CqIntrusivePtrCounted> m_parentTile;
+		// const boost::intrusive_ptr<const CqIntrusivePtrCounted> m_parentTile;
 };
 
 
 //==============================================================================
-// Implementation of inline functions and templates
+// Implementation details
 //==============================================================================
+// CqSampleVector implementation
 
-// Inline functions for CqSampleVector
+//template<typename T>
+//inline CqSampleVector<T>::CqSampleVector(const T* sampleData,
+//		const boost::intrusive_ptr<const CqIntrusivePtrCounted>& parentTile)
+//	: m_sampleData(sampleData),
+//	m_parentTile(parentTile)
+//{ }
 
 template<typename T>
-inline CqSampleVector<T>::CqSampleVector(const T* sampleData,
-		const boost::intrusive_ptr<const CqIntrusivePtrCounted>& parentTile)
-	: m_sampleData(sampleData),
-	m_parentTile(parentTile)
+inline CqSampleVector<T>::CqSampleVector(const T* sampleData)
+	: m_sampleData(sampleData)
 { }
 
 template<typename T>
