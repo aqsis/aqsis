@@ -19,8 +19,9 @@ SET(AQSISTEX_SRCS
 	itexinputfile.cpp
 	itexoutputfile.cpp
 	itexturesampler.cpp
+	levelsamplercache.cpp
 	magicnumber.cpp
-	mipmaplevels.cpp
+	mipmaptexturesampler.cpp
 	texfileheader.cpp
 	tiffdirhandle.cpp
 	tiffinputfile.cpp

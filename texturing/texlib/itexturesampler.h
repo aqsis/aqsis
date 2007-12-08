@@ -40,7 +40,12 @@
 namespace Aqsis {
 
 //------------------------------------------------------------------------------
-/** \brief A class which knows how to sample texture buffers.
+/** \brief An interface for sampling texture buffers.
+ *
+ * This intent of this interface is to provide texture sampling facilities
+ * independently of the sampling options.  Classes which implement the
+ * interface should attempt to use the sampling method as specified by a
+ * CqTexutureSampleOptions, passed to the filter() interface function.
  *
  */
 class IqTextureSampler
@@ -54,6 +59,18 @@ class IqTextureSampler
 		 */
 		virtual void filter(const SqSampleQuad& sampleQuad,
 				const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const = 0;
+
+		/** \brief Get the default sample options for this texture.
+		 *
+		 * The default implementation returns texture sample options
+		 * initialized by the default CqTextureSampleOptions constructor.
+		 *
+		 * \return The default sample options - in the case that the texture
+		 * originates from an underlying file, these should include options
+		 * which were used when the texture was created (things like the
+		 * texutre wrap mode).
+		 */
+		virtual const CqTextureSampleOptions& defaultSampleOptions() const;
 
 		/** \brief Create and return a IqTextureSampler derived class
 		 *

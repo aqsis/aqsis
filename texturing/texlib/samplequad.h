@@ -19,7 +19,7 @@
 
 /** \file
  *
- * \brief Declare a filtered texture mapping class
+ * \brief Sampling quadrilateral struct definition
  *
  * \author Chris Foster [ chris42f (at) gmail (dot) com ]
  */

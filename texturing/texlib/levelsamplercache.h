@@ -40,36 +40,37 @@ namespace Aqsis
 {
 
 class IqTextureSampler;
+class IqTiledTexInputFile;
 
 //------------------------------------------------------------------------------
-/** \brief A container for a set of texture mipmap levels.
+/** \brief Cache for a set of associated texture samplers
  *
- * This class holds texture mipmap level data, in a way which is independent of
- * the sampling options.  This makes sense because our typical usage is for
- * sampling options to change very often, while the underlying data is fixed.
+ * This class holds texture samplers for a set of associated 2D textures, such
+ * as mipmap levels.  The class is independent of any of any details of the
+ * sampling procedure.
+ *
+ * Samplers for textures in the cache are constructed only on-demand.
  * 
- * CqMipmapLevels is the class which will be held in the texture cache.
+ * CqLevelSamplerCache is the class which will be held in the high-level
+ * texture cache (yes, caches within caches).
  *
- * In addition to holding mipmap levels, this class also caches the default
- * sampling options, as determined from attributes of the underlying texture
- * file.  When these aren't present, we attempt to choose sensible defaults.
+ * In addition to holding a set of samplers, this class also caches the default
+ * sampling options, as determined from attributes of the texture file.  When
+ * these aren't present, we attempt to choose sensible defaults.
  */
-class CqMipmapLevels
+class CqLevelSamplerCache
 {
 	public:
-		/** \brief Construct a set of mipmap levels from a file
+		/** \brief Construct the sampler cache from an open file.
 		 *
-		 * If the file named by texName doesn't exist, this class is still
-		 * constructed sucessfully.  However, the number of levels is then set
-		 * to one, and that level is a dummy texture consisting of a single
-		 * pixel.  This allows us to gracefully recover from a missing file.
+		 * If the file pointer is null, this class is still constructed
+		 * sucessfully.  However, the number of levels is then set to one, and
+		 * that level is a dummy texture consisting of a single pixel.  This
+		 * allows us to gracefully recover from missing files.
 		 *
-		 * \param texName - Name of the texture file to open.
-		 *
-		 * \todo: Consider whether this should really take a pointer to an open
-		 * file inestead of a file name...
+		 * \param file - read texture data from here.
 		 */
-		CqMipmapLevels(const std::string& texName);
+		CqLevelSamplerCache(const boost::shared_ptr<IqTiledTexInputFile>& file);
 		/** \brief Get the texture sampler for a given level.
 		 *
 		 * \param levelNum - mipmap level to grab
@@ -86,42 +87,28 @@ class CqMipmapLevels
 		 * mode).
 		 */
 		inline const CqTextureSampleOptions& defaultSampleOptions();
-		/** \brief Get the texture name
-		 *
-		 * This is the name of the associated texture file, (if the file
-		 * doesn't exist, this is still the name which was passed to the
-		 * constructor).
-		 *
-		 * \return The texture name
-		 */
-		inline const std::string& name() const;
 	private:
-		std::string m_texName;  ///< Name of texture
 		/// Default texture sampling options for the set of mipmap levels.
 		CqTextureSampleOptions m_defaultSampleOptions;
 		/** \brief List of samplers for mipmap levels.  The pointers to these
 		 * may be NULL since they are created only on demand.
 		 */
-		mutable std::vector<boost::shared_ptr<IqTextureSampler> > m_mipLevels;
+		mutable std::vector<boost::shared_ptr<IqTextureSampler> > m_levels;
+		boost::shared_ptr<IqTiledTexInputFile> m_texFile;
 };
 
 
 //==============================================================================
 // Implementation details
 //==============================================================================
-inline TqInt CqMipmapLevels::numLevels() const
+inline TqInt CqLevelSamplerCache::numLevels() const
 {
-	return m_mipLevels.size();
+	return m_levels.size();
 }
 
-inline const CqTextureSampleOptions& CqMipmapLevels::defaultSampleOptions()
+inline const CqTextureSampleOptions& CqLevelSamplerCache::defaultSampleOptions()
 {
 	return m_defaultSampleOptions;
-}
-
-inline const std::string& CqMipmapLevels::name() const
-{
-	return m_texName;
 }
 
 } // namespace Aqsis

@@ -29,11 +29,10 @@
 #include "vector3d.h"
 #include "matrix.h"
 #include "itexturesampler.h"
-#include "mipmaplevels.h"
+#include "mipmaptexturesampler.h"
 
 #include "ishaderdata.h"  /// \todo remove when removing the wrapper.
 #include "logging.h"
-#include "smartptr.h"
 
 namespace Aqsis
 {
@@ -41,11 +40,12 @@ namespace Aqsis
 //------------------------------------------------------------------------------
 // Implementation of CqTextureMap2
 
-CqTextureMap2::CqTextureMap2(const boost::shared_ptr<CqMipmapLevels>& mipmapLevels)
-	: m_mipLevels(mipmapLevels),
-	m_sampleOptions(m_mipLevels->defaultSampleOptions())
+CqTextureMap2::CqTextureMap2(const boost::shared_ptr<IqTextureSampler>& sampler)
+	: m_sampler(sampler),
+	m_sampleOptions(sampler->defaultSampleOptions())
 {
-	assert(m_mipLevels);
+	/// \todo Proper error handling if null...
+	assert(m_sampler);
 }
 
 TqInt CqTextureMap2::numSamples() const
@@ -54,17 +54,10 @@ TqInt CqTextureMap2::numSamples() const
 	return 1;
 }
 
-const std::string& CqTextureMap2::name() const
-{
-	return m_mipLevels->name();
-}
-
 void CqTextureMap2::sampleMap(const SqSampleQuad& sampleQuad, TqFloat* outSamples) const
 {
 	/// \todo Add timing statistics?
-	SqSampleQuad quad = sampleQuad;
-	m_sampleOptions.adjustSampleQuad(quad);
-	m_mipLevels->level(0).filter(quad, m_sampleOptions, outSamples);
+	m_sampler->filter(sampleQuad, m_sampleOptions, outSamples);
 }
 
 
@@ -72,10 +65,17 @@ void CqTextureMap2::sampleMap(const SqSampleQuad& sampleQuad, TqFloat* outSample
 // Implementation of CqTextureMap2Wrapper
 
 CqTextureMap2Wrapper::CqTextureMap2Wrapper(const std::string& texName)
-	: m_texName(),
-	m_levels(texName),
-	m_realMap(boost::shared_ptr<CqMipmapLevels>(&m_levels, nullDeleter))
+	: m_texName(texName),
+	m_realMap(newWrappedTexture())
 { }
+
+boost::shared_ptr<IqTextureSampler> CqTextureMap2Wrapper::newWrappedTexture()
+{
+	boost::shared_ptr<IqTiledTexInputFile> file;
+	boost::shared_ptr<CqLevelSamplerCache> levels(new CqLevelSamplerCache(file));
+	boost::shared_ptr<IqTextureSampler> sampler(new CqMipmapTextureSampler(levels));
+	return sampler;
+}
 
 void CqTextureMap2Wrapper::Open()
 {

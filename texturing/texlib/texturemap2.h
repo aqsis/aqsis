@@ -38,13 +38,11 @@
 #include "sstring.h"
 #include "texfileheader.h"
 
-#include "mipmaplevels.h" /// \todo may be removed when removing wrapper class.
-
 namespace Aqsis
 {
 
 class IqTextureSampler;
-class CqMipmapLevels;
+class CqLevelSamplerCache;
 
 //------------------------------------------------------------------------------
 /* \brief A multi-resolution filtering texture sampler
@@ -54,7 +52,7 @@ class CqMipmapLevels;
 class CqTextureMap2
 {
 	public:
-		CqTextureMap2(const boost::shared_ptr<CqMipmapLevels>& mipmapLevels);
+		CqTextureMap2(const boost::shared_ptr<IqTextureSampler>& sampler);
 		/** \brief Get the texture attributes of the underlying file.
 		 *
 		 * This function allows access to the texture file attributes such as
@@ -66,7 +64,6 @@ class CqTextureMap2
 		virtual inline const CqTexFileHeader* attributes() const;
 		/// \todo Decide if these two methods are actually needed.
 		virtual TqInt numSamples() const;
-		virtual const std::string& name() const;
 
 		/** \brief Sample the texture map.
 		 *
@@ -85,7 +82,7 @@ class CqTextureMap2
 
 		virtual ~CqTextureMap2() {}
 	private:
-		boost::shared_ptr<CqMipmapLevels> m_mipLevels; ///< Collection of mipmap levels
+		boost::shared_ptr<IqTextureSampler> m_sampler; ///< Underlying sampler to use.
 		CqTextureSampleOptions m_sampleOptions;  ///< sampler options
 };
 
@@ -127,8 +124,8 @@ class CqTextureMap2Wrapper : public IqTextureMap
 
 		virtual TqInt NumPages() const;
 	private:
+		static boost::shared_ptr<IqTextureSampler> newWrappedTexture();
 		mutable CqString m_texName;
-		CqMipmapLevels m_levels;
 		CqTextureMap2 m_realMap;
 };
 
@@ -188,8 +185,6 @@ inline EqMapType CqTextureMap2Wrapper::Type() const
 
 inline const CqString& CqTextureMap2Wrapper::getName() const
 {
-	// \todo implementation
-	m_texName = m_realMap.name();
 	return m_texName;
 }
 

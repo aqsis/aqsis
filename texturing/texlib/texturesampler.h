@@ -48,10 +48,11 @@ namespace Aqsis {
 /** \brief Implementation of texture buffer samplers
  */
 template<typename T>
-class CqTextureSamplerImpl : public IqTextureSampler
+class CqTextureSampler : public IqTextureSampler
 {
 	public:
-		CqTextureSamplerImpl(const boost::shared_ptr<CqTileArray<T> >& texData);
+		CqTextureSampler(const boost::shared_ptr<CqTileArray<T> >& texData);
+		// from IqTextureSampler
 		virtual void filter(const SqSampleQuad& sampleQuad,
 				const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const;
 	private:
@@ -166,7 +167,7 @@ class CqTextureSamplerImpl : public IqTextureSampler
 //==============================================================================
 
 template<typename T>
-inline CqTextureSamplerImpl<T>::CqTextureSamplerImpl(
+inline CqTextureSampler<T>::CqTextureSampler(
 		const boost::shared_ptr<CqTileArray<T> >& texData)
 	: m_texData(texData),
 	m_sMult(511),
@@ -176,7 +177,7 @@ inline CqTextureSamplerImpl<T>::CqTextureSamplerImpl(
 { }
 
 template<typename T>
-void CqTextureSamplerImpl<T>::filter(const SqSampleQuad& sampleQuad, const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
+void CqTextureSampler<T>::filter(const SqSampleQuad& sampleQuad, const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
 {
 	switch(sampleOpts.filterType())
 	{
@@ -194,7 +195,7 @@ void CqTextureSamplerImpl<T>::filter(const SqSampleQuad& sampleQuad, const CqTex
 }
 
 template<typename T>
-inline TqFloat CqTextureSamplerImpl<T>::wrapCoord(TqFloat pos, EqWrapMode mode) const
+inline TqFloat CqTextureSampler<T>::wrapCoord(TqFloat pos, EqWrapMode mode) const
 {
 	switch(mode)
 	{
@@ -214,7 +215,7 @@ inline TqFloat CqTextureSamplerImpl<T>::wrapCoord(TqFloat pos, EqWrapMode mode) 
 }
 
 template<typename T>
-inline CqVector2D CqTextureSamplerImpl<T>::texToRasterCoords(
+inline CqVector2D CqTextureSampler<T>::texToRasterCoords(
 		const CqVector2D& pos, EqWrapMode sMode, EqWrapMode tMode) const
 {
 	return CqVector2D(m_sOffset + m_sMult*wrapCoord(pos.x(), sMode),
@@ -222,7 +223,7 @@ inline CqVector2D CqTextureSamplerImpl<T>::texToRasterCoords(
 }
 
 template<typename T>
-void CqTextureSamplerImpl<T>::filterSimple( const SqSampleQuad& sQuad,
+void CqTextureSampler<T>::filterSimple( const SqSampleQuad& sQuad,
 		const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
 {
 	sampleBilinear((sQuad.v1 + sQuad.v2 + sQuad.v3 + sQuad.v4)/4,
@@ -258,7 +259,7 @@ inline SqMatrix2D estimateJacobianInverse(const SqSampleQuad& sQuad)
 /** Get the quadratic form matrix for an EWA filter.
  */
 template<typename T>
-inline SqMatrix2D CqTextureSamplerImpl<T>::getEWAQuadForm(const SqSampleQuad& sQuad,
+inline SqMatrix2D CqTextureSampler<T>::getEWAQuadForm(const SqSampleQuad& sQuad,
 		const CqTextureSampleOptions& sampleOpts) const
 {
 	// Get Jacobian of the texture warp
@@ -303,7 +304,7 @@ inline SqMatrix2D CqTextureSamplerImpl<T>::getEWAQuadForm(const SqSampleQuad& sQ
 }
 
 template<typename T>
-void CqTextureSamplerImpl<T>::filterEWA( const SqSampleQuad& sQuad,
+void CqTextureSampler<T>::filterEWA( const SqSampleQuad& sQuad,
 		const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
 {
 	// Zero the samples
@@ -360,7 +361,7 @@ void CqTextureSamplerImpl<T>::filterEWA( const SqSampleQuad& sQuad,
 }
 
 template<typename T>
-inline void CqTextureSamplerImpl<T>::sampleBilinear(const CqVector2D& st,
+inline void CqTextureSampler<T>::sampleBilinear(const CqVector2D& st,
 		const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
 {
 	CqVector2D stRaster = texToRasterCoords(st,
@@ -385,7 +386,7 @@ inline void CqTextureSamplerImpl<T>::sampleBilinear(const CqVector2D& st,
 }
 
 template<typename T>
-void CqTextureSamplerImpl<T>::filterMC(const SqSampleQuad& sampleQuad,
+void CqTextureSampler<T>::filterMC(const SqSampleQuad& sampleQuad,
 		const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
 {
 	std::vector<TqFloat> tempSamps(sampleOpts.numChannels(), 0);
@@ -422,7 +423,7 @@ void CqTextureSamplerImpl<T>::filterMC(const SqSampleQuad& sampleQuad,
 }
 
 template<typename T>
-TqFloat CqTextureSamplerImpl<T>::dummyGridTex(TqInt s, TqInt t) const
+TqFloat CqTextureSampler<T>::dummyGridTex(TqInt s, TqInt t) const
 {
 	const TqInt gridSize = 8;
 	const TqInt lineWidth = 1;
