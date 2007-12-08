@@ -25,7 +25,9 @@
  */
 
 #include "itexturesampler.h"
+
 #include "texturesampler.h"
+#include "tilearray.h"
 
 namespace Aqsis {
 
@@ -34,7 +36,7 @@ boost::shared_ptr<IqTextureSampler> IqTextureSampler::create(
 {
 	// \todo write a switch based on the pixel type in file.
 	return boost::shared_ptr<IqTextureSampler>(
-			new CqTextureSampler<TqUchar>(boost::shared_ptr<CqTileArray<TqUchar> >()));
+			new CqTextureSampler<CqTileArray<TqUchar> >(boost::shared_ptr<CqTileArray<TqUchar> >()));
 }
 
 const CqTextureSampleOptions& IqTextureSampler::defaultSampleOptions() const

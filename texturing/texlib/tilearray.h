@@ -40,7 +40,7 @@
 #include <tiffio.h>
 
 #include "memorysentry.h"
-#include "texturetile.h"
+#include "texturebuffer.h"
 
 
 namespace Aqsis {
@@ -116,7 +116,7 @@ class CqTileArray : public CqMemoryMonitored
 		 *
 		 * \return The tile holding the underlying data at the given indices.
 		 */
-		boost::intrusive_ptr<CqTextureTile<T> >& tileForIndex(const TqInt x, const TqInt y) const;
+		boost::intrusive_ptr<CqTextureBuffer<T> >& tileForIndex(const TqInt x, const TqInt y) const;
 
 		/** \brief Get the number of samples per pixel
 		 *
@@ -162,13 +162,13 @@ class CqTileArray : public CqMemoryMonitored
 		/** A list holding recently used or "hot" tiles in the order of
 		 * hotness.  The same tiles are also held in hotMap.
 		 */
-		std::list<boost::intrusive_ptr<CqTextureTile<T> > > hotList;
+		std::list<boost::intrusive_ptr<CqTextureBuffer<T> > > hotList;
 		/** A map to hold recently used or "hot" tiles.  The same tiles are
 		 * also held in hotList.
 		 */
-		std::map<TileKey, boost::intrusive_ptr<CqTextureTile<T> > > hotMap;
+		std::map<TileKey, boost::intrusive_ptr<CqTextureBuffer<T> > > hotMap;
 		/// A map holding tiles which haven't been used for a while; "cold tiles"
-		std::map<TileKey, boost::intrusive_ptr<CqTextureTile<T> > > coldMap;
+		std::map<TileKey, boost::intrusive_ptr<CqTextureBuffer<T> > > coldMap;
 };
 
 
@@ -211,11 +211,11 @@ CqSampleVector<T> CqTileArray<T>::value(const TqInt x, const TqInt y) const
 
 
 template<typename T>
-boost::intrusive_ptr<CqTextureTile<T> >& CqTileArray<T>::tileForIndex(const TqInt x, const TqInt y) const
+boost::intrusive_ptr<CqTextureBuffer<T> >& CqTileArray<T>::tileForIndex(const TqInt x, const TqInt y) const
 {
 	/// \todo Implementation
 	// if() 
-	return boost::intrusive_ptr<CqTextureTile<T> > (0); // dodgy; get the stub to compile...
+	return boost::intrusive_ptr<CqTextureBuffer<T> > (0); // dodgy; get the stub to compile...
 }
 
 template<typename T>
@@ -230,20 +230,6 @@ CqTileArray<T>::~CqTileArray()
 {
 	/// \todo Implementation
 }
-
-/* Stuff to go in CqTextureMap
-	// Validate the filename
-	CqRiFile textureFile(fileName.c_str(), "texture");
-	if(!textureFile.IsValid())
-	{
-		Aqsis::log() << error << "Cannot open texture file '" << fileName << "'; using default texture\n";
-		m_validFile = false;
-	}
-	else
-	{
-
-	}
-*/
 
 //------------------------------------------------------------------------------
 } // namespace Aqsis

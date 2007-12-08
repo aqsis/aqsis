@@ -31,7 +31,6 @@
 
 #include <cmath>
 
-#include "tilearray.h"
 #include "aqsismath.h"
 #include "samplequad.h"
 #include "texturesampleoptions.h"
@@ -47,11 +46,11 @@ namespace Aqsis {
 //------------------------------------------------------------------------------
 /** \brief Implementation of texture buffer samplers
  */
-template<typename T>
+template<typename ArrayT>
 class CqTextureSampler : public IqTextureSampler
 {
 	public:
-		CqTextureSampler(const boost::shared_ptr<CqTileArray<T> >& texData);
+		CqTextureSampler(const boost::shared_ptr<ArrayT>& texData);
 		// from IqTextureSampler
 		virtual void filter(const SqSampleQuad& sampleQuad,
 				const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const;
@@ -153,7 +152,7 @@ class CqTextureSampler : public IqTextureSampler
 
 	private:
 		// instance data
-		boost::shared_ptr<CqTileArray<T> > m_texData;
+		boost::shared_ptr<ArrayT> m_texData;
 		TqFloat m_sMult;
 		TqFloat m_tMult;
 		// (Analyse performance+complexity/quality tradeoff for offsets?):
@@ -166,9 +165,9 @@ class CqTextureSampler : public IqTextureSampler
 // Implementation details
 //==============================================================================
 
-template<typename T>
-inline CqTextureSampler<T>::CqTextureSampler(
-		const boost::shared_ptr<CqTileArray<T> >& texData)
+template<typename ArrayT>
+inline CqTextureSampler<ArrayT>::CqTextureSampler(
+		const boost::shared_ptr<ArrayT>& texData)
 	: m_texData(texData),
 	m_sMult(511),
 	m_tMult(511),
@@ -176,8 +175,8 @@ inline CqTextureSampler<T>::CqTextureSampler(
 	m_tOffset(0)
 { }
 
-template<typename T>
-void CqTextureSampler<T>::filter(const SqSampleQuad& sampleQuad, const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
+template<typename ArrayT>
+void CqTextureSampler<ArrayT>::filter(const SqSampleQuad& sampleQuad, const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
 {
 	switch(sampleOpts.filterType())
 	{
@@ -194,8 +193,8 @@ void CqTextureSampler<T>::filter(const SqSampleQuad& sampleQuad, const CqTexture
 	}
 }
 
-template<typename T>
-inline TqFloat CqTextureSampler<T>::wrapCoord(TqFloat pos, EqWrapMode mode) const
+template<typename ArrayT>
+inline TqFloat CqTextureSampler<ArrayT>::wrapCoord(TqFloat pos, EqWrapMode mode) const
 {
 	switch(mode)
 	{
@@ -214,16 +213,16 @@ inline TqFloat CqTextureSampler<T>::wrapCoord(TqFloat pos, EqWrapMode mode) cons
 	}
 }
 
-template<typename T>
-inline CqVector2D CqTextureSampler<T>::texToRasterCoords(
+template<typename ArrayT>
+inline CqVector2D CqTextureSampler<ArrayT>::texToRasterCoords(
 		const CqVector2D& pos, EqWrapMode sMode, EqWrapMode tMode) const
 {
 	return CqVector2D(m_sOffset + m_sMult*wrapCoord(pos.x(), sMode),
 			m_tOffset + m_tMult*wrapCoord(pos.y(), tMode));
 }
 
-template<typename T>
-void CqTextureSampler<T>::filterSimple( const SqSampleQuad& sQuad,
+template<typename ArrayT>
+void CqTextureSampler<ArrayT>::filterSimple( const SqSampleQuad& sQuad,
 		const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
 {
 	sampleBilinear((sQuad.v1 + sQuad.v2 + sQuad.v3 + sQuad.v4)/4,
@@ -258,8 +257,8 @@ inline SqMatrix2D estimateJacobianInverse(const SqSampleQuad& sQuad)
 
 /** Get the quadratic form matrix for an EWA filter.
  */
-template<typename T>
-inline SqMatrix2D CqTextureSampler<T>::getEWAQuadForm(const SqSampleQuad& sQuad,
+template<typename ArrayT>
+inline SqMatrix2D CqTextureSampler<ArrayT>::getEWAQuadForm(const SqSampleQuad& sQuad,
 		const CqTextureSampleOptions& sampleOpts) const
 {
 	// Get Jacobian of the texture warp
@@ -303,8 +302,8 @@ inline SqMatrix2D CqTextureSampler<T>::getEWAQuadForm(const SqSampleQuad& sQuad,
 	return 0.5*coVar.inv();
 }
 
-template<typename T>
-void CqTextureSampler<T>::filterEWA( const SqSampleQuad& sQuad,
+template<typename ArrayT>
+void CqTextureSampler<ArrayT>::filterEWA( const SqSampleQuad& sQuad,
 		const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
 {
 	// Zero the samples
@@ -360,8 +359,8 @@ void CqTextureSampler<T>::filterEWA( const SqSampleQuad& sQuad,
 		outSamps[i] *= renormalizer;
 }
 
-template<typename T>
-inline void CqTextureSampler<T>::sampleBilinear(const CqVector2D& st,
+template<typename ArrayT>
+inline void CqTextureSampler<ArrayT>::sampleBilinear(const CqVector2D& st,
 		const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
 {
 	CqVector2D stRaster = texToRasterCoords(st,
@@ -385,8 +384,8 @@ inline void CqTextureSampler<T>::sampleBilinear(const CqVector2D& st,
 	}
 }
 
-template<typename T>
-void CqTextureSampler<T>::filterMC(const SqSampleQuad& sampleQuad,
+template<typename ArrayT>
+void CqTextureSampler<ArrayT>::filterMC(const SqSampleQuad& sampleQuad,
 		const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
 {
 	std::vector<TqFloat> tempSamps(sampleOpts.numChannels(), 0);
@@ -422,9 +421,11 @@ void CqTextureSampler<T>::filterMC(const SqSampleQuad& sampleQuad,
 		outSamps[i] *= renormalizer;
 }
 
-template<typename T>
-TqFloat CqTextureSampler<T>::dummyGridTex(TqInt s, TqInt t) const
+template<typename ArrayT>
+TqFloat CqTextureSampler<ArrayT>::dummyGridTex(TqInt s, TqInt t) const
 {
+	assert(s >= 0);
+	assert(t >= 0);
 	const TqInt gridSize = 8;
 	const TqInt lineWidth = 1;
 	TqFloat outVal = 1;

@@ -29,15 +29,14 @@
 
 #include "aqsis.h"
 
-#include <valarray>
+#include <boost/shared_ptr.hpp>
 
-#include "tilearray.h"
-#include "aqsismath.h"
 #include "samplequad.h"
-#include "texturesampleoptions.h"
-#include "random.h"
 
 namespace Aqsis {
+
+class CqTextureSampleOptions;
+class IqTiledTexInputFile;
 
 //------------------------------------------------------------------------------
 /** \brief An interface for sampling texture buffers.
