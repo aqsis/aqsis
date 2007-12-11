@@ -29,15 +29,53 @@
 #include "texturesampler.h"
 #include "tilearray.h"
 
+#include "itexinputfile.h"
+
 namespace Aqsis {
 
 boost::shared_ptr<IqTextureSampler> IqTextureSampler::create(
 		const boost::shared_ptr<IqTiledTexInputFile>& file)
 {
-	// \todo write a switch based on the pixel type in file.
+	assert(0);
 	return boost::shared_ptr<IqTextureSampler>(
-			new CqTextureSampler<CqTileArray<TqUchar> >(boost::shared_ptr<CqTileArray<TqUchar> >()));
+			new CqTextureSampler<CqTextureBuffer<TqUchar> >(boost::shared_ptr<CqTextureBuffer<TqUchar> >()));
 }
+
+boost::shared_ptr<IqTextureSampler> IqTextureSampler::create(
+		const boost::shared_ptr<IqTexInputFile>& file)
+{
+	if(file)
+	{
+		switch(file->header().channelList().sharedChannelType())
+		{
+			case Channel_Float32:
+			case Channel_Unsigned32:
+			case Channel_Signed32:
+				assert(0);
+				break;
+			case Channel_Float16:
+			case Channel_Unsigned16:
+			case Channel_Signed16:
+				assert(0);
+				break;
+			case Channel_Unsigned8:
+				{
+					boost::shared_ptr<CqTextureBuffer<TqUchar> > buffer(
+						new CqTextureBuffer<TqUchar>() );
+					file->readPixels(*buffer);
+					return boost::shared_ptr<IqTextureSampler>(
+							new CqTextureSampler<CqTextureBuffer<TqUchar> >(buffer) );
+				}
+			case Channel_Signed8:
+			case Channel_TypeUnknown:
+				assert(0);
+				break;
+		}
+	}
+	return boost::shared_ptr<IqTextureSampler>(
+			new CqTextureSampler<CqTextureBuffer<TqUchar> >(boost::shared_ptr<CqTextureBuffer<TqUchar> >()));
+}
+
 
 const CqTextureSampleOptions& IqTextureSampler::defaultSampleOptions() const
 {

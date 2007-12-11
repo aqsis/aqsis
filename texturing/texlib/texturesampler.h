@@ -147,8 +147,7 @@ class CqTextureSampler : public IqTextureSampler
 		//@}
 
 		/// May be better put in the CqTextureTileArray class.
-		//inline bool putWithinBounds(TqInt& iStart, TqInt& iStop, TqInt& jStart, TqInt& jStop);
-		TqFloat dummyGridTex(TqInt s, TqInt t) const;
+		TqFloat dummyGridTex(TqInt s, TqInt t, TqInt sampIdx) const;
 
 	private:
 		// instance data
@@ -169,8 +168,8 @@ template<typename ArrayT>
 inline CqTextureSampler<ArrayT>::CqTextureSampler(
 		const boost::shared_ptr<ArrayT>& texData)
 	: m_texData(texData),
-	m_sMult(511),
-	m_tMult(511),
+	m_sMult(texData->width()-1),
+	m_tMult(texData->height()-1),
 	m_sOffset(0),
 	m_tOffset(0)
 { }
@@ -225,6 +224,7 @@ template<typename ArrayT>
 void CqTextureSampler<ArrayT>::filterSimple( const SqSampleQuad& sQuad,
 		const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
 {
+	assert(0);
 	sampleBilinear((sQuad.v1 + sQuad.v2 + sQuad.v3 + sQuad.v4)/4,
 			sampleOpts, outSamps);
 }
@@ -271,15 +271,14 @@ inline SqMatrix2D CqTextureSampler<ArrayT>::getEWAQuadForm(const SqSampleQuad& s
 	// adjusted up slightly.
 	//
 	// Default reconstruction filter variance - this is the variance of the
-	// filter (conceptually) used to reconstruct a continuous image from the
-	// underlying discrete samples.
+	// filter used to reconstruct a continuous image from the underlying
+	// discrete samples.
 	const TqFloat reconsVar = 1.3/(2*M_PI);
 	// "Prefilter" variance - this is the variance of the antialiasing filter
-	// which is (conceptually) used immediately before resampling onto a
-	// discrete grid.
+	// which is used immediately before resampling onto the discrete grid.
 	const TqFloat prefilterVar = 1.3/(2*M_PI);
 	// the covariance matrix
-	SqMatrix2D coVar(prefilterVar);
+	SqMatrix2D coVar = prefilterVar * invJ*invJ.transpose();
 	if(sampleOpts.sBlur() != 0 || sampleOpts.tBlur() != 0)
 	{
 		// The reconstruction variance matrix provides a very nice way of
@@ -289,14 +288,14 @@ inline SqMatrix2D CqTextureSampler<ArrayT>::getEWAQuadForm(const SqSampleQuad& s
 		sVariance = sVariance*sVariance + reconsVar;
 		TqFloat tVariance = sampleOpts.tBlur()*m_tMult;
 		tVariance = tVariance*tVariance + reconsVar;
-		coVar += invJ * SqMatrix2D(sVariance, tVariance) * invJ.transpose();
+		coVar += SqMatrix2D(sVariance, tVariance);
 	}
 	else
 	{
 		// Note: This looks slightly different from Heckbert's thesis, since
 		// We're using a column-vector convention rather than a row-vector one.
 		// That is, the transpose is in the opposite position.
-		coVar += reconsVar*(invJ*invJ.transpose());
+		coVar += reconsVar;
 	}
 	// Get the quadratic form
 	return 0.5*coVar.inv();
@@ -346,9 +345,10 @@ void CqTextureSampler<ArrayT>::filterEWA( const SqSampleQuad& sQuad,
 			TqFloat q = Q.a*x*x + (Q.b+Q.c)*x*y + Q.d*y*y;
 			if(q < logEdgeWeight)
 			{
+				/// \todo: Possible optimization: lookup table for exp?
 				TqFloat weight = exp(-q);
 				for(TqInt i = 0; i < sampleOpts.numChannels(); ++i)
-					outSamps[i] += weight*dummyGridTex(s,t);
+					outSamps[i] += weight*dummyGridTex(s,t,i);
 				totWeight += weight;
 			}
 		}
@@ -372,10 +372,10 @@ inline void CqTextureSampler<ArrayT>::sampleBilinear(const CqVector2D& st,
 
 	for(TqInt i = 0; i < sampleOpts.numChannels(); ++i)
 	{
-		TqFloat texVal1 = dummyGridTex(s, t);
-		TqFloat texVal2 = dummyGridTex(s+1, t);
-		TqFloat texVal3 = dummyGridTex(s, t+1);
-		TqFloat texVal4 = dummyGridTex(s+1, t+1);
+		TqFloat texVal1 = dummyGridTex(s, t,i);
+		TqFloat texVal2 = dummyGridTex(s+1, t,i);
+		TqFloat texVal3 = dummyGridTex(s, t+1,i);
+		TqFloat texVal4 = dummyGridTex(s+1, t+1,i);
 
 		outSamps[i] = lerp(tInterp,
 				lerp(sInterp, texVal1, texVal2),
@@ -388,6 +388,7 @@ template<typename ArrayT>
 void CqTextureSampler<ArrayT>::filterMC(const SqSampleQuad& sampleQuad,
 		const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
 {
+	assert(0);
 	std::vector<TqFloat> tempSamps(sampleOpts.numChannels(), 0);
 	// zero all samples
 	for(int i = 0; i < sampleOpts.numChannels(); ++i)
@@ -422,10 +423,11 @@ void CqTextureSampler<ArrayT>::filterMC(const SqSampleQuad& sampleQuad,
 }
 
 template<typename ArrayT>
-TqFloat CqTextureSampler<ArrayT>::dummyGridTex(TqInt s, TqInt t) const
+TqFloat CqTextureSampler<ArrayT>::dummyGridTex(TqInt s, TqInt t, TqInt sampIdx) const
 {
-	assert(s >= 0);
-	assert(t >= 0);
+	//assert(s >= 0);
+	//assert(t >= 0);
+	/*
 	const TqInt gridSize = 8;
 	const TqInt lineWidth = 1;
 	TqFloat outVal = 1;
@@ -437,6 +439,14 @@ TqFloat CqTextureSampler<ArrayT>::dummyGridTex(TqInt s, TqInt t) const
 	if((s % gridSize) < lineWidth || (t % gridSize) < lineWidth)
 		outVal = 0;
 	return outVal;
+	*/
+	if(s >= 0 && t >= 0 && s < m_texData->width() && t < m_texData->height())
+	{
+		return (*m_texData)(s,t)[sampIdx];
+	}
+	if(sampIdx == 1)
+		return 1;
+	return 0;
 }
 
 } // namespace Aqsis

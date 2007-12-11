@@ -33,6 +33,8 @@
 
 #include "ishaderdata.h"  /// \todo remove when removing the wrapper.
 #include "logging.h"
+#include "itexturesampler.h"
+#include "itexinputfile.h"
 
 namespace Aqsis
 {
@@ -51,7 +53,7 @@ CqTextureMap2::CqTextureMap2(const boost::shared_ptr<IqTextureSampler>& sampler)
 TqInt CqTextureMap2::numSamples() const
 {
 	/// \todo implementation
-	return 1;
+	return 3;
 }
 
 void CqTextureMap2::sampleMap(const SqSampleQuad& sampleQuad, TqFloat* outSamples) const
@@ -66,15 +68,20 @@ void CqTextureMap2::sampleMap(const SqSampleQuad& sampleQuad, TqFloat* outSample
 
 CqTextureMap2Wrapper::CqTextureMap2Wrapper(const std::string& texName)
 	: m_texName(texName),
-	m_realMap(newWrappedTexture())
+	m_realMap(newWrappedTexture(texName.c_str()))
 { }
 
-boost::shared_ptr<IqTextureSampler> CqTextureMap2Wrapper::newWrappedTexture()
+boost::shared_ptr<IqTextureSampler> CqTextureMap2Wrapper::newWrappedTexture(const char* texName)
 {
+	Aqsis::log() << texName << "\n";
+	boost::shared_ptr<IqTexInputFile> file = IqTexInputFile::open(texName);
+	return IqTextureSampler::create(file);
+	/*
 	boost::shared_ptr<IqTiledTexInputFile> file;
 	boost::shared_ptr<CqLevelSamplerCache> levels(new CqLevelSamplerCache(file));
 	boost::shared_ptr<IqTextureSampler> sampler(new CqMipmapTextureSampler(levels));
 	return sampler;
+	*/
 }
 
 void CqTextureMap2Wrapper::Open()

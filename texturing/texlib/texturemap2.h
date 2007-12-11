@@ -124,7 +124,7 @@ class CqTextureMap2Wrapper : public IqTextureMap
 
 		virtual TqInt NumPages() const;
 	private:
-		static boost::shared_ptr<IqTextureSampler> newWrappedTexture();
+		static boost::shared_ptr<IqTextureSampler> newWrappedTexture(const char* texName);
 		mutable CqString m_texName;
 		CqTextureMap2 m_realMap;
 };
@@ -157,12 +157,14 @@ inline const CqTextureSampleOptions& CqTextureMap2::sampleOptions() const
 inline TqUint CqTextureMap2Wrapper::XRes() const
 {
 	// \todo implementation
+	assert(0);
 	return 512;
 }
 
 inline TqUint CqTextureMap2Wrapper::YRes() const
 {
 	// \todo implementation
+	assert(0);
 	return 512;
 }
 
