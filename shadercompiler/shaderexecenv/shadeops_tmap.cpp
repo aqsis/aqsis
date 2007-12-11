@@ -363,39 +363,36 @@ void CqShaderExecEnv::SO_ctexture1( IqShaderData* name, IqShaderData* channel, I
 		{
 			if(!__fVarying || RS.Value( __iGrid ) )
 			{
-				TqFloat swidth = 0.0f, twidth = 0.0f;
-				if ( fdu != 0.0f && fdv != 0.0f )
-				{
-					TqFloat dsdu = SO_DuType<TqFloat>( s(), __iGrid, this, Deffloat );
-					swidth = fabs( dsdu * fdu );
-					TqFloat dsdv = SO_DvType<TqFloat>( s(), __iGrid, this, Deffloat );
-					swidth += fabs( dsdv * fdv );
-
-					TqFloat dtdu = SO_DuType<TqFloat>( t(), __iGrid, this, Deffloat );
-					twidth = fabs( dtdu * fdu );
-					TqFloat dtdv = SO_DvType<TqFloat>( t(), __iGrid, this, Deffloat );
-					twidth += fabs( dtdv * fdv );
-				}
-				else
-				{
-					swidth = 1.0 / pTMap->XRes();
-					twidth = 1.0 / pTMap->YRes();
-				}
-
-				// Sample the texture.
-				TqFloat fs, ft;
-				s() ->GetFloat( fs, __iGrid );
-				t() ->GetFloat( ft, __iGrid );
-				pTMap->SampleMap( fs, ft, swidth, twidth, val );
+				/// \todo this can be improved apon by not using fdu & fdv at all.
+				// What we need here is really want a difference operator,
+				// *not* the derivative.
+				TqFloat ds_uOn2 = fdu*0.5*SO_DuType<TqFloat>(s(), __iGrid, this, Deffloat);
+				TqFloat dt_uOn2 = fdu*0.5*SO_DuType<TqFloat>(t(), __iGrid, this, Deffloat);
+				TqFloat ds_vOn2 = fdv*0.5*SO_DvType<TqFloat>(s(), __iGrid, this, Deffloat);
+				TqFloat dt_vOn2 = fdv*0.5*SO_DvType<TqFloat>(t(), __iGrid, this, Deffloat);
+				// Centre of the texture region to be filtered.
+				TqFloat ss = 0;
+				TqFloat tt = 0;
+				s()->GetFloat(ss,__iGrid);
+				t()->GetFloat(tt,__iGrid);
+				// Compute the filter box.
+				TqFloat s1 = ss - ds_uOn2 - ds_vOn2;
+				TqFloat t1 = tt - dt_uOn2 - dt_vOn2;
+				TqFloat s2 = ss + ds_uOn2 - ds_vOn2;
+				TqFloat t2 = tt + dt_uOn2 - dt_vOn2;
+				TqFloat s3 = ss - ds_uOn2 + ds_vOn2;
+				TqFloat t3 = tt - dt_uOn2 + dt_vOn2;
+				TqFloat s4 = ss + ds_uOn2 + ds_vOn2;
+				TqFloat t4 = tt + dt_uOn2 + dt_vOn2;
+				// filter the texture over the box.
+				pTMap->SampleMap(s1,t1, s2,t2, s3,t3, s4,t4, val);
 
 				// Grab the appropriate channel.
-				TqFloat fchan = _aq_channel;
-				CqColor colResult;
-				colResult.SetfRed( (fchan >= val.size())? fill : val[ static_cast<unsigned int>( fchan ) ] );
-				colResult.SetfGreen( ((fchan + 1) >= val.size())? fill : val[ static_cast<unsigned int>( fchan+1 ) ] );
-				colResult.SetfBlue( ((fchan + 2) >= val.size())? fill : val[ static_cast<unsigned int>( fchan+2 ) ] );
-
-				(Result)->SetColor(colResult,__iGrid);
+				TqUint chan = static_cast<TqUint>(_aq_channel);
+				CqColor col(chan < val.size() ? val[chan] : fill,
+						chan+1 < val.size() ? val[chan+1] : fill,
+						chan+2 < val.size() ? val[chan+2] : fill);
+				Result->SetColor(col, __iGrid);
 			}
 		}
 		while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
@@ -460,40 +457,36 @@ void CqShaderExecEnv::SO_ctexture2( IqShaderData* name, IqShaderData* channel, I
 		{
 			if(!__fVarying || RS.Value( __iGrid ) )
 			{
-				TqFloat swidth = 0.0f, twidth = 0.0f;
-				if ( fdu != 0.0f && fdv != 0.0f )
-				{
-					TqFloat dsdu = SO_DuType<TqFloat>( s, __iGrid, this, Deffloat );
-					swidth = fabs( dsdu * fdu );
-					TqFloat dsdv = SO_DvType<TqFloat>( s, __iGrid, this, Deffloat );
-					swidth += fabs( dsdv * fdv );
-
-					TqFloat dtdu = SO_DuType<TqFloat>( t, __iGrid, this, Deffloat );
-					twidth = fabs( dtdu * fdu );
-					TqFloat dtdv = SO_DvType<TqFloat>( t, __iGrid, this, Deffloat );
-					twidth += fabs( dtdv * fdv );
-				}
-				else
-				{
-					swidth = 1.0 / pTMap->XRes();
-					twidth = 1.0 / pTMap->YRes();
-				}
-
-				// Sample the texture.
-				TqFloat _aq_s;
-				(s)->GetFloat(_aq_s,__iGrid);
-				TqFloat _aq_t;
-				(t)->GetFloat(_aq_t,__iGrid);
-				pTMap->SampleMap( _aq_s, _aq_t, swidth, twidth, val );
+				/// \todo this can be improved apon by not using fdu & fdv at all.
+				// What we need here is really want a difference operator,
+				// *not* the derivative.
+				TqFloat ds_uOn2 = fdu*0.5*SO_DuType<TqFloat>(s, __iGrid, this, Deffloat);
+				TqFloat dt_uOn2 = fdu*0.5*SO_DuType<TqFloat>(t, __iGrid, this, Deffloat);
+				TqFloat ds_vOn2 = fdv*0.5*SO_DvType<TqFloat>(s, __iGrid, this, Deffloat);
+				TqFloat dt_vOn2 = fdv*0.5*SO_DvType<TqFloat>(t, __iGrid, this, Deffloat);
+				// Centre of the texture region to be filtered.
+				TqFloat ss = 0;
+				TqFloat tt = 0;
+				s->GetFloat(ss,__iGrid);
+				t->GetFloat(tt,__iGrid);
+				// Compute the filter box.
+				TqFloat s1 = ss - ds_uOn2 - ds_vOn2;
+				TqFloat t1 = tt - dt_uOn2 - dt_vOn2;
+				TqFloat s2 = ss + ds_uOn2 - ds_vOn2;
+				TqFloat t2 = tt + dt_uOn2 - dt_vOn2;
+				TqFloat s3 = ss - ds_uOn2 + ds_vOn2;
+				TqFloat t3 = tt - dt_uOn2 + dt_vOn2;
+				TqFloat s4 = ss + ds_uOn2 + ds_vOn2;
+				TqFloat t4 = tt + dt_uOn2 + dt_vOn2;
+				// filter the texture over the box.
+				pTMap->SampleMap(s1,t1, s2,t2, s3,t3, s4,t4, val);
 
 				// Grab the appropriate channel.
-				TqFloat fchan = _aq_channel;
-				CqColor colResult;
-				colResult.SetfRed( (fchan >= val.size())? fill : val[ static_cast<unsigned int>( fchan ) ] );
-				colResult.SetfGreen( ((fchan + 1) >= val.size())? fill : val[ static_cast<unsigned int>( fchan+1 ) ] );
-				colResult.SetfBlue( ((fchan + 2) >= val.size())? fill : val[ static_cast<unsigned int>( fchan+2 ) ] );
-
-				(Result)->SetColor(colResult,__iGrid);
+				TqUint chan = static_cast<TqUint>(_aq_channel);
+				CqColor col(chan < val.size() ? val[chan] : fill,
+						chan+1 < val.size() ? val[chan+1] : fill,
+						chan+2 < val.size() ? val[chan+2] : fill);
+				Result->SetColor(col, __iGrid);
 			}
 		}
 		while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
