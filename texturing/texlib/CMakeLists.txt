@@ -1,5 +1,4 @@
-PROJECT(AQSISTEX)
-
+PROJECT(AQSISTEX) 
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR})
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/interfaces)
 INCLUDE_DIRECTORIES(
@@ -16,6 +15,7 @@ INCLUDE(${DDMANAGER_SOURCE_DIR}/export.cmake)
 SET(AQSISTEX_SRCS
 	channelinfo.cpp
 	channellist.cpp
+	ewafilter.cpp
 	itexinputfile.cpp
 	itexoutputfile.cpp
 	itexturesampler.cpp

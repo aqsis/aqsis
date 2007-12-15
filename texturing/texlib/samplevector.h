@@ -30,6 +30,7 @@
 
 #include "aqsis.h"
 
+#include <limits>
 #include <boost/intrusive_ptr.hpp>
 
 #include "smartptr.h"

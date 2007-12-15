@@ -29,16 +29,17 @@
 
 #include "aqsis.h"
 
-#include <cmath>
-
-#include "aqsismath.h"
+//#include <cmath>
+//
+//#include "aqsismath.h"
+//#include "random.h"
 #include "samplequad.h"
 #include "texturesampleoptions.h"
 #include "itexturesampler.h"
-#include "random.h"
 #include "lowdiscrep.h"
 #include "matrix2d.h"
 #include "logging.h"
+#include "ewafilter.h"
 
 namespace Aqsis {
 
@@ -70,25 +71,7 @@ class CqTextureSampler : public IqTextureSampler
 				const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const;
 
 		//--------------------------------------------------
-		/// Methods for EWA filtering
-		//@{
-		//inline CqMatrix2D estimateJacobian(const SqSampleQuad& sampleQuad);
 		/** \brief Filter using an Elliptical Weighted Average
-		 *
-		 * EWA filtering is based on the convolution of several gaussian
-		 * filters and composition with the linear approximation to the image
-		 * warp at the sampling point.  The original theory was developed in
-		 * Paul Heckbert's masters thesis, "Fundamentals of Texture Mapping and
-		 * Image Warping", which may be found at http://www.cs.cmu.edu/~ph/.
-		 * "Physically Based Rendering" also has a small section mentioning
-		 * EWA.
-		 *
-		 * In EWA the total anisotropic filter acting on the original image
-		 * turns out to be simply another gaussian filter with a given angle
-		 * and ellipticity.  This means that the result may be computed
-		 * deterministically and hence suffers from no sampling error.  The
-		 * inclusion of the linear transformation implies good anisotropic
-		 * filtering characteristics.
 		 *
 		 * \param sampleQuad - quadrilateral region to sample over
 		 * \param sampleOpts - options to the sampler, including filter widths etc.
@@ -96,26 +79,6 @@ class CqTextureSampler : public IqTextureSampler
 		 */
 		void filterEWA(const SqSampleQuad& sampleQuad,
 				const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const;
-		/** Get the quadratic form defining the gaussian filter for EWA.
-		 *
-		 * A 2D gaussian filter may be defined by a quadratic form,
-		 *   Q(x,y) = a*x^2 + b*x*y + c*y*x + d*y^2,
-		 * such that the filter weights are given by
-		 *   W(x,y) = exp(-Q(x,y)).
-		 *
-		 * This function returns the appropriate matrix for the quadratic form,
-		 *   Q = [a b]
-		 *       [c d]
-		 * which represents the EWA filter over the quadrilateral given by sampleQuad.
-		 *
-		 * \param sampleQuad - quadrilateral to sample over in texture coordinates.
-		 * \param sampleOpts - sample options (needed to include blur).
-		 *
-		 * \return quadratic form matrix defining the EWA filter.
-		 */
-		inline SqMatrix2D getEWAQuadForm(const SqSampleQuad& sQuad,
-				const CqTextureSampleOptions& sampleOpts) const;
-		//@}
 
 		//--------------------------------------------------
 		/// Methods for Monte Carlo filtering
@@ -229,78 +192,6 @@ void CqTextureSampler<ArrayT>::filterSimple( const SqSampleQuad& sQuad,
 			sampleOpts, outSamps);
 }
 
-/** Estimate the inverse Jacobian of the mapping defined by a sampling quad
- *
- * The four corners of the sampling quad are assumed to point to four corners
- * of a pixel box in the resampled output raster.
- *
- * The averaging in computing the derivatives may be slightly unnecessary, but
- * makes sense for user-supplied 
- */
-inline SqMatrix2D estimateJacobianInverse(const SqSampleQuad& sQuad)
-{
-	// Computes what is essentially a scaled version of the jacobian of the
-	// mapping
-	//
-	//
-	// [ds/du ds/dv]
-	// [dt/du dt/dv]
-	//
-	// We use some averaging for numerical stability (giving the factor of 0.5).
-	return SqMatrix2D(
-			0.5*(sQuad.v2.x() - sQuad.v1.x() + sQuad.v4.x() - sQuad.v3.x()),
-			0.5*(sQuad.v3.x() - sQuad.v1.x() + sQuad.v4.x() - sQuad.v2.x()),
-			0.5*(sQuad.v2.y() - sQuad.v1.y() + sQuad.v4.y() - sQuad.v3.y()),
-			0.5*(sQuad.v3.y() - sQuad.v1.y() + sQuad.v4.y() - sQuad.v2.y())
-			);
-}
-
-/** Get the quadratic form matrix for an EWA filter.
- */
-template<typename ArrayT>
-inline SqMatrix2D CqTextureSampler<ArrayT>::getEWAQuadForm(const SqSampleQuad& sQuad,
-		const CqTextureSampleOptions& sampleOpts) const
-{
-	// Get Jacobian of the texture warp
-	SqMatrix2D invJ = estimateJacobianInverse(sQuad);
-	// Compute covariance matrix for the gaussian filter
-	//
-	// Variances for the reconstruction & prefilters.  A variance of 1/(2*pi)
-	// gives a filter with centeral weight 1, but in practise this is slightly
-	// too small (resulting in a little bit of aliasing).  Therefore it's
-	// adjusted up slightly.
-	//
-	// Default reconstruction filter variance - this is the variance of the
-	// filter used to reconstruct a continuous image from the underlying
-	// discrete samples.
-	const TqFloat reconsVar = 1.3/(2*M_PI);
-	// "Prefilter" variance - this is the variance of the antialiasing filter
-	// which is used immediately before resampling onto the discrete grid.
-	const TqFloat prefilterVar = 1.3/(2*M_PI);
-	// the covariance matrix
-	SqMatrix2D coVar = prefilterVar * invJ*invJ.transpose();
-	if(sampleOpts.sBlur() != 0 || sampleOpts.tBlur() != 0)
-	{
-		// The reconstruction variance matrix provides a very nice way of
-		// incorporating extra filter blurring if necessary.  Here we do this
-		// by adding the extra blur to the variance matrix.
-		TqFloat sVariance = sampleOpts.sBlur()*m_sMult;
-		sVariance = sVariance*sVariance + reconsVar;
-		TqFloat tVariance = sampleOpts.tBlur()*m_tMult;
-		tVariance = tVariance*tVariance + reconsVar;
-		coVar += SqMatrix2D(sVariance, tVariance);
-	}
-	else
-	{
-		// Note: This looks slightly different from Heckbert's thesis, since
-		// We're using a column-vector convention rather than a row-vector one.
-		// That is, the transpose is in the opposite position.
-		coVar += reconsVar;
-	}
-	// Get the quadratic form
-	return 0.5*coVar.inv();
-}
-
 template<typename ArrayT>
 void CqTextureSampler<ArrayT>::filterEWA( const SqSampleQuad& sQuad,
 		const CqTextureSampleOptions& sampleOpts, TqFloat* outSamps) const
@@ -308,48 +199,26 @@ void CqTextureSampler<ArrayT>::filterEWA( const SqSampleQuad& sQuad,
 	// Zero the samples
 	for(TqInt i = 0; i < sampleOpts.numChannels(); ++i)
 		outSamps[i] = 0;
-	// Translate the sample quad to into raster coords.
-	/// \todo Deal with edge effects...  This may be tricky.
-	SqSampleQuad rasterSampleQuad = SqSampleQuad(
-			texToRasterCoords(sQuad.v1, WrapMode_Black, WrapMode_Black),
-			texToRasterCoords(sQuad.v2, WrapMode_Black, WrapMode_Black),
-			texToRasterCoords(sQuad.v3, WrapMode_Black, WrapMode_Black),
-			texToRasterCoords(sQuad.v4, WrapMode_Black, WrapMode_Black)
-			);
-	// The filter weight at the edge is exp(-logEdgeWeight).  If we choose
-	// logEdgeWeight = 4, we have maxIgnoredWeight = exp(-4) ~ 0.01, which
-	// should be more than good enough.
-	const TqFloat logEdgeWeight = 4;
-	// Get the quadratic form matrix
-	SqMatrix2D Q = getEWAQuadForm(rasterSampleQuad, sampleOpts);
-	TqFloat detQ = Q.det();
-	// Radius of filter.
-	TqFloat sRad = std::sqrt(Q.d*logEdgeWeight/detQ);
-	TqFloat tRad = std::sqrt(Q.a*logEdgeWeight/detQ);
-	// Center point of filter
-	CqVector2D center = 0.25*(rasterSampleQuad.v1 + rasterSampleQuad.v2
-			+ rasterSampleQuad.v3 + rasterSampleQuad.v4);
+	CqEwaFilterWeights weights(sQuad, m_sMult, m_tMult,
+			sampleOpts.sBlur(), sampleOpts.tBlur());
 	// Starting and finishing texture coordinates for the filter support
-	TqInt sStart = lceil(center.x()-sRad);
-	TqInt tStart = lceil(center.y()-tRad);
-	TqInt sEnd = lfloor(center.x()+sRad);
-	TqInt tEnd = lfloor(center.y()+tRad);
+	TqInt sStart = 0;
+	TqInt tStart = 0;
+	TqInt sEnd = 0;
+	TqInt tEnd = 0;
+	weights.filterExtent(sStart, tStart, sEnd, tEnd);
 	TqFloat totWeight = 0;
 	for(TqInt s = sStart; s <= sEnd; ++s)
 	{
-		TqFloat x = s - center.x();
 		for(TqInt t = tStart; t <= tEnd; ++t)
 		{
-			TqFloat y = t - center.y();
-			// Evaluate quadratic form.
-			TqFloat q = Q.a*x*x + (Q.b+Q.c)*x*y + Q.d*y*y;
-			if(q < logEdgeWeight)
+			// Get filter weight
+			TqFloat w = weights(s,t);
+			if(w > 0)
 			{
-				/// \todo: Possible optimization: lookup table for exp?
-				TqFloat weight = exp(-q);
 				for(TqInt i = 0; i < sampleOpts.numChannels(); ++i)
-					outSamps[i] += weight*dummyGridTex(s,t,i);
-				totWeight += weight;
+					outSamps[i] += w*dummyGridTex(s,t,i);
+				totWeight += w;
 			}
 		}
 	}

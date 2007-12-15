@@ -31,7 +31,6 @@
 
 #include "aqsis.h"
 
-#include <limits>
 #include <map>
 #include <vector>
 
@@ -46,6 +45,8 @@
 namespace Aqsis {
 
 class IqTiledTexInputFile;
+
+struct TileKey;
 
 //------------------------------------------------------------------------------
 /** \brief 2D array interface for tiled data - aimed at tiled textures.
@@ -88,7 +89,7 @@ class CqTileArray : public CqMemoryMonitored
 		 * \param y - index in height direction (row index)
 		 * \return a lightweight vector holding a reference to the sample data
 		 */
-		CqSampleVector<T> value(const TqInt x, const TqInt y) const;
+		CqSampleVector<T> operator()(const TqInt x, const TqInt y) const;
 
 		/** \brief Set the value of the array at a particular position
 		 *
@@ -118,22 +119,12 @@ class CqTileArray : public CqMemoryMonitored
 		 */
 		boost::intrusive_ptr<CqTextureBuffer<T> >& tileForIndex(const TqInt x, const TqInt y) const;
 
-		/** \brief Get the number of samples per pixel
-		 *
-		 * \return number of samples per pixel
-		 */
+		/// Get the number of samples per pixel
 		inline TqInt samplesPerPixel() const;
 
-		/** \brief Get array width
-		 *
-		 * \return array width
-		 */
+		/// Get array width
 		inline TqInt width() const;
-
-		/** \brief Get array height
-		 *
-		 * \return array height
-		 */
+		/// Get array height
 		inline TqInt height() const;
 
 		// Inherited from CqMemoryMonitored
@@ -146,29 +137,28 @@ class CqTileArray : public CqMemoryMonitored
 		 */
 		void allocateTile();
 
-		/// Key to use when finding tiles in std::maps.
-		struct TileKey
-		{
-			int x;
-			int y;
-		};
-
 		/// Width of the array
 		TqInt m_width;
 		/// Height of the array
 		TqInt m_height;
+		/// Width of the tiles making up the array
+		TqInt m_tileWidth;
+		/// Height of tiles making up the the array
+		TqInt m_tileHeight;
 		/// Number of samples per pixel
 		TqInt m_samplesPerPixel;
+		/// The tile which was last accessed.
+		boost::intrusive_ptr<CqTextureBuffer<T> > m_lastUsedTile;
 		/** A list holding recently used or "hot" tiles in the order of
 		 * hotness.  The same tiles are also held in hotMap.
 		 */
-		std::list<boost::intrusive_ptr<CqTextureBuffer<T> > > hotList;
+		std::list<boost::intrusive_ptr<CqTextureBuffer<T> > > m_hotList;
 		/** A map to hold recently used or "hot" tiles.  The same tiles are
 		 * also held in hotList.
 		 */
-		std::map<TileKey, boost::intrusive_ptr<CqTextureBuffer<T> > > hotMap;
+		std::map<TileKey, boost::intrusive_ptr<CqTextureBuffer<T> > > m_hotMap;
 		/// A map holding tiles which haven't been used for a while; "cold tiles"
-		std::map<TileKey, boost::intrusive_ptr<CqTextureBuffer<T> > > coldMap;
+		std::map<TileKey, boost::intrusive_ptr<CqTextureBuffer<T> > > m_coldMap;
 };
 
 
@@ -177,8 +167,19 @@ class CqTileArray : public CqMemoryMonitored
 // Implementation details
 //==============================================================================
 
-// Implementation for CqTileArray
+/// Key to use when finding tiles in std::maps.
+struct TileKey
+{
+	TqInt x;
+	TqInt y;
+	bool operator<(const TileKey& rhs)
+	{
+		return x < rhs.x || y < rhs.y;
+	}
+};
 
+
+// CqTileArray Implementation
 template<typename T>
 CqTileArray<T>::CqTileArray( const boost::shared_ptr<IqTiledTexInputFile>& texFile,
 		const boost::shared_ptr<CqMemorySentry>& memSentry)
@@ -204,9 +205,9 @@ inline TqInt CqTileArray<T>::samplesPerPixel() const
 }
 
 template<typename T>
-CqSampleVector<T> CqTileArray<T>::value(const TqInt x, const TqInt y) const
+CqSampleVector<T> CqTileArray<T>::operator()(const TqInt x, const TqInt y) const
 {
-	return tileForIndex(x, y)->value();
+	return (*tileForIndex(x/m_tileWidth, y/m_tileHeight))(x,y);
 }
 
 
@@ -214,7 +215,7 @@ template<typename T>
 boost::intrusive_ptr<CqTextureBuffer<T> >& CqTileArray<T>::tileForIndex(const TqInt x, const TqInt y) const
 {
 	/// \todo Implementation
-	// if() 
+	if(m_lastUsedTile) 
 	return boost::intrusive_ptr<CqTextureBuffer<T> > (0); // dodgy; get the stub to compile...
 }
 

@@ -30,6 +30,7 @@
 #include "aqsis.h"
 
 #include <cmath>
+#include <iostream>
 
 namespace Aqsis
 {
@@ -92,6 +93,8 @@ struct SqMatrix2D
 	 * The behaviour is undefined if the eigenvalues are complex rather than
 	 * real.
 	 *
+	 * The eigenvalues are guarenteed to be ordered such that that l1 >= l2.
+	 *
 	 * \param l1 - first eigenvalue (output variable)
 	 * \param l2 - second eigenvalue (output variable)
 	 */
@@ -118,6 +121,8 @@ struct SqMatrix2D
 	//@}
 };
 
+/// Stream insertion operator
+inline std::ostream& operator<<(std::ostream& out, SqMatrix2D& mat);
 
 //==============================================================================
 // Implentation details
@@ -201,10 +206,16 @@ inline void SqMatrix2D::eigenvalues(TqFloat& l1, TqFloat& l2) const
 	// for l.
 	TqFloat trace = a+d;
 	TqFloat determ = det();
-	TqFloat firstTerm = trace/2;
+	TqFloat firstTerm = trace*0.5;
 	TqFloat secondTerm = trace*trace - 4*determ;
-	assert(secondTerm >= 0);
-	secondTerm = std::sqrt(secondTerm)/2;
+	// "secondTerm" should be positive (at least to within some small numerical
+	// tolerance, otherwise the eigenvalues will be negative.
+	assert(secondTerm > -trace*std::numeric_limits<TqFloat>::epsilon());
+	// For robustness, set secondTerm = 0 if it's negative.  This will result
+	// in something wrong, but at least it's well-defined.
+	if(secondTerm < 0)
+		secondTerm = 0;
+	secondTerm = std::sqrt(secondTerm)*0.5;
 	l1 = firstTerm + secondTerm;
 	l2 = firstTerm - secondTerm;
 }
@@ -242,6 +253,14 @@ inline SqMatrix2D SqMatrix2D::orthogDiagonalize(TqFloat l1, TqFloat l2) const
 	TqFloat invLenV = 1/std::sqrt(v1*v1 + v2*v2);
 	return SqMatrix2D(u1*invLenU, v1*invLenV,
 					  u2*invLenU, v2*invLenV);
+}
+
+
+inline std::ostream& operator<<(std::ostream& out, SqMatrix2D& mat)
+{
+	out << "[" << mat.a << ", " << mat.b << ", "
+		<< mat.c << ", " << mat.d << "]";
+	return out;
 }
 
 
