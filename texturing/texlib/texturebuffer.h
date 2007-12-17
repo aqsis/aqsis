@@ -90,16 +90,25 @@ class CqTextureBuffer // : public CqIntrusivePtrCounted
 		/// Get a pointer to the underlying raw data
 		inline TqUchar* rawData();
 
-		/** \brief Get a reference to the tile channels at the given position.
-		 *
-		 * Positions are in image coordinates, not tile coordinates, counting
-		 * from zero in the top-left
+		/// \name Indexing operations
+		//@{
+		/** \brief 2D Indexing operator - get a reference to the channel data.
 		 *
 		 * \param x - pixel index in width direction (column index)
 		 * \param y - pixel index in height direction (row index)
 		 * \return a lightweight vector holding a reference to the channels data
 		 */
 		inline const CqSampleVector<T> operator()(const TqInt x, const TqInt y) const;
+		/** \brief 2D Indexing - access to the underlying _typed_ channel data.
+		 *
+		 * \param x - pixel index in width direction (column index)
+		 * \param y - pixel index in height direction (row index)
+		 * \return a pointer to the channel data for the given pixel
+		 */
+		inline T* value(const TqInt x, const TqInt y);
+		/// 2D indexing of typed channel data, const version.
+		inline const T* value(const TqInt x, const TqInt y) const;
+		//@}
 
 		/// Get the buffer width
 		inline TqInt width() const;
@@ -110,15 +119,6 @@ class CqTextureBuffer // : public CqIntrusivePtrCounted
 		/// Get the number of channels per pixel
 		inline TqInt channelsPerPixel() const;
 	private:
-		/** \brief Get a pointer to the sample at the given coordinates.
-		 *
-		 * Positions are in image coordinates, not tile coordinates, counting
-		 * from zero in the top-left
-		 *
-		 * \param x - pixel index in width direction (column index)
-		 * \param y - pixel index in height direction (row index)
-		 */
-		inline T* samplePtr(TqInt x, TqInt y) const;
 
 		boost::shared_array<T> m_pixelData;	///< Pointer to the underlying pixel data.
 		TqInt m_width;				///< Width of the buffer
@@ -153,10 +153,26 @@ CqTextureBuffer<T>::CqTextureBuffer(TqInt width, TqInt height, TqInt channelsPer
 template<typename T>
 inline const CqSampleVector<T> CqTextureBuffer<T>::operator()(const TqInt x, const TqInt y) const
 {
-	return CqSampleVector<T>(samplePtr(x,y));
+	return CqSampleVector<T>(value(x,y));
 	/// \todo Have to think about how to do the below for the multi-threaded case...
-//	return CqSampleVector<T>(samplePtr(x,y),
+//	return CqSampleVector<T>(value(x,y),
 //			boost::intrusive_ptr<const CqIntrusivePtrCounted>(this));
+}
+
+template<typename T>
+inline T* CqTextureBuffer<T>::value(const TqInt x, const TqInt y)
+{
+	return const_cast<T*>(value(x,y));
+}
+
+template<typename T>
+inline const T* CqTextureBuffer<T>::value(const TqInt x, const TqInt y) const
+{
+	assert(x >= 0);
+	assert(x < m_width);
+	assert(y >= 0);
+	assert(y < m_height);
+	return m_pixelData.get() + (y*m_width + x)*m_channelsPerPixel;
 }
 
 template<typename T>
@@ -198,17 +214,6 @@ inline TqInt CqTextureBuffer<T>::channelsPerPixel() const
 {
 	return m_channelsPerPixel;
 }
-
-template<typename T>
-inline T* CqTextureBuffer<T>::samplePtr(TqInt x, TqInt y) const
-{
-	assert(x >= 0);
-	assert(x < m_width);
-	assert(y >= 0);
-	assert(y < m_height);
-	return m_pixelData.get() + (y*m_width + x)*m_channelsPerPixel;
-}
-
 
 } // namespace Aqsis
 

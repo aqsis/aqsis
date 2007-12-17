@@ -38,7 +38,7 @@ namespace Aqsis
 /** \brief Defines the various modes of handling texture access outside of the
  * normal range.
  */
-enum	EqWrapMode
+enum EqWrapMode
 {
     WrapMode_Black,		///< Return black.
     WrapMode_Periodic,	///< Wrap around to the opposite side.
