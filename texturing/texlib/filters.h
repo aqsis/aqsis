@@ -31,8 +31,11 @@
 
 #include <cmath>
 
+#include "filtersupport.h"
+
 namespace Aqsis
 {
+
 //------------------------------------------------------------------------------
 /** \brief A sinc filter functional.
  *
@@ -83,7 +86,7 @@ class CqGaussianFilter
 };
 
 //------------------------------------------------------------------------------
-/** \brief A Cache for filter weights on a regular grid.
+/** \brief Cached filter weights for resampling an image.
  *
  * When resampling images for such purposes as mipmapping, the positions of
  * sample points are fixed relative to each output pixel.  This means it's
@@ -93,34 +96,64 @@ class CqGaussianFilter
 class CqCachedFilter
 {
 	public:
-		/** \brief Compute and cache the given filter on a regular grid.
+		/** \brief Create a zeroed filter on a regular grid.
 		 *
-		 * In the x-direction, the filter is cached on a regular lattice with
-		 * width+1 points, step size "stepSize" and centered about 0.  That is,
+		 * In the x-direction, the filter is cached on a regular lattice
+		 * \todo finish docs
 		 *
-		 * [-stepSize*width/2.0, -stepSize*(width-1)/2.0, ..., stepSize*width/2.0]
-		 *
-		 * The lattice in the y-direction is similar.
-		 *
-		 * \param filter - filter functor to cache.
-		 * \param width - width (number of points) of cached grid
-		 * \param height - height (number of points) of cached grid
-		 * \param stepSize - Step size for the cached lattice.  For
-		 *                   downsampling by a factor of 2 in mipmapping, this
-		 *                   should be 1/2 for example.
+		 * \param width - filter width in the source image
+		 * \param height - filter height in the source image
+		 * \param scale - Scale factor which will produce the new image
+		 *                dimensions from the old ones.  For example, scale
+		 *                should be 1/2 when downsampling by a factor of 2
+		 *                during mipmapping.
 		 */
 		template<typename FilterFuncT>
-		CqCachedFilter(const FilterFuncT& filter, TqInt width, TqInt height,
-				TqInt stepSize);
+		CqCachedFilter(const FilterFuncT& filter, TqFloat width, TqFloat height,
+				bool evenNumberX, bool evenNumberY, TqFloat scale);
+
+		/** \brief Get the number of points in the x-direction for the discrete
+		 * filter kernel.
+		 *
+		 * Note that this is different from the floating point width provided
+		 * to the constructor.
+		 */
+		TqInt width();
+		/** \brief Get the number of points in the y-direction for the discrete
+		 * filter kernel
+		 *
+		 * Note that this is different from the floating point height provided
+		 * to the constructor.
+		 */
+		TqInt height();
 		/** \brief Get the cached filter weight.
 		 *
-		 * \param x - x-coordinate in the range [0, width+1]
-		 * \param y - y-coordinate in the range [0, height+1]
+		 * \param x - x-coordinate in the support [support().startX, support().endX-1]
+		 * \param y - y-coordinate in the support [support().startY, support().endY-1]
 		 */
 		inline TqFloat operator()(TqInt x, TqInt y);
+
+		/** \brief Get the support for the filter in the source image.
+		 *
+		 * The support is the (rectangular) region over which the filter has
+		 * nonzero coefficients.
+		 */
+		SqFilterSupport support() const;
+		/// \brief Set the top left point in the filter support
+		void setSupportTopLeft(TqInt x, TqInt y);
 	private:
+		/** \brief Cache the given filter functor at the lattice points.
+		 * \param filter - filter functor to cache.
+		 */
+		template<typename FilterFuncT>
+		cacheFilter(const FilterFuncT& filter, TqFloat scale);
+
+		static TqInt filterSupportSize(bool includeZero,
+				TqFloat filterSize, TqFloat scale);
 		TqInt m_width; ///< number of points in horizontal lattice directon
 		TqInt m_height; ///< number of points in vertical lattice directon
+		TqInt m_topLeftX; ///< top left x-position in filter support
+		TqInt m_topLeftY; ///< top left y-position in filter support
 		std::vector<TqFloat> m_weights; ///< cached weights.
 };
 
@@ -172,26 +205,39 @@ inline TqFloat CqGaussianFilter::operator()(TqFloat x, TqFloat y)
 // CqCachedFilter
 
 template<typename FilterFuncT>
-CqCachedFilter::CqCachedFilter(const FilterFuncT& filter, TqInt width,
-		TqInt height, TqInt stepSize);
-	: m_width(width+1), // Need width+1 to include *both* endpoints in the lattice
-	                    // from -width/2 to width/2
-	m_height(height+1),
+CqCachedFilter::CqCachedFilter(const FilterFuncT& filter,
+		TqFloat width, TqFloat height, bool includeZeroX, bool includeZeroY,
+		TqFloat scale)
+	: m_width(filterSupportSize(includeZeroX, width)),
+	m_height(filterSupportSize(includeZeroY, height)),
+	m_topLeftX(0),
+	m_topLeftY(0),
 	m_weights(m_width*m_height, 0)
 {
+	cacheFilter(filter, scale);
+}
+
+inline TqFloat CqCachedFilter::operator()(TqInt x, TqInt y)
+{
+	return m_weights[y*m_width + x];
+}
+
+template<typename FilterFuncT>
+CqCachedFilter::cacheFilter(const FilterFuncT& filter, TqFloat scale);
+{
 	// Compute and cache the desired filter weights on a regular grid.
-	TqFloat sOffset = width/2.0f;
-	TqFloat tOffset = height/2.0f;
+	TqFloat sOffset = m_width/2.0f;
+	TqFloat tOffset = m_height/2.0f;
 	TqFloat totWeight = 0;
 	for(TqInt j = 0; j < m_height; ++j)
 	{
-		TqFloat t = (j - tOffset)*stepSize;
+		TqFloat t = (j - tOffset)*scale;
 		for(TqInt i = 0; i < m_width; ++i)
 		{
-			TqFloat s = (i - sOffset)*stepSize;
-			TqFloat w = filter(s, t);
-			m_weights[j*width + i] = w;
-			totWeight += w;
+			TqFloat s = (i - sOffset)*scale;
+			TqFloat weight = filter(s, t);
+			m_weights[j*width + i] = weight;
+			totWeight += weight;
 		}
 	}
 	// Normalize so that the total weight is 1.
@@ -200,10 +246,37 @@ CqCachedFilter::CqCachedFilter(const FilterFuncT& filter, TqInt width,
 		*i /= totWeight;
 }
 
-inline TqFloat CqCachedFilter::operator()(TqInt x, TqInt y)
+inline const SqFilterSupport& CqCachedFilter::support() const
 {
-	return m_weights[y*m_width + x];
+	return SqFilterSupport(m_topLeftX, m_topLeftY,
+			m_topLeftX+m_width, m_topLeftY+m_height);
 }
+
+inline void CqCachedFilter::setSupportTopLeft(TqInt x, TqInt y)
+{
+	m_topLeftX = x;
+	m_topLeftY = y;
+}
+
+
+inline TqInt CqCachedFilter::filterSupportSize(bool includeZero,
+		TqFloat width)
+{
+	// Get the size of the lattice in the source buffer over which the filter
+	// needs to be evaluated.  For even-sized images, our downsampled points
+	// will lie *between* samples of the source, so we want to straddle the
+	// zero point of the filter rather than include the zero point.  This leads
+	// to the two different cases.
+
+	// Since we're centered around 0, if we include zero as part of the
+	// support, this gives an odd-sized filter kernel.  If we straddle zero, we
+	// have an even-sized filter kernel.
+	if(includeZero)
+		return max(2*static_cast<TqInt>(0.5*width) + 1, 3);
+	else
+		return max(2*static_cast<TqInt>(0.5*(width+1)), 2)
+}
+
 
 } // namespace Aqsis
 

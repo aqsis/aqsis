@@ -48,7 +48,7 @@ BOOST_AUTO_UNIT_TEST(CqTiffInputFile_readPixels_test)
 	// Check that the buffer is the right size.
 	BOOST_CHECK_EQUAL(buffer.width(), 6);
 	BOOST_CHECK_EQUAL(buffer.height(), 4);
-	BOOST_CHECK_EQUAL(buffer.channelsPerPixel(), 3);
+	BOOST_CHECK_EQUAL(buffer.numChannels(), 3);
 
 	// Check that the buffer contains the right data.
 	// part of the fist strip (should be red)
@@ -76,7 +76,7 @@ BOOST_AUTO_UNIT_TEST(CqTiffInputFile_readPixels_secondSubImage_test)
 	// Check that the buffer is the right size.
 	BOOST_CHECK_EQUAL(buffer.width(), 6);
 	BOOST_CHECK_EQUAL(buffer.height(), 4);
-	BOOST_CHECK_EQUAL(buffer.channelsPerPixel(), 3);
+	BOOST_CHECK_EQUAL(buffer.numChannels(), 3);
 
 	// part of the fist strip (should be white)
 	BOOST_CHECK_CLOSE(buffer(0,0)[0], 1.0f, 1e-5);
