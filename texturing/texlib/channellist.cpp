@@ -44,6 +44,18 @@ CqChannelList CqChannelList::displayChannels()
 	return displayChannels;
 }
 
+bool CqChannelList::channelTypesMatch(const CqChannelList& other) const
+{
+	if(numChannels() != other.numChannels())
+		return false;
+	for(TqInt i = 0; i < numChannels(); ++i)
+	{
+		if(m_channels[i].type != other.m_channels[i].type)
+			return false;
+	}
+	return true;
+}
+
 void CqChannelList::addChannel(const SqChannelInfo& newChan)
 {
 	m_channels.push_back(newChan);

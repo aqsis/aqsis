@@ -210,7 +210,7 @@ inline void SqMatrix2D::eigenvalues(TqFloat& l1, TqFloat& l2) const
 	TqFloat secondTerm = trace*trace - 4*determ;
 	// "secondTerm" should be positive (at least to within some small numerical
 	// tolerance, otherwise the eigenvalues will be negative.
-	assert(secondTerm > -trace*std::numeric_limits<TqFloat>::epsilon());
+	assert(secondTerm > -2*trace*std::numeric_limits<TqFloat>::epsilon());
 	// For robustness, set secondTerm = 0 if it's negative.  This will result
 	// in something wrong, but at least it's well-defined.
 	if(secondTerm < 0)

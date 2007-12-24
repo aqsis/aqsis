@@ -76,7 +76,7 @@ void CqTiffOutputFile::initialize()
 
 void CqTiffOutputFile::writePixelsImpl(const CqMixedImageBuffer& buffer)
 {
-	if(buffer.channelList() != header().channelList())
+	if(!buffer.channelList().channelTypesMatch(header().channelList()))
 		throw XqInternal("Buffer and file channels don't match",
 				__FILE__, __LINE__);
 	CqTiffDirHandle dirHandle(m_fileHandle);

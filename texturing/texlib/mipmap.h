@@ -29,8 +29,14 @@
 
 #include "aqsis.h"
 
+#include <boost/shared_ptr.hpp>
+
 #include "aqsismath.h"
+#include "texturebuffer.h"
 #include "texturesampleoptions.h"
+#include "filters.h"
+
+#include "logging.h" /// \todo debug: remove later
 
 namespace Aqsis
 {
@@ -49,13 +55,12 @@ template<typename FilterFunctorT, typename ChannelT>
 boost::shared_ptr<CqTextureBuffer<ChannelT> > mipmapDownsample(
 		const CqTextureBuffer<ChannelT>& inputBuf,
 		TqFloat sWidth, TqFloat tWidth,
-		const FilterFunctorT& filterWeights,
 		EqWrapMode sWrapMode, EqWrapMode tWrapMode);
 
 template<typename ChannelT>
 boost::shared_ptr<CqTextureBuffer<ChannelT> > mipmapDownsampleNonseperable(
 		const CqTextureBuffer<ChannelT>& srcBuf,
-		const CqCachedFilter& filterWeights,
+		CqCachedFilter& filterWeights,
 		EqWrapMode sWrapMode, EqWrapMode tWrapMode);
 
 //template<typename FilterFunctorT, typename ChannelT>
@@ -73,7 +78,6 @@ template<typename FilterFunctorT, typename ChannelT>
 boost::shared_ptr<CqTextureBuffer<ChannelT> > mipmapDownsample(
 		const CqTextureBuffer<ChannelT>& srcBuf,
 		TqFloat sWidth, TqFloat tWidth,
-		const FilterFunctorT& filterWeights,
 		EqWrapMode sWrapMode, EqWrapMode tWrapMode)
 {
 	// Amount to scale the image by.  Fixed at a factor of 2 for now.
@@ -86,10 +90,10 @@ boost::shared_ptr<CqTextureBuffer<ChannelT> > mipmapDownsample(
 	// if(FilterFunctorT::isSeperable) ...
 
 	// General case: Non-seperable filter.
-	CqCachedFilter weights(CqSincFilter(sWidth*scale, tWidth*scale),
-			sWidth, tWidth, srcBuf->width() % 2 != 0, srcBuf->height() % 2 != 0,
+	CqCachedFilter weights(FilterFunctorT(sWidth*scale, tWidth*scale),
+			sWidth, tWidth, srcBuf.width() % 2 != 0, srcBuf.height() % 2 != 0,
 			scale);
-	return mipmapDownsampleNonseperable(srcBuf, weights, mipmapRatio,
+	return mipmapDownsampleNonseperable(srcBuf, mipmapRatio, weights,
 			sWrapMode, tWrapMode);
 }
 
@@ -97,9 +101,10 @@ template<typename ChannelT>
 boost::shared_ptr<CqTextureBuffer<ChannelT> > mipmapDownsampleNonseperable(
 		const CqTextureBuffer<ChannelT>& srcBuf,
 		TqInt mipmapRatio,
-		const CqCachedFilter& filterWeights,
+		CqCachedFilter& filterWeights,
 		EqWrapMode sWrapMode, EqWrapMode tWrapMode)
 {
+	Aqsis::log() << filterWeights;
 	TqInt newWidth = lceil(TqFloat(srcBuf.width())/mipmapRatio);
 	TqInt newHeight = lceil(TqFloat(srcBuf.height())/mipmapRatio);
 	TqInt numChannels = srcBuf.numChannels();
@@ -117,12 +122,12 @@ boost::shared_ptr<CqTextureBuffer<ChannelT> > mipmapDownsampleNonseperable(
 			// in the destination buffer.
 			accum.assign(numChannels, 0);
 			filterWeights.setSupportTopLeft(2*x-filterOffsetX, 2*y-filterOffsetY);
-			srcBuf->applyFilter(filterWeights, &accum[0],
+			srcBuf.applyFilter(filterWeights, &accum[0],
 					sWrapMode, tWrapMode);
 			destBuf->setPixel(x, y, &accum[0]);
 		}
 	}
-	return outBuf;
+	return destBuf;
 }
 
 } // namespace Aqsis

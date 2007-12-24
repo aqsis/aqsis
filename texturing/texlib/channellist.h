@@ -74,6 +74,14 @@ COMMON_SHARE class CqChannelList
 		 * \return !(*this == other)
 		 */
 		inline bool operator!=(const CqChannelList& other) const;
+		/** \brief Determine whether the channel types of two channel lists
+		 * match.
+		 *
+		 * \param other - other channel list to match with this one.
+		 * \return true if the number and types of all channels match.
+		 *   Channel names are not considered.
+		 */
+		bool channelTypesMatch(const CqChannelList& other) const;
 		//@}
 
 		//----------------------------------------------------------------------

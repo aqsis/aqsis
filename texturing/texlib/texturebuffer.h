@@ -89,8 +89,17 @@ class CqTextureBuffer // : public CqIntrusivePtrCounted
 		 */
 		void resize(TqInt width, TqInt height, const CqChannelList& channelList);
 
+		/** \brief Get the list of channels for the buffer.
+		 *
+		 * \return a (synthetic) list of channels with the correct type and
+		 * number for the buffer.
+		 */
+		CqChannelList channelList() const;
+
 		/// Get a pointer to the underlying raw data
 		inline TqUchar* rawData();
+		/// Get a pointer to the underlying raw data (const version)
+		inline const TqUchar* rawData() const;
 
 		/// \name Indexing operations
 		//@{
@@ -136,7 +145,7 @@ class CqTextureBuffer // : public CqIntrusivePtrCounted
 		 */
 		template<typename FilterKernelT>
 		void applyFilter(const FilterKernelT& filterKer, TqFloat* resultBuf,
-				EqWrapMode xWrapMode, EqWrapMode yWrapMode);
+				EqWrapMode xWrapMode, EqWrapMode yWrapMode) const;
 
 		/// Get the buffer width
 		inline TqInt width() const;
@@ -157,7 +166,22 @@ class CqTextureBuffer // : public CqIntrusivePtrCounted
 		 */
 		template<typename FilterKernelT>
 		void applyFilterInternal(const FilterKernelT& filterKer,
-				const SqFilterSupport& support, TqFloat* resultBuf);
+				const SqFilterSupport& support, TqFloat* resultBuf) const;
+		/** \brief Apply a filter to the buffer near the edge
+		 *
+		 * \param filterKer - filter to apply
+		 * \param support - support for the filter; may lie (partially)
+		 *                  outside the texture boundaries.
+		 * \param resultBuf - buffer where the results of the filtering
+		 *                    operation should be placed.
+		 * \param xWrapMode
+		 * \param yWrapMode - wrap modes for texture coordinates off the image
+		 *                    edge.
+		 */
+		template<typename FilterKernelT>
+		void applyFilterBoundary(const FilterKernelT& filterKer,
+				const SqFilterSupport& support, TqFloat* resultBuf,
+				EqWrapMode xWrapMode, EqWrapMode yWrapMode) const;
 
 		boost::shared_array<T> m_pixelData;	///< Pointer to the underlying pixel data.
 		TqInt m_width;				///< Width of the buffer
@@ -223,7 +247,10 @@ inline void CqTextureBuffer<T>::setPixel(const TqInt x, const TqInt y,
 template<typename T>
 inline T* CqTextureBuffer<T>::value(const TqInt x, const TqInt y)
 {
-	return const_cast<T*>(value(x,y));
+	// Call the const version
+	return const_cast<T*>(
+			const_cast<const CqTextureBuffer<T>*>(this)->value(x,y)
+			);
 }
 
 template<typename T>
@@ -253,61 +280,105 @@ void CqTextureBuffer<T>::resize(TqInt width, TqInt height, const CqChannelList& 
 }
 
 template<typename T>
+CqChannelList CqTextureBuffer<T>::channelList() const
+{
+	CqChannelList chanList;
+	chanList.addUnnamedChannels(getChannelTypeEnum<T>(), m_numChannels);
+	return chanList;
+}
+
+template<typename T>
 inline TqUchar* CqTextureBuffer<T>::rawData()
 {
 	return reinterpret_cast<TqUchar*>(m_pixelData.get());
 }
 
 template<typename T>
+inline const TqUchar* CqTextureBuffer<T>::rawData() const
+{
+	return reinterpret_cast<const TqUchar*>(m_pixelData.get());
+}
+
+namespace detail
+{
+
+inline bool remapSupport(SqFilterSupport1D support,
+		EqWrapMode wrapMode, TqInt length)
+{
+	switch(wrapMode)
+	{
+		case WrapMode_Black:
+			support.truncate(0, length);
+			if(support.isEmpty())
+			{
+				// If the wrapmode truncation has left the filter support
+				// empty, return false to indicate so.
+				return false;
+			}
+			break;
+		case WrapMode_Periodic:
+			support.remapPeriodic(length);
+			break;
+		default:
+			// In other cases we do nothing here.
+			break;
+	}
+	return true;
+}
+
+}
+
+template<typename T>
 template<typename FilterKernelT>
 void CqTextureBuffer<T>::applyFilter(const FilterKernelT& filterKer,
-		TqFloat* resultBuf, EqWrapMode xWrapMode, EqWrapMode yWrapMode)
+		TqFloat* resultBuf, EqWrapMode xWrapMode, EqWrapMode yWrapMode) const
 {
 	/// \todo Modify to use a specifiable number of channels.
 	// Clear the result buffer.
 	for(TqInt chan = 0; chan < m_numChannels; ++chan)
 		resultBuf[chan] = 0;
 	SqFilterSupport support = filterKer.support();
-	/// \todo Put the following code in the filter support file & fix it.
-	// Remap start and end coordinates if using a periodic coordinate system.
-	/*if(xWrapMode == WrapMode_Periodic)
-	{
-		TqInt offset = lfloor(TqFloat(support.startX)/m_width)*m_width;
-		support.startX -= offset;
-		support.endX -= offset;
-		remapCoordsPeriodic(startX, endX);
-	}
-	if(yWrapMode == WrapMode_Periodic)
-		remapCoordsPeriodic(startY, endY);
-	*/
-	// Return black if outside texture in black mode
-	// Apply filter
-	if( support.startX >= 0 && support.endX <= m_width
-		&& support.startY >= 0 && support.endY <= m_height )
+	if( support.inRange(0, m_width, 0, m_height) )
 	{
 		// The bounds for the filter support are all inside the texture; do
-		// simple filtering.
+		// simple and efficient filtering without remapping the support.
 		applyFilterInternal(filterKer, support, resultBuf);
 	}
 	else
 	{
-		// The bounds for the filter support cross the boundary of the texture;
-		// have to use a version with boundary checking.
-		//applyFilterBoundary(filterKer, resultBuf, xWrapMode, yWrapMode);
-		resultBuf[0] = 1;
-		for(TqInt chan = 1; chan < m_numChannels; ++chan)
-			resultBuf[chan] = 0;
+		// If we get here, the filter support falls (possibly partially)
+		// outside the texture range.
+		if( !detail::remapSupport(support.sx, xWrapMode, m_width)
+			|| !detail::remapSupport(support.sy, yWrapMode, m_height) )
+		{
+			// Return without further calculation when the support is empty
+			// after being remapped.
+			return;
+		}
+		// The filter support may still be in the 
+		if( support.inRange(0, m_width, 0, m_height) )
+		{
+			// The bounds for the filter support are now inside the texture...
+			applyFilterInternal(filterKer, support, resultBuf);
+		}
+		else
+		{
+			// The bounds for the filter support cross the boundary of the
+			// texture; we must use a version without any boundary checking.
+			applyFilterBoundary(filterKer, support, resultBuf,
+					xWrapMode, yWrapMode);
+		}
 	}
 }
 
 template<typename T>
 template<typename FilterKernelT>
 void CqTextureBuffer<T>::applyFilterInternal(const FilterKernelT& filterKer,
-		const SqFilterSupport& support, TqFloat* resultBuf)
+		const SqFilterSupport& support, TqFloat* resultBuf) const
 {
-	for(TqInt y = support.startY; y < support.endY; ++y)
+	for(TqInt y = support.sy.start; y < support.sy.end; ++y)
 	{
-		for(TqInt x = support.startX; x < support.endX; ++x)
+		for(TqInt x = support.sx.start; x < support.sx.end; ++x)
 		{
 			TqFloat weight = filterKer(x, y);
 			// Some filters are likely to return a lot of zeros (eg, sinc,
@@ -316,6 +387,55 @@ void CqTextureBuffer<T>::applyFilterInternal(const FilterKernelT& filterKer,
 			if(weight != 0)
 			{
 				const CqSampleVector<T> samples = (*this)(x,y);
+				for(TqInt chan = 0; chan < m_numChannels; ++chan)
+					resultBuf[chan] += weight * samples[chan];
+			}
+		}
+	}
+}
+
+inline bool wrapCoord(TqInt& x, TqInt width, EqWrapMode wrapMode)
+{
+	switch(wrapMode)
+	{
+		case WrapMode_Black:
+			if(x < 0 || x >= width)
+				return false;
+			break;
+		case WrapMode_Periodic:
+			x = (x + width) % width;
+			break;
+		case WrapMode_Clamp:
+			x = clamp(x, 0, width-1);
+			break;
+	}
+	return true;
+}
+
+template<typename T>
+template<typename FilterKernelT>
+void CqTextureBuffer<T>::applyFilterBoundary(const FilterKernelT& filterKer,
+		const SqFilterSupport& support, TqFloat* resultBuf,
+		EqWrapMode xWrapMode, EqWrapMode yWrapMode) const
+{
+	for(TqInt y = support.sy.start; y < support.sy.end; ++y)
+	{
+		TqInt yRemap = y;
+		if(!wrapCoord(yRemap, m_height, yWrapMode))
+			continue;
+		for(TqInt x = support.sx.start; x < support.sx.end; ++x)
+		{
+			TqInt xRemap = x;
+			if(!wrapCoord(xRemap, m_width, xWrapMode))
+				continue;
+			TqFloat weight = filterKer(x, y);
+			// Some filters are likely to return a lot of zeros (eg, sinc,
+			// EWA), so we check that the weight is nonzero before doing any
+			// filtering.
+			if(weight != 0)
+			{
+				// Remap filter coordinates if they're outside the bounds
+				const CqSampleVector<T> samples = (*this)(xRemap,yRemap);
 				for(TqInt chan = 0; chan < m_numChannels; ++chan)
 					resultBuf[chan] += weight * samples[chan];
 			}

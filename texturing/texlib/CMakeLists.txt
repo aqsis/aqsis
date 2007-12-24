@@ -16,6 +16,7 @@ SET(AQSISTEX_SRCS
 	channelinfo.cpp
 	channellist.cpp
 	ewafilter.cpp
+	filters.cpp
 	itexinputfile.cpp
 	itexoutputfile.cpp
 	itexturesampler.cpp
@@ -78,3 +79,7 @@ SET(TEST_LINKLIBS  aqsistex dl ${LINKLIBS})
 
 AQSIS_ADD_TESTS("${AQSISTEX_TEST_SRCS}" "${TEST_LINKLIBS}")
 
+ADD_EXECUTABLE(mipmap mipmap_test.cpp)
+TARGET_LINK_LIBRARIES(mipmap aqsistex dl ${LINKLIBS})
+INSTALL(TARGETS mipmap RUNTIME DESTINATION ${BINDIR})
+SET_TARGET_PROPERTIES(mipmap PROPERTIES INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${RENDERENGINEDIR}")

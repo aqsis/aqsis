@@ -30,11 +30,40 @@
 #include "aqsis.h"
 
 #include <cmath>
+#include <vector>
+#include <iosfwd>
 
 #include "filtersupport.h"
+#include "aqsismath.h"
 
 namespace Aqsis
 {
+
+//------------------------------------------------------------------------------
+/** \brief A sinc filter functional.
+ *
+ * The width/height of this filter determine only the behaviour of the
+ * windowing function (which is chosen to be the centeral lobe of a cosine).
+ *
+ * The wavelength of oscillations for the sinc function is taken to be 2.0
+ * (meaning that the distance between consecutive zeros of the function is
+ * 1.0).  This choice of frequency has the consequence that for large width and
+ * height the filter represents an ideal lowpass filter, which keeps only
+ * frequencies representable on a regular grid with spacing 1.
+ */
+class CqBoxFilter
+{
+	public:
+		/// Box is a seperable filter.
+		static const bool isSeperable = true;
+
+		inline CqBoxFilter(TqFloat width, TqFloat height);
+
+		inline TqFloat operator()(TqFloat x, TqFloat y) const;
+	private:
+		TqFloat m_widthOn2;
+		TqFloat m_heightOn2;
+};
 
 //------------------------------------------------------------------------------
 /** \brief A sinc filter functional.
@@ -56,9 +85,9 @@ class CqSincFilter
 
 		inline CqSincFilter(TqFloat width, TqFloat height);
 
-		inline TqFloat operator()(TqFloat x, TqFloat y);
+		inline TqFloat operator()(TqFloat x, TqFloat y) const;
 	private:
-		inline TqFloat windowedSinc(TqFloat x, invWidthOn2);
+		inline TqFloat windowedSinc(TqFloat x, TqFloat invWidthOn2) const;
 		TqFloat m_invWidthOn2;
 		TqFloat m_invHeightOn2;
 };
@@ -79,7 +108,7 @@ class CqGaussianFilter
 		/// Construct a gaussian filter with the given width and height.
 		inline CqGaussianFilter(TqFloat width, TqFloat height);
 
-		inline TqFloat operator()(TqFloat x, TqFloat y);
+		inline TqFloat operator()(TqFloat x, TqFloat y) const;
 	private:
 		TqFloat m_invWidth;
 		TqFloat m_invHeight;
@@ -112,26 +141,27 @@ class CqCachedFilter
 		CqCachedFilter(const FilterFuncT& filter, TqFloat width, TqFloat height,
 				bool evenNumberX, bool evenNumberY, TqFloat scale);
 
+		/** \brief Get the cached filter weight.
+		 *
+		 * \param x - x-coordinate in the support [support().startX, support().endX-1]
+		 * \param y - y-coordinate in the support [support().startY, support().endY-1]
+		 */
+		inline TqFloat operator()(TqInt x, TqInt y) const;
+
 		/** \brief Get the number of points in the x-direction for the discrete
 		 * filter kernel.
 		 *
 		 * Note that this is different from the floating point width provided
 		 * to the constructor.
 		 */
-		TqInt width();
+		TqInt width() const;
 		/** \brief Get the number of points in the y-direction for the discrete
 		 * filter kernel
 		 *
 		 * Note that this is different from the floating point height provided
 		 * to the constructor.
 		 */
-		TqInt height();
-		/** \brief Get the cached filter weight.
-		 *
-		 * \param x - x-coordinate in the support [support().startX, support().endX-1]
-		 * \param y - y-coordinate in the support [support().startY, support().endY-1]
-		 */
-		inline TqFloat operator()(TqInt x, TqInt y);
+		TqInt height() const;
 
 		/** \brief Get the support for the filter in the source image.
 		 *
@@ -146,10 +176,9 @@ class CqCachedFilter
 		 * \param filter - filter functor to cache.
 		 */
 		template<typename FilterFuncT>
-		cacheFilter(const FilterFuncT& filter, TqFloat scale);
+		void cacheFilter(const FilterFuncT& filter, TqFloat scale);
 
-		static TqInt filterSupportSize(bool includeZero,
-				TqFloat filterSize, TqFloat scale);
+		static TqInt filterSupportSize(bool includeZero, TqFloat width);
 		TqInt m_width; ///< number of points in horizontal lattice directon
 		TqInt m_height; ///< number of points in vertical lattice directon
 		TqInt m_topLeftX; ///< top left x-position in filter support
@@ -157,24 +186,39 @@ class CqCachedFilter
 		std::vector<TqFloat> m_weights; ///< cached weights.
 };
 
+/// Stream insertion operator for printing a filter kernel
+std::ostream& operator<<(std::ostream& out, const CqCachedFilter& filter);
+
 
 //==============================================================================
 // Implementation details
 //==============================================================================
 
-//--------------------------------------------------
+// CqBoxFilter implementation
+inline CqBoxFilter::CqBoxFilter(TqFloat width, TqFloat height)
+	: m_widthOn2(width/2), m_heightOn2(height/2)
+{ }
+
+inline TqFloat CqBoxFilter::operator()(TqFloat x, TqFloat y) const
+{
+	if(std::fabs(x) <= m_widthOn2 && std::fabs(y) <= m_heightOn2)
+		return 1;
+	return 0;
+}
+
+//------------------------------------------------------------------------------
 // CqSincFilter implementation
 inline CqSincFilter::CqSincFilter(TqFloat width, TqFloat height)
 	: m_invWidthOn2(0.5/width),
 	m_invHeightOn2(0.5/height)
 { }
 
-inline TqFloat CqSincFilter::operator()(TqFloat x, TqFloat y)
+inline TqFloat CqSincFilter::operator()(TqFloat x, TqFloat y) const
 {
 	return windowedSinc(x, m_invWidthOn2) * windowedSinc(y, m_invHeightOn2);
 }
 
-inline TqFloat CqSincFilter::windowedSinc(TqFloat x, invWidthOn2)
+inline TqFloat CqSincFilter::windowedSinc(TqFloat x, TqFloat invWidthOn2) const
 {
 	x *= M_PI;
 	if(x != 0)
@@ -187,21 +231,21 @@ inline TqFloat CqSincFilter::windowedSinc(TqFloat x, invWidthOn2)
 		return 1.0;
 }
 
-//--------------------------------------------------
+//------------------------------------------------------------------------------
 // CqGaussianFilter
 inline CqGaussianFilter::CqGaussianFilter(TqFloat width, TqFloat height)
 	: m_invWidth(1/width),
 	m_invHeight(1/height)
 { }
 
-inline TqFloat CqGaussianFilter::operator()(TqFloat x, TqFloat y)
+inline TqFloat CqGaussianFilter::operator()(TqFloat x, TqFloat y) const
 {
 	x *= m_invWidth;
-	y *= m_invHeigth;
+	y *= m_invHeight;
 	return exp(-8*(x*x + y*y));
 }
 
-//--------------------------------------------------
+//------------------------------------------------------------------------------
 // CqCachedFilter
 
 template<typename FilterFuncT>
@@ -217,36 +261,22 @@ CqCachedFilter::CqCachedFilter(const FilterFuncT& filter,
 	cacheFilter(filter, scale);
 }
 
-inline TqFloat CqCachedFilter::operator()(TqInt x, TqInt y)
+inline TqFloat CqCachedFilter::operator()(TqInt x, TqInt y) const
 {
-	return m_weights[y*m_width + x];
+	return m_weights[(y-m_topLeftY)*m_width + (x-m_topLeftX)];
 }
 
-template<typename FilterFuncT>
-CqCachedFilter::cacheFilter(const FilterFuncT& filter, TqFloat scale);
+TqInt CqCachedFilter::width() const
 {
-	// Compute and cache the desired filter weights on a regular grid.
-	TqFloat sOffset = m_width/2.0f;
-	TqFloat tOffset = m_height/2.0f;
-	TqFloat totWeight = 0;
-	for(TqInt j = 0; j < m_height; ++j)
-	{
-		TqFloat t = (j - tOffset)*scale;
-		for(TqInt i = 0; i < m_width; ++i)
-		{
-			TqFloat s = (i - sOffset)*scale;
-			TqFloat weight = filter(s, t);
-			m_weights[j*width + i] = weight;
-			totWeight += weight;
-		}
-	}
-	// Normalize so that the total weight is 1.
-	for(std::vector<TqFloat>::iterator i = m_weight.begin(), e = m_weights.end();
-			i != e; ++i)
-		*i /= totWeight;
+	return m_width;
 }
 
-inline const SqFilterSupport& CqCachedFilter::support() const
+TqInt CqCachedFilter::height() const
+{
+	return m_height;
+}
+
+inline SqFilterSupport CqCachedFilter::support() const
 {
 	return SqFilterSupport(m_topLeftX, m_topLeftY,
 			m_topLeftX+m_width, m_topLeftY+m_height);
@@ -257,7 +287,6 @@ inline void CqCachedFilter::setSupportTopLeft(TqInt x, TqInt y)
 	m_topLeftX = x;
 	m_topLeftY = y;
 }
-
 
 inline TqInt CqCachedFilter::filterSupportSize(bool includeZero,
 		TqFloat width)
@@ -274,7 +303,40 @@ inline TqInt CqCachedFilter::filterSupportSize(bool includeZero,
 	if(includeZero)
 		return max(2*static_cast<TqInt>(0.5*width) + 1, 3);
 	else
-		return max(2*static_cast<TqInt>(0.5*(width+1)), 2)
+		return max(2*static_cast<TqInt>(0.5*(width+1)), 2);
+}
+
+template<typename FilterFuncT>
+void CqCachedFilter::cacheFilter(const FilterFuncT& filter, TqFloat scale)
+{
+	// Compute and cache the desired filter weights on a regular grid.
+	TqFloat sOffset = (m_width-1)/2.0f;
+	TqFloat tOffset = (m_height-1)/2.0f;
+	TqFloat totWeight = 0;
+	for(TqInt j = 0; j < m_height; ++j)
+	{
+		TqFloat t = (j - tOffset)*scale;
+		for(TqInt i = 0; i < m_width; ++i)
+		{
+			TqFloat s = (i - sOffset)*scale;
+			TqFloat weight = filter(s, t);
+			m_weights[j*m_width + i] = weight;
+			totWeight += weight;
+		}
+	}
+	// Optimize filter weights
+	for(std::vector<TqFloat>::iterator i = m_weights.begin(), e = m_weights.end();
+			i != e; ++i)
+	{
+		// Normalize so that the total weight is 1.
+		TqFloat weight = *i/totWeight;
+		// If the weight is very small, set it to zero; this makes applying
+		// the filter more efficient when zero weights are explicitly skipped
+		// (see CqTextureBuffer<T>::applyFilter, for eg).
+		if(std::fabs(weight) < 1e-5)
+			weight = 0;
+		*i = weight;
+	}
 }
 
 

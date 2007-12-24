@@ -123,7 +123,7 @@ void IqTexOutputFile::writePixels(const Array2DType& buffer)
 {
 	TqInt numScanlines = min(buffer.height(), header().height() - currentLine());
 	if(buffer.width() != header().width())
-		throw XqInternal("Provieded buffer has wrong width for output file",
+		throw XqInternal("Provided buffer has wrong width for output file",
 				__FILE__, __LINE__);
 	CqMixedImageBuffer newBuf(buffer.channelList(),
 			boost::shared_array<TqUchar>(const_cast<TqUchar*>(buffer.rawData()),

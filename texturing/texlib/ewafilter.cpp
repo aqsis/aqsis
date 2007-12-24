@@ -25,6 +25,7 @@
  */
 
 #include "ewafilter.h"
+#include "logging.h"
 
 namespace Aqsis {
 
@@ -70,6 +71,7 @@ inline void clampEccentricity(SqMatrix2D& covariance,
 	// check one inequality here.
 	if(maxAspectRatio*maxAspectRatio*eig2 < eig1)
 	{
+		Aqsis::log() << "aspect ratio = " << eig2/eig1 << "\n";
 		// Need to perform eccentricity clamping
 		SqMatrix2D R = covariance.orthogDiagonalize(eig1, eig2);
 		// By construction, covariance = R^T * D * R, where D = SqMatrix2D(eig1, eig2);
