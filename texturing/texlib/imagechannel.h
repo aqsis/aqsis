@@ -185,6 +185,25 @@ COMMON_SHARE class CqImageChannelCheckered : public IqImageChannelSource
 
 
 //------------------------------------------------------------------------------
+/** \brief A rescaling image channel
+ */
+COMMON_SHARE class CqImageChannelZoom : public IqImageChannelSource
+{
+	public:
+		/** \brief Construct a checker channel
+		 *
+		 * \param tileSize - the size of the checkered tiles
+		 */
+		CqImageChannelZoom(const IqImageChannelSource& src, TqInt zoomFactor);
+		virtual void requireSize(TqInt width, TqInt height) const;
+		virtual const TqFloatConv* getRow(TqInt row) const;
+	private:
+		const IqImageChannelSource& m_source; ///< Place to get source data from.
+		TqInt m_zoomFactor; ///< The amount to zoom in by.
+		mutable std::vector<TqFloatConv> m_rowBuf; ///< mem buffer for rows.
+};
+
+//------------------------------------------------------------------------------
 /** \brief A thin wrapper around channel data held in a CqMixedImageBuffer
  *
  * CqImageChannel wraps around a single channel of a subregion of a heterogenous

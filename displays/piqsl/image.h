@@ -109,6 +109,10 @@ public:
 	/** \brief Connect a channel of the underlying data to the blue display channel
 	 */
 	inline void connectChannelB(const std::string& chanName);
+	/// Get the scale factor used to display the image.
+	inline TqInt zoom() const;
+	/// Set the scale factor for the displayed image
+	void setZoom(TqInt zoom);
 	/** Get the number of channels in this image.
 	 * \return				The number of channels.
 	 */
@@ -175,16 +179,19 @@ public:
 	 * \param fileName	The name of the TIFF file to load the image data from.
 	 */
 	void loadFromFile(const std::string& fileName, TqInt imageIndex = 0);
-	/** \breif Load the next subimage from the current image file.
+	/** \brief Load the next subimage from the current image file.
 	 *
 	 * Do nothing if there is no next subimage.
 	 */
 	void loadNextSubImage();
-	/** \breif Load the previous subimage from the current image file.
+	/** \brief Load the previous subimage from the current image file.
 	 *
 	 * Do nothing if there is no previous subimage.
 	 */
 	void loadPrevSubImage();
+	/** \brief Reload the current image file.
+	 */
+	void reloadFromFile();
 
 protected:
 	/** Check m_displayMap is pointing to valid channel names from channels.
@@ -205,6 +212,7 @@ protected:
     std::string		m_fileName;		///< File name.
     std::string		m_description;		///< Description or Software' renderer name.
 	boost::shared_ptr<CqMixedImageBuffer> m_displayData;		///< Buffer to store the 8bit data for display. 
+	boost::shared_ptr<CqMixedImageBuffer> m_zoomDisplayData;	///< Zoomed 8bit buffer for display. 
 	boost::shared_ptr<CqMixedImageBuffer> m_realData;	///< Buffer to store the natural format image data.
 	TqUlong			m_frameWidth;	///< The width of the frame within the whole image.
 	TqUlong			m_frameHeight;	///< The height of the frame within the whole image.
@@ -213,7 +221,8 @@ protected:
 	TqUlong			m_originX;		///< The origin of the frame within the whole image.
 	TqUlong			m_originY;		///< The origin of the frame within the whole image.
 	TqInt 			m_imageIndex;	///< Current image index in a multi-image file.
-	TqChannelNameMap m_displayMap; ///< map from display to underlying channel names
+	TqInt			m_zoom;  ///< How much the image will be scaled by when displayed
+	TqChannelNameMap m_displayMap;  ///< map from display to underlying channel names
 
 	boost::function<void(int,int,int,int)> m_updateCallback;	///< A callback, called when an image changes.
 	mutable boost::mutex m_mutex;	///< The unique mutex for this image.
@@ -237,6 +246,7 @@ inline CqImage::CqImage( const std::string& name)
 	m_originX(0),
 	m_originY(0),
 	m_imageIndex(0),
+	m_zoom(1),
 	m_displayMap(),
 	m_updateCallback(),
 	m_mutex()
@@ -293,6 +303,11 @@ inline void CqImage::setFrameSize(TqUlong width, TqUlong height)
 	m_frameHeight = height;
 }
 
+inline TqInt CqImage::zoom() const
+{
+	return m_zoom;
+}
+
 inline const CqChannelList& CqImage::channelList() const
 {
 	return m_realData->channelList();
@@ -308,7 +323,10 @@ inline TqUint CqImage::numChannels() const
 
 inline boost::shared_ptr<const CqMixedImageBuffer> CqImage::displayBuffer() const
 {
-	return m_displayData;
+	if(m_zoom > 1)
+		return m_zoomDisplayData;
+	else
+		return m_displayData;
 }
 
 inline TqUlong CqImage::originX() const

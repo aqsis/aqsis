@@ -41,6 +41,55 @@ CqImage::~CqImage()
 {
 }
 
+void CqImage::setZoom(TqInt zoom)
+{
+	if(zoom <= 0)
+		throw XqInternal("Negative or zero zoom specified.", __FILE__, __LINE__);
+
+	if(zoom == m_zoom || !m_displayData)
+		return;
+
+	boost::mutex::scoped_lock lock(mutex());
+	m_zoom = zoom;
+
+	if(!m_zoomDisplayData)
+	{
+		m_zoomDisplayData.reset( new CqMixedImageBuffer(
+				m_displayData->channelList(),
+				m_displayData->width()*m_zoom,
+				m_displayData->height()*m_zoom)
+			);
+	}
+
+	// Make sure the zoom buffer has the right size
+	m_zoomDisplayData->resize( m_displayData->width()*m_zoom,
+			m_displayData->height()*m_zoom, m_displayData->channelList()
+			);
+
+	// Copy channels from display data to zoom data, zooming them as we go.
+	for(TqInt chan = 0; chan < m_displayData->channelList().numChannels();
+			++chan)
+	{
+		m_zoomDisplayData->channel(chan)->copyFrom(
+				CqImageChannelZoom(*(m_displayData->channel(chan)), m_zoom) );
+	}
+	/// \todo: This is a nasty hack - the frame height isn't preserved
+	//anywhere else, so this will be broken when we resize cropped images...
+	//
+	// The fix is time-consuming though; the piqsl CqImage and
+	// CqDisplayServerImage classes really need a thorough refactor to better
+	// seperate two distinct concerns:
+	//
+	// 1) Holding and updating the underlying data piped in from aqsis or a
+	//    file
+	// 2) Formatting that data for display.
+	setFrameSize(m_zoomDisplayData->width(), m_zoomDisplayData->height());
+	setImageSize(m_zoomDisplayData->width(), m_zoomDisplayData->height());
+
+	if(m_updateCallback)
+		m_updateCallback(-1, -1, -1, -1);
+}
+
 void CqImage::prepareImageBuffers(const CqChannelList& channelList)
 {
 	boost::mutex::scoped_lock lock(mutex());
@@ -158,6 +207,13 @@ void CqImage::loadPrevSubImage()
 {
 	if(m_imageIndex-1 >= 0)
 		loadFromFile(filename(), m_imageIndex-1);
+}
+
+void CqImage::reloadFromFile()
+{
+	/// \todo Warning!  Probable bad behaviour for the case when the image
+	// comes from aqsis rather than a file.
+	loadFromFile(filename(), m_imageIndex);
 }
 
 void CqImage::saveToFile(const std::string& fileName) const

@@ -141,42 +141,69 @@ int CqFramebuffer::handle(int event)
 		case FL_UNFOCUS:
 			return 1;
 		case FL_KEYDOWN:
-			if(Fl::event_alt())
 			{
+				boost::shared_ptr<Aqsis::CqImage>& image
+					= m_uiImageWidget->image();
 				int key = Fl::event_key();
-				if(key == 'n' || key == 'p')
+				std::cout << key << "\n";
+				if(Fl::event_alt())
 				{
-					boost::shared_ptr<Aqsis::CqImage>& image
-						= m_uiImageWidget->image();
-					if(image)
+					switch(key)
 					{
-						if(key == 'n')
-							image->loadNextSubImage();
-						else
-							image->loadPrevSubImage();
+						case 'n':
+							if(image)
+								image->loadNextSubImage();
+							return 1;
+						case 'p':
+							if(image)
+								image->loadPrevSubImage();
+							return 1;
 					}
-					return 1;
 				}
-			}
-			else
-			{
-				switch (Fl::event_key())
+				else if(Fl::event_shift())
 				{
-					case 'r':
-						//std::cout << "Red channel toggle" << std::endl;
-						return 1;
-					case 'h':
-						// 'Home' widget back to center
-						centerImageWidget();
-						m_scroll->redraw();
-						return 1;
+					switch(key)
+					{
+						case 'r':
+							if(image)
+								image->reloadFromFile();
+							return 1;
+					}
+				}
+				else
+				{
+					switch(key)
+					{
+						case 'h':
+							// 'Home' widget back to center
+							centerImageWidget();
+							m_scroll->redraw();
+							return 1;
+						case FL_KP + '+':
+							if(image)
+							{
+								image->setZoom(image->zoom()+1);
+								m_scroll->redraw();
+								queueResize();
+							}
+							return 1;
+						case FL_KP + '-':
+							if(image)
+							{
+								TqInt newZoom = image->zoom()-1;
+								if(newZoom > 0)
+								{
+									image->setZoom(newZoom);
+									queueResize();
+								}
+							}
+							return 1;
+					}
 				}
 			}
 			break;
 		case FL_KEYUP:
-			return 1;
 			break;
-
 		case FL_PUSH:
 			switch (Fl::event_button())
 			{

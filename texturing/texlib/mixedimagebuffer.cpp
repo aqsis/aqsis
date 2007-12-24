@@ -192,27 +192,27 @@ void CqMixedImageBuffer::compositeOver(const CqMixedImageBuffer& source,
 	}
 }
 
-inline boost::shared_ptr<CqImageChannel> CqMixedImageBuffer::channel(const std::string& name,
+boost::shared_ptr<CqImageChannel> CqMixedImageBuffer::channel(const std::string& name,
 		TqInt topLeftX, TqInt topLeftY, TqInt width, TqInt height)
 {
 	return channelImpl(m_channelList.findChannelIndex(name),
 			topLeftX, topLeftY, width, height);
 }
 
-inline boost::shared_ptr<CqImageChannel> CqMixedImageBuffer::channel(TqInt index, TqInt topLeftX,
+boost::shared_ptr<CqImageChannel> CqMixedImageBuffer::channel(TqInt index, TqInt topLeftX,
 		TqInt topLeftY, TqInt width, TqInt height)
 {
 	return channelImpl(index, topLeftX, topLeftY, width, height);
 }
 
-inline boost::shared_ptr<const CqImageChannel> CqMixedImageBuffer::channel(const std::string& name,
+boost::shared_ptr<const CqImageChannel> CqMixedImageBuffer::channel(const std::string& name,
 		TqInt topLeftX, TqInt topLeftY, TqInt width, TqInt height) const
 {
 	return channelImpl(m_channelList.findChannelIndex(name),
 			topLeftX, topLeftY, width, height);
 }
 
-inline boost::shared_ptr<const CqImageChannel> CqMixedImageBuffer::channel(TqInt index,
+boost::shared_ptr<const CqImageChannel> CqMixedImageBuffer::channel(TqInt index,
 		TqInt topLeftX, TqInt topLeftY, TqInt width, TqInt height) const
 {
 	return channelImpl(index, topLeftX, topLeftY, width, height);

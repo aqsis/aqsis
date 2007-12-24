@@ -134,6 +134,35 @@ const TqFloatConv* CqImageChannelCheckered::getRow(TqInt row) const
 
 
 //------------------------------------------------------------------------------
+// CqImageChannelZoom implementation
+CqImageChannelZoom::CqImageChannelZoom(const IqImageChannelSource& src,
+		TqInt zoomFactor)
+	: m_source(src),
+	m_zoomFactor(zoomFactor > 0 ? zoomFactor : 1),
+	m_rowBuf()
+{ }
+
+void CqImageChannelZoom::requireSize(TqInt width, TqInt height) const
+{
+	m_source.requireSize(width/m_zoomFactor, height/m_zoomFactor);
+	if(static_cast<TqInt>(m_rowBuf.size()) != width)
+		m_rowBuf.resize(width);
+}
+
+const TqFloatConv* CqImageChannelZoom::getRow(TqInt row) const
+{
+	const TqFloatConv* srcRow = m_source.getRow(row/m_zoomFactor);
+	TqInt srcSize = m_rowBuf.size()/m_zoomFactor;
+	for(TqInt i = 0; i < srcSize; ++i)
+	{
+		for(TqInt j = i*m_zoomFactor, jEnd = (i+1)*m_zoomFactor; j < jEnd; ++j)
+			m_rowBuf[j] = srcRow[i];
+	}
+	return &m_rowBuf[0];
+}
+
+
+//------------------------------------------------------------------------------
 // CqImageChannel implementation
 CqImageChannel::CqImageChannel(const SqChannelInfo& chanInfo, TqUchar* data,
 		TqInt width, TqInt height, TqInt stride, TqInt rowSkip)

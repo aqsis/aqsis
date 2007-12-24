@@ -197,11 +197,11 @@ COMMON_SHARE class CqMixedImageBuffer : boost::noncopyable
 		 *
 		 * \return The named channel subregion.
 		 */
-		inline boost::shared_ptr<CqImageChannel> channel(const std::string& name,
+		boost::shared_ptr<CqImageChannel> channel(const std::string& name,
 				TqInt topLeftX = 0, TqInt topLeftY = 0, TqInt width = 0,
 				TqInt height = 0);
 		/// Retrieve a named image channel subregion (const version)
-		inline boost::shared_ptr<const CqImageChannel> channel(const std::string& name,
+		boost::shared_ptr<const CqImageChannel> channel(const std::string& name,
 				TqInt topLeftX = 0, TqInt topLeftY = 0, TqInt width = 0,
 				TqInt height = 0) const;
 		/** \brief Retreive the image channel subregion with the given index in
@@ -209,11 +209,11 @@ COMMON_SHARE class CqMixedImageBuffer : boost::noncopyable
 		 *
 		 * \see channel(const std::string& name, ...)
 		 */
-		inline boost::shared_ptr<CqImageChannel> channel(TqInt index,
+		boost::shared_ptr<CqImageChannel> channel(TqInt index,
 				TqInt topLeftX = 0, TqInt topLeftY = 0, TqInt width = 0,
 				TqInt height = 0);
 		/// Retrieve an image channel subregion by index (const version)
-		inline boost::shared_ptr<const CqImageChannel> channel(TqInt index,
+		boost::shared_ptr<const CqImageChannel> channel(TqInt index,
 				TqInt topLeftX = 0, TqInt topLeftY = 0, TqInt width = 0,
 				TqInt height = 0) const;
 		//@}
