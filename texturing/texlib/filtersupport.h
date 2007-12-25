@@ -31,6 +31,7 @@
 #include "aqsis.h"
 
 #include "aqsismath.h"
+#include "texturesampleoptions.h" // for EqWrapMode; factor this out somehow?
 
 namespace Aqsis
 {
@@ -60,7 +61,41 @@ struct SqFilterSupport1D
 	 * amount, so may lie outside the right hand end of the range.
 	 */
 	inline void remapPeriodic(TqInt length);
+
+	/** \brief Remap the support depending on a wrap mode constant.
+	 *
+	 * For WrapMode_Black call truncate(); for WrapMode_Periodic call
+	 * remapPeriodic().  Other wrapmodes are ignored.
+	 *
+	 * \return false if the resulting support is empty due to truncation, true
+	 * otherwise.
+	 */
+	inline bool remap(EqWrapMode wrapMode, TqInt length);
 };
+
+
+/** \brief Hold filter support area.
+ *
+ * The end markers are *exclusive*, so the support of a filter is inside the
+ * rectangular region [sx.start, ..., endX-1] x [startY, ..., endY-1].
+ */
+struct SqFilterSupport
+{
+	SqFilterSupport1D sx; ///< support in x-direction
+	SqFilterSupport1D sy; ///< support in y-direction
+	/// Trivial constructor.
+	inline SqFilterSupport(TqInt startX = 0, TqInt startY = 0, TqInt endX = 0, TqInt endY = 0);
+	/// Return true if the support is an empty set.
+	inline bool isEmpty();
+	inline bool inRange(TqInt startX, TqInt endX, TqInt startY, TqInt endY);
+};
+
+
+
+//==============================================================================
+// Implementation details
+//==============================================================================
+// SqFilterSupport1D
 
 inline SqFilterSupport1D::SqFilterSupport1D(TqInt start, TqInt end)
 	: start(start), end(end)
@@ -104,21 +139,37 @@ inline void SqFilterSupport1D::remapPeriodic(TqInt length)
 	}
 }
 
-/** \brief Hold filter support area.
- *
- * The end markers are *exclusive*, so the support of a filter is inside the
- * rectangular region [sx.start, ..., endX-1] x [startY, ..., endY-1].
- */
-struct SqFilterSupport
+inline bool SqFilterSupport1D::remap(EqWrapMode wrapMode, TqInt length)
 {
-	SqFilterSupport1D sx; ///< support in x-direction
-	SqFilterSupport1D sy; ///< support in y-direction
-	/// Trivial constructor.
-	inline SqFilterSupport(TqInt startX = 0, TqInt startY = 0, TqInt endX = 0, TqInt endY = 0);
-	/// Return true if the support is an empty set.
-	inline bool isEmpty();
-	inline bool inRange(TqInt startX, TqInt endX, TqInt startY, TqInt endY);
-};
+	switch(wrapMode)
+	{
+		case WrapMode_Black:
+			truncate(0, length);
+			if(isEmpty())
+			{
+				// Return false when truncation leaves an empty support.
+				return false;
+			}
+			break;
+		case WrapMode_Periodic:
+			remapPeriodic(length);
+			break;
+		default:
+			// In other cases we do nothing here.
+			break;
+	}
+	return true;
+}
+
+
+//------------------------------------------------------------------------------
+// SqFilterSupport
+
+inline SqFilterSupport::SqFilterSupport(TqInt startX, TqInt startY,
+		TqInt endX, TqInt endY)
+	: sx(startX, endX),
+	sy(startY, endY)
+{ }
 
 inline bool SqFilterSupport::isEmpty()
 {
@@ -130,16 +181,6 @@ inline bool SqFilterSupport::inRange(
 {
 	return sx.inRange(startX, endX) && sy.inRange(startY, endY);
 }
-
-//==============================================================================
-// Implementation details.
-//==============================================================================
-
-inline SqFilterSupport::SqFilterSupport(TqInt startX, TqInt startY,
-		TqInt endX, TqInt endY)
-	: sx(startX, endX),
-	sy(startY, endY)
-{ }
 
 } // namespace Aqsis
 

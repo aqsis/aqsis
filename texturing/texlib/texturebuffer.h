@@ -38,7 +38,6 @@
 #include "samplevector.h"
 #include "channellist.h"
 #include "filtersupport.h"
-#include "texturesampleoptions.h" // for EqWrapMode; factor this out somehow?
 
 namespace Aqsis {
 
@@ -299,35 +298,6 @@ inline const TqUchar* CqTextureBuffer<T>::rawData() const
 	return reinterpret_cast<const TqUchar*>(m_pixelData.get());
 }
 
-namespace detail
-{
-
-inline bool remapSupport(SqFilterSupport1D support,
-		EqWrapMode wrapMode, TqInt length)
-{
-	switch(wrapMode)
-	{
-		case WrapMode_Black:
-			support.truncate(0, length);
-			if(support.isEmpty())
-			{
-				// If the wrapmode truncation has left the filter support
-				// empty, return false to indicate so.
-				return false;
-			}
-			break;
-		case WrapMode_Periodic:
-			support.remapPeriodic(length);
-			break;
-		default:
-			// In other cases we do nothing here.
-			break;
-	}
-	return true;
-}
-
-}
-
 template<typename T>
 template<typename FilterKernelT>
 void CqTextureBuffer<T>::applyFilter(const FilterKernelT& filterKer,
@@ -348,8 +318,8 @@ void CqTextureBuffer<T>::applyFilter(const FilterKernelT& filterKer,
 	{
 		// If we get here, the filter support falls (possibly partially)
 		// outside the texture range.
-		if( !detail::remapSupport(support.sx, xWrapMode, m_width)
-			|| !detail::remapSupport(support.sy, yWrapMode, m_height) )
+		if( !support.sx.remap(xWrapMode, m_width)
+			|| !support.sy.remap(yWrapMode, m_height) )
 		{
 			// Return without further calculation when the support is empty
 			// after being remapped.
