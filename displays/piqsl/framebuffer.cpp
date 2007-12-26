@@ -145,7 +145,6 @@ int CqFramebuffer::handle(int event)
 				boost::shared_ptr<Aqsis::CqImage>& image
 					= m_uiImageWidget->image();
 				int key = Fl::event_key();
-				std::cout << key << "\n";
 				if(Fl::event_alt())
 				{
 					switch(key)
@@ -153,10 +152,14 @@ int CqFramebuffer::handle(int event)
 						case 'n':
 							if(image)
 								image->loadNextSubImage();
+								m_scroll->redraw();
+								queueResize();
 							return 1;
 						case 'p':
 							if(image)
 								image->loadPrevSubImage();
+								m_scroll->redraw();
+								queueResize();
 							return 1;
 					}
 				}
