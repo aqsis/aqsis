@@ -72,6 +72,16 @@ COMMON_SHARE class CqTiffInputFile : public IqMultiTexInputFile
 		virtual void readPixelsImpl(TqUchar* buffer, TqInt startLine,
 				TqInt numScanlines) const;
 
+		/// Read pixels from a tiff file with data stored in strips.
+		void readPixelsStripped(TqUchar* buffer, TqInt startLine,
+				TqInt numScanlines) const;
+		/// Read pixels from a tiff file with data stored in tiles.
+		void readPixelsTiled(TqUchar* buffer, TqInt startLine,
+				TqInt numScanlines) const;
+		/// Read pixels in a strange formats using generic RGBA reading
+		void readPixelsRGBA(TqUchar* buffer, TqInt startLine,
+				TqInt numScanlines) const;
+
 		/** \brief Initializations for directory-specific data
 		 *
 		 * \throw XqInternal if newDir is outside the valid range of

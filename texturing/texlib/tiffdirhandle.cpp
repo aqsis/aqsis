@@ -375,6 +375,7 @@ void CqTiffDirHandle::fillHeaderOptionalAttrs(CqTexFileHeader& header) const
 
 void CqTiffDirHandle::fillHeaderPixelLayout(CqTexFileHeader& header) const
 {
+	header.set<Attr::TiffUseGenericRGBA>(false);
 	// Deal with fields which determine the pixel layout.
 	try
 	{
@@ -407,9 +408,7 @@ void CqTiffDirHandle::fillHeaderPixelLayout(CqTexFileHeader& header) const
 		channelList.addChannel( SqChannelInfo("b", chanType) );
 		channelList.addChannel( SqChannelInfo("a", chanType) );
 		header.set<Attr::ChannelList>(channelList);
-		// For the moment, throw another error here.
-		/// \todo Make the generic RGBA handling work properly.
-		throw XqInternal("Cannot handle desired tiff format", __FILE__, __LINE__);
+		header.set<Attr::TiffUseGenericRGBA>(true);
 	}
 }
 

@@ -50,6 +50,17 @@ class CqTiffFileHandle;
 
 extern const char* tiffFileTypeString;
 
+namespace Attr {
+	/**
+	 * Extra image attribute to record whether a TIFF file has pixels in a
+	 * format which are supported for reading natively by aqsistex.  If the
+	 * attribute is true, use the generic libtiff RGBA image reading facility
+	 * rather than handling the pixel format natively.
+	 */
+	AQSIS_IMAGE_ATTR_TAG(TiffUseGenericRGBA, bool);
+}
+
+
 //------------------------------------------------------------------------------
 /** \brief A locked handle to a tiff directory.
  *
