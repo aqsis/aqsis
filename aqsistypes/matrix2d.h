@@ -90,8 +90,8 @@ struct SqMatrix2D
 	inline SqMatrix2D transpose() const;
 	/** \brief Get the eigenvalues of the matrix
 	 *
-	 * The behaviour is undefined if the eigenvalues are complex rather than
-	 * real.
+	 * If the eigenvalues are complex rather than real, trigger an assert in
+	 * debug mode.  In release mode, return the real part of the eigenvalues.
 	 *
 	 * The eigenvalues are guarenteed to be ordered such that that l1 >= l2.
 	 *
@@ -122,7 +122,7 @@ struct SqMatrix2D
 };
 
 /// Stream insertion operator
-inline std::ostream& operator<<(std::ostream& out, SqMatrix2D& mat);
+inline std::ostream& operator<<(std::ostream& out, const SqMatrix2D& mat);
 
 //==============================================================================
 // Implentation details
@@ -204,15 +204,11 @@ inline void SqMatrix2D::eigenvalues(TqFloat& l1, TqFloat& l2) const
 	// l^2 - Tr(A)*l + det(A) = 0
 	//
 	// for l.
-	TqFloat trace = a+d;
-	TqFloat determ = det();
-	TqFloat firstTerm = trace*0.5;
-	TqFloat secondTerm = trace*trace - 4*determ;
-	// "secondTerm" should be positive (at least to within some small numerical
-	// tolerance, otherwise the eigenvalues will be negative.
-	assert(secondTerm > -2*trace*std::numeric_limits<TqFloat>::epsilon());
-	// For robustness, set secondTerm = 0 if it's negative.  This will result
-	// in something wrong, but at least it's well-defined.
+	TqFloat firstTerm = (a+d)*0.5;
+	TqFloat secondTerm = (a-d)*(a-d) + c*b;
+	assert(secondTerm >= 0);
+	// For robustness, set secondTerm = 0 if it's negative.  This will get the
+	// real part of the result.
 	if(secondTerm < 0)
 		secondTerm = 0;
 	secondTerm = std::sqrt(secondTerm)*0.5;
@@ -256,7 +252,7 @@ inline SqMatrix2D SqMatrix2D::orthogDiagonalize(TqFloat l1, TqFloat l2) const
 }
 
 
-inline std::ostream& operator<<(std::ostream& out, SqMatrix2D& mat)
+inline std::ostream& operator<<(std::ostream& out, const SqMatrix2D& mat)
 {
 	out << "[" << mat.a << ", " << mat.b << ", "
 		<< mat.c << ", " << mat.d << "]";
