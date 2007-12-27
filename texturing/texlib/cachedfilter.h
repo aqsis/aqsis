@@ -24,8 +24,8 @@
  * \author Chris Foster [ chris42f (at) gmail (dot) com ]
  */
 
-#ifndef FILTERS_H_INCLUDED
-#define FILTERS_H_INCLUDED
+#ifndef CACHEDFILTER_H_INCLUDED
+#define CACHEDFILTER_H_INCLUDED
 
 #include "aqsis.h"
 
@@ -34,85 +34,9 @@
 #include <iosfwd>
 
 #include "filtersupport.h"
-#include "aqsismath.h"
 
 namespace Aqsis
 {
-
-//------------------------------------------------------------------------------
-/** \brief A sinc filter functional.
- *
- * The width/height of this filter determine only the behaviour of the
- * windowing function (which is chosen to be the centeral lobe of a cosine).
- *
- * The wavelength of oscillations for the sinc function is taken to be 2.0
- * (meaning that the distance between consecutive zeros of the function is
- * 1.0).  This choice of frequency has the consequence that for large width and
- * height the filter represents an ideal lowpass filter, which keeps only
- * frequencies representable on a regular grid with spacing 1.
- */
-class CqBoxFilter
-{
-	public:
-		/// Box is a seperable filter.
-		static const bool isSeperable = true;
-
-		inline CqBoxFilter(TqFloat width, TqFloat height);
-
-		inline TqFloat operator()(TqFloat x, TqFloat y) const;
-	private:
-		TqFloat m_widthOn2;
-		TqFloat m_heightOn2;
-};
-
-//------------------------------------------------------------------------------
-/** \brief A sinc filter functional.
- *
- * The width/height of this filter determine only the behaviour of the
- * windowing function (which is chosen to be the centeral lobe of a cosine).
- *
- * The wavelength of oscillations for the sinc function is taken to be 2.0
- * (meaning that the distance between consecutive zeros of the function is
- * 1.0).  This choice of frequency has the consequence that for large width and
- * height the filter represents an ideal lowpass filter, which keeps only
- * frequencies representable on a regular grid with spacing 1.
- */
-class CqSincFilter
-{
-	public:
-		/// Sinc is a seperable filter.
-		static const bool isSeperable = true;
-
-		inline CqSincFilter(TqFloat width, TqFloat height);
-
-		inline TqFloat operator()(TqFloat x, TqFloat y) const;
-	private:
-		inline TqFloat windowedSinc(TqFloat x, TqFloat invWidthOn2) const;
-		TqFloat m_invWidthOn2;
-		TqFloat m_invHeightOn2;
-};
-
-//------------------------------------------------------------------------------
-/** \brief Gaussian filter functor
- *
- * A tight gaussian filter, falling to exp(-8) ~= 0.0003 at the given width or
- * height.  This is the same as given in renderman specification, though it
- * seems very small.
- */
-class CqGaussianFilter
-{
-	public:
-		/// Gaussians are seperable filters.
-		static const bool isSeperable = true;
-
-		/// Construct a gaussian filter with the given width and height.
-		inline CqGaussianFilter(TqFloat width, TqFloat height);
-
-		inline TqFloat operator()(TqFloat x, TqFloat y) const;
-	private:
-		TqFloat m_invWidth;
-		TqFloat m_invHeight;
-};
 
 //------------------------------------------------------------------------------
 /** \brief Cached filter weights for resampling an image.
@@ -138,7 +62,7 @@ class CqCachedFilter
 		 *                during mipmapping.
 		 */
 		template<typename FilterFuncT>
-		CqCachedFilter(const FilterFuncT& filter, TqFloat width, TqFloat height,
+		inline CqCachedFilter(const FilterFuncT& filter, TqFloat width, TqFloat height,
 				bool evenNumberX, bool evenNumberY, TqFloat scale);
 
 		/** \brief Get the cached filter weight.
@@ -154,23 +78,23 @@ class CqCachedFilter
 		 * Note that this is different from the floating point width provided
 		 * to the constructor.
 		 */
-		TqInt width() const;
+		inline TqInt width() const;
 		/** \brief Get the number of points in the y-direction for the discrete
 		 * filter kernel
 		 *
 		 * Note that this is different from the floating point height provided
 		 * to the constructor.
 		 */
-		TqInt height() const;
+		inline TqInt height() const;
 
 		/** \brief Get the support for the filter in the source image.
 		 *
 		 * The support is the (rectangular) region over which the filter has
 		 * nonzero coefficients.
 		 */
-		SqFilterSupport support() const;
+		inline SqFilterSupport support() const;
 		/// \brief Set the top left point in the filter support
-		void setSupportTopLeft(TqInt x, TqInt y);
+		inline void setSupportTopLeft(TqInt x, TqInt y);
 	private:
 		/** \brief Cache the given filter functor at the lattice points.
 		 * \param filter - filter functor to cache.
@@ -190,66 +114,14 @@ class CqCachedFilter
 std::ostream& operator<<(std::ostream& out, const CqCachedFilter& filter);
 
 
+
 //==============================================================================
 // Implementation details
 //==============================================================================
-
-// CqBoxFilter implementation
-inline CqBoxFilter::CqBoxFilter(TqFloat width, TqFloat height)
-	: m_widthOn2(width/2), m_heightOn2(height/2)
-{ }
-
-inline TqFloat CqBoxFilter::operator()(TqFloat x, TqFloat y) const
-{
-	if(std::fabs(x) <= m_widthOn2 && std::fabs(y) <= m_heightOn2)
-		return 1;
-	return 0;
-}
-
-//------------------------------------------------------------------------------
-// CqSincFilter implementation
-inline CqSincFilter::CqSincFilter(TqFloat width, TqFloat height)
-	: m_invWidthOn2(0.5/width),
-	m_invHeightOn2(0.5/height)
-{ }
-
-inline TqFloat CqSincFilter::operator()(TqFloat x, TqFloat y) const
-{
-	return windowedSinc(x, m_invWidthOn2) * windowedSinc(y, m_invHeightOn2);
-}
-
-inline TqFloat CqSincFilter::windowedSinc(TqFloat x, TqFloat invWidthOn2) const
-{
-	x *= M_PI;
-	if(x != 0)
-	{
-		// Use a -PI to PI cosine window.
-		/// \todo: Investigate if this is really best for mipmap downsampling.
-		return cos(x*invWidthOn2) * sin(x)/x;
-	}
-	else
-		return 1.0;
-}
-
-//------------------------------------------------------------------------------
-// CqGaussianFilter
-inline CqGaussianFilter::CqGaussianFilter(TqFloat width, TqFloat height)
-	: m_invWidth(1/width),
-	m_invHeight(1/height)
-{ }
-
-inline TqFloat CqGaussianFilter::operator()(TqFloat x, TqFloat y) const
-{
-	x *= m_invWidth;
-	y *= m_invHeight;
-	return exp(-8*(x*x + y*y));
-}
-
-//------------------------------------------------------------------------------
 // CqCachedFilter
 
 template<typename FilterFuncT>
-CqCachedFilter::CqCachedFilter(const FilterFuncT& filter,
+inline CqCachedFilter::CqCachedFilter(const FilterFuncT& filter,
 		TqFloat width, TqFloat height, bool includeZeroX, bool includeZeroY,
 		TqFloat scale)
 	: m_width(filterSupportSize(includeZeroX, width)),
@@ -266,12 +138,12 @@ inline TqFloat CqCachedFilter::operator()(TqInt x, TqInt y) const
 	return m_weights[(y-m_topLeftY)*m_width + (x-m_topLeftX)];
 }
 
-TqInt CqCachedFilter::width() const
+inline TqInt CqCachedFilter::width() const
 {
 	return m_width;
 }
 
-TqInt CqCachedFilter::height() const
+inline TqInt CqCachedFilter::height() const
 {
 	return m_height;
 }
@@ -342,4 +214,4 @@ void CqCachedFilter::cacheFilter(const FilterFuncT& filter, TqFloat scale)
 
 } // namespace Aqsis
 
-#endif // FILTERS_H_INCLUDED
+#endif // CACHEDFILTER_H_INCLUDED

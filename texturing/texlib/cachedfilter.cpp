@@ -19,12 +19,12 @@
 
 /** \file
  *
- * \brief Implementation for Filter functors
+ * \brief Implementation for cached filter functor
  *
  * \author Chris Foster [ chris42f (at) gmail (dot) com ]
  */
 
-#include "filters.h"
+#include "cachedfilter.h"
 
 #include <iostream>
 

@@ -34,7 +34,7 @@
 #include "aqsismath.h"
 #include "texturebuffer.h"
 #include "texturesampleoptions.h"
-#include "filters.h"
+#include "cachedfilter.h"
 
 #include "logging.h" /// \todo debug: remove later
 

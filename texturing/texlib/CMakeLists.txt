@@ -16,7 +16,7 @@ SET(AQSISTEX_SRCS
 	channelinfo.cpp
 	channellist.cpp
 	ewafilter.cpp
-	filters.cpp
+	cachedfilter.cpp
 	itexinputfile.cpp
 	itexoutputfile.cpp
 	itexturesampler.cpp
